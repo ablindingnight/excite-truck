@@ -126,32 +126,16 @@ inline int WidgetMinInt(int value,int limit){if(value<limit)return value;return 
 inline int WidgetMaxInt(int value,int limit){if(value>limit)return value;return limit;}
 void fn_80219718(WidgetFragment* self);
 
-extern u32 lbl_8033F4B8[];
-WidgetFragment* fn_80222340(WidgetFragment*,int,int,int,int,int,OwnedWidget*);
-WidgetFragment* fn_802223C4(WidgetFragment*,int);
+
 void fn_80219AB4(WidgetFragment*,int,const char*,int,int,int,bool);
-WidgetFragment* fn_8021995C(WidgetFragment* self,int x,int y,int width,OwnedWidget* value,void* watched);
-WidgetFragment* fn_802199D0(WidgetFragment* self,int destroy);
 
-int fn_802298DC(WidgetFragment* self);
 
-extern u32 lbl_8033F90C[];
-WidgetFragment* fn_80222340(WidgetFragment* self,int x,int y,int kind,int dx,int dy,OwnedWidget* child);
-WidgetFragment* fn_802223C4(WidgetFragment* self,int destroy);
-void fn_80222450(WidgetFragment* self);
-void fn_80222468(WidgetFragment* self,int x,int y);
 
-extern u32 lbl_8033F880[];
+
+
 // Window completion takes a signed result; callback contexts remain opaque.
 void fn_802168BC(int result);
-WidgetFragment* fn_802224B4(WidgetFragment* self,void* context,int x,int y,int dx,int dy,OwnedWidget* child,int(*callback)(void*),unsigned char a,unsigned char b);
-void fn_80229628(WidgetFragment* self,int,int);
-void fn_80229640(WidgetFragment* self,int,int);
-int fn_802296C0(WidgetFragment* self);
 
-void fn_80229750(WidgetFragment* self);
-void fn_80229790(WidgetFragment* self);
-void fn_802297D0(WidgetFragment* self);
 
 
 
@@ -197,11 +181,8 @@ void fn_8022FFE8(Background*);void fn_8022F8CC(Background*);void fn_8022F824(Bac
 
 struct WatchedChildPrefix {char base[0x254];void* watched;int kind;};
 extern "C" {
-extern u32 lbl_8033F324[],lbl_8033F298[];
+
 unsigned char* fn_80216708();
-WidgetFragment* fn_8021A77C(WidgetFragment* self,int x,int y,int kind,void* watched,OwnedWidget* child);
-int fn_8021A804(WidgetFragment* self,int key);
-WidgetFragment* fn_8021A808(WidgetFragment* self,int x,int y,int kind,void* watched,OwnedWidget* child);
 }
 
 
@@ -209,8 +190,6 @@ struct WindowOffsetPrefix {char prefix[0x454];int x,y;};
 struct WidgetWindowOffsetPrefix {char prefix[0x244];int x,y;unsigned char enabled;};
 extern "C" {
 void fn_8021818C(void*);
-void fn_8021A8A8(WidgetFragment* self);
-int fn_8021A9A4(WidgetFragment* self);
 static inline float InlineWidgetMinimum(float value,float bound){if(value<bound)return value;return bound;}
 static inline float InlineWidgetMaximum(float value,float bound){if(value>bound)return value;return bound;}
 static inline void InlineOffsetSet(WidgetWindowOffsetPrefix* f,int x,int y){f->x=x;f->enabled=1;f->y=y;}
@@ -221,7 +200,6 @@ extern "C" {
 extern const float lbl_805634E4,lbl_805634E8;
 Background* fn_8022F638(const char*,unsigned char,unsigned char,int,float);
 void fn_80218968(void*,int,float);void fn_8021889C(void*,int,float);
-void fn_8021A910(WidgetFragment* self,int mode,void*);
 }
 
 
@@ -409,16 +387,12 @@ int fn_80228F40(int x,int y);
 extern "C" {
 }
 static inline void ObservedNullable_fn_8021915C(WidgetFragment* self){if(self)__dt__8UIWidgetFv(self,0);}
-static inline void ObservedNullable_fn_802223C4(WidgetFragment* self){if(self)fn_802223C4(self,0);}
 extern "C" {
 WidgetFragment* fn_80228FA4(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80228FFC(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229054(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802290B0(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802292D8(WidgetFragment* self,int destroy);
-WidgetFragment* fn_80229330(WidgetFragment* self,int destroy);
-WidgetFragment* fn_80229388(WidgetFragment* self,int destroy);
-WidgetFragment* fn_80229550(WidgetFragment* self,int destroy);
 
 // Forward declarations of functions defined further down (all decompiled; they were empty placeholders
 // before 2026-11).
@@ -612,14 +586,6 @@ struct LeafChildPrefix {char base[0x244];LeafChildDispatch* child;int first,seco
 struct LeafResource250 {char base[0x250];void* resource;};
 extern "C" {
 void fn_802C744C(int,void*);
-void fn_80229900(WidgetFragment* self);
-void fn_80229918(WidgetFragment* self);
-void fn_80229958(WidgetFragment* self);
-void fn_80229998(WidgetFragment* self,int,int);
-void fn_80229A94(WidgetFragment* self);
-void fn_80229AC4(WidgetFragment* self,int,int);
-int fn_80229ADC(WidgetFragment*);
-int fn_80229AE4(WidgetFragment* self,int x,int y);
 void fn_80229ED4(WidgetFragment* self);
 void fn_80229EF4(WidgetFragment* self);
 void* fn_80229F14(WidgetFragment* self);
@@ -660,7 +626,6 @@ extern "C" {
 
 void fn_801A7E54(char*,int,Binding*);void fn_802C40B8(gxCanvas*,int,int);void fn_802ECFEC(void*);void fn_802ED038(void*,float,float,float,float);
 void fn_802237DC(WidgetFragment*);
-int fn_8021AB88(WidgetFragment*);
 void fn_8021B3BC(WidgetFragment* self,void* context);
 void fn_8021BD48(WidgetFragment* self,void* context);
 void fn_8021F42C(WidgetFragment* self,int,void*);
@@ -677,13 +642,6 @@ int fn_802237E8(WidgetFragment* self);
 int fn_802237F0(WidgetFragment* self,int index);
 void fn_80224160(WidgetFragment* self);
 void fn_8022419C(WidgetFragment* self);
-WidgetFragment* fn_802266B0(WidgetFragment* self,int destroy);
-void fn_80226708(WidgetFragment* self);
-void fn_80226758(WidgetFragment* self,int,int);
-void fn_80226768(WidgetFragment* self,int,int);
-int fn_802268A0(WidgetFragment* self,int key);
-int fn_802299B0(WidgetFragment* self);
-void fn_80229B0C(WidgetFragment* self,int dx,int dy);
 }
 
 
@@ -709,7 +667,6 @@ struct HitAreaPrefix {char base[0x264];int x,y,width,height;};
 extern "C" {
 extern u32 lbl_8033E8FC[];
 int strcmp(const char*,const char*);
-int fn_8021AB90(WidgetFragment* self,int key);
 WidgetFragment* fn_8021F394(WidgetFragment* self,int x,int y,int parameter,Binding* value,int height);
 int fn_8021FBC4(WidgetFragment* self,int x,int y);
 }
@@ -764,7 +721,6 @@ extern KeyDetect lbl_80490934;
 void fn_801A7844(int);int fn_801A7C8C(Binding*);void fn_802E47E8();void fn_802E30C8(const char*,...);
 int fn_8021F478(int* result);
 void fn_80227C9C(gArtSet* self,float x,float y,float width,float height);
-void fn_802299FC(WidgetFragment* self);
 }
 
 struct SelectNavigationPrefix {char base[0x2c8];int count;int* selected;unsigned char available[1];};
@@ -790,18 +746,16 @@ struct NavigationPreviousNew {char prefix[0x2c8];int count;int* selected;unsigne
 typedef char NavigationPreviousAddressWordCheckNew[(sizeof(void*)==sizeof(u32))?1:-1];
 void fn_80223644(WidgetFragment* self);
 void fn_80226570(WidgetFragment* self,int delta);
-int fn_802268E8(WidgetFragment* self);
 }
 
 
 struct AssetRotationPrefix {char base[0x25c];UIContext* matrix;unsigned char owned;};
 struct AssetFormatPrefix {char base[0x244];int first;GTextFont* resource;char gap24c[13];char text[64];unsigned char owned;char gap29a[2];UIContext* asset;};
 extern "C" {
-extern const float lbl_805634F8;extern const char lbl_8055B88C[4];extern u32 lbl_8033F7F4[];
+extern const float lbl_805634F8;extern const char lbl_8055B88C[4];
 void fn_802E317C(const char*,...);
 void fn_80224DDC(WidgetFragment*,float,float,float);
 void fn_80227044(WidgetFragment*,float,float,float);
-WidgetFragment* fn_80226630(WidgetFragment* self,void* context,int x,int y,int dx,int dy,OwnedWidget* child,int(*callback)(void*));
 void fn_80227880(float x,float y,float width,float height);
 
 }
@@ -845,7 +799,6 @@ struct ToggleImagePrefix {char base[0x244];int frame,mode;float elapsed;void* co
 struct SelectionCallbackPrefix {char base[0x258];int(*callback)(void*);void* context;int token;int* focus;};
 extern "C" {
 
-int fn_802267C4(WidgetFragment* self,int key);
 void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int);
 }
 
@@ -1065,7 +1018,6 @@ extern "C" {
 
 static inline int FocusSelected(FocusPaintPrefix* w){int on=0;if(w->focus&&*w->focus==w->token)on=1;return on;}
 extern "C" {
-void fn_8021AA18(FocusPaintPrefix* self);
 }
 
 extern "C" {
@@ -1251,11 +1203,9 @@ CheckBox::CheckBox(int x,int y,const char* text,unsigned char* flag,int height) 
 }
 
 int CheckBox::Slot64(int key){return UIWidget::Slot64(key);}
-WidgetFragment* fn_8021995C(WidgetFragment* self,int x,int y,int width,OwnedWidget* value,void* watched){
- fn_80222340(self,x,y,width,0,0,value);self->vtable=lbl_8033F4B8;
- self->label=(const char*)watched;if(watched)fn_80219440(self,0,watched,4);return self;
-}
-WidgetFragment* fn_802199D0(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+gText::gText(int x,int y,int width,OwnedWidget* value,void* watched) : UIImageButton(x,y,width,0,0,value) {WidgetFragment* self=(WidgetFragment*)this;
+ self->label=(const char*)watched;if(watched)fn_80219440(self,0,watched,4);}
+gText::~gText(void) {}
 ArtWidget::ArtWidget(WidgetDesc* desc,const char* text,int value) : UIWidget(desc) {WidgetFragment* self=(WidgetFragment*)this;
  fn_80219AB4(self,desc->flags,text,desc->field9c,value,desc->fielda0,desc->fielda4!=0);}
 void fn_80219AB4(WidgetFragment* self,int kind,const char* name,int style,int argument,int flags,bool flag){
@@ -1420,37 +1370,34 @@ void BackWidget::Slot0C(void) {
  fields->active=fn_8022F638(fields->textureName,1,1,1,(30.0f));
 }
 void BackWidget::Slot10(void) {BackgroundWidgetPrefix* fields=(BackgroundWidgetPrefix*)((WidgetFragment*)this);fn_8022F824(fields->active);fields->active=0;}
-WidgetFragment* fn_8021A77C(WidgetFragment* self,int x,int y,int kind,void* watched,OwnedWidget* child){
- fn_80222340(self,x,y,0,0,0,child);self->vtable=lbl_8033F324;
+RadioButton::RadioButton(int x,int y,int kind,void* watched,OwnedWidget* child) : UIImageButton(x,y,0,0,0,child) {WidgetFragment* self=(WidgetFragment*)this;
  WatchedChildPrefix* fields=(WatchedChildPrefix*)self;fields->watched=watched;fields->kind=kind;
- if(watched)fn_80219440(self,0,watched,4);return self;
-}
-int fn_8021A804(WidgetFragment* self,int key){return Slot64__8UIWidgetFi(self,key);}
-WidgetFragment* fn_8021A808(WidgetFragment* self,int x,int y,int kind,void* watched,OwnedWidget* child){
- fn_80222340(self,x,y,0,0,0,child);self->vtable=lbl_8033F298;
+ if(watched)fn_80219440(self,0,watched,4);}
+int RadioButton::Slot64(int key) {return Slot64__8UIWidgetFi(((WidgetFragment*)this),key);}
+TabButton::TabButton(int x,int y,int kind,void* watched,OwnedWidget* child) : UIImageButton(x,y,0,0,0,child) {WidgetFragment* self=(WidgetFragment*)this;
  WatchedChildPrefix* fields=(WatchedChildPrefix*)self;fields->watched=watched;fields->kind=kind;
- if(watched)fn_80219440(self,0,watched,4);fn_80219440(self,1,fn_80216708(),1);return self;
+ if(watched)fn_80219440(self,0,watched,4);fn_80219440(self,1,fn_80216708(),1);}
+void TabButton::Slot0C(void) {
+ ((WidgetDispatch*)((WidgetFragment*)this))->Slot74(2,0);fn_8021818C(((WidgetFragment*)this)->window);
+ WatchedChildPrefix* fields=(WatchedChildPrefix*)((WidgetFragment*)this);
+ if(*(int*)fields->watched==fields->kind)fn_80218198(((WidgetFragment*)this)->window,((WidgetFragment*)this));
 }
-void fn_8021A8A8(WidgetFragment* self){
- ((WidgetDispatch*)self)->Slot74(2,0);fn_8021818C(self->window);
- WatchedChildPrefix* fields=(WatchedChildPrefix*)self;
- if(*(int*)fields->watched==fields->kind)fn_80218198(self->window,self);
+void TabButton::Slot74(int mode, void*) {
+ WatchedChildPrefix* fields=(WatchedChildPrefix*)((WidgetFragment*)this);
+ if(*(int*)fields->watched==fields->kind)fn_80218968(((WidgetFragment*)this)->window,fields->kind,mode==2?(0.0f):(0.3f));
+ else fn_8021889C(((WidgetFragment*)this)->window,fields->kind,mode==2?(0.0f):(0.3f));
+ ((WidgetDispatch*)((WidgetFragment*)this))->Slot84();
 }
-void fn_8021A910(WidgetFragment* self,int mode,void*){
- WatchedChildPrefix* fields=(WatchedChildPrefix*)self;
- if(*(int*)fields->watched==fields->kind)fn_80218968(self->window,fields->kind,mode==2?(0.0f):(0.3f));
- else fn_8021889C(self->window,fields->kind,mode==2?(0.0f):(0.3f));
- ((WidgetDispatch*)self)->Slot84();
-}
-int fn_8021A9A4(WidgetFragment* self){
+int TabButton::Slot88(void) {
  unsigned char observed=*fn_80216708();int mode=0;if(observed)mode=2;
- WatchedChildPrefix* fields=(WatchedChildPrefix*)self;int selected=0;
+ WatchedChildPrefix* fields=(WatchedChildPrefix*)((WidgetFragment*)this);int selected=0;
  if(fields->watched&&*(int*)fields->watched==fields->kind)selected=1;
  return (selected!=0)|mode;
 }
-void fn_8021AA18(FocusPaintPrefix* self){FullDrawStatePrefix state;const FullDrawStatePrefix* live=fn_8022EDC4();state.xf=live->xf;state.alpha=live->alpha;state.unk34=live->unk34;state.scale=live->scale;int selected=FocusSelected(self);if(!*fn_80216708()&&!selected)state.alpha*=(0.3f);fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;self->child->Paint(self->first,self->second,self->third,((WidgetDispatch*)self)->Slot78(),height,((WidgetDispatch*)self)->Slot88());fn_8022EDB8();}
-int fn_8021AB88(WidgetFragment*){return 0;}
-int fn_8021AB90(WidgetFragment* self,int key){if(*fn_80216708()){switch(key){case 0x126:fn_80217AC0(self->window);return 1;case 0x128:fn_802179A0(self->window);return 1;}}return Slot64__8UIWidgetFi(self,key);}
+void TabButton::Slot28(void) {
+    FocusPaintPrefix* self = (FocusPaintPrefix*)this;FullDrawStatePrefix state;const FullDrawStatePrefix* live=fn_8022EDC4();state.xf=live->xf;state.alpha=live->alpha;state.unk34=live->unk34;state.scale=live->scale;int selected=FocusSelected(self);if(!*fn_80216708()&&!selected)state.alpha*=(0.3f);fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;self->child->Paint(self->first,self->second,self->third,((WidgetDispatch*)self)->Slot78(),height,((WidgetDispatch*)self)->Slot88());fn_8022EDB8();}
+int UIImageButton::Slot88(void) {return 0;}
+int TabButton::Slot64(int key) {if(*fn_80216708()){switch(key){case 0x126:fn_80217AC0(((WidgetFragment*)this)->window);return 1;case 0x128:fn_802179A0(((WidgetFragment*)this)->window);return 1;}}return Slot64__8UIWidgetFi(((WidgetFragment*)this),key);}
 UIArrowButton::UIArrowButton(int x,int y,void* handle) : UIWidget(x,y,x+fn_802C51C0(handle),y+fn_802C5220(handle),0) {
  WidgetFragment* self=(WidgetFragment*)this;
  TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;fields->handle=handle;fields->active=0;fields->elapsed=(0.0f);fields->period=(0.3f);
@@ -2431,20 +2378,14 @@ void fn_80222234(MenuHitWidgetNew *self, int x, int y) {
         }
     }
 }
-WidgetFragment* fn_80222340(WidgetFragment* self,int x,int y,int kind,int dx,int dy,OwnedWidget* child){
- __ct__8UIWidgetFiiiii(self,x,y,x+dx,y+dy,kind);self->vtable=lbl_8033F90C;
+UIImageButton::UIImageButton(int x,int y,int kind,int dx,int dy,OwnedWidget* child) : UIWidget(x,y,x+dx,y+dy,kind) {WidgetFragment* self=(WidgetFragment*)this;
  OwnedWidgetPrefix* fields=(OwnedWidgetPrefix*)self;fields->x=x;fields->y=y;fields->kind=kind;fields->child=child;
- ((WidgetDispatch*)self)->Slot84();return self;
-}
-WidgetFragment* fn_802223C4(WidgetFragment* self,int destroy){
- if(self){OwnedWidget* child=((OwnedWidgetPrefix*)self)->child;self->vtable=lbl_8033F90C;delete child;__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;
-}
-void fn_80222450(WidgetFragment* self){WidgetMarkDirty(self);}
-void fn_80222468(WidgetFragment* self,int x,int y){Slot1C__8UIWidgetFii(self,x,y);OwnedWidgetPrefix* fields=(OwnedWidgetPrefix*)self;fields->x=x;fields->y=y;}
-WidgetFragment* fn_802224B4(WidgetFragment* self,void* context,int x,int y,int dx,int dy,OwnedWidget* child,int(*callback)(void*),unsigned char a,unsigned char b){
- fn_80222340(self,x,y,0,dx,dy,child);self->vtable=lbl_8033F880;
- CallbackPrefix* fields=(CallbackPrefix*)self;fields->context=context;fields->callback=callback;fields->flag256=a;fields->flag257=b;fields->unknown255=0;fields->active=0;return self;
-}
+ ((WidgetDispatch*)self)->Slot84();}
+UIImageButton::~UIImageButton(void) {WidgetFragment* self=(WidgetFragment*)this;OwnedWidget* child=((OwnedWidgetPrefix*)self)->child;delete child;}
+void UIImageButton::Slot84(void) {WidgetMarkDirty(((WidgetFragment*)this));}
+void UIImageButton::Slot1C(int x, int y) {Slot1C__8UIWidgetFii(((WidgetFragment*)this),x,y);OwnedWidgetPrefix* fields=(OwnedWidgetPrefix*)((WidgetFragment*)this);fields->x=x;fields->y=y;}
+IButton::IButton(void* context,int x,int y,int dx,int dy,OwnedWidget* child,int (*callback)(void*),unsigned char a,unsigned char b) : UIImageButton(x,y,0,dx,dy,child) {WidgetFragment* self=(WidgetFragment*)this;
+ CallbackPrefix* fields=(CallbackPrefix*)self;fields->context=context;fields->callback=callback;fields->flag256=a;fields->flag257=b;fields->unknown255=0;fields->active=0;}
 ResourcePrefix::ResourcePrefix(const char* path, const char* t) {
  resource=fn_80232578(path);text=t;
 }
@@ -2903,14 +2844,14 @@ var_r4++;var_r7++;}
 int ButtonList::Slot64(int key) {RollingActionPrefix* f=(RollingActionPrefix*)((WidgetFragment*)this);if(f->focus&&f->token!=*f->focus)return 0;switch(key){case 0x127:if(f->list->vertical){fn_80217C4C(((WidgetFragment*)this)->window);return 1;}break;case 0x125:if(f->list->vertical){fn_80217D84(((WidgetFragment*)this)->window);return 1;}break;case 0x128:((CycleList*)f->list)->Next();fn_80226570(((WidgetFragment*)this),-1);f->direction=2;f->stamp=fn_8023659C();return 1;case 0x126:((CycleList*)f->list)->Prev();fn_80226570(((WidgetFragment*)this),1);f->direction=1;f->stamp=fn_8023659C();return 1;case 13:{void* context;int(*callback)(void*)=f->list->callback;context=(void*)((CycleList*)f->list)->Value();if(!callback||callback(context))fn_802168BC(reinterpret_cast<int>(context));return 1;}}return 0;}
 int ButtonList::Slot6C(int key) {Bound27c* f=(Bound27c*)((WidgetFragment*)this);if(f->focus&&f->token!=*f->focus)return 0;return key==13||(unsigned int)key==0x126||(unsigned int)key==0x128;}
 void fn_80226570(WidgetFragment* self,int delta){RollingRowsPrefix* f=(RollingRowsPrefix*)self;for(int i=0;i<f->list->count;i++){f->rows[i].previous=f->rows[i].current;f->rows[i].target-=f->speed*(float)delta;if(f->rows[i].target>f->upper)f->rows[i].target-=f->period;if(f->rows[i].target<f->lower)f->rows[i].target+=f->period;}}
-WidgetFragment* fn_80226630(WidgetFragment* self,void* context,int x,int y,int dx,int dy,OwnedWidget* child,int(*callback)(void*)){fn_802224B4(self,context,x,y,dx,dy,child,callback,1,0);self->vtable=lbl_8033F7F4;Bound264* f=(Bound264*)self;f->token=fn_80228F40(x,y);f->focus=0;return self;}
-WidgetFragment* fn_802266B0(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_80226708(WidgetFragment* self){Bound264* f=(Bound264*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}
-void fn_80226758(WidgetFragment* self,int,int){Bound264* f=(Bound264*)self;*f->focus=f->token;}
-void fn_80226768(WidgetFragment* self,int,int){Bound264* f=(Bound264*)self;if(self->flag18){if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));}}
-int fn_802267C4(WidgetFragment* self,int key){SelectionCallbackPrefix* f=(SelectionCallbackPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;switch(key){case 13:if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));return 1;case 0x126:fn_80217D84(self->window);fn_80230E90(0);return 1;case 0x128:fn_80217C4C(self->window);fn_80230E90(0);return 1;}return 0;}
-int fn_802268A0(WidgetFragment* self,int key){Bound264* f=(Bound264*)self;if(f->focus&&f->token!=*f->focus)return 0;return key==13||(unsigned int)key==0x126||(unsigned int)key==0x128;}
-int fn_802268E8(WidgetFragment* self){SelectionActionPrefix* f=(SelectionActionPrefix*)self;if(!f->focus)return 0;int selected=f->token==*f->focus;unsigned int state;if(self->flag18)state=(selected!=0)+2;else state=selected!=0;if(f->child->State()==3&&state==3)state=1;if(!self->enabled)state=4;return state;}
+MenuBtn::MenuBtn(void* context,int x,int y,int dx,int dy,OwnedWidget* child,int (*callback)(void*)) : IButton(context,x,y,dx,dy,child,callback,1,0) {WidgetFragment* self=(WidgetFragment*)this;Bound264* f=(Bound264*)self;f->token=fn_80228F40(x,y);f->focus=0;}
+
+void MenuBtn::Slot14(void) {Bound264* f=(Bound264*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}
+void MenuBtn::Slot3C(int, int) {Bound264* f=(Bound264*)((WidgetFragment*)this);*f->focus=f->token;}
+void MenuBtn::Slot40(int, int) {Bound264* f=(Bound264*)((WidgetFragment*)this);if(((WidgetFragment*)this)->flag18){if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));}}
+int MenuBtn::Slot64(int key) {SelectionCallbackPrefix* f=(SelectionCallbackPrefix*)((WidgetFragment*)this);if(!f->focus)return 0;if(f->token!=*f->focus)return 0;switch(key){case 13:if(!f->callback||f->callback(f->context))fn_802168BC(reinterpret_cast<int>(f->context));return 1;case 0x126:fn_80217D84(((WidgetFragment*)this)->window);fn_80230E90(0);return 1;case 0x128:fn_80217C4C(((WidgetFragment*)this)->window);fn_80230E90(0);return 1;}return 0;}
+int MenuBtn::Slot6C(int key) {Bound264* f=(Bound264*)((WidgetFragment*)this);if(f->focus&&f->token!=*f->focus)return 0;return key==13||(unsigned int)key==0x126||(unsigned int)key==0x128;}
+int MenuBtn::Slot88(void) {SelectionActionPrefix* f=(SelectionActionPrefix*)((WidgetFragment*)this);if(!f->focus)return 0;int selected=f->token==*f->focus;unsigned int state;if(((WidgetFragment*)this)->flag18)state=(selected!=0)+2;else state=selected!=0;if(f->child->State()==3&&state==3)state=1;if(!((WidgetFragment*)this)->enabled)state=4;return state;}
 RotImage::RotImage(WidgetDesc* desc) : UIWidget(desc) { WidgetFragment* self=(WidgetFragment*)this;CenteredImagePrefix* f=(CenteredImagePrefix*)self;f->image=gxGetImage(desc->name);if(!f->image)fn_802E30C8("RotImage: couldn't find image %s!",desc->name);f->asset=fn_8022EE9C();fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;f->value=desc->field9c;}
 RotImage::~RotImage(void) {WidgetFragment* self=(WidgetFragment*)this;GXAssetImage244Prefix* f=(GXAssetImage244Prefix*)self;if(f->asset)fn_8022EE98(f->asset);f->asset=0;if(f->image)fn_802C519C(f->image);f->image=0;}
 void RotImage::Slot28(void) {
@@ -3226,55 +3167,55 @@ WidgetFragment* fn_802290B0(WidgetFragment* self,int destroy){if(self){ObservedN
 
 
 WidgetFragment* fn_802292D8(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_80229330(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_80229388(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-
-
-
-
-WidgetFragment* fn_80229550(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_802223C4(self);if(destroy>0)__dl__FPv(self);}return self;}
 
 
 
 
 
 
-void fn_80229628(WidgetFragment* self,int,int){((CallbackPrefix*)self)->active=1;((WidgetDispatch*)self)->Slot84();}
-void fn_80229640(WidgetFragment* self,int,int){
- ((WidgetDispatch*)self)->Slot84();CallbackPrefix* fields=(CallbackPrefix*)self;fields->active=0;
- if(self->flag18&&fields->context!=(void*)-66666){if(!fields->callback||fields->callback(fields->context))fn_802168BC(reinterpret_cast<int>(fields->context));}
+
+
+
+
+
+
+
+inline void IButton::Slot3C(int, int) {((CallbackPrefix*)((WidgetFragment*)this))->active=1;((WidgetDispatch*)((WidgetFragment*)this))->Slot84();}
+inline void IButton::Slot40(int, int) {
+ ((WidgetDispatch*)((WidgetFragment*)this))->Slot84();CallbackPrefix* fields=(CallbackPrefix*)((WidgetFragment*)this);fields->active=0;
+ if(((WidgetFragment*)this)->flag18&&fields->context!=(void*)-66666){if(!fields->callback||fields->callback(fields->context))fn_802168BC(reinterpret_cast<int>(fields->context));}
 }
-int fn_802296C0(WidgetFragment* self){
- CallbackPrefix* fields=(CallbackPrefix*)self;u32 result;
- if(fields->context!=(void*)-66666){if(self->flag18)result=2+(fields->active!=0);else result=0;}else result=1;
- if(((OwnedWidgetPrefix*)self)->child->Slot1c()==3&&result==3)result=1;return result;
+inline int IButton::Slot88(void) {
+ CallbackPrefix* fields=(CallbackPrefix*)((WidgetFragment*)this);u32 result;
+ if(fields->context!=(void*)-66666){if(((WidgetFragment*)this)->flag18)result=2+(fields->active!=0);else result=0;}else result=1;
+ if(((OwnedWidgetPrefix*)((WidgetFragment*)this))->child->Slot1c()==3&&result==3)result=1;return result;
 }
-void fn_80229750(WidgetFragment* self){((WidgetDispatch*)self)->Slot84();self->flag18=1;}
-void fn_80229790(WidgetFragment* self){((WidgetDispatch*)self)->Slot84();self->flag18=0;}
-void fn_802297D0(WidgetFragment* self){
- CallbackPrefix* fields=(CallbackPrefix*)self;
- if(fields->flag257&&fields->active&&self->flag18){if(!fields->callback||fields->callback(fields->context))fn_802168BC(reinterpret_cast<int>(fields->context));}
- Slot7C__8UIWidgetFv(self);
+inline void IButton::Slot58(void) {((WidgetDispatch*)((WidgetFragment*)this))->Slot84();((WidgetFragment*)this)->flag18=1;}
+inline void IButton::Slot5C(void) {((WidgetDispatch*)((WidgetFragment*)this))->Slot84();((WidgetFragment*)this)->flag18=0;}
+inline void IButton::Slot7C(void) {
+ CallbackPrefix* fields=(CallbackPrefix*)((WidgetFragment*)this);
+ if(fields->flag257&&fields->active&&((WidgetFragment*)this)->flag18){if(!fields->callback||fields->callback(fields->context))fn_802168BC(reinterpret_cast<int>(fields->context));}
+ Slot7C__8UIWidgetFv(((WidgetFragment*)this));
 }
 
 
 
 
 
-int fn_802298DC(WidgetFragment* self){int* value=((IntWatchPrefix*)self)->value;if(value)return *value;return 0;}
+inline int gText::Slot88(void) {int* value=((IntWatchPrefix*)((WidgetFragment*)this))->value;if(value)return *value;return 0;}
 
 
-void fn_80229900(WidgetFragment* self){((WidgetDispatch*)self)->Slot74(0,0);}
-void fn_80229918(WidgetFragment* self){((WidgetDispatch*)self)->Slot84();self->flag18=1;}
-void fn_80229958(WidgetFragment* self){((WidgetDispatch*)self)->Slot84();self->flag18=0;}
-void fn_80229998(WidgetFragment* self,int,int){LeafStoredValue* fields=(LeafStoredValue*)self;if(fields->destination)*fields->destination=fields->value;}
-int fn_802299B0(WidgetFragment* self){int result=0;if(self->flag18)result=2;int selected=0;int* value=(int*)self->label;if(value&&*value==(int)self->unknown258)selected=1;return (selected!=0)|result;}
-void fn_802299FC(WidgetFragment* self){const char* label;int height=self->bottom-self->top;label=((WidgetDispatch*)self)->Slot88();int width=((WidgetDispatch*)self)->Slot78();DelegatePaintPrefix* f=(DelegatePaintPrefix*)self;f->child->Paint(f->first,f->second,f->third,width,height,label);}
-void fn_80229A94(WidgetFragment* self){self->flag19=1;WidgetMarkDirty(self);((PointerEventDispatch*)self)->Slot3c(self->left,self->top);}
-void fn_80229AC4(WidgetFragment* self,int,int){LeafStoredValue* fields=(LeafStoredValue*)self;if(fields->destination)*fields->destination=fields->value;}
-int fn_80229ADC(WidgetFragment*){return 1;}
-int fn_80229AE4(WidgetFragment* self,int x,int y){LeafChildPrefix* fields=(LeafChildPrefix*)self;return fields->child->HitTest(fields->first,fields->second,x,y);}
-void fn_80229B0C(WidgetFragment* self,int dx,int dy){Slot20__8UIWidgetFii(self,dx,dy);self->y+=dx;self->width+=dy;}
+inline void RadioButton::Slot0C(void) {((WidgetDispatch*)((WidgetFragment*)this))->Slot74(0,0);}
+inline void RadioButton::Slot58(void) {((WidgetDispatch*)((WidgetFragment*)this))->Slot84();((WidgetFragment*)this)->flag18=1;}
+inline void RadioButton::Slot5C(void) {((WidgetDispatch*)((WidgetFragment*)this))->Slot84();((WidgetFragment*)this)->flag18=0;}
+inline void RadioButton::Slot3C(int, int) {LeafStoredValue* fields=(LeafStoredValue*)((WidgetFragment*)this);if(fields->destination)*fields->destination=fields->value;}
+inline int RadioButton::Slot88(void) {int result=0;if(((WidgetFragment*)this)->flag18)result=2;int selected=0;int* value=(int*)((WidgetFragment*)this)->label;if(value&&*value==(int)((WidgetFragment*)this)->unknown258)selected=1;return (selected!=0)|result;}
+inline void UIImageButton::Slot28(void) {const char* label;int height=((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top;label=((WidgetDispatch*)((WidgetFragment*)this))->Slot88();int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();DelegatePaintPrefix* f=(DelegatePaintPrefix*)((WidgetFragment*)this);f->child->Paint(f->first,f->second,f->third,width,height,label);}
+inline void TabButton::Slot34(void) {((WidgetFragment*)this)->flag19=1;WidgetMarkDirty(((WidgetFragment*)this));((PointerEventDispatch*)((WidgetFragment*)this))->Slot3c(((WidgetFragment*)this)->left,((WidgetFragment*)this)->top);}
+inline void TabButton::Slot3C(int, int) {LeafStoredValue* fields=(LeafStoredValue*)((WidgetFragment*)this);if(fields->destination)*fields->destination=fields->value;}
+inline int TabButton::Slot68(void) {return 1;}
+inline int UIImageButton::Slot70(int x, int y) {LeafChildPrefix* fields=(LeafChildPrefix*)((WidgetFragment*)this);return fields->child->HitTest(fields->first,fields->second,x,y);}
+inline void UIImageButton::Slot20(int dx, int dy) {Slot20__8UIWidgetFii(((WidgetFragment*)this),dx,dy);((WidgetFragment*)this)->y+=dx;((WidgetFragment*)this)->width+=dy;}
 
 
 WidgetFragment* fn_80229B78(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033EFF4;fn_801E4A2C(((RichCaptionPrefix*)self)->renderer);__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}

@@ -611,21 +611,20 @@ void* operator new(unsigned long size, const char* tag);
 extern "C" char* strstr(const char*, const char*);
 extern "C" int abs(int);
 extern "C" void* fn_80215270(int, int);
-// MATCHING-AID (transitional): retail evaluates ArrowBtn's watched value into a named local after the allocation
-// check; a new-expression with the same ternary swaps two saved registers, so the factory still calls the ctor by name.
+// MATCHING-AID (transitional): the factory still calls these constructors by linker name. ArrowBtn, RadioButton and
+// TabButton: retail evaluates the watched value into a named local after the allocation check (a new-expression swaps
+// saved registers); gText: its table has a pure 0x8C slot, and MWCC refuses a new-expression on an abstract class.
+extern "C" WidgetFragment* __ct__11RadioButtonFiiiPvP11OwnedWidget(WidgetFragment*, int, int, int, void*, void*);
+extern "C" WidgetFragment* __ct__9TabButtonFiiiPvP11OwnedWidget(WidgetFragment*, int, int, int, void*, void*);
+extern "C" WidgetFragment* __ct__5gTextFiiiP11OwnedWidgetPv(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* __ct__8ArrowBtnFiiPviiPvff(WidgetFragment*, int, int, void*, int, int, void*, float, float);
 extern "C" void fn_802E30C8(const char *, ...);
 extern "C" int fn_80129BC4(void);
 extern "C" unsigned int fn_8022D1B4(const char*);
 extern "C" void fn_802168EC(void*, WidgetFragment*, int);
 extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
-extern "C" WidgetFragment* fn_8021995C(WidgetFragment*, int, int, int, void*, void*);
-extern "C" WidgetFragment* fn_802224B4(WidgetFragment*, void*, int, int, int, int, void*, void*, int, int);
-extern "C" WidgetFragment* fn_80226630(WidgetFragment*, void*, int, int, int, int, void*, void*);
-extern "C" WidgetFragment* fn_8021A77C(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
-extern "C" WidgetFragment* fn_8021A808(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
 extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
@@ -837,7 +836,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         }
         void* image = new ("gTextImage") ResourcePrefix(d->style, (const char*)text->value);
         p = (WidgetFragment*)operator new(0x258, "gText");
-        if (p) p = fn_8021995C(p, d->x, d->y, d->kind, image, 0);
+        if (p) p = __ct__5gTextFiiiP11OwnedWidgetPv(p, d->x, d->y, d->kind, image, 0);
         widgets[count++] = p;
         break;
     }
@@ -860,13 +859,11 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         void* handler = button ? button->value : (void*)fn_80212338;
         UIImageRef* ref = new ("StyleImage") UIImageRef(label, d->flags);
         if (d->field9c == 1 || !fn_80129BC4()) {
-            p = (WidgetFragment*)operator new(0x260, "IButton");
-            if (p) p = fn_802224B4(p, image, d->x, d->y, d->dx, d->dy, ref, handler, 0, d->field9c != 0);
+            p = (WidgetFragment*)new ("IButton") IButton(image, d->x, d->y, d->dx, d->dy, (OwnedWidget*)ref, (int (*)(void*))handler, 0, d->field9c != 0);
             widgets[count++] = p;
             break;
         }
-        p = (WidgetFragment*)operator new(0x268, "MenuBtn");
-        if (p) p = fn_80226630(p, image, d->x, d->y, d->dx, d->dy, ref, handler);
+        p = (WidgetFragment*)new ("MenuBtn") MenuBtn(image, d->x, d->y, d->dx, d->dy, (OwnedWidget*)ref, (int (*)(void*))handler);
         widgets[count++] = p;
         break;
     }
@@ -909,7 +906,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             p = (WidgetFragment*)operator new(0x258, "imgstamproll");
             if (p) {
                 void* image = new ("imgimg") AnimationPrefix(path, d->dx, d->dy);
-                p = fn_8021995C(p, d->x, d->y, d->kind, image, watched);
+                p = __ct__5gTextFiiiP11OwnedWidgetPv(p, d->x, d->y, d->kind, image, watched);
             }
             widgets[count++] = p;
             break;
@@ -929,7 +926,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)operator new(0x25c, "RadioButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF4C;
-            p = fn_8021A77C(p, d->x, d->y, d->field9c, watched, new ("rimg") UIImageRef(d->name, d->flags));
+            p = __ct__11RadioButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, new ("rimg") UIImageRef(d->name, d->flags));
         }
         widgets[count++] = p;
         break;
@@ -939,7 +936,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)operator new(0x25c, "BRadioButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF4C;
-            p = fn_8021A77C(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 2, -1, -1));
+            p = __ct__11RadioButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 2, -1, -1));
         }
         widgets[count++] = p;
         break;
@@ -1090,7 +1087,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)operator new(0x25c, "TabButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF54;
-            p = fn_8021A808(p, d->x, d->y, d->field9c, watched, new ("timg") UIImageRef(d->name, d->flags));
+            p = __ct__9TabButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, new ("timg") UIImageRef(d->name, d->flags));
         }
         widgets[count++] = p;
         break;
@@ -1100,7 +1097,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)operator new(0x25c, "BTabButton");
         if (p) {
             void* watched = value ? value->value : &lbl_8055EF54;
-            p = fn_8021A808(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 1, -1, -1));
+            p = __ct__9TabButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 1, -1, -1));
         }
         widgets[count++] = p;
         break;

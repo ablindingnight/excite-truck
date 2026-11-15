@@ -160,6 +160,51 @@ public:
     float height;    // 0xC
 };
 
+// A widget drawn by an owned child image (vtable lbl_8033F90C; class name unproven). Its Slot20/28/70 and its
+// subclasses' small slots are inline members defined in widgets.cpp (the TU-end copies).
+struct OwnedWidget;
+class UIImageButton : public UIWidget {  /* Class name unproven; vtable lbl_8033F90C */
+public:
+    UIImageButton(int x, int y, int kind, int dx, int dy, OwnedWidget* child);  // fn_80222340
+    virtual ~UIImageButton(void);                // fn_802223C4: deletes the child
+    virtual void Slot1C(int x, int y);           // fn_80222468
+    virtual void Slot20(int dx, int dy);         // inline fn_80229B0C
+    virtual void Slot28(void);                   // inline fn_802299FC
+    virtual int Slot70(int x, int y);            // inline fn_80229AE4
+    virtual void Slot84(void);                   // fn_80222450
+    virtual int Slot88(void);                    // fn_8021AB88: the draw state
+    OwnedWidget* child;          // 0x244
+    int posX, posY, kind;        // 0x248
+};
+
+class IButton : public UIImageButton {  /* Class name unproven (allocation tag "IButton"); vtable lbl_8033F880 */
+public:
+    IButton(void* context, int x, int y, int dx, int dy, OwnedWidget* child, int (*callback)(void*), unsigned char a, unsigned char b);  // fn_802224B4
+    virtual ~IButton(void) {}                    // inline: out-of-line copy fn_802266B0
+    virtual void Slot3C(int a, int b);           // inline fn_80229628
+    virtual void Slot40(int a, int b);           // inline fn_80229640
+    virtual int Slot88(void);                    // inline fn_802296C0
+    virtual void Slot58(void);                   // inline fn_80229750
+    virtual void Slot5C(void);                   // inline fn_80229790
+    virtual void Slot7C(void);                   // inline fn_802297D0
+    unsigned char active, unknown255, flag256, flag257;  // 0x254
+    int (*callback)(void*);      // 0x258
+    void* context;               // 0x25C
+};
+
+class MenuBtn : public IButton {  /* Class name unproven (allocation tag "MenuBtn"); vtable lbl_8033F7F4 */
+public:
+    MenuBtn(void* context, int x, int y, int dx, int dy, OwnedWidget* child, int (*callback)(void*));  // fn_80226630 (implicit dtor fn_80229550)
+    virtual void Slot14(void);                   // fn_80226708
+    virtual void Slot3C(int a, int b);           // fn_80226758
+    virtual void Slot40(int a, int b);           // fn_80226768
+    virtual int Slot64(int key);                 // fn_802267C4
+    virtual int Slot6C(int key);                 // fn_802268A0
+    virtual int Slot88(void);                    // fn_802268E8
+    int token;                   // 0x260
+    int* focus;                  // 0x264
+};
+
 // The first UILabel subclass; declared after the image prefixes so its vtable comes out before theirs.
 class CheckBox : public UILabel {  /* Class name unproven (allocation tag "CheckBox"); vtable lbl_8033F768 */
 public:
@@ -224,6 +269,15 @@ public:
     ObservedScrollState* state;  // 0x258
 };
 
+class gText : public UIImageButton {  /* Class name unproven (allocation tags "gText"/"imgstamproll"); vtable lbl_8033F4B8 */
+public:
+    gText(int x, int y, int width, OwnedWidget* value, void* watched);  // fn_8021995C
+    virtual ~gText(void);                        // fn_802199D0 (empty)
+    virtual int Slot88(void);                    // inline fn_802298DC
+    virtual void Slot8C(void) = 0;               // 0x8C: pure in retail's table (meaning unknown)
+    void* watched;               // 0x254
+};
+
 class ArtWidget : public UIWidget {  /* Class name unproven (allocation tag "ArtWidget"); vtable lbl_8033F434 */
 public:
     ArtWidget(struct WidgetDesc* desc, const char* text, int value);  // fn_80219A28
@@ -243,6 +297,34 @@ public:
     virtual void Slot24(void* context) {}        // inline: TU-end copy fn_802298FC
     virtual void Slot28(void);                   // fn_8021A6A8
     unsigned char fields244[0x14];  // 0x244, read through widgets.cpp's BackgroundWidgetPrefix
+};
+
+class RadioButton : public UIImageButton {  /* Class name unproven (allocation tags "RadioButton"/"BRadioButton"); vtable lbl_8033F324 */
+public:
+    RadioButton(int x, int y, int kind, void* watched, OwnedWidget* child);  // fn_8021A77C (implicit dtor fn_80229388)
+    virtual void Slot0C(void);                   // inline fn_80229900
+    virtual void Slot58(void);                   // inline fn_80229918
+    virtual void Slot5C(void);                   // inline fn_80229958
+    virtual void Slot3C(int a, int b);           // inline fn_80229998
+    virtual int Slot64(int key);                 // fn_8021A804
+    virtual int Slot88(void);                    // inline fn_802299B0
+    void* watched;               // 0x254
+    int value;                   // 0x258
+};
+
+class TabButton : public UIImageButton {  /* Class name unproven (allocation tags "TabButton"/"BTabButton"); vtable lbl_8033F298 */
+public:
+    TabButton(int x, int y, int kind, void* watched, OwnedWidget* child);  // fn_8021A808 (implicit dtor fn_80229330)
+    virtual void Slot0C(void);                   // fn_8021A8A8
+    virtual void Slot28(void);                   // fn_8021AA18
+    virtual void Slot34(void);                   // inline fn_80229A94
+    virtual void Slot3C(int a, int b);           // inline fn_80229AC4
+    virtual int Slot64(int key);                 // fn_8021AB90
+    virtual int Slot68(void);                    // inline fn_80229ADC
+    virtual void Slot74(int key, void* data);    // fn_8021A910
+    virtual int Slot88(void);                    // fn_8021A9A4
+    void* watched;               // 0x254
+    int value;                   // 0x258
 };
 
 class StaticText : public UILabel {  /* Class name unproven (allocation tag "StaticText"); vtable lbl_8033F20C */
