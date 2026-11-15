@@ -25,17 +25,16 @@ extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
 extern "C" void fn_8021481C(const char*);
 
 extern "C" s32 fn_802168E4(void);
-extern "C" s32 fn_802168DC(s32, s32);
-extern "C" s32 fn_802168D4(s32);
-extern "C" s32 fn_802168CC(s32, float);
-extern "C" s32 fn_802168E0(s32, s32, s32);
+class Window;
+extern "C" void fn_802168CC(Window* window, s32 group, f32 time);
+extern "C" void fn_802168D0(Window* window, s32 group, f32 time);
+extern "C" s32 fn_802168D4(Window* window, s32 group);
+extern "C" void fn_802168D8(Window* window, s32 group);
+extern "C" void fn_802168DC(Window* window, s32 group);
+extern "C" void fn_802168E0(Window* window, s32 group, s32 x, s32 y);
 
 extern "C" s32 fn_802180E0(s32, s32);
 
-extern "C" s32 fn_802168DC(s32, s32);
-extern "C" s32 fn_802168D4(s32);
-extern "C" s32 fn_802168CC(s32, float);
-extern "C" s32 fn_802168E0(s32, s32, s32);
 
 class VfObj {
 public:
@@ -1649,7 +1648,7 @@ extern "C" void fn_802149FC(s32 arg0) {
 extern "C" s32 fn_80214A38(s32 arg0) {
     s32 result = 0;
     s32 check = fn_802168E4();
-    if (check != 0) result = ((s32 (*)(s32, s32))fn_802168D4)(check, arg0);
+    if (check != 0) result = fn_802168D4((Window*)check, arg0);
     else ((s32 (*)(const char *, ...))fn_802E317C)("UIGroupIsVisible(): No active window");
     return result;
 }
@@ -1657,16 +1656,15 @@ extern "C" s32 fn_80214A38(s32 arg0) {
 extern "C" void fn_80214A9C(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32, float))fn_802168CC)(temp, arg0, 0.0f);
+        fn_802168CC((Window*)temp, arg0, 0.0f);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)("UIHideGroup(): No active window");
     }
 }
-extern "C" s32 fn_802168D0(s32, s32, float);
 extern "C" void fn_80214AF0(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32, float))fn_802168D0)(temp, arg0, 0.0f);
+        fn_802168D0((Window*)temp, arg0, 0.0f);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)("UIShowGroup(): No active window");
     }
@@ -1675,16 +1673,15 @@ extern "C" void fn_80214AF0(s32 arg0) {
 extern "C" void fn_80214B44(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32))fn_802168DC)(temp, arg0);
+        fn_802168DC((Window*)temp, arg0);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)("UIDisableGroup(): No active window");
     }
 }
-extern "C" s32 fn_802168D8(s32);
 extern "C" void fn_80214B94(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32))fn_802168D8)(temp, arg0);
+        fn_802168D8((Window*)temp, arg0);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)("UIEnableGroup(): No active window");
     }
@@ -1694,7 +1691,7 @@ extern "C" void fn_80214B94(s32 arg0) {
 extern "C" void fn_80214BE4(s32 group, s32 x, s32 y) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32, s32, s32))fn_802168E0)(temp, group, x, y);
+        fn_802168E0((Window*)temp, group, x, y);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)("UIMoveGroup(): No active window");
     }
