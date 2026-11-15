@@ -379,12 +379,18 @@ struct SolFile {
 
 struct AnimSlot;
 
-class AnimObj {
+class WObj {
+public:
+    virtual ~WObj(void) {}
+    virtual void Update(void);
+    virtual void Draw(void) = 0;
+    virtual void PostDraw(void);
+};
+
+class AnimObj : public WObj {
 public:
     virtual ~AnimObj(void);
-    virtual void vf0C(void);
     virtual void Draw(void) = 0;
-    virtual void vf14(void);
     virtual f32 Depth(void);
     virtual void vf1C(void);
     virtual void Set(const AnimSlot* s);
