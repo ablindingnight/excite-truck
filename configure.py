@@ -699,6 +699,7 @@ config.libs.append(
             Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_picture.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/lyt/lyt_resourceAccessor.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/math/math_triangular.cpp"),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_AnimSound.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_AxManager.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_AxVoice.cpp"),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Bank.cpp"),
