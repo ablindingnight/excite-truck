@@ -2133,7 +2133,7 @@ extern "C" void fn_80215824(void) {
 
 extern "C" void fn_80215828(void *self, void *arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6) {
     struct Obj {
-        virtual void v0();
+        virtual ~Obj();  // slot 0 of the widget vtables (lbl_8033D504...) is the destructor
         virtual void v1();
         virtual void v2(void *, void *, void *, void *);
     };
@@ -2142,7 +2142,7 @@ extern "C" void fn_80215828(void *self, void *arg1, void *arg2, void *arg3, void
 
 extern "C" s32 fn_8021583C(void *arg0, s32 unused1, s32 unused2, s32 arg1, s32 arg2) {
     struct Local {
-        virtual void f0();
+        virtual ~Local();  // slot 0 of the widget vtables (lbl_8033D504...) is the destructor
         virtual void f1();
         virtual void f2();
         virtual void call(s32, s32, s32*, s32*, s32*, s32*);
