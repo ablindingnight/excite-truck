@@ -4,6 +4,7 @@
 // textures, the facing test and its per-frame instances. Objects are created by name; their data is
 // byte-swapped on load. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -24,12 +25,8 @@ struct TFrame {
     PVec pos;  // offset 0x24
 };
 
-struct TMat3 {
-    f32 m[3][3];
-};
-
 struct TMtx {
-    TMat3 r;   // offset 0x0
+    Mat3 r;   // offset 0x0
     f32 t[3];  // offset 0x24
 };
 
@@ -51,7 +48,7 @@ struct TObj {
     f32 pos[3];   // offset 0x20
     s32 d2C;      // offset 0x2C
     f32 d30;      // offset 0x30
-    TMat3 rot;    // offset 0x34
+    Mat3 rot;    // offset 0x34
 };
 
 struct TNode {
@@ -99,7 +96,7 @@ struct Rot {
     Rot(void);
     s32 id;        // offset 0x0
     f32 pos[3];    // offset 0x4
-    const TMat3* rot;    // offset 0x10
+    const Mat3* rot;    // offset 0x10
     f32 speed;     // offset 0x14
 };
 
@@ -396,13 +393,17 @@ ModuleTag lbl_8055EBF8;
 UnkStaticFFFF lbl_8055EC00;
 extern const f32 lbl_8055EC04 = Angle(0.7853982f);  // lowest sun elevation
 
+void Mat3RotY(Mat3* m, f32 a);
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+f32 Dot(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);
+
 extern "C" {
 void fn_801C0E60(TVec* out, const f32* a, const f32* b);
 void fn_80144B54(TMtx* m, TCam* c);
 f32* fn_80144B44(PVec* v, f32 x, f32 y, f32 z);
 u32 fn_80144C68(int r, int g, int b, int a);
 void fn_80144DAC(f32* dst, const f32* src);
-void fn_80144DC8(TMat3* m);
+void fn_80144DC8(Mat3* m);
 void fn_801BFD34(void* vtx, const f32* p, TMtx* m);
 void fn_802C8BD0(void* tex);
 void fn_802C8DB8(void* vtx, int n, u16* idx, int ni);
@@ -427,8 +428,6 @@ void fn_80297990(u32 color);
 void fn_802923EC(f32 v);
 void fn_802C990C(u32 color);
 f32 fn_801E7E18(void);
-void Mat3RotY(TMat3* m, f32 a);
-void Mat3Mul(TMat3* out, const TMat3* a, const TMat3* b);
 void fn_802C744C(void* model, TMtx* m);
 void fn_802CD320(void* scene, TrackInst* inst);
 void fn_802CD33C(void* a, int b, int c);
@@ -437,7 +436,6 @@ void fn_802C9900(f32 a);
 void fn_802C9904(void);
 void fn_802C77F0(void* model, f32* bounds);
 ValueNode* fn_802AE414(void* data);
-f32 fn_80144514(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);
 void fn_802CDAB4(void* ctx, s32 id, TMtx* m);
 int fn_802CDB20(void* ctx, s32 id);
 void fn_802CDAFC(void* ctx, s32 id);
@@ -460,6 +458,12 @@ static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
 static inline f32 Clamp01(f32 a) { return FMax(FMin(a, 1.0f), 0.0f); }
 
+static inline void NegInto(PVec* o, const f32* v, f32 k) {
+    o->x = v[0] * k;
+    o->y = v[1] * k;
+    o->z = v[2] * k;
+}
+
 extern "C" {
 u8* fn_801F1CE8(TObj* o);
 int fn_801F1CF0(u8* d);
@@ -470,17 +474,13 @@ f32 fn_801F3174(f32 y, f32 x);
 void fn_801F3198(TVec* v);
 void fn_801F3E60(void);
 
-extern const f32 lbl_80562F48;  // -1.0
-
 // Billboard frame facing the camera, upright.
 void fn_801F1C24(TFrame* f) {
     TCam* cam = fn_802C86DC();
     f->y.x = 0.0f;
     f->y.y = 1.0f;
     f->y.z = 0.0f;
-    f->z.x = cam->dir[0] * lbl_80562F48;
-    f->z.y = cam->dir[1] * lbl_80562F48;
-    f->z.z = cam->dir[2] * lbl_80562F48;
+    NegInto(&f->z, cam->dir, -1.0f);
     PSVECCrossProduct(&f->y, &f->z, &f->x);
     if (PSVECDotProduct(&f->x, &f->x) > 0.0001f) {
         PSVECNormalize(&f->x, &f->x);
@@ -562,7 +562,7 @@ AxisFacingTMH::~AxisFacingTMH(void) {}
 
 GenericTMH::~GenericTMH(void) {}
 
-inline void GenericTMH::Draw(TObj* list) {
+void GenericTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         fn_802C7040(list->model);
     }
@@ -587,7 +587,7 @@ extern "C" inline void fn_801F2570(TNode* n) {
     }
 }
 
-inline void AxisFacingTMH::Draw(TObj* list) {
+void AxisFacingTMH::Draw(TObj* list) {
     TFrame f;
     fn_801F1C24(&f);
     fn_802C7730(&f);
@@ -596,7 +596,7 @@ inline void AxisFacingTMH::Draw(TObj* list) {
     }
 }
 
-inline void PointFacingTMH::Draw(TObj* list) {
+void PointFacingTMH::Draw(TObj* list) {
     TFrame f;
     fn_801F1C24(&f);
     fn_802C7730(&f);
@@ -629,7 +629,7 @@ static inline int FaceSeg(TObj* o, f32*& pos, TCam* cam) {
     return seg;
 }
 
-inline void MultiFacingTMH::Draw(TObj* list) {
+void MultiFacingTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         TCam* cam = fn_802C86DC();
         PVec c4;
@@ -694,7 +694,7 @@ SkyTMH::~SkyTMH(void) { obj = 0; }
 
 #pragma push
 #pragma ppc_unroll_instructions_limit 60
-inline void SkyTMH::Swap(TObj* o) {
+void SkyTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     int i;
     for (i = 0; i < 32; i++, p += 16) {
@@ -706,9 +706,9 @@ inline void SkyTMH::Swap(TObj* o) {
 }
 #pragma pop
 
-inline void SkyTMH::Init(TObj* o) { obj = o; }
+void SkyTMH::Init(TObj* o) { obj = o; }
 
-inline void SkyTMH::Draw(TObj* list) {
+void SkyTMH::Draw(TObj* list) {
     TCam* cam;
     f32* c;
     f32* cone;
@@ -742,7 +742,7 @@ inline void SkyTMH::Draw(TObj* list) {
     }
 }
 
-inline void SunTMH::Swap(TObj* o) {
+void SunTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -752,7 +752,7 @@ inline void SunTMH::Swap(TObj* o) {
 
 SunTMH::~SunTMH(void) { fn_802C9994(-1); }
 
-inline void SunTMH::Init(TObj* o) {
+void SunTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     dir[0] = ((f32*)d)[1];
@@ -761,12 +761,6 @@ inline void SunTMH::Init(TObj* o) {
 }
 
 static inline f32 Sq(f32 a) { return a * a; }
-
-static inline void NegInto(PVec* o, const f32* v, f32 k) {
-    o->x = v[0] * k;
-    o->y = v[1] * k;
-    o->z = v[2] * k;
-}
 
 inline void SunTMH::Apply(void) {
     PVec d;
@@ -810,17 +804,17 @@ inline void SunTMH::Default(void) {
     }
 }
 
-inline void SunTMH::Draw(TObj* list) { fn_8029231C(dir); }
+void SunTMH::Draw(TObj* list) { fn_8029231C(dir); }
 
 AmbientColorTMH::~AmbientColorTMH(void) {}
 
-inline void AmbientColorTMH::Init(TObj* o) {
+void AmbientColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-inline void AmbientColorTMH::Apply(void) {
+void AmbientColorTMH::Apply(void) {
     if (*fn_801E1F44() == 1) {
         fn_802C9950(0xFF646464);
     } else {
@@ -832,13 +826,13 @@ inline void AmbientColorTMH::Draw(TObj* list) { fn_802E317C("AmbientColorTMH: sh
 
 ShadowColorTMH::~ShadowColorTMH(void) {}
 
-inline void ShadowColorTMH::Init(TObj* o) {
+void ShadowColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-inline void ShadowColorTMH::Swap(TObj* o) {
+void ShadowColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -846,7 +840,7 @@ inline void ShadowColorTMH::Swap(TObj* o) {
     Swap32(d + 12);
 }
 
-inline void ShadowColorTMH::Apply(void) {
+void ShadowColorTMH::Apply(void) {
     if (set) {
         fn_80297990(color);
     } else {
@@ -858,7 +852,7 @@ inline void ShadowColorTMH::Draw(TObj* list) { fn_802E317C("ShadowColorTMH: shou
 
 SunIntensityTMH::~SunIntensityTMH(void) {}
 
-inline void SunIntensityTMH::Swap(TObj* o) {
+void SunIntensityTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -872,7 +866,7 @@ inline void SunIntensityTMH::Init(TObj* o) {
     set = 1;
 }
 
-inline void SunIntensityTMH::Apply(void) {
+void SunIntensityTMH::Apply(void) {
     if (set) {
         fn_802923EC(value);
     } else {
@@ -884,13 +878,13 @@ inline void SunIntensityTMH::Draw(TObj* list) { fn_802E317C("SunIntensityTMH: sh
 
 FogColorTMH::~FogColorTMH(void) {}
 
-inline void FogColorTMH::Init(TObj* o) {
+void FogColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-inline void FogColorTMH::Swap(TObj* o) {
+void FogColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -898,7 +892,7 @@ inline void FogColorTMH::Swap(TObj* o) {
     Swap32(d + 12);
 }
 
-inline void FogColorTMH::Apply(void) {
+void FogColorTMH::Apply(void) {
     if (set) {
         fn_802C990C(color);
     } else {
@@ -1120,17 +1114,17 @@ inline XFadeList::~XFadeList(void) {}
 
 inline RotList::~RotList(void) { delete[] rots; }
 
-static inline void Mat3MulD(TMat3* out, const TMat3* l, const TMat3* r) {
+static inline void Mat3MulD(Mat3* out, const Mat3* l, const Mat3* r) {
     if (out == l || out == r) {
-        f32 m00 = fn_80144514(r->m[0][0], l->m[0][0], r->m[1][0], l->m[0][1], r->m[2][0], l->m[0][2]);
-        f32 m10 = fn_80144514(r->m[0][0], l->m[1][0], r->m[1][0], l->m[1][1], r->m[2][0], l->m[1][2]);
-        f32 m20 = fn_80144514(r->m[0][0], l->m[2][0], r->m[1][0], l->m[2][1], r->m[2][0], l->m[2][2]);
-        f32 m01 = fn_80144514(r->m[0][1], l->m[0][0], r->m[1][1], l->m[0][1], r->m[2][1], l->m[0][2]);
-        f32 m11 = fn_80144514(r->m[0][1], l->m[1][0], r->m[1][1], l->m[1][1], r->m[2][1], l->m[1][2]);
-        f32 m21 = fn_80144514(r->m[0][1], l->m[2][0], r->m[1][1], l->m[2][1], r->m[2][1], l->m[2][2]);
-        f32 m02 = fn_80144514(r->m[0][2], l->m[0][0], r->m[1][2], l->m[0][1], r->m[2][2], l->m[0][2]);
-        f32 m12 = fn_80144514(r->m[0][2], l->m[1][0], r->m[1][2], l->m[1][1], r->m[2][2], l->m[1][2]);
-        f32 m22 = fn_80144514(r->m[0][2], l->m[2][0], r->m[1][2], l->m[2][1], r->m[2][2], l->m[2][2]);
+        f32 m00 = Dot(r->m[0][0], l->m[0][0], r->m[1][0], l->m[0][1], r->m[2][0], l->m[0][2]);
+        f32 m10 = Dot(r->m[0][0], l->m[1][0], r->m[1][0], l->m[1][1], r->m[2][0], l->m[1][2]);
+        f32 m20 = Dot(r->m[0][0], l->m[2][0], r->m[1][0], l->m[2][1], r->m[2][0], l->m[2][2]);
+        f32 m01 = Dot(r->m[0][1], l->m[0][0], r->m[1][1], l->m[0][1], r->m[2][1], l->m[0][2]);
+        f32 m11 = Dot(r->m[0][1], l->m[1][0], r->m[1][1], l->m[1][1], r->m[2][1], l->m[1][2]);
+        f32 m21 = Dot(r->m[0][1], l->m[2][0], r->m[1][1], l->m[2][1], r->m[2][1], l->m[2][2]);
+        f32 m02 = Dot(r->m[0][2], l->m[0][0], r->m[1][2], l->m[0][1], r->m[2][2], l->m[0][2]);
+        f32 m12 = Dot(r->m[0][2], l->m[1][0], r->m[1][2], l->m[1][1], r->m[2][2], l->m[1][2]);
+        f32 m22 = Dot(r->m[0][2], l->m[2][0], r->m[1][2], l->m[2][1], r->m[2][2], l->m[2][2]);
         out->m[0][0] = m00;
         out->m[1][0] = m10;
         out->m[2][0] = m20;
@@ -1141,15 +1135,15 @@ static inline void Mat3MulD(TMat3* out, const TMat3* l, const TMat3* r) {
         out->m[1][2] = m12;
         out->m[2][2] = m22;
     } else {
-        out->m[0][0] = fn_80144514(r->m[0][0], l->m[0][0], r->m[1][0], l->m[0][1], r->m[2][0], l->m[0][2]);
-        out->m[1][0] = fn_80144514(r->m[0][0], l->m[1][0], r->m[1][0], l->m[1][1], r->m[2][0], l->m[1][2]);
-        out->m[2][0] = fn_80144514(r->m[0][0], l->m[2][0], r->m[1][0], l->m[2][1], r->m[2][0], l->m[2][2]);
-        out->m[0][1] = fn_80144514(r->m[0][1], l->m[0][0], r->m[1][1], l->m[0][1], r->m[2][1], l->m[0][2]);
-        out->m[1][1] = fn_80144514(r->m[0][1], l->m[1][0], r->m[1][1], l->m[1][1], r->m[2][1], l->m[1][2]);
-        out->m[2][1] = fn_80144514(r->m[0][1], l->m[2][0], r->m[1][1], l->m[2][1], r->m[2][1], l->m[2][2]);
-        out->m[0][2] = fn_80144514(r->m[0][2], l->m[0][0], r->m[1][2], l->m[0][1], r->m[2][2], l->m[0][2]);
-        out->m[1][2] = fn_80144514(r->m[0][2], l->m[1][0], r->m[1][2], l->m[1][1], r->m[2][2], l->m[1][2]);
-        out->m[2][2] = fn_80144514(r->m[0][2], l->m[2][0], r->m[1][2], l->m[2][1], r->m[2][2], l->m[2][2]);
+        out->m[0][0] = Dot(r->m[0][0], l->m[0][0], r->m[1][0], l->m[0][1], r->m[2][0], l->m[0][2]);
+        out->m[1][0] = Dot(r->m[0][0], l->m[1][0], r->m[1][0], l->m[1][1], r->m[2][0], l->m[1][2]);
+        out->m[2][0] = Dot(r->m[0][0], l->m[2][0], r->m[1][0], l->m[2][1], r->m[2][0], l->m[2][2]);
+        out->m[0][1] = Dot(r->m[0][1], l->m[0][0], r->m[1][1], l->m[0][1], r->m[2][1], l->m[0][2]);
+        out->m[1][1] = Dot(r->m[0][1], l->m[1][0], r->m[1][1], l->m[1][1], r->m[2][1], l->m[1][2]);
+        out->m[2][1] = Dot(r->m[0][1], l->m[2][0], r->m[1][1], l->m[2][1], r->m[2][1], l->m[2][2]);
+        out->m[0][2] = Dot(r->m[0][2], l->m[0][0], r->m[1][2], l->m[0][1], r->m[2][2], l->m[0][2]);
+        out->m[1][2] = Dot(r->m[0][2], l->m[1][0], r->m[1][2], l->m[1][1], r->m[2][2], l->m[1][2]);
+        out->m[2][2] = Dot(r->m[0][2], l->m[2][0], r->m[1][2], l->m[2][1], r->m[2][2], l->m[2][2]);
     }
 }
 
