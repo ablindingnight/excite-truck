@@ -696,8 +696,7 @@ void fn_80239AC0(void) {
 
 int fn_80239DE4(void) {
     if (sCur.track != sCur.trackOld && fn_802104D0()) {
-        const char* body = fn_80131234("TrackMusic:CONFIRM_CHANGE_BODY");
-        return fn_8021521C(fn_80131234("TrackMusic:CONFIRM_CHANGE_HEAD"), body, 0);
+        return fn_8021521C(fn_80131234("TrackMusic:CONFIRM_CHANGE_HEAD"), fn_80131234("TrackMusic:CONFIRM_CHANGE_BODY"), 0);
     }
     return 1;
 }
