@@ -428,7 +428,10 @@ void AsyncResource::operator delete(void* p) {
 
 extern "C" {
 
-void fn_8012A648(void) { lbl_8055E008->Free(AsyncResource::operator new(sizeof(AsyncResource), "baz")); }
+void fn_8012A648(void) {
+    void* p = AsyncResource::operator new(sizeof(AsyncResource), "baz");  // creates the pool first
+    lbl_8055E008->Free(p);
+}
 
 void fn_8012A67C(void) {
     lbl_8055E004 = 0;

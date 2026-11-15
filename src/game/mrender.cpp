@@ -121,7 +121,7 @@ struct Perspective {
 };
 
 struct Pool {
-    Pool(const char* name, long count, long size);
+    Pool(const char* name, s32 count, s32 size);
     void* Alloc(void);
     void Free(void* item);
     virtual ~Pool(void);
