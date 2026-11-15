@@ -197,11 +197,6 @@ inline ValuePair* ValueNodeImpl::OrInherited(ValuePair* p, const char* key) {
     return p;
 }
 
-int ValueNodeImpl::Has(const char* key) {
-    ValuePair* p = FindPair(key);
-    return OrInherited(p, key) != 0;
-}
-
 inline const char* ValueNodeImpl::GetValue(const char* key) {
     ValuePair* p = FindPair(key);
     p = OrInherited(p, key);
@@ -209,27 +204,6 @@ inline const char* ValueNodeImpl::GetValue(const char* key) {
         fn_802E317C("ValueTable: Can't find entry \"%s\" in \"%s\"", key, GetName());
     }
     return p->value;
-}
-
-// Searches this table, then the parents. The search is written out here rather than through FindPair so the recursion
-// inlines one level deeper; defined after the class so its callers make a real call.
-inline ValuePair* ValueNodeImpl::FindPairInherited(const char* key) {
-    struct {
-        const char* key;
-        s32 unk;
-    } k = {key, 0};
-    ValuePair* r = 0;
-    int i;
-    for (i = 0; i < count; i++) {
-        if (!strcasecmp(key, pairs[i].key)) {
-            r = &pairs[i];
-            break;
-        }
-    }
-    if (!r && parent) {
-        r = parent->FindPairInherited(key);
-    }
-    return r;
 }
 
 class ValueFileNode : public ValueNodeImpl {
@@ -414,4 +388,30 @@ ValueFileNode::ValueFileNode(ValueFile* base) {
             *(char*)p->value = 1;
         }
     }
+}
+
+inline int ValueNodeImpl::Has(const char* key) {
+    ValuePair* p = FindPair(key);
+    return OrInherited(p, key) != 0;
+}
+
+// Searches this table, then the parents. The search is written out here rather than through FindPair so the recursion
+// inlines one level deeper; defined after the class so its callers make a real call.
+inline ValuePair* ValueNodeImpl::FindPairInherited(const char* key) {
+    struct {
+        const char* key;
+        s32 unk;
+    } k = {key, 0};
+    ValuePair* r = 0;
+    int i;
+    for (i = 0; i < count; i++) {
+        if (!strcasecmp(key, pairs[i].key)) {
+            r = &pairs[i];
+            break;
+        }
+    }
+    if (!r && parent) {
+        r = parent->FindPairInherited(key);
+    }
+    return r;
 }

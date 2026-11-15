@@ -462,9 +462,9 @@ void ParseTrack(Track* t, int index, ValueNode* node, const char* file) {
     }
 }
 
-s32 GetIntOr(ValueNode* node, const char* key, s32 def) {
-    if (node->Has(key)) {
-        return node->GetIntValue(key);
+s32 ValueNode::GetInt(const char* key, s32 def) {
+    if (Has(key)) {
+        return GetIntValue(key);
     }
     return def;
 }

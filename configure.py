@@ -1005,7 +1005,7 @@ config.libs.append(
             Object(NonMatching, "game/quat.cpp"),
             Object(Matching, "game/base64.cpp"),
             Object(Matching, "game/locale.cpp"),
-            Object(NonMatching, "game/valtable.cpp"),
+            Object(Matching, "game/valtable.cpp"),
             Object(Matching, "game/crc.cpp"),
             Object(Matching, "game/options.cpp"),
             Object(Matching, "game/loadpool.cpp"),

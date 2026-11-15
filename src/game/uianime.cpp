@@ -164,7 +164,7 @@ inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
                     k->t = f->GetFloat("t");
                     k->scale = f->GetFloat("scale", prev->scale);
                     k->alpha = f->GetFloat("alpha", prev->alpha);
-                    k->p = f->GetPointOr("offset", prev->p);
+                    k->p = f->GetPointOr("offset", CopyValPoint(prev->p));
                 }
             }
         } else {

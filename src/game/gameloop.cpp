@@ -585,9 +585,9 @@ void fn_8000B2AC(void) {
     fn_802D08C4(1);
 }
 
-s32 fn_8000B33C(ValueNode* node, const char* key, s32 def) {
-    if (node->Has(key)) {
-        return node->GetIntValue2(key);
+int ValueNode::GetBool(const char* key, int def) {
+    if (Has(key)) {
+        return GetIntValue2(key);
     }
     return def;
 }

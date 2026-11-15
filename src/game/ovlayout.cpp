@@ -1292,11 +1292,13 @@ static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
 
 static inline f32 LayLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
+static inline V2 MakeLayoutPoint(f32 x, f32 y) {
+    V2 p = {x, y};
+    return p;
+}
+
 static inline V2 LayLerpV2(const V2& a, const V2& b, f32 t) { /* Helper name unproven */
-    V2 r;
-    r.y = LayLerp(a.y, b.y, t);
-    r.x = LayLerp(a.x, b.x, t);
-    return r;
+    return MakeLayoutPoint(LayLerp(a.x, b.x, t), LayLerp(a.y, b.y, t));
 }
 
 void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);

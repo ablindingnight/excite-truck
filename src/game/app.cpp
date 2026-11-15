@@ -139,14 +139,6 @@ int GetNumTracks(void);
 Track* GetTrack(int track);
 Eve* FindTrackEvent(int track, int eve);
 
-class Checker {
-public:
-    virtual void vf0(void);
-    virtual int IsValid(void);
-    virtual void vf2(void);
-    virtual int Get(int key);
-};
-
 extern u32 lbl_8055D430;
 extern u8 lbl_8055F63C;
 
@@ -383,9 +375,9 @@ int FindContest(int* out_track, int* out_eve, const char* name) {
     return found;
 }
 
-int CheckerGet(Checker* checker, int key, int def) {
-    if (checker->IsValid()) {
-        return checker->Get(key);
+const char* ValueNode::GetString(const char* key, const char* def) {
+    if (Has(key)) {
+        return GetValue(key);
     }
     return def;
 }

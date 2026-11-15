@@ -350,6 +350,13 @@ void fn_8029F5C8(ChunkRef* c, ValueNode* node) {
 }
 
 // Reads one "trkeffect_<name>" emitter definition.
+static inline u32 PackEmitterColor(ValVec3 color) {
+    const f32 red = 255.0f * color.x;
+    const f32 green = 255.0f * color.y;
+    const f32 blue = 255.0f * color.z;
+    return ARGB(0xFF, red, green, blue);
+}
+
 void fn_8029F658(ValueNode* node) {
     ValVec3 zero3;
     ValPoint zero2;
@@ -370,23 +377,22 @@ void fn_8029F658(ValueNode* node) {
     d->speedScale = node->GetFloat("speed_scale", 0.0f);
     d->spewK = node->GetFloat("spew_k", 0.0f);
     d->spewM = node->GetFloat("spew_m", 0.0f);
-    d->ptK = node->GetPointOr("pt_k", ValPoint(zero2));
-    d->ptM = node->GetPointOr("pt_m", ValPoint(zero2));
-    d->vK = node->GetPointOr("v_k", ValPoint(zero2));
-    d->vM = node->GetPointOr("v_m", ValPoint(zero2));
+    d->ptK = node->GetPointOr("pt_k", CopyValPoint(zero2));
+    d->ptM = node->GetPointOr("pt_m", CopyValPoint(zero2));
+    d->vK = node->GetPointOr("v_k", CopyValPoint(zero2));
+    d->vM = node->GetPointOr("v_m", CopyValPoint(zero2));
     const ValVec3& off = node->GetVec3Or("offset", ValVec3(zero3));
     d->offset.x = off.x;
     d->offset.y = off.y;
     d->offset.z = off.z;
-    d->vScale = node->GetPointOr("v_scale", ValPoint(zero2));
+    d->vScale = node->GetPointOr("v_scale", CopyValPoint(zero2));
     d->radius = node->GetFloat("radius", 0.001f);
     d->fogDensity = node->GetFloat("fog_density", 0.0f);
     ValVec3 white;
     white.x = 1.0f;
     white.y = 1.0f;
     white.z = 1.0f;
-    const ValVec3& fc = node->GetVec3Or("fog_color", ValVec3(white));
-    d->fogColor = ARGB(0xFF, 255.0f * fc.x, 255.0f * fc.y, 255.0f * fc.z);
+    d->fogColor = PackEmitterColor(node->GetVec3Or("fog_color", ValVec3(white)));
     d->repeat = node->GetInt("repeat", 1);
     const ValVec3& dp = node->GetVec3Or("dpos", ValVec3(zero3));
     d->dpos.x = dp.x;
