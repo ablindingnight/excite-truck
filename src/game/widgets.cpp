@@ -515,7 +515,7 @@ struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,s
 typedef char SteppedFloatPrefixObservedSize268[sizeof(SteppedFloatPrefix)==0x268?1:-1];
 extern "C" {
 extern float __float_epsilon[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
-void fn_802354A0(void*,int,u32,float,float,float,float,float);
+void fn_802354A0(void*,int,float,float,float,float,float,u32);
 }
 static inline float ObservedProviderClamp(float value){float one=(1.0f);float limited=one<value?one:value;float zero=(0.0f);return limited>zero?limited:zero;}
 static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
@@ -656,7 +656,7 @@ struct ProviderDrawMetrics {char unknown[0x70];float margin;};
 extern "C" {
 extern ProviderDrawMetrics* lbl_8055E050;extern float __float_epsilon[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
 int fn_8022AB18(int,int,int);float fn_8022AAA8(int,const char*);int fn_8022AA84(int);
-void fn_802354A0(void*,int,u32,float,float,float,float,float);
+void fn_802354A0(void*,int,float,float,float,float,float,u32);
 }
 static inline float ObservedAbsDecision(float value){return (float)__fabs(value);}
 extern "C" {
@@ -1242,7 +1242,7 @@ typedef struct ImageFillGlobalNew {char gap0[0x70];float padding;} ImageFillGlob
 extern "C" {
 extern const float lbl_805634A8,lbl_805634C0,lbl_805634C4,lbl_805634C8,lbl_805634D8,lbl_805634DC,lbl_805634E0;extern const double lbl_805634D0;
 float fn_8023659C(void);double fmod(double,double);double sin(double);
-void fn_802354A0(void*,int,unsigned int,float,float,float,float,float);
+void fn_802354A0(void*,int,float,float,float,float,float,unsigned int);
 // Shared UIDraw declarations use one consistent source contract.
 // Remaining opaque graphics imports are bounded views, not recovered original headers.
 void fn_80219FE0(WidgetFragment *source);
@@ -1454,14 +1454,14 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
                 borderX = x - (borderWidth / 2.0f);
                 x = borderX;
                 borderHeight = (float) (fields->bottom - fields->top);
-                fn_802354A0(borderImage, 0, -1U, borderX, y, zero, borderWidth, borderHeight);
+                fn_802354A0(borderImage, 0, borderX, y, zero, borderWidth, borderHeight, -1U);
                 frameCount = fn_80235FD8(borderImage);
                 if (frameCount >= 2) {
                     leftCapWidth = fn_80235EF0(borderImage, 1);
-                    fn_802354A0(borderImage, 1, -1U, x - leftCapWidth, y, zero, leftCapWidth, borderHeight);
+                    fn_802354A0(borderImage, 1, x - leftCapWidth, y, zero, leftCapWidth, borderHeight, -1U);
                 }
                 if (frameCount >= 3) {
-                    fn_802354A0(borderImage, 2, -1U, x + borderWidth, y, zero, fn_80235EF0(borderImage, 2), borderHeight);
+                    fn_802354A0(borderImage, 2, x + borderWidth, y, zero, fn_80235EF0(borderImage, 2), borderHeight, -1U);
                     return;
                 }
             }
@@ -1481,10 +1481,10 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
                     double phase = fmod(fn_8023659C(), 1.0);
                     extra = (pulseSpan * ((0.5f) + ((0.5f) * (float) sin((double) ((6.2831855f) * (float) phase))))) - (pulseSpan / 2.0f);
 
-                    fn_802354A0(pulseImage, pulseFrame, -1U, x - (0.5f)*extra, y + (0.5f)*extra, (0.0f), extra + (float) ((WidgetDispatch*)source)->Slot78(), extra + (float) (fields->bottom - fields->top));
+                    fn_802354A0(pulseImage, pulseFrame, x - (0.5f)*extra, y + (0.5f)*extra, (0.0f), extra + (float) ((WidgetDispatch*)source)->Slot78(), extra + (float) (fields->bottom - fields->top), -1U);
                     return;
                 }
-                fn_802354A0(pulseImage, pulseFrame, -1U, x, y, (0.0f), (float) ((WidgetDispatch*)source)->Slot78(), (float) (fields->bottom - fields->top));
+                fn_802354A0(pulseImage, pulseFrame, x, y, (0.0f), (float) ((WidgetDispatch*)source)->Slot78(), (float) (fields->bottom - fields->top), -1U);
                 return;
             }
             break;
@@ -1500,10 +1500,10 @@ void fn_80219FE0(WidgetFragment *source) {ImageFillPaintNew* fields=(ImageFillPa
                 }
                 if ((int) fields->nativeSize != 0) {
                     nativeHeight = fn_80235F64(image, imageFrame);
-                    fn_802354A0(image, imageFrame, -1U, x, y, (0.0f), fn_80235EF0(image, imageFrame), nativeHeight);
+                    fn_802354A0(image, imageFrame, x, y, (0.0f), fn_80235EF0(image, imageFrame), nativeHeight, -1U);
                     return;
                 }
-                fn_802354A0(image, imageFrame, -1U, x, y, (0.0f), (float) ((WidgetDispatch*)source)->Slot78(), (float) (fields->bottom - fields->top));
+                fn_802354A0(image, imageFrame, x, y, (0.0f), (float) ((WidgetDispatch*)source)->Slot78(), (float) (fields->bottom - fields->top), -1U);
                 return;
             }
             break;
@@ -1914,11 +1914,11 @@ void fn_8021DB58(WidgetFragment* self){
  if(!fields->provider||!fields->provider->HasNext())nextColor=ObservedArrowColor(&fields->nextTime);
  if((!fields->provider||fields->provider->HasPrevious())||ObservedAbsDecision(previousOffset)>__float_epsilon[0]){
   if(previousArrow){float width=fn_80235EF0(previousArrow,previousFrame);float height=fn_80235F64(previousArrow,previousFrame);
-   fn_802354A0(previousArrow,previousFrame,previousColor,previousX,y+height/2.0f,(0.0f),width,height);}
+   fn_802354A0(previousArrow,previousFrame,previousX,y+height/2.0f,(0.0f),width,height,previousColor);}
  }
  if((!fields->provider||fields->provider->HasNext())||ObservedAbsDecision(nextOffset)>__float_epsilon[0]){
   if(nextArrow){float width=fn_80235EF0(nextArrow,nextFrame);float height=fn_80235F64(nextArrow,nextFrame);
-   fn_802354A0(nextArrow,nextFrame,nextColor,nextX,y+height/2.0f,(0.0f),width,height);}
+   fn_802354A0(nextArrow,nextFrame,nextX,y+height/2.0f,(0.0f),width,height,nextColor);}
  }
 }
 WidgetFragment* fn_8021E0C0(WidgetFragment *self, int x, int y, int width, int height, StringList *list, int *selected, ObservedListViewport *view)
@@ -2268,10 +2268,10 @@ float previousOffset=ObservedArrowOffset(&f->previousTime),nextOffset=ObservedAr
  
 if(previousArrow){float arrowWidth=fn_80235EF0(previousArrow,previousFrame);
  float arrowHeight=fn_80235F64(previousArrow,previousFrame);
- fn_802354A0(previousArrow,previousFrame,previousColor,previousOffset,coordinates[0]+(arrowHeight-height)/2.0f,(0.0f),arrowWidth,arrowHeight);
+ fn_802354A0(previousArrow,previousFrame,previousOffset,coordinates[0]+(arrowHeight-height)/2.0f,(0.0f),arrowWidth,arrowHeight,previousColor);
  }if(nextArrow){float arrowWidth=fn_80235EF0(nextArrow,nextFrame);
  float arrowHeight=fn_80235F64(nextArrow,nextFrame);
- fn_802354A0(nextArrow,nextFrame,nextColor,nextX,coordinates[0]+(arrowHeight-height)/2.0f,(0.0f),arrowWidth,arrowHeight);
+ fn_802354A0(nextArrow,nextFrame,nextX,coordinates[0]+(arrowHeight-height)/2.0f,(0.0f),arrowWidth,arrowHeight,nextColor);
  }}
 int fn_802205AC(WidgetFragment* self,int key){SteppedFloatPrefix* f=(SteppedFloatPrefix*)self;if(!f->focus||*f->focus!=f->token)return 0;switch(key){case 0x127:if(f->value&&*f->value!=f->maximum){f->nextTime=fn_8023659C();*f->value=InlineWidgetMinimum(*f->value+f->step,f->maximum);}break;case 0x125:if(f->value&&*f->value!=f->minimum){f->previousTime=fn_8023659C();*f->value=InlineWidgetMaximum(*f->value-f->step,f->minimum);}break;case 0x126:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217D84(self->window);fn_80230E90(0);}else return 0;break;case 0x128:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217C4C(self->window);fn_80230E90(0);}else return 0;break;default:return 0;}return 1;}
 void fn_8022071C(WidgetFragment* self){if(fn_80129BC4(self)){Bound258* f=(Bound258*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}}
@@ -3089,7 +3089,7 @@ WidgetFragment* fn_80226CBC(WidgetFragment* self,WidgetDesc* desc){
  return self;
 }
 WidgetFragment* fn_80226F00(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E038;EffectImage351* f=(EffectImage351*)self;if(f->owned)fn_8022EE98(f->matrix);if(f->image)fn_80235380(f->image);f->image=0;__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_80226F94(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);}fn_80230C30(&f->x,&f->y,self->left,self->top);if(f->model&&f->frame>=0&&f->frame<15)fn_802354A0(f->model,f->frame,0xffffffffu,f->x,f->y,(0.0f),f->width,f->height);if(f->owned)fn_8022EDB8();}
+void fn_80226F94(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */SceneResourcePrefix* f=(SceneResourcePrefix*)self;if(f->owned){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);}fn_80230C30(&f->x,&f->y,self->left,self->top);if(f->model&&f->frame>=0&&f->frame<15)fn_802354A0(f->model,f->frame,f->x,f->y,(0.0f),f->width,f->height,0xffffffffu);if(f->owned)fn_8022EDB8();}
 void fn_80227044(WidgetFragment* self,float x,float y,float z){AssetRotationPrefix* f=(AssetRotationPrefix*)self;f->owned=1;f->matrix=fn_8022EE9C();RotationVec rotation={RotationScale360((0.017453292f),x),RotationScale360((0.017453292f),y),RotationScale360((0.017453292f),z)};RotationMatrix matrix;RotationMatrix* target=&f->matrix->xf.basis;Mat3FromEuler(&matrix,&rotation);Mat3Mul(target,&matrix,target);}
 ColorBackground::ColorBackground(WidgetDesc* desc) : UIWidget(desc) {
   WidgetFragment* self=(WidgetFragment*)this;TimedImage349* f=(TimedImage349*)self;
@@ -3183,13 +3183,13 @@ void ColorBackground::Slot28(void) {
 void fn_80227880(float x,float y,float width,float height){fn_80230924(0x40ffffffu,x,y,x+width,y-height,(0.0f));fn_80230924(0x99000000u,x,y,x+width,y-height,(0.0f));}
 void fn_802278F0(gArtSet* image,float x,float y,float width,float height){if(image){
  float offset=(0.0f);int frame=8;
- while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)fn_802353F4(image,frame,x+offset,y,(0.0f));else{float h=fn_80235F64(image,frame);fn_802354A0(image,frame,0xffffffffu,x+offset,y,(0.0f),width-offset,h);}offset+=tile-(1.0f);frame++;if(frame>=10)frame=8;}
+ while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)fn_802353F4(image,frame,x+offset,y,(0.0f));else{float h=fn_80235F64(image,frame);fn_802354A0(image,frame,x+offset,y,(0.0f),width-offset,h,0xffffffffu);}offset+=tile-(1.0f);frame++;if(frame>=10)frame=8;}
  offset=(0.0f);frame=10;float h=fn_80235F64(image,10);float bottom=h+(y-height);
- while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)fn_802353F4(image,frame,x+offset,bottom,(0.0f));else fn_802354A0(image,frame,0xffffffffu,x+offset,bottom,(0.0f),width-offset,h);offset+=tile-(1.0f);frame++;if(frame>=12)frame=10;}
+ while(offset<width){float tile=fn_80235EF0(image,frame);if(tile-(1.0f)<width-offset)fn_802353F4(image,frame,x+offset,bottom,(0.0f));else fn_802354A0(image,frame,x+offset,bottom,(0.0f),width-offset,h,0xffffffffu);offset+=tile-(1.0f);frame++;if(frame>=12)frame=10;}
  float vertical=(0.0f);frame=4;
- while(vertical<height){float tile=fn_80235F64(image,frame);if(tile-(1.0f)<height-vertical)fn_802353F4(image,frame,x,y-vertical,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image,frame,0xffffffffu,x,y-vertical,(0.0f),w,height-vertical);}vertical+=tile-(1.0f);frame++;if(frame>=6)frame=4;}
+ while(vertical<height){float tile=fn_80235F64(image,frame);if(tile-(1.0f)<height-vertical)fn_802353F4(image,frame,x,y-vertical,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image,frame,x,y-vertical,(0.0f),w,height-vertical,0xffffffffu);}vertical+=tile-(1.0f);frame++;if(frame>=6)frame=4;}
  float rightOffset=(0.0f);frame=4;float right=(x+width)-fn_80235EF0(image,4);
- while(rightOffset<height){float tile=fn_80235F64(image,frame);if(tile-(1.0f)<height-rightOffset)fn_802353F4(image,frame,right,y-rightOffset,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image,frame,0xffffffffu,right,y-rightOffset,(0.0f),w,height-rightOffset);}rightOffset+=tile-(1.0f);frame++;if(frame>=8)frame=6;}
+ while(rightOffset<height){float tile=fn_80235F64(image,frame);if(tile-(1.0f)<height-rightOffset)fn_802353F4(image,frame,right,y-rightOffset,(0.0f));else{float w=fn_80235EF0(image,frame);fn_802354A0(image,frame,right,y-rightOffset,(0.0f),w,height-rightOffset,0xffffffffu);}rightOffset+=tile-(1.0f);frame++;if(frame>=8)frame=6;}
  fn_802353F4(image,0,x-(2.0f),(2.0f)+y,(0.0f));
  float w=fn_80235EF0(image,1);fn_802353F4(image,1,((2.0f)+(x+width))-w,(2.0f)+y,(0.0f));
  float cornerY=(y-height-(2.0f))+fn_80235F64(image,2);fn_802353F4(image,2,x-(2.0f),cornerY,(0.0f));
@@ -3252,7 +3252,7 @@ void fn_80228010(WidgetFragment* source) {
    rowY = y;
    fn_802353F4(f->frame,0,nextX,rowY,(0.0f));
    nextX+=firstWidth;
-   fn_802354A0(f->frame,1,-1U,nextX,rowY,(0.0f),width,frameHeight);
+   fn_802354A0(f->frame,1,nextX,rowY,(0.0f),width,frameHeight,-1U);
    textX = nextX+(width/2.0f);
    textY = rowY-(frameHeight/2.0f);
    unsigned int color=active?-1U:0xFF707070U;
@@ -3275,7 +3275,7 @@ void fn_80228010(WidgetFragment* source) {
  fn_80227880(left,y-frameHeight,available,(float)(f->bottom-f->top));
  nextX=left;
  if(multiple){fn_802353F4(f->frame,3,left,panelY,(0.0f));nextX=left+leftWidth;}
- fn_802354A0(f->frame,5,-1U,nextX,panelY,(0.0f),bodyWidth,bodyHeight);
+ fn_802354A0(f->frame,5,nextX,panelY,(0.0f),bodyWidth,bodyHeight,-1U);
  titleX = nextX+((0.5f)*bodyWidth);
  const char* title=NameTabsTitleShared(f,selected);
  fn_80232BA4(title,f->font,titleX,((5.0f)+panelY)-((0.5f)*bodyHeight),-1U,0x14,(1.2f),(0.0f),(1.0f));

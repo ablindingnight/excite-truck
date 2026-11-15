@@ -83,7 +83,7 @@ const char* lbl_8055B6BC = "__null";
 extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(int*));
 extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(int*), int defaultNo);
 extern "C" s32 fn_80206430(void);
-extern "C" void fn_8022BAD0(s32 style, s32 x, s32 y, s32 z, s32 w, s32 h, const char* text, s32 color, f32 scale, s32 extra);
+extern "C" void fn_8022BAD0(s32 style, s32 x, s32 y, s32 z, s32 w, s32 h, const char* text, s32 color, s32 extra, f32 scale);
 extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
@@ -2009,7 +2009,7 @@ void UIImageRef::Extra(void) {
 
 void UIImageRef::DrawAt(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
     void * arg0 = (void *)this;
-    fn_8022BAD0(*(s32 *)((char *)arg0 + 8), arg1, arg2, 0, arg4, arg5, *(const char **)((char *)arg0 + 4), arg6, 1.0f, 0);
+    fn_8022BAD0(*(s32 *)((char *)arg0 + 8), arg1, arg2, 0, arg4, arg5, *(const char **)((char *)arg0 + 4), arg6, 0, 1.0f);
 }
 
 void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* p_arg5, int* p_arg6) {
