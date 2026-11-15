@@ -3032,7 +3032,8 @@ inline void BetaMaster::LoadLevel(void) {
         ValueNode* n;
         for (i = 0; (n = ev->GetChildAt(i)) != 0; i++) {
             if (n->Has("bound0")) {
-                stars.Add(new ("trigger") Pickup(n));
+                Pickup* p = new ("trigger") Pickup(n);
+                stars.Add(p);
             }
         }
     }
