@@ -210,7 +210,7 @@ struct MutSlot {
 
 class PlayerObj {
 public:
-    virtual void vf08(void);
+    virtual ~PlayerObj(void);  // 0x08 (a CarModel: slot 0 is __dt__8CarModel)
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);

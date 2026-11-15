@@ -36,7 +36,7 @@ DebugFlags* fn_801E87A8(void);
 
 class ShadowCaster {
 public:
-    virtual void Unk08(void);
+    virtual ~ShadowCaster(void);  // 0x08 (a WObj (CarModel/StaticObject/WheelAnim): slot 0 is its destructor)
     virtual void Unk0C(void);
     virtual void Unk10(void);
     virtual void Unk14(void);

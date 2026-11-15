@@ -53,7 +53,7 @@ struct ArtElem {
 
 class PopupDrawer {
 public:
-    virtual void vf08(void);
+    virtual ~PopupDrawer(void);  // 0x08 (an OverlayCmd: slot 0 is __dt__10OverlayCmd)
     virtual void Draw(void);  // 0x0C
 };
 

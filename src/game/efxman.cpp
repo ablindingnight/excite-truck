@@ -156,7 +156,7 @@ struct EfxFloat {
 
 class Viewer {
 public:
-    virtual void v08(void);
+    virtual ~Viewer(void);  // 0x08 (the arena master GameMode: slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);

@@ -193,7 +193,7 @@ typedef struct LayoutPane {
 // The sound menu layout: slot 0x0C finds a text box, slot 0x14 a picture pane.
 class SoundMenuLayout {
 public:
-    virtual void vf08(void);
+    virtual ~SoundMenuLayout(void);  // 0x08 (a Layout: slot 0 is __dt__6Layout)
     virtual LayoutText *FindText(const char *name);
     virtual void vf10(void);
     virtual LayoutPane *FindPane(const char *name);
