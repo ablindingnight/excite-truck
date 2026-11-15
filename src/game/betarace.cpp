@@ -1342,6 +1342,11 @@ struct RaceTimer {
     u8 b1C;             // offset 0x1C
 
     int Finishing(void) const { return limit - now < finishTimeout; }
+    /* Helper name unproven */
+    f32 Left(void) const {
+        f32 l = limit - now;
+        return 0.0f > l ? 0.0f : l;
+    }
     int Expired(void) const { return now > limit; }
     int Extend(void) {
         if (!Finishing()) {
@@ -2437,7 +2442,7 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
     {
         f32 timeout = master->timer.finishTimeout;
         f32 lo = 0.6f + timeout;
-        f32 k = Lerp(0.0f, 1.0f, Clamp01(((0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now) - lo) / (timeout - lo)));
+        f32 k = Lerp(0.0f, 1.0f, Clamp01((master->timer.Left() - lo) / (timeout - lo)));
         f32 limit = master->timer.limit;
         f32 elapsed = limit - (0.0f > master->timer.limit - master->timer.now ? 0.0f : master->timer.limit - master->timer.now);
         int art;
