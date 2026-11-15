@@ -119,9 +119,9 @@ static inline s32 BoundBytes(s32 n) { return n * sizeof(BoundPt) + 8; }
 inline Bound* AllocBound(s32 n) { return (Bound*)fn_801284E8("arenabnd", n * sizeof(BoundPt) + 8); }
 
 static inline void Perp(V2* v) {
-    f32 t = v->y;
-    v->y = -v->x;
-    v->x = t;
+    f32 t = -v->x;
+    v->x = v->y;
+    v->y = t;
 }
 
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
@@ -203,11 +203,9 @@ int fn_80139B70(const Bound* b, f32 x, f32 y) {
         }
         {
             V2 e;
-            V2 a;
             e.x = q->x - p->x;
             e.y = q->y - p->y;
-            a.x = x - p->x;
-            a.y = y - p->y;
+            V2 a(x - p->x, y - p->y);
             Perp(&e);
             if ((e.x * a.x + e.y * a.y < 0.0f) == up) {
                 c++;
