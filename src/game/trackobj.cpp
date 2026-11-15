@@ -269,6 +269,7 @@ public:
         rad = r;
         half = h;
     }
+    virtual ~TubeBase(void);  // declared, never defined: no implicit dtor/vtable is emitted (retail has none)
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28
 };
