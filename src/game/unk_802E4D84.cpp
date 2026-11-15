@@ -852,11 +852,11 @@ void fn_802E620C(void *arg0, float farg0) {
 
 void fn_802E622C(void *arg0, float farg0) { *(float *)((char *)arg0 + 0x10) = farg0; }
 
-void fn_802E6234(void) {}
+void fn_802E6234(void*, f32) {}
 
-void fn_802E6238(void) {}
+void fn_802E6238(void*, f32) {}
 
-void fn_802E623C(void) {}
+void fn_802E623C(void*, f32) {}
 
 void fn_802E6240(void* arg0, int arg1) {
     *(int*)((char*)arg0 + 0x18) = arg1;
@@ -1129,7 +1129,7 @@ void fn_802E6264(void) {
     }
 }
 
-const char* fn_802E6ABC(void) {
+const char* fn_802E6ABC(void*) {
     return "!!";
 }
 

@@ -463,7 +463,7 @@ int fn_802C8DBC(int prim) {
 
 extern "C" {
 
-void fn_802C8E00(void) {
+void fn_802C8E00(u32 color, int strip, f32 x, f32 y, f32 z, f32 u, f32 v) {
     u8 open = 0;
     if (lbl_8055FC8F && !((int (*)(void))fn_801E4F3C)()) {
         open = 1;
@@ -573,7 +573,7 @@ void fn_802C942C(u32 color) {
     fn_802C92D8();
 }
 
-void fn_802C9474(void) {
+void fn_802C9474(u32) {
     if (lbl_8055FC94) {
         return;
     }
@@ -726,7 +726,7 @@ void fn_802C9A1C(const Vec* dir) {
 
 Vec* fn_802C9A40(void) { return &lbl_804C1440; }
 
-void fn_802C9A4C(void) { fn_802D93E0(); }
+void fn_802C9A4C(f32) { fn_802D93E0(); }
 
 f32 fn_802C9A50(void) { return lbl_8055D020; }
 

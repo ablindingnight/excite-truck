@@ -87,7 +87,7 @@ void fn_802C2A48(s32 mode) {
     lbl_8055FB98 = stride;
 }
 
-void fn_802C2AA8(void) {
+void fn_802C2AA8(int) {
     fn_802C2A48(2);
     fn_802CF5F8(fn_802CE344(2)->x10);
     fn_802CA0E4();
@@ -149,7 +149,7 @@ void fn_802C2C60(int n) { fn_802DD63C(n); }
 
 void fn_802C2C64(int i, f32 power) { fn_802DD738(i, power); }
 
-void fn_802C2C68(void) { fn_802DD750(); }
+void fn_802C2C68(int, int) { fn_802DD750(); }
 
 void fn_802C2C6C(void) { fn_802DE774(); }
 

@@ -4,10 +4,10 @@
 ModuleTag lbl_8055D438;
 UnkStatic7F lbl_8055D440;
 
-extern "C" void fn_8000D7F0(void) {}
+extern "C" void fn_8000D7F0(void*) {}
 
-extern "C" void fn_8000D7F4(void) {}
+extern "C" void fn_8000D7F4(void*) {}
 
-extern "C" void fn_8000D7F8(void) {}
+extern "C" void fn_8000D7F8(int, f32) {}
 
 extern "C" void fn_8000D7FC(void) {}

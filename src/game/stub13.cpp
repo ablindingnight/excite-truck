@@ -8,6 +8,6 @@ DropSource::DropSource(void) {}
 
 extern "C" {
 
-void fn_802A7BDC(void) {}
+void fn_802A7BDC(int, void*) {}
 
 }  // extern "C"

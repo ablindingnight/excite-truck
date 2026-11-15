@@ -298,7 +298,7 @@ void fn_80288A40(const Vec* p, const Vec* v) { fn_8028E584(lbl_8055F6E0->large, 
 
 void fn_80288A58(const Vec* p, const Vec* v) { fn_8028E584(lbl_8055F6E0->small, p, v); }
 
-void fn_80288A70(void) {}
+void fn_80288A70(const void*, const Vec*, f32) {}
 
 void fn_80288A74(SmokeEntry* e, int n) {
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {

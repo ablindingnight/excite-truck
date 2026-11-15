@@ -873,6 +873,6 @@ void fn_802E13D8(BinkMovie* r, f32 x, f32 y, f32 w, f32 h) {
     fn_802E2C20();
 }
 
-int fn_802E1718(void) { return 0; }
+int fn_802E1718(s32) { return 0; }
 
 }  // extern "C"

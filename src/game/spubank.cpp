@@ -22,7 +22,7 @@ void fn_801292CC(const char* name) {
     lbl_8055DFA8 = fn_802E75E4(buf);
 }
 
-void fn_80129324(void) {
+void fn_80129324(void*) {
     fn_802E30C8("SpuQueueUnloadBank!");
     fn_802E75FC(lbl_8055DFA8);
     lbl_8055DFA8 = 0;

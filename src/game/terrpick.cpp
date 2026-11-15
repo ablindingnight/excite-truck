@@ -35,18 +35,18 @@ void fn_80203FFC(void) {}
 void fn_80204000(void) {}
 void fn_80204004(void) {}
 void fn_80204008(void) {}
-int fn_8020400C(void) { return 0; }
-void fn_80204014(void) {}
-void fn_80204018(void) {}
-void fn_8020401C(void) {}
+int fn_8020400C(int) { return 0; }
+void fn_80204014(void*, void*, void*) {}
+void fn_80204018(void*, void*) {}
+void fn_8020401C(void*) {}
 void fn_80204020(void) {}
 int fn_80204024(void) { return 0; }
 int fn_8020402C(void) { return 0; }
 void fn_80204034(void) {}
 void fn_80204038(void) {}
 int fn_8020403C(void) { return 1; }
-void fn_80204044(void) {}
-void fn_80204048(void) {}
+void fn_80204044(s32, f32, f32) {}
+void fn_80204048(void*, void*) {}
 void fn_8020404C(void) {}
 void fn_80204050(void) {}
 

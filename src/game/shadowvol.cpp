@@ -82,7 +82,7 @@ void fn_802979A4(void);
 void fn_80297A08(ShadowCaster* c);
 void fn_80297C3C(void* model, const ValMatrix* mtx, u32 color, f32 alpha, f32 radius);
 
-void fn_802978B8(void) {
+void fn_802978B8(void*) {
     fn_80297998();
     fn_80297A30();
     lbl_8055F7B0 = 0x50000000;
@@ -93,7 +93,7 @@ void fn_802978E4(void) {
     lbl_8055F7A4 = 0;
 }
 
-void fn_8029790C(void) {
+void fn_8029790C(int) {
     if (fn_802C9C8C(lbl_8055F7B0)) {
         fn_802C7ADC((fn_801E87A8()->flags >> 1) & 1);
         fn_80297AFC();

@@ -129,7 +129,7 @@ extern "C" {
 
 void fn_801B664C(void) {}
 
-void fn_801B6650(void) {}
+void fn_801B6650(u8*) {}
 
 void fn_801B6654(void) {}
 
@@ -139,7 +139,7 @@ void fn_801B665C(void) {}
 
 void fn_801B6660(void) {}
 
-void fn_801B6664(void) {}
+void fn_801B6664(u8*) {}
 
 int fn_801B6668(void) { return 0; }
 

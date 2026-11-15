@@ -5,6 +5,6 @@ ModuleTag lbl_8055FA98;
 
 extern "C" {
 
-void fn_802BC328(void) {}
+void fn_802BC328(const char*) {}
 
 }  // extern "C"

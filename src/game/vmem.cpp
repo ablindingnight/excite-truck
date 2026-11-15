@@ -28,9 +28,9 @@ ModuleTag lbl_8055FF68;
 
 extern "C" {
 
-void fn_802E4C14(void) {}
+void fn_802E4C14(int) {}
 
-void fn_802E4C18(void) {}
+void fn_802E4C18(int) {}
 
 VirtualMemory* fn_802E4C1C(int n) { return new ("vmem") VirtualMemory(n); }
 

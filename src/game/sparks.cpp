@@ -417,7 +417,7 @@ void fn_8028A92C(void) {
     }
 }
 
-void fn_8028A9BC(void) {
+void fn_8028A9BC(int) {
     lbl_8055F6F0->Draw();
     lbl_8055F6F4->Draw();
     lbl_8055F6F8->Draw();

@@ -532,7 +532,7 @@ extern "C" void fn_802A1794(void) {
 
 void TrailSys::Update(void) {}
 
-extern "C" void fn_802A17FC(void) {
+extern "C" void fn_802A17FC(int) {
     int i;
     for (i = 0; i < 8; i++) {
         if (lbl_804BCF88[i]) {

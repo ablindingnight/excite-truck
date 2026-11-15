@@ -8,7 +8,7 @@ u8 lbl_8055E614;
 
 extern "C" {
 
-int fn_801AE59C(void) { return 0; }
+int fn_801AE59C(int) { return 0; }
 
 void fn_801AE5A4(void) {}
 

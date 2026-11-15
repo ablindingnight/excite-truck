@@ -1486,7 +1486,7 @@ void fn_801FA1D4(void) {
     }
 }
 
-void fn_801FA298(void) {
+void fn_801FA298(void*) {
     if (!fn_8020402C()) {
         fn_801F9B28();
     }

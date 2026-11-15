@@ -33,7 +33,7 @@ CSubTaskMgr* fn_8013C9F4(int type) {
     }
 }
 
-void fn_8013CA3C(void) {}
+void fn_8013CA3C(int, int) {}
 
 }  // extern "C"
 

@@ -21,7 +21,7 @@ void fn_801FC8A8(void) {
 
 void fn_801FC8D8(void) { fn_801EBBB4(); }
 
-int fn_801FC8DC(void) {
+int fn_801FC8DC(void*) {
     fn_801FC8A8();
     return 1;
 }
@@ -30,6 +30,6 @@ void fn_801FC900(void) { fn_801FC8D8(); }
 
 void fn_801FC904(void) { fn_801EBD70(); }
 
-void fn_801FC908(void) { fn_801EBDCC(); }
+void fn_801FC908(int) { fn_801EBDCC(); }
 
 }  // extern "C"
