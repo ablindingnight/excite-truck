@@ -1441,10 +1441,22 @@ ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f),
     fn_802049DC("Start Time", &lbl_8042FB3C.bigLifeTimer, 2.0f, 60.0f, 2.0f);
     volume = 1.0f;
     fn_801331C4(4, "effects_volume", &volume);
-    LoadSound(fcount, "fcount.sfx");
-    LoadSound(levelup, "levelup.sfx");
-    LoadSound(missflag, "missflag.sfx");
-    LoadSound(ringhit, "ringhit.sfx");
+    {
+        const char* name = "fcount.sfx";
+        LoadSound(fcount, name);
+    }
+    {
+        const char* name = "levelup.sfx";
+        LoadSound(levelup, name);
+    }
+    {
+        const char* name = "missflag.sfx";
+        LoadSound(missflag, name);
+    }
+    {
+        const char* name = "ringhit.sfx";
+        LoadSound(ringhit, name);
+    }
     i288 = -1;
     b26C = 0;
     ringModel = fn_802C6FC0("unitring.mod", 0, 0);

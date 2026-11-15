@@ -552,8 +552,14 @@ inline Skybox::Skybox(const char* sunTex) {
 
 WaterEnvMap::WaterEnvMap(void) {
     target = fn_802CB128(0x100, 0x100, 0, 0);
-    LoadModel(&world, "worldmodel.mod");
-    LoadModel(&envModel, "wenv_mod.mod");
+    {
+        const char* name = "worldmodel.mod";
+        LoadModel(&world, name);
+    }
+    {
+        const char* name = "wenv_mod.mod";
+        LoadModel(&envModel, name);
+    }
     if (lbl_8055FAFC == 0) {
         Skybox* sb = new ("skybox") Skybox("env_sun.tex");
         lbl_8055FB00 = sb;
