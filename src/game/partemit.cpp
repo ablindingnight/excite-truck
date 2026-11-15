@@ -351,11 +351,18 @@ void fn_8029F5C8(ChunkRef* c, ValueNode* node) {
 }
 
 // Reads one "trkeffect_<name>" emitter definition.
-static inline u32 PackEmitterColor(ValVec3 color) {
-    const f32 red = 255.0f * color.x;
-    const f32 green = 255.0f * color.y;
-    const f32 blue = 255.0f * color.z;
-    return ARGB(0xFF, red, green, blue);
+// A white default built by a constructor: the temporary is created in statement order (unlike a named local or
+// the local of an inline). Name unproven.
+struct WhiteVec3 : ValVec3 {
+    WhiteVec3(void) {
+        x = 1.0f;
+        y = 1.0f;
+        z = 1.0f;
+    }
+};
+
+static inline u32 PackEmitterColor(const ValVec3& color) {
+    return ARGB(0xFF, 255.0f * color.x, 255.0f * color.y, 255.0f * color.z);
 }
 
 void fn_8029F658(ValueNode* node) {
@@ -382,23 +389,14 @@ void fn_8029F658(ValueNode* node) {
     d->ptM = node->GetPointOr("pt_m", CopyValPoint(zero2));
     d->vK = node->GetPointOr("v_k", CopyValPoint(zero2));
     d->vM = node->GetPointOr("v_m", CopyValPoint(zero2));
-    const ValVec3& off = node->GetVec3Or("offset", ValVec3(zero3));
-    d->offset.x = off.x;
-    d->offset.y = off.y;
-    d->offset.z = off.z;
+    *(ValVec3*)&d->offset = node->GetVec3Or("offset", ValVec3(zero3));
     d->vScale = node->GetPointOr("v_scale", CopyValPoint(zero2));
     d->radius = node->GetFloat("radius", 0.001f);
     d->fogDensity = node->GetFloat("fog_density", 0.0f);
-    ValVec3 white;
-    white.x = 1.0f;
-    white.y = 1.0f;
-    white.z = 1.0f;
-    d->fogColor = PackEmitterColor(node->GetVec3Or("fog_color", ValVec3(white)));
+    ValVec3 fog = ValVec3(node->GetVec3Or("fog_color", ValVec3(WhiteVec3())));
+    d->fogColor = PackEmitterColor(fog);
     d->repeat = node->GetInt("repeat", 1);
-    const ValVec3& dp = node->GetVec3Or("dpos", ValVec3(zero3));
-    d->dpos.x = dp.x;
-    d->dpos.y = dp.y;
-    d->dpos.z = dp.z;
+    *(ValVec3*)&d->dpos = node->GetVec3Or("dpos", ValVec3(zero3));
     fn_8029F534(&d->part, node->FindChild("particle"));
     fn_8029F5C8(&d->chunk, node->FindChild("chunk"));
     lbl_8055F81C++;
