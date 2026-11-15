@@ -144,6 +144,14 @@ const char* fn_802E85B8(s32 slot);
 }
 
 
+// These inline definitions keep the widgets' messages in their retail data order (after the vtables).
+struct RollStrings {  /* Helper name unproven */
+    static const char* InvalidState(void) { return "JoinLeaveWidget: invalid state %d found on focus group #%d"; }
+    static const char* ColorKey(void) { return "UICar:COLOR%d"; }
+    static const char* StatFont(void) { return "uifnt_o.gtx"; }
+    static const char* StatKey(void) { return "UICar:STAT_%i_TEXT_%i"; }
+};
+
 // One stat bar: a menu state that draws one stat's caption (class name from garage.cpp).
 class StatBar : public MenuState {
 public:
@@ -209,7 +217,6 @@ VehicleInfo* FindVehicleNamed(const char* chassis, int n);
 VehicleColor* GetVehicleColor(VehicleInfo* v, int slot);
 CarStats* CarStatsLookup(const char* chassis);
 
-extern char lbl_8034287C[];  // "UICar:COLOR%d"
 
 static inline s32 Min(s32 a, s32 b) { return b < a ? b : a; }
 
@@ -286,7 +293,7 @@ public:
             u32 rgb = vehicle->colors[color];
             *rgbOut = rgb;
             screen->SetAnim(rgb);
-            fn_801345D8(label, 0x40, lbl_8034287C, color + 1);
+            fn_801345D8(label, 0x40, RollStrings::ColorKey(), color + 1);
             const char* text = fn_80131234(label);
             CopyName(text, 0x40, label);
         }
@@ -456,7 +463,6 @@ struct FocusGroup {
     s32 state;    // offset 0x1C
 };
 
-extern char lbl_80342840[];  // "JoinLeaveWidget: invalid state %d found on focus group #%d"
 extern s32 lbl_8055F1F8;
 
 extern "C" {
@@ -541,7 +547,7 @@ public:
                     g->sel->SetActive(0);
                     break;
                 default:
-                    fn_802E317C(lbl_80342840, g->state, i);
+                    fn_802E317C(RollStrings::InvalidState(), g->state, i);
                     break;
                 }
                 g->prev = g->state;
@@ -833,7 +839,7 @@ StatBar::StatBar(void) {
     index = -1;
     value = 0;
     flag = 0;
-    font = fn_80232578("uifnt_o.gtx");
+    font = fn_80232578(RollStrings::StatFont());
 }
 
 void StatBar::Exit(void) {}
@@ -870,7 +876,7 @@ void StatBar::Draw(void) {
             }
         }
         char buf[0x1E];
-        fn_801345D8(buf, 0x1E, "UICar:STAT_%i_TEXT_%i", S32(p, 0x1C), lvl);
+        fn_801345D8(buf, 0x1E, RollStrings::StatKey(), S32(p, 0x1C), lvl);
         int align = 10;
         f32 size = lbl_8056375C;
         if (*PTR(p, 0x20)) {
