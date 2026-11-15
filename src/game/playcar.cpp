@@ -251,7 +251,7 @@ extern "C" {
 u8* fn_801769CC(void);
 PcGameMode* fn_801B83A0(void);
 u32 fn_80134E90(void);
-u32 fn_80134EC8(void);
+u32 fn_80134EC8(u32);
 u32 fn_80135078(void);
 u8* fn_801912B4(u8* p);
 u8* fn_8018FD88(u8* p, u32 a, u32 b);
@@ -270,7 +270,7 @@ SpringCar* fn_8018FB18(void) {
         if (U32(prof, 0x4) & 0x100) {
             ctl = fn_80134E90();
         } else if (U32(prof, 0x4) == 0x180201) {
-            ctl = fn_80134EC8();
+            ctl = fn_80134EC8(U32(prof, 0x4));
         } else {
             ctl = fn_80135078();
         }
