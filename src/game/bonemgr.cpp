@@ -4,6 +4,7 @@
 // word tables. Applying no command applies the default pose (80 zero vectors). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/vec3_init.h"
 #include "game/camframe34.h"
 
 extern "C" {
@@ -55,12 +56,7 @@ public:
     }
 };
 
-struct BVec {
-    BVec(void);
-    f32 x;
-    f32 y;
-    f32 z;
-};
+typedef Vec3Storage BVec;
 
 struct BMtx33 {
     void Identity(void) {

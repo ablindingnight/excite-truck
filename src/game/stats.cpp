@@ -277,7 +277,7 @@ u8 lbl_8055D5D8;              // first load pending
 StatEntry lbl_80358628;       // returned when a stat has no contest
 StatList* lbl_80358658[NUM_IDENTITIES];
 
-void DefaultConstructVec3(void* storage) {}
+Vec3Storage::Vec3Storage(void) {}
 
 const char* StatsGetLabel(u32 type) {
     return GetStatLabel(type);

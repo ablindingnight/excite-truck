@@ -10,10 +10,7 @@
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-struct TVec {
-    TVec(void);
-    f32 x, y, z;
-};
+typedef Vec3Storage TVec;
 
 struct PVec {
     f32 x, y, z;
@@ -617,7 +614,6 @@ struct TVtx {
 };
 
 
-inline TVec::TVec(void) { DefaultConstructVec3(this); }
 
 // Which of the 32 facings of the billboard atlas looks at the camera.
 static inline int FaceSeg(TObj* o, f32*& pos, TCam* cam) {

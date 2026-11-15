@@ -5,6 +5,7 @@
 // model. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/dropsource.h"
+#include "game/vec3_init.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -28,15 +29,7 @@ struct PVec {
 };
 
 // A point in a particle array (constructed by new[]).
-struct WPt {
-    WPt(void);
-    void Set(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x, y, z;
-};
+typedef Vec3Storage WPt;
 
 // Axes (rows) and the origin.
 struct WFrame {
