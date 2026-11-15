@@ -567,8 +567,9 @@ struct SimpleHeap {
         }
         if (best) {
             HeapBlock* split = 0;
+            s32 rest;
             HeapBlock* b = *best;
-            s32 rest = b->size - n;
+            rest = b->size - n;
             HeapBlock* next = b->next;
             s32 hdr = (align + 0x10) & ~align;
             if (rest > hdr + 0x20) {
