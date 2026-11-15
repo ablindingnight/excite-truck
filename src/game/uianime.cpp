@@ -279,11 +279,18 @@ u8 lbl_8055F0C6;            // no parent match
 u8 lbl_8055F0C7;
 
 
+// The 2D point class (retail weak __ct__4Vec2Fff): a plain ValPoint with an (x, y) constructor. Its arguments are
+// evaluated right to left, so the y lerp is computed first.
+class Vec2 : public ValPoint {
+public:
+    Vec2(f32 x_, f32 y_) {
+        x = x_;
+        y = y_;
+    }
+};
+
 static inline ValPoint Lerp2(const ValPoint& a, const ValPoint& b, f32 f) {
-    ValPoint r;
-    r.y = LerpT(f, a.y, b.y);
-    r.x = LerpT(f, a.x, b.x);
-    return r;
+    return Vec2(LerpT(f, a.x, b.x), LerpT(f, a.y, b.y));
 }
 
 // A row of the pose's 3x3 rotation.
