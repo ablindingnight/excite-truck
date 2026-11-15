@@ -71,16 +71,14 @@ struct RoadSoundEntry {
 static char RoadSoundTag[] = "roadsnd";
 static char RoadSoundType[] = "sound";
 
-// The linker places these constructor strings after the RoadSound vtable.
-#ifdef __MWERKS__
-#pragma section const_type ".data.roadsnd_strings" ".bss.roadsnd_strings"
-#endif
 class RoadSound {
+    // The inline definitions emit the constructor strings in retail order.
+    static const char* Path() { return "roadsnd.val"; }  /* Helper name unproven */
+    static const char* SurfaceKey() { return "surftype"; }  /* Helper name unproven */
+    static const char* MissingVoiceFormat() { return "roadsnd: can't find %s"; }  /* Helper name unproven */
+
 public:
     RoadSound(char* car) {
-        static const char RoadSoundPath[] = "roadsnd.val";
-        static const char RoadSoundSurfaceKey[] = "surftype";
-        static const char RoadSoundMissingVoice[] = "roadsnd: can't find %s";
         RoadSoundEntry* e;
         const char* name;
         char* c;
@@ -89,7 +87,7 @@ public:
         int i;
         this->car = car;
         count = 0;
-        table = fn_80131808(RoadSoundPath);
+        table = fn_80131808(Path());
         for (i = 0; (node = table->GetChild(i)) != NULL; i++) {
             if (strcmp(node->GetName(), RoadSoundType) == 0) {
                 c = this->car;
@@ -97,9 +95,9 @@ public:
                 name = node->GetValue("sound");
                 e->voice = fn_802077A4(name, 4, c + 0x118, c + 0x60);
                 if (e->voice == NULL && *(s32*)(c + 0x1EC) == 0) {
-                    fn_802E30C8(RoadSoundMissingVoice, name);
+                    fn_802E30C8(MissingVoiceFormat(), name);
                 }
-                e->surface = node->GetIntValue(RoadSoundSurfaceKey);
+                e->surface = node->GetIntValue(SurfaceKey());
                 e->speed1 = 0.44444445f * node->GetFloat("speed1");
                 e->speed2 = 0.44444445f * node->GetFloat("speed2");
                 e->speed3 = 0.44444445f * node->GetFloat("speed3");
@@ -118,10 +116,6 @@ public:
     int count;                    // offset 0x8
     RoadSoundEntry entries[8];    // offset 0xC
 };
-
-#ifdef __MWERKS__
-#pragma section const_type
-#endif
 
 ModuleTag lbl_8055EE60;
 

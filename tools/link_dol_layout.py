@@ -10,30 +10,16 @@ import sys
 from tempfile import TemporaryDirectory
 
 
-def order_section(script, section, orders, objects, link_objects):
-    anchors = {}
-    for unit, sections in orders.items():
-        anchor, = (index for index, path in enumerate(objects) if path.as_posix().endswith("/" + unit))
-        anchors[anchor] = sections
-
-    selectors = []
-    for index, path in enumerate(link_objects[:max(anchors) + 1]):
-        selectors.extend(f'            "{path.name}" ({name})' for name in anchors.get(index, [section]))
-    selectors.append(f"            * ({section})")
-    body = "\n".join(selectors)
-    declaration = rf"(?m)^(        {re.escape(section)} ALIGN\(0x[0-9a-fA-F]+\):)\{{\}}$"
-    updated, count = re.subn(declaration, lambda match: f"{match[1]}{{\n{body}\n        }}", script)
+def apply_layout(base_script, layout, objects):
+    unit = layout["unit"]
+    anchor, = (index for index, path in enumerate(objects) if path.as_posix().endswith("/" + unit))
+    earlier = [f'            "{path.name}" (.text)' for path in objects[:anchor]]
+    ordered = [f'            "{objects[anchor].name}" ({name})' for name in layout["code_sections"]]
+    text_body = "\n".join(earlier + ordered + ["            * (.text)"])
+    script, count = re.subn(r"(?m)^(        \.text ALIGN\(0x4\):)\{\}$",
+                            lambda match: f"{match[1]}{{\n{text_body}\n        }}", base_script)
     if count != 1:
-        raise ValueError(f"expected the default {section} declaration in the DOL linker script")
-    return updated
-
-
-def apply_layout(base_script, layout, objects, link_objects=None):
-    if link_objects is None:
-        link_objects = objects
-    script = order_section(base_script, ".text", {layout["unit"]: layout["code_sections"]}, objects, link_objects)
-    if data_sections := layout.get("data_sections"):
-        script = order_section(script, ".data", data_sections, objects, link_objects)
+        raise ValueError("expected the default .text declaration in the DOL linker script")
 
     aliases = "".join(f"    {name} = {target};\n" for name, target in layout["aliases"].items())
     marker = "    _stack_end = "
@@ -68,12 +54,11 @@ def main():
 
     with TemporaryDirectory(prefix="link-", dir=response_path.parent) as folder:
         directory = Path(folder)
-        link_objects = objects.copy()
-        distinct_objects(link_objects, directory)
+        distinct_objects(objects, directory)
         script = directory / "main.lcf"
-        script.write_text(apply_layout(original, layout, objects, link_objects), encoding="utf-8")
+        script.write_text(apply_layout(original, layout, objects), encoding="utf-8")
         response = directory / "main.rsp"
-        response.write_text("".join(f'"{path}"\n' for path in link_objects), encoding="utf-8")
+        response.write_text("".join(f'"{path}"\n' for path in objects), encoding="utf-8")
         return subprocess.run([*sys.argv[5:], "-lcf", str(script), f"@{response}"]).returncode
 
 
