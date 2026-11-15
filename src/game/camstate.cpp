@@ -218,6 +218,12 @@ extern const f32 lbl_80563FEC;
 
 // Camera frame (0x58) = the car-relative frame (0xC0), moved by a lift that follows the car's 0x2458 value;
 // flag 0x260C on the car takes fn_80274460 instead.
+/* Helper name unproven */
+static inline void SetV3(CVec3* v, f32 x, f32 y, f32 z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
 void fn_80274268(u8* p) {
     u8* car = PTR(p, 0x140);
     if (U8(car, 0x260C)) {
@@ -227,9 +233,8 @@ void fn_80274268(u8* p) {
     CVec3 v;
     CVec3 w;
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
-    v.z = lbl_80563FEC + (F32(car, 0x2458) - 1.397f);
-    v.x = 0.0f;
-    v.y = 0.8f;
+    f32 h = F32(car, 0x2458) - 1.397f;
+    SetV3(&v, 0.0f, 0.8f, lbl_80563FEC + h);
     MulVec(&w, &v, (CFrame*)(p + 0x58));
     F32(p, 0x7C) = F32(p, 0x7C) + w.x;
     F32(p, 0x80) = F32(p, 0x80) + w.y;
