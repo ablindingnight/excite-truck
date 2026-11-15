@@ -359,10 +359,11 @@ void fn_802BF160(void) {
         f32 s = FMax(FMin((c - -1.0f) / 2.0f, 1.0f), 0.0f);
         f32 h = Lerp(0.0f, w, s);
         TexMtx m = {{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}}};
+        f32 top = h + rings.r[i].scale;
         f32 inv = 1.0f / rings.r[i].scale;
         f32 off = -inv * h;
         m.m[0][3] = rings.r[i].y;
-        m.m[1][1] = (1.0f + inv * (1.0f - (h + rings.r[i].scale))) - off;
+        m.m[1][1] = (1.0f + inv * (1.0f - top)) - off;
         m.m[1][3] = off;
         fn_802C9900(fn_802BF02C(a));
         fn_802D3D94(0, &m);
