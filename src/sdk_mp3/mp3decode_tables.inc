@@ -11,8 +11,10 @@ MP3_STATIC const s16 lbl_802F3478[3][16] = {
     192, 240, 288, 336, 384, 432, 480, 0, 0, 36, 72, 108,
     144, 180, 216, 252, 288, 360, 432, 504, 576, 648, 720, 0,
 };
-MP3_STATIC const s32 lbl_802F34D8[4] = {
-    0x1A20180, 0x226020A, 0x21C020A, 0,
+/* count1 region end per [lsf][sr_index] (s16, read as s16[][3] by mp3decode.c). Declared as s16 so the table is
+ * endian-neutral for the PC port (was an s32[4] of packed pairs; same bytes on the Wii). */
+MP3_STATIC const s16 lbl_802F34D8[8] = {
+    0x1A2, 0x180, 0x226, 0x20A, 0x21C, 0x20A, 0, 0,
 };
 MP3_STATIC const s16 lbl_80560DA0[4] = {
     184, 168, 304, 288,
