@@ -32,9 +32,20 @@ void fn_801E9DC4(s16* h);
 void* fn_80171698(void);
 }
 
-struct Vec3 {
+/* The vector without constructors: by-value copies of it are word copies (DrawNextGate). */
+struct PlainVec3 {
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+struct Vec3 : PlainVec3 {
     Vec3(void) {}
-    Vec3(f32 x, f32 y, f32 z) : x(x), y(y), z(z) {}
+    Vec3(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
     void Set(f32 x, f32 y, f32 z) {
         this->x = x;
         this->y = y;
@@ -43,9 +54,6 @@ struct Vec3 {
     Vec3 operator+(const Vec3& b) const { return Vec3(x + b.x, y + b.y, z + b.z); }
     Vec3 operator-(const Vec3& b) const { return Vec3(x - b.x, y - b.y, z - b.z); }
     Vec3 operator*(f32 s) const { return Vec3(x * s, y * s, z * s); }
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 extern "C" {
@@ -1007,9 +1015,8 @@ public:
     virtual void vfFC(void);
 
     Gate* NextGate(Gate* g) const {
-        ZoneLevel* l = &levels->levels[level];
-        Gate* first = l->gates;
-        if (g == first + l->n - 1) {
+        Gate* first = CurLevel()->gates;
+        if (g == CurLevel()->gates + CurLevel()->n - 1) {
             g = first;
         } else {
             g++;
@@ -1758,7 +1765,7 @@ extern "C" void fn_8013EB0C(ZoneMaster* zm, int car) {
 extern "C" {
 int fn_801E866C(int player);
 Watcher* fn_802C86DC(void);
-void fn_802A9BFC(Vec3* a, Vec3* b, s32 tex, int d, int e, int f, int g, f32 t);
+void fn_802A9BFC(PlainVec3* a, PlainVec3* b, s32 tex, int d, int e, int f, int g, f32 t);
 void fn_801E9E30(s16* h, Vec3* p);
 f32 fn_801E7E24(void);
 void fn_802981F8(Vec3* p);
@@ -1776,42 +1783,47 @@ void fn_80147BD0(LayoutArt* a, LayoutArt* b, int c, int d, s32 tex, f32 alpha);
 void fn_8000FF88(u32 color, int size, const char* text, f32 scale, f32 x, f32 y, ...);
 }
 
+/* Helper name unproven: the watcher's position. */
+static inline Vec3* WatcherPos(void) { return &fn_802C86DC()->pos; }
+
+/* Helper name unproven: the bar drawn above the next gate (endpoints copied as plain vectors, level and texture by value). */
+static inline void DrawGateBar(const PlainVec3& from, const PlainVec3& to, int level, s32 tex, f32 t) {
+    PlainVec3 a = from;
+    PlainVec3 b = to;
+    f32 y = (a.y > b.y ? a.y : b.y) + 10.0f;
+    int lo;
+    int hi;
+    b.y = y;
+    a.y = y;
+    lo = 0;
+    hi = 0x48;
+    if (level == lbl_8042FB3C.highestLevel - 1) {
+        lo = 0x48;
+        hi = 0x72;
+    }
+    fn_802A9BFC(&a, &b, tex, 0, lo, 0x100, hi, t);
+}
+
 void ZoneMaster::DrawNextGate(void) {
     f32 t = fn_8013CB3C() - nextT;
-    CarState* c = &cars[fn_801E866C(0)];
+    CarState* c = GetCar(fn_801E866C(0));
     Gate* g = c->gate;
     if (g && lbl_8042FB3C.levelupGates - c->gates < 3) {
         int i;
         while (g->ring) {
             g = NextGate(g);
         }
-        int limit = lbl_8042FB3C.levelupGates;
-        for (i = c->gates + 1; i < limit; i++) {
+        for (i = c->gates + 1; i < lbl_8042FB3C.levelupGates; i++) {
             do {
                 g = NextGate(g);
             } while (g->ring);
         }
-        if (g == nextGate || PSVECSquareDistance(&g->a, &fn_802C86DC()->pos) < 40000.0f) {
+        if (g == nextGate || PSVECSquareDistance(&g->a, WatcherPos()) < 40000.0f) {
             if (nextGate != g) {
                 nextGate = g;
                 nextT = fn_8013CB3C();
             }
-            {
-                Vec3 b = g->b;
-                Vec3 a = g->a;
-                f32 y = (a.y > b.y ? a.y : b.y) + 10.0f;
-                int lo;
-                int hi;
-                b.y = y;
-                a.y = y;
-                lo = 0;
-                hi = 0x48;
-                if (level == lbl_8042FB3C.highestLevel - 1) {
-                    lo = 0x48;
-                    hi = 0x72;
-                }
-                fn_802A9BFC(&a, &b, tex[1], 0, lo, 0x100, hi, t);
-            }
+            DrawGateBar(g->a, g->b, level, tex[1], t);
         }
     }
 }
