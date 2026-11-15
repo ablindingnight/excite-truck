@@ -1217,10 +1217,10 @@ static inline u8 PackDent(f32 v) {
 #define DMG_MIN(a, b) ((a) < (b) ? (a) : (b))
 
 // A packed dent byte back to its offset.
-static inline f32 UnpackDent(u32 b) {
+static inline f32 UnpackDent(u32 b, f32 span) {
     f32 t = DMG_MIN(lbl_80561F88, (b - lbl_80561F74) / lbl_80562038);
     t = FMax(t, lbl_80561F74);
-    return -0.508f + t * 1.016f;
+    return -0.508f + t * span;
 }
 
 extern "C" {
@@ -1234,10 +1234,11 @@ void fn_8018F2C0(u8* p, const u8* q) {
     S32(p, 0x268C) = S32(q, 0x298);
     const u8* o = q;
     u8* d = p;
+    const f32 dentSpan = 1.016f;
     for (int i = 0; i < S32(p, 0x5F8); o += 4, i++, d += 0xC) {
-        F32(d, 0x5FC) = UnpackDent(o[0]);
-        F32(d, 0x600) = UnpackDent(o[1]);
-        f32 z = UnpackDent(o[2]);
+        F32(d, 0x5FC) = UnpackDent(o[0], dentSpan);
+        F32(d, 0x600) = UnpackDent(o[1], dentSpan);
+        f32 z = UnpackDent(o[2], dentSpan);
         F32(d, 0x604) = z;
         F32(d, 0xD94) = F32(d, 0x5FC);
         F32(d, 0xD98) = F32(d, 0x600);
