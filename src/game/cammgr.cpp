@@ -1434,7 +1434,7 @@ void fn_80276054(CamRec* c);
 u32 fn_801769A8(void);
 void fn_80273490(int type, CamRec* c);
 void camera_car(CamRec* c, int which);
-void fn_80275B9C(f32 a, f32 b, f32 c, CamRec* rec);
+void fn_80275B9C(CamRec* rec, f32 a, f32 b, f32 c);
 void fn_80277A14(CamRec* c, int idx);
 void fn_80278360(CamRec* c);
 void fn_802E317C(const char* fmt, ...);
@@ -1594,21 +1594,21 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             c->pose = lbl_80499950;
             break;
         case 0x1A:
-            fn_80275B9C(lbl_80563CC0, lbl_80563CC4, lbl_80563CC8, c);
+            fn_80275B9C(c, lbl_80563CC0, lbl_80563CC4, lbl_80563CC8);
             break;
         case 0x1E:
         {
             f32 speed = lbl_80563CCC + lbl_80563C20 * lbl_80563CD0;
             f32 height = lbl_80563CD4 + lbl_80563C20 * lbl_80563CD8;
             f32 radius = lbl_80563CDC + lbl_80563C20 * lbl_80563CE0;
-            fn_80275B9C(radius, height, speed, c);
+            fn_80275B9C(c, radius, height, speed);
             break;
         }
         case 0x1B:
             fn_802704D4(7, c);
             break;
         case 0x1C:
-            fn_80275B9C(lbl_80563CA4, lbl_80563CE4, lbl_80563CC8, c);
+            fn_80275B9C(c, lbl_80563CA4, lbl_80563CE4, lbl_80563CC8);
             break;
         case 0x1D:
             fn_802704D4(7, c);

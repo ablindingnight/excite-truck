@@ -373,7 +373,7 @@ struct CamFrame {
 };
 
 void GetTipsCamera(CamFrame* cam, f32* fov);
-extern "C" void fn_8026A2CC(CamFrame* cam, f32 fov, int a);
+extern "C" void fn_8026A2CC(CamFrame* cam, int a, f32 fov);
 
 // A help page: its text and its optional overlay layout.
 struct HelpPage {
@@ -821,7 +821,7 @@ public:
         CamFrame cam;
         f32 fov;
         GetTipsCamera(&cam, &fov);
-        fn_8026A2CC(&cam, fov, 0);
+        fn_8026A2CC(&cam, 0, fov);
         fn_8000C630(0x15, -1);
     }
     virtual const char* Title(void) { return "Challenge List"; }
@@ -1478,7 +1478,7 @@ inline void Challenge::Camera(void) {
             CamFrame cam;
             f32 fov;
             GetTipsCamera(&cam, &fov);
-            fn_8026A2CC(&cam, fov, 0);
+            fn_8026A2CC(&cam, 0, fov);
             fn_8000C630(0x15, -1);
         } else {
             fn_8000C630(0x20, -1);

@@ -158,8 +158,8 @@ void fn_802C8B70(s32 tex);
 void fn_802C8B98(s32 tex, const MFrame* m);
 void fn_802C8D74(void);
 int fn_802C90E0(void);
-int fn_802C94A0(const MVec3* c, f32 r, u8* clip, f32* dist);
-int fn_802C9638(const MVec3* c, f32 r, u8* clip);
+int fn_802C94A0(const MVec3* c, u8* clip, f32* dist, f32 r);
+int fn_802C9638(const MVec3* c, u8* clip, f32 r);
 const MVec3* fn_802C9A40(void);
 s32 fn_802C9C58(s32 v);
 s32 fn_802CAC28(const char* name, s32 key);
@@ -419,7 +419,7 @@ void fn_802C57B4(s32 i, void* mtx, u32 mat, u8 clip, f32 dist) {
         el = &info->elems[e];
         if (lbl_8055D008 & (1 << el->bit)) {
             c = clip;
-            if (slot->spheres && !fn_802C9638(&slot->spheres[e].c, slot->spheres[e].r, &c)) {
+            if (slot->spheres && !fn_802C9638(&slot->spheres[e].c, &c, slot->spheres[e].r)) {
                 continue;
             }
             cl = c;
@@ -852,7 +852,7 @@ void fn_802C7040(s32 i) {
         ModelInfo* m = fn_802C5390(i)->info;
         u8 clip;
         f32 dist;
-        if (fn_802C94A0(&m->center, m->radius, &clip, &dist)) {
+        if (fn_802C94A0(&m->center, &clip, &dist, m->radius)) {
             fn_802C57B4(i, 0, 0xFFFFFFFF, clip, dist);
         }
     }
@@ -868,7 +868,7 @@ void fn_802C70AC(s32 i, const MFrame* f, u32 mat, u32 mask) {
         u8 clip;
         f32 dist;
         f32 r = slot->info->radius;
-        if (fn_802C94A0(&c, r, &clip, &dist)) {
+        if (fn_802C94A0(&c, &clip, &dist, r)) {
             fn_802C57B4(i, fn_802D0514(f), mat, clip, dist);
         }
         lbl_8055D008 = old;
@@ -925,7 +925,7 @@ void fn_802C7458(s32 i, u32 mask) {
         ModelInfo* m = fn_802C5390(i)->info;
         u8 clip;
         f32 dist;
-        if (fn_802C94A0(&m->center, m->radius, &clip, &dist)) {
+        if (fn_802C94A0(&m->center, &clip, &dist, m->radius)) {
             fn_802C57B4(i, 0, 0xFFFFFFFF, clip, dist);
         }
         lbl_8055D008 = old;
@@ -940,7 +940,7 @@ void fn_802C74D8(s32 i, const MFrame* f, s32 tex) {
     u8 clip;
     f32 dist;
     f32 r = slot->info->radius;
-    if (fn_802C94A0(&c, r, &clip, &dist)) {
+    if (fn_802C94A0(&c, &clip, &dist, r)) {
         if (lbl_8055FC20) {
             TexNode* t = fn_802C5EFC(tex);
             void* mtx = fn_802D0514(f);
@@ -1048,7 +1048,7 @@ void fn_802C7AE0(s32 i, const MFrame* f, u32 mask, f32 t) {
     c.x = c.x + d->x * k;
     c.y = c.y + d->y * k;
     c.z = c.z + d->z * k;
-    if (fn_802C9638(&c, k + slot->info->radius, &clip)) {
+    if (fn_802C9638(&c, &clip, k + slot->info->radius)) {
         fn_802D6C4C(t);
         fn_802DB2BC(clip);
         fn_802C7734(f);
@@ -1084,7 +1084,7 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 a, f32 b, f32 range) {
     u8 clip;
     f32 dist;
     f32 r = slot->info->radius;
-    if (fn_802C94A0(&c, r, &clip, &dist)) {
+    if (fn_802C94A0(&c, &clip, &dist, r)) {
         void* mtx = fn_802D0514(f);
         ModelInfo* m = slot->info;
         if (!lbl_8055FC20) {

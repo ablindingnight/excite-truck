@@ -44,7 +44,7 @@ void fn_801E4FF4(void);
 void fn_802CB29C(int a);
 void fn_802D0368(f32 a, f32 b, f32 fov, f32 aspect);
 void fn_802D007C(f32 a);
-void fn_802D01B0(f32 a, void* v);
+void fn_802D01B0(void* v, f32 a);
 void fn_802D93E0(void);
 int fn_802D31D8(int a);
 void fn_802D362C(int a);
@@ -57,7 +57,7 @@ f32 PSVECDistance(const void* a, const void* b);
 f32 PSVECSquareDistance(const void* a, const void* b);
 void* fn_801E7840(int a);
 void fn_801E7888(void* p);
-void fn_801E7890(void* p, int a, int b, f32 x, f32 y, f32 z, f32 s, f32 t);
+void fn_801E7890(void* p, f32 x, f32 y, f32 z, int a, f32 s, f32 t, int b);
 void fn_801E7894(void* p);
 }
 
@@ -710,7 +710,7 @@ u32 fn_802C9994(u32 color) {
     return old;
 }
 
-void fn_802C99D8(void) { fn_802D01B0(lbl_8055D01C, &lbl_804C1440); }
+void fn_802C99D8(void) { fn_802D01B0(&lbl_804C1440, lbl_8055D01C); }
 
 f32 fn_802C99E8(f32 v) {
     f32 old = lbl_8055D01C;
@@ -864,7 +864,7 @@ void Flare::Draw(int a, int b, f32 x, f32 y, f32 z, f32 s, f32 t) {
             radius = 0.5f * (radius + dist);
         }
     }
-    fn_801E7890(fx, a, b, x, y, z, s, t);
+    fn_801E7890(fx, x, y, z, a, s, t, b);
     count++;
 }
 

@@ -151,7 +151,7 @@ void fn_801293E8(void* buf);
 const MCam* fn_802C86DC(void);
 void fn_802C8B70(s32 tex);
 void fn_802C8D74(void);
-int fn_802C94A0(const MVec3* c, f32 r, u8* clip, f32* dist);
+int fn_802C94A0(const MVec3* c, u8* clip, f32* dist, f32 r);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
@@ -230,7 +230,7 @@ static inline u8 Cull(const MLSphere* sp) {
     c.y = s.y;
     c.z = s.z;
     f32 r = s.r;
-    if (fn_802C94A0(&c, r, &clip, &lbl_8055FCE0)) {
+    if (fn_802C94A0(&c, &clip, &lbl_8055FCE0, r)) {
         lbl_8055FCDC = clip ? 0x81 : 1;
     } else {
         lbl_8055FCDC = 0;
