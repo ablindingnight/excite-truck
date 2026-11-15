@@ -361,9 +361,16 @@ struct AIOrder {
 };
 
 // The interlude editor's state (this file's .bss, in address order).
-u8 lbl_80437D88[0x9C];         // player state
+struct PlayerState {
+    CamPlay play;  // offset 0x0
+    CamPose prev;  // offset 0x68: the pose blended from
+    f32 prevFov;   // offset 0x98
+};
+PlayerState lbl_80437D88;
 Message lbl_80437E24;
-AIOrder lbl_80437E30[20];      // each car's standing order
+AIOrder lbl_80437E30[8];       // each car's standing order
+CamPose lbl_80437ED0[4];       // each view's last camera pose
+IVec3 lbl_80437F90[4];         // each view's car heading
 char lbl_80437FC0[0x130];      // status line
 char lbl_804380F0[0x100];      // input line
 IMtx lbl_804381F0;
@@ -968,8 +975,8 @@ void fn_801C4BAC(void) {
     lbl_8055E7F4 = 0;
     lbl_8055E7E3 = 0;
     lbl_8055E7E4 = 0.0f;
-    u8* s = lbl_80437D88;
-    memset(s, 0, 0x9C);
+    memset(&lbl_80437D88, 0, sizeof(lbl_80437D88));
+    u8* s = (u8*)&lbl_80437D88;
     f32* m = (f32*)(s + 0x14);
     m[0] = 1.0f;
     m[1] = 0.0f;
@@ -1185,7 +1192,7 @@ void debug_event(void) {
     if (lbl_8055E7FC) {
         lbl_8055E7E4 = -lbl_8055E3C8;
     }
-    s = lbl_80437D88;
+    s = (u8*)&lbl_80437D88;
     msg = (Message*)&lbl_80437E24;
     while (!blocked && lbl_8055E7F4 < lbl_8055E7F0) {
         Event* e = &lbl_8055E7F8[lbl_8055E7F4];
@@ -1589,18 +1596,16 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 // current camera move at the current time, relative to the world, the start line or a car, blended in
 // from the previous camera over the interpolation time. Returns 0 when not active.
 int fn_801C5B68(CamView* v, int idx) {
-    u8* s = lbl_80437D88;
-    CamPlay* p = (CamPlay*)s;
     if (idx == 0) {
         lbl_8055E800++;
     }
     if (fn_801C5B60() && !lbl_8055E80C) {
         CamPose* cam = (CamPose*)&lbl_80499050;
-        cam->pos.x = p->origin.x;
-        cam->pos.y = p->origin.y;
-        cam->pos.z = p->origin.z;
-        cam->rot = p->rot;
-        lbl_8055F47C = p->fov;
+        cam->pos.x = lbl_80437D88.play.origin.x;
+        cam->pos.y = lbl_80437D88.play.origin.y;
+        cam->pos.z = lbl_80437D88.play.origin.z;
+        cam->rot = lbl_80437D88.play.rot;
+        lbl_8055F47C = lbl_80437D88.play.fov;
     }
     if (!fn_801C5B60() || lbl_8055E80C) {
         return 0;
@@ -1613,50 +1618,50 @@ int fn_801C5B68(CamView* v, int idx) {
     }
     memset(v, 0, sizeof(CamView));
     int car = fn_80179630(idx);
-    if (p->target >= 0) {
-        car = p->target;
+    if (lbl_80437D88.play.target >= 0) {
+        car = lbl_80437D88.play.target;
     }
     ICar* c = (ICar*)fn_8017960C(car);
     v->flags |= 5;
     f32 dt;
-    if (fn_801C3B6C() > p->end) {
-        dt = p->end - p->start;
+    if (fn_801C3B6C() > lbl_80437D88.play.end) {
+        dt = lbl_80437D88.play.end - lbl_80437D88.play.start;
     } else {
-        dt = fn_801C3B6C() - p->start;
+        dt = fn_801C3B6C() - lbl_80437D88.play.start;
     }
-    f32 len = p->end - p->start;
+    f32 len = lbl_80437D88.play.end - lbl_80437D88.play.start;
     if (len > 0.1f) {
         f32 e = Ease(dt / len);
-        if (p->accel) {
+        if (lbl_80437D88.play.accel) {
             dt = e * len;
         }
     }
-    v->pos.x = p->origin.x;
-    v->pos.y = p->origin.y;
-    v->pos.z = p->origin.z;
-    v->rot = p->rot;
+    v->pos.x = lbl_80437D88.play.origin.x;
+    v->pos.y = lbl_80437D88.play.origin.y;
+    v->pos.z = lbl_80437D88.play.origin.z;
+    v->rot = lbl_80437D88.play.rot;
     IVec3 move;
-    move.x = p->v.x * dt;
-    move.y = p->v.y * dt;
-    move.z = p->v.z * dt;
+    move.x = lbl_80437D88.play.v.x * dt;
+    move.y = lbl_80437D88.play.v.y * dt;
+    move.z = lbl_80437D88.play.v.z * dt;
     IVec3 d;
     MulVec(&d, &move, &v->rot);
     v->pos.x += d.x;
     v->pos.y += d.y;
     v->pos.z += d.z;
     ValVec3 turn;
-    turn.x = p->av.x * dt;
-    turn.y = p->av.y * dt;
-    turn.z = p->av.z * dt;
+    turn.x = lbl_80437D88.play.av.x * dt;
+    turn.y = lbl_80437D88.play.av.y * dt;
+    turn.z = lbl_80437D88.play.av.z * dt;
     Mat3 r;
     AxisAngleToRot(&r, turn);
     MulM(&v->rot, &r, &v->rot);
-    if (p->target >= 0) {
+    if (lbl_80437D88.play.target >= 0) {
         CamPose rel;
         rel.rot = v->rot;
         rel.pos = v->pos;
         CamPose f;
-        switch (p->camType) {
+        switch (lbl_80437D88.play.camType) {
         case 0:
             f.rot.m[0] = 1.0f;
             f.rot.m[1] = 0.0f;
@@ -1678,10 +1683,10 @@ int fn_801C5B68(CamView* v, int idx) {
             f = c->frame;
             break;
         default:
-            fn_802E317C("intrlude: unknown camtype %d", p->camType);
+            fn_802E317C("intrlude: unknown camtype %d", lbl_80437D88.play.camType);
             break;
         }
-        if (p->camType != 1) {
+        if (lbl_80437D88.play.camType != 1) {
             fn_801BFD34(&v->pos, &rel.pos, &f);
             Mat3Mul(&v->rot, &rel.rot, &f.rot);
         } else {
@@ -1694,33 +1699,29 @@ int fn_801C5B68(CamView* v, int idx) {
             v->pos.z += o.z;
         }
     }
-    CamPose* prev = (CamPose*)(s + 0x68);
-    f32* prevFov = (f32*)(s + 0x98);
-    if (!(AbsF(p->interpTime) <= lbl_80558DC4[0]) && dt < p->interpTime) {
-        f32 u = dt / p->interpTime;
-        if (p->interpType == 1) {
+    if (!(AbsF(lbl_80437D88.play.interpTime) <= lbl_80558DC4[0]) && dt < lbl_80437D88.play.interpTime) {
+        f32 u = dt / lbl_80437D88.play.interpTime;
+        if (lbl_80437D88.play.interpType == 1) {
             u = Ease(u);
         }
-        fn_801C2FF4((IFrame*)v, (IFrame*)prev, (IFrame*)v, u);
-        p->fov = *prevFov + u * (p->fov - *prevFov);
+        fn_801C2FF4((IFrame*)v, (IFrame*)&lbl_80437D88.prev, (IFrame*)v, u);
+        lbl_80437D88.play.fov = lbl_80437D88.prevFov + u * (lbl_80437D88.play.fov - lbl_80437D88.prevFov);
     } else {
-        *prev = *v;
-        f32 fovv = p->fov;
-        *prevFov = fovv;
+        lbl_80437D88.prev = *v;
+        f32 fovv = lbl_80437D88.play.fov;
+        lbl_80437D88.prevFov = fovv;
     }
-    v->fov = p->fov;
-    CamPose* saved = (CamPose*)(s + 0x148) + idx;
-    IVec3* heading = (IVec3*)(s + 0x208) + idx;
-    *saved = *v;
-    *heading = c->heading;
+    v->fov = lbl_80437D88.play.fov;
+    lbl_80437ED0[idx] = *v;
+    lbl_80437F90[idx] = c->heading;
     v->car = car;
     v->modeA = 0xB;
     v->modeB = 0xB;
     v->carId = c->id;
     CamListen l;
     l.car = car;
-    l.pose = saved;
-    l.heading = heading;
+    l.pose = &lbl_80437ED0[idx];
+    l.heading = &lbl_80437F90[idx];
     fn_8020655C(&l, 0);
     return 1;
 }
