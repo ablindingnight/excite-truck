@@ -106,10 +106,9 @@ public:
     virtual s32 Size(void) { return size; }
     virtual void* Disk(void) { return disk; }
     /* Helper name unproven */
-    void ReadSectors(s32 n, s32 aligned, s32& got) {
-        s32 cnt = 0;
+    void ReadSectors(s32 n, s32 aligned, s32& got, s32 retry) {
         for (;;) {
-            if (cnt) {
+            if (retry) {
                 got = DVDReadPrio(&info, lbl_804DBAA0, n, aligned, 2);
             } else {
                 got = DVDReadAsyncPrio(&info, lbl_804DBAA0, n, aligned, NULL, 2);
@@ -139,10 +138,11 @@ public:
         if (len == 0) {
             return 0;
         }
+        s32 aligned;
         s32 skip;
         s32 n;
         s32 got;
-        s32 aligned;
+        s32 retry;
         s32 cnt;
         aligned = pos & ~3;
         skip = pos - aligned;
@@ -150,7 +150,8 @@ public:
         if (n > 0x20000) {
             n = 0x20000;
         }
-        ReadSectors(n, aligned, got);
+        retry = 0;
+        ReadSectors(n, aligned, got, retry);
         cnt = got - skip;
         if (cnt > len) {
             cnt = len;
