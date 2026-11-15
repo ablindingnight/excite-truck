@@ -191,7 +191,7 @@ void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inp
  if(firstCar&&allowed&&impact*impact>lbl_80562628&&PSVECDotProduct(&relative,&relative)>lbl_8056262C){
   Body* secondCar=second?fn_801B3338(second):0;
   CollisionMessage message;
-float ax=firstVelocity.x*lbl_80562630;float ay=firstVelocity.y*lbl_80562630;float az=firstVelocity.z*lbl_80562630;float bx=secondVelocity.x*lbl_80562630;float by=secondVelocity.y*lbl_80562630;float bz=secondVelocity.z*lbl_80562630;float sumx=ax+bx;float sumy=ay+by;float sumz=az+bz;message.velocity.x=sumx;message.velocity.y=sumy;message.velocity.z=sumz;
+float ay;float ax=firstVelocity.x*lbl_80562630;ay=firstVelocity.y*lbl_80562630;float az=firstVelocity.z*lbl_80562630;float bx=secondVelocity.x*lbl_80562630;float by=secondVelocity.y*lbl_80562630;float bz=secondVelocity.z*lbl_80562630;float sumx=ax+bx;float sumy=ay+by;float sumz=az+bz;message.velocity.x=sumx;message.velocity.y=sumy;message.velocity.z=sumz;
   message.vectorA=vectorA;message.position=*position;message.vectorB=vectorB;message.kind=kind;message.car=firstCar->id;
   fn_801796CC(1,(const Message*)&message,0x38);
   CollisionMessage queued=message;fn_801B5360(15,&queued,0x38);
