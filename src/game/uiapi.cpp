@@ -38,7 +38,7 @@ extern "C" s32 fn_802168E0(s32, s32, s32);
 
 class VfObj {
 public:
-    virtual void vf0();
+    virtual ~VfObj();
     virtual void vf1();
     virtual void vf2();
     virtual void vf3();
@@ -2165,7 +2165,7 @@ extern "C" void fn_802158C8(void *arg0) {
 
 class Vf4Obj {
 public:
-    virtual void vf0();
+    virtual ~Vf4Obj();
     virtual void vf1();
     virtual void vf2();
     virtual void vf3();
@@ -2252,7 +2252,7 @@ extern "C" void fn_80215A74(void *arg0) {
 extern "C" s32 fn_80215AA4(void *arg0, s32 arg1) {
     class Callback {
     public:
-        virtual void f0(); virtual void f1(); virtual void f2(); virtual void f3();
+        virtual ~Callback(); virtual void f1(); virtual void f2(); virtual void f3();
         virtual void f4(); virtual void f5(); virtual void f6(); virtual void f7();
         virtual void f8(); virtual void f9(); virtual void f10(); virtual void f11();
         virtual void f12(); virtual void f13(); virtual void f14(); virtual void f15();
