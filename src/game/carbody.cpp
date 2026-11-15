@@ -1407,7 +1407,12 @@ struct CbV3 {
 };
 
 // The game-side 4-vector: built from a solver record through its xyz and w, written back through a temporary.
-/* Helper names unproven (CbV3, CbVec4, Set, Sol, CbFrame): the shapes come from the target copies (2026-11-08), the names are guesses. */
+/* Helper names unproven (CbV3, CbF, CbVec4, Set, Sol, CbFrame): the shapes come from the target copies (2026-11-08), the names are guesses. CbF (a one-float value passed by value) gives retail's float store + word copy of the w lane (2026-11-14). */
+struct CbF {
+    CbF(f32 a) { v = a; }
+    f32 v;
+};
+
 struct CbVec4 {
     CbVec4(void) {}
     CbVec4(f32 x_, f32 y_, f32 z_, f32 w_) {
@@ -1416,12 +1421,15 @@ struct CbVec4 {
         z = z_;
         w = w_;
     }
-    CbVec4(CbSolVec s) { Set(CbV3(s.x, s.y, s.z), s.w); }
-    void Set(const CbV3& p, f32 w_) {
+    CbVec4(CbSolVec s) {
+        CbF f(s.w);
+        Set(CbV3(s.x, s.y, s.z), f);
+    }
+    void Set(const CbV3& p, CbF w_) {
         x = p.x;
         y = p.y;
         z = p.z;
-        w = w_;
+        w = w_.v;
     }
     CbSolVec Sol(void) const { return CbSolVec4(x, y, z, w); }
     f32& operator[](int i) { return (&x)[i]; }
@@ -3681,11 +3689,10 @@ static inline void ToBody(u8* p, BVec* o, const BVec* v) {
 // Copies the flapping parts' simulated points (0x26C4 flag, 0x26C8 aerial) into the car model's point
 // list `m` (0xE24) in body space, then pins the four wheel points at the suspension heights.
 void fn_8018A9F0(u8* p, u8* m) {
-    f32 zero = lbl_80561CAC;
     if (PTR(p, 0x26C4)) {
-        s32 n = 0;
         BVec* pos = 0;
         BVec* old = 0;
+        s32 n = 0;
         fn_801C2BDC(PTR(p, 0x26C4), &n, &pos, &old);
         if (S32(PTR(p, 0x26C0), 0xA4) > 0) {
             for (int i = 0; i < S32(PTR(p, 0x26C0), 0xA4); i++) {
@@ -3695,9 +3702,9 @@ void fn_8018A9F0(u8* p, u8* m) {
         }
     }
     if (PTR(p, 0x26C8)) {
-        s32 n = 0;
         BVec* pos = 0;
         BVec* old = 0;
+        s32 n = 0;
         fn_801C2BDC(PTR(p, 0x26C8), &n, &pos, &old);
         if (S32(PTR(p, 0x26C0), 0xC8) > 0) {
             for (s32 i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
@@ -3711,7 +3718,7 @@ void fn_8018A9F0(u8* p, u8* m) {
     CbVec4 h = *(CbSolVec*)(x + 0x70);
     for (int i = 0; i < 4; i++) {
         BVec* o = (BVec*)(m + 0xE24) + ((s32*)(PTR(p, 0x26C0) + 0xCC))[i];
-        SetXYZ(o, zero, F32(p, 0x5AC) + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]), zero);
+        SetXYZ(o, lbl_80561CAC, F32(p, 0x5AC) + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]), lbl_80561CAC);
     }
     S32(m, 0xFA4) = S32(PTR(p, 0x26C0), 0xDC);
 }
