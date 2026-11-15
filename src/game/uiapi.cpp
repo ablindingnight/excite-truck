@@ -59,7 +59,7 @@ public:
   virtual void vf18();
   virtual void vf19();
   virtual void vf20();
-  virtual void vf21();    // vtable 0x5C
+  virtual int vf21();     // vtable 0x5C
 };
 
 
@@ -2260,7 +2260,7 @@ int UICustom::Slot64(int arg1) {
 int UICustom::Slot68(void) {
     void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
-    obj->vf21();
+    return obj->vf21();
 }
 
 void UICustom::Slot24(void*) {
