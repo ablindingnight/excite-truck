@@ -31,6 +31,7 @@ struct TextElem : ElemBase {
 
 struct ArtElem : ElemBase {
     ArtElem(const ArtElem& o);
+    ArtElem& operator=(const ArtElem& o);
     f32 w;   // offset 0x10
     f32 h;   // offset 0x14
     f32 u0;  // offset 0x18
@@ -150,21 +151,15 @@ s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 tex);
 Sound2D* fn_80207848(const char* name, int flags);
 void fn_801476D8(const ArtElem* a, u32 color, s32 tex);
-void fn_8014C72C(ILayout* l, const char* name);
-void fn_8014C75C(V2* d, const V2* s);
-void fn_8014C7B4(ArtElem* d, const ArtElem* s);
-f32 fn_8014C8B4(f32 x0, f32 x1, f32 y0, f32 y1, f32 x);  // remap
 u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a);
 f32 fn_80144BD8(f32 x);  // ease in/out
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, ...);
 void fn_80148100(GartElem* e);
 void fn_8014E61C(int id, int kind, f32 v);
-int fn_80141F7C(f32 x);  // near zero
 f32 fn_80176A2C(void);
 f32 fn_801E7E18(void);
 f32 fn_802C9A50(void);
-int fn_80009C84(void);
 int fn_80161BB8(void);
 int fn_80179650(void);
 int fn_801B8570(int car);
@@ -180,6 +175,13 @@ extern f32 lbl_8055E3C8;  // race time
 extern s32 lbl_8055CFF0;  // screen width
 extern f32 __float_epsilon[];
 }
+
+// Out-of-line copies of shared inline helpers (defined in other units; called, not inlined, by retail).
+int fn_80009C84(void);
+int NearZero(f32 x);
+void DrawText(ILayout* l, const char* name);
+void SetV2(V2& d, const V2& s);
+f32 Remap(f32 x0, f32 x1, f32 y0, f32 y1, f32 x);
 
 struct LocalCarDesc {
     s32 event;  // offset 0x0
@@ -197,12 +199,14 @@ void* operator new(size_t size, const char* tag);
 class Updatable {
 public:
     Updatable(void) { fn_801D0DDC(this); }
-    virtual ~Updatable(void) { fn_801D0DFC(this); }
+    virtual ~Updatable(void) = 0;  // pure (retail vtable slot is 0) but defined below
     virtual void vf0C(void) = 0;
     virtual void vf10(void) = 0;
     virtual void vf14(void) = 0;
     virtual void vf18(void) = 0;
 };
+
+inline Updatable::~Updatable(void) { fn_801D0DFC(this); }
 
 namespace {
 class CrashMode;
@@ -316,7 +320,6 @@ static inline f32 Max2(f32 a, f32 b) {
     return r;
 }
 static inline f32 Max1(f32 a, f32 b) { return (a > b) ? a : b; }
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 static inline int IsTutorialCrash(void) { return fn_801769CC()->flags == 0x180201; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
@@ -332,13 +335,13 @@ void fn_801DF6FC(void) { new ("crashmode") CrashMode(); }
 
 static inline void DrawFill(CrashMode* m, ArtElem* fl, ArtElem* fr, f32 fill) {
     f32 split = fl->w / (fl->w + fr->w);
-    f32 a = fn_8014C8B4(0.0f, split, 0.0f, 1.0f, fill);
-    f32 b = fn_8014C8B4(split, 1.0f, 0.0f, 1.0f, fill);
+    f32 a = Remap(0.0f, split, 0.0f, 1.0f, fill);
+    f32 b = Remap(split, 1.0f, 0.0f, 1.0f, fill);
     ArtElem e(*fl);
     e.w *= a;
     e.u1 *= a;
     fn_801476D8(&e, -1, m->boostTex);
-    fn_8014C7B4(&e, fr);
+    e = *fr;
     e.w *= b;
     e.u1 *= b;
     fn_801476D8(&e, -1, m->boostTex);
@@ -351,6 +354,11 @@ static inline void LayoutBoost(TextElem* b, CrashMode* m, TextElem* a, f32 k) {
         fn_801479A8(a, b, fn_80131234("Crash:BOOST"), k);
     }
 }
+
+// Stripped helper (name unproven): retail pools 3.0f FIRST in .sdata2, before this unit's first float user below.
+// A never-called static function is dropped by the compiler but keeps its constant in creation order (FACTS:
+// strings/constants of linker-stripped functions, romfont); fn_801DFFB4 and vf14 compute the same window inline.
+static f32 PumpWindow(void) { return lbl_8055AE40 / 3.0f; }
 
 int fn_801DF93C(int view) {
     ArtElem* fl;
@@ -368,11 +376,11 @@ int fn_801DF93C(int view) {
     f32 fill;
     m = lbl_8055EA04;
     car = fn_801E866C(view);
-    if (fn_80141F7C(Car(car)->F2690())) {
+    if (NearZero(Car(car)->F2690())) {
         return 0;
     }
     if (fn_801E85A4() > 1) {
-        fn_8014C72C(m->layout, "crashed");
+        DrawText(m->layout, "crashed");
         return 1;
     }
     s = &m->cars[car];
@@ -395,15 +403,15 @@ int fn_801DF93C(int view) {
         }
         fn_80144C68(255.0f * fill, 0xFF, 0xFF, 0xFF);
         if (!s->boosted) {
-            fn_8014C72C(m->layout, "boost_text");
+            DrawText(m->layout, "boost_text");
         }
-        if (fn_80141F7C(left)) {
+        if (NearZero(left)) {
             f32 k;
             f32 t = Fmod(4.0f * fn_801E7E18() * fn_80176A2C(), 1.0f);
             if (t < 0.5f) {
-                k = fn_8014C8B4(0.0f, 0.5f, 0.0f, 1.0f, t);
+                k = Remap(0.0f, 0.5f, 0.0f, 1.0f, t);
             } else {
-                k = fn_8014C8B4(0.5f, 1.0f, 1.0f, 0.0f, t);
+                k = Remap(0.5f, 1.0f, 1.0f, 0.0f, t);
             }
             u32 col = fn_80144C68(255.0f * k, 0xFF, 0xFF, 0xFF);
             DrawArt(m->layout, "impact_left", col, m->tapTex);
@@ -419,15 +427,15 @@ int fn_801DF93C(int view) {
             if (up && dn) {
                 ArtElem e(*up);
                 V2 p = LerpV2(up->pos, dn->pos, k);
-                fn_8014C75C(&e.pos, &p);
+                SetV2(e.pos, p);
                 DrawArt(&e, m->tapTex);
             }
-            fn_8014C72C(m->layout, "press_text");
+            DrawText(m->layout, "press_text");
         }
     }
-    if (!fn_80141F7C(left) && s->boosted) {
+    if (!NearZero(left) && s->boosted) {
         f32 d = lbl_8055AE40 / fn_80176A2C();
-        f32 k = fn_80144BD8(fn_8014C8B4(d - fade, d - d / 2.0f, 0.0f, 1.0f, left));
+        f32 k = fn_80144BD8(Remap(d - fade, d - d / 2.0f, 0.0f, 1.0f, left));
         LayoutBoost(b, m, m->layout->Find("boost_text"), k);
     }
     fn_801769CC();

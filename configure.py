@@ -1101,7 +1101,7 @@ config.libs.append(
             Object(NonMatching, "game/heightfld.cpp"),
             Object(Matching, "game/garagetweak.cpp"),
             Object(Matching, "game/popup.cpp"),
-            Object(NonMatching, "game/crashmode.cpp"),
+            Object(Matching, "game/crashmode.cpp"),
             Object(NonMatching, "game/boostman.cpp"),
             Object(Matching, "game/weather.cpp"),
             Object(Matching, "game/physcol.cpp"),
