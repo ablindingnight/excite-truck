@@ -72,7 +72,8 @@ public:
         data[n] = v;
     }
     template <typename V>
-    int Find(V* v) {
+    int Find(V* key) {
+        V* v = key;
         for (int i = 0; i < Count(); i++) {
             if ((V*)data[i] == v) {
                 return i;
@@ -857,8 +858,8 @@ static inline void SelectBar(int i) {
     } else {
         lbl_8055F698 = 0;
     }
-    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-        u8* e = (u8*)lbl_804B30D8.data[i];
+    u8* e;
+    if (i >= 0 && i < lbl_804B30D8.Count() && PTR(e = (u8*)lbl_804B30D8.data[i], 0x60)) {
         if (e) {
             CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
             CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
