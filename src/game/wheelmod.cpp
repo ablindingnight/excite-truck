@@ -397,23 +397,21 @@ void fn_801F0AA0(void) {
 void WheelModStripped(void) { fn_802E317C("wheelmod: can't change classes of an attached wheel"); }
 
 void fn_801F0CC4(void) {
-    WheelLod* lod;
     int i;
     int l;
     int j;
     int k;
     for (i = 0; i < lbl_8055EBF0; i++) {
-        lod = lbl_8055EBEC[i].lods;
+        WheelLod* lods = lbl_8055EBEC[i].lods;
         for (l = 0; l < lbl_8055EBEC[i].numLods; l++) {
             for (j = 0; j < 2; j++) {
-                if (lod->slow[j] != -1) {
-                    mrModelUnload(lod->slow[j]);
+                if (lods[l].slow[j] != -1) {
+                    mrModelUnload(lods[l].slow[j]);
                 }
-                if (lod->fast[j] != -1) {
-                    mrModelUnload(lod->fast[j]);
+                if (lods[l].fast[j] != -1) {
+                    mrModelUnload(lods[l].fast[j]);
                 }
             }
-            lod++;
         }
         for (k = 0; k < lbl_8055EBEC[i].shadow.count; k++) {
             mrModelUnload(lbl_8055EBEC[i].shadow.lods[k].model);
