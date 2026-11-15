@@ -46,7 +46,6 @@ struct ModelChunks {
 extern "C" {
 ModelChunks* fn_802C6C34(s32 model);
 s32 fn_802C7A38(int a, const BFrame* m, s32 n);
-f32 fn_80144514(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);  // a*b + c*d + e*f
 void fn_801BFD34(BVec* out, const BVec* v, const BFrame* m);
 void fn_801C7254(BMtx33* m);
 void fn_801BFE7C(BVec* out, const BVec* a, const BVec* b);
@@ -57,7 +56,7 @@ void StatsUpdate__Fv(BVec* v);
 struct Mat3;
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
-static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return fn_80144514(a, b, c, d, e, f); }
+f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);  // a*b + c*d + e*f (weak, 0x80144514)
 
 // d = a * b
 static inline void MtxMul(BMtx33& d, const BMtx33& a, const BMtx33& b) {
