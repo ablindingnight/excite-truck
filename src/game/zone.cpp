@@ -1781,8 +1781,8 @@ void fn_802981F8(Vec3* p);
 }  // extern "C"
 void UpdateContinueOverlay(void);
 extern "C" {
-void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step, f32 u0, f32 v0,
-                 f32 u1, f32 v1);
+void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
+                 f32 v0, f32 u1, f32 v1);
 void fn_80147EE0(LayoutArt* a, f32 s);
 void fn_801476D8(LayoutArt* a, u32 color, s32 tex);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
@@ -1982,10 +1982,11 @@ void ZoneMaster::DrawBonus(int p, CarState* c) const {
         if (n > 0) {
             const f32 degree = 0.017453292f;
             const f32 startAngle = 1.5707964f;
-            fn_80147F30(x, y, r, 0.0f, 0xFF00FF00, n, tex[4], startAngle, degree, 0.0f, 0.0f, 1.0f, 1.0f);
-            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, tex[4], startAngle, 0.06981317f, 0.0f, 0.0f, 1.0f, 1.0f);
+            fn_80147F30(x, y, r, 0.0f, 0xFF00FF00, n, startAngle, degree, tex[4], 0.0f, 0.0f, 1.0f, 1.0f);
+            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, startAngle, 0.06981317f, tex[4], 0.0f, 0.0f, 1.0f,
+                        1.0f);
             f32 end = startAngle + degree * n;
-            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, tex[4], end, 0.06981317f, 0.0f, 0.0f, 1.0f, 1.0f);
+            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, end, 0.06981317f, tex[4], 0.0f, 0.0f, 1.0f, 1.0f);
         }
         mainLyt->FindArt("score_star_art");
         {
@@ -2085,8 +2086,10 @@ void ZoneMaster::DrawMissed(int p, CarState* c) const {
     }
     if (c->timeLeft < lbl_8042FB3C.lowTimeWarnT) {
         f32 f = 1.0f - c->timeLeft / lbl_8042FB3C.lowTimeWarnT;
-        fn_80147F30(320.0f, 160.0f, 50.0f, 0.0f, ((int)(f * 255.0f) << 24) | 0xFFFFFF, (1.0f - f) * 100.0f, tex[2],
-                    1.5707964f, 0.06283186f, 0.0f, 0.0f, 1.0f, 1.0f);
+        const f32 alpha = f * 255.0f;
+        const f32 remaining = 1.0f - f;
+        fn_80147F30(320.0f, 160.0f, 50.0f, 0.0f, ((int)alpha << 24) | 0xFFFFFF, remaining * 100.0f,
+                    1.5707964f, 0.06283186f, tex[2], 0.0f, 0.0f, 1.0f, 1.0f);
     }
 }
 

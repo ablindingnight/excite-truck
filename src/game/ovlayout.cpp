@@ -1370,8 +1370,8 @@ void fn_80147EE0(ArtElem* e, f32 s) {
     e->pos.y = cy - e->h / 2.0f;
 }
 
-void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step, f32 u0, f32 v0,
-                 f32 u1, f32 v1) {
+void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
+                 f32 v0, f32 u1, f32 v1) {
     fn_80011630(color, segs, tex, fn_801451DC(x, 0), fn_801452B4(y), w, h, start, step, u0, v0, u1, v1);
 }
 

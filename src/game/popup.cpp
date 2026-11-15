@@ -117,7 +117,8 @@ int fn_802E2C20(void);  // milliseconds
 s64 fn_802E2C9C(void);  // time
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
 void fn_801476D8(ArtElem* a, u32 color, s32 tex);
-void fn_80147F30(u32 color, int segs, int tex, f32 x, f32 y, f32 r, f32 a0, f32 a1, f32 da, f32 u0, f32 v0, f32 su, f32 sv);
+void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
+                 f32 v0, f32 su, f32 sv);
 void fn_8014E7D8(int x, int y, int size);
 void fn_801331C4(int section, const char* name, f32* v);
 void fn_801332D0(void* prefs, const char* name, u32* v);
@@ -160,7 +161,8 @@ s64 lbl_8055ADF0 = -1;     // when the current popup came up
 static inline void* Prefs(void) { return (u8*)IdentGetCurrentSlot() + 0xC; }
 
 static inline void DrawRing(f32 y, f32 x, f32 r) {
-    fn_80147F30(0xFFC8C800, 1000, -1, x, y, r, 0.0f, 1.5707964f, -6.2831855f / 1000.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+    fn_80147F30(x, y, r, 0.0f, 0xFFC8C800, 1000, 1.5707964f, -6.2831855f / 1000.0f, -1, 0.0f, 0.0f, 1.0f,
+                1.0f);
 }
 
 extern "C" {

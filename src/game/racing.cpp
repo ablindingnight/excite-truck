@@ -233,8 +233,8 @@ void fn_801E4F3C(u32 color, int back, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_801E4FF4(void);
 void fn_802C8D74(void);
 void fn_801478E0(Layout* layout, const char* name, int art, int frame);
-void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, s32 tex, f32 start, f32 step,
-                 f32 u0, f32 v0, f32 u1, f32 v1);
+void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
+                 f32 v0, f32 u1, f32 v1);
 void fn_80011E04(int unk);
 void fn_80010FDC(const char* text, int flags);
 extern u8 lbl_8055E520;
@@ -1091,11 +1091,11 @@ void RacingOverlay::DrawHeat(void) {
     box = layout->FindBox("temp_pie");
     if (box) {
         if (blink || lbl_8055D350->truck->overheat > 0.0f) {
-            fn_80147F30(box->pos.x, box->pos.y, box->w, box->h, box->color, Round(80.0f * heat), zoneTex,
-                        start, (end - start) / 80.0f, 0.5f, 0.0f, 1.0859375f, 0.5859375f);
+            fn_80147F30(box->pos.x, box->pos.y, box->w, box->h, box->color, Round(80.0f * heat), start,
+                        (end - start) / 80.0f, zoneTex, 0.5f, 0.0f, 1.0859375f, 0.5859375f);
         } else {
-            fn_80147F30(box->pos.x, box->pos.y, box->w, box->h, box->color, Round(80.0f * heat), zoneTex,
-                        start, (end - start) / 80.0f, 0.0f, 0.0f, 0.5859375f, 0.5859375f);
+            fn_80147F30(box->pos.x, box->pos.y, box->w, box->h, box->color, Round(80.0f * heat), start,
+                        (end - start) / 80.0f, zoneTex, 0.0f, 0.0f, 0.5859375f, 0.5859375f);
         }
     }
     fn_801478E0(layout, "temp_gauge", zoneArt, 0);
