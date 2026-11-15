@@ -2394,7 +2394,10 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
     if (pal) {
         return;
     }
-    DrawBonanza(&master->coins, id);
+    {
+        Coins* co = &master->coins;
+        DrawBonanza(co, id);
+    }
     if (!out) {
         TextElem* t = l->Find("nice_landing");
         if (t) {
