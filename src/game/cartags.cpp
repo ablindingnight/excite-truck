@@ -94,17 +94,20 @@ void fn_802A7C68(void) {
 }
 
 // Helper name unproven.
+static inline f32 ClampRampWeight(f32 a) {
+    f32 capped = MIN(1.0f, a);
+    return MAX(capped, 0.0f);
+}
+
 static inline f32 Ramp(f32 v, f32 x0, f32 x1, f32 y0, f32 y1) {
-    f32 a = (v - x0) / (x1 - x0);
-    a = MIN(1.0f, a);
-    a = MAX(a, 0.0f);
+    const f32 a = ClampRampWeight((v - x0) / (x1 - x0));
     return y0 + a * (y1 - y0);
 }
+
 void fn_802A7CA8(int car, int gem, f32 t) {
     TagObj* o = fn_801EA9A0(car)->obj;
     ValVec3 p = o->pos;
     ValVec3 scr;
-    f32 a;
     u32 color;
     f32 size;
     p.y += 2.5f;
