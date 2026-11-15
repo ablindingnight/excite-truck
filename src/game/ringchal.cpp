@@ -1965,12 +1965,13 @@ inline void RingResults::Load(void) {
 
 inline void RingChalMaster::vf40(void) {
     int i;
+    int j;
+    ObjSet* s;
     int wo = 0;
+    int off;
     for (i = 0; i < arena.nFiles; wo += sizeof(arena.sets->data[0]), i++) {
-        ObjSet* s = (ObjSet*)((u8*)arena.sets->data + wo);
+        s = (ObjSet*)((u8*)arena.sets->data + wo);
         if (s->active) {
-            int j;
-            int off;
             for (j = 0, off = 0; j < s->infos->count; off += sizeof(ObjInfo), j++) {
                 ObjInfo* o = (ObjInfo*)((u8*)s->infos->data + off);
                 if (o->type == 1) {
