@@ -88,7 +88,7 @@ const StuntCar* fn_80287B24(s32 i);
 f32 fn_80287BC8(f32 lo, f32 hi);
 void fn_8028DFFC(void);
 void fn_8028E024(void);
-void fn_8028E070(void);
+void fn_8028E070(f32 t);
 void fn_8028E080(void);
 void fn_8028E240(int a);
 void* fn_8028E2F8(StuntDesc* desc, const char* name, const char* tex);
@@ -727,7 +727,7 @@ void fn_802AB994(void) {
     fn_802C2C00(lbl_8055F92D);
 }
 
-void fn_802AB9E0(void) { fn_8028E070(); }
+void fn_802AB9E0(f32 t) { fn_8028E070(t); }
 
 void fn_802AB9E4(void) { fn_8028E080(); }
 

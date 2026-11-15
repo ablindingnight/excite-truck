@@ -46,8 +46,8 @@ void fn_80127468(void);
 void fn_801279B8(void);
 void fn_802E4C18(int x);
 void fn_802D0014(f32 a, f32 b, f32 c);
-void fn_802DD63C(void);
-void fn_802DD738(void);
+void fn_802DD63C(int n);
+void fn_802DD738(int i, f32 power);
 void fn_802DD750(void);
 void fn_802DE774(void);
 
@@ -145,9 +145,9 @@ u8 fn_802C2C00(u8 on) {
     return old;
 }
 
-void fn_802C2C60(void) { fn_802DD63C(); }
+void fn_802C2C60(int n) { fn_802DD63C(n); }
 
-void fn_802C2C64(void) { fn_802DD738(); }
+void fn_802C2C64(int i, f32 power) { fn_802DD738(i, power); }
 
 void fn_802C2C68(void) { fn_802DD750(); }
 

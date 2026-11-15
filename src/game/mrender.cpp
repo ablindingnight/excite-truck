@@ -36,7 +36,8 @@ void fn_802CC518(int w, f32 f);
 void fn_802D02F8(u32 color, int a);
 void fn_802CAD74(void);
 void fn_802CAD68(void);
-void fn_802D68C4(void);
+struct ColVtx;
+void fn_802D68C4(ColVtx* verts, int unused, u16* idx, int n);
 int fn_801E4F20(int prim);
 void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int a);
 void fn_801E4FF4(void);
@@ -447,7 +448,7 @@ void fn_802C8D74(void) {
     lbl_8055FC35 = 0;
 }
 
-void fn_802C8DB8(void) { fn_802D68C4(); }
+void fn_802C8DB8(void* v, int nv, u16* idx, int ni) { fn_802D68C4((ColVtx*)v, nv, idx, ni); }
 
 int fn_802C8DBC(int prim) {
     if (fn_801E4F20(prim)) {

@@ -169,7 +169,7 @@ void fn_801CEFC4(void);
 void fn_80206550(int a);
 void fn_801D0E70(void);
 void fn_801D0CFC(void);
-void fn_801E21B4(void);
+void fn_801E21B4(void*);  // Group* (physcol.cpp)
 int fn_801CF050(void);
 void fn_801D9A08(void);
 void fn_801B8BE8(void);
@@ -1194,7 +1194,7 @@ void fn_801791A8(void) {
     fn_801D0CFC();
 }
 
-void fn_801792F4(void) { fn_801E21B4(); }
+void fn_801792F4(void* g) { fn_801E21B4(g); }
 
 PhobMsg* fn_801792F8(void) { return lbl_8055E454; }
 

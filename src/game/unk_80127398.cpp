@@ -7,9 +7,9 @@
 
 extern "C" {
 
-extern void* fn_802ECC74(void*);
-extern void fn_80127F70(void*);
-extern void fn_80127F94(void*);
+extern void fn_802ECC74(void);
+extern void fn_80127F70(void);
+extern void fn_80127F94(void);
 extern void fn_802E300C(s32);
 typedef struct CallbackList {
     s32 count;
@@ -45,17 +45,19 @@ void fn_80127434(void) {
     lbl_8055DF08 = 0;
 }
 
-void fn_80127440(void* alarm) {
-    fn_80127F94(fn_802ECC74(alarm));
+// No parameters: the home-button poll and the background tick both take none (homebtn.cpp, bg.cpp).
+void fn_80127440(void) {
+    fn_802ECC74();
+    fn_80127F94();
 }
 
-void fn_80127464(void *alarm) {
-    fn_80127440(alarm);
+void fn_80127464(void) {
+    fn_80127440();
 }
 
-void fn_80127468(OSAlarm *alarm, OSContext *ctx) {
-#pragma unused(ctx)
-    fn_80127F70(fn_802ECC74(alarm));
+void fn_80127468(void) {
+    fn_802ECC74();
+    fn_80127F70();
 }
 
 void fn_8012748C(s32 arg0) {

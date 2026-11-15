@@ -16,7 +16,7 @@ f32 PSVECDotProduct(const void* a, const void* b);
 int fn_801DCE14(s16* hint, const V3* pos, V3* outPos, V3* outNormal, int flags);
 void fn_801DCEF4(void);
 void fn_801DCF00(void);
-void fn_801DD3BC(int a, int on);
+void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z);
 void fn_801DD808(void);
 }
 
@@ -162,7 +162,7 @@ void fn_801EA1D8(void) { fn_801DCEF4(); }
 
 void fn_801EA1DC(void) { fn_801DCF00(); }
 
-void fn_801EA1E0(int a, int on) { fn_801DD3BC(a, on != 0); }
+void fn_801EA1E0(f32 x, f32 z, f32* y, int a) { fn_801DD3BC(y, a != 0, x, z); }
 
 void fn_801EA1F0(void) { fn_801DD808(); }
 

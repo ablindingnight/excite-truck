@@ -177,13 +177,16 @@ void fn_802D6B80(MPrim* p, u32 base, const char* name);
 void fn_802D6C44(MPrim* p);
 void fn_802D6C48(MPrim* p);
 void fn_802D6C4C(f32 f);
-void fn_802D754C(void);
-void fn_802DA550(void);
-void fn_802DA704(void);
-void fn_802DA80C(void);
-s32 fn_802DA918(void);
+void fn_802D754C(u8 on);
+struct BoneCmd;
+struct BVec;
+struct BMtx;
+BoneCmd* fn_802DA550(int start, const BVec* v, int n, int wstart, const u32* w, int wn);
+BoneCmd* fn_802DA704(int start, const BVec* v, int n);
+BoneCmd* fn_802DA80C(int start, const BMtx* v, int n);
+BoneCmd* fn_802DA918(f32 a, f32 b, f32 c);
 void fn_802DAA18(u32 mat);
-void fn_802DABA4(void);
+void fn_802DABA4(const f32* p);
 void fn_802DB2B4(void);
 void fn_802DB2B8(void);
 void fn_802DB2BC(u8 clip);
@@ -955,7 +958,7 @@ void fn_802C74D8(s32 i, const MFrame* f, s32 tex) {
     }
 }
 
-void fn_802C7730(void) { fn_802DABA4(); }
+void fn_802C7730(const f32* p) { fn_802DABA4(p); }
 
 void fn_802C7734(const MFrame* f) { fn_802D0610(fn_802D0514(f)); }
 
@@ -1003,13 +1006,13 @@ void fn_802C7A00(void) { lbl_804C13B4.count = 0; }
 
 const char* fn_802C7A10(s32 i) { return fn_8012C58C(fn_802C53A8(i)); }
 
-void fn_802C7A34(void) { fn_802DA704(); }
+BoneCmd* fn_802C7A34(int start, const BVec* v, int n) { return fn_802DA704(start, v, n); }
 
-void fn_802C7A38(void) { fn_802DA80C(); }
+BoneCmd* fn_802C7A38(int start, const BMtx* v, int n) { return fn_802DA80C(start, v, n); }
 
-s32 fn_802C7A3C(void) { return fn_802DA918(); }
+BoneCmd* fn_802C7A3C(f32 a, f32 b, f32 c) { return fn_802DA918(a, b, c); }
 
-void fn_802C7A40(void) { fn_802DA550(); }
+BoneCmd* fn_802C7A40(int start, const BVec* v, int n, int wstart, const u32* w, int wn) { return fn_802DA550(start, v, n, wstart, w, wn); }
 
 void fn_802C7A44(void) {
     lbl_8055FC20 = 1;
@@ -1033,7 +1036,7 @@ void fn_802C7A94(int pri) {
 
 void fn_802C7AD4(void) { fn_802C7A94(9); }
 
-void fn_802C7ADC(void) { fn_802D754C(); }
+void fn_802C7ADC(u8 on) { fn_802D754C(on); }
 
 void fn_802C7AE0(s32 i, const MFrame* f, u32 mask, f32 t) {
     ModelNode* slot = fn_802C5390(i);
@@ -1070,8 +1073,8 @@ static inline void DrawElemSurfs(MElem* el, int inst, void* mtx, u32 mat, u8 cl,
     }
 }
 
-void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 unused1, f32 unused2, f32 range) {
-    u32 mat = fn_802C7A3C();
+void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 a, f32 b, f32 range) {
+    u32 mat = (u32)fn_802C7A3C(a, b, range);
     s32 saved = fn_802C9C58(v);
     u32 old = lbl_8055D008;
     lbl_8055D008 = 8;

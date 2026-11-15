@@ -10,7 +10,8 @@ int strcasecmp(const char* a, const char* b);
 s32 fn_802E11A4(const char* name, int flag);  // open movie
 void fn_802E1290(s32 h);                      // close movie
 void fn_802E12DC(s32 h);
-void fn_802E13D8(s32 h);
+struct BinkMovie;
+void fn_802E13D8(BinkMovie* r, f32 x, f32 y, f32 w, f32 h);
 void fn_802E1718(s32 h);
 }
 
@@ -122,7 +123,7 @@ void fn_802ECFF4(MovieInfo* m) {
     }
 }
 
-void fn_802ED038(MovieInfo* m) { fn_802E13D8(m->handle); }
+void fn_802ED038(MovieInfo* m, f32 x, f32 y, f32 w, f32 h) { fn_802E13D8((BinkMovie*)m->handle, x, y, w, h); }
 
 void fn_802ED040(MovieInfo* m) { fn_802E1718(m->handle); }
 

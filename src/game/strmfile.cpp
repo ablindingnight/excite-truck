@@ -10,7 +10,7 @@ void fn_802E3734(s32* f);           // close
 s32 fn_802E37C4(s32 f);             // file size
 void fn_802E3A14(s32 f, s32 pos);   // seek
 void fn_802E3930(s32 f, void* buf, s32 len);  // read
-void fn_802E3990(void);
+int fn_802E3990(int id);
 }
 
 struct StrmFile {
@@ -123,7 +123,7 @@ s32 fn_802E748C(s32 sector, void* buf, s32 len) {
     return f;
 }
 
-void fn_802E7544(void) { fn_802E3990(); }
+int fn_802E7544(int id) { return fn_802E3990(id); }
 
 void fn_802E7548(s32 f) { fn_802E3734(&f); }
 

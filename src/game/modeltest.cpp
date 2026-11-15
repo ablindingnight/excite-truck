@@ -5,10 +5,10 @@
 
 extern "C" {
 void fn_8024BB98(u8* p);
-void fn_8024A110(u8* p);
+u8* fn_8024A110(u8* p, int del);
 void fn_8024BBF4(u8* p);
 void fn_8024BCC0(u8* p);
-void fn_8024A1AC(u8* p);
+u8* fn_8024A1AC(u8* p, int del);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
 void fn_802E30C8(const char* fmt, ...);
@@ -75,13 +75,13 @@ extern "C" {
 
 void fn_8024BDDC(u8* p) { fn_8024BB98(p - 0x34); }
 
-void fn_8024BDE4(u8* p) { fn_8024A110(p - 0x34); }
+u8* fn_8024BDE4(u8* p, int del) { return fn_8024A110(p - 0x34, del); }
 
 void fn_8024BDEC(u8* p) { fn_8024BBF4(p - 0x18); }
 
 void fn_8024BDF4(u8* p) { fn_8024BCC0(p - 0x18); }
 
-void fn_8024BDFC(u8* p) { fn_8024A1AC(p - 0x18); }
+u8* fn_8024BDFC(u8* p, int del) { return fn_8024A1AC(p - 0x18, del); }
 
 // The model/texture test viewer: draws leather.tex on a unit quad until ESC is pressed.
 // NonMatching: the target builds v[1..3] by copying earlier vertices (lfd/stfd) and keeps four position

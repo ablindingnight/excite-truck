@@ -4,10 +4,10 @@
 // before the PC port. Tricks are tagged MATCHING-AID.
 #include <types.h>
 #include <string.h>
-extern void fn_80241354(void*);
+extern int fn_80241354(void* c, int key);
 
-void fn_80243460(void* arg0) {
-    fn_80241354((u8*)arg0 - 0x10);
+int fn_80243460(void* arg0, int key) {
+    return fn_80241354((u8*)arg0 - 0x10, key);
 }
 
 extern void fn_80241820(void*);
@@ -15,7 +15,7 @@ void fn_80243468(void* arg0) {
     fn_80241820((u8*)arg0 - 0x10);
 }
 
-extern void fn_802408B0(void*);
-void fn_80243470(void* arg0) {
-    fn_802408B0((u8*)arg0 - 0x10);
+extern u8* fn_802408B0(u8* p, int del);
+u8* fn_80243470(void* arg0, int del) {
+    return fn_802408B0((u8*)arg0 - 0x10, del);
 }
