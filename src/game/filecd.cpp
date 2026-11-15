@@ -58,7 +58,7 @@ public:
     virtual File* OpenAppend(const char* name) = 0;
     virtual void Close(File* f) = 0;
     virtual void Print(const char* s) = 0;
-    virtual void vf24(void);
+    virtual class FileFinder* Finder(void);
 };
 
 extern u8 lbl_804DBAA0[0x20000];  // read buffer
