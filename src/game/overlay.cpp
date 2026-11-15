@@ -939,8 +939,13 @@ int ArenaOverlay::HandleKey(int player, u32 type, int key) {
     return 0;
 }
 
+#pragma push
+#pragma opt_common_subs off
 void ResultsOverlay::Update(void) {
-    SetState(state);
+    if (shown != state) {
+        shown = state;
+        start = GetTime();
+    }
     fn_80011A2C();
     switch (state) {
     case 3:
@@ -956,6 +961,7 @@ void ResultsOverlay::Update(void) {
         break;
     }
 }
+#pragma pop
 
 void ResultsOverlay::MoveSelection(int dir) {
     selection += dir;
