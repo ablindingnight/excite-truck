@@ -4,6 +4,7 @@
 // "mist" point clouds read from the track effect tables, a full-screen flash/tint and a lightning
 // model. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/dropsource.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -55,20 +56,6 @@ struct DropHit {
     s32 source;    // offset 0x4
     f32 dist;      // offset 0x8
     u8 enabled;    // offset 0xC
-};
-
-// One rectangular droplet emitter of a source (0x30).
-struct Droplet {
-    ValVec3 n;       // offset 0x0
-    ValVec3 origin;  // offset 0xC
-    ValVec3 sv;      // offset 0x18
-    ValVec3 tv;      // offset 0x24
-};
-
-struct DropSource {
-    DropSource(void);
-    Droplet drops[4];  // offset 0x0
-    s32 count;         // offset 0xC0
 };
 
 struct WeatherCfg {
