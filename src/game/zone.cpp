@@ -254,7 +254,7 @@ public:
     void Init(ValueNode* node, f32 w);
     void Scale(f32 f);
     Gate& operator=(const Gate& o);
-    Vec3 Center(void) const { return Vec3(a.x + 0.5f * (b.x - a.x), a.y + 0.5f * (b.y - a.y), a.z + 0.5f * (b.z - a.z)); }
+    Vec3 Center(void) const { return Vec3(Lerp(a.x, b.x, 0.5f), Lerp(a.y, b.y, 0.5f), Lerp(a.z, b.z, 0.5f)); }
 
     Vec3 a;     // offset 0x0
     Vec3 b;     // offset 0xC
@@ -1299,10 +1299,10 @@ struct Watcher {
 
 int fn_8013CFF0(const Gate* g, const Watcher* w, f32* out) {
     Vec3 mid = g->Center();
-    f32 dx = mid.x - w->pos.x;
-    f32 dy = mid.y - w->pos.y;
-    f32 dz = mid.z - w->pos.z;
-    Vec3 d(dx, dy, dz);
+    Vec3 d;
+    d.x = mid.x - w->pos.x;
+    d.y = mid.y - w->pos.y;
+    d.z = mid.z - w->pos.z;
     f32 dist2 = PSVECDotProduct(&d, &d);
     int r = 0;
     if (dist2 < 275625.0f) {
