@@ -1364,13 +1364,18 @@ void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h) {
     fn_802354A0(art, 8, p.x, p.y, 0.0f, pw, h - b - fn_80235F64(art, 2), color);
 }
 
+static inline void ApplyRotation(Vec2* v, f32 x, f32 c, f32 s) {
+    v->x = v->x * c - v->y * s;
+    v->y = x * s + v->y * c;
+}
+
 static inline void Rotate(Vec2* v, f32 angle) {
     f32 x = v->x;
     f32 c = cos(angle);
     f32 s = sin(angle);
-    v->x = v->x * c - v->y * s;
-    v->y = x * s + v->y * c;
+    ApplyRotation(v, x, c, s);
 }
+
 
 void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 start, f32 step,
                  f32 u0, f32 v0, f32 incomingU1, f32 v1) {
@@ -1398,7 +1403,10 @@ void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 s
     t = Lerp(v0, v1, ArcV(ratio * d.y));
     fn_801E4F3C(x + ratio * p.x, y + ratio * p.y, 0.0f, u, t, color, 0);
     for (i = 0; i < segs; i++) {
-        Rotate(&p, step);
+        const f32 px = p.x;
+        const f32 c = cos(step);
+        const f32 s = sin(step);
+        ApplyRotation(&p, px, c, s);
         Rotate(&d, step);
         u = Lerp(u0, u1, ArcU(d.x));
         t = Lerp(v0, v1, ArcV(d.y));
