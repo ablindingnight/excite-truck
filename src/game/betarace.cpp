@@ -4699,11 +4699,11 @@ inline void BetaMaster::b2Body(StuntEvt* e, int car) {
 inline void BetaMaster::b2(StuntEvt* e, int car) { b2Body(e, car); }
 
 inline void BetaMaster::c2(Body* b, int car) {
+    int i;
     Token* t;
     RaceCarRec* rc = fn_8017960C(car);
     if (rc && (f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
         BetaCar* c = &cars[car];
-        int i;
         for (i = 0; i < bumps.a.count; i++) {
             t = bumps.a.data[i];
             f32 pts;
@@ -4722,9 +4722,9 @@ inline void BetaMaster::c2(Body* b, int car) {
                 c->score += pts;
             }
         }
-        int off = 0;
-        for (i = 0; i < bumps2.a.count; off += sizeof(bumps2.a.data[0]), i++) {
-            Token* t = *(Token**)((u8*)bumps2.a.data + off);
+        int j;
+        for (j = 0; j < bumps2.a.count; j++) {
+            Token* t = bumps2.a.data[j];
             int got;
             if (b == t->body && t->active) {
                 RaceCarRec* r2 = fn_8017960C(car);
