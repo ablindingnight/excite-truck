@@ -233,6 +233,8 @@ int fn_801B3DC0(Manager* self,u32 first,u32 second){
 
 inline u32 PairKey(int first,int second){if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
 
+#pragma push
+#pragma opt_lifetimes off
 void fn_801B3E24(Manager* self,const Vec3* position,Contact* first,Contact* second,int secondKind,float amplitude){
  u32 key=PairKey(first->kind,secondKind);
  SoundTuple* choice=(SoundTuple*)fn_801B4570(self,key);
@@ -246,12 +248,22 @@ void fn_801B3E24(Manager* self,const Vec3* position,Contact* first,Contact* seco
   entry->d=lbl_80562624;entry->e=lbl_80562624;entry->f=lbl_80562624;
   entry->a=position->x;entry->b=position->y;entry->c=position->z;
   SoundHandle* sound=(SoundHandle*)entry->sound;
-  // MATCHING-AID: retained volatile zero vector forces the observed stack stores; natural-source replacement remains open.
-  volatile V3 zero={lbl_80562624,lbl_80562624,lbl_80562624};
-  if(sound){if(gain!=sound->gain){sound->dirty=1;sound->gain=gain;}sound=(SoundHandle*)entry->sound;sound->playing=1;sound->stopped=0;sound->paused=0;}
+  // The original zero vector lives at SP+8 with lifetime optimization disabled.
+  V3 zero={lbl_80562624,lbl_80562624,lbl_80562624};
+  if (sound) {
+   if (gain != sound->gain) {
+    sound->dirty = 1;
+    sound->gain = gain;
+   }
+   SoundHandle* active = (SoundHandle*)entry->sound;
+   active->playing = 1;
+   active->stopped = 0;
+   active->paused = 0;
+  }
   self->next=(self->next+1)%16;
  }
 }
+#pragma pop
 
 }  // extern "C"
 
