@@ -60,10 +60,13 @@ struct CarElem {
     f32 Torque(f32 x) {
         f32 t;
         if (x > f2C) {
-            t = x - f20;
-            t = 0.0f > t ? 0.0f : t;
-            f32 sq = x * x;
-            t = fC + (f8 * x + f4 * sq) - f24 * t;
+            f32 sq;
+            f32 d = x - f20;
+            if (0.0f > d) {
+                d = 0.0f;
+            }
+            sq = x * x;
+            t = fC + (f8 * x + f4 * sq) - f24 * d;
             t = f28 > t ? f28 : t;
         } else {
             f32 sq = x * x;
