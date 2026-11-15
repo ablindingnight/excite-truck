@@ -14,7 +14,8 @@ static UnkStatic123 lbl_804A16D0;
 extern const s16 lbl_8055F5D8 = MakeS16(0x100);
 extern const s16 lbl_8055F5DA = MakeS16(0x405);
 extern const s16 lbl_8055F5DC = MakeS16(0x401);
-UnkStatic7F lbl_8055F5E0;
+static inline u32 Default7FValue(void) { return 0x7F000000u; }
+const u32 lbl_8055F5E0 = Default7FValue();
 
 extern "C" {
 

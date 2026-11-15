@@ -1223,7 +1223,7 @@ config.libs.append(
             Object(NonMatching, "game/camstate.cpp"),
             Object(NonMatching, "game/namedcam.cpp"),
             Object(Matching, "game/cscript.cpp"),
-            Object(NonMatching, "game/stub18.cpp"),
+            Object(Matching, "game/stub18.cpp"),
             Object(Matching, "game/carlayout.cpp"),
             Object(Matching, "game/lightset.cpp"),
             Object(Matching, "game/cartype.cpp"),
