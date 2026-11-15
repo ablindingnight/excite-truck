@@ -41,7 +41,6 @@ void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
 int fn_802E8504(int ch);
 void __construct_array(void* p, void* ctor, void* dtor, u32 size, u32 n);
-u8* fn_80241098(u8* p);
 }
 
 void operator delete(void* p);
@@ -55,7 +54,6 @@ struct JoinSlot {
 };
 
 extern JoinSlot lbl_80498828[2];
-extern void* lbl_80342734[];
 extern void* lbl_80342618[];
 extern s32 lbl_8055F1F4;
 
@@ -349,33 +347,20 @@ public:
     }
 };
 
-// One stat bar (vtable lbl_80342734).
-class StatBar {
+// One stat bar: a menu state that draws one stat's caption (class name from garage.cpp).
+class StatBar : public MenuState {
 public:
-    virtual ~StatBar(void);  // 0x08 (fn_80240928; garage.cpp declares it the same way)
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
-    virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
-    virtual void v4C(void);
-    virtual void v50(void);
-    virtual void v54(void);
-    virtual void v58(void);
-    virtual void v5C(void);
+    StatBar(void);
+    virtual ~StatBar(void);
+    virtual void Exit(void);
+    virtual void Update(void);
+    virtual void Draw(void);
     virtual void Set(int i, s32* value, u8* flag);
-    u8 pad4[0x24];
+
+    u8* font;    // offset 0x18
+    s32 index;   // offset 0x1C: stat number + 1 (-1 = none)
+    u8* flag;    // offset 0x20
+    s32* value;  // offset 0x24
 };
 
 // The stat panel of the car picker: the car's stats, one bar and caption per stat.
@@ -384,6 +369,8 @@ struct StatPanel {
     StatBar bars[5];       // offset 0x2C
     char text[5][0x64];    // offset 0xF4
     u8 flag;               // offset 0x2E8
+
+    StatPanel(void);
 
     void SetCar(const char* chassis) {
         CarStats* cs = CarStatsLookup(chassis);
@@ -586,12 +573,20 @@ void fn_80129AEC(int a);
 u32 fn_802E4A10(void);
 void fn_8023D4B8(s32 ch);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
-u8* fn_80240928(u8* p, int del);
-u8* fn_80241024(u8* p);
 CarPicker* fn_80240BA4(CarPicker* p, s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats,
                        CarUIScreen* screen);
 CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car);
 void fn_802409AC(CarSel* p, CarSelItem* item);
+}  // extern "C"
+
+StatBar::~StatBar(void) {
+    value = 0;
+    flag = 0;
+    fn_802328D4(font);
+    font = 0;
+}
+
+extern "C" {
 void fn_802409A4(u8* p, u8 v);
 int fn_802411A4(int* out);
 }
@@ -601,23 +596,21 @@ int fn_802411A4(int* out);
 struct RollPanel {
     CarUIScreen screen;  // offset 0x0
     ColorPick color;     // offset 0x124
-    u8 stats[0x2EC];     // offset 0x1C0: StatPanel (fn_80241024)
+    StatPanel stats;     // offset 0x1C0
     CarPicker picker;    // offset 0x4AC
     CarSel sel;          // offset 0x51C
     s32 colorIndex;      // offset 0x578
 
-    RollPanel(JoinSlot* s, u8 flag) : screen(0), color(&s->color, &colorIndex, &screen) {
-        fn_80241024(stats);
-        fn_80240BA4(&picker, (s32*)&s->unk4, (s32*)&s->car, &color, (StatPanel*)stats, &screen);
+    RollPanel(JoinSlot* s, u8 flag) : screen(0), color(&s->color, &colorIndex, &screen), stats() {
+        fn_80240BA4(&picker, (s32*)&s->unk4, (s32*)&s->car, &color, &stats, &screen);
         fn_80240A1C(&sel, &s->id, (u8*)&screen);
         fn_802409AC(&sel, (CarSelItem*)&picker);
         fn_802409AC(&sel, &color);
-        fn_802409A4(stats, flag);
+        fn_802409A4((u8*)&stats, flag);
     }
     ~RollPanel(void) {
         picker.vt = lbl_80342618;
         delete (VDel*)picker.list;
-        __destroy_arr(stats + 0x2C, (void*)fn_80240928, 0x28, 5);
     }
 };
 
@@ -651,16 +644,16 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#locker_1", 2, &pp.p1.picker.item, 0, 0),
         MenuItem("#controller_1", pp.p1.sel.name),
         MenuItem("#car_position_1", 5, pp.p1.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p1", ((StatPanel*)pp.p1.stats)->text[0]),
-        MenuItem("#stat_art_1_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[0].value, 0, 0),
-        MenuItem("#stat_text_2_p1", ((StatPanel*)pp.p1.stats)->text[1]),
-        MenuItem("#stat_art_2_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[1].value, 0, 0),
-        MenuItem("#stat_text_3_p1", ((StatPanel*)pp.p1.stats)->text[2]),
-        MenuItem("#stat_art_3_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[2].value, 0, 0),
-        MenuItem("#stat_text_4_p1", ((StatPanel*)pp.p1.stats)->text[3]),
-        MenuItem("#stat_custom_4_p1", 5, &((StatPanel*)pp.p1.stats)->bars[3], 0, 0),
-        MenuItem("#stat_text_5_p1", ((StatPanel*)pp.p1.stats)->text[4]),
-        MenuItem("#stat_art_5_p1", 2, &((StatPanel*)pp.p1.stats)->stats.stats[4].value, 0, 0),
+        MenuItem("#stat_text_1_p1", pp.p1.stats.text[0]),
+        MenuItem("#stat_art_1_p1", 2, &pp.p1.stats.stats.stats[0].value, 0, 0),
+        MenuItem("#stat_text_2_p1", pp.p1.stats.text[1]),
+        MenuItem("#stat_art_2_p1", 2, &pp.p1.stats.stats.stats[1].value, 0, 0),
+        MenuItem("#stat_text_3_p1", pp.p1.stats.text[2]),
+        MenuItem("#stat_art_3_p1", 2, &pp.p1.stats.stats.stats[2].value, 0, 0),
+        MenuItem("#stat_text_4_p1", pp.p1.stats.text[3]),
+        MenuItem("#stat_custom_4_p1", 5, &pp.p1.stats.bars[3], 0, 0),
+        MenuItem("#stat_text_5_p1", pp.p1.stats.text[4]),
+        MenuItem("#stat_art_5_p1", 2, &pp.p1.stats.stats.stats[4].value, 0, 0),
         MenuItem(NULL, 5, &pp.p2.sel, 0, 0),
         MenuItem("#carmodel_2", 0x13, &pp.p2.screen, 0, 0),
         MenuItem("#carmodel_2", pp.p2.picker.chassis),
@@ -669,16 +662,16 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
         MenuItem("#controller_2", pp.p2.sel.name),
         MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p2", ((StatPanel*)pp.p2.stats)->text[0]),
-        MenuItem("#stat_art_1_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[0].value, 0, 0),
-        MenuItem("#stat_text_2_p2", ((StatPanel*)pp.p2.stats)->text[1]),
-        MenuItem("#stat_art_2_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[1].value, 0, 0),
-        MenuItem("#stat_text_3_p2", ((StatPanel*)pp.p2.stats)->text[2]),
-        MenuItem("#stat_art_3_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[2].value, 0, 0),
-        MenuItem("#stat_text_4_p2", ((StatPanel*)pp.p2.stats)->text[3]),
-        MenuItem("#stat_custom_4_p2", 5, &((StatPanel*)pp.p2.stats)->bars[3], 0, 0),
-        MenuItem("#stat_text_5_p2", ((StatPanel*)pp.p2.stats)->text[4]),
-        MenuItem("#stat_art_5_p2", 2, &((StatPanel*)pp.p2.stats)->stats.stats[4].value, 0, 0),
+        MenuItem("#stat_text_1_p2", pp.p2.stats.text[0]),
+        MenuItem("#stat_art_1_p2", 2, &pp.p2.stats.stats.stats[0].value, 0, 0),
+        MenuItem("#stat_text_2_p2", pp.p2.stats.text[1]),
+        MenuItem("#stat_art_2_p2", 2, &pp.p2.stats.stats.stats[1].value, 0, 0),
+        MenuItem("#stat_text_3_p2", pp.p2.stats.text[2]),
+        MenuItem("#stat_art_3_p2", 2, &pp.p2.stats.stats.stats[2].value, 0, 0),
+        MenuItem("#stat_text_4_p2", pp.p2.stats.text[3]),
+        MenuItem("#stat_custom_4_p2", 5, &pp.p2.stats.bars[3], 0, 0),
+        MenuItem("#stat_text_5_p2", pp.p2.stats.text[4]),
+        MenuItem("#stat_art_5_p2", 2, &pp.p2.stats.stats.stats[4].value, 0, 0),
         MenuItem(lbl_80498810),
     };
     MenuDesc desc = {lbl_8055FC8C ? "rollcall2_w.lyt" : "rollcall2.lyt", items, fn_802411A4, 0, 0};
@@ -735,19 +728,6 @@ u8* fn_80240830(u8* p, int del) {
     return p;
 }
 
-u8* fn_80240928(u8* p, int del) {
-    if (p) {
-        U32(p, 0x24) = 0;
-        *(void**)p = lbl_80342734;
-        U32(p, 0x20) = 0;
-        fn_802328D4(PTR(p, 0x18));
-        U32(p, 0x18) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
 
 void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
 
@@ -810,32 +790,8 @@ CarPicker* fn_80240BA4(CarPicker* p, s32* unk9COut, s32* idOut, ColorPick* color
     return p;
 }
 
-void fn_80241010(u8* p, s32 a, s32 b, s32 c) {
-    S32(p, 0x24) = b;
-    S32(p, 0x1C) = a + 1;
-    S32(p, 0x20) = c;
-}
 
-u8* fn_80241024(u8* p) {
-    __construct_array(p + 0x2C, (void*)fn_80241098, (void*)fn_80240928, 0x28, 5);
-    memset(p, 0, 0x2C);
-    U8(p, 0xF4) = 0;
-    U8(p, 0x158) = 0;
-    U8(p, 0x1BC) = 0;
-    U8(p, 0x220) = 0;
-    U8(p, 0x284) = 0;
-    return p;
-}
 
-u8* fn_80241098(u8* p) {
-    *(void**)p = lbl_80342734;
-    U32(p, 0x14) = 0;
-    S32(p, 0x1C) = -1;
-    U32(p, 0x24) = 0;
-    U32(p, 0x20) = 0;
-    PTR(p, 0x18) = fn_80232578("uifnt_o.gtx");
-    return p;
-}
 
 }  // extern "C"
 
@@ -876,9 +832,35 @@ int fn_802411D4(void) {
     return r;
 }
 
-void fn_80241224(u8* p) {}
+}  // extern "C"
 
-void fn_80241228(u8* p) {}
+void StatBar::Set(int i, s32* v, u8* f) {
+    value = v;
+    index = i + 1;
+    flag = f;
+}
+
+StatPanel::StatPanel(void) {
+    memset(this, 0, sizeof(CarStats));
+    text[0][0] = 0;
+    text[1][0] = 0;
+    text[2][0] = 0;
+    text[3][0] = 0;
+    text[4][0] = 0;
+}
+
+StatBar::StatBar(void) {
+    index = -1;
+    value = 0;
+    flag = 0;
+    font = fn_80232578("uifnt_o.gtx");
+}
+
+void StatBar::Exit(void) {}
+
+void StatBar::Update(void) {}
+
+extern "C" {
 
 void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
@@ -893,7 +875,10 @@ extern const f32 lbl_80563764;     // 1.0
 // The stat value the bars compare against (field 0x24 points at it).
 static inline s32 StatOf(const u8* p) { return *(s32*)PTR(p, 0x24); }
 
-void fn_8024122C(u8* p) {
+}  // extern "C"
+
+void StatBar::Draw(void) {
+    u8* p = (u8*)this;
     f32 x, y;
     fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
     if (S32(p, 0x1C) >= 0) {
@@ -915,6 +900,8 @@ void fn_8024122C(u8* p) {
         fn_80232BA4(fn_80131234(buf), PTR(p, 0x18), x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
     }
 }
+
+extern "C" {
 
 // Colour chooser input: right/left step through the car's colours; bumping an end leaves the menu.
 int ColorPick::Key(int key) {
