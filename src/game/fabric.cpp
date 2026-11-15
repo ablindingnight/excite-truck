@@ -495,7 +495,7 @@ static inline void LerpVert(DrawVert* out, Corner a, Corner b, f32 t) {
     out->color = LerpColor( b.color,a.color, t);
 }
 
-extern "C" void fn_801F5970(Fabric* f, Quad* q) {
+extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
     int n = f->rows * f->cols;
     int r;
     f->verts = new ("fabric verts") TVec[n * 2];
@@ -530,7 +530,7 @@ extern "C" void fn_801F5970(Fabric* f, Quad* q) {
 
 extern "C" {
 
-void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
+void fn_801F602C(Fabric* f, const Quad* q, const char* tex, int style, u32 flags) {
     f32 w = PSVECDistance(&q->c[2].pos, &q->c[3].pos);
     f32 h;
     f32 d;
@@ -555,19 +555,17 @@ void fn_801F602C(Fabric* f, Quad* q, const char* tex, int style, u32 flags) {
         f->cols = ClampI((int)(w * q->colDensity), 2, 8);
         f->rows = ClampI((int)(h * q->rowDensity), 2, 4);
     } else {
-        int c = ClampI((int)(3.0f * (w * q->colDensity)), 2, 8);
-        int r = ClampI((int)(3.0f * (h * q->rowDensity)), 2, 4);
-        f->rows = r;
-        f->cols = c;
+        f->cols = ClampI((int)(3.0f * (w * q->colDensity)), 2, 8);
+        f->rows = ClampI((int)(3.0f * (h * q->rowDensity)), 2, 4);
     }
     umin = FMin(q->c[0].u, FMin(q->c[1].u, FMin(q->c[2].u, q->c[3].u)));
     umax = FMax(q->c[0].u, FMax(q->c[1].u, FMax(q->c[2].u, q->c[3].u)));
     vmin = FMin(q->c[0].v, FMin(q->c[1].v, FMin(q->c[2].v, q->c[3].v)));
     vmax = FMax(q->c[0].v, FMax(q->c[1].v, FMax(q->c[2].v, q->c[3].v)));
     f->tex = fn_802CAC28(tex, 0);
-    f32 du = (f32)__fabs(umax - umin);
-    f32 dv = (f32)__fabs(vmax - vmin);
-    span = FMax(du, dv);
+    f64 dv = __fabs(vmax - vmin);
+    f64 du = __fabs(umax - umin);
+    span = FMax((f32)du, (f32)dv);
     f->lod = log2(span / FMax(w, h));
     fn_801F5970(f, q);
     fn_801F5508(f);
