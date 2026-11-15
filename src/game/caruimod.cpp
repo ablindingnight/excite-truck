@@ -1307,7 +1307,6 @@ void CarUIScreen::Deactivate(void) {
 
 void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
     Vec t;
-    u32 a;
     lbl_8055F334 = dt;
     if (fn_802D3EBC()) {
         dt = 0.0f;
@@ -1344,10 +1343,8 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         CopyName(loaded, loading, 0x20);
         loading[0] = 0;
         CarUIModel* nm = model;
-        a = anim;
         loadName[0] = 0;
-        nm->anim = a;
-        nm->animSet = a;
+        nm->animSet = nm->anim = anim;
         tint = nextTint;
     }
     if (!loading[0]) {
