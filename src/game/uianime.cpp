@@ -63,6 +63,7 @@ struct UiAnimTrack {
         n = 0;
         keys = 0;
     }
+    void Apply(f32 time);  /* Helper name unproven: per-track inline (UiAnimList::Apply EXACT) */
     s32 id;     // offset 0x0
     UiAnimKey* keys;  // offset 0x4
     s32 n;      // offset 0x8
@@ -353,6 +354,12 @@ static inline void* EvalTrack(UiAnimTrack* tr, f32 time) {
     return obj;
 }
 
+inline void UiAnimTrack::Apply(f32 time) {
+    void* obj = EvalTrack(this, time);
+    fn_80214C54(id, obj);
+    fn_8022EE98(obj);
+}
+
 UiAnimList::~UiAnimList(void) {
     if (tracks) {
         delete[] tracks;
@@ -368,12 +375,8 @@ void UiAnimList::Apply(f32 t) {
     t = 1.0f < t ? 1.0f : t;
     t = t > 0.0f ? t : 0.0f;
     f32 time = len * t;
-    UiAnimTrack* tr;
     for (int i = 0; i < n; i++) {
-        tr = &tracks[i];
-        void* obj = EvalTrack(tr, time);
-        fn_80214C54(tr->id, obj);
-        fn_8022EE98(obj);
+        tracks[i].Apply(time);
     }
 }
 
