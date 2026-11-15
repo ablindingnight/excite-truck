@@ -428,7 +428,9 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     cam.fwd.z = dir[1];
     PSVECCrossProduct((Vec*)&cam.axes[1], &cam.fwd, right);
     t = fn_802E2C20() - lbl_8055D63C;
-    k = 5.0f + 20.0f * (1.0f + -(f32)cos(6.2831855f * ((t % 50000) / 50000.0f)));
+    f32 phase = (t % 50000) / 50000.0f;
+    f32 angle = 6.2831855f * phase;
+    k = 5.0f + 20.0f * (1.0f + -(f32)cos(angle));
     cam.pos.x += cam.fwd.x * k;
     cam.pos.y += cam.fwd.y * k;
     cam.pos.z += cam.fwd.z * k;
@@ -559,8 +561,9 @@ void DrawLoadingScreen(int alpha, f32 t) {
                     0.0f, 1.0f);
     }
     if (!lbl_8055D646 && show_goals && GetNumPlayers() == 1) {
-        f32 slide = 4.0f * SCurve(t);
-        f32 panel_x = lbl_8055CFF0 * slide - 160.0f;
+        f32 eased = SCurve(t);
+        f32 panelLeft = 160.0f;
+        f32 panel_x = lbl_8055CFF0 * (eased * 4.0f) - panelLeft;
 
         fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, lbl_8055D658);
         int rows[3] = {10, 8, 9};
