@@ -1248,14 +1248,22 @@ inline int TrackInst::Kind(void) { return -1; }
 inline void TrackInst::Draw2(void* ctx) {}
 
 
+static inline Rot* AllocateRotatorTable(const char* tag = "rotator tab") {
+    return new (tag) Rot[16];
+}
+
 inline RotList::RotList(void) {
-    rots = new ("rotator tab") Rot[16];
+    rots = AllocateRotatorTable();
     count = 0;
 }
 
 /* Helper name unproven */
+static inline void ReportRotatorLimit(const char* message = "trackmod: exceeded rotator limit") {
+    fn_802E317C(message);
+}
+
 inline void RotList::Check(void) {
     if (count >= 16) {
-        fn_802E317C("trackmod: exceeded rotator limit");
+        ReportRotatorLimit();
     }
 }
