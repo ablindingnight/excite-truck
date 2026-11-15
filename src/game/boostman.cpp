@@ -581,7 +581,7 @@ void BoostMan::a3(void) {
     for (i = 0; i < fn_801E85A4(); i++) {
         int car = cars[i];
         if (car != players[i].car) {
-            players[i].Clear();
+            players[i].Reset();
             players[i].car = car;
         }
         if (players[i].car != -1) {
@@ -595,8 +595,8 @@ void BoostMan::a3(void) {
             }
             players[i].last = speed;
             if (players[i].timer > 0.0f) {
-                players[i].color0 = 0xFFFFFF00;
                 players[i].color1 = -1;
+                players[i].color0 = 0xFFFFFF00;
             } else if (players[i].flag) {
                 players[i].color1 = -1;
                 players[i].color0 = 0xFFFF0000;
