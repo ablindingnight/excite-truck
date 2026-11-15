@@ -1252,7 +1252,7 @@ config.libs.append(
             Object(NonMatching, "game/fire.cpp"),
             Object(NonMatching, "game/waterpool.cpp"),
             Object(Matching, "game/drawline.cpp"),
-            Object(NonMatching, "game/partemit.cpp"),
+            Object(Matching, "game/partemit.cpp"),
             Object(Matching, "game/fence.cpp"),
             Object(NonMatching, "game/sfline.cpp"),
             Object(NonMatching, "game/trail.cpp"),
