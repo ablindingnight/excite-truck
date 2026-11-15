@@ -1015,7 +1015,7 @@ config.libs.append(
             Object(NonMatching, "game/proxer.cpp"),
             Object(Matching, "game/league.cpp"),
             Object(NonMatching, "game/idealres.cpp"),
-            Object(NonMatching, "game/catchup.cpp"),
+            Object(Matching, "game/catchup.cpp"),
             Object(Matching, "game/aiwidth.cpp"),
             Object(Matching, "game/radar.cpp"),
             Object(NonMatching, "game/arenabnd.cpp"),

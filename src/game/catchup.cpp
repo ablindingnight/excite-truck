@@ -116,12 +116,15 @@ f32 fn_80138DF4(const Motion* m) {
 
 f32 fn_80138F38(const Motion* m) {
     f32 t;
-    if (m->v2 > 0.0f && m->a2 < 0.0f && fn_80138C28(m, &t, 0)) {
+    f32 component;
+    if ((component = m->v2) > 0.0f && (component = m->a2) < 0.0f && fn_80138C28(m, &t, 0)) {
         f32 a2v = m->a2;
         f32 stop = -m->v2 / a2v;
         if (stop <= t) {
             f32 r;
-            f32 p = m->p2 + stop * m->v2 + 0.5f * m->a2 * (stop * stop);
+            f32 square = stop * stop;
+            f32 advance = m->p2 + stop * m->v2;
+            f32 p = advance + 0.5f * m->a2 * square;
             Motion l = *m;
             l.p2 = p;
             l.a2 = 0.0f;
