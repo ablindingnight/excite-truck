@@ -331,9 +331,6 @@ namespace homebutton {
             return NULL;
         }
 
-#pragma push
-#pragma opt_propagation off  // ???
-
         void PaneManager::setAllBoundingBoxComponentTriggerTarget(bool b) {
             for (u32 i = 0; i < nw4hbm::ut::List_GetSize(&mIDToComponent); i++) {
                 PaneToComponent* p =
@@ -344,8 +341,6 @@ namespace homebutton {
                 }
             }
         }
-
-#pragma pop
 
         bool PaneComponent::contain(f32 x_, f32 y_) {
             if (!mpManager) {

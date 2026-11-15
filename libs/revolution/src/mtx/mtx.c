@@ -180,8 +180,6 @@ void C_MTXConcatArray(const Mtx a, const Mtx* srcBase, Mtx* dstBase, u32 count) 
 }
 
 #if DEBUG
-#pragma push
-#pragma optimization_level 1
 // This function will not compile at optimization level 0
 #endif
 void PSMTXConcatArray(const __REGISTER Mtx a, const __REGISTER Mtx* srcBase, __REGISTER Mtx* dstBase, __REGISTER u32 count) {
@@ -274,7 +272,6 @@ void PSMTXConcatArray(const __REGISTER Mtx a, const __REGISTER Mtx* srcBase, __R
     }
 }
 #if DEBUG
-#pragma pop
 #endif
 
 void C_MTXTranspose(const Mtx src, Mtx xPose) {
