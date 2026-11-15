@@ -264,10 +264,28 @@ void fn_80291E64(FlareSet* fs) {
         t = (1.0f < t) ? 1.0f : t;
         t = (t > 0.0f) ? t : 0.0f;
         VecP p;
+        f32 endX;
+        f32 endY;
+        f32 endZ;
+        f32 deltaX;
+        f32 deltaY;
+        f32 deltaZ;
+
         startZ = start.z;
+        endY = end.y;
         startY = start.y;
+        endZ = end.z;
+        endX = end.x;
         startX = start.x;
-        p.Set(startX + t * (end.x - startX), startY + t * (end.y - startY), startZ + t * (end.z - startZ));
+
+        deltaZ = endZ - startZ;
+        deltaY = endY - startY;
+        deltaX = endX - startX;
+
+        f32 projectedZ = startZ + t * deltaZ;
+        f32 projectedY = startY + t * deltaY;
+        f32 projectedX = startX + t * deltaX;
+        p.Set(projectedX, projectedY, projectedZ);
         fn_802C8E70(&p, &f->pos);
         if (f->visible && fn_802C8FF4(&f->pos, 0.0f)) {
             fn_802C8C04(f->tex);

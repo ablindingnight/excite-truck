@@ -607,7 +607,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             break;
         }
         f32 radius = F32(c->car, 0x5B4);
-        f32 dist = 7.0f + k * radius;
+        f32 dist = 7.0f + radius * k;
         f32 lift = CarHeight(c->car) + 2.7f;
         c->fov = fn_8026ECE4(p, &dist);
         target = c->pos;
@@ -631,6 +631,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             on *= -1.0f;
         }
         c->lastOn = c->lastOn + lbl_80563EA8 * (on - c->lastOn);
+        CVec3* forward;
         int reverse = c->lastOn < lbl_80563E78;
         int back = PSVECDotProduct(&c->tf.axes.fwd.x, c->vel) < lbl_80563E78;
         if (PSVECDotProduct(&c->tf.axes.fwd.x, &c->axes.fwd.x) < lbl_80563E78) {
@@ -694,21 +695,23 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             c->tf.axes.fwd.y = c->tf.axes.fwd.y + side.y * kk;
             c->tf.axes.fwd.z = c->tf.axes.fwd.z + side.z * kk;
         }
-        CVec3& v = c->tf.axes.fwd;
-        f32 n = PSVECMag(&v.x);
+        forward = &c->tf.axes.fwd;
+        f32 n = PSVECMag(&forward->x);
         n = 0.05f > n ? 0.05f : n;
         f32 inv3 = lbl_80563E30 / n;
-        v.x = v.x * inv3;
-        v.y = v.y * inv3;
-        v.z = v.z * inv3;
-        c->tf.pos.v[0] = target.v[0] + v.x * lbl_80563F18;
-        c->tf.pos.v[1] = target.v[1] + v.y * lbl_80563F18;
-        c->tf.pos.v[2] = target.v[2] + v.z * lbl_80563F18;
+        forward->x = forward->x * inv3;
+        forward->y = forward->y * inv3;
+        forward->z = forward->z * inv3;
+        c->tf.pos.v[0] = target.v[0] + forward->x * lbl_80563F18;
+        c->tf.pos.v[1] = target.v[1] + forward->y * lbl_80563F18;
+        c->tf.pos.v[2] = target.v[2] + forward->z * lbl_80563F18;
         fw = *(PVec3*)&c->tf.axes.fwd;
         f32 out = -dist;
         c->view.pos.v[0] = c->pos.v[0] + fw.v[0] * out;
-        c->view.pos.v[1] = c->pos.v[1] + fw.v[1] * out + lift;
-        c->view.pos.v[2] = c->pos.v[2] + fw.v[2] * out;
+        c->view.pos.v[1] = c->pos.v[1] + fw.v[1] * out;
+        c->view.pos.v[1] += lift;
+        f32 viewZ = c->pos.v[2] + fw.v[2] * out;
+        c->view.pos.v[2] = viewZ;
         eye = c->view.pos;
         if (fn_801EA03C((const s16*)(c->car + 0x6C), eye.v)) {
             f32 g = 0.5f + eye.v[1];

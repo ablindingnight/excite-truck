@@ -1720,13 +1720,13 @@ void fn_80230F78(u8* alpha, f32* pulse, u32* color, int a);
 u8 lbl_8055E308;  // warned about the elems
 namespace {
 
-static inline void DrawEntry(ChalList* list, TextElem* el, int i, TextElem* e1, TextElem* e2, GartElem* but, GartElem* star) {
+static inline void DrawEntry(ChalList* list, TextElem* el, int i, TextElem* e1, TextElem* e2, GartElem* but, GartElem* star, int& off) {
     TextElem te = *el;
     GartElem b;
     f32 dx = te.pos.x - e1->pos.x;
     f32 dy = te.pos.y - e1->pos.y;
     b = *but;
-    int off = i != list->sel;
+    off = i != list->sel;
     u8 alpha;
     f32 pulse;
     if (i > fn_80160CE4() && i != lbl_8042FDEC.count) {
@@ -1799,6 +1799,7 @@ inline int ChalList::Draw(int a) {
         if (e1 && e2) {
             struct {
                 int i;
+                int off;
             } entry;
             for (entry.i = 1; entry.i <= lbl_8042FDEC.count; entry.i++) {
                 char name[0xA];
@@ -1806,7 +1807,7 @@ inline int ChalList::Draw(int a) {
                 fn_801345D8(name, sizeof(name), "elem%d", entry.i);
                 el = (TextElem*)lbl_8055E2E0->Find(name);
                 if (el) {
-                    DrawEntry(this, el, entry.i, e1, e2, but, star);
+                    DrawEntry(this, el, entry.i, e1, e2, but, star, entry.off);
                 } else if (!lbl_8055E308) {
                     lbl_8055E308 = 1;
                     fn_802E30C8("%s", "Challenge: ran out of elems, have someone check challist.txt");
