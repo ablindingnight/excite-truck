@@ -1590,11 +1590,11 @@ s32 lbl_8055E258;  // pickups alive
 
 namespace {
 inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
-    CarHud* h;
+    int i;
     s32 tx = c->tex[2];
-    h = c->hud;
     int pal;
     StuntEvent* cur;
+    CarHud* h = c->hud;
     l->FindBox("stunt_column_info");
     {
         static LocString sAir("Stunt:AIR");
@@ -1621,7 +1621,6 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
         StuntCIter it(&h->pending, 0);
         for (; it.Valid(); it.Next()) {
             if (it->Value() > 0.5f) {
-                int i;
                 for (i = 0; i < ARRAY_COUNT(kinds); i++) {
                     char buf[0x20];
                     ArtElem* a;
