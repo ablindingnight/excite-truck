@@ -318,7 +318,9 @@ static inline f32 Smooth(f32 t) {
 }
 
 static inline f32 OscValue(const Osc* o) {
-    f32 t = fmod(lbl_8055E318 - o->start, o->Period());
+    const f32 period = o->Period();
+    const f32 elapsed = lbl_8055E318 - o->start;
+    f32 t = fmod(elapsed, period);
     if (t > o->half) {
         t = 2.0f * o->half - t;
     }
