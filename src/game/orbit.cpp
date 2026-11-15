@@ -226,7 +226,6 @@ bool lbl_8055E329;
 u8 lbl_8055E32A;   // enabled
 u8 lbl_8055E32B;   // turtle
 DynArray<OrbitCarState>* lbl_8055E32C;
-void* lbl_8055E330;  // boost bounds
 
 OrbitConfig lbl_8042FE38;
 FixedArr<Role, 8> lbl_8042FEB0;
@@ -486,6 +485,8 @@ void fn_801662FC(void) {
         }
     }
 }
+
+void* lbl_8055E330;  // boost bounds
 
 struct CarSetup {
     s32 type;  // offset 0x0
