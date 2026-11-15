@@ -4695,20 +4695,46 @@ inline void BetaMaster::b2Body(StuntEvt* e, int car) {
 
 inline void BetaMaster::b2(StuntEvt* e, int car) { b2Body(e, car); }
 
+/* Helper name unproven */
+static inline f32 TakePoints(Token* t, Body* b) {
+    if (b == t->body && t->active) {
+        t->active = 0;
+        t->Hide();
+        return t->body->Info()->GetFloat("points", 10.0f);
+    }
+    return 0.0f;
+}
+
+/* Helper name unproven */
+static inline int TakeInv(Token* t, Body* b, int car) {
+    if (b == t->body && t->active) {
+        RaceCarRec* r2 = fn_8017960C(car);
+        if (r2) {
+            PickupEvent ev;
+            const f32* p = b->Pos();
+            ev.pos[0] = p[0];
+            ev.pos[1] = p[1];
+            ev.pos[2] = p[2];
+            ev.vel[0] = r2->vel[0];
+            ev.vel[1] = r2->vel[1];
+            ev.vel[2] = r2->vel[2];
+            ev.heading = r2->heading;
+            ev.sfx = 0x96;
+            fn_801796EC(10, &ev, sizeof(ev));
+        }
+        t->active = 0;
+        t->Hide();
+        return 1;
+    }
+    return 0;
+}
+
 inline void BetaMaster::c2(Body* b, int car) {
     int i;
     RaceCarRec* rc = fn_8017960C(car);
     if (rc && (f32)__fabs(rc->f2690) <= __float_epsilon[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
         for (i = 0; i < bumps.a.count; i++) {
-            Token* t = bumps.a.data[i];
-            f32 pts;
-            if (b == t->body && t->active) {
-                t->active = 0;
-                t->Hide();
-                pts = t->body->Info()->GetFloat("points", 10.0f);
-            } else {
-                pts = 0.0f;
-            }
+            f32 pts = TakePoints(bumps.a.data[i], b);
             if (pts > 0.5f) {
                 if (coinSnd) {
                     fn_80206750(coinSnd, car, SOUND_ROUTE_MIX);
@@ -4719,30 +4745,7 @@ inline void BetaMaster::c2(Body* b, int car) {
         }
         int j;
         for (j = 0; j < bumps2.a.count; j++) {
-            Token* t = bumps2.a.data[j];
-            int got;
-            if (b == t->body && t->active) {
-                RaceCarRec* r2 = fn_8017960C(car);
-                if (r2) {
-                    PickupEvent ev;
-                    const f32* p = b->Pos();
-                    ev.pos[0] = p[0];
-                    ev.pos[1] = p[1];
-                    ev.pos[2] = p[2];
-                    ev.vel[0] = r2->vel[0];
-                    ev.vel[1] = r2->vel[1];
-                    ev.vel[2] = r2->vel[2];
-                    ev.heading = r2->heading;
-                    ev.sfx = 0x96;
-                    fn_801796EC(10, &ev, sizeof(ev));
-                }
-                t->active = 0;
-                t->Hide();
-                got = 1;
-            } else {
-                got = 0;
-            }
-            if (got) {
+            if (TakeInv(bumps2.a.data[j], b, car)) {
                 if (starSnd) {
                     fn_80206750(starSnd, car, fn_80009C84() ? SOUND_ROUTE_MIX : SOUND_ROUTE_PLAYER);
                     starSnd->Play();
