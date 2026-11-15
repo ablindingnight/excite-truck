@@ -476,12 +476,15 @@ static inline int EscDrawT(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color,
 
 static inline const char* EscName(const int& i) { return lbl_80497F14.data[i].name; }
 
-static inline int EscAdv(const char* const& s, f32 h, double& adv) {
+static inline EscSeq* GetEscapeEntry(int i) { return &lbl_80497F14.data[i]; }
+
+static inline int EscAdv(const char* const& s, f32 h, double& adv, EscSeq*& e) {
     if (*s == '\\') {
-        for (int i = 0; i < lbl_80497F14.count; i++) {
-            const char* name = lbl_80497F14.data[i].name;
+        int i;
+        for (i = 0; i < lbl_80497F14.count; i++) {
+            const char* const& name = lbl_80497F14.data[i].name;
             if (strncasecmp(s + 1, name, strlen(name)) == 0) {
-                EscSeq* e = &lbl_80497F14.data[i];
+                e = GetEscapeEntry(i);
                 if (e->art) {
                     f32 k = h / fn_80235F64(e->art, e->artIdx);
                     adv = e->scale * (k * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * k);
@@ -499,15 +502,16 @@ void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
     const char* p = s;
     strlen(p);
     while (*p) {
+        EscSeq* e;
         double adv = h;
-        int skip = EscAdv(p, h, adv);
+        int skip = EscAdv(p, h, adv, e);
         if (skip > 0) {
             p += skip;
             x += (f32)adv;
             continue;
         }
         const char* next;
-        u16 c = DecodeUTF8(p, &next);
+        u16 c = DecodeUTF8(p, &next, *reinterpret_cast<const u8*>(p));
         Glyph* g = &f->glyphs[c];
         x += xs * (scale * g->pre);
         p += next - p;
