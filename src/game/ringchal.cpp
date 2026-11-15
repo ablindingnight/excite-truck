@@ -1745,14 +1745,17 @@ inline void Arena::ActivateRingSet(void) {
 
 inline void Arena::ActivateObjSet(void) {
     if (curSet < nFiles) {
-        ObjSet* s = &sets->data[curSet];
         int i;
+        ObjSet* s = &sets->data[curSet];
+        u32 off;
         s->active = 1;
         s->time = lbl_8055E3C8;
         s->f10 = 0;
-        for (i = 0; i < s->infos->count; i++) {
-            if (s->infos->data[i].obj) {
-                fn_802BAF98(s->infos->data[i].obj, 1);
+        // The element offset is stepped by hand next to the index (numfit: a named walker, not the compiler's).
+        for (i = 0, off = 0; i < s->infos->count; off += sizeof(ObjInfo), i++) {
+            ObjInfo* info = (ObjInfo*)((u8*)s->infos->data + off);
+            if (info->obj) {
+                fn_802BAF98(info->obj, 1);
             }
         }
     }
