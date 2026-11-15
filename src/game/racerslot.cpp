@@ -98,7 +98,7 @@ struct RacerSlot {
 // The car's controller; slot 0x14 returns its option flags.
 class Ctl {
 public:
-    virtual void v08(void);
+    virtual ~Ctl(void);  // 0x08 (the car's Controller (0x270C, Hybrid/IDriver): slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual u32 Flags(void);

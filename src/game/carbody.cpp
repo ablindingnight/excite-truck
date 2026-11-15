@@ -125,7 +125,7 @@ struct CollShape;
 // The body's collision shape interface (vtable slots used here).
 class CbShapeV {
 public:
-    virtual void v08(void);
+    virtual ~CbShapeV(void);  // 0x08 (the 0x184 car volume (sphcoll lbl_803339B8): slot 0 fn_801A0040 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -1034,7 +1034,7 @@ public:
 // The body's model handle at 0x268 (slot 0x28 resets it).
 class CbModel {
 public:
-    virtual void v08(void);
+    virtual ~CbModel(void);  // 0x08 (the same car volume: slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -1343,7 +1343,7 @@ struct SurfType {
 
 class CbFlagsV {
 public:
-    virtual void v08(void);
+    virtual ~CbFlagsV(void);  // 0x08 (the car's Controller (0x270C, Hybrid/IDriver): slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual u32 Flags(void);  // 0x14
@@ -3306,7 +3306,7 @@ void fn_80189C64(u8* p) {
 // A collision shape of the body (slots at 0x14, count at 0x24).
 class CbShape {
 public:
-    virtual void v08(void);
+    virtual ~CbShape(void);  // 0x08 (a CollShape: slot 0 is __dt__9CollShape)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);

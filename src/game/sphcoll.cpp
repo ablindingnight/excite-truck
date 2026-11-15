@@ -112,7 +112,7 @@ public:
 
 class VGroup {
 public:
-    virtual void v08(void);
+    virtual ~VGroup(void);  // 0x08 (a CollShape: slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(u8* a);
 };
@@ -172,7 +172,7 @@ struct Pose12s {
 
 class VMesh {
 public:
-    virtual void v08(void);
+    virtual ~VMesh(void);  // 0x08 (a CollShape: slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -584,7 +584,7 @@ extern const f32 lbl_80562308;  // 0.05
 // The race rules object (fn_801B83A0) seen through its car-hit hook.
 class HitRules {
 public:
-    virtual void vf08(void);
+    virtual ~HitRules(void);  // 0x08 (the arena master GameMode: slot 0 is its destructor)
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);

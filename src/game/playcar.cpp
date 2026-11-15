@@ -178,7 +178,7 @@ extern "C" {
 
 class PcGameMode {
 public:
-    virtual void v08(void);
+    virtual ~PcGameMode(void);  // 0x08 (the arena master GameMode: slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -823,7 +823,7 @@ void fn_80191064(u8* p) {
 // The camera/view slots seen as switchable modes: 0x24 enters, 0x28 leaves.
 class VSwitch {
 public:
-    virtual void v08(void);
+    virtual ~VSwitch(void);  // 0x08 (the Hybrid's IDriver: slot 0 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
