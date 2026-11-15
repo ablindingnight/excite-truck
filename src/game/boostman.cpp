@@ -433,41 +433,39 @@ static inline BoostArea& AreaAt(BoostArea* areas, int index) {
 
 extern "C" {
 
+static inline int InArea(BoostMan* m, CarRec* rec) {  /* Helper name unproven */
+    int hit;
+    Wheel* ws;
+    int i;
+    int j;
+    ws = rec->wheels;
+    for (i = 0; i < m->areas.count; i++) {
+        for (j = 0; j < 4; j++) {
+            V3 p = ws[j].pos;
+            MulVec(&p, &p, &rec->rot);
+            p.x += rec->pos.x;
+            p.y += rec->pos.y;
+            p.z += rec->pos.z;
+            hit = 0;
+            if (AreaAt(m->areas.data, i).bound && fn_80139B70(m->areas.data[i].bound, p.x, p.z)) {
+                hit = 1;
+            }
+            if (hit) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 int fn_801E1048(int car) {
     BoostMan* m;
     int r;
-    CarRec* rec;
-    Wheel* ws;
-    int hit;
-    int i;
-    Wheel* w;
-    int j;
     m = lbl_8055EA10;
     r = m != 0;
     if (r) {
-        rec = (CarRec*)fn_8017960C(car);
-        ws = rec->wheels;
-        for (i = 0; i < m->areas.count; i++) {
-            w = ws;
-            for (j = 0; j < 4; j++, w++) {
-                V3 p = w->pos;
-                MulVec(&p, &p, &rec->rot);
-                p.x += rec->pos.x;
-                p.y += rec->pos.y;
-                p.z += rec->pos.z;
-                hit = 0;
-                if (AreaAt(m->areas.data, i).bound && fn_80139B70(m->areas.data[i].bound, p.x, p.z)) {
-                    hit = 1;
-                }
-                if (hit) {
-                    r = 1;
-                    goto done;
-                }
-            }
-        }
-        r = 0;
+        r = InArea(m, (CarRec*)fn_8017960C(car));
     }
-done:
     return r;
 }
 
@@ -483,22 +481,33 @@ void fn_801E1250(int car, u8 on) {
     }
 }
 
+static inline void DrawLines(BoostMan* m, PlayerBoost* p) {  /* Helper name unproven */
+    for (int i = 0; i < m->areas.Count(); i++) {
+        fn_801E1384(m->areas.At(i), p->color1);
+    }
+}
+
+static inline void DrawArrows(BoostMan* m, PlayerBoost* p) {  /* Helper name unproven */
+    for (int i = 0; i < m->areas.Count(); i++) {
+        fn_801E1384(m->areas.At(i), p->color0);
+    }
+}
+
+static inline void DrawView(BoostMan* m) {  /* Helper name unproven */
+    int view = fn_801E85B4();
+    m->cars[view] = fn_801E866C(view);
+    fn_802C8BD0(m->lines);
+    DrawLines(m, &m->players[view]);
+    fn_802C8D74();
+    fn_802C8BD0(m->arrows);
+    DrawArrows(m, &m->players[view]);
+    fn_802C8D74();
+}
+
 void fn_801E12A4(void) {
     BoostMan* m = lbl_8055EA10;
     if (m) {
-        int view = fn_801E85B4();
-        m->cars[view] = fn_801E866C(view);
-        fn_802C8BD0(m->lines);
-        PlayerBoost* p = &m->players[view];
-        for (int i = 0; i < m->areas.Count(); i++) {
-            fn_801E1384(m->areas.At(i), p->color1);
-        }
-        fn_802C8D74();
-        fn_802C8BD0(m->arrows);
-        for (int i = 0; i < m->areas.Count(); i++) {
-            fn_801E1384(m->areas.At(i), p->color0);
-        }
-        fn_802C8D74();
+        DrawView(m);
     }
 }
 
