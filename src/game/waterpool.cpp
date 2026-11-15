@@ -617,6 +617,8 @@ static inline void MadT(Vec* o, const Vec* a, const Vec* b, f32 s) {
 
 static inline f32 Mag2(f32 x, f32 y) { return (f32)sqrt(x * x + y * y); }
 
+#pragma push
+#pragma opt_propagation off
 WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) {
     memset(&desc, 0, sizeof(desc));
     nx = 1.333f * Mag2(g->right.x, g->right.y);
@@ -627,7 +629,9 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     buf = new ("water mesh") s16[ny * (nx * 2)];
     memset(buf, 0, ny * (nx * 4));
     cur = buf;
-    prev = buf + nx * ny;
+    s32 n = nx * ny;
+    n <<= 1;
+    prev = (s16*)((char*)buf + n);
     desc = *d;
     desc.color &= 0xFFFFFF;
     timer = 0.0f;
@@ -657,6 +661,7 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     MadT(&c, &c, &u, 0.5f);
     fn_8014E740(&c, radius);
 }
+#pragma pop
 
 // More editing interface hooks.
 extern "C" void fn_8029D460(ValueNode* n, f32 t, f32 x, f32 y) {
