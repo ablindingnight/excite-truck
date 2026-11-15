@@ -404,6 +404,7 @@ static inline f32 BackOffset(int mode, int wide) {
 // blends the target height and the eye distance between the two modes, side-steps the eye when the car
 // moves sideways, keeps it above the ground and aims it.
 static inline f32 CarHeight(u8* car) { return F32(car, 0x5B8); }  /* Helper name unproven */
+static inline f32 CarScale(u8* car) { return F32(car, 0x5E4); }  /* Helper name unproven */
 void fn_8026F420(int mode, int prev, u8* p) {
     ChaseCam* c = (ChaseCam*)p;
     int wide = fn_80178CA4() > 1;
@@ -456,7 +457,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     c->fov = fn_8026ECE4(p, &dist);
     f32 a = fn_8026EA44(mode);
     f32 b = fn_8026EA44(c->lastMode);
-    tgt.y = tgt.y + F32(c->car, 0x5E4) * (lift + LerpF(ease, b, a));
+    tgt.y = tgt.y + CarScale(c->car) * (lift + LerpF(ease, b, a));
     c->view = c->tf;
     CsVec up1(lbl_80563E78, lbl_80563E30, lbl_80563E78);
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up1.x);
@@ -503,19 +504,20 @@ void fn_8026F420(int mode, int prev, u8* p) {
     f32 scale = F32(c->car, 0x5E4);
     f32 pa = fn_8026EA8C(mode, c->pitchT);
     f32 pb = fn_8026EA8C(c->lastMode, c->pitchT);
-    f32 back = LerpF(ease, pb, pa) * (k * scale) - dist;
+    f32 pitch = LerpF(ease, pb, pa);
+    f32 back = pitch * (k * scale) - dist;
     c->view.pos.v[0] = tgt.x + c->view.axes.fwd.x * back;
     c->view.pos.v[1] = tgt.y + c->view.axes.fwd.y * back;
     c->view.pos.v[2] = tgt.z + c->view.axes.fwd.z * back;
     c->tf = c->view;
     c->view.pos.v[1] = c->view.pos.v[1] - lbl_80563EA8;
     if (seven || U8(c->car, 0x260C)) {
-        f32 positionX = c->pos.v[0];
-        f32 frameX = c->tf.pos.v[0];
-        c->view.pos.v[0] = positionX * lbl_80563E58 - frameX;
-        f32 scaledY = c->pos.v[1] * lbl_80563E58;
-        c->view.pos.v[1] = scaledY - c->tf.pos.v[1];
-        c->view.pos.v[2] = c->pos.v[2] * lbl_80563E58 - c->tf.pos.v[2];
+        c->view.pos.v[0] = c->pos.v[0] * lbl_80563E58;
+        c->view.pos.v[1] = c->pos.v[1] * lbl_80563E58;
+        c->view.pos.v[2] = c->pos.v[2] * lbl_80563E58;
+        c->view.pos.v[0] = c->view.pos.v[0] - c->tf.pos.v[0];
+        c->view.pos.v[1] = c->view.pos.v[1] - c->tf.pos.v[1];
+        c->view.pos.v[2] = c->view.pos.v[2] - c->tf.pos.v[2];
         f32 h = 5.0f;
         switch (mode) {
         case 4:
@@ -527,12 +529,17 @@ void fn_8026F420(int mode, int prev, u8* p) {
             h = 8.0f;
             break;
         }
-        c->view.pos.v[1] = c->view.pos.v[1] + (h + lbl_80563E58 * lift) * F32(c->car, 0x5E4);
+        c->view.pos.v[1] = c->view.pos.v[1] + (h + lbl_80563E58 * lift) * CarScale(c->car);
         c->view.pos.v[1] = c->view.pos.v[1] > (lbl_80563E30 + c->pos.v[1]) ? c->view.pos.v[1] : (lbl_80563E30 + c->pos.v[1]);
         CsVec up3(lbl_80563E78, lbl_80563E30, lbl_80563E78);
         fn_8026E870(c->view.pos.v, &tgt.x, p, &up3.x);
     }
-    f32 gap = seven ? 2.2f : 0.5f;
+    f32 gap;
+    if (seven) {
+        gap = 2.2f;
+    } else {
+        gap = 0.5f;
+    }
     c->time = lbl_8055E3C8;
     y = c->view.pos.v[1];
     if (!fn_801EA03C((const s16*)(c->car + 0x6C), c->view.pos.v)) {
