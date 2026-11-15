@@ -746,9 +746,15 @@ int fn_8001B308(const Vec2* pos, int art, int part) {
 
 void fn_8001B450(int index) { lbl_803583C8[index].Reset(); }
 
-static inline void LerpVec2(Vec2* out, const Vec2* a, const Vec2* b, f32 t) {
-    out->y = a->y + t * (b->y - a->y);
-    out->x = a->x + t * (b->x - a->x);
+static inline f32 NLerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
+// Point and heading on the path, t of the way from node n to the next (name unproven; retail has the same
+// block in aicar fn_80195F6C and LineFollower::Locate).
+static inline void NodeAt(const PathNode* n, f32 t, Vec2* p, Vec2* d) {
+    p->x = NLerpT(t, n->pos.x, n->next->pos.x);
+    p->y = NLerpT(t, n->pos.y, n->next->pos.y);
+    d->x = NLerpT(t, n->dir.x, n->next->dir.x);
+    d->y = NLerpT(t, n->dir.y, n->next->dir.y);
 }
 
 void fn_8001B478(int index, f32 width) {
@@ -796,8 +802,7 @@ void fn_8001B478(int index, f32 width) {
     for (i = 0; i < count; i++, node = node->next) {
         if (i % 4 == 0) {
             f32 t;
-            LerpVec2(&d, &node->dir, &node->next->dir, 0.0f);
-            LerpVec2(&p, &node->pos, &node->next->pos, 0.0f);
+            NodeAt(node, 0.0f, &p, &d);
             {
                 f32 inv = 1.0f / (f32)sqrt(d.x * d.x + d.y * d.y);
                 f32 dx;
