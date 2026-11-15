@@ -87,7 +87,8 @@ struct V3 : ValVec3 {
     }
 };
 
-struct FireDesc {
+struct PartParams {
+    PartParams(void);  // partman.cpp: fills in the defaults
     s32 kind;       // offset 0x0
     s32 max;        // offset 0x4
     f32 size0;      // offset 0x8
@@ -167,10 +168,9 @@ const TorchPart* fn_80288060(FireModel* model, int i);
 FireModel* fn_80288208(s32 i);
 void fn_80288A40(const Vec* p, const Vec* v);
 void fn_80288A58(const Vec* p, const Vec* v);
-void* fn_8028E2F8(FireDesc* desc, const char* name, const char* tex);
+void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
-void fn_8028E61C(FireDesc* desc);
 void fn_802C77F0(s32 model, f32* box);
 const FireMtx* fn_802C86DC(void);
 void fn_802C8BD0(s32 tex);
@@ -535,7 +535,7 @@ int fn_80297D90(s32* out, int n) {
     return 0;
 }
 
-void fn_80297DC8(FireDesc* e) {
+void fn_80297DC8(PartParams* e) {
     e->max = 0xC0;
     e->size0 = 1.0f;
     e->size1 = 0.25f;
@@ -562,8 +562,7 @@ void fn_80297DC8(FireDesc* e) {
 }
 
 void fn_80297E90(void) {
-    FireDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     fn_80297DC8(&e);
     lbl_8055F7E0 = fn_8028E2F8(&e, "torch fire", lbl_8055CA80);
 }
@@ -678,8 +677,7 @@ void fn_802981F8(const Vec* p) {
 
 // Ground fire manager setup; dead-stripped from the game but its name remains.
 void fn_ground_dead(RingFireMan* m) {
-    FireDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     m->emitter = fn_8028E2F8(&e, "ground fire", lbl_8055CA80);
 }
 
@@ -893,8 +891,7 @@ void EngineFireMan::Emit(EngineEntry* e) {
 }
 
 extern "C" void fn_802991BC(EngineFireMan* m) {
-    FireDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0x80;
     e.size0 = 0.4f;
     e.size1 = 0.5f;
@@ -1065,9 +1062,8 @@ void BigRingMan::Spawn(const FireCar* m, f32 radius) {
 }
 
 void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
-    FireDesc e;
+    PartParams e;
     Mat3 rot;
-    fn_8028E61C(&e);
     e.max = 0xA0;
     e.size0 = 1.0f;
     e.size1 = 1.0f;
@@ -1266,8 +1262,7 @@ void GroundFire::Refresh(const FireCar* c) {
 
 BoostFireMan::BoostFireMan(void) {
     Reset();
-    FireDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     memset(&e, 0, sizeof(e));
     e.kind = 1;
     e.max = 500;
@@ -1679,8 +1674,7 @@ void TorchFireMan::Add(const TorchFire* ev) {
 }
 
 void TorchFireMan::InitEmitter(void) {
-    FireDesc e;
-    fn_8028E61C(&e);
+    PartParams e;
     e.max = 0xC0;
     e.size0 = 0.5f;
     e.size1 = 1.0f;

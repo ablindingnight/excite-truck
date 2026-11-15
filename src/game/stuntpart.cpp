@@ -39,7 +39,8 @@ struct SColor {
     f32 b_;
 };
 
-struct StuntDesc {
+struct PartParams {
+    PartParams(void);  // partman.cpp: fills in the defaults
     s32 kind;       // offset 0x0
     s32 max;        // offset 0x4
     f32 size0;      // offset 0x8
@@ -91,11 +92,10 @@ void fn_8028E024(void);
 void fn_8028E070(f32 t);
 void fn_8028E080(void);
 void fn_8028E240(int a);
-void* fn_8028E2F8(StuntDesc* desc, const char* name, const char* tex);
+void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, ValVec3 p, ValVec3 v);
 void fn_8028E590(void* e, ValVec3 p, ValVec3 v, f32 spin);
-void fn_8028E61C(StuntDesc* desc);
 u8 fn_802C2C00(u8 a);
 void fn_802C2B78(f32 a, f32 b, f32 c);
 void fn_802C2BB8(f32* a, f32* b, f32* c);
@@ -185,8 +185,7 @@ struct StuntPart {
 struct StuntEmitters {
     // Helper names unproven: the stack order shows each descriptor sits in its own inline.
     void MakeTrail(void) {
-        StuntDesc r;
-        fn_8028E61C(&r);
+        PartParams r;
         r.max = 0x60;
         r.size0 = 0.5f;
         r.size1 = 1.0f;
@@ -214,8 +213,7 @@ struct StuntEmitters {
         e1 = fn_8028E2F8(&r, "reentry", "entrypuff.tex");
     }
     void MakeSpark(void) {
-        StuntDesc e;
-        fn_8028E61C(&e);
+        PartParams e;
         f32 t2;
         f32 g;
         f32 t;

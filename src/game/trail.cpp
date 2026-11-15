@@ -66,8 +66,9 @@ struct TrailEvent {
     s32 surface;  // offset 0x2C
 };
 
-// Particle system description (filled with defaults by fn_8028E61C).
-struct PartDesc {
+// Particle system description (PartParams in partman.cpp; the constructor fills in the defaults).
+struct PartParams {
+    PartParams(void);  // partman.cpp: fills in the defaults
     s32 flags;   // offset 0x0
     s32 max;     // offset 0x4
     f32 f08;     // offset 0x8
@@ -188,12 +189,11 @@ int fn_80287B14(void);
 TBody* fn_80287B24(int i);
 void fn_80287B38(RacerHook h);
 f32 fn_80287BC8(f32 lo, f32 hi);  // random range
-s32 fn_8028E2F8(PartDesc* d, const char* name, const char* tex);
+s32 fn_8028E2F8(PartParams* d, const char* name, const char* tex);
 void fn_8028E398(s32 sys);
 void fn_8028E584(s32 sys, const TVec* pos, const TVec* vel);
 void fn_8028E58C(s32 sys, const TVec* pos, const TVec* vel, f32 a);
 void fn_8028E590(s32 sys, const TVec* pos, const TVec* vel, f32 a);
-void fn_8028E61C(PartDesc* d);
 ValueNode* fn_802AE414(const char* name);  // track effect table lookup
 int fn_802BF4F0(void);                     // has water
 f32 fn_802BF590(void);                     // water level
@@ -628,8 +628,7 @@ extern "C" {
 void fn_802A1CC4(void) {
     const char* tex = "splash.tex";
     if (DbgFlag(8)) {
-        PartDesc d;
-        fn_8028E61C(&d);
+        PartParams d;
         d.max = 0x80;
         d.f08 = 0.35f;
         d.f0C = 1.0f;
@@ -838,8 +837,7 @@ void DustTrail::Touch(const TrailEvent* e) {
 }
 
 void DustTrail::InitSmall(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.max = 0x200;
     d.f08 = 0.25f;
     d.f0C = 1.0f;
@@ -865,8 +863,7 @@ void DustTrail::InitSmall(const char* tex) {
 }
 
 void DustTrail::InitMedium(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.max = 0x200;
     d.f08 = 1.0f;
     d.f0C = 0.25f;
@@ -892,8 +889,7 @@ void DustTrail::InitMedium(const char* tex) {
 }
 
 void DustTrail::InitEvent(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.max = 0x100;
     d.f08 = 1.0f;
     d.f0C = 1.0f;
@@ -975,8 +971,7 @@ void AsphaltTrail::Emit(const TRacer* r, int wheel) {
 }
 
 void AsphaltTrail::InitSmall(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.max = 0x80;
     d.f08 = 1.0f;
     d.f0C = 0.5f;
@@ -1005,8 +1000,7 @@ void AsphaltTrail::InitSmall(const char* tex) {
 }
 
 void AsphaltTrail::InitLarge(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.max = 0x40;
     d.f08 = 4.0f;
     d.f0C = 0.34f;
@@ -1060,8 +1054,7 @@ void GrassTrail::Emit(const TRacer* r, int wheel) {
 }
 
 void GrassTrail::Init(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.max = 0x12C;
     d.f08 = 0.8f;
     d.f0C = 0.5f;
@@ -1109,8 +1102,7 @@ void SandTrail::Emit(const TRacer* r, int wheel) {
 }
 
 void SandTrail::Init(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.max = 0xC0;
     d.f08 = 1.2f;
     d.f0C = 0.6f;
@@ -1168,8 +1160,7 @@ void WaterTrail::Emit(const TRacer* r, int wheel) {
 }
 
 void WaterTrail::Init(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.flags = 2;
     d.max = 0x100;
     d.f08 = 0.5f;
@@ -1238,8 +1229,7 @@ void MudTrail::Touch(const TrailEvent* e) {
 }
 
 void MudTrail::Init(const char* tex) {
-    PartDesc d;
-    fn_8028E61C(&d);
+    PartParams d;
     d.flags = 2;
     d.max = 0x100;
     d.f08 = 0.5f;

@@ -134,7 +134,6 @@ void* fn_8028E2F8(void* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
 void fn_8028E590(void* e, const Vec* p, const Vec* v, f32 spin);
-void fn_8028E61C(void* desc);
 ValueNode* fn_802AE414(const char* name);
 int fn_802BF4F0(void);
 f32 fn_802BF590(void);
@@ -462,7 +461,8 @@ struct SplashColor {
     f32 b_;
 };
 
-struct EmitterDesc {
+struct PartParams {
+    PartParams(void);  // partman.cpp: fills in the defaults
     s32 kind;         // offset 0x0
     s32 max;          // offset 0x4
     f32 size0;        // offset 0x8
@@ -501,8 +501,7 @@ extern "C" void fn_8029CBA0(void) {
         shading = n->GetFloat("shading", shading);
     }
     if (fn_802BF4F0() || lbl_8055F7F0 > 0 || lbl_8055F7F4 > 0) {
-        EmitterDesc e;
-        fn_8028E61C(&e);
+        PartParams e;
         e.kind = 2;
         e.max = 0x200;
         e.size0 = 0.75f;

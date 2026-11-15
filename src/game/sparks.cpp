@@ -85,7 +85,8 @@ public:
     int Play(f32 t, const ValVec3* pos);
 };
 
-struct SparkDesc {
+struct PartParams {
+    PartParams(void);  // partman.cpp: fills in the defaults
     s32 kind;       // offset 0x0
     s32 max;        // offset 0x4
     f32 size0;      // offset 0x8
@@ -134,10 +135,9 @@ int fn_80287B5C(int n);
 int fn_80287B94(int lo, int hi);
 f32 fn_80287BC8(f32 lo, f32 hi);
 void fn_80288A70(const void* ev, const Vec* v, f32 x);
-void* fn_8028E2F8(SparkDesc* desc, const char* name, const char* tex);
+void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const void* p, const void* v);
-void fn_8028E61C(SparkDesc* desc);
 Chunks* fn_802929D8(int type, const char* base, int inst, const char* remap);
 SparkNode* fn_802AE414(const char* name);
 void fn_802C8BD0(s32 tex);
@@ -571,8 +571,7 @@ static inline int PaintOn(void) {
 void fn_8028B3CC(void) {
     const char* tex = "splash.tex";
     if (PaintOn()) {
-        SparkDesc e;
-        fn_8028E61C(&e);
+        PartParams e;
         e.max = 0x80;
         e.size0 = 0.5f;
         e.size1 = 1.0f;
