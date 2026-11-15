@@ -816,27 +816,27 @@ void fn_80009534(void) {
                 if (fn_801E8838()) {
                     key = 0;
                 }
-                key = fn_80008DBC((u16)key);
-                if (key && !fn_80008F68(key)) {
+                int cmd = fn_80008DBC((u16)key);
+                if (cmd && !fn_80008F68(cmd)) {
                     TouchPrompts();
                     if (!PromptsVisible()) {
-                        key = 0;
+                        cmd = 0;
                     }
                 }
-                if (locked && (u32)(key - 2) <= 3) {
-                    key = 0;
+                if (locked && (u32)(cmd - 2) <= 3) {
+                    cmd = 0;
                 }
-                if (key == 0x12) {
-                    key = 0x10;
+                if (cmd == 0x12) {
+                    cmd = 0x10;
                     if (!lbl_8055D370) {
-                        key = 0x11;
+                        cmd = 0x11;
                     }
                 }
-                if (!fn_800085D8(key)) {
-                    key = 0;
+                if (!fn_800085D8(cmd)) {
+                    cmd = 0;
                 }
-                handled = key != 0;
-                switch (key) {
+                handled = cmd != 0;
+                switch (cmd) {
                 case 0:
                     break;
                 case 2:
@@ -916,7 +916,7 @@ void fn_80009534(void) {
                 case 0x1B:
                     break;
                 default:
-                    fn_802E317C("control-stream replay - action %d undefined!", key);
+                    fn_802E317C("control-stream replay - action %d undefined!", cmd);
                     break;
                 }
                 if (handled) {
