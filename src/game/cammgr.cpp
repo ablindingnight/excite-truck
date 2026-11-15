@@ -752,6 +752,8 @@ extern const f32 lbl_80563C64;
 static inline void ResetSavedPose(u8* c, const CamPose& pose) { fn_80276BE4(c + 0x1A4, c + 0x1D4); }
 
 // Resets the four players' camera records, the shake table, the split-screen rects and the shake levels.
+#pragma push
+#pragma opt_lifetimes off
 void fn_80267680(void) {
     fn_802733C8();
     u8* c = (u8*)lbl_80499080;
@@ -780,19 +782,19 @@ void fn_80267680(void) {
         S32(c, 0x14C) = -1;
         S32(c, 0x150) = -1;
         if (!fn_801796B4()) {
-            volatile f32 id[12];  // identity pose (unused; volatile keeps its stack layout)
-            id[0] = lbl_80563C2C;
-            id[1] = lbl_80563C20;
-            id[2] = lbl_80563C20;
-            id[3] = lbl_80563C20;
-            id[4] = lbl_80563C2C;
-            id[5] = lbl_80563C20;
-            id[6] = lbl_80563C20;
-            id[7] = lbl_80563C20;
-            id[8] = lbl_80563C2C;
-            id[9] = lbl_80563C20;
-            id[10] = lbl_80563C20;
-            id[11] = lbl_80563C20;
+            CamPose id;
+            id.rot.m[0] = lbl_80563C2C;
+            id.rot.m[1] = lbl_80563C20;
+            id.rot.m[2] = lbl_80563C20;
+            id.rot.m[3] = lbl_80563C20;
+            id.rot.m[4] = lbl_80563C2C;
+            id.rot.m[5] = lbl_80563C20;
+            id.rot.m[6] = lbl_80563C20;
+            id.rot.m[7] = lbl_80563C20;
+            id.rot.m[8] = lbl_80563C2C;
+            id.pos.v[0] = lbl_80563C20;
+            id.pos.v[1] = lbl_80563C20;
+            id.pos.v[2] = lbl_80563C20;
             fn_80276BE4(c + 0x1A4, c + 0x1D4);
         }
         fn_801E9DC4(c + 0x1EC);
@@ -823,6 +825,7 @@ void fn_80267680(void) {
         *q++ = lbl_80563C20;
     }
 }
+#pragma pop
 
 void fn_8026785C(void) {
     EventUnInstallHandler((void*)fn_8026A554);

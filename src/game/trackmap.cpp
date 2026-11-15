@@ -156,7 +156,7 @@ void* memset(void* p, int c, size_t n);
 int fn_8023512C(const char* name);
 void fn_80235380(int art);
 f32 fn_80235EF0(int art, int part);
-void fn_802354A0(int art, int part, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_80235AFC(int art, int part, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h, f32 angle);
 void fn_802A1120(Vec2* pos, Vec2* dir);
 int fn_8012C33C(const char* name);
@@ -695,8 +695,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
                     rel.z *= w * 0.5f;
                 }
                 size = fn_80235EF0(lbl_803583C8[j].art, lbl_803583C8[j].part);
-                fn_802354A0(lbl_803583C8[j].art, lbl_803583C8[j].part, -1, c.x + rel.x - size / 2.0f, size * 0.5f + (c.y + rel.y), 0.0f,
-                            size, size);
+                fn_802354A0(lbl_803583C8[j].art, lbl_803583C8[j].part, c.x + rel.x - size / 2.0f, size * 0.5f + (c.y + rel.y), 0.0f, size, size, -1);
             }
         }
     }

@@ -226,7 +226,7 @@ ResultRacer* fn_801EA9B0(int index);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_80011DEC(int player);
 f32 fn_80011DC0(int player);
-void fn_802354A0(int art, int frame, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_802354A0(int art, int frame, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_802C8BD0(s32 tex);
 void fn_801E4F20(int n);
 void fn_801E4F3C(u32 color, int back, f32 x, f32 y, f32 z, f32 u, f32 v);
@@ -913,7 +913,7 @@ void RacingOverlay::DrawScore(void) {
     int score1 = fn_80144F34(lbl_8055D350->view, 1, &b);
     f32 x = fn_80011DEC(lbl_8055D350->player) - 60.0f;
     f32 y = fn_80011DC0(lbl_8055D350->player) - 314.0f;
-    fn_802354A0(uiArt, 3, -1, x, y, 0.0f, 60.0f, 45.0f);
+    fn_802354A0(uiArt, 3, x, y, 0.0f, 60.0f, 45.0f, -1);
     fn_8000FF88(-0x100, 10, "%d", 0.94f, x - 10.0f, y, score0);
     fn_8000FF88(-0x100, 10, "%d", 0.94f, x - 10.0f, y - 22.5f, score1);
 }

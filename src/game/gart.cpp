@@ -370,7 +370,7 @@ void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 
     }
 }
 
-void fn_80235AFC(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, f32 angle, u32 color) {
+void fn_80235AFC(gArtSet* s, int idx, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h, f32 angle) {
     UIXform m;
     UIXform* mp = &m;
     mp->translation.v[0] = x;
