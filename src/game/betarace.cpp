@@ -3749,26 +3749,29 @@ inline int BetaMaster::vf8C(int p, int key) {
     return 0;
 }
 
+/* Helper name unproven: the vertical marker drawn at a puddle read from the track file. */
+static inline void DrawPuddleMarker(const Puddle* p, u32 col) {
+    V3 a = *(V3*)&p->x;
+    V3 b = *(V3*)&p->x;
+    a.y = a.y - 0.75f;
+    b.y += 0.75f;
+    fn_801E41D8(&a, &b, col, p->r);
+}
 inline void BetaMaster::vf48(void) {
-    int i;
     u32 col;
+    int i;
     BetaCar* c = &cars[fn_801E866C(fn_801E85B4())];
+    // Retail keeps the car and mode tests: the colour is assigned again for mode 1 (the same global today).
+    col = lbl_8055E230.value;
     if (c && c->mode != 0) {
         if (c->mode == 1) {
+            col = lbl_8055E230.value;
         }
-    }
-    col = lbl_8055E230.value;
-    if (puddles.a.count <= 0) {
-        return;
     }
     for (i = 0; i < puddles.a.count; i++) {
         Puddle* p = puddles.a.data[i];
         if (p->b10) {
-            V3 a = *(V3*)&p->x;
-            V3 b = *(V3*)&p->x;
-            a.y = a.y - 0.75f;
-            b.y += 0.75f;
-            fn_801E41D8(&a, &b, col, p->r);
+            DrawPuddleMarker(p, col);
         }
     }
 }
