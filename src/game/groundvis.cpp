@@ -466,12 +466,12 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
         return;
     }
     // Corner offsets of each side, in half-node steps: start, middle and end.
-    s16 endY[4] = {1, -1, -1, 1};
-    s16 endX[4] = {-1, -1, 1, 1};
-    s16 midY[4] = {1, 0, -1, 0};
-    s16 midX[4] = {0, -1, 0, 1};
-    s16 startY[4] = {1, 1, -1, -1};
     s16 startX[4] = {1, -1, -1, 1};
+    s16 startY[4] = {1, 1, -1, -1};
+    s16 midX[4] = {0, -1, 0, 1};
+    s16 midY[4] = {1, 0, -1, 0};
+    s16 endX[4] = {-1, -1, 1, 1};
+    s16 endY[4] = {1, -1, -1, 1};
     s16 step = fn_802B0130(n);
     if (fn_802B0130(n) >= 4) {
         fn_802BDFBC(cell, fn_802B0130(n), n->scale);
