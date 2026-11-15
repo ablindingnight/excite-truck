@@ -918,6 +918,8 @@ void fn_80233010(const char* text, GTextFont* f, u32 color, int align, int ingam
     }
 }
 
+#pragma push
+#pragma opt_dead_assignments off
 void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z) {
     u32 c = color;
     fn_80231714(&c);
@@ -927,11 +929,13 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
         f32 lh = f->height * scale;
         const char* next;
         DecodeUTF8(text, &next);
+        f32 w;
         if (align & 1) {
+            w = 0.0f;
         } else if (align & 2) {
-            fn_8023293C(f, text, 1.0f);
+            w = fn_8023293C(f, text, 1.0f);
         } else if (align & 4) {
-            fn_8023293C(f, text, 1.0f);
+            w = fn_8023293C(f, text, 1.0f);
         }
         if (align & 8) {
             x += f->height * scale;
@@ -940,9 +944,10 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
         } else if (align & 0x10) {
             x += Mul(f->height * scale, 0.5f);
         }
+        int i;
         for (int passes = (f->outline != NULL) + 1; passes > 0; passes--) {
             y = y0;
-            int i = 0;
+            i = 0;
             GTextFont* ff = f;
             u32 cc = c;
             if (passes == 2) {
@@ -964,6 +969,7 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
         }
     }
 }
+#pragma pop
 
 
 
