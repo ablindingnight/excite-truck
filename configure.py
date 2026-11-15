@@ -1281,7 +1281,7 @@ config.libs.append(
             Object(NonMatching, "game/water.cpp"),
             Object(Matching, "game/sky.cpp"),
             Object(Matching, "game/boats.cpp"),
-            Object(NonMatching, "game/swlmap.cpp"),
+            Object(Matching, "game/swlmap.cpp"),
             Object(Matching, "game/preload.cpp"),
             Object(Matching, "game/vidsetup.cpp"),
             Object(NonMatching, "game/gxcanvas.cpp"),

@@ -24,14 +24,15 @@ void gxForgetTexture(s32 tex);
 extern const f32 lbl_80564EB0;
 
 ModuleTag lbl_8055FB60;
-UnkStaticFFFF lbl_8055FB68;
+static inline u32 DefaultMapFlags(void) { return 0xFFFF0000u; }
+const u32 lbl_8055FB68 = DefaultMapFlags();
 s32 lbl_8055FB6C;  // render target
 s32 lbl_8055FB70;  // loaded texture
-// The target computes this at run time; a const defined after it keeps MWCC from folding it.
-// The target sinit also schedules its epilogue into the stores (see the handoff), so NonMatching.
-f32 lbl_8055FB74 = 1024.0f * lbl_80564EB0;
+// The scale is defined below so MWCC computes this during startup.
+const f32 lbl_8055FB74 = 1024.0f * lbl_80564EB0;
 
 const f32 lbl_80564EB0 = 2.0f;
+static const f32 MapTexelSize[] = { 1.0f / 512.0f };
 
 extern "C" {
 
@@ -53,7 +54,7 @@ void fn_802C276C(void) {
         fn_802CB274(lbl_8055FB6C);
         fn_802C9294(lbl_8055FB6C, 0);
         cam.origin.x = 0.0f;
-        cam.origin.y = 512.0f * (lbl_8055FB74 / 512.0f) / 2;
+        cam.origin.y = 512.0f * (lbl_8055FB74 * MapTexelSize[0]) / 2;
         cam.origin.z = 0.0f;
         cam.basis[0].x = 1.0f;
         cam.basis[0].y = 0.0f;
