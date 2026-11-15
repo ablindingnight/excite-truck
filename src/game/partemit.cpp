@@ -116,6 +116,9 @@ struct TArray {
         n = 0;
         cap = 0;
     }
+    T& operator[](int i) { return data[i]; }  /* Helper name unproven */
+    T* Add(void) { return &data[n++]; }  /* Helper name unproven */
+
     T* data;  // offset 0x0
     s32 n;    // offset 0x4
     s32 cap;  // offset 0x8
@@ -312,12 +315,10 @@ void fn_8029F458(const char* name, Obj* obj) {
     }
     StrCopy(buf, 32, name);
     s32 fx = fn_8029F3BC(buf);
-    int off;  // MATCHING-AID: byte offset walker, needed for the loop registers
-    int i;
-    for (i = 0, off = 0; i < lbl_804B9B7C.n; off += sizeof(EmitterInst), i++) {
-        s32 f = ((EmitterInst*)((u8*)lbl_804B9B7C.data + off))->fx;
-        if (f == fx) {
-            ((EmitterInst*)((u8*)lbl_804B9B7C.data + off))->obj = obj;
+    for (int i = 0; i < lbl_804B9B7C.n; i++) {
+        EmitterInst& e = lbl_804B9B7C[i];
+        if (e.fx == fx) {
+            e.obj = obj;
         }
     }
 }
@@ -405,19 +406,12 @@ void fn_8029F658(ValueNode* node) {
 
 // Reads one placed "emitter".
 void fn_8029FB00(ValueNode* node) {
-    EmitterInst* in;
-    NameEntry* a;
-    NameEntry* b;  // MATCHING-AID: second walker over the same table, needed for the loop registers
     s32 fx = lbl_8055F818;
-    a = lbl_804B7770;
-    in = &lbl_804B9B7C.data[lbl_804B9B7C.n++];
-    b = a;
+    EmitterInst* in = lbl_804B9B7C.Add();
     for (int i = 0; i < lbl_8055F818; i++) {
-        if (strcmp(a->name, node->GetValue("name")) == 0) {
-            fx = b->id;
+        if (strcmp(lbl_804B7770[i].name, node->GetValue("name")) == 0) {
+            fx = lbl_804B7770[i].id;
         }
-        a++;
-        b++;
     }
     in->fx = fx;
     in->alwaysOn = node->GetBool("always_on", 0);

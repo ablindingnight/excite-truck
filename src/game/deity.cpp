@@ -1112,7 +1112,7 @@ void fn_801B24B8(void) {
         return;
     }
     Crossing* p = lbl_80435BE8.e;
-    CrossQueue* q = (CrossQueue*)p;  // MATCHING-AID: same address through the walker, needed for the load order
+    CrossQueue* q = &lbl_80435BE8;
     for (int i = 0; i < q->n; p++, i++) {
         int rank = lbl_8055E688 - i + 9;
         if (!lbl_8055E684[p->car].locked) {

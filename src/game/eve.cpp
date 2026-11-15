@@ -594,11 +594,11 @@ void FixupMyoEves(void) {
             t->track.num_contests = 0;
         }
     }
-    int wo = 0;  // MATCHING-AID: byte offset walker, needed for the loop registers
-    for (i = 0; i < lbl_8055D508; wo += sizeof(lbl_80352AD0[0]), i++) {
+    for (i = 0; i < lbl_8055D508; i++) {
+        Event* e = &lbl_80352AD0[i];
         for (j = 0; j < lbl_8055D518; j++) {
-            if (((Event*)((u8*)lbl_80352AD0 + wo))->track == lbl_803551E0[j].track.index) {
-                ((Event*)((u8*)lbl_80352AD0 + wo))->enabled = 0;
+            if (e->track == lbl_803551E0[j].track.index) {
+                e->enabled = 0;
             }
         }
     }

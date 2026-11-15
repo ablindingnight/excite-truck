@@ -286,9 +286,13 @@ ActionPrompt lbl_802FB8F0[7] = {
     {0x11, "\\1", NULL},
 };
 void fn_80008684(int camera) {
-    s32 action;
-    ActionPrompt* prompt;
-    int wk;
+    // The prompt being listed and its action.
+    struct PromptIter {  /* Helper name unproven */
+        s32 action;
+        ActionPrompt* prompt;
+        PromptIter() : action(0), prompt(0) {}
+    } it;
+
     int dt;
     DrawOffset off;
     f32 t;
@@ -337,16 +341,15 @@ void fn_80008684(int camera) {
         } s_init;
         fn_8014819C(&off, x, y);
         n = 0;
-        for (i = 0, prompt = lbl_802FB8F0; i < 7; i++, prompt++) {
-            action = prompt->action;
-            // MATCHING-AID: named offset walker; the compiler walker ranks above action.
-            for (j = 0, wk = 0; j < lbl_8034F3D0.list.count; wk += 4, j++) {
-                if (action == *(s32*)((u8*)lbl_8034F3D0.list.data + wk)) {
+        for (i = 0, it.prompt = lbl_802FB8F0; i < 7; i++, it.prompt++) {
+            it.action = it.prompt->action;
+            for (j = 0; j < lbl_8034F3D0.list.count; j++) {
+                if (it.action == lbl_8034F3D0.list.data[j]) {
                     fn_801345D8(name, sizeof(name), "prompt%d", n);
                     fn_801345D8(label, sizeof(label), "label%d", n);
                     if (lbl_8055D374) {
-                        fn_801473F8(lbl_8055D374, name, "%s", prompt->glyph);
-                        fn_801473F8(lbl_8055D374, label, "%s", prompt->label);
+                        fn_801473F8(lbl_8055D374, name, "%s", it.prompt->glyph);
+                        fn_801473F8(lbl_8055D374, label, "%s", it.prompt->label);
                     }
                     n++;
                 }

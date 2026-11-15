@@ -1026,12 +1026,14 @@ void fn_80241820(ColorPick* c) {
         f32 e = Ease(t);
         f32 cur = c->pos + e * (c->target - c->pos);
         f32 start = x + w * lbl_80563784 - cell * lbl_80563784 - cell * cur;
-        u32 frame;
-        u32 tint;
-        // MATCHING-AID: named offset walker; the compiler walker ranks below frame.
-        int wk;
+        // The swatch colour and its frame.
+        struct Swatch {  /* Helper name unproven */
+            u32 tint;
+            u32 frame;
+            Swatch() : tint(0), frame(0) {}
+        } sw;
         int i;
-        for (i = 0, wk = 0; i < c->vehicle->num_colors; wk += 4, i++) {
+        for (i = 0; i < c->vehicle->num_colors; i++) {
             f32 sx = start + (f32)i * cell;
             if (sx + cell > x && sx < x + w) {
                 f32 d = sx + cell * lbl_80563784 - x;
@@ -1040,21 +1042,21 @@ void fn_80241820(ColorPick* c) {
                 }
                 f32 a = Clamp01((d - lbl_80563758) / (w * lbl_80563784 - lbl_80563758));
                 u8 alpha = (s32)(lbl_80563790 * (lbl_80563788 + a * lbl_8056378C));
-                tint = (*(u32*)((u8*)c->vehicle->colors + wk) & 0xFFFFFF) | (alpha << 24);
-                frame = (alpha << 24) | 0xFFFFFF;
+                sw.tint = (c->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
+                sw.frame = (alpha << 24) | 0xFFFFFF;
                 if (sx > x && sx + cell < x + w) {
-                    fn_802354A0(c->art, 3, sx, y, lbl_80563758, cell, h, tint);
-                    fn_802354A0(c->art, 6, sx, y, lbl_80563758, cell, h, frame);
+                    fn_802354A0(c->art, 3, sx, y, lbl_80563758, cell, h, sw.tint);
+                    fn_802354A0(c->art, 6, sx, y, lbl_80563758, cell, h, sw.frame);
                 } else if (sx > x) {
                     f32 vis = cell - (sx + cell - (x + w));
                     f32 u = vis / cell;
-                    fn_80235758(c->art, 3, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, tint);
-                    fn_80235758(c->art, 6, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, frame);
+                    fn_80235758(c->art, 3, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, sw.tint);
+                    fn_80235758(c->art, 6, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, sw.frame);
                 } else {
                     f32 vis = cell - (x - sx);
                     f32 u = (cell - vis) / cell;
-                    fn_80235758(c->art, 3, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, tint);
-                    fn_80235758(c->art, 6, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, frame);
+                    fn_80235758(c->art, 3, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, sw.tint);
+                    fn_80235758(c->art, 6, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, sw.frame);
                 }
             }
         }
