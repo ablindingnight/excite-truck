@@ -124,6 +124,14 @@ struct FixedArr : ArrayRef<T> {
     T storage[N];
 };
 
+// Explicit specialisations, defined further down (MWCC emits their bodies at the definition point).
+template <>
+inline FixedArr<BoostArea, 100>::FixedArr(void);
+template <>
+inline int ArrayRef<BoostArea>::Count(void);
+template <>
+inline BoostArea* ArrayRef<BoostArea>::At(int i);
+
 struct PlayerBoost {
     void Reset(void);
     void Clear(void) {
