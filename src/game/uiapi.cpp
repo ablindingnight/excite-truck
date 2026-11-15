@@ -630,12 +630,7 @@ extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, 
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
 extern "C" WidgetFragment* fn_8021AF0C(WidgetFragment*, int, int, void*, int, int, void*, float, float);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
-extern "C" WidgetFragment* fn_8021BD98(WidgetFragment* self, int x, int y, void* value, float scale, const char* format, float bias, int height);
-extern "C" WidgetFragment* fn_8021CEEC(WidgetFragment*, int, int, void*, float, const char*, float, int);
-extern "C" WidgetFragment* fn_8021BEC0(WidgetFragment*, int, int, void*, int, int, int, int);
 extern "C" WidgetFragment* fn_8021C97C(WidgetFragment*, int, int, void*, int, void*);
-extern "C" WidgetFragment* fn_8021C344(WidgetFragment*, int, int, void*, int, int, int, int, const char*, int);
-extern "C" WidgetFragment* fn_8021D7C8(WidgetFragment*, int, int, int, int, int, void*);
 extern "C" WidgetFragment* fn_8021A808(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
 extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
@@ -1033,15 +1028,13 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 6: {
         value = FindStyle(styles, d->style, 9);
-        p = (WidgetFragment*)operator new(0x2b4, "Numeric");
-        if (p) p = fn_8021BD98(p, d->x, d->y, value ? value->value : &lbl_8055EF50, 100.0f, d->name, 0.0f, d->flags);
+        p = (WidgetFragment*)new ("Numeric") Numeric(d->x, d->y, (float*)(value ? value->value : &lbl_8055EF50), 100.0f, d->name, 0.0f, d->flags);
         widgets[count++] = p;
         break;
     }
     case 7: {
         value = FindStyle(styles, d->style, 2);
-        p = (WidgetFragment*)operator new(0x2b4, "IntNumeric");
-        if (p) p = fn_8021CEEC(p, d->x, d->y, value ? value->value : &lbl_8055EF4C, 1.0f, d->name, 0.0f, d->flags);
+        p = (WidgetFragment*)new ("IntNumeric") IntNumeric(d->x, d->y, (int*)(value ? value->value : &lbl_8055EF4C), 1.0f, d->name, 0.0f, d->flags);
         widgets[count++] = p;
         break;
     }
@@ -1053,14 +1046,12 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         case 0:
         default:
             fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
-            p = (WidgetFragment*)operator new(0x2bc, "SpinCtl");
-            if (p) p = fn_8021BEC0(p, x, d->y, target, 15, left, right, line);
+            p = (WidgetFragment*)new ("SpinCtl") SpinCtl(x, d->y, (FullFormatDispatch*)target, 15, left, right, line);
             widgets[count++] = p;
             break;
         case 1:
             fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
-            p = (WidgetFragment*)operator new(0x2bc, "SpinCtl");
-            if (p) p = fn_8021BEC0(p, x, d->y, target, 20, left, right, line);
+            p = (WidgetFragment*)new ("SpinCtl") SpinCtl(x, d->y, (FullFormatDispatch*)target, 20, left, right, line);
             widgets[count++] = p;
             break;
         case 4:
@@ -1075,8 +1066,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             break;
         case 5:
             fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
-            p = (WidgetFragment*)operator new(0x2d4, "SpinText");
-            if (p) p = fn_8021C344(p, x, d->y, target, 15, left, right, line, d->name, d->field9c);
+            p = (WidgetFragment*)new ("SpinText") SpinText(x, d->y, (FullFormatDispatch*)target, 15, left, right, line, d->name, d->field9c);
             widgets[count++] = p;
             break;
         }
@@ -1086,9 +1076,8 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* list = FindStyle(styles, d->style, 0x10);
         s32 left, x, right, line;
         fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
-        p = (WidgetFragment*)operator new(0x26c, "MutableMulti");
-        if (p) p = fn_8021D7C8(p, d->x, d->y, d->dx, d->dy, d->flags,
-                               list ? list->arg1 : (void*)&sDefaultMulti);
+        p = (WidgetFragment*)new ("MutableMulti") MutableMulti(d->x, d->y, d->dx, d->dy, d->flags,
+                               (ChoiceProviderDispatch*)(list ? list->arg1 : (void*)&sDefaultMulti));
         widgets[count++] = p;
         break;
     }

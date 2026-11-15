@@ -178,6 +178,52 @@ public:
     unsigned char fields244[0x20];  // 0x244, read through widgets.cpp views
 };
 
+class Numeric : public UILabel {  /* Class name unproven (allocation tag "Numeric"); vtable lbl_8033EF68 */
+public:
+    Numeric(int x, int y, float* value, float scale, const char* format, float bias, int height);  // fn_8021BD98 (implicit dtor fn_8022927C)
+    virtual void Slot74(int key, void* data);              // fn_8021BEBC
+    virtual const char* Slot88(void) { return text; }      // inline: fn_80229C9C
+    float scale, bias;           // 0x254
+    float* value;                // 0x25C
+    const char* format;          // 0x260
+    char text[0x50];             // 0x264
+};
+
+struct FullFormatDispatch;
+class SpinCtl : public UILabel {  /* Class name unproven (allocation tag "SpinCtl"); vtable lbl_8033EEDC */
+public:
+    SpinCtl(int x, int y, FullFormatDispatch* target, int height, int left, int right, int lineY);  // fn_8021BEC0 (implicit dtor fn_80229220)
+    virtual void Slot14(void);                             // fn_8021BF90
+    virtual void Slot28(void);                             // fn_8021BFEC
+    virtual int Slot64(int key);                           // fn_8021C18C
+    virtual void Slot74(int key, void* data);              // fn_8021C128
+    virtual int Slot84(void);                              // fn_8021C318
+    virtual const char* Slot88(void) { return text; }      // inline: fn_80229CA4
+    char text[80];               // 0x254
+    FullFormatDispatch* target;  // 0x2A4
+    int* focus;                  // 0x2A8
+    int token, left, right, lineY;  // 0x2AC
+};
+
+class SpinText : public UILabel {  /* Class name unproven (allocation tag "SpinText"); vtable lbl_8033EE50 */
+public:
+    SpinText(int x, int y, FullFormatDispatch* target, int height, int left, int right, int lineY, const char* label, int alignment);  // fn_8021C344 (implicit dtor fn_802291C4)
+    virtual void Slot14(void);                             // fn_8021C478
+    virtual void Slot28(void);                             // fn_8021C4D4
+    virtual int Slot64(int key);                           // fn_8021C730
+    virtual void Slot74(int key, void* data);              // fn_8021C6CC
+    virtual int Slot84(void);                              // fn_8021C974
+    virtual const char* Slot88(void) { return text; }      // inline: fn_80229CAC
+    char text[80];               // 0x254
+    FullFormatDispatch* target;  // 0x2A4
+    int* focus;                  // 0x2A8
+    int token, left, right, lineY;  // 0x2AC
+    int labelLeft, labelRight, font;  // 0x2BC
+    const char* label;           // 0x2C8
+    int side;                    // 0x2CC
+    bool showArrows;             // 0x2D0
+};
+
 class SpinSldr : public UIWidget {  /* Class name unproven (allocation tag "SpinSldr"); vtable lbl_8033ED44 */
 public:
     SpinSldr(int x, int y, int dx, int dy, ObservedValueProvider* provider);  // fn_8021CA0C
@@ -188,6 +234,34 @@ public:
     virtual void Slot40(int a, int b);  // fn_8021CEAC
     virtual void Slot4C(int x, int y);  // fn_8021CE8C
     unsigned char fields244[0x18];  // 0x244, read through widgets.cpp views
+};
+
+class IntNumeric : public UILabel {  /* Class name unproven (allocation tag "IntNumeric"); vtable lbl_8033ECB8 */
+public:
+    IntNumeric(int x, int y, int* value, float scale, const char* format, float bias, int height);  // fn_8021CEEC (implicit dtor fn_8022910C)
+    virtual void Slot74(int key, void* data);              // fn_8021D040
+    virtual const char* Slot88(void) { return text; }      // inline: fn_80229D5C
+    float scale, bias;           // 0x254
+    int* value;                  // 0x25C
+    const char* format;          // 0x260
+    char text[0x50];             // 0x264
+};
+
+struct ChoiceProviderDispatch;
+class MutableMulti : public UILabel {  /* Class name unproven (allocation tag "MutableMulti"); vtable lbl_8033EC2C */
+public:
+    MutableMulti(int x, int y, int dx, int dy, int height, ChoiceProviderDispatch* provider);  // fn_8021D7C8
+    virtual ~MutableMulti(void) {}                         // inline: TU-end copy fn_80229D64
+    virtual void Slot14(void);                             // fn_8021D878
+    virtual void Slot28(void);                             // fn_8021DB58
+    virtual int Slot64(int key);                           // fn_8021D97C
+    virtual int Slot84(void);                              // fn_8021D8D4
+    virtual const char* Slot88(void);                      // fn_8021D864
+    ChoiceProviderDispatch* provider;  // 0x254
+    int* focus;                  // 0x258
+    int token;                   // 0x25C
+    float previousTime, nextTime;  // 0x260
+    int fontResource;            // 0x268
 };
 
 extern "C" void fn_802C519C(void*);

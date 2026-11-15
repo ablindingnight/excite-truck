@@ -314,12 +314,10 @@ extern "C" {
 struct NumericCaptionPrefix {char base[0x254];float scale,bias;int* value;const char* format;char text[1];};
 typedef char NumericCaptionPrefixSize[(sizeof(NumericCaptionPrefix)==0x268)?1:-1];
 extern "C" {
-extern u32 lbl_8033ECB8[];
+
 int sprintf(char*,const char*,...);void fn_80130568(char*);
 void fn_8021CF9C(WidgetFragment*);
-WidgetFragment* fn_8021CEEC(WidgetFragment* self,int x,int y,int* value,float scale,const char* format,float bias,int height);
 void fn_8021CF9C(WidgetFragment* self);
-void fn_8021D040(WidgetFragment* self,int,void*);
 }
 
 
@@ -382,12 +380,7 @@ struct ProviderChoicePrefix {
  int fontResource; // 0x268: passed to font measurement/text APIs, not a pixel height
 };
 extern "C" {
-extern u32 lbl_8033EC2C[];float fn_8023659C();void fn_80216D28();void fn_80230E90(int);
-WidgetFragment* fn_8021D7C8(WidgetFragment* self,int x,int y,int dx,int dy,int height,ChoiceProviderDispatch* provider);
-const char* fn_8021D864(WidgetFragment* self);
-void fn_8021D878(WidgetFragment* self);
-int fn_8021D8D4(WidgetFragment* self);
-int fn_8021D97C(WidgetFragment* self,int key);
+float fn_8023659C();void fn_80216D28();void fn_80230E90(int);
 }
 
 
@@ -460,11 +453,7 @@ WidgetFragment* fn_80228FA4(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80228FFC(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229054(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802290B0(WidgetFragment* self,int destroy);
-WidgetFragment* fn_8022910C(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229168(WidgetFragment* self,int destroy);
-WidgetFragment* fn_802291C4(WidgetFragment* self,int destroy);
-WidgetFragment* fn_80229220(WidgetFragment* self,int destroy);
-WidgetFragment* fn_8022927C(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802292D8(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229330(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229388(WidgetFragment* self,int destroy);
@@ -637,7 +626,6 @@ void fn_802354A0(void*,int,float,float,float,float,float,u32);
 }
 static inline float ObservedAbsDecision(float value){return (float)__fabs(value);}
 extern "C" {
-void fn_8021DB58(WidgetFragment* self);
 }
 
 struct EditorDispatch {virtual ~EditorDispatch();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual void Slot1c(int,int);virtual void Slot20();virtual void Slot24();virtual void Slot28();virtual void Slot2c();virtual void Slot30();virtual void Slot34();virtual void Slot38();virtual void Slot3c();virtual void Slot40();virtual void Slot44();virtual void Slot48();virtual void Slot4c();virtual void Slot50();virtual void Slot54();virtual void Slot58();virtual void Slot5c();virtual void Slot60();virtual void Slot64(int);virtual void Slot68();virtual void Slot6c();virtual void Slot70();virtual void Slot74(int,void*);virtual int Slot78();virtual void Slot7c();virtual void Slot80();virtual int Slot84();virtual const char* Slot88();};
@@ -682,15 +670,11 @@ int fn_80229ADC(WidgetFragment*);
 int fn_80229AE4(WidgetFragment* self,int x,int y);
 int fn_80229B68(WidgetFragment*);
 void* fn_80229B70(WidgetFragment* self);
-void* fn_80229C9C(WidgetFragment* self);
-void* fn_80229CA4(WidgetFragment* self);
-void* fn_80229CAC(WidgetFragment* self);
 void fn_80229CB4(WidgetFragment* self,int,int);
 void fn_80229CD8(WidgetFragment* self,int,int);
 void fn_80229CF8(WidgetFragment* self);
 void fn_80229D1C(WidgetFragment* self);
 int fn_80229D3C(WidgetFragment* self,int x,int y);
-void* fn_80229D5C(WidgetFragment* self);
 void* fn_80229DC0(WidgetFragment* self);
 void fn_80229ED4(WidgetFragment* self);
 void fn_80229EF4(WidgetFragment* self);
@@ -733,12 +717,8 @@ extern "C" {
 void fn_801A7E54(char*,int,Binding*);void fn_802C40B8(gxCanvas*,int,int);void fn_802ECFEC(void*);void fn_802ED038(void*,float,float,float,float);
 void fn_802237DC(WidgetFragment*);
 int fn_8021AB88(WidgetFragment*);
-int fn_8021C974(WidgetFragment*);
 void fn_8021B3BC(WidgetFragment* self,void* context);
 void fn_8021BD48(WidgetFragment* self,void* context);
-void fn_8021BF90(WidgetFragment* self);
-void fn_8021C478(WidgetFragment* self);
-int fn_8021C318(WidgetFragment* self);
 void fn_8021F42C(WidgetFragment* self,int,void*);
 void fn_802208EC(WidgetFragment* self);
 void fn_80220AFC(WidgetFragment* self,int x,int y);
@@ -761,7 +741,6 @@ void fn_80226768(WidgetFragment* self,int,int);
 int fn_802268A0(WidgetFragment* self,int key);
 int fn_802299B0(WidgetFragment* self);
 void fn_80229B0C(WidgetFragment* self,int dx,int dy);
-WidgetFragment* fn_80229D64(WidgetFragment* self,int destroy);
 }
 
 
@@ -774,11 +753,8 @@ extern "C" {
 extern u32 lbl_8033EDC8[];
 int sprintf(char*,const char*,...);void fn_8021818C(void*);
 void fn_8021BE48(WidgetFragment* self);
-void fn_8021BEBC(WidgetFragment* self,int,void*);
 void fn_8021C12C(WidgetFragment* self);
-void fn_8021C128(WidgetFragment* self,int,void*);
 void fn_8021C6D0(WidgetFragment* self);
-void fn_8021C6CC(WidgetFragment* self,int,void*);
 WidgetFragment* fn_8021C97C(WidgetFragment* self,int x,int y,void* handle,int direction,FormatTarget* target);
 int fn_8021C9D8(WidgetFragment* self);
 u32 fn_802236C8(WidgetFragment* self,int index);
@@ -834,13 +810,12 @@ struct MenuRecord {char base[0x20];void* context;int(*callback)(void*);};
 struct MenuRowPrefix {void* handle;char rest[32];};
 struct MenuSelectionPrefix {char base[0x244];MenuRowPrefix* rows;unsigned char active;char pad249[3];int row,column;};
 extern "C" {
-extern u32 lbl_8033E668[],lbl_8033E560[],lbl_8033EFF4[],lbl_8033EF68[];
+extern u32 lbl_8033E668[],lbl_8033E560[],lbl_8033EFF4[];
 void gxForgetTexture(int);void mrModelUnload(int);int fn_8012C33C(const char*);int fn_802C6FC0(const char*,int,int);MenuRecord* fn_8022D97C(void*,int);
 WidgetFragment* fn_80220874(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80222C8C(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229B78(WidgetFragment* self,int destroy);
 void fn_80229BE8(WidgetFragment* self);
-WidgetFragment* fn_8021BD98(WidgetFragment* self,int x,int y,float* value,float scale,const char* format,float bias,int height);
 void fn_80222178(WidgetFragment* self,int x,int y);
 }
 
@@ -911,26 +886,20 @@ struct FocusPaintPrefix {
 struct FullFormatDispatch {virtual ~FullFormatDispatch();virtual void Bind(void**,int*);virtual void Format(char*,int);virtual int Increase();virtual int Decrease();virtual int CanNext();virtual int CanPrevious();virtual float Value();};
 struct ExtendedFormatPrefix {char base[0x254];char text[80];FullFormatDispatch* target;int* focus;int token,left,right,lineY;};
 extern "C" {
-extern u32 lbl_8033F434[],lbl_8033EEDC[];int strncasecmp(const char*,const char*,unsigned long);
+extern u32 lbl_8033F434[];int strncasecmp(const char*,const char*,unsigned long);
 WidgetFragment* fn_80219E44(WidgetFragment* self,int destroy);
 void fn_80219F14(WidgetFragment* self);
 
-WidgetFragment* fn_8021BEC0(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY);
-void fn_8021BFEC(WidgetFragment* self);
 }
 
 struct ExtendedLabeledFormatPrefix {char base[0x254];char text[80];FullFormatDispatch* target;int* focus;int token,left,right,lineY,labelLeft,labelRight,font;const char* label;int side;bool showArrows;};
 extern "C" {
-extern u32 lbl_8033EE50[];int fn_8022B498(int,const char*);
-int fn_8021C18C(WidgetFragment* self,int key);
-WidgetFragment* fn_8021C344(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY,const char* label,int alignment);
-void fn_8021C4D4(WidgetFragment* self);
+int fn_8022B498(int,const char*);
 }
 
 struct GaugeValuePrefix {char base[0x248];FullFormatDispatch* target;void* background;void* marker;int inset;};
 extern "C" {
 void fn_802180BC(void*);void fn_802180B0(void*);void fn_802180C8(void*);void fn_802180D4(void*);extern const float lbl_80563500;
-int fn_8021C730(WidgetFragment* self,int key);
 }
 
 struct SelectResourcePrefix {char base[0x3fc];GTextFont* resource;};
@@ -1658,23 +1627,23 @@ void fn_8021BA64(WidgetFragment* self,int width,int height,UITable* list,int col
 Column::~Column(void) {WidgetFragment* self=(WidgetFragment*)this;PageTextPrefix* f=(PageTextPrefix*)self;fn_8022A8E4(f->font);if(f->image)fn_802C519C(f->image);}
 void Column::Slot28(void) {PageTextPrefix* f=(PageTextPrefix*)((WidgetFragment*)this);int end;int x=((WidgetFragment*)this)->left;int start=f->list->page*f->list->visible;int y=((WidgetFragment*)this)->top;end=start+f->list->visible;if(f->list->used<end)end=f->list->used;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=f->list->Get(i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);fn_802C5320(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
 void fn_8021BD48(WidgetFragment* self,void* context){fn_802C3034(reinterpret_cast<gxCanvas*>(context));RichCaptionPrefix* f=(RichCaptionPrefix*)self;fn_801E4BEC(f->renderer,0,9,self->left,self->top,f->label);}
-WidgetFragment* fn_8021BD98(WidgetFragment* self,int x,int y,float* value,float scale,const char* format,float bias,int height){__ct__7UILabelFiiiiii(self,x,y,0,height,0,0);FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->value=value;self->vtable=lbl_8033EF68;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);return self;}
+Numeric::Numeric(int x,int y,float* value,float scale,const char* format,float bias,int height) : UILabel(x,y,0,height,0,0), value(value) {WidgetFragment* self=(WidgetFragment*)this;FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);}
 void fn_8021BE48(WidgetFragment* self){FloatFormatPrefix* f=(FloatFormatPrefix*)self;sprintf(f->text,f->format,*f->value*f->scale+f->bias);fn_80130568(f->text);fn_80219718(self);WidgetMarkDirty(self);}
-void fn_8021BEBC(WidgetFragment* self,int,void*){fn_8021BE48(self);}
-WidgetFragment* fn_8021BEC0(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY){__ct__7UILabelFiiiiii(self,x,y,0,height,0,0);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;f->target=target;self->vtable=lbl_8033EEDC;f->left=left;f->right=right;f->lineY=lineY;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C12C(self);f->focus=0;f->token=fn_80228F40(x,y);return self;}
-void fn_8021BF90(WidgetFragment* self){if(fn_80129BC4(self)){Bound2a8* f=(Bound2a8*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}}
-void fn_8021BFEC(WidgetFragment* self){Slot28__7UILabelFv(self);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;if(f->left!=f->right){int selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float zero=(0.0f);float x=zero,y=zero;fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,zero);fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,zero);}}
-void fn_8021C128(WidgetFragment* self,int,void*){fn_8021C12C(self);}
+void Numeric::Slot74(int, void*) {fn_8021BE48(((WidgetFragment*)this));}
+SpinCtl::SpinCtl(int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY) : UILabel(x,y,0,height,0,0), target(target) {WidgetFragment* self=(WidgetFragment*)this;ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;f->left=left;f->right=right;f->lineY=lineY;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C12C(self);f->focus=0;f->token=fn_80228F40(x,y);}
+void SpinCtl::Slot14(void) {if(fn_80129BC4(((WidgetFragment*)this))){Bound2a8* f=(Bound2a8*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}}
+void SpinCtl::Slot28(void) {Slot28__7UILabelFv(((WidgetFragment*)this));ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)((WidgetFragment*)this);if(f->left!=f->right){int selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float zero=(0.0f);float x=zero,y=zero;fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,zero);fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,zero);}}
+void SpinCtl::Slot74(int, void*) {fn_8021C12C(((WidgetFragment*)this));}
 void fn_8021C12C(WidgetFragment* self){FormatPrefix* f=(FormatPrefix*)self;f->target->Format(f->text,80);fn_80219718(self);WidgetMarkDirty(self);}
-int fn_8021C18C(WidgetFragment* self,int key){ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x125:f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x126:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217D84(self->window);return 1;}break;case 0x128:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217C4C(self->window);return 1;}break;}return 0;}
-int fn_8021C318(WidgetFragment* self){Bound2a8* f=(Bound2a8*)self;return !f->focus?0:*f->focus==f->token;}
-WidgetFragment* fn_8021C344(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY,const char* label,int alignment){__ct__7UILabelFiiiiii(self,x,y,0,height,0,0);ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;f->target=target;self->vtable=lbl_8033EE50;f->left=left;f->right=right;f->lineY=lineY;f->label=label;if(alignment==1)f->side=0;else f->side=1;f->labelLeft=left;f->font=8;int labelEnd=right+fn_802C51C0(fn_8021165C(1,2));f->labelRight=labelEnd-fn_8022B498(f->font,label);f->showArrows=0;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C6D0(self);f->focus=0;f->token=fn_80228F40(x,y);return self;}
-void fn_8021C478(WidgetFragment* self){if(fn_80129BC4(self)){Bound2a8* f=(Bound2a8*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}}
-void fn_8021C4D4(WidgetFragment* self){Slot28__7UILabelFv(self);ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;int selected=0;if(f->focus&&*f->focus==f->token)selected=1;unsigned int flags=selected!=0;if(f->side==0&&f->label)fn_8022BAD0(f->font,f->labelLeft,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));else if(f->side==1&&f->label)fn_8022BAD0(f->font,f->labelRight,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));if(f->left!=f->right&&f->showArrows){selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,(0.0f));fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,(0.0f));}}
-void fn_8021C6CC(WidgetFragment* self,int,void*){fn_8021C6D0(self);}
+int SpinCtl::Slot64(int key) {ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)((WidgetFragment*)this);if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x125:f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x126:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217D84(((WidgetFragment*)this)->window);return 1;}break;case 0x128:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217C4C(((WidgetFragment*)this)->window);return 1;}break;}return 0;}
+int SpinCtl::Slot84(void) {Bound2a8* f=(Bound2a8*)((WidgetFragment*)this);return !f->focus?0:*f->focus==f->token;}
+SpinText::SpinText(int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY,const char* label,int alignment) : UILabel(x,y,0,height,0,0), target(target) {WidgetFragment* self=(WidgetFragment*)this;ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;f->left=left;f->right=right;f->lineY=lineY;f->label=label;if(alignment==1)f->side=0;else f->side=1;f->labelLeft=left;f->font=8;int labelEnd=right+fn_802C51C0(fn_8021165C(1,2));f->labelRight=labelEnd-fn_8022B498(f->font,label);f->showArrows=0;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C6D0(self);f->focus=0;f->token=fn_80228F40(x,y);}
+void SpinText::Slot14(void) {if(fn_80129BC4(((WidgetFragment*)this))){Bound2a8* f=(Bound2a8*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}}
+void SpinText::Slot28(void) {Slot28__7UILabelFv(((WidgetFragment*)this));ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)((WidgetFragment*)this);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;unsigned int flags=selected!=0;if(f->side==0&&f->label)fn_8022BAD0(f->font,f->labelLeft,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));else if(f->side==1&&f->label)fn_8022BAD0(f->font,f->labelRight,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));if(f->left!=f->right&&f->showArrows){selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,(0.0f));fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,(0.0f));}}
+void SpinText::Slot74(int, void*) {fn_8021C6D0(((WidgetFragment*)this));}
 void fn_8021C6D0(WidgetFragment* self){FormatPrefix* f=(FormatPrefix*)self;f->target->Format(f->text,80);fn_80219718(self);WidgetMarkDirty(self);}
-int fn_8021C730(WidgetFragment* self,int key){ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:if(f->showArrows){f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180BC(self->window);return 1;}break;case 0x125:if(f->showArrows){f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180B0(self->window);return 1;}break;case 0x126:if(!f->showArrows&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180C8(self->window);return 1;}break;case 0x128:if(!f->showArrows&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180D4(self->window);return 1;}break;case 13:f->showArrows=!f->showArrows;return 1;case 27:if(f->showArrows){f->showArrows=0;return 1;}return 0;}return 0;}
-int fn_8021C974(WidgetFragment*){return 0;}
+int SpinText::Slot64(int key) {ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)((WidgetFragment*)this);if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:if(f->showArrows){f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180BC(((WidgetFragment*)this)->window);return 1;}break;case 0x125:if(f->showArrows){f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180B0(((WidgetFragment*)this)->window);return 1;}break;case 0x126:if(!f->showArrows&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180C8(((WidgetFragment*)this)->window);return 1;}break;case 0x128:if(!f->showArrows&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180D4(((WidgetFragment*)this)->window);return 1;}break;case 13:f->showArrows=!f->showArrows;return 1;case 27:if(f->showArrows){f->showArrows=0;return 1;}return 0;}return 0;}
+int SpinText::Slot84(void) {return 0;}
 WidgetFragment* fn_8021C97C(WidgetFragment* self,int x,int y,void* handle,int direction,FormatTarget* target){fn_8021AC24(self,x,y,handle);DirectionPrefix* f=(DirectionPrefix*)self;f->direction=direction;self->vtable=lbl_8033EDC8;f->target=target;return self;}
 int fn_8021C9D8(WidgetFragment* self){DirectionPrefix* f=(DirectionPrefix*)self;if(f->direction>0)return f->target->Increase();return f->target->Decrease();}
 SpinSldr::SpinSldr(int x, int y, int dx, int dy, ObservedValueProvider* provider) : UIWidget(x,y,x+dx,y+dy,0) {
@@ -1708,18 +1677,16 @@ void SpinSldr::Slot4C(int x, int y) {
     WidgetFragment* self = (WidgetFragment*)this;if(((ProviderWidgetPrefix*)self)->active)((PointerEventDispatch*)self)->Slot3c(x,y);}
 void SpinSldr::Slot40(int x, int y) {
     WidgetFragment* self = (WidgetFragment*)this;((RowInputDispatch*)self)->Slot4c(x,y);((ProviderWidgetPrefix*)self)->active=0;}
-WidgetFragment* fn_8021CEEC(WidgetFragment* self,int x,int y,int* value,float scale,const char* format,float bias,int height){
- __ct__7UILabelFiiiiii(self,x,y,0,height,0,0);self->vtable=lbl_8033ECB8;
+IntNumeric::IntNumeric(int x,int y,int* value,float scale,const char* format,float bias,int height) : UILabel(x,y,0,height,0,0) {WidgetFragment* self=(WidgetFragment*)this;
  NumericCaptionPrefix* fields=(NumericCaptionPrefix*)self;fields->value=value;fields->scale=scale;fields->bias=bias;fields->format=format;
- *((char*)self+0x264)=0;fn_80219440(self,0,value,4);fn_8021CF9C(self);return self;
-}
+ *((char*)self+0x264)=0;fn_80219440(self,0,value,4);fn_8021CF9C(self);}
 void fn_8021CF9C(WidgetFragment* self){
  NumericCaptionPrefix* fields=(NumericCaptionPrefix*)self;
  float number=fields->bias+(float)*fields->value*fields->scale;
  sprintf(fields->text,fields->format,(int)((0.5f)+number));
  fn_80130568(fields->text);fn_80219718(self);WidgetMarkDirty(self);
 }
-void fn_8021D040(WidgetFragment* self,int,void*){fn_8021CF9C(self);}
+void IntNumeric::Slot74(int, void*) {fn_8021CF9C(((WidgetFragment*)this));}
 WidgetFragment* fn_8021D044(WidgetFragment* self,int x,int y,int* value,const char* list,int height,int first,int second,int style){
  __ct__7UILabelFiiiiii(self,x,y,0,height,0,0);self->vtable=lbl_8033EBA0;
  ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
@@ -1830,26 +1797,24 @@ WidgetFragment* fn_8021D758(WidgetFragment* self,int destroy){
  if(self){self->vtable=lbl_8033EB14;fn_8022A8E4(((ChoiceResourcePrefix*)self)->resource);fn_8021D300(self,0);if(destroy>0)__dl__FPv(self);}
  return self;
 }
-WidgetFragment* fn_8021D7C8(WidgetFragment* self,int x,int y,int dx,int dy,int height,ChoiceProviderDispatch* provider){
- __ct__7UILabelFiiiiii(self,x,y,0,height,dx,dy);self->vtable=lbl_8033EC2C;
+MutableMulti::MutableMulti(int x,int y,int dx,int dy,int height,ChoiceProviderDispatch* provider) : UILabel(x,y,0,height,dx,dy) {WidgetFragment* self=(WidgetFragment*)this;
  ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;float time=fn_8023659C()-(0.3f);
  fields->provider=provider;fields->fontResource=height;fields->nextTime=time;fields->previousTime=time;fields->focus=0;
- fields->token=fn_80228F40(x,y);return self;
-}
-const char* fn_8021D864(WidgetFragment* self){return ((ProviderChoicePrefix*)self)->provider->Text();}
-void fn_8021D878(WidgetFragment* self){
- if(fn_80129BC4(self)){ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;
-  fields->focus=fn_80217BD8(self->window,fields->token,self);fn_80219440(self,1,fields->focus,4);
+ fields->token=fn_80228F40(x,y);}
+const char* MutableMulti::Slot88(void) {return ((ProviderChoicePrefix*)((WidgetFragment*)this))->provider->Text();}
+void MutableMulti::Slot14(void) {
+ if(fn_80129BC4(((WidgetFragment*)this))){ProviderChoicePrefix* fields=(ProviderChoicePrefix*)((WidgetFragment*)this);
+  fields->focus=fn_80217BD8(((WidgetFragment*)this)->window,fields->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,fields->focus,4);
  }
 }
-int fn_8021D8D4(WidgetFragment* self){
- ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;
+int MutableMulti::Slot84(void) {
+ ProviderChoicePrefix* fields=(ProviderChoicePrefix*)((WidgetFragment*)this);
  if(!fields->focus)return 0;
- if(self->enabled){int status;if(fields->provider->Modal())status=fields->provider->Selected();else status=(*fields->focus==fields->token);return status!=0;}
+ if(((WidgetFragment*)this)->enabled){int status;if(fields->provider->Modal())status=fields->provider->Selected();else status=(*fields->focus==fields->token);return status!=0;}
  return 4;
 }
-int fn_8021D97C(WidgetFragment* self,int key){
- ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;
+int MutableMulti::Slot64(int key) {
+ ProviderChoicePrefix* fields=(ProviderChoicePrefix*)((WidgetFragment*)this);
  if(fields->provider->Modal()){if(!fields->provider->AcceptsKeys())return 0;}
  else{if(!fields->focus)return 0;if(fields->token!=*fields->focus)return 0;}
  switch(key){
@@ -1858,21 +1823,21 @@ int fn_8021D97C(WidgetFragment* self,int key){
  case 0x125:
   if(fields->provider->HasPrevious()){fields->provider->Previous();fields->previousTime=fn_8023659C();}else fn_80216D28();return 1;
  case 0x126:
-  if(!fields->provider->Modal()&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217D84(self->window);fn_80230E90(0);return 1;}break;
+  if(!fields->provider->Modal()&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217D84(((WidgetFragment*)this)->window);fn_80230E90(0);return 1;}break;
  case 0x128:
-  if(!fields->provider->Modal()&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217C4C(self->window);fn_80230E90(0);return 1;}break;
+  if(!fields->provider->Modal()&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217C4C(((WidgetFragment*)this)->window);fn_80230E90(0);return 1;}break;
  }return 0;
 }
-void fn_8021DB58(WidgetFragment* self){
- ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;int selected;
+void MutableMulti::Slot28(void) {
+ ProviderChoicePrefix* fields=(ProviderChoicePrefix*)((WidgetFragment*)this);int selected;
  if(fields->provider->Modal())selected=fields->provider->Selected();
  else{selected=0;if(fields->focus&&fields->token==*fields->focus)selected=1;}
- float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,self->left,self->top);
- float available=(float)((WidgetDispatch*)self)->Slot78()+lbl_8055E050->margin;
+ float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top);
+ float available=(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78()+lbl_8055E050->margin;
 // Reconstructed unused int-to-float conversion work observed in the original.
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
- float unusedHeight=(float)(self->bottom-self->top);
- Slot28__7UILabelFv(self);
+ float unusedHeight=(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top);
+ Slot28__7UILabelFv(((WidgetFragment*)this));
  int previousFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
  int nextFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->nextTime>=now)nextFrame=2;else nextFrame=1;}else nextFrame=0;
  gArtSet* previousArrow=static_cast<gArtSet*>(fn_80211660(0));gArtSet* nextArrow=static_cast<gArtSet*>(fn_80211660(1));
@@ -3358,11 +3323,11 @@ WidgetFragment* fn_80228FA4(WidgetFragment* self,int destroy){if(self){__dt__8UI
 WidgetFragment* fn_80228FFC(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80229054(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_802290B0(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_8022910C(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+
 WidgetFragment* fn_80229168(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_802291C4(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_80229220(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_8022927C(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+
+
+
 WidgetFragment* fn_802292D8(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80229330(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80229388(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
@@ -3417,16 +3382,16 @@ int fn_80229B68(WidgetFragment*){return 0;}
 void* fn_80229B70(WidgetFragment* self){return ((IntWatchPrefix*)self)->value;}
 WidgetFragment* fn_80229B78(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033EFF4;fn_801E4A2C(((RichCaptionPrefix*)self)->renderer);__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80229BE8(WidgetFragment* self){Slot7C__8UIWidgetFv(self);RichCaptionPrefix* f=(RichCaptionPrefix*)self;const char* label=f->label;if(strcmp(label,f->text)!=0){strcpy(f->text,label);int width=fn_801E4A6C(f->renderer,f->label);int oldWidth=((WidgetDispatch*)self)->Slot78();if(oldWidth>width)width=oldWidth;int height=fn_801E4BA8(f->renderer);fn_80219284(self,width,height);WidgetMarkDirty(self);}}
-void* fn_80229C9C(WidgetFragment* self){return(char*)self+0x264;}
-void* fn_80229CA4(WidgetFragment* self){return(char*)self+0x254;}
-void* fn_80229CAC(WidgetFragment* self){return(char*)self+0x254;}
+
+
+
 void fn_80229CB4(WidgetFragment* self,int,int){LeafActivity* fields=(LeafActivity*)self;fields->active=1;fields->elapsed=(0.0f);WidgetMarkDirty(self);}
 void fn_80229CD8(WidgetFragment* self,int,int){((LeafActivity*)self)->active=0;WidgetMarkDirty(self);}
 void fn_80229CF8(WidgetFragment* self){self->flag18=1;((LeafActivity*)self)->elapsed=(0.0f);WidgetMarkDirty(self);}
 void fn_80229D1C(WidgetFragment* self){self->flag18=0;WidgetMarkDirty(self);}
 int fn_80229D3C(WidgetFragment* self,int x,int y){return fn_802C5280(((LeafResource250*)self)->resource,x-self->left,y-self->top,0);}
-void* fn_80229D5C(WidgetFragment* self){return(char*)self+0x264;}
-WidgetFragment* fn_80229D64(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+
+
 void* fn_80229DC0(WidgetFragment* self){return(char*)self+0x268;}
 void fn_80229DC8(WidgetFragment* self,int x,int y){
  RowListPrefix* fields=(RowListPrefix*)self;fields->direction=0;fields->active=1;((RowInputDispatch*)self)->Slot4c(x,y);
