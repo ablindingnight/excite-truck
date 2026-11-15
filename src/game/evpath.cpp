@@ -285,6 +285,10 @@ class EvEventBar : public LogoMover {
 public:
     EvEventBar(void);
     virtual ~EvEventBar(void);
+    void SetContest(EvContest* c) {
+        contest = c;
+        Reset();
+    }
     void Reset(void);
     virtual void Enter(void);
     virtual void Update(void);
@@ -1195,11 +1199,9 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
                 t->acc = 0.0f;
             }
             acc.next = cur;
-            bars[i].contest = &acc;
-            bars[i].Reset();
+            bars[i].SetContest(&acc);
         } else {
-            bars[i].contest = c;
-            bars[i].Reset();
+            bars[i].SetContest(c);
         }
         char file[33];
         fn_801345D8(file, 33, "/%s.tex", SkipPrefix(((EventDesc*)GetEvent(c->EventId()))->table->GetValue("name"), "career_"));
@@ -1260,9 +1262,8 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
         MenuItem(lbl_804B2FF8),
     };
-    MenuDesc desc = {0, 0, (int (*)(int*))fn_8024739C, 0, 0};
-    desc.layout = "ep_chevent.lyt";
-    desc.items = items;
+    const char* layout = "ep_chevent.lyt";
+    MenuDesc desc = {layout, items, (int (*)(int*))fn_8024739C, 0, 0};
     if (res->improved) {
         SelectBar(*event);
     } else {
