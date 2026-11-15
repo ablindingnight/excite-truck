@@ -397,12 +397,14 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         t = time / ramp;
         t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
+        target = vel + t * (depth - vel);
         f32 xv = v.x;
         p.x = car->pos.x + xv * 0.016683351f;
         p.y = car->pos.y + v.y * 0.016683351f;
         p.z = car->pos.z + v.z * 0.016683351f;
         dist = PlaneDist(&n, &p, &owner->plane->origin);
-        target = vel + t * (depth - vel);
+        // Unused, as in retail: only its compare of the stored distance survives (what it fed is unproven).
+        f32 side = this->dist > 0.0f ? 1.0f : -1.0f;
         ramping = Ramping();
         if (ramping) {
             f32 pen = target - d;
