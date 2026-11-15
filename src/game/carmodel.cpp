@@ -885,8 +885,19 @@ static inline void SetVtx(P2* v, f32 x, f32 y, f32 s, f32 t) {
 
 extern "C" {
 
+static inline void OffsetDashboardFrame(Frame& f) {
+    Vec w;
+    Vec off;
+    off.x = -0.3f;
+    off.y = 1.1f;
+    off.z = 0.12f;
+    MulVec(&w, &off, f.axes);
+    f.pos.x = f.pos.x + w.x;
+    f.pos.y = f.pos.y + w.y;
+    f.pos.z = f.pos.z + w.z;
+}
+
 void fn_801ED718(CarModel* m) {
-    Vec k;
     fn_802C974C(0.1f, 20.0f, fn_801E8738(-1));
     fn_802C88BC(2);
     s32 tex = fn_801E7E2C();
@@ -899,15 +910,7 @@ void fn_801ED718(CarModel* m) {
         SetVtx(&v[9], -0.09f, 0.0225f, 0.0f, 0.0f);
         u16 idx[6] = {0, 3, 1, 1, 3, 2};
         f = m->frame;
-        Vec off;
-        Vec w;
-        off.x = -0.3f;
-        off.y = 1.1f;
-        off.z = 0.12f;
-        MulVec(&w, &off, f.axes);
-        f.pos.x = f.pos.x + w.x;
-        f.pos.y = f.pos.y + w.y;
-        f.pos.z = f.pos.z + w.z;
+        OffsetDashboardFrame(f);
         fn_802C8B98(tex, &f);
         fn_802C8DB8(v, 4, idx, 6);
         fn_802C8D74();
@@ -915,6 +918,7 @@ void fn_801ED718(CarModel* m) {
     if (!lbl_8055AFC8) {
         fn_802C70AC(m->chassis, &m->frame, 0, 5);
     } else {
+        Vec k;
         Vec b[23];
         int i;
         for (i = 0; i < 23; i++) {
