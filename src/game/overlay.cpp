@@ -559,7 +559,7 @@ ModuleTag lbl_8055D330;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 extern const u32 lbl_8055D338 = MakeILPos(0xFFFF, 0);
-u32 lbl_8055D33C = MakeILPos(0x7F00, 0);
+extern const u32 lbl_8055D33C = MakeILPos(0x7F00, 0);
 RetryFlags lbl_8055D340;
 GameOverlay* lbl_8055D344;
 s32 lbl_8055D348;
