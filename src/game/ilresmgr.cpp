@@ -198,8 +198,8 @@ class CenterLine : public LineSource {
 public:
     CenterLine(void) { InitCenter(this); }
     virtual ~CenterLine(void) { fn_80138AD8(&line); }
-    virtual IdealLineRes* GetLine(int i) { return line; }
     virtual IdealLineRes* Get(int car) { return line; }
+    virtual IdealLineRes* GetLine(int i) { return line; }
     virtual void Reset(void) {}
 
     IdealLineRes* line;  // offset 0x4
@@ -212,13 +212,13 @@ class SingleLine : public LineSource {
 public:
     SingleLine(LineSource* center) { InitSingle(this, center); }
     virtual ~SingleLine(void) { fn_80138AD8(&line); }
+    virtual IdealLineRes* Get(int car) { return line; }
     virtual IdealLineRes* GetLine(int i) {
         if (i == 0) {
             return line;
         }
         return 0;
     }
-    virtual IdealLineRes* Get(int car) { return line; }
     virtual void Reset(void) {}
 
     IdealLineRes* line;  // offset 0x4
@@ -291,6 +291,18 @@ public:
         cars[car].next = now + fn_80129DC4(4, minT, maxT);
         cars[car].line = line;
     }
+    virtual void Switch(int car) {
+    struct { IdealLineRes* l; IdealLineRes* cur; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
+        f32 now = lbl_8055E3C8;
+        sp_.cur = cars[car].line;
+        int k = fn_80129D90(4, 0, lines.a.count);
+        sp_.l = lines.a.data[k].line;
+        if (sp_.l == sp_.cur) {
+            sp_.l = lines.a.data[(k + 1) % lines.a.count].line;
+        }
+        cars[car].next = now + fn_80129DC4(4, minT, maxT);
+        cars[car].line = sp_.l;
+    }
     virtual void Snap(int car, const f32* pos) {
         V2 p;
         f32 best;
@@ -313,18 +325,6 @@ public:
             }
         }
         StoreSnappedLine(car, lines.a.data[bi].line);
-    }
-    virtual void Switch(int car) {
-    struct { IdealLineRes* l; IdealLineRes* cur; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
-        f32 now = lbl_8055E3C8;
-        sp_.cur = cars[car].line;
-        int k = fn_80129D90(4, 0, lines.a.count);
-        sp_.l = lines.a.data[k].line;
-        if (sp_.l == sp_.cur) {
-            sp_.l = lines.a.data[(k + 1) % lines.a.count].line;
-        }
-        cars[car].next = now + fn_80129DC4(4, minT, maxT);
-        cars[car].line = sp_.l;
     }
     virtual void Assign(void) {
         int n;
@@ -383,21 +383,21 @@ public:
         center = c;
         racing = r;
     }
-    virtual IdealLineRes* GetLine(int i) { return center->GetLine(i); }
-    virtual IdealLineRes* GetRacingLine(int i) { return racing->GetLine(i); }
-    virtual IdealLineRes* CenterFor(int car) { return center->Get(car); }
-    virtual IdealLineRes* LineFor(int car) { return racing->Get(car); }
-    virtual void Snap(int car, const f32* pos) { racing->Snap(car, pos); }
-    virtual void Switch(int car) { racing->Switch(car); }
-    virtual void Reset(void) {
-        center->Reset();
-        racing->Reset();
-    }
-    virtual void Assign(void) { racing->Assign(); }
     virtual ~RacingLines(void) {
         delete center;
         delete racing;
     }
+    virtual IdealLineRes* GetLine(int i) { return center->GetLine(i); }
+    virtual IdealLineRes* GetRacingLine(int i) { return racing->GetLine(i); }
+    virtual IdealLineRes* CenterFor(int car) { return center->Get(car); }
+    virtual IdealLineRes* LineFor(int car) { return racing->Get(car); }
+    virtual void Reset(void) {
+        center->Reset();
+        racing->Reset();
+    }
+    virtual void Snap(int car, const f32* pos) { racing->Snap(car, pos); }
+    virtual void Switch(int car) { racing->Switch(car); }
+    virtual void Assign(void) { racing->Assign(); }
 
     LineSource* racing;  // offset 0x4
     LineSource* center;  // offset 0x8

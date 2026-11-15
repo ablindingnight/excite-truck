@@ -1031,7 +1031,7 @@ config.libs.append(
             Object(Matching, "game/records.cpp"),
             Object(NonMatching, "game/ovlayout.cpp"),
             Object(NonMatching, "game/betarace.cpp"),
-            Object(NonMatching, "game/ilresmgr.cpp"),
+            Object(Matching, "game/ilresmgr.cpp"),
             Object(NonMatching, "game/stunts.cpp"),
             Object(NonMatching, "game/aiobst.cpp"),
             Object(Matching, "game/gradesched.cpp"),
