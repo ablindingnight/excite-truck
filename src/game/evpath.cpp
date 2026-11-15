@@ -71,6 +71,9 @@ public:
         int n = count++;
         data[n] = v;
     }
+    T& AppendSlot(void) {
+        return data[count++];
+    }
     template <typename V>
     int Find(V* key) {
         V* v = key;
@@ -854,13 +857,15 @@ int IdentGetCurrentSlot(void);
 
 extern "C" void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
 
-// Makes event bar i current (none when out of range or without a condition) and shows its title,
+// Shows the details of event bar i. When select is true, it also makes that bar current.
 // description and best time.
-static inline void SelectBar(int i) {
-    if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
-        lbl_8055F698 = (u32)lbl_804B30D8.data[i];
-    } else {
-        lbl_8055F698 = 0;
+static inline void SelectBar(int i, bool select = true) {
+    if (select) {
+        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+            lbl_8055F698 = (u32)lbl_804B30D8.data[i];
+        } else {
+            lbl_8055F698 = 0;
+        }
     }
     u8* e;
     if (i >= 0 && i < lbl_804B30D8.Count() && PTR(e = (u8*)lbl_804B30D8.data[i], 0x60)) {
@@ -1036,7 +1041,7 @@ inline void EvEventBar::Reset(void) {
 
 inline EvEventBar::EvEventBar(void) : LogoMover(0.2f, 1) {
     contest = 0;
-    lbl_804B30D8.Add((u8*)this);
+    lbl_804B30D8.AppendSlot() = (u8*)this;
     Reset();
 }
 
@@ -1265,7 +1270,7 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     const char* layout = "ep_chevent.lyt";
     MenuDesc desc = {layout, items, (int (*)(int*))fn_8024739C, 0, 0};
     if (res->improved) {
-        SelectBar(*event);
+        SelectBar(*event, false);
     } else {
         SelectBar(cur);
     }
