@@ -15,7 +15,6 @@ s32 fn_802C6FC0(void* model, int a, int b);
 void mrModelUnload(s32 inst);
 f32 fn_801E88F0(int car);
 extern f32 lbl_80558DC4[];  // FLT_EPSILON
-extern char lbl_8055CA60[3];  // "%s"
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -102,7 +101,7 @@ void fn_8029790C(void) {
         fn_802C9CE0();
     } else if (!lbl_8055F7B4) {
         lbl_8055F7B4 = 1;
-        fn_802E30C8(lbl_8055CA60, "shadow: shadow volumes failed!");
+        fn_802E30C8("%s", "shadow: shadow volumes failed!");
     }
 }
 
