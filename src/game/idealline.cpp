@@ -109,7 +109,7 @@ public:
     void Init(void);
     int Update(V2* pos);
     void SetPosition(V2* pos, V2* dir, IdealPoint* start);
-    void Locate(V2* pos, V2* dir, ILPos* out, int unused);
+    void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
     int Step(V2* pos);
 
     ILPos il;      // offset 0x4
@@ -268,14 +268,14 @@ IdealPoint* fn_80135420(V2* p, V2* d, CenterLine* line) {
     return found;
 }
 
-int fn_801355B8(LineFollower* f, V2* p, IdealPoint** seg, f32* t) { return 0; }
+int fn_801355B8(const LineFollower* f, V2* p, IdealPoint** seg, f32* t) { return 0; }
 
 }  // extern "C"
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 static inline double AbsD(double v) { return __fabs(v); }
 
-void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
+void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
     out->mode = il.mode;
     if (fn_801355B8(this, p, &out->seg, &out->t)) {
         return;

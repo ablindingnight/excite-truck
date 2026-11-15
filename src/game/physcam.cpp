@@ -1027,7 +1027,7 @@ struct ILPos {
 
 class LineFollower {
 public:
-    void Locate(V2* pos, V2* dir, ILPos* out, int unused);
+    void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
 };
 
 extern "C" {

@@ -231,7 +231,7 @@ public:
     LineFollower(void);
     ~LineFollower(void);
     void SetLine(CenterLine* line);
-    int Locate(V2* p, V2* dir, ILPos* out, int n);
+    int Locate(V2* p, V2* dir, ILPos* out, int n) const;
     u8 pad0[0x38];
 };
 
