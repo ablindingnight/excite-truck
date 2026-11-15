@@ -31,7 +31,7 @@ game/overlay.cpp:
 	.bss        start:0x8034EC78 end:0x8034EF1C
 	.sdata      start:0x80558928 end:0x8055894B
 	.sbss       start:0x8055D330 end:0x8055D358
-	.sdata2     start:0x80560110 end:0x805601B0
+	.sdata2     start:0x80560108 end:0x805601B0
 
 game/race.cpp:
 	.text       start:0x80007D94 end:0x80008390

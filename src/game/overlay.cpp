@@ -14,6 +14,10 @@
 
 void* operator new(size_t size, const char* tag);
 
+// Two AI tuning constants defined here (first in this unit's .sdata2) and read by aidriver.
+extern const f32 lbl_80560108 = 4.0f;
+extern const f32 lbl_8056010C = 4.0f;
+
 // One element of a layout set (0x20 bytes).
 struct LayoutPos {
     f32 x;
