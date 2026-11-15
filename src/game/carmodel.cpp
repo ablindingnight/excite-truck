@@ -360,7 +360,6 @@ u8 lbl_8055EBC4;
 CarModel* lbl_8055EBC8;  // the player's own car
 
 u8 lbl_8055AFC8 = 1;      // draw the cockpit
-f32 lbl_8055B088 = 12.3f;  // battery volts
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -1223,6 +1222,8 @@ void fn_801EEC68(CarModel* m) {
         m->xray = -1;
     }
 }
+
+f32 lbl_8055B088 = 12.3f;  // battery volts
 
 void fn_801EECAC(CarModel* m, u8* data) {
     m->car = (CarState*)(data + m->offset);
