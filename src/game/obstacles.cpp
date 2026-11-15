@@ -1275,38 +1275,44 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 extern "C" {
 
-// Writes this obstacle's draw state into the frame buffer: its pose (blended from the previous one when the
-// draw falls between physics steps) and part id; links also work out both anchor points.
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801ACB30(u8* buf, u8* p) {
+static inline void BlendFencePose(ObPose* dest, const ObPose* previous, const ObPose* current, f32 f) {
+    f32* d = (f32*)dest;
+    const f32* prev = (const f32*)previous;
+    const f32* cur = (const f32*)current;
+    for (int i = 0; i < 12; i++) {
+        *d++ = ObLerp(*prev++, *cur++, f);
+    }
+}
+
+// Copies or blends the frame pose before writing its associated part ID.
+static inline void WriteFencePose(u8* buf, u8* p) {
     f32 f = lbl_8055E460;
     u8* out = buf + S32(p, 0x8);
     if ((f32)__fabs(f - lbl_805624AC) <= __float_epsilon[0]) {
         *(ObPose*)out = *(ObPose*)(p + 0x70);
     } else {
         ObPose t;
-        f32* prev = (f32*)(p + 0xA0);
-        f32* cur = (f32*)(p + 0x70);
-        f32* d = (f32*)&t;
-        for (int i = 0; i < 12; i++) {
-            d[i] = ObLerp( prev[i],cur[i], f);
-        }
+        BlendFencePose(&t, (const ObPose*)(p + 0xA0), (const ObPose*)(p + 0x70), f);
         *(ObPose*)out = t;
     }
     *(s16*)(out + 0x30) = *(s16*)(p + 0x6C);
 }
 
+// Writes this obstacle's draw state into the frame buffer: its pose (blended from the previous one when the
+// draw falls between physics steps) and part id; links also work out both anchor points.
 void fn_801ACB30(u8* p, u8* buf) {
-    Loop1_fn_801ACB30(buf, p);
+    WriteFencePose(buf, p);
     if (PTR(p, 0x23C)) {
         ObVec3 a;
         ObRotate(&a, (f32*)(p + 0x3C), (ObVec3*)(p + 0x244));
         a.x += F32(p, 0x60);
         a.y += F32(p, 0x64);
         a.z += F32(p, 0x68);
+        const ObVec3* anchor;
         u8* o = PTR(p, 0x23C);
         ObVec3 b;
-        ObRotate(&b, (f32*)(o + 0x3C), (ObVec3*)(o + 0x244));
+        anchor = (const ObVec3*)(o + 0x244);
+        ObRotate(&b, (const f32*)(o + 0x3C), anchor);
         b.x += F32(o, 0x60);
         b.y += F32(o, 0x64);
         b.z += F32(o, 0x68);
