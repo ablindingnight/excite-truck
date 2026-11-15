@@ -134,7 +134,8 @@ static inline void PoseToQuat(const CamPose* p, f32* q) {
         // The components are written by axis index here, through their own pointer.
         f32* o = q;
         int i = 0;
-        if (m[1][1] > m[0][0]) {
+        // Read the diagonal again after choosing the nonpositive-trace path.
+        if (const_cast<f32&>(m[1][1]) > const_cast<f32&>(m[0][0])) {
             i = 1;
         }
         if (m[2][2] > m[i][i]) {
