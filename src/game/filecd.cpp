@@ -63,7 +63,29 @@ public:
 
 extern u8 lbl_804DBAA0[0x20000];  // read buffer
 
-class FileDisk;
+class FileCD;
+
+class FileDisk : public FileSystem {
+public:
+    FileDisk(void) {
+        DVDInit();
+        ok = 1;
+        OSReport("filecd: started DVD services");
+    }
+    virtual ~FileDisk(void) {}
+    virtual File* Create(const char* name);
+    virtual File* Open(const char* name);
+    virtual File* OpenWrite(const char* name);
+    virtual File* OpenAppend(const char* name);
+    virtual void Close(File* f) { delete f; }
+    virtual void Print(const char* s) { OSReport("%s", s); }
+    static void* operator new(size_t size, const char* tag);
+    static void operator delete(void* p);
+    FileCD* OpenCD(const char* name);
+
+    u8 ok;  // offset 0x4
+};
+
 
 // FileCD's in-class methods were compiled without the global optimizer: Read keeps its always-false sync
 // flag in a register and its wait loop top-tested (2026-11-14). In-class bodies take the pragma state at the
@@ -193,26 +215,6 @@ public:
 };
 #pragma pop
 
-class FileDisk : public FileSystem {
-public:
-    FileDisk(void) {
-        DVDInit();
-        ok = 1;
-        OSReport("filecd: started DVD services");
-    }
-    virtual ~FileDisk(void) {}
-    virtual File* Create(const char* name);
-    virtual File* Open(const char* name);
-    virtual File* OpenWrite(const char* name);
-    virtual File* OpenAppend(const char* name);
-    virtual void Close(File* f) { delete f; }
-    virtual void Print(const char* s) { OSReport("%s", s); }
-    static void* operator new(size_t size, const char* tag);
-    static void operator delete(void* p);
-    FileCD* OpenCD(const char* name);
-
-    u8 ok;  // offset 0x4
-};
 
 
 
