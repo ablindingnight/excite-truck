@@ -200,7 +200,7 @@ void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inp
 }
 #pragma pop
 
-void fn_801B3B24(){}
+void fn_801B3B24(u8*, void*, void*){}
 
 void fn_801B3B28(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
 

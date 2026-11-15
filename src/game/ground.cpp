@@ -57,7 +57,7 @@ f32 fn_801E9DDC(s16* hint, f32 x, f32 z);
 
 f32 fn_801E9DD0(s16* hint, f32 x, f32 z) { return fn_801E9DDC(hint, x, z); }
 
-void fn_801E9DD4(void) {}
+void fn_801E9DD4(const char*, const char*) {}
 
 void fn_801E9DD8(void) {}
 

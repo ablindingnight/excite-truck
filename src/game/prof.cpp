@@ -181,7 +181,7 @@ u32 fn_80127954(void) { return fn_802E2C20(); }
 
 void fn_80127958(void) {}
 
-int fn_8012795C(void) { return 0; }
+int fn_8012795C(int) { return 0; }
 
 void fn_80127964(void) {}
 

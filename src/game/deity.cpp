@@ -1465,7 +1465,7 @@ void fn_801B3208(int i, s32 start, f32 qual) {
     *(f32*)((u8*)&lbl_8055E684[i] + 0x24) = qual;
 }
 
-int fn_801B327C(void) { return 0; }
+int fn_801B327C(int) { return 0; }
 
 void fn_801B3284(void) {}
 

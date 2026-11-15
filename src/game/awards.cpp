@@ -506,7 +506,7 @@ void fn_801CB648(int car, int valid, f32 t) {
     fn_801CD7BC(car, valid, t);
 }
 
-void fn_801CB6B4(void) {
+void fn_801CB6B4(int, int, int) {
     if (Disabled()) {
         return;
     }

@@ -83,7 +83,7 @@ void fn_802E6BD8(u32 cookie, u32 version, void* data, s32 size, void (*cb)(int))
     c->cb = cb;
 }
 
-void fn_802E6CA4(void) {}
+void fn_802E6CA4(int) {}
 
 u32 fn_802E7130(void);
 int fn_802E721C(u32 cookie, u32 version, s32 size);

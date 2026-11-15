@@ -149,7 +149,7 @@ u32 fn_801281F4(u32 x, u32 a) { return (x + a - 1) & ~(a - 1); }
 
 void fn_80128208(const char* name) {}
 
-int fn_8012820C(void) {
+int fn_8012820C(u32) {
     void* base0;
     void* base1;
     u32 size0;

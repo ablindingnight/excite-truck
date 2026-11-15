@@ -279,7 +279,7 @@ void fn_8028E1D0(void) {
     }
 }
 
-void fn_8028E240(void) {
+void fn_8028E240(int) {
     struct { s32 t; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
     if (lbl_8055F740) {
         f32 old = fn_802C9A4C(0.0f);

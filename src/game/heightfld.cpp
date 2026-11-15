@@ -517,7 +517,7 @@ void fn_801DCEC8(int i, f32 w) { lbl_804424B0[i] = w; }
 
 void fn_801DCEDC(int i, f32 w) { lbl_804425DC[i] = w; }
 
-void fn_801DCEF0(void) {}
+void fn_801DCEF0(int) {}
 
 void fn_801DCEF4(void) { lbl_8055E9A8[0] = 0; }
 

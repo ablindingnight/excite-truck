@@ -89,7 +89,7 @@ int fn_802E47B8(void) {
 
 void fn_802E47E8(void) { memset(lbl_8055FF50, 0, sizeof(lbl_8055FF50)); }
 
-int fn_802E47F8(void) { return 0; }
+int fn_802E47F8(int) { return 0; }
 
 void fn_802E4800(u16 key) {
     if (fn_802ECC10()) {

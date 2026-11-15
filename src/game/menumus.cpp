@@ -336,7 +336,7 @@ void fn_8020C59C(void) {
     fn_80210688(0);
 }
 
-void fn_8020C8F4(void) {}
+void fn_8020C8F4(u32) {}
 
 void fn_8020C8F8(void) {}
 
@@ -351,9 +351,9 @@ void fn_8020C908(f32 volume) {
 
 void fn_8020C910(f32 target) { lbl_8055EE50 = target; }
 
-void fn_8020C918(void) {}
+void fn_8020C918(int) {}
 
-void fn_8020C91C(void) {}
+void fn_8020C91C(int) {}
 
 void fn_8020C920(const char* track) {
     MusicTrack* t;

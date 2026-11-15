@@ -19,7 +19,7 @@ void fn_8013A1F0(void) {}
 
 void fn_8013A1F4(void) {}
 
-int fn_8013A1F8(void) { return 0; }
+int fn_8013A1F8(int) { return 0; }
 
 void fn_8013A200(s32 idx) {}
 

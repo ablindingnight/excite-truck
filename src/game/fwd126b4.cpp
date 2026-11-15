@@ -15,10 +15,10 @@ struct Unk_800126B4 {
 
 ModuleTag lbl_8055D4F0;
 
-extern "C" void fn_800126B4(void*, Unk_800126B4* obj) {
+extern "C" void fn_800126B4(void*, Unk_800126B4* obj, int, int) {
     fn_801EA4B4(obj->unk28, obj->unk24);
 }
 
-extern "C" void fn_800126C0(void) {
+extern "C" void fn_800126C0(void*, void*) {
     fn_801EA4B8();
 }

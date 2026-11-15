@@ -76,7 +76,7 @@ static inline void SetInches(ValVec3* dst, const ValVec3& v) {
 
 extern "C" {
 
-int fn_80278A1C(void) { return 0; }
+int fn_80278A1C(const char*) { return 0; }
 
 void fn_80278A24(void) {}
 

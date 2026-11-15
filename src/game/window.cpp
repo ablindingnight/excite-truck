@@ -47,8 +47,8 @@ public:
     virtual void PressB(s32 x, s32 y);      // 0x44
     virtual void ReleaseB(s32 x, s32 y);    // 0x48
     virtual void Move(s32 x, s32 y);        // 0x4C
-    virtual void Unk50(void);
-    virtual void Unk54(void);
+    virtual void Unk50(s32 x, s32 y);
+    virtual void Unk54(s32 x, s32 y);
     virtual void Hover(void);               // 0x58
     virtual void Unhover(void);             // 0x5C
     virtual int Cursor(void);               // 0x60
@@ -386,15 +386,15 @@ void fn_80217734(Window* win, s32 x, s32 y) {
     }
 }
 
-void fn_80217834(Window* win) {
+void fn_80217834(Window* win, s32 x, s32 y) {
     if (win->hover) {
-        win->hover->Unk50();
+        win->hover->Unk50(x, y);
     }
 }
 
-void fn_80217854(Window* win) {
+void fn_80217854(Window* win, s32 x, s32 y) {
     if (win->hover) {
-        win->hover->Unk54();
+        win->hover->Unk54(x, y);
     }
 }
 

@@ -2673,7 +2673,7 @@ static inline void InitBeta(BetaMaster* m) {
 inline BetaMaster::BetaMaster(void) { InitBeta(this); }
 
 
-extern "C" GameMode* fn_8014DE50(void) { return new ("betamaster") BetaMaster; }
+extern "C" GameMode* fn_8014DE50(void*) { return new ("betamaster") BetaMaster; }
 
 static inline void AwardCar(BetaCar* c, int id, int kind, f32 v) {
     switch (kind) {
@@ -2729,7 +2729,7 @@ void fn_8014E740(const f32* pos, f32 r) {
     }
 }
 
-void fn_8014E7D8(void) {}
+void fn_8014E7D8(int, int, int) {}
 
 }  // extern "C"
 

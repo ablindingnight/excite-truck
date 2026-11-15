@@ -177,7 +177,7 @@ s32 fn_8027DEAC(void) { return fn_8027DE98(IdentGetCurrentSlot()); }
 
 s32 fn_8027DED0(void) { return lbl_8055C790; }
 
-void fn_8027DED8(void) {}
+void fn_8027DED8(int, struct Damage*) {}
 
 static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 

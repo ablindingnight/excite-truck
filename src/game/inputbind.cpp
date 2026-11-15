@@ -953,7 +953,7 @@ int ControlExists(const Binding* b) {
     return type != 0;
 }
 
-int fn_801A902C(void) {
+int fn_801A902C(void*) {
     fn_801A7628();
     return 21;
 }

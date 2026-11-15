@@ -561,6 +561,6 @@ void fn_80203EF4(void) {
     }
 }
 
-void fn_80203F0C(void) {}
+void fn_80203F0C(const char*) {}
 
 }  // extern "C"

@@ -1257,9 +1257,9 @@ void fn_802D6B80(Surf* s, u32 base, const char* name) {
     }
 }
 
-void fn_802D6C44(void) {}
+void fn_802D6C44(void*) {}
 
-void fn_802D6C48(void) {}
+void fn_802D6C48(void*) {}
 
 void fn_802D6C4C(f32 x) { lbl_8055FDE0 = x; }
 

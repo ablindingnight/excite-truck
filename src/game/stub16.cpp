@@ -6,13 +6,13 @@ UnkStatic7F lbl_8055F460;
 
 extern "C" {
 
-void fn_80265D38(void) {}
+void fn_80265D38(void*, s32) {}
 
-void fn_80265D3C(void) {}
+void fn_80265D3C(void*) {}
 
-void fn_80265D40(void) {}
+void fn_80265D40(void*, s32) {}
 
-void fn_80265D44(void) {}
+void fn_80265D44(void*) {}
 
 void fn_80265D48(void) {}
 
@@ -20,7 +20,7 @@ void fn_80265D4C(void) {}
 
 void fn_80265D50(void) {}
 
-void fn_80265D54(void) {}
+void fn_80265D54(int) {}
 
 int fn_80265D58(void) { return 0; }
 
@@ -34,13 +34,13 @@ void fn_80265D74(void) {}
 
 void fn_80265D78(void) {}
 
-int fn_80265D7C(void) { return 0; }
+int fn_80265D7C(int) { return 0; }
 
 void fn_80265D84(void) {}
 
 void fn_80265D88(void) {}
 
-void fn_80265D8C(void) {}
+void fn_80265D8C(void*) {}
 
 void fn_80265D90(void) {}
 

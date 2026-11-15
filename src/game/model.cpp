@@ -1126,9 +1126,9 @@ void fn_802C8218(int on) {
     lbl_8055D00C = mode;
 }
 
-void fn_802C8230(void) { fn_802DB2B4(); }
+void fn_802C8230(f32) { fn_802DB2B4(); }
 
-void fn_802C8234(void) { fn_802DB2B8(); }
+void fn_802C8234(f32) { fn_802DB2B8(); }
 
 }  // extern "C"
 

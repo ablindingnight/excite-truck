@@ -793,7 +793,7 @@ void fn_802CF5D4(void) {
     GXSetAlphaCompare(4, 0, 1, 0, 0);
 }
 
-void fn_802CF5F8(void) {}
+void fn_802CF5F8(u32) {}
 
 void fn_802CF5FC(void) {}
 
@@ -2185,7 +2185,7 @@ void fn_802D3144(void) {
     lbl_804C5700.dirty = 1;
 }
 
-int fn_802D31D8(void) {
+int fn_802D31D8(int) {
     lbl_8055FDB4 = 1;
     GXSetColorUpdate(0);
     GXSetAlphaUpdate(1);
@@ -2337,7 +2337,7 @@ void fn_802D3900(void) {
     lbl_804C9984.count = 0;
 }
 
-VisTest* fn_802D39A4(f32 rate) {
+VisTest* fn_802D39A4(void*, f32 rate) {
     VisTest* t = 0;
     for (int i = 0; i < 0x40; i++) {
         if (!lbl_804C9984.tests[i].used) {
@@ -2382,7 +2382,7 @@ int fn_802D3A5C(VisTest* t, const V3* p) {
     return t->vis >= 0.007843138f;
 }
 
-void fn_802D3BB0(void) {}
+void fn_802D3BB0(void*) {}
 
 struct QuadVtx {
     V3 pos;

@@ -343,7 +343,7 @@ void fn_80209090(s32 q) {
 
 s32 fn_802090B4(void) { return lbl_8055EDA8; }
 
-void fn_802090BC(void) { fn_802E30C8("mixer: MixerSetSoundMode is a NOOP"); }
+void fn_802090BC(int) { fn_802E30C8("mixer: MixerSetSoundMode is a NOOP"); }
 
 // Dead-stripped in the game (sound mode name).
 const char* MixerSoundModeName(void) { return "Surround"; }

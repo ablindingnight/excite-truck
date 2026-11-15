@@ -473,7 +473,7 @@ void fn_802E8528(s32 chan, f32 strength, f32 b);
 
 void fn_802E8518(s32 chan) { fn_802E8528(chan, 0.0f, 0.0f); }
 
-void fn_802E8524(void) {}
+void fn_802E8524(int, int) {}
 
 void fn_802E8528(s32 chan, f32 strength, f32 b) {
     f32 v = 65535.0f * (strength - 0.01f);
@@ -482,11 +482,11 @@ void fn_802E8528(s32 chan, f32 strength, f32 b) {
     lbl_80505978[chan].rumble = x < 0xFFFF ? x : 0xFFFF;
 }
 
-void fn_802E85A8(void) {}
+void fn_802E85A8(int, f32, f32, f32) {}
 
-void fn_802E85AC(void) {}
+void fn_802E85AC(int, f32, f32) {}
 
-int fn_802E85B0(void) { return 3; }
+int fn_802E85B0(s32) { return 3; }
 
 const char* fn_802E85B8(s32 chan) {
     const char* names[4] = {"Controller Socket 1", "Controller Socket 2", "Controller Socket 3", "Controller Socket 4"};
@@ -503,7 +503,7 @@ void fn_802E85F4(s32 chan) {
     r->histPos = (r->histPos + 1) % 16;
 }
 
-void fn_802E8664(void) {}
+void fn_802E8664(int) {}
 
 KStatus* fn_802E8668(s32 chan) {
     Remote* r = &lbl_80505978[chan];

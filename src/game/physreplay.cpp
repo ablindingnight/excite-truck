@@ -412,7 +412,7 @@ void fn_801B5354(void) { fn_801B49C8(lbl_8055E6D8); }
 
 void fn_801B535C(void* list, int n) {}
 
-void fn_801B5360(void) {}
+void fn_801B5360(int, const void*, int) {}
 
 void fn_801B5364(int type, EventHandler h) { lbl_80435C70.handlers[type] = h; }
 

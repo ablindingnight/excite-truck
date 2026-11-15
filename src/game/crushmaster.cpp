@@ -1105,7 +1105,7 @@ static inline void CrushSetup(CrushMaster* m) {
 
 inline CrushMaster::CrushMaster(void) : t174(0.0f), t17C(2.0f), t184(1.5f), t18C(1.5f) { CrushSetup(this); }
 
-extern "C" CrushMaster* fn_80172C28(void) { return new ("crushmaster") CrushMaster; }
+extern "C" CrushMaster* fn_80172C28(void*) { return new ("crushmaster") CrushMaster; }
 
 inline CrushMaster::~CrushMaster(void) {
     if (sPreRace) {

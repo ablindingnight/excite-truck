@@ -13,7 +13,7 @@ ModuleTag lbl_8055E108;
 
 extern "C" {
 
-void fn_80139044(void) {}
+void fn_80139044(int*) {}
 
 f32 fn_80139048(void) { return 0.305f + fn_80137C54(-1)->carLen * 0.5f; }
 

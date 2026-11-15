@@ -467,7 +467,7 @@ void fn_802879E4(int mode) {
     }
 }
 
-void fn_80287A34(void) {
+void fn_80287A34(int) {
     fn_801E12A4();
     fn_802A1548();
     fn_801B83A0()->Draw();
@@ -490,7 +490,7 @@ void fn_80287A6C(int mode) {
     }
 }
 
-void fn_80287AF0(void) {
+void fn_80287AF0(int) {
     fn_80292864();
     fn_8028A9F4();
 }

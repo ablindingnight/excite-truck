@@ -3744,13 +3744,13 @@ void fn_8018AE2C(u8* p, f32 v) { F32(p, 0x2600) = v; }
 
 void fn_8018AE34(u8* p, f32 v) { F32(p, 0x2604) = v; }
 
-f32 fn_8018AE3C(void) { return 0.0f; }
+f32 fn_8018AE3C(u8*) { return 0.0f; }
 
-f32 fn_8018AE44(void) { return 0.0f; }
+f32 fn_8018AE44(u8*) { return 0.0f; }
 
-f32 fn_8018AE4C(void) { return 0.0f; }
+f32 fn_8018AE4C(u8*) { return 0.0f; }
 
-f32 fn_8018AE54(void) { return 0.0f; }
+f32 fn_8018AE54(u8*) { return 0.0f; }
 
 // Shared body-tuning block (lbl_80434990), built on first use.
 struct BodyTune {
@@ -3758,7 +3758,7 @@ struct BodyTune {
     u8 data[0x10];
 };
 
-BodyTune* fn_8018AE5C(void) {
+BodyTune* fn_8018AE5C(u8*) {
     static BodyTune s;
     return &s;
 }

@@ -637,7 +637,7 @@ void fn_802980A0(void) {
     }
 }
 
-void fn_80298124(void) {
+void fn_80298124(int) {
     lbl_8055F7C8->Draw();
     lbl_8055F7D8->Draw();
     if (lbl_8055F7C4) {

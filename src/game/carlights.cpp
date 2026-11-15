@@ -194,7 +194,7 @@ void fn_80294CC4(void) {}
 
 void fn_80294ED4(void);
 
-void fn_80294CC8(void) { fn_80294ED4(); }
+void fn_80294CC8(int) { fn_80294ED4(); }
 
 void fn_80294CCC(const Vec* p, const Vec* r, const Vec* u, f32 w, f32 h, u32 color, s32 type) {
     QuadIdx idx = lbl_802FA9B0;
