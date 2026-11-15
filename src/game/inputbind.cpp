@@ -466,62 +466,62 @@ static JoyStatus lbl_804351E0[4];  // last frame's
 static Mouse lbl_80435370;  // current mouse
 static Mouse lbl_8043537C;  // last frame's
 
-static LocString lbl_80435388(lbl_80333D18 + 0x126C);
-static LocString lbl_80435394(lbl_80333D18 + 0x1288);
-static LocString lbl_804353A0(lbl_80333D18 + 0x12A4);
-static LocString lbl_804353AC(lbl_80333D18 + 0x12C0);
-static LocString lbl_804353B8(lbl_80333D18 + 0x12DC);
-static LocString lbl_804353C4(lbl_80333D18 + 0x12F8);
-static LocString lbl_804353D0(lbl_80333D18 + 0x1314);
-static LocString lbl_804353DC(lbl_80333D18 + 0x1330);
-static LocString lbl_804353E8(lbl_80333D18 + 0x1350);
-static LocString lbl_804353F4(lbl_80333D18 + 0x1368);
-static LocString lbl_80435400(lbl_80333D18 + 0x1384);
-static LocString lbl_8043540C(lbl_80333D18 + 0x13A0);
-static LocString lbl_80435418(lbl_80333D18 + 0x13B8);
-static LocString lbl_80435424(lbl_80333D18 + 0x13D0);
-static LocString lbl_80435430(lbl_80333D18 + 0x13EC);
-static LocString lbl_8043543C(lbl_80333D18 + 0x1408);
-static LocString lbl_80435448(lbl_80333D18 + 0x1420);
-static LocString lbl_80435454(lbl_80333D18 + 0x1438);
-static LocString lbl_80435460(lbl_80333D18 + 0x1450);
-static LocString lbl_8043546C(lbl_80333D18 + 0x1468);
-static LocString lbl_80435478(lbl_80333D18 + 0x1480);
-static LocString lbl_80435484(lbl_80333D18 + 0x1498);
-static LocString lbl_80435490(lbl_80333D18 + 0x14B0);
-static LocString lbl_8043549C(lbl_80333D18 + 0x14C8);
-static LocString lbl_804354A8(lbl_80333D18 + 0x14E0);
-static LocString lbl_804354B4(lbl_80333D18 + 0x14F8);
-static LocString lbl_804354C0(lbl_80333D18 + 0x1510);
-static LocString lbl_804354CC(lbl_80333D18 + 0x1528);
-static LocString lbl_804354D8(lbl_80333D18 + 0x1540);
-static LocString lbl_804354E4(lbl_80333D18 + 0x1558);
-static LocString lbl_804354F0(lbl_80333D18 + 0x1570);
-static LocString lbl_804354FC(lbl_80333D18 + 0x1588);
-static LocString lbl_80435508(lbl_80333D18 + 0x15A0);
-static LocString lbl_80435514(lbl_80333D18 + 0x15B8);
-static LocString lbl_80435520(lbl_80333D18 + 0x15D0);
-static LocString lbl_8043552C(lbl_80333D18 + 0x15E8);
-static LocString lbl_80435538(lbl_80333D18 + 0x1600);
-static LocString lbl_80435544(lbl_80333D18 + 0x1618);
-static LocString lbl_80435550(lbl_80333D18 + 0x1630);
-static LocString lbl_8043555C(lbl_80333D18 + 0x164C);
-static LocString lbl_80435568(lbl_80333D18 + 0x1668);
-static LocString lbl_80435574(lbl_80333D18 + 0x1684);
-static LocString lbl_80435580(lbl_80333D18 + 0x16A4);
-static LocString lbl_8043558C(lbl_80333D18 + 0x16C8);
-static LocString lbl_80435598(lbl_80333D18 + 0x16E8);
-static LocString lbl_804355A4(lbl_80333D18 + 0x1700);
-static LocString lbl_804355B0(lbl_80333D18 + 0x1718);
-static LocString lbl_804355BC(lbl_80333D18 + 0x1738);
-static LocString lbl_804355C8(lbl_80333D18 + 0x1750);
-static LocString lbl_804355D4(lbl_80333D18 + 0x1768);
-static LocString lbl_804355E0(lbl_80333D18 + 0x1780);
-static LocString lbl_804355EC(lbl_80333D18 + 0x1798);
-static LocString lbl_804355F8(lbl_80333D18 + 0x17B0);
-static LocString lbl_80435604(lbl_80333D18 + 0x17C8);
-static LocString lbl_80435610(lbl_80333D18 + 0x17E0);
-static LocString lbl_8043561C(lbl_80333D18 + 0x17F8);
+static LocString lbl_80435388("ControlStrings:JoyAXPlus");
+static LocString lbl_80435394("ControlStrings:JoyAYPlus");
+static LocString lbl_804353A0("ControlStrings:JoyBXPlus");
+static LocString lbl_804353AC("ControlStrings:JoyBYPlus");
+static LocString lbl_804353B8("ControlStrings:JoyAXMinus");
+static LocString lbl_804353C4("ControlStrings:JoyAYMinus");
+static LocString lbl_804353D0("ControlStrings:JoyBXMinus");
+static LocString lbl_804353DC("ControlStrings:JoyBYMinus");
+static LocString lbl_804353E8("ControlStrings:JoyALeft");
+static LocString lbl_804353F4("ControlStrings:JoyARight");
+static LocString lbl_80435400("ControlStrings:JoyAUp");
+static LocString lbl_8043540C("ControlStrings:JoyADown");
+static LocString lbl_80435418("ControlStrings:JoyBLeft");
+static LocString lbl_80435424("ControlStrings:JoyBRight");
+static LocString lbl_80435430("ControlStrings:JoyBUp");
+static LocString lbl_8043543C("ControlStrings:JoyBDown");
+static LocString lbl_80435448("ControlStrings:Button1");
+static LocString lbl_80435454("ControlStrings:Button2");
+static LocString lbl_80435460("ControlStrings:Button3");
+static LocString lbl_8043546C("ControlStrings:Button4");
+static LocString lbl_80435478("ControlStrings:Button5");
+static LocString lbl_80435484("ControlStrings:Button6");
+static LocString lbl_80435490("ControlStrings:Button7");
+static LocString lbl_8043549C("ControlStrings:Button8");
+static LocString lbl_804354A8("ControlStrings:Button9");
+static LocString lbl_804354B4("ControlStrings:Button10");
+static LocString lbl_804354C0("ControlStrings:Button11");
+static LocString lbl_804354CC("ControlStrings:Button12");
+static LocString lbl_804354D8("ControlStrings:Button13");
+static LocString lbl_804354E4("ControlStrings:Button14");
+static LocString lbl_804354F0("ControlStrings:Button15");
+static LocString lbl_804354FC("ControlStrings:Button16");
+static LocString lbl_80435508("ControlStrings:POVLeft");
+static LocString lbl_80435514("ControlStrings:POVRight");
+static LocString lbl_80435520("ControlStrings:POVFront");
+static LocString lbl_8043552C("ControlStrings:POVBack");
+static LocString lbl_80435538("ControlStrings:POVAny");
+static LocString lbl_80435544("ControlStrings:MouseUp");
+static LocString lbl_80435550("ControlStrings:MouseDown");
+static LocString lbl_8043555C("ControlStrings:MouseLeft");
+static LocString lbl_80435568("ControlStrings:MouseRight");
+static LocString lbl_80435574("ControlStrings:MouseButtonLeft");
+static LocString lbl_80435580("ControlStrings:MouseButtonMiddle");
+static LocString lbl_8043558C("ControlStrings:MouseButtonRight");
+static LocString lbl_80435598("ControlStrings:KeySHIFT");
+static LocString lbl_804355A4("ControlStrings:KeyCTRL");
+static LocString lbl_804355B0("ControlStrings:KeyRSHIFT");
+static LocString lbl_804355BC("ControlStrings:KeyRCTRL");
+static LocString lbl_804355C8("ControlStrings:KeyINS");
+static LocString lbl_804355D4("ControlStrings:KeyDEL");
+static LocString lbl_804355E0("ControlStrings:KeySPACE");
+static LocString lbl_804355EC("ControlStrings:KeyUP");
+static LocString lbl_804355F8("ControlStrings:KeyDOWN");
+static LocString lbl_80435604("ControlStrings:KeyLEFT");
+static LocString lbl_80435610("ControlStrings:KeyRIGHT");
+static LocString lbl_8043561C("ControlStrings:Unknown\0");
 
 static inline f32 MaxZero(f32 v) { return 0.0f > v ? 0.0f : v; }
 
@@ -1059,5 +1059,4 @@ BindEntry* fn_801A9234(Binding* b) {
 }
 
 extern "C" {
-char lbl_80334F84[0x5A4] = "ControlStrings:JoyAXPlus\0\0\0\0ControlStrings:JoyAYPlus\0\0\0\0ControlStrings:JoyBXPlus\0\0\0\0ControlStrings:JoyBYPlus\0\0\0\0ControlStrings:JoyAXMinus\0\0\0ControlStrings:JoyAYMinus\0\0\0ControlStrings:JoyBXMinus\0\0\0ControlStrings:JoyBYMinus\0\0\0\0\0\0\0ControlStrings:JoyALeft\0ControlStrings:JoyARight\0\0\0\0ControlStrings:JoyAUp\0\0\0\0\0\0\0ControlStrings:JoyADown\0ControlStrings:JoyBLeft\0ControlStrings:JoyBRight\0\0\0\0ControlStrings:JoyBUp\0\0\0\0\0\0\0ControlStrings:JoyBDown\0ControlStrings:Button1\0\0ControlStrings:Button2\0\0ControlStrings:Button3\0\0ControlStrings:Button4\0\0ControlStrings:Button5\0\0ControlStrings:Button6\0\0ControlStrings:Button7\0\0ControlStrings:Button8\0\0ControlStrings:Button9\0\0ControlStrings:Button10\0ControlStrings:Button11\0ControlStrings:Button12\0ControlStrings:Button13\0ControlStrings:Button14\0ControlStrings:Button15\0ControlStrings:Button16\0ControlStrings:POVLeft\0\0ControlStrings:POVRight\0ControlStrings:POVFront\0ControlStrings:POVBack\0\0ControlStrings:POVAny\0\0\0ControlStrings:MouseUp\0\0ControlStrings:MouseDown\0\0\0\0ControlStrings:MouseLeft\0\0\0\0ControlStrings:MouseRight\0\0\0ControlStrings:MouseButtonLeft\0\0ControlStrings:MouseButtonMiddle\0\0\0\0ControlStrings:MouseButtonRight\0ControlStrings:KeySHIFT\0ControlStrings:KeyCTRL\0\0ControlStrings:KeyRSHIFT\0\0\0\0\0\0\0\0ControlStrings:KeyRCTRL\0ControlStrings:KeyINS\0\0\0ControlStrings:KeyDEL\0\0\0ControlStrings:KeySPACE\0ControlStrings:KeyUP\0\0\0\0ControlStrings:KeyDOWN\0\0ControlStrings:KeyLEFT\0\0ControlStrings:KeyRIGHT\0ControlStrings:Unknown";
 }
