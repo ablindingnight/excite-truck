@@ -364,6 +364,23 @@ public:
     unsigned char fields244[0x20];  // 0x244, read through widgets.cpp views
 };
 
+class ColorRect : public UIWidget {  /* Class name unproven; vtable lbl_8033F078 (no constructor in widgets.cpp) */
+public:
+    virtual void Slot24(void* context);          // fn_8021B3BC (implicit dtor fn_802292D8)
+    int rectX, rectY, rectW, rectH;              // 0x244
+    int color;                                   // 0x254
+};
+
+class RichCaption : public UIWidget {  /* Class name unproven; vtable lbl_8033EFF4 (no constructor in widgets.cpp) */
+public:
+    inline virtual ~RichCaption(void);           // defined in widgets.cpp: TU-end copy fn_80229B78
+    virtual void Slot24(void* context);          // fn_8021BD48
+    inline virtual void Slot7C(void);            // defined in widgets.cpp: TU-end copy fn_80229BE8
+    const char* label;                           // 0x244
+    char text[256];                              // 0x248
+    void* renderer;                              // 0x348 (BitmapFont*)
+};
+
 class Numeric : public UILabel {  /* Class name unproven (allocation tag "Numeric"); vtable lbl_8033EF68 */
 public:
     Numeric(int x, int y, float* value, float scale, const char* format, float bias, int height);  // fn_8021BD98 (implicit dtor fn_8022927C)
@@ -538,6 +555,51 @@ public:
     void* track;                 // 0x248
     void* marker;                // 0x24C
     unsigned char rest250[0x10]; // 0x250, read through widgets.cpp's ScrollbarPrefix
+};
+
+class CanvasWidget : public UIWidget {  /* Class name unproven; vtable lbl_8033E6EC (no constructor in widgets.cpp) */
+public:
+    virtual void Slot24(void* context);          // fn_80220E08 (implicit dtor fn_80228FFC)
+    void* canvas;                                // 0x244
+};
+
+class IntSlider : public UIWidget {  /* Class name unproven (allocation tag "IntSlider"); vtable lbl_8033E668 */
+public:
+    IntSlider(int x, int y, int width, int height, int* value, int minimum, int maximum);  // fn_80220778
+    virtual ~IntSlider(void);                    // fn_80220874
+    virtual void Slot14(void);                   // fn_802208EC
+    virtual void Slot24(void* context);          // fn_80220B5C
+    virtual void Slot28(void);                   // fn_80220C54
+    virtual void Slot3C(int x, int y);           // fn_80220A50
+    virtual void Slot40(int x, int y);           // fn_80220AFC
+    virtual void Slot4C(int x, int y);           // fn_80220B3C
+    virtual int Slot64(int key);                 // fn_80220948
+    int* value;                  // 0x244
+    void* background;            // 0x248
+    void* marker;                // 0x24C
+    int minimum, maximum;        // 0x250
+    bool dragging;               // 0x258
+    unsigned char gap259[3];
+    int* focus;                  // 0x25C
+    int token;                   // 0x260
+};
+
+class MenuGrid : public UIWidget {  /* Class name unproven; vtable lbl_8033E5E4 (no constructor in widgets.cpp) */
+public:
+    virtual void Slot24(void* context);          // fn_80221F9C (implicit dtor fn_80228FA4)
+    virtual void Slot3C(int x, int y);           // fn_80222120
+    virtual void Slot40(int x, int y);           // fn_80222178
+    virtual void Slot4C(int x, int y);           // fn_80222234
+    unsigned char fields244[0x10];  // 0x244, read through widgets.cpp's MenuSelectionPrefix
+};
+
+class CircleList : public UIWidget {  /* Class name unproven (allocation tag "CircleList"); vtable lbl_8033E560 */
+public:
+    CircleList(struct WidgetDesc* desc, void* context);  // fn_80222BDC
+    virtual ~CircleList(void);                   // fn_80222C8C
+    virtual void Slot28(void);                   // fn_80222CFC
+    void* context;               // 0x244
+    unsigned char rest248[0x10]; // 0x248, read through widgets.cpp's UnsignedAssetPrefix
 };
 
 class StringList;

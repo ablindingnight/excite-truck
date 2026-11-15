@@ -623,10 +623,8 @@ extern "C" int fn_80129BC4(void);
 extern "C" unsigned int fn_8022D1B4(const char*);
 extern "C" void fn_802168EC(void*, WidgetFragment*, int);
 extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
-extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
 extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
-extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
 extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
@@ -965,8 +963,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)new ("IntArrowBtn") IntArrowBtn(d->x, d->y + 1, (int*)value, (int)low, (int)high, -1, fn_80215270(0, 1));
         widgets[count++] = p;
         if (d->dx - 37 > 10) {
-            p = (WidgetFragment*)operator new(0x264, "IntSlider");
-            if (p) p = fn_80220778(p, d->x + 21, d->y, d->dx - 37, d->dy, value, low, high);
+            p = (WidgetFragment*)new ("IntSlider") IntSlider(d->x + 21, d->y, d->dx - 37, d->dy, (int*)value, (int)low, (int)high);
             widgets[count++] = p;
         }
         p = (WidgetFragment*)new ("IntArrowBtn") IntArrowBtn(d->x + d->dx - 14, d->y + 1, (int*)value, (int)low, (int)high, 1, fn_80215270(1, 1));
@@ -1130,8 +1127,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 35: {
         UIStyle* list = FindStyle(styles, d->style, 0xa);
-        p = (WidgetFragment*)operator new(0x258, "CircleList");
-        if (p) p = fn_80222BDC(p, d, list ? list->value : lbl_8055EF24);
+        p = (WidgetFragment*)new ("CircleList") CircleList((WidgetDesc*)d, list ? list->value : lbl_8055EF24);
         widgets[count++] = p;
         break;
     }
