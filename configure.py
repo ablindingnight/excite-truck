@@ -1300,7 +1300,7 @@ config.libs.append(
             Object(Matching, "game/gndtex.cpp"),
             Object(NonMatching, "game/glare.cpp"),
             Object(NonMatching, "game/tevbink.cpp"),
-            Object(NonMatching, "game/kernel.cpp"),
+            Object(Matching, "game/kernel.cpp"),
             Object(Matching, "game/log.cpp"),
             Object(Matching, "game/file.cpp"),
             Object(Matching, "game/memarena.cpp"),

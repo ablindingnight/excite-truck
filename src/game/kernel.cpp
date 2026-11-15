@@ -240,26 +240,32 @@ void fn_802E1780(u8* dst, u32 w, u32 pitch) {
     }
 }
 
+/* Helper name unproven */
+// Copies one 8-byte x 4-row tile.
+static inline void CopyTile(u32* d, const u8* s, u32 off, u32 pitch) {
+    for (int r = 0; r < 4; r++) {
+        const u32* p = (const u32*)(s + off + pitch * r);
+        d[r * 2] = p[0];
+        d[r * 2 + 1] = p[1];
+    }
+}
+
 // Swizzles linear rows into 4-row tiles of 8 bytes.
-// NonMatching: same instructions as the target, registers differ (56 rows).
 void fn_802E1804(u8* dst, const u8* src, int w, u32 h, int bpp) {
     u32 k;
     u32 y;
     u32 pitch;
-    u32* d;
-    u32 off;
+    u32 cols;
+    u32 rows;
     int out;
     out = 0;
     pitch = w * bpp;
-    for (y = 0; y < (h >> 2); y++) {
+    rows = h >> 2;
+    cols = pitch >> 3;
+    for (y = 0; y < rows; y++) {
         const u32 row = y * 4;
-        off = row * pitch;
-        for (k = 0; k < (pitch >> 3); k++, off += 8) {
-            d = (u32*)(dst + out);
-            for (int r = 0; r < 4; r++) {
-                d[r * 2] = *(const u32*)((src + off) + pitch * r);
-                d[r * 2 + 1] = *(const u32*)((src + off) + pitch * r + 4);
-            }
+        for (k = 0; k < cols; k++) {
+            CopyTile((u32*)(dst + out), src, row * pitch + k * 8, pitch);
             out += 0x20;
         }
     }
@@ -390,7 +396,9 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     } else if (alpha <= 0.01f) {
         a = 0;
     } else {
-        a = (int)(0.5f + 255.0f * alpha);
+        // A two-statement branch: IRO does not fold this if/else into a ?:, so 0.01f is pooled before 0.5f/255.0f.
+        f32 scaled = 0.5f + 255.0f * alpha;
+        a = (int)scaled;
     }
     // The target branches (beq; li 1; b; li 0); every if/else or ?: form becomes branch-free (neg/or/srwi) here.
     // A switch with default first reproduces it; the original may have switched on a related format value.
