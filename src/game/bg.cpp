@@ -5,7 +5,7 @@
 
 class BgObject {
 public:
-    virtual void vf08(void);
+    virtual ~BgObject(void);
     virtual void Update(void);  // 0xC
 };
 
