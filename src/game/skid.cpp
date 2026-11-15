@@ -441,30 +441,33 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
     }
 }
 
+#pragma push
+#pragma opt_propagation off
 void fn_8028DDF0(SkidEntry* e, int n) {
-    SkidEntry* current = e;
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     f32 maxd = 40000.0f;
     f32 now = fn_801E7E18();
+    int none;
     u32* track = lbl_804B3490;
-    int none = -1;
-    int i;
-    for (i = 0; i < n; i++, current++) {
-        if (current->dist < maxd && current->car->surface == lbl_804B3490[current->index] && current->active) {
+    int i = 0;
+    none = -1;
+    for (; i < n; i++, e++) {
+        if (e->dist < maxd && e->car->surface == lbl_804B3490[e->index] && e->active) {
             for (int w = 0; w < 4; w++) {
-                fn_8028D89C(current, w, now);
+                fn_8028D89C(e, w, now);
             }
         } else {
-            int k = current->index;
+            int k = e->index;
             lbl_8055F720[k * 4 + 0].type = none;
             lbl_8055F720[k * 4 + 1].type = none;
             lbl_8055F720[k * 4 + 2].type = none;
             lbl_8055F720[k * 4 + 3].type = none;
         }
-        track[current->index] = current->car->surface;
+        track[e->index] = e->car->surface;
     }
 }
+#pragma pop
 
 }  // extern "C"
