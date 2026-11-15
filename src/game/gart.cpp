@@ -479,7 +479,7 @@ public:
         int id;           // offset 0x28
     };
 
-    DynoTex(int max, u8 flip);
+    DynoTex(int max, int flip);
     virtual ~DynoTex(void);
     void Add(int id, const char* name);
     void Draw(int id, int x, int y, int w, int h);
@@ -491,7 +491,7 @@ public:
     u8 flip;         // offset 0x14
 };
 
-DynoTex::DynoTex(int max, u8 flip) {
+DynoTex::DynoTex(int max, int flip) {
     this->max = max;
     entries = (Entry*)__nwa__FUlPCc(max * sizeof(Entry), "dynotex");
     count = 0;

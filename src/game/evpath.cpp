@@ -1095,7 +1095,7 @@ public:
 // A set of named textures, one of which is drawn at a time (gart.cpp).
 class DynoTex {
 public:
-    DynoTex(int max, u8 flip);
+    DynoTex(int max, int flip);
     virtual ~DynoTex(void);
     void Add(int id, const char* name);
 

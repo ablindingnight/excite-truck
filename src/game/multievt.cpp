@@ -336,7 +336,7 @@ int fn_802146BC(MenuDesc* desc, int x, int y, int modal);
 void fn_802E317C(const char* fmt, ...);
 void fn_80236914(int which, f32* out, f32 t);
 void __ct__10StatsTableFv(void* p);
-void __ct__7DynoTexFiUc(void* p, int n, u8 f);
+void __ct__7DynoTexFii(void* p, int n, int flip);
 void Add__7DynoTexFiPCc(void* p, int id, const char* name);
 int fn_8024A4B8(const char** a, const char** b);
 }
@@ -461,7 +461,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     MoviePath(loc.movie, loc.data[loc.cur].env);
     UnlockList* unlocks = lbl_8055F28C;
     CourseTex tex;
-    __ct__7DynoTexFiUc(&tex, unlocks->count, 0);
+    __ct__7DynoTexFii(&tex, unlocks->count, 0);
     *(void**)&tex = lbl_80343C30;
     tex.f2C = 0;
     tex.vt2 = lbl_80343C30 + 3;
@@ -1148,7 +1148,7 @@ struct PtrVec {
         d[n] = e;
     }
 };
-void __ct__7DynoTexFiUc(void* p, int n, u8 f);
+void __ct__7DynoTexFii(void* p, int n, int flip);
 void Add__7DynoTexFiPCc(void* p, int id, const char* name);
 
 static inline void AddIfInGroup(const char* name, EvEntry* e, u8* p) {
@@ -1166,7 +1166,7 @@ u8* fn_8024B73C(u8* p, const char* name, EvList* list) {
     PTR(p, 0x18) = p + 0x24;
     S32(p, 0x20) = 10;
     S32(p, 0x1C) = 0;
-    __ct__7DynoTexFiUc(p + 0x4C, 10, 0);
+    __ct__7DynoTexFii(p + 0x4C, 10, 0);
     for (i = 0; i < list->count; i++) {
         AddIfInGroup(name, &list->items[i], p);
     }
