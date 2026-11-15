@@ -88,9 +88,11 @@ struct VisibleList {
 };
 
 ModuleTag lbl_8055ECB0;
+static inline u32 InitialFFFFWord() { return 0xFFFF0000u; }
+extern const u32 lbl_8055ECB8 = InitialFFFFWord();
 static UnkStatic123 lbl_804888B8;
-UnkStaticFFFF lbl_8055ECB8;
-UnkStatic7F lbl_8055ECBC;
+static inline u32 Initial7FWord() { return 0x7F000000u; }
+extern const u32 lbl_8055ECBC = Initial7FWord();
 int lbl_8055B410 = 7;              // chunk window
 int lbl_8055B414 = -1;             // forced chunk
 int lbl_8055ECC0;                  // chunk count
