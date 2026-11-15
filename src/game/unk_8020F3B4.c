@@ -501,6 +501,8 @@ extern "C" void fn_802101F8(PanelWidget *arg0, long arg1, long arg2, void *arg3)
 #pragma pop
 
  
+extern void fn_802E6BD8(unsigned long, int, void *, unsigned long, void (*)(int));
+extern void fn_8000DBC8(void (*)(long, long));
 void fn_8021031C(void) {
     long type;
     char *buffer;
@@ -759,8 +761,6 @@ extern "C" void fn_80147230(void *, const char *, ...);
 extern "C" void fn_801473F8(PanelWidget *, const char *, const char *, ...);
 extern "C" void fn_801476C4(void *);
 extern "C" void fn_8014784C(PanelWidget *, const char *, const char *, int);
-extern "C" void *memset(void *, int, unsigned long);
-extern "C" char *strncpy(char *, const char *, unsigned long);
 extern "C" unsigned long strlen(const char *);
 
 // Draws the custom-course menu: a page of 10 names with their numbers, the cursor, the option buttons,

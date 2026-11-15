@@ -340,12 +340,16 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
     }
 }
 
+}
+
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
     v->x = x;
     v->y = y;
     v->z = z;
 }
+
+extern "C" {
 
 /* Helper name unproven */
 static inline ArtItem* ItemAt(int off) {

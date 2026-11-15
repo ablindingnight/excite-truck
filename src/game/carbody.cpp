@@ -408,9 +408,6 @@ f32 fn_80181AC0(void) {
 
 f32 fn_80181AEC(void) { return driveTune.v[3]; }
 
-extern f32 lbl_8055E4F0;        // bad landing bounce time
-extern f32 lbl_8055E4E8[2];
-extern f32 lbl_8055E4D8;
 int OptE3Demo(void);
 extern "C" {
 void fn_802049DC(const char* name, f32* var, f32 lo, f32 hi, f32 step);  // debug tunable
@@ -1469,7 +1466,7 @@ f32 PSVECMag(const void* v);
 void PSVECNormalize(const void* a, void* b);
 f32 PSVECDotProduct(const void* a, const void* b);
 extern u8* lbl_8055E908;
-extern const f32 lbl_80561CB0, lbl_80561CC0, lbl_80561CDC, lbl_80561DE4, lbl_80561E5C, lbl_80561CCC, lbl_80561CD0, lbl_80561CD8, lbl_80561CE4, lbl_80561CFC,
+extern const f32 lbl_80561CC0, lbl_80561CDC, lbl_80561DE4, lbl_80561E5C, lbl_80561CCC, lbl_80561CD0, lbl_80561CD8, lbl_80561CE4, lbl_80561CFC,
     lbl_80561D00, lbl_80561D04, lbl_80561D2C, lbl_80561D34, lbl_80561D38, lbl_80561D44, lbl_80561D50,
     lbl_80561D60, lbl_80561D98, lbl_80561DA0, lbl_80561DA4, lbl_80561DC0, lbl_80561DD0, lbl_80561DEC,
     lbl_80561E58, lbl_80561E60, lbl_80561E64, lbl_80561E68, lbl_80561E6C, lbl_80561E70, lbl_80561E74,
@@ -1552,7 +1549,7 @@ void fn_8018E330(u8* p);
 f32 fn_801DCEC0(void);
 double sqrt(double x);
 void PSVECCrossProduct(const void* a, const void* b, void* out);
-extern const f32 lbl_80561CB8, lbl_80561CEC, lbl_80561CF0, lbl_80561CF4, lbl_80561CF8, lbl_80561D08, lbl_80561D0C,
+extern const f32 lbl_80561CEC, lbl_80561CF0, lbl_80561CF4, lbl_80561CF8, lbl_80561D08, lbl_80561D0C,
     lbl_80561D40, lbl_80561D64, lbl_80561D7C, lbl_80561D84, lbl_80561D94, lbl_80561D9C, lbl_80561DA8,
     lbl_80561DAC, lbl_80561DB0, lbl_80561DB4, lbl_80561DB8, lbl_80561DBC, lbl_80561DC4, lbl_80561DC8,
     lbl_80561DCC, lbl_80561DD4, lbl_80561DD8, lbl_80561DDC, lbl_80561DE0, lbl_80561DE8, lbl_80561DF0,
@@ -2898,7 +2895,6 @@ void fn_80186DE8(void) {
 
 
 void vf20__10CollVolumeFv(u8* p);
-extern const f32 lbl_80561CAC;  // 0.0
 extern const f32 lbl_80561CDC;  // 0.5
 extern const f32 lbl_80561D9C;  // 1/60 s
 extern const f32 lbl_80561DE4;  // -1.0
@@ -2994,7 +2990,6 @@ struct SnapPose {
 
 
 extern f32 lbl_8055E460;  // render interpolation factor between the last two physics steps
-extern u8 lbl_8055E4F5;
 extern s32 lbl_8055E3C4;  // frame counter
 void fn_8018DA5C(u8* p, u8* m);
 u32 fn_8018B06C(u8* p);
@@ -3296,7 +3291,6 @@ int fn_80189BDC(u8* p) {
     return fn_801B83A0()->sCC(S32(p, 0x1EC));
 }
 
-extern const f32 lbl_80561CAC;  // 0.0
 
 void fn_80189C64(u8* p) {
     if (U8(p, 0x26AC)) {
@@ -3510,7 +3504,6 @@ struct TuneSink {
     virtual void Add(const char* name, void* value, const char* units, float lo, float hi, float step);
 };
 
-extern const f32 lbl_80561CAC;
 extern const f32 lbl_80561CCC, lbl_80561CDC, lbl_80561CE4, lbl_80561CEC, lbl_80561CF8,
     lbl_80561D00, lbl_80561D0C, lbl_80561D28, lbl_80561D34, lbl_80561D44, lbl_80561D68, lbl_80561DE4, lbl_80561EBC,
     lbl_80561F0C, lbl_80561F10, lbl_80561F14, lbl_80561F18;
@@ -3877,7 +3870,6 @@ int vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(u8* p, f32 t, const CbPacket* a, co
 void fn_8018ADB4(u8* p, f32 v);
 void fn_8018ADBC(u8* p, f32 v);
 void fn_801E9DD0(s16* surface, f32 x, f32 z);
-extern u8* lbl_8055E918;
 
 // CarBody::vf30: applies a state packet interpolated between `cur` and `prev` (t = 0 is cur): the rigid body
 // part, engine speed, steering, pedals, gear and the four wheels (suspension, spin with 2 pi wrap, slip, skid,

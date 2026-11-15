@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "game/stringlist.h"
 #include "game/uitable.h"
 #include "game/gart.h"

@@ -284,7 +284,7 @@ GAllocator* lbl_8055F9A0;
 extern bool lbl_8055FA59;  // draw debug
 InlineVec<GMat*, 32> lbl_804BE104;
 static GVec lbl_804BE190[8];  // ocean corners
-extern const f32 kWorldScale;
+extern "C" const f32 kWorldScale;
 
 static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
@@ -745,12 +745,12 @@ inline int IdxBlock<T>::Count(void) {
 
 template <class T, int N>
 inline int InlineVec<T, N>::Count(void) {
-    return count;
+    return this->count;
 }
 
 template <class T, int N>
 inline T* InlineVec<T, N>::At(int i) {
-    return &data[i];
+    return &this->data[i];
 }
 
 inline GVec* GVerts::At(int i) { return &data[i]; }

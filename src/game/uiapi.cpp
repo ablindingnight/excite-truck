@@ -95,8 +95,8 @@ extern "C" void* fn_8021165C(int dir, int set) {
     return fn_80215270(dir, set);
 }
 
-extern s32 lbl_8055EF1C;
-extern s32 lbl_8055EF20;
+extern "C" s32 lbl_8055EF1C;
+extern "C" s32 lbl_8055EF20;
 // The lite-mode blinker art (0 = left, else right).
 // Plain two-return form: the target has no bnelr fold here, which only optimization_level 0 reproduces.
 #pragma push
@@ -190,7 +190,7 @@ extern "C" int lbl_8055EF08;
 extern "C" int lbl_8055EF3C;
 extern "C" void* lbl_8055EF24;
 extern "C" void* lbl_8055EF28;
-extern void *lbl_8055EF38;
+extern "C" void *lbl_8055EF38;
 void LoadTimerProgress(void);
 void LoadTimerEnd(const char* name, int);
 void* operator new(unsigned long size, const char* tag);
@@ -579,7 +579,7 @@ extern "C" UnkStatic123 lbl_80490510;  // this unit's 0x7B end-of-list item
 extern "C" f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" void* lbl_8055EF24;
 extern "C" void* lbl_8055EF28;
-extern void *lbl_8055EF38;
+extern "C" void *lbl_8055EF38;
 extern "C" int lbl_8055EF48;
 extern "C" int lbl_8055EF4C;
 extern "C" int lbl_8055EF50;
@@ -1877,7 +1877,7 @@ extern "C" void fn_8021521C(const char* title, const char* message, int defaultN
 // Was the last layout UIBegin/UIDoMappedDialog saw the given one?
 extern "C" int fn_80215228(void) { return stricmp(lbl_8033CAE8, lbl_8055B6B0) == 0; }
 
-extern void *lbl_8055EF38;
+extern "C" void *lbl_8055EF38;
 extern "C" void* fn_8021525C(void) {
     return lbl_8055EF38;
 }
@@ -2090,7 +2090,6 @@ extern "C" s32 fn_80215730(void *arg0) {
     return fn_802C4F14(*(s32*)((u8*)arg0 + 4));
 }
 
-  void fn_802C2FC4(int);
   s32 fn_80128668(void *);
 extern "C" void fn_802C40E8(int, int, int);
 void fn_802C4F2C(int, int *, int *);

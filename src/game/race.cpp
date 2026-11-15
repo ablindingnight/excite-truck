@@ -42,7 +42,7 @@ struct EventType {
 struct TrackEntry {
     const char* name;
     const char* friendly_name;
-    const char* environ;
+    const char* environment;
 };
 
 struct TrackList {
@@ -90,7 +90,7 @@ void LoadTracks(void) {
         if (strcasecmp(track->GetName(), "track") == 0) {
             lbl_8034EF38.entries[lbl_8034EF38.count].name = track->GetValue("name");
             lbl_8034EF38.entries[lbl_8034EF38.count].friendly_name = track->GetString("friendly_name", "");
-            lbl_8034EF38.entries[lbl_8034EF38.count].environ = track->GetString("environ", "");
+            lbl_8034EF38.entries[lbl_8034EF38.count].environment = track->GetString("environ", "");
             if (++lbl_8034EF38.count >= 40) {
                 fn_802E317C("race: Too many tracks!");
                 break;
@@ -195,7 +195,7 @@ const char* GetTrackFriendlyName(const char* name) {
 }
 
 const char* GetTrackEnviron(const char* name) {
-    return lbl_8034EF38.entries[FindTrack(name)].environ;
+    return lbl_8034EF38.entries[FindTrack(name)].environment;
 }
 
 extern "C" s32 fn_800081F0(Unk_8000822C* obj) {

@@ -333,7 +333,6 @@ extern "C" {
 int fn_8026B0C0(int view);
 double sin(double x);
 double cos(double x);
-extern f32 lbl_8055E3C8;        // race time
 extern const f32 lbl_80563C40;  // smallest rotation
 extern const f32 lbl_80563C50;
 extern const f32 lbl_80563CA0;  // smallest shake
@@ -1544,6 +1543,7 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             *own = 1;
             break;
         case 0x15:
+        {
             fn_80275FC0(c);
             f32 zero = lbl_80563C20;
             c->vel.v[0] = zero;
@@ -1551,6 +1551,7 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             c->vel.v[2] = zero;
             *own = 1;
             break;
+        }
         case 0x21:
             fn_80276044(c);
             *own = 1;
@@ -1713,7 +1714,6 @@ u8 fn_8026A38C(void) { return lbl_8055F488; }
 
 extern const f32 lbl_80563CBC;
 extern const f32 lbl_80563C2C;
-extern f32 lbl_8055E3C8;
 
 // Starts a camera transition for the camera following `car`.
 void fn_8026A394(u8* car) {

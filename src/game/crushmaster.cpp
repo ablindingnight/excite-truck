@@ -1673,7 +1673,7 @@ inline void CrushMaster::vf4C(int view) const {
     UpdateScoreOverlays(fn_801E866C(view), lbl_8043038C.pointsPerKill * (cars[car].fC + cars[car].f8));
 }
 
-extern "C" static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
+static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
     TextElem* a = l->Find(from);
     TextElem* b = l->Find(to);
     TextElem e;

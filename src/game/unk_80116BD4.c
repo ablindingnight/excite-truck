@@ -374,6 +374,8 @@ s32 fn_8011BFFC(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4);
 void fn_8011C274(void *arg0, void *arg1);
 void fn_80120084(void *arg0);
 extern void memset(void *, int, unsigned int);
+extern void *memcpy(void *, const void *, unsigned int);
+extern void *memmove(void *, const void *, unsigned int);
 
 // Takuya Ooura's General Purpose FFT Package (https://www.kurims.kyoto-u.ac.jp/~ooura/fft.html), Copyright
 // Takuya OOURA 1996-2001, used under its licence. This is fftsg.c of the Oct. 1999 release (fft.tgz as
@@ -428,6 +430,13 @@ extern void fn_80127F70(void*);
 extern void fn_80127F94(void*);
 extern s32 fn_8011A7CC(DVDFileInfo *);
 extern s32 OSDisableInterrupts(void);
+extern s32 OSEnableInterrupts(void);
+extern s32 OSRestoreInterrupts(s32);
+extern void OSYieldThread(void);
+extern int DVDReadAsyncPrio(DVDFileInfo *, void *, s32, s32, DVDAsyncCallback, s32);
+extern int DVDClose(DVDFileInfo *);
+extern s32 DVDConvertPathToEntrynum(const char *);
+extern int DVDFastOpen(s32, DVDFileInfo *);
 void fn_80127440(void);
 extern void fn_80127398(s32);
 extern void fn_802E300C(s32);
@@ -2195,7 +2204,11 @@ void *fn_8011A168(StreamAllocator *allocator) {
 static inline u32 Swap32(register u32 *p) {
     register u32 v;
     register u32 z = 0;
+#ifdef __MWERKS__
     asm { lwbrx v, z, p }
+#else
+    v = (p[z] >> 24) | ((p[z] >> 8) & 0xFF00) | ((p[z] << 8) & 0xFF0000) | (p[z] << 24);
+#endif
     return v;
 }
 
@@ -2631,7 +2644,7 @@ extern void fn_8011A330(void *);
 void fn_8011AC84(void *arg0) {
     fn_8011A330(arg0);
     if (*(s32 *)((u8 *)arg0 + 0xB0) == 0) {
-        DVDClose((u8 *)arg0 + 0x54);
+        DVDClose((DVDFileInfo *)((u8 *)arg0 + 0x54));
     }
 }
 

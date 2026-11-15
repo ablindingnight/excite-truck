@@ -242,12 +242,16 @@ void fn_802A85C8(void) {
     lbl_804BD6C4.n = 0;
 }
 
+}
+
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
     v->x = x;
     v->y = y;
     v->z = z;
 }
+
+extern "C" {
 
 /* Helper name unproven */
 static inline Flock* FlockAt(int i) {

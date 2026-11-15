@@ -76,8 +76,8 @@ extern const ModeEntry lbl_802FA3B4[5];
 extern s32 lbl_8055BEF0;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-extern s32 lbl_8055BEA8;
-extern s32 lbl_8055BEC0;
+extern "C" s32 lbl_8055BEA8;
+extern "C" s32 lbl_8055BEC0;
 extern void* lbl_803435A0[];
 extern char lbl_8055B860[8];
 extern char lbl_8055BAC0[4];  // ""

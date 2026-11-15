@@ -1271,8 +1271,10 @@ void fn_802D6C68(void) {
 }
 
 static inline void SetGQR6(void) {
+#ifdef __MWERKS__
     register u32 v = 0x08070807;
     asm { mtspr 0x396, v }
+#endif
 }
 
 #define LC_BUF(i) ((u8*)0xE0000000 + ((i) << 13))

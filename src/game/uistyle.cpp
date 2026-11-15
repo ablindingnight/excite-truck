@@ -134,8 +134,12 @@ void fn_802E30C8(const char*,...);
 extern const char lbl_8055B8C0[2];
 void fn_802C4F2C(u32,int*,int*);
 
+}
+
 template<class T> static inline T StyleMinimum(const T& a,const T& b) {return a<b?a:b;}
 template<class T> static inline T StyleMaximum(const T& a,const T& b) {return a>b?a:b;}
+
+extern "C" {
 
 
 

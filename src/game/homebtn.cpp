@@ -156,6 +156,7 @@ void HomeSoundCallback(int ev) { fn_802E30C8("homebtn: sound_callback(%d)\n", ev
 void HomeEventCallback(int a, int b) { fn_802E30C8("homebtn: event_callback(%d, %d)\n", a, b); }
 
 static inline void InitFastCast(void) {
+#ifdef __MWERKS__
     asm {
         li r3, 4
         oris r3, r3, 4
@@ -170,6 +171,7 @@ static inline void InitFastCast(void) {
         oris r3, r3, 7
         mtspr 0x395, r3
     }
+#endif
 }
 
 void fn_802EC614(void) {
