@@ -1259,7 +1259,7 @@ config.libs.append(
             Object(NonMatching, "game/stuntpart.cpp"),
             Object(NonMatching, "game/artanim.cpp"),
             Object(Matching, "game/stub13.cpp"),
-            Object(NonMatching, "game/cartags.cpp"),
+            Object(Matching, "game/cartags.cpp"),
             Object(NonMatching, "game/birds.cpp"),
             Object(NonMatching, "game/zonelite.cpp"),
             Object(Matching, "game/lightwall.cpp"),
