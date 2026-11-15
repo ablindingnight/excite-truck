@@ -1133,9 +1133,9 @@ inline void* SimpleHeap::Alloc(s32 size) {
     HeapBlock* s;
     HeapBlock** l;
     s32 bestSize;
+    res = 0;
     best = 0;
     bestSize = 0x7FFFFFFF;
-    res = 0;
     for (l = &free; *l; l = &(*l)->next) {
         b = *l;
         if (b->size >= n && bestSize > b->size) {
@@ -1148,7 +1148,7 @@ inline void* SimpleHeap::Alloc(s32 size) {
         split = 0;
         next = b->next;
         rest = b->size - n;
-        s32 hdr = (align + 0x10) & ~align;
+        s32 hdr = ~align & (align + 0x10);
         if (rest > hdr + 0x20) {
             s = (HeapBlock*)((u8*)b + align + n + 1);
             s->magic = 0xABCFEED0;
@@ -1159,8 +1159,8 @@ inline void* SimpleHeap::Alloc(s32 size) {
             split = s;
         }
         if (split) {
-            *best = split;
             split->next = next;
+            *best = split;
         } else {
             *best = next;
         }
