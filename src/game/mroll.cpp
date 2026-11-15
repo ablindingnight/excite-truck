@@ -121,11 +121,14 @@ static inline void SetItem(MenuWidgetBase* w, u8 s, u32 v) {  /* Helper name unp
     w->id = v;
 }
 
-// A player's car choice list (vtable lbl_80342650).
-struct CarSel {
-    void* vt;               // offset 0x0
-    u8 pad4[0x10];          // offset 0x4
-    s32 f14;                // offset 0x14
+// A player's car choice list: a menu state over the rows (class name unproven).
+class CarSel : public MenuState {
+public:
+    CarSel(s32* slot, u8* car);
+    virtual ~CarSel(void) {}
+    virtual void Enter(void);
+    virtual int Key(int key);
+
     CarSelItem* items[4];   // offset 0x18
     u8* car;                // offset 0x28
     s32 count;              // offset 0x2C
@@ -174,7 +177,6 @@ static inline void CopyName(const char* src, int n, char* dst) {
     }
 }
 
-extern void* lbl_80342650[];
 
 extern "C" {
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
@@ -576,7 +578,6 @@ void fn_80129AEC(int a);
 u32 fn_802E4A10(void);
 void fn_8023D4B8(s32 ch);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
-CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car);
 void fn_802409AC(CarSel* p, CarSelItem* item);
 }  // extern "C"
 
@@ -603,8 +604,7 @@ struct RollPanel {
     s32 colorIndex;      // offset 0x578
 
     RollPanel(JoinSlot* s, u8 flag) : screen(0), color(&s->color, &colorIndex, &screen), stats(),
-        picker((s32*)&s->unk4, (s32*)&s->car, &color, &stats, &screen) {
-        fn_80240A1C(&sel, &s->id, (u8*)&screen);
+        picker((s32*)&s->unk4, (s32*)&s->car, &color, &stats, &screen), sel(&s->id, (u8*)&screen) {
         fn_802409AC(&sel, &picker);
         fn_802409AC(&sel, &color);
         fn_802409A4((u8*)&stats, flag);
@@ -709,12 +709,6 @@ u8* JoinLeaveWidget_vf08(u8* p, int del) {
     return p;
 }
 
-u8* fn_802407F0(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
 
 
 
@@ -732,26 +726,27 @@ void fn_802409AC(CarSel* p, CarSelItem* item) {
     p->Refresh();
 }
 
-CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car) {
-    p->car = car;
-    p->vt = lbl_80342650;
-    p->f14 = 0;
-    p->count = 0;
-    p->cur = 0;
-    p->slot = slot;
-    p->active = 1;
-    CopyName("", 0x20, p->name);
-    S32(p->car, 0xD8) = *p->slot;
-    if (*p->slot < 0) {
-        CopyName("", 0x20, p->name);
+
+}  // extern "C"
+
+CarSel::CarSel(s32* slot, u8* car) {
+    this->car = car;
+    this->count = 0;
+    this->cur = 0;
+    this->slot = slot;
+    this->active = 1;
+    CopyName("", 0x20, this->name);
+    S32(this->car, 0xD8) = *this->slot;
+    if (*this->slot < 0) {
+        CopyName("", 0x20, this->name);
     } else {
-        const char* nm = fn_802E85B8(*p->slot);
-        CopyName(nm, 0x20, p->name);
+        const char* nm = fn_802E85B8(*this->slot);
+        CopyName(nm, 0x20, this->name);
     }
-    p->Refresh();
-    return p;
+    this->Refresh();
 }
 
+extern "C" {
 }  // extern "C"
 
 CarPicker::CarPicker(s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats, CarUIScreen* screen) {
@@ -1036,15 +1031,23 @@ void ColorPick::Draw(void) {
     }
 }
 
-void fn_80241DE8(CarSel* p) { p->Refresh(); }
+}  // extern "C"
 
-int fn_80241E40(CarSel* p) {
-    if (*p->slot != (s32)fn_802E4A10() || !p->active) {
+void CarSel::Enter(void) { Refresh(); }
+
+extern "C" {
+
+}  // extern "C"
+
+int CarSel::Key(int key) {
+    if (*this->slot != (s32)fn_802E4A10() || !this->active) {
         return 0;
     }
-    p->Refresh();
+    this->Refresh();
     return 1;
 }
+
+extern "C" {
 
 }  // extern "C"
 
