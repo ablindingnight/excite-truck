@@ -236,6 +236,12 @@ static inline void GlareVtx(GVtx* buf, int* n, Streak* s, f32 fx, f32 fy, u32 co
     v->color = color;
 }
 
+static inline void GlareVtxPair(GVtx* buf, int* n, Streak* s, f32 x0, f32 y0, u32 color,
+                                f32 x1, f32 y1, f32 du, f32 dv) {
+    GlareVtx(buf, n, s, x0, y0, color, du, dv);
+    GlareVtx(buf, n, s, x1, y1, color, du, dv);
+}
+
 // Draws one light streak as a framed quad: an outer ring (lit at the edge, faded inside) as a strip.
 void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
     f32 powerv = s->power;
@@ -250,8 +256,7 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
     GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
     GlareVtx(buf, &n, s, 0.0f, 1.0f, color, du, dv);
     GlareVtx(buf, &n, s, 0.09f, 0.97f, color, du, dv);
-    GlareVtx(buf, &n, s, 1.0f, 1.0f, color, du, dv);
-    GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.97f, color, du, dv);
+    GlareVtxPair(buf, &n, s, 1.0f, 1.0f, color, 1.0f - 0.09f, 0.97f, du, dv);
     GlareVtx(buf, &n, s, 1.0f, 0.0f, color, du, dv);
     GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.09f, color, du, dv);
     GlareVtx(buf, &n, s, 0.0f, 0.0f, color, du, dv);
