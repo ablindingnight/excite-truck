@@ -3,9 +3,11 @@
 #include "game/common.h"
 
 ModuleTag lbl_8055E140;
+static inline u32 DefaultAiFlags(void) { return 0xFFFF0000u; }
+extern const u32 lbl_8055E148 = DefaultAiFlags();
 static UnkStatic123 lbl_8042F840;
-UnkStaticFFFF lbl_8055E148;
-UnkStatic7F lbl_8055E14C;
+static inline u32 DefaultAiLimit(void) { return 0x7F000000u; }
+extern const u32 lbl_8055E14C = DefaultAiLimit();
 
 extern "C" {
 
