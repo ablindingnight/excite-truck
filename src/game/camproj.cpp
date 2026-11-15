@@ -26,8 +26,7 @@ struct ProjState {
     bool large;    // offset 0x4
 };
 
-// volatile keeps MWCC from folding the multiply below; the target does it at run time.
-const volatile f32 lbl_80562E38 = 61.5f;  // default field of view (degrees)
+extern const f32 lbl_80562E38 = 61.5f;  // default field of view (degrees)
 f32 lbl_8055AF68 = 61.5f;  // field of view (radians once set)
 
 inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
@@ -39,7 +38,10 @@ ProjState lbl_8055EB60;
 
 extern "C" {
 
-void fn_801EA1FC(void) { lbl_8055AF68 = DegToRad(lbl_80562E38); }
+void fn_801EA1FC(void) {
+    const f32& degrees = lbl_80562E38;
+    lbl_8055AF68 = DegToRad(degrees);
+}
 
 void fn_801EA210(int cam, f32 fov) {
     if (!lbl_8055EB58) {
