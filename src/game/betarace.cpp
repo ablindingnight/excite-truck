@@ -199,6 +199,7 @@ ILayout* fn_80145E70(const char* name);
 // The base of every race mode; the defaults are shared weak copies.
 class GameMode {
 public:
+    int Reset(void);
     virtual ~GameMode(void) {}
     virtual void vf0C(void);
     virtual void vf10(void);
@@ -4347,7 +4348,7 @@ inline void* BetaMaster::vfE8(void) {
     if (p) {
         return p;
     }
-    return GameMode::vfE8();
+    return (void*)GameMode::Reset();
 }
 
 inline int BetaMaster::vfDC(void) { return 1; }
