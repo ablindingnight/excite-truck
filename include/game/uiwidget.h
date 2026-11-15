@@ -63,6 +63,17 @@ public:
     void* stylePtr;                               // 0x240
 };
 
+// A widget that drags its window by its stored offset (vtable lbl_8033FAB4; no constructor in widgets.cpp, so the
+// table is emitted for its key function). Class name unproven; declared before UILabel (its vtable follows UILabel's).
+class UIDragArea : public UIWidget {  /* Class name unproven */
+public:
+    virtual void Slot3C(int x, int y);           // fn_80219510 (implicit dtor fn_802295AC)
+    virtual void Slot40(int a, int b) { enabled = 0; }  // inline: TU-end copy fn_80229604
+    virtual void Slot4C(int x, int y);           // fn_8021952C
+    int offsetX, offsetY;        // 0x244
+    unsigned char enabled;       // 0x24C
+};
+
 // Text label base of the "choice"/caption widgets (vtable lbl_8033FA28; abstract): draws Slot88()'s text with
 // Slot84()'s frame. Class and slot names unproven. The widgets still written as C call it by its linker names.
 class UILabel : public UIWidget {  /* Class name unproven */
@@ -166,6 +177,27 @@ public:
 struct FormattedChoiceDescriptor;
 struct ObservedValueProvider;
 class UITable;
+
+class ArtWidget : public UIWidget {  /* Class name unproven (allocation tag "ArtWidget"); vtable lbl_8033F434 */
+public:
+    ArtWidget(struct WidgetDesc* desc, const char* text, int value);  // fn_80219A28
+    virtual ~ArtWidget(void);                    // fn_80219E44
+    virtual void Slot24(void* context) {}        // inline: TU-end copy fn_802298F8
+    virtual void Slot28(void);                   // fn_80219FE0
+    virtual void Slot7C(void);                   // fn_80219F14
+    unsigned char fields244[0x40];  // 0x244, read through widgets.cpp's SourceResourcePrefix
+};
+
+class BackWidget : public UIWidget {  /* Class name unproven (allocation tag "BackWidget"); vtable lbl_8033F3B0 */
+public:
+    BackWidget(const char* textureName, unsigned char a, unsigned char b, int option, float amount);  // fn_8021A5B8
+    virtual ~BackWidget(void);                   // fn_8021A650 (empty: no vptr store)
+    virtual void Slot0C(void);                   // fn_8021A6EC
+    virtual void Slot10(void);                   // fn_8021A744
+    virtual void Slot24(void* context) {}        // inline: TU-end copy fn_802298FC
+    virtual void Slot28(void);                   // fn_8021A6A8
+    unsigned char fields244[0x14];  // 0x244, read through widgets.cpp's BackgroundWidgetPrefix
+};
 
 class StaticText : public UILabel {  /* Class name unproven (allocation tag "StaticText"); vtable lbl_8033F20C */
 public:
@@ -383,6 +415,17 @@ public:
     int count;                     // 0x2C8
     int* selected;                 // 0x2CC
     unsigned char rest2D0[0x150];  // 0x2D0, read through widgets.cpp's SelectionFullPrefix
+};
+
+class BarTab : public BottomBar {  /* Class name unproven (allocation tag "BarTab"); vtable lbl_8033E458 */
+public:
+    BarTab(int x, int y, void* model, int* watched);  // fn_80223800 (implicit dtor fn_80228F4C)
+    virtual void Slot0C(void);                   // fn_80223880
+    virtual void Slot28(void);                   // fn_80223A58
+    virtual int Slot64(int key);                 // fn_802239C8
+    virtual int Slot68(void);                    // fn_80223AAC
+    virtual void Slot74(int key, void* data);    // fn_802238D0
+    int* watched;                // 0x420
 };
 
 class MenuImage : public UIWidget {  /* Class name unproven (allocation tag "MenuImage"); vtable lbl_8033E3D4 */

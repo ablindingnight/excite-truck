@@ -619,8 +619,6 @@ extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
 extern "C" WidgetFragment* fn_8021995C(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_802224B4(WidgetFragment*, void*, int, int, int, int, void*, void*, int, int);
 extern "C" WidgetFragment* fn_80226630(WidgetFragment*, void*, int, int, int, int, void*, void*);
-extern "C" WidgetFragment* fn_8021A5B8(WidgetFragment*, const char*, u8, u8, int, float);
-extern "C" WidgetFragment* fn_80219A28(WidgetFragment*, UIDesc*, const char*, void*);
 extern "C" WidgetFragment* fn_8021A77C(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, void*, int, void*);
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
@@ -633,7 +631,6 @@ extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
 extern "C" WidgetFragment* fn_8021B1C4(WidgetFragment*, int, int, void*, int, void*);
 extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
-extern "C" WidgetFragment* fn_80223800(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
 
 
@@ -898,8 +895,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         fn_802E30C8("BButtons aren't supported anymore.  If you want one, talk to Chris");
         break;
     case 34:
-        p = (WidgetFragment*)operator new(0x258, "BackWidget");
-        if (p) p = fn_8021A5B8(p, d->name, 1, 1, 1, d->kind);
+        p = (WidgetFragment*)new ("BackWidget") BackWidget(d->name, 1, 1, 1, d->kind);
         widgets[count++] = p;
         break;
     case 17:
@@ -919,8 +915,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             widgets[count++] = p;
             break;
         }
-        p = (WidgetFragment*)operator new(0x284, "ArtWidget");
-        if (p) p = fn_80219A28(p, d, path, watched);
+        p = (WidgetFragment*)new ("ArtWidget") ArtWidget((WidgetDesc*)d, path, (int)watched);
         widgets[count++] = p;
         break;
     }
@@ -1236,9 +1231,8 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 37: {
         UIStyle* selected = FindStyle(styles, d->style, 2);
         UIStyle* list = FindStyle(styles, d->style, 0xa);
-        p = (WidgetFragment*)operator new(0x424, "BarTab");
-        if (p) p = fn_80223800(p, d->x, d->y, list ? list->value : lbl_8055EF28,
-                               selected ? selected->value : &lbl_8055EF54);
+        p = (WidgetFragment*)new ("BarTab") BarTab(d->x, d->y, list ? list->value : lbl_8055EF28,
+                               (int*)(selected ? selected->value : &lbl_8055EF54));
         widgets[count++] = p;
         break;
     }
