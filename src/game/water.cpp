@@ -250,11 +250,11 @@ struct WaterTint {
 
 static WaterTint lbl_8055FAD8;
 s32 lbl_8055FADC;
-f32 lbl_8055FAE0;
-u32 lbl_8055FAE4;  // far water color (the log line labels it N)
-u32 lbl_8055FAE8;  // near water color
-u32 lbl_8055FAEC;
-u32 lbl_8055FAF0;
+f32 waterHeight;
+u32 farWaterColor;  // far water color (the log line labels it N)
+u32 nearWaterColor;  // near water color
+u32 deepWaterSubColor;
+u32 shimWaterColor;
 f32 lbl_8055FAF4;
 f32 lbl_8055FAF8;
 s32 lbl_8055FAFC;
@@ -289,26 +289,26 @@ void fn_802BED90(PVec* v) {
 }
 
 void fn_802BEDFC(void) {
-    lbl_8055FAE4 = 0xE0005030;
-    lbl_8055FAE0 = 0.7f;
-    lbl_8055FAE8 = 0xE0FFFFFF;
-    lbl_8055FAEC = 0x00202040;
-    lbl_8055FAF0 = 0xE0001040;
+    farWaterColor = 0xE0005030;
+    waterHeight = 0.7f;
+    nearWaterColor = 0xE0FFFFFF;
+    deepWaterSubColor = 0x00202040;
+    shimWaterColor = 0xE0001040;
     ValueTable* t = fn_80131808("track.val");
     if (t) {
         ValueNode* g = t->HasChild("Graphics") ? t->FindChild("Graphics") : 0;
         if (g) {
-            lbl_8055FAE0 = g->GetFloat("water_height", lbl_8055FAE0);
-            lbl_8055FAE8 = fn_802BECE4(g->GetString("near_water_color", ""), lbl_8055FAE8);
-            lbl_8055FAE4 = fn_802BECE4(g->GetString("far_water_color", ""), lbl_8055FAE4);
-            lbl_8055FAEC = fn_802BECE4(g->GetString("deep_water_sub_color", ""), lbl_8055FAEC);
-            lbl_8055FAF0 = fn_802BECE4(g->GetString("shim_water_color", ""), lbl_8055FAF0);
-            fn_802E30C8("water colors: N %08x, F %08x DS %08x SH %08x", lbl_8055FAE4, lbl_8055FAE8,
-                        lbl_8055FAEC, lbl_8055FAF0);
+            waterHeight = g->GetFloat("water_height", waterHeight);
+            nearWaterColor = fn_802BECE4(g->GetString("near_water_color", ""), nearWaterColor);
+            farWaterColor = fn_802BECE4(g->GetString("far_water_color", ""), farWaterColor);
+            deepWaterSubColor = fn_802BECE4(g->GetString("deep_water_sub_color", ""), deepWaterSubColor);
+            shimWaterColor = fn_802BECE4(g->GetString("shim_water_color", ""), shimWaterColor);
+            fn_802E30C8("water colors: N %08x, F %08x DS %08x SH %08x", farWaterColor, nearWaterColor,
+                        deepWaterSubColor, shimWaterColor);
         }
         fn_80131818(t);
     }
-    lbl_8055FAF4 = lbl_8055FAE0;
+    lbl_8055FAF4 = waterHeight;
 }
 
 f32 fn_802BEFB4(void) {
@@ -434,7 +434,7 @@ void EnvBase::Mirror(Frame* out, const Frame* in, const PVec* up) {
     out->y.y *= -1.0f;
     out->z.y *= -1.0f;
     out->pos.y *= -1.0f;
-    out->pos.y = out->pos.y + 2.0f * lbl_8055FAE0;
+    out->pos.y = out->pos.y + 2.0f * waterHeight;
 }
 
 extern "C" EnvBase* fn_802BF6AC(void) {
@@ -857,7 +857,7 @@ void WaterSystem::Draw(void) {
         f32 depth = lc.z;
         fn_802BED90(&rel);
         f32 f = FMax(FMin(1.0f - -rel.y, 1.0f), 0.0f);
-        u32 col = fn_802C03E0(fn_80147C50(f * f, lbl_8055FAE4, lbl_8055FAE8));
+        u32 col = fn_802C03E0(fn_80147C50(f * f, farWaterColor, nearWaterColor));
         for (int c = 0; c < 16; c++) {
             WVert* v = &verts[r * 16 + c];
             f32 u = (2.0f * (f32)c / 15.0f - 1.0f) * depth * sx;
@@ -878,7 +878,7 @@ void WaterSystem::Draw(void) {
     m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
     fn_802D3D94(2, &m);
     f32 sh = FMax(cam.pos.y / 4.0f, 1.0f);
-    u32 deepCol = fn_80147C50(1.0f / sh, 0, lbl_8055FAEC);
+    u32 deepCol = fn_80147C50(1.0f / sh, 0, deepWaterSubColor);
     fn_802C8BD0(env->Target());
     fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (lbl_80564E20 * 2.0f), deep, mask, deepCol);
     fn_802DD27C(verts, 0x400, &idx[0][0][0], 0x1626);
@@ -921,7 +921,7 @@ void WaterSystem::Draw(void) {
         sv[i].pos.z += cam2.y.z * ((i & 2) ? lbl_80564E24 : 0.0f);
         sv[i].v = 0.0f;
         sv[i].u = 0.0f;
-        sv[i].color = lbl_8055FAF0;
+        sv[i].color = shimWaterColor;
     }
     fn_802C8BD0(-1);
     fn_802C8DB8(sv, 4, qi.i, 6);

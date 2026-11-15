@@ -210,7 +210,7 @@ GameMode* lbl_8055E744;     // current master
 u8 lbl_8055E748;            // race started
 u32 lbl_8055E74C;           // event type
 f32 lbl_8055E750;           // time since the master finished
-f32 lbl_8055A910 = 1.0f;    // damage factor
+f32 damageFactor = 1.0f;    // damage factor
 f32 lbl_80436D08[8];
 
 extern "C" {
@@ -239,7 +239,7 @@ void fn_801B826C(const RaceSetup* s) {
     } else {
         lbl_8055E744 = new ("null_amaster") NullArenaMaster;
     }
-    lbl_8055A910 = GetEvent(s->event)->node->GetFloat("damage_factor", 1.0f);
+    damageFactor = GetEvent(s->event)->node->GetFloat("damage_factor", 1.0f);
     lbl_8055E748 = 0;
     fn_80161618();
     lbl_8055E750 = 0.0f;
@@ -327,7 +327,7 @@ void fn_801B86A4(int car) { lbl_8055E744->vfAC(car); }
 
 void fn_801B86BC(int car, Damage* d) {
     lbl_8055E744->vfB4(car, d);
-    d->amount *= lbl_8055A910;
+    d->amount *= damageFactor;
     fn_8027DED8(car, d);
 }
 

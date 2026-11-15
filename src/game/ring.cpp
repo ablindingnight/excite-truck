@@ -186,7 +186,7 @@ struct RingMaster {
 
 ModuleTag lbl_8055E358;
 UnkStaticFFFF lbl_8055E360;
-u8 lbl_8055E364;  // radius_score_mode
+u8 radiusScoreMode;  // radius_score_mode
 
 MechaSimpleArray<RingType> lbl_804302F0;
 MechaSimpleArray<Ring> lbl_80430318;
@@ -215,7 +215,7 @@ static inline void StrCopyN(char* d, const char* s) {
 }
 
 inline void RingType::Make(int i) {
-    if (lbl_8055E364) {
+    if (radiusScoreMode) {
         fn_801345D8(name, 30, "freestyle_ring_%d.mod", i);
     } else {
         fn_801345D8(name, 30, "stunt_ring_%d.mod", i);
@@ -337,7 +337,7 @@ inline int Ring::Check(RaceCarRec* rec) {
     int hit = 0;
     if (Live()) {
         f32 rad = (f32)radius;
-        if (lbl_8055E364) {
+        if (radiusScoreMode) {
             rad += 1.0f;
         }
         if (PSVECSquareDistance(rec->pos, &frame.origin) < rad * rad) {
@@ -520,7 +520,7 @@ int fn_8016A878(const char* name) {
 
 void fn_8016A8F8(void) {
     int i;
-    lbl_8055E364 = fn_8000AC38()->vals->GetBool("radius_score_mode", 0);
+    radiusScoreMode = fn_8000AC38()->vals->GetBool("radius_score_mode", 0);
     lbl_804302F0.Reserve(5);
     for (i = 1; lbl_804302F0.count + 1 <= lbl_804302F0.cap && i < 100; i++) {
         RingType* t = lbl_804302F0.Add();

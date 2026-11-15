@@ -381,7 +381,7 @@ extern "C" {
 
 // .sdata in address order (tuning values before the first function's strings).
 f32 lbl_80559EB0 = 1.5f;
-f32 lbl_80559EB4 = 1.0f;  // score factor
+f32 scoreFactor = 1.0f;  // score factor
 f32 lbl_80559EB8 = 0.3f;
 f32 lbl_80559EBC = 0.3f;  // starting meter of the ACAR
 s32 lbl_80559EC0 = 3;
@@ -1582,7 +1582,7 @@ ILayout* lbl_8055E23C;
 ILayout* lbl_8055E240;
 ILayout* lbl_8055E244;
 ILayout* lbl_8055E248;
-f32 lbl_8055E24C;  // high-speed threshold
+f32 hispeedThresh;  // high-speed threshold
 s32 lbl_8055E250;
 s32 lbl_8055E254 = NoModel();  // the spin-trigger model, loaded on first use
 s32 lbl_8055E258;  // pickups alive
@@ -2973,8 +2973,8 @@ struct TuneRef {
 
 class Trigger;
 
-extern f32 lbl_8055E24C;  // high-speed threshold
-extern f32 lbl_80559EB4;  // score factor
+extern f32 hispeedThresh;  // high-speed threshold
+extern f32 scoreFactor;  // score factor
 
 extern "C" {
 void fn_8013A0B0(TuneRef* r, const char* table, const char* entry);
@@ -3001,14 +3001,14 @@ inline void BetaMaster::LoadLevel(void) {
     int loaded;
     int i;
     ValueTable* t;
-    lbl_8055E24C = 57.77778f;
+    hispeedThresh = 57.77778f;
     fn_8013A0B0(&ref, "betarace", "info");
     {
         ValueNode* n = ref.node;
         if (n) {
-            lbl_8055E24C = 0.44444445f * n->GetFloat("hispeed_thresh", 130.0f);
-            lbl_80559EB4 = n->GetFloat("score_factor", 1.0f);
-            fn_802E30C8("betarace: score_factor = %1.2f", lbl_80559EB4);
+            hispeedThresh = 0.44444445f * n->GetFloat("hispeed_thresh", 130.0f);
+            scoreFactor = n->GetFloat("score_factor", 1.0f);
+            fn_802E30C8("betarace: score_factor = %1.2f", scoreFactor);
         }
     }
     fn_8013A198(&ref, -1);
@@ -4626,7 +4626,7 @@ inline void BetaMaster::a1(void) {
                 }
             }
         }
-        cars[i].meterObj = fn_801572A4(cars[i].hud, cars[i].id, &lbl_8055E24C);
+        cars[i].meterObj = fn_801572A4(cars[i].hud, cars[i].id, &hispeedThresh);
         cars[i].fullSnd = 0;
         cars[i].starSnd = 0;
         if (!acar) {

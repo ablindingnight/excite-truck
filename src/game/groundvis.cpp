@@ -183,8 +183,8 @@ u32 lbl_8055F974;          // terrain
 u32 lbl_8055F978;          // objects
 s32 lbl_8055F97C;          // water cell value
 u8 lbl_8055F980;           // has a swell map
-u8 lbl_8055F981;           // crystal mode
-s32 lbl_8055CD78 = -1;     // water layer
+u8 crystalMode;           // crystal mode
+s32 waterLayer = -1;     // water layer
 u16* lbl_8055F984;         // visibility masks
 s32 lbl_8055F988;          // view quadrant
 f32 lbl_8055F98C;
@@ -294,8 +294,8 @@ void fn_802AE7F4(void) {
         fn_802BF350();
     }
     fn_802B58E0();
-    lbl_8055CD78 = fn_802B59CC()->GetInt("water_layer", -1);
-    lbl_8055F981 = fn_802B59CC()->GetBool("crystal_mode", 0);
+    waterLayer = fn_802B59CC()->GetInt("water_layer", -1);
+    crystalMode = fn_802B59CC()->GetBool("crystal_mode", 0);
     f32 dist[8];
     dist[0] = 10.0f * (2.0f * lbl_80564AF0);
     dist[1] = 4.0f * (4.0f * lbl_80564AF0);
@@ -323,7 +323,7 @@ void fn_802AE7F4(void) {
 }
 
 void fn_802AE9D0(void) {
-    lbl_8055CD78 = -1;
+    waterLayer = -1;
     fn_802C10C4();
     if (!fn_802B05E4()) {
         fn_802BF40C();
@@ -929,14 +929,14 @@ int fn_802B03C0(const Vec* p) {
 }
 
 int fn_802B04D4(const Vec* p) {
-    if (lbl_8055F981) {
+    if (crystalMode) {
         return fn_801EA0E8(p->x, p->z) < -0.95f;
     }
-    if (lbl_8055CD78 >= 0) {
+    if (waterLayer >= 0) {
         if (InWorld(p)) {
             int x = p->x / lbl_80564AF0;
             int z = p->z / lbl_80564AF0;
-            return fn_802BBD38(x, z, lbl_8055CD78) > (u8)lbl_8055F97C;
+            return fn_802BBD38(x, z, waterLayer) > (u8)lbl_8055F97C;
         }
         return 1;
     }
@@ -945,11 +945,11 @@ int fn_802B04D4(const Vec* p) {
 
 void fn_802B05D8(void) { fn_802C10C8(); }
 
-s32 fn_802B05DC(void) { return lbl_8055CD78; }
+s32 fn_802B05DC(void) { return waterLayer; }
 
 int fn_802B05E4(void) { return lbl_8055F980; }
 
-int fn_802B05EC(void) { return lbl_8055F981; }
+int fn_802B05EC(void) { return crystalMode; }
 
 }  // extern "C"
 
