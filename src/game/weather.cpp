@@ -77,9 +77,9 @@ struct WeatherRace {
 };
 
 extern f32 lbl_8055E3C8;     // race clock
-extern f32 lbl_80558DC4[];   // FLT_EPSILON
+extern f32 __float_epsilon[];   // FLT_EPSILON
 
-#define NearZero(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
+#define NearZero(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
 static inline int MaxI(int a, int b) { return a > b ? a : b; }
 static inline int MinI(int a, int b) { return a < b ? a : b; }

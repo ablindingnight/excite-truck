@@ -16,7 +16,7 @@ void* operator new(size_t size, const char* tag);
 
 extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 struct RVec3 {
     RVec3(void) {}
@@ -319,7 +319,7 @@ static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
 
 void Wheel::vf28(u8* buf) {
     WheelPose* p = (WheelPose*)(buf + a8);
-    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         p->mtx = world;
     } else {
         RMtx m;

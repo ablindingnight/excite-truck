@@ -23,7 +23,7 @@ ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 }
 
-extern f32 lbl_80558DC0[];  // FLT_MAX (MSL)
+extern f32 __float_max[];  // FLT_MAX (MSL)
 extern u32 lbl_8055E044;
 
 struct Unit {
@@ -431,7 +431,7 @@ void fn_80130980(char* buf, s32 size, int fields, f32 secs) {
     s32 hours;
     int started;
     char* p;
-    if (secs == -lbl_80558DC0[0]) {
+    if (secs == -__float_max[0]) {
         StrNCpy(buf, fn_80131234("Locale:EMPTY_TIME_STRING"), size);
         return;
     }

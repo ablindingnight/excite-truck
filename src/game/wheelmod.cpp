@@ -41,7 +41,7 @@ struct Mat3 {
 
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 // A model's material list (fn_802C6B44).
 struct MatList {
@@ -309,7 +309,7 @@ void fn_801F0488(WheelClass* c, WNode* t) {
             c->lods[i].fast[j] = fn_802C6FC0(path, c->fastRemap, 0);
         }
     }
-    if (!((f32)__fabs(c->width) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(c->width) <= __float_epsilon[0])) {
         f32 b[6];
         fn_802C77F0(c->lods[0].slow[0], b);
         c->scale = c->width / (b[1] - b[0]);
@@ -526,7 +526,7 @@ void fn_801F0F78(Wheel* w, const WheelState* s, const ValMatrix* m, f32 scale) {
     Mat3 r2;
     Mat3FromEuler(&r2, (const Vec3*)&steer);
     Mat3Mul((Mat3*)&w->mtx, &r2, (Mat3*)&w->mtx);
-    if (!((f32)__fabs(scale - 1.0f) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(scale - 1.0f) <= __float_epsilon[0])) {
         w->mtx.basis[0].x *= scale;
         w->mtx.basis[0].y *= scale;
         w->mtx.basis[0].z *= scale;

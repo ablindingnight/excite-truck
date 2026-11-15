@@ -111,7 +111,7 @@ public:
 ModuleTag lbl_8055E7C0;
 UnkStaticFFFF lbl_8055E7C8;
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
@@ -472,7 +472,7 @@ void fn_801C1CBC(PSys* s, int nv, const PVertDesc* v, int ne, const PEdgeDesc* e
     }
     for (i = 0; i < ne; i++) {
         f32 stiff = e[i].stiff;
-        if ((f32)__fabs(stiff) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(stiff) <= __float_epsilon[0]) {
             stiff = 1.0f;
         }
         AddStick(s, e[i].a, e[i].b, e[i].extra, stiff);

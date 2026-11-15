@@ -77,7 +77,7 @@ void fn_802A93A4(void);
 void fn_802A9428(void);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : 0.5f + x; }
 
@@ -106,7 +106,7 @@ void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* __restrict b, f32 size, f
     int i;
     int al;
     u32 c;
-    if (white && !((f32)__fabs(alpha) <= lbl_80558DC4[0])) {
+    if (white && !((f32)__fabs(alpha) <= __float_epsilon[0])) {
         al = Round(255.0f * alpha);
         al = al > 0 ? al : 0;
         al = al < 255 ? al : 255;

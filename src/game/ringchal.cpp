@@ -203,9 +203,9 @@ struct RaceCarRec {
 
 extern "C" RaceCarRec* fn_8017960C(int id);
 extern "C" f32 PSVECDotProduct(const void* a, const void* b);
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
-#define NearZeroF(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
+#define NearZeroF(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
 struct PathPt {
     f32 x;    // offset 0x0

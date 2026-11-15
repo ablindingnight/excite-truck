@@ -7,7 +7,7 @@ double atan2(double y, double x);
 double sin(double x);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
 struct Quat {
     f32 x, y, z, w;
@@ -57,7 +57,7 @@ extern "C" void fn_8012F57C(Quat* out, const Quat* a, const Quat* b, f32 t) {
         QuatScale((Quat*)a, a, -1.0f);
     }
     sinom = sqrtf(fabsf(1.0f - cosom * cosom));
-    if (fabsf(sinom) < lbl_80558DC4[0]) {
+    if (fabsf(sinom) < __float_epsilon[0]) {
         QuatCopy(out, a);
     } else {
         f32 omega = atan2f(sinom, cosom);
@@ -71,7 +71,7 @@ extern "C" void fn_8012F57C(Quat* out, const Quat* a, const Quat* b, f32 t) {
         QuatScale(&t1, b, s1);
         QuatAdd(out, &t0, &t1);
         len = out->w * out->w + out->z * out->z + out->y * out->y + out->x * out->x;
-        if (!(fabsf(len) <= lbl_80558DC4[0])) {
+        if (!(fabsf(len) <= __float_epsilon[0])) {
             f32 s = 1.0f / sqrtf(len);
             out->x *= s;
             out->y *= s;

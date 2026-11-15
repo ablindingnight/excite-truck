@@ -261,7 +261,7 @@ TrackInfo* GetTrack(int track);
 VehicleInfo* GetVehicle(int i);
 const char* GetTrackFriendlyName(const char* name);
 const char* fn_80131234(const char* key);
-extern f32 lbl_80558DC0[];  // FLT_MAX (MSL)
+extern f32 __float_max[];  // FLT_MAX (MSL)
 
 extern "C" {
 void fn_801308F4(char* buf, s32 size, s32 value);
@@ -294,7 +294,7 @@ void fn_8025C204(int event, int difficulty) {
     for (int i = 0; i < 5; i++) {
         CopyName("", 20, rows[i].score);
         rows[i].grade = "";
-        f32 time = -lbl_80558DC0[0];
+        f32 time = -__float_max[0];
         HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), event, difficulty, i);
         if (hs) {
             fn_801308F4(rows[i].score, 20, hs->score);

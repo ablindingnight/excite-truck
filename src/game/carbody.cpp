@@ -296,10 +296,10 @@ u8 lbl_8055A3AC = 1;      // enable stalling
 f32 lbl_8055A3B0 = 1.5f;
 u8 lbl_8055A3B4 = 1;
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline int Positive(f32 x) { return x > lbl_80558DC4[0]; }
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int Positive(f32 x) { return x > __float_epsilon[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 ModuleTag lbl_8055E4C0;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
@@ -1643,7 +1643,7 @@ void fn_80183E7C(u8* p) {
     }
     if (still && (U32(p, 0x10) != 'PCAR' || ((CarHost*)PTR(p, 0x270))->v14())) {
         if (S32(p, 0x2620) <= 2 && F32(p, 0x4C) < lbl_80561DB4) {
-            if (S32(p, 0x2620) == 0 || !((f32)__fabs(F32(p, 0x2614)) <= lbl_80558DC4[0]) || F32(p, 0x4C) < lbl_80561CAC) {
+            if (S32(p, 0x2620) == 0 || !((f32)__fabs(F32(p, 0x2614)) <= __float_epsilon[0]) || F32(p, 0x4C) < lbl_80561CAC) {
                 f32 t = F32(p, 0x2614) + lbl_80561D9C;
                 F32(p, 0x2614) = t;
                 if (F32(p, 0x25D4) < lbl_80561D50) {
@@ -1795,7 +1795,7 @@ void fn_80183E7C(u8* p) {
         if (!fn_802B04D4(p + 0x60)) {
             if (ramp) {
                 if (tilt < lbl_80561DD0 && F32(p, 0x2618) > lbl_80561CDC) {
-                    if (!((f32)__fabs(lbl_8055E4F0) <= lbl_80558DC4[0])) {
+                    if (!((f32)__fabs(lbl_8055E4F0) <= __float_epsilon[0])) {
                         (*(CbFx**)(p + 0x2584))->v24();
                     }
                     F32(p, 0x2590) = lbl_8055E4F0;
@@ -1923,7 +1923,7 @@ void fn_80183E7C(u8* p) {
             U8(p, 0x2624) = 1;
         }
         if (U8(p, 0x2624) && F32(p, 0x2618) >= lbl_80561CB8 && (U8(p, 0x2624) = 0, F32(p, 0x11C) > lbl_80561DDC) &&
-            (f32)__fabs(F32(p, 0x2588)) <= lbl_80558DC4[0] && NearZero(F32(p, 0x2690))) {
+            (f32)__fabs(F32(p, 0x2588)) <= __float_epsilon[0] && NearZero(F32(p, 0x2690))) {
             s32 id = S32(p, 0x1EC);
             U8(p, 0x2625) = 1;
             fn_801796EC(13, &id, 4);
@@ -2026,7 +2026,7 @@ void fn_80183E7C(u8* p) {
             }
         }
     }
-    if (F32(p, 0x258C) > lbl_80558DC4[0] && !U8(p, 0x259D) && F32(p, 0x2618) < lbl_80561D00 &&
+    if (F32(p, 0x258C) > __float_epsilon[0] && !U8(p, 0x259D) && F32(p, 0x2618) < lbl_80561D00 &&
         F32(p, 0x25D4) > lbl_80561DA4) {
         s32 id = S32(p, 0x1EC);
         fn_801796CC(14, &id, 4);
@@ -2041,7 +2041,7 @@ void fn_80183E7C(u8* p) {
     boost = boost > lbl_80561E10 ? boost : lbl_80561E10;
     F32(p, 0x258C) = boost;
     f32 pad = F32(p, 0x25BC);
-    if (pad > lbl_80558DC4[0]) {
+    if (pad > __float_epsilon[0]) {
         pad = pad > boost ? pad : boost;
         f32 left = F32(p, 0x25BC) - lbl_80561D9C;
         F32(p, 0x258C) = pad;
@@ -2821,7 +2821,7 @@ void fn_80186DE8(u8* p) {
         if (!NearZero(F32(car, 0x2650))) {
             throttle = lbl_80561CAC;
         }
-        if ((f32)!((f32)__fabs(water[6]) <= lbl_80558DC4[0]) != lbl_80561CAC) {  // a bool converted to float
+        if ((f32)!((f32)__fabs(water[6]) <= __float_epsilon[0]) != lbl_80561CAC) {  // a bool converted to float
             brake = lbl_80561CAC;
         }
         boosting = 1;
@@ -3016,7 +3016,7 @@ void vf28__7CarBodyFv(u8* p, u8* buf) {
     u8* m = buf + S32(p, 0x8);
     memset(m, 0, 0xFA8);
     SnapPose* pose = (SnapPose*)(buf + S32(p, 0x8));
-    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         *pose = *(SnapPose*)(p + 0x70);
     } else {
         LerpSnapshotMatrix(&tmp, (const SnapPose*)(p + 0xA0), (const SnapPose*)(p + 0x70), lbl_8055E460);
@@ -4049,7 +4049,7 @@ void vf24__7CarBodyFv(u8* p) {
 }
 
 void fn_8018BE54(u8* p, f32 s) {
-    if ((f32)__fabs(F32(p, 0x5E4) - s) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(F32(p, 0x5E4) - s) <= __float_epsilon[0]) {
         return;
     }
     F32(p, 0x5E4) = s;

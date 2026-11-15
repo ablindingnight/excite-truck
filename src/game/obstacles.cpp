@@ -309,7 +309,7 @@ struct ObMesh {
 extern const f32 lbl_8056249C;  // 0.8
 extern const f32 lbl_805624A4;  // -1
 extern const f32 lbl_805624AC;  // 1
-extern f32 lbl_80558DC4[];      // FLT_EPSILON
+extern f32 __float_epsilon[];      // FLT_EPSILON
 
 extern "C" {
 void fn_8019EECC(u8* owner, ObVec3* c);
@@ -795,7 +795,7 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
             }
         }
         fn_802C6C20(m);
-        if (ObAbsDiff(q->b, q->a) <= lbl_80558DC4[0]) {
+        if (ObAbsDiff(q->b, q->a) <= __float_epsilon[0]) {
             shape = new ("obstacle:cornerball") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, *(const RVec3*)&q->c);
         } else {
             shape = new ("obstacle:cornerball") FlatSphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, q->b, *(const RVec3*)&q->c);
@@ -1271,7 +1271,7 @@ struct ObPose {
 };
 
 extern f32 lbl_8055E460;    // draw interpolation factor (1 = current frame)
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 extern "C" {
 
@@ -1281,7 +1281,7 @@ extern "C" {
 static inline void Loop1_fn_801ACB30(u8* buf, u8* p) {
     f32 f = lbl_8055E460;
     u8* out = buf + S32(p, 0x8);
-    if ((f32)__fabs(f - lbl_805624AC) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(f - lbl_805624AC) <= __float_epsilon[0]) {
         *(ObPose*)out = *(ObPose*)(p + 0x70);
     } else {
         ObPose t;

@@ -137,7 +137,7 @@ public:
     f32 t;          // offset 0x4
 };
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 
@@ -430,7 +430,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 ValVec3 axis;
                 SetV3(&axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
                 f32 d = PSVECDotProduct(&axis.x, &axis.x);
-                if (!((f32)__fabs(d) <= lbl_80558DC4[0])) {
+                if (!((f32)__fabs(d) <= __float_epsilon[0])) {
                     f32 len = sqrt(d);
                     f32 s;
                     f32 half = 0.5f * len;

@@ -339,7 +339,7 @@ int fn_8026F408(int n) { return n <= 8; }
 extern const f32 lbl_80563E44;  // -10.0
 extern const f32 lbl_80563E58;  // 2.0
 extern const f32 lbl_80563F18;  // -13.0
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 f32 PSVECMag(const f32* v);
 int fn_801EA03C(const s16* hint, f32* pos);
 
@@ -777,10 +777,10 @@ void fn_802704E4(u8* p) {
     c->fov = fn_8026ECE4(p, &dist);
     target = c->pos;
     target.v[1] += MulF(wide ? 2.5f : lbl_80563E58, F32(c->car, 0x5E4));
-    if ((f32)__fabs(on - c->lastOn) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(on - c->lastOn) <= __float_epsilon[0]) {
         f32 altitude = F32(c->car, 0x25D8);
         int below = altitude < -0.1f;
-        int moving = !((f32)__fabs(on) <= lbl_80558DC4[0]);
+        int moving = !((f32)__fabs(on) <= __float_epsilon[0]);
         d.x = target.v[0] - c->tf.pos.v[0];
         d.y = target.v[1] - c->tf.pos.v[1];
         d.z = target.v[2] - c->tf.pos.v[2];

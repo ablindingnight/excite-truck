@@ -340,7 +340,7 @@ struct ModelInfo {
     Vec center;  // offset 0x20
 };
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 extern u8 lbl_8055E614;
 
 static inline f32 Angle(f32 a) { return a; }
@@ -602,7 +602,7 @@ CarModel::~CarModel(void) {
 
 extern "C" {
 
-int fn_801ECB60(CarModel* m) { return m->car->x2D4 > lbl_80558DC4[0]; }
+int fn_801ECB60(CarModel* m) { return m->car->x2D4 > __float_epsilon[0]; }
 
 void fn_801ECB80(CarModel* m) {
     f32 d = fn_802C88D4(&m->frame.pos);
@@ -746,7 +746,7 @@ void fn_801ECFE0(CarModel* m) {
         BoneArg arg;
         arg.a = m->color;
         arg.b = lbl_8055EBC0;
-        if (Abs(m->car->x28C) <= lbl_80558DC4[0]) {
+        if (Abs(m->car->x28C) <= __float_epsilon[0]) {
             fn_802DAC54();
         }
         s32 h = fn_802C7A40(1, &m->car->bones[bs->first + 1], bs->last - bs->first, 1, &arg, 2);
@@ -971,7 +971,7 @@ void CarModel::Set(const AnimSlot* s) {
     AnimObj::Set((const AnimSlot*)car);
     k = ((const CarState*)s)->scale;
     scale = k;
-    if (Abs(k - 1.0f) <= lbl_80558DC4[0]) {
+    if (Abs(k - 1.0f) <= __float_epsilon[0]) {
         scaled = frame;
     } else {
 

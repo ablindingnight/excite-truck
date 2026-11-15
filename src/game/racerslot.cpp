@@ -30,7 +30,7 @@ struct SFrame {
 };
 
 extern s32 lbl_8055E3C4;  // frame counter
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 
 extern "C" {
 int fn_801CF064(void);
@@ -156,7 +156,7 @@ int fn_8026A698(u8* p, int i) {
     int n = fn_80178CA4();
     int multi = n > 1;
     u8* c = PTR(p, 0x140);
-    int done = !((f32)__fabs(F32(c, 0x2690)) <= lbl_80558DC4[0]) && fn_801B8570(S32(c, 0x1EC));
+    int done = !((f32)__fabs(F32(c, 0x2690)) <= __float_epsilon[0]) && fn_801B8570(S32(c, 0x1EC));
     if (!done) {
         s->t = 0.0f;
         if (s->active) {

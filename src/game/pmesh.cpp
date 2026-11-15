@@ -49,7 +49,7 @@ void fn_802C8B08(PFrame* cam);
 void fn_801E41D8(const PVec3* a, const PVec3* b, u32 color, f32 width);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -271,7 +271,7 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
                     e.x = p.x - v.x;
                     e.y = p.y - v.y;
                     e.z = p.z - v.z;
-                    if (PSVECDotProduct(&e, &tr->edge[k]) > lbl_80558DC4[0]) {
+                    if (PSVECDotProduct(&e, &tr->edge[k]) > __float_epsilon[0]) {
                         in = 0;
                     }
                 }

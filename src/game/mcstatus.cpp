@@ -54,7 +54,7 @@ extern s32 lbl_8055CFF0;
 extern s32 lbl_8055CFF4;
 extern s32 lbl_8055FB9C;  // screen width
 extern s32 lbl_8055FBA0;  // screen height
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 void fn_802C5310(u8* img, int a, f32 x, f32 y, f32 z);
 void fn_802337A0(u8* font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 alpha, ...);
 s32 fn_802E2C20(void);  // milliseconds
@@ -353,7 +353,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
         y -= 20.0f;
     }
     f32 frac = m->frac;
-    if (!(AbsF(frac) <= lbl_80558DC4[0])) {
+    if (!(AbsF(frac) <= __float_epsilon[0])) {
         strcpy(dots, "");
         for (int n = 0; n < (int)(30.0f * frac); n++) {
             strcat(dots, ".");

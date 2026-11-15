@@ -14,7 +14,7 @@ void fn_802C7AE0(s32 inst, const ValMatrix* m, u32 color, f32 alpha);
 s32 fn_802C6FC0(void* model, int a, int b);
 void mrModelUnload(s32 inst);
 f32 fn_801E88F0(int car);
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -170,7 +170,7 @@ void fn_80297AFC(void) {
         } else {
             alpha = s->alpha;
         }
-        if (!((f32)__fabs(alpha) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(alpha) <= __float_epsilon[0])) {
             fn_802C7AE0(s->inst, &s->mtx, s->color, alpha);
         }
     }

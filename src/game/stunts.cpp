@@ -159,8 +159,8 @@ int fn_80161C4C(void);
 
 void AchievementsAdd(int category, s32 value);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
-#define NearZero(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
+#define NearZero(x) ((f32)__fabs(x) <= __float_epsilon[0])
 // SpinTracker::Rate tests its angle through a float abs inline (the call copy gives fabs its own register);
 // the other trackers use the macro above. Exact original spelling unknown.
 static inline f32 AbsF(f32 x) { return (f32)__fabs(x); }
@@ -999,7 +999,7 @@ public:
     virtual void Bump(const RaceCarRec* rc, int kind, void* other);
     virtual void Stop(const RaceCarRec* rc);
     virtual void Land(const RaceCarRec* rc) {
-        if (!turbo && (rc->turbo > lbl_80558DC4[0]) != 0) {
+        if (!turbo && (rc->turbo > __float_epsilon[0]) != 0) {
             turbo = 1;
             turboTime = lbl_8055E3C8;
         }
@@ -1026,7 +1026,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     int n;
     if (turbo) {
         f32 turboLimit = 10.0f;
-        if ((now - turboTime) > turboLimit || (rc->turbo > lbl_80558DC4[0]) == 0) {
+        if ((now - turboTime) > turboLimit || (rc->turbo > __float_epsilon[0]) == 0) {
             turbo = 0;
         }
     }
@@ -1268,7 +1268,7 @@ static inline f32 HitMax(f32 a, f32 b) { return a > b ? a : b; }
 
 struct CarHit {
     CarHit(void) { timer = 0.0f; }
-    bool Active(void) const { return timer > lbl_80558DC4[0]; }
+    bool Active(void) const { return timer > __float_epsilon[0]; }
     f32 timer;  // offset 0x0
     f32 mag;    // offset 0x4
 };
@@ -1312,10 +1312,10 @@ public:
             }
         }
         r = 0.0f;
-        if (f28C > lbl_80558DC4[0]) {
+        if (f28C > __float_epsilon[0]) {
             Show();
             Refresh();
-            if (f290 > lbl_80558DC4[0]) {
+            if (f290 > __float_epsilon[0]) {
                 f32 pts = Points(Rank());
                 Score(&pts);
                 Hide();
@@ -1337,7 +1337,7 @@ public:
     }
     virtual void Stop(const RaceCarRec* rc) {
         s32 n;
-        if (f28C > lbl_80558DC4[0]) {
+        if (f28C > __float_epsilon[0]) {
             f32 pts = Points(Rank());
             Score(&pts);
             Hide();
@@ -1359,7 +1359,7 @@ public:
         if (wrecked) {
             return 0x7FFFFFFF;
         }
-        if (f290 > lbl_80558DC4[0]) {
+        if (f290 > __float_epsilon[0]) {
             return f290;
         }
         return f28C;
@@ -1739,7 +1739,7 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
 f32 SpinTracker::Rate(const RaceCarRec* rc) {
     f32 r;
     int full;
-    if (!(AbsF(angle) <= lbl_80558DC4[0])) {
+    if (!(AbsF(angle) <= __float_epsilon[0])) {
         spins += rolls;
         if (Round(angle) > 0) {
             int add = rolls ? 0 : Round(angle);

@@ -135,7 +135,7 @@ extern unsigned int lbl_8055EE00;
 extern s32 lbl_8055EE08;
 extern int lbl_8055EE0C;
 extern Pool* lbl_8055EE10;
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 extern SoundSample lbl_804892D0[64];
 }
 
@@ -584,7 +584,7 @@ void VoiceSoundMixer::SetListeners(void* listeners) {
             }
             if (p->state == 1) {
                 p->frames++;
-                if (!p->muted && !((f32)__fabs(p->pitch) <= lbl_80558DC4[0])) p->elapsed += lbl_8055EE00;
+                if (!p->muted && !((f32)__fabs(p->pitch) <= __float_epsilon[0])) p->elapsed += lbl_8055EE00;
                 if (!p->paused && p->elapsed > p->maxTime) p->Stop();
             } else {
                 p->elapsed = 0;

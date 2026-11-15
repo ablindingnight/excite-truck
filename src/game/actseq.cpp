@@ -712,9 +712,9 @@ int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 }
 
 extern s32 lbl_8055E3C4;  // frame counter
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 // A thrown or knocked object on the track.
 class Body {
@@ -1657,8 +1657,8 @@ int Obstacle_ASE::Begin(int reverse) {
             dir.Set(Lerp(dir1.x, dir2.x, td), Lerp(dir1.y, dir2.y, td), Lerp(dir1.z, dir2.z, td));
             f32 speed = Lerp(speed1, speed2, ts);
             Vec vel(0.0f, 0.0f, 0.0f);
-            if (MotionMagnitude(PSVECDotProduct(&dir, &dir)) <= lbl_80558DC4[0] ||
-                MotionMagnitude(speed) <= lbl_80558DC4[0]) {
+            if (MotionMagnitude(PSVECDotProduct(&dir, &dir)) <= __float_epsilon[0] ||
+                MotionMagnitude(speed) <= __float_epsilon[0]) {
                 bodies.data[i]->Place(1);
             } else {
                 PSVECNormalize(&dir, &dir);

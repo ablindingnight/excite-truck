@@ -145,7 +145,7 @@ void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline void GSwap32(void* p) {
     u8 t;
@@ -620,7 +620,7 @@ void fn_801EBF00(void) {
         }
         lbl_804885E8[6]->Draw(0);
         GObj* o = &fn_801E7E34()[fn_801E85B4()];
-        if (!(AbsF(o->flash) <= lbl_80558DC4[0])) {
+        if (!(AbsF(o->flash) <= __float_epsilon[0])) {
             int a = (int)(255.0f * o->flash);
             a = a > 0 ? a : 0;
             int c = 0xFF;

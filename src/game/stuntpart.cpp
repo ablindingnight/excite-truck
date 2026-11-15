@@ -118,7 +118,7 @@ void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
 
 extern void* lbl_80488648[];  // car models
-extern f32 lbl_80558DC4[];    // FLT_EPSILON
+extern f32 __float_epsilon[];    // FLT_EPSILON
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -153,7 +153,7 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
-static inline int IsZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int IsZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 static inline u32 TrailColor(int a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 
@@ -450,7 +450,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                 sum.z = b.z + a.z;
                 AddScaled(&p->pts[i * 2], &p->pts[i * 2 - 2], &sum, 0.125f);
                 AddScaled(&p->pts[i * 2 + 1], &p->pts[i * 2 - 1], &sum, 0.125f);
-                if (!(dt <= lbl_80558DC4[0]) && fn_80287BC8(0.0f, 1.0f) < p->alpha * p->facing &&
+                if (!(dt <= __float_epsilon[0]) && fn_80287BC8(0.0f, 1.0f) < p->alpha * p->facing &&
                     fn_80287BC8(0.0f, 1.0f) > t) {
                     f32 r = fn_80287BC8(0.25f, 0.75f);
                     Vec q;
@@ -487,7 +487,7 @@ void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
     } else {
         p->reentryAmt = MAX(p->reentryAmt - 8.0f * dt, 0.0f);
     }
-    if ((f32)__fabs(dt) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(dt) <= __float_epsilon[0]) {
         return;
     }
     if (fn_80287BC8(0.0f, 1.0f) < p->reentryAmt) {
@@ -497,7 +497,7 @@ void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
         BoxPoint(&pos, car, ang, hx, hz);
         AddScaled(&pos, &pos, &car->axes[1], fn_80287BC8(0.0f, 2.0f * hy));
         vel = *(const WV3*)&car->vel;
-        if (car->height >= 1.5f - lbl_80558DC4[0]) {
+        if (car->height >= 1.5f - __float_epsilon[0]) {
             fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, *(ValVec3*)&vel, 1.0f);
         }
     }
@@ -682,7 +682,7 @@ void fn_802AB770(int idx) {
     car = fn_80287B24(idx);
 
     dt = fn_801E7E24();
-    if (!((f32)__fabs(dt) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(dt) <= __float_epsilon[0])) {
 
         r = fn_80129D90(0, 140, 255);
         g = fn_80129D90(0, 250, 255);

@@ -1674,7 +1674,7 @@ inline void EvCupBar::Update(void) {
 }
 
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" double cos(double x);
 extern "C" double sin(double x);
 
@@ -1702,7 +1702,7 @@ inline void EvCupBar::Draw(void) {
         x = cx + radius * (f32)cos(a);
         y = cy + radius * (f32)sin(a);
         if (cup->Get(i)->Unlocked()) {
-            if (!((f32)__fabs(fill[i] - 1.0f) <= lbl_80558DC4[0])) {
+            if (!((f32)__fabs(fill[i] - 1.0f) <= __float_epsilon[0])) {
                 fn_8027ED70()->DrawImage("star_small_empty", x, y, 20, -1);
                 fn_8027ED70()->DrawImageFade("star_small_full", x, y, 2.0f - fill[i], 20, -1);
             } else {
@@ -1877,7 +1877,7 @@ static inline int AnimsBusy(ScoreAccumulator* a) {
     }
     f32 t = a->wait - fn_80214D48();
     a->wait = 0.0f > t ? 0.0f : t;
-    return a->wait > lbl_80558DC4[0];
+    return a->wait > __float_epsilon[0];
 }
 
 void fn_802168BC(int a);

@@ -74,7 +74,7 @@ void operator delete(void* p);
 extern void* lbl_80343780[];
 extern const ModeEntry lbl_802FA3B4[5];
 extern s32 lbl_8055BEF0;
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 extern s32 lbl_8055BEA8;
 extern s32 lbl_8055BEC0;
@@ -1151,7 +1151,7 @@ void fn_80248C0C(u8* p) {
         w->timer -= fn_80214D48();
         fn_80214AF0(0x1E);
     }
-    if (w->timer < lbl_80558DC4[0]) {
+    if (w->timer < __float_epsilon[0]) {
         ((MenuState*)p)->Finish(0);
     }
 }

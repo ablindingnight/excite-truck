@@ -156,7 +156,7 @@ double cos(double x);
 void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 extern u32 lbl_8055D430;    // debug flags
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
@@ -499,7 +499,7 @@ void fn_8028AD78(void) {
 
 void fn_8028ADF4(SparkEntry* e, int n) {
     const SparkWheel* w;
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     f32 maxDist = 2500.0f;

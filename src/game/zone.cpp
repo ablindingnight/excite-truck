@@ -69,7 +69,7 @@ extern u8 lbl_8055E1BC;  // timed-out-of-zone mode
 void* GetEvent(int event);
 
 extern f32 lbl_8055E3C8;     // current race time
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
 // One text element of a layout set (0x20 bytes).
 struct LayoutItem {
@@ -372,7 +372,7 @@ struct Stats {
     s32 bonus;    // offset 0x18
 };
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
@@ -406,7 +406,7 @@ struct CarState {
             timeLeft = Clamp01(old + dt / lbl_8056149C);
             if (old < timeLeft) {
                 gainT = timeLeft - old;
-            } else if (NearZero(timeLeft) && !(AbsF(old) <= lbl_80558DC4[0])) {
+            } else if (NearZero(timeLeft) && !(AbsF(old) <= __float_epsilon[0])) {
                 EndCombo();
                 EndStreak();
                 tA8.Start();
@@ -1355,7 +1355,7 @@ static inline f32 SignF(f32 x) { return x > 0.0f ? 1.0f : -1.0f; }
 int fn_8013D224(f32 a, f32 b) {
     f32 d = a - b;
     f32 m = (f32)__fabs(d);
-    if (m <= lbl_80558DC4[0]) {
+    if (m <= __float_epsilon[0]) {
         return 0;
     }
     return d > 0.0f ? 1.0f : -1.0f;
@@ -1843,7 +1843,7 @@ void ZoneMaster::DrawNextGate(void) {
 inline void ZoneMaster::MarkHitGates(FixedArray<GateHit, 8>& hits) {
     Gate* gg;
     Vec3* p;
-    if (!((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0])) {
         int i;
         for (i = 0; i < hits.count; i++) {
             gg = hits.data[i].gate;
@@ -1927,7 +1927,7 @@ extern "C" f32 fn_8013EFB0(f32 x) { return x - 320.0f; }
 extern "C" f32 fn_8013EFBC(f32 y) { return 240.0f - y; }
 
 int ZoneMaster::vf5C(int p) const {
-    if ((f32)__fabs(f250) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(f250) <= __float_epsilon[0]) {
         if (hud.b8) {
             vf4C(p);
         }
@@ -2721,7 +2721,7 @@ inline void ZoneMaster::vf0C(void) {
     } else {
         f32 t = f250 - 0.016683351f;
         f250 = 0.0f > t ? 0.0f : t;
-        if ((f32)__fabs(f250) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(f250) <= __float_epsilon[0]) {
             int car = fn_80179630(0);
             hud.Update(&cars[car]);
         }
@@ -2907,7 +2907,7 @@ inline int ZoneMaster::vf8C(int p, int key) {
         f32 tanY = tan.y;
         len = sqrt(tan.x * tan.x + tanY * tan.y);
         f32 mag = (f32)__fabs(len);
-        if (!(mag <= lbl_80558DC4[0])) {
+        if (!(mag <= __float_epsilon[0])) {
             tan.x *= half / len;
             tan.y *= half / len;
         }

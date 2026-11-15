@@ -147,7 +147,7 @@ void* memset(void* d, int c, unsigned long n);
 void fn_80130978(char* buf, int n, f32 t);
 void fn_80214AF0(s32 s);
 }
-extern f32 lbl_80558DC0[];  // FLT_MAX (MSL)
+extern f32 __float_max[];  // FLT_MAX (MSL)
 
 static inline void CopyName(char* d, int n, const char* s) {
     char* p = d;
@@ -440,7 +440,7 @@ inline void fn_8025F46C(CarPickScreen* s) {
                 s2.Format(s->rows[k].value, 0x14);
                 s->rows[k].best = 2;
             } else {
-                fn_80130978(s->rows[k].value, 0x14, -lbl_80558DC0[0]);
+                fn_80130978(s->rows[k].value, 0x14, -__float_max[0]);
                 s->rows[k].best = 0;
                 s->icons[k]->visible = 0;
             }

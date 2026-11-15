@@ -17,7 +17,7 @@ extern int lbl_8055EE74, lbl_8055EE78, lbl_8055EEA0;
 extern void *lbl_8055EE7C, *lbl_8055EE80;
 extern char lbl_8055EE94;
 extern float lbl_8055EE84, lbl_8055EE88, lbl_8055EE8C, lbl_8055EE90, lbl_8055EE98, lbl_8055EE9C;
-__declspec(section ".data") extern float lbl_80558DC4;
+__declspec(section ".data") extern float __float_epsilon;
 extern int fn_802E2C20(void);
 extern void fn_80012158(void);
 extern void fn_8020CF6C(int);
@@ -305,11 +305,11 @@ void fn_8020D2D4(void) {
 
                 switch (i) {
                 case 0:
-                    if ((float)__fabs(lbl_8055EE8C) <= lbl_80558DC4) canDec = 0;
+                    if ((float)__fabs(lbl_8055EE8C) <= __float_epsilon) canDec = 0;
                     if (1.0f == lbl_8055EE8C) canInc = 0;
                     break;
                 case 1:
-                    if ((float)__fabs(lbl_8055EE90) <= lbl_80558DC4) canDec = 0;
+                    if ((float)__fabs(lbl_8055EE90) <= __float_epsilon) canDec = 0;
                     if (1.0f == lbl_8055EE90) canInc = 0;
                     break;
                 case 2:
@@ -383,14 +383,14 @@ int fn_8020DB0C(int arg0) {
     case 0x125:
         switch (lbl_8055EE78) {
         case 0:
-            if (!((float)__fabs(lbl_8055EE8C) <= lbl_80558DC4)) {
+            if (!((float)__fabs(lbl_8055EE8C) <= __float_epsilon)) {
                 lbl_8055EE98 = 0.001f * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;
             }
             break;
         case 1:
-            if (!((float)__fabs(lbl_8055EE90) <= lbl_80558DC4)) {
+            if (!((float)__fabs(lbl_8055EE90) <= __float_epsilon)) {
                 lbl_8055EE98 = 0.001f * (float)fn_802E2C20();
             } else {
                 var_r31 = 0;

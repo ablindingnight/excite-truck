@@ -29,7 +29,7 @@ void* operator new[](size_t size, const char* tag);
 void operator delete(void* p);
 void operator delete[](void* p);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 // A car's race result (0x1C).
 struct RaceResult {
@@ -308,7 +308,7 @@ f32 fn_801AE9E0(int i, f32* rate) {
 }
 
 int fn_801AEA64(f32 a, f32 b) {
-    if ((f32)__fabs(a - b) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(a - b) <= __float_epsilon[0]) {
         return 0;
     }
     if (b < a) {

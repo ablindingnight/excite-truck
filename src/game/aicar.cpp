@@ -189,7 +189,7 @@ extern Proxer* lbl_8055E0D0;
 extern u32 lbl_8055D430;
 extern s32 lbl_8055E3C4;
 extern f32 lbl_8055E3C8;
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 extern void* lbl_80333348[];  // AIDriver vtable
 extern void* lbl_80333390[];  // IDriver vtable
 
@@ -1409,7 +1409,7 @@ void fn_801959AC(u8* d) {
         U8(d, 0x2A7) = 0;
         fn_8018A174(CAR(d));
     }
-    if (!((f32)__fabs(F32(CAR(d), 0x2690)) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(F32(CAR(d), 0x2690)) <= __float_epsilon[0])) {
         fn_801961F8(d, "i am damaged");
     }
     fn_80195B28(d, 0.0f);
@@ -2691,7 +2691,7 @@ void fn_80198530(u8* d) {
         f32 lo = 1.3333334f + F32(d, 0x28);
         f32 t = Clamp01((speed - lo) / (hi - lo));
         grip = LerpF(0.0f, 1.0f, t);
-        if (AbsFlt(F32(d, 0x28)) <= lbl_80558DC4[0]) {
+        if (AbsFlt(F32(d, 0x28)) <= __float_epsilon[0]) {
             brake = 1.0f;
         }
     }

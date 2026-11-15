@@ -23,8 +23,8 @@ void fn_802E317C(const char* fmt, ...);  // fatal
 const char* fn_80131234(const char* key);  // localize
 void fn_801308F4(char* buf, s32 size, s32 value);  // format a score
 void fn_80130978(char* buf, int size, f32 v);      // format a time
-extern f32 lbl_80558DC0[];  // FLT_MAX (MSL)
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_max[];  // FLT_MAX (MSL)
+extern f32 __float_epsilon[];  // FLT_EPSILON
 }
 
 int OptE3Demo(void);
@@ -762,7 +762,7 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
         if (rec.HasValue()) {
             fn_80130978(r->recordTime.s, 20, rec.GetValue());
         } else {
-            fn_80130978(r->recordTime.s, 20, -lbl_80558DC0[0]);
+            fn_80130978(r->recordTime.s, 20, -__float_max[0]);
         }
     }
     fn_801308F4(r->score.s, 20, lbl_8055E884->score);
@@ -770,7 +770,7 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
     if (lbl_8055E884->hasTime) {
         fn_80130978(r->time.s, 20, lbl_8055E884->time);
     } else {
-        fn_80130978(r->time.s, 20, -lbl_80558DC0[0]);
+        fn_80130978(r->time.s, 20, -__float_max[0]);
     }
     StatsGetHighScoreCount(IdentGetCurrentSlot(), m->event, m->difficulty);
     for (int i = 0; i < 5; i++) {
@@ -783,7 +783,7 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
         } else {
             row->score.Set("-");
             row->grade.Set("-");
-            fn_80130978(row->time.s, 20, -lbl_80558DC0[0]);
+            fn_80130978(row->time.s, 20, -__float_max[0]);
         }
     }
     r->name.Set(IdentGetSlotName(IdentGetCurrentSlot()));
@@ -833,7 +833,7 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
         break;
     case 2: {
         r->t = MinF(0.08341675f + r->t, 1.0f);
-        if (AbsF(r->t - 1.0f) <= lbl_80558DC4[0]) {
+        if (AbsF(r->t - 1.0f) <= __float_epsilon[0]) {
             r->state = 3;
         }
         break;

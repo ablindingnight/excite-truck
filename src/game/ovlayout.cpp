@@ -694,7 +694,7 @@ T* FindIn(const char* name, DynArray<T>* a) {
     return 0;
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
 struct MouseEvent {
     s32 type;   // offset 0x0
@@ -780,7 +780,7 @@ public:
                         if (ev.flags & 1) {
                             d.x = p.x - c->lastX;
                             d.y = p.y - c->lastY;
-                            if (!(AbsF(d.x) <= lbl_80558DC4[0]) || !(AbsF(d.y) <= lbl_80558DC4[0])) {
+                            if (!(AbsF(d.x) <= __float_epsilon[0]) || !(AbsF(d.y) <= __float_epsilon[0])) {
                                 c->moved = 1;
                             }
                             c->active->handler->Drag(&d, c->active->target);

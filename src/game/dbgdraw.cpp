@@ -48,13 +48,13 @@ void fn_802C9904(void);
 DCam* fn_802C86DC(void);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void SetLength(DVec3* v, f32 len) {
     f32 m = PSVECMag(v);
-    if ((f32)__fabs(m) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(m) <= __float_epsilon[0]) {
         return;
     }
     f32 s = len / m;

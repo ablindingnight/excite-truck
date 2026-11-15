@@ -302,7 +302,7 @@ void PSVECNormalize(const f32* in, f32* out);
 f32 PSVECDistance(const f32* a, const f32* b);
 double tan(double x);
 double atan(double x);
-extern f32 lbl_80558DC4[];  // epsilon
+extern f32 __float_epsilon[];  // epsilon
 extern const f32 lbl_80563FC4;
 extern const f32 lbl_80563FD8;
 
@@ -317,7 +317,7 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     F32(p, 0x70) = dx;
     F32(p, 0x74) = dy;
     F32(p, 0x78) = dz;
-    f32 eps = lbl_80558DC4[0];
+    f32 eps = __float_epsilon[0];
     if ((f32)__fabs(dx) <= eps && (f32)__fabs(dz) <= eps) {
         F32(p, 0x70) = F32(p, 0xD8);
         F32(p, 0x78) = F32(p, 0xE0);

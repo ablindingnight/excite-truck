@@ -69,7 +69,7 @@ f32 fn_8019DF88(f32 mass, f32 e, const RVec3* pos, const RVec3* vel, const RMat3
 void fn_802E30C8(const char* fmt, ...);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 extern s32 lbl_8055E3C4;    // frame counter
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
@@ -209,7 +209,7 @@ void Corner::Hit(RigidBody* b) {
             vel.z = vel.z * s;
         }
         f32 k;
-        if ((f32)__fabs(damping) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(damping) <= __float_epsilon[0]) {
             k = depth * spring * (vn < 0.0f ? 1.0f : 0.2f);
         } else {
             k = depth * spring - vn * damping;

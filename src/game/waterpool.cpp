@@ -170,7 +170,7 @@ void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
 
 extern void* lbl_80488648[];  // car models
-extern f32 lbl_80558DC4[];    // FLT_EPSILON
+extern f32 __float_epsilon[];    // FLT_EPSILON
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -201,7 +201,7 @@ static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 static inline int InRange(f32 v, f32 lo, f32 hi) {
     int in = 0;
-    if (v >= lo - lbl_80558DC4[0] && v <= hi + lbl_80558DC4[0]) {
+    if (v >= lo - __float_epsilon[0] && v <= hi + __float_epsilon[0]) {
         in = 1;
     }
     return in;
@@ -273,7 +273,7 @@ void fn_8029C22C(void) {
 }
 
 void fn_8029C25C(void) {
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     for (int i = 0; i < lbl_8055F7F0; i++) {
@@ -319,7 +319,7 @@ WaterIface::~WaterIface(void) { Close(); }
 
 extern "C" void fn_8029C450(WaterCarEntry* e, int n) {
     f32 far = 2500.0f;
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     for (int i = 0; i < n; e++, i++) {
@@ -706,7 +706,7 @@ void fn_8029DDB8(WaterPool* p);
 void fn_8029DB78(WaterPool* p, PoolVtx* v, int x, int y);
 
 void fn_8029D574(WaterPool* p) {
-    if (p->timer >= 1.0f - lbl_80558DC4[0]) {
+    if (p->timer >= 1.0f - __float_epsilon[0]) {
         f32 amount = fn_80287BC8(-p->desc.unk14, p->desc.unk14);
         int y = fn_80287B94(1, p->ny - 2);
         int x = fn_80287B94(1, p->nx - 2);
@@ -885,7 +885,7 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     d.x = at->x - p->origin.x;
     SetPt(&v, vel->x, vel->z);
     f32 s2 = v.x * v.x + v.y * v.y;
-    if (AbsF(s2) <= lbl_80558DC4[0]) {
+    if (AbsF(s2) <= __float_epsilon[0]) {
         return;
     }
     f32 dy = at->y - p->origin.y;

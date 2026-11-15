@@ -335,7 +335,7 @@ MSL/printf.c:
 	.sdata2     start:0x805605C0 end:0x805605C8
 
 MSL/float.c:
-	.sdata      start:0x80558DB0 end:0x80558DC0
+	.sdata      start:0x80558DB0 end:0x80558DC8
 
 MSL/qsort.c:
 	extab       start:0x80004658 end:0x80004660

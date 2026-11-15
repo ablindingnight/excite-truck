@@ -26,11 +26,11 @@ const char* fn_8012F2F0(StringTable* t, int row, int col);
 s32 fn_802CAC28(const char* name, s32 key);  // load texture
 void gxForgetTexture(s32 tex);
 void fn_802CC5B8(s32 tex);
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 }
 
 static inline int NearZero(f32 x) {
-    if ((f32)__fabs(x) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(x) <= __float_epsilon[0]) {
         return 1;
     }
     return 0;

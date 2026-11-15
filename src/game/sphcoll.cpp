@@ -573,7 +573,7 @@ static inline f32 ClampExt(f32 v, f32 e) {
     return v > -e ? v : -e;
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 void fn_801B34DC(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
 extern const f32 lbl_805622E8;  // 0.5
 extern const f32 lbl_80562300;  // 0.2
@@ -844,7 +844,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         if (pb && IsCarObj((u8*)pb) && (u32)(qk - 0x73) <= 1) {
             int fast = 1;
             if (!U8(pb, 0x25C8)) {
-                bool big = F32(pb, 0x25BC) > lbl_80558DC4[0];
+                bool big = F32(pb, 0x25BC) > __float_epsilon[0];
                 if (!big) {
                     fast = 0;
                 }
@@ -946,7 +946,7 @@ int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
 
 void fn_8019AA18(u8* p, u32 a, u32 b, u32 c) { fn_8019A820(p, (f32*)(p + 0x34), (RVec3*)a, b, c, F32(p, 0x24)); }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 void PSVECNormalize(const void* in, void* out);
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
@@ -964,7 +964,7 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
     int hit = 0;
     if (AbsF(dd.v[0]) < rs && AbsF(dd.v[2]) < rs && AbsF(dd.v[1]) < rs) {
         f32 dist = PSVECMag(dd.v);
-        if (!(AbsF(dist) <= lbl_80558DC4[0])) {
+        if (!(AbsF(dist) <= __float_epsilon[0])) {
             f32 pen = s + (-dist + r);
             if (pen > 0.0f) {
                 f32 inv = 1.0f / dist;
@@ -1120,7 +1120,7 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
     f32 len = F32(q, 0x28);
     if (l.z < len && l.z > -len) {
         f32 dist = (f32)sqrt(Sq(l.x) + Sq(l.y));
-        if (!((f32)__fabs(dist) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(dist) <= __float_epsilon[0])) {
             f32 R = F32(q, 0x24);
             r += -dist + R;
             if (r > 0.0f) {
@@ -1763,7 +1763,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
         w.z = mid.z - cb.z;
         t = PSVECDotProduct(&db.x, &w.x);
     } else {
-        if (!((f32)__fabs(nn) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(nn) <= __float_epsilon[0])) {
         m[0][0] = d.x;
         m[0][1] = db.x;
         m[0][2] = n.x;
@@ -1806,7 +1806,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     diff.y = pb.y - pa.y;
     diff.z = pb.z - pa.z;
     f32 dist = PSVECMag(&diff.x);
-    if ((f32)__fabs(dist) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(dist) <= __float_epsilon[0]) {
         return 0;
     }
     f32 pen = (F32(q, 0x24) + F32(p, 0x24)) - dist;
@@ -1956,12 +1956,12 @@ f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, 
     return 0.0f;
 }
 
-extern f32 lbl_80558DC4[];       // FLT_EPSILON
+extern f32 __float_epsilon[];       // FLT_EPSILON
 extern const f32 lbl_805622D0;  // 0.0
 
 // Clips the ray parameter range [*tmin, *tmax] against the slab |o + t*d| <= r.
 int fn_8019E1F4(f32* tmin, f32* tmax, f32 o, f32 d, f32 r) {
-    if ((f32)__fabs(d) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(d) <= __float_epsilon[0]) {
         if (o < -r || o > r) {
             return 0;
         }

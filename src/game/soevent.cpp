@@ -26,7 +26,7 @@ void PSVECNormalize(const void* in, void* out);
 }
 
 extern f32 lbl_8055E3C8;      // race time
-extern f32 lbl_80558DC4[];    // FLT_EPSILON
+extern f32 __float_epsilon[];    // FLT_EPSILON
 
 struct Vec {
     Vec(void) {}
@@ -497,7 +497,7 @@ void fn_801D2E38(SoSpawn* s, SObj* obj, const Vec* pos, const Vec* vel, f32 mass
         f.z = c->throwVel.z * pm;
         p->Push(&f, &xf.pos, surf, 0);
         f.Set(fn_80129DC4(4, 0.0f, 1.0f), fn_80129DC4(4, 0.0f, 1.0f), fn_80129DC4(4, 0.0f, 1.0f));
-        if (!((f32)__fabs(PSVECDotProduct(&f, &f)) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(PSVECDotProduct(&f, &f)) <= __float_epsilon[0])) {
             PSVECNormalize(&f, &f);
             f32 r = fn_80129DC4(4, 0.0f, c->randScale);
             f.x *= r;

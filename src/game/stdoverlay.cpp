@@ -91,7 +91,7 @@ const char* GetGradeDisplayName(int grade);
 
 extern s32 lbl_8055E3C4;  // frame counter
 extern f32 lbl_8055E3C8;  // current time
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 
 static inline s32 LoadScoreTex(void) {
     return fn_802CAC28("betatex2.tex", 0);
@@ -399,7 +399,7 @@ inline void OverheatOverlay::Update(int player, int unused) {
 
     hot = truck->heat > 0.0f;
     if (hot) {
-        if (!((f32)fabs(s->level - 1.0f) <= lbl_80558DC4[0])) {
+        if (!((f32)fabs(s->level - 1.0f) <= __float_epsilon[0])) {
             s->start = lbl_8055E3C8;
         }
         s->level = 1.0f;

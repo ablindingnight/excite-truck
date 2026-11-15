@@ -114,7 +114,7 @@ void fn_802E317C(const char* fmt, ...);
 
 void* operator new[](size_t size, const char* name);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 ModuleTag lbl_8055F708;
 extern const f32 lbl_8055F710 = log2(2.2222223f);
@@ -163,7 +163,7 @@ void fn_8028CF50(void) {
 
 void fn_8028CF64(void) {
     if (lbl_8055F714) {
-        if (!((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0])) {
             fn_8028D728();
         }
     }
@@ -443,7 +443,7 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
 
 void fn_8028DDF0(SkidEntry* e, int n) {
     SkidEntry* current = e;
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     f32 maxd = 40000.0f;

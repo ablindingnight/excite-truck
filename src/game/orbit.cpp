@@ -41,7 +41,7 @@ void* operator new[](size_t size, const char* tag);
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 extern f32 lbl_8055E3C8;    // race time
 
 struct EventDesc {
@@ -281,7 +281,7 @@ struct OrbitCarState {
 };
 
 
-#define NearEq(a, b) ((f32)__fabs((a) - (b)) <= lbl_80558DC4[0])
+#define NearEq(a, b) ((f32)__fabs((a) - (b)) <= __float_epsilon[0])
 
 static inline f32 Unlerp(f32 a, f32 b, f32 x) {
     f32 t = (x - a) / (b - a);

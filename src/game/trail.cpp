@@ -210,9 +210,9 @@ void PSVECCrossProduct(const TVec* a, const TVec* b, TVec* out);
 }
 
 extern u32 lbl_8055D430;
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
-#define NearZero(x) ((f32)__fabs(x) <= lbl_80558DC4[0])
+#define NearZero(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
 inline bool DbgFlag(u32 m) {
     int r = 0;
@@ -222,10 +222,10 @@ inline bool DbgFlag(u32 m) {
     return r;
 }
 
-static inline int Full(f32 v) { return v > 1.0f - lbl_80558DC4[0]; }
+static inline int Full(f32 v) { return v > 1.0f - __float_epsilon[0]; }
 
 static inline void Wrap(f32& v, f32 step) {
-    if (v > 1.0f - lbl_80558DC4[0]) {
+    if (v > 1.0f - __float_epsilon[0]) {
         v = v - 1.0f;
     }
     v = v + step;

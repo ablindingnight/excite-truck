@@ -55,7 +55,7 @@ extern const u32 lbl_8055C458;
 extern f32 lbl_8055C454;
 
 // Unsized address view reproduces original absolute access to the known 4-byte object.
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 extern const char lbl_8055C4A8[8], lbl_803464EC[];
 extern CreditsFade* lbl_8055F444;
 extern void* lbl_8055F448;
@@ -288,7 +288,7 @@ static inline void CreditUpdateGroup(CreditFontGroupFields* self,f32 delta) {
     while(index<self->glyphs.count) {
         CreditGlyphFields* glyph=&((CreditGlyphFields*)self->glyphs.items)[index];
         glyph->remaining-=delta;
-        if(glyph->remaining<lbl_80558DC4[0])CreditRemoveGlyph(&self->glyphs,index);
+        if(glyph->remaining<__float_epsilon[0])CreditRemoveGlyph(&self->glyphs,index);
         else {f32& vx=glyph->velocity.values[0];f32& vy=glyph->velocity.values[1];
             f32 accelerationX=self->desc.accelerationX;vx+=accelerationX*delta;
             vy+=self->desc.accelerationY*delta;
@@ -544,7 +544,7 @@ extern "C" f32 fn_80264588(void) {
     return (-1.0f);
 }
 
-extern "C" int fn_802645C0(void) { return (f32)__fabs((f64)lbl_8055F444->value) <= lbl_80558DC4[0]; }
+extern "C" int fn_802645C0(void) { return (f32)__fabs((f64)lbl_8055F444->value) <= __float_epsilon[0]; }
 
 extern "C" void fn_802645EC(void) { lbl_8055F444->saved = lbl_8055C454; }
 
@@ -555,7 +555,7 @@ void CreditsFade::Enter(void) {
 }
 
 void CreditsFade::Update(void) {
-    if ((f32)__fabs(saved) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(saved) <= __float_epsilon[0]) {
         Finish(0);
         fn_80216CA8();
     }
@@ -574,7 +574,7 @@ CreditBackgroundFields::~CreditBackgroundFields(){lbl_8055F448=0;}
 extern "C" void* fn_80264A54(void) { return lbl_8055F448; }
 
 extern "C" void fn_80264A5C(f32 x,f32 y) {
-    if((f32)__fabs((f64)fn_80214D48())<=lbl_80558DC4[0])return;
+    if((f32)__fabs((f64)fn_80214D48())<=__float_epsilon[0])return;
     f32 screenX,screenY;
     fn_80230C30(&screenX,&screenY,(int)x,(int)y);
     screenX+=x-(f32)(int)x;screenY-=y-(f32)(int)y;
@@ -662,7 +662,7 @@ void CreditsKeyEnabler::Enter(void) { done = 0; remaining = duration; }
 
 void CreditsKeyEnabler::Update(void) {
     fn_802645EC();
-    if (remaining > lbl_80558DC4[0]) remaining -= fn_80214D48();
+    if (remaining > __float_epsilon[0]) remaining -= fn_80214D48();
     else done = 1;
 }
 

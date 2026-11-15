@@ -582,7 +582,7 @@ public:
 
 extern f32 lbl_8055E3C8;  // race time
 extern u8 lbl_8055E529;
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 BOOL OptPaTest(void);
 
 extern "C" {
@@ -599,7 +599,7 @@ int fn_802B02C8(u8* p);
 int fn_801796C4(void);
 void fn_801B86A4(s32 car);
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 void fn_80190388(u8* p) {
     u8* info = ((CarCtl*)PTR(p, 0x14))->Info();
@@ -1155,7 +1155,7 @@ extern u8 lbl_8055E52A;
 extern u8 lbl_8055E52B;
 extern u8 lbl_8055E52C;
 extern f32 lbl_8055E3C8;  // race time
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 extern const f32 lbl_805620BC;  // 10
 extern const f32 lbl_805620F0;  // -2
 extern const f32 lbl_80562128;  // -0.05
@@ -1362,7 +1362,7 @@ void PlayerDriver_vf48(u8* p) {
     fn_8018ADC4(PTR(p, 0x34), cl > c ? cl : c);
     if (lbl_8055E52B && ((Gearbox*)PTR(p, 0x38))->v3C()) {
         int calm;
-        calm = (f32)__fabs(F32(PTR(p, 0x34), 0x2690)) <= lbl_80558DC4[0];
+        calm = (f32)__fabs(F32(PTR(p, 0x34), 0x2690)) <= __float_epsilon[0];
         if (!lbl_8055E52C && (lbl_8055E52B || calm)) {
             fn_801B86A4(S32(p, 0x3C));
         }

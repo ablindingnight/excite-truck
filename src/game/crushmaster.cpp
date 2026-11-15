@@ -326,11 +326,11 @@ void fn_802C8DB8(MarkVtx* v, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline void SetLen(ValVec3* v, f32 len) {
     f32 m = PSVECMag(v);
-    if (!((f32)__fabs(m) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(m) <= __float_epsilon[0])) {
         f32 k = len / m;
         v->x *= k;
         v->y *= k;
@@ -1364,7 +1364,7 @@ inline void CrushMaster::vf0C(void) {
             f32 left = endTime - now;
             left = 0.0f > left ? 0.0f : left;
             f32 mag = __fabs(left);
-            if (mag <= lbl_80558DC4[0] && AliveAI() > 0) {
+            if (mag <= __float_epsilon[0] && AliveAI() > 0) {
                 StrCopyN(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
                 StrCopyN(results.bB2, "", 0x14);
                 StrCopyN(results.bC6, "", 0x14);
@@ -1400,7 +1400,7 @@ inline void CrushMaster::vf10(void) {
     b2B8 = 0;
 }
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 static inline f32 Max0(f32 x) { return 0.0f > x ? 0.0f : x; }
 
 inline int CrushMaster::vf20(int car) const {
@@ -1871,7 +1871,7 @@ static inline void PickTarget(CrushTarget* t, int car, f32 base, f32 a1, f32 a0)
         dir.y = rec->mtx.basis[2].z;
         {
             f32 len = sqrt(dir.x * dir.x + dir.y * dir.y);
-            if (!(FAbs(len) <= lbl_80558DC4[0])) {
+            if (!(FAbs(len) <= __float_epsilon[0])) {
                 f32 k = dist / len;
                 dir.x *= k;
                 dir.y *= k;

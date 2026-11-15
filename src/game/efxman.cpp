@@ -306,7 +306,7 @@ void fn_802AE394(void);
 void* operator new[](size_t size, const char* name);
 
 extern void* lbl_80488648[];  // car models
-extern f32 lbl_80558DC4[];    // FLT_EPSILON
+extern f32 __float_epsilon[];    // FLT_EPSILON
 
 static inline void Scale(Vec* out, const Vec* in, f32 s) {
     out->x = in->x * s;
@@ -647,7 +647,7 @@ void fn_802882EC(void) {
         c->vel.x = phys->vel.x;
         c->vel.y = phys->vel.y;
         c->vel.z = phys->vel.z;
-        if (!((f32)__fabs(PSVECDotProduct(&phys->vel, &phys->vel)) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(PSVECDotProduct(&phys->vel, &phys->vel)) <= __float_epsilon[0])) {
             Scale(&c->dir, &phys->vel, 1.0f / (f32)sqrt(PSVECDotProduct(&phys->vel, &phys->vel)));
         } else {
             c->dir.x = 0.0f;

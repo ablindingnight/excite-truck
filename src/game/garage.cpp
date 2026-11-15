@@ -214,7 +214,7 @@ static inline void FreeIconPool(IconPool* pool) {
 }
 extern s32 lbl_8055F2E8;
 extern void* lbl_80344384[];
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 extern char lbl_8055C0E8[4];  // ""
 extern u32 lbl_8055E044;
@@ -416,7 +416,7 @@ extern char lbl_8034287C[];
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 extern "C" const char* fn_80131234(u8* s);
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 extern "C" {
 
@@ -1028,12 +1028,12 @@ public:
         panel->SetCar(model);
         f32 t = wait - fn_80214D48();
         wait = lbl_80563960 > t ? lbl_80563960 : t;
-        if (AbsF(wait) <= lbl_80558DC4[0]) {
+        if (AbsF(wait) <= __float_epsilon[0]) {
             fn_80214AF0(0x1F);
         }
         t = hold - fn_80214D48();
         hold = lbl_80563960 > t ? lbl_80563960 : t;
-        if (AbsF(hold) <= lbl_80558DC4[0]) {
+        if (AbsF(hold) <= __float_epsilon[0]) {
             fn_80214AF0(0x1F);
         }
     }
@@ -1453,7 +1453,7 @@ void fn_80251D0C(u8* p) {
 
 int fn_80252238(u8* p, int key) {
     if (key == 0xD) {
-        if (AbsF(F32(p, 0x194)) <= lbl_80558DC4[0] || AbsF(F32(p, 0x198)) <= lbl_80558DC4[0]) {
+        if (AbsF(F32(p, 0x194)) <= __float_epsilon[0] || AbsF(F32(p, 0x198)) <= __float_epsilon[0]) {
             ((MenuState*)p)->Finish(0);
             return 1;
         }

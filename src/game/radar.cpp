@@ -16,7 +16,7 @@ u8* fn_8017960C(int i);
 int fn_801B8570(int i);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 extern s32 lbl_8055E4D0;    // car count
 
 struct V2 {
@@ -74,7 +74,7 @@ extern const u32 lbl_8055E128 = MakeILPos(0xFFFF, 0);
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 static inline f32 Clamp01(f32 t) {
     if (1.0f < t) {
@@ -177,7 +177,7 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
     corner.y = origin.y + size.y;
     fn_801392F8(fn_8017960C(self));
     cam = fn_801E8718();
-    if (AbsF(cam->dir.x) <= lbl_80558DC4[0] && AbsF(cam->dir.z) <= lbl_80558DC4[0]) {
+    if (AbsF(cam->dir.x) <= __float_epsilon[0] && AbsF(cam->dir.z) <= __float_epsilon[0]) {
         return;
     }
     h.x = cam->dir.x;
@@ -227,7 +227,7 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
             alpha = LerpF(1.0f, 0.3f, Clamp01((dist - 2.0f * range) / (6.0f * range - 2.0f * range)));
             if (dist > range) {
                 f32 mag = PSVECMag(&p);
-                if (!((f32)__fabs(mag) <= lbl_80558DC4[0])) {
+                if (!((f32)__fabs(mag) <= __float_epsilon[0])) {
                     f32 k = range / mag;
                     p.x *= k;
                     p.y *= k;

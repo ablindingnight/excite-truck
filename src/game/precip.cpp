@@ -259,7 +259,7 @@ void fn_802CE86C(u32 color, int i, f32 size, f32 x, f32 y, f32 z);
 void fn_802CE868(void);
 }
 
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 extern s32 lbl_8055CFF0;
 extern s32 lbl_8055CFF4;
 
@@ -448,7 +448,7 @@ void fn_802A4D08(void) {
         lbl_8055F888->Draw();
     }
     f32 f = fn_801E7E34()->flash;
-    if (!((f32)__fabs(f) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(f) <= __float_epsilon[0])) {
         int a = Alpha(0.5f * (255.0f * f));
         fn_802C90F0(lbl_8055F89C);
         fn_802C9124(0, 0, lbl_8055CFF0, lbl_8055CFF4, 0.0f, 0.0f, 1.0f, 1.0f, a << 24 | 0xFFFFFF);
@@ -462,13 +462,13 @@ void fn_802A4E08(void) {
     // MATCHING-AID: one variable holds the byte offset, then the pointer; plain &a[i] keeps the offset in its own register.
     ScreenFx* s = (ScreenFx*)(fn_801E85B4() * (int)sizeof(ScreenFx));
     s = (ScreenFx*)((u8*)fn_801E7E34() + (int)s);
-    if (!(AbsF(s->flash) <= lbl_80558DC4[0])) {
+    if (!(AbsF(s->flash) <= __float_epsilon[0])) {
         int a = Alpha(255.0f * s->flash);
         fn_802C90F0(lbl_8055F89C);
         fn_802C9124(0, 0, lbl_8055CFF0, lbl_8055CFF4, 0.0f, 0.0f, 1.0f, 1.0f, a << 24 | 0xE6F0FF);
         fn_802C9118();
     }
-    if (!((f32)__fabs(s->lightning) <= lbl_80558DC4[0]) && lbl_8055F898 != -1) {
+    if (!((f32)__fabs(s->lightning) <= __float_epsilon[0]) && lbl_8055F898 != -1) {
         WFrame m;
         m.pos = fn_802C86DC()->pos;
         f32 ang = *(f32*)(s + 1);
@@ -586,7 +586,7 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
 }
 void fn_802A53B0(DropHit* hits, int n) {
     int k2;
-    if ((f32)__fabs(fn_802A4AD4()) <= lbl_80558DC4[0] || !lbl_8055F894) {
+    if ((f32)__fabs(fn_802A4AD4()) <= __float_epsilon[0] || !lbl_8055F894) {
         return;
     }
     RainSystem* r = lbl_8055F88C;
@@ -827,7 +827,7 @@ void SnowSystem::Frustum(void) {
 }
 
 void SnowSystem::Drift(void) {
-    if ((f32)__fabs(fn_802A4AD4()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_802A4AD4()) <= __float_epsilon[0]) {
         return;
     }
     driftX = fn_80287BC8(-1.5f, 1.5f);
@@ -1162,7 +1162,7 @@ void Mist::Update(void) {
     } else {
         a = density * (1.0f - (f32)sqrt(d2) / rad);
     }
-    if ((lbl_80558DC4[0] >= (f32)__fabs(a)) != (lbl_80558DC4[0] >= (f32)__fabs(alpha))) {
+    if ((__float_epsilon[0] >= (f32)__fabs(a)) != (__float_epsilon[0] >= (f32)__fabs(alpha))) {
         fn_802C990C(color);
     }
     fn_802C2B78(0.5f, 50.0f, a);

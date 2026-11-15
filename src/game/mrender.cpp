@@ -62,7 +62,7 @@ void fn_801E7894(void* p);
 
 void* operator new(size_t size, const char* tag);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 
@@ -145,7 +145,7 @@ struct Flare {
 
 static inline f32 fabsf(f32 x) { return __fabs(x); }
 
-static inline BOOL Equal(f32 a, f32 b) { return fabsf(a - b) <= lbl_80558DC4[0]; }
+static inline BOOL Equal(f32 a, f32 b) { return fabsf(a - b) <= __float_epsilon[0]; }
 
 static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -511,7 +511,7 @@ f32 fn_802C8FEC(void) { return lbl_8055FC6C; }
 
 int fn_802C8FF4(const VecP* p, f32 r) {
     int in = 0;
-    if (p->z > lbl_8055FC38 + lbl_80558DC4[0] && p->z < lbl_8055FC3C - lbl_80558DC4[0] && p->x >= lbl_8055FC5C - r &&
+    if (p->z > lbl_8055FC38 + __float_epsilon[0] && p->z < lbl_8055FC3C - __float_epsilon[0] && p->x >= lbl_8055FC5C - r &&
         p->x < r + (lbl_8055FC5C + lbl_8055FC64) && p->y >= lbl_8055FC60 - r &&
         p->y < r + (lbl_8055FC60 + lbl_8055FC68)) {
         in = 1;
@@ -654,7 +654,7 @@ void fn_802C974C(f32 near, f32 far, f32 fov) {
     lbl_8055FC40 = fov;
     lbl_804C144C.fov = fov;
     if (!is2D || lbl_8055FC75) {
-        if (!((f32)__fabs(lbl_8055D020 - 1.0f) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(lbl_8055D020 - 1.0f) <= __float_epsilon[0])) {
             f32 q = (f32)tan(0.5f * fov) / lbl_8055D020;
             fov = 2.0f * (f32)atan(q);
         }

@@ -220,7 +220,7 @@ extern u8 lbl_8055E3BD;
 extern s32 lbl_8055E488;
 extern u32 lbl_8055D430;
 extern s32 lbl_8055E8F8;
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 struct PVec3 {
     void Set(f32 x_, f32 y_, f32 z_) {
@@ -1384,7 +1384,7 @@ StatePacket* fn_80179824(void) {
 void fn_80179AF4(const Phob* v, u8* buf) {
     u8* o = buf + v->a8;
     PMtx* out = (PMtx*)o;
-    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         *out = v->world;
     } else {
         PMtx t;

@@ -138,7 +138,7 @@ void* memset(void* dst, int c, size_t n);
 void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -289,7 +289,7 @@ void fn_802889F0(void) {
 void fn_80288A1C(int mode) {}
 
 void fn_80288A20(void) {
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
 }
@@ -301,7 +301,7 @@ void fn_80288A58(const Vec* p, const Vec* v) { fn_8028E584(lbl_8055F6E0->small, 
 void fn_80288A70(void) {}
 
 void fn_80288A74(SmokeEntry* e, int n) {
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     SmokeEntry* p = e;

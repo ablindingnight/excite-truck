@@ -23,7 +23,7 @@ f32 PSVECSquareDistance(const void* a, const void* b);
 
 extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 // ValueNode/ValueTable without the inline GetFloat(key, def) body (no weak copy here).
 class ValueNodeV {
@@ -506,7 +506,7 @@ static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
 
 void MutPhob::vf28(u8* buf) {
     MutPose* p = (MutPose*)(buf + a8);
-    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         p->mtx = world;
     } else {
         RMtx m;

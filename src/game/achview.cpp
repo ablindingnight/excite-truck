@@ -175,7 +175,7 @@ void AchievementsQuery(AchQuery* q);
 int AchievementsGetLevel(int category, s32 value);
 int AchievementsGetLevelCount(int category);
 extern "C" void fn_80130FCC(char* buf, s32 size, s32 value);
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 int strcasecmp(const char* a, const char* b);
 void fn_80236954(const char* name);
 void fn_80236958(const char* name);
@@ -321,7 +321,7 @@ public:
     void ShowValue(void) {
         s32 v;
         int show;
-        v = (s32)(shown + lbl_80558DC4[0]);
+        v = (s32)(shown + __float_epsilon[0]);
         fn_80130FCC(valueText, 0x14, v);
         show = 1;
         if (counting && (started || !levelUp)) {
@@ -1059,7 +1059,7 @@ inline void AchView::Update(void) {
         shown = best < next ? best : next;
     }
     u8 wasStarted = started;
-    started = (s32)(shown + lbl_80558DC4[0]) < q.best;
+    started = (s32)(shown + __float_epsilon[0]) < q.best;
     tally += fn_80214D48();
     if (started) {
         f32 x = lbl_8055F3A4;

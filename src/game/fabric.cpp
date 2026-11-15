@@ -204,7 +204,7 @@ void fn_802C8D74(void);
 int fn_802CDB20(void* ctx, s32 id);
 void fn_802CD320(void* scene, TrackInst* inst);
 void* fn_802C9C24(void* model);
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 }
 
 ModuleTag lbl_8055EC08;
@@ -760,7 +760,7 @@ UniformFabricMan::~UniformFabricMan(void) {
     count = 0;
 }
 
-static inline BOOL Paused(void) { return (f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]; }
+static inline BOOL Paused(void) { return (f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]; }
 
 void UniformFabricMan::Update(void* ctx) {
     f32 gravity;

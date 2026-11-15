@@ -30,7 +30,7 @@ void* operator new(size_t size, const char* name);
 void operator delete(void* p);
 
 extern f32 lbl_8055E3C8;    // time
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 struct BVec {
     BVec(void) {}
@@ -154,7 +154,7 @@ static inline void InitBoid(Boid* b, const BoidDesc* d) {
     b->vel.x = fn_80287BC8(-10.0f, 10.0f);
     b->vel.y = 0.0f;
     b->vel.z = z;
-    if ((f32)__fabs(PSVECDotProduct(&b->vel, &b->vel)) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(PSVECDotProduct(&b->vel, &b->vel)) <= __float_epsilon[0]) {
         b->vel.x = 1.0f;
     }
     PSVECNormalize(&b->vel, &b->vel);
@@ -347,7 +347,7 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     to[0] = g[0] - p[0];
     to[1] = g[1] - p[1];
     f32 d2 = to[0] * to[0] + to[1] * to[1];
-    if (!((f32)__fabs(d2) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(d2) <= __float_epsilon[0])) {
         f32 k = 1.0f / (f32)sqrt(d2);
         to[0] *= k;
         to[1] *= k;
@@ -403,7 +403,7 @@ void fn_802A8DE8(void) {
             m.fwd.x = b->vel.x;
             m.fwd.y = b->vel.y;
             m.fwd.z = b->vel.z;
-            if ((f32)__fabs(PSVECDotProduct(&m.fwd, &m.fwd)) <= lbl_80558DC4[0]) {
+            if ((f32)__fabs(PSVECDotProduct(&m.fwd, &m.fwd)) <= __float_epsilon[0]) {
                 m.fwd.x = 0.0f;
                 m.fwd.y = 0.0f;
                 m.fwd.z = 1.0f;

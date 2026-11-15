@@ -1036,7 +1036,7 @@ int fn_802726EC(f32 x, f32 a, f32 b);
 void fn_802723B4(u8* src, f32* out, f32 at);
 void fn_8027264C(const char* name, u8* src, f32 x);
 void* memmove(void* d, const void* s, u32 n);
-extern f32 lbl_80558DC4[];  // epsilon
+extern f32 __float_epsilon[];  // epsilon
 }
 extern const f32 lbl_80563F50;  // 1.0
 
@@ -1087,7 +1087,7 @@ void CamRegion::Prepare(u8* line) {
         rel.y = s.y - yv;
         f32 b = 2.0f * (dir.x * rel.x + dir.y * rel.y);
         f32 disc = b * b - 4.0f * a * (rel.x * rel.x + rel.y * rel.y - r2);
-        if (!(AbsF(a) <= lbl_80558DC4[0]) && disc > lbl_80563F48) {
+        if (!(AbsF(a) <= __float_epsilon[0]) && disc > lbl_80563F48) {
             f32 q = (f32)sqrt(disc);
             n = 2;
             sol[0] = (-b - q) / (2.0f * a);

@@ -178,7 +178,7 @@ extern RaceCarRec* lbl_804348E8[8];
 extern s32 lbl_8055E4D0;  // number of cars
 extern f32 lbl_8055E3C8;  // race time
 extern s32 lbl_8055CFF0;  // screen width
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 }
 
 struct LocalCarDesc {
@@ -316,7 +316,7 @@ static inline f32 Max2(f32 a, f32 b) {
     return r;
 }
 static inline f32 Max1(f32 a, f32 b) { return (a > b) ? a : b; }
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 static inline int IsTutorialCrash(void) { return fn_801769CC()->flags == 0x180201; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
@@ -473,7 +473,7 @@ void fn_801DFFB4(void) {
         f32 x = 0.1f + (dur - (fn_801E7E18() - m->cars[car].time));
         left = 0.0f;
         left = (left > x) ? left : x;
-        if (!((f32)__fabs(left) <= lbl_80558DC4[0])) {
+        if (!((f32)__fabs(left) <= __float_epsilon[0])) {
             e = m->layout->FindBox("whiteout");
             f32 t = Max1(Min1((left - dur / 2.0f) / (0.1f - dur / 2.0f), 1.0f), 0.0f);
             e->color = ((int)Lerp(0.0f, 255.0f, t) << 24) | 0xFFFFFF;
@@ -572,7 +572,7 @@ void CrashMode::vf14(void) {
     for (i = 0; i < lbl_8055E4D0; i++) {
         rc = Car(i);
         s = &cars[i];
-        if ((f32)__fabs(rc->crashed) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(rc->crashed) <= __float_epsilon[0]) {
             continue;
         }
         s->elapsed += 0.016683352f;

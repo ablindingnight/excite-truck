@@ -494,7 +494,7 @@ struct DmgPose {
 };
 
 extern f32 lbl_8055E460;    // tick alpha
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline void SetE(EVec* d, const EVec* s) {
     d->x = s->x;
@@ -514,7 +514,7 @@ static inline void Loop1_fn_8018DA5C(DmgSlot* s, u8* m, DamagePart* tp, f32 t) {
     }
     if (s->state == 2 || s->state == 4) {
         DmgDraw* d = (DmgDraw*)(m + 0xA7C) + S32(m, 0xA78)++;
-        if ((f32)__fabs(t - 1.0f) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(t - 1.0f) <= __float_epsilon[0]) {
             d->frame = s->cur;
         } else {
             DFrame f;
@@ -871,7 +871,7 @@ extern const f32 lbl_8056202C;  // 0.6
 extern const f32 lbl_80562030;  // 0.03
 extern const f32 lbl_80562034;  // 0.9
 f32 lbl_8055A460 = 4.0f;  // 4
-extern f32 lbl_80558DC4[];      // FLT_EPSILON
+extern f32 __float_epsilon[];      // FLT_EPSILON
 int fn_80189BDC(u8* p);
 u8* fn_8017960C(s32 car);
 void fn_8018A174(u8* p);
@@ -881,8 +881,8 @@ void fn_8018F76C(u8* p, int i);
 void fn_802E30C8(const char* fmt, ...);
 f32 PSVECSquareDistance(const f32* a, const f32* b);
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
-static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
+static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > __float_epsilon[0]; }
 static inline int HitTooSoon(const u8* car) { return lbl_8055E3C8 < 3.0f + F32(car, 0x26D8); }
 
 // Which corner of the car a body-space point is nearest: 0/1 front left/right, 3/2 rear left/right.
@@ -1044,7 +1044,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             if ((sl->on && sl->point > 0 && !sl->state) || sl->state == 2) {
                 DentVec* g = (DentVec*)(p + 0x5FC) + sl->point;
                 if (PSVECDotProduct(&g->x, &g->x) > t->size * t->size) {
-                    if (!((f32)__fabs(PSVECDotProduct(&t->axis.x, &t->axis.x)) <= lbl_80558DC4[0])) {
+                    if (!((f32)__fabs(PSVECDotProduct(&t->axis.x, &t->axis.x)) <= __float_epsilon[0])) {
                         if ((u32)t->kind <= 1) {
                             if (sl->state != 2) {
                                 sl->state = 2;

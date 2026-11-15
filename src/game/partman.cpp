@@ -30,7 +30,7 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 void operator delete(void* p);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 typedef ValVec3 V3;
 
@@ -143,7 +143,7 @@ struct PartSys : PartParams {
     void DrawAnimated(Particle* p, int n);
     f32 CellOf(int n) { return (f32)n * cell; }
     void DrawRotating(Particle* p, int n);
-    int CanEmit(void) { return accum >= 1.0f - lbl_80558DC4[0] && head != tail; }
+    int CanEmit(void) { return accum >= 1.0f - __float_epsilon[0] && head != tail; }
     Particle* parts;  // offset 0x8C
     s32 head;         // offset 0x90
     s32 tail;         // offset 0x94
@@ -686,7 +686,7 @@ void PartSys::Reset(void) {
 }
 
 void PartSys::Update(f32 t) {
-    if (accum >= 1.0f - lbl_80558DC4[0]) {
+    if (accum >= 1.0f - __float_epsilon[0]) {
         accum -= 1.0f;
     }
     int i = head;

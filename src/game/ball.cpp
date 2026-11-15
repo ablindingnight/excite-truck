@@ -28,7 +28,7 @@ void* operator new(size_t size, const char* tag);
 extern u32 lbl_8055D430;
 extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 inline bool DbgFlag(u32 m) {
     int r = 0;
@@ -801,7 +801,7 @@ static inline void LerpMtx(BMtx* out, const BMtx* a, const BMtx* b, f32 t) {
 inline void Ball::vf28(u8* buf) {
     u8* o = buf + a8;
     BMtx* out = (BMtx*)o;
-    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         *out = world;
     } else {
         BMtx t;

@@ -118,7 +118,7 @@ extern s32 lbl_8055CFF4;
 extern u8 lbl_8055F024;
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 ModuleTag lbl_8055EF60;
 static UnkStatic123 lbl_804908B0;
@@ -410,7 +410,7 @@ s32 fn_802168F0(Window* w) {
     fn_80211F64();
     fn_80211F64();
     rate = 1.0f / FadeMax(fade.in, 0.01f);
-    t = (f32)__fabs(fade.in) <= lbl_80558DC4[0] ? 1.0f : 0.0f;
+    t = (f32)__fabs(fade.in) <= __float_epsilon[0] ? 1.0f : 0.0f;
     started = 0;
     lbl_8055EF94 = t;
     while (!lbl_8055EF70) {
@@ -451,7 +451,7 @@ s32 fn_802168F0(Window* w) {
     fn_8021747C(w, 0, &fade, 0.0f);
     rateOut = 1.0f / FadeMax(fade.out, 0.01f);
     tOut = 1.0f;
-    if ((f32)__fabs(fade.out) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fade.out) <= __float_epsilon[0]) {
         tOut = 0.0f;
     }
     lbl_8055EF94 = tOut;

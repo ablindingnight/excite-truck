@@ -294,7 +294,7 @@ void fn_802E3AD0(int fd, const char* fmt, ...);
 }
 
 extern f32 lbl_8055E3C8;    // time
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 extern f32 lbl_8055F47C;
 extern IMtx lbl_80499050;   // current camera
 
@@ -524,7 +524,7 @@ f32 fn_801C3450(f32 t) {
     return (f32)(int)(t * fn_801C2F58(2, 10.0f)) / d;
 }
 
-int fn_801C34CC(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
+int fn_801C34CC(f32 a, f32 b) { return (f32)__fabs(a - b) <= __float_epsilon[0]; }
 
 f32 fn_801C34F4(f32 x) { return 180.0f * x / 3.1415927f; }
 
@@ -1483,7 +1483,7 @@ void fn_801C56AC(void) {
                 fn_8018ADAC(car, ClampSigned(o->x));
             } else if (o->kind != 3 && o->kind != 4) {
                 f32 cur = car->speed;
-                if (!((f32)__fabs(speed) <= lbl_80558DC4[0])) {
+                if (!((f32)__fabs(speed) <= __float_epsilon[0])) {
                     fn_8018ADB4(car, Clamp01(0.5f * (speed - cur)));
                     fn_8018ADBC(car, Clamp01(0.5f * (cur - speed)));
                 } else {
@@ -1699,7 +1699,7 @@ int fn_801C5B68(CamView* v, int idx) {
             v->pos.z += o.z;
         }
     }
-    if (!(AbsF(lbl_80437D88.play.interpTime) <= lbl_80558DC4[0]) && dt < lbl_80437D88.play.interpTime) {
+    if (!(AbsF(lbl_80437D88.play.interpTime) <= __float_epsilon[0]) && dt < lbl_80437D88.play.interpTime) {
         f32 u = dt / lbl_80437D88.play.interpTime;
         if (lbl_80437D88.play.interpType == 1) {
             u = Ease(u);
@@ -1794,7 +1794,7 @@ static inline void RotToAxisAngle(const Mat3* m, IVec3* out) {
     RotToQuat(m, &q);
     f32 ang = acos(q.w);
     f32 sn = sin(ang);
-    if ((f32)__fabs(sn) > lbl_80558DC4[0]) {
+    if ((f32)__fabs(sn) > __float_epsilon[0]) {
         f32 k = 2.0f * ang / sn;
         out->x = q.x * k;
         out->y = q.y * k;
@@ -2098,7 +2098,7 @@ static inline f32 Angle(const V2& b, const V2& a) {
     V2 na;
     V2 nb;
     f32 la = a.x * a.x + a.y * a.y;
-    if (!((f32)__fabs(la - 1.0f) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(la - 1.0f) <= __float_epsilon[0])) {
         na = a;
         f32 inv = 1.0f / (f32)sqrt(la);
         na.x *= inv;
@@ -2108,7 +2108,7 @@ static inline f32 Angle(const V2& b, const V2& a) {
     f32 by = b.y;
     f32 bx = b.x;
     f32 lb = bx * bx + by * by;
-    if (!((f32)__fabs(lb - 1.0f) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(lb - 1.0f) <= __float_epsilon[0])) {
         nb = b;
         f32 inv = 1.0f / (f32)sqrt(lb);
         nb.x *= inv;

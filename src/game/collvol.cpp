@@ -146,7 +146,7 @@ public:
 
 ModuleTag lbl_8055E478;
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 struct CollPacket {
     u16 rot[3];  // offset 0x0
@@ -392,7 +392,7 @@ s32 CollVolume::vf34(CollPacket* p) {
     }
     th = acos(q[3]);
     sn = sin(th);
-    if ((f32)__fabs(sn) > lbl_80558DC4[0]) {
+    if ((f32)__fabs(sn) > __float_epsilon[0]) {
         f32 f = 2.0f * th / sn;
         v[0] = q[0] * f;
         v[1] = q[1] * f;

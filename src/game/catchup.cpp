@@ -7,7 +7,7 @@ extern "C" {
 double sqrt(double x);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
 struct Motion {
     f32 p1;  // offset 0x0
@@ -38,7 +38,7 @@ extern "C" {
 
 int fn_80138BE4(f32 a, f32 b) { return a * b < 0.0f; }
 
-int fn_80138BFC(f32 x) { return (f32)__fabs(x) <= 10.0f * lbl_80558DC4[0]; }
+int fn_80138BFC(f32 x) { return (f32)__fabs(x) <= 10.0f * __float_epsilon[0]; }
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 

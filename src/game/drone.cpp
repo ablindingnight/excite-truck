@@ -356,7 +356,7 @@ void fn_8012F57C(Quat* out, Quat* a, Quat* b, f32 t);
 f32 fn_80144514(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 }
 
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 
 ModuleTag lbl_8055EC88;
 
@@ -923,7 +923,7 @@ extern "C" void fn_801FEB58(LinearPathData* d);
 
 void LinearPathTMH::Unk1C(void) {
     f32 dt = fn_801E7E24();
-    if ((f32)__fabs(dt) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(dt) <= __float_epsilon[0]) {
         return;
     }
     LinearPathSlot* s = paths;
@@ -1158,7 +1158,7 @@ void HermitePathTMH::Draw(TObj* list) {}
 
 void HermiteDroneMan::Update(void* ctx) {
     f32 dt = fn_801E7E24();
-    if ((f32)__fabs(dt) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(dt) <= __float_epsilon[0]) {
         return;
     }
     pools.Update(dt);
@@ -1177,7 +1177,7 @@ void HermiteDroneMan::AddDrone(TObj* o, HermitePathData* d) {
 
 void LinearDroneMan::Update(void* ctx) {
     f32 dt = fn_801E7E24();
-    if ((f32)__fabs(dt) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(dt) <= __float_epsilon[0]) {
         return;
     }
     pools.Update(dt);

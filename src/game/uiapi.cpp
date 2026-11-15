@@ -576,7 +576,7 @@ extern "C" void* lbl_8033D54C[];
 extern "C" void* lbl_8033D480[];
 extern "C" void* lbl_8033D590[];
 extern "C" UnkStatic123 lbl_80490510;  // this unit's 0x7B end-of-list item
-extern "C" f32 lbl_80558DC4[];  // FLT_EPSILON
+extern "C" f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" void* lbl_8055EF24;
 extern "C" void* lbl_8055EF28;
 extern void *lbl_8055EF38;
@@ -1005,7 +1005,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             low = fn_80212248((s32)range->arg1);
             high = fn_80212248((s32)range->arg2);
         }
-        if ((f32)__fabs(low - high) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(low - high) <= __float_epsilon[0]) {
             break;
         }
         if (!d->field9c) {

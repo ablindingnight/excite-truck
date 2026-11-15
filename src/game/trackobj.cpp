@@ -675,7 +675,7 @@ inline SolObj* NewSolObj(s32 id, s32 event, CollShape* s, const OFrame* f, Value
     return o;
 }
 
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 
 ModuleTag lbl_8055EC28;
 RVec3 lbl_80488898(0.0f, 0.0f, 0.0f);
@@ -2144,7 +2144,7 @@ void StaticObject::vf1C(void) {
     } else {
         a = shadow.extend;
     }
-    if (!((f32)__fabs(a) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(a) <= __float_epsilon[0])) {
         fn_802C7AE0((void*)shadow.h, &frame, -1, a);
     }
 }

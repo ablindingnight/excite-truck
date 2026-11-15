@@ -187,7 +187,7 @@ PanelVol* lbl_80437D48[16];
 
 extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static const PanelEdge lbl_802F98D0[6] = {
     {0, 1, 0, 0}, {1, 3, 0, 0}, {3, 2, 0, 0}, {2, 0, 0, 0}, {0, 3, 0, 0}, {1, 2, 0, 0},
@@ -436,8 +436,8 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
 }
 
 int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32* ids) {
-    if ((f32)__fabs(lo->x - hi->x) <= lbl_80558DC4[0] && (f32)__fabs(lo->y - hi->y) <= lbl_80558DC4[0] &&
-        (f32)__fabs(lo->z - hi->z) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lo->x - hi->x) <= __float_epsilon[0] && (f32)__fabs(lo->y - hi->y) <= __float_epsilon[0] &&
+        (f32)__fabs(lo->z - hi->z) <= __float_epsilon[0]) {
         return 0;
     }
     PanelVol* p = 0;
@@ -782,7 +782,7 @@ static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
 
 void PanelVol::vf28(u8* buf) {
     PanelPose* out = (PanelPose*)(buf + a8);
-    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         out->mtx = world;
     } else {
         RMtx t;

@@ -776,8 +776,8 @@ static inline int SlowMotion(void) { return fn_80176A1C() == 2; }
 static inline f32 FrameDt(void) { return (SlowMotion() ? fn_80176A2C() : 1.0f) * 0.016683351f; }
 
 inline f32 Floor(f32 x) { return floor(x); }
-extern f32 lbl_80558DC4[];  // FLT_EPSILON (MSL)
-inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
+extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
+inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 class StuntEvent : public StuntDisplay {
 public:
@@ -1541,7 +1541,7 @@ inline f32 Clamp(f32 x, f32 lo, f32 hi) {
     r = r > lo ? r : lo;
     return r;
 }
-inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
+inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= __float_epsilon[0]; }
 inline u8 ColR(u32 c) { return c >> 24; }
 inline u8 ColA(u32 c) { return c; }
 inline u8 ColB(u32 c) { return c >> 8; }
@@ -2020,7 +2020,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     }
     score += add + gain;
     {
-        int m = !((f32)__fabs(score - shown) <= lbl_80558DC4[0]);
+        int m = !((f32)__fabs(score - shown) <= __float_epsilon[0]);
         moving = m;
     }
     {
@@ -2071,7 +2071,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     if (over && overtime < 0.0f) {
         overtime = lbl_8055E3C8;
     }
-    wasFull = (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= lbl_80558DC4[0]);
+    wasFull = (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= __float_epsilon[0]);
     boosting = 0;
     if (fn_801B2EC0(id)->GetInfo()->flags & 4) {
         meterObj->Start(rc);
@@ -2089,7 +2089,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         f32 t = fullFlash - 0.016683351f;
         fullFlash = 0.0f > t ? 0.0f : t;
     }
-    if (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= lbl_80558DC4[0]) {
+    if (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= __float_epsilon[0]) {
         int j;
         int busy;
         int i;
@@ -2127,7 +2127,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             int got;
             if (e->kind == 3) {
                 u8* mine;
-                if ((f32)__fabs(e->respawn) <= lbl_80558DC4[0] && (mine = &e->hit[rc->index])[0]) {
+                if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && (mine = &e->hit[rc->index])[0]) {
                     if (e->big) {
                         PickupEvent ev;
                         ev.pos[0] = e->pos[0];
@@ -2146,7 +2146,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                 } else {
                     got = 0;
                 }
-            } else if ((f32)__fabs(e->respawn) <= lbl_80558DC4[0] && PSVECSquareDistance(pos, e->pos) < 25.0f) {
+            } else if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && PSVECSquareDistance(pos, e->pos) < 25.0f) {
                 e->respawn = fn_801D48F4(e->objs[e->which]);
                 got = 1;
             } else {
@@ -2194,7 +2194,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         }
     }
     {
-        int turbo = rc->turbo > lbl_80558DC4[0];
+        int turbo = rc->turbo > __float_epsilon[0];
         if (lbl_80559EC0 < 0 || lbl_80559EC0 >= 4) {
             lbl_80559EC0 = 0;
         }
@@ -2294,7 +2294,7 @@ inline void DrawBonanza(Coins* co, int id) {
         s1 = co->obj->FindBox("star_1");
         s2 = co->obj->FindBox("star_2");
         for (k = 0; k < ARRAY_COUNT(car->flash); k++) {
-            if (car->flash[k] > -lbl_80558DC4[0]) {
+            if (car->flash[k] > -__float_epsilon[0]) {
                 f32 u = 1.0f - car->flash[k] / 0.6f;
                 f32 st[4] = {0.0f, 0.166f, 0.416f, 1.0f};
                 int seg;
@@ -2302,7 +2302,7 @@ inline void DrawBonanza(Coins* co, int id) {
                 f32 w;
                 int j;
                 for (seg = 0; seg < 3; seg++) {
-                    if (st[seg] - lbl_80558DC4[0] < u && st[seg + 1] > u) {
+                    if (st[seg] - __float_epsilon[0] < u && st[seg + 1] > u) {
                         break;
                     }
                 }
@@ -2410,16 +2410,16 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
             const char* s;
             s = 0;
             a = 0.0f;
-            if (!(AbsF(flash[3]) <= lbl_80558DC4[0])) {
+            if (!(AbsF(flash[3]) <= __float_epsilon[0])) {
                 a = flash[3];
                 s = sThrown.Get();
-            } else if (!(AbsF(flash[2]) <= lbl_80558DC4[0])) {
+            } else if (!(AbsF(flash[2]) <= __float_epsilon[0])) {
                 a = flash[2];
                 s = sTurbo.Get();
-            } else if (!(AbsF(flash[1]) <= lbl_80558DC4[0])) {
+            } else if (!(AbsF(flash[1]) <= __float_epsilon[0])) {
                 a = flash[1];
                 s = sNice.Get();
-            } else if (!(AbsF(flash[4]) <= lbl_80558DC4[0])) {
+            } else if (!(AbsF(flash[4]) <= __float_epsilon[0])) {
                 a = flash[4];
                 s = sSpin.Get();
             }
@@ -3860,7 +3860,7 @@ inline void BetaMaster::vf44(void) {
     if (vf20(car)) {
         c = &cars[car];
         if (c) {
-            st.on = c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= lbl_80558DC4[0];
+            st.on = c->mode == 0 ? 0 : c->mode == 1 ? 1 : (f32)__fabs(c->meter - 1.0f) <= __float_epsilon[0];
             for (i = 0; i < stars.a.count; i++) {
                 st.p = stars.a.data[i];
                 if (NearZero(st.p->respawn) && st.on && st.p->big) {
@@ -4668,13 +4668,13 @@ inline void BetaMaster::b2Body(StuntEvt* e, int car) {
     BetaCar* bc;
     u8* f;
     s32 h;
-    if (cars[car].mode == 0 ? 0 : cars[car].mode == 1 ? 1 : (f32)__fabs(cars[car].meter - 1.0f) <= lbl_80558DC4[0]) {
+    if (cars[car].mode == 0 ? 0 : cars[car].mode == 1 ? 1 : (f32)__fabs(cars[car].meter - 1.0f) <= __float_epsilon[0]) {
         for (i = 0, off = 0; i < stars.a.count; off += 4, i++) {
             h = (*(Pickup**)((u8*)stars.a.data + off))->hC0;
             if (h == e->Id()) {
                 t = *(Pickup**)((u8*)stars.a.data + off);
-                if ((f32)__fabs(t->respawn) <= lbl_80558DC4[0] &&
-                    AbsF(lbl_804348E8[car]->f2690) <= lbl_80558DC4[0] && !fn_80161BB8()) {
+                if ((f32)__fabs(t->respawn) <= __float_epsilon[0] &&
+                    AbsF(lbl_804348E8[car]->f2690) <= __float_epsilon[0] && !fn_80161BB8()) {
                     t->hit[car] = 1;
                 }
             }
@@ -4683,7 +4683,7 @@ inline void BetaMaster::b2Body(StuntEvt* e, int car) {
     if (e->Type() == 's') {
         bc = &cars[car];
         f = &bc->bA8;
-        turbo = lbl_804348E8[car]->turbo > lbl_80558DC4[0];
+        turbo = lbl_804348E8[car]->turbo > __float_epsilon[0];
         if (f[0]) {
             bc->meterObj->Crash(lbl_804348E8[bc->id]);
         }
@@ -4708,7 +4708,7 @@ inline void BetaMaster::b2(StuntEvt* e, int car) { b2Body(e, car); }
 inline void BetaMaster::c2(Body* b, int car) {
     int i;
     RaceCarRec* rc = fn_8017960C(car);
-    if (rc && (f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
+    if (rc && (f32)__fabs(rc->f2690) <= __float_epsilon[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
         for (i = 0; i < bumps.a.count; i++) {
             Token* t = bumps.a.data[i];
             f32 pts;

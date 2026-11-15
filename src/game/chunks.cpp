@@ -221,7 +221,7 @@ void fn_801E9DD8(void);
 int fn_801E9E78(s16* slot, PVec* hit, PVec* n, s32* id);
 }
 
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 extern CarInfo* lbl_80488648[8];
 
 const char* lbl_8055C958 = "Andrew";
@@ -464,7 +464,7 @@ CarChunks::~CarChunks(void) { FreeModels(); }
 void CarChunks::Reset(void) { count = 0; }
 
 void CarChunks::Update(void) {
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     Step();
@@ -641,7 +641,7 @@ TerrainChunks::~TerrainChunks(void) { FreeModels(); }
 void TerrainChunks::Reset(void) { count = 0; }
 
 void TerrainChunks::Update(void) {
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     Step();
@@ -785,7 +785,7 @@ WoodChunks::~WoodChunks(void) { FreeModels(); }
 void WoodChunks::Reset(void) { count = 0; }
 
 void WoodChunks::Update(void) {
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     Step();

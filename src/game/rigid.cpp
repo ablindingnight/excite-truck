@@ -25,7 +25,7 @@ double cos(double x);
 
 void* operator new[](size_t size, const char* tag);
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 struct RVec3 {
     f32 x;
@@ -302,7 +302,7 @@ void RigidBody::SetMass(f32 m, f32 ix, f32 iy, f32 iz) {
 }
 
 void RigidBody::AddForceAt(const RVec3* f, const RVec3* at) {
-    if (!((f32)__fabs(PSVECDotProduct(f, f)) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(PSVECDotProduct(f, f)) <= __float_epsilon[0])) {
         RVec3 r;
         RVec3 t;
         r.x = at->x - mtx.pos.x;
@@ -485,7 +485,7 @@ void RigidBody::Update(void) {
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->Wake();
     }
-    if (!(AbsF(impW) <= lbl_80558DC4[0])) {
+    if (!(AbsF(impW) <= __float_epsilon[0])) {
 
         inv = 1.0f / impW;
         impF.x *= inv;
@@ -636,7 +636,7 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->Wake();
     }
-    if (!(AbsF(impW) <= lbl_80558DC4[0])) {
+    if (!(AbsF(impW) <= __float_epsilon[0])) {
         int i;
         f32 inv = 1.0f / impW;
         impF.x *= inv;

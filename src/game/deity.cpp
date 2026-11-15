@@ -20,7 +20,7 @@ void operator delete[](void* p);
 
 extern f32 lbl_8055E3C8;    // time
 extern s32 lbl_8055E3C4;    // frame
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 struct V2 {
     f32 x;
@@ -678,7 +678,7 @@ int fn_801B11DC(const void* pa, const void* pb) {
         // MATCHING-AID: single-use local; it sets the load order. The real form is unknown.
         f32 ta = a->finishTime;
         f32 tb = b->finishTime;
-        if ((f32)__fabs(ta - tb) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(ta - tb) <= __float_epsilon[0]) {
             return 0;
         }
         if (b->finishTime < a->finishTime) {
@@ -1164,7 +1164,7 @@ f32 fn_8013B650(s32 car);  // AI qualifying time
 int fn_801B25B0(const s32* pa, const s32* pb);
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
-static inline int NearZero(f32 x) { return AbsF(x) <= lbl_80558DC4[0]; }
+static inline int NearZero(f32 x) { return AbsF(x) <= __float_epsilon[0]; }
 
 // Race start: the intro timer (short in test mode), cleared race counters, every car on its line, and the
 // starting order from the qualifying times.

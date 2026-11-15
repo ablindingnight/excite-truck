@@ -250,7 +250,7 @@ struct HudCar {
     HudVec vel; /* 0x118 */
 };
 
-__declspec(section ".data") extern float lbl_80558DC4;
+__declspec(section ".data") extern float __float_epsilon;
 extern float lbl_8055E3C8;
 extern const float lbl_80563374, lbl_80563378, lbl_8056337C, lbl_80563380, lbl_80563384, lbl_80563388;
 extern const float lbl_8056338C, lbl_80563390, lbl_80563394, lbl_80563398, lbl_8056339C, lbl_805633A0;
@@ -340,7 +340,7 @@ extern "C" void fn_8020E598(Hud *h) {
                 h->startPending = 0;
             }
         } else {
-            int moving = VF32(h->vehicle, 0x25BC) > lbl_80558DC4;
+            int moving = VF32(h->vehicle, 0x25BC) > __float_epsilon;
             if (!moving) {
                 h->started = 0;
                 HudPart_Hide(h->start);
@@ -498,10 +498,10 @@ extern "C" void fn_8020E598(Hud *h) {
         float spd;
         v = h->vehicle;
         spd = VF32(v, 0x25D4);
-        if (AbsFlt(VF32(v, 0x2690)) <= lbl_80558DC4 && spd > lbl_805633DC && *(long *)(v + 0x2620) > 1 &&
+        if (AbsFlt(VF32(v, 0x2690)) <= __float_epsilon && spd > lbl_805633DC && *(long *)(v + 0x2620) > 1 &&
             !underwater) {
             float dot = AbsFlt(PSVECDotProduct((HudVec *)(v + 0x118), (HudVec *)(v + 0x3C)));
-            float lim = spd * (AbsFlt(h->driftTime) <= lbl_80558DC4 ? lbl_805633E0 : lbl_805633E4);
+            float lim = spd * (AbsFlt(h->driftTime) <= __float_epsilon ? lbl_805633E0 : lbl_805633E4);
             shown = dot > lim;
             if (shown) {
                 float t = HudClamp01(lbl_805633DC * (dot / lim - lbl_80563368));

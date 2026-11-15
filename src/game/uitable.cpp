@@ -9,7 +9,7 @@ void* memset(void* p, int c, u32 n);
 char* strcpy(char* d, const char* s);
 char* strncpy(char* d, const char* s, u32 n);
 int sprintf(char* s, const char* fmt, ...);
-extern f32 lbl_80558DC4[];
+extern f32 __float_epsilon[];
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -84,8 +84,8 @@ public:
 
 
 static inline f32 Snap(f32 v, f32 s) { return s * (f32)(int)(0.5f + v / s); }
-static inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
-static inline bool NearEq2(f32 a, f32 b) { return (f32)__fabs(a - b) <= lbl_80558DC4[0]; }
+static inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= __float_epsilon[0]; }
+static inline bool NearEq2(f32 a, f32 b) { return (f32)__fabs(a - b) <= __float_epsilon[0]; }
 static inline int MinI(int a, int b) { return (b < a) ? b : a; }
 static inline int MaxI(int a, int b) { return (b > a) ? b : a; }
 static inline int MinI2(int a, int b) { return (a < b) ? a : b; }

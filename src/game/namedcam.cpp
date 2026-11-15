@@ -75,7 +75,7 @@ static CamRec lbl_804A0C60[4];
 static CamFrame34 lbl_804A1500[4];
 
 extern f32 lbl_8055E3C8;
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 NamedCam* lbl_8055F598;
 NamedCam* lbl_8055F59C;
 s32 lbl_8055F5A0;
@@ -103,7 +103,7 @@ extern "C" double sqrt(double x);
 
 static inline f32 AbsF(f32 x) { double a = __fabs(x); return a; }
 
-static inline int Near(f32 x) { return AbsF(x) <= lbl_80558DC4[0]; }
+static inline int Near(f32 x) { return AbsF(x) <= __float_epsilon[0]; }
 
 static inline int SamePose(const CamPose* a, const CamPose* b) {
     int same = Near(PSVECSquareDistance(&a->pos, &b->pos));
@@ -153,7 +153,7 @@ static inline void PoseToQuat(const CamPose* p, f32* q) {
 
 // Starts transition `slot` from pose a to pose b over `dur` (nothing to do when they already match).
 void fn_80276098(const CamPose* a, const CamPose* b, int slot, int kind, f32 fovA, f32 fovB, f32 dur) {
-    if (AbsF(fovA - fovB) <= lbl_80558DC4[0] && SamePose(a, b)) {
+    if (AbsF(fovA - fovB) <= __float_epsilon[0] && SamePose(a, b)) {
         return;
     }
     lbl_8049FD58[slot].dur = dur;

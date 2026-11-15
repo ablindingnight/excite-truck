@@ -193,7 +193,7 @@ void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
 
 extern void* lbl_80488648[];  // car models
-extern f32 lbl_80558DC4[];    // FLT_EPSILON
+extern f32 __float_epsilon[];    // FLT_EPSILON
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -646,7 +646,7 @@ void fn_80298124(void) {
 }
 
 void fn_80298160(void) {
-    if ((f32)__fabs(fn_801E7E24()) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
     lbl_8055F7C8->Update();
@@ -752,8 +752,8 @@ int RingFireMan::Snap(FireRing* r, const Vec* pos, const Vec* d1, const Vec* d2,
     e2.x = b.x - p.x;
     e2.y = b.y - p.y;
     e2.z = b.z - p.z;
-    if ((f32)__fabs(PSVECDotProduct(&e1, &e1)) <= lbl_80558DC4[0] ||
-        (f32)__fabs(PSVECDotProduct(&e2, &e2)) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(PSVECDotProduct(&e1, &e1)) <= __float_epsilon[0] ||
+        (f32)__fabs(PSVECDotProduct(&e2, &e2)) <= __float_epsilon[0]) {
         return 0;
     }
     r->p0.x = p.x;
@@ -1140,7 +1140,7 @@ static inline void MixVec(Vec* o, const Vec* a, const Vec* b, f32 t) {
 }
 
 void BigRingMan::Tick(BigRing* r, f32 now) {
-    if (r->t > 1.0f - lbl_80558DC4[0]) {
+    if (r->t > 1.0f - __float_epsilon[0]) {
         Vec v;
         v.x = 0.0f;
         v.y = 0.0f;
@@ -1339,7 +1339,7 @@ static inline void AddR(Vec* o, const Vec& a, const Vec& b) {
 }
 void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
     BoostEntry* e = Entry(i);
-    if (!((f32)__fabs(car->boost) <= lbl_80558DC4[0])) {
+    if (!((f32)__fabs(car->boost) <= __float_epsilon[0])) {
         e->active = 0;
         e->t = 0.0f;
     }
@@ -1726,7 +1726,7 @@ int fn_8029C054(const void* ev) {
 
 void fn_8029C084(FireCarEntry* e, int n) {
     f32 dt = fn_801E7E24();
-    if ((f32)__fabs(dt) <= lbl_80558DC4[0]) {
+    if ((f32)__fabs(dt) <= __float_epsilon[0]) {
         return;
     }
     for (int i = 0; i < n; e++, i++) {

@@ -424,8 +424,8 @@ GPMetric lbl_8034BD40[6] = {
     {5, "XF XFrm", 0x15, "Clock", 1},        {6, "XF Lit", 0x15, "Clock", 1},
 };
 
-extern s32 lbl_80558DC4[];  // FLT_EPSILON
-#define FEPS (*(f32*)lbl_80558DC4)
+extern s32 __float_epsilon[];  // FLT_EPSILON
+#define FEPS (*(f32*)__float_epsilon)
 
 ModuleTag lbl_8055FD00;
 static inline u16 BlendKey(int v) { return v; }

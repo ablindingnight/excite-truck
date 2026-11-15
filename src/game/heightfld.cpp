@@ -88,7 +88,7 @@ void fn_802E317C(const char* fmt, ...);
 void PSVECNormalize(const GVec* src, GVec* dst);
 }
 
-extern f32 lbl_80558DC4[];  // FLT_EPSILON
+extern f32 __float_epsilon[];  // FLT_EPSILON
 
 f32 lbl_804424B0[75];          // layer weights
 f32 lbl_804425DC[75];          // layer weights for the second query
@@ -635,7 +635,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
         int j;
         lbl_804424B0[i] = 1.0f;
         dh = fn_801DCF0C(x, z) - h0;
-        if (!(AbsF(dh) <= lbl_80558DC4[0])) {
+        if (!(AbsF(dh) <= __float_epsilon[0])) {
             if (n >= 3) {
                 k = -1;
                 m = 0.0f;
@@ -662,7 +662,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     }
     int any = 0;
     for (int i = 0; i < 3; i++) {
-        if (!((float)__fabs(d->terms[i].k) <= lbl_80558DC4[0])) {
+        if (!((float)__fabs(d->terms[i].k) <= __float_epsilon[0])) {
             any = 1;
         }
     }

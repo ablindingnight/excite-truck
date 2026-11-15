@@ -323,7 +323,7 @@ struct MenuState {
 };
 extern TCar* lbl_804348E8[];  // race cars
 extern f32 lbl_8055E3C8;      // race clock
-extern f32 lbl_80558DC4[];    // FLT_EPSILON
+extern f32 __float_epsilon[];    // FLT_EPSILON
 
 extern "C" {
 int fn_801C5B60(void);
@@ -1322,7 +1322,7 @@ inline void Challenge::Collect(void) {
             passed = 1;
         }
     } else {
-        if ((f32)__fabs(endTime) <= lbl_80558DC4[0]) {
+        if ((f32)__fabs(endTime) <= __float_epsilon[0]) {
             int i;
             fn_80276DC8(0);
             for (i = 0; i < fn_801B2F24(); i++) {
