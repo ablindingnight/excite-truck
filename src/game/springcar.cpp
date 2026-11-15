@@ -154,6 +154,13 @@ public:
     virtual void Respawn(s32 player);  // 0xAC
 };
 
+// The rigid body a car body is (rigid.cpp); CarBody below is still declared flat.
+struct RVec3;
+class RigidBody {
+public:
+    void AddForceAt(const RVec3* f, const RVec3* at);
+};
+
 class CarBody {
 public:
     CarBody(void);
@@ -254,7 +261,6 @@ void vf58__7CarBodyFv(CarBody* b);
 void vf48__7CarBodyFv(CarBody* b, const TVec* a, const TVec* bb, int kind, int c);
 void vf30__7CarBodyFv(CarBody* b, f32 t, int a, int bb, int* na, int* nb);
 int vf34__7CarBodyFv(CarBody* b, u8* p);
-void fn_8017B3A8(CarBody* b, const TVec* imp, const TVec* at);
 Course* fn_801B83A0(void);
 int fn_801E9E30(s16* h, TPos* pos);
 void fn_80265D38(CarBody* b, s32 i);
@@ -457,7 +463,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 pt.y = car->pos.y;
                 pt.z = car->pos.z;
             }
-            fn_8017B3A8(car, &imp, &pt);
+            ((RigidBody*)car)->AddForceAt((const RVec3*)&imp, (const RVec3*)&pt);
             car->push.x = 0.0f;
             car->push.y = 0.0f;
             car->push.z = 0.0f;
@@ -598,7 +604,7 @@ void Lift::Apply(SpringCar* car) {
     imp.y = f;
     imp.x = 0.0f;
     imp.z = 0.0f;
-    fn_8017B3A8(car, &imp, &at);
+    ((RigidBody*)car)->AddForceAt((const RVec3*)&imp, (const RVec3*)&at);
 }
 
 void Lift::Step(SpringCar* car, f32 rate) {

@@ -15,8 +15,6 @@ extern "C" {
 void* fn_801B60F4(const void* pos, f32 r);                            // grid cell at
 void fn_801B6428(void* cell, void* body);                             // cell remove
 void fn_801B63E0(void* cell, void* body);                             // cell add
-void fn_801AE158(void* contact);
-void fn_801ADB44(void* contact, void* body);
 void PSVECNormalize(const void* src, void* dst);
 f32 PSVECMag(const void* v);
 double sin(double x);
@@ -146,8 +144,12 @@ public:
     RMtx prev;       // offset 0xA0
 };
 
-struct Contact {
-    Contact* next;  // offset 0x0
+// A contact point in body space (corners.cpp); the body keeps its corners in a list.
+class RigidBody;
+struct Corner {
+    void Hit(RigidBody* b);
+    void Stop(void);
+    Corner* next;  // offset 0x0
 };
 
 struct ImpRec {
@@ -191,7 +193,7 @@ public:
     void Flush(RVec3* f, RVec3* t);
     void SetState(const RMtx* m, const RVec3* v, const RVec3* w);
     void UpdateCell(void);
-    Contact* contacts;  // offset 0xD0
+    Corner* contacts;  // offset 0xD0
     f32 mass;           // offset 0xD4
     RVec3 inertia;      // offset 0xD8
     f32 invMass;        // offset 0xE4
@@ -238,7 +240,7 @@ void RigidBody::Reset(void) {
 }
 
 void RigidBody::ResetState(void) {
-    Contact* c;
+    Corner* c;
     nImp = 0;
     vel.x = 0.0f;
     vel.y = 0.0f;
@@ -273,7 +275,7 @@ void RigidBody::ResetState(void) {
     }
     cell = 0;
     for (c = contacts; c; c = c->next) {
-        fn_801AE158(c);
+        c->Stop();
     }
 }
 
@@ -461,7 +463,7 @@ void RigidBody::Update(void) {
     RMat33* ii;
     f32 tx;
     f32 co;
-    Contact* c;
+    Corner* c;
     f32 t;
     int j;
     f32 yy;
@@ -480,7 +482,7 @@ void RigidBody::Update(void) {
     force.y += g.y;
     force.z += g.z;
     for (c = contacts; c; c = c->next) {
-        fn_801ADB44(c, this);
+        c->Hit(this);
     }
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->Wake();

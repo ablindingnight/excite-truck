@@ -68,8 +68,12 @@ struct Camera {
     u8 data[0x30];
 };
 
-struct DrawOffset {
-    u8 data[0x8];
+// Pushes an offset onto the layout origin for the lifetime of the object (ovlayout.cpp).
+struct LayoutOffset {
+    LayoutOffset(f32 dx, f32 dy);
+    ~LayoutOffset(void);
+    f32 ox;
+    f32 oy;
 };
 
 extern "C" {
@@ -82,8 +86,6 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 const char* fn_80131234(const char* key);
 void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
-void fn_8014819C(DrawOffset* off, f32 x, f32 y);
-void fn_801481C8(DrawOffset* off, int unk);
 u32 fn_8026E20C(void);
 void fn_8026E204(u32 flags);
 EventInfo* fn_801E87A8(void);
@@ -294,7 +296,6 @@ void fn_80008684(int camera) {
     } it;
 
     int dt;
-    DrawOffset off;
     f32 t;
     f32 x;
     int now;
@@ -339,23 +340,24 @@ void fn_80008684(int camera) {
                 lbl_802FB8F0[6].label = s_advanced.Get();
             }
         } s_init;
-        fn_8014819C(&off, x, y);
-        n = 0;
-        for (i = 0, it.prompt = lbl_802FB8F0; i < 7; i++, it.prompt++) {
-            it.action = it.prompt->action;
-            for (j = 0; j < lbl_8034F3D0.list.count; j++) {
-                if (it.action == lbl_8034F3D0.list.data[j]) {
-                    fn_801345D8(name, sizeof(name), "prompt%d", n);
-                    fn_801345D8(label, sizeof(label), "label%d", n);
-                    if (lbl_8055D374) {
-                        fn_801473F8(lbl_8055D374, name, "%s", it.prompt->glyph);
-                        fn_801473F8(lbl_8055D374, label, "%s", it.prompt->label);
+        {
+            LayoutOffset off(x, y);
+            n = 0;
+            for (i = 0, it.prompt = lbl_802FB8F0; i < 7; i++, it.prompt++) {
+                it.action = it.prompt->action;
+                for (j = 0; j < lbl_8034F3D0.list.count; j++) {
+                    if (it.action == lbl_8034F3D0.list.data[j]) {
+                        fn_801345D8(name, sizeof(name), "prompt%d", n);
+                        fn_801345D8(label, sizeof(label), "label%d", n);
+                        if (lbl_8055D374) {
+                            fn_801473F8(lbl_8055D374, name, "%s", it.prompt->glyph);
+                            fn_801473F8(lbl_8055D374, label, "%s", it.prompt->label);
+                        }
+                        n++;
                     }
-                    n++;
                 }
             }
         }
-        fn_801481C8(&off, -1);
         if (fn_801769F8()) {
             if (lbl_8055D380.time % 1000 < 500) {
                 fn_801473F8(lbl_8055D374, "title", "%s", s_pauseTitle.Get());

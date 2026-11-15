@@ -35,18 +35,13 @@ void fn_8013BC34(void);
 void fn_80166898(void);
 void fn_80137904(void);
 void fn_8013A1F0(void);
-void fn_80136CB8(void* ai, s32 idx);
-void fn_80136D20(void* ai, s32 idx);
 void fn_8013A200(s32 idx);
 void fn_8013A204(s32 idx);
-void fn_801371E0(void* ai);
 void fn_8013BC54(void);
 void fn_80166A24(void);
-int fn_80136F08(void* ai);
 u8* fn_8017960C(int i);
 u32 fn_801769A8(void);
 void* fn_801938F4(void* p);
-void* fn_801A520C(void* p, void* driver);
 u8* fn_801792F8(void);
 void fn_8018ADBC(void* car, f32 v);
 void fn_8018ADB4(void* car, f32 v);
@@ -54,6 +49,22 @@ void fn_8018ADA4(void* car, f32 v);
 }
 
 void* GetEvent(int event);
+
+// The AI proximity tracker (proxer.cpp).
+class Proxer {
+public:
+    void Activate(int i);
+    void Update(int i);
+    void UpdateAll(void);
+    void Process(void);
+};
+
+class Controller;
+class SpringCar {
+public:
+    SpringCar(Controller* c);
+    u8 data[0x2844];
+};
 
 class IDriver;
 struct LocalCarDesc {
@@ -209,7 +220,7 @@ public:
 
 extern const f32 lbl_80560108;
 extern const f32 lbl_8056010C;
-extern void* lbl_8055E0D4;  // AI system
+extern Proxer* lbl_8055E0D4;  // AI system
 extern u32 lbl_8055E3C4;
 
 ModuleTag lbl_8055E098;
@@ -311,7 +322,7 @@ void fn_801349C4(void) {
     for (i = 0; i < 8; i++) {
         p = lbl_8042F758[i];
         if (p) {
-            fn_80136CB8(lbl_8055E0D4, p->idx);
+            lbl_8055E0D4->Activate(p->idx);
             fn_8013A200(p->idx);
             p->active = 1;
         }
@@ -329,22 +340,22 @@ void fn_80134A8C(void) {
         p = lbl_8042F758[i];
         if (p) {
             if (p->active) {
-                fn_80136CB8(lbl_8055E0D4, p->idx);
+                lbl_8055E0D4->Activate(p->idx);
             } else {
-                fn_80136D20(lbl_8055E0D4, p->idx);
+                lbl_8055E0D4->Update(p->idx);
             }
             p->active = 0;
             fn_8013A204(p->idx);
         }
     }
     if (fn_80134A44(-1)) {
-        fn_801371E0(lbl_8055E0D4);
+        lbl_8055E0D4->Process();
     }
     fn_8013BC54();
     fn_80166A24();
 }
 
-int fn_80134B50(void) { return fn_80136F08(lbl_8055E0D4); }
+void fn_80134B50(void) { lbl_8055E0D4->UpdateAll(); }
 
 f32 fn_80134B58(const char* key, f32 def) {
     const char* s = fn_80134B9C(key, 0);
@@ -452,7 +463,6 @@ void* fn_80134F48(void) {
     LocalCarDesc* desc = fn_801769CC();
     IDriver* d;
     bool park = false;
-    void* p;
     if (fn_801792F8()[0xD8] & 4) {
         park = true;
     }
@@ -465,11 +475,7 @@ void* fn_80134F48(void) {
     } else {
         d = fn_80134FF8();
     }
-    p = operator new(0x2844, "LocalCar (ai)");
-    if (p) {
-        p = fn_801A520C(p, d);
-    }
-    return p;
+    return new ("LocalCar (ai)") SpringCar((Controller*)d);
 }
 
 IDriver* fn_80134FF8(void) { return new ("NullDriver") NullDriver; }

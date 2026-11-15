@@ -147,7 +147,9 @@ f32 fn_80204CFC(const char* name);  // tuning value
 char* fn_8023139C(char* buf, int size, u32 value);  // format a score
 void fn_801CB6E4(u32 type, int car, long v);  // stop a rumble effect (awards.cpp)
 void fn_801CB750(u32 type, int car, f32 v);  // awards.cpp
-int fn_80141F7C(f32 x);  // near zero
+// The weak out-of-line copy of NearZero, which retail calls in some trackers while others expand it (the macro
+// below), by its mangled name: an inline NearZero function expands at every call (asmcmp: 11 functions change).
+int NearZero__Ff(f32 x);
 LocalCarDesc* fn_801769CC(void);
 int fn_80179650(void);
 int fn_801CF064(void);
@@ -591,7 +593,7 @@ public:
             Score(&pts);
             Hide();
         }
-        if (!fn_80141F7C(pts)) {
+        if (!NearZero__Ff(pts)) {
             Ended(dur);
         }
         dur = 0.0f;
@@ -690,7 +692,7 @@ AirTracker::~AirTracker(void) {}
 f32 AirTracker::Rate(const RaceCarRec* rc) {
     f32 r = 0.0f;
     b272 = 0;
-    if (fn_80141F7C(((RaceCarRec*)rc)->F2690()) && Airborne(rc)) {
+    if (NearZero__Ff(((RaceCarRec*)rc)->F2690()) && Airborne(rc)) {
         if (dur > minT) {
             Show();
         }
@@ -708,7 +710,7 @@ f32 AirTracker::Rate(const RaceCarRec* rc) {
             }
         }
         r = 0.0f;
-    } else if (fn_80141F7C(since)) {
+    } else if (NearZero__Ff(since)) {
         r = Finish(rc);
     } else {
         Hide();
@@ -1096,7 +1098,7 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
-    if (fn_80141F7C(timer) || full) {
+    if (NearZero__Ff(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1608,7 +1610,7 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
     if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
-    if (fn_80141F7C(timer) || full) {
+    if (NearZero__Ff(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1723,7 +1725,7 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
     if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
-    if (fn_80141F7C(timer) || full) {
+    if (NearZero__Ff(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1761,7 +1763,7 @@ f32 SpinTracker::Rate(const RaceCarRec* rc) {
     if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
-    if (fn_80141F7C(timer) || full) {
+    if (NearZero__Ff(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }
@@ -1831,7 +1833,7 @@ f32 RingTracker::Rate(const RaceCarRec* rc) {
     if (Capped() && Rank() == NumRanks() - 1) {
         full = 1;
     }
-    if (fn_80141F7C(timer) || full) {
+    if (NearZero__Ff(timer) || full) {
         if (count > 0) {
             r = Collect(rc);
         }

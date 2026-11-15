@@ -14,8 +14,9 @@ void fn_801E9DC4(s16* h);
 int fn_801E9E30(s16* h, const f32* pos);
 void fn_801D0C58(void* l, int car, int a);  // register listener
 void fn_801D0C84(void* l);                  // unregister listener
-void fn_801602B0(void* v);
-void fn_80160230(void* dst, const void* xz);
+// Vec2's empty constructor, which retail calls out of line in Drop, by its mangled name (xz stays a plain array:
+// PickDrop takes an f32*).
+void __ct__4Vec2Fv(f32* v);
 void fn_80144DC8(void* m);
 void fn_80144B44(void* v, f32 x, f32 y, f32 z);
 }
@@ -71,15 +72,23 @@ struct BTrack {
     BTrackStart* start;  // offset 0x2C
 };
 
-struct BCarRec {
-    u8 pad0[0x10];
-    u32 model;  // offset 0x10
-};
-
 struct BGround {
     u8 pad0[0x28];
     f32 y;  // offset 0x28
 };
+
+class Vec2;
+// A ground position set from an x/z point (aiobst.cpp defines From: y = 0).
+struct Spot {
+    void From(const Vec2& v);
+};
+
+struct RaceCarRec {
+    BGround* Mtx(void);  // weak: the car's frame
+    u8 pad0[0x10];
+    u32 model;  // offset 0x10
+};
+
 
 struct BRacerInfo {
     u8 pad0[0x24];
@@ -161,9 +170,8 @@ struct BPath {
 
 extern "C" {
 BTrack* fn_80178C9C(void);
-BCarRec* fn_8017960C(int id);
+RaceCarRec* fn_8017960C(int id);
 BRacer* fn_801B2EC0(int id);
-BGround* fn_801602B4(BCarRec* c);
 void* fn_801769CC(void);
 }
 
@@ -438,7 +446,7 @@ BVec3 Home(int car) {
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, int car) {
-    BCarRec* by = fn_8017960C(car);
+    RaceCarRec* by = fn_8017960C(car);
     struct Node {
         Phob* obj;
         Node* next;
@@ -586,13 +594,13 @@ inline void Ball::Drop(void) {
     BVec3 v;
     BMtx m;
     f32 up;
-    fn_801602B0(xz);
+    __ct__4Vec2Fv(xz);
     PickDrop(xz, &h);
     fn_80144DC8(&m);
     fn_8017E388(&m);
-    fn_80160230(&m.pos, xz);
+    ((Spot*)&m.pos)->From(*(const Vec2*)xz);
     up = DropHeight();
-    f32 base = fn_801602B4(fn_8017960C(car))->y;
+    f32 base = fn_8017960C(car)->Mtx()->y;
     m.pos.y = base + up;
     fn_80144B44(&v, 0.0f, 0.0f, 0.0f);
     Launch(&m, &v, h, 0.0f);
