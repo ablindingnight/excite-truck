@@ -51,6 +51,7 @@ struct ILPos {
 
 class LineFollower {
 public:
+    LineFollower(void);
     virtual ~LineFollower(void);
     virtual int SetLine(CenterLine* line);
     virtual void Attach(CenterLine* line, V2* pos, V2* dir);
@@ -340,7 +341,6 @@ DMaster* fn_801B83A0(void);
 DAI* fn_8013C9F4(int a);
 void fn_80204A1C(const char* key, u8* out);
 PathSet* fn_80156A40(void);
-void* fn_801352B8(void* mem);
 int fn_801B8928(int car, TeleportInfo* t, int a);
 int fn_801B526C(void);
 int fn_8026A344(int);
@@ -817,11 +817,7 @@ void fn_801B179C(DeityCar* c, int index, DCar* car) {
     *(s32*)((u8*)c + 0x8) = index + 1;
     PathSet* ps = fn_80156A40();
     c->follower = new ("Deity:center_line") IdealFollower(1, ps->Center(index));
-    void* m2 = operator new(0x34, "Deity:racing_line");
-    if (m2) {
-        m2 = fn_801352B8(m2);
-    }
-    c->line = (LineFollower*)m2;
+    c->line = new ("Deity:racing_line") LineFollower;
     c->line->x30 = c->follower;
     c->line->SetLine(ps->Racing(index));
     if (car->type == 'PCAR') {

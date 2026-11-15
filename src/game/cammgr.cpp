@@ -48,7 +48,6 @@ struct PathPos {
 extern "C" {
 void fn_80134E34(IdealFollower* f, f32 dist);
 void fn_80136468(PathPos* out, IdealFollower* f);
-void fn_8013530C(IdealFollower* f, int del);
 void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 k);
 }
 
@@ -56,6 +55,9 @@ extern CamPose lbl_80499950;  // trackside camera frames
 extern CamPose lbl_80499920;
 
 extern "C" IdealFollower* __ct__13IdealFollowerFiP10CenterLine(IdealFollower* f, int mode, CenterLine* line);
+// The base LineFollower destructor (idealline.cpp) that IdealFollower's inlined destructor ends with, by its
+// mangled name like the constructor above (IdealFollower is a flat struct here).
+extern "C" void __dt__12LineFollowerFv(IdealFollower* f, int del);
 
 extern "C" {
 void EventUnInstallHandler(void* cb);
@@ -1233,7 +1235,7 @@ void fn_80268358(CamRec* c) {
                 delete[] f.buf;
             }
             f.buf = 0;
-            fn_8013530C(&f, 0);
+            __dt__12LineFollowerFv(&f, 0);
         }
         KVec3 in = *(KVec3*)&m[i][0];
         for (int k = 0; k < 2; k++) {
@@ -1359,7 +1361,7 @@ void fn_80268D94(void) {
         delete[] f.buf;
     }
     f.buf = 0;
-    fn_8013530C(&f, 0);
+    __dt__12LineFollowerFv(&f, 0);
 }
 
 void fn_80268E00(void) {
@@ -1375,7 +1377,7 @@ void fn_80268E00(void) {
         delete[] f.buf;
     }
     f.buf = 0;
-    fn_8013530C(&f, 0);
+    __dt__12LineFollowerFv(&f, 0);
 }
 
 

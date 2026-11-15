@@ -28,8 +28,10 @@ ValueNode* fn_802B59CC(void);
 void fn_802B8AE0(const char* name, s32* value);
 s32 fn_802B110C(s32 (*load)(const char*), const char* name);
 struct GroundCell* fn_802BE844(s16 x, s16 y, int size);
-f32 Floor__Ff_80141C9C(f32 x);
-void fn_801602B0(void* v);
+extern "C++" f32 Floor(f32 x);  // weak (C++ linkage; this part of the file sits in an extern "C" block)
+// Vec2's empty constructor, which retail calls out of line here, by its mangled name: declaring it out of line in
+// the class would add calls at every other default-constructed Vec2.
+void __ct__4Vec2Fv(class Vec2* v);
 void fn_80160BA0(struct V2* r, const struct V2* a, f32 s);
 void fn_80160B18(struct V2* v);
 void StatsUpdate__Fv(struct Vec3* v);
@@ -41,9 +43,6 @@ f32 Remap(float, float, float, float, float);
 extern "C" {
 void fn_801286A0(void* p, s32 shrink);         // MemShrink
 void fn_80265DCC(void* base, int num, int size, int (*cmp)(const void*, const void*));  // qsort
-void* fn_801352B8(void* it);
-void fn_80135D60(void* it, void* line);
-void fn_8013530C(void* it, int del);
 struct XSeg* fn_80138B4C(void* line, struct XSeg* prev);
 void fn_80136414(struct XSample* out, void* it, int idx);
 void fn_802C8BD0(s32 tex);
@@ -513,11 +512,11 @@ static inline void BinShadows(Grid& g, TexEntry* te, f32 s) {
     f32 step = 2.0f * h;
     for (Item* it = te->head; it; it = it->next) {
         Vec2 lo, hi;
-        fn_801602B0(&lo);
-        fn_801602B0(&hi);
+        __ct__4Vec2Fv(&lo);
+        __ct__4Vec2Fv(&hi);
         it->AsShadow()->GetBounds(&lo, &hi);
-        int x0 = (h + step * Floor__Ff_80141C9C(lo.x / step)) / s;
-        int y0 = (h + step * Floor__Ff_80141C9C(lo.y / step)) / s;
+        int x0 = (h + step * Floor(lo.x / step)) / s;
+        int y0 = (h + step * Floor(lo.y / step)) / s;
         int x1 = (step * Ceil(hi.x / step) - h) / s;
         int y1 = (step * Ceil(hi.y / step) - h) / s;
         for (s16 x = x0; x <= (s16)x1; x += g.size * 2) {
@@ -702,6 +701,16 @@ void fn_802B9D08(void) {
 void fn_802BA004(void) { lbl_8055FA84 = 0; }
 
 
+// Ideal-line walker (idealline.cpp).
+struct CenterLine;
+class LineFollower {
+public:
+    LineFollower(void);
+    virtual ~LineFollower(void);
+    virtual int SetLine(CenterLine* line);
+    u8 pad4[0x34 - 0x4];
+};
+
 void fn_802BA010(void* line, int idx) {
     Obj* o;
     XPoint* pt;
@@ -710,9 +719,8 @@ void fn_802BA010(void* line, int idx) {
     if (!line) {
         line = fn_80156A40()->Get(0);
     }
-    u8 it[0x34];
-    fn_801352B8(it);
-    fn_80135D60(it, line);
+    LineFollower it;
+    it.SetLine((CenterLine*)line);
     XScale* sc = fn_802B8FE0(idx);
     XSeg* s = fn_80138B4C(line, 0);
     if (s) {
@@ -723,7 +731,7 @@ void fn_802BA010(void* line, int idx) {
             if (te) {
                 pt = s->pts;
                 for (int k = 0; k < s->count; k++, pt++) {
-                    fn_80136414(&smp, it, pt->idx);
+                    fn_80136414(&smp, &it, pt->idx);
                     o = &lbl_8055FA78->data[lbl_8055FA78->count++];
                     o->Init(pt->x, pt->y, sc);
                     smp.Pos(&o->pos);
@@ -741,7 +749,6 @@ void fn_802BA010(void* line, int idx) {
             s = fn_80138B4C(line, s);
         } while (s);
     }
-    fn_8013530C(it, -1);
 }
 
 void fn_802BA348(void) {
@@ -785,18 +792,18 @@ static inline const V2& PtV2(const ValPoint& p) { return *(const V2*)&p; }
 
 static inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
     Vec2 org;
-    fn_801602B0(&org);
+    __ct__4Vec2Fv(&org);
     Vec2 along;
-    fn_801602B0(&along);
+    __ct__4Vec2Fv(&along);
     Vec2 side;
-    fn_801602B0(&side);
+    __ct__4Vec2Fv(&side);
     Vec2 size;
-    fn_801602B0(&size);
+    __ct__4Vec2Fv(&size);
     fn_80160BA0(&size, &PtV2(node->GetPoint("size")), scale);
     Vec3 sun;
     fn_80144D64(&sun, fn_802C9A40());
     Vec2 dir;
-    fn_801602B0(&dir);
+    __ct__4Vec2Fv(&dir);
     dir.SetXZ(sun);
     fn_80160B18(&dir);
     fn_80160BA0(&along, &dir, size.y);
@@ -804,13 +811,13 @@ static inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
     fn_802BAA50(&side);
     AddScaled(&org, pos, -0.5f, &side);
     Vec2 at;
-    fn_801602B0(&at);
+    __ct__4Vec2Fv(&at);
     AddScaled(&at, pos, 0.5f, &along);
     Vec3 nrm;
     StatsUpdate__Fv(&nrm);
     if (fn_801DCF48(&nrm, at.x, at.y)) {
         Vec2 n2;
-        fn_801602B0(&n2);
+        __ct__4Vec2Fv(&n2);
         n2.SetXZ(nrm);
         f32 k = Remap(-0.6f, -0.1f, 0.4f, 1.0f, Dot(&n2, &dir));
         fn_80160BA0(&along, &along, k);
@@ -868,11 +875,11 @@ f32 fn_802BAD90(f32 deg);
 
 static inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
     Vec2 org;
-    fn_801602B0(&org);
+    __ct__4Vec2Fv(&org);
     Vec2 along;
-    fn_801602B0(&along);
+    __ct__4Vec2Fv(&along);
     Vec2 side;
-    fn_801602B0(&side);
+    __ct__4Vec2Fv(&side);
     along.SetXZ(*(const Vec3*)&m->basis[2]);
     fn_80160B18(&along);
     side.SetXZ(*(const Vec3*)&m->basis[0]);

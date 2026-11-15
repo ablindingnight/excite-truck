@@ -151,8 +151,10 @@ f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 int fn_80129D18(int seed, int n);           // random int
 void fn_8023E52C(void* a);
 u8* fn_8017960C(s32 id);
-void fn_801352B8(void* p);
-void fn_8013530C(void* p, int del);
+// LineFollower's constructor and destructor (idealline.cpp) for the driver's two line followers at 0x168 and
+// 0x19C, by their mangled names: the driver here is a byte buffer, not a class with LineFollower members.
+void __ct__12LineFollowerFv(void* p);
+void __dt__12LineFollowerFv(void* p, int del);
 void fn_80134CD4(s32 car, void* out);
 f32* fn_80137C54(int a);
 void* fn_801769CC(void);
@@ -543,8 +545,8 @@ u8* fn_801938F4(u8* d) {
     S32(d, 0xB8) = -1;
     U8(d, 0xB4) = 0;
     u8* m = d + 0x168;
-    fn_801352B8(m);
-    fn_801352B8(m + 0x34);
+    __ct__12LineFollowerFv(m);
+    __ct__12LineFollowerFv(m + 0x34);
     F32(m, 0x68) = -999.0f;
     VI(m + 0x34)->v0C(0);
     VI(m)->v0C(0);
@@ -583,8 +585,8 @@ u8* AIDriver_vf08(u8* d, int del) {
         lbl_8055E550--;
         u8* m = d + 0x168;
         if (m) {
-            fn_8013530C(d + 0x19C, -1);
-            fn_8013530C(d + 0x168, -1);
+            __dt__12LineFollowerFv(d + 0x19C, -1);
+            __dt__12LineFollowerFv(d + 0x168, -1);
         }
         if (del > 0) {
             operator delete(d);

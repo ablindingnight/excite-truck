@@ -31,14 +31,23 @@ public:
     virtual SFPath* GetLine(int i);  // 0x0C
 };
 
-struct SFIter {
-    u8 pad[0x3C];
-};
-
-struct SFHit {
+// A position on the ideal line (idealline.cpp).
+struct ILPos {
     SFNode* node;  // offset 0x0
     f32 t;         // offset 0x4
     s32 max;       // offset 0x8
+};
+
+// Ideal-line walker (idealline.cpp).
+struct V2;
+struct CenterLine;
+class LineFollower {
+public:
+    LineFollower(void);
+    virtual ~LineFollower(void);
+    virtual int SetLine(CenterLine* line);
+    void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
+    u8 pad4[0x34 - 0x4];
 };
 
 struct SFConfig {
@@ -56,10 +65,6 @@ SFConfig* fn_8000AC38(void);
 extern "C" {
 int fn_80161C38(void);
 SFPathSet* fn_80156A40(void);
-void fn_801352B8(SFIter* it);
-int fn_80135D60(SFIter* it, SFPath* path);
-void fn_801355C0(SFIter* it, SFNode* pos, int a, SFHit* hit, int b);
-void fn_8013530C(SFIter* it, int unk);
 int fn_801E9E30(s16* h, SFVec3* pos);
 void fn_801E9DC4(s16* h);
 double log2(double x);
@@ -170,8 +175,7 @@ void fn_802A1120(SFVec2* pos, SFVec2* dir) {
     SFPath* path;
     SFPath* line;
     SFNode* n;
-    SFIter it;
-    SFHit h;
+    ILPos h;
     f32 t;
     path = fn_80156A40()->GetPath(0);
     {
@@ -179,13 +183,13 @@ void fn_802A1120(SFVec2* pos, SFVec2* dir) {
         dir->x = f->dir.x;
         dir->y = f->dir.y;
     }
-    fn_801352B8(&it);
+    LineFollower it;
     line = fn_80156A40()->GetLine(0);
-    fn_80135D60(&it, line);
+    it.SetLine((CenterLine*)line);
     h.node = 0;
     h.max = 10000;
     h.t = 0.0f;
-    fn_801355C0(&it, path->nodes, 0, &h, 0);
+    it.Locate((V2*)path->nodes, 0, &h, 0);
     n = fn_802A1040(path->nodes, h.node, line);
     for (t = 0.0f; t < 1.0f; t += 0.025f) {
         pos->x = n->pos.x + t * (n->next->pos.x - n->pos.x);
@@ -194,7 +198,6 @@ void fn_802A1120(SFVec2* pos, SFVec2* dir) {
             break;
         }
     }
-    fn_8013530C(&it, -1);
 }
 
 // NonMatching: the hoisted loop constants get different callee-saved float registers.

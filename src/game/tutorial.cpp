@@ -226,6 +226,14 @@ struct CarState {
     TVec3 origin;    // offset 0x24
 };
 
+// The rigid body every car is (rigid.cpp).
+struct RMtx;
+struct RVec3;
+class RigidBody {
+public:
+    void SetState(const RMtx* m, const RVec3* v, const RVec3* w);
+};
+
 struct TCar {
     u8 pad0[0x10];
     u32 model;  // offset 0x10
@@ -309,7 +317,6 @@ void fn_80147230(void* elem, const char* fmt, ...);
 void fn_8018ADBC(TCar* car, f32 v);
 void fn_8018ADB4(TCar* car, f32 v);
 void fn_8018ADA4(TCar* car, f32 v);
-void fn_8017CFFC(TCar* car, void* m, TVec3* v, TVec3* w);
 void fn_80176780(int a, int b);
 void fn_8017691C(void);
 void fn_801B7C8C(TCar* car, TVec2* pos, TVec2* dir);
@@ -1671,7 +1678,7 @@ inline void ChalList::Update(void) {
         v.x = 0.0f;
         v.y = 0.0f;
         v.z = 0.0f;
-        fn_8017CFFC(car, &m, &v, &w);
+        ((RigidBody*)car)->SetState((const RMtx*)&m, (const RVec3*)&v, (const RVec3*)&w);
     }
     if (pick) {
         fn_801796BC(0);
@@ -1818,9 +1825,22 @@ inline int ChalList::Draw(int a) {
     return 1;
 }
 
-struct PathIter {
-    u8 pad[0x58];
+}  // namespace
+
+// Ideal-line walker (idealline.cpp).
+struct V2;
+struct CenterLine;
+struct ILPos;
+class LineFollower {
+public:
+    LineFollower(void);
+    virtual ~LineFollower(void);
+    virtual int SetLine(CenterLine* line);
+    void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
+    u8 pad4[0x58 - 0x4];  // idealline.cpp's class is 0x34 bytes; at 0x34 ChallengeBase::Query's frame shrinks (130 -> 116 diff rows, unverified)
 };
+
+namespace {
 
 struct LineNode {
     f32 x;   // offset 0x0
@@ -1844,10 +1864,6 @@ public:
 };
 
 extern "C" {
-void fn_801352B8(PathIter* it);
-int fn_80135D60(PathIter* it, int line);
-void fn_801355C0(PathIter* it, TVec2* pos, int a, LineHit* hit, int b);
-void fn_8013530C(PathIter* it, int unk);
 PathSet* fn_80156A40(void);
 }
 
@@ -1910,16 +1926,15 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
                 dir.z *= inv;
             }
             if (place->GetBool("on_racingline", 1)) {
-                PathIter it;
+                LineFollower it;
                 LineHit h;
                 LineNode* n;
                 f32 inv;
-                fn_801352B8(&it);
-                fn_80135D60(&it, fn_80156A40()->GetLine(0));
+                it.SetLine((CenterLine*)fn_80156A40()->GetLine(0));
                 h.node = 0;
                 h.max = 10000;
                 h.t = 0.0f;
-                fn_801355C0(&it, &pos, 0, &h, 0);
+                it.Locate((V2*)&pos, 0, (ILPos*)&h, 0);
                 n = h.node;
                 pos.x = n->x + h.t * (n->next->x - n->x);
                 pos.z = n->z + h.t * (n->next->z - n->z);
@@ -1929,7 +1944,6 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
                 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
                 dir.x *= inv;
                 dir.z *= inv;
-                fn_8013530C(&it, -1);
             }
             fn_801B7C8C((TCar*)carp, &pos, &dir);
             spd = 0.44444445f * place->GetFloat("speed", 0.0f);
