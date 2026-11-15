@@ -621,6 +621,8 @@ static void ResCacheReport(const char* name, s32 bytes, s32 ms, f32 kps) {
     fn_802E30C8("rescache: %s: copied %d bytes in %d ms (%.1f K/s)", name, bytes, ms, kps);
 }
 
+static char sTrackExtension[] = ".trk";
+
 char* fn_8012B2C4(char* buf, const char* name, int i) {
     char* path = 0;
     if (i == 0) {
@@ -814,7 +816,7 @@ void fn_8012BA1C(ResourceSet* set) {
             fn_802E30C8("ResourceSetUnload(\"%s\"): \"%s\" still used by %d", set, e, e->refs);
         }
     }
-    if (strstr(set->name, ".trk") && strcasecmp(set->name, "uitrack.trk")) {
+    if (strstr(set->name, sTrackExtension) && strcasecmp(set->name, "uitrack.trk")) {
         for (i = 0; i < set->hdr.resCount; i++) {
             ResEntry* e = &set->entries[i];
             if ((e->flags & 0xA) == 8) {
