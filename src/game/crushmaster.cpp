@@ -1602,10 +1602,10 @@ inline void CrushMaster::DrawKills(int car) const {
     }
     col = layout.p->Find("score_column");
     for (i = 0; i < n; i++) {
-        bool killed = i < cc->f8;
-        Box b = *icon;
         int pts;
+        Box b = *icon;
         b.pos.y += i * hit->h;
+        bool killed = i < cc->f8;
         if (!killed) {
             b.color.all = 0x66FFFFFF;
         }
