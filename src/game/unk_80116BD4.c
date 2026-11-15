@@ -2133,9 +2133,9 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     }
     buf = ((void *(*)(u32))lbl_8055DEE0[0])(t->bufSize);
     t->bufL = (s16 *)buf;
-    t->physL = (u32)buf - 0x80000000;
     t->bufR = (s16 *)(buf + t->voiceSize);
-    t->physR = (u32)buf - 0x80000000 + t->voiceSize;
+    t->physL = (u32)buf - 0x80000000;
+    t->physR = t->physL + t->voiceSize;
     t->minimum = t->chunk;
     t->volume = 0x7FFF;
     t->panL = 0x67F8;
@@ -2268,13 +2268,13 @@ u32 fn_8011A240(void *arg0, u32 arg1, s32 arg2, u32 arg3) {
 
 void fn_8011A330(void *arg0) {
     s32 status;
-    *(s32 *)((u8 *)arg0 + 0xC4) = 1;
+    *(volatile s32 *)((u8 *)arg0 + 0xC4) = 1;
     DVDCancel((DVDCommandBlock *)((u8 *)arg0 + 0x54));
     do {
         status = DVDGetDriveStatus();
     } while (status == 2 || status == 1);
-    *(s32 *)((u8 *)arg0 + 0xC4) = 0;
-    *(s32 *)((u8 *)arg0 + 0x24) = 0;
+    *(volatile s32 *)((u8 *)arg0 + 0xC4) = 0;
+    *(volatile s32 *)((u8 *)arg0 + 0x24) = 0;
 }
 
 u32 fn_8011A388(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
@@ -3699,12 +3699,12 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     u32 count;
     s32 len;
     u32 width;
-    u32 mask;
     u32 e;
     u32 bit;
     u32 last;
     u32 lo;
     u32 word;
+    u32 maxBits;
     u8 *dst;
     u8 *lookup;
     u8 *symbols;
@@ -3728,7 +3728,7 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     }
     if (len != 0) {
         dst = b->data;
-        width = b->maxBits;
+        maxBits = b->maxBits;
         symbols = b->symbols;
         b->cur = dst;
         lookup = b->lookup;
@@ -3748,7 +3748,6 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
             len = -20 - len;
         }
         ones = 0xFFFFFFFFU;
-        mask = ones >> (32 - width);
         do {
             u32 w;
             u32 c;
@@ -3775,15 +3774,15 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
                     count = count + 32 - e;
                 }
             }
-            if (count >= width) {
-                e = lookup[value & mask];
+            if (count >= maxBits) {
+                e = lookup[value & (ones >> (32 - maxBits))];
                 lo = symbols[e & 15];
                 e >>= 4;
                 value >>= e;
                 count -= e;
             } else {
                 word = *next;
-                e = lookup[(value | (word << count)) & mask];
+                e = lookup[(ones >> (32 - maxBits)) & (value | (word << count))];
                 lo = symbols[e & 15];
                 e >>= 4;
                 if (count >= e) {
@@ -3822,12 +3821,12 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     u32 count;
     s32 len;
     u32 width;
-    u32 mask;
     u32 e;
     u32 bit;
     u32 last;
     u32 lo;
     u32 word;
+    u32 maxBits;
     u8 *dst;
     u8 *lookup;
     u8 *symbols;
@@ -3851,7 +3850,7 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     }
     if (len != 0) {
         dst = b->data;
-        width = b->maxBits;
+        maxBits = b->maxBits;
         symbols = b->symbols;
         b->cur = dst;
         lookup = b->lookup;
@@ -3871,7 +3870,6 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
             len = -20 - len;
         }
         ones = 0xFFFFFFFFU;
-        mask = ones >> (32 - width);
         do {
             u32 w;
             len--;
@@ -3896,15 +3894,15 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
                     count = count + 32 - e;
                 }
             }
-            if (count >= width) {
-                e = lookup[value & mask];
+            if (count >= maxBits) {
+                e = lookup[value & (ones >> (32 - maxBits))];
                 lo = symbols[e & 15];
                 e >>= 4;
                 value >>= e;
                 count -= e;
             } else {
                 word = *next;
-                e = lookup[(value | (word << count)) & mask];
+                e = lookup[(ones >> (32 - maxBits)) & (value | (word << count))];
                 lo = symbols[e & 15];
                 e >>= 4;
                 if (count >= e) {
@@ -4115,132 +4113,132 @@ void fn_8011D7F8(Bundle8011 *b, BitReader8011 *bits) {
     bits->count = count;
 }
 
-void fn_8011D9E4(void* arg0, void* arg1) {
-    u32* bits;
+void fn_8011D9E4(Bundle8011 *b, BitReader8011 *bits) {
+    u32 *next;
     u32 value;
-    u32 bitCount;
     u32 count;
-    u8* table;
-    u32 i;
-    u32 code;
     u32 len;
-    u8* dst;
-    u8* lookup;
-    u32 symbol;
+    u32 width;
+    u32 e;
     u32 bit;
-    BitWin8011 w;
-    if ((*((u32 *) arg0)) != (*((u32 *) (((u8 *) arg0) + 4)))) {
-        return;
-    }
-    bitCount = *((u32 *) (((u8 *) arg1) + 8));
-    w.width = *((u32 *) (((u8 *) arg0) + 0x28));
-    bits = *((u32 **) (((u8 *) arg1) + 4));
-    value = *((u32 *) arg1);
-    if (bitCount < w.width) {
-        u32 next = *(bits++);
-        count = (value | (next << bitCount)) & (0xFFFFFFFFU >> (32 - w.width));
-        value = next >> (w.width - bitCount);
-        bitCount = (bitCount + 32) - w.width;
+    u32 maxBits;
+    u8 *dst;
+    u8 *lookup;
+    u8 *symbols;
+    u32 sym;
+    u32 word;
+    u32 ones;
+
+    if (b->cur != b->end) return;
+    count = bits->count;
+    width = b->countBits;
+    next = bits->next;
+    value = bits->value;
+    if (count < width) {
+        u32 word = *next;
+        len = (value | (word << count)) & (0xFFFFFFFFU >> (32 - width));
+        value = word >> (width - count);
+        count = count + 32 - width;
+        next++;
     } else {
-        count = value & (0xFFFFFFFFU >> (32 - w.width));
-        value >>= w.width;
-        bitCount -= w.width;
+        len = value & (0xFFFFFFFFU >> (32 - width));
+        value >>= width;
+        count -= width;
     }
-    if (count != 0) {
-        dst = *((u8 **) (((u8 *) arg0) + 0x2C));
-        *((u8 **) arg0) = dst;
-        *((u8 **) (((u8 *) arg0) + 4)) = dst + count;
-        if (bitCount == 0) {
-            bit = *(bits++);
-            bitCount = 31;
+    if (len != 0) {
+        b->cur = b->data;
+        b->end = b->data + len;
+        if (count == 0) {
+            bit = *next;
             value = bit >> 1;
+            count = 31;
+            next++;
         } else {
             bit = value;
             value >>= 1;
-            bitCount--;
+            count--;
         }
-        if ((bit & 1) == 0) {
-            dst = *((u8 **) (((u8 *) arg0) + 0x2C));
-            lookup = *((u8 **) (((u8 *) arg0) + 0x24));
-            table = ((u8 *) arg0) + 0x10;
-            w.width = *((u32 *) (((u8 *) arg0) + 0x20));
-            w.mask = 0xFFFFFFFFU >> (32 - w.width);
+        if (!(bit & 1)) {
+            maxBits = b->maxBits;
+            ones = 0xFFFFFFFFU;
+            dst = b->data;
+            symbols = b->symbols;
+            lookup = b->lookup;
             do {
-                count--;
-                if (bitCount >= w.width) {
-                    code = value & w.mask;
-                    symbol = lookup[code];
-                    len = symbol >> 4;
-                    symbol = table[symbol & 15];
-                    value >>= len;
-                    bitCount -= len;
+                len--;
+                if (count >= maxBits) {
+                    e = lookup[value & (ones >> (32 - maxBits))];
+                    sym = symbols[e & 15];
+                    e >>= 4;
+                    value >>= e;
+                    count -= e;
                 } else {
-                    u32 next = *bits;
-                    code = (value | (next << bitCount)) & w.mask;
-                    len = lookup[code];
-                    symbol = table[len & 15];
-                    len >>= 4;
-                    if (bitCount >= len) {
-                        value >>= len;
-                        bitCount -= len;
+                    word = *next;
+                    e = lookup[(ones >> (32 - maxBits)) & (value | (word << count))];
+                    sym = symbols[e & 15];
+                    e >>= 4;
+                    if (count >= e) {
+                        value >>= e;
+                        count -= e;
                     } else {
-                        value = next >> (len - bitCount);
-                        bits++;
-                        bitCount = (bitCount + 32) - len;
+                        value = word >> (e - count);
+                        next++;
+                        count = count + 32 - e;
                     }
                 }
-                if (symbol != 0) {
-                    if (bitCount == 0) {
-                        bit = *(bits++);
-                        bitCount = 31;
+                if (sym != 0) {
+                    if (count == 0) {
+                        bit = *next;
                         value = bit >> 1;
+                        count = 31;
+                        next++;
                     } else {
                         bit = value;
                         value >>= 1;
-                        bitCount--;
+                        count--;
                     }
                     if (bit & 1) {
-                        symbol = -symbol;
+                        sym = -sym;
                     }
                 }
-                *(dst++) = symbol;
-            } while (count != 0);
-
+                *dst++ = sym;
+            } while (len != 0);
         } else {
-            if (bitCount < 4) {
-                u32 next = *(bits++);
-                code = (value | (next << bitCount)) & 15;
-                value = next >> (4 - bitCount);
-                bitCount += 28;
+            if (count < 4) {
+                u32 word = *next++;
+                sym = (value | (word << count)) & 15;
+                value = word >> (4 - count);
+                count += 28;
             } else {
-                code = value & 15;
+                sym = value & 15;
                 value >>= 4;
-                bitCount -= 4;
+                count -= 4;
             }
-            if (code != 0) {
-                if (bitCount == 0) {
-                    bit = *(bits++);
-                    bitCount = 31;
+            if (sym != 0) {
+                if (count == 0) {
+                    bit = *next;
                     value = bit >> 1;
+                    count = 31;
+                    next++;
                 } else {
                     bit = value;
                     value >>= 1;
-                    bitCount--;
+                    count--;
                 }
                 if (bit & 1) {
-                    code = -code;
+                    sym = -sym;
                 }
             }
-            memset(*((void **) (((u8 *) arg0) + 0x2C)), code, count);
+            memset(b->data, sym, len);
         }
     } else {
-        dst = *((u8 **) (((u8 *) arg0) + 0x2C));
-        *((u8 **) (((u8 *) arg0) + 4)) = dst;
-        *((u8 **) arg0) = dst + 4;
+        dst = b->data;
+        b->end = dst;
+        b->cur = dst + 4;
     }
-    *((u32 **) (((u8 *) arg1) + 4)) = bits;
-    *((u32 *) arg1) = value;
-    *((u32 *) (((u8 *) arg1) + 8)) = bitCount;
+    bits->next = next;
+    bits->value = value;
+    bits->count = count;
 }
 
 void fn_8011DC5C(void *arg0, void *arg1) {
