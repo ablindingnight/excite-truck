@@ -273,7 +273,7 @@ static inline double DMax(f32 a, f32 b) { return a > b ? a : b; }
 int GetNumPlayers(void);
 void LoadTimerMark(const char* name, f32 step);
 void LoadTimerBegin(const char* name, int a, int b, f32 duration);
-extern "C" void LoadTimerEnd__FPCc(const char* name, int abiUnused);
+void LoadTimerEnd(const char* name);
 ValueTable* GetEvent(int i);
 BOOL OptPaTest(void);
 
@@ -615,7 +615,7 @@ void WorldBeginCommon(RaceSetup* s) {
     fn_80127464();
     fn_802023D4();
     fn_80127464();
-    LoadTimerEnd__FPCc("-WorldBeginCommon", 1);
+    ((void (*)(const char*, int))LoadTimerEnd)("-WorldBeginCommon", 1);  // retail passes a second argument (1)
     fn_8000D878();
     fn_802C2C60(1);
     fn_802C8218(0);

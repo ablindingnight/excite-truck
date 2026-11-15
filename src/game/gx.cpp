@@ -118,7 +118,7 @@ int fn_802E3D68(const char* name);
 void fn_802E3734(s32* fd);
 void fn_802E3A64(s32 fd, const void* buf, u32 n);
 void fn_801BFD34(V3* out, const V3* in, const RMtx* m);
-void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(Mat3* out, const Mat3* a, const RMtx* b);
+extern "C++" void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);  // racing.cpp
 void fn_802C8588(void* out, const V3* a, const V3* b);
 void GXInitLightPos(GXLightObj* l, f32 x, f32 y, f32 z);
 void GXInitLightDistAttn(GXLightObj* l, f32 a, f32 b, int f);
@@ -1807,7 +1807,7 @@ void fn_802D1C04(void) {
     Invert(&inv, &lbl_804C56C0);
     RMtx w;
     fn_801BFD34(&w.pos, &lbl_804C5690.pos, &inv);
-    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&w.rot, &lbl_804C5690.rot, &inv);
+    Mat3Mul(&w.rot, &lbl_804C5690.rot, &inv.rot);
     fn_802D0DD4(lbl_804C5650, &w);
     GXLoadPosMtxImm(lbl_804C5650, 0);
     if (lbl_8055FD19) {
@@ -1829,7 +1829,7 @@ void fn_802D1C04(void) {
         fn_802C8588(&look, &lbl_804C56C0.pos, &lbl_804C5690.pos);
         Invert(&li, &look);
         fn_801BFD34(&lw.pos, &lbl_804C5690.pos, &li);
-        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lw.rot, &lbl_804C5690.rot, &li);
+        Mat3Mul(&lw.rot, &lbl_804C5690.rot, &li.rot);
         fn_802D0DD4(m, &lw);
         PSMTXInvXpose(m, b);
         PSMTXScale(s, 0.5f, -0.5f, 0.0f);
@@ -2118,7 +2118,7 @@ void fn_802D2ED8(const RMtx* m, int slot) {
     }
     RMtx t;
     fn_801BFD34(&t.pos, &m->pos, &lbl_804CA2D8);
-    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&t.rot, &m->rot, &lbl_804CA2D8);
+    Mat3Mul(&t.rot, &m->rot, &lbl_804CA2D8.rot);
     fn_802D0DD4(lbl_804C5650, &t);
     GXLoadPosMtxImm(lbl_804C5650, slot * 3);
 }
