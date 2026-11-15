@@ -297,7 +297,7 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
     fn_802C8D74();
 }
 
-#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = d.x * (m)->x.x + d.y * (m)->x.y + d.z * (m)->x.z;             f32 y = d.x * (m)->y.x + d.y * (m)->y.y + d.z * (m)->y.z;             f32 z = d.x * (m)->z.x + d.y * (m)->z.y + d.z * (m)->z.z;             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag(&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
+#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = d.z * (m)->x.z + (d.y * (m)->x.y + d.x * (m)->x.x);             f32 y = d.z * (m)->y.z + (d.y * (m)->y.y + d.x * (m)->y.x);             f32 z = d.z * (m)->z.z + (d.y * (m)->z.y + d.x * (m)->z.x);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag(&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
 
 // Terrain silhouette rings around the camera.
 void fn_80203380(EFrame* m) {
@@ -319,10 +319,11 @@ void fn_80203380(EFrame* m) {
             p.y = dist;
             Rotate(&p, a);
             p.x += m->pos.x;
-            p.y = p.y + m->pos.z;
+            f32 z = p.y + m->pos.z;
+            p.y = z;
+            w.y = fn_801DCF48(0, p.x, z);
+            w.z = z;
             w.x = p.x;
-            w.y = fn_801DCF48(0, p.x, p.y);
-            w.z = p.y;
             {
                 EVec3 d;
                 ENV_PROJECT(m, w, d, sx, sy);
