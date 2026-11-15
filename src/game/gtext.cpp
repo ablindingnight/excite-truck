@@ -143,9 +143,8 @@ void fn_802C8E00(u32 color, int row, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 }
 
-static inline u16 DecodeUTF8(const char* s, const char** next) {
+static inline u16 DecodeUTF8(const char* s, const char** next, const u8& b) {
     u16 r;
-    u8 b = s[0];
     const char* n;
     if ((b & 0xF0) == 0xE0) {
         r = ((b & 0xF) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F);
@@ -159,6 +158,11 @@ static inline u16 DecodeUTF8(const char* s, const char** next) {
     }
     *next = n;
     return r;
+}
+
+static inline u16 DecodeUTF8(const char* s, const char** next) {
+    const u8 firstByte = s[0];
+    return DecodeUTF8(s, next, firstByte);
 }
 
 static inline const char* ReadUTF8(const char* s, u16* c) {
@@ -923,10 +927,9 @@ void fn_80233010(const char* text, GTextFont* f, u32 color, int align, int ingam
 }
 
 #pragma push
-#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
+#pragma opt_dead_assignments off  // Retain the initial UTF-8 scan for the alignment pass, as in retail.
 void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z) {
-    u32 c = color;
-    fn_80231714(&c);
+    fn_80231714(&color);
     f32 y0 = y;
     strlen(text);
     if (*text) {
@@ -953,7 +956,7 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
             y = y0;
             i = 0;
             GTextFont* ff = f;
-            u32 cc = c;
+            u32 cc = color;
             if (passes == 2) {
                 ff = f->outline;
                 cc = fn_80231718(cc);
@@ -962,7 +965,7 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
             while (text[i]) {
                 const char* nx;
                 const char* p = text + i;
-                u16 ch = DecodeUTF8(p, &nx);
+                u16 ch = DecodeUTF8(p, &nx, *reinterpret_cast<const u8*>(p));
                 Glyph* g = &ff->glyphs[ch];
                 y -= scale * g->pre;
                 fn_80233EC0(ff, ch, x, y, z, x + lh, y - scale * g->width, z);
