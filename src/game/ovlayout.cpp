@@ -22,7 +22,7 @@ s32 fn_802C9C48(void);  // screen width
 void fn_8000FF88(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_800104B0(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_8001027C(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
-void fn_802354A0(f32 x, f32 y, f32 z, f32 w, f32 h, int art, int part, u32 color);
+void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 }
 
 extern f32 lbl_8055D020;  // widescreen x stretch
@@ -410,7 +410,7 @@ void fn_80145CF4(const GartElem* e, int art, int part) {
     f32 w;
     w = fn_801452A0(e->w, e->elemJust);
     y = fn_801452B4(e->pos.y);
-    fn_802354A0(fn_801451DC(e->pos.x, e->elemJust), y, 0.0f, w, e->h, art, part, e->color);
+    fn_802354A0(art, part, fn_801451DC(e->pos.x, e->elemJust), y, 0.0f, w, e->h, e->color);
 }
 
 }  // extern "C"

@@ -47,7 +47,7 @@ TagCar* fn_801EA9A0(int car);
 int fn_801EA994(void);
 void fn_802C8E70(const ValVec3* p, ValVec3* out);
 int fn_802C8FF4(ValVec3* p, f32 margin);
-void fn_80235CBC(void* art, int part, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_80235CBC(void* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 int fn_801E85B4(void);
 TagCam* fn_802678C0(int view);
 f32 PSVECSquareDistance(const void* a, const void* b);
@@ -115,7 +115,7 @@ void fn_802A7CA8(int car, int gem, f32 t) {
     color = (int)(255.0f * Ramp(t, 1.0f, 0.0f, 1.0f, 0.0f)) << 24 | 0xFFFFFF;
     size = Ramp(t, 1.0f, 0.0f, 24.0f, 14.0f);
     if (fn_802C8FF4(&scr, 0.0f)) {
-        fn_80235CBC(lbl_8055F8C0, gem, color, scr.x - 0.5f * size, scr.y - 0.5f * size, 0.0f, size, size);
+        fn_80235CBC(lbl_8055F8C0, gem, scr.x - 0.5f * size, scr.y - 0.5f * size, 0.0f, size, size, color);
     }
 }
 

@@ -4497,14 +4497,14 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
+#pragma opt_propagation off  /* Pragma unproven: as on the PCM clamps; partial, Process review lead */
+#pragma opt_unroll_loops off  /* Pragma unproven: retail keeps the 7-row scaled fill as a ctr loop; MWCC unrolls it otherwise */
 // Decodes one Bink plane (8x8 blocks, or 16x16 scaled blocks) into dst, using prev as the previous frame.
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
 // plane's data. Structure cross-checked against n100f's ExpandPlane (reference only).
-#pragma push
-#pragma opt_propagation off  /* as on the PCM clamps; partial (92.56 -> 93.16), Process review lead */
 u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
-                 s32 blocksWide, s32 step, void **bufs, u32 flags, u32 *skipped) {
+                 s32 blocksWide, u32 step, void **bufs, u32 flags, u32 *skipped) {
     BinkColorTrees8011 trees;
     s16 block[64];
     Bundle8011 types;
@@ -4663,13 +4663,12 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                         d0 = dst;
                         d1 = dst + pitch;
                         BINK_FILL16(d0);
-                        i = 7;
-                        do {
+                        for (i = 0; i < 7; i++) {
                             BINK_FILL16(d1);
                             d0 = d1 + pitch;
                             BINK_FILL16(d0);
                             d1 = d0 + pitch;
-                        } while (--i);
+                        }
                         BINK_FILL16(d1);
                         break;
                     }
@@ -4708,11 +4707,10 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                     }
                     case 9: {
                         u8 *d0 = dst;
-                        u8 *d1;
+                        u8 *d1 = dst + pitch;
                         if ((u32)colors.cur & 3) {
                             for (i = 0; i < 8; i++) {
                                 u32 w;
-                                d1 = d0 + pitch;
                                 w = colors.cur[1];
                                 w = (w | (w << 8)) | ((colors.cur[0] << 24) | (colors.cur[0] << 16));
                                 ((u32 *)(d0))[0] = w;
@@ -4730,12 +4728,12 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                                 ((u32 *)(d0))[3] = w;
                                 ((u32 *)(d1))[3] = w;
                                 colors.cur += 8;
-                                d0 = d1 + pitch;
+                                d0 += pitch * 2;
+                                d1 += pitch * 2;
                             }
                         } else {
                             for (i = 0; i < 8; i++) {
                                 u32 w;
-                                d1 = d0 + pitch;
                                 w = ((u16 *)colors.cur)[0];
                                 w = BINK_DOUBLE2(w);
                                 ((u32 *)(d0))[0] = w;
@@ -4753,7 +4751,8 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                                 ((u32 *)(d0))[3] = w;
                                 ((u32 *)(d1))[3] = w;
                                 colors.cur += 8;
-                                d0 = d1 + pitch;
+                                d0 += pitch * 2;
+                                d1 += pitch * 2;
                             }
                         }
                         break;
@@ -4922,7 +4921,6 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     bits.count = 0;
     return bits.next;
 }
-#pragma pop
 #pragma pop
 
 // Decodes a video frame into the next frame buffer (alpha, luma, then the two chroma planes); returns the number

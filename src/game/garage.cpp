@@ -80,7 +80,7 @@ void fn_80214D50(int s);
 void __ct__9LocStringFPCc(u8* p, const char* key);
 void fn_80235380(u8* p);
 void gxForgetTexture(u8* p);
-void fn_802354A0(u8* o, int kind, s32 v, f32 x, f32 y, f32 z, f32 w, f32 h);
+void fn_802354A0(u8* o, int kind, f32 x, f32 y, f32 z, f32 w, f32 h, s32 v);
 f32 fn_80216CB4(void);  // menu fade-in (0..1)
 void fn_80214A9C(int s);
 }
@@ -1270,7 +1270,7 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
     if (!locked && ((GarageList*)PTR(p, 0xD0))->IsExtreme(i)) {
         extreme = 1;
     }
-    fn_802354A0(PTR(p, 0x24), shown && extreme, locked ? 0xFF808080 : -1, x, y, lbl_80563960, w, h);
+    fn_802354A0(PTR(p, 0x24), shown && extreme, x, y, lbl_80563960, w, h, locked ? 0xFF808080 : -1);
     f32 fade = fn_80216CB4();
     if (extreme) {
         for (int k = 0; k < 2; k++) {
@@ -1283,8 +1283,7 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
             f32 ph = fn_80235F64(PTR(p, 0x24), part) * (0.5f + Clamp01(t) * 0.5f);
             int a = RoundF(255.0f * fade);
             a = a > 0x13F ? 0x13F : a;
-            fn_802354A0(PTR(p, 0x24), part, (a << 24) | 0xFFFFFF, (x + 0.5f * w) - 0.5f * pw,
-                        k == 0 ? y + ph : y - h, lbl_80563960, pw, ph);
+            fn_802354A0(PTR(p, 0x24), part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, lbl_80563960, pw, ph, (a << 24) | 0xFFFFFF);
         }
     }
     int k = shown > 0 ? shown : 0;
@@ -1302,10 +1301,10 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
 
 void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {
     s32 v = S32(PTR(p, 0xCC) + i * 0x14, 0x10);
-    fn_802354A0(PTR(p, 0x24), 0, -1, x, y, 0.0f, w, h);
+    fn_802354A0(PTR(p, 0x24), 0, x, y, 0.0f, w, h, -1);
     fn_80216CB4();
-    fn_802354A0(PTR(p, 0x24), 3, v, x, y, 0.0f, w, h);
-    fn_802354A0(PTR(p, 0x24), 6, -1, x, y, 0.0f, w, h);
+    fn_802354A0(PTR(p, 0x24), 3, x, y, 0.0f, w, h, v);
+    fn_802354A0(PTR(p, 0x24), 6, x, y, 0.0f, w, h, -1);
 }
 
 // Colour list input: left/right pick the previous/next colour; bumping an end plays the error cue.
@@ -1435,7 +1434,7 @@ void fn_80251B04(u8* p) {
         f32 alpha = 1.0f - d;
         ((GarageSlotView*)p)->DrawSlot(i, e->shown, x, y + 5.0f * s, 82.5f, h + 10.0f * s, alpha);
     }
-    fn_802354A0(PTR(p, 0x24), 2, -1, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f);
+    fn_802354A0(PTR(p, 0x24), 2, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f, -1);
 }
 
 void fn_80251D0C(u8* p) {
