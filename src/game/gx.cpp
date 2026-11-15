@@ -699,11 +699,11 @@ void fn_802CF104(void) { fn_802CF048(1); }
 
 void fn_802CF10C(u32 count) {
     u16* buf;
-    Capture* cap = &lbl_804C5710;
     fn_802CEF90();
     if (lbl_8055FD44 == 4000) {
         OSReport("gx: hang? or perhaps the disk drive has powered down...\n");
     }
+    Capture* cap = &lbl_804C5710;
     lbl_8055FD44++;
     lbl_8055FD4C++;
     if (lbl_8055FD4C < 5 || (!lbl_8055FD50 && !cap->active)) {
