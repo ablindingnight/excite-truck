@@ -2031,35 +2031,43 @@ AnimDesc::~AnimDesc(void) { AnimDescTeardown(animModel); }
 extern "C" void fn_801FC4D8(AnimInst** list, AnimInst* a);
 extern "C" void fn_801FC644(EWSound** list, EWSound* s);
 
+// The frame as retail copies it: a 36-byte rotation block and the position (copy = 4 word pairs + 1, then 1 pair + 1).
+// OFrame itself (four PVec members) copies 12+12+12+12. Names unproven.
+struct ORot { PVec x; PVec y; PVec z; };
+struct OFrameRP { ORot rot; PVec pos; };
+namespace {
+static inline void AnimSetup(AnimInst* a, AnimDesc* d, ValueNode* node) {
+    a->name = "unknown";
+    a->anim = fn_801E6A3C(d->animModel, d->streaming != 0, 0);
+    a->count = d->numStreams;
+    for (int i = 0; i < a->count; i++) {
+        a->streams[i] = fn_801E6BEC(d->streams[i]);
+    }
+    fn_801E6CC8(a->anim, a->count <= 1);
+    if (d->streaming) {
+        a->state = 1;
+        a->live = 1;
+        if (node && lbl_8055EC68) {
+            a->liveRad2 = node->GetFloat("live_radius", lbl_8055EC68->GetFloat("live_radius"));
+        } else {
+            a->liveRad2 = 100.0f;
+        }
+        a->liveRad2 = a->liveRad2 * a->liveRad2;
+    } else {
+        a->state = 2;
+        StartAnim(a);
+    }
+    a->f5A = 0;
+    *(OFrameRP*)&a->frame = *(OFrameRP*)&d->place;
+    a->next = 0;
+    a->tag = lbl_8055EC40.cur;
+}
+}  // namespace
 void AnimDesc::Create(const PlacedObj* o) {
     place = o->frame;
     AnimInst* a = new ("val-gob") AnimInst;
     if (a) {
-        ValueNode* node = o->node;
-        a->name = "unknown";
-        a->anim = fn_801E6A3C(animModel, streaming != 0, 0);
-        a->count = numStreams;
-        for (int i = 0; i < a->count; i++) {
-            a->streams[i] = fn_801E6BEC(streams[i]);
-        }
-        fn_801E6CC8(a->anim, a->count <= 1);
-        if (streaming) {
-            a->state = 1;
-            a->live = 1;
-            if (node && lbl_8055EC68) {
-                a->liveRad2 = node->GetFloat("live_radius", lbl_8055EC68->GetFloat("live_radius"));
-            } else {
-                a->liveRad2 = 100.0f;
-            }
-            a->liveRad2 = a->liveRad2 * a->liveRad2;
-        } else {
-            a->state = 2;
-            StartAnim(a);
-        }
-        a->f5A = 0;
-        a->frame = place;
-        a->next = 0;
-        a->tag = lbl_8055EC40.cur;
+        AnimSetup(a, this, o->node);
     }
     fn_801FC4D8(&lbl_8055EC5C, a);
 }
