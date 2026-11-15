@@ -653,8 +653,8 @@ PVec* fn_802C9A40(void);
 OFrame* fn_802C86DC(void);
 f32 fn_802C88E8(const PVec* p);
 SolObj* fn_801A4A8C(SolObj* o, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node);
-void fn_801B5D30(SolBuilder* b);
-void fn_801792F4(void);
+void* fn_801B5D30(SolBuilder* b);
+void fn_801792F4(void*);
 SolFile* fn_801A4548(const char* name);
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
 f32 fn_801EA0E8(f32 x, f32 z);
@@ -1630,8 +1630,7 @@ OFrame* fn_801FA8E0(CollShape* s, const OFrame* f, s32 event) {
 
 void fn_801FA978(void) {
     fn_801F9BE8();
-    fn_801B5D30(lbl_8055EC74);
-    fn_801792F4();
+    fn_801792F4(fn_801B5D30(lbl_8055EC74));
     lbl_8055EC3C = 0;
 }
 

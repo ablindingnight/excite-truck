@@ -1098,7 +1098,7 @@ void fn_800105A0(const char* text, int player) {
     fn_8000FF88(-1, 0xC, text, scale, cx, y);
 }
 
-void fn_8001071C(const char* text) { fn_80010FDC(text, 13); }
+void fn_8001071C(const char* text, int) { fn_80010FDC(text, 13); }
 
 void fn_80010724(int x, int y, const char* text) {
     f32 w = 14.0f + fn_8001084C(16, text);

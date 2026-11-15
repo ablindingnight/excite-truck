@@ -267,7 +267,7 @@ void fn_80233EC0(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f3
 void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f32 scale);
 void fn_802346C8(void);
 
-int fn_80231504(void) { return 0; }
+int fn_80231504(int) { return 0; }
 
 int fn_8023150C(const char* name) {
     for (int i = 0; i < lbl_8055F068->count; i++) {
