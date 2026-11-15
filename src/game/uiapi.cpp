@@ -629,7 +629,6 @@ extern "C" WidgetFragment* fn_80219870(WidgetFragment*, int, int, const char*, v
 extern "C" WidgetFragment* fn_8021A77C(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, void*, int, void*);
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
-extern "C" WidgetFragment* fn_8021F678(WidgetFragment*, int, int, int, int, void*, float, int, float);
 extern "C" WidgetFragment* fn_8021AF0C(WidgetFragment*, int, int, void*, int, int, void*, float, float);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
 extern "C" WidgetFragment* fn_8021BD98(WidgetFragment* self, int x, int y, void* value, float scale, const char* format, float bias, int height);
@@ -1019,9 +1018,8 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             break;
         }
         if (d->dx - 37 > 10) {
-            p = (WidgetFragment*)operator new(0x27c, "Slider");
-            if (p) p = fn_8021F678(p, d->x + 21, d->y, d->dx - 37, d->dy,
-                                   range ? range->value : &lbl_8055EF50, low, d->field9c, high);
+            p = (WidgetFragment*)new ("Slider") Slider(d->x + 21, d->y, d->dx - 37, d->dy,
+                                   (float*)(range ? range->value : &lbl_8055EF50), low, d->field9c, high);
             widgets[count++] = p;
         }
         p = (WidgetFragment*)operator new(0x268, "ArrowBtn");

@@ -177,6 +177,33 @@ public:
 };
 
 extern "C" void fn_802C519C(void*);
+class Slider : public UIWidget {  /* Class name unproven (allocation tag "Slider"); vtable lbl_8033E878 */
+public:
+    Slider(int x, int y, int width, int height, float* value, float minimum, int rate, float maximum);  // fn_8021F678
+    virtual ~Slider(void) { fn_802C519C(background); fn_802C519C(marker); }  // inline: TU-end copy fn_80229F78
+    virtual void Slot14(void);                        // fn_8021F7EC
+    virtual void Slot24(void* context);               // fn_8021FC40
+    virtual void Slot28(void);                        // fn_8021FD68
+    virtual void Slot3C(int x, int y) { dragging = 1; Slot4C(x, y); }  // inline: fn_80229FF0
+    virtual void Slot40(int a, int b) { dragging = 0; }                // inline: fn_8022A008
+    virtual void Slot4C(int x, int y);                // fn_8021FA98
+    virtual void Slot58(void) { if (flag1a) dirty = 1; flag18 = 1; }   // inline: fn_8022A014
+    virtual void Slot5C(void) { if (flag1a) dirty = 1; flag18 = 0; }   // inline: fn_8022A034
+    virtual int Slot64(int key);                      // fn_8021F848
+    bool dragging;               // 0x244
+    unsigned char gap245[3];
+    float minimum, maximum;      // 0x248
+    float* value;                // 0x250
+    int rate;                    // 0x254
+    bool negative;               // 0x258
+    unsigned char gap259[3];
+    void* background;            // 0x25C
+    void* marker;                // 0x260
+    int oldX, oldY, oldWidth, oldHeight;  // 0x264
+    int* focus;                  // 0x274
+    int token;                   // 0x278
+};
+
 class ScrollBar : public UIWidget {  /* Class name unproven (allocation tags "VScrollBar"/"HScrollBar"); vtable lbl_8033E770 */
 public:
     ScrollBar(int x, int y, int width, int height, void* view, int vertical);  // fn_80220E48
