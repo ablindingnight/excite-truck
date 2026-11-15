@@ -2522,7 +2522,8 @@ inline void RingChalMaster::vf4C(int view) const {
 
 inline void ArenaTimer::Draw(ILayout* l) const {
     char buf[0x20];
-    fn_80130978(buf, MAX(0.0f, t), 0x20);
+    f32 shown = MaxI(0.0f, t);
+    fn_80130978(buf, shown, 0x20);
     fn_8014784C(l, "stop_watch_art", "stop_watch_artset", 0);
     fn_801475D0(l, "timer", "%s", buf);
 }
