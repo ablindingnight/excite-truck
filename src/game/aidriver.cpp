@@ -433,7 +433,7 @@ f32 fn_80134E00(void) {
     return fn_80134DF8();
 }
 
-f32 fn_80134E34(f32 d) {
+f32 fn_80134E34(void*, f32 d) {
     f32 t = d < 0.0f ? fn_80134E00() : d;
     f32 speed = fn_80134C1C();
     return fn_80134D20() - t * speed;

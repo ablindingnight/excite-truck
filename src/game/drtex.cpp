@@ -516,7 +516,7 @@ static inline void FixTexImage(TexImage* img) {
     Fix(&img->alpha, img);
 }
 
-void fn_802D8DCC(GXTexDesc* d) {
+void fn_802D8DCC(GXTexDesc* d, const char*) {
     FixTexImage(d->data);
     u32 fmt = d->format;
     if (fmt == 0x40 || fmt == 0) {
@@ -603,7 +603,7 @@ GXTex* fn_802D9154(void) { return fn_802D7600("handle"); }
 
 void fn_802D915C(GXTex* t) { fn_802D768C(t); }
 
-void fn_802D9160(GXTex* t) {
+void fn_802D9160(GXTex* t, int) {
     fn_802D6C68();
     lbl_8055FE18 = t;
     fn_802CFF5C(t->flags | (lbl_8055FD1C & ~0x14E));

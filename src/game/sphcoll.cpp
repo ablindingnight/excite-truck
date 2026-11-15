@@ -2760,7 +2760,7 @@ void fn_801A0378(u8* p, u8* s);
 extern const f32 lbl_805622D0;  // 0.0
 
 // Adds a sphere part (radius r) at c to the group.
-void fn_801A0258(u8* grp, const RVec3* c, f32 r, f32 s0, f32 s1) {
+void fn_801A0258(u8* grp, const RVec3* c, const void*, f32 r, f32 s0, f32 s1) {
     u8* s = (u8*)operator new(0x54, "SphereGroupPart");
     if (s) {
         f32 cz = c->z;

@@ -896,7 +896,7 @@ static inline int HitCorner(const AVec* at) {
 // raises the car's impairment.
 static inline double AbsDbl(double v) { return __fabs(v); }
 
-void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind) {
+void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind, u8*, int) {
     DentVec nd;
     DentVec dg;
     DentVec c0;

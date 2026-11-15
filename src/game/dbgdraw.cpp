@@ -232,7 +232,7 @@ static inline void ScaleFrame(DFrame* m, f32 s) {
     m->pos.z = 0.0f;
 }
 
-void fn_801E3FC8(const DVec3* pos, f32 radius) {
+void fn_801E3FC8(const DVec3* pos, f32 radius, u32) {
     DFrame m;
     ScaleFrame(&m, radius / lbl_8055EA68);
     m.pos.x = pos->x;

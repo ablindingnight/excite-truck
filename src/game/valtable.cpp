@@ -351,7 +351,7 @@ ValueTable* fn_80131810(const char* name) { return fn_80131588(name, 1); }
 
 void fn_80131818(ValueTable* t) { fn_8012C4D8(t); }
 
-ValueTable* fn_8013181C(const char* name) {
+ValueTable* fn_8013181C(const char* name, const char*, const char*) {
     fn_802E30C8("Attempt to call ValueFileLoadHumanReadable() from non-PC platform???");
     return 0;
 }

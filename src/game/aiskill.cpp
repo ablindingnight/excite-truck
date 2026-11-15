@@ -313,7 +313,7 @@ struct AIGrid {
     s32 count;          // offset 0x3C0
 };
 
-void fn_8013B4E0(AIGrid* g) {
+void fn_8013B4E0(AIGrid* g, void*) {
     s32 cars[8];
     int i;
     for (i = 0; i < g->count; i++) {

@@ -20,7 +20,7 @@ static inline void StrCopyN(char* dst, const char* src, int len) {
 
 extern "C" {
 
-void fn_8022D0D8(char* list) {
+void fn_8022D0D8(char* list, int) {
     list[1] = 0;
     list[0] = 0;
 }

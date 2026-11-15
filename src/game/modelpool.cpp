@@ -174,7 +174,7 @@ s32 fn_802CE728(ModelSlot* s) {
 
 void fn_802CE7D4(u8* data, s32 size, void* arg);
 
-void fn_802CE744(ModelSlot* s) {
+void fn_802CE744(ModelSlot* s, int) {
     ModelPool* p = s->pool;
     s->stamp = p->time++;
     if (s->state == 0) {

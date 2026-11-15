@@ -558,7 +558,7 @@ static inline void ApplyAcceleration(PSys* s, const RVec3* a) {
     }
 }
 
-void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up, const RVec3* f) {
+void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up, const RVec3* f, void*) {
     s->org = *org;
     s->up = *up;
     RVec3 a;
@@ -573,7 +573,7 @@ void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up,
     *n = k;
 }
 
-void fn_801C27D8(PSys* s, const RVec3* org, const RVec3* up, const RVec3* f) {
+void fn_801C27D8(PSys* s, const RVec3* org, const RVec3* up, const RVec3* f, void*) {
     s->org = *org;
     s->up = *up;
     RVec3 a;

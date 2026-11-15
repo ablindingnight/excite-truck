@@ -641,7 +641,7 @@ Sound2D* fn_80207848(const char* name, int cls) {
 
 extern "C" {
 
-Sound2D* fn_802078CC(const char* name, int cls, void* mem) {
+Sound2D* fn_802078CC(const char* name, int cls, void* mem, int) {
     Sound2D* s = new (mem) Sound2D(name, cls);
     if (s->dev) {
         return s;
