@@ -1167,7 +1167,7 @@ config.libs.append(
             Object(NonMatching, "game/gtext.cpp"),
             Object(Matching, "game/gart.cpp"),
             Object(Matching, "game/gtime.cpp"),
-            Object(NonMatching, "game/uianime.cpp"),
+            Object(Matching, "game/uianime.cpp"),
             Object(Matching, "game/uitext.cpp"),
             Object(NonMatching, "game/swfanim.cpp"),
             Object(Matching, "game/stub19.cpp"),

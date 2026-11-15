@@ -360,54 +360,6 @@ inline void UiAnimTrack::Apply(f32 time) {
     fn_8022EE98(obj);
 }
 
-UiAnimList::~UiAnimList(void) {
-    if (tracks) {
-        delete[] tracks;
-    }
-    tracks = 0;
-    n = 0;
-    len = 0.0f;
-}
-
-f32 UiAnimList::Length(void) { return len; }
-
-void UiAnimList::Apply(f32 t) {
-    t = 1.0f < t ? 1.0f : t;
-    t = t > 0.0f ? t : 0.0f;
-    f32 time = len * t;
-    for (int i = 0; i < n; i++) {
-        tracks[i].Apply(time);
-    }
-}
-
-UiSpecialList::~UiSpecialList(void) {
-    if (items) {
-        delete[] items;
-    }
-    items = 0;
-    n = 0;
-}
-
-f32 UiSpecialList::Length(void) { return 0.0f; }
-
-void UiSpecialList::Apply(f32 t) {
-    f32 now = fn_8023659C();
-    UiSpecial* s;
-    for (int i = 0; i < n; i++) {
-        s = &items[i];
-        if (s->active) {
-            f32 time = now - s->start;
-            void* obj = EvalTrack(&s->track, time);
-            fn_80214C54(s->track.id, obj);
-            fn_8022EE98(obj);
-            s = &items[i];
-            if (s->autoEnd && time > LastTime(&s->track)) {
-                s->active = 0;
-            }
-        }
-    }
-}
-
 extern "C" {
 
 AnimState* fn_80237C40(void);
@@ -674,3 +626,51 @@ int fn_80237EFC(const char* name) { return lbl_8055F0C0->special->State(name); }
 
 }  // extern "C"
 
+// The class methods come after the C interface in retail (.text order).
+UiAnimList::~UiAnimList(void) {
+    if (tracks) {
+        delete[] tracks;
+    }
+    tracks = 0;
+    n = 0;
+    len = 0.0f;
+}
+
+f32 UiAnimList::Length(void) { return len; }
+
+void UiAnimList::Apply(f32 t) {
+    t = 1.0f < t ? 1.0f : t;
+    t = t > 0.0f ? t : 0.0f;
+    f32 time = len * t;
+    for (int i = 0; i < n; i++) {
+        tracks[i].Apply(time);
+    }
+}
+
+UiSpecialList::~UiSpecialList(void) {
+    if (items) {
+        delete[] items;
+    }
+    items = 0;
+    n = 0;
+}
+
+f32 UiSpecialList::Length(void) { return 0.0f; }
+
+void UiSpecialList::Apply(f32 t) {
+    f32 now = fn_8023659C();
+    UiSpecial* s;
+    for (int i = 0; i < n; i++) {
+        s = &items[i];
+        if (s->active) {
+            f32 time = now - s->start;
+            void* obj = EvalTrack(&s->track, time);
+            fn_80214C54(s->track.id, obj);
+            fn_8022EE98(obj);
+            s = &items[i];
+            if (s->autoEnd && time > LastTime(&s->track)) {
+                s->active = 0;
+            }
+        }
+    }
+}
