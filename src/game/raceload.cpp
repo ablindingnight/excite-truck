@@ -81,27 +81,12 @@ void LoadTimerBegin(const char* name, int a, int b, f32 total);
 void LoadTimerProgress(void);
 
 // Six-word static built by an inline constructor (first word stored first).
-class RaceLoadStatic {
-public:
-    RaceLoadStatic(void) {
-        unk0 = 0;
-        unk4 = 123;
-        unkC = 0;
-        unk8 = 0;
-        unk10 = 0;
-    }
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-    u32 unk10;
-    u32 unk14;
-};
-
 ModuleTag lbl_8055D3A0;
-static RaceLoadStatic lbl_8034F4C8;
-UnkStaticFFFF lbl_8055D3A8;
-UnkStatic7F lbl_8055D3AC;
+static inline u32 InitialFFFFWord() { return 0xFFFF0000u; }
+extern const u32 lbl_8055D3A8 = InitialFFFFWord();
+static UnkStatic123 lbl_8034F4C8;
+static inline u32 Initial7FWord() { return 0x7F000000u; }
+extern const u32 lbl_8055D3AC = Initial7FWord();
 
 static char lbl_8034F4E0[64];  // track
 char lbl_8034F520[64];         // track resource
