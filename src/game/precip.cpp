@@ -39,11 +39,7 @@ struct WPt {
 
 // Axes (rows) and the origin.
 struct WFrame {
-    struct {
-        ValVec3 x;    // offset 0x0
-        ValVec3 y;    // offset 0xC
-        ValVec3 z;    // offset 0x18
-    };
+    ValVec3 axis[3];
     ValVec3 pos;  // offset 0x24
 };
 
@@ -301,24 +297,25 @@ static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return 
 // The vector in the frame's axes (multiply by the transpose).
 static inline void MulT(const WFrame* m, const ValVec3* v, ValVec3* out) {
     if (out == v) {
-        f32 x = Dot3(v->x, m->x.x, v->y, m->x.y, v->z, m->x.z);
-        f32 y = Dot3(v->x, m->y.x, v->y, m->y.y, v->z, m->y.z);
-        f32 z = Dot3(v->x, m->z.x, v->y, m->z.y, v->z, m->z.z);
+        f32 x = Dot3(v->x, m->axis[0].x, v->y, m->axis[0].y, v->z, m->axis[0].z);
+        f32 y = Dot3(v->x, m->axis[1].x, v->y, m->axis[1].y, v->z, m->axis[1].z);
+        f32 z = Dot3(v->x, m->axis[2].x, v->y, m->axis[2].y, v->z, m->axis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(v->x, m->x.x, v->y, m->x.y, v->z, m->x.z);
-        out->y = Dot3(v->x, m->y.x, v->y, m->y.y, v->z, m->y.z);
-        out->z = Dot3(v->x, m->z.x, v->y, m->z.y, v->z, m->z.z);
+        out->x = Dot3(v->x, m->axis[0].x, v->y, m->axis[0].y, v->z, m->axis[0].z);
+        out->y = Dot3(v->x, m->axis[1].x, v->y, m->axis[1].y, v->z, m->axis[1].z);
+        out->z = Dot3(v->x, m->axis[2].x, v->y, m->axis[2].y, v->z, m->axis[2].z);
     }
 }
 
 // In place, with no alias test.
-static inline void MulTSelf(const WFrame* m, ValVec3* v) {
-    f32 x = Dot3(v->x, m->x.x, v->y, m->x.y, v->z, m->x.z);
-    f32 y = Dot3(v->x, m->y.x, v->y, m->y.y, v->z, m->y.z);
-    f32 z = Dot3(v->x, m->z.x, v->y, m->z.y, v->z, m->z.z);
+static inline void MulTSelf(const void* basis, ValVec3* v) {
+    const ValVec3* rows = static_cast<const ValVec3*>(basis);
+    f32 x = Dot3(v->x, rows[0].x, v->y, rows[0].y, v->z, rows[0].z);
+    f32 y = Dot3(v->x, rows[1].x, v->y, rows[1].y, v->z, rows[1].z);
+    f32 z = Dot3(v->x, rows[2].x, v->y, rows[2].y, v->z, rows[2].z);
     v->x = x;
     v->y = y;
     v->z = z;
@@ -327,16 +324,16 @@ static inline void MulTSelf(const WFrame* m, ValVec3* v) {
 // The vector out of the frame's axes.
 static inline void Mul(const WFrame* m, const ValVec3* v, ValVec3* out) {
     if (out == v) {
-        f32 x = Dot3(v->x, m->x.x, v->y, m->y.x, v->z, m->z.x);
-        f32 y = Dot3(v->x, m->x.y, v->y, m->y.y, v->z, m->z.y);
-        f32 z = Dot3(v->x, m->x.z, v->y, m->y.z, v->z, m->z.z);
+        f32 x = Dot3(v->x, m->axis[0].x, v->y, m->axis[1].x, v->z, m->axis[2].x);
+        f32 y = Dot3(v->x, m->axis[0].y, v->y, m->axis[1].y, v->z, m->axis[2].y);
+        f32 z = Dot3(v->x, m->axis[0].z, v->y, m->axis[1].z, v->z, m->axis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(v->x, m->x.x, v->y, m->y.x, v->z, m->z.x);
-        out->y = Dot3(v->x, m->x.y, v->y, m->y.y, v->z, m->z.y);
-        out->z = Dot3(v->x, m->x.z, v->y, m->y.z, v->z, m->z.z);
+        out->x = Dot3(v->x, m->axis[0].x, v->y, m->axis[1].x, v->z, m->axis[2].x);
+        out->y = Dot3(v->x, m->axis[0].y, v->y, m->axis[1].y, v->z, m->axis[2].y);
+        out->z = Dot3(v->x, m->axis[0].z, v->y, m->axis[1].z, v->z, m->axis[2].z);
     }
 }
 
@@ -477,15 +474,15 @@ void fn_802A4E08(void) {
         f32 ang = *(f32*)(s + 1);
         f32 c = cos(ang);
         f32 sn = sin(ang);
-        m.x.x = c;
-        m.x.y = 0.0f;
-        m.x.z = -sn;
-        m.y.x = 0.0f;
-        m.y.y = 1.0f;
-        m.y.z = 0.0f;
-        m.z.x = sn;
-        m.z.y = 0.0f;
-        m.z.z = c;
+        m.axis[0].x = c;
+        m.axis[0].y = 0.0f;
+        m.axis[0].z = -sn;
+        m.axis[1].x = 0.0f;
+        m.axis[1].y = 1.0f;
+        m.axis[1].z = 0.0f;
+        m.axis[2].x = sn;
+        m.axis[2].y = 0.0f;
+        m.axis[2].z = c;
         fn_802C9900(FMin(2.0f * s->lightning, 1.0f));
         fn_802C744C(lbl_8055F898, &m);
         fn_802C9904();
@@ -760,18 +757,20 @@ void SnowSystem::Update(void) {
     MulT(&cam, &g, &grav);
     Scaled(&vel, &grav, 0.05f);
     if (!fn_801E8758(view)) {
-        SubV3(&d.x, &lastPos.x, &cam.pos.x);
-        MulTSelf(&cam, &d);
+        d.x = lastPos.x - cam.pos.x;
+        d.y = lastPos.y - cam.pos.y;
+        d.z = lastPos.z - cam.pos.z;
+        MulTSelf(cam.axis, &d);
         AddScaled(&vel, &d, 0.2f);
-        PSVECCrossProduct(&cam.z, &lastDir, &c);
-        Move(PSVECDotProduct(&cam.y, &c), &cam, (const PVec*)&d);
+        PSVECCrossProduct(&cam.axis[2], &lastDir, &c);
+        Move(PSVECDotProduct(&cam.axis[1], &c), &cam, (const PVec*)&d);
         Spawn();
         Drift();
     } else {
         Fill();
     }
     lastPos = cam.pos;
-    lastDir = cam.z;
+    lastDir = cam.axis[2];
 }
 
 static inline int GridYLimit(s32 height, int edge) {
@@ -953,7 +952,7 @@ void RainSystem::Update(void) {
         d.x = lastPos.x - cam->pos.x;
         d.y = lastPos.y - cam->pos.y;
         d.z = lastPos.z - cam->pos.z;
-        MulTSelf(cam, &d);
+        MulTSelf(cam->axis, &d);
         MadV(&vel, &dir, &d, -1.5f);
         f32 inv = 1.0f / (f32)sqrt(PSVECDotProduct(&vel, &vel));
         vel.x = vel.x * (0.25f * inv);
