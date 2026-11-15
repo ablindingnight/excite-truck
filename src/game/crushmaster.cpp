@@ -945,11 +945,12 @@ void fn_801720FC(const ValVec3* at, u32 color, f32 size) {
         fn_802C8BD0(lbl_8055E3A8);
         fn_802C8DB8(v, 5, idx, 6);
         fn_802C8D74();
-        v[0].color &= 0x3FFFFFFF;
-        v[1].color &= 0x3FFFFFFF;
-        v[2].color &= 0x3FFFFFFF;
-        v[3].color &= 0x3FFFFFFF;
-        v[4].color &= 0x3FFFFFFF;
+        i = 5;
+        MarkVtx* p = v;
+        while (i--) {
+            p->color &= 0x3FFFFFFF;
+            p++;
+        }
         fn_802C8BD0(-1);
         fn_802C8DB8(v, 5, idx, 6);
         fn_802C8D74();
