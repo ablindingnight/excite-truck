@@ -1735,8 +1735,8 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
                         s2.pos.x = s2.pos.x - s2.w / 2.0f - 4.0f * s2.w / 2.0f;
                         st.w = sc * fn_80144C80(s2.w, st.w, p);
                         st.h = sc * fn_80144C80(s2.h, st.h, p);
+                        st.pos.x = st.pos.x - 0.5f * st.w * n;
                         st.pos.y = st.pos.y - 0.5f * st.h;
-                        st.pos.x = st.pos.x - st.w / 2.0f * n;
                         SetV2(st.pos, LerpV2(s2.pos, st.pos, p));
                     } else {
                         st.w = st.w * sc;
@@ -1752,8 +1752,8 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
                         st = *sa;
                         st.w = sc2 * fn_80144C80(s3.w, st.w, fadeOut);
                         st.h = sc2 * fn_80144C80(s3.h, st.h, fadeOut);
+                        s3.pos.x = s3.pos.x - st.w * n / 2.0f;
                         s3.pos.y = s3.pos.y - 0.5f * st.h;
-                        s3.pos.x = s3.pos.x - st.w * n * 0.5f;
                         SetV2(st.pos, LerpV2(s3.pos, st.pos, fadeOut));
                     }
                 }
