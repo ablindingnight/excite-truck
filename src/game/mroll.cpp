@@ -7,6 +7,8 @@
 // Stat level thresholds (defined first: its .rodata precedes the unit's initialiser templates).
 extern const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
 #include "game/menu.h"
+#include "game/menustate.h"
+#include "game/menuwidget.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -53,7 +55,6 @@ struct JoinSlot {
 };
 
 extern JoinSlot lbl_80498828[2];
-extern void* lbl_803426B0[];
 extern void* lbl_80342734[];
 extern void* lbl_80342618[];
 extern s32 lbl_8055F1F4;
@@ -115,23 +116,13 @@ void fn_8023FE60(int id, u32* car, u32* color, s32* slot) {
 
 }  // extern "C"
 
-// One row of a player's car choice list.
-struct CarSelItem {
-    u8 sel;        // offset 0x0
-    u8 pad1[0x3];
-    u32 value;     // offset 0x4
-    u8 f8;         // offset 0x8
+// One row of a player's car choice list: a menu value widget (sel = flag0, value = id).
+typedef MenuWidgetBase CarSelItem;
 
-    void Set(u8 s, u32 v) {
-        sel = s;
-        value = v;
-    }
-    // vtable pointer at 0xC (CodeWarrior places it after the members)
-    virtual void v08(void);
-    virtual int IsShown(void);
-    virtual int IsFocused(void);
-    virtual int IsSet(void);
-};
+static inline void SetItem(MenuWidgetBase* w, u8 s, u32 v) {  /* Helper name unproven */
+    w->flag0 = s;
+    w->id = v;
+}
 
 // A player's car choice list (vtable lbl_80342650).
 struct CarSel {
@@ -149,7 +140,7 @@ struct CarSel {
     // Marks the current row (when active) and gives every row the slot.
     void Refresh(void) {
         for (int i = 0; i < count; i++) {
-            items[i]->Set(active && i == cur, *slot);
+            SetItem(items[i], active && i == cur, *slot);
         }
     }
     void SetSlot(s32 s);
@@ -161,7 +152,7 @@ struct CarSel {
     u8 Confirmable(void) {
         if (active) {
             for (int i = 0; i < count; i++) {
-                if (!items[i]->IsSet()) {
+                if (!items[i]->vf14()) {
                     return 0;
                 }
             }
@@ -287,14 +278,18 @@ static inline f32 Ease(f32 t) {
     return -2.0f * t * t * t - 3.0f * t * t;
 }
 
-// The body colour chooser of the car picker (constructor fn_802410F8).
-struct ColorPick : CarSelItem {
-    void* vt2;             // offset 0x10
-    s32 x;                 // offset 0x14
-    s32 y;                 // offset 0x18
-    s32 w;                 // offset 0x1C
-    s32 h;                 // offset 0x20
-    u8 pad24[0x4];
+// The body colour chooser of the car picker: a menu value widget (MenuWidgetBase at +0) that is also a menu
+// state (MenuState at +0x10); the compiler emits its this-0x10 thunks at the end of the unit (0x80243460).
+class ColorPick : public MenuWidgetBase, public MenuState {  /* Class name unproven */
+public:
+    ColorPick(u32* rgb, s32* sel, CarUIScreen* scr);
+    virtual ~ColorPick(void) {
+        lbl_8055F1F4--;
+        fn_80235380(art);
+    }
+    virtual void Draw(void);
+    virtual int Key(int key);
+
     VehicleInfo* vehicle;  // offset 0x28
     s32 color;             // offset 0x2C
     s32* colorOut;         // offset 0x30
@@ -592,7 +587,6 @@ u32 fn_802E4A10(void);
 void fn_8023D4B8(s32 ch);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 u8* fn_80240928(u8* p, int del);
-u8* fn_802410F8(u8* p, u32 owner, u32* sel, u32 extra);
 u8* fn_80241024(u8* p);
 CarPicker* fn_80240BA4(CarPicker* p, s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats,
                        CarUIScreen* screen);
@@ -606,29 +600,24 @@ int fn_802411A4(int* out);
 // choice list over them. The chooser and stat panel are built by their (out-of-line) constructors.
 struct RollPanel {
     CarUIScreen screen;  // offset 0x0
-    u8 color[0x9C];      // offset 0x124: ColorPick (fn_802410F8)
+    ColorPick color;     // offset 0x124
     u8 stats[0x2EC];     // offset 0x1C0: StatPanel (fn_80241024)
     CarPicker picker;    // offset 0x4AC
     CarSel sel;          // offset 0x51C
     s32 colorIndex;      // offset 0x578
 
-    RollPanel(JoinSlot* s, u8 flag) : screen(0) {
-        fn_802410F8(color, (u32)&s->color, (u32*)&colorIndex, (u32)&screen);
+    RollPanel(JoinSlot* s, u8 flag) : screen(0), color(&s->color, &colorIndex, &screen) {
         fn_80241024(stats);
-        fn_80240BA4(&picker, (s32*)&s->unk4, (s32*)&s->car, (ColorPick*)color, (StatPanel*)stats, &screen);
+        fn_80240BA4(&picker, (s32*)&s->unk4, (s32*)&s->car, &color, (StatPanel*)stats, &screen);
         fn_80240A1C(&sel, &s->id, (u8*)&screen);
         fn_802409AC(&sel, (CarSelItem*)&picker);
-        fn_802409AC(&sel, (CarSelItem*)color);
+        fn_802409AC(&sel, &color);
         fn_802409A4(stats, flag);
     }
     ~RollPanel(void) {
         picker.vt = lbl_80342618;
         delete (VDel*)picker.list;
         __destroy_arr(stats + 0x2C, (void*)fn_80240928, 0x28, 5);
-        *(void**)(color + 0xC) = lbl_803426B0;
-        *(void**)(color + 0x10) = (u8*)lbl_803426B0 + 0x18;
-        lbl_8055F1F4--;
-        fn_80235380(PTR(color, 0x44));
     }
 };
 
@@ -658,7 +647,7 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#carmodel_1", 0x13, &pp.p1.screen, 0, 0),
         MenuItem("#carmodel_1", 3, pp.p1.picker.chassis, 0, 0),
         MenuItem("#model_1", 0x10, NULL, (int)&pp.p1.picker, 0),
-        MenuItem("#color_1", 5, pp.p1.color + 0x10, 0, 0),
+        MenuItem("#color_1", 5, static_cast<MenuState*>(&pp.p1.color), 0, 0),
         MenuItem("#locker_1", 2, &pp.p1.picker.item, 0, 0),
         MenuItem("#controller_1", pp.p1.sel.name),
         MenuItem("#car_position_1", 5, pp.p1.screen.state, 0, 0),
@@ -676,7 +665,7 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#carmodel_2", 0x13, &pp.p2.screen, 0, 0),
         MenuItem("#carmodel_2", pp.p2.picker.chassis),
         MenuItem("#model_2", 0x10, NULL, (int)&pp.p2.picker, 0),
-        MenuItem("#color_2", 5, pp.p2.color + 0x10, 0, 0),
+        MenuItem("#color_2", 5, static_cast<MenuState*>(&pp.p2.color), 0, 0),
         MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
         MenuItem("#controller_2", pp.p2.sel.name),
         MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
@@ -739,19 +728,6 @@ u8* fn_80240830(u8* p, int del) {
     if (p) {
         *(void**)(p + 0xC) = lbl_80342618;
         delete (VDel*)PTR(p, 0x24);
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_802408B0(u8* p, int del) {
-    if (p) {
-        *(void**)(p + 0xC) = lbl_803426B0;
-        *(void**)(p + 0x10) = (u8*)lbl_803426B0 + 0x18;
-        lbl_8055F1F4--;
-        fn_80235380(PTR(p, 0x44));
         if (del > 0) {
             operator delete(p);
         }
@@ -861,25 +837,22 @@ u8* fn_80241098(u8* p) {
     return p;
 }
 
-u8* fn_802410F8(u8* p, u32 owner, u32* sel, u32 extra) {
-    *(void**)(p + 0xC) = lbl_803426B0;
-    S32(p, 0x4) = -1;
-    U8(p, 0x0) = 0;
-    U8(p, 0x8) = 1;
-    U32(p, 0x24) = 0;
-    *(void**)(p + 0x10) = (u8*)lbl_803426B0 + 0x18;
-    U32(p, 0x28) = 0;
-    U32(p, 0x2C) = *sel;
-    PTR(p, 0x30) = (u8*)sel;
-    U32(p, 0x34) = owner;
-    U32(p, 0x38) = extra;
-    S32(p, 0x3C) = lbl_8055F1F4++;
-    PTR(p, 0x44) = fn_8023512C("caricona.art");
-    F32(p, 0x58) = 0.0f;
-    F32(p, 0x54) = 0.0f;
-    U8(p, 0x5C) = 0;
-    return p;
+}  // extern "C"
+
+ColorPick::ColorPick(u32* rgb, s32* sel, CarUIScreen* scr) : MenuWidgetBase(1) {
+    vehicle = 0;
+    color = *sel;
+    colorOut = sel;
+    rgbOut = rgb;
+    screen = scr;
+    slot = lbl_8055F1F4++;
+    art = fn_8023512C("caricona.art");
+    rightFlash = 0.0f;
+    leftFlash = 0.0f;
+    label[0] = 0;
 }
+
+extern "C" {
 
 int fn_802411A4(int* out) {
     if (lbl_8055F1FC) {
@@ -944,15 +917,15 @@ void fn_8024122C(u8* p) {
 }
 
 // Colour chooser input: right/left step through the car's colours; bumping an end leaves the menu.
-int fn_80241354(ColorPick* c, int key) {
+int ColorPick::Key(int key) {
     int handled = 0;
-    if (c->IsFocused()) {
+    if (this->vf10()) {
         handled = 1;
         switch (key) {
         case 0x127: {
             bool end = false;
-            if (++c->color >= c->vehicle->num_colors) {
-                c->color = c->vehicle->num_colors - 1;
+            if (++this->color >= this->vehicle->num_colors) {
+                this->color = this->vehicle->num_colors - 1;
                 end = true;
             }
             if (end) {
@@ -960,16 +933,16 @@ int fn_80241354(ColorPick* c, int key) {
                 fn_80214D50(1);
                 break;
             }
-            c->SaveColor();
-            c->ShowColor();
-            c->Slide();
-            c->rightFlash = lbl_8056377C;
+            this->SaveColor();
+            this->ShowColor();
+            this->Slide();
+            this->rightFlash = lbl_8056377C;
             break;
         }
         case 0x125: {
             bool end = false;
-            if (--c->color < 0) {
-                c->color = 0;
+            if (--this->color < 0) {
+                this->color = 0;
                 end = true;
             }
             if (end) {
@@ -977,10 +950,10 @@ int fn_80241354(ColorPick* c, int key) {
                 fn_80214D50(1);
                 break;
             }
-            c->SaveColor();
-            c->ShowColor();
-            c->Slide();
-            c->leftFlash = lbl_8056377C;
+            this->SaveColor();
+            this->ShowColor();
+            this->Slide();
+            this->leftFlash = lbl_8056377C;
             break;
         }
         default:
@@ -1012,19 +985,19 @@ extern const f32 lbl_80563794;  // 4.0 arrow gap
 // Helper name unproven: half of a size, the value stays the left operand.
 static inline f32 HalfF(f32 v) { return v * lbl_80563784; }
 
-void fn_80241820(ColorPick* c) {
-    if (c->vehicle && c->IsShown()) {
+void ColorPick::Draw(void) {
+    if (this->vehicle && this->vf0C()) {
         f32 x;
         f32 y;
-        fn_80230C30(&x, &y, c->x, c->y);
-        f32 w = c->w;
+        fn_80230C30(&x, &y, this->x, this->y);
+        f32 w = this->w;
         f32 h;
-        h = c->h;
+        h = this->h;
         f32 cell = w / lbl_80563780;
         s32 now = fn_8023659C() * lbl_80563768;
-        f32 t = Clamp01((f32)(now - c->time) / lbl_8056376C);
+        f32 t = Clamp01((f32)(now - this->time) / lbl_8056376C);
         f32 e = Ease(t);
-        f32 cur = c->pos + e * (c->target - c->pos);
+        f32 cur = this->pos + e * (this->target - this->pos);
         f32 start = x + w * lbl_80563784 - cell * lbl_80563784 - cell * cur;
         // The swatch colour and its frame.
         struct Swatch {  /* Helper name unproven */
@@ -1033,7 +1006,7 @@ void fn_80241820(ColorPick* c) {
             Swatch() : tint(0), frame(0) {}
         } sw;
         int i;
-        for (i = 0; i < c->vehicle->num_colors; i++) {
+        for (i = 0; i < this->vehicle->num_colors; i++) {
             f32 sx = start + (f32)i * cell;
             if (sx + cell > x && sx < x + w) {
                 f32 d = sx + cell * lbl_80563784 - x;
@@ -1042,49 +1015,49 @@ void fn_80241820(ColorPick* c) {
                 }
                 f32 a = Clamp01((d - lbl_80563758) / (w * lbl_80563784 - lbl_80563758));
                 u8 alpha = (s32)(lbl_80563790 * (lbl_80563788 + a * lbl_8056378C));
-                sw.tint = (c->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
+                sw.tint = (this->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
                 sw.frame = (alpha << 24) | 0xFFFFFF;
                 if (sx > x && sx + cell < x + w) {
-                    fn_802354A0(c->art, 3, sx, y, lbl_80563758, cell, h, sw.tint);
-                    fn_802354A0(c->art, 6, sx, y, lbl_80563758, cell, h, sw.frame);
+                    fn_802354A0(this->art, 3, sx, y, lbl_80563758, cell, h, sw.tint);
+                    fn_802354A0(this->art, 6, sx, y, lbl_80563758, cell, h, sw.frame);
                 } else if (sx > x) {
                     f32 vis = cell - (sx + cell - (x + w));
                     f32 u = vis / cell;
-                    fn_80235758(c->art, 3, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, sw.tint);
-                    fn_80235758(c->art, 6, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, sw.frame);
+                    fn_80235758(this->art, 3, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, sw.tint);
+                    fn_80235758(this->art, 6, sx, y, vis, h, lbl_80563758, lbl_80563758, u, lbl_80563764, sw.frame);
                 } else {
                     f32 vis = cell - (x - sx);
                     f32 u = (cell - vis) / cell;
-                    fn_80235758(c->art, 3, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, sw.tint);
-                    fn_80235758(c->art, 6, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, sw.frame);
+                    fn_80235758(this->art, 3, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, sw.tint);
+                    fn_80235758(this->art, 6, x, y, vis, h, u, lbl_80563758, lbl_80563764, lbl_80563764, sw.frame);
                 }
             }
         }
-        if (c->IsShown()) {
-            if (c->color > 0) {
+        if (this->vf0C()) {
+            if (this->color > 0) {
                 u8* art = fn_80211660(0);
                 f32 ah = fn_80235F64(art, 1);
                 f32 ay = y - HalfF(h - ah);
-                f32 gap = lbl_80563794 + c->leftFlash;
+                f32 gap = lbl_80563794 + this->leftFlash;
                 fn_802353F4(art, 1, x - fn_80235EF0(art, 1) - gap, ay, lbl_80563758);
             }
-            if (c->color < c->vehicle->num_colors - 1) {
+            if (this->color < this->vehicle->num_colors - 1) {
                 u8* art = fn_80211660(1);
                 f32 ay = y - HalfF(h - fn_80235F64(art, 1));
-                fn_802353F4(art, 1, lbl_80563794 + c->rightFlash + (x + w), ay,
+                fn_802353F4(art, 1, lbl_80563794 + this->rightFlash + (x + w), ay,
                             lbl_80563758);
             }
-            f32 l = c->leftFlash - lbl_80563764;
-            c->leftFlash = lbl_80563758 > l ? lbl_80563758 : l;
-            f32 r = c->rightFlash - lbl_80563764;
-            c->rightFlash = lbl_80563758 > r ? lbl_80563758 : r;
+            f32 l = this->leftFlash - lbl_80563764;
+            this->leftFlash = lbl_80563758 > l ? lbl_80563758 : l;
+            f32 r = this->rightFlash - lbl_80563764;
+            this->rightFlash = lbl_80563758 > r ? lbl_80563758 : r;
         }
     } else {
-        f32 x = c->x;
-        f32 y = c->y;
-        f32 w = c->w;
-        f32 h = c->h;
-        fn_8022BD40(0xCC, c->label, 0, 0, x + lbl_80563784 * w, y + lbl_80563784 * h, lbl_80563758, w, h, lbl_80563764);
+        f32 x = this->x;
+        f32 y = this->y;
+        f32 w = this->w;
+        f32 h = this->h;
+        fn_8022BD40(0xCC, this->label, 0, 0, x + lbl_80563784 * w, y + lbl_80563784 * h, lbl_80563758, w, h, lbl_80563764);
     }
 }
 

@@ -19,13 +19,18 @@ public:
         id = -1;
         flag8 = 0;
     }
+    MenuWidgetBase(u8 f8) {  // mroll ColorPick starts with flag8 set
+        flag8 = f8;
+        flag0 = 0;
+        id = -1;
+    }
 
     u8 flag0;  // offset 0x0
     s32 id;    // offset 0x4
     u8 flag8;  // offset 0x8
 
     virtual u8 vf08(void);
-    virtual u8 vf0C(void);
+    virtual int vf0C(void);  // returns flag0 (mroll tests the result as an int)
     virtual int vf10(void) const;
     virtual int vf14(void);
 };

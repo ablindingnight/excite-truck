@@ -1187,7 +1187,6 @@ config.libs.append(
             Object(NonMatching, "game/mroll.cpp", extra_cflags=["-opt noloop"]),
             Object(Matching, "game/menusel.cpp"),
             Object(NonMatching, "game/mcstatus.cpp"),
-            Object(Matching, "game/unk_80243460.c"),
             Object(Matching, "game/keyboard.cpp"),
             Object(Matching, "game/loadscrn.cpp"),
             Object(NonMatching, "game/unlkmenu.cpp"),

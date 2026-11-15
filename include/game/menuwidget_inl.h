@@ -8,7 +8,7 @@ extern "C" int fn_802E4A10(void);
 
 inline u8 MenuWidgetBase::vf08(void) { return flag8; }
 
-inline u8 MenuWidgetBase::vf0C(void) { return flag0; }
+inline int MenuWidgetBase::vf0C(void) { return flag0; }
 
 inline int MenuWidgetBase::vf10(void) const {
     int result = 0;
