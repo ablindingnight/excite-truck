@@ -711,11 +711,6 @@ struct ZoneResults {
     Entry entries[8];  // offset 0x10
 };
 
-struct ArtAnimManager {
-    ArtAnimManager(int a);
-    u8 pad0[8];
-};
-
 class GameUI {
 public:
     virtual ~GameUI(void) {}
@@ -1827,7 +1822,7 @@ inline void RingChalMaster::vfB8(ZoneResults* r) {
 #pragma dont_inline on
 inline void RingChalMaster::vfF8(void) {
     layout = (ILayout*)fn_80145E70("freestyle.val");
-    results.layout = new ("ArtAnimManager") ArtAnimManager(1);
+    results.layout = new ("ArtAnimManager") ArtPlayer(1);
     results.Load();
     results.Reset();
 }

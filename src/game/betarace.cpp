@@ -31,19 +31,19 @@ int fn_801609C4(s32 score);  // grade for a score
 }
 
 // The results-screen art animation player.
-class ArtAnimMan {
+class ArtPlayer {
 public:
-    ArtAnimMan(int n);
+    ArtPlayer(int n);
     u8 pad0[0x8];
 };
 
 extern "C" {
-void fn_802AE168(ArtAnimMan* anim);
-void fn_802ADFF4(ArtAnimMan* anim, s32 arg);
-void fn_802AE02C(ArtAnimMan* anim, s32 arg);
-void fn_802AE0B8(ArtAnimMan* anim, s32 arg);
-void fn_802AE0E0(ArtAnimMan* anim);
-void fn_802ADE60(ArtAnimMan* anim, int arg);
+void fn_802AE168(ArtPlayer* anim);
+void fn_802ADFF4(ArtPlayer* anim, s32 arg);
+void fn_802AE02C(ArtPlayer* anim, s32 arg);
+void fn_802AE0B8(ArtPlayer* anim, s32 arg);
+void fn_802AE0E0(ArtPlayer* anim);
+void fn_802ADE60(ArtPlayer* anim, int arg);
 }
 
 const char* GetGradeDisplayName(int grade);
@@ -738,7 +738,7 @@ public:
 
     s32 state;              // offset 0x0
     f32 bonusStart;         // offset 0x4
-    ArtAnimMan* anim;       // offset 0x8
+    ArtPlayer* anim;       // offset 0x8
     u8 go;                  // offset 0xC
     Sound* bonusSnd;        // offset 0x10
     Sound* noBonusSnd;      // offset 0x14
@@ -2223,7 +2223,7 @@ extern "C" {
 void UpdateOutOfTimeOverlay(void);
 extern "C" {
 f32 fn_801E7E18(void);
-void fn_802AE220(ArtAnimMan* anim, const f32* rect);
+void fn_802AE220(ArtPlayer* anim, const f32* rect);
 }
 int GetNumPlayers(void);
 
@@ -2490,7 +2490,7 @@ void BetaCar::SetResultsView(FinishAnimation* a) {
     fn_801E7E18();
     if (!result.dnf) {
         if (GetNumPlayers() == 2) {
-            ArtAnimMan* h = a->anim;
+            ArtPlayer* h = a->anim;
             f32 r[4];
             r[0] = 1.5f;
             r[1] = 8.5f;
@@ -2872,13 +2872,13 @@ static inline AnimBinding Bind(s32 t, const char* n, const void* p) {
 
 extern "C" {
 s32 fn_80204CF0(void);  // difficulty
-s32 fn_802ADF34(ArtAnimMan* anim, const char* file, const AnimBinding* table);
+s32 fn_802ADF34(ArtPlayer* anim, const char* file, const AnimBinding* table);
 }
 
 // Helper name unproven: creates one finish animation. Setup stays a call because this inlined body, with Setup
 // expanded, is over the inline size limit.
 inline void FinishAnimation::Create(void) {
-    anim = new ("artanim_man") ArtAnimMan(2);
+    anim = new ("artanim_man") ArtPlayer(2);
     Setup();
 }
 
