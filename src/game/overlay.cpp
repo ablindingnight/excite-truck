@@ -485,12 +485,11 @@ public:
     virtual const char* GetName(void);
 };
 
-// The pre-race screen's base, with the same two (undefined) extra slots.
+// Common query interface for the race overlays.
 class WaitOverlay : public GameOverlay {
 public:
     WaitOverlay(void) {}
     virtual int IsDone(void) = 0;         // 0x38
-    virtual void DrawContinue(void) = 0;  // 0x3C
 };
 
 class InterludeOverlay : public GameOverlay {
@@ -509,7 +508,6 @@ public:
     virtual void Reset(void);
     virtual void Draw(void);
     virtual int IsDone(void);
-    virtual void DrawContinue(void);
     virtual void Update(void);
     virtual int HandleKey(int player, u32 type, int key);
     virtual const char* GetName(void);
