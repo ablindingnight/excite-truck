@@ -1322,7 +1322,7 @@ config.libs.append(
             Object(Matching, "game/homebtn.cpp"),
             Object(Matching, "game/movieinfo.cpp"),
             Object(NonMatching, "game/rigid.cpp"),
-            Object(NonMatching, "game/ball.cpp"),
+            Object(Matching, "game/ball.cpp"),
         ],
     }
 )

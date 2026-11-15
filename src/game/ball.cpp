@@ -1,6 +1,6 @@
-// Ball (0x8017D378-0x8017EB80): the "Ball" physics object, a rigid sphere ("ball-volume") parked under the
-// track per car. A player drops or throws it ("Arming" -> "Press" status), and it explodes on a hard enough
-// hit, pushing every body within range away ("explode.sfx"). Also registered as a status/input listener for
+// Ball (0x8017D378-0x8017EB80): the "Ball" physics object, a rigid sphere (BallStrings::VolumeName()) parked under the
+// track per car. A player drops or throws it (BallStrings::Arming() -> "Press" status), and it explodes on a hard enough
+// hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
 
@@ -294,8 +294,13 @@ public:
     f32 f50;       // offset 0x50
 };
 
-struct BallDesc {
-    u8 pad0[0x18];
+struct BodyDesc {
+    u8 pad0[0x8];
+    f32 mass;
+    f32 ix, iy, iz;
+};
+
+struct BallDesc : public BodyDesc {
     s32 car;        // offset 0x18
     u8 pad1C[0x4];
     f32 radius;     // offset 0x20
@@ -345,25 +350,77 @@ public:
 
 struct RVec3;  // rigid.cpp vector (same layout as BVec3)
 
-class RigidBody : public Phob {
+struct RPacket;
+struct RVec3;
+
+class CollVolume {
+public:
+    virtual void Init(BodyDesc* d);
+    virtual ~CollVolume(void);
+    virtual void Reset(void);
+    virtual void vf14(void);
+    virtual void vf18(void);
+    virtual void Update(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    virtual void vf28(u8* buf);
+    virtual s32 vf2C(void);
+    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual s32 vf34(RPacket* p);
+    virtual void vf38(u8* out);
+    virtual void vf3C(void);
+    virtual int vf40(void);
+    virtual int vf44(void);
+    void AddShape(CollShape* s);
+    s32 a4;
+    s32 a8;
+    u8 padC[0x3C - 0xC];
+    BMtx mtx;
+    s16 hint[2];
+    BMtx world;
+    BMtx prev;
+};
+
+class RigidBody : public CollVolume {
 public:
     RigidBody(void);
-    virtual void Init(BallDesc* d);
+    virtual void Init(BodyDesc* d);
     virtual void Reset(void);
+    virtual void vf18(void);
     virtual void Update(void);
-    virtual void vf48(int a, int b, int kind, RigidBody* other);  // 0x48
-    virtual void vf4C(void);
-    virtual void vf50(void);
+    virtual s32 vf2C(void);
+    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual s32 vf34(RPacket* p);
+    virtual void vf3C(void);
+    virtual int vf40(void);
+    virtual void OnHit(const RVec3* force, const RVec3* at, int kind, void* contact);
+    virtual void OnImpulse(const RVec3* force, const RVec3* at, int kind, void* contact, void* by);
+    virtual void OnImpulses(RVec3* force, RVec3* torque);
     void Push(Phob* a, void* b, const RVec3* imp, const RVec3* at, int kind, const RVec3* c, void* by, f32 k);
-    u8 b1E8;  // offset 0x1E8
-    u8 b1E9;  // offset 0x1E9
+    u8 padD0[0x118 - 0xD0];
+    BVec3 vel;
+    BVec3 avel;
+    u8 pad130[0x1E8 - 0x130];
+    u8 b1E8;
+    u8 b1E9;
 };
 
 class IBallListener {
 public:
-    virtual void Status(const char** text, u8* flash) = 0;
     virtual void Input(Phob* src, u8* pressed) = 0;
+    virtual void Status(const char** text, u8* flash) = 0;
     virtual bool GetPos(f32* xz, f32* vxz) = 0;
+};
+
+struct BallStrings {
+    static inline const char* ExplodeSound() { return "explode.sfx"; }
+    static inline const char* RollSound() { return "chkroll.sfx"; }
+    static inline const char* StartSound() { return "chkstart.sfx"; }
+    static inline const char* VolumeName() { return "ball-volume"; }
+    static inline const char* Exploded() { return "Exploded"; }
+    static inline const char* Unknown() { return "UNK"; }
+    static inline const char* Pressed() { return "Press  "; }
+    static inline const char* Arming() { return "Arming"; }
 };
 
 class Ball : public RigidBody, public IBallListener {
@@ -371,7 +428,7 @@ public:
     void PredictPos(BVec3& p, RigidBody* b, f32 k);
 public:
     Ball(void) {}
-    virtual void Init(BallDesc* d);
+    virtual void Init(BodyDesc* d);
     virtual ~Ball(void);
     virtual void Reset(void);
     void Rehome(void);
@@ -380,31 +437,8 @@ public:
     void Drop(void);
     virtual void Update(void);
     virtual void vf28(u8* buf);
-    virtual void vf48(int a, int b, int kind, RigidBody* other);
-    virtual void Status(const char** text, u8* flash) {
-        switch (state) {
-        case 0:
-            *text = "Arming";
-            *flash = 0;
-            return;
-        case 3:
-            *text = "Exploded";
-            *flash = 0;
-            return;
-        case 1:
-            *text = 0;
-            *flash = 0;
-            return;
-        case 2:
-            *text = "Press  ";
-            *flash = 1;
-            return;
-        default:
-            *text = "UNK";
-            *flash = 0;
-            return;
-        }
-    }
+    virtual void OnHit(const RVec3* force, const RVec3* at, int kind, void* contact);
+    virtual void Status(const char** text, u8* flash);
     virtual void Input(Phob* src, u8* pressed);
     virtual bool GetPos(f32* xz, f32* vxz);
     void Launch(const BMtx* m, const BVec3* v, s16 h, f32 k);
@@ -509,21 +543,22 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
 
 extern "C" Ball* fn_8017D688(void) { return new ("Ball") Ball; }
 
-inline void Ball::Init(BallDesc* d) {
+void Ball::Init(BodyDesc* desc) {
     SphereShape* s;
-    RigidBody::Init(d);
+    BallDesc* d = static_cast<BallDesc*>(desc);
+    RigidBody::Init(desc);
     f32 kk = d->stiffK;
-    f32 k = 4.45f * d->stiff / 0.0254f;
     f32 skin = d->skin;
     f32 radius = 0.0254f * d->radius;
+    f32 k = 4.45f * d->stiff / 0.0254f;
     f32 stiff = k * (kk * kk);
     BVec3 c(0.0f, 0.0f, 0.0f);
     car = d->car;
     mtx.pos = Home(car);
-    Xform();
+    CollVolume::Update();
     explodable = d->explodable;
     launch = d->launch;
-    s = new ("ball-volume") SphereShape(this, &mtx, stiff, skin, radius, c);
+    s = new (BallStrings::VolumeName()) SphereShape(reinterpret_cast<Phob*>(this), &mtx, stiff, skin, radius, c);
     s->SetId(1001);
     AddShape(s);
     b1E8 = 1;
@@ -533,12 +568,12 @@ inline void Ball::Init(BallDesc* d) {
     fn_801D0C58((IBallListener*)this, car, 0);
     startPos = mtx.pos;
     explPos = mtx.pos;
-    sndStart = fn_802077A4("chkstart.sfx", 5, &vel, &startPos);
-    sndRoll = fn_802077A4("chkroll.sfx", 8, &vel, &mtx.pos);
-    sndExpl = fn_802077A4("explode.sfx", 5, &vel, &explPos);
+    sndStart = fn_802077A4(BallStrings::StartSound(), 5, &vel, &startPos);
+    sndRoll = fn_802077A4(BallStrings::RollSound(), 8, &vel, &mtx.pos);
+    sndExpl = fn_802077A4(BallStrings::ExplodeSound(), 5, &vel, &explPos);
 }
 
-inline Ball::~Ball(void) {
+Ball::~Ball(void) {
     fn_801D0C84((IBallListener*)this);
     if (sndExpl) {
         delete (Sound3D*)sndExpl;
@@ -551,10 +586,10 @@ inline Ball::~Ball(void) {
     }
 }
 
-inline void Ball::Reset(void) {
+void Ball::Reset(void) {
     RigidBody::Reset();
     mtx.pos = Home(car);
-    Xform();
+    CollVolume::Update();
     b1E9 = 0;
     if (DbgFlag(8)) {
         state = 0;
@@ -564,7 +599,7 @@ inline void Ball::Reset(void) {
     active = 0;
 }
 
-inline void Ball::vf48(int a, int b, int kind, RigidBody* other) {
+void Ball::OnHit(const RVec3* force, const RVec3* at, int kind, void* contact) {
     if (active && explodable) {
         if ((kind >= 100 || DbgFlag(0x90)) && kind < 1000) {
             struct {
@@ -574,7 +609,7 @@ inline void Ball::vf48(int a, int b, int kind, RigidBody* other) {
             ev.pos = mtx.pos;
             ev.vel = vel;
             fn_801796EC(8, &ev, sizeof(ev));
-            fn_8017D404(5.0f, 17500.0f, &mtx.pos, other, car);
+            fn_8017D404(5.0f, 17500.0f, &mtx.pos, static_cast<RigidBody*>(contact), car);
             if (sndRoll) {
                 sndRoll->Stop();
             }
@@ -587,7 +622,7 @@ inline void Ball::vf48(int a, int b, int kind, RigidBody* other) {
             resetPending = 1;
         }
     }
-    RigidBody::vf48(a, b, kind, other);
+    RigidBody::OnHit(force, at, kind, contact);
 }
 
 inline void Ball::Drop(void) {
@@ -627,10 +662,10 @@ inline void Ball::CheckBounds(void) {
 
 inline void Ball::Rehome(void) {
     mtx.pos = Home(car);
-    Xform();
+    CollVolume::Update();
 }
 
-inline void Ball::Update(void) {
+void Ball::Update(void) {
     if (resetPending) {
         RigidBody::Reset();
         Rehome();
@@ -647,7 +682,7 @@ inline void Ball::Update(void) {
     }
     if (!DbgFlag(0x88)) {
         mtx.pos = Home(car);
-        Xform();
+        CollVolume::Update();
         vel.x = 0.0f;
         vel.y = 0.0f;
         vel.z = 0.0f;
@@ -704,7 +739,7 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
     p += m.pos;
     m.pos = p;
     mtx = m;
-    Xform();
+    CollVolume::Update();
     if (DbgFlag(0x80)) {
         vel.x = 0.0f;
         vel.y = -19.62f;
@@ -810,7 +845,7 @@ static inline void LerpMtx(BMtx* out, const BMtx* a, const BMtx* b, f32 t) {
     }
 }
 
-inline void Ball::vf28(u8* buf) {
+void Ball::vf28(u8* buf) {
     u8* o = buf + a8;
     BMtx* out = (BMtx*)o;
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
@@ -824,7 +859,7 @@ inline void Ball::vf28(u8* buf) {
     buf[a8 + 0x32] = active;
 }
 
-inline bool Ball::GetPos(f32* xz, f32* vxz) {
+bool Ball::GetPos(f32* xz, f32* vxz) {
     if (active) {
         xz[0] = mtx.pos.x;
         xz[1] = mtx.pos.z;
@@ -833,6 +868,31 @@ inline bool Ball::GetPos(f32* xz, f32* vxz) {
         return true;
     }
     return false;
+}
+
+void Ball::Status(const char** text, u8* flash) {
+    switch (state) {
+    case 0:
+        *text = BallStrings::Arming();
+        *flash = 0;
+        return;
+    case 3:
+        *text = BallStrings::Exploded();
+        *flash = 0;
+        return;
+    case 1:
+        *text = 0;
+        *flash = 0;
+        return;
+    case 2:
+        *text = BallStrings::Pressed();
+        *flash = 1;
+        return;
+    default:
+        *text = BallStrings::Unknown();
+        *flash = 0;
+        return;
+    }
 }
 
 void Ball::Input(Phob* src, u8* pressed) {
