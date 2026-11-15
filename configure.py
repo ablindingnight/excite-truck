@@ -1099,7 +1099,7 @@ config.libs.append(
             Object(NonMatching, "game/path.cpp"),
             Object(Matching, "game/pathman.cpp"),
             Object(NonMatching, "game/heightfld.cpp"),
-            Object(NonMatching, "game/garagetweak.cpp"),
+            Object(Matching, "game/garagetweak.cpp"),
             Object(Matching, "game/popup.cpp"),
             Object(NonMatching, "game/crashmode.cpp"),
             Object(NonMatching, "game/boostman.cpp"),
