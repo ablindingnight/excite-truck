@@ -1164,6 +1164,8 @@ void fn_801C1CBC(s32 sys, int nv, FenceVert* v, int ne, FenceEdge* e, int np, Fe
 // Once the last fence pole of the course has registered, builds the rope cloth that joins them: one particle
 // pinned at each pole top, four free particles strung between neighbouring bound poles (slack sticks), and the
 // collision sphere range of each span.
+#pragma push
+#pragma opt_lifetimes off
 void fn_801AC544(u8* p) {
     fn_801AC184(p);
     if (S32(p, 0x250) == lbl_8055E5EC - 1 && lbl_8055E5F0) {
@@ -1192,14 +1194,24 @@ void fn_801AC544(u8* p) {
                 b.x += F32(prev, 0x210);
                 b.y += F32(prev, 0x214);
                 b.z += F32(prev, 0x218);
+                f32 weightedZ;
                 for (int j = 0; j < 5; j++) {
                     if (j > 0) {
-                        f32 t = (f32)j / 5.0f;
+                        f32 weightedY;
+                        f32 weightedX;
+                        f32 weight = (f32)j;
+                        const f32 nextWeight = weight / 5.0f;
+                        weight = 1.0f - nextWeight;
                         FenceVert* v = &verts[nv++];
-                        v->pos.x = b.x * (1.0f - t) + a.x * t;
-                        v->pos.y = b.y * (1.0f - t) + a.y * t;
-                        f32 zv = b.z;
-                        v->pos.z = zv * (1.0f - t) + a.z * t;
+                        weightedY = b.y;
+                        weightedX = b.x;
+                        weightedZ = b.z;
+                        weightedY *= weight;
+                        weightedX *= weight;
+                        weightedZ *= weight;
+                        v->pos.x = weightedX + a.x * nextWeight;
+                        v->pos.y = weightedY + a.y * nextWeight;
+                        v->pos.z = weightedZ + a.z * nextWeight;
                         v->w34 = 1.0f;
                         v->w30 = 1.0f;
                     }
@@ -1229,6 +1241,7 @@ void fn_801AC544(u8* p) {
         fn_801C1CBC(lbl_8055E5F0, nv, verts, ne, edges, np, pins);
     }
 }
+#pragma pop
 
 }  // extern "C"
 
