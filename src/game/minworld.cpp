@@ -45,10 +45,62 @@ struct MWWheel {
     u8 padC[0x10 - 0xC];
 };
 
+// The solver's 4-vector record (copied by value).
+struct MWSolVec {
+    MWSolVec(void) {}
+    f32 x, y, z, w;
+};
+
+static inline MWSolVec MWSolVec4(f32 x, f32 y, f32 z, f32 w) {
+    MWSolVec v;
+    v.y = y;
+    v.x = x;
+    v.z = z;
+    v.w = w;
+    return v;
+}
+
+struct MWV3 {
+    MWV3(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+    f32 x, y, z;
+};
+
+struct MWF {
+    MWF(f32 a) { v = a; }
+    f32 v;
+};
+
+/* Helper names unproven (MWV3, MWF, MWV4, Set, Sol): the shapes are carbody's CbVec4 family; MWF (a one-float value) reproduces retail's float store + word copy of the w lane. */
+struct MWV4 {
+    MWV4(void) {}
+    MWV4(MWSolVec s) {
+        MWF f(s.w);
+        Set(MWV3(s.x, s.y, s.z), f);
+    }
+    MWV4& operator=(MWSolVec s) {
+        MWF f(s.w);
+        Set(MWV3(s.x, s.y, s.z), f);
+        return *this;
+    }
+    void Set(const MWV3& p, MWF w_) {
+        x = p.x;
+        y = p.y;
+        z = p.z;
+        w = w_.v;
+    }
+    MWSolVec Sol(void) const { return MWSolVec4(x, y, z, w); }
+    f32& operator[](int i) { return (&x)[i]; }
+    f32 x, y, z, w;
+};
+
 // Per-body wheel state (0x1F0).
 struct MWWheels {
-    f32 drop[4];  // offset 0x0
-    f32 spin[4];  // offset 0x10
+    MWSolVec drop;  // offset 0x0
+    MWSolVec spin;  // offset 0x10
     u8 pad20[0x1F0 - 0x20];
 };
 
@@ -64,7 +116,7 @@ struct MWSlot {
     u8 valid;      // offset 0x30
     MWVec3 f34;    // offset 0x34
     f32 h[4];      // offset 0x40
-    f32 spin[4];   // offset 0x50
+    MWV4 spin;     // offset 0x50
     MWVec3 vel;    // offset 0x60
     MWVec3 avel;   // offset 0x6C
 };
@@ -266,22 +318,22 @@ static inline void SetV3(MWVec3* v, f32 x, f32 y, f32 z) { /* Helper name unprov
 
 void fn_80252C90(void) {
     MWWheels* w;
-    int n;
+    MWBody* bodies;
     MWWheels* wheels;
     MWWheel* c;
     int i;
     MWContacts* contacts;
-    MWBody* bodies;
+    s32 d;
     MWBody* b;
     MWSlot* s;
-    s32 d;
+    int n;
     fn_801BEDA8(&bodies, &wheels, &contacts, &d, &n);
     for (i = 0; i < n; i++) {
         fn_8025280C(&bodies[i], lbl_8055F300.speed);
     }
     fn_801BEDD4();
-    s = lbl_80498D00;
-    for (i = 0; n > i; i++, s++) {
+    for (i = 0; i < n; i++) {
+        s = &lbl_80498D00[i];
         b = &bodies[i];
         w = &wheels[i];
         c = contacts[i].w;
@@ -292,16 +344,14 @@ void fn_80252C90(void) {
         SetV3(&s->mtx.z, b->z.x, b->z.y, b->z.z);
         SetV3(&s->vel, b->vel.x, b->vel.y, b->vel.z);
         SetV3(&s->avel, b->accel.x, b->accel.y, b->accel.z);
-        for (j = 0; j < 4; j++) {
-            s->spin[j] = w->spin[j];
-        }
+        MWV4 drop(w->drop);
+        s->spin = w->spin;
         for (j = 0; j < 4; j++) {
             s->spin[j] = fmod(6.2831855f + s->spin[j], 6.2831855f);
-            s->h[j] = w->drop[j] + c[j].pos.y;
+            MWV3 p(c[j].pos.x, c[j].pos.y, c[j].pos.z);
+            s->h[j] = drop[j] + p.y;
         }
-        for (j = 0; j < 4; j++) {
-            w->spin[j] = s->spin[j];
-        }
+        w->spin = s->spin.Sol();
         s->valid = 1;
     }
     fn_801BF1B4();
