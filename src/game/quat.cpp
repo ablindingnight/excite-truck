@@ -45,16 +45,14 @@ static inline f32 atan2f(f32 y, f32 x) { return atan2(y, x); }
 
 ModuleTag lbl_8055E028;
 
-extern "C" void fn_8012F57C(Quat* out, Quat* a, const Quat* b, f32 t) {
-    f32 zv = b->z;
-    f32 cosom = a->w * b->w + a->x * b->x + a->y * b->y + a->z * zv;
+extern "C" void fn_8012F57C(Quat* out, const Quat* a, const Quat* b, f32 t) {
+    f32 cosom = a->w * b->w + a->x * b->x + a->y * b->y + a->z * b->z;
     f32 sinom;
     if (cosom < 0.0f) {
         cosom = -cosom;
-        a->x *= -1.0f;
-        a->y *= -1.0f;
-        a->z *= -1.0f;
-        a->w *= -1.0f;
+        // The source quaternion is flipped in place although it comes in as const: retail loads it above the
+        // stack saves, which needs the const, and negates with the scale inline.
+        QuatScale((Quat*)a, a, -1.0f);
     }
     sinom = sqrtf(fabsf(1.0f - cosom * cosom));
     if (fabsf(sinom) < lbl_80558DC4[0]) {
