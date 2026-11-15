@@ -64,8 +64,7 @@ public:
 
 extern "C" {
 int fn_801E9EC4(s16* hint, RVec3* hit, RVec3* n, u32* flags, f32 x, f32 z);  // ground contact under a point
-f32 fn_8019DF88(f32 mass, f32 e, const RVec3* pos, const RVec3* vel, const RMat33* invI, const RVec3* at,
-                const RVec3* n);  // contact impulse
+f32 fn_8019DF88(const RVec3* pos, const RVec3* vel, const RMat33* invI, const RVec3* at, const RVec3* n, f32 mass, f32 e);  // contact impulse
 void fn_802E30C8(const char* fmt, ...);
 }
 
@@ -241,7 +240,7 @@ void Corner::Hit(RigidBody* b) {
         imp.y = imp.y + fr.y;
         imp.z = imp.z + fr.z;
         b->OnHit(&imp, &p, flags, 0);
-        f32 j = fn_8019DF88(b->mass, 0.0f, &b->mtx.pos, &v, &b->worldInvI, &p, &n);
+        f32 j = fn_8019DF88(&b->mtx.pos, &v, &b->worldInvI, &p, &n, b->mass, 0.0f);
         if (j > 0.0f) {
             ji.x = n.x * j;
             ji.y = n.y * j;

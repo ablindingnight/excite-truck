@@ -80,7 +80,7 @@ void fn_80012158(void);
 void fn_80230B5C(Camera* cam);
 void fn_802C8638(Camera* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
-void fn_800109E4(f32 x, f32 y, f32 w, f32 h, u32 color);
+void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
 const char* fn_80131234(const char* key);
 void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);
@@ -206,7 +206,7 @@ static void fn_8000C964(void) {
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(1.0f, 1000.0f, 1.4398966f);
-    fn_800109E4(-428.0f, 241.0f, 855.0f, 482.0f, 0x7F000000);
+    fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);
     if (lbl_8055D414) {
         const char* choices[2] = {"Generic:YES", "Generic:NO"};
         fn_801473F8(lbl_8055D414, "confirm_title", "%s", fn_80131234(lbl_802FC098[lbl_8055D400]));
@@ -391,7 +391,7 @@ void fn_8000D1DC(void) {
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(1.0f, 1000.0f, 1.4398966f);
-    fn_800109E4(-428.0f, 241.0f, 855.0f, 482.0f, 0x7F000000);
+    fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);
     if (lbl_8055D407) {
         fn_8000CD24();
         return;

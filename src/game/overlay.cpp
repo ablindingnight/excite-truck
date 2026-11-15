@@ -283,7 +283,7 @@ void fn_80012158(void);
 int fn_801CB880(void);
 void fn_80011E70(void);
 void fn_80011E90(void);
-void fn_800109E4(f32 x, f32 y, f32 w, f32 h, u32 color);
+void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
 void fn_8014784C(ILayout* layout, const char* name, const char* set, int index);
 void fn_80230F78(u8* alpha, f32* scale, u32* color, int unk);
 void fn_80147940(ILayout* layout, LayoutArtItem* item, const char* set, int index);
@@ -1036,7 +1036,7 @@ void ResultsOverlay::DrawMenu(void) {
     fn_80011E90();
     int layer = 2;
     f32 z = layer;
-    fn_800109E4(-428.0f, 241.0f, 855.0f, 482.0f, 0x7F000000);
+    fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);
     if (layout) {
         fn_8014784C(layout, "back_art", "back_artset", 0);
     }
