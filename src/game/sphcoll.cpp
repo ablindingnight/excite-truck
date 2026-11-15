@@ -135,7 +135,7 @@ struct Xform {
 
 extern "C" void* lbl_80333968[];
 extern "C" void* lbl_80333818[];
-extern "C" void* lbl_803337C8[];
+extern "C" void* __vt__7RingVol[];
 extern "C" void* __vt__8BoxShape[];
 extern "C" void* lbl_80333868[];
 
@@ -3645,7 +3645,7 @@ void fn_801A2CAC(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, lbl_8055E598.value, F3
 
 u8* fn_801A2CC0(u8* p, u32 a, u32 swap) {
     fn_8019ECC4(p, a, swap);
-    *(void**)p = lbl_803337C8;
+    *(void**)p = __vt__7RingVol;
     if (swap) {
         Swap32(p + 0x24);
         Swap32(p + 0x28);
@@ -4386,7 +4386,7 @@ void PhysTaskDumpCars(void);
 void* lbl_803336F8[12] = {(void*)0, (void*)0, (void*)fn_801A5174, (void*)fn_801A48C8, (void*)fn_801A517C, (void*)fn_801A5184, (void*)fn_801A518C, (void*)fn_801A5190, (void*)fn_801A51B0, (void*)fn_801A51CC, (void*)fn_801A51D4, (void*)fn_801A5134};
 void* lbl_80333728[20] = {(void*)0, (void*)0, (void*)fn_801A3FB8, (void*)fn_8017A800, (void*)fn_801A401C, (void*)fn_8017C7C4, (void*)fn_801A40F8, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A442C, (void*)fn_801A4460, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A44C4};
 void* lbl_80333778[20] = {(void*)0, (void*)0, (void*)fn_801A4F00, (void*)fn_8017A800, (void*)fn_801A38E4, (void*)fn_8017C7C4, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A34D0, (void*)fn_801A3880, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A3BE0};
-void* lbl_803337C8[20] = {(void*)0, (void*)0, (void*)fn_801A4F40, (void*)fn_8017A800, (void*)fn_801A2D50, (void*)fn_801A2EC8, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A2ECC, (void*)fn_801A5124, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A3174};
+void* __vt__7RingVol[20] = {(void*)0, (void*)0, (void*)fn_801A4F40, (void*)fn_8017A800, (void*)fn_801A2D50, (void*)fn_801A2EC8, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A2ECC, (void*)fn_801A5124, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A3174};
 void* lbl_80333818[20] = {(void*)0, (void*)0, (void*)fn_801A4F80, (void*)fn_8017A800, (void*)fn_801A26FC, (void*)fn_8017C7C4, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A2684, (void*)fn_801A511C, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A2CAC};
 void* lbl_80333868[22] = {(void*)0, (void*)0, (void*)fn_801A010C, (void*)fn_801A2474, (void*)fn_801A1DD4, (void*)fn_8017C7C4, (void*)fn_801A1E7C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)fn_801A2C9C};
 void* __vt__8BoxShape[22] = {(void*)0, (void*)0, (void*)fn_801A2434, (void*)fn_8017A800, (void*)fn_801A1DD4, (void*)fn_8017C7C4, (void*)fn_801A1E7C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)0};
