@@ -123,9 +123,11 @@ static const char* lbl_802FC098[] = {
 };
 
 ModuleTag lbl_8055D3F0;
+static inline u32 DefaultPauseFlags() { return 0xFFFF0000u; }
+extern const u32 lbl_8055D3F8 = DefaultPauseFlags();
 static UnkStatic123 lbl_8034F610;
-UnkStaticFFFF lbl_8055D3F8;
-UnkStatic7F lbl_8055D3FC;
+static inline u32 DefaultPauseLimit() { return 0x7F000000u; }
+extern const u32 lbl_8055D3FC = DefaultPauseLimit();
 
 s32 lbl_8055D400;                  // selected item
 u8 lbl_8055D404;                   // menu still active when left
