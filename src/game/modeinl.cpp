@@ -6,9 +6,11 @@
 #include "game/common.h"
 
 ModuleTag lbl_8055E1D0;
+static inline u32 InitialFFFFWord() { return 0xFFFF0000u; }
+extern const u32 lbl_8055E1D8 = InitialFFFFWord();
 static UnkStatic123 lbl_8042FB88;
-UnkStaticFFFF lbl_8055E1D8;
-UnkStatic7F lbl_8055E1DC;
+static inline u32 Initial7FWord() { return 0x7F000000u; }
+extern const u32 lbl_8055E1DC = Initial7FWord();
 
 struct Vec3 {
     f32 x;
