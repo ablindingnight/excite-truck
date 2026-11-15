@@ -487,7 +487,10 @@ static inline int EscAdv(const char* const& s, f32 h, double& adv, EscSeq*& e) {
                 e = GetEscapeEntry(i);
                 if (e->art) {
                     f32 k = h / fn_80235F64(e->art, e->artIdx);
-                    adv = e->scale * (k * fn_80235EF0(e->art, e->artIdx)) + e->scale * (e->postspace * k);
+                    const f32 width = fn_80235EF0(e->art, e->artIdx);
+                    const f32 assetScale = e->scale;
+                    const f32 postspace = e->postspace;
+                    adv = assetScale * (k * width) + assetScale * (postspace * k);
                 } else {
                     adv = h * e->scale;
                 }
