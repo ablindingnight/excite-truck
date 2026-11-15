@@ -254,8 +254,10 @@ extern "C" {
 s32 fn_8016A30C(void* rings);
 s32 fn_8016A780(const char* name, void* rings);
 s32 fn_8016A878(const char* name);
-int fn_80141FA0(RSound* s);
-void fn_80142B60(RSound* s);
+// The weak out-of-line copies of Sound::Active and Sound::Play (RSound below is the Sound class), which retail
+// calls here while other paths expand the inline Play, by their mangled names.
+int Active__5SoundFv(RSound* s);
+void Play__5SoundFv(RSound* s);
 void fn_801CB5DC(int car, s32 score, s32 grade);
 void fn_801CB648(int car, int a, f32 t);
 }
@@ -1473,20 +1475,20 @@ inline void Arena::Step(PlayerData* pd) {
                     difficulty = 2;
                 }
                 if (sRingHit) {
-                    if (fn_80141FA0(sRingHit)) {
+                    if (Active__5SoundFv(sRingHit)) {
                         fn_80144C54(sRingHit);
                     }
-                    fn_80142B60(sRingHit);
+                    Play__5SoundFv(sRingHit);
                 }
                 if (sCheerHit) {
-                    if (fn_80141FA0(sCheerHit)) {
+                    if (Active__5SoundFv(sCheerHit)) {
                         fn_80144C54(sCheerHit);
                     }
-                    fn_80142B60(sCheerHit);
+                    Play__5SoundFv(sCheerHit);
                 }
                 if (stats->At(curSet)->best == 10 || stats->At(curSet)->best == 15) {
                     if (sLongCheer) {
-                        fn_80142B60(sLongCheer);
+                        Play__5SoundFv(sLongCheer);
                     }
                 }
             } else {
@@ -2391,8 +2393,8 @@ inline void RingChalMaster::DrawRings(void) const {
                 TextElem m = *msg;
                 if (dt < 0.1f) {
                     f32 k;
-                    if (!fn_80141FA0(arena.sMissFlag)) {
-                        fn_80142B60(arena.sMissFlag);
+                    if (!Active__5SoundFv(arena.sMissFlag)) {
+                        Play__5SoundFv(arena.sMissFlag);
                     }
                     k = Remap(0.0f, 0.1f, 0.0f, 1.0f, dt);
                     m.scale = fn_80144C80(10.0f, m.scale, k);
@@ -2408,8 +2410,8 @@ inline void RingChalMaster::DrawRings(void) const {
                 f32 d2 = dt - 1.7f;
                 if (d2 < 0.1f) {
                     f32 k;
-                    if (!fn_80141FA0(arena.sMissFlag)) {
-                        fn_80142B60(arena.sMissFlag);
+                    if (!Active__5SoundFv(arena.sMissFlag)) {
+                        Play__5SoundFv(arena.sMissFlag);
                     }
                     k = Remap(0.0f, 0.1f, 0.0f, 1.0f, d2);
                     n.scale = fn_80144C80(10.0f, n.scale, k);
@@ -2456,12 +2458,12 @@ inline void RingChalMaster::DrawRings(void) const {
                 if (d <= 0.15f) {
                     f32 k;
                     if (arena.stats->At(arena.curSet - 1)->done) {
-                        if (!fn_80141FA0(arena.sLevelUp)) {
-                            fn_80142B60(arena.sLevelUp);
+                        if (!Active__5SoundFv(arena.sLevelUp)) {
+                            Play__5SoundFv(arena.sLevelUp);
                         }
                     } else {
-                        if (!fn_80141FA0(arena.sFail)) {
-                            fn_80142B60(arena.sFail);
+                        if (!Active__5SoundFv(arena.sFail)) {
+                            Play__5SoundFv(arena.sFail);
                         }
                     }
                     k = Remap(0.0f, 0.15f, 0.0f, 1.0f, d);
