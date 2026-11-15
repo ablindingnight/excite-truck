@@ -138,7 +138,7 @@ void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color
 f32 fn_801E7E18(void);
 RaceProgress* fn_801E7E3C(void);
 int fn_801E85A4(void);
-int fn_8023441C(const char* font);  // void in gtext.cpp; see the return note at fn_8000F0E4
+int fn_8023441C(const char* font);  // gtext.cpp: returns the loaded font (GTextFont*)
 void fn_80234470(void);
 int fn_80232B70(int font);
 int fn_80232578(const char* name);

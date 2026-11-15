@@ -1135,10 +1135,11 @@ void fn_8023423C(int idx, int align) {
     }
 }
 
-void fn_8023441C(const char* font) {
+GTextFont* fn_8023441C(const char* font) {
     lbl_8055F06C = (TextItem*)__nwa__FUlPCc(0x60 * sizeof(TextItem), "gText ingame buffer");
     lbl_8055F058.font = fn_80232578(font);
     lbl_8055F058.count = 0;
+    return lbl_8055F058.font;
 }
 
 void fn_80234470(void) {
