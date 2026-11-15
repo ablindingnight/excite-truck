@@ -2,6 +2,7 @@
 // player launches off one, the camera switches to a jump view with heart/whoosh sounds. Names are
 // guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/racer_camera_slot.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -119,9 +120,9 @@ RSound* lbl_8055F4D0;   // heartbeat
 JumpPt lbl_8049A028[16];
 JumpState lbl_8049A0E8[8];
 
-extern "C" {
+CameraRacerSlot::CameraRacerSlot(void) {}
 
-void fn_8026B118(void) {}
+extern "C" {
 
 void fn_8026B11C(RSound** out, const char* name) {
     RSound* s = fn_80207848(name, 0);

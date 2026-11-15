@@ -2,6 +2,7 @@
 // constructor and the distance-along-axis helper. The large update routine is still a stub. Names
 // are guesses.
 #include "game/common.h"
+#include "game/racer_camera_slot.h"
 #include "macros.h"
 #include <string.h>
 #include <math.h>
@@ -12,22 +13,9 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-struct Mat3 {
-    f32 m[9];
-};
 struct Vec3;
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 void Mat3FromEuler(Mat3* out, const Vec3* euler);
-
-struct SVec {
-    f32 x, y, z;
-};
-
-// Rotation + position (a camera frame).
-struct SFrame {
-    Mat3 rot;
-    SVec pos;
-};
 
 extern s32 lbl_8055E3C4;  // frame counter
 extern f32 __float_epsilon[];
@@ -80,21 +68,6 @@ void fn_80266120(u8* p);
 f32 PSVECDotProduct(const f32* a, const f32* b);
 }
 
-// One racer's record; its constructor lives in the next unit.
-struct RacerSlot {
-    u8 active;          // offset 0x0
-    SFrame frame;       // offset 0x4: the camera frame when the orbit started
-    f32 fov;            // offset 0x34
-    f32 yaw;            // offset 0x38
-    SVec target;        // offset 0x3C
-    SVec pos;           // offset 0x48
-    SVec vel;           // offset 0x54
-    f32 t;              // offset 0x60
-    f32 spin;           // offset 0x64
-    s32 frameNo;        // offset 0x68
-    RacerSlot(void);
-};
-
 // The car's controller; slot 0x14 returns its option flags.
 class Ctl {
 public:
@@ -105,7 +78,7 @@ public:
 };
 
 ModuleTag lbl_8055F4B0;
-RacerSlot lbl_80499E60[4];
+CameraRacerSlot lbl_80499E60[4];
 
 extern "C" {
 
@@ -139,7 +112,7 @@ extern "C" {
 int fn_8026A698(u8* p, int i) {
     f32* r;
     u8* car = PTR(p, 0x140);
-    RacerSlot* s = &lbl_80499E60[i];
+    CameraRacerSlot* s = &lbl_80499E60[i];
     int ok = 1;
     if (U32(car, 0x10) == 'PCAR') {
         u8* ctl = PTR(car, 0x270C);
