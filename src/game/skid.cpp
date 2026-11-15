@@ -452,7 +452,7 @@ void fn_8028DDF0(SkidEntry* e, int n) {
     int none = -1;
     int i;
     for (i = 0; i < n; i++, current++) {
-        if (current->dist < maxd && current->car->surface == track[current->index] && current->active) {
+        if (current->dist < maxd && current->car->surface == lbl_804B3490[current->index] && current->active) {
             for (int w = 0; w < 4; w++) {
                 fn_8028D89C(current, w, now);
             }
