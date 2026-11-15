@@ -519,7 +519,7 @@ struct ArenaTimer {
     void Set(f32 t);
     void Reset(void);
     f32 Get(void);
-    void Draw(class ILayout* l);
+    void Draw(class ILayout* l) const;
     int Expired(void) { return t <= 0.0f; }
     f32 t;      // offset 0x0
     f32 limit;  // offset 0x4
@@ -721,8 +721,8 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car);
-    virtual int vf24(void);
+    virtual int vf20(int car) const;
+    virtual int vf24(void) const;
     virtual int vf28(void);
     virtual int Started20(int car);
     virtual int vf30(void);
@@ -732,14 +732,14 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(void);
     virtual int vf58(void);
-    virtual int vf5C(int p);
+    virtual int vf5C(int p) const;
     virtual void vf60(int view);
     virtual int vf64(void);
-    virtual int vf68(void);
+    virtual int vf68(void) const;
     virtual void vf6C(void);
     virtual void vf70(void);
     virtual void vf74(void);
@@ -747,7 +747,7 @@ public:
     virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
@@ -788,8 +788,8 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car) = 0;
-    virtual int vf24(void);
+    virtual int vf20(int car) const = 0;
+    virtual int vf24(void) const;
     virtual int vf28(void);
     virtual int Started20(int car);
     virtual int vf30(void);
@@ -799,7 +799,7 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(void);
     virtual void vf6C(void);
@@ -809,7 +809,7 @@ public:
     virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
@@ -846,29 +846,29 @@ public:
     RingChalMaster(Race* race);
     virtual ~RingChalMaster(void);
     virtual void vf10(void);
-    virtual int vf20(int car);
+    virtual int vf20(int car) const;
     virtual int vf3C(int view);
     virtual f32 vf38(void);
     virtual void vfB8(ZoneResults* r);
     virtual void vfF8(void);
     virtual void vfFC(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual void vf40(void);
     virtual void vf44(void);
     virtual int vf54(void);
     virtual int vfA0(struct Respawn* out, int idx);
     virtual void vf0C(void);
-    virtual int vf24(void);
-    virtual int vf68(void);
+    virtual int vf24(void) const;
+    virtual int vf68(void) const;
     virtual int vf64(void);
-    virtual int vf5C(int p);
+    virtual int vf5C(int p) const;
     virtual int vf8C(int p, int key);
     virtual int vf28(void);
     virtual void vfA8(int car);
     virtual int vfB0(int car, struct Respawn* r);
     virtual int vfE0(int car, u8* out);
-    void DrawRings(void);
+    void DrawRings(void) const;
     PlayerList players;       // offset 0x4
     Arena arena;              // offset 0x30
     ILayout* layout;          // offset 0x98
@@ -1804,7 +1804,7 @@ inline void Arena::Deactivate(int i) {
 
 inline void ArenaTimer::Reset(void) { t = limit; }
 
-inline int RingChalMaster::vf20(int car) { return b9C; }
+inline int RingChalMaster::vf20(int car) const { return b9C; }
 
 inline void RingChalMaster::vfB8(ZoneResults* r) {
     int i;
@@ -2016,7 +2016,7 @@ inline void RingChalMaster::vf50(int p) { vf4C(p); }
 inline int RingChalMaster::vf54(void) { return 0x1408; }
 
 
-inline int RingChalMaster::vf24(void) {
+inline int RingChalMaster::vf24(void) const {
     int r = 0;
     if (fn_801B8514() && arena.b49 && !b9C) {
         r = 1;
@@ -2024,7 +2024,7 @@ inline int RingChalMaster::vf24(void) {
     return r;
 }
 
-inline int RingChalMaster::vf68(void) {
+inline int RingChalMaster::vf68(void) const {
     if (vf24()) {
         return results.state == 2;
     }
@@ -2033,7 +2033,7 @@ inline int RingChalMaster::vf68(void) {
 
 inline int RingChalMaster::vf64(void) { return 1; }
 
-inline int RingChalMaster::vf5C(int p) {
+inline int RingChalMaster::vf5C(int p) const {
     if (lbl_8055E3C8 - fA0 < 2.25f) {
         vf4C(p);
     } else {
@@ -2283,7 +2283,7 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx) {
 
 // The set list and the ring graphics. Everything but the score overlay; the stack puts its locals in rising order.
 #pragma dont_inline on
-inline void RingChalMaster::DrawRings(void) {
+inline void RingChalMaster::DrawRings(void) const {
     TextElem* setScore;
     Box* setIcon;
     Box* arrowIcon;
@@ -2507,7 +2507,7 @@ inline void RingChalMaster::DrawRings(void) {
 }
 #pragma dont_inline reset
 
-inline void RingChalMaster::vf4C(int view) {
+inline void RingChalMaster::vf4C(int view) const {
     {
         PlayerData* p = players.data[fn_801E866C(view)];
         if (p) {
@@ -2517,7 +2517,7 @@ inline void RingChalMaster::vf4C(int view) {
     DrawRings();
 }
 
-inline void ArenaTimer::Draw(ILayout* l) {
+inline void ArenaTimer::Draw(ILayout* l) const {
     char buf[0x20];
     fn_80130978(buf, MAX(0.0f, t), 0x20);
     fn_8014784C(l, "stop_watch_art", "stop_watch_artset", 0);

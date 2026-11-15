@@ -205,8 +205,8 @@ public:
     virtual void vf14(int p) {}
     virtual void vf18(void) {}
     virtual int vf1C(int car) { return vf20(car); }
-    virtual int vf20(int car) = 0;
-    virtual int vf24(void);
+    virtual int vf20(int car) const = 0;
+    virtual int vf24(void) const;
     virtual int Started1C(int car);
     virtual int Started20(int car);
     virtual int vf30(void) { return 0; }
@@ -216,14 +216,14 @@ public:
     virtual void vf40(void) {}
     virtual void vf44(void);
     virtual void vf48(void) {}
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(void);
     virtual int vf58(void);
-    virtual int vf5C(int p);
+    virtual int vf5C(int p) const;
     virtual void vf60(int view);
     virtual int vf64(void);
-    virtual int vf68(void);
+    virtual int vf68(void) const;
     virtual void vf6C(void) {}
     virtual void vf70(void) {}
     virtual void vf74(void) {}
@@ -231,7 +231,7 @@ public:
     virtual int vf7C(int p) { return 0; }
     virtual int vf80(void) { return 0; }
     virtual int vf84(void) { return 0; }
-    virtual int vf88(void) { return 0; }
+    virtual int vf88(void) const { return 0; }
     virtual int vf8C(int p, int key);
     virtual void vf90(struct RaceCarRec* a, struct RaceCarRec* b, void* p, const f32* hit) {}
     virtual void vf94(struct RaceCarRec* rc) {}
@@ -1179,7 +1179,7 @@ public:
     void BankStunts(const RaceCarRec* rc);
 public:
     void Update(PickupList* stars, PuddleList* puddles);
-    void DrawHud(ILayout* l, int view);
+    void DrawHud(ILayout* l, int view) const;
     void DrawResults(ILayout* l, int view);
     void StopBonus(void);
     int Results(FinishAnimation* a);
@@ -1374,18 +1374,18 @@ public:
     virtual int vf8C(int p, int key);
     virtual void vf48(void);
     virtual void vf44(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf58(void);
-    virtual int vf68(void);
+    virtual int vf68(void) const;
     virtual int vf64(void);
-    virtual int vf5C(int p);
+    virtual int vf5C(int p) const;
     virtual void vf60(int view);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf3C(int p);
     virtual f32 vf38(void);
     virtual void vfB8(void* r);
-    virtual int vf24(void);
+    virtual int vf24(void) const;
     virtual void* vfE8(void);
     virtual int vfDC(void);
     virtual void vfA8(int a, int b);
@@ -1404,7 +1404,7 @@ public:
     virtual void c2(Body* b, int car);
     virtual void c3(void);
     BetaCar* CarFor(RaceCarRec* rc) { return &cars[rc->index]; }
-    int AllDone(int n) {
+    int AllDone(int n) const {
         int i;
         for (i = 0; i < n; i++) {
             if (anims[i].state != 4) {
@@ -1413,7 +1413,7 @@ public:
         }
         return 1;
     }
-    virtual int vf20(int car) {
+    virtual int vf20(int car) const {
         RacerState* s = fn_801B2ED0(car)->GetInfo();
         int r = 0;
         if (StillRacing(s) && !(timer.now > timer.limit)) {
@@ -1577,7 +1577,7 @@ s32 lbl_8055E258;  // pickups alive
 
 
 namespace {
-inline void DrawStunts(BetaCar* c, ILayout* l, int view) {
+inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
     CarHud* h;
     s32 tx = c->tex[2];
     h = c->hud;
@@ -2332,7 +2332,7 @@ inline void DrawBonanza(Coins* co, int id) {
 #pragma inline_depth(1)
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
-void BetaCar::DrawHud(ILayout* l, int view) {
+void BetaCar::DrawHud(ILayout* l, int view) const {
     RaceCarRec* rc = fn_8017960C(id);
     PlaceInfo* info = rc->places->Get();
     PlaceDist* dist = rc->places->Dist();
@@ -4115,14 +4115,14 @@ void UpdateContinueOverlay(void);
 extern "C" {
 }
 
-inline void BetaMaster::vf4C(int view) {
+inline void BetaMaster::vf4C(int view) const {
     if (b9E0) {
         vf88();
         return;
     }
     (fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238)->Edit();
     {
-        BetaCar* c = &cars[fn_801E866C(view)];
+        const BetaCar* c = &cars[fn_801E866C(view)];
         if (c) {
             c->DrawHud(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, view);
             fn_801CB7BC(0);
@@ -4139,7 +4139,7 @@ inline void BetaMaster::vf50(int view) {
 
 inline int BetaMaster::vf58(void) { return 0; }
 
-inline int BetaMaster::vf68(void) {
+inline int BetaMaster::vf68(void) const {
     int i;
     fn_80179650();
     for (i = 0; i < fn_801E85A4(); i++) {
@@ -4152,20 +4152,23 @@ inline int BetaMaster::vf68(void) {
 
 inline int BetaMaster::vf64(void) { return 1; }
 
-inline int BetaMaster::vf5C(int view) {
+inline int BetaMaster::vf5C(int view) const {
+    // The slot is const in retail (the ring and zone masters only match as const methods), but this override
+    // updates the cars and the finish animations, so it works through a non-const view of itself.
+    BetaMaster* self = (BetaMaster*)this;
     int n = fn_80179650();
-    BetaCar* mine = &cars[fn_801E86F8(view)];
+    BetaCar* mine = &self->cars[fn_801E86F8(view)];
     if (!mine->result.dnf) {
-        BetaCar* c = &cars[fn_801E866C(view)];
+        BetaCar* c = &self->cars[fn_801E866C(view)];
         if (c && view >= 0 && view < ARRAY_COUNT(anims)) {
-            c->SetResultsView(&anims[view]);
+            c->SetResultsView(&self->anims[view]);
         }
     } else {
         mine->StopBonus();
     }
     if (vf68() && n > 1) {
         int any = 0;
-        BetaCar* c = cars;
+        BetaCar* c = self->cars;
         for (int i = 0; i < nCars; i++) {
             if (!c[i].result.dnf) {
                 any = 1;
@@ -4195,7 +4198,7 @@ inline void BetaMaster::vf60(int view) {
     }
 }
 
-inline int BetaMaster::vf88(void) { return 1; }
+inline int BetaMaster::vf88(void) const { return 1; }
 
 struct RaceSetup {
     u8 pad0[0x8];
@@ -4341,7 +4344,7 @@ void fn_801B0F70(int a, int b);
 void fn_80168104(void);
 }
 
-inline int BetaMaster::vf24(void) {
+inline int BetaMaster::vf24(void) const {
     RaceCarRec** it = lbl_804348E8;
     int r;
     int any = 0;

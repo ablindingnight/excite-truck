@@ -55,8 +55,8 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car);
-    virtual int vf24(void);
+    virtual int vf20(int car) const;
+    virtual int vf24(void) const;
     virtual int Started1C(int car);
     virtual int Started20(int car);
     virtual int vf30(void);
@@ -66,14 +66,14 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(int p);
     virtual int vf58(void);
-    virtual int vf5C(int p);
+    virtual int vf5C(int p) const;
     virtual void vf60(int view);
     virtual int vf64(void);
-    virtual int vf68(void);
+    virtual int vf68(void) const;
     virtual void vf6C(void);
     virtual void vf70(void);
     virtual void vf74(void);
@@ -81,7 +81,7 @@ public:
     virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
@@ -121,8 +121,8 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car) = 0;
-    virtual int vf24(void);
+    virtual int vf20(int car) const = 0;
+    virtual int vf24(void) const;
     virtual int Started1C(int car);
     virtual int Started20(int car);
     virtual int vf30(void);
@@ -132,7 +132,7 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(int p);
     virtual void vf6C(void);
@@ -142,7 +142,7 @@ public:
     virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
@@ -182,9 +182,9 @@ public:
     virtual int vfE4(void) { return 1; }
     virtual void vf10(void) {}
     virtual void vf0C(void) {}
-    virtual int vf20(int car) { return 1; }
-    virtual int vf24(void) { return 0; }
-    virtual void vf4C(int p) {}
+    virtual int vf20(int car) const { return 1; }
+    virtual int vf24(void) const { return 0; }
+    virtual void vf4C(int p) const {}
     virtual void vfB8(int p) {}
     virtual void vfC0(void) {}
     virtual void vfC4(void) {}
@@ -286,7 +286,7 @@ void fn_801B848C(int p) { lbl_8055E744->vf14(p); }
 
 void fn_801B84A4(int p) { lbl_8055E744->vf4C(p); }
 
-void GameMode::vf4C(int p) {}
+void GameMode::vf4C(int p) const {}
 
 void fn_801B84C0(int p) { lbl_8055E744->vf50(p); }
 

@@ -304,11 +304,11 @@ struct Tune {
 class Timer {
 public:
     Timer(f32 len);
-    f32 Now(void);
-    f32 Progress(void);
+    f32 Now(void) const;
+    f32 Progress(void) const;
 
     void Start(void) { start = Now(); }
-    int Active(void) {
+    int Active(void) const {
         f32 t = Now() - start;
         return t >= 0.0f && t < len;
     }
@@ -787,8 +787,8 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car);
-    virtual int vf24(void);
+    virtual int vf20(int car) const;
+    virtual int vf24(void) const;
     virtual int Started1C(int car);
     virtual int Started20(int car);
     virtual int vf30(void);
@@ -798,14 +798,14 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(void);
     virtual int vf58(void);
-    virtual int vf5C(int p);
+    virtual int vf5C(int p) const;
     virtual void vf60(int view);
     virtual int vf64(void);
-    virtual int vf68(void);
+    virtual int vf68(void) const;
     virtual void vf6C(void);
     virtual void vf70(void);
     virtual void vf74(void);
@@ -813,7 +813,7 @@ public:
     virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
@@ -853,8 +853,8 @@ public:
     virtual void vf14(int p) {}
     virtual void vf18(void) {}
     virtual int vf1C(int car) { return vf20(car); }
-    virtual int vf20(int car) = 0;
-    virtual int vf24(void);
+    virtual int vf20(int car) const = 0;
+    virtual int vf24(void) const;
     virtual int Started1C(int car);
     virtual int Started20(int car);
     virtual int vf30(void) { return 0; }
@@ -864,7 +864,7 @@ public:
     virtual void vf40(void) {}
     virtual void vf44(void);
     virtual void vf48(void) {}
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(void);
     virtual void vf6C(void) {}
@@ -874,7 +874,7 @@ public:
     virtual int vf7C(int p) { return 0; }
     virtual int vf80(void) { return 0; }
     virtual int vf84(void) { return 0; }
-    virtual int vf88(void) { return 0; }
+    virtual int vf88(void) const { return 0; }
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d) {}
     virtual void vf94(int p) {}
@@ -982,12 +982,12 @@ public:
 public:
     ZoneMaster(Race* race);
     virtual ~ZoneMaster(void);
-    virtual int vf20(int car);
-    virtual int vf24(void);
+    virtual int vf20(int car) const;
+    virtual int vf24(void) const;
     virtual void vf44(void);
-    virtual void vf4C(int p);
-    virtual int vf5C(int p);
-    virtual int vf68(void);
+    virtual void vf4C(int p) const;
+    virtual int vf5C(int p) const;
+    virtual int vf68(void) const;
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf50(int p);
@@ -1017,16 +1017,16 @@ public:
         return g;
     }
     void DrawNextGate(void);
-    void DrawBonus(int p, CarState* c);
-    void DrawLevel(int p, CarState* c);
-    void DrawMissed(int p, CarState* c);
-    void DrawGateStar(int p, CarState* c);
-    void DrawHud(int p);
-    void DrawNothing(int p, CarState* c);
-    void DrawTimer(int p, CarState* c);
-    void DrawScore(int p, CarState* c);
-    void DrawMissedFlag(int p, CarState* c);
-    void DrawGateBonus(int p, CarState* c);
+    void DrawBonus(int p, CarState* c) const;
+    void DrawLevel(int p, CarState* c) const;
+    void DrawMissed(int p, CarState* c) const;
+    void DrawGateStar(int p, CarState* c) const;
+    void DrawHud(int p) const;
+    void DrawNothing(int p, CarState* c) const;
+    void DrawTimer(int p, CarState* c) const;
+    void DrawScore(int p, CarState* c) const;
+    void DrawMissedFlag(int p, CarState* c) const;
+    void DrawGateBonus(int p, CarState* c) const;
     void DrawRing(const Gate* g, int c);
     CarState* GetCar(int i) { return &cars[i]; }
     int Paused(f32 now) { return 0; }
@@ -1904,7 +1904,7 @@ extern "C" f32 fn_8013EFB0(f32 x) { return x - 320.0f; }
 
 extern "C" f32 fn_8013EFBC(f32 y) { return 240.0f - y; }
 
-int ZoneMaster::vf5C(int p) {
+int ZoneMaster::vf5C(int p) const {
     if ((f32)__fabs(f250) <= lbl_80558DC4[0]) {
         if (hud.b8) {
             vf4C(p);
@@ -1921,9 +1921,9 @@ int ZoneMaster::vf5C(int p) {
     return hud.state != 4;
 }
 
-int ZoneMaster::vf68(void) { return hud.state == 2; }
+int ZoneMaster::vf68(void) const { return hud.state == 2; }
 
-void ZoneMaster::vf4C(int p) { DrawHud(p); }
+void ZoneMaster::vf4C(int p) const { DrawHud(p); }
 
 extern "C" void fn_801475D0(Layout* l, const char* name, const char* fmt, ...);
 
@@ -1947,7 +1947,7 @@ extern "C" void fn_zone_WideOpen(Layout* l, int mode, int mult, f32* out) {
     fn_801475D0(l, "wideopen_mult", "%d", mult);
 }
 
-void ZoneMaster::DrawBonus(int p, CarState* c) {
+void ZoneMaster::DrawBonus(int p, CarState* c) const {
     if (c->gate) {
         f32 k = c->BonusScale();
         f32 a = Lerp(1.0f, 0.0f, Clamp01(InvLerp(0.0f, lbl_8042FB3C.timeBonusLen,
@@ -1979,7 +1979,7 @@ void ZoneMaster::DrawBonus(int p, CarState* c) {
     }
 }
 
-void ZoneMaster::DrawNothing(int p, CarState* c) {}
+void ZoneMaster::DrawNothing(int p, CarState* c) const {}
 
 extern "C" int fn_8013F438(f32 t) { return Lerp(200.0f, 0.0f, Clamp01(InvLerp(0.2f, 0.8f, t))); }
 
@@ -2010,7 +2010,7 @@ extern "C" void fn_zone_LevelTitle(Layout* l) {
     l->Find("level_fade_out");
 }
 
-void ZoneMaster::DrawLevel(int p, CarState* c) {
+void ZoneMaster::DrawLevel(int p, CarState* c) const {
     if (level > 0) {
         if (t74.Active()) {
             f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t74.Progress())));
@@ -2051,7 +2051,7 @@ void ZoneMaster::DrawLevel(int p, CarState* c) {
     }
 }
 
-void ZoneMaster::DrawMissed(int p, CarState* c) {
+void ZoneMaster::DrawMissed(int p, CarState* c) const {
     if (c->tA8.Active()) {
         f32 t = c->tA8.Progress();
         u32 col = (fn_8013F438(t) << 24) | 0xFF7F00;
@@ -2069,7 +2069,7 @@ void ZoneMaster::DrawMissed(int p, CarState* c) {
     }
 }
 
-void ZoneMaster::DrawGateStar(int p, CarState* c) {
+void ZoneMaster::DrawGateStar(int p, CarState* c) const {
     if (c->gate && !vf24()) {
         f32 k = c->BonusScale();
         LayoutArt* a = mainLyt->FindArt("gate_star_art");
@@ -2084,7 +2084,7 @@ void ZoneMaster::DrawGateStar(int p, CarState* c) {
     }
 }
 
-int ZoneMaster::vf24(void) {
+int ZoneMaster::vf24(void) const {
     int n = 0;
     int i;
     for (i = 0; i < nCars; i++) {
@@ -2097,7 +2097,7 @@ int ZoneMaster::vf24(void) {
     return 0;
 }
 
-int ZoneMaster::vf20(int car) {
+int ZoneMaster::vf20(int car) const {
     CarState* c = &cars[car];
     int r = 1;
     if (c->done) {
@@ -2142,14 +2142,14 @@ static inline f32 Ease(f32 x) {
     return x * (x * -2.0f * x) - x * 3.0f * x;
 }
 
-static inline void DrawClock(ZoneMaster* z, f32 t) {
+static inline void DrawClock(const ZoneMaster* z, f32 t) {
     char buf[0x14];
     fn_80130980(buf, 0x14, 3, t);
     fn_801475D0(z->mainLyt, "big_timer", "%s", buf);
     fn_8014784C(z->mainLyt, "stop_watch_art", "stop_watch_artset", 0);
 }
 
-void ZoneMaster::DrawTimer(int p, CarState* c) {
+void ZoneMaster::DrawTimer(int p, CarState* c) const {
     f32 age;
     if (lbl_8055E1BC) {
         fn_802C8BD0(tex[0]);
@@ -2223,7 +2223,7 @@ void ZoneMaster::DrawTimer(int p, CarState* c) {
     }
 }
 
-void ZoneMaster::DrawScore(int p, CarState* c) {
+void ZoneMaster::DrawScore(int p, CarState* c) const {
     int score = c->score - c->timeBonus;
     if (c->t98.Active() && c->bonus > 50) {
         f32 f = 1.0f - c->t98.Progress();
@@ -2232,7 +2232,7 @@ void ZoneMaster::DrawScore(int p, CarState* c) {
     UpdateScoreOverlays(fn_801E866C(p), score);
 }
 
-void ZoneMaster::DrawMissedFlag(int p, CarState* c) {
+void ZoneMaster::DrawMissedFlag(int p, CarState* c) const {
     if (!c->tA8.Active() && c->tA0.Active()) {
         LayoutItem* a = mainLyt->Find("missed_start");
         LayoutItem* b = mainLyt->Find("missed_end");
@@ -2241,7 +2241,7 @@ void ZoneMaster::DrawMissedFlag(int p, CarState* c) {
     }
 }
 
-void ZoneMaster::DrawGateBonus(int p, CarState* c) {
+void ZoneMaster::DrawGateBonus(int p, CarState* c) const {
     if (c->tD8.Active()) {
         LayoutArt* a0;
         LayoutArt* a1;
@@ -2272,7 +2272,7 @@ void ZoneMaster::DrawGateBonus(int p, CarState* c) {
     }
 }
 
-void ZoneMaster::DrawHud(int p) {
+void ZoneMaster::DrawHud(int p) const {
     int i = fn_801E866C(p);
     CarState* c = &cars[i];
     if (!fn_8013CB10(p)) {

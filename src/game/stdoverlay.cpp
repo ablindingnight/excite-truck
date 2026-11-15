@@ -105,8 +105,8 @@ static inline Sound* LoadGradeSound(void) {
 class Timer {
 public:
     Timer(f32 duration);
-    f32 Now(void);
-    f32 Progress(void);
+    f32 Now(void) const;
+    f32 Progress(void) const;
 
     f32 duration;  // offset 0x0
     f32 start;     // offset 0x4
@@ -256,11 +256,11 @@ Timer::Timer(f32 duration) {
     this->duration = duration;
 }
 
-f32 Timer::Now(void) {
+f32 Timer::Now(void) const {
     return lbl_8055E3C8;
 }
 
-f32 Timer::Progress(void) {
+f32 Timer::Progress(void) const {
     return Clamp01((Now() - start) / duration);
 }
 

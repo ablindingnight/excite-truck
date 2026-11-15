@@ -103,8 +103,8 @@ public:
     virtual void vf14(void);
     virtual void vf18(void);
     virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
+    virtual void vf20(void) const;
+    virtual void vf24(void) const;
     virtual void vf28(void);
     virtual void vf2C(void);
     virtual void vf30(void);
@@ -114,14 +114,14 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(void);
+    virtual void vf4C(void) const;
     virtual void vf50(void);
     virtual void vf54(void);
     virtual void vf58(void);
-    virtual int vf5C(int player) { return 0; }
+    virtual int vf5C(int player) const { return 0; }
     virtual void vf60(int player) {}
     virtual int vf64(void) { return 0; }
-    virtual int vf68(void) { return 1; }
+    virtual int vf68(void) const { return 1; }
     virtual void vf6C(void);
     virtual void vf70(void);
     virtual void vf74(void);
@@ -129,7 +129,7 @@ public:
     virtual void vf7C(void);
     virtual void vf80(void);
     virtual void vf84(void);
-    virtual void vf88(void);
+    virtual void vf88(void) const;
     virtual void vf8C(void);
     virtual void vf90(void);
     virtual void vf94(void);

@@ -300,9 +300,9 @@ void fn_8018F76C(RaceCarRec* car, int wheel);
 // Interval timer on the race clock (0x8001DAE0..), shared with zone and stdoverlay.
 struct Timer {
     Timer(f32 len);
-    f32 Now(void);
-    f32 Progress(void);
-    int Running(void) {
+    f32 Now(void) const;
+    f32 Progress(void) const;
+    int Running(void) const {
         f32 t = Now() - start;
         return t >= 0.0f && t < len;
     }
@@ -530,8 +530,8 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car);
-    virtual int vf24(void);
+    virtual int vf20(int car) const;
+    virtual int vf24(void) const;
     virtual int vf28(void);
     virtual int Started20(int car);
     virtual int vf30(void);
@@ -541,14 +541,14 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(void);
     virtual int vf58(void);
-    virtual int vf5C(int p);
+    virtual int vf5C(int p) const;
     virtual void vf60(int view);
     virtual int vf64(void);
-    virtual int vf68(void);
+    virtual int vf68(void) const;
     virtual void vf6C(void);
     virtual void vf70(void);
     virtual void vf74(void);
@@ -556,7 +556,7 @@ public:
     virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
@@ -597,8 +597,8 @@ public:
     virtual void vf14(int p);
     virtual void vf18(void);
     virtual int vf1C(int car);
-    virtual int vf20(int car) = 0;
-    virtual int vf24(void);
+    virtual int vf20(int car) const = 0;
+    virtual int vf24(void) const;
     virtual int vf28(void);
     virtual int Started20(int car);
     virtual int vf30(void);
@@ -608,7 +608,7 @@ public:
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf54(void);
     virtual void vf6C(void);
@@ -618,7 +618,7 @@ public:
     virtual int vf7C(int p);
     virtual int vf80(void);
     virtual int vf84(void);
-    virtual int vf88(void);
+    virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(int a, int b, int c, int d);
     virtual void vf94(int p);
@@ -723,25 +723,25 @@ public:
     virtual int vf28(void);
     virtual void vf0C(void);
     virtual void vf10(void);
-    virtual int vf20(int car);
-    virtual int vf24(void);
+    virtual int vf20(int car) const;
+    virtual int vf24(void) const;
     virtual int vf54(void);
     virtual void vfA8(int car);
     virtual void vfB8(ZoneResults* r);
     virtual void vf44(void);
     virtual int vfA0(StartPos* out, int idx);
-    virtual void vf4C(int p);
+    virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf3C(int view);
     virtual f32 vf38(void);
     virtual int vf64(void);
-    virtual int vf5C(int p);
-    virtual int vf68(void);
+    virtual int vf5C(int p) const;
+    virtual int vf68(void) const;
     virtual int vf8C(int p, int key);
     virtual void* vfE8(void);
-    void DrawKills(int car);
+    void DrawKills(int car) const;
     void LoadTuning(ValueNode* t);
-    int AliveAI(void) {
+    int AliveAI(void) const {
         int n = 0;
         int i;
         for (i = 0; i < nCars; i++) {
@@ -752,7 +752,7 @@ public:
         return n;
     }
     void Finish(f32 now);
-    f32 TimeLeft(f32 now) { return endTime - now; }
+    f32 TimeLeft(f32 now) const { return endTime - now; }
     SpawnList spawns;          // offset 0x4
     CrushCar cars[8];          // offset 0x90
     s32 nCars;                 // offset 0x170
@@ -1404,8 +1404,8 @@ inline void CrushMaster::vf10(void) {
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= lbl_80558DC4[0]; }
 static inline f32 Max0(f32 x) { return 0.0f > x ? 0.0f : x; }
 
-inline int CrushMaster::vf20(int car) {
-    CrushCar* c = &cars[car];
+inline int CrushMaster::vf20(int car) const {
+    const CrushCar* c = &cars[car];
     int r = c->active;
     if (r) {
         r = !NearZero(Max0(TimeLeft(lbl_8055E3C8)));
@@ -1413,7 +1413,7 @@ inline int CrushMaster::vf20(int car) {
     return r;
 }
 
-inline int CrushMaster::vf24(void) { return finishTime > 0.0f; }
+inline int CrushMaster::vf24(void) const { return finishTime > 0.0f; }
 
 inline int CrushMaster::vf54(void) { return 8; }
 
@@ -1583,8 +1583,8 @@ static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32
 }
 
 // Helper name unproven: the kill icon column (its locals colour as an inlined body).
-inline void CrushMaster::DrawKills(int car) {
-    CrushCar* cc;
+inline void CrushMaster::DrawKills(int car) const {
+    const CrushCar* cc;
     int n;
     Box* icon;
     Box* hit;
@@ -1626,7 +1626,7 @@ inline void CrushMaster::DrawKills(int car) {
     }
 }
 
-inline void CrushMaster::vf4C(int view) {
+inline void CrushMaster::vf4C(int view) const {
     int car = fn_801E866C(view);
     int radar = 1;
     if (!lbl_8043038C.alwaysRadar && !fn_80171D38(view)) {
@@ -1700,7 +1700,7 @@ inline f32 CrushMaster::vf38(void) { return 7.75f; }
 
 inline int CrushMaster::vf64(void) { return 1; }
 
-inline int CrushMaster::vf5C(int p) {
+inline int CrushMaster::vf5C(int p) const {
     fn_801E866C(p);
     if (t17C.Running()) {
         vf4C(p);
@@ -1718,7 +1718,7 @@ inline int CrushMaster::vf5C(int p) {
     return results.state != 4;
 }
 
-inline int CrushMaster::vf68(void) { return results.state == 2; }
+inline int CrushMaster::vf68(void) const { return results.state == 2; }
 
 inline int CrushMaster::vf8C(int p, int key) {
     int r = 0;
