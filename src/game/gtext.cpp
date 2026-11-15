@@ -406,6 +406,8 @@ void fn_80231ADC(void) { lbl_8049846C.count = 0; }
 
 static inline const char* EName(const EscSeq* e) { return e->name; }
 
+static inline f32 AddTextOffset(f32 position, f32 offset) { return position + offset; }
+
 static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, f32* adv) {
     if (*s == '\\') {
         ArtItem* it;
@@ -425,7 +427,8 @@ static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, 
                     it->h = h * e->scale;
                 }
                 it->x = x;
-                it->y = (y + h) + 0.5f * (it->h - h);
+                const f32 dy = 0.5f * (it->h - h);
+                it->y = AddTextOffset(y + h, dy);
                 it->z = z;
                 it->color = color;
                 if (adv) {
@@ -534,7 +537,7 @@ void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
             continue;
         }
         const char* next;
-        u16 c = DecodeUTF8(p, &next);
+        u16 c = DecodeUTF8(p, &next, *reinterpret_cast<const u8*>(p));
         Glyph* g = &f->glyphs[c];
         x += xs * (scale * g->pre);
         p += next - p;
