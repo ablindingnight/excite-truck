@@ -1185,13 +1185,10 @@ void fn_8013CB90(LayoutArt* a) {
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
-    Vec3 mid;
+    Vec3 mid = g->Center();
     Vec3 at;
     Vec3 ring;
     f32 half;
-    mid.x = g->a.x + (g->b.x - g->a.x) * 0.5f;
-    mid.y = g->a.y + (g->b.y - g->a.y) * 0.5f;
-    mid.z = g->a.z + (g->b.z - g->a.z) * 0.5f;
     half = PSVECDistance(&g->a, &g->b) / 2.0f;
     ring.y = g->ringY;
     f32 zv = mid.z;
