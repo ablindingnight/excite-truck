@@ -1153,6 +1153,7 @@ public:
     }
 
     int Restart(const char* name);
+    void Open(const char* name, char* path, int sector, int& ok);
     int StartLoad(const char* name);
     void Reset(void);
     static void CopyHeader(ResSetHeader* d, const ResSetHeader* s);
@@ -1257,31 +1258,34 @@ int AsyncResourceSet::Restart(const char* name) {
     return Begin(name);
 }
 
+/* Helper name unproven: opens the file's sector into the buffer and starts the set. */
+inline void AsyncResourceSet::Open(const char* name, char* path, int sector, int& ok) {
+    if (sector != -1) {
+        fileSize = bufSize;
+        if (fileSize <= bufSize) {
+            handle = fn_802E748C(sector, buf, fileSize);
+            if (handle != -1) {
+                state = 2;
+                set.Init(name, path, 0, sector);
+                ok = 1;
+                deadline = fn_802E2C20() + 500 + fileSize / 3000;
+            }
+        }
+    }
+}
+
 int AsyncResourceSet::StartLoad(const char* name) {
     char path0[0x40];
     int ok = 0;
     do {
         char* path;
         s32 size;
-        int sector;
         path = fn_8012B314(name, path0, tries);
         if (!path) {
             break;
         }
         ok = 0;
-        sector = fn_8012AC28(path, &size);
-        if (sector != -1) {
-            fileSize = bufSize;
-            if (fileSize <= bufSize) {
-                handle = fn_802E748C(sector, buf, fileSize);
-                if (handle != -1) {
-                    state = 2;
-                    set.Init(name, path, 0, sector);
-                    ok = 1;
-                    deadline = fn_802E2C20() + 500 + fileSize / 3000;
-                }
-            }
-        }
+        Open(name, path, fn_8012AC28(path, &size), ok);
         tries++;
     } while (!ok);
     return ok;
