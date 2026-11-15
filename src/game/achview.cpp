@@ -476,7 +476,6 @@ struct AchQuery3 {
     s32 value;     // offset 0x4
     s32 best;      // offset 0x8
 };
-void AchievementsQuery(AchQuery3* q);
 int AchievementsGetLevel(int category, s32 value);
 
 extern "C" {
@@ -514,7 +513,7 @@ int fn_8025978C(u8* p) {
         } else {
             iconColor[i] = 10;
             barColor[i] = 11;
-            AchQuery3 q;
+            AchQuery q;
             q.category = cat;
             AchievementsQuery(&q);
             levels[i] = AchievementsGetLevel(cat, S32(p, 0x18) > cat ? q.best : q.value);
