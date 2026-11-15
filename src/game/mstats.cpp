@@ -96,7 +96,7 @@ public:
     virtual void Unk18(void);
     virtual void Update(void);  // 0x1C
     virtual void Unk20(void);
-    virtual void Unk24(void);
+    virtual void Unk24(struct gxCanvas*);
     virtual void Draw(void);    // 0x28
     virtual void Unk2C(void);
     virtual void Unk30(void);

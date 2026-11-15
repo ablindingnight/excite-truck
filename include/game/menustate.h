@@ -3,6 +3,8 @@
 
 #include "game/common.h"
 
+struct gxCanvas;
+
 // The menu state interface. Its all-pure vtable (24 zero words) is what follows the vtables of every unit
 // that builds menu states (as in unlkmenu.cpp).
 class IMenuState {
@@ -14,7 +16,7 @@ public:
     virtual void Unk18(void) = 0;
     virtual void Update(void) = 0;
     virtual void Unk20(void) = 0;
-    virtual void Unk24(void) = 0;
+    virtual void Unk24(gxCanvas*) = 0;
     virtual void Draw(void) = 0;
     virtual void Unk2C(void) = 0;
     virtual void Unk30(void) = 0;
@@ -46,7 +48,7 @@ public:
     virtual void Unk18(void);
     virtual void Update(void);  // 0x1C
     virtual void Unk20(void);
-    virtual void Unk24(void);
+    virtual void Unk24(gxCanvas*);  // 0x24: draw hook, given the canvas (UICustomHandler fills its rect)
     virtual void Draw(void);    // 0x28
     virtual void Unk2C(void);
     virtual void Unk30(void);

@@ -1,5 +1,7 @@
-// UI API layer (0x802115AC-0x80215CF4): UIShowGroup/UIHideGroup/UIMoveGroup/UIGetMenuIndex... on the
-// active window, plus menu-state glue. Imported verbatim from the upstream project
+// UI API layer (0x8021165C-0x802160AC): UIShowGroup/UIHideGroup/UIMoveGroup/UIGetMenuIndex... on the
+// active window, plus menu-state glue. The unit ends with __sinit and the weak inline functions it emits after it
+// (MenuWidget/UICustomHandler/OptionPair/FloatValue dtors, OptionPair and MenuWidget(Base) virtuals,
+// UICustomHandler::Unk24), up to 0x802160AC where widgetwin.cpp starts. Imported verbatim from the upstream project
 // (github.com/orangedude27/excite-truck, CC0), where its functions match exactly.
 // CLEANUP: raw offsets and placeholder classes from an automated decompiler; replace with real types
 // (Window, Widget, MenuState) before the PC port. Tricks are tagged MATCHING-AID.
@@ -8,7 +10,8 @@
 #include "game/menustate.h"
 #include "game/uilists.h"
 #include "game/menu.h"
-#include "game/menuwidget.h"
+#include "game/menuwidget_inl.h"
+#include "game/gxcanvas.h"
 
 extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" s32 fn_802E317C(const char *, ...);
@@ -16,35 +19,22 @@ extern "C" void fn_80214934(const void *, s32, void *, s32);
 extern "C" s32 fn_80029004(const char *, s32);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
-extern "C" char lbl_8055B808[8];
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
 extern "C" void fn_8021481C(const char*);
-extern "C" char lbl_8033D388[];
-extern "C" char lbl_8033D268[];
-extern "C" char lbl_8055B810[];
 
 extern "C" s32 fn_802168E4(void);
 extern "C" s32 fn_802168DC(s32, s32);
 extern "C" s32 fn_802168D4(s32);
 extern "C" s32 fn_802168CC(s32, float);
 extern "C" s32 fn_802168E0(s32, s32, s32);
-extern "C" char lbl_8033D2E0[];
-extern "C" char lbl_8033D328[];
-extern "C" char lbl_8033D2A0[];
-extern "C" char lbl_8033D274[];
 
 extern "C" s32 fn_802180E0(s32, s32);
-extern "C" char lbl_8033D3B0[];
 
 extern "C" s32 fn_802168DC(s32, s32);
 extern "C" s32 fn_802168D4(s32);
 extern "C" s32 fn_802168CC(s32, float);
 extern "C" s32 fn_802168E0(s32, s32, s32);
-extern "C" char lbl_8033D2E0[];
-extern "C" char lbl_8033D328[];
-extern "C" char lbl_8033D2A0[];
-extern "C" char lbl_8033D274[];
 
 class VfObj {
 public:
@@ -79,13 +69,17 @@ extern "C" void* fn_80215270(int, int);
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
 s32 fn_80211678(u8* arg0);
-extern "C" char lbl_8055B750[4];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
 extern "C" void *memcpy(void *, const void *, unsigned long);
 // Name of the last layout UIBegin saw (first .data object of the unit).
 extern "C" char lbl_8033CAE8[100];
 char lbl_8033CAE8[100] = "__OOPS_NO_LAST_LAYOUT__";
+// Layout names CopyName/stricmp compare against: the first layout and the "no layout" name.
+extern "C" char* lbl_8055B6B0;
+char* lbl_8055B6B0 = "__first";
+extern "C" const char* lbl_8055B6BC;
+const char* lbl_8055B6BC = "__null";
 extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(int*));
 extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(int*), int defaultNo);
 extern "C" s32 fn_80206430(void);
@@ -93,7 +87,6 @@ extern "C" void fn_8022BAD0(s32 style, s32 x, s32 y, s32 z, s32 w, s32 h, const 
 extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
-extern "C" char *lbl_8055B6B0;
 
 extern "C" s32 fn_80128668(void);
 extern "C" s32 (*lbl_8055EF0C)(s32 *);
@@ -442,29 +435,27 @@ extern "C" void fn_80211FF0(void) {
 }
 
 extern "C" void *fn_801284F8(s32, const char *);
+extern "C" void* lbl_8033D528[];
+extern "C" void* lbl_8033D504[];
 extern "C" s32 fn_8012C33C(s32);
 extern "C" s32 fn_802C49E8(s32);
 extern "C" s32 fn_802C2DD4(s32);
 extern "C" void *fn_802228B0(void *, const char *, s32, s32);
 extern "C" void *fn_802226D4(void *, const char *);
 extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    extern int lbl_8033D528[];
-    extern char lbl_8033D504[];
-    extern const char lbl_8055B720[4], lbl_8055B724[4], lbl_8055B728[5], lbl_8055B730[5];
-    extern const char lbl_8055B738[4], lbl_8055B73C[5], lbl_8055B744[4], lbl_8055B748[5];
     struct ObjA { void *vtable; void *value; };
     struct ObjB { void *vtable; void *value; s32 count; s32 divisor; };
     char *name = (char *)fn_80029004(arg0, 0x2e);
     ObjA *a;
     ObjB *b;
     void *c;
-    if (stricmp(name + 1, lbl_8055B724) == 0) {
-        a = (ObjA *)fn_801284F8(8, lbl_8055B728);
+    if (stricmp(name + 1, "stp") == 0) {
+        a = (ObjA *)fn_801284F8(8, "simg");
         if (a) { a->vtable = lbl_8033D528; a->value = (void *)fn_802C49E8((s32)arg0); }
         return a;
     }
-    if (stricmp(name + 1, lbl_8055B720) == 0) {
-        b = (ObjB *)fn_801284F8(16, lbl_8055B730);
+    if (stricmp(name + 1, "cvs") == 0) {
+        b = (ObjB *)fn_801284F8(16, "cimg");
         if (b) {
             b->vtable = lbl_8033D504;
             if (fn_8012C33C((s32)arg0)) {
@@ -475,13 +466,13 @@ extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
         }
         return b;
     }
-    if (stricmp(name + 1, lbl_8055B738) == 0) {
-        c = fn_801284F8(16, lbl_8055B73C);
+    if (stricmp(name + 1, "img") == 0) {
+        c = fn_801284F8(16, "iimg");
         if (c) c = fn_802228B0(c, arg0, arg2, arg3);
         return c;
     }
-    if (stricmp(name + 1, lbl_8055B744) == 0) {
-        c = fn_801284F8(8, lbl_8055B748);
+    if (stricmp(name + 1, "art") == 0) {
+        c = fn_801284F8(8, "aimg");
         if (c) c = fn_802226D4(c, arg0);
         return c;
     }
@@ -512,7 +503,6 @@ extern "C" float fn_80212248(s32 arg0) {
 
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
-extern "C" char lbl_8055B750[4];
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int stricmp(const char *, const char *);
 extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
@@ -520,7 +510,7 @@ extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
     if (*name == '#') {
         name = name + 1;
     }
-    sprintf(buf, lbl_8055B750, name);
+    sprintf(buf, "#%s", name);
     while (*(s32 *)((char *)entry + 4) != 0x7B) {
         if (*(s32 *)((char *)entry + 4) == arg2 && *(char **)entry != 0 &&
             (stricmp(*(char **)entry, name) == 0 ||
@@ -672,13 +662,36 @@ struct UIImageRef {
     }
 };
 
+// The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
+class OptionPair : public MenuWidget {
+public:
+    OptionPair(void) { value = 0; }
+    virtual ~OptionPair(void) {}
+    virtual const char* Current(void) {
+        if (value) {
+            return "OPTION 2";
+        }
+        return "OPTION 1";
+    }
+    virtual void Prev(void) { value ^= 1; }
+    virtual void Next(void) { value ^= 1; }
+    u32 value;  // offset 0x10
+};
+
 // Handler state a "Custom" widget reports its rectangle to: x, y, w, h, with the widget in unk14.
+// Its Unk24 fills that rectangle on the canvas in the custom-widget colour.
+extern "C" s32 lbl_8055FBDC;
+extern "C" void fn_802C3424(s32 x0, s32 y0, s32 x1, s32 y1, s32 a);
 class UICustomHandler : public MenuState {
 public:
     UICustomHandler(void) {}
     virtual ~UICustomHandler(void) {}
-    virtual void Unk24(void);
+    virtual void Unk24(gxCanvas* canvas) {
+        fn_802C3034(canvas);
+        fn_802C3424(x, y, x + w, y + h, lbl_8055FBDC);
+    }
 };
+
 struct UICustom {
     u8 base[0x244];
     UICustomHandler* handler;
@@ -732,17 +745,6 @@ public:
     f32 lo, hi, min, max, step;
     f32* value;
     s32 decimals;
-};
-
-// The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
-class OptionPair : public MenuWidget {
-public:
-    OptionPair(void) { value = 0; }
-    virtual ~OptionPair(void) {}
-    virtual const char* Current(void);
-    virtual void Prev(void);
-    virtual void Next(void);
-    u32 value;  // offset 0x10
 };
 
 class UIBox {
@@ -1577,7 +1579,6 @@ extern "C" int fn_802168F0(Window*);
 extern "C" void fn_802E3D00(void);
 extern "C" void fn_80236950(void);
 extern "C" void fn_8021683C(Window*);
-extern "C" const char* lbl_8055B6BC;
 
 // UIDoMappedDialog: builds the mapped window, runs it until it returns a result, then tears it down.
 extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
@@ -1635,7 +1636,7 @@ extern "C" void fn_80214934(const void *arg0, s32 arg1, void *arg2, s32 arg3) {
     if (end == 0) {
         end = (s32)((const char *)arg1 + strlen((const char *)arg1));
     }
-    fn_801345D8(arg2, arg3, lbl_8055B808, (s32)arg0, end - arg1, (const char *)arg1);
+    fn_801345D8(arg2, arg3, "%s\\%.*s", (s32)arg0, end - arg1, (const char *)arg1);
 }
 
 extern "C" void fn_802149C4(s32 arg0) {
@@ -1645,12 +1646,9 @@ extern "C" void fn_802149C4(s32 arg0) {
 }
 extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" void fn_80214934(const void*, s32, void*, s32);
-extern "C" char lbl_8033D388[];
-extern "C" char lbl_8033D268[];
-extern "C" char lbl_8055B810[];
 extern "C" void fn_802149FC(s32 arg0) {
     char sp8[0x64];
-    fn_80214934(lbl_8033D268, arg0, sp8, 0x64);
+    fn_80214934("transout", arg0, sp8, 0x64);
     fn_8021481C(sp8);
 }
 
@@ -1658,7 +1656,7 @@ extern "C" s32 fn_80214A38(s32 arg0) {
     s32 result = 0;
     s32 check = fn_802168E4();
     if (check != 0) result = ((s32 (*)(s32, s32))fn_802168D4)(check, arg0);
-    else ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D274);
+    else ((s32 (*)(const char *, ...))fn_802E317C)("UIGroupIsVisible(): No active window");
     return result;
 }
 
@@ -1669,18 +1667,17 @@ extern "C" void fn_80214A9C(s32 arg0) {
     if (temp != 0) {
         ((s32 (*)(s32, s32, float))fn_802168CC)(temp, arg0, 0.0f);
     } else {
-        ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D2A0);
+        ((s32 (*)(const char *, ...))fn_802E317C)("UIHideGroup(): No active window");
     }
 }
 #pragma scheduling on
 extern "C" s32 fn_802168D0(s32, s32, float);
-extern "C" char lbl_8033D2C0[];
 extern "C" void fn_80214AF0(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
         ((s32 (*)(s32, s32, float))fn_802168D0)(temp, arg0, 0.0f);
     } else {
-        ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D2C0);
+        ((s32 (*)(const char *, ...))fn_802E317C)("UIShowGroup(): No active window");
     }
 }
 
@@ -1689,29 +1686,42 @@ extern "C" void fn_80214B44(s32 arg0) {
     if (temp != 0) {
         ((s32 (*)(s32, s32))fn_802168DC)(temp, arg0);
     } else {
-        ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D2E0);
+        ((s32 (*)(const char *, ...))fn_802E317C)("UIDisableGroup(): No active window");
     }
 }
 #pragma scheduling on
 extern "C" s32 fn_802168D8(s32);
-extern "C" char lbl_8033D304[];
 extern "C" void fn_80214B94(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
         ((s32 (*)(s32, s32))fn_802168D8)(temp, arg0);
     } else {
-        ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D304);
+        ((s32 (*)(const char *, ...))fn_802E317C)("UIEnableGroup(): No active window");
     }
 }
 
-extern "C" char lbl_8033D328[];
 // UIMoveGroup
 extern "C" void fn_80214BE4(s32 group, s32 x, s32 y) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
         ((s32 (*)(s32, s32, s32, s32))fn_802168E0)(temp, group, x, y);
     } else {
-        ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D328);
+        ((s32 (*)(const char *, ...))fn_802E317C)("UIMoveGroup(): No active window");
+    }
+}
+
+// UIUnfocus / UIRefocus: nothing calls them, so the linker dropped their code and only their messages remain in
+// .data (between UIMoveGroup's and UIUpdateAnimeContext's). What they did with the window is unknown; the
+// no-window path is all that is kept here.
+static void UIUnfocus(void) {
+    if (fn_802168E4() == 0) {
+        fn_802E317C("UIUnfocus(): No active window");
+    }
+}
+
+static void UIRefocus(void) {
+    if (fn_802168E4() == 0) {
+        fn_802E317C("UIRefocus(): No active window");
     }
 }
 
@@ -1720,7 +1730,7 @@ extern "C" void fn_80214C54(s32 arg0, s32 arg1) {
     if (w != 0) {
         fn_80218C14(w, arg0, arg1);
     } else {
-        fn_802E317C(lbl_8033D388);
+        fn_802E317C("UIUpdateAnimeContext: No active Window");
     }
 }
 
@@ -1729,20 +1739,19 @@ extern "C" void fn_80214CB4(s32 arg0) {
     if (temp != 0) {
         ((s32 (*)(s32, s32))fn_802180E0)(temp, arg0);
     } else {
-        ((s32 (*)(const char *, ...))fn_802E317C)(lbl_8033D3B0);
+        ((s32 (*)(const char *, ...))fn_802E317C)("UISetMenuIndex: No active window");
     }
 }
 
 extern "C" s32 fn_802168E4(void);
 extern "C" s32 fn_80218120(s32);
 extern "C" s32 fn_802E317C(const char *, ...);
-extern "C" char lbl_8033D3D4[];
 extern "C" s32 fn_80214D04(void) {
     s32 w = fn_802168E4();
     if (w != 0) {
         return fn_80218120(w);
     }
-    fn_802E317C(lbl_8033D3D4);
+    fn_802E317C("UIGetMenuIndex: No active window");
     return 0;
 }
 
@@ -1856,12 +1865,8 @@ extern "C" s32 fn_80215194(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-extern "C" s32 fn_802151D4(s32 arg0, s32 arg1) {
-    if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
-    }
-    return arg0;
-}
+// 0x802151D4 is MenuState's deleting dtor (the in-class ~MenuState in menustate.h, slot 2 of __vt__9MenuState);
+// our compiler emits that weak copy after the last function instead of here.
 
 extern "C" void fn_80215214(const char* title, const char* message, int (*poll)(int*)) {
     fn_80214FE0(title, message, poll, 1);
@@ -2048,10 +2053,9 @@ extern "C" s32 fn_802155AC(void) {
 }
 
 extern "C" void fn_802C4C80(void*);
-extern "C" int lbl_8033D528[];
 extern "C" void* fn_802155B4(void* arg0, s32 arg1) {
     if (arg0 != 0) {
-        *(void**)arg0 = &lbl_8033D528;
+        *(void**)arg0 = lbl_8033D528;
         fn_802C4C80(((void**)arg0)[1]);
         if (arg1 > 0) {
             ((s32 (*)(void*))fn_80128668)(arg0);
@@ -2063,7 +2067,6 @@ extern "C" void* fn_802155B4(void* arg0, s32 arg1) {
 extern "C" s32 fn_80029004(const char *, s32);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
-extern "C" char lbl_8055B808[8];
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
 extern "C" void fn_80215618(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -2095,13 +2098,12 @@ extern "C" void fn_802C40E8(int, int, int);
 void fn_802C4F2C(int, int *, int *);
 int fn_802C4EE4(int);
 int fn_802C4EFC(int);
-extern "C" char lbl_8033D504[];
 extern "C" s32 fn_802C2FC4(s32);
 extern "C" void *fn_80215738(void *arg0, s32 arg1) {
     s32 old;
     if (arg0 != 0) {
         old = *(s32 *)((char *)arg0 + 4);
-        *(char **)arg0 = lbl_8033D504;
+        *(void **)arg0 = lbl_8033D504;
         if (old != 0) fn_802C2FC4(old);
         if (arg1 > 0) ((s32 (*)(void *))fn_80128668)(arg0);
     }
@@ -2374,7 +2376,7 @@ void MenuState::Unk20(void) {
 
 }
 
-void MenuState::Unk24(void) {
+void MenuState::Unk24(gxCanvas*) {
 
 }
 
@@ -2454,4 +2456,41 @@ int lbl_8055EF50;
 int lbl_8055EF54;
 int lbl_8055EF58;
 int lbl_8055EF5C;
+}
+
+// MenuState slots the hand-built tables reuse (referenced by their linker names).
+extern "C" {
+void Draw__9MenuStateFv(void);
+void Exit__9MenuStateFv(void);
+void Unk14__9MenuStateFv(void);
+void Unk18__9MenuStateFv(void);
+void Unk20__9MenuStateFv(void);
+void Unk24__9MenuStateFP8gxCanvas(void);
+void Unk2C__9MenuStateFv(void);
+void Unk30__9MenuStateFv(void);
+void Unk34__9MenuStateFv(void);
+void Unk38__9MenuStateFv(void);
+void Unk3C__9MenuStateFv(void);
+void Unk40__9MenuStateFv(void);
+void Unk44__9MenuStateFv(void);
+void Unk48__9MenuStateFv(void);
+void Unk4C__9MenuStateFv(void);
+void Unk50__9MenuStateFv(void);
+void Unk54__9MenuStateFv(void);
+void Unk5C__9MenuStateFv(void);
+void Update__9MenuStateFv(void);
+void fn_80219264(void);
+void fn_802192A0(void);
+}
+
+// Virtual tables of the raw-offset handler/widget objects above (vptrs stored by hand), in .data order.
+// CLEANUP: become real classes once the slot functions are methods.
+extern "C" {
+void* lbl_8033D420[24] = {0, 0, (void*)fn_80215194, (void*)fn_80215C18, (void*)Exit__9MenuStateFv, (void*)Unk14__9MenuStateFv, (void*)Unk18__9MenuStateFv, (void*)Update__9MenuStateFv, (void*)Unk20__9MenuStateFv, (void*)Unk24__9MenuStateFP8gxCanvas, (void*)Draw__9MenuStateFv, (void*)Unk2C__9MenuStateFv, (void*)Unk30__9MenuStateFv, (void*)Unk34__9MenuStateFv, (void*)Unk38__9MenuStateFv, (void*)Unk3C__9MenuStateFv, (void*)Unk40__9MenuStateFv, (void*)Unk44__9MenuStateFv, (void*)Unk48__9MenuStateFv, (void*)Unk4C__9MenuStateFv, (void*)Unk50__9MenuStateFv, (void*)Unk54__9MenuStateFv, (void*)fn_80215C28, (void*)Unk5C__9MenuStateFv};
+void* lbl_8033D480[33] = {0, 0, (void*)fn_802152F0, (void*)fn_802158C8, (void*)fn_802158DC, (void*)fn_802158F0, (void*)fn_80215BAC, (void*)fn_80215B58, (void*)fn_80219264, (void*)fn_80215B1C, (void*)fn_80215B30, (void*)fn_80215BB4, (void*)fn_80215B44, (void*)fn_80215A48, (void*)fn_80215A74, (void*)fn_80215984, (void*)fn_80215998, (void*)fn_802159AC, (void*)fn_802159C0, (void*)fn_802159FC, (void*)fn_80215BB8, (void*)fn_80215BBC, (void*)fn_80215A10, (void*)fn_80215A2C, (void*)fn_802159D4, (void*)fn_80215AA4, (void*)fn_80215B08, (void*)fn_80215BC0, (void*)fn_80215BC8, (void*)fn_802159E8, (void*)fn_80215C08, (void*)fn_80215904, (void*)fn_80215944};
+void* lbl_8033D504[9] = {0, 0, (void*)fn_80215738, (void*)fn_80215828, (void*)fn_80215824, (void*)fn_802157DC, (void*)fn_8021583C, (void*)fn_8021581C, (void*)fn_802157A8};
+void* lbl_8033D528[9] = {0, 0, (void*)fn_802155B4, (void*)fn_80215828, (void*)fn_80215824, (void*)fn_8021568C, (void*)fn_8021583C, (void*)fn_80215730, (void*)fn_80215618};
+void* lbl_8033D54C[9] = {0, 0, (void*)fn_802154C0, (void*)fn_80215504, (void*)fn_80215824, (void*)fn_80215544, (void*)fn_8021583C, (void*)fn_802155AC, (void*)fn_80215500};
+void* lbl_8033D570[8] = {0, 0, (void*)fn_802121D4, (void*)fn_80215828, (void*)fn_80215824, 0, (void*)fn_8021583C, (void*)fn_802154B8};
+void* lbl_8033D590[33] = {0, 0, (void*)fn_80215348, (void*)fn_80215414, (void*)fn_80215418, (void*)fn_8021541C, (void*)fn_80215BAC, (void*)fn_802191F0, (void*)fn_80219264, (void*)fn_802192A0, (void*)fn_80215420, (void*)fn_80215BB4, (void*)fn_80215424, (void*)fn_80215428, (void*)fn_80215444, (void*)fn_80215464, (void*)fn_80215468, (void*)fn_8021546C, (void*)fn_80215470, (void*)fn_80215474, (void*)fn_80215BB8, (void*)fn_80215BBC, (void*)fn_80215478, (void*)fn_80215484, (void*)fn_80215490, (void*)fn_802153AC, (void*)fn_80215498, (void*)fn_80215BC0, (void*)fn_80215BC8, (void*)fn_802154A0, (void*)fn_80215C08, (void*)fn_802192AC, (void*)fn_80219354};
 }

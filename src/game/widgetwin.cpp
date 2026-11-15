@@ -1,4 +1,4 @@
-// Widget windows (0x80216054-0x80216D14, "WidgetWindow"): the table of up to 16 open menu windows,
+// Widget windows (0x802160AC-0x80216D14, "WidgetWindow"): the table of up to 16 open menu windows,
 // the pointer position in 640x480 screen space and its button dispatch to the active window,
 // drawing every window with the pointer on top, and the modal run loop that fades a window in,
 // runs it until it reports a result and fades it out again. Names are guesses apart from the strings.
@@ -47,17 +47,8 @@ public:
     u8 padDE5[0xDE8 - 0xDE5];
 };
 
-struct WinRect {
-    u8 pad0[4];
-    s32 x;  // offset 0x4
-    s32 y;  // offset 0x8
-    s32 w;  // offset 0xC
-    s32 h;  // offset 0x10
-};
-
 extern "C" {
 
-void fn_802C3424(s32 x0, s32 y0, s32 x1, s32 y1, s32 a);
 Window* fn_8021832C(Window* w);
 void fn_802C974C(f32 nearPlane, f32 farPlane, f32 fov);
 void fn_80230B5C(UIXform* m);
@@ -124,7 +115,6 @@ void fn_80236600(void);
 double fabs(double x);
 extern s32 lbl_8055CFF0;
 extern s32 lbl_8055CFF4;
-extern s32 lbl_8055FBDC;
 extern u8 lbl_8055F024;
 }
 
@@ -162,17 +152,17 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
     }
 }
 
+// The empty item name the menus give their hotkey rows (MenuItem(lbl_8055B860, 6, ...)). It is all zero yet sits
+// in .sdata, so it was explicitly initialised; it follows uiapi's __sinit strings, so it is not uiapi's. Owner
+// unproven (this unit or window.cpp).
+#pragma explicit_zero_data on
+extern "C" char lbl_8055B860[8] = "";
+#pragma explicit_zero_data off
+
 static inline f32 FadeMax(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 FadeMin(f32 a, f32 b) { return a < b ? a : b; }
 
 extern "C" {
-
-int vf14__14MenuWidgetBaseFv(void) { return 1; }
-
-void fn_8021605C(WinRect* r, int color) {
-    fn_802C3034(reinterpret_cast<gxCanvas*>(color));
-    fn_802C3424(r->x, r->y, r->x + r->w, r->y + r->h, lbl_8055FBDC);
-}
 
 void fn_802160AC(void) {
     Window* w = lbl_8055EF88 ? fn_8021832C(lbl_8055EF88) : 0;

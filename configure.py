@@ -1154,7 +1154,6 @@ config.libs.append(
             Object(Matching, "game/unk_8002B0A0.c"),
             Object(Matching, "game/unk_8002B0B0.c", cflags=cflags_runtime, extra_cflags=["-Cpp_exceptions on"]),
             Object(NonMatching, "game/uiapi.cpp"),
-            Object(Matching, "game/unk_80215E68.c"),
             Object(NonMatching, "game/widgetwin.cpp"),
             Object(Matching, "game/window.cpp"),
             Object(NonMatching, "game/widgets.cpp"),

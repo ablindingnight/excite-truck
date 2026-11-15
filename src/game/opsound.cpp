@@ -168,7 +168,7 @@ public:
     }
     virtual void Enter(void);
     virtual void Changed(int item);
-    virtual void Unk24(void);
+    virtual void Unk24(gxCanvas*);
     // Restarts the announcer preview at volume v. The menu calls it only when a sample is loaded; right after
     // construction none is, so MWCC turns the caller's test into a branch over the (kept) body, as in the target.
     void ResetPreview(f32 v) {
@@ -331,7 +331,7 @@ extern "C" void fn_8023D1C0(void) {
     lbl_8055BB68 = 2;
 }
 
-void SoundOptions::Unk24(void) {}
+void SoundOptions::Unk24(gxCanvas*) {}
 
 void SoundOptions::Enter(void) {
     fn_80221EA0(this, 2, mixer, 4);
