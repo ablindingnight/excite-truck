@@ -1281,15 +1281,6 @@ void fn_80147940(ILayout* l, GartElem* b, const char* set, int part) {
     }
 }
 
-static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
-    V2 r;
-    f32 ax = a.x;
-    f32 ay = a.y;
-    r.x = ax + t * (b.x - ax);
-    r.y = ay + t * (b.y - ay);
-    return r;
-}
-
 static inline f32 LayLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 static inline V2 MakeLayoutPoint(f32 x, f32 y) {
@@ -1359,7 +1350,7 @@ void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
 
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
-    V2 p = LerpV2(a->pos, b->pos, t);
+    V2 p = LayLerpV2(a->pos, b->pos, t);
     *out = *a;
     out->pos = p;
     out->u0 = LerpT(t, a->u0, b->u0);
