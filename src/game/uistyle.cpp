@@ -115,6 +115,92 @@ int fn_802C5220(u32);
 
 
 
+// .data (in retail order): defined before the functions so the per-string pieces can be static.
+extern "C" {
+__declspec(section ".data") const char lbl_8033FBE8[25] = "\x55\x49\x53\x74\x79\x6C\x65\x3A\x20\x74\x6F\x6F\x20\x6D\x61\x6E\x79\x20\x73\x74\x79\x6C\x65\x73";
+__declspec(section ".data") const char lbl_8033FC08[56] = "\x75\x69\x53\x74\x79\x6C\x65\x3A\x20\x67\x78\x46\x6F\x6E\x74\x73\x20\x6E\x6F\x20\x6C\x6F\x6E\x67\x65\x72\x20\x65\x78\x69\x73\x74\x21\x20\x75\x73\x65\x20\x67\x46\x6F\x6E\x74\x73\x20\x61\x6E\x64\x20\x44\x72\x61\x77\x33\x44";
+__declspec(section ".data") const char lbl_8033FC40[10] = "\x75\x69\x66\x6E\x74\x2E\x67\x74\x78";
+__declspec(section ".data") static const char lbl_8033FC4C[11] = "\x73\x74\x79\x6C\x65\x73\x2E\x76\x61\x6C";
+__declspec(section ".data") static const char lbl_8033FC58[12] = "\x73\x74\x79\x6C\x65\x5F\x69\x6E\x64\x65\x78";
+__declspec(section ".data") static const char lbl_8033FC64[11] = "\x73\x74\x79\x6C\x65\x5F\x6E\x61\x6D\x65";
+__declspec(section ".data") static const char lbl_8033FC70[44] = "\x55\x49\x3A\x20\x73\x74\x79\x6C\x65\x20\x74\x61\x62\x6C\x65\x20\x68\x61\x73\x20\x6E\x6F\x20\x73\x74\x79\x6C\x65\x5F\x6E\x61\x6D\x65\x2C\x20\x73\x6B\x69\x70\x70\x69\x6E\x67";
+__declspec(section ".data") static const char lbl_8033FC9C[45] = "\x55\x49\x3A\x20\x73\x74\x79\x6C\x65\x20\x25\x73\x20\x61\x70\x70\x65\x61\x72\x73\x20\x74\x6F\x20\x62\x65\x20\x69\x6E\x76\x61\x6C\x69\x64\x2C\x20\x73\x6B\x69\x70\x70\x69\x6E\x67";
+__declspec(section ".data") static const char lbl_8033FCCC[10] = "\x28\x75\x6E\x6E\x61\x6D\x65\x64\x29";
+__declspec(section ".data") static const char lbl_8033FCD8[10] = "\x66\x6F\x6E\x74\x5F\x6E\x61\x6D\x65";
+__declspec(section ".data") static const char lbl_8033FCE4[10] = "\x66\x6F\x6E\x74\x5F\x73\x69\x7A\x65";
+__declspec(section ".data") static const char lbl_8033FCF0[21] = "\x68\x6F\x72\x69\x7A\x6F\x6E\x74\x61\x6C\x5F\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74";
+__declspec(section ".data") static const char lbl_8033FD08[51] = "\x55\x49\x3A\x20\x75\x6E\x65\x78\x70\x65\x63\x74\x65\x64\x20\x68\x6F\x72\x69\x7A\x6F\x6E\x74\x61\x6C\x20\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74\x20\x27\x25\x73\x27\x2C\x20\x69\x67\x6E\x6F\x72\x69\x6E\x67";
+__declspec(section ".data") static const char lbl_8033FD3C[19] = "\x76\x65\x72\x74\x69\x63\x61\x6C\x5F\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74";
+__declspec(section ".data") static const char lbl_8033FD50[9] = "\x62\x61\x73\x65\x6C\x69\x6E\x65";
+__declspec(section ".data") static const char lbl_8033FD5C[49] = "\x55\x49\x3A\x20\x75\x6E\x65\x78\x70\x65\x63\x74\x65\x64\x20\x76\x65\x72\x74\x69\x63\x61\x6C\x20\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74\x20\x27\x25\x73\x27\x2C\x20\x69\x67\x6E\x6F\x72\x69\x6E\x67";
+__declspec(section ".data") static const char lbl_8033FD90[9] = "\x62\x75\x74\x74\x6F\x6E\x5F\x78";
+__declspec(section ".data") static const char lbl_8033FD9C[9] = "\x62\x75\x74\x74\x6F\x6E\x5F\x79";
+__declspec(section ".data") const char lbl_8033FDA8[13] = "\x53\x54\x59\x4C\x45\x5F\x42\x55\x54\x54\x4F\x4E";
+__declspec(section ".data") const char lbl_8033FDB8[15] = "\x53\x54\x59\x4C\x45\x5F\x43\x48\x45\x43\x4B\x42\x4F\x58";
+__declspec(section ".data") const char lbl_8033FDC8[18] = "\x53\x54\x59\x4C\x45\x5F\x52\x41\x44\x49\x4F\x42\x55\x54\x54\x4F\x4E";
+__declspec(section ".data") const char lbl_8033FDDC[21] = "\x53\x54\x59\x4C\x45\x5F\x54\x52\x41\x43\x4B\x55\x49\x5F\x42\x55\x54\x54\x4F\x4E";
+__declspec(section ".data") const char lbl_8033FDF4[12] = "\x53\x54\x59\x4C\x45\x5F\x49\x4E\x50\x55\x54";
+__declspec(section ".data") const char lbl_8033FE00[14] = "\x53\x54\x59\x4C\x45\x5F\x4E\x55\x4D\x45\x52\x49\x43";
+__declspec(section ".data") const char lbl_8033FE10[14] = "\x53\x54\x59\x4C\x45\x5F\x43\x44\x45\x54\x45\x43\x54";
+__declspec(section ".data") const char lbl_8033FE20[14] = "\x53\x54\x59\x4C\x45\x5F\x4C\x49\x53\x54\x42\x4F\x58";
+__declspec(section ".data") const char lbl_8033FE30[12] = "\x53\x54\x59\x4C\x45\x5F\x4C\x41\x42\x45\x4C";
+__declspec(section ".data") const char lbl_8033FE3C[13] = "\x53\x54\x59\x4C\x45\x5F\x52\x4C\x41\x42\x45\x4C";
+__declspec(section ".data") const char lbl_8033FE4C[14] = "\x53\x54\x59\x4C\x45\x5F\x4D\x45\x53\x53\x41\x47\x45";
+__declspec(section ".data") const char lbl_8033FE5C[19] = "\x53\x54\x59\x4C\x45\x5F\x4C\x4F\x4E\x47\x5F\x4D\x45\x53\x53\x41\x47\x45";
+__declspec(section ".data") const char lbl_8033FE70[12] = "\x53\x54\x59\x4C\x45\x5F\x54\x49\x54\x4C\x45";
+__declspec(section ".data") const char lbl_8033FE7C[18] = "\x53\x54\x59\x4C\x45\x5F\x42\x49\x47\x43\x48\x45\x43\x4B\x42\x4F\x58";
+__declspec(section ".data") const char lbl_8033FE90[12] = "\x53\x54\x59\x4C\x45\x5F\x4D\x55\x4C\x54\x49";
+__declspec(section ".data") const char lbl_8033FE9C[14] = "\x53\x54\x59\x4C\x45\x5F\x53\x50\x49\x4E\x4E\x45\x52";
+__declspec(section ".data") const char lbl_8033FEAC[20] = "\x53\x54\x59\x4C\x45\x5F\x43\x41\x52\x45\x54\x5F\x42\x55\x54\x54\x4F\x4E\x32";
+__declspec(section ".data") const char lbl_8033FEC0[19] = "\x53\x54\x59\x4C\x45\x5F\x43\x41\x52\x45\x54\x5F\x42\x55\x54\x54\x4F\x4E";
+__declspec(section ".data") const char lbl_8033FED4[14] = "\x53\x54\x59\x4C\x45\x5F\x42\x55\x54\x54\x4F\x4E\x32";
+__declspec(section ".data") const char lbl_8033FEE8[16] = "\x53\x54\x59\x4C\x45\x5F\x43\x48\x41\x4C\x4C\x45\x4E\x47\x45";
+__declspec(section ".data") const char lbl_8033FEF8[14] = "\x53\x54\x59\x4C\x45\x5F\x4F\x50\x54\x49\x4F\x4E\x53";
+__declspec(section ".data") const char lbl_8033FF08[18] = "\x53\x54\x59\x4C\x45\x5F\x4E\x41\x4D\x45\x43\x48\x4F\x4F\x53\x45\x52";
+__declspec(section ".data") const char lbl_8033FF1C[17] = "\x53\x54\x59\x4C\x45\x5F\x42\x54\x48\x5F\x4C\x4F\x43\x4B\x45\x44";
+__declspec(section ".data") const char lbl_8033FF30[19] = "\x53\x54\x59\x4C\x45\x5F\x42\x55\x54\x54\x4F\x4E\x5F\x53\x4D\x41\x4C\x4C";
+__declspec(section ".data") const char lbl_8033FF44[21] = "\x53\x54\x59\x4C\x45\x5F\x45\x4E\x44\x5F\x45\x56\x45\x5F\x42\x55\x54\x54\x4F\x4E";
+__declspec(section ".data") const char lbl_8033FF5C[26] = "\x53\x54\x59\x4C\x45\x5F\x53\x54\x41\x52\x54\x5F\x53\x43\x52\x45\x45\x4E\x5F\x42\x55\x54\x54\x4F\x4E";
+__declspec(section ".data") const char lbl_8033FF78[31] = "\x53\x54\x59\x4C\x45\x5F\x4D\x41\x58\x5F\x49\x53\x5F\x4E\x4F\x54\x5F\x41\x5F\x56\x41\x4C\x49\x44\x5F\x53\x54\x59\x4C\x45";
+__declspec(section ".data") const UIStyleNameFields lbl_8033FF98[27] = {
+ {0,lbl_8033FDA8+0},
+ {1,lbl_8033FDB8+0},
+ {2,lbl_8033FDC8+0},
+ {3,lbl_8033FDDC+0},
+ {4,lbl_8033FDF4+0},
+ {5,lbl_8033FE00+0},
+ {6,lbl_8033FE10+0},
+ {7,lbl_8033FE20+0},
+ {8,lbl_8033FE30+0},
+ {9,lbl_8033FE3C+0},
+ {10,lbl_8033FE4C+0},
+ {11,lbl_8033FE5C+0},
+ {12,lbl_8033FE70+0},
+ {13,lbl_8033FE7C+0},
+ {14,lbl_8033FE90+0},
+ {15,lbl_8033FE9C+0},
+ {16,lbl_8033FEAC+0},
+ {17,lbl_8033FEC0+0},
+ {18,lbl_8033FED4+0},
+ {19,lbl_8033FEE8+0},
+ {20,lbl_8033FEF8+0},
+ {21,lbl_8033FF08+0},
+ {22,lbl_8033FF1C+0},
+ {23,lbl_8033FF30+0},
+ {24,lbl_8033FF44+0},
+ {25,lbl_8033FF5C+0},
+ {26,lbl_8033FF78+0},
+};
+__declspec(section ".data") const char lbl_80340070[15] = "\x25\x64\x2C\x20\x25\x64\x2C\x20\x25\x64\x2C\x20\x25\x64";
+__declspec(section ".data") static const char lbl_80340080[11] = "\x66\x6F\x72\x65\x67\x72\x6F\x75\x6E\x64";
+__declspec(section ".data") static const char lbl_8034008C[23] = "\x66\x6F\x72\x65\x67\x72\x6F\x75\x6E\x64\x5F\x68\x69\x67\x68\x6C\x69\x67\x68\x74\x65\x64";
+__declspec(section ".data") static const char lbl_803400A4[11] = "\x62\x61\x63\x6B\x67\x72\x6F\x75\x6E\x64";
+__declspec(section ".data") static const char lbl_803400B0[23] = "\x62\x61\x63\x6B\x67\x72\x6F\x75\x6E\x64\x5F\x68\x69\x67\x68\x6C\x69\x67\x68\x74\x65\x64";
+__declspec(section ".data") static const char lbl_803400C8[12] = "\x74\x65\x78\x74\x5F\x65\x66\x66\x65\x63\x74";
+__declspec(section ".data") static const char lbl_803400D4[12] = "\x6D\x65\x6E\x75\x5F\x62\x75\x74\x74\x6F\x6E";
+__declspec(section ".data") static const char lbl_803400E0[12] = "\x63\x6F\x6C\x6F\x72\x5F\x63\x79\x63\x6C\x65";
+__declspec(section ".data") static const char lbl_803400EC[28] = "\x63\x6F\x6C\x6F\x72\x5F\x63\x79\x63\x6C\x65\x5F\x62\x6C\x61\x63\x6B\x5F\x6F\x75\x74\x6C\x69\x6E\x65";
+}
 static inline int StyleAddPair(int a,int b) { return a+b; }
 static inline f32 StyleMultiply(f32 a,f32 b) { return a*b; }
 
@@ -649,43 +735,42 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
 }
 
 void fn_8022C520(void) {
-    const u32 pool=(u32)lbl_8033FBE8;
     UIStyleInputFields defaults=lbl_802F9F58;
     defaults.words0C[0]=0xFFD6003C; defaults.words0C[1]=0xFFD6003C;
     defaults.words0C[2]=0xFF2DC82D; defaults.words0C[3]=0xFF2DC82D;
     defaults.words0C[7]=0xFF2D2DC8; defaults.words0C[8]=0xFF2D2DC8;
     defaults.words0C[9]=0xFFD6003C; defaults.words0C[10]=0xFFD6003C;
-    ValueTable* table=fn_80131810(((const char*)(pool+0x64)));
+    ValueTable* table=fn_80131810(lbl_8033FC4C);
     if(table) {
         ValueNode* node;
         for(int i=0;(node=table->GetChild(i))!=0;i++) {
             if(strcasecmp(node->GetName(),lbl_8055B8C4)!=0)continue;
             int id;
-            if(node->Has(((const char*)(pool+0x70)))) id=node->GetIntValue(((const char*)(pool+0x70)));
+            if(node->Has(lbl_8033FC58)) id=node->GetIntValue(lbl_8033FC58);
             else {
-                if(!node->Has(((const char*)(pool+0x7C)))) {fn_802E30C8(((const char*)(pool+0x88)));continue;}
-                id=fn_8022CC8C(node->GetValue(((const char*)(pool+0x7C))));
+                if(!node->Has(lbl_8033FC64)) {fn_802E30C8(lbl_8033FC70);continue;}
+                id=fn_8022CC8C(node->GetValue(lbl_8033FC64));
             }
-            if(id<0||id>=256) {fn_802E30C8(((const char*)(pool+0xB4)),node->GetString(((const char*)(pool+0x7C)),((const char*)(pool+0xE4))));continue;}
+            if(id<0||id>=256) {fn_802E30C8(lbl_8033FC9C,node->GetString(lbl_8033FC64,lbl_8033FCCC));continue;}
             UIStyleInputFields input=defaults;
-            input.fontName=node->GetString(((const char*)(pool+0xF0)),input.fontName);
-            input.height=node->GetFloat(((const char*)(pool+0xFC)),input.height);
+            input.fontName=node->GetString(lbl_8033FCD8,input.fontName);
+            input.height=node->GetFloat(lbl_8033FCE4,input.height);
             int horizontal=1;
-            if(node->Has(((const char*)(pool+0x108)))) {
-                const char* value=node->GetValue(((const char*)(pool+0x108)));
+            if(node->Has(lbl_8033FCF0)) {
+                const char* value=node->GetValue(lbl_8033FCF0);
                 if(strcasecmp(value,lbl_8055B8CC)==0)horizontal=1;
                 else if(strcasecmp(value,lbl_8055B8D4)==0)horizontal=2;
                 else if(strcasecmp(value,lbl_8055B8DC)==0)horizontal=4;
-                else fn_802E30C8(((const char*)(pool+0x120)),value);
+                else fn_802E30C8(lbl_8033FD08,value);
             }
             int vertical=8;
-            if(node->Has(((const char*)(pool+0x154)))) {
-                const char* value=node->GetValue(((const char*)(pool+0x154)));
+            if(node->Has(lbl_8033FD3C)) {
+                const char* value=node->GetValue(lbl_8033FD3C);
                 if(strcasecmp(value,lbl_8055B8E4)==0)vertical=8;
                 else if(strcasecmp(value,lbl_8055B8E8)==0)vertical=16;
-                else if(strcasecmp(value,((const char*)(pool+0x168)))==0)vertical=32;
+                else if(strcasecmp(value,lbl_8033FD50)==0)vertical=32;
                 else if(strcasecmp(value,lbl_8055B8F0)==0)vertical=64;
-                else fn_802E30C8(((const char*)(pool+0x174)),value);
+                else fn_802E30C8(lbl_8033FD5C,value);
             }
             input.field08=horizontal|vertical;
             fn_8022CDE4(&input.words0C[0],node->FindChild(lbl_8055B8F8));
@@ -693,8 +778,8 @@ void fn_8022C520(void) {
             if(node->Has(lbl_8055B900))input.resource=node->GetValue(lbl_8055B900);
             input.field54=node->GetInt(lbl_8055B908,input.field54);
             input.field48=node->GetInt(lbl_8055B910,input.field48);
-            input.field4C=node->GetFloat(((const char*)(pool+0x1A8)),input.field4C);
-            input.field50=node->GetFloat(((const char*)(pool+0x1B4)),input.field50);
+            input.field4C=node->GetFloat(lbl_8033FD90,input.field4C);
+            input.field50=node->GetFloat(lbl_8033FD9C,input.field50);
             fn_8022A858(id,&input);
         }
         fn_80131818(table);
@@ -774,20 +859,19 @@ u32 fn_8022CD0C(const char* text) {
 }
 
 void fn_8022CDE4(u32* out,ValueNode* node) {
-    const u32 pool=(u32)lbl_8033FBE8;
     if(node) {
-        if(node->Has(((const char*)(pool+0x498)))) out[0]=fn_8022CD0C(node->GetValue(((const char*)(pool+0x498))));
-        if(node->Has(((const char*)(pool+0x4A4)))) out[1]=fn_8022CD0C(node->GetValue(((const char*)(pool+0x4A4))));
-        if(node->Has(((const char*)(pool+0x4BC)))) out[2]=fn_8022CD0C(node->GetValue(((const char*)(pool+0x4BC))));
-        if(node->Has(((const char*)(pool+0x4C8)))) out[3]=fn_8022CD0C(node->GetValue(((const char*)(pool+0x4C8))));
-        if(node->Has(((const char*)(pool+0x4E0)))) {
-            const char* value=node->GetValue(((const char*)(pool+0x4E0)));
+        if(node->Has(lbl_80340080)) out[0]=fn_8022CD0C(node->GetValue(lbl_80340080));
+        if(node->Has(lbl_8034008C)) out[1]=fn_8022CD0C(node->GetValue(lbl_8034008C));
+        if(node->Has(lbl_803400A4)) out[2]=fn_8022CD0C(node->GetValue(lbl_803400A4));
+        if(node->Has(lbl_803400B0)) out[3]=fn_8022CD0C(node->GetValue(lbl_803400B0));
+        if(node->Has(lbl_803400C8)) {
+            const char* value=node->GetValue(lbl_803400C8);
             if(strcasecmp(value,lbl_8055B930)==0) out[4]=0;
             else if(strcasecmp(value,lbl_8055B938)==0) out[4]=4;
             else if(strcasecmp(value,lbl_8055B940)==0) out[4]=2;
-            else if(strcasecmp(value,((const char*)(pool+0x4EC)))==0) out[4]=1;
-            else if(strcasecmp(value,((const char*)(pool+0x4F8)))==0) out[4]=5;
-            else if(strcasecmp(value,((const char*)(pool+0x504)))==0) out[4]=6;
+            else if(strcasecmp(value,lbl_803400D4)==0) out[4]=1;
+            else if(strcasecmp(value,lbl_803400E0)==0) out[4]=5;
+            else if(strcasecmp(value,lbl_803400EC)==0) out[4]=6;
             else out[4]=fn_8022CD0C(value);
         }
         if(node->Has(lbl_8055B948)) sscanf(node->GetValue(lbl_8055B948),lbl_8055B950,&out[5],&out[6]);
@@ -802,7 +886,7 @@ extern "C" {
 extern const UIStyleInputFields lbl_802F9F58;
 extern const char lbl_8033FBE8[25];
 extern const char lbl_8033FC08[56];
-extern const char lbl_8033FC40[360];
+extern const char lbl_8033FC40[10];
 extern const char lbl_8033FDA8[13];
 extern const char lbl_8033FDB8[15];
 extern const char lbl_8033FDC8[18];
@@ -831,7 +915,7 @@ extern const char lbl_8033FF44[21];
 extern const char lbl_8033FF5C[26];
 extern const char lbl_8033FF78[31];
 extern const UIStyleNameFields lbl_8033FF98[27];
-extern const char lbl_80340070[152];
+extern const char lbl_80340070[15];
 extern const char lbl_8055B8B0[5];
 extern const char lbl_8055B8B8[5];
 extern const char lbl_8055B8C0[2];
@@ -856,66 +940,6 @@ extern const char lbl_8055B940[7];
 extern const char lbl_8055B948[7];
 extern const char lbl_8055B950[8];
 __declspec(section ".rodata") const UIStyleInputFields lbl_802F9F58 = {lbl_8033FC40,25.0f,20,{0,0,0,0,0,0,0,0,0,0,0},4,0,0,0,0xFFFFFFFF,0.0f,0.0f,0xFFFFFFFF};
-__declspec(section ".data") const char lbl_8033FBE8[25] = "\x55\x49\x53\x74\x79\x6C\x65\x3A\x20\x74\x6F\x6F\x20\x6D\x61\x6E\x79\x20\x73\x74\x79\x6C\x65\x73";
-__declspec(section ".data") const char lbl_8033FC08[56] = "\x75\x69\x53\x74\x79\x6C\x65\x3A\x20\x67\x78\x46\x6F\x6E\x74\x73\x20\x6E\x6F\x20\x6C\x6F\x6E\x67\x65\x72\x20\x65\x78\x69\x73\x74\x21\x20\x75\x73\x65\x20\x67\x46\x6F\x6E\x74\x73\x20\x61\x6E\x64\x20\x44\x72\x61\x77\x33\x44";
-__declspec(section ".data") const char lbl_8033FC40[360] = "\x75\x69\x66\x6E\x74\x2E\x67\x74\x78\x00\x00\x00\x73\x74\x79\x6C\x65\x73\x2E\x76\x61\x6C\x00\x00\x73\x74\x79\x6C\x65\x5F\x69\x6E\x64\x65\x78\x00\x73\x74\x79\x6C\x65\x5F\x6E\x61\x6D\x65\x00\x00\x55\x49\x3A\x20\x73\x74\x79\x6C\x65\x20\x74\x61\x62\x6C\x65\x20\x68\x61\x73\x20\x6E\x6F\x20\x73\x74\x79\x6C\x65\x5F\x6E\x61\x6D\x65\x2C\x20\x73\x6B\x69\x70\x70\x69\x6E\x67\x00\x55\x49\x3A\x20\x73\x74\x79\x6C\x65\x20\x25\x73\x20\x61\x70\x70\x65\x61\x72\x73\x20\x74\x6F\x20\x62\x65\x20\x69\x6E\x76\x61\x6C\x69\x64\x2C\x20\x73\x6B\x69\x70\x70\x69\x6E\x67\x00\x00\x00\x00\x28\x75\x6E\x6E\x61\x6D\x65\x64\x29\x00\x00\x00\x66\x6F\x6E\x74\x5F\x6E\x61\x6D\x65\x00\x00\x00\x66\x6F\x6E\x74\x5F\x73\x69\x7A\x65\x00\x00\x00\x68\x6F\x72\x69\x7A\x6F\x6E\x74\x61\x6C\x5F\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74\x00\x00\x00\x00\x55\x49\x3A\x20\x75\x6E\x65\x78\x70\x65\x63\x74\x65\x64\x20\x68\x6F\x72\x69\x7A\x6F\x6E\x74\x61\x6C\x20\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74\x20\x27\x25\x73\x27\x2C\x20\x69\x67\x6E\x6F\x72\x69\x6E\x67\x00\x00\x76\x65\x72\x74\x69\x63\x61\x6C\x5F\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74\x00\x00\x62\x61\x73\x65\x6C\x69\x6E\x65\x00\x00\x00\x00\x55\x49\x3A\x20\x75\x6E\x65\x78\x70\x65\x63\x74\x65\x64\x20\x76\x65\x72\x74\x69\x63\x61\x6C\x20\x61\x6C\x69\x67\x6E\x6D\x65\x6E\x74\x20\x27\x25\x73\x27\x2C\x20\x69\x67\x6E\x6F\x72\x69\x6E\x67\x00\x00\x00\x00\x62\x75\x74\x74\x6F\x6E\x5F\x78\x00\x00\x00\x00\x62\x75\x74\x74\x6F\x6E\x5F\x79\x00\x00\x00";
-__declspec(section ".data") const char lbl_8033FDA8[13] = "\x53\x54\x59\x4C\x45\x5F\x42\x55\x54\x54\x4F\x4E";
-__declspec(section ".data") const char lbl_8033FDB8[15] = "\x53\x54\x59\x4C\x45\x5F\x43\x48\x45\x43\x4B\x42\x4F\x58";
-__declspec(section ".data") const char lbl_8033FDC8[18] = "\x53\x54\x59\x4C\x45\x5F\x52\x41\x44\x49\x4F\x42\x55\x54\x54\x4F\x4E";
-__declspec(section ".data") const char lbl_8033FDDC[21] = "\x53\x54\x59\x4C\x45\x5F\x54\x52\x41\x43\x4B\x55\x49\x5F\x42\x55\x54\x54\x4F\x4E";
-__declspec(section ".data") const char lbl_8033FDF4[12] = "\x53\x54\x59\x4C\x45\x5F\x49\x4E\x50\x55\x54";
-__declspec(section ".data") const char lbl_8033FE00[14] = "\x53\x54\x59\x4C\x45\x5F\x4E\x55\x4D\x45\x52\x49\x43";
-__declspec(section ".data") const char lbl_8033FE10[14] = "\x53\x54\x59\x4C\x45\x5F\x43\x44\x45\x54\x45\x43\x54";
-__declspec(section ".data") const char lbl_8033FE20[14] = "\x53\x54\x59\x4C\x45\x5F\x4C\x49\x53\x54\x42\x4F\x58";
-__declspec(section ".data") const char lbl_8033FE30[12] = "\x53\x54\x59\x4C\x45\x5F\x4C\x41\x42\x45\x4C";
-__declspec(section ".data") const char lbl_8033FE3C[13] = "\x53\x54\x59\x4C\x45\x5F\x52\x4C\x41\x42\x45\x4C";
-__declspec(section ".data") const char lbl_8033FE4C[14] = "\x53\x54\x59\x4C\x45\x5F\x4D\x45\x53\x53\x41\x47\x45";
-__declspec(section ".data") const char lbl_8033FE5C[19] = "\x53\x54\x59\x4C\x45\x5F\x4C\x4F\x4E\x47\x5F\x4D\x45\x53\x53\x41\x47\x45";
-__declspec(section ".data") const char lbl_8033FE70[12] = "\x53\x54\x59\x4C\x45\x5F\x54\x49\x54\x4C\x45";
-__declspec(section ".data") const char lbl_8033FE7C[18] = "\x53\x54\x59\x4C\x45\x5F\x42\x49\x47\x43\x48\x45\x43\x4B\x42\x4F\x58";
-__declspec(section ".data") const char lbl_8033FE90[12] = "\x53\x54\x59\x4C\x45\x5F\x4D\x55\x4C\x54\x49";
-__declspec(section ".data") const char lbl_8033FE9C[14] = "\x53\x54\x59\x4C\x45\x5F\x53\x50\x49\x4E\x4E\x45\x52";
-__declspec(section ".data") const char lbl_8033FEAC[20] = "\x53\x54\x59\x4C\x45\x5F\x43\x41\x52\x45\x54\x5F\x42\x55\x54\x54\x4F\x4E\x32";
-__declspec(section ".data") const char lbl_8033FEC0[19] = "\x53\x54\x59\x4C\x45\x5F\x43\x41\x52\x45\x54\x5F\x42\x55\x54\x54\x4F\x4E";
-__declspec(section ".data") const char lbl_8033FED4[14] = "\x53\x54\x59\x4C\x45\x5F\x42\x55\x54\x54\x4F\x4E\x32";
-__declspec(section ".data") const char lbl_8033FEE8[16] = "\x53\x54\x59\x4C\x45\x5F\x43\x48\x41\x4C\x4C\x45\x4E\x47\x45";
-__declspec(section ".data") const char lbl_8033FEF8[14] = "\x53\x54\x59\x4C\x45\x5F\x4F\x50\x54\x49\x4F\x4E\x53";
-__declspec(section ".data") const char lbl_8033FF08[18] = "\x53\x54\x59\x4C\x45\x5F\x4E\x41\x4D\x45\x43\x48\x4F\x4F\x53\x45\x52";
-__declspec(section ".data") const char lbl_8033FF1C[17] = "\x53\x54\x59\x4C\x45\x5F\x42\x54\x48\x5F\x4C\x4F\x43\x4B\x45\x44";
-__declspec(section ".data") const char lbl_8033FF30[19] = "\x53\x54\x59\x4C\x45\x5F\x42\x55\x54\x54\x4F\x4E\x5F\x53\x4D\x41\x4C\x4C";
-__declspec(section ".data") const char lbl_8033FF44[21] = "\x53\x54\x59\x4C\x45\x5F\x45\x4E\x44\x5F\x45\x56\x45\x5F\x42\x55\x54\x54\x4F\x4E";
-__declspec(section ".data") const char lbl_8033FF5C[26] = "\x53\x54\x59\x4C\x45\x5F\x53\x54\x41\x52\x54\x5F\x53\x43\x52\x45\x45\x4E\x5F\x42\x55\x54\x54\x4F\x4E";
-__declspec(section ".data") const char lbl_8033FF78[31] = "\x53\x54\x59\x4C\x45\x5F\x4D\x41\x58\x5F\x49\x53\x5F\x4E\x4F\x54\x5F\x41\x5F\x56\x41\x4C\x49\x44\x5F\x53\x54\x59\x4C\x45";
-__declspec(section ".data") const UIStyleNameFields lbl_8033FF98[27] = {
- {0,lbl_8033FDA8+0},
- {1,lbl_8033FDB8+0},
- {2,lbl_8033FDC8+0},
- {3,lbl_8033FDDC+0},
- {4,lbl_8033FDF4+0},
- {5,lbl_8033FE00+0},
- {6,lbl_8033FE10+0},
- {7,lbl_8033FE20+0},
- {8,lbl_8033FE30+0},
- {9,lbl_8033FE3C+0},
- {10,lbl_8033FE4C+0},
- {11,lbl_8033FE5C+0},
- {12,lbl_8033FE70+0},
- {13,lbl_8033FE7C+0},
- {14,lbl_8033FE90+0},
- {15,lbl_8033FE9C+0},
- {16,lbl_8033FEAC+0},
- {17,lbl_8033FEC0+0},
- {18,lbl_8033FED4+0},
- {19,lbl_8033FEE8+0},
- {20,lbl_8033FEF8+0},
- {21,lbl_8033FF08+0},
- {22,lbl_8033FF1C+0},
- {23,lbl_8033FF30+0},
- {24,lbl_8033FF44+0},
- {25,lbl_8033FF5C+0},
- {26,lbl_8033FF78+0},
-};
-__declspec(section ".data") const char lbl_80340070[152] = "\x25\x64\x2C\x20\x25\x64\x2C\x20\x25\x64\x2C\x20\x25\x64\x00\x00\x66\x6F\x72\x65\x67\x72\x6F\x75\x6E\x64\x00\x00\x66\x6F\x72\x65\x67\x72\x6F\x75\x6E\x64\x5F\x68\x69\x67\x68\x6C\x69\x67\x68\x74\x65\x64\x00\x00\x62\x61\x63\x6B\x67\x72\x6F\x75\x6E\x64\x00\x00\x62\x61\x63\x6B\x67\x72\x6F\x75\x6E\x64\x5F\x68\x69\x67\x68\x6C\x69\x67\x68\x74\x65\x64\x00\x00\x74\x65\x78\x74\x5F\x65\x66\x66\x65\x63\x74\x00\x6D\x65\x6E\x75\x5F\x62\x75\x74\x74\x6F\x6E\x00\x63\x6F\x6C\x6F\x72\x5F\x63\x79\x63\x6C\x65\x00\x63\x6F\x6C\x6F\x72\x5F\x63\x79\x63\x6C\x65\x5F\x62\x6C\x61\x63\x6B\x5F\x6F\x75\x74\x6C\x69\x6E\x65\x00\x00";
 ModuleTag lbl_8055EFC0;
 UnkStatic123s lbl_80490950;
 UIStyleRecordFields lbl_80490968[256];
