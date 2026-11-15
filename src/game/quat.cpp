@@ -45,6 +45,8 @@ static inline f32 atan2f(f32 y, f32 x) { return atan2(y, x); }
 
 ModuleTag lbl_8055E028;
 
+#pragma push
+#pragma global_optimizer off
 extern "C" void fn_8012F57C(Quat* out, const Quat* a, const Quat* b, f32 t) {
     f32 cosom = a->w * b->w + a->x * b->x + a->y * b->y + a->z * b->z;
     f32 sinom;
@@ -61,7 +63,7 @@ extern "C" void fn_8012F57C(Quat* out, const Quat* a, const Quat* b, f32 t) {
         f32 omega = atan2f(sinom, cosom);
         f32 inv = 1.0f / sinom;
         f32 s0 = inv * sinf((1.0f - t) * omega);
-        f32 s1 = inv * sinf(omega * t);
+        f32 s1 = inv * sinf(t * omega);
         f32 len;
         Quat t0;
         Quat t1;
@@ -78,3 +80,4 @@ extern "C" void fn_8012F57C(Quat* out, const Quat* a, const Quat* b, f32 t) {
         }
     }
 }
+#pragma pop
