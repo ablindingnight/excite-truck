@@ -186,7 +186,6 @@ extern "C" void *fn_8020DE74(unsigned char *vehicle) {
     return hud;
 }
 
-extern "C" void fn_80128668(void *);
 extern "C" void *fn_8020E288(void *arg0, s32 arg1) {
     struct Dummy { virtual ~Dummy(); };
     void *child;
@@ -236,7 +235,7 @@ extern "C" void *fn_8020E288(void *arg0, s32 arg1) {
         if (child != 0) delete (Dummy *)child;
         child = *(void **)((u8 *)arg0 + 0x54);
         if (child != 0) delete (Dummy *)child;
-        if (arg1 > 0) fn_80128668(arg0);
+        if (arg1 > 0) operator delete(arg0);
     }
     return arg0;
 }
@@ -521,13 +520,13 @@ extern "C" void fn_8020E598(Hud *h) {
 
 #pragma cplusplus reset
 
-extern long fn_80009C84(void);
+extern long fn_80009C84__Fv(void);  /* replay.cpp fn_80009C84 (C++ linkage; this region compiles as C) */
 extern void fn_80206750(void *, void *, long);
 
 // Applies the current mode (0 while fn_80009C84 is set, otherwise 2) to the three optional parts.
 void fn_8020F15C(void *arg0) {
     void *owner = *(void **)((char *)*(void **)((char *)arg0 + 4) + 0x1EC);
-    long busy = fn_80009C84();
+    long busy = fn_80009C84__Fv();
     long mode = 2;
     if (busy) mode = 0;
     if (*(void **)((char *)arg0 + 0x48) != 0)

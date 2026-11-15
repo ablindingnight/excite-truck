@@ -294,9 +294,11 @@ public:
 
 #define VE(p) ((VEx*)(p))
 
+struct WallObj;  // springcar.cpp
+
 class SpringCar {
 public:
-    void HitWall(void* w);
+    void HitWall(WallObj* w);
 };
 
 extern "C" {
@@ -545,7 +547,7 @@ void fn_801996BC(RVec3* out, const RVec3* pt, const RVec3* n, u8* a, u8* b, f32 
 void fn_80199870(u8* p, void* w) {
     u32 t = U32(p, 0x10);
     if (t == 'PCAR' || t == 'ACAR') {
-        ((SpringCar*)p)->HitWall(w);
+        ((SpringCar*)p)->HitWall((WallObj*)w);
     }
 }
 

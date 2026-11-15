@@ -195,12 +195,14 @@ void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
 void fn_80011A2C(void);
 void fn_802C9904(void);
 
+void fn_8000AB44(void);
+// overlay.cpp / escape.cpp / replay.cpp (C++ linkage; this part of the file sits in an extern "C" block)
+extern "C++" {
 void fn_800070DC(void);
 int fn_800075A0(int player);
 int fn_80007554(int player, u32 type, int key);
 void fn_80006D9C(void);
 void fn_80006E54(void);
-void fn_8000AB44(void);
 void fn_8000CE60(void);
 void fn_8000CEF0(void);
 void fn_8000D000(int (*callback)(int), void (*draw)(void), int item);
@@ -212,6 +214,7 @@ int fn_8000749C(void);
 void fn_80009C80(void);
 int fn_80009C8C(void);
 int fn_80009CB8(void);
+}
 
 void fn_8013A1F4(void);
 int fn_8013A1F8(int key);

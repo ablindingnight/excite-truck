@@ -368,15 +368,15 @@ public:
     u8 pad0[0x2780];
 };
 
-class StaticPhob {
+class BoxVolume {
 public:
-    StaticPhob(void);
+    BoxVolume(void);
     u8 pad0[0xD0];
 };
 
-class WheelPhob {
+class Wheel {
 public:
-    WheelPhob(void);
+    Wheel(void);
     u8 pad0[0x1FC];
 };
 
@@ -709,9 +709,9 @@ char* fn_801781F4(u32 v) {
 
 Phob* fn_80178224(void) { return (Phob*)new ("NetCar") NetCar; }
 
-Phob* fn_80178258(void) { return (Phob*)new ("PhobStatic") StaticPhob; }
+Phob* fn_80178258(void) { return (Phob*)new ("PhobStatic") BoxVolume; }
 
-Phob* fn_80178290(void) { return (Phob*)new ("WheelPhob") WheelPhob; }
+Phob* fn_80178290(void) { return (Phob*)new ("WheelPhob") Wheel; }
 
 Phob* fn_801782C8(void) { return (Phob*)new ("MutablePhob") MutPhob; }
 

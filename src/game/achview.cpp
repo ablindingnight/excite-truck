@@ -176,11 +176,11 @@ int AchievementsGetLevel(int category, s32 value);
 int AchievementsGetLevelCount(int category);
 extern "C" void fn_80130FCC(char* buf, s32 size, s32 value);
 extern f32 __float_epsilon[];  // FLT_EPSILON
-int strcasecmp(const char* a, const char* b);
-void fn_80236954(const char* name);
-void fn_80236958(const char* name);
-f32 fn_80214D48(void);
-void fn_802168BC(int);
+extern "C" int strcasecmp(const char* a, const char* b);
+extern "C" void fn_80236954(const char* name);
+extern "C" void fn_80236958(const char* name);
+extern "C" f32 fn_80214D48(void);
+extern "C" void fn_802168BC(int);
 extern u8 lbl_8055F67C;     // demo: show every category one step ahead
 extern f32 lbl_8055F398;     // trophy spin angle
 extern f32 lbl_80498EAC[3];  // smoothed view direction

@@ -411,7 +411,7 @@ f32 fn_80181AC0(void) {
 
 f32 fn_80181AEC(void) { return driveTune.v[3]; }
 
-int OptE3Demo(void);
+extern "C++" int OptE3Demo(void);  // cmdline.cpp (C++ linkage; this part of the file sits in an extern "C" block)
 extern "C" {
 void fn_802049DC(const char* name, f32* var, f32 lo, f32 hi, f32 step);  // debug tunable
 int fn_8020503C(const char* name);                                       // debug switch

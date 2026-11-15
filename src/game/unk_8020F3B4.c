@@ -53,7 +53,7 @@ extern struct Unk_804902C4 lbl_804902C4;
 extern long lbl_8055EEC4;
 extern long lbl_8055EED0;
 extern long lbl_8055EED4;
-extern long __AXFXGetLfoSinTable_801769CC();
+extern long fn_801769CC();
 extern void fn_802EC1C0(float vol);
 extern long fn_802EC0FC(void);
 extern void fn_802EC1E4();
@@ -274,7 +274,7 @@ extern long lbl_8055EEBC;
 extern long lbl_8055EEE0;
 extern long lbl_8055EEE4;
 extern long lbl_8055EEE8;
-extern void *fn_8001285C(long);
+extern void *GetEvent__Fi(long);
 extern long fn_802EC1D8(void);
 extern void fn_802E30C8(const char *, ...);
 #pragma push
@@ -290,7 +290,7 @@ public:
 };
 
 extern "C" void fn_8020FCC4(void) {
-    EventInfo *object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+    EventInfo *object = *(EventInfo **)((long *)GetEvent__Fi(*(long *)fn_801769CC()) + 8);
     const char *name = object->GetString("name", "invalid_contest");
     long idx = fn_8020FC6C(name);
     if (idx >= 0 && idx < lbl_804900AC.m_count) {
@@ -409,20 +409,20 @@ extern "C" void fn_802100AC(void) {
     EventInfo *ev;
     fn_802EC12C();
     if (lbl_8055EEE0 == -2) {
-        ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        ev = *(EventInfo **)((long *)GetEvent__Fi(*(long *)fn_801769CC()) + 8);
         fn_8020FDE4(0, "", ev->GetString("name", "invalid_contest"));
         if (lbl_8055EEEC) {
             fn_8020F608(0, IdentGetCurrentSlot());
         }
     } else if (lbl_8055EEE0 == -1) {
-        ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        ev = *(EventInfo **)((long *)GetEvent__Fi(*(long *)fn_801769CC()) + 8);
         fn_8020FDE4(1, "", ev->GetString("name", "invalid_contest"));
         if (lbl_8055EEED) {
             fn_8020F608(1, IdentGetCurrentSlot());
         }
     } else {
         long idx = lbl_8055EEE0 + lbl_8055EEE4 * 10;
-        ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        ev = *(EventInfo **)((long *)GetEvent__Fi(*(long *)fn_801769CC()) + 8);
         fn_8020FDE4(2, ((char **)lbl_804900AC.m_entries)[idx], ev->GetString("name", "invalid_contest"));
         lbl_8055B658 = idx;
     }
@@ -550,7 +550,7 @@ extern "C" void fn_802103BC(void) {
     lbl_8055EED0 = 0;
 }
 #pragma pop
-extern long fn_80009C84(void);
+extern long fn_80009C84__Fv(void);
 extern int fn_801B85CC(void);
 extern unsigned char lbl_8055EEC0;
 extern unsigned char lbl_8055EEC8;
@@ -560,7 +560,7 @@ void fn_80210444(void) {
     lbl_8055EEC0 = 0;
     lbl_8055EEC8 = 0;
     lbl_8055EECC = 0;
-    if (fn_80009C84() == 0 && fn_801B85CC() == 0 &&
+    if (fn_80009C84__Fv() == 0 && fn_801B85CC() == 0 &&
         lbl_8055B658 == fn_8020F3B4(1)) {
         lbl_8055B658 = fn_8020F3B4(0);
         fn_802EC12C();
@@ -664,11 +664,11 @@ extern "C" void fn_80210688(unsigned char arg0) {
     lbl_8055EEBC = count;
 
     loading = 0;
-    if (IsLoadingActive__Fv() && !fn_80009C84()) {
+    if (IsLoadingActive__Fv() && !fn_80009C84__Fv()) {
         loading = 1;
     }
     busy = 1;
-    if (!fn_801B85CC() && !fn_80009C84()) {
+    if (!fn_801B85CC() && !fn_80009C84__Fv()) {
         busy = 0;
     }
 
@@ -699,7 +699,7 @@ extern "C" void fn_80210688(unsigned char arg0) {
     if (fn_802EC124() == -1 && !inWindow) {
         fn_802EC11C(lbl_8055B658);
         fn_802EC138();
-        object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+        object = *(EventInfo **)((long *)GetEvent__Fi(*(long *)fn_801769CC()) + 8);
         if (*(long *)fn_8020FAF0(object->GetString("name", "invalid_contest")) == 1 &&
             lbl_8055EEBC > 0) {
             lbl_8055B658 = fn_8020F6FC();
@@ -964,11 +964,11 @@ long fn_802111E4(long arg0) {
 }
 
 extern long fn_80265D64(void);
-extern void __AXDSPInitCallback_801769E0(void);
+extern void fn_801769E0(void);
 extern void fn_80206444(void);
 extern void fn_80209190(long, float);
-extern long __AXFXGetLfoSinTable_801769CC(void);
-extern void *fn_8001285C(long);
+extern long fn_801769CC(void);
+extern void *GetEvent__Fi(long);
 extern unsigned char lbl_8055EEEC;
 extern unsigned char lbl_8055EEED;
 #pragma push
@@ -985,7 +985,7 @@ extern "C" void fn_802112AC(void) {
         lbl_8055EEE0 = -2;
         if (lbl_8055EEBC > 0) {
             fn_8020FCC4();
-            object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+            object = *(EventInfo **)((long *)GetEvent__Fi(*(long *)fn_801769CC()) + 8);
             mode = *(long *)fn_8020FAF0(object->GetString("name", "invalid_contest"));
             if (mode == 1) {
                 lbl_8055EEE0 = -1;
@@ -1025,7 +1025,7 @@ extern "C" void fn_802113D8(void) {
     EventInfo *object;
 
     if (fn_80265D64() == 0) {
-        __AXDSPInitCallback_801769E0();
+        fn_801769E0();
     }
     fn_80206444();
     fn_80209190(lbl_8055EEF0, 0.0f);
@@ -1034,7 +1034,7 @@ extern "C" void fn_802113D8(void) {
     lbl_8055B65C = lbl_8055B658;
     lbl_8055EEEC = zero;
     lbl_8055EEED = zero;
-    object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
+    object = *(EventInfo **)((long *)GetEvent__Fi(*(long *)fn_801769CC()) + 8);
     mode = *(long *)fn_8020FAF0(object->GetString("name", "invalid_contest"));
     if (mode == 1) {
         lbl_8055EEE0 = -1;

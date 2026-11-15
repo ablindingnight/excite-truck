@@ -549,6 +549,7 @@ public:
     void Pause(int i);
     void Resume(int i);
     void StopAll(void);
+    void Rewind(void);
     void Update(void);
     void Draw(int flags);
 
@@ -853,6 +854,8 @@ public:
     virtual void vfFC(void);
 };
 
+extern "C" int fn_801B8514(void);  // amaster.cpp: nonzero while the race is running
+
 class GameMode : public GameUI {
 public:
     virtual ~GameMode(void) {}
@@ -903,7 +906,7 @@ public:
     virtual int vfD0(void) { return 0; }
     virtual int vfD4(int car) {
         int r = 0;
-        if (IsRacing(car) && !vf20(car)) {
+        if (fn_801B8514() && !vf20(car)) {
             r = 1;
         }
         return r;
@@ -918,7 +921,6 @@ public:
     virtual void vfF4(void) {}
 
 
-    int IsRacing(int car);  // 0x801B8514
 
     s32 unk4;  // offset 0x4
 
@@ -959,10 +961,12 @@ struct Path {
 };
 
 // Ideal-path walker from the track map unit (0x801352B8..).
-struct PathIter {
-    PathIter(void);
-    ~PathIter(void);
-    int Set(int index);
+struct CenterLine;
+class LineFollower {
+public:
+    LineFollower(void);
+    ~LineFollower(void);
+    void SetLine(CenterLine* line);
     u8 pad0[0x2C];
     Path* path;  // offset 0x2C
     u8 pad30[0x38 - 0x30];
@@ -979,7 +983,7 @@ struct RaceClock {
     f32 t;  // offset 0x10
 };
 
-extern "C" void PlaceCamera(Cam* cam, PathIter* it, f32 a, f32 b);
+extern "C" void fn_801B8048(Cam* cam, LineFollower* it, f32 a, f32 b);  // placecar.cpp
 
 static inline int Boosting(Truck* t) { return !NearZero(t->boost); }
 
@@ -2512,7 +2516,6 @@ void fn_801CB5DC(int car, int score, int grade);
 void fn_801CB648(int car, int a, f32 t);
 void* fn_80178C9C(void);
 void* fn_802C6C34(int id);
-void fn_802AE118(ArtPlayer* a);
 int fn_80204CF0(void);
 void* fn_80156A40(void);
 void fn_801352B8(void* it);
@@ -2847,11 +2850,11 @@ inline int ZoneMaster::vf54(void) { return 0x1008; }
 inline CSubTaskMgr* ZoneMaster::vfE8(void) { return fn_8013D288(); }
 
 inline int ZoneMaster::vfA0(Cam* cam) {
-    PathIter it;
+    LineFollower it;
     Path* path;
-    it.Set((int)((PathSet*)fn_80156A40())->Get(0));
+    it.SetLine((CenterLine*)((PathSet*)fn_80156A40())->Get(0));
     path = it.path;
-    PlaceCamera(cam, &it, 0.0f, path->len - 25.0f - 35.0f);
+    fn_801B8048(cam, &it, 0.0f, path->len - 25.0f - 35.0f);
     ScaleV(&cam->v30, &cam->v18, 4.4444447f);
     cam->i44 = 1;
     return 1;
@@ -2924,7 +2927,7 @@ inline int ZoneMaster::vf8C(int p, int key) {
             if (hud.State() == 1 && !hud.noBonus && hud.t > 0.0f && now - hud.t < 1.0f) {
                 hud.noBonus = 1;
                 if (hud.anim) {
-                    fn_802AE118(hud.anim);
+                    hud.anim->Rewind();
                 }
                 StopSound(hud.timeBonusAnim);
                 StopSound(hud.noTimeBonusAnim);

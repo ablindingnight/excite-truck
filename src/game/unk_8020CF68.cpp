@@ -29,7 +29,7 @@ extern void fn_80206444(void);
 extern float fn_80209028(void);
 extern float fn_8020A5F0(void);
 extern int fn_80265D64(void);
-extern void __AXDSPInitCallback_801769E0(void);
+extern void fn_801769E0(void);
 extern void fn_80230E90(int);
 extern void *fn_802090D4(const char *);
 extern void *fn_80145E70(const char *);
@@ -132,7 +132,7 @@ void fn_8020D224(void) {
     lbl_8055EE8C = value;
     lbl_8055EE84 = value;
     if (fn_80265D64() == 0)
-        __AXDSPInitCallback_801769E0();
+        fn_801769E0();
     fn_80206444();
     fn_80209190(lbl_8055EE74, 0.0f);
     lbl_8055EE78 = 0;

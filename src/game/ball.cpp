@@ -216,9 +216,9 @@ extern "C" BSound* fn_802077A4(const char* name, int prio, const BVec3* vel, con
 class Phob;
 extern "C" void fn_8019EECC(Phob* p, BVec3* v);
 
-class BShape {
+class CollShape {
 public:
-    BShape(Phob* o, const BMtx* m, u32 t, f32 k, f32 s) {
+    CollShape(Phob* o, const BMtx* m, u32 t, f32 k, f32 s) {
         mtx = m;
         owner = o;
         a8 = 0;
@@ -228,7 +228,7 @@ public:
         a20 = 100;
         a1C = 0;
     }
-    virtual ~BShape(void);
+    virtual ~CollShape(void);
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
@@ -253,9 +253,9 @@ public:
     s32 a20;          // offset 0x20
 };
 
-class BSphere : public BShape {
+class SphereShape : public CollShape {
 public:
-    BSphere(Phob* o, const BMtx* m, f32 k, f32 s, f32 r, const BVec3& c) : BShape(o, m, 0x53504852, k, s), center(c) {
+    SphereShape(Phob* o, const BMtx* m, f32 k, f32 s, f32 r, const BVec3& c) : CollShape(o, m, 0x53504852, k, s), center(c) {
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;
@@ -272,7 +272,7 @@ public:
             fn_8019EECC(o, &center);
         }
     }
-    virtual ~BSphere(void);
+    virtual ~SphereShape(void);
     virtual void vf38(void);
     f32 radius;    // offset 0x24
     BVec3 center;  // offset 0x28
@@ -318,7 +318,7 @@ public:
     virtual int vf40(void);           // 0x40
     virtual void vf44(void);          // 0x44
     void Xform(void);
-    void AddShape(BShape* s);
+    void AddShape(CollShape* s);
     const s16* Hint(void);
     const BVec3* Vel(void);
     const BMtx* World(void);
@@ -335,6 +335,8 @@ public:
     u8 pad130[0x1E8 - 0x130];
 };
 
+struct RVec3;  // rigid.cpp vector (same layout as BVec3)
+
 class RigidBody : public Phob {
 public:
     RigidBody(void);
@@ -344,7 +346,7 @@ public:
     virtual void vf48(int a, int b, int kind, RigidBody* other);  // 0x48
     virtual void vf4C(void);
     virtual void vf50(void);
-    void Push(int a, int b, const BVec3* imp, const BVec3* at, int kind, int c, BCarRec* by, f32 k);
+    void Push(Phob* a, void* b, const RVec3* imp, const RVec3* at, int kind, const RVec3* c, void* by, f32 k);
     u8 b1E8;  // offset 0x1E8
     u8 b1E9;  // offset 0x1E9
 };
@@ -488,7 +490,7 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                     f32 yv = d.y;
                     imp.y = (-fall * force) * yv;
                     imp.z = d.z * (-fall * force);
-                    b->Push(0, 0, &imp, &at, 1001, 0, by, 1.0f);
+                    b->Push(0, 0, (const RVec3*)&imp, (const RVec3*)&at, 1001, 0, by, 1.0f);
                 }
             }
         }
@@ -498,7 +500,7 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
 extern "C" Ball* fn_8017D688(void) { return new ("Ball") Ball; }
 
 inline void Ball::Init(BallDesc* d) {
-    BSphere* s;
+    SphereShape* s;
     RigidBody::Init(d);
     f32 kk = d->stiffK;
     f32 k = 4.45f * d->stiff / 0.0254f;
@@ -511,7 +513,7 @@ inline void Ball::Init(BallDesc* d) {
     Xform();
     explodable = d->explodable;
     launch = d->launch;
-    s = new ("ball-volume") BSphere(this, &mtx, stiff, skin, radius, c);
+    s = new ("ball-volume") SphereShape(this, &mtx, stiff, skin, radius, c);
     s->SetId(1001);
     AddShape(s);
     b1E8 = 1;

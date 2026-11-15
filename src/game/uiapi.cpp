@@ -16,7 +16,7 @@
 extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" s32 fn_802E317C(const char *, ...);
 extern "C" void fn_80214934(const void *, s32, void *, s32);
-extern "C" s32 fn_80029004(const char *, s32);
+extern "C" char* strrchr(const char *, int);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
 extern "C" s32 fn_802C4F14(s32);
@@ -70,12 +70,12 @@ extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
 s32 fn_80211678(u8* arg0);
 extern "C" int sprintf(char *, const char *, ...);
-extern "C" int stricmp(const char *, const char *);
+extern "C" int strcasecmp(const char *, const char *);
 extern "C" void *memcpy(void *, const void *, unsigned long);
 // Name of the last layout UIBegin saw (first .data object of the unit).
 extern "C" char lbl_8033CAE8[100];
 char lbl_8033CAE8[100] = "__OOPS_NO_LAST_LAYOUT__";
-// Layout names CopyName/stricmp compare against: the first layout and the "no layout" name.
+// Layout names CopyName/strcasecmp compare against: the first layout and the "no layout" name.
 extern "C" char* lbl_8055B6B0;
 char* lbl_8055B6B0 = "__first";
 extern "C" const char* lbl_8055B6BC;
@@ -88,7 +88,6 @@ extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
 
-extern "C" s32 fn_80128668(void);
 extern "C" s32 (*lbl_8055EF0C)(s32 *);
 extern "C" s32 fn_802168BC(s32);
 extern "C" void* fn_8021165C(int dir, int set) {
@@ -154,6 +153,9 @@ public:
     u32 magic;      // 0x28
     s32 sel;        // 0x2C
 };
+// uitable.cpp defines Set(int, int, const char*, char) but this caller passes the flag unconverted (no extsb):
+// call retail's symbol directly with an int flag.
+extern "C" void Set__7UITableFiiPCcc(UITable*, int, int, const char*, int);
 extern "C" UISoundSlot lbl_80490558[8];
 extern "C" void* lbl_80490528[3][4];
 extern "C" void* lbl_8055EF24;
@@ -192,7 +194,7 @@ extern "C" void* lbl_8055EF24;
 extern "C" void* lbl_8055EF28;
 extern "C" void *lbl_8055EF38;
 void LoadTimerProgress(void);
-void LoadTimerEnd(const char* name, int);
+extern "C" void LoadTimerEnd__FPCc(const char* name, int);
 void* operator new(unsigned long size, const char* tag);
 
 static inline void SetSound(UISoundSlot* slot, const char* bank, float volume) {
@@ -288,7 +290,7 @@ extern "C" void fn_80211690(int mode) {
         for (i = 0; i < lbl_8055EF2C->rows; i++) {
             char entry[0x20];
             sprintf(entry, "Entry %d", i + 1);
-            lbl_8055EF2C->Set(i, 0, entry, i % 3);
+            Set__7UITableFiiPCcc(lbl_8055EF2C, i, 0, entry, i % 3);
         }
         lbl_8055EF30 = new ("generic_button_list") CycleList(sItemNames, sItemValues, 8, 0);
         const char* tabs[3] = {"Menu1", "Menu2", "Menu3"};
@@ -328,7 +330,7 @@ extern "C" void fn_80211690(int mode) {
     lbl_8055EF3C = -1;
     lbl_8055EF38 = (void*)-1;
     if (timer) {
-        LoadTimerEnd("-UIBegin", 0);
+        LoadTimerEnd__FPCc("-UIBegin", 0);
     }
     CopyName(lbl_8055B6B0, 100, lbl_8033CAE8);
     const char* label = lite ? "UIBeginLite" : "UIBegin";
@@ -434,7 +436,6 @@ extern "C" void fn_80211FF0(void) {
     }
 }
 
-extern "C" void *fn_801284F8(s32, const char *);
 extern "C" void* lbl_8033D528[];
 extern "C" void* lbl_8033D504[];
 extern "C" s32 fn_8012C33C(s32);
@@ -445,17 +446,17 @@ extern "C" void *fn_802226D4(void *, const char *);
 extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct ObjA { void *vtable; void *value; };
     struct ObjB { void *vtable; void *value; s32 count; s32 divisor; };
-    char *name = (char *)fn_80029004(arg0, 0x2e);
+    char *name = strrchr(arg0, 0x2e);
     ObjA *a;
     ObjB *b;
     void *c;
-    if (stricmp(name + 1, "stp") == 0) {
-        a = (ObjA *)fn_801284F8(8, "simg");
+    if (strcasecmp(name + 1, "stp") == 0) {
+        a = (ObjA *)operator new(8, "simg");
         if (a) { a->vtable = lbl_8033D528; a->value = (void *)fn_802C49E8((s32)arg0); }
         return a;
     }
-    if (stricmp(name + 1, "cvs") == 0) {
-        b = (ObjB *)fn_801284F8(16, "cimg");
+    if (strcasecmp(name + 1, "cvs") == 0) {
+        b = (ObjB *)operator new(16, "cimg");
         if (b) {
             b->vtable = lbl_8033D504;
             if (fn_8012C33C((s32)arg0)) {
@@ -466,13 +467,13 @@ extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
         }
         return b;
     }
-    if (stricmp(name + 1, "img") == 0) {
-        c = fn_801284F8(16, "iimg");
+    if (strcasecmp(name + 1, "img") == 0) {
+        c = operator new(16, "iimg");
         if (c) c = fn_802228B0(c, arg0, arg2, arg3);
         return c;
     }
-    if (stricmp(name + 1, "art") == 0) {
-        c = fn_801284F8(8, "aimg");
+    if (strcasecmp(name + 1, "art") == 0) {
+        c = operator new(8, "aimg");
         if (c) c = fn_802226D4(c, arg0);
         return c;
     }
@@ -480,10 +481,9 @@ extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 0;
 }
 
-extern "C" s32 fn_80128668(void);
 extern "C" s32 fn_802121D4(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        operator delete((void*)arg0);
     }
     return arg0;
 }
@@ -504,7 +504,7 @@ extern "C" float fn_80212248(s32 arg0) {
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
 extern "C" int sprintf(char *, const char *, ...);
-extern "C" int stricmp(const char *, const char *);
+extern "C" int strcasecmp(const char *, const char *);
 extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
     char buf[0x100];
     if (*name == '#') {
@@ -513,8 +513,8 @@ extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
     sprintf(buf, "#%s", name);
     while (*(s32 *)((char *)entry + 4) != 0x7B) {
         if (*(s32 *)((char *)entry + 4) == arg2 && *(char **)entry != 0 &&
-            (stricmp(*(char **)entry, name) == 0 ||
-             stricmp(*(char **)entry, buf) == 0)) return entry;
+            (strcasecmp(*(char **)entry, name) == 0 ||
+             strcasecmp(*(char **)entry, buf) == 0)) return entry;
         entry = (char *)entry + 0x14;
     }
     return 0;
@@ -1632,7 +1632,7 @@ extern "C" void fn_8021481C(const char* movie) {
 }
 
 extern "C" void fn_80214934(const void *arg0, s32 arg1, void *arg2, s32 arg3) {
-    s32 end = fn_80029004((const char *)arg1, 0x2e);
+    s32 end = (s32)strrchr((const char *)arg1, 0x2e);
     if (end == 0) {
         end = (s32)((const char *)arg1 + strlen((const char *)arg1));
     }
@@ -1858,7 +1858,7 @@ extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(i
 
 extern "C" s32 fn_80215194(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        operator delete((void*)arg0);
     }
     return arg0;
 }
@@ -1875,7 +1875,7 @@ extern "C" void fn_8021521C(const char* title, const char* message, int defaultN
 }
 
 // Was the last layout UIBegin/UIDoMappedDialog saw the given one?
-extern "C" int fn_80215228(void) { return stricmp(lbl_8033CAE8, lbl_8055B6B0) == 0; }
+extern "C" int fn_80215228(void) { return strcasecmp(lbl_8033CAE8, lbl_8055B6B0) == 0; }
 
 extern "C" void *lbl_8055EF38;
 extern "C" void* fn_8021525C(void) {
@@ -1913,7 +1913,7 @@ extern "C" s32 fn_802152CC(void) {
 extern "C" void *fn_802152F0(void *arg0, int arg1) {
     if (arg0 != 0) {
         fn_8021915C(arg0, 0);
-        if (arg1 > 0) ((s32 (*)(void *))fn_80128668)(arg0);
+        if (arg1 > 0) operator delete(arg0);
     }
     return arg0;
 }
@@ -1922,7 +1922,7 @@ extern "C" s32 fn_80215348(void *arg0, s32 arg1) {
     if (arg0 != 0) {
         fn_8021915C(arg0, 0);
         if (arg1 > 0) {
-            ((s32 (*)(void *))fn_80128668)(arg0);
+            operator delete(arg0);
         }
     }
     return (s32)arg0;
@@ -2029,7 +2029,7 @@ extern "C" u32 fn_802154B8(void) { return 1; }
 
 extern "C" s32 fn_802154C0(s32 arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
-        fn_80128668();
+        operator delete((void*)arg0);
     }
     return arg0;
 }
@@ -2056,13 +2056,13 @@ extern "C" void* fn_802155B4(void* arg0, s32 arg1) {
         *(void**)arg0 = lbl_8033D528;
         fn_802C4C80(((void**)arg0)[1]);
         if (arg1 > 0) {
-            ((s32 (*)(void*))fn_80128668)(arg0);
+            operator delete(arg0);
         }
     }
     return arg0;
 }
 
-extern "C" s32 fn_80029004(const char *, s32);
+extern "C" char* strrchr(const char *, int);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
 extern "C" s32 fn_802C4F14(s32);
@@ -2072,9 +2072,9 @@ extern "C" void fn_80215618(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     fn_802C4C90(*(s32 *)((char *)arg0 + 4), arg1, arg2, rem, 0);
 }
 
-void fn_802C4F2C(int, int *, int *);
-int fn_802C4EE4(int);
-int fn_802C4EFC(int);
+extern "C" void fn_802C4F2C(int, int *, int *);
+extern "C" int fn_802C4EE4(int);
+extern "C" int fn_802C4EFC(int);
 // Screen rectangle of an image drawn at (x, y), allowing for the image's origin.
 extern "C" void fn_8021568C(void* self, s32 x, s32 y, s32* left, s32* top, s32* right, s32* bottom) {
     int ox = 0;
@@ -2090,11 +2090,10 @@ extern "C" s32 fn_80215730(void *arg0) {
     return fn_802C4F14(*(s32*)((u8*)arg0 + 4));
 }
 
-  s32 fn_80128668(void *);
 extern "C" void fn_802C40E8(int, int, int);
-void fn_802C4F2C(int, int *, int *);
-int fn_802C4EE4(int);
-int fn_802C4EFC(int);
+extern "C" void fn_802C4F2C(int, int *, int *);
+extern "C" int fn_802C4EE4(int);
+extern "C" int fn_802C4EFC(int);
 extern "C" s32 fn_802C2FC4(s32);
 extern "C" void *fn_80215738(void *arg0, s32 arg1) {
     s32 old;
@@ -2102,7 +2101,7 @@ extern "C" void *fn_80215738(void *arg0, s32 arg1) {
         old = *(s32 *)((char *)arg0 + 4);
         *(void **)arg0 = lbl_8033D504;
         if (old != 0) fn_802C2FC4(old);
-        if (arg1 > 0) ((s32 (*)(void *))fn_80128668)(arg0);
+        if (arg1 > 0) operator delete(arg0);
     }
     return arg0;
 }

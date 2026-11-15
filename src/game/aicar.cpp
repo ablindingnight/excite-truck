@@ -1182,7 +1182,7 @@ f32 fn_801931AC(f32 t, f32 a, f32 b, f32 len);
 f32 fn_801948B0(u8* d, f32 t, int steer);
 f32 fn_80194FC8(u8* d);
 u8* fn_8017960C(s32 car);
-void fn_80137788(Pair* p, int car, V2* out);
+extern "C" void fn_80137788(Pair* p, int car, V2* out);
 
 static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
     V2 r;
@@ -1966,7 +1966,7 @@ void fn_80196C90(u8* d) {
     F32(d, 0x148) = F32(d, 0x144);
 }
 
-extern "C++" void fn_80137788(Pair* p, int car, V2* out);
+extern "C" void fn_80137788(Pair* p, int car, V2* out);
 void fn_801377EC(Pair* p, int car, V2* out);
 int fn_8019799C(u8* d, u8* p);
 int fn_8019703C(const u8* d, const u8* p);

@@ -131,9 +131,9 @@ extern void fn_802E7770(void);
 extern int fn_802E7774(void (*arg0)(void));
 extern void fn_802E2E0C(int (*arg0)(int), const char *name);
 int lbl_8055D1D0 = -1;  // output mode last applied
-extern int TRKReadBuffer_ui32(void);
+extern void AXQuit(void);
 extern float fn_802E9A2C(void);
-extern void fn_80060CC0(int, int, void (*)());
+extern void WPADControlSpeaker(int, int, void (*)());
 extern void fn_802E30C8(const char *fmt, ...);  // Spu report
 extern void fn_802E5248(int, int);
 void fn_802E51D0(int chan, int result);
@@ -363,14 +363,14 @@ void fn_802E51D0(int chan, int result) {
 }
 
 void fn_802E5248(int arg0, int arg1) {
-    if (arg1 == 0) fn_80060CC0(arg0, 4, (void (*)())fn_802E51D0);
+    if (arg1 == 0) WPADControlSpeaker(arg0, 4, (void (*)())fn_802E51D0);
 }
 
 void fn_802E5264(int arg0, int arg1) {
     fn_802E30C8(lbl_8034D39C, arg0,
                  arg1 < 0 ? lbl_8034D3C0 : "connect");
     lbl_804FC800[arg0 * 0x2C] = 0;
-    if (arg1 >= 0) fn_80060CC0(arg0, 1, (void (*)())fn_802E5248);
+    if (arg1 >= 0) WPADControlSpeaker(arg0, 1, (void (*)())fn_802E5248);
 }
 
 extern int OSRestoreInterrupts(int);
@@ -415,7 +415,7 @@ void fn_802E52EC(void) {
 }
 
 int fn_802E540C(int arg0) {
-    if (arg0 == 1) TRKReadBuffer_ui32();
+    if (arg0 == 1) AXQuit();
     return 0;
 }
 

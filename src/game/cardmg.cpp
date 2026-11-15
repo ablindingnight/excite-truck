@@ -86,7 +86,7 @@ LightPart lbl_80332D08[13] = {
     {"hood latch", 12, 0.0254f, -1},
 };
 
-extern "C" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
+f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
 
 static inline void MulM(DMat3* out, const DMat3* a, const DMat3* b) {
     if (out == b || out == a) {

@@ -273,10 +273,10 @@ public:
     f32 half;  // offset 0x28
 };
 
-class TubeVol : public TubeBase {
+class TubeShape : public TubeBase {
 public:
-    TubeVol(f32 k, f32 s, f32 r, f32 h) : TubeBase(k, s, r, h) {}
-    virtual ~TubeVol(void);
+    TubeShape(f32 k, f32 s, f32 r, f32 h) : TubeBase(k, s, r, h) {}
+    virtual ~TubeShape(void);
     virtual void vf38(void);
 };
 
@@ -292,9 +292,9 @@ public:
     f32 ring;   // offset 0x28
 };
 
-class SphereVol : public CollShape {
+class SphereShape : public CollShape {
 public:
-    SphereVol(void* o, const void* m, f32 k, f32 s, f32 r, const RVec3& c)
+    SphereShape(void* o, const void* m, f32 k, f32 s, f32 r, const RVec3& c)
         : CollShape(o, m, 0x53504852, k, s), center(c) {
         radius = r;
         f34 = 0.0f;
@@ -312,7 +312,7 @@ public:
             fn_8019EECC(owner, &center);
         }
     }
-    virtual ~SphereVol(void);
+    virtual ~SphereShape(void);
     virtual void vf38(void);
     f32 radius;    // offset 0x24
     RVec3 center;  // offset 0x28
@@ -624,7 +624,7 @@ void fn_802E30C8(const char* fmt, ...);
 ValueNode* fn_8013184C(void);
 void fn_80204018(ObjDesc* d, PlacedObj* o);
 void fn_80204014(void* p, ValueNode* node, ValueNode* props);
-Settings* fn_8000AC38(void);
+extern "C++" Settings* fn_8000AC38(void);
 void fn_8020401C(RaceDesc* r);
 void fn_80204020(void);
 int fn_8020402C(void);
@@ -1990,7 +1990,7 @@ OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame
 }
 
 CollShape* fn_801FBEA8(const ObstacleDesc* d) {
-    return new ("ewcv:tubevol") TubeVol(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
+    return new ("ewcv:tubevol") TubeShape(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
 }
 
 CollShape* fn_801FBF48(const ObstacleDesc* d) {
@@ -2008,7 +2008,7 @@ CollShape* fn_801FBFE8(ObstacleDesc* d) {
 
 CollShape* fn_801FC048(const ObstacleDesc* d) {
     f32 k = 50000.0f;
-    return new ("ewcv:spherevol") SphereVol(0, 0, k, 0.2f, d->shape.f[0], RVec3(0.0f, 0.0f, 0.0f));
+    return new ("ewcv:spherevol") SphereShape(0, 0, k, 0.2f, d->shape.f[0], RVec3(0.0f, 0.0f, 0.0f));
 }
 
 CollShape* fn_801FC12C(const ObstacleDesc* d) {

@@ -47,7 +47,7 @@ struct RaceCarRec {
     s32 air;    // offset 0x2620 (0 while airborne)
     u8 pad2624[0x2690 - 0x2624];
     f32 f2690;  // offset 0x2690
-    f32 F2690(void) const;
+    f32 F2690(void);  // non-const in retail (F2690__10RaceCarRecFv)
     f32 Speed(void) const;
     s32 Air(void) const;
 };
@@ -690,7 +690,7 @@ AirTracker::~AirTracker(void) {}
 f32 AirTracker::Rate(const RaceCarRec* rc) {
     f32 r = 0.0f;
     b272 = 0;
-    if (fn_80141F7C(rc->F2690()) && Airborne(rc)) {
+    if (fn_80141F7C(((RaceCarRec*)rc)->F2690()) && Airborne(rc)) {
         if (dur > minT) {
             Show();
         }
@@ -872,7 +872,7 @@ struct CloseCallSlot {
 extern f32 lbl_8055E3C8;  // race clock
 extern f32 lbl_8055A02C;  // close-call speed
 
-extern "C" f32 fn_801429D0(f32 a, f32 b);  // max
+f32 Max(f32 a, f32 b);  // out-of-line max (0x801429D0)
 
 // Near misses with other cars ("close call", "turbo close call" while boosting).
 namespace {
@@ -1087,9 +1087,9 @@ f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     if (count > 0 && Rank() > 0) {
         flags |= 1;
     }
-    timer = fn_801429D0(0.0f, timer - 0.016683351f);
+    timer = Max(0.0f, timer - 0.016683351f);
     if (!rc->Air() && !Grounded()) {
-        timer = fn_801429D0(timer, 0.033366702f);
+        timer = Max(timer, 0.033366702f);
     }
     r = 0.0f;
     full = 0;
@@ -1599,9 +1599,9 @@ f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
         }
     }
     jumped = 0;
-    timer = fn_801429D0(0.0f, timer - 0.016683351f);
+    timer = Max(0.0f, timer - 0.016683351f);
     if (!rc->Air() && !Grounded()) {
-        timer = fn_801429D0(timer, 0.033366702f);
+        timer = Max(timer, 0.033366702f);
     }
     r = 0.0f;
     full = 0;
@@ -1714,9 +1714,9 @@ f32 ThrowTracker::Rate(const RaceCarRec* rc) {
             handle = 0;
         }
     }
-    timer = fn_801429D0(0.0f, timer - 0.016683351f);
+    timer = Max(0.0f, timer - 0.016683351f);
     if (!rc->Air() && !Grounded()) {
-        timer = fn_801429D0(timer, 0.033366702f);
+        timer = Max(timer, 0.033366702f);
     }
     r = 0.0f;
     full = 0;
@@ -1752,9 +1752,9 @@ f32 SpinTracker::Rate(const RaceCarRec* rc) {
             }
         }
     }
-    timer = fn_801429D0(0.0f, timer - 0.016683351f);
+    timer = Max(0.0f, timer - 0.016683351f);
     if (!rc->Air() && !Grounded()) {
-        timer = fn_801429D0(timer, 0.033366702f);
+        timer = Max(timer, 0.033366702f);
     }
     r = 0.0f;
     full = 0;
@@ -1822,9 +1822,9 @@ f32 RingTracker::Rate(const RaceCarRec* rc) {
         queued--;
         PlaySound(snd);
     }
-    timer = fn_801429D0(0.0f, timer - 0.016683351f);
+    timer = Max(0.0f, timer - 0.016683351f);
     if (!rc->Air() && !Grounded()) {
-        timer = fn_801429D0(timer, 0.033366702f);
+        timer = Max(timer, 0.033366702f);
     }
     r = 0.0f;
     full = 0;

@@ -1802,7 +1802,7 @@ void fn_801195A0(void *arg0) {
     *(s32 *)((u8 *)arg0 + 0x38) = 1;
 }
 
-extern f64 fn_8002EFBC(f32, f64);
+extern f64 pow(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
@@ -1925,7 +1925,7 @@ s32 fn_80119994(void) { return 0; }
 s32 fn_8011999C(void) { return 0; }
 
 void fn_801199A4(void* arg0, s32 arg1) {
-    extern void fn_8003381C(void*, s16*);
+    extern void AXSetVoiceAddr(void*, s16*);
     s16 rect[8];
     u32 width;
     u32 limit;
@@ -1946,7 +1946,7 @@ void fn_801199A4(void* arg0, s32 arg1) {
     rect[5] = x1;
     rect[6] = limit >> 16;
     rect[7] = limit;
-    fn_8003381C(*(void**)arg0, rect);
+    AXSetVoiceAddr(*(void**)arg0, rect);
     if (*(void**)((u8*)arg0 + 4) != 0) {
         u32 height = *(u32*)((u8*)arg0 + 0x14);
         u32 y0 = height >> 1;
@@ -1961,7 +1961,7 @@ void fn_801199A4(void* arg0, s32 arg1) {
         rect[5] = y1;
         rect[6] = limit >> 16;
         rect[7] = limit;
-        fn_8003381C(*(void**)((u8*)arg0 + 4), rect);
+        AXSetVoiceAddr(*(void**)((u8*)arg0 + 4), rect);
     }
 }
 
@@ -1970,7 +1970,7 @@ void fn_80119AB0(void *arg0, s32 arg1) {
     f32 temp;
     if (value < 0) value = 0;
     if (value > 0x7fff) value = 0x7fff;
-    temp = (f32) fn_8002EFBC((f32)value, 1.6666666f);
+    temp = (f32) pow((f32)value, 1.6666666f);
     *(s32 *)((u8 *)arg0 + 0xa4) = (s32)(0.000976582407f * temp);
     fn_80119288(arg0);
 }
@@ -1983,14 +1983,14 @@ void fn_80119B38(void *arg0, s32 arg1) {
     if (value < 0) value = 0;
     if (value > 0x10000) value = 0x10000;
     temp_f31 = (f32)value / 65536.0f;
-    temp_f3 = (f32)fn_8002EFBC(1.0f - temp_f31, 0.3f);
+    temp_f3 = (f32)pow(1.0f - temp_f31, 0.3f);
     *(s32*)((u8*)arg0 + 0xa8) = (s32)(32768.0f * temp_f3);
-    temp_f1 = (f32)fn_8002EFBC(temp_f31, 0.3f);
+    temp_f1 = (f32)pow(temp_f31, 0.3f);
     *(s32*)((u8*)arg0 + 0xac) = (s32)(32768.0f * temp_f1);
     fn_80119288(arg0);
 }
 
-extern f64 fn_8002EFBC(f32, f64);
+extern f64 pow(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
@@ -7965,7 +7965,7 @@ void fn_80126EF0(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src
     row[7] = block[63] + ref[7];
 }
 
-extern f64 fn_8002EFBC(f32, f64);
+extern f64 pow(f32, f64);
 extern void fn_80119288(void *);
 extern void fn_80119300(void *, u32, u32);
 extern void fn_8011943C(void *, s32);
