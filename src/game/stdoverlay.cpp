@@ -222,10 +222,6 @@ static inline LayoutItem* FindResItem(const char* name) {
     return GetResLayout()->Find(name);
 }
 
-static inline u32 WithAlpha(u32 color, s32 alpha) {
-    return (color & 0xFFFFFF) | (alpha << 24);
-}
-
 static inline f32 Lerp(f32 a, f32 b, f32 t) {
     return a + t * (b - a);
 }
@@ -386,6 +382,8 @@ inline void ScoreOverlay::Update(int player, int score) {
 
 inline OverheatOverlay::~OverheatOverlay(void) {}
 
+#pragma push
+#pragma opt_propagation off
 inline void OverheatOverlay::Update(int player, int unused) {
     Truck* truck = fn_8017960C(player);
     LayoutItem* a;
@@ -415,8 +413,14 @@ inline void OverheatOverlay::Update(int player, int unused) {
             b = layout->Find("overheat_text_end");
             if (a && b) {
                 fn_80147CEC(&item, a, b, Lerp(0.0f, 1.0f, Clamp01((lbl_8055E3C8 - s->start - 1.0f) / 0.39999998f)));
-                item.color = WithAlpha(fn_80147C50(a->color, b->color, PulseFast()), alpha);
-                fn_80232928(WithAlpha(fn_80147C50(b->color, a->color, PulseFast()), alpha));
+                item.color = fn_80147C50(a->color, b->color, PulseFast());
+                item.color &= 0xFFFFFFu;
+                item.color |= static_cast<u32>(alpha) << 24;
+                u32 glowAlpha = alpha;
+                glowAlpha <<= 24;
+                u32 glowColor = fn_80147C50(b->color, a->color, PulseFast());
+                glowColor &= 0xFFFFFFu;
+                fn_80232928(glowColor | glowAlpha);
                 fn_80147230(&item, "%s", fn_80131234("RaceOverlay:OVERHEAT"));
                 fn_80232930();
             }
@@ -430,6 +434,7 @@ inline void OverheatOverlay::Update(int player, int unused) {
         }
     }
 }
+#pragma pop
 
 inline void OverheatOverlay::Reset(void) {
     for (int i = 0; i < sizeof(state) / sizeof(state[0]); i++) {
