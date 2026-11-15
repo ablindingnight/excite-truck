@@ -54,7 +54,6 @@ struct JoinSlot {
 };
 
 extern JoinSlot lbl_80498828[2];
-extern void* lbl_80342618[];
 extern s32 lbl_8055F1F4;
 
 ModuleTag lbl_8055F1E8;
@@ -396,11 +395,15 @@ struct StatPanel {
 };
 
 // The car picker: steps through the car list and updates the colour chooser and stat panel.
-struct CarPicker {
-    u8 f0;                 // offset 0x0
-    s32 f4;                // offset 0x4
-    u8 f8;                 // offset 0x8
-    void* vt;              // offset 0xC
+class CarPicker : public MenuWidget {  /* Class name unproven */
+public:
+    CarPicker(s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats, CarUIScreen* screen);
+    virtual ~CarPicker(void) { delete (VDel*)list; }
+    virtual const char* Current(void);
+    virtual void Prev(void);
+    virtual void Next(void);
+    virtual u8* Item(void);  /* Helper name unproven */
+
     s32* unk9COut;         // offset 0x10
     s32* idOut;            // offset 0x14
     ColorPick* colors;     // offset 0x18
@@ -573,8 +576,6 @@ void fn_80129AEC(int a);
 u32 fn_802E4A10(void);
 void fn_8023D4B8(s32 ch);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
-CarPicker* fn_80240BA4(CarPicker* p, s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats,
-                       CarUIScreen* screen);
 CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car);
 void fn_802409AC(CarSel* p, CarSelItem* item);
 }  // extern "C"
@@ -601,16 +602,14 @@ struct RollPanel {
     CarSel sel;          // offset 0x51C
     s32 colorIndex;      // offset 0x578
 
-    RollPanel(JoinSlot* s, u8 flag) : screen(0), color(&s->color, &colorIndex, &screen), stats() {
-        fn_80240BA4(&picker, (s32*)&s->unk4, (s32*)&s->car, &color, &stats, &screen);
+    RollPanel(JoinSlot* s, u8 flag) : screen(0), color(&s->color, &colorIndex, &screen), stats(),
+        picker((s32*)&s->unk4, (s32*)&s->car, &color, &stats, &screen) {
         fn_80240A1C(&sel, &s->id, (u8*)&screen);
-        fn_802409AC(&sel, (CarSelItem*)&picker);
+        fn_802409AC(&sel, &picker);
         fn_802409AC(&sel, &color);
         fn_802409A4((u8*)&stats, flag);
     }
     ~RollPanel(void) {
-        picker.vt = lbl_80342618;
-        delete (VDel*)picker.list;
     }
 };
 
@@ -717,16 +716,6 @@ u8* fn_802407F0(u8* p, int del) {
     return p;
 }
 
-u8* fn_80240830(u8* p, int del) {
-    if (p) {
-        *(void**)(p + 0xC) = lbl_80342618;
-        delete (VDel*)PTR(p, 0x24);
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
 
 
 void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
@@ -763,32 +752,31 @@ CarSel* fn_80240A1C(CarSel* p, s32* slot, u8* car) {
     return p;
 }
 
-// Car picker constructor: starts on the car whose id is *idOut (the first car if none matches).
-CarPicker* fn_80240BA4(CarPicker* p, s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats,
-                       CarUIScreen* screen) {
-    p->f0 = 0;
-    p->f4 = -1;
-    p->f8 = 0;
-    p->vt = lbl_80342618;
-    p->unk9COut = unk9COut;
-    p->idOut = idOut;
-    p->colors = colors;
-    p->stats = stats;
-    p->screen = screen;
-    p->list = fn_8027DB40(6);
-    p->f8 = 1;
-    p->index = 0;
-    int n = p->list->v14();
+}  // extern "C"
+
+CarPicker::CarPicker(s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* stats, CarUIScreen* screen) {
+    this->unk9COut = unk9COut;
+    this->idOut = idOut;
+    this->colors = colors;
+    this->stats = stats;
+    this->screen = screen;
+    this->list = fn_8027DB40(6);
+    flag8 = 1;
+    this->index = 0;
+    int n = this->list->v14();
     for (int i = 0; i < n; i++) {
-        VehicleInfo* v = FindVehicleNamed(p->list->v18(i), 0);
+        VehicleInfo* v = FindVehicleNamed(this->list->v18(i), 0);
         if (v->id == *idOut) {
-            p->index = i;
+            this->index = i;
             break;
         }
     }
-    p->Select();
-    return p;
+    this->Select();
 }
+
+extern "C" {
+
+// Car picker constructor: starts on the car whose id is *idOut (the first car if none matches).
 
 
 
@@ -1058,30 +1046,47 @@ int fn_80241E40(CarSel* p) {
     return 1;
 }
 
-u8* fn_80241EE8(u8* p) { return p + 0x4c; }
+}  // extern "C"
 
-void fn_80241EF0(CarPicker* p) {
-    p->index++;
-    if (p->index >= p->list->v14()) {
-        p->index = 0;
+const char* CarPicker::Current(void) { return name; }
+
+extern "C" {
+
+}  // extern "C"
+
+void CarPicker::Next(void) {
+    this->index++;
+    if (this->index >= this->list->v14()) {
+        this->index = 0;
     }
-    p->Select();
+    this->Select();
 }
 
-void fn_802422DC(CarPicker* p) {
-    if (--p->index < 0) {
-        p->index = p->list->v14() - 1;
+extern "C" {
+
+}  // extern "C"
+
+void CarPicker::Prev(void) {
+    if (--this->index < 0) {
+        this->index = this->list->v14() - 1;
     }
-    p->Select();
+    this->Select();
 }
 
-u8* fn_802426C0(u8* p) {
+extern "C" {
+
+}  // extern "C"
+
+u8* CarPicker::Item(void) {
+    u8* p = (u8*)this;
     s32 i = S32(p, 0x28);
     if (i >= 0 && i < ((VU*)PTR(p, 0x24))->v14()) {
         return ((VU*)PTR(p, 0x24))->v1C(i);
     }
     return 0;
 }
+
+extern "C" {
 
 }  // extern "C"
 
