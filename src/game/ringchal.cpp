@@ -652,7 +652,10 @@ public:
     void Update(int score, int rings, int bonus);
     void Reset(void);
     void Load(void);
-    volatile s32 state;  // offset 0x0
+    // Accessor name unproven. The key handler reads the state through it once and directly afterwards,
+    // which is why retail loads the field twice (this used to be forced with a volatile field).
+    int Active(void) const { return state != 0; }
+    s32 state;  // offset 0x0
     f32 start;         // offset 0x4
     u8 b8;             // offset 0x8
     u8 b9;             // offset 0x9
@@ -2057,7 +2060,7 @@ inline int RingChalMaster::vf8C(int p, int key) {
         }
         return 1;
     }
-    if (results.state != 0) {
+    if (results.Active()) {
         f32 now = lbl_8055E3C8;
         if (results.state == 1 && !results.noBonus && results.start > 0.0f && now - results.start < 1.0f) {
             results.noBonus = 1;

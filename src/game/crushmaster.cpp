@@ -434,13 +434,16 @@ public:
     void Update(int score, int kills, int bonus);
     void Reset(void);
     void Load(void);
+    // Accessor name unproven. The key handler reads the state through it once and directly afterwards,
+    // which is why retail loads the field twice (this used to be forced with a volatile field).
+    int Active(void) const { return state != 0; }
     void Init(void);
-    volatile s32 state;  // offset 0x0
+    s32 state;  // offset 0x0
     f32 start;         // offset 0x4
     u8 b8;             // offset 0x8
     u8 b9;             // offset 0x9
     u8 padA[2];
-    void* layout;      // offset 0xC
+    ArtPlayer* layout; // offset 0xC: the results' art animation player
     u8 noBonus;        // offset 0x10
     u8 pad11[3];
     RSound* sBonus;    // offset 0x14
@@ -512,11 +515,6 @@ public:
 struct LayoutRef {
     void Free(void);
     ILayout* p;  // offset 0x0
-};
-
-struct ArtAnimManager {
-    ArtAnimManager(int a);
-    u8 pad0[8];
 };
 
 extern "C" int fn_80171EC0(int id);
@@ -1044,7 +1042,7 @@ void CrushResults::Update(int score, int kills, int bonus) {
         }
         switch (state) {
         case 0:
-            ((ArtPlayer*)(layout))->Start(fF4);
+            layout->Start(fF4);
             if (strlen(complete)) {
                 PlayIdle(s2C);
             } else {
@@ -1066,27 +1064,27 @@ void CrushResults::Update(int score, int kills, int bonus) {
                 Play(s1C);
             }
             if (f100) {
-                ((ArtPlayer*)(layout))->Pause(fF4);
+                layout->Pause(fF4);
                 state = 2;
             }
             break;
         case 2:
             if (b9) {
-                ((ArtPlayer*)(layout))->Resume(fF4);
+                layout->Resume(fF4);
                 Play(s24);
                 state = 3;
             }
             break;
         case 3:
             if (f104) {
-                ((ArtPlayer*)(layout))->Pause(fF4);
+                layout->Pause(fF4);
                 state = 4;
             }
             break;
         case 4:
             break;
         }
-        ((ArtPlayer*)(layout))->Update();
+        layout->Update();
     }
 }
 
@@ -1145,7 +1143,7 @@ inline void CrushMaster::LoadTuning(ValueNode* t) {
 // Helper name unproven: results set-up. Load and Reset stay out of line here (an inlined body does not
 // expand inlines defined after it), which is what the target shows; no pragma is needed.
 inline void CrushResults::Init(void) {
-    layout = new ("ArtAnimManager") ArtAnimManager(1);
+    layout = new ("ArtAnimManager") ArtPlayer(1);
     Load();
     Reset();
 }
@@ -1200,7 +1198,7 @@ inline void CrushResults::Reset(void) {
     f100 = 0;
     f104 = 0;
     if (layout) {
-        ((ArtPlayer*)(layout))->StopAll();
+        layout->StopAll();
     }
     Stop(sBonus);
     Stop(sNoBonus);
@@ -1235,7 +1233,7 @@ inline void CrushResults::Load(void) {
     StrCopyN(finalScore, "150", 0x14);
     fn_80130980(timeBonus, 0x14, 2, 75.0f);
     fF0 = fn_80204CF0() + 1;
-    fF4 = ((ArtPlayer*)(layout))->Add("a_crush_finish.val", (int)(b));
+    fF4 = layout->Add("a_crush_finish.val", (int)(b));
     sBonus = fn_80207848("pr_crushchal1.sfx", 1);
     sNoBonus = fn_80207848("pr_crushchal1_nobonus.sfx", 1);
     s1C = fn_80207848("pr_crushchal2.sfx", 1);
@@ -1709,7 +1707,7 @@ inline int CrushMaster::vf5C(int p) const {
             vf4C(p);
         }
         if (results.layout) {
-            ((ArtPlayer*)(results.layout))->Draw(0);
+            results.layout->Draw(0);
         }
     }
     if (vf68()) {
@@ -1727,7 +1725,7 @@ inline int CrushMaster::vf8C(int p, int key) {
             results.b9 = 1;
         }
         r = 1;
-    } else if (results.state != 0) {
+    } else if (results.Active()) {
         f32 now = lbl_8055E3C8;
         if (results.state == 1 && !results.noBonus && results.start > 0.0f && now - results.start < 1.0f) {
             results.noBonus = 1;
@@ -1827,10 +1825,16 @@ public:
     virtual void Crushed(int by);  // 0x30
 };
 
+struct RVec3;
+// The car record starts with its rigid body (physics unit); only this method is used here.
+class RigidBody {
+public:
+    void AddForceAt(const RVec3* f, const RVec3* at);
+};
+
 extern "C" {
 CarBrain* fn_801B2EC0(int car);
 u8 fn_801B3050(int car);
-void fn_8017B3A8(RaceCarRec* car, const ValVec3* imp, const ValVec3* at);
 void fn_8018F9B4(RaceCarRec* car);
 }
 
@@ -2024,7 +2028,7 @@ static inline void Punt(int a, int victim) {
     imp.y = 17.777779f * fD4v / 0.0166833512f;
     ValVec3 at = v->mtx.origin;
     at.y += 0.5f;
-    fn_8017B3A8(v, &imp, &at);
+    ((RigidBody*)v)->AddForceAt((const RVec3*)&imp, (const RVec3*)&at);
     fn_8018F9B4(v);
 }
 
