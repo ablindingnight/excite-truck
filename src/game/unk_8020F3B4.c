@@ -44,7 +44,6 @@ struct Unk_804902C4 {
 #pragma cplusplus off
 extern struct Unk_804900AC lbl_804900AC;
 extern void fn_801345D8(void *, ...);
-extern long lbl_8055B664;
 extern unsigned char lbl_8055EEF4;
 extern unsigned char lbl_8055EEF5;
 extern unsigned char lbl_8055EEF6;
@@ -54,33 +53,36 @@ extern struct Unk_804902C4 lbl_804902C4;
 extern long lbl_8055EEC4;
 extern long lbl_8055EED0;
 extern long lbl_8055EED4;
-extern long lbl_8055B658;
 extern long __AXFXGetLfoSinTable_801769CC();
-extern long lbl_8055B674;
-extern long lbl_8033C970[4];
 extern void fn_802EC1C0(float vol);
 extern long fn_802EC0FC(void);
 extern void fn_802EC1E4();
 extern long fn_802EC12C();
+/* Initialised .sdata (0x8055B650-0x8055B661): the two menu songs, the current and the saved song (-1 = none)
+   and the music-on flag. */
+const char *lbl_8055B650 = "mus_postrace";
+const char *lbl_8055B654 = "mus_prerace";
+long lbl_8055B658 = -1;
+long lbl_8055B65C = -1;
+unsigned char lbl_8055B660 = 1;
+
 long fn_8020F3B4(long slot) { return -1; }
  
+// Builds a song's stream file name ("<name>.mp3") in buf.
 long fn_8020F3BC(long arg0, long arg1, long arg2) {
     long result = arg1;
-    fn_801345D8((void *)arg1, arg2, &lbl_8055B664, arg0);
+    fn_801345D8((void *)arg1, arg2, "%s.mp3", arg0);
     return result;
 }
  
-extern char lbl_8055B66C;
+// Builds a song's description file name ("<name>.sng") in buf.
 long fn_8020F400(long arg0, long arg1, long arg2) {
     long result = arg1;
-    fn_801345D8((void *)arg1, arg2, &lbl_8055B66C, arg0);
+    fn_801345D8((void *)arg1, arg2, "%s.sng", arg0);
     return result;
 }
 
 extern char lbl_804904D0[0x40];
-extern long lbl_8055B650;
-extern long lbl_8055B654;
-extern char lbl_8033C95C[];
 extern int fn_8012E938(const char *name);
 extern void fn_8012E81C(const char *name);
 extern void fn_802EC294(int slot, const char *name);
@@ -91,19 +93,19 @@ void fn_8020F444(void) {
     if (!lbl_8055EEF4 && fn_8012E938((const char *)fn_8020F400((long)lbl_804904D0, (long)buf, sizeof(buf)))) {
         fn_8012E81C((const char *)fn_8020F400((long)lbl_804904D0, (long)buf, sizeof(buf)));
         fn_802EC294(0, (const char *)fn_8020F3BC((long)lbl_804904D0, (long)buf, sizeof(buf)));
-        fn_802E30C8(lbl_8033C95C, buf);
+        fn_802E30C8("Tried to load %s!", buf);
         lbl_8055EEF4 = 1;
     }
-    if (!lbl_8055EEF5 && fn_8012E938((const char *)fn_8020F400(lbl_8055B650, (long)buf, sizeof(buf)))) {
-        fn_8012E81C((const char *)fn_8020F400(lbl_8055B650, (long)buf, sizeof(buf)));
-        fn_802EC294(1, (const char *)fn_8020F3BC(lbl_8055B650, (long)buf, sizeof(buf)));
-        fn_802E30C8(lbl_8033C95C, buf);
+    if (!lbl_8055EEF5 && fn_8012E938((const char *)fn_8020F400((long)lbl_8055B650, (long)buf, sizeof(buf)))) {
+        fn_8012E81C((const char *)fn_8020F400((long)lbl_8055B650, (long)buf, sizeof(buf)));
+        fn_802EC294(1, (const char *)fn_8020F3BC((long)lbl_8055B650, (long)buf, sizeof(buf)));
+        fn_802E30C8("Tried to load %s!", buf);
         lbl_8055EEF5 = 1;
     }
-    if (!lbl_8055EEF6 && fn_8012E938((const char *)fn_8020F400(lbl_8055B654, (long)buf, sizeof(buf)))) {
-        fn_8012E81C((const char *)fn_8020F400(lbl_8055B654, (long)buf, sizeof(buf)));
-        fn_802EC294(2, (const char *)fn_8020F3BC(lbl_8055B654, (long)buf, sizeof(buf)));
-        fn_802E30C8(lbl_8033C95C, buf);
+    if (!lbl_8055EEF6 && fn_8012E938((const char *)fn_8020F400((long)lbl_8055B654, (long)buf, sizeof(buf)))) {
+        fn_8012E81C((const char *)fn_8020F400((long)lbl_8055B654, (long)buf, sizeof(buf)));
+        fn_802EC294(2, (const char *)fn_8020F3BC((long)lbl_8055B654, (long)buf, sizeof(buf)));
+        fn_802E30C8("Tried to load %s!", buf);
         lbl_8055EEF6 = 1;
     }
 }
@@ -275,7 +277,6 @@ extern long lbl_8055EEE8;
 extern void *fn_8001285C(long);
 extern long fn_802EC1D8(void);
 extern void fn_802E30C8(const char *, ...);
-extern char lbl_8033C980[];
 #pragma push
 #pragma cplusplus on
 // The current event's info object (event + 0x20); slot 0x18 looks up a string by key.
@@ -285,15 +286,15 @@ public:
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
-    virtual const char *GetString(long key, long fallback);
+    virtual const char *GetString(const char *key, const char *fallback);
 };
 
 extern "C" void fn_8020FCC4(void) {
     EventInfo *object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
-    const char *name = object->GetString((long)&lbl_8055B674, (long)lbl_8033C970);
+    const char *name = object->GetString("name", "invalid_contest");
     long idx = fn_8020FC6C(name);
     if (idx >= 0 && idx < lbl_804900AC.m_count) {
-        fn_802E30C8(lbl_8033C980, idx, ((char **)lbl_804900AC.m_entries)[idx], name);
+        fn_802E30C8("TrackMusic: Found song %d (%s) for event %s", idx, ((char **)lbl_804900AC.m_entries)[idx], name);
     }
     if (idx == fn_8020F3B4(0) && lbl_8055B658 == fn_8020F3B4(1)) {
         idx = fn_8020F3B4(1);
@@ -409,20 +410,20 @@ extern "C" void fn_802100AC(void) {
     fn_802EC12C();
     if (lbl_8055EEE0 == -2) {
         ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
-        fn_8020FDE4(0, "", ev->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+        fn_8020FDE4(0, "", ev->GetString("name", "invalid_contest"));
         if (lbl_8055EEEC) {
             fn_8020F608(0, IdentGetCurrentSlot());
         }
     } else if (lbl_8055EEE0 == -1) {
         ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
-        fn_8020FDE4(1, "", ev->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+        fn_8020FDE4(1, "", ev->GetString("name", "invalid_contest"));
         if (lbl_8055EEED) {
             fn_8020F608(1, IdentGetCurrentSlot());
         }
     } else {
         long idx = lbl_8055EEE0 + lbl_8055EEE4 * 10;
         ev = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
-        fn_8020FDE4(2, ((char **)lbl_804900AC.m_entries)[idx], ev->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+        fn_8020FDE4(2, ((char **)lbl_804900AC.m_entries)[idx], ev->GetString("name", "invalid_contest"));
         lbl_8055B658 = idx;
     }
 }
@@ -510,13 +511,12 @@ void fn_8021031C(void) {
     fn_8000DBC8(&fn_8020F6E0);
 }
  
-extern long fn_80207848(void *, long);
+extern long fn_80207848(const char *, long);
 extern long fn_802EC1D8(void);
 extern long fn_802EC12C(void);
-extern char lbl_8033C9AC[0xD];
 extern long lbl_8055EED0;
 void fn_8021037C(void) {
-    lbl_8055EED0 = fn_80207848(lbl_8033C9AC, 1);
+    lbl_8055EED0 = fn_80207848("goalline.sfx", 1);
     fn_802EC1D8();
     fn_802EC12C();
     fn_8020FCC4();
@@ -549,8 +549,8 @@ extern "C" void fn_802103BC(void) {
 extern long fn_80009C84(void);
 extern int fn_801B85CC(void);
 extern unsigned char lbl_8055EEC0;
-extern unsigned char lbl_8055EEC8, lbl_8055B660;
-extern long lbl_8055EECC, lbl_8055B658;
+extern unsigned char lbl_8055EEC8;
+extern long lbl_8055EECC;
 void fn_80210444(void) {
     lbl_8055B660 = 1;
     lbl_8055EEC0 = 0;
@@ -616,8 +616,8 @@ long fn_80210570(void) {
     return 0;
 }
  
-extern long fn_80145E70(void *);
-extern long fn_802090D4(void *);
+extern long fn_80145E70(const char *);
+extern long fn_802090D4(const char *);
 extern long fn_80209110(void *);
 #pragma cplusplus on
 struct Dummy_80210904 {
@@ -625,11 +625,8 @@ struct Dummy_80210904 {
   };
 #pragma cplusplus off
 extern long fn_8000DA10(void);
-extern long lbl_8033C9BC[];
-extern long lbl_8033C9C8[];
 extern long lbl_8055EED4;
 extern long lbl_8055EEF0;
-extern long lbl_8055B658;
 extern long IsLoadingActive__Fv(void);
 extern long fn_802E2C20(void);
 extern long fn_802EC124(void);
@@ -699,7 +696,7 @@ extern "C" void fn_80210688(unsigned char arg0) {
         fn_802EC11C(lbl_8055B658);
         fn_802EC138();
         object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
-        if (*(long *)fn_8020FAF0(object->GetString((long)&lbl_8055B674, (long)lbl_8033C970)) == 1 &&
+        if (*(long *)fn_8020FAF0(object->GetString("name", "invalid_contest")) == 1 &&
             lbl_8055EEBC > 0) {
             lbl_8055B658 = fn_8020F6FC();
         }
@@ -718,8 +715,8 @@ extern "C" void fn_80210688(unsigned char arg0) {
 #pragma pop
 
 void fn_802108C8(void) {
-    lbl_8055EED4 = fn_80145E70(&lbl_8033C9BC[0]);
-    lbl_8055EEF0 = fn_802090D4(&lbl_8033C9C8[0]);
+    lbl_8055EED4 = fn_80145E70("tmuslyt.val");
+    lbl_8055EEF0 = fn_802090D4("TrkMusDash");
 }
  
 #pragma cplusplus on
@@ -747,8 +744,6 @@ typedef struct CourseVec2 {
 // The menu layout object, read fresh from its global at every use.
 #define COURSE_LAYOUT ((PanelWidget *)lbl_8055EED4)
 
-extern char lbl_8033C940[];
-extern char lbl_8055B680[6], lbl_8055B688[5], lbl_8055B690[6], lbl_8055B698[3], lbl_8055B69C[4], lbl_8055B6A0[8];
 
 #pragma push
 #pragma cplusplus on
@@ -768,29 +763,9 @@ extern "C" void *memset(void *, int, unsigned long);
 extern "C" char *strncpy(char *, const char *, unsigned long);
 extern "C" unsigned long strlen(const char *);
 
-// Draws one of the option buttons below the list, highlighted when it is the selected one.
-static inline void CourseMenu_DrawOption(const char *pool, const char *text, const char *pane, int sel,
-                                         long hilite) {
-    TextBox *t = COURSE_LAYOUT->FindText(text);
-    if (t != 0) {
-        long style = 6;
-        TextBox box;
-        if (sel) {
-            style = 3;
-        }
-        fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), style, COURSE_LAYOUT->FindPane(pane));
-        box = *t;
-        if (sel) {
-            box.color = hilite;
-        }
-        fn_801476C4(&box);
-    }
-}
-
 // Draws the custom-course menu: a page of 10 names with their numbers, the cursor, the option buttons,
 // the page counter and the page arrows.
 extern "C" void fn_8021095C(void) {
-    const char *pool = lbl_8033C940;
     char camera[0x30];
 
     if (lbl_8055EEDC != 0) {
@@ -813,7 +788,7 @@ extern "C" void fn_8021095C(void) {
         long base;
         long i;
 
-        fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), 0, COURSE_LAYOUT->FindPane(pool + 0xA0));
+        fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", 0, COURSE_LAYOUT->FindPane("main_box"));
         hilite = ((long)(255.0f * fn_80230EF4(1)) << 24) | 0xFFFF00;
         col.x = 0.0f;
         col.y = 0.0f;
@@ -821,9 +796,9 @@ extern "C" void fn_8021095C(void) {
         step.y = 0.0f;
         cursor.x = 0.0f;
         cursor.y = 0.0f;
-        name = COURSE_LAYOUT->FindText(lbl_8055B680);
-        num = COURSE_LAYOUT->FindText(lbl_8055B688);
-        next = COURSE_LAYOUT->FindText(lbl_8055B690);
+        name = COURSE_LAYOUT->FindText("item0");
+        num = COURSE_LAYOUT->FindText("num0");
+        next = COURSE_LAYOUT->FindText("item1");
         if (name != 0 && num != 0 && next != 0) {
             col.x = num->pos.x - name->pos.x;
             step.x = next->pos.x - name->pos.x;
@@ -831,7 +806,7 @@ extern "C" void fn_8021095C(void) {
             col.y = y2 - name->pos.y;
             step.y = next->pos.y - name->pos.y;
         }
-        mark = COURSE_LAYOUT->FindPane(pool + 0xAC);
+        mark = COURSE_LAYOUT->FindPane("item0_box");
         if (mark != 0 && name != 0) {
             cursor.x = mark->pos.x - name->pos.x;
             cursor.y = mark->pos.y - name->pos.y;
@@ -850,14 +825,14 @@ extern "C" void fn_8021095C(void) {
             numBox.pos.x = nameBox.pos.x + col.x;
             numBox.pos.y = nameBox.pos.y + col.y;
             if (row == lbl_8055EEE0) {
-                PanelBox *cur = COURSE_LAYOUT->FindPane(pool + 0xAC);
+                PanelBox *cur = COURSE_LAYOUT->FindPane("item0_box");
                 if (cur != 0) {
                     PanelBox b = *cur;
                     float y_ = cursor.y;
                     float xv = cursor.x;
                     b.pos.x = nameBox.pos.x + xv;
                     b.pos.y = nameBox.pos.y + y_;
-                    fn_802101F8(COURSE_LAYOUT, (long)(pool + 0x94), 9, &b);
+                    fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", 9, &b);
                 }
                 nameBox.color = hilite;
                 numBox.color = hilite;
@@ -867,25 +842,85 @@ extern "C" void fn_8021095C(void) {
             while (strlen(buf) > 4 && fn_800108C8(buf, nameBox.size) > 385.0f) {
                 buf[strlen(buf) - 1] = 0;
             }
-            fn_80147230(&nameBox, lbl_8055B698, buf);
-            fn_80147230(&numBox, lbl_8055B69C, i + 1);
+            fn_80147230(&nameBox, "%s", buf);
+            fn_80147230(&numBox, "%d.", i + 1);
         }
-        CourseMenu_DrawOption(pool, pool + 0xB8, pool + 0xC8, lbl_8055EEE0 == -2 && lbl_8055EEEC == 0, hilite);
-        CourseMenu_DrawOption(pool, pool + 0xD4, pool + 0xE8, lbl_8055EEE0 == -2 && lbl_8055EEEC == 1, hilite);
+        {
+            TextBox *opt = COURSE_LAYOUT->FindText("default_item");
+            if (opt != 0) {
+                long style = 6;
+                TextBox box;
+                if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 0) {
+                    style = 3;
+                }
+                fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("default_box"));
+                box = *opt;
+                if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 0) {
+                    box.color = hilite;
+                }
+                fn_801476C4(&box);
+            }
+        }
+        {
+            TextBox *opt = COURSE_LAYOUT->FindText("default_all_item");
+            if (opt != 0) {
+                long style = 6;
+                TextBox box;
+                if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 1) {
+                    style = 3;
+                }
+                fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("default_all_box"));
+                box = *opt;
+                if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 1) {
+                    box.color = hilite;
+                }
+                fn_801476C4(&box);
+            }
+        }
         if (fn_8020F6F8() > 0) {
-            CourseMenu_DrawOption(pool, pool + 0xF8, pool + 0x104, lbl_8055EEE0 == -1 && lbl_8055EEED == 0, hilite);
-            CourseMenu_DrawOption(pool, pool + 0x110, pool + 0x120, lbl_8055EEE0 == -1 && lbl_8055EEED == 1, hilite);
+            {
+                TextBox *opt = COURSE_LAYOUT->FindText("random_item");
+                if (opt != 0) {
+                    long style = 6;
+                    TextBox box;
+                    if (lbl_8055EEE0 == -1 && lbl_8055EEED == 0) {
+                        style = 3;
+                    }
+                    fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("random_box"));
+                    box = *opt;
+                    if (lbl_8055EEE0 == -1 && lbl_8055EEED == 0) {
+                        box.color = hilite;
+                    }
+                    fn_801476C4(&box);
+                }
+            }
+            {
+                TextBox *opt = COURSE_LAYOUT->FindText("random_all_item");
+                if (opt != 0) {
+                    long style = 6;
+                    TextBox box;
+                    if (lbl_8055EEE0 == -1 && lbl_8055EEED == 1) {
+                        style = 3;
+                    }
+                    fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("random_all_box"));
+                    box = *opt;
+                    if (lbl_8055EEE0 == -1 && lbl_8055EEED == 1) {
+                        box.color = hilite;
+                    }
+                    fn_801476C4(&box);
+                }
+            }
         }
-        fn_801476C4(COURSE_LAYOUT->FindText(pool + 0x130));
-        fn_801473F8(COURSE_LAYOUT, pool + 0x144, lbl_8055B6A0, lbl_8055EEE4 + 1, lbl_8055EEE8);
-        fn_801476C4(COURSE_LAYOUT->FindText(pool + 0x150));
+        fn_801476C4(COURSE_LAYOUT->FindText("select_song_prompt"));
+        fn_801473F8(COURSE_LAYOUT, "page_count", "%d / %d", lbl_8055EEE4 + 1, lbl_8055EEE8);
+        fn_801476C4(COURSE_LAYOUT->FindText("page_label"));
         if (lbl_8055EEE4 < lbl_8055EEE8 - 1 && lbl_8055EEE0 >= 0) {
-            fn_8014784C(COURSE_LAYOUT, pool + 0x15C, pool + 0x168, 1);
+            fn_8014784C(COURSE_LAYOUT, "next_arrow", "right_arrow_art", 1);
         }
         if (lbl_8055EEE4 > 0 && lbl_8055EEE0 >= 0) {
-            fn_8014784C(COURSE_LAYOUT, pool + 0x178, pool + 0x184, 1);
+            fn_8014784C(COURSE_LAYOUT, "prev_arrow", "left_arrow_art", 1);
         }
-        fn_801476C4(COURSE_LAYOUT->FindText(pool + 0x194));
+        fn_801476C4(COURSE_LAYOUT->FindText("cancel_prompt"));
     }
     fn_80011A2C();
     fn_802C9904();
@@ -932,9 +967,6 @@ extern void fn_80206444(void);
 extern void fn_80209190(long, float);
 extern long __AXFXGetLfoSinTable_801769CC(void);
 extern void *fn_8001285C(long);
-extern long lbl_8033C970[4];
-extern long lbl_8055B65C;
-extern long lbl_8055B674;
 extern unsigned char lbl_8055EEEC;
 extern unsigned char lbl_8055EEED;
 #pragma push
@@ -952,7 +984,7 @@ extern "C" void fn_802112AC(void) {
         if (lbl_8055EEBC > 0) {
             fn_8020FCC4();
             object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
-            mode = *(long *)fn_8020FAF0(object->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+            mode = *(long *)fn_8020FAF0(object->GetString("name", "invalid_contest"));
             if (mode == 1) {
                 lbl_8055EEE0 = -1;
             } else if (mode == 2) {
@@ -1001,7 +1033,7 @@ extern "C" void fn_802113D8(void) {
     lbl_8055EEEC = zero;
     lbl_8055EEED = zero;
     object = *(EventInfo **)((long *)fn_8001285C(*(long *)__AXFXGetLfoSinTable_801769CC()) + 8);
-    mode = *(long *)fn_8020FAF0(object->GetString((long)&lbl_8055B674, (long)lbl_8033C970));
+    mode = *(long *)fn_8020FAF0(object->GetString("name", "invalid_contest"));
     if (mode == 1) {
         lbl_8055EEE0 = -1;
     } else if (mode == 2) {
@@ -1026,7 +1058,6 @@ void fn_802114C4(void) {
 }
 
 extern void fn_801345D8(void *, ...);
-extern long lbl_8055B664;
 extern unsigned char lbl_8055EEF4;
 extern unsigned char lbl_8055EEF5;
 extern unsigned char lbl_8055EEF6;
