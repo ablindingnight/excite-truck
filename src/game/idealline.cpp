@@ -341,7 +341,8 @@ int LineFollower::Step(V2* p) {
         off.x = ox;
         off.y = oy;
         x = (f32)AbsD(dx * oy + -ox * dy);
-        wide = x > 15.0f * 0.305f + il.seg->width * 0.5f;
+        f32 half = 0.5f;
+        wide = x > 15.0f * 0.305f + il.seg->width * half;
         a = (dx * ox + dy * oy) / s->len;
         if (t + a > 1.0f) {
             int i;
