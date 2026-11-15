@@ -1304,14 +1304,49 @@ void fn_8018F6F8(u8* p) {
 
 }  // extern "C"
 
-struct CVec4 {
-    CVec4(void) {}
-    CVec4(const CVec4& o) {
-        x = o.x;
-        y = o.y;
-        z = o.z;
-        w = o.w;
+// The solver's 4-vector record and the game-side vector built from it (carbody CbVec4, minworld MWV4).
+/* Helper names unproven (CDSolVec, CDV3, CDF, CDVec4, Set, Sol) */
+struct CDSolVec {
+    CDSolVec(void) {}
+    f32 x, y, z, w;
+};
+
+static inline CDSolVec CDSolVec4(f32 x, f32 y, f32 z, f32 w) {
+    CDSolVec v;
+    v.y = y;
+    v.x = x;
+    v.z = z;
+    v.w = w;
+    return v;
+}
+
+struct CDV3 {
+    CDV3(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
     }
+    f32 x, y, z;
+};
+
+struct CDF {
+    CDF(f32 a) { v = a; }
+    f32 v;
+};
+
+struct CDVec4 {
+    CDVec4(CDSolVec s) {
+        CDF f(s.w);
+        Set(CDV3(s.x, s.y, s.z), f);
+    }
+    void Set(const CDV3& p, CDF w_) {
+        x = p.x;
+        y = p.y;
+        z = p.z;
+        w = w_.v;
+    }
+    CDSolVec Sol(void) const { return CDSolVec4(x, y, z, w); }
+    f32& operator[](int i) { return (&x)[i]; }
     f32 x, y, z, w;
 };
 
@@ -1333,10 +1368,6 @@ struct PFrame {
     PVec3 basis[3];
 };
 
-struct PColor {
-    f32 r, g, b, a;
-};
-
 struct WFrame {
     PVec3 basis[3];
 };
@@ -1354,14 +1385,13 @@ void fn_8018F76C(u8* p, int i) {
         fn_802E30C8("cardmg: wheel %d is already missing from car %d", i, S32(p, 0x1EC));
     }
     u8* x;
+    WVec3 hub;
     fn_801BEB30(S32(p, 0x1EC), &x);
-    CVec4 c;
-    PColor pc = *(PColor*)(x + 0x70);
-    c = CVec4(*(CVec4*)&pc);
-    (&c.x)[i] *= 0.15f;
-    *(CVec4*)(x + 0x70) = c;
+    CDVec4 c(*(CDSolVec*)(x + 0x70));
+    c[i] *= 0.15f;
+    *(CDSolVec*)(x + 0x70) = c.Sol();
     WFrame m = *(WFrame*)(p + 0x3C);
-    WVec3 hub = *(WVec3*)(w + 0x23D0);
+    hub = *(WVec3*)(w + 0x23D0);
     hub.x += m.basis[1].x * 0.3f;
     hub.y += m.basis[1].y * 0.3f;
     f32 zv = m.basis[1].z;
