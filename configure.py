@@ -1058,7 +1058,7 @@ config.libs.append(
             Object(NonMatching, "game/sphcoll.cpp"),
             Object(NonMatching, "game/springcar.cpp"),
             Object(NonMatching, "game/netcar.cpp"),
-            Object(NonMatching, "game/inputbind.cpp"),
+            Object(Matching, "game/inputbind.cpp"),
             Object(NonMatching, "game/obstacles.cpp"),
             Object(Matching, "game/corners.cpp"),
             Object(Matching, "game/stub6.cpp"),

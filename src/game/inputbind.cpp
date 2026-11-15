@@ -836,35 +836,33 @@ f32 fn_801A7F98(const Binding* b) {
 f32 fn_801A85E8(const Binding* b) {
     if (b->type == 1) {
         return 0.0f;
-    } else {
-        JoyStatus* cur = &lbl_80435050[b->pad];
-        JoyStatus saved = *cur;
-        Mouse m = lbl_80435370;
-        f32 v;
-        *cur = lbl_804351E0[b->pad];
-        lbl_80435370 = lbl_8043537C;
-        v = fn_801A7F98(b);
-        *cur = saved;
-        lbl_80435370 = m;
-        return v;
     }
+
+    int pad = b->pad;
+    JoyStatus saved = lbl_80435050[pad];
+    Mouse m = lbl_80435370;
+    lbl_80435050[pad] = lbl_804351E0[pad];
+    lbl_80435370 = lbl_8043537C;
+    f32 result = fn_801A7F98(b);
+    lbl_80435050[pad] = saved;
+    lbl_80435370 = m;
+    return result;
 }
 
 int fn_801A8A10(const Binding* b) {
     if (b->type == 1) {
         return 0;
-    } else {
-        JoyStatus* cur = &lbl_80435050[b->pad];
-        JoyStatus saved = *cur;
-        Mouse m = lbl_80435370;
-        int v;
-        *cur = lbl_804351E0[b->pad];
-        lbl_80435370 = lbl_8043537C;
-        v = fn_801A8E38(b);
-        *cur = saved;
-        lbl_80435370 = m;
-        return v;
     }
+
+    int pad = b->pad;
+    JoyStatus saved = lbl_80435050[pad];
+    Mouse m = lbl_80435370;
+    lbl_80435050[pad] = lbl_804351E0[pad];
+    lbl_80435370 = lbl_8043537C;
+    int result = fn_801A8E38(b);
+    lbl_80435050[pad] = saved;
+    lbl_80435370 = m;
+    return result;
 }
 
 int fn_801A8E38(const Binding* b) { return fn_801A7F98(b) > 0.2f; }
@@ -1056,7 +1054,4 @@ BindEntry* fn_801A9234(Binding* b) {
     }
     return 0;
 }
-}
-
-extern "C" {
 }
