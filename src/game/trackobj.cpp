@@ -678,12 +678,12 @@ inline SolObj* NewSolObj(s32 id, s32 event, CollShape* s, const OFrame* f, Value
 extern f32 __float_epsilon[];
 
 ModuleTag lbl_8055EC28;
-RVec3 lbl_80488898(0.0f, 0.0f, 0.0f);
-
-// MATCHING-AID: invented name; the target sets this f32 in __sinit, so its initialiser was a call (any inline).
 static inline f32 QuarterPi(void) { return 0.7853982f; }
-static UnkStatic7F lbl_8055EC30;
-static f32 lbl_8055EC34 = QuarterPi();
+static inline u32 InitialSegment() { return 0x7F000000; }
+
+static const u32 lbl_8055EC30 = InitialSegment();
+static const f32 lbl_8055EC34 = QuarterPi();
+RVec3 lbl_80488898(0.0f, 0.0f, 0.0f);
 ObjDesc* lbl_8055EC38;
 u8 lbl_8055EC3C;
 EWState lbl_8055EC40;
