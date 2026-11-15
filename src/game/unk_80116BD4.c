@@ -1660,7 +1660,7 @@ s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
     s32 any = 0;
     s32 locked;
     u32 i;
-    s32 r;
+    u32 r;
     if (p != 0) {
         locked = 0;
         for (i = 0; i < p->numTracks; i++) {
@@ -2723,27 +2723,48 @@ void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
 #pragma pop
 
 // Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
-void fn_8011AED8(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
-    s16 *out = (s16 *)arg0;
+#pragma push
+#pragma opt_propagation off
+#pragma opt_unroll_loops off
+#pragma ppc_unroll_speculative off
+void fn_8011AED8(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
     f32 *right = arg1 + arg2;
     u32 i;
-    s32 l;
-    s32 r;
+    u32 l;
+    u32 r;
+    u32 d;
+    u64 t;
+    u32 lo = 0x7FFF8000;
+    u32 hi = 0x80007FFF;
+    arg0--;
     for (i = 0; i < arg2; i++) {
         l = (s32)(*arg1++ * farg0);
         r = (s32)(farg0 * *right++);
-        if (l >= -32768) {
-            l = l;
-        } else {
-            l = -32768;
-        }
-        l = l <= 32767 ? l : 32767;
-        r = r >= -32768 ? r : -32768;
-        r = r <= 32767 ? r : 32767;
-        *out++ = l;
-        *out++ = r;
+        l ^= 0x80000000;
+        t = (u64)l - lo;
+        d = (u32)t;
+        d &= ~(u32)(t >> 32);
+        l = d - 32768;
+        l ^= 0x80000000;
+        t = (u64)l - hi;
+        d = (u32)t;
+        d &= (u32)(t >> 32);
+        l = d + 32767;
+        r ^= 0x80000000;
+        t = (u64)r - lo;
+        d = (u32)t;
+        d &= ~(u32)(t >> 32);
+        r = d - 32768;
+        r ^= 0x80000000;
+        t = (u64)r - hi;
+        d = (u32)t;
+        d &= (u32)(t >> 32);
+        r = d + 32767;
+        *++arg0 = l;
+        *++arg0 = r;
     }
 }
+#pragma pop
 
 extern u8 lbl_80329B50[];
 void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
@@ -3008,7 +3029,7 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
         p += size;
     }
     if (channels == 1) fn_8011AE68((s16 *)output, buffer, size, gain);
-    else fn_8011AED8(output, buffer, size, gain);
+    else fn_8011AED8((s16 *)output, buffer, size, gain);
     bits.count = 0;
     return ((u32)bits.next - (u32)bits.start) & 0x1fffffff;
 }
