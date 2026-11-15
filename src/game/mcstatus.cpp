@@ -274,7 +274,10 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
     }
 }
 
+#pragma push
+#pragma opt_lifetimes off
 int MemCardDialogBg::Setup(McDialogCfg* cfg) { return RunChoices(this, cfg); }
+#pragma pop
 
 // Draws the background (or a black screen), the title, the message word-wrapped at 480 units ('^' is a
 // space that does not break) and, when m->frac is set, a row of progress dots.
