@@ -1489,7 +1489,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V17A0.y = V17B0.y;
         V17A0.z = V17B0.z;
         V17A0.w = V17B0.w;
-        V1790.x = V17F0.z;
+        V1790.x = temp_f31;
         V1790.y = V1790.x;
         V1790.z = V1790.y;
         V1780.x = V1790.z;
