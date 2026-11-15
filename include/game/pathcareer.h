@@ -8,7 +8,7 @@ extern "C" {
 void* memset(void* dst, int c, size_t n);
 int strcasecmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);
-void fn_802E6BD8(u32 tag, int version, void* data, int size, void (*reset)(int));
+void fn_802E6BD8(u32 tag, u32 version, void* data, s32 size, void (*reset)(int));
 void fn_802840F4(void);
 void fn_802840F8(void);
 int fn_802E4A10(void);
