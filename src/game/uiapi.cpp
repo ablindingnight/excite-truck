@@ -624,9 +624,6 @@ extern "C" unsigned int fn_8022D1B4(const char*);
 extern "C" void fn_802168EC(void*, WidgetFragment*, int);
 extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
-extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
-extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
-extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
 
 
@@ -1107,8 +1104,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             buffer = input->value;
             capacity = input->arg1;
         }
-        p = (WidgetFragment*)operator new(0xa64, "Input");
-        if (p) p = fn_8021EA64(p, d->x, d->y, d->dx, 10, buffer, capacity, 1, d->flags, 0);
+        p = (WidgetFragment*)new ("Input") Input(d->x, d->y, d->dx, 10, (char*)buffer, (int)capacity, 1, d->flags, 0);
         widgets[count++] = p;
         break;
     }
@@ -1135,10 +1131,9 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* selected = FindStyle(styles, d->style, 2);
         UIStyle* list = FindStyle(styles, d->style, 0xa);
         UIStyle* view = FindStyle(styles, d->style, 0xb);
-        p = (WidgetFragment*)operator new(0x26c, "ListBox");
-        if (p) p = fn_8021E0C0(p, d->x, d->y, d->dx, d->dy, list ? list->value : lbl_8055EF24,
-                               selected ? selected->value : &lbl_8055EF4C,
-                               view ? view->value : (void*)&sDefaultView);
+        p = (WidgetFragment*)new ("ListBox") ListBox(d->x, d->y, d->dx, d->dy, (StringList*)(list ? list->value : lbl_8055EF24),
+                               (int*)(selected ? selected->value : &lbl_8055EF4C),
+                               (ObservedListViewport*)(view ? view->value : (void*)&sDefaultView));
         widgets[count++] = p;
         break;
     }
@@ -1166,9 +1161,8 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 12: {
         UIStyle* control = FindStyle(styles, d->style, 4);
-        p = (WidgetFragment*)operator new(0x274, "CDetect");
-        if (p) p = fn_8021F394(p, d->x, d->y, control ? (const char*)control->arg1 : "Unmapped control",
-                               control ? control->value : (void*)&sDefaultControl, 6);
+        p = (WidgetFragment*)new ("CDetect") CDetect(d->x, d->y, (int)(control ? (const char*)control->arg1 : "Unmapped control"),
+                               (Binding*)(control ? control->value : (void*)&sDefaultControl), 6);
         widgets[count++] = p;
         break;
     }

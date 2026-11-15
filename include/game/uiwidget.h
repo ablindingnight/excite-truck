@@ -504,6 +504,75 @@ public:
     int resource;                // 0x2C4
 };
 
+class StringList;
+struct ObservedListViewport;
+class ListBox : public UIWidget {  /* Class name unproven (allocation tag "ListBox"); vtable lbl_8033EA90 */
+public:
+    ListBox(int x, int y, int width, int height, StringList* list, int* selected, ObservedListViewport* view);  // fn_8021E0C0
+    virtual ~ListBox(void) {}                    // inline: out-of-line copy fn_8021E884
+    virtual void Slot24(void* context);          // fn_8021E3BC
+    virtual void Slot28(void);                   // fn_8021E51C
+    virtual void Slot3C(int x, int y);           // inline fn_80229DC8
+    virtual void Slot40(int x, int y);           // inline fn_80229EB4
+    virtual void Slot4C(int x, int y);           // fn_8021E1C8
+    virtual void Slot50(void);                   // inline fn_80229E74
+    virtual void Slot54(void);                   // inline fn_80229E34
+    virtual int Slot64(int key);                 // fn_8021E620
+    virtual int Slot68(void);                    // inline fn_80229EC4
+    virtual void Slot7C(void);                   // fn_8021E2A0
+    StringList* list;            // 0x244
+    ObservedListViewport* view;  // 0x248
+    int unknown24C, columns, rows, rowHeight;  // 0x24C
+    int* selected;               // 0x25C
+    int direction;               // 0x260
+    float elapsed;               // 0x264
+    unsigned char active;        // 0x268
+};
+
+class DropdownList : public ListBox {  /* Class name unproven; vtable lbl_8033EA0C (no constructor in widgets.cpp) */
+public:
+    virtual void Slot24(void* context);          // fn_8021E8DC (implicit dtor fn_802290B0)
+    virtual void Slot3C(int x, int y);           // inline fn_80229DE8
+    virtual void Slot4C(int x, int y);           // inline fn_80229E1C
+    int width, height;           // 0x26C
+};
+
+class Input : public UIWidget {  /* Class name unproven (allocation tag "Input"); vtable lbl_8033E988 */
+public:
+    Input(int x, int y, int width, int height, char* buffer, int capacity, int stride, int font, bool clear);  // fn_8021EA64
+    virtual ~Input(void);                        // fn_8021EB9C
+    virtual void Slot24(void* context);          // fn_8021EC1C
+    virtual void Slot28(void);                   // fn_8021EDA4
+    virtual void Slot3C(int x, int y);           // fn_8021EFE0
+    virtual int Slot68(void);                    // inline fn_80229ECC
+    virtual void Slot58(void);                   // inline fn_80229ED4
+    virtual void Slot5C(void);                   // inline fn_80229EF4
+    virtual void* Slot60(void);                  // inline fn_80229F14
+    virtual int Slot64(int key);                 // fn_8021F06C
+    virtual void Slot74(int key, void* data);    // fn_8021F044
+    int state, capacity, stride, cursor;  // 0x244
+    char unknown254[0x800];      // 0x254
+    char* buffer;                // 0xA54
+    int font;                    // 0xA58
+    void* first;                 // 0xA5C
+    void* second;                // 0xA60
+};
+
+struct Binding;
+class CDetect : public UILabel {  /* Class name unproven (allocation tag "CDetect"); vtable lbl_8033E8FC */
+public:
+    CDetect(int x, int y, int parameter, Binding* value, int height);  // fn_8021F394 (implicit dtor fn_80229054)
+    virtual void Slot40(int x, int y);           // fn_8021F4F0
+    virtual void Slot58(void);                   // inline fn_80229F1C
+    virtual void Slot5C(void);                   // inline fn_80229F38
+    virtual void Slot74(int key, void* data);    // fn_8021F42C
+    virtual const char* Slot88(void);            // inline fn_80229F58
+    virtual int Slot84(void);                    // inline fn_80229F60
+    char buffer[24];             // 0x254
+    int parameter;               // 0x26C
+    Binding* value;              // 0x270
+};
+
 extern "C" void fn_802C519C(void*);
 class Slider : public UIWidget {  /* Class name unproven (allocation tag "Slider"); vtable lbl_8033E878 */
 public:
