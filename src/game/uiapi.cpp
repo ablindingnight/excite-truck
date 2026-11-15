@@ -616,10 +616,6 @@ extern "C" int fn_80129BC4(void);
 extern "C" unsigned int fn_8022D1B4(const char*);
 extern "C" void fn_802168EC(void*, WidgetFragment*, int);
 extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
-extern "C" WidgetFragment* fn_8021B2B0(WidgetFragment*, int, int, const char*, int, void*, int);
-extern "C" WidgetFragment* fn_8021D044(WidgetFragment*, int, int, void*, const char*, int, int, int, int);
-extern "C" WidgetFragment* fn_8021D6A0(WidgetFragment*, int, int, void*, void*, const char*, int, int, int);
-extern "C" WidgetFragment* fn_8021B460(WidgetFragment*, UIDesc*, const char*, void*);
 extern "C" WidgetFragment* fn_8021995C(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_802224B4(WidgetFragment*, void*, int, int, int, int, void*, void*, int, int);
 extern "C" WidgetFragment* fn_80226630(WidgetFragment*, void*, int, int, int, int, void*, void*);
@@ -805,21 +801,18 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* text = FindStyle(styles, d->style, 3);
         if (text) {
             value = FindStyle(styles, d->style, 2);
-            p = (WidgetFragment*)operator new(0x368, "StaticText");
-            if (p) p = fn_8021B2B0(p, d->x, d->y, (const char*)text->value, d->flags, value ? value->value : 0, 0);
+            p = (WidgetFragment*)new ("StaticText") StaticText(d->x, d->y, (const char*)text->value, d->flags, (int*)(value ? value->value : 0), 0);
             widgets[count++] = p;
             break;
         }
         UIStyle* multi = FindStyle(styles, d->style, 7);
         if (multi) {
-            p = (WidgetFragment*)operator new(0x2c4, "Multi");
-            if (p) p = fn_8021D044(p, d->x, d->y, multi->value, (const char*)multi->arg1, d->flags, 0, 0, 0);
+            p = (WidgetFragment*)new ("Multi") Multi(d->x, d->y, (int*)multi->value, (const char*)multi->arg1, d->flags, 0, 0, 0);
             widgets[count++] = p;
             break;
         }
         value = FindStyle(styles, d->style, 2);
-        p = (WidgetFragment*)operator new(0x368, "StaticText");
-        if (p) p = fn_8021B2B0(p, d->x, d->y, d->name, d->flags, value ? value->value : 0, 0);
+        p = (WidgetFragment*)new ("StaticText") StaticText(d->x, d->y, d->name, d->flags, (int*)(value ? value->value : 0), 0);
         widgets[count++] = p;
         break;
     }
@@ -832,8 +825,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
                 if (text) {
                     int first = fn_80212214(d->field9c);
                     int second = fn_80212214(d->fielda0);
-                    p = (WidgetFragment*)operator new(0x2c8, "CustomMulti");
-                    if (p) p = fn_8021D6A0(p, d->x, d->y, text->value, text->arg1, d->style, d->flags, first, second);
+                    p = (WidgetFragment*)new ("CustomMulti") CustomMulti(d->x, d->y, (int*)text->value, (const char*)text->arg1, d->style, d->flags, first, second);
                     widgets[count++] = p;
                     break;
                 }
@@ -843,8 +835,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             text = 0;
         }
         if (!text || !text->value || !strstr((const char*)text->value, ".gtx")) {
-            p = (WidgetFragment*)operator new(0x374, "CustomText");
-            if (p) p = fn_8021B460(p, d, (text && text->value) ? (const char*)text->value : d->name, value ? value->value : 0);
+            p = (WidgetFragment*)new ("CustomText") CustomText((RotatingChoiceDescriptorNew*)d, (text && text->value) ? (const char*)text->value : d->name, (int*)(value ? value->value : 0));
             widgets[count++] = p;
             break;
         }
@@ -1096,13 +1087,11 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             }
             s32 left, x, right, line;
             fn_80215298(&left, &x, &right, &line, d->x, d->y, d->dx);
-            p = (WidgetFragment*)operator new(0x2c4, "Multi");
-            if (p) p = fn_8021D044(p, x, d->y, value, list, d->flags, left, right, line);
+            p = (WidgetFragment*)new ("Multi") Multi(x, d->y, (int*)value, (const char*)list, d->flags, left, right, line);
             widgets[count++] = p;
             break;
         }
-        p = (WidgetFragment*)operator new(0x2c4, "Multi");
-        if (p) p = fn_8021D044(p, d->x, d->y, value, list, d->flags, 0, 0, 0);
+        p = (WidgetFragment*)new ("Multi") Multi(d->x, d->y, (int*)value, (const char*)list, d->flags, 0, 0, 0);
         widgets[count++] = p;
         break;
     }

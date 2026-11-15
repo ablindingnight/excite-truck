@@ -167,6 +167,32 @@ struct FormattedChoiceDescriptor;
 struct ObservedValueProvider;
 class UITable;
 
+class StaticText : public UILabel {  /* Class name unproven (allocation tag "StaticText"); vtable lbl_8033F20C */
+public:
+    StaticText(int x, int y, const char* label, int height, int* value, int width);  // fn_8021B2B0
+    virtual ~StaticText(void) {}                            // inline: out-of-line copy fn_8021B404
+    virtual void Slot7C(void);                              // fn_8021B32C
+    virtual int Slot84(void);                               // fn_8021B3A0
+    virtual const char* Slot88(void) { return label; }      // inline: fn_80229B70
+    const char* label;           // 0x254
+    unsigned int unknown258, unknown25C, unknown260;
+    int* value;                  // 0x264
+    char text[0x100];            // 0x268
+};
+
+struct RotatingChoiceDescriptorNew;
+class CustomText : public StaticText {  /* Class name unproven (allocation tag "CustomText"); vtable lbl_8033F180 */
+public:
+    CustomText(RotatingChoiceDescriptorNew* desc, const char* label, int* value);  // fn_8021B460
+    virtual ~CustomText(void);                              // fn_8021B8AC
+    virtual void Slot28(void);                              // fn_8021B944
+    virtual int Slot78(void) { return 0; }                  // inline: fn_80229B68
+    int resource;                // 0x368
+    unsigned char mode;          // 0x36C
+    unsigned char pad36D[3];
+    void* pose;                  // 0x370
+};
+
 // Concrete widgets defined in widgets.cpp and built by uiapi's factory. Names are the retail allocation tags
 // passed to operator new (class names unproven). Fields are still read through widgets.cpp's observed views,
 // so the storage here is opaque; declared in reverse retail .data order (vtables come out reversed).
@@ -262,6 +288,34 @@ public:
     int token;                   // 0x25C
     float previousTime, nextTime;  // 0x260
     int fontResource;            // 0x268
+};
+
+class Multi : public UILabel {  /* Class name unproven (allocation tag "Multi"); vtable lbl_8033EBA0 */
+public:
+    Multi(int x, int y, int* value, const char* list, int height, int first, int second, int style);  // fn_8021D044
+    virtual ~Multi(void);                                   // fn_8021D300
+    virtual void Slot14(void);                              // fn_8021D154
+    virtual void Slot24(void* context);                     // fn_8021D568
+    virtual void Slot28(void);                              // fn_8021D378
+    virtual void Slot3C(int a, int b);                      // fn_8021D614
+    virtual int Slot64(int key);                            // fn_8021D1F0
+    virtual void Slot74(int key, void* data);               // fn_8021D618
+    virtual int Slot84(void);                               // fn_8021D1B0
+    virtual const char* Slot88(void) { return text; }       // inline: fn_80229DC0
+    int* value;                  // 0x254
+    int count;                   // 0x258
+    int first, second, style;    // 0x25C
+    char text[0x50];             // 0x268
+    const char** choices;        // 0x2B8
+    int* focus;                  // 0x2BC
+    int token;                   // 0x2C0
+};
+
+class CustomMulti : public Multi {  /* Class name unproven (allocation tag "CustomMulti"); vtable lbl_8033EB14 */
+public:
+    CustomMulti(int x, int y, int* value, const char* list, const char* first, int second, int third, int fourth);  // fn_8021D6A0
+    virtual ~CustomMulti(void);                             // fn_8021D758
+    int resource;                // 0x2C4
 };
 
 extern "C" void fn_802C519C(void*);
