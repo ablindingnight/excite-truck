@@ -208,7 +208,7 @@ extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
-void fn_80144B44(RVec3* v, f32 x, f32 y, f32 z);
+void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144B54(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
@@ -410,7 +410,7 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
     }
     for (i = 0; i < 4; i++) {
         RVec3 c;
-        fn_80144B44(&c, (i & xb) ? a.x : b.x, (i & yb) ? a.y : b.y, (i & zb) ? a.z : b.z);
+        __ct__4VPosFfff(&c, (i & xb) ? a.x : b.x, (i & yb) ? a.y : b.y, (i & zb) ? a.z : b.z);
         fn_801BFD34(&verts[i].p, &c, &m);
         verts[i].u = kPanelU;
         verts[i].v = kPanelV;

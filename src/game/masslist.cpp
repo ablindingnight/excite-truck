@@ -177,7 +177,7 @@ void fn_80279D40(CarSetup* out);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, s16 c);
-void fn_80144B44(MVec3* v, f32 x, f32 y, f32 z);
+void __ct__4VPosFfff(MVec3* v, f32 x, f32 y, f32 z);
 void StatsUpdate__Fv(MVec3* v);  // vector default constructor (empty, out of line)
 s32 lbl_8055A920 = -1;
 MVec4* fn_801BF12C(MVec4* out, const MVec4* in);
@@ -587,7 +587,7 @@ static inline void PostUpdateCar(int car) {
         StatsUpdate__Fv(&pt);
         fn_801BF198(&pt, &cs->pts[i].p);
         surface = 0xFF;
-        fn_80144B44(&n, 0.0f, 1.0f, 0.0f);
+        __ct__4VPosFfff(&n, 0.0f, 1.0f, 0.0f);
         fn_801BF0C4(&pt, &n, cx, &surface);
         cx->surface[i] = surface;
         fn_801BF12C((MVec4*)&cs->nrm[i], fn_801BF150(&t4, n.x, n.y, n.z, pt.y));

@@ -416,7 +416,7 @@ f32 Dot(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);
 extern "C" {
 void fn_801C0E60(TVec* out, const f32* a, const f32* b);
 void fn_80144B54(TMtx* m, TCam* c);
-f32* fn_80144B44(PVec* v, f32 x, f32 y, f32 z);
+f32* __ct__4VPosFfff(PVec* v, f32 x, f32 y, f32 z);
 u32 fn_80144C68(int r, int g, int b, int a);
 void fn_80144DAC(f32* dst, const f32* src);
 void __ct__10CamFrame34Fv(Mat3* m);
@@ -667,7 +667,7 @@ void MultiFacingTMH::Draw(TObj* list) {
         v0 = 0.25f * (seg / 8);
         u1 = 0.125f + u0;
         v1 = 0.25f + v0;
-        fn_801F3158(base.pos, fn_80144B44(&c0, 0.0f, 0.0f, 0.0f));
+        fn_801F3158(base.pos, __ct__4VPosFfff(&c0, 0.0f, 0.0f, 0.0f));
         base.u = u0;
         base.v = v0;
         base.color = fn_80144C68(0xFF, 0xFF, 0xFF, 0xFF);
@@ -682,10 +682,10 @@ void MultiFacingTMH::Draw(TObj* list) {
         v[2].v = v1;
         fn_80144B54(&m, cam);
         fn_80144DAC(m.t, pos);
-        fn_801BFD34(&v[0], fn_80144B44(&c1, -0.5f, 1.0f, 0.0f), &m);
-        fn_801BFD34(&v[1], fn_80144B44(&c2, 0.5f, 1.0f, 0.0f), &m);
-        fn_801BFD34(&v[2], fn_80144B44(&c3, -0.5f, -1.0f, 0.0f), &m);
-        fn_801BFD34(&v[3], fn_80144B44(&c4, 0.5f, -1.0f, 0.0f), &m);
+        fn_801BFD34(&v[0], __ct__4VPosFfff(&c1, -0.5f, 1.0f, 0.0f), &m);
+        fn_801BFD34(&v[1], __ct__4VPosFfff(&c2, 0.5f, 1.0f, 0.0f), &m);
+        fn_801BFD34(&v[2], __ct__4VPosFfff(&c3, -0.5f, -1.0f, 0.0f), &m);
+        fn_801BFD34(&v[3], __ct__4VPosFfff(&c4, 0.5f, -1.0f, 0.0f), &m);
         fn_802C8BD0(tex);
         fn_802C8DB8(v, 4, idx, 6);
         fn_802C8D74();

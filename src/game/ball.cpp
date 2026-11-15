@@ -18,7 +18,7 @@ void fn_801D0C84(void* l);                  // unregister listener
 // PickDrop takes an f32*).
 void __ct__4Vec2Fv(f32* v);
 void __ct__10CamFrame34Fv(void* m);
-void fn_80144B44(void* v, f32 x, f32 y, f32 z);
+void __ct__4VPosFfff(void* v, f32 x, f32 y, f32 z);
 }
 
 struct BMtx;
@@ -639,7 +639,7 @@ inline void Ball::Drop(void) {
     up = DropHeight();
     f32 base = fn_8017960C(car)->Mtx()->y;
     m.pos.y = base + up;
-    fn_80144B44(&v, 0.0f, 0.0f, 0.0f);
+    __ct__4VPosFfff(&v, 0.0f, 0.0f, 0.0f);
     Launch(&m, &v, h, 0.0f);
 }
 

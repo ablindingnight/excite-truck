@@ -4,6 +4,7 @@
 // packer and the sound stop helper. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/vpos.h"
 #include "game/camframe34.h"
 
 ModuleTag lbl_8055E1D0;
@@ -147,10 +148,10 @@ GameMode::GameMode(void) {}
 extern "C" {
 
 
-void fn_80144B44(Vec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
+VPos::VPos(f32 x, f32 y, f32 z) {
+    this->x = x;
+    this->y = y;
+    this->z = z;
 }
 
 void fn_80144B54(Mtx34* d, const Mtx34* s) { *d = *s; }

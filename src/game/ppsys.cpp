@@ -129,7 +129,7 @@ void fn_801C1364(PSys* s);
 void fn_801C1320(PSys* s);
 void fn_801C1B60(PSys* s);
 void fn_801C2B9C(RVec3* out, const RVec3* a, const RVec3* d, f32 k);
-void fn_80144B44(RVec3* v, f32 x, f32 y, f32 z);
+void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144D64(RVec3* d, const RVec3* s);
 void fn_80144CD0(RVec3* out, const RVec3* p, const RMtx* m);
 void fn_80144DAC(RVec3* d, const RVec3* s);
@@ -606,8 +606,8 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
     RVec3 sum;
     int n = last;
     n = CountOrAll(n, s);
-    fn_80144B44(&sum, 0.0f, 0.0f, 0.0f);
-    fn_80144B44(&force, 0.0f, 0.0f, 0.0f);
+    __ct__4VPosFfff(&sum, 0.0f, 0.0f, 0.0f);
+    __ct__4VPosFfff(&force, 0.0f, 0.0f, 0.0f);
     f32 total = 0.0f;
     for (int i = first; i < n; i++) {
         f32 w;

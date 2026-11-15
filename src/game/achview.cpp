@@ -755,7 +755,7 @@ void fn_80144DAC(f32* dst, const f32* src);
 f32 fn_80144CC8(f32 x);
 void fn_801BFEBC(f32* v, f32 x, f32 y, f32 z);
 void fn_801F3198(f32* v);
-void fn_80144B44(f32* v, f32 x, f32 y, f32 z);
+void __ct__4VPosFfff(f32* v, f32 x, f32 y, f32 z);
 f32 fn_8017F70C(f32 x);
 void fn_801C0E4C(f32* out, const f32* a, const f32* b);
 Mat3* fn_802C86DC(void);
@@ -799,8 +799,8 @@ inline void AchievementTrophyModel::Update(f32 dt) {
         fn_801BFEBC(&rot[3], lbl_80498EAC[0], -lbl_80498EAC[1], lbl_80498EAC[2]);
         fn_801F3198(&rot[3]);
     }
-    fn_80144B44(side, 1.0f, 0.0f, 0.0f);
-    fn_80144B44(fwd, 0.0f, 0.0f, 1.0f);
+    __ct__4VPosFfff(side, 1.0f, 0.0f, 0.0f);
+    __ct__4VPosFfff(fwd, 0.0f, 0.0f, 1.0f);
     f32 tilt = fn_8017F70C(fn_8025AD88(side, &rot[3]));
     fn_8017F70C(fn_8025AD88(&rot[3], fwd));
     if (tilt > 0.707f) {

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/vpos.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -3808,13 +3809,6 @@ struct Xform {
     void SetRotY(f32 a) { r.SetRotY(a); }
     Mat3 r;  // offset 0x0
     V3 t;    // offset 0x24
-};
-
-struct VPos {
-    VPos(f32 x, f32 y, f32 z);
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 extern "C" {
