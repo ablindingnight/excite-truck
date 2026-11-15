@@ -129,6 +129,7 @@ public:
 
     s32 tex;  // offset 0x4
     u32 unk8;
+    void DrawStars(Layout* layout);
 };
 
 struct HeatState {
@@ -332,12 +333,17 @@ inline ScoreOverlay::~ScoreOverlay(void) {
     gxForgetTexture(tex);
 }
 
+/* Helper name unproven */
+inline void ScoreOverlay::DrawStars(Layout* layout) {
+    s32 t = tex;
+    u32 color = layout->Find("star_color_1")->color;
+    fn_801476D8(layout->FindArt("score_star_art"), color, t);
+}
+
 inline void ScoreOverlay::Update(int player, int score) {
     Layout* layout = GetLayout();
     int diff;
     int art;
-    s32 t;
-    u32 color;
     LayoutItem* p;
     LayoutItem item;
     char total[20];
@@ -361,9 +367,7 @@ inline void ScoreOverlay::Update(int player, int score) {
             break;
         }
         fn_8014784C(layout, "score_art", "excite_artset", art);
-        t = tex;
-        color = layout->Find("star_color_1")->color;
-        fn_801476D8(layout->FindArt("score_star_art"), color, t);
+        DrawStars(layout);
         fn_801609C4(score);
         p = layout->Find("score");
         if (p) {
