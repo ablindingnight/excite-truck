@@ -67,6 +67,8 @@ public:
 
 extern "C" PathSet* fn_80156A40(void);
 
+static inline f32 ILerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+
 struct ILPos {
     ILPos(void) {
         seg = 0;
@@ -77,6 +79,15 @@ struct ILPos {
         seg = s;
         t = f;
         mode = m;
+    }
+    // Point and heading on the line at this position (method names unproven).
+    void Pos(V2* o) const {
+        o->x = ILerpT(t, seg->pos.x, seg->next->pos.x);
+        o->y = ILerpT(t, seg->pos.y, seg->next->pos.y);
+    }
+    void Dir(V2* o) const {
+        o->x = ILerpT(t, seg->dir.x, seg->next->dir.x);
+        o->y = ILerpT(t, seg->dir.y, seg->next->dir.y);
     }
     IdealPoint* seg;  // offset 0x0
     f32 t;            // offset 0x4
@@ -260,7 +271,6 @@ int fn_801355B8(LineFollower* f, V2* p, IdealPoint** seg, f32* t) { return 0; }
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 static inline double AbsD(double v) { return __fabs(v); }
 
-static inline f32 LerpT_hm( f32 b, f32 a,f32 t) { return a + t * (b - a); }  /* Helper name unproven */
 void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
     out->mode = il.mode;
     if (fn_801355B8(this, p, &out->seg, &out->t)) {
@@ -273,19 +283,13 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
     if (out->seg) {
         int i;
         for (i = 0; i < 10; i++) {
-            IdealPoint* s = out->seg;
-            f32 t = out->t;
-            IdealPoint* n = s->next;
             V2 pt;
             V2 dv;
             V2 v;
             f32 inv;
             f32 a;
-            dv.x = s->dir.x + t * (n->dir.x - s->dir.x);
-            f32 dirY = n->dir.y;
-            dv.y = s->dir.y + t * (dirY - s->dir.y);
-            pt.x = s->pos.x + t * (n->pos.x - s->pos.x);
-            pt.y = LerpT_hm(n->pos.y, s->pos.y, t);
+            out->Pos(&pt);
+            out->Dir(&dv);
             inv = 1.0f / (f32)sqrt(dv.x * dv.x + dv.y * dv.y);
             dv.x *= inv;
             dv.y *= inv;
