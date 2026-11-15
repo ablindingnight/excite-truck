@@ -68,7 +68,8 @@ struct RoadSoundEntry {
     f32 pitch3;             // offset 0x20
 };
 
-static inline const char* RoadSoundNameKey(const char* key = "sound") { return key; }
+static char RoadSoundTag[] = "roadsnd";
+static char RoadSoundType[] = "sound";
 
 class RoadSound {
 public:
@@ -83,10 +84,10 @@ public:
         count = 0;
         table = fn_80131808("roadsnd.val");
         for (i = 0; (node = table->GetChild(i)) != NULL; i++) {
-            if (strcmp(node->GetName(), "sound") == 0) {
+            if (strcmp(node->GetName(), RoadSoundType) == 0) {
                 c = this->car;
                 e = &entries[count++];
-                name = node->GetValue(RoadSoundNameKey());
+                name = node->GetValue("sound");
                 e->voice = fn_802077A4(name, 4, c + 0x118, c + 0x60);
                 if (e->voice == NULL && *(s32*)(c + 0x1EC) == 0) {
                     fn_802E30C8("roadsnd: can't find %s", name);
@@ -121,7 +122,7 @@ void fn_8020CA34(void) {}
 
 void fn_8020CA38(void) {}
 
-RoadSound* fn_8020CA3C(char* car) { return new ("roadsnd") RoadSound(car); }
+RoadSound* fn_8020CA3C(char* car) { return new (RoadSoundTag) RoadSound(car); }
 
 }  // extern "C"
 
