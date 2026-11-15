@@ -3736,17 +3736,20 @@ static inline void DrawPuddleMarker(const Puddle* p, u32 col) {
     b.y += 0.75f;
     fn_801E41D8(&a, &b, col, p->r);
 }
+// Retail compiled vf48 with dead-assignment elimination off: the mode-1 colour assignment survives (so the car and
+// mode tests stay) and the back end deletes its load (same family as gtext fn_80233354 and pickup fn_80168104).
+#pragma push
+#pragma opt_dead_assignments off
 inline void BetaMaster::vf48(void) {
     u32 col;
     int i;
     BetaCar* c = &cars[fn_801E866C(fn_801E85B4())];
-    // Retail keeps the car and mode tests: the colour is assigned again for mode 1 (the same global today).
-    col = lbl_8055E230.value;
     if (c && c->mode != 0) {
         if (c->mode == 1) {
             col = lbl_8055E230.value;
         }
     }
+    col = lbl_8055E230.value;
     for (i = 0; i < puddles.a.count; i++) {
         Puddle* p = puddles.a.data[i];
         if (p->b10) {
@@ -3754,6 +3757,7 @@ inline void BetaMaster::vf48(void) {
         }
     }
 }
+#pragma pop
 
 
 // ---------------------------------------------------------------------------------------------------
