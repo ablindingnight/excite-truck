@@ -2310,12 +2310,10 @@ inline void RingChalMaster::DrawRings(void) const {
         icon = *setIcon;
         TextElem txt = *setScore;
         f32 dt;
-        int cur;
         dt = Time() - arena.stats->At(i)->time;
-        cur = arena.curSet;
         icon.pos.y += i * 40;
         txt.pos.y += i * 40;
-        if (i > cur) {
+        if (i > arena.curSet) {
             icon.color.all = 0x66FFFFFF;
         }
         fn_80147940(l, &icon, "star_art", 0);
@@ -2445,12 +2443,12 @@ inline void RingChalMaster::DrawRings(void) const {
         next = l->FindBox("next_ring");
         tr = *target;
         s = arena.curSet;
-        if (s > 0 && !arena.b49) {
+        if (arena.curSet > 0 && !arena.b49) {
             f32 k = 1.7f + 0.2f;
-            f32 a = Time() - arena.stats->At(s - 1)->time;
+            f32 a = Time() - arena.stats->At(arena.curSet - 1)->time;
             f32 d = a - k;
-            if (Time() - arena.stats->At(s - 1)->time > 0.0f && d <= 2.2f) {
-                s = s - 1;
+            if (Time() - arena.stats->At(arena.curSet - 1)->time > 0.0f && d <= 2.2f) {
+                s = arena.curSet - 1;
             }
             if (d >= 0.0f) {
                 Box nx;
