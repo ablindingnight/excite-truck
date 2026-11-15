@@ -412,7 +412,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         int k;
         ArtPath* p = &a->paths[i];
         p->elem = pn->GetIntValue("elem_idx");
-        const ValPoint& pxy = pn->GetPointOr("xy", MakePoint(0.0f, 0.0f));
+        const ValPoint& raw = pn->GetPointOr("xy", MakePoint(0.0f, 0.0f));
+        const ValPoint pxy = {raw.x, raw.y};
         f32 t0 = fn_802AC344((ArtNode*)pn, (ArtNode*)named, 0);
         int nFrames = 0;
         ValueNode* c;
@@ -457,8 +458,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 }
             }
             if (f->Has("xy")) {
-                ValPoint v;
-            v = f->GetPoint("xy");
+                const ValPoint& raw = f->GetPoint("xy");
+                ValPoint v = raw;
                 v.x = v.x + pxy.x;
                 v.y = pxy.y + v.y;
                 key->pos[0] = v.x - 320.0f;
@@ -515,8 +516,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         ValueNode* g = t->FindChild("global_transform");
         f32 off[3];
         if (g->Has("xy")) {
-            ValPoint v;
-            v = g->GetPoint("xy");
+            const ValPoint& raw = g->GetPoint("xy");
+            ValPoint v = raw;
             off[0] = v.x;
             off[1] = -v.y;
             off[2] = 0.0f;
