@@ -326,29 +326,36 @@ int fn_80137140(int i, int j) {
 
 static inline double AbsD(double v) { return __fabs(v); }
 
+/* Helper name unproven */
+static inline f32 PxAbs(f32 v) { return (f32)AbsD(v); }
 void Proxer::Process(void) {
     f32 d;
     f32 gap = fn_80137C54(-1)->gap;
     int k;
     int n;
     fn_80137C54(-1);
+    f32 two = 2.0f;
     n = count * (count - 1) / 2;
     for (k = 0; k < n; k++) {
+        CarRec* a = Rec(pairs[k].a);
+        CarRec* b = Rec(pairs[k].b);
         Pair* p = PairAt(k);
-        CarRec* a = Rec(p->a);
-        CarRec* b = Rec(p->b);
         f32 dy;
         u8 close;
         p->dvel.x = b->vel.x - a->vel.x;
         p->dvel.y = b->vel.y - a->vel.y;
         pairs[k].SetPos(a, b);
-        dy = b->pos.y - a->pos.y;
-        if ((f32)AbsD(dy) > lapLen / 2.0f && !((a->sec | b->sec) & 8)) {
+        {
+            f32 ay = a->pos.y;
+            f32 by = b->pos.y;
+            dy = by - ay;
+        }
+        if (PxAbs(dy) > lapLen / 2.0f && !((a->sec | b->sec) & 8)) {
             dy += lapLen * -(dy > 0.0f ? 1.0f : -1.0f);
         }
         pairs[k].dpos.y = dy;
         close = 0;
-        if ((f32)AbsD(dy) < gap * 2.0f && fn_80137140(pairs[k].a, pairs[k].b)) {
+        if (PxAbs(dy) < gap * two && fn_80137140(pairs[k].a, pairs[k].b)) {
             close = 1;
         }
         pairs[k].close = close;
@@ -398,7 +405,7 @@ void Proxer::Process(void) {
                         }
                     }
                 } else if (!fn_8013705C(q->dvel.y, q->dpos.y)) {
-                    q->time = ((f32)AbsD(q->dpos.y) - gap) / (f32)AbsD(q->dvel.y);
+                    q->time = (PxAbs(q->dpos.y) - gap) / PxAbs(q->dvel.y);
                     q->bFlag = 1;
                     q->aFlag = 1;
                 } else {
