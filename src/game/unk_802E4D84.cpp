@@ -27,8 +27,8 @@ struct SpuSample** lbl_8055FF9C;
 int lbl_8055FFA0;
 volatile unsigned char lbl_8055FFA4;
 unsigned char lbl_8055FFA5;
-unsigned char lbl_8055FFA6;
-int lbl_8055FFA8;
+volatile unsigned char lbl_8055FFA6;
+volatile int lbl_8055FFA8;
 int lbl_8055FFAC;
 void* lbl_8055FFB0;
 volatile unsigned char lbl_8055FFB4;
@@ -273,7 +273,7 @@ typedef struct SpuAdpcmLoop {
 } SpuAdpcmLoop;
 
 extern volatile unsigned char lbl_8055FFA4;
-extern unsigned char lbl_8055FFA6;
+extern volatile unsigned char lbl_8055FFA6;
 extern volatile unsigned char lbl_8055FFB4;
 extern int fn_802D9BF0(void);
 extern void AXSetVoiceAdpcmLoop(void *vpb, SpuAdpcmLoop *loop);
@@ -395,7 +395,7 @@ extern void WENCGetEncodeData(void *, int, short *, int, void *);
 extern int WPADSendStreamData(int chan, void *data, int len);
 extern void AXRmtAdvancePtr(int);
 extern unsigned char lbl_804FC6C0[];
-extern int lbl_8055FFA8;
+extern volatile int lbl_8055FFA8;
 // Wii Remote speaker alarm: for each remote that can take data, pulls 40 samples from AX and, if the remote is ready
 // and any of its voices played recently, encodes them (restarting the encoder after a gap) and sends the packet.
 void fn_802E52EC(void) {
