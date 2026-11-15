@@ -29,9 +29,11 @@ f32 fn_802C88E8(const ValVec3* p);  // squared distance to the camera
 f32 fn_801E88F0(int view);          // zoom
 int fn_801EA03C(s16* hint, ValVec3* p);  // ground below
 struct Mat3;
-void fn_80015A20(Mat3* out, const ValVec3* angles);
 void fn_80297988(void* obj);
 }
+
+struct Vec3;
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 
 struct Mat3 {
     ValVec3 axis[3];
@@ -517,12 +519,12 @@ void fn_801F0F78(Wheel* w, const WheelState* s, const ValMatrix* m, f32 scale) {
     ValVec3 roll;
     SetVec(&roll, 0.0f, 0.0f, s->roll);
     Mat3 r;
-    fn_80015A20(&r, &roll);
+    Mat3FromEuler(&r, (const Vec3*)&roll);
     Mat3Mul((Mat3*)&w->mtx, &r, (Mat3*)&w->mtx);
     ValVec3 steer;
     SetVec(&steer, 0.0f, s->steer + (left ? 0.0f : 3.1415927f), 0.0f);
     Mat3 r2;
-    fn_80015A20(&r2, &steer);
+    Mat3FromEuler(&r2, (const Vec3*)&steer);
     Mat3Mul((Mat3*)&w->mtx, &r2, (Mat3*)&w->mtx);
     if (!((f32)__fabs(scale - 1.0f) <= lbl_80558DC4[0])) {
         w->mtx.basis[0].x *= scale;
@@ -616,7 +618,7 @@ void fn_801F163C(Wheel* w, int lod, f32 spin) {
         a.y = 0.0f;
         a.z = 0.0f;
         Mat3 r;
-        fn_80015A20(&r, &a);
+        Mat3FromEuler(&r, (const Vec3*)&a);
         Mat3Mul((Mat3*)&m, &r, (Mat3*)&m);
     }
     f32 k = w->cls->scale;
