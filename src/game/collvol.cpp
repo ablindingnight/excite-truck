@@ -387,7 +387,7 @@ s32 CollVolume::vf34(CollPacket* p) {
         inv = 0.5f / r;
         qp[i] = 0.5f * r;
         qp[3] = inv * (m[j][k] - m[k][j]);
-        qp[j] = inv * (m[j][i] + m[i][j]);
+        qp[j] = inv * (m[i][j] + m[j][i]);
         qp[k] = inv * (m[i][k] + m[k][i]);
     }
     th = acos(q[3]);

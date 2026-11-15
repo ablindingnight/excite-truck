@@ -237,9 +237,12 @@ inline void ActZone::Load(ValueNode* n) {
     }
     d.x = b->pts[0].x - b->pts[1].x;
     d.z = b->pts[0].z - b->pts[1].z;
-    if (d.x * d.x + d.z * d.z > best) {
-        best = d.x * d.x + d.z * d.z;
-        start = 0;
+    {
+        f32 len = d.x * d.x + d.z * d.z;
+        if (len > best) {
+            best = len;
+            start = 0;
+        }
     }
     d.z = b->pts[1].z - b->pts[2].z;
     d.x = b->pts[1].x - b->pts[2].x;

@@ -972,9 +972,7 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         PSVECNormalize(&p->frame.b.v[1], &p->frame.b.v[1]);
         PSVECNormalize(&p->frame.b.v[2], &p->frame.b.v[2]);
         f32 back = -1.5566f;
-        lbl_80498E18.x = mid.x + p->frame.b.v[2].x * back;
-        lbl_80498E18.y = mid.y + p->frame.b.v[2].y * back;
-        lbl_80498E18.z = mid.z + p->frame.b.v[2].z * back;
+        TAddS(&lbl_80498E18, &mid, &p->frame.b.v[2], -1.5566f);
         TAddS(&lbl_80498E18, &lbl_80498E18, &p->frame.b.v[1], 1.2283f);
         if (m->loaded) {
             f32 rad = fn_801F159C(m->fwheels);

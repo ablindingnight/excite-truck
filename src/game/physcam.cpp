@@ -1058,8 +1058,9 @@ void CamRegion::Prepare(u8* line) {
     V2 pt;
     V2 d1;
     V2 d2;
-    f32 cx = F32(cam, 0x0);
+    f32 cx;
     f32 cy = F32(cam, 0x8);
+    cx = F32(cam, 0x0);
     center.x = cx;
     center.y = cy;
     f32 wrap;

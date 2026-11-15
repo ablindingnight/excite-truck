@@ -300,8 +300,8 @@ void fn_80294ED4(void) {
     }
     fn_802C8D74();
     fn_802C8BD0(lbl_8055C994);
-    s = lbl_804B42F0;
-    for (i = 0; i < fn_80287B14(); i++, s++) {
+    for (i = 0; i < fn_80287B14(); i++) {
+        s = &lbl_804B42F0[i];
         LightCar* car = fn_80287B24(i);
         if (fn_802C88E8(&car->pos) * fn_801E88F0(-1) > maxDist || (car->flags & 8)) {
             continue;

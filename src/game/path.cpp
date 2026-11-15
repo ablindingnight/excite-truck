@@ -343,7 +343,9 @@ int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
             w.y = dq.y * k;
             w.z = dq.z * k;
         } else {
-            w.x = w.y = w.z = 0.0f;
+            w.x = 0.0f;
+            w.y = 0.0f;
+            w.z = 0.0f;
         }
         angvel->x = w.x * rate;
         angvel->y = w.y * rate;

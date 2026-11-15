@@ -471,11 +471,12 @@ static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return 
 // and, when it has a child, is turned from its bind direction to aim at the child.
 template <class O, class A, class B> static inline void TSub(O* o, const A* a, const B* b) { o->x = a->x - b->x; o->y = a->y - b->y; o->z = a->z - b->z; }  /* Helper name unproven */
 void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, const u8* bind, const BonePose* f) {
-    const BoneLink* p = links;
+    int i = 0;
     if (n <= 0) {
         return;
     }
-    for (int i = 0; i < n; i++, p++) {
+    for (; i < n; i++) {
+        const BoneLink* p = &links[i];
         BonePose* o = &out[p->index];
         const BRot* b = (const BRot*)(bind + p->index * 0x38);
         BVec v;
