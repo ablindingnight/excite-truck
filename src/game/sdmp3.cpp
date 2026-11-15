@@ -531,11 +531,11 @@ int fn_802EAA58(MP3Info* info, int strict) {
             return 0;
         }
     }
-    bool format = false;
     int ok = 0;
+    bool format = false;
     if (ChannelsOk(info)) {
-        const s32 rate = info->sampleRate;
         bool validRate = false;
+        const s32 rate = info->sampleRate;
         if (rate >= 8000 && rate <= 60000) {
             validRate = true;
         }
