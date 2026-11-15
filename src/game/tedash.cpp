@@ -11,6 +11,15 @@ struct V2 {
     f32 y;
 };
 
+// The 2D point class (retail weak __ct__4Vec2Fff): a plain V2 with an (x, y) constructor, arguments read right to left.
+class Vec2 : public V2 {
+public:
+    Vec2(f32 x_, f32 y_) {
+        x = x_;
+        y = y_;
+    }
+};
+
 struct V3 {
     f32 x, y, z;
 };
@@ -714,14 +723,8 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     u32 nw = lbl_8055CEA0 * b->w;
     u32 nh = lbl_8055CEA0 * b->h;
     if (lbl_8055FA38 == 5) {
-        V2 a;
-        V2 c;
-        f32 a_y = 2.0f * (f32)fn_802B6ED8(cz, 0, nh);
-        f32 a_x = 2.0f * (f32)fn_802B6E7C(cx, 0, nw);
-        a.y = a_y;
-        a.x = a_x;
-        c.y = 2.0f * (f32)fn_802B6ED8(cz, nh - 1, nh);
-        c.x = 2.0f * (f32)fn_802B6E7C(cx, nw - 1, nw);
+        Vec2 a(2.0f * (f32)fn_802B6E7C(cx, 0, nw), 2.0f * (f32)fn_802B6ED8(cz, 0, nh));
+        Vec2 c(2.0f * (f32)fn_802B6E7C(cx, nw - 1, nw), 2.0f * (f32)fn_802B6ED8(cz, nh - 1, nh));
         fn_80204048(&a, &c);
     }
     for (u32 i = 0; i < nw; i++) {
