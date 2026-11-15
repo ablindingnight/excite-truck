@@ -6,6 +6,11 @@
 
 #include "game/common.h"
 
+// gameloop.cpp (C++ linkage in retail: fn_8000C69C__Fv etc., found by linkcheck).
+const char* fn_8000C69C(void);
+void fn_8000C6E4(void);
+void fn_8000C730(void);
+
 extern "C" {
 
 extern int lbl_8055EE74, lbl_8055EE78, lbl_8055EEA0;
@@ -44,11 +49,9 @@ extern void fn_8020C908(float);
 extern void fn_80209030(float);
 extern void fn_8013323C(int, char *, float);
 extern void fn_800121F0(void);
-extern void fn_8000C730(void);
 extern void fn_8020D0CC(int);
 extern int lbl_8055EE78;
 extern float lbl_8055EE8C, lbl_8055EE90, lbl_8055EE98, lbl_8055EE9C;
-extern void fn_8000C6E4(void);
 
 // Raises the selected sound-menu value one step (the counterpart of fn_8020CFEC).
 void fn_8020CF6C(int arg0) {
@@ -157,7 +160,6 @@ extern void fn_800109E4(unsigned long, float, float, float, float);
 extern const char *fn_80131234(const char *);
 extern void fn_801473F8(int, const char *, const char *, ...);
 extern void fn_801345D8(char *, int, const char *, ...);
-extern int fn_8000C69C(void);
 extern void fn_80230F78(unsigned char *, float *, unsigned long *, int);
 extern void fn_80147940(int, void *, const char *, int);
 extern void fn_80147230(void *, const char *, ...);
