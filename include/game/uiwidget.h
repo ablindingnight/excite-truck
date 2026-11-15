@@ -204,6 +204,16 @@ public:
     int token;                   // 0x278
 };
 
+class SimpleSlider : public UIWidget {  /* Class name unproven (allocation tag "SimpleSlider"); vtable lbl_8033E7F4 */
+public:
+    SimpleSlider(struct WidgetDesc* desc, float* value, int divisions, float minimum, float maximum);  // fn_8021FF34
+    virtual ~SimpleSlider(void);   // fn_8022003C
+    virtual void Slot14(void);     // fn_8022071C
+    virtual void Slot28(void);     // fn_802200AC
+    virtual int Slot64(int key);   // fn_802205AC
+    unsigned char fields244[0x24];  // 0x244, read through widgets.cpp's SteppedFloatPrefix
+};
+
 class ScrollBar : public UIWidget {  /* Class name unproven (allocation tags "VScrollBar"/"HScrollBar"); vtable lbl_8033E770 */
 public:
     ScrollBar(int x, int y, int width, int height, void* view, int vertical);  // fn_80220E48
@@ -217,6 +227,20 @@ public:
     void* track;                 // 0x248
     void* marker;                // 0x24C
     unsigned char rest250[0x10]; // 0x250, read through widgets.cpp's ScrollbarPrefix
+};
+
+class StringList;
+class BottomBar : public UIWidget {  /* Class name unproven (allocation tag "BottomBar"); vtable lbl_8033E4DC */
+public:
+    BottomBar(int x, int y, const StringList* list, int* selected);  // fn_802230A4
+    virtual ~BottomBar(void);      // fn_80223208
+    virtual void Slot28(void);     // fn_80223280
+    virtual int Slot64(int key);   // fn_80223760
+    virtual void Slot7C(void);     // fn_80223728
+    const char* labels[33];        // 0x244
+    int count;                     // 0x2C8
+    int* selected;                 // 0x2CC
+    unsigned char rest2D0[0x150];  // 0x2D0, read through widgets.cpp's SelectionFullPrefix
 };
 
 class MenuImage : public UIWidget {  /* Class name unproven (allocation tag "MenuImage"); vtable lbl_8033E3D4 */
@@ -253,6 +277,20 @@ public:
     virtual ~TextBox(void);  // fn_80224D40
     virtual void Slot28(void);  // fn_80224E74
     unsigned char fields244[0x5C];  // 0x244, read through widgets.cpp views
+};
+
+struct RollingListData;
+class ButtonList : public UIWidget {  /* Class name unproven (allocation tag "ButtonList"); vtable lbl_8033E140 */
+public:
+    ButtonList(RollingListData* list, struct WidgetDesc* desc);  // fn_8022553C
+    virtual ~ButtonList(void);     // fn_80225828
+    virtual void Slot14(void);     // fn_802258C8
+    virtual void Slot28(void);     // fn_80225B6C
+    virtual int Slot64(int key);   // fn_802263CC
+    virtual int Slot6C(int key);   // fn_80226528
+    virtual void Slot7C(void);     // fn_80225918
+    RollingListData* list;         // 0x244
+    unsigned char rest248[0x3C];   // 0x248, read through widgets.cpp's RollingListFullPrefix
 };
 
 class RotImage : public UIWidget {  /* Class name unproven (allocation tag "RotImage"); vtable lbl_8033E0BC */

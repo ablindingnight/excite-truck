@@ -643,11 +643,8 @@ extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
 extern "C" WidgetFragment* fn_8021B1C4(WidgetFragment*, int, int, void*, int, void*);
 extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
-extern "C" WidgetFragment* fn_802230A4(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223800(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
-extern "C" WidgetFragment* fn_8022553C(WidgetFragment*, void*, UIDesc*);
-extern "C" WidgetFragment* fn_8021FF34(WidgetFragment*, UIDesc*, void*, int, float, float);
 
 
 // The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
@@ -1255,9 +1252,8 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 36: {
         UIStyle* selected = FindStyle(styles, d->style, 2);
         UIStyle* list = FindStyle(styles, d->style, 0xa);
-        p = (WidgetFragment*)operator new(0x420, "BottomBar");
-        if (p) p = fn_802230A4(p, d->x, d->y, list ? list->value : lbl_8055EF28,
-                               selected ? selected->value : &lbl_8055EF4C);
+        p = (WidgetFragment*)new ("BottomBar") BottomBar(d->x, d->y, (const StringList*)(list ? list->value : lbl_8055EF28),
+                               (int*)(selected ? selected->value : &lbl_8055EF4C));
         widgets[count++] = p;
         break;
     }
@@ -1313,8 +1309,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 44: {
         UIStyle* menu = FindStyle(styles, d->style, 0xe);
-        p = (WidgetFragment*)operator new(0x284, "ButtonList");
-        if (p) p = fn_8022553C(p, menu ? menu->value : (void*)lbl_8055EF30, d);
+        p = (WidgetFragment*)new ("ButtonList") ButtonList((RollingListData*)(menu ? menu->value : (void*)lbl_8055EF30), (WidgetDesc*)d);
         widgets[count++] = p;
         break;
     }
@@ -1345,8 +1340,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 50: {
         UIStyle* range = FindStyle(styles, d->style, 9);
         UIStyle* steps = FindStyle(styles, d->style, 2);
-        p = (WidgetFragment*)operator new(0x268, "SimpleSlider");
-        if (p) p = fn_8021FF34(p, d, range ? range->value : 0, steps ? *(int*)steps->value : 10,
+        p = (WidgetFragment*)new ("SimpleSlider") SimpleSlider((WidgetDesc*)d, (float*)(range ? range->value : 0), steps ? *(int*)steps->value : 10,
                                range ? fn_80212248((s32)range->arg1) : 0.0f,
                                range ? fn_80212248((s32)range->arg2) : 1.0f);
         widgets[count++] = p;
