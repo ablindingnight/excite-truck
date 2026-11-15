@@ -1597,6 +1597,7 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 // current camera move at the current time, relative to the world, the start line or a car, blended in
 // from the previous camera over the interpolation time. Returns 0 when not active.
 int fn_801C5B68(CamView* v, int idx) {
+    f32 minLen = 0.1f;
     if (idx == 0) {
         lbl_8055E800++;
     }
@@ -1631,7 +1632,7 @@ int fn_801C5B68(CamView* v, int idx) {
         dt = fn_801C3B6C() - lbl_80437D88.play.start;
     }
     f32 len = lbl_80437D88.play.end - lbl_80437D88.play.start;
-    if (len > 0.1f) {
+    if (len > minLen) {
         f32 e = Ease(dt / len);
         if (lbl_80437D88.play.accel) {
             dt = e * len;
