@@ -187,7 +187,7 @@ static inline void AddV(DVtx* o, const DVtx* a, const DVec3* b) {
     o->pos.z = a->pos.z + b->z;
 }
 
-void fn_801E3CB4(const DVec3* pos, const DVec3* dir, u32 color, f32 size) {
+void fn_801E3CB4(const DVec3* pos, const DVec3* dir, f32 size, u32 color) {
     DBasis b;
     DVtx v[5];
     fn_801E3640(dir, &b);
@@ -242,7 +242,7 @@ void fn_801E3FC8(const DVec3* pos, f32 radius) {
 }
 
 // Box of the given width from a to b.
-void fn_801E4040(const DVec3* a, const DVec3* b, u32 c0, u32 c1, f32 width) {
+void fn_801E4040(const DVec3* a, const DVec3* b, f32 width, u32 c0, u32 c1) {
     DVec3 d;
     DFrame f;
     d.x = b->x - a->x;
@@ -260,10 +260,10 @@ void fn_801E4040(const DVec3* a, const DVec3* b, u32 c0, u32 c1, f32 width) {
     fn_801E370C(&f, c0, c1);
 }
 
-void fn_801E41D8(const DVec3* a, const DVec3* b, u32 color, f32 width) { fn_801E4040(a, b, color, color, width); }
+void fn_801E41D8(const DVec3* a, const DVec3* b, u32 color, f32 width) { fn_801E4040(a, b, width, color, color); }
 
 // Camera-facing triangle around pos.
-void fn_801E41E0(const DVec3* pos, u32 color, f32 size) {
+void fn_801E41E0(const DVec3* pos, f32 size, u32 color) {
     DVtx t;
     DVtx v[3];
     t.v = 0.0f;
