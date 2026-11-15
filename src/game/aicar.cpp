@@ -1072,6 +1072,15 @@ struct ILPos {
         mode = 10000;
         t = 0.0f;
     }
+    // Point and heading on the line at this position (method names unproven).
+    void Pos(V2* o) const {
+        o->x = LerpT(t, seg->pos.x, seg->next->pos.x);
+        o->y = LerpT(t, seg->pos.y, seg->next->pos.y);
+    }
+    void Dir(V2* o) const {
+        o->x = LerpT(t, seg->dir.x, seg->next->dir.x);
+        o->y = LerpT(t, seg->dir.y, seg->next->dir.y);
+    }
     IdealPoint* seg;  // offset 0x0
     f32 t;            // offset 0x4
     s32 mode;         // offset 0x8
@@ -1600,9 +1609,8 @@ void fn_80195F6C(u8* d) {
     F32(d, 0x280) = F32(PTR(d, 0x164), 0x48);
     F32(d, 0x27C) = F32(PTR(d, 0x164), 0x44);
     U8(d, 0x2FE) = 0;
-    f32 ahead = 0.3f * F32(d, 0x270);
     f32 speedScale = 0.5f;
-    ahead = lbl_8055A48C > ahead ? lbl_8055A48C : ahead;
+    f32 ahead = MAX(lbl_8055A48C, 0.3f * F32(d, 0x270));
     ILPos il;
     fn_80135B9C((LineFollower*)PTR(d, 0x164), ahead, 0, 0, (f32*)(d + 0x50), &il);
     F32(d, 0x54) = speedScale;
@@ -1613,12 +1621,8 @@ void fn_80195F6C(u8* d) {
     if (il.seg) {
         V2 pos;
         V2 dir;
-        IdealPoint* s = il.seg;
-        f32 dir_x = s->dir.x + il.t * (s->next->dir.x - s->dir.x);
-        pos.x = s->pos.x + il.t * (s->next->pos.x - s->pos.x);
-        pos.y = s->pos.y + il.t * (s->next->pos.y - s->pos.y);
-        dir.y = s->dir.y + il.t * (s->next->dir.y - s->dir.y);
-        dir.x = dir_x;
+        il.Pos(&pos);
+        il.Dir(&dir);
         f32 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
         dir.x *= inv;
         dir.y *= inv;
