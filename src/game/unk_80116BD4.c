@@ -2092,6 +2092,7 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     u32 total;
     u32 n;
     void **voice;
+    u32 *vs;
     u32 i;
     u8 *buf;
 
@@ -2128,15 +2129,17 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
         total = t->chunk;
     }
     if (chans != 1) {
-        t->voiceSize = t->bufSize >> 1;
+        vs = &t->voiceSize;
+        *vs = t->bufSize >> 1;
     } else {
-        t->voiceSize = t->bufSize;
+        vs = &t->voiceSize;
+        *vs = t->bufSize;
     }
     buf = ((void *(*)(u32))lbl_8055DEE0[0])(t->bufSize);
     t->bufL = (s16 *)buf;
-    t->bufR = (s16 *)(buf + t->voiceSize);
+    t->bufR = (s16 *)(buf + *vs);
     t->physL = (u32)buf - 0x80000000;
-    t->physR = t->physL + t->voiceSize;
+    t->physR = t->physL + *vs;
     t->minimum = t->chunk;
     t->volume = 0x7FFF;
     t->panL = 0x67F8;
