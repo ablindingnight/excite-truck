@@ -516,8 +516,10 @@ void fn_8000E3B4(int player) {
             {
                 f32 bx = x5 + pad;
                 f32 fill = bx + MulQ(row->c, 89.0f) / 100.0f;
+                f32 half;
                 f32 bh = 17.0f;
-                fn_800109E4(barColor, fill, ty + bh * 0.5f, 89.0f + bx - fill, bh);
+                half = 0.5f;
+                fn_800109E4(barColor, fill, ty + bh * half, 89.0f + bx - fill, bh);
             }
             break;
         case 8:
