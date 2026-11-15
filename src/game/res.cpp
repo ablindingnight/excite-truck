@@ -1723,9 +1723,25 @@ void QueueNode::Free(void) {
 
 QueueNode* NodePool::Used(void) { return used; }
 
+inline void SayWaiting(QueueNode* n) {  /* Helper name unproven */
+    fn_802E30C8("res: waiting for %s...", n->name);
+}
+
+inline void ReportWait(QueueNode* n, s32 start) {  /* Helper name unproven */
+    fn_802E30C8("res: wait(%s) took %d msec", n->name, fn_802E2C20() - start);
+}
+
+inline void ClearPending(const char* name) {  /* Helper name unproven */
+    ResourceSet* set = fn_8012BD3C(lbl_8055E000, name);
+    if (set) {
+        set->pending = 0;
+    } else {
+        fn_802E30C8("res: Someone was waiting for %s, but it just wasn't pending!", name);
+    }
+}
+
 inline void AsyncSetQueue::Wait(const char* name) {
     QueueNode* n;
-    ResourceSet* set;
     for (n = pending.head; n; n = n->next) {
         if (!strcasecmp(name, n->name)) {
             s32 start = fn_802E2C20();
@@ -1736,26 +1752,20 @@ inline void AsyncSetQueue::Wait(const char* name) {
                 fn_802E2D74(10);
                 now = fn_802E2C20();
                 if (now > next) {
-                    fn_802E30C8("res: waiting for %s...", n->name);
+                    SayWaiting(n);
                     next = now + 2000;
                 }
             }
             Pump();
-            fn_802E30C8("res: wait(%s) took %d msec", n->name, fn_802E2C20() - start);
+            ReportWait(n, start);
             break;
         }
     }
-    set = fn_8012BD3C(lbl_8055E000, name);
-    if (set) {
-        set->pending = 0;
-    } else {
-        fn_802E30C8("res: Someone was waiting for %s, but it just wasn't pending!", name);
-    }
+    ClearPending(name);
 }
 
 inline void AsyncSetQueue::WaitFirst(const char* name) {
     QueueNode* n;
-    ResourceSet* set;
     for (n = pending.First(); n; n = n->next) {
         if (!strcasecmp(name, n->name)) {
             s32 start = fn_802E2C20();
@@ -1766,21 +1776,16 @@ inline void AsyncSetQueue::WaitFirst(const char* name) {
                 fn_802E2D74(10);
                 now = fn_802E2C20();
                 if (now > next) {
-                    fn_802E30C8("res: waiting for %s...", n->name);
+                    SayWaiting(n);
                     next = now + 2000;
                 }
             }
             Process();
-            fn_802E30C8("res: wait(%s) took %d msec", n->name, fn_802E2C20() - start);
+            ReportWait(n, start);
             break;
         }
     }
-    set = fn_8012BD3C(lbl_8055E000, name);
-    if (set) {
-        set->pending = 0;
-    } else {
-        fn_802E30C8("res: Someone was waiting for %s, but it just wasn't pending!", name);
-    }
+    ClearPending(name);
 }
 
 extern "C" void fn_8012E81C(const char* name) {
