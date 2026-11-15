@@ -50,9 +50,16 @@ struct ObVec3 {
 };
 
 // A visitor called for each obstacle in a linked chain.
+class ObstacleSink;
+
 class VVisit {
 public:
-    virtual void Visit(u8* o);
+    virtual void Visit(ObstacleSink* o) = 0;
+};
+
+class WakeVisit : public VVisit {
+public:
+    virtual void Visit(ObstacleSink* o);
 };
 
 struct CVec3 {
@@ -131,7 +138,6 @@ static inline int IsCar(u8* o) {
     return t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR';
 }
 extern void* lbl_80335744[];
-extern void* lbl_80335940[];
 extern f32 lbl_8055E3C8;
 
 ModuleTag lbl_8055E5D8;
@@ -971,7 +977,7 @@ void fn_801ABFF8(u8* p, VVisit* f) {
     if (o && U8(p, 0x223) && lbl_8055E3C4 > 1) {
         while (o != p) {
             U8(o, 0x223) = 0;
-            f->Visit(o);
+            f->Visit((ObstacleSink*)o);
             o = PTR(o, 0x224);
         }
         U8(p, 0x223) = 0;
@@ -982,15 +988,24 @@ void fn_801ABFF8(u8* p, VVisit* f) {
 }  // extern "C"
 
 // Visitor handed to the linked obstacles when this one is hit hard.
-struct HitVisit {
-    void* vt;     // offset 0x0
-    f32 v[3];     // offset 0x4
-    f32 at[3];    // offset 0x10
-    s32 force;    // offset 0x1C
-    u8* extra;    // offset 0x20
+struct HitVisit : VVisit {
+    HitVisit(const f32* velocity, const f32* at_, int force_, u8* extra_)
+        {
+        v[0] = velocity[0];
+        v[1] = velocity[1];
+        v[2] = velocity[2];
+        at[0] = at_[0];
+        at[1] = at_[1];
+        at[2] = at_[2];
+        force = force_;
+        extra = extra_;
+    }
+    virtual void Visit(ObstacleSink* o);
+    f32 v[3];
+    f32 at[3];
+    s32 force;
+    u8* extra;
 };
-
-extern void* lbl_803357F0[];
 
 extern "C" {
 
@@ -1000,17 +1015,8 @@ void fn_801AC0A0(u8* p, const f32* v, const f32* at, int force, u8* extra) {
         f32 k = 1.7777778f * r;
         f32 k2 = k * k;
         if (PSVECDotProduct(v, v) > k2) {
-            HitVisit h;
-            h.vt = lbl_803357F0;
-            h.v[0] = v[0];
-            h.v[1] = v[1];
-            h.v[2] = v[2];
-            h.at[0] = at[0];
-            h.at[1] = at[1];
-            h.at[2] = at[2];
-            h.force = force;
-            h.extra = extra;
-            fn_801ABFF8(p, (VVisit*)&h);
+            HitVisit h(v, at, force, extra);
+            fn_801ABFF8(p, &h);
         }
     }
     ((RigidBody*)p)->OnHit((const RVec3*)v, (const RVec3*)at, force, 0);
@@ -1544,7 +1550,7 @@ public:
     virtual void v3C(void);
     virtual void v40(void);
     virtual void v44(void);
-    virtual void Hit(const f32* push, const f32* at, u32 a, u32 b);  // 0x48
+    virtual void Hit(const f32* push, const f32* at, u32 force, void* extra);  // 0x48
 };
 
 extern "C" {
@@ -1557,16 +1563,21 @@ static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
     v[1] = y;
     v[2] = z;
 }
-void fn_801AD5F4(u8* p, ObstacleSink* q) {
-    f32 push[3];
-    push[0] = F32(p, 0x4) * lbl_805624F4;
-    push[1] = F32(p, 0x8) * lbl_805624F4;
-    push[2] = F32(p, 0xC) * lbl_805624F4;
-    f32 at[3];
-    Set3(at, LerpT(lbl_8056249C, F32(p, 0x10), F32((u8*)q, 0x60)), LerpT(lbl_8056249C, F32(p, 0x14), F32((u8*)q, 0x64)), LerpT(lbl_8056249C, F32(p, 0x18), F32((u8*)q, 0x68)));
+}  // extern "C"
 
-    q->Hit(push, at, U32(p, 0x1C), U32(p, 0x20));
+void HitVisit::Visit(ObstacleSink* q) {
+
+    f32 push[3];
+    push[0] = v[0] * lbl_805624F4;
+    push[1] = v[1] * lbl_805624F4;
+    push[2] = v[2] * lbl_805624F4;
+    f32 adjusted[3];
+    Set3(adjusted, LerpT(lbl_8056249C, at[0], F32((u8*)q, 0x60)), LerpT(lbl_8056249C, at[1], F32((u8*)q, 0x64)), LerpT(lbl_8056249C, at[2], F32((u8*)q, 0x68)));
+
+    q->Hit(push, adjusted, force, extra);
 }
+
+extern "C" {
 
 void fn_801D0934(u8* p);
 
@@ -1669,8 +1680,8 @@ void DynamicObstacle_vfA0(u8* p, f32* v, f32* off) {
 
 void DynamicObstacle_vf9C(u8* p, int on) {
     if (on) {
-        void* f = lbl_80335940;
-        fn_801ABFF8(p, (VVisit*)&f);
+        WakeVisit wake;
+        fn_801ABFF8(p, &wake);
     } else {
         U8(p, 0x220) = 0;
     }
@@ -1688,7 +1699,11 @@ void DynamicObstacle_vf88(u8* p) { ((VO*)PTR(p, 0x240))->v18("dyno", "unknown");
 
 u32 DynamicObstacle_vf84(u8* p) { return U32(p, 0x240); }
 
-void fn_801ADAC0(u8* self, u8* p) { fn_801AC240(p); }
+}  // extern "C"
+
+void WakeVisit::Visit(ObstacleSink* o) { fn_801AC240((u8*)o); }
+
+extern "C" {
 
 
 
