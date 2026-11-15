@@ -726,7 +726,7 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
 // The running game mode (only the slot used here is named).
 class GameMode {
 public:
-    virtual void v08(void);
+    virtual ~GameMode(void);
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);

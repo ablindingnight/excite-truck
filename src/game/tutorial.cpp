@@ -254,7 +254,7 @@ public:
 
 class Arena {
 public:
-    virtual void vf08(void);
+    virtual ~Arena(void);  // the current GameMode: slot 0 is its destructor
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
