@@ -96,7 +96,7 @@ template <class T> struct FixedVec {
 
 class Contest {
 public:
-    virtual void v08(void);
+    virtual ~Contest(void);  // 0x08 (__vt__7Contest slot 0 is __dt__7Contest)
     virtual int v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -132,7 +132,7 @@ public:
 
 class Bracket {
 public:
-    virtual void v08(void);
+    virtual ~Bracket(void);  // 0x08 (__vt__7Bracket slot 0 is __dt__7Bracket)
     virtual int v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -158,8 +158,7 @@ public:
 
 class Path {
 public:
-    ~Path(void);
-    virtual void v08(void);
+    virtual ~Path(void);  // 0x08 (__vt__4Path slot 0 is __dt__4Path)
     virtual int Count(void);       // 0xC
     virtual Bracket* Get(int i);   // 0x10
     ValueTable* table;             // offset 0x4

@@ -14,7 +14,7 @@
 
 class VPage {
 public:
-    virtual void v08(void);
+    virtual ~VPage(void);  // 0x08 (pathclass Contest: slot 0 is __dt__7Contest)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -1161,7 +1161,7 @@ static inline f32 Ease(f32 x) {
 // The node's label source (slot 0xC returns the text).
 class NodeText {
 public:
-    virtual void Unk8(void);
+    virtual ~NodeText(void);  // 0x08 (the level's Bracket (ChalLevel): slot 0 is __dt__7Bracket)
     virtual const char* GetText(void);  // 0xC
 };
 

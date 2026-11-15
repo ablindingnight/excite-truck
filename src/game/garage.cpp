@@ -100,7 +100,7 @@ extern u8* lbl_8055F2EC;
 
 class VList {
 public:
-    virtual void v08(void);
+    virtual ~VList(void);  // 0x08 (the VehicleList (lbl_80344384): slot 0 fn_802522A8 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -381,7 +381,7 @@ extern char lbl_8055C0C0[];  // "%d/%d"
 
 class GarageList {
 public:
-    virtual void v08(void);
+    virtual ~GarageList(void);  // 0x08 (the VehicleList (lbl_80344384): slot 0 fn_802522A8 is its destructor)
     virtual void Add(const char* name, u8 unlocked, u8 extreme);  // 0x0C
     virtual void v10(void);
     virtual int Count(void);                 // 0x14
@@ -1381,7 +1381,7 @@ void fn_80251934(u8* p) {
 // The garage screen's per-slot draw hook (vtable slot 0x60).
 class GarageSlotView {
 public:
-    virtual void v08(void);
+    virtual ~GarageSlotView(void);  // 0x08 (the slot strip (lbl_803444D8): slot 0 fn_8024E920 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);

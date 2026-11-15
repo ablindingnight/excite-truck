@@ -22,7 +22,7 @@ public:
 
 class VU {
 public:
-    virtual void v08(void);
+    virtual ~VU(void);  // 0x08 (the VehicleList (lbl_80344384): slot 0 fn_802522A8 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual int v14(void);

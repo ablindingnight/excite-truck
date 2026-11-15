@@ -305,7 +305,7 @@ public:
 // An event's unlock condition (object at event + 0x60).
 class EvCond {
 public:
-    virtual void v08(void);
+    virtual ~EvCond(void);  // 0x08 (the event's Contest/Bracket: slot 0 is its destructor)
     virtual const char* Title(void);  // 0x0C
     virtual void v10(void);
     virtual void v14(void);
@@ -1380,7 +1380,7 @@ public:
 // Extra vehicles an event offers on top of the unlockables.
 class ExtraVehicles {
 public:
-    virtual void v08(void);
+    virtual ~ExtraVehicles(void);  // 0x08 (the VehicleList (lbl_80344384): slot 0 fn_802522A8 is its destructor)
     virtual void v0C(void);
     virtual void v10(void);
     virtual int Count(void);            // 0x14

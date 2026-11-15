@@ -26,7 +26,7 @@ UnkStatic7F lbl_8055F3D0;
 // A cup of a car choice.
 class CupChoice {
 public:
-    virtual void v08(void);
+    virtual ~CupChoice(void);  // 0x08 (pathclass Contest: slot 0 is __dt__7Contest)
     virtual const char* Name(void);    // 0x0C
     virtual void v10(void);
     virtual void v14(void);
@@ -38,7 +38,7 @@ public:
 // A car choice in one of the pick lists.
 class CarChoice {
 public:
-    virtual void v08(void);
+    virtual ~CarChoice(void);  // 0x08 (pathclass Bracket: slot 0 is __dt__7Bracket)
     virtual const char* Name(void);  // 0x0C
     virtual void v10(void);
     virtual void v14(void);
@@ -52,7 +52,7 @@ public:
 
 class CarChoiceList {
 public:
-    virtual void v08(void);
+    virtual ~CarChoiceList(void);  // 0x08 (pathclass Path: slot 0 is __dt__4Path)
     virtual int Count(void);            // 0x0C
     virtual CarChoice* Get(int i);      // 0x10
 };
