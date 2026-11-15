@@ -1313,8 +1313,8 @@ struct CDSolVec {
 
 static inline CDSolVec CDSolVec4(f32 x, f32 y, f32 z, f32 w) {
     CDSolVec v;
-    v.y = y;
     v.x = x;
+    v.y = y;
     v.z = z;
     v.w = w;
     return v;
@@ -1372,10 +1372,16 @@ struct WFrame {
     PVec3 basis[3];
 };
 
+// The wheel's launch frame: the car's rotation rows with the hub as the position.
+struct WLaunch {
+    WFrame rot;
+    WVec3 pos;
+};
+
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);
 void fn_801BEB30(s32 car, u8** out);
-void fn_801AFC44(s32 car, int wheel, WFrame* m, WVec3* vel, WVec3* imp);
+void fn_801AFC44(s32 car, int wheel, WLaunch* m, WVec3* vel, WVec3* imp);
 
 // Knocks wheel i off the car: dims its channel in the car's cross-link colour, then launches it from
 // the hub with the car's velocity plus its own spin.
@@ -1385,28 +1391,28 @@ void fn_8018F76C(u8* p, int i) {
         fn_802E30C8("cardmg: wheel %d is already missing from car %d", i, S32(p, 0x1EC));
     }
     u8* x;
-    WVec3 hub;
+    WLaunch m;
     fn_801BEB30(S32(p, 0x1EC), &x);
     CDVec4 c(*(CDSolVec*)(x + 0x70));
     c[i] *= 0.15f;
     *(CDSolVec*)(x + 0x70) = c.Sol();
-    WFrame m = *(WFrame*)(p + 0x3C);
-    hub = *(WVec3*)(w + 0x23D0);
-    hub.x += m.basis[1].x * 0.3f;
-    hub.y += m.basis[1].y * 0.3f;
-    f32 zv = m.basis[1].z;
-    hub.z += zv * 0.3f;
+    m.rot = *(WFrame*)(p + 0x3C);
+    m.pos = *(WVec3*)(w + 0x23D0);
+    m.pos.x += m.rot.basis[1].x * 0.3f;
+    m.pos.y += m.rot.basis[1].y * 0.3f;
+    f32 zv = m.rot.basis[1].z;
+    m.pos.z += zv * 0.3f;
     WVec3 vel;
-    ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&hub);
+    ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&m.pos);
     f32 s = F32(w, 0x23AC);
     if ((f32)__fabs(s) < 5.0f) {
         s = s < lbl_80561F74 ? -5.0f : 5.0f;
     }
     f32 spin = F32(w, 0x23AC);
     WVec3 imp;
-    imp.x = m.basis[0].x * spin;
-    imp.y = m.basis[0].y * spin;
-    imp.z = m.basis[0].z * spin;
+    imp.x = m.rot.basis[0].x * spin;
+    imp.y = m.rot.basis[0].y * spin;
+    imp.z = m.rot.basis[0].z * spin;
     imp.x += F32(p, 0x124);
     imp.y += F32(p, 0x128);
     imp.z += F32(p, 0x12C);
