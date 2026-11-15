@@ -314,7 +314,7 @@ extern f32 __float_epsilon[];      // FLT_EPSILON
 extern "C" {
 void fn_8019EECC(u8* owner, ObVec3* c);
 CollShape* fn_8019FFD8(void* p, u8* frame, u8* owner);
-void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin);
+void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin, f32 m, f32 im);
 void fn_801A0444(CollShape* grp, CollShape* box);
 CollShape* fn_801A2354(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
 CollShape* fn_801A3190(void* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
@@ -620,10 +620,10 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 r = q->a * lbl_80562478;
         const f32 firstCenterXY = lbl_8056247C;
         fn_801A0258(shape, RVec3(firstCenterXY, firstCenterXY, -(q->c * lbl_80562478 - r)),
-                    RVec3(directionComponent, directionComponent, directionComponent), r, k, skin);
+                    RVec3(directionComponent, directionComponent, directionComponent), r, k, skin, directionComponent, firstCenterXY);
         const f32 secondCenterXY = lbl_8056247C;
-        fn_801A0258(shape, RVec3(secondCenterXY, secondCenterXY, lbl_80562478 * q->c - r),
-                    RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin);
+        fn_801A0258(shape, RVec3(secondCenterXY, secondCenterXY, q->c * lbl_80562478 - r),
+                    RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin, lbl_805624AC, secondCenterXY);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
             box = fn_801A2354(box, p + 0x3C, origin, p, k, skin, 0.3f, 0.3f, 0.3f);
