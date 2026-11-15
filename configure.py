@@ -985,7 +985,7 @@ config.libs.append(
             Object(NonMatching, "game/replay.cpp"),
             Object(Matching, "game/raceload.cpp"),
             Object(Matching, "game/gameloop.cpp"),
-            Object(NonMatching, "game/racing.cpp"),
+            Object(Matching, "game/racing.cpp"),
             Object(NonMatching, "game/dashhelper.cpp"),
             Object(NonMatching, "game/trackmap.cpp"),
             Object(NonMatching, "game/unk_80116BD4.c", mw_version="GC/3.0a5",

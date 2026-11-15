@@ -920,24 +920,30 @@ void RacingOverlay::DrawScore(void) {
 
 void Mat3FromEuler(Mat3* m, const Vec3* r);
 
+static inline f32 NeedleDot(f32 vx, f32 mx, f32 vy, f32 my, f32 vz, f32 mz) {
+    return vx * mx + vy * my + vz * mz;
+}
+
 static inline void MulVec(Vec3* out, const Vec3* in, const Mat3* m) {
     if (out == in) {
-        f32 x = in->x * m->m[0][0] + in->y * m->m[1][0] + in->z * m->m[2][0];
-        f32 y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
-        f32 z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
-        out->y = y;
+        f32 x = NeedleDot(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        f32 y = NeedleDot(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        f32 z = NeedleDot(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
         out->x = x;
+        out->y = y;
         out->z = z;
     } else {
-        out->x = m->m[0][0] * in->x + in->y * m->m[1][0] + in->z * m->m[2][0];
-        out->y = in->x * m->m[0][1] + in->y * m->m[1][1] + in->z * m->m[2][1];
-        out->z = in->x * m->m[0][2] + in->y * m->m[1][2] + in->z * m->m[2][2];
+        out->x = NeedleDot(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        out->y = NeedleDot(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        out->z = NeedleDot(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
     }
 }
 
 void RacingOverlay::DrawNeedle(f32 x, f32 y, f32 len, f32 width, f32 angle) {
-    Vec3 pos;
-    Mat3 m;
+    struct NeedleFrame {
+        Mat3 rotation;
+        Vec3 translation;
+    } frame;
     Vec3 pts[4];
     Vec3 rot;
     int i;
@@ -945,18 +951,18 @@ void RacingOverlay::DrawNeedle(f32 x, f32 y, f32 len, f32 width, f32 angle) {
     rot.x = 0.0f;
     rot.y = 0.0f;
     rot.z = angle;
-    Mat3FromEuler(&m, &rot);
-    pos.x = x;
-    pos.y = y;
-    pos.z = 0.0f;
+    Mat3FromEuler(&frame.rotation, &rot);
+    frame.translation.x = x;
+    frame.translation.y = y;
+    frame.translation.z = 0.0f;
     for (i = 0; i < 4; i++) {
         pts[i].y = (i % 2) ? width / 2 : -width / 2;
         pts[i].x = i < 2 ? len - 14.0f : -14.0f;
         pts[i].z = 0.0f;
-        MulVec(&pts[i], &pts[i], &m);
-        pts[i].x += pos.x;
-        pts[i].y += pos.y;
-        pts[i].z += pos.z;
+        MulVec(&pts[i], &pts[i], &frame.rotation);
+        pts[i].x += frame.translation.x;
+        pts[i].y += frame.translation.y;
+        pts[i].z += frame.translation.z;
     }
     fn_802C8BD0(zoneTex);
     fn_801E4F20(4);
