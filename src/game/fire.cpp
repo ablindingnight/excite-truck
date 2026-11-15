@@ -449,11 +449,12 @@ struct BackfireEvt {
     f32 x;     // offset 0x4
     s32 unk8;  // offset 0x8
     s32 mode;  // offset 0xC
+    int Car(void) const { return car; }  /* Helper name unproven */
 };
 
 class BackfireMan {
 public:
-    void Fire(const BackfireEvt* ev);
+    void Fire(BackfireEvt* ev);
 public:
     BackfireMan(void);
     ~BackfireMan(void);
@@ -1581,17 +1582,28 @@ void BackfireMan::Reset(void) {
 void BackfireMan::Draw(void) { torch->Draw(); }
 
 // MATCHING-AID: whole body as an inline (early returns join at the end); raises 78.86 to 89.06, unproven.
-inline void BackfireMan::Fire(const BackfireEvt* ev) {
-    if (ev->car < 0 || ev->car >= fn_80287B14()) {
+inline void BackfireMan::Fire(BackfireEvt* ev) {
+    if (ev->Car() < 0) {
         return;
     }
-    if ((entries[ev->car].state & 0xF) != 1) {
+    int cnt = fn_80287B14();
+    int car = ev->car;
+    if (car >= cnt) {
         return;
     }
-    FireModel* model = fn_80288208(ev->car);
+    // Retail keeps this three-way chain's branch shape (beq +8; b end) with an unsigned compare; a plain
+    // `if (st != 1) return;` or a one-case switch folds or compares signed (Process review, FACTS 2026-11-15).
+    u32 st = entries[car].state & 0xF;
+    if (st == 1) {
+    } else if (st != 1) {
+        return;
+    } else {
+        return;
+    }
+    FireModel* model = fn_80288208(car);
     int n;
     n = model->nParts;
-    BackfireEntry* e = &entries[ev->car];
+    BackfireEntry* e = &entries[ev->Car()];
     if (ev->mode < 0) {
         e->state = 2;
         e->a = ev->x;
@@ -1608,7 +1620,7 @@ inline void BackfireMan::Fire(const BackfireEvt* ev) {
 }
 
 void BackfireMan::Event(const BackfireEvt* ev) {
-    Fire(ev);
+    Fire((BackfireEvt*)ev);
 }
 
 void BackfireMan::Tick(int i, int on) {
