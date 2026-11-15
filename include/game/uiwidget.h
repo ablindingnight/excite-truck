@@ -234,4 +234,25 @@ public:
     unsigned char fields244[0x4];  // 0x244, read through widgets.cpp views
 };
 
+class MenuCustomView;
+class ModelWidget : public UIWidget {  /* Class name unproven (allocation tag "ModelWidget"); vtable lbl_8033DD20 */
+public:
+    ModelWidget(struct WidgetDesc* desc, const char* name);                          // fn_802286E4: builds a default view
+    ModelWidget(struct WidgetDesc* desc, MenuCustomView* target, const char* name);  // fn_8022886C
+    virtual ~ModelWidget(void);  // fn_802288E0
+    virtual void Slot0C(void);   // fn_8022897C
+    virtual void Slot10(void);   // fn_80228DAC
+    virtual void Slot28(void);   // fn_80228A84
+    virtual void Slot2C(void);   // fn_80228A6C
+    virtual int Slot64(int key); // fn_80228D90
+    virtual void Slot7C(void);   // fn_80228994
+    virtual void Slot80(void);   // fn_80228A38
+    const char* name;            // 0x244
+    char lastName[32];           // 0x248
+    MenuCustomView* target;      // 0x268
+    unsigned char owned;         // 0x26C
+    unsigned char pad26D[3];
+    int viewLeft, viewTop, viewRight, viewBottom;  // 0x270
+};
+
 #endif

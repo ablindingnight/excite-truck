@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "game/menucustomview.h"
 #include "game/uiwidget.h"
 #include "game/stringlist.h"
 #include "game/uitable.h"
@@ -637,7 +638,6 @@ inline float ModelFitBoundsNew::RadiusNew() const {
 }
 
 extern "C" {
-void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int height, float delta);
 }
 extern "C" {
 
@@ -723,7 +723,6 @@ void fn_80229FF0(WidgetFragment* self,int x,int y);
 void fn_8022A008(WidgetFragment* self,int,int);
 void fn_8022A014(WidgetFragment* self);
 void fn_8022A034(WidgetFragment* self);
-void fn_8022A574(ModelResourcePrefix* self);
 }
 
 
@@ -731,24 +730,9 @@ struct AdapterTarget {virtual ~AdapterTarget();virtual void Name(const char*);vi
 struct AdapterPrefix {char base[0x244];const char* name;char lastName[32];AdapterTarget* target;unsigned char owned;char padding[3];int left,top,right,bottom;};
 typedef char AdapterPrefixSize[(sizeof(AdapterPrefix)==0x280)?1:-1];
 extern "C" {
-extern u32 lbl_8033DD20[];
 void* memset(void*,int,unsigned long);int strcasecmp(const char*,const char*);
 void fn_80228AEC(WidgetFragment*,float);
 void fn_802C88BC(int);
-void* fn_8022882C(AdapterTarget* self,int destroy);
-WidgetFragment* fn_8022886C(WidgetFragment* self,WidgetDesc* desc,AdapterTarget* target,const char* name);
-WidgetFragment* fn_802288E0(WidgetFragment* self,int destroy);
-int fn_8022897C(WidgetFragment* self);
-void fn_80228990(WidgetFragment*);
-void fn_80228994(WidgetFragment* self);
-void fn_80228A38(WidgetFragment* self);
-int fn_80228A6C(WidgetFragment* self);
-void Unk18__14MenuCustomViewFv(WidgetFragment*);
-void fn_80228A84(WidgetFragment* self);
-int fn_80228D90(WidgetFragment* self,int);
-int Unk20__14MenuCustomViewFv(WidgetFragment*);
-int fn_80228DAC(WidgetFragment* self);
-void fn_80228DC0(WidgetFragment*);
 }
 
 
@@ -884,7 +868,7 @@ struct MenuRecord {char base[0x20];void* context;int(*callback)(void*);};
 struct MenuRowPrefix {void* handle;char rest[32];};
 struct MenuSelectionPrefix {char base[0x244];MenuRowPrefix* rows;unsigned char active;char pad249[3];int row,column;};
 extern "C" {
-extern u32 lbl_8033E668[],lbl_8033E560[],lbl_8033E038[],lbl_8033DF30[],lbl_8033EFF4[],lbl_8033E878[],lbl_8033E770[],lbl_8033DCF8[],lbl_8033EF68[];
+extern u32 lbl_8033E668[],lbl_8033E560[],lbl_8033E038[],lbl_8033DF30[],lbl_8033EFF4[],lbl_8033E878[],lbl_8033E770[],lbl_8033EF68[];
 void gxForgetTexture(int);void mrModelUnload(int);int fn_8012C33C(const char*);int fn_802C6FC0(const char*,int,int);MenuRecord* fn_8022D97C(void*,int);
 WidgetFragment* fn_80220874(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80222C8C(WidgetFragment* self,int destroy);
@@ -895,8 +879,6 @@ WidgetFragment* fn_80229B78(WidgetFragment* self,int destroy);
 void fn_80229BE8(WidgetFragment* self);
 WidgetFragment* fn_80229F78(WidgetFragment* self,int destroy);
 WidgetFragment* fn_8022A054(WidgetFragment* self,int destroy);
-ModelResourcePrefix* fn_8022A124(ModelResourcePrefix* self,int destroy);
-void fn_8022A19C(ModelResourcePrefix* self,const char* name);
 WidgetFragment* fn_8021BD98(WidgetFragment* self,int x,int y,float* value,float scale,const char* format,float bias,int height);
 void fn_80222178(WidgetFragment* self,int x,int y);
 }
@@ -1112,11 +1094,64 @@ extern "C" { extern const float lbl_80563544;extern const char lbl_8033DAEC[],lb
 WidgetFragment* fn_8022553C(WidgetFragment* self,RollingListData* list,WidgetDesc* desc);
 }
 
-struct StreamAsset348 {u32* vtable;int resource;float matrix[12];float elapsed,period;};
-struct StreamWidget348 {char base[0x244];void* context;char cache[32];StreamAsset348* asset;bool owned;};
+// The default "def_ui_model" view a ModelWidget builds when its style names no model (class name unproven): spins a
+// model about Y and fits it to the widget's rectangle. Every member is inline, so the copies follow the TU's code.
+class ModelView : public MenuCustomView {  /* Class name unproven (allocation tag "def_ui_model"); vtable lbl_8033DCF8 */
+public:
+    ModelView(WidgetDesc* desc) {
+        resource=-1;angle=(0.0f);speed=(0.0f);
+        if(fn_8012C33C(desc->name))resource=fn_802C6FC0(desc->name,0,0);
+        if(desc->field9c)speed=(6.2831855f)/(float)(u32)desc->field9c;
+        float* m=(float*)&matrix;
+        m[0]=(1.0f);m[1]=(0.0f);m[2]=(0.0f);m[3]=(0.0f);
+        m[4]=(1.0f);m[5]=(0.0f);m[6]=(0.0f);m[7]=(0.0f);
+        m[8]=(1.0f);m[9]=(0.0f);m[10]=(0.0f);m[11]=(0.0f);
+    }
+    virtual ~ModelView(void) {if(resource!=-1){mrModelUnload(resource);resource=-1;}}
+    virtual void Load(const char* name) {if(resource!=-1){mrModelUnload(resource);resource=-1;}if(fn_8012C33C(name))resource=fn_802C6FC0(name,0,0);}
+    virtual void Update(int x, int y, int width, int height, float delta) {
+
+  if (resource != (-1))
+  {
+    angle += speed * delta;
+    matrix = *fn_802C86DC();
+    RotationVec center;
+    RotationVec3New rotation((0.0f),angle,(0.0f));
+    RotationMatrix tmp;
+    Mat3FromEuler(&tmp, &rotation);
+    Mat3Mul(&matrix.basis, &tmp, &matrix.basis);
+    ModelFitBoundsNew bounds;
+    fn_802C77F0(resource, &bounds);
+    float radius = bounds.RadiusNew();
+    float nearPlane;
+    float unused;
+    float horizontal;
+    float vertical;
+    fn_802C98DC(&horizontal, &nearPlane, &unused, &vertical);
+    float minimum = radius / vertical;
+    float sine = (float) sin((float) atan((horizontal * ((float) height)) / ((float) width)));
+    float candidate = radius + (lbl_80563584 * nearPlane);
+    float distance = radius / sine;
+    distance = (distance > candidate) ? (distance) : (candidate);
+    minimum = (minimum > distance) ? (minimum) : (distance);
+    matrix.translation.z += minimum;
+    center.z = ModelFitCenterLerpNew(bounds.z.minimum, bounds.z.maximum, 0.5f);
+    center.y = ModelFitCenterLerpNew(bounds.y.minimum, bounds.y.maximum, 0.5f);
+    center.x = ModelFitCenterLerpNew(bounds.x.minimum, bounds.x.maximum, 0.5f);
+    ModelFitTransformNew(&center, &matrix, &center);
+    matrix.translation.x -= center.x;
+    matrix.translation.y -= center.y;
+    matrix.translation.z -= center.z;
+  }
+}
+    virtual void Draw(void) {if(resource!=-1)fn_802C744C(resource,&matrix);}
+
+    int resource;               // 0x4
+    ModelFitMatrixNew matrix;   // 0x8
+    float angle, speed;         // 0x38
+};
 extern "C" {
-void* __nw__FUlPCc(unsigned long,const char*);extern const float lbl_805634D8;extern const char lbl_8033DCE8[];extern u32 lbl_8033DD20[],lbl_8033DCF8[];
-WidgetFragment* fn_802286E4(WidgetFragment* self,WidgetDesc* desc,void* context);
+void* __nw__FUlPCc(unsigned long,const char*);extern const float lbl_805634D8;extern const char lbl_8033DCE8[];
 }
 
 // Observed timed-image prefix: byte 0x264 is the fade direction, and 0x270 reverses angular motion.
@@ -3299,45 +3334,35 @@ void fn_802285B8(WidgetFragment* self){
  if(fields->texture){int width=((WidgetDispatch*)self)->Slot78();fields->texture->Draw(frame,(int)x,(int)y,width,self->bottom-self->top);}
  else{int width=((WidgetDispatch*)self)->Slot78();fn_80230924(0x8FAFBFCFu,x,y,x+(float)width,y-(float)(self->bottom-self->top),(0.0f));}
 }
-WidgetFragment* fn_802286E4(WidgetFragment* self,WidgetDesc* desc,void* context){
- __ct__8UIWidgetFP10WidgetDesc(self,desc);StreamWidget348* f=(StreamWidget348*)self;
- f->context=context;f->asset=0;self->vtable=lbl_8033DD20;f->owned=0;memset(f->cache,0,32);
- StreamAsset348* asset=(StreamAsset348*)__nw__FUlPCc(64,lbl_8033DCE8);
- if(asset){asset->vtable=lbl_8033DCF8;asset->resource=-1;asset->elapsed=(0.0f);asset->period=(0.0f);
- if(fn_8012C33C(desc->name))asset->resource=fn_802C6FC0(desc->name,0,0);
- if(desc->field9c)asset->period=(6.2831855f)/(float)(u32)desc->field9c;
- asset->matrix[0]=(1.0f);asset->matrix[1]=(0.0f);asset->matrix[2]=(0.0f);asset->matrix[3]=(0.0f);
- asset->matrix[4]=(1.0f);asset->matrix[5]=(0.0f);asset->matrix[6]=(0.0f);asset->matrix[7]=(0.0f);
- asset->matrix[8]=(1.0f);asset->matrix[9]=(0.0f);asset->matrix[10]=(0.0f);asset->matrix[11]=(0.0f);
- }f->asset=asset;f->owned=1;return self;
+ModelWidget::ModelWidget(WidgetDesc* desc,const char* name) : UIWidget(desc), name(name), target(0) {
+ owned=0;memset(lastName,0,32);
+ ModelView* view=new (lbl_8033DCE8) ModelView(desc);
+ target=view;owned=1;
 }
-void* fn_8022882C(AdapterTarget* self,int destroy){if(self){if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_8022886C(WidgetFragment* self,WidgetDesc* desc,AdapterTarget* target,const char* name){
- __ct__8UIWidgetFP10WidgetDesc(self,desc);AdapterPrefix* fields=(AdapterPrefix*)self;fields->name=name;self->vtable=lbl_8033DD20;fields->target=target;fields->owned=0;
- memset(fields->lastName,0,32);return self;
+
+ModelWidget::ModelWidget(WidgetDesc* desc,MenuCustomView* target,const char* name) : UIWidget(desc), name(name) {
+ this->target=target;owned=0;
+ memset(lastName,0,32);
 }
-WidgetFragment* fn_802288E0(WidgetFragment* self,int destroy){
- if(self){self->vtable=lbl_8033DD20;AdapterPrefix* fields=(AdapterPrefix*)self;
-  if(fields->owned){delete fields->target;fields->target=0;}
-  __dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);
- }return self;
+ModelWidget::~ModelWidget(void) {
+ if(owned){delete target;target=0;}
 }
-int fn_8022897C(WidgetFragment* self){return ((AdapterPrefix*)self)->target->Enter();}
-void fn_80228990(WidgetFragment*){}
-void fn_80228994(WidgetFragment* self){
- AdapterPrefix* fields=(AdapterPrefix*)self;
+void ModelWidget::Slot0C(void){((AdapterPrefix*)this)->target->Enter();}
+void MenuCustomView::Reset(void){}
+void ModelWidget::Slot7C(void){
+ AdapterPrefix* fields=(AdapterPrefix*)((WidgetFragment*)this);
  if(fields->name&&strcasecmp(fields->lastName,fields->name)!=0){
   const char* source=fields->name;int remaining=32;char* destination=fields->lastName;
   while((*destination++=*source++)!=0){if(--remaining<=0){destination[-1]=0;break;}}
   fields->target->Name(fields->lastName);
  }
- fn_80228AEC(self,fn_80214D48());
+ fn_80228AEC(((WidgetFragment*)this),fn_80214D48());
 }
-void fn_80228A38(WidgetFragment* self){fn_80228AEC(self,fn_80214D48());}
-int fn_80228A6C(WidgetFragment* self){return ((AdapterPrefix*)self)->target->Leave();}
-void Unk18__14MenuCustomViewFv(WidgetFragment*){}
-void fn_80228A84(WidgetFragment* self){
- AdapterPrefix* fields=(AdapterPrefix*)self;Viewport saved(fields->left,fields->top,fields->right,fields->bottom);
+void ModelWidget::Slot80(void){fn_80228AEC((WidgetFragment*)this,fn_80214D48());}
+void ModelWidget::Slot2C(void){((AdapterPrefix*)this)->target->Leave();}
+void MenuCustomView::Unk18(void){}
+void ModelWidget::Slot28(void){
+ AdapterPrefix* fields=(AdapterPrefix*)((WidgetFragment*)this);Viewport saved(fields->left,fields->top,fields->right,fields->bottom);
  fn_802C88BC(2);fields->target->Draw();
 }
 void fn_80228AEC(WidgetFragment *source, float opacity) {MapViewportReceiverNew* viewport=(MapViewportReceiverNew*)source;
@@ -3375,10 +3400,10 @@ int boundWidth=displayWidth-viewport->x;int resultWidth=(int)roundedWidth;if(res
     renderer = viewport->renderer;
     ((MapRendererDispatchCppNew*)renderer)->Draw( viewport->x, viewport->y, viewport->width, clippedHeight, opacity);
 }
-int fn_80228D90(WidgetFragment* self,int){return ((AdapterPrefix*)self)->target->Flags();}
-int Unk20__14MenuCustomViewFv(WidgetFragment*){return 0;}
-int fn_80228DAC(WidgetFragment* self){return ((AdapterPrefix*)self)->target->State();}
-void fn_80228DC0(WidgetFragment*){}
+int ModelWidget::Slot64(int){return ((AdapterPrefix*)this)->target->Flags();}
+int MenuCustomView::Unk20(void){return 0;}
+void ModelWidget::Slot10(void){((AdapterPrefix*)this)->target->State();}
+void MenuCustomView::Unk24(void){}
 void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,int){fn_802C3034(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);fn_802C51C0(image);int height=fn_802C5220(image);int bottom=y+height;int middle=x+width/2;fn_80218EE0(context,x,y,middle,bottom);fn_80218EBC(context,&saved);fn_80218EE0(context,middle,y,x+width,bottom);fn_80218EBC(context,&saved);}
 void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int){fn_802C3034(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);int width=fn_802C51C0(image);int imageHeight=fn_802C5220(image);int middle=y+height/2;fn_80218EE0(context,x,y,x+imageHeight,middle);fn_80218EBC(context,&saved);fn_80218EE0(context,x,middle,x+width,y+height);fn_80218EBC(context,&saved);}
 int fn_80228F40(int x,int y){return x+1000*y;}
@@ -3483,45 +3508,10 @@ void fn_8022A014(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=1;}
 void fn_8022A034(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=0;}
 WidgetFragment* fn_8022A054(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E770;PairImage248* f=(PairImage248*)self;fn_802C519C(f->first);fn_802C519C(f->second);__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_8022A0CC(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-ModelResourcePrefix* fn_8022A124(ModelResourcePrefix* self,int destroy){if(self){self->vtable=lbl_8033DCF8;if(self->resource!=-1){mrModelUnload(self->resource);self->resource=-1;}if(destroy>0)__dl__FPv(self);}return self;}
-void fn_8022A19C(ModelResourcePrefix* self,const char* name){if(self->resource!=-1){mrModelUnload(self->resource);self->resource=-1;}if(fn_8012C33C(name))self->resource=fn_802C6FC0(name,0,0);}
-void fn_8022A210(ModelFitAssetNew * const self, int x, int y, int width, int height, float delta)
-{
 
-  if (self->resource != (-1))
-  {
-    self->angle += self->speed * delta;
-    self->matrix = *fn_802C86DC();
-    RotationVec center;
-    RotationVec3New rotation((0.0f),self->angle,(0.0f));
-    RotationMatrix tmp;
-    Mat3FromEuler(&tmp, &rotation);
-    Mat3Mul(&self->matrix.basis, &tmp, &self->matrix.basis);
-    ModelFitBoundsNew bounds;
-    fn_802C77F0(self->resource, &bounds);
-    float radius = bounds.RadiusNew();
-    float nearPlane;
-    float unused;
-    float horizontal;
-    float vertical;
-    fn_802C98DC(&horizontal, &nearPlane, &unused, &vertical);
-    float minimum = radius / vertical;
-    float sine = (float) sin((float) atan((horizontal * ((float) height)) / ((float) width)));
-    float candidate = radius + (lbl_80563584 * nearPlane);
-    float distance = radius / sine;
-    distance = (distance > candidate) ? (distance) : (candidate);
-    minimum = (minimum > distance) ? (minimum) : (distance);
-    self->matrix.translation.z += minimum;
-    center.z = ModelFitCenterLerpNew(bounds.z.minimum, bounds.z.maximum, 0.5f);
-    center.y = ModelFitCenterLerpNew(bounds.y.minimum, bounds.y.maximum, 0.5f);
-    center.x = ModelFitCenterLerpNew(bounds.x.minimum, bounds.x.maximum, 0.5f);
-    ModelFitTransformNew(&center, &self->matrix, &center);
-    self->matrix.translation.x -= center.x;
-    self->matrix.translation.y -= center.y;
-    self->matrix.translation.z -= center.z;
-  }
-}
-void fn_8022A574(ModelResourcePrefix* self){if(self->resource!=-1)fn_802C744C(self->resource,(char*)self+8);}
+
+
+
 void fn_8022A594(){RegisterModuleTag__FP9ModuleTag(lbl_8055EFB0);StartupSharedPrefixNew* settings=&lbl_80490920;settings->kind=123;settings->fifth=settings->fourth=settings->third=settings->first=0;lbl_8055EFB8=0x7f000000;}
 }
 

@@ -648,8 +648,6 @@ extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, v
 extern "C" WidgetFragment* fn_802230A4(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223800(WidgetFragment*, int, int, void*, void*);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
-extern "C" WidgetFragment* fn_8022886C(WidgetFragment*, UIDesc*, void*, void*);
-extern "C" WidgetFragment* fn_802286E4(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8022553C(WidgetFragment*, void*, UIDesc*);
 extern "C" WidgetFragment* fn_80226CBC(WidgetFragment*, UIDesc*);
 extern "C" WidgetFragment* fn_80227E84(WidgetFragment*, void*, UIDesc*, void*);
@@ -1304,12 +1302,10 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         UIStyle* model = FindStyle(styles, d->style, 0x13);
         UIStyle* name = FindStyle(styles, d->style, 3);
         if (model) {
-            p = (WidgetFragment*)operator new(0x280, "ModelWidget");
-            if (p) p = fn_8022886C(p, d, model->value, name ? name->value : 0);
+            p = (WidgetFragment*)new ("ModelWidget") ModelWidget((WidgetDesc*)d, (MenuCustomView*)model->value, (const char*)(name ? name->value : 0));
             widgets[count++] = p;
         } else {
-            p = (WidgetFragment*)operator new(0x280, "ModelWidget");
-            if (p) p = fn_802286E4(p, d, name ? name->value : 0);
+            p = (WidgetFragment*)new ("ModelWidget") ModelWidget((WidgetDesc*)d, (const char*)(name ? name->value : 0));
             widgets[count++] = p;
         }
         break;
