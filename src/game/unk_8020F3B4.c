@@ -139,7 +139,7 @@ long fn_8020F608(long arg0, long arg1) {
     }
 }
  
-void fn_8020F6E0(long arg0, long arg1) {
+void fn_8020F6E0(int arg0, int arg1) {
     if (arg1 != 0) {
         return;
     }
@@ -502,7 +502,9 @@ extern "C" void fn_802101F8(PanelWidget *arg0, long arg1, long arg2, void *arg3)
 
  
 extern void fn_802E6BD8(unsigned long, int, void *, unsigned long, void (*)(int));
-extern void fn_8000DBC8(void (*)(long, long));
+#pragma cplusplus on
+void IdentRegisterCallback(void (*cb)(int, int));  // ident.cpp
+#pragma cplusplus reset
 void fn_8021031C(void) {
     long type;
     char *buffer;
@@ -510,7 +512,7 @@ void fn_8021031C(void) {
     buffer = lbl_80489CA0;
     memset(&lbl_80489CA0, 0, 0x6400);
     fn_802E6BD8(type, 0, buffer, 0x6400, 0);
-    fn_8000DBC8(&fn_8020F6E0);
+    IdentRegisterCallback(&fn_8020F6E0);
 }
  
 extern long fn_80207848(const char *, long);
