@@ -38,6 +38,14 @@ struct V3 {
     f32 z;
 };
 
+// A ground position set from an x/z point (aiobst.cpp defines From: y = 0).
+struct Spot {
+    void From(const Vec2& v);
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
 struct Mat3 {
     f32 m[3][3];
 };
@@ -52,7 +60,7 @@ struct Bound {
 struct BoostVtx {
     void Emit(u32 c, int idx);
     void Draw(int idx);  /* Helper name unproven */
-    V3 pos;     // offset 0x0
+    Spot pos;   // offset 0x0
     u32 color;  // offset 0xC
     f32 u;      // offset 0x10
     f32 v;      // offset 0x14
@@ -79,7 +87,7 @@ struct BoostArea {
     BoostVtx* verts;  // offset 0x4
     s32 nx;           // offset 0x8
     s32 ny;           // offset 0xC
-    V3 center;        // offset 0x10
+    Spot center;      // offset 0x10
 };
 
 template <typename T>
@@ -163,7 +171,6 @@ void fn_80160B7C(V2* r, const V2* a, const V2* b);
 void fn_80160BA0(V2* r, const V2* a, f32 s);
 void fn_80160BBC(V2* r, const V2* a, const V2* b);
 f32 fn_80160BE0(const V2* a, const V2* b);
-void fn_80160230(V3* d, const V2* xz);
 Bound* fn_801399FC(ValueNode* n);
 int fn_80139B70(Bound* b, f32 x, f32 y);
 V2 fn_80139C5C(Bound* b);
@@ -232,7 +239,7 @@ public:
 };
 }  // namespace
 
-static inline void Vertex(const u32& c, int idx, const V3& p, f32 u, f32 v) { f32 x = p.x; f32 y = p.y; f32 z = p.z; fn_802C8E00(c, idx, x, y, z, u, v); }
+static inline void Vertex(const u32& c, int idx, const Spot& p, f32 u, f32 v) { f32 x = p.x; f32 y = p.y; f32 z = p.z; fn_802C8E00(c, idx, x, y, z, u, v); }
 
 inline void BoostVtx::Draw(int idx) {
     Vertex(color, idx, pos, u, v);
@@ -282,7 +289,7 @@ struct CarRec {
 };
 
 static inline void SetVtx(BoostVtx* v, const V2* p) {
-    fn_80160230(&v->pos, p);
+    v->pos.From((const Vec2&)*p);
     v->pos.y = fn_801DD88C(v->pos.x, v->pos.z);
     fn_801EA1E0(v->pos.x, v->pos.z, &v->pos.y, 0);
 }
@@ -365,7 +372,7 @@ static inline int AddArea(BoostMan* m, ValueNode* n) {  /* Helper name unproven 
         AddScaled(&a->bound->pts[3], &a->bound->pts[3], 1.0f, &side);
         AddScaled(&a->bound->pts[3], &a->bound->pts[3], 2.0f, &dir);
         Vec2 c(fn_80139C5C(a->bound));
-        fn_80160230(&a->center, &c);
+        a->center.From(c);
         a->center.y = fn_801DD88C(a->center.x, a->center.z);
         ok = 1;
     } else {

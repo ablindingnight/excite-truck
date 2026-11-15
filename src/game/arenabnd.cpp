@@ -116,7 +116,13 @@ char lbl_8042F7C0[0x80];   // external table path
 
 static inline s32 BoundBytes(s32 n) { return n * sizeof(BoundPt) + 8; }
 
-inline Bound* AllocBound(s32 n) { return (Bound*)fn_801284E8("arenabnd", n * sizeof(BoundPt) + 8); }
+// Shared with boostman.cpp: retail's weak NewBound__Fl uses this unit's "arenabnd" string object.
+inline Bound* NewBound(s32 n) {
+    Bound* b = (Bound*)fn_801284E8("arenabnd", n * sizeof(BoundPt) + 8);
+    b->cap = n;
+    b->n = n;
+    return b;
+}
 
 static inline void Perp(V2* v) {
     f32 t = -v->x;
@@ -149,12 +155,10 @@ int fn_8013990C(ValueNode* n) {
 Bound* fn_801399FC(ValueNode* n) {
     char buf[0x10];
     s32 cnt = fn_8013990C(n);
-    Bound* b = AllocBound(cnt);
+    Bound* b = NewBound(cnt);
     BoundPt* p;
     int i;
     const char* v;
-    b->cap = cnt;
-    b->n = cnt;
     p = b->pts;
     i = 0;
     do {
