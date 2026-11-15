@@ -4,6 +4,7 @@
 // packer and the sound stop helper. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/camframe34.h"
 
 ModuleTag lbl_8055E1D0;
 static inline u32 InitialFFFFWord() { return 0xFFFF0000u; }
@@ -225,7 +226,7 @@ void fn_80144DAC(Vec3* d, const Vec3* s) {
     d->z = s->z;
 }
 
-void fn_80144DC8(void) {}
+CamFrame34::CamFrame34(void) {}
 
 int GameMode::vf3C(int p) { return 0; }
 

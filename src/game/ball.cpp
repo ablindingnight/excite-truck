@@ -17,7 +17,7 @@ void fn_801D0C84(void* l);                  // unregister listener
 // Vec2's empty constructor, which retail calls out of line in Drop, by its mangled name (xz stays a plain array:
 // PickDrop takes an f32*).
 void __ct__4Vec2Fv(f32* v);
-void fn_80144DC8(void* m);
+void __ct__10CamFrame34Fv(void* m);
 void fn_80144B44(void* v, f32 x, f32 y, f32 z);
 }
 
@@ -633,7 +633,7 @@ inline void Ball::Drop(void) {
     f32 up;
     __ct__4Vec2Fv(xz);
     PickDrop(xz, &h);
-    fn_80144DC8(&m);
+    __ct__10CamFrame34Fv(&m);
     fn_8017E388(&m);
     ((Spot*)&m.pos)->From(*(const Vec2*)xz);
     up = DropHeight();

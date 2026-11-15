@@ -4,6 +4,7 @@
 // word tables. Applying no command applies the default pose (80 zero vectors). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/camframe34.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -59,25 +60,6 @@ struct BVec {
     f32 x;
     f32 y;
     f32 z;
-};
-
-struct BMtx {
-    BMtx(void);
-    void Identity(void) {
-        m[0][0] = 1.0f;
-        m[0][1] = 0.0f;
-        m[0][2] = 0.0f;
-        m[1][0] = 0.0f;
-        m[1][1] = 1.0f;
-        m[1][2] = 0.0f;
-        m[2][0] = 0.0f;
-        m[2][1] = 0.0f;
-        m[2][2] = 1.0f;
-        m[3][0] = 0.0f;
-        m[3][1] = 0.0f;
-        m[3][2] = 0.0f;
-    }
-    f32 m[4][3];
 };
 
 struct BMtx33 {
@@ -159,7 +141,7 @@ ModuleTag lbl_8055FE50;
 u8 lbl_8055FE58;
 BoneMgr* lbl_8055FE5C;
 BoneCmd* lbl_8055FE60;
-BMtx lbl_804DAC48[22];
+CamFrame34 lbl_804DAC48[22];
 BVec lbl_804DB068[81];
 BMtx33 lbl_804DB434;
 u32 lbl_804DB458[4];
@@ -172,7 +154,7 @@ void fn_802D9C5C(int start, const BVec* src, int n) {
     }
 }
 
-void fn_802D9DE4(int start, const BMtx* src, int n) {
+void fn_802D9DE4(int start, const CamFrame34* src, int n) {
     for (int i = 0; i < n; i++) {
         lbl_804DAC48[start + i] = src[i];
     }
@@ -227,9 +209,9 @@ BoneCmd* fn_802DA704(int start, const BVec* v, int n) {
     return m->NewCmd(start, v, n, n * sizeof(BVec), 0, 0);
 }
 
-BoneCmd* fn_802DA80C(int start, const BMtx* v, int n) {
+BoneCmd* fn_802DA80C(int start, const CamFrame34* v, int n) {
     BoneMgr* m = lbl_8055FE5C;
-    return m->NewCmd(start, v, n, n * sizeof(BMtx), 1, 0);
+    return m->NewCmd(start, v, n, n * sizeof(CamFrame34), 1, 0);
 }
 
 BoneCmd* fn_802DA918(f32 a, f32 b, f32 c) {

@@ -212,7 +212,7 @@ void fn_80144B44(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144B54(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
-void fn_80144DC8(RMtx* m);
+void __ct__10CamFrame34Fv(RMtx* m);
 const RMtx* Mtx__10RaceCarRecFv(Phob* car);
 void StatsUpdate__Fv(void* p);
 void fn_8017E388(RMtx* m);
@@ -420,7 +420,7 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
         fn_80144DAC(&pts[k], &verts[k].p);
     }
     RMtx frame;
-    fn_80144DC8(&frame);
+    __ct__10CamFrame34Fv(&frame);
     fn_801BFB2C(p, &frame, pts);
     fn_801BF75C(&p->rest, &m, &frame);
     PanelLink links[2];
@@ -724,7 +724,7 @@ void PanelVol::vf1C(void) {
     }
     RMtx w;
     RMtx m;
-    fn_80144DC8(&m);
+    __ct__10CamFrame34Fv(&m);
     fn_80144DAC(&m.pos, &pts[org]);
     fn_801C0E60(&m.rot[0], &pts[e0b], &pts[e0a]);
     fn_801C0E60(&m.rot[1], &pts[e1b], &pts[e1a]);

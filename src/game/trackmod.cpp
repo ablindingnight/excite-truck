@@ -419,7 +419,7 @@ void fn_80144B54(TMtx* m, TCam* c);
 f32* fn_80144B44(PVec* v, f32 x, f32 y, f32 z);
 u32 fn_80144C68(int r, int g, int b, int a);
 void fn_80144DAC(f32* dst, const f32* src);
-void fn_80144DC8(Mat3* m);
+void __ct__10CamFrame34Fv(Mat3* m);
 void fn_801BFD34(void* vtx, const f32* p, TMtx* m);
 void fn_802C8BD0(void* tex);
 void fn_802C8DB8(void* vtx, int n, u16* idx, int ni);
@@ -933,7 +933,7 @@ inline void RotatorTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         TMtx m;
         f32 a = list->d30 * fn_801E7E18();
-        fn_80144DC8(&m.r);
+        __ct__10CamFrame34Fv(&m.r);
         Mat3RotY(&m.r, a);
         Mat3Mul(&m.r, &m.r, &list->rot);
         fn_80144DAC(m.t, list->pos);

@@ -3,6 +3,7 @@
 // Written partly against raw field offsets (the camera record layout is in game/camrec.h). Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/camframe34.h"
 #include <string.h>
 #include "game/camrec.h"
 
@@ -60,12 +61,6 @@ struct CamShot {
     s32 kind;        // offset 0x4C
 };
 
-
-// A 3x4 frame; its empty constructor lives in modeinl.cpp (fn_80144DC8).
-struct CamFrame34 {
-    CamFrame34(void);
-    f32 m[12];
-};
 
 ModuleTag lbl_8055F590;
 static CamShot lbl_8049FD58[4];

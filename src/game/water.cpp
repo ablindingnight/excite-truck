@@ -110,7 +110,7 @@ void fn_802C8638(const Frame* cam);
 void fn_802C88BC(int mode);
 void fn_802C10C8(void);
 void fn_802BDD8C(f32 dist);
-void fn_80144DC8(Frame* f);
+void __ct__10CamFrame34Fv(Frame* f);
 void fn_80144DAC(PVec* out, const PVec* in);
 void fn_802C8B98(s32 tex, const Frame* m);
 void fn_802C8DB8(const WVert* v, int nv, const u16* idx, int ni);
@@ -608,7 +608,7 @@ inline void WaterEnvMap::RenderFaces(f32 h, Frame& m) {
     Perspective ps(0.1f, 2.0f, hf);
     for (i = 0; i < 6; i++) {
         Frame f;
-        fn_80144DC8(&f);
+        __ct__10CamFrame34Fv(&f);
         fn_802C0054((Mat3*)&f, (const Mat3*)&k->frames[i]);
         fn_80144DAC(&f.pos, &m.pos);
         fn_802C8B98(k->faces[i], &f);
