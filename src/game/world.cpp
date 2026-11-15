@@ -245,7 +245,7 @@ struct WallVol {
         width = w;
         length = l;
         f34 = 0;
-        radius = w + (f32)sqrt(w * w + h * h + l * l);
+        radius = w + (f32)sqrt(width * width + height * height + length * length);
     }
     void SetType(int t) { ((void (*)(WallVol*, int))vtbl[0x40 / 4])(this, t); }
     void** vtbl;  // offset 0x0
@@ -1286,6 +1286,8 @@ static inline ValPoint BoundPoint(ValueNode* nd, const char* key) { /* Helper na
     return nd->GetPoint(key);
 }
 
+static inline f32 GroundY(const ValPoint& p) { return fn_801DCF48(0, p.x, p.y); }
+
 void fn_801E96D8(RaceSetup* s) {
     EventInfo* ev = (EventInfo*)GetEvent(s->event);
     const char* file = ev->node->GetString("wall_file", 0);
@@ -1308,7 +1310,7 @@ void fn_801E96D8(RaceSetup* s) {
                 prev.x = p0.x;
                 prev.y = 0.0f;
                 prev.z = p0.y;
-                prev.y = fn_801DCF48(0, p0.x, p0.y);
+                prev.y = GroundY(p0);
                 do {
                     char name[0x10];
                     BOOL ok;
@@ -1334,7 +1336,7 @@ void fn_801E96D8(RaceSetup* s) {
                         cur.x = p.x;
                         cur.y = 0.0f;
                         cur.z = p.y;
-                        cur.y = fn_801DCF48(0, p.x, p.y);
+                        cur.y = GroundY(p);
                         c.x = cur.x + 0.5f * (prev.x - cur.x);
                         c.z = cur.z + 0.5f * (prev.z - cur.z);
                         mtx.z.x = cur.x - prev.x;
@@ -1342,7 +1344,7 @@ void fn_801E96D8(RaceSetup* s) {
                         mtx.z.y = 0.0f;
                         mtx.z.z = cur.z - prev.z;
                         mtx.pos = c;
-                        len = PSVECMag(&mtx.z) / 2.0f;
+                        len = PSVECMag(&mtx.z) * 0.5f;
                         PSVECNormalize(&mtx.z, &mtx.z);
                         mtx.y.x = 0.0f;
                         mtx.y.z = 0.0f;
