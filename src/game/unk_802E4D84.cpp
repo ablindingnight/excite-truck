@@ -137,8 +137,6 @@ extern void WPADControlSpeaker(int, int, void (*)());
 extern void fn_802E30C8(const char *fmt, ...);  // Spu report
 extern void fn_802E5248(int, int);
 void fn_802E51D0(int chan, int result);
-extern char lbl_8034D39C[];
-extern char lbl_8034D3C0[];
 extern unsigned char lbl_804FC800[];
 // Per-remote speaker state (4 remotes).
 typedef struct SpuRemote {
@@ -149,7 +147,6 @@ typedef struct SpuRemote {
     int unk28;
 } SpuRemote;
 #define SPU_REMOTES ((SpuRemote *)lbl_804FC800)
-extern char lbl_8034D384[];
 extern char lbl_804FC558[][0x20];  // names of the loaded sound packages
 extern int lbl_8055FF78;
 extern int lbl_8055FFA0;
@@ -160,13 +157,8 @@ extern void fn_8012C41C(void (*)(void), int, const char *name);
 extern void fn_802E589C(char *name);
 extern int fn_802E582C(char *name);
 extern int sprintf(char *, const char *, ...);
-extern char lbl_8034D490[];
-extern char lbl_8034D4A0[];
-extern char lbl_8034D5B0[];
 extern void fn_802E317C(const char *fmt, ...);  // Spu warning
 extern int lbl_8055FF98;
-extern char lbl_8034D584[];
-extern char lbl_8034D528[];
 extern void fn_80128670(int);
 extern void fn_8012C4D8(void *res);
 void fn_802E5D5C(void *arg0);
@@ -178,7 +170,6 @@ extern void __dla__FPv(void *);
 extern char lbl_804FC690[];  // the Spu alarm
 extern void *lbl_8055FFB0;
 extern unsigned int lbl_8055FF84;  // ARAM buffer size
-extern char lbl_8034D210[];  // the Spu's message strings
 extern void fn_801282EC(int align);
 extern void fn_801282F4(void);
 extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator new[](size, tag)
@@ -194,8 +185,6 @@ extern unsigned char lbl_8055FFA5;
 extern int OSEnableInterrupts(void);
 extern int OSRestoreInterrupts(int);
 extern void *memset(void *, int, unsigned int);
-extern char lbl_8034D554[];
-extern char lbl_8034D578[];
 
 // Copies at most n - 1 characters of src to dst and terminates it.
 static inline void StrCopy(char *d, const char *s, int n) {
@@ -228,7 +217,15 @@ static inline void Swap16(void *p) {
 
 extern void *fn_8012C370(const char *name, unsigned int type, unsigned int *version, unsigned int *size,
                          unsigned char *first, unsigned char *swapped);
-extern char lbl_8034D280[];
+
+// MATCHING-AID (unproven names and bodies): retail keeps the messages of linker-stripped ARAM allocator functions
+// at the start of this unit's .data; a never-called static helper creates them at this point (it is dropped).
+static void SpuAramMessages(int i, char *name, int size, unsigned int base, unsigned int end) {
+    fn_802E30C8("reacquire %d!\n", i);
+    fn_802E317C("Spu: Can't fit %s into ARAM (%d bytes)", name, size);
+    fn_802E30C8(" %2d: %16s : 0x%08x %d", i, name, base, size);
+    fn_802E30C8("aram_base: %08x  last_end: %08x", base, end);
+}
 
 // Looks up the SFX0 resource `name` (version 3); the first time a byte-swapped copy is seen its header and
 // 16-bit PCM data are swapped, its data offset becomes a pointer and the data is flushed for the DSP.
@@ -243,7 +240,7 @@ SpuSampleRes *fn_802E4DC8(char *name) {
     res = (SpuSampleRes *)fn_8012C370(name, 'SFX0', &version, 0, &first, &swapped);
     if (res != 0) {
         if (version != 3) {
-            fn_802E317C(lbl_8034D280, name, version, 3);
+            fn_802E317C("Spu: %s has wrong version (%x != %x)", name, version, 3);
         }
         if (swapped) {
             Swap32(&res->size);
@@ -280,6 +277,23 @@ extern unsigned char lbl_8055FFA6;
 extern volatile unsigned char lbl_8055FFB4;
 extern int fn_802D9BF0(void);
 extern void AXSetVoiceAdpcmLoop(void *vpb, SpuAdpcmLoop *loop);
+
+// MATCHING-AID (unproven names and bodies): messages of linker-stripped ARQ and Spu test functions, kept by
+// retail between fn_802E4DC8's and fn_802E51D0's strings; a never-called static helper creates them here.
+static void SpuTestMessages(void *req, void *pending, unsigned int addr) {
+    fn_802E317C("spu: unknown arq request %p (vs %p)", req, pending);
+    fn_802E30C8("aram addr = %x", addr);
+    fn_802E30C8("copying noise to ARAM...");
+    fn_802E30C8("filled ARAM with noise!");
+    fn_802E30C8("Spu Test!");
+    fn_802E30C8("spotter.sfx");
+    fn_802E30C8("got sample");
+    fn_802E30C8("got channel");
+    fn_802E30C8("going into loop");
+    fn_802E30C8("done with loop");
+    fn_802E30C8("released channel");
+    fn_802E30C8("forgot sample!");
+}
 
 // Spu alarm: for every voice playing a streaming sample, refills the half of its buffer that playback has just
 // left (with silence while muted) and flushes it for the DSP.
@@ -358,7 +372,7 @@ void fn_802E51D0(int chan, int result) {
         r->restart = 1;
         r->unk28 = 0;
         memset(r->wenc, 0, sizeof(r->wenc));
-        fn_802E30C8(lbl_8034D384, chan);
+        fn_802E30C8("spu: chan[%d] is ready", chan);
     }
 }
 
@@ -367,8 +381,8 @@ void fn_802E5248(int arg0, int arg1) {
 }
 
 void fn_802E5264(int arg0, int arg1) {
-    fn_802E30C8(lbl_8034D39C, arg0,
-                 arg1 < 0 ? lbl_8034D3C0 : "connect");
+    fn_802E30C8("spu: WPAD connect callback(%d) : %s", arg0,
+                 arg1 < 0 ? "disconnect" : "connect");
     lbl_804FC800[arg0 * 0x2C] = 0;
     if (arg1 >= 0) WPADControlSpeaker(arg0, 1, (void (*)())fn_802E5248);
 }
@@ -454,32 +468,31 @@ extern void fn_802E52EC(void);
 // Starts the Spu: takes an ARAM buffer, starts AI/AX, allocates the sample, voice and cache tables, acquires the
 // 32 voices, clears the zero area at the end of ARAM, and starts the refill callback and the 150 Hz alarm.
 void fn_802E5478(void) {
-    char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
     float *vol;
     int i;
     void *vpb;
     void *zero;
 
-    fn_802E30C8(msg + 0x1BC);
+    fn_802E30C8("+SpuBegin");
     lbl_8055FF8C = 1;
     lbl_8055FF84 = 0x20000;
     fn_801282F4();
-    lbl_8055FF80 = lbl_8055FF7C = lbl_8055FFB0 = fn_801284E8(msg + 0x1C8, lbl_8055FF84);
+    lbl_8055FF80 = lbl_8055FF7C = lbl_8055FFB0 = fn_801284E8("aram_buf", lbl_8055FF84);
     DCInvalidateRange(lbl_8055FF80, lbl_8055FF84);
-    fn_802E30C8(msg + 0x1D4, lbl_8055FF80, lbl_8055FF84, lbl_8055FF84 >> 10);
+    fn_802E30C8("spu: aram_base: %x -- %x (%dK)", lbl_8055FF80, lbl_8055FF84, lbl_8055FF84 >> 10);
     AIInit(0);
     AXInit();
     AXSetMode(0);
-    lbl_8055FF90 = (unsigned char *)__nwa__FUlPCc(0x100 * 0xB0, msg + 0x1F4);
-    SPU_VOICES = (unsigned char *)__nwa__FUlPCc(0x20 * 0x2C, msg + 0x200);
-    lbl_8055FF9C = (SpuSample **)__nwa__FUlPCc(0x100 * 4, msg + 0x20C);
+    lbl_8055FF90 = (unsigned char *)__nwa__FUlPCc(0x100 * 0xB0, "SpuSample");
+    SPU_VOICES = (unsigned char *)__nwa__FUlPCc(0x20 * 0x2C, "SpuChannel");
+    lbl_8055FF9C = (SpuSample **)__nwa__FUlPCc(0x100 * 4, "Spucache");
     lbl_8055FFA0 = 0;
     memset(lbl_8055FF90, 0, 0x100 * 0xB0);
     memset(SPU_VOICES, 0, 0x20 * 0x2C);
     for (i = 0; i < 0x20; i++) {
         vpb = AXAcquireVoice(0x1F, 0, 0);
         if (vpb == 0) {
-            fn_802E317C(msg + 0x218, i);
+            fn_802E317C("Spu: can't acquire voice %d", i);
         }
         AXSetVoiceState(vpb, 0);
         AXSetVoiceType(vpb, 0);
@@ -488,7 +501,7 @@ void fn_802E5478(void) {
     }
     lbl_8055FF88 = (int)lbl_8055FF7C + (lbl_8055FF84 - 0x20000);
     fn_801282EC(0x20);
-    zero = __nwa__FUlPCc(0x20000, msg + 0x234);
+    zero = __nwa__FUlPCc(0x20000, "zero_buf");
     memset(zero, 0, 0x20000);
     fn_802E4D84((void *)lbl_8055FF88, zero, 0x20000, 1);
     __dla__FPv(zero);
@@ -506,8 +519,6 @@ void fn_802E5478(void) {
 }
 
 extern unsigned char lbl_8055FFA5;
-extern char lbl_8034D450[];
-extern char lbl_8034D470[];
 extern void OSCancelAlarm(void *);
 extern void AXFreeVoice(void *);
 extern void AXQuit(void);
@@ -524,14 +535,14 @@ void fn_802E56F0(void) {
     fn_802E6B34();
     for (i = 0; i < 0x20; i++) {
         if (SPU_VOICES[i * 0x2C + 0x20] != 0) {
-            fn_802E317C(lbl_8034D450, *(void **)(SPU_VOICES + i * 0x2C + 0x1C));
+            fn_802E317C("Spu: channel %s still in use", *(void **)(SPU_VOICES + i * 0x2C + 0x1C));
         }
         AXFreeVoice(*(void **)(SPU_VOICES + i * 0x2C + 4));
         *(void **)(SPU_VOICES + i * 0x2C + 4) = 0;
     }
     for (j = 0; j < 0x100; j++) {
         if (*(int *)(lbl_8055FF90 + j * 0xB0 + 0x94) > 0) {
-            fn_802E317C(lbl_8034D470, lbl_8055FF90 + j * 0xB0);
+            fn_802E317C("Spu: sample %s still in use", lbl_8055FF90 + j * 0xB0);
         }
     }
     __dla__FPv(SPU_VOICES);
@@ -596,9 +607,9 @@ void fn_802E58B8(char *name) {
 void fn_802E5950(int arg0, int arg1) {
     char name[0x100];
     sprintf(name, "*%s/%s", arg0, arg1);
-    fn_802E30C8(lbl_8034D490, name);
+    fn_802E30C8("Spu: caching %s", name);
     if (fn_802E582C(name) == 0) {
-        fn_802E30C8(lbl_8034D4A0, name);
+        fn_802E30C8("Spu: couldn't cache %s", name);
     }
 }
 
@@ -621,7 +632,6 @@ void fn_802E5A54(void) {
     lbl_8055FF78 = 0;
 }
 
-extern char lbl_8034D210[];  // the Spu's message strings
 extern char *strrchr(const char *, int);
 extern int strcasecmp(const char *, const char *);
 extern char *strcpy(char *, const char *);
@@ -631,7 +641,6 @@ extern SpuSampleRes *fn_802E4DC8(char *name);
 // Returns the cached sample for `name` (its directory stripped), adding a reference; loads it into a free slot
 // when it is not cached yet.
 SpuSample *fn_802E5AE8(char *name) {
-    char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
     char *base;
     struct { char * slash; int i; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
     int free;
@@ -661,14 +670,14 @@ SpuSample *fn_802E5AE8(char *name) {
         }
     }
     if (free < 0) {
-        fn_802E317C(msg + 0x2A8, name);
+        fn_802E317C("Spu: out of samples (%s)", name);
     }
     res = fn_802E4DC8(name);
     if (res == 0) {
         return 0;
     }
     if ((magic = res->magic = 0xCFFE) != 0xCFFE) {
-        fn_802E317C(msg + 0x2C4, name, magic, 0xCFFE);
+        fn_802E317C("spu: %s is not a GameCube ADPCM format file (%x != %x)", name, magic, 0xCFFE);
     }
     size = res->size;
     length = (float)(size >> 1) / 22050.0f;
@@ -681,7 +690,7 @@ SpuSample *fn_802E5AE8(char *name) {
     memset(s, 0, sizeof(SpuSample));
     addr = (unsigned int)res->data;
     if (addr & 0x1F) {
-        fn_802E317C(msg + 0x2FC, base, addr);
+        fn_802E317C("spu: %s is misaligned (%p)!", base, addr);
     }
     s->size = size;
     s->refs = 1;
@@ -710,7 +719,7 @@ extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator ne
 // Drops a reference to a cached sample, freeing its data with the last one.
 void fn_802E5D5C(void *arg0) {
     if (*(int *)((char *)arg0 + 0x94) == 1 && *(int *)((char *)arg0 + 0x98) > 0) {
-        fn_802E317C(lbl_8034D528, arg0, *(int *)((char *)arg0 + 0x98));
+        fn_802E317C("Spu: sample %s still in use by %d channels", arg0, *(int *)((char *)arg0 + 0x98));
     }
     if (--*(int *)((char *)arg0 + 0x94) == 0 && *(void **)((char *)arg0 + 0xAC) != 0) {
         fn_8012C4D8(*(void **)((char *)arg0 + 0xAC));
@@ -731,13 +740,13 @@ SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(vo
         }
     }
     if (free < 0) {
-        fn_802E317C(lbl_8034D554, name);
+        fn_802E317C("spu: out of samples for stream %s", name);
     }
     s = &SPU_SAMPLES[free];
     memset(s, 0, sizeof(SpuSample));
     fn_801282EC(0x80);
     fn_801282F4();
-    s->data = (unsigned char *)__nwa__FUlPCc(size, lbl_8034D578);
+    s->data = (unsigned char *)__nwa__FUlPCc(size, "stream_buf");
     memset(s->data, 0, size);
     s->loop = 1;
     s->addr = (unsigned int)s->data - 0x80000000;
@@ -757,7 +766,7 @@ SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(vo
 // Free a stream's buffer (warns if channels still use it; the stream's name is at its start).
 void fn_802E5FE4(void *arg0) {
     if (*(int *)((char *)arg0 + 0x98) > 0) {
-        fn_802E317C(lbl_8034D584, arg0, *(int *)((char *)arg0 + 0x98));
+        fn_802E317C("Spu: stream %s still in use by %d channels", arg0, *(int *)((char *)arg0 + 0x98));
     }
     delete[] *(unsigned char **)((char *)arg0 + 0x90);
     *(int *)((char *)arg0 + 0x90) = 0;
@@ -804,7 +813,7 @@ SpuVoice *fn_802E6058(SpuSample *s) {
 
 void fn_802E6138(void *arg0) {
     if (((unsigned char *)arg0)[0x23] != 0) {
-        fn_802E317C(lbl_8034D5B0, *(int *)arg0, *(void **)((char *)arg0 + 0x1C));
+        fn_802E317C("Spu: channel %d/%s is still playing", *(int *)arg0, *(void **)((char *)arg0 + 0x1C));
     }
     {
         void *temp_r4 = *(void **)((char *)arg0 + 0x1C);
@@ -888,17 +897,17 @@ extern void AXSetVoiceRmtMix(void *vpb, AXPBRMTMIX *mix);
 // their addresses for in-memory or streaming PCM16/ADPCM samples), and sets pitch, volume, pan and remote-speaker
 // mixes for playing voices; records which remotes were used over the last 10 frames.
 void fn_802E6264(void) {
-    char *msg = lbl_8034D210;  // MATCHING-AID: stands in for the pooled message literals until this unit owns its .data
-    int muted;  // silence all voices this update
+    int off;            // byte offset of voice i (and of history entry i)
+    unsigned int used;  // remotes used this update
+    struct {
+        int muted;  // silence all voices this update
+    } state;  /* Struct unproven: a struct-field local numbers as a temp, which gives retail's register for muted (structpair.py) */
     int level;
     int i;
     SpuVoice *v;
     int wasPlaying;
     SpuSample *s;
     int starting;
-    struct {
-        unsigned int used;
-    } remoteState;
     unsigned int remotes;
     unsigned int start;
     unsigned int loop;
@@ -907,10 +916,10 @@ void fn_802E6264(void) {
     if (lbl_8055FFA4) {
         lbl_8055FFA4 = 0;
         lbl_8055FFA6 = 1;
-        remoteState.used = 0;
+        used = 0;
         if (lbl_8055FF8C != lbl_8055D1D0) {
             lbl_8055D1D0 = lbl_8055FF8C;
-            fn_802E30C8(msg + 0x3C4);
+            fn_802E30C8("spu: switching to mode %d", lbl_8055FF8C);
             switch (lbl_8055FF8C) {
             case 0:
             case 1:
@@ -920,17 +929,17 @@ void fn_802E6264(void) {
                 AXSetMode(2);
                 break;
             default:
-                fn_802E317C(msg + 0x3E0);
+                fn_802E317C("spu: bad sound mode %d", lbl_8055FF8C);
                 break;
             }
         }
-        muted = 1;
+        state.muted = 1;
         if (!fn_802ECC10() && !fn_802D9BF0()) {
-            muted = 0;
+            state.muted = 0;
         }
         level = OSDisableInterrupts();
-        for (i = 0; i < 0x20; i++) {
-            v = &SPU_VOICE_TABLE[i];
+        for (i = 0, off = 0; i < 0x20; i++, off += sizeof(SpuVoice)) {
+            v = (SpuVoice *)(SPU_VOICES + off);
             wasPlaying = v->wasPlaying;
             starting = v->start;
             v->wasPlaying = v->play;
@@ -1047,7 +1056,7 @@ void fn_802E6264(void) {
                         adpcm.yn2 = hdr.yn2;
                         AXSetVoiceAdpcm(v->vpb, &adpcm);
                     } else {
-                        fn_802E317C(msg + 0x3F8);
+                        fn_802E317C("spu: bad sample type %d", s->locked);
                     }
                     {
                         AXPBSRC src;
@@ -1068,7 +1077,7 @@ void fn_802E6264(void) {
                     float right;
                     float front;
                     float back;
-                    AXSetVoiceSrcRatio(v->vpb, muted ? 0.0f : v->sample->rate * ((22050.0f / 32000.0f) * v->pitch));
+                    AXSetVoiceSrcRatio(v->vpb, state.muted ? 0.0f : v->sample->rate * ((22050.0f / 32000.0f) * v->pitch));
                     memset(&ve, 0, sizeof(ve));
                     vol = v->volume;
                     if (1.0f < vol) {
@@ -1076,7 +1085,7 @@ void fn_802E6264(void) {
                     }
                     ve.currentVolume = 0.75f * (32767.0f * vol);
                     ve.currentDelta = 0;
-                    if (muted) {
+                    if (state.muted) {
                         ve.currentVolume = 0;
                     }
                     AXSetVoiceVe(v->vpb, &ve);
@@ -1095,7 +1104,7 @@ void fn_802E6264(void) {
                     mix.vAuxCL = 32767.0f * (right * back);
                     AXSetVoiceMix(v->vpb, &mix);
                     remotes = v->remotes;
-                    remoteState.used |= remotes;
+                    used |= remotes;
                     if (remotes) {
                         AXSetVoiceRmtOn(v->vpb, 1);
                     } else {
@@ -1116,17 +1125,25 @@ void fn_802E6264(void) {
             }
         }
         OSRestoreInterrupts(level);
-        lbl_804FC658[lbl_8055FFAC++] = remoteState.used;
+        lbl_804FC658[lbl_8055FFAC++] = used;
         if (lbl_8055FFAC >= 10) {
             lbl_8055FFAC = 0;
         }
-        int off = 0;
+        off = 0;
         for (i = 0; i < 10; off += sizeof(lbl_804FC658[0]), i++) {
-            remoteState.used |= *(unsigned int*)((u8*)lbl_804FC658 + off);
+            used |= *(unsigned int*)((u8*)lbl_804FC658 + off);
         }
-        lbl_8055FFA8 = remoteState.used;
+        lbl_8055FFA8 = used;
         lbl_8055FFA6 = 0;
     }
+}
+
+// MATCHING-AID (unproven names and bodies): messages of linker-stripped stream track functions, kept by retail at
+// the end of this unit's .data; a never-called static helper creates them here.
+static void SpuStreamMessages(char *name) {
+    fn_802E317C("spu: can't open stream %s", name);
+    fn_802E30C8("spu: queued track %s", name);
+    fn_802E317C("spu: sound stream destroy timeout!");
 }
 
 const char* fn_802E6ABC(void*) {
@@ -1171,20 +1188,3 @@ char lbl_804FC690[0x30];
 unsigned char lbl_804FC6C0[0x140];
 unsigned char lbl_804FC800[0xB0];
 
-// This unit's .data strings, in address order (strdata.py).
-extern "C" {
-char lbl_8034D210[0x70] = "reacquire %d!\n\0\0Spu: Can't fit %s into ARAM (%d bytes)\0\0 %2d: %16s : 0x%08x %d\0\0aram_base: %08x  last_end: %08x";
-char lbl_8034D280[0x104] = "Spu: %s has wrong version (%x != %x)\0\0\0\0spu: unknown arq request %p (vs %p)\0aram addr = %x\0\0copying noise to ARAM...\0\0\0\0filled ARAM with noise!\0Spu Test!\0\0\0spotter.sfx\0got sample\0\0got channel\0going into loop\0done with loop\0\0released channel\0\0\0\0forgot sample!";
-char lbl_8034D384[] = "spu: chan[%d] is ready";
-char lbl_8034D39C[] = "spu: WPAD connect callback(%d) : %s";
-char lbl_8034D3C0[0x90] = "disconnect\0\0+SpuBegin\0\0\0aram_buf\0\0\0\0spu: aram_base: %x -- %x (%dK)\0\0SpuSample\0\0\0SpuChannel\0\0Spucache\0\0\0\0Spu: can't acquire voice %d\0zero_buf";
-char lbl_8034D450[] = "Spu: channel %s still in use";
-char lbl_8034D470[] = "Spu: sample %s still in use";
-char lbl_8034D490[] = "Spu: caching %s";
-char lbl_8034D4A0[0x88] = "Spu: couldn't cache %s\0\0Spu: out of samples (%s)\0\0\0\0spu: %s is not a GameCube ADPCM format file (%x != %x)\0\0spu: %s is misaligned (%p)!";
-char lbl_8034D528[] = "Spu: sample %s still in use by %d channels";
-char lbl_8034D554[] = "spu: out of samples for stream %s";
-char lbl_8034D578[] = "stream_buf";
-char lbl_8034D584[] = "Spu: stream %s still in use by %d channels";
-char lbl_8034D5B0[0xC8] = "Spu: channel %d/%s is still playing\0spu: switching to mode %d\0\0\0spu: bad sound mode %d\0\0spu: bad sample type %d\0spu: can't open stream %s\0\0\0spu: queued track %s\0\0\0\0spu: sound stream destroy timeout!";
-}
