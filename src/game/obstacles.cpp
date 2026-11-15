@@ -1,7 +1,6 @@
 // Track obstacles (0x801A9660-0x801ADB44): the obstacle factory ("fencepst", "obst", "DynamicObstacle"),
 // static and dynamic obstacle rigid bodies, the extents/plane/polyvol/pmshvol readers and the
-// fence-pole binding ("fencepole: binding to %p"). Written against raw field offsets; the large
-// routines are still stubs. Names are guesses apart from the strings.
+// fence-pole binding ("fencepole: binding to %p"). Some names are descriptive.
 #include "game/common.h"
 #include <string.h>
 
@@ -52,13 +51,26 @@ struct ObVec3 {
 // A visitor called for each obstacle in a linked chain.
 class ObstacleSink;
 
-class VVisit {
+class VVisit;
+typedef void (*VisitObstacle)(VVisit*, ObstacleSink*);
+
+struct VisitorTable {
+    const void* reserved[2];
+    VisitObstacle visit;
+};
+
+// The obstacle tables and these visitor tables share one ABI data block.
+extern "C" VisitorTable __vt__8HitVisit;
+extern "C" VisitorTable __vt__9WakeVisit;
+
+class __declspec(novtable) VVisit {
 public:
     virtual void Visit(ObstacleSink* o) = 0;
 };
 
-class WakeVisit : public VVisit {
+class __declspec(novtable) WakeVisit : public VVisit {
 public:
+    WakeVisit() { *(const VisitorTable**)this = &__vt__9WakeVisit; }
     virtual void Visit(ObstacleSink* o);
 };
 
@@ -100,12 +112,6 @@ public:
     void OnHit(const RVec3* v, const RVec3* at, int force, void* extra);
 };
 
-// A handle whose constructor marks it unused.
-struct ObHandle {
-    s32 v;
-    ObHandle(void) { v = 0xFFFF0000; }
-};
-
 extern "C" {
 u8* __ct__9RigidBodyFv(u8* p);
 void __dt__10CollVolumeFv(void* p, int del);
@@ -140,8 +146,8 @@ static inline int IsCar(u8* o) {
 extern void* lbl_80335744[];
 extern f32 lbl_8055E3C8;
 
-ModuleTag lbl_8055E5D8;
-ObHandle lbl_8055E5E0;
+u32 lbl_8055E5D8[2];  // Storage for the module tag.
+s32 lbl_8055E5E0;     // Unused handle until the module starts.
 s32 lbl_8055E5E4;
 s32 lbl_8055E5E8;
 s32 lbl_8055E5EC;
@@ -206,10 +212,10 @@ u8* fn_801A973C(u8* p, int del) {
 
 }  // extern "C"
 
-extern "C" const f32 lbl_8056247C;  // 0.0
-extern "C" const f32 lbl_80562478;  // 0.5
 
 // A contact corner (corners.cpp), kept in a body's list at 0xD0.
+// Keep the scale operand in MWCC's floating-point pool.
+static inline f32 ScaleOperand(f32 value) { return value; }
 struct BodyCorner {
     BodyCorner* next;  // offset 0x0
     RVec3 pos;         // offset 0x4
@@ -229,11 +235,11 @@ static inline void AddCorner(u8* body, f32 x, f32 y, f32 z, f32 spring) {
     BodyCorner* c = fn_801AE180();
     c->pos = pos;
     c->spring = spring;
-    c->friction = lbl_80562478;
-    c->vel.x = lbl_8056247C;
-    c->vel.y = lbl_8056247C;
-    c->vel.z = lbl_8056247C;
-    c->damping = lbl_8056247C;
+    c->friction = 0.5f;
+    c->vel.x = 0.0f;
+    c->vel.y = 0.0f;
+    c->vel.z = 0.0f;
+    c->damping = 0.0f;
     c->next = *(BodyCorner**)(body + 0xD0);
     *(BodyCorner**)(body + 0xD0) = c;
 }
@@ -312,9 +318,6 @@ struct ObMesh {
     ObMeshPart** parts;  // offset 0x14
 };
 
-extern "C" const f32 lbl_8056249C;  // 0.8
-extern "C" const f32 lbl_805624A4;  // -1
-extern "C" const f32 lbl_805624AC;  // 1
 extern f32 __float_epsilon[];      // FLT_EPSILON
 
 extern "C" {
@@ -339,11 +342,11 @@ static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
     BodyCorner* c = fn_801AE180();
     c->pos = v;
     c->spring = spring;
-    c->friction = lbl_80562478;
-    c->vel.x = lbl_8056247C;
-    c->vel.y = lbl_8056247C;
-    c->vel.z = lbl_8056247C;
-    c->damping = lbl_8056247C;
+    c->friction = 0.5f;
+    c->vel.x = 0.0f;
+    c->vel.y = 0.0f;
+    c->vel.z = 0.0f;
+    c->damping = 0.0f;
     c->next = *(BodyCorner**)(body + 0xD0);
     *(BodyCorner**)(body + 0xD0) = c;
 }
@@ -352,11 +355,11 @@ static inline void AddCornerV(u8* body, const ObVec3& v, f32 spring) {
     BodyCorner* c = fn_801AE180();
     c->pos = (const RVec3&)v;
     c->spring = spring;
-    c->friction = lbl_80562478;
-    c->vel.x = lbl_8056247C;
-    c->vel.y = lbl_8056247C;
-    c->vel.z = lbl_8056247C;
-    c->damping = lbl_8056247C;
+    c->friction = 0.5f;
+    c->vel.x = 0.0f;
+    c->vel.y = 0.0f;
+    c->vel.z = 0.0f;
+    c->damping = 0.0f;
     c->next = *(BodyCorner**)(body + 0xD0);
     *(BodyCorner**)(body + 0xD0) = c;
 }
@@ -415,14 +418,14 @@ public:
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
         : CollShape(o, m, 'SPHR', k, s), center(c) {
         radius = r;
-        f34 = lbl_8056247C;
-        f38 = lbl_8056247C;
-        f3C = lbl_8056247C;
-        f40 = lbl_8056247C;
-        f44 = lbl_8056247C;
-        f48 = lbl_8056247C;
+        f34 = 0.0f;
+        f38 = 0.0f;
+        f3C = 0.0f;
+        f40 = 0.0f;
+        f44 = 0.0f;
+        f48 = 0.0f;
         b4C = 0;
-        f50 = lbl_8056247C;
+        f50 = 0.0f;
         center.x = c.x;
         center.y = c.y;
         center.z = c.z;
@@ -489,6 +492,7 @@ public:
         rad = r;
         half = h;
     }
+    virtual ~TubeBase(void);
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28: half the length between the end spheres
 };
@@ -538,28 +542,28 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     U8(p, 0x221) = 0;
     U8(p, 0x220) = 1;
     U8(p, 0x222) = 0;
-    F32(p, 0x21C) = lbl_8056247C;
+    F32(p, 0x21C) = 0.0f;
     U8(p, 0x223) = 1;
     S32(p, 0x224) = 0;
-    F32(p, 0x228) = lbl_8056247C;
-    F32(p, 0x22C) = lbl_8056247C;
-    F32(p, 0x230) = lbl_8056247C;
+    F32(p, 0x228) = 0.0f;
+    F32(p, 0x22C) = 0.0f;
+    F32(p, 0x230) = 0.0f;
     U8(p, 0x235) = 0;
     U8(p, 0x234) = 0;
-    F32(p, 0x238) = lbl_8056247C;
+    F32(p, 0x238) = 0.0f;
     fn_801AC240(p);
     *(ObRot*)(p + 0x3C) = q->rot;
     *(ObPos*)(p + 0x60) = q->pos;
     ((CollVolume*)p)->Update();
-    *(RVec3*)(p + 0x30) = RVec3(lbl_8056247C, lbl_8056247C, lbl_8056247C);
+    *(RVec3*)(p + 0x30) = RVec3(0.0f, 0.0f, 0.0f);
     vf20__10CollVolumeFv(p);
     shape = 0;
     corners = 1;
     k = 1.5f * (9.81f * q->mass / 0.03f);
     skin = q->skin;
-    origin.x = lbl_8056247C;
-    origin.y = lbl_8056247C;
-    origin.z = lbl_8056247C;
+    origin.x = 0.0f;
+    origin.y = 0.0f;
+    origin.z = 0.0f;
     spring = 0.4f * k;
     s32 kind = q->kind;
     switch (q->type) {
@@ -573,9 +577,9 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         f32 x = q->a;
         f32 y = q->b;
         f32 z = q->c;
-        fn_801A9798(p, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478, spring);
+        fn_801A9798(p, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f), spring);
         if (q->type == 1) {
-            shape = new ("box1:box-volume") BoxShape((CollVolume*)p, ObFrameOf(p), k, skin, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478);
+            shape = new ("box1:box-volume") BoxShape((CollVolume*)p, ObFrameOf(p), k, skin, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f));
             corners = 0;
         } else {
             f32 r = (z + (y + x)) / 3.0f / 2.0f;
@@ -585,15 +589,16 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         break;
     }
     case 7:
-        shape = new ("obstacle-post:tube") TubeShape((CollVolume*)p, ObFrameOf(p), 437992.1f, lbl_8056249C, q->a, q->b);
+        shape = new ("obstacle-post:tube") TubeShape((CollVolume*)p, ObFrameOf(p), 437992.1f, 0.8f, q->a, q->b);
         U8(p, 0x221) = 1;
         corners = 0;
         break;
     case 12: {
         CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
-            s = fn_801A2354(s, p + 0x3C, RVec3(lbl_8056247C, lbl_80562478 * q->b, lbl_8056247C), p, 50000.0f,
-                            0.2f, q->a, lbl_80562478 * q->b, q->a);
+            const f32& half = 0.5f;
+            s = fn_801A2354(s, p + 0x3C, RVec3(0.0f, half * q->b, 0.0f), p, 50000.0f,
+                            0.2f, q->a, half * q->b, q->a);
         }
         shape = s;
         kind = 110;
@@ -602,34 +607,34 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     }
     case 8: {
         RVec3 c;
-        c = RVec3(q->b * lbl_80562478, -q->a * lbl_80562478, q->c * lbl_80562478);
+        c = RVec3(q->b * ScaleOperand(0.5f), -q->a * ScaleOperand(0.5f), q->c * ScaleOperand(0.5f));
         AddCornerV(p, c, spring);
-        c.z *= lbl_805624A4;
+        c.z *= (-1.0f);
         AddCornerV(p, c, spring);
-        c.x *= lbl_805624A4;
+        c.x *= (-1.0f);
         AddCornerV(p, c, spring);
-        c.z *= lbl_805624A4;
+        c.z *= (-1.0f);
         AddCornerV(p, c, spring);
-        c = RVec3(0.0762f, q->a * lbl_80562478, q->c * lbl_80562478);
+        c = RVec3(0.0762f, q->a * ScaleOperand(0.5f), q->c * ScaleOperand(0.5f));
         AddCornerV(p, c, spring);
-        c.z *= lbl_805624A4;
+        c.z *= (-1.0f);
         AddCornerV(p, c, spring);
-        c.x *= lbl_805624A4;
+        c.x *= (-1.0f);
         AddCornerV(p, c, spring);
-        c.z *= lbl_805624A4;
+        c.z *= (-1.0f);
         AddCornerV(p, c, spring);
         shape = (CollShape*)operator new(0x184, "horse-volume");
         if (shape) {
             shape = fn_8019FFD8(shape, p + 0x3C, p);
         }
-        const f32 directionComponent = lbl_805624AC;
-        f32 r = q->a * lbl_80562478;
-        const f32 firstCenterXY = lbl_8056247C;
-        fn_801A0258(shape, RVec3(firstCenterXY, firstCenterXY, -(q->c * lbl_80562478 - r)),
+        const f32 directionComponent = 1.0f;
+        f32 r = q->a * ScaleOperand(0.5f);
+        const f32 firstCenterXY = 0.0f;
+        fn_801A0258(shape, RVec3(firstCenterXY, firstCenterXY, -(q->c * ScaleOperand(0.5f) - r)),
                     RVec3(directionComponent, directionComponent, directionComponent), r, k, skin, directionComponent, firstCenterXY);
-        const f32 secondCenterXY = lbl_8056247C;
-        fn_801A0258(shape, RVec3(secondCenterXY, secondCenterXY, q->c * lbl_80562478 - r),
-                    RVec3(lbl_805624AC, lbl_805624AC, lbl_805624AC), r, k, skin, lbl_805624AC, secondCenterXY);
+        const f32 secondCenterXY = 0.0f;
+        fn_801A0258(shape, RVec3(secondCenterXY, secondCenterXY, q->c * ScaleOperand(0.5f) - r),
+                    RVec3(1.0f, 1.0f, 1.0f), r, k, skin, 1.0f, secondCenterXY);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
             box = fn_801A2354(box, p + 0x3C, origin, p, k, skin, 0.3f, 0.3f, 0.3f);
@@ -641,24 +646,24 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     case 4: {
         f32 w = q->b;
         f32 h = q->c;
-        f32 r = q->a * lbl_80562478;
+        f32 r = q->a * ScaleOperand(0.5f);
         ObVec3 start;
         start.x = q->a;
         start.z = q->a;
-        start.y = -h * lbl_80562478;
+        start.y = -h * ScaleOperand(0.5f);
         ObVec3 v = start;
         AddCornerV(p, v, spring);
         f32 m[9];
         cs = cos(1.5707963705062866);
         f32 sn = sin(1.5707963705062866);
         m[0] = cs;
-        m[1] = lbl_8056247C;
+        m[1] = 0.0f;
         m[2] = -sn;
-        m[3] = lbl_8056247C;
-        m[4] = lbl_805624AC;
-        m[5] = lbl_8056247C;
+        m[3] = 0.0f;
+        m[4] = 1.0f;
+        m[5] = 0.0f;
         m[6] = sn;
-        m[7] = lbl_8056247C;
+        m[7] = 0.0f;
         m[8] = cs;
         ObRotate(&v, &m[0], &v);
         AddCornerV(p, v, spring);
@@ -666,30 +671,30 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
         AddCornerV(p, v, spring);
         ObRotate(&v, &m[0], &v);
         AddCornerV(p, v, spring);
-        AddCornerV(p, RVec3(-w, h * lbl_80562478, -w), spring);
-        AddCornerV(p, RVec3(w, h * lbl_80562478, -w), spring);
-        AddCornerV(p, RVec3(-w, h * lbl_80562478, w), spring);
-        AddCornerV(p, RVec3(w, h * lbl_80562478, w), spring);
+        AddCornerV(p, RVec3(-w, h * ScaleOperand(0.5f), -w), spring);
+        AddCornerV(p, RVec3(w, h * ScaleOperand(0.5f), -w), spring);
+        AddCornerV(p, RVec3(-w, h * ScaleOperand(0.5f), w), spring);
+        AddCornerV(p, RVec3(w, h * ScaleOperand(0.5f), w), spring);
         shape = new ("cone:ball-volume") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, r, origin);
         corners = 0;
         break;
     }
     case 5:
-        fn_801A9798(p, q->a, q->b * lbl_80562478, q->a, spring);
-        shape = new ("barrel:flat-volume") FlatSphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, q->b * lbl_80562478, origin);
+        fn_801A9798(p, q->a, q->b * ScaleOperand(0.5f), q->a, spring);
+        shape = new ("barrel:flat-volume") FlatSphereShape((CollVolume*)p, ObFrameOf(p), k, skin, q->a, q->b * ScaleOperand(0.5f), origin);
         corners = 0;
         break;
     case 3: {
         f32 x = q->a;
         f32 y = q->b;
         f32 z = q->c;
-        f32 r = y * lbl_80562478;
-        AddCornerV(p, RVec3(-x * lbl_80562478, -y * lbl_80562478, -z * lbl_80562478), spring);
-        AddCornerV(p, RVec3(x * lbl_80562478, -y * lbl_80562478, -z * lbl_80562478), spring);
-        AddCornerV(p, RVec3(-x * lbl_80562478, -y * lbl_80562478, z * lbl_80562478), spring);
-        AddCornerV(p, RVec3(x * lbl_80562478, -y * lbl_80562478, z * lbl_80562478), spring);
-        AddCornerV(p, RVec3(lbl_8056247C, y * lbl_80562478, -z * lbl_80562478), spring);
-        AddCornerV(p, RVec3(lbl_8056247C, y * lbl_80562478, z * lbl_80562478), spring);
+        f32 r = y * ScaleOperand(0.5f);
+        AddCornerV(p, RVec3(-x * ScaleOperand(0.5f), -y * ScaleOperand(0.5f), -z * ScaleOperand(0.5f)), spring);
+        AddCornerV(p, RVec3(x * ScaleOperand(0.5f), -y * ScaleOperand(0.5f), -z * ScaleOperand(0.5f)), spring);
+        AddCornerV(p, RVec3(-x * ScaleOperand(0.5f), -y * ScaleOperand(0.5f), z * ScaleOperand(0.5f)), spring);
+        AddCornerV(p, RVec3(x * ScaleOperand(0.5f), -y * ScaleOperand(0.5f), z * ScaleOperand(0.5f)), spring);
+        AddCornerV(p, RVec3(0.0f, y * ScaleOperand(0.5f), -z * ScaleOperand(0.5f)), spring);
+        AddCornerV(p, RVec3(0.0f, y * ScaleOperand(0.5f), z * ScaleOperand(0.5f)), spring);
         shape = new ("wedge:ball-volume") SphereShape((CollVolume*)p, ObFrameOf(p), k, skin, r, origin);
         corners = 0;
         break;
@@ -763,17 +768,17 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
     }
     case 13:
     case 18:
-        shape = new ("obs-tubevolume") TubeShape((CollVolume*)p, ObFrameOf(p), 0.9f * k, skin, q->a, q->b * lbl_80562478 - q->a);
+        shape = new ("obs-tubevolume") TubeShape((CollVolume*)p, ObFrameOf(p), 0.9f * k, skin, q->a, q->b * ScaleOperand(0.5f) - q->a);
         F32(p, 0x238) = 0.016683351f * q->c / q->a;
-        AddCornerV(p, RVec3(q->a, q->a, lbl_8056247C), spring * lbl_80562478);
+        AddCornerV(p, RVec3(q->a, q->a, 0.0f), spring * ScaleOperand(0.5f));
         corners = 1;
         break;
     case 16: {
         f32 x = q->a;
         f32 y = q->b;
         f32 z = q->c;
-        fn_801A9798(p, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478, spring);
-        shape = new ("box1:box-volume") BoxShape((CollVolume*)p, ObFrameOf(p), k, skin, x * lbl_80562478, y * lbl_80562478, z * lbl_80562478);
+        fn_801A9798(p, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f), spring);
+        shape = new ("box1:box-volume") BoxShape((CollVolume*)p, ObFrameOf(p), k, skin, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f));
         F32(p, 0x228) = q->d;
         F32(p, 0x22C) = q->e;
         F32(p, 0x230) = q->f;
@@ -858,24 +863,20 @@ void fn_801A9AB0(u8* p, ObDesc* q) {
 }
 
 
-extern const f32 lbl_8056247C;  // 0.0
-extern const f32 lbl_805624AC;  // 1.0
-extern const f32 lbl_805624A4;  // -1.0
-extern const f32 lbl_80562478;  // 0.5
 
 static inline double AbsD(double v) { return __fabs(v); }
 
 void fn_801ABB54(u8* p) {
     f32 d = PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x54));
-    f32 imp = lbl_8056247C;
+    f32 imp = 0.0f;
     f32 ad = (f32)AbsD(d);
     f32 lim = F32(p, 0x238);
     if (ad > lim) {
         lim = lim < ad ? lim : ad;
-        f32 sign = d > lbl_8056247C ? lbl_805624AC : lbl_805624A4;
+        f32 sign = d > 0.0f ? 1.0f : (-1.0f);
         imp = -sign * lim;
     } else if (ad > 0.01f) {
-        imp = -d * lbl_80562478;
+        imp = -d * ScaleOperand(0.5f);
     }
     F32(p, 0x124) = F32(p, 0x124) + F32(p, 0x54) * imp;
     F32(p, 0x128) = F32(p, 0x128) + F32(p, 0x58) * imp;
@@ -918,14 +919,14 @@ void fn_801ABC28(u8* p) {
         }
     }
     if (U8(p, 0x220)) {
-        if (lbl_8055E3C4 == 1 || lbl_8055E3C8 > lbl_805624AC + F32(p, 0x21C)) {
+        if (lbl_8055E3C4 == 1 || lbl_8055E3C8 > 1.0f + F32(p, 0x21C)) {
             fn_801AC254(p);
-            F32(p, 0x124) = lbl_8056247C;
-            F32(p, 0x128) = lbl_8056247C;
-            F32(p, 0x12C) = lbl_8056247C;
-            F32(p, 0x118) = lbl_8056247C;
-            F32(p, 0x11C) = lbl_8056247C;
-            F32(p, 0x120) = lbl_8056247C;
+            F32(p, 0x124) = 0.0f;
+            F32(p, 0x128) = 0.0f;
+            F32(p, 0x12C) = 0.0f;
+            F32(p, 0x118) = 0.0f;
+            F32(p, 0x11C) = 0.0f;
+            F32(p, 0x120) = 0.0f;
         } else if (!U8(p, 0x221)) {
             ((RigidBody*)p)->Update();
             F32(p, 0x118) *= 0.99983317f;
@@ -934,22 +935,22 @@ void fn_801ABC28(u8* p) {
             F32(p, 0x124) *= 0.99983317f;
             F32(p, 0x128) *= 0.99983317f;
             F32(p, 0x12C) *= 0.99983317f;
-            if (F32(p, 0x238) > lbl_8056247C) {
+            if (F32(p, 0x238) > 0.0f) {
                 fn_801ABB54(p);
             }
             int up = 0;
-            if (U8(p, 0x234) && F32(p, 0x4C) > lbl_80562478) {
+            if (U8(p, 0x234) && F32(p, 0x4C) > 0.5f) {
                 up = 1;
             }
             U8(p, 0x234) = up;
         } else {
             ((RigidBody*)p)->Update();
-            F32(p, 0x124) = lbl_8056247C;
-            F32(p, 0x128) = lbl_8056247C;
-            F32(p, 0x12C) = lbl_8056247C;
-            F32(p, 0x118) = lbl_8056247C;
-            F32(p, 0x11C) = lbl_8056247C;
-            F32(p, 0x120) = lbl_8056247C;
+            F32(p, 0x124) = 0.0f;
+            F32(p, 0x128) = 0.0f;
+            F32(p, 0x12C) = 0.0f;
+            F32(p, 0x118) = 0.0f;
+            F32(p, 0x11C) = 0.0f;
+            F32(p, 0x120) = 0.0f;
             *(Pose12*)(p + 0x3C) = *(Pose12*)(p + 0x1EC);
             ((CollVolume*)p)->Update();
         }
@@ -988,9 +989,9 @@ void fn_801ABFF8(u8* p, VVisit* f) {
 }  // extern "C"
 
 // Visitor handed to the linked obstacles when this one is hit hard.
-struct HitVisit : VVisit {
-    HitVisit(const f32* velocity, const f32* at_, int force_, u8* extra_)
-        {
+struct __declspec(novtable) HitVisit : VVisit {
+    HitVisit(const f32* velocity, const f32* at_, int force_, u8* extra_) {
+        *(const VisitorTable**)this = &__vt__8HitVisit;
         v[0] = velocity[0];
         v[1] = velocity[1];
         v[2] = velocity[2];
@@ -1307,7 +1308,7 @@ static inline void BlendFencePose(ObPose* dest, const ObPose* previous, const Ob
 static inline void WriteFencePose(u8* buf, u8* p) {
     f32 f = lbl_8055E460;
     u8* out = buf + S32(p, 0x8);
-    if ((f32)__fabs(f - lbl_805624AC) <= __float_epsilon[0]) {
+    if ((f32)__fabs(f - 1.0f) <= __float_epsilon[0]) {
         *(ObPose*)out = *(ObPose*)(p + 0x70);
     } else {
         ObPose t;
@@ -1348,8 +1349,6 @@ struct FenceMsg {
 
 void fn_801C2694(s32 rope, f32 (*out)[3], s32* n, f32* d, f32* c, f32* b, f32* a);
 void fn_801796CC(int kind, void* msg, int size);
-extern const f32 lbl_8056247C;  // 0.0
-extern const f32 lbl_805624AC;  // 1.0
 
 // Samples the fence rope and sends each linked post pair its span of points.
 void fn_801ACF94(void) {
@@ -1361,18 +1360,18 @@ void fn_801ACF94(void) {
         f32 b[3];
         f32 a[3];
         s32 n = 0x13C;
-        a[0] = lbl_8056247C;
-        a[1] = lbl_8056247C;
-        a[2] = lbl_8056247C;
-        b[0] = lbl_8056247C;
-        b[1] = lbl_8056247C;
-        b[2] = lbl_8056247C;
-        c[0] = lbl_8056247C;
-        c[1] = lbl_805624AC;
-        c[2] = lbl_8056247C;
-        d[0] = lbl_8056247C;
+        a[0] = 0.0f;
+        a[1] = 0.0f;
+        a[2] = 0.0f;
+        b[0] = 0.0f;
+        b[1] = 0.0f;
+        b[2] = 0.0f;
+        c[0] = 0.0f;
+        c[1] = 1.0f;
+        c[2] = 0.0f;
+        d[0] = 0.0f;
         d[1] = -10000.0f;
-        d[2] = lbl_8056247C;
+        d[2] = 0.0f;
         fn_801C2694(lbl_8055E5F0, out, &n, d, c, b, a);
         for (int i = 0; i < lbl_8055E5EC; i++) {
             u8* next;
@@ -1459,6 +1458,9 @@ void fn_801AD28C(u8* p, const CVec3* a, CollVolume* other, const CVec3* b, f32 x
 
 double sqrt(double x);
 
+// The joint threshold occupies the final eight bytes of the small-data pool.
+static const struct { f32 value; u32 reserved; } MinJointLength = { 0.001f, 0 };
+
 // Applies the joint's spring (beyond the rest length) and damping between the two attachment points.
 void fn_801AD394(u8* p) {
     CVec3 wa;
@@ -1481,14 +1483,14 @@ void fn_801AD394(u8* p) {
     F32(p, 0x30) = (f32)sqrt(hxx + hzz);
     f32 stretch = len - F32(p, 0x28);
     F32(p, 0x2C) = stretch;
-    if (len > 0.001f && len < F32(p, 0x28) + F32(p, 0x24)) {
+    if (len > MinJointLength.value && len < F32(p, 0x28) + F32(p, 0x24)) {
         CVec3 dir;
         CVec3 force;
         CVec3 va;
         CVec3 vb;
         CVec3 dv;
-        f32 inv = lbl_805624AC / len;
-        f32 zero = lbl_8056247C;
+        f32 inv = 1.0f / len;
+        f32 zero = 0.0f;
         force.x = zero;
         force.y = zero;
         force.z = zero;
@@ -1499,9 +1501,9 @@ void fn_801AD394(u8* p) {
         if (PTR(p, 0xC)) {
             ((RigidBody*)PTR(p, 0xC))->VelAt((RVec3*)&vb, (const RVec3*)&wb);
         } else {
-            vb.x = lbl_8056247C;
-            vb.y = lbl_8056247C;
-            vb.z = lbl_8056247C;
+            vb.x = 0.0f;
+            vb.y = 0.0f;
+            vb.z = 0.0f;
         }
         dv.x = vb.x - va.x;
         dv.y = vb.y - va.y;
@@ -1518,9 +1520,9 @@ void fn_801AD394(u8* p) {
         }
         ((RigidBody*)PTR(p, 0x34))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
         if (PTR(p, 0xC)) {
-            force.x = force.x * lbl_805624A4;
-            force.y = force.y * lbl_805624A4;
-            force.z = force.z * lbl_805624A4;
+            force.x = force.x * ScaleOperand(-1.0f);
+            force.y = force.y * ScaleOperand(-1.0f);
+            force.z = force.z * ScaleOperand(-1.0f);
             ((RigidBody*)PTR(p, 0xC))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
         }
     }
@@ -1554,8 +1556,6 @@ public:
 };
 
 extern "C" {
-extern const f32 lbl_805624F4;  // 5.0
-extern const f32 lbl_8056249C;  // 0.8
 
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
@@ -1568,11 +1568,11 @@ static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
 void HitVisit::Visit(ObstacleSink* q) {
 
     f32 push[3];
-    push[0] = v[0] * lbl_805624F4;
-    push[1] = v[1] * lbl_805624F4;
-    push[2] = v[2] * lbl_805624F4;
+    push[0] = v[0] * ScaleOperand(5.0f);
+    push[1] = v[1] * ScaleOperand(5.0f);
+    push[2] = v[2] * ScaleOperand(5.0f);
     f32 adjusted[3];
-    Set3(adjusted, LerpT(lbl_8056249C, at[0], F32((u8*)q, 0x60)), LerpT(lbl_8056249C, at[1], F32((u8*)q, 0x64)), LerpT(lbl_8056249C, at[2], F32((u8*)q, 0x68)));
+    Set3(adjusted, LerpT(0.8f, at[0], F32((u8*)q, 0x60)), LerpT(0.8f, at[1], F32((u8*)q, 0x64)), LerpT(0.8f, at[2], F32((u8*)q, 0x68)));
 
     q->Hit(push, adjusted, force, extra);
 }
@@ -1705,8 +1705,17 @@ void WakeVisit::Visit(ObstacleSink* o) { fn_801AC240((u8*)o); }
 
 extern "C" {
 
+void InitObstacleModule(void) {
+    RegisterModuleTag((ModuleTag*)lbl_8055E5D8);
+    lbl_8055E5E0 = -0x10000;
+}
 
+#pragma push
+#pragma force_active on
+__declspec(section ".ctors") static void (*const ObstacleModuleStartup)(void) = InitObstacleModule;
+#pragma pop
 
+// Adjustors from the secondary interface to the owning obstacle.
 void DynamicObstacle_vf80(u8* p) { DynamicObstacle_vfA8(p - 0x23C); }
 
 void DynamicObstacle_vf7C(u8* p, const Pose12* pose, const ObVec3* lo, const ObVec3* hi) { DynamicObstacle_vfA4(p - 0x23C, pose, lo, hi); }
@@ -1727,3 +1736,167 @@ void DynamicObstacle_vf60(u8* p) { DynamicObstacle_vf88(p - 0x23C); }
 
 void DynamicObstacle_vf5C(u8* p) { DynamicObstacle_vf84(p - 0x23C); }
 }  // extern "C"
+
+extern "C" {
+void Init__9RigidBodyFP8BodyDesc(void);
+void OnHit__9RigidBodyFPC5RVec3PC5RVec3iPv(void);
+void OnImpulse__9RigidBodyFPC5RVec3PC5RVec3iPvPv(void);
+void OnImpulses__9RigidBodyFP5RVec3P5RVec3(void);
+void Reset__9RigidBodyFv(void);
+void Update__9RigidBodyFv(void);
+void fn_80179AF4(void);
+void vf14__10CollVolumeFv(void);
+void vf18__9RigidBodyFv(void);
+void vf24__10CollVolumeFv(void);
+void vf38__10CollVolumeFPUc(void);
+void vf3C__9RigidBodyFv(void);
+void vf40__9RigidBodyFv(void);
+void vf44__10CollVolumeFv(void);
+}
+
+// Dynamic obstacle, then its secondary interface at offset 0x54 in the table.
+void* lbl_80335744[] = {
+    0,
+    0,
+    (void*)DynamicObstacle_vf08,
+    (void*)DynamicObstacle_vf0C,
+    (void*)fn_801AC184,
+    (void*)vf14__10CollVolumeFv,
+    (void*)vf18__9RigidBodyFv,
+    (void*)fn_801ABC28,
+    (void*)fn_801ABFF4,
+    (void*)vf24__10CollVolumeFv,
+    (void*)fn_80179AF4,
+    (void*)fn_801AD868,
+    (void*)fn_801AD870,
+    (void*)fn_801AD880,
+    (void*)vf38__10CollVolumeFPUc,
+    (void*)vf3C__9RigidBodyFv,
+    (void*)vf40__9RigidBodyFv,
+    (void*)fn_801AD860,
+    (void*)DynamicObstacle_vf48,
+    (void*)DynamicObstacle_vf4C,
+    (void*)OnImpulses__9RigidBodyFP5RVec3P5RVec3,
+    0,
+    0,
+    // Secondary interface adjustors and their unadjusted entries.
+    (void*)DynamicObstacle_vf5C,
+    (void*)DynamicObstacle_vf60,
+    (void*)DynamicObstacle_vf64,
+    (void*)DynamicObstacle_vf68,
+    (void*)DynamicObstacle_vf6C,
+    (void*)DynamicObstacle_vf70,
+    (void*)DynamicObstacle_vf74,
+    (void*)DynamicObstacle_vf78,
+    (void*)DynamicObstacle_vf7C,
+    (void*)DynamicObstacle_vf80,
+    (void*)DynamicObstacle_vf84,
+    (void*)DynamicObstacle_vf88,
+    (void*)DynamicObstacle_vf8C,
+    (void*)DynamicObstacle_vf90,
+    (void*)DynamicObstacle_vf94,
+    (void*)DynamicObstacle_vf98,
+    (void*)DynamicObstacle_vf9C,
+    (void*)DynamicObstacle_vfA0,
+    (void*)DynamicObstacle_vfA4,
+    (void*)DynamicObstacle_vfA8,
+};
+
+extern "C" void Visit__8HitVisitFP12ObstacleSink(HitVisit*, ObstacleSink*);
+extern "C" VisitorTable __vt__8HitVisit = { { 0, 0 }, (VisitObstacle)Visit__8HitVisitFP12ObstacleSink };
+
+// Base visitor has one pure slot.
+#pragma push
+#pragma force_active on
+#pragma explicit_zero_data on
+extern "C" VisitorTable __vt__6VVisit = { { 0, 0 }, 0 };
+#pragma pop
+
+// Fence pole.
+void* lbl_80335808[] = {
+    0,
+    0,
+    (void*)fn_801AC454,
+    (void*)fn_801AC3AC,
+    (void*)fn_801AC544,
+    (void*)vf14__10CollVolumeFv,
+    (void*)vf18__9RigidBodyFv,
+    (void*)fn_801ACA48,
+    (void*)fn_801ABFF4,
+    (void*)vf24__10CollVolumeFv,
+    (void*)fn_801ACB30,
+    (void*)fn_801AD868,
+    (void*)fn_801AD870,
+    (void*)fn_801AD880,
+    (void*)vf38__10CollVolumeFPUc,
+    (void*)vf3C__9RigidBodyFv,
+    (void*)vf40__9RigidBodyFv,
+    (void*)fn_801AD860,
+    (void*)fn_801AC0A0,
+    (void*)OnImpulse__9RigidBodyFPC5RVec3PC5RVec3iPvPv,
+    (void*)OnImpulses__9RigidBodyFP5RVec3P5RVec3,
+};
+
+// Obstacle and its base table entries.
+void* lbl_8033585C[] = {
+    0,
+    0,
+    (void*)fn_801A9AB0,
+    (void*)fn_801AC2C8,
+    (void*)fn_801AC184,
+    (void*)vf14__10CollVolumeFv,
+    (void*)vf18__9RigidBodyFv,
+    (void*)fn_801ABC28,
+    (void*)fn_801ABFF4,
+    (void*)vf24__10CollVolumeFv,
+    (void*)fn_80179AF4,
+    (void*)fn_801AD868,
+    (void*)fn_801AD870,
+    (void*)fn_801AD880,
+    (void*)vf38__10CollVolumeFPUc,
+    (void*)vf3C__9RigidBodyFv,
+    (void*)vf40__9RigidBodyFv,
+    (void*)fn_801AD860,
+    (void*)fn_801AC0A0,
+    (void*)OnImpulse__9RigidBodyFPC5RVec3PC5RVec3iPvPv,
+    (void*)OnImpulses__9RigidBodyFP5RVec3P5RVec3,
+    0,
+    0,
+    (void*)Init__9RigidBodyFP8BodyDesc,
+    (void*)fn_801A973C,
+    (void*)Reset__9RigidBodyFv,
+    (void*)vf14__10CollVolumeFv,
+    (void*)vf18__9RigidBodyFv,
+    (void*)Update__9RigidBodyFv,
+    (void*)vf20__10CollVolumeFv,
+    (void*)vf24__10CollVolumeFv,
+    (void*)fn_80179AF4,
+    (void*)fn_801AD868,
+    (void*)fn_801AD870,
+    (void*)fn_801AD880,
+    (void*)vf38__10CollVolumeFPUc,
+    (void*)vf3C__9RigidBodyFv,
+    (void*)vf40__9RigidBodyFv,
+    (void*)vf44__10CollVolumeFv,
+    (void*)OnHit__9RigidBodyFPC5RVec3PC5RVec3iPv,
+    (void*)OnImpulse__9RigidBodyFPC5RVec3PC5RVec3iPvPv,
+    (void*)OnImpulses__9RigidBodyFP5RVec3P5RVec3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+};
+
+extern "C" void Visit__9WakeVisitFP12ObstacleSink(WakeVisit*, ObstacleSink*);
+extern "C" VisitorTable __vt__9WakeVisit = { { 0, 0 }, (VisitObstacle)Visit__9WakeVisitFP12ObstacleSink };
