@@ -105,19 +105,9 @@ public:
     }
     virtual s32 Size(void) { return size; }
     virtual void* Disk(void) { return disk; }
-    virtual s32 Read(void* dst, s32 len) {
-        if (len == 0) {
-            return 0;
-        }
-        s32 n;
-        s32 aligned = pos & ~3;
-        s32 skip = pos - aligned;
-        n = (len + skip + 0x1F) & ~0x1F;
-        if (n > 0x20000) {
-            n = 0x20000;
-        }
+    /* Helper name unproven */
+    void ReadSectors(s32 n, s32 aligned, s32& got) {
         s32 cnt = 0;
-        s32 got;
         for (;;) {
             if (cnt) {
                 got = DVDReadPrio(&info, lbl_804DBAA0, n, aligned, 2);
@@ -144,6 +134,23 @@ public:
             VIFlush();
             VIWaitForRetrace();
         }
+    }
+    virtual s32 Read(void* dst, s32 len) {
+        if (len == 0) {
+            return 0;
+        }
+        s32 skip;
+        s32 n;
+        s32 got;
+        s32 aligned;
+        s32 cnt;
+        aligned = pos & ~3;
+        skip = pos - aligned;
+        n = (len + skip + 0x1F) & ~0x1F;
+        if (n > 0x20000) {
+            n = 0x20000;
+        }
+        ReadSectors(n, aligned, got);
         cnt = got - skip;
         if (cnt > len) {
             cnt = len;
@@ -157,7 +164,7 @@ public:
             return 0;
         }
         return -1;
-    }
+        }
     virtual int ReadAsync(void* dst, s32 len) {
         if (DVDReadAsyncPrio(&info, dst, len, pos, NULL, 2) <= 0) {
             fn_802E317C("filecd: DVDRead fails!");
