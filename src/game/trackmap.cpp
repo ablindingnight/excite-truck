@@ -44,12 +44,20 @@ struct Vertex {
     f32 data[6];
 };
 
+// Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
 struct Viewport {
+    Viewport(int x, int y, int w, int h);
+    ~Viewport(void);
     u8 data[0x10];
 };
 
-struct Projection {
-    u8 data[0x10];
+// Saves the projection and sets a new one; the destructor restores it (mrender.cpp).
+struct Perspective {
+    Perspective(f32 near, f32 far, f32 fov);
+    ~Perspective(void);
+    f32 near;  // offset 0x0
+    f32 far;   // offset 0x4
+    f32 fov;   // offset 0x8
 };
 
 struct CameraPose {
@@ -122,10 +130,16 @@ struct Path {
     PathNode* first;  // offset 0x1C
 };
 
-struct PathIter {
-    u8 pad0[0x2C];
-    Path* path;  // offset 0x2C
-    u8 pad30[0x38 - 0x30];
+// Ideal-line walker (idealline.cpp).
+struct CenterLine;
+class LineFollower {
+public:
+    LineFollower(void);
+    virtual ~LineFollower(void);
+    virtual int SetLine(CenterLine* line);
+    u8 pad4[0x2C - 0x4];
+    Path* path;  // offset 0x2C: the line
+    u8 pad30[0x34 - 0x30];
 };
 
 class PathSet {
@@ -172,19 +186,12 @@ void fn_80231380(Vertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 void fn_802C8DB8(Vertex* v, int nv, const u16* idx, int ni);
-void fn_801352B8(PathIter* it);
-int fn_80135D60(PathIter* it, int index);
-void fn_8013530C(PathIter* it, int unk);
 void fn_802C8DBC(int n);
 void fn_802C8E00(u32 color, int flag, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 PathSet* fn_80156A40(void);
 void fn_802D3050(int pass);
 void fn_802C9294(int rt, int unk);
-void fn_802C9694(Projection* p, f32 nearZ, f32 farZ, f32 fov, f32 tanHalf);
-void fn_802C96DC(Projection* p, int unk);
-void fn_802C86F0(Viewport* vp, int x, int y, int w, int h);
-void fn_802C8750(Viewport* vp, int unk);
 void fn_802C88CC(u32 color);
 int fn_802C2C00(int mode);
 void fn_802C8638(CameraPose* cam);
@@ -761,7 +768,7 @@ static inline void NodeAt(const PathNode* n, f32 t, Vec2* p, Vec2* d) {
 }
 
 void fn_8001B478(int index, f32 width) {
-    PathIter it;
+    LineFollower it;
     Vec2 p;
     Vec2 d;
     Vec2 v;
@@ -777,9 +784,7 @@ void fn_8001B478(int index, f32 width) {
     f32 prev;
     int i;
 
-    fn_801352B8(&it);
-    if (!fn_80135D60(&it, index)) {
-        fn_8013530C(&it, -1);
+    if (!it.SetLine((CenterLine*)index)) {
         return;
     }
     path = it.path;
@@ -831,7 +836,6 @@ void fn_8001B478(int index, f32 width) {
         }
     }
     fn_802C8E48();
-    fn_8013530C(&it, -1);
 }
 
 void fn_8001B754(f32 width) {
@@ -845,8 +849,6 @@ void fn_8001B754(f32 width) {
 void fn_8001B7B8(int pass) { fn_802D3050(pass); }
 
 void fn_8001B7BC(TrackMap* map) {
-    Projection proj;
-    Viewport vp;
     CameraPose cam;
     f32 fov;
     f32 dist;
@@ -855,12 +857,10 @@ void fn_8001B7BC(TrackMap* map) {
     fn_802CB274(map->target);
     fn_802C9294(map->target, 0);
     fov = 0.34906584f;
-    {
-        f32 t = tan(fov / 2);
-        dist = 0.5f * map->width / t;
-        fn_802C9694(&proj, dist - 1.0f, 1.0f + dist, fov, t);
-    }
-    fn_802C86F0(&vp, 0, 0, map->texSize, map->texSize);
+    f32 t = tan(fov / 2);
+    dist = 0.5f * map->width / t;
+    Perspective proj(dist - 1.0f, 1.0f + dist, fov);
+    Viewport vp(0, 0, map->texSize, map->texSize);
     fn_802C88CC(0xFFFFFF);
     old = fn_802C2C00(0);
     cam.pos.x = 0.0f;
@@ -886,8 +886,6 @@ void fn_8001B7BC(TrackMap* map) {
     fn_8001B7B8(1);
     fn_802C2C00(old);
     fn_802C9294(-2, 0);
-    fn_802C8750(&vp, -1);
-    fn_802C96DC(&proj, -1);
 }
 
 }  // extern "C"

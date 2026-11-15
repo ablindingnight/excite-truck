@@ -52,7 +52,10 @@ public:
     u8 dirty;  // offset 0x4D
 };
 
+// Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
 struct Viewport {
+    Viewport(int x, int y, int w, int h);
+    ~Viewport(void);
     u8 data[0x10];
 };
 
@@ -154,8 +157,6 @@ int fn_802C6FC0(const char* name, int a, int b);
 void mrModelUnload(int model);
 Sound* fn_80207848(const char* name, int flags);
 Layout* fn_80145E70(const char* name);
-void fn_802C86F0(Viewport* vp, int x, int y, int w, int h);
-void fn_802C8750(Viewport* vp, int unk);
 const char* fn_80131268(const char* key);
 void fn_80232928(u32 color);
 void fn_80232930(void);
@@ -854,13 +855,12 @@ static inline void CopyString(const char* src, int size, char* dst) {
 static inline u32 WithAlpha(u32 color, s32 alpha) { return (color & 0xFFFFFF) | (alpha << 24); }
 
 void fn_8000F4F0(void) {
-    Viewport vp;
+    Viewport vp(0, 0, lbl_8055CFF0, lbl_8055CFF4);
     f32 t;
     int num;
     u8 alpha;
     f32 phase;
 
-    fn_802C86F0(&vp, 0, 0, lbl_8055CFF0, lbl_8055CFF4);
     t = fn_801E7E3C()->elapsed;
     num = -1;
     char text[32] = {0};
@@ -906,7 +906,6 @@ void fn_8000F4F0(void) {
             fn_80232930();
         }
     }
-    fn_802C8750(&vp, -1);
 }
 
 

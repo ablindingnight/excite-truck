@@ -229,7 +229,9 @@ struct EventTable {
 
 EventTable* GetEvent(int i);
 const char* GetEventTypeName(u32 type);
+struct Vec3;
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 void* operator new[](size_t size, const char* name);
 void operator delete[](void* p);
 
@@ -264,7 +266,6 @@ void fn_80144CD0(IVec3* out, const IVec3* p, const f32* m);
 f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_8000FC8C(const char* s);
 void fn_8000FDF0(const char* s);
-void fn_80015A20(Mat3* out, const IVec3* euler);
 void fn_80128678(void);
 void fn_80128684(void);
 void fn_8012BEF0(const char* name);
@@ -623,7 +624,7 @@ void fn_801C3A3C(Mat3* m, f32 h, f32 yaw) {
     e.y = yaw;
     e.z = 0.0f;
     Mat3 r;
-    fn_80015A20(&r, &e);
+    Mat3FromEuler(&r, (const Vec3*)&e);
     Mat3Mul(m, &r, m);
 }
 
@@ -1328,7 +1329,7 @@ void debug_event(void) {
                         IVec3 euler;
                         SetXYZ(&euler, 0.0f, tp->yaw, 0.0f);
                         Mat3 r;
-                        fn_80015A20(&r, &euler);
+                        Mat3FromEuler(&r, (const Vec3*)&euler);
                         Mat3Mul(&f.rot, &r, &f.rot);
                         f32 xv = off.x;
                         f.pos.x += f.rot.m[0] * xv;
@@ -1520,8 +1521,8 @@ struct CamListen {
     IVec3* heading;
 };
 
+extern "C++" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);  // weak (C++ linkage; this part of the file sits in an extern "C" block)
 extern "C" {
-f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
 void fn_801BFD34(IVec3* out, const IVec3* p, const CamPose* m);
 void fn_8020655C(CamListen* l, int a);
 }

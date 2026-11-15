@@ -25,7 +25,9 @@ struct Mtx33 {
 };
 
 struct Mat3;
+struct Vec3;
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 
 // GetVec3Or takes its default by const reference.
 class ValueNodeV {
@@ -73,7 +75,6 @@ struct CarSetup {
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
 void* memset(void* dst, int c, size_t n);
-void fn_80015A20(Mtx33* out, const ValVec3* angles);
 void* fn_801284E8(const char* name, u32 size);  // alloc
 void fn_80128658(void* p);                      // free
 ValueTableV* fn_80131808(const char* name);
@@ -443,13 +444,13 @@ void CarUIModel::SetPose(const Frame* f, const f32* wy, const f32* steer) {
             a.x = 0.0f;
             a.y = 3.1415927f;
             a.z = 0.0f;
-            fn_80015A20(&r, &a);
+            Mat3FromEuler((Mat3*)&r, (const Vec3*)&a);
             Mat3Mul((Mat3*)&w, (const Mat3*)&r, (const Mat3*)&w);
         }
         b.x = steer[i] * (left ? 1.0f : -1.0f);
         b.y = 0.0f;
         b.z = 0.0f;
-        fn_80015A20(&r2, &b);
+        Mat3FromEuler((Mat3*)&r2, (const Vec3*)&b);
         Mat3Mul((Mat3*)&w, (const Mat3*)&r2, (const Mat3*)&w);
         wheels[i] = w;
     }
@@ -1108,14 +1109,14 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         a.y = yaw;
         a.z = 0.0f;
         Mtx33 ry;
-        fn_80015A20(&ry, &a);
+        Mat3FromEuler((Mat3*)&ry, (const Vec3*)&a);
         Mat3Mul((Mat3*)&cam, (const Mat3*)&ry, (const Mat3*)&cam);
         ValVec3 b;
         b.x = pitch;
         b.y = 0.0f;
         b.z = 0.0f;
         Mtx33 rx;
-        fn_80015A20(&rx, &b);
+        Mat3FromEuler((Mat3*)&rx, (const Vec3*)&b);
         Mat3Mul((Mat3*)&cam, (const Mat3*)&rx, (const Mat3*)&cam);
         f32 z2;
         f32 rideHeightv = model->rideHeight;

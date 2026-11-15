@@ -57,6 +57,10 @@ struct TexMtx {
 struct Viewport {
     s32 x, y, w, h;
 };
+// Viewport's constructor and destructor (mrender.cpp), called by their mangled names: declaring them in the class
+// and scoping vp as an object moves RenderBody's stack slots (frame 0x150 -> 0x140), so the calls stay explicit.
+extern "C" void __ct__8ViewportFiiii(Viewport* v, int x, int y, int w, int h);
+extern "C" void __dt__8ViewportFv(Viewport* v, int del);
 
 struct Perspective {
     Perspective(f32 near, f32 far, f32 fov);
@@ -66,7 +70,9 @@ struct Perspective {
     f32 fov;   // offset 0x8
 };
 
+struct Vec3;
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);
@@ -99,8 +105,6 @@ void fn_802CB274(s32 target);
 void fn_802C9294(s32 target, int a);
 s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
-void fn_802C86F0(Viewport* v, int x, int y, int w, int h);
-void fn_802C8750(Viewport* v, int del);
 void fn_802C8B08(Frame* cam);
 void fn_802C8638(const Frame* cam);
 void fn_802C88BC(int mode);
@@ -111,7 +115,6 @@ void fn_80144DAC(PVec* out, const PVec* in);
 void fn_802C8B98(s32 tex, const Frame* m);
 void fn_802C8DB8(const WVert* v, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
-void fn_80015A20(Mat3* out, const PVec* angles);
 void fn_802C98DC(f32* a, f32* b, f32* c, f32* d);
 WVert* fn_802DD42C(int size);
 int fn_802C9C50(void);
@@ -625,7 +628,7 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
             fn_802C9294(s->faces[i], 0);
             Perspective p(1.0f, 2000.0f, 1.5707964f);
             Viewport vp;
-            fn_802C86F0(&vp, 0, 0, 0x100, 0x100);
+            __ct__8ViewportFiiii(&vp, 0, 0, 0x100, 0x100);
             Frame save;
             fn_802C8B08(&save);
             fn_802C8638(&s->frames[i]);
@@ -633,7 +636,7 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
             fn_802C10C8();
             fn_802C9294(-2, 0);
             fn_802C8638(&save);
-            fn_802C8750(&vp, -1);
+            __dt__8ViewportFv(&vp, -1);
         }
         s->drawn = 1;
     }
@@ -649,7 +652,7 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
     f32 h = 2.0f * (f32)atan(scale * (f32)tan(0.5f * fov));
     Viewport vp;
     Perspective p(1.0f, 3000.0f, h);
-    fn_802C86F0(&vp, 0, 0, 0x100, 0x100);
+    __ct__8ViewportFiiii(&vp, 0, 0, 0x100, 0x100);
     fn_802C8B08(&save);
     fn_802C8638(&m);
     fn_802C88BC(2);
@@ -665,7 +668,7 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
     }
     fn_802C9294(-2, 0);
     fn_802C8638(&save);
-    fn_802C8750(&vp, -1);
+    __dt__8ViewportFv(&vp, -1);
 }
 
 void WaterEnvMap::Render(void* cam, f32 fov) { RenderBody(cam, fov); }
@@ -705,7 +708,7 @@ void fn_802BFE48(Skybox* __restrict s, const Frame* view, f32 scale) {
     a.y = 0.0f;
     a.z = 0.0f;
     Mat3 r30;
-    fn_80015A20(&r30, &a);
+    Mat3FromEuler(&r30, (const Vec3*)&a);
     Mat3Mul(mp, &r30, mp);
     fn_802C8B98(s->sun, &m);
     fn_802C8DB8(v, 4, idx.i, 6);

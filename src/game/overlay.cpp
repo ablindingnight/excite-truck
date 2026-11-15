@@ -165,7 +165,10 @@ public:
     virtual void vfFC(void) {}
 };
 
+// Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
 struct Viewport {
+    Viewport(int x, int y, int w, int h);
+    ~Viewport(void);
     u8 data[0x10];
 };
 
@@ -247,14 +250,12 @@ void fn_80010EC8(void);
 extern s32 lbl_8055CFF0;
 extern s32 lbl_8055CFF4;
 void fn_801E88B4(int* x, int* y, int* w, int* h, int player);
-void fn_802C86F0(Viewport* vp, int x, int y, int w, int h);
 int fn_801E89EC(void);
 }  // extern "C"
 void fn_8000D75C(void);
 extern "C" {
 void fn_8001123C(int player);
 void fn_80011A2C(void);
-void fn_802C8750(Viewport* vp, int unk);
 int* fn_801769CC(void);
 void fn_800105A0(const char* text, int unk);
 int fn_801B8914(void);
@@ -711,8 +712,6 @@ void fn_80005930(void) {
     int y;
     int w;
     int h;
-    Viewport vp;
-    Viewport vp2;
 
     for (i = 0; i < n; i++) {
         fn_80005740(i);
@@ -733,7 +732,7 @@ void fn_80005930(void) {
         } else {
             fn_801E88B4(&x, &y, &w, &h, i);
         }
-        fn_802C86F0(&vp, x, y, w, h);
+        Viewport vp(x, y, w, h);
         overlay->Draw();
         if (fn_801E89EC() != 3) {
             fn_8000D75C();
@@ -743,13 +742,12 @@ void fn_80005930(void) {
         }
         fn_8001123C(lbl_8055D350->player);
         fn_80011A2C();
-        fn_802C8750(&vp, -1);
     }
     for (j = 0; j < n; j++) {
         fn_80005740(j);
         overlay2 = lbl_8034EEB8.players[j].next;
         fn_80010EC8();
-        fn_802C86F0(&vp2, 0, 0, lbl_8055CFF0, lbl_8055CFF4);
+        Viewport vp2(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         overlay2->Draw();
         if (fn_801E89EC() != 3) {
             fn_8000D75C();
@@ -757,7 +755,6 @@ void fn_80005930(void) {
         }
         fn_8001123C(lbl_8055D350->player);
         fn_80011A2C();
-        fn_802C8750(&vp2, -1);
     }
 }
 
