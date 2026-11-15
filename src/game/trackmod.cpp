@@ -6,6 +6,19 @@
 #include "game/common.h"
 #include "game/math_types.h"
 
+// Keep the instance method groups in the retail link order.
+#ifdef __MWERKS__
+#pragma section code_type ".text.trackmod_prefix"
+#pragma section RX ".text.trackmod_facing_dt"
+#pragma section RX ".text.trackmod_scroll_dt"
+#pragma section RX ".text.trackmod_xfade_dt"
+#pragma section RX ".text.trackmod_rot_dt"
+#pragma section RX ".text.trackmod_tail"
+#define TRACKMOD_CODE_SECTION(name) __declspec(section name)
+#else
+#define TRACKMOD_CODE_SECTION(name)
+#endif
+
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
@@ -95,7 +108,10 @@ public:
 struct Rot {
     Rot(void);
     s32 id;        // offset 0x0
-    f32 pos[3];    // offset 0x4
+    struct Position {
+        Position(void);
+        f32 values[3];
+    } pos;         // offset 0x4
     const Mat3* rot;    // offset 0x10
     f32 speed;     // offset 0x14
 };
@@ -126,8 +142,8 @@ public:
     XFadeList(void) { count = 0; }
     virtual ~XFadeList(void);
     virtual void Draw(void* ctx);
-    virtual int Kind(void);
     virtual void Draw2(void* ctx);
+    virtual int Kind(void);
 
     XFade fades[48];  // offset 0x4
     s32 count;        // offset 0x544
@@ -144,8 +160,8 @@ class ScrollList : public TrackInst {
 public:
     ScrollList(void) { count = 0; }
     virtual ~ScrollList(void);
-    virtual void Draw(void* ctx);
     virtual int Kind(void);
+    virtual void Draw(void* ctx);
     virtual void Draw2(void* ctx);
 
     Scroll scrolls[16];  // offset 0x4
@@ -258,8 +274,8 @@ public:
         set = 0;
     }
     virtual ~ShadowColorTMH(void);
-    virtual void Swap(TObj* o);
     virtual void Init(TObj* o);
+    virtual void Swap(TObj* o);
     virtual void Apply(void);
     virtual void Draw(TObj* list);
 
@@ -290,8 +306,8 @@ public:
         set = 0;
     }
     virtual ~FogColorTMH(void);
-    virtual void Swap(TObj* o);
     virtual void Init(TObj* o);
+    virtual void Swap(TObj* o);
     virtual void Apply(void);
     virtual void Draw(TObj* list);
 
@@ -315,10 +331,10 @@ public:
 class OptTerrainTMH : public TrackMod {
 public:
     virtual ~OptTerrainTMH(void);
+    virtual void Unk30(void);  // 0x30
     virtual void Swap(TObj* o);
     virtual void Draw(TObj* list);
     virtual void Link(int a, void* b, int c, void* d, int e);
-    virtual void Unk30(void);  // 0x30
 };
 
 // One cross-fading model (0x1C).
@@ -804,17 +820,17 @@ inline void SunTMH::Default(void) {
     }
 }
 
-void SunTMH::Draw(TObj* list) { fn_8029231C(dir); }
+inline void SunTMH::Draw(TObj* list) { fn_8029231C(dir); }
 
-AmbientColorTMH::~AmbientColorTMH(void) {}
+inline AmbientColorTMH::~AmbientColorTMH(void) {}
 
-void AmbientColorTMH::Init(TObj* o) {
+inline void AmbientColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-void AmbientColorTMH::Apply(void) {
+inline void AmbientColorTMH::Apply(void) {
     if (*fn_801E1F44() == 1) {
         fn_802C9950(0xFF646464);
     } else {
@@ -824,15 +840,15 @@ void AmbientColorTMH::Apply(void) {
 
 inline void AmbientColorTMH::Draw(TObj* list) { fn_802E317C("AmbientColorTMH: shouldn't draw!"); }
 
-ShadowColorTMH::~ShadowColorTMH(void) {}
+inline ShadowColorTMH::~ShadowColorTMH(void) {}
 
-void ShadowColorTMH::Init(TObj* o) {
+inline void ShadowColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-void ShadowColorTMH::Swap(TObj* o) {
+inline void ShadowColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -840,7 +856,7 @@ void ShadowColorTMH::Swap(TObj* o) {
     Swap32(d + 12);
 }
 
-void ShadowColorTMH::Apply(void) {
+inline void ShadowColorTMH::Apply(void) {
     if (set) {
         fn_80297990(color);
     } else {
@@ -850,9 +866,9 @@ void ShadowColorTMH::Apply(void) {
 
 inline void ShadowColorTMH::Draw(TObj* list) { fn_802E317C("ShadowColorTMH: shouldn't draw!"); }
 
-SunIntensityTMH::~SunIntensityTMH(void) {}
+inline SunIntensityTMH::~SunIntensityTMH(void) {}
 
-void SunIntensityTMH::Swap(TObj* o) {
+inline void SunIntensityTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -866,7 +882,7 @@ inline void SunIntensityTMH::Init(TObj* o) {
     set = 1;
 }
 
-void SunIntensityTMH::Apply(void) {
+inline void SunIntensityTMH::Apply(void) {
     if (set) {
         fn_802923EC(value);
     } else {
@@ -876,15 +892,15 @@ void SunIntensityTMH::Apply(void) {
 
 inline void SunIntensityTMH::Draw(TObj* list) { fn_802E317C("SunIntensityTMH: shouldn't draw!"); }
 
-FogColorTMH::~FogColorTMH(void) {}
+inline FogColorTMH::~FogColorTMH(void) {}
 
-void FogColorTMH::Init(TObj* o) {
+inline void FogColorTMH::Init(TObj* o) {
     u8* d = fn_801F1CE8(o);
     color = *(u32*)d;
     set = 1;
 }
 
-void FogColorTMH::Swap(TObj* o) {
+inline void FogColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
     Swap32(d);
     Swap32(d + 4);
@@ -892,7 +908,7 @@ void FogColorTMH::Swap(TObj* o) {
     Swap32(d + 12);
 }
 
-void FogColorTMH::Apply(void) {
+inline void FogColorTMH::Apply(void) {
     if (set) {
         fn_802C990C(color);
     } else {
@@ -945,15 +961,16 @@ inline void RotatorTMH::Add(void* scene, const TObj* o, s32 id) {
     f32 z = o->pos[2];
     f32 y = o->pos[1];
     f32 x = o->pos[0];
-    r->pos[0] = x;
-    r->pos[1] = y;
-    r->pos[2] = z;
+    r->pos.values[0] = x;
+    r->pos.values[1] = y;
+    r->pos.values[2] = z;
     r->rot = &o->rot;
     r->speed = speed;
     l->count++;
 }
 
-Rot::Rot(void) {}
+inline Rot::Position::Position(void) {}
+inline Rot::Rot(void) {}
 
 inline void OptTerrainTMH::Unk30(void) {}
 
@@ -974,7 +991,7 @@ inline void OptTerrainTMH::Link(int a, void* b, int c, void* d, int e) {
 // had a call; a stripped (empty inline) debug call stands in for it (cf. smoke SmokeNop, panelvol DbgLine).
 static inline void XFaderTeardown(XFader* faders) {}
 
-XFaderTMH::~XFaderTMH(void) { XFaderTeardown(faders); }
+inline XFaderTMH::~XFaderTMH(void) { XFaderTeardown(faders); }
 
 inline void XFaderTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
@@ -1060,7 +1077,7 @@ inline void WaterTMH::Swap(TObj* o) {
 
 inline void WaterTMH::Draw(TObj* list) {}
 
-ScrollingTMH::~ScrollingTMH(void) {}
+inline ScrollingTMH::~ScrollingTMH(void) {}
 
 inline void ScrollingTMH::Draw(TObj* list) {}
 
@@ -1106,13 +1123,13 @@ inline void FacingTestTMH::Add(void* scene, const TObj* o, s32 id) {
 
 inline void TrackMod::DrawTree(TNode* tree) {}
 
-inline FacingTestInst::~FacingTestInst(void) {}
+TRACKMOD_CODE_SECTION(".text.trackmod_facing_dt") inline FacingTestInst::~FacingTestInst(void) {}
 
-inline ScrollList::~ScrollList(void) {}
+TRACKMOD_CODE_SECTION(".text.trackmod_scroll_dt") inline ScrollList::~ScrollList(void) {}
 
-inline XFadeList::~XFadeList(void) {}
+TRACKMOD_CODE_SECTION(".text.trackmod_xfade_dt") inline XFadeList::~XFadeList(void) {}
 
-inline RotList::~RotList(void) { delete[] rots; }
+TRACKMOD_CODE_SECTION(".text.trackmod_rot_dt") inline RotList::~RotList(void) { delete[] rots; }
 
 static inline void Mat3MulD(Mat3* out, const Mat3* l, const Mat3* r) {
     if (out == l || out == r) {
@@ -1147,7 +1164,7 @@ static inline void Mat3MulD(Mat3* out, const Mat3* l, const Mat3* r) {
     }
 }
 
-inline void RotList::Draw(void* ctx) {
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void RotList::Draw(void* ctx) {
     int i = 0;
     if (count > 0) {
     for (; i < count; i++) {
@@ -1168,14 +1185,14 @@ inline void RotList::Draw(void* ctx) {
         m.r.m[2][1] = 0.0f;
         m.r.m[2][2] = c;
         Mat3MulD(&m.r, &m.r, r->rot);
-        m.t[0] = r->pos[0];
-        m.t[1] = r->pos[1];
-        m.t[2] = r->pos[2];
+        m.t[0] = r->pos.values[0];
+        m.t[1] = r->pos.values[1];
+        m.t[2] = r->pos.values[2];
         fn_802CDAB4(ctx, r->id, &m);
     }
     }
 }
-inline void XFadeList::Draw(void* ctx) {}
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void XFadeList::Draw(void* ctx) {}
 
 inline void XFadeList::DrawFade(XFade** vis, int i) {
     XFade* f = vis[i];
@@ -1187,7 +1204,7 @@ inline void XFadeList::DrawFade(XFade** vis, int i) {
     }
 }
 
-inline void XFadeList::Draw2(void* ctx) {
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void XFadeList::Draw2(void* ctx) {
     XFade* vis[48];
     int n = 0;
     int i;
@@ -1201,13 +1218,13 @@ inline void XFadeList::Draw2(void* ctx) {
     }
 }
 
-inline int XFadeList::Kind(void) { return 4; }
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline int XFadeList::Kind(void) { return 4; }
 
-inline int ScrollList::Kind(void) { return 3; }
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline int ScrollList::Kind(void) { return 3; }
 
-inline void ScrollList::Draw(void* ctx) {}
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void ScrollList::Draw(void* ctx) {}
 
-inline void ScrollList::Draw2(void* ctx) {
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void ScrollList::Draw2(void* ctx) {
     f32 uv[2];
     f32 m[4][3];
     f32 t = fn_801E7E18();
@@ -1237,15 +1254,15 @@ inline void ScrollList::Draw2(void* ctx) {
     }
 }
 
-inline void FacingTestInst::Draw(void* ctx) {
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void FacingTestInst::Draw(void* ctx) {
     if (fn_802CDB20(ctx, id) && !fn_801F1CF0(data)) {
         fn_802CDAFC(ctx, id);
     }
 }
 
-inline int TrackInst::Kind(void) { return -1; }
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline int TrackInst::Kind(void) { return -1; }
 
-inline void TrackInst::Draw2(void* ctx) {}
+TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void TrackInst::Draw2(void* ctx) {}
 
 
 static inline Rot* AllocateRotatorTable(const char* tag = "rotator tab") {
@@ -1267,3 +1284,7 @@ inline void RotList::Check(void) {
         ReportRotatorLimit();
     }
 }
+
+#ifdef __MWERKS__
+#pragma section code_type
+#endif

@@ -162,6 +162,7 @@ class ProjectConfig:
         self.generate_map: bool = False  # Generate map file(s)
         self.asflags: Optional[List[str]] = None  # Assembler flags
         self.ldflags: Optional[List[str]] = None  # Linker flags
+        self.dol_link_layout: Optional[Path] = None  # Extra input section order and aliases
         self.libs: Optional[List[Library]] = None  # List of libraries
         self.linker_version: Optional[str] = None  # mwld version
         self.version: Optional[str] = None  # Version name
@@ -688,6 +689,16 @@ def generate_build_ninja(
         rspfile="$out.rsp",
         rspfile_content="$in_newline",
     )
+    layout_helper = config.tools_dir / "link_dol_layout.py"
+    if config.dol_link_layout:
+        n.rule(
+            name="link_with_layout",
+            command=f'$python "{layout_helper}" "$layout" "$ldscript" "$out.rsp" -- '
+                    f"{wrapper_cmd}{mwld} $ldflags -o $out",
+            description="LINK $out",
+            rspfile="$out.rsp",
+            rspfile_content="$in_newline",
+        )
     n.newline()
 
     n.comment("Generate DOL")
@@ -834,7 +845,16 @@ def generate_build_ninja(
             n.comment(f"Link {self.name}")
             if self.module_id == 0:
                 elf_path = build_path / f"{self.name}.elf"
-                elf_ldflags = f"$ldflags -lcf {serialize_path(self.ldscript)}"
+                elf_ldflags = "$ldflags"
+                link_rule = "link"
+                extra_inputs = []
+                variables = {}
+                if config.dol_link_layout:
+                    link_rule = "link_with_layout"
+                    extra_inputs = [layout_helper, config.dol_link_layout]
+                    variables = {"layout": config.dol_link_layout, "ldscript": self.ldscript}
+                else:
+                    elf_ldflags += f" -lcf {serialize_path(self.ldscript)}"
                 if config.generate_map:
                     elf_map = map_path(elf_path)
                     elf_ldflags += f" -map {serialize_path(elf_map)}"
@@ -842,14 +862,15 @@ def generate_build_ninja(
                     elf_map = None
                 n.build(
                     outputs=elf_path,
-                    rule="link",
+                    rule=link_rule,
                     inputs=self.inputs,
                     implicit=[
                         self.ldscript,
+                        *extra_inputs,
                         *mwld_implicit,
                     ],
                     implicit_outputs=elf_map,
-                    variables={"ldflags": elf_ldflags},
+                    variables={**variables, "ldflags": elf_ldflags},
                     order_only="post-compile",
                 )
             else:

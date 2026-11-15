@@ -159,6 +159,7 @@ config.wibo_tag = "0.6.16"
 # Project
 config.config_path = Path("config") / config.version / "config.yml"
 config.check_sha_path = Path("config") / config.version / "build.sha1"
+config.dol_link_layout = config.config_path.with_name("link_layout.json")
 config.asflags = [
     "-mgekko",
     "--strip-local-absolute",
@@ -1127,7 +1128,7 @@ config.libs.append(
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/xraysusp.cpp"),
             Object(Matching, "game/wheelmod.cpp"),
-            Object(NonMatching, "game/trackmod.cpp"),
+            Object(Matching, "game/trackmod.cpp"),
             Object(NonMatching, "game/fabric.cpp"),
             Object(NonMatching, "game/trackobj.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
