@@ -4707,12 +4707,10 @@ inline void BetaMaster::b2(StuntEvt* e, int car) { b2Body(e, car); }
 
 inline void BetaMaster::c2(Body* b, int car) {
     int i;
-    Token* t;
     RaceCarRec* rc = fn_8017960C(car);
     if (rc && (f32)__fabs(rc->f2690) <= lbl_80558DC4[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
-        BetaCar* c = &cars[car];
         for (i = 0; i < bumps.a.count; i++) {
-            t = bumps.a.data[i];
+            Token* t = bumps.a.data[i];
             f32 pts;
             if (b == t->body && t->active) {
                 t->active = 0;
@@ -4726,7 +4724,7 @@ inline void BetaMaster::c2(Body* b, int car) {
                     fn_80206750(coinSnd, car, SOUND_ROUTE_MIX);
                     coinSnd->Play();
                 }
-                c->score += pts;
+                cars[car].score += pts;
             }
         }
         int j;
