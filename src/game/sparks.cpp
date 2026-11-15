@@ -949,10 +949,10 @@ void ShardSys::Draw(void) {
                 sn = sin(ang);
                 f32 cs = cos(ang);
                 f32 t = 1.0f - cs;
-                f32 xx = x * x;
                 f32 yy = y * y;
                 f32 zz = z * z;
                 f32 tx = t * x;
+                f32 xx = x * x;
                 f32 ty = t * y;
                 r.m[0][0] = cs + t * xx;
                 r.m[0][1] = sn * z + y * tx;
