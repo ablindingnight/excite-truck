@@ -1968,9 +1968,9 @@ inline void RingChalMaster::vf40(void) {
     int i;
     int j;
     ObjSet* s;
-    int wo = 0;
+    int wo;
     int off;
-    for (i = 0; i < arena.nFiles; wo += sizeof(arena.sets->data[0]), i++) {
+    for (i = 0, wo = 0; i < arena.nFiles; wo += sizeof(arena.sets->data[0]), i++) {
         s = (ObjSet*)((u8*)arena.sets->data + wo);
         if (s->active) {
             for (j = 0, off = 0; j < s->infos->count; off += sizeof(ObjInfo), j++) {
@@ -1984,10 +1984,10 @@ inline void RingChalMaster::vf40(void) {
             if (t < 0.25f) {
                 f32 a = Lerp(1.0f, 0.0f, Unlerp(0.0f, 0.25f, t));
                 if (a > 0.01f) {
+                    int off;
                     int j;
                     fn_802C9900(a);
-                    int off = 0;
-                    for (j = 0; j < s->infos->count; j++, off += sizeof(s->infos->data[0])) {
+                    for (j = 0, off = 0; j < s->infos->count; off += sizeof(s->infos->data[0]), j++) {
                         ObjInfo* o = (ObjInfo*)((u8*)s->infos->data + off);
                         if (o->type == 1) {
                             fn_802C744C(o->model, &o->mtx);
