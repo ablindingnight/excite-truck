@@ -32,18 +32,21 @@ struct RVec3 {
 };
 
 struct RMat33 {
-    f32 m[3][3];
+    RMat33(void) {}
+    RVec3 x;  // offset 0x0
+    RVec3 y;  // offset 0xC
+    RVec3 z;  // offset 0x18
     void Transpose(void) {
         f32 t;
-        t = m[0][1];
-        m[0][1] = m[1][0];
-        m[1][0] = t;
-        t = m[0][2];
-        m[0][2] = m[2][0];
-        m[2][0] = t;
-        t = m[1][2];
-        m[1][2] = m[2][1];
-        m[2][1] = t;
+        t = x.y;
+        x.y = y.x;
+        y.x = t;
+        t = x.z;
+        x.z = z.x;
+        z.x = t;
+        t = y.z;
+        y.z = z.y;
+        z.y = t;
     }
 };
 
@@ -56,34 +59,34 @@ static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return 
 
 static inline void Mul(RMat33* out, const RMat33* l, const RMat33* r) {
     if (out == l || out == r) {
-        f32 m00 = Dot(r->m[0][0], l->m[0][0], r->m[1][0], l->m[0][1], r->m[2][0], l->m[0][2]);
-        f32 m10 = Dot(r->m[0][0], l->m[1][0], r->m[1][0], l->m[1][1], r->m[2][0], l->m[1][2]);
-        f32 m20 = Dot(r->m[0][0], l->m[2][0], r->m[1][0], l->m[2][1], r->m[2][0], l->m[2][2]);
-        f32 m01 = Dot(r->m[0][1], l->m[0][0], r->m[1][1], l->m[0][1], r->m[2][1], l->m[0][2]);
-        f32 m11 = Dot(r->m[0][1], l->m[1][0], r->m[1][1], l->m[1][1], r->m[2][1], l->m[1][2]);
-        f32 m21 = Dot(r->m[0][1], l->m[2][0], r->m[1][1], l->m[2][1], r->m[2][1], l->m[2][2]);
-        f32 m02 = Dot(r->m[0][2], l->m[0][0], r->m[1][2], l->m[0][1], r->m[2][2], l->m[0][2]);
-        f32 m12 = Dot(r->m[0][2], l->m[1][0], r->m[1][2], l->m[1][1], r->m[2][2], l->m[1][2]);
-        f32 m22 = Dot(r->m[0][2], l->m[2][0], r->m[1][2], l->m[2][1], r->m[2][2], l->m[2][2]);
-        out->m[0][0] = m00;
-        out->m[1][0] = m10;
-        out->m[2][0] = m20;
-        out->m[0][1] = m01;
-        out->m[1][1] = m11;
-        out->m[2][1] = m21;
-        out->m[0][2] = m02;
-        out->m[1][2] = m12;
-        out->m[2][2] = m22;
+        f32 m00 = Dot(r->x.x, l->x.x, r->y.x, l->x.y, r->z.x, l->x.z);
+        f32 m10 = Dot(r->x.x, l->y.x, r->y.x, l->y.y, r->z.x, l->y.z);
+        f32 m20 = Dot(r->x.x, l->z.x, r->y.x, l->z.y, r->z.x, l->z.z);
+        f32 m01 = Dot(r->x.y, l->x.x, r->y.y, l->x.y, r->z.y, l->x.z);
+        f32 m11 = Dot(r->x.y, l->y.x, r->y.y, l->y.y, r->z.y, l->y.z);
+        f32 m21 = Dot(r->x.y, l->z.x, r->y.y, l->z.y, r->z.y, l->z.z);
+        f32 m02 = Dot(r->x.z, l->x.x, r->y.z, l->x.y, r->z.z, l->x.z);
+        f32 m12 = Dot(r->x.z, l->y.x, r->y.z, l->y.y, r->z.z, l->y.z);
+        f32 m22 = Dot(r->x.z, l->z.x, r->y.z, l->z.y, r->z.z, l->z.z);
+        out->x.x = m00;
+        out->y.x = m10;
+        out->z.x = m20;
+        out->x.y = m01;
+        out->y.y = m11;
+        out->z.y = m21;
+        out->x.z = m02;
+        out->y.z = m12;
+        out->z.z = m22;
     } else {
-        out->m[0][0] = Dot(r->m[0][0], l->m[0][0], r->m[1][0], l->m[0][1], r->m[2][0], l->m[0][2]);
-        out->m[1][0] = Dot(r->m[0][0], l->m[1][0], r->m[1][0], l->m[1][1], r->m[2][0], l->m[1][2]);
-        out->m[2][0] = Dot(r->m[0][0], l->m[2][0], r->m[1][0], l->m[2][1], r->m[2][0], l->m[2][2]);
-        out->m[0][1] = Dot(r->m[0][1], l->m[0][0], r->m[1][1], l->m[0][1], r->m[2][1], l->m[0][2]);
-        out->m[1][1] = Dot(r->m[0][1], l->m[1][0], r->m[1][1], l->m[1][1], r->m[2][1], l->m[1][2]);
-        out->m[2][1] = Dot(r->m[0][1], l->m[2][0], r->m[1][1], l->m[2][1], r->m[2][1], l->m[2][2]);
-        out->m[0][2] = Dot(r->m[0][2], l->m[0][0], r->m[1][2], l->m[0][1], r->m[2][2], l->m[0][2]);
-        out->m[1][2] = Dot(r->m[0][2], l->m[1][0], r->m[1][2], l->m[1][1], r->m[2][2], l->m[1][2]);
-        out->m[2][2] = Dot(r->m[0][2], l->m[2][0], r->m[1][2], l->m[2][1], r->m[2][2], l->m[2][2]);
+        out->x.x = Dot(r->x.x, l->x.x, r->y.x, l->x.y, r->z.x, l->x.z);
+        out->y.x = Dot(r->x.x, l->y.x, r->y.x, l->y.y, r->z.x, l->y.z);
+        out->z.x = Dot(r->x.x, l->z.x, r->y.x, l->z.y, r->z.x, l->z.z);
+        out->x.y = Dot(r->x.y, l->x.x, r->y.y, l->x.y, r->z.y, l->x.z);
+        out->y.y = Dot(r->x.y, l->y.x, r->y.y, l->y.y, r->z.y, l->y.z);
+        out->z.y = Dot(r->x.y, l->z.x, r->y.y, l->z.y, r->z.y, l->z.z);
+        out->x.z = Dot(r->x.z, l->x.x, r->y.z, l->x.y, r->z.z, l->x.z);
+        out->y.z = Dot(r->x.z, l->y.x, r->y.z, l->y.y, r->z.z, l->y.z);
+        out->z.z = Dot(r->x.z, l->z.x, r->y.z, l->z.y, r->z.z, l->z.z);
     }
 }
 
@@ -188,6 +191,7 @@ public:
     void AddImpulse(f32 w, const RVec3* v, const RVec3* at);
     void Push(Phob* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c, f32 w);
     void ClearImpulses(void);
+    void NotifyAll(void);
     void VelAt(RVec3* out, const RVec3* p);
     void VelAt2(RVec3* out, const RVec3* p);
     void Flush(RVec3* f, RVec3* t);
@@ -291,15 +295,15 @@ void RigidBody::SetMass(f32 m, f32 ix, f32 iy, f32 iz) {
     invMass = 1.0f / mass;
     invInertia.y = 1.0f / inertia.y;
     invInertia.z = 1.0f / inertia.z;
-    invI.m[0][0] = invInertia.x;
-    invI.m[0][1] = 0.0f;
-    invI.m[0][2] = 0.0f;
-    invI.m[1][0] = 0.0f;
-    invI.m[1][1] = invInertia.y;
-    invI.m[1][2] = 0.0f;
-    invI.m[2][0] = 0.0f;
-    invI.m[2][1] = 0.0f;
-    invI.m[2][2] = invInertia.z;
+    invI.x.x = invInertia.x;
+    invI.x.y = 0.0f;
+    invI.x.z = 0.0f;
+    invI.y.x = 0.0f;
+    invI.y.y = invInertia.y;
+    invI.y.z = 0.0f;
+    invI.z.x = 0.0f;
+    invI.z.y = 0.0f;
+    invI.z.z = invInertia.z;
     worldInvI = invI;
 }
 
@@ -415,16 +419,16 @@ static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        f32 x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        f32 y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        f32 z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        out->x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        out->y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        out->z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
     }
 }
 
@@ -451,6 +455,23 @@ static inline void Scaled(RVec3* o, const RVec3* v, f32 s) {
     o->y = v->y * s;
     o->z = v->z * s;
 }
+/* Helper name unproven: hands each pending impulse, scaled by the total weight, to its object. */
+inline void RigidBody::NotifyAll(void) {
+    int i;
+    for (i = 0; i < nImp; i++) {
+        ImpRec* p = imps[i];
+        f32 k = 1.0f / impW;
+        p->v.x *= k;
+        p->v.y *= k;
+        p->v.z *= k;
+        if (p->obj) {
+            p->obj->Notify(&p->v, &p->at, p->kind, p->c, p->by);
+        } else {
+            OnImpulse(&p->v, &p->at, p->kind, p->c, p->by);
+        }
+    }
+}
+
 void RigidBody::Update(void) {
     int i;
     ImpRec* p;
@@ -516,18 +537,7 @@ void RigidBody::Update(void) {
                 }
             }
         }
-        for (i = 0; i < nImp; i++) {
-            p = imps[i];
-            k = 1.0f / impW;
-            p->v.x *= k;
-            p->v.y *= k;
-            p->v.z *= k;
-            if (p->obj) {
-                p->obj->Notify(&p->v, &p->at, p->kind, p->c, p->by);
-            } else {
-                OnImpulse(&p->v, &p->at, p->kind, p->c, p->by);
-            }
-        }
+        NotifyAll();
         OnImpulses(&impF, &impT);
         impF.x = 0.0f;
         impF.y = 0.0f;
@@ -575,25 +585,25 @@ void RigidBody::Update(void) {
             zz = az * az;
             tx = t * ax;
             ty = t * ay;
-            r.rot.m[0][0] = co + t * xx;
-            r.rot.m[0][1] = (s * az) + (ay * tx);
-            r.rot.m[0][2] = az * tx - s * ay;
-            r.rot.m[1][0] = (ay * tx) - (s * az);
-            r.rot.m[1][1] = co + t * yy;
-            r.rot.m[2][0] = az * tx + s * ay;
-            r.rot.m[1][2] = az * ty + s * ax;
-            r.rot.m[2][1] = az * ty - s * ax;
-            r.rot.m[2][2] = co + t * zz;
+            r.rot.x.x = co + t * xx;
+            r.rot.x.y = (s * az) + (ay * tx);
+            r.rot.x.z = az * tx - s * ay;
+            r.rot.y.x = (ay * tx) - (s * az);
+            r.rot.y.y = co + t * yy;
+            r.rot.z.x = az * tx + s * ay;
+            r.rot.y.z = az * ty + s * ax;
+            r.rot.z.y = az * ty - s * ax;
+            r.rot.z.z = co + t * zz;
         } else {
-            r.rot.m[0][0] = 1.0f;
-            r.rot.m[0][1] = 0.0f;
-            r.rot.m[0][2] = 0.0f;
-            r.rot.m[1][0] = 0.0f;
-            r.rot.m[1][1] = 1.0f;
-            r.rot.m[1][2] = 0.0f;
-            r.rot.m[2][0] = 0.0f;
-            r.rot.m[2][1] = 0.0f;
-            r.rot.m[2][2] = 1.0f;
+            r.rot.x.x = 1.0f;
+            r.rot.x.y = 0.0f;
+            r.rot.x.z = 0.0f;
+            r.rot.y.x = 0.0f;
+            r.rot.y.y = 1.0f;
+            r.rot.y.z = 0.0f;
+            r.rot.z.x = 0.0f;
+            r.rot.z.y = 0.0f;
+            r.rot.z.z = 1.0f;
         }
         {
             rr = Rot();
@@ -607,7 +617,9 @@ void RigidBody::Update(void) {
         rt.Transpose();
         {
             ii = InvInertia();
-            Mul(&tmp, &rt, ii);
+            RMat33* rtp = &rt;
+            RMat33* tp = &tmp;
+            Mul(tp, rtp, ii);
         }
         {
             wi = &worldInvI;
@@ -632,9 +644,9 @@ void RigidBody::OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, vo
 extern "C" void fn_8017C7C4(void) {}
 
 void RigidBody::Flush(RVec3* f, RVec3* t) {
-    RMat33* rr;
     RMat33* ii;
     RMat33* wi;
+    RMat33* rr;
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->Wake();
     }
@@ -649,18 +661,7 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
         impT.z *= inv;
         AddScaled(&force, &impF, 59.94f);
         AddScaled(&torque, &impT, 59.94f);
-        for (i = 0; i < nImp; i++) {
-            ImpRec* p = imps[i];
-            f32 k = 1.0f / impW;
-            p->v.x *= k;
-            p->v.y *= k;
-            p->v.z *= k;
-            if (p->obj) {
-                p->obj->Notify(&p->v, &p->at, p->kind, p->c, p->by);
-            } else {
-                OnImpulse(&p->v, &p->at, p->kind, p->c, p->by);
-            }
-        }
+        NotifyAll();
         OnImpulses(&impF, &impT);
         impF.x = 0.0f;
         impF.y = 0.0f;
@@ -681,12 +682,13 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
     torque.z = 0.0f;
     {
         RMat33 tmp;
-        RMat33 rt;
-        rt = mtx.rot;
+        RMat33 rt = mtx.rot;
         rt.Transpose();
         {
-            ii = &invI;
-            Mul(&tmp, &rt, ii);
+            ii = InvInertia();
+            RMat33* rtp = &rt;
+            RMat33* tp = &tmp;
+            Mul(tp, rtp, ii);
         }
         {
             wi = &worldInvI;
