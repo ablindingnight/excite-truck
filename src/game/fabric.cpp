@@ -168,7 +168,7 @@ public:
     virtual void Unk1C(void);
     virtual void Draw(TObj* list);
     virtual void DrawTree(struct TNode* tree);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
     virtual void Link(int a, void* b, int c, void* d, int e);
 };
 
@@ -178,7 +178,7 @@ public:
     virtual void Swap(TObj* o);
     virtual void Init(TObj* o);
     virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
 };
 
 extern "C" {
@@ -1039,7 +1039,7 @@ void FabricTMH::Swap(TObj* o) {
 
 void FabricTMH::Init(TObj* o) {}
 
-void FabricTMH::Add(void* scene, TObj* o, s32 id) { fn_801F75A4(o, (u8*)o + 0x2C, scene, id); }
+void FabricTMH::Add(void* scene, const TObj* o, s32 id) { fn_801F75A4(const_cast<TObj*>(o), (u8*)o + 0x2C, scene, id); }
 
 extern "C" TrackMod* fn_801F78F0(void) { return new ("FabricTMH") FabricTMH; }
 

@@ -82,7 +82,7 @@ public:
     virtual void Unk1C(void);                                // 0x1C
     virtual void Draw(TObj* list);                           // 0x20
     virtual void DrawTree(TNode* tree);                      // 0x24
-    virtual void Add(void* scene, TObj* o, s32 id);          // 0x28
+    virtual void Add(void* scene, const TObj* o, s32 id);          // 0x28
     virtual void Link(int a, void* b, int c, void* d, int e);  // 0x2C
 };
 
@@ -99,7 +99,7 @@ struct Rot {
     Rot(void);
     s32 id;        // offset 0x0
     f32 pos[3];    // offset 0x4
-    TMat3* rot;    // offset 0x10
+    const TMat3* rot;    // offset 0x10
     f32 speed;     // offset 0x14
 };
 
@@ -310,7 +310,7 @@ public:
     RotatorTMH(void) { list = 0; }
     virtual void Swap(TObj* o);
     virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
 
     RotList* list;  // offset 0x4
 };
@@ -343,7 +343,7 @@ public:
     virtual void Swap(TObj* o);
     virtual void Init(TObj* o);
     virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
     XFadeList* List(void* scene);
 
     XFader* faders;   // offset 0x4
@@ -370,7 +370,7 @@ public:
     ScrollingTMH(void) { list = 0; }
     virtual ~ScrollingTMH(void);
     virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
 
     ScrollList* list;  // offset 0x4
 };
@@ -385,7 +385,7 @@ class FacingTestTMH : public TrackMod {
 public:
     virtual ~FacingTestTMH(void);
     virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
 };
 
 // One scrolling-texture model (0x10).
@@ -932,7 +932,7 @@ inline void RotatorTMH::Draw(TObj* list) {
 }
 
 
-inline void RotatorTMH::Add(void* scene, TObj* o, s32 id) {
+inline void RotatorTMH::Add(void* scene, const TObj* o, s32 id) {
     RotList* l;
     f32 speed;
     s32 rid;
@@ -948,9 +948,12 @@ inline void RotatorTMH::Add(void* scene, TObj* o, s32 id) {
     l->Check();
     r = &l->rots[l->count];
     r->id = rid;
-    r->pos[0] = o->pos[0];
-    r->pos[1] = o->pos[1];
-    r->pos[2] = o->pos[2];
+    f32 z = o->pos[2];
+    f32 y = o->pos[1];
+    f32 x = o->pos[0];
+    r->pos[0] = x;
+    r->pos[1] = y;
+    r->pos[2] = z;
     r->rot = &o->rot;
     r->speed = speed;
     l->count++;
@@ -1008,7 +1011,7 @@ static inline f32 MidOf(f32 lo, f32 hi, f32 s) {
     return lo + d * s;
 }
 
-inline void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
+inline void XFaderTMH::Add(void* scene, const TObj* __restrict o, s32 id) {
     XFadeList* l;
     XFade* f;
     f32 b[6];
@@ -1022,7 +1025,7 @@ inline void XFaderTMH::Add(void* scene, TObj* __restrict o, s32 id) {
     f->pos[1] = o->pos[1] + MidOf(b[2], b[3], 0.5f);
     f->pos[2] = o->pos[2] + MidOf(b[4], b[5], 0.5f);
     f->model = o->model;
-    f->scale = 1.0f / (*(f32*)&o->d2C - o->d30);
+    f->scale = 1.0f / (*(const f32*)&o->d2C - o->d30);
     f->start = o->d30;
     l->fades[l->count].id = id;
     l->count++;
@@ -1067,7 +1070,7 @@ ScrollingTMH::~ScrollingTMH(void) {}
 
 inline void ScrollingTMH::Draw(TObj* list) {}
 
-inline void ScrollingTMH::Add(void* scene, TObj* o, s32 id) {
+inline void ScrollingTMH::Add(void* scene, const TObj* o, s32 id) {
     ScrollList* l;
     Scroll* s;
     ValueNode* vn;
@@ -1102,7 +1105,7 @@ inline void FacingTestTMH::Draw(TObj* list) {
     }
 }
 
-inline void FacingTestTMH::Add(void* scene, TObj* o, s32 id) {
+inline void FacingTestTMH::Add(void* scene, const TObj* o, s32 id) {
     u8* data = (u8*)&o->d2C;
     fn_802CD320(scene, new ("mlfto") FacingTestInst(data, id));
 }

@@ -62,7 +62,7 @@ public:
     virtual void Unk1C(void);
     virtual void Draw(TObj* list);
     virtual void DrawTree(struct TNode* tree);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
     virtual void Link(int a, void* b, int c, void* d, int e);
 };
 
@@ -319,7 +319,7 @@ public:
     virtual void Init(TObj* o);
     virtual void Unk1C(void);
     virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
 
     LinearDroneMan* man;  // offset 0x4
 };
@@ -332,7 +332,7 @@ public:
     virtual void Init(TObj* o);
     virtual void Unk1C(void);
     virtual void Draw(TObj* list);
-    virtual void Add(void* scene, TObj* o, s32 id);
+    virtual void Add(void* scene, const TObj* o, s32 id);
 
     HermiteDroneMan* man;  // offset 0x4
 };
@@ -1099,13 +1099,13 @@ void fn_801FEDA4(HermiteEntry* e) {
 }
 }
 
-void LinearDroneTMH::Add(void* scene, TObj* o, s32 id) {
+void LinearDroneTMH::Add(void* scene, const TObj* o, s32 id) {
     LinearPathData* d = (LinearPathData*)o->data;
     if (!man) {
         man = new ("DroneManager") LinearDroneMan;
         fn_802CD320(scene, man);
     }
-    man->AddDrone(o, d);
+    man->AddDrone(const_cast<TObj*>(o), d);
 }
 
 void LinearDroneTMH::Draw(TObj* list) {
@@ -1128,13 +1128,13 @@ static inline void DroneTeardown(void* man) {}
 
 LinearDroneTMH::~LinearDroneTMH(void) { DroneTeardown(man); }
 
-void HermiteDroneTMH::Add(void* scene, TObj* o, s32 id) {
+void HermiteDroneTMH::Add(void* scene, const TObj* o, s32 id) {
     HermitePathData* d = (HermitePathData*)o->data;
     if (!man) {
         man = new ("DroneManager") HermiteDroneMan;
         fn_802CD320(scene, man);
     }
-    man->AddDrone(o, d);
+    man->AddDrone(const_cast<TObj*>(o), d);
 }
 
 void HermiteDroneTMH::Draw(TObj* list) {

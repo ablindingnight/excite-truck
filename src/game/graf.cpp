@@ -404,7 +404,7 @@ void init_display_list(GNode* root) {
 
 void Link__8TrackModFiPviPvi(GModelHandler* h, void* a, void* b) { h->vf28(b, a); }
 
-void Add__8TrackModFPvP4TObjl(void) {}
+void Add__8TrackModFPvPC4TObjl(void) {}
 
 void Init__8TrackModFP4TObj(void) {}
 
