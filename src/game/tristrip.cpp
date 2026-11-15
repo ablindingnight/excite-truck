@@ -88,7 +88,7 @@ int fn_801E4F20(void) {
     return 1;
 }
 
-int fn_801E4F3C(u32 color, int strip, f32 x, f32 y, f32 z, f32 u, f32 v) {
+int fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int strip) {
     TVtx* p = &lbl_80487578[lbl_8055EAA8];
     p->pos.x = x;
     p->pos.y = y;

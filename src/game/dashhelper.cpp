@@ -168,7 +168,7 @@ void fn_802C8D74(void);
 int fn_8022EDC4(void);
 void fn_802C8B98(s32 tex, int unk);
 void fn_801E4F20(int n);
-void fn_801E4F3C(u32 color, int back, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
 void fn_802346C8(void);
 void fn_80234AEC(void);
@@ -1392,19 +1392,19 @@ void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 s
     p.y = d.y * w;
     f32 u = Lerp(u0, u1, ArcU(d.x));
     f32 t = Lerp(v0, v1, ArcV(d.y));
-    fn_801E4F3C(color, 0, x + p.x, y + p.y, 0.0f, u, t);
+    fn_801E4F3C(x + p.x, y + p.y, 0.0f, u, t, color, 0);
     u = Lerp(u0, u1, ArcU(ratio * d.x));
     t = Lerp(v0, v1, ArcV(ratio * d.y));
-    fn_801E4F3C(color, 0, x + ratio * p.x, y + ratio * p.y, 0.0f, u, t);
+    fn_801E4F3C(x + ratio * p.x, y + ratio * p.y, 0.0f, u, t, color, 0);
     for (i = 0; i < segs; i++) {
         Rotate(&p, step);
         Rotate(&d, step);
         u = Lerp(u0, u1, ArcU(d.x));
         t = Lerp(v0, v1, ArcV(d.y));
-        fn_801E4F3C(color, 1, x + p.x, y + p.y, 0.0f, u, t);
+        fn_801E4F3C(x + p.x, y + p.y, 0.0f, u, t, color, 1);
         u = Lerp(u0, u1, ArcU(ratio * d.x));
         t = Lerp(v0, v1, ArcV(ratio * d.y));
-        fn_801E4F3C(color, 1, x + ratio * p.x, y + ratio * p.y, 0.0f, u, t);
+        fn_801E4F3C(x + ratio * p.x, y + ratio * p.y, 0.0f, u, t, color, 1);
     }
     fn_801E4FF4();
     fn_802C8D74();

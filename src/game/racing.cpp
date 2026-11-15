@@ -229,7 +229,7 @@ f32 fn_80011DC0(int player);
 void fn_802354A0(int art, int frame, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_802C8BD0(s32 tex);
 void fn_801E4F20(int n);
-void fn_801E4F3C(u32 color, int back, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
 void fn_802C8D74(void);
 void fn_801478E0(Layout* layout, const char* name, int art, int frame);
@@ -970,7 +970,7 @@ void RacingOverlay::DrawNeedle(f32 x, f32 y, f32 len, f32 width, f32 angle) {
         int back = i > 1;
         f32 u = (i % 2) ? 0.91015625f : 1.0f;
         f32 v = i < 2 ? 0.609375f : 1.0f;
-        fn_801E4F3C(-1, back, pts[i].x, pts[i].y, pts[i].z, u, v);
+        fn_801E4F3C(pts[i].x, pts[i].y, pts[i].z, u, v, -1, back);
     }
     fn_801E4FF4();
     fn_802C8D74();

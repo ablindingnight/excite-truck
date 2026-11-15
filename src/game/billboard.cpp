@@ -10,7 +10,7 @@ extern "C" {
 CamMtx* fn_802C86DC(void);
 void fn_801E4F20(int n);
 void fn_801E4FF4(void);
-int fn_801E4F3C(u32 color, int back, f32 x, f32 y, f32 z, f32 u, f32 v);
+int fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 }
 
 ModuleTag lbl_8055FCF8;
@@ -57,7 +57,7 @@ void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
         MadV3(&p.x, &pos.x, &right->m[0], a);
         f32 b = size * ((1.0f + -2.0f * v) * sign[flags & 2]);
         AddScaledV3(&p.x, &up->m[3], b);
-        if (fn_801E4F3C(color, i >= 2, p.x, p.y, p.z, u, v)) {
+        if (fn_801E4F3C(p.x, p.y, p.z, u, v, color, i >= 2)) {
             break;
         }
     }

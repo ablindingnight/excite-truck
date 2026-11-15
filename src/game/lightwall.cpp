@@ -15,7 +15,7 @@ void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 void fn_801E4F20(int n);
-int fn_801E4F3C(u32 color, int back, f32 x, f32 y, f32 z, f32 u, f32 v);
+int fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
 }
 
@@ -199,10 +199,10 @@ void fn_802A9BFC(const LVec* from, const LVec* to, s32 tex, f32 fade, int u0, in
     f32 h = (v1 - v0) * (seg.Length() / 3.0f) / 72.0f;
     fn_802C8BD0(tex);
     fn_801E4F20(4);
-    fn_801E4F3C(c, 0, seg.a.x, seg.a.y, seg.a.z, fu0, fv1);
-    fn_801E4F3C(c, 0, seg.b.x, seg.b.y, seg.b.z, fu1, fv1);
-    fn_801E4F3C(c, 1, seg.a.x, seg.a.y + h, seg.a.z, fu0, fv0);
-    fn_801E4F3C(c, 1, seg.b.x, seg.b.y + h, seg.b.z, fu1, fv0);
+    fn_801E4F3C(seg.a.x, seg.a.y, seg.a.z, fu0, fv1, c, 0);
+    fn_801E4F3C(seg.b.x, seg.b.y, seg.b.z, fu1, fv1, c, 0);
+    fn_801E4F3C(seg.a.x, seg.a.y + h, seg.a.z, fu0, fv0, c, 1);
+    fn_801E4F3C(seg.b.x, seg.b.y + h, seg.b.z, fu1, fv0, c, 1);
     fn_801E4FF4();
     fn_802C8D74();
 }
