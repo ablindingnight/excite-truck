@@ -2698,36 +2698,6 @@ f32 fn_8011AE18(s32 arg0) {
 }
 
 // Scales float samples by `gain` into clamped 16-bit PCM.
-#pragma push  /* RAD built this routine without constant propagation or speculative unrolling (Process review) */
-#pragma opt_propagation off
-#pragma opt_unroll_loops off
-#pragma ppc_unroll_speculative off
-void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
-    u32 i;
-    u32 v;
-    u32 d;
-    u64 t;
-    u32 lo = 0x7FFF8000;
-    u32 hi = 0x80007FFF;
-    arg0--;
-    for (i = 0; i < arg2; i++) {
-        v = (s32)(*arg1++ * farg0);
-        v ^= 0x80000000;
-        t = (u64)v - lo;
-        d = (u32)t;
-        d &= ~(u32)(t >> 32);
-        v = d - 32768;
-        v ^= 0x80000000;
-        t = (u64)v - hi;
-        d = (u32)t;
-        d &= (u32)(t >> 32);
-        v = d + 32767;
-        *++arg0 = v;
-    }
-}
-#pragma pop
-
-// Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
 static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
     u64 t;
     u32 d;
@@ -2742,6 +2712,24 @@ static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
     d &= (u32)(t >> 32);
     return d + 32767;
 }
+#pragma push  /* RAD built this routine without constant propagation or speculative unrolling (Process review) */
+#pragma opt_propagation off
+#pragma opt_unroll_loops off
+#pragma ppc_unroll_speculative off
+void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
+    u32 lo = 0x7FFF8000;
+    u32 hi = 0x80007FFF;
+    u32 i;
+    u32 v;
+    arg0--;
+    for (i = 0; i < arg2; i++) {
+        v = (s32)(*arg1++ * farg0);
+        *++arg0 = Clamp16(v, lo, hi);
+    }
+}
+#pragma pop
+
+// Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
 #pragma push
 #pragma opt_propagation off
 #pragma opt_unroll_loops off
