@@ -337,10 +337,10 @@ void CarUIModel::Unload(void) {
 }
 
 void CarUIModel::LoadEfx(const char* path) {
-    struct {
-        int index;
-    } joint;
     if (efx == -1) {
+        const char** name;
+        u8* boneCursor;
+        ValueNodeV* n;
         char file[0x100];
         fn_801345D8(file, 0x100, "%s/efxmesh.val", path);
         ValueTableV* t = fn_80131810(file);
@@ -352,7 +352,7 @@ void CarUIModel::LoadEfx(const char* path) {
         }
         char bonesetName[0x100] = {0};
         if (t->HasChild("boneset")) {
-            ValueNodeV* n = t->FindChild("boneset");
+            n = t->FindChild("boneset");
             sprintf(bonesetName, "%s/%s", path, n->GetValue("mesh_name"));
             char mod[0x100];
             fn_801345D8(mod, 0x100, "%s/%s", path, n->GetValue("model_name"));
@@ -374,10 +374,13 @@ void CarUIModel::LoadEfx(const char* path) {
             zero.y = 0.0f;
             zero.z = 0.0f;
             ValueNodeV* r = t->FindChild("at_rest");
-            for (joint.index = 0; joint.index < numBones; joint.index++) {
+            // Keep the bone member displacement in each vector store.
+            boneCursor = reinterpret_cast<u8*>(this);
+            const size_t bonesOffset = offsetof(CarUIModel, bones);
+            for (int boneIndex = 0; boneIndex < numBones; boneCursor += sizeof(ValVec3), boneIndex++) {
                 char key[0x20];
-                fn_801345D8(key, 0x20, "%d", joint.index);
-                ValVec3& bone = bones[joint.index];
+                fn_801345D8(key, 0x20, "%d", boneIndex);
+                ValVec3& bone = *reinterpret_cast<ValVec3*>(boneCursor + bonesOffset);
                 bone = r->GetVec3Or(key, ValVec3(zero));
             }
         } else {
@@ -385,10 +388,9 @@ void CarUIModel::LoadEfx(const char* path) {
         }
         const char* susp[4] = {"lf", "rf", "lr", "rr"};
         if (t->HasChild("susp")) {
-            int j;
             ValueNodeV* s = t->FindChild("susp");
-            const char** name = susp;
-            for (j = 0; j < 4; name++, j++) {
+            name = susp;
+            for (int j = 0; j < 4; name++, j++) {
                 s->GetInt(*name, -1);
             }
         }

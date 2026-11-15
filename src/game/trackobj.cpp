@@ -106,7 +106,10 @@ struct ReaderList {
 };
 
 s32 lbl_8055B1C8 = -20000;
-static const SkipList sSkip = {{"floater", "gfx", 0}};
+static inline SkipList MakeSkipList() {
+    const SkipList skip = {{"floater", "gfx", 0}};
+    return skip;
+}
 static const TypeList sTypes = {{
     "ball",  "box1",    "box2",    "wedge",         "cone",      "barrel",      "wall",    "post",
     "horse", "ring",    "polyhedra", "barrier",     "wobble",    "tube",        "so_ball", "so_wall",
@@ -706,7 +709,7 @@ static inline void Lift(OFrame* f, f32 h) {
 
 static inline int IsSkipType(ValueNode* vn) {
     int i;
-    SkipList skip = sSkip;
+    SkipList skip = MakeSkipList();
     const char* type = vn->GetValue("type");
     for (i = 0; skip.names[i]; i++) {
         if (strcasecmp(skip.names[i], type) == 0) {
@@ -959,7 +962,7 @@ ObjDesc* fn_801F86C8(ValueNode* vn) {
 }
 
 int fn_801F88F4(ValueNode* vn) {
-    SkipList skip = sSkip;
+    SkipList skip = MakeSkipList();
     const char* type = vn->GetValue("type");
     const char** p;
     for (p = skip.names; *p; p++) {

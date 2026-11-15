@@ -488,7 +488,6 @@ int fn_8012AC28(const char* name, s32* sizeOut) {
 int fn_8012AC98(const char* name) { return fn_8012AC28(name, 0); }
 
 int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
-    ResToc* toc;
     int ok;
     ResEntry* entries;
     ResEntry* e;
@@ -496,7 +495,7 @@ int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
     if (!lbl_8055DFFC) {
         fn_802E317C("res(%s): TOC library unavailable, can't load.", set);
     }
-    toc = GetToc(set->name);
+    ResToc* const toc = GetToc(set->name);
     if (!toc) {
         fn_802E317C("res(%s): Library has no TOC for set.", set);
     }
