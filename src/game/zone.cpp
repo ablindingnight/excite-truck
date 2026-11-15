@@ -1155,12 +1155,6 @@ static inline void LoadSound(Sound*& s, const char* name) {
     }
 }
 
-class Color {
-public:
-    Color(u32 c) { rgba = c; }
-    u32 rgba;
-};
-
 ModuleTag lbl_8055E1A8;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
@@ -1170,7 +1164,8 @@ static UnkStatic123s lbl_8042FB28;
 extern const u32 lbl_8055E1B8 = MakeILPos(0x7F00, 0);
 u8 lbl_8055E1BC;
 ZoneMaster* lbl_8055E1C0;
-Color lbl_8055E1C4(0xFF2A85F0);
+static inline u32 DefaultTimerColor() { return 0xFF2A85F0; }
+extern const u32 lbl_8055E1C4 = DefaultTimerColor();
 Tune lbl_8042FB3C;
 
 extern "C" {
@@ -2190,7 +2185,7 @@ void ZoneMaster::DrawTimer(int p, CarState* c) const {
             fn_802C8E00(-1, 0, x, y - h, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(-1, 1, x + w, y, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(-1, 1, x + w, y - h, 0.0f, 0.46484375f, 0.98828125f);
-            col = lbl_8055E1C4.rgba;
+            col = lbl_8055E1C4;
             fn_802C8E00(col, 0, x, y, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(col, 0, x, y - h, 0.0f, 0.46484375f, 0.98828125f);
             fn_802C8E00(col, 1, x + w * c->timeLeft, y, 0.0f, 0.46484375f, 0.98828125f);
