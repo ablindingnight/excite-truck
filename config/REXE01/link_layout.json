@@ -11,5 +11,11 @@
   ],
   "aliases": {
     "__ct__4TVecFv": "StatsUpdate__Fv"
+  },
+  "data_sections": {
+    "src/game/roadsnd.o": [
+      ".data",
+      ".data.roadsnd_strings"
+    ]
   }
 }
