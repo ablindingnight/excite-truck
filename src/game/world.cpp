@@ -86,7 +86,7 @@ struct EventCfg {
 
 // One car of the race (0x78).
 struct CarDef {
-    CarDef(void);
+    CarDef(void) {}
     s32 type;      // offset 0x0
     u8 b4[0x40];   // offset 0x4
     char name[0x20]; // offset 0x44
@@ -1230,9 +1230,8 @@ void fn_801E8F10(RaceSetup* s) {
     }
 }
 
-RaceSetup* fn_801E952C(RaceSetup* s) {
-    memset(s, 0, sizeof(*s));
-    return s;
+RaceSetup::RaceSetup(void) {
+    memset(this, 0, sizeof(*this));
 }
 
 void fn_801E9564(RaceSetup* s) {

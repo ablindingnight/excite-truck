@@ -159,7 +159,7 @@ int fn_80128314(int heap);
 int fn_80265D58(void);
 int fn_80204024(void);
 void fn_8012BF28(void);
-void fn_801E952C(RaceSetup* rs);
+void __ct__9RaceSetupFv(RaceSetup* rs);
 void fn_80129AEC(int a);
 int fn_802411CC(void);
 void fn_802411C8(void);
@@ -261,7 +261,7 @@ void fn_8023B9EC(int track, int eve, RaceResult* out, int difficulty, int skip) 
             fn_8012BF28();
         }
         RaceSetup rs;
-        fn_801E952C(&rs);
+        __ct__9RaceSetupFv(&rs);
         fn_8023B7EC(&rs, track, eve, difficulty);
         rs.unk3F0 = 0;
         rs.difficulty = difficulty;

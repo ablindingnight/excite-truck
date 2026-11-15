@@ -38,7 +38,7 @@ extern "C" {
 RegUser* fn_8027ABF8(s32 id);
 s32 fn_8027AC08(RegUser* u, s32 key);
 void fn_8013CA3C(int a, int b);  // empty in the shipped game
-void fn_801E952C(void* setup);   // race setup init
+void __ct__9RaceSetupFv(void* setup);   // race setup init
 }
 
 struct RaceCar {
@@ -47,8 +47,8 @@ struct RaceCar {
     u8 pad6C[0xC];
 };
 
-struct RaceSetup {
-    RaceSetup(void) { fn_801E952C(this); }
+struct ArrivalRaceSetup {
+    ArrivalRaceSetup(void) { __ct__9RaceSetupFv(this); }
     char track[0x20];  // offset 0x0
     RaceCar cars[8];   // offset 0x20
     s32 numCars;       // offset 0x3E0
@@ -57,7 +57,7 @@ struct RaceSetup {
 
 struct RivalRace {
     u8 pad0[0xC];
-    RaceSetup setup;  // offset 0xC
+    ArrivalRaceSetup setup;  // offset 0xC
 };
 
 ModuleTag lbl_8055F628;
