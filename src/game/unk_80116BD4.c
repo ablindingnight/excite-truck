@@ -4490,8 +4490,8 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
     ((u32 *)(d))[3] = c
 #define BINK_PAT8(d, k)                                                         \
     p = *pattern.cur++;                                                         \
-    ((u32 *)(d))[0] = (c0 & BINK_PAT_C0[p & 15]) | (c1 & BINK_PAT_C1[p & 15]);  \
-    ((u32 *)(d))[1] = (c0 & BINK_PAT_C0[p >> 4]) | (c1 & BINK_PAT_C1[p >> 4])
+    ((u32 *)(d))[0] = (c0 & masks0[p & 15]) | (c1 & masks1[p & 15]);  \
+    ((u32 *)(d))[1] = (c0 & masks0[p >> 4]) | (c1 & masks1[p >> 4])
 // Doubles the two pixels of a u16 into four.
 #define BINK_DOUBLE2(w) (((w) << 8) | ((w) & 0xFF)) | (((w) << 16) & 0xFF000000)
 
@@ -4503,6 +4503,7 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
 // plane's data. Structure cross-checked against n100f's ExpandPlane (reference only).
+#pragma opt_loop_invariants off  /* Keep the scaled-row test and stride in the block decoder. */
 u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
                  s32 blocksWide, u32 step, void **bufs, u32 flags, u32 *skipped) {
     BinkColorTrees8011 trees;
@@ -4555,6 +4556,10 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     fn_8011CD78(&yOff, &bits);
     fn_8011CD78(&runs, &bits);
     for (y = 0; y < height; y += 8) {
+        u32 *masks0 = BINK_PAT_C0;
+        u32 *masks1 = BINK_PAT_C1;
+        u32 *scaledMasks0 = BINK_PAT2_C0;
+        u32 *scaledMasks1 = BINK_PAT2_C1;
         fn_8011CE18(&types, &bits);
         fn_8011CE18(&subTypes, &bits);
         readColors(&colors, &bits, &trees);
@@ -4688,16 +4693,16 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                         for (i = 0; i < 8; i++) {
                             u32 p = *pattern.cur++;
                             u32 w;
-                            w = (c0 & BINK_PAT2_C0[p & 3]) | (c1 & BINK_PAT2_C1[p & 3]);
+                            w = (c0 & scaledMasks0[p & 3]) | (c1 & scaledMasks1[p & 3]);
                             ((u32 *)d0)[0] = w;
                             ((u32 *)d1)[0] = w;
-                            w = (c0 & BINK_PAT2_C0[(p >> 2) & 3]) | (c1 & BINK_PAT2_C1[(p >> 2) & 3]);
+                            w = (c0 & scaledMasks0[(p >> 2) & 3]) | (c1 & scaledMasks1[(p >> 2) & 3]);
                             ((u32 *)d0)[1] = w;
                             ((u32 *)d1)[1] = w;
-                            w = (c0 & BINK_PAT2_C0[(p >> 4) & 3]) | (c1 & BINK_PAT2_C1[(p >> 4) & 3]);
+                            w = (c0 & scaledMasks0[(p >> 4) & 3]) | (c1 & scaledMasks1[(p >> 4) & 3]);
                             ((u32 *)d0)[2] = w;
                             ((u32 *)d1)[2] = w;
-                            w = (c0 & BINK_PAT2_C0[p >> 6]) | (c1 & BINK_PAT2_C1[p >> 6]);
+                            w = (c0 & scaledMasks0[p >> 6]) | (c1 & scaledMasks1[p >> 6]);
                             ((u32 *)d0)[3] = w;
                             ((u32 *)d1)[3] = w;
                             d0 = d1 + pitch;
