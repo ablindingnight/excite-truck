@@ -361,8 +361,9 @@ void UiAnimList::Apply(f32 t) {
     t = 1.0f < t ? 1.0f : t;
     t = t > 0.0f ? t : 0.0f;
     f32 time = len * t;
+    UiAnimTrack* tr;
     for (int i = 0; i < n; i++) {
-        UiAnimTrack* tr = &tracks[i];
+        tr = &tracks[i];
         void* obj = EvalTrack(tr, time);
         fn_80214C54(tr->id, obj);
         fn_8022EE98(obj);
@@ -381,8 +382,9 @@ f32 UiSpecialList::Length(void) { return 0.0f; }
 
 void UiSpecialList::Apply(f32 t) {
     f32 now = fn_8023659C();
+    UiSpecial* s;
     for (int i = 0; i < n; i++) {
-        UiSpecial* s = &items[i];
+        s = &items[i];
         if (s->active) {
             f32 time = now - s->start;
             void* obj = EvalTrack(&s->track, time);
