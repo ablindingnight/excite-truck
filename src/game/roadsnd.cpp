@@ -68,6 +68,8 @@ struct RoadSoundEntry {
     f32 pitch3;             // offset 0x20
 };
 
+static inline const char* RoadSoundNameKey(const char* key = "sound") { return key; }
+
 class RoadSound {
 public:
     RoadSound(char* car) {
@@ -84,7 +86,7 @@ public:
             if (strcmp(node->GetName(), "sound") == 0) {
                 c = this->car;
                 e = &entries[count++];
-                name = node->GetValue("sound");
+                name = node->GetValue(RoadSoundNameKey());
                 e->voice = fn_802077A4(name, 4, c + 0x118, c + 0x60);
                 if (e->voice == NULL && *(s32*)(c + 0x1EC) == 0) {
                     fn_802E30C8("roadsnd: can't find %s", name);
@@ -132,6 +134,10 @@ RoadSound::~RoadSound(void) {
 }
 
 static inline f32 Ramp_hm(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }  /* Helper name unproven */
+static inline f32 BlendRoadVolume(f32 speed, f32 lo, f32 hi, f32 firstVol, f32 lastVol, f32 firstSpeed, f32 lastSpeed) {
+    return Lerp(Max(Min((speed - firstSpeed) / (lastSpeed - firstSpeed), hi), lo), firstVol, lastVol);
+}
+
 void RoadSound::Update(void) {
     char* c = car;
     f32 hi;
@@ -152,13 +158,11 @@ void RoadSound::Update(void) {
         if (type == entries[i].surface) {
             RoadSoundVoice* v = entries[i].voice;
             if (v) {
-                f32 vol;
-                f32 middleSpeed = entries[i].speed2;
-                if (speed < middleSpeed) {
-                    vol = Lerp(Max(Min((speed - entries[i].speed1) / (entries[i].speed2 - entries[i].speed1), hi), lo), 0.0f, entries[i].vol2);
-                } else {
-                    vol = Lerp(Max(Min((speed - entries[i].speed2) / (entries[i].speed3 - entries[i].speed2), hi), lo), entries[i].vol2, entries[i].vol3);
-                }
+                f32 vol = speed < entries[i].speed2
+                              ? BlendRoadVolume(speed, lo, hi, 0.0f, entries[i].vol2,
+                                                entries[i].speed1, entries[i].speed2)
+                              : BlendRoadVolume(speed, lo, hi, entries[i].vol2, entries[i].vol3,
+                                                entries[i].speed2, entries[i].speed3);
                 f32 pitch = Lerp(Ramp_hm(speed, entries[i].speed1, entries[i].speed3), entries[i].pitch1, entries[i].pitch3);
                 v->unk4A = 0;
                 v->unk4B = 1;
@@ -172,5 +176,4 @@ void RoadSound::Update(void) {
     }
 }
 
-// NonMatching: the target emits the vtable first in .data (our compiler puts it last), and
-// Update's FPR allocation for its loop constants differs.
+// NonMatching: the order of the constructor strings in .data differs from retail.
