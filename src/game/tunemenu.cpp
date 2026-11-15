@@ -19,15 +19,15 @@ struct TuneScales {
 static inline int FloatBits(f32 f) { return *(int*)&f; }
 
 extern "C" {
-TuneScales* fn_8027A798(void);  // the current car's scales
+TuneScales* fn_8027A798(const char*);  // the current car's scales
 extern char lbl_8055B860[8];
 }
 
 ModuleTag lbl_8055F358;
 static UnkStatic123 lbl_80498E50;
 
-extern "C" void fn_80257C10(void) {
-    TuneScales* t = fn_8027A798();
+extern "C" void fn_80257C10(const char* chassis) {
+    TuneScales* t = fn_8027A798(chassis);
     int steps = 30;
     f32 lo = 0.25f;
     f32 hi = 1.75f;

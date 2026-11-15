@@ -1503,7 +1503,7 @@ void fn_801AD394(u8* p) {
 
 void fn_801AD5EC(void) { fn_801AC508(); }
 
-void fn_801AD5F0(u8* p) { fn_801ACF94(); }
+void fn_801AD5F0(void) { fn_801ACF94(); }
 
 }  // extern "C"
 

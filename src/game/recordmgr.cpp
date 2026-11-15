@@ -12,7 +12,7 @@ void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 int fn_801B2F24(void);           // racer count
 s32 fn_801B3050(int i);          // racer id
 int fn_801B2ED4(void);           // total laps
-void fn_801B3208(int idx, int place);
+void fn_801B3208(int, int, f32);
 int fn_801EA994(void);           // human count
 u8* fn_801EA9A0(int i);          // car info (first byte: still racing)
 int fn_801769B8(void);           // game mode
@@ -497,8 +497,7 @@ void fn_801AF6FC(void) {
     if (mode == 1) {
         for (int i = 0; i < st->entries.n; i++) {
             int idx = st->entries.order[i];
-            fn_801AF9EC(idx, 0);
-            fn_801B3208(idx, i);
+            fn_801B3208(idx, i, fn_801AF9EC(idx, 0));
         }
     }
 }

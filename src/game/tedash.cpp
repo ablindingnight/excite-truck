@@ -182,7 +182,7 @@ void fn_802B4E44(void* objs);
 void fn_802B4E3C(s32 layer);
 s32 fn_802B05DC(void);
 int fn_802B05E4(void);
-void fn_802B0288(void);
+void fn_802B0288(void*);  // GroundSet*
 s32 fn_802B1C14(void* layers);
 const char* fn_802B1C1C(void* layers, s32 i);
 void fn_80128684(void);
@@ -1144,8 +1144,7 @@ void fn_802B87A0(void) {
 void fn_802B87F4(void) {
     if (lbl_8055FA48) {
         fn_802B869C();
-        fn_802B59A4(lbl_8055FA3C);
-        fn_802B0288();
+        fn_802B0288(fn_802B59A4(lbl_8055FA3C));
         if (lbl_8055FA38 != 1 && lbl_8055FA40 != 6) {
             fn_802B4E3C(lbl_8055FA40);
         }

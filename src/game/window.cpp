@@ -131,7 +131,7 @@ int fn_8012C33C(const char* name);
 void* gxGetImage(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 const Style* fn_8022EE9C(void);
-void fn_8022EE98(void);
+void fn_8022EE98(const Style*);  // UIContext* (uictx.cpp); deletes what fn_8022EE9C made
 void fn_802C4C80(void* p);
 void fn_802C2FC4(void* p);
 void fn_802C519C(void* p);
@@ -242,7 +242,7 @@ Window::Window(const char* bg, s32 x, s32 y, s32 w, s32 h, s32 f) {
     for (i = 0; i < 31; i++) {
         styles[i] = *s;
     }
-    fn_8022EE98();
+    fn_8022EE98(s);
 }
 
 Window::~Window(void) {

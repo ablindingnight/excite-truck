@@ -1354,7 +1354,7 @@ void fn_802733C8(void) {
     lbl_8055F54C = 0x12;
 }
 
-void fn_802733F0(u8* p) {}
+void fn_802733F0(void) {}
 
 void fn_802733F4(u8* p) {
     if (!U8(p, 0x138) && lbl_8055F558) {

@@ -99,7 +99,7 @@ extern "C" {
 extern f32 lbl_8055D0B4;  // last DMA draw time
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_802044E8(void);
-int fn_80204870(void);
+int fn_80204870(u32);
 int fn_802E4A10(void);
 void fn_80129374(int i, int x);
 int fn_80204024(void);
@@ -153,7 +153,7 @@ int fn_801E85A4(void);
 void fn_802D08C4(int unk);
 void fn_802C2B48(void);
 void fn_8020DE10(int (*fn)(int, int), void (*draw)(void));
-int fn_8016212C(void);
+int fn_8016212C(int);
 int fn_80265D64(void);
 void fn_80176734(void);
 int fn_80265D6C(void);
@@ -389,7 +389,7 @@ void fn_8000ACB0(void) {
 }
 
 int fn_8000ACDC(int key) {
-    if (fn_80204870()) {
+    if (fn_80204870(key)) {
         return 1;
     }
     return fn_800074EC(key);
@@ -608,7 +608,7 @@ void fn_8000B3DC(u8 replay) {
 
 int fn_8000B42C(int choice) {
     int resume = 1;
-    if (!fn_8016212C()) {
+    if (!fn_8016212C(choice)) {
         switch (choice) {
         case 0:
             break;

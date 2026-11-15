@@ -105,7 +105,7 @@ void fn_801CEC80(void);
 void fn_80181F30(void);
 void fn_801DE0A4(void);
 void* fn_801769CC(void);
-void fn_801B2024(void);
+void fn_801B2024(void*);  // RaceInfo*
 void fn_801C4AD0(void);
 void fn_8020C41C(void);
 void fn_8026B644(void);
@@ -1067,8 +1067,7 @@ void fn_80178DD4(s32 stream) {
     fn_801CEC80();
     fn_80181F30();
     fn_801DE0A4();
-    fn_801769CC();
-    fn_801B2024();
+    fn_801B2024(fn_801769CC());
     fn_80127464();
     fn_801C4AD0();
     fn_8020C41C();

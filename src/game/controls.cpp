@@ -90,8 +90,8 @@ extern const char* lbl_8055BBA0;
 void __ct__7UITableFiiPCi(ControlsTableFields*, int, int, const int*);
 const char* Get__7UITableFiiPi(ControlsTableFields*, int, int, int*);
 void Set__7UITableFiiPCcc(ControlsTableFields*, int, int, const char*, char);
-void fn_80137C98(int);
-void* fn_8018108C(void);
+int fn_80137C98(int);
+void* fn_8018108C(int);
 void fn_801A7E54(char*, int, const ControlInputFields*);
 extern ControlsTableFields* lbl_8055F190;
 extern const char* lbl_80341C40[];
@@ -299,8 +299,7 @@ extern "C" void fn_8023D4B8(int controller) {
     fn_80137C78(1);
     fn_80137C84(controller, 0);
     fn_8017EBE0();
-    fn_80137C98(controller);
-    lbl_8055F198 = fn_8018108C();
+    lbl_8055F198 = fn_8018108C(fn_80137C98(controller));
     ControlsTableFields table;
     fn_8023E078(&table, controller);
     lbl_8055F190 = &table;
@@ -510,8 +509,7 @@ extern "C" int fn_8023E028(void) {
 extern "C" ControlsTableFields* fn_8023E078(ControlsTableFields* self, int controller) {
     __ct__7UITableFiiPCi(self, 18, 2, lbl_80563748);
     self->controller = controller;
-    fn_80137C98(controller);
-    self->inputConfig = fn_8018108C();
+    self->inputConfig = fn_8018108C(fn_80137C98(controller));
     fn_8023E1FC(self);
     return self;
 }

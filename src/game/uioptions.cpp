@@ -149,8 +149,8 @@ void fn_8023FCFC(int slot);
 void fn_8023D1C0(void);
 void fn_8023C958(void);
 void fn_8023C94C(void);
-void fn_802E4A10(void);
-void fn_8023D4B8(void);
+u32 fn_802E4A10(void);
+void fn_8023D4B8(int);
 void fn_8023C3D4(void);
 void fn_80278A24(void);
 void fn_802449A0(void);
@@ -657,8 +657,7 @@ void fn_80239AC0(void) {
             fn_8023C94C();
             break;
         case 3:
-            fn_802E4A10();
-            fn_8023D4B8();
+            fn_8023D4B8(fn_802E4A10());
             break;
         case 8:
             fn_8023C3D4();

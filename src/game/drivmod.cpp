@@ -49,9 +49,9 @@ f32* fn_801FFB08(u8* skel, const char* name) {
     return (f32*)(bone + 0x24);
 }
 
-void fn_801FFB6C(u8* p) {}
+void fn_801FFB6C(void) {}
 
-void fn_801FFB70(u8* p) {}
+void fn_801FFB70(void) {}
 
 }  // extern "C"
 

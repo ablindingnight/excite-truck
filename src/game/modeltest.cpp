@@ -86,7 +86,7 @@ u8* fn_8024BDFC(u8* p, int del) { return fn_8024A1AC(p - 0x18, del); }
 // The model/texture test viewer: draws leather.tex on a unit quad until ESC is pressed.
 // NonMatching: the target builds v[1..3] by copying earlier vertices (lfd/stfd) and keeps four position
 // temporaries on the stack; matrix and calls match.
-void fn_8024BE04(u8* p) {
+void fn_8024BE04(void) {
     fn_802E30C8("ModelTest!");
     MTMtx* vp;
     s32 tex = fn_802CAC28("leather.tex", 0);

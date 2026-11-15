@@ -161,7 +161,7 @@ void fn_801838C8(u8* p);
 void fn_801A1474(u8* p, f32 s);
 void fn_8018A180(u8* p);
 u8* fn_801D2008(u8* name);
-s32 fn_801C1C1C(void);
+s32 fn_801C1C1C(const void*);  // const PSysDesc*
 s32 fn_801C1BA4(s32 a, s32 b, s32 c);
 }
 
@@ -587,7 +587,7 @@ CbValueTable* fn_80131808(const char* name);
 void fn_80131818(CbValueTable* table);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 s32 fn_802792E4(s32 vehicle);
-s32 fn_80279874(void);
+s32 fn_80279874(s32);
 int fn_8027AA48(void);
 void fn_80279F58(CbSetup* setup, CbValueTable* table);
 void* fn_8027A798(const char* model);
@@ -635,8 +635,9 @@ void CarBody_vf08(u8* p, u8* desc) {
     S32(p, 0x1F0) = S32(desc, 0x68);
     *(CbIdent*)(p + 0x1F4) = *(CbIdent*)(desc + 0x6C);
     S32(p, 0x26C) = fn_802792E4(S32(p, 0x25C));
+    s32 id = S32(p, 0x25C);
     *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)(desc + 0x18);
-    S32(p, 0x328) = fn_80279874();
+    S32(p, 0x328) = fn_80279874(id);
     if (!fn_8027AA48()) {
         S32(p, 0x328) = 0;
     }
@@ -2431,7 +2432,7 @@ extern "C" {
 static inline int CarHot(u8* car) { return F32(car, 0x258C) > lbl_80561DC0; }
 static inline int CarOnGas(u8* car) { return F32(car, 0x25E0) > lbl_80561CDC; }
 
-void fn_80186DE8(u8* p) {
+void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
     CbSolCross* cross;
@@ -3548,7 +3549,7 @@ void fn_8018A654(u8* p, const u8* cfg) {
         u8* m = fn_801D2008((u8*)cfg + 0xEC);
         PTR(p, 0x26C0) = m;
         if (S32(m, 0x10) > 0) {
-            S32(p, 0x26C4) = fn_801C1C1C();
+            S32(p, 0x26C4) = fn_801C1C1C(m);
         } else {
             S32(p, 0x26C4) = 0;
         }

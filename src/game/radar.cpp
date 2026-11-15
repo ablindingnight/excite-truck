@@ -56,7 +56,7 @@ struct Camera {
     V3 pos;  // offset 0x24
 };
 
-extern "C" Camera* fn_801E8718(void);
+extern "C" Camera* fn_801E8718(int);
 
 struct Frame {
     V3 rows[3];  // offset 0x0
@@ -175,8 +175,7 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
     size.y = sizeY;
     corner.x = origin.x + size.x;
     corner.y = origin.y + size.y;
-    fn_801392F8(fn_8017960C(self));
-    cam = fn_801E8718();
+    cam = fn_801E8718(fn_801392F8(fn_8017960C(self)));
     if (AbsF(cam->dir.x) <= __float_epsilon[0] && AbsF(cam->dir.z) <= __float_epsilon[0]) {
         return;
     }

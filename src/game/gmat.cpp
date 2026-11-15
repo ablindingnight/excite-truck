@@ -24,7 +24,7 @@ s32 fn_802C2C00(s32 mode);
 s32 fn_802C28C0(void);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
-void fn_802DBF00(void);
+void fn_802DBF00(int);  // u8 prepass in gndtex.cpp: retail passes fn_802B05EC's int without truncating
 void fn_802DBF30(void);
 void fn_802CADD0(s32 tex, int stage);
 s32 fn_802BC30C(int layer);
@@ -577,8 +577,7 @@ void fn_802B14B4(GMat* g) {
         } else {
             fn_802C8BD0(fn_802C28C0());
         }
-        fn_802B05EC();
-        fn_802DBF00();
+        fn_802DBF00(fn_802B05EC());
         for (i = 0; i < g->layers.Count(); i++) {
             texs = &g->layers.At(i)->texs;
             if (lbl_8055FA59) {

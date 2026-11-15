@@ -29,8 +29,8 @@ void* fn_802E5AE8(const char* name);
 void fn_802E5D5C(void* stream);
 f32 fn_802E6040(void* stream);
 void* fn_802E6058(void* stream);
-void fn_802E6ABC(void* stream);
-void fn_80207938(void);
+const char* fn_802E6ABC(void* stream);
+void fn_80207938(const char*);
 void fn_802E6138(void* handle);
 void fn_802E61A8(void* handle);
 void fn_802E61BC(void* handle);
@@ -273,8 +273,7 @@ public:
         if (stream0 != 0 && handle0 == 0) {
             handle0 = fn_802E6058(stream0);
             if (handle0 == 0) {
-                fn_802E6ABC(stream0);
-                fn_80207938();
+                fn_80207938(fn_802E6ABC(stream0));
             } else if (stream1 != 0) {
                 handle1 = fn_802E6058(stream1);
                 if (handle1 == 0) {
