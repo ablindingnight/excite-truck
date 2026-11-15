@@ -2728,45 +2728,37 @@ void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
 #pragma pop
 
 // Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
+static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
+    u64 t;
+    u32 d;
+    v ^= 0x80000000;
+    t = (u64)v - lo;
+    d = (u32)t;
+    d &= ~(u32)(t >> 32);
+    v = d - 32768;
+    v ^= 0x80000000;
+    t = (u64)v - hi;
+    d = (u32)t;
+    d &= (u32)(t >> 32);
+    return d + 32767;
+}
 #pragma push
 #pragma opt_propagation off
 #pragma opt_unroll_loops off
 #pragma ppc_unroll_speculative off
 void fn_8011AED8(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
+    u32 lo = 0x7FFF8000;
+    u32 hi = 0x80007FFF;
     f32 *right = arg1 + arg2;
     u32 i;
     u32 l;
     u32 r;
-    u32 d;
-    u64 t;
-    u32 lo = 0x7FFF8000;
-    u32 hi = 0x80007FFF;
     arg0--;
     for (i = 0; i < arg2; i++) {
         l = (s32)(*arg1++ * farg0);
         r = (s32)(farg0 * *right++);
-        l ^= 0x80000000;
-        t = (u64)l - lo;
-        d = (u32)t;
-        d &= ~(u32)(t >> 32);
-        l = d - 32768;
-        l ^= 0x80000000;
-        t = (u64)l - hi;
-        d = (u32)t;
-        d &= (u32)(t >> 32);
-        l = d + 32767;
-        r ^= 0x80000000;
-        t = (u64)r - lo;
-        d = (u32)t;
-        d &= ~(u32)(t >> 32);
-        r = d - 32768;
-        r ^= 0x80000000;
-        t = (u64)r - hi;
-        d = (u32)t;
-        d &= (u32)(t >> 32);
-        r = d + 32767;
-        *++arg0 = l;
-        *++arg0 = r;
+        *++arg0 = Clamp16(l, lo, hi);
+        *++arg0 = Clamp16(r, lo, hi);
     }
 }
 #pragma pop
