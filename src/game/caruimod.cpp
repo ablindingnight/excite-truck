@@ -778,12 +778,12 @@ WheelHit lbl_80344890[4] = {{"lf", 0.0f, 0.0f}, {"rf", 0.0f, 0.0f}, {"lr", 0.0f,
 ModuleTag lbl_8055F318;
 inline s16 MakeS16(s16 v) { return v; }
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
-u16 lbl_8055F320 = MakeS16(0x100);
-u16 lbl_8055F322 = MakeS16(0x405);
-u16 lbl_8055F324 = MakeS16(0x401);
+extern const u16 lbl_8055F320 = MakeS16(0x100);
+extern const u16 lbl_8055F322 = MakeS16(0x405);
+extern const u16 lbl_8055F324 = MakeS16(0x401);
 extern const u32 lbl_8055F328 = MakeILPos(0xFFFF, 0);
 UnkStatic123 lbl_80498DF0;
-u32 lbl_8055F32C = MakeILPos(0x7F00, 0);
+extern const u32 lbl_8055F32C = MakeILPos(0x7F00, 0);
 u8 lbl_8055F330;   // track scene mode
 f32 lbl_8055F334;  // frame time
 f32 lbl_8055F338;  // total time
