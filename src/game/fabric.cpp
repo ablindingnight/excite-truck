@@ -225,7 +225,7 @@ static inline int ClampI(int v, int lo, int hi) {
     return a < hi ? a : hi;
 }
 
-static inline int ToByte(f32 x) {
+static inline int ToByte(const f32& x) {
     int v = (int)(255.0f * x);
     v = v > 0 ? v : 0;
     return v < 0xFF ? v : 0xFF;
@@ -314,17 +314,21 @@ static inline void MulVec(PVec* out, const PVec* in, const TMtx* m) {
         out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
     }
 }
+/* Helper names unproven: NodeVec3 / NodePoint / NodeVec3Or / White (by-value wrappers, fn_801F4F9C) */
+static inline ValVec3 NodeVec3(ValueNode* vn, const char* k) { return vn->GetVec3(k); }
+static inline ValPoint NodePoint(ValueNode* vn, const char* k) { return vn->GetPoint(k); }
+static inline ValVec3 NodeVec3Or(ValueNode* vn, const char* k, ValVec3 def) { return vn->GetVec3Or(k, def); }
+static inline ValVec3 White(void) {
+    ValVec3 w;
+    w.x = 1.0f;
+    w.y = 1.0f;
+    w.z = 1.0f;
+    return w;
+}
 void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
-    const ValVec3& offr = vn->GetVec3("offset");
-    PVec p = *(const PVec*)&offr;
-    const ValPoint& uvr = vn->GetPoint("uv");
-    ValPoint uv = uvr;
-    ValVec3 white;
-    white.x = 1.0f;
-    white.y = 1.0f;
-    white.z = 1.0f;
-    const ValVec3& cr = vn->GetVec3Or("color", ValVec3(white));
-    ValVec3 c = cr;
+    PVec p = *(const PVec*)&NodeVec3(vn, "offset");
+    ValPoint uv = NodePoint(vn, "uv");
+    ValVec3 c = NodeVec3Or(vn, "color", White());
     MulVec(&out->pos, &p, m);
     out->pos.x += m->t[0];
     out->pos.y += m->t[1];
