@@ -328,10 +328,14 @@ public:
 
 class BoxShape : public CollShape {
 public:
-    BoxShape(f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape(0, 0, 'BOX ', k, s) {
-        hy = y * 0.5f;
-        hx = x * 0.5f;
-        hz = z * 0.5f;
+    BoxShape(f32 k, f32 s, const f32* dims) : CollShape(0, 0, 'BOX ', k, s) {
+        f32 half = 0.5f;
+        const f32 halfY = dims[1] * half;
+        const f32 halfX = dims[0] * half;
+        const f32 halfZ = dims[2] * half;
+        hx = halfX;
+        hy = halfY;
+        hz = halfZ;
         f34 = 0;
         radius = 0.2f + (f32)sqrt(hx * hx + hy * hy + hz * hz);
     }
@@ -2009,7 +2013,7 @@ CollShape* fn_801FC048(const ObstacleDesc* d) {
 
 CollShape* fn_801FC12C(const ObstacleDesc* d) {
     f32 k = 50000.0f;
-    return new ("ewcv:wallvol") BoxShape(k, 0.2f, d->shape.f[0], d->shape.f[1], d->shape.f[2]);
+    return new ("ewcv:wallvol") BoxShape(k, 0.2f, d->shape.f);
 }
 }
 

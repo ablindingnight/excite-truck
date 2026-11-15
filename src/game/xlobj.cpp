@@ -808,7 +808,7 @@ static inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
     AddScaled(&at, pos, 0.5f, &along);
     Vec3 nrm;
     StatsUpdate__Fv(&nrm);
-    if (fn_801DCF48(&nrm, at.x, at.y) != 0.0f) {
+    if (fn_801DCF48(&nrm, at.x, at.y)) {
         Vec2 n2;
         fn_801602B0(&n2);
         n2.SetXZ(nrm);
@@ -817,14 +817,15 @@ static inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
     }
     fn_802BA848(s, &side, &along, &org);
     s->type = 1;
-    TexEntry* te = FindTex(node->GetValue("texture"), 999);
-    s->next = te->head;
-    te->head = s;
 }
 
 Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
     Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
     FillB(s, node, pos, scale);
+    const char* tex = node->GetValue("texture");
+    TexEntry* te = FindTex(tex, 999);
+    s->next = te->head;
+    te->head = s;
     lbl_8055FA84++;
     return s;
 }
@@ -888,15 +889,15 @@ static inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
     AddScaled(&org, &org, -0.5f, &along);
     fn_802BA848(s, &side, &along, &org);
     s->type = 0;
-    const char* tex = node->GetValue("texture");
-    TexEntry* te = FindTex(tex, node->GetInt("prio", 888));
-    s->next = te->head;
-    te->head = s;
 }
 
 Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
     Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
     FillA(s, node, m);
+    const char* tex = node->GetValue("texture");
+    TexEntry* te = FindTex(tex, node->GetInt("prio", 888));
+    s->next = te->head;
+    te->head = s;
     lbl_8055FA84++;
     return s;
 }
