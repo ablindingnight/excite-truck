@@ -2277,61 +2277,58 @@ inline void DrawText(ILayout* l, const char* name) { fn_801476C4(l->Find(name));
 namespace {
 
 // Draws the "bonanza" coin counter and the three stars that fly into it.
-inline void DrawBonanza(Coins* co, int id) {
-    CoinCar* car;
-    if (co->enabled && co->obj && (car = &co->cars[id])->active) {
-        char buf[0x14];
-        GartElem* s0;
-        GartElem* s1;
-        GartElem* s2;
-        int k;
-        DrawText(co->obj, "bonanza_title");
-        fn_801308F4(buf, sizeof(buf), car->count);
-        fn_801473F8(co->obj, "bonanza_score", buf);
-        s0 = co->obj->FindBox("star_0");
-        s1 = co->obj->FindBox("star_1");
-        s2 = co->obj->FindBox("star_2");
-        for (k = 0; k < ARRAY_COUNT(car->flash); k++) {
-            if (car->flash[k] > -__float_epsilon[0]) {
-                f32 u = 1.0f - car->flash[k] / 0.6f;
-                f32 st[4] = {0.0f, 0.166f, 0.416f, 1.0f};
-                int seg;
-                f32 t;
-                f32 w;
-                int j;
-                for (seg = 0; seg < 3; seg++) {
-                    if (st[seg] - __float_epsilon[0] < u && st[seg + 1] > u) {
-                        break;
-                    }
-                }
-                t = Remap(st[seg], st[seg + 1], 0.0f, 1.0f, u);
-                GartElem g;
-                w = s0->w;
-                switch (seg) {
-                case 0:
-                    g = *s0;
-                    break;
-                case 1:
-                    g = *s0;
-                    g.pos.x = fn_80144C80(s0->pos.x, s1->pos.x, 2.0f * fn_80144BD8(0.5f + 0.5f * t) - 1.0f);
-                    g.pos.y = fn_80144C80(s0->pos.y, s1->pos.y, t);
-                    break;
-                case 2:
-                    g = *s2;
-                    g.pos.x = fn_80144C80(s1->pos.x, s2->pos.x, 2.0f * fn_80144BD8(0.5f * t));
-                    g.pos.y = fn_80144C80(s1->pos.y, s2->pos.y, t);
-                    w = fn_80144C80(w, 0.0f, t);
-                    break;
-                default:
-                    g = *s2;
-                    w = 0.0f;
+inline void DrawBonanza(Coins* co, CoinCar* car) {
+    char buf[0x14];
+    GartElem* s0;
+    GartElem* s1;
+    GartElem* s2;
+    int k;
+    DrawText(co->obj, "bonanza_title");
+    fn_801308F4(buf, sizeof(buf), car->count);
+    fn_801473F8(co->obj, "bonanza_score", buf);
+    s0 = co->obj->FindBox("star_0");
+    s1 = co->obj->FindBox("star_1");
+    s2 = co->obj->FindBox("star_2");
+    for (k = 0; k < ARRAY_COUNT(car->flash); k++) {
+        if (car->flash[k] > -__float_epsilon[0]) {
+            f32 u = 1.0f - car->flash[k] / 0.6f;
+            f32 st[4] = {0.0f, 0.166f, 0.416f, 1.0f};
+            int seg;
+            f32 t;
+            f32 w;
+            int j;
+            for (seg = 0; seg < 3; seg++) {
+                if (st[seg] - __float_epsilon[0] < u && st[seg + 1] > u) {
                     break;
                 }
-                g.pos.x += w * co->value;
-                for (j = 0; j < co->value; j++) {
-                    g.pos.x -= w;
-                    fn_80147940(co->obj, &g, "star_art", 0);
-                }
+            }
+            t = Remap(st[seg], st[seg + 1], 0.0f, 1.0f, u);
+            GartElem g;
+            w = s0->w;
+            switch (seg) {
+            case 0:
+                g = *s0;
+                break;
+            case 1:
+                g = *s0;
+                g.pos.x = fn_80144C80(s0->pos.x, s1->pos.x, 2.0f * fn_80144BD8(0.5f + 0.5f * t) - 1.0f);
+                g.pos.y = fn_80144C80(s0->pos.y, s1->pos.y, t);
+                break;
+            case 2:
+                g = *s2;
+                g.pos.x = fn_80144C80(s1->pos.x, s2->pos.x, 2.0f * fn_80144BD8(0.5f * t));
+                g.pos.y = fn_80144C80(s1->pos.y, s2->pos.y, t);
+                w = fn_80144C80(w, 0.0f, t);
+                break;
+            default:
+                g = *s2;
+                w = 0.0f;
+                break;
+            }
+            g.pos.x += w * co->value;
+            for (j = 0; j < co->value; j++) {
+                g.pos.x -= w;
+                fn_80147940(co->obj, &g, "star_art", 0);
             }
         }
     }
@@ -2396,7 +2393,11 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
     }
     {
         Coins* co = &master->coins;
-        DrawBonanza(co, id);
+        int me = id;
+        CoinCar* car;
+        if (co->enabled && co->obj && (car = &co->cars[me])->active) {
+            DrawBonanza(co, car);
+        }
     }
     if (!out) {
         TextElem* t = l->Find("nice_landing");
