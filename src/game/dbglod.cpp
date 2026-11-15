@@ -61,9 +61,13 @@ DbgLog lbl_804874F0;
 
 extern "C" {
 
+// The DMA test progress line: never called in this build (the compiler drops it but keeps its string).
+static void DmaTestStatus(char* buf, int i, int n, f32 lon, f32 lat) {  /* Helper name unproven */
+    sprintf(buf, "test %d of %d from lon %8.1f / %.1f", i, n, lon, lat);
+}
+
 void fn_801E45CC(void) {
     char buf[80];
-    static const char* unused[] = {"test %d of %d from lon %8.1f / %.1f"};  // from a stripped DMA test
     fn_8023895C();
     fn_80238B44(10, 10, 230, 84, 0x80000000);
     sprintf(buf, "LOD Factor:  %4.1f", lbl_8055AEC4);

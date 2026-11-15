@@ -164,9 +164,12 @@ void fn_802D9C18(void) {
     OSSetPowerCallback(fn_802D98F8);
 }
 
+// The disc-error reset request: never called in this build (the compiler drops it but keeps its string).
+static void QueueReset(void) {  /* Helper name unproven */
+    OSReport("drQueueReset!");
+}
+
 void fn_802D9C4C(void) {
-    // From a reset function the linker stripped.
-    static const char* unused[] = {"drQueueReset!"};
     VISetPostRetraceCallback(NULL);
 }
 
