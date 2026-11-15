@@ -68,6 +68,15 @@ struct PhobCell {
     PhobNode* head;  // offset 0x0
 };
 
+// Walk over the objects of a set of grid cells: the object, its list node and the cell.
+struct PhobIter {  /* Helper name unproven */
+    Phob* p;
+    PhobNode* nd;
+    PhobCell** w;
+
+    PhobIter(PhobCell** cells) : p(0), nd(0), w(cells) {}
+};
+
 struct QuadNode {
     u16 first;  // offset 0x0
     u16 end;    // offset 0x2
@@ -256,16 +265,13 @@ void fn_801E22D0(Phob** list, int n) {
             int nc = 5;
             PhobCell* cells[5];
             fn_801B619C(cells, &nc, &p->pos);
-            // MATCHING-AID: named cell walker, declared in register order.
-            Phob* o;
-            PhobNode* nd;
-            PhobCell** w;
+            PhobIter it(cells);
             int k;
-            for (k = 0, w = cells; k < nc; w++, k++) {
-                for (nd = (*w)->head; nd; nd = nd->next) {
-                    o = nd->phob;
-                    if (p < o || !o->Solid()) {
-                        fn_801E1F8C(p, o);
+            for (k = 0; k < nc; it.w++, k++) {
+                for (it.nd = (*it.w)->head; it.nd; it.nd = it.nd->next) {
+                    it.p = it.nd->phob;
+                    if (p < it.p || !it.p->Solid()) {
+                        fn_801E1F8C(p, it.p);
                     }
                 }
             }
@@ -342,22 +348,20 @@ int fn_801E2640(const PVec* from, const PVec* to, PVec* outPos, PVec* outNormal,
         int nc = 5;
         PhobCell* cells[5];
         fn_801B619C(cells, &nc, from);
-        PhobNode* nd;
-        PhobCell** w;
-        Phob* p;
+        PhobIter it(cells);
         int k;
-        for (k = 0, w = cells; k < nc; w++, k++) {
-            for (nd = (*w)->head; nd; nd = nd->next) {
-                p = nd->phob;
-                if (p && p->Solid()) {
-                    for (int j = 0; j < p->count; j++) {
-                        Shape* s = p->Get(j);
+        for (k = 0; k < nc; it.w++, k++) {
+            for (it.nd = (*it.w)->head; it.nd; it.nd = it.nd->next) {
+                it.p = it.nd->phob;
+                if (it.p && it.p->Solid()) {
+                    for (int j = 0; j < it.p->count; j++) {
+                        Shape* s = it.p->Get(j);
                         s32 id = s->id;
                         if (!filter || filter(id)) {
                             if (s->Ray(from, &dir, &t, outNormal)) {
                                 *outSurf = id;
                                 hit = 1;
-                                *outBody = p;
+                                *outBody = it.p;
                             }
                         }
                     }
