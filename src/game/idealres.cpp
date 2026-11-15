@@ -158,24 +158,22 @@ void fn_80137F74(u32* v) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_80137FF0(ResExt* e, u8* p) {
-    int i;
-    for (i = 0; i < (s32)e->data[0]; i++) {
-        Swap2(p);
-        Swap2(p + 2);
-        Swap4(p + 4);
-        p += 8;
-    }
-}
 
+/* Helper and record names unproven */
+struct IrRec { u16 a; u16 b; u32 c; };
+static inline void IrItem(IrRec* r) {
+    Swap2(&r->a);
+    Swap2(&r->b);
+    Swap4(&r->c);
+}
 void fn_80137FF0(ResExt* e) {
-    u8* p;
     int i;
     Swap4(&e->data[0]);
     Swap4(&e->data[1]);
     Swap4(&e->data[2]);
-    p = (u8*)&e->data[3];
-    Loop1_fn_80137FF0(e, p);
+    for (i = 0; i < (s32)e->data[0]; i++) {
+        IrItem(&((IrRec*)&e->data[3])[i]);
+    }
 }
 
 void fn_801380DC(ResExt* e) {
