@@ -360,14 +360,57 @@ static inline void FillPoint(SkidPt* p, const SkidCar* car, const SkidWheel* w, 
     p->alpha = MIN(a, 0xFFFF);
 }
 
+/* Helper name unproven */
+static inline void Append_hm(SkidType* t, int idx, SkidCar* car, SkidWheel* w) {
+    SkidStrip* s;
+    SkidPt* p;
+    s = &t->strips[idx];
+    p = &s->pts[s->n];
+    FillPoint(p, car, w, t);
+    p->on = 1;
+    s->n++;
+    t->total++;
+}
+
+/* Helper name unproven */
+static inline void Update_hm(SkidType* t, int idx, SkidCar* car, SkidWheel* w) {
+    SkidStrip* s;
+    SkidPt* p;
+    s = &t->strips[idx];
+    p = &s->pts[s->n - 1];
+    FillPoint(p, car, w, t);
+}
+
+/* Helper name unproven */
+static inline void Start_hm(SkidType* t, int idx, SkidCar* car, SkidWheel* w) {
+    SkidStrip* s;
+    SkidPt* p;
+    SkidPt* q;
+    s = &t->strips[idx];
+    p = &s->pts[s->n];
+    q = &s->pts[s->n + 1];
+    FillPoint(p, car, w, t);
+    p->on = 0;
+    q->pos.x = p->pos.x;
+    q->pos.y = p->pos.y;
+    q->pos.z = p->pos.z;
+    q->d2.x = p->d2.x;
+    q->d2.y = p->d2.y;
+    q->d2.z = p->d2.z;
+    q->d1.x = p->d1.x;
+    q->d1.y = p->d1.y;
+    q->d1.z = p->d1.z;
+    q->alpha = p->alpha;
+    q->on = 1;
+    s->n += 2;
+    t->total += 2;
+}
+
 void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
     SkidWheel* w;
-    SkidStrip* s;
-    SkidPt* q;
     int type;
     SkidSlot* slot;
     SkidType* t;
-    SkidPt* p;
     SkidCar* car = e->car;
     w = &car->wheels[wi];
     int idx = wi + e->index * 4;
@@ -381,37 +424,13 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
         if (skid) {
             if (slot->type == type) {
                 if (now > 0.2f + slot->time) {
-                    s = &t->strips[idx];
-                    p = &s->pts[s->n];
-                    FillPoint(p, car, w, t);
-                    p->on = 1;
-                    s->n++;
-                    t->total++;
+                    Append_hm(t, idx, car, w);
                     slot->time = now;
                 } else {
-                    s = &t->strips[idx];
-                    p = &s->pts[s->n - 1];
-                    FillPoint(p, car, w, t);
+                    Update_hm(t, idx, car, w);
                 }
             } else {
-                s = &t->strips[idx];
-                p = &s->pts[s->n];
-                q = &s->pts[s->n + 1];
-                FillPoint(p, car, w, t);
-                p->on = 0;
-                q->pos.x = p->pos.x;
-                q->pos.y = p->pos.y;
-                q->pos.z = p->pos.z;
-                q->d2.x = p->d2.x;
-                q->d2.y = p->d2.y;
-                q->d2.z = p->d2.z;
-                q->d1.x = p->d1.x;
-                q->d1.y = p->d1.y;
-                q->d1.z = p->d1.z;
-                q->alpha = p->alpha;
-                q->on = 1;
-                s->n += 2;
-                t->total += 2;
+                Start_hm(t, idx, car, w);
             }
             slot->type = type;
         } else {
