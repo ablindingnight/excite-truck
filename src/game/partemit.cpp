@@ -28,7 +28,7 @@ struct SpawnEvent {
 
 class Chunks {
 public:
-    virtual void vf08(void);
+    virtual ~Chunks(void);
     virtual void Update(void);                                                   // 0xC
     virtual void vf10(void);
     virtual void vf14(void);

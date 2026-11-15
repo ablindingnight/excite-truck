@@ -357,7 +357,7 @@ struct ColorPick : CarSelItem {
 // One stat bar (vtable lbl_80342734).
 class StatBar {
 public:
-    virtual void v08(void);
+    virtual ~StatBar(void);  // 0x08 (fn_80240928; garage.cpp declares it the same way)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
