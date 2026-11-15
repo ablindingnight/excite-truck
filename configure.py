@@ -1188,7 +1188,7 @@ config.libs.append(
             Object(Matching, "game/menusel.cpp"),
             Object(NonMatching, "game/mcstatus.cpp"),
             Object(Matching, "game/unk_80243460.c"),
-            Object(NonMatching, "game/keyboard.cpp"),
+            Object(Matching, "game/keyboard.cpp"),
             Object(Matching, "game/loadscrn.cpp"),
             Object(NonMatching, "game/unlkmenu.cpp"),
             Object(NonMatching, "game/popwarn.cpp"),
