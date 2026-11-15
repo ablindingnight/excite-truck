@@ -199,9 +199,9 @@ void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
 void fn_80011A2C(void);
 void fn_802C9904(void);
 
-void fn_8000AB44__FP9RaceSetup(void);
-// overlay.cpp / escape.cpp / replay.cpp (C++ linkage; this part of the file sits in an extern "C" block)
+// overlay.cpp / escape.cpp / replay.cpp / raceload.cpp (C++ linkage; this part of the file sits in an extern "C" block)
 extern "C++" {
+void fn_8000AB44(RaceSetup* rs);
 void fn_800070DC(void);
 int fn_800075A0(int player);
 int fn_80007554(int player, u32 type, int key);
@@ -463,7 +463,7 @@ void gameloop_begin(RaceSetup* rs) {
     fn_801E7C1C(rs);
     fn_801E8818(fn_8000AEC4, "gameloop");
     fn_8012E81C("overlays.res");
-    fn_8000AB44__FP9RaceSetup();
+    ((void (*)(void))fn_8000AB44)();  // retail passes no argument (r3 is left over)
     fn_8023889C();
     fn_801CB808();
     fn_801617BC();

@@ -29,7 +29,7 @@ extern "C" void *memset(void *, int, unsigned long);
 extern "C" void fn_801345D8(char *, int, const char *, ...);
 extern "C" void *fn_802077A4(const char *name, long kind, void *a, void *b);
 extern "C" void *fn_802076A0(const char *name, long kind, void *owner, long mode);
-long *FindVehicle(long);
+extern "C++" long *FindVehicle(s32);  /* driver.cpp (C++ linkage) */
 
 // A part created by fn_802077A4: owner at 0x10, a level at 0x04 with a dirty flag at 0x4E.
 struct HudPart {
@@ -520,13 +520,13 @@ extern "C" void fn_8020E598(Hud *h) {
 
 #pragma cplusplus reset
 
-extern long fn_80009C84__Fv(void);  /* replay.cpp fn_80009C84 (C++ linkage; this region compiles as C) */
+extern "C++" long fn_80009C84(void);  /* replay.cpp (C++ linkage) */
 extern void fn_80206750(void *, void *, long);
 
 // Applies the current mode (0 while fn_80009C84 is set, otherwise 2) to the three optional parts.
 void fn_8020F15C(void *arg0) {
     void *owner = *(void **)((char *)*(void **)((char *)arg0 + 4) + 0x1EC);
-    long busy = fn_80009C84__Fv();
+    long busy = fn_80009C84();
     long mode = 2;
     if (busy) mode = 0;
     if (*(void **)((char *)arg0 + 0x48) != 0)
