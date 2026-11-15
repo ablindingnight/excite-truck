@@ -65,6 +65,11 @@ extern u8 lbl_804DBAA0[0x20000];  // read buffer
 
 class FileDisk;
 
+// FileCD's in-class methods were compiled without the global optimizer: Read keeps its always-false sync
+// flag in a register and its wait loop top-tested (2026-11-14). In-class bodies take the pragma state at the
+// class's closing brace, so the push/pop wraps the whole class.
+#pragma push
+#pragma global_optimizer off
 class FileCD : public File {
 public:
     FileCD(FileDisk* disk, const char* name) {
@@ -119,7 +124,10 @@ public:
             } else {
                 got = DVDReadAsyncPrio(&info, lbl_804DBAA0, n, aligned, NULL, 2);
                 if (got > 0) {
-                    while (DVDGetCommandBlockStatus(&info.block)) {
+                    for (;;) {
+                        if (DVDGetCommandBlockStatus(&info.block) == 0) {
+                            break;
+                        }
                         fn_80127464();
                     }
                     got = n;
@@ -175,6 +183,7 @@ public:
     s32 pos;           // offset 0x88
     FileDisk* disk;    // offset 0x8C
 };
+#pragma pop
 
 class FileDisk : public FileSystem {
 public:
@@ -274,5 +283,4 @@ File* FileDisk::OpenAppend(const char* name) {
 }
 
 
-// NonMatching: FileCD::Read keeps its (always false) sync flag in a register in the target, while our
-// compiler folds it away; and FileDisk's vtable needs the FileSystem default at 0x802E33D0 named.
+// NonMatching: FileDisk's vtable needs the FileSystem default at 0x802E33D0 named.
