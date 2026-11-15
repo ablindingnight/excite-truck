@@ -4499,6 +4499,8 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
 // plane's data. Structure cross-checked against n100f's ExpandPlane (reference only).
+#pragma push
+#pragma opt_propagation off  /* as on the PCM clamps; partial (92.56 -> 93.16), Process review lead */
 u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
                  s32 blocksWide, s32 step, void **bufs, u32 flags, u32 *skipped) {
     BinkColorTrees8011 trees;
@@ -4918,6 +4920,7 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     bits.count = 0;
     return bits.next;
 }
+#pragma pop
 #pragma pop
 
 // Decodes a video frame into the next frame buffer (alpha, luma, then the two chroma planes); returns the number
