@@ -322,13 +322,17 @@ int LineFollower::Step(V2* p) {
         dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
         dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
         inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
-        off.x = p->x - pos.x;
-        dir.x *= inv;
-        off.y = p->y - pos.y;
-        dir.y *= inv;
-        x = (f32)AbsD(dir.x * off.y + -dir.y * off.x);
+        f32 ox = p->x - pos.x;
+        f32 dx = dir.x * inv;
+        f32 oy = p->y - pos.y;
+        f32 dy = dir.y * inv;
+        dir.x = dx;
+        dir.y = dy;
+        off.x = ox;
+        off.y = oy;
+        x = (f32)AbsD(dx * oy + -ox * dy);
         wide = x > 15.0f * 0.305f + il.seg->width * 0.5f;
-        a = (dir.x * off.x + off.y * dir.y) / s->len;
+        a = (dx * ox + dy * oy) / s->len;
         if (t + a > 1.0f) {
             int i;
             t = 0.0f;
@@ -339,15 +343,17 @@ int LineFollower::Step(V2* p) {
                 if (s->ilpos == 0) {
                     r = 0;
                 }
+                f32 px = p->x;
                 pos.x = s->pos.x;
-                f32 xv = p->x;
-                off.x = xv - pos.x;
+                f32 ox = px - pos.x;
+                f32 py = p->y;
                 pos.y = s->pos.y;
-                f32 y2 = p->y;
-                off.y = y2 - pos.y;
-                dir.y = s->dir.y;
+                f32 oy = py - pos.y;
                 dir.x = s->dir.x;
-                a = (dir.x * off.x + dir.y * off.y) / s->len;
+                dir.y = s->dir.y;
+                off.x = ox;
+                off.y = oy;
+                a = (dir.x * ox + dir.y * oy) / s->len;
                 if (a < 1.0f) {
                     t = t > a ? t : a;
                     break;
@@ -388,13 +394,16 @@ int LineFollower::Step(V2* p) {
         pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
         pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
         dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
-        f32 yv = s->dir.y;
-        dir.y = yv + t * (s->next->dir.y - yv);
+        dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
         inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
-        off.x = p->x - pos.x;
-        off.y = p->y - pos.y;
-        dir.y *= inv;
-        dir.x *= inv;
+        f32 dx = dir.x * inv;
+        f32 dy = dir.y * inv;
+        f32 ox = p->x - pos.x;
+        f32 oy = p->y - pos.y;
+        dir.x = dx;
+        dir.y = dy;
+        off.x = ox;
+        off.y = oy;
         return 2;
     }
 }
