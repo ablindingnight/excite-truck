@@ -153,8 +153,8 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
 }
 
 // The empty item name the menus give their hotkey rows (MenuItem(lbl_8055B860, 6, ...)). It is all zero yet sits
-// in .sdata, so it was explicitly initialised; it follows uiapi's __sinit strings, so it is not uiapi's. Owner
-// unproven (this unit or window.cpp).
+// in .sdata, so it was explicitly initialised; it follows uiapi's __sinit strings, so it is not uiapi's. It is
+// this unit's whole .sdata (0x8055B860, 8-aligned unit start; window's .sdata begins at 0x8055B868).
 #pragma explicit_zero_data on
 extern "C" char lbl_8055B860[8] = "";
 #pragma explicit_zero_data off
