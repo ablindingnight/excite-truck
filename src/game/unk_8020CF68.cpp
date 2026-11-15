@@ -2,6 +2,11 @@
 // CC0; file src/auto/text_8020CF68_.c), where its functions match exactly. Unit name is provisional.
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
+// C++ (it has a static initializer and calls through vtables); the fn_ functions keep C linkage.
+
+#include "game/common.h"
+
+extern "C" {
 
 extern int lbl_8055EE74, lbl_8055EE78, lbl_8055EEA0;
 extern void *lbl_8055EE7C, *lbl_8055EE80;
@@ -21,15 +26,14 @@ extern float fn_8020A5F0(void);
 extern int fn_80265D64(void);
 extern void __AXDSPInitCallback_801769E0(void);
 extern void fn_80230E90(int);
-extern void *fn_802090D4(void *);
-extern void *fn_80145E70(void *);
+extern void *fn_802090D4(const char *);
+extern void *fn_80145E70(const char *);
 extern void fn_80209110(void *);
-#pragma cplusplus on
+extern int fn_802104D0(void);
 class Dummy_8020D1C8 {
 public:
     virtual ~Dummy_8020D1C8();
 };
-#pragma cplusplus off
 
 int fn_8020CF68(void) {
     return fn_802104D0();
@@ -45,9 +49,6 @@ extern void fn_8020D0CC(int);
 extern int lbl_8055EE78;
 extern float lbl_8055EE8C, lbl_8055EE90, lbl_8055EE98, lbl_8055EE9C;
 extern void fn_8000C6E4(void);
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 // Raises the selected sound-menu value one step (the counterpart of fn_8020CFEC).
 void fn_8020CF6C(int arg0) {
@@ -108,8 +109,7 @@ void fn_8020D178(void) {
     lbl_8055EEA0 = (int)fn_80145E70("vollyt.val");
 }
 
-#pragma cplusplus on
-extern "C" void fn_8020D1C8(void) {
+void fn_8020D1C8(void) {
     Dummy_8020D1C8 *obj = (Dummy_8020D1C8 *)lbl_8055EEA0;
     if (obj != 0) {
         delete obj;
@@ -119,7 +119,6 @@ extern "C" void fn_8020D1C8(void) {
     lbl_8055EE7C = 0;
     lbl_8055EE80 = 0;
 }
-#pragma cplusplus off
 void fn_8020D224(void) {
     float value;
     lbl_8055EE94 = 1;
@@ -151,7 +150,6 @@ typedef struct SoundMenuLabels {
 } SoundMenuLabels;
 
 const SoundMenuLabels lbl_802F9E58 = {{"Volume:MUSIC", "Volume:EFFECTS", "Volume:SD_CARD"}};
-extern char lbl_8055B630[6], lbl_8055B638[3], lbl_8055B63C[7];
 extern void fn_80230B5C(void *);
 extern void fn_802C8638(void *);
 extern void fn_802C974C(float, float, float);
@@ -167,7 +165,6 @@ extern void fn_801476C4(void *);
 extern void fn_80011A2C(void);
 extern void fn_802C9904(void);
 
-#pragma cplusplus on
 // A text box from the layout (0x20 bytes); color at 0x18.
 typedef struct LayoutVec {
     float v[3];
@@ -214,7 +211,7 @@ static inline float Ramp(float now, float start, float delay, float len) {
     t = 1.0f < t ? 1.0f : t;
     return t > 0.0f ? t : 0.0f;
 }
-extern "C" void fn_8020D2D4(void) {
+void fn_8020D2D4(void) {
     float camera[12];
     float now;
     SoundMenuLabels labels;
@@ -229,7 +226,7 @@ extern "C" void fn_8020D2D4(void) {
     now = 0.001f * (float)fn_802E2C20();
     fn_800109E4(0x7F000000, (-428.0f), 241.0f, 855.0f, 482.0f);
     if (lbl_8055EEA0 != 0) {
-        fn_801473F8(lbl_8055EEA0, lbl_8055B630, lbl_8055B638, fn_80131234("Volume:TITLE"));
+        fn_801473F8(lbl_8055EEA0, "title", "%s", fn_80131234("Volume:TITLE"));
     }
     labels = lbl_802F9E58;
     if (lbl_8055EEA0 != 0) {
@@ -267,7 +264,7 @@ extern "C" void fn_8020D2D4(void) {
             }
             }
             fn_801345D8(paneName, 0x20, "item%d_button", i);
-            fn_801345D8(textName, 0x20, lbl_8055B63C, i);
+            fn_801345D8(textName, 0x20, "item%d", i);
             selected = i == lbl_8055EE78;
             box = *((SoundMenuLayout *)lbl_8055EEA0)->FindText(textName);
             alpha = 0xFF;
@@ -352,7 +349,7 @@ extern "C" void fn_8020D2D4(void) {
             if (i == 2 && fn_8020CF68() == 0) {
                 box.color = HalveAlpha(box.color);
             }
-            fn_80147230(&box, lbl_8055B638, value);
+            fn_80147230(&box, "%s", value);
         }
         fn_801476C4(((SoundMenuLayout *)lbl_8055EEA0)->FindText("cancel_prompt"));
         if (lbl_8055EE78 == 2) {
@@ -362,7 +359,6 @@ extern "C" void fn_8020D2D4(void) {
     fn_80011A2C();
     fn_802C9904();
 }
-#pragma cplusplus off
 
 void fn_8020DABC(void) {
     fn_8020C908(lbl_8055EE8C);
@@ -471,31 +467,8 @@ char fn_8020DE1C(void) {
 }
 
 // The module's statics, the same trio as achview and others: tag, list terminator, marker.
-#pragma cplusplus on
-class ModuleTag;
-void RegisterModuleTag(ModuleTag* tag);
-class ModuleTag {
-public:
-    ModuleTag(void) { RegisterModuleTag(this); }
-    unsigned char flag;
-    ModuleTag* next;
-};
-class UnkStatic123s {
-public:
-    UnkStatic123s(void) {
-        unk4 = 123;
-        unk0 = 0;
-        unk8 = 0;
-        unkC = 0;
-        unk10 = 0;
-    }
-    unsigned long unk0, unk4, unk8, unkC, unk10, unk14;
-};
-class UnkStatic7F {
-public:
-    UnkStatic7F(void) { value = 0x7F000000; }
-    unsigned long value;
-};
+}  // extern "C"
+
 ModuleTag lbl_8055EE68;
 UnkStatic123s lbl_80489C70;
 UnkStatic7F lbl_8055EE70;
@@ -511,4 +484,3 @@ char lbl_8055EE94;
 float lbl_8055EE98;
 float lbl_8055EE9C;
 int lbl_8055EEA0;
-#pragma cplusplus off
