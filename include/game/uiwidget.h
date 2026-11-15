@@ -63,6 +63,19 @@ public:
     void* stylePtr;                               // 0x240
 };
 
+// Text label base of the "choice"/caption widgets (vtable lbl_8033FA28; abstract): draws Slot88()'s text with
+// Slot84()'s frame. Class and slot names unproven. The widgets still written as C call it by its linker names.
+class UILabel : public UIWidget {  /* Class name unproven */
+public:
+    UILabel(int x, int y, int width, int height, int dx, int dy);  // fn_80219568
+    virtual ~UILabel(void);                   // fn_80219900
+    virtual void Slot24(void* context);       // fn_802195DC
+    virtual void Slot28(void);                // fn_80219660
+    virtual int Slot84(void);                 // fn_80219658: frame
+    virtual const char* Slot88(void) = 0;     // text
+    int textX, textY, textWidth, textStyle;   // 0x244 (widgets.cpp views: x, y, width, height)
+};
+
 // uiapi's key binding widget (lbl_8033D590): calls its mapped action when the key is pressed. Declared before UIImage
 // because its vtable follows UIImage's in uiapi .data (vtables come out in reverse declaration order).
 class UIHotKey : public UIWidget {  /* Class name unproven */

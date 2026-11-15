@@ -68,6 +68,9 @@ struct WidgetFragment {inline int ProjectX(float scale,int index){return left+(i
 // MATCHING-AID (transitional): the widgets still written as C call UIWidget's members by their linker names;
 // each alias goes away when its last caller becomes a real UIWidget subclass (FRAMEWORK_PLAN_2026-11-15.md).
 extern "C" {
+WidgetFragment* __ct__7UILabelFiiiiii(WidgetFragment*,int,int,int,int,int,int);
+void Slot24__7UILabelFPv(WidgetFragment*,void*);
+void Slot28__7UILabelFv(WidgetFragment*);
 WidgetFragment* __ct__8UIWidgetFiiiii(WidgetFragment*,int,int,int,int,int);
 WidgetFragment* __ct__8UIWidgetFP10WidgetDesc(WidgetFragment*,WidgetDesc*);
 WidgetFragment* __dt__8UIWidgetFv(WidgetFragment*,int);
@@ -84,7 +87,7 @@ typedef char WidgetPrefixSizeCheck[(sizeof(WidgetFragment)==0x268)?1:-1];
 extern "C" {
 void fn_80227880(float,float,float,float);
 void fn_802235B4(WidgetFragment*);void fn_80223644(WidgetFragment*);
-extern u32 lbl_8033FA28[],lbl_8033F20C[];
+extern u32 lbl_8033F20C[];
 extern const float lbl_805634A0,lbl_805634A4,lbl_805634A8,lbl_805634AC,lbl_805634B0,lbl_805634B4;
 float fn_80214D48();
 int fn_8021525C();void __dla__FPv(void*);
@@ -92,8 +95,6 @@ void fn_80218FEC(WidgetFragment*,int,int,int,int,int);
 void fn_80219718(WidgetFragment*);
 void __dl__FPv(void*);
 char* strcpy(char*,const char*);
-WidgetFragment* fn_80219568(WidgetFragment* self,int x,int y,int width,int height,int dx,int dy);
-WidgetFragment* fn_80219900(WidgetFragment* self,int destroy);
 WidgetFragment* fn_8021B2B0(WidgetFragment* self,int x,int y,const char* label,int height,int* value,int width);
 int fn_8021B3A0(WidgetFragment* self);
 WidgetFragment* fn_8021B404(WidgetFragment* self,int destroy);
@@ -125,9 +126,6 @@ void fn_8022BAD0(int,int,int,int,int,int,const char*,u32,unsigned char,float);
 void fn_8022AC1C(int,const char*,int,int,int*,int*,int*,int*);
 inline int WidgetMinInt(int value,int limit){if(value<limit)return value;return limit;}
 inline int WidgetMaxInt(int value,int limit){if(value>limit)return value;return limit;}
-void fn_802195DC(WidgetFragment* self,void* context);
-int fn_80219658(WidgetFragment*);
-void fn_80219660(WidgetFragment* self);
 void fn_80219718(WidgetFragment* self);
 
 extern u32 lbl_8033F768[],lbl_8033F4B8[],lbl_8033F434[];
@@ -370,7 +368,6 @@ void fn_8021D61C(WidgetFragment* self);
 
 extern "C" {
 void* fn_8021165C(int,int);
-void fn_80219660(WidgetFragment*);
 void fn_8021D378(WidgetFragment *self);
 
 extern const u32 lbl_8055FBC0;
@@ -1342,21 +1339,19 @@ void fn_8021952C(WidgetFragment* self,int x,int y){
  WindowOffsetPrefix* window=(WindowOffsetPrefix*)self->window;
  if(fields->enabled){int dx=(int)((unsigned int)fields->x+(unsigned int)x);int dy=(int)((unsigned int)fields->y+(unsigned int)y);int wx=window->x;int wy=window->y;window->x=(int)((unsigned int)dx+(unsigned int)wx);window->y=(int)((unsigned int)wy+(unsigned int)dy);}
 }
-WidgetFragment* fn_80219568(WidgetFragment* self,int x,int y,int width,int height,int dx,int dy){
- __ct__8UIWidgetFiiiii(self,x,y,x+dx,y+dy,width);
- self->vtable=lbl_8033FA28;
+UILabel::UILabel(int x,int y,int width,int height,int dx,int dy) : UIWidget(x,y,x+dx,y+dy,width) {
+ WidgetFragment* self=(WidgetFragment*)this;
  self->x=0;self->y=0;self->width=width;self->height=height;
- return self;
 }
-void fn_802195DC(WidgetFragment* self,void* context){
- fn_802C3034(reinterpret_cast<gxCanvas*>(context));int frame=((WidgetDispatch*)self)->Slot84();const char* text=((WidgetDispatch*)self)->Slot88();
- fn_8022B91C(self->height,self->x,self->y,text,frame);
+void UILabel::Slot24(void* context) {
+ fn_802C3034(reinterpret_cast<gxCanvas*>(context));int frame=((WidgetDispatch*)((WidgetFragment*)this))->Slot84();const char* text=((WidgetDispatch*)((WidgetFragment*)this))->Slot88();
+ fn_8022B91C(((WidgetFragment*)this)->height,((WidgetFragment*)this)->x,((WidgetFragment*)this)->y,text,frame);
 }
-int fn_80219658(WidgetFragment*){return 0;}
-void fn_80219660(WidgetFragment* self){
+int UILabel::Slot84(void){return 0;}
+void UILabel::Slot28(void) {
  const char* text;int frame,height,x,y;
- y=self->top;x=self->left;height=self->bottom-y;frame=((WidgetDispatch*)self)->Slot84();text=((WidgetDispatch*)self)->Slot88();int width=((WidgetDispatch*)self)->Slot78();
- fn_8022BAD0(self->height,self->x+x,self->y+y,self->width,width,height,text,frame,0,(1.0f));
+ y=((WidgetFragment*)this)->top;x=((WidgetFragment*)this)->left;height=((WidgetFragment*)this)->bottom-y;frame=((WidgetDispatch*)((WidgetFragment*)this))->Slot84();text=((WidgetDispatch*)((WidgetFragment*)this))->Slot88();int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();
+ fn_8022BAD0(((WidgetFragment*)this)->height,((WidgetFragment*)this)->x+x,((WidgetFragment*)this)->y+y,((WidgetFragment*)this)->width,width,height,text,frame,0,(1.0f));
 }
 void fn_80219718(WidgetFragment* self){
  int left,top,right,bottom;const char* text=((WidgetDispatch*)self)->Slot88();
@@ -1367,14 +1362,11 @@ void fn_80219718(WidgetFragment* self){
  ((WidgetDispatch*)self)->Slot1c(left,top);fn_80219284(self,right-left,bottom-top);
 }
 WidgetFragment* fn_80219870(WidgetFragment* self,int x,int y,const char* text,unsigned char* flag,int height){
- fn_80219568(self,x,y,0,height,0,0);self->vtable=lbl_8033F768;
+ __ct__7UILabelFiiiiii(self,x,y,0,height,0,0);self->vtable=lbl_8033F768;
  strcpy((char*)self+0x258,text);((FlagTextPrefix*)self)->flag=flag;
  fn_80219440(self,0,flag,1);fn_80219718(self);return self;
 }
-WidgetFragment* fn_80219900(WidgetFragment* self,int destroy){
- if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}
- return self;
-}
+UILabel::~UILabel(void) {}
 int fn_80219958(WidgetFragment* self,int key){return Slot64__8UIWidgetFi(self,key);}
 WidgetFragment* fn_8021995C(WidgetFragment* self,int x,int y,int width,OwnedWidget* value,void* watched){
  fn_80222340(self,x,y,width,0,0,value);self->vtable=lbl_8033F4B8;
@@ -1655,7 +1647,7 @@ void fn_8021B224(WidgetFragment* self){
  }
 }
 WidgetFragment* fn_8021B2B0(WidgetFragment* self,int x,int y,const char* label,int height,int* value,int width){
- fn_80219568(self,x,y,width,height,0,0);
+ __ct__7UILabelFiiiiii(self,x,y,width,height,0,0);
  self->vtable=lbl_8033F20C;self->label=label;
  strcpy((char*)self+0x268,label);self->value=value;fn_80219718(self);return self;
 }
@@ -1676,25 +1668,25 @@ float x,y,z;memcpy(&x,&desc->rx,4);memcpy(&y,&desc->ry,4);memcpy(&z,&desc->rz,4)
 if((0.0f)==x&&(0.0f)==y&&(0.0f)==z)f->pose=0;else{RotationVec rotation={(0.017453292f)*x,(0.017453292f)*y,(0.017453292f)*z};RotationMatrix matrix;Mat3FromEuler(&matrix,&rotation);Mat3Mul(&pose.basis,&matrix,&pose.basis);input.x=-input.x;input.y=-input.y;ChoiceApplyOffsetNew(&pose,&input);f->pose=fn_8022EDE4(&pose,(1.0f));}return self;
 }
 WidgetFragment* fn_8021B8AC(WidgetFragment* self,int destroy){if(self){RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;self->vtable=lbl_8033F180;if(f->pose){fn_8022EE98(f->pose);f->pose=0;}fn_8022A8E4(f->resource);if(self)ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_8021B944(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;if(f->pose){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->pose,context);fn_8022ED00(&scope);}fn_80219660(self);if(f->pose)fn_8022EDB8();}
+void fn_8021B944(WidgetFragment* self){FullDrawStatePrefix scope;/* The context stack retains this record through drawing and pop. */RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)self;if(f->pose){const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->pose,context);fn_8022ED00(&scope);}Slot28__7UILabelFv(self);if(f->pose)fn_8022EDB8();}
 Column::Column(FormattedChoiceDescriptor* desc, UITable* provider, int column) : UIWidget((WidgetDesc*)desc) { WidgetFragment* self=(WidgetFragment*)this;fn_8021BA64(self,desc->width,desc->height,provider,column,desc->name,desc->font,desc->option90,desc->optiona4,desc->option94,desc->option98,(int)desc->lineHeight,desc->option84);}
 void fn_8021BA64(WidgetFragment* self,int width,int height,UITable* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;UIStyleInputFields spec={};spec.fontName=font;spec.field08=flags;spec.words0C[0]=value;spec.words0C[1]=second;spec.words0C[2]=third;spec.words0C[3]=horizontal;spec.words0C[4]=vertical;spec.words0C[7]=first;spec.words0C[8]=second;spec.words0C[9]=third;spec.words0C[10]=horizontal;spec.field38=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,"Foo")-23)/2;fn_80219440(self,0,&list->changes,4);list->SetVisible(height/rowHeight);}
 Column::~Column(void) {WidgetFragment* self=(WidgetFragment*)this;PageTextPrefix* f=(PageTextPrefix*)self;fn_8022A8E4(f->font);if(f->image)fn_802C519C(f->image);}
 void Column::Slot28(void) {PageTextPrefix* f=(PageTextPrefix*)((WidgetFragment*)this);int end;int x=((WidgetFragment*)this)->left;int start=f->list->page*f->list->visible;int y=((WidgetFragment*)this)->top;end=start+f->list->visible;if(f->list->used<end)end=f->list->used;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=f->list->Get(i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);fn_802C5320(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
 void fn_8021BD48(WidgetFragment* self,void* context){fn_802C3034(reinterpret_cast<gxCanvas*>(context));RichCaptionPrefix* f=(RichCaptionPrefix*)self;fn_801E4BEC(f->renderer,0,9,self->left,self->top,f->label);}
-WidgetFragment* fn_8021BD98(WidgetFragment* self,int x,int y,float* value,float scale,const char* format,float bias,int height){fn_80219568(self,x,y,0,height,0,0);FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->value=value;self->vtable=lbl_8033EF68;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);return self;}
+WidgetFragment* fn_8021BD98(WidgetFragment* self,int x,int y,float* value,float scale,const char* format,float bias,int height){__ct__7UILabelFiiiiii(self,x,y,0,height,0,0);FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->value=value;self->vtable=lbl_8033EF68;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);return self;}
 void fn_8021BE48(WidgetFragment* self){FloatFormatPrefix* f=(FloatFormatPrefix*)self;sprintf(f->text,f->format,*f->value*f->scale+f->bias);fn_80130568(f->text);fn_80219718(self);WidgetMarkDirty(self);}
 void fn_8021BEBC(WidgetFragment* self,int,void*){fn_8021BE48(self);}
-WidgetFragment* fn_8021BEC0(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY){fn_80219568(self,x,y,0,height,0,0);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;f->target=target;self->vtable=lbl_8033EEDC;f->left=left;f->right=right;f->lineY=lineY;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C12C(self);f->focus=0;f->token=fn_80228F40(x,y);return self;}
+WidgetFragment* fn_8021BEC0(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY){__ct__7UILabelFiiiiii(self,x,y,0,height,0,0);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;f->target=target;self->vtable=lbl_8033EEDC;f->left=left;f->right=right;f->lineY=lineY;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C12C(self);f->focus=0;f->token=fn_80228F40(x,y);return self;}
 void fn_8021BF90(WidgetFragment* self){if(fn_80129BC4(self)){Bound2a8* f=(Bound2a8*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}}
-void fn_8021BFEC(WidgetFragment* self){fn_80219660(self);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;if(f->left!=f->right){int selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float zero=(0.0f);float x=zero,y=zero;fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,zero);fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,zero);}}
+void fn_8021BFEC(WidgetFragment* self){Slot28__7UILabelFv(self);ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;if(f->left!=f->right){int selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float zero=(0.0f);float x=zero,y=zero;fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,zero);fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,zero);}}
 void fn_8021C128(WidgetFragment* self,int,void*){fn_8021C12C(self);}
 void fn_8021C12C(WidgetFragment* self){FormatPrefix* f=(FormatPrefix*)self;f->target->Format(f->text,80);fn_80219718(self);WidgetMarkDirty(self);}
 int fn_8021C18C(WidgetFragment* self,int key){ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x125:f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x126:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217D84(self->window);return 1;}break;case 0x128:if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_80217C4C(self->window);return 1;}break;}return 0;}
 int fn_8021C318(WidgetFragment* self){Bound2a8* f=(Bound2a8*)self;return !f->focus?0:*f->focus==f->token;}
-WidgetFragment* fn_8021C344(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY,const char* label,int alignment){fn_80219568(self,x,y,0,height,0,0);ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;f->target=target;self->vtable=lbl_8033EE50;f->left=left;f->right=right;f->lineY=lineY;f->label=label;if(alignment==1)f->side=0;else f->side=1;f->labelLeft=left;f->font=8;int labelEnd=right+fn_802C51C0(fn_8021165C(1,2));f->labelRight=labelEnd-fn_8022B498(f->font,label);f->showArrows=0;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C6D0(self);f->focus=0;f->token=fn_80228F40(x,y);return self;}
+WidgetFragment* fn_8021C344(WidgetFragment* self,int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY,const char* label,int alignment){__ct__7UILabelFiiiiii(self,x,y,0,height,0,0);ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;f->target=target;self->vtable=lbl_8033EE50;f->left=left;f->right=right;f->lineY=lineY;f->label=label;if(alignment==1)f->side=0;else f->side=1;f->labelLeft=left;f->font=8;int labelEnd=right+fn_802C51C0(fn_8021165C(1,2));f->labelRight=labelEnd-fn_8022B498(f->font,label);f->showArrows=0;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C6D0(self);f->focus=0;f->token=fn_80228F40(x,y);return self;}
 void fn_8021C478(WidgetFragment* self){if(fn_80129BC4(self)){Bound2a8* f=(Bound2a8*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,1,f->focus,4);}}
-void fn_8021C4D4(WidgetFragment* self){fn_80219660(self);ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;int selected=0;if(f->focus&&*f->focus==f->token)selected=1;unsigned int flags=selected!=0;if(f->side==0&&f->label)fn_8022BAD0(f->font,f->labelLeft,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));else if(f->side==1&&f->label)fn_8022BAD0(f->font,f->labelRight,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));if(f->left!=f->right&&f->showArrows){selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,(0.0f));fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,(0.0f));}}
+void fn_8021C4D4(WidgetFragment* self){Slot28__7UILabelFv(self);ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;int selected=0;if(f->focus&&*f->focus==f->token)selected=1;unsigned int flags=selected!=0;if(f->side==0&&f->label)fn_8022BAD0(f->font,f->labelLeft,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));else if(f->side==1&&f->label)fn_8022BAD0(f->font,f->labelRight,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));if(f->left!=f->right&&f->showArrows){selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,(0.0f));fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,(0.0f));}}
 void fn_8021C6CC(WidgetFragment* self,int,void*){fn_8021C6D0(self);}
 void fn_8021C6D0(WidgetFragment* self){FormatPrefix* f=(FormatPrefix*)self;f->target->Format(f->text,80);fn_80219718(self);WidgetMarkDirty(self);}
 int fn_8021C730(WidgetFragment* self,int key){ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:if(f->showArrows){f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180BC(self->window);return 1;}break;case 0x125:if(f->showArrows){f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180B0(self->window);return 1;}break;case 0x126:if(!f->showArrows&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180C8(self->window);return 1;}break;case 0x128:if(!f->showArrows&&((ChoiceWindowPrefix*)self->window)->depth>1){fn_802180D4(self->window);return 1;}break;case 13:f->showArrows=!f->showArrows;return 1;case 27:if(f->showArrows){f->showArrows=0;return 1;}return 0;}return 0;}
@@ -1733,7 +1725,7 @@ void SpinSldr::Slot4C(int x, int y) {
 void SpinSldr::Slot40(int x, int y) {
     WidgetFragment* self = (WidgetFragment*)this;((RowInputDispatch*)self)->Slot4c(x,y);((ProviderWidgetPrefix*)self)->active=0;}
 WidgetFragment* fn_8021CEEC(WidgetFragment* self,int x,int y,int* value,float scale,const char* format,float bias,int height){
- fn_80219568(self,x,y,0,height,0,0);self->vtable=lbl_8033ECB8;
+ __ct__7UILabelFiiiiii(self,x,y,0,height,0,0);self->vtable=lbl_8033ECB8;
  NumericCaptionPrefix* fields=(NumericCaptionPrefix*)self;fields->value=value;fields->scale=scale;fields->bias=bias;fields->format=format;
  *((char*)self+0x264)=0;fn_80219440(self,0,value,4);fn_8021CF9C(self);return self;
 }
@@ -1745,7 +1737,7 @@ void fn_8021CF9C(WidgetFragment* self){
 }
 void fn_8021D040(WidgetFragment* self,int,void*){fn_8021CF9C(self);}
 WidgetFragment* fn_8021D044(WidgetFragment* self,int x,int y,int* value,const char* list,int height,int first,int second,int style){
- fn_80219568(self,x,y,0,height,0,0);self->vtable=lbl_8033EBA0;
+ __ct__7UILabelFiiiiii(self,x,y,0,height,0,0);self->vtable=lbl_8033EBA0;
  ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
  fields->first=first;fields->second=second;fields->style=style;fields->value=value;fields->count=0;
  fields->choices=(const char**)__nwa__FUlPCc(fn_8022D1B4(list)*4,lbl_8033D940);
@@ -1804,7 +1796,7 @@ void fn_8021D378(WidgetFragment *self) {
     float firstHeight;
     float secondHeight;
 
-    fn_80219660(self);ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
+    Slot28__7UILabelFv(self);ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
     if ((int) fields->first != (int) fields->second) {
         focus = fields->focus;
         selected = 0;
@@ -1833,7 +1825,7 @@ void fn_8021D568(WidgetFragment* self,void* context){
   int x=self->left,y=self->top;int width=((WidgetDispatch*)self)->Slot78();
   fn_802C3424(x,y,x+width,self->bottom,lbl_8055FBC0);
  }
- fn_802195DC(self,context);
+ Slot24__7UILabelFPv(self,context);
 }
 void fn_8021D614(WidgetFragment* self,int,int){}
 void fn_8021D618(WidgetFragment* self,int,void*){fn_8021D61C(self);}
@@ -1855,7 +1847,7 @@ WidgetFragment* fn_8021D758(WidgetFragment* self,int destroy){
  return self;
 }
 WidgetFragment* fn_8021D7C8(WidgetFragment* self,int x,int y,int dx,int dy,int height,ChoiceProviderDispatch* provider){
- fn_80219568(self,x,y,0,height,dx,dy);self->vtable=lbl_8033EC2C;
+ __ct__7UILabelFiiiiii(self,x,y,0,height,dx,dy);self->vtable=lbl_8033EC2C;
  ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;float time=fn_8023659C()-(0.3f);
  fields->provider=provider;fields->fontResource=height;fields->nextTime=time;fields->previousTime=time;fields->focus=0;
  fields->token=fn_80228F40(x,y);return self;
@@ -1896,7 +1888,7 @@ void fn_8021DB58(WidgetFragment* self){
 // Reconstructed unused int-to-float conversion work observed in the original.
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
  float unusedHeight=(float)(self->bottom-self->top);
- fn_80219660(self);
+ Slot28__7UILabelFv(self);
  int previousFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
  int nextFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->nextTime>=now)nextFrame=2;else nextFrame=1;}else nextFrame=0;
  gArtSet* previousArrow=static_cast<gArtSet*>(fn_80211660(0));gArtSet* nextArrow=static_cast<gArtSet*>(fn_80211660(1));
@@ -2145,7 +2137,7 @@ int fn_8021F06C(WidgetFragment* self,int key){
  }
  return 1;
 }
-WidgetFragment* fn_8021F394(WidgetFragment* self,int x,int y,int parameter,Binding* value,int height){fn_80219568(self,x,y,0,height,0,0);BindingFieldPrefix* f=(BindingFieldPrefix*)self;f->parameter=parameter;self->vtable=lbl_8033E8FC;f->value=value;fn_801A7E54(f->buffer,24,value);fn_80219440(self,0,value,16);fn_80219718(self);return self;}
+WidgetFragment* fn_8021F394(WidgetFragment* self,int x,int y,int parameter,Binding* value,int height){__ct__7UILabelFiiiiii(self,x,y,0,height,0,0);BindingFieldPrefix* f=(BindingFieldPrefix*)self;f->parameter=parameter;self->vtable=lbl_8033E8FC;f->value=value;fn_801A7E54(f->buffer,24,value);fn_80219440(self,0,value,16);fn_80219718(self);return self;}
 void fn_8021F42C(WidgetFragment* self,int,void*){fn_801A7E54(((BindingFieldPrefix*)self)->buffer,24,((BindingFieldPrefix*)self)->value);WidgetMarkDirty(self);}
 int fn_8021F478(int* result){fn_801A7844(1);KeyDetect* file=&lbl_80490934;if(fn_801A7C8C(file->binding)){fn_801A7E54(file->label,24,file->binding);fn_802E47E8();*result=-2;return 1;}return 0;}
 struct CaptionContext {int value;inline CaptionContext(int v=0):value(v){}};
