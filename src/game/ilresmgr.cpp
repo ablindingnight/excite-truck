@@ -442,8 +442,9 @@ static inline void InitSingle(SingleLine* s, LineSource* center) {
 }
 
 static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
+    int i;
     const char* prefix = "line";
-    for (int i = 1;; i++) {
+    for (i = 1;; i++) {
         char key[0x10];
         char sideKey[0x20];
         const char* name;
@@ -482,7 +483,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
         ValueNode* regs = set->FindChild("legal_transition_regions");
         if (regs) {
             ValueNode* r;
-            for (int i = 0; (r = regs->GetChildAt(i)) != 0 && !s->regions.a.Full(); i++) {
+            for (i = 0; (r = regs->GetChildAt(i)) != 0 && !s->regions.a.Full(); i++) {
                 s->regions.a.data[s->regions.a.count++] = fn_801399FC(r);
             }
         }
@@ -497,7 +498,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
 extern "C" {
 
 void fn_801564B0(void) {
-    CenterLine* center;
+    LineSource* center;
     LineSource* racing;
     ValueNode* set;
     fn_8012E81C("ghostcar.res");
