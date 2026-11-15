@@ -412,9 +412,9 @@ struct BoneLink {
 };
 
 f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
+extern "C" {
 double sin(double x);
 double cos(double x);
-extern "C" {
 f32 PSVECMag(const f32* v);
 void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 }
