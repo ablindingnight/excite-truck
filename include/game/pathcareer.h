@@ -189,6 +189,10 @@ template <class T, int N> struct InlineVec : FixedVec<T> {
     T buf[N];
 };
 
+extern char CareerTrackTest[6];
+extern char CareerTrackLookup[6];
+extern char CareerContestName[5];
+
 class Contest : public IContest {
 public:
     Contest(void) {
@@ -198,12 +202,12 @@ public:
     ~Contest(void);
     const char* TrackName(void) const {
         EventInfo* e = GetEvent(event);
-        if (e->node->Has("track")) {
-            return GetTrackFriendlyName(e->node->GetValue("track"));
+        if (e->node->Has(CareerTrackTest)) {
+            return GetTrackFriendlyName(e->node->GetValue(CareerTrackLookup));
         }
         return GetTrackFriendlyName(GetTrack(e->track)->name);
     }
-    const char* Name(void) const { return GetEvent(event)->node->GetValue("name"); }
+    const char* Name(void) const { return GetEvent(event)->node->GetValue(CareerContestName); }
     const char* TypeName(void) const { return GetEventTypeName(GetEvent(event)->type); }
     const char* TypeDisplayName(void) const { return GetEventTypeDisplayName(GetEvent(event)->type); }
     const char* FriendlyName(void) const { return GetEvent(event)->node->GetValue("friendly_name"); }

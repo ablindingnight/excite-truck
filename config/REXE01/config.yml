@@ -4,6 +4,7 @@ object: sys/main.dol
 hash: e51685814152f377e5c76a50067d8132e25f672b
 symbols: config/REXE01/symbols.txt
 splits: config/REXE01/splits.txt
+force_active: [__vt__5IPath, __vt__8IBracket, __vt__8IContest]
 # Change this to match the linker version.
 # See config.example.yml for a list.
 mw_comment_version: 14 # GC Linker 3.0

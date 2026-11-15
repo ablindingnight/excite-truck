@@ -6,6 +6,8 @@
 // strings.
 #include "game/common.h"
 
+extern char CareerMissingName[4];
+
 extern "C" {
 int strcmp(const char* a, const char* b);
 int strcasecmp(const char* a, const char* b);
@@ -592,7 +594,7 @@ void fn_8027C014(ContestRef* r, s32 type, const char* bracket, ValueNode* n) {
     r->name = n->GetValue("contest_name");
     for (int i = 0; i < GetNumEvents(); i++) {
         EventInfo* e = GetEvent(i);
-        if (!strcasecmp(e->node->GetString("name", ""), r->name)) {
+        if (!strcasecmp(e->node->GetString("name", CareerMissingName), r->name)) {
             r->event = e->id;
         }
     }
@@ -948,3 +950,11 @@ void fn_8027D158(const char* name, char* out, int n) {
 s32 fn_8027D1F4(void) { return lbl_8055F654->difficulty; }
 
 }  // extern "C"
+
+#pragma push
+#pragma explicit_zero_data on
+char CareerMissingName[4] = "";
+char CareerTrackLookup[6] = "track";
+char CareerTrackTest[6] = "track";
+char CareerContestName[5] = "name";
+#pragma pop
