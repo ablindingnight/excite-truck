@@ -2738,12 +2738,11 @@ inline void ZoneMaster::vf10(void) {
     int lv;
     ZoneLevel* l;
     int j;
+    int loff;
     Gate* g;
-    int i;
     lbl_8055E1BC = 0;
     b294 = 0;
     nextGate = 0;
-    int loff;
     for (lv = 0, loff = 0; lv < levels->n; loff += sizeof(ZoneLevel), lv++) {
         l = (ZoneLevel*)((u8*)levels->levels + loff);
         for (j = 0; j < l->n; j++) {
@@ -2772,8 +2771,7 @@ inline void ZoneMaster::vf10(void) {
     t84.start = -999.0f;
     t8C.start = -999.0f;
     i288 = fn_8013D18C(0);
-    int off = 0;
-    for (i = 0; i < nCars; i++, off += sizeof(cars[0])) {
+    for (int i = 0, off = 0; i < nCars; off += sizeof(cars[0]), i++) {
         c = (CarState*)((u8*)cars + off);
         memset(c->hits, 0, sizeof(c->hits));
         c->tC0.start = -999.0f;
@@ -2784,16 +2782,9 @@ inline void ZoneMaster::vf10(void) {
         c->refill = 0;
         c->bonus = 0;
         c->bonusT = -999.9f;
-        c->i20[0] = 4;
-        c->i20[1] = 4;
-        c->i20[2] = 4;
-        c->i20[3] = 4;
-        c->i20[4] = 4;
-        c->i20[5] = 4;
-        c->i20[6] = 4;
-        c->i20[7] = 4;
-        c->i20[8] = 4;
-        c->i20[9] = 4;
+        for (int n = 0; n < 10; n++) {
+            c->i20[n] = 4;
+        }
         c->tA0.start = -999.0f;
         c->tA8.start = -999.0f;
         c->tB0.start = -999.0f;
