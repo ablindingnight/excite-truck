@@ -1985,8 +1985,8 @@ void ZoneMaster::DrawBonus(int p, CarState* c) const {
             fn_80147F30(x, y, r, 0.0f, 0xFF00FF00, n, startAngle, degree, tex[4], 0.0f, 0.0f, 1.0f, 1.0f);
             fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, startAngle, 0.06981317f, tex[4], 0.0f, 0.0f, 1.0f,
                         1.0f);
-            f32 end = startAngle + degree * n;
-            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, end, 0.06981317f, tex[4], 0.0f, 0.0f, 1.0f, 1.0f);
+            f32 angularSpan = degree * n;
+            fn_80147F30(x, y, r, 0.0f, 0xFF000000, 1, startAngle + angularSpan, 0.06981317f, tex[4], 0.0f, 0.0f, 1.0f, 1.0f);
         }
         mainLyt->FindArt("score_star_art");
         {
