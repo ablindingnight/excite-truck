@@ -389,7 +389,7 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     int count;
     f32 pen;
     f32 z;
-    f32 yv;
+    f32 sq;
     f32 inv;
     o = (u8*)world;
     f = (CFrame*)PTR(o, 0xC);
@@ -458,10 +458,10 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     RVec3 pc = lc;
     q = push;
     for (; count > 0; count--, q++) {
-        k = -q->d * (inv * (q->d * q->d));
+        sq = q->d * q->d;
+        k = -q->d * (inv * sq);
         pc.x += q->n.x * k;
-        yv = q->n.y;
-        pc.y += yv * k;
+        pc.y += q->n.y * k;
         pc.z += q->n.z * k;
     }
     RVec3 w;
