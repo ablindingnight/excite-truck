@@ -625,7 +625,6 @@ extern "C" WidgetFragment* fn_802224B4(WidgetFragment*, void*, int, int, int, in
 extern "C" WidgetFragment* fn_80226630(WidgetFragment*, void*, int, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021A5B8(WidgetFragment*, const char*, u8, u8, int, float);
 extern "C" WidgetFragment* fn_80219A28(WidgetFragment*, UIDesc*, const char*, void*);
-extern "C" WidgetFragment* fn_80219870(WidgetFragment*, int, int, const char*, void*, int);
 extern "C" WidgetFragment* fn_8021A77C(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, void*, int, void*);
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
@@ -941,8 +940,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 13: {
         UIStyle* flag = FindStyle(styles, d->style, 1);
-        p = (WidgetFragment*)operator new(0x358, "CheckBox");
-        if (p) p = fn_80219870(p, d->x, d->y, d->name, flag ? flag->value : &lbl_8055EF48, d->flags);
+        p = (WidgetFragment*)new ("CheckBox") CheckBox(d->x, d->y, d->name, (unsigned char*)(flag ? flag->value : &lbl_8055EF48), d->flags);
         widgets[count++] = p;
         break;
     }

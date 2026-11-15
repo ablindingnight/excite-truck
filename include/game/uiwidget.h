@@ -68,12 +68,25 @@ public:
 class UILabel : public UIWidget {  /* Class name unproven */
 public:
     UILabel(int x, int y, int width, int height, int dx, int dy);  // fn_80219568
-    virtual ~UILabel(void);                   // fn_80219900
+    virtual ~UILabel(void) {}                 // inline: out-of-line copy fn_80219900
     virtual void Slot24(void* context);       // fn_802195DC
     virtual void Slot28(void);                // fn_80219660
     virtual int Slot84(void);                 // fn_80219658: frame
     virtual const char* Slot88(void) = 0;     // text
     int textX, textY, textWidth, textStyle;   // 0x244 (widgets.cpp views: x, y, width, height)
+};
+
+class CheckBox : public UILabel {  /* Class name unproven (allocation tag "CheckBox"); vtable lbl_8033F768 */
+public:
+    CheckBox(int x, int y, const char* text, unsigned char* flag, int height);  // fn_80219870 (no dtor: implicit fn_802294F4)
+    virtual void Slot3C(int a, int b) { *(bool*)flag = !*(bool*)flag; }   // inline: fn_8022984C
+    virtual void Slot58(void) { if (flag1a) dirty = 1; flag18 = 1; }      // inline: fn_80229864
+    virtual void Slot5C(void) { if (flag1a) dirty = 1; flag18 = 0; }      // inline: fn_80229884
+    virtual int Slot64(int key);                                           // fn_80219958
+    virtual const char* Slot88(void) { return text; }                      // inline: fn_802298A4
+    virtual int Slot84(void) { int mode = 0; if (flag18) mode = 2; return (flag[0] != 0) | mode; }  // inline: fn_802298AC
+    unsigned char* flag;         // 0x254
+    char text[0x100];            // 0x258
 };
 
 // uiapi's key binding widget (lbl_8033D590): calls its mapped action when the key is pressed. Declared before UIImage

@@ -133,21 +133,14 @@ inline int WidgetMinInt(int value,int limit){if(value<limit)return value;return 
 inline int WidgetMaxInt(int value,int limit){if(value>limit)return value;return limit;}
 void fn_80219718(WidgetFragment* self);
 
-extern u32 lbl_8033F768[],lbl_8033F4B8[],lbl_8033F434[];
+extern u32 lbl_8033F4B8[],lbl_8033F434[];
 WidgetFragment* fn_80222340(WidgetFragment*,int,int,int,int,int,OwnedWidget*);
 WidgetFragment* fn_802223C4(WidgetFragment*,int);
 void fn_80219AB4(WidgetFragment*,int,const char*,int,int,int,bool);
-WidgetFragment* fn_80219870(WidgetFragment* self,int x,int y,const char* text,unsigned char* flag,int height);
-int fn_80219958(WidgetFragment* self,int key);
 WidgetFragment* fn_8021995C(WidgetFragment* self,int x,int y,int width,OwnedWidget* value,void* watched);
 WidgetFragment* fn_802199D0(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80219A28(WidgetFragment* self,WidgetDesc* desc,const char* text,int value);
 
-void fn_8022984C(WidgetFragment* self,int,int);
-void fn_80229864(WidgetFragment* self);
-void fn_80229884(WidgetFragment* self);
-char* fn_802298A4(WidgetFragment* self);
-int fn_802298AC(WidgetFragment* self);
 int fn_802298DC(WidgetFragment* self);
 
 extern u32 lbl_8033F90C[];
@@ -478,7 +471,6 @@ WidgetFragment* fn_80229388(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802293E0(WidgetFragment* self,int destroy);
 WidgetFragment* fn_8022943C(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229498(WidgetFragment* self,int destroy);
-WidgetFragment* fn_802294F4(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229550(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802295AC(WidgetFragment* self,int destroy);
 
@@ -1353,13 +1345,13 @@ void fn_80219718(WidgetFragment* self){
  self->x+=self->left-left;self->y+=self->top-top;
  ((WidgetDispatch*)self)->Slot1c(left,top);fn_80219284(self,right-left,bottom-top);
 }
-WidgetFragment* fn_80219870(WidgetFragment* self,int x,int y,const char* text,unsigned char* flag,int height){
- __ct__7UILabelFiiiiii(self,x,y,0,height,0,0);self->vtable=lbl_8033F768;
+CheckBox::CheckBox(int x,int y,const char* text,unsigned char* flag,int height) : UILabel(x,y,0,height,0,0) {
+ WidgetFragment* self=(WidgetFragment*)this;
  strcpy((char*)self+0x258,text);((FlagTextPrefix*)self)->flag=flag;
- fn_80219440(self,0,flag,1);fn_80219718(self);return self;
+ fn_80219440(self,0,flag,1);fn_80219718(self);
 }
-UILabel::~UILabel(void) {}
-int fn_80219958(WidgetFragment* self,int key){return Slot64__8UIWidgetFi(self,key);}
+
+int CheckBox::Slot64(int key){return UIWidget::Slot64(key);}
 WidgetFragment* fn_8021995C(WidgetFragment* self,int x,int y,int width,OwnedWidget* value,void* watched){
  fn_80222340(self,x,y,width,0,0,value);self->vtable=lbl_8033F4B8;
  self->label=(const char*)watched;if(watched)fn_80219440(self,0,watched,4);return self;
@@ -3377,7 +3369,7 @@ WidgetFragment* fn_80229388(WidgetFragment* self,int destroy){if(self){fn_802223
 WidgetFragment* fn_802293E0(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_8022943C(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80229498(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_802294F4(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+
 WidgetFragment* fn_80229550(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_802223C4(self);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_802295AC(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 void fn_80229604(WidgetFragment* self,int,int){((LeafByte24c*)self)->value=0;}
@@ -3402,11 +3394,11 @@ void fn_802297D0(WidgetFragment* self){
  if(fields->flag257&&fields->active&&self->flag18){if(!fields->callback||fields->callback(fields->context))fn_802168BC(reinterpret_cast<int>(fields->context));}
  Slot7C__8UIWidgetFv(self);
 }
-void fn_8022984C(WidgetFragment* self,int,int){bool* flag=(bool*)((FlagTextPrefix*)self)->flag;*flag=!*flag;}
-void fn_80229864(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=1;}
-void fn_80229884(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=0;}
-char* fn_802298A4(WidgetFragment* self){return (char*)self+0x258;}
-int fn_802298AC(WidgetFragment* self){int mode=0;if(self->flag18)mode=2;return (((FlagTextPrefix*)self)->flag[0]!=0)|mode;}
+
+
+
+
+
 int fn_802298DC(WidgetFragment* self){int* value=((IntWatchPrefix*)self)->value;if(value)return *value;return 0;}
 void fn_802298F8(WidgetFragment*,void*){}
 void fn_802298FC(WidgetFragment*,void*){}
