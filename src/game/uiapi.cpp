@@ -48,9 +48,9 @@ public:
     virtual void vf7();
     virtual void vf8();
     virtual void vf9();     // vtable 0x24
-    virtual void vf10();    // vtable 0x28
-    virtual void vf11();    // vtable 0x2C
-    virtual void vf12();
+    virtual void vf10(int x, int y);    // vtable 0x28
+    virtual void vf11(int x, int y);    // vtable 0x2C
+    virtual void vf12(int x, int y);
     virtual void vf13();
     virtual void vf14();
     virtual void vf15();
@@ -2062,14 +2062,14 @@ void UICustom::Slot80(void) {
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf6();
 }
 
-void UICustom::Slot3C(int, int) {
+void UICustom::Slot3C(int x, int y) {
     void * arg0 = (void *)this;
-    ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf10();
+    ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf10(x, y);
 }
 
-void UICustom::Slot40(int, int) {
+void UICustom::Slot40(int x, int y) {
     void * arg0 = (void *)this;
-    ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf11();
+    ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf11(x, y);
 }
 
 void UICustom::Slot44(void) {
@@ -2094,10 +2094,10 @@ void UICustom::Slot74(int, void*) {
     obj->vf4();
 }
 
-void UICustom::Slot4C(int, int) {
+void UICustom::Slot4C(int x, int y) {
     void * arg0 = (void *)this;
     VfObj *obj = *(VfObj **)((char *)arg0 + 0x244);
-    obj->vf12();
+    obj->vf12(x, y);
 }
 
 void UICustom::Slot58(void) {
@@ -2140,10 +2140,10 @@ int UICustom::Slot64(int arg1) {
         virtual void f8(); virtual void f9(); virtual void f10(); virtual void f11();
         virtual void f12(); virtual void f13(); virtual void f14(); virtual void f15();
         virtual void f16(); virtual void f17(); virtual void f18(); virtual void f19();
-        virtual s32 call();
+        virtual s32 call(int key);  // 0x58: the handler's MenuState::Key
     };
     Callback *obj = *(Callback **)((u8 *)arg0 + 0x244);
-    if (obj->call() != 0) return 1;
+    if (obj->call(arg1) != 0) return 1;
     return UIWidget::Slot64(arg1);
 }
 
