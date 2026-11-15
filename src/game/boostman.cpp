@@ -51,6 +51,7 @@ struct Bound {
 // One grid vertex of a boost area.
 struct BoostVtx {
     void Emit(u32 c, int idx);
+    void Draw(int idx);  /* Helper name unproven */
     V3 pos;     // offset 0x0
     u32 color;  // offset 0xC
     f32 u;      // offset 0x10
@@ -64,6 +65,7 @@ struct BoostArea {
     }
     ~BoostArea(void) { Free(); }
     void Build(Bound* b);
+    int Index(int x, int y) const { return x * ny + y; }  /* Helper name unproven */
     BoostVtx* Vtx(int x, int y) {
         int k = x * ny + y;
         return &verts[k];
@@ -232,7 +234,11 @@ public:
 };
 }  // namespace
 
-static inline void Vertex(u32 c, int idx, const V3& p, f32 u, f32 v) { fn_802C8E00(c, idx, p.x, p.y, p.z, u, v); }
+static inline void Vertex(const u32& c, int idx, const V3& p, f32 u, f32 v) { f32 x = p.x; f32 y = p.y; f32 z = p.z; fn_802C8E00(c, idx, x, y, z, u, v); }
+
+inline void BoostVtx::Draw(int idx) {
+    Vertex(color, idx, pos, u, v);
+}
 
 inline void BoostVtx::Emit(u32 c, int idx) {
     color = c;
@@ -433,7 +439,7 @@ static inline BoostArea& AreaAt(BoostArea* areas, int index) {
 
 extern "C" {
 
-static inline int InArea(BoostMan* m, CarRec* rec) {  /* Helper name unproven */
+static inline int InArea(BoostMan* m, CarRec* rec) {
     int hit;
     Wheel* ws;
     int i;
@@ -481,19 +487,19 @@ void fn_801E1250(int car, u8 on) {
     }
 }
 
-static inline void DrawLines(BoostMan* m, PlayerBoost* p) {  /* Helper name unproven */
+static inline void DrawLines(BoostMan* m, PlayerBoost* p) {
     for (int i = 0; i < m->areas.Count(); i++) {
         fn_801E1384(m->areas.At(i), p->color1);
     }
 }
 
-static inline void DrawArrows(BoostMan* m, PlayerBoost* p) {  /* Helper name unproven */
+static inline void DrawArrows(BoostMan* m, PlayerBoost* p) {
     for (int i = 0; i < m->areas.Count(); i++) {
         fn_801E1384(m->areas.At(i), p->color0);
     }
 }
 
-static inline void DrawView(BoostMan* m) {  /* Helper name unproven */
+static inline void DrawView(BoostMan* m) {
     int view = fn_801E85B4();
     m->cars[view] = fn_801E866C(view);
     fn_802C8BD0(m->lines);
@@ -527,14 +533,21 @@ extern "C" {
 
 void fn_801E1384(BoostArea* a, u32 color) {
     if (a->bound) {
+        int x;
         int i;
         fn_802C8DBC(a->ny * ((a->nx - 1) * 2));
         for (i = 1; i < a->nx; i++) {
             int j;
             a->Vtx(i - 1, 0)->Emit(color, 0);
             a->Vtx(i, 0)->Emit(color, 0);
+            x = i - 1;
             for (j = 1; j < a->ny; j++) {
-                a->Vtx(i - 1, j)->Emit(color, 1);
+                BoostVtx* vs = a->verts;
+                BoostVtx* p = &vs[x * a->ny + j];
+                int k = a->Index(x, j);
+                p->color = color;
+                p = &vs[k];
+                p->Draw(1);
                 a->Vtx(i, j)->Emit(color, 1);
             }
         }
