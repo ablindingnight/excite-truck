@@ -652,8 +652,6 @@ extern "C" WidgetFragment* fn_8022553C(WidgetFragment*, void*, UIDesc*);
 extern "C" WidgetFragment* fn_80226CBC(WidgetFragment*, UIDesc*);
 extern "C" WidgetFragment* fn_80227E84(WidgetFragment*, void*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021FF34(WidgetFragment*, UIDesc*, void*, int, float, float);
-extern "C" WidgetFragment* fn_80228418(WidgetFragment*, UIDesc*, void*);
-extern "C" WidgetFragment* fn_8022855C(WidgetFragment*, UIDesc*, void*, void*);
 
 
 // The placeholder two-choice widget ("OPTION 1" / "OPTION 2").
@@ -1365,16 +1363,14 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     }
     case 52: {
         UIStyle* movie = FindStyle(styles, d->style, 0x11);
-        p = (WidgetFragment*)operator new(0x24c, "UISW2Movie");
-        if (p) p = fn_80228418(p, d, movie ? movie->value : 0);
+        p = (WidgetFragment*)new ("UISW2Movie") UISW2Movie((WidgetDesc*)d, (SwfAnim*)(movie ? movie->value : 0));
         widgets[count++] = p;
         break;
     }
     case 53: {
         UIStyle* texture = FindStyle(styles, d->style, 0x12);
         UIStyle* frame = FindStyle(styles, d->style, 2);
-        p = (WidgetFragment*)operator new(0x24c, "DynoTexWidget");
-        if (p) p = fn_8022855C(p, d, texture ? texture->value : 0, frame ? frame->value : 0);
+        p = (WidgetFragment*)new ("DynoTexWidget") DynoTexWidget((WidgetDesc*)d, (DynoTex*)(texture ? texture->value : 0), (int*)(frame ? frame->value : 0));
         widgets[count++] = p;
         break;
     }

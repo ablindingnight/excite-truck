@@ -234,6 +234,27 @@ public:
     unsigned char fields244[0x4];  // 0x244, read through widgets.cpp views
 };
 
+class SwfAnim;
+class DynoTex;
+class UISW2Movie : public UIWidget {  /* Class name unproven (allocation tag "UISW2Movie"); vtable lbl_8033DE28 */
+public:
+    UISW2Movie(struct WidgetDesc* desc, SwfAnim* movie);  // fn_80228418
+    virtual ~UISW2Movie(void);   // fn_802284BC
+    virtual void Slot28(void);   // fn_8022854C
+    virtual void Slot7C(void);   // fn_80228554
+    SwfAnim* animation;          // 0x244
+    unsigned char owned;         // 0x248
+};
+
+class DynoTexWidget : public UIWidget {  /* Class name unproven (allocation tag "DynoTexWidget"); vtable lbl_8033DDA4 */
+public:
+    DynoTexWidget(struct WidgetDesc* desc, DynoTex* texture, int* frame);  // fn_8022855C
+    virtual ~DynoTexWidget(void) {}  // inline: its copy fn_8022A0CC follows the TU's code
+    virtual void Slot28(void);       // fn_802285B8
+    DynoTex* texture;                // 0x244
+    int* frame;                      // 0x248
+};
+
 class MenuCustomView;
 class ModelWidget : public UIWidget {  /* Class name unproven (allocation tag "ModelWidget"); vtable lbl_8033DD20 */
 public:

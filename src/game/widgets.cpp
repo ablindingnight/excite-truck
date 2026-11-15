@@ -280,21 +280,14 @@ void fn_8021B224(WidgetFragment* self);
 }
 
 
-class SwfAnim {char observedAllocation[0x18];public:SwfAnim();void Load(const char*);void Unload();void Draw();void Update();};
+class SwfAnim {char observedAllocation[0x18];public:SwfAnim();~SwfAnim();void Load(const char*);void Unload();void Draw();void Update();};
 class DynoTex {public:void Draw(int,int,int,int,int);};
 void* operator new(unsigned long,const char*);
 struct SwfWidgetPrefix {char base[0x244];SwfAnim* animation;unsigned char owned;};
 struct DynoWidgetPrefix {char base[0x244];DynoTex* texture;int* frame;};
 extern "C" {
-extern u32 lbl_8033DE28[],lbl_8033DDA4[];extern const char lbl_8033DCDC[];
-SwfAnim* __dt__7SwfAnimFv(SwfAnim*,int);
+extern const char lbl_8033DCDC[];
 
-WidgetFragment* fn_80228418(WidgetFragment* self,WidgetDesc* desc,SwfAnim* animation);
-WidgetFragment* fn_802284BC(WidgetFragment* self,int destroy);
-void fn_8022854C(WidgetFragment* self);
-void fn_80228554(WidgetFragment* self);
-WidgetFragment* fn_8022855C(WidgetFragment* self,WidgetDesc* desc,DynoTex* texture,int* frame);
-void fn_802285B8(WidgetFragment* self);
 }
 
 
@@ -793,7 +786,6 @@ int fn_802268A0(WidgetFragment* self,int key);
 int fn_802299B0(WidgetFragment* self);
 void fn_80229B0C(WidgetFragment* self,int dx,int dy);
 WidgetFragment* fn_80229D64(WidgetFragment* self,int destroy);
-WidgetFragment* fn_8022A0CC(WidgetFragment* self,int destroy);
 }
 
 
@@ -3309,30 +3301,26 @@ void fn_80228010(WidgetFragment* source) {
  if(multiple){nextX+=bodyWidth;fn_802353F4(f->frame,4,nextX,panelY,(0.0f));}
  fn_802278F0(f->panel,left,bottom,available,(float)(f->bottom-f->top));
 }
-WidgetFragment* fn_80228418(WidgetFragment* self,WidgetDesc* desc,SwfAnim* animation){
- __ct__8UIWidgetFP10WidgetDesc(self,desc);SwfWidgetPrefix* fields=(SwfWidgetPrefix*)self;
- fields->animation=0;self->vtable=lbl_8033DE28;fields->owned=0;
- if(animation)fields->animation=animation;
- else{fields->animation=new(lbl_8033DCDC)SwfAnim;fields->owned=1;}
- fields->animation->Load((const char*)desc+0x40);return self;
+UISW2Movie::UISW2Movie(WidgetDesc* desc,SwfAnim* movie) : UIWidget(desc), animation(0) {
+ owned=0;
+ if(movie)animation=movie;
+ else{animation=new(lbl_8033DCDC)SwfAnim;owned=1;}
+ animation->Load((const char*)desc+0x40);
 }
-WidgetFragment* fn_802284BC(WidgetFragment* self,int destroy){
- if(self){self->vtable=lbl_8033DE28;SwfWidgetPrefix* fields=(SwfWidgetPrefix*)self;
-  fields->animation->Unload();if(fields->owned)__dt__7SwfAnimFv(fields->animation,1);
-  fields->animation=0;__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);
- }return self;
+UISW2Movie::~UISW2Movie(void) {
+ animation->Unload();if(owned)delete animation;
+ animation=0;
 }
-void fn_8022854C(WidgetFragment* self){((SwfWidgetPrefix*)self)->animation->Draw();}
-void fn_80228554(WidgetFragment* self){((SwfWidgetPrefix*)self)->animation->Update();}
-WidgetFragment* fn_8022855C(WidgetFragment* self,WidgetDesc* desc,DynoTex* texture,int* frame){
- __ct__8UIWidgetFP10WidgetDesc(self,desc);self->vtable=lbl_8033DDA4;DynoWidgetPrefix* fields=(DynoWidgetPrefix*)self;
- fields->texture=texture;fields->frame=frame;return self;
+void UISW2Movie::Slot28(void){animation->Draw();}
+void UISW2Movie::Slot7C(void){animation->Update();}
+DynoTexWidget::DynoTexWidget(WidgetDesc* desc,DynoTex* texture,int* frame) : UIWidget(desc) {
+ this->texture=texture;this->frame=frame;
 }
-void fn_802285B8(WidgetFragment* self){
- float x,y;fn_80230C30(&x,&y,self->left,self->top);
- DynoWidgetPrefix* fields=(DynoWidgetPrefix*)self;int frame;if(fields->frame)frame=*fields->frame;else frame=0;
- if(fields->texture){int width=((WidgetDispatch*)self)->Slot78();fields->texture->Draw(frame,(int)x,(int)y,width,self->bottom-self->top);}
- else{int width=((WidgetDispatch*)self)->Slot78();fn_80230924(0x8FAFBFCFu,x,y,x+(float)width,y-(float)(self->bottom-self->top),(0.0f));}
+void DynoTexWidget::Slot28(void) {
+ float x,y;fn_80230C30(&x,&y,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top);
+ DynoWidgetPrefix* fields=(DynoWidgetPrefix*)((WidgetFragment*)this);int frame;if(fields->frame)frame=*fields->frame;else frame=0;
+ if(fields->texture){int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fields->texture->Draw(frame,(int)x,(int)y,width,((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top);}
+ else{int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80230924(0x8FAFBFCFu,x,y,x+(float)width,y-(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top),(0.0f));}
 }
 ModelWidget::ModelWidget(WidgetDesc* desc,const char* name) : UIWidget(desc), name(name), target(0) {
  owned=0;memset(lastName,0,32);
@@ -3507,7 +3495,7 @@ void fn_8022A008(WidgetFragment* self,int,int){((LeafActivity*)self)->active=0;}
 void fn_8022A014(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=1;}
 void fn_8022A034(WidgetFragment* self){WidgetMarkDirty(self);self->flag18=0;}
 WidgetFragment* fn_8022A054(WidgetFragment* self,int destroy){if(self){self->vtable=lbl_8033E770;PairImage248* f=(PairImage248*)self;fn_802C519C(f->first);fn_802C519C(f->second);__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_8022A0CC(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
+
 
 
 
