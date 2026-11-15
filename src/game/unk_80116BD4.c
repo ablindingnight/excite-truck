@@ -4443,7 +4443,7 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 #define BINK_DOUBLE2(w) (((w) << 8) | ((w) & 0xFF)) | (((w) << 16) & 0xFF000000)
 
 #pragma push
-#pragma opt_lifetimes off
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 // Decodes one Bink plane (8x8 blocks, or 16x16 scaled blocks) into dst, using prev as the previous frame.
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the

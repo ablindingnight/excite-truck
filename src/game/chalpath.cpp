@@ -1074,7 +1074,7 @@ extern const f32 lbl_80563B90;  // 0.0f
 
 // Event node: its tile (pulsing while selected), name, grade and "score/target".
 #pragma push
-#pragma opt_propagation off
+#pragma opt_propagation off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_802621F0(u8* p) {
     static f32 sTextY = -(f32)S32(p, 0x10) / 2.0f;
     char line[30];

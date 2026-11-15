@@ -523,7 +523,7 @@ static inline void DrawGroup(int i) {
 }
 
 #pragma push
-#pragma opt_dead_assignments off
+#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_80168104(void) {
     Camera* cam = fn_802C86DC();
     V2 c;

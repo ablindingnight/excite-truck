@@ -341,7 +341,7 @@ void fn_80203380(EFrame* m) {
 }
 
 // Object silhouettes: a camera-facing w x h quad over each of the n points.
-#pragma opt_strength_reduction off
+#pragma opt_strength_reduction off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 // Helper name unproven: ENV_PROJECT as an inline that reads the frame as twelve floats (the target addresses the
 // global frame through one register, with no folded offset-0 load).
 static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx, f32& sy) {
@@ -377,7 +377,7 @@ static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx
     sy = 73.98844f * d.z / (1.0f + d.y);
 }
 #pragma push
-#pragma opt_loop_invariants off
+#pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
     if (tex != lbl_8055ED1C) {
         lbl_8055ED1C = tex;

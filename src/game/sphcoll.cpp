@@ -2531,7 +2531,7 @@ static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  
 // impulse, clamped friction (with its own slip accumulator at 0x64) and the bounce event. In water (surface 7)
 // the box floats instead: buoyancy from the submerged depth on a bobbing water line, and drag.
 #pragma push
-#pragma opt_loop_invariants off
+#pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_8019F780(u8* p) {
     RVec3 at;
     RVec3 pos;

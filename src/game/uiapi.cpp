@@ -1670,7 +1670,6 @@ extern "C" void fn_80214A9C(s32 arg0) {
         ((s32 (*)(const char *, ...))fn_802E317C)("UIHideGroup(): No active window");
     }
 }
-#pragma scheduling on
 extern "C" s32 fn_802168D0(s32, s32, float);
 extern "C" void fn_80214AF0(s32 arg0) {
     s32 temp = fn_802168E4();
@@ -1689,7 +1688,6 @@ extern "C" void fn_80214B44(s32 arg0) {
         ((s32 (*)(const char *, ...))fn_802E317C)("UIDisableGroup(): No active window");
     }
 }
-#pragma scheduling on
 extern "C" s32 fn_802168D8(s32);
 extern "C" void fn_80214B94(s32 arg0) {
     s32 temp = fn_802168E4();

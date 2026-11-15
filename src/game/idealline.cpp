@@ -317,7 +317,7 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
 }
 
 #pragma push
-#pragma opt_lifetimes off
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 int LineFollower::Step(V2* p) {
     if (!fn_801355B8(this, p, &il.seg, &il.t)) {
         int r;

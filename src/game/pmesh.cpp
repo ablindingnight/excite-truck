@@ -318,7 +318,7 @@ static inline void SwapTri(PTri* t) {
    target is otherwise scheduled, so the real cause is still unknown. */
 #pragma push
 #pragma ppc_unroll_instructions_limit 100
-#pragma scheduling off
+#pragma scheduling off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_801CFA48(PMesh* m) {
     PSwap32(&m->cells);
     PSwap32(&m->numCells);

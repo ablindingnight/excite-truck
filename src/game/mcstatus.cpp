@@ -275,7 +275,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
 }
 
 #pragma push
-#pragma opt_lifetimes off
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 int MemCardDialogBg::Setup(McDialogCfg* cfg) { return RunChoices(this, cfg); }
 #pragma pop
 

@@ -519,7 +519,6 @@ extern "C" void fn_8020E598(Hud *h) {
     }
 }
 
-#pragma scheduling on
 #pragma cplusplus reset
 
 extern long fn_80009C84(void);

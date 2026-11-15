@@ -919,7 +919,7 @@ void fn_80233010(const char* text, GTextFont* f, u32 color, int align, int ingam
 }
 
 #pragma push
-#pragma opt_dead_assignments off
+#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z) {
     u32 c = color;
     fn_80231714(&c);

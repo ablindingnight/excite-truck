@@ -1062,7 +1062,7 @@ void fn_802B84E4(CursorState* c) {
 }
 
 #pragma push
-#pragma opt_strength_reduction off
+#pragma opt_strength_reduction off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_802B8510(int op) {
     if ((u32)(op - 6) > 1) {
         return;

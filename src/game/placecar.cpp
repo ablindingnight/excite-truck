@@ -214,8 +214,6 @@ extern const f32 lbl_80562700;  // 5.0f: lane offset of the grid columns
 
 #pragma push
 #pragma opt_lifetimes off
-#pragma push
-#pragma opt_lifetimes off
 void fn_801B79D4(Respawn* r, int car, int mode) {
     LineFollower* f = fn_801B2ED0(car)->Follower();
     f32 row = fn_80139048();
@@ -255,7 +253,6 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
         r->vel.z = 0.0f;
     }
 }
-#pragma pop
 #pragma pop
 
 void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {

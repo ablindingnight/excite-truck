@@ -576,7 +576,7 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
 }
 
 #pragma push
-#pragma opt_common_subs off
+#pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 h;
