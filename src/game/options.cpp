@@ -21,7 +21,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got);
 int fn_8012C4D8(void* p);
-void fn_802E6BD8(u32 code, int, void* buf, u32 size, void (*cb)(int));
+void fn_802E6BD8(u32 code, u32, void* buf, s32 size, void (*cb)(int));
 }
 void IdentRegisterCallback(void (*cb)(int slot, int event));
 void* operator new(size_t size, const char* tag);

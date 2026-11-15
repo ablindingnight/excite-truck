@@ -12,7 +12,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 const char* fn_80131234(const char* key);  // localize
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);
-void fn_802E6BD8(u32 code, int, void* buf, u32 size, void (*cb)(int));
+void fn_802E6BD8(u32 code, u32, void* buf, s32 size, void (*cb)(int));
 int fn_801E8838(void);
 }
 

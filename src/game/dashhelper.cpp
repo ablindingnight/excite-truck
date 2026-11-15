@@ -147,10 +147,9 @@ int fn_80232B70(int font);
 int fn_80232578(const char* name);
 void fn_802328D4(int font);
 f32 fn_8023293C(int font, const char* text, f32 scale);
-void fn_802344CC(const char* text, u32 color, int flags, f32 x, f32 y, f32 scale, int unk);
+void fn_802344CC(const char* text, u32 color, int flags, int unk, f32 x, f32 y, f32 scale);
 void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
-void fn_80233010(const char* text, int font, u32 color, int flags, f32 x, f32 y, f32 w, f32 scale,
-                 f32 z, f32 alpha, int wrap);
+void fn_80233010(const char* text, int font, u32 color, int flags, int wrap, f32 x, f32 y, f32 w, f32 scale, f32 z, f32 alpha);
 void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
                  f32 alpha, ...);
 int fn_802C6FC0(const char* name, int a, int b);
@@ -1029,7 +1028,7 @@ void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     va_start(args, y);
     vsprintf(buf, fmt, args);
     va_end(args);
-    fn_802344CC(buf, color, flags, x, y, 0.73333335f * scale, 0);
+    fn_802344CC(buf, color, flags, 0, x, y, 0.73333335f * scale);
 }
 
 void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
@@ -1038,8 +1037,8 @@ void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     va_start(args, y);
     vsprintf(buf, fmt, args);
     va_end(args);
-    fn_802344CC(buf, color & 0xFF000000, flags, 2.0f + x, y - 2.0f, 0.73333335f * scale, 0);
-    fn_802344CC(buf, color, flags, x, y, 0.73333335f * scale, 0);
+    fn_802344CC(buf, color & 0xFF000000, flags, 0, 2.0f + x, y - 2.0f, 0.73333335f * scale);
+    fn_802344CC(buf, color, flags, 0, x, y, 0.73333335f * scale);
 }
 
 void fn_80010188(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...) {
@@ -1071,7 +1070,7 @@ void fn_800103B8(f32 scale, u32 color, int flags, f32 x, f32 y, f32 w, const cha
     va_start(args, fmt);
     vsprintf(buf, fmt, args);
     va_end(args);
-    fn_80233010(buf, lbl_8055D490, color, flags, x, y, w, 0.73333335f * scale, 0.0f, 1.0f, 1);
+    fn_80233010(buf, lbl_8055D490, color, flags, 1, x, y, w, 0.73333335f * scale, 0.0f, 1.0f);
 }
 
 void fn_800104B0(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {

@@ -10,7 +10,7 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 const char* fn_80131234(const char* key);  // localize
 void* fn_801284E8(const char* tag, u32 size);
 void fn_80128658(void* p);
-void fn_802E6BD8(u32 code, int, void* buf, u32 size, void (*cb)(int));
+void fn_802E6BD8(u32 code, u32, void* buf, s32 size, void (*cb)(int));
 void fn_80247624(void);
 }
 

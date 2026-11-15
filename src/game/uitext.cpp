@@ -14,7 +14,7 @@ int vsprintf(char* buf, const char* fmt, va_list args);
 int fn_8012C33C(const char* name);
 int fn_802344B0(void);
 void fn_802344C4(int on);
-void fn_802344CC(const char* text, u32 color, int flags, f32 x, f32 y, f32 scale, int unk);
+void fn_802344CC(const char* text, u32 color, int flags, int unk, f32 x, f32 y, f32 scale);
 void fn_802346C8(void);
 void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
 s32 fn_80232578(const char* name);  // load font
@@ -42,7 +42,7 @@ extern "C" {
 
 void fn_8023875C(int x, int y, const char* text, u32 color, int flags) {
     if (fn_802344B0() && strlen(text) + 1 < 64) {
-        fn_802344CC(text, color, flags, x - lbl_8055CFF0 / 2, lbl_8055CFF4 / 2 - y, 0.4f, 0);
+        fn_802344CC(text, color, flags, 0, x - lbl_8055CFF0 / 2, lbl_8055CFF4 / 2 - y, 0.4f);
     } else {
         fn_80232BA4(text, lbl_8055F0D4, x - lbl_8055CFF0 / 2, lbl_8055CFF4 / 2 - y, color, flags, 0.4f, 0.0f, 1.0f);
     }
