@@ -13,7 +13,6 @@ int fn_801B2F24(void);                  // car count
 int fn_801B2F54(int car);               // lap
 void fn_801E9DC4(s16* h);
 void fn_801E9E30(s16* h, f32* pos);
-void fn_8000FF00(void);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -74,11 +73,16 @@ public:
     virtual void Draw(void) = 0;
 };
 
-struct ZoneDraw {
-    ZoneDraw(void);
-    ~ZoneDraw(void);
-    void Draw(void* zone, int mode, void (*fn)(void));
-    u8 pad0[0x8];
+struct Vec3;
+
+// The zone outline renderer (zone.cpp).
+class Glow {
+public:
+    Glow(void);
+    ~Glow(void);
+    void Draw(Vec3* pts, int n, int c);
+    s32 lite;  // offset 0x0
+    s32 glow;  // offset 0x4
 };
 
 template <class T>
@@ -137,7 +141,7 @@ public:
     virtual void a2(void);
     virtual void a3(void);
     FixedArr<ActZone, 64> zones;  // offset 0x8
-    ZoneDraw zd;                  // offset 0xA14
+    Glow glow;                    // offset 0xA14
 };
 
 ModuleTag lbl_8055E380;
@@ -160,7 +164,7 @@ inline void TechDemoMaster::Draw(void) {
     for (i = 0; i < zones.count; i++) {
         ActZone* z = &zones.data[i];
         if (z->draw && !z->done && z->bound->n > 1) {
-            zd.Draw(z, 2, fn_8000FF00);
+            glow.Draw(z->pt, 2, 0x8000FF00);
         }
     }
 }

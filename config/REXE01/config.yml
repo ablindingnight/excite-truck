@@ -65,6 +65,10 @@ add_relocations:
   type: l
   target: fn_8024EC3C
 block_relocations:
+# techdemo TechDemoMaster::Draw passes the colour 0x8000FF00 to Glow::Draw (lis/addi); it only looks like
+# fn_8000FDF0+0x110 (found by linkcheck.py, 2026-11-15).
+- source: 0x8017189C
+- source: 0x801718F0
 - source: 0x8004ADB0
 - source: 0x8004AE28
 # __OSDBJump's `bl +0x60` is copied to the debugger jump point at run time; its target only looks like a
