@@ -74,7 +74,8 @@ void fn_80118C44(void* bink);  // BinkNextFrame
 int fn_802ECC10(void);
 void fn_80119214(void* (*alloc)(u32), void (*free)(void*));
 void fn_80116E54(void* fn, void* arg);
-void fn_8011A168(void);
+struct StreamAllocator;
+void* fn_8011A168(StreamAllocator *allocator);
 void fn_802E1728(void* tex);
 int fn_802E1BB4(void* tex);
 void fn_802E27B8(void* tex);

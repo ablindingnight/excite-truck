@@ -207,7 +207,7 @@ int fn_80222BD4(AnimationPrefix* self);
 
 extern "C" {
 // Opaque method identities only; held bodies are not reconstructed.
-void fn_80215828();void fn_8021583C();
+void fn_80215828(void *self, void *arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);void fn_8021583C();
 u32 lbl_8033F998[9]={0,0,(u32)fn_80222998,(u32)fn_80215828,(u32)fn_80222A3C,(u32)fn_80222AFC,(u32)fn_80222B48,(u32)fn_80222BD4,(u32)fn_802229FC};
 u32 lbl_8033F9BC[9]={0,0,(u32)fn_80222718,(u32)fn_80215828,(u32)fn_80222788,(u32)fn_80222800,(u32)fn_8021583C,(u32)fn_80229620,(u32)fn_8022961C};
 u32 lbl_8033F9E0[9]={0,0,(u32)fn_80222584,(u32)fn_80215828,(u32)fn_802225E8,(u32)fn_8022264C,(u32)fn_8021583C,(u32)fn_80229614,(u32)fn_80229610};

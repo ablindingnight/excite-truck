@@ -334,7 +334,7 @@ void fn_801286A0(void* p, s32 shrink);
 void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
 int fn_802146BC(MenuDesc* desc, int x, int y, int modal);
 void fn_802E317C(const char* fmt, ...);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 void __ct__10StatsTableFv(void* p);
 void __ct__7DynoTexFiUc(void* p, int n, u8 f);
 void Add__7DynoTexFiPCc(void* p, int id, const char* name);

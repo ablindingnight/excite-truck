@@ -653,7 +653,7 @@ extern const float lbl_805633FC;
 
 // The Hud's .data (0x8033C7A0-0x8033C940): the sound/part name pool its constructor indexes, then the vtable
 // (two zero header words and the 13 methods), a second small table (fn_801837DC) and zero words.
-void fn_801837DC(void);
+u8* fn_801837DC(u8* p, int del);
 
 void *lbl_8033C8C4[31] = {
     0, 0, (void *)fn_8020E288, (void *)fn_8020E598, (void *)fn_8020F15C, (void *)fn_8020F1F8, (void *)fn_8020F21C, (void *)fn_8020F240, (void *)fn_8020F30C, (void *)fn_8020F330, (void *)fn_8020F354, (void *)fn_8020F284, (void *)fn_8020F378, (void *)fn_8020F39C, (void *)fn_8020F3A0, 0, 0, (void *)fn_801837DC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0

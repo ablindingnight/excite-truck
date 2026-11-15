@@ -123,7 +123,7 @@ void fn_8022D350(MenuStrList* l, const char* s, int a);
 int fn_802146BC(const MenuDesc* desc, int x, int y, int a);
 void fn_80214A9C(int sound);
 void fn_80236900(void);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 void OptionsDefault(int section);
 void fn_801331C4(int section, const char* key, f32* v);
 void fn_8013323C(int section, const char* key, f32 v);

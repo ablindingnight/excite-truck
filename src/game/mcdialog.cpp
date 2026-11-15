@@ -25,7 +25,7 @@ void fn_8022D2BC(MenuStrList* l, int flags);
 void fn_8022D350(MenuStrList* l, const char* s, int a);
 void fn_80214A9C(int sound);
 void fn_80214AF0(int sound);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 s32 fn_802E2C20(void);  // milliseconds
 int fn_802E8D84(void);
 void fn_802E30C8(const char* fmt, ...);  // debug print

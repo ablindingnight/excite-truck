@@ -19,7 +19,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 int fn_8012C33C(const char* name);       // resource exists
 void* fn_8012C370(const char* name, u32 magic, u32* version, int a, int b, u8* swapped);  // load resource
 void fn_8012C4D8(void* p);                                                               // free resource
-void fn_80131810(void);
+ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);
 s32 fn_802CAC28(const char* name, int a);  // texture handle
 void gxForgetTexture(s32 tex);
@@ -75,11 +75,12 @@ struct TModelData {
 extern "C" {
 const char* fn_802C9C24(TModelData* d);
 s32 fn_802B110C(s32 (*load)(const char*), const char* name);
-TModel* fn_802B2C34(void (*load)(void), const char* name);
-void fn_802C6B44(void);
+TModel* fn_802B2C34(void* (*load)(const char*), const char* name);
+struct ModelInfo;
+ModelInfo* fn_802C6B44(const char* name);
 void fn_802C6C20(TModel* m);
 s32 fn_802B1DA0(s32 id);
-ValueTable* fn_802B561C(void (*load)(void), const char* name);
+ValueTable* fn_802B561C(ValueTable* (*load)(const char*), const char* name);
 void fn_802DCAE4(s32 model, const TMtx* m, f32 alpha);
 void fn_801F1C24(TMtx* m);
 }
@@ -540,11 +541,11 @@ void fn_802BCBDC(void) {
                 t = &lbl_804C00D4.data[lbl_804C00D4.n++];
                 t->name = n->GetValue("name");
                 t->shadow = n->FindChild("tree_shadow");
-                t->far = fn_802B2C34(fn_802C6B44, n->GetValue("far_model"));
+                t->far = fn_802B2C34((void* (*)(const char*))fn_802C6B44, n->GetValue("far_model"));
                 t->farId = fn_802BC4D4(t->far);
                 t->farTex = fn_802BC4E0(t->far);
                 t->farTris = fn_802B1DA0(t->farId);
-                t->near = fn_802B2C34(fn_802C6B44, n->GetValue("near_model"));
+                t->near = fn_802B2C34((void* (*)(const char*))fn_802C6B44, n->GetValue("near_model"));
                 t->nearId = fn_802BC4D4(t->near);
                 t->nearTex = fn_802BC4E0(t->near);
                 t->nearTris = fn_802B1DA0(t->nearId);

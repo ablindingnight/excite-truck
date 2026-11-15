@@ -174,7 +174,7 @@ struct MenuDesc {
 
 extern "C" {
 int fn_802146BC(MenuDesc* desc, int x, int y, int a);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 extern char lbl_8055BAB8[4];
 extern char lbl_8055B860[8];
 }

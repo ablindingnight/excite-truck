@@ -1439,7 +1439,7 @@ extern "C" void fn_80276D3C(const char*, int);
 extern "C" int fn_802C51C0(void*);
 extern "C" int fn_802C5220(void*);
 extern "C" Window* fn_80216770(const char*, int, int, int, int, int);
-extern "C" void fn_80236914(void);
+extern "C" void fn_80236914(int which, f32* out, f32 t);
 extern "C" int strcmp(const char*, const char*);
 extern "C" const char* lbl_8055EF44;
 extern "C" int lbl_8055CFF0;
@@ -2477,8 +2477,8 @@ void Unk50__9MenuStateFv(void);
 void Unk54__9MenuStateFv(void);
 void Unk5C__9MenuStateFv(void);
 void Update__9MenuStateFv(void);
-void fn_80219264(void);
-void fn_802192A0(void);
+void fn_80219264(WidgetFragment* self,int x,int y);
+void fn_802192A0(WidgetFragment*,void*);
 }
 
 // Virtual tables of the raw-offset handler/widget objects above (vptrs stored by hand), in .data order.

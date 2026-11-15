@@ -144,7 +144,7 @@ void fn_80214CB4(int a);
 const char* fn_80131234(const char* key);  // localized string
 int fn_8021521C(const char* head, const char* body, int a);
 int fn_802146BC(const MenuDesc* desc, int x, int y, int a);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 void fn_8023FCFC(int slot);
 void fn_8023D1C0(void);
 void fn_8023C958(void);

@@ -65,7 +65,7 @@ public:
 
 extern "C" {
 int fn_802146BC(MenuDesc* desc, int x, int y, int a);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 void fn_80236900(void);
 int fn_8027AA48(void);
 void fn_80214A9C(int id);

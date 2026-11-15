@@ -42,7 +42,7 @@ int sprintf(char* buf, const char* fmt, ...);
 char* strcpy(char* dst, const char* src);
 int strcasecmp(const char* a, const char* b);
 int fn_802146BC(MenuDesc* desc, int x, int y, int a);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 void fn_80236900(void);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 s32 fn_802E2C20(void);                   // milliseconds

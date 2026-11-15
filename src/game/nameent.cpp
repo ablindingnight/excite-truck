@@ -31,7 +31,7 @@ extern "C" {
 void fn_80214A9C(int sound);
 void fn_80214AF0(int sound);
 void fn_8024683C(void);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 void fn_8022D228(MenuStrList* l, int count, int len);
 void fn_8022D2BC(MenuStrList* l, int flags);
 void fn_8022D350(MenuStrList* l, const char* s, int a);

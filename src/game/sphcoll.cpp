@@ -4376,7 +4376,7 @@ void fn_8017A800(void);
 void fn_8017C7C4(void);
 void fn_80179EE4(void);
 void SetSurface__9CollShapeFi(void);
-void fn_8018A088(void);
+void fn_8018A088(u8* p);
 void __dt__9CollShapeFv(void);
 void PhysTaskDumpCars(void);
 void* lbl_803336F8[12] = {(void*)0, (void*)0, (void*)fn_801A5174, (void*)fn_801A48C8, (void*)fn_801A517C, (void*)fn_801A5184, (void*)fn_801A518C, (void*)fn_801A5190, (void*)fn_801A51B0, (void*)fn_801A51CC, (void*)fn_801A51D4, (void*)fn_801A5134};

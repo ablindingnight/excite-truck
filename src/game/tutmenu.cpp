@@ -39,7 +39,7 @@ struct TutorialChoice {
 
 extern "C" {
 int fn_802146BC(MenuDesc* desc, int x, int y, int a);
-void fn_80236914(void);
+void fn_80236914(int which, f32* out, f32 t);
 int fn_80161D14(void);       // lessons passed
 int fn_80161ECC(void);       // set count
 void* fn_80161E40(int set);
