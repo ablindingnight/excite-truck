@@ -178,6 +178,52 @@ struct FormattedChoiceDescriptor;
 struct ObservedValueProvider;
 class UITable;
 
+// Animated arrow/step button (vtable lbl_8033F6E0; abstract: Slot84 is the press action). Class name unproven.
+// Its in-class-declared Slot3C/40/58/5C/70 are inline, defined in widgets.cpp (TU-end copies fn_80229CB4..D3C).
+class UIArrowButton : public UIWidget {  /* Class name unproven; vtable lbl_8033F6E0 */
+public:
+    UIArrowButton(int x, int y, void* handle);   // fn_8021AC24
+    virtual ~UIArrowButton(void) {}              // inline: out-of-line copy fn_8021AF9C
+    virtual void Slot24(void* context);          // fn_8021ACC0
+    virtual void Slot28(void);                   // fn_8021AD10
+    virtual void Slot3C(int a, int b);           // inline fn_80229CB4
+    virtual void Slot40(int a, int b);           // inline fn_80229CD8
+    virtual void Slot58(void);                   // inline fn_80229CF8
+    virtual void Slot5C(void);                   // inline fn_80229D1C
+    virtual int Slot70(int x, int y);            // inline fn_80229D3C
+    virtual void Slot7C(void);                   // fn_8021AE18
+    virtual void Slot84(void) = 0;               // the press action
+    unsigned char active, pad245[3];             // 0x244
+    float elapsed, period;                       // 0x248
+    void* handle;                                // 0x250
+};
+
+class ArrowBtn : public UIArrowButton {  /* Class name unproven (allocation tag "ArrowBtn"); vtable lbl_8033F658 */
+public:
+    ArrowBtn(int x, int y, void* watched, int option, int mode, void* handle, float low, float high);  // fn_8021AF0C (implicit dtor fn_80229498)
+    virtual void Slot84(void);                   // fn_8021AFF4
+    void* watched;               // 0x254
+    float low, high;             // 0x258
+    int option, mode;            // 0x260
+};
+
+class IntArrowBtn : public UIArrowButton {  /* Class name unproven (allocation tag "IntArrowBtn"); vtable lbl_8033F5D0 */
+public:
+    IntArrowBtn(int x, int y, int* watched, int low, int high, int step, void* handle);  // fn_8021B0CC (implicit dtor fn_8022943C)
+    virtual void Slot84(void);                   // fn_8021B134
+    int* watched;                // 0x254
+    int low, high, step;         // 0x258
+};
+
+struct ObservedScrollState;
+class ScrollBtn : public UIArrowButton {  /* Class name unproven (allocation tag "ScrollBtn"); vtable lbl_8033F548 */
+public:
+    ScrollBtn(int x, int y, ObservedScrollState* state, int direction, void* handle);  // fn_8021B1C4 (implicit dtor fn_802293E0)
+    virtual void Slot84(void);                   // fn_8021B224
+    int direction;               // 0x254
+    ObservedScrollState* state;  // 0x258
+};
+
 class ArtWidget : public UIWidget {  /* Class name unproven (allocation tag "ArtWidget"); vtable lbl_8033F434 */
 public:
     ArtWidget(struct WidgetDesc* desc, const char* text, int value);  // fn_80219A28
@@ -280,6 +326,15 @@ public:
     const char* label;           // 0x2C8
     int side;                    // 0x2CC
     bool showArrows;             // 0x2D0
+};
+
+struct FormatTarget;
+class SpinArrow : public UIArrowButton {  /* Class name unproven (allocation tag "SpinArrow"); vtable lbl_8033EDC8 */
+public:
+    SpinArrow(int x, int y, void* handle, int direction, FormatTarget* target);  // fn_8021C97C (implicit dtor fn_80229168)
+    virtual void Slot84(void);                   // fn_8021C9D8
+    FormatTarget* target;        // 0x254
+    int direction;               // 0x258
 };
 
 class SpinSldr : public UIWidget {  /* Class name unproven (allocation tag "SpinSldr"); vtable lbl_8033ED44 */

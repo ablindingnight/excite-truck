@@ -233,18 +233,13 @@ struct WatchedAnimationPrefix {
 };
 typedef char TimedAnimationPrefixSize[(sizeof(TimedAnimationPrefix)==0x254)?1:-1];
 extern "C" {
-extern u32 lbl_8033F6E0[],lbl_8033F658[];extern const float lbl_805634EC;
-WidgetFragment* fn_8021AC24(WidgetFragment* self,int x,int y,void* handle);
-int fn_8021ACC0(WidgetFragment* self,void* context);
-void fn_8021AE18(WidgetFragment* self);
-WidgetFragment* fn_8021AF0C(WidgetFragment* self,int x,int y,void* watched,int option,int mode,void* handle,float low,float high);
+extern const float lbl_805634EC;
 }
 
 
 extern "C" {
 extern int lbl_8055FB9C,lbl_8055FBA0;
 
-void fn_8021AD10(WidgetFragment* self);
 }
 
 
@@ -252,13 +247,7 @@ struct IntegerAnimationPrefix {TimedAnimationPrefix base;int* watched;int low,hi
 struct ObservedScrollState {int size,visible,offset;};
 struct ScrollAnimationPrefix {TimedAnimationPrefix base;int direction;ObservedScrollState* state;};
 extern "C" {
-extern u32 lbl_8033F5D0[],lbl_8033F548[];extern const float lbl_805634C4;
-WidgetFragment* fn_8021AF9C(WidgetFragment* self,int destroy);
-void fn_8021AFF4(WidgetFragment* self);
-WidgetFragment* fn_8021B0CC(WidgetFragment* self,int x,int y,int* watched,int low,int high,int step,void* handle);
-void fn_8021B134(WidgetFragment* self);
-WidgetFragment* fn_8021B1C4(WidgetFragment* self,int x,int y,ObservedScrollState* state,int direction,void* handle);
-void fn_8021B224(WidgetFragment* self);
+extern const float lbl_805634C4;
 }
 
 
@@ -426,13 +415,9 @@ WidgetFragment* fn_80228FA4(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80228FFC(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229054(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802290B0(WidgetFragment* self,int destroy);
-WidgetFragment* fn_80229168(WidgetFragment* self,int destroy);
 WidgetFragment* fn_802292D8(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229330(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229388(WidgetFragment* self,int destroy);
-WidgetFragment* fn_802293E0(WidgetFragment* self,int destroy);
-WidgetFragment* fn_8022943C(WidgetFragment* self,int destroy);
-WidgetFragment* fn_80229498(WidgetFragment* self,int destroy);
 WidgetFragment* fn_80229550(WidgetFragment* self,int destroy);
 
 // Forward declarations of functions defined further down (all decompiled; they were empty placeholders
@@ -635,11 +620,6 @@ void fn_80229A94(WidgetFragment* self);
 void fn_80229AC4(WidgetFragment* self,int,int);
 int fn_80229ADC(WidgetFragment*);
 int fn_80229AE4(WidgetFragment* self,int x,int y);
-void fn_80229CB4(WidgetFragment* self,int,int);
-void fn_80229CD8(WidgetFragment* self,int,int);
-void fn_80229CF8(WidgetFragment* self);
-void fn_80229D1C(WidgetFragment* self);
-int fn_80229D3C(WidgetFragment* self,int x,int y);
 void fn_80229ED4(WidgetFragment* self);
 void fn_80229EF4(WidgetFragment* self);
 void* fn_80229F14(WidgetFragment* self);
@@ -713,13 +693,11 @@ struct DirectionPrefix {char base[0x254];FormatTarget* target;int direction;};
 struct FloatFormatPrefix {char base[0x254];float scale,bias;float* value;const char* format;char text[1];};
 struct SelectionColorPrefix {char base[0x2cc];int* selected;unsigned char flags[0x44];char gap314[0x100];float pulse;char gap418[4];unsigned char locked;};
 extern "C" {
-extern u32 lbl_8033EDC8[];
+
 int sprintf(char*,const char*,...);void fn_8021818C(void*);
 void fn_8021BE48(WidgetFragment* self);
 void fn_8021C12C(WidgetFragment* self);
 void fn_8021C6D0(WidgetFragment* self);
-WidgetFragment* fn_8021C97C(WidgetFragment* self,int x,int y,void* handle,int direction,FormatTarget* target);
-int fn_8021C9D8(WidgetFragment* self);
 u32 fn_802236C8(WidgetFragment* self,int index);
 }
 
@@ -1473,32 +1451,31 @@ int fn_8021A9A4(WidgetFragment* self){
 void fn_8021AA18(FocusPaintPrefix* self){FullDrawStatePrefix state;const FullDrawStatePrefix* live=fn_8022EDC4();state.xf=live->xf;state.alpha=live->alpha;state.unk34=live->unk34;state.scale=live->scale;int selected=FocusSelected(self);if(!*fn_80216708()&&!selected)state.alpha*=(0.3f);fn_8022ED00(&state);int height=((WidgetFragment*)self)->bottom-((WidgetFragment*)self)->top;self->child->Paint(self->first,self->second,self->third,((WidgetDispatch*)self)->Slot78(),height,((WidgetDispatch*)self)->Slot88());fn_8022EDB8();}
 int fn_8021AB88(WidgetFragment*){return 0;}
 int fn_8021AB90(WidgetFragment* self,int key){if(*fn_80216708()){switch(key){case 0x126:fn_80217AC0(self->window);return 1;case 0x128:fn_802179A0(self->window);return 1;}}return Slot64__8UIWidgetFi(self,key);}
-WidgetFragment* fn_8021AC24(WidgetFragment* self,int x,int y,void* handle){
- int height=fn_802C5220(handle);int width=fn_802C51C0(handle);
- __ct__8UIWidgetFiiiii(self,x,y,x+width,y+height,0);self->vtable=lbl_8033F6E0;
- TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;fields->handle=handle;fields->active=0;fields->elapsed=(0.0f);fields->period=(0.3f);return self;
+UIArrowButton::UIArrowButton(int x,int y,void* handle) : UIWidget(x,y,x+fn_802C51C0(handle),y+fn_802C5220(handle),0) {
+ WidgetFragment* self=(WidgetFragment*)this;
+ TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;fields->handle=handle;fields->active=0;fields->elapsed=(0.0f);fields->period=(0.3f);
 }
-int fn_8021ACC0(WidgetFragment* self,void* context){
- fn_802C3034(reinterpret_cast<gxCanvas*>(context));TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;
+void UIArrowButton::Slot24(void* context) {
+ fn_802C3034(reinterpret_cast<gxCanvas*>(context));TimedAnimationPrefix* fields=(TimedAnimationPrefix*)((WidgetFragment*)this);
  fn_802C51AC(fields->handle);int result=fn_802C51AC(fields->handle);
- if(result>0)result=fn_802C51AC(fields->handle);return result;
+ if(result>0)fn_802C51AC(fields->handle);
 }
-void fn_8021AD10(WidgetFragment* self){
- TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;int mode;
- if(self->flag18)mode=2+(fields->active!=0);else mode=0;
+void UIArrowButton::Slot28(void) {
+ TimedAnimationPrefix* fields=(TimedAnimationPrefix*)((WidgetFragment*)this);int mode;
+ if(((WidgetFragment*)this)->flag18)mode=2+(fields->active!=0);else mode=0;
  if(fn_802C51AC(fields->handle)==3&&mode==3)mode=1;
  if(fn_802C51AC(fields->handle)>0)mode%=fn_802C51AC(fields->handle);
- int x=self->left-lbl_8055FB9C/2;int y=lbl_8055FBA0/2-self->top;
+ int x=((WidgetFragment*)this)->left-lbl_8055FB9C/2;int y=lbl_8055FBA0/2-((WidgetFragment*)this)->top;
  fn_802C5310(fields->handle,mode,(float)x,(float)y,(0.0f));
 }
-void fn_8021AE18(WidgetFragment* self){
- TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;
- if(fields->active&&self->flag18){
+void UIArrowButton::Slot7C(void) {
+ TimedAnimationPrefix* fields=(TimedAnimationPrefix*)((WidgetFragment*)this);
+ if(fields->active&&((WidgetFragment*)this)->flag18){
   float increment,one,zero;fields->elapsed-=fn_80214D48();zero=(0.0f);
   if(fields->elapsed<zero){
    one=(1.0f);increment=(2.0f);int limit=10;
    while(fields->elapsed<zero){
-    fields->elapsed+=fields->period;((WidgetDispatch*)self)->Slot84();
+    fields->elapsed+=fields->period;((WidgetDispatch*)((WidgetFragment*)this))->Slot84();
     fields->period=one/(increment+one/fields->period);
     if(--limit<0)break;
    }
@@ -1506,35 +1483,29 @@ void fn_8021AE18(WidgetFragment* self){
   }
  }else{fields->elapsed=(0.0f);fields->period=(0.3f);}
 }
-WidgetFragment* fn_8021AF0C(WidgetFragment* self,int x,int y,void* watched,int option,int mode,void* handle,float low,float high){
- fn_8021AC24(self,x,y,handle);self->vtable=lbl_8033F658;
- WatchedAnimationPrefix* fields=(WatchedAnimationPrefix*)self;fields->watched=watched;fields->low=low;fields->high=high;fields->option=option;fields->mode=mode;return self;
-}
-WidgetFragment* fn_8021AF9C(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-void fn_8021AFF4(WidgetFragment* self){
- WatchedAnimationPrefix* fields=(WatchedAnimationPrefix*)self;
+ArrowBtn::ArrowBtn(int x,int y,void* watched,int option,int mode,void* handle,float low,float high) : UIArrowButton(x,y,handle) {WidgetFragment* self=(WidgetFragment*)this;
+ WatchedAnimationPrefix* fields=(WatchedAnimationPrefix*)self;fields->watched=watched;fields->low=low;fields->high=high;fields->option=option;fields->mode=mode;}
+
+void ArrowBtn::Slot84(void) {
+ WatchedAnimationPrefix* fields=(WatchedAnimationPrefix*)((WidgetFragment*)this);
  float step=(fields->high-fields->low)/(float)(fields->option-1);
  *(float*)fields->watched+=(float)fields->mode*step;
  *(float*)fields->watched=step*(float)(int)((0.5f)+*(float*)fields->watched/step);
  if(*(float*)fields->watched<fields->low)*(float*)fields->watched=fields->low;
  if(*(float*)fields->watched>fields->high)*(float*)fields->watched=fields->high;
 }
-WidgetFragment* fn_8021B0CC(WidgetFragment* self,int x,int y,int* watched,int low,int high,int step,void* handle){
- fn_8021AC24(self,x,y,handle);self->vtable=lbl_8033F5D0;
- IntegerAnimationPrefix* fields=(IntegerAnimationPrefix*)self;fields->watched=watched;fields->low=low;fields->high=high;fields->step=step;return self;
-}
-void fn_8021B134(WidgetFragment* self){
- IntegerAnimationPrefix* fields=(IntegerAnimationPrefix*)self;bool wrap=fields->high-fields->low==2;
+IntArrowBtn::IntArrowBtn(int x,int y,int* watched,int low,int high,int step,void* handle) : UIArrowButton(x,y,handle) {WidgetFragment* self=(WidgetFragment*)this;
+ IntegerAnimationPrefix* fields=(IntegerAnimationPrefix*)self;fields->watched=watched;fields->low=low;fields->high=high;fields->step=step;}
+void IntArrowBtn::Slot84(void) {
+ IntegerAnimationPrefix* fields=(IntegerAnimationPrefix*)((WidgetFragment*)this);bool wrap=fields->high-fields->low==2;
  *fields->watched+=fields->step;
  if(*fields->watched>=fields->high){if(wrap)*fields->watched=fields->low;else *fields->watched=fields->high-1;}
  if(*fields->watched<fields->low){if(wrap)*fields->watched=fields->high-1;else *fields->watched=fields->low;}
 }
-WidgetFragment* fn_8021B1C4(WidgetFragment* self,int x,int y,ObservedScrollState* state,int direction,void* handle){
- fn_8021AC24(self,x,y,handle);self->vtable=lbl_8033F548;
- ScrollAnimationPrefix* fields=(ScrollAnimationPrefix*)self;fields->direction=direction;fields->state=state;return self;
-}
-void fn_8021B224(WidgetFragment* self){
- ScrollAnimationPrefix* fields=(ScrollAnimationPrefix*)self;
+ScrollBtn::ScrollBtn(int x,int y,ObservedScrollState* state,int direction,void* handle) : UIArrowButton(x,y,handle) {WidgetFragment* self=(WidgetFragment*)this;
+ ScrollAnimationPrefix* fields=(ScrollAnimationPrefix*)self;fields->direction=direction;fields->state=state;}
+void ScrollBtn::Slot84(void) {
+ ScrollAnimationPrefix* fields=(ScrollAnimationPrefix*)((WidgetFragment*)this);
  if(fields->direction==1){
   ObservedScrollState* state=fields->state;state->offset++;
   int maximum=state->size-state->visible;if(state->offset>maximum)state->offset=maximum;
@@ -1582,8 +1553,8 @@ void SpinText::Slot74(int, void*) {fn_8021C6D0(((WidgetFragment*)this));}
 void fn_8021C6D0(WidgetFragment* self){FormatPrefix* f=(FormatPrefix*)self;f->target->Format(f->text,80);fn_80219718(self);WidgetMarkDirty(self);}
 int SpinText::Slot64(int key) {ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)((WidgetFragment*)this);if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:if(f->showArrows){f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180BC(((WidgetFragment*)this)->window);return 1;}break;case 0x125:if(f->showArrows){f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180B0(((WidgetFragment*)this)->window);return 1;}break;case 0x126:if(!f->showArrows&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180C8(((WidgetFragment*)this)->window);return 1;}break;case 0x128:if(!f->showArrows&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180D4(((WidgetFragment*)this)->window);return 1;}break;case 13:f->showArrows=!f->showArrows;return 1;case 27:if(f->showArrows){f->showArrows=0;return 1;}return 0;}return 0;}
 int SpinText::Slot84(void) {return 0;}
-WidgetFragment* fn_8021C97C(WidgetFragment* self,int x,int y,void* handle,int direction,FormatTarget* target){fn_8021AC24(self,x,y,handle);DirectionPrefix* f=(DirectionPrefix*)self;f->direction=direction;self->vtable=lbl_8033EDC8;f->target=target;return self;}
-int fn_8021C9D8(WidgetFragment* self){DirectionPrefix* f=(DirectionPrefix*)self;if(f->direction>0)return f->target->Increase();return f->target->Decrease();}
+SpinArrow::SpinArrow(int x,int y,void* handle,int direction,FormatTarget* target) : UIArrowButton(x,y,handle), direction(direction) {WidgetFragment* self=(WidgetFragment*)this;DirectionPrefix* f=(DirectionPrefix*)self;f->target=target;}
+void SpinArrow::Slot84(void) {DirectionPrefix* f=(DirectionPrefix*)((WidgetFragment*)this);if(f->direction>0)f->target->Increase();else f->target->Decrease();}
 SpinSldr::SpinSldr(int x, int y, int dx, int dy, ObservedValueProvider* provider) : UIWidget(x,y,x+dx,y+dy,0) {
   WidgetFragment* self=(WidgetFragment*)this;
  ProviderWidgetPrefix* fields=(ProviderWidgetPrefix*)self;fields->provider=provider;fields->active=0;
@@ -3250,16 +3221,16 @@ WidgetFragment* fn_80228FFC(WidgetFragment* self,int destroy){if(self){__dt__8UI
 WidgetFragment* fn_80229054(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_802290B0(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
 
-WidgetFragment* fn_80229168(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+
 
 
 
 WidgetFragment* fn_802292D8(WidgetFragment* self,int destroy){if(self){__dt__8UIWidgetFv(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80229330(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
 WidgetFragment* fn_80229388(WidgetFragment* self,int destroy){if(self){fn_802223C4(self,0);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_802293E0(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_8022943C(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
-WidgetFragment* fn_80229498(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_8021915C(self);if(destroy>0)__dl__FPv(self);}return self;}
+
+
+
 
 WidgetFragment* fn_80229550(WidgetFragment* self,int destroy){if(self){ObservedNullable_fn_802223C4(self);if(destroy>0)__dl__FPv(self);}return self;}
 
@@ -3311,11 +3282,11 @@ void fn_80229BE8(WidgetFragment* self){Slot7C__8UIWidgetFv(self);RichCaptionPref
 
 
 
-void fn_80229CB4(WidgetFragment* self,int,int){LeafActivity* fields=(LeafActivity*)self;fields->active=1;fields->elapsed=(0.0f);WidgetMarkDirty(self);}
-void fn_80229CD8(WidgetFragment* self,int,int){((LeafActivity*)self)->active=0;WidgetMarkDirty(self);}
-void fn_80229CF8(WidgetFragment* self){self->flag18=1;((LeafActivity*)self)->elapsed=(0.0f);WidgetMarkDirty(self);}
-void fn_80229D1C(WidgetFragment* self){self->flag18=0;WidgetMarkDirty(self);}
-int fn_80229D3C(WidgetFragment* self,int x,int y){return fn_802C5280(((LeafResource250*)self)->resource,x-self->left,y-self->top,0);}
+inline void UIArrowButton::Slot3C(int,int){active=1;elapsed=(0.0f);if(flag1a)dirty=1;}
+inline void UIArrowButton::Slot40(int,int){active=0;if(flag1a)dirty=1;}
+inline void UIArrowButton::Slot58(void){flag18=1;elapsed=(0.0f);if(flag1a)dirty=1;}
+inline void UIArrowButton::Slot5C(void){flag18=0;if(flag1a)dirty=1;}
+inline int UIArrowButton::Slot70(int x,int y){return fn_802C5280(handle,x-left,y-top,0);}
 
 
 

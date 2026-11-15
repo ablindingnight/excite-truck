@@ -611,6 +611,9 @@ void* operator new(unsigned long size, const char* tag);
 extern "C" char* strstr(const char*, const char*);
 extern "C" int abs(int);
 extern "C" void* fn_80215270(int, int);
+// MATCHING-AID (transitional): retail evaluates ArrowBtn's watched value into a named local after the allocation
+// check; a new-expression with the same ternary swaps two saved registers, so the factory still calls the ctor by name.
+extern "C" WidgetFragment* __ct__8ArrowBtnFiiPviiPvff(WidgetFragment*, int, int, void*, int, int, void*, float, float);
 extern "C" void fn_802E30C8(const char *, ...);
 extern "C" int fn_80129BC4(void);
 extern "C" unsigned int fn_8022D1B4(const char*);
@@ -620,16 +623,12 @@ extern "C" WidgetFragment* fn_8021995C(WidgetFragment*, int, int, int, void*, vo
 extern "C" WidgetFragment* fn_802224B4(WidgetFragment*, void*, int, int, int, int, void*, void*, int, int);
 extern "C" WidgetFragment* fn_80226630(WidgetFragment*, void*, int, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021A77C(WidgetFragment*, int, int, int, void*, void*);
-extern "C" WidgetFragment* fn_8021B0CC(WidgetFragment*, int, int, void*, void*, void*, int, void*);
 extern "C" WidgetFragment* fn_80220778(WidgetFragment*, int, int, int, int, void*, void*, void*);
-extern "C" WidgetFragment* fn_8021AF0C(WidgetFragment*, int, int, void*, int, int, void*, float, float);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
-extern "C" WidgetFragment* fn_8021C97C(WidgetFragment*, int, int, void*, int, void*);
 extern "C" WidgetFragment* fn_8021A808(WidgetFragment*, int, int, int, void*, void*);
 extern "C" WidgetFragment* fn_8021EA64(WidgetFragment*, int, int, int, int, void*, void*, int, int, int);
 extern "C" WidgetFragment* fn_80222BDC(WidgetFragment*, UIDesc*, void*);
 extern "C" WidgetFragment* fn_8021E0C0(WidgetFragment*, int, int, int, int, void*, void*, void*);
-extern "C" WidgetFragment* fn_8021B1C4(WidgetFragment*, int, int, void*, int, void*);
 extern "C" WidgetFragment* fn_8021F394(WidgetFragment*, int, int, const char*, void*, int);
 extern "C" WidgetFragment* fn_80223CF0(WidgetFragment*, UIDesc*, void*);
 
@@ -966,16 +965,14 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
                 high = (void*)5;
             }
         }
-        p = (WidgetFragment*)operator new(0x264, "IntArrowBtn");
-        if (p) p = fn_8021B0CC(p, d->x, d->y + 1, value, low, high, -1, fn_80215270(0, 1));
+        p = (WidgetFragment*)new ("IntArrowBtn") IntArrowBtn(d->x, d->y + 1, (int*)value, (int)low, (int)high, -1, fn_80215270(0, 1));
         widgets[count++] = p;
         if (d->dx - 37 > 10) {
             p = (WidgetFragment*)operator new(0x264, "IntSlider");
             if (p) p = fn_80220778(p, d->x + 21, d->y, d->dx - 37, d->dy, value, low, high);
             widgets[count++] = p;
         }
-        p = (WidgetFragment*)operator new(0x264, "IntArrowBtn");
-        if (p) p = fn_8021B0CC(p, d->x + d->dx - 14, d->y + 1, value, low, high, 1, fn_80215270(1, 1));
+        p = (WidgetFragment*)new ("IntArrowBtn") IntArrowBtn(d->x + d->dx - 14, d->y + 1, (int*)value, (int)low, (int)high, 1, fn_80215270(1, 1));
         widgets[count++] = p;
         break;
     }
@@ -1001,13 +998,13 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)operator new(0x268, "ArrowBtn");
         if (p) {
             void* value = range ? range->value : &lbl_8055EF50;
-            p = fn_8021AF0C(p, d->x, d->y + 1, value, abs((int)d->field9c), -1, fn_80215270(0, 1), low, high);
+            p = __ct__8ArrowBtnFiiPviiPvff(p, d->x, d->y + 1, value, abs((int)d->field9c), -1, fn_80215270(0, 1), low, high);
         }
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x268, "ArrowBtn");
         if (p) {
             void* value = range ? range->value : &lbl_8055EF50;
-            p = fn_8021AF0C(p, d->x + d->dx - 14, d->y + 1, value, abs((int)d->field9c), 1, fn_80215270(1, 1), low, high);
+            p = __ct__8ArrowBtnFiiPviiPvff(p, d->x + d->dx - 14, d->y + 1, value, abs((int)d->field9c), 1, fn_80215270(1, 1), low, high);
         }
         widgets[count++] = p;
         break;
@@ -1043,11 +1040,9 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         case 4:
             p = (WidgetFragment*)new ("SpinSldr") SpinSldr(d->x + 15, d->y, d->dx - 30, d->dy, (ObservedValueProvider*)target);
             widgets[count++] = p;
-            p = (WidgetFragment*)operator new(0x25c, "SpinArrow");
-            if (p) p = fn_8021C97C(p, d->x + 1, d->y + 2, fn_80215270(0, 2), -1, target);
+            p = (WidgetFragment*)new ("SpinArrow") SpinArrow(d->x + 1, d->y + 2, fn_80215270(0, 2), -1, (FormatTarget*)target);
             widgets[count++] = p;
-            p = (WidgetFragment*)operator new(0x25c, "SpinArrow");
-            if (p) p = fn_8021C97C(p, d->x + d->dx - 15, d->y + 2, fn_80215270(1, 2), 1, target);
+            p = (WidgetFragment*)new ("SpinArrow") SpinArrow(d->x + d->dx - 15, d->y + 2, fn_80215270(1, 2), 1, (FormatTarget*)target);
             widgets[count++] = p;
             break;
         case 5:
@@ -1159,27 +1154,9 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)new ("VScrollBar") ScrollBar(d->x - 3, d->y + 21, d->dx, d->dy - 40,
                                view ? view->value : (void*)&sDefaultView, 0);
         widgets[count++] = p;
-        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
-        if (p) {
-            void* state;
-            if (view) {
-                state = view->value;
-            } else {
-                state = (void*)&sDefaultView;
-            }
-            p = fn_8021B1C4(p, d->x, d->y, state, -1, fn_80215270(2, 0));
-        }
+        p = (WidgetFragment*)new ("ScrollBtn") ScrollBtn(d->x, d->y, (ObservedScrollState*)(view ? view->value : (void*)&sDefaultView), -1, fn_80215270(2, 0));
         widgets[count++] = p;
-        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
-        if (p) {
-            void* state;
-            if (view) {
-                state = view->value;
-            } else {
-                state = (void*)&sDefaultView;
-            }
-            p = fn_8021B1C4(p, d->x, d->y + d->dy - 18, state, 1, fn_80215270(3, 0));
-        }
+        p = (WidgetFragment*)new ("ScrollBtn") ScrollBtn(d->x, d->y + d->dy - 18, (ObservedScrollState*)(view ? view->value : (void*)&sDefaultView), 1, fn_80215270(3, 0));
         widgets[count++] = p;
         break;
     }
@@ -1188,27 +1165,9 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         p = (WidgetFragment*)new ("HScrollBar") ScrollBar(d->x + 21, d->y, d->dx - 40, d->dy,
                                view ? view->value : (void*)&sDefaultView, 1);
         widgets[count++] = p;
-        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
-        if (p) {
-            void* state;
-            if (view) {
-                state = view->value;
-            } else {
-                state = (void*)&sDefaultView;
-            }
-            p = fn_8021B1C4(p, d->x, d->y + 3, state, -1, fn_80215270(0, 0));
-        }
+        p = (WidgetFragment*)new ("ScrollBtn") ScrollBtn(d->x, d->y + 3, (ObservedScrollState*)(view ? view->value : (void*)&sDefaultView), -1, fn_80215270(0, 0));
         widgets[count++] = p;
-        p = (WidgetFragment*)operator new(0x25c, "ScrollBtn");
-        if (p) {
-            void* state;
-            if (view) {
-                state = view->value;
-            } else {
-                state = (void*)&sDefaultView;
-            }
-            p = fn_8021B1C4(p, d->x + d->dx - 18, d->y + 3, state, 1, fn_80215270(1, 0));
-        }
+        p = (WidgetFragment*)new ("ScrollBtn") ScrollBtn(d->x + d->dx - 18, d->y + 3, (ObservedScrollState*)(view ? view->value : (void*)&sDefaultView), 1, fn_80215270(1, 0));
         widgets[count++] = p;
         break;
     }
