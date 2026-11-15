@@ -1295,7 +1295,7 @@ config.libs.append(
             Object(NonMatching, "game/drtex.cpp"),
             Object(Matching, "game/discerr.cpp"),
             Object(NonMatching, "game/bonemgr.cpp"),
-            Object(NonMatching, "game/romfont.cpp"),
+            Object(Matching, "game/romfont.cpp"),
             Object(Matching, "game/stub15.cpp"),
             Object(Matching, "game/gndtex.cpp"),
             Object(NonMatching, "game/glare.cpp"),

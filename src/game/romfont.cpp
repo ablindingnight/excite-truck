@@ -224,26 +224,27 @@ void fn_802DB03C(const char* msg) {
     fn_802D2FD8();
 }
 
+// The boot screen (date/time stamp, version check and the progressive/interlaced dialog): never called in this
+// build, so the compiler drops it but keeps its strings. Body reconstructed from the strings only.
+static void BootScreenUnused(const char* name, int a, int b, int t[6], int dtv, int pro) {  /* Helper name unproven */
+    fn_802E30C8("%s %d %d", name, a, b);
+    fn_802E30C8("%d:%d:%d", t[3], t[4], t[5]);
+    fn_802E30C8("%04d/%02d/%02d   %02d:%02d:%02d", t[0], t[1], t[2], t[3], t[4], t[5]);
+    fn_802E30C8("Do you want to use interlaced mode?");
+    fn_802E30C8("drDoBootScreen");
+    fn_802E30C8("version check...");
+    fn_802E30C8("VERSION CHECK");
+    fn_802E30C8(pro ? "Progressive" : "Interlaced");
+    fn_802E30C8("bootscrn: has DTV cable (old mode %s)...", dtv ? "Progressive" : "Interlaced");
+    fn_802E30C8("dr: interlaced dialog requested!");
+    fn_802E30C8("bootscrn: switching to progressive mode");
+    fn_802E30C8("Screen has been set to progressive mode");
+    fn_802E30C8("bootscrn: switching to interlaced mode");
+    fn_802E30C8("Screen has been set to interlaced mode");
+}
+
 void fn_802DB168(void) {
     ClearScreen();
-    // From the boot-screen functions the linker stripped.
-    static const char* unused[] = {
-        "%s %d %d",
-        "%d:%d:%d",
-        "%04d/%02d/%02d   %02d:%02d:%02d",
-        "Do you want to use interlaced mode?",
-        "drDoBootScreen",
-        "version check...",
-        "VERSION CHECK",
-        "Progressive",
-        "Interlaced",
-        "bootscrn: has DTV cable (old mode %s)...",
-        "dr: interlaced dialog requested!",
-        "bootscrn: switching to progressive mode",
-        "Screen has been set to progressive mode",
-        "bootscrn: switching to interlaced mode",
-        "Screen has been set to interlaced mode",
-    };
     fn_802DAE64(-450, 380, "LOADING");
     fn_802D2FD8();
     fn_802CED50(450, 380, 120, 30);
