@@ -256,6 +256,11 @@ static inline int Loop1_fn_802BC09C(u8* cur, short x, short z) {
     return i;
 }
 
+// Stripped helper (name unproven): retail pools 0.0f BEFORE 0.5f, while the ?: rounding below creates 0.5f first.
+// A never-called static function is dropped by the compiler but keeps its constants in creation order (FACTS:
+// constants/strings of linker-stripped functions; romfont, crashmode PumpWindow).
+static f32 Clamp0(f32 f) { return (f < 0.0f) ? 0.0f : f; }
+
 int fn_802BC09C(short x, short z, int layer, u8 value, f32 strength) {
     int locked;
     int i;

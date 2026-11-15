@@ -1272,7 +1272,7 @@ config.libs.append(
             Object(Matching, "game/umat.cpp"),
             Object(NonMatching, "game/tedash.cpp"),
             Object(NonMatching, "game/xlobj.cpp"),
-            Object(NonMatching, "game/lweight.cpp"),
+            Object(Matching, "game/lweight.cpp"),
             Object(Matching, "game/stub14.cpp"),
             Object(NonMatching, "game/faninfo.cpp"),
             Object(NonMatching, "game/water.cpp"),
