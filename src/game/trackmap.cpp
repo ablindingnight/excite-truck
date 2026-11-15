@@ -706,10 +706,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         Vec2 c;
         Vec3 rel;
         c.y = y - h * 0.5f;
-        c.x = x + w * 0.5f;
         Vec3 p = tr->pos;
         tp.x = p.x;
         tp.y = p.z;
+        c.x = x + w * 0.5f;
         SetXYZ(&rel, m->pos.x - basis.pos.x, m->pos.y - basis.pos.y, 0.0f - basis.pos.z);
         MulVecT(&rel, &rel, &basis);
         {

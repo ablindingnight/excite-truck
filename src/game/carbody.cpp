@@ -1859,9 +1859,9 @@ void fn_80183E7C(u8* p) {
         f32 stall = lbl_80561D34 * F32(p, 0x264C);
         stall = stall < lbl_80561CD0 ? stall : lbl_80561CD0;
         f32 pitch = F32(p, 0x2600) + lbl_80561D64 * stall * fn_80129DC4(4, lbl_80561DE4, lbl_80561CD0);
-        f32 roll = F32(p, 0x2604);
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = lbl_80561CAC;
+        f32 roll = F32(p, 0x2604);
         f32 m = PSVECMag(&fl);
         m = m > lbl_80561CD0 ? m : lbl_80561CD0;
         f32 inv = lbl_80561CD0 / m;
@@ -1939,8 +1939,8 @@ void fn_80183E7C(u8* p) {
             if (lbl_80561D9C + stalled < lbl_80561CD0) {
                 st = lbl_80561D9C + stalled;
             }
-            F32(p, 0x264C) = st;
             nosedive = 1;
+            F32(p, 0x264C) = st;
             dive = lbl_80561DD0 + Clamp01((st - lbl_80561CDC) / lbl_80561CDC) * lbl_80561DF0;
         }
         f32 lean = lbl_80561CEC * dive;
@@ -1960,13 +1960,13 @@ void fn_80183E7C(u8* p) {
             }
             target = LerpT(Clamp01((lean - lbl_80561CAC) / lbl_80561DB4), F32(p, 0x261C), top);
         } else {
+            airLift = airLift + lbl_8055A3B0 * -lean;
             f32 t = Clamp01((lean - lbl_80561CAC) / lbl_80561DF4);
             target = LerpT(t, F32(p, 0x261C), lbl_80561DD0 * F32(p, 0x261C));
-            airLift = airLift + lbl_8055A3B0 * -lean;
         }
+        f32 want = target - lbl_80561DA0 * F32(p, 0x25E4);
         HVec dir = *(HVec*)(p + 0x118);
         dir.y = lbl_80561CAC;
-        f32 want = target - lbl_80561DA0 * F32(p, 0x25E4);
         f32 m = PSVECMag(&dir);
         m = m > lbl_80561CCC ? m : lbl_80561CCC;
         f32 one = lbl_80561CD0;
@@ -2026,8 +2026,8 @@ void fn_80183E7C(u8* p) {
     f32 t2588 = F32(p, 0x2588) - lbl_80561D9C;
     t2588 = t2588 > lbl_80561CAC ? t2588 : lbl_80561CAC;
     f32 t2590 = F32(p, 0x2590) - lbl_80561D9C;
-    F32(p, 0x2588) = t2588;
     t2590 = t2590 > lbl_80561CAC ? t2590 : lbl_80561CAC;
+    F32(p, 0x2588) = t2588;
     f32 boost = F32(p, 0x258C) - lbl_80561D9C;
     F32(p, 0x2590) = t2590;
     boost = boost > lbl_80561E10 ? boost : lbl_80561E10;
@@ -2385,13 +2385,13 @@ void fn_80183E7C(u8* p) {
         f32 az = sz + vz + acc.z * lbl_80561E4C;
         f32 nvx = F32(p, 0x26F0) + ax * lbl_80561D9C;
         f32 nvy = F32(p, 0x26F4) + ay * lbl_80561D9C;
-        f32 dx = nvx * lbl_80561D9C;
         f32 nvz = F32(p, 0x26F8) + az * lbl_80561D9C;
+        f32 dx = nvx * lbl_80561D9C;
         f32 dy = nvy * lbl_80561D9C;
-        f32 dz = nvz * lbl_80561D9C;
         int lean = F32(p, 0x26FC) > lbl_80561CB8;
         F32(p, 0x26F0) = nvx;
         F32(p, 0x26F4) = nvy;
+        f32 dz = nvz * lbl_80561D9C;
         F32(p, 0x26F8) = nvz;
         F32(p, 0x26E4) = F32(p, 0x26E4) + dx;
         F32(p, 0x26E8) = F32(p, 0x26E8) + dy;

@@ -661,9 +661,9 @@ void fn_8026C014(int player) {
         u32 now = fn_802E2C20();
         u32 last = lbl_8055F514;
         f32 dt;
+        f32 fovRate;
         f32 speed;
         f32 turn;
-        f32 fovRate;
         f32 hi;
         f32 lo;
         f32 t;
