@@ -2693,20 +2693,34 @@ f32 fn_8011AE18(s32 arg0) {
 }
 
 // Scales float samples by `gain` into clamped 16-bit PCM.
-void fn_8011AE68(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
-    s16 *out = (s16 *)arg0;
+#pragma push  /* RAD built this routine without constant propagation or speculative unrolling (Process review) */
+#pragma opt_propagation off
+#pragma opt_unroll_loops off
+#pragma ppc_unroll_speculative off
+void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
     u32 i;
     u32 v;
-    if (arg2 <= 0) {
-        return;
-    }
+    u32 d;
+    u64 t;
+    u32 lo = 0x7FFF8000;
+    u32 hi = 0x80007FFF;
+    arg0--;
     for (i = 0; i < arg2; i++) {
         v = (s32)(*arg1++ * farg0);
-        if (v < -32768) v = -32768;
-        if (v > 32767) v = 32767;
-        *out++ = v;
+        v ^= 0x80000000;
+        t = (u64)v - lo;
+        d = (u32)t;
+        d &= ~(u32)(t >> 32);
+        v = d - 32768;
+        v ^= 0x80000000;
+        t = (u64)v - hi;
+        d = (u32)t;
+        d &= (u32)(t >> 32);
+        v = d + 32767;
+        *++arg0 = v;
     }
 }
+#pragma pop
 
 // Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
 void fn_8011AED8(s32 arg0, f32 *arg1, u32 arg2, f32 farg0) {
@@ -2993,7 +3007,7 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
         else fn_801200BC(size, -1, p, (int *)arg3, (f32 *)arg4);
         p += size;
     }
-    if (channels == 1) fn_8011AE68(output, buffer, size, gain);
+    if (channels == 1) fn_8011AE68((s16 *)output, buffer, size, gain);
     else fn_8011AED8(output, buffer, size, gain);
     bits.count = 0;
     return ((u32)bits.next - (u32)bits.start) & 0x1fffffff;
