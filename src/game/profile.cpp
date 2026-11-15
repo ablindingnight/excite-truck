@@ -626,20 +626,24 @@ int ProfileKeyboardState::Key(int key) {
     return 1;
 }
 
+/* Helper name unproven */
+static inline f32 PkMul(f32 k, f32 v) { return k * v; }
 void ProfileKeyboardState::Draw(void) {
     ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
     f32 x, y;
     fn_80230C30(&x, &y, self->x, self->y);
     f32 cellHeight;
     f32 cellWidth = (f32)self->width / 10.0f;
-    cellHeight = (f32)self->height * 0.25f;
+    cellHeight = PkMul((f32)self->height, 0.25f);
+    f32 border;
+    f32 left;
     f32 top;
-    f32 left = x + cellWidth * (f32)self->selectedColumn;
+    left = x + cellWidth * (f32)self->selectedColumn;
     top = y - cellHeight * (f32)self->selectedRow;
     // right/bottom are unused: the target still converts column+1 and row+1 (xoris/stw) but drops the float math.
     f32 right = x + cellWidth * (f32)(self->selectedColumn + 1);
     f32 bottom = y - cellHeight * (f32)(self->selectedRow + 1);
-    f32 border = 4.0f;
+    border = 4.0f;
     fn_80230924(0xFFAF7F00, left, top, left + cellWidth, top - border, 0.0f);
     fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, border + (top - cellHeight), 0.0f);
     fn_80230924(0xFFAF7F00, left, top, left + border, top - cellHeight, 0.0f);
