@@ -937,6 +937,7 @@ void fn_80254568(Vec3a* out, s32 model, const char* name) {
 
 }
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
+static inline f32 LerpH(f32 a, f32 b, f32 t) { return a + t * (b - a); }  /* Helper name unproven */
 extern "C" {
 void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
     memset(p, 0, sizeof(CarPose));
@@ -957,12 +958,9 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         fn_80254568((Vec3a*)&l, model, "front_l");
         fn_80254568((Vec3a*)&c, model, "rear_c");
         Vec mid;
-        mid.x = l.x + 0.5f * (r.x - l.x);
-        f32 yv = r.y;
-        f32 ly = l.y;
-        mid.y = ly + 0.5f * (yv - l.y);
-        f32 zv = r.z;
-        mid.z = l.z + 0.5f * (zv - l.z);
+        mid.x = LerpH(l.x, r.x, 0.5f);
+        mid.y = LerpH(l.y, r.y, 0.5f);
+        mid.z = LerpH(l.z, r.z, 0.5f);
         p->frame.b.v[2].x = mid.x - c.x;
         p->frame.b.v[2].y = mid.y - c.y;
         p->frame.b.v[2].z = mid.z - c.z;
@@ -985,9 +983,9 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
             p->frame.pos.x = mid.x + p->frame.b.v[2].x * back;
             p->frame.pos.y = mid.y + p->frame.b.v[2].y * back;
             p->frame.pos.z = mid.z + p->frame.b.v[2].z * back;
-            f32 lift = Sum(0.0f, h + (-m->wheelPos[1].y + rad));
-            f32 vx = p->frame.b.v[1].x;
-            p->frame.pos.x = p->frame.pos.x + vx * lift;
+            f32 zero = 0.0f;
+            f32 lift = zero + (h + (-m->wheelPos[1].y + rad));
+            p->frame.pos.x = p->frame.pos.x + p->frame.b.v[1].x * lift;
             p->frame.pos.y = p->frame.pos.y + p->frame.b.v[1].y * lift;
             p->frame.pos.z = p->frame.pos.z + p->frame.b.v[1].z * lift;
         } else {
