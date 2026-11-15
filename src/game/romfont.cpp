@@ -201,7 +201,7 @@ void fn_802DAE64(int x, int y, const char* str) {
                 int sy = row + sheetY;
                 int sx = col + sheetX;
                 int tile = sx / 8 + (sy / 8 * 512) / 8;
-                int texel = tile * 64 + sy % 8 * 8 + sx % 8;
+                int texel = sy % 8 * 8 + (sx % 8 + tile * 64);
                 u8 b = image[texel / 2];
                 u8 level = !(col & 1) ? ((b >> 4) & 0xF) : (b & 0xF);
                 if (level) {
