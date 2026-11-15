@@ -532,7 +532,7 @@ void fn_802C9118(void) {
     fn_802C8D74();
 }
 
-void fn_802C9124(int x0, int y0, int x1, int y1, u32 color, f32 u0, f32 v0, f32 u1, f32 v1) {
+void fn_802C9124(int x0, int y0, int x1, int y1, f32 u0, f32 v0, f32 u1, f32 v1, u32 color) {
     if (fn_801E4F20(4)) {
         fn_801E4F3C(x1, y0, 0.0f, u1, v0, color, 0);
         fn_801E4F3C(x0, y0, 0.0f, u0, v0, color, 0);
