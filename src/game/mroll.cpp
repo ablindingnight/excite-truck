@@ -455,10 +455,14 @@ void fn_80214AF0(int s);
 void fn_80214A9C(int s);
 }
 
-struct JoinLeaveWidget {
-    void* vt;              // offset 0x0
-    u8 pad4[0x10];
-    s32 f14;               // offset 0x14
+class JoinLeaveWidget : public MenuState {
+public:
+    JoinLeaveWidget(void) { memset(groups, 0, sizeof(groups)); }
+    virtual ~JoinLeaveWidget(void) {}
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual int Key(int key);
+
     FocusGroup groups[2];  // offset 0x18
     u8 allReady;           // offset 0x58
 
@@ -567,7 +571,6 @@ static inline void AddFocus(JoinLeaveWidget* w, CarSel* s, int join, int car, in
     fn_802E317C("JoinLeaveWidget: tried to add too many focii! (%d is the max)", 2);
 }
 
-extern void* __vt__15JoinLeaveWidget[];
 extern u8 lbl_8055FC8C;  // wide-screen layout
 void CarStatsInit(void);
 void CarStatsShutdown(void);
@@ -628,9 +631,6 @@ int fn_8023FF1C(u8 flag) {
     fn_8013C804();
     RollPanels pp(flag);
     JoinLeaveWidget w;
-    w.vt = __vt__15JoinLeaveWidget;
-    w.f14 = 0;
-    memset(w.groups, 0, sizeof(w.groups));
     AddFocus(&w, &pp.p1.sel, 3, 1, 5, 7, 9);
     AddFocus(&w, &pp.p2.sel, 4, 2, 6, 8, 10);
     MenuItem items[] = {
@@ -702,12 +702,6 @@ int fn_8023FF1C(u8 flag) {
     return result;
 }
 
-u8* JoinLeaveWidget_vf08(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
 
 
 
@@ -1095,46 +1089,56 @@ extern "C" {
 
 extern "C" {
 
-void JoinLeaveWidget_vf0C(JoinLeaveWidget* w) {
+}  // extern "C"
+
+void JoinLeaveWidget::Enter(void) {
     lbl_8055F1FC = 0;
     for (int i = 0; i < 2; i++) {
-        w->groups[i].sel->SetSlot(i);
-        w->groups[i].state = 2;
+        this->groups[i].sel->SetSlot(i);
+        this->groups[i].state = 2;
     }
-    w->allReady = 0;
-    w->groups[0].prev = 0;
-    w->groups[1].prev = 0;
-    w->UpdateFocus();
+    this->allReady = 0;
+    this->groups[0].prev = 0;
+    this->groups[1].prev = 0;
+    this->UpdateFocus();
 }
 
+extern "C" {
+
 // Every tenth frame, drops players whose controller is gone back to the join prompt.
-void JoinLeaveWidget_vf1C(JoinLeaveWidget* w) {
+}  // extern "C"
+
+void JoinLeaveWidget::Update(void) {
     if (++lbl_8055F1F8 % 10 == 0) {
         for (u32 i = 0; i < 2; i++) {
-            if (w->groups[i].state > 1 && !fn_802E8504(*w->groups[i].sel->slot)) {
-                FocusGroup* g = &w->groups[i];
+            if (this->groups[i].state > 1 && !fn_802E8504(*this->groups[i].sel->slot)) {
+                FocusGroup* g = &this->groups[i];
                 g->sel->SetSlot(-1);
                 g->state = 1;
             }
         }
     }
-    w->UpdateFocus();
+    this->UpdateFocus();
     if (!fn_802411D4()) {
         lbl_8055F1FC = 1;
         lbl_8055F200 = 0;
     }
 }
 
+extern "C" {
+
 void fn_80216D28(void);
 void fn_80214D50(int s);
 
 // Join/leave input: Back steps a player back (or leaves), Enter confirms, joins or starts the race.
-int JoinLeaveWidget_vf58(JoinLeaveWidget* w, int key) {
+}  // extern "C"
+
+int JoinLeaveWidget::Key(int key) {
     int ctrl = fn_802E4A10();
     if (ctrl >= 2) {
         return 0;
     }
-    FocusGroup* c = &w->groups[ctrl];
+    FocusGroup* c = &this->groups[ctrl];
     int same = ctrl == *c->sel->slot;
     u8 owns = 0;
     if (c->state > 1 && same) {
@@ -1145,7 +1149,7 @@ int JoinLeaveWidget_vf58(JoinLeaveWidget* w, int key) {
     switch (key) {
     case 0x1B:
         if (mine >= 0) {
-            FocusGroup* g = &w->groups[mine];
+            FocusGroup* g = &this->groups[mine];
             if (--g->state == 1) {
                 if (mine == 0) {
                     lbl_8055F1FC = 1;
@@ -1163,7 +1167,7 @@ int JoinLeaveWidget_vf58(JoinLeaveWidget* w, int key) {
         }
         break;
     case 0x0D:
-        if (w->AllReady()) {
+        if (this->AllReady()) {
             if (ctrl == 0) {
                 lbl_8055F1FC = 1;
                 lbl_8055F200 = 2;
@@ -1172,16 +1176,16 @@ int JoinLeaveWidget_vf58(JoinLeaveWidget* w, int key) {
                 fn_80214D50(1);
             }
         } else if (mine >= 0) {
-            FocusGroup* g = &w->groups[mine];
-            if (w->Unconfirmed(mine) > 0) {
+            FocusGroup* g = &this->groups[mine];
+            if (this->Unconfirmed(mine) > 0) {
                 if (g->state > 1 && g->sel->Confirmable()) {
                     g->state++;
                     g->sel->SetCur(g->state != 2);
                 }
             }
         } else if (free >= 0) {
-            w->groups[free].sel->SetSlot(ctrl);
-            w->groups[free].state = 2;
+            this->groups[free].sel->SetSlot(ctrl);
+            this->groups[free].state = 2;
         }
         break;
     case 0x6F:
@@ -1191,6 +1195,8 @@ int JoinLeaveWidget_vf58(JoinLeaveWidget* w, int key) {
     }
     return 1;
 }
+
+extern "C" {
 
 // .sdata2 constants owned by this unit (0x80563750-0x80563798), in address order.
 extern const double lbl_80563750 = 4503601774854144.0;
