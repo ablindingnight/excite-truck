@@ -1122,7 +1122,7 @@ config.libs.append(
             Object(Matching, "game/carinfo.cpp"),
             Object(Matching, "game/animobj.cpp"),
             Object(NonMatching, "game/graf.cpp"),
-            Object(NonMatching, "game/carmodel.cpp"),
+            Object(Matching, "game/carmodel.cpp"),
             Object(Matching, "game/fwd1ea4b4.cpp"),
             Object(Matching, "game/event.cpp"),
             Object(Matching, "game/xraysusp.cpp"),

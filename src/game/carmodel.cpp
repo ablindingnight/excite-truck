@@ -354,7 +354,8 @@ static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055EBB0 = MakeILPos(0xFFFF, 0);
 extern const f32 lbl_8055EBB4 = Angle(0.7853982f);
 extern const u32 lbl_8055EBB8 = MakeILPos(0x7F00, 0);
-extern const f32 lbl_8055EBBC = Angle(1.0471976f);  // wheel turn scale
+extern const f32 WheelTurnAngle;
+extern const f32 lbl_8055EBBC = WheelTurnAngle;  // wheel turn scale
 extern const s32 lbl_8055EBC0 = Mask(-0x100);
 u8 lbl_8055EBC4;
 CarModel* lbl_8055EBC8;  // the player's own car
@@ -1268,3 +1269,5 @@ void PlayerCarModel::Set(const AnimSlot* s) {
 }
 
 int PlayerCarModel::vf28(void) { return 1; }
+
+extern const f32 WheelTurnAngle = 1.0471976f;
