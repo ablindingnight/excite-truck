@@ -1021,7 +1021,7 @@ config.libs.append(
             Object(Matching, "game/catchup.cpp"),
             Object(Matching, "game/aiwidth.cpp"),
             Object(Matching, "game/radar.cpp"),
-            Object(NonMatching, "game/arenabnd.cpp"),
+            Object(Matching, "game/arenabnd.cpp"),
             Object(Matching, "game/aistub.cpp"),
             Object(Matching, "game/pushpass.cpp"),
             Object(Matching, "game/aiskill.cpp"),

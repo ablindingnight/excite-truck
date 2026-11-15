@@ -125,9 +125,9 @@ inline Bound* NewBound(s32 n) {
 }
 
 static inline void Perp(V2* v) {
-    f32 t = -v->x;
-    v->x = v->y;
-    v->y = t;
+    const f32 x = v->y;
+    v->y = -v->x;
+    v->x = x;
 }
 
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
@@ -209,9 +209,10 @@ int fn_80139B70(const Bound* b, f32 x, f32 y) {
             V2 e;
             e.x = q->x - p->x;
             e.y = q->y - p->y;
-            V2 a(x - p->x, y - p->y);
             Perp(&e);
-            if ((e.x * a.x + e.y * a.y < 0.0f) == up) {
+            V2 a(x - p->x, y - p->y);
+            const f32 side = e.y;
+            if ((e.x * a.x + side * a.y < 0.0f) == up) {
                 c++;
             }
         }
