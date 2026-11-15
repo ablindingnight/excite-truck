@@ -2601,12 +2601,16 @@ void fn_801C957C(int on) {
     lbl_8055E838 = on;
 }
 
+#pragma push
+#pragma opt_dead_assignments off
 void fn_801C95EC(void) {
     strcpy(lbl_80437FC0, "");
     lbl_8055E86C[lbl_8055E81C].items[lbl_8055E820].fn();
     int m = lbl_8055E81C;
-    int i = lbl_8055E820;
-    int n = lbl_8055E86C[m].items[i].next;
+    const Menu& menu = lbl_8055E86C[m];
+    const int i = lbl_8055E820;
+    const unsigned offset = static_cast<unsigned>(i) * sizeof(MenuItem);
+    const int n = reinterpret_cast<const MenuItem*>(reinterpret_cast<const u8*>(menu.items) + offset)->next;
     if (n == 0x22) {
         lbl_8055E81C = lbl_8055E870;
     } else {
@@ -2617,6 +2621,7 @@ void fn_801C95EC(void) {
         }
     }
 }
+#pragma pop
 
 void fn_801C968C(int d) {
     int i = lbl_8055E820 + d;
