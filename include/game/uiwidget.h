@@ -76,19 +76,6 @@ public:
     int textX, textY, textWidth, textStyle;   // 0x244 (widgets.cpp views: x, y, width, height)
 };
 
-class CheckBox : public UILabel {  /* Class name unproven (allocation tag "CheckBox"); vtable lbl_8033F768 */
-public:
-    CheckBox(int x, int y, const char* text, unsigned char* flag, int height);  // fn_80219870 (no dtor: implicit fn_802294F4)
-    virtual void Slot3C(int a, int b) { *(bool*)flag = !*(bool*)flag; }   // inline: fn_8022984C
-    virtual void Slot58(void) { if (flag1a) dirty = 1; flag18 = 1; }      // inline: fn_80229864
-    virtual void Slot5C(void) { if (flag1a) dirty = 1; flag18 = 0; }      // inline: fn_80229884
-    virtual int Slot64(int key);                                           // fn_80219958
-    virtual const char* Slot88(void) { return text; }                      // inline: fn_802298A4
-    virtual int Slot84(void) { int mode = 0; if (flag18) mode = 2; return (flag[0] != 0) | mode; }  // inline: fn_802298AC
-    unsigned char* flag;         // 0x254
-    char text[0x100];            // 0x258
-};
-
 // uiapi's key binding widget (lbl_8033D590): calls its mapped action when the key is pressed. Declared before UIImage
 // because its vtable follows UIImage's in uiapi .data (vtables come out in reverse declaration order).
 class UIHotKey : public UIWidget {  /* Class name unproven */
@@ -160,6 +147,20 @@ public:
     void* handle;  // 0x4
     float width;     // 0x8
     float height;    // 0xC
+};
+
+// The first UILabel subclass; declared after the image prefixes so its vtable comes out before theirs.
+class CheckBox : public UILabel {  /* Class name unproven (allocation tag "CheckBox"); vtable lbl_8033F768 */
+public:
+    CheckBox(int x, int y, const char* text, unsigned char* flag, int height);  // fn_80219870 (no dtor: implicit fn_802294F4)
+    virtual void Slot3C(int a, int b) { *(bool*)flag = !*(bool*)flag; }   // inline: fn_8022984C
+    virtual void Slot58(void) { if (flag1a) dirty = 1; flag18 = 1; }      // inline: fn_80229864
+    virtual void Slot5C(void) { if (flag1a) dirty = 1; flag18 = 0; }      // inline: fn_80229884
+    virtual int Slot64(int key);                                           // fn_80219958
+    virtual const char* Slot88(void) { return text; }                      // inline: fn_802298A4
+    virtual int Slot84(void) { int mode = 0; if (flag18) mode = 2; return (flag[0] != 0) | mode; }  // inline: fn_802298AC
+    unsigned char* flag;         // 0x254
+    char text[0x100];            // 0x258
 };
 
 struct FormattedChoiceDescriptor;
