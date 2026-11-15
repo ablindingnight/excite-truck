@@ -599,7 +599,7 @@ static inline void SubVec(f32* out, const f32* a, const f32* b) {
     out[2] = a[2] - b[2];
 }
 
-void fn_801683F4(PickupCounts* out, int player) {
+PickupCounts fn_801683F4(int player) {
     PickupCounts res;
     RaceCarRec* rec;
     memset(&res, 0, sizeof(res));
@@ -681,7 +681,7 @@ void fn_801683F4(PickupCounts* out, int player) {
     lbl_80430260[player].pos[1] = rec->pos[1];
     lbl_80430260[player].pos[2] = rec->pos[2];
     lbl_80430260[player].frame = lbl_8055E3C4;
-    *out = res;
+    return res;
 }
 
 void fn_801688B4(int id) { lbl_8055E354->EnableGroups(id); }
