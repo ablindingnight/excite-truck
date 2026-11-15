@@ -1796,17 +1796,18 @@ void fn_8000FF88(u32 color, int size, const char* text, f32 scale, f32 x, f32 y,
 static inline Vec3* WatcherPos(void) { return &fn_802C86DC()->pos; }
 
 /* Helper name unproven: the bar drawn above the next gate (endpoints copied as plain vectors, level and texture by value). */
-static inline void DrawGateBar(const PlainVec3& from, const PlainVec3& to, int level, s32 tex, f32 t) {
+static inline void DrawGateBar(const PlainVec3& from, const PlainVec3& to, const s32& level, const s32& tex, f32 t) {
     PlainVec3 a = from;
     PlainVec3 b = to;
     f32 y = (a.y > b.y ? a.y : b.y) + 10.0f;
+    const s32 currentLevel = level;
     int lo;
     int hi;
     b.y = y;
     a.y = y;
     lo = 0;
     hi = 0x48;
-    if (level == lbl_8042FB3C.highestLevel - 1) {
+    if (currentLevel == lbl_8042FB3C.highestLevel - 1) {
         lo = 0x48;
         hi = 0x72;
     }
@@ -2062,11 +2063,10 @@ void ZoneMaster::DrawLevel(int p, CarState* c) const {
             LayoutItem* it = mainLyt->Find("middle_message");
             if (it) {
                 LayoutItem m;
-                int n = level + 1;
                 m = *it;
                 m.scale *= 0.3f;
                 m.color = 0xFFFFFF;
-                fn_801479A8(it, &m, "LEVEL %d", a, n);
+                fn_801479A8(it, &m, "LEVEL %d", a, level + 1);
             }
         }
     }
