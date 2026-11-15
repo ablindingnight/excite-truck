@@ -9,6 +9,7 @@ extern const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
 #include "game/menu.h"
 #include "game/menustate.h"
 #include "game/menuwidget.h"
+#include "game/menuwidget_inl.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -36,7 +37,7 @@ extern "C" {
 void fn_80235380(u8* p);
 void fn_802E317C(const char* fmt, ...);
 u8* fn_8023512C(const char* name);
-u32 fn_802E4A10(void);
+int fn_802E4A10(void);
 void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
 int fn_802E8504(int ch);
@@ -121,49 +122,6 @@ static inline void SetItem(MenuWidgetBase* w, u8 s, u32 v) {  /* Helper name unp
     w->id = v;
 }
 
-// A player's car choice list: a menu state over the rows (class name unproven).
-class CarSel : public MenuState {
-public:
-    CarSel(s32* slot, u8* car);
-    virtual ~CarSel(void) {}
-    virtual void Enter(void);
-    virtual int Key(int key);
-
-    CarSelItem* items[4];   // offset 0x18
-    u8* car;                // offset 0x28
-    s32 count;              // offset 0x2C
-    s32 cur;                // offset 0x30
-    s32* slot;              // offset 0x34
-    u8 active;              // offset 0x38
-    char name[0x20];        // offset 0x39
-
-    // Marks the current row (when active) and gives every row the slot.
-    void Refresh(void) {
-        for (int i = 0; i < count; i++) {
-            SetItem(items[i], active && i == cur, *slot);
-        }
-    }
-    void SetSlot(s32 s);
-    void SetCur(s32 c) {
-        cur = c;
-        Refresh();
-    }
-    // True when the list is active and every row has been set.
-    u8 Confirmable(void) {
-        if (active) {
-            for (int i = 0; i < count; i++) {
-                if (!items[i]->vf14()) {
-                    return 0;
-                }
-            }
-        }
-        return active;
-    }
-    void SetActive(u8 a) {
-        active = a;
-        Refresh();
-    }
-};
 
 // Copies at most n - 1 characters and always terminates.
 static inline void CopyName(const char* src, int n, char* dst) {
@@ -185,17 +143,27 @@ VU* fn_8027DB40(int kind);
 const char* fn_802E85B8(s32 slot);
 }
 
-// Shows controller slot s (no name when negative).
-inline void CarSel::SetSlot(s32 s) {
-    *slot = s;
-    S32(car, 0xD8) = *slot;
-    if (*slot < 0) {
-        CopyName("", 0x20, name);
-    } else {
-        CopyName(fn_802E85B8(*slot), 0x20, name);
+
+// One stat bar: a menu state that draws one stat's caption (class name from garage.cpp).
+class StatBar : public MenuState {
+public:
+    StatBar(void);
+    virtual ~StatBar(void) {
+        value = 0;
+        flag = 0;
+        fn_802328D4(font);
+        font = 0;
     }
-    Refresh();
-}
+    virtual void Exit(void);
+    virtual void Update(void);
+    virtual void Draw(void);
+    virtual void Set(int i, s32* value, u8* flag);
+
+    u8* font;    // offset 0x18
+    s32 index;   // offset 0x1C: stat number + 1 (-1 = none)
+    u8* flag;    // offset 0x20
+    s32* value;  // offset 0x24
+};
 
 struct VehicleInfo {
     s32 index;                // offset 0x0
@@ -348,21 +316,62 @@ public:
     }
 };
 
-// One stat bar: a menu state that draws one stat's caption (class name from garage.cpp).
-class StatBar : public MenuState {
-public:
-    StatBar(void);
-    virtual ~StatBar(void);
-    virtual void Exit(void);
-    virtual void Update(void);
-    virtual void Draw(void);
-    virtual void Set(int i, s32* value, u8* flag);
 
-    u8* font;    // offset 0x18
-    s32 index;   // offset 0x1C: stat number + 1 (-1 = none)
-    u8* flag;    // offset 0x20
-    s32* value;  // offset 0x24
+// A player's car choice list: a menu state over the rows (class name unproven).
+class CarSel : public MenuState {
+public:
+    CarSel(s32* slot, u8* car);
+    virtual ~CarSel(void) {}
+    virtual void Enter(void);
+    virtual int Key(int key);
+
+    CarSelItem* items[4];   // offset 0x18
+    u8* car;                // offset 0x28
+    s32 count;              // offset 0x2C
+    s32 cur;                // offset 0x30
+    s32* slot;              // offset 0x34
+    u8 active;              // offset 0x38
+    char name[0x20];        // offset 0x39
+
+    // Marks the current row (when active) and gives every row the slot.
+    void Refresh(void) {
+        for (int i = 0; i < count; i++) {
+            SetItem(items[i], active && i == cur, *slot);
+        }
+    }
+    void SetSlot(s32 s);
+    void SetCur(s32 c) {
+        cur = c;
+        Refresh();
+    }
+    // True when the list is active and every row has been set.
+    u8 Confirmable(void) {
+        if (active) {
+            for (int i = 0; i < count; i++) {
+                if (!items[i]->vf14()) {
+                    return 0;
+                }
+            }
+        }
+        return active;
+    }
+    void SetActive(u8 a) {
+        active = a;
+        Refresh();
+    }
 };
+
+// Shows controller slot s (no name when negative).
+inline void CarSel::SetSlot(s32 s) {
+    *slot = s;
+    S32(car, 0xD8) = *slot;
+    if (*slot < 0) {
+        CopyName("", 0x20, name);
+    } else {
+        CopyName(fn_802E85B8(*slot), 0x20, name);
+    }
+    Refresh();
+}
 
 // The stat panel of the car picker: the car's stats, one bar and caption per stat.
 struct StatPanel {
@@ -578,18 +587,12 @@ extern "C" {
 void fn_8013C804(void);
 void fn_8013C8B8(void);
 void fn_80129AEC(int a);
-u32 fn_802E4A10(void);
+int fn_802E4A10(void);
 void fn_8023D4B8(s32 ch);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 void fn_802409AC(CarSel* p, CarSelItem* item);
 }  // extern "C"
 
-StatBar::~StatBar(void) {
-    value = 0;
-    flag = 0;
-    fn_802328D4(font);
-    font = 0;
-}
 
 extern "C" {
 void fn_802409A4(u8* p, u8 v);
