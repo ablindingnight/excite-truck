@@ -135,6 +135,8 @@ int fn_802A7E08(const void* pa, const void* pb) {
 
 // NonMatching: register numbering only. The run-time (far - near) and 3 * far come from plain
 // (non-const) float locals, which MWCC does not fold.
+static inline u32 WhiteAlpha(f32 a) { return (int)(255.0f * a) << 24 | 0xFFFFFF; }  /* Helper name unproven */
+
 void fn_802A7EEC(void) {
     int order[8];
     int* q;
@@ -146,12 +148,13 @@ void fn_802A7EEC(void) {
         *q = i;
     }
     qsort(order, fn_801EA994(), sizeof(int), fn_802A7E08);
-    f32 nearDist;
-    f32 farDist;
-    farDist = 7056.0f;
-    nearDist = 100.0f;
-    for (i = 0, q = order; i < fn_801EA994(); q++, i++) {
-        int car = *q;
+    f32 lift = 2.0f;
+    f32 nearDist = 100.0f;
+    f32 farDist = 7056.0f;
+    int car;
+    int j;
+    for (j = 0, q = order; j < fn_801EA994(); q++, j++) {
+        car = *q;
         TagCar* c;
         TagObj* o;
         f32 d;
@@ -169,12 +172,12 @@ void fn_802A7EEC(void) {
         {
             ValVec3 p = o->pos;
             ValVec3 scr;
-            p.y += 2.0f;
+            p.y += lift;
             fn_802C8E70(&p, &scr);
             d = PSVECSquareDistance(&p, &fn_802678C0(fn_801E85B4())->pos);
             if (fn_802C8FF4(&scr, 0.0f)) {
                 char buf[8];
-                u32 color = (int)(255.0f * Ramp(d, nearDist, farDist, 1.0f, 0.0f)) << 24 | 0xFFFFFF;
+                u32 color = WhiteAlpha(Ramp(d, nearDist, farDist, 1.0f, 0.0f));
                 fn_802339A8(lbl_8055F8BC, color, 0x44, "%s", scr.x, scr.y, 0.0f, 0.42000002f, 1.0f,
                             fn_800122B4(c->place, buf));
             }
