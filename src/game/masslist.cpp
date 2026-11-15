@@ -503,18 +503,13 @@ void PSVECNormalize(const CVec3* src, CVec3* dst);
 
 // Blends contact i's surface normal and anchor towards a new contact (point pt, normal n) when it lies close
 // to the old plane: fully replaced from 0.2 below the plane, unchanged above it.
-/* Helper name unproven */
-}
-template <class T>
-static inline T* AtP(T* p, int i) {
-    return &p[i];
 }
 extern "C" {
 
 void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     ContactSet* cs = &lbl_8055E798[car];
     CVec3 p(cs->pts[i].p.x, cs->pts[i].p.y, cs->pts[i].p.z);
-    CVec3 ref(cs->ref[i].p.x, cs->ref[i].p.y, cs->ref[i].p.z);
+    CVec3 ref(((MVec4*)&cs->ref[i])->x, ((MVec4*)&cs->ref[i])->y, ((MVec4*)&cs->ref[i])->z);
     CVec3 nrm(cs->nrm[i].p.x, cs->nrm[i].p.y, cs->nrm[i].p.z);
     CVec3 d;
     d.x = p.x - ref.x;
@@ -537,7 +532,13 @@ void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     PSVECNormalize(&nrm, &nrm);
     CVec3 r(LerpT(k, pt->x, ref.x), LerpT(k, pt->y, ref.y), LerpT(k, pt->z, ref.z));
     ref = r;
-    *(MVec4*)AtP(cs->ref, i) = MVec4(ref.x, ref.y, ref.z);
+    {
+        MVec4 t(ref.x, ref.y, ref.z);
+        cs->ref[i].p.x = t.x;
+        cs->ref[i].p.y = t.y;
+        cs->ref[i].p.z = t.z;
+        cs->ref[i].w = t.w;
+    }
     *(MVec4*)&cs->nrm[i] = MVec4(nrm.x, nrm.y, nrm.z);
 }
 
