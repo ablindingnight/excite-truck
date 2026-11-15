@@ -1240,11 +1240,13 @@ void PlayerDriver_vf48(u8* p) {
     ((Gearbox*)PTR(p, 0x38))->SetDir(fn_8018B084(PTR(p, 0x34)));
     lbl_8055E0D0->SortCar(S32(p, 0x3C));
     car = PTR(p, 0x34);
-    sp = (f32)__fabs(VDot(car + 0x118, car + 0x54));
+    double speed = __fabs(VDot(car + 0x118, car + 0x54));
+    sp = (f32)speed;
     f32 mag;
     u8* c4;
+    const f32 initialSteer = kZero;
     st = ((Gearbox*)PTR(p, 0x38))->Steer(sp);
-    fn_8018ADA4(PTR(p, 0x34), dir * (kZero + st));
+    fn_8018ADA4(PTR(p, 0x34), dir * (initialSteer + st));
     if (((Gearbox*)PTR(p, 0x38))->Clutch() < 0.25f) {
         fn_8018ADB4(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->Throttle());
     } else {
@@ -1252,8 +1254,7 @@ void PlayerDriver_vf48(u8* p) {
     }
     U8(PTR(p, 0x34), 0x260E) = ((Gearbox*)PTR(p, 0x38))->v30();
     air = (U32(fn_801769CC(), 0x4) & 0x20000) ? kOne : 0.5f;
-    car = PTR(p, 0x34);
-    if (lbl_8055E3C4 - S32(p, 0xC) > 10 && 0.9f < F32(car, 0x25F4) && fwd < 4.4444447f &&
+    if (lbl_8055E3C4 - S32(p, 0xC) > 10 && F32(car = PTR(p, 0x34), 0x25F4) > 0.9f && fwd < 4.4444447f &&
         S32(car, 0x2620) >= 3 && !lbl_8055E52A) {
         f32 roll;
         f32 boost;
