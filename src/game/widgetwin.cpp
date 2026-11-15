@@ -121,9 +121,11 @@ extern u8 lbl_8055F024;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
 ModuleTag lbl_8055EF60;
+static inline u32 InitialFFFFWord() { return 0xFFFF0000u; }
+extern const u32 lbl_8055EF68 = InitialFFFFWord();
 static UnkStatic123 lbl_804908B0;
-UnkStaticFFFF lbl_8055EF68;
-UnkStatic7F lbl_8055EF6C;
+static inline u32 Initial7FWord() { return 0x7F000000u; }
+extern const u32 lbl_8055EF6C = Initial7FWord();
 static Window* lbl_804908C8[16];
 u8 lbl_8055EF70;   // the active window reported a result
 s32 lbl_8055EF74;  // that result
