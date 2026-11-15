@@ -25,16 +25,20 @@ void fn_801796CC(u8 type, const void* data, u32 n);
 f32 PSVECDotProduct(const void* a, const void* b);
 }
 
-struct RVec3 {
+/* The vector without constructors (by-value copies are word copies). */
+struct PlainRVec3 {
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+struct RVec3 : PlainRVec3 {
     RVec3(void) {}
     RVec3(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
     }
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 struct TRot {
@@ -368,10 +372,16 @@ Trailer::~Trailer(void) {
     lbl_8055E774--;
 }
 
+/* Helper name unproven: a named model point returned by value, with a default. */
+static inline RVec3 FindPoint(int model, const char* name, RVec3 def) {
+    RVec3 r;
+    fn_801B8CC0(&r, model, name, def);
+    return r;
+}
+
 void Trailer::Init(void* desc) {
     low = (fn_801769CC()->flags >> 12) & 1;
     CarBody_vf08(this, desc);
-    RVec3 cd;
     RVec3 p;
     fn_801B8CC0(&p, model, "hitch", RVec3(0.0f, 0.0f, 3.0f));
     hitchLocal = p;
@@ -382,10 +392,8 @@ void Trailer::Init(void* desc) {
     }
     f32 cb[6];
     fn_802C77F0(car->model, cb);
-    cd = low ? RVec3(0.0f, 0.0f, cb[4] - 0.1524f) : RVec3(0.0f, 0.4318f, cb[4] - 0.2032f);
-    RVec3 q;
-    fn_801B8CC0(&q, car->model, "hitch", cd);
-    hitchCar = q;
+    RVec3 cd = low ? RVec3(0.0f, 0.0f, cb[4] - 0.1524f) : RVec3(0.0f, 0.4318f, cb[4] - 0.2032f);
+    hitchCar = FindPoint(car->model, "hitch", cd);
     hitchCar.y += 0.127f;
 }
 
