@@ -412,7 +412,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         int k;
         ArtPath* p = &a->paths[i];
         p->elem = pn->GetIntValue("elem_idx");
-        ValPoint pxy = pn->GetPointOr("xy", MakePoint(0.0f, 0.0f));
+        const ValPoint& pxy = pn->GetPointOr("xy", MakePoint(0.0f, 0.0f));
         f32 t0 = fn_802AC344((ArtNode*)pn, (ArtNode*)named, 0);
         int nFrames = 0;
         ValueNode* c;
