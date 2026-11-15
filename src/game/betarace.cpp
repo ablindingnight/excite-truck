@@ -607,6 +607,28 @@ public:
 };
 
 // A point or invincibility token placed by the pickup system; spins once it is live.
+// A row of the 3x4 body matrix (three rotation rows, then the position).
+struct MtxRow {
+    f32 x, y, z;
+};
+
+/* Helper name unproven: identity body matrix, written through its rows. Retail keeps the matrix address in a saved
+   register at three of the call sites, which only happens when the matrix is filled through a row-typed pointer. */
+static inline void IdentityRows(f32* m) {
+    MtxRow* r = (MtxRow*)m;
+    r[0].x = 1.0f;
+    r[0].y = 0.0f;
+    r[0].z = 0.0f;
+    r[1].x = 0.0f;
+    r[1].y = 1.0f;
+    r[1].z = 0.0f;
+    r[2].x = 0.0f;
+    r[2].y = 0.0f;
+    r[2].z = 1.0f;
+    r[3].x = 0.0f;
+    r[3].y = 0.0f;
+    r[3].z = 0.0f;
+}
 class Token {
 public:
     Token(Body* b) {
@@ -625,18 +647,7 @@ public:
         f32 m[12];
         f32 vel[3];
         f32 spin[3];
-        m[0] = 1.0f;
-        m[1] = 0.0f;
-        m[2] = 0.0f;
-        m[3] = 0.0f;
-        m[4] = 1.0f;
-        m[5] = 0.0f;
-        m[6] = 0.0f;
-        m[7] = 0.0f;
-        m[8] = 1.0f;
-        m[9] = 0.0f;
-        m[10] = 0.0f;
-        m[11] = 0.0f;
+        IdentityRows(m);
         m[10] = -9999.0f;
         spin[0] = 0.0f;
         spin[1] = 0.0f;
@@ -3319,18 +3330,7 @@ inline Pickup::Pickup(ValueNode* n) {
         f32 hz;
         f32 hy;
         fn_802C77F0(lbl_80559ED4, box);
-        m[0] = 1.0f;
-        m[1] = 0.0f;
-        m[2] = 0.0f;
-        m[3] = 0.0f;
-        m[4] = 1.0f;
-        m[5] = 0.0f;
-        m[6] = 0.0f;
-        m[7] = 0.0f;
-        m[8] = 1.0f;
-        m[9] = 0.0f;
-        m[10] = 0.0f;
-        m[11] = 0.0f;
+        IdentityRows(m);
         m[9] = pos[0];
         m[10] = pos[1];
         m[11] = pos[2];
@@ -3452,18 +3452,7 @@ static inline void Rest(Token* b, const f32* m) {
 static inline void LaunchBump(Token* b) {
     f32 m[12];
     b->active = 1;
-    m[0] = 1.0f;
-    m[1] = 0.0f;
-    m[2] = 0.0f;
-    m[3] = 0.0f;
-    m[4] = 1.0f;
-    m[5] = 0.0f;
-    m[6] = 0.0f;
-    m[7] = 0.0f;
-    m[8] = 1.0f;
-    m[9] = 0.0f;
-    m[10] = 0.0f;
-    m[11] = 0.0f;
+    IdentityRows(m);
     m[9] = b->pos[0];
     m[10] = b->pos[1];
     m[11] = b->pos[2];
@@ -3481,18 +3470,7 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
             f32 a;
             f32 c;
             f32 s;
-            m[0] = 1.0f;
-            m[1] = 0.0f;
-            m[2] = 0.0f;
-            m[3] = 0.0f;
-            m[4] = 1.0f;
-            m[5] = 0.0f;
-            m[6] = 0.0f;
-            m[7] = 0.0f;
-            m[8] = 1.0f;
-            m[9] = 0.0f;
-            m[10] = 0.0f;
-            m[11] = 0.0f;
+            IdentityRows(m);
             m[9] = b->pos[0];
             m[10] = b->pos[1];
             m[11] = b->pos[2];
