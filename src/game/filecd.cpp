@@ -64,13 +64,16 @@ public:
 extern u8 lbl_804DBAA0[0x20000];  // read buffer
 
 class FileCD;
+static inline void ReportDVDStartup(const char* message = "filecd: started DVD services") {
+    OSReport(message);
+}
 
 class FileDisk : public FileSystem {
 public:
     FileDisk(void) {
         DVDInit();
         ok = 1;
-        OSReport("filecd: started DVD services");
+        ReportDVDStartup();
     }
     virtual ~FileDisk(void) {}
     virtual File* Create(const char* name);
@@ -113,11 +116,7 @@ public:
             size = info.size;
         }
     }
-    virtual ~FileCD(void) {
-        if (open && !DVDClose(&info)) {
-            fn_802E30C8("filecd: error closing file %s", name);
-        }
-    }
+    virtual inline ~FileCD(void);
     virtual int Seek(s32 p) {
         if (p >= 0 && p <= size) {
             pos = p;
@@ -263,11 +262,6 @@ extern "C" FileDisk* fn_802E3F94(void) {
     return NULL;
 }
 
-File* FileDisk::Create(const char* name) {
-    fn_802E30C8("filecd: create not supported (%s)", name);
-    return NULL;
-}
-
 inline FileCD* FileDisk::OpenCD(const char* name) {
     FileCD* f = new ("fdo") FileCD(this, name);
     if (f->open) {
@@ -277,14 +271,42 @@ inline FileCD* FileDisk::OpenCD(const char* name) {
     return NULL;
 }
 
-File* FileDisk::Open(const char* name) { return OpenCD(name); }
+inline File* FileDisk::Open(const char* name) { return OpenCD(name); }
 
-File* FileDisk::OpenWrite(const char* name) {
-    fn_802E30C8("filecd: open writable not supported (%s)", name);
+#pragma push
+#pragma global_optimizer off
+// Default arguments let MWCC create the report strings when emitting their callers.
+static inline void ReportDVDCloseError(const char* path, const char* format = "filecd: error closing file %s") {
+    fn_802E30C8(format, path);
+}
+
+inline FileCD::~FileCD(void) {
+    if (open && !DVDClose(&info)) {
+        ReportDVDCloseError(name);
+    }
+}
+
+#pragma pop
+
+static inline void ReportUnsupportedCreate(const char* path, const char* format = "filecd: create not supported (%s)") {
+    fn_802E30C8(format, path);
+}
+
+inline File* FileDisk::Create(const char* name) {
+    ReportUnsupportedCreate(name);
     return NULL;
 }
 
-File* FileDisk::OpenAppend(const char* name) {
+static inline void ReportUnsupportedOpenWrite(const char* path, const char* format = "filecd: open writable not supported (%s)") {
+    fn_802E30C8(format, path);
+}
+
+inline File* FileDisk::OpenWrite(const char* name) {
+    ReportUnsupportedOpenWrite(name);
+    return NULL;
+}
+
+inline File* FileDisk::OpenAppend(const char* name) {
     FileCD* f = OpenCD(name);
     if (f) {
         f->Seek(f->Size());
