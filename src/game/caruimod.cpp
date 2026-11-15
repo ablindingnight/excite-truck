@@ -554,7 +554,7 @@ void fn_8012D8A8(AsyncResourceSet* s);
 int fn_8012C33C(const char* name);
 void fn_8012E81C(const char* name);
 void fn_8012E96C(const char* name);
-f32 fn_801DCF48(int a);
+f32 fn_801DCF48(void*, f32, f32);  // (GVec* normal, x, z) in heightfld.cpp: ground height
 void fn_801E2CCC(s32 model, const char* name, const Frame** f);
 void fn_801EFF4C(void);
 void fn_801EFF70(void);
@@ -1087,12 +1087,14 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             MulM(m, &rx, m);
             MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
             f32 vx = cam.b.v[0].x;
-            cam.pos.x = cam.pos.x + vx * -offX + cam.b.v[1].x * ny;
+            f32 px = cam.pos.x + vx * -offX + cam.b.v[1].x * ny;
+            cam.pos.x = px;
             f32 yv = cam.pos.y;
             cam.pos.y = yv + cam.b.v[0].y * -offX + cam.b.v[1].y * ny;
             f32 zv = cam.pos.z;
-            cam.pos.z = zv + cam.b.v[0].z * -offX + cam.b.v[1].z * ny;
-            if (!lbl_8055F330 || (2.0f * aspect) + fn_801DCF48(0) < cam.pos.y) {
+            f32 pz = zv + cam.b.v[0].z * -offX + cam.b.v[1].z * ny;
+            cam.pos.z = pz;
+            if (!lbl_8055F330 || (2.0f * aspect) + fn_801DCF48(0, px, pz) < cam.pos.y) {
                 break;
             }
             pitch += 1.5707964f / 800.0f;
