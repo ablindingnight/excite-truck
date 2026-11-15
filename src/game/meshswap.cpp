@@ -78,46 +78,35 @@ static inline void Fix(void** p, u32 base) {
 
 extern "C" {
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop1_fn_801D1C68(MeshHeader* m) {
-    int i;
-    for (i = 0; i < m->numVerts; i++) {
-        m->verts[i].Swap();
-    }
-    return i;
-}
-
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop2_fn_801D1C68(MeshHeader* m) {
-    int i;
-    for (i = 0; i < m->numFaces; i++) {
-        m->faces[i].Swap();
-    }
-    return i;
-}
-
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop3_fn_801D1C68(MeshHeader* m) {
-    int i;
-    for (i = 0; i < m->numStrips; i++) {
-        m->strips[i].Swap();
-        m->strips[i].vert = &m->verts[(u32)m->strips[i].vert];
-    }
-    return i;
-}
-
 void fn_801D1C68(MeshHeader* m, u32 base) {
     Fix((void**)&m->verts, base);
     Fix((void**)&m->faces, base);
     Fix((void**)&m->strips, base);
     Fix((void**)&m->bones, base);
-    int i;
-    i = Loop1_fn_801D1C68(m);
-    i = Loop2_fn_801D1C68(m);
-    i = Loop3_fn_801D1C68(m);
-    unsigned offset = 0;
-    for (i = 0; i < m->numBones; i++, offset += sizeof(*m->bones)) {
-        MeshBone* b = (MeshBone*)((u8*)m->bones + offset);
+    MeshVert* v;
+    int iv;
+    MeshFace* f;
+    int jf;
+    MeshStrip* s;
+    int ks;
+    int lb;
+    unsigned offset;
+    MeshBone* b;
+    for (iv = 0; iv < m->numVerts; iv++) {
+        v = &m->verts[iv];
+        v->Swap();
+    }
+    for (jf = 0; jf < m->numFaces; jf++) {
+        f = &m->faces[jf];
+        f->Swap();
+    }
+    for (ks = 0; ks < m->numStrips; ks++) {
+        s = &m->strips[ks];
+        s->Swap();
+        m->strips[ks].vert = &m->verts[(u32)m->strips[ks].vert];
+    }
+    for (lb = 0, offset = 0; lb < m->numBones; lb++, offset += sizeof(*m->bones)) {
+        b = (MeshBone*)((u8*)m->bones + offset);
         b->Swap();
     }
 }
