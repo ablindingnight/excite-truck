@@ -914,11 +914,13 @@ struct CVec4 {
         z = z_;
         w = w_;
     }
-    CVec4(const CVec4& o) {
-        x = o.x;
-        z = o.z;
-        y = o.y;
-        w = o.w;
+    CVec4(const CVec4& o) { Set(o.x, o.y, o.z, o.w); }
+    // Arguments evaluate right to left: the copy reads w first and stores x first.
+    void Set(f32 x_, f32 y_, f32 z_, f32 w_) {
+        x = x_;
+        y = y_;
+        z = z_;
+        w = w_;
     }
     f32 x, y, z, w;
 };
@@ -3797,13 +3799,17 @@ void fn_8018F6F8(u8* p);
 
 // Puts the car back in one piece: restores the saved damage state (the alternate copy when fn_801CF064 says so),
 // clears the wheels' detached flags and resets the matching cross-link state.
+// Clears a wheel's detached flag and returns its saved load. /* Helper name unproven */
+static inline f32 CbReattach(u8* w) {
+    S32(w, 0x0) &= ~8;
+    return F32(w, -0x34);
+}
 void fn_8018AF04(u8* p) {
     fn_8018F2C0(p, !fn_801CF064() ? p + 0x1E44 : p + 0x20F8);
     CVec4 load;
     u8* w = p + 0x241C;
     for (int i = 0; i < 4; i++, w += 0x74) {
-        S32(w, 0x0) &= ~8;
-        (&load.x)[i] = F32(w, -0x34);
+        (&load.x)[i] = CbReattach(w);
     }
     u8* x;
     fn_801BEB30(S32(p, 0x1EC), &x);
