@@ -572,6 +572,11 @@ RaceInfo* lbl_8055D350 = GetRaceInfo();
 void* lbl_8055D354;
 
 static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
+
+static inline void MeasureStickY(const f32& scale, const f32& axis, f32 xSquared, f32& y, f32& magnitude) {
+    magnitude = xSquared + axis * axis;
+    y = axis * scale;
+}
 static void fn_800053CC(void) {
     f32 v[28];
     f32 len;
@@ -581,9 +586,10 @@ static void fn_800053CC(void) {
     if (fn_801298E8(v, 0)) {
         r = 10.0f;
         x = 300.0f * v[0];
-        f32 yCoord = v[1];
-        y = 200.0f * yCoord;
-        len = sqrt(Dot4_hm(v[0], v[1], v[0], v[1]));
+        f32 xx = v[0] * v[0];
+        f32 mag;
+        MeasureStickY(200.0f, v[1], xx, y, mag);
+        len = sqrt(mag);
         fn_80010B80(x, y, r, r, 0x800000FF);
     }
 }
