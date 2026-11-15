@@ -436,14 +436,11 @@ static inline void RecordCrossing(s32 car, f32 tm) {
     }
 }
 
-void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
-    u32 n1;
-    s32 idx;
+static inline f32 Scale(f32 v, f32 k) { return v * k; }  /* Helper name unproven */
+static inline void CountCrossing(DeityCar* c, IdealPoint* from, IdealPoint* to) {  /* Helper name unproven */
     u32 n2;
-    IdealPoint* from = c->Ideal()->il.seg;
-    c->Car()->Teleport(t);
-    fn_8018A08C(c->Car());
-    IdealPoint* to = c->Ideal()->il.seg;
+    s32 idx;
+    u32 n1;
     idx = c->index;
     n1 = c->Ideal()->line->total;
     n2 = c->Ideal()->line->total;
@@ -451,7 +448,7 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     u32 fwd = fn_801B08E8(from->ilpos, to->ilpos, n2);
     int backward = back < fwd;
     if (backward != 0) {
-        for (IdealPoint* p = to->next; p != from->next; p = p->next) {
+        for (IdealPoint* p = to->next, *e = from->next; p != e; p = p->next) {
             if (p->ilpos == 0) {
                 s32 l = *(s32*)((u8*)c + 0x14) - 1;
                 *(s32*)((u8*)c + 0x14) = l > 0 ? l : 0;
@@ -459,13 +456,23 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
             }
         }
     } else {
-        for (IdealPoint* p = from->next; p != to->next; p = p->next) {
+        for (IdealPoint* p = from->next, *e = to->next; p != e; p = p->next) {
             if (p->ilpos == 0) {
-                RecordCrossing(idx, lbl_8055E3C8 - (1.0f / 59.94f) * (f32)(idx + 1) * 0.0625f);
+                f32 now = lbl_8055E3C8;
+                f32 tm = now - Scale((1.0f / 59.94f) * (f32)(idx + 1), 0.0625f);
+                RecordCrossing(idx, tm);
                 break;
             }
         }
     }
+}
+
+void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
+    IdealPoint* from = c->Ideal()->il.seg;
+    c->Car()->Teleport(t);
+    fn_8018A08C(c->Car());
+    IdealPoint* to = c->Ideal()->il.seg;
+    CountCrossing(c, from, to);
     if (!(fn_801769CC()->flags & 0x4000)) {
         fn_8018AF04(c->Car());
         c->Release();
