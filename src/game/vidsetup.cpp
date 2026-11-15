@@ -53,8 +53,8 @@ void fn_802DE774(void);
 
 }  // extern "C"
 
-extern u32 lbl_8055CFF0;  // screen width
-extern u32 lbl_8055CFF4;  // screen height
+u32 lbl_8055CFF0 = 640;  // screen width
+u32 lbl_8055CFF4 = 480;  // screen height
 extern u8 lbl_8055CFF8;
 
 ModuleTag lbl_8055FB88;
