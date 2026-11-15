@@ -1837,7 +1837,7 @@ public:
     virtual ~LineFollower(void);
     virtual int SetLine(CenterLine* line);
     void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
-    u8 pad4[0x58 - 0x4];  // idealline.cpp's class is 0x34 bytes; at 0x34 ChallengeBase::Query's frame shrinks (130 -> 116 diff rows, unverified)
+    u8 pad4[0x34 - 0x4];  // idealline.cpp's class is 0x34 bytes
 };
 
 namespace {
