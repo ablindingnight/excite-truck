@@ -269,9 +269,11 @@ void fn_8015EE14(ValueNode* list, Track* trk) {
 }
 
 /* Helper name unproven */
-static inline ValPoint ReadObstaclePoint(ValueNode* n) {
-    return n->GetPoint("p");
-}
+struct EraserPoint {
+    ValPoint value;
+    ValPoint center;
+    EraserPoint(ValueNode* n, const char* name) : value(n->GetPoint(name)), center(value) {}
+};
 
 void fn_8015EF84(ValueNode* list) {
     int erased = 0;
@@ -281,15 +283,14 @@ void fn_8015EF84(ValueNode* list) {
         for (i = 0; (n = list->GetChildAt(i)) != 0; i++) {
             if (fn_8015ED54(n)) {
                 erased++;
-                ValPoint t = ReadObstaclePoint(n);
-                ValPoint p = t;
+                EraserPoint point(n, "p");
                 f32 r2 = n->GetFloat("rad");
                 s32 j;
                 r2 = r2 * r2;
                 j = 0;
                 while (j < lbl_8055E29C->Size()) {
                     Obst* o = lbl_8055E29C->At(j);
-                    Vec2 d(p.x - o->pos.v.x, p.y - o->pos.v.y);
+                    Vec2 d(point.center.x - o->pos.v.x, point.center.y - o->pos.v.y);
                     if (d.v.x * d.v.x + d.v.y * d.v.y < r2) {
                         lbl_8055E29C->Remove(j);
                     } else {
