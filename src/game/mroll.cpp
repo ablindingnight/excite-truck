@@ -7,9 +7,9 @@
 // Stat level thresholds (defined first: its .rodata precedes the unit's initialiser templates).
 extern const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
 #include "game/menu.h"
-#include "game/menustate.h"
 #include "game/menuwidget.h"
 #include "game/menuwidget_inl.h"
+#include "game/menustate.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -261,8 +261,8 @@ public:
         lbl_8055F1F4--;
         fn_80235380(art);
     }
-    virtual void Draw(void);
     virtual int Key(int key);
+    virtual void Draw(void);
 
     VehicleInfo* vehicle;  // offset 0x28
     s32 color;             // offset 0x2C
