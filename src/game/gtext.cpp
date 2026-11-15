@@ -858,7 +858,8 @@ void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
                 u16 ch;
                 const char* next;
                 Glyph* g;
-                next = ReadUTF8(text + i, &ch);
+                next = text + i;
+                ch = DecodeUTF8(next, &next, *reinterpret_cast<const u8*>(next));
                 g = &ff->glyphs[ch];
                 px += (scale * g->pre) * xs;
                 fn_80233AA4(ff, ch, px, py - lh, px + scale * ff->glyphs[ch].width, py, z);
@@ -1039,7 +1040,7 @@ void fn_80233AA4(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
 void fn_80233BF0(const char* s, GTextFont* f, f32* x, f32* y, int align, f32 scale, f32 xs) {
     if (align & 1) {
         const char* next;
-        u16 c = DecodeUTF8(s, &next);
+        u16 c = DecodeUTF8(s, &next, *reinterpret_cast<const u8*>(s));
         *x -= f->glyphs[c].pre;
     } else if (align & 2) {
         *x -= scale * fn_8023293C(f, s, xs);
@@ -1122,7 +1123,8 @@ void fn_8023423C(int idx, int align) {
     f32 xs = lbl_8055F06C[idx].xs;
     if (align & 1) {
         const char* next;
-        u16 c = DecodeUTF8(lbl_8055F06C[idx].text, &next);
+        const char* p = lbl_8055F06C[idx].text;
+        u16 c = DecodeUTF8(p, &next, *reinterpret_cast<const u8*>(p));
         lbl_8055F06C[idx].x -= xs * f->glyphs[c].pre;
     } else if (align & 2) {
         lbl_8055F06C[idx].x -= fn_8023400C(idx);
