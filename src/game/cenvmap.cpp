@@ -376,6 +376,8 @@ static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx
     sx = 73.98844f * d.x / (1.0f + d.y);
     sy = 73.98844f * d.z / (1.0f + d.y);
 }
+#pragma push
+#pragma opt_loop_invariants off
 void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
     if (tex != lbl_8055ED1C) {
         lbl_8055ED1C = tex;
@@ -428,6 +430,7 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
         fn_802C8E48();
     }
 }
+#pragma pop
 #pragma opt_strength_reduction reset
 
 void fn_802039CC(const EFrame* cam, const EFrame* m) {

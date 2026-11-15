@@ -172,6 +172,8 @@ void fn_801DE12C(void) { lbl_8055E9CC = fn_802E2C20(); }
 
 void fn_801DE150(void) {}
 
+#pragma push
+#pragma opt_loop_invariants off
 void fn_801DE154(void) {
     fn_801DDF0C();
     Camera cam;
@@ -225,6 +227,7 @@ void fn_801DE154(void) {
     }
     fn_80011A2C();
 }
+#pragma pop
 
 static inline int MaxI(int a, int b) { return a > b ? a : b; }
 static inline int MinI(int a, int b) { return a < b ? a : b; }

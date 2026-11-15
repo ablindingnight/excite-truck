@@ -575,6 +575,8 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
     return h;
 }
 
+#pragma push
+#pragma opt_common_subs off
 f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 h;
@@ -600,6 +602,7 @@ f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
     int lx = ix - tx * 32;
     return Loop1_fn_801DCF48(g, tx, tz, normal, lx, lz, h);
 }
+#pragma pop
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 

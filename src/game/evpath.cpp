@@ -578,6 +578,8 @@ void fn_80281138(void);
 
 // A path's cup screen: a marker per cup (at most five) with its name and progress, coloured and titled for
 // the path's difficulty. Returns 1 with the picked cup in *sel, 0 when backed out.
+#pragma push
+#pragma opt_dead_assignments off
 int fn_8027F958(s32* sel, EvPath* path) {
     int diff = path->Get(0)->Difficulty();
     EvCupBar bars[5];
@@ -645,6 +647,7 @@ int fn_8027F958(s32* sel, EvPath* path) {
     lbl_8055F694 = 0;
     return picked;
 }
+#pragma pop
 
 int fn_80280898(void) {
     if (lbl_8055F688 == 0) {

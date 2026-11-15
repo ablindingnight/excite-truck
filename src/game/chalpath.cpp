@@ -1073,6 +1073,8 @@ extern const f32 lbl_80563B90;  // 0.0f
 #define EV ((ChalEvent*)PTR(p, 0x18))
 
 // Event node: its tile (pulsing while selected), name, grade and "score/target".
+#pragma push
+#pragma opt_propagation off
 void fn_802621F0(u8* p) {
     static f32 sTextY = -(f32)S32(p, 0x10) / 2.0f;
     char line[30];
@@ -1123,6 +1125,7 @@ void fn_802621F0(u8* p) {
     }
     fn_80232BA4(line, PTR(p, 0x24), 350.0f + x, y + sTextY, color, 0x12, 0.65f, lbl_80563B90, 1.0f);
 }
+#pragma pop
 
 void fn_80262574(u8* p) {}
 

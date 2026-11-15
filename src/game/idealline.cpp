@@ -316,6 +316,8 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
     }
 }
 
+#pragma push
+#pragma opt_lifetimes off
 int LineFollower::Step(V2* p) {
     if (!fn_801355B8(this, p, &il.seg, &il.t)) {
         int r;
@@ -415,6 +417,7 @@ int LineFollower::Step(V2* p) {
         return 2;
     }
 }
+#pragma pop
 
 extern "C" {
 
