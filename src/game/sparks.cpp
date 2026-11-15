@@ -643,18 +643,20 @@ int fn_8028B500(const void* evp) {
         k = MIN(k, 8.0f);
         Vec v;
         v.x = ev->vel.x / 4.0f;
+        v.y = ev->vel.y / 4.0f;
         v.z = ev->vel.z / 4.0f;
-        v.y = ev->vel.y / 4.0f + 0.25f * k;
+        v.y += 0.25f * k;
         lbl_8055F6F0->Emit(m, &ev->pos, &v, k);
         lbl_8055F6F4->Emit(m, &ev->pos, &v, k);
     }
+    int chunkCount;
     Chunks* sys;
     if (ev->terrain >= 0 && ev->terrain < 8 && (sys = lbl_804B3238[ev->terrain].sys) != 0) {
         int i;
-        int m = n / 3;
+        chunkCount = n / 3;
         f32 spread = MIN(0.0003f * mag, 6.0f);
         f32 zero = 0.0f;
-        for (i = 0; i < m; i++) {
+        for (i = 0; i < chunkCount; i++) {
             Vec d;
             Scale(&d, &ev->vel, fn_80287BC8(-0.25f, 1.0f));
             d.x = d.x + fn_80287BC8(-spread, spread);

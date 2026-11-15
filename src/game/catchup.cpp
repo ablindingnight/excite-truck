@@ -19,7 +19,12 @@ struct Motion {
 
     f32 Dp(void) const { return p2 - p1; }
     f32 Dv(void) const { return v2 - v1; }
-    f32 Da(void) const { return a2 - a1; }
+    f32 Da(void) const {
+        f32 second;
+        f32 first = a1;
+        second = a2;
+        return second - first;
+    }
 };
 
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
@@ -85,7 +90,8 @@ f32 fn_80138DF4(const Motion* m) {
             f32 t;
             f32 miss;
             if (fn_80138C28(m, &t, &miss)) {
-                f32 n = m->v2 + m->a2 * t - m->v1;
+                f32 a2 = m->a2;
+                f32 n = m->v2 + t * a2 - m->v1;
                 r = n / MaxF(t, 0.01f);
                 lbl_8055E100 = CU_HIT;
             } else {
