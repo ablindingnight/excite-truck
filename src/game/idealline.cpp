@@ -69,6 +69,10 @@ extern "C" PathSet* fn_80156A40(void);
 
 static inline f32 ILerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
+// Squared length (name unproven): retail evaluates the squares inside an inline, which is what orders them
+// against the caller's other float work.
+static inline f32 MagSq(const V2& v) { return v.x * v.x + v.y * v.y; }
+
 struct ILPos {
     ILPos(void) {
         seg = 0;
@@ -290,7 +294,7 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) {
             f32 a;
             out->Pos(&pt);
             out->Dir(&dv);
-            inv = 1.0f / (f32)sqrt(dv.x * dv.x + dv.y * dv.y);
+            inv = 1.0f / (f32)sqrt(MagSq(dv));
             dv.x *= inv;
             dv.y *= inv;
             v.x = p->x - pt.x;

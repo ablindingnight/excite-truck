@@ -1585,6 +1585,10 @@ void fn_80195D80(u8* d, f32 t) {
 
 // Re-anchors the AI on the ideal line: lane half-width and margin, track limits, the look-ahead point and
 // the line direction there.
+// Squared length (name unproven): retail evaluates the squares inside an inline, which is what orders them
+// against the caller's other float work.
+static inline f32 MagSq(const V2& v) { return v.x * v.x + v.y * v.y; }
+
 void fn_80195F6C(u8* d) {
     if (U8(d, 0x2A5)) {
         return;
@@ -1623,7 +1627,7 @@ void fn_80195F6C(u8* d) {
         V2 dir;
         il.Pos(&pos);
         il.Dir(&dir);
-        f32 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
+        f32 inv = 1.0f / (f32)sqrt(MagSq(dir));
         dir.x *= inv;
         dir.y *= inv;
         F32(d, 0x48) = pos.x;

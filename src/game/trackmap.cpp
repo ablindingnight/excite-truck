@@ -750,6 +750,9 @@ static inline f32 NLerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 // Point and heading on the path, t of the way from node n to the next (name unproven; retail has the same
 // block in aicar fn_80195F6C and LineFollower::Locate).
+// Squared length (name unproven): retail evaluates the squares inside an inline, which is what orders them
+// against the caller's other float work.
+static inline f32 MagSq(const Vec2& v) { return v.x * v.x + v.y * v.y; }
 static inline void NodeAt(const PathNode* n, f32 t, Vec2* p, Vec2* d) {
     p->x = NLerpT(t, n->pos.x, n->next->pos.x);
     p->y = NLerpT(t, n->pos.y, n->next->pos.y);
@@ -804,7 +807,7 @@ void fn_8001B478(int index, f32 width) {
             f32 t;
             NodeAt(node, 0.0f, &p, &d);
             {
-                f32 inv = 1.0f / (f32)sqrt(d.x * d.x + d.y * d.y);
+                f32 inv = 1.0f / (f32)sqrt(MagSq(d));
                 f32 dx;
                 d.x *= inv;
                 d.y *= inv;
