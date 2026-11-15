@@ -23,7 +23,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 int fn_802C6FC0(const char* name, int remap, int b);  // load a model
 void mrModelUnload(int model);
 void fn_802C70AC(int model, const ValMatrix* m, int a, u32 mask);
-void fn_802C7AE0(int model, const ValMatrix* m, f32 height, int a);  // shadow
+void fn_802C7AE0(int model, const ValMatrix* m, int a, f32 height);  // shadow
 void fn_802C77F0(int model, f32* bounds);
 f32 fn_802C88E8(const ValVec3* p);  // squared distance to the camera
 f32 fn_801E88F0(int view);          // zoom
@@ -566,12 +566,12 @@ void fn_801F13F4(Wheel* w, f32 d2, f32 height) {
     if (i < 0) {
         return;
     }
-    fn_802C7AE0(s->lods[i].model, &w->mtx, s->baseLen + height, -1);
+    fn_802C7AE0(s->lods[i].model, &w->mtx, -1, s->baseLen + height);
 }
 
 void fn_801F1474(Wheel* w, const ValMatrix* m, f32 height) {
     if (w->cls->shadow.count > 0) {
-        fn_802C7AE0(w->cls->shadow.lods[0].model, m, height, -1);
+        fn_802C7AE0(w->cls->shadow.lods[0].model, m, -1, height);
     }
 }
 
@@ -588,7 +588,7 @@ void fn_801F1494(Wheel* w, const ValMatrix* m, s16 hint) {
     if (d2 < s->offDist2 && i >= 0) {
         ValVec3 p = m->origin;
         if (fn_801EA03C(&hint, &p) && m->origin.y > p.y) {
-            fn_802C7AE0(s->lods[i].model, m, s->baseLen + m->origin.y - p.y, -1);
+            fn_802C7AE0(s->lods[i].model, m, -1, s->baseLen + m->origin.y - p.y);
         }
     }
 }

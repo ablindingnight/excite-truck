@@ -5,7 +5,7 @@
 
 extern "C" {
 const char* fn_80131234(const char* key);  // localize
-void fn_8022BAD0(int style, int x, int y, int z, int w, int h, const char* text, int color, f32 scale, int a);
+void fn_8022BAD0(int style, int x, int y, int z, int w, int h, const char* text, int color, int a, f32 scale);
 }
 
 class MenuState {
@@ -40,7 +40,7 @@ public:
         w = this->w;
         y = this->y;
         x = this->x;
-        fn_8022BAD0(style, x + dx, y + dy, 0, w, h, fn_80131234(key), color, 1.0f, 0);
+        fn_8022BAD0(style, x + dx, y + dy, 0, w, h, fn_80131234(key), color, 0, 1.0f);
     }
 
     s32 x;      // offset 0x4

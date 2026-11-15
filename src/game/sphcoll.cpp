@@ -305,7 +305,7 @@ extern "C" {
 f32 PSVECDotProduct(const void* a, const void* b);
 double sqrt(double x);
 void fn_801E3FC8(u8* c, u32 color, f32 r);
-void fn_801E44F4(u8* m, u32 color, f32 a, f32 b, f32 c);
+void fn_801E44F4(u8* m, f32 a, f32 b, f32 c, u32 color);
 void fn_801CFA48(u8* p);
 void fn_801CFF14(u8* p);
 void fn_801CFF18(u8* p, u32 a);
@@ -3339,11 +3339,11 @@ void fn_801A1CA0(const u8* p) {
     if (S32(p, 0x20) < 1000) {
         f32 x = F32(p, 0x24);
         f32 z = F32(p, 0x28);
-        fn_801E44F4(PTR(p, 0xC), 0x40FFFF00, x, x, z);
+        fn_801E44F4(PTR(p, 0xC), x, x, z, 0x40FFFF00);
     } else {
         f32 x = F32(p, 0x24);
         f32 z = F32(p, 0x28);
-        fn_801E44F4(PTR(p, 0xC), 0x4000FF80, x, x, z);
+        fn_801E44F4(PTR(p, 0xC), x, x, z, 0x4000FF80);
     }
 }
 
@@ -3443,7 +3443,7 @@ void fn_801A22A4(u8* p) {
     f32 cz = c->z;
     f32 cy = c->y;
     f32 cx = c->x;
-    fn_801E44F4((u8*)&x, 0x50000000, cx, cy, cz);
+    fn_801E44F4((u8*)&x, cx, cy, cz, 0x50000000);
 }
 
 u8* fn_801A2354(u8* p, u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz) {

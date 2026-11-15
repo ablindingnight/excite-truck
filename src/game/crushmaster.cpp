@@ -1304,7 +1304,7 @@ int fn_80179650(void);
 int fn_80009C84(void);
 extern "C" {
 void fn_801CB5DC(int id, s32 total, s32 grade);
-void fn_801CB648(int id, f32 t, int done);
+void fn_801CB648(int id, int done, f32 t);
 int fn_80179630(int view);
 const char* fn_80131234(const char* key);  // localize
 }
@@ -1322,7 +1322,7 @@ inline void CrushMaster::Finish(f32 now) {
         if (c->human) {
             s32 g = fn_801609C4(c->Score());
             fn_801CB5DC(i, c->Score(), g);
-            fn_801CB648(i, c->bonus, 1);
+            fn_801CB648(i, 1, c->bonus);
         }
     }
     finishTime = now;

@@ -94,7 +94,7 @@ extern "C" {
 double log2(double x);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 int fn_801E5370(int n, int k, f32 w);
-void fn_801E53A8(const Vec* p, const Vec* a, const Vec* b, f32 alpha, int on);
+void fn_801E53A8(const Vec* p, const Vec* a, const Vec* b, int on, f32 alpha);
 void fn_801E58FC(void);
 f32 fn_801E7E18(void);
 f32 fn_801E7E24(void);
@@ -329,7 +329,7 @@ void fn_8028D7C0(int i) {
         SkidStrip* s = &t->strips[k];
         for (int j = 0; j < s->n; j++) {
             SkidPt* p = &s->pts[j];
-            fn_801E53A8(&p->pos, &p->d1, &p->d2, (1.0f / 65280.0f) * p->alpha, p->on != 0);
+            fn_801E53A8(&p->pos, &p->d1, &p->d2, p->on != 0, (1.0f / 65280.0f) * p->alpha);
         }
     }
 }

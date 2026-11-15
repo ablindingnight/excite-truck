@@ -121,7 +121,7 @@ int fn_802C9C50(void);
 int fn_802C9C40(void);
 int fn_802C9C38(void);
 int fn_802C9C48(void);
-u32 fn_80147C50(f32 t, u32 a, u32 b);
+u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_802C8E70(const PVec* p, PVec* out);
 void fn_802DBE4C(void);
 void fn_802DBECC(void);
@@ -867,7 +867,7 @@ void WaterSystem::Draw(void) {
         f32 depth = lc.z;
         fn_802BED90(&rel);
         f32 f = FMax(FMin(1.0f - -rel.y, 1.0f), 0.0f);
-        u32 col = fn_802C03E0(fn_80147C50(f * f, farWaterColor, nearWaterColor));
+        u32 col = fn_802C03E0(fn_80147C50(farWaterColor, nearWaterColor, f * f));
         for (int c = 0; c < 16; c++) {
             WVert* v = &verts[r * 16 + c];
             f32 u = (2.0f * (f32)c / 15.0f - 1.0f) * depth * sx;
@@ -888,7 +888,7 @@ void WaterSystem::Draw(void) {
     m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
     fn_802D3D94(2, &m);
     f32 sh = FMax(cam.pos.y / 4.0f, 1.0f);
-    u32 deepCol = fn_80147C50(1.0f / sh, 0, deepWaterSubColor);
+    u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
     fn_802C8BD0(env->Target());
     fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (lbl_80564E20 * 2.0f), deep, mask, deepCol);
     fn_802DD27C(verts, 0x400, &idx[0][0][0], 0x1626);

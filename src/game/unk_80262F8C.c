@@ -15,7 +15,7 @@ extern s32 fn_80214AF0(s32);
 extern void fn_80214A9C(s32);
 extern void __dl__FPv(void *p);  /* operator delete */
 extern const char *fn_80131234(const char *key);
-extern void fn_8022BAD0(s32, s32, s32, s32, s32, s32, s32, s32, f32, s32);
+extern void fn_8022BAD0(s32, s32, s32, s32, s32, s32, s32, s32, s32, f32);
 extern s32 fn_802328D4(s32);
 extern const char lbl_80346324[];
 extern const u8 __vt__10OptionItem[];

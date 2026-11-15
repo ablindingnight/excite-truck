@@ -137,7 +137,7 @@ f32 fn_80147204(TextElem* e, const char* text);
 s32 fn_80160998(s32 a);
 s32 fn_80160A74(void);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
-void fn_80130978(char* buf, f32 v, int size);
+void fn_80130978(char* buf, int size, f32 v);
 }  // extern "C"
 f32 Remap(float, float, float, float, float);
 extern "C" {
@@ -1916,7 +1916,7 @@ inline int RingChalMaster::vf3C(int view) {
             if (h0 && h1 && body && timer) {
                 char buf[0x14];
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(k));
-                fn_80130978(buf, arena.timer.t, sizeof(buf));
+                fn_80130978(buf, sizeof(buf), arena.timer.t);
                 {
                     TextElem e;
                     e = *body;
@@ -2523,7 +2523,7 @@ inline void RingChalMaster::vf4C(int view) const {
 inline void ArenaTimer::Draw(ILayout* l) const {
     char buf[0x20];
     f32 shown = MaxI(0.0f, t);
-    fn_80130978(buf, shown, 0x20);
+    fn_80130978(buf, 0x20, shown);
     fn_8014784C(l, "stop_watch_art", "stop_watch_artset", 0);
     fn_801475D0(l, "timer", "%s", buf);
 }

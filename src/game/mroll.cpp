@@ -945,7 +945,7 @@ void fn_80235758(u8* art, int part, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, 
 f32 fn_80235F64(u8* art, int part);
 f32 fn_80235EF0(u8* art, int part);
 void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
-void fn_8022BD40(int font, const char* text, int a, int b, f32 x, f32 y, f32 z, f32 w, f32 h, f32 scale);
+void fn_8022BD40(int font, f32 x, f32 y, f32 z, f32 w, f32 h, f32 scale, const char* text, int a, int b);
 extern const f32 lbl_80563780;  // 3.5 swatches across
 extern const f32 lbl_80563784;  // 0.5
 extern const f32 lbl_80563788;  // 0.3 edge alpha
@@ -1030,7 +1030,7 @@ void ColorPick::Draw(void) {
         f32 y = this->y;
         f32 w = this->w;
         f32 h = this->h;
-        fn_8022BD40(0xCC, this->label, 0, 0, x + lbl_80563784 * w, y + lbl_80563784 * h, lbl_80563758, w, h, lbl_80563764);
+        fn_8022BD40(0xCC, x + lbl_80563784 * w, y + lbl_80563784 * h, lbl_80563758, w, h, lbl_80563764, this->label, 0, 0);
     }
 }
 

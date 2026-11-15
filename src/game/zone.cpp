@@ -1774,7 +1774,7 @@ extern "C" void fn_8013EB0C(ZoneMaster* zm, int car) {
 extern "C" {
 int fn_801E866C(int player);
 Watcher* fn_802C86DC(void);
-void fn_802A9BFC(PlainVec3* a, PlainVec3* b, s32 tex, int d, int e, int f, int g, f32 t);
+void fn_802A9BFC(PlainVec3* a, PlainVec3* b, s32 tex, f32 t, int d, int e, int f, int g);
 void fn_801E9E30(s16* h, Vec3* p);
 f32 fn_801E7E24(void);
 void fn_802981F8(Vec3* p);
@@ -1811,7 +1811,7 @@ static inline void DrawGateBar(const PlainVec3& from, const PlainVec3& to, const
         lo = 0x48;
         hi = 0x72;
     }
-    fn_802A9BFC(&a, &b, tex, 0, lo, 0x100, hi, t);
+    fn_802A9BFC(&a, &b, tex, t, 0, lo, 0x100, hi);
 }
 
 void ZoneMaster::DrawNextGate(void) {

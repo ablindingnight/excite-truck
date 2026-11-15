@@ -2537,7 +2537,7 @@ void BetaCar::DrawWinner(ILayout* l) const {
 extern "C" {
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 double fmod(double x, double y);
-void fn_801CB648(int id, f32 t, int done);
+void fn_801CB648(int id, int done, f32 t);
 void fn_801CB5DC(int id, s32 total, s32 grade);
 }
 
@@ -2585,7 +2585,7 @@ void BetaCar::Retire(void) {
     result.Finish(this);
     left = master->timer.limit - master->timer.now;
     left = 0.0f > left ? 0.0f : left;
-    fn_801CB648(id, master->timer.limit - left, 0);
+    fn_801CB648(id, 0, master->timer.limit - left);
 }
 
 /* Helper name unproven: stops the meter and adds the points of finished stunts to the score. */
@@ -2627,7 +2627,7 @@ void BetaCar::Finish(const RaceCarRec* rc) {
         fn_801CB5DC(id, total, grade);
         left = master->timer.limit - master->timer.now;
         left = 0.0f > left ? 0.0f : left;
-        fn_801CB648(id, master->timer.limit - left, 1);
+        fn_801CB648(id, 1, master->timer.limit - left);
     }
 }
 

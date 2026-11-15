@@ -181,7 +181,7 @@ void MenuDoControlUnified(void);
 void fn_80263F30(int a, int b, int c);
 void fn_80230E90(int a);
 void fn_802168BC(int a);
-void fn_8022BAD0(int id, int x, int y, int z, int w, int h, const char* s, int sel, f32 scale, int extra);
+void fn_8022BAD0(int id, int x, int y, int z, int w, int h, const char* s, int sel, int extra, f32 scale);
 void* fn_80232578(const char* font);
 void fn_802328D4(void* font);
 int fn_802399DC(int unused);
@@ -382,7 +382,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xCB, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ERASEDATA"), sel, 1.0f, 0);
+        fn_8022BAD0(0xCB, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ERASEDATA"), sel, 0, 1.0f);
     }
     virtual int Armed(void);
 
@@ -436,7 +436,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:SFXVOLUME"), sel, 1.0f, 0);
+        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:SFXVOLUME"), sel, 0, 1.0f);
     }
 };
 
@@ -459,7 +459,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:MUSICVOLUME"), sel, 1.0f, 0);
+        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:MUSICVOLUME"), sel, 0, 1.0f);
     }
 };
 
@@ -492,7 +492,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ICONS"), sel, 1.0f, 0);
+        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ICONS"), sel, 0, 1.0f);
     }
 
     u8 special;  // offset 0x1C
@@ -549,7 +549,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:RACE_MUSIC"), sel, 1.0f, 0);
+        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:RACE_MUSIC"), sel, 0, 1.0f);
     }
 
     s32 sel;              // offset 0x18
