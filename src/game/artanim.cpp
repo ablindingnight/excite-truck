@@ -27,6 +27,9 @@ struct ArtMap {
     s32 value;         // offset 0x8
 };
 
+// The shared end entry of a name -> value table (id 0); the game modes copy it as their tables' last row.
+extern const ArtMap lbl_802FAA40 = {0, 0, 0};
+
 struct ArtJustify {
     const char* name;  // offset 0x0
     u32 flag;          // offset 0x4
