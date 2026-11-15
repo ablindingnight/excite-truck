@@ -24,7 +24,7 @@ static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 class VR {
 public:
-    virtual void v08(void);
+    virtual ~VR(void);  // 0x08 (the 0x2584 effects object; ~CarBody deletes it through slot 0)
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -149,9 +149,12 @@ struct CbPose {
     u32 w[12];
 };
 
+struct CollDesc;
+
 class CollVolume {
 public:
-    virtual ~CollVolume(void);
+    virtual void Init(CollDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
+    virtual ~CollVolume(void);       // 0xC
     void Update(void);
     void AddShape(CollShape* s);
 };

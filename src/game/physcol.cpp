@@ -16,7 +16,7 @@ class Phob;
 // A collision primitive owned by an object.
 class Shape {
 public:
-    virtual void vf08(void);
+    virtual ~Shape(void);  // 0x08 (CollShape's destructor; retail BoxShape vtable slot 0)
     virtual void Reset(void);                                                // 0x0C
     virtual void Collide(Shape* other);                                      // 0x10
     virtual void vf14(void);
@@ -26,10 +26,12 @@ public:
     s32 id;  // offset 0x20: surface/owner id
 };
 
+struct CollDesc;
+
 class Phob {
 public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
+    virtual void Init(CollDesc* d);  // 0x8 (CollVolume::Init; retail slot order: Init, then the destructor)
+    virtual ~Phob(void);             // 0xC
     virtual void vf10(void);
     virtual void vf14(void);
     virtual void vf18(void);

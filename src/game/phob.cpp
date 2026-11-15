@@ -380,9 +380,12 @@ public:
     u8 pad0[0x1FC];
 };
 
+struct CollDesc;
+
 class CollVolume {
 public:
-    virtual ~CollVolume(void);
+    virtual void Init(CollDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
+    virtual ~CollVolume(void);       // 0xC
 };
 
 class RigidBody : public CollVolume {
