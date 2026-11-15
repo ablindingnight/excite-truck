@@ -59,10 +59,7 @@ struct BoostVtx {
 };
 
 struct BoostArea {
-    BoostArea(void) {
-        bound = 0;
-        verts = 0;
-    }
+    BoostArea(void);
     ~BoostArea(void) { Free(); }
     void Build(Bound* b);
     int Index(int x, int y) const { return x * ny + y; }  /* Helper name unproven */
@@ -99,6 +96,7 @@ struct ArrayRef {
     }
     int Count(void);
     T* At(int i);
+    int Size(void) const { return count; }  /* Helper name unproven */
     void RemoveAt(int i) {
         if (i >= 0 && i < count) {
             if (i != count - 1) {
@@ -305,94 +303,90 @@ inline void PlayerBoost::Reset(void) {
     Clear();
 }
 
-inline IRaceListener::IRaceListener(void) {}
-
-template <typename T, int N>
-inline FixedArr<T, N>::FixedArr(void) : ArrayRef<T>(storage, N) {}
-
-static inline void BuildArea(BoostArea* a, Bound* b) {
-    int best = -1;
-    int k;
-    for (k = 0; k < b->n; k++) {
-        if (best < 0 || fn_80160BE0(&b->pts[best], &b->pts[best % b->n]) > fn_80160BE0(&b->pts[k], &b->pts[k % b->n])) {
-            best = k;
+/* Helper name unproven */
+static inline int AddArea(BoostMan* m, ValueNode* n) {  /* Helper name unproven */
+    BoostArea* a;
+    Bound* b;
+    int ok;
+    a = &m->areas.data[m->areas.count++];
+    b = fn_801399FC(n);
+    ok = 0;
+    if (b->n == 3) {
+        int best = -1;
+        int k;
+        for (k = 0; k < b->n; k++) {
+            if (best < 0 || fn_80160BE0(&b->pts[best], &b->pts[best % b->n]) > fn_80160BE0(&b->pts[k], &b->pts[k % b->n])) {
+                best = k;
+            }
         }
-    }
-    Vec2 tip(b->pts[(best + 2) % b->n]);
-    Vec2 mid;
-    fn_80160BBC(&mid, &b->pts[best], &b->pts[(best + 1) % b->n]);
-    fn_80160BA0(&mid, &mid, 0.5f);
-    Vec2 dir;
-    fn_80160B7C(&dir, &tip, &mid);
-    fn_80160B18(&dir);
-    Vec2 side;
-    fn_80160B7C(&side, &b->pts[best], &mid);
-    AddScaled(&side, &side, -Dot(&dir, &side), &dir);
-    a->bound = NewBound(4);
-    fn_80160BBC(&a->bound->pts[0], &mid, &side);
-    AddScaled(&a->bound->pts[1], &mid, -1.0f, &side);
-    AddScaled(&a->bound->pts[2], &tip, -1.0f, &side);
-    fn_80160BBC(&a->bound->pts[3], &tip, &side);
-    a->bound->n = 4;
-    a->ny = Max(2, (int)((2.5f + Dist(&a->bound->pts[0], &a->bound->pts[1])) / 5.0f));
-    a->nx = Max(2, (int)((2.5f + Dist(&a->bound->pts[1], &a->bound->pts[2])) / 5.0f));
-    a->verts = new ("BoostArea_v") BoostVtx[a->ny * a->nx];
-    int x;
-    for (x = 0; x < a->nx; x++) {
-        f32 t = (f32)x / (f32)(a->nx - 1);
-        Vec2 l(LerpV2(a->bound->pts[1], a->bound->pts[2], t));
-        Vec2 r(LerpV2(a->bound->pts[0], a->bound->pts[3], t));
-        f32 v = 1.0f - t;
-        int y;
-        for (y = 0; y < a->ny; y++) {
-            t = (f32)y / (f32)(a->ny - 1);
-            Vec2 p(LerpV2(l, r, t));
-            BoostVtx* vt = &a->verts[x * a->ny + y];
-            SetVtx(vt, &p);
-            vt->color = -1;
-            vt->u = t;
-            vt->v = v;
+        Vec2 tip(b->pts[(best + 2) % b->n]);
+        Vec2 mid;
+        fn_80160BBC(&mid, &b->pts[best], &b->pts[(best + 1) % b->n]);
+        fn_80160BA0(&mid, &mid, 0.5f);
+        Vec2 dir;
+        fn_80160B7C(&dir, &tip, &mid);
+        fn_80160B18(&dir);
+        Vec2 side;
+        fn_80160B7C(&side, &b->pts[best], &mid);
+        AddScaled(&side, &side, -Dot(&dir, &side), &dir);
+        a->bound = NewBound(4);
+        fn_80160BBC(&a->bound->pts[0], &mid, &side);
+        AddScaled(&a->bound->pts[1], &mid, -1.0f, &side);
+        AddScaled(&a->bound->pts[2], &tip, -1.0f, &side);
+        fn_80160BBC(&a->bound->pts[3], &tip, &side);
+        a->bound->n = 4;
+        a->ny = Max(2, (int)((2.5f + Dist(&a->bound->pts[0], &a->bound->pts[1])) / 5.0f));
+        a->nx = Max(2, (int)((2.5f + Dist(&a->bound->pts[1], &a->bound->pts[2])) / 5.0f));
+        a->verts = new ("BoostArea_v") BoostVtx[a->ny * a->nx];
+        int x;
+        for (x = 0; x < a->nx; x++) {
+            f32 s = (f32)x / (f32)(a->nx - 1);
+            f32 t;
+            Vec2 l(LerpV2(a->bound->pts[1], a->bound->pts[2], s));
+            Vec2 r(LerpV2(a->bound->pts[0], a->bound->pts[3], s));
+            int y;
+            for (y = 0; y < a->ny; y++) {
+                t = (f32)y / (f32)(a->ny - 1);
+                Vec2 p(LerpV2(l, r, t));
+                BoostVtx* vt = &a->verts[x * a->ny + y];
+                SetVtx(vt, &p);
+                vt->color = -1;
+                vt->u = t;
+                vt->v = 1.0f - s;
+            }
         }
+        fn_80160B18(&side);
+        AddScaled(&a->bound->pts[0], &a->bound->pts[0], 1.0f, &side);
+        AddScaled(&a->bound->pts[0], &a->bound->pts[0], -2.0f, &dir);
+        AddScaled(&a->bound->pts[1], &a->bound->pts[1], -1.0f, &side);
+        AddScaled(&a->bound->pts[1], &a->bound->pts[1], -2.0f, &dir);
+        AddScaled(&a->bound->pts[2], &a->bound->pts[2], -1.0f, &side);
+        AddScaled(&a->bound->pts[2], &a->bound->pts[2], 2.0f, &dir);
+        AddScaled(&a->bound->pts[3], &a->bound->pts[3], 1.0f, &side);
+        AddScaled(&a->bound->pts[3], &a->bound->pts[3], 2.0f, &dir);
+        Vec2 c(fn_80139C5C(a->bound));
+        fn_80160230(&a->center, &c);
+        a->center.y = fn_801DD88C(a->center.x, a->center.z);
+        ok = 1;
+    } else {
+        fn_802E30C8("BoostArea: table %s is not an ArenaBound with three points!", n->GetName());
     }
-    fn_80160B18(&side);
-    AddScaled(&a->bound->pts[0], &a->bound->pts[0], 1.0f, &side);
-    AddScaled(&a->bound->pts[0], &a->bound->pts[0], -2.0f, &dir);
-    AddScaled(&a->bound->pts[1], &a->bound->pts[1], -1.0f, &side);
-    AddScaled(&a->bound->pts[1], &a->bound->pts[1], -2.0f, &dir);
-    AddScaled(&a->bound->pts[2], &a->bound->pts[2], -1.0f, &side);
-    AddScaled(&a->bound->pts[2], &a->bound->pts[2], 2.0f, &dir);
-    AddScaled(&a->bound->pts[3], &a->bound->pts[3], 1.0f, &side);
-    AddScaled(&a->bound->pts[3], &a->bound->pts[3], 2.0f, &dir);
-    Vec2 c(fn_80139C5C(a->bound));
-    fn_80160230(&a->center, &c);
-    a->center.y = fn_801DD88C(a->center.x, a->center.z);
+    fn_80160B14(b);
+    return ok;
 }
 
 extern "C" {
 
 void fn_801E0890(BoostMan* m) {
-    BoostArea* a;
-    Bound* b;
     ValueTable* t;
-    int ok;
     int i;
     ValueNode* n;
     const char* name = ((EventInfo*)GetEvent(fn_801769CC()->event))->values->GetString("booster_file", "boosters.val");
     t = fn_80131810(name);
     if (t) {
         for (i = 0; (n = t->GetChild(i)) != 0; i++) {
-            a = &m->areas.data[m->areas.count++];
-            b = fn_801399FC(n);
-            ok = 0;
-            if (b->n == 3) {
-                BuildArea(a, b);
-                ok = 1;
-            } else {
-                fn_802E30C8("BoostArea: table %s is not an ArenaBound with three points!", n->GetName());
-            }
-            fn_80160B14(b);
-            if (!ok) {
-                m->areas.RemoveAt(m->areas.Count() - 1);
+            if (!AddArea(m, n)) {
+                m->areas.RemoveAt(m->areas.Size() - 1);
             }
         }
         fn_80131818(t);
@@ -401,6 +395,8 @@ void fn_801E0890(BoostMan* m) {
 
 }  // extern "C"
 
+inline int Max(int a, int b) { return b > a ? b : a; }
+
 inline f32 Dist(const V2* a, const V2* b) {
     V2 d;
     d.y = a->y - b->y;
@@ -408,7 +404,12 @@ inline f32 Dist(const V2* a, const V2* b) {
     return sqrt(d.x * d.x + d.y * d.y);
 }
 
-inline int Max(int a, int b) { return b > a ? b : a; }
+inline Bound* NewBound(s32 n) {
+    Bound* b = (Bound*)fn_801284E8("arenabnd", n * sizeof(V2) + 8);
+    b->cap = n;
+    b->n = n;
+    return b;
+}
 
 inline void AddScaled(V2* r, const V2* a, f32 s, const V2* b) {
     f32 x = a->x + b->x * s;
@@ -425,12 +426,15 @@ inline f32 Dot(const V2* a, const V2* b) {
     return a->x * x + a->y * y;
 }
 
-inline Bound* NewBound(s32 n) {
-    Bound* b = (Bound*)fn_801284E8("arenabnd", n * sizeof(V2) + 8);
-    b->cap = n;
-    b->n = n;
-    return b;
+template <>
+inline FixedArr<BoostArea, 100>::FixedArr(void) : ArrayRef<BoostArea>(storage, 100) {}
+
+inline BoostArea::BoostArea(void) {
+    bound = 0;
+    verts = 0;
 }
+
+inline IRaceListener::IRaceListener(void) {}
 
 /* Helper name unproven */
 static inline BoostArea& AreaAt(BoostArea* areas, int index) {
@@ -519,14 +523,9 @@ void fn_801E12A4(void) {
 
 }  // extern "C"
 
-template <typename T>
-inline int ArrayRef<T>::Count(void) {
+template <>
+inline int ArrayRef<BoostArea>::Count(void) {
     return count;
-}
-
-template <typename T>
-inline T* ArrayRef<T>::At(int i) {
-    return &data[i];
 }
 
 extern "C" {
@@ -554,6 +553,15 @@ void fn_801E1384(BoostArea* a, u32 color) {
         fn_802C8E48();
     }
 }
+
+}  // extern "C"
+
+template <>
+inline BoostArea* ArrayRef<BoostArea>::At(int i) {
+    return &data[i];
+}
+
+extern "C" {
 
 void fn_801E1520(void) {
     if (lbl_8055EA10) {
