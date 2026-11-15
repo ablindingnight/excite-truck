@@ -204,7 +204,7 @@ void fn_801DE154(void) {
         v.pos.x += step.x * (f32)i;
         v.pos.y += step.y * (f32)i;
         if (i == lbl_8055E9BC) {
-            n.color = v.color = name2.color;
+            v.color = n.color = name2.color;
         }
         if (i >= 0) {
             Tweak* tw = &lbl_80486F30[i];
