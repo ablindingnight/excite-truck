@@ -662,7 +662,7 @@ void fn_8029798C(const char* model, const OFrame* f, u32 mask, f32 extend, f32 c
 void fn_80297988(StaticObject* o);
 void fn_802981EC(const PlacedObj* o, f32 a);
 void fn_801F4DD4(const char* table, const PlacedObj* o);
-CollShape* fn_801A324C(void* p, void* o, f32 k, f32 s, const char* file);
+CollShape* fn_801A324C(void* p, void* o, const char* file, f32 k, f32 s);
 Sound3D* fn_802077A4(const char* name, int cls, const RVec3* vel, const PVec* pos);
 }
 
@@ -1917,7 +1917,7 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
                 s = fn_801FBEA8(&phys);
                 break;
             default:
-                fn_802E317C("eventwob: unhandled static object subtype %x");
+                fn_802E317C("eventwob: unhandled static object subtype %x", static_cast<unsigned int>(phys.kind));
                 s = 0;
                 break;
             }
@@ -2001,7 +2001,7 @@ CollShape* fn_801FBFE8(ObstacleDesc* d) {
     f32 k = 50000.0f;
     void* p = operator new(0xE0, "ewcv:polyvol");
     if (p) {
-        p = fn_801A324C(p, 0, k, d->friction, d->shape.name);
+        p = fn_801A324C(p, 0, d->shape.name, k, d->friction);
     }
     return (CollShape*)p;
 }
