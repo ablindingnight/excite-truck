@@ -1471,6 +1471,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
     for (i = 0; t->GetChild(i) != 0; i++) {
         child = t->GetChild(i);
         if (fn_8013CB44("ZoneLevel", child)) {
+            ValueNode* sn;
             ZoneLevel* prev = lvl > 0 ? levels : 0;
             ZoneLevel* l = &levels[lvl];
             s32 j;
@@ -1530,7 +1531,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
             l->score = 10;
             sprintf(buf, "scoring_level%d", lvl + 1);
             if (t->HasChild(buf)) {
-                ValueNode* sn = t->FindChild(buf);
+                sn = t->FindChild(buf);
                 l = &levels[lvl];
                 if (sn) {
                     l->mult = sn->GetInt("m", lvl + 1);
