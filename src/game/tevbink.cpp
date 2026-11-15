@@ -673,10 +673,10 @@ void fn_802E0D44(void* p) {
             a = *l;
             al = h->align;
             c = *m;
-            adj = (u8*)a + al + a->size + 1 == (u8*)c || (u8*)c + al + c->size + 1 == (u8*)a;
+            adj = (u8*)a + al + 1 + a->size == (u8*)c || (u8*)c + al + 1 + c->size == (u8*)a;
             if (adj) {
                 dst = l;
-                if ((u8*)c + al + c->size + 1 == (u8*)a) {
+                if ((u8*)c + al + 1 + c->size == (u8*)a) {
                     dst = m;
                     m = l;
                 }
