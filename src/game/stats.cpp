@@ -4,6 +4,7 @@
 // "RealStatistic" and "IntStatistic" messages give the names; the rest are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/vec3_init.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -276,7 +277,7 @@ u8 lbl_8055D5D8;              // first load pending
 StatEntry lbl_80358628;       // returned when a stat has no contest
 StatList* lbl_80358658[NUM_IDENTITIES];
 
-void StatsUpdate(void) {}
+void DefaultConstructVec3(void* storage) {}
 
 const char* StatsGetLabel(u32 type) {
     return GetStatLabel(type);

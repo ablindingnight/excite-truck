@@ -3,6 +3,7 @@
 // free flag) are joined by distance sticks and pinned to moving frames by anchors; a step integrates,
 // relaxes the constraints and resets the accelerations to gravity. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/vec3_init.h"
 
 struct RVec3 {
     f32 x;
@@ -133,7 +134,6 @@ void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144D64(RVec3* d, const RVec3* s);
 void fn_80144CD0(RVec3* out, const RVec3* p, const RMtx* m);
 void fn_80144DAC(RVec3* d, const RVec3* s);
-void StatsUpdate__Fv(RVec3* v);  // vector default constructor (empty, out of line)
 f32 fn_8017F70C(f32 x);
 void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
@@ -623,10 +623,10 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
         ey = 0.254f + (half->y + w);
         ez = 0.254f + (half->z + w);
         fn_80144D64(&was, &s->pos[i]);
-        StatsUpdate__Fv(&p);
+        DefaultConstructVec3(&p);
         fn_80144CD0(&p, &was, m);
-        StatsUpdate__Fv(&q);
-        StatsUpdate__Fv(&prev);
+        DefaultConstructVec3(&q);
+        DefaultConstructVec3(&prev);
         fn_80144D64(&v, vel);
         fn_801C2B9C(&prev, &s->old[i], &v, 0.016666668f);
         fn_80144CD0(&q, &prev, m);
@@ -649,7 +649,7 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
                 }
             }
             fn_801BFD34(&s->pos[i], &p, m);
-            StatsUpdate__Fv(&d);
+            DefaultConstructVec3(&d);
             fn_801C0E60(&d, &was, &s->pos[i]);
             k = Max(fn_801C0E44(&d), 0.00001f);
             fn_801C2B9C(&force, &force, &d, 1000.0f * s->w34[i]);

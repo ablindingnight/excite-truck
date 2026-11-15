@@ -3,6 +3,7 @@
 // 4-float records. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/vec3_init.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -178,7 +179,6 @@ void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, s16 c);
 void __ct__4VPosFfff(MVec3* v, f32 x, f32 y, f32 z);
-void StatsUpdate__Fv(MVec3* v);  // vector default constructor (empty, out of line)
 s32 lbl_8055A920 = -1;
 MVec4* fn_801BF12C(MVec4* out, const MVec4* in);
 MVec4* fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w);
@@ -571,7 +571,7 @@ static inline void PostUpdateCar(int car) {
     CxEntry* cx = &lbl_8055E7A4[car];
     ContactSet* cs = &lbl_8055E798[car];
     MassSet* m = &lbl_8055E794[car];
-    StatsUpdate__Fv(&p);
+    DefaultConstructVec3(&p);
     fn_801BF198(&p, (MVec3*)&m->pos);
     if (!fn_801BD628(&p)) {
         fn_802E30C8("CarPostUpdate: illegal mass position (%f %f %f)", p.x, p.y, p.z);
@@ -582,10 +582,10 @@ static inline void PostUpdateCar(int car) {
             fn_801BF150(&t3, 0.0f, 0.0f, 0.0f, 0.0f)))));
         fn_801BF198(&p, (MVec3*)&m->pos);
     }
-    StatsUpdate__Fv(&up);
+    DefaultConstructVec3(&up);
     fn_801BF198(&up, (MVec3*)&m->rot[2]);
     for (i = 0; i < 4; i++) {
-        StatsUpdate__Fv(&pt);
+        DefaultConstructVec3(&pt);
         fn_801BF198(&pt, &cs->pts[i].p);
         surface = 0xFF;
         __ct__4VPosFfff(&n, 0.0f, 1.0f, 0.0f);

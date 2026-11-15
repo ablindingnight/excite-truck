@@ -3,6 +3,7 @@
 // one quaternion per bone) and from given world frames, then handing the skin matrices to the model.
 // Names are guesses.
 #include "game/common.h"
+#include "game/vec3_init.h"
 
 struct BVec {
     f32 x, y, z;
@@ -50,7 +51,6 @@ void fn_801BFD34(BVec* out, const BVec* v, const BFrame* m);
 void fn_801C7254(BMtx33* m);
 void fn_801BFE7C(BVec* out, const BVec* a, const BVec* b);
 void fn_801C0E60(BVec* out, const BVec* a, const BVec* b);
-void StatsUpdate__Fv(BVec* v);
 }
 
 struct Mat3;
@@ -252,7 +252,7 @@ s32 fn_801E65BC(const BoneSet* set, const BFrame* world, int n, BFrame* root) {
             BFrame* s = &skin[d];
             Mat3Mul((Mat3*)s, (const Mat3*)&w, (const Mat3*)&l);
             BVec tmp;
-            StatsUpdate__Fv(&tmp);
+            DefaultConstructVec3(&tmp);
             fn_801E67B4(&tmp, &b->rest.t, s);
             BVec* t = &s->t;
             fn_801C0E60(t, &b->rest.t, &tmp);

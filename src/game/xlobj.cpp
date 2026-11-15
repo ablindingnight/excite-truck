@@ -5,6 +5,7 @@
 // decals over it, which then draw them with their own texture matrix. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/vec3_init.h"
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
@@ -34,7 +35,6 @@ extern "C++" f32 Floor(f32 x);  // weak (C++ linkage; this part of the file sits
 void __ct__4Vec2Fv(class Vec2* v);
 void fn_80160BA0(struct V2* r, const struct V2* a, f32 s);
 void fn_80160B18(struct V2* v);
-void StatsUpdate__Fv(struct Vec3* v);
 void fn_80144D64(struct Vec3* d, const struct Vec3* s);
 const struct Vec3* fn_802C9A40(void);
 f32 fn_801DCF48(struct Vec3* n, f32 x, f32 z);  // ground height
@@ -814,7 +814,7 @@ static inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
     __ct__4Vec2Fv(&at);
     AddScaled(&at, pos, 0.5f, &along);
     Vec3 nrm;
-    StatsUpdate__Fv(&nrm);
+    DefaultConstructVec3(&nrm);
     if (fn_801DCF48(&nrm, at.x, at.y)) {
         Vec2 n2;
         __ct__4Vec2Fv(&n2);

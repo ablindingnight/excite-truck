@@ -5,19 +5,7 @@
 // byte-swapped on load. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/math_types.h"
-
-// Keep the instance method groups in the retail link order.
-#ifdef __MWERKS__
-#pragma section code_type ".text.trackmod_prefix"
-#pragma section RX ".text.trackmod_facing_dt"
-#pragma section RX ".text.trackmod_scroll_dt"
-#pragma section RX ".text.trackmod_xfade_dt"
-#pragma section RX ".text.trackmod_rot_dt"
-#pragma section RX ".text.trackmod_tail"
-#define TRACKMOD_CODE_SECTION(name) __declspec(section name)
-#else
-#define TRACKMOD_CODE_SECTION(name)
-#endif
+#include "game/vec3_init.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -140,7 +128,6 @@ public:
     void DrawFade(XFade** vis, int i);
 public:
     XFadeList(void) { count = 0; }
-    virtual ~XFadeList(void);
     virtual void Draw(void* ctx);
     virtual void Draw2(void* ctx);
     virtual int Kind(void);
@@ -159,7 +146,6 @@ struct Scroll {
 class ScrollList : public TrackInst {
 public:
     ScrollList(void) { count = 0; }
-    virtual ~ScrollList(void);
     virtual int Kind(void);
     virtual void Draw(void* ctx);
     virtual void Draw2(void* ctx);
@@ -174,7 +160,6 @@ public:
         data = d;
         id = i;
     }
-    virtual ~FacingTestInst(void);
     virtual void Draw(void* ctx);
 
     u8* data;  // offset 0x4
@@ -630,6 +615,9 @@ struct TVtx {
     f32 u;       // offset 0x10
     f32 v;       // offset 0x14
 };
+
+
+inline TVec::TVec(void) { DefaultConstructVec3(this); }
 
 // Which of the 32 facings of the billboard atlas looks at the camera.
 static inline int FaceSeg(TObj* o, f32*& pos, TCam* cam) {
@@ -1123,13 +1111,7 @@ inline void FacingTestTMH::Add(void* scene, const TObj* o, s32 id) {
 
 inline void TrackMod::DrawTree(TNode* tree) {}
 
-TRACKMOD_CODE_SECTION(".text.trackmod_facing_dt") inline FacingTestInst::~FacingTestInst(void) {}
-
-TRACKMOD_CODE_SECTION(".text.trackmod_scroll_dt") inline ScrollList::~ScrollList(void) {}
-
-TRACKMOD_CODE_SECTION(".text.trackmod_xfade_dt") inline XFadeList::~XFadeList(void) {}
-
-TRACKMOD_CODE_SECTION(".text.trackmod_rot_dt") inline RotList::~RotList(void) { delete[] rots; }
+inline RotList::~RotList(void) { delete[] rots; }
 
 static inline void Mat3MulD(Mat3* out, const Mat3* l, const Mat3* r) {
     if (out == l || out == r) {
@@ -1164,7 +1146,7 @@ static inline void Mat3MulD(Mat3* out, const Mat3* l, const Mat3* r) {
     }
 }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void RotList::Draw(void* ctx) {
+inline void RotList::Draw(void* ctx) {
     int i = 0;
     if (count > 0) {
     for (; i < count; i++) {
@@ -1192,7 +1174,7 @@ TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void RotList::Draw(void* ctx
     }
     }
 }
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void XFadeList::Draw(void* ctx) {}
+inline void XFadeList::Draw(void* ctx) {}
 
 inline void XFadeList::DrawFade(XFade** vis, int i) {
     XFade* f = vis[i];
@@ -1204,7 +1186,7 @@ inline void XFadeList::DrawFade(XFade** vis, int i) {
     }
 }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void XFadeList::Draw2(void* ctx) {
+inline void XFadeList::Draw2(void* ctx) {
     XFade* vis[48];
     int n = 0;
     int i;
@@ -1218,13 +1200,13 @@ TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void XFadeList::Draw2(void* 
     }
 }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline int XFadeList::Kind(void) { return 4; }
+inline int XFadeList::Kind(void) { return 4; }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline int ScrollList::Kind(void) { return 3; }
+inline int ScrollList::Kind(void) { return 3; }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void ScrollList::Draw(void* ctx) {}
+inline void ScrollList::Draw(void* ctx) {}
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void ScrollList::Draw2(void* ctx) {
+inline void ScrollList::Draw2(void* ctx) {
     f32 uv[2];
     f32 m[4][3];
     f32 t = fn_801E7E18();
@@ -1254,15 +1236,15 @@ TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void ScrollList::Draw2(void*
     }
 }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void FacingTestInst::Draw(void* ctx) {
+inline void FacingTestInst::Draw(void* ctx) {
     if (fn_802CDB20(ctx, id) && !fn_801F1CF0(data)) {
         fn_802CDAFC(ctx, id);
     }
 }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline int TrackInst::Kind(void) { return -1; }
+inline int TrackInst::Kind(void) { return -1; }
 
-TRACKMOD_CODE_SECTION(".text.trackmod_tail") inline void TrackInst::Draw2(void* ctx) {}
+inline void TrackInst::Draw2(void* ctx) {}
 
 
 static inline Rot* AllocateRotatorTable(const char* tag = "rotator tab") {
@@ -1284,7 +1266,3 @@ inline void RotList::Check(void) {
         ReportRotatorLimit();
     }
 }
-
-#ifdef __MWERKS__
-#pragma section code_type
-#endif

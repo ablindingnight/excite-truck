@@ -159,7 +159,6 @@ config.wibo_tag = "0.6.16"
 # Project
 config.config_path = Path("config") / config.version / "config.yml"
 config.check_sha_path = Path("config") / config.version / "build.sha1"
-config.dol_link_layout = config.config_path.with_name("link_layout.json")
 config.asflags = [
     "-mgekko",
     "--strip-local-absolute",

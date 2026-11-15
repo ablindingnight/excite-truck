@@ -3,6 +3,7 @@
 // Names are guesses apart from the value keys and messages.
 #include "game/common.h"
 #include <revolution/MTX.h>
+#include "game/vec3_init.h"
 
 struct GroundFrame {
     Vec axes[3];  // offset 0x0
@@ -398,7 +399,6 @@ u32 fn_802B0118(const GroundCell* c);
 u32 fn_802B0124(const GroundCell* c);
 s16 fn_802B0130(const GroundNode* n);
 
-void StatsUpdate__Fv(Vec* v);  // empty Vec constructor (folded)
 f32 PSVECDotProduct(const Vec* a, const Vec* b);
 double atan(double x);
 double tan(double x);
@@ -494,7 +494,7 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
     Vec* centerp = bag ? &corner[4] : 0;
 
     Vec here;
-    StatsUpdate__Fv(&here);
+    DefaultConstructVec3(&here);
     fn_802B009C(&here, 0, n->x, n->y);
     if (centerp) {
         fn_80144DAC(centerp, &here);
@@ -502,7 +502,7 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
     u16 id;
     if (1.0f != alpha) {
         Vec from;
-        StatsUpdate__Fv(&from);
+        DefaultConstructVec3(&from);
         u16* e = n->edge[n->unk6];
         u16 at = n->unk6 < 2 ? 0 : n->size;
         if (e[at] > 0xFFFD) {
@@ -552,14 +552,14 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
                 *em = fn_802AFFA8(mx, my);
             } else {
                 Vec a;
-                StatsUpdate__Fv(&a);
+                DefaultConstructVec3(&a);
                 if (*first > 0xFFFD) {
                     fn_802B1BF0(lbl_8055F974, &a, *first);
                 } else {
                     fn_802B009C(&a, 0, n->x + step * startX[i], n->y + step * startY[i]);
                 }
                 Vec b;
-                StatsUpdate__Fv(&b);
+                DefaultConstructVec3(&b);
                 fn_802B009C(&b, 0, mx, my);
                 Vec m;
                 fn_8025AD3C(&m, &a, &b, alpha);
@@ -620,7 +620,7 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
             GroundItem* it = (GroundItem*)fn_802AFF5C(bag, j);
             if (it->lists[lod]) {
                 Vec pos;
-                StatsUpdate__Fv(&pos);
+                DefaultConstructVec3(&pos);
                 fn_801C2B9C(&pos, &corner[4], &corner[it->corner], it->t0);
                 fn_801C2B9C(&pos, &pos, &corner[(it->corner + 1) & 3], it->t1);
                 if (j < used) {

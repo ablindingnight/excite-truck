@@ -4,6 +4,7 @@
 // a driver projects the obstacles ahead into 64 lateral bins and picks the nearest free gap. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/vec3_init.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -137,7 +138,6 @@ int fn_80179630(int view);
 RaceCarRec* fn_8017960C(int id);
 void fn_8019321C(Vec2* out, const Vec2* local, Frame* f);
 void fn_8014C75C(void* steer, const Vec2* target);
-void StatsUpdate__Fv(Vec3* v);
 }
 
 template <class T>
@@ -748,7 +748,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                     if (steer) {
                         fn_8014C75C(steer, &w);
                     }
-                    StatsUpdate__Fv(&spot.pos);
+                    DefaultConstructVec3(&spot.pos);
                     spot.From(w);
                 }
             }

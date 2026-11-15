@@ -7,6 +7,7 @@
 #include "game/menustate.h"
 #include "game/menu.h"
 #include <string.h>
+#include "game/vec3_init.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -750,7 +751,6 @@ extern f32 lbl_80498EAC[3];  // smoothed view direction
 
 extern "C" {
 int fn_801298E8(ViewPad* pad, int chan);
-void StatsUpdate__Fv(f32* v);  // vector default constructor (empty, out of line)
 void fn_80144DAC(f32* dst, const f32* src);
 f32 fn_80144CC8(f32 x);
 void fn_801BFEBC(f32* v, f32 x, f32 y, f32 z);
@@ -789,7 +789,7 @@ inline void AchievementTrophyModel::Update(f32 dt) {
         f32 plus = (pad.hold & 2) ? 1.0f : 0.0f;
         f32 minus = (pad.hold & 8) ? -1.0f : 0.0f;
         lbl_8055F398 += dt * (3.1415927f * (minus + plus));
-        StatsUpdate__Fv(v);
+        DefaultConstructVec3(v);
         if (pad.flags & 0x20) {
             fn_80144DAC(v, pad.dir);
         } else {
@@ -804,9 +804,9 @@ inline void AchievementTrophyModel::Update(f32 dt) {
     f32 tilt = fn_8017F70C(fn_8025AD88(side, &rot[3]));
     fn_8017F70C(fn_8025AD88(&rot[3], fwd));
     if (tilt > 0.707f) {
-        StatsUpdate__Fv(a);
-        StatsUpdate__Fv(b);
-        StatsUpdate__Fv(c);
+        DefaultConstructVec3(a);
+        DefaultConstructVec3(b);
+        DefaultConstructVec3(c);
         fn_801C0E4C(c, side, &rot[3]);
         fn_801C0E4C(a, &rot[3], c);
         fn_801C0E4C(b, &rot[3], fwd);
@@ -901,7 +901,7 @@ void fn_802C744C(s32 model, u8* m);
 // fills the screen, lit from a fixed direction.
 static inline void TrophyCenterOffset(AchievementTrophyModel* p, f32* bounds, u8* cam) {
     f32 c[3];
-    StatsUpdate__Fv(c);
+    DefaultConstructVec3(c);
     fn_801BFEBC(c, fn_8025B0A8(bounds), fn_8025B0A8(bounds + 2), fn_8025B0A8(bounds + 4));
     fn_801E67B4(c, c, (u8*)p->xform);
     fn_801C0E60(&p->xform[9], &p->xform[9], c);

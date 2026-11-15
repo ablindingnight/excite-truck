@@ -3,6 +3,7 @@
 // simulation (fn_801C1BA4 handle) and is re-fitted to the simulated corners every update. A body
 // is reused when free, else the oldest one is taken. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/vec3_init.h"
 
 struct RVec3 {
     f32 x;
@@ -214,7 +215,6 @@ f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
 void __ct__10CamFrame34Fv(RMtx* m);
 const RMtx* Mtx__10RaceCarRecFv(Phob* car);
-void StatsUpdate__Fv(void* p);
 void fn_8017E388(RMtx* m);
 CollShape* fn_801A25F8(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
 void fn_8019EECC(CollVolume* v, RVec3* c);
@@ -229,7 +229,6 @@ void* memset(void* dst, int c, size_t n);
 f32 PSVECDotProduct(const void* a, const void* b);
 void PSVECCrossProduct(const void* a, const void* b, void* out);
 void PSVECNormalize(const void* in, void* out);
-void StatsUpdate(void);
 
 void fn_801BFE7C(RVec3* out, const RVec3* a, const RVec3* b);
 void fn_801BFEB0(PanelVert* v);
@@ -355,9 +354,8 @@ extern "C" {
 
 PanelVol* fn_801BF214(void) { return new ("panel") PanelVol; }
 
-// The retail linker folds this empty initializer to StatsUpdate.
 struct WVec : RVec3 {
-    WVec(void) { StatsUpdate__Fv(this); }
+    WVec(void) { DefaultConstructVec3(this); }
 };
 
 inline PanelVert::PanelVert(void) { fn_801BFEB0(this); }
