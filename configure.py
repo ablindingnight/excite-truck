@@ -1289,7 +1289,7 @@ config.libs.append(
             Object(NonMatching, "game/mlist.cpp"),
             Object(Matching, "game/vidmode.cpp"),
             Object(Matching, "game/modelpool.cpp"),
-            Object(NonMatching, "game/billboard.cpp"),
+            Object(Matching, "game/billboard.cpp"),
             Object(NonMatching, "game/gx.cpp"),
             Object(NonMatching, "game/drsurf.cpp"),
             Object(NonMatching, "game/drtex.cpp"),
