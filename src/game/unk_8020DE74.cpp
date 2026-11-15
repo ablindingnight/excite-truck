@@ -23,7 +23,6 @@ extern const float lbl_805633FC;
 #pragma cplusplus on
 extern void *lbl_8033C8C4[];
 extern char lbl_8033C7A0[];
-extern char lbl_8055B648[7];
 extern const float lbl_8056336C;
 void *operator new(unsigned long size, const char *tag);
 extern "C" void *memset(void *, int, unsigned long);
@@ -90,7 +89,7 @@ struct Hud {
 // Builds the HUD parts for a vehicle; the extra gauges exist only for the 'PCAR' type.
 extern "C" void *fn_8020DE74(unsigned char *vehicle) {
     const char *names = lbl_8033C7A0;
-    Hud *hud = (Hud *)operator new(0x74, lbl_8055B648);
+    Hud *hud = (Hud *)operator new(0x74, "carsnd");
     if (hud != 0) {
         long isCar;
         void *res2;
