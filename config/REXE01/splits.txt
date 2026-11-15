@@ -4638,6 +4638,7 @@ game/tevbink.cpp:
 	.sdata      start:0x8055D150 end:0x8055D170
 	.sbss       start:0x8055FEE0 end:0x8055FEF0
 	.sdata2     start:0x805650C8 end:0x805650F0
+	.sbss2      start:0x80565238 end:0x80565240
 
 game/kernel.cpp:
 	.text       start:0x802E1728 end:0x802E3028
