@@ -566,7 +566,8 @@ void fn_8000E874(int player) {
         int part2;
         part = fn_8000DFA8(row->type);
         part2 = fn_8000DFC0(row->type);
-        f32 w = fn_80235EF0(lbl_80351214.art, part) + pad;
+        f32 w = fn_80235EF0(lbl_80351214.art, part);
+        w += pad;
         f32 h = fn_80235F64(lbl_80351214.art, part);
         f32 x = Lerp(5.0f + lbl_8055CFF0, right, row->slide);
         f32 ty;
@@ -574,6 +575,7 @@ void fn_8000E874(int player) {
         f32 bw;
         f32 size;
         f32 x9;
+        f32 half;
         f32 xr;
         fn_80235EF0(lbl_80351214.art, part2);
         x9 = 9.0f + x;
@@ -620,7 +622,8 @@ void fn_8000E874(int player) {
             {
                 bw = 2.0f;
                 bh = 17.0f;
-                fn_800109E4(barColor, x5 + MulQ(row->c, 89.0f) / 100.0f - 1.0f, ty + bh * 0.5f, bw, bh);
+                half = 0.5f;
+                fn_800109E4(barColor, x5 + MulQ(row->c, 89.0f) / 100.0f - 1.0f, ty + bh * half, bw, bh);
             }
             break;
         case 8:
