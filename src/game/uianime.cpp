@@ -286,20 +286,33 @@ static inline ValPoint Lerp2(const ValPoint& a, const ValPoint& b, f32 f) {
     return r;
 }
 
+// A row of the pose's 3x3 rotation.
+struct UiRow {
+    f32 x, y, z;
+};
+
+/* Helper name unproven: identity rotation written through its rows. Retail keeps the pose address in a saved
+   register outside the track loop, which only happens when the matrix is filled through a row-typed pointer
+   (same fact as betarace IdentityRows). */
+static inline void IdentityRot(f32* m) {
+    UiRow* r = (UiRow*)m;
+    r[0].x = 1.0f;
+    r[0].y = 0.0f;
+    r[0].z = 0.0f;
+    r[1].x = 0.0f;
+    r[1].y = 1.0f;
+    r[1].z = 0.0f;
+    r[2].x = 0.0f;
+    r[2].y = 0.0f;
+    r[2].z = 1.0f;
+}
+
 static inline void* MakeObj(ValPoint p, f32 s, f32 a) {
     UiPose pose;
     pose.y = p.y;
     pose.x = p.x;
     pose.z = 0.0f;
-    pose.m[0] = 1.0f;
-    pose.m[1] = 0.0f;
-    pose.m[2] = 0.0f;
-    pose.m[3] = 0.0f;
-    pose.m[4] = 1.0f;
-    pose.m[5] = 0.0f;
-    pose.m[6] = 0.0f;
-    pose.m[7] = 0.0f;
-    pose.m[8] = 1.0f;
+    IdentityRot(pose.m);
     void* o = fn_8022EDE4(&pose, a);
     *(f32*)((u8*)o + 0x38) = s;
     return o;
