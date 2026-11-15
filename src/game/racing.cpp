@@ -312,32 +312,34 @@ public:
 };
 
 // HUD colours (not referenced by the surviving code).
-class HudColors {
-public:
-    HudColors(void) {
-        c[0] = 0xDC000000;
-        c[1] = 0x90900000;
-        c[2] = 0xC8800000;
-        c[3] = 0xC8000060;
-        c[4] = 0x7F000000;
-        c[5] = 0x90000000;
-        c[6] = 0xFFFFD03F;
-        c[7] = 0xFFFFFFFF;
-        c[8] = 0x64FFFFFF;
-        c[9] = 0xA0000000;
-        c[10] = 0x82000000;
-        c[11] = 0x6E000000;
-        c[12] = 0x58000000;
-        c[13] = 0x2D000000;
-        c[14] = 0x64000000;
-    }
+static inline u32 InitHudValue(u32 value) { return value; }
+
+struct HudColors {
     u32 c[15];
 };
 
 ModuleTag lbl_8055D520;
-UnkStaticFFFF lbl_8055D528;
-HudColors lbl_803577A0;
-UnkStatic7F lbl_8055D52C;
+extern const u32 lbl_8055D528 = InitHudValue(0xFFFF0000);
+extern const u32 lbl_8055D52C = InitHudValue(0x7F000000);
+extern const HudColors lbl_803577A0 = {
+    {
+        InitHudValue(0xDC000000),
+        InitHudValue(0x90900000),
+        InitHudValue(0xC8800000),
+        InitHudValue(0xC8000060),
+        InitHudValue(0x7F000000),
+        InitHudValue(0x90000000),
+        InitHudValue(0xFFFFD03F),
+        InitHudValue(0xFFFFFFFF),
+        InitHudValue(0x64FFFFFF),
+        InitHudValue(0xA0000000),
+        InitHudValue(0x82000000),
+        InitHudValue(0x6E000000),
+        InitHudValue(0x58000000),
+        InitHudValue(0x2D000000),
+        InitHudValue(0x64000000),
+    },
+};
 
 RacingOverlay* lbl_803577E0[4];
 
