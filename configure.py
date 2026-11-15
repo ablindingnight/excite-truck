@@ -970,7 +970,7 @@ config.libs.append(
             Object(Matching, "game/carstats.cpp"),
             Object(Matching, "game/unlocks.cpp"),
             Object(Matching, "game/ident.cpp"),
-            Object(NonMatching, "game/achieve.cpp"),
+            Object(Matching, "game/achieve.cpp"),
             Object(Matching, "game/driver.cpp"),
             Object(NonMatching, "game/loading.cpp"),
             Object(Matching, "game/stats.cpp"),

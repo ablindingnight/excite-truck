@@ -342,8 +342,14 @@ void AchMerge(AchStats* dst, const AchStats* src) {
                 empty = j;
             } else if (strcasecmp(d->name, s->name) == 0) {
                 found = TRUE;
-                d->values[0] += s->values[0];
-                d->values[1] += s->values[1];
+                s32* out = d->values;
+                const s32* in = s->values;
+                int n = 2;
+                while (n--) {
+                    *out += *in;
+                    ++out;
+                    ++in;
+                }
             }
         }
         if (!found) {
