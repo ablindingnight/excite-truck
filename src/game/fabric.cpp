@@ -469,7 +469,7 @@ Anchor::Anchor(void) {}
 
 static inline f32 Lerp( f32 b,f32 a, f32 t) { return a + t * (b - a); }
 
-static inline u8 LerpB(u8 a, u8 b, f32 t) { return (u8)(int)((f32)b + t * ((f32)a - (f32)b)); }
+static inline int LerpB(f32 a, f32 b, f32 t) { return b + t * (a - b); }
 
 static inline u32 LerpColor( u32 b,u32 a, f32 t) {
     u32 c;
