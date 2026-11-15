@@ -403,7 +403,7 @@ void* fn_8021165C(int,int);
 void fn_80219660(WidgetFragment*);
 void fn_8021D378(WidgetFragment *self);
 
-extern int lbl_8055FBC0;
+extern const u32 lbl_8055FBC0;
 void fn_802C3424(int,int,int,int,int);
 void fn_8021D568(WidgetFragment* self,void* context);
 }
@@ -473,7 +473,7 @@ WidgetFragment* fn_8021E884(WidgetFragment* self,int destroy);
 
 
 extern "C" {
-extern int lbl_8055FBDC;
+extern const u32 lbl_8055FBDC;
 
 void fn_8021E3BC(WidgetFragment* self,void* context);
 void fn_8021E51C(WidgetFragment* self);
@@ -556,7 +556,7 @@ void fn_802200AC(WidgetFragment* self);
 void fn_80220F90(WidgetFragment*,int,int);
 
 struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
-extern int lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
+extern const u32 lbl_8055FBE0,lbl_8055FBFC;void fn_80228E80(ObservedClipPrefix*,void*,int,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
 void fn_80221544(WidgetFragment *self, void *context);
 extern const char lbl_8033D9F8[];void fn_802E30C8(const char*,...);
 void fn_80221970(WidgetFragment* self);
@@ -705,7 +705,7 @@ extern "C" {
 extern u32 lbl_8033E988[];extern const char lbl_8033D96C[],lbl_8033D978[];
 void fn_802C2FC8(void*,int,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
 void fn_8022B390(int,const char*,int,int*,int*);void fn_802C47B8(int,int,int,int,int);void fn_802C3014(void*);
-int fn_8022B2D4(int,const char*,int,int);extern int lbl_8055FBF8;
+int fn_8022B2D4(int,const char*,int,int);extern const u32 lbl_8055FBF8;
 WidgetFragment* fn_8021EA64(WidgetFragment* self,int x,int y,int width,int height,char* buffer,int capacity,int stride,int font,bool clear);
 WidgetFragment* fn_8021EB9C(WidgetFragment* self,int destroy);
 // Observed text-entry prefix only; no complete allocation or buffer-storage ownership claim.
@@ -1323,7 +1323,7 @@ void fn_80220A50(WidgetFragment* self,int x,int unused);
 
 
 
-extern "C" {extern int lbl_8055FBE0,lbl_8055FBFC;
+extern "C" {extern const u32 lbl_8055FBE0,lbl_8055FBFC;
 
 }
 
@@ -2428,10 +2428,10 @@ bottom=(self->top + ((int) (ratio * ((float) (start + f->state->page)))))-5;
  fn_80228E80((ObservedClipPrefix *) context, f->second, left + ((imageExtent - tw) / 2), top, bottom - top, 0);
  }
 else { fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
- int dark = lbl_8055FBE0;
+ const u32 dark = lbl_8055FBE0;
  fn_802C3424(left, bottom - 1, right, bottom, dark);
  fn_802C3424(right - 1, top, right, bottom, dark);
- int light = lbl_8055FBFC;
+ const u32 light = lbl_8055FBFC;
  fn_802C3424(left, top, right, top + 1, light);
  fn_802C3424(left, top, left + 1, bottom, light);
  } } }
@@ -2456,10 +2456,10 @@ else { int left;
  fn_80228DC4((ObservedClipPrefix *) context, f->second, left, top + ((imageExtent - th) / 2), right - left, 0);
  }
 else { fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
- int dark = lbl_8055FBE0;
+ const u32 dark = lbl_8055FBE0;
  fn_802C3424(left, bottom - 1, right, bottom, dark);
  fn_802C3424(right - 1, top, right, bottom, dark);
- int light = lbl_8055FBFC;
+ const u32 light = lbl_8055FBFC;
  fn_802C3424(left, top, right, top + 1, light);
  fn_802C3424(left, top, left + 1, bottom, light);
  } } } 
@@ -2503,10 +2503,10 @@ void fn_80221970(WidgetFragment* self){
         else {
           fn_802E30C8(lbl_8033D9F8);
           fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
-          int dark = lbl_8055FBE0;
+          const u32 dark = lbl_8055FBE0;
           fn_802C3424(left, bottom - 1, right, bottom, dark);
           fn_802C3424(right - 1, top, right, bottom, dark);
-          int light = lbl_8055FBFC;
+          const u32 light = lbl_8055FBFC;
           fn_802C3424(left, top, right, top + 1, light);
           fn_802C3424(left, top, left + 1, bottom, light);
         }
@@ -2541,10 +2541,10 @@ void fn_80221970(WidgetFragment* self){
         else {
           fn_802E30C8(lbl_8033D9F8);
           fn_802C3424(left, top, right, bottom, lbl_8055FBDC);
-          int dark = lbl_8055FBE0;
+          const u32 dark = lbl_8055FBE0;
           fn_802C3424(left, bottom - 1, right, bottom, dark);
           fn_802C3424(right - 1, top, right, bottom, dark);
-          int light = lbl_8055FBFC;
+          const u32 light = lbl_8055FBFC;
           fn_802C3424(left, top, right, top + 1, light);
           fn_802C3424(left, top, left + 1, bottom, light);
         }
@@ -2556,7 +2556,7 @@ void fn_80221E7C(WidgetFragment* self){WidgetFragment* parent=(WidgetFragment*)s
 void fn_80221EA0(WidgetFragment* self,int key,void* value,int size){fn_80219440((WidgetFragment*)self->kind,key,value,size);}
 int fn_80221EA8(GroupSearchProxyNew* self){GroupSearchWordNew one=1;GroupSearchWordNew group=self->context->group;for(int index=0;index<32;index++){if(group==(one<<index))return index;}fn_802E317C(lbl_8033DA2C,group);return 0;}
 void Finish__9MenuStateFi(void*,void* context){fn_802168BC(reinterpret_cast<int>(context));}
-extern int lbl_8055FBE4;
+extern const u32 lbl_8055FBE4;
 // NonMatching: clean two-argument menu draw remains41 original-address words off.
 void fn_80221F9C(WidgetFragment* self, void* context) {
     MenuEntryCountPrefix* list;

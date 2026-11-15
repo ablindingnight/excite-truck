@@ -65,25 +65,25 @@ static inline u32 gxColor(u32 r, u32 g, u32 b) { return (gxPack565(r, g, b) << 1
 static inline u16 gxShort(int v) { return v; }
 
 ModuleTag lbl_8055FBB0;
-u16 lbl_8055FBB8 = gxShort(0x100);
-u16 lbl_8055FBBA = gxShort(0x405);
-u16 lbl_8055FBBC = gxShort(0x401);
-u32 lbl_8055FBC0 = gxColor(0, 0, 0);
-u32 lbl_8055FBC4 = gxColor(0, 0, 0xFF);
-u32 lbl_8055FBC8 = gxColor(0, 0x7F, 0);
-u32 lbl_8055FBCC = gxColor(0, 0x7F, 0x7F);
-u32 lbl_8055FBD0 = gxColor(0x7F, 0, 0);
-u32 lbl_8055FBD4 = gxColor(0x7F, 0, 0x7F);
-u32 lbl_8055FBD8 = gxColor(0x7F, 0x7F, 0);
-u32 lbl_8055FBDC = gxColor(0x7F, 0x7F, 0x7F);
-u32 lbl_8055FBE0 = gxColor(0x40, 0x40, 0x40);
-u32 lbl_8055FBE4 = gxColor(0, 0, 0xFF);
-u32 lbl_8055FBE8 = gxColor(0, 0xFF, 0);
-u32 lbl_8055FBEC = gxColor(0, 0xFF, 0xFF);
-u32 lbl_8055FBF0 = gxColor(0xFF, 0, 0);
-u32 lbl_8055FBF4 = gxColor(0xFF, 0, 0xFF);
-u32 lbl_8055FBF8 = gxColor(0xFF, 0xFF, 0);
-u32 lbl_8055FBFC = gxColor(0xFF, 0xFF, 0xFF);
+extern const u16 lbl_8055FBB8 = gxShort(0x100);
+extern const u16 lbl_8055FBBA = gxShort(0x405);
+extern const u16 lbl_8055FBBC = gxShort(0x401);
+extern const u32 lbl_8055FBC0 = gxColor(0, 0, 0);
+extern const u32 lbl_8055FBC4 = gxColor(0, 0, 0xFF);
+extern const u32 lbl_8055FBC8 = gxColor(0, 0x7F, 0);
+extern const u32 lbl_8055FBCC = gxColor(0, 0x7F, 0x7F);
+extern const u32 lbl_8055FBD0 = gxColor(0x7F, 0, 0);
+extern const u32 lbl_8055FBD4 = gxColor(0x7F, 0, 0x7F);
+extern const u32 lbl_8055FBD8 = gxColor(0x7F, 0x7F, 0);
+extern const u32 lbl_8055FBDC = gxColor(0x7F, 0x7F, 0x7F);
+extern const u32 lbl_8055FBE0 = gxColor(0x40, 0x40, 0x40);
+extern const u32 lbl_8055FBE4 = gxColor(0, 0, 0xFF);
+extern const u32 lbl_8055FBE8 = gxColor(0, 0xFF, 0);
+extern const u32 lbl_8055FBEC = gxColor(0, 0xFF, 0xFF);
+extern const u32 lbl_8055FBF0 = gxColor(0xFF, 0, 0);
+extern const u32 lbl_8055FBF4 = gxColor(0xFF, 0, 0xFF);
+extern const u32 lbl_8055FBF8 = gxColor(0xFF, 0xFF, 0);
+extern const u32 lbl_8055FBFC = gxColor(0xFF, 0xFF, 0xFF);
 gxCanvas* lbl_8055FC00;
 
 s8 lbl_8055CFF8 = 3;

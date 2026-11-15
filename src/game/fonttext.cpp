@@ -16,8 +16,8 @@ int fn_802C4EFC(s32 tex);
 void fn_802C4F58(int x, int y, const char* s, u32 color);  // debug text
 }
 
-extern u32 lbl_8055FBC0;  // debug text shadow color
-extern u32 lbl_8055FBFC;  // debug text color
+extern const u32 lbl_8055FBC0;  // debug text shadow color
+extern const u32 lbl_8055FBFC;  // debug text color
 
 struct Font {
     ~Font(void) { fn_802C4C80(tex); }

@@ -680,7 +680,7 @@ public:
 
 // Handler state a "Custom" widget reports its rectangle to: x, y, w, h, with the widget in unk14.
 // Its Unk24 fills that rectangle on the canvas in the custom-widget colour.
-extern "C" s32 lbl_8055FBDC;
+extern "C" const u32 lbl_8055FBDC;
 extern "C" void fn_802C3424(s32 x0, s32 y0, s32 x1, s32 y1, s32 a);
 class UICustomHandler : public MenuState {
 public:
