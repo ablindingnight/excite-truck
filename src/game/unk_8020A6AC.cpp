@@ -211,6 +211,9 @@ public:
         return result;
     }
     virtual void Stop(void);
+    // Accessor name unproven: State() tests through it and then returns the field directly, which is why
+    // retail loads the state twice (this used to be forced with a volatile pointer).
+    int Playing(void) const { return state == 1; }
     virtual int State(void);
     virtual void Pause(void) {
         if (muted == 0 && state != 3) {
@@ -463,11 +466,9 @@ void VoiceSound::Stop(void) {
     muted = 0;
 }
 
-// MATCHING-AID?: volatile from upstream (the state is re-read after the check); revisit.
 int VoiceSound::State(void) {
-    volatile s32* p = &state;
-    if (*p == 1 && muted != 0) return 2;
-    return *p;
+    if (Playing() && muted != 0) return 2;
+    return state;
 }
 
 // Loads the "samples" table (name and volume of each voice sample) from the sound config.

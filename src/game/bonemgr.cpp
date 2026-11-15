@@ -27,8 +27,12 @@ public:
     virtual ~AllocBuf(void) { buf = 0; }
     u8* buf;  // offset 0x4
     const char* name;  // offset 0x8
-    volatile s32 size;  // offset 0xC
-    volatile s32 used;  // offset 0x10
+    // Accessor names unproven: Alloc reads each field once directly and once through these, which gives
+    // retail's repeated loads (the fields used to be volatile to force them).
+    s32 Used(void) const { return used; }
+    s32 Size(void) const { return size; }
+    s32 size;  // offset 0xC
+    s32 used;  // offset 0x10
 };
 
 class StackAlloc : public AllocBuf {
@@ -38,10 +42,10 @@ public:
     void* Alloc(const s32& n) {
         s32 a = (n + 3) & ~3;
         if (a + used + 8 > size) {
-            fn_802E317C("StackAlloc(%s:%d)::insufficient memory (max %dK)", name, n, size / 1024);
+            fn_802E317C("StackAlloc(%s:%d)::insufficient memory (max %dK)", name, n, Size() / 1024);
             return 0;
         }
-        s32* h = (s32*)(buf + used);
+        s32* h = (s32*)(buf + Used());
         *h = 1;
         void* p = h + 1;
         *(s32*)(buf + used + (a + 4)) = a;
