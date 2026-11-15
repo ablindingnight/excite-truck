@@ -791,10 +791,11 @@ public:
 }
 
 ModuleTag lbl_8055E390;
-UnkStaticFFFF lbl_8055E398;
+static inline u32 MakeStartupWord(u32 value) { return value; }
+extern const u32 lbl_8055E398 = MakeStartupWord(0xFFFF0000);
+extern const u32 lbl_8055E39C = MakeStartupWord(0xFFFF0000);
 static UnkStatic123s lbl_80430378;
-UnkStaticFFFF lbl_8055E39C;
-UnkStatic7F lbl_8055E3A0;
+extern const u32 lbl_8055E3A0 = MakeStartupWord(0x7F000000);
 static CrushTuning lbl_8043038C;
 BoundSet* lbl_8055E3A4;
 s32 lbl_8055E3A8;
