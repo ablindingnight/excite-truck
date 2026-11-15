@@ -280,7 +280,8 @@ int fn_802BC09C(short x, short z, int layer, u8 value, f32 strength) {
                 next[layer] = value;
                 for (i = 0; i < 6; i++) {
                     f32 f = Lerp(cur[i], next[i], strength);
-                    next[i] = (int)((f < 0.0f) ? f - 0.5f : 0.5f + f);
+                    int r = (int)((f < 0.0f) ? f - 0.5f : 0.5f + f);
+                    next[i] = r;
                 }
                 if (locked != -1) {
                     u8 old = next[locked];
@@ -305,5 +306,4 @@ s32 fn_802BC30C(int i) { return lbl_804C0098[i]; }
 
 }  // extern "C"
 
-// NonMatching: fn_802BC09C assigns the cur loop's counter/pointer and the unrolled blend's volatile
-// registers differently (25 diffs); fn_802BBBC8's sdata2 template reference differs only by symbol.
+// NonMatching: fn_802BBBC8's sdata2 template reference differs only by symbol.
