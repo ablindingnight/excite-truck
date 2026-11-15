@@ -417,7 +417,7 @@ void fn_801254E4(int n, f32 *a, int nc, f32 *c);             // dctsub
 
 #define M2C_FIELD(base, type, offset) (*(type)((u8 *)(base) + (offset)))
 
-extern void* fn_802ECC74(void*);
+extern void fn_802ECC74(void);
 extern void *fn_8011FFC4(s32);
 extern f32 lbl_80329D48[];
 extern void fn_8011A330(void *);
@@ -426,8 +426,8 @@ extern void *lbl_8055DEF8;
 extern void *lbl_8055DEFC;
 extern void ***lbl_80559948;
 extern u32 *lbl_8055994C;
-extern void fn_80127F70(void*);
-extern void fn_80127F94(void*);
+extern void fn_80127F70(void);
+extern void fn_80127F94(void);
 extern s32 fn_8011A7CC(DVDFileInfo *);
 extern s32 OSDisableInterrupts(void);
 extern s32 OSEnableInterrupts(void);
