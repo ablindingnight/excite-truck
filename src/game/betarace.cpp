@@ -4038,24 +4038,25 @@ static inline void ScaleRot(Mat3* m, f32 s) {
     m->m[2][2] *= s;
 }
 
+class Vec3 : public V3 {  /* Helper name unproven */
+public:
+    Vec3(f32 x_, f32 y_, f32 z_) { x = x_; y = y_; z = z_; }
+};
+
+static inline void Scale(V3* out, const V3* in, f32 s) { out->x = in->x * s; out->y = in->y * s; out->z = in->z * s; }  /* Helper name unproven */
+
 void DrawSpin(const VPos& pos, const Xform* src) {
     Xform a;
     Xform b;
     f32 box[6];
-    V3 c;
-    V3 n;
     fn_802C86DC();
     a = *src;
     b = a;
     fn_802C77F0(lbl_80559ED8, box);
-    __typeof__(c.x) c_x = box[0] + (box[1] - box[0]) * 0.5f;
-    c.y = box[2] + (box[3] - box[2]) * 0.5f;
-    const f32 minZ = box[4];
-    c.z = minZ + (box[5] - minZ) * 0.5f;
-    n.z = c.z * -1.0f;
-    n.y = c.y * -1.0f;
-    c.x = c_x;
-    n.x = c.x * -1.0f;
+    f32 half = 0.5f;
+    Vec3 c(box[0] + half * (box[1] - box[0]), box[2] + half * (box[3] - box[2]), box[4] + half * (box[5] - box[4]));
+    V3 n;
+    Scale(&n, &c, -1.0f);
     MulVec(&n, &n, &b.r);
     f32 lift = 0.0f;
     b.t.x += n.x;
