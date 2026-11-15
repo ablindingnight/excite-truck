@@ -240,7 +240,7 @@ struct TPos2 {
 };
 
 extern "C" void* fn_802BA580(ValueNode* cfg, const TPos2* p, f32 r);
-extern "C" void fn_802BAF98(void* p);
+extern "C" void fn_802BAF98(void* p, u8 on);
 
 class CollShape {
 public:
@@ -985,10 +985,10 @@ void fn_802BDFBC(FanCell* f, int lod, f32 blend) {
     }
 }
 
-void fn_802BDFF4(TMtx* m) {
+void fn_802BDFF4(TMtx* m, u8 on) {
     TreeRec* tr = (TreeRec*)((u8*)m - 0xC);
     if (tr->hit) {
-        fn_802BAF98(tr->hit);
+        fn_802BAF98(tr->hit, on);
     }
 }
 

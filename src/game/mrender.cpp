@@ -34,7 +34,7 @@ void fn_802D03F4(void* mtx);
 void fn_802D01E0(int x, int y, int w, int h);
 void fn_802CC518(int w, f32 f);
 void fn_802D02F8(u32 color, int a);
-void fn_802CAD74(void);
+void fn_802CAD74(s32);
 void fn_802CAD68(void);
 struct ColVtx;
 void fn_802D68C4(ColVtx* verts, int unused, u16* idx, int n);
@@ -408,7 +408,7 @@ void fn_802C89E8(Camera* m) {
 void fn_802C8B08(Camera* out) { *out = lbl_804C1410; }
 
 void fn_802C8B70(int a) {
-    fn_802CAD74();
+    fn_802CAD74(a);
     lbl_8055FC70 = 2;
 }
 

@@ -419,7 +419,7 @@ extern void* fn_802ECC74(void*);
 extern void *fn_8011FFC4(s32);
 extern f32 lbl_80329D48[];
 extern void fn_8011A330(void *);
-void fn_8011FFB8();
+void fn_8011FFB8(void *arg0, void *arg1);
 extern void *lbl_8055DEF8;
 extern void *lbl_8055DEFC;
 extern void ***lbl_80559948;
@@ -1687,8 +1687,8 @@ s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
     return any;
 }
 
-void fn_80119214(void) {
-    fn_8011FFB8();
+void fn_80119214(void *arg0, void *arg1) {
+    fn_8011FFB8(arg0, arg1);
 }
 
 extern void memset(void *, int, unsigned int);

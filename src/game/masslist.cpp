@@ -172,7 +172,7 @@ double sqrt(double x);
 void fn_801E9DC4(CxEntry* e);
 void fn_801BDA70(CarSetup* out);
 void fn_801BDA74(int car, CarSetup* out);
-int fn_801E9E78(void* h, MVec3* p, MVec3* n);
+int fn_801E9E78(void* h, MVec3* p, MVec3* n, s32* surface);
 void fn_80279D40(CarSetup* out);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -598,7 +598,7 @@ void fn_801BEDD4(void) {
 }
 
 void fn_801BF0C4(MVec3* p, MVec3* n, void* h, s32* surface) {
-    if (!fn_801E9E78(h, p, n)) {
+    if (!fn_801E9E78(h, p, n, surface)) {
         n->x = 0.0f;
         n->y = 1.0f;
         n->z = 0.0f;

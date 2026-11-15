@@ -33,7 +33,7 @@ struct Words5 {
 };
 
 extern "C" {
-void fn_80236914(void);
+void fn_80236914(int, f32*, f32);
 void fn_80214A9C(int s);
 void fn_80230E90(int a);
 void fn_8025C204(u8* p, s32 a);
@@ -667,7 +667,7 @@ const char* fn_80261948(s32* p);
 const char* fn_802619A0(s32* p);
 void fn_80261688(u8* p, s32 a, s32 b, s32 c);
 void fn_80261AA0(void);
-void fn_80261A40(int x);
+void fn_80261A40(int, f32*, f32);
 int fn_802610C8(void);
 int fn_80260E30(void);
 int fn_80261178(void);
@@ -891,8 +891,8 @@ void fn_80261A18(u8* p, s32 a) {
     S32(p, 0x10) = 0;
 }
 
-void fn_80261A40(int x) {
-    fn_80236914();
+void fn_80261A40(int x, f32* out, f32 t) {
+    fn_80236914(x, out, t);
     lbl_8055F3E9 = x == 2;
 }
 

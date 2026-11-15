@@ -343,7 +343,7 @@ PathSet* fn_80156A40(void);
 void* fn_801352B8(void* mem);
 int fn_801B8928(int car, TeleportInfo* t, int a);
 int fn_801B526C(void);
-int fn_8026A344(void);
+int fn_8026A344(int);
 void fn_8026A248(int car, int slot);
 int fn_8026A27C(int slot);
 int fn_801366C0(IdealFollower* f, void* p, f32 k);
@@ -709,7 +709,7 @@ void fn_801B1318(void) {
 }
 
 void fn_801B1390(int slot, int car) {
-    int base = fn_8026A344();
+    int base = fn_8026A344(slot);
     if (fn_801B526C()) {
         fn_8026A248((lbl_8055E678 + (car + base)) % lbl_8055E678, slot);
     } else {

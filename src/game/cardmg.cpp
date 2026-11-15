@@ -176,9 +176,9 @@ void fn_8018BFA0(DFrame* out, const DFrame* a, const DFrame* b) {
     out->pos.z = out->pos.z - v[2];
 }
 
-void fn_8018C50C(u8* p) {}
+void fn_8018C50C(void) {}
 
-void fn_8018C510(u8* p) {}
+void fn_8018C510(void) {}
 
 f32 PSVECDistance(const f32* a, const f32* b);
 

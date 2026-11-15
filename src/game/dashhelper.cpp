@@ -138,7 +138,7 @@ void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color
 f32 fn_801E7E18(void);
 RaceProgress* fn_801E7E3C(void);
 int fn_801E85A4(void);
-int fn_8023441C(void);
+int fn_8023441C(const char* font);  // void in gtext.cpp; see the return note at fn_8000F0E4
 void fn_80234470(void);
 int fn_80232B70(int font);
 int fn_80232578(const char* name);
@@ -736,8 +736,8 @@ void fn_8000EF74(int player) {
     }
 }
 
-void fn_8000F0E4(void) {
-    lbl_8055D490 = fn_8023441C();
+void fn_8000F0E4(const char* font) {
+    lbl_8055D490 = fn_8023441C(font);
     lbl_80558A90 = 0.73333335f * fn_80232B70(lbl_8055D490);
     lbl_8055D49C = fn_80011EDC();
     lbl_8055D498 = fn_80232578("bigtext.gtx");

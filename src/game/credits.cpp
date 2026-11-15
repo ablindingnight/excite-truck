@@ -62,7 +62,7 @@ extern void* lbl_8055F448;
 extern CreditsKeyEnabler* lbl_8055F44C;
 extern u8 lbl_8055F450;
 
-void fn_80236914(void);
+void fn_80236914(int, f32*, f32);
 void fn_80236954(const char*);
 int fn_8023695C(const char*);
 f32 fn_80214D48(void);
@@ -82,9 +82,9 @@ int fn_802645C0(void);
 f32 fn_80264588(void);
 void fn_802645EC(void);
 void fn_802658FC(void);
-void fn_80265904(void);
+void fn_80265904(int which, f32* out, f32 t);
 void fn_80265A28(void);
-void fn_80265A34(void);
+void fn_80265A34(int which, f32* out, f32 t);
 int fn_80265B5C(void);
 
 // Physical views, not claims about original class or field names.
@@ -701,8 +701,8 @@ int allocated=count+5;CreditItemFields* items=new(lbl_803464B4) CreditItemFields
 
 extern "C" void fn_802658FC(void) { fn_80236954(lbl_8055C4A8); }
 
-extern "C" void fn_80265904(void) {
-    fn_80236914();
+extern "C" void fn_80265904(int which, f32* out, f32 t) {
+    fn_80236914(which, out, t);
     if (fn_8023695C(lbl_8055C4A8) == 2) { fn_80216CA8(); fn_802168BC(0); }
 }
 
@@ -718,8 +718,8 @@ extern "C" void fn_80265940(void) {
 
 extern "C" void fn_80265A28(void) { fn_80236954(lbl_803464EC); }
 
-extern "C" void fn_80265A34(void) {
-    fn_80236914();
+extern "C" void fn_80265A34(int which, f32* out, f32 t) {
+    fn_80236914(which, out, t);
     if (fn_8023695C(lbl_803464EC) == 2) { fn_80216CA8(); fn_802168BC(0); }
 }
 

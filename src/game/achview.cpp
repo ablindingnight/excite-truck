@@ -41,7 +41,7 @@ public:
 };
 
 extern "C" {
-void fn_80236914(void);
+void fn_80236914(int, f32*, f32);
 void mrModelUnload(s32 h);
 void gxForgetTexture(u8* p);
 void fn_80214AF0(int s);
@@ -389,7 +389,7 @@ const char* AchievementsGetCategoryName(int cat);
 extern "C" {
 void fn_802368E0(void);
 void fn_80216CA8(void);
-void fn_80259740(int x, f32 v);
+void fn_80259740(int x, f32* out, f32 v);
 
 // The trophy viewer for one achievement row: its model, level and the five level thresholds.
 int fn_80259224(u8* p) {
@@ -443,8 +443,8 @@ int fn_80259224(u8* p) {
     return r;
 }
 
-void fn_80259740(int x, f32 v) {
-    fn_80236914();
+void fn_80259740(int x, f32* out, f32 v) {
+    fn_80236914(x, out, v);
     lbl_8055F3A4 = v;
     lbl_8055F3A0 = x == 2;
 }
@@ -891,8 +891,8 @@ f32 fn_802C99E8(f32 v);
 LightDir* fn_802C9A40(void);
 void fn_802C9A1C(const LightDir* d);
 void fn_802D7554(int on);
-void fn_802CA294(s32 tex);
-void fn_802D9230(void);
+void* fn_802CA294(s32 tex);
+void fn_802D9230(void*);
 void fn_802C744C(s32 model, u8* m);
 
 }  // extern "C"
@@ -944,8 +944,7 @@ inline void AchievementTrophyModel::Draw(void) {
     LightDir saved = *fn_802C9A40();
     fn_802C9A1C(&dir);
     fn_802D7554(1);
-    fn_802CA294((s32)env);
-    fn_802D9230();
+    fn_802D9230(fn_802CA294((s32)env));
     Perspective persp(0.1f, 100.0f, lbl_8055F39C);
     fn_802C744C(handle, (u8*)xform);
     fn_802D7554(0);

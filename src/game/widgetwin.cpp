@@ -85,12 +85,12 @@ void fn_80230DA0(void);
 void fn_802C855C(void);
 void fn_802C2B48(void);
 void fn_802E317C(const char* fmt, ...);
-int fn_8021889C(Window* w);
-int fn_80218968(Window* w);
-int fn_8021885C(Window* w);
-int fn_80218A34(Window* w);
-int fn_80218ADC(Window* w);
-int fn_80218B88(Window* w);
+void fn_8021889C(Window* win, int g, f32 t);
+void fn_80218968(Window* win, int g, f32 t);
+int fn_8021885C(Window* win, int g);
+void fn_80218A34(Window* win, int g);
+void fn_80218ADC(Window* win, int g);
+void fn_80218B88(Window* win, int g, int a, int b);
 void fn_80218C98(Window* w, Widget* widget, int group);
 int fn_8012742C(void);
 void fn_80214D50(int sound);
@@ -356,17 +356,17 @@ void fn_802168BC(s32 result) {
     lbl_8055EF70 = 1;
 }
 
-int fn_802168CC(Window* w) { return fn_8021889C(w); }
+void fn_802168CC(Window* w, int g, f32 t) { fn_8021889C(w, g, t); }
 
-int fn_802168D0(Window* w) { return fn_80218968(w); }
+void fn_802168D0(Window* w, int g, f32 t) { fn_80218968(w, g, t); }
 
-int fn_802168D4(Window* w) { return fn_8021885C(w); }
+int fn_802168D4(Window* w, int g) { return fn_8021885C(w, g); }
 
-int fn_802168D8(Window* w) { return fn_80218A34(w); }
+void fn_802168D8(Window* w, int g) { fn_80218A34(w, g); }
 
-int fn_802168DC(Window* w) { return fn_80218ADC(w); }
+void fn_802168DC(Window* w, int g) { fn_80218ADC(w, g); }
 
-int fn_802168E0(Window* w) { return fn_80218B88(w); }
+void fn_802168E0(Window* w, int g, int a, int b) { fn_80218B88(w, g, a, b); }
 
 Window* fn_802168E4(void) { return lbl_8055EF88; }
 

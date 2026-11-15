@@ -64,7 +64,7 @@ public:
 
 extern "C" void fn_8021915C(void *, unsigned int);
 
-extern "C" void fn_80221E7C(void);
+extern "C" void fn_80221E7C(void*);
 extern "C" void* fn_80215270(int, int);
 extern "C" void fn_8022E4BC(s32);
 extern "C" void fn_8022E960(s32);
@@ -1660,8 +1660,8 @@ extern "C" s32 fn_80214A38(s32 arg0) {
     return result;
 }
 
-extern "C" void fn_802192AC(void);
-extern "C" void fn_80219354(void);
+extern "C" void fn_802192AC(void*);
+extern "C" void fn_80219354(void*);
 extern "C" void fn_80214A9C(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
@@ -2184,12 +2184,12 @@ extern "C" void fn_802158F0(void *arg0) {
 }
 
 extern "C" void fn_80215904(void *arg0) {
-    fn_802192AC();
+    fn_802192AC(arg0);
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf5();
 }
 
 extern "C" void fn_80215944(void *arg0) {
-    fn_80219354();
+    fn_80219354(arg0);
     ((VfObj *)*(void **)((char *)arg0 + 0x244))->vf6();
 }
 
@@ -2286,9 +2286,9 @@ extern "C" void fn_80215B44(void *arg0) {
     obj->vf9();
 }
 
-extern "C" void fn_802191F0(void);
+extern "C" void fn_802191F0(void*, s32, s32);
 extern "C" void fn_80215B58(void *arg0, s32 arg1, s32 arg2) {
-    fn_802191F0();
+    fn_802191F0(arg0, arg1, arg2);
     ((void **)*(void ***)((char *)arg0 + 0x244))[1] = (void *)arg1;
     ((void **)*(void ***)((char *)arg0 + 0x244))[2] = (void *)arg2;
 }
@@ -2363,7 +2363,7 @@ void MenuState::Unk14(void) {
 }
 
 void MenuState::Unk18(void) {
-	fn_80221E7C();
+	fn_80221E7C(this);
 }
 
 void MenuState::Update(void) {

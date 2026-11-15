@@ -114,7 +114,7 @@ public:
 const char* GetEventTypeName(u32 type);
 
 extern "C" {
-void fn_80236914(void);
+void fn_80236914(int, f32*, f32);
 void fn_80216D28(void);
 void fn_802E30C8(const char* fmt, ...);
 void fn_8025C204(u8* p, s32 a);
@@ -396,9 +396,9 @@ void fn_8027ED78(const char* title, const char* message) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
-void fn_8027EE74(int x) {
+void fn_8027EE74(int x, f32* out, f32 t) {
     lbl_8055F684 = x == 2;
-    fn_80236914();
+    fn_80236914(x, out, t);
 }
 
 int fn_8027EE88(void) {
