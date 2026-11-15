@@ -34,17 +34,16 @@ int fn_801609C4(s32 score);  // grade for a score
 class ArtPlayer {
 public:
     ArtPlayer(int n);
+    ~ArtPlayer(void);
+    int Add(const char* name, int map);
+    void Start(int i);
+    void Pause(int i);
+    void Resume(int i);
+    void StopAll(void);
+    void Update(void);
+    void Draw(int flags);
     u8 pad0[0x8];
 };
-
-extern "C" {
-void fn_802AE168(ArtPlayer* anim);
-void fn_802ADFF4(ArtPlayer* anim, s32 arg);
-void fn_802AE02C(ArtPlayer* anim, s32 arg);
-void fn_802AE0B8(ArtPlayer* anim, s32 arg);
-void fn_802AE0E0(ArtPlayer* anim);
-void fn_802ADE60(ArtPlayer* anim, int arg);
-}
 
 const char* GetGradeDisplayName(int grade);
 
@@ -717,7 +716,7 @@ public:
             signal[1] = 0;
             signal[2] = 0;
             go = 0;
-            fn_802AE0E0(anim);
+            anim->StopAll();
             StopSound(bonusSnd);
             StopSound(noBonusSnd);
             StopSound(transitionSnd);
@@ -725,7 +724,7 @@ public:
     }
     void Release(void) {
         if (anim) {
-            fn_802ADE60(anim, 1);
+            delete anim;
             anim = 0;
         }
         SafeDelete(bonusSnd);
@@ -1854,11 +1853,11 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         stuntLabel[i].Set(lbl_80559F0C);
         stuntValue[i].Set(lbl_80559F0C);
     }
-    fn_802AE168(anim);
+    anim->Update();
     switch (state) {
     case 0:
         LOG_STATE(this, "initial state - starting animation");
-        fn_802ADFF4(anim, animArg);
+        anim->Start(animArg);
         if (b > 0) {
             if (bonusSnd) {
                 bonusSnd->Play();
@@ -1875,14 +1874,14 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         }
         if (signal[1]) {
             LOG_STATE(this, "first anim - moving to wait state");
-            fn_802AE02C(anim, animArg);
+            anim->Pause(animArg);
             state = 2;
         }
         break;
     case 2:
         if (go) {
             LOG_STATE(this, "waiting - starting second animation");
-            fn_802AE0B8(anim, animArg);
+            anim->Resume(animArg);
             if (transitionSnd) {
                 transitionSnd->Play();
             }
@@ -1892,7 +1891,7 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
     case 3:
         if (signal[2]) {
             LOG_STATE(this, "second anim - ending animation");
-            fn_802AE0E0(anim);
+            anim->StopAll();
             state = 4;
         }
         break;
@@ -2223,7 +2222,6 @@ extern "C" {
 void UpdateOutOfTimeOverlay(void);
 extern "C" {
 f32 fn_801E7E18(void);
-void fn_802AE220(ArtPlayer* anim, const f32* rect);
 }
 int GetNumPlayers(void);
 
@@ -2497,10 +2495,10 @@ void BetaCar::SetResultsView(FinishAnimation* a) {
             r[2] = 39.0f;
             r[3] = 0.0f;
             if (h) {
-                fn_802AE220(h, r);
+                h->Draw((int)r);
             }
         } else if (a->anim) {
-            fn_802AE220(a->anim, 0);
+            a->anim->Draw(0);
         }
         if (overtime >= 0.0f) {
             return;
@@ -2872,7 +2870,6 @@ static inline AnimBinding Bind(s32 t, const char* n, const void* p) {
 
 extern "C" {
 s32 fn_80204CF0(void);  // difficulty
-s32 fn_802ADF34(ArtPlayer* anim, const char* file, const AnimBinding* table);
 }
 
 // Helper name unproven: creates one finish animation. Setup stays a call because this inlined body, with Setup
@@ -2952,7 +2949,7 @@ inline void FinishAnimation::Setup(void) {
         stuntValue[i].Set("33");
     }
     x23C = fn_80204CF0() + 1;
-    animArg = fn_802ADF34(anim, "a_beta_finish.val", table);
+    animArg = anim->Add("a_beta_finish.val", (int)table);
     bonusSnd = fn_80207848("pr_score.sfx", 1);
     noBonusSnd = fn_80207848("pr_score_nobonus.sfx", 1);
     transitionSnd = fn_80207848("pr_transition.sfx", 1);
@@ -2966,9 +2963,12 @@ T* FixedList<T, N>::Add(const T& v) {
     return p;
 }
 
-struct TuneRef {
+// A tuning table entry lookup (arenabnd.cpp).
+struct TableRef {
+    TableRef(const char* what, const char* name);
+    ~TableRef(void);
     ValueNode* node;  // offset 0x0
-    s32 x4;           // offset 0x4
+    u8 pad4[4];       // the stack frame below gives the object 8 bytes (arenabnd.cpp uses only node)
 };
 
 class Trigger;
@@ -2977,8 +2977,6 @@ extern f32 hispeedThresh;  // high-speed threshold
 extern f32 scoreFactor;  // score factor
 
 extern "C" {
-void fn_8013A0B0(TuneRef* r, const char* table, const char* entry);
-void fn_8013A198(TuneRef* r, int flag);
 s32 fn_80204BB4(const char* s);
 f32 fn_801EA0E8(f32 x, f32 z);  // ground height
 double sqrt(double x);
@@ -2997,13 +2995,12 @@ inline void BetaMaster::vfFC(void) {
 // locals take ascending stack slots), and being over the compiler's inline size limit it keeps Pickup's
 // constructor a call - no dont_inline pragma needed.
 inline void BetaMaster::LoadLevel(void) {
-    TuneRef ref;
     int loaded;
     int i;
     ValueTable* t;
     hispeedThresh = 57.77778f;
-    fn_8013A0B0(&ref, "betarace", "info");
     {
+        TableRef ref("betarace", "info");
         ValueNode* n = ref.node;
         if (n) {
             hispeedThresh = 0.44444445f * n->GetFloat("hispeed_thresh", 130.0f);
@@ -3011,7 +3008,6 @@ inline void BetaMaster::LoadLevel(void) {
             fn_802E30C8("betarace: score_factor = %1.2f", scoreFactor);
         }
     }
-    fn_8013A198(&ref, -1);
     t = fn_80131810(GetEvent(fn_801769CC()->event)->vals->GetString("trigger_file", "triggers.val"));
     if (t) {
         ValueNode* n;

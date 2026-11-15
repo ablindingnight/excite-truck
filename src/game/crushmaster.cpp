@@ -21,6 +21,7 @@ public:
     void Pause(int i);
     void Resume(int i);
     void StopAll(void);
+    void Rewind(void);
     void Update(void);
     void Draw(int flags);
 
@@ -46,7 +47,6 @@ void fn_801345D8(char* buf, int size, const char* fmt, ...);
 void fn_801308F4(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
 int fn_801609C4(int score);                                // grade for a score
-void fn_802ADE60(void* layout, int flag);
 void fn_802ADDD8(void* p, int a);
 s32 fn_80145E70(const char* name);
 s32 fn_80204CF0(void);
@@ -403,7 +403,7 @@ public:
     ~CrushResults(void) { Unload(); }
     void Unload(void) {
         if (layout) {
-            fn_802ADE60(layout, 1);
+            delete layout;
             layout = 0;
         }
         if (sBonus) {
@@ -1271,7 +1271,6 @@ void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, .
 f32 fn_80147204(TextElem* e, const char* text);
 s32 fn_80160998(s32 a);
 s32 fn_80160A74(void);
-void fn_802AE118(void* layout);
 }  // extern "C"
 void UpdateContinueOverlay(void);
 extern "C" {
@@ -1735,7 +1734,7 @@ inline int CrushMaster::vf8C(int p, int key) {
         if (results.state == 1 && !results.noBonus && results.start > 0.0f && now - results.start < 1.0f) {
             results.noBonus = 1;
             if (results.layout) {
-                fn_802AE118(results.layout);
+                results.layout->Rewind();
             }
             Stop(results.sBonus);
             Stop(results.sNoBonus);

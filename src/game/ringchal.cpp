@@ -14,6 +14,7 @@ public:
     void Pause(int i);
     void Resume(int i);
     void StopAll(void);
+    void Rewind(void);
     void Update(void);
     void Draw(int flags);
 
@@ -47,7 +48,6 @@ void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void* fn_802BAA68(void* xlo, const ValMatrix* m);
 void fn_8016A0B0(void);
-void fn_802ADE60(void* layout, int flag);
 void fn_8016A15C(const char* name);  // activate ring set
 void fn_8016A240(const char* name);  // deactivate ring set
 void fn_8016A0D4(void);
@@ -174,7 +174,6 @@ int fn_801B8514(void);
 }  // extern "C"
 void UpdateContinueOverlay(void);
 extern "C" {
-void fn_802AE118(void* layout);
 void fn_801B0C78(int car);
 }
 
@@ -199,6 +198,7 @@ struct RaceCarRec {
     u8 pad2694[0x270C - 0x2694];
     CarCtl* ctl;      // offset 0x270C
     void* Rings(void);
+    s32 Air(void) const;  // stunts.cpp
 };
 
 extern "C" RaceCarRec* fn_8017960C(int id);
@@ -254,7 +254,6 @@ extern "C" {
 s32 fn_8016A30C(void* rings);
 s32 fn_8016A780(const char* name, void* rings);
 s32 fn_8016A878(const char* name);
-s32 fn_8015A404(RaceCarRec* car);
 int fn_80141FA0(RSound* s);
 void fn_80142B60(RSound* s);
 void fn_801CB5DC(int car, s32 score, s32 grade);
@@ -621,7 +620,7 @@ public:
     ~RingResults(void) { Unload(); }
     void Unload(void) {
         if (layout) {
-            fn_802ADE60(layout, 1);
+            delete layout;
             layout = 0;
         }
         if (sBonus) {
@@ -660,7 +659,7 @@ public:
     u8 b8;             // offset 0x8
     u8 b9;             // offset 0x9
     u8 padA[2];
-    void* layout;      // offset 0xC
+    ArtPlayer* layout; // offset 0xC
     u8 noBonus;        // offset 0x10
     u8 pad11[3];
     RSound* sBonus;    // offset 0x14
@@ -1459,7 +1458,7 @@ inline void Arena::Step(PlayerData* pd) {
         if (b4A && f24 == -1) {
             ShowSetGems();
         }
-        if ((hit > 0 || left == fn_8016A878(name) || (left > 0 && fn_8015A404(car) > 1)) && b4A) {
+        if ((hit > 0 || left == fn_8016A878(name) || (left > 0 && car->Air() > 1)) && b4A) {
             stats->At(curSet)->time = Time();
             Deactivate(curSet);
             if (hit > 0) {
@@ -2064,7 +2063,7 @@ inline int RingChalMaster::vf8C(int p, int key) {
         if (results.state == 1 && !results.noBonus && results.start > 0.0f && now - results.start < 1.0f) {
             results.noBonus = 1;
             if (results.layout) {
-                fn_802AE118(results.layout);
+                results.layout->Rewind();
             }
             Stop(results.sBonus);
             Stop(results.sNoBonus);
