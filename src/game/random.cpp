@@ -68,8 +68,8 @@ f32 fn_80129DC4(int index, f32 lo, f32 hi) {
 f32 RandomZero(void) { return 0.0f; }
 
 void fn_80129E34(Ranmar* r, int ij, int kl) {
-    f32 t;
     f32 s;
+    f32 t;
     int i = (int)(f32)fmod(ij / 177.0f, 177.0) + 2;
     int j = (int)(f32)fmod((f32)ij, 177.0) + 2;
     int k = (int)(f32)fmod(kl / 169.0f, 178.0) + 1;
@@ -79,7 +79,8 @@ void fn_80129E34(Ranmar* r, int ij, int kl) {
     for (ii = 0; ii <= 96; ii++) {
         s = 0.0f;
         t = 0.5f;
-        for (jj = 0; jj <= 23; jj++) {
+        jj = 0;
+        do {
             int m = (f32)fmod((f32)fmod((f32)(i * j), 179.0) * k, 179.0);
             i = j;
             j = k;
@@ -89,7 +90,8 @@ void fn_80129E34(Ranmar* r, int ij, int kl) {
                 s += t;
             }
             t = 0.5f * t;
-        }
+            jj++;
+        } while (jj <= 23);
         r->u[ii] = s;
     }
     r->c = 362436.0f / 16777216.0f;
