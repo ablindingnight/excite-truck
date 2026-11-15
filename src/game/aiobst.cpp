@@ -707,7 +707,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                 Vec2 target(0.0f, 0.0f);
                 mid = fn_8015F7A0(64, vel, f.Right());
                 c = mid + 32;
-                if (bins.bins[c].dist < range) {
+                if (bins.bins[mid + 32].dist < range) {
                     int r = fn_8015FA44(bins.bins, c, range);
                     int l = fn_8015FAB8(bins.bins, c, range);
                     if (r >= 0 && (l < 0 || Abs(r - c) < Abs(l - c))) {
