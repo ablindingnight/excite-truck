@@ -4,6 +4,40 @@
 // resources. Little-endian headers are byte-swapped on load. Names are guesses.
 #include "game/common.h"
 
+// These inline definitions keep the resource messages in their retail data order.
+struct ResStrings {
+    static const char* AsyncSetQueueName(void) { return "AsyncSetQueue"; }
+    static const char* QueueingMessage(void) { return "res: Queueing %s..."; }
+    static const char* DetachedNodeMessage(void) {
+        return "res: wtf!  this node should not be in the fifo anymore";
+    }
+    static const char* MissingPendingMessage(void) {
+        return "res: Someone was waiting for %s, but it just wasn't pending!";
+    }
+    static const char* WaitTimeMessage(void) { return "res: wait(%s) took %d msec"; }
+    static const char* WaitingMessage(void) { return "res: waiting for %s..."; }
+    static const char* WaitBeforeGetError(void) {
+        return "res-CRIP(%s/%s): Get-Before-Wait error! Must wait for set.";
+    }
+    static const char* NoTocEntryError(void) { return "res(%s): No toc entry."; }
+    static const char* ResidencySizeError(void) { return "res: resident size exceeded buf! (%d > %d)"; }
+    static const char* ExtractedResidencyMessage(void) {
+        return "res: extracted resource memory not freed until set unload. (%s)";
+    }
+    static const char* ExternalTocError(void) {
+        return "res: Bad external toc version/size (%d != %d || %d != %d)";
+    }
+    static const char* TocLoadPath(void) { return "tocres.res"; }
+    static const char* TocUnloadPath(void) { return "tocres.res"; }
+    static const char* ReloadOpenError(void) { return "reload: failed even to open %s"; }
+    static const char* ReloadSetError(void) { return "reload: not a set, afaict %s"; }
+    static const char* ReloadEthError(void) { return "reload: no eth for %s"; }
+    static const char* ReloadCountError(void) {
+        return "res(%s): Can't reload TOC, res_count mismatch! (new %d old %d)";
+    }
+    static const char* ReloadTocMessage(void) { return "res(%s): reloading TOC! "; }
+};
+
 extern "C" {
 int sprintf(char* s, const char* fmt, ...);
 int strcasecmp(const char* a, const char* b);
@@ -211,7 +245,7 @@ inline ResToc* GetToc(const char* name) {
         Swap4((u8*)&toc->count);
         Swap4((u8*)&toc->loadSize);
         if (toc->version != 0 || toc->size != 0x14) {
-            fn_802E317C("res: Bad external toc version/size (%d != %d || %d != %d)", toc->version, 0,
+            fn_802E317C(ResStrings::ExternalTocError(), toc->version, 0,
                         toc->size, 0x14);
         }
         for (i = 0; i < toc->count; i++) {
@@ -252,7 +286,7 @@ public:
         int i;
         for (i = 0; i < hdr.resCount; i++) {
             if (entries[i].flags & 4) {
-                fn_802E317C("res: extracted resource memory not freed until set unload. (%s)", &entries[i]);
+                fn_802E317C(ResStrings::ExtractedResidencyMessage(), &entries[i]);
             }
             entries[i].flags &= ~0xF;
         }
@@ -285,9 +319,9 @@ void fn_8012BF24(const char* name);
 
 class TocLib {
 public:
-    TocLib(void) { fn_8012BEF0("tocres.res"); }
+    TocLib(void) { fn_8012BEF0(ResStrings::TocLoadPath()); }
     void Reload(void);
-    ~TocLib(void) { fn_8012BF24("tocres.res"); }
+    ~TocLib(void) { fn_8012BF24(ResStrings::TocUnloadPath()); }
 };
 
 inline void TocLib::Reload(void) {
@@ -311,25 +345,25 @@ inline void TocLib::Reload(void) {
                         if (toc) {
                             if (th.createTime != toc->createTime) {
                                 if (toc->count == th.count) {
-                                    fn_802E30C8("res(%s): reloading TOC! ", name);
+                                    fn_802E30C8(ResStrings::ReloadTocMessage(), name);
                                     toc->createTime = th.createTime;
                                     toc->loadSize = th.loadSize;
                                     fn_802E3804(fd, toc->entries, th.count * sizeof(ResEntry));
                                 } else {
-                                    fn_802E30C8("res(%s): Can't reload TOC, res_count mismatch! (new %d old %d)",
+                                    fn_802E30C8(ResStrings::ReloadCountError(),
                                                 name, th.count, toc->count);
                                 }
                             }
                             fn_8012C4D8(toc);
                         } else {
-                            fn_802E30C8("reload: no eth for %s", name);
+                            fn_802E30C8(ResStrings::ReloadEthError(), name);
                         }
                     } else {
-                        fn_802E30C8("reload: not a set, afaict %s", name);
+                        fn_802E30C8(ResStrings::ReloadSetError(), name);
                     }
                     fn_802E3734(&fd);
                 } else {
-                    fn_802E30C8("reload: failed even to open %s", name);
+                    fn_802E30C8(ResStrings::ReloadOpenError(), name);
                 }
             } while (FileFindNext(h, name, sizeof(name)));
             FileFindClose(h);
@@ -1224,7 +1258,7 @@ int AsyncResourceSet::Restart(const char* name) {
         fn_8012A80C(&set.hdr);
         set.mem = 0;
         if (set.hdr.baseOffset + set.hdr.loadSize > bufSize) {
-            fn_802E317C("res: resident size exceeded buf! (%d > %d)", bufSize, set.hdr.loadSize);
+            fn_802E317C(ResStrings::ResidencySizeError(), bufSize, set.hdr.loadSize);
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;
@@ -1324,7 +1358,7 @@ void AsyncResourceSet::Update(void) {
         fn_8012A80C(&set.hdr);
         set.mem = 0;
         if (set.hdr.baseOffset + set.hdr.loadSize > bufSize) {
-            fn_802E317C("res: resident size exceeded buf! (%d > %d)", bufSize, set.hdr.loadSize);
+            fn_802E317C(ResStrings::ResidencySizeError(), bufSize, set.hdr.loadSize);
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;
@@ -1412,7 +1446,7 @@ public:
         pool.free = pool.nodes;
         pending.head = 0;
         pending.tail = &pending.head;
-        fn_80127CF4(this, "AsyncSetQueue");
+        fn_80127CF4(this, ResStrings::AsyncSetQueueName());
         busy = 0;
     }
     virtual ~AsyncSetQueue(void) { fn_80127E28(this); }
@@ -1502,7 +1536,7 @@ extern "C" void fn_8012D908(const char* name) {
         QueueNode* n = q->pending.head;
         found = Loop1_fn_8012D908(n, found, name);
         if (found) {
-            fn_802E317C("res-CRIP(%s/%s): Get-Before-Wait error! Must wait for set.", found->name, name);
+            fn_802E317C(ResStrings::WaitBeforeGetError(), found->name, name);
         }
     }
 }
@@ -1534,7 +1568,7 @@ extern "C" void fn_8012DDA8(const char* name) {
             }
         }
         if (!found) {
-            fn_802E30C8("res: Queueing %s...", name);
+            fn_802E30C8(ResStrings::QueueingMessage(), name);
             n = q->pool.Alloc();
             if (!n) {
                 q->Flush();
@@ -1609,7 +1643,7 @@ s32 TocSizer::LoadSize(const char* name) {
     ResToc* toc = GetToc(name);
     s32 size;
     if (!toc) {
-        fn_802E317C("res(%s): No toc entry.", name);
+        fn_802E317C(ResStrings::NoTocEntryError(), name);
     }
     size = toc->loadSize + 0x80;
     fn_8012C4D8(toc);
@@ -1683,7 +1717,7 @@ extern "C" void fn_8012E498(const char* name) {
             }
             for (n = q->pending.First(); n; n = n->next) {
                 if (!strcasecmp(n->name, name)) {
-                    fn_802E317C("res: wtf!  this node should not be in the fifo anymore");
+                    fn_802E317C(ResStrings::DetachedNodeMessage());
                 }
             }
             for (n = q->pool.Used(); n; n = n->link) {
@@ -1730,11 +1764,11 @@ void QueueNode::Free(void) {
 QueueNode* NodePool::Used(void) { return used; }
 
 inline void SayWaiting(QueueNode* n) {  /* Helper name unproven */
-    fn_802E30C8("res: waiting for %s...", n->name);
+    fn_802E30C8(ResStrings::WaitingMessage(), n->name);
 }
 
 inline void ReportWait(QueueNode* n, s32 start) {  /* Helper name unproven */
-    fn_802E30C8("res: wait(%s) took %d msec", n->name, fn_802E2C20() - start);
+    fn_802E30C8(ResStrings::WaitTimeMessage(), n->name, fn_802E2C20() - start);
 }
 
 inline void ClearPending(const char* name) {  /* Helper name unproven */
@@ -1742,7 +1776,7 @@ inline void ClearPending(const char* name) {  /* Helper name unproven */
     if (set) {
         set->pending = 0;
     } else {
-        fn_802E30C8("res: Someone was waiting for %s, but it just wasn't pending!", name);
+        fn_802E30C8(ResStrings::MissingPendingMessage(), name);
     }
 }
 

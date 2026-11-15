@@ -1002,7 +1002,7 @@ config.libs.append(
             Object(Matching, "game/sysinit.cpp"),
             Object(Matching, "game/random.cpp"),
             Object(Matching, "game/pool.cpp"),
-            Object(NonMatching, "game/res.cpp"),
+            Object(Matching, "game/res.cpp"),
             Object(Matching, "game/strtab.cpp"),
             Object(Matching, "game/memstream.cpp"),
             Object(Matching, "game/quat.cpp"),
