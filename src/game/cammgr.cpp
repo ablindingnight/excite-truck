@@ -1133,7 +1133,7 @@ u8 lbl_8055F4A8[8];
 extern const f32 lbl_80563CFC;  // 42.5 deg
 extern const f32 lbl_80563D00;  // 55 deg
 extern const f32 lbl_80563D04;  // 60 deg
-CamMount lbl_803467E8[3] = {
+extern const CamMount lbl_803467E8[3] = {
     {{0.0f, 0.7f, 0.0f}, {0.0f, 0.8f, 9.0f}, lbl_80563CFC, 1},
     {{0.0f, -0.5f, -30.5f}, {0.0f, 2.1f, 1.0f}, lbl_80563D00, 1},
     {{0.1f, 1.1f, -0.2f}, {-9.5f, 2.5f, 4.2f}, lbl_80563D04, 0},
