@@ -5,6 +5,10 @@
 #include <string.h>
 #include "game/common.h"
 
+static const f32 DemoNear[] = {1.0f};
+static const f32 DemoFar[] = {1000.0f};
+static const f32 DemoFov[] = {1.4398966f};
+
 struct GameMode {
     void (*draw)(void);         // offset 0x0
     int (*handleKey)(int key);  // offset 0x4
@@ -195,7 +199,7 @@ void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
 void fn_80011A2C(void);
 void fn_802C9904(void);
 
-void fn_8000AB44(void);
+void fn_8000AB44__FP9RaceSetup(void);
 // overlay.cpp / escape.cpp / replay.cpp (C++ linkage; this part of the file sits in an extern "C" block)
 extern "C++" {
 void fn_800070DC(void);
@@ -337,27 +341,12 @@ static void DrawPressTwo(void) {
 }
 
 // Six-word static built by an inline constructor (first word stored first).
-class GameLoopStatic {
-public:
-    GameLoopStatic(void) {
-        unk0 = 0;
-        unk4 = 123;
-        unkC = 0;
-        unk8 = 0;
-        unk10 = 0;
-    }
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-    u32 unk10;
-    u32 unk14;
-};
+static inline u32 MakeStartupWord(u32 value) { return value; }
 
 ModuleTag lbl_8055D3C0;
-static GameLoopStatic lbl_8034F5A0;
-UnkStaticFFFF lbl_8055D3C8;
-UnkStatic7F lbl_8055D3CC;
+extern const u32 lbl_8055D3C8 = MakeStartupWord(0xFFFF0000);
+static UnkStatic123 lbl_8034F5A0;
+extern const u32 lbl_8055D3CC = MakeStartupWord(0x7F000000);
 
 ViewCam lbl_8034F5B8[4];
 s32 lbl_8034F5D8[8];  // allowed racing cameras
@@ -474,7 +463,7 @@ void gameloop_begin(RaceSetup* rs) {
     fn_801E7C1C(rs);
     fn_801E8818(fn_8000AEC4, "gameloop");
     fn_8012E81C("overlays.res");
-    fn_8000AB44();
+    fn_8000AB44__FP9RaceSetup();
     fn_8023889C();
     fn_801CB808();
     fn_801617BC();
@@ -869,10 +858,10 @@ void game_loop(void) {
 }
 
 void fn_8000BD64(void) {
-    lbl_8034F5F8.x = 1000.0f;
+    lbl_8034F5F8.x = DemoFar[0];
     lbl_8034F5F8.z = 0.0f;
     lbl_8034F5F8.y = 0.0f;
-    lbl_8034F604.x = 1000.0f;
+    lbl_8034F604.x = DemoFar[0];
     lbl_8034F604.z = 0.0f;
     lbl_8034F604.y = 0.0f;
 }
@@ -1010,8 +999,8 @@ void fn_8000C5CC(void) {
     Camera cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
-    fn_80010074(0xFFFFFF00, 9, "DEMO", 1.0f, -270.0f, -180.0f);
+    fn_802C974C(DemoNear[0], DemoFar[0], DemoFov[0]);
+    fn_80010074(0xFFFFFF00, 9, "DEMO", DemoNear[0], -270.0f, -180.0f);
     fn_80011A2C();
     fn_802C9904();
 }
