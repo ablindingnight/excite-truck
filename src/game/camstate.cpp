@@ -447,11 +447,6 @@ struct CamPreset {
     f32 fov;
 };
 
-extern CamPreset lbl_802FA788;
-extern CamPreset lbl_802FA7A4;
-extern CamPreset lbl_802FA7C0;
-extern CamPreset lbl_802FA7DC;
-extern CamPreset lbl_802FA7F8;
 extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FDC;
 void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
@@ -524,7 +519,7 @@ void fn_802750C4(u8* p, f32 k, f32 dist) {
 // A fixed camera placement: offset from the car frame, rotation vector in degrees, field of view.
 // Camera frame = the car frame (0xC0) turned by the preset rotation and moved to its offset.
 void fn_802751AC(u8* p) {
-    CamPreset c = lbl_802FA788;
+    CamPreset c = {{0.0f, 1.1f, 0.9f}, {8.0f, 0.0f, 0.0f}, 86.25f};
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
     f32 z = c.off.z;
@@ -540,7 +535,8 @@ void fn_802751AC(u8* p) {
 void fn_80275410(u8* p) {
     CamPreset c;
     u8* car = PTR(p, 0x140);
-    c = lbl_802FA7A4;
+    const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
+    c = k;
     CamVec off = *(CVec3*)(car + 0x2450) + CamVec(0.8f, 0.65f, -1.75f);
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
@@ -555,7 +551,8 @@ void fn_80275410(u8* p) {
 void fn_802756A4(u8* p) {
     CamPreset c;
     u8* car = PTR(p, 0x140);
-    c = lbl_802FA7C0;
+    const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
+    c = k;
     CamVec off = *(CVec3*)(car + 0x2538) + CamVec(0.85f, lbl_80563FDC, lbl_80563FD8);
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
@@ -567,7 +564,7 @@ void fn_802756A4(u8* p) {
 }
 
 void fn_80275938(u8* p) {
-    CamPreset c = lbl_802FA7DC;
+    CamPreset c = {{-1.0f, 0.9f, -3.2f}, {5.8f, 63.6f, 1.8f}, 87.75f};
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     Mat3 rot;
     f32 z = c.off.z;
@@ -626,7 +623,7 @@ void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 // As fn_802751AC, but relative to a level frame at the target: forward = the car's forward axis,
 // up = world y made perpendicular.
 void fn_80275D0C(u8* p) {
-    CamPreset c = lbl_802FA7F8;
+    CamPreset c = {{-28.5f, 9.1f, -9.1f}, {16.3f, 70.4f, -13.4f}, 18.75f};
     *(CFrame*)(p + 0x58) = *(CFrame*)(p + 0xC0);
     CFrame f;
     f.t.x = F32(p, 0xE4);
