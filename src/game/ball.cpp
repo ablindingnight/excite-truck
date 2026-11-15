@@ -424,11 +424,13 @@ public:
     BVec3 launch;       // offset 0x224
 };
 
+static inline u32 MakeStartupWord(u32 value) { return value; }
+
 ModuleTag lbl_8055E498;
-UnkStatic7F lbl_8055E4A0;
+extern const u32 lbl_8055E4A0 = MakeStartupWord(0xFFFF0000);
+extern const u32 lbl_8055E4A4 = MakeStartupWord(0xFFFF0000);
 static UnkStatic123 lbl_804348C0;
-UnkStaticFFFF lbl_8055E4A4;
-UnkStaticFFFF lbl_8055E4A8;
+extern const u32 lbl_8055E4A8 = MakeStartupWord(0x7F000000);
 
 extern "C" f32 fn_8017D378(void) { return lbl_8055E3C8; }
 
