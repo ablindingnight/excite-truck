@@ -412,7 +412,7 @@ static inline u32 GetSelColor(u8* p) {
     return GetVehicleColor(v, 0)[1];
 }
 
-extern char lbl_8034287C[];
+#include "game/roll_strings.h"
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 extern "C" const char* fn_80131234(u8* s);
 
@@ -722,7 +722,7 @@ static inline void SaveColor(u8* p, s32 c) {
 static inline void DisplaySelectedColor(u8* p, VehicleInfo* v) {
     *(u32*)PTR(p, 0xDC) = ((u32*)((u8*)v + 0x64))[((GarageSel*)p)->sel];
     ShowCarColor(p);
-    fn_801345D8((char*)(p + 0xE0), 0x100, lbl_8034287C, ((GarageSel*)p)->sel + 1);
+    fn_801345D8((char*)(p + 0xE0), 0x100, RollStrings::ColorKey(), ((GarageSel*)p)->sel + 1);
     const char* str = fn_80131234(p + 0xE0);
     CopyName(str, 0x100, (char*)(p + 0xE0));
 }
