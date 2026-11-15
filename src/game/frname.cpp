@@ -109,8 +109,8 @@ template<int N> struct IconTail {
 void* operator new(size_t n, const char* tag);
 void* operator new[](size_t n, const char* tag);
 void operator delete[](void* p);
-ValueTable* fn_80131808(const char* name);
-void fn_80131818(ValueTable* t);
+extern "C" ValueTable* fn_80131808(const char* name);
+extern "C" void fn_80131818(ValueTable* t);
 extern "C" u8* fn_802CAC28(const char* name, int flags);
 extern "C" int strcmp(const char* a, const char* b);
 extern "C" void gxForgetTexture(u8* tex);

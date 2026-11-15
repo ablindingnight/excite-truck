@@ -141,8 +141,8 @@ public:
 };
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
-ValueTable* fn_80131808(const char* name);
-void fn_80131818(ValueTable* t);
+extern "C" ValueTable* fn_80131808(const char* name);
+extern "C" void fn_80131818(ValueTable* t);
 
 extern "C" {
 void* memset(void* p, int c, size_t n);
