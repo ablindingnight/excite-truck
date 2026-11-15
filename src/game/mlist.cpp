@@ -461,11 +461,11 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     u8* vis = ctx->vis;
     vis[0] = 0x81;
     const MLSphere* sp;
+    int i;
     u8* vp = vis + 1;
+    int count = sa.n;
     int k = 1;
     sp = sa.p;
-    int i;
-    int count = sa.n;
     for (i = 0; i < count; i++, k++, vp++) {
         *vp = Cull(sp);
         sp++;

@@ -431,9 +431,9 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     loc.cur = 0;
     loc.count = 0;
     for (int i = 0; i < (*loc.pairs)->count; i++) {
-        int found = 0;
         const char* name = (*loc.pairs)->items[i].track;
         const char* env = GetTrackEnviron(name);
+        int found = 0;
         for (int j = 0; j < loc.count; j++) {
             if (!strcasecmp(loc.data[j].env, env)) {
                 found = 1;

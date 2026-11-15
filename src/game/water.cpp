@@ -809,10 +809,10 @@ void WaterSystem::Draw(void) {
     f32 nd = nearZ;
     sx = sx * (f32)sqrt(1.5625);
     WVert* verts = fn_802DD42C(0x6000);
+    f32 k;
     f32 vx = fn_802C9C50();
     f32 vy = fn_802C9C40();
     f32 vw = fn_802C9C38();
-    f32 k;
     f32 cx;
     f32 vh = fn_802C9C48();
     k = 640.0f / (vh * env->Scale());

@@ -330,8 +330,8 @@ int LineFollower::Step(V2* p) {
         dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
         dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
         inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
-        f32 ox = p->x - pos.x;
         f32 dx = dir.x * inv;
+        f32 ox = p->x - pos.x;
         f32 oy = p->y - pos.y;
         f32 dy = dir.y * inv;
         dir.x = dx;

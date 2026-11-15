@@ -292,9 +292,9 @@ void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     V3 up;
     V3 pts[3];
     m.origin.x = pos->x;
+    up.z = 0.0f;
     m.origin.y = 0.0f;
     m.origin.z = pos->y;
-    up.z = 0.0f;
     up.x = 0.0f;
     up.y = 1.0f;
     f32 tmp = n.x;

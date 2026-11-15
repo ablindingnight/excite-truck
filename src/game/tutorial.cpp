@@ -1416,13 +1416,13 @@ inline void Challenge::Init(void) {
                 d1.z = c->z - b.z;
                 Delta2 d2;
                 d2.x = a.x - b.x;
-                d2.z = a.z - b.z;
                 e1.x = d1.x;
                 e1.y = 0.0f;
-                e1.z = d1.z;
+                d2.z = a.z - b.z;
                 e2.x = d2.x;
                 e2.y = 0.0f;
                 e2.z = d2.z;
+                e1.z = d1.z;
                 PSVECNormalize(&e1, &e1);
                 PSVECNormalize(&e2, &e2);
                 PSVECCrossProduct(&e1, &e2, &n3);
@@ -1885,9 +1885,9 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
                 d.z = pts[2].z - pts[0].z;
                 f32 xv = pts[0].x;
                 d.x = pts[2].x - xv;
+                e.x = pts[0].x - pts[1].x;
                 best = 2;
                 max = d.x * d.x + d.z * d.z;
-                e.x = pts[0].x - pts[1].x;
                 e.z = pts[0].z - pts[1].z;
                 len = e.x * e.x + e.z * e.z;
                 if (len > max) {

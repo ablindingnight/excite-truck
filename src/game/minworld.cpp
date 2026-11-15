@@ -205,10 +205,10 @@ void fn_8025280C(MWBody* b, f32 speed) {
         MWVec2 zz;
         zz.x = b->z.x;
         zz.y = b->z.z;
+        b->vel = MWVec4(t.x, b->vel.y, t.y);
         radial = -2.5f * (zz.x * e.x + zz.y * e.y);
         f32 h;
         f32 depth;
-        b->vel = MWVec4(t.x, b->vel.y, t.y);
         fwd = MWVec4(b->z.x, b->z.y, b->z.z);
         a = b->accel;
         a.y = radial;

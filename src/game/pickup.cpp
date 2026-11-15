@@ -796,11 +796,11 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 perp.x = zv;
                 perp.z = -x;
                 inv = 1.0f / (f32)sqrt(Len2_hm(perp.x, perp.z));
+                perp.x *= inv;
                 base.x = seg[0].x + dir.x * t;
                 f32 z2 = dir.z;
-                base.z = seg[0].z + z2 * t;
-                perp.x *= inv;
                 perp.z *= inv;
+                base.z = seg[0].z + z2 * t;
                 nrm = perp;
             }
             rt = rainbowTypes.t;

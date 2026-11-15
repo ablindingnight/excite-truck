@@ -833,20 +833,20 @@ void fn_80182DF4(u8* p) {
     BVec rear(0.7f, 0.1f, 1.0f);
     BVec mid(0.7f, 0.1f, 1.0f);
     BVec front(0.7f, 0.1f, 1.0f);
-    f32 a = maxX - 0.45000002f;
-    f32 b = 0.8f * a;
     f32 yMid = 0.45000002f + minY;
+    f32 a = maxX - 0.45000002f;
     f32 yRear = 0.36f + minY;
     zRear = maxZ - 0.45000002f;
+    zFront = 0.44999998f + minZ;
     f32 h = 0.5f * (maxY - minY);
     f32 zMid = 0.5f * (minZ + maxZ);
-    zFront = 0.44999998f + minZ;
     f32 zRearMid = 0.5f * (zRear + zMid);
+    f32 b = 0.8f * a;
     f32 xSide = maxX - h;
-    f32 xFront = maxX - 0.44999998f;
     f32 zFrontMid = 0.5f * (zFront + zMid);
-    f32 ySide = h + minY;
     f32 yFront = 0.44999998f + minY;
+    f32 ySide = h + minY;
+    f32 xFront = maxX - 0.44999998f;
     f32 nb = -b;
     f32 yr = 0.254f + yRear;
     AddBodySphere(p, PTR(p, 0x268), nb, yr, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
@@ -3683,9 +3683,9 @@ static inline void ToBody(u8* p, BVec* o, const BVec* v) {
 void fn_8018A9F0(u8* p, u8* m) {
     f32 zero = lbl_80561CAC;
     if (PTR(p, 0x26C4)) {
+        s32 n = 0;
         BVec* pos = 0;
         BVec* old = 0;
-        s32 n = 0;
         fn_801C2BDC(PTR(p, 0x26C4), &n, &pos, &old);
         if (S32(PTR(p, 0x26C0), 0xA4) > 0) {
             for (int i = 0; i < S32(PTR(p, 0x26C0), 0xA4); i++) {
@@ -3695,9 +3695,9 @@ void fn_8018A9F0(u8* p, u8* m) {
         }
     }
     if (PTR(p, 0x26C8)) {
+        s32 n = 0;
         BVec* pos = 0;
         BVec* old = 0;
-        s32 n = 0;
         fn_801C2BDC(PTR(p, 0x26C8), &n, &pos, &old);
         if (S32(PTR(p, 0x26C0), 0xC8) > 0) {
             for (s32 i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
