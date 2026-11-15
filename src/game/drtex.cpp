@@ -392,33 +392,29 @@ void fn_802D81C4(GXTexDesc* d) {
     const u8* wa;
     s32 w = d->w;
     u8* tex;
-    int row;
     s32 h = d->h;
     TexImage* img = d->data;
     tex = img->tex;
     int i;
     u8* p = tex;
-    int n = w * h / 2;
-    if (n > 0) {
-        for (i = 0; i < n; i++) {
-            *p = *p >> 4 | *p << 4;
-            p++;
-        }
+    for (i = 0; i < w * h / 2; i++) {
+        *p = *p >> 4 | *p << 4;
+        p++;
     }
     u32* pal = img->pal;
     for (i = 0; i < 16; i++) {
         Swap32(&pal[i]);
     }
+    int row = w / 2;
     fn_801282EC(0x20);
-    u8* tmp = new ("tmp_tx8") u8[n];
-    memcpy(tmp, tex, n);
-    row = w / 2;
-    int tw = row / 4;
+    u8* tmp = new ("tmp_tx8") u8[row * h];
+    memcpy(tmp, tex, row * h);
+    int tw = w / 2 / 4;
     const u8* src = tmp;
     int y;
     for (y = 0; y < h; y++) {
         wa = src;
-        for (int x = 0; x < row; wa++, x++) {
+        for (int x = 0; x < w / 2; wa++, x++) {
             tex[((y / 8) * tw + x / 4) * 32 + (y % 8) * 4 + x % 4] = *wa;
         }
         src += row;
