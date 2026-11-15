@@ -2629,13 +2629,13 @@ void fn_80186DE8(u8* p) {
             f32 a;
             f32 b;
             a = F32(car, wh * 0x74 + 0x23B4);
-            CbVec4 s1(0.0f, 0.0f, 0.0f, 0.0f);
-            CbVec4 s0(0.0f, 0.0f, 0.0f, 0.0f);
+            f32 s1[4] = {0};
+            f32 s0[4] = {0};
             s1[wh] = (a - lbl_80561E6C) * (a - lbl_80561E70) * (lbl_80561E74 * a) * lbl_80561E78;
             b = fmod(lbl_80561E7C + a, 6.2831854820251465);
-            x->v130 = s1.Sol();
+            x->v130 = CbVec4(s1[0], s1[1], s1[2], s1[3]).Sol();
             s0[wh] = -((b - lbl_80561E6C) * (b - lbl_80561E70) * (lbl_80561E74 * b)) * lbl_80561E78;
-            x->v140 = s0.Sol();
+            x->v140 = CbVec4(s0[0], s0[1], s0[2], s0[3]).Sol();
         }
         player = 0;
         if (U32(car, 0x10) == 'PCAR' && ((*(CbFlagsV**)(car + 0x270C))->Flags() & 0x20)) {
