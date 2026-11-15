@@ -42,6 +42,9 @@ struct Unk_804902C4 {
     long m_storage[0x80];
 };
 #pragma cplusplus off
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 extern struct Unk_804900AC lbl_804900AC;
 extern void fn_801345D8(void *, ...);
 extern unsigned char lbl_8055EEF4;
@@ -205,9 +208,15 @@ void fn_8020F950(void) {
     fn_8020F730();
 }
 
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 long IdentGetCurrentSlot(void);
 #pragma cplusplus off
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 extern int strcasecmp(const char *, const char *);
 extern int strncasecmp(const char *, const char *, unsigned long);
 long fn_8020F9F4(void) {
@@ -278,6 +287,9 @@ extern void *GetEvent__Fi(long);
 extern long fn_802EC1D8(void);
 extern void fn_802E30C8(const char *, ...);
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 // The current event's info object (event + 0x20); slot 0x18 looks up a string by key.
 class EventInfo {
@@ -308,6 +320,9 @@ extern "C" void fn_8020FCC4(void) {
     lbl_8055B658 = idx;
 }
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 #pragma pop
 
 extern char *strncpy(char *, const char *, unsigned long);
@@ -404,6 +419,9 @@ void fn_8020FFE4(long arg0) {
 extern unsigned char lbl_8055EEEC;
 extern unsigned char lbl_8055EEED;
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 extern "C" void fn_802100AC(void) {
     EventInfo *ev;
@@ -428,6 +446,9 @@ extern "C" void fn_802100AC(void) {
     }
 }
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 #pragma pop
 
 extern float fn_80235EF0(long, long);
@@ -447,6 +468,9 @@ typedef struct PanelBox {
 } PanelBox;
 
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 // A UI widget; slot 0x18 returns its font.
 // A text box from the layout (0x20 bytes); color at 0x18.
@@ -498,13 +522,22 @@ extern "C" void fn_802101F8(PanelWidget *arg0, long arg1, long arg2, void *arg3)
     }
 }
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 #pragma pop
 
  
 extern void fn_802E6BD8(unsigned long, int, void *, unsigned long, void (*)(int));
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 void IdentRegisterCallback(void (*cb)(int, int));  // ident.cpp
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 void fn_8021031C(void) {
     long type;
     char *buffer;
@@ -531,6 +564,9 @@ void fn_802103B8(void* a0) {
 }
 
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 /* Helper name unproven: the layouts held in lbl_8055EED4/lbl_8055EED0 are deleted through their virtual destructor (slot 8). */
 class LayoutObj {
@@ -550,6 +586,9 @@ extern "C" void fn_802103BC(void) {
     lbl_8055EED0 = 0;
 }
 #pragma pop
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 extern long fn_80009C84__Fv(void);
 extern int fn_801B85CC(void);
 extern unsigned char lbl_8055EEC0;
@@ -623,11 +662,17 @@ long fn_80210570(void) {
 extern long fn_80145E70(const char *);
 extern long fn_802090D4(const char *);
 extern long fn_80209110(void *);
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 struct Dummy_80210904 {
       virtual void f1(long);
   };
 #pragma cplusplus off
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 extern long fn_8000DA10(void);
 extern long lbl_8055EED4;
 extern long lbl_8055EEF0;
@@ -640,6 +685,9 @@ extern void fn_802EC158(void);
 extern long lbl_8055EECC;
 
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 extern "C" void fn_80210688(unsigned char arg0) {
     long count;
@@ -716,6 +764,9 @@ extern "C" void fn_80210688(unsigned char arg0) {
     lbl_8055B660 = arg0;
 }
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 #pragma pop
 
 void fn_802108C8(void) {
@@ -723,6 +774,9 @@ void fn_802108C8(void) {
     lbl_8055EEF0 = fn_802090D4("TrkMusDash");
 }
  
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 extern "C" void fn_80210904(void) {
     fn_80209110(&lbl_8055EEF0);
@@ -733,6 +787,9 @@ extern "C" void fn_80210904(void) {
     lbl_8055EED4 = 0;
 }
 #pragma cplusplus off
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 extern void *lbl_8055EED8;
 extern void *lbl_8055EEDC;
 void fn_80210950(void *arg0, void *arg1) {
@@ -750,6 +807,9 @@ typedef struct CourseVec2 {
 
 
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 extern "C" void fn_80230B5C(void *);
 extern "C" void fn_802C8638(void *);
@@ -928,6 +988,9 @@ extern "C" void fn_8021095C(void) {
     fn_802C9904();
 }
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 #pragma pop
 
 extern void fn_8020FEF0(long);
@@ -972,6 +1035,9 @@ extern void *GetEvent__Fi(long);
 extern unsigned char lbl_8055EEEC;
 extern unsigned char lbl_8055EEED;
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 extern "C" void fn_802112AC(void) {
     long mode;
@@ -1011,9 +1077,15 @@ extern "C" void fn_802112AC(void) {
     }
 }
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 #pragma pop
 
 #pragma push
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 extern "C" void fn_802113D8(void) {
     long mode;
@@ -1049,6 +1121,9 @@ extern "C" void fn_802113D8(void) {
     }
 }
 #pragma cplusplus reset
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 #pragma pop
 
 extern void fn_80206454(void);
@@ -1074,6 +1149,9 @@ extern int fn_8002B1D8(const char *, const char *, int);
 
 // The module's statics: tag, list terminator, marker, then the two lists. fn_802114F4 is the __sinit of
 // this unit and the two weak list dtors follow it (they sat at the head of uiapi's split).
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 #pragma cplusplus on
 class ModuleTag;
 void RegisterModuleTag(ModuleTag* tag);
@@ -1107,6 +1185,9 @@ Unk_804900AC lbl_804900AC;
 Unk_804902C4 lbl_804902C4;
 char lbl_804904D0[0x40];
 #pragma cplusplus off
+#ifdef __cplusplus
+extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
+#endif
 
 /* .sbss owned by this unit (0x8055EEB0-0x8055EEF7), defined in reverse address order: this C block is emitted last-defined-first. */
 unsigned char lbl_8055EEF6;
@@ -1127,3 +1208,6 @@ unsigned char lbl_8055EEC8;
 long lbl_8055EEC4;
 unsigned char lbl_8055EEC0;
 long lbl_8055EEBC;
+#ifdef __cplusplus
+}  // extern "C"
+#endif
