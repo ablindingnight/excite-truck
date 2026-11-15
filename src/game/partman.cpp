@@ -904,11 +904,10 @@ void PartSys::DrawSprites(Particle* p, int n) {
         f32 ratio = PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist);
         fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         b = Byte(255.0f * (blueConst + blueRamp * t));
-        u8 r;
         g = Byte(255.0f * (greenConst + greenRamp * t));
-        r = Byte(255.0f * (redConst + redRamp * t));
+        const u32 r = Byte(255.0f * (redConst + redRamp * t));
         a = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
-        color = (a << 24) | (r << 16) | (g << 8) | b;
+        color = ((u32)a << 24) | ((u8)r << 16) | (g << 8) | b;
         int rot = p->rot;
         const struct { int v, u; } uv = {(rot >> 1) & 1, ((rot + 1) & 2) >> 1};
         PVtx q[4];
