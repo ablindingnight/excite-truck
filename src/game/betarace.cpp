@@ -1057,6 +1057,7 @@ struct Pickup {
     }
     void Draw(Color col);
     Palette* GetPalette(void);
+    void Update(void);
 
     f32 pos[3];            // offset 0x0
     void* objs[2];         // offset 0xC
@@ -3355,51 +3356,62 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
 /* Helper names unproven */
 static inline f32 Wave(f32 time) { return (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * time, 1.0)); }
 static inline f32 Swing(f32 w, f32 amp) { return w * amp; }
+// The star loop body is an inline method called through stars.a.data[i] and the spin block a helper called with
+// the (SpinBody*)hB8 expression: their parameters are inline objects, which puts the loop counter and its offset
+// in r30/r31 and the two body pointers in r23/r26 as in retail (2026-11-16 TC helper pushsim).
+static inline void SpinStar(Pickup* t, SpinBody* body) {  /* Helper name unproven */
+    f32 c;
+    f32 ang;
+    f32 s;
+    f32 w;
+    w = Swing(Wave(lbl_8055E3C8), 0.5235988f);
+    ang = w + t->angle;
+    body->pos[0] = t->pos[0];
+    body->pos[1] = t->pos[1];
+    body->pos[2] = t->pos[2];
+    SpinBody* r = (SpinBody*)t->hB8;
+    c = cos(ang);
+    s = sin(ang);
+    r->rot[0] = c;
+    r->rot[1] = 0.0f;
+    r->rot[2] = -s;
+    r->rot[3] = 0.0f;
+    r->rot[4] = 1.0f;
+    r->rot[5] = 0.0f;
+    r->rot[6] = s;
+    r->rot[7] = 0.0f;
+    r->rot[8] = c;
+}
+
+inline void Pickup::Update(void) {  /* Helper name unproven */
+    if (hB8) {
+        SpinStar(this, (SpinBody*)hB8);
+    }
+    if (fn_801D48F8(objs[which]) || fn_801D4904(objs[which])) {
+        f32 r = respawn - 0.016683351f;
+        if (0.0f > r) {
+            r = 0.0f;
+        }
+        respawn = r;
+    }
+    if (!fn_801D4900(objs[which])) {
+        f32 r = respawn;
+        respawn = r > 0.016683351f ? r : 0.016683351f;
+    }
+    if (kind == 4) {
+        switchLeft -= 0.016683351f;
+        if (switchLeft < 0.0f) {
+            which = 1 - which;
+            switchLeft = switchTime;
+        }
+    }
+}
+
 inline void BetaMaster::vf0C(void) {
     int found;
     f32 lead;
     for (int i = 0; i < stars.a.count; i++) {
-        Pickup* t = stars.a.data[i];
-        SpinBody* body = (SpinBody*)t->hB8;
-        if (body) {
-            f32 w = Swing(Wave(lbl_8055E3C8), 0.5235988f);
-            f32 ang = w + t->angle;
-            f32 c;
-            f32 s;
-            body->pos[0] = t->pos[0];
-            body->pos[1] = t->pos[1];
-            body->pos[2] = t->pos[2];
-            SpinBody* r = (SpinBody*)t->hB8;
-            c = cos(ang);
-            s = sin(ang);
-            r->rot[0] = c;
-            r->rot[1] = 0.0f;
-            r->rot[2] = -s;
-            r->rot[3] = 0.0f;
-            r->rot[4] = 1.0f;
-            r->rot[5] = 0.0f;
-            r->rot[6] = s;
-            r->rot[7] = 0.0f;
-            r->rot[8] = c;
-        }
-        if (fn_801D48F8(t->objs[t->which]) || fn_801D4904(t->objs[t->which])) {
-            f32 r = t->respawn - 0.016683351f;
-            if (0.0f > r) {
-                r = 0.0f;
-            }
-            t->respawn = r;
-        }
-        if (!fn_801D4900(t->objs[t->which])) {
-            f32 r = t->respawn;
-            t->respawn = r > 0.016683351f ? r : 0.016683351f;
-        }
-        if (t->kind == 4) {
-            t->switchLeft -= 0.016683351f;
-            if (t->switchLeft < 0.0f) {
-                t->which = 1 - t->which;
-                t->switchLeft = t->switchTime;
-            }
-        }
+        stars.a.data[i]->Update();
     }
     found = 0;
     lead = fn_801B306C();
