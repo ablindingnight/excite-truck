@@ -13,14 +13,9 @@ struct VideoModeInfo {
     u32 magic;   // offset 0x14
 };
 
+// DUMP_DATA lbl_8034BC00 {s32,s32,s32,u32,s32,u32}
 VideoModeInfo lbl_8034BC00[7] = {
-    {0, 0, 0, 0x04000000, 6, 0x000F1CCE},
-    {0, 0, 0, 0x04000000, 6, 0x000F1CCE},
-    {640, 480, 16, 0x04000000, 0, 0x000F1CCE},
-    {800, 600, 16, 0x04000000, 1, 0x000F1CCE},
-    {1024, 768, 16, 0x04000000, 2, 0x000F1CCE},
-    {1280, 1024, 16, 0x04000000, 3, 0x000F1CCE},
-    {640, 480, 32, 0x05000000, 4, 0x000F1CCE},
+#include "dumpdata/lbl_8034BC00.inc"
 };
 
 ModuleTag lbl_8055FCE8;

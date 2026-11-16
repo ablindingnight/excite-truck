@@ -51,15 +51,9 @@ const char* lbl_80346B54[19] = {
     "HELI", "MAX", "R_FIXED", "S_PAN", "S_ZOOM", "S_CLOSEUP", "HOOD", "FLYCAM", "REPORT_ME",
 };
 
+// DUMP_DATA lbl_80346BA0 {s32,u8[4],f32[3],f32[3],f32,u8,u8,u8[2]}
 CamView lbl_80346BA0[8] = {
-    {34, {0}, {0.7f, 2.0f, 0.0f}, {0.0f, -90.0f, 0.0f}, 60.0f, 1, 1},
-    {34, {0}, {-0.7f, 2.0f, 0.0f}, {0.0f, 90.0f, 0.0f}, 60.0f, 1, 1},
-    {34, {0}, {0.0f, 2.0f, 1.5239999f}, {0.0f, 0.0f, 0.0f}, 80.0f, 1, 1},
-    {4},
-    {5},
-    {34, {0}, {0.0f, 0.7f, -1.426f}, {1.2f, 180.0f, 1.6f}, 60.0f, 1, 1},
-    {7},
-    {34, {0}, {0.0f, 1.4f, 2.3000002f}, {0.3f, 178.5f, -2.2f}, 71.85f, 0, 0},
+#include "dumpdata/lbl_80346BA0.inc"
 };
 
 f32 lbl_8055C598 = -1.0f;  // focus distance override (< 0: use the target)

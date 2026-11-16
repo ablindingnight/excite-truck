@@ -624,8 +624,10 @@ void fn_802B9108(s16 size) {
 
 inline s16 Obj::Y(void) { return y; }
 
-static const s16 lbl_802FAB60[32] = {0, 1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1,
-                                     16, 1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1};
+// DUMP_DATA lbl_802FAB60 s16
+static const s16 lbl_802FAB60[32] = {
+#include "dumpdata/lbl_802FAB60.inc"
+};
 
 inline s16 LowBit(s16 v) {
     v += 0x200;

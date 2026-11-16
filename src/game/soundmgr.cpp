@@ -109,10 +109,9 @@ struct VoiceBudget {
     s32 unk28;     // offset 0x28
 };
 
+// DUMP_DATA lbl_802F9DC8 {s32,s32[9],s32}
 const VoiceBudget lbl_802F9DC8[3] = {
-    {6, {256, 256, 256, 3, 2, 2, 1, 1, 1}, 555},
-    {16, {256, 256, 256, 6, 6, 3, 3, 1, 1}, 555},
-    {24, {256, 256, 256, 10, 6, 6, 6, 1, 1}, 555},
+#include "dumpdata/lbl_802F9DC8.inc"
 };
 
 ModuleTag lbl_8055ED98;

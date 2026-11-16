@@ -312,9 +312,9 @@ public:
 
 extern "C" {
 
+// DUMP_DATA lbl_802FC2A8 {s32,s32,s32} count=11
 DashRowType lbl_802FC2A8[11] = {
-    {0, 0, 4}, {1, 1, 5}, {2, 1, 5}, {3, 1, 5}, {4, 1, 5}, {5, 1, 5},
-    {6, 2, 6}, {7, 2, 6}, {8, 2, 6}, {9, 2, 6}, {10, 1, 5},
+#include "dumpdata/lbl_802FC2A8.inc"
 };
 
 }  // extern "C"

@@ -190,8 +190,9 @@ extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
+// DUMP_DATA lbl_802F98D0 {s32,s32,s32,s32}
 static const PanelEdge lbl_802F98D0[6] = {
-    {0, 1, 0, 0}, {1, 3, 0, 0}, {3, 2, 0, 0}, {2, 0, 0, 0}, {0, 3, 0, 0}, {1, 2, 0, 0},
+#include "dumpdata/lbl_802F98D0.inc"
 };
 
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
