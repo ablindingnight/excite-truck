@@ -6,10 +6,11 @@
 // animated surface rings. Names are guesses apart from the strings.
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
-// World units per grid cell (name unproven). A named constant with external linkage defined before any code: retail
+// World units per grid cell (name unproven), a one-element const array: Draw loads it and multiplies by 1024 at run
+// time (a scalar const would fold into 1/2048). A named constant with external linkage defined before any code: retail
 // keeps it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal (same pattern as heightfld).
-extern const f32 lbl_80564D78;
-const f32 lbl_80564D78 = 2.0f;
+extern const f32 lbl_80564D78[1];
+const f32 lbl_80564D78[1] = {2.0f};
 #include "game/math_types.h"
 #include "game/plainvec.h"
 
@@ -796,8 +797,7 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 }
 static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
-extern const f32 lbl_80564E24;  // -10
-extern const f32 lbl_80564E20;  // 1024
+template <class O, class A, class D> static inline void AddScaledK(O* o, const A* a, const D* d, f32 s) { o->x = a->x + d->x * s; o->y = a->y + d->y * s; o->z = a->z + d->z * s; }  /* Helper name unproven */
 void WaterSystem::Draw(void) {
     Frame cam;
     fn_802C8B08(&cam);
@@ -883,7 +883,7 @@ void WaterSystem::Draw(void) {
     f32 sh = FMax(cam.pos.y / 4.0f, 1.0f);
     u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
     fn_802C8BD0(env->Target());
-    fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (lbl_80564E20 * lbl_80564D78), deep, mask, deepCol);
+    fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (1024.0f * lbl_80564D78[0]), deep, mask, deepCol);
     fn_802DD27C(verts, 0x400, &idx[0][0][0], 0x1626);
     fn_802DD228();
     fn_802C8D74();
@@ -909,19 +909,15 @@ void WaterSystem::Draw(void) {
     PSVECCrossProduct((const Vec*)&upv, (const Vec*)&ax, (Vec*)&fw);
     PVec e0;
     PVec e1;
-    e0.x = q.x + fw.x * lbl_80564E24;
-    e0.y = q.y + fw.y * lbl_80564E24;
-    e0.z = q.z + fw.z * lbl_80564E24;
-    e1.x = q.x + fw.x * 10.0f;
-    e1.y = q.y + fw.y * 10.0f;
-    e1.z = q.z + fw.z * 10.0f;
+    AddScaledK(&e0, &q, &fw, -10.0f);
+    AddScaledK(&e1, &q, &fw, 10.0f);
     IdxTable qi = {{0, 1, 2, 2, 1, 3}};
     WVert sv[4];
     for (int i = 0; i < 4; i++) {
         sv[i].pos = *((i & 1) ? &e1 : &e0);
-        sv[i].pos.x += cam2.y.x * ((i & 2) ? lbl_80564E24 : 0.0f);
-        sv[i].pos.y += cam2.y.y * ((i & 2) ? lbl_80564E24 : 0.0f);
-        sv[i].pos.z += cam2.y.z * ((i & 2) ? lbl_80564E24 : 0.0f);
+        sv[i].pos.x += cam2.y.x * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.y += cam2.y.y * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.z += cam2.y.z * ((i & 2) ? -10.0f : 0.0f);
         sv[i].v = 0.0f;
         sv[i].u = 0.0f;
         sv[i].color = shimWaterColor;
