@@ -259,6 +259,7 @@ void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 void fn_80270EC4(u8* car, u32 id) {
     AngleRef refs[64];
     fn_80270C04(car, id);
+    u8*& viewedCar = car;
     if (id & 0x100) {
         for (int g = 0; g < 3; g++) {
             int n = 0;
@@ -279,9 +280,9 @@ void fn_80270EC4(u8* car, u32 id) {
             }
             if (n > 0) {
                 qsort(refs, n, sizeof(AngleRef), (int (*)(const void*, const void*))fn_80270D4C);
-                f32 wrap = *(f32*)(PTR(car, 0x2C) + g * 4 + 8);
-                int i;
+                f32 wrap = *(f32*)(PTR(viewedCar, 0x2C) + g * 4 + 8);
                 int last;
+                int i;
                 AngleRef* ref = refs;
                 last = n - 1;
                 for (i = 0; i < last; ref++, i++) {
