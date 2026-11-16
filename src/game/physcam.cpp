@@ -4,6 +4,7 @@
 // static-array initialiser are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/camrect.h"
+#include "game/camrec.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -565,7 +566,8 @@ static inline void UpdateFixedTvCamera(u8* p, f32 fov, TvCamera* tv) {
 }
 
 void fn_80271624(int mode, u8* p) {
-    u8* track = ((CamCarCtl*)PTR(PTR(p, 0x140), 0x270))->Track();
+    CamRec* r = (CamRec*)p;
+    u8* track = ((CamCarCtl*)PTR(r->car, 0x270))->Track();
     int group;
     switch (PitMode(track)) {
     case 1:
@@ -589,21 +591,21 @@ void fn_80271624(int mode, u8* p) {
         int fresh = 0;
         int idx;
         if (mode == 11) {
-            idx = find_best_region(PTR(p, 0x140), group);
+            idx = find_best_region(r->car, group);
             if (idx >= 0) {
-                S32(p, 0x14C) = idx;
-                if (idx != S32(p, 0x150)) {
-                    S32(p, 0x150) = idx;
+                r->w14C = idx;
+                if (idx != r->w150) {
+                    r->w150 = idx;
                     RegionSphere* rs = &lbl_8049EDC8[idx];
                     fresh = 1;
-                    S32(p, 0x148) = rs->cameras[fn_80129D90(6, 0, rs->cameraCount)];
+                    r->w148 = rs->cameras[fn_80129D90(6, 0, rs->cameraCount)];
                 }
             }
         } else {
             idx = -1;
         }
         if (idx >= 0) {
-            TvCamera* tv = &lbl_8049A2C8[S32(p, 0x148)];
+            TvCamera* tv = &lbl_8049A2C8[r->w148];
             if (tv->moves) {
                 CamRegion* r = &lbl_8049F9D8[idx];
                 if (lbl_8055F564) {
@@ -663,29 +665,29 @@ void fn_80271624(int mode, u8* p) {
                     tv->fov = tv->fovFrom;
                 }
             }
-            F32(p, 0x7C) = tv->pos[0];
-            F32(p, 0x80) = tv->pos[1];
-            F32(p, 0x84) = tv->pos[2];
-            F32(p, 0x120) = lbl_80563F48;
-            F32(p, 0x124) = lbl_80563F48;
-            F32(p, 0x128) = lbl_80563F48;
+            r->pose.pos.v[0] = tv->pos[0];
+            r->pose.pos.v[1] = tv->pos[1];
+            r->pose.pos.v[2] = tv->pos[2];
+            r->vel.v[0] = lbl_80563F48;
+            r->vel.v[1] = lbl_80563F48;
+            r->vel.v[2] = lbl_80563F48;
             if (lbl_8055F54C != tv->type) {
-                fn_801E9DC4(p + 0x1EC);
+                fn_801E9DC4((u8*)&r->h1EC);
             }
             if (tv->flags & 2) {
-                fn_80265EC4(p + 0x160, fn_802E2C20(), fn_801769F8());
-                fn_80266070(p + 0x160, (f32*)(p + 0x4C), (f32*)(p + 0xE4), (f32*)(p + 0x12C));
+                fn_80265EC4((u8*)&r->w160, fn_802E2C20(), fn_801769F8());
+                fn_80266070((u8*)&r->w160, (f32*)&r->v4C, (f32*)&r->carFrame.pos, (f32*)&r->carVel);
             } else {
-                F32(p, 0x4C) = F32(p, 0xE4);
-                F32(p, 0x50) = F32(p, 0xE8);
-                F32(p, 0x54) = F32(p, 0xEC);
+                r->v4C.v[0] = r->carFrame.pos.v[0];
+                r->v4C.v[1] = r->carFrame.pos.v[1];
+                r->v4C.v[2] = r->carFrame.pos.v[2];
             }
             if (tv->flags & 1) {
-                fn_80266170(p + 0x178, fn_802E2C20(), fn_801769F8(), fresh, F32(p, 0xBC));
+                fn_80266170((u8*)&r->w178, fn_802E2C20(), fn_801769F8(), fresh, r->fov);
                 f32 fovBlend = F32(p, 0x184);
-                f32 fov = F32(p, 0x180) + fovBlend * (F32(p, 0xBC) - F32(p, 0x180));
-                F32(p, 0x194) = fov;
-                F32(p, 0xBC) = fov;
+                f32 fov = F32(p, 0x180) + fovBlend * (r->fov - F32(p, 0x180));
+                r->f194 = fov;
+                r->fov = fov;
             }
             switch (tv->type) {
             case 1:
@@ -748,19 +750,19 @@ void fn_80271624(int mode, u8* p) {
             }
             lbl_8055F54C = tv->type;
             if (tv->flags & 1) {
-                fn_802662D8(p + 0x178, (f32*)(p + 0x7C), (f32*)(p + 0x7C), (f32*)(p + 0x70), (f32*)(p + 0x4C));
+                fn_802662D8((u8*)&r->w178, (f32*)&r->pose.pos, (f32*)&r->pose.pos, (f32*)&r->pose.rot.m[6], (f32*)&r->v4C);
             }
             if (tv->flags & 4) {
-                fn_80266388(p + 0x188, fn_801769F8(), (f32*)(p + 0x58), (u8*)tv, PTR(p, 0x140));
+                fn_80266388((u8*)&r->link, fn_801769F8(), (f32*)&r->pose, (u8*)tv, r->car);
             }
             if (tv->flags & 8) {
                 f32 d[3];
-                d[0] = F32(p, 0xE4) - F32(p, 0x7C);
-                d[1] = F32(p, 0xE8) - F32(p, 0x80);
-                d[2] = F32(p, 0xEC) - F32(p, 0x84);
-                f32 focus = PSVECDotProduct(d, (f32*)(p + 0x70));
+                d[0] = r->carFrame.pos.v[0] - r->pose.pos.v[0];
+                d[1] = r->carFrame.pos.v[1] - r->pose.pos.v[1];
+                d[2] = r->carFrame.pos.v[2] - r->pose.pos.v[2];
+                f32 focus = PSVECDotProduct(d, (f32*)&r->pose.rot.m[6]);
                 focus = lbl_8055C598 < lbl_80563F48 ? focus : lbl_8055C598;
-                F32(p, 0x1A0) = focus > 5.0f ? focus : 5.0f;
+                r->f1A0 = focus > 5.0f ? focus : 5.0f;
             }
         } else if (idx != -10) {
             f32 off[3];
@@ -777,20 +779,20 @@ void fn_80271624(int mode, u8* p) {
             down.m[6] = lbl_80563F48;
             down.m[7] = lbl_80563F44;
             down.m[8] = lbl_80563F48;
-            fn_801BFD34(p + 0x7C, off, p + 0xC0);
-            Mat3Mul((Mat3*)(p + 0x58), &down, (Mat3*)(p + 0xC0));
-            *(Words12*)lbl_80499050 = *(Words12*)(p + 0x58);
+            fn_801BFD34((u8*)&r->pose.pos, off, (u8*)&r->carFrame);
+            Mat3Mul((Mat3*)&r->pose, &down, (Mat3*)&r->carFrame);
+            *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
         }
     } else {
-        F32(p, 0x7C) = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + F32(p, 0xE4) / 100.041f)) - 50.0f);
-        F32(p, 0x84) = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + F32(p, 0xEC) / 100.041f)) - 50.0f);
-        fn_801E9DC4(p + 0x1EC);
-        if (!fn_801E9E30(p + 0x1EC, (f32*)(p + 0x7C))) {
-            F32(p, 0x80) = fn_801E9DDC(p + 0x1EC, F32(p, 0xE4), F32(p, 0xEC));
+        r->pose.pos.v[0] = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + r->carFrame.pos.v[0] / 100.041f)) - 50.0f);
+        r->pose.pos.v[2] = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + r->carFrame.pos.v[2] / 100.041f)) - 50.0f);
+        fn_801E9DC4((u8*)&r->h1EC);
+        if (!fn_801E9E30((u8*)&r->h1EC, (f32*)&r->pose.pos)) {
+            r->pose.pos.v[1] = fn_801E9DDC((u8*)&r->h1EC, r->carFrame.pos.v[0], r->carFrame.pos.v[2]);
         }
-        F32(p, 0x80) = F32(p, 0x80) + lbl_80563F78;
+        r->pose.pos.v[1] = r->pose.pos.v[1] + lbl_80563F78;
         fn_80274E94(p);
-        *(Words12*)lbl_80499050 = *(Words12*)(p + 0x58);
+        *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
     }
 }
 

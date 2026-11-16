@@ -57,7 +57,7 @@ struct CamRec {
     CamVec3 v28;        // offset 0x28
     CamVec3 v34;        // offset 0x34
     CamVec3 eye;        // offset 0x40
-    u32 w4C[3];         // offset 0x4C
+    CamVec3 v4C;        // offset 0x4C
     CamPose pose;       // offset 0x58
     CamPose lastPose;   // offset 0x88
     s32 lastFrame;      // offset 0xB8
