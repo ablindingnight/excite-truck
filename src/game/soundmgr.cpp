@@ -4,6 +4,7 @@
 // from the file name and messages.
 #include "game/common.h"
 #include "game/sound.h"
+#include "game/math_types.h"
 #include "macros.h"
 
 extern "C" {
@@ -89,22 +90,27 @@ ModuleTag lbl_8055ED98;
 ValMatrix lbl_804891F8;
 ValVec3 lbl_80489228;
 
-// MATCHING-AID (PROVISIONAL per the user 2026-11-16, listed in AIDS): the pose as four rows through a cast local pointer: retail keeps one resolved base register for all twelve
-// stores (a plain m->basis[0].x store takes a split @ha/@l address for offset 0).
+// Identity pose (PROVISIONAL per the user 2026-11-16, listed in AIDS). Retail keeps one resolved base register for
+// all twelve stores; a plain m->basis[0].x store takes a split @ha/@l address for offset 0. Aids audit 2026-11-16:
+// the base must come through a pointer CAST: eleven cast-free spellings (direct members, m->basis decay,
+// &m->basis[0], row setter inline, accessor returning basis, reference parameter, Mat3::SetScale through Mat())
+// all score 96.24, every cast spelling ((ValVec3*)m rows, (f32*)m, a same-type (ValMatrix*)m, Mat() bound to a
+// reference) is exact. So retail's source had a cast here; which one is unknown. This spelling reuses the
+// documented ValMatrix::Mat() view instead of a cast of its own.
 static inline void Ident(ValMatrix* m) {
-    ValVec3* r = (ValVec3*)m;
-    r[0].x = 1.0f;
-    r[0].y = 0.0f;
-    r[0].z = 0.0f;
-    r[1].x = 0.0f;
-    r[1].y = 1.0f;
-    r[1].z = 0.0f;
-    r[2].x = 0.0f;
-    r[2].y = 0.0f;
-    r[2].z = 1.0f;
-    r[3].x = 0.0f;
-    r[3].y = 0.0f;
-    r[3].z = 0.0f;
+    Mat3& r = m->Mat();
+    r.m[0][0] = 1.0f;
+    r.m[0][1] = 0.0f;
+    r.m[0][2] = 0.0f;
+    r.m[1][0] = 0.0f;
+    r.m[1][1] = 1.0f;
+    r.m[1][2] = 0.0f;
+    r.m[2][0] = 0.0f;
+    r.m[2][1] = 0.0f;
+    r.m[2][2] = 1.0f;
+    m->origin.x = 0.0f;
+    m->origin.y = 0.0f;
+    m->origin.z = 0.0f;
 }
 
 static inline void Zero(ValVec3* v) {
