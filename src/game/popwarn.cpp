@@ -657,13 +657,13 @@ void MenuDoDemo(void) {
 void ShowUnavailable(void) { fn_80214FD8("Unavailable", "This option is not available in this demo."); }
 
 int ShowTechDemo(void) {
+    MenuDesc desc;  // filled field by field: retail keeps no .rodata initializer for this stripped menu
+    desc.layout = "techdemo.lyt";  // retail's .data has this literal before the item names
     MenuItem items[] = {
         MenuItem("invalid1", 0, 0, 1, 0),
         MenuItem("invalid2", 0, 0, 2, 0),
         MenuItem(lbl_804988F0),
     };
-    MenuDesc desc;  // filled field by field: retail keeps no .rodata initializer for this stripped menu
-    desc.layout = "techdemo.lyt";
     desc.items = items;
     desc.poll = 0;
     desc.unkC = 0;
