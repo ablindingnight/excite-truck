@@ -3,6 +3,7 @@
 // speeds across that range in a shuffled order, with per-driver overrides. Names are guesses apart from
 // the value keys and messages.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 char* strcpy(char* d, const char* s);
@@ -20,10 +21,7 @@ s32 fn_80135108(void);
 void fn_801E879C(void);
 }
 
-void* GetEvent(int event);
-void* GetTrack(int track);
 int GetNumDrivers(void);
-void* GetDriver(int i);
 
 struct V2 {
     f32 x;
@@ -183,26 +181,26 @@ f32 fn_8013AA68(ValueNode* t, const char* key, const char* table, Strength* s) {
 }
 
 void fn_8013AB08(V2* out, Strength* s) {
-    u8* ev = (u8*)GetEvent(s->event);
-    u8* trk = (u8*)GetTrack(*(s32*)(ev + 4));
-    if (!fn_8013A860(out, *(ValueNode**)(ev + 0x20), "Contest Table") &&
-        !fn_8013A860(out, *(ValueNode**)(trk + 0x80), "Eve Table") &&
-        !fn_8013A9C0(out, *(ValueNode**)(ev + 0x20), s, "Contest Table") &&
-        !fn_8013A9C0(out, *(ValueNode**)(trk + 0x80), s, "Eve Table")) {
+    EventInfo* ev = GetEvent(s->event);
+    TrackInfo* trk = GetTrack(ev->track);
+    if (!fn_8013A860(out, ev->node, "Contest Table") &&
+        !fn_8013A860(out, trk->node, "Eve Table") &&
+        !fn_8013A9C0(out, ev->node, s, "Contest Table") &&
+        !fn_8013A9C0(out, trk->node, s, "Eve Table")) {
         out->x = 0.05f;
         out->y = 1.5f;
         fn_802E30C8("skill: !! !! no skill for this contest !! !!");
     }
     if (!fn_8027AA48()) {
-        out->x += fn_8013AA68(*(ValueNode**)(ev + 0x20), "srd", "Contest Table", s);
-        out->y += fn_8013AA68(*(ValueNode**)(ev + 0x20), "sfd", "Contest Table", s);
+        out->x += fn_8013AA68(ev->node, "srd", "Contest Table", s);
+        out->y += fn_8013AA68(ev->node, "sfd", "Contest Table", s);
     }
 }
 
 f32 fn_8013AC2C(const Strength* s) {
-    u8* ev = (u8*)GetEvent(s->event);
-    u8* trk = (u8*)GetTrack(*(s32*)(ev + 4));
-    return (*(ValueNode**)(trk + 0x80))->GetFloat("rtt_speed_factor", 1.0f);
+    EventInfo* ev = GetEvent(s->event);
+    TrackInfo* trk = GetTrack(ev->track);
+    return trk->node->GetFloat("rtt_speed_factor", 1.0f);
 }
 
 void fn_8013AC78(V2* ovr, const s32* cars) {
@@ -227,9 +225,9 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
     lbl_8042F858.base = sk.y;
     num = GetNumDrivers();
     for (nd = 0; nd < num; nd++) {
-        u8* d = (u8*)GetDriver(nd);
-        bonus[nd].id = *(s32*)(d + 4);
-        bonus[nd].bonus = *(s32*)(d + 0x48);
+        DriverInfo* d = GetDriver(nd);
+        bonus[nd].id = d->id;
+        bonus[nd].bonus = d->bonus;
     }
     for (i = 0; i < n; i++) {
         SkillSlot* e = &slots[i];
@@ -262,22 +260,22 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
     }
     for (i = 0; i < n; i++) {
         SkillSlot* e = &slots[i];
-        u8* d = 0;
+        DriverInfo* d = 0;
         int idx;
         int hasStart;
         for (int j = 0; j < nd; j++) {
             s32 id = bonus[j].id;
             if (id == e->driver) {
-                d = (u8*)GetDriver(j);
+                d = GetDriver(j);
             }
         }
         idx = e->idx;
-        hasStart = (*(ValueNode**)(d + 0x58))->Has("override_start_skill");
+        hasStart = d->node->Has("override_start_skill");
         if (hasStart) {
-            lbl_8042F858.entries[idx].start = sk.y * (*(ValueNode**)(d + 0x58))->GetFloat("override_start_skill");
+            lbl_8042F858.entries[idx].start = sk.y * d->node->GetFloat("override_start_skill");
         }
-        if ((*(ValueNode**)(d + 0x58))->Has("override_skill")) {
-            lbl_8042F858.entries[idx].race = sk.y * (*(ValueNode**)(d + 0x58))->GetFloat("override_skill");
+        if (d->node->Has("override_skill")) {
+            lbl_8042F858.entries[idx].race = sk.y * d->node->GetFloat("override_skill");
             if (!hasStart) {
                 lbl_8042F858.entries[idx].start = lbl_8042F858.entries[idx].race;
             }

@@ -205,7 +205,7 @@ void fn_8027E024(void* out, int event, int which) {
     run.track = GetEvent(event)->track;
     run.index = -1;
     for (int i = GetTrack(run.track)->events; i-- > 0;) {
-        if (event == FindTrackEvent(run.track, i)->event) {
+        if (event == FindTrackEvent(run.track, i)->id) {
             run.index = i;
         }
     }

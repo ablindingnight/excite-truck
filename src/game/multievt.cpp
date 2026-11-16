@@ -4,6 +4,7 @@
 // The pickers and pages are real classes (names unproven): their vtables, the inline members emitted after
 // fn_8024974C and at the end of the unit, and the two this-adjust thunk pairs (0x8024BDDC..) are the compiler's.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menuwidget_inl.h"
 #include "game/menustate.h"
@@ -57,8 +58,6 @@ struct NameEntry {
     const char* name;
 };
 
-void* FindTrackEvent(int track, int eve);
-u8* GetEvent(int i);
 
 class VN {
 public:
@@ -105,10 +104,10 @@ struct UnlockList {
 
 extern UnlockList* lbl_8055F28C;
 
-static inline int FindUnlock(u8* car) {
+static inline int FindUnlock(EventInfo* ev) {
     UnlockList* l = lbl_8055F28C;
     for (int i = 0; i < l->count; i++) {
-        if (S32(car, 0x0) == l->entries[i].id) {
+        if (ev->id == l->entries[i].id) {
             return i;
         }
     }
@@ -145,48 +144,40 @@ extern "C" {
 
 
 /* Helper name unproven */
-static inline int FindUnlockByOffset(u8* car) {
+static inline int FindUnlockByOffset(EventInfo* ev) {
     UnlockList* l = lbl_8055F28C;
     unsigned offset;
     int i;
     for (i = 0, offset = 0; i < l->count; offset += sizeof(UnlockEntry), i++) {
         UnlockEntry* entry = (UnlockEntry*)((u8*)l->entries + offset);
-        if (entry->id == S32(car, 0x0)) {
+        if (entry->id == ev->id) {
             return i;
         }
     }
     return -1;
 }
 
-int fn_8024958C(u8* car, const char* track) {
-    u32 ok = S32(car, 0x8) == 0x180302;
+int fn_8024958C(EventInfo* ev, const char* track) {
+    u32 ok = ev->type == 0x180302;
     if (ok) {
-        ok = FindUnlock(car) != -1;
+        ok = FindUnlock(ev) != -1;
     }
     if (ok) {
-        ok = lbl_8055F28C->entries[FindUnlockByOffset(car)].unlocked;
+        ok = lbl_8055F28C->entries[FindUnlockByOffset(ev)].unlocked;
     }
     return ok;
 }
 
-int fn_80249660(u8* p, const char* track) { return 1; }
+int fn_80249660(EventInfo* ev, const char* track) { return 1; }
 
 }  // extern "C"
 
-// A track record as GetTrack returns it.
-struct MpTrack {
-    u8 pad0[0x8];    // offset 0x0
-    char name[0x68]; // offset 0x8
-    s32 numEves;    // offset 0x70
-};
-
-MpTrack* GetTrack(int track);
 const char* GetTrackEnviron(const char* track);
 const char* GetEventDisplayName(int ev);
 
 struct EvPair {
     const char* track;  // offset 0x0
-    u8* ev;             // offset 0x4
+    EventInfo* ev;      // offset 0x4
 };
 
 // The event/track pairs the pickers choose from.
@@ -391,7 +382,7 @@ public:
         s32 a;
         s32 b;
         picker->Get(&a, &b);
-        Show(*(s32*)FindTrackEvent(a, b));
+        Show(FindTrackEvent(a, b)->id);
     }
     s32 u54;           // offset 0x54
     char text[0x100];  // offset 0x58
@@ -412,9 +403,9 @@ public:
             s32 track;
             s32 eve;
             c->Get(&track, &eve);
-            u8* ev = (u8*)FindTrackEvent(track, eve);
-            id = S32(ev, 0x0);
-            const char* name_ = ((VN*)PTR(ev, 0x20))->v14("friendly_name");
+            EventInfo* ev = FindTrackEvent(track, eve);
+            id = ev->id;
+            const char* name_ = ((VN*)ev->node)->v14("friendly_name");
             CopyName(name_, 100, name);
         } else {
             id = -1;
@@ -583,8 +574,8 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     fn_801332D0(0, lbl_8055BF14, track);
     EvPairsRef pairs(new ("ci-list") EvPairs);
     for (int i = 0; i < GetNumEvents(); i++) {
-        u8* ev = GetEvent(i);
-        const char* name = GetTrack(S32(ev, 0x4))->name;
+        EventInfo* ev = GetEvent(i);
+        const char* name = GetTrack(ev->track)->name;
         if ((testing ? fn_8024958C : fn_80249660)(ev, name)) {
             EvPair* d = pairs.p->items;
             int k = pairs.p->count;
@@ -631,7 +622,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     CourseTex tex(unlocks->count);
     for (int i = 0; i < unlocks->count; i++) {
         char buf[0x21];
-        const char* name = ((VN*)PTR(GetEvent(unlocks->entries[i].id), 0x20))->v14("name");
+        const char* name = ((VN*)GetEvent(unlocks->entries[i].id)->node)->v14("name");
         const char* prefix = "career_";
         if (!strncmp(name, prefix, strlen(prefix))) {
             name += strlen(prefix);
@@ -706,16 +697,17 @@ inline void EvPicker::Select(s32 track, s32 eve) {
 }
 
 
-// The name an event is listed under.
+// The name an event is listed under. The u8* parameter is retail's (the string label is
+// @STRING@EventFriendlyName__FPUc).
 inline const char* EventFriendlyName(u8* ev) {
-    return ((ValueNode*)PTR(ev, 0x20))->GetString("friendly_name", GetEventDisplayName(S32(ev, 0x0)));
+    return ((EventInfo*)ev)->node->GetString("friendly_name", GetEventDisplayName(((EventInfo*)ev)->id));
 }
 
 // The unlock-table row for event ev, or -1.
-static inline int FindUnlockEv(u8* ev) {
+static inline int FindUnlockEv(EventInfo* ev) {
     UnlockList* l = lbl_8055F28C;
     for (int i = 0; i < l->count; i++) {
-        if (l->entries[i].id == S32(ev, 0x0)) {
+        if (l->entries[i].id == ev->id) {
             return i;
         }
     }
@@ -723,10 +715,10 @@ static inline int FindUnlockEv(u8* ev) {
 }
 
 // The event's index within its track, or -1.
-static inline int EveIndex(u8* ev) {
-    int n = GetTrack(S32(ev, 0x4))->numEves;
+static inline int EveIndex(EventInfo* ev) {
+    int n = GetTrack(ev->track)->events;
     for (int k = 0; k < n; k++) {
-        if (ev == FindTrackEvent(S32(ev, 0x4), k)) {
+        if (ev == FindTrackEvent(ev->track, k)) {
             return k;
         }
     }
@@ -736,7 +728,7 @@ static inline int EveIndex(u8* ev) {
 // Fills the course list with the events at tracks in environment env.
 inline void EvPicker::SetEnv(EvPairs** pairs, const char* env_) {
     EvPicker* p = this;
-    u8* ev;
+    EventInfo* ev;
     int i;
     int j;
     p->env = env_;
@@ -745,13 +737,13 @@ inline void EvPicker::SetEnv(EvPairs** pairs, const char* env_) {
     for (i = 0; i < (*pairs)->count; i++) {
         if (!strcasecmp(GetTrackEnviron((*pairs)->items[i].track), p->env)) {
             ev = (*pairs)->items[i].ev;
-            p->ents[p->count].track = S32(ev, 0x4);
+            p->ents[p->count].track = ev->track;
             p->ents[p->count].eve = EveIndex(ev);
             j = FindUnlockEv(ev);
             if (lbl_8055F290 && j >= 0) {
                 p->ents[p->count].name = lbl_8055F28C->entries[j].name;
             } else {
-                p->ents[p->count].name = EventFriendlyName(ev);
+                p->ents[p->count].name = EventFriendlyName((u8*)ev);
             }
             p->count++;
         }
@@ -788,20 +780,20 @@ int fn_8024A4CC(s32* track, s32* eve, s32* extra) {
     fn_8027BCD0(&list);
     s32 key = -1;
     if (*track >= 0 && *track < GetNumTracks()) {
-        MpTrack* t = GetTrack(*track);
-        if (*eve >= 0 && *eve < t->numEves) {
-            s32 id = S32(FindTrackEvent(*track, *eve), 0x0);
+        TrackInfo* t = GetTrack(*track);
+        if (*eve >= 0 && *eve < t->events) {
+            s32 id = FindTrackEvent(*track, *eve)->id;
             if (list.Find(id) >= 0) {
                 key = id;
             }
         }
     }
     if (fn_8024B070(&key, (u8*)&list)) {
-        *track = S32(GetEvent(key), 0x4);
+        *track = GetEvent(key)->track;
         *eve = -1;
-        int k = GetTrack(*track)->numEves;
+        int k = GetTrack(*track)->events;
         while (k-- > 0) {
-            if (key == S32(FindTrackEvent(*track, k), 0x0)) {
+            if (key == FindTrackEvent(*track, k)->id) {
                 *eve = k;
                 break;
             }
@@ -940,7 +932,7 @@ int fn_8024B070(s32* key, const u8* list) {
 }
 
 const char* fn_8024B178(int ev) {
-    const char* name = ((VN*)PTR(GetEvent(ev), 0x20))->v14("name");
+    const char* name = ((VN*)GetEvent(ev)->node)->v14("name");
     const char* prefix = "career_";
     if (!strncmp(name, prefix, strlen(prefix))) {
         name += strlen(prefix);

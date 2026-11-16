@@ -3,6 +3,7 @@
 // Shared by pathcareer.cpp and pathclass.cpp (KC prototype: the classes' accessors are in-class inlines,
 // deferred to the end of pathclass.cpp in declaration order).
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -27,49 +28,6 @@ public:
     s32 passing;        // offset 0x14
 };
 
-struct EventInfo {
-    s32 id;      // offset 0x0
-    s32 track;   // offset 0x4
-    u32 type;    // offset 0x8
-    u8 padC[0x20 - 0xC];
-    ValueNode* node;  // offset 0x20
-};
-
-struct TrackInfo {
-    u8 pad0[0x8];
-    char name[0x68];   // offset 0x8
-    s32 events;        // offset 0x70
-    u8 pad74[0x80 - 0x74];
-    ValueNode* node;   // offset 0x80
-};
-
-struct TrackEvent {
-    s32 event;  // offset 0x0
-};
-
-struct Unlockable {
-    const char* type;  // offset 0x0
-    const char* name;  // offset 0x4
-    s32 points;        // offset 0x8
-};
-
-struct VehicleInfo {
-    u8 pad0[0x4];
-    s32 a4;          // offset 0x4
-    s32 a8;          // offset 0x8
-    u8 padC[0x2C - 0xC];
-    char name[0x74];  // offset 0x2C
-    u32 flags;        // offset 0xA0
-};
-
-struct DriverInfo {
-    u8 pad0[0x4];
-    s32 id;       // offset 0x4
-    u8 pad8[0x4C - 0x8];
-    s32 vehicle;  // offset 0x4C
-    s32 a50;      // offset 0x50
-};
-
 class VehicleList {
 public:
     virtual ~VehicleList(void);                                    // 0x8
@@ -84,9 +42,6 @@ struct AchQuery {
     s32 a8;
 };
 
-EventInfo* GetEvent(int i);
-TrackInfo* GetTrack(int i);
-TrackEvent* FindTrackEvent(int track, int i);
 const char* GetTrackFriendlyName(const char* name);
 const char* GetEventTypeName(u32 type);
 const char* GetEventTypeDisplayName(u32 type);
@@ -114,7 +69,6 @@ int GetEveMode(void);
 void UnloadEves(void);
 void LoadModeEves(int mode);
 void SetNumPlayers(int n);
-DriverInfo* GetDriver(int i);
 VehicleInfo* GetVehicle(int i);
 void SetPlayer(int i, long driver, long vehicle, unsigned long color);
 void SetPlayerName(const char* name, int i);
