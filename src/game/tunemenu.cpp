@@ -16,7 +16,9 @@ struct TuneScales {
     f32 slip;        // offset 0x20
 };
 
-static inline int FloatBits(f32 f) { return *(int*)&f; }
+// A slider item (type 9): the range travels as the two floats' bit patterns in the int argument words.
+/* Helper name unproven */
+static inline MenuItem Slider(const char* n, f32* v, f32 lo, f32 hi) { return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi); }
 
 extern "C" {
 TuneScales* fn_8027A798(const char*);  // the current car's scales
@@ -32,23 +34,23 @@ extern "C" void fn_80257C10(const char* chassis) {
     f32 lo = 0.25f;
     f32 hi = 1.75f;
     MenuItem items[] = {
-        MenuItem("mass", 9, &t->mass, FloatBits(lo), FloatBits(hi)),
+        Slider("mass", &t->mass, lo, hi),
         MenuItem("mass", 2, &steps, 0, 0),
-        MenuItem("mass_moment", 9, &t->massMoment, FloatBits(lo), FloatBits(hi)),
+        Slider("mass_moment", &t->massMoment, lo, hi),
         MenuItem("mass_moment", 2, &steps, 0, 0),
-        MenuItem("power", 9, &t->power, FloatBits(lo), FloatBits(hi)),
+        Slider("power", &t->power, lo, hi),
         MenuItem("power", 2, &steps, 0, 0),
-        MenuItem("gear_ratio", 9, &t->gearRatio, FloatBits(lo), FloatBits(hi)),
+        Slider("gear_ratio", &t->gearRatio, lo, hi),
         MenuItem("gear_ratio", 2, &steps, 0, 0),
-        MenuItem("spring", 9, &t->spring, FloatBits(lo), FloatBits(hi)),
+        Slider("spring", &t->spring, lo, hi),
         MenuItem("spring", 2, &steps, 0, 0),
-        MenuItem("bump", 9, &t->bump, FloatBits(lo), FloatBits(hi)),
+        Slider("bump", &t->bump, lo, hi),
         MenuItem("bump", 2, &steps, 0, 0),
-        MenuItem("rebound", 9, &t->rebound, FloatBits(lo), FloatBits(hi)),
+        Slider("rebound", &t->rebound, lo, hi),
         MenuItem("rebound", 2, &steps, 0, 0),
-        MenuItem("grip", 9, &t->grip, FloatBits(lo), FloatBits(hi)),
+        Slider("grip", &t->grip, lo, hi),
         MenuItem("grip", 2, &steps, 0, 0),
-        MenuItem("slip", 9, &t->slip, FloatBits(lo), FloatBits(hi)),
+        Slider("slip", &t->slip, lo, hi),
         MenuItem("slip", 2, &steps, 0, 0),
         MenuItem(lbl_8055B860, 6, NULL, -1, 27),
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
