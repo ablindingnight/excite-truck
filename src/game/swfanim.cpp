@@ -197,6 +197,8 @@ inline void SwfAnim::SwapShapeData(u32 i) {
     }
 }
 
+#pragma push
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void SwfAnim::LoadFile(const char* name) {
     int k;
     Sw2Item* it;
@@ -263,6 +265,7 @@ void SwfAnim::LoadFile(const char* name) {
         }
     }
 }
+#pragma pop
 
 SwfAnim::SwfAnim() { Reset(); }
 
