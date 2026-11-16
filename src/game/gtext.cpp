@@ -334,18 +334,20 @@ GTextFont* fn_80231730(const char* name) {
     return NULL;
 }
 
+static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+
 static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
-    if (in == out) {
-        f32 x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
-        f32 y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
-        f32 z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
+    if (out == in) {
+        f32 x = Dot3(in->x, m->basis.m[0][0], in->y, m->basis.m[1][0], in->z, m->basis.m[2][0]);
+        f32 y = Dot3(in->x, m->basis.m[0][1], in->y, m->basis.m[1][1], in->z, m->basis.m[2][1]);
+        f32 z = Dot3(in->x, m->basis.m[0][2], in->y, m->basis.m[1][2], in->z, m->basis.m[2][2]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
-        out->y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
-        out->z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
+        out->x = Dot3(in->x, m->basis.m[0][0], in->y, m->basis.m[1][0], in->z, m->basis.m[2][0]);
+        out->y = Dot3(in->x, m->basis.m[0][1], in->y, m->basis.m[1][1], in->z, m->basis.m[2][1]);
+        out->z = Dot3(in->x, m->basis.m[0][2], in->y, m->basis.m[1][2], in->z, m->basis.m[2][2]);
     }
 }
 
@@ -366,9 +368,10 @@ static inline ArtItem* ItemAt(int off) {
 }
 
 void fn_80231780(const UIXform* m) {
-    int i;
-    int off = 0;
-    for (i = 0; i < lbl_8049846C.count; i++, off += sizeof(lbl_8049846C.data[0])) {
+    int off;
+    int i = 0;
+    off = 0;
+    for (; i < lbl_8049846C.count; off += sizeof(lbl_8049846C.data[0]), i++) {
         ArtItem* it = ItemAt(off);
         EscSeq* e = &lbl_80497F14.data[it->esc];
         u32 color = e->takeColor ? it->color : fn_80230B9C((it->color & 0xFF000000) | 0xFFFFFF);
