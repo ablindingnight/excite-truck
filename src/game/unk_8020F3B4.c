@@ -827,6 +827,8 @@ extern "C" unsigned long strlen(const char *);
 
 // Draws the custom-course menu: a page of 10 names with their numbers, the cursor, the option buttons,
 // the page counter and the page arrows.
+/* Helper name unproven */
+static inline long CourseHilite(float a) { return ((long)(255.0f * a) << 24) | 0xFFFF00; }
 extern "C" void fn_8021095C(void) {
     char camera[0x30];
 
@@ -851,7 +853,7 @@ extern "C" void fn_8021095C(void) {
         long i;
 
         fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", 0, COURSE_LAYOUT->FindPane("main_box"));
-        hilite = ((long)(255.0f * fn_80230EF4(1)) << 24) | 0xFFFF00;
+        hilite = CourseHilite(fn_80230EF4(1));
         col.x = 0.0f;
         col.y = 0.0f;
         step.x = 0.0f;
@@ -863,9 +865,8 @@ extern "C" void fn_8021095C(void) {
         next = COURSE_LAYOUT->FindText("item1");
         if (name != 0 && num != 0 && next != 0) {
             col.x = num->pos.x - name->pos.x;
+            col.y = num->pos.y - name->pos.y;
             step.x = next->pos.x - name->pos.x;
-            float y2 = num->pos.y;
-            col.y = y2 - name->pos.y;
             step.y = next->pos.y - name->pos.y;
         }
         mark = COURSE_LAYOUT->FindPane("item0_box");
@@ -881,8 +882,7 @@ extern "C" void fn_8021095C(void) {
             char buf[0xFF];
             nameBox = *name;
             nameBox.pos.x = nameBox.pos.x + step.x * (float)row;
-            float yv = step.y;
-            nameBox.pos.y = nameBox.pos.y + yv * (float)row;
+            nameBox.pos.y = nameBox.pos.y + step.y * (float)row;
             numBox = *num;
             numBox.pos.x = nameBox.pos.x + col.x;
             numBox.pos.y = nameBox.pos.y + col.y;
