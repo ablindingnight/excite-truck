@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -1774,17 +1775,6 @@ inline int ChalList::Draw(int a) {
 
 // Ideal-line walker (idealline.cpp).
 struct V2;
-struct CenterLine;
-struct ILPos;
-class LineFollower {
-public:
-    LineFollower(void);
-    virtual ~LineFollower(void);
-    virtual int SetLine(CenterLine* line);
-    void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
-    u8 pad4[0x34 - 0x4];  // idealline.cpp's class is 0x34 bytes
-};
-
 namespace {
 
 struct LineNode {

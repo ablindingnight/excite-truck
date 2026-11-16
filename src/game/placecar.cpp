@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/respawn.h"
@@ -22,41 +23,10 @@ double sin(double x);
 
 typedef ValVec3 V3;
 
-struct IdealPoint {
-    V2 pos;            // offset 0x0
-    V2 dir;            // offset 0x8
-    u32 ilpos;         // offset 0x10 (16.16)
-    IdealPoint* next;  // offset 0x14
-    f32 len;           // offset 0x18
-    f32 dist;          // offset 0x1C
-};
-
-struct CenterLine {
-    u8 pad0[0x1C];
-    IdealPoint* points;  // offset 0x1C
-    IdealPoint* start;   // offset 0x20
-};
-
 class PathSet {
 public:
     virtual void vf08(void);
     virtual CenterLine* GetLine(int index);  // offset 0xC
-};
-
-struct ILPos {
-    ILPos(void) {
-        seg = 0;
-        mode = 10000;
-        t = 0.0f;
-    }
-    IdealPoint* seg;  // offset 0x0
-    f32 t;            // offset 0x4
-    s32 mode;         // offset 0x8
-};
-
-struct LineFollower {
-    u8 pad0[0x2C];
-    CenterLine* line;  // offset 0x2C
 };
 
 // The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;

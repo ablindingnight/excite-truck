@@ -5,6 +5,7 @@
 // decals over it, which then draw them with their own texture matrix. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/v2.h"
 #include "game/vec3_init.h"
 #include "game/math_types.h"
@@ -700,16 +701,6 @@ void fn_802B9D08(void) {
 
 void fn_802BA004(void) { lbl_8055FA84 = 0; }
 
-
-// Ideal-line walker (idealline.cpp).
-struct CenterLine;
-class LineFollower {
-public:
-    LineFollower(void);
-    virtual ~LineFollower(void);
-    virtual int SetLine(CenterLine* line);
-    u8 pad4[0x34 - 0x4];
-};
 
 void fn_802BA010(void* line, int idx) {
     Obj* o;
