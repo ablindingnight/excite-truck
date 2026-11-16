@@ -1057,7 +1057,7 @@ public:
 class CbBodyV {
 public:
     virtual void v08(void);
-    virtual void v0C(void);
+    virtual ~CbBodyV(void);  // 0x0C (CarBody/RigidBody family: Init at 0x08, destructor at 0x0C)
     virtual void v10(void);
     virtual void v14(void);
     virtual void v18(void);
@@ -1407,7 +1407,7 @@ public:
 class CbTickV {
 public:
     virtual void v08(void);
-    virtual void v0C(void);
+    virtual ~CbTickV(void);  // 0x0C (CarBody/RigidBody family: Init at 0x08, destructor at 0x0C)
     virtual void v10(void);
     virtual void v14(void);
     virtual void v18(void);

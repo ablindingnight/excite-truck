@@ -135,7 +135,7 @@ struct SObj {
 class SpawnPhob {
 public:
     virtual void vf08(void);
-    virtual void vf0C(void);
+    virtual ~SpawnPhob(void);  // 0x0C (CarBody/RigidBody family: Init at 0x08, destructor at 0x0C)
     virtual void vf10(void);
     virtual void vf14(void);
     virtual void vf18(void);
