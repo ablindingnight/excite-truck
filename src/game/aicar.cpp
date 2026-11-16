@@ -1940,6 +1940,7 @@ void fn_8019684C(void) {
 void fn_80196A9C(u8* d) { fn_8019684C(); }
 
 extern const f32 lbl_80562250[2];  // phase ends: 0.1 s, 1 s
+const f32 lbl_80562250[2] = {0.1f, 1.0f};
 extern const f32 lbl_80562258;     // -44500
 extern const f32 lbl_8056225C;     // -31150
 extern const f32 lbl_80562160;     // 4.444
