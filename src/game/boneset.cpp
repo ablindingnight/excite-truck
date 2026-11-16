@@ -4,6 +4,7 @@
 // Names are guesses.
 #include "game/common.h"
 #include "game/vec3_init.h"
+#include "game/math_types.h"
 
 struct BVec {
     f32 x, y, z;
@@ -52,9 +53,6 @@ void fn_801C7254(BMtx33* m);
 void fn_801BFE7C(BVec* out, const BVec* a, const BVec* b);
 void fn_801C0E60(BVec* out, const BVec* a, const BVec* b);
 }
-
-struct Mat3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);  // a*b + c*d + e*f (weak, 0x80144514)
 

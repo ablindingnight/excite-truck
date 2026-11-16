@@ -4,12 +4,9 @@
 // mounts are aimed at the wheel, the shock and shaft follow, and the spring is stretched between its
 // ends. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
-
-struct Mat3 {
-    f32 m[3][3];
-};
 
 struct Joint;
 
@@ -30,8 +27,6 @@ void fn_801E353C(Joint* j, f32 angle);
 void fn_801E35D4(Joint* j, const Mat3* r);
 f32 fn_801F159C(void* w);
 }  // extern "C"
-struct Vec3;
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
 f32 PSVECDotProduct(const void* a, const void* b);
@@ -40,8 +35,6 @@ double atan2(double y, double x);
 double cos(double x);
 double sin(double x);
 }
-
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 static inline void Mul(Mat3* out, const Mat3* l, const Mat3* r) {
     if (out == l || out == r) {

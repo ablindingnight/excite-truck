@@ -3,6 +3,7 @@
 // eight 16K buffers, played on a model's bone set by blending each bone between its last two keys.
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -82,9 +83,6 @@ void fn_802C70AC(s32 model, const ValMatrix* m, s32 a, int b);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
 }
-
-struct Mat3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 #define AMIN(a, b) ((a) < (b) ? (a) : (b))
 

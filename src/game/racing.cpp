@@ -4,6 +4,7 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/math_types.h"
 
 // One element of a layout set (0x20 bytes); copied, moved and drawn.
 struct LayoutItem {
@@ -151,16 +152,6 @@ public:
     virtual void vf50(void);
     virtual void vf54(void);
     virtual int vf58(void) { return 1; }
-};
-
-struct Vec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct Mat3 {
-    f32 m[3][3];
 };
 
 class TrackMap;
@@ -920,8 +911,6 @@ void RacingOverlay::DrawScore(void) {
     fn_8000FF88(-0x100, 10, "%d", 0.94f, x - 10.0f, y - 22.5f, score1);
 }
 
-void Mat3FromEuler(Mat3* m, const Vec3* r);
-
 static inline f32 NeedleDot(f32 vx, f32 mx, f32 vy, f32 my, f32 vz, f32 mz) {
     return vx * mx + vy * my + vz * mz;
 }
@@ -977,11 +966,6 @@ void RacingOverlay::DrawNeedle(f32 x, f32 y, f32 len, f32 width, f32 angle) {
     fn_801E4FF4();
     fn_802C8D74();
 }
-
-void Mat3RotY(Mat3* m, f32 a);
-void Mat3RotX(Mat3* m, f32 a);
-void Mat3RotZ(Mat3* m, f32 a);
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 void Mat3FromEuler(Mat3* m, const Vec3* r) {
     f32 x = r->x;

@@ -7,6 +7,7 @@
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/shapes.h"
+#include "game/math_types.h"
 #include <stdarg.h>
 
 void* operator new(size_t size, const char* tag);
@@ -477,9 +478,6 @@ struct EWState {
 };
 
 VehicleInfo* FindVehicle(s32 id);
-
-struct Mat3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);

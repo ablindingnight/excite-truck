@@ -1,6 +1,7 @@
 // Background boats (0x802C2298-0x802C26F0): reads boat models and positions from _boat.val and
 // draws them bobbing and rolling. Names are guesses apart from the value keys.
 #include "game/common.h"
+#include "game/math_types.h"
 
 extern "C" {
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
@@ -16,11 +17,6 @@ double sin(double x);
 struct Mtx33 {
     f32 m[9];
 };
-
-struct Mat3;
-struct Vec3;
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 template <typename T>
 struct ArrayRef {

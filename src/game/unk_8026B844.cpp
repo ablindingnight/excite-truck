@@ -7,6 +7,7 @@
 // which is still unexplained.
 #include "types.h"
 #include "game/common.h"
+#include "game/math_types.h"
 
 // The unit's module tag, registered by its static initializer (the 8-byte function after the code, formerly the
 // separate split unk_8026E224).
@@ -76,9 +77,6 @@ s32 fn_8026A344(s32 i);
 CamCar* fn_8017960C(s32 car);
 void fn_8026E688(CamFrame* out, const CamVec* eye, const CamVec* target, const CamVec* up);
 void fn_801BFD34(CamVec* out, const CamVec* v, const CamFrame* m);
-struct Mat3;
-struct Vec3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);  // racing.cpp
 
 // The pad as fn_801298E8 fills it (achview's ViewPad, keybd's KeyState): sticks, the analog trigger at 0x1C,
 // buttons, d-pad bits.
@@ -110,7 +108,6 @@ int fn_801298E8(FreePad* pad, int chan);
 u32 fn_802E2C20(void);
 int fn_802E4A1C(int key);
 f32 fn_801EA0E8(f32 x, f32 z);
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // racing.cpp
 
 static __inline f32 CamDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {

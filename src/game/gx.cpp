@@ -4,6 +4,7 @@
 // texture-environment presets, region screenshots, visibility (z peek) tests and a couple of debug
 // helpers. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 #include "macros.h"
 
 struct GXColor {
@@ -42,10 +43,6 @@ struct GXRenderModeObj {
 
 struct V3 {
     f32 x, y, z;
-};
-
-struct Mat3 {
-    f32 m[3][3];
 };
 
 // One matrix row as a block (retail copies Invert's rows as three 12-byte blocks: lfd+lwz each).
@@ -123,7 +120,6 @@ int fn_802E3D68(const char* name);
 void fn_802E3734(s32* fd);
 void fn_802E3A64(s32 fd, const void* buf, u32 n);
 void fn_801BFD34(V3* out, const V3* in, const RMtx* m);
-extern "C++" void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);  // racing.cpp
 void fn_802C8588(void* out, const V3* a, const V3* b);
 void GXInitLightPos(GXLightObj* l, f32 x, f32 y, f32 z);
 void GXInitLightDistAttn(GXLightObj* l, f32 a, f32 b, int f);

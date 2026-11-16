@@ -2,6 +2,7 @@
 // with a local and a base transform, and their world matrices. Names are guesses apart from the
 // messages.
 #include "game/common.h"
+#include "game/math_types.h"
 
 extern "C" {
 double cos(double x);
@@ -43,9 +44,6 @@ struct Mtx33 {
 extern "C" {
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const ValMatrix* m);
 }
-
-struct Mat3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 // One joint record in a model's MRJT chunk: "name model" and the joint's transform.
 struct JointEntry {

@@ -3,12 +3,9 @@
 // paint splats and the explosion sequences. Names are guesses apart from the allocation tags,
 // file names and value keys.
 #include "game/common.h"
+#include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
-
-struct Mat3 {
-    f32 m[3][3];
-};
 
 struct SparkMtx {
     Vec rot[3];  // offset 0x0

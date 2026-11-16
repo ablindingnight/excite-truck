@@ -3,12 +3,9 @@
 // textured cross quads, and event-driven torch fires. Names are guesses apart from the
 // allocation tags, value keys, file names and messages.
 #include "game/common.h"
+#include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
-
-struct Mat3 {
-    f32 m[3][3];
-};
 
 // Car state as returned per car index.
 struct FireCar {
@@ -187,8 +184,6 @@ double cos(double x);
 double sin(double x);
 void* memset(void* dst, int c, size_t n);
 }
-
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
 

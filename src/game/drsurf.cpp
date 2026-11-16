@@ -5,6 +5,7 @@
 // surfaces and builds and caches the per-format vertex descriptor display lists. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 #include "revolution/GX/GXTypes.h"
 
 template <class T>
@@ -23,10 +24,6 @@ struct V3 {
     f32 x;
     f32 y;
     f32 z;
-};
-
-struct Mat3 {
-    f32 m[3][3];
 };
 
 // Bone delta (bonemgr).

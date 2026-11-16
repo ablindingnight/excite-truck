@@ -6,6 +6,7 @@
 // apart from the strings.
 #include "game/common.h"
 #include "game/rmtx.h"
+#include "game/math_types.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -30,9 +31,6 @@ extern "C" {
 void fn_8022FF10(RMat33* out, const RVec3* axis);  // rotation from axis * angle
 void fn_802BDFF4(RMtx* tree, int a);
 }
-
-struct Mat3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 struct CarRec {
     u8 pad0[0x6C];

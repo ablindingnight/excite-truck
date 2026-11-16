@@ -11,8 +11,6 @@
 #include "game/fonttext.h"
 #include "game/uidraw.h"
 typedef Vec3 RotationVec;typedef Mat3 RotationMatrix;
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);  // racing.cpp
 void* fn_80211660(long i);  // uiapi.cpp
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
 struct Viewport {Viewport(int x,int y,int w,int h);~Viewport(void);int x,y,w,h;};
@@ -419,6 +417,7 @@ int fn_802C9A58();
 inline int Round355(float value){return (int)(value<(0.0f)?value-(0.5f):(0.5f)+value);}
 struct RollingRow;
 #include "game/uilists.h"
+#include "game/math_types.h"
 typedef CycleList PaletteListTypedNew;typedef char CycleListSize28_391[sizeof(CycleList)==28?1:-1];
 
 typedef struct PalettePaintNew {void* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x228];PaletteListTypedNew* list;GTextFont* resource;int count;float stamp,x,y,lineHeight,period,upper,lower,elapsed,nextStamp;int direction;RollingRow* rows;int* focus;int token;} PalettePaintNew;

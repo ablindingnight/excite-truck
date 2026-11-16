@@ -4,6 +4,7 @@
 // from the strings.
 #include "game/common.h"
 #include "game/rigid.h"
+#include "game/math_types.h"
 #include "macros.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -303,10 +304,6 @@ void fn_8018C5A0(u8* p, u8* desc) {
 extern "C" f32 PSVECDotProduct(const f32* a, const f32* b);
 
 struct RVec3;
-struct Mat3;
-struct Vec3;
-void Mat3FromEuler(Mat3* m, const Vec3* e);
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 // A rotation plus position, filled from euler angles (modeinl.cpp).
 struct Mtx33 {

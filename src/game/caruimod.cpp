@@ -2,6 +2,7 @@
 // efx bone mesh read from the car's .car folder), its resource loader and the menu state that
 // draws it. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
@@ -23,11 +24,6 @@ struct Vec3a {
 struct Mtx33 {
     f32 m[9];
 };
-
-struct Mat3;
-struct Vec3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 
 // GetVec3Or takes its default by const reference.
 class ValueNodeV {

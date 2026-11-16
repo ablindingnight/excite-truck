@@ -4,6 +4,7 @@
 // line/arrow textures in a per-player colour (yellow while boosting). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -44,10 +45,6 @@ struct Spot {
     f32 x;
     f32 y;
     f32 z;
-};
-
-struct Mat3 {
-    f32 m[3][3];
 };
 
 struct Bound {

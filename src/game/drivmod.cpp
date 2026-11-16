@@ -3,6 +3,7 @@
 // against raw field offsets; the large routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/math_types.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -565,11 +566,6 @@ static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 struct RiderLinks {
     BoneLink l[6];
 };
-
-struct Mat3;
-struct Vec3;
-void Mat3FromEuler(Mat3* out, const Vec3* e);
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 extern const f32 lbl_80563064;  // 0.0762 (3 in)
 extern const f32 lbl_8056307C;  // pi/3
 extern const f32 lbl_80563080;  // 10 deg

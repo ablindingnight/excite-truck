@@ -5,6 +5,7 @@
 // the mirrored world and a shared sky cube ("skybox") into a 256x256 target. A gen_surf model adds
 // animated surface rings. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -37,10 +38,6 @@ struct Frame {
     PVec pos;  // offset 0x24
 };
 
-struct Mat3 {
-    f32 m[3][3];
-};
-
 // A coloured, textured vertex (0x18).
 struct WVert {
     PVec pos;   // offset 0x0
@@ -69,10 +66,6 @@ struct Perspective {
     f32 far;   // offset 0x4
     f32 fov;   // offset 0x8
 };
-
-struct Vec3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);
