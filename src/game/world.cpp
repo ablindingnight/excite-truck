@@ -128,7 +128,11 @@ struct CarTypeMap {
 extern "C" CarTypeMap* fn_801E8EA4(int type);
 extern "C" void fn_801E9DC4(void* p);
 
-// What a car model is built from (0xE4).
+// What a car model is built from. Only the first 0xE4 bytes are declared here; the real class is 0x11C
+// (carmodel.cpp's Racer adds lodModel 0xE4, color 0xE8, xrayMesh[32] 0xEC, wheelSize[4] 0x10C, and retail's
+// fn_801E8F10 keeps it at sp+0x8 with the next slot at sp+0x124). Declaring the tail moves our frame further from
+// retail's (asmcmp 617 -> 673 rows, objdiff unchanged), so it stays out until the frame's other temps match;
+// the PC port must allocate 0x11C here.
 struct Racer {
     Racer(const CarDef& d, int i) : def(d), index(i) {
         CarTypeMap* m = fn_801E8EA4(d.type);
