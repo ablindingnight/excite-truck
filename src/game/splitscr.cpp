@@ -3,6 +3,7 @@
 // icon), and the START/FINISH labels at the ends of the bars. Names are guesses apart from the
 // keys and the texture name.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 // A vertex position (constructed in place).
 struct VtxPos {
@@ -11,12 +12,6 @@ struct VtxPos {
         y = y_;
         z = z_;
     }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct VecP {
     f32 x;
     f32 y;
     f32 z;

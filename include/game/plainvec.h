@@ -65,4 +65,21 @@ struct BVec {
     f32 x, y, z;
 };
 
+// x, y, z with no constructor (mrender's Set helper).
+struct VecP {
+    void Set(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+// Three floats as an array (copies as words).
+struct WV3 {
+    f32 v[3];
+};
+
 #endif

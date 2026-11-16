@@ -4,6 +4,7 @@
 // cars and locks the finish order, and runs the race intro countdown ("green flag"). The per-car update, the
 // lap-crossing scan and the qualify helper are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 // Lane offset of the grid columns (5.0f): this unit's FIRST .sdata2 entry in retail, negated at run time, so it is a
 // named constant defined before any code whose value is not folded. A one-field const struct gives exactly that
 // (type unproven; same idiom as placecar's lbl_80562650).
@@ -280,11 +281,6 @@ struct Crossing {
 struct CrossQueue {
     Crossing e[8];  // offset 0x0
     s32 n;          // offset 0x40
-};
-
-// A position copied as words (array member).
-struct WV3 {
-    f32 v[3];
 };
 
 struct TeleportInfo {

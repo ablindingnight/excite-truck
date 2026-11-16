@@ -4,6 +4,7 @@
 // fullscreen and screen-rectangle fills, the "mrDrawList" pooled flare objects and the light
 // direction. Names are guesses apart from the messages.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 BOOL OptWidescreen(void);
 
@@ -73,17 +74,6 @@ struct Vec {
         this->x = x;
         this->y = y;
         this->z = z;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct VecP {
-    void Set(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
     }
     f32 x;
     f32 y;

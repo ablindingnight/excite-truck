@@ -69,11 +69,8 @@ struct IngameText {
     int count;   // offset 0x4
 };
 
-struct VecP {
-    f32 x, y, z;
-};
-
 #include "game/uicontext.h"
+#include "game/plainvec.h"
 
 
 struct UIVert {

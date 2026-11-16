@@ -8,6 +8,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
+#include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -172,12 +173,6 @@ inline void Trailer::Reglue(void) {
 }
 
 extern "C" {
-
-// The position of joint 'name' of 'model' (or 'def' when the model has none).
-// The joint position is copied as words (array member).
-struct WV3 {
-    f32 v[3];
-};
 
 void fn_801B8CC0(RVec3* out, int model, const char* name, RVec3 def) {
     *(WV3*)out = *(WV3*)&def;

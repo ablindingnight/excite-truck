@@ -8,11 +8,8 @@
 void* operator new(size_t size, const char* tag);
 void OptE3Demo(void);
 
-struct VecP {
-    f32 x, y, z;
-};
-
 #include "game/uicontext.h"
+#include "game/plainvec.h"
 
 // Fade timing a window reports for its open and close.
 struct WinFade {

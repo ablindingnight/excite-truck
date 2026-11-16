@@ -2,6 +2,7 @@
 // re-entry puffs, the invincible-car sparks and the stunt fog colour, plus the menu copies of
 // the emitter setup. Names are guesses apart from the allocation tags and file names.
 #include "game/common.h"
+#include "game/plainvec.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
@@ -468,10 +469,6 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
         }
     }
 }
-
-struct WV3 {
-    f32 v[3];
-};
 
 static inline void BoxPoint(Vec* pos, const StuntCar* car, f32 ang, f32 hx, f32 hz) {
     Vec x = *(const Vec*)&car->axes[0];

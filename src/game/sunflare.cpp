@@ -3,7 +3,7 @@
 #include "game/common.h"
 #include <math.h>
 
-struct VecP {
+struct SunVecP {
     void Set(f32 x_, f32 y_, f32 z_) {
         x = x_;
         z = z_;
@@ -15,14 +15,14 @@ struct VecP {
 };
 
 struct Rot {
-    VecP right;  // offset 0x0
-    VecP up;     // offset 0xC
-    VecP fwd;    // offset 0x18
+    SunVecP right;  // offset 0x0
+    SunVecP up;     // offset 0xC
+    SunVecP fwd;    // offset 0x18
 };
 
 struct Camera {
     Rot rot;   // offset 0x0
-    VecP pos;  // offset 0x24
+    SunVecP pos;  // offset 0x24
 };
 
 struct WeatherDef {
@@ -33,7 +33,7 @@ struct WeatherDef {
 
 // A camera-facing sprite; pos holds its projected screen position.
 struct Sprite {
-    VecP pos;    // offset 0x0
+    SunVecP pos;    // offset 0x0
     s32 tex;     // offset 0xC
     void* obj;   // offset 0x10
     u8 visible;  // offset 0x14
@@ -51,15 +51,15 @@ struct FlareSet {
     f32 pivotDepth;   // offset 0x124
     f32 rodLength;    // offset 0x128
     f32 maxRadius;    // offset 0x12C
-    VecP sunPos;      // offset 0x130
-    VecP screen;      // offset 0x13C
+    SunVecP sunPos;      // offset 0x130
+    SunVecP screen;      // offset 0x13C
     u8 visible;       // offset 0x148
 };
 
 static inline f32 Mul(f32 b, f32 a) { return a * b; }
 
 extern "C" {
-void PSVECNormalize(const VecP* src, VecP* dst);
+void PSVECNormalize(const SunVecP* src, SunVecP* dst);
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
@@ -70,17 +70,17 @@ int fn_802C2C00(int on);
 Camera* fn_802C86DC(void);
 void fn_802C8C04(int a);
 void fn_802C8D74(void);
-void fn_802C8E70(const VecP* p, VecP* out);
-int fn_802C8FF4(const VecP* p, f32 r);
+void fn_802C8E70(const SunVecP* p, SunVecP* out);
+int fn_802C8FF4(const SunVecP* p, f32 r);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 void* fn_802CA294(s32 tex);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
 void* fn_802D39A4(void* tex, f32 scale);
 void fn_802D3A50(void* obj);
-int fn_802D3A5C(void* obj, const VecP* p);
+int fn_802D3A5C(void* obj, const SunVecP* p);
 void fn_802D3BB0(void* obj);
-void fn_802D3BB4(void* obj, f32 radius, const VecP* p, const VecP* u, const VecP* v, u32 color);
+void fn_802D3BB4(void* obj, f32 radius, const SunVecP* p, const SunVecP* u, const SunVecP* v, u32 color);
 extern s32 lbl_8055CFF0;  // screen width
 }
 
@@ -162,7 +162,7 @@ void fn_80291AC8(void) {
     s->obj = NULL;
 }
 
-void fn_80291B14(const VecP* p, f32 depth) {
+void fn_80291B14(const SunVecP* p, f32 depth) {
     fn_802C8E70(p, &lbl_804B4010.pos);
     lbl_804B4010.pos.z = depth;
     u8 vis = 0;
@@ -172,7 +172,7 @@ void fn_80291B14(const VecP* p, f32 depth) {
     lbl_804B4010.visible = vis;
 }
 
-void fn_80291B9C(FlareSet* fs, const VecP* p, f32 depth) {
+void fn_80291B9C(FlareSet* fs, const SunVecP* p, f32 depth) {
     fs->sunPos = *p;
     fn_802C8E70(p, &fs->screen);
     fs->screen.z = depth;
@@ -200,9 +200,9 @@ static inline f32 LinStep(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) {
 }
 
 void fn_80291C7C(const Sprite* s, int sun) {
-    VecP p = s->pos;
-    VecP u;
-    VecP v;
+    SunVecP p = s->pos;
+    SunVecP u;
+    SunVecP v;
     p.z = 0.0f;
     f32 delta = p.x - 0.5f * lbl_8055CFF0;
     f64 distance = fabs(delta);
@@ -234,8 +234,8 @@ void fn_80291C7C(const Sprite* s, int sun) {
 
 void fn_80291E64(FlareSet* fs) {
     Camera* c = fn_802C86DC();
-    VecP pivot;
-    VecP dir;
+    SunVecP pivot;
+    SunVecP dir;
     f32 pivotDepthv = fs->pivotDepth;
     pivot.x = c->pos.x + c->rot.fwd.x * pivotDepthv;
     pivot.y = c->pos.y + c->rot.fwd.y * fs->pivotDepth;
@@ -245,8 +245,8 @@ void fn_80291E64(FlareSet* fs) {
     dir.z = pivot.z - fs->sunPos.z;
     PSVECNormalize(&dir, &dir);
     f32 back = -(fs->rodLength - fs->pivotDepth);
-    VecP start;
-    VecP end;
+    SunVecP start;
+    SunVecP end;
     start.x = pivot.x + dir.x * back;
     start.y = pivot.y + dir.y * back;
     start.z = pivot.z + dir.z * back;
@@ -263,7 +263,7 @@ void fn_80291E64(FlareSet* fs) {
         f32 t = i * step + f->slide * slideK;
         t = (1.0f < t) ? 1.0f : t;
         t = (t > 0.0f) ? t : 0.0f;
-        VecP p;
+        SunVecP p;
         f32 endX;
         f32 endY;
         f32 endZ;
@@ -360,11 +360,11 @@ void fn_8029227C(void) {
     }
 }
 
-void fn_8029231C(const VecP* dir) {
+void fn_8029231C(const SunVecP* dir) {
     if (lbl_8055F75C) {
         f32 dist = fn_801EC114();
         Camera* c = fn_802C86DC();
-        VecP p;
+        SunVecP p;
         p.x = c->pos.x + dir->x * dist;
         p.y = c->pos.y + dir->y * dist;
         p.z = c->pos.z + dir->z * dist;
