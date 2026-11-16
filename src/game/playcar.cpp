@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include "game/rigid.h"
+#include "game/carbody.h"
 #include <string.h>
 #include <revolution/MTX/vec.h>
 
@@ -596,11 +597,6 @@ static inline void SetV2C(Recorder* r, u8 v) { CurPkt(r)->v2C = v; }
 static inline void SetV30(Recorder* r, u8 v) { CurPkt(r)->v30 = v; }
 static inline void SetV44(Recorder* r, int v) { CurPkt(r)->v44 = v; }
 static inline void SetV48(Recorder* r, int v) { CurPkt(r)->v48 = v; }
-
-class RaceCarRec {
-public:
-    f32 Speed(void) const;
-};
 
 // Track position tracker of a car (car + 0x270).
 class CarTrackPos {

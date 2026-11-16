@@ -10,6 +10,7 @@
 #include "game/rigid.h"
 #include "game/camframe34.h"
 #include "game/math_types.h"
+#include "game/carbody.h"
 
 
 struct RPacket;
@@ -126,11 +127,6 @@ extern const f32 kAxisTolerance;
 extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
-// The race-car record (aiobst.cpp), declared as far as this unit uses it.
-class RaceCarRec {
-public:
-    const RMtx* Mtx(void);
-};
 extern "C" {
 void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144B54(RMtx* dst, const RMtx* src);

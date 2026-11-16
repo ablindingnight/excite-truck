@@ -299,4 +299,16 @@ public:
     f32 f26FC;                   // offset 0x26FC
 };
 
+// The car body as the race sees it (fn_8017960C(id) returns it): the same object, with the accessors other units
+// call on it. A shared view so every unit uses one declaration; the mangled names keep RaceCarRec (no symbol churn).
+// The accessors are inline, defined in the unit retail keeps their weak copy in (Mtx: aiobst, F2690: betarace,
+// Rings: ringchal; Speed/Air: stunts). Names unproven.
+struct RaceCarRec : CarBody {
+    RMtx* Mtx(void);           // the car's frame (&mtx)
+    f32 F2690(void);           // f2690 (non-const in retail)
+    f32 Speed(void) const;     // speed
+    s32 Air(void) const;       // airborne (0 while airborne)
+    void* Rings(void);         // the ring record at 0x1EC (ringchal)
+};
+
 #endif

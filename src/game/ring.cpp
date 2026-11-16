@@ -3,6 +3,7 @@
 // "ring"s (radius + frame64). Sets are switched on and off by name; a car passes a ring by getting within its
 // radius, and rings fade in, flash and fade out. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -28,11 +29,6 @@ void* operator new[](size_t size, const char* tag);
 struct Event {
     u8 pad0[0x20];
     ValueNode* vals;  // offset 0x20
-};
-
-struct RaceCarRec {
-    u8 pad0[0x60];
-    f32 pos[3];  // offset 0x60
 };
 
 struct V2 {
@@ -340,7 +336,7 @@ inline int Ring::Check(RaceCarRec* rec) {
         if (radiusScoreMode) {
             rad += 1.0f;
         }
-        if (PSVECSquareDistance(rec->pos, &frame.origin) < rad * rad) {
+        if (PSVECSquareDistance(&rec->mtx.pos, &frame.origin) < rad * rad) {
             passed = 1;
             hit = 1;
             passTime = lbl_8055E3C8;
@@ -497,9 +493,9 @@ int fn_8016A780(const char* name, int player) {
             if (strcasecmp(lbl_80430340.data[i].name, name) == 0) {
                 Ring* r = &lbl_80430318.data[i];
                 V3 d;
-                d.x = r->frame.origin.x - rec->pos[0];
-                d.y = r->frame.origin.y - rec->pos[1];
-                d.z = r->frame.origin.z - rec->pos[2];
+                d.x = r->frame.origin.x - rec->mtx.pos.x;
+                d.y = r->frame.origin.y - rec->mtx.pos.y;
+                d.z = r->frame.origin.z - rec->mtx.pos.z;
                 if (PSVECDotProduct(&d, &r->frame.basis[2]) < 0.0f) {
                     n++;
                 }

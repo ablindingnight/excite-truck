@@ -2,6 +2,7 @@
 // and either a single ghost line or a "racingline_set" of lines with per-car switching between them, inside
 // "legal_transition_regions", every min_change_t..max_change_t seconds. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -31,11 +32,6 @@ public:
     virtual void vf08(void);
     virtual void vf0C(void);
     virtual RacerInfo* GetInfo(void);  // 0x10
-};
-
-struct RaceCarRec {
-    u8 pad0[0x60];
-    f32 pos[3];  // offset 0x60
 };
 
 struct V2 {
@@ -362,8 +358,8 @@ public:
     int InRegion(RaceCarRec* rc) {
         int i;
         for (i = 0; i < regions.a.count; i++) {
-            f32 x = rc->pos[0];
-            f32 z = rc->pos[2];
+            f32 x = rc->mtx.pos.x;
+            f32 z = rc->mtx.pos.z;
             if (fn_80139B70(regions.a.data[i], x, z)) {
                 return 1;
             }

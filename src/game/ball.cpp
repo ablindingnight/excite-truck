@@ -8,6 +8,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/shapes.h"
+#include "game/carbody.h"
 
 extern "C" {
 double sqrt(double x);
@@ -53,23 +54,11 @@ struct BTrack {
     BTrackStart* start;  // offset 0x2C
 };
 
-struct BGround {
-    u8 pad0[0x28];
-    f32 y;  // offset 0x28
-};
-
 class Vec2;
 // A ground position set from an x/z point (aiobst.cpp defines From: y = 0).
 struct Spot {
     void From(const Vec2& v);
 };
-
-struct RaceCarRec {
-    BGround* Mtx(void);  // weak: the car's frame
-    u8 pad0[0x10];
-    u32 model;  // offset 0x10
-};
-
 
 struct BRacerInfo {
     u8 pad0[0x24];
@@ -451,7 +440,7 @@ inline void Ball::Drop(void) {
     fn_8017E388(&m);
     ((Spot*)&m.pos)->From(*(const Vec2*)xz);
     up = DropHeight();
-    f32 base = fn_8017960C(car)->Mtx()->y;
+    f32 base = fn_8017960C(car)->Mtx()->pos.y;
     m.pos.y = base + up;
     __ct__4VPosFfff(&v, 0.0f, 0.0f, 0.0f);
     Launch(&m, &v, h, 0.0f);
@@ -487,7 +476,7 @@ void Ball::Update(void) {
         resetPending = 0;
     }
     if (state == 0 && timer < fn_8017D378()) {
-        u32 model = fn_8017960C(car)->model;
+        u32 model = fn_8017960C(car)->type;
         int st = 1;
         if (model == 0x41434152) {
             st = 2;
