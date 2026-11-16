@@ -3973,6 +3973,8 @@ static inline f32 PackClamp01(f32 x) {
     x = 1.0f < x ? 1.0f : x;
     return x > 0.0f ? x : 0.0f;
 }
+static inline f32 PackMin(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 PackMax(f32 a, f32 b) { return a > b ? a : b; }
 
 static inline f32 PackLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
@@ -3988,7 +3990,7 @@ public:
 
 // Quantises x from [lo, hi] to 0..range (rounded).
 static inline int Pack(f32 x, f32 lo, f32 hi, f32 range) {
-    return (int)(0.5f + PackLerp(0.0f, range, PackClamp01((x - lo) / (hi - lo))));
+    return (int)(0.5f + PackLerp(0.0f, range, PackMax(PackMin(1.0f, (x - lo) / (hi - lo)), 0.0f)));
 }
 
 extern "C" {
