@@ -35,7 +35,7 @@ s32 fn_80144E38(int i, int level, u8* best) {
     return ScoreIsBest(best, level, i);
 }
 
-u8 fn_80144F2C(void) { return lbl_8055E1E8; }
+int fn_80144F2C(void) { return lbl_8055E1E8; }
 
 s32 fn_80144F34(int i, int level, u8* best) { return fn_80144E38(i, level, best); }
 
