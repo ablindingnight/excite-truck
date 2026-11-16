@@ -1211,6 +1211,11 @@ static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
     return r;
 }
 
+// Seconds a gate adds (declared extern above). Defined here, between the first function that pools 0.5f and
+// fn_8013CBC0: retail holds it as the second .sdata2 entry, separate from the pooled 5.0f literal of the tuning
+// loader. Defining it above its users would let the compiler fold it into them.
+const f32 lbl_8056149C = 5.0f;
+
 int fn_8013CBC0(ZoneCar* zm, int car) {
     Gate* g = zm->gate;
     int r = 0;
