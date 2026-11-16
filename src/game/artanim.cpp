@@ -629,18 +629,20 @@ static inline f32 Ease(f32 x) {
 }
 
 // out = in * m (row vector; m's first three rows), safe when out aliases in.
+/* Helper name unproven */
+static inline f32 ArtDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void MulVec(f32* out, const f32* in, f32 m[4][3]) {
     if (out == in) {
-        f32 x = in[2] * m[2][0] + (m[0][0] * in[0] + in[1] * m[1][0]);
-        f32 y = in[2] * m[2][1] + (in[0] * m[0][1] + in[1] * m[1][1]);
-        f32 z = in[2] * m[2][2] + (in[0] * m[0][2] + in[1] * m[1][2]);
+        f32 x = ArtDot3(in[0], m[0][0], in[1], m[1][0], in[2], m[2][0]);
+        f32 y = ArtDot3(in[0], m[0][1], in[1], m[1][1], in[2], m[2][1]);
+        f32 z = ArtDot3(in[0], m[0][2], in[1], m[1][2], in[2], m[2][2]);
         out[0] = x;
         out[1] = y;
         out[2] = z;
     } else {
-        out[0] = m[2][0] * in[2] + (m[0][0] * in[0] + in[1] * m[1][0]);
-        out[1] = in[2] * m[2][1] + (in[0] * m[0][1] + in[1] * m[1][1]);
-        out[2] = m[2][2] * in[2] + (m[0][2] * in[0] + in[1] * m[1][2]);
+        out[0] = ArtDot3(in[0], m[0][0], in[1], m[1][0], in[2], m[2][0]);
+        out[1] = ArtDot3(in[0], m[0][1], in[1], m[1][1], in[2], m[2][1]);
+        out[2] = ArtDot3(in[0], m[0][2], in[1], m[1][2], in[2], m[2][2]);
     }
 }
 
