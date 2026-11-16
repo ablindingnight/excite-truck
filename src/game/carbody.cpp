@@ -3433,7 +3433,8 @@ void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     fn_8026A394(p);
 }
 
-void fn_8018A088(u8* p) {}
+// CollShape::vf48 (empty; slot 0x48 of the sphcoll shape tables), by its linker name: carbody only forward-declares CollShape.
+extern "C" void vf48__9CollShapeFv(void) {}
 
 void fn_8018A08C(u8* p) { F32(p, 0x26D8) = lbl_8055E3C8; }
 

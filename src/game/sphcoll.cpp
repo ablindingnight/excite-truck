@@ -320,10 +320,68 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
 void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r);
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
-void fn_8019ECC4(u8* p, u32 a, u32 b);
+// The collision-shape interface: twelve pure slots (the destructor and vf0C-vf34). Its vtable is the 14 zero
+// words after CollShape's (0x80333BE8); nothing stores it (its inlined constructor's vptr store is dead).
+// Class and method names unproven.
+class CollShapeIface {
+public:
+    virtual ~CollShapeIface(void) = 0;
+    virtual void vf0C(void) = 0;
+    virtual void vf10(u8* other) = 0;
+    virtual void vf14(void) = 0;
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) = 0;
+    virtual void vf1C(void) = 0;
+    virtual void vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g) = 0;
+    virtual void vf24(const RVec3* v) = 0;
+    virtual void vf28(void) = 0;
+    virtual void vf2C(u8* data) = 0;
+    virtual u32 vf30(void) = 0;
+    virtual void vf34(CFrame* frame) = 0;
+};
+inline CollShapeIface::~CollShapeIface(void) {}
+
+// A collision shape (vtable __vt__9CollShape). The empty slots live in other units: vf0C and vf28 in collvol,
+// vf14 in rigid, vf48 in carbody, vf4C in phob; the inline dtor and SetSurface have their kept copies in betarace.
+class CollShape : public CollShapeIface {
+public:
+    CollShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    // Overrides of the interface slots (their order here does not change the layout). One defined in this unit
+    // comes first, so this unit emits the vtable, as retail does.
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf1C(void);
+    virtual void vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
+    virtual void vf24(const RVec3* v);
+    virtual void vf2C(u8* data);
+    virtual u32 vf30(void);
+    virtual void vf34(CFrame* frame);
+    virtual ~CollShape(void) {}
+    virtual void vf0C(void);
+    virtual void vf10(u8* other) = 0;
+    virtual void vf14(void);
+    virtual void vf28(void);
+    // New slots 0x38-0x4C.
+    virtual void vf38(RVec3* lo, RVec3* hi) = 0;
+    virtual f32 Radius(void) = 0;
+    virtual void SetSurface(int m) { surface = m; }
+    virtual void vf44(u32 v);
+    virtual void vf48(void);
+    virtual void vf4C(void);
+
+    u8* owner;       // 0x04
+    u8* data;        // 0x08
+    CFrame* frame;   // 0x0C
+    f32 stiff;       // 0x10
+    f32 skin;        // 0x14
+    s32 type;        // 0x18
+    u32 x1C;         // 0x1C
+    s32 surface;     // 0x20
+};
+
+// MATCHING-AID (transitional): the derived shapes are still written as C and construct their CollShape base by
+// its linker name; this goes when they become real subclasses.
+extern "C" void __ct__9CollShapeFUlUl(u8* p, u32 data, u32 swap);
 u8* fn_801A1520(u8* p, u32 a, u32 swap);
 void fn_8019F1A4(u8* p);
-void fn_8019EBC0(u8* p);
 void fn_8019F03C(u8* p);
 void fn_801A49FC(u8* p);
 void fn_801A49E8(u8* p);
@@ -886,7 +944,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     VE(q)->v1C(&imp, &pq, U32(p, 0x20), (u32)pb);
 }
 
-u32 fn_8019A780(u8* p) { return U32(p, 0x8); }
+u32 CollShape::vf30(void) {
+    u8* p = (u8*)this; return U32(p, 0x8); }
 
 extern const f32 lbl_805622DC;  // -1.0
 
@@ -2193,40 +2252,43 @@ void fn_8019EB14(u8* tree, int i) {
     }
 }
 
-void fn_8019EBC0(u8* p) {
+void CollShape::vf1C(void) {
+    u8* p = (u8*)this;
     u8* o = PTR(p, 0x4);
     if (o) {
         VE(o)->v48();
     }
 }
 
-void fn_8019EBE0(u8* p, void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g) {
-    if (PTR(p, 0x4)) {
-        ((RigidBody*)PTR(p, 0x4))->Push((Phob*)p, a, b, c, d, e, f, g);
-    } else if (PTR(p, 0x8)) {
-        fn_801A4A10(PTR(p, 0x8), c, f, b);
+void CollShape::vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g) {
+    if (owner) {
+        ((RigidBody*)owner)->Push((Phob*)this, a, b, c, d, e, f, g);
+    } else if (data) {
+        fn_801A4A10(data, c, f, b);
     }
 }
 
-void fn_8019EC84(u8* p) {
+void CollShape::vf24(const RVec3*) {
+    u8* p = (u8*)this;
     u8* o = PTR(p, 0x4);
     if (o) {
         VE(o)->v4C();
     }
 }
 
-void fn_8019ECA4(u8* p, u8* q) {
+void CollShape::vf2C(u8* q) {
+    u8* p = (u8*)this;
     PTR(p, 0x8) = q;
     VE(p)->v34(q + 4);
 }
 
-void fn_8019ECBC(u8* p, u32 v) { U32(p, 0xc) = v; }
-
-extern void* __vt__9CollShape[];
+void CollShape::vf34(CFrame* p_v) {
+    u8* p = (u8*)this;
+    u32 v = (u32)p_v; U32(p, 0xc) = v; }
 
 // Collision volume base constructor from file data (byte-swapped when `swap`).
-void fn_8019ECC4(u8* p, u32 a, u32 swap) {
-    *(void**)p = __vt__9CollShape;
+CollShape::CollShape(u32 a, u32 swap) {
+    u8* p = (u8*)this;
     if (swap) {
         Swap32(p + 0x18);
         Swap32(p + 0x10);
@@ -2243,7 +2305,7 @@ extern void* __vt__11SphereShape[];
 
 // Sphere volume constructor from file data (byte-swapped when `swap`).
 u8* fn_8019EDB8(u8* p, u32 a, u32 swap) {
-    fn_8019ECC4(p, a, swap);
+    __ct__9CollShapeFUlUl(p, a, swap);
     *(void**)p = __vt__11SphereShape;
     if (swap) {
         Swap32(p + 0x24);
@@ -2426,7 +2488,7 @@ void fn_8019F414(u8* p) {
 
 // Projects v onto the plane of p's frame row 1 (the result feeds a debug view that is compiled out).
 void fn_8019F4D4(u8* p, const RVec3* v) {
-    fn_8019EC84(p);
+    ((CollShape*)p)->CollShape::vf24(v);
     f32 d = -PSVECDotProduct(&((CFrame*)PTR(p, 0xC))->m[3], v);
     CFrame* f = (CFrame*)PTR(p, 0xC);
     f32 x = v->x + f->m[3] * d;
@@ -2676,7 +2738,7 @@ void fn_8019F780(u8* p) {
 }
 #pragma pop
 
-void fn_8019FF88(u8* p) { fn_8019EBC0(p); }
+void fn_8019FF88(u8* p) { ((CollShape*)p)->CollShape::vf1C(); }
 
 void fn_8019FF8C(u8* p) {
     fn_8019F03C(p);
@@ -3107,7 +3169,8 @@ void fn_801A12C4(u8* p, u32 v) {
     }
 }
 
-void fn_801A1358(u8* p, u32 v) { U32(p, 0x1c) = v; }
+void CollShape::vf44(u32 v) {
+    u8* p = (u8*)this; U32(p, 0x1c) = v; }
 
 void fn_801A1360(u8* p, u32 v) {
     U32(p, 0x20) = v;
@@ -3163,7 +3226,7 @@ void fn_801A1474(SphGroupData* g, f32 s) {
 }
 
 u8* fn_801A1520(u8* p, u32 a, u32 swap) {
-    fn_8019ECC4(p, a, swap);
+    __ct__9CollShapeFUlUl(p, a, swap);
     *(void**)p = lbl_80333968;
     if (swap) {
         Swap32(p + 0x24);
@@ -3348,7 +3411,7 @@ void fn_801A1CA0(const u8* p) {
 }
 
 u8* fn_801A1CE4(u8* p, u32 a, u32 swap) {
-    fn_8019ECC4(p, a, swap);
+    __ct__9CollShapeFUlUl(p, a, swap);
     *(void**)p = __vt__8BoxShape;
     if (swap) {
         Swap32(p + 0x24);
@@ -3644,7 +3707,7 @@ f32 fn_801A2CA4(u8* p) { return F32(p, 0x178); }
 void fn_801A2CAC(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
 
 u8* fn_801A2CC0(u8* p, u32 a, u32 swap) {
-    fn_8019ECC4(p, a, swap);
+    __ct__9CollShapeFUlUl(p, a, swap);
     *(void**)p = __vt__7RingVol;
     if (swap) {
         Swap32(p + 0x24);
@@ -3941,7 +4004,7 @@ u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
 }
 
 u8* fn_801A3F5C(u8* p, u32 a, u32 b) {
-    fn_8019ECC4(p, a, b);
+    __ct__9CollShapeFUlUl(p, a, b);
     *(void**)p = lbl_80333728;
     if (b) {
         PTR(p, 0x24) = p + 0x40;
@@ -4332,7 +4395,7 @@ f32 fn_801A511C(u8* p) { return F32(p, 0x24); }
 
 f32 fn_801A5124(u8* p) { return F32(p, 0x28); }
 
-u32 fn_801A512C(u8* p) { return 0; }
+int CollShape::vf18(const RVec3*, const RVec3*, f32*, RVec3*) { return 0; }
 
 u8* fn_801A5134(u8* p, int del) {
     if (p && del > 0) {
@@ -4376,25 +4439,34 @@ u8 lbl_8055A518 = 1;  // unused in ET (its users are gone); last object of .sdat
 
 // The hand-built vtables of the collision shapes, in the target's .data order.
 extern "C" {
-void fn_8017A800(void);
-void fn_8017C7C4(void);
-void fn_80179EE4(void);
+// MATCHING-AID (transitional): the hand-written derived tables name CollShape's members by their linker names.
+void vf0C__9CollShapeFv(void);
+void vf14__9CollShapeFv(void);
+void vf28__9CollShapeFv(void);
+void vf48__9CollShapeFv(void);
+void vf4C__9CollShapeFv(void);
+void vf1C__9CollShapeFv(void);
+void vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf(void);
+void vf24__9CollShapeFPC5RVec3(void);
+void vf2C__9CollShapeFPUc(void);
+void vf30__9CollShapeFv(void);
+void vf34__9CollShapeFP6CFrame(void);
+void vf44__9CollShapeFUl(void);
+void vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3(void);
 void SetSurface__9CollShapeFi(void);
-void fn_8018A088(u8* p);
 void __dt__9CollShapeFv(void);
-void PhysTaskDumpCars(void);
 void* lbl_803336F8[12] = {(void*)0, (void*)0, (void*)fn_801A5174, (void*)fn_801A48C8, (void*)fn_801A517C, (void*)fn_801A5184, (void*)fn_801A518C, (void*)fn_801A5190, (void*)fn_801A51B0, (void*)fn_801A51CC, (void*)fn_801A51D4, (void*)fn_801A5134};
-void* lbl_80333728[20] = {(void*)0, (void*)0, (void*)fn_801A3FB8, (void*)fn_8017A800, (void*)fn_801A401C, (void*)fn_8017C7C4, (void*)fn_801A40F8, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A442C, (void*)fn_801A4460, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A44C4};
-void* lbl_80333778[20] = {(void*)0, (void*)0, (void*)fn_801A4F00, (void*)fn_8017A800, (void*)fn_801A38E4, (void*)fn_8017C7C4, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A34D0, (void*)fn_801A3880, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A3BE0};
-void* __vt__7RingVol[20] = {(void*)0, (void*)0, (void*)fn_801A4F40, (void*)fn_8017A800, (void*)fn_801A2D50, (void*)fn_801A2EC8, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A2ECC, (void*)fn_801A5124, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A3174};
-void* lbl_80333818[20] = {(void*)0, (void*)0, (void*)fn_801A4F80, (void*)fn_8017A800, (void*)fn_801A26FC, (void*)fn_8017C7C4, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A2684, (void*)fn_801A511C, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A2CAC};
-void* lbl_80333868[22] = {(void*)0, (void*)0, (void*)fn_801A010C, (void*)fn_801A2474, (void*)fn_801A1DD4, (void*)fn_8017C7C4, (void*)fn_801A1E7C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)fn_801A2C9C};
-void* __vt__8BoxShape[22] = {(void*)0, (void*)0, (void*)fn_801A2434, (void*)fn_8017A800, (void*)fn_801A1DD4, (void*)fn_8017C7C4, (void*)fn_801A1E7C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)0};
-void* __vt__9TubeShape[20] = {(void*)0, (void*)0, (void*)fn_801A4FC0, (void*)fn_8017A800, (void*)fn_801A1ABC, (void*)fn_801A1B9C, (void*)fn_801A15CC, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A18D4, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A1CA0};
-void* lbl_80333968[20] = {(void*)0, (void*)0, (void*)fn_8019E834, (void*)fn_8017A800, (void*)0, (void*)fn_8017C7C4, (void*)fn_801A15CC, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)0, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_801A17B8};
-void* lbl_803339B8[40] = {(void*)0, (void*)0, (void*)fn_801A0040, (void*)fn_801A014C, (void*)fn_801A0464, (void*)fn_801A0F10, (void*)fn_801A1148, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_801A1250, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_801A01E0, (void*)fn_801A2CA4, (void*)fn_801A1360, (void*)fn_801A12C4, (void*)fn_801A5108, (void*)fn_801A13F4, (void*)0, (void*)0, (void*)fn_801A5000, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F1A4, (void*)fn_8019F1B4, (void*)fn_8019FF88, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_8019FF8C, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_8019F248};
-void* lbl_80333A58[40] = {(void*)0, (void*)0, (void*)fn_801A5040, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F780, (void*)fn_8019F1B4, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_8019F6F0, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_8019F248, (void*)0, (void*)0, (void*)fn_801A5080, (void*)fn_8019F414, (void*)fn_8019F064, (void*)fn_8019F560, (void*)fn_8019F1B4, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019F4D4, (void*)fn_8019F03C, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_8019F248};
-void* __vt__15FlatSphereShape[20] = {(void*)0, (void*)0, (void*)fn_801A50C0, (void*)fn_8019EF00, (void*)fn_8019F26C, (void*)fn_8019F3D0, (void*)fn_8019F1B4, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_8019F03C, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_8019F248};
-void* __vt__11SphereShape[20] = {(void*)0, (void*)0, (void*)fn_8019F3D4, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F1A4, (void*)fn_8019F1B4, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_8019F03C, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)fn_8019F248};
-void* __vt__9CollShape[34] = {(void*)0, (void*)0, (void*)__dt__9CollShapeFv, (void*)fn_8017A800, (void*)0, (void*)fn_8017C7C4, (void*)fn_801A512C, (void*)fn_8019EBC0, (void*)fn_8019EBE0, (void*)fn_8019EC84, (void*)fn_80179EE4, (void*)fn_8019ECA4, (void*)fn_8019A780, (void*)fn_8019ECBC, (void*)0, (void*)0, (void*)SetSurface__9CollShapeFi, (void*)fn_801A1358, (void*)fn_8018A088, (void*)PhysTaskDumpCars, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0};
+void* lbl_80333728[20] = {(void*)0, (void*)0, (void*)fn_801A3FB8, (void*)vf0C__9CollShapeFv, (void*)fn_801A401C, (void*)vf14__9CollShapeFv, (void*)fn_801A40F8, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A442C, (void*)fn_801A4460, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A44C4};
+void* lbl_80333778[20] = {(void*)0, (void*)0, (void*)fn_801A4F00, (void*)vf0C__9CollShapeFv, (void*)fn_801A38E4, (void*)vf14__9CollShapeFv, (void*)vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A34D0, (void*)fn_801A3880, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A3BE0};
+void* __vt__7RingVol[20] = {(void*)0, (void*)0, (void*)fn_801A4F40, (void*)vf0C__9CollShapeFv, (void*)fn_801A2D50, (void*)fn_801A2EC8, (void*)vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A2ECC, (void*)fn_801A5124, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A3174};
+void* lbl_80333818[20] = {(void*)0, (void*)0, (void*)fn_801A4F80, (void*)vf0C__9CollShapeFv, (void*)fn_801A26FC, (void*)vf14__9CollShapeFv, (void*)vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A2684, (void*)fn_801A511C, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A2CAC};
+void* lbl_80333868[22] = {(void*)0, (void*)0, (void*)fn_801A010C, (void*)fn_801A2474, (void*)fn_801A1DD4, (void*)vf14__9CollShapeFv, (void*)fn_801A1E7C, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)fn_801A2C9C};
+void* __vt__8BoxShape[22] = {(void*)0, (void*)0, (void*)fn_801A2434, (void*)vf0C__9CollShapeFv, (void*)fn_801A1DD4, (void*)vf14__9CollShapeFv, (void*)fn_801A1E7C, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)0};
+void* __vt__9TubeShape[20] = {(void*)0, (void*)0, (void*)fn_801A4FC0, (void*)vf0C__9CollShapeFv, (void*)fn_801A1ABC, (void*)fn_801A1B9C, (void*)fn_801A15CC, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A18D4, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A1CA0};
+void* lbl_80333968[20] = {(void*)0, (void*)0, (void*)fn_8019E834, (void*)vf0C__9CollShapeFv, (void*)0, (void*)vf14__9CollShapeFv, (void*)fn_801A15CC, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)0, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A17B8};
+void* lbl_803339B8[40] = {(void*)0, (void*)0, (void*)fn_801A0040, (void*)fn_801A014C, (void*)fn_801A0464, (void*)fn_801A0F10, (void*)fn_801A1148, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_801A1250, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A01E0, (void*)fn_801A2CA4, (void*)fn_801A1360, (void*)fn_801A12C4, (void*)fn_801A5108, (void*)fn_801A13F4, (void*)0, (void*)0, (void*)fn_801A5000, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F1A4, (void*)fn_8019F1B4, (void*)fn_8019FF88, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019FF8C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
+void* lbl_80333A58[40] = {(void*)0, (void*)0, (void*)fn_801A5040, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F780, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019F6F0, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248, (void*)0, (void*)0, (void*)fn_801A5080, (void*)fn_8019F414, (void*)fn_8019F064, (void*)fn_8019F560, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)fn_8019F4D4, (void*)fn_8019F03C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
+void* __vt__15FlatSphereShape[20] = {(void*)0, (void*)0, (void*)fn_801A50C0, (void*)fn_8019EF00, (void*)fn_8019F26C, (void*)fn_8019F3D0, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019F03C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
+void* __vt__11SphereShape[20] = {(void*)0, (void*)0, (void*)fn_8019F3D4, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F1A4, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019F03C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
+
 }

@@ -969,7 +969,9 @@ s32 fn_80178C4C(u16* m) {
     return m[0] + 4;
 }
 
-void PhysTaskDumpCars(void) {
+// CollShape::vf4C (slot 0x4C of the sphcoll shape tables), by its linker name. Empty in retail; the dead debug
+// format string below is all that is left of its body (it was labelled PhysTaskDumpCars after that string).
+extern "C" void vf4C__9CollShapeFv(void) {
     const char* dump[] = {"PhysTaskDumpCars: %2d - (%3.2f, %3.2f, %3.2f) tri %d"};
 }
 

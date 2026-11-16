@@ -213,7 +213,7 @@ void CollVolume::Reset(void) {
     fn_801E9DC4(hint);
 }
 
-extern "C" void fn_80179EE4(void) {}
+void CollShape::vf28(void) {}  // empty; slot 0x28 of every sphcoll shape table
 
 CollVolume::~CollVolume(void) {
     int i;
@@ -348,7 +348,7 @@ void CollVolume::Update(void) {
     }
 }
 
-extern "C" void fn_8017A800(void) {}
+void CollShape::vf0C(void) {}  // empty; slot 0x0C of the non-sphere shape tables
 
 s32 CollVolume::vf34(CollPacket* p) {
     f32 v[3];

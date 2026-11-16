@@ -641,7 +641,8 @@ void RigidBody::OnImpulses(RVec3* f, RVec3* t) {}
 
 void RigidBody::OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by) {}
 
-extern "C" void fn_8017C7C4(void) {}
+// CollShape::vf14 (empty; slot 0x14 of the sphcoll shape tables), by its linker name: CollShape is not declared here.
+extern "C" void vf14__9CollShapeFv(void) {}
 
 void RigidBody::Flush(RVec3* f, RVec3* t) {
     RMat33* ii;
