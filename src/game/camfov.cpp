@@ -3,6 +3,7 @@
 // field offsets; the large routines and the initialiser are still stubs. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/camframe.h"
 #include "game/camrect.h"
 #include "game/camrec.h"
@@ -27,7 +28,6 @@ extern CamRect lbl_8049A218[4];
 
 extern "C" {
 
-f32 PSVECDotProduct(const f32* a, const f32* b);
 extern const f32 lbl_80563E30;  // minimum squared distance
 
 // Places the camera at `pos` looking at `target` with `up` as the up hint; nothing changes the frame
@@ -41,7 +41,7 @@ void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
     d.x = target[0] - cr->pose.pos.v[0];
     d.y = target[1] - cr->pose.pos.v[1];
     d.z = target[2] - cr->pose.pos.v[2];
-    if (PSVECDotProduct(&d.x, &d.x) < lbl_80563E30) {
+    if (PSVECDotProduct((const Vec*)&d.x, (const Vec*)&d.x) < lbl_80563E30) {
         return;
     }
     if (AbsF(d.x) < 0.01f && AbsF(d.z) < 0.01f) {
@@ -50,8 +50,8 @@ void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
     cr->pose.rot.m[6] = d.x;
     cr->pose.rot.m[7] = d.y;
     cr->pose.rot.m[8] = d.z;
-    PSVECCrossProduct(up, (f32*)&cr->pose.rot.m[6], (f32*)&cr->pose);
-    PSVECCrossProduct((f32*)&cr->pose.rot.m[6], (f32*)&cr->pose, (f32*)&cr->pose.rot.m[3]);
+    PSVECCrossProduct((const Vec*)up, (const Vec*)((f32*)&cr->pose.rot.m[6]), (Vec*)((f32*)&cr->pose));
+    PSVECCrossProduct((const Vec*)((f32*)&cr->pose.rot.m[6]), (const Vec*)((f32*)&cr->pose), (Vec*)((f32*)&cr->pose.rot.m[3]));
     Orthonormalize(cam);
 }
 
@@ -337,7 +337,6 @@ extern const f32 lbl_80563E44;  // -10.0
 extern const f32 lbl_80563E58;  // 2.0
 extern const f32 lbl_80563F18;  // -13.0
 extern f32 __float_epsilon[];  // FLT_EPSILON
-f32 PSVECMag(const f32* v);
 int fn_801EA03C(const s16* hint, f32* pos);
 
 // A vector copied as words (the original's struct copies of these move lwz/stw pairs).
@@ -466,26 +465,26 @@ void fn_8026F420(int mode, int prev, u8* p) {
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up1.x);
     d.Set(lbl_80563E78, lbl_80563E78, lbl_80563E78);
     int still = 0;
-    if (PSVECDotProduct(c->move, c->move) < lbl_80563E30) {
+    if (PSVECDotProduct((const Vec*)c->move, (const Vec*)c->move) < lbl_80563E30) {
         still = 1;
         d.x = c->move[0];
         d.y = c->move[1];
         d.z = c->move[2];
     } else {
-        f32 inv = lbl_80563E30 / PSVECMag(c->move);
+        f32 inv = lbl_80563E30 / PSVECMag((const Vec*)c->move);
         d.x = c->move[0] * inv;
         d.y = c->move[1] * inv;
         d.z = c->move[2] * inv;
     }
     if (!fn_801769F8()) {
-        if (still || PSVECDotProduct(&d.x, &c->view.axes.fwd.x) >= lbl_80563E78) {
-            f32 k = -0.15015016f * PSVECDotProduct(&d.x, &c->view.axes.right.x);
+        if (still || PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.fwd.x) >= lbl_80563E78) {
+            f32 k = -0.15015016f * PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.right.x);
             c->view.pos.v[0] = c->view.pos.v[0] + c->view.axes.right.x * k;
             c->view.pos.v[1] = c->view.pos.v[1] + c->view.axes.right.y * k;
             c->view.pos.v[2] = c->view.pos.v[2] + c->view.axes.right.z * k;
         } else {
             f32 k = -0.15015016f *
-                    (PSVECDotProduct(&d.x, &c->view.axes.right.x) > lbl_80563E78 ? lbl_80563E30 : -1.0f);
+                    (PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.right.x) > lbl_80563E78 ? lbl_80563E30 : -1.0f);
             c->view.pos.v[0] = c->view.pos.v[0] + c->view.axes.right.x * k;
             c->view.pos.v[1] = c->view.pos.v[1] + c->view.axes.right.y * k;
             c->view.pos.v[2] = c->view.pos.v[2] + c->view.axes.right.z * k;
@@ -624,7 +623,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             c->tf.pos.v[1] = c->tf.pos.v[1] + c->axes.fwd.y * lbl_80563E44;
             c->tf.pos.v[2] = c->tf.pos.v[2] + c->axes.fwd.z * lbl_80563E44;
         }
-        f32 along = PSVECDotProduct(&c->axes.fwd.x, c->vel);
+        f32 along = PSVECDotProduct((const Vec*)&c->axes.fwd.x, (const Vec*)c->vel);
         // The original computes a travel direction here and never uses it (its compares survive).
         f32 dir = lbl_80563E78;
         if (along > 3.5555556f || along < -5.3333335f) {
@@ -637,8 +636,8 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         c->lastOn = c->lastOn + lbl_80563EA8 * (on - c->lastOn);
         CVec3* forward;
         int reverse = c->lastOn < lbl_80563E78;
-        int back = PSVECDotProduct(&c->tf.axes.fwd.x, c->vel) < lbl_80563E78;
-        if (PSVECDotProduct(&c->tf.axes.fwd.x, &c->axes.fwd.x) < lbl_80563E78) {
+        int back = PSVECDotProduct((const Vec*)&c->tf.axes.fwd.x, (const Vec*)c->vel) < lbl_80563E78;
+        if (PSVECDotProduct((const Vec*)&c->tf.axes.fwd.x, (const Vec*)&c->axes.fwd.x) < lbl_80563E78) {
             back = !back;
         }
         if (!back) {
@@ -649,7 +648,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             d.x = target.v[0] - c->tf.pos.v[0];
             d.y = target.v[1] - c->tf.pos.v[1];
             d.z = target.v[2] - c->tf.pos.v[2];
-            f32 m = lbl_80563E58 * PSVECDotProduct(&d.x, &c->tf.axes.fwd.x);
+            f32 m = lbl_80563E58 * PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->tf.axes.fwd.x);
             q.x = c->tf.pos.v[0] + c->tf.axes.fwd.x * m;
             q.y = c->tf.pos.v[1] + c->tf.axes.fwd.y * m;
             q.z = c->tf.pos.v[2] + c->tf.axes.fwd.z * m;
@@ -657,13 +656,13 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             d.y = q.y - target.v[1];
             d.z = q.z - target.v[2];
         }
-        f32 len = PSVECMag(&d.x);
+        f32 len = PSVECMag((const Vec*)&d.x);
         len = len > lbl_80563EA8 ? len : lbl_80563EA8;
         f32 inv = lbl_80563E30 / len;
         c->tf.axes.fwd.x = d.x * inv;
         c->tf.axes.fwd.y = d.y * inv;
         c->tf.axes.fwd.z = d.z * inv;
-        f32 t = (PSVECMag(c->vel) - 1.3333334f) / 26.666666f;
+        f32 t = (PSVECMag((const Vec*)c->vel) - 1.3333334f) / 26.666666f;
         t = lbl_80563E30 < t ? lbl_80563E30 : t;
         t = t > lbl_80563E78 ? t : lbl_80563E78;
         f32 s = fn_8026FCE0(t, -0.5f);
@@ -676,13 +675,13 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             f.v[2] *= -1.0f;
         }
         f.v[1] *= 0.2f;
-        f32 m = PSVECMag(f.v);
+        f32 m = PSVECMag((const Vec*)f.v);
         m = 0.05f > m ? 0.05f : m;
         f32 inv2 = lbl_80563E30 / m;
         f.v[0] *= inv2;
         f.v[1] *= inv2;
         f.v[2] *= inv2;
-        if (PSVECDotProduct(f.v, &c->tf.axes.fwd.x) > -0.95f) {
+        if (PSVECDotProduct((const Vec*)f.v, (const Vec*)&c->tf.axes.fwd.x) > -0.95f) {
             f32 w = s + 0.7f * (lbl_80563E30 - s);
             SetZXY(&r, LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
             c->tf.axes.fwd.x = r.x;
@@ -694,13 +693,13 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             side.x = c->tf.axes.fwd.z;
             side.y = y2;
             side.z = sideZ;
-            f32 kk = lbl_80563EA8 * (PSVECDotProduct(&side.x, f.v) > lbl_80563E78 ? lbl_80563E30 : -1.0f);
+            f32 kk = lbl_80563EA8 * (PSVECDotProduct((const Vec*)&side.x, (const Vec*)f.v) > lbl_80563E78 ? lbl_80563E30 : -1.0f);
             c->tf.axes.fwd.x = c->tf.axes.fwd.x + side.x * kk;
             c->tf.axes.fwd.y = c->tf.axes.fwd.y + side.y * kk;
             c->tf.axes.fwd.z = c->tf.axes.fwd.z + side.z * kk;
         }
         forward = &c->tf.axes.fwd;
-        f32 n = PSVECMag(&forward->x);
+        f32 n = PSVECMag((const Vec*)&forward->x);
         n = 0.05f > n ? 0.05f : n;
         f32 inv3 = lbl_80563E30 / n;
         forward->x = forward->x * inv3;
@@ -788,13 +787,13 @@ void fn_802704E4(u8* p) {
         d.x = target.v[0] - c->tf.pos.v[0];
         d.y = target.v[1] - c->tf.pos.v[1];
         d.z = target.v[2] - c->tf.pos.v[2];
-        f32 len = PSVECMag(&d.x);
+        f32 len = PSVECMag((const Vec*)&d.x);
         len = len > lbl_80563EA8 ? len : lbl_80563EA8;
         f32 inv = lbl_80563E30 / len;
         c->tf.axes.fwd.x = d.x * inv;
         c->tf.axes.fwd.y = d.y * inv;
         c->tf.axes.fwd.z = d.z * inv;
-        f32 t = (PSVECMag(c->vel) - 1.3333334f) / 26.666666f;
+        f32 t = (PSVECMag((const Vec*)c->vel) - 1.3333334f) / 26.666666f;
         t = lbl_80563E30 < t ? lbl_80563E30 : t;
         t = t > lbl_80563E78 ? t : lbl_80563E78;
         f32 k;
@@ -812,7 +811,7 @@ void fn_802704E4(u8* p) {
             f.v[2] *= -1.0f;
         }
         f.v[1] *= 0.2f;
-        f32 m = PSVECMag(f.v);
+        f32 m = PSVECMag((const Vec*)f.v);
         m = 0.05f > m ? 0.05f : m;
         f32 inv2 = lbl_80563E30 / m;
         f.v[0] *= inv2;

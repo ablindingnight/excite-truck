@@ -6,10 +6,7 @@
 // Camera-frame helpers shared by the camera units (camfov, camstate). A camera keeps its rows at
 // +0x58/+0x64/+0x70 (right, up, view axis) and its position at +0x7C.
 
-extern "C" {
-void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
-void PSVECNormalize(const f32* in, f32* out);
-}
+#include <revolution/MTX/vec.h>
 
 // |x| as a float (a plain (f32)__fabs(x) allocates the compare differently).
 static inline f32 AbsF(f32 x) { return __fabs(x); }
@@ -32,10 +29,10 @@ static inline void Orthonormalize(u8* p) {
     CsVec z;
     x.Set(*(f32*)(p + 0x58), *(f32*)(p + 0x5C), *(f32*)(p + 0x60));
     z.Set(*(f32*)(p + 0x70), *(f32*)(p + 0x74), *(f32*)(p + 0x78));
-    PSVECCrossProduct(&z.x, &x.x, &y.x);
-    PSVECNormalize(&x.x, &x.x);
-    PSVECNormalize(&y.x, &y.x);
-    PSVECCrossProduct(&x.x, &y.x, &z.x);
+    PSVECCrossProduct((const Vec*)&z.x, (const Vec*)&x.x, (Vec*)&y.x);
+    PSVECNormalize((const Vec*)&x.x, (Vec*)&x.x);
+    PSVECNormalize((const Vec*)&y.x, (Vec*)&y.x);
+    PSVECCrossProduct((const Vec*)&x.x, (const Vec*)&y.x, (Vec*)&z.x);
     *(f32*)(p + 0x58) = x.x;
     *(f32*)(p + 0x5C) = x.y;
     *(f32*)(p + 0x60) = x.z;
