@@ -91,13 +91,6 @@ s32 lbl_8055F25C;
 u8 lbl_8055F260;  // career mode active
 f32 lbl_8055F264;
 u8 lbl_8055F268;
-u8 lbl_8055F269;
-u8 lbl_8055F26A;
-s32 lbl_8055F26C;
-u8 lbl_8055F270;
-u8 lbl_8055F271;
-s32 lbl_8055F274;
-u8* lbl_8055F278;
 
 extern "C" void fn_802E317C(const char* fmt, ...);
 
@@ -648,6 +641,16 @@ void MenuDoDemo(void) {
     }
     lbl_8055F260 = 0;
 }
+
+}  // extern "C"
+
+s32 lbl_8055F26C;
+u8 lbl_8055F270;
+u8 lbl_8055F271;
+s32 lbl_8055F274;
+u8* lbl_8055F278;
+
+extern "C" {
 
 // Not in the DOL (dead-stripped): other demo menu entries.
 void ShowUnavailable(void) { fn_80214FD8("Unavailable", "This option is not available in this demo."); }

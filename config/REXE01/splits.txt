@@ -3731,7 +3731,7 @@ game/popwarn.cpp:
 	.data       start:0x80343270 end:0x80343998
 	.bss        start:0x804988F0 end:0x80498998
 	.sdata      start:0x8055BE80 end:0x8055BF10
-	.sbss       start:0x8055F250 end:0x8055F280
+	.sbss       start:0x8055F250 end:0x8055F27C
 	.sdata2     start:0x80563898 end:0x80563908
 
 game/multievt.cpp:
