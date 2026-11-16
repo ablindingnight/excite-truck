@@ -1147,7 +1147,7 @@ config.libs.append(
             Object(Matching, "game/mixer.cpp"),
             Object(Matching, "game/engsnd.cpp"),
             Object(Matching, "game/tiresnd.cpp"),
-            Object(NonMatching, "game/musicplr.cpp"),
+            Object(Matching, "game/musicplr.cpp"),
             Object(Matching, "game/unk_8020A6AC.cpp"),
             Object(Matching, "game/sounddash.cpp"),
             Object(NonMatching, "game/menumus.cpp"),
