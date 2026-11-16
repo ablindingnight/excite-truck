@@ -16,6 +16,7 @@
 #include "game/shapes.h"
 #include "game/math_types.h"
 #include "game/vpos.h"
+#include "game/carbody.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -429,32 +430,8 @@ public:
     virtual PlaceDist* Dist(void);
 };
 
-struct RaceCarRec {
-    u8 pad0[0x10];
-    u32 model;            // offset 0x10
-    u8 pad14[0x60 - 0x14];
-    f32 pos[3];           // offset 0x60
-    s16 heading;          // offset 0x6C
-    u8 pad6E[0x118 - 0x6E];
-    f32 vel[3];           // offset 0x118
-    u8 pad124[0x1EC - 0x124];
-    s32 index;            // offset 0x1EC
-    s32 kind;             // offset 0x1F0
-    u8 pad1F4[0x270 - 0x1F4];
-    PlaceSource* places;  // offset 0x270
-    u8 pad274[0x25A0 - 0x274];
-    f32 f25A0;            // offset 0x25A0
-    u8 pad25A4[0x25BC - 0x25A4];
-    f32 turbo;            // offset 0x25BC
-    u8 pad25C0[0x25D4 - 0x25C0];
-    f32 speed;            // offset 0x25D4
-    u8 pad25D8[0x2620 - 0x25D8];
-    s32 i2620;            // offset 0x2620
-    u8 pad2624[0x2690 - 0x2624];
-    f32 f2690;            // offset 0x2690
-
-    f32 F2690(void) { return f2690; }
-};
+// The racer's F2690 accessor (carbody.h's RaceCarRec; retail keeps its weak copy here).
+inline f32 RaceCarRec::F2690(void) { return f2690; }
 
 class BetaCar;
 
@@ -1907,7 +1884,7 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
 void CarResult::Finish(const BetaCar* c) {
     s32 p;
     clock = c->master->timer.now;
-    p = fn_8017960C(c->id)->places->Get()->place;
+    p = ((PlaceSource*)fn_8017960C(c->id)->src)->Get()->place;
     place = p;
     table.index = p - 1;
     Compute(c);
@@ -2082,7 +2059,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     }
     meterObj->SetActive(!bAA && !boosting);
     if (!boosting && !bAA) {
-        f32 k = rc->model == 'ACAR' ? lbl_80559EB8 : 1.0f;
+        f32 k = (u32)rc->type == 'ACAR' ? lbl_80559EB8 : 1.0f;
         f32 m = meter + 0.0004f * (meterObj->Rate(rc) * k);
         meter = 1.0f < m ? 1.0f : m;
     }
@@ -2096,7 +2073,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         int busy;
         int i;
         if (!wasFull) {
-            if (rc->kind == 0x50) {
+            if (rc->f1F0 == 0x50) {
                 fn_801DF074(2, 1);
             }
             fullFlash = 2.0f;
@@ -2114,16 +2091,16 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             for (; j < puddles->count; j++) {
                 Puddle* p = puddles->items[j];
                 f32 zv = p->z;
-                f32 dz = rc->pos[2] - zv;
+                f32 dz = rc->mtx.pos.z - zv;
                 f32 xv = p->x;
-                f32 dx = rc->pos[0] - xv;
-                if (dx * dx + dz * dz < p->r * p->r ? rc->i2620 > 0 : 0) {
+                f32 dx = rc->mtx.pos.x - xv;
+                if (dx * dx + dz * dz < p->r * p->r ? rc->airborne > 0 : 0) {
                     f32 v = rc->f25A0 - 0.1f;
                     rc->f25A0 = 0.0f > v ? 0.0f : v;
                 }
             }
         }
-        pos = rc->pos;
+        pos = &rc->mtx.pos.x;
         for (i = 0; i < stars->count; i++) {
             Pickup* e = stars->items[i];
             int got;
@@ -2135,10 +2112,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                         ev.pos[0] = e->pos[0];
                         ev.pos[1] = e->pos[1];
                         ev.pos[2] = e->pos[2];
-                        ev.vel[0] = rc->vel[0];
-                        ev.vel[1] = rc->vel[1];
-                        ev.vel[2] = rc->vel[2];
-                        ev.heading = rc->heading;
+                        ev.vel[0] = rc->vel.x;
+                        ev.vel[1] = rc->vel.y;
+                        ev.vel[2] = rc->vel.z;
+                        ev.heading = rc->hint[0];
                         ev.sfx = 0x97;
                         fn_801796EC(10, &ev, sizeof(ev));
                     }
@@ -2175,7 +2152,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         fullTime = 0.0f;
     }
     if (star) {
-        if (rc->kind == 0x50) {
+        if (rc->f1F0 == 0x50) {
             fn_801DF074(3, 1);
         }
         fn_801D488C(star, 1, 1, &lastPos);
@@ -2184,7 +2161,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         boosts++;
         maxBoosts = boosts > maxBoosts ? boosts : maxBoosts;
     }
-    if (fn_801B2EC0(id)->GetInfo()->state == 0 && rc->kind == 0x50 && rc->speed > 44.444447f) {
+    if (fn_801B2EC0(id)->GetInfo()->state == 0 && rc->f1F0 == 0x50 && rc->speed > 44.444447f) {
         fn_801DF074(4, 1);
     }
     f58 = 0.0f;
@@ -2196,7 +2173,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         }
     }
     {
-        int turbo = rc->turbo > __float_epsilon[0];
+        int turbo = rc->f25BC > __float_epsilon[0];
         if (lbl_80559EC0 < 0 || lbl_80559EC0 >= 4) {
             lbl_80559EC0 = 0;
         }
@@ -2344,8 +2321,8 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void BetaCar::DrawHud(ILayout* l, int view) const {
     RaceCarRec* rc = fn_8017960C(id);
-    PlaceInfo* info = rc->places->Get();
-    PlaceDist* dist = rc->places->Dist();
+    PlaceInfo* info = ((PlaceSource*)rc->src)->Get();
+    PlaceDist* dist = ((PlaceSource*)rc->src)->Dist();
     int out = (info->flags >> 2) & 1;
     s32 pts = Round(shown);
     int grade = fn_801609C4(pts);
@@ -2688,7 +2665,7 @@ static inline void AwardCar(BetaCar* c, int id, int kind, f32 v) {
         break;
     case 1:
         c->flash[1] = 1.5f;
-        if (fn_8017960C(id)->kind == 0x50) {
+        if (fn_8017960C(id)->f1F0 == 0x50) {
             fn_801DF074(1, 1);
         }
         break;
@@ -3524,7 +3501,7 @@ inline void BetaMaster::vf0C(void) {
                 if (!c->result.dnf) {
                     c->Retire();
                 }
-            } else if (fn_8017960C(i)->kind == 0x50) {
+            } else if (fn_8017960C(i)->f1F0 == 0x50) {
                 s32 n;
                 found = 1;
                 if (fn_801609C4((s32)c->score) == 0 && coins.enabled) {
@@ -3539,7 +3516,7 @@ inline void BetaMaster::vf0C(void) {
                     fn_8014E61C(i, 5, n);
                 }
             }
-        } else if (fn_8017960C(i)->kind == 0x50) {
+        } else if (fn_8017960C(i)->f1F0 == 0x50) {
             int j;
             for (j = 0; j < fn_80179650(); j++) {
                 if (i == fn_80179630(j)) {
@@ -3632,7 +3609,7 @@ inline void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* h
     f32 mag = PSVECMag(hit);
     int fa = 1;
     int fb = 1;
-    if (a->kind == 0x50 && b->kind == 0x50) {
+    if (a->f1F0 == 0x50 && b->f1F0 == 0x50) {
         f32 sb = b->speed;
         f32 sa = a->speed;
         fa = sa > sb;
@@ -4238,7 +4215,7 @@ inline int BetaMaster::vf24(void) const {
     int r;
     int any = 0;
     for (int i = 0; i < fn_801B2F24(); i++) {
-        if ((*it)->kind == 0x50 && vf20(i)) {
+        if ((*it)->f1F0 == 0x50 && vf20(i)) {
             any = 1;
         }
         it++;
@@ -4347,7 +4324,7 @@ inline void BetaCar::Reset(void) {
     }
     meterSmooth = 0.0f;
     meter = 0.0f;
-    if (lbl_804348E8[id]->model == 'ACAR') {
+    if ((u32)lbl_804348E8[id]->type == 'ACAR') {
         meter = lbl_80559EBC;
     }
     fullTime = 0.0f;
@@ -4497,7 +4474,7 @@ inline void BetaMaster::a1(void) {
     nCars = lbl_8055E4D0;
     if (nCars > 0) {
         for (; i < nCars; i++) {
-        bool acar = lbl_804348E8[i]->model == 'ACAR';
+        bool acar = (u32)lbl_804348E8[i]->type == 'ACAR';
         cars[i].hud = new ("stuntdash") CarHud(i, acar);
         cars[i].stunts = new ("pr_stuntdash") StuntList;
         cars[i].master = this;
@@ -4584,7 +4561,7 @@ inline void BetaMaster::b2Body(StuntEvt* e, int car) {
     if (e->Type() == 's') {
         bc = &cars[car];
         f = &bc->bA8;
-        turbo = lbl_804348E8[car]->turbo > __float_epsilon[0];
+        turbo = lbl_804348E8[car]->f25BC > __float_epsilon[0];
         if (f[0]) {
             bc->meterObj->Crash(lbl_804348E8[bc->id]);
         }
@@ -4626,10 +4603,10 @@ static inline int TakeInv(Token* t, Body* b, int car) {
             ev.pos[0] = p[0];
             ev.pos[1] = p[1];
             ev.pos[2] = p[2];
-            ev.vel[0] = r2->vel[0];
-            ev.vel[1] = r2->vel[1];
-            ev.vel[2] = r2->vel[2];
-            ev.heading = r2->heading;
+            ev.vel[0] = r2->vel.x;
+            ev.vel[1] = r2->vel.y;
+            ev.vel[2] = r2->vel.z;
+            ev.heading = r2->hint[0];
             ev.sfx = 0x96;
             fn_801796EC(10, &ev, sizeof(ev));
         }
@@ -4643,7 +4620,7 @@ static inline int TakeInv(Token* t, Body* b, int car) {
 inline void BetaMaster::c2(Body* b, int car) {
     int i;
     RaceCarRec* rc = fn_8017960C(car);
-    if (rc && (f32)__fabs(rc->f2690) <= __float_epsilon[0] && vf20(car) && !fn_80161BB8() && rc->kind == 0x50) {
+    if (rc && (f32)__fabs(rc->f2690) <= __float_epsilon[0] && vf20(car) && !fn_80161BB8() && rc->f1F0 == 0x50) {
         for (i = 0; i < bumps.a.count; i++) {
             f32 pts = TakePoints(bumps.a.data[i], b);
             if (pts > 0.5f) {
