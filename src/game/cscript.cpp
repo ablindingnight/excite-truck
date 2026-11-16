@@ -2,6 +2,7 @@
 // replays them by interpolation, and drives screenshot "movie" capture over a tick range. Names
 // are guesses apart from the messages and allocation tag.
 #include "game/common.h"
+#include "game/camblend.h"
 #include "macros.h"
 
 extern "C" {
@@ -37,7 +38,6 @@ struct ScriptPlayer {
 };
 
 extern "C" {
-void fn_8026E22C(ScriptCamFrame* out, const ScriptNode* a, const ScriptNode* b, f32 t);
 ScriptPlayer* fn_802678E4(int player);
 }
 
@@ -147,7 +147,7 @@ void fn_8027847C(ScriptCam* cam) {
         f32 t = (f32)(lbl_8055E3C4 - a->tick) / span;
         t = MIN(1.0f, t);
         t = MAX(t, 0.0f);
-        fn_8026E22C(&cam->frame, a, b, t);
+        fn_8026E22C((RMtx*)&cam->frame, (const RMtx*)&a->frame, (const RMtx*)&b->frame, t);
         cam->fov = a->fov + t * (b->fov - a->fov);
         if (lbl_8055F5B9 && !lbl_8055F5BA && lbl_8055E3C4 >= lbl_8055F5C0 && lbl_8055E3C4 < lbl_8055F5C0 + 10) {
             lbl_8055F5B9 = 0;

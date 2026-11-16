@@ -3,6 +3,7 @@
 // "tips:" messages give the subject; the names are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/camblend.h"
 #include "game/rmtx.h"
 #include "game/locstring.h"
 #include "game/gamedb.h"
@@ -74,7 +75,6 @@ void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0,
 void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
 int fn_80277960(const char* name, RMtx* frame, f32* fov);
-void fn_8026E22C(RMtx* out, const RMtx* a, const RMtx* b, f32 t);
 void fn_802A1120(f32* center, f32* dir);
 f32 fn_801EA0E8(f32 x, f32 z);
 void fn_8026A2CC(RMtx* cam, int unk, f32 fov);

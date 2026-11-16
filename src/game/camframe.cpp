@@ -3,6 +3,7 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
+#include "game/camblend.h"
 #include <revolution/MTX/vec.h>
 
 extern "C" {

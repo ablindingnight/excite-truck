@@ -2,6 +2,7 @@
 // constructor and the distance-along-axis helper. The large update routine is still a stub. Names
 // are guesses.
 #include "game/common.h"
+#include "game/camblend.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/racer_camera_slot.h"
@@ -33,7 +34,6 @@ int fn_801B8570(int car);
 int fn_8026A38C(void);
 int fn_801784AC(const ValVec3* from, const ValVec3* to, ValVec3* hit, ValVec3* n, void* a, void* b, int flags);
 int fn_801EA03C(u8* ground, ValVec3* p);
-void fn_8026E22C(u8* out, PlainValMatrix* from, PlainValMatrix* to, f32 t);
 }
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
@@ -288,7 +288,7 @@ int fn_8026A698(u8* p, int i) {
     } else {
         e = k * (-2.0f * k * k) - 3.0f * k * k;
     }
-    fn_8026E22C((u8*)&((CamRec*)p)->pose, &s->frame, &f, e);
+    fn_8026E22C((RMtx*)&((CamRec*)p)->pose, (const RMtx*)&s->frame, (const RMtx*)&f, e);
     ((CamRec*)p)->fov = s->fov + e * (1.3089969f - s->fov);
     ((CamRec*)p)->mode = 5;
     s->frameNo = lbl_8055E3C4;

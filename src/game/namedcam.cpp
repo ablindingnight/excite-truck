@@ -3,6 +3,7 @@
 // Written partly against raw field offsets (the camera record layout is in game/camrec.h). Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/camblend.h"
 #include <revolution/MTX/vec.h>
 #include "game/camframe34.h"
 #include <string.h>
@@ -344,7 +345,6 @@ void fn_801C7254(Mat3* m);  // transpose
 void fn_801BFD34(CamVec3* out, const CamVec3* v, const CamPose* m);
 void fn_80144CD0(CamVec3* out, const CamVec3* p, const CamPose* m);
 void fn_8026E688(CamPose* out, const CamVec3* eye, const CamVec3* target, const CamVec3* up);
-void fn_8026E22C(CamPose* out, const CamPose* a, const CamPose* b, f32 t);
 double atan2(double y, double x);
 double atan(double x);
 double tan(double x);
@@ -656,7 +656,7 @@ void fn_80277A14(CamRec* c, int slot) {
     up.v[2] = 0.0f;
     fn_8026E688(&frame, &frame.pos, &c->carFrame.pos, &up);
     f32 tf = 1.0471976f;
-    fn_8026E22C(&blend, &lbl_804A0C60[slot].pose, &frame, e);
+    fn_8026E22C((RMtx*)&blend, (const RMtx*)&lbl_804A0C60[slot].pose, (const RMtx*)&frame, e);
     f32 fov = Lerp(lbl_804A0C60[slot].fov, tf, e);
     if (fn_80178CA4() == 2) {
         fov = 2.0f * (f32)atan(Lerp(1.0f, 0.65f, e) * (f32)tan(fov / 2.0f));
