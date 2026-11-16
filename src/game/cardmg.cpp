@@ -547,9 +547,9 @@ void fn_8018DA5C(u8* p, u8* m) {
         lean = lean > -0.25f ? lean : -0.25f;
         ApplyDamagePointDeformation(car, p, roll, lean, twist, mdl);
     }
-    U32(m, 0x29C) |= U32(p, 0x1E40);
+    U32(m, 0x29C) |= ((u32&)((CarBody*)p)->f1E40);
     DamagePart* tp = lbl_80332840;
-    CbJoint* s = (CbJoint*)(p + 0x152C);
+    CbJoint* s = (CbJoint*)&((CarBody*)p)->joints;
     f32 t = lbl_8055E460;
     S32(m, 0xA78) = 0;
     for (int i = 0; i < 17; i++) {
@@ -765,8 +765,8 @@ extern f32 lbl_8055E3C8;
 
 void fn_8018E330(u8* p) {
     fn_801B83A0()->ResetCar(p);
-    fn_80161A38(0, PTR(p, 0x1EC), 0);
-    fn_801DFF1C(PTR(p, 0x1EC));
+    fn_80161A38(0, ((u8*&)((CarBody*)p)->index), 0);
+    fn_801DFF1C(((u8*&)((CarBody*)p)->index));
     f32 zero = lbl_80561F74;
     f32 k = lbl_80561F8C;
     ((CarBody*)p)->f258C = zero;
@@ -1081,12 +1081,12 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             int idx = l->index;
             u32 bit = 1 << idx;
             u8 pt = U8(p, 0x1E2C + idx);
-            if (pt != 0xFF && !(U32(p, 0x1E3C) & bit)) {
+            if (pt != 0xFF && !(((u32&)((CarBody*)p)->f1E3C) & bit)) {
                 DentVec* g = (DentVec*)(p + 0x5FC) + pt;
                 if (PSVECDotProduct(&g->x, &g->x) > l->radius * l->radius) {
-                    U32(p, 0x1E3C) |= bit;
+                    ((u32&)((CarBody*)p)->f1E3C) |= bit;
                     if (l->point > 0) {
-                        U32(p, 0x1E40) |= 1 << l->point;
+                        ((u32&)((CarBody*)p)->f1E40) |= 1 << l->point;
                     }
                     if (idx >= 2 && idx <= 7) {
                         DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + U8(p, 0x1E2C + idx);
@@ -1252,23 +1252,23 @@ void fn_8018F538(u8* p, u8* q) {
         o[1] = PackDent(F32(d, 0x600));
         o[2] = PackDent(F32(d, 0x604));
     }
-    U8(q, 0x2A0) = S32(p, 0x15A8);
-    U8(q, 0x2A1) = S32(p, 0x1628);
-    U8(q, 0x2A2) = S32(p, 0x16A8);
-    U8(q, 0x2A3) = S32(p, 0x1728);
-    U8(q, 0x2A4) = S32(p, 0x17A8);
-    U8(q, 0x2A5) = S32(p, 0x1828);
-    U8(q, 0x2A6) = S32(p, 0x18A8);
-    U8(q, 0x2A7) = S32(p, 0x1928);
-    U8(q, 0x2A8) = S32(p, 0x19A8);
-    U8(q, 0x2A9) = S32(p, 0x1A28);
-    U8(q, 0x2AA) = S32(p, 0x1AA8);
-    U8(q, 0x2AB) = S32(p, 0x1B28);
-    U8(q, 0x2AC) = S32(p, 0x1BA8);
-    U8(q, 0x2AD) = S32(p, 0x1C28);
-    U8(q, 0x2AE) = S32(p, 0x1CA8);
-    U8(q, 0x2AF) = S32(p, 0x1D28);
-    U8(q, 0x2B0) = S32(p, 0x1DA8);
+    U8(q, 0x2A0) = ((CarBody*)p)->joints[0].state;
+    U8(q, 0x2A1) = ((CarBody*)p)->joints[1].state;
+    U8(q, 0x2A2) = ((CarBody*)p)->joints[2].state;
+    U8(q, 0x2A3) = ((CarBody*)p)->joints[3].state;
+    U8(q, 0x2A4) = ((CarBody*)p)->joints[4].state;
+    U8(q, 0x2A5) = ((CarBody*)p)->joints[5].state;
+    U8(q, 0x2A6) = ((CarBody*)p)->joints[6].state;
+    U8(q, 0x2A7) = ((CarBody*)p)->joints[7].state;
+    U8(q, 0x2A8) = ((CarBody*)p)->joints[8].state;
+    U8(q, 0x2A9) = ((CarBody*)p)->joints[9].state;
+    U8(q, 0x2AA) = ((CarBody*)p)->joints[10].state;
+    U8(q, 0x2AB) = ((CarBody*)p)->joints[11].state;
+    U8(q, 0x2AC) = ((CarBody*)p)->joints[12].state;
+    U8(q, 0x2AD) = ((CarBody*)p)->joints[13].state;
+    U8(q, 0x2AE) = ((CarBody*)p)->joints[14].state;
+    U8(q, 0x2AF) = ((CarBody*)p)->joints[15].state;
+    U8(q, 0x2B0) = ((CarBody*)p)->joints[16].state;
     S32(q, 0x29C) = ((CarBody*)p)->f1E3C;
 }
 
