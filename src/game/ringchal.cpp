@@ -2124,7 +2124,7 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
             V2 d;
             V2 a;
             V2 b;
-            int inside;
+            int outside;
             int behind;
             a.x = t->mtx.origin.x;
             a.y = t->mtx.origin.z;
@@ -2132,12 +2132,12 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
             d.x = a.x - b.x;
             b.y = c->pos.z;
             d.y = a.y - b.y;
-            inside = t->radius > (f32)sqrt(d.x * d.x + d.y * d.y);
+            outside = (f32)sqrt(d.x * d.x + d.y * d.y) > t->radius;  /* retail: fcmpo sqrt,radius + GT bit */
             behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
-            if (s->f10 == s->teles->count - 1 && inside) {
+            if (s->f10 == s->teles->count - 1 && outside) {
                 s->teles->data[s->f10].b30 = 0;
             } else {
-                if (inside || behind) {
+                if (outside || behind) {
                     if (!p->b8) {
                         p->b8 = 1;
                         p->fC = 0.0f;
