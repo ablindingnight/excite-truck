@@ -2,6 +2,7 @@
 // neutral, a timer and a flag block, looked up by vehicle id. Names are guesses apart from the
 // allocation tag and message.
 #include "game/common.h"
+#include "game/carstate.h"
 #include "macros.h"
 
 extern "C" {
@@ -10,23 +11,6 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 }
 
 void* operator new[](size_t size, const char* tag);
-
-struct CarColors {
-    u8 c[164][4];
-};
-
-struct CarFlags {
-    u8 f[18];
-};
-
-struct CarState {
-    CarColors col;   // offset 0x0
-    f32 time;        // offset 0x290
-    f32 duration;    // offset 0x294
-    s32 x298;        // offset 0x298
-    s32 x29C;        // offset 0x29C
-    CarFlags flags;  // offset 0x2A0
-};
 
 struct CarStateBlock {
     s32 id;          // offset 0x0

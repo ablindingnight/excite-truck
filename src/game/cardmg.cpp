@@ -174,23 +174,6 @@ int fn_8018C514(u8* p, const f32* pos) {
 }  // extern "C"
 
 // The car's paint/flag state block (carstate.cpp).
-struct CarColors {
-    u8 c[164][4];
-};
-
-struct CarFlags {
-    u8 f[18];
-};
-
-struct CarState {
-    CarColors col;   // offset 0x0
-    f32 time;        // offset 0x290
-    f32 duration;    // offset 0x294
-    s32 x298;        // offset 0x298
-    s32 x29C;        // offset 0x29C
-    CarFlags flags;  // offset 0x2A0
-};
-
 void* GetEvent(int event);
 
 struct EventDesc {
@@ -563,15 +546,6 @@ void fn_8018DA5C(u8* p, u8* m) {
 #pragma pop
 
 // A deformable point of the car body (0x34 bytes, from the model at car + 0x26C).
-struct DentVec {
-    void AddScaled(const DentVec& v, f32 s) {
-        x += v.x * s;
-        y += v.y * s;
-        z += v.z * s;
-    }
-    f32 x, y, z;
-};
-
 struct DentPoint {
     s32 unk0;     // offset 0x0
     s32 goal;     // offset 0x4: index into the car's spring goals (car + 0x5FC)

@@ -3377,7 +3377,7 @@ void fn_8018A180(u8* p) {
     if (cb->f328) {
         fn_80279B28(cb->f328, p + 0x1E44);
         fn_8018F2C0(p, p + 0x1E44);
-        if (cb->f20DC < 9 && ((CarHost*)((u8*&)cb->src))->IsImpaired()) {
+        if (cb->state.x298 < 9 && ((CarHost*)((u8*&)cb->src))->IsImpaired()) {
             fn_802E30C8("car: unimpairing car %d", cb->index);
             ((CarHost*)((u8*&)cb->src))->Unimpair();
             fn_8018AF04(p);

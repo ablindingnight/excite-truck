@@ -3,6 +3,7 @@
 
 #include "game/common.h"
 #include "game/rigid.h"
+#include "game/carstate.h"
 
 // The car body (0x2700 bytes; vtable emitted by carbody.cpp): the rigid body every car, net car and trailer is.
 // One declaration for carbody, netcar, springcar and trailer (port ODR work, 2026-11-16). Most of carbody.cpp still
@@ -64,6 +65,16 @@ struct CbSetup {
     CbWheelSetup wheels[4];                                             // 0x80
     f32 f110, f114, f118, f11C, f120, f124, f128;                       // 0x110
     HVec modelOffset;                                                   // 0x12C
+};
+
+// A body point (the spring goals and their eased copies; cardmg).
+struct DentVec {
+    void AddScaled(const DentVec& v, f32 s) {
+        x += v.x * s;
+        y += v.y * s;
+        z += v.z * s;
+    }
+    f32 x, y, z;
 };
 
 struct EVec {
@@ -298,14 +309,14 @@ public:
     f32 f5F0;                    // offset 0x5F0
     f32 f5F4;                    // offset 0x5F4
     s32 f5F8;                    // offset 0x5F8
-    u8 pad5FC[0x152C - 0x5FC];
+    DentVec goal[162];           // offset 0x5FC: spring goals (cardmg)
+    DentVec ease[162];           // offset 0xD94: eased points (names unproven)
     CbJoint joints[18];          // offset 0x152C
     u8 pad1E2C[0x1E3C - 0x1E2C];
     s32 f1E3C;                   // offset 0x1E3C
     s32 f1E40;                   // offset 0x1E40
-    u8 pad1E44[0x20DC - 0x1E44];
-    s32 f20DC;                   // offset 0x20DC
-    u8 pad20E0[0x23AC - 0x20E0];
+    CarState state;              // offset 0x1E44: live damage snapshot
+    CarState saved;              // offset 0x20F8: saved copy (cardmg)
     CbWheel wheels[4];           // offset 0x23AC
     u8* f257C;                   // offset 0x257C
     u8* f2580;                   // offset 0x2580
