@@ -185,8 +185,7 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
             BFrame local = b->rest;
             BFrame parent;
             BMtx33 rot;
-            BVec v;
-            BMtx33 t;
+            BFrame t;
             if (b->parent < 1) {
                 parent.r.xx = 1.0f;
                 parent.r.xy = 0.0f;
@@ -207,12 +206,12 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
             BMtx33 m = local.r;
             BFrame a;
             Transpose(&m);
-            MtxMul(t, m, rot);
-            MulVec(&v, &local.t, &t);
-            v.x *= -1.0f;
-            v.y *= -1.0f;
-            v.z *= -1.0f;
-            fn_801BFD34(&a.t, &v, &local);
+            MtxMul(t.r, m, rot);
+            MulVec(&t.t, &local.t, &t.r);
+            t.t.x *= -1.0f;
+            t.t.y *= -1.0f;
+            t.t.z *= -1.0f;
+            fn_801BFD34(&a.t, &t.t, &local);
             Mat3Mul((Mat3*)&a, (const Mat3*)&t, (const Mat3*)&local);
             fn_801BFD34(&wa->t, &a.t, &parent);
             Mat3Mul((Mat3*)wb, (const Mat3*)&a, (const Mat3*)&parent);
