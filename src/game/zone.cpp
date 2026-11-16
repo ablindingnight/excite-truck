@@ -374,7 +374,11 @@ struct Stats {
     s32 bonus;    // offset 0x18
 };
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
+static inline int NearZero(f32 x) {
+    f64 absValue = __fabs(x);
+    f32 value = (f32)absValue;
+    return value <= __float_epsilon[0];
+}
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
