@@ -3,6 +3,7 @@
 // car list for the effect callbacks, reads each car's efx.val, and owns the effects random
 // number generator. Names are guesses apart from the allocation tags and messages.
 #include "game/common.h"
+#include "game/carinfo.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
@@ -138,11 +139,7 @@ struct EfxModel {
     s32 i3EC;    // offset 0x3EC
 };
 
-struct CarDef {
-    u8 pad0[0x88];
-    char name[0x30];  // offset 0x88
-    u32 flags;        // offset 0xB8
-};
+// CarInfo: game/carinfo.h (fn_801EA9A0; was a local CarDef view).
 
 struct EfxShort {
     EfxShort(s16 v) { x = v; }
@@ -189,7 +186,7 @@ int fn_801E866C(int view);
 f32 fn_801E88F0(int view);
 int fn_801E8954(int view);
 int fn_801EA994(void);
-CarDef* fn_801EA9A0(int i);
+CarInfo* fn_801EA9A0(int i);
 EfxDriver* fn_801EA9CC(int i);
 s32 fn_801EE0C8(void* model);
 f32 fn_801EE0D0(void* model, int wheel);
@@ -598,9 +595,9 @@ void fn_802880F4(void) {
     int n = fn_801EA994();
     lbl_8055F6C4 = new ("efx car tab") EfxInfo[n];
     for (int i = 0; i < fn_801EA994(); i++) {
-        CarDef* d = fn_801EA9A0(i);
+        CarInfo* d = fn_801EA9A0(i);
         s32 model = fn_801EE0C8((u32)i < 8 ? lbl_80488648[i] : 0);
-        fn_80287CE8(&lbl_8055F6C4[i], d->name, model, d->flags);
+        fn_80287CE8(&lbl_8055F6C4[i], d->setup.paint, model, d->setup.flags);
     }
 }
 

@@ -18,7 +18,7 @@ struct CarSetup {
     u32 driver;      // offset 0x68
     u32 x6C;         // offset 0x6C
     u8 slot;         // offset 0x70
-    u32 x74;         // offset 0x74
+    u32 flags;       // offset 0x74 (efxman passes it to fn_80287CE8)
 };
 
 struct CarParams {
