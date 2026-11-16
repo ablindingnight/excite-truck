@@ -75,7 +75,11 @@ struct ObjBlock {
         count = 0;
     }
     bool CanAdd(void) const { return count + 1 <= cap; }
-    ObjLoc* Alloc(void) { return &data[count++]; }
+    ObjLoc* Alloc(void) {
+        ObjLoc* p = &data[count];
+        count++;
+        return p;
+    }
     ObjLoc* data;    // offset 0x0
     s32 count;       // offset 0x4
     s32 cap;         // offset 0x8
