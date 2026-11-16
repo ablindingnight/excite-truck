@@ -2,6 +2,7 @@
 // height field drawn as an environment-mapped strip mesh) and flat shallows, with wheel and body
 // splashes from the cars. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "macros.h"
 #include <revolution/MTX.h>
 
@@ -156,7 +157,6 @@ s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 tex);
 void fn_802E317C(const char* fmt, ...);
 double sqrt(double x);
-f32 PSVECDistance(const Vec* a, const Vec* b);
 void* memset(void* dst, int c, size_t n);
 }
 
@@ -382,7 +382,7 @@ extern "C" void fn_8029C664(void) {
             Vec c2;
             f32 r2;
             fn_8029D550(*q, &c2, &r2);
-            if (PSVECDistance(&c, &c2) < r2 + (250.0f + r)) {
+            if (PSVECDistance((const Vec*)&c, (const Vec*)&c2) < r2 + (250.0f + r)) {
                 fn_802E317C("water: pools are too close");
             }
         }
@@ -653,7 +653,7 @@ WaterPool::WaterPool(const PoolDesc* d, const PoolGeom* g, const char* texName) 
     dyx = g->up.x * iy;
     dyz = g->up.y * iy;
     SetV3(&center, g->origin.x + 0.5f * (g->right.x + g->up.x), g->origin.y, g->origin.z + 0.5f * (g->right.y + g->up.y));
-    radius = PSVECDistance(&center, &origin);
+    radius = PSVECDistance((const Vec*)&center, (const Vec*)&origin);
     verts = new ("water vcache") PoolVtx[nx * 2];
     tex = fn_802CAC28(texName, 0);
     Vec c;
@@ -983,7 +983,7 @@ WaterShallow::WaterShallow(const PoolGeom* g, const char* texName) {
     SetVec(&c, corners[0].x + 0.5f * (corners[3].x - corners[0].x), corners[0].y + 0.5f * (corners[3].y - corners[0].y),
            corners[0].z + 0.5f * (corners[3].z - corners[0].z));
     center = c;
-    radius = PSVECDistance(&corners[0], &center);
+    radius = PSVECDistance((const Vec*)&corners[0], (const Vec*)&center);
     tex = fn_802CAC28(texName, 0);
 }
 

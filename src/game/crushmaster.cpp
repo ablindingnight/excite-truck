@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/rigid.h"
 #include "game/carbody.h"
 #include <stdarg.h>
@@ -41,8 +42,6 @@ double sqrt(double x);
 double cos(double x);
 double sin(double x);
 double fmod(double x, double y);
-f32 PSVECMag(const void* v);
-f32 PSVECDistance(const void* a, const void* b);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_801345D8(char* buf, int size, const char* fmt, ...);
@@ -295,7 +294,7 @@ void fn_802C8D74(void);
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline void SetLen(ValVec3* v, f32 len) {
-    f32 m = PSVECMag(v);
+    f32 m = PSVECMag((const Vec*)v);
     if (!((f32)__fabs(m) <= __float_epsilon[0])) {
         f32 k = len / m;
         v->x *= k;
@@ -930,7 +929,7 @@ static inline ValVec3* CamPos(void) { return &fn_802C86DC()->pos; }
 
 void fn_8017248C(int id) {
     RaceCarRec* car = fn_8017960C(id);
-    f32 size = Remap(PSVECDistance((ValVec3*)&car->mtx.pos, CamPos()), 200.0f, 700.0f, 14.0f, 28.0f);
+    f32 size = Remap(PSVECDistance((const Vec*)((ValVec3*)&car->mtx.pos), (const Vec*)(CamPos())), 200.0f, 700.0f, 14.0f, 28.0f);
     ValVec3 p;
     p.x = car->mtx.pos.x;
     p.y = car->mtx.pos.y;
@@ -951,7 +950,7 @@ f32 fn_801725C8(f32 t) {
 int fn_80172624(int killer, int victim) {
     RaceCarRec* a = fn_8017960C(killer);
     RaceCarRec* b = fn_8017960C(victim);
-    f32 d = PSVECDistance((ValVec3*)&a->vel, (ValVec3*)&b->vel);
+    f32 d = PSVECDistance((const Vec*)((ValVec3*)&a->vel), (const Vec*)((ValVec3*)&b->vel));
     f32 sp = a->speed;
     f32 f = lbl_8043038C.killDist * d + lbl_8043038C.killSpeed * sp;
     int r = 0;
@@ -1258,7 +1257,6 @@ void fn_8018AF04(RaceCarRec* car);
 void fn_801E9DC4(s16* h);
 f32 fn_801DCF48(int a, f32 x, f32 z);  // ground height
 void fn_801B7C8C(Respawn* r, V2* pos, V2* dir);
-void PSVECNormalize(const void* src, void* dst);
 f32 fn_801B306C(void);  // race time
 int fn_80161C38(void);
 int fn_80179650(void);
@@ -1465,7 +1463,7 @@ inline void CrushMaster::vfA8(int car) {
                 r.m.basis[2].x = v.x;
                 r.m.basis[2].y = 0.0f;
                 r.m.basis[2].z = v.z;
-                PSVECNormalize(&r.m.basis[2], &r.m.basis[2]);
+                PSVECNormalize((const Vec*)&r.m.basis[2], (Vec*)&r.m.basis[2]);
                 SetV3(&r.m.basis[0], r.m.basis[2].z, 0.0f, -r.m.basis[2].x);
                 r.vel = v;
             } else {
@@ -1970,7 +1968,7 @@ static inline void Punt(int a, int victim) {
     imp.x = tgt.x - v->mtx.pos.x;
     imp.y = tgt.y - v->mtx.pos.y;
     imp.z = tgt.z - v->mtx.pos.z;
-    len = PSVECMag(&imp);
+    len = PSVECMag((const Vec*)&imp);
     len = 0.01f > len ? 0.01f : len;
     {
         f32 inv = 1.0f / len;

@@ -1,10 +1,10 @@
 // Terrain picking (0x80203FE0-0x80204330): a set of stub hooks, plus the screen-to-terrain pick that
 // walks a ray from the camera until it lands on the ground. Names are guesses apart from the message.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void PSVECNormalize(const void* src, void* dst);
 void fn_801E9DC4(s16* h);
 int fn_801E9E78(s16* h, ValVec3* pos, ValVec3* normal, void* info);
 extern s32 lbl_8055CFF0;  // screen width
@@ -100,7 +100,7 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam,
     f32 aby = ay + by;
     f32 abz = az + bz;
     AddVertical(dir, cam->basis[1], syDelta, abx, aby, abz);
-    PSVECNormalize(&dir, &dir);
+    PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
     if (hint == NULL) {
         hint = localHint;
     }

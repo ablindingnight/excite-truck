@@ -2,6 +2,7 @@
 // data block, which copies the slot's frame (and flags) into the object every update. A model
 // object draws a loaded model at the frame; a point object draws a sprite. Names are guesses.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include <revolution/MTX/mtxtypes.h>  // Vec
 
 extern "C" {
@@ -13,7 +14,6 @@ void fn_802C744C(void* model, const void* frame);
 void fn_802C70AC(s32 sprite, const void* frame, s32 tex, s32 size);
 void fn_802DAC54(void);
 s32 fn_802C7A40(int a, void* buf, int size, int b, const void* src, int c);
-f32 PSVECDotProduct(const void* a, const void* b);
 }
 
 extern const s16 lbl_80562E28;  // no flags
@@ -170,7 +170,7 @@ f32 AnimObj::Depth(void) {
     d.x = frame.pos.x - c->pos.x;
     d.y = frame.pos.y - c->pos.y;
     d.z = frame.pos.z - c->pos.z;
-    return PSVECDotProduct(&d, &c->fwd);
+    return PSVECDotProduct((const Vec*)&d, (const Vec*)&c->fwd);
 }
 
 ModuleTag lbl_8055EB80;

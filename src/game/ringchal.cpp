@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/springcar.h"
 
 // Art animation player (artanim.cpp).
@@ -175,7 +176,6 @@ void fn_801B0C78(int car);
 }
 
 extern "C" RaceCarRec* fn_8017960C(int id);
-extern "C" f32 PSVECDotProduct(const void* a, const void* b);
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
 #define NearZeroF(x) ((f32)__fabs(x) <= __float_epsilon[0])
@@ -2114,7 +2114,7 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
             f32 radius = t->radius;
             f32 distance = (f32)wide;
             outside = distance > radius;
-            behind = PSVECDotProduct(&t->mtx.basis[2], (const ValVec3*)&c->mtx.rot.z) < 0.0f;
+            behind = PSVECDotProduct((const Vec*)&t->mtx.basis[2], (const Vec*)((const ValVec3*)&c->mtx.rot.z)) < 0.0f;
             if (s->f10 == s->teles->count - 1 && outside) {
                 s->teles->data[s->f10].b30 = 0;
             } else {
