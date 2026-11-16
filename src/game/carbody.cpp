@@ -1171,7 +1171,7 @@ void fn_801838C8(u8* p) {
     fn_801B8100(p + 0x274, cb->index, cb->f1F0);
     ((CbBodyV*)p)->SetPose(p + 0x274);
     f->ClearFlag();
-    fn_8018F2C0(p, !fn_801CF064() ? p + 0x1E44 : p + 0x20F8);
+    fn_8018F2C0(p, !fn_801CF064() ? (u8*)&cb->state : (u8*)&cb->saved);
     ((CbModel*)cb->f268)->Reset();
     if (*fn_801E1F44() == 1) {
         fn_8018F6F8(p);
@@ -3375,8 +3375,8 @@ static void KickReport(int id, f32 mph, f32 terr) {
 void fn_8018A180(u8* p) {
     CarBody* cb = (CarBody*)p;
     if (cb->f328) {
-        fn_80279B28(cb->f328, p + 0x1E44);
-        fn_8018F2C0(p, p + 0x1E44);
+        fn_80279B28(cb->f328, (u8*)&cb->state);
+        fn_8018F2C0(p, (u8*)&cb->state);
         if (cb->state.x298 < 9 && ((CarHost*)((u8*&)cb->src))->IsImpaired()) {
             fn_802E30C8("car: unimpairing car %d", cb->index);
             ((CarHost*)((u8*&)cb->src))->Unimpair();
@@ -3705,7 +3705,7 @@ static inline f32 CbReattach(u8* w) {
 }
 void fn_8018AF04(u8* p) {
     CarBody* cb = (CarBody*)p;
-    fn_8018F2C0(p, !fn_801CF064() ? p + 0x1E44 : p + 0x20F8);
+    fn_8018F2C0(p, !fn_801CF064() ? (u8*)&cb->state : (u8*)&cb->saved);
     CVec4 load;
     u8* w = p + 0x241C;
     for (int i = 0; i < 4; i++, w += 0x74) {

@@ -233,7 +233,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
     } else {
         fn_80279CD8((CarState*)(p + 0x1E44));
     }
-    *(CarState*)(p + 0x20F8) = *(CarState*)(p + 0x1E44);
+    ((CarBody*)p)->saved = ((CarBody*)p)->state;
     for (int i = 0; i < 16; i++) {
         U8(p, 0x1E2C + i) = 0xFF;
     }
@@ -1185,11 +1185,11 @@ extern "C" {
 
 // Restores the damage state saved by fn_8018F538.
 void fn_8018F2C0(u8* p, const u8* q) {
-    f32 h = F32(q, 0x290);
+    f32 h = ((CarState*)q)->time;
     ((CarBody*)p)->f2690 = h;
     ((CarBody*)p)->f2694 = h;
-    ((CarBody*)p)->f2698 = F32(q, 0x294);
-    ((CarBody*)p)->a268C = S32(q, 0x298);
+    ((CarBody*)p)->f2698 = ((CarState*)q)->duration;
+    ((CarBody*)p)->a268C = ((CarState*)q)->x298;
     const u8* o = q;
     u8* d = p;
     const f32 dentSpan = 1.016f;
@@ -1204,10 +1204,10 @@ void fn_8018F2C0(u8* p, const u8* q) {
     }
     u8* s = p;
     for (int i = 0; i < 17; i++, s += 0x80) {
-        S32(s, 0x15A8) = q[0x2A0 + i];
+        S32(s, 0x15A8) = ((CarState*)q)->flags.f[i];
         U8(s, 0x15A4) = 0;
     }
-    ((CarBody*)p)->f1E3C = S32(q, 0x29C);
+    ((CarBody*)p)->f1E3C = ((CarState*)q)->x29C;
 }
 
 }  // extern "C"
@@ -1216,9 +1216,9 @@ extern "C" {
 
 // Saves the damage state (dents packed to bytes, part states) into a snapshot.
 void fn_8018F538(u8* p, u8* q) {
-    F32(q, 0x290) = ((CarBody*)p)->f2690;
-    F32(q, 0x294) = ((CarBody*)p)->f2698;
-    S32(q, 0x298) = ((CarBody*)p)->a268C;
+    ((CarState*)q)->time = ((CarBody*)p)->f2690;
+    ((CarState*)q)->duration = ((CarBody*)p)->f2698;
+    ((CarState*)q)->x298 = ((CarBody*)p)->a268C;
     u8* d = p;
     u8* o = q;
     for (int i = 0; i < ((CarBody*)p)->f5F8; d += 0xC, i++, o += 4) {
@@ -1226,24 +1226,24 @@ void fn_8018F538(u8* p, u8* q) {
         o[1] = PackDent(F32(d, 0x600));
         o[2] = PackDent(F32(d, 0x604));
     }
-    U8(q, 0x2A0) = ((CarBody*)p)->joints[0].state;
-    U8(q, 0x2A1) = ((CarBody*)p)->joints[1].state;
-    U8(q, 0x2A2) = ((CarBody*)p)->joints[2].state;
-    U8(q, 0x2A3) = ((CarBody*)p)->joints[3].state;
-    U8(q, 0x2A4) = ((CarBody*)p)->joints[4].state;
-    U8(q, 0x2A5) = ((CarBody*)p)->joints[5].state;
-    U8(q, 0x2A6) = ((CarBody*)p)->joints[6].state;
-    U8(q, 0x2A7) = ((CarBody*)p)->joints[7].state;
-    U8(q, 0x2A8) = ((CarBody*)p)->joints[8].state;
-    U8(q, 0x2A9) = ((CarBody*)p)->joints[9].state;
-    U8(q, 0x2AA) = ((CarBody*)p)->joints[10].state;
-    U8(q, 0x2AB) = ((CarBody*)p)->joints[11].state;
-    U8(q, 0x2AC) = ((CarBody*)p)->joints[12].state;
-    U8(q, 0x2AD) = ((CarBody*)p)->joints[13].state;
-    U8(q, 0x2AE) = ((CarBody*)p)->joints[14].state;
-    U8(q, 0x2AF) = ((CarBody*)p)->joints[15].state;
-    U8(q, 0x2B0) = ((CarBody*)p)->joints[16].state;
-    S32(q, 0x29C) = ((CarBody*)p)->f1E3C;
+    ((CarState*)q)->flags.f[0] = ((CarBody*)p)->joints[0].state;
+    ((CarState*)q)->flags.f[1] = ((CarBody*)p)->joints[1].state;
+    ((CarState*)q)->flags.f[2] = ((CarBody*)p)->joints[2].state;
+    ((CarState*)q)->flags.f[3] = ((CarBody*)p)->joints[3].state;
+    ((CarState*)q)->flags.f[4] = ((CarBody*)p)->joints[4].state;
+    ((CarState*)q)->flags.f[5] = ((CarBody*)p)->joints[5].state;
+    ((CarState*)q)->flags.f[6] = ((CarBody*)p)->joints[6].state;
+    ((CarState*)q)->flags.f[7] = ((CarBody*)p)->joints[7].state;
+    ((CarState*)q)->flags.f[8] = ((CarBody*)p)->joints[8].state;
+    ((CarState*)q)->flags.f[9] = ((CarBody*)p)->joints[9].state;
+    ((CarState*)q)->flags.f[10] = ((CarBody*)p)->joints[10].state;
+    ((CarState*)q)->flags.f[11] = ((CarBody*)p)->joints[11].state;
+    ((CarState*)q)->flags.f[12] = ((CarBody*)p)->joints[12].state;
+    ((CarState*)q)->flags.f[13] = ((CarBody*)p)->joints[13].state;
+    ((CarState*)q)->flags.f[14] = ((CarBody*)p)->joints[14].state;
+    ((CarState*)q)->flags.f[15] = ((CarBody*)p)->joints[15].state;
+    ((CarState*)q)->flags.f[16] = ((CarBody*)p)->joints[16].state;
+    ((CarState*)q)->x29C = ((CarBody*)p)->f1E3C;
 }
 
 void fn_8018F6F8(u8* p) {
