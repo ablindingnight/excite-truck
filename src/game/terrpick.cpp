@@ -60,14 +60,6 @@ void fn_80204048(void*, void*) {}
 void fn_8020404C(void) {}
 void fn_80204050(void) {}
 
-// Helper name unproven. Add the vertical basis after forming the other two partial sums.
-static inline void AddVertical(ValVec3& out, const ValVec3& up, f32 delta, f32 a, f32 b, f32 c) {
-    f32 dy = -(f32)delta;
-    out.x = a + up.x * dy;
-    out.y = b + up.y * dy;
-    out.z = c + up.z * dy;
-}
-
 // Finds the terrain under screen point (sx, sy); returns 0 when there is none.
 int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PlainValMatrix* cam, int sx, int sy) {
     ValVec3 dir;
@@ -91,11 +83,13 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PlainValMatri
     bx = cam->basis[0].x * dx;
     by = cam->basis[0].y * dx;
     bz = cam->basis[0].z * dx;
-    const f32 syDelta = sy - lbl_8055CFF4 / 2;
+    f32 dy = sy - lbl_8055CFF4 / 2;
     f32 abx = ax + bx;
     f32 aby = ay + by;
     f32 abz = az + bz;
-    AddVertical(dir, cam->basis[1], syDelta, abx, aby, abz);
+    dir.x = abx + cam->basis[1].x * -dy;
+    dir.y = aby + cam->basis[1].y * -dy;
+    dir.z = abz + cam->basis[1].z * -dy;
     PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
     if (hint == NULL) {
         hint = localHint;
