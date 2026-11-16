@@ -213,7 +213,6 @@ static inline void MulVecTSelf(Vec* v, const Vec* m) {
 
 // A hit effect kept playing on a car, at a point in the car's frame, until 'time'.
 struct HeldEffect {
-    void Start(s32 e, f32 t, const Vec* p, const Car* car);
     u8 active;   // offset 0x0
     s32 effect;  // offset 0x4
     f32 time;    // offset 0x8
@@ -264,16 +263,6 @@ HeldEffect lbl_80438898[8];
 SoEvent lbl_80438958[32];
 
 // Starts holding effect 'e' until 't' at world point 'p', kept in the car's frame.
-inline void HeldEffect::Start(s32 e, f32 t, const Vec* p, const Car* car) {
-    effect = e;
-    time = t;
-    active = 1;
-    pos.x = p->x - car->origin.x;
-    pos.y = p->y - car->origin.y;
-    pos.z = p->z - car->origin.z;
-    MulVecTSelf(&pos, car->rot);
-}
-
 extern Car* lbl_804348E8[];
 
 extern "C" {
@@ -464,7 +453,16 @@ void fn_801D2C70(SoEffects* s, const Vec* pos, Car* car, int id) {
         m.effect = effect;
         fn_801796CC(10, &m, 0x20);
         if (IsCar(car)) {
-            lbl_80438898[car->index].Start(m.effect, s->effects[i].dur + lbl_8055E3C8, pos, car);
+            HeldEffect* held = &lbl_80438898[car->index];
+            f32 duration = s->effects[i].dur;
+            held->active = 1;
+            held->effect = m.effect;
+            f32 now = lbl_8055E3C8;
+            held->time = duration + now;
+            held->pos.x = pos->x - car->origin.x;
+            held->pos.y = pos->y - car->origin.y;
+            held->pos.z = pos->z - car->origin.z;
+            MulVecTSelf(&held->pos, car->rot);
         }
     }
 }
