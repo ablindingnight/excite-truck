@@ -452,6 +452,8 @@ extern "C" {
 
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 
+#pragma push
+#pragma opt_lifetimes off  /* Setting unproven: recovers the fill-loop register reuse. */
 int fn_8015F848(Bin* bins, f32 range) {
     f32 d;
     int i;
@@ -465,7 +467,10 @@ int fn_8015F848(Bin* bins, f32 range) {
                 Bin* a = &bins[last];
                 Bin* b = &bins[i];
                 for (; last <= i; last++) {
-                    bins[last].dist = MinF(a->dist, b->dist);
+                    const f32 distance = b->dist;
+                    d = a->dist;
+                    d = d < distance ? d : distance;
+                    bins[last].dist = d;
                 }
             }
             last = i;
@@ -473,6 +478,7 @@ int fn_8015F848(Bin* bins, f32 range) {
     }
     return last >= 0;
 }
+#pragma pop
 
 static inline f32 WinMin(Bin* bins, f32 x) {  /* Helper name unproven */
     int n = lbl_8055E2A8 / 2 + 1;
