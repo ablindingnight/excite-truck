@@ -889,8 +889,21 @@ static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > __float_ep
 static inline int HitTooSoon(const u8* car) { return lbl_8055E3C8 < 3.0f + F32(car, 0x26D8); }
 
 // Which corner of the car a body-space point is nearest: 0/1 front left/right, 3/2 rear left/right.
+// Retail bug: the rear branch tests `front` again (false there) instead of `left`, so a rear hit is always
+// corner 3 (retail keeps the dead li 2 behind a beq on the front flag).
 static inline int HitCorner(const AVec* at) {
-    return at->v[2] > lbl_80561F74 ? !(at->v[0] < lbl_80561F74) : (at->v[0] < lbl_80561F74 ? 3 : 2);
+    int front = at->v[2] > lbl_80561F74;
+    int left = at->v[0] < lbl_80561F74;
+    int corner;
+    if (front) {
+        corner = !left;
+    } else {
+        corner = 3;
+        if (front) {
+            corner = 2;
+        }
+    }
+    return corner;
 }
 
 // A collision impulse `imp` at body point `at` (negated when `flip`) from car `other` (-1: the world) of
