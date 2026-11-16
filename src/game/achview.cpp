@@ -948,7 +948,15 @@ inline void AchievementTrophyModel::Draw(void) {
     fn_802C9950(oldAmb);
 }
 
-extern const f32 lbl_80563B1C;  // 0.5
+// 0.5, this unit's own pool entry. Retail creates it in AchievementTrophyModel::Draw, which is compiled BEFORE this
+// helper (Draw calls the four small functions here and they are emitted after it); our compiler would inline them into
+// a deferred Draw, so they are plain functions compiled first, and a literal here would enter the pool six words early.
+// Until that emission order is solved the matching build reads the entry by its label; other compilers get the value.
+#ifdef __MWERKS__
+extern const f32 lbl_80563B1C;
+#else
+static const f32 lbl_80563B1C = 0.5f;
+#endif
 
 extern "C" {
 f32 fn_8025B0A8(f32* r) {
