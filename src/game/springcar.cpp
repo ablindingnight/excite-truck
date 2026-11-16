@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/carbody.h"
 
 class SpringCar;
 
@@ -75,11 +76,6 @@ public:
 struct SaveRec {
     u8 pad0[0x2C0];
     s32 ctl;  // offset 0x2C0
-};
-
-struct WheelState {
-    u8 contact;  // offset 0x0
-    u8 pad1[0x74 - 0x1];
 };
 
 struct Stats {
@@ -156,40 +152,6 @@ struct RVec3;
 struct RPacket;
 struct BodyState;
 struct BodyDesc;
-
-class CarBody : public RigidBody {
-public:
-    CarBody(void);
-    virtual ~CarBody(void);           // 0x0C
-    virtual void Init(BodyDesc* d);   // 0x08
-    virtual void Reset(void);         // 0x10
-    virtual void vf14(void);          // 0x14
-    virtual void Update(void);        // 0x1C
-    virtual void vf20(void);          // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(RPacket* pk);    // 0x2C
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* pk);    // 0x34
-    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void SetState(const BodyState* s);  // 0x54
-    virtual void vf58(void);          // 0x58
-    virtual void vf5C(void);          // 0x5C
-
-    s32 index;   // offset 0x1EC
-    u8 pad1F0[0x270 - 0x1F0];
-    StatsSrc* src;  // offset 0x270
-    u8 pad274[0x23CC - 0x274];
-    WheelState wheels[4];  // offset 0x23CC
-    u8 pad259C[0x25D4 - 0x259C];
-    f32 speed;   // offset 0x25D4
-    u8 pad25D8[0x2620 - 0x25D8];
-    s32 airborne;  // offset 0x2620
-    u8 pad2624[0x26B4 - 0x2624];
-    RVec3 push;   // offset 0x26B4
-    u8 pad26C0[0x2700 - 0x26C0];
-};
 
 class SpringCar : public CarBody {
 public:
@@ -592,7 +554,7 @@ void Lift::Apply(SpringCar* car) {
 void Lift::Step(SpringCar* car, f32 rate) {
     if (state) {
         int stop = 1;
-        if (!car->wheels[0].contact && !car->wheels[1].contact && car->wheels[2].contact && car->wheels[3].contact) {
+        if (!car->wheels[0].grounded && !car->wheels[1].grounded && car->wheels[2].grounded && car->wheels[3].grounded) {
             f32 r = car->speed / rate;
             if (r > 0.6f && car->vel.y > 0.0f && car->vel.y < 0.5f * car->speed) {
                 if (++count > 4) {

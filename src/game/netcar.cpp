@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/carbody.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -49,14 +50,6 @@ struct Packet {
 };
 #pragma pack(pop)
 
-// The state handed to a body's SetState (vtable 0x54).
-struct BodyState {
-    RMtx mtx;   // offset 0x0
-    RVec3 vel;   // offset 0x30
-    s32 a3C;    // offset 0x3C
-    s16 hint;   // offset 0x40
-};
-
 struct Blend {
     f32 k;    // offset 0x0
     RVec3 at;  // offset 0x4
@@ -88,34 +81,6 @@ struct RVec3;
 struct RPacket;
 struct BodyState;
 struct BodyDesc;
-
-class CarBody : public RigidBody {
-public:
-    CarBody(void);
-    virtual ~CarBody(void);           // 0x0C
-    virtual void Init(BodyDesc* d);   // 0x08
-    virtual void Reset(void);         // 0x10
-    virtual void vf14(void);          // 0x14
-    virtual void Update(void);        // 0x1C
-    virtual void vf20(void);          // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(RPacket* pk);    // 0x2C
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* pk);    // 0x34
-    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void SetState(const BodyState* s);  // 0x54
-    virtual void vf58(void);          // 0x58
-    virtual void vf5C(void);          // 0x5C
-
-    s32 index;   // offset 0x1EC
-    u8 pad1F0[0x2610 - 0x1F0];
-    s32 link;    // offset 0x2610
-    u8 pad2614[0x267C - 0x2614];
-    s32 f267C;   // offset 0x267C
-    u8 pad2680[0x2700 - 0x2680];
-};
 
 class NetCar : public CarBody {
 public:

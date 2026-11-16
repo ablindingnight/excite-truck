@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/carbody.h"
 #include <string.h>
 
 template <class T>
@@ -164,29 +165,6 @@ u8* fn_801D2008(u8* name);
 s32 fn_801C1C1C(const void*);  // const PSysDesc*
 s32 fn_801C1BA4(s32 a, s32 b, s32 c);
 }
-
-class CarBody : public RigidBody {
-public:
-    CarBody(void);
-    // The destructor is declared first: MWCC emits the vtable where the first-declared non-inline virtual is
-    // defined, and Init's body is the extern "C" aid below. (Overrides keep their base slots in any order.)
-    virtual ~CarBody(void);           // 0x0C
-    virtual void Init(BodyDesc* d);   // 0x08
-    virtual void Reset(void);         // 0x10
-    virtual void vf14(void);          // 0x14
-    virtual void Update(void);        // 0x1C (empty)
-    virtual void vf20(void);          // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(RPacket* pk);    // 0x2C: 0x44 bytes
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* pk);    // 0x34
-    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void SetState(const BodyState* s);  // 0x54: places the car at a pose
-    virtual void vf58(void);          // 0x58
-    virtual void vf5C(void);          // 0x5C
-};
 
 // A block of tuning values.
 struct TuneBlock {
@@ -1316,37 +1294,6 @@ struct CbSolCx {
     s16 id;             // offset 0x0
     u8 pad2[0x2];
     s32 surface[4];     // offset 0x4, per wheel
-};
-
-// A wheel's contact plane, copied as one block.
-struct CbPlane {
-    f32 nRight;     // offset 0x0, ground normal . body right
-    f32 nFwd;       // offset 0x4, ground normal . body forward
-    f32 ground[3];  // offset 0x8, contact plane anchor
-};
-
-// A wheel's per-step state in the car body (4 of them at 0x23AC).
-struct CbWheel {
-    CbWheel(void) {}
-    f32 load;        // offset 0x0
-    f32 loadN;       // offset 0x4
-    f32 spin;        // offset 0x8
-    f32 slip;        // offset 0xC
-    f32 v10;         // offset 0x10
-    f32 steer;       // offset 0x14
-    f32 v18;         // offset 0x18
-    f32 prevSlip;    // offset 0x1C
-    u8 grounded;     // offset 0x20
-    f32 contact[3];  // offset 0x24
-    f32 local[3];    // offset 0x30, body-space mount point
-    f32 v3C;         // offset 0x3C
-    f32 v40;         // offset 0x40
-    CbPlane plane;   // offset 0x44
-    f32 normal[3];   // offset 0x58, contact plane normal
-    s32 groundH;     // offset 0x64, fn_802B03C0's result (an int)
-    f32 comp;        // offset 0x68
-    s8 sound;        // offset 0x6C
-    u32 flags;       // offset 0x70
 };
 
 struct SurfType {
