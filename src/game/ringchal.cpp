@@ -71,7 +71,7 @@ union ElemColor {
 
 struct TextElem {
     TextElem(void) {}
-    TextElem(const TextElem& o);  // fn_8014C920
+    TextElem(const TextElem& o);  // fn_8014C920 (weak; defined at the end, after its uses)
     const char* name;     // offset 0x0
     V2 pos;               // offset 0x4
     s32 elemJust;         // offset 0xC
@@ -2637,3 +2637,8 @@ inline void Arena::SetName(char* buf, int n) { SET_NAME(this, buf, n); }
 
 
 static inline f32 Time(void) { return lbl_8055E3C8; }
+
+// TextElem's member-wise copy, defined after its uses, so this unit calls the out-of-line weak copy (retail's kept
+// copy is betarace's).
+inline TextElem::TextElem(const TextElem& o)
+    : name(o.name), pos(o.pos), elemJust(o.elemJust), scale(o.scale), just(o.just), color(o.color), defText(o.defText) {}
