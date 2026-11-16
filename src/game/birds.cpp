@@ -318,18 +318,19 @@ static inline f32 Clamp01(f32 x) {
 }
 
 // Helper names unproven: vector operations written as inlines, as the target evaluates them.
+static inline f32 MDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void MulM(const f32* m, const BVec* v, BVec* out) {
     if (out == v) {
-        f32 x = v->x * m[0] + v->y * m[3] + v->z * m[6];
-        f32 y = v->x * m[1] + v->y * m[4] + v->z * m[7];
-        f32 z = v->x * m[2] + v->y * m[5] + v->z * m[8];
+        f32 x = MDot3(v->x, m[0], v->y, m[3], v->z, m[6]);
+        f32 y = MDot3(v->x, m[1], v->y, m[4], v->z, m[7]);
+        f32 z = MDot3(v->x, m[2], v->y, m[5], v->z, m[8]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = v->x * m[0] + v->y * m[3] + v->z * m[6];
-        out->y = v->x * m[1] + v->y * m[4] + v->z * m[7];
-        out->z = v->x * m[2] + v->y * m[5] + v->z * m[8];
+        out->x = MDot3(v->x, m[0], v->y, m[3], v->z, m[6]);
+        out->y = MDot3(v->x, m[1], v->y, m[4], v->z, m[7]);
+        out->z = MDot3(v->x, m[2], v->y, m[5], v->z, m[8]);
     }
 }
 static inline f32 Sq(f32 x) { return x * x; }
