@@ -189,9 +189,6 @@ static inline void SetV(ValVec3* v, f32 x, f32 y, f32 z) {
     v->z = z;
 }
 
-// MATCHING-AID: keeps the literal on the right of the product; the real form is unknown.
-static inline f32 Mul(f32 a, f32 b) { return a * b; }
-
 /* Helper name unproven */
 static inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
 
@@ -208,7 +205,10 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->balance = 0.5f;
     s->cmHeight = In(c->GetFloat("cm_height"));
     s->collideCmHeight = In(c->GetFloat("collide_cm_height", 29.999998f));
-    s->airDrag = Mul(c->GetFloat("air_drag", 6.0f), 0.093025006f);
+    // A compound assignment loads the value before the literal (a literal in a plain product is always loaded first).
+    f32 drag = c->GetFloat("air_drag", 6.0f);
+    drag *= 0.093025006f;
+    s->airDrag = drag;
 
     ValueNode* tr = t->FindChild("Transmission");
     s->torqueBalance = tr->GetFloat("torque_balance");
