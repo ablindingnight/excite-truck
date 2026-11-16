@@ -491,12 +491,7 @@ f32 fn_802715F0(u8* p) {
 struct Words12 {
     u32 w[12];
 };
-// A camera frame: rotation rows then position (the layout of Words12).
-struct CamFrame {
-    Mat3 rot;
-    f32 pos[3];
-};
-
+// CamFrame: common.h's PlainValMatrix.
 extern "C" {
 void fn_802704D4(int to, u8* cam);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
@@ -1451,17 +1446,17 @@ void camera_car(u8* p, int ci) {
     switch (v->type) {
     case 34: {
         *(Words12*)&r->pose = *(Words12*)&r->carFrame;
-        CamFrame f;
+        PlainValMatrix f;
         f32 w[3];
-        f.pos[0] = v->off[0];
-        f.pos[1] = v->off[1];
-        f.pos[2] = v->off[2];
+        f.origin.x = v->off[0];
+        f.origin.y = v->off[1];
+        f.origin.z = v->off[2];
         w[0] = 0.017453292f * v->rot[0];
         w[1] = 0.017453292f * v->rot[1];
         w[2] = 0.017453292f * v->rot[2];
-        CamRotFromVec(&f.rot, w);
-        fn_801BFD34((u8*)&r->pose.pos, f.pos, (u8*)&r->carFrame);
-        Mat3Mul((Mat3*)&r->pose, &f.rot, (Mat3*)&r->carFrame);
+        CamRotFromVec(&f.Mat(), w);
+        fn_801BFD34((u8*)&r->pose.pos, (f32*)&f.origin, (u8*)&r->carFrame);
+        Mat3Mul((Mat3*)&r->pose, &f.Mat(), (Mat3*)&r->carFrame);
         f32 fovv = v->fov;
         r->fov = 0.017453292f * fovv;
         break;

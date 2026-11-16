@@ -2,6 +2,7 @@
 // position linearly) and building a frame looking from one point at another. Names are guesses.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/rmtx.h"
 #include <revolution/MTX/vec.h>
 
 extern "C" {
@@ -13,17 +14,12 @@ struct Quat {
     f32 x, y, z, w;
 };
 
-// Axes (rows) and position.
-struct CamFrame {
-    RVec3 axes[3];  // offset 0x0
-    RVec3 pos;      // offset 0x24
-};
-
+// CamFrame: rmtx.h's RMtx.
 // The camera record cammgr/namedcam call CamRec (0x88 here: its frame at 0x58); was named Camera here,
 // mrender's 0x30 render camera.
 struct CamRec {
     u8 pad[0x58];
-    CamFrame frame;  // offset 0x58
+    RMtx frame;  // offset 0x58
 };
 
 extern "C" {
@@ -51,9 +47,9 @@ static inline void MtxToQuatAxis(f32 (*m)[3], Quat* q) {
     v[k] = (m[i][k] + m[k][i]) * s;
 }
 
-static inline void MtxToQuat(const CamFrame* f, Quat* q) {
+static inline void MtxToQuat(const RMtx* f, Quat* q) {
     const f32(*m)[3] = (const f32(*)[3])f;
-    f32 tr = f->axes[0].x + f->axes[1].y + f->axes[2].z;
+    f32 tr = f->rot.x.x + f->rot.y.y + f->rot.z.z;
     if (tr > 0.0f) {
         f32 s = sqrt(tr + 1.0f);
         q->w = 0.5f * s;
@@ -67,7 +63,7 @@ static inline void MtxToQuat(const CamFrame* f, Quat* q) {
 }
 
 // The rotation of a unit quaternion.
-static inline void QuatToMtx(CamFrame* f, const Quat* q) {
+static inline void QuatToMtx(RMtx* f, const Quat* q) {
     f32(*m)[3] = (f32(*)[3])f;
     f32 x2 = q->x + q->x;
     f32 y2 = q->y + q->y;
@@ -98,7 +94,7 @@ extern "C" {
 
 static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
-void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
+void fn_8026E22C(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     Quat qa;
     Quat qb;
     Quat q;
@@ -111,7 +107,7 @@ void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
     out->pos = pos;
 }
 
-void fn_8026E688(CamFrame* out, const RVec3* eye, const RVec3* target, const RVec3* up) {
+void fn_8026E688(RMtx* out, const RVec3* eye, const RVec3* target, const RVec3* up) {
     RVec3 d;
     RVec3 fwd;
     RVec3 upv;
@@ -119,34 +115,34 @@ void fn_8026E688(CamFrame* out, const RVec3* eye, const RVec3* target, const RVe
     d.x = target->x - eye->x;
     d.y = target->y - eye->y;
     d.z = target->z - eye->z;
-    out->axes[0].x = 1.0f;
-    out->axes[0].y = 0.0f;
-    out->axes[0].z = 0.0f;
-    out->axes[1].x = 0.0f;
-    out->axes[1].y = 1.0f;
-    out->axes[1].z = 0.0f;
-    out->axes[2].x = 0.0f;
-    out->axes[2].y = 0.0f;
-    out->axes[2].z = 1.0f;
+    out->rot.x.x = 1.0f;
+    out->rot.x.y = 0.0f;
+    out->rot.x.z = 0.0f;
+    out->rot.y.x = 0.0f;
+    out->rot.y.y = 1.0f;
+    out->rot.y.z = 0.0f;
+    out->rot.z.x = 0.0f;
+    out->rot.z.y = 0.0f;
+    out->rot.z.z = 1.0f;
     if (PSVECDotProduct((const Vec*)&d, (const Vec*)&d) < 1.0f) {
         return;
     }
     if (fabsf(d.x) < 0.01f && fabsf(d.z) < 0.01f) {
         return;
     }
-    out->axes[2] = d;
-    PSVECCrossProduct((const Vec*)up, (const Vec*)&out->axes[2], (Vec*)&out->axes[0]);
-    PSVECCrossProduct((const Vec*)&out->axes[2], (const Vec*)&out->axes[0], (Vec*)&out->axes[1]);
+    out->rot.z = d;
+    PSVECCrossProduct((const Vec*)up, (const Vec*)&out->rot.z, (Vec*)&out->rot.x);
+    PSVECCrossProduct((const Vec*)&out->rot.z, (const Vec*)&out->rot.x, (Vec*)&out->rot.y);
     RVec3 right;
-    right.Set(out->axes[0].x, out->axes[0].y, out->axes[0].z);
-    fwd.Set(out->axes[2].x, out->axes[2].y, out->axes[2].z);
+    right.Set(out->rot.x.x, out->rot.x.y, out->rot.x.z);
+    fwd.Set(out->rot.z.x, out->rot.z.y, out->rot.z.z);
     PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&right, (Vec*)&upv);
     PSVECNormalize((const Vec*)&right, (Vec*)&right);
     PSVECNormalize((const Vec*)&upv, (Vec*)&upv);
     PSVECCrossProduct((const Vec*)&right, (const Vec*)&upv, (Vec*)&fwd);
-    out->axes[0] = right;
-    out->axes[1] = upv;
-    out->axes[2] = fwd;
+    out->rot.x = right;
+    out->rot.y = upv;
+    out->rot.z = fwd;
 }
 
 void fn_8026E850(const RVec3* eye, const RVec3* target, CamRec* cam, const RVec3* up) {
