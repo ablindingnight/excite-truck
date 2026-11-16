@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include <string.h>
 #include "game/camrec.h"
+#include "game/camview.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -547,25 +548,25 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
 }
 
 
-void fn_802670A0(u8* p, int idx) {
+void fn_802670A0(CamView* p, int idx) {
     int n = fn_80178CA4();
     int cols = (n > 1) + 1;
     int rows = (n + cols - 1) / cols;
     int w = lbl_8055CFF0 / cols;
     int h = lbl_8055CFF4 / rows;
-    S32(p, 0x40) = w;
-    S32(p, 0x44) = h;
-    S32(p, 0x38) = w * (idx / rows);
-    S32(p, 0x3C) = h * (idx % rows);
+    p->w = w;
+    p->h = h;
+    p->x = w * (idx / rows);
+    p->y = h * (idx % rows);
 }
 
-void fn_80267130(u8* p) {
-    f32 t = (F32(p, 0x30) - 0.39269909f) / 0.7853981f;
+void fn_80267130(CamView* p) {
+    f32 t = (p->fov - 0.39269909f) / 0.7853981f;
     f32 c = (1.0f < t) ? 1.0f : t;
     c = (c > 0.0f) ? c : 0.0f;
     f32 k = -2.5f;
-    F32(p, 0x48) = 3.0f + c * k;
-    F32(p, 0x4C) = lbl_8055F484 * (fn_80178CA4() == 1 ? 1.0f : 0.8f);
+    p->nearZ = 3.0f + c * k;
+    p->farZ = lbl_8055F484 * (fn_80178CA4() == 1 ? 1.0f : 0.8f);
 }
 
 struct KVec3 {
@@ -599,13 +600,13 @@ f32 fn_801EA0E8(f32 x, f32 z);  // ground height
 extern f32 lbl_8055D020;        // aspect
 
 // Keeps the camera's near plane above the ground: lifts it by the deepest corner (not in modes 17/21).
-void fn_802671CC(u8* p) {
+void fn_802671CC(CamView* p) {
     KVec3 v;
     KVec3 w;
-    f32 nearZ = F32(p, 0x48);
-    f32 s = nearZ * F32(p, 0x34);
+    f32 nearZ = p->nearZ;
+    f32 s = nearZ * p->tanHalf;
     f32 hx = s / lbl_8055D020;
-    f32 hy = ((f32)S32(p, 0x44) * s) / (f32)S32(p, 0x40);
+    f32 hy = ((f32)p->h * s) / (f32)p->w;
     f32 lift = lbl_80563C20;
     for (int i = 0; i < 4; i++) {
         f32 cx = (i & 1) ? hx : -hx;
@@ -614,14 +615,14 @@ void fn_802671CC(u8* p) {
         v.y = cy;
         v.z = nearZ;
         KMulVec(&w, &v, (KFrame*)p);
-        w.x += F32(p, 0x24);
-        w.y += F32(p, 0x28);
-        w.z += F32(p, 0x2C);
+        w.x += p->pos.v[0];
+        w.y += p->pos.v[1];
+        w.z += p->pos.v[2];
         f32 d = fn_801EA0E8(w.x, w.z) - w.y;
         lift = lift > d ? lift : d;
     }
-    if (S32(p, 0x58) != 0x11 && S32(p, 0x58) != 0x15) {
-        F32(p, 0x28) = F32(p, 0x28) + lift;
+    if (p->modeB != 0x11 && p->modeB != 0x15) {
+        p->pos.v[1] = p->pos.v[1] + lift;
     }
 }
 
@@ -850,7 +851,7 @@ struct ListenerRef {
 };
 
 void fn_8020655C(const ListenerRef& l, int i);
-int fn_801C5B68(u8* view, int idx);
+int fn_801C5B68(CamView* view, int idx);
 void fn_8026B768(int target, int idx);
 int fn_8026B734(int target, f32* out);
 u8* fn_8017960C(int car);
@@ -875,7 +876,7 @@ extern const f32 lbl_80563C7C;  // shake decay per frame
 // tick alpha, and fill the view (pose, fov, rumble, flags). The shake levels decay unless paused.
 #pragma push
 #pragma optimization_level 3
-void fn_802678E8(u8* view, int idx) {
+void fn_802678E8(CamView* view, int idx) {
     fn_802670A0(view, idx);
     if (fn_801C5B68(view, idx)) {
         fn_80267130(view);
@@ -891,7 +892,7 @@ void fn_802678E8(u8* view, int idx) {
     if (c->nextMode < 0 || c->nextMode >= 0x22) {
         c->nextMode = 4;
     }
-    S32(view, 0x5C) = c->w1C;
+    view->modeA = c->w1C;
     lbl_8055F480 = 0;
     c->target = c->nextTarget;
     c->mode = c->nextMode;
@@ -930,8 +931,8 @@ void fn_802678E8(u8* view, int idx) {
     } else {
         *(CamPose*)view = c->pose;
     }
-    F32(view, 0x30) = c->fov;
-    F32(view, 0x34) = tan(lbl_80563C6C * c->fov);
+    view->fov = c->fov;
+    view->tanHalf = tan(lbl_80563C6C * c->fov);
     f32 rumble;
     f32 r;
     if (!fn_801769F8()) {
@@ -956,20 +957,20 @@ void fn_802678E8(u8* view, int idx) {
     }
     rumble = lbl_80563C20;
 done:
-    F32(view, 0x50) = rumble;
-    F32(view, 0x54) = c->f1A0;
+    view->rumble = rumble;
+    view->f54 = c->f1A0;
     if (c->b138) {
         flags |= 0x10;
     }
     c->b138 = 0;
     c->b139 = 0;
-    S32(view, 0x58) = c->mode;
-    S32(view, 0x60) = c->target;
-    S32(view, 0x68) = flags;
+    view->modeB = c->mode;
+    view->car = c->target;
+    view->flags = flags;
     if (own) {
-        *(s16*)(view + 0x64) = c->h1EC;
+        view->carId = c->h1EC;
     } else {
-        *(s16*)(view + 0x64) = *(s16*)(c->car + 0x6C);
+        view->carId = *(s16*)(c->car + 0x6C);
     }
     if (!fn_801769F8()) {
         for (int i = 0; i < 8; i++) {
