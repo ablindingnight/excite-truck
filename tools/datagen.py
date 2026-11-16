@@ -17,7 +17,10 @@ Element types:
   u8 s8 u16 s16 u32 s32 f32 f64 char wchar (wchar = u16)
   {t1,t2,...}   one struct row per element, fields aligned naturally;
                 a field may repeat as t[n] (emitted as a nested {...}).
-If a label name is not unique in symbols.txt, add addr=0x8xxxxxxx after the type.
+Options after the type:
+  addr=0x8xxxxxxx  pick the symbol when a label name is not unique in symbols.txt
+  count=N          the table is the first N elements/rows of the label (symbols.txt sizes
+                   can run past the C array into data that follows it)
 
 Only tables WITHOUT relocations may be converted (no pointers). `--check-relocs` audits
 every marker against the dtk-split target objects (build/<ver>/obj) and fails if any
@@ -30,6 +33,8 @@ Usage:
   python tools/datagen.py --version REXE01 --out build/REXE01/include/dumpdata [--stamp f]
   python tools/datagen.py --list           # print markers found (configure.py uses this)
   python tools/datagen.py --check-relocs   # audit markers against the split objects
+  python tools/datagen.py --verify-objects # compiled objects' table bytes == DOL bytes
+                                           # (covers NonMatching units the DOL hash misses)
 """
 
 import argparse
@@ -44,7 +49,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SCAN_DIRS = ["src", "libs"]
 SCAN_EXT = {".c", ".cpp", ".h", ".hpp", ".inc"}
 MARKER_RE = re.compile(
-    r"^\s*//\s*DUMP_DATA\s+(\S+)\s+(\{[^}]*\}|\S+)(?:\s+addr=(0x[0-9A-Fa-f]+))?"
+    r"^\s*//\s*DUMP_DATA\s+(\S+)\s+(\{[^}]*\}|\S+)((?:\s+(?:addr|count)=\w+)*)"
 )
 SYM_RE = re.compile(
     r"^(\S+)\s*=\s*(\.[\w.]+):(0x[0-9A-Fa-f]+);\s*//(.*)$"
@@ -66,10 +71,12 @@ SCALARS = {
 
 
 class Marker:
-    def __init__(self, label: str, type_: str, addr: Optional[int], src: Path, line: int):
+    def __init__(self, label: str, type_: str, addr: Optional[int], src: Path, line: int,
+                 count: Optional[int] = None):
         self.label = label
         self.type = type_
         self.addr = addr
+        self.count = count
         self.src = src
         self.line = line
 
@@ -91,8 +98,10 @@ def find_markers() -> List[Marker]:
                 for i, line in enumerate(text.splitlines(), 1):
                     m = MARKER_RE.match(line)
                     if m:
-                        addr = int(m.group(3), 16) if m.group(3) else None
-                        out.append(Marker(m.group(1), m.group(2), addr, p, i))
+                        opts = dict(o.split("=", 1) for o in m.group(3).split())
+                        addr = int(opts["addr"], 16) if "addr" in opts else None
+                        count = int(opts["count"], 0) if "count" in opts else None
+                        out.append(Marker(m.group(1), m.group(2), addr, p, i, count))
     out.sort(key=lambda m: (str(m.src), m.line))
     return out
 
@@ -204,6 +213,10 @@ def layout(fields: List[Tuple[str, int]]) -> Tuple[List[Tuple[str, int, int]], i
 def render(m: Marker, data: bytes) -> str:
     fields = parse_type(m.type)
     lay, row = layout(fields)
+    if m.count is not None:
+        if m.count * row > len(data):
+            raise ValueError(f"count={m.count} rows of 0x{row:X} run past the label (0x{len(data):X})")
+        data = data[: m.count * row]
     if len(data) % row:
         raise ValueError(f"size 0x{len(data):X} is not a multiple of row size 0x{row:X}")
     n = len(data) // row
@@ -320,6 +333,57 @@ def check_relocs(ver: str, markers: List[Marker], syms) -> int:
     return 1 if bad else 0
 
 
+def elf_symbol_bytes(path: Path, names) -> Dict[str, bytes]:
+    """Bytes of the named defined symbols (by symbol size) in a big-endian ELF32 object."""
+    d = path.read_bytes()
+    shoff, = struct.unpack_from(">I", d, 0x20)
+    shentsize, shnum, _ = struct.unpack_from(">HHH", d, 0x2E)
+    secs = [struct.unpack_from(">IIIIIIIIII", d, shoff + i * shentsize) for i in range(shnum)]
+    symtab = next((s for s in secs if s[1] == 2), None)
+    if symtab is None:
+        return {}
+    strtab = secs[symtab[6]]
+    out: Dict[str, bytes] = {}
+    for i in range(symtab[5] // 16):
+        nm, val, sz, info, oth, shndx = struct.unpack_from(">IIIBBH", d, symtab[4] + i * 16)
+        if not 0 < shndx < 0xFF00:
+            continue
+        o = strtab[4] + nm
+        name = d[o : d.index(b"\0", o)].decode("latin-1")
+        if name in names:
+            sec = secs[shndx]
+            out[name] = b"" if sec[1] == 8 else d[sec[4] + val : sec[4] + val + sz]
+    return out
+
+
+def verify_objects(ver: str, markers: List[Marker], syms, dol: "Dol") -> int:
+    bad = 0
+    for m in markers:
+        rel = m.src.relative_to(ROOT).as_posix()
+        for top in ("src/", "libs/"):
+            if rel.startswith(top):
+                rel = rel[len(top):]
+        obj = ROOT / "build" / ver / "src" / (rel.rsplit(".", 1)[0] + ".o")
+        if not obj.exists():
+            print(f"?? {m.label}: no compiled object {obj.relative_to(ROOT).as_posix()}")
+            bad += 1
+            continue
+        addr, size = resolve(m, syms)
+        if m.count is not None:
+            size = m.count * layout(parse_type(m.type))[1]
+        got = elf_symbol_bytes(obj, {m.label}).get(m.label)
+        want = dol.read(addr, size)
+        if got is None:
+            print(f"?? {m.label}: symbol not in {obj.name}")
+            bad += 1
+        elif got[:size] != want:
+            print(f"!! {m.label}: compiled bytes differ from the DOL")
+            bad += 1
+        else:
+            print(f"ok {m.label}")
+    return 1 if bad else 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", default="REXE01")
@@ -329,6 +393,7 @@ def main() -> int:
     ap.add_argument("--stamp", type=Path, help="touch this file when done")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--check-relocs", action="store_true")
+    ap.add_argument("--verify-objects", action="store_true")
     a = ap.parse_args()
 
     markers = find_markers()
@@ -341,6 +406,8 @@ def main() -> int:
         return check_relocs(a.version, markers, syms)
 
     dol = Dol(a.dol or ROOT / "orig" / a.version / "sys" / "main.dol")
+    if a.verify_objects:
+        return verify_objects(a.version, markers, syms, dol)
     out = a.out or ROOT / "build" / a.version / "include" / "dumpdata"
     out.mkdir(parents=True, exist_ok=True)
     labels = set()
