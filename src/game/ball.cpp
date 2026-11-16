@@ -3,6 +3,7 @@
 // hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
@@ -12,8 +13,6 @@
 
 extern "C" {
 double sqrt(double x);
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* src, void* dst);
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 void fn_801796EC(int type, const void* data, int size);  // post event
 void fn_801E9DC4(s16* h);
@@ -308,7 +307,7 @@ extern "C" void fn_8017D404(f32 r, f32 force, const RVec3* c, RigidBody* self, i
                 d.x = c->x - b->mtx.pos.x;
                 d.y = c->y - b->mtx.pos.y;
                 d.z = c->z - b->mtx.pos.z;
-                d2 = PSVECDotProduct(&d, &d);
+                d2 = PSVECDotProduct((const Vec*)&d, (const Vec*)&d);
                 if (d2 < r * r && d2 > 0.0001f) {
                     f32 fall;
                     RVec3 at;
@@ -320,7 +319,7 @@ extern "C" void fn_8017D404(f32 r, f32 force, const RVec3* c, RigidBody* self, i
                     } else {
                         fall = 1.0f - SqrtF(d2) / r;
                     }
-                    PSVECNormalize(&d, &d);
+                    PSVECNormalize((const Vec*)&d, (Vec*)&d);
                     at.x = b->mtx.pos.x + d.x;
                     at.y = b->mtx.pos.y + d.y;
                     at.z = b->mtx.pos.z + d.z;

@@ -4,6 +4,7 @@
 // for 5 seconds while the car is moving it is reglued behind the car. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/rvec.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
@@ -28,7 +29,6 @@ struct TFlags {
 };
 TFlags* fn_801769CC(void);
 void fn_801796CC(u8 type, const void* data, u32 n);
-f32 PSVECDotProduct(const void* a, const void* b);
 }
 
 class CarBody;
@@ -132,7 +132,7 @@ inline void Trailer::Reglue(void) {
     s.mtx.pos.y += c->world.pos.y;
     s.mtx.pos.z += c->world.pos.z;
     s.mtx.rot = car->world.rot;
-    f32 v = PSVECDotProduct(&car->vel, &mtx.rot.z);
+    f32 v = PSVECDotProduct((const Vec*)&car->vel, (const Vec*)&mtx.rot.z);
     s.vel.x = s.mtx.rot.z.x * v;
     s.vel.y = s.mtx.rot.z.y * v;
     s.vel.z = s.mtx.rot.z.z * v;
@@ -330,7 +330,7 @@ void Trailer::Update(void) {
         dv.x = vel.x - c->vel.x;
         dv.y = vel.y - c->vel.y;
         dv.z = vel.z - c->vel.z;
-        f32 a = 0.15f * PSVECDotProduct(&dv, &mtx.rot.z);
+        f32 a = 0.15f * PSVECDotProduct((const Vec*)&dv, (const Vec*)&mtx.rot.z);
         a = (0.25f < a) ? 0.25f : a;
         a = (a > -0.25f) ? a : -0.25f;
         f32 s = 0.2f * l.x - 0.3f * avel.y - a;

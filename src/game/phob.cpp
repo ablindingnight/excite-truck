@@ -4,6 +4,7 @@
 // sent to the renderer, the view->car map and the event message buffers. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/springcar.h"
@@ -28,8 +29,6 @@ void fn_801DCEC8(int i, f32 v);
 void fn_801DCEDC(int i, f32 v);
 int fn_801CF064(void);
 int fn_8018FD38(void);
-void PSVECNormalize(const void* src, void* dst);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 int fn_801B526C(void);
 void fn_801AD5F0(void);
 void fn_80186DE8(void);
@@ -511,10 +510,10 @@ void fn_80177CEC(void) {
         PVec3 x;
         x.Set(p->mtx.rot[0].x, p->mtx.rot[0].y, p->mtx.rot[0].z);
         z.Set(p->mtx.rot[2].x, p->mtx.rot[2].y, p->mtx.rot[2].z);
-        PSVECCrossProduct(&z, &x, &y);
-        PSVECNormalize(&x, &x);
-        PSVECNormalize(&y, &y);
-        PSVECCrossProduct(&x, &y, &z);
+        PSVECCrossProduct((const Vec*)&z, (const Vec*)&x, (Vec*)&y);
+        PSVECNormalize((const Vec*)&x, (Vec*)&x);
+        PSVECNormalize((const Vec*)&y, (Vec*)&y);
+        PSVECCrossProduct((const Vec*)&x, (const Vec*)&y, (Vec*)&z);
         p->mtx.rot[0] = x;
         p->mtx.rot[1] = y;
         p->mtx.rot[2] = z;

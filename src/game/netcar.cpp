@@ -4,6 +4,7 @@
 // blended towards that each frame and snapped when a packet asks for it. Names are guesses apart
 // from the allocation tag.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
@@ -133,7 +134,6 @@ void fn_80265D40(CarBody* b, s32 i);
 void fn_80265D44(CarBody* b);
 Blend* fn_80265D98(void);
 s32 fn_802E2C20(void);  // milliseconds
-f32 PSVECDotProduct(const RVec3* a, const RVec3* b);
 void Transform__10CollVolumeFv(CarBody* b);
 }
 
@@ -475,7 +475,7 @@ void NetCar::Predict(void) {
     avel.x = avel.x * (1.0f - b.k);
     avel.y = avel.y * (1.0f - b.k);
     avel.z = avel.z * (1.0f - b.k);
-    if (PSVECDotProduct(&vel, &vel) > 4444.4443f) {
+    if (PSVECDotProduct((const Vec*)&vel, (const Vec*)&vel) > 4444.4443f) {
         vel.x = 0.0f;
         vel.y = 1.0f;
         vel.z = 0.0f;
