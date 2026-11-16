@@ -200,11 +200,14 @@ inline void SwfAnim::SwapShapeData(u32 i) {
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void SwfAnim::LoadFile(const char* name) {
-    int k;
-    Sw2Item* it;
-    u32 n;
-    Sw2Frame* f;
-    int j;
+    u32 frameOffset;
+    u32 itemOffset;
+    u32 frameIndex;
+    int itemIndex;
+    Sw2Frame* frame;
+    Sw2Item* item;
+    int component;
+    Sw2* current;
     u32 size = 0;
     u8 firstLoad = 0;
     u8 swapped = 0;
@@ -237,14 +240,14 @@ void SwfAnim::LoadFile(const char* name) {
     data->cxforms = (Sw2Cxform*)(base + (u32)data->cxforms);
     data->frames = (Sw2Frame*)(base + (u32)data->frames);
     u32 i;
-    for (i = 0; i < data->numFrames; i++) {
-        data->frames[i].items = (Sw2Item*)(base + (u32)data->frames[i].items);
-        if (data->frames[i].extra) {
-            data->frames[i].extra = base + (u32)data->frames[i].extra;
+    for (u32 n = 0; n < data->numFrames; n++) {
+        data->frames[n].items = (Sw2Item*)(base + (u32)data->frames[n].items);
+        if (data->frames[n].extra) {
+            data->frames[n].extra = base + (u32)data->frames[n].extra;
         }
     }
-    for (i = 0; i < data->numTextures; i++) {
-        SwfSwap32(&data->textures[i].handle);
+    for (u32 n = 0; n < data->numTextures; n++) {
+        SwfSwap32(&data->textures[n].handle);
     }
     i = 0;
     if (data->numShapes != 0) {
@@ -252,15 +255,18 @@ void SwfAnim::LoadFile(const char* name) {
             SwapShapeData(i);
         }
     }
-    for (n = 0; n < data->numFrames; n++) {
-        f = &data->frames[n];
-        SwfSwap16(&f->count);
-        for (j = 0; j < f->count; j++) {
-            it = &f->items[j];
-            SwfSwap16(&it->shape);
-            SwfSwap16(&it->cxform);
-            for (k = 0; k < 6; k++) {
-                SwfSwap32(&it->m[k]);
+    for (frameIndex = 0, frameOffset = 0; frameIndex < (current = data)->numFrames;
+         frameOffset += sizeof(Sw2Frame), ++frameIndex) {
+        frame = (Sw2Frame*)((u8*)current->frames + frameOffset);
+        SwfSwap16(&frame->count);
+
+        for (itemIndex = 0, itemOffset = 0; itemIndex < frame->count;
+             ++itemIndex, itemOffset += sizeof(Sw2Item)) {
+            item = (Sw2Item*)((u8*)frame->items + itemOffset);
+            SwfSwap16(&item->shape);
+            SwfSwap16(&item->cxform);
+            for (component = 0; component < 6; ++component) {
+                SwfSwap32(&item->m[component]);
             }
         }
     }
