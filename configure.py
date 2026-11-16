@@ -1149,7 +1149,7 @@ config.libs.append(
             Object(Matching, "game/difficulty.cpp", extra_cflags=["-opt nocse"]),
             Object(Matching, "game/splitscr.cpp"),
             Object(Matching, "game/sound.cpp"),
-            Object(NonMatching, "game/soundmgr.cpp"),
+            Object(Matching, "game/soundmgr.cpp"),
             Object(Matching, "game/mixer.cpp"),
             Object(Matching, "game/engsnd.cpp"),
             Object(Matching, "game/tiresnd.cpp"),
