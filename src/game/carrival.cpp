@@ -41,7 +41,9 @@ void fn_8013CA3C(int a, int b);  // empty in the shipped game
 void __ct__9RaceSetupFv(void* setup);   // race setup init
 }
 
-struct RaceCar {
+// One car of the race setup (8 of them from 0x20): world.cpp's CarDef (0x78); was named RaceCar here, the
+// 0x25F8 car of carelem/cargear.
+struct CarDef {
     u8 pad0[0x68];
     s32 id;  // offset 0x68
     u8 pad6C[0xC];
@@ -50,7 +52,7 @@ struct RaceCar {
 struct ArrivalRaceSetup {
     ArrivalRaceSetup(void) { __ct__9RaceSetupFv(this); }
     char track[0x20];  // offset 0x0
-    RaceCar cars[8];   // offset 0x20
+    CarDef cars[8];   // offset 0x20
     s32 numCars;       // offset 0x3E0
     u8 pad3E4[0x60];
 };

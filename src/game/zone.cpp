@@ -197,14 +197,16 @@ struct EventDesc {
     ValueNode* vals;  // offset 0x20
 };
 
-struct RaceCar {
+// One car of the race setup (8 of them from 0x20): world.cpp's CarDef (0x78); was named RaceCar here, the
+// 0x25F8 car of carelem/cargear.
+struct CarDef {
     u8 pad0[0x20];
     s32 kind;  // offset 0x20
     u8 pad24[0x78 - 0x24];
 };
 
 struct Race {
-    RaceCar cars[8];
+    CarDef cars[8];
     u8 pad3C0[0x3E0 - 0x3C0];
     s32 nCars;  // offset 0x3E0
 };
