@@ -213,165 +213,20 @@ extern "C" {
 
 void fn_802AE64C(u16** p);
 
-void fn_802AE5E0(int n) {
-    s32* p = &lbl_804BDFF0[1];
-    int ofs = 0;
-    for (int s = 2; s <= n; s *= 2) {
-        *p = ofs;
-        ofs += (s + 1) * 4;
-        p++;
-    }
-    lbl_8055F984 = new ("wtab") u16[ofs];
-}
-
-void fn_802AE644(void) { fn_802AE64C(&lbl_8055F984); }
-
-void fn_802AE64C(u16** p) {
-    if (*p) {
-        delete[] *p;
-        *p = 0;
-    }
-}
-
-void fn_802AE690(const GroundFrame* cam) {
-    f32 x = cam->axes[2].x;
-    if (x * cam->axes[2].z > 0.0f) {
-        lbl_8055F988 = x > 0.0f ? 3 : 0;
-        return;
-    }
-    lbl_8055F988 = x > 0.0f ? 1 : 2;
-}
-
-f32 fn_802AE6E0(const Vec* a, const Vec* b) {
-    f32 dz = a->z - b->z;
-    f32 dx = a->x - b->x;
-    f32 z2 = dz * dz;
-    f32 x2 = dx * dx;
-    return sqrt(x2 + z2);
-}
-
-void fn_802AE728(void) {
-    fn_802C7A44();
-    fn_802C9648(1.1f);
-    fn_80287A34(0);
-    fn_802C967C();
-    fn_802879E4(0);
-    fn_801FA6B8();
-    fn_802C7A50();
-    fn_802C9904();
-    fn_801FA738();
-}
-
-int fn_802B05E4(void);
-
-void fn_802AE774(void) {
-    fn_802BA004();
-    if (!fn_802B05E4()) {
-        fn_802BA348();
-    }
-    fn_802C29A0();
-    fn_802BAE50();
-}
-
-int fn_802AE7AC(void) { return lbl_8055F984 != 0; }
-
-void fn_802AE7C0(void) {
-    fn_802C9950(0x555766);
-    fn_802C9994(0xFFF5D9);
-}
-
-void fn_802AE7F4(void) {
-    lbl_8055F980 = fn_8012C33C("swlmap.tex");
-    fn_802AE5E0(0x400);
-    fn_802BE7F8();
-    fn_802B40F8();
-    fn_802B0914();
-    fn_802C26F0();
-    fn_802B1E28();
-    fn_802B57B8();
-    fn_802BBBC8();
-    fn_802C2138();
-    fn_802B9B68();
-    fn_802BDBA8();
-    fn_802C2298();
-    if (!lbl_8055F980) {
-        fn_802BF350();
-    }
-    fn_802B58E0();
-    waterLayer = fn_802B59CC()->GetInt("water_layer", -1);
-    crystalMode = fn_802B59CC()->GetBool("crystal_mode", 0);
-    f32 dist[8];
-    dist[0] = 10.0f * (2.0f * lbl_80564AF0.cell);
-    dist[1] = 4.0f * (4.0f * lbl_80564AF0.cell);
-    dist[2] = 4.0f * (8.0f * lbl_80564AF0.cell);
-    dist[3] = 10.0f * (16.0f * lbl_80564AF0.cell);
-    dist[4] = 4.0f * (32.0f * lbl_80564AF0.cell);
-    dist[5] = 3.0f * (64.0f * lbl_80564AF0.cell);
-    dist[6] = 2.0f * (128.0f * lbl_80564AF0.cell);
-    dist[7] = 256.0f * lbl_80564AF0.cell;
-    f32 sum = dist[0];
-    int scale = 2;
-    f32* out = &lbl_804BE090[1];
-    f32* next = &dist[1];
-    for (int i = 0; i < 7; i++) {
-        f32 size = *next;
-        f32 d = (1.4142f * (0.5f * lbl_80564AF0.cell)) * (f32)(scale * 2 + scale);
-        *out = sum;
-        sum += d > size ? d : size;
-        scale *= 2;
-        out++;
-        next++;
-    }
-    fn_802BEAB0();
-    lbl_8055F97C = 0xFA;
-}
-
-void fn_802AE9D0(void) {
-    waterLayer = -1;
-    fn_802C10C4();
-    if (!fn_802B05E4()) {
-        fn_802BF40C();
-    }
-    fn_802C2410();
-    fn_802BDC60();
-    fn_802B9D08();
-    fn_802C2A34();
-    fn_802B5808();
-    fn_802C217C();
-    fn_802B1FD4();
-    fn_802C2874();
-    fn_802B0954();
-    fn_802B4BDC();
-    fn_802BBCC4();
-    fn_802BE840();
-    fn_802AE644();
-    lbl_8055F970 = 0;
-}
-
-void fn_802AEA44(void) {
-    fn_802C10B8();
-    {
-        ScopeTimer t("FanInfoSetVisibilityMasks");
-        fn_802BEB70();
-    }
-    fn_802AE774();
-}
-
-void fn_802AEAA8(void) { fn_802BDC3C(); }
-
-void fn_802B0288(GroundSet* g);
-
-void fn_802AEAAC(void) {
-    if (!lbl_8055F970) {
-        fn_802B0288(fn_802B59A4(0));
-    }
-    lbl_8055F974 = lbl_8055F970->terrain;
-    lbl_8055F978 = lbl_8055F970->objects;
-    for (int i = 0; i < 4; i++) {
-        fn_802BB674(lbl_8055F970->layers[i].a, i);
-    }
-    fn_802C10CC(lbl_8055F970->sky);
-}
+// The inline quadtree helpers (MaskLevel .. DrawNode) are defined HERE, before the first function: retail keeps the
+// eight s16 corner tables of DrawNode right after the cell size in .sdata2, i.e. the helper was parsed before the
+// early functions created their literals. Prototypes for what the helpers call follow.
+void fn_802AE5E0(int n);
+void fn_802AE64C(u16** p);
+void fn_802AE690(const GroundFrame* cam);
+f32 fn_802AE6E0(const Vec* a, const Vec* b);
+void fn_802AE728(void);
+void fn_802AE774(void);
+void fn_802AE7C0(void);
+void fn_802AE7F4(void);
+void fn_802AE9D0(void);
+void fn_802AEA44(void);
+void fn_802AEAAC(void);
 
 // Mask level for a node of size n: log2(n) for powers of two, from the float exponent.
 static inline int MaskLevel(int n) {
@@ -634,6 +489,166 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
             }
         }
     }
+}
+
+void fn_802AE5E0(int n) {
+    s32* p = &lbl_804BDFF0[1];
+    int ofs = 0;
+    for (int s = 2; s <= n; s *= 2) {
+        *p = ofs;
+        ofs += (s + 1) * 4;
+        p++;
+    }
+    lbl_8055F984 = new ("wtab") u16[ofs];
+}
+
+void fn_802AE644(void) { fn_802AE64C(&lbl_8055F984); }
+
+void fn_802AE64C(u16** p) {
+    if (*p) {
+        delete[] *p;
+        *p = 0;
+    }
+}
+
+void fn_802AE690(const GroundFrame* cam) {
+    f32 x = cam->axes[2].x;
+    if (x * cam->axes[2].z > 0.0f) {
+        lbl_8055F988 = x > 0.0f ? 3 : 0;
+        return;
+    }
+    lbl_8055F988 = x > 0.0f ? 1 : 2;
+}
+
+f32 fn_802AE6E0(const Vec* a, const Vec* b) {
+    f32 dz = a->z - b->z;
+    f32 dx = a->x - b->x;
+    f32 z2 = dz * dz;
+    f32 x2 = dx * dx;
+    return sqrt(x2 + z2);
+}
+
+void fn_802AE728(void) {
+    fn_802C7A44();
+    fn_802C9648(1.1f);
+    fn_80287A34(0);
+    fn_802C967C();
+    fn_802879E4(0);
+    fn_801FA6B8();
+    fn_802C7A50();
+    fn_802C9904();
+    fn_801FA738();
+}
+
+int fn_802B05E4(void);
+
+void fn_802AE774(void) {
+    fn_802BA004();
+    if (!fn_802B05E4()) {
+        fn_802BA348();
+    }
+    fn_802C29A0();
+    fn_802BAE50();
+}
+
+int fn_802AE7AC(void) { return lbl_8055F984 != 0; }
+
+void fn_802AE7C0(void) {
+    fn_802C9950(0x555766);
+    fn_802C9994(0xFFF5D9);
+}
+
+void fn_802AE7F4(void) {
+    lbl_8055F980 = fn_8012C33C("swlmap.tex");
+    fn_802AE5E0(0x400);
+    fn_802BE7F8();
+    fn_802B40F8();
+    fn_802B0914();
+    fn_802C26F0();
+    fn_802B1E28();
+    fn_802B57B8();
+    fn_802BBBC8();
+    fn_802C2138();
+    fn_802B9B68();
+    fn_802BDBA8();
+    fn_802C2298();
+    if (!lbl_8055F980) {
+        fn_802BF350();
+    }
+    fn_802B58E0();
+    waterLayer = fn_802B59CC()->GetInt("water_layer", -1);
+    crystalMode = fn_802B59CC()->GetBool("crystal_mode", 0);
+    f32 dist[8];
+    dist[0] = 10.0f * (2.0f * lbl_80564AF0.cell);
+    dist[1] = 4.0f * (4.0f * lbl_80564AF0.cell);
+    dist[2] = 4.0f * (8.0f * lbl_80564AF0.cell);
+    dist[3] = 10.0f * (16.0f * lbl_80564AF0.cell);
+    dist[4] = 4.0f * (32.0f * lbl_80564AF0.cell);
+    dist[5] = 3.0f * (64.0f * lbl_80564AF0.cell);
+    dist[6] = 2.0f * (128.0f * lbl_80564AF0.cell);
+    dist[7] = 256.0f * lbl_80564AF0.cell;
+    f32 sum = dist[0];
+    int scale = 2;
+    f32* out = &lbl_804BE090[1];
+    f32* next = &dist[1];
+    for (int i = 0; i < 7; i++) {
+        f32 size = *next;
+        f32 d = (1.4142f * (0.5f * lbl_80564AF0.cell)) * (f32)(scale * 2 + scale);
+        *out = sum;
+        sum += d > size ? d : size;
+        scale *= 2;
+        out++;
+        next++;
+    }
+    fn_802BEAB0();
+    lbl_8055F97C = 0xFA;
+}
+
+void fn_802AE9D0(void) {
+    waterLayer = -1;
+    fn_802C10C4();
+    if (!fn_802B05E4()) {
+        fn_802BF40C();
+    }
+    fn_802C2410();
+    fn_802BDC60();
+    fn_802B9D08();
+    fn_802C2A34();
+    fn_802B5808();
+    fn_802C217C();
+    fn_802B1FD4();
+    fn_802C2874();
+    fn_802B0954();
+    fn_802B4BDC();
+    fn_802BBCC4();
+    fn_802BE840();
+    fn_802AE644();
+    lbl_8055F970 = 0;
+}
+
+void fn_802AEA44(void) {
+    fn_802C10B8();
+    {
+        ScopeTimer t("FanInfoSetVisibilityMasks");
+        fn_802BEB70();
+    }
+    fn_802AE774();
+}
+
+void fn_802AEAA8(void) { fn_802BDC3C(); }
+
+void fn_802B0288(GroundSet* g);
+
+void fn_802AEAAC(void) {
+    if (!lbl_8055F970) {
+        fn_802B0288(fn_802B59A4(0));
+    }
+    lbl_8055F974 = lbl_8055F970->terrain;
+    lbl_8055F978 = lbl_8055F970->objects;
+    for (int i = 0; i < 4; i++) {
+        fn_802BB674(lbl_8055F970->layers[i].a, i);
+    }
+    fn_802C10CC(lbl_8055F970->sky);
 }
 
 // Walks the terrain quadtree from the camera, building the visible cell batches and their scattered objects.
