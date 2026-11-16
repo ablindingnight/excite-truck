@@ -878,6 +878,14 @@ void EngineFireMan::Emit(EngineEntry* e) {
     fn_8028E584(emitter, &p, &c->vel);
 }
 
+/* Helper unproven: retail creates 0.1f and 0.05f BEFORE the literals of fn_802991BC, although their first users in
+   the code are BoostFireMan's constructor and BackfireMan::Event much later. An unused static function with those
+   two literals was compiled here (the linker drops it; its constants stay in .sdata2). */
+static f32 SparkFade(f32 a) {
+    f32 d = 0.1f * a;
+    return d + 0.05f;
+}
+
 extern "C" void fn_802991BC(EngineFireMan* m) {
     PartParams e;
     e.max = 0x80;
