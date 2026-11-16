@@ -3,6 +3,7 @@
 // simulation (fn_801C1BA4 handle) and is re-fitted to the simulated corners every update. A body
 // is reused when free, else the oldest one is taken. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/vec3_init.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
@@ -144,9 +145,6 @@ void fn_801C2694(void* strip, RVec3* out, s32* n, const RVec3* pos, const RVec3*
 void fn_801E9DC4(s16* h);
 int fn_801E9E78(s16* h, RVec3* p, RVec3* n, s32* id);
 void* memset(void* dst, int c, size_t n);
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-void PSVECNormalize(const void* in, void* out);
 
 void fn_801BFE7C(RVec3* out, const RVec3* a, const RVec3* b);
 void fn_801BFEB0(PanelVert* v);
@@ -234,10 +232,10 @@ static inline void Orthonormalize(Mat3* m) {
     CVec a(m->m[0][0], m->m[0][1], m->m[0][2]);
     CVec b;
     CVec c(m->m[2][0], m->m[2][1], m->m[2][2]);
-    PSVECCrossProduct(&c, &a, &b);
-    PSVECNormalize(&a, &a);
-    PSVECNormalize(&b, &b);
-    PSVECCrossProduct(&a, &b, &c);
+    PSVECCrossProduct((const Vec*)&c, (const Vec*)&a, (Vec*)&b);
+    PSVECNormalize((const Vec*)&a, (Vec*)&a);
+    PSVECNormalize((const Vec*)&b, (Vec*)&b);
+    PSVECCrossProduct((const Vec*)&a, (const Vec*)&b, (Vec*)&c);
     m->m[0][0] = a.x;
     m->m[0][1] = a.y;
     m->m[0][2] = a.z;
@@ -415,8 +413,8 @@ void fn_801BFB2C(PanelVol* p, RMtx* out, const RVec3* pts) {
     m.pos = pts[p->org];
     Sub(&m.rot.x, &pts[p->e0b], &pts[p->e0a]);
     Sub(&m.rot.y, &pts[p->e1b], &pts[p->e1a]);
-    PSVECCrossProduct(&m.rot.x, &m.rot.y, &m.rot.z);
-    if (PSVECDotProduct(&m.rot.z, &m.rot.z) > kAxisTolerance) {
+    PSVECCrossProduct((const Vec*)&m.rot.x, (const Vec*)&m.rot.y, (Vec*)&m.rot.z);
+    if (PSVECDotProduct((const Vec*)&m.rot.z, (const Vec*)&m.rot.z) > kAxisTolerance) {
         Orthonormalize((Mat3*)&m.rot);
     } else {
         Identity((Mat3*)&m.rot);
@@ -625,7 +623,7 @@ void PanelVol::Update(void) {
     nrm.y *= 0.100000024f;
     nrm.z *= 0.100000024f;
     AddScaled(&nrm, &dir, 0.9f);
-    PSVECNormalize(&nrm, &nrm);
+    PSVECNormalize((const Vec*)&nrm, (Vec*)&nrm);
     pos = p;
     dir = nrm;
     RVec3 pts[8];
@@ -668,9 +666,9 @@ void fn_801C0D3C(Mat3* m) { Identity(m); }
 
 void fn_801C0D6C(Mat3* m) { Orthonormalize(m); }
 
-f32 fn_801C0E44(const RVec3* v) { return PSVECDotProduct(v, v); }
+f32 fn_801C0E44(const RVec3* v) { return PSVECDotProduct((const Vec*)v, (const Vec*)v); }
 
-void fn_801C0E4C(RVec3* out, const RVec3* a, const RVec3* b) { PSVECCrossProduct(a, b, out); }
+void fn_801C0E4C(RVec3* out, const RVec3* a, const RVec3* b) { PSVECCrossProduct((const Vec*)a, (const Vec*)b, (Vec*)out); }
 
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b) { Sub(out, a, b); }
 

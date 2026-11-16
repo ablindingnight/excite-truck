@@ -2,21 +2,19 @@
 // transform (and last frame's), plus the box volume ("box-volume" shapes). Some CollVolume virtuals live in
 // the neighbouring physics object unit. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
 #include "game/shapes.h"
 
 extern "C" {
-f32 PSVECMag(const void* v);
 double cos(double x);
 double sqrt(double x);
 double acos(double x);
 double sin(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801E9DC4(s16* h);
-void PSVECNormalize(const void* src, void* dst);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -154,7 +152,7 @@ static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
 }
 
 static inline void AxisAngle(RVec3* m, const RVec3* v) {
-    f32 a = PSVECMag(v);
+    f32 a = PSVECMag((const Vec*)v);
     if (a > 0.0001f) {
         f32 inv = 1.0f / a;
         f32 z;
@@ -351,15 +349,15 @@ extern "C" void fn_8017AE94(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
         p += 6;
         q += 6;
     }
-    PSVECNormalize(&out->rot.x, &out->rot.x);
-    PSVECNormalize(&out->rot.y, &out->rot.y);
-    PSVECNormalize(&out->rot.z, &out->rot.z);
+    PSVECNormalize((const Vec*)&out->rot.x, (Vec*)&out->rot.x);
+    PSVECNormalize((const Vec*)&out->rot.y, (Vec*)&out->rot.y);
+    PSVECNormalize((const Vec*)&out->rot.z, (Vec*)&out->rot.z);
     x.Set(out->rot.x.x, out->rot.x.y, out->rot.x.z);
     z.Set(out->rot.z.x, out->rot.z.y, out->rot.z.z);
-    PSVECCrossProduct(&z, &x, &y);
-    PSVECNormalize(&x, &x);
-    PSVECNormalize(&y, &y);
-    PSVECCrossProduct(&x, &y, &z);
+    PSVECCrossProduct((const Vec*)&z, (const Vec*)&x, (Vec*)&y);
+    PSVECNormalize((const Vec*)&x, (Vec*)&x);
+    PSVECNormalize((const Vec*)&y, (Vec*)&y);
+    PSVECCrossProduct((const Vec*)&x, (const Vec*)&y, (Vec*)&z);
     out->rot.x = x;
     out->rot.y = y;
     out->rot.z = z;

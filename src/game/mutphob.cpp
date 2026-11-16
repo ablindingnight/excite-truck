@@ -5,6 +5,7 @@
 // a hinged chunk instead swings back to its rest pose and is parked once it is upright again and no
 // car is touching it. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
@@ -21,9 +22,6 @@ void fn_801796CC(u8 type, const void* data, u32 n);
 void fn_801A4868(void* obj, int a);
 int fn_801D04D0(const char* name);  // surface type by name
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECSquareDistance(const void* a, const void* b);
 }
 
 
@@ -462,11 +460,11 @@ static inline void AddScaled(RVec3* v, const RVec3* a, f32 s) {
 
 // A hinged chunk swings back upright; parked when it is and no car is near.
 void fn_801D4598(MutPhob* p, f32 now) {
-    f32 d = PSVECDotProduct(&p->mtx.rot.z, &p->home.rot.z);
+    f32 d = PSVECDotProduct((const Vec*)&p->mtx.rot.z, (const Vec*)&p->home.rot.z);
     if (now < p->time + p->maxLife || d < 0.99f ||
-        (p->car && PSVECSquareDistance(&p->car->mtx.pos, &p->home.pos) < (1.0f + p->shapeRadius) * (1.0f + p->shapeRadius))) {
+        (p->car && PSVECSquareDistance((const Vec*)&p->car->mtx.pos, (const Vec*)&p->home.pos) < (1.0f + p->shapeRadius) * (1.0f + p->shapeRadius))) {
         RVec3 axis;
-        PSVECCrossProduct(&p->mtx.rot.z, &p->home.rot.z, &axis);
+        PSVECCrossProduct((const Vec*)&p->mtx.rot.z, (const Vec*)&p->home.rot.z, (Vec*)&axis);
         p->vel.Set(0.0f, 0.0f, 0.0f);
         f32 k = d - 0.25f;
         k = (0.0f < k) ? 0.0f : k;

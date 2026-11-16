@@ -4,6 +4,7 @@
 // wheels. Also hands the car back to the course when it has been off the terrain for too long.
 // Names are guesses apart from the message.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/springcar.h"
@@ -95,7 +96,6 @@ int fn_801E9E30(s16* h, RVec3* pos);
 void fn_80265D38(CarBody* b, s32 i);
 void fn_80265D3C(CarBody* b);
 void fn_802E30C8(const char* fmt, ...);
-f32 PSVECDotProduct(const RVec3* a, const RVec3* b);
 }
 
 extern s32 lbl_8055E3C4;    // frame counter
@@ -235,7 +235,7 @@ void SpringWall::Apply(SpringCar* car, RVec3* acc) {
         v.x = acc->x + car->vel.x;
         v.y = acc->y + car->vel.y;
         v.z = acc->z + car->vel.z;
-        d = PSVECDotProduct(&v, &n);
+        d = PSVECDotProduct((const Vec*)&v, (const Vec*)&n);
         t = time / ramp;
         t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
@@ -288,7 +288,7 @@ void SpringWall::Apply(SpringCar* car, RVec3* acc) {
             f64 absWide = __fabs(pen);
             f32 absPen = (f32)absWide;
             at.y = 0.0f;
-            if (!(absPen <= __float_epsilon[0]) && PSVECDotProduct((RVec3*)&at, &n) < 0.0f && (f32)__fabs(car->avel.y) < 1.5707964f) {
+            if (!(absPen <= __float_epsilon[0]) && PSVECDotProduct((const Vec*)((RVec3*)&at), (const Vec*)&n) < 0.0f && (f32)__fabs(car->avel.y) < 1.5707964f) {
                 f32 m = 17.777779f / pen;
                 m = 1.0f < m ? 1.0f : m;
                 m = 0.8f * m;
@@ -317,7 +317,7 @@ static f32 PlaneDist(const RVec3* n, const RVec3* p, const RVec3* o) {
     d.x = p->x - o->x;
     d.y = p->y - o->y;
     d.z = p->z - o->z;
-    return PSVECDotProduct(n, &d);
+    return PSVECDotProduct((const Vec*)n, (const Vec*)&d);
 }
 
 void SpringWall::Set(WallObj* w, SpringCar* car, const RVec3* other) {
@@ -326,11 +326,11 @@ void SpringWall::Set(WallObj* w, SpringCar* car, const RVec3* other) {
         f32 k;
         n = *(RVec3*)w->plane;
         AddScaled(&p, &car->mtx.pos, &car->vel, -0.016683351f);
-        if (other && PSVECDotProduct(other, &n) < 0.0f) {
+        if (other && PSVECDotProduct((const Vec*)other, (const Vec*)&n) < 0.0f) {
             Scale(&n, -1.0f);
         }
         dist = PlaneDist(&n, &p, &w->plane->origin);
-        vel = PSVECDotProduct(&car->vel, &n);
+        vel = PSVECDotProduct((const Vec*)&car->vel, (const Vec*)&n);
         k = -vel;
         k = 17.777779f < k ? 17.777779f : k;
         k = k > 0.8888889f ? k : 0.8888889f;
