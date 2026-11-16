@@ -12,7 +12,9 @@ static const f32 DemoNear[] = {1.0f};
 static const f32 DemoFar[] = {1000.0f};
 static const f32 DemoFov[] = {1.4398966f};
 
-struct GameMode {
+// One entry of the game-mode function table lbl_802FBC90 (draw, key, update, enter, leave). Was "GameMode", the name of
+// the real GameMode class (gamemode.h) - port ODR. /* Helper name unproven */
+struct GameModeEntry {
     void (*draw)(void);         // offset 0x0
     int (*handleKey)(int key);  // offset 0x4
     void (*update)(void);       // offset 0x8
@@ -267,7 +269,7 @@ void fn_8000AD20(void);
 int fn_8000AD24(int key);
 void fn_8000C5CC(void);
 
-GameMode lbl_802FBC90[25] = {
+GameModeEntry lbl_802FBC90[25] = {
     {fn_80007238, fn_800074EC, NULL, NULL, NULL},
     {fn_8000D1DC, fn_8000D540, fn_8000D19C, fn_8000D070, fn_8000D100},
     {fn_8013A1F4, fn_8013A1F8, NULL, NULL, NULL},
@@ -314,7 +316,7 @@ s32 lbl_8034F5D8[8];  // allowed racing cameras
 Vec3 lbl_8034F5F8;
 Vec3 lbl_8034F604;
 
-GameMode* lbl_8055D3D0;  // current mode
+GameModeEntry* lbl_8055D3D0;  // current mode
 u8 lbl_8055D3D4;         // race running
 u8 lbl_8055D3D5;
 s32 lbl_8055D3D8;        // last input time
