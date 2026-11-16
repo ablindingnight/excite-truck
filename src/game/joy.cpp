@@ -188,7 +188,7 @@ s32* fn_801297F4(void) { return lbl_804223C0; }
 
 int fn_801298E8(JoyStatus* out, int chan);
 
-u8 fn_80129800(int chan, int button) {
+int fn_80129800(int chan, int button) {
     JoyStatus s;
     if (fn_801298E8(&s, chan) && lbl_804223C0[button] >= 0) {
         return s.buttons[lbl_804223C0[button]];
