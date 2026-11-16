@@ -1294,7 +1294,7 @@ config.libs.append(
             Object(Matching, "game/image.cpp"),
             Object(NonMatching, "game/model.cpp"),
             Object(Matching, "game/mrender.cpp"),
-            Object(NonMatching, "game/texture.cpp"),
+            Object(Matching, "game/texture.cpp"),
             Object(NonMatching, "game/mlist.cpp"),
             Object(Matching, "game/vidmode.cpp"),
             Object(Matching, "game/modelpool.cpp"),

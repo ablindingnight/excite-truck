@@ -529,6 +529,9 @@ struct SimpleHeap {
             fn_802E317C("SimpleHeap Destroyed with pending allocations");
         }
     }
+    static void ReportAllocationFailure(s32 size) {
+        fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", size);
+    }
     void* Alloc(u32 size) {
         s32 n = (size + align) & ~align;
         HeapBlock* split;
@@ -568,7 +571,7 @@ struct SimpleHeap {
             res = (u8*)b + align + 1;
         }
         if (!res && active) {
-            fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", n);
+            ReportAllocationFailure(n);
         }
         return res;
     }
