@@ -223,6 +223,8 @@ void fn_80138144(ResExt* e) {
 
 void fn_80138434(void* p);
 
+#pragma push
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_801381B4(IdealLineRes* res) {
     int i;
     int t;
@@ -271,6 +273,7 @@ void fn_801381B4(IdealLineRes* res) {
         fn_80138144(e);
     }
 }
+#pragma pop
 
 void fn_80138434(void* p) { fn_80137F2C(p); }
 
