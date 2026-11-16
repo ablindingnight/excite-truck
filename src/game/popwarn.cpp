@@ -97,10 +97,6 @@ u8 lbl_8055F271;
 s32 lbl_8055F274;
 u8* lbl_8055F278;
 
-extern "C" {
-
-}  // extern "C"
-
 // A scrolling menu art widget that owns its image ("extruck.art").
 class MenuArt : public MenuState {
 public:
@@ -226,6 +222,7 @@ public:
     virtual ~MenuTimer(void) {}
     virtual void Update(void);
     virtual void Draw(void);
+    virtual int Key(int key);
 
     s32 kind;   // offset 0x18: how it ends (1 = timeout)
     s32 start;  // offset 0x1C
@@ -988,10 +985,6 @@ struct BobPoint {
     f32 y;  // offset 0x4
 };
 
-extern "C" {
-
-}  // extern "C"
-
 // y of the drift curve at x, scaled by the remaining ease u.
 static inline f32 BobCurve(f32 x, f32 y, f32 u) {
     BobPoint pts[9] = {
@@ -1035,10 +1028,6 @@ static inline void SetRamp(u8* r, s32 start, s32 dur) {
     S32(r, 0x0) = start;
     S32(r, 0x4) = dur;
 }
-
-extern "C" {
-
-}  // extern "C"
 
 s32 lbl_8055BEF0 = 0x352;
 f32 lbl_8055BEF4 = 0.7f;
@@ -1126,10 +1115,6 @@ int fn_80248668(void) {
 }  // extern "C"
 
 
-extern "C" {
-
-}  // extern "C"
-
 void MenuArt::Enter(void) { scroll = 0.0f; }
 
 void MenuArt::Update(void) {
@@ -1191,10 +1176,6 @@ int PadWait::Key(int key) {
     return 0;
 }
 
-extern "C" {
-
-}  // extern "C"
-
 // Black overlay fading out over the first and in over the last 500 ms.
 void MenuTimer::Draw(void) {
     int t = fn_802E2C20() - start;
@@ -1251,42 +1232,38 @@ void MenuTimer::Update(void) {
     }
 }
 
-extern "C" {
-
-int MenuTimer_vf58(u8* p, int key) {
+int MenuTimer::Key(int key) {
     s32 now = fn_802E2C20();
-    s32 t0 = S32(p, 0x1C);
+    s32 t0 = start;
     if (now < t0 + 750) {
         return 0;
     }
-    s32 d = S32(p, 0x20);
+    s32 d = dur;
     if (d && now - t0 > d - 500) {
         return 0;
     }
-    if (S32(p, 0x18) != 1) {
+    if (kind != 1) {
         return 0;
     }
     switch (key) {
     case 27:
-        if (U32(p, 0x24) & 2) {
-            S32(p, 0x18) = 4;
+        if ((u32)mode & 2) {
+            kind = 4;
             break;
         }
         return 0;
     case 13:
-        if (U32(p, 0x24) & 1) {
-            S32(p, 0x18) = 2;
+        if ((u32)mode & 1) {
+            kind = 2;
             break;
         }
         return 0;
     default:
         return 0;
     }
-    S32(p, 0x1C) = now - S32(p, 0x20) + 500;
+    start = now - dur + 500;
     return 1;
 }
-
-}  // extern "C"
 
 void StrapScreen::Enter(void) {
     left = 0;
@@ -1358,11 +1335,6 @@ int CupSelect::Key(int key) {
     return 0;
 }
 
-extern "C" {
-
-
-}  // extern "C"
-
 void ModeList::Enter(void) {
     for (int i = 0; i < list.count; i++) {
         Entry* e = &list.data[i];
@@ -1373,8 +1345,3 @@ void ModeList::Enter(void) {
         }
     }
 }
-
-extern "C" {
-
-
-}  // extern "C"

@@ -945,6 +945,8 @@ public:
             delete objects;
         }
     }
+    virtual void Enter(void);
+    virtual int Key(int key);
     virtual void Update(void) {
         s32 i = index;
         if (i >= 0 && i < list->Count()) {
@@ -1443,30 +1445,25 @@ void SlotStrip::Draw(void) {
     fn_802354A0(PTR(p, 0x24), 2, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f, -1);
 }
 
-extern "C" {
-
-void fn_80251D0C(u8* p) {
-    ((CarUIScreen*)PTR(p, 0x20))->UnloadModel();
-    S32(p, 0x190) = -1;
-    U8(p, 0x28) = 0;
-    U8(p, 0x48) = 0;
-    U8(p, 0x88) = 0;
-    U8(p, 0x108) = 0;
-    F32(p, 0x194) = 0.0f;
-    F32(p, 0x198) = 20.0f;
+void UnlockScreen::Enter(void) {
+    ui->UnloadModel();
+    shown = -1;
+    model[0] = 0;
+    name[0] = 0;
+    message[0] = 0;
+    title[0] = 0;
+    wait = 0.0f;
+    hold = 20.0f;
     fn_80214A9C(0x1F);
-    U8(p, 0x19C) = 0;
+    revealed = 0;
 }
 
-int fn_80252238(u8* p, int key) {
+int UnlockScreen::Key(int key) {
     if (key == 0xD) {
-        if (AbsF(F32(p, 0x194)) <= __float_epsilon[0] || AbsF(F32(p, 0x198)) <= __float_epsilon[0]) {
-            ((MenuState*)p)->Finish(0);
+        if (AbsF(wait) <= __float_epsilon[0] || AbsF(hold) <= __float_epsilon[0]) {
+            Finish(0);
             return 1;
         }
     }
     return 0;
 }
-
-
-}  // extern "C"
