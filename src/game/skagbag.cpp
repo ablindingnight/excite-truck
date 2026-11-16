@@ -277,8 +277,8 @@ void fn_802B40F8(void) {
         ValueNode* first = fn_802B4014(root);
         for (int i = 0; i < lbl_8055F9D0->cap; i++) {
             SkagBag* bag = new ("root-SkagBag") SkagBag(first);
-            int k = lbl_8055F9D0->count++;
-            lbl_8055F9D0->data[k] = bag;
+            SkagBag** slot = &lbl_8055F9D0->data[lbl_8055F9D0->count++];
+            *slot = bag;
         }
         lbl_804BE248[1] = new ("Root-SBDM") SkagGrid(lbl_8055F9D0);
         ValueNode* c;
