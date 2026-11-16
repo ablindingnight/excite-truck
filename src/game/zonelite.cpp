@@ -110,23 +110,22 @@ static inline void ZSub(ValVec3* d, const ValVec3* a, const ValVec3* b) {
     d->z = a->z - b->z;
 }
 
-static inline f32 ZMax(f32& a, const f32& b) { return a > b ? a : b; }
+static inline f32 ZMax(const f32& a, const f32& b) { return a > b ? a : b; }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802A9090(const ValVec3& vb, PlainValMatrix* f) {
     lbl_804BD704 = vb;
-    f32 xv = vb.x;
-    f->origin.x = lbl_804BD6F8.x + xv;
-    f32 yv = vb.y;
-    f->origin.y = lbl_804BD6F8.y + yv;
-    f32 zv = vb.z;
-    f->origin.z = lbl_804BD6F8.z + zv;
+    f->origin = vb;
+    f32 yBase = lbl_804BD6F8.y;
+    f->origin.x = lbl_804BD6F8.x + f->origin.x;
+    f->origin.y = yBase + f->origin.y;
+    f->origin.z = lbl_804BD6F8.z + f->origin.z;
     f->origin.x *= 0.5f;
     f->origin.y *= 0.5f;
     f->origin.z *= 0.5f;
     f32 y = ZMax(lbl_804BD6F8.y, vb.y);
-    ZSub(&f->basis[0], &lbl_804BD704, &lbl_804BD6F8);
     f->origin.y = y;
+    ZSub(&f->basis[0], &lbl_804BD704, &lbl_804BD6F8);
     f->basis[0].y = 0.0f;
     f->basis[1].x = 0.0f;
     f->basis[1].y = 1.0f;

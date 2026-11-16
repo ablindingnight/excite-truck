@@ -1270,7 +1270,7 @@ config.libs.append(
             Object(Matching, "game/stub13.cpp"),
             Object(Matching, "game/cartags.cpp"),
             Object(NonMatching, "game/birds.cpp"),
-            Object(NonMatching, "game/zonelite.cpp"),
+            Object(Matching, "game/zonelite.cpp"),
             Object(Matching, "game/lightwall.cpp"),
             Object(Matching, "game/trkefx.cpp"),
             Object(NonMatching, "game/groundvis.cpp"),
