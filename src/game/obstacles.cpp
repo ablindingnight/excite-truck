@@ -737,10 +737,11 @@ static inline double AbsD(double v) { return __fabs(v); }
 extern "C" {
 
 void fn_801ABB54(u8* p) {
-    f32 d = PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x54));
+    Obstacle* ob = (Obstacle*)p;
+    f32 d = PSVECDotProduct((f32*)&ob->avel, (f32*)&ob->mtx.rot.z);
     f32 imp = 0.0f;
     f32 ad = (f32)AbsD(d);
-    f32 lim = F32(p, 0x238);
+    f32 lim = ob->u238;
     if (ad > lim) {
         lim = lim < ad ? lim : ad;
         f32 sign = d > 0.0f ? 1.0f : (-1.0f);
@@ -748,9 +749,9 @@ void fn_801ABB54(u8* p) {
     } else if (ad > 0.01f) {
         imp = -d * ScaleOperand(0.5f);
     }
-    F32(p, 0x124) = F32(p, 0x124) + F32(p, 0x54) * imp;
-    F32(p, 0x128) = F32(p, 0x128) + F32(p, 0x58) * imp;
-    F32(p, 0x12C) = F32(p, 0x12C) + F32(p, 0x5C) * imp;
+    ob->avel.x = ob->avel.x + ob->mtx.rot.z.x * imp;
+    ob->avel.y = ob->avel.y + ob->mtx.rot.z.y * imp;
+    ob->avel.z = ob->avel.z + ob->mtx.rot.z.z * imp;
 }
 
 }  // extern "C"
@@ -841,14 +842,15 @@ void Obstacle::vf20(void) { CollVolume::vf20(); }
 extern "C" {
 
 void fn_801ABFF8(u8* p, VVisit* f) {
-    u8* o = PTR(p, 0x224);
-    if (o && U8(p, 0x223) && lbl_8055E3C4 > 1) {
-        while (o != p) {
-            U8(o, 0x223) = 0;
+    Obstacle* ob = (Obstacle*)p;
+    Obstacle* o = ob->chain;
+    if (o && ob->chainArmed && lbl_8055E3C4 > 1) {
+        while ((u8*)o != p) {
+            o->chainArmed = 0;
             f->Visit((ObstacleSink*)o);
-            o = PTR(o, 0x224);
+            o = o->chain;
         }
-        U8(p, 0x223) = 0;
+        ob->chainArmed = 0;
     }
     fn_801AC240(p);
 }
