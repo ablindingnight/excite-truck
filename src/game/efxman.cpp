@@ -3,6 +3,7 @@
 // car list for the effect callbacks, reads each car's efx.val, and owns the effects random
 // number generator. Names are guesses apart from the allocation tags and messages.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include "game/carinfo.h"
 #include "macros.h"
 #include <revolution/MTX.h>
@@ -52,15 +53,11 @@ struct EfxWheel {
     s32 i38;    // offset 0x38
 };
 
-struct EfxMtx {
-    Vec rot[3];  // offset 0x0
-    Vec pos;     // offset 0x24
-};
-
+// EfxMtx: vecmatrix.h's VecMatrix.
 // Per-frame snapshot of a car for the effects.
 struct EfxCar {
     EfxCar(void);
-    EfxMtx m;        // offset 0x0
+    VecMatrix m;        // offset 0x0
     s16 hint;        // offset 0x30
     Vec vel;         // offset 0x34
     Vec dir;         // offset 0x40
@@ -134,7 +131,7 @@ struct EfxDriver {
 
 struct EfxModel {
     u8 pad0[4];
-    EfxMtx m;    // offset 0x4
+    VecMatrix m;    // offset 0x4
     u8 pad34[0x3EC - 0x34];
     s32 i3EC;    // offset 0x3EC
 };
@@ -181,7 +178,7 @@ int fn_801E2CCC(s32 model, const char* name, void** out);
 int fn_801E7DF0(int a);
 f32 fn_801E7E24(void);
 int fn_801E85A4(void);
-const EfxMtx* fn_801E8718(int view);
+const VecMatrix* fn_801E8718(int view);
 int fn_801E866C(int view);
 f32 fn_801E88F0(int view);
 int fn_801E8954(int view);
@@ -697,7 +694,7 @@ int fn_802885C4(const void* a, const void* b) {
 
 void fn_802885F0(void) {
     int carOf[4];
-    EfxMtx cams[4];
+    VecMatrix cams[4];
     int i;
     int n = fn_801E85A4();
     for (i = 0; i < n; i++) {
@@ -706,10 +703,10 @@ void fn_802885F0(void) {
     }
     for (i = 0; i < lbl_804B3150.count; i++) {
         EfxCar* c = fn_80287B24(i);
-        const Vec* pos = &c->m.pos;
+        const Vec* pos = &c->m.origin;
         f32 s = fn_801E88F0(0);
         s *= s;
-        f32 best = PSVECSquareDistance(pos, &cams[0].pos);
+        f32 best = PSVECSquareDistance(pos, &cams[0].origin);
         best *= s;
         int vis = 0;
         if (i != carOf[0] || fn_801E8954(0)) {
@@ -718,7 +715,7 @@ void fn_802885F0(void) {
         for (int v = 1; vis && v < n; v++) {
             s = fn_801E88F0(v);
             s *= s;
-            f32 d = PSVECSquareDistance(pos, &cams[v].pos);
+            f32 d = PSVECSquareDistance(pos, &cams[v].origin);
             d *= s;
             best = MIN(best, d);
             vis = 0;

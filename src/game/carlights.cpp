@@ -2,15 +2,12 @@
 // model's light nodes, drawn as camera-facing flares and car-aligned glow quads. Names are guesses
 // apart from the node names and value keys.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include "game/weather.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
-struct LightFrame {
-    Vec axes[3];  // offset 0x0
-    Vec pos;      // offset 0x24
-};
-
+// LightFrame: vecmatrix.h's VecMatrix.
 struct LightCar {
     Vec axes[3];  // offset 0x0
     Vec pos;      // offset 0x24
@@ -21,7 +18,7 @@ struct LightCar {
 // Unit-local (port ODR: other units define a different Light).
 namespace {
 struct Light {
-    const LightFrame* frame;  // offset 0x0
+    const VecMatrix* frame;  // offset 0x0
     Vec off;                  // offset 0x4
     f32 h;                    // offset 0x10
     f32 w;                    // offset 0x14
@@ -59,9 +56,9 @@ s32 fn_80287B14(void);
 LightCar* fn_80287B24(s32 i);
 int fn_80287E20(s32 model, const char* name);
 ValueNode* fn_80287E80(s32 model, const char* name);
-int fn_80288070(s32 model, const char* name, const LightFrame** frame);
+int fn_80288070(s32 model, const char* name, const VecMatrix** frame);
 s32 fn_80288208(s32 i);
-const LightFrame* fn_802C86DC(void);
+const VecMatrix* fn_802C86DC(void);
 f32 fn_802C88E8(const Vec* p);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
@@ -228,9 +225,9 @@ void fn_80294CCC(const Vec* p, const Vec* r, const Vec* u, f32 w, f32 h, u32 col
 
 void fn_80294ED4(void) {
     f32 maxDist = 40000.0f;
-    const LightFrame* cam = fn_802C86DC();
-    Vec right = cam->axes[0];
-    Vec up = cam->axes[1];
+    const VecMatrix* cam = fn_802C86DC();
+    Vec right = cam->basis[0];
+    Vec up = cam->basis[1];
     LightCar* car;
     int i;
     int j;
@@ -249,14 +246,14 @@ void fn_80294ED4(void) {
         l = s->lights;
         for (; j < s->count; l++, j++) {
             Vec p;
-            MulVec(&p, &l->frame->pos, car->axes);
+            MulVec(&p, &l->frame->origin, car->axes);
             p.x = p.x + car->pos.x;
             p.y = p.y + car->pos.y;
             p.z = p.z + car->pos.z;
             Vec d;
-            d.x = p.x - cam->pos.x;
-            d.y = p.y - cam->pos.y;
-            d.z = p.z - cam->pos.z;
+            d.x = p.x - cam->origin.x;
+            d.y = p.y - cam->origin.y;
+            d.z = p.z - cam->origin.z;
             if (PSVECDotProduct(&d, &d) > 0.1f) {
                 PSVECNormalize(&d, &d);
                 Vec dir;
@@ -299,14 +296,14 @@ void fn_80294ED4(void) {
         Light* l = s->lights;
         for (; j < s->count; l++, j++) {
             Vec p;
-            MulVec(&p, &l->frame->pos, car->axes);
+            MulVec(&p, &l->frame->origin, car->axes);
             p.x = p.x + car->pos.x;
             p.y = p.y + car->pos.y;
             p.z = p.z + car->pos.z;
             Vec d;
-            d.x = p.x - cam->pos.x;
-            d.y = p.y - cam->pos.y;
-            d.z = p.z - cam->pos.z;
+            d.x = p.x - cam->origin.x;
+            d.y = p.y - cam->origin.y;
+            d.z = p.z - cam->origin.z;
             if (PSVECDotProduct(&d, &d) > 0.1f) {
                 PSVECNormalize(&d, &d);
                 Vec dir;
@@ -323,7 +320,7 @@ void fn_80294ED4(void) {
     fn_802C8D74();
 }
 
-void fn_80295C70(LightSet* s, const LightFrame* frame, const Vec* off, f32 w, f32 h, u32 color, s32 type) {
+void fn_80295C70(LightSet* s, const VecMatrix* frame, const Vec* off, f32 w, f32 h, u32 color, s32 type) {
     Light* l = &s->lights[s->count];
     l->frame = frame;
     l->off = *off;
@@ -337,7 +334,7 @@ void fn_80295C70(LightSet* s, const LightFrame* frame, const Vec* off, f32 w, f3
 }
 
 void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int unused, Vec off, f32 rad) {
-    const LightFrame* frame;
+    const VecMatrix* frame;
     ValVec3 def = color;
     if (fn_80288070(model, name, &frame)) {
         ValueNode* n;

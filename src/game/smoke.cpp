@@ -2,6 +2,7 @@
 // exhaust parts, fire smoke and radiator steam, plus the shared small/large fire smoke
 // emitters. Names are guesses apart from the allocation tags, emitter names and value keys.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
@@ -21,11 +22,7 @@ struct SmokeEntry {
     u8 active;      // offset 0xC
 };
 
-struct SmokePart {
-    Vec rot[3];  // offset 0x0
-    Vec pos;     // offset 0x24
-};
-
+// SmokePart: vecmatrix.h's VecMatrix.
 struct SmokeModel {
     u8 pad0[0x24];
     s32 nParts;  // offset 0x24
@@ -127,7 +124,7 @@ int fn_80287B5C(int n);
 int fn_80287E20(SmokeModel* model, const char* name);
 ValueNodeV* fn_80287E80(SmokeModel* model, const char* name);
 ValVec3 fn_80287ED0(SmokeModel* model, const char* node, const char* key);
-const SmokePart* fn_80288060(SmokeModel* model, int i);
+const VecMatrix* fn_80288060(SmokeModel* model, int i);
 SmokeModel* fn_80288208(s32 i);
 void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
@@ -554,14 +551,14 @@ void ExhaustSmokeMan::InitDark(void) {
 
 void ExhaustSmokeMan::Emit(void* e, int car, int part) {
     const SmokeCar* c = fn_80287B24(car);
-    const SmokePart* pt = fn_80288060(fn_80288208(car), part);
+    const VecMatrix* pt = fn_80288060(fn_80288208(car), part);
     Vec p;
     Vec d;
-    MulVec(&p, &pt->pos, c->axes);
+    MulVec(&p, &pt->origin, c->axes);
     p.x = p.x + c->pos.x;
     p.y = p.y + c->pos.y;
     p.z = p.z + c->pos.z;
-    MulVec(&d, &pt->rot[1], c->axes);
+    MulVec(&d, &pt->basis[1], c->axes);
     AddScaled(&d, &c->vel, &d, 1.75f);
     fn_8028E584(e, &p, &d);
 }

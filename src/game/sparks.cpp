@@ -3,15 +3,12 @@
 // paint splats and the explosion sequences. Names are guesses apart from the allocation tags,
 // file names and value keys.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
-struct SparkMtx {
-    Vec rot[3];  // offset 0x0
-    Vec pos;     // offset 0x24
-};
-
+// SparkMtx: vecmatrix.h's VecMatrix.
 struct SparkWheel {
     Vec pos;     // offset 0x0
     Vec v0C;     // offset 0xC
@@ -120,7 +117,7 @@ int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
 int fn_801E85B4(void);
-const SparkMtx* fn_801E8718(int view);
+const VecMatrix* fn_801E8718(int view);
 int fn_801E8758(int view);
 f32 fn_801E7E18(void);
 f32 fn_801E7E24(void);
@@ -271,7 +268,7 @@ public:
     void Draw(void);
     void Emit(int n, const Vec* pos, const Vec* vel, f32 spread);
     void Step(void);
-    void DrawAll(const SparkMtx* cam, const SparkMtx* prev);
+    void DrawAll(const VecMatrix* cam, const VecMatrix* prev);
 
     Spark* pts;          // offset 0x0
     s32 count;           // offset 0x4
@@ -280,7 +277,7 @@ public:
     f32 invLife;         // offset 0x10
     s32 tex;             // offset 0x14
     f32 lod;             // offset 0x18
-    SparkMtx views[4];   // offset 0x1C
+    VecMatrix views[4];   // offset 0x1C
 };
 
 struct Shard {
@@ -735,25 +732,25 @@ SparkSys::~SparkSys(void) {
 void SparkSys::Reset(void) {
     count = 0;
     for (int i = 0; i < 4; i++) {
-        views[i].rot[0].x = 1.0f;
-        views[i].rot[0].y = 0.0f;
-        views[i].rot[0].z = 0.0f;
-        views[i].rot[1].x = 0.0f;
-        views[i].rot[1].y = 1.0f;
-        views[i].rot[1].z = 0.0f;
-        views[i].rot[2].x = 0.0f;
-        views[i].rot[2].y = 0.0f;
-        views[i].rot[2].z = 1.0f;
-        views[i].pos.x = 0.0f;
-        views[i].pos.y = 0.0f;
-        views[i].pos.z = 0.0f;
+        views[i].basis[0].x = 1.0f;
+        views[i].basis[0].y = 0.0f;
+        views[i].basis[0].z = 0.0f;
+        views[i].basis[1].x = 0.0f;
+        views[i].basis[1].y = 1.0f;
+        views[i].basis[1].z = 0.0f;
+        views[i].basis[2].x = 0.0f;
+        views[i].basis[2].y = 0.0f;
+        views[i].basis[2].z = 1.0f;
+        views[i].origin.x = 0.0f;
+        views[i].origin.y = 0.0f;
+        views[i].origin.z = 0.0f;
     }
 }
 
 void SparkSys::Update(void) { Step(); }
 
 void SparkSys::Draw(void) {
-    SparkMtx cam;
+    VecMatrix cam;
     int view = fn_801E85B4();
     cam = *fn_801E8718(view);
     if (count > 0) {
@@ -813,7 +810,7 @@ void SparkSys::Step(void) {
     count = out - pts;
 }
 
-void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
+void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
     if (!fn_802C8DBC(count * 4)) {
         return;
     }
@@ -838,24 +835,24 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
             Vec d;
             Vec p;
             f32 yv = s->pos.y;
-            p.x = s->pos.x + s->vel.x * (5.0f * -dt) - prev->pos.x;
-            p.y = yv + s->vel.y * (5.0f * -dt) - prev->pos.y;
+            p.x = s->pos.x + s->vel.x * (5.0f * -dt) - prev->origin.x;
+            p.y = yv + s->vel.y * (5.0f * -dt) - prev->origin.y;
             f32 a = invLife * (now - s->t);
             color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
-            p.z = s->pos.z + s->vel.z * (5.0f * -dt) - prev->pos.z;
+            p.z = s->pos.z + s->vel.z * (5.0f * -dt) - prev->origin.z;
             MulVec(&p, &p, (const Vec*)&m);
-            p.x = p.x + cam->pos.x;
-            p.y = p.y + cam->pos.y;
-            p.z = p.z + cam->pos.z;
+            p.x = p.x + cam->origin.x;
+            p.y = p.y + cam->origin.y;
+            p.z = p.z + cam->origin.z;
             d.x = p.x - s->pos.x;
             d.y = p.y - s->pos.y;
             d.z = p.z - s->pos.z;
-            f32 sign = PSVECDotProduct(&cam->rot[1], &d) > 0.0f ? 1.0f : -1.0f;
+            f32 sign = PSVECDotProduct(&cam->basis[1], &d) > 0.0f ? 1.0f : -1.0f;
             Vec q[4];
-            AddScaled(&q[0], &s->pos, &cam->rot[0], -0.0375f);
-            AddScaled(&q[1], &s->pos, &cam->rot[0], 0.075f);
-            AddScaled(&q[2], &p, &cam->rot[0], sign * -0.0375f);
-            AddScaled(&q[3], &p, &cam->rot[0], 0.075f * sign);
+            AddScaled(&q[0], &s->pos, &cam->basis[0], -0.0375f);
+            AddScaled(&q[1], &s->pos, &cam->basis[0], 0.075f);
+            AddScaled(&q[2], &p, &cam->basis[0], sign * -0.0375f);
+            AddScaled(&q[3], &p, &cam->basis[0], 0.075f * sign);
             fn_802C8E00(q[0].x, q[0].y, q[0].z, 0.0f, 1.0f, color, 0);
             fn_802C8E00(q[1].x, q[1].y, q[1].z, 1.0f, 1.0f, color, 0);
             fn_802C8E00(q[2].x, q[2].y, q[2].z, 0.0f, 0.0f, color, 1);

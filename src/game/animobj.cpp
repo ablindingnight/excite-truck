@@ -2,6 +2,7 @@
 // data block, which copies the slot's frame (and flags) into the object every update. A model
 // object draws a loaded model at the frame; a point object draws a sprite. Names are guesses.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include <revolution/MTX/vec.h>
 #include <revolution/MTX/mtxtypes.h>  // Vec
 
@@ -27,20 +28,15 @@ struct Camera {
 
 extern "C" Camera* fn_802C86DC(void);
 
-// Axes and position.
-struct Frame {
-    Vec axes[3];  // offset 0x0
-    Vec pos;      // offset 0x24
-};
-
+// Frame: vecmatrix.h's VecMatrix.
 // An animation slot.
 struct AnimSlot {
-    Frame frame;  // offset 0x0
+    VecMatrix frame;  // offset 0x0
     s16 flags;    // offset 0x30
 };
 
 struct PointSlot {
-    Frame frame;    // offset 0x0
+    VecMatrix frame;    // offset 0x0
     s16 flags;      // offset 0x30
     s32 sprite;     // offset 0x34
     s32 size;       // offset 0x38
@@ -68,7 +64,7 @@ public:
     void Update(u8* data);
     s16 Flags(void);
 
-    Frame frame;  // offset 0x4
+    VecMatrix frame;  // offset 0x4
     s32 offset;   // offset 0x34
     s16 flags;    // offset 0x38
 };
@@ -95,20 +91,20 @@ public:
 AnimObj::AnimObj(void) {
     // MATCHING-AID: the target stores axes[0].x/y twice (once before the vtable pointer); the original source
     // for that is unknown (a member or base initialiser?).
-    frame.axes[0].x = 1.0f;
-    frame.axes[0].y = 0.0f;
-    frame.axes[0].x = 1.0f;
-    frame.axes[0].y = 0.0f;
-    frame.axes[0].z = 0.0f;
-    frame.axes[1].x = 0.0f;
-    frame.axes[1].y = 1.0f;
-    frame.axes[1].z = 0.0f;
-    frame.axes[2].x = 0.0f;
-    frame.axes[2].y = 0.0f;
-    frame.axes[2].z = 1.0f;
-    frame.pos.x = 0.0f;
-    frame.pos.y = 0.0f;
-    frame.pos.z = 0.0f;
+    frame.basis[0].x = 1.0f;
+    frame.basis[0].y = 0.0f;
+    frame.basis[0].x = 1.0f;
+    frame.basis[0].y = 0.0f;
+    frame.basis[0].z = 0.0f;
+    frame.basis[1].x = 0.0f;
+    frame.basis[1].y = 1.0f;
+    frame.basis[1].z = 0.0f;
+    frame.basis[2].x = 0.0f;
+    frame.basis[2].y = 0.0f;
+    frame.basis[2].z = 1.0f;
+    frame.origin.x = 0.0f;
+    frame.origin.y = 0.0f;
+    frame.origin.z = 0.0f;
     flags = lbl_80562E28;
 }
 
@@ -167,9 +163,9 @@ void AnimObj::vf1C(void) {}
 f32 AnimObj::Depth(void) {
     Camera* c = fn_802C86DC();
     Vec d;
-    d.x = frame.pos.x - c->pos.x;
-    d.y = frame.pos.y - c->pos.y;
-    d.z = frame.pos.z - c->pos.z;
+    d.x = frame.origin.x - c->pos.x;
+    d.y = frame.origin.y - c->pos.y;
+    d.z = frame.origin.z - c->pos.z;
     return PSVECDotProduct((const Vec*)&d, (const Vec*)&c->fwd);
 }
 

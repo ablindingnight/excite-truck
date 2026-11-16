@@ -2,6 +2,7 @@
 // height field drawn as an environment-mapped strip mesh) and flat shallows, with wheel and body
 // splashes from the cars. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include <revolution/MTX/vec.h>
 #include "macros.h"
 #include <revolution/MTX.h>
@@ -144,7 +145,7 @@ s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
 void fn_802C7040(s32 model);
 void fn_802C8230(f32 a);
 void fn_802C8234(f32 a);
-const struct WaterFrame* fn_802C86DC(void);
+const VecMatrix* fn_802C86DC(void);
 f32 fn_802C88D4(const Vec* p);
 f32 fn_802C88E8(const Vec* p);
 void fn_802C8BD0(s32 tex);
@@ -160,11 +161,7 @@ double sqrt(double x);
 void* memset(void* dst, int c, size_t n);
 }
 
-struct WaterFrame {
-    Vec axes[3];  // offset 0x0
-    Vec pos;      // offset 0x24
-};
-
+// WaterFrame: vecmatrix.h's VecMatrix.
 void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
 
@@ -731,10 +728,10 @@ void fn_8029D574(WaterPool* p) {
 /* Helper name unproven. */
 static inline void RenderPool(WaterPool* p) {
     int i = (p->ny - 1) * (p->nx * 2);
-    const WaterFrame* cam = fn_802C86DC();
-    p->eye.x = cam->pos.x;
-    p->eye.y = cam->pos.y;
-    p->eye.z = cam->pos.z;
+    const VecMatrix* cam = fn_802C86DC();
+    p->eye.x = cam->origin.x;
+    p->eye.y = cam->origin.y;
+    p->eye.z = cam->origin.z;
     fn_802C8BD0(p->tex);
     if (fn_802C8DBC(i)) {
         PoolVtx* rows[2];
@@ -1017,7 +1014,7 @@ extern "C" {
 void fn_8029E8E0(WaterShallow* s) {
     fn_802C8BD0(s->tex);
     if (fn_802C8DBC(4)) {
-        Vec eye = fn_802C86DC()->pos;
+        Vec eye = fn_802C86DC()->origin;
         Vec* c = s->corners;
         for (int i = 0; i < ARRAY_SIZE(s->corners); i++, c++) {
             Vec d;

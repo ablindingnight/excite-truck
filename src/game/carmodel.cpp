@@ -4,6 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/mtxtypes.h>  // Vec
@@ -18,13 +19,9 @@ f32 PSVECMag(const void* v);
 
 void* operator new(size_t size, const char* tag);
 
-struct Frame {
-    Vec axes[3];  // offset 0x0
-    Vec pos;      // offset 0x24
-};
-
+// Frame: vecmatrix.h's VecMatrix.
 struct AnimSlot {
-    Frame frame;  // offset 0x0
+    VecMatrix frame;  // offset 0x0
     s16 flags;    // offset 0x30
 };
 
@@ -46,7 +43,7 @@ public:
     void Bind(const char* name);
     s16 Flags(void);
 
-    Frame frame;  // offset 0x4
+    VecMatrix frame;  // offset 0x4
     s32 offset;   // offset 0x34
     s16 flags;    // offset 0x38
 };
@@ -58,7 +55,7 @@ struct WheelState {
 };
 
 struct BoneFrame {
-    Frame frame;  // offset 0x0
+    VecMatrix frame;  // offset 0x0
     u32 mask;     // offset 0x30
 };
 
@@ -66,7 +63,7 @@ struct BoneFrame {
 // (CarBody::vf28 fills it). Distinct name for now; merge the two layouts later.
 struct CarDrawState;
 struct CarDrawView {
-    Frame frame;              // offset 0x0
+    VecMatrix frame;              // offset 0x0
     u8 pad30[4];
     f32 rpm;                  // offset 0x34
     f32 x38;                  // offset 0x38
@@ -233,7 +230,7 @@ public:
     s32 xrayBones;          // offset 0x494
     u32 suspGroup;          // offset 0x498
     u32 xrayMask;           // offset 0x49C
-    Frame scaled;           // offset 0x4A0
+    VecMatrix scaled;           // offset 0x4A0
     f32 scale;              // offset 0x4D0
     void* wheels[4];        // offset 0x4D4
 };
@@ -250,7 +247,7 @@ extern "C" {
 Joint* fn_801E3004(s32 model, const char* name, s32 a);
 int fn_801E320C(s32 model, const char* name);
 void fn_801E323C(Joint* bone);
-void fn_801E34E4(Joint* bone, const Frame* f);
+void fn_801E34E4(Joint* bone, const VecMatrix* f);
 void fn_801E353C(Joint* bone, f32 angle);
 s32 fn_801E7E2C(void);
 s32 fn_801E866C(s32 a);
@@ -268,7 +265,7 @@ void fn_801EF428(void* p, int del);
 void fn_801EFC90(void* p, CarDrawView* c, void** wheels);
 void* fn_801EFF94(const char* cls, s32 index, int i);
 void fn_801EFFF8(void* w);
-void fn_801F0F78(void* w, WheelState* s, const Frame* f, f32 scale);
+void fn_801F0F78(void* w, WheelState* s, const VecMatrix* f, f32 scale);
 void fn_801F131C(void* w, f32 spin, int mine);
 void fn_801F1378(void* w, f32 spin);
 void fn_801F13F4(void* w, f32 a, f32 b);
@@ -292,16 +289,16 @@ void* fn_80179CB0(void);
 struct ModelInfo* fn_802C6C34(s32 model);
 void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
-void fn_802C70AC(s32 model, const Frame* f, s32 mat, u32 mask);
-void fn_802C7AE0(s32 model, const Frame* f, u32 mask, f32 t);
+void fn_802C70AC(s32 model, const VecMatrix* f, s32 mat, u32 mask);
+void fn_802C7AE0(s32 model, const VecMatrix* f, u32 mask, f32 t);
 u32 fn_802C7830(const char* s);
 s32 fn_802C7A34(int a, void* p, s32 n);
 s32 fn_802C7A40(int a, void* p, s32 n, int b, BoneArg* c, int d);
-const Frame* fn_802C86DC(void);
+const VecMatrix* fn_802C86DC(void);
 void fn_802C88BC(int a);
 f32 fn_802C88D4(const Vec* p);
 f32 fn_802C88E8(const Vec* p);
-void fn_802C8B98(s32 tex, const Frame* f);
+void fn_802C8B98(s32 tex, const VecMatrix* f);
 void fn_802C8D74(void);
 void fn_802C8DB8(void* v, int nv, u16* idx, int ni);
 void fn_802C974C(f32 a, f32 b, f32 c);
@@ -455,7 +452,7 @@ Gauge::~Gauge(void) {
 
 extern "C" {
 
-void fn_801EC4A8(Gauge* g, const Frame* f) {
+void fn_801EC4A8(Gauge* g, const VecMatrix* f) {
     if (g->bone) {
         f32 lo = g->min;
         f32 hi = g->max;
@@ -584,7 +581,7 @@ extern "C" {
 int fn_801ECB60(CarModel* m) { return m->car->x2D4 > __float_epsilon[0]; }
 
 void fn_801ECB80(CarModel* m) {
-    f32 d = fn_802C88D4(&m->frame.pos);
+    f32 d = fn_802C88D4(&m->frame.origin);
     d *= fn_801E88F0(-1);
     m->curLod = *m->lodCount - 1;
     for (int i = 0; i < *m->lodCount; i++) {
@@ -712,7 +709,7 @@ void fn_801ECF58(CarModel* m) {
 static inline f32 Abs(f32 x) { return __fabs(x); }
 
 void fn_801ECFE0(CarModel* m) {
-    Frame f;
+    VecMatrix f;
     if (m->car->x22C < 0.01f) {
         return;
     }
@@ -734,9 +731,9 @@ void fn_801ECFE0(CarModel* m) {
             if (bf->mask & mask) {
                 if (mirror) {
                     f = bf->frame;
-                    f.axes[0].x *= -1.0f;
-                    f.axes[0].y *= -1.0f;
-                    f.axes[0].z *= -1.0f;
+                    f.basis[0].x *= -1.0f;
+                    f.basis[0].y *= -1.0f;
+                    f.basis[0].z *= -1.0f;
                     fn_802C70AC(m->models[m->curLod], &f, h, bf->mask);
                 } else {
                     fn_802C70AC(m->models[m->curLod], &bf->frame, h, bf->mask);
@@ -746,11 +743,11 @@ void fn_801ECFE0(CarModel* m) {
         }
         if (!lbl_8055E614) {
             if (mirror) {
-                Frame f;
+                VecMatrix f;
                 f = m->scaled;
-                f.axes[0].x *= -1.0f;
-                f.axes[0].y *= -1.0f;
-                f.axes[0].z *= -1.0f;
+                f.basis[0].x *= -1.0f;
+                f.basis[0].y *= -1.0f;
+                f.basis[0].z *= -1.0f;
                 fn_802C70AC(m->models[m->curLod], &f, h, mask);
             } else {
                 fn_802C70AC(m->models[m->curLod], &m->scaled, h, mask);
@@ -792,7 +789,7 @@ void fn_801ED46C(CarModel* m) {
     if (m->xray != -1 && m->curLod <= 2) {
         CarDrawView* c = m->car;
         Vec v;
-        MulVecT(&v, &fn_802C86DC()->axes[0], c->frame.axes);
+        MulVecT(&v, &fn_802C86DC()->basis[0], c->frame.basis);
         Vec* e = &m->car->effect[m->facingPos];
         e->x = v.x;
         e->y = v.y;
@@ -864,16 +861,16 @@ static inline void SetVtx(P2* v, f32 x, f32 y, f32 s, f32 t) {
 
 extern "C" {
 
-static inline void OffsetDashboardFrame(Frame& f) {
+static inline void OffsetDashboardFrame(VecMatrix& f) {
     Vec w;
     Vec off;
     off.x = -0.3f;
     off.y = 1.1f;
     off.z = 0.12f;
-    MulVec(&w, &off, f.axes);
-    f.pos.x = f.pos.x + w.x;
-    f.pos.y = f.pos.y + w.y;
-    f.pos.z = f.pos.z + w.z;
+    MulVec(&w, &off, f.basis);
+    f.origin.x = f.origin.x + w.x;
+    f.origin.y = f.origin.y + w.y;
+    f.origin.z = f.origin.z + w.z;
 }
 
 void fn_801ED718(CarModel* m) {
@@ -881,7 +878,7 @@ void fn_801ED718(CarModel* m) {
     fn_802C88BC(2);
     s32 tex = fn_801E7E2C();
     if (tex != -1) {
-        Frame f;
+        VecMatrix f;
         P2 v[12] = {0};
         SetVtx(&v[0], -0.09f, -0.0225f, 0.0f, 0.25f);
         SetVtx(&v[3], 0.09f, -0.0225f, 1.0f, 0.25f);
@@ -958,16 +955,16 @@ void CarModel::Set(const AnimSlot* s) {
         scaled = frame;
     } else {
 
-        scaled.pos = frame.pos;
-        scaled.axes[0].x = frame.axes[0].x * k;
-        scaled.axes[0].y = frame.axes[0].y * k;
-        scaled.axes[0].z = frame.axes[0].z * k;
-        scaled.axes[1].x = frame.axes[1].x * k;
-        scaled.axes[1].y = frame.axes[1].y * k;
-        scaled.axes[1].z = frame.axes[1].z * k;
-        scaled.axes[2].x = frame.axes[2].x * k;
-        scaled.axes[2].y = frame.axes[2].y * k;
-        scaled.axes[2].z = frame.axes[2].z * k;
+        scaled.origin = frame.origin;
+        scaled.basis[0].x = frame.basis[0].x * k;
+        scaled.basis[0].y = frame.basis[0].y * k;
+        scaled.basis[0].z = frame.basis[0].z * k;
+        scaled.basis[1].x = frame.basis[1].x * k;
+        scaled.basis[1].y = frame.basis[1].y * k;
+        scaled.basis[1].z = frame.basis[1].z * k;
+        scaled.basis[2].x = frame.basis[2].x * k;
+        scaled.basis[2].y = frame.basis[2].y * k;
+        scaled.basis[2].z = frame.basis[2].z * k;
     }
     for (i = 0; i < 4; i++) {
         fn_801F0F78(wheels[i], &car->wheels[i], &frame, scale);
@@ -982,7 +979,7 @@ struct ShadowQuery {
 void CarModel::vf1C(void) {
     f32 r = fn_801E88F0(-1);
     f32 s = r * r;
-    f32 scale = fn_802C88E8(&frame.pos);
+    f32 scale = fn_802C88E8(&frame.origin);
     s = scale * s;
     int i = numShadows - 1;
     while (i >= 0 && s < shadows[i].dist * shadows[i].dist) {
@@ -991,7 +988,7 @@ void CarModel::vf1C(void) {
     if (i < 0 || (index == fn_801E866C(-1) && !fn_801E89A4(-1))) {
         return;
     }
-    Vec p = frame.pos;
+    Vec p = frame.origin;
     ShadowQuery q;
     q.flags = Flags();
     Vec up;
@@ -1003,7 +1000,7 @@ void CarModel::vf1C(void) {
     f32 h;
     if (fn_801E9E78(&q, &p, &up, &q.hit)) {
         f32 d = -PSVECDotProduct(&up, fn_802C9A40());
-        h = frame.pos.y - p.y;
+        h = frame.origin.y - p.y;
         k = 1.0f / (0.1f > d ? 0.1f : d);
     } else {
         h = 0.0f;

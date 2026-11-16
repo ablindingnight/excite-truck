@@ -3,6 +3,7 @@
 // textured cross quads, and event-driven torch fires. Names are guesses apart from the
 // allocation tags, value keys, file names and messages.
 #include "game/common.h"
+#include "game/vecmatrix.h"
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include "macros.h"
@@ -33,11 +34,7 @@ struct FireCarEntry {
     u8 active;     // offset 0xC
 };
 
-struct FireMtx {
-    Vec rot[3];  // offset 0x0
-    Vec pos;     // offset 0x24
-};
-
+// FireMtx: vecmatrix.h's VecMatrix.
 // TorchPart: common.h's PlainValMatrix.
 struct FireModel {
     u8 pad0[0x24];
@@ -144,7 +141,7 @@ void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
 void fn_802C77F0(s32 model, f32* box);
-const FireMtx* fn_802C86DC(void);
+const VecMatrix* fn_802C86DC(void);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 int fn_802C8DBC(int n);
@@ -339,7 +336,7 @@ public:
     void Start(int idx);
     void Refresh(const FireCar* c);
 
-    FireMtx m;  // offset 0x0
+    VecMatrix m;  // offset 0x0
     Vec off;    // offset 0x30
     s32 car;    // offset 0x3C
     s32 ring;   // offset 0x40
@@ -1134,18 +1131,18 @@ void BigRingMan::Tick(BigRing* r, f32 now) {
 }
 
 void GroundFire::Reset(void) {
-    m.rot[0].x = 1.0f;
-    m.rot[0].y = 0.0f;
-    m.rot[0].z = 0.0f;
-    m.rot[1].x = 0.0f;
-    m.rot[1].y = 1.0f;
-    m.rot[1].z = 0.0f;
-    m.rot[2].x = 0.0f;
-    m.rot[2].y = 0.0f;
-    m.rot[2].z = 1.0f;
-    m.pos.x = 0.0f;
-    m.pos.y = 0.0f;
-    m.pos.z = 0.0f;
+    m.basis[0].x = 1.0f;
+    m.basis[0].y = 0.0f;
+    m.basis[0].z = 0.0f;
+    m.basis[1].x = 0.0f;
+    m.basis[1].y = 1.0f;
+    m.basis[1].z = 0.0f;
+    m.basis[2].x = 0.0f;
+    m.basis[2].y = 0.0f;
+    m.basis[2].z = 1.0f;
+    m.origin.x = 0.0f;
+    m.origin.y = 0.0f;
+    m.origin.z = 0.0f;
     *(FVec*)&off = FVec(0.0f, 0.0f, 0.0f);
     car = -1;
     ring = -1;
@@ -1182,18 +1179,18 @@ static inline int Turned(const Vec* a, const Vec* b) { return PSVECDotProduct(a,
 int GroundFire::Moved(const FireCar* c) {
     f32 lim = 0.25f;
     int moved = 1;
-    if (!(PSVECSquareDistance(&m.pos, &c->pos) > lim) && !Turned(&m.rot[0], &c->axes[0])) {
+    if (!(PSVECSquareDistance(&m.origin, &c->pos) > lim) && !Turned(&m.basis[0], &c->axes[0])) {
         moved = 0;
     }
     return moved;
 }
 
 void GroundFire::Corners(Vec* p, Vec* e1, Vec* e2) {
-    const Vec* rows = m.rot;
+    const Vec* rows = m.basis;
     MulVec(p, &off, rows);
-    p->x = p->x + m.pos.x;
-    p->y = p->y + m.pos.y;
-    p->z = p->z + m.pos.z;
+    p->x = p->x + m.origin.x;
+    p->y = p->y + m.origin.y;
+    p->z = p->z + m.origin.z;
     Scale(e1, &rows[0], 0.4f);
     Scale(e2, &rows[2], 0.75f);
 }
@@ -1202,7 +1199,7 @@ void GroundFire::Start(int idx) {
     f32 box[6];
     const FireCar* c = fn_80287B24(idx);
     fn_802C77F0(fn_801EE0C8((u32)idx < 8 ? lbl_80488648[idx] : 0), box);
-    m = *(const FireMtx*)c;
+    m = *(const VecMatrix*)c;
     *(FVec*)&off = FVec(box[0], box[2], box[4]);
     car = idx;
     Vec p;
@@ -1234,7 +1231,7 @@ void GroundFire::Refresh(const FireCar* c) {
     e2.x = 0.0f;
     e2.y = 0.0f;
     e2.z = 0.0f;
-    m = *(const FireMtx*)c;
+    m = *(const VecMatrix*)c;
     Corners(&p, &e1, &e2);
     lbl_8055F7C0->Move(ring, &p, &e1, &e2, c->hint);
 }
@@ -1500,8 +1497,8 @@ inline void ExhaustTorchMan::TransformTorchPart(int i, const PlainValMatrix* par
 static inline const TorchEntry& TorchAt(const TorchEntry* p, int i) { return p[i]; }
 
 void ExhaustTorchMan::DrawEdges(void) {
-    const Vec* right = fn_802C86DC()->rot;
-    const Vec* up = &fn_802C86DC()->rot[1];
+    const Vec* right = fn_802C86DC()->basis;
+    const Vec* up = &fn_802C86DC()->basis[1];
     int i;
     for (i = 0; i < fn_80287B14(); ++i) {
         if (TorchAt(entries, i).on) {
