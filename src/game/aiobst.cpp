@@ -70,8 +70,8 @@ struct Seg {
 
 struct Path {
     u8 pad0[0x18];
-    u32 count : 16;  // offset 0x18
-    u32 pad18 : 16;
+    u32 countFlags;  // offset 0x18: count << 16 | flags, as sfline writes the word
+    int Count(void) const { return countFlags >> 16; }
     Seg* segs;       // offset 0x1C
 };
 
@@ -137,8 +137,14 @@ int fn_80179650(void);
 int fn_80179630(int view);
 RaceCarRec* fn_8017960C(int id);
 void fn_8019321C(Vec2* out, const Vec2* local, Frame* f);
-void fn_8014C75C(void* steer, const Vec2* target);
 }
+
+// betarace.cpp's 2D copy helper; retail calls its out-of-line weak copy (0x8014C75C) here.
+struct V2 {
+    f32 x;
+    f32 y;
+};
+void SetV2(V2& d, const V2& s);
 
 template <class T>
 struct ArrayRef {
@@ -371,7 +377,7 @@ void fn_8015F3FC(Track* trk) {
         int j;
         int s;
         fn_80265DCC(lbl_8055E29C->a.data, lbl_8055E29C->a.count, sizeof(Obst), fn_8015F3EC);
-        nseg = trk->path->count;
+        nseg = trk->path->Count();
         lbl_8055E2A0 = new ("ai-obsindex") DynArray<Obst*>(nseg);
         j = 0;
         for (s = 0; s < nseg; s++) {
@@ -753,7 +759,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                     Spot spot;
                     fn_8019321C(&w, &target, &f);
                     if (steer) {
-                        fn_8014C75C(steer, &w);
+                        SetV2(*(V2*)steer, (const V2&)w);
                     }
                     DefaultConstructVec3(&spot.pos);
                     spot.From(w);
