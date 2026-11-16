@@ -100,26 +100,29 @@ public:
 };
 
 struct RVec3;
+struct RPacket;
+struct BodyState;
+struct BodyDesc;
 
 // The collision volume RigidBody derives from (collvol.cpp); declared as far as the CarBody slots need.
 class CollVolume {
 public:
-    virtual void Init(void* desc);   // 0x08
+    virtual void Init(BodyDesc* d);  // 0x08
     virtual ~CollVolume(void);       // 0x0C
     virtual void Reset(void);        // 0x10
     virtual void vf14(void);         // 0x14
     virtual void vf18(void);         // 0x18
-    virtual void Update(void);  // 0x1C
+    virtual void Update(void);       // 0x1C
     virtual void vf20(void);         // 0x20
-    virtual void vf24(void);         // 0x24
-    virtual void vf28(void);  // 0x28
-    virtual void vf2C(void);  // 0x2C
-    virtual void vf30(void);  // 0x30
-    virtual void vf34(void);  // 0x34
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
+    virtual void vf28(u8* buf);      // 0x28
+    virtual s32 vf2C(RPacket* pk);   // 0x2C: the packet size
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual s32 vf34(RPacket* pk);   // 0x34
     virtual void vf38(u8* buf);      // 0x38
     virtual void vf3C(void);         // 0x3C
     virtual int vf40(void);          // 0x40
-    virtual void vf44(void);         // 0x44
+    virtual int vf44(void);          // 0x44
 };
 
 // The rigid body CarBody derives from (rigid.cpp).
@@ -128,30 +131,30 @@ public:
     virtual void vf18(void);
     virtual void vf3C(void);
     virtual int vf40(void);
-    virtual void vf48(void);  // 0x48
-    virtual void vf4C(void);  // 0x4C
+    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
+    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
     virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
 };
 
 class CarBody : public RigidBody {
 public:
     CarBody(void);
-    virtual void Init(void* desc);   // 0x08
-    virtual ~CarBody(void);          // 0x0C
-    virtual void Reset(void);        // 0x10
-    virtual void vf14(void);
-    virtual void Update(void);       // 0x1C
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf48(void);
-    virtual void vf4C(void);
+    virtual ~CarBody(void);           // 0x0C
+    virtual void Init(BodyDesc* d);   // 0x08
+    virtual void Reset(void);         // 0x10
+    virtual void vf14(void);          // 0x14
+    virtual void Update(void);        // 0x1C
+    virtual void vf20(void);          // 0x20
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
+    virtual void vf28(u8* buf);       // 0x28
+    virtual s32 vf2C(RPacket* pk);    // 0x2C
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual s32 vf34(RPacket* pk);    // 0x34
+    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
+    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
     virtual void SetState(const BodyState* s);  // 0x54
-    virtual void vf58(void);
-    virtual void vf5C(void);
+    virtual void vf58(void);          // 0x58
+    virtual void vf5C(void);          // 0x5C
 
     u8 pad4[0x3C - 0x4];
     TMtx mtx;    // offset 0x3C
@@ -172,7 +175,7 @@ public:
 class NetCar : public CarBody {
 public:
     NetCar(void);
-    virtual void Init(void* desc);
+    virtual void Init(BodyDesc* desc);
     virtual ~NetCar(void);
     virtual void Reset(void);
     virtual void Update(void);
@@ -203,8 +206,6 @@ extern "C" {
 void* memset(void* p, int c, u32 n);
 double sqrt(double x);
 void fn_8012F57C(TQuat* out, const TQuat* a, const TQuat* b, f32 t);  // slerp
-void CarBody_vf08(CarBody* b, void* desc);  // CarBody::Init
-void CarBody_vf10(CarBody* b);              // CarBody::Reset
 void fn_8018ADA4(CarBody* b, f32 v);
 void fn_8018ADB4(CarBody* b, f32 v);
 void fn_8018ADBC(CarBody* b, f32 v);
@@ -267,7 +268,7 @@ ZVec::ZVec(void) { memset(this, 0, sizeof(*this)); }
 NetCar::NetCar(void) { ptab = new ("netcar:ptab") Packet[3]; }
 
 void NetCar::Reset(void) {
-    CarBody_vf10(this);
+    CarBody::Reset();
     Clear();
 }
 
@@ -295,8 +296,8 @@ void NetCar::Clear(void) {
     }
 }
 
-void NetCar::Init(void* desc) {
-    CarBody_vf08(this, desc);
+void NetCar::Init(BodyDesc* desc) {
+    CarBody::Init(desc);
     linkObj = fn_801B2EC0(index);
     waiting = 0;
     first = 1;

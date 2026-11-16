@@ -159,26 +159,29 @@ public:
 struct RVec3;
 
 struct RVec3;
+struct RPacket;
+struct BodyState;
+struct BodyDesc;
 
 // The collision volume RigidBody derives from (collvol.cpp); declared as far as the CarBody slots need.
 class CollVolume {
 public:
-    virtual void Init(void* desc);   // 0x08
+    virtual void Init(BodyDesc* d);  // 0x08
     virtual ~CollVolume(void);       // 0x0C
     virtual void Reset(void);        // 0x10
     virtual void vf14(void);         // 0x14
     virtual void vf18(void);         // 0x18
-    virtual void vf1C(void);  // 0x1C
+    virtual void Update(void);       // 0x1C
     virtual void vf20(void);         // 0x20
-    virtual void vf24(void);         // 0x24
-    virtual void vf28(u8* buf);  // 0x28
-    virtual int vf2C(u8* buf);  // 0x2C
-    virtual void vf30(f32 t, int a, int b, int* na, int* nb);  // 0x30
-    virtual int vf34(u8* p);  // 0x34
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
+    virtual void vf28(u8* buf);      // 0x28
+    virtual s32 vf2C(RPacket* pk);   // 0x2C: the packet size
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual s32 vf34(RPacket* pk);   // 0x34
     virtual void vf38(u8* buf);      // 0x38
     virtual void vf3C(void);         // 0x3C
     virtual int vf40(void);          // 0x40
-    virtual void vf44(void);         // 0x44
+    virtual int vf44(void);          // 0x44
 };
 
 // The rigid body CarBody derives from (rigid.cpp).
@@ -188,30 +191,30 @@ public:
     virtual void vf18(void);
     virtual void vf3C(void);
     virtual int vf40(void);
-    virtual void vf48(const TVec* a, const TVec* b, int kind, int c);  // 0x48
-    virtual void vf4C(const TVec* a, const TVec* b, int kind, int c);  // 0x4C
+    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
+    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
     virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
 };
 
 class CarBody : public RigidBody {
 public:
     CarBody(void);
-    virtual void Init(void* desc);   // 0x08
-    virtual ~CarBody(void);          // 0x0C
-    virtual void Reset(void);        // 0x10
-    virtual void vf14(void);         // 0x14
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(u8* buf);                                    // 0x28
-    virtual int vf2C(u8* buf);                                     // 0x2C
-    virtual void vf30(f32 t, int a, int b, int* na, int* nb);      // 0x30
-    virtual int vf34(u8* p);                                       // 0x34
-    virtual void vf48(const TVec* a, const TVec* b, int kind, int c);  // 0x48
-    virtual void vf4C(const TVec* a, const TVec* b, int kind, int c);  // 0x4C
-    virtual void vf54(void);   // 0x54
-    virtual void vf58(void);   // 0x58
-    virtual void Update(void); // 0x5C
+    virtual ~CarBody(void);           // 0x0C
+    virtual void Init(BodyDesc* d);   // 0x08
+    virtual void Reset(void);         // 0x10
+    virtual void vf14(void);          // 0x14
+    virtual void Update(void);        // 0x1C
+    virtual void vf20(void);          // 0x20
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
+    virtual void vf28(u8* buf);       // 0x28
+    virtual s32 vf2C(RPacket* pk);    // 0x2C
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual s32 vf34(RPacket* pk);    // 0x34
+    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
+    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
+    virtual void SetState(const BodyState* s);  // 0x54
+    virtual void vf58(void);          // 0x58
+    virtual void vf5C(void);          // 0x5C
 
     u8 pad4[0x8 - 0x4];
     s32 slot;    // offset 0x8
@@ -243,19 +246,19 @@ public:
 class SpringCar : public CarBody {
 public:
     SpringCar(Controller* c);
-    virtual void Init(void* desc);
+    virtual void Init(BodyDesc* desc);
     virtual ~SpringCar(void);
     virtual void Reset(void);
     virtual void vf14(void);
     virtual void vf28(u8* buf);
-    virtual int vf2C(u8* buf);
-    virtual void vf30(f32 t, int a, int b, int* na, int* nb);
-    virtual int vf34(u8* p);
-    virtual void vf48(const TVec* a, const TVec* b, int kind, int c);
-    virtual void vf4C(const TVec* a, const TVec* b, int kind, int c);
-    virtual void vf54(void);
+    virtual s32 vf2C(RPacket* pk);
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
+    virtual s32 vf34(RPacket* pk);
+    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
+    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
+    virtual void SetState(const BodyState* s);  // 0x54
     virtual void vf58(void);
-    virtual void Update(void);
+    virtual void vf5C(void);  // 0x5C: one frame (the controller's update)
     void SetController(Controller* c);
     void CheckLost(void);
     void HitWall(WallObj* w);
@@ -276,17 +279,6 @@ public:
 };
 
 extern "C" {
-void CarBody_vf08(CarBody* b, void* desc);  // CarBody::Init
-void CarBody_vf10(CarBody* b);              // CarBody::Reset
-void vf14__7CarBodyFv(CarBody* b);
-void vf5C__7CarBodyFv(CarBody* b);
-void vf28__7CarBodyFv(CarBody* b, u8* buf);
-void vf4C__7CarBodyFv(CarBody* b, const TVec* a, const TVec* bb, int kind, int c);
-void SetState__7CarBodyFPC9BodyState(CarBody* b);
-void vf58__7CarBodyFv(CarBody* b);
-void vf48__7CarBodyFv(CarBody* b, const TVec* a, const TVec* bb, int kind, int c);
-void vf30__7CarBodyFv(CarBody* b, f32 t, int a, int bb, int* na, int* nb);
-int vf34__7CarBodyFv(CarBody* b, u8* p);
 Course* fn_801B83A0(void);
 int fn_801E9E30(s16* h, TPos* pos);
 void fn_80265D38(CarBody* b, s32 i);
@@ -321,8 +313,8 @@ static inline void Scale(TVec* v, f32 k) {
 
 SpringCar::SpringCar(Controller* c) { ctl = c; }
 
-void SpringCar::Init(void* desc) {
-    CarBody_vf08(this, desc);
+void SpringCar::Init(BodyDesc* desc) {
+    CarBody::Init(desc);
     fn_80265D38(this, index);
     f2708 = 0;
     dead = 0;
@@ -369,9 +361,9 @@ void SpringCar::CheckLost(void) {
     }
 }
 
-void SpringCar::Update(void) {
+void SpringCar::vf5C(void) {
     u32 i;
-    vf5C__7CarBodyFv(this);
+    CarBody::vf5C();
     CheckLost();
     ctl->Update();
     if (lifting && lbl_8055A518) {
@@ -391,7 +383,7 @@ void SpringCar::Update(void) {
 #pragma push
 #pragma opt_unroll_loops off
 void SpringCar::Reset(void) {
-    CarBody_vf10(this);
+    CarBody::Reset();
     ClearWalls();
     lift.Reset();
     ctl->Detach();
@@ -402,7 +394,7 @@ void SpringCar::Reset(void) {
 #pragma pop
 
 void SpringCar::vf14(void) {
-    vf14__7CarBodyFv(this);
+    CarBody::vf14();
     ctl->vf34();
 }
 
@@ -560,16 +552,22 @@ void SpringCar::HitWall(WallObj* w) {
     }
 }
 
-void SpringCar::vf48(const TVec* a, const TVec* b, int kind, int c) {
-    vf48__7CarBodyFv(this, a, b, kind, c);
+void SpringCar::OnHit(const RVec3* a_, const RVec3* b_, int kind, void* c_) {
+    const TVec* a = (const TVec*)a_;
+    const TVec* b = (const TVec*)b_;
+    int c = (int)c_;
+    CarBody::OnHit(a_, b_, kind, c_);
     ctl->vf38(a, b, kind, c);
     if (kind == 0x6D) {
         lift.Reset();
     }
 }
 
-void SpringCar::vf4C(const TVec* a, const TVec* b, int kind, int c) {
-    vf4C__7CarBodyFv(this, a, b, kind, c);
+void SpringCar::OnImpulse(const RVec3* a_, const RVec3* b_, int kind, void* c_, void* by) {
+    const TVec* a = (const TVec*)a_;
+    const TVec* b = (const TVec*)b_;
+    int c = (int)c_;
+    CarBody::OnImpulse(a_, b_, kind, c_, by);
     ctl->vf3C(a, b, kind, c);
     if (kind == 0x6D) {
         lift.Reset();
@@ -577,13 +575,13 @@ void SpringCar::vf4C(const TVec* a, const TVec* b, int kind, int c) {
 }
 
 void SpringCar::vf58(void) {
-    vf58__7CarBodyFv(this);
+    CarBody::vf58();
     ctl->vf40();
 }
 
-void SpringCar::vf54(void) {
+void SpringCar::SetState(const BodyState* s) {
     int i;
-    SetState__7CarBodyFPC9BodyState(this);
+    CarBody::SetState(s);
     dead = 1;
     ctl->vf44();
     for (i = 0; i < 8; i++) {
@@ -591,24 +589,26 @@ void SpringCar::vf54(void) {
     }
 }
 
-int SpringCar::vf2C(u8* buf) { return ctl->vf18(buf + 0x44) + 0x44; }
+s32 SpringCar::vf2C(RPacket* pk) { return ctl->vf18((u8*)pk + 0x44) + 0x44; }
 
-void SpringCar::vf30(f32 t, int a, int b, int* na, int* nb) {
-    int x, y, x2, y2;
-    vf30__7CarBodyFv(this, t, a, b, &x, &y);
-    ctl->vf1C(t, a + x, b + y, &x2, &y2);
+void SpringCar::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
+    s32 x, y;
+    int x2, y2;
+    CarBody::vf30(t, a, b, &x, &y);
+    ctl->vf1C(t, (int)a + x, (int)b + y, &x2, &y2);
     *na = x + x2;
     *nb = y + y2;
 }
 
-int SpringCar::vf34(u8* p) {
-    u8* q = p + vf34__7CarBodyFv(this, p);
+s32 SpringCar::vf34(RPacket* pk) {
+    u8* p = (u8*)pk;
+    u8* q = p + CarBody::vf34(pk);
     q += ctl->vf20(q);
     return q - p;
 }
 
 void SpringCar::vf28(u8* buf) {
-    vf28__7CarBodyFv(this, buf);
+    CarBody::vf28(buf);
     SaveRec* r = (SaveRec*)(buf + slot);
     r->ctl = ctl->vf14();
 }
