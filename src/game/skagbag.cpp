@@ -371,20 +371,16 @@ static inline void ResolveBag(SkagBag* bag, void* ctx) {
 static inline void ResolveGrid(SkagGrid* g, void* ctx) {
     SkagCell* c = g->cells[0];
     for (u32 k = 0; k < 1024; k++, c++) {
-        const struct { SkagBag* value; } bag = {c->bag};
-        if (bag.value) {
-            ResolveBag(bag.value, ctx);
+        if (c->bag) {
+            ResolveBag(c->bag, ctx);
         }
     }
 }
 
 void fn_802B4E44(void* ctx) {
-    SkagGrid* grid;
-    SkagGrid** g = lbl_804BE248;
-    for (u32 r = 0; r < 128; r++, g++) {
-        grid = *g;
-        if (grid) {
-            ResolveGrid(grid, ctx);
+    for (u32 r = 0; r < 128; r++) {
+        if (lbl_804BE248[r]) {
+            ResolveGrid(lbl_804BE248[r], ctx);
         }
     }
 }
