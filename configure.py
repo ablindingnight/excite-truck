@@ -1210,7 +1210,7 @@ config.libs.append(
             Object(NonMatching, "game/carpick.cpp"),
             Object(NonMatching, "game/chalpath.cpp"),
             Object(Matching, "game/unk_80262F8C.c"),
-            Object(NonMatching, "game/contmenu.cpp"),
+            Object(Matching, "game/contmenu.cpp"),
             Object(Matching, "game/credits.cpp"),
             Object(Matching, "game/stub16.cpp"),
             Object(Matching, "game/sortwrap.cpp"),

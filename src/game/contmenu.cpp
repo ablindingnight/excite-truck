@@ -2,54 +2,24 @@
 // for each of two controllers, saved to the "force_feedback" / "controller_speaker" options, and a
 // "decide" button. The items are menu states. Names are guesses apart from the strings.
 #include "game/common.h"
+// The intermediate base vptr is unused while constructing these controls.
+class __declspec(novtable) MenuState;
+
+#include "game/menustate.h"
 
 extern "C" {
 const char* fn_80131234(const char* key);  // localize
 void fn_8022BAD0(int style, int x, int y, int z, int w, int h, const char* text, int color, int a, f32 scale);
 }
 
-class MenuState {
-public:
-    MenuState(void) { unk14 = 0; }
-    virtual ~MenuState(void) {}
-    virtual void Enter(void);   // 0x0C
-    virtual void Exit(void);    // 0x10
-    virtual void Unk14(void);
-    virtual void Unk18(void);
-    virtual void Update(void);  // 0x1C
-    virtual void Unk20(void);
-    virtual void Unk24(struct gxCanvas*);
-    virtual void Draw(void);    // 0x28
-    virtual void Unk2C(void);
-    virtual void Unk30(void);
-    virtual void Unk34(void);
-    virtual void Unk38(void);
-    virtual void Unk3C(void);
-    virtual void Unk40(void);
-    virtual void Unk44(void);
-    virtual void Unk48(void);
-    virtual void Unk4C(void);
-    virtual void Unk50(void);
-    virtual void Unk54(void);
-    virtual int Key(int key);   // 0x58
-    virtual void Unk5C(void);
-
-    void DrawText(int style, int dx, int dy, const char* key, int color) {
-        int x, y, w, h;
-        h = this->h;
-        w = this->w;
-        y = this->y;
-        x = this->x;
-        fn_8022BAD0(style, x + dx, y + dy, 0, w, h, fn_80131234(key), color, 0, 1.0f);
-    }
-
-    s32 x;      // offset 0x4
-    s32 y;      // offset 0x8
-    s32 w;      // offset 0xC
-    s32 h;      // offset 0x10
-    int unk14;  // offset 0x14
-};
-
+static inline void DrawText(const MenuState& menu, int style, int dx, int dy, const char* key, int color) {
+    int x, y, w, h;
+    h = menu.h;
+    w = menu.w;
+    y = menu.y;
+    x = menu.x;
+    fn_8022BAD0(style, x + dx, y + dy, 0, w, h, fn_80131234(key), color, 0, 1.0f);
+}
 
 class Sound {
 public:
@@ -144,7 +114,7 @@ public:
             selected = 0;
         }
     }
-    virtual void Draw(void) { DrawText(0x12, 0, 0, "UIOptions:DECIDE", selected); }
+    virtual void Draw(void) { DrawText(*this, 0x12, 0, 0, "UIOptions:DECIDE", selected); }
 
     int selected;  // offset 0x18
 };
@@ -212,12 +182,12 @@ public:
             }
         }
         if (index % 2 != 0) {
-            DrawText(0xC9, 0, 0, "UIOptions:SPEAKER", selected);
+            DrawText(*this, 0xC9, 0, 0, "UIOptions:SPEAKER", selected);
         } else {
-            DrawText(0xC9, 0, 0, "UIOptions:RUMBLE", selected);
+            DrawText(*this, 0xC9, 0, 0, "UIOptions:RUMBLE", selected);
         }
-        DrawText(0xCA, 345, 2, "UIOptions:ENABLE", on);
-        DrawText(0xCA, 445, 2, "UIOptions:DISABLE", off);
+        DrawText(*this, 0xCA, 345, 2, "UIOptions:ENABLE", on);
+        DrawText(*this, 0xCA, 445, 2, "UIOptions:DISABLE", off);
     }
 
     s32 font;      // offset 0x18
