@@ -297,6 +297,9 @@ static inline int InCone(f32 a, f32 depth, f32 tanA, const f32& secA, f32 pad, f
 }
 
 static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
+    // Cone margins as locals, horizontal first: retail creates 40.0f before 18.0f although the vertical test comes first.
+    f32 padH = 40.0f;
+    f32 padV = 18.0f;
     Vec d;
     d.x = c->x - lbl_804BE0B0.cam.pos.x;
     d.y = c->y - lbl_804BE0B0.cam.pos.y;
@@ -307,9 +310,9 @@ static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
         return 0;
     }
     f32 ax = __fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[0]));
-    if (InCone(ax, depth, lbl_804BE0B0.tanV, lbl_804BE0B0.secV, 18.0f, radius, k)) {
+    if (InCone(ax, depth, lbl_804BE0B0.tanV, lbl_804BE0B0.secV, padV, radius, k)) {
         f32 ay = __fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[1]));
-        if (InCone(ay, depth, lbl_804BE0B0.tanH, lbl_804BE0B0.secH, 40.0f, radius, k)) {
+        if (InCone(ay, depth, lbl_804BE0B0.tanH, lbl_804BE0B0.secH, padH, radius, k)) {
             *dist = fn_802AE6E0(c, &lbl_804BE0B0.cam.pos);
             return 1;
         }
@@ -666,9 +669,11 @@ void fn_802AEB3C(const GroundFrame* cam) {
     f32 fov = fn_802C973C();
     f32 hfov = 2.0f * (f32)atan((f32)tan(fov / 2.0f) / aspect);
     lbl_804BE0B0.tanV = tan(fov / 2.0f);
-    lbl_804BE0B0.secV = 1.0f / (f32)sin(1.5707964f - fov / 2.0f);
+    f32 cosV = (f32)sin(1.5707964f - fov / 2.0f);
+    lbl_804BE0B0.secV = 1.0f / cosV;
     lbl_804BE0B0.tanH = tan(hfov / 2.0f);
-    lbl_804BE0B0.secH = 1.0f / (f32)sin(1.5707964f - hfov / 2.0f);
+    f32 cosH = (f32)sin(1.5707964f - hfov / 2.0f);
+    lbl_804BE0B0.secH = 1.0f / cosH;
     f32 tmp;
     fn_802C98DC(&tmp, &lbl_804BE0B0.znear, &lbl_804BE0B0.zfar, &tmp);
 
