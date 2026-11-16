@@ -140,13 +140,6 @@ static inline void ReadFlyPad(FreePad& pad, f32 dt, f32 turn, f32 speed, CamVec&
     lbl_80499050.pos.z += move.z;
 }
 
-// Helper name unproven: arguments read right to left, stores go x, y, z.
-static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
-    f32* o = (f32*)o_;
-    o[0] = x;
-    o[1] = y;
-    o[2] = z;
-}
 // Helper name unproven: 1 + t * k; as an inline its constant read is numbered above the clamp it follows (retail f2/f3).
 static inline f32 CamBlend(f32 t, f32 k) { return 1.0f + t * k; }
 // The constants this unit reads are its own literals (its .sdata2 is created in retail order by the forms below).
@@ -158,32 +151,16 @@ static inline f32 CamUnit(f32 v, f32 lo, f32 hi) { return CamMax(CamMin(1.0f, (v
 static inline f32 CamMulF(f32 a, f32 b) { return a * b; }
 // CamSpeed: retail keeps the multiply by a scale of 1.0 (a literal 1.0f * x is folded away).
 static inline f32 CamSpeed(f32 t, f32 scale) { return scale * (100.0f * CamBlend(t, 5.0f)); }
-/* Helper name unproven. The cast is retail evidence (aids audit 2026-11-16): the stores keep one resolved base only
-   when the pointer comes through a cast; (CamVec*)m, (Mat3*)m and (f32*)m tie, the cast-free m->axes scores lower
-   (same result as the SoundManager ctor, where 11 cast-free forms fail). Which cast retail had is unknown. */
-static inline void CamIdentityRows(CamRot* m) {
-    CamVec* r = (CamVec*)m;
-    r[0].x = 1.0f;
-    r[0].y = 0.0f;
-    r[0].z = 0.0f;
-    r[1].x = 0.0f;
-    r[1].y = 1.0f;
-    r[1].z = 0.0f;
-    r[2].x = 0.0f;
-    r[2].y = 0.0f;
-    r[2].z = 1.0f;
-}
-
 void fn_8026B8A0(void) {
     FreePad pad;
-    CamRot yawM;
-    CamRot pitchM;
+    Mat3 yawM;
+    Mat3 pitchM;
     CamVec right;
     CamVec fwd;
     CamVec in;
     CamVec in2;
-    CamVec yawE;
-    CamVec pitchE;
+    Vec3 yawE;
+    Vec3 pitchE;
     CamVec move;
     CamVec move2;
     s32 mx;
@@ -236,10 +213,8 @@ void fn_8026B8A0(void) {
     if (free) {
         f32 t = CamMax(CamMin(1.0f, (h - 20.0f) / 480.0f), 0.0f);
         f32 px = 0.0f;
+        f32 py = 0.0f;
         f32 pan = 50.0f * CamBlend(t, 19.0f);
-        f32 py = px;
-        f32 a;
-        f32 b;
         if (mx < 0x50) {
             px = -1.0f + (f32)mx / 80.0f;
         } else if (mx > lbl_8055CFF0 - 0x50) {
@@ -250,24 +225,27 @@ void fn_8026B8A0(void) {
         } else if (my > lbl_8055CFF4 - 0x3C) {
             py = (f32)(my - (lbl_8055CFF4 - 0x3C)) / 60.0f;
         }
-        a = dt * (px * pan);
-        f32 nx = lbl_80499050.pos.x + right.x * a;
-        f32 ny = lbl_80499050.pos.y + right.y * a;
-        f32 nz = lbl_80499050.pos.z + right.z * a;
-        lbl_80499050.pos.x = nx + fwd.x * (dt * (-py * pan));
-        lbl_80499050.pos.y = ny + fwd.y * (dt * (-py * pan));
-        lbl_80499050.pos.z = nz + fwd.z * (dt * (-py * pan));
+        lbl_80499050.pos.x += right.x * (dt * (px * pan));
+        lbl_80499050.pos.y += right.y * (dt * (px * pan));
+        lbl_80499050.pos.z += right.z * (dt * (px * pan));
+        lbl_80499050.pos.x += fwd.x * (dt * (-py * pan));
+        lbl_80499050.pos.y += fwd.y * (dt * (-py * pan));
+        lbl_80499050.pos.z += fwd.z * (dt * (-py * pan));
     }
-    lbl_80499050.pos.y = lbl_80499050.pos.y + (h - (lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z)));
-    CamIdentityRows(&lbl_80499050.rot);
-    SetV3(&yawE, 0.0f, lbl_8055F4F4, 0.0f);
-    Mat3FromEuler((Mat3*)&yawM, (const Vec3*)&yawE);
-    Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&yawM, (const Mat3*)&lbl_80499050.rot);
-    pitchE.x = -lbl_8055F4F8;
-    pitchE.y = 0.0f;
-    pitchE.z = 0.0f;
-    Mat3FromEuler((Mat3*)&pitchM, (const Vec3*)&pitchE);
-    Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
+    lbl_80499050.pos.y += h - (lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z));
+    // The rotation is reset and rebuilt through a Mat3 view. The cast is retail evidence (aids audit 2, 2026-11-16,
+    // on the EXACT form): the identity stores keep one resolved base only when they go through a pointer variable
+    // obtained by a cast (this view, rot->m[r][c] stores, or a cast pointer inside a helper: all exact); every
+    // cast-free form (rot.axes[i] in place, .v[i], CamRot*/CamFrame*/CamVec* locals, CamRot& helper) and the unnamed
+    // cast ((Mat3*)&...)->SetScale miss by 6 rows. Same mechanism as the SoundManager ctor. SetScale(1.0f) = identity.
+    Mat3* rot = (Mat3*)&lbl_80499050.rot;
+    rot->SetScale(1.0f);
+    yawE.Set(0.0f, lbl_8055F4F4, 0.0f);
+    Mat3FromEuler(&yawM, &yawE);
+    Mat3Mul(rot, &yawM, rot);
+    pitchE.Set(-lbl_8055F4F8, 0.0f, 0.0f);
+    Mat3FromEuler(&pitchM, &pitchE);
+    Mat3Mul(rot, &pitchM, rot);
 }
 
 BOOL fn_8026BFF0(s32 x) {
