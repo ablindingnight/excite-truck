@@ -880,6 +880,12 @@ public:
 ModuleTag lbl_8055F3D8;
 UnkStatic123s lbl_80498F00;
 UnkStatic7F lbl_8055F3E0;
+ChalPath* lbl_8055F3E4;  // the challenge path
+u8 lbl_8055F3E8;
+bool lbl_8055F3E9;
+u8 lbl_8055F3EA;
+u8 lbl_8055F3EB;  // event picking (not difficulty picking)
+u8 lbl_8055F3EC;
 static UnlockAnim sUnlockAnim;  // lbl_80498F20
 extern "C" const char* fn_80131234(const char* key);
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
@@ -1163,6 +1169,9 @@ void LevelNode::Draw(void) {
     fn_80232BA4(((NodeText*)p->lv)->GetText(), p->font, 22.0f + x, -16.0f + y, color, 0x11, 0.6f, 0.0f,
                 1.0f);
 }
+
+// Defined below the functions that own the six static sizes: retail's .sbss has those between the flags and this.
+u8* lbl_8055F420;  // the challenge map screen
 
 
 
