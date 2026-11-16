@@ -325,20 +325,9 @@ char lbl_80335D3C[]="CollisionSoundMan";
 char lbl_80335D50[]="collide: sound pool %d is empty!";
 char lbl_80335D74[]="sound pool";
 char lbl_80335D80[]="collide: tree nodes can't have the same key";
+// DUMP_DATA lbl_802F9630 {cstrptr,s32,f32}
 extern const SoundInfo lbl_802F9630[13]={
- {lbl_80335C80,0,1.0f},
- {lbl_80335C8C,0,1.0f},
- {lbl_80335C98,0,1.0f},
- {lbl_80335CA4,0,1.0f},
- {lbl_80335CB0,1,1.0f},
- {lbl_80335CC0,1,1.0f},
- {lbl_80335CD0,2,1.25f},
- {lbl_80335CDC,3,1.399999976158142f},
- {lbl_80335CEC,3,1.399999976158142f},
- {lbl_80335CFC,3,1.399999976158142f},
- {lbl_80335D0C,4,2.0999999046325684f},
- {lbl_80335D1C,4,2.0999999046325684f},
- {lbl_80335D2C,5,1.2999999523162842f}
+#include "dumpdata/lbl_802F9630.inc"
 };
 // DUMP_DATA lbl_802F96CC {s32,s32,s32}
 extern const KeyInfo lbl_802F96CC[43]={

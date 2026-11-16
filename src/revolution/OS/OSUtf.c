@@ -470,31 +470,10 @@ static wchar_t UcsFF[256] = {
 #include "dumpdata/UcsFF.inc"
 };
 
+// DUMP_DATA UcsSjisTable tableptr
 static wchar_t* UcsSjisTable[256] = {
-    Ucs00, NULL,  NULL,  Ucs03, Ucs04, NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  Ucs20,
-    Ucs21, Ucs22, Ucs23, NULL,  Ucs25, Ucs26, NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  Ucs30, NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  Ucs4E, Ucs4F, Ucs50, Ucs51, Ucs52, Ucs53, Ucs54, Ucs55, Ucs56, Ucs57,
-    Ucs58, Ucs59, Ucs5A, Ucs5B, Ucs5C, Ucs5D, Ucs5E, Ucs5F, Ucs60, Ucs61, Ucs62,
-    Ucs63, Ucs64, Ucs65, Ucs66, Ucs67, Ucs68, Ucs69, Ucs6A, Ucs6B, Ucs6C, Ucs6D,
-    Ucs6E, Ucs6F, Ucs70, Ucs71, Ucs72, Ucs73, Ucs74, Ucs75, Ucs76, Ucs77, Ucs78,
-    Ucs79, Ucs7A, Ucs7B, Ucs7C, Ucs7D, Ucs7E, Ucs7F, Ucs80, Ucs81, Ucs82, Ucs83,
-    Ucs84, Ucs85, Ucs86, Ucs87, Ucs88, Ucs89, Ucs8A, Ucs8B, Ucs8C, Ucs8D, Ucs8E,
-    Ucs8F, Ucs90, Ucs91, Ucs92, Ucs93, Ucs94, Ucs95, Ucs96, Ucs97, Ucs98, Ucs99,
-    Ucs9A, Ucs9B, Ucs9C, Ucs9D, Ucs9E, Ucs9F, NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
-    NULL,  NULL,  UcsFF};
+#include "dumpdata/UcsSjisTable.inc"
+};
 
 const u8* OSUTF8to32(const u8* utf8, u32* utf32) {
     u32 code;

@@ -15,16 +15,19 @@ out of orig/<ver>/sys/main.dol, and writes build/<ver>/include/dumpdata/<label>.
 
 Element types:
   u8 s8 u16 s16 u32 s32 f32 f64 char wchar (wchar = u16)
+  cstrptr     address of a named lbl_<address> C string, or zero
+  cstr        pointer to a C string, emitted as an exact-byte string literal
+  tableptr    pointer to an explicitly marked DUMP_DATA table
   {t1,t2,...}   one struct row per element, fields aligned naturally;
                 a field may repeat as t[n] (emitted as a nested {...}).
 Options after the type:
-  addr=0x8xxxxxxx  pick the symbol when a label name is not unique in symbols.txt
-  count=N          the table is the first N elements/rows of the label (symbols.txt sizes
-                   can run past the C array into data that follows it)
+  addr=0x8xxxxxxx  select an entry when a label name is ambiguous
+  count=N          use the first N elements or rows of the label
+  group=N          group N struct rows in each inner array of a 2D initializer
 
-Only tables WITHOUT relocations may be converted (no pointers). `--check-relocs` audits
-every marker against the dtk-split target objects (build/<ver>/obj) and fails if any
-relocation falls inside a marked table.
+`--check-relocs` audits every marker against the dtk-split target objects
+(build/<ver>/obj). Each non-null pointer requires a matching R_PPC_ADDR32
+relocation. Other fields must have no relocations.
 
 Floats are emitted as the shortest decimal that parses back to the identical bits;
 NaN, infinities and denormals are refused (leave such tables as source).
@@ -33,8 +36,7 @@ Usage:
   python tools/datagen.py --version REXE01 --out build/REXE01/include/dumpdata [--stamp f]
   python tools/datagen.py --list           # print markers found (configure.py uses this)
   python tools/datagen.py --check-relocs   # audit markers against the split objects
-  python tools/datagen.py --verify-objects # compiled objects' table bytes == DOL bytes
-                                           # (covers NonMatching units the DOL hash misses)
+  python tools/datagen.py --verify-objects # verify table data and pointer targets in compiled objects
 """
 
 import argparse
@@ -43,13 +45,13 @@ import re
 import struct
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 SCAN_DIRS = ["src", "libs"]
 SCAN_EXT = {".c", ".cpp", ".h", ".hpp", ".inc"}
 MARKER_RE = re.compile(
-    r"^\s*//\s*DUMP_DATA\s+(\S+)\s+(\{[^}]*\}|\S+)((?:\s+(?:addr|count)=\w+)*)"
+    r"^\s*//\s*DUMP_DATA\s+(\S+)\s+(\{[^}]*\}|\S+)((?:\s+(?:addr|count|group)=\w+)*)"
 )
 SYM_RE = re.compile(
     r"^(\S+)\s*=\s*(\.[\w.]+):(0x[0-9A-Fa-f]+);\s*//(.*)$"
@@ -67,16 +69,20 @@ SCALARS = {
     "s32": (4, ">i", "dec"),
     "f32": (4, ">f", "f32"),
     "f64": (8, ">d", "f64"),
+    "cstrptr": (4, ">I", "cstrptr"),
+    "cstr": (4, ">I", "cstr"),
+    "tableptr": (4, ">I", "tableptr"),
 }
 
 
 class Marker:
     def __init__(self, label: str, type_: str, addr: Optional[int], src: Path, line: int,
-                 count: Optional[int] = None):
+                 count: Optional[int] = None, group: int = 0):
         self.label = label
         self.type = type_
         self.addr = addr
         self.count = count
+        self.group = group
         self.src = src
         self.line = line
 
@@ -101,7 +107,8 @@ def find_markers() -> List[Marker]:
                         opts = dict(o.split("=", 1) for o in m.group(3).split())
                         addr = int(opts["addr"], 16) if "addr" in opts else None
                         count = int(opts["count"], 0) if "count" in opts else None
-                        out.append(Marker(m.group(1), m.group(2), addr, p, i, count))
+                        group = int(opts.get("group", "0"), 0)
+                        out.append(Marker(m.group(1), m.group(2), addr, p, i, count, group))
     out.sort(key=lambda m: (str(m.src), m.line))
     return out
 
@@ -132,6 +139,15 @@ class Dol:
             if a <= addr and addr + size <= a + s:
                 return self.data[off + addr - a : off + addr - a + size]
         raise ValueError(f"0x{addr:08X}+0x{size:X} is not file-backed in the DOL (bss?)")
+
+    def c_string(self, addr: int) -> bytes:
+        for base, size, off in self.sections:
+            if base <= addr < base + size:
+                start = off + addr - base
+                end = self.data.find(b"\0", start, off + size)
+                if end != -1:
+                    return self.data[start:end]
+        raise ValueError(f"no terminated C string at 0x{addr:08X}")
 
 
 def parse_type(t: str) -> List[Tuple[str, int]]:
@@ -180,9 +196,21 @@ def fmt_f64(v: float, bits: int) -> str:
     return s
 
 
-def fmt_scalar(name: str, raw: bytes) -> str:
+def fmt_scalar(name: str, raw: bytes, references: Dict[str, Dict[int, str]], dol: Dol) -> str:
     size, fmt, kind = SCALARS[name]
     v = struct.unpack(fmt, raw)[0]
+    if kind == "cstr":
+        if not v:
+            return "0"
+        content = "".join(chr(ch) if 0x20 <= ch < 0x7F and ch not in b'"\\?' else f"\\{ch:03o}"
+                          for ch in dol.c_string(v))
+        return f'"{content}"'
+    if kind in references:
+        if not v:
+            return "0"
+        if v not in references[kind]:
+            raise ValueError(f"unresolved {kind} at 0x{v:08X}")
+        return references[kind][v]
     if kind == "hex":
         return "0x%0*X" % (size * 2, v)
     if kind == "dec":
@@ -210,13 +238,9 @@ def layout(fields: List[Tuple[str, int]]) -> Tuple[List[Tuple[str, int, int]], i
     return out, row
 
 
-def render(m: Marker, data: bytes) -> str:
+def render(m: Marker, data: bytes, references: Dict[str, Dict[int, str]], dol: Dol) -> str:
     fields = parse_type(m.type)
     lay, row = layout(fields)
-    if m.count is not None:
-        if m.count * row > len(data):
-            raise ValueError(f"count={m.count} rows of 0x{row:X} run past the label (0x{len(data):X})")
-        data = data[: m.count * row]
     if len(data) % row:
         raise ValueError(f"size 0x{len(data):X} is not a multiple of row size 0x{row:X}")
     n = len(data) // row
@@ -225,7 +249,7 @@ def render(m: Marker, data: bytes) -> str:
     if not is_struct:
         name = fields[0][0]
         size = SCALARS[name][0]
-        vals = [fmt_scalar(name, data[i : i + size]) for i in range(0, len(data), size)]
+        vals = [fmt_scalar(name, data[i : i + size], references, dol) for i in range(0, len(data), size)]
         per = {1: 16, 2: 8, 4: 8, 8: 4}[size] if SCALARS[name][2] not in ("f32", "f64") else 4
         for i in range(0, len(vals), per):
             lines.append("    " + ", ".join(vals[i : i + per]) + ",")
@@ -240,16 +264,25 @@ def render(m: Marker, data: bytes) -> str:
                 covered[off + k * size : off + (k + 1) * size] = b"\x01" * size
             if count:
                 sub = [
-                    fmt_scalar(name, data[base + off + k * size : base + off + (k + 1) * size])
+                    fmt_scalar(name, data[base + off + k * size : base + off + (k + 1) * size], references, dol)
                     for k in range(count)
                 ]
                 parts.append("{" + ", ".join(sub) + "}")
             else:
-                parts.append(fmt_scalar(name, data[base + off : base + off + size]))
+                parts.append(fmt_scalar(name, data[base + off : base + off + size], references, dol))
         for i in range(row):
             if not covered[i] and data[base + i]:
                 raise ValueError(f"row {r}: padding byte +0x{i:X} is nonzero")
         lines.append("    {" + ", ".join(parts) + "},")
+    if m.group:
+        if n % m.group:
+            raise ValueError(f"{n} rows cannot be grouped into arrays of {m.group}")
+        group_lines = []
+        for i in range(0, n, m.group):
+            group_lines.append("    {")
+            group_lines.extend("    " + row_text for row_text in lines[i : i + m.group])
+            group_lines.append("    },")
+        lines = group_lines
     return "\n".join(lines) + "\n"
 
 
@@ -264,130 +297,205 @@ def resolve(m: Marker, syms: Dict[str, List[Tuple[int, int]]]) -> Tuple[int, int
     return cands[0]
 
 
-# ---------------------------------------------------------------- relocation audit
-def elf_relocs_in(path: Path, ranges: Dict[str, Tuple[int, int]]) -> Dict[str, int]:
-    """Count relocations inside the named symbols' ranges in a big-endian ELF32 object."""
-    d = path.read_bytes()
-    if d[:4] != b"\x7fELF":
-        return {}
-    shoff, = struct.unpack_from(">I", d, 0x20)
-    shentsize, shnum, shstrndx = struct.unpack_from(">HHH", d, 0x2E)
-    secs = [struct.unpack_from(">IIIIIIIIII", d, shoff + i * shentsize) for i in range(shnum)]
-    symtab = next((s for s in secs if s[1] == 2), None)
-    if symtab is None:
-        return {}
-    strtab = secs[symtab[6]]
+def table_size(marker: Marker, symbol_size: int) -> int:
+    if marker.count is None:
+        return symbol_size
+    row = layout(parse_type(marker.type))[1]
+    size = marker.count * row
+    if size < 0 or size > symbol_size:
+        raise ValueError(f"{marker.label}: count={marker.count} runs outside the label")
+    return size
 
-    def cstr(off: int) -> str:
-        end = d.index(b"\0", off)
-        return d[off:end].decode("latin-1")
 
-    found: Dict[str, Tuple[int, int, int]] = {}  # name -> (shndx, value, size)
-    for i in range(symtab[5] // 16):
-        nm, val, sz, info, oth, shndx = struct.unpack_from(">IIIBBH", d, symtab[4] + i * 16)
-        name = cstr(strtab[4] + nm)
-        if name in ranges and 0 < shndx < 0xFF00:  # defined here
-            found[name] = (shndx, val, sz)
-    out: Dict[str, int] = {}
-    for s in secs:
-        if s[1] != 4:  # SHT_RELA
+def string_symbols(symbol_path: Path) -> Dict[int, str]:
+    result = {}
+    for line in symbol_path.read_text(encoding="utf-8").splitlines():
+        match = SYM_RE.match(line)
+        if match is None:
             continue
-        target = s[7]
-        for name, (shndx, val, sz) in found.items():
-            if shndx != target:
+        name, section, address, metadata = match.groups()
+        addr = int(address, 16)
+        if (name == f"lbl_{addr:08X}" and section in (".rodata", ".data", ".sdata")
+                and re.search(r"\bdata:string1?\b", metadata)):
+            result[addr] = name
+    return result
+
+
+def table_symbols(markers: List[Marker], syms) -> Dict[int, str]:
+    result = {}
+    for marker in markers:
+        address, _ = resolve(marker, syms)
+        if address in result and result[address] != marker.label:
+            raise ValueError(f"ambiguous table pointer target at 0x{address:08X}")
+        result[address] = marker.label
+    return result
+
+
+class ElfSymbol(NamedTuple):
+    name: str
+    value: int
+    size: int
+    section: int
+
+
+class Relocation(NamedTuple):
+    offset: int
+    type: int
+    symbol: ElfSymbol
+    addend: int
+
+
+class ElfTables:
+    """Read symbol data and RELA entries in a big-endian PowerPC ELF32 object."""
+
+    def __init__(self, path: Path):
+        self.data = data = path.read_bytes()
+        self.sections = []
+        self.symbols = []
+        self.defined = {}
+        if data[:4] != b"\x7fELF":
+            return
+        start, = struct.unpack_from(">I", data, 0x20)
+        entry, count = struct.unpack_from(">HH", data, 0x2E)
+        self.sections = [struct.unpack_from(">10I", data, start + i * entry) for i in range(count)]
+        symtab = next((s for s in self.sections if s[1] == 2), None)
+        if symtab is None:
+            return
+        strings = self.sections[symtab[6]][4]
+        for off in range(symtab[4], symtab[4] + symtab[5], 16):
+            nm, val, size, _, _, index = struct.unpack_from(">IIIBBH", data, off)
+            nm += strings
+            name = data[nm : data.index(b"\0", nm)].decode("latin-1")
+            symbol = ElfSymbol(name, val, size, index)
+            self.symbols.append(symbol)
+            if 0 < index < len(self.sections):
+                self.defined[name] = symbol
+
+    def relocations(self, symbol: ElfSymbol, size: int) -> List[Relocation]:
+        rows = []
+        for section in self.sections:
+            if section[1] != 4 or section[7] != symbol.section:  # SHT_RELA
                 continue
-            size = ranges[name][1]
-            cnt = 0
-            for j in range(s[5] // 12):
-                r_off, = struct.unpack_from(">I", d, s[4] + j * 12)
-                if val <= r_off < val + size:
-                    cnt += 1
-            out[name] = out.get(name, 0) + cnt
-    for name in found:
-        out.setdefault(name, 0)
-    return out
+            for off in range(section[4], section[4] + section[5], 12):
+                address, info, addend = struct.unpack_from(">IIi", self.data, off)
+                if symbol.value <= address < symbol.value + size:
+                    rows.append(Relocation(address - symbol.value, info & 0xFF, self.symbols[info >> 8], addend))
+        return sorted(rows)
+
+    def contents(self, symbol: ElfSymbol) -> bytes:
+        section = self.sections[symbol.section]
+        start = section[4] + symbol.value
+        return b"" if section[1] == 8 else self.data[start:start + symbol.size]  # SHT_NOBITS
+
+    def pointed_string(self, relocation: Relocation) -> Optional[bytes]:
+        symbol = relocation.symbol
+        if not 0 < symbol.section < len(self.sections):
+            return None
+        section = self.sections[symbol.section]
+        offset = relocation.addend + symbol.value
+        if section[1] == 8 or not 0 <= offset < section[5]:
+            return None
+        start = section[4] + offset
+        end = self.data.find(b"\0", start, section[4] + section[5])
+        return self.data[start:end] if end != -1 else None
 
 
-def check_relocs(ver: str, markers: List[Marker], syms) -> int:
-    ranges = {m.label: resolve(m, syms) for m in markers}
+def pointer_values(marker: Marker, data: bytes) -> List[Tuple[int, str, int]]:
+    fields, row = layout(parse_type(marker.type))
+    sites = [(offset + 4 * index, name) for name, count, offset in fields if name in ("cstrptr", "cstr", "tableptr")
+             for index in range(max(count, 1))]
+    if not sites:
+        return []
+    if len(data) % row:
+        raise ValueError(f"{marker.label}: size does not match row layout")
+    return [(base + offset, name, value) for base in range(0, len(data), row) for offset, name in sites
+            if (value := struct.unpack_from(">I", data, base + offset)[0]) != 0]
+
+
+def check_relocs(ver: str, markers: List[Marker], syms, dol: Dol) -> int:
     import json
 
-    seen: Dict[str, int] = {}
+    ranges = {}
+    for marker in markers:
+        address, size = resolve(marker, syms)
+        ranges[marker.label] = address, table_size(marker, size)
+    seen: Dict[str, List[Tuple[int, int]]] = {}
     # only the current split's units (build/<ver>/obj may hold stale objects from older splits)
     cfg = json.loads((ROOT / "build" / ver / "config.json").read_text(encoding="utf-8"))
     for unit in cfg["units"]:
         obj = ROOT / unit["object"]
-        if obj.exists():
-            for k, v in elf_relocs_in(obj, ranges).items():
-                seen[k] = seen.get(k, 0) + v
+        if not obj.exists():
+            continue
+        elf = ElfTables(obj)
+        for label in elf.defined.keys() & ranges.keys():
+            relocs = elf.relocations(elf.defined[label], ranges[label][1])
+            seen.setdefault(label, []).extend((r.offset, r.type) for r in relocs)
     bad = 0
     for m in markers:
+        pointers = pointer_values(m, dol.read(*ranges[m.label]))
         if m.label not in seen:
             print(f"?? {m.label}: not found in any split object")
             bad += 1
-        elif seen[m.label]:
-            print(f"!! {m.label}: {seen[m.label]} relocations - must stay as source")
+        elif sorted(seen[m.label]) != [(offset, 1) for offset, _, _ in pointers]:  # R_PPC_ADDR32
+            print(f"!! {m.label}: relocation offsets or types disagree with the marker")
             bad += 1
         else:
             print(f"ok {m.label}")
     return 1 if bad else 0
 
 
-def elf_symbol_bytes(path: Path, names) -> Dict[str, bytes]:
-    """Bytes of the named defined symbols (by symbol size) in a big-endian ELF32 object."""
-    d = path.read_bytes()
-    shoff, = struct.unpack_from(">I", d, 0x20)
-    shentsize, shnum, _ = struct.unpack_from(">HHH", d, 0x2E)
-    secs = [struct.unpack_from(">IIIIIIIIII", d, shoff + i * shentsize) for i in range(shnum)]
-    symtab = next((s for s in secs if s[1] == 2), None)
-    if symtab is None:
-        return {}
-    strtab = secs[symtab[6]]
-    out: Dict[str, bytes] = {}
-    for i in range(symtab[5] // 16):
-        nm, val, sz, info, oth, shndx = struct.unpack_from(">IIIBBH", d, symtab[4] + i * 16)
-        if not 0 < shndx < 0xFF00:
-            continue
-        o = strtab[4] + nm
-        name = d[o : d.index(b"\0", o)].decode("latin-1")
-        if name in names:
-            sec = secs[shndx]
-            out[name] = b"" if sec[1] == 8 else d[sec[4] + val : sec[4] + val + sz]
-    return out
+def verify_table(elf: ElfTables, marker: Marker, expected: bytes, dol: Dol, references) -> None:
+    symbol = elf.defined.get(marker.label)
+    if symbol is None:
+        raise ValueError("symbol missing from compiled object")
+    got = bytearray(elf.contents(symbol)[:len(expected)])
+    pointers = pointer_values(marker, expected)
+    relocs = elf.relocations(symbol, len(expected))
+    if [(r.offset, r.type) for r in relocs] != [(offset, 1) for offset, _, _ in pointers]:  # R_PPC_ADDR32
+        raise ValueError("compiled relocation offsets or types disagree with the marker")
+    for relocation, (offset, kind, address) in zip(relocs, pointers):
+        if kind == "cstr":
+            matches = elf.pointed_string(relocation) == dol.c_string(address)
+        else:
+            name = references[kind].get(address)
+            target = elf.defined.get(name)
+            matches = name is not None and relocation.symbol.name == name and not relocation.addend
+            if not matches and target is not None:
+                matches = (target.section == relocation.symbol.section
+                           and target.value == relocation.symbol.value + relocation.addend)
+        if not matches:
+            raise ValueError(f"wrong pointer target at +0x{offset:X} (expected DOL address 0x{address:08X})")
+        got[offset:offset + 4] = expected[offset:offset + 4]
+    if got != expected:
+        raise ValueError("compiled data differs from the DOL")
 
 
-def verify_objects(ver: str, markers: List[Marker], syms, dol: "Dol") -> int:
-    # source -> object from build.ninja (libs/ sources compile to paths without their libs/... prefix)
+def verify_objects(ver: str, markers: List[Marker], syms, dol: Dol, references) -> int:
+    # Splits may give SDK sources object paths unrelated to their source directories.
     ninja = (ROOT / "build.ninja").read_text(encoding="utf-8")
-    objs = {
+    paths = {
         src.replace("\\", "/"): obj.replace("\\", "/")
         for obj, src in re.findall(r"^build (\S+\.o): mwcc\w* \$\n\s+(\S+)", ninja, re.M)
     }
+    objects = {}
     bad = 0
-    for m in markers:
-        rel = m.src.relative_to(ROOT).as_posix()
-        if rel in objs:
-            obj = ROOT / objs[rel]
-        else:  # src/<unit>.c -> build/<ver>/src/<unit>.o
-            unit = rel[len("src/"):] if rel.startswith("src/") else rel
-            obj = ROOT / "build" / ver / "src" / (unit.rsplit(".", 1)[0] + ".o")
-        if not obj.exists():
-            print(f"?? {m.label}: no compiled object {obj.relative_to(ROOT).as_posix()}")
-            bad += 1
-            continue
-        addr, size = resolve(m, syms)
-        if m.count is not None:
-            size = m.count * layout(parse_type(m.type))[1]
-        got = elf_symbol_bytes(obj, {m.label}).get(m.label)
-        want = dol.read(addr, size)
-        if got is None:
-            print(f"?? {m.label}: symbol not in {obj.name}")
-            bad += 1
-        elif got[:size] != want:
-            print(f"!! {m.label}: compiled bytes differ from the DOL")
+    for marker in markers:
+        relative = marker.src.relative_to(ROOT).as_posix()
+        if relative in paths:
+            obj = ROOT / paths[relative]
+        else:
+            obj = ROOT / "build" / ver / "src" / Path(relative.removeprefix("src/")).with_suffix(".o")
+        try:
+            if obj not in objects:
+                objects[obj] = ElfTables(obj)
+            address, size = resolve(marker, syms)
+            data = dol.read(address, table_size(marker, size))
+            verify_table(objects[obj], marker, data, dol, references)
+        except (OSError, ValueError) as error:
+            print(f"!! {marker.label}: {error}")
             bad += 1
         else:
-            print(f"ok {m.label}")
+            print(f"ok {marker.label}")
     return 1 if bad else 0
 
 
@@ -408,13 +516,15 @@ def main() -> int:
         for m in markers:
             print(f"{m.label}\t{m.type}\t{m.src.relative_to(ROOT).as_posix()}:{m.line}")
         return 0
-    syms = load_symbols(a.symbols or ROOT / "config" / a.version / "symbols.txt")
-    if a.check_relocs:
-        return check_relocs(a.version, markers, syms)
-
+    symbol_path = a.symbols or ROOT / "config" / a.version / "symbols.txt"
+    syms = load_symbols(symbol_path)
     dol = Dol(a.dol or ROOT / "orig" / a.version / "sys" / "main.dol")
+    if a.check_relocs:
+        return check_relocs(a.version, markers, syms, dol)
+
+    references = {"cstrptr": string_symbols(symbol_path), "tableptr": table_symbols(markers, syms)}
     if a.verify_objects:
-        return verify_objects(a.version, markers, syms, dol)
+        return verify_objects(a.version, markers, syms, dol, references)
     out = a.out or ROOT / "build" / a.version / "include" / "dumpdata"
     out.mkdir(parents=True, exist_ok=True)
     labels = set()
@@ -429,7 +539,7 @@ def main() -> int:
             addr, size = resolve(m, syms)
             text = (
                 f"/* generated by tools/datagen.py from main.dol 0x{addr:08X}+0x{size:X}; do not edit */\n"
-                + render(m, dol.read(addr, size))
+                + render(m, dol.read(addr, table_size(m, size)), references, dol)
             )
         except ValueError as e:
             print(f"{m.src}:{m.line}: {m.label}: {e}", file=sys.stderr)
