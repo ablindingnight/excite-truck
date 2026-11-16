@@ -11,6 +11,14 @@ struct CaptionContext {
 };
 
 struct MenuItem {
+    MenuItem(const char* n, CaptionContext context, const char* t) {
+        arg1 = 0;
+        type = 3;
+        data = t;
+        arg0 = context.value;
+        name = n;
+    }
+
     // A text item (type 3).
     MenuItem(const char* n, const char* t, CaptionContext context = CaptionContext()) {
         type = 3;
