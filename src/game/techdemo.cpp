@@ -2,6 +2,7 @@
 // on at least the given lap drives into them, fire their "act_seq" sequence at the midpoint of the bound's
 // longest edge. Registered as a race listener. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -21,13 +22,7 @@ struct EventDesc {
     s32 event;  // offset 0x0
 };
 
-struct Event {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
-
 extern "C" EventDesc* fn_801769CC(void);
-Event* GetEvent(int id);
 
 struct BoundPt {
     f32 x;
@@ -204,7 +199,7 @@ inline void TechDemoMaster::a2(void) {
 }
 
 inline void TechDemoMaster::a1(void) {
-    ValueNode* vals = GetEvent(fn_801769CC()->event)->vals;
+    ValueNode* vals = GetEvent(fn_801769CC()->event)->node;
     int i;
     ValueNode* n;
     for (i = 0; (n = vals->GetChildAt(i)) != 0; i++) {

@@ -2,6 +2,7 @@
 // event type, and the global functions that forward to it; a few GameMode helpers; and the null
 // master used when the event has none. Names are guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
@@ -24,12 +25,6 @@ void fn_801B2C70(void* r);
 int fn_8013C9F4(int a);
 }
 
-struct EventInfo {
-    u8 pad0[0x20];
-    ValueNode* node;  // offset 0x20
-};
-
-EventInfo* GetEvent(int i);
 int GetNumPlayers(void);
 
 void* operator new(size_t size, const char* tag);

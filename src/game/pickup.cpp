@@ -4,6 +4,7 @@
 // coins. Pickups are kept in groups (one per table, with a bounding circle) and drawn spinning; a car
 // collects a pickup when it falls in the car's footprint. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/carbody.h"
 
 extern "C" {
@@ -33,13 +34,7 @@ struct EventDesc {
     s32 event;  // offset 0x0
 };
 
-struct Event {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
-
 extern "C" EventDesc* fn_801769CC(void);
-Event* GetEvent(int id);
 
 struct V2 {
     f32 x;
@@ -394,7 +389,7 @@ void fn_801678D8(void) {
 void fn_80168020(void);
 
 void fn_801679F0(void) {
-    ValueNode* vals = GetEvent(fn_801769CC()->event)->vals;
+    ValueNode* vals = GetEvent(fn_801769CC()->event)->node;
     CoinStripPickupMaker strip;
     CoinBoxPickupMaker box;
     SinglesPickupMaker singles;

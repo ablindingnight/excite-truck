@@ -2,6 +2,7 @@
 // and either a single ghost line or a "racingline_set" of lines with per-car switching between them, inside
 // "legal_transition_regions", every min_change_t..max_change_t seconds. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/carbody.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
@@ -11,11 +12,6 @@ UnkStaticFFFF lbl_8055E278;
 
 struct IdealLineRes;
 struct Region;
-struct EventInfo {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
-
 struct Strength {
     s32 event;  // offset 0x0
 };
@@ -39,7 +35,6 @@ struct V2 {
     f32 y;
 };
 
-EventInfo* GetEvent(int event);
 
 extern "C" {
 char* strrchr(const char* s, int c);
@@ -132,7 +127,7 @@ void fn_801561E8(char* s) {
     }
 }
 
-ValueNode* fn_8015621C(void) { return GetEvent(fn_801E87A8()->event)->vals; }
+ValueNode* fn_8015621C(void) { return GetEvent(fn_801E87A8()->event)->node; }
 
 char* fn_80156248(char* buf, int size) {
     const char* base = fn_8015621C()->GetString("line_basename", "");

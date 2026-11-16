@@ -1,25 +1,31 @@
 #ifndef GAME_GAMEDB_H
 #define GAME_GAMEDB_H
 // The game database records (events, tracks, unlockables, vehicles, drivers) and their getters, defined in
-// pathcareer.cpp. One declaration for every unit (port ODR work, 2026-11-16): other units still declare the
-// getters with local views (Eve, Track, TrackDesc, void*) and join as they are converted. Field names unproven.
+// pathcareer.cpp. One declaration for every unit (port ODR work, 2026-11-16); fields are the union of what the
+// units read. Field names unproven.
 #include "game/common.h"
 
 // An event (also what FindTrackEvent returns: the track's i-th event record).
 struct EventInfo {
-    s32 id;      // offset 0x0
-    s32 track;   // offset 0x4
-    u32 type;    // offset 0x8
-    u8 padC[0x20 - 0xC];
-    ValueNode* node;  // offset 0x20
+    s32 id;           // offset 0x0
+    s32 track;        // offset 0x4
+    u32 type;         // offset 0x8
+    s32 laps;         // offset 0xC
+    s32 drivers;      // offset 0x10: number of racers
+    u32 terrain;      // offset 0x14
+    s32 rounds;       // offset 0x18
+    s32 purse;        // offset 0x1C
+    ValueNode* node;  // offset 0x20: the event's settings
 };
 
 struct TrackInfo {
-    u8 pad0[0x8];
-    char name[0x68];   // offset 0x8
+    s32 index;         // offset 0x0
+    s32 league;        // offset 0x4
+    char name[0x20];   // offset 0x8
+    char name2[0x48];  // offset 0x28
     s32 events;        // offset 0x70: number of events on the track
     u8 pad74[0x80 - 0x74];
-    ValueNode* node;   // offset 0x80
+    ValueNode* node;   // offset 0x80: the track's settings
 };
 
 struct Unlockable {
@@ -38,12 +44,12 @@ struct VehicleInfo {
 };
 
 struct DriverInfo {
-    u8 pad0[0x4];
-    s32 id;       // offset 0x4
-    u8 pad8[0x48 - 0x8];
-    s32 bonus;    // offset 0x48: skill bonus
-    s32 vehicle;  // offset 0x4C
-    s32 a50;      // offset 0x50
+    s32 index;        // offset 0x0
+    s32 id;           // offset 0x4
+    char name[0x40];  // offset 0x8
+    s32 rank;         // offset 0x48 (aiskill adds it to the driver's skill score)
+    s32 vehicle;      // offset 0x4C
+    u32 color;        // offset 0x50
     u8 pad54[0x58 - 0x54];
     ValueNode* node;  // offset 0x58: the driver's settings ("override_skill", ...)
 };

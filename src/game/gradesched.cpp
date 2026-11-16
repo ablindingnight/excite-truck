@@ -1,6 +1,7 @@
 // Grade schedule (0x8016071C-0x80160B14): the race grades' score thresholds for the current event, from the
 // event's own grade table, else grades.val, else built-in defaults. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -16,13 +17,7 @@ struct EventDesc {
     s32 event;  // offset 0x0
 };
 
-struct Event {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
-
 extern "C" EventDesc* fn_801769CC(void);
-Event* GetEvent(int id);
 const char* GetGradeDisplayName(int grade);
 
 class Grades {
@@ -88,7 +83,7 @@ void fn_80160850(void) {
     file = "grades.val";
     ok = 0;
     key = "grades";
-    ev = GetEvent(fn_801769CC()->event)->vals;
+    ev = GetEvent(fn_801769CC()->event)->node;
     name = fn_80204EA0("grade_table");
     if (HasNode(ev, name)) {
         fn_8016071C(ev->FindChild(name));

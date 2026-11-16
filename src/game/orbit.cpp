@@ -6,6 +6,7 @@
 // and when the player cannot finish in time the "turtle" mode turns it all off. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -48,13 +49,7 @@ struct EventDesc {
     s32 event;  // offset 0x0
 };
 
-struct Event {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
-
 extern "C" EventDesc* fn_801769CC(void);
-Event* GetEvent(int id);
 
 struct CarProgress {
     u8 pad0[0x4];
@@ -497,7 +492,7 @@ void fn_801663C8(int n, const CarSetup* cars, const RaceDesc* race) {
     int i;
     lbl_8055E324 = fn_801659D0(race);
     fn_80165FAC();
-    lbl_8042FE38.maxSf = GetEvent(fn_801769CC()->event)->vals->GetFloat("orbit_max_sf", lbl_8042FE38.maxSf);
+    lbl_8042FE38.maxSf = GetEvent(fn_801769CC()->event)->node->GetFloat("orbit_max_sf", lbl_8042FE38.maxSf);
     fn_802E30C8("orbit: %.2f->%.2f on %.2f->%.2f", lbl_8042FE38.minSf, lbl_8042FE38.maxSf, lbl_8042FE38.maxLon,
                 lbl_8042FE38.minLon);
     lbl_8055E32C = new ("orbit-ci") DynArray<OrbitCarState>(n);

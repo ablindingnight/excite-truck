@@ -218,7 +218,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
     s32 sel = -1;
     s32 driver = GetDriver(0)->id;
     s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->a4;
-    s32 x = GetDriver(0)->a50;
+    s32 x = GetDriver(0)->color;
     IPath* path = getPath(which);
     fn_802840F4();
     CareerResult res;

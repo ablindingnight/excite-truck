@@ -227,7 +227,7 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
     for (nd = 0; nd < num; nd++) {
         DriverInfo* d = GetDriver(nd);
         bonus[nd].id = d->id;
-        bonus[nd].bonus = d->bonus;
+        bonus[nd].bonus = d->rank;
     }
     for (i = 0; i < n; i++) {
         SkillSlot* e = &slots[i];

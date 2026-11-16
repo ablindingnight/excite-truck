@@ -3,6 +3,7 @@
 // "tips:" messages give the subject; the names are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include <revolution/MTX/vec.h>
 
@@ -55,20 +56,6 @@ struct RaceGoals {
     f32 time_limit;  // offset 0x0
     s32 stars;       // offset 0x4
     s32 laps;        // offset 0x8
-};
-
-struct EventInfo {
-    s32 id;           // offset 0x0
-    s32 track;        // offset 0x4
-    s32 type;         // offset 0x8
-    s32 laps;         // offset 0xC
-    u8 unk10[0x10];
-    ValueNode* node;  // offset 0x20
-};
-
-struct Track {
-    u8 unk0[0x8];
-    char name[0x20];  // offset 0x8
 };
 
 struct RecordEntry {
@@ -145,9 +132,7 @@ int fn_8027DED0(void);
 f32 fn_8014E7DC(s32 event, s32 difficulty);
 int fn_80129D18(int lo, int hi);
 }
-Track* GetTrack(int track);
 const char* GetEventDisplayName(int event);
-EventInfo* GetEvent(int event);
 
 class LocString {
 public:

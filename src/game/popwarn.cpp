@@ -3,6 +3,7 @@
 // timeouts. Written against raw field offsets; the large screen routines are still stubs. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menuwidget_inl.h"
 #include "macros.h"
 #include "game/menu.h"
@@ -396,14 +397,7 @@ void fn_80247174(void) {
 
 }  // extern "C"
 
-// A track record as GetTrack returns it; only its value node is used here.
-struct KioskTrack {
-    u8 pad0[0x80];      // offset 0x0
-    ValueNode* vals;    // offset 0x80
-};
-
 int GetNumTracks(void);
-KioskTrack* GetTrack(int track);
 
 extern "C" {
 f32 fn_8020A5F0(void);
@@ -463,9 +457,9 @@ void fn_80247210(void) {
     int track = -1;
     int song = -1;
     for (int i = 0; i < GetNumTracks(); i++) {
-        if (skip == GetTrack(i)->vals->GetInt("demo_idx", -1)) {
+        if (skip == GetTrack(i)->node->GetInt("demo_idx", -1)) {
             track = i;
-            song = GetTrack(i)->vals->GetInt("song_id", -1);
+            song = GetTrack(i)->node->GetInt("song_id", -1);
             break;
         }
     }

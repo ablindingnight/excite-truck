@@ -2,6 +2,7 @@
 // player launches off one, the camera switches to a jump view with heart/whoosh sounds. Names are
 // guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/racer_camera_slot.h"
 
 extern "C" {
@@ -62,13 +63,6 @@ public:
 
 extern "C" RSound* fn_80207848(const char* name, int a);
 
-class EventInfo {
-public:
-    u8 pad0[0x20];
-    ValueNode* table;  // offset 0x20
-};
-
-EventInfo* GetEvent(int id);
 
 struct JumpCar {
     u8 pad0[0x60];
@@ -151,7 +145,7 @@ void fn_8026B260(void) {
     char name[24];
     const char* file;
     lbl_8055F4C8 = 0;
-    file = GetEvent(*fn_801769CC())->table->GetString("jump_file", 0);
+    file = GetEvent(*fn_801769CC())->node->GetString("jump_file", 0);
     if (file) {
         char* dot;
         strncpy(name, file, 11);
