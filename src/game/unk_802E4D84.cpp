@@ -356,6 +356,9 @@ void fn_802E4F98(void) {
     }
 }
 
+// MATCHING-AID (pool order): retail creates 1.0, 0.0 and 32768 together here; a never-called static volume clamp
+// creates the first two (the linker strips its code). Helper name and body unproven.
+static float SpuClampVolume(float v) { return v > 1.0f ? 1.0f : (v < 0.0f ? 0.0f : v); }
 // Converts a 0..1 volume to a remote-speaker mix level (0..0x8000), rounding to nearest.
 unsigned short fn_802E5168(float volume) {
     float value = 32768.0f * volume;

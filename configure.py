@@ -1308,7 +1308,7 @@ config.libs.append(
             Object(Matching, "game/filecd.cpp"),
             Object(Matching, "game/keybd.cpp"),
             Object(Matching, "game/vmem.cpp"),
-            Object(NonMatching, "game/unk_802E4D84.cpp"),
+            Object(Matching, "game/unk_802E4D84.cpp"),
             Object(Matching, "game/mcsys.cpp"),
             Object(Matching, "game/strmfile.cpp"),
             Object(Matching, "game/strmbank.cpp"),
