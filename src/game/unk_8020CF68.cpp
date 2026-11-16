@@ -199,8 +199,12 @@ public:
     virtual LayoutPane *FindPane(const char *name);
 };
 
+/* Helper name unproven */
+static inline unsigned long MakeColor(unsigned long a, unsigned long r, unsigned long g, unsigned long b) {
+    return (a << 24) | (r << 16) | (g << 8) | b;
+}
 static inline unsigned long HalveAlpha(unsigned long color) {
-    return (color & 0x00FFFFFF) | ((color >> 1) & 0x7F000000);
+    return MakeColor((color >> 24) >> 1, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
 }
 
 // Draws the sound menu: music volume, effects volume and the third item, the selection highlight,
@@ -237,7 +241,7 @@ void fn_8020D2D4(void) {
             char paneName[0x20];
             char textName[0x20];
             const char *text = fn_80131234(labels.names[i]);
-            long selected;
+            bool selected;
             LayoutText box;
             LayoutPane *pane;
             unsigned char alpha;
@@ -285,12 +289,11 @@ void fn_8020D2D4(void) {
                 if (selected) {
                     LayoutPane glow;
                     glow = *pane;
-                    float grow = 1.0f + scale;
                     glow.pos.v[0] = glow.pos.v[0] - 0.5f * glow.w * scale;
                     glow.pos.v[1] = glow.pos.v[1] - 0.5f * glow.h * scale;
-                    glow.w = glow.w * grow;
-                    glow.h = glow.h * grow;
-                    glow.color = ((unsigned long)alpha << 24) | (glow.color & 0x00FFFFFF);
+                    glow.w = glow.w * (1.0f + scale);
+                    glow.h = glow.h * (1.0f + scale);
+                    glow.color = MakeColor(alpha, (glow.color >> 16) & 0xFF, (glow.color >> 8) & 0xFF, glow.color & 0xFF);
                     fn_80147940(lbl_8055EEA0, &glow, "menu_artset", 1);
                 }
             }
