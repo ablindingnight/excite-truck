@@ -1227,6 +1227,21 @@ static inline BOOL OptRumble(void) { return (lbl_8055D430 & 1) && (lbl_8055D430 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+/* Helper name unproven */
+static inline void SpinXform(f32* out, const f32* in, const f32* m) {
+    if (out == in) {
+        f32 x = Dot3(in[0], m[0], in[1], m[3], in[2], m[6]);
+        f32 y = Dot3(in[0], m[1], in[1], m[4], in[2], m[7]);
+        f32 z = Dot3(in[0], m[2], in[1], m[5], in[2], m[8]);
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+    } else {
+        out[0] = Dot3(in[0], m[0], in[1], m[3], in[2], m[6]);
+        out[1] = Dot3(in[0], m[1], in[1], m[4], in[2], m[7]);
+        out[2] = Dot3(in[0], m[2], in[1], m[5], in[2], m[8]);
+    }
+}
 void PlayerDriver_vf48(u8* p) {
     RVec3 rx;
     f32 cl;
@@ -1524,21 +1539,7 @@ void PlayerDriver_vf48(u8* p) {
         f32 ref;
         v = (const f32*)(PTR(p, 0x34) + 0x3C);
         u8* c6;
-        if (&u.x == v) {
-            f32 x;
-            f32 z;
-            f32 y;
-            x = spin[0] * v[0] + v[1] * spin[3] + v[2] * spin[6];
-            z = v[0] * spin[2] + spin[5] * v[1] + spin[8] * v[2];
-            y = Dot3(v[0], spin[1], v[1], spin[4], v[2], spin[7]);
-            u.x = x;
-            u.y = y;
-            u.z = z;
-        } else {
-            u.x = Dot3(v[0], spin[0], v[1], spin[3], v[2], spin[6]);
-            u.y = v[0] * spin[1] + spin[4] * v[1] + spin[7] * v[2];
-            u.z = Dot3(v[0], spin[2], v[1], spin[5], v[2], spin[8]);
-        }
+        SpinXform(&u.x, v, spin);
         slip = MaxF(kZero, kOne - 0.5f * (F32(c5, 0x2488) + F32(c5, 0x2414)));
         str *= slip;
         ref = MaxF(0.1f, F32(PTR(p, 0x34), 0x25D4));
