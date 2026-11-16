@@ -365,8 +365,8 @@ void fn_8016A240(const char* name) {
 
 }
 template <class T>
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline T& AtR(T* p, int i) {
+/* Helper name unproven: element i by reference; the accessor boundary is needed (in place: fn_8016A30C 100 -> 99.33) */
+static inline T& ElemRef(T* p, int i) {
     return p[i];
 }
 extern "C" {
@@ -377,7 +377,7 @@ int fn_8016A30C(int player) {
         int n = 0;
         int i;
         for (i = 0; i < lbl_80430318.count; i++) {
-            if (AtR(lbl_80430318.data, i).Check(rec)) {
+            if (ElemRef(lbl_80430318.data, i).Check(rec)) {
                 n++;
             }
         }
