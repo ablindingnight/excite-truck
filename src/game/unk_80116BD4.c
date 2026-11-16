@@ -7133,125 +7133,20 @@ void dctsub(int n, f32 *a, int nc, f32 *c) {
 #define BINK_MUL(x, y) (((x) * (y)) >> 11)
 
 // Dequantizes and inverse-transforms an 8x8 block of coefficients (columns, then rows) into 8-bit pixels at dst.
+// This is the AAN fast IDCT as laid out in libjpeg's jidctfst.c (same work variables, reused; the BINK_A
+// constants are its FIX_ constants at 11 bits). The plain OR chain below is what gives retail's OR tree.
 void fastidct8x8(u8* dst, s32 stride, s16* block, s32* quant) {
     s32 tmp[64];
     s32* t = tmp;
     s32 i;
+    s32 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+    s32 tmp10, tmp11, tmp12, tmp13;
+    s32 z5, z10, z11, z12, z13;
+
+    // Pass 1: columns, from the coefficient block into the work array.
     for (i = 0; i < 8; i++) {
-        s32 s1 = block[8];
-        s32 s5 = block[40];
-        s32 s3 = block[24];
-        s32 s7;
-        s32 s4 = block[32];
-        s32 s6 = block[48];
-        s7 = block[56];
-        if (((((s4 | ((s1 | block[16]) | s3)) | s5) | s6) | s7) == 0) {
-            s32 dc;
-            dc = (block[0] * quant[0]) >> 11;
-            quant++;
-            block++;
-            t[0] = dc;
-            t[8] = dc;
-            t[16] = dc;
-            t[24] = dc;
-            t[32] = dc;
-            t[40] = dc;
-            t[48] = dc;
-            t[56] = dc;
-            t++;
-        } else {
-            s32 b4;
-            s32 b3;
-            s32 d0 = (quant[0] * block[0]) >> 11;
-            s32 d2 = (block[16] * quant[16]) >> 11;
-            s32 d4 = (s4 * quant[32]) >> 11;
-            s32 a0 = d0 + d4;
-            s32 b1;
-            s32 d6 = (quant[48] * s6) >> 11;
-            s32 a2 = d2 + d6;
-            s32 a1 = d0 - d4;
-            s32 a3 = ((2896 * (d2 - d6)) >> 11) - a2;
-            s32 e0 = a0 + a2;
-            s32 e1 = a1 + a3;
-            s32 e2 = a1 - a3;
-            s32 e3 = a0 - a2;
-            s32 d1 = (s1 * quant[8]) >> 11;
-            s32 d3 = (quant[24] * s3) >> 11;
-            s32 d5 = (s5 * quant[40]) >> 11;
-            s32 d7 = (s7 * quant[56]) >> 11;
-            s32 a4 = d5 + d3;
-            s32 a6 = d1 + d7;
-            s32 b0;
-            s32 a5 = d5 - d3;
-            s32 a7 = d1 - d7;
-            s32 b2;
-            b1 = (3784 * (a5 + a7)) >> 11;
-            b0 = a4 + a6;
-            b2 = ((((-5352) * a5) >> 11) + b1) - b0;
-            b3 = ((2896 * (a6 - a4)) >> 11) - b2;
-            b4 = (((2217 * a7) >> 11) - b1) + b3;
-            block++;
-            quant++;
-            t[0] = e0 + b0;
-            t[56] = e0 - b0;
-            t[8] = e1 + b2;
-            t[48] = e1 - b2;
-            t[16] = e2 + b3;
-            t[40] = e2 - b3;
-            t[32] = e3 + b4;
-            t[24] = e3 - b4;
-            t++;
-        }
-    }
-
-    t = tmp;
-    for (i = 0; i < 8; i++) {
-        s32 a0 = t[0] + t[4];
-        s32 a1 = t[0] - t[4];
-        s32 b3;
-        s32 a2 = t[2] + t[6];
-        s32 a4 = t[5] + t[3];
-        s32 a3 = (((t[2] - t[6]) * 2896) >> 11) - a2;
-        s32 b4;
-        s32 a5 = t[5] - t[3];
-        s32 a7 = t[1] - t[7];
-        s32 a6 = t[7] + t[1];
-        s32 b0 = a6 + a4;
-        s32 b1 = (3784 * (a5 + a7)) >> 11;
-        s32 b2 = ((((t[5] - t[3]) * (-5352)) >> 11) + b1) - b0;
-        b3 = ((2896 * (a6 - a4)) >> 11) - b2;
-        b4 = (((2217 * a7) >> 11) - b1) + b3;
-        dst[0] = (((a0 + a2) + b0) + 0x7F) >> 8;
-        dst[7] = (((a0 + a2) - b0) + 0x7F) >> 8;
-        dst[1] = (((a1 + a3) + b2) + 0x7F) >> 8;
-        dst[6] = (((a1 + a3) - b2) + 0x7F) >> 8;
-        dst[2] = (0x7F + ((a1 - a3) + b3)) >> 8;
-        dst[5] = (((a1 - a3) - b3) + 0x7F) >> 8;
-        dst[4] = (0x7F + ((a0 - a2) + b4)) >> 8;
-        dst[3] = (((a0 - a2) - b4) + 0x7F) >> 8;
-        t += 8;
-        dst += stride;
-    }
-
-}
-
-// Like fastidct8x8, but draws the block at double size (16x16) into dst.
-void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
-    s32 tmp[64];
-    s32 *t = tmp;
-    s32 i;
-    u8 *dst2 = dst + stride;
-    s32 stride2 = stride * 2;
-
-    for (i = 0; i < 8; i++) {
-        s32 s1 = block[8];
-        s32 s2 = block[16];
-        s32 s3 = block[24];
-        s32 s4 = block[32];
-        s32 s6 = block[48];
-        s32 s7 = block[56];
-        s32 s5 = block[40];
-        if ((s1 | s2 | s3 | s4 | s5 | s6 | s7) == 0) {
+        if ((block[8] | block[16] | block[24] | block[32] | block[40] | block[48] | block[56]) == 0) {
+            // All AC terms are zero: the column is the dequantized DC value.
             s32 dc = (block[0] * quant[0]) >> 11;
             block++;
             quant++;
@@ -7265,80 +7160,218 @@ void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
             t[56] = dc;
             t++;
         } else {
-            s32 d0 = (quant[0] * block[0]) >> 11;
-            s32 d2 = (s2 * quant[16]) >> 11;
-            s32 d4 = (s4 * quant[32]) >> 11;
-            s32 d6 = (quant[48] * s6) >> 11;
-            s32 a0 = d0 + d4;
-            s32 a1 = d0 - d4;
-            s32 a2 = d2 + d6;
-            s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
-            s32 e0 = a0 + a2;
-            s32 e3 = a0 - a2;
-            s32 e1 = a1 + a3;
-            s32 e2 = a1 - a3;
-            s32 d3 = (s3 * quant[24]) >> 11;
-            s32 d1 = (s1 * quant[8]) >> 11;
-            s32 d5 = (s5 * quant[40]) >> 11;
-            s32 d7 = (s7 * quant[56]) >> 11;
-            s32 a4 = d5 + d3;
-            s32 a5 = d5 - d3;
-            s32 a7 = d1 - d7;
-            s32 a6 = d1 + d7;
-            s32 b0 = a4 + a6;
-            s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
-            s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-            s32 b3 = BINK_MUL(BINK_A1, a6 - a4) - b2;
-            s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;
+            // Even part
+            tmp0 = (block[0] * quant[0]) >> 11;
+            tmp1 = (block[16] * quant[16]) >> 11;
+            tmp2 = (block[32] * quant[32]) >> 11;
+            tmp3 = (block[48] * quant[48]) >> 11;
+            tmp10 = tmp0 + tmp2;
+            tmp11 = tmp0 - tmp2;
+            tmp13 = tmp1 + tmp3;
+            tmp12 = BINK_MUL(BINK_A1, tmp1 - tmp3) - tmp13;
+            tmp0 = tmp10 + tmp13;
+            tmp3 = tmp10 - tmp13;
+            tmp1 = tmp11 + tmp12;
+            tmp2 = tmp11 - tmp12;
+
+            // Odd part
+            tmp4 = (block[8] * quant[8]) >> 11;
+            tmp5 = (block[24] * quant[24]) >> 11;
+            tmp6 = (block[40] * quant[40]) >> 11;
+            tmp7 = (block[56] * quant[56]) >> 11;
+            z13 = tmp6 + tmp5;
+            z10 = tmp6 - tmp5;
+            z11 = tmp4 + tmp7;
+            z12 = tmp4 - tmp7;
+            tmp7 = z11 + z13;
+            tmp11 = BINK_MUL(BINK_A1, z11 - z13);
+            z5 = BINK_MUL(BINK_A3, z10 + z12);
+            tmp10 = BINK_MUL(BINK_A2, z12) - z5;
+            tmp12 = z5 + BINK_MUL(BINK_A4, z10);
+            tmp6 = tmp12 - tmp7;
+            tmp5 = tmp11 - tmp6;
+            tmp4 = tmp10 + tmp5;
+
             block++;
             quant++;
-            t[0] = e0 + b0;
-            t[56] = e0 - b0;
-            t[8] = e1 + b2;
-            t[48] = e1 - b2;
-            t[16] = e2 + b3;
-            t[40] = e2 - b3;
-            t[32] = e3 + b4;
-            t[24] = e3 - b4;
+            t[0] = tmp0 + tmp7;
+            t[56] = tmp0 - tmp7;
+            t[8] = tmp1 + tmp6;
+            t[48] = tmp1 - tmp6;
+            t[16] = tmp2 + tmp5;
+            t[40] = tmp2 - tmp5;
+            t[32] = tmp3 + tmp4;
+            t[24] = tmp3 - tmp4;
+            t++;
+        }
+    }
+
+    // Pass 2: rows, from the work array to pixels.
+    t = tmp;
+    for (i = 0; i < 8; i++) {
+        // Even part
+        tmp10 = t[0] + t[4];
+        tmp11 = t[0] - t[4];
+        tmp13 = t[2] + t[6];
+        tmp12 = BINK_MUL(BINK_A1, t[2] - t[6]) - tmp13;
+        tmp0 = tmp10 + tmp13;
+        tmp3 = tmp10 - tmp13;
+        tmp1 = tmp11 + tmp12;
+        tmp2 = tmp11 - tmp12;
+
+        // Odd part
+        z13 = t[5] + t[3];
+        z10 = t[5] - t[3];
+        z11 = t[1] + t[7];
+        z12 = t[1] - t[7];
+        tmp7 = z11 + z13;
+        tmp11 = BINK_MUL(BINK_A1, z11 - z13);
+        z5 = BINK_MUL(BINK_A3, z10 + z12);
+        tmp10 = BINK_MUL(BINK_A2, z12) - z5;
+        tmp12 = z5 + BINK_MUL(BINK_A4, z10);
+        tmp6 = tmp12 - tmp7;
+        tmp5 = tmp11 - tmp6;
+        tmp4 = tmp10 + tmp5;
+
+        dst[0] = (tmp0 + tmp7 + 0x7F) >> 8;
+        dst[7] = (tmp0 - tmp7 + 0x7F) >> 8;
+        dst[1] = (tmp1 + tmp6 + 0x7F) >> 8;
+        dst[6] = (tmp1 - tmp6 + 0x7F) >> 8;
+        dst[2] = (tmp2 + tmp5 + 0x7F) >> 8;
+        dst[5] = (tmp2 - tmp5 + 0x7F) >> 8;
+        dst[4] = (tmp3 + tmp4 + 0x7F) >> 8;
+        dst[3] = (tmp3 - tmp4 + 0x7F) >> 8;
+        t += 8;
+        dst += stride;
+    }
+}
+
+// Like fastidct8x8, but draws the block at double size (16x16) into dst.
+void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
+    s32 tmp[64];
+    s32 *t;
+    s32 i;
+    u8 *dst2;
+    s32 stride2;
+    s32 tmp0;
+    s32 tmp1;
+    s32 tmp2;
+    s32 tmp3;
+    s32 tmp4;
+    s32 tmp5;
+    s32 tmp6;
+    s32 tmp7;
+    s32 tmp10;
+    s32 tmp11;
+    s32 tmp12;
+    s32 tmp13;
+    s32 z5;
+    s32 z10;
+    s32 z11;
+    s32 z12;
+    s32 z13;
+    dst2 = dst + stride;
+    stride2 = stride * 2;
+    t = tmp;
+
+    for (i = 0; i < 8; i++) {
+        if ((block[8] | block[16] | block[24] | block[32] | block[40] | block[48] | block[56]) == 0) {
+            s32 dc = (block[0] * quant[0]) >> 11;
+            block++;
+            quant++;
+            t[0] = dc;
+            t[8] = dc;
+            t[16] = dc;
+            t[24] = dc;
+            t[32] = dc;
+            t[40] = dc;
+            t[48] = dc;
+            t[56] = dc;
+            t++;
+        } else {
+            tmp0 = (block[0] * quant[0]) >> 11;
+            tmp1 = (block[16] * quant[16]) >> 11;
+            tmp2 = (block[32] * quant[32]) >> 11;
+            tmp3 = (block[48] * quant[48]) >> 11;
+            tmp10 = tmp0 + tmp2;
+            tmp11 = tmp0 - tmp2;
+            tmp13 = tmp1 + tmp3;
+            tmp12 = BINK_MUL(BINK_A1, tmp1 - tmp3) - tmp13;
+            tmp0 = tmp10 + tmp13;
+            tmp3 = tmp10 - tmp13;
+            tmp1 = tmp11 + tmp12;
+            tmp2 = tmp11 - tmp12;
+            tmp4 = (block[8] * quant[8]) >> 11;
+            tmp5 = (block[24] * quant[24]) >> 11;
+            tmp6 = (block[40] * quant[40]) >> 11;
+            tmp7 = (block[56] * quant[56]) >> 11;
+            z13 = tmp6 + tmp5;
+            z10 = tmp6 - tmp5;
+            z11 = tmp4 + tmp7;
+            z12 = tmp4 - tmp7;
+            tmp7 = z11 + z13;
+            tmp11 = BINK_MUL(BINK_A1, z11 - z13);
+            z5 = BINK_MUL(BINK_A3, z10 + z12);
+            tmp10 = BINK_MUL(BINK_A2, z12) - z5;
+            tmp12 = z5 + BINK_MUL(BINK_A4, z10);
+            tmp6 = tmp12 - tmp7;
+            tmp5 = tmp11 - tmp6;
+            tmp4 = tmp10 + tmp5;
+            block++;
+            quant++;
+            t[0] = tmp0 + tmp7;
+            t[56] = tmp0 - tmp7;
+            t[8] = tmp1 + tmp6;
+            t[48] = tmp1 - tmp6;
+            t[16] = tmp2 + tmp5;
+            t[40] = tmp2 - tmp5;
+            t[32] = tmp3 + tmp4;
+            t[24] = tmp3 - tmp4;
             t++;
         }
     }
     t = tmp;
     for (i = 0; i < 8; i++) {
-        u32 a0 = t[0] + t[4];
-        s32 a1 = t[0] - t[4];
-        u32 a2 = t[2] + t[6];
-        s32 a3 = BINK_MUL(BINK_A1, t[2] - t[6]) - a2;
-        s32 a4 = t[5] + t[3];
-        s32 a6 = t[1] + t[7];
-        s32 a5 = t[5] - t[3];
-        s32 a7 = t[1] - t[7];
-        s32 b0 = a4 + a6;
-        s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
-        s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-        s32 b3 = BINK_MUL(BINK_A1, a6 - a4) - b2;
-        s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;
-        u32 o0 = (a0 + a2 + b0 + 0x7F) >> 8;
-        u32 o1 = (a1 + a3 + b2 + 0x7F) >> 8;
-        u32 o2 = (a1 - a3 + b3 + 0x7F) >> 8;
-        u32 o3 = (a0 - a2 - b4 + 0x7F) >> 8;
-        u32 o4 = (a0 - a2 + b4 + 0x7F) >> 8;
-        u32 o5 = (a1 - a3 - b3 + 0x7F) >> 8;
-        u32 o7 = (a0 + a2 - b0 + 0x7F) >> 8;
-        u32 w0 = ((o0 & 0xFF) << 16) | (o1 & 0xFF);
-        u32 w1 = ((o2 & 0xFF) << 16) | (o3 & 0xFF);
-        u32 w2 = ((o4 & 0xFF) << 16) | (o5 & 0xFF);
-        u32 w3 = ((((a1 + a3 - b2 + 0x7F) >> 8) & 0xFF) << 16) | (o7 & 0xFF);
+        u32 o0, o1, o2, o3;
+        u32 w0, w1, w2, w3;
+        tmp10 = t[0] + t[4];
+        tmp11 = t[0] - t[4];
+        tmp13 = t[2] + t[6];
+        tmp12 = BINK_MUL(BINK_A1, t[2] - t[6]) - tmp13;
+        tmp0 = tmp10 + tmp13;
+        tmp3 = tmp10 - tmp13;
+        tmp1 = tmp11 + tmp12;
+        tmp2 = tmp11 - tmp12;
+        z13 = t[5] + t[3];
+        z10 = t[5] - t[3];
+        z11 = t[1] + t[7];
+        z12 = t[1] - t[7];
+        tmp7 = z11 + z13;
+        tmp11 = BINK_MUL(BINK_A1, z11 - z13);
+        z5 = BINK_MUL(BINK_A3, z10 + z12);
+        tmp10 = BINK_MUL(BINK_A2, z12) - z5;
+        tmp12 = z5 + BINK_MUL(BINK_A4, z10);
+        tmp6 = tmp12 - tmp7;
+        tmp5 = tmp11 - tmp6;
+        tmp4 = tmp10 + tmp5;
+        o0 = (tmp0 + tmp7 + 0x7F) >> 8;
+        o1 = (tmp1 + tmp6 + 0x7F) >> 8;
+        o2 = (tmp2 + tmp5 + 0x7F) >> 8;
+        o3 = (tmp3 - tmp4 + 0x7F) >> 8;
+        w0 = ((o0 & 0xFF) << 16) | (o1 & 0xFF);
+        w1 = ((o2 & 0xFF) << 16) | (o3 & 0xFF);
+        w2 = (((tmp2 - tmp5 + 0x7F) >> 8) & 0xFF) | ((((tmp3 + tmp4 + 0x7F) >> 8) & 0xFF) << 16);
+        w3 = (((tmp0 - tmp7 + 0x7F) >> 8) & 0xFF) | ((((tmp1 - tmp6 + 0x7F) >> 8) & 0xFF) << 16);
         w0 |= w0 << 8;
         w1 |= w1 << 8;
         w2 |= w2 << 8;
         w3 |= w3 << 8;
         ((u32 *)dst)[0] = w0;
         ((u32 *)dst)[1] = w1;
-        ((u32 *)dst2)[0] = w0;
         ((u32 *)dst)[2] = w2;
         ((u32 *)dst)[3] = w3;
         dst += stride2;
+        ((u32 *)dst2)[0] = w0;
         ((u32 *)dst2)[1] = w1;
         ((u32 *)dst2)[2] = w2;
         ((u32 *)dst2)[3] = w3;
