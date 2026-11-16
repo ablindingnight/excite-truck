@@ -913,7 +913,7 @@ void fn_8000F4F0(void) {
 }
 
 
-static inline f32 ArcU(f32 c) { return Clamp01((c - -1.0f) * 0.5f); }
+static inline f32 ArcU(f32 c) { return Clamp01((c - -1.0f) / 2.0f); }
 
 static inline f32 ArcV(f32 s) { return Clamp01((s - 1.0f) / -2.0f); }
 
@@ -1370,8 +1370,9 @@ static inline void ApplyRotation(Vec2* v, f32 x, f32 c, f32 s) {
 }
 
 static inline void Rotate(Vec2* v, f32 angle) {
+    f32 c;
     f32 x = v->x;
-    f32 c = cos(angle);
+    c = cos(angle);
     f32 s = sin(angle);
     ApplyRotation(v, x, c, s);
 }
