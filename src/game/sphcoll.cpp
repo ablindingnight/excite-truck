@@ -2786,12 +2786,13 @@ static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  
 #pragma push
 #pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void BoxSphereShape::vf14(void) {
-    u8* p = (u8*)this;
+    int i;
     RVec3 at;
     RVec3 pos;
     RVec3 nrm;
     RVec3 v;
     int surf;
+    u8* p = (u8*)this;
     RigidBody* rb = (RigidBody*)PTR(p, 0x4);
     at.x = F32(p, 0x34);
     at.y = F32(p, 0x38);
@@ -2813,7 +2814,7 @@ void BoxSphereShape::vf14(void) {
                 BoxCorner(-h->x, -h->y, h->z),  BoxCorner(h->x, -h->y, h->z),
                 BoxCorner(-h->x, h->y, h->z),   BoxCorner(h->x, h->y, h->z),
             };
-            for (int i = 0; i < 8; i++) {
+            for (i = 0; i < 8; i++) {
                 RVec3 w;
                 RVec3 d;
                 RVec3 vel;
@@ -2891,7 +2892,7 @@ void BoxSphereShape::vf14(void) {
             }
         }
     } else {
-        for (int i = 0; i < 24; i++) {
+        for (i = 0; i < 24; i++) {
             ((SphCache*)p)->v[i] = lbl_805622D0;
         }
     }
