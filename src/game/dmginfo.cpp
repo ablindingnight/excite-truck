@@ -4,7 +4,7 @@
 
 void* operator new[](size_t size, const char* tag);
 
-struct DmgSlot {
+struct DmgInfoSlot {
     void Update(void) {
         if (id >= 0) {
             age += 0.016683351f;
@@ -39,7 +39,7 @@ struct DmgCar {
             slots[j].Update();
         }
     }
-    DmgSlot slots[4];
+    DmgInfoSlot slots[4];
 };
 
 struct DmgCarRec {
@@ -112,7 +112,7 @@ void fn_801CEDDC(void) {
     int i;
     int j;
     DmgCar* c;
-    DmgSlot* s;
+    DmgInfoSlot* s;
     for (i = 0; i < 8; i++) {
         c = &lbl_8055E890[i];
         for (j = 0; j < 4; j++) {
@@ -135,7 +135,7 @@ void fn_801CEDDC(void) {
 
 void fn_801CEEC8(DmgRace* r) {
     DmgPlayer* p;
-    DmgSlot* s;
+    DmgInfoSlot* s;
     DmgOut* o;
     int i;
     int j;

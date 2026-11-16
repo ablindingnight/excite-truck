@@ -14,7 +14,7 @@ struct DBasis {
 };
 
 // Three axes and a position.
-struct DFrame : DBasis {
+struct DbgFrame : DBasis {
     DVec3 pos;  // offset 0x24
 };
 
@@ -36,7 +36,7 @@ s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void mrModelUnload(s32 model);
-void fn_802C744C(s32 model, const DFrame* m);
+void fn_802C744C(s32 model, const DbgFrame* m);
 void fn_802C7760(s32 model, f32* x0, f32* y0, f32* z0, f32* x1, f32* y1, f32* z1);
 void fn_802C8BD0(s32 tex);
 int fn_802C8DBC(int prim);
@@ -63,7 +63,7 @@ static inline void SetLength(DVec3* v, f32 len) {
     v->z *= s;
 }
 
-static inline void MulVec(DVec3* out, const DVec3* in, const DFrame* m) {
+static inline void MulVec(DVec3* out, const DVec3* in, const DbgFrame* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
         f32 y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
@@ -126,7 +126,7 @@ static inline void DbgStep(DVec3* p, const DVec3* d, f32 k) {
     p->z += d->z * k;
 }
 
-void fn_801E370C(const DFrame* m, u32 c0, u32 c1) {
+void fn_801E370C(const DbgFrame* m, u32 c0, u32 c1) {
     fn_802C8BD0(lbl_8055EA6C);
     if (fn_802C8DBC(0x11)) {
         DVec3 pos;
@@ -217,7 +217,7 @@ void fn_801E3CB4(const DVec3* pos, const DVec3* dir, f32 size, u32 color) {
     fn_802C9904();
 }
 
-static inline void ScaleFrame(DFrame* m, f32 s) {
+static inline void ScaleFrame(DbgFrame* m, f32 s) {
     m->x.x = s;
     m->x.y = 0.0f;
     m->x.z = 0.0f;
@@ -233,7 +233,7 @@ static inline void ScaleFrame(DFrame* m, f32 s) {
 }
 
 void fn_801E3FC8(const DVec3* pos, f32 radius, u32) {
-    DFrame m;
+    DbgFrame m;
     ScaleFrame(&m, radius / lbl_8055EA68);
     m.pos.x = pos->x;
     m.pos.y = pos->y;
@@ -244,7 +244,7 @@ void fn_801E3FC8(const DVec3* pos, f32 radius, u32) {
 // Box of the given width from a to b.
 void fn_801E4040(const DVec3* a, const DVec3* b, f32 width, u32 c0, u32 c1) {
     DVec3 d;
-    DFrame f;
+    DbgFrame f;
     d.x = b->x - a->x;
     d.y = b->y - a->y;
     d.z = b->z - a->z;
@@ -296,7 +296,7 @@ void fn_801E41E0(const DVec3* pos, f32 size, u32 color) {
 }
 
 // Red/green/blue axis bars of the frame.
-void fn_801E43BC(const DFrame* m, f32 len, f32 width) {
+void fn_801E43BC(const DbgFrame* m, f32 len, f32 width) {
     DVec3 p;
     p.x = m->pos.x + m->x.x * len;
     p.y = m->pos.y + m->x.y * len;
@@ -312,8 +312,8 @@ void fn_801E43BC(const DFrame* m, f32 len, f32 width) {
     fn_801E41D8(&m->pos, &p, 0xFF0000FF, width);
 }
 
-void fn_801E44F4(const DFrame* m, f32 sx, f32 sy, f32 sz, u32 color) {
-    DFrame f;
+void fn_801E44F4(const DbgFrame* m, f32 sx, f32 sy, f32 sz, u32 color) {
+    DbgFrame f;
     f.pos = m->pos;
     f.x.x = m->x.x * sx;
     f.x.y = m->x.y * sx;
