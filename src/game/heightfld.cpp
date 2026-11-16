@@ -565,9 +565,7 @@ static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, i
         hx -= h;
         f32 sx = (lx & 1 ? -1.0f : 1.0f) / g->scaleX;
         f32 sz = (lz & 1 ? -1.0f : 1.0f) / g->scaleZ;
-        normal->x = -sx * hx;
-        normal->z = -hz * sz;
-        normal->y = __fabs(sx * sz);
+        normal->Set(-sx * hx, __fabs(sx * sz), -hz * sz);
         PSVECNormalize((const Vec*)normal, (Vec*)normal);
         return h;
     }
