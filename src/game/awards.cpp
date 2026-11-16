@@ -1318,7 +1318,7 @@ void fn_801CD970(int car) {
     f32 t = p->time < 0.25f ? p->time : 3.0f - p->time;
     f32 out = box->w + (640.0f - (box->pos.x + box->w));
     f32 k = AwUnlerp(t, 0.0f, 0.25f);
-    k = k < 1.0f ? k : 1.0f;
+    k = 1.0f < k ? 1.0f : k;
     k = k > 0.0f ? k : 0.0f;
     f32 slide = AwLerp(out, 0.0f, k);
     if (box) {
