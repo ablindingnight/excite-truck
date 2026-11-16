@@ -79,61 +79,10 @@ public:
         m.vis = 0;
         m.f44 = 0;
     }
-    virtual void Enter(void) {
-        m.active = 1;
-        m.idx = fn_80221EA8((u8*)this);
-    }
-    virtual void Exit(void) { m.active = 0; }
-    // One frame of motion: shows/hides the menu item, applies a pending jump or move, eases toward the target.
-    virtual void Update(void) {
-        if (m.vis != m.lastVis) {
-            if (m.vis == 0) {
-                fn_80214AF0(m.idx);
-            } else {
-                fn_80214A9C(m.idx);
-            }
-            m.lastVis = m.vis;
-        }
-        if (m.jumpOn) {
-            m.fromX = m.toX = m.jumpX;
-            m.fromY = m.toY = m.jumpY;
-            fn_80214BE4(m.idx, m.jumpX - x, m.jumpY - y);
-            m.jumpOn = 0;
-            m.t = 1.1f;
-        }
-        if (m.moveOn) {
-            m.fromX = x;
-            m.fromY = y;
-            m.toX = m.moveX;
-            m.toY = m.moveY;
-            m.t = 0.0f;
-            m.moveOn = 0;
-        }
-        m.t += m.rate * fn_80214D48();
-        f32 k;
-        switch (m.ease) {
-        case 1: {
-            f32 v = m.t < 1.0f ? m.t : 1.0f;
-            k = v * v;
-            break;
-        }
-        case 2: {
-            f32 v = m.t < 1.0f ? m.t : 1.0f;
-            k = SmoothSign(v);
-            break;
-        }
-        default:
-            k = m.t < 1.0f ? m.t : 1.0f;
-            break;
-        }
-        int nx = (int)LerpF((f32)m.fromX, (f32)m.toX, k);
-        int ny = (int)LerpF((f32)m.fromY, (f32)m.toY, k);
-        fn_80214BE4(m.idx, nx - x, ny - y);
-        if (m.f44 && m.Done()) {
-            m.f44 = 0;
-            m.vis = 1;
-        }
-    }
+    // Enter/Exit/Update are defined in logomover_inl.h (out of line in popwarn.cpp, as in retail).
+    virtual void Enter(void);
+    virtual void Exit(void);
+    virtual void Update(void);
 
     LogoMotion m;  // offset 0x18
 };

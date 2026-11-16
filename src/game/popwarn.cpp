@@ -1114,6 +1114,10 @@ int fn_80248668(void) {
 
 }  // extern "C"
 
+#define LOGOMOVER_DEFINE
+#include "game/logomover_inl.h"
+
+
 
 void MenuArt::Enter(void) { scroll = 0.0f; }
 

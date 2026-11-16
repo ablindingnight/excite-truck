@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/menu.h"
 #include "game/logomover.h"
+#include "game/logomover_inl.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
