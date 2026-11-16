@@ -2,15 +2,9 @@
 // vehicles (plus "Trailer" slots), builds the track/resource/weather .trk names for the event and
 // loads/unloads the track, car and overlay resources. Names are guesses.
 #include "game/common.h"
+#include "game/davmap.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
-
-struct DAVMap {
-    s32 num_drivers;   // offset 0x0
-    s32 drivers[8];    // offset 0x4
-    s32 num_vehicles;  // offset 0x24
-    s32 vehicles[8];   // offset 0x28
-};
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);

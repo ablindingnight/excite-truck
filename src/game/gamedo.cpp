@@ -1,6 +1,7 @@
 // Single events (0x8023B764-0x8023C2B4): sets up and runs one event, head-to-head sessions and
 // direct-to-track starts from the command line. Names are guesses apart from the messages.
 #include "game/common.h"
+#include "game/davmap.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
 
@@ -11,13 +12,6 @@ int fn_80265D58(void);
 }
 
 // The drivers/vehicles of one race.
-struct DAVMap {
-    s32 num_drivers;   // offset 0x0
-    s32 drivers[8];    // offset 0x4
-    s32 num_vehicles;  // offset 0x24
-    s32 vehicles[8];   // offset 0x28
-};
-
 struct RaceResultEntry {
     u8 pad0[0x10];
     s32 value;  // offset 0x10

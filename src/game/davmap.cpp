@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "game/common.h"
+#include "game/davmap.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -84,17 +85,6 @@ typedef FixedArray<u32, MAX_LIST> ColorList;
 
 void ShuffleIds(IdList* list);
 void ShuffleColors(ColorList* list);
-
-class DAVMap {
-public:
-    void Add(s32 driver, s32 vehicle);
-    void Append(DAVMap* other);
-
-    s32 num_drivers;              // offset 0x0
-    s32 drivers[MAX_RACERS];      // offset 0x4
-    s32 num_vehicles;             // offset 0x24
-    s32 vehicles[MAX_RACERS];     // offset 0x28
-};
 
 ModuleTag lbl_8055D558;
 s32 lbl_8055D560;           // forced racer count
