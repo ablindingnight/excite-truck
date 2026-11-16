@@ -708,7 +708,7 @@ const ModeEntry lbl_802FA3B4[5] = {
     {0, 0, 0},
 };
 
-u8 fn_80247624(void) { return lbl_8055F260; }
+int fn_80247624(void) { return lbl_8055F260; }
 
 int fn_8024762C(void) {
     if (fn_802E2C20() % 1500 > 500) {
