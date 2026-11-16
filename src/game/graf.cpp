@@ -273,6 +273,8 @@ void fn_801EB128(void) {
     lbl_8055EB98[1] = 1.0f;
 }
 
+#pragma push
+#pragma opt_propagation off  /* Pragma unproven */
 void fn_801EB13C(GModel* m) {
     GSwap32(&m->handle);
     GSwap32(&m->res);
@@ -284,11 +286,12 @@ void fn_801EB13C(GModel* m) {
         GSwap32(&m->unk14);
         GSwap32(&m->unk18);
         GSwap32(&m->unk1C);
-        GSwap32(&m->unk20);
-        GSwap32(&m->unk24);
-        GSwap32(&m->unk28);
+        for (int i = 0; i < 3; ++i) {
+            GSwap32((u8*)m + 32 + 4 * i);
+        }
     }
 }
+#pragma pop
 
 void fixup_display_list(GNode* root, u32 base) {
     GNode* n = root;
