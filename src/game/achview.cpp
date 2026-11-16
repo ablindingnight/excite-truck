@@ -395,15 +395,16 @@ void fn_80259740(int x, f32* out, f32 v);
 
 // The trophy viewer for one achievement row: its model, level and the five level thresholds.
 int fn_80259224(u8* p) {
+    AchView* av = (AchView*)p;
     AchievementTrophyModel view;
     TrophyController* ctl;
     if (fn_8025921C()) {
-        ctl = new ("trophycontroller") TrophyController(&view, S32(p, 0x18), 5);
+        ctl = new ("trophycontroller") TrophyController(&view, av->q.category, 5);
     } else {
         ctl = new ("trophycontroller") TrophyController(&view, TrophyRow(p));
     }
-    s32 level = S32(p, 0xC8);
-    s32 cat = S32(p, 0x18);
+    s32 level = av->level;
+    s32 cat = av->q.category;
     view.levelNum = level;
     const char* model = AchievementsGetLevelModel(cat, level);
     if (model) {
@@ -419,15 +420,15 @@ int fn_80259224(u8* p) {
     view.shown = 1;
     char counts[32][5];
     for (int i = 1; i <= 5; i++) {
-        fn_801345D8(counts[i - 1], 0x20, "%d", AchievementsGetLevelThreshold(S32(p, 0x18), i));
+        fn_801345D8(counts[i - 1], 0x20, "%d", AchievementsGetLevelThreshold(av->q.category, i));
     }
     MenuItem items[] = {
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_80259740, 2, 0),
         MenuItem(0, 5, ctl, 0, 0),
         MenuItem("trophy", 0x13, &view, 0, 0),
         MenuItem("trophy", ctl->text),
-        MenuItem("achievement_title", AchievementsGetCategoryName(S32(p, 0x18))),
-        MenuItem("achievement_icon", lbl_80344EA0[S32(p, 0x24)].name),
+        MenuItem("achievement_title", AchievementsGetCategoryName(av->q.category)),
+        MenuItem("achievement_icon", lbl_80344EA0[av->index].name),
         MenuItem("cnt1", counts[0]),
         MenuItem("cnt2", counts[1]),
         MenuItem("cnt3", counts[2]),
@@ -486,17 +487,18 @@ const char* fn_80131234(const char* key);
 // The achievement viewer for one row (with the level-up "new" effect while tallying): the trophy front and
 // back, the progress towards the next level and every category's level bar.
 int fn_8025978C(u8* p) {
+    AchView* av = (AchView*)p;
     s32 cat;
     lbl_8055F3A0 = 0;
     AchievementTrophyModel front;
     AchievementTrophyModel back;
-    back.shown = !U8(p, 0xC4);
+    back.shown = !av->counting;
     TrophyFace frontFace(&front, p);
     TrophyFace backFace(&back, p);
     TROPHY_VIEW_SHOW(front, p);
     TROPHY_VIEW_SHOW(back, p);
     char toNext[0x20];
-    fn_801345D8(toNext, 0x20, "%d %s", S32(p, 0x20) - S32(p, 0x1C), fn_80131234("Achievements:UP") + 1);
+    fn_801345D8(toNext, 0x20, "%d %s", av->q.best - av->q.value, fn_80131234("Achievements:UP") + 1);
     s32 iconColor[7];
     s32 barColor[7];
     s32 levels[7];
@@ -507,21 +509,21 @@ int fn_8025978C(u8* p) {
     for (i = 0; i < 7; i++, lp++) {
         s32 category = lbl_80344EA0[i].category;
         cat = category;
-        if (cat == S32(p, 0x18)) {
+        if (cat == av->q.category) {
             iconColor[i] = 9;
             barColor[i] = 8;
-            vals[i] = (s32*)(p + 0xC8);
+            vals[i] = (s32*)&av->level;
         } else {
             iconColor[i] = 10;
             barColor[i] = 11;
             AchQuery q;
             q.category = cat;
             AchievementsQuery(&q);
-            levels[i] = AchievementsGetLevel(cat, S32(p, 0x18) > cat ? q.best : q.value);
+            levels[i] = AchievementsGetLevel(cat, av->q.category > cat ? q.best : q.value);
             vals[i] = lp;
         }
     }
-    if (U8(p, 0xC4) && U8(p, 0xC5)) {
+    if (av->counting && av->levelUp) {
         fn_80236910("a_ep_achieve_new.val");
     }
     MenuItem items[] = {
@@ -533,10 +535,10 @@ int fn_8025978C(u8* p) {
         MenuItem("trophy", (const char*)(frontFace.owner + 0x60)),
         MenuItem("back_trophy", 0x13, &back, 0, 0),
         MenuItem("back_trophy", (const char*)(backFace.owner + 0x60)),
-        MenuItem("achievement_icon", lbl_80344EA0[S32(p, 0x24)].name),
-        MenuItem("achievement_title", AchievementsGetCategoryName(S32(p, 0x18))),
-        MenuItem("achievement_value", (const char*)(p + 0x2C)),
-        MenuItem("next_level_value", (const char*)(p + 0x40)),
+        MenuItem("achievement_icon", lbl_80344EA0[av->index].name),
+        MenuItem("achievement_title", AchievementsGetCategoryName(av->q.category)),
+        MenuItem("achievement_value", (const char*)&av->valueText),
+        MenuItem("next_level_value", (const char*)&av->nextText),
         MenuItem("increment_amt", toNext),
         MenuItem("back_1", 0x14, &barColor[0], 0, 0),
         MenuItem("icon_1", 0x14, &iconColor[0], 0, 0),
@@ -575,9 +577,9 @@ int fn_8025978C(u8* p) {
         MenuItem("title_7", AchievementsGetCategoryName(lbl_80344EA0[6].category)),
         MenuItem(lbl_80498E98),
     };
-    MenuDesc desc = {U8(p, 0xC4) ? "ep_achieve.lyt" : "ach_viewer.lyt", items, 0, 0, 0};
+    MenuDesc desc = {av->counting ? "ep_achieve.lyt" : "ach_viewer.lyt", items, 0, 0, 0};
     fn_802368E0();
-    if (U8(p, 0xC4)) {
+    if (av->counting) {
         fn_80216CA8();
     }
     int r = fn_802146BC(&desc, -999, -999, 1);
@@ -585,7 +587,7 @@ int fn_8025978C(u8* p) {
     while (wait) {
         switch (r) {
         case -2: {
-            int busy = F32(p, 0xCC) < 1.5f && U8(p, 0xC5);
+            int busy = av->tally < 1.5f && av->levelUp;
             if (!busy) {
                 wait = 0;
             }
@@ -999,12 +1001,13 @@ static inline int MinI(int a, int b) { return a < b ? a : b; }
 
 // Moves the shown level by d within [1, unlocked]; a bump sound when it can't move.
 static inline void StepLevel(u8* p, int d) {
-    int old = S32(p, 0x74);
-    S32(p, 0x74) = old + d;
-    S32(p, 0x74) = MinI(MaxI(S32(p, 0x74), 1), S32(p, 0x1C));
-    if (old != S32(p, 0x74)) {
-        SetTrophy(p, S32(p, 0x70), S32(p, 0x74));
-        fn_801345D8((char*)(p + 0x20), 0x50, "%s", AchievementsGetLevelModel(S32(p, 0x70), S32(p, 0x74)));
+    TrophyController* tc = (TrophyController*)p;
+    int old = tc->shownLevel;
+    tc->shownLevel = old + d;
+    tc->shownLevel = MinI(MaxI(tc->shownLevel, 1), tc->level);
+    if (old != tc->shownLevel) {
+        SetTrophy(p, tc->category, tc->shownLevel);
+        fn_801345D8((char*)&tc->text, 0x50, "%s", AchievementsGetLevelModel(tc->category, tc->shownLevel));
     } else {
         fn_80216D28();
         fn_80214D50(1);
