@@ -159,6 +159,8 @@ FanCell* fn_802BE844(short x, short z, int size) {
     return &lbl_804C06E0[size][fn_802BE7C4(x, z, size)];
 }
 
+#pragma push
+#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_802BE8B4(short x, short z, int size) {
     struct {
         u32 mask;
@@ -197,6 +199,7 @@ void fn_802BE8B4(short x, short z, int size) {
     }
     SetMaterial(fn_802BE844(x, z, size), sample.mask, best);
 }
+#pragma pop
 
 void fn_802BEAB0(void) {
     if (!lbl_8055FACC) {
