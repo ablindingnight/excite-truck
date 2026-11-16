@@ -1010,10 +1010,9 @@ int EventNode::Key(int key) { return 0; }
 
 
 void EventNode::Update(void) {
-    u8* p = (u8*)this;
-    if (U8(p, 0x1E) && lbl_8055F3E9 && !lbl_8055F3EA) {
+    if (f1E && lbl_8055F3E9 && !lbl_8055F3EA) {
         fn_80230E90(0);
-        U8(p, 0x1E) = 0;
+        f1E = 0;
     }
     if (lbl_8055F3EB && !lbl_8055F3EA) {
         fn_80214AF0(0x1E);
@@ -1034,7 +1033,7 @@ void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, u32 color, int align,
 void fn_801308F4(char* buf, s32 size, s32 value);
 extern const f32 lbl_80563B90;  // 0.0f
 
-#define EV ((ChalEvent*)PTR(p, 0x18))
+#define EV ((ChalEvent*)p->ev)
 
 // Event node: its tile (pulsing while selected), name, grade and "score/target".
 #pragma push
@@ -1042,8 +1041,8 @@ extern const f32 lbl_80563B90;  // 0.0f
 }  // extern "C"
 
 void EventNode::Draw(void) {
-    u8* p = (u8*)this;
-    static f32 sTextY = -(f32)S32(p, 0x10) / 2.0f;
+    EventNode* p = this;
+    static f32 sTextY = -(f32)p->h / 2.0f;
     char line[30];
     char target[30];
     int part;
@@ -1054,35 +1053,35 @@ void EventNode::Draw(void) {
     f32 grow;
     u8 alpha;
     u32 gradeColor;
-    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    fn_80230C30(&x, &y, p->x, p->y);
     color = 0xFFFFFFFF;
     part = 0;
     gradeColor = 0xFFFFFFFF;
     tile = 0xFFFFFFFF;
-    if (U8(p, 0x1C)) {
+    if (p->sel) {
         color = 0xFFFFFFFF;
         part = 1;
         gradeColor = 0xFFFFFFFF;
         tile = 0xFFFFFFFF;
-    } else if (U8(p, 0x1D)) {
+    } else if (p->open) {
         color = 0xFFFFFFFF;
         gradeColor = 0xFFFFFFFF;
         tile = 0xFFFFFFFF;
     }
-    fn_802354A0(PTR(p, 0x20), part, x, y, lbl_80563B90, (f32)S32(p, 0xC), (f32)S32(p, 0x10), tile);
-    if (U8(p, 0x1C) && !lbl_8055F3EA) {
+    fn_802354A0(p->art, part, x, y, lbl_80563B90, (f32)p->w, (f32)p->h, tile);
+    if (p->sel && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
         u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
-        f32 hw = (f32)S32(p, 0xC) / 2.0f;
-        f32 hh = (f32)S32(p, 0x10) / 2.0f;
+        f32 hw = (f32)p->w / 2.0f;
+        f32 hh = (f32)p->h / 2.0f;
         f32 nx = x - grow * hw;
         f32 ny = y + grow * hh;
-        fn_802354A0(PTR(p, 0x20), part, nx, ny, lbl_80563B90, (1.0f + grow) * (f32)S32(p, 0xC),
-                    (1.0f + grow) * (f32)S32(p, 0x10), c);
+        fn_802354A0(p->art, part, nx, ny, lbl_80563B90, (1.0f + grow) * (f32)p->w,
+                    (1.0f + grow) * (f32)p->h, c);
     }
-    fn_80232BA4(EV->Name(), PTR(p, 0x24), 15.0f + x, y + sTextY, color, 0x11, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(EV->Name(), p->font, 15.0f + x, y + sTextY, color, 0x11, 0.65f, lbl_80563B90, 1.0f);
     const char* grade = EV->Grade() != -1 ? GetGradeDisplayName(EV->Grade()) : "-";
-    fn_80232BA4(grade, PTR(p, 0x24), 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(grade, p->font, 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, lbl_80563B90, 1.0f);
     fn_801308F4(target, 30, EV->Target());
     if (EV->Score() <= 0) {
         fn_801345D8(line, 30, "0/%s", target + 1);
@@ -1090,7 +1089,7 @@ void EventNode::Draw(void) {
         fn_801308F4(line, 30, EV->Score());
         fn_801345D8(line, 30, "%s/%s", line, target + 1);
     }
-    fn_80232BA4(line, PTR(p, 0x24), 350.0f + x, y + sTextY, color, 0x12, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(line, p->font, 350.0f + x, y + sTextY, color, 0x12, 0.65f, lbl_80563B90, 1.0f);
 }
 
 extern "C" {
@@ -1108,10 +1107,9 @@ int LevelNode::Key(int key) { return 0; }
 
 
 void LevelNode::Update(void) {
-    u8* p = (u8*)this;
-    if (U8(p, 0x1F) && lbl_8055F3E9) {
+    if (f1F && lbl_8055F3E9) {
         fn_80230E90(0);
-        U8(p, 0x1F) = 0;
+        f1F = 0;
     }
 }
 
@@ -1147,39 +1145,39 @@ void fn_80230F6C(u32* color);
 }  // extern "C"
 
 void LevelNode::Draw(void) {
-    u8* p = (u8*)this;
+    LevelNode* p = this;
     f32 x;
     f32 y;
     u32 color;
     int part;
     u32 tile;
-    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
+    fn_80230C30(&x, &y, p->x, p->y);
     tile = 0xFFFFFFFF;
-    part = lbl_80345B40[S32(p, 0x20)] + 1;
+    part = lbl_80345B40[p->index] + 1;
     color = 0xFFFFFFFF;
-    if (U8(p, 0x1C)) {
-        part = lbl_80345B40[S32(p, 0x20)];
+    if (p->sel) {
+        part = lbl_80345B40[p->index];
         color = 0xFFFFFFFF;
         tile = 0xFFFFFFFF;
-    } else if (U8(p, 0x1D)) {
+    } else if (p->open) {
         tile = 0xFFFFFFFF;
     }
     static f32 sPeriod = kGrow + kShrink;
-    static f32 sSmallW = kSmall * (f32)S32(p, 0xC);
-    static f32 sSmallH = kSmall * (f32)S32(p, 0x10);
-    static f32 sBigW = kBig * (f32)S32(p, 0xC);
-    static f32 sBigH = kBig * (f32)S32(p, 0x10);
-    if (U8(p, 0x1E) && lbl_8055F3E9) {
-        fn_80214AF0(S32(p, 0x20) + 10);
+    static f32 sSmallW = kSmall * (f32)p->w;
+    static f32 sSmallH = kSmall * (f32)p->h;
+    static f32 sBigW = kBig * (f32)p->w;
+    static f32 sBigH = kBig * (f32)p->h;
+    if (p->f1E && lbl_8055F3E9) {
+        fn_80214AF0(p->index + 10);
     } else {
-        fn_80214A9C(S32(p, 0x20) + 10);
+        fn_80214A9C(p->index + 10);
     }
-    if (U8(p, 0x1C)) {
+    if (p->sel) {
         f32 fx = x - sBigW / 2.0f;
         f32 fy = y + sBigH / 2.0f;
-        f32 fw = sBigW + (f32)S32(p, 0xC);
-        f32 fh = sBigH + (f32)S32(p, 0x10);
-        if (!U8(p, 0x1E)) {
+        f32 fw = sBigW + (f32)p->w;
+        f32 fh = sBigH + (f32)p->h;
+        if (!p->f1E) {
             f32 now = fn_8023659C();
             if (now - sStart > sPeriod) {
                 sStart = now;
@@ -1192,8 +1190,8 @@ void LevelNode::Draw(void) {
                 f32 s = Lerp(0.0f, 1.0f, t);
                 fx = Lerp(x - sSmallW / 2.0f, x - sBigW / 2.0f, Ease(s));
                 fy = Lerp(y + sSmallH / 2.0f, y + sBigH / 2.0f, Ease(s));
-                fw = Lerp(sSmallW + (f32)S32(p, 0xC), sBigW + (f32)S32(p, 0xC), Ease(s));
-                fh = Lerp(sSmallH + (f32)S32(p, 0x10), sBigH + (f32)S32(p, 0x10), Ease(s));
+                fw = Lerp(sSmallW + (f32)p->w, sBigW + (f32)p->w, Ease(s));
+                fh = Lerp(sSmallH + (f32)p->h, sBigH + (f32)p->h, Ease(s));
             } else {
                 t = InvLerp(kGrow, kGrow + kShrink, t);
                 t = MIN(1.0f, t);
@@ -1201,17 +1199,17 @@ void LevelNode::Draw(void) {
                 f32 s = Lerp(0.0f, 1.0f, t);
                 fx = Lerp(x - sBigW / 2.0f, x - sSmallW / 2.0f, Ease(s));
                 fy = Lerp(y + sBigH / 2.0f, y + sSmallH / 2.0f, Ease(s));
-                fw = Lerp(sBigW + (f32)S32(p, 0xC), sSmallW + (f32)S32(p, 0xC), Ease(s));
-                fh = Lerp(sBigH + (f32)S32(p, 0x10), sSmallH + (f32)S32(p, 0x10), Ease(s));
+                fw = Lerp(sBigW + (f32)p->w, sSmallW + (f32)p->w, Ease(s));
+                fh = Lerp(sBigH + (f32)p->h, sSmallH + (f32)p->h, Ease(s));
             }
             fn_80230F6C(&color);
         } else {
             color = 0xFFFFCA44;
         }
-        fn_802354A0(PTR(p, 0x24), 0x12, fx, fy, 0.0f, fw, fh, tile);
+        fn_802354A0(p->art, 0x12, fx, fy, 0.0f, fw, fh, tile);
     }
-    fn_802354A0(PTR(p, 0x24), part, x, y, 0.0f, (f32)S32(p, 0xC), (f32)S32(p, 0x10), tile);
-    fn_80232BA4(((NodeText*)PTR(p, 0x18))->GetText(), PTR(p, 0x28), 22.0f + x, -16.0f + y, color, 0x11, 0.6f, 0.0f,
+    fn_802354A0(p->art, part, x, y, 0.0f, (f32)p->w, (f32)p->h, tile);
+    fn_80232BA4(((NodeText*)p->lv)->GetText(), p->font, 22.0f + x, -16.0f + y, color, 0x11, 0.6f, 0.0f,
                 1.0f);
 }
 
