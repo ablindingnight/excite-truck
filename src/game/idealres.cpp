@@ -392,10 +392,16 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
         do {
             f32 w = fn_801385F0(p->dist, lap, amount, radius);
             if (w > 0.0f) {
-                V2 m = MakeV2( q->dir.x + 0.5f * (p->dir.x - q->dir.x),q->dir.y + 0.5f * (p->dir.y - q->dir.y));
-                p->lat += (w * step);
+                f32 qx;
+                f32 py = p->dir.y;
+                f32 qy = q->dir.y;
+                f32 px = p->dir.x;
+                qx = q->dir.x;
+                f32 y = qy + 0.5f * (py - qy);
+                V2 m = MakeV2(qx + 0.5f * (px - qx), y);
                 V2 n = m;
                 Perp(&n);
+                p->lat += (w * step);
                 p->pos.x += n.x * (w * step);
                 p->pos.y += n.y * (w * step);
             }
