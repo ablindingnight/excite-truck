@@ -3072,9 +3072,10 @@ inline void BetaMaster::LoadLevel(void) {
             maxd = 0.0f;
             for (j = 0; j < k; j++) {
                 f32 dd;
-                d.y = pts[j].y - c.y;
-                f32 cx = c.x;
-                d.x = pts[j].x - cx;
+                f32 dy = pts[j].y - c.y;
+                f32 dx = pts[j].x - c.x;
+                d.y = dy;
+                d.x = dx;
                 dd = d.x * d.x + d.y * d.y;
                 maxd = maxd > dd ? maxd : dd;
             }
