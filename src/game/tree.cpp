@@ -11,6 +11,10 @@
 #include "game/rmtx.h"
 #include "game/shapes.h"
 
+// Query cell scale. The name is unproven.
+extern const f32 kTreeCellScale;
+const f32 kTreeCellScale = 2.0f;
+
 extern "C" {
 double sqrt(double x);
 int strcmp(const char* a, const char* b);
@@ -189,6 +193,13 @@ struct TreeType {
     f32 sway;          // offset 0x5C
 };
 
+#ifdef __MWERKS__
+extern "C" {
+void* __register_global_object(void*, void*, void*);
+void __dt__7FanCellFv(void*, int);
+}
+#endif
+
 template <class T, int N>
 struct TFixed {
     TFixed(void) {
@@ -196,7 +207,13 @@ struct TFixed {
         cap = N;
         n = 0;
     }
-    ~TFixed(void) {}
+#ifndef __MWERKS__
+    ~TFixed(void) {
+        data = 0;
+        n = 0;
+        cap = 0;
+    }
+#endif
     T* data;     // offset 0x0
     s32 n;       // offset 0x4
     s32 cap;     // offset 0x8
@@ -259,7 +276,19 @@ bool lbl_8055FAB0; // trees collide
 ValueTable* lbl_8055FAB4;
 TListFile* lbl_8055FAB8;
 TreePreloader* lbl_8055FABC;
+#ifdef __MWERKS__
+static void* sTreeDestructorLink[3];
+#endif
+
 TFixed<TreeType, 16> lbl_804C00D4;
+#ifdef __MWERKS__
+// Retail's shutdown callback zeros the three header words and leaves the inline elements alone.
+struct TreeTypeCleanup {
+    TreeTypeCleanup() { __register_global_object(&lbl_804C00D4, (void*)__dt__7FanCellFv, sTreeDestructorLink); }
+};
+static TreeTypeCleanup sTreeTypeCleanup;
+#endif
+
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -979,7 +1008,7 @@ typedef void (*TreeQuery)(s32 handle, const RVec3* pos, int size, int n, f32 r, 
 
 void fn_802BE07C(const RVec3* pos, TreeQuery cb) {
     f32 x = pos->x;
-    f32 size = 2.0f;
+    const f32& size = kTreeCellScale;
     s16 bx = ((s16)(int)(x / size) / 128) * 128 + 0x40;
     s16 bz = ((s16)(int)(pos->z / size) / 128) * 128 + 0x40;
     for (int i = -0x80; i <= 0x80; i += 0x80) {
