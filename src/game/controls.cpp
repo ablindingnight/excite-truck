@@ -1,6 +1,7 @@
 // Track B2 full-body draft from original assembly; data qualification incomplete. External declarations identify
 // unresolved code and storage; this TU is not registered or linked into the game.
 #include "game/common.h"
+#include "game/menu.h"
 #include "game/menuwidget_inl.h"
 
 int IdentGetCurrentSlot(void);
@@ -248,31 +249,9 @@ void fn_8023D7CC(void);
 
 // Same five-word records as the known menu units. Reading the shared end tag's
 // fields explicitly avoids type-punning the UnkStatic123 object as a MenuItem.
-struct CaptionContext { int value; CaptionContext(int v=0):value(v){} };
-struct MenuItem {
-MenuItem(const char* n,const char* t,CaptionContext context=CaptionContext()){type=3;name=n;data=t;arg0=(int)context.value;arg1=0;}
-
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t; name = n; data = d; arg0 = a0; arg1 = a1;
-    }
-    MenuItem(const UnkStatic123& end) {
-        name = (const char*)end.unk0;
-        type = end.unk4;
-        data = (const void*)end.unk8;
-        arg0 = end.unkC;
-        arg1 = end.unk10;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0, arg1;
-};
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int*);
-    int unkC, unk10;
-};
+// CaptionContext: game/menu.h.
+// MenuItem: game/menu.h.
+// MenuDesc: game/menu.h.
 extern char lbl_8055B860[8];
 int fn_802146BC(MenuDesc*, int, int, int);
 void fn_8017EBE0(void);

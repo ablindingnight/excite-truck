@@ -1,6 +1,7 @@
 // Loading screen state (0x802445FC-0x8024497C): the menu state shown while a race loads; it fades
 // the music and the screen over its duration. Names are guesses apart from the layout name.
 #include "game/common.h"
+#include "game/menu.h"
 
 class EventInfo;
 
@@ -83,29 +84,8 @@ public:
     f32 volume;        // offset 0x28
 };
 
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
+// MenuItem: game/menu.h.
+// MenuDesc: game/menu.h.
 extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int a);
 
 ModuleTag lbl_8055F218;

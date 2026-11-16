@@ -2,6 +2,7 @@
 // builds a plain fallback layout from a menu description. Names are guesses apart from the
 // messages.
 #include "game/common.h"
+#include "game/menu.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -51,19 +52,8 @@ struct LytFile {
     LytElem* elems;  // offset 0x64
 };
 
-struct MenuItem {
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-};
-
+// MenuItem: game/menu.h.
+// MenuDesc: game/menu.h.
 static inline LytElem* NextElem(LytFile* f, int& n) { return &f->elems[n++]; }
 
 static inline void Swap32(void* p) {
