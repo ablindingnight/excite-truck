@@ -316,6 +316,15 @@ extern "C" void fn_8029C3EC(void) {}
 
 WaterIface::~WaterIface(void) { Close(); }
 
+/* Helper unproven: retail creates 0.9f, 0.05f and 0.1f right after the 0.0f of fn_8029C2D4 and before the literals of
+   fn_8029C450, although their first users in the code are three later functions. An unused static function with
+   those three literals was compiled here (the linker drops it; its constants stay in .sdata2). */
+static f32 RippleDamp(f32 a, f32 b) {
+    f32 d = 0.9f * a;
+    d += 0.05f * b;
+    return d + 0.1f;
+}
+
 extern "C" void fn_8029C450(WaterCarEntry* e, int n) {
     f32 far = 2500.0f;
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
