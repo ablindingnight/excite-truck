@@ -5,6 +5,7 @@
 // guesses apart from the strings.
 #include "game/common.h"
 #include "game/vec3_init.h"
+#include "game/carbody.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -97,17 +98,8 @@ public:
     virtual Track* GetTrack(void);  // 0x18
 };
 
-struct RaceCarRec {
-    u8 pad0[0x3C];
-    Frame mtx;  // offset 0x3C
-    u8 pad6C[0x118 - 0x6C];
-    Vec3 vel;  // offset 0x118
-    u8 pad124[0x270 - 0x124];
-    TrackPosOwner* pos;  // offset 0x270
-    u8 pad274[0x25D4 - 0x274];
-    f32 speed;  // offset 0x25D4
-    Frame* Mtx(void) { return &mtx; }
-};
+// The racer's frame accessor (carbody.h's RaceCarRec; retail keeps its weak copy here).
+inline RMtx* RaceCarRec::Mtx(void) { return &mtx; }
 
 // An object placed on the track (a group member's model instance).
 struct TrackObj {
@@ -657,7 +649,7 @@ struct Spot {
 
 inline int Abs(int x) { return x < 0 ? -x : x; }
 inline int MinI(int a, int b) { return b < a ? b : a; }
-inline Track* GetTrack(RaceCarRec* rc) { return rc->pos->GetTrack(); }
+inline Track* GetTrack(RaceCarRec* rc) { return ((TrackPosOwner*)rc->src)->GetTrack(); }
 
 extern "C" {
 
@@ -666,7 +658,7 @@ extern "C" {
 int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
     int found = 0;
     if (lbl_8055E2A0) {
-        Track* trk = rc->pos->GetTrack();
+        Track* trk = ((TrackPosOwner*)rc->src)->GetTrack();
         int seg = trk->seg - trk->path->segs;
         Frame f;
         f32 range;
@@ -677,12 +669,12 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
         int i;
         int any;
         f32 nearest;
-        fn_8015FB28(&f, &rc->mtx);
+        fn_8015FB28(&f, (Frame*)&rc->mtx);
         f32 curSpeed = rc->speed;
         range = MAX(20.0f, 0.6f * curSpeed);
         opts.side = side;
         o = lbl_8055E2A0->a.data[seg];
-        vel = &rc->vel;
+        vel = (Vec3*)&rc->vel;
         opts.Init();
         found = 0;
         for (i = 0; i < 64; i++) {
@@ -699,7 +691,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                 }
             }
             for (i = 0; i < fn_80179650(); i++) {
-                const Vec3& p = fn_8017960C(fn_80179630(i))->Mtx()->origin;
+                const Vec3& p = (const Vec3&)fn_8017960C(fn_80179630(i))->Mtx()->pos;
                 Vec2 xz;
                 xz.SetXZ(p);
                 {

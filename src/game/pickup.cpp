@@ -4,6 +4,7 @@
 // coins. Pickups are kept in groups (one per table, with a bounding circle) and drawn spinning; a car
 // collects a pickup when it falls in the car's footprint. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -63,16 +64,6 @@ struct CarDims {
 struct CarModel {
     u8 pad0[0x17C];
     CarDims* dims;  // offset 0x17C
-};
-
-struct RaceCarRec {
-    u8 pad0[0x14];
-    CarModel* model;  // offset 0x14
-    u8 pad18[0x24 - 0x18];
-    s32 hasModel;  // offset 0x24
-    u8 pad28[0x3C - 0x28];
-    f32 rot[9];  // offset 0x3C
-    f32 pos[3];  // offset 0x60
 };
 
 struct Camera {
@@ -608,18 +599,18 @@ PickupCounts fn_801683F4(int player) {
         V2 hi;
         CarModel* car;
         int i;
-        pos.x = rec->pos[0];
-        pos.z = rec->pos[2];
+        pos.x = rec->mtx.pos.x;
+        pos.z = rec->mtx.pos.z;
         lo.x = 0.0f;
         lo.z = 0.0f;
         hi.x = 0.0f;
         hi.z = 0.0f;
-        car = rec->hasModel > 0 ? rec->model : 0;
+        car = rec->nAdded > 0 ? (CarModel*)rec->sub[0] : 0;
         if (car) {
             f32 l[3];
             CarDims* dims;
-            SubVec(l, lbl_80430260[player].pos, rec->pos);
-            RotVec(l, rec->rot, l);
+            SubVec(l, lbl_80430260[player].pos, &rec->mtx.pos.x);
+            RotVec(l, &rec->mtx.rot.x.x, l);
             dims = car->dims;
             f32 x = l[0];
             f32 w = dims->wid;
@@ -658,8 +649,8 @@ PickupCounts fn_801683F4(int player) {
                             Pickup* p = &lbl_8055E354->objs.data[lbl_8055E354->groups.data[i].first + j];
                             f32 l[3];
                             f32 rad;
-                            SubVec(l, p->pos, rec->pos);
-                            RotVec(l, rec->rot, l);
+                            SubVec(l, p->pos, &rec->mtx.pos.x);
+                            RotVec(l, &rec->mtx.rot.x.x, l);
                             rad = p->type ? p->type->radius : 0.0f;
                             if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
                                 p->taken = 1;
@@ -673,9 +664,9 @@ PickupCounts fn_801683F4(int player) {
         }
         res.n[5] = done;
     }
-    lbl_80430260[player].pos[0] = rec->pos[0];
-    lbl_80430260[player].pos[1] = rec->pos[1];
-    lbl_80430260[player].pos[2] = rec->pos[2];
+    lbl_80430260[player].pos[0] = rec->mtx.pos.x;
+    lbl_80430260[player].pos[1] = rec->mtx.pos.y;
+    lbl_80430260[player].pos[2] = rec->mtx.pos.z;
     lbl_80430260[player].frame = lbl_8055E3C4;
     return res;
 }

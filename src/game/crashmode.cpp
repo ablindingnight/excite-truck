@@ -4,6 +4,7 @@
 // the shake prompt and the white-out flash with crashlyt.val. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/carbody.h"
 
 struct V2 {
     f32 x;
@@ -68,29 +69,6 @@ public:
     u8 start;  // offset 0x49
     u8 stop;   // offset 0x4A
     u8 loop;   // offset 0x4B
-};
-
-class RaceCarRec {
-public:
-    f32 F2690(void);
-    u8 pad0[0x118];
-    V3 vel;     // offset 0x118
-    V3 angvel;  // offset 0x124
-    u8 pad130[0xC0];
-    s32 surface;  // offset 0x1F0
-    u8 pad1F4[0x2398];
-    f32 boost;    // offset 0x258C
-    u8 pad2590[0xD];
-    u8 boosting;  // offset 0x259D
-    u8 pad259E[0x36];
-    f32 f25D4;    // offset 0x25D4
-    u8 pad25D8[0x36];
-    u8 shaking;   // offset 0x260E
-    u8 pad260F[0x81];
-    f32 crashed;  // offset 0x2690
-    u8 pad2694[0xC];
-    f32 crashTime;  // offset 0x26A0
-    s32 f26A4;      // offset 0x26A4
 };
 
 class GameUI {
@@ -478,7 +456,7 @@ void fn_801DFF1C(int car) {
     s->elapsed = 0.0f;
     s->time = -100.0f;
     s->boosted = 0;
-    s->damage = 20.0f * (lbl_8055AE30 * PSVECMag(&rc->vel)) / 53.333332f;
+    s->damage = 20.0f * (lbl_8055AE30 * PSVECMag((V3*)&rc->vel)) / 53.333332f;
     s->scored = 0;
     s->score = -1;
 }
@@ -548,9 +526,9 @@ void CrashMode::vf10(void) {
 /* Helper name unproven: pump boost while shaking inside the window; returns done. */
 inline void CrashMode::PumpStep(CrashState* s, RaceCarRec* rc, f32 since, f32 window, f32 now, int& done) {
     if (s->time < 0.0f && !s->boosted) {
-        if (rc->shaking && since < window && fn_80179650() == 1) {
+        if (rc->f260E && since < window && fn_80179650() == 1) {
             s->pump += 0.1f;
-            if (pumpSnd[pumpIdx] && rc->surface == 0x50 && !fn_80009C84()) {
+            if (pumpSnd[pumpIdx] && rc->f1F0 == 0x50 && !fn_80009C84()) {
                 pumpSnd[pumpIdx]->Play();
                 pumpIdx = (pumpIdx + 1) % 3;
             }
@@ -559,12 +537,12 @@ inline void CrashMode::PumpStep(CrashState* s, RaceCarRec* rc, f32 since, f32 wi
             s->pump = 1.0f;
             s->boosted = 1;
             s->time = now;
-            if (boostSnd && rc->surface == 0x50 && !fn_80009C84()) {
+            if (boostSnd && rc->f1F0 == 0x50 && !fn_80009C84()) {
                 boostSnd->Play();
             }
         } else if (since >= window) {
             s->time = now;
-            if (failSnd && rc->surface == 0x50 && !fn_80009C84()) {
+            if (failSnd && rc->f1F0 == 0x50 && !fn_80009C84()) {
                 failSnd->Play();
             }
         } else {
@@ -577,8 +555,8 @@ inline void CrashMode::PumpStep(CrashState* s, RaceCarRec* rc, f32 since, f32 wi
         if (now - s->time > lbl_8055AE40 / 3.0f) {
             done = 1;
             if (s->boosted) {
-                rc->boost = 4.5f;
-                rc->boosting = 0;
+                rc->f258C = 4.5f;
+                rc->f259D = 0;
             }
         }
     }
@@ -595,13 +573,13 @@ void CrashMode::vf14(void) {
     for (i = 0; i < lbl_8055E4D0; i++) {
         rc = Car(i);
         s = &cars[i];
-        if ((f32)__fabs(rc->crashed) <= __float_epsilon[0]) {
+        if ((f32)__fabs(rc->f2690) <= __float_epsilon[0]) {
             continue;
         }
         s->elapsed += 0.016683352f;
         if (!s->scored) {
-            f32 spin = PSVECMag(&rc->angvel);
-            f32 speed = PSVECMag(&rc->vel);
+            f32 spin = PSVECMag((V3*)&rc->avel);
+            f32 speed = PSVECMag((V3*)&rc->vel);
             s->damage += 0.016683352f * (lbl_8055AE34 * speed + lbl_8055AE38 * spin);
             if (!IsTutorialCrash() && s->elapsed > lbl_8055AE3C) {
                 s->score = -1;
@@ -616,11 +594,11 @@ void CrashMode::vf14(void) {
                 s->scored = 1;
             }
         }
-        f32 speed = rc->f25D4;
+        f32 speed = rc->speed;
         f32 now = lbl_8055E3C8;
-        f32 since = now - rc->crashTime;
+        f32 since = now - rc->f26A0;
         f32 window = 1.5f;
-        if (speed > 3.5555556f || PSVECDotProduct(&rc->angvel, &rc->angvel) > 0.2f * 0.2f) {
+        if (speed > 3.5555556f || PSVECDotProduct((V3*)&rc->avel, (V3*)&rc->avel) > 0.2f * 0.2f) {
             window *= 1.5f;
         }
         done = 0;
