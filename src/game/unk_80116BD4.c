@@ -2713,9 +2713,7 @@ static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
     return d + 32767;
 }
 #pragma push  /* RAD built this routine without constant propagation or speculative unrolling (Process review) */
-#pragma opt_lifetimes off
-#pragma opt_propagation off
-#pragma opt_unroll_loops off
+#pragma global_optimizer off  /* same code as lifetimes/propagation/unroll_loops off; see ExpandPlane */
 #pragma ppc_unroll_speculative off
 void quanttos16s(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
     u32 lo = 0x7FFF8000;
@@ -2745,9 +2743,7 @@ void quanttos16s(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
 
 // Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
 #pragma push
-#pragma opt_lifetimes off
-#pragma opt_propagation off
-#pragma opt_unroll_loops off
+#pragma global_optimizer off  /* same code as lifetimes/propagation/unroll_loops off; see ExpandPlane */
 #pragma ppc_unroll_speculative off
 void quanttos16chans2(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
     u32 l;
@@ -4519,15 +4515,11 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
 #define BINK_DOUBLE2(w) (((w) << 8) | ((w) & 0xFF)) | (((w) << 16) & 0xFF000000)
 
 #pragma push
-#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
-#pragma opt_propagation off  /* Pragma unproven: as on the PCM clamps; partial, Process review lead */
-#pragma opt_common_subs off  /* Pragma unproven: 94.15 -> 95.28; the inter IDCT is EXACT with the same three off (Process review) */
-#pragma opt_unroll_loops off  /* Pragma unproven: retail keeps the 7-row scaled fill as a ctr loop; MWCC unrolls it otherwise */
+#pragma global_optimizer off  /* Pragma unproven, strong evidence: only this keeps both arms of the readColors if/else as retail has them (each optimizer switch alone hoists one arm); it replaces the earlier lifetimes/propagation/common_subs/unroll/loop_invariants set (Bink session) */
 // Decodes one Bink plane (8x8 blocks, or 16x16 scaled blocks) into dst, using prev as the previous frame.
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
 // plane's data. Structure cross-checked against n100f's ExpandPlane (reference only).
-#pragma opt_loop_invariants off  /* Keep the scaled-row test and stride in the block decoder. */
 u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
                  s32 blocksWide, u32 step, void **bufs, u32 flags, u32 *skipped) {
     BinkColorTrees8011 trees;
@@ -4543,14 +4535,20 @@ u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     Bundle8011 runs;
     u8 tmp[64];
     BitReader8011 bits;
+    u32 *masks1;
+    u32 *masks0;
+    u32 *scaledMasks1;
+    u32 *scaledMasks0;
+    s32 x;
+    u32 y;
     s32 rowSkip;
     void (*readColors)(void *b, void *bits, void *trees);
     u32 skipCount;
     u32 idx;
-    s32 x;
-    u32 y;
     s32 i;
+    u8 *tables;
 
+    tables = (u8 *)lbl_802F65C0;
     rowSkip = pitch * 8 - width;
     skipCount = 0;
     idx = 0;
@@ -4579,11 +4577,11 @@ u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     StartReadHuff4Bundle(&xOff, &bits);
     StartReadHuff4Bundle(&yOff, &bits);
     StartReadHuff4Bundle(&runs, &bits);
+    scaledMasks0 = (u32 *)(tables + 0x470);
+    scaledMasks1 = (u32 *)(tables + 0x460);
+    masks0 = (u32 *)(tables + 0x420);
+    masks1 = (u32 *)(tables + 0x3E0);
     for (y = 0; y < height; y += 8) {
-        u32 *masks0 = BINK_PAT_C0;
-        u32 *masks1 = BINK_PAT_C1;
-        u32 *scaledMasks0 = BINK_PAT2_C0;
-        u32 *scaledMasks1 = BINK_PAT2_C1;
         CheckReadRLEHuff4Bundle(&types, &bits);
         CheckReadRLEHuff4Bundle(&subTypes, &bits);
         readColors(&colors, &bits, &trees);
@@ -4611,7 +4609,7 @@ u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 break;
             }
             case 1:  // scaled: one 8x8 block drawn as 16x16
-                if (!(y & 8)) {
+                if (!((y >> 3) & 1)) {
                     switch (*subTypes.cur++) {
                     case 3: {
                         u32 value = bits.value;
@@ -4737,6 +4735,7 @@ u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                     case 9: {
                         u8 *d0 = dst;
                         u8 *d1 = dst + pitch;
+                        s32 pitch2 = pitch + pitch;
                         if ((u32)colors.cur & 3) {
                             for (i = 0; i < 8; i++) {
                                 u32 w;
@@ -4757,8 +4756,8 @@ u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                                 ((u32 *)(d0))[3] = w;
                                 ((u32 *)(d1))[3] = w;
                                 colors.cur += 8;
-                                d0 += pitch * 2;
-                                d1 += pitch * 2;
+                                d0 += pitch2;
+                                d1 += pitch2;
                             }
                         } else {
                             for (i = 0; i < 8; i++) {
@@ -4780,8 +4779,8 @@ u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                                 ((u32 *)(d0))[3] = w;
                                 ((u32 *)(d1))[3] = w;
                                 colors.cur += 8;
-                                d0 += pitch * 2;
-                                d1 += pitch * 2;
+                                d0 += pitch2;
+                                d1 += pitch2;
                             }
                         }
                         break;
@@ -7420,9 +7419,7 @@ void fn_80125CB4(void *arg0, void *arg1, void *arg2, s32 arg3) {
 extern const s32 lbl_802F7A40[];
 // Dequantizes (inter table `q`) and inverse-transforms a block, adding the result to the motion source src.
 #pragma push
-#pragma opt_lifetimes off
-#pragma opt_propagation off
-#pragma opt_common_subs off
+#pragma global_optimizer off  /* same code as the three switches it replaces (lifetimes, propagation, common_subs off); see ExpandPlane */
 /* The AAN fast IDCT in the libjpeg jidctfst.c layout: the same work variables serve both passes and are
  * assigned again (tmp10..tmp12 hold the even sums first and the odd products later). RAD built it without
  * lifetime splitting, copy propagation or common-subexpression elimination, so every variable keeps one
