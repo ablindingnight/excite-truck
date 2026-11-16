@@ -3,33 +3,13 @@
 // is reported (to a hook that is empty in the shipped game). The unit's other data is unreferenced
 // here (its users were stripped). Names are guesses.
 #include "game/common.h"
+#include "game/carreg.h"
 
-struct RegPair {
-    s32 key;    // offset 0x0
-    s32 value;  // offset 0x4
-};
-
-struct RegMap {
-    RegPair pairs[11];  // offset 0x0
-    s32 count;          // offset 0x58
-};
-
-struct RegUser {
-    u8 pad0[0x30];
-    RegMap map;  // offset 0x30
-};
-
-struct RegEntry {
-    s32 id;  // offset 0x0
-};
-
-struct RegTable {
-    RegTable(void) { count = 0; }
-    ~RegTable(void) {}
-    RegEntry* items[12];  // offset 0x0
-    s32 count;            // offset 0x30
-};
-
+// RegPair: game/carreg.h.
+// RegMap: game/carreg.h.
+// RegUser: game/carreg.h.
+// RegEntry: game/carreg.h.
+// RegTable: game/carreg.h.
 // Stripped from the shipped game: its delete[] makes the compiler emit RegTable's weak dtor right here, at the
 // start of the unit (0x8027AA08), before fn_8027AA48.
 void fn_RegTableUser(RegTable* t) { delete[] t; }  /* Helper name unproven */
