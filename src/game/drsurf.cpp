@@ -5,6 +5,14 @@
 // surfaces and builds and caches the per-format vertex descriptor display lists. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include <revolution/GX/GXAttr.h>
+#include <revolution/GX/GXDisplayList.h>
+#include <revolution/GX/GXGeometry.h>
+#include <revolution/GX/GXPixel.h>
+#include <revolution/GX/GXTransform.h>
+#include <revolution/MTX/mtx.h>
+#include <revolution/MTX/vec.h>
+#include <revolution/OS/OSCache.h>
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include "revolution/GX/GXTypes.h"
@@ -16,10 +24,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
     v->z = z;
 }
 
-struct GXVtxDescList {
-    int attr;
-    int type;
-};
+// GXVtxDescList: the SDK's.
 
 // Skin matrix (rotation then translation).
 struct SkinMtx {
@@ -29,7 +34,6 @@ struct SkinMtx {
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
-void DCInvalidateRange(void* p, u32 n);
 void fn_802E317C(const char* fmt, ...);  // fatal
 void fn_802E30C8(const char* fmt, ...);  // warning print
 void* fn_802CFF64(u32 size);              // frame allocation
@@ -39,25 +43,8 @@ void fn_802D0E48(int pass);
 void fn_802D2614(void);
 void fn_802D2B0C(void);
 const V3* fn_802D2D04(void);  // light direction
-f32 PSVECDotProduct(const void* a, const void* b);
 f32 PSVECDistance(const void* a, const void* b);
-f32 PSVECSquareDistance(const void* a, const void* b);
-void PSMTXTransApply(const void* src, void* dst, f32 x, f32 y, f32 z);
-void GXLoadPosMtxImm(const void* m, u32 id);
-void GXSetArray(int attr, const void* base, u8 stride);
-void GXCallDisplayList(const void* list, u32 size);
-void GXSetCullMode(GXCullMode mode);
-void GXSetBlendMode(int type, int src, int dst, int op);
-void GXClearVtxDesc(void);
-void GXSetVtxDesc(int attr, int type);
-void GXSetVtxDescv(const GXVtxDescList* list);
-void GXSetVtxAttrFmt(int fmt, int attr, int cnt, int type, int frac);
-void GXBegin(int prim, int fmt, u16 n);
-void GXBeginDisplayList(void* list, u32 size);
-u32 GXEndDisplayList(void);
 void LCLoadData(void* dst, const void* src, u32 n);
-void LCStoreData(void* dst, const void* src, u32 n);
-void LCQueueWait(u32 n);
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -305,24 +292,24 @@ static inline void Skin2(const SkinVtx* v, V3* out, int n) {
 extern "C" {
 
 void fn_802D3F34(Surf* s) {
-    GXSetArray(9, s->verts, 0xC);
-    GXSetArray(0xB, s->attr, 2);
-    GXSetArray(0xD, s->uv, 4);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0xC);
+    GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D3F98(Surf* s) {
-    GXSetArray(9, s->verts, 0xC);
-    GXSetArray(0xB, s->attr, 4);
-    GXSetArray(0xD, s->uv, 4);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0xC);
+    GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)4);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D3FFC(Surf* s) {
-    GXSetArray(9, s->verts, 0xC);
-    GXSetArray(0xD, s->uv, 4);
-    GXSetArray(0xE, s->attr, 4);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0xC);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    GXSetArray((GXAttr)0xE, (const void*)s->attr, (u8)4);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D4060(Surf* s) {
@@ -332,31 +319,31 @@ void fn_802D4060(Surf* s) {
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
         Skin2(v, out, n);
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xD, s->uv, 4);
-        GXSetArray(0xE, s->attr, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXSetArray((GXAttr)0xE, (const void*)s->attr, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
 void fn_802D41C8(Surf* s) {
-    GXSetArray(9, s->verts, 0xC);
-    GXSetArray(0xA, s->attr, 3);
-    GXSetArray(0xD, s->uv, 4);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0xC);
+    GXSetArray((GXAttr)0xA, (const void*)s->attr, (u8)3);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D422C(Surf* s) {
-    GXSetArray(9, s->verts, 0xC);
-    GXSetArray(0xD, s->uv, 4);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0xC);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D4280(Surf* s) {
-    GXSetArray(9, s->verts, 0x10);
-    GXSetArray(0xA, s->attr, 3);
-    GXSetArray(0xD, s->uv, 4);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0x10);
+    GXSetArray((GXAttr)0xA, (const void*)s->attr, (u8)3);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D42E4(Surf* s) {
@@ -369,10 +356,10 @@ void fn_802D42E4(Surf* s) {
         return;
     }
     Skin2(v, out, n);
-    GXSetArray(9, out, 0xC);
-    GXSetArray(0xA, s->attr, 3);
-    GXSetArray(0xD, s->uv, 4);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+    GXSetArray((GXAttr)0xA, (const void*)s->attr, (u8)3);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D4458(Surf* s) {
@@ -382,10 +369,10 @@ void fn_802D4458(Surf* s) {
     V3* out = (V3*)fn_802CFF64(n * 0xC);
     if (out) {
         Skin2(v, out, n);
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xB, s->attr, 2);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
@@ -406,10 +393,10 @@ void fn_802D45C0(Surf* s) {
                 o++;
             }
         }
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xB, s->attr, 2);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
@@ -445,10 +432,10 @@ void fn_802D479C(Surf* s) {
             v++;
             o++;
         }
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xB, s->attr, 2);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
@@ -479,10 +466,10 @@ void fn_802D4988(Surf* s) {
                 o++;
             }
         }
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xB, s->attr, 2);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
@@ -520,10 +507,10 @@ void fn_802D4C44(Surf* s) {
             v++;
             o++;
         }
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xB, s->attr, 2);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
@@ -557,10 +544,10 @@ void fn_802D4ECC(Surf* s) {
             v++;
             o++;
         }
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xB, s->attr, 2);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
@@ -596,10 +583,10 @@ void fn_802D50B4(Surf* s) {
                 o++;
             }
         }
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xB, s->attr, 2);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
@@ -643,17 +630,17 @@ void fn_802D5270(Surf* s) {
             v++;
             position++;
         }
-        GXSetArray(9, out, 0xC);
-        GXSetArray(0xA, s->attr, 3);
-        GXSetArray(0xD, s->uv, 4);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetArray((GXAttr)0xA, (const void*)s->attr, (u8)3);
+        GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
 void fn_802D5680(Surf* s) {
-    GXSetArray(9, s->verts, 0x10);
-    GXSetArray(0xA, s->attr, 3);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0x10);
+    GXSetArray((GXAttr)0xA, (const void*)s->attr, (u8)3);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D56D4(Surf* s) {
@@ -666,9 +653,9 @@ void fn_802D56D4(Surf* s) {
         return;
     }
     Skin2(v, out, n);
-    GXSetArray(9, out, 0xC);
-    GXSetArray(0xA, s->attr, 3);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+    GXSetArray((GXAttr)0xA, (const void*)s->attr, (u8)3);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D5838(Surf* s) {
@@ -684,7 +671,7 @@ void fn_802D5838(Surf* s) {
         MulVecR(&l, dir, rot);
         o = out;
         for (int i = 0; i < n; i++) {
-            if (PSVECDotProduct(nrm, &l) < 0.0f) {
+            if (PSVECDotProduct((const Vec*)nrm, (const Vec*)&l) < 0.0f) {
                 f32 e = lbl_8055FDE0;
                 o->x = p->x + l.x * e;
                 o->y = p->y + l.y * e;
@@ -698,26 +685,26 @@ void fn_802D5838(Surf* s) {
             p++;
             o++;
         }
-        GXSetArray(9, out, 0xC);
-        GXSetCullMode(lbl_8055FDE4 ? GX_CULL_BACK : GX_CULL_FRONT);
-        GXSetBlendMode(1, 1, 1, 5);
-        GXCallDisplayList(s->dl, s->dlSize);
-        GXSetCullMode(lbl_8055FDE4 ? GX_CULL_FRONT : GX_CULL_BACK);
-        GXSetBlendMode(3, 1, 1, 5);
-        GXCallDisplayList(s->dl, s->dlSize);
+        GXSetArray((GXAttr)9, (const void*)out, (u8)0xC);
+        GXSetCullMode((GXCullMode)(lbl_8055FDE4 ? GX_CULL_BACK : GX_CULL_FRONT));
+        GXSetBlendMode((GXBlendMode)1, (GXBlendFactor)1, (GXBlendFactor)1, (GXLogicOp)5);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
+        GXSetCullMode((GXCullMode)(lbl_8055FDE4 ? GX_CULL_FRONT : GX_CULL_BACK));
+        GXSetBlendMode((GXBlendMode)3, (GXBlendFactor)1, (GXBlendFactor)1, (GXLogicOp)5);
+        GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     }
 }
 
 void fn_802D5ACC(Surf* s) {
     f32 m[3][4];
-    GXSetArray(9, s->verts, 0xC);
-    GXSetArray(0xB, s->attr, 2);
-    GXSetArray(0xD, s->uv, 4);
-    PSMTXTransApply(lbl_804C5650, m, s->off0, 0.0f, 0.0f);
-    GXLoadPosMtxImm(m, 3);
-    PSMTXTransApply(lbl_804C5650, m, s->off1, 0.0f, 0.0f);
-    GXLoadPosMtxImm(m, 6);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0xC);
+    GXSetArray((GXAttr)0xB, (const void*)s->attr, (u8)2);
+    GXSetArray((GXAttr)0xD, (const void*)s->uv, (u8)4);
+    PSMTXTransApply((const f32 (*)[4])(lbl_804C5650), (f32 (*)[4])(m), s->off0, 0.0f, 0.0f);
+    GXLoadPosMtxImm((const f32 (*)[4])(m), (u32)3);
+    PSMTXTransApply((const f32 (*)[4])(lbl_804C5650), (f32 (*)[4])(m), s->off1, 0.0f, 0.0f);
+    GXLoadPosMtxImm((const f32 (*)[4])(m), (u32)6);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
     lbl_8055FD19 = 1;
 }
 
@@ -769,7 +756,7 @@ static inline void SurfFog(int n, u32* col, f32* uv, const Surf* s) {
     suv = (f32*)s->uv;
     t = uv;
     for (i = 0; i < n;) {
-        f32 dist = PSVECSquareDistance(p, &d);
+        f32 dist = PSVECSquareDistance((const Vec*)p, (const Vec*)&d);
         u32 v = *src;
         int x = MAX((int)((u8)v * (1.0f - dist * k)), 0);
         int lo = x < 0xFF ? x : 0xFF;
@@ -786,10 +773,10 @@ static inline void SurfFog(int n, u32* col, f32* uv, const Surf* s) {
         suv += 2;
         t += 2;
     }
-    GXSetArray(9, s->verts, 0xC);
-    GXSetArray(0xB, col, 4);
-    GXSetArray(0xD, uv, 8);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXSetArray((GXAttr)9, (const void*)s->verts, (u8)0xC);
+    GXSetArray((GXAttr)0xB, (const void*)col, (u8)4);
+    GXSetArray((GXAttr)0xD, (const void*)uv, (u8)8);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D5B8C(const Surf* s) {
@@ -807,66 +794,66 @@ void fn_802D5DE8(u32 fmt) {
     memset(list, 0, sizeof(list));
     GXVtxDescList* p = list;
     if (fmt & 1) {
-        p->attr = 0;
-        p->type = 1;
+        p->attr = (GXAttr)0;
+        p->type = (GXAttrType)1;
         p++;
     }
     if (fmt & 2) {
-        p->attr = 9;
-        p->type = 2;
+        p->attr = (GXAttr)9;
+        p->type = (GXAttrType)2;
         p++;
     } else if (fmt & 4) {
-        p->attr = 9;
-        p->type = 3;
+        p->attr = (GXAttr)9;
+        p->type = (GXAttrType)3;
         p++;
     }
     if (fmt & 8) {
-        p->attr = 0xA;
-        p->type = 2;
+        p->attr = (GXAttr)0xA;
+        p->type = (GXAttrType)2;
         p++;
     } else if (fmt & 0x10) {
-        p->attr = 0xA;
-        p->type = 3;
+        p->attr = (GXAttr)0xA;
+        p->type = (GXAttrType)3;
         p++;
     }
     if (fmt & 0x20) {
-        p->attr = 0xB;
-        p->type = 2;
+        p->attr = (GXAttr)0xB;
+        p->type = (GXAttrType)2;
         p++;
     } else if (fmt & 0x40) {
-        p->attr = 0xB;
-        p->type = 3;
+        p->attr = (GXAttr)0xB;
+        p->type = (GXAttrType)3;
         p++;
     }
     if (fmt & 0x80) {
-        p->attr = 0xD;
-        p->type = 2;
+        p->attr = (GXAttr)0xD;
+        p->type = (GXAttrType)2;
         p++;
     } else if (fmt & 0x100) {
-        p->attr = 0xD;
-        p->type = 3;
+        p->attr = (GXAttr)0xD;
+        p->type = (GXAttrType)3;
         p++;
     }
     if (fmt & 0x200) {
-        p->attr = 0xE;
-        p->type = 2;
+        p->attr = (GXAttr)0xE;
+        p->type = (GXAttrType)2;
         p++;
     } else if (fmt & 0x400) {
-        p->attr = 0xE;
-        p->type = 3;
+        p->attr = (GXAttr)0xE;
+        p->type = (GXAttrType)3;
         p++;
     }
-    p->attr = 0xFF;
-    p->type = 0;
+    p->attr = (GXAttr)0xFF;
+    p->type = (GXAttrType)0;
     GXClearVtxDesc();
-    GXSetVtxDescv(list);
+    GXSetVtxDescv((const GXVtxDescList*)list);
 }
 
 void fn_802D5F88(const Surf* s) {
     u32 key = s->vfmt & ~0x300000;
     u32 b = s->b9;
     if (key != lbl_8055FDE8) {
-        GXCallDisplayList(s->fmtDL, s->dlBlocks << 5);
+        GXCallDisplayList((void*)s->fmtDL, (u32)(s->dlBlocks << 5));
         lbl_8055FDE8 = key;
         lbl_8055FDEC = b;
     }
@@ -954,7 +941,7 @@ void fn_802D6170(Surf* s) {
     fn_802D0E48(0);
     fn_802D5FE4(s);
     fn_802D0E48(1);
-    GXCallDisplayList(s->dl, s->dlSize);
+    GXCallDisplayList((void*)s->dl, (u32)s->dlSize);
 }
 
 void fn_802D61BC(Surf* s) {
@@ -1019,7 +1006,7 @@ void fn_802D62FC(const Surf* s, void** dl, u32* size) {
     e = &lbl_804CA438[lbl_8055FDF0++];
     e->key = key;
     e->b = b;
-    GXBeginDisplayList(lbl_8055FDF8, lbl_8055FDF4 + 0x4000 - lbl_8055FDF8);
+    GXBeginDisplayList((void*)lbl_8055FDF8, (u32)(lbl_8055FDF4 + 0x4000 - lbl_8055FDF8));
     fn_802D5DE8(key);
     u32 n = GXEndDisplayList();
     e->dl = lbl_8055FDF8;
@@ -1148,7 +1135,7 @@ void fn_802D6810(void) {
     lbl_8055FDF0 = 0;
     fn_801282EC(0x20);
     lbl_8055FDF8 = lbl_8055FDF4 = new ("vertex_format_dl_buf") u8[0x4000];
-    DCInvalidateRange(lbl_8055FDF4, 0x4000);
+    DCInvalidateRange((const void*)lbl_8055FDF4, (u32)0x4000);
     fn_802D6C68();
 }
 
@@ -1176,13 +1163,13 @@ void fn_802D68C4(ColVtx* __restrict verts, int unused, u16* __restrict idx, int 
     fn_802D2614();
     fn_802D2B0C();
     GXClearVtxDesc();
-    GXSetVtxDesc(9, 1);
-    GXSetVtxDesc(0xB, 1);
-    GXSetVtxDesc(0xD, 1);
-    GXSetVtxAttrFmt(0, 9, 1, 4, 0);
-    GXSetVtxAttrFmt(0, 0xB, 1, 5, 0);
-    GXSetVtxAttrFmt(0, 0xD, 1, 4, 0);
-    GXBegin(0x90, 0, n);
+    GXSetVtxDesc((GXAttr)9, (GXAttrType)1);
+    GXSetVtxDesc((GXAttr)0xB, (GXAttrType)1);
+    GXSetVtxDesc((GXAttr)0xD, (GXAttrType)1);
+    GXSetVtxAttrFmt((GXVtxFmt)0, (GXAttr)9, (GXCompCnt)1, (GXCompType)4, (u8)0);
+    GXSetVtxAttrFmt((GXVtxFmt)0, (GXAttr)0xB, (GXCompCnt)1, (GXCompType)5, (u8)0);
+    GXSetVtxAttrFmt((GXVtxFmt)0, (GXAttr)0xD, (GXCompCnt)1, (GXCompType)4, (u8)0);
+    GXBegin((GXPrimitive)0x90, (GXVtxFmt)0, (u16)n);
     for (int i = 0; i < n; i++) {
         ColVtx v;
         f32 x;
@@ -1320,9 +1307,9 @@ static inline void FlushYMorph(DeformQueue* q) {
         pdst = 0;
         pout = 0;
         for (;;) {
-            LCQueueWait(0);
+            LCQueueWait((u32)0);
             if (pc > 0) {
-                LCStoreData(pdst, pout, (pc * 0xC + 0x1F) & ~0x1F);
+                LCStoreData((void*)pdst, (const void*)pout, (u32)((pc * 0xC + 0x1F) & ~0x1F));
             }
             pdst = dst;
             pc = c;
@@ -1354,7 +1341,7 @@ static inline void FlushYMorph(DeformQueue* q) {
                 out += 3;
             }
         }
-        LCQueueWait(0);
+        LCQueueWait((u32)0);
         lbl_804D2C40.count = 0;
     }
 }
@@ -1396,9 +1383,9 @@ void fn_802D6C78(void) {
         pdst = 0;
         pout = 0;
         for (;;) {
-            LCQueueWait(0);
+            LCQueueWait((u32)0);
             if (pc > 0) {
-                LCStoreData(pdst, pout, (pc * 0xC + 0x1F) & ~0x1F);
+                LCStoreData((void*)pdst, (const void*)pout, (u32)((pc * 0xC + 0x1F) & ~0x1F));
             }
             pdst = dst;
             pc = c;
@@ -1439,7 +1426,7 @@ void fn_802D6C78(void) {
                 o++;
             }
         }
-        LCQueueWait(0);
+        LCQueueWait((u32)0);
         lbl_804D6C44.count = 0;
     }
     SetGQR6();
@@ -1473,9 +1460,9 @@ void fn_802D6C78(void) {
         pdst = 0;
         pout = 0;
         for (;;) {
-            LCQueueWait(0);
+            LCQueueWait((u32)0);
             if (pc > 0) {
-                LCStoreData(pdst, pout, (pc * 0xC + 0x1F) & ~0x1F);
+                LCStoreData((void*)pdst, (const void*)pout, (u32)((pc * 0xC + 0x1F) & ~0x1F));
             }
             pdst = dst;
             pc = c;
@@ -1507,7 +1494,7 @@ void fn_802D6C78(void) {
                 out += 3;
             }
         }
-        LCQueueWait(0);
+        LCQueueWait((u32)0);
         lbl_804CEC3C.count = 0;
     }
 }
