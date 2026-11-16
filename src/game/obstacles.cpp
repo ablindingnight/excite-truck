@@ -422,23 +422,23 @@ void Obstacle::Init(BodyDesc* d) {
     f32 skin;
     ObDesc* const q = (ObDesc*)d;
     RigidBody::Init(d);
-    U8(this, 0x221) = 0;
-    U8(this, 0x220) = 1;
-    U8(this, 0x222) = 0;
-    F32(this, 0x21C) = 0.0f;
-    U8(this, 0x223) = 1;
-    S32(this, 0x224) = 0;
-    F32(this, 0x228) = 0.0f;
-    F32(this, 0x22C) = 0.0f;
-    F32(this, 0x230) = 0.0f;
-    U8(this, 0x235) = 0;
-    U8(this, 0x234) = 0;
-    F32(this, 0x238) = 0.0f;
+    this->u221 = 0;
+    this->asleep = 1;
+    this->u222 = 0;
+    this->sleepTime = 0.0f;
+    this->chainArmed = 1;
+    this->chain = 0;
+    this->hitOffset[0] = 0.0f;
+    this->hitOffset[1] = 0.0f;
+    this->hitOffset[2] = 0.0f;
+    this->u235 = 0;
+    this->u234 = 0;
+    this->u238 = 0.0f;
     fn_801AC240((u8*)this);
     *(ObRot*)((u8*)&mtx) = q->rot;
-    *(ObPos*)((u8*)this + 0x60) = q->pos;
+    *(ObPos*)((u8*)(u8*)&this->mtx.pos) = q->pos;
     CollVolume::Transform();
-    *(RVec3*)((u8*)this + 0x30) = RVec3(0.0f, 0.0f, 0.0f);
+    *(RVec3*)((u8*)(u8*)&this->offset) = RVec3(0.0f, 0.0f, 0.0f);
     CollVolume::vf20();
     shape = 0;
     corners = 1;
@@ -473,7 +473,7 @@ void Obstacle::Init(BodyDesc* d) {
     }
     case 7:
         shape = new ("obstacle-post:tube") TubeShape(this, ObFrameOf((u8*)this), 437992.1f, 0.8f, q->a, q->b);
-        U8(this, 0x221) = 1;
+        this->u221 = 1;
         corners = 0;
         break;
     case 12: {
@@ -605,14 +605,14 @@ void Obstacle::Init(BodyDesc* d) {
         fn_80131818(t);
         CollShape* s = (CollShape*)new ("polyvol") PolyShape((u32)&mtx, (const PolyPlane*)pl, n, (const RVec3*)&lo, (const RVec3*)&hi, k, skin);
         shape = s;
-        U8(this, 0x221) = 1;
+        this->u221 = 1;
         corners = 0;
         break;
     }
     case 20: {
         CollShape* s = (CollShape*)new ("pmshvol") MeshShape((u32)&mtx, (const char*)&q->a, (u32)this);
         shape = s;
-        U8(this, 0x221) = 1;
+        this->u221 = 1;
         corners = 0;
         break;
     }
@@ -637,7 +637,7 @@ void Obstacle::Init(BodyDesc* d) {
     case 13:
     case 18:
         shape = new ("obs-tubevolume") TubeShape(this, ObFrameOf((u8*)this), 0.9f * k, skin, q->a, q->b * ScaleOperand(0.5f) - q->a);
-        F32(this, 0x238) = 0.016683351f * q->c / q->a;
+        this->u238 = 0.016683351f * q->c / q->a;
         AddCornerV((u8*)this, RVec3(q->a, q->a, 0.0f), spring * ScaleOperand(0.5f));
         corners = 1;
         break;
@@ -647,11 +647,11 @@ void Obstacle::Init(BodyDesc* d) {
         f32 z = q->c;
         fn_801A9798((u8*)this, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f), spring);
         shape = new ("box1:box-volume") BoxShape(this, ObFrameOf((u8*)this), k, skin, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f));
-        F32(this, 0x228) = q->d;
-        F32(this, 0x22C) = q->e;
-        F32(this, 0x230) = q->f;
-        U8(this, 0x235) = 1;
-        U8(this, 0x234) = 1;
+        this->hitOffset[0] = q->d;
+        this->hitOffset[1] = q->e;
+        this->hitOffset[2] = q->f;
+        this->u235 = 1;
+        this->u234 = 1;
         corners = 0;
         break;
     }
@@ -694,13 +694,13 @@ void Obstacle::Init(BodyDesc* d) {
     if (shape) {
         shape->SetSurface(kind);
         AddShape(shape);
-        U8(this, 0x1E8) = corners;
+        this->b1E8 = corners;
     }
     for (BodyCorner* c = *(BodyCorner**)((u8*)this + 0xD0); c; c = c->next) {
         c->friction = 2.0f;
     }
-    *(Pose12*)((u8*)this + 0x1EC) = *(Pose12*)((u8*)&mtx);
-    S32(this, 0x224) = 0;
+    *(Pose12*)((u8*)(u8*)&this->restPose) = *(Pose12*)((u8*)&mtx);
+    this->chain = 0;
     if (q->flags & 1) {
         u32 group = q->flags & 2;
         if (lbl_8055E5E4 && group == (u32)lbl_8055E5E8) {
@@ -711,7 +711,7 @@ void Obstacle::Init(BodyDesc* d) {
             }
             PTR(o, 0x224) = ((u8*)this);
         } else {
-            PTR(this, 0x224) = ((u8*)this);
+            ((u8*&)this->chain) = ((u8*)this);
         }
         lbl_8055E5E8 = group;
         lbl_8055E5E4 = (s32)((u8*)this);
@@ -723,7 +723,7 @@ void Obstacle::Init(BodyDesc* d) {
         path = q->extra->GetValue("path");
         id = q->extra->GetString("path_id", q->extra->GetString("dyno", ""));
         fn_801DA758((u8*)this, id, path);
-        U8(this, 0x222) = 1;
+        this->u222 = 1;
         for (i = 0; i < nAdded; i++) {
             Shape(i)->SetSurface(0x72);
         }
