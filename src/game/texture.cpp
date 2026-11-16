@@ -904,8 +904,8 @@ void fn_802CB6B4(void) {
     lbl_8055FCBC = 0;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_802CB82C(TexCache* c, s32 id, HeapBlock**& cursor) {
+/* Helper name unproven: drops the pending loads of one texture; the boundary is needed (in place -0.66) */
+static inline void CancelMipLoads(TexCache* c, s32 id, HeapBlock**& cursor) {
     for (MipLoad* l = c->loads; l; l = l->next) {
         if (l->tex == id) {
             for (MipDiscard* d = c->discards; d; d = d->next) {
@@ -946,7 +946,7 @@ void fn_802CB82C(s32 id) {
         t->mip0Mem = 0;
         fn_802CB3F8(t->name, "quick-unload");
     } else if (s->state == 1) {
-        Loop2_fn_802CB82C(c, id, cursor);
+        CancelMipLoads(c, id, cursor);
     }
     s->state = 0;
 }
@@ -1336,8 +1336,8 @@ static inline void RankVisibleTexture(int i) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop3_fn_802CC770(TexCache* c, HeapBlock**& cursor, int& ok) {
+/* Helper name unproven: discards the first resident mip marked for it; the boundary is needed (in place -0.54) */
+static inline void DiscardOneResident(TexCache* c, HeapBlock**& cursor, int& ok) {
     for (MipSlot* s = c->resident; s; s = s->next) {
         if (s->state == 2) {
             DiscardMip(c, s->tex, s->frame + 2, 0, cursor, ok);
@@ -1357,7 +1357,7 @@ void fn_802CC770(void) {
         TexCache* c = lbl_8055FCBC;
         HeapBlock** cursor;
         int ok;
-        Loop3_fn_802CC770(c, cursor, ok);
+        DiscardOneResident(c, cursor, ok);
     }
     TexCache* c = lbl_8055FCBC;
     fn_802CC410(c);
