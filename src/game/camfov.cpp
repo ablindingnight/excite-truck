@@ -29,7 +29,6 @@ extern CamRect lbl_8049A218[4];
 
 extern "C" {
 
-extern const f32 lbl_80563E30;  // minimum squared distance
 
 // Places the camera at `pos` looking at `target` with `up` as the up hint; nothing changes the frame
 // when the target is too close or straight above/below.
@@ -42,7 +41,7 @@ void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
     d.x = target[0] - cr->pose.pos.v[0];
     d.y = target[1] - cr->pose.pos.v[1];
     d.z = target[2] - cr->pose.pos.v[2];
-    if (PSVECDotProduct((const Vec*)&d.x, (const Vec*)&d.x) < lbl_80563E30) {
+    if (PSVECDotProduct((const Vec*)&d.x, (const Vec*)&d.x) < 1.0f) {
         return;
     }
     if (AbsF(d.x) < 0.01f && AbsF(d.z) < 0.01f) {
@@ -105,9 +104,14 @@ f32 fn_8026EA8C(int mode, f32 t) {
     }
 }
 
+// The constants this unit reads are its own literals; the forms below give retail's .sdata2 creation order and
+// operand order where a plain literal does not. Helpers unproven (names and existence).
+// TanHalf / AtanTwice: retail creates 0.5 before 0.4 and 2.0.
+static inline f32 TanHalf(f32 a) { return (f32)tan(a / 2.0f); }
+static inline f32 AtanTwice(f32 t) { return 2.0f * (f32)atan(t); }
 f32 fn_8026EAEC(f32 fov) {
     if (fn_80178CA4() > 1) {
-        fov = 2.0f * (f32)atan(0.4f * (f32)tan(fov / 2.0f));
+        fov = AtanTwice(0.4f * TanHalf(fov));
     }
     return fov;
 }
@@ -131,6 +135,20 @@ extern f32 lbl_8055F530;  // boost fov
 extern f32 lbl_8055F534;  // normal fov
 
 static inline int Boosting(u8* car) { return F32(car, 0x258C) > 0.001f; }
+// MulF: a product whose constant arrives as an inline parameter (a literal written in a multiply is always the
+// first operand; retail has the variable first at these sites).
+static inline f32 MulF(f32 a, f32 b) { return a * b; }
+// AddScaled / Scaled: o = a + d * s and o = a * s; retail loads the scale once for the three components.
+static inline void AddScaled(f32* o, const f32* a, const f32* d, f32 s) {
+    o[0] = a[0] + d[0] * s;
+    o[1] = a[1] + d[1] * s;
+    o[2] = a[2] + d[2] * s;
+}
+static inline void Scaled(f32* o, const f32* a, f32 s) {
+    o[0] = a[0] * s;
+    o[1] = a[1] * s;
+    o[2] = a[2] * s;
+}
 static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 static inline int Above(f32 v, f32 k) { return v > k; }
 
@@ -161,30 +179,28 @@ f32 fn_8026EB4C(const u8* p) {
 }
 
 double cos(double x);
-extern const f32 lbl_80563E68;    // 0.25
 
 // Returns the view angle; scales *scale so that wider views keep the reference framing.
 f32 fn_8026ECE4(u8* p, f32* scale) {
     f32 ref;
     f32 fov = fn_8026EB4C(p);
     if (fov > lbl_8055F52C) {
-        ref = cos(lbl_8055F52C * lbl_80563E68);
-        *scale *= (f32)cos(fov * lbl_80563E68) / ref;
+        ref = cos(MulF(lbl_8055F52C, 0.25f));
+        *scale *= (f32)cos(MulF(fov, 0.25f)) / ref;
     }
     return fov;
 }
 
-extern const f32 lbl_80563E78;
 
 // Cubic ease of a 0..1 screen fraction (mirrored below the midpoint).
 static inline f32 Ease(f32 x) {
     if (x < -1.0f) {
         return -1.0f;
     }
-    if (x > lbl_80563E30) {
-        return lbl_80563E30;
+    if (x > 1.0f) {
+        return 1.0f;
     }
-    if (x > lbl_80563E78) {
+    if (x > 0.0f) {
         return x * (-2.0f * x * x) + 3.0f * x * x;
     }
     return x * (-2.0f * x * x) - 3.0f * x * x;
@@ -192,15 +208,21 @@ static inline f32 Ease(f32 x) {
 
 // Adjusts the camera position for the player's split-screen viewport: lifts it by `lift` scaled with
 // the viewport's height, then pulls it toward the target by its vertical placement.
+
+// Unit01: v mapped from lo..hi and clamped to 0..1 (retail keeps the subtraction of a zero lo).
+static inline f32 Unit01(f32 v, f32 lo, f32 hi) {
+    f32 t = (v - lo) / (hi - lo);
+    t = 1.0f < t ? 1.0f : t;
+    t = t > 0.0f ? t : 0.0f;
+    return t;
+}
 #pragma push
 #pragma peephole off  /* Setting unproven: recovers the viewport adjustment body. */
 void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
     CamRect* r = &lbl_8049A218[*cam];
     f32 e = Ease(r->v[3]);
-    f32 t = (r->v[1] - lbl_80563E78) / 20.0f;
-    t = lbl_80563E30 < t ? lbl_80563E30 : t;
-    t = t > lbl_80563E78 ? t : lbl_80563E78;
-    f32 k = lbl_80563E78 + t * lbl_80563E30;
+    f32 t = Unit01(r->v[1], 0.0f, 20.0f);
+    f32 k = LerpF(t, 0.0f, 1.0f);
     pos[1] = pos[1] + lift * (-4.0f * (k * e));
     CsVec d;
     d.x = target[0] - pos[0];
@@ -213,10 +235,6 @@ void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
 }
 #pragma pop
 
-extern const f32 lbl_80563E84;  // ground sample spacing
-extern const f32 lbl_80563E88;
-extern const f32 lbl_80563E90;
-extern const f32 lbl_80563EA8;
 f32 fn_801E9FDC(const s16* hint, f32 x, f32 z);
 int fn_801784DC(f32* pos, f32* h, int a, int b, int (*filter)(int));
 f32 fn_8026A520(int i);
@@ -243,7 +261,7 @@ static inline void EaseGroundHeight(f32 t, bool onGround, f32 h, CamRect* r) {
     f32 hi;
     f32 up;
     f32 down;
-    up = lbl_80563E88 * (400.0f + t * lbl_80563E90);
+    up = 0.016683351f * LerpF(t, 400.0f, 20.0f);
     down = onGround ? 6.6733403f : 0.33366704f;
     if (h < r->v[1]) {
         lo = r->v[1] - down;
@@ -288,55 +306,51 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
         CVec3 c = *(CVec3*)(car + 0x60);
         y = c.y;
         z = c.z;
-        h0 = fn_801E9FDC(hint, c.x + lbl_80563E84, lbl_80563E84 + z);
-        h0 = OverObstacle(h0, lbl_80563E84 + c.x, y, lbl_80563E84 + z);
-        h1 = fn_801E9FDC(hint, c.x - lbl_80563E84, lbl_80563E84 + z);
-        h1 = OverObstacle(h1, c.x - lbl_80563E84, y, lbl_80563E84 + z);
-        h2 = fn_801E9FDC(hint, c.x - lbl_80563E84, z - lbl_80563E84);
-        h2 = OverObstacle(h2, c.x - lbl_80563E84, y, z - lbl_80563E84);
-        h3 = fn_801E9FDC(hint, c.x + lbl_80563E84, z - lbl_80563E84);
-        h3 = OverObstacle(h3, lbl_80563E84 + c.x, y, z - lbl_80563E84);
-        avg = lbl_80563E68 * (h0 + (h1 + (h2 + h3)));
+        h0 = fn_801E9FDC(hint, c.x + 10.0f, 10.0f + z);
+        h0 = OverObstacle(h0, 10.0f + c.x, y, 10.0f + z);
+        h1 = fn_801E9FDC(hint, c.x - 10.0f, 10.0f + z);
+        h1 = OverObstacle(h1, c.x - 10.0f, y, 10.0f + z);
+        h2 = fn_801E9FDC(hint, c.x - 10.0f, z - 10.0f);
+        h2 = OverObstacle(h2, c.x - 10.0f, y, z - 10.0f);
+        h3 = fn_801E9FDC(hint, c.x + 10.0f, z - 10.0f);
+        h3 = OverObstacle(h3, 10.0f + c.x, y, z - 10.0f);
+        avg = 0.25f * (h0 + (h1 + (h2 + h3)));
         if (onGround) {
             r->v[0] = avg - c.y;
-            r->v[2] = lbl_80563E78;
+            r->v[2] = 0.0f;
         } else {
-            r->v[2] = r->v[2] + lbl_80563E88;
+            r->v[2] += 0.016683351f;
         }
         h = r->v[0] + (c.y - avg);
         rv = r->v[2];
-        t = (rv - lbl_80563E78) / lbl_80563E30;
-        t = lbl_80563E30 < t ? lbl_80563E30 : t;
-        t = t > lbl_80563E78 ? t : lbl_80563E78;
+        t = Unit01(rv, 0.0f, 1.0f);
         EaseGroundHeight(t, onGround, h, r);
-        zoom = fn_8026A520(S32(car, 0x1EC)) > lbl_80563E78;
-        if (zoom != lbl_80563E78) {
+        zoom = fn_8026A520(S32(car, 0x1EC)) > 0.0f;
+        if (zoom) {
             v = 0.04170838f + r->v[3];
-            r->v[3] = v < lbl_80563E30 ? v : lbl_80563E30;
+            r->v[3] = v < 1.0f ? v : 1.0f;
         } else {
             v = r->v[3] - 0.008341676f;
-            r->v[3] = v > lbl_80563E78 ? v : lbl_80563E78;
+            r->v[3] = v > 0.0f ? v : 0.0f;
         }
     }
-    lift = MaxF(lbl_80563E78, r->v[1]);
+    lift = MaxF(0.0f, r->v[1]);
+    f32 span = 0.2f;  /* Unused local, unproven: retail creates 0.2 in the pool here with no code that reads it. */
     top = lbl_8049A208[3];
-    m = lbl_80563EA8 + lbl_8049A208[2];
+    m = 0.1f + lbl_8049A208[2];
     top = top > m ? top : m;
     k = (lift - lbl_8049A208[2]) / (top - lbl_8049A208[2]);
-    f32 kMax = lbl_80563E30;
+    f32 kMax = 1.0f;
     k = kMax < k ? kMax : k;
-    k = k > lbl_80563E78 ? k : lbl_80563E78;
-    k = lbl_80563E78 + k * lbl_80563E30;
+    k = k > 0.0f ? k : 0.0f;
+    k = LerpF(k, 0.0f, 1.0f);
     pos[1] = pos[1] + lbl_8049A208[0] * k;
     target[1] = target[1] + lbl_8049A208[1] * k;
-    fn_8026ED64(cam, MinF(lbl_80563E30, 5.0f * k), pos, target);
+    fn_8026ED64(cam, MinF(1.0f, 5.0f * k), pos, target);
 }
 
 int fn_8026F408(int n) { return n <= 8; }
 
-extern const f32 lbl_80563E44;  // -10.0
-extern const f32 lbl_80563E58;  // 2.0
-extern const f32 lbl_80563F18;  // -13.0
 extern f32 __float_epsilon[];  // FLT_EPSILON
 int fn_801EA03C(const s16* hint, f32* pos);
 
@@ -351,7 +365,6 @@ struct CamAxes {
 };
 
 static inline f32 AddMul(f32 a, f32 b, f32 c) { return a + c * b; }
-static inline f32 MulF(f32 a, f32 b) { return a * b; }
 
 // A camera frame: its rows and its position.
 struct CamFrame {
@@ -389,8 +402,6 @@ struct ChaseCam {
     f32 lastOn;         // offset 0x19C
 };
 
-extern const f32 lbl_80563EC4;  // -20.0
-extern const f32 lbl_80563EE4;  // 0.97
 extern f32 lbl_8055E3C8;        // race time
 
 // Extra eye distance by mode (wider on a wide screen).
@@ -399,7 +410,7 @@ static inline f32 BackOffset(int mode, int wide) {
     case 8:
         return wide ? 6.0f : 1.75f;
     default:
-        return wide ? 4.0f : lbl_80563E78;
+        return wide ? 4.0f : 0.0f;
     }
 }
 
@@ -416,41 +427,39 @@ void fn_8026F420(int mode, int prev, u8* p) {
     f32 carDistance = F32(c->car, 0x5B4);
     f32 dist = carDistance + off;
     f32 lift = F32(c->car, 0x5B8);
-    int air = F32(c->car, 0x2688) > lbl_80563E78;
+    int air = F32(c->car, 0x2688) > 0.0f;
     if (c->reset || air) {
-        c->blend = lbl_80563E78;
+        c->blend = 0.0f;
         if (!fn_8026EA14(prev) && mode != 23) {
             c->lastMode = 4;
-            c->pitchT = lbl_80563E78;
+            c->pitchT = 0.0f;
         } else {
             c->lastMode = prev;
         }
         if ((c->lastMode != 23 && mode != 23) || c->hold) {
-            c->pitchT = lbl_80563E78;
+            c->pitchT = 0.0f;
         }
         if (!fn_8026EA14(prev) || c->hold || air) {
             c->tf.pos = c->pos;
             c->tf.axes = c->axes;
-            c->tf.pos.v[0] = c->tf.pos.v[0] + c->axes.fwd.x * lbl_80563EC4;
-            c->tf.pos.v[1] = c->tf.pos.v[1] + c->axes.fwd.y * lbl_80563EC4;
-            c->tf.pos.v[2] = c->tf.pos.v[2] + c->axes.fwd.z * lbl_80563EC4;
+            AddScaled(c->tf.pos.v, c->tf.pos.v, &c->axes.fwd.x, -20.0f);
             if (!seven) {
-                c->tf.pos.v[1] = c->tf.pos.v[1] + lbl_80563E84;
+                c->tf.pos.v[1] += 10.0f;
             } else {
-                c->tf.pos.v[1] = c->tf.pos.v[1] - lbl_80563E84;
+                c->tf.pos.v[1] = c->tf.pos.v[1] - 10.0f;
             }
-            c->pitchT = lbl_80563E78;
+            c->pitchT = 0.0f;
         }
     }
     f32 t = 1.6f * c->blend;
-    t = lbl_80563E30 < t ? lbl_80563E30 : t;
-    t = t > lbl_80563E78 ? t : lbl_80563E78;
+    t = 1.0f < t ? 1.0f : t;
+    t = t > 0.0f ? t : 0.0f;
     f32 ease = Ease(t);
     if (mode == 23) {
         if (!fn_801769F8()) {
-            c->pitchT = c->pitchT + lbl_80563E88;
+            c->pitchT += 0.016683351f;
         }
-        ease = lbl_80563E30;
+        ease = 1.0f;
     }
     CsVec tgt;
     CsVec d;
@@ -462,45 +471,45 @@ void fn_8026F420(int mode, int prev, u8* p) {
     f32 b = fn_8026EA44(c->lastMode);
     tgt.y = tgt.y + CarScale(c->car) * (lift + LerpF(ease, b, a));
     c->view = c->tf;
-    CsVec up1(lbl_80563E78, lbl_80563E30, lbl_80563E78);
+    CsVec up1(0.0f, 1.0f, 0.0f);
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up1.x);
-    d.Set(lbl_80563E78, lbl_80563E78, lbl_80563E78);
+    d.Set(0.0f, 0.0f, 0.0f);
     int still = 0;
-    if (PSVECDotProduct((const Vec*)c->move, (const Vec*)c->move) < lbl_80563E30) {
+    if (PSVECDotProduct((const Vec*)c->move, (const Vec*)c->move) < 1.0f) {
         still = 1;
         d.x = c->move[0];
         d.y = c->move[1];
         d.z = c->move[2];
     } else {
-        f32 inv = lbl_80563E30 / PSVECMag((const Vec*)c->move);
+        f32 inv = 1.0f / PSVECMag((const Vec*)c->move);
         d.x = c->move[0] * inv;
         d.y = c->move[1] * inv;
         d.z = c->move[2] * inv;
     }
     if (!fn_801769F8()) {
-        if (still || PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.fwd.x) >= lbl_80563E78) {
+        if (still || PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.fwd.x) >= 0.0f) {
             f32 k = -0.15015016f * PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.right.x);
             c->view.pos.v[0] = c->view.pos.v[0] + c->view.axes.right.x * k;
             c->view.pos.v[1] = c->view.pos.v[1] + c->view.axes.right.y * k;
             c->view.pos.v[2] = c->view.pos.v[2] + c->view.axes.right.z * k;
         } else {
             f32 k = -0.15015016f *
-                    (PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.right.x) > lbl_80563E78 ? lbl_80563E30 : -1.0f);
+                    (PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->view.axes.right.x) > 0.0f ? 1.0f : -1.0f);
             c->view.pos.v[0] = c->view.pos.v[0] + c->view.axes.right.x * k;
             c->view.pos.v[1] = c->view.pos.v[1] + c->view.axes.right.y * k;
             c->view.pos.v[2] = c->view.pos.v[2] + c->view.axes.right.z * k;
         }
     }
-    CsVec up2(lbl_80563E78, lbl_80563E30, lbl_80563E78);
+    CsVec up2(0.0f, 1.0f, 0.0f);
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up2.x);
     f32 k;
     f32 sf = c->speedFrac;
     switch (mode) {
     case 8:
-        k = lbl_80563E30 - lbl_80563E68 * sf;
+        k = 1.0f - MulF(0.25f, sf);
         break;
     default:
-        k = lbl_80563E30 - 0.35f * sf;
+        k = 1.0f - 0.35f * sf;
         break;
     }
     f32 y;
@@ -513,11 +522,9 @@ void fn_8026F420(int mode, int prev, u8* p) {
     c->view.pos.v[1] = tgt.y + c->view.axes.fwd.y * back;
     c->view.pos.v[2] = tgt.z + c->view.axes.fwd.z * back;
     c->tf = c->view;
-    c->view.pos.v[1] = c->view.pos.v[1] - lbl_80563EA8;
+    c->view.pos.v[1] = c->view.pos.v[1] - 0.1f;
     if (seven || U8(c->car, 0x260C)) {
-        c->view.pos.v[0] = c->pos.v[0] * lbl_80563E58;
-        c->view.pos.v[1] = c->pos.v[1] * lbl_80563E58;
-        c->view.pos.v[2] = c->pos.v[2] * lbl_80563E58;
+        Scaled(c->view.pos.v, c->pos.v, 2.0f);
         c->view.pos.v[0] = c->view.pos.v[0] - c->tf.pos.v[0];
         c->view.pos.v[1] = c->view.pos.v[1] - c->tf.pos.v[1];
         c->view.pos.v[2] = c->view.pos.v[2] - c->tf.pos.v[2];
@@ -532,9 +539,9 @@ void fn_8026F420(int mode, int prev, u8* p) {
             h = 8.0f;
             break;
         }
-        c->view.pos.v[1] = c->view.pos.v[1] + (h + lbl_80563E58 * lift) * CarScale(c->car);
-        c->view.pos.v[1] = c->view.pos.v[1] > (lbl_80563E30 + c->pos.v[1]) ? c->view.pos.v[1] : (lbl_80563E30 + c->pos.v[1]);
-        CsVec up3(lbl_80563E78, lbl_80563E30, lbl_80563E78);
+        c->view.pos.v[1] = c->view.pos.v[1] + (h + MulF(2.0f, lift)) * CarScale(c->car);
+        c->view.pos.v[1] = c->view.pos.v[1] > (1.0f + c->pos.v[1]) ? c->view.pos.v[1] : (1.0f + c->pos.v[1]);
+        CsVec up3(0.0f, 1.0f, 0.0f);
         fn_8026E870(c->view.pos.v, &tgt.x, p, &up3.x);
     }
     f32 gap;
@@ -547,24 +554,24 @@ void fn_8026F420(int mode, int prev, u8* p) {
     y = c->view.pos.v[1];
     if (!fn_801EA03C((const s16*)(c->car + 0x6C), c->view.pos.v)) {
         c->view.pos.v[1] = y;
-        c->bump = 9.150001f - lbl_80563EE4 * (9.150001f - c->bump);
+        c->bump = 9.150001f - 0.97f * (9.150001f - c->bump);
     } else {
         c->view.pos.v[1] = c->view.pos.v[1] + gap;
         if (c->view.pos.v[1] < y) {
             c->view.pos.v[1] = y;
         }
-        c->bump = c->bump * lbl_80563EE4;
+        c->bump = MulF(c->bump, 0.97f);
     }
     f32 bumpv = c->bump;
     f32 v = 9.150001f < bumpv ? 9.150001f : bumpv;
-    v = v > lbl_80563E78 ? v : lbl_80563E78;
+    v = v > 0.0f ? v : 0.0f;
     c->bump = v;
     c->view.pos.v[1] = c->view.pos.v[1] + c->bump;
     fn_8026EF48((const s32*)p, c->view.pos.v, &tgt.x);
-    CsVec up4(lbl_80563E78, lbl_80563E30, lbl_80563E78);
+    CsVec up4(0.0f, 1.0f, 0.0f);
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up4.x);
     if (!fn_801769F8()) {
-        f32 b2 = lbl_80563E88 + c->blend;
+        f32 b2 = 0.016683351f + c->blend;
         c->blend = b2 < 100.0f ? b2 : 100.0f;
     }
 }
@@ -603,10 +610,10 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f32 k = c->speedFrac;
         switch (mode) {
         case 8:
-            k = lbl_80563E30 - lbl_80563E68 * k;
+            k = 1.0f - MulF(0.25f, k);
             break;
         default:
-            k = lbl_80563E30 - 0.35f * k;
+            k = 1.0f - 0.35f * k;
             break;
         }
         f32 radius = F32(c->car, 0x5B4);
@@ -619,25 +626,23 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             fn_802E30C8("physcam: %d != %d (tv = %d)", prev, mode, 11);
             c->tf.pos = c->pos;
             c->tf.axes = c->axes;
-            c->tf.pos.v[0] = c->tf.pos.v[0] + c->axes.fwd.x * lbl_80563E44;
-            c->tf.pos.v[1] = c->tf.pos.v[1] + c->axes.fwd.y * lbl_80563E44;
-            c->tf.pos.v[2] = c->tf.pos.v[2] + c->axes.fwd.z * lbl_80563E44;
+            AddScaled(c->tf.pos.v, c->tf.pos.v, &c->axes.fwd.x, -10.0f);
         }
         f32 along = PSVECDotProduct((const Vec*)&c->axes.fwd.x, (const Vec*)c->vel);
         // The original computes a travel direction here and never uses it (its compares survive).
-        f32 dir = lbl_80563E78;
+        f32 dir = 0.0f;
         if (along > 3.5555556f || along < -5.3333335f) {
-            dir = along > lbl_80563E78 ? lbl_80563E30 : -1.0f;
+            dir = along > 0.0f ? 1.0f : -1.0f;
         }
-        f32 on = fn_8018B06C(c->car) < 0 ? -1.0f : lbl_80563E30;
+        f32 on = fn_8018B06C(c->car) < 0 ? -1.0f : 1.0f;
         if (U8(c->car, 0x260C)) {
             on *= -1.0f;
         }
-        c->lastOn = c->lastOn + lbl_80563EA8 * (on - c->lastOn);
+        c->lastOn = c->lastOn + 0.1f * (on - c->lastOn);
         CVec3* forward;
-        int reverse = c->lastOn < lbl_80563E78;
-        int back = PSVECDotProduct((const Vec*)&c->tf.axes.fwd.x, (const Vec*)c->vel) < lbl_80563E78;
-        if (PSVECDotProduct((const Vec*)&c->tf.axes.fwd.x, (const Vec*)&c->axes.fwd.x) < lbl_80563E78) {
+        int reverse = c->lastOn < 0.0f;
+        int back = PSVECDotProduct((const Vec*)&c->tf.axes.fwd.x, (const Vec*)c->vel) < 0.0f;
+        if (PSVECDotProduct((const Vec*)&c->tf.axes.fwd.x, (const Vec*)&c->axes.fwd.x) < 0.0f) {
             back = !back;
         }
         if (!back) {
@@ -648,7 +653,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             d.x = target.v[0] - c->tf.pos.v[0];
             d.y = target.v[1] - c->tf.pos.v[1];
             d.z = target.v[2] - c->tf.pos.v[2];
-            f32 m = lbl_80563E58 * PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->tf.axes.fwd.x);
+            f32 m = MulF(2.0f, PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->tf.axes.fwd.x));
             q.x = c->tf.pos.v[0] + c->tf.axes.fwd.x * m;
             q.y = c->tf.pos.v[1] + c->tf.axes.fwd.y * m;
             q.z = c->tf.pos.v[2] + c->tf.axes.fwd.z * m;
@@ -657,14 +662,14 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             d.z = q.z - target.v[2];
         }
         f32 len = PSVECMag((const Vec*)&d.x);
-        len = len > lbl_80563EA8 ? len : lbl_80563EA8;
-        f32 inv = lbl_80563E30 / len;
+        len = len > 0.1f ? len : 0.1f;
+        f32 inv = 1.0f / len;
         c->tf.axes.fwd.x = d.x * inv;
         c->tf.axes.fwd.y = d.y * inv;
         c->tf.axes.fwd.z = d.z * inv;
         f32 t = (PSVECMag((const Vec*)c->vel) - 1.3333334f) / 26.666666f;
-        t = lbl_80563E30 < t ? lbl_80563E30 : t;
-        t = t > lbl_80563E78 ? t : lbl_80563E78;
+        t = 1.0f < t ? 1.0f : t;
+        t = t > 0.0f ? t : 0.0f;
         f32 s = fn_8026FCE0(t, -0.5f);
         s = s + 0.9f * (c->smooth - s);
         c->smooth = s;
@@ -677,12 +682,12 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f.v[1] *= 0.2f;
         f32 m = PSVECMag((const Vec*)f.v);
         m = 0.05f > m ? 0.05f : m;
-        f32 inv2 = lbl_80563E30 / m;
+        f32 inv2 = 1.0f / m;
         f.v[0] *= inv2;
         f.v[1] *= inv2;
         f.v[2] *= inv2;
         if (PSVECDotProduct((const Vec*)f.v, (const Vec*)&c->tf.axes.fwd.x) > -0.95f) {
-            f32 w = s + 0.7f * (lbl_80563E30 - s);
+            f32 w = s + 0.7f * (1.0f - s);
             SetZXY(&r, LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
             c->tf.axes.fwd.x = r.x;
             c->tf.axes.fwd.y = r.y;
@@ -693,7 +698,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             side.x = c->tf.axes.fwd.z;
             side.y = y2;
             side.z = sideZ;
-            f32 kk = lbl_80563EA8 * (PSVECDotProduct((const Vec*)&side.x, (const Vec*)f.v) > lbl_80563E78 ? lbl_80563E30 : -1.0f);
+            f32 kk = 0.1f * (PSVECDotProduct((const Vec*)&side.x, (const Vec*)f.v) > 0.0f ? 1.0f : -1.0f);
             c->tf.axes.fwd.x = c->tf.axes.fwd.x + side.x * kk;
             c->tf.axes.fwd.y = c->tf.axes.fwd.y + side.y * kk;
             c->tf.axes.fwd.z = c->tf.axes.fwd.z + side.z * kk;
@@ -701,13 +706,11 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         forward = &c->tf.axes.fwd;
         f32 n = PSVECMag((const Vec*)&forward->x);
         n = 0.05f > n ? 0.05f : n;
-        f32 inv3 = lbl_80563E30 / n;
+        f32 inv3 = 1.0f / n;
         forward->x = forward->x * inv3;
         forward->y = forward->y * inv3;
         forward->z = forward->z * inv3;
-        c->tf.pos.v[0] = target.v[0] + forward->x * lbl_80563F18;
-        c->tf.pos.v[1] = target.v[1] + forward->y * lbl_80563F18;
-        c->tf.pos.v[2] = target.v[2] + forward->z * lbl_80563F18;
+        AddScaled(c->tf.pos.v, target.v, &forward->x, -13.0f);
         fw = *(PVec3A*)&c->tf.axes.fwd;
         f32 out = -dist;
         c->view.pos.v[0] = c->pos.v[0] + fw.v[0] * out;
@@ -724,7 +727,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             eye.v[1] = c->view.pos.v[1];
             eye.v[2] = c->view.pos.v[2];
         }
-        CsVec up(lbl_80563E78, lbl_80563E30, lbl_80563E78);
+        CsVec up(0.0f, 1.0f, 0.0f);
         fn_8026E870(eye.v, target.v, p, &up.x);
     }
 }
@@ -767,19 +770,17 @@ void fn_802704E4(u8* p) {
     PVec3A eye;
     CVec3 r;
     int wide = fn_80178CA4() > 1;
-    f32 dist = AddMul(wide ? 8.0f : 4.0f, lbl_80563E30 - MulF(0.35f, c->speedFrac), F32(c->car, 0x5B4));
+    f32 dist = AddMul(wide ? 8.0f : 4.0f, 1.0f - MulF(0.35f, c->speedFrac), F32(c->car, 0x5B4));
     lift = CarHeight(c->car) + 2.1f;
     if (c->mode != 9) {
         c->tf.pos = c->pos;
         c->tf.axes = c->axes;
-        c->tf.pos.v[0] = c->tf.pos.v[0] + c->axes.fwd.x * lbl_80563E44;
-        c->tf.pos.v[1] = c->tf.pos.v[1] + c->axes.fwd.y * lbl_80563E44;
-        c->tf.pos.v[2] = c->tf.pos.v[2] + c->axes.fwd.z * lbl_80563E44;
+        AddScaled(c->tf.pos.v, c->tf.pos.v, &c->axes.fwd.x, -10.0f);
     }
-    on = U8(c->car, 0x260C) ? lbl_80563E30 : lbl_80563E78;
+    on = U8(c->car, 0x260C) ? 1.0f : 0.0f;
     c->fov = fn_8026ECE4(p, &dist);
     target = c->pos;
-    target.v[1] += MulF(wide ? 2.5f : lbl_80563E58, F32(c->car, 0x5E4));
+    target.v[1] += MulF(wide ? 2.5f : 2.0f, F32(c->car, 0x5E4));
     if ((f32)__fabs(on - c->lastOn) <= __float_epsilon[0]) {
         f32 altitude = F32(c->car, 0x25D8);
         int below = altitude < -0.1f;
@@ -788,17 +789,17 @@ void fn_802704E4(u8* p) {
         d.y = target.v[1] - c->tf.pos.v[1];
         d.z = target.v[2] - c->tf.pos.v[2];
         f32 len = PSVECMag((const Vec*)&d.x);
-        len = len > lbl_80563EA8 ? len : lbl_80563EA8;
-        f32 inv = lbl_80563E30 / len;
+        len = len > 0.1f ? len : 0.1f;
+        f32 inv = 1.0f / len;
         c->tf.axes.fwd.x = d.x * inv;
         c->tf.axes.fwd.y = d.y * inv;
         c->tf.axes.fwd.z = d.z * inv;
         f32 t = (PSVECMag((const Vec*)c->vel) - 1.3333334f) / 26.666666f;
-        t = lbl_80563E30 < t ? lbl_80563E30 : t;
-        t = t > lbl_80563E78 ? t : lbl_80563E78;
+        t = 1.0f < t ? 1.0f : t;
+        t = t > 0.0f ? t : 0.0f;
         f32 k;
         if ((moving && !below) || (below && !moving)) {
-            k = t * lbl_80563EA8;
+            k = MulF(t, 0.1f);
         } else {
             k = fn_8026FCE0(t, -0.5f);
         }
@@ -813,11 +814,11 @@ void fn_802704E4(u8* p) {
         f.v[1] *= 0.2f;
         f32 m = PSVECMag((const Vec*)f.v);
         m = 0.05f > m ? 0.05f : m;
-        f32 inv2 = lbl_80563E30 / m;
+        f32 inv2 = 1.0f / m;
         f.v[0] *= inv2;
         f.v[1] *= inv2;
         f.v[2] *= inv2;
-        f32 w = s + 0.7f * (lbl_80563E30 - s);
+        f32 w = s + 0.7f * (1.0f - s);
         SetZXY(&r, LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
         c->tf.axes.fwd.x = r.x;
         c->tf.axes.fwd.y = r.y;
@@ -827,7 +828,7 @@ void fn_802704E4(u8* p) {
         c->tf.axes.fwd.y *= -1.0f;
         c->tf.axes.fwd.z *= -1.0f;
     }
-    f32 back = MulF(lbl_80563F18, F32(c->car, 0x5E4));
+    f32 back = MulF(-13.0f, F32(c->car, 0x5E4));
     c->tf.pos.v[0] = target.v[0] + c->tf.axes.fwd.x * back;
     c->tf.pos.v[1] = target.v[1] + c->tf.axes.fwd.y * back;
     c->tf.pos.v[2] = target.v[2] + c->tf.axes.fwd.z * back;
@@ -846,22 +847,20 @@ void fn_802704E4(u8* p) {
         eye.v[2] = c->view.pos.v[2];
     }
     fn_8026EF48((const s32*)p, eye.v, target.v);
-    CsVec up(lbl_80563E78, lbl_80563E30, lbl_80563E78);
+    CsVec up(0.0f, 1.0f, 0.0f);
     fn_8026E870(eye.v, target.v, p, &up.x);
     c->lastOn = on;
 }
 
 }  // extern "C"
 
-extern const f32 lbl_80563F2C;
-extern const f32 lbl_80563F30;
-extern const f32 lbl_80563F34;
-extern const f32 lbl_80563F38;
 
 ModuleTag lbl_8055F520;
-f32 lbl_8055F528 = lbl_80563F2C;
-f32 lbl_8055F52C = lbl_80563F30;  // reference field of view
-f32 lbl_8055F530 = lbl_80563F34;
-f32 lbl_8055F534 = lbl_80563F38;
+// The four view angles are set by the static initialiser in retail (not constant data): 75, 95, 125 and 110 degrees.
+static inline f32 DegToRad(f32 d) { return d * 0.017453292f; }
+f32 lbl_8055F528 = DegToRad(75.0f);
+f32 lbl_8055F52C = DegToRad(95.0f);  // reference field of view
+f32 lbl_8055F530 = DegToRad(125.0f);
+f32 lbl_8055F534 = DegToRad(110.0f);
 f32 lbl_8049A208[4];  // lift terms
 CamRect lbl_8049A218[4];
