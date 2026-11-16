@@ -564,7 +564,7 @@ public:
     VDel* colors;       // offset 0xD4
     CarUIScreen* ui2;   // offset 0xD8
     u32* out;           // offset 0xDC
-    u8 padE0[0x100];
+    char colorText[0x100];  // offset 0xE0: the "UICar:COLOR%d" label
 };
 
 }  // namespace
@@ -684,15 +684,17 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
 
 // Tints the car with the selected slot's animation, or its saved paint.
 static inline void ShowCarColor(u8* p) {
-    VehicleInfo* v2 = FindVehicleNamed((const char*)(p + 0x60), 0);
+    ColorPick* cp = (ColorPick*)p;
+    VehicleInfo* v2 = FindVehicleNamed(cp->chassis, 0);
     u32 col = GetSelColor(p);
-    u32 anim = *(u32*)(PTR(p, 0xCC) + ((GarageSel*)p)->sel * 0x14 + 0x10);
-    ((CarUIScreen*)PTR(p, 0x4C))->SetAnim(anim ? anim : ((u32*)((u8*)v2 + 0x64))[col]);
+    u32 anim = *(u32*)(((u8*)cp->entries) + cp->sel * 0x14 + 0x10);
+    cp->ui->SetAnim(anim ? anim : ((u32*)((u8*)v2 + 0x64))[col]);
 }
 
 // Remembers colour c as the car's body (alt) or trim colour.
 static inline void SaveColor(u8* p, s32 c) {
-    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
+    ColorPick* cp = (ColorPick*)p;
+    VehicleInfo* v = FindVehicleNamed(cp->chassis, 0);
     if (lbl_80498C48.alt) {
         GetVehicleColor(v, 0)[0] = c;
     } else {
@@ -702,20 +704,22 @@ static inline void SaveColor(u8* p, s32 c) {
 
 // Saves the selected colour for the car and shows it (tint and "UICar:COLOR%d" label).
 static inline void DisplaySelectedColor(u8* p, VehicleInfo* v) {
-    *(u32*)PTR(p, 0xDC) = ((u32*)((u8*)v + 0x64))[((GarageSel*)p)->sel];
+    ColorPick* cp = (ColorPick*)p;
+    *cp->out = ((u32*)((u8*)v + 0x64))[cp->sel];
     ShowCarColor(p);
-    fn_801345D8((char*)(p + 0xE0), 0x100, RollStrings::ColorKey(), ((GarageSel*)p)->sel + 1);
-    const char* str = fn_80131234(p + 0xE0);
-    CopyName(str, 0x100, (char*)(p + 0xE0));
+    fn_801345D8(cp->colorText, 0x100, RollStrings::ColorKey(), cp->sel + 1);
+    const char* str = fn_80131234((u8*)cp->colorText);
+    CopyName(str, 0x100, cp->colorText);
 }
 
 static inline void ShowSelColor(u8* p) {
-    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
+    ColorPick* cp = (ColorPick*)p;
+    VehicleInfo* v = FindVehicleNamed(cp->chassis, 0);
     if (lbl_80498C48.alt) {
-        s32 c = S32(p, 0x2C);
+        s32 c = cp->sel;
         GetVehicleColor(v, 0)[0] = c;
     } else {
-        s32 c = S32(p, 0x2C);
+        s32 c = cp->sel;
         GetVehicleColor(v, 0)[1] = c;
     }
     DisplaySelectedColor(p, v);
@@ -725,14 +729,21 @@ extern "C" {
 
 void fn_8024EA1C(u8* p) { ShowSelColor(p); }
 
-s32 fn_8024EB94(u8* p) { return S32(p, 0x1c); }
+s32 fn_8024EB94(u8* p) {
+    CarSlotList* cp = (CarSlotList*)p;
+    return cp->count;
+}
 
-u8* fn_8024EB9C(u8* p, int i) { return PTR(p, 0xCC) + i * 0x14; }
+u8* fn_8024EB9C(u8* p, int i) {
+    CarSlotList* cp = (CarSlotList*)p;
+    return ((u8*)cp->entries) + i * 0x14;
+}
 
 void fn_8024EBAC(u8* p, s32 v, int set) {
-    S32(p, 0x2C) = v;
+    CarSlotList* cp = (CarSlotList*)p;
+    cp->sel = v;
     if (set) {
-        F32(p, 0x28) = (f32)v;
+        cp->pos = (f32)v;
     }
 }
 
@@ -1130,13 +1141,14 @@ extern const f32 lbl_80563964;
 extern const f32 lbl_80563970;
 
 static inline void UpdateSlotAnims(u8* p) {
+    SlotStrip* cp = (SlotStrip*)p;
     int i;
     SlotAnim* e;
     f32 dt;
     dt = fn_80214D48();
-    F32(p, 0x28) = F32(p, 0x28) + 0.2f * ((f32)S32(p, 0x2C) - F32(p, 0x28));
-    for (i = 0; i < S32(p, 0x1C); i++) {
-        e = &((SlotAnim*)PTR(p, 0x18))[i];
+    cp->pos = cp->pos + 0.2f * ((f32)cp->sel - cp->pos);
+    for (i = 0; i < cp->count; i++) {
+        e = &((SlotAnim*)((u8*)cp->slots))[i];
         if (e->sel != e->shown) {
             e->t = e->t + 6.0f * dt;
             if (e->t >= lbl_80563964) {
@@ -1338,12 +1350,13 @@ extern "C" {
 
 // Colour list input: left/right pick the previous/next colour; bumping an end plays the error cue.
 static inline void ShowChangedColor(u8* p) {
-    VehicleInfo* v = FindVehicleNamed((const char*)(p + 0x60), 0);
+    ColorPick* cp = (ColorPick*)p;
+    VehicleInfo* v = FindVehicleNamed(cp->chassis, 0);
     if (lbl_80498C48.alt) {
-        const struct { s32 selected; } paint = {S32(p, 0x2C)};
+        const struct { s32 selected; } paint = {cp->sel};
         GetVehicleColor(v, 0)[0] = paint.selected;
     } else {
-        const struct { s32 selected; } paint = {S32(p, 0x2C)};
+        const struct { s32 selected; } paint = {cp->sel};
         GetVehicleColor(v, 0)[1] = paint.selected;
     }
     DisplaySelectedColor(p, v);
