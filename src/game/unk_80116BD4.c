@@ -4506,6 +4506,7 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 #pragma opt_propagation off  /* Pragma unproven: as on the PCM clamps; partial, Process review lead */
+#pragma opt_common_subs off  /* Pragma unproven: 94.15 -> 95.28; the inter IDCT is EXACT with the same three off (Process review) */
 #pragma opt_unroll_loops off  /* Pragma unproven: retail keeps the 7-row scaled fill as a ctr loop; MWCC unrolls it otherwise */
 // Decodes one Bink plane (8x8 blocks, or 16x16 scaled blocks) into dst, using prev as the previous frame.
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
