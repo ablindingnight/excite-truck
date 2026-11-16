@@ -324,7 +324,8 @@ void fn_80202924(void) {
 }
 
 void fn_802029FC(void) {
-    s32 color = fn_802C7A3C(1.0f - (f32)fmod(fn_801E7E18(), 1.0), 0.0f, 50.0f);
+    f32 frac = (f32)fmod(fn_801E7E18(), 1.0);
+    s32 color = fn_802C7A3C(1.0f - frac, 0.0f, 50.0f);
     ValMatrix m;
     Identity(&m);
     for (int i = 0; i < (int)lbl_804888E0.count; i++) {
