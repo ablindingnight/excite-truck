@@ -195,6 +195,7 @@ struct EvPair {
 // The event/track pairs the pickers choose from.
 struct EvPairs {
     EvPairs();
+    ~EvPairs() { items = 0; count = 0; cap = 0; }
     void Trim();
     EvPair* items;  // offset 0x0
     s32 count;      // offset 0x4
@@ -545,14 +546,12 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         events.f18 = -1;
         events.cur = 0;
         events.env = 0;
-        if (pairs) {
-            delete[] pairs->alloc;
-            pairs->items = 0;
-            pairs->count = 0;
-            pairs->cap = 0;
-            operator delete(pairs);
+        EvPairs* p = pairs;
+        if (p) {
+            delete[] p->alloc;
+            delete p;
+            pairs = 0;
         }
-        pairs = 0;
         return 0;
     }
     __dt__7UITableFv(&stats, 0);
@@ -564,14 +563,12 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     events.f18 = -1;
     events.cur = 0;
     events.env = 0;
-    if (pairs) {
-        delete[] pairs->alloc;
-        pairs->items = 0;
-        pairs->count = 0;
-        pairs->cap = 0;
-        operator delete(pairs);
+    EvPairs* p = pairs;
+    if (p) {
+        delete[] p->alloc;
+        delete p;
+        pairs = 0;
     }
-    pairs = 0;
     return 1;
 }
 
