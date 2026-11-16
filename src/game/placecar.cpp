@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/respawn.h"
 #include <revolution/MTX/vec.h>
 // Lane offset of the grid columns (5.0f). A named constant defined before any code: retail keeps it as the FIRST
 // .sdata2 entry and negates it at run time, so its value is not folded where it is used. A one-field const struct
@@ -90,16 +91,7 @@ struct GroundInfo {
     s32 b;
 };
 
-struct Respawn {
-    ValMatrix place;  // offset 0x0
-    ValVec3 vel;   // offset 0x30
-    s32 unk3C;     // offset 0x3C
-    s16 hint;      // offset 0x40
-    u8 pad42[2];
-    s32 mode;      // offset 0x44
-    u8 pad48[8];
-};
-
+// Respawn, CarPlace: game/respawn.h.
 struct ObjTeleport {
     u8 pad0[0x18];
     f32 dx;  // offset 0x18
@@ -130,8 +122,8 @@ void fn_801E9DC4(s16* h);
 int fn_801E9E30(s16* h, const V3* pos);
 int fn_801E9E78(s16* h, V3* pos, V3* normal, GroundInfo* info);
 int fn_801B8630(Respawn* r, int car, int mode);
-void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir);
-void fn_801B8054(Respawn* r, LineFollower* f, f32 side, f32 dist);
+void fn_801B7C8C(CarPlace* r, const V2* pos, const V2* dir);
+void fn_801B8054(CarPlace* r, LineFollower* f, f32 side, f32 dist);
 }
 
 ModuleTag lbl_8055E730;
@@ -176,7 +168,7 @@ int fn_801B7688(int mode) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-void fn_801B7760(Respawn* r, const ILPos* p, f32 side, f32 angle) {
+void fn_801B7760(CarPlace* r, const ILPos* p, f32 side, f32 angle) {
     f32 nx;
     IdealPoint* s = p->seg;
     f32 t = p->t;
@@ -205,7 +197,7 @@ void fn_801B7760(Respawn* r, const ILPos* p, f32 side, f32 angle) {
     r->unk3C = 0;
 }
 
-void fn_801B78EC(Respawn* r, LineFollower* f, int byIlpos, f32 side, f32 dist, f32 angle) {
+void fn_801B78EC(CarPlace* r, LineFollower* f, int byIlpos, f32 side, f32 dist, f32 angle) {
     ILPos p;
     if (byIlpos) {
         p = fn_80135B24(f, dist);
@@ -296,7 +288,7 @@ static inline f32 Corner(f32 p, f32 d, f32 n) { return p + d * 0.5f + n * 0.5f; 
    function with that literal was compiled here (dead static functions keep their constants). */
 static f32 SlotStart(f32 base) { return 10.0f + base; }
 
-void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
+void fn_801B7C8C(CarPlace* r, const V2* pos, const V2* dir) {
     V2 n = *dir;
     ValMatrix m;
     V3 up;
@@ -369,15 +361,15 @@ void fn_801B7F4C(Respawn* r, int slot, int mode) {
     }
 }
 
-void fn_801B8040(Respawn* r, const ILPos* p, f32 side) { fn_801B7760(r, p, side, 0.0f); }
+void fn_801B8040(CarPlace* r, const ILPos* p, f32 side) { fn_801B7760(r, p, side, 0.0f); }
 
-void fn_801B8048(Respawn* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC(r, f, 0, side, dist, 0.0f); }
+void fn_801B8048(CarPlace* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC(r, f, 0, side, dist, 0.0f); }
 
-void fn_801B8054(Respawn* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC(r, f, 1, side, dist, 0.0f); }
+void fn_801B8054(CarPlace* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC(r, f, 1, side, dist, 0.0f); }
 
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
-void fn_801B8060(Respawn* r, const ObjTeleport* t) {
+void fn_801B8060(CarPlace* r, const ObjTeleport* t) {
     V2 pos;
     V2 dir;
     pos.x = t->x;

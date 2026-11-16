@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/respawn.h"
 #include <revolution/MTX/vec.h>
 #include "game/springcar.h"
 
@@ -156,12 +157,7 @@ struct Phob {
     ValVec3 pos;  // offset 0x60
 };
 
-struct Respawn {
-    ValVec3 basis[3];  // offset 0x0
-    ValVec3 pos;       // offset 0x24
-    ValVec3 vel;       // offset 0x30
-};
-
+// Respawn, CarPlace: game/respawn.h.
 extern "C" {
 double sqrt(double x);
 void fn_802C744C(s32 model, const ValMatrix* m);
@@ -216,7 +212,7 @@ public:
 
 extern "C" {
 PathSet* fn_80156A40(void);
-void fn_801B7C8C(struct Respawn* r, V2* pos, V2* dir);
+void fn_801B7C8C(CarPlace* r, V2* pos, V2* dir);
 }
 
 extern "C" {
@@ -244,7 +240,7 @@ struct GemRef {
 
 extern "C" GemRef fn_8016A6B0(const char* name, int n);
 extern "C" s32 fn_8001B308(GemRef* g, void* art, int a);
-extern "C" void fn_801B8060(struct Respawn* r, struct ObjTeleport* t);
+extern "C" void fn_801B8060(CarPlace* r, struct ObjTeleport* t);
 
 const char* GetGradeDisplayName(int grade);
 int IdentGetCurrentSlot(void);
@@ -2070,7 +2066,7 @@ inline int RingChalMaster::vfB0(int car, Respawn* r) {
             ObjTeleport* t = s->Next();
             fn_801B8060(r, t);
             ScaleV(&r->vel, &t->mtx.basis[2], 26.666666f);
-            r->pos.y += 7.625f;
+            r->place.origin.y += 7.625f;
             return 1;
         }
         return 0;
@@ -2256,9 +2252,9 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx) {
             fn_801B7C8C(out, &mid, &dir);
             {
                 f32 s = (4.0f / 9.0f) * sp->GetFloat("speed", 0.0f);
-                out->vel.x = out->basis[2].x * s;
-                out->vel.y = out->basis[2].y * s;
-                out->vel.z = out->basis[2].z * s;
+                out->vel.x = out->place.basis[2].x * s;
+                out->vel.y = out->place.basis[2].y * s;
+                out->vel.z = out->place.basis[2].z * s;
             }
             return 1;
         }
