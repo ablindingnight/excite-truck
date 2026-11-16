@@ -300,18 +300,22 @@ static inline void ScaleQ(Quat* o, const Quat* a, f32 k) {
     o->w = a->w * k;
 }
 
+static inline void LerpQ(Quat* q, const Quat* a, const Quat* b, f32 f) {  /* Helper name unproven */
+    f32 g = 1.0f - f;
+    q->w = a->w * g + b->w * f;
+    q->z = a->z * g + b->z * f;
+    q->y = a->y * g + b->y * f;
+    q->x = a->x * g + b->x * f;
+}
+
 int fn_801DA294(PathFollower* p, PlainValMatrix* m, V3* vel, V3* angvel) {
     PathKey* a = 0;
     PathKey* b = 0;
     f32 f = 0.0f;
     if (fn_801DA1F8(p, &a, &b, &f)) {
         LerpPos(m, a, b, f);
-        f32 g = 1.0f - f;
         Quat q;
-        q.w = a->rot.w * g + b->rot.w * f;
-        q.z = a->rot.z * g + b->rot.z * f;
-        q.y = a->rot.y * g + b->rot.y * f;
-        q.x = a->rot.x * g + b->rot.x * f;
+        LerpQ(&q, &a->rot, &b->rot, f);
         f32 inv = 1.0f / (f32)sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
         q.y *= inv;
         q.z *= inv;
