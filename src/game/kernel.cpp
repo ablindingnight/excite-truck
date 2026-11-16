@@ -3,23 +3,29 @@
 // draws a planar YUV(A) video frame through indirect texturing (two colour-ramp lookup textures turn the
 // chroma planes into RGB). Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/GX/GXTypes.h>
+#include <revolution/GX/GXVert.h>
+#include <revolution/GX/GXAttr.h>
+#include <revolution/GX/GXBump.h>
+#include <revolution/GX/GXGeometry.h>
+#include <revolution/GX/GXLight.h>
+#include <revolution/GX/GXPixel.h>
+#include <revolution/GX/GXTev.h>
+#include <revolution/GX/GXTexture.h>
+#include <revolution/GX/GXTransform.h>
+#include <revolution/OS/OS.h>
+#include <revolution/OS/OSCache.h>
+#include <revolution/OS/OSError.h>
+#include <revolution/OS/OSReset.h>
+#include <revolution/OS/OSTime.h>
+#include <revolution/VI/vi.h>
 
 extern "C" {
 void* radmalloc(u32 size);  // allocate
 void radfree(void* p);
-void DCFlushRange(void* p, u32 n);
-void DCStoreRange(void* p, u32 n);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);  // fatal
-void OSPanic(const char* file, int line, const char* msg, ...);
-s64 OSGetTime(void);
-void OSTicksToCalendarTime(s64 ticks, void* td);
-void OSInit(void);
-void VIInit(void);
-void LCEnable(void);
 void OSRestart(u32 code);
-void OSReturnToMenu(void);
-void OSShutdownSystem(void);
 int DVDCancelAll(void);
 void __WPADShutdown(void);
 s32 WPADGetStatus(void);
@@ -28,81 +34,21 @@ void fn_80127D58(void (*cb)(void));
 int fn_802D9BF0(void);
 int fn_802D9C04(void);
 
-void GXInitTexObj(void* obj, void* image, u16 w, u16 h, int fmt, int ws, int wt, int mip);
-void GXInitTexObjLOD(void* obj, int minf, int magf, f32 minlod, f32 maxlod, f32 bias, int clamp, int edge,
-                     int aniso);
-void GXLoadTexObj(void* obj, int id);
-void GXSetVtxAttrFmt(int fmt, int attr, int cnt, int type, int frac);
-void GXClearVtxDesc(void);
-void GXSetVtxDesc(int attr, int type);
-void GXSetNumChans(int n);
-void GXSetNumTexGens(int n);
-void GXSetNumTevStages(int n);
-void GXSetNumIndStages(int n);
-void GXSetIndTexOrder(int stage, int coord, int map);
-void GXSetBlendMode(int type, int src, int dst, int op);
-void GXSetTevIndirect(int stage, int ind, int fmt, int bias, int mtx, int ws, int wt, int addPrev, int utcLod,
-                      int alpha);
-void GXSetTevOrder(int stage, int coord, int map, int color);
-void GXSetTevColorIn(int stage, int a, int b, int c, int d);
-void GXSetTevColorOp(int stage, int op, int bias, int scale, int clamp, int reg);
-void GXSetTevAlphaIn(int stage, int a, int b, int c, int d);
-void GXSetTevAlphaOp(int stage, int op, int bias, int scale, int clamp, int reg);
-void GXSetTevKColorSel(int stage, int sel);
-void GXSetTevKAlphaSel(int stage, int sel);
-void GXSetTevSwapMode(int stage, int ras, int tex);
-void GXSetTevSwapModeTable(int table, int r, int g, int b, int a);
-void GXSetIndTexMtx(int id, const f32 m[2][3], s8 exp);
-void GXSetTexCoordGen2(int dst, int type, int src, int mtx, int norm, int pt);
-void GXLoadTexMtxImm(const void* m, u32 id, int type);
-void GXBegin(int prim, int fmt, u16 n);
 }
 
-struct GXColor {
-    u8 r, g, b, a;
-};
+// GXColor: the SDK's.
 
-struct GXColorS10 {
-    s16 r, g, b, a;
-};
+// GXColorS10: the SDK's.
 
 extern "C" {
-void GXSetTevColorS10(int reg, GXColorS10 c);
-void GXSetTevKColor(int reg, GXColor c);
 }
 
 int ParseCommandLine(const char* cmd);
 void AppMain(void);
 
-union WGPipe {
-    u8 uc;
-    s16 s;
-    f32 f;
-};
 
-#define WGPIPE (*(volatile WGPipe*)0xCC008000)
 
-static inline void GXPosition3s16(s16 x, s16 y, s16 z) {
-    WGPIPE.s = x;
-    WGPIPE.s = y;
-    WGPIPE.s = z;
-}
-
-static inline void GXColor4u8(u8 r, u8 g, u8 b, u8 a) {
-    WGPIPE.uc = r;
-    WGPIPE.uc = g;
-    WGPIPE.uc = b;
-    WGPIPE.uc = a;
-}
-
-static inline void GXTexCoord2f32(f32 s, f32 t) {
-    WGPIPE.f = s;
-    WGPIPE.f = t;
-}
-
-struct GXTexObj {
-    u32 dummy[8];
-};
+// GXTexObj: the SDK's.
 
 // Textures of one frame buffer: luma, the two chroma planes and alpha.
 struct VidTexSet {
@@ -274,8 +220,8 @@ void fn_802E1804(u8* dst, const u8* src, int w, u32 h, int bpp) {
 }
 
 int fn_802E18D4(u32 w, u32 h, int fmt, int wrap, GXTexObj* obj, void* image) {
-    GXInitTexObj(obj, image, w, h, fmt, wrap, wrap, 0);
-    GXInitTexObjLOD(obj, 0, 0, 0.0f, 0.0f, 0.0f, 0, 0, 0);
+    GXInitTexObj((GXTexObj*)obj, (void*)image, (u16)w, (u16)h, (GXTexFmt)fmt, (GXTexWrapMode)wrap, (GXTexWrapMode)wrap, (GXBool)0);
+    GXInitTexObjLOD((GXTexObj*)obj, (GXTexFilter)0, (GXTexFilter)0, 0.0f, 0.0f, 0.0f, (GXBool)0, (GXBool)0, (GXAnisotropy)0);
     return 1;
 }
 
@@ -297,7 +243,7 @@ u32 fn_802E1980(u8* buf, GXTexObj* obj, u32* outW, u32* outH, u32 w) {
     u32 size = fn_802E1954(n << 3);
     fn_802E1780(tmp, w, n);
     fn_802E1804(buf, tmp, n, 4, 2);
-    DCFlushRange(buf, size);
+    DCFlushRange((const void*)buf, (u32)size);
     fn_802E18D4(n, 4, 3, 1, obj, buf);
     return size;
 }
@@ -413,89 +359,89 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
         break;
     }
     v->busy[v->info.cur] = 1;
-    GXSetVtxAttrFmt(0, 9, 1, 3, 0);
-    GXSetVtxAttrFmt(0, 11, 1, 5, 0);
-    GXSetVtxAttrFmt(0, 13, 1, 4, 0);
-    GXSetVtxAttrFmt(0, 14, 1, 4, 0);
+    GXSetVtxAttrFmt((GXVtxFmt)0, (GXAttr)9, (GXCompCnt)1, (GXCompType)3, (u8)0);
+    GXSetVtxAttrFmt((GXVtxFmt)0, (GXAttr)11, (GXCompCnt)1, (GXCompType)5, (u8)0);
+    GXSetVtxAttrFmt((GXVtxFmt)0, (GXAttr)13, (GXCompCnt)1, (GXCompType)4, (u8)0);
+    GXSetVtxAttrFmt((GXVtxFmt)0, (GXAttr)14, (GXCompCnt)1, (GXCompType)4, (u8)0);
     GXClearVtxDesc();
-    GXLoadTexObj(&v->tex[v->info.cur].y, 0);
-    GXLoadTexObj(&v->ramp1, 1);
-    GXLoadTexObj(&v->ramp2, 2);
-    GXLoadTexObj(&v->tex[v->info.cur].u, 3);
-    GXLoadTexObj(&v->tex[v->info.cur].v, 4);
-    GXSetVtxDesc(9, 1);
-    GXSetVtxDesc(11, 1);
-    GXSetVtxDesc(13, 1);
-    GXSetVtxDesc(14, 1);
+    GXLoadTexObj((const GXTexObj*)&v->tex[v->info.cur].y, (GXTexMapID)0);
+    GXLoadTexObj((const GXTexObj*)&v->ramp1, (GXTexMapID)1);
+    GXLoadTexObj((const GXTexObj*)&v->ramp2, (GXTexMapID)2);
+    GXLoadTexObj((const GXTexObj*)&v->tex[v->info.cur].u, (GXTexMapID)3);
+    GXLoadTexObj((const GXTexObj*)&v->tex[v->info.cur].v, (GXTexMapID)4);
+    GXSetVtxDesc((GXAttr)9, (GXAttrType)1);
+    GXSetVtxDesc((GXAttr)11, (GXAttrType)1);
+    GXSetVtxDesc((GXAttr)13, (GXAttrType)1);
+    GXSetVtxDesc((GXAttr)14, (GXAttrType)1);
     if (hasAlpha) {
-        GXLoadTexObj(&v->tex[v->info.cur].a, 5);
+        GXLoadTexObj((const GXTexObj*)&v->tex[v->info.cur].a, (GXTexMapID)5);
     }
-    GXSetNumChans(1);
-    GXSetNumTexGens(4);
-    GXSetNumTevStages(4);
-    GXSetNumIndStages(3);
-    GXSetIndTexOrder(0, 1, 1);
-    GXSetIndTexOrder(1, 2, 2);
+    GXSetNumChans((u8)1);
+    GXSetNumTexGens((u8)4);
+    GXSetNumTevStages((u8)4);
+    GXSetNumIndStages((u8)3);
+    GXSetIndTexOrder((GXIndTexStageID)0, (GXTexCoordID)1, (GXTexMapID)1);
+    GXSetIndTexOrder((GXIndTexStageID)1, (GXTexCoordID)2, (GXTexMapID)2);
     if (hasAlpha) {
-        GXSetBlendMode(1, 4, 5, 0);
+        GXSetBlendMode((GXBlendMode)1, (GXBlendFactor)4, (GXBlendFactor)5, (GXLogicOp)0);
     } else if ((u8)a != 0xFF) {
-        GXSetBlendMode(1, 4, 5, 0);
+        GXSetBlendMode((GXBlendMode)1, (GXBlendFactor)4, (GXBlendFactor)5, (GXLogicOp)0);
     } else {
-        GXSetBlendMode(1, 1, 0, 0);
+        GXSetBlendMode((GXBlendMode)1, (GXBlendFactor)1, (GXBlendFactor)0, (GXLogicOp)0);
     }
-    GXSetTevIndirect(0, 1, 0, 7, 1, 0, 0, 0, 0, 0);
-    GXSetTevOrder(0, 0, 4, 0xFF);
-    GXSetTevColorIn(0, 15, 8, 14, 2);
-    GXSetTevColorOp(0, 0, 0, 0, 0, 0);
-    GXSetTevAlphaIn(0, 7, 4, 6, 1);
-    GXSetTevAlphaOp(0, 1, 0, 0, 0, 0);
-    GXSetTevKColorSel(0, 12);
-    GXSetTevKAlphaSel(0, 0x1C);
-    GXSetTevSwapMode(0, 0, 0);
-    GXSetTevIndirect(1, 1, 0, 7, 1, 0, 0, 0, 0, 0);
-    GXSetTevOrder(1, 0, 3, 0xFF);
-    GXSetTevColorIn(1, 15, 8, 14, 0);
-    GXSetTevColorOp(1, 0, 0, 1, 0, 0);
-    GXSetTevAlphaIn(1, 7, 4, 6, 0);
-    GXSetTevAlphaOp(1, 1, 0, 0, 0, 0);
-    GXSetTevKColorSel(1, 13);
-    GXSetTevKAlphaSel(1, 0x1D);
-    GXSetTevSwapMode(1, 0, 0);
-    GXSetTevIndirect(2, 0, 0, 7, 1, 0, 0, 0, 0, 0);
-    GXSetTevOrder(2, 3, 0, 0xFF);
-    GXSetTevColorIn(2, 15, 8, 12, 0);
-    GXSetTevColorOp(2, 0, 0, 0, 1, 0);
-    GXSetTevAlphaIn(2, 4, 7, 7, 0);
-    GXSetTevAlphaOp(2, 0, 0, 0, 1, 0);
-    GXSetTevSwapMode(2, 0, 0);
+    GXSetTevIndirect((GXTevStageID)0, (GXIndTexStageID)1, (GXIndTexFormat)0, (GXIndTexBiasSel)7, (GXIndTexMtxID)1, (GXIndTexWrap)0, (GXIndTexWrap)0, (GXBool)0, (GXBool)0, (GXIndTexAlphaSel)0);
+    GXSetTevOrder((GXTevStageID)0, (GXTexCoordID)0, (GXTexMapID)4, (GXChannelID)0xFF);
+    GXSetTevColorIn((GXTevStageID)0, (GXTevColorArg)15, (GXTevColorArg)8, (GXTevColorArg)14, (GXTevColorArg)2);
+    GXSetTevColorOp((GXTevStageID)0, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)0, (GXTevRegID)0);
+    GXSetTevAlphaIn((GXTevStageID)0, (GXTevAlphaArg)7, (GXTevAlphaArg)4, (GXTevAlphaArg)6, (GXTevAlphaArg)1);
+    GXSetTevAlphaOp((GXTevStageID)0, (GXTevOp)1, (GXTevBias)0, (GXTevScale)0, (GXBool)0, (GXTevRegID)0);
+    GXSetTevKColorSel((GXTevStageID)0, (GXTevKColorSel)12);
+    GXSetTevKAlphaSel((GXTevStageID)0, (GXTevKAlphaSel)0x1C);
+    GXSetTevSwapMode((GXTevStageID)0, (GXTevSwapSel)0, (GXTevSwapSel)0);
+    GXSetTevIndirect((GXTevStageID)1, (GXIndTexStageID)1, (GXIndTexFormat)0, (GXIndTexBiasSel)7, (GXIndTexMtxID)1, (GXIndTexWrap)0, (GXIndTexWrap)0, (GXBool)0, (GXBool)0, (GXIndTexAlphaSel)0);
+    GXSetTevOrder((GXTevStageID)1, (GXTexCoordID)0, (GXTexMapID)3, (GXChannelID)0xFF);
+    GXSetTevColorIn((GXTevStageID)1, (GXTevColorArg)15, (GXTevColorArg)8, (GXTevColorArg)14, (GXTevColorArg)0);
+    GXSetTevColorOp((GXTevStageID)1, (GXTevOp)0, (GXTevBias)0, (GXTevScale)1, (GXBool)0, (GXTevRegID)0);
+    GXSetTevAlphaIn((GXTevStageID)1, (GXTevAlphaArg)7, (GXTevAlphaArg)4, (GXTevAlphaArg)6, (GXTevAlphaArg)0);
+    GXSetTevAlphaOp((GXTevStageID)1, (GXTevOp)1, (GXTevBias)0, (GXTevScale)0, (GXBool)0, (GXTevRegID)0);
+    GXSetTevKColorSel((GXTevStageID)1, (GXTevKColorSel)13);
+    GXSetTevKAlphaSel((GXTevStageID)1, (GXTevKAlphaSel)0x1D);
+    GXSetTevSwapMode((GXTevStageID)1, (GXTevSwapSel)0, (GXTevSwapSel)0);
+    GXSetTevIndirect((GXTevStageID)2, (GXIndTexStageID)0, (GXIndTexFormat)0, (GXIndTexBiasSel)7, (GXIndTexMtxID)1, (GXIndTexWrap)0, (GXIndTexWrap)0, (GXBool)0, (GXBool)0, (GXIndTexAlphaSel)0);
+    GXSetTevOrder((GXTevStageID)2, (GXTexCoordID)3, (GXTexMapID)0, (GXChannelID)0xFF);
+    GXSetTevColorIn((GXTevStageID)2, (GXTevColorArg)15, (GXTevColorArg)8, (GXTevColorArg)12, (GXTevColorArg)0);
+    GXSetTevColorOp((GXTevStageID)2, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
+    GXSetTevAlphaIn((GXTevStageID)2, (GXTevAlphaArg)4, (GXTevAlphaArg)7, (GXTevAlphaArg)7, (GXTevAlphaArg)0);
+    GXSetTevAlphaOp((GXTevStageID)2, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
+    GXSetTevSwapMode((GXTevStageID)2, (GXTevSwapSel)0, (GXTevSwapSel)0);
     if (hasAlpha) {
-        GXSetTevIndirect(3, 0, 0, 7, 1, 0, 0, 0, 0, 0);
-        GXSetTevOrder(3, 3, 5, 4);
-        GXSetTevColorIn(3, 1, 0, 14, 15);
-        GXSetTevColorOp(3, 0, 0, 0, 1, 0);
-        GXSetTevAlphaIn(3, 7, 4, 5, 7);
-        GXSetTevAlphaOp(3, 0, 0, 0, 1, 0);
-        GXSetTevSwapMode(3, 0, 0);
-        GXSetTevKColorSel(3, 14);
+        GXSetTevIndirect((GXTevStageID)3, (GXIndTexStageID)0, (GXIndTexFormat)0, (GXIndTexBiasSel)7, (GXIndTexMtxID)1, (GXIndTexWrap)0, (GXIndTexWrap)0, (GXBool)0, (GXBool)0, (GXIndTexAlphaSel)0);
+        GXSetTevOrder((GXTevStageID)3, (GXTexCoordID)3, (GXTexMapID)5, (GXChannelID)4);
+        GXSetTevColorIn((GXTevStageID)3, (GXTevColorArg)1, (GXTevColorArg)0, (GXTevColorArg)14, (GXTevColorArg)15);
+        GXSetTevColorOp((GXTevStageID)3, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
+        GXSetTevAlphaIn((GXTevStageID)3, (GXTevAlphaArg)7, (GXTevAlphaArg)4, (GXTevAlphaArg)5, (GXTevAlphaArg)7);
+        GXSetTevAlphaOp((GXTevStageID)3, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
+        GXSetTevSwapMode((GXTevStageID)3, (GXTevSwapSel)0, (GXTevSwapSel)0);
+        GXSetTevKColorSel((GXTevStageID)3, (GXTevKColorSel)14);
     } else {
-        GXSetTevOrder(3, 0xFF, 0xFF, 4);
-        GXSetTevColorIn(3, 1, 0, 14, 15);
-        GXSetTevColorOp(3, 0, 0, 0, 1, 0);
-        GXSetTevAlphaIn(3, 7, 6, 5, 7);
-        GXSetTevAlphaOp(3, 0, 0, 0, 1, 0);
-        GXSetTevSwapMode(3, 0, 0);
-        GXSetTevKColorSel(3, 14);
+        GXSetTevOrder((GXTevStageID)3, (GXTexCoordID)0xFF, (GXTexMapID)0xFF, (GXChannelID)4);
+        GXSetTevColorIn((GXTevStageID)3, (GXTevColorArg)1, (GXTevColorArg)0, (GXTevColorArg)14, (GXTevColorArg)15);
+        GXSetTevColorOp((GXTevStageID)3, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
+        GXSetTevAlphaIn((GXTevStageID)3, (GXTevAlphaArg)7, (GXTevAlphaArg)6, (GXTevAlphaArg)5, (GXTevAlphaArg)7);
+        GXSetTevAlphaOp((GXTevStageID)3, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
+        GXSetTevSwapMode((GXTevStageID)3, (GXTevSwapSel)0, (GXTevSwapSel)0);
+        GXSetTevKColorSel((GXTevStageID)3, (GXTevKColorSel)14);
     }
     GXColorS10 c0 = {-90, 0, -114, 135};
-    GXSetTevColorS10(1, c0);
+    GXSetTevColorS10((GXTevRegID)1, (GXColorS10)c0);
     GXColor k0 = {0, 0, 0xE2, 0x58};
-    GXSetTevKColor(0, k0);
+    GXSetTevKColor((GXTevKColorID)0, (GXColor)k0);
     GXColor k1 = {0xB3, 0, 0, 0xB6};
-    GXSetTevKColor(1, k1);
+    GXSetTevKColor((GXTevKColorID)1, (GXColor)k1);
     GXColor k2 = {0xFF, 0, 0xFF, 0x80};
-    GXSetTevKColor(2, k2);
-    GXSetTevSwapModeTable(0, 0, 1, 2, 3);
-    GXSetIndTexMtx(1, (const f32(*)[3])lbl_802FAE40, 4);
+    GXSetTevKColor((GXTevKColorID)2, (GXColor)k2);
+    GXSetTevSwapModeTable((GXTevSwapSel)0, (GXTevColorChan)0, (GXTevColorChan)1, (GXTevColorChan)2, (GXTevColorChan)3);
+    GXSetIndTexMtx((GXIndTexMtxID)1, (const f32(*)[3])lbl_802FAE40, (s8)4);
     f32 ys = (f32)(v->info.width >> 3) / (f32)v->rampW[0];
     f32 yt = (f32)v->info.height / (f32)v->rampW[1];
     f32 cs = (f32)(v->info.cwidth >> 3) / (f32)v->rampW2[0];
@@ -504,15 +450,15 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     lbl_804DB740[1][1] = yt;
     lbl_804DB760[0][0] = cs;
     lbl_804DB760[1][1] = ct;
-    GXSetTexCoordGen2(0, 1, 4, 0x1E, 0, 0x7D);
-    GXSetTexCoordGen2(1, 1, 4, 0x21, 0, 0x7D);
-    GXSetTexCoordGen2(2, 1, 4, 0x24, 0, 0x7D);
-    GXSetTexCoordGen2(3, 1, 5, 0x27, 0, 0x7D);
-    GXLoadTexMtxImm(lbl_802FAE60, 0x1E, 1);
-    GXLoadTexMtxImm(lbl_804DB740, 0x21, 1);
-    GXLoadTexMtxImm(lbl_804DB760, 0x24, 1);
-    GXLoadTexMtxImm(lbl_802FAE60, 0x27, 1);
-    GXBegin(0x80, 0, 4);
+    GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)4, (u32)0x1E, (GXBool)0, (u32)0x7D);
+    GXSetTexCoordGen2((GXTexCoordID)1, (GXTexGenType)1, (GXTexGenSrc)4, (u32)0x21, (GXBool)0, (u32)0x7D);
+    GXSetTexCoordGen2((GXTexCoordID)2, (GXTexGenType)1, (GXTexGenSrc)4, (u32)0x24, (GXBool)0, (u32)0x7D);
+    GXSetTexCoordGen2((GXTexCoordID)3, (GXTexGenType)1, (GXTexGenSrc)5, (u32)0x27, (GXBool)0, (u32)0x7D);
+    GXLoadTexMtxImm((const f32 (*)[4])(lbl_802FAE60), (u32)0x1E, (GXMtxType)1);
+    GXLoadTexMtxImm((const f32 (*)[4])(lbl_804DB740), (u32)0x21, (GXMtxType)1);
+    GXLoadTexMtxImm((const f32 (*)[4])(lbl_804DB760), (u32)0x24, (GXMtxType)1);
+    GXLoadTexMtxImm((const f32 (*)[4])(lbl_802FAE60), (u32)0x27, (GXMtxType)1);
+    GXBegin((GXPrimitive)0x80, (GXVtxFmt)0, (u16)4);
     int x1;
     int x0;
     int y0;
@@ -538,7 +484,7 @@ void fn_802E1DA4(Video* v, u32 w, u32 h, f32 x, f32 y, f32 sx, f32 sy, f32 alpha
     GXTexCoord2f32(0.0f, 1.0f);
 }
 
-void fn_802E27A0(Video* v) { DCStoreRange(v->info.frames[v->info.cur].y.buf, v->frameSize); }
+void fn_802E27A0(Video* v) { DCStoreRange((const void*)(v->info.frames[v->info.cur].y.buf), (u32)v->frameSize); }
 
 void fn_802E27B8(Video* v) {
     int next = v->info.cur + 1;
@@ -705,7 +651,7 @@ s64 fn_802E2C9C(void) {
 
 void fn_802E2CFC(KDate* d) {
     KCalendar c;
-    OSTicksToCalendarTime(OSGetTime(), &c);
+    OSTicksToCalendarTime((s64)(OSGetTime()), (OSCalendarTime*)&c);
     d->sec = c.sec;
     d->min = c.min;
     d->hour = c.hour;
