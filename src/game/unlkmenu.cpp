@@ -135,16 +135,21 @@ extern "C" int fn_8024497C(void) {
 /* Helper name unproven */
 static inline int ListKind(int type = 5) { return type; }
 
+/* Helper name unproven */
+static inline MenuItem MakeRatingLabel(const UnlockList& list) {
+    int capacity = sizeof(list.title);
+    return MenuItem("#rating", 3, list.title, capacity, 0);
+}
+
 #pragma push
 #pragma opt_propagation off  /* Pragma unproven */
 extern "C" void fn_802449A0(void) {
     UnlockList list;
     int arrows = 1;
     int on = 2;
-    int width = 0x80;
     MenuItem items[] = {
         MenuItem("downarrow", 2, &arrows, 0, 0),
-        MenuItem("#rating", 3, list.title, width, 0),
+        MakeRatingLabel(list),
         MenuItem("unlockable_list", ListKind(), &list, 0, 0),
         MenuItem(lbl_8055B860, 6, (void*)fn_8024497C, -1, 27),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, on, 0),
