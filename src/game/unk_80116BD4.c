@@ -7358,14 +7358,27 @@ extern const s32 lbl_802F7A40[];
 // Dequantizes (inter table `q`) and inverse-transforms a block, adding the result to the motion source src.
 #pragma push
 #pragma opt_lifetimes off
+#pragma opt_propagation off
+#pragma opt_common_subs off
+/* The AAN fast IDCT in the libjpeg jidctfst.c layout: the same work variables serve both passes and are
+ * assigned again (tmp10..tmp12 hold the even sums first and the odd products later). RAD built it without
+ * lifetime splitting, copy propagation or common-subexpression elimination, so every variable keeps one
+ * register for the whole routine (Process review, 2026-11-16). */
 void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride) {
     s32 tmp[64];
     s32 i;
-    s32 *t = tmp;
-    s32 *quant = (s32 *)((u8 *)lbl_802F7A40 + (q << 8));
+    s32 *t;
+    s32 *quant;
+    s32 s1, s2, s3, s4, s5, s6, s7;
+    s32 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+    s32 tmp10, tmp11, tmp12, tmp13;
+    s32 z5, z10, z11, z12, z13;
 
+    quant = (s32 *)((u8 *)lbl_802F7A40 + (q << 8));
+    t = tmp;
+
+    // Pass 1: columns, from the coefficient block into the work array.
     for (i = 8; i != 0; --i) {
-        s32 s1, s3, s4, s5, s6, s7, s2;
         s6 = block[48];
         s5 = block[40];
         s4 = block[32];
@@ -7375,6 +7388,7 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
         s2 = block[16];
         // The cast keeps CodeWarrior from reassociating the zero-test ORs.
         if (((s7 | (s32)((u32)s6 | (u32)s5)) | ((s4 | s3) | (s1 | s2))) == 0) {
+            // All AC terms are zero: the column is the dequantized DC value.
             s32 dc = (block[0] * quant[0]) >> 11;
             block++;
             quant++;
@@ -7388,87 +7402,89 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
             t[56] = dc;
             t++;
         } else {
-            s32 d0 = (block[0] * quant[0]) >> 11;
-            s32 d2 = (s2 * quant[16]) >> 11;
-            s32 d4 = (s4 * quant[32]) >> 11;
-            s32 d6 = (s6 * quant[48]) >> 11;
-            s32 a0 = d0 + d4;
-            s32 a2 = d2 + d6;
-            s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
-            s32 e3 = a0 - a2;
-            s32 a1 = d0 - d4;
-            s32 e0 = a0 + a2;
-            s32 e2 = a1 - a3;
-            s32 e1 = a1 + a3;
-            s32 d3 = (s3 * quant[24]) >> 11;
-            s32 d1 = (s1 * quant[8]) >> 11;
-            s32 d5 = (s5 * quant[40]) >> 11;
-            s32 d7 = (s7 * quant[56]) >> 11;
-            s32 a7 = d1 - d7;
-            s32 a6 = d1 + d7;
-            s32 a4 = d5 + d3;
-            s32 a5 = d5 - d3;
-            s32 b0 = a6 + a4;
-            s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
-            s32 b3 = BINK_MUL(BINK_A1, a6 - a4);
-            s32 b4 = BINK_MUL(BINK_A2, a7) - b1;
-            s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-            b3 -= b2;
-            b4 += b3;
+            s32 s0 = block[0];
+
+            // Even part
+            tmp0 = (s0 * quant[0]) >> 11;
+            tmp1 = (s2 * quant[16]) >> 11;
+            tmp2 = (s4 * quant[32]) >> 11;
+            tmp3 = (s6 * quant[48]) >> 11;
+            tmp10 = tmp0 + tmp2;
+            tmp11 = tmp0 - tmp2;
+            tmp13 = tmp1 + tmp3;
+            tmp12 = BINK_MUL(BINK_A1, tmp1 - tmp3) - tmp13;
+            tmp0 = tmp10 + tmp13;
+            tmp3 = tmp10 - tmp13;
+            tmp1 = tmp11 + tmp12;
+            tmp2 = tmp11 - tmp12;
+
+            // Odd part
+            tmp4 = (s1 * quant[8]) >> 11;
+            tmp5 = (s3 * quant[24]) >> 11;
+            tmp6 = (s5 * quant[40]) >> 11;
+            tmp7 = (s7 * quant[56]) >> 11;
+            z13 = tmp6 + tmp5;
+            z10 = tmp6 - tmp5;
+            z11 = tmp4 + tmp7;
+            z12 = tmp4 - tmp7;
+            tmp7 = z11 + z13;
+            tmp11 = BINK_MUL(BINK_A1, z11 - z13);
+            z5 = BINK_MUL(BINK_A3, z10 + z12);
+            tmp10 = BINK_MUL(BINK_A2, z12) - z5;
+            tmp12 = z5 + BINK_MUL(BINK_A4, z10);
+            tmp6 = tmp12 - tmp7;
+            tmp5 = tmp11 - tmp6;
+            tmp4 = tmp10 + tmp5;
+
             block++;
             quant++;
-            t[0] = e0 + b0;
-            t[56] = e0 - b0;
-            t[8] = e1 + b2;
-            t[48] = e1 - b2;
-            t[16] = e2 + b3;
-            t[40] = e2 - b3;
-            t[32] = e3 + b4;
-            t[24] = e3 - b4;
+            t[0] = tmp0 + tmp7;
+            t[56] = tmp0 - tmp7;
+            t[8] = tmp1 + tmp6;
+            t[48] = tmp1 - tmp6;
+            t[16] = tmp2 + tmp5;
+            t[40] = tmp2 - tmp5;
+            t[32] = tmp3 + tmp4;
+            t[24] = tmp3 - tmp4;
             t++;
         }
     }
+
+    // Pass 2: rows, from the work array onto the motion-compensated source.
     t = tmp;
-    for (i = 8; i != 0; --i) {
-        s32 e0;
-        s32 e1;
-        s32 e2;
-        s32 e3;
-        s32 x0 = t[0];
-        s32 x2 = t[2];
-        s32 x6 = t[6];
-        s32 x5 = t[5];
-        s32 x3 = t[3];
-        s32 x1 = t[1];
-        s32 x7 = t[7];
-        s32 a2 = x2 + x6;
-        s32 a3 = BINK_MUL(BINK_A1, x2 - x6) - a2;
-        s32 a4 = x5 + x3;
-        s32 a6 = x1 + x7;
-        s32 x4 = t[4];
-        s32 b0 = a6 + a4;
-        s32 b3 = BINK_MUL(BINK_A1, a6 - a4);
-        s32 a0 = x0 + x4;
-        s32 a7 = x1 - x7;
-        s32 a5 = x5 - x3;
-        s32 a1 = x0 - x4;
-        s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
-        s32 b4 = BINK_MUL(BINK_A2, a7) - b1;
-        s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-        b3 -= b2;
-        b4 += b3;
-        e0 = a0 + a2;
-        e1 = a1 + a3;
-        e2 = a1 - a3;
-        e3 = a0 - a2;
-        dst[0] = src[0] + ((e0 + b0 + 0x7F) >> 8);
-        dst[7] = src[7] + ((e0 - b0 + 0x7F) >> 8);
-        dst[1] = src[1] + ((e1 + b2 + 0x7F) >> 8);
-        dst[6] = src[6] + ((e1 - b2 + 0x7F) >> 8);
-        dst[2] = src[2] + ((e2 + b3 + 0x7F) >> 8);
-        dst[5] = src[5] + ((e2 - b3 + 0x7F) >> 8);
-        dst[3] = src[3] + ((e3 - b4 + 0x7F) >> 8);
-        dst[4] = src[4] + ((e3 + b4 + 0x7F) >> 8);
+    for (i = 0; i < 8; i++) {
+        // Even part
+        tmp10 = t[0] + t[4];
+        tmp11 = t[0] - t[4];
+        tmp13 = t[2] + t[6];
+        tmp12 = BINK_MUL(BINK_A1, t[2] - t[6]) - tmp13;
+        tmp0 = tmp10 + tmp13;
+        tmp3 = tmp10 - tmp13;
+        tmp1 = tmp11 + tmp12;
+        tmp2 = tmp11 - tmp12;
+
+        // Odd part
+        z13 = t[5] + t[3];
+        z10 = t[5] - t[3];
+        z11 = t[1] + t[7];
+        z12 = t[1] - t[7];
+        tmp7 = z11 + z13;
+        tmp11 = BINK_MUL(BINK_A1, z11 - z13);
+        z5 = BINK_MUL(BINK_A3, z10 + z12);
+        tmp10 = BINK_MUL(BINK_A2, z12) - z5;
+        tmp12 = z5 + BINK_MUL(BINK_A4, z10);
+        tmp6 = tmp12 - tmp7;
+        tmp5 = tmp11 - tmp6;
+        tmp4 = tmp10 + tmp5;
+
+        dst[0] = src[0] + ((tmp0 + tmp7 + 0x7F) >> 8);
+        dst[7] = src[7] + ((tmp0 - tmp7 + 0x7F) >> 8);
+        dst[1] = src[1] + ((tmp1 + tmp6 + 0x7F) >> 8);
+        dst[6] = src[6] + ((tmp1 - tmp6 + 0x7F) >> 8);
+        dst[2] = src[2] + ((tmp2 + tmp5 + 0x7F) >> 8);
+        dst[5] = src[5] + ((tmp2 - tmp5 + 0x7F) >> 8);
+        dst[3] = src[3] + ((tmp3 - tmp4 + 0x7F) >> 8);
+        dst[4] = src[4] + ((tmp3 + tmp4 + 0x7F) >> 8);
         src += srcStride;
         dst += stride;
         t += 8;
