@@ -6,6 +6,14 @@
 int IdentGetCurrentSlot(void);
 const char* IdentGetSlotName(int);
 
+// The text table the controls table derives from (uitable.cpp), declared as far as the calls below need.
+class UITable {
+public:
+    void Clear(void);
+    char* Get(int row, int col, int* flag);
+    void Set(int row, int col, const char* s, char flag);
+};
+
 extern "C" {
 struct ControlActionInfoFields { const char* displayName; const char* key; };
 struct ControlActionDescriptorFields { const char* key; const char* defaultValue; };
@@ -88,8 +96,6 @@ struct ControlInputFields { int id, controller; u32 modifiers; u8 flag; };
 extern const int lbl_80563748[2];
 extern const char* lbl_8055BBA0;
 void __ct__7UITableFiiPCi(ControlsTableFields*, int, int, const int*);
-const char* Get__7UITableFiiPi(ControlsTableFields*, int, int, int*);
-void Set__7UITableFiiPCcc(ControlsTableFields*, int, int, const char*, char);
 int fn_80137C98(int);
 void* fn_8018108C(int);
 void fn_801A7E54(char*, int, const ControlInputFields*);
@@ -158,7 +164,6 @@ void fn_8023E33C(void* pointer);
 
 extern const ControlActionDescriptorFields lbl_802FA190[17];
 ControlActionInfoFields* fn_8023DC38(const char*);
-void Clear__7UITableFv(ControlsTableFields*);
 void fn_801A7974(ControlInputFields*, const char*, ControlValueTableHandle);
 typedef ControlValueTableHandle (*ControlConfigMapGetter)(void*);
 
@@ -468,7 +473,7 @@ extern "C" int fn_8023DD80(void) {
     fn_801A7974(&initial, lbl_802FA190[lbl_8055F194].key, table);
     ControlsChoiceFields choice(&initial);
     MenuItem items[] = {
-        MenuItem("#title", 3, Get__7UITableFiiPi(lbl_8055F190, lbl_8055F194, 0, 0), 0, 0),
+        MenuItem("#title", 3, ((UITable*)lbl_8055F190)->Get(lbl_8055F194, 0, 0), 0, 0),
         MenuItem("#input", 16, 0, (int)&choice, 0),
         MenuItem(lbl_8055B860, 6, 0, -1, 27),
         MenuItem(lbl_8055B860, 6, 0, -2, 13),
@@ -518,8 +523,8 @@ extern "C" void fn_8023E0DC(ControlsTableFields* self, int selectedRow) {
     if (selectedRow >= 0 && selectedRow < self->rowCount) {
         int column = self->columnCount;
         while (column-- > 0) {
-            const char* text = Get__7UITableFiiPi(self, selectedRow, column, 0);
-            Set__7UITableFiiPCcc(self, selectedRow, column, text, 1);
+            const char* text = ((UITable*)self)->Get(selectedRow, column, 0);
+            ((UITable*)self)->Set(selectedRow, column, text, 1);
         }
     }
 }
@@ -528,21 +533,21 @@ extern "C" void fn_8023E16C(ControlsTableFields* self, int selectedRow) {
     if (selectedRow >= 0 && selectedRow < self->rowCount) {
         int column = self->columnCount;
         while (column-- > 0) {
-            const char* text = Get__7UITableFiiPi(self, selectedRow, column, 0);
-            Set__7UITableFiiPCcc(self, selectedRow, column, text, 0);
+            const char* text = ((UITable*)self)->Get(selectedRow, column, 0);
+            ((UITable*)self)->Set(selectedRow, column, text, 0);
         }
     }
 }
 
 extern "C" void fn_8023E1FC(ControlsTableFields* self) {
-    Clear__7UITableFv(self);
+    ((UITable*)self)->Clear();
     ControlInputFields input;
     input.controller = self->controller;
     input.flag = 0;
     const ControlActionDescriptorFields* action = lbl_802FA190;
     for (int row = 0; row < 17; row++, action++) {
         const char* title = fn_8023DC38(action->key)->displayName;
-        Set__7UITableFiiPCcc(self, row, 0, title, 0);
+        ((UITable*)self)->Set(row, 0, title, 0);
         // The original calls the configuration object's virtual slot +0x70.
         // Its class name and the map's concrete type are deliberately unknown.
         ControlValueTableHandle map = ((ControlsConfigCallView*)self->inputConfig)->GetMap();
@@ -556,9 +561,9 @@ extern "C" void fn_8023E1FC(ControlsTableFields* self) {
                 if (--n <= 0) { dst[-1] = 0; break; }
             }
         } else fn_801A7E54(text, 20, &input);
-        Set__7UITableFiiPCcc(self, row, 1, text, 0);
+        ((UITable*)self)->Set(row, 1, text, 0);
     }
-    Set__7UITableFiiPCcc(self, 17, 0, "Restore Defaults", 0);
+    ((UITable*)self)->Set(17, 0, "Restore Defaults", 0);
 }
 
 extern "C" void fn_8023E33C(void* pointer) {
