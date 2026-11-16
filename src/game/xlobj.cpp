@@ -6,6 +6,7 @@
 // strings.
 #include "game/common.h"
 #include "game/vec3_init.h"
+#include "game/math_types.h"
 // Shadow grid scale (name unproven): a named constant with external linkage defined before any code, retail's first
 // .sdata2 entry. BinShadows takes it by const reference, so its value is not folded into the divisions there.
 extern const f32 lbl_80564CB0;
@@ -71,12 +72,6 @@ void operator delete[](void* p);
 struct V2 {
     f32 x;
     f32 y;
-};
-
-struct Vec3 {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 class Vec2 : public V2 {

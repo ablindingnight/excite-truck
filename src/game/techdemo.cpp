@@ -73,14 +73,14 @@ public:
     virtual void Draw(void) = 0;
 };
 
-struct Vec3;
+struct TdVec3;
 
 // The zone outline renderer (zone.cpp).
 class Glow {
 public:
     Glow(void);
     ~Glow(void);
-    void Draw(Vec3* pts, int n, int c);
+    void Draw(TdVec3* pts, int n, int c);
     s32 lite;  // offset 0x0
     s32 glow;  // offset 0x4
 };
@@ -108,8 +108,8 @@ struct FixedArr : ArrayRef<T> {
     T storage[N];
 };
 
-struct Vec3 {
-    Vec3(void) {}
+struct TdVec3 {
+    TdVec3(void) {}
     f32 x;
     f32 y;
     f32 z;
@@ -122,7 +122,7 @@ struct ActZone {
         fn_80128658(bound);
         bound = 0;
     }
-    Vec3 pt[2];    // offset 0x0
+    TdVec3 pt[2];    // offset 0x0
     Bound* bound;  // offset 0x18
     s32 seq;       // offset 0x1C
     s32 lap;       // offset 0x20

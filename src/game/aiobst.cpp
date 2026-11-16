@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/vec3_init.h"
 #include "game/carbody.h"
+#include "game/math_types.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -23,12 +24,6 @@ void* operator new[](size_t size, const char* tag);
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 #define LERP(a, b, t) ((a) + (t) * ((b) - (a)))
-
-struct Vec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct Pt {
     f32 x;

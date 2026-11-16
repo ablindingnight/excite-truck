@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/vpos.h"
 #include "game/camframe34.h"
+#include "game/math_types.h"
 
 ModuleTag lbl_8055E1D0;
 static inline u32 InitialFFFFWord() { return 0xFFFF0000u; }
@@ -13,12 +14,6 @@ extern const u32 lbl_8055E1D8 = InitialFFFFWord();
 static UnkStatic123 lbl_8042FB88;
 static inline u32 Initial7FWord() { return 0x7F000000u; }
 extern const u32 lbl_8055E1DC = Initial7FWord();
-
-struct Vec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 

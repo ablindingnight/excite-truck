@@ -39,9 +39,9 @@ struct PlainVec3 {
     f32 z;
 };
 
-struct Vec3 : PlainVec3 {
-    Vec3(void) {}
-    Vec3(f32 x_, f32 y_, f32 z_) {
+struct ZoneVec3 : PlainVec3 {
+    ZoneVec3(void) {}
+    ZoneVec3(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
@@ -51,15 +51,15 @@ struct Vec3 : PlainVec3 {
         this->y = y;
         this->z = z;
     }
-    Vec3 operator+(const Vec3& b) const { return Vec3(x + b.x, y + b.y, z + b.z); }
-    Vec3 operator-(const Vec3& b) const { return Vec3(x - b.x, y - b.y, z - b.z); }
-    Vec3 operator*(f32 s) const { return Vec3(x * s, y * s, z * s); }
+    ZoneVec3 operator+(const ZoneVec3& b) const { return ZoneVec3(x + b.x, y + b.y, z + b.z); }
+    ZoneVec3 operator-(const ZoneVec3& b) const { return ZoneVec3(x - b.x, y - b.y, z - b.z); }
+    ZoneVec3 operator*(f32 s) const { return ZoneVec3(x * s, y * s, z * s); }
 };
 
 extern "C" {
-f32 PSVECDotProduct(const Vec3* a, const Vec3* b);
-f32 PSVECDistance(const Vec3* a, const Vec3* b);
-f32 PSVECSquareDistance(const Vec3* a, const Vec3* b);
+f32 PSVECDotProduct(const ZoneVec3* a, const ZoneVec3* b);
+f32 PSVECDistance(const ZoneVec3* a, const ZoneVec3* b);
+f32 PSVECSquareDistance(const ZoneVec3* a, const ZoneVec3* b);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -168,10 +168,10 @@ struct TrackPos {
 
 struct Truck {
     u8 pad0[0x54];
-    Vec3 vel;  // offset 0x54
-    Vec3 p60;  // offset 0x60
+    ZoneVec3 vel;  // offset 0x54
+    ZoneVec3 p60;  // offset 0x60
     u8 pad6C[0x94 - 0x6C];
-    Vec3 pos;  // offset 0x94
+    ZoneVec3 pos;  // offset 0x94
     u8 padA0[0x118 - 0xA0];
     f32 dirX;  // offset 0x118
     u8 pad11C[0x4];
@@ -212,7 +212,7 @@ struct Race {
 };
 
 static inline ValPoint GetPt(ValueNode* n, const char* k) { return n->GetPoint(k); }
-static inline void ScaleV(Vec3* d, const Vec3* s, f32 k) {
+static inline void ScaleV(ZoneVec3* d, const ZoneVec3* s, f32 k) {
     d->x = s->x * k;
     d->y = s->y * k;
     d->z = s->z * k;
@@ -256,10 +256,10 @@ public:
     void Init(ValueNode* node, f32 w);
     void Scale(f32 f);
     Gate& operator=(const Gate& o);
-    Vec3 Center(void) const { return Vec3(Lerp(a.x, b.x, 0.5f), Lerp(a.y, b.y, 0.5f), Lerp(a.z, b.z, 0.5f)); }
+    ZoneVec3 Center(void) const { return ZoneVec3(Lerp(a.x, b.x, 0.5f), Lerp(a.y, b.y, 0.5f), Lerp(a.z, b.z, 0.5f)); }
 
-    Vec3 a;     // offset 0x0
-    Vec3 b;     // offset 0xC
+    ZoneVec3 a;     // offset 0x0
+    ZoneVec3 b;     // offset 0xC
     f32 t;      // offset 0x18
     s16 h;      // offset 0x1C
     u8 ring;    // offset 0x1E
@@ -791,7 +791,7 @@ class Glow {
 public:
     Glow(void);
     ~Glow(void);
-    void Draw(Vec3* pts, int n, int c);
+    void Draw(ZoneVec3* pts, int n, int c);
     s32 lite;  // offset 0x0
     s32 glow;  // offset 0x4
 };
@@ -939,9 +939,9 @@ extern "C" u32 fn_8013D18C(u32 i);
 
 struct Cam {
     u8 pad0[0x18];
-    Vec3 v18;  // offset 0x18
-    Vec3 v24;
-    Vec3 v30;  // offset 0x30
+    ZoneVec3 v18;  // offset 0x18
+    ZoneVec3 v24;
+    ZoneVec3 v30;  // offset 0x30
     u8 pad3C[0x44 - 0x3C];
     s32 i44;  // offset 0x44
 };
@@ -1192,9 +1192,9 @@ void fn_8013CB90(LayoutArt* a) {
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
-    Vec3 mid = g->Center();
-    Vec3 at;
-    Vec3 ring;
+    ZoneVec3 mid = g->Center();
+    ZoneVec3 at;
+    ZoneVec3 ring;
     f32 half;
     half = PSVECDistance(&g->a, &g->b) / 2.0f;
     ring.y = g->ringY;
@@ -1220,7 +1220,7 @@ int fn_8013CBC0(ZoneCar* zm, int car) {
     Gate* g = zm->gate;
     int r = 0;
     Truck* t = fn_8017960C(car);
-    Vec3 pos;
+    ZoneVec3 pos;
     V2 p;
     V2 q;
     V2 ap;
@@ -1300,13 +1300,13 @@ int fn_8013CBC0(ZoneCar* zm, int car) {
 
 struct Watcher {
     u8 pad0[0x18];
-    Vec3 dir;  // offset 0x18
-    Vec3 pos;  // offset 0x24
+    ZoneVec3 dir;  // offset 0x18
+    ZoneVec3 pos;  // offset 0x24
 };
 
 int fn_8013CFF0(const Gate* g, const Watcher* w, f32* out) {
-    Vec3 mid = g->Center();
-    Vec3 d;
+    ZoneVec3 mid = g->Center();
+    ZoneVec3 d;
     d.x = mid.x - w->pos.x;
     d.y = mid.y - w->pos.y;
     d.z = mid.z - w->pos.z;
@@ -1612,9 +1612,9 @@ int fn_8013DE7C(ValueNode* t, const char* name) {
 }
 
 void fn_8013DF24(Gate* g, Gate* prev, Gate* next) {
-    Vec3* a = &prev->a;
-    Vec3* b = &next->a;
-    Vec3* p = &g->a;
+    ZoneVec3* a = &prev->a;
+    ZoneVec3* b = &next->a;
+    ZoneVec3* p = &g->a;
     u32 i;
     for (i = 0; i < 2; i++) {
         V2 pa;
@@ -1697,9 +1697,9 @@ void Gate::Scale(f32 f) {
         f32 mz = az + (bz - az) * 0.5f;
         f32 my = ay + (by - ay) * 0.5f;
         f32 mx = ax + (bx - ax) * 0.5f;
-        Vec3 mid(mx, my, mz);
-        a = Vec3(mid.x + s * (ax - mid.x), mid.y + s * (ay - mid.y), mid.z + s * (az - mid.z));
-        b = Vec3(mid.x + s * (bx - mid.x), mid.y + s * (by - mid.y), mid.z + s * (bz - mid.z));
+        ZoneVec3 mid(mx, my, mz);
+        a = ZoneVec3(mid.x + s * (ax - mid.x), mid.y + s * (ay - mid.y), mid.z + s * (az - mid.z));
+        b = ZoneVec3(mid.x + s * (bx - mid.x), mid.y + s * (by - mid.y), mid.z + s * (bz - mid.z));
     }
 #undef s
 }
@@ -1707,8 +1707,8 @@ void Gate::Scale(f32 f) {
 // MATCHING-AID: the target copies both end points as one 24-byte block (six lwz, six stw), which means
 // a and b were probably one segment struct in the original. GateSeg stands in for that type.
 struct GateSeg {
-    Vec3 a;
-    Vec3 b;
+    ZoneVec3 a;
+    ZoneVec3 b;
 };
 
 Gate& Gate::operator=(const Gate& o) {
@@ -1799,9 +1799,9 @@ extern "C" {
 int fn_801E866C(int player);
 Watcher* fn_802C86DC(void);
 void fn_802A9BFC(PlainVec3* a, PlainVec3* b, s32 tex, f32 t, int d, int e, int f, int g);
-void fn_801E9E30(s16* h, Vec3* p);
+void fn_801E9E30(s16* h, ZoneVec3* p);
 f32 fn_801E7E24(void);
-void fn_802981F8(Vec3* p);
+void fn_802981F8(ZoneVec3* p);
 }  // extern "C"
 void UpdateContinueOverlay(void);
 extern "C" {
@@ -1817,7 +1817,7 @@ void fn_8000FF88(u32 color, int size, const char* text, f32 scale, f32 x, f32 y,
 }
 
 /* Helper name unproven: the watcher's position. */
-static inline Vec3* WatcherPos(void) { return &fn_802C86DC()->pos; }
+static inline ZoneVec3* WatcherPos(void) { return &fn_802C86DC()->pos; }
 
 /* Helper name unproven: the bar drawn above the next gate (endpoints copied as plain vectors, level and texture by value). */
 static inline void DrawGateBar(const PlainVec3& from, const PlainVec3& to, const s32& level, const s32& tex, f32 t) {
@@ -1866,7 +1866,7 @@ void ZoneMaster::DrawNextGate(void) {
 /* Helper name unproven: handles the gates hit this frame. */
 inline void ZoneMaster::MarkHitGates(FixedArray<GateHit, 8>& hits) {
     Gate* gg;
-    Vec3* p;
+    ZoneVec3* p;
     if (!((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0])) {
         int i;
         for (i = 0; i < hits.count; i++) {
@@ -1893,7 +1893,7 @@ void ZoneMaster::vf44(void) {
     int nRing;
     GateHit* h;
     int nPlain;
-    Vec3* p;
+    ZoneVec3* p;
     Gate* g;
 
     FixedArray<GateHit, 8> hits;
@@ -2170,10 +2170,10 @@ void fn_801474EC(LayoutItem* item, const char* fmt, ...);
 void UpdateScoreOverlays(int, int);
 extern "C" {
 void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
-void PSVECNormalize(const Vec3* a, Vec3* b);
-void PSVECCrossProduct(const Vec3* a, const Vec3* b, Vec3* c);
+void PSVECNormalize(const ZoneVec3* a, ZoneVec3* b);
+void PSVECCrossProduct(const ZoneVec3* a, const ZoneVec3* b, ZoneVec3* c);
 void fn_802C70AC(int model, void* mtx, int a, int b);
-void fn_802A96E8(Vec3* pts, int n, int c, s32 lite, s32 glow);
+void fn_802A96E8(ZoneVec3* pts, int n, int c, s32 lite, s32 glow);
 }
 
 
@@ -2343,17 +2343,17 @@ void ZoneMaster::DrawHud(int p) const {
 }
 
 struct RingMtx {
-    Vec3 x;
-    Vec3 y;
-    Vec3 z;
-    Vec3 pos;
+    ZoneVec3 x;
+    ZoneVec3 y;
+    ZoneVec3 z;
+    ZoneVec3 pos;
 };
 
 void ZoneMaster::DrawRing(const Gate* g, int c) const {
     RingMtx m;
     f32 s;
     {
-        Vec3 mid = g->Center();
+        ZoneVec3 mid = g->Center();
         m.pos = mid;
     }
     m.x.x = g->a.x - g->b.x;
@@ -2380,7 +2380,7 @@ void ZoneMaster::DrawRing(const Gate* g, int c) const {
 void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* hits) {
     DrawNextGate();
     int i = hits->count - 1;
-    FixedArray<Vec3, 32> pts;
+    FixedArray<ZoneVec3, 32> pts;
     for (; i >= 0; i--) {
         GateHit* data = hits->data;
         Gate* g;
@@ -2583,7 +2583,7 @@ Glow::~Glow(void) {
     gxForgetTexture(glow);
 }
 
-void Glow::Draw(Vec3* pts, int n, int c) { fn_802A96E8(pts, n, c, lite, glow); }
+void Glow::Draw(ZoneVec3* pts, int n, int c) { fn_802A96E8(pts, n, c, lite, glow); }
 
 
 // Nothing is inlined into the per-frame update in the original build: every helper it uses is a call to
@@ -2759,7 +2759,7 @@ inline void ZoneMaster::vf10(void) {
     ZoneCar* c;
     void* tr;
     u32 k;
-    Vec3* p;
+    ZoneVec3* p;
     int lv;
     ZoneLevel* l;
     int j;
@@ -2779,7 +2779,7 @@ inline void ZoneMaster::vf10(void) {
                 p++;
             }
             {
-                Vec3 mid = g->Center();
+                ZoneVec3 mid = g->Center();
                 V2 q;
                 tr = fn_80178C9C();
                 q.y = mid.z;

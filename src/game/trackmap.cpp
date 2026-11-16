@@ -3,6 +3,7 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/math_types.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -16,12 +17,6 @@ void* operator new(size_t size, const char* tag);
 struct Vec2 {
     f32 x;
     f32 y;
-};
-
-struct Vec3 {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 struct CirclePoint : public Vec3 {
@@ -102,6 +97,8 @@ struct PlayerCtrl {
     u8 reversed;  // offset 0x260C
 };
 
+// Unit-local (port ODR: other units define a different PlayerObj).
+namespace {
 struct PlayerObj {
     u8 pad0[0x70];
     f32 dirX;  // offset 0x70
@@ -110,6 +107,7 @@ struct PlayerObj {
     u8 pad7C[0x140 - 0x7C];
     PlayerCtrl* ctrl;  // offset 0x140
 };
+}  // namespace
 
 struct EventInfo {
     u8 pad0[0x10];
