@@ -1037,6 +1037,8 @@ static inline void Seeds(void) {
     fn_80129C80(5, lbl_8055E428[0], lbl_8055E428[1]);
 }
 
+#pragma push
+#pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_80178DD4(s32 stream) {
     int i;
     s32 s;
@@ -1135,6 +1137,7 @@ void fn_80178DD4(s32 stream) {
     fn_80127464();
     fn_80179320();
 }
+#pragma pop
 
 void fn_80179110(void) {
     fn_801B2C6C();
