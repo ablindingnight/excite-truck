@@ -692,7 +692,7 @@ void fn_8016707C(OrbitCarState* s, OrbitCar* car) {
     }
 }
 
-u8 fn_801671AC(int i) {
+int fn_801671AC(int i) {
     if (fn_801667F0()) {
         return lbl_8055E32C->a.data[i].suicide;
     }
@@ -737,28 +737,28 @@ f32 fn_801673A4(int i, f32* wander) {
     return 0.0f;
 }
 
-u8 fn_80167544(int i) {
+int fn_80167544(int i) {
     if (fn_801667F0()) {
         return lbl_8055E32C->a.data[i].park;
     }
     return 0;
 }
 
-u8 fn_80167594(int i) {
+int fn_80167594(int i) {
     if (fn_801667F0()) {
         return lbl_8055E32C->a.data[i].infTurbo;
     }
     return 0;
 }
 
-u8 fn_801675E4(int i) {
+int fn_801675E4(int i) {
     if (fn_801667F0()) {
         return lbl_8055E32C->a.data[i].tree;
     }
     return 0;
 }
 
-u8 fn_80167634(int i) {
+int fn_80167634(int i) {
     if (fn_801667F0()) {
         return lbl_8055E32C->a.data[i].lowGrav;
     }
@@ -778,7 +778,7 @@ void fn_80167684(f32 left) {
 
 int fn_80167728(int i) { return lbl_8055E32C->a.data[i].dist < lbl_8042FE38.rjLon; }
 
-u8 fn_80167758(void) { return lbl_8042FE38.turboTap; }
+int fn_80167758(void) { return lbl_8042FE38.turboTap; }
 
 int fn_80167768(f32 throttle) { return throttle > lbl_8042FE38.throttle; }
 
