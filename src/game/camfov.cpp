@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/camframe.h"
 #include "game/camrect.h"
+#include "game/camrec.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -31,24 +32,25 @@ extern const f32 lbl_80563E30;  // minimum squared distance
 // Places the camera at `pos` looking at `target` with `up` as the up hint; nothing changes the frame
 // when the target is too close or straight above/below.
 void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
-    F32(cam, 0x7C) = pos[0];
-    F32(cam, 0x80) = pos[1];
-    F32(cam, 0x84) = pos[2];
+    CamRec* cr = (CamRec*)cam;
+    cr->pose.pos.v[0] = pos[0];
+    cr->pose.pos.v[1] = pos[1];
+    cr->pose.pos.v[2] = pos[2];
     CsVec d;
-    d.x = target[0] - F32(cam, 0x7C);
-    d.y = target[1] - F32(cam, 0x80);
-    d.z = target[2] - F32(cam, 0x84);
+    d.x = target[0] - cr->pose.pos.v[0];
+    d.y = target[1] - cr->pose.pos.v[1];
+    d.z = target[2] - cr->pose.pos.v[2];
     if (PSVECDotProduct(&d.x, &d.x) < lbl_80563E30) {
         return;
     }
     if (AbsF(d.x) < 0.01f && AbsF(d.z) < 0.01f) {
         return;
     }
-    F32(cam, 0x70) = d.x;
-    F32(cam, 0x74) = d.y;
-    F32(cam, 0x78) = d.z;
-    PSVECCrossProduct(up, (f32*)(cam + 0x70), (f32*)(cam + 0x58));
-    PSVECCrossProduct((f32*)(cam + 0x70), (f32*)(cam + 0x58), (f32*)(cam + 0x64));
+    cr->pose.rot.m[6] = d.x;
+    cr->pose.rot.m[7] = d.y;
+    cr->pose.rot.m[8] = d.z;
+    PSVECCrossProduct(up, (f32*)&cr->pose.rot.m[6], (f32*)&cr->pose);
+    PSVECCrossProduct((f32*)&cr->pose.rot.m[6], (f32*)&cr->pose, (f32*)&cr->pose.rot.m[3]);
     Orthonormalize(cam);
 }
 
@@ -133,24 +135,25 @@ static inline int Above(f32 v, f32 k) { return v > k; }
 // The view angle for the camera: blended from the last one (0x194) toward the speed-based angle, or
 // toward the boost angle while boosting (not while an AI driver is in mode 1).
 f32 fn_8026EB4C(const u8* p) {
+    const CamRec* cr = (const CamRec*)p;
     f32 fov;
-    f32 r = fn_8026EAEC(!Boosting(PTR(p, 0x140)) ? lbl_8055F534 : lbl_8055F530);
+    f32 r = fn_8026EAEC(!Boosting(cr->car) ? lbl_8055F534 : lbl_8055F530);
     f32 lo = lbl_8055F528;
-    fov = fn_8026EAEC(LerpF(F32(p, 0x13C), lo, lbl_8055F52C));
-    u8* car = PTR(p, 0x140);
+    fov = fn_8026EAEC(LerpF(cr->f13C, lo, lbl_8055F52C));
+    u8* car = cr->car;
     int boost = 0;
     int on = Boosting(car) || car[0x259C];
     if (on && Above(F32(car, 0x25E0), 0.5f)) {
         boost = 1;
     }
-    if (S32(p, 0x4) != S32(p, 0x10)) {
+    if (cr->w4 != cr->mode) {
         r = boost ? r : fov;
-    } else if (fn_801769F8() || IsLoadingActive() || S32(PTR(p, 0x140), 0x2620) < 1) {
-        r = F32(p, 0x194);
-    } else if (boost && *(s32*)(fn_801B2ED0(S32(PTR(p, 0x140), 0x1EC))->v10() + 0x24) != 1) {
-        r = F32(p, 0x194) + 0.05f * (r - F32(p, 0x194));
+    } else if (fn_801769F8() || IsLoadingActive() || S32(cr->car, 0x2620) < 1) {
+        r = cr->f194;
+    } else if (boost && *(s32*)(fn_801B2ED0(S32(cr->car, 0x1EC))->v10() + 0x24) != 1) {
+        r = cr->f194 + 0.05f * (r - cr->f194);
     } else {
-        r = F32(p, 0x194) + 0.02f * (fov - F32(p, 0x194));
+        r = cr->f194 + 0.02f * (fov - cr->f194);
     }
     return r;
 }
@@ -259,6 +262,7 @@ static inline void EaseGroundHeight(f32 t, bool onGround, f32 h, CamRect* r) {
 // Per-frame camera height tracking: averages the ground around the car into the player's rect
 // (lbl_8049A218), eases the rect's lift/zoom terms, then lifts pos/target and applies fn_8026ED64.
 void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
+    const CamRec* cr = (const CamRec*)cam;
     f32 avg;
     f32 v;
     f32 h;
@@ -279,7 +283,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     f32 top;
     f32 rv;
     CamRect* r;
-    car = PTR(cam, 0x140);
+    car = cr->car;
     r = &lbl_8049A218[*cam];
     if (!fn_801769F8()) {
         hint = (const s16*)(car + 0x6C);
@@ -751,7 +755,7 @@ void fn_80270484(void) {
 
 void fn_802704D0(int to, int from, u8* cam) { fn_8026FCFC(to, from, cam); }
 
-void fn_802704D4(int to, u8* cam) { fn_802704D0(to, S32(cam, 0x4), cam); }
+void fn_802704D4(int to, u8* cam) { fn_802704D0(to, ((CamRec*)cam)->w4, cam); }
 
 f32 fn_802704E0(int mode, f32 t) { return fn_8026EA8C(mode, t); }
 
