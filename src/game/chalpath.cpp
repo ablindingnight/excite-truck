@@ -639,15 +639,15 @@ extern "C" {
 void fn_8026003C(void);
 void fn_80261AF0(u8* p, int difficulty);
 void fn_80261AE8(u8* p, u32 v);
-void fn_80261A7C(u8* p, s32 a);
-void fn_80261A18(u8* p, s32 a);
+void fn_80261A7C(MenuItem* p, s32 a);
+void fn_80261A18(MenuItem* p, s32 a);
 u8* fn_80261A08(u8* p, int i);
 u8* fn_802619D8(u8* p, int i);
-void fn_802619E8(u8* p, s32 a, s32 b);
-void fn_80261980(u8* p, s32 a, s32 b, s32 c);
+void fn_802619E8(MenuItem* p, s32 a, s32 b);
+void fn_80261980(MenuItem* p, s32 a, s32 b, s32 c);
 const char* fn_80261948(s32* p);
 const char* fn_802619A0(s32* p);
-void fn_80261688(u8* p, s32 a, s32 b, s32 c);
+void fn_80261688(MenuItem* p, s32 a, s32 b, s32 c);
 void fn_80261AA0(void);
 void fn_80261A40(int, f32*, f32);
 int fn_802610C8(void);
@@ -688,24 +688,24 @@ void MenuDoChallengeMode(int arg) {
             }
         }
         fn_80261AE8((u8*)&diff, scr.arg);
-        fn_80261A7C((u8*)&items[0], (s32)fn_80261AA0);
-        fn_80261A18((u8*)&items[1], (s32)fn_80261A40);
-        fn_802619E8((u8*)&items[2], (s32)"path_custom_0", *(s32*)fn_80261A08((u8*)&scr.levels, 0));
-        fn_802619E8((u8*)&items[3], (s32)"path_custom_1", *(s32*)fn_80261A08((u8*)&scr.levels, 1));
-        fn_802619E8((u8*)&items[4], (s32)"path_custom_2", *(s32*)fn_80261A08((u8*)&scr.levels, 2));
-        fn_802619E8((u8*)&items[5], (s32)"button_custom_0", *(s32*)fn_802619D8((u8*)&scr.events, 0));
-        fn_802619E8((u8*)&items[6], (s32)"button_custom_1", *(s32*)fn_802619D8((u8*)&scr.events, 1));
-        fn_802619E8((u8*)&items[7], (s32)"button_custom_2", *(s32*)fn_802619D8((u8*)&scr.events, 2));
-        fn_802619E8((u8*)&items[8], (s32)"button_custom_3", *(s32*)fn_802619D8((u8*)&scr.events, 3));
-        fn_802619E8((u8*)&items[9], (s32)"button_custom_4", *(s32*)fn_802619D8((u8*)&scr.events, 4));
-        fn_802619E8((u8*)&items[10], (s32)"button_custom_5", *(s32*)fn_802619D8((u8*)&scr.events, 5));
-        fn_80261980((u8*)&items[11], (s32)"#bar4_top_color", (s32)fn_802619A0(&diff), 0);
-        fn_80261980((u8*)&items[12], (s32)"#bar4_bot_color", (s32)fn_80261948(&diff), 0);
-        fn_80261688((u8*)&items[13], 0x126, 0, (s32)fn_802616A8);
-        fn_80261688((u8*)&items[14], 0x128, 0, (s32)fn_802613E0);
-        fn_80261688((u8*)&items[15], 0xD, -2, (s32)fn_80261178);
-        fn_80261688((u8*)&items[16], 0x121, 0, (s32)fn_802610C8);
-        fn_80261688((u8*)&items[17], 0x1B, -1, (s32)fn_80260E30);
+        fn_80261A7C((MenuItem*)&items[0], (s32)fn_80261AA0);
+        fn_80261A18((MenuItem*)&items[1], (s32)fn_80261A40);
+        fn_802619E8((MenuItem*)&items[2], (s32)"path_custom_0", *(s32*)fn_80261A08((u8*)&scr.levels, 0));
+        fn_802619E8((MenuItem*)&items[3], (s32)"path_custom_1", *(s32*)fn_80261A08((u8*)&scr.levels, 1));
+        fn_802619E8((MenuItem*)&items[4], (s32)"path_custom_2", *(s32*)fn_80261A08((u8*)&scr.levels, 2));
+        fn_802619E8((MenuItem*)&items[5], (s32)"button_custom_0", *(s32*)fn_802619D8((u8*)&scr.events, 0));
+        fn_802619E8((MenuItem*)&items[6], (s32)"button_custom_1", *(s32*)fn_802619D8((u8*)&scr.events, 1));
+        fn_802619E8((MenuItem*)&items[7], (s32)"button_custom_2", *(s32*)fn_802619D8((u8*)&scr.events, 2));
+        fn_802619E8((MenuItem*)&items[8], (s32)"button_custom_3", *(s32*)fn_802619D8((u8*)&scr.events, 3));
+        fn_802619E8((MenuItem*)&items[9], (s32)"button_custom_4", *(s32*)fn_802619D8((u8*)&scr.events, 4));
+        fn_802619E8((MenuItem*)&items[10], (s32)"button_custom_5", *(s32*)fn_802619D8((u8*)&scr.events, 5));
+        fn_80261980((MenuItem*)&items[11], (s32)"#bar4_top_color", (s32)fn_802619A0(&diff), 0);
+        fn_80261980((MenuItem*)&items[12], (s32)"#bar4_bot_color", (s32)fn_80261948(&diff), 0);
+        fn_80261688((MenuItem*)&items[13], 0x126, 0, (s32)fn_802616A8);
+        fn_80261688((MenuItem*)&items[14], 0x128, 0, (s32)fn_802613E0);
+        fn_80261688((MenuItem*)&items[15], 0xD, -2, (s32)fn_80261178);
+        fn_80261688((MenuItem*)&items[16], 0x121, 0, (s32)fn_802610C8);
+        fn_80261688((MenuItem*)&items[17], 0x1B, -1, (s32)fn_80260E30);
         fn_80260E04((Words5*)&items[18], (const Words5*)&lbl_80498F00);
         MenuDesc desc = *(const MenuDesc*)&lbl_802FA6C0;
         desc.items = (MenuItem*)items;
@@ -807,12 +807,12 @@ int fn_802613E0(void) {
     return 0;
 }
 
-void fn_80261688(u8* p, s32 a, s32 b, s32 c) {
-    S32(p, 0x8) = c;
-    S32(p, 0x4) = 6;
-    PTR(p, 0x0) = lbl_8055B860;
-    S32(p, 0xC) = b;
-    S32(p, 0x10) = a;
+void fn_80261688(MenuItem* p, s32 a, s32 b, s32 c) {
+    p->data = (const void*)c;
+    p->type = 6;
+    p->name = (const char*)lbl_8055B860;
+    p->arg0 = b;
+    p->arg1 = a;
 }
 
 // Previous difficulty, or previous event of the chosen difficulty.
@@ -837,12 +837,12 @@ const char* fn_80261948(s32* p) {
     return t[*p];
 }
 
-void fn_80261980(u8* p, s32 a, s32 b, s32 c) {
-    S32(p, 0x0) = a;
-    S32(p, 0x4) = 3;
-    S32(p, 0x8) = b;
-    S32(p, 0xC) = c;
-    S32(p, 0x10) = 0;
+void fn_80261980(MenuItem* p, s32 a, s32 b, s32 c) {
+    p->name = (const char*)a;
+    p->type = 3;
+    p->data = (const void*)b;
+    p->arg0 = c;
+    p->arg1 = 0;
 }
 
 const char* fn_802619A0(s32* p) {
@@ -852,22 +852,22 @@ const char* fn_802619A0(s32* p) {
 
 u8* fn_802619D8(u8* p, int i) { return PTR(p, 0x0) + i * 4; }
 
-void fn_802619E8(u8* p, s32 a, s32 b) {
-    S32(p, 0x0) = a;
-    S32(p, 0x4) = 5;
-    S32(p, 0x8) = b;
-    S32(p, 0xC) = 0;
-    S32(p, 0x10) = 0;
+void fn_802619E8(MenuItem* p, s32 a, s32 b) {
+    p->name = (const char*)a;
+    p->type = 5;
+    p->data = (const void*)b;
+    p->arg0 = 0;
+    p->arg1 = 0;
 }
 
 u8* fn_80261A08(u8* p, int i) { return PTR(p, 0x0) + i * 4; }
 
-void fn_80261A18(u8* p, s32 a) {
-    S32(p, 0x8) = a;
-    S32(p, 0x4) = 8;
-    PTR(p, 0x0) = lbl_8055BAB8;
-    S32(p, 0xC) = 2;
-    S32(p, 0x10) = 0;
+void fn_80261A18(MenuItem* p, s32 a) {
+    p->data = (const void*)a;
+    p->type = 8;
+    p->name = (const char*)lbl_8055BAB8;
+    p->arg0 = 2;
+    p->arg1 = 0;
 }
 
 void fn_80261A40(int x, f32* out, f32 t) {
@@ -875,12 +875,12 @@ void fn_80261A40(int x, f32* out, f32 t) {
     lbl_8055F3E9 = x == 2;
 }
 
-void fn_80261A7C(u8* p, s32 a) {
-    S32(p, 0x8) = a;
-    S32(p, 0x4) = 8;
-    PTR(p, 0x0) = lbl_8055BAC0;
-    S32(p, 0xC) = 0;
-    S32(p, 0x10) = 0;
+void fn_80261A7C(MenuItem* p, s32 a) {
+    p->data = (const void*)a;
+    p->type = 8;
+    p->name = (const char*)lbl_8055BAC0;
+    p->arg0 = 0;
+    p->arg1 = 0;
 }
 
 void fn_80261AA0(void) {
