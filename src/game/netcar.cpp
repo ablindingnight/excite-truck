@@ -344,24 +344,15 @@ static inline void QuatToMtx(RMtx* m, const TQuat* q) {
     f32 xz = q->x * z2;
     f32 wz = q->w * z2;
     f32 xy = q->x * y2;
-    f32 m00 = 1.0f - (yy + zz);
-    f32 m11 = 1.0f - (xx + zz);
-    f32 m22 = 1.0f - (xx + yy);
-    f32 zy = yz - wx;
-    f32 yz1 = wx + yz;
-    f32 zx = xz + wy;
-    f32 xz1 = xz - wy;
-    f32 yx = xy - wz;
-    f32 xy1 = xy + wz;
-    m->rot.x.x = m00;
-    m->rot.y.y = m11;
-    m->rot.z.y = zy;
-    m->rot.z.x = zx;
-    m->rot.y.x = yx;
-    m->rot.x.y = xy1;
-    m->rot.x.z = xz1;
-    m->rot.y.z = yz1;
-    m->rot.z.z = m22;
+    m->rot.x.x = 1.0f - (yy + zz);
+    m->rot.y.x = xy - wz;
+    m->rot.z.x = xz + wy;
+    m->rot.x.y = xy + wz;
+    m->rot.y.y = 1.0f - (xx + zz);
+    m->rot.z.y = yz - wx;
+    m->rot.x.z = xz - wy;
+    m->rot.y.z = yz + wx;
+    m->rot.z.z = 1.0f - (xx + yy);
 }
 
 void NetCar::Snap(void) {
@@ -406,20 +397,43 @@ extern "C" f32 fn_801A70EC(TQuat* out, const Packet* a, const Packet* b, s32 fra
     return k;
 }
 
+// Helper name unproven. Convert using the largest diagonal when the trace is nonpositive.
+static inline void NetMtxToQuatAxis(const f32 (*m)[3], TQuat* q) {
+    f32* c = &q->x;
+    int i = 0;
+    int j;
+    int l;
+    f32 s;
+    if (m[1][1] > m[0][0]) {
+        i = 1;
+    }
+    if (m[2][2] > m[i][i]) {
+        i = 2;
+    }
+    j = (i + 1) % 3;
+    l = (j + 1) % 3;
+    s = sqrt(1.0f + (m[i][i] - (m[j][j] + m[l][l])));
+    c[i] = 0.5f * s;
+    s = 0.5f / s;
+    q->w = s * (m[j][l] - m[l][j]);
+    c[j] = s * (m[i][j] + m[j][i]);
+    c[l] = s * (m[i][l] + m[l][i]);
+}
+
 void NetCar::Rotate(Blend* b) {
     s32 now = lbl_8055E3C4;
     TQuat q1;
     TQuat q2;
     TQuat q;
     TQuat cur;
-    f32* c;
     f32 tr;
     f32 k;
     fn_801A70EC(&q1, &ptab[1], &ptab[0], now);
     fn_801A70EC(&q2, &ptab[2], &ptab[1], now);
     fn_8012F57C(&q, &q2, &q1, t);
     k = b->k;
-    t = t + dt;
+    f32 nextTime = t + dt;
+    t = nextTime;
     tr = mtx.rot.x.x + mtx.rot.y.y + mtx.rot.z.z;
     f32(*m)[3] = (f32(*)[3])&mtx;
     if (tr > 0.0f) {
@@ -430,26 +444,7 @@ void NetCar::Rotate(Blend* b) {
         cur.y = inv * (m[2][0] - m[0][2]);
         cur.z = inv * (m[0][1] - m[1][0]);
     } else {
-        int l;
-        c = &cur.x;
-        s32 i = 0;
-        int j;
-        f32 s;
-        f32 inv;
-        if (m[1][1] > m[0][0]) {
-            i = 1;
-        }
-        if (m[2][2] > m[i][i]) {
-            i = 2;
-        }
-        j = (i + 1) % 3;
-        l = (j + 1) % 3;
-        s = sqrt(1.0f + (m[i][i] - (m[j][j] + m[l][l])));
-        inv = 0.5f / s;
-        c[i] = 0.5f * s;
-        cur.w = inv * (m[j][l] - m[l][j]);
-        c[j] = inv * (m[i][j] + m[j][i]);
-        c[l] = inv * (m[i][l] + m[l][i]);
+        NetMtxToQuatAxis(m, &cur);
     }
     fn_8012F57C(&q, &cur, &q, k);
     QuatToMtx(&mtx, &q);
