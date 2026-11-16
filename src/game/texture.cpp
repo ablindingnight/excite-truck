@@ -905,7 +905,7 @@ void fn_802CB6B4(void) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop2_fn_802CB82C(TexCache* c, s32 id) {
+static inline void Loop2_fn_802CB82C(TexCache* c, s32 id, HeapBlock**& cursor) {
     for (MipLoad* l = c->loads; l; l = l->next) {
         if (l->tex == id) {
             for (MipDiscard* d = c->discards; d; d = d->next) {
@@ -920,7 +920,9 @@ static inline void Loop2_fn_802CB82C(TexCache* c, s32 id) {
             l->res = 0;
             fn_802D915C(l->gx);
             l->gx = 0;
-            c->heapRef->heap->Free(l->mem);
+            SimpleHeap* heap = c->heapRef->heap;
+            cursor = c->heapRef->heap->ReleaseBlock(l->mem);
+            heap->CoalesceFreeBlocks(cursor);
             l->mem = 0;
             fn_802CBB9C(&c->freeLoads, &c->loads, l);
             break;
@@ -931,6 +933,7 @@ static inline void Loop2_fn_802CB82C(TexCache* c, s32 id) {
 static inline SimpleHeap* TextureHeap(TexCache* c) { return c->heapRef->heap; }
 
 void fn_802CB82C(s32 id) {
+    HeapBlock** cursor;
     TexCache* c = lbl_8055FCBC;
     MipSlot* s = &c->slots[id];
     if (s->state == 2) {
@@ -938,11 +941,12 @@ void fn_802CB82C(s32 id) {
         fn_802CB3F4(t->mip0);
         t->mip0 = 0;
         SimpleHeap* heap = TextureHeap(c);
-        heap->Free(t->mip0Mem);
+        cursor = heap->ReleaseBlock(t->mip0Mem);
+        heap->CoalesceFreeBlocks(cursor);
         t->mip0Mem = 0;
         fn_802CB3F8(t->name, "quick-unload");
     } else if (s->state == 1) {
-        Loop2_fn_802CB82C(c, id);
+        Loop2_fn_802CB82C(c, id, cursor);
     }
     s->state = 0;
 }
