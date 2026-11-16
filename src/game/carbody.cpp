@@ -1839,7 +1839,7 @@ void fn_80183E7C(u8* p) {
         if (U8(p, 0x2680)) {
             gain = 1.0f;
         }
-        f32 lead = 5.0f * (0.0f + Clamp01((F32(p, 0x2618) - 0.15f) / 0.35f) / 2.0f);
+        f32 lead = 5.0f * LerpT(Clamp01((F32(p, 0x2618) - 0.15f) / 0.35f), 0.0f, 0.5f);
         if (!U8(p, 0x2680)) {
             lead = 0.0f;
         }
