@@ -41,9 +41,12 @@ struct Packet {
     f32 brake;    // offset 0x11
     s32 gear;     // offset 0x15
     f32 f19;      // offset 0x19
-    u8 b1D;       // offset 0x1D
-    PVec pos;     // offset 0x1E
-    PQuat rot;    // offset 0x2A
+    // The packet copy groups the state byte, position, and orientation.
+    struct Pose {
+        u8 b1D;       // offset 0x1D
+        PVec pos;     // offset 0x1E
+        PQuat rot;    // offset 0x2A
+    } pose;
     u8 pad3A[0x48 - 0x3A];
     u8 snap;      // offset 0x48
     s32 f49;      // offset 0x49
@@ -310,9 +313,9 @@ void NetCar::Extrapolate(Blend* b) {
     RVec3 d;
     RVec3 r;
     RVec3 r2;
-    p.x = fn_801A6370(ptab[0].pos.v[0], v[0].x, acc.x, s);
-    p.y = fn_801A6370(ptab[0].pos.v[1], v[0].y, acc.y, s);
-    p.z = fn_801A6370(ptab[0].pos.v[2], v[0].z, acc.z, s);
+    p.x = fn_801A6370(ptab[0].pose.pos.v[0], v[0].x, acc.x, s);
+    p.y = fn_801A6370(ptab[0].pose.pos.v[1], v[0].y, acc.y, s);
+    p.z = fn_801A6370(ptab[0].pose.pos.v[2], v[0].z, acc.z, s);
     {
         f32 t1 = fn_801A63C4(ptab[1].frame, ptab[2].frame);
         f32 t0 = fn_801A63C4(ptab[0].frame, ptab[2].frame);
@@ -320,9 +323,18 @@ void NetCar::Extrapolate(Blend* b) {
         double b0 = DL(tn, t0, 0.0, t1);
         double b1 = DL(tn, t1, 0.0, t0);
         double b2 = DL(tn, 0.0, t1, t0);
-        d.x = ptab[0].pos.v[0] * b0 + (ptab[2].pos.v[0] * b2 + ptab[1].pos.v[0] * b1);
-        d.y = ptab[0].pos.v[1] * b0 + (ptab[2].pos.v[1] * b2 + ptab[1].pos.v[1] * b1);
-        d.z = ptab[0].pos.v[2] * b0 + (ptab[2].pos.v[2] * b2 + ptab[1].pos.v[2] * b1);
+        f32 x2 = ptab[2].pose.pos.v[0];
+        f32 x1 = ptab[1].pose.pos.v[0];
+        f32 x0 = ptab[0].pose.pos.v[0];
+        d.x = x0 * b0 + (x2 * b2 + x1 * b1);
+        f32 y2 = ptab[2].pose.pos.v[1];
+        f32 y1 = ptab[1].pose.pos.v[1];
+        f32 y0 = ptab[0].pose.pos.v[1];
+        d.y = y0 * b0 + (y2 * b2 + y1 * b1);
+        f32 z2 = ptab[2].pose.pos.v[2];
+        f32 z1 = ptab[1].pose.pos.v[2];
+        f32 z0 = ptab[0].pose.pos.v[2];
+        d.z = z0 * b0 + (z2 * b2 + z1 * b1);
     }
     fn_801A63F4(&r, &mtx.pos, &p, &b->at);
     mtx.pos = r;
@@ -358,8 +370,8 @@ static inline void QuatToMtx(RMtx* m, const TQuat* q) {
 void NetCar::Snap(void) {
     BodyState s;
     s.hint = -1;
-    QuatToMtx(&s.mtx, (const TQuat*)&ptab[0].rot);
-    const PVec* p = &ptab[0].pos;
+    QuatToMtx(&s.mtx, (const TQuat*)&ptab[0].pose.rot);
+    const PVec* p = &ptab[0].pose.pos;
     s.mtx.pos.x = p->v[0];
     s.mtx.pos.y = p->v[1];
     s.mtx.pos.z = p->v[2];
@@ -393,10 +405,11 @@ void NetCar::Snap(void) {
 extern "C" f32 fn_801A70EC(TQuat* out, const Packet* a, const Packet* b, s32 frame) {
     f32 d = fn_801A63C4(b->frame, a->frame);
     f32 k = fn_801A63C4(frame, a->frame) / d;
-    fn_8012F57C(out, (const TQuat*)&a->rot, (const TQuat*)&b->rot, k);
+    fn_8012F57C(out, (const TQuat*)&a->pose.rot, (const TQuat*)&b->pose.rot, k);
     return k;
 }
 
+// Helper name unproven. Convert using the largest diagonal when the trace is nonpositive.
 // Helper name unproven. Convert using the largest diagonal when the trace is nonpositive.
 static inline void NetMtxToQuatAxis(const f32 (*m)[3], TQuat* q) {
     f32* c = &q->x;
