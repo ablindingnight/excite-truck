@@ -87,6 +87,21 @@ struct GObj {
     u8 padDC[4];
 };
 
+// The track-model handler base (trackmod.cpp's TrackMod, the same class as GModelHandler above): graf defines its
+// empty default slots in place. Declared here as far as those definitions need, without virtuals: retail graf emits
+// no TrackMod table (its copies are the linker-blanked weak tables in drone/fabric). Port: same member names.
+struct TObj;
+class TrackMod {
+public:
+    void Swap(TObj* o);
+    void Init(TObj* o);
+    void Unk14(void);
+    void Apply(void);
+    void Unk1C(void);
+    void Add(void* scene, const TObj* o, s32 id);
+    void Link(int a, void* b, int c, void* d, int e);
+};
+
 extern "C" {
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, u8* first, u8* swapped);
 void fn_8012C4D8(void* res);
@@ -367,7 +382,11 @@ void fn_801EB66C(void* p, u32 base) {
     }
 }
 
-void Swap__8TrackModFP4TObj(void) {}
+}  // extern "C"
+
+void TrackMod::Swap(TObj* o) {}
+
+extern "C" {
 
 void init_display_list(GNode* root) {
     GNode* n = root;
@@ -405,11 +424,15 @@ void init_display_list(GNode* root) {
     }
 }
 
-void Link__8TrackModFiPviPvi(GModelHandler* h, void* a, void* b) { h->vf28(b, a); }
+}  // extern "C"
 
-void Add__8TrackModFPvPC4TObjl(void) {}
+void TrackMod::Link(int a, void* b, int c, void* d, int e) { ((GModelHandler*)this)->vf28(b, (void*)a); }
 
-void Init__8TrackModFP4TObj(void) {}
+void TrackMod::Add(void* scene, const TObj* o, s32 id) {}
+
+void TrackMod::Init(TObj* o) {}
+
+extern "C" {
 
 void fn_801EB824(GNode* root) {
     GrafReleaser v;
@@ -434,7 +457,11 @@ void fn_801EB90C(void) {
     }
 }
 
-void Apply__8TrackModFv(void) {}
+}  // extern "C"
+
+void TrackMod::Apply(void) {}
+
+extern "C" {
 
 void fn_801EB96C(GModelHandler** slot, GModelHandler* (*create)(void)) { *slot = create(); }
 
@@ -535,7 +562,11 @@ void fn_801EBCAC(void) {
     }
 }
 
-void Unk1C__8TrackModFv(void) {}
+}  // extern "C"
+
+void TrackMod::Unk1C(void) {}
+
+extern "C" {
 
 void fn_801EBD18(int view) {
     if (fn_801E85A4() > 1) {
@@ -678,5 +709,5 @@ void GrafReleaser::Visit(GModel* m, void* res, s32 handle) {
     }
 }
 
-extern "C" void Unk14__8TrackModFv(void) {}
+void TrackMod::Unk14(void) {}
 
