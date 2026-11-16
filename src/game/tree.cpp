@@ -892,17 +892,19 @@ static inline void Loop1_fn_802BDD8C(int i, f32 range) {
     int n;
     TArray<TCell>* frames;
     TArray<TreeRec>* list;
+    f32 r2;
+    f32 fade;
+    f32 span;
+    fade = 50.0f;
     t = &lbl_804C00D4.data[i];
     if (t->set) {
-        f32 r2;
         frames = t->set->frames;
         list = t->set->list;
         if (t->farTris <= 10) {
             fn_802C8BD0(fn_802C28C0());
             fn_802DC71C(t->farId, t->farTex);
-            f32 span;
             r2 = range * range;
-            f32 in = range - 50.0f;
+            f32 in = range - fade;
             span = r2 - in * in;
             TMtx cam;
             fn_801F1C24(&cam);
