@@ -24,7 +24,9 @@ struct RacerInfo {
     f32 side;  // offset 0x34
 };
 
-class Racer {
+// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
+// was named Racer here, a name world/carmodel use for a different class).
+class DeityCar {
 public:
     virtual void vf08(void);
     virtual void vf0C(void);
@@ -62,7 +64,7 @@ f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 RaceCarRec* fn_8017960C(int id);
 f32 fn_801B306C(void);
 int fn_801B2F24(void);
-Racer* fn_801B2ED0(int i);
+DeityCar* fn_801B2ED0(int i);
 V2* fn_80135420(V2* p, int a, IdealLineRes* line);  // closest point on a line
 }
 
@@ -170,7 +172,7 @@ public:
     virtual ~PathSet(void) {}                              // 0x28
 };
 
-static inline int RightSide(Racer* r) {
+static inline int RightSide(DeityCar* r) {
     if (r->GetInfo()->side > 0.0f) {
         return 1;
     }

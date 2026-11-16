@@ -1334,13 +1334,15 @@ u32 fn_8013D18C(u32 i) {
 }
 
 
-class Racer {
+// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
+// was named Racer here, a name world/carmodel use for a different class).
+class DeityCar {
 public:
     virtual void vf08(void);
     virtual void vf0C(void);
     virtual RacerInfo* GetInfo(void);
 };
-extern "C" Racer* fn_801B2EC0(int i);
+extern "C" DeityCar* fn_801B2EC0(int i);
 
 // Ring-hit pitch per ring in the current chain.
 const f32 lbl_802F93B0[5] = {0.7932f, 0.8904f, 0.9433f, 0.9994f, 1.0f};

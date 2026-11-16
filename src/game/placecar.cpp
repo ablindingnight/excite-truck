@@ -54,7 +54,9 @@ struct LineFollower {
     CenterLine* line;  // offset 0x2C
 };
 
-class Racer {
+// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
+// was named Racer here, a name world/carmodel use for a different class).
+class DeityCar {
 public:
     virtual void vf08(void);
     virtual void vf0C(void);
@@ -114,7 +116,7 @@ ILPos fn_80135B24(const LineFollower* f, f32 m);
 ILPos fn_80136468(LineFollower* f, f32 m);
 League* fn_80137C54(s32 i);
 f32 fn_80139048(void);
-Racer* fn_801B2ED0(int id);
+DeityCar* fn_801B2ED0(int id);
 int fn_801B3050(int car);
 PathSet* fn_80156A40(void);
 LineFollower* fn_80178C9C(void);

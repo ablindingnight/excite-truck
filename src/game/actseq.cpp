@@ -38,14 +38,16 @@ struct LapInfo {
     s32 lap;         // offset 0x10
 };
 
-class Racer {
+// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
+// was named Racer here, a name world/carmodel use for a different class).
+class DeityCar {
 public:
     virtual void vf08(void);
     virtual void vf0C(void);
     virtual LapInfo* Laps(void);  // 0x10
 };
 
-extern "C" Racer* fn_801B2EC0(int car);
+extern "C" DeityCar* fn_801B2EC0(int car);
 
 struct Vec {
     Vec(void) {}

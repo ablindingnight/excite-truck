@@ -1041,7 +1041,9 @@ static inline bool StillRacing(RacerState* s) {
 }
 
 
-class Racer {
+// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
+// was named Racer here, a name world/carmodel use for a different class).
+class DeityCar {
 public:
     virtual void vf08(void);
     virtual void vf0C(void);
@@ -1169,8 +1171,8 @@ class Body;
 extern "C" {
 CoinFrame fn_801683F4(int player);
 int fn_801B8514(void);
-Racer* fn_801B2EC0(int id);
-Racer* fn_801B2ED0(int id);
+DeityCar* fn_801B2EC0(int id);
+DeityCar* fn_801B2ED0(int id);
 void fn_801DF074(int a, int b);
 void fn_801796EC(int type, void* data, int size);
 f32 fn_801D48F4(void* obj);
