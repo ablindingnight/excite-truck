@@ -346,32 +346,27 @@ ObjLoc::ObjLoc(void) {}
 
 extern "C" {
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802B1FD4(SetPlacer* set) {
-    ObjectPlacer*p;
-    int k;
-    MatPlacer*m;
-    int j;
-    for (j = 0; j < set->count; j++) {
-        m = set->data[j];
-        if (m) {
-            for (k = 0; k < m->placers.count; k++) {
-                p = m->placers.data[k];
-                if (p) {
-                    SafeDelete(p->model);
-                    delete p;
-                }
-            }
-            m->placers.count = 0;
-            m->placers.~InlineVec();
-            operator delete(m);
-        }
-    }
-}
-
 static inline void FreeSet(SetPlacer* set) { /* Helper name unproven */
     if (set) {
-        Loop1_fn_802B1FD4(set);
+        ObjectPlacer* p;
+        int k;
+        MatPlacer* m;
+        int j;
+        for (j = 0; j < set->count; j++) {
+            m = set->data[j];
+            if (m) {
+                for (k = 0; k < m->placers.count; k++) {
+                    p = m->placers.data[k];
+                    if (p) {
+                        SafeDelete(p->model);
+                        delete p;
+                    }
+                }
+                m->placers.count = 0;
+                m->placers.~InlineVec();
+                operator delete(m);
+            }
+        }
         set->count = 0;
         ((InlineVec<MatPlacer*, 6>*)set)->~InlineVec();
         operator delete(set);
