@@ -398,13 +398,11 @@ static inline int Rows(Fabric* f) {
     return f->rows;
 }
 
-void fn_801F5664(Fabric* f, int style) {
+/* Helper name unproven */
+static inline int AnchorCount(Fabric* f, int style) {
     int rows = Rows(f);
     int cols = f->cols;
     int n;
-    Anchor* a;
-    int k;
-    int i;
     switch (style) {
     case 1:
     case 4:
@@ -424,6 +422,14 @@ void fn_801F5664(Fabric* f, int style) {
         n = 0;
         break;
     }
+    return n;
+}
+
+void fn_801F5664(Fabric* f, int style) {
+    int n = AnchorCount(f, style);
+    Anchor* a;
+    int k;
+    int i;
     a = new ("fabric anchors") Anchor[n];
     k = 0;
     switch (style) {
@@ -453,8 +459,8 @@ void fn_801F5664(Fabric* f, int style) {
         fn_802E317C("mesh: invalid anchor style %d", style);
         break;
     }
-    f->numAnchors = n;
     f->anchors = a;
+    f->numAnchors = n;
 }
 }
 
