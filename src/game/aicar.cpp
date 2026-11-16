@@ -2194,6 +2194,8 @@ void fn_80198488(u8* d);
 
 // Keeps the car between its neighbours: the left/right side hits (0x74/0x9C) narrow the allowed lateral band
 // [0xC4, 0xC8]; when the band closes the two cars negotiate who yields, then the car is pulled toward the band.
+#pragma push
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_8019743C(u8* d, u8* out) {
     f32 diff = 0.0f;
     int decay = 1;
@@ -2326,6 +2328,7 @@ void fn_8019743C(u8* d, u8* out) {
         F32(d, 0xE0) *= 0.99f * 0.99f;
     }
 }
+#pragma pop
 
 void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c);
 
