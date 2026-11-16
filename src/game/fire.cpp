@@ -1313,8 +1313,7 @@ void BoostFireMan::Reset(void) {
 /* Helper name unproven: off.x/off.z = vel * f. */
 inline void BoostFireMan::ScaleVelXZ(Vec& off, const Vec* vel, f32 f) {
     off.z = vel->z * f;
-    f32 velX = vel->x;
-    off.x = velX * f;
+    off.x = vel->x * f;
 }
 
 /* Helper name unproven: the i-th boost entry. */
@@ -1348,10 +1347,12 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
             n = MIN(n, 4);
             f32 step = dt / n;
             for (int k = 0; k < n; k++) {
+                f32 squared;
                 f32 f = -k * step;
                 Vec off;
                 ScaleVelXZ(off, vel, f);
-                off.y = vel->y * f + -0.5f * (f * f);
+                squared = f * f;
+                off.y = vel->y * f + -0.5f * squared;
                 for (u32 j = 0; j < 2; j++) {
                     Vec p;
                     AddV(&p, &e->pts[j], &off);

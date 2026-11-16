@@ -818,7 +818,8 @@ public:
         sliding = Sliding(rc, was, rc->speed);
         if (sliding) {
             spd = rc->speed;
-            side = (f32)__fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
+            f64 magnitude = __fabs(PSVECDotProduct(&rc->f118, &rc->f3c));
+            side = (f32)magnitude;
             k = was ? 0.15f : 0.35f;
             fade = 1.0f - 8.0f * ground;
             fade = fade > 0.0f ? fade : 0.0f;

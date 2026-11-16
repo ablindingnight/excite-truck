@@ -2602,7 +2602,10 @@ inline void ObjSet::CheckTeleport(Phob* car) {
         d.x = a.x - b.x;
         b.y = car->pos.z;
         d.y = a.y - b.y;
-        if (t->radius > (f32)sqrt(d.x * d.x + d.y * d.y)) {
+        f64 wide = sqrt(d.x * d.x + d.y * d.y);
+        f32 distance = (f32)wide;
+        f32 radius = t->radius;
+        if (distance < radius) {
             data[cur].b30 = 0;
             f10 = next;
             teles->data[f10].b30 = 1;
