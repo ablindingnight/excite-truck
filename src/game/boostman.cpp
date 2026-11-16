@@ -4,6 +4,7 @@
 // line/arrow textures in a per-player colour (yellow while boosting). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/math_types.h"
@@ -84,37 +85,20 @@ struct BoostArea {
     Spot center;      // offset 0x10
 };
 
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    int Count(void);
-    T* At(int i);
-    int Size(void) const { return count; }  /* Helper name unproven */
-    void RemoveAt(int i) {
-        if (i >= 0 && i < count) {
-            if (i != count - 1) {
-                data[i] = data[count - 1];
-            }
-            count--;
-        }
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
-
 template <typename T, int N>
 struct FixedArr : ArrayRef<T> {
     FixedArr(void);
+    int Count(void);  // explicit specialisations below place the weak copies
+    T* At(int i);
+    int Size(void) const { return this->count; }  /* Helper name unproven */
+    void RemoveAt(int i) {
+        if (i >= 0 && i < this->count) {
+            if (i != this->count - 1) {
+                this->data[i] = this->data[this->count - 1];
+            }
+            this->count--;
+        }
+    }
     T storage[N];
 };
 
@@ -122,9 +106,9 @@ struct FixedArr : ArrayRef<T> {
 template <>
 inline FixedArr<BoostArea, 100>::FixedArr(void);
 template <>
-inline int ArrayRef<BoostArea>::Count(void);
+inline int FixedArr<BoostArea, 100>::Count(void);
 template <>
-inline BoostArea* ArrayRef<BoostArea>::At(int i);
+inline BoostArea* FixedArr<BoostArea, 100>::At(int i);
 
 struct PlayerBoost {
     void Reset(void);
@@ -508,8 +492,8 @@ void fn_801E12A4(void) {
 }  // extern "C"
 
 template <>
-inline int ArrayRef<BoostArea>::Count(void) {
-    return count;
+inline int FixedArr<BoostArea, 100>::Count(void) {
+    return this->count;
 }
 
 extern "C" {
@@ -541,8 +525,8 @@ void fn_801E1384(BoostArea* a, u32 color) {
 }  // extern "C"
 
 template <>
-inline BoostArea* ArrayRef<BoostArea>::At(int i) {
-    return &data[i];
+inline BoostArea* FixedArr<BoostArea, 100>::At(int i) {
+    return &this->data[i];
 }
 
 extern "C" {

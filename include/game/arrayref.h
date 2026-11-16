@@ -20,6 +20,7 @@ struct ArrayRef {
     }
     int Count(void) const { return count; }
     T* Next(void) { return &data[count++]; }
+    T* At(int i) { return &data[i]; }
 
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
