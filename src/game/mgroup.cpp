@@ -4,13 +4,13 @@
 #include "game/common.h"
 
 namespace {
-extern char kOverlay[8];
-extern char kStartTime[8];
-extern char kStopTime[8];
-extern char kRegionIndex[8];
-extern char kGroupIndexFmt[8];
-extern char kModelNameFmt[8];
-extern char kGroupName[8];
+extern char kOverlay[];
+extern char kStartTime[];
+extern char kStopTime[];
+extern char kRegionIndex[];
+extern char kGroupIndexFmt[];
+extern char kModelNameFmt[];
+extern char kGroupName[];
 extern char kTerrainRegion[];
 extern char kMissingRegion[];
 extern char kMorphRegion[];
@@ -170,13 +170,13 @@ u8 lbl_8055E968;             // groups locked
 MorphGroup* lbl_8055E96C;    // morph groups
 
 namespace {
-char kOverlay[8] = "oml";
-char kStartTime[8] = "start_t";
-char kStopTime[8] = "stop_t";
-char kRegionIndex[8] = "index";
-char kGroupIndexFmt[8] = "gidx%d";
-char kModelNameFmt[8] = "model%d";
-char kGroupName[8] = "name";
+char kOverlay[] = "oml";
+char kStartTime[] = "start_t";
+char kStopTime[] = "stop_t";
+char kRegionIndex[] = "index";
+char kGroupIndexFmt[] = "gidx%d";
+char kModelNameFmt[] = "model%d";
+char kGroupName[] = "name";
 }
 
 #pragma force_active on
