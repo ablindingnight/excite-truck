@@ -508,12 +508,10 @@ int fn_8015FAB8(Bin* bins, int i, f32 range) {
 }
 
 // The car's frame pushed 3.1 forward.
-extern const f32 lbl_80561810;  // 3.1f
+template <class O, class A, class D> static inline void AddScaledK(O* o, const A* a, const D* d, f32 s) { o->x = a->x + d->x * s; o->y = a->y + d->y * s; o->z = a->z + d->z * s; }  /* Helper name unproven */
 void fn_8015FB28(Frame* f, const Frame* m) {
     *f = *m;
-    f->origin.x += f->basis[2].x * lbl_80561810;
-    f->origin.y += f->basis[2].y * lbl_80561810;
-    f->origin.z += f->basis[2].z * lbl_80561810;
+    AddScaledK(&f->origin, &f->origin, &f->basis[2], 3.1f);
 }
 
 }  // extern "C"
