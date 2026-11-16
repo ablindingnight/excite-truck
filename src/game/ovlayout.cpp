@@ -4,6 +4,7 @@
 // apart from the keys, messages and allocation tags.
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/dashhelper.h"
 
 extern "C" {
 char* strstr(const char* s, const char* t);
@@ -14,7 +15,6 @@ int sscanf(const char* s, const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E3AD0(void* file, const char* fmt, ...);  // file printf
 const char* fn_8013126C(char* buf, const char* s);   // quote for saving
-int fn_8023512C(const char* name);                  // load image
 int fn_802C9A58(void);  // widescreen
 int fn_802C9A60(void);
 s32 fn_802C9C38(void);  // screen height
@@ -22,7 +22,7 @@ s32 fn_802C9C48(void);  // screen width
 void fn_8000FF88(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_800104B0(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_8001027C(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
-void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 }
 
 extern f32 lbl_8055D020;  // widescreen x stretch
@@ -41,7 +41,6 @@ void fn_801455B8(TextElem* e, ValueNode* n);
 void fn_80145438(ArtElem* e, ValueNode* n);
 void fn_80145538(GartElem* e, ValueNode* n);
 void fn_80145670(GartSet* s, ValueNode* n);
-void fn_80235380(int handle);
 }
 
 // Fields shared by every element type.
@@ -102,7 +101,7 @@ struct GartSet {
     void Read(ValueNode* n) { fn_80145670(this, n); }
     const char* name;      // offset 0x0
     const char* resource;  // offset 0x4
-    s32 handle;            // offset 0x8
+    gArtSet* handle;            // offset 0x8
 };
 
 template <typename T>
@@ -405,7 +404,7 @@ void fn_80145C7C(const TextElem* e, const char* text) {
     fn_8001027C(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, "%s", text);
 }
 
-void fn_80145CF4(const GartElem* e, int art, int part) {
+void fn_80145CF4(const GartElem* e, gArtSet* art, int part) {
     f32 y;
     f32 w;
     w = fn_801452A0(e->w, e->elemJust);
@@ -434,7 +433,6 @@ void fn_802C8D74(void);
 f32 fn_800108C8(const char* text, f32 scale);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 void fn_80011278(u32 color, f32 x, f32 y, f32 w, f32 h);
-void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h);
 void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 start, f32 step, f32 u0, f32 v0,
                  f32 u1, f32 v1);
 }
@@ -479,7 +477,7 @@ public:
     virtual TextElem* Find(const char* name) = 0;
     virtual ArtElem* FindArt(const char* name) = 0;
     virtual GartElem* FindBox(const char* name) = 0;
-    virtual int FindSet(const char* name) = 0;
+    virtual gArtSet* FindSet(const char* name) = 0;
     virtual void Edit(void) = 0;
     virtual void ToggleEdit(void) = 0;
     virtual u8 IsEditing(void) = 0;
@@ -726,7 +724,7 @@ public:
     virtual TextElem* Find(const char* name) { return FindIn(name, texts); }
     virtual ArtElem* FindArt(const char* name) { return FindIn(name, arts); }
     virtual GartElem* FindBox(const char* name) { return FindIn(name, garts); }
-    virtual int FindSet(const char* name) {
+    virtual gArtSet* FindSet(const char* name) {
         GartSet* s = FindIn(name, sets);
         return s ? s->handle : 0;
     }
@@ -1258,13 +1256,13 @@ void fn_801476D8(const ArtElem* e, u32 color, s32 tex) {
 
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part) {
     GartElem* b = l->FindBox(box);
-    int art = l->FindSet(set);
+    gArtSet* art = l->FindSet(set);
     if (b && art) {
         fn_80145CF4(b, art, part);
     }
 }
 
-void fn_801478E0(ILayout* l, const char* box, int art, int part) {
+void fn_801478E0(ILayout* l, const char* box, gArtSet* art, int part) {
     GartElem* b = l->FindBox(box);
     if (b && art) {
         fn_80145CF4(b, art, part);
@@ -1272,7 +1270,7 @@ void fn_801478E0(ILayout* l, const char* box, int art, int part) {
 }
 
 void fn_80147940(ILayout* l, GartElem* b, const char* set, int part) {
-    int art = l->FindSet(set);
+    gArtSet* art = l->FindSet(set);
     if (b && art) {
         fn_80145CF4(b, art, part);
     }
@@ -1377,7 +1375,7 @@ void fn_80147FF0(const GartElem* e, u32 color) {
     fn_80011278(color, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h);
 }
 
-void fn_80148070(const GartElem* e, u32 color, int art) {
+void fn_80148070(const GartElem* e, u32 color, gArtSet* art) {
     f32 w = fn_801452A0(e->w, e->elemJust);
     fn_80011280(color, art, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h);
 }
@@ -1439,7 +1437,7 @@ void OverlayCmd::Draw(void) {
     }
     for (i = 0; i < boxes->a.count; i++) {
         c = BoxAt(i);
-        int art = layout->FindSet(c->art);
+        gArtSet* art = layout->FindSet(c->art);
         GartElem* b = layout->FindBox(c->elem);
         if (b && art) {
             fn_80148070(b, c->color, art);

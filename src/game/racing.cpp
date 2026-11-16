@@ -4,6 +4,7 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/dashhelper.h"
 #include "game/math_types.h"
 
 // One element of a layout set (0x20 bytes); copied, moved and drawn.
@@ -172,8 +173,6 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 f32 fn_801E7E24(void);
 int fn_802C9A58(void);
 f32 fn_80011EB0(int player);
-int fn_8023512C(const char* name);
-void fn_80235380(int art);
 s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 tex);
 void fn_801333E8(int type, const char* name, u8* out);
@@ -206,9 +205,6 @@ int fn_80144F2C(void);
 int fn_80144F34(int view, int team, u8* out);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, s32 unk);
 void fn_801D490C(void);
-f32 fn_80235EF0(int art, int frame);
-f32 fn_80235F64(int art, int frame);
-void fn_80010E94(int art, int unk, f32 x, f32 y, f32 w, f32 h);
 f32 fn_80011E60(void);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 f32 fn_8013672C(void);
@@ -219,13 +215,13 @@ ResultRacer* fn_801EA9B0(int index);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_80011DEC(int player);
 f32 fn_80011DC0(int player);
-void fn_802354A0(int art, int frame, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 void fn_802C8BD0(s32 tex);
 void fn_801E4F20(int n);
 void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
 void fn_802C8D74(void);
-void fn_801478E0(Layout* layout, const char* name, int art, int frame);
+void fn_801478E0(Layout* layout, const char* name, gArtSet* art, int frame);
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
                  f32 v0, f32 u1, f32 v1);
 void fn_80011E04(int unk);
@@ -294,10 +290,10 @@ public:
     f32 unk28;   // offset 0x28
     f32 fade;    // offset 0x2C
     u8 pad30[0x34 - 0x30];
-    int raceInfoArt;  // offset 0x34
-    int arrowsArt;    // offset 0x38
-    int uiArt;        // offset 0x3C
-    int zoneArt;      // offset 0x40
+    gArtSet* raceInfoArt;  // offset 0x34
+    gArtSet* arrowsArt;    // offset 0x38
+    gArtSet* uiArt;        // offset 0x3C
+    gArtSet* zoneArt;      // offset 0x40
     s32 zoneTex;      // offset 0x44
     TrackMap* map;    // offset 0x48
     u8 units;         // offset 0x4C

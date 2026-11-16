@@ -5,6 +5,7 @@
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
 // animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -15,8 +16,6 @@ void* fn_80145E70(const char* name);  // layout
 int fn_801345D8(char* dst, int n, const char* fmt, ...);
 int fn_80160AB4(void);
 int fn_80161C38(void);
-void fn_80235380(void* art);
-void* fn_8023512C(const char* name);
 void* fn_80207848(const char* name, int a);
 int fn_801EA994(void);
 void fn_802E317C(const char* fmt, ...);  // fatal
@@ -347,7 +346,7 @@ struct AwardsMgr {
     s32 event;                // offset 0x0
     s32 difficulty;           // offset 0x4
     LayoutObj* sfx;           // offset 0x8
-    void* art;                // offset 0xC
+    gArtSet* art;                // offset 0xC
     u8 paused;                // offset 0x10
     u8 off[4];                // offset 0x11
     HandlerVec handlers;      // offset 0x18
@@ -704,7 +703,7 @@ extern "C" {
 f32 fn_801E7E24(void);
 int fn_8026B0C0(int player);
 int fn_80204CF0(void);
-void fn_80148070(AwBox* box, u32 color, void* art);
+void fn_80148070(AwBox* box, u32 color, gArtSet* art);
 void fn_80147230(AwText* e, const char* fmt, ...);
 void fn_801476C4(AwText* e);
 }

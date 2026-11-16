@@ -3,6 +3,7 @@
 // and scales, dumping the world model, and the stats columns other units register. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/plainvec.h"
 #include <string.h>
 #include <stdarg.h>
@@ -44,7 +45,7 @@ public:
     virtual TextElem* Find(const char* name) = 0;
     virtual void* FindArt(const char* name) = 0;
     virtual BoxElem* FindBox(const char* name) = 0;
-    virtual int FindSet(const char* name) = 0;
+    virtual gArtSet* FindSet(const char* name) = 0;
     virtual void Edit(void) = 0;
     virtual void Toggle(void) = 0;
     virtual int Busy(void) = 0;

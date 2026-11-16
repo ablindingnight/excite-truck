@@ -4,6 +4,7 @@
 // the shake prompt and the white-out flash with crashlyt.val. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/plainvec.h"
@@ -49,7 +50,7 @@ public:
     virtual TextElem* Find(const char* name) = 0;
     virtual ArtElem* FindArt(const char* name) = 0;
     virtual GartElem* FindBox(const char* name) = 0;
-    virtual int FindSet(const char* name) = 0;
+    virtual gArtSet* FindSet(const char* name) = 0;
     virtual void Edit(void) = 0;
 };
 

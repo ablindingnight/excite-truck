@@ -2,6 +2,7 @@
 // confirmation dialog and the "missing controller" popup, drawn from esclyt.val. "escape:" in its
 // debug message suggests escape.cpp; function names are guesses.
 #include "game/common.h"
+#include "game/gart.h"
 
 struct LayoutPos {
     f32 x;
@@ -35,7 +36,7 @@ public:
     virtual LayoutItem* Find(const char* name);            // 0xC
     virtual void* FindArt(const char* name);               // 0x10
     virtual LayoutArtItem* FindArtItem(const char* name);  // 0x14
-    virtual void* FindArtSet(const char* name);            // 0x18
+    virtual gArtSet* FindArtSet(const char* name);            // 0x18
 };
 
 class GameSound {
@@ -96,7 +97,7 @@ extern "C" {
 int fn_80137CFC(int player);
 int fn_802E8504(int pad);
 int fn_80137C74(void);
-void fn_80148070(LayoutArtItem* item, u32 color, void* set);
+void fn_80148070(LayoutArtItem* item, u32 color, gArtSet* set);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, u32 unk);
 void fn_800103B8(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
 void* fn_802090D4(const char* name);

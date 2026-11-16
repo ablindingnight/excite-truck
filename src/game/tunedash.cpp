@@ -2,6 +2,7 @@
 // tunedash.val, edited with the arrow keys and faded out after a few seconds without input. Names
 // are guesses apart from the file names, element names and messages.
 #include "game/common.h"
+#include "game/gart.h"
 
 struct V2 {
     f32 x;
@@ -33,7 +34,7 @@ public:
     virtual TextElem* Find(const char* name) = 0;
     virtual void* FindArt(const char* name) = 0;
     virtual Box* FindBox(const char* name) = 0;
-    virtual int FindSet(const char* name) = 0;
+    virtual gArtSet* FindSet(const char* name) = 0;
     virtual void Edit(void) = 0;
 };
 

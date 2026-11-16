@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/dashhelper.h"
 #include "macros.h"
 
 void* operator new(size_t size, const char* tag);
@@ -263,8 +264,6 @@ void fn_800105A0(const char* text, int unk);
 int fn_801B8914(void);
 void fn_80176780(int a, int b);
 int fn_801B8900(void);
-int fn_8023512C(const char* name);
-void fn_80235380(int art);
 ILayout* fn_80145E70(const char* name);
 void fn_801769E0(void);
 void fn_8017691C(void);
@@ -296,7 +295,6 @@ extern "C" {
 f32 fn_80011E34(void);
 f32 fn_80011E54(void);
 ResultRacer* fn_801EA9B0(int index);
-void fn_80010E94(int art, int unk, f32 x, f32 y, f32 w, f32 h);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);
 const char* fn_800122B4(int place, char* buf);
@@ -463,8 +461,8 @@ public:
     s32 shown;       // offset 0x8
     s32 start;       // offset 0xC
     s32 selection;   // offset 0x10
-    s32 art;         // offset 0x14
-    s32 popup;       // offset 0x18
+    gArtSet* art;         // offset 0x14
+    gArtSet* popup;       // offset 0x18
     ILayout* layout;  // offset 0x1C
 };
 

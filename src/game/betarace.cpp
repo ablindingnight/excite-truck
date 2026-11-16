@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #define COLLSHAPE_BASE_DECL  // MATCHING-AID: betarace emits the root shape table (see game/collshape.h)
 #include "game/shapes.h"
@@ -187,7 +188,7 @@ public:
     virtual TextElem* Find(const char* name) = 0;
     virtual ArtElem* FindArt(const char* name) = 0;
     virtual GartElem* FindBox(const char* name) = 0;
-    virtual int FindSet(const char* name) = 0;
+    virtual gArtSet* FindSet(const char* name) = 0;
     virtual void Edit(void) = 0;
 };
 

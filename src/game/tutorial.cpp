@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #include "game/rigid.h"
 
@@ -12,8 +13,6 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
-s32 fn_8023512C(const char* name);
-void fn_80235380(s32 art);
 void fn_80176734(void);
 int fn_80158618(const char* name);  // stunt type by name
 void fn_80158558(void* w);          // add stunt watcher
@@ -26,7 +25,7 @@ void fn_80137C84(void* a, int b);
 void fn_80137C80(int a);
 void fn_8023BEC4(int event, void* out);
 void fn_802E7128(void);
-void fn_80148070(void* elem, u32 color, void* art);
+void fn_80148070(void* elem, u32 color, gArtSet* art);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, s32 mode);
 void fn_800103B8(f32 x, s32 a, s32 b, f32 y, f32 w, f32 h, const char* fmt, ...);
 void fn_801473F8(void* layout, const char* elem, const char* fmt, ...);
@@ -80,7 +79,7 @@ public:
     virtual void* Find(const char* name);   // 0x0C
     virtual void* Art(const char* name);    // 0x10
     virtual void* Elem(const char* name);   // 0x14
-    virtual void* Image(const char* name);  // 0x18
+    virtual gArtSet* Image(const char* name);  // 0x18
 };
 
 extern "C" Layout* fn_80145E70(const char* name);
@@ -194,7 +193,7 @@ s32 lbl_8055E2EC;  // bar1_bot.tex
 s32 lbl_8055E2F0;  // tut_pass.tex
 s32 lbl_8055E2F4;  // tut_fail.tex
 s32 lbl_8055E2F8;  // tut_timer.tex
-s32 lbl_8055E2FC;  // tut_box.art
+gArtSet* lbl_8055E2FC;  // tut_box.art
 Task* lbl_8055E300;  // current task
 s32 lbl_8055E304;    // current challenge index
 TaskList lbl_8042FDEC;

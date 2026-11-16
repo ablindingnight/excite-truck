@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/dashhelper.h"
 
 extern const f32 kBarWidth;
 extern const f32 kBarHeight;
@@ -83,7 +84,7 @@ struct DashRow {
 };
 
 struct DashRowList {
-    int art;            // offset 0x0
+    gArtSet* art;            // offset 0x0
     u8 wide;            // offset 0x4
     DashRow rows[10];   // offset 0x8
     s32 count;          // offset 0x288
@@ -139,13 +140,7 @@ double cos(double x);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
-f32 fn_80235EF0(int art, int part);
-f32 fn_80235F64(int art, int part);
-int fn_80235FD8(int art);
-int fn_8023512C(const char* name);
-void fn_80235380(int art);
-void fn_802353F4(int art, int part, f32 x, f32 y, f32 z);
-void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 f32 fn_801E7E18(void);
 RaceProgress* fn_801E7E3C(void);
 int fn_801E85A4(void);
@@ -207,12 +202,10 @@ void fn_80010B7C(void);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 void fn_80010C74(f32 x, f32 y, f32 w);
 void fn_80010D88(f32 x, f32 y, f32 h);
-void fn_80010E94(int art, int part, f32 x, f32 y, f32 w, f32 h);
 void fn_80010FDC(const char* text, int type);
 int fn_8001084C(int size, const char* text);
 int fn_80010964(int size);
 f32 fn_800109A0(int size);
-void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h);
 char* fn_800122B4(s32 value, char* out);
 void fn_8000F4F0(void);
 void fn_80010BEC(void);
@@ -261,7 +254,7 @@ public:
         f32 w;
         f32 h;
     } parts[8];  // offset 0x10
-    int art;     // offset 0x50
+    gArtSet* art;     // offset 0x50
     u32 color;   // offset 0x54
 };
 
@@ -360,13 +353,13 @@ DashSoundPlayer* lbl_8055D4AC;
 Layout* lbl_8055D4B0;
 Sound* lbl_8055D4B4;
 Sound* lbl_8055D4B8;
-int lbl_8055D4BC;
-int lbl_8055D4C0;
+gArtSet* lbl_8055D4BC;
+gArtSet* lbl_8055D4C0;
 int lbl_8055D4C4;
 int lbl_8055D4C8;
-int lbl_8055D4CC;
-int lbl_8055D4D0;
-int lbl_8055D4D4;
+gArtSet* lbl_8055D4CC;
+gArtSet* lbl_8055D4D0;
+gArtSet* lbl_8055D4D4;
 f32 lbl_8055D4D8;  // centre text wrap width
 
 static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
@@ -1191,7 +1184,7 @@ void fn_80010D88(f32 x, f32 y, f32 h) {
     }
 }
 
-void fn_80010E94(int art, int part, f32 x, f32 y, f32 w, f32 h) {
+void fn_80010E94(gArtSet* art, int part, f32 x, f32 y, f32 w, f32 h) {
     if (0.0f == w && 0.0f == h) {
         fn_802353F4(art, part, x, y, 1.0f);
     } else {
@@ -1304,7 +1297,7 @@ struct Vec2 {
     f32 y;
 };
 
-void fn_80011280(u32 color, int art, f32 x, f32 y, f32 w, f32 h) {
+void fn_80011280(u32 color, gArtSet* art, f32 x, f32 y, f32 w, f32 h) {
     Vec2 p;
     f32 pw;
     f32 a;

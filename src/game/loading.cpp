@@ -3,6 +3,7 @@
 // "tips:" messages give the subject; the names are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/dashhelper.h"
 #include <revolution/MTX/vec.h>
 
 struct LdVec {
@@ -108,8 +109,6 @@ void fn_80131318(LocString* s);
 void fn_8012E81C(const char* name);
 void* fn_80232578(const char* name);  // load font
 void fn_802328D4(void* font);
-void* fn_8023512C(const char* name);  // load image
-void fn_80235380(void* image);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
 u32 fn_802E2C20(void);  // milliseconds
@@ -119,8 +118,7 @@ void fn_8023293C(void* font, const char* text, f32 scale);
 void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f32 x, f32 y, f32 width,
                  f32 scale, f32 a, f32 b);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
-void fn_802354A0(void* image, int idx, f32 x, f32 y, f32 z, f32 width, f32 height, int color);
-void fn_80011280(u32 color, f32 x, f32 y, f32 width, void* image);
+void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
 int fn_80277960(const char* name, CamFrame* frame, f32* fov);
 void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t);
@@ -219,8 +217,8 @@ bool lbl_8055D647;  // show tip
 bool lbl_8055D648;  // fading out
 void* lbl_8055D64C;  // uifnt_o.gtx
 void* lbl_8055D650;  // digiface.gtx
-void* lbl_8055D654;  // loadback.img
-void* lbl_8055D658;  // tips_box.art
+gArtSet* lbl_8055D654;  // loadback.img
+gArtSet* lbl_8055D658;  // tips_box.art
 const char* lbl_8055D65C;  // tip text
 const char* lbl_8055D660;  // title
 const char* lbl_8055D664;  // subtitle
@@ -546,14 +544,13 @@ void DrawLoadingScreen(int alpha, f32 t) {
     fn_80232BA4(lbl_8055D664, lbl_8055D64C, sub_x, sub_y, color, 9, 0.88000005f, 0.0f, 1.0f);
     show_goals = !lbl_8055D647;
     if (!lbl_8055D646 && lbl_8055D647) {
-        f32 box_h;
-        f32 panelOrigin = 225.0f;
         f32 slide = GoalsPanelSlide(t);
-        box_h = 140.0f;
+        f32 box_h = 140.0f;
+        f32 panelSlide = (f32)lbl_8055CFF0 * slide;
         f32 box_y = 0.5f * box_h - 80.0f;
-        f32 box_x = lbl_8055CFF0 * slide - panelOrigin;
+        f32 box_x = panelSlide - 225.0f;
+        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, lbl_8055D658, box_x, box_y, 450.0f, box_h);
 
-        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, box_x, box_y, 450.0f, lbl_8055D658);
         static LocString s_title("Tips:TITLE");
         fn_8023293C(lbl_8055D64C, s_title.Get(), 1.0f);
         fn_80233010(lbl_8055D65C, lbl_8055D64C, -1, 0x11, 0, 20.0f + box_x, box_y - 50.0f, 410.0f, 0.51333332f,
@@ -562,9 +559,11 @@ void DrawLoadingScreen(int alpha, f32 t) {
     if (!lbl_8055D646 && show_goals && GetNumPlayers() == 1) {
         f32 eased = SCurve(t);
         f32 panelLeft = 160.0f;
+        f32 panelY = 40.0f;
+        f32 panelWidth = 320.0f;
         f32 panel_x = lbl_8055CFF0 * (eased * 4.0f) - panelLeft;
+        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, lbl_8055D658, panel_x, panelY, panelWidth, panelLeft);
 
-        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, lbl_8055D658);
         int rows[3] = {10, 8, 9};
         int* row = rows;
         for (int i = 0; i < sizeof(rows) / sizeof(rows[0]); row++, i++) {
