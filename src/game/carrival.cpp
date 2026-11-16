@@ -3,6 +3,7 @@
 // is reported (to a hook that is empty in the shipped game). The unit's other data is unreferenced
 // here (its users were stripped). Names are guesses.
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/carreg.h"
 
 // RegPair: game/carreg.h.
@@ -22,24 +23,10 @@ void fn_8013CA3C(int a, int b);  // empty in the shipped game
 
 // One car of the race setup (8 of them from 0x20): world.cpp's CarDef (0x78); was named RaceCar here, the
 // 0x25F8 car of carelem/cargear.
-struct CarDef {
-    u8 pad0[0x68];
-    s32 id;  // offset 0x68
-    u8 pad6C[0xC];
-};
-
-// The race setup (world.cpp), as far as the rival race uses it.
-struct RaceSetup {
-    RaceSetup(void);  // world.cpp
-    char track[0x20];  // offset 0x0
-    CarDef cars[8];   // offset 0x20
-    s32 numCars;       // offset 0x3E0
-    u8 pad3E4[0x60];
-};
-
 struct RivalRace {
     u8 pad0[0xC];
     RaceSetup setup;  // offset 0xC
+    u8 pad404[0x450 - 0x404];
 };
 
 ModuleTag lbl_8055F628;
@@ -60,15 +47,15 @@ int fn_8027AA48(void) { return lbl_8055F634; }
 
 void fn_8027AA50(void) {
     if (lbl_8055F634) {
-        for (int i = 0; i < lbl_804A3EE0.setup.numCars; i++) {
-            RegUser* u = fn_8027ABF8(lbl_804A3EE0.setup.cars[i].id);
+        for (int i = 0; i < lbl_804A3EE0.setup.cars.count; i++) {
+            RegUser* u = fn_8027ABF8(lbl_804A3EE0.setup.cars.defs[i].driver);
             s32 best = -1;
             int bestIdx = -1;
-            for (int j = 0; j < lbl_804A3EE0.setup.numCars; j++) {
+            for (int j = 0; j < lbl_804A3EE0.setup.cars.count; j++) {
                 if (j == i) {
                     continue;
                 }
-                s32 id = lbl_804A3EE0.setup.cars[j].id;
+                s32 id = lbl_804A3EE0.setup.cars.defs[j].driver;
                 if (best == -1 || fn_8027AC08(u, id) < fn_8027AC08(u, best)) {
                     best = id;
                     bestIdx = j;

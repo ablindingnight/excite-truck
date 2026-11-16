@@ -4042,7 +4042,8 @@ inline void BetaMaster::vf60(int view) {
 
 inline int BetaMaster::vf88(void) const { return 1; }
 
-struct RaceSetup {
+// The race progress record fn_801E7E3C returns (world.cpp racers[8]; was named RaceSetup here, not the setup).
+struct RaceProgress {
     u8 pad0[0x8];
     s32 laps;  // offset 0x8
     u8 padC[0x10 - 0xC];
@@ -4050,7 +4051,7 @@ struct RaceSetup {
 };
 
 extern "C" {
-RaceSetup* fn_801E7E3C(void);
+RaceProgress* fn_801E7E3C(void);
 void fn_8000FBE4(void);
 s32 fn_80160A90(void);  // stars needed
 }  // extern "C"

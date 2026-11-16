@@ -297,10 +297,6 @@ struct RaceInfo {
     u32 flags;  // offset 0x4
 };
 
-struct RaceSetup {
-    s32 cars;  // offset 0x0
-};
-
 ModuleTag lbl_8055E660;
 UnkStatic7F lbl_8055E668;
 void* lbl_8055E66C;  // bad-teleport regions
@@ -336,7 +332,7 @@ void fn_8018A08C(DCar* car);
 void fn_8018AF04(DCar* car);
 void fn_8018B0D0(DCar* car, int mode);
 RaceInfo* fn_801769CC(void);
-RaceSetup* fn_801769D8(void);
+s32* fn_801769D8(void);  // physics.cpp: the race seed
 int fn_801769F8(void);
 int fn_80179630(int view);  // car of a local player
 int fn_800081F0(RaceInfo* r);
@@ -997,7 +993,7 @@ void fn_801B2024(RaceInfo* r) {
     u32 f = r->flags;
     lbl_8055E690 = (f >> 8) & 1;
     lbl_8055E691 = (f >> 9) & 1;
-    s32 n = fn_801769D8()->cars;
+    s32 n = *fn_801769D8();
     lbl_8055E678 = n;
     lbl_8055E67C = 0;
     lbl_8055E684 = new ("proxy_list") DeityCar[n];

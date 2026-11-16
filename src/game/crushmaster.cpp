@@ -1203,13 +1203,14 @@ inline int CrushMaster::vf28(void) { return AliveAI() != 0; }
 
 int IsLoadingActive(void);
 
-struct RaceSetup {
+// The race progress record fn_801E7E3C returns (world.cpp racers[8]; was named RaceSetup here, not the setup).
+struct RaceProgress {
     u8 pad0[0x10];
     f32 time;  // offset 0x10
 };
 
 extern "C" {
-RaceSetup* fn_801E7E3C(void);
+RaceProgress* fn_801E7E3C(void);
 void fn_8000FBE4(void);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 f32 fn_80147204(TextElem* e, const char* text);
