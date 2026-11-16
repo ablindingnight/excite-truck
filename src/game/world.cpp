@@ -67,7 +67,8 @@ struct WorldState {
     s32 f398;            // offset 0x398
     u8 pad39C[0x3A0 - 0x39C];
     u8 racers[8][0x38];  // offset 0x3A0
-    u8 pad560[0xDB0 - 0x560];
+    RaceProgress progress; // offset 0x560: the race progress (fn_801E7E3C)
+    u8 pad574[0xDB0 - 0x574];
     s32 fDB0;            // offset 0xDB0
     f32 fDB4[75];        // offset 0xDB4
     u8 bufEE0[0x1004];   // offset 0xEE0
@@ -685,7 +686,7 @@ s32 fn_801E7E2C(void) { return -1; }
 
 WorldState* fn_801E7E34(void) { return lbl_8055EB04; }
 
-RaceProgress* fn_801E7E3C(void) { return (RaceProgress*)lbl_8055EB04->racers[8]; }
+RaceProgress* fn_801E7E3C(void) { return &lbl_8055EB04->progress; }
 
 static inline void SaveView(ViewState* s, WView* v) {
     if (fn_801E87A8()->flags & 2) {
