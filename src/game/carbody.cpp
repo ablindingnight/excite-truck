@@ -754,7 +754,8 @@ s32 fn_801E3004(s32 model, const char* name, s32 a);
 HVec* fn_801E3630(s32 joint);
 void fn_801E323C(s32 joint);
 void fn_802C7760(s32 model, f32* x0, f32* x1, f32* y0, f32* y1, f32* z0, f32* z1);
-u8* fn_8019FFD8(u8* p, u8* frame, u8* owner);
+// SphereGroup::SphereGroup(frame, owner) in sphcoll, called by its linker name.
+u8* __ct__11SphereGroupFUlUl(u8* p, u8* frame, u8* owner);
 void fn_801A0258(u8* grp, const HVec* c, const BVec* mat, f32 r, f32 k, f32 d, f32 m, f32 im);
 u8* fn_801A2354(u8* p, u8* frame, const BVec* c, u8* owner, f32 k, f32 d, f32 hx, f32 hy, f32 hz);
 void fn_801A0444(u8* grp, u8* box);
@@ -828,7 +829,7 @@ void fn_80182DF4(u8* p) {
     F32(p, 0x5BC) = maxZ;
     u8* g = (u8*)operator new(0x184, "car-volume");
     if (g) {
-        g = fn_8019FFD8(g, p + 0x3C, p);
+        g = __ct__11SphereGroupFUlUl(g, p + 0x3C, p);
     }
     PTR(p, 0x268) = g;
     BVec rear(0.7f, 0.1f, 1.0f);

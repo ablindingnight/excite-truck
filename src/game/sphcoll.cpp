@@ -338,6 +338,18 @@ inline CollShapeIface::~CollShapeIface(void) {}
 class CollShape : public CollShapeIface {
 public:
     CollShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    // Parameter form, inlined into every builder; store order as mutphob's copy (the only order that keeps
+    // SphereGroup and PolyShape identical).
+    CollShape(u32 frame_, u32 owner_, s32 type_, f32 k, f32 s) {
+        frame = (CFrame*)frame_;
+        owner = (u8*)owner_;
+        data = 0;
+        type = type_;
+        stiff = k;
+        skin = s;
+        surface = 100;
+        x1C = 0;
+    }
     // Overrides of the interface slots (their order here does not change the layout). One defined in this unit
     // comes first, so this unit emits the vtable, as retail does.
     virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
@@ -429,6 +441,7 @@ public:
 // child set at 0x17C. Built by fn_8019FFD8, which carbody and obstacles call. Class name unproven.
 class SphereGroup : public CollShape {
 public:
+    SphereGroup(u32 frame, u32 owner);
     virtual ~SphereGroup(void);
     virtual void vf0C(void);
     virtual void vf10(u8* other);
@@ -513,6 +526,7 @@ public:
 // A convex polygon volume ('POLY'; vtable 0x80333778; built by fn_801A3190 / fn_801A324C). Class name unproven.
 class PolyShape : public CollShape {
 public:
+    PolyShape(u32 frame, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 k, f32 skin);
     virtual void vf10(u8* other);
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
@@ -554,7 +568,6 @@ public:
 // builds a SphereShape in place, by their linker names.
 extern "C" void* __vt__11SphereShape[];
 extern "C" void* __vt__14BoxSphereShape[];
-extern "C" void* __vt__11SphereGroup[];
 extern "C" void* __vt__8BoxShape[];
 extern "C" void* __vt__16OrientedBoxShape[];
 extern "C" void* __vt__12RagdollShape[];
@@ -2921,16 +2934,8 @@ void OffsetSphereShape::vf28(void) {
     U8(p, 0x78) = 0;
 }
 
-u8* fn_8019FFD8(u8* p, u32 a, u32 b) {
-    U32(p, 0xC) = a;
-    U32(p, 0x4) = b;
-    U32(p, 0x8) = 0;
-    U32(p, 0x18) = 'GRUP';
-    F32(p, 0x10) = 0.0f;
-    F32(p, 0x14) = 0.0f;
-    U32(p, 0x20) = 100;
-    U32(p, 0x1C) = 0;
-    *(void**)p = __vt__11SphereGroup;
+SphereGroup::SphereGroup(u32 a, u32 b) : CollShape(a, b, 'GRUP', 0.0f, 0.0f) {
+    u8* p = (u8*)this;
     F32(p, 0x170) = 0.0f;
     F32(p, 0x178) = 0.0f;
     F32(p, 0x16C) = 0.0f;
@@ -2939,7 +2944,6 @@ u8* fn_8019FFD8(u8* p, u32 a, u32 b) {
     U32(p, 0x174) = 0;
     U32(p, 0x17C) = 0;
     S32(p, 0x180) = -1;
-    return p;
 }
 
 SphereGroup::~SphereGroup(void) {
@@ -3936,16 +3940,8 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
 void RingVol::vf4C(void) {
     u8* p = (u8*)this; fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24) + F32(p, 0x28), lbl_8055E598.value); }
 
-u8* fn_801A3190(u8* p, u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) {
-    U32(p, 0xC) = a;
-    U32(p, 0x4) = 0;
-    U32(p, 0x8) = 0;
-    S32(p, 0x18) = 'POLY';
-    F32(p, 0x10) = f1;
-    F32(p, 0x14) = f2;
-    S32(p, 0x20) = 100;
-    U32(p, 0x1C) = 0;
-    *(void**)p = __vt__9PolyShape;
+PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape(a, 0, 'POLY', f1, f2) {
+    u8* p = (u8*)this;
     U32(p, 0xDC) = 0;
     S32(p, 0xBC) = n;
     for (int i = 0; i < S32(p, 0xBC); i++) {
@@ -3958,7 +3954,6 @@ u8* fn_801A3190(u8* p, u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, c
     F32(p, 0x30) = hi->x;
     F32(p, 0x34) = hi->y;
     F32(p, 0x38) = hi->z;
-    return p;
 }
 
 ValueTable* fn_80131808(const char* name);  // open a .val table

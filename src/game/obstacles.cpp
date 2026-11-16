@@ -398,11 +398,12 @@ extern f32 __float_epsilon[];      // FLT_EPSILON
 
 extern "C" {
 void fn_8019EECC(u8* owner, ObVec3* c);
-CollShape* fn_8019FFD8(void* p, u8* frame, u8* owner);
+// sphcoll constructors, called by their linker names: SphereGroup(frame, owner), PolyShape(frame, planes, n, lo, hi, k, skin).
+CollShape* __ct__11SphereGroupFUlUl(void* p, u8* frame, u8* owner);
 void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin, f32 m, f32 im);
 void fn_801A0444(CollShape* grp, CollShape* box);
 CollShape* fn_801A2354(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
-CollShape* fn_801A3190(void* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
+CollShape* __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(void* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
 CollShape* fn_801A3DAC(void* p, u8* frame, const char* name, u8* owner);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
@@ -700,7 +701,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddCornerV((u8*)this, c, spring);
         shape = (CollShape*)operator new(0x184, "horse-volume");
         if (shape) {
-            shape = fn_8019FFD8(shape, (u8*)frame, (u8*)this);
+            shape = __ct__11SphereGroupFUlUl(shape, (u8*)frame, (u8*)this);
         }
         const f32 directionComponent = 1.0f;
         f32 r = q->a * ScaleOperand(0.5f);
@@ -803,7 +804,7 @@ void Obstacle::Init(BodyDesc* d) {
         fn_80131818(t);
         CollShape* s = (CollShape*)operator new(0xE0, "polyvol");
         if (s) {
-            s = fn_801A3190(s, (u8*)frame, pl, n, &lo, &hi, k, skin);
+            s = __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(s, (u8*)frame, pl, n, &lo, &hi, k, skin);
         }
         shape = s;
         U8(this, 0x221) = 1;
