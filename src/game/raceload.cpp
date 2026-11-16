@@ -2,19 +2,7 @@
 // vehicles (plus "Trailer" slots), builds the track/resource/weather .trk names for the event and
 // loads/unloads the track, car and overlay resources. Names are guesses.
 #include "game/common.h"
-
-struct DriverInfo {
-    u8 pad0[0x8];
-    char name[1];  // offset 0x8
-};
-
-struct VehicleInfo {
-    u8 pad0[0x4];
-    s32 id;  // offset 0x4
-    u8 pad8[0x2C - 0x8];
-    char name[0x78];  // offset 0x2C
-    s32 unkA4;        // offset 0xA4
-};
+#include "game/gamedb.h"
 
 struct RacerSlot {
     s32 type;              // offset 0x0
@@ -46,11 +34,6 @@ struct DAVMap {
     s32 vehicles[8];   // offset 0x28
 };
 
-struct Event {
-    u8 pad0[0x20];
-    ValueNode* values;  // offset 0x20
-};
-
 extern "C" {
 int strcasecmp(const char* a, const char* b);
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
@@ -76,7 +59,6 @@ DriverInfo* FindDriver(long id);
 VehicleInfo* FindVehicle(long id);
 VehicleInfo* FindVehicleByFlags(u32 flags, int n);
 int IsPlayerDriver(long id, int player);
-Event* GetEvent(int id);
 void LoadTimerBegin(const char* name, int a, int b, f32 total);
 void LoadTimerProgress(void);
 
@@ -94,7 +76,7 @@ static char lbl_8034F560[64];  // track weather
 void* lbl_8055D3B0;            // race sounds
 u8 lbl_8055D3B4;               // resource track used
 u8 lbl_8055D3B5;               // weather track used
-Event* lbl_8055D3B8;
+EventInfo* lbl_8055D3B8;
 
 static inline void CopyString(const char* s, int size, char* dst) {
     char* d = dst;
@@ -122,9 +104,9 @@ void fn_80009DC8(RaceSetup* rs) {
         d = FindDriver(s->driver);
         v = FindVehicle(s->vehicle);
         s->flags = 0;
-        s->unk74 = v->unkA4;
+        s->unk74 = v->groups;
         s->unk64.v = 0.0f;
-        CopyString(v->name, 32, s->vehicleName);
+        CopyString(v->chassis, 32, s->vehicleName);
         s->type = 'Q';
         for (p = 0; p < fn_80137C74(); p++) {
             if (IsPlayerDriver(s->driver, p)) {
@@ -152,7 +134,7 @@ void fn_80009DC8(RaceSetup* rs) {
             vehicle = FindVehicleByFlags(1, i)->id;
             *trailer = tmp;
             trailer->vehicle = vehicle;
-            CopyString(FindVehicle(vehicle)->name, 32, trailer->vehicleName);
+            CopyString(FindVehicle(vehicle)->chassis, 32, trailer->vehicleName);
         }
     }
 }
@@ -179,7 +161,7 @@ void fn_8000A688(void (*fn)(const char* name), const char* car) {
 }
 
 void fn_8000A6D8(void) {
-    const char* contest = lbl_8055D3B8->values->GetValue("weather");
+    const char* contest = lbl_8055D3B8->node->GetValue("weather");
     const char* res = "none";
     ValueTable* table = fn_80131810("weather.val");
     if (table) {
@@ -230,7 +212,7 @@ void fn_8000A8C4(RaceSetup* rs) {
     fn_802E3D00();
     fn_801345D8(lbl_8034F4E0, sizeof(lbl_8034F4E0), "%s.trk", rs->track);
     lbl_8055D3B8 = GetEvent(rs->event);
-    res = lbl_8055D3B8->values->GetString("resource", NULL);
+    res = lbl_8055D3B8->node->GetString("resource", NULL);
     if (res) {
         lbl_8055D3B4 = 1;
         fn_801345D8(lbl_8034F520, sizeof(lbl_8034F520), "%s_%s.trk", rs->track, res);
@@ -238,7 +220,7 @@ void fn_8000A8C4(RaceSetup* rs) {
         lbl_8055D3B4 = 0;
         fn_801345D8(lbl_8034F520, sizeof(lbl_8034F520), "%s.trk", rs->track);
     }
-    weather = lbl_8055D3B8->values->GetValue("weather");
+    weather = lbl_8055D3B8->node->GetValue("weather");
     if ((lbl_8055D3B5 = strcasecmp(weather, "none") != 0)) {
         fn_801345D8(lbl_8034F560, sizeof(lbl_8034F560), "%s_%s.trk", rs->track, weather);
     } else {
@@ -310,4 +292,4 @@ void fn_8000ABE0(RaceSetup* rs) {
 
 char* fn_8000AC2C(void) { return lbl_8034F520; }
 
-Event* fn_8000AC38(void) { return lbl_8055D3B8; }
+EventInfo* fn_8000AC38(void) { return lbl_8055D3B8; }

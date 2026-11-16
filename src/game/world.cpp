@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 
 void* operator new(size_t size, const char* tag);
@@ -113,11 +114,6 @@ struct RaceSetup {
 
 struct StartOpts {
     s32 f0;
-};
-
-struct EventInfo {
-    u8 pad0[0x20];
-    ValueNode* node;  // offset 0x20
 };
 
 struct CarTypeMap {
@@ -290,7 +286,6 @@ int GetNumPlayers(void);
 void LoadTimerMark(const char* name, f32 step);
 void LoadTimerBegin(const char* name, int a, int b, f32 duration);
 void LoadTimerEnd(const char* name);
-ValueTable* GetEvent(int i);
 BOOL OptPaTest(void);
 
 extern "C" {
@@ -347,7 +342,7 @@ void fn_801F9E04(RaceSetup* s);
 void fn_80265D8C(RaceSetup* s);
 void fn_801DCE0C(int a);
 void fn_801FC8DC(RaceSetup* s);
-void fn_80139F5C(ValueTable* ev);
+void fn_80139F5C(EventInfo* ev);
 void fn_801FA298(RaceSetup* s);
 void fn_801EC11C(void);
 void fn_80287800(RaceSetup* s);
@@ -1301,7 +1296,7 @@ static inline ValPoint BoundPoint(ValueNode* nd, const char* key) { /* Helper na
 static inline f32 GroundY(const ValPoint& p) { return fn_801DCF48(0, p.x, p.y); }
 
 void fn_801E96D8(RaceSetup* s) {
-    EventInfo* ev = (EventInfo*)GetEvent(s->event);
+    EventInfo* ev = GetEvent(s->event);
     const char* file = ev->node->GetString("wall_file", 0);
     if (file) {
         ValueNode* nd;

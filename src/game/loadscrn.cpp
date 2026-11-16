@@ -1,11 +1,10 @@
 // Loading screen state (0x802445FC-0x8024497C): the menu state shown while a race loads; it fades
 // the music and the screen over its duration. Names are guesses apart from the layout name.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 
-class EventInfo;
 
-EventInfo* FindTrackEvent(int track, int eve);
 void LoadingBegin(EventInfo* info, long difficulty);
 void LoadingStop3(void);
 void LoadingFinish(void);

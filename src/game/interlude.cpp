@@ -4,6 +4,7 @@
 // re-timed and reordered, and export to "intrlude.txt"). Every function is written; the player state at
 // lbl_80437D88 is still addressed by offsets in places. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 
@@ -228,12 +229,6 @@ public:
     virtual const char* GetValue(const char* key);
 };
 
-struct EventTable {
-    u8 pad0[0x20];
-    ValueNodeV* node;  // offset 0x20
-};
-
-EventTable* GetEvent(int i);
 const char* GetEventTypeName(u32 type);
 void* operator new[](size_t size, const char* name);
 void operator delete[](void* p);
@@ -684,7 +679,7 @@ Event* fn_801C3C80(void) {
     return e;
 }
 
-ValueNodeV* fn_801C3D5C(void) { return GetEvent(fn_801769CC()->event)->node; }
+ValueNodeV* fn_801C3D5C(void) { return (ValueNodeV*)GetEvent(fn_801769CC()->event)->node; }
 
 // An enum key, or def when the node does not have it.
 static inline int GetEnumOr(ValueNode* n, const char* key, const char* names, int def) {

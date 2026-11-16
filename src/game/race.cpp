@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -18,14 +19,6 @@ void fn_80279488(void);
 void LoadArcadeEves(void);
 void UnloadEves(void);
 
-struct Unk_8001285C {
-    s32 unk0;
-    u32 unk4;
-    s32 unk8;
-    s32 unkC;
-};
-
-Unk_8001285C* GetEvent(int id);
 
 class LocString {
 public:
@@ -203,7 +196,7 @@ const char* GetTrackEnviron(const char* name) {
 
 extern "C" s32 fn_800081F0(Unk_8000822C* obj) {
     if ((obj->flags & 1) == 0) {
-        return GetEvent(obj->id)->unkC;
+        return GetEvent(obj->id)->laps;
     } else {
         return 200;
     }
@@ -218,12 +211,12 @@ extern "C" void fn_8000822C(Unk_8000822C* obj) {
 }
 
 extern "C" void fn_8000824C(Unk_8000822C* obj, s32 id) {
-    Unk_8001285C* src;
+    EventInfo* src;
 
     fn_8000822C(obj);
     src = GetEvent(id);
-    obj->id = src->unk0;
-    obj->unk4 = src->unk8;
+    obj->id = src->id;
+    obj->unk4 = src->type;
 }
 
 // Twelve separate statics, not an array: MWCC then pools their .bss addresses off one base

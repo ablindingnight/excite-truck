@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include "macros.h"
 
@@ -56,12 +57,8 @@ public:
     virtual LayoutArtItem* FindArtItem(const char* name) = 0;  // 0x14
 };
 
-struct Event {
-    u8 pad0[0x20];
-    ValueNode* values;  // offset 0x20
-};
-
-struct EventInfo {
+// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
+struct RaceOpts {
     u32 unk0;  // offset 0x0
     u32 type;  // offset 0x4
 };
@@ -206,7 +203,7 @@ struct RaceInfo {
     u8 split;           // offset 0x0
     u8 active;          // offset 0x1
     s32 mode;           // offset 0x4
-    EventInfo* event;   // offset 0x8
+    RaceOpts* event;   // offset 0x8
     void* info;         // offset 0xC
     f32 time;           // offset 0x10
     s32 numPlayers;     // offset 0x14
@@ -238,7 +235,7 @@ void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 int fn_801769B8(void);
 int fn_801EA994(void);
 int fn_802E2C20(void);
-EventInfo* fn_801E87A8(void);
+RaceOpts* fn_801E87A8(void);
 int fn_801E86F8(int player);
 RacerState* fn_801EA9CC(int index);
 int fn_801B8570(int index);
@@ -347,7 +344,6 @@ int fn_801B880C(void);
 int fn_801CB8FC(void);
 }
 int OptPaTest(void);
-Event* GetEvent(int id);
 void LoadTipsSequence(void);
 void LoadingStop2(void);
 int LoadingDraw(void);
@@ -771,7 +767,7 @@ void fn_80005B74(void) {
     f32 t;
     f32 now;
     if (OptPaTest()) {
-        t = GetEvent(*fn_801769CC())->values->GetFloat("pa_sample_request_t");
+        t = GetEvent(*fn_801769CC())->node->GetFloat("pa_sample_request_t");
         now = lbl_8055D350->time;
         if (now > t) {
             if (now - t < 2.0f) {
