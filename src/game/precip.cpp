@@ -824,32 +824,31 @@ void SnowSystem::Fill(void) {
 
 struct PVec2 {
     f32 x, y;
+    void Set(f32 x_, f32 y_) {
+        x = x_;
+        y = y_;
+    }
 };
 void SnowSystem::Spawn(void) {
     f32 asp = fn_802C9A50();
     f32 ty = tanHalf;
     f32 tx = ty / asp;
-    f32 half = 0.5f;
-    f32 one = 1.0f;
     while (count < max) {
         f32 r = fn_80287BC8(0.0f, 1.0f);
-        f32 k = half - half * r;
+        f32 k = 0.5f - 0.5f * r;
         PVec2 g;
-        g.y = grav.y * k;
-        g.x = grav.x * k;
+        g.Set(grav.x * k, grav.y * k);
         f64 absGravityX = __fabs(g.x);
         f32 gravityX = (f32)absGravityX;
         f64 absGravityY = __fabs(g.y);
         f32 gravityY = (f32)absGravityY;
-        f32 ax = one - gravityX;
-        f32 ay = one - gravityY;
+        f32 ax = 1.0f - gravityX;
+        f32 ay = 1.0f - gravityY;
         f32 rx = fn_80287BC8(-ax, ax);
         f32 ry = fn_80287BC8(-ay, ay);
         f32 z = near + r * (far - near);
         PVec p;
-        p.z = z;
-        p.y = ty * z * (g.y + ry);
-        p.x = tx * z * (g.x + rx);
+        p.Set(tx * z * (g.x + rx), ty * z * (g.y + ry), z);
         Add(&p);
     }
 }
@@ -992,27 +991,22 @@ void RainSystem::Spawn(void) {
     f32 ty = tanHalf;
     f32 tx = ty / asp;
     if (vel.z >= -0.01f) {
-        f32 half = 0.5f;
-        f32 one = 1.0f;
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
-            f32 k = half - half * r;
+            f32 k = 0.5f - 0.5f * r;
             PVec2 g;
-            g.y = dir.y * k;
-            g.x = dir.x * k;
+            g.Set(dir.x * k, dir.y * k);
             f64 absDirectionX = __fabs(g.x);
             f32 directionX = (f32)absDirectionX;
             f64 absDirectionY = __fabs(g.y);
             f32 directionY = (f32)absDirectionY;
-            f32 ax = one - directionX;
-            f32 ay = one - directionY;
+            f32 ax = 1.0f - directionX;
+            f32 ay = 1.0f - directionY;
             f32 rx = fn_80287BC8(-ax, ax);
             f32 ry = fn_80287BC8(-ay, ay);
             f32 z = near + r * (far - near);
             PVec p;
-            p.z = z;
-            p.y = ty * z * (g.y + ry);
-            p.x = tx * z * (g.x + rx);
+            p.Set(tx * z * (g.x + rx), ty * z * (g.y + ry), z);
             Add(&p);
         }
     } else {
@@ -1022,9 +1016,7 @@ void RainSystem::Spawn(void) {
             f32 a = fn_80287BC8(-z, z);
             f32 b = fn_80287BC8(-z, z);
             PVec p;
-            p.z = z;
-            p.x = tx * a;
-            p.y = ty * b;
+            p.Set(tx * a, ty * b, z);
             Add(&p);
         }
     }
