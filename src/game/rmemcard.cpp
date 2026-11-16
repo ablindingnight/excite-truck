@@ -3,6 +3,10 @@
 // the save asynchronously (create, open, write, close) from a state machine polled by the frame callback,
 // blocking with a timeout where the caller needs a result. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/NAND/NANDCheck.h>
+#include <revolution/NAND/NANDCore.h>
+#include <revolution/NAND/NANDOpenClose.h>
+#include <revolution/NAND/nand.h>
 
 namespace {
 extern char kPackBanner[];
@@ -41,17 +45,7 @@ void fn_8012E81C(const char* name);
 void* fn_8012C370(const char* name, u32 type, void* a, s32* size, int b, int c);
 int fn_802ECC10(void);
 
-s32 NANDInit(void);
-s32 NANDCheck(u32 blocks, u32 inodes, u32* answer);
-s32 NANDOpen(const char* path, void* info, u8 mode);
-s32 NANDClose(void* info);
-s32 NANDGetLength(void* info, u32* len);
-s32 NANDRead(void* info, void* buf, u32 len);
-s32 NANDDelete(const char* path);
 s32 NANDCreateAsync(const char* path, u8 perm, u8 attr, void (*cb)(s32, void*), void* block);
-s32 NANDOpenAsync(const char* path, void* info, u8 mode, void (*cb)(s32, void*), void* block);
-s32 NANDWriteAsync(void* info, const void* buf, u32 len, void (*cb)(s32, void*), void* block);
-s32 NANDCloseAsync(void* info, void (*cb)(s32, void*), void* block);
 }
 
 void* operator new[](size_t size, const char* name);
@@ -221,7 +215,7 @@ void fn_802E8918(void) { fn_802E2E38(1); }
 
 void fn_802E8920(s32 size) {
     u32 answer = 0;
-    s32 r = NANDCheck((size + 0x3FFF) / 0x4000 + 4, 2, &answer);
+    s32 r = NANDCheck((u32)((size + 0x3FFF) / 0x4000 + 4), (u32)2, (u32*)&answer);
     if (r == 0) {
     retry:
         if (answer & 1) {
@@ -258,10 +252,10 @@ void fn_802E8920(s32 size) {
 int test_banner_ok(void) {
     u8 file[0x8C];
     int ok = 0;
-    s32 r = NANDOpen("banner.bin", file, 1);
+    s32 r = NANDOpen((const char*)("banner.bin"), (NANDFileInfo*)file, (u8)1);
     if (r == 0) {
         u32 len = 0;
-        if (NANDGetLength(file, &len) == 0) {
+        if (NANDGetLength((NANDFileInfo*)file, (u32*)&len) == 0) {
             if (len == 0xF0A0) {
                 fn_802E30C8("rmemcard: test_banner_ok: banner is ok");
                 ok = 1;
@@ -271,7 +265,7 @@ int test_banner_ok(void) {
         } else {
             fn_802E30C8("rmemcard: test_banner_ok: banner length cannot be read.");
         }
-        NANDClose(file);
+        NANDClose((NANDFileInfo*)file);
     } else {
         fn_802E30C8("rmemcard: test_banner_ok: can't open banner (%d)", r);
     }
@@ -281,16 +275,16 @@ int test_banner_ok(void) {
 int fn_802E8AE8(const char* name) {
     u8 file[0x8C];
     int ok = 0;
-    if (NANDOpen(name, file, 1) == 0) {
+    if (NANDOpen((const char*)name, (NANDFileInfo*)file, (u8)1) == 0) {
         ok = 1;
-        NANDClose(file);
+        NANDClose((NANDFileInfo*)file);
     }
     return ok;
 }
 
 void fn_802E8B34(const char* name) {
     fn_802E30C8("rmemcard: deleting %s", name);
-    s32 r = NANDDelete(name);
+    s32 r = NANDDelete((const char*)name);
     if (r != 0) {
         fn_802E30C8("rmemcard: NANDDelete returned %d! (%s)", r, name);
     }
@@ -391,7 +385,7 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
         }
         return 0;
     }
-    s32 r = NANDOpen(name, file, 1);
+    s32 r = NANDOpen((const char*)name, (NANDFileInfo*)file, (u8)1);
     if (r != 0) {
         fn_802E30C8("rmemcard: NANDOpen (R) returns %d", r);
         if (first) {
@@ -404,16 +398,16 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
         if (size > 0x55730) {
             fn_802E317C("memcard: too big for ASYNC_MEMCARD_BYTES (%d > %d)", size, 0x55730);
         }
-        got = NANDRead(file, lbl_80560020, size);
+        got = NANDRead((NANDFileInfo*)file, (void*)lbl_80560020, (u32)size);
         if (got == size) {
             memcpy(dst, lbl_80560020, size);
         }
     } else {
-        got = NANDRead(file, dst, size);
+        got = NANDRead((NANDFileInfo*)file, (void*)dst, (u32)size);
     }
     if (got != size) {
         fn_802E30C8("rmemcard: NANDRead returns %d", got);
-        NANDClose(file);
+        NANDClose((NANDFileInfo*)file);
         if (got == -4) {
             fn_802E8C2C();
         } else if (fn_802E8BE4()) {
@@ -421,7 +415,7 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
         }
         return 0;
     }
-    r = NANDClose(file);
+    r = NANDClose((NANDFileInfo*)file);
     if (r != 0) {
         fn_802E30C8("rmemcard: NANDClose returns %d", r);
         return 0;
@@ -503,7 +497,7 @@ inline void fn_802E91D8(Writer* w, const char* name, const void* buf, u32 len) {
 inline void fn_802E95CC(s32 result, void* block);
 
 // Starts one NAND call; a refused call ends the write.
-#define NAND_START(call, name, next, closeOnFail)      {                                                         w->done = 0;                                          w->result = 0;                                        s32 r = call;                                         if (r != 0) {                                             fn_802E30C8(kNandFailure, name, r);             w->state = 0;                                         w->err = r;                                           if (closeOnFail) {                                        NANDClose(w->file);                               }                                                 } else {                                                  w->state = next;                                  }                                                 }
+#define NAND_START(call, name, next, closeOnFail)      {                                                         w->done = 0;                                          w->result = 0;                                        s32 r = call;                                         if (r != 0) {                                             fn_802E30C8(kNandFailure, name, r);             w->state = 0;                                         w->err = r;                                           if (closeOnFail) {                                        NANDClose((NANDFileInfo*)w->file);                               }                                                 } else {                                                  w->state = next;                                  }                                                 }
 
 inline void fn_802E9254(Writer* w) {
     s32 res;
@@ -517,7 +511,7 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == 0 || res == -6) {
-            NAND_START(NANDOpenAsync(w->name, w->file, 2, fn_802E95CC, &w->user), kOpenStart, 4, 0);
+            NAND_START(NANDOpenAsync((const char*)w->name, (NANDFileInfo*)w->file, (u8)2, (NANDAsyncCallback)fn_802E95CC, (NANDCommandBlock*)&w->user), kOpenStart, 4, 0);
         } else {
             if (res == -11) {
                 lbl_80560034 = 1;
@@ -535,7 +529,7 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == 0) {
-            NAND_START(NANDWriteAsync(w->file, w->buf, w->len, fn_802E95CC, &w->user), kWriteStart, 5, 1);
+            NAND_START(NANDWriteAsync((NANDFileInfo*)w->file, (const void*)w->buf, (u32)w->len, (NANDAsyncCallback)fn_802E95CC, (NANDCommandBlock*)&w->user), kWriteStart, 5, 1);
         } else {
             fn_802E30C8(kNandFailure, kOpenComplete, res);
             w->err = res;
@@ -548,12 +542,12 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == (s32)w->len) {
-            NAND_START(NANDCloseAsync(w->file, fn_802E95CC, &w->user), kCloseStart, 6, 1);
+            NAND_START(NANDCloseAsync((NANDFileInfo*)w->file, (NANDAsyncCallback)fn_802E95CC, (NANDCommandBlock*)&w->user), kCloseStart, 6, 1);
         } else {
             fn_802E30C8(kNandFailure, kWriteComplete, res);
             w->err = res;
             w->state = 0;
-            NANDClose(w->file);
+            NANDClose((NANDFileInfo*)w->file);
         }
         break;
     case 6:
@@ -568,7 +562,7 @@ inline void fn_802E9254(Writer* w) {
             fn_802E30C8(kNandFailure, kCloseComplete, res);
             w->err = res;
             w->state = 0;
-            NANDClose(w->file);
+            NANDClose((NANDFileInfo*)w->file);
         }
         break;
     }
