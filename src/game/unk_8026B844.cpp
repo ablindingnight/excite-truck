@@ -240,10 +240,9 @@ void fn_8026B8A0(void) {
         f32 nx = lbl_80499050.pos.x + right.x * a;
         f32 ny = lbl_80499050.pos.y + right.y * a;
         f32 nz = lbl_80499050.pos.z + right.z * a;
-        b = dt * (-py * pan);
-        lbl_80499050.pos.x = nx + fwd.x * b;
-        lbl_80499050.pos.y = ny + fwd.y * b;
-        lbl_80499050.pos.z = nz + fwd.z * b;
+        lbl_80499050.pos.x = nx + fwd.x * (dt * (-py * pan));
+        lbl_80499050.pos.y = ny + fwd.y * (dt * (-py * pan));
+        lbl_80499050.pos.z = nz + fwd.z * (dt * (-py * pan));
     }
     lbl_80499050.pos.y = lbl_80499050.pos.y + (h - (lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z)));
     lbl_80499050.rot.axes[0].x = lbl_80563D94;
