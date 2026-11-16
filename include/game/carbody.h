@@ -10,6 +10,7 @@
 // (fXXXX = offset, typed by the accessor; 2026-11-16 offset census) plus the names the other units use. Names unproven.
 
 class StatsSrc;
+struct CarLayout;
 
 // The contact plane under a wheel.
 struct CbPlane {
@@ -102,7 +103,7 @@ public:
     u8 f260;                     // offset 0x260
     u8 pad261[0x268 - 0x261];
     u8* f268;                    // offset 0x268
-    s32 f26C;                    // offset 0x26C
+    CarLayout* layout;           // offset 0x26C (carlayout.cpp; cardmg walks its deformable points)
     StatsSrc* src;               // offset 0x270
     u8 pad274[0x2A4 - 0x274];
     f32 f2A4;                    // offset 0x2A4
@@ -120,7 +121,8 @@ public:
     f32 f2F4;                    // offset 0x2F4
     f32 f2F8;                    // offset 0x2F8
     f32 f2FC;                    // offset 0x2FC
-    u8 pad300[0x318 - 0x300];
+    u8 pad300[0x314 - 0x300];
+    f32 f314;                    // offset 0x314
     f32 f318;                    // offset 0x318
     u8 pad31C[0x328 - 0x31C];
     u8* f328;                    // offset 0x328
@@ -149,7 +151,8 @@ public:
     f32 f5EC;                    // offset 0x5EC
     f32 f5F0;                    // offset 0x5F0
     f32 f5F4;                    // offset 0x5F4
-    u8 pad5F8[0x1E3C - 0x5F8];
+    s32 f5F8;                    // offset 0x5F8
+    u8 pad5FC[0x1E3C - 0x5FC];
     s32 f1E3C;                   // offset 0x1E3C
     s32 f1E40;                   // offset 0x1E40
     u8 pad1E44[0x20DC - 0x1E44];
@@ -238,7 +241,8 @@ public:
     f32 f2694;                   // offset 0x2694
     f32 f2698;                   // offset 0x2698
     f32 f269C;                   // offset 0x269C
-    u8 pad26A0[0x26A8 - 0x26A0];
+    f32 f26A0;                   // offset 0x26A0
+    s32 f26A4;                   // offset 0x26A4
     f32 f26A8;                   // offset 0x26A8
     u8 f26AC;                    // offset 0x26AC
     u8 pad26AD[0x26B0 - 0x26AD];

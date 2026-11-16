@@ -553,7 +553,7 @@ public:
 CbValueTable* fn_80131808(const char* name);
 void fn_80131818(CbValueTable* table);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
-s32 fn_802792E4(const char* car);
+CarLayout* fn_802792E4(const char* car);  // carlayout.cpp
 s32 fn_80279874(s32);
 int fn_8027AA48(void);
 void fn_80279F58(CbSetup* setup, CbValueTable* table);
@@ -603,7 +603,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     cb->index = S32(desc, 0xE0);
     cb->f1F0 = S32(desc, 0x68);
     *(CbIdent*)(p + 0x1F4) = *(CbIdent*)(desc + 0x6C);
-    cb->f26C = fn_802792E4((char*)(p + 0x234));
+    cb->layout = fn_802792E4((char*)(p + 0x234));
     s32 id = cb->f25C;
     *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)(desc + 0x18);
     S32(p, 0x328) = fn_80279874(id);

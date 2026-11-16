@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/rigid.h"
 #include "game/math_types.h"
+#include "game/carbody.h"
 #include "macros.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -188,8 +189,8 @@ f32 PSVECDistance(const f32* a, const f32* b);
 int fn_8018C514(u8* p, const f32* pos) {
     f32 best = 10000000.0f;
     int idx = 0;
-    for (int i = 1; i < *(s32*)PTR(p, 0x26C); i++) {
-        f32 d = PSVECDistance(pos, (f32*)(PTR(p, 0x26C) + i * 0x34 + 0x20));
+    for (int i = 1; i < *(s32*)((u8*&)((CarBody*)p)->layout); i++) {
+        f32 d = PSVECDistance(pos, (f32*)(((u8*&)((CarBody*)p)->layout) + i * 0x34 + 0x20));
         if (d < best) {
             best = d;
             idx = i;
@@ -247,7 +248,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
     DamagePart* d = lbl_80332840;
     DmgSlot* s = (DmgSlot*)(p + 0x152C);
     for (int i = 0; i < 17; i++, d++, s++) {
-        if (fn_801E2CCC(S32(p, 0x59C), d->name, &s->on)) {
+        if (fn_801E2CCC(((CarBody*)p)->model, d->name, &s->on)) {
             EVec v;
             ToWorld(&v, &d->anchor, s->on);
             s->point = fn_8018C514(p, &v.x);
@@ -260,20 +261,20 @@ void fn_8018C5A0(u8* p, u8* desc) {
             s->limit = 1.5707964f;
         }
     }
-    S32(p, 0x5F8) = *(s32*)PTR(p, 0x26C);
-    F32(p, 0x5F4) = 1818.0f / (0.4545f * F32(desc, 0x8));
-    if (F32(p, 0x314) >= -0.0001f) {
-        F32(p, 0x5F4) = F32(p, 0x5F4) * F32(p, 0x314);
+    ((CarBody*)p)->f5F8 = *(s32*)((u8*&)((CarBody*)p)->layout);
+    ((CarBody*)p)->f5F4 = 1818.0f / (0.4545f * F32(desc, 0x8));
+    if (((CarBody*)p)->f314 >= -0.0001f) {
+        ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * ((CarBody*)p)->f314;
     } else {
-        F32(p, 0x5F4) = (f32)__fabs(F32(p, 0x314));
+        ((CarBody*)p)->f5F4 = (f32)__fabs(((CarBody*)p)->f314);
     }
-    if (S32(p, 0x1F0) == 0x50) {
+    if (((CarBody*)p)->f1F0 == 0x50) {
         ValueNode* t = ((EventDesc*)GetEvent(*(s32*)fn_801769CC()))->table;
-        F32(p, 0x5F4) = F32(p, 0x5F4) * t->GetFloat("player_damage_tweak", lbl_80561F88);
+        ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * t->GetFloat("player_damage_tweak", lbl_80561F88);
     }
-    F32(p, 0x5F4) = F32(p, 0x5F4) * lbl_80561F8C;
-    if (PTR(p, 0x328)) {
-        fn_80279B28(PTR(p, 0x328), (CarState*)(p + 0x1E44));
+    ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * lbl_80561F8C;
+    if (((CarBody*)p)->f328) {
+        fn_80279B28(((CarBody*)p)->f328, (CarState*)(p + 0x1E44));
     } else {
         fn_80279CD8((CarState*)(p + 0x1E44));
     }
@@ -292,7 +293,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
                 fn_802E317C("cardmg: unknown special helper %s", l->name);
             }
         }
-        if (fn_801E2CCC(S32(p, 0x59C), l->name, &bone)) {
+        if (fn_801E2CCC(((CarBody*)p)->model, l->name, &bone)) {
             *point = fn_8018C514(p, &bone->pos.x);
         }
     }
@@ -567,10 +568,10 @@ void fn_8018DA5C(u8* p, u8* m) {
         EaseV(&car->ease[i], &car->goal[i], 0.8f, 1.0f - 0.8f);
         SetE(&mdl->pt[i], e + i);
     }
-    if (U8(p, 0x26E0)) {
-        f32 lean = F32(p, 0x26E8);
-        f32 twist = 0.2f * F32(p, 0x26E4);
-        roll = 0.1f * F32(p, 0x26EC);
+    if (((CarBody*)p)->f26E0) {
+        f32 lean = ((CarBody*)p)->f26E8;
+        f32 twist = 0.2f * ((CarBody*)p)->f26E4;
+        roll = 0.1f * ((CarBody*)p)->f26EC;
         lean = lean > -0.25f ? lean : -0.25f;
         ApplyDamagePointDeformation(car, p, roll, lean, twist, mdl);
     }
@@ -631,7 +632,7 @@ f32 PSVECDotProduct(const f32* a, const f32* b);
 // direction is cancelled), clamps it to the point's box, then passes the push on to linked points (not back to
 // `from`), up to three links deep.
 void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
-    DentPoint* pt = (DentPoint*)PTR(p, 0x26C) + i;
+    DentPoint* pt = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
     f32 k = 10.0f * (0.0000068539325f * pt->soft);
     f32 mag = PSVECMag(&push->x);
     DentVec d;
@@ -659,14 +660,14 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
         at.x = pt->pos.x + gi->x;
         at.y = pt->pos.y + gi->y;
         at.z = pt->pos.z + gi->z;
-        for (int n = 0; n < S32(PTR(p, 0x26C), 0x20F0); n++) {
-            DentLink* l = (DentLink*)PTR(PTR(p, 0x26C), 0x20EC) + n;
+        for (int n = 0; n < S32(((u8*&)((CarBody*)p)->layout), 0x20F0); n++) {
+            DentLink* l = (DentLink*)PTR(((u8*&)((CarBody*)p)->layout), 0x20EC) + n;
             other = l->a;
             if ((other == i && l->b != from) || (l->b == i && other != from)) {
                 if (other == i) {
                     other = l->b;
                 }
-                DentPoint* o = (DentPoint*)PTR(p, 0x26C) + other;
+                DentPoint* o = (DentPoint*)((u8*&)((CarBody*)p)->layout) + other;
                 DentVec* go = (DentVec*)(p + 0x5FC) + other;
                 DentVec op;
                 // MATCHING-AID: y read ahead of x (single-use reads); the target adds y first but stores x first.
@@ -796,20 +797,20 @@ void fn_8018E330(u8* p) {
     fn_801DFF1C(PTR(p, 0x1EC));
     f32 zero = lbl_80561F74;
     f32 k = lbl_80561F8C;
-    F32(p, 0x258C) = zero;
-    F32(p, 0x2690) = k;
-    F32(p, 0x25BC) = zero;
-    F32(p, 0x26A0) = lbl_8055E3C8;
-    S32(p, 0x26A4) = S32(((DmgModel*)PTR(p, 0x270))->Current(), 0x4);
-    F32(p, 0x2588) = lbl_80561F74;
-    F32(p, 0x25A0) = lbl_80561F74;
-    U8(p, 0x259D) = 0;
-    U8(p, 0x259C) = 0;
-    S32(p, 0x2638) = 0;
-    S32(p, 0x2644) = 0;
-    F32(p, 0x2630) = lbl_80561F74;
-    F32(p, 0x262C) = lbl_80561F74;
-    F32(p, 0x2628) = lbl_80561F74;
+    ((CarBody*)p)->f258C = zero;
+    ((CarBody*)p)->f2690 = k;
+    ((CarBody*)p)->f25BC = zero;
+    ((CarBody*)p)->f26A0 = lbl_8055E3C8;
+    ((CarBody*)p)->f26A4 = S32(((DmgModel*)((u8*&)((CarBody*)p)->src))->Current(), 0x4);
+    ((CarBody*)p)->f2588 = lbl_80561F74;
+    ((CarBody*)p)->f25A0 = lbl_80561F74;
+    ((CarBody*)p)->f259D = 0;
+    ((CarBody*)p)->f259C = 0;
+    ((CarBody*)p)->f2638 = 0;
+    ((CarBody*)p)->f2644 = 0;
+    ((CarBody*)p)->f2630 = lbl_80561F74;
+    ((CarBody*)p)->f262C = lbl_80561F74;
+    ((CarBody*)p)->f2628 = lbl_80561F74;
 }
 
 struct DVec {
@@ -919,21 +920,21 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     AVec h;
     DentVec cand;
     AVec g0;
-    f32 mass = F32(p, 0xD4);
+    f32 mass = ((CarBody*)p)->mass;
     f32 inv = -0.1f / mass;
-    F32(p, 0x26F0) += imp->v[0] * inv;
-    F32(p, 0x26F4) += imp->v[1] * inv;
-    F32(p, 0x26F8) += imp->v[2] * inv;
+    ((CarBody*)p)->f26F0 += imp->v[0] * inv;
+    ((CarBody*)p)->f26F4 += imp->v[1] * inv;
+    ((CarBody*)p)->f26F8 += imp->v[2] * inv;
     if (!fn_80189BDC(p)) {
         return;
     }
-    if (NearZero(F32(p, 0x2690))) {
-        if ((F32(p, 0x4C) < lbl_80561F74 && kind != 0x6D) || kind == 0x3E7) {
+    if (NearZero(((CarBody*)p)->f2690)) {
+        if ((((CarBody*)p)->mtx.rot.y.y < lbl_80561F74 && kind != 0x6D) || kind == 0x3E7) {
             fn_8018E330(p);
         }
     }
     if (kind == 0x73) {
-        int fast = U8(p, 0x25C8) || Boosting(p);
+        int fast = ((CarBody*)p)->f25C8 || Boosting(p);
         if (fast) {
             return;
         }
@@ -949,7 +950,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     }
     da = *at;
     f32 mag = PSVECMag(di.v);
-    if (!(U32(fn_801769CC(), 0x4) & 0x4000) && F32(p, 0x2690) < 0.001f) {
+    if (!(U32(fn_801769CC(), 0x4) & 0x4000) && ((CarBody*)p)->f2690 < 0.001f) {
         if (mag < 1500.0f) {
             return;
         }
@@ -964,9 +965,9 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         f32 hm = PSVECMag(h.v);
         if (other >= 0) {
             hm *= lbl_80561F98;
-            if (S32(p, 0x1F0) != 0x50 && !Boosting(p)) {
+            if (((CarBody*)p)->f1F0 != 0x50 && !Boosting(p)) {
                 if (Boosting(fn_8017960C(other)) || hm > 15000.0f) {
-                    if (F32(p, 0x25D4) < F32(fn_8017960C(other), 0x25D4)) {
+                    if (((CarBody*)p)->speed < F32(fn_8017960C(other), 0x25D4)) {
                         fn_8018A174(p);
                     }
                 }
@@ -978,19 +979,19 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             if (hm < 30000.0f) {
                 return;
             }
-            if (other < 0 && F32(p, 0x25D4) < 13.333333f && hm < 300000.0f) {
+            if (other < 0 && ((CarBody*)p)->speed < 13.333333f && hm < 300000.0f) {
                 return;
             }
         }
-        if (U32(fn_801769CC(), 0x4) == 0x180304 && S32(p, 0x1F0) == 0x50 && other >= 0) {
+        if (U32(fn_801769CC(), 0x4) == 0x180304 && ((CarBody*)p)->f1F0 == 0x50 && other >= 0) {
             return;
         }
         fn_8018E330(p);
     }
     DentNode* best = 0;
     f32 bestD = 100000.0f;
-    for (int i = 1; i < S32(p, 0x5F8); i++) {
-        DentNode* d = (DentNode*)(PTR(p, 0x26C) + 4) + i;
+    for (int i = 1; i < ((CarBody*)p)->f5F8; i++) {
+        DentNode* d = (DentNode*)(((u8*&)((CarBody*)p)->layout) + 4) + i;
         if (!d->fixed) {
             cand.x = d->pos.x + ((DentCar*)p)->goal[i].x * 1.8f;
             cand.y = d->pos.y + ((DentCar*)p)->goal[i].y * 1.8f;
@@ -1018,9 +1019,9 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
         c0.z = best->pos.z + gb->z;
-        int count = S32(p, 0x5F8);
+        int count = ((CarBody*)p)->f5F8;
         for (int i = 1; i < count; i++) {
-            DentPoint* q = (DentPoint*)PTR(p, 0x26C) + i;
+            DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
             DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
             w.x = q->pos.x + g->x;
             w.y = q->pos.y + g->y;
@@ -1088,7 +1089,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         sl->valid = 0;
                     }
                     if (sl->state == 3) {
-                        DVec* lo = &((CarModel*)PTR(p, 0x26C))->boxes[t->bit].lo;
+                        DVec* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[t->bit].lo;
                         DVec* hi = lo + 1;
                         c.x = lo->x + (lo + 1)->x;
                         c.y = lo->y + hi->y;
@@ -1116,10 +1117,10 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         U32(p, 0x1E40) |= 1 << l->point;
                     }
                     if (idx >= 2 && idx <= 7) {
-                        DentPoint* q = (DentPoint*)PTR(p, 0x26C) + U8(p, 0x1E2C + idx);
-                        ToWorld(&msg.pos, (EVec*)&q->pos, (DFrame*)(p + 0x3C));
+                        DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + U8(p, 0x1E2C + idx);
+                        ToWorld(&msg.pos, (EVec*)&q->pos, (DFrame*)&((CarBody*)p)->mtx);
                         ((RigidBody*)p)->VelAt((RVec3*)&msg.vel, (RVec3*)&msg.pos);
-                        msg.car = *(s16*)(p + 0x6C);
+                        msg.car = *(s16*)&((CarBody*)p)->hint;
                         fn_801796CC(7, &msg, sizeof(GlassMsg));
                     }
                     if (idx >= 8 && idx <= 11 && fn_80129D18(4, 10) < 5) {
@@ -1127,9 +1128,9 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                     }
                     if (idx == 12) {
                         if (fn_80129D18(4, 10) < 5) {
-                            S32(p, 0x268C) = 6;
+                            ((CarBody*)p)->a268C = 6;
                         } else {
-                            S32(p, 0x268C) = 3;
+                            ((CarBody*)p)->a268C = 3;
                         }
                         DmgSlot* hood = (DmgSlot*)(p + 0x152C);
                         if (hood->state != 3) {
@@ -1144,24 +1145,24 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             l++;
         }
     }
-    f32 was = F32(p, 0x2690);
+    f32 was = ((CarBody*)p)->f2690;
     if (U32(fn_801769CC(), 0x4) & 0x4000) {
         int hit = 0;
-        s32 st = S32(p, 0x268C);
+        s32 st = ((CarBody*)p)->a268C;
         if (st == 0) {
             if (mag > lbl_80562020) {
                 f32 cap = kind != 0x70 ? 0.1f : lbl_80562024;
                 f32 add = lbl_80562028 * mag;
                 add = add < cap ? add : cap;
-                f32 v = F32(p, 0x2690) += add;
+                f32 v = ((CarBody*)p)->f2690 += add;
                 if (v > lbl_8056202C || (v > lbl_80561F8C && add > lbl_80562030)) {
                     if (fn_80129D18(4, 2) == 0) {
-                        S32(p, 0x268C) = 2;
+                        ((CarBody*)p)->a268C = 2;
                     } else {
-                        S32(p, 0x268C) = 3;
+                        ((CarBody*)p)->a268C = 3;
                     }
-                    if (S32(p, 0x26B0) < 0 && fn_80129D18(4, 6) == 0) {
-                        S32(p, 0x26B0) = HitCorner(&da);
+                    if (((CarBody*)p)->f26B0 < 0 && fn_80129D18(4, 6) == 0) {
+                        ((CarBody*)p)->f26B0 = HitCorner(&da);
                     }
                 }
             }
@@ -1170,21 +1171,21 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                 f32 cap = kind != 0x70 ? 0.1f : lbl_80562024;
                 f32 add = lbl_80562028 * mag;
                 add = add < cap ? add : cap;
-                f32 v = F32(p, 0x2690) += add;
-                if (kind == 0x70 && other == S32(p, 0x1EC) && v > lbl_80562034) {
-                    F32(p, 0x2690) = was > lbl_80562034 ? was : lbl_80562034;
+                f32 v = ((CarBody*)p)->f2690 += add;
+                if (kind == 0x70 && other == ((CarBody*)p)->index && v > lbl_80562034) {
+                    ((CarBody*)p)->f2690 = was > lbl_80562034 ? was : lbl_80562034;
                 }
-                if (F32(p, 0x2690) > lbl_80561F88) {
-                    F32(p, 0x2690) = lbl_80561F88;
+                if (((CarBody*)p)->f2690 > lbl_80561F88) {
+                    ((CarBody*)p)->f2690 = lbl_80561F88;
                     switch (fn_80129D18(4, 3)) {
                     case 0:
-                        S32(p, 0x268C) = 10;
+                        ((CarBody*)p)->a268C = 10;
                         break;
                     case 1:
-                        S32(p, 0x268C) = 11;
+                        ((CarBody*)p)->a268C = 11;
                         break;
                     default:
-                        S32(p, 0x268C) = 12;
+                        ((CarBody*)p)->a268C = 12;
                         break;
                     }
                     if (fn_80129D18(4, 4) == 0) {
@@ -1193,22 +1194,22 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                             fn_8018F76C(p, corner);
                         }
                     }
-                    fn_802E30C8("car %d: impaired", S32(p, 0x1EC));
+                    fn_802E30C8("car %d: impaired", ((CarBody*)p)->index);
                     hit = 1;
-                    fn_801B8610(S32(p, 0x1EC), other);
+                    fn_801B8610(((CarBody*)p)->index, other);
                 }
             }
         } else if (st >= 9) {
-            if (!((DmgModel*)PTR(p, 0x270))->Busy()) {
-                fn_802E30C8("car %d: re-impairing?", S32(p, 0x1EC));
+            if (!((DmgModel*)((u8*&)((CarBody*)p)->src))->Busy()) {
+                fn_802E30C8("car %d: re-impairing?", ((CarBody*)p)->index);
                 hit = 1;
             }
         }
         if (hit) {
-            ((DmgModel*)PTR(p, 0x270))->Impair(other);
+            ((DmgModel*)((u8*&)((CarBody*)p)->src))->Impair(other);
         }
     }
-    F32(p, 0x269C) = lbl_80561F74;
+    ((CarBody*)p)->f269C = lbl_80561F74;
 }
 
 
@@ -1239,14 +1240,14 @@ extern "C" {
 // Restores the damage state saved by fn_8018F538.
 void fn_8018F2C0(u8* p, const u8* q) {
     f32 h = F32(q, 0x290);
-    F32(p, 0x2690) = h;
-    F32(p, 0x2694) = h;
-    F32(p, 0x2698) = F32(q, 0x294);
-    S32(p, 0x268C) = S32(q, 0x298);
+    ((CarBody*)p)->f2690 = h;
+    ((CarBody*)p)->f2694 = h;
+    ((CarBody*)p)->f2698 = F32(q, 0x294);
+    ((CarBody*)p)->a268C = S32(q, 0x298);
     const u8* o = q;
     u8* d = p;
     const f32 dentSpan = 1.016f;
-    for (int i = 0; i < S32(p, 0x5F8); o += 4, i++, d += 0xC) {
+    for (int i = 0; i < ((CarBody*)p)->f5F8; o += 4, i++, d += 0xC) {
         F32(d, 0x5FC) = UnpackDent(o[0], dentSpan);
         F32(d, 0x600) = UnpackDent(o[1], dentSpan);
         f32 z = UnpackDent(o[2], dentSpan);
@@ -1260,7 +1261,7 @@ void fn_8018F2C0(u8* p, const u8* q) {
         S32(s, 0x15A8) = q[0x2A0 + i];
         U8(s, 0x15A4) = 0;
     }
-    S32(p, 0x1E3C) = S32(q, 0x29C);
+    ((CarBody*)p)->f1E3C = S32(q, 0x29C);
 }
 
 }  // extern "C"
@@ -1269,12 +1270,12 @@ extern "C" {
 
 // Saves the damage state (dents packed to bytes, part states) into a snapshot.
 void fn_8018F538(u8* p, u8* q) {
-    F32(q, 0x290) = F32(p, 0x2690);
-    F32(q, 0x294) = F32(p, 0x2698);
-    S32(q, 0x298) = S32(p, 0x268C);
+    F32(q, 0x290) = ((CarBody*)p)->f2690;
+    F32(q, 0x294) = ((CarBody*)p)->f2698;
+    S32(q, 0x298) = ((CarBody*)p)->a268C;
     u8* d = p;
     u8* o = q;
-    for (int i = 0; i < S32(p, 0x5F8); d += 0xC, i++, o += 4) {
+    for (int i = 0; i < ((CarBody*)p)->f5F8; d += 0xC, i++, o += 4) {
         o[0] = PackDent(F32(d, 0x5FC));
         o[1] = PackDent(F32(d, 0x600));
         o[2] = PackDent(F32(d, 0x604));
@@ -1296,7 +1297,7 @@ void fn_8018F538(u8* p, u8* q) {
     U8(q, 0x2AE) = S32(p, 0x1CA8);
     U8(q, 0x2AF) = S32(p, 0x1D28);
     U8(q, 0x2B0) = S32(p, 0x1DA8);
-    S32(q, 0x29C) = S32(p, 0x1E3C);
+    S32(q, 0x29C) = ((CarBody*)p)->f1E3C;
 }
 
 void fn_8018F6F8(u8* p) {
@@ -1400,15 +1401,15 @@ void fn_801AFC44(s32 car, int wheel, WLaunch* m, WVec3* vel, WVec3* imp);
 void fn_8018F76C(u8* p, int i) {
     u8* w = p + i * 0x74;
     if (U32(w, 0x241C) & 8) {
-        fn_802E30C8("cardmg: wheel %d is already missing from car %d", i, S32(p, 0x1EC));
+        fn_802E30C8("cardmg: wheel %d is already missing from car %d", i, ((CarBody*)p)->index);
     }
     u8* x;
     WLaunch m;
-    fn_801BEB30(S32(p, 0x1EC), &x);
+    fn_801BEB30(((CarBody*)p)->index, &x);
     CDVec4 c(*(CDSolVec*)(x + 0x70));
     c[i] *= 0.15f;
     *(CDSolVec*)(x + 0x70) = c.Sol();
-    m.rot = *(WFrame*)(p + 0x3C);
+    m.rot = *(WFrame*)&((CarBody*)p)->mtx;
     m.pos = *(WVec3*)(w + 0x23D0);
     m.pos.x += m.rot.basis[1].x * 0.3f;
     m.pos.y += m.rot.basis[1].y * 0.3f;
@@ -1425,10 +1426,10 @@ void fn_8018F76C(u8* p, int i) {
     imp.x = m.rot.basis[0].x * spin;
     imp.y = m.rot.basis[0].y * spin;
     imp.z = m.rot.basis[0].z * spin;
-    imp.x += F32(p, 0x124);
-    imp.y += F32(p, 0x128);
-    imp.z += F32(p, 0x12C);
-    fn_801AFC44(S32(p, 0x1EC), i, &m, &vel, &imp);
+    imp.x += ((CarBody*)p)->avel.x;
+    imp.y += ((CarBody*)p)->avel.y;
+    imp.z += ((CarBody*)p)->avel.z;
+    fn_801AFC44(((CarBody*)p)->index, i, &m, &vel, &imp);
     U32(w, 0x241C) |= 8;
 }
 
@@ -1450,7 +1451,7 @@ void fn_8018F9B4(u8* p) {
     for (int i = 0; i < 17; i++) {
         if ((w->attached && w->hp > 0 && !w->state) || w->state == 2) {
             s32 bone = *(s32*)((u8*)t + 0x8);
-            DVec* lo = &((CarModel*)PTR(p, 0x26C))->boxes[bone].lo;
+            DVec* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[bone].lo;
             DVec* hi = lo + 1;
             DVec c;
             c.x = lo->x + (lo + 1)->x;
