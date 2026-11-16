@@ -3,6 +3,7 @@
 // cues ("crash_vol", "cheer3.sfx") and the per-slot shake levels. Written against raw field offsets;
 // the large routines and the initialiser are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include <string.h>
 #include "game/camrec.h"
 #include "game/camview.h"
@@ -192,7 +193,6 @@ void fn_80265EC4(CamShake* s, s32 now, int paused) {
     s->y = a->y + s->t * (b->y - a->y);
 }
 
-f32 PSVECMag(const f32* v);
 
 // out = from + dir * scale (0x10), lifted by |dir| * rise (0x14).
 void fn_80266070(u8* p, f32* out, const f32* from, const f32* dir) {
@@ -201,7 +201,7 @@ void fn_80266070(u8* p, f32* out, const f32* from, const f32* dir) {
     v[0] = dir[0] * k;
     v[1] = dir[1] * k;
     v[2] = dir[2] * k;
-    v[1] += F32(p, 0x14) * PSVECMag(dir);
+    v[1] += F32(p, 0x14) * PSVECMag((const Vec*)dir);
     f32 x = from[0] + v[0];
     f32 y = from[1] + v[1];
     f32 z = from[2] + v[2];
@@ -265,13 +265,12 @@ void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
     f->t = ShakeEase(FovRemap(x));
 }
 
-f32 PSVECDistance(const f32* a, const f32* b);
 extern f32 lbl_8055C4C4;
 extern const f32 lbl_80563C20;
 
 // out = from + dir * (distance to `to`, eased by the blend at 0xC).
 void fn_802662D8(u8* p, f32* out, const f32* from, const f32* dir, const f32* to) {
-    f32 d = PSVECDistance(from, to) - lbl_8055C4C4;
+    f32 d = PSVECDistance((const Vec*)from, (const Vec*)to) - lbl_8055C4C4;
     f32 k = F32(p, 0xC);
     f32 t = lbl_80563C20 + k * (d - lbl_80563C20);
     f32 x = from[0] + dir[0] * t;
@@ -348,7 +347,7 @@ extern const f32 lbl_80563CB8;  // wave weight
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
 static inline void ShakeRot(ShakeMat* r, const ShakeVec& w) {
-    f32 a = PSVECMag(&w.x);
+    f32 a = PSVECMag((const Vec*)&w.x);
     if (a > lbl_80563C40) {
         f32 x, s, y, z, c, k;
         f32 inv = lbl_80563C2C / a;
@@ -422,7 +421,6 @@ struct CamXZ {
 void fn_80136594(CamTrackPos* out, CamTrack* trk, const CamXZ* xz);  // PORT: idealline returns the ILPos by value (a by-value form here is not code-identical)
 int fn_8026A2C8(void);
 CamRacerObj* fn_801B2EC0(int i);
-f32 PSVECSquareDistance(const f32* a, const f32* b);
 extern f32 lbl_8055F49C;  // pass-by range squared
 extern u8 lbl_8055F498;   // shake position
 extern u8 lbl_8055C4C8;   // shake rotation
@@ -459,7 +457,7 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
             d += *(f32*)(trk->path + lap * 4 + 8);
         }
         if (d * d < lbl_8055F49C) {
-            f32 sq = PSVECSquareDistance(eye, rp);
+            f32 sq = PSVECSquareDistance((const Vec*)eye, (const Vec*)rp);
             if (sq < best) {
                 best = sq;
                 near = r;
@@ -518,7 +516,7 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
             d += *(f32*)(trk->path + lap * 4 + 8);
         }
         if (d * d < lbl_8055F49C) {
-            f32 sq = PSVECSquareDistance(eye, rp);
+            f32 sq = PSVECSquareDistance((const Vec*)eye, (const Vec*)rp);
             if (sq < best) {
                 best = sq;
                 near = r;
@@ -857,7 +855,6 @@ int fn_8026B734(int target, f32* out);
 u8* fn_8017960C(int car);
 int fn_801769F8(void);
 f32 fn_801B8950(int car);
-f32 PSVECDotProduct(const f32* a, const f32* b);
 double tan(double x);
 double fabs(double x);
 void fn_802693F4(CamRec* c, u8* own, int idx);
@@ -947,7 +944,7 @@ void fn_802678E8(CamView* view, int idx) {
             }
             if (chase) {
                 r = fn_801B8950(c->target);
-                f32 k = ((f32)__fabs(PSVECDotProduct(&c->pose.rot.m[6], &c->carFrame.rot.m[6])) - lbl_80563C70) / lbl_80563C74;
+                f32 k = ((f32)__fabs(PSVECDotProduct((const Vec*)&c->pose.rot.m[6], (const Vec*)&c->carFrame.rot.m[6])) - lbl_80563C70) / lbl_80563C74;
                 k = (lbl_80563C2C < k) ? lbl_80563C2C : k;
                 k = (k > lbl_80563C20) ? k : lbl_80563C20;
                 rumble = r * (lbl_80563C2C + k * lbl_80563C78);
@@ -1050,7 +1047,7 @@ void fn_80267EF8(u8* p) {
     CamPose car;
     cam = *(CamPose*)(p + 0x58);
     car = *(CamPose*)(p + 0xC0);
-    f32 dist = PSVECDistance(car.pos.v, cam.pos.v);
+    f32 dist = PSVECDistance((const Vec*)car.pos.v, (const Vec*)cam.pos.v);
     CamPose f;
     f = cam;
     f.pos.v[0] += f.rot.m[6] * dist;
@@ -1094,8 +1091,6 @@ void fn_802682B0(u8* p) {
     F32(p, 0xBC) = lbl_8055F47C;
 }
 
-void PSVECNormalize(const f32* in, f32* out);
-void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 void fn_8026E850(f32* pos, const f32* target, u8* cam, const f32* up);
 int fn_801E9E78(void* ground, KVec3* p, KVec3* n, s32* hit);
 extern f32 lbl_8055C4F0;  // mount blend time (aim, up, fov)
@@ -1229,11 +1224,11 @@ void fn_80268358(CamRec* c) {
             fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
             r = &fr[j];
             SetM3(&r->m[6], f.dir[0], lbl_80563C20, f.dir[1]);
-            PSVECNormalize(&r->m[6], &r->m[6]);
-            PSVECCrossProduct(&n.x, &r->m[6], &r->m[0]);
-            PSVECNormalize(&r->m[0], &r->m[0]);
-            PSVECCrossProduct(&r->m[6], &r->m[0], &r->m[3]);
-            PSVECNormalize(&r->m[3], &r->m[3]);
+            PSVECNormalize((const Vec*)&r->m[6], (Vec*)&r->m[6]);
+            PSVECCrossProduct((const Vec*)&n.x, (const Vec*)&r->m[6], (Vec*)&r->m[0]);
+            PSVECNormalize((const Vec*)&r->m[0], (Vec*)&r->m[0]);
+            PSVECCrossProduct((const Vec*)&r->m[6], (const Vec*)&r->m[0], (Vec*)&r->m[3]);
+            PSVECNormalize((const Vec*)&r->m[3], (Vec*)&r->m[3]);
             r->t = v;
             if (f.buf) {
                 delete[] f.buf;
@@ -1273,7 +1268,7 @@ void fn_80268358(CamRec* c) {
     KV3 bl(CamLerp(out[0].b.x, out[1].b.x, ka), CamLerp(out[0].b.y, out[1].b.y, ka), CamLerp(out[0].b.z, out[1].b.z, ka));
     KV3 al(CamLerp(out[0].a.x, out[1].a.x, kb), CamLerp(out[0].a.y, out[1].a.y, kb), CamLerp(out[0].a.z, out[1].a.z, kb));
     KV3 up(CamLerp(out[0].up.x, out[1].up.x, ka), CamLerp(out[0].up.y, out[1].up.y, ka), CamLerp(out[0].up.z, out[1].up.z, ka));
-    PSVECNormalize(&up.x, &up.x);
+    PSVECNormalize((const Vec*)&up.x, (Vec*)&up.x);
     c->fov = CamLerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
     fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
 }
@@ -1299,7 +1294,6 @@ int fn_80268BA4(int mode) {
 double sqrt(double x);
 double sin(double x);
 double cos(double x);
-void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 void fn_801EA140(f32* pos);  // drop onto the ground
 extern const f32 lbl_80563C8C;
 extern const f32 lbl_80563C90;
@@ -1354,7 +1348,7 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
     F32(rec, 0x18) = d.x;
     F32(rec, 0x1C) = lbl_80563C20;
     F32(rec, 0x20) = d.y;
-    PSVECCrossProduct((f32*)(0xC + rec), (f32*)(0x18 + rec), (f32*)rec);
+    PSVECCrossProduct((const Vec*)((f32*)(0xC + rec)), (const Vec*)((f32*)(0x18 + rec)), (Vec*)((f32*)rec));
 }
 
 void fn_80268D94(void) {
@@ -1632,7 +1626,7 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
         k = (lbl_80563C2C < k) ? lbl_80563C2C : k;
         k = (k > lbl_80563C20) ? k : lbl_80563C20;
         w = lbl_80563C20 + k * lbl_80563C2C;
-        f32 s = PSVECMag((const f32*)(c->car + 0x26B4));
+        f32 s = PSVECMag((const Vec*)((const f32*)(c->car + 0x26B4)));
         s *= scale;
         f32 value = lbl_80563CEC;
         s = (value < s) ? lbl_80563CEC : s;

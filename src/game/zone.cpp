@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -57,9 +58,6 @@ struct ZoneVec3 : PlainVec3 {
 };
 
 extern "C" {
-f32 PSVECDotProduct(const ZoneVec3* a, const ZoneVec3* b);
-f32 PSVECDistance(const ZoneVec3* a, const ZoneVec3* b);
-f32 PSVECSquareDistance(const ZoneVec3* a, const ZoneVec3* b);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -1196,7 +1194,7 @@ static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
     ZoneVec3 at;
     ZoneVec3 ring;
     f32 half;
-    half = PSVECDistance(&g->a, &g->b) / 2.0f;
+    half = PSVECDistance((const Vec*)&g->a, (const Vec*)&g->b) / 2.0f;
     ring.y = g->ringY;
     f32 zv = mid.z;
     ring.x = mid.x;
@@ -1205,7 +1203,7 @@ static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
     at.x = t->pos.x + t->vel.x * dtv;
     at.y = t->pos.y + t->vel.y * dtv;
     at.z = t->pos.z + t->vel.z * dtv;
-    if (PSVECSquareDistance(&at, &ring) > half * half) {
+    if (PSVECSquareDistance((const Vec*)&at, (const Vec*)&ring) > half * half) {
         r = 1;
     }
     return r;
@@ -1310,15 +1308,15 @@ int fn_8013CFF0(const Gate* g, const Watcher* w, f32* out) {
     d.x = mid.x - w->pos.x;
     d.y = mid.y - w->pos.y;
     d.z = mid.z - w->pos.z;
-    f32 dist2 = PSVECDotProduct(&d, &d);
+    f32 dist2 = PSVECDotProduct((const Vec*)&d, (const Vec*)&d);
     int r = 0;
     if (dist2 < 275625.0f) {
-        r = PSVECDotProduct(&d, &w->dir) > -0.1f;
+        r = PSVECDotProduct((const Vec*)&d, (const Vec*)&w->dir) > -0.1f;
         if (!r) {
             d.x = g->b.x - w->pos.x;
             d.y = g->b.y - w->pos.y;
             d.z = g->b.z - w->pos.z;
-            r = PSVECDotProduct(&d, &w->dir) > -0.1f;
+            r = PSVECDotProduct((const Vec*)&d, (const Vec*)&w->dir) > -0.1f;
         }
         if (r && out) {
             *out = dist2;
@@ -1679,7 +1677,7 @@ void Gate::Scale(f32 f) {
     f32 d;
     b.y = 0.0f;
     a.y = 0.0f;
-    d = PSVECDistance(&a, &b);
+    d = PSVECDistance((const Vec*)&a, (const Vec*)&b);
 #define s (f / d)
     {
         f32 ay;
@@ -1852,7 +1850,7 @@ void ZoneMaster::DrawNextGate(void) {
                 g = NextGate(g);
             } while (g->ring);
         }
-        if (g == nextGate || PSVECSquareDistance(&g->a, WatcherPos()) < 40000.0f) {
+        if (g == nextGate || PSVECSquareDistance((const Vec*)&g->a, (const Vec*)(WatcherPos())) < 40000.0f) {
             if (nextGate != g) {
                 nextGate = g;
                 nextT = fn_8013CB3C();
@@ -2170,8 +2168,6 @@ void fn_801474EC(LayoutItem* item, const char* fmt, ...);
 void UpdateScoreOverlays(int, int);
 extern "C" {
 void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
-void PSVECNormalize(const ZoneVec3* a, ZoneVec3* b);
-void PSVECCrossProduct(const ZoneVec3* a, const ZoneVec3* b, ZoneVec3* c);
 void fn_802C70AC(int model, void* mtx, int a, int b);
 void fn_802A96E8(ZoneVec3* pts, int n, int c, s32 lite, s32 glow);
 }
@@ -2359,11 +2355,11 @@ void ZoneMaster::DrawRing(const Gate* g, int c) const {
     m.x.x = g->a.x - g->b.x;
     m.x.y = g->a.y - g->b.y;
     m.x.z = g->a.z - g->b.z;
-    PSVECNormalize(&m.x, &m.x);
+    PSVECNormalize((const Vec*)&m.x, (Vec*)&m.x);
     m.y.Set(0.0f, 1.0f, 0.0f);
-    PSVECCrossProduct(&m.x, &m.y, &m.z);
+    PSVECCrossProduct((const Vec*)&m.x, (const Vec*)&m.y, (Vec*)&m.z);
     f32 size = 20.0f;
-    s = PSVECDistance(&g->a, &g->b) / size;
+    s = PSVECDistance((const Vec*)&g->a, (const Vec*)&g->b) / size;
     m.x.x *= s;
     m.x.y *= s;
     m.x.z *= s;
@@ -2928,7 +2924,7 @@ inline int ZoneMaster::vf8C(int p, int key) {
         fn_802E30C8("\tcenter %.2f,%.2f", t->p60.x, t->p60.z);
         tan.x = t->dirX;
         tan.y = t->dirZ;
-        half = PSVECDistance(&levels->levels->gates->a, &levels->levels->gates->b) * 0.5f;
+        half = PSVECDistance((const Vec*)&levels->levels->gates->a, (const Vec*)&levels->levels->gates->b) * 0.5f;
         f32 tanY = tan.y;
         len = sqrt(tan.x * tan.x + tanY * tan.y);
         f32 mag = (f32)__fabs(len);

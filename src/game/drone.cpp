@@ -5,6 +5,7 @@
 // Hermite curves with slerped key orientations that loop, reverse (turning the key rotations around)
 // or restock at the end. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
@@ -335,11 +336,6 @@ public:
 };
 
 extern "C" {
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* src, void* dst);
-f32 PSVECMag(const void* v);
-f32 PSVECDistance(const void* a, const void* b);
 void fn_802C744C(void* model, const OFrame* f);
 void fn_802C7040(void* model);
 f32 fn_802C99E8(f32 v);
@@ -571,8 +567,8 @@ void LinearDrone::Advance(f32 dt) {
     d.x = p1->x - p0->x;
     d.y = p1->y - p0->y;
     d.z = p1->z - p0->z;
-    f32 inv = 1.0f / PSVECMag(&d);
-    f32 s = inv * PSVECDistance(&frame.pos, p0);
+    f32 inv = 1.0f / PSVECMag((const Vec*)&d);
+    f32 s = inv * PSVECDistance((const Vec*)&frame.pos, (const Vec*)p0);
     f32 step = inv * (dt * (k->speed0 + s * (k->speed1 - k->speed0)));
     PVec np;
     np.x = frame.pos.x + d.x * step;
@@ -582,7 +578,7 @@ void LinearDrone::Advance(f32 dt) {
     rem.x = p1->x - np.x;
     rem.y = p1->y - np.y;
     rem.z = p1->z - np.z;
-    if (PSVECDotProduct(&d, &rem) <= 0.0f) {
+    if (PSVECDotProduct((const Vec*)&d, (const Vec*)&rem) <= 0.0f) {
         seg++;
         if (seg >= path->count - 1) {
             fn_801FEA28(this);
@@ -595,8 +591,8 @@ void LinearDrone::Advance(f32 dt) {
         d.x = p1->x - p0->x;
         d.y = p1->y - p0->y;
         d.z = p1->z - p0->z;
-        inv = 1.0f / PSVECMag(&d);
-        f32 over = inv * PSVECMag(&rem);
+        inv = 1.0f / PSVECMag((const Vec*)&d);
+        f32 over = inv * PSVECMag((const Vec*)&rem);
         frame.pos.x = p0->x + d.x * over;
         frame.pos.y = p0->y + d.y * over;
         frame.pos.z = p0->z + d.z * over;
@@ -609,7 +605,7 @@ void LinearDrone::Advance(f32 dt) {
         d2.x = p2->x - p1->x;
         d2.y = p2->y - p1->y;
         d2.z = p2->z - p1->z;
-        f32 u = inv * PSVECDistance(&frame.pos, p0);
+        f32 u = inv * PSVECDistance((const Vec*)&frame.pos, (const Vec*)p0);
         PVec up;
         SetXYZ(&up, LerpU(u, ((const LinearKey*)p0)->up.x, ((const LinearKey*)p1)->up.x),
                LerpU(u, ((const LinearKey*)p0)->up.y, ((const LinearKey*)p1)->up.y),
@@ -618,14 +614,14 @@ void LinearDrone::Advance(f32 dt) {
         PVec dir;
         SetXYZ(&dir, LerpU(u, d.x, d2.x), LerpU(u, d.y, d2.y), LerpU(u, d.z, d2.z));
         frame.z = dir;
-        PSVECNormalize(&frame.z, &frame.z);
+        PSVECNormalize((const Vec*)&frame.z, (Vec*)&frame.z);
     } else {
         frame.x = ((const LinearKey*)p0)->up;
         frame.z.x = d.x * inv;
         frame.z.y = d.y * inv;
         frame.z.z = d.z * inv;
     }
-    PSVECCrossProduct(&frame.z, &frame.x, &frame.y);
+    PSVECCrossProduct((const Vec*)&frame.z, (const Vec*)&frame.x, (Vec*)&frame.y);
 }
 
 HermiteDrone::~HermiteDrone(void) {}

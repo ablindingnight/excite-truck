@@ -4,6 +4,7 @@
 // "mist" point clouds read from the track effect tables, a full-screen flash/tint and a lightning
 // model. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/dropsource.h"
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
@@ -169,11 +170,6 @@ int IsLoading(void);
 int GetNumPlayers(void);
 
 extern "C" {
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECDotProduct(const void* a, const void* b);
-f32 PSVECMag(const void* v);
-f32 PSVECDistance(const void* a, const void* b);
-f32 PSVECSquareDistance(const void* a, const void* b);
 s32 fn_802E2C20(void);
 f32 fn_801E7E24(void);
 WeatherCfg* fn_801E1F44(void);
@@ -463,8 +459,8 @@ void fn_802A4E08(void) {
 
 static inline f32 Area(const ValVec3* a, const ValVec3* b) {
     PVec c;
-    PSVECCrossProduct(a, b, &c);
-    return PSVECMag(&c);
+    PSVECCrossProduct((const Vec*)a, (const Vec*)b, (Vec*)&c);
+    return PSVECMag((const Vec*)&c);
 }
 
 int fn_802A4FA8(Droplet* d, ValueNode* vn) {
@@ -562,7 +558,7 @@ void fn_802A53B0(DropHit* hits, int n) {
         return;
     }
     RainSystem* r = lbl_8055F88C;
-    f32 inv = -(1.0f / (f32)sqrt(PSVECDotProduct(&r->vel, &r->vel)));
+    f32 inv = -(1.0f / (f32)sqrt(PSVECDotProduct((const Vec*)&r->vel, (const Vec*)&r->vel)));
     ValVec3 dir;
     dir.x = r->vel.x * inv;
     dir.y = r->vel.y * inv;
@@ -580,11 +576,11 @@ void fn_802A53B0(DropHit* hits, int n) {
         if (s->count > 0) for (; j < s->count; d++, j++) {
             ValVec3 nrm;
             Mul(&o->frame, &d->n, &nrm);
-            f32 dot = PSVECDotProduct(&dir, &nrm);
+            f32 dot = PSVECDotProduct((const Vec*)&dir, (const Vec*)&nrm);
             ValVec3 vel;
             PVec c;
-            PSVECCrossProduct(&d->sv, &d->tv, &c);
-            int cnt = -dot * (2.5f * PSVECMag(&c));
+            PSVECCrossProduct((const Vec*)&d->sv, (const Vec*)&d->tv, (Vec*)&c);
+            int cnt = -dot * (2.5f * PSVECMag((const Vec*)&c));
             if (cnt < 1) {
                 continue;
             }
@@ -734,8 +730,8 @@ void SnowSystem::Update(void) {
         d.z = lastPos.z - cam.pos.z;
         MulTSelf(cam.axis, &d);
         AddScaled(&vel, &d, 0.2f);
-        PSVECCrossProduct(&cam.axis[2], &lastDir, &c);
-        Move(PSVECDotProduct(&cam.axis[1], &c), &cam, (const PVec*)&d);
+        PSVECCrossProduct((const Vec*)&cam.axis[2], (const Vec*)&lastDir, (Vec*)&c);
+        Move(PSVECDotProduct((const Vec*)&cam.axis[1], (const Vec*)&c), &cam, (const PVec*)&d);
         Spawn();
         Drift();
     } else {
@@ -755,7 +751,7 @@ void SnowSystem::Draw(void) {
     }
     f32 old = fn_802C9A4C(lbl_8055F880);
     fn_802C8B98(flakeTex, fn_802C86DC());
-    f32 a = 1.0f / (4.0f * PSVECMag(&vel));
+    f32 a = 1.0f / (4.0f * PSVECMag((const Vec*)&vel));
     int i = 255.0f * a;
     i = i < 0 ? 0 : i;
     if (fn_801E501C(count, &vel, 0.05f, i < 0xFF ? i : 0xFF)) {
@@ -931,7 +927,7 @@ void RainSystem::Update(void) {
         d.z = lastPos.z - cam->pos.z;
         MulTSelf(cam->axis, &d);
         MadV(&vel, &dir, &d, -1.5f);
-        f32 inv = 1.0f / (f32)sqrt(PSVECDotProduct(&vel, &vel));
+        f32 inv = 1.0f / (f32)sqrt(PSVECDotProduct((const Vec*)&vel, (const Vec*)&vel));
         vel.x = vel.x * (0.25f * inv);
         vel.y = vel.y * (0.25f * inv);
         vel.z = vel.z * (0.25f * inv);
@@ -1108,7 +1104,7 @@ void Mist::Reset(void) {
 
 void Mist::Update(void) {
     f32 z;
-    f32 d2 = PSVECSquareDistance(&fn_801E8718(0)->pos, &center);
+    f32 d2 = PSVECSquareDistance((const Vec*)(&fn_801E8718(0)->pos), (const Vec*)&center);
     f32 a;
     if (d2 > rad * rad) {
         f32 dt = fn_802A4AD4();
@@ -1126,7 +1122,7 @@ void Mist::Update(void) {
         side.y = -t;
         for (int i = 0; i < count; i++) {
             WPt* p = &pts[i];
-            if (PSVECSquareDistance(p, &center) < rad * rad) {
+            if (PSVECSquareDistance((const Vec*)p, (const Vec*)&center) < rad * rad) {
                 p->x = p->x + dv.x;
                 p->y = p->y + dv.y;
                 p->z = p->z + dv.z;
@@ -1152,7 +1148,7 @@ void Mist::Update(void) {
 }
 
 void Mist::Draw(void) {
-    int a = Alpha(0.01f * (255.0f * (PSVECDistance(&fn_802C86DC()->pos, &center) - 0.5f * rad)));
+    int a = Alpha(0.01f * (255.0f * (PSVECDistance((const Vec*)(&fn_802C86DC()->pos), (const Vec*)&center) - 0.5f * rad)));
     if (a > 0) {
         f32 old = fn_802C9A4C(pointScale);
         fn_802C8BD0(tex);
@@ -1160,7 +1156,7 @@ void Mist::Draw(void) {
             f32 k = (f32)a / Sq(rad);
             for (int i = 0; i < count; i++) {
                 WPt* p = &pts[i];
-                int b = (int)((f32)a - k * PSVECSquareDistance(p, &center));
+                int b = (int)((f32)a - k * PSVECSquareDistance((const Vec*)p, (const Vec*)&center));
                 b = b > 0 ? b : 0;
                 f32 s = 0.5f * size;
                 f32 x = p->x;

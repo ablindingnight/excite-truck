@@ -2,12 +2,10 @@
 // fading out with distance from the camera, plus a single fading textured gate between two points. Names
 // are guesses.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 double fmod(double x, double y);
-f32 PSVECDistance(const void* a, const void* b);
-f32 PSVECSquareDistance(const void* a, const void* b);
-void PSVECNormalize(const void* in, void* out);
 f32 fn_801E7E18(void);  // time
 void fn_802C8BD0(s32 tex);
 int fn_802C8DBC(int n);
@@ -37,7 +35,7 @@ extern "C" LCam* fn_802C86DC(void);
 struct LSeg {
     LSeg(void) {}
     LSeg(const LVec* p, const LVec* q) : a(*p), b(*q) {}
-    f32 Length(void) const { return PSVECDistance(&a, &b); } /* Helper name unproven */
+    f32 Length(void) const { return PSVECDistance((const Vec*)&a, (const Vec*)&b); } /* Helper name unproven */
     void Set(const LVec* p, const LVec* q) {
         a = *p;
         b = *q;
@@ -86,7 +84,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
         u32 rgb = color & 0xFFFFFF;
         for (int i = 0; i < n; i++) {
             const LVec* p = &pts[i];
-            f32 d = PSVECDistance(p, eye);
+            f32 d = PSVECDistance((const Vec*)p, (const Vec*)eye);
             if (d < 225.0f) {
                 f32 k = 2.0f * d / 225.0f - 1.0f;
                 int a = (int)(196.0f * (1.0f - k * k));
@@ -129,7 +127,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
         fn_802C8BD0(tex2);
         fn_802C8DBC(n * 4);
         for (int i = 0; i < n; pts++, i++) {
-            f32 d = PSVECDistance(pts, eye);
+            f32 d = PSVECDistance((const Vec*)pts, (const Vec*)eye);
             if (d < 225.0f) {
                 f32 k = 2.0f * d / 225.0f - 1.0f;
                 int a = (int)(196.0f * (1.0f - k * k));
@@ -179,13 +177,13 @@ void fn_802A9BFC(const LVec* from, const LVec* to, s32 tex, f32 fade, int u0, in
     seg.b.y = 10.0f + top;
     seg.a.y = seg.b.y;
     f32 len = 16.0f;
-    if (PSVECSquareDistance(&seg.a, &seg.b) < len * len) {
+    if (PSVECSquareDistance((const Vec*)&seg.a, (const Vec*)&seg.b) < len * len) {
         len -= seg.Length();
         LVec dir;
         dir.x = seg.a.x - seg.b.x;
         dir.y = seg.a.y - seg.b.y;
         dir.z = seg.a.z - seg.b.z;
-        PSVECNormalize(&dir, &dir);
+        PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
         LAddScaled(&seg.a, &dir, len / 2);
         LAddScaled(&seg.b, &dir, -len / 2);
     }

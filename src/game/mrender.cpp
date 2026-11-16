@@ -4,6 +4,7 @@
 // fullscreen and screen-rectangle fills, the "mrDrawList" pooled flare objects and the light
 // direction. Names are guesses apart from the messages.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 BOOL OptWidescreen(void);
@@ -51,11 +52,6 @@ int fn_802D31D8(int a);
 void fn_802D362C(int a);
 void fn_802D3304(void);
 void fn_802D08CC(int a);
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* in, void* out);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECDistance(const void* a, const void* b);
-f32 PSVECSquareDistance(const void* a, const void* b);
 void* fn_801E7840(int a);
 void fn_801E7888(void* p);
 void fn_801E7890(void* p, f32 x, f32 y, f32 z, int a, f32 s, f32 t, int b);
@@ -305,10 +301,10 @@ void fn_802C8588(Camera* cam, const VecP* eye, const VecP* target) {
     cam->rot.fwd.x = target->x - eye->x;
     cam->rot.fwd.y = target->y - eye->y;
     cam->rot.fwd.z = target->z - eye->z;
-    PSVECNormalize(&cam->rot.fwd, &cam->rot.fwd);
-    PSVECCrossProduct(&up, &cam->rot.fwd, &cam->rot.right);
-    PSVECNormalize(&cam->rot.right, &cam->rot.right);
-    PSVECCrossProduct(&cam->rot.fwd, &cam->rot.right, &cam->rot.up);
+    PSVECNormalize((const Vec*)&cam->rot.fwd, (Vec*)&cam->rot.fwd);
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)&cam->rot.fwd, (Vec*)&cam->rot.right);
+    PSVECNormalize((const Vec*)&cam->rot.right, (Vec*)&cam->rot.right);
+    PSVECCrossProduct((const Vec*)&cam->rot.fwd, (const Vec*)&cam->rot.right, (Vec*)&cam->rot.up);
 }
 
 void fn_802C8638(const Camera* cam) {
@@ -354,9 +350,9 @@ void fn_802C88BC(int a) { fn_802D02F8(lbl_8055D018, a & 1); }
 
 void fn_802C88CC(u32 color) { fn_802D02F8(color, 1); }
 
-f32 fn_802C88D4(const VecP* p) { return PSVECDistance(&lbl_804C1410.pos, p); }
+f32 fn_802C88D4(const VecP* p) { return PSVECDistance((const Vec*)&lbl_804C1410.pos, (const Vec*)p); }
 
-f32 fn_802C88E8(const VecP* p) { return PSVECSquareDistance(&lbl_804C1410.pos, p); }
+f32 fn_802C88E8(const VecP* p) { return PSVECSquareDistance((const Vec*)&lbl_804C1410.pos, (const Vec*)p); }
 
 }  // extern "C"
 
@@ -580,20 +576,20 @@ int fn_802C94A0(const VecP* p, u8* visible, f32* depth, f32 r) {
     d.x = p->x - c->pos.x;
     d.y = p->y - c->pos.y;
     d.z = p->z - c->pos.z;
-    f32 z = PSVECDotProduct(&d, &c->rot.fwd);
+    f32 z = PSVECDotProduct((const Vec*)&d, (const Vec*)&c->rot.fwd);
     if (z < lbl_8055FC38 - r || z > lbl_8055FC3C + r) {
         return 0;
     }
     if (z - r > lbl_8055FC3C - 0.15f * lbl_8055FC3C) {
         return 0;
     }
-    f32 x = fabsf(PSVECDotProduct(&d, &c->rot.right));
+    f32 x = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&c->rot.right));
     f32 lim = z * lbl_8055FC44;
     f32 m = Max(0.0f, lim);
     if (x > m + r * lbl_8055FC54) {
         return 0;
     }
-    f32 y = fabsf(PSVECDotProduct(&d, &lbl_804C1410.rot.up));
+    f32 y = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&lbl_804C1410.rot.up));
     lim = z * lbl_8055FC50;
     m = Max(0.0f, lim);
     if (y > m + r * lbl_8055FC58) {
@@ -840,13 +836,13 @@ void Flare::Draw(int a, int b, f32 x, f32 y, f32 z, f32 s, f32 t) {
         p.x = x;
         p.y = y;
         p.z = z;
-        f32 dist = PSVECDistance(&pos, &p);
+        f32 dist = PSVECDistance((const Vec*)&pos, (const Vec*)&p);
         if (dist > radius) {
             VecP d;
             d.x = p.x - pos.x;
             d.y = p.y - pos.y;
             d.z = p.z - pos.z;
-            PSVECNormalize(&d, &d);
+            PSVECNormalize((const Vec*)&d, (Vec*)&d);
             f32 grow = 0.5f * (dist - radius);
             pos.x += d.x * grow;
             pos.y += d.y * grow;
