@@ -212,9 +212,9 @@ int fn_80129D18(int seed, int n);           // random int
 void fn_8023E52C(void* a);
 u8* fn_8017960C(s32 id);
 // LineFollower's constructor and destructor (idealline.cpp) for the driver's two line followers at 0x168 and
-// 0x19C, by their mangled names: the driver here is a byte buffer, not a class with LineFollower members.
+// 0x19C. The constructor is called by its mangled name (the driver here is a byte buffer, not a class with
+// LineFollower members; placement new would add a null test retail lacks); the destructor is called as a member.
 void __ct__12LineFollowerFv(void* p);
-void __dt__12LineFollowerFv(void* p, int del);
 void fn_80134CD4(s32 car, void* out);
 f32* fn_80137C54(int a);
 void* fn_801769CC(void);
@@ -334,6 +334,13 @@ static inline f32 Clamp01(f32 x) {
 class AIDriver {
 public:
     AIDriver(void);
+};
+
+// The race-line follower (idealline.cpp), declared as far as this unit uses it.
+class LineFollower {
+public:
+    virtual ~LineFollower(void);
+    void Update(V2* p);
 };
 
 extern "C" {
@@ -656,8 +663,8 @@ u8* AIDriver_vf08(u8* d, int del) {
         lbl_8055E550--;
         u8* m = d + 0x168;
         if (m) {
-            __dt__12LineFollowerFv(d + 0x19C, -1);
-            __dt__12LineFollowerFv(d + 0x168, -1);
+            ((LineFollower*)(d + 0x19C))->LineFollower::~LineFollower();
+            ((LineFollower*)(d + 0x168))->LineFollower::~LineFollower();
         }
         if (del > 0) {
             operator delete(d);
@@ -1614,11 +1621,6 @@ public:
     virtual void s14(void);
     virtual void s18(void);
     virtual u8* Pos(void);  // 0x1C
-};
-
-class LineFollower {
-public:
-    void Update(V2* p);
 };
 
 extern const f32 lbl_805621C0;  // 1.5f
