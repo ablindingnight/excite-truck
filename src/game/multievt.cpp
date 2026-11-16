@@ -1,10 +1,13 @@
-// Multiplayer event menu (0x8024958C-0x8024BDDC, "multi_evt.lyt" / "multi_country.lyt" /
+// Multiplayer event menu (0x8024958C-0x8024BE04, "multi_evt.lyt" / "multi_country.lyt" /
 // "multi_course.lyt"): choosing the location, course, event and difficulty for a multiplayer race,
 // remembering the last choices ("last_mp_event_count", ...), and the stats table beside the course list.
-// Written against raw field offsets; the large screen routines are still stubs. Names are guesses
-// apart from the strings.
+// The pickers and pages are real classes (names unproven): their vtables, the inline members emitted after
+// fn_8024974C and at the end of the unit, and the two this-adjust thunk pairs (0x8024BDDC..) are the compiler's.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/menuwidget_inl.h"
+#include "game/menustate.h"
+#include "game/uitable.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -20,30 +23,28 @@ char lbl_8055BF1C[] = "Easy";
 char lbl_8055BF24[] = "Medium";
 char lbl_8055BF2C[] = "Hard";
 
-// A list widget: the base data comes first, the vptr after it.
-class VC {
+// A set of named textures, one of which is drawn at a time (gart.cpp).
+class DynoTex {
 public:
-    u8 b0;
-    s32 f4;
-    u8 b8;
-    virtual void s08(void);
-    virtual void s0C(void);
-    virtual void s10(void);
-    virtual void s14(void);
-    virtual void s18(void);
-    virtual void s1C(void);
-    virtual void s20(void);
-    virtual void s24(void);
-    virtual void s28(void);
-    virtual void s2C(void);
-    virtual void s30(u32 a, const char* b);
-    virtual void s34(s32 a, s32 b);
-    virtual void s38(s32* a, s32* b);
+    DynoTex(int max, int flip);
+    virtual ~DynoTex(void);
+    void Add(int id, const char* name);
+
+    void* entries;  // offset 0x4
+    int max;        // offset 0x8
+    int count;      // offset 0xC
+    s32 current;    // offset 0x10
+    u8 flip;        // offset 0x14
 };
 
-class StatsTable {
+// The course stats table (mstats.cpp).
+class StatsTable : public UITable {
 public:
+    StatsTable(void);
+    ~StatsTable(void) {}
     void Show(s32 event);
+
+    s32 event;  // offset 0x30
 };
 
 struct NamedValue {
@@ -76,14 +77,10 @@ void fn_8023E52C(u32 a);
 s32 fn_80214D04(void);
 void fn_80214CB4(s32 a);
 int fn_802411D4(void);
-void __dt__7UITableFv(void* p, int del);
-void __dt__7DynoTexFv(void* p, int del);
 int fn_8024974C(s32* track, s32* eve, s32* diff, int testing);
-void fn_8024B260(u8* p);
 void fn_80214AF0(int s);
 void fn_80214A9C(int s);
 void fn_80214B44(int i);
-void fn_8024B6AC(u8* p);
 }
 
 void operator delete(void* p);
@@ -203,6 +200,21 @@ struct EvPairs {
     EvPair* alloc;  // offset 0xC
 };
 
+/* Class name unproven */
+// Owns the event pairs for one menu run.
+struct EvPairsRef {
+    EvPairsRef(EvPairs* q) : p(q) {}
+    ~EvPairsRef(void) {
+        EvPairs* q = p;
+        if (q) {
+            delete[] q->alloc;
+            delete q;
+            p = 0;
+        }
+    }
+    EvPairs* p;
+};
+
 // One course row of the picker.
 struct EvPick {
     s32 track;         // offset 0x0
@@ -210,17 +222,68 @@ struct EvPick {
     const char* name;  // offset 0x8
 };
 
-// The head of a page widget: its state, then the vptr.
-struct PageHead {
-    u8 b0;      // offset 0x0
-    s32 f4;     // offset 0x4
-    u8 b8;      // offset 0x8
-    void** vt;  // offset 0xC
+// A fixed-capacity list over inline storage. Its destructor (and its own base's) clears the header.
+template <class T>
+struct VecRef {
+    ~VecRef(void) {
+        data = 0;
+        count = 0;
+        cap = 0;
+    }
+    int Size() const { return count; }
+    T* Next() { return &data[count++]; }
+    void Push(T e) {
+        T* d = data;
+        int n = count;
+        count = n + 1;
+        d[n] = e;
+    }
+    T* data;    // offset 0x0
+    s32 count;  // offset 0x4
+    s32 cap;    // offset 0x8
 };
 
-// Event picker page (vtable lbl_80343D78): the courses of the chosen location.
-struct EvPicker {
-    PageHead head;     // offset 0x0
+/* Class name unproven */
+template <class T, int N>
+struct FixedVec : VecRef<T> {
+    FixedVec(void) {
+        this->data = buf;
+        this->cap = N;
+        this->count = 0;
+    }
+    T buf[N];  // offset 0xC
+};
+
+// The preview movie of a track environment.
+inline void MoviePath(char* buf, const char* env);
+
+/* Class name unproven */
+// Event picker page: the courses of the chosen location.
+class EvPicker : public MenuWidget {
+public:
+    EvPicker(void) { f18 = -1; }
+    virtual ~EvPicker(void) {
+        f18 = -1;
+        cur = 0;
+        env = 0;
+    }
+    virtual const char* Current(void) { return ents[cur].name; }
+    virtual void Prev(void) {
+        s32 n = count;
+        cur = (n + cur - 1) % n;
+    }
+    virtual void Next(void) { cur = (cur + 1) % count; }
+    virtual void SetEnv(EvPairs** pairs, const char* env);  // 0x30
+    virtual void Select(s32 track, s32 eve);               // 0x34
+    virtual s32 Get(s32* track, s32* eve) {                 // 0x38
+        EvPick* q = &ents[cur];
+        s32 v1 = q->track;
+        s32 v2 = q->eve;
+        *track = v1;
+        *eve = v2;
+        return v1;
+    }
+
     s32 cur;           // offset 0x10
     s32 count;         // offset 0x14
     s32 f18;           // offset 0x18
@@ -264,58 +327,183 @@ struct EvListBuf {
     EvEntryBuf buf[0x80];   // offset 0xC
 };
 
-// Location picker page (vtable lbl_80343D48): one row per track environment.
+// Location picker page: one row per track environment.
 struct LocEntry {
     const char* name;  // offset 0x0, friendly name
     const char* env;   // offset 0x4
 };
 
-struct LocPicker {
-    PageHead head;         // offset 0x0
-    LocEntry* data;        // offset 0x10
-    s32 count;             // offset 0x14
-    s32 cap;               // offset 0x18
-    LocEntry buf[0x20];    // offset 0x1C
-    s32 cur;               // offset 0x11C
-    EvPairs** pairs;       // offset 0x120
-    EvPicker* events;      // offset 0x124
-    char movie[0x20];      // offset 0x128
+/* Class name unproven */
+class LocPicker : public MenuWidget {
+public:
+    LocPicker(EvPairs** p, EvPicker* e) {
+        pairs = p;
+        events = e;
+        cur = 0;
+    }
+    virtual ~LocPicker(void) { cur = 0; }
+    virtual const char* Current(void) { return list.data[cur].name; }
+    virtual void Prev(void) {
+        cur = (list.count + cur - 1) % list.count;
+        events->SetEnv(pairs, list.data[cur].env);
+        MoviePath(movie, list.data[cur].env);
+    }
+    virtual void Next(void) {
+        cur = (cur + 1) % list.count;
+        events->SetEnv(pairs, list.data[cur].env);
+        MoviePath(movie, list.data[cur].env);
+    }
+
+    FixedVec<LocEntry, 0x20> list;  // offset 0x10
+    s32 cur;                        // offset 0x11C
+    EvPairs** pairs;                // offset 0x120
+    EvPicker* events;               // offset 0x124
+    char movie[0x20];               // offset 0x128
 };
 
-// Difficulty picker page (vtable lbl_80343D18).
-struct DiffPicker {
-    PageHead head;  // offset 0x0
-    s32 cur;        // offset 0x10
+/* Class name unproven */
+// Difficulty picker page.
+class DiffPicker : public MenuWidget {
+public:
+    DiffPicker(void) { cur = 0; }
+    virtual ~DiffPicker(void) {}
+    virtual void Prev(void) {
+        s32 v = cur - 1;
+        cur = v > 0 ? v : 0;
+    }
+    virtual void Next(void) {
+        s32 v = cur + 1;
+        cur = v > 2 ? 2 : v;
+    }
+    virtual const char* Current(void) { return lbl_802FA4B0[cur].name; }
+
+    s32 cur;  // offset 0x10
 };
 
-// Course texture page (vtable lbl_80343C30): a DynoTex of the event pictures plus the chosen course.
-struct CourseTex {
-    u8 tex[0x18];        // offset 0x0, DynoTex (vptr first)
-    void** vt2;          // offset 0x18
-    u8 pad1C[0x10];
-    s32 f2C;             // offset 0x2C
-    EvPicker* picker;    // offset 0x30
-    s32 id;              // offset 0x34
-    char name[100];      // offset 0x38
+/* Class name unproven */
+// Stats page: the StatsTable of the chosen course.
+class StatsPage : public StatsTable, public MenuState {
+public:
+    EvPicker* picker;  // offset 0x4C
+    StatsPage(EvPicker* p) : picker(p) { text[0] = 0; }
+    virtual ~StatsPage(void) {}
+    virtual void Update(void) {
+        s32 a;
+        s32 b;
+        picker->Get(&a, &b);
+        Show(*(s32*)FindTrackEvent(a, b));
+    }
+    s32 u54;           // offset 0x54
+    char text[0x100];  // offset 0x58
 };
 
-// Stats page (vtable lbl_80343CA8): a StatsTable of the chosen course.
-struct StatsPage {
-    u8 table[0x34];      // offset 0x0, StatsTable
-    void** vt2;          // offset 0x34
-    u8 pad38[0x10];
-    s32 f48;             // offset 0x48
-    EvPicker* picker;    // offset 0x4C
-    void** vt;           // offset 0x50
-    u8 pad54[0x4];
-    char text[0x100];    // offset 0x58
+/* Class name unproven */
+// Course texture page: a DynoTex of the event pictures plus the chosen course.
+class CourseTex : public DynoTex, public MenuState {
+public:
+    CourseTex(int n) : DynoTex(n, 0) {}
+    virtual ~CourseTex(void) {}
+    virtual void Update(void) { Pick(); }
+    virtual void Enter(void) { Pick(); }
+    // Takes the chosen course from the event picker.
+    void Pick(void) {
+        EvPicker* c = picker;
+        if (c) {
+            s32 track;
+            s32 eve;
+            c->Get(&track, &eve);
+            u8* ev = (u8*)FindTrackEvent(track, eve);
+            id = S32(ev, 0x0);
+            const char* name_ = ((VN*)PTR(ev, 0x20))->v14("friendly_name");
+            CopyName(name_, 100, name);
+        } else {
+            id = -1;
+            name[0] = 0;
+        }
+    }
+
+    EvPicker* picker;  // offset 0x30
+    s32 id;            // offset 0x34
+    char name[100];    // offset 0x38
 };
 
-extern void* lbl_80343D78[];
-extern void* lbl_80343D48[];
-extern void* lbl_80343D18[];
-extern void* lbl_80343C30[];
-extern void* lbl_80343CA8[];
+struct EvEntry {
+    s32 id;             // offset 0x0
+    const char* name;   // offset 0x4
+    s32 slot;           // offset 0x8
+    const char* group;  // offset 0xC, country/location key
+    const char* name2;  // offset 0x10
+    u8 unlocked;        // offset 0x14
+    u8 flag;            // offset 0x15
+    u8 pad16[0x2];
+};
+
+struct EvList {
+    EvEntry* items;  // offset 0x0
+    s32 count;       // offset 0x4
+};
+
+// One course row on the course list.
+struct CourseSlot {
+    char name[50];   // offset 0x0
+    char name2[50];  // offset 0x32
+    s32 open;        // offset 0x64
+};
+
+// One location on the location list.
+struct GroupEntry {
+    const char* name;  // offset 0x0
+    u8 flag;           // offset 0x4
+    u8 pad5[0x3];
+};
+
+/* Class name unproven */
+// Location (country) screen of the multiplayer course choice ("multi_country.lyt").
+class CountryScreen : public MenuState {
+public:
+    CountryScreen(EvList* l);
+    virtual ~CountryScreen(void) {}
+    virtual void Enter(void);
+    virtual void Update(void);
+    void Refresh(void);
+    void Select(const char* name);
+    const char* Name(int i);
+    char* Course(int i);
+    char* Cup(int i);
+    s32* Lock(int i);
+
+    FixedVec<GroupEntry, 10> groups;  // offset 0x18
+    EvList* list;                     // offset 0x74
+    CourseSlot slots[5];              // offset 0x78
+    s32 sel;                          // offset 0x280
+    u8 anyNew;                        // offset 0x284
+};
+
+/* Class name unproven */
+// Course screen of one location ("multi_course.lyt").
+class CourseScreen : public MenuState {
+public:
+    CourseScreen(const char* group, EvList* l);
+    virtual ~CourseScreen(void) {}
+    virtual void Enter(void);
+    virtual void Update(void);
+    void Refresh(void);
+    void Select(s32 id);
+    char* Name(void);
+    const char* CourseName(int i);
+    s32 CourseId(int i);
+    DynoTex* Tex(void);
+    s32* IdPtr(void);
+
+    FixedVec<EvEntry*, 10> events;  // offset 0x18
+    DynoTex tex;                    // offset 0x4C
+    char name[50];                  // offset 0x64
+    s32 id;                         // offset 0x98
+    s32 sel;                        // offset 0x9C
+};
+
+inline void MoviePath(char* buf, const char* env) { fn_801345D8(buf, 0x20, "%s/race.%s", env, "m2v"); }
+
 extern u8 lbl_8055F291;
 extern "C" char lbl_8055B860[8];
 extern char lbl_8055BAC0[8];
@@ -323,9 +511,6 @@ extern char lbl_8055BABC[4];
 extern char lbl_8055BAB8[4];
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-// The preview movie of a track environment.
-inline void MoviePath(char* buf, const char* env) { fn_801345D8(buf, 0x20, "%s/race.%s", env, "m2v"); }
 
 extern "C" {
 void fn_801332D0(int slot, const char* name, s32* value);
@@ -336,9 +521,6 @@ void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
 int fn_802146BC(MenuDesc* desc, int x, int y, int modal);
 void fn_802E317C(const char* fmt, ...);
 void fn_80236914(int which, f32* out, f32 t);
-void __ct__10StatsTableFv(void* p);
-void __ct__7DynoTexFii(void* p, int n, int flip);
-void Add__7DynoTexFiPCc(void* p, int id, const char* name);
 int fn_8024A4B8(const char** a, const char** b);
 }
 
@@ -399,73 +581,54 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     *diff = 0;
     fn_801332D0(0, lbl_8055BF10, eve);
     fn_801332D0(0, lbl_8055BF14, track);
-    EvPairs* pairs = new ("ci-list") EvPairs;
+    EvPairsRef pairs(new ("ci-list") EvPairs);
     for (int i = 0; i < GetNumEvents(); i++) {
         u8* ev = GetEvent(i);
         const char* name = GetTrack(S32(ev, 0x4))->name;
         if ((testing ? fn_8024958C : fn_80249660)(ev, name)) {
-            EvPair* d = pairs->items;
-            int k = pairs->count;
-            pairs->count = k + 1;
+            EvPair* d = pairs.p->items;
+            int k = pairs.p->count;
+            pairs.p->count = k + 1;
             d[k].ev = ev;
             d[k].track = name;
         }
     }
-    pairs->Trim();
+    pairs.p->Trim();
     EvPicker events;
-    events.head.b0 = 0;
-    events.head.vt = lbl_80343D78;
-    events.head.f4 = -1;
-    events.head.b8 = 0;
-    events.f18 = -1;
     s32 lastEve = *eve;
     s32 lastTrack = *track;
-    LocPicker loc;
-    loc.head.b0 = 0;
-    loc.head.f4 = -1;
-    loc.head.b8 = 0;
-    loc.head.vt = lbl_80343D48;
-    loc.data = loc.buf;
-    loc.cap = 0x20;
-    loc.pairs = &pairs;
-    loc.events = &events;
-    loc.cur = 0;
-    loc.count = 0;
+    LocPicker loc(&pairs.p, &events);
     for (int i = 0; i < (*loc.pairs)->count; i++) {
         const char* name = (*loc.pairs)->items[i].track;
         const char* env = GetTrackEnviron(name);
         int found = 0;
-        for (int j = 0; j < loc.count; j++) {
-            if (!strcasecmp(loc.data[j].env, env)) {
+        for (int j = 0; j < loc.list.count; j++) {
+            if (!strcasecmp(loc.list.data[j].env, env)) {
                 found = 1;
                 break;
             }
         }
         if (!found) {
-            LocEntry* e = &loc.data[loc.count++];
+            LocEntry* e = &loc.list.data[loc.list.count++];
             e->name = GetTrackFriendlyName(name);
             e->env = env;
         }
     }
-    fn_80265DCC(loc.data, loc.count, sizeof(LocEntry), (int (*)(u8*, u8*))fn_8024A4B8);
+    fn_80265DCC(loc.list.data, loc.list.count, sizeof(LocEntry), (int (*)(u8*, u8*))fn_8024A4B8);
     if (lastTrack >= 0 && lastTrack < GetNumTracks()) {
         const char* env = GetTrackEnviron(GetTrack(lastTrack)->name);
-        for (int j = 0; j < loc.count; j++) {
-            if (!strcasecmp(env, loc.data[j].env)) {
+        for (int j = 0; j < loc.list.count; j++) {
+            if (!strcasecmp(env, loc.list.data[j].env)) {
                 loc.cur = j;
                 break;
             }
         }
     }
-    ((VC*)loc.events)->s30((u32)loc.pairs, loc.data[loc.cur].env);
-    ((VC*)&events)->s34(lastTrack, lastEve);
-    MoviePath(loc.movie, loc.data[loc.cur].env);
+    loc.events->SetEnv(loc.pairs, loc.list.data[loc.cur].env);
+    events.Select(lastTrack, lastEve);
+    MoviePath(loc.movie, loc.list.data[loc.cur].env);
     UnlockList* unlocks = lbl_8055F28C;
-    CourseTex tex;
-    __ct__7DynoTexFii(&tex, unlocks->count, 0);
-    *(void**)&tex = lbl_80343C30;
-    tex.f2C = 0;
-    tex.vt2 = lbl_80343C30 + 3;
+    CourseTex tex(unlocks->count);
     for (int i = 0; i < unlocks->count; i++) {
         char buf[0x21];
         const char* name = ((VN*)PTR(GetEvent(unlocks->entries[i].id), 0x20))->v14("name");
@@ -474,7 +637,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
             name += strlen(prefix);
         }
         fn_801345D8(buf, 0x21, "/%s.tex", name);
-        Add__7DynoTexFiPCc(&tex, unlocks->entries[i].id, buf);
+        tex.Add(unlocks->entries[i].id, buf);
     }
     tex.picker = &events;
     tex.id = -1;
@@ -485,11 +648,6 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         *diff = 0;
     }
     DiffPicker level;
-    level.head.b0 = 0;
-    level.head.f4 = -1;
-    level.head.b8 = 0;
-    level.head.vt = lbl_80343D18;
-    level.cur = 0;
     if (*diff == lbl_802FA4B0[0].id) {
         level.cur = 0;
     } else if (*diff == lbl_802FA4B0[1].id) {
@@ -497,13 +655,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     } else if (*diff == lbl_802FA4B0[2].id) {
         level.cur = 2;
     }
-    StatsPage stats;
-    __ct__10StatsTableFv(&stats);
-    stats.vt = lbl_80343CA8;
-    stats.vt2 = lbl_80343CA8 + 2;
-    stats.f48 = 0;
-    stats.picker = &events;
-    stats.text[0] = 0;
+    StatsPage stats(&events);
     lbl_8055F294 = stats.text;
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_80249744, 0, 0),
@@ -517,11 +669,11 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         MenuItem("#course_name", tex.name),
         MenuItem("#trackmap", 0x12, &tex, 0, 0),
         MenuItem("#trackmap", 2, &tex.id, 0, 0),
-        MenuItem(0, 5, &tex.vt2, 0, 0),
+        MenuItem(0, 5, (MenuState*)&tex, 0, 0),
         MenuItem("#track_movie", loc.movie, CaptionContext(0x20)),
         MenuItem("Stat", 0xD, &stats, 0, 0),
         MenuItem("Value", 0xD, &stats, 1, 0),
-        MenuItem(0, 5, &stats.vt2, 0, 0),
+        MenuItem(0, 5, (MenuState*)&stats, 0, 0),
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_80236914, 2, 0),
         MenuItem(lbl_80498998),
     };
@@ -537,115 +689,21 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     delete (EvListBuf*)lbl_8055F28C;
     lbl_8055F28C = 0;
     if (r == -1) {
-        __dt__7UITableFv(&stats, 0);
-        __dt__7DynoTexFv(&tex, 0);
-        loc.cur = 0;
-        loc.data = 0;
-        loc.count = 0;
-        loc.cap = 0;
-        events.f18 = -1;
-        events.cur = 0;
-        events.env = 0;
-        EvPairs* p = pairs;
-        if (p) {
-            delete[] p->alloc;
-            delete p;
-            pairs = 0;
-        }
         return 0;
-    }
-    __dt__7UITableFv(&stats, 0);
-    __dt__7DynoTexFv(&tex, 0);
-    loc.cur = 0;
-    loc.data = 0;
-    loc.count = 0;
-    loc.cap = 0;
-    events.f18 = -1;
-    events.cur = 0;
-    events.env = 0;
-    EvPairs* p = pairs;
-    if (p) {
-        delete[] p->alloc;
-        delete p;
-        pairs = 0;
     }
     return 1;
 }
 
-u8* fn_8024A110(u8* p, int del) {
-    if (p) {
-        if (p) {
-            __dt__7UITableFv(p, 0);
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
+}  // extern "C"
 
-u8* fn_8024A16C(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_8024A1AC(u8* p, int del) {
-    if (p) {
-        __dt__7DynoTexFv(p, 0);
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-static inline void ClearMaybe(u8* m, u8* p) {
-    if (m) {
-        if (m) {
-            U32(p, 0x10) = 0;
-            U32(p, 0x14) = 0;
-            U32(p, 0x18) = 0;
-        }
-    }
-}
-
-u8* fn_8024A204(u8* p, int del) {
-    if (p) {
-        U32(p, 0x11C) = 0;
-        ClearMaybe(p + 0x10, p);
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_8024A268(u8* p, int del) {
-    if (p) {
-        S32(p, 0x18) = -1;
-        U32(p, 0x10) = 0;
-        U32(p, 0x1C) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-void fn_8024A2BC(u8* p, s32 a, s32 b) {
-    u8* q = p;
-    for (int i = 0; i < S32(p, 0x14); i++) {
-        if (a == S32(q, 0x20) && b == S32(q, 0x24)) {
-            S32(p, 0x10) = i;
+inline void EvPicker::Select(s32 track, s32 eve) {
+    for (int i = 0; i < count; i++) {
+        if (track == ents[i].track && eve == ents[i].eve) {
+            cur = i;
             return;
         }
-        q += 0xC;
     }
 }
-
-}  // extern "C"
 
 
 // The name an event is listed under.
@@ -675,14 +733,13 @@ static inline int EveIndex(u8* ev) {
     return -1;
 }
 
-extern "C" {
-
 // Fills the course list with the events at tracks in environment env.
-void fn_8024A304(EvPicker* p, EvPairs** pairs, const char* env) {
+inline void EvPicker::SetEnv(EvPairs** pairs, const char* env_) {
+    EvPicker* p = this;
     u8* ev;
     int i;
     int j;
-    p->env = env;
+    p->env = env_;
     p->cur = 0;
     p->count = 0;
     for (i = 0; i < (*pairs)->count; i++) {
@@ -700,6 +757,8 @@ void fn_8024A304(EvPicker* p, EvPairs** pairs, const char* env) {
         }
     }
 }
+
+extern "C" {
 
 int fn_8024A4B8(const char** a, const char** b) { return strcasecmp(*a, *b); }
 
@@ -762,13 +821,6 @@ int fn_8024A6A4(s32* p) {
     return 0;
 }
 
-struct EvList;
-u8* fn_8024B3E8(u8* p, EvList* list);
-void fn_8024B544(u8* p, const char* name);
-const char* fn_8024B5D4(u8* p, int i);
-u8* fn_8024B5F8(u8* p, int i);
-u8* fn_8024B608(u8* p, int i);
-u8* fn_8024B618(u8* p, int i);
 extern char lbl_8055B860[8];
 
 // Location menu: on a choice stores the location name in *sel and returns 1.
@@ -776,40 +828,39 @@ int fn_8024A6EC(const char** sel, u8* list) {
     if (!fn_802411D4()) {
         return 0;
     }
-    u32 buf[0xA2];
-    fn_8024B3E8((u8*)buf, (EvList*)list);
-    fn_8024B544((u8*)buf, *sel);
+    CountryScreen screen((EvList*)list);
+    screen.Select(*sel);
     MenuItem items[] = {
-        MenuItem("__first", 5, (u8*)buf, 0, 0),
-        MenuItem("#country_1", fn_8024B5D4((u8*)buf, 0)),
+        MenuItem("__first", 5, &screen, 0, 0),
+        MenuItem("#country_1", screen.Name(0)),
         MenuItem("#country_1", 0, 0, 1, 0),
-        MenuItem("#country_2", fn_8024B5D4((u8*)buf, 1)),
+        MenuItem("#country_2", screen.Name(1)),
         MenuItem("#country_2", 0, 0, 2, 0),
-        MenuItem("#country_3", fn_8024B5D4((u8*)buf, 2)),
+        MenuItem("#country_3", screen.Name(2)),
         MenuItem("#country_3", 0, 0, 3, 0),
-        MenuItem("#country_4", fn_8024B5D4((u8*)buf, 3)),
+        MenuItem("#country_4", screen.Name(3)),
         MenuItem("#country_4", 0, 0, 4, 0),
-        MenuItem("#country_5", fn_8024B5D4((u8*)buf, 4)),
+        MenuItem("#country_5", screen.Name(4)),
         MenuItem("#country_5", 0, 0, 5, 0),
-        MenuItem("#country_6", fn_8024B5D4((u8*)buf, 5)),
+        MenuItem("#country_6", screen.Name(5)),
         MenuItem("#country_6", 0, 0, 6, 0),
-        MenuItem("#country_7", fn_8024B5D4((u8*)buf, 6)),
+        MenuItem("#country_7", screen.Name(6)),
         MenuItem("#country_7", 0, 0, 7, 0),
-        MenuItem("#cup_1", (const char*)fn_8024B608((u8*)buf, 0)),
-        MenuItem("#course_1", (const char*)fn_8024B5F8((u8*)buf, 0)),
-        MenuItem("#lock_1", 2, fn_8024B618((u8*)buf, 0), 0, 0),
-        MenuItem("#cup_2", (const char*)fn_8024B608((u8*)buf, 1)),
-        MenuItem("#course_2", (const char*)fn_8024B5F8((u8*)buf, 1)),
-        MenuItem("#lock_2", 2, fn_8024B618((u8*)buf, 1), 0, 0),
-        MenuItem("#cup_3", (const char*)fn_8024B608((u8*)buf, 2)),
-        MenuItem("#course_3", (const char*)fn_8024B5F8((u8*)buf, 2)),
-        MenuItem("#lock_3", 2, fn_8024B618((u8*)buf, 2), 0, 0),
-        MenuItem("#cup_4", (const char*)fn_8024B608((u8*)buf, 3)),
-        MenuItem("#course_4", (const char*)fn_8024B5F8((u8*)buf, 3)),
-        MenuItem("#lock_4", 2, fn_8024B618((u8*)buf, 3), 0, 0),
-        MenuItem("#cup_5", (const char*)fn_8024B608((u8*)buf, 4)),
-        MenuItem("#course_5", (const char*)fn_8024B5F8((u8*)buf, 4)),
-        MenuItem("#lock_5", 2, fn_8024B618((u8*)buf, 4), 0, 0),
+        MenuItem("#cup_1", screen.Cup(0)),
+        MenuItem("#course_1", screen.Course(0)),
+        MenuItem("#lock_1", 2, screen.Lock(0), 0, 0),
+        MenuItem("#cup_2", screen.Cup(1)),
+        MenuItem("#course_2", screen.Course(1)),
+        MenuItem("#lock_2", 2, screen.Lock(1), 0, 0),
+        MenuItem("#cup_3", screen.Cup(2)),
+        MenuItem("#course_3", screen.Course(2)),
+        MenuItem("#lock_3", 2, screen.Lock(2), 0, 0),
+        MenuItem("#cup_4", screen.Cup(3)),
+        MenuItem("#course_4", screen.Course(3)),
+        MenuItem("#lock_4", 2, screen.Lock(3), 0, 0),
+        MenuItem("#cup_5", screen.Cup(4)),
+        MenuItem("#course_5", screen.Course(4)),
+        MenuItem("#lock_5", 2, screen.Lock(4), 0, 0),
         MenuItem(lbl_8055B860, 6, 0, -1, 27),
         MenuItem(lbl_80498998),
     };
@@ -817,77 +868,36 @@ int fn_8024A6EC(const char** sel, u8* list) {
     desc.items = items;
     int r = fn_802146BC(&desc, -999, -999, 1);
     if (r != -1) {
-        *sel = fn_8024B5D4((u8*)buf, r - 1);
-        U32(buf, 0x18) = 0;
-        U32(buf, 0x1C) = 0;
-        U32(buf, 0x20) = 0;
+        *sel = screen.Name(r - 1);
         return 1;
     }
-    U32(buf, 0x18) = 0;
-    U32(buf, 0x1C) = 0;
-    U32(buf, 0x20) = 0;
     return 0;
 }
 
-u8* fn_8024AC54(u8* p, int del) {
-    if (p) {
-        u8* m = p + 0x18;
-        if (m) {
-            if (m) {
-                U32(p, 0x18) = 0;
-                U32(p, 0x1C) = 0;
-                U32(p, 0x20) = 0;
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-struct EvList;
-u8* fn_8024B73C(u8* p, const char* name, EvList* list);
-void fn_8024B830(u8* p, s32 id);
-u8* fn_8024B874(u8* p);
-const char* fn_8024B87C(u8* p, int i);
-s32 fn_8024B8A4(u8* p, int i);
-u8* fn_8024B8CC(u8* p);
-u8* fn_8024B8D4(u8* p);
-void __dt__7DynoTexFv(void* p, int del);
 extern char lbl_8055B860[8];
-
-// Tears down the course list built by fn_8024B73C.
-static inline void CourseListFree(u8* m) {
-    __dt__7DynoTexFv(m + 0x4C, -1);
-    U32(m, 0x18) = 0;
-    U32(m, 0x1C) = 0;
-    U32(m, 0x20) = 0;
-}
 
 // Course menu of location sel; on a choice stores the event in *key and returns 1.
 int fn_8024ACB4(s32* key, const char* sel, u8* list) {
     if (!fn_802411D4()) {
         return 0;
     }
-    u32 buf[0x28];
-    fn_8024B73C((u8*)buf, sel, (EvList*)list);
-    fn_8024B830((u8*)buf, *key);
+    CourseScreen screen(sel, (EvList*)list);
+    screen.Select(*key);
     MenuItem items[] = {
-        MenuItem("__first", 5, (u8*)buf, 0, 0),
-        MenuItem("#course_1", fn_8024B87C((u8*)buf, 0)),
-        MenuItem("#course_1", 0, 0, fn_8024B8A4((u8*)buf, 0), 0),
-        MenuItem("#course_2", fn_8024B87C((u8*)buf, 1)),
-        MenuItem("#course_2", 0, 0, fn_8024B8A4((u8*)buf, 1), 0),
-        MenuItem("#course_3", fn_8024B87C((u8*)buf, 2)),
-        MenuItem("#course_3", 0, 0, fn_8024B8A4((u8*)buf, 2), 0),
-        MenuItem("#course_4", fn_8024B87C((u8*)buf, 3)),
-        MenuItem("#course_4", 0, 0, fn_8024B8A4((u8*)buf, 3), 0),
-        MenuItem("#course_5", fn_8024B87C((u8*)buf, 4)),
-        MenuItem("#course_5", 0, 0, fn_8024B8A4((u8*)buf, 4), 0),
-        MenuItem("#trackmap", 0x12, fn_8024B8CC((u8*)buf), 0, 0),
-        MenuItem("#trackmap", 2, fn_8024B8D4((u8*)buf), 0, 0),
-        MenuItem("#course_name", (const char*)fn_8024B874((u8*)buf)),
+        MenuItem("__first", 5, &screen, 0, 0),
+        MenuItem("#course_1", screen.CourseName(0)),
+        MenuItem("#course_1", 0, 0, screen.CourseId(0), 0),
+        MenuItem("#course_2", screen.CourseName(1)),
+        MenuItem("#course_2", 0, 0, screen.CourseId(1), 0),
+        MenuItem("#course_3", screen.CourseName(2)),
+        MenuItem("#course_3", 0, 0, screen.CourseId(2), 0),
+        MenuItem("#course_4", screen.CourseName(3)),
+        MenuItem("#course_4", 0, 0, screen.CourseId(3), 0),
+        MenuItem("#course_5", screen.CourseName(4)),
+        MenuItem("#course_5", 0, 0, screen.CourseId(4), 0),
+        MenuItem("#trackmap", 0x12, screen.Tex(), 0, 0),
+        MenuItem("#trackmap", 2, screen.IdPtr(), 0, 0),
+        MenuItem("#course_name", screen.Name()),
         MenuItem(lbl_8055B860, 6, 0, -1, 27),
         MenuItem(lbl_80498998),
     };
@@ -896,48 +906,12 @@ int fn_8024ACB4(s32* key, const char* sel, u8* list) {
     int r = fn_802146BC(&desc, -999, -999, 1);
     if (r != -1) {
         *key = r;
-        CourseListFree((u8*)buf);
         return 1;
     }
-    CourseListFree((u8*)buf);
     return 0;
 }
 
-u8* fn_8024AFF8(u8* p, int del) {
-    if (p) {
-        __dt__7DynoTexFv(p + 0x4C, -1);
-        u8* m = p + 0x18;
-        if (m) {
-            if (m) {
-                U32(p, 0x18) = 0;
-                U32(p, 0x1C) = 0;
-                U32(p, 0x20) = 0;
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
 int fn_80215228(void);
-
-struct EvEntry {
-    s32 id;             // offset 0x0
-    const char* name;   // offset 0x4
-    s32 slot;           // offset 0x8
-    const char* group;  // offset 0xC, country/location key
-    const char* name2;  // offset 0x10
-    u8 unlocked;        // offset 0x14
-    u8 flag;            // offset 0x15
-    u8 pad16[0x2];
-};
-
-struct EvList {
-    EvEntry* items;  // offset 0x0
-    s32 count;       // offset 0x4
-};
 
 static inline int FindById(const EvList* list, const s32* key) {
     for (int i = 0; i < list->count; i++) {
@@ -986,34 +960,28 @@ int fn_8024B214(u8* a, u8* b) {
     return strcasecmp(*(const char**)a, *(const char**)b);
 }
 
-// One course row on the course list.
-struct CourseSlot {
-    char name[50];   // offset 0x0
-    char name2[50];  // offset 0x32
-    s32 open;        // offset 0x64
-};
-
 const char* fn_80131234(const char* key);
 
-static inline EvEntry* EventAt(u8* p, int i) {
-    return &((EvList*)PTR(p, 0x74))->items[i];
-}
+}  // extern "C"
 
-void fn_8024B260(u8* p) {
+static inline EvEntry* EventAt(CountryScreen* s, int i) { return &s->list->items[i]; }
+
+// Fills the five course rows of the selected location.
+void CountryScreen::Refresh(void) {
     EvEntry* e;
     const char* group;
     int i;
     int k;
-    S32(p, 0x280) = fn_80214D04();
-    group = ((const char**)PTR(p, 0x18))[S32(p, 0x280) * 2];
-    memset(p + 0x78, 0, 5 * sizeof(CourseSlot));
+    sel = fn_80214D04();
+    group = groups.data[sel].name;
+    memset(slots, 0, 5 * sizeof(CourseSlot));
     for (k = 0; k < 5; k++) {
-        ((CourseSlot*)(p + 0x78))[k].open = 1;
+        slots[k].open = 1;
     }
-    for (i = 0; i < ((EvList*)PTR(p, 0x74))->count; i++) {
-        e = EventAt(p, i);
+    for (i = 0; i < list->count; i++) {
+        e = EventAt(this, i);
         if (!strcasecmp(group, e->group)) {
-            CourseSlot* c = &((CourseSlot*)(p + 0x78))[e->slot];
+            CourseSlot* c = &slots[e->slot];
             CopyName(e->name, 50, c->name);
             if (e->unlocked) {
                 CopyName(e->name2, 50, c->name2);
@@ -1027,186 +995,137 @@ void fn_8024B260(u8* p) {
     }
 }
 
-// One location on the location list.
-struct GroupEntry {
-    const char* name;  // offset 0x0
-    u8 flag;           // offset 0x4
-    u8 pad5[0x3];
-};
-
-struct GroupVec {
-    int Size() const { return count; }
-    GroupEntry* Next() { return &data[count++]; }
-    GroupEntry* data;  // offset 0x0
-    s32 count;         // offset 0x4
-    s32 cap;           // offset 0x8
-};
-
-extern void* lbl_80343BD0[];
-void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
-
-}
 template <class T>
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
 static inline T* AtP(T* p, int i) {
     return &p[i];
 }
-extern "C" {
 
-u8* fn_8024B3E8(u8* p, EvList* list) {
-    PTR(p, 0x74) = (u8*)list;
-    S32(p, 0x14) = 0;
-    *(void**)p = lbl_80343BD0;
-    PTR(p, 0x18) = p + 0x24;
-    S32(p, 0x20) = 10;
-    S32(p, 0x1C) = 0;
-    U8(p, 0x284) = 0;
-    for (int i = 0; i < list->count; i++) {
-        EvEntry* e = AtP(list->items, i);
+extern "C" int fn_8024B214(u8* a, u8* b);
+
+CountryScreen::CountryScreen(EvList* l) {
+    list = l;
+    anyNew = 0;
+    for (int i = 0; i < l->count; i++) {
+        EvEntry* e = AtP(l->items, i);
         int isNew = 1;
         int j;
-        for (j = 0; j < ((GroupVec*)(p + 0x18))->Size(); j++) {
-            if (!e->unlocked || !strcasecmp(((GroupEntry*)PTR(p, 0x18))[j].name, e->group)) {
+        for (j = 0; j < groups.Size(); j++) {
+            if (!e->unlocked || !strcasecmp(groups.data[j].name, e->group)) {
                 isNew = 0;
             }
         }
         if (isNew) {
-            GroupEntry* g = ((GroupVec*)(p + 0x18))->Next();
+            GroupEntry* g = groups.Next();
             g->name = e->group;
             g->flag = e->flag;
         }
         if (e->unlocked && e->flag) {
-            U8(p, 0x284) = 1;
+            anyNew = 1;
         }
     }
-    fn_80265DCC(PTR(p, 0x18), S32(p, 0x1C), 8, fn_8024B214);
-    memset(p + 0x78, 0, 0x208);
-    S32(p, 0x280) = -1;
-    return p;
+    fn_80265DCC(groups.data, groups.count, 8, fn_8024B214);
+    memset(slots, 0, 0x208);
+    sel = -1;
 }
 
-void fn_8024B544(u8* p, const char* name) {
-    S32(p, 0x280) = 0;
+void CountryScreen::Select(const char* name) {
+    sel = 0;
     if (name) {
-        for (int i = 0; i < S32(p, 0x1C); i++) {
-            if (!strcasecmp(((const NamedValue*)PTR(p, 0x18))[i].name, name)) {
-                S32(p, 0x280) = i;
+        for (int i = 0; i < groups.count; i++) {
+            if (!strcasecmp(groups.data[i].name, name)) {
+                sel = i;
             }
         }
     }
 }
 
-const char* fn_8024B5D4(u8* p, int i) {
-    if (i < S32(p, 0x1C)) {
-        return ((const char**)PTR(p, 0x18))[i * 2];
+const char* CountryScreen::Name(int i) {
+    if (i < groups.count) {
+        return groups.data[i].name;
     }
     return "";
 }
 
-u8* fn_8024B5F8(u8* p, int i) { return p + i * 0x68 + 0xAA; }
+char* CountryScreen::Course(int i) { return slots[i].name2; }
 
-u8* fn_8024B608(u8* p, int i) { return p + i * 0x68 + 0x78; }
+char* CountryScreen::Cup(int i) { return slots[i].name; }
 
-u8* fn_8024B618(u8* p, int i) { return p + i * 0x68 + 0xDC; }
+s32* CountryScreen::Lock(int i) { return &slots[i].open; }
 
-void fn_8024B628(u8* p) {
-    fn_80214CB4(S32(p, 0x280));
-    for (int i = S32(p, 0x1C); i < S32(p, 0x20); i++) {
+void CountryScreen::Enter(void) {
+    fn_80214CB4(sel);
+    for (int i = groups.count; i < groups.cap; i++) {
         fn_80214A9C(i + 1);
     }
-    if (!U8(p, 0x284)) {
+    if (!anyNew) {
         fn_80214A9C(10);
     } else {
         fn_80214AF0(10);
     }
-    fn_8024B260(p);
+    Refresh();
 }
 
-void fn_8024B6A8(u8* p) { fn_8024B260(p); }
+void CountryScreen::Update(void) { Refresh(); }
 
-void fn_8024B6AC(u8* p) {
-    S32(p, 0x9C) = fn_80214D04();
-    CopyName((const char*)PTR(((u8**)PTR(p, 0x18))[S32(p, 0x9C)], 0x10), 50, (char*)(p + 0x64));
-    U32(p, 0x98) = U32(((u8**)PTR(p, 0x18))[S32(p, 0x9C)], 0x0);
+void CourseScreen::Refresh(void) {
+    sel = fn_80214D04();
+    CopyName(events.data[sel]->name2, 50, name);
+    id = events.data[sel]->id;
 }
 
-extern void* lbl_80343B70[];
-
-// Fixed-capacity pointer list with inline storage.
-struct PtrVec {
-    EvEntry** data;  // offset 0x0
-    s32 count;       // offset 0x4
-    s32 cap;         // offset 0x8
-
-    void Push(EvEntry* e) {
-        EvEntry** d = data;
-        int n = count;
-        count = n + 1;
-        d[n] = e;
-    }
-};
-void __ct__7DynoTexFii(void* p, int n, int flip);
-void Add__7DynoTexFiPCc(void* p, int id, const char* name);
-
-static inline void AddIfInGroup(const char* name, EvEntry* e, u8* p) {
-    if (!strcasecmp(name, e->group)) {
-        ((PtrVec*)(p + 0x18))->Push(e);
-        Add__7DynoTexFiPCc(p + 0x4C, e->id, fn_8024B178(e->id));
+static inline void AddIfInGroup(const char* group, EvEntry* e, CourseScreen* s) {
+    if (!strcasecmp(group, e->group)) {
+        s->events.Push(e);
+        s->tex.Add(e->id, fn_8024B178(e->id));
     }
 }
 
-u8* fn_8024B73C(u8* p, const char* name, EvList* list) {
+CourseScreen::CourseScreen(const char* group, EvList* l) : tex(10, 0) {
     EvEntry* e;
     int i;
-    S32(p, 0x14) = 0;
-    *(void**)p = lbl_80343B70;
-    PTR(p, 0x18) = p + 0x24;
-    S32(p, 0x20) = 10;
-    S32(p, 0x1C) = 0;
-    __ct__7DynoTexFii(p + 0x4C, 10, 0);
-    for (i = 0; i < list->count; i++) {
-        AddIfInGroup(name, &list->items[i], p);
+    for (i = 0; i < l->count; i++) {
+        AddIfInGroup(group, &l->items[i], this);
     }
-    U8(p, 0x64) = 0;
-    S32(p, 0x98) = -1;
-    S32(p, 0x9C) = -1;
-    return p;
+    name[0] = 0;
+    id = -1;
+    sel = -1;
 }
 
-void fn_8024B830(u8* p, s32 id) {
-    S32(p, 0x9C) = -1;
-    for (int i = 0; i < S32(p, 0x1C); i++) {
-        if (id == S32(((u8**)PTR(p, 0x18))[i], 0x0)) {
-            S32(p, 0x9C) = i;
+void CourseScreen::Select(s32 id_) {
+    sel = -1;
+    for (int i = 0; i < events.count; i++) {
+        if (id_ == events.data[i]->id) {
+            sel = i;
         }
     }
 }
 
-u8* fn_8024B874(u8* p) { return p + 0x64; }
+char* CourseScreen::Name(void) { return name; }
 
-const char* fn_8024B87C(u8* p, int i) {
-    if (i < S32(p, 0x1C)) {
-        return *(const char**)(((u8**)PTR(p, 0x18))[i] + 0x4);
+const char* CourseScreen::CourseName(int i) {
+    if (i < events.count) {
+        return events.data[i]->name;
     }
     return "";
 }
 
-s32 fn_8024B8A4(u8* p, int i) {
-    if (i < S32(p, 0x1C)) {
-        return S32(((u8**)PTR(p, 0x18))[i], 0x0);
+s32 CourseScreen::CourseId(int i) {
+    if (i < events.count) {
+        return events.data[i]->id;
     }
     return -1;
 }
 
-u8* fn_8024B8CC(u8* p) { return p + 0x4c; }
+DynoTex* CourseScreen::Tex(void) { return &tex; }
 
-u8* fn_8024B8D4(u8* p) { return p + 0x98; }
+s32* CourseScreen::IdPtr(void) { return &id; }
 
-void fn_8024B8DC(u8* p) {
-    fn_80214CB4(S32(p, 0x9C));
-    for (int i = 0; i < S32(p, 0x20); i++) {
-        if (i < S32(p, 0x1C)) {
-            if (!U8(((u8**)PTR(p, 0x18))[i], 0x14)) {
+void CourseScreen::Enter(void) {
+    fn_80214CB4(sel);
+    for (int i = 0; i < events.cap; i++) {
+        if (i < events.count) {
+            if (!events.data[i]->unlocked) {
                 fn_80214B44(i + 1);
             }
         } else {
@@ -1215,91 +1134,4 @@ void fn_8024B8DC(u8* p) {
     }
 }
 
-void fn_8024B970(u8* p) { fn_8024B6AC(p); }
-
-u32 fn_8024B974(u8* p) { return U32(p + S32(p, 0x10) * 0xC, 0x28); }
-
-void fn_8024B988(u8* p) {
-    s32 n = S32(p, 0x14);
-    S32(p, 0x10) = (n + S32(p, 0x10) - 1) % n;
-}
-
-void fn_8024B9AC(u8* p) { S32(p, 0x10) = (S32(p, 0x10) + 1) % S32(p, 0x14); }
-
-s32 fn_8024B9CC(u8* p, s32* a, s32* b) {
-    u8* q = p + S32(p, 0x10) * 0xC;
-    s32 v1 = S32(q, 0x20);
-    s32 v2 = S32(q, 0x24);
-    *a = v1;
-    *b = v2;
-    return v1;
-}
-
-u32 fn_8024B9EC(u8* p) { return ((u32*)PTR(p, 0x10))[S32(p, 0x11C) * 2]; }
-
-void fn_8024BA00(u8* p) {
-    S32(p, 0x11C) = (S32(p, 0x14) + S32(p, 0x11C) - 1) % S32(p, 0x14);
-    ((VC*)PTR(p, 0x124))->s30(U32(p, 0x120), ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name);
-    fn_801345D8((char*)(p + 0x128), 0x20, "%s/race.%s", ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name, "m2v");
-}
-
-void fn_8024BAA0(u8* p) {
-    S32(p, 0x11C) = (S32(p, 0x11C) + 1) % S32(p, 0x14);
-    ((VC*)PTR(p, 0x124))->s30(U32(p, 0x120), ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name);
-    fn_801345D8((char*)(p + 0x128), 0x20, "%s/race.%s", ((const NameEntry*)PTR(p, 0x10))[S32(p, 0x11C)].name, "m2v");
-}
-
-void fn_8024BB3C(u8* p) {
-    s32 v = S32(p, 0x10) - 1;
-    S32(p, 0x10) = v > 0 ? v : 0;
-}
-
-void fn_8024BB5C(u8* p) {
-    s32 v = S32(p, 0x10) + 1;
-    S32(p, 0x10) = v > 2 ? 2 : v;
-}
-
-const char* fn_8024BB7C(u8* p) { return lbl_802FA4B0[S32(p, 0x10)].name; }
-
-void fn_8024BB98(u8* p) {
-    s32 a;
-    s32 b;
-    ((VC*)PTR(p, 0x4C))->s38(&a, &b);
-    ((StatsTable*)p)->Show(*(s32*)FindTrackEvent(a, b));
-}
-
-void fn_8024BBF4(u8* p) {
-    VC* c = (VC*)PTR(p, 0x30);
-    if (c) {
-        s32 eve;
-        s32 track;
-        c->s38(&track, &eve);
-        u8* ev = (u8*)FindTrackEvent(track, eve);
-        S32(p, 0x34) = S32(ev, 0x0);
-        const char* name = ((VN*)PTR(ev, 0x20))->v14("friendly_name");
-        CopyName(name, 100, (char*)(p + 0x38));
-    } else {
-        S32(p, 0x34) = -1;
-        U8(p, 0x38) = 0;
-    }
-}
-
-void fn_8024BCC0(u8* p) {
-    VC* c = (VC*)PTR(p, 0x30);
-    if (c) {
-        s32 eve;
-        s32 track;
-        c->s38(&track, &eve);
-        u8* ev = (u8*)FindTrackEvent(track, eve);
-        S32(p, 0x34) = S32(ev, 0x0);
-        const char* name = ((VN*)PTR(ev, 0x20))->v14("friendly_name");
-        CopyName(name, 100, (char*)(p + 0x38));
-    } else {
-        S32(p, 0x34) = -1;
-        U8(p, 0x38) = 0;
-    }
-}
-
-
-
-}  // extern "C"
+void CourseScreen::Update(void) { Refresh(); }
