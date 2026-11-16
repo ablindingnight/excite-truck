@@ -2210,6 +2210,8 @@ static inline void Normalize(V2& v) {
 
 static inline f32 PathLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
+#pragma push
+#pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 inline int RingChalMaster::vfA0(Respawn* out, int idx) {
     ValueNode* cfg = fn_8000AC38()->vals;
     if (cfg) {
@@ -2285,6 +2287,7 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx) {
     }
     return 0;
 }
+#pragma pop
 
 #define ALPHA(c, v) ((c).all = ((int)(255.0f * (v)) << 24) | ((c).all & 0xFFFFFF))
 
