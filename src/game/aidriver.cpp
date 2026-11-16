@@ -60,10 +60,6 @@ public:
 };
 
 class IDriver;
-struct LocalCarDesc {
-    u32 unk0;
-    u32 flags;  // offset 0x4
-};
 class Arena {
 public:
     virtual ~Arena(void);  // the current GameMode: slot 0 is its destructor
@@ -125,7 +121,6 @@ public:
     virtual void vfE8(void);
     virtual IDriver* CreateDriver(void);  // offset 0xEC
 };
-extern "C" LocalCarDesc* fn_801769CC(void);
 extern "C" Arena* fn_801B83A0(void);
 void* operator new(size_t size, const char* tag);
 
@@ -453,7 +448,7 @@ IDriver* fn_80134EC8(u32 type) {
 int GameMode::vfEC(void) { return 0; }
 
 void* fn_80134F48(void) {
-    LocalCarDesc* desc = fn_801769CC();
+    EventDesc* desc = fn_801769CC();
     IDriver* d;
     bool park = false;
     if (fn_801792F8()[0xD8] & 4) {
@@ -461,10 +456,10 @@ void* fn_80134F48(void) {
     }
     if (park) {
         d = fn_801350C0();
-    } else if (desc->flags & 0x100) {
+    } else if (desc->type & 0x100) {
         d = fn_80134E90();
-    } else if (desc->flags & 0x200) {
-        d = fn_80134EC8(desc->flags);
+    } else if (desc->type & 0x200) {
+        d = fn_80134EC8(desc->type);
     } else {
         d = fn_80134FF8();
     }

@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/gart.h"
 #include <revolution/MTX/vec.h>
@@ -41,11 +42,6 @@ void SetPlayer(int player, long driver, long vehicle, unsigned long color);
 void AchievementsClearSession(void);
 int GetNumEvents(void);
 
-struct EventDesc {
-    s32 event;  // offset 0x0
-};
-
-extern "C" EventDesc* fn_801769CC(void);
 
 VehicleInfo* GetDriverVehicle(long driver);
 

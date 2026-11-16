@@ -4,6 +4,7 @@
 // cars and locks the finish order, and runs the race intro countdown ("green flag"). The per-car update, the
 // lap-crossing scan and the qualify helper are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/plainvec.h"
 // Lane offset of the grid columns (5.0f): this unit's FIRST .sdata2 entry in retail, negated at run time, so it is a
 // named constant defined before any code whose value is not folded. A one-field const struct gives exactly that
@@ -292,11 +293,6 @@ struct TeleportInfo {
     s16 a40;       // offset 0x40
 };
 
-struct RaceInfo {
-    s32 a0;
-    u32 flags;  // offset 0x4
-};
-
 ModuleTag lbl_8055E660;
 UnkStatic7F lbl_8055E668;
 void* lbl_8055E66C;  // bad-teleport regions
@@ -331,11 +327,10 @@ int fn_801784DC(f32* pos, f32* h, int a, int b, int c);
 void fn_8018A08C(DCar* car);
 void fn_8018AF04(DCar* car);
 void fn_8018B0D0(DCar* car, int mode);
-RaceInfo* fn_801769CC(void);
 s32* fn_801769D8(void);  // physics.cpp: the race seed
 int fn_801769F8(void);
 int fn_80179630(int view);  // car of a local player
-int fn_800081F0(RaceInfo* r);
+int fn_800081F0(EventDesc* r);
 DMaster* fn_801B83A0(void);
 DAI* fn_8013C9F4(int a);
 void fn_80204A1C(const char* key, u8* out);
@@ -472,7 +467,7 @@ void fn_801B08FC(DeityCar* c, TeleportInfo* t) {
     fn_8018A08C(c->Car());
     IdealPoint* to = c->Ideal()->il.seg;
     CountCrossing(c, from, to);
-    if (!(fn_801769CC()->flags & 0x4000)) {
+    if (!(fn_801769CC()->type & 0x4000)) {
         fn_8018AF04(c->Car());
         c->Release();
     }
@@ -986,11 +981,11 @@ extern "C" {
 void fn_801B21B8(DeityCar* c);
 void fn_801B2118(DeityCar* c, short del);
 
-void fn_801B2024(RaceInfo* r) {
+void fn_801B2024(EventDesc* r) {
     lbl_8055E66C = fn_80139D4C("bad_teleport.val");
     lbl_8055E670 = fn_80139D4C("bridge_teleport.val");
     fn_80204A1C("Unlimited Laps", &lbl_8055E692);
-    u32 f = r->flags;
+    u32 f = r->type;
     lbl_8055E690 = (f >> 8) & 1;
     lbl_8055E691 = (f >> 9) & 1;
     s32 n = *fn_801769D8();
@@ -1179,7 +1174,7 @@ void fn_801B265C(void) {
     static u8 warned;
     s32 order[8];
     lbl_8055E6A8 = 1;
-    if ((((u32*)fn_801769CC())[4] & 1) || OptDirectToTrack()) {
+    if ((fn_801769CC()->flags & 1) || OptDirectToTrack()) {
         if (!warned) {
             warned = 1;
             fn_802E30C8("%s", "deity: using 'test mode' quick intro duration");

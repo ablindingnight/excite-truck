@@ -1,6 +1,7 @@
 // Grade schedule (0x8016071C-0x80160B14): the race grades' score thresholds for the current event, from the
 // event's own grade table, else grades.val, else built-in defaults. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -13,11 +14,6 @@ int fn_8027DED0(void);
 
 void* operator new(size_t size, const char* tag);
 
-struct EventDesc {
-    s32 event;  // offset 0x0
-};
-
-extern "C" EventDesc* fn_801769CC(void);
 const char* GetGradeDisplayName(int grade);
 
 class Grades {

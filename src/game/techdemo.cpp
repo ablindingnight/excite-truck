@@ -2,6 +2,7 @@
 // on at least the given lap drives into them, fire their "act_seq" sequence at the midpoint of the bound's
 // longest edge. Registered as a race listener. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -18,11 +19,6 @@ void fn_801E9E30(s16* h, f32* pos);
 
 void* operator new(size_t size, const char* tag);
 
-struct EventDesc {
-    s32 event;  // offset 0x0
-};
-
-extern "C" EventDesc* fn_801769CC(void);
 
 struct BoundPt {
     f32 x;

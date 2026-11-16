@@ -12,8 +12,8 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
-#include "game/raceprog.h"
 #include "game/raceopts.h"
+#include "game/raceprog.h"
 #include "game/highscore.h"
 #include "game/gamedb.h"
 #include "game/gart.h"
@@ -1241,21 +1241,12 @@ public:
 };
 
 
-struct LocalCarDesc {
-    s32 event;  // offset 0x0
-    u8 pad4[0x8 - 0x4];
-    s32 track;  // offset 0x8
-    u8 padC[0x10 - 0xC];
-    u32 flags;  // offset 0x10
-};
-
 struct Settings {
     u8 pad0[0x20];
     ValueNode* vals;  // offset 0x20
 };
 
 extern "C" {
-LocalCarDesc* fn_801769CC(void);
 f32 fn_80204CFC(const char* name);  // tuning value
 Sound* fn_80207848(const char* name, int flags);
 }  // extern "C"
@@ -4278,9 +4269,9 @@ inline void BetaCar::Reset(void) {
     f5C = 0.0f;
     f60 = 0.0f;
     {
-        LocalCarDesc* d = fn_801769CC();
-        LocalCarDesc* e = fn_801769CC();
-        HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), e->event, d->track, 0);
+        EventDesc* d = fn_801769CC();
+        EventDesc* e = fn_801769CC();
+        HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), e->event, d->difficulty, 0);
         if (hs) {
             shownInt = hs->score;
         } else {
@@ -4490,8 +4481,8 @@ inline void BetaMaster::a1(void) {
         fn_801EA1E0(t->pos[0], t->pos[2], &t->pos[1], 1);
     }
     {
-        LocalCarDesc* d = fn_801769CC();
-        f32 lim = fn_8014E7DC(fn_801769CC()->event, d->track);
+        EventDesc* d = fn_801769CC();
+        f32 lim = fn_8014E7DC(fn_801769CC()->event, d->difficulty);
         if (fn_801769CC()->flags & 1) {
             lim = 3600.0f;
         }

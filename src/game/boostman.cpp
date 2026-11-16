@@ -4,6 +4,7 @@
 // line/arrow textures in a per-player colour (yellow while boosting). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/math_types.h"
 #include "game/carbody.h"
@@ -187,12 +188,6 @@ void fn_801E1384(BoostArea* a, u32 color);
 
 V2 LerpV2(const V2& a, const V2& b, f32 t);
 
-struct LocalCarDesc {
-    s32 event;  // offset 0x0
-    u32 flags;  // offset 0x4
-};
-
-extern "C" LocalCarDesc* fn_801769CC(void);
 
 namespace {
 class BoostMan : public IRaceListener {
@@ -280,7 +275,7 @@ static inline void SetVtx(BoostVtx* v, const V2* p) {
 extern "C" {
 
 void fn_801E0710(void) {
-    if (fn_801769CC()->flags & 0x200000) {
+    if (fn_801769CC()->type & 0x200000) {
         lbl_8055EA10 = new ("BoostMan") BoostMan();
     }
 }

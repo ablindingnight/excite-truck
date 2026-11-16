@@ -5,6 +5,7 @@
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
 // animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/carinfo.h"
 #include "game/gamedb.h"
 #include "game/highscore.h"
@@ -47,16 +48,8 @@ const char* IdentGetSlotName(int slot);
 
 HighScore* StatsGetHighScore(int slot, long event, long difficulty, int a);
 
-// physics.cpp's EventDesc (fn_801769CC), declared as far as this unit reads it
-struct EventDesc {
-    s32 event;  // offset 0x0
-    s32 a4;
-    s32 difficulty;  // offset 0x8
-};
-
 // CarInfo: game/carinfo.h.
 extern "C" {
-EventDesc* fn_801769CC(void);
 CarInfo* fn_801EA9A0(int car);
 }
 

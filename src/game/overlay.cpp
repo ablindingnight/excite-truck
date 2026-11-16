@@ -10,10 +10,10 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/raceprog.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
-#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include "macros.h"
@@ -236,7 +236,6 @@ void fn_8000D75C(void);
 extern "C" {
 void fn_8001123C(int player);
 void fn_80011A2C(void);
-int* fn_801769CC(void);
 void fn_800105A0(const char* text, int unk);
 int fn_801B8914(void);
 void fn_80176780(int a, int b);
@@ -746,7 +745,7 @@ void fn_80005B74(void) {
     f32 t;
     f32 now;
     if (OptPaTest()) {
-        t = GetEvent(*fn_801769CC())->node->GetFloat("pa_sample_request_t");
+        t = GetEvent(fn_801769CC()->event)->node->GetFloat("pa_sample_request_t");
         now = lbl_8055D350->time;
         if (now > t) {
             if (now - t < 2.0f) {

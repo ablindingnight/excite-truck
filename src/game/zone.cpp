@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/racesetup.h"
 #include "game/raceprog.h"
 #include "game/gamedb.h"
@@ -186,11 +187,6 @@ struct Truck {
     f32 boost;  // offset 0x2690
 };
 extern "C" Truck* fn_8017960C(int index);
-
-struct LocalCarDesc {
-    s32 event;  // offset 0x0
-};
-extern "C" LocalCarDesc* fn_801769CC(void);
 
 static inline ValPoint GetPt(ValueNode* n, const char* k) { return n->GetPoint(k); }
 static inline void ScaleV(ZoneVec3* d, const ZoneVec3* s, f32 k) {

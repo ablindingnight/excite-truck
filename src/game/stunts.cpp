@@ -3,15 +3,11 @@
 // thresholds in stunts.val / stuntdef.val, award points and drive the HUD's stunt pop-up. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
-
-struct LocalCarDesc {
-    u8 pad0[0x4];
-    u32 flags;  // offset 0x4
-};
 
 extern RaceCarRec* lbl_804348E8[];
 
@@ -107,7 +103,6 @@ void fn_801CB750(u32 type, int car, f32 v);  // awards.cpp
 // below), as (NearZero)(x) so the macro does not expand: an inline NearZero function expands at every call
 // (asmcmp: 11 functions change).
 extern "C++" int NearZero(f32 x);
-LocalCarDesc* fn_801769CC(void);
 int fn_80179650(void);
 int fn_801CF064(void);
 int fn_801B2F2C(int id);
@@ -617,7 +612,7 @@ public:
     virtual int Count(void) const { return Rank() > 0; }
     virtual f32 Points(int rank) const {
         f32 p = Tracker::Points(rank);
-        if (fn_801769CC()->flags & 0x200000) {
+        if (fn_801769CC()->type & 0x200000) {
             if (b271) {
                 return p * (b270 ? 2.0f : 1.0f);
             }

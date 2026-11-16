@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/respawn.h"
 #include <revolution/MTX/vec.h>
 // Lane offset of the grid columns (5.0f). A named constant defined before any code: retail keeps it as the FIRST
@@ -79,13 +80,6 @@ struct League {
     f32 carLen;  // offset 0x4
 };
 
-struct LocalCarDesc {
-    u32 unk0;
-    u32 flags;  // offset 0x4
-    u8 pad8[8];
-    u32 flags10;  // offset 0x10
-};
-
 struct GroundInfo {
     s32 a;
     s32 b;
@@ -105,7 +99,6 @@ struct ObjTeleport {
 extern "C" {
 void* memset(void* p, int c, u32 n);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-LocalCarDesc* fn_801769CC(void);
 int fn_801769B8(void);
 u32 fn_801769A8(void);
 int fn_801796B4(void);
@@ -131,9 +124,9 @@ ModuleTag lbl_8055E730;
 extern "C" {
 
 int fn_801B7688(int mode) {
-    LocalCarDesc* d = fn_801769CC();
+    EventDesc* d = fn_801769CC();
     int r = 1;
-    if (d->flags & 0x100) {
+    if (d->type & 0x100) {
         int a = fn_801769B8();
         int z = (a == 0);
         switch (mode) {
@@ -238,7 +231,7 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
         p = p->next;
     } while (p != first);
     back = best->dist - back;
-    row = (fn_801769CC()->flags10 & 1) ? row : back + row;
+    row = (fn_801769CC()->flags & 1) ? row : back + row;
     fn_801B78EC(r, f, 0, side, row, 0.0f);
     if (r->mode == 1) {
         f32 v = fn_80134C1C();

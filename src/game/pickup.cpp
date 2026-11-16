@@ -4,6 +4,7 @@
 // coins. Pickups are kept in groups (one per table, with a bounding circle) and drawn spinning; a car
 // collects a pickup when it falls in the car's footprint. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/carbody.h"
 
@@ -30,11 +31,6 @@ void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
 
 void* operator new(size_t size, const char* tag);
 
-struct EventDesc {
-    s32 event;  // offset 0x0
-};
-
-extern "C" EventDesc* fn_801769CC(void);
 
 struct V2 {
     f32 x;

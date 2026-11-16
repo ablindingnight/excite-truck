@@ -4,6 +4,7 @@
 // the shake prompt and the white-out flash with crashlyt.val. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
@@ -156,12 +157,6 @@ void DrawText(ILayout* l, const char* name);
 void SetV2(V2& d, const V2& s);
 f32 Remap(f32 x0, f32 x1, f32 y0, f32 y1, f32 x);
 
-struct LocalCarDesc {
-    s32 event;  // offset 0x0
-    u32 flags;  // offset 0x4
-};
-
-extern "C" LocalCarDesc* fn_801769CC(void);
 
 f32 Clamp(f32 x, f32 lo, f32 hi);
 f32 Max(f32 a, f32 b);
@@ -293,7 +288,7 @@ static inline f32 Max2(f32 a, f32 b) {
     return r;
 }
 static inline f32 Max1(f32 a, f32 b) { return (a > b) ? a : b; }
-static inline int IsTutorialCrash(void) { return fn_801769CC()->flags == 0x180201; }
+static inline int IsTutorialCrash(void) { return fn_801769CC()->type == 0x180201; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 inline RaceCarRec* Car(int i);
@@ -562,7 +557,7 @@ void CrashMode::vf14(void) {
     RaceCarRec* rc;
     int done;
     CrashState* s;
-    if (fn_801769CC()->flags & 0x4000) {
+    if (fn_801769CC()->type & 0x4000) {
         return;
     }
     for (i = 0; i < lbl_8055E4D0; i++) {

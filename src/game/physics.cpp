@@ -2,6 +2,7 @@
 // restart, post-race), the race mode requests with their screen fader, the frame clock and the physics
 // state listeners. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 
 extern "C" {
 char* strcpy(char* dst, const char* src);
@@ -78,19 +79,6 @@ struct RaceMode {
     s32 mode;     // offset 0x0
     u32 flags;    // offset 0x4
     u8 extra[1];  // offset 0x8
-};
-
-struct EventSetup {
-    s32 event;  // offset 0x0
-    s32 w4;     // offset 0x4
-    s32 w8;     // offset 0x8
-    s32 wC;     // offset 0xC
-    u32 flags;  // offset 0x10
-};
-
-struct EventDesc {
-    EventSetup setup;  // offset 0x0
-    u8 pad14[0x18 - 0x14];
 };
 
 struct PendingCall {
@@ -180,10 +168,10 @@ void fn_801769EC(void);
 s32 fn_80176A1C(void);
 f32 fn_80176A2C(void);
 
-void fn_80176460(const EventSetup* s, const char* name, const s32* seed) {
+void fn_80176460(const RaceOpts* s, const char* name, const s32* seed) {
     lbl_8055E3BC = 1;
     lbl_8055E3F8 = *seed;
-    lbl_804303E0.setup = *s;
+    (RaceOpts&)lbl_804303E0 = *s;
     strcpy(lbl_804303F8, name);
     lbl_8055E3F4 = 0;
     lbl_8055E3BD = 1;

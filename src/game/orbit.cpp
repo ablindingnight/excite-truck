@@ -6,6 +6,7 @@
 // and when the player cannot finish in time the "turtle" mode turns it all off. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -45,11 +46,6 @@ void* operator new[](size_t size, const char* tag);
 extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 extern f32 lbl_8055E3C8;    // race time
 
-struct EventDesc {
-    s32 event;  // offset 0x0
-};
-
-extern "C" EventDesc* fn_801769CC(void);
 
 struct CarProgress {
     u8 pad0[0x4];

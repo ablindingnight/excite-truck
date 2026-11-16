@@ -5,6 +5,7 @@
 // done and then resets or stays finished; laps outside its active range park it. A rumble sound
 // and an on-screen text line are shared. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
@@ -22,11 +23,6 @@ u8* fn_8017960C(int car);
 int fn_801B2F24(void);  // racer count
 }
 
-struct LocalCarDesc {
-    s32 event;  // offset 0x0
-};
-
-extern "C" LocalCarDesc* fn_801769CC(void);
 
 struct LapInfo {
     u8 pad[0x4];

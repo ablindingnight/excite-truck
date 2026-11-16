@@ -15,4 +15,12 @@ struct RaceOpts {
 
 extern "C" RaceOpts* fn_801E87A8(void);
 
+// The started race's options physics keeps (physics.cpp lbl_804303E0, fn_801769CC): fn_80176460 copies the
+// RaceOpts in, then 4 more bytes. Units used to view it as LocalCarDesc, RaceInfo, TFlags or a raw u8*/int*.
+struct EventDesc : RaceOpts {
+    u8 pad14[0x18 - 0x14];
+};
+
+extern "C" EventDesc* fn_801769CC(void);
+
 #endif
