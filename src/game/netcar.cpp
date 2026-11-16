@@ -449,10 +449,9 @@ void NetCar::Rotate(Blend* b) {
     fn_801A70EC(&q2, &ptab[2], &ptab[1], now);
     fn_8012F57C(&q, &q2, &q1, t);
     k = b->k;
-    f32 nextTime = t + dt;
-    t = nextTime;
-    tr = mtx.rot.x.x + mtx.rot.y.y + mtx.rot.z.z;
+    t += dt;
     f32(*m)[3] = (f32(*)[3])&mtx;
+    tr = m[0][0] + m[1][1] + m[2][2];
     if (tr > 0.0f) {
         f32 s = sqrt(1.0f + tr);
         f32 inv = 0.5f / s;
