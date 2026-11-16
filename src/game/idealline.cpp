@@ -110,6 +110,7 @@ public:
     int Update(V2* pos);
     void SetPosition(V2* pos, V2* dir, IdealPoint* start);
     void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
+    f32 Project(IdealPoint* s, f32 t, V2* p);
     int Step(V2* pos);
 
     ILPos il;      // offset 0x4
@@ -316,34 +317,37 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
     }
 }
 
-#pragma push
-#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
+/* Helper name unproven */
+inline f32 LineFollower::Project(IdealPoint* s, f32 t, V2* p) {
+    pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
+    pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
+    dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
+    dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
+    f32 len = (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
+    f32 one = 1.0f;
+    f32 inv = one / len;
+    f32 dx = dir.x * inv;
+    f32 dy = dir.y * inv;
+    f32 ox = p->x - pos.x;
+    f32 oy = p->y - pos.y;
+    dir.x = dx;
+    dir.y = dy;
+    off.x = ox;
+    off.y = oy;
+    f32 x = (f32)AbsD(oy * dx + -ox * dy);
+    f32 half = 0.5f;
+    wide = x > 15.0f * 0.305f + il.seg->width * half;
+    return (dx * ox + dy * oy) / s->len;
+}
+
 int LineFollower::Step(V2* p) {
     if (!fn_801355B8(this, p, &il.seg, &il.t)) {
         int r;
         IdealPoint* s = il.seg;
         f32 t = il.t;
         r = 2;
-        f32 inv;
-        f32 x;
         f32 a;
-        pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
-        pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
-        dir.x = s->dir.x + t * (s->next->dir.x - s->dir.x);
-        dir.y = s->dir.y + t * (s->next->dir.y - s->dir.y);
-        inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.y * dir.y);
-        f32 dx = dir.x * inv;
-        f32 ox = p->x - pos.x;
-        f32 oy = p->y - pos.y;
-        f32 dy = dir.y * inv;
-        dir.x = dx;
-        dir.y = dy;
-        off.x = ox;
-        off.y = oy;
-        x = (f32)AbsD(dx * oy + -ox * dy);
-        f32 half = 0.5f;
-        wide = x > 15.0f * 0.305f + il.seg->width * half;
-        a = (dx * ox + dy * oy) / s->len;
+        a = Project(s, t, p);
         if (t + a > 1.0f) {
             int i;
             t = 0.0f;
@@ -418,7 +422,6 @@ int LineFollower::Step(V2* p) {
         return 2;
     }
 }
-#pragma pop
 
 extern "C" {
 
