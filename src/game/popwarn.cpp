@@ -1231,7 +1231,9 @@ inline void MenuTimer::Update(void) {
 
 const f32 MenuTimer::FadeMilliseconds = 400.0f;
 
-int MenuTimer::Key(int key) {
+// Every method from MenuTimer::Update to the end of the file is inline: retail emits them, in this order, after the
+// first vtable batch (Update sits between Draw and Key in .text while its "mdemo" string follows the tables).
+inline int MenuTimer::Key(int key) {
     s32 now = fn_802E2C20();
     s32 t0 = start;
     if (now < t0 + 750) {
@@ -1264,7 +1266,7 @@ int MenuTimer::Key(int key) {
     return 1;
 }
 
-void StrapScreen::Enter(void) {
+inline void StrapScreen::Enter(void) {
     left = 0;
     start = fn_802E2C20();
     if (fn_802C9A58()) {
@@ -1274,13 +1276,13 @@ void StrapScreen::Enter(void) {
     }
 }
 
-void StrapScreen::Update(void) {
+inline void StrapScreen::Update(void) {
     if (!left && fn_802E2C20() - start >= 15000) {
         fn_802168BC(-2);
     }
 }
 
-int StrapScreen::Key(int key) {
+inline int StrapScreen::Key(int key) {
     if (!left && fn_802E2C20() - start >= 1500) {
         fn_802168BC(-2);
     }
@@ -1297,7 +1299,7 @@ void fn_80234AFC(CupText* st, f32 x, f32 y, const char* fmt, ...);
 }  // extern "C"
 
 // Two cup tiles side by side, the selected one lit; the row slides toward the selection.
-void CupSelect::Draw(void) {
+inline void CupSelect::Draw(void) {
     for (int i = 0; i < count; i++) {
         f32 off = 300.0f * ((f32)i - pos) - 100.0f;
         bool cur = i == sel;
@@ -1312,7 +1314,7 @@ void CupSelect::Draw(void) {
     pos = p + 0.05f * ((f32)sel - p);
 }
 
-int CupSelect::Key(int key) {
+inline int CupSelect::Key(int key) {
     switch (key) {
     case 0x125:
         if (sel > 0) {
@@ -1334,7 +1336,7 @@ int CupSelect::Key(int key) {
     return 0;
 }
 
-void ModeList::Enter(void) {
+inline void ModeList::Enter(void) {
     for (int i = 0; i < list.count; i++) {
         Entry* e = &list.data[i];
         if (e->on) {
