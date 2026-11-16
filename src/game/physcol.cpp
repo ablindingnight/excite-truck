@@ -4,65 +4,13 @@
 // back to a slow test of every object for near-horizontal rays. Names are guesses apart from the
 // message and the file name.
 #include "game/common.h"
+#include "game/collshape.h"
+#include "game/collvol.h"
 
-struct PVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
-class Phob;
-
-// A collision primitive owned by an object.
-class Shape {
-public:
-    virtual ~Shape(void);  // 0x08 (CollShape's destructor; retail BoxShape vtable slot 0)
-    virtual void Reset(void);                                                // 0x0C
-    virtual void Collide(Shape* other);                                      // 0x10
-    virtual void vf14(void);
-    virtual int Ray(const PVec* from, const PVec* dir, f32* t, PVec* normal);  // 0x18
-
-    u8 pad4[0x1C];
-    s32 id;  // offset 0x20: surface/owner id
-};
-
-struct BodyDesc;
-
-class Phob {
-public:
-    virtual void Init(BodyDesc* d);  // 0x8 (CollVolume::Init; retail slot order: Init, then the destructor)
-    virtual ~Phob(void);             // 0xC
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual int Solid(void);  // 0x44
-
-    Shape* Get(int i) {
-        if (i >= 0 && i < count) {
-            return shapes[i];
-        }
-        return 0;
-    }
-
-    u8 pad4[0x10];
-    Shape* shapes[4];  // offset 0x14
-    s32 count;         // offset 0x24
-    u8 pad28[0x38];
-    PVec pos;          // offset 0x60
-};
 
 struct PhobNode {
-    Phob* phob;      // offset 0x0
+    CollVolume* phob;      // offset 0x0
     PhobNode* next;  // offset 0x4
 };
 
@@ -72,7 +20,7 @@ struct PhobCell {
 
 // Walk over the objects of a set of grid cells: the object, its list node and the cell.
 struct PhobIter {  /* Helper name unproven */
-    Phob* p;
+    CollVolume* p;
     PhobNode* nd;
     PhobCell** w;
 
@@ -88,7 +36,7 @@ struct QuadNode {
 
 struct GroupItem {
     u8 pad0[0x3C];
-    Shape* shape;  // offset 0x3C
+    CollShape* shape;  // offset 0x3C
     u8 active;     // offset 0x40
 };
 
@@ -104,8 +52,8 @@ struct Group {
 typedef int (*RayFilter)(s32 id);
 
 struct RayQuery {
-    PVec from;         // offset 0x0
-    PVec dir;          // offset 0xC
+    RVec3 from;         // offset 0x0
+    RVec3 dir;          // offset 0xC
     f32* t;            // offset 0x18
     u8 hit;            // offset 0x1C
     RayFilter filter;  // offset 0x20
@@ -113,14 +61,14 @@ struct RayQuery {
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-f32 PSVECMag(const PVec* v);
-f32 PSVECDotProduct(const PVec* a, const PVec* b);
-void fn_801B619C(PhobCell** out, int* n, const PVec* pos);
+f32 PSVECMag(const RVec3* v);
+f32 PSVECDotProduct(const RVec3* a, const RVec3* b);
+void fn_801B619C(PhobCell** out, int* n, const RVec3* pos);
 Group* fn_801A4548(const char* name);
 void fn_801A47FC(Group* g);
 void fn_801A47C8(Group* g);
 void fn_8015F670(Group** groups, int n);
-int fn_801A4E88(const PVec* from, const PVec* dir, f32* t, PVec* normal, s32* surf);  // terrain
+int fn_801A4E88(const RVec3* from, const RVec3* dir, f32* t, RVec3* normal, s32* surf);  // terrain
 extern s32 lbl_8055E3C4;  // frame counter
 }
 
@@ -133,39 +81,39 @@ Group* lbl_8055EA40;  // game-supplied
 
 extern "C" {
 
-static inline void CollideShapes2(Phob* a, Shape* s) {
+static inline void CollideShapes2(CollVolume* a, CollShape* s) {
     int j;
-    for (j = 0; j < a->count; j++) {
-        a->shapes[j]->Collide(s);
+    for (j = 0; j < a->nAdded; j++) {
+        a->sub[j]->vf10((u8*)s);
     }
 }
 
-void fn_801E1F8C(Phob* a, Phob* b) {
-    Shape* s;
+void fn_801E1F8C(CollVolume* a, CollVolume* b) {
+    CollShape* s;
     int j;
     int i;
-    if (a->count && a->Get(0)->id == 0x72 && b->count && b->Get(0)->id == 0x72) {
+    if (a->nAdded && a->Shape(0)->surface == 0x72 && b->nAdded && b->Shape(0)->surface == 0x72) {
         return;
     }
-    for (i = 0; i < b->count; i++) {
-        CollideShapes2(a, b->Get(i));
+    for (i = 0; i < b->nAdded; i++) {
+        CollideShapes2(a, b->Shape(i));
     }
 }
 
-static inline void CollideShapes(Phob* p, Shape* s) {
-    for (int i = 0; i < p->count; i++) {
-        p->shapes[i]->Collide(s);
+static inline void CollideShapes(CollVolume* p, CollShape* s) {
+    for (int i = 0; i < p->nAdded; i++) {
+        p->sub[i]->vf10((u8*)s);
     }
 }
 
-void fn_801E2084(Shape* s, Phob* p) {
+void fn_801E2084(CollShape* s, CollVolume* p) {
     CollideShapes(p, s);
 }
 
-void fn_801E2100(Shape* s, RayQuery* q) {
-    if (!q->filter || q->filter(s->id)) {
-        PVec n;
-        if (s->Ray(&q->from, &q->dir, q->t, &n)) {
+void fn_801E2100(CollShape* s, RayQuery* q) {
+    if (!q->filter || q->filter(s->surface)) {
+        RVec3 n;
+        if (s->vf18(&q->from, &q->dir, q->t, &n)) {
             q->hit = 1;
         }
     }
@@ -209,9 +157,9 @@ void fn_801E2294(void) {
 
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
-static inline void QuadCollide(Group* g, Phob* p, f32 scale) {
-    int x = (int)(scale * p->pos.x);
-    int z = (int)(scale * p->pos.z);
+static inline void QuadCollide(Group* g, CollVolume* p, f32 scale) {
+    int x = (int)(scale * p->mtx.pos.x);
+    int z = (int)(scale * p->mtx.pos.z);
     int minX = -40000000;
     int minZ = -40000000;
     int maxX = 40000000;
@@ -253,26 +201,26 @@ static inline void QuadCollide(Group* g, Phob* p, f32 scale) {
     }
 }
 
-void fn_801E22D0(Phob** list, int n) {
+void fn_801E22D0(CollVolume** list, int n) {
     for (int i = 0; i < n; i++) {
-        Phob* p = list[i];
-        for (int j = 0; j < p->count; j++) {
-            p->Get(j)->Reset();
+        CollVolume* p = list[i];
+        for (int j = 0; j < p->nAdded; j++) {
+            p->Shape(j)->vf0C();
         }
     }
     f32 scale = 10.0f;
     for (int i = 0; i < n; i++) {
-        Phob* p = list[i];
-        if (p->count > 0) {
+        CollVolume* p = list[i];
+        if (p->nAdded > 0) {
             int nc = 5;
             PhobCell* cells[5];
-            fn_801B619C(cells, &nc, &p->pos);
+            fn_801B619C(cells, &nc, &p->mtx.pos);
             PhobIter it(cells);
             int k;
             for (k = 0; k < nc; it.w++, k++) {
                 for (it.nd = (*it.w)->head; it.nd; it.nd = it.nd->next) {
                     it.p = it.nd->phob;
-                    if (p < it.p || !it.p->Solid()) {
+                    if (p < it.p || !it.p->vf44()) {
                         fn_801E1F8C(p, it.p);
                     }
                 }
@@ -287,7 +235,7 @@ void fn_801E22D0(Phob** list, int n) {
     }
 }
 
-static inline void QuadRay(Group* g, const PVec* from, RayQuery* q, f32 scale) {
+static inline void QuadRay(Group* g, const RVec3* from, RayQuery* q, f32 scale) {
     int x = (int)(scale * from->x);
     int z = (int)(scale * from->z);
     int minX = -40000000;
@@ -331,15 +279,15 @@ static inline void QuadRay(Group* g, const PVec* from, RayQuery* q, f32 scale) {
     }
 }
 
-int fn_801E2640(const PVec* from, const PVec* to, PVec* outPos, PVec* outNormal, s32* outSurf, Phob** outBody,
-                Phob** list, int n, RayFilter filter) {
-    PVec d;
+int fn_801E2640(const RVec3* from, const RVec3* to, RVec3* outPos, RVec3* outNormal, s32* outSurf, CollVolume** outBody,
+                CollVolume** list, int n, RayFilter filter) {
+    RVec3 d;
     d.x = to->x - from->x;
     d.y = to->y - from->y;
     d.z = to->z - from->z;
     f32 len = PSVECMag(&d);
     f32 inv = 1.0f / Max(0.01f, len);
-    PVec dir;
+    RVec3 dir;
     dir.x = d.x * inv;
     dir.y = d.y * inv;
     dir.z = d.z * inv;
@@ -355,12 +303,12 @@ int fn_801E2640(const PVec* from, const PVec* to, PVec* outPos, PVec* outNormal,
         for (k = 0; k < nc; it.w++, k++) {
             for (it.nd = (*it.w)->head; it.nd; it.nd = it.nd->next) {
                 it.p = it.nd->phob;
-                if (it.p && it.p->Solid()) {
-                    for (int j = 0; j < it.p->count; j++) {
-                        Shape* s = it.p->Get(j);
-                        s32 id = s->id;
+                if (it.p && it.p->vf44()) {
+                    for (int j = 0; j < it.p->nAdded; j++) {
+                        CollShape* s = it.p->Shape(j);
+                        s32 id = s->surface;
                         if (!filter || filter(id)) {
-                            if (s->Ray(from, &dir, &t, outNormal)) {
+                            if (s->vf18(from, &dir, &t, outNormal)) {
                                 *outSurf = id;
                                 hit = 1;
                                 *outBody = it.p;
@@ -389,13 +337,13 @@ int fn_801E2640(const PVec* from, const PVec* to, PVec* outPos, PVec* outNormal,
     } else {
         fn_802E30C8("physcollide: using slow PhysCollideCheckRay path %08x", lbl_8055E3C4);
         for (int i = 0; i < n; i++) {
-            Phob* p = list[i];
-            if (p && p->Solid()) {
-                for (int j = 0; j < p->count; j++) {
-                    Shape* s = p->Get(j);
-                    s32 id = s->id;
+            CollVolume* p = list[i];
+            if (p && p->vf44()) {
+                for (int j = 0; j < p->nAdded; j++) {
+                    CollShape* s = p->Shape(j);
+                    s32 id = s->surface;
                     if (!filter || filter(id)) {
-                        if (s->Ray(from, &dir, &t, outNormal)) {
+                        if (s->vf18(from, &dir, &t, outNormal)) {
                             *outSurf = id;
                             hit = 1;
                             *outBody = p;
@@ -412,9 +360,9 @@ int fn_801E2640(const PVec* from, const PVec* to, PVec* outPos, PVec* outNormal,
                 for (int k = 0; k < g[i]->count; k++) {
                     GroupItem* it = g[i]->items[k];
                     if (it->active) {
-                        if (it->shape->Ray(from, &dir, &t, outNormal)) {
+                        if (it->shape->vf18(from, &dir, &t, outNormal)) {
                             hit = 1;
-                            *outSurf = it->shape->id;
+                            *outSurf = it->shape->surface;
                             *outBody = 0;
                         }
                     }

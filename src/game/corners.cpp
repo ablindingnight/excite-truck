@@ -3,55 +3,18 @@
 // guesses apart from the messages.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/collvol.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
-struct RMat33 {
-    f32 m[3][3];
-};
+class Phob;  // the type RigidBody::Push names its first parameter (really the first CollShape)
 
-struct RMtx {
-    RMat33 rot;  // offset 0x0
-    RVec3 pos;   // offset 0x24
-};
-
-class Phob {
-public:
-    virtual void Init(void* d);       // 0x8
-    virtual ~Phob(void);              // 0xC
-    virtual void Reset(void);         // 0x10
-    virtual void vf14(void);          // 0x14
-    virtual void vf18(void);          // 0x18
-    virtual void Update(void);        // 0x1C
-    virtual void vf20(void);          // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(void);           // 0x2C
-    virtual void vf30(void);          // 0x30
-    virtual s32 vf34(void);           // 0x34
-    virtual void vf38(void);          // 0x38
-    virtual void vf3C(void);          // 0x3C
-    virtual int vf40(void);           // 0x40
-    virtual void vf44(void);          // 0x44
-    s32 a4;          // offset 0x4
-    s32 a8;          // offset 0x8
-    void* desc;      // offset 0xC
-    s32 type;        // offset 0x10
-    void* sub[4];    // offset 0x14
-    s32 nAdded;      // offset 0x24
-    s32 nSub;        // offset 0x28
-    f32 radius;      // offset 0x2C
-    RVec3 offset;    // offset 0x30
-    RMtx mtx;        // offset 0x3C
-    s16 hint[2];     // offset 0x6C
-};
-
-class RigidBody : public Phob {
+class RigidBody : public CollVolume {
 public:
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
     void Push(Phob* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c, f32 w);
     void VelAt(RVec3* out, const RVec3* p);
-    u8 pad70[0xD4 - 0x70];
+    u8 padD0[0xD4 - 0xD0];
     f32 mass;  // offset 0xD4
     u8 padD8[0x148 - 0xD8];
     RMat33 worldInvI;  // offset 0x148
@@ -70,16 +33,16 @@ static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return 
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        f32 x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        f32 y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        f32 z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        out->x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
+        out->y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
+        out->z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
     }
 }
 
@@ -164,7 +127,7 @@ void Corner::Hit(RigidBody* b) {
     RVec3 fr;
     RVec3 ji;
     u32 flags;
-    if (Dot3(c.x, b->mtx.rot.m[0][1], c.y, b->mtx.rot.m[1][1], c.z, b->mtx.rot.m[2][1]) > 0.0f) {
+    if (Dot3(c.x, b->mtx.rot.x.y, c.y, b->mtx.rot.y.y, c.z, b->mtx.rot.z.y) > 0.0f) {
         return;
     }
     MulVec(&p, &pos, &b->mtx.rot);
