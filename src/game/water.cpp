@@ -5,6 +5,10 @@
 // the mirrored world and a shared sky cube ("skybox") into a 256x256 target. A gen_surf model adds
 // animated surface rings. Names are guesses apart from the strings.
 #include "game/common.h"
+// World units per grid cell (name unproven). A named constant with external linkage defined before any code: retail
+// keeps it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal (same pattern as heightfld).
+extern const f32 lbl_80564D78;
+const f32 lbl_80564D78 = 2.0f;
 #include "game/math_types.h"
 
 template <class T>
@@ -883,7 +887,7 @@ void WaterSystem::Draw(void) {
     f32 sh = FMax(cam.pos.y / 4.0f, 1.0f);
     u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
     fn_802C8BD0(env->Target());
-    fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (lbl_80564E20 * 2.0f), deep, mask, deepCol);
+    fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (lbl_80564E20 * lbl_80564D78), deep, mask, deepCol);
     fn_802DD27C(verts, 0x400, &idx[0][0][0], 0x1626);
     fn_802DD228();
     fn_802C8D74();
