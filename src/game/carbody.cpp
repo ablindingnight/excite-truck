@@ -747,7 +747,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     fn_80182DF4(p);
     fn_8018C5A0(p, desc);
     fn_8018A654(p, desc);
-    int player = S32(desc, 0x0) == 'PCAR';
+    bool player = S32(desc, 0x0) == 'PCAR';
     PTR(p, 0x257C) = fn_80209448(p);
     if (player) {
         PTR(p, 0x2580) = fn_80209D4C(p);

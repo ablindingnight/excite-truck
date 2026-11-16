@@ -1927,7 +1927,7 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
             if (fl & 1) {
                 phys.flags = fl;
             }
-            int vis = (flags >> 9) & 1;
+            bool vis = (flags >> 9) & 1;
             StaticObject* so =
                 new ("EWObject") StaticObject((const char*)&phys, model, PickFacing(flags), &shadow, vis);
             fn_801E87D4(so);
