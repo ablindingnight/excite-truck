@@ -15,12 +15,6 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
     v->z = z;
 }
 
-struct IVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
 // A ground-plane (x, z) vector.
 struct V2 {
     V2(void) {}
@@ -30,7 +24,7 @@ struct V2 {
     f32 y;
 };
 
-static inline V2 XZ(const IVec3& v) { return V2(v.x, v.z); }
+static inline V2 XZ(const ValVec3& v) { return V2(v.x, v.z); }
 
 static inline V2 operator-(const V2& a, const V2& b) {
     V2 r;
@@ -84,7 +78,7 @@ struct WaitEvent {
     u32 mask;           // offset 0x10
     char who[0x100];    // offset 0x14
     char except[0x100]; // offset 0x114
-    IVec3 pt;           // offset 0x214
+    ValVec3 pt;           // offset 0x214
 };
 
 struct ThinkEvent {
@@ -134,10 +128,10 @@ struct CamEvent {
     f32 time;
     s32 order;
     s32 type;
-    IVec3 origin;  // offset 0xC
+    ValVec3 origin;  // offset 0xC
     Mat3 rot;      // offset 0x18
-    IVec3 v;       // offset 0x3C: per second, in the start frame
-    IVec3 av;      // offset 0x48: per second (axis * angle)
+    ValVec3 v;       // offset 0x3C: per second, in the start frame
+    ValVec3 av;      // offset 0x48: per second (axis * angle)
     f32 fov;       // offset 0x54
     f32 end;       // offset 0x58
     u8 accel;      // offset 0x5C
@@ -150,17 +144,17 @@ struct CamEvent {
 // An editor camera: rotation rows, then position.
 struct CamPose {
     Mat3 rot;   // offset 0x0
-    IVec3 pos;  // offset 0x24
+    ValVec3 pos;  // offset 0x24
 };
 
 // The camera move being played (the player state starts with it).
 struct CamPlay {
     f32 start;       // offset 0x0
     f32 end;         // offset 0x4
-    IVec3 origin;    // offset 0x8
+    ValVec3 origin;    // offset 0x8
     Mat3 rot;        // offset 0x14
-    IVec3 v;         // offset 0x38
-    IVec3 av;        // offset 0x44
+    ValVec3 v;         // offset 0x38
+    ValVec3 av;        // offset 0x44
     f32 fov;         // offset 0x50
     u8 accel;        // offset 0x54
     s32 target;      // offset 0x58
@@ -254,12 +248,12 @@ void fn_802C8638(void* cam);
 void fn_801EA478(int cam);
 void fn_801E9DC4(s16* hint);
 f32 fn_801E9DDC(s16* hint, f32 x, f32 z);
-void fn_801E3FC8(const IVec3* p, f32 size, u32 color);
+void fn_801E3FC8(const ValVec3* p, f32 size, u32 color);
 double cos(double x);
 int fn_8012C33C(const char* name);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
-void fn_80144CD0(IVec3* out, const IVec3* p, const f32* m);
+void fn_80144CD0(ValVec3* out, const ValVec3* p, const f32* m);
 void fn_8000FC8C(const char* s);
 void fn_8000FDF0(const char* s);
 void fn_80128678(void);
@@ -367,20 +361,20 @@ PlayerState lbl_80437D88;
 Message lbl_80437E24;
 AIOrder lbl_80437E30[8];       // each car's standing order
 CamPose lbl_80437ED0[4];       // each view's last camera pose
-IVec3 lbl_80437F90[4];         // each view's car heading
+ValVec3 lbl_80437F90[4];         // each view's car heading
 char lbl_80437FC0[0x130];      // status line
 char lbl_804380F0[0x100];      // input line
 IMtx lbl_804381F0;
 IMtx lbl_80438220;
-IVec3 lbl_80438250;
-IVec3 lbl_8043825C;
-IVec3 lbl_80438268;            // cursor
-IVec3 lbl_80438274;
+ValVec3 lbl_80438250;
+ValVec3 lbl_8043825C;
+ValVec3 lbl_80438268;            // cursor
+ValVec3 lbl_80438274;
 char lbl_80438280[0x100];      // wait: who
 char lbl_80438380[0x100];      // wait: except
-IVec3 lbl_80438480;
-IVec3 lbl_8043848C;
-IVec3 lbl_80438498;
+ValVec3 lbl_80438480;
+ValVec3 lbl_8043848C;
+ValVec3 lbl_80438498;
 char lbl_804384A8[0x100];      // think: who
 char lbl_804385A8[0x100];      // think: except
 extern "C" u8 lbl_80337474[];         // debug key table
@@ -395,8 +389,8 @@ static const char* const lbl_80562968 = "linear\0hermite\0\0\0\0";
 
 // A camera frame: axes (rows) and position, as in camframe.
 struct IFrame {
-    IVec3 axes[3];  // offset 0x0
-    IVec3 pos;      // offset 0x24
+    ValVec3 axes[3];  // offset 0x0
+    ValVec3 pos;      // offset 0x24
 };
 
 struct IQuat {
@@ -496,7 +490,7 @@ f32 fn_801C2F58(int n, f32 x) {
 static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 /* Helper name unproven: sets all three components (arguments evaluate right to left). */
-static inline void SetV(IVec3* v, f32 x, f32 y, f32 z) {
+static inline void SetV(ValVec3* v, f32 x, f32 y, f32 z) {
     v->x = x;
     v->y = y;
     v->z = z;
@@ -506,7 +500,7 @@ void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     IQuat qa;
     IQuat qb;
     IQuat q;
-    IVec3 pos;
+    ValVec3 pos;
     FrameToQuat(a, &qa);
     FrameToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
@@ -615,7 +609,7 @@ void fn_801C3A3C(Mat3* m, f32 h, f32 yaw) {
     }
     f32 y = n ? n->height : 0.0f;
     fn_801B8054(m, t, 0.0f, y + h);
-    IVec3 e;
+    ValVec3 e;
     e.x = 0.0f;
     e.y = yaw;
     e.z = 0.0f;
@@ -749,7 +743,7 @@ struct XV3 : ValVec3 {
 };
 
 // Helper name unproven: copies a vector read from the table.
-static inline void CopyV(IVec3* d, const ValVec3& s) {
+static inline void CopyV(ValVec3* d, const ValVec3& s) {
     d->x = s.x;
     d->y = s.y;
     d->z = s.z;
@@ -1033,7 +1027,7 @@ struct CarPlace {
         frame.pos.z = 0.0f;
     }
     CamPose frame;  // offset 0x0
-    IVec3 vel;      // offset 0x30
+    ValVec3 vel;      // offset 0x30
     u32 unk3C;      // offset 0x3C
     s16 node;       // offset 0x40
 };
@@ -1049,15 +1043,15 @@ struct Respawn {
 // The parts of a car body the AI orders read.
 struct ICar {
     u8 pad0[0x3C];
-    IVec3 side;  // offset 0x3C
+    ValVec3 side;  // offset 0x3C
     u8 pad48[0xC];
-    IVec3 fwd;   // offset 0x54
-    IVec3 pos;   // offset 0x60
+    ValVec3 fwd;   // offset 0x54
+    ValVec3 pos;   // offset 0x60
     s16 id;       // offset 0x6C
     u8 pad6E[2];
     CamPose frame;  // offset 0x70
     u8 padA0[0x118 - 0xA0];
-    IVec3 heading;  // offset 0x118
+    ValVec3 heading;  // offset 0x118
     u8 pad124[0x128 - 0x124];
     f32 yawRate;  // offset 0x128
     u8 pad12C[0x1F0 - 0x12C];
@@ -1208,7 +1202,7 @@ void debug_event(void) {
                     if (fn_801C3508(w->mask, i)) {
                         ICar* car = (ICar*)fn_8017960C(i);
                         if (car) {
-                            IVec3 d;
+                            ValVec3 d;
                             d.x = car->frame.pos.x - w->pt.x;
                             d.y = car->frame.pos.y - w->pt.y;
                             d.z = car->frame.pos.z - w->pt.z;
@@ -1324,7 +1318,7 @@ void debug_event(void) {
                     } else {
                         CamPose f;
                         f = car->pose.place.frame;
-                        IVec3 euler;
+                        ValVec3 euler;
                         SetXYZ(&euler, 0.0f, tp->yaw, 0.0f);
                         Mat3 r;
                         Mat3FromEuler(&r, (const Vec3*)&euler);
@@ -1441,14 +1435,14 @@ void fn_801C56AC(void) {
                 }
                 tgt.x -= pos.x;
                 tgt.y -= pos.y;
-                IVec3 to;
+                ValVec3 to;
                 to.x = tgt.x;
                 to.y = 0.0f;
                 to.z = tgt.y;
                 f32 side = PSVECDotProduct((const Vec*)&to, (const Vec*)&car->side);
                 fn_8018ADAC(car, ClampSigned(0.1f * side + 0.9f * -car->yawRate));
                 if (o->kind == 3 || o->kind == 4) {
-                    IVec3 rel;
+                    ValVec3 rel;
                     rel.x = lead->pos.x - car->pos.x;
                     rel.y = lead->pos.y - car->pos.y;
                     rel.z = lead->pos.z - car->pos.z;
@@ -1516,12 +1510,12 @@ struct CamView : CamPose {  // rot at 0x0, pos at 0x24
 struct CamListen {
     s32 car;
     CamPose* pose;
-    IVec3* heading;
+    ValVec3* heading;
 };
 
 extern "C++" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);  // weak (C++ linkage; this part of the file sits in an extern "C" block)
 extern "C" {
-void fn_801BFD34(IVec3* out, const IVec3* p, const CamPose* m);
+void fn_801BFD34(ValVec3* out, const ValVec3* p, const CamPose* m);
 void fn_8020655C(CamListen* l, int a);
 }
 
@@ -1574,7 +1568,7 @@ static inline void MulM(Mat3* out, const Mat3* a, const Mat3* b) {
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(IVec3* out, const IVec3* in, Mat3* m) {
+static inline void MulVec(ValVec3* out, const ValVec3* in, Mat3* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
         f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
@@ -1640,11 +1634,11 @@ int fn_801C5B68(CamView* v, int idx) {
     v->pos.y = lbl_80437D88.play.origin.y;
     v->pos.z = lbl_80437D88.play.origin.z;
     v->rot = lbl_80437D88.play.rot;
-    IVec3 move;
+    ValVec3 move;
     move.x = lbl_80437D88.play.v.x * dt;
     move.y = lbl_80437D88.play.v.y * dt;
     move.z = lbl_80437D88.play.v.z * dt;
-    IVec3 d;
+    ValVec3 d;
     MulVec(&d, &move, &v->rot);
     v->pos.x += d.x;
     v->pos.y += d.y;
@@ -1692,7 +1686,7 @@ int fn_801C5B68(CamView* v, int idx) {
         } else {
             v->pos = f.pos;
             MulM(&v->rot, &rel.rot, &f.rot);
-            IVec3 o;
+            ValVec3 o;
             MulVec(&o, &rel.pos, &v->rot);
             v->pos.x += o.x;
             v->pos.y += o.y;
@@ -1761,7 +1755,7 @@ void fn_801C6B70(void) {
     }
 }
 
-int fn_801C6C28(const IVec3* p) {
+int fn_801C6C28(const ValVec3* p) {
     int found = -1;
     for (int i = 0; i < lbl_8055E804; i++) {
         if (PSVECSquareDistance((const Vec*)(fn_8017960C(i) + 0x60), (const Vec*)p) < 2.25f) {
@@ -1789,7 +1783,7 @@ void fn_801C6D94(void) {
 }
 
 // A rotation as axis * angle.
-static inline void RotToAxisAngle(const Mat3* m, IVec3* out) {
+static inline void RotToAxisAngle(const Mat3* m, ValVec3* out) {
     IQuat q;
     RotToQuat(m, &q);
     f32 ang = acos(q.w);
@@ -1815,7 +1809,7 @@ static inline void InitCameraEvent(CamEvent* e, CamPose* cur) {
     e->end = e->time + lbl_8055E830;
     e->accel = 1;
     if (lbl_8055E830 > 0.01f) {
-        IVec3 dp;
+        ValVec3 dp;
         Mat3 d;
         Mat3 inv;
         inv = cur->rot;
@@ -2709,7 +2703,7 @@ void fn_801C9920(const Event* e, int fd) {
         fn_802E3AD0(fd, "\t\ttype\tcamera\r\n");
         fn_802E3AD0(fd, "\t\tfov\t%.2f\r\n", fn_801C34F4(c->fov));
         fn_802E3AD0(fd, "\t\torigin\t%.2f, %.2f, %.2f\r\n", c->origin.x, c->origin.y, c->origin.z);
-        IVec3 dir;
+        ValVec3 dir;
         RotToAxisAngle(&c->rot, &dir);
         fn_802E3AD0(fd, "\t\tdir\t%.2f, %.2f, %.2f\r\n", dir.x, dir.y, dir.z);
         fn_802E3AD0(fd, "\t\tv\t%.2f, %.2f, %.2f\r\n", c->v.x, c->v.y, c->v.z);
@@ -2929,7 +2923,7 @@ void fn_801CA67C(void) {
     int h = fn_80238A20();
     int bottom = (434 / h) * h;
     int lineH = h + 6;
-    IVec3 rot;
+    ValVec3 rot;
     RotToAxisAngle((const Mat3*)&lbl_80499050, &rot);
     fn_8023895C();
     if (lbl_8055E7E0) {
@@ -3063,7 +3057,7 @@ void fn_801CA67C(void) {
             if (tp->where == 0) {
                 s16 hint;
                 fn_801E9DC4(&hint);
-                IVec3 p;
+                ValVec3 p;
                 f32 z = tp->pt.y;
                 f32 x = tp->pt.x;
                 p.x = x;
@@ -3079,7 +3073,7 @@ void fn_801CA67C(void) {
             if (th->kind == 2) {
                 s16 hint;
                 fn_801E9DC4(&hint);
-                IVec3 p;
+                ValVec3 p;
                 f32 z = th->z;
                 f32 x = th->x;
                 p.x = x;
