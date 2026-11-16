@@ -345,7 +345,17 @@ u8 lbl_8055A3B4 = 1;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline int Positive(f32 x) { return x > __float_epsilon[0]; }
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
+/* Helper name unproven: |x| held as a double and narrowed separately (DOUBLE ABS THEN NARROW) */
+static inline f32 AbsNarrow(f32 x) {
+    f64 absValue = __fabs(x);
+    f32 value = (f32)absValue;
+    return value;
+}
+static inline int NearZero(f32 x) {
+    f64 absValue = __fabs(x);
+    f32 value = (f32)absValue;
+    return value <= __float_epsilon[0];
+}
 
 ModuleTag lbl_8055E4C0;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
@@ -1693,7 +1703,7 @@ void fn_80183E7C(u8* p) {
     }
     if (still && (U32(p, 0x10) != 'PCAR' || ((CarHost*)PTR(p, 0x270))->v14())) {
         if (S32(p, 0x2620) <= 2 && F32(p, 0x4C) < lbl_80561DB4) {
-            if (S32(p, 0x2620) == 0 || !((f32)__fabs(F32(p, 0x2614)) <= __float_epsilon[0]) || F32(p, 0x4C) < lbl_80561CAC) {
+            if (S32(p, 0x2620) == 0 || !(AbsNarrow(F32(p, 0x2614)) <= __float_epsilon[0]) || F32(p, 0x4C) < lbl_80561CAC) {
                 f32 t = F32(p, 0x2614) + lbl_80561D9C;
                 F32(p, 0x2614) = t;
                 if (F32(p, 0x25D4) < lbl_80561D50) {
@@ -1708,7 +1718,7 @@ void fn_80183E7C(u8* p) {
         if (!(F32(p, 0x2614) < lbl_80561D44)) {
             if (F32(p, 0x4C) > lbl_80561CDC) {
                 F32(p, 0x2614) = lbl_80561CAC;
-            } else if (!((f32)__fabs(F32(p, 0x58)) > lbl_80561CDC)) {
+            } else if (!(AbsNarrow(F32(p, 0x58)) > lbl_80561CDC)) {
                 f32 side = -F32(p, 0x40);
                 if ((f32)__fabs(-F32(p, 0x40)) < lbl_80561CCC) {
                     side = lbl_80561D00;
@@ -1934,7 +1944,7 @@ void fn_80183E7C(u8* p) {
         f32 nose = PSVECDotProduct(&fl, p + 0x48);
         f32 wantR;
         f32 wantP = lbl_80561CFC * pitch - nose;
-        wantR = -roll - F32(p, 0x40) * (lbl_80561CD0 - (f32)__fabs(F32(p, 0x58)));
+        wantR = -roll - F32(p, 0x40) * (lbl_80561CD0 - AbsNarrow(F32(p, 0x58)));
         f32 wp = PSVECDotProduct(p + 0x124, p + 0x3C);
         f32 wr = PSVECDotProduct(p + 0x124, p + 0x54);
         f32 gain = lbl_80561CFC;
@@ -2388,10 +2398,10 @@ void fn_80183E7C(u8* p) {
             f32 pitch = F32(p, 0x2600);
             if (pitch < lbl_80561E44) {
                 grav = LerpT(__fabsf(pitch), grav, lbl_80561CDC * grav);
-                gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC * gravUp - gravUp);
+                gravUp = gravUp + AbsNarrow(pitch) * (lbl_80561CDC * gravUp - gravUp);
             } else if (pitch > lbl_80561CCC) {
                 grav = LerpT(__fabsf(pitch), grav, lbl_80561CDC + grav);
-                gravUp = gravUp + (f32)__fabs(pitch) * (lbl_80561CDC + gravUp - gravUp);
+                gravUp = gravUp + AbsNarrow(pitch) * (lbl_80561CDC + gravUp - gravUp);
             }
         }
         if (!U8(p, 0x2625) && F32(p, 0x2618) >= lbl_80561CB8) {
@@ -2838,7 +2848,7 @@ void fn_80186DE8(void) {
                 steerK = steerK * (lbl_80561CD0 - lbl_80561CDC * t) * (lbl_80561CD0 - lbl_80561D38 * t);
             }
         }
-        slide = (f32)__fabs(F32(car, 0x25CC)) - lbl_80561EB0 * (f32)__fabs(F32(car, 0x25D8)) - lbl_80561D44;
+        slide = (f32)__fabs(F32(car, 0x25CC)) - lbl_80561EB0 * AbsNarrow(F32(car, 0x25D8)) - lbl_80561D44;
         if (lbl_80561CAC > slide) {
             slide = lbl_80561CAC;
         }
