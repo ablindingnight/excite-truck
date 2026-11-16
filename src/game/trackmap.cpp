@@ -76,7 +76,9 @@ struct TruckState {
     f32 lapDist;  // offset 0x2C8
 };
 
-struct Racer {
+// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
+// declared (was named Racer here, a name world/carmodel use for a different class).
+struct CarInfo {
     u8 pad0[0x8];
     TruckState* truck;  // offset 0x8
     u8 padC[0x1C - 0xC];
@@ -171,7 +173,7 @@ void fn_802C8530(void);
 void fn_802C855C(void);
 int fn_801E866C(int player);
 Mtx34* fn_801E8718(int player);
-Racer* fn_801EA9A0(int index);
+CarInfo* fn_801EA9A0(int index);
 int fn_801EA994(void);
 Truck* fn_8017960C(int index);
 PlayerObj* fn_802678E4(int player);
@@ -523,7 +525,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     memset(draw->icons, 0, sizeof(draw->icons));
     draw->count = fn_801EA994();
     for (i = 0; i < draw->count; i++) {
-        Racer* r = fn_801EA9A0(i);
+        CarInfo* r = fn_801EA9A0(i);
         draw->icons[i].part = FindDriver(r->driver)->mapIcon;
         if (r->truck) {
             draw->icons[i].angle = -Atan2F(r->truck->dirX, r->truck->dirZ);

@@ -102,7 +102,9 @@ struct RaceInfo {
     RacerStats* stats;    // offset 0x30
 };
 
-struct Racer {
+// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
+// declared (was named Racer here, a name world/carmodel use for a different class).
+struct CarInfo {
     u8 human;  // offset 0x0
     u8 pad1[0x8 - 0x1];
     TruckState* truck;  // offset 0x8
@@ -220,7 +222,7 @@ f32 fn_80011E60(void);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 f32 fn_8013672C(void);
 RaceProgress* fn_801E7E3C(void);
-Racer* fn_801EA9A0(int index);
+CarInfo* fn_801EA9A0(int index);
 int fn_801EA994(void);
 ResultRacer* fn_801EA9B0(int index);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);

@@ -31,7 +31,9 @@ public:
     virtual LayoutArt* FindArt(const char* name);  // 0x10
 };
 
-struct Racer {
+// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
+// declared (was named Racer here, a name world/carmodel use for a different class).
+struct CarInfo {
     u8 pad0[0x1C];
     s32 lap;  // offset 0x1C
 };
@@ -80,7 +82,7 @@ void fn_80147CEC(LayoutItem* out, LayoutItem* a, LayoutItem* b, f32 t);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_80232928(u32 color);
 void fn_80232930(void);
-Racer* fn_801EA9A0(int player);
+CarInfo* fn_801EA9A0(int player);
 f32 fn_801E7E18(void);
 LapInfo* fn_801E7E3C(void);
 void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
@@ -532,7 +534,7 @@ inline void LapTitleOverlay::Update(int player, int unused) {
     f32 t;
     LapState* s;
     const char* str;
-    Racer* racer;
+    CarInfo* racer;
     f32 elapsed;
     int i;
     racer = fn_801EA9A0(player);

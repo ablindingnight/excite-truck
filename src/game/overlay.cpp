@@ -81,7 +81,9 @@ struct RacerUnkC {
     u8 impaired;  // offset 0x28
 };
 
-struct Racer {
+// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
+// declared (was named Racer here, a name world/carmodel use for a different class).
+struct CarInfo {
     u8 pad0[0x8];
     RacerUnk8* unk8;  // offset 0x8
     RacerUnkC unkC;   // offset 0xC
@@ -211,7 +213,7 @@ struct RaceInfo {
     s32 player;         // offset 0x1C
     u32 flags;          // offset 0x20
     s32 unk24;          // offset 0x24
-    Racer* racer;       // offset 0x28
+    CarInfo* racer;       // offset 0x28
     RacerUnk8* unk2C;   // offset 0x2C
     RacerUnkC* unk30;   // offset 0x30
 };
@@ -240,7 +242,7 @@ int fn_801E86F8(int player);
 RacerState* fn_801EA9CC(int index);
 int fn_801B8570(int index);
 int fn_801E866C(int player);
-Racer* fn_801EA9A0(int index);
+CarInfo* fn_801EA9A0(int index);
 u32 fn_801B84D8(int player);
 extern u8 lbl_8055F024;
 void fn_80230DA0(void);
@@ -660,7 +662,7 @@ void fn_800056E0(GameOverlay* overlay) {
 }
 
 void fn_80005740(int player) {
-    Racer* racer;
+    CarInfo* racer;
     lbl_8034EE84.player = player;
     lbl_8034EE84.unk24 = fn_801E866C(player);
     racer = fn_801EA9A0(lbl_8034EE84.unk24);

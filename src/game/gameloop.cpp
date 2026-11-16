@@ -22,7 +22,9 @@ struct ViewCam {
     s32 next;  // offset 0x4
 };
 
-struct Racer {
+// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
+// declared (was named Racer here, a name world/carmodel use for a different class).
+struct CarInfo {
     u8 pad0[0x30];
     s32 state;  // offset 0x30
     u8 pad34[0xAC - 0x34];
@@ -142,7 +144,7 @@ void fn_801E7DEC(RaceSetup* rs);
 void fn_8017685C(int unk);
 void fn_801AF6FC(void);
 void fn_801AF92C(RaceResult* res);
-Racer* fn_801EA9A0(int index);
+CarInfo* fn_801EA9A0(int index);
 int fn_80231504(int unk);
 void fn_801DF110(void);
 void fn_802C8530(void);
