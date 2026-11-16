@@ -1,9 +1,10 @@
-// Challenge event path screen (0x8025FE8C-0x80262F8C): the challenge map
+// Challenge event path screen (0x8025FE8C-0x80262FCC): the challenge map
 // ("EventPath:CHALLENGE_DIFFICULTY_%d_UNLOCKED", "EventPath:CONGRATULATIONS"), its title/message
 // popup, the "%s/%s" progress counters and the list descriptors behind it. Written against raw field
 // offsets; the large screen routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/menustate.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -51,8 +52,6 @@ extern bool lbl_8055F3E9;
 extern u8 lbl_8055F3EC;
 extern u8 lbl_8055F3EA;
 extern u8 lbl_8055F3EB;
-extern void* lbl_80345E28[];
-extern void* lbl_80345EA0[];
 extern u8* lbl_8055F420;
 
 // Per-difficulty values (10, 6, 8), indexed by fn_802625D4.
@@ -141,37 +140,107 @@ public:
     virtual int Complete(void);      // 0x48
 };
 
-// A node on the challenge map (event or difficulty marker).
-class PathNode {
+class ChalLevel;
+extern "C" u8* fn_8023512C(const char* art);
+extern "C" u8* fn_80232578(const char* name);
+
+namespace {
+
+/* Class name unproven */
+// A node on the challenge map (event or difficulty marker). The slot order is this base's; each derived class
+// declares its overrides in its own order, which is the order retail emits them in.
+// MATCHING-AID (unproven): novtable - retail's unit has no table for this abstract base (only the two nodes'
+// and IMenuState's), and without it the compiler emits one through the nodes' inline constructors.
+class __declspec(novtable) PathNode : public MenuState {
 public:
-    virtual ~PathNode(void);
-    virtual void s0C(void);
-    virtual void s10(void);
-    virtual void s14(void);
-    virtual void s18(void);
-    virtual void s1C(void);
-    virtual void s20(void);
-    virtual void s24(void);
-    virtual void s28(void);
-    virtual void s2C(void);
-    virtual void s30(void);
-    virtual void s34(void);
-    virtual void s38(void);
-    virtual void s3C(void);
-    virtual void s40(void);
-    virtual void s44(void);
-    virtual void s48(void);
-    virtual void s4C(void);
-    virtual void s50(void);
-    virtual void s54(void);
-    virtual void s58(void);
-    virtual void s5C(void);
-    virtual void Dim(void);      // 0x60
-    virtual void Open(void);     // 0x64
-    virtual void Select(void);   // 0x68
-    virtual void Refresh(void);  // 0x6C
-    virtual void Focus(void);    // 0x70
+    virtual void Dim(void) = 0;      // 0x60
+    virtual void Open(void) = 0;     // 0x64
+    virtual void Select(void) = 0;   // 0x68
+    virtual void Refresh(void) = 0;  // 0x6C
 };
+
+
+/* Class name unproven */
+// An event marker ("eventcontrol").
+class EventNode : public PathNode {
+public:
+    EventNode(void* e) {
+        ev = e;
+        f1E = 0;
+        sel = 0;
+        open = 1;
+        art = fn_8023512C("bar7.art");
+        font = fn_80232578("uifnt_o.gtx");
+    }
+    virtual ~EventNode(void) {
+        fn_80235380(art);
+        art = 0;
+        fn_802328D4(font);
+        font = 0;
+    }
+    virtual void Open(void) { open = 0; }
+    virtual void Select(void) {
+        if (!sel) {
+            f1E = 1;
+            sel = 1;
+        }
+    }
+    virtual void Refresh(void) { sel = 0; }
+    virtual void Dim(void) { open = 1; }
+
+    void* ev;   // offset 0x18
+    u8 sel;     // offset 0x1C
+    u8 open;    // offset 0x1D
+    u8 f1E;     // offset 0x1E
+    u8* art;    // offset 0x20
+    u8* font;   // offset 0x24
+};
+
+/* Class name unproven */
+// A difficulty marker ("pathcontrol").
+class LevelNode : public PathNode {
+public:
+    LevelNode(ChalLevel* l, int i) {
+        index = i;
+        lv = l;
+        sel = 0;
+        open = 1;
+        f1E = 0;
+        f1F = 0;
+        art = fn_8023512C("bar7.art");
+        font = fn_80232578("uifnt_o.gtx");
+    }
+    virtual ~LevelNode(void) {
+        fn_80235380(art);
+        art = 0;
+        fn_802328D4(font);
+        font = 0;
+    }
+    virtual void Dim(void) { open = 1; }
+    virtual void Focus(void) { f1E = 1; }  // 0x70
+    virtual void Refresh(void) {
+        f1E = 0;
+        sel = 0;
+    }
+    virtual void Open(void) { open = 0; }
+    virtual void Select(void) {
+        if (!sel) {
+            sel = 1;
+            f1F = 1;
+        }
+    }
+
+    ChalLevel* lv;  // offset 0x18
+    u8 sel;         // offset 0x1C
+    u8 open;        // offset 0x1D
+    u8 f1E;         // offset 0x1E
+    u8 f1F;         // offset 0x1F
+    s32 index;      // offset 0x20
+    u8* art;        // offset 0x24
+    u8* font;       // offset 0x28
+};
+
+}  // namespace
 
 // The challenge map screen (lbl_8055F420).
 struct PathScreen {
@@ -180,9 +249,9 @@ struct PathScreen {
     s32 numEvents;       // offset 0x8
     s32 numLevels;       // offset 0xC
     u8 pad10[0x8];       // offset 0x10
-    PathNode** events;   // offset 0x18
+    EventNode** events;  // offset 0x18
     u8 pad1C[0x20];      // offset 0x1C
-    PathNode** levels;   // offset 0x3C
+    LevelNode** levels;  // offset 0x3C
 };
 
 #define SCREEN ((PathScreen*)lbl_8055F420)
@@ -241,30 +310,30 @@ extern "C" void fn_80261C68(PathScreenBuf* s);
 // Node lists with inline storage for 6 events / 3 difficulties.
 struct NodeVec6 {
     inline NodeVec6(void);
-    void Push(PathNode* p) {
-        PathNode** d = data;
+    void Push(EventNode* p) {
+        EventNode** d = data;
         int k = count;
         count = k + 1;
         d[k] = p;
     }
-    PathNode** data;  // offset 0x0
-    s32 count;        // offset 0x4
-    s32 cap;          // offset 0x8
-    PathNode* buf[6]; // offset 0xC
+    EventNode** data;  // offset 0x0
+    s32 count;         // offset 0x4
+    s32 cap;           // offset 0x8
+    EventNode* buf[6]; // offset 0xC
 };
 
 struct NodeVec3 {
     inline NodeVec3(void);
-    void Push(PathNode* p) {
-        PathNode** d = data;
+    void Push(LevelNode* p) {
+        LevelNode** d = data;
         int k = count;
         count = k + 1;
         d[k] = p;
     }
-    PathNode** data;  // offset 0x0
-    s32 count;        // offset 0x4
-    s32 cap;          // offset 0x8
-    PathNode* buf[3]; // offset 0xC
+    LevelNode** data;  // offset 0x0
+    s32 count;         // offset 0x4
+    s32 cap;           // offset 0x8
+    LevelNode* buf[3]; // offset 0xC
 };
 
 // The whole screen as it sits on MenuDoChallengeMode's stack (PathScreen is its head).
@@ -445,36 +514,10 @@ static inline void BuildMap(PathScreenBuf* s) {
     s->levels.count = 0;
     for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
         s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
-        u8* n = (u8*)operator new(0x2C, "pathcontrol");
-        if (n) {
-            ChalLevel* lv = lbl_8055F3E4->GetLevel(i);
-            S32(n, 0x14) = 0;
-            *(void**)n = lbl_80345E28;
-            S32(n, 0x20) = i;
-            PTR(n, 0x18) = (u8*)lv;
-            U8(n, 0x1C) = 0;
-            U8(n, 0x1D) = 1;
-            U8(n, 0x1E) = 0;
-            U8(n, 0x1F) = 0;
-            PTR(n, 0x24) = fn_8023512C("bar7.art");
-            PTR(n, 0x28) = fn_80232578("uifnt_o.gtx");
-        }
-        s->levels.Push((PathNode*)n);
+        s->levels.Push(new ("pathcontrol") LevelNode(lbl_8055F3E4->GetLevel(i), i));
         for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
             s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
-            u8* e = (u8*)operator new(0x28, "eventcontrol");
-            if (e) {
-                void* ev = lbl_8055F3E4->GetLevel(i)->GetEvent(j);
-                S32(e, 0x14) = 0;
-                *(void**)e = lbl_80345EA0;
-                PTR(e, 0x18) = (u8*)ev;
-                U8(e, 0x1E) = 0;
-                U8(e, 0x1C) = 0;
-                U8(e, 0x1D) = 1;
-                PTR(e, 0x20) = fn_8023512C("bar7.art");
-                PTR(e, 0x24) = fn_80232578("uifnt_o.gtx");
-            }
-            s->events.Push((PathNode*)e);
+            s->events.Push(new ("eventcontrol") EventNode(lbl_8055F3E4->GetLevel(i)->GetEvent(j)));
             s->numEvents++;
         }
     }
@@ -577,77 +620,6 @@ void fn_8026003C(void) {
             lbl_8055F3E8 = 1;
         }
     }
-}
-
-void fn_802607C4(u8* p) {
-    U8(p, 0x1D) = 1;
-}
-
-void fn_802607D0(u8* p) {
-    U8(p, 0x1E) = 1;
-}
-
-void fn_802607DC(u8* p) {
-    U8(p, 0x1E) = 0;
-    U8(p, 0x1C) = 0;
-}
-
-void fn_802607EC(u8* p) {
-    U8(p, 0x1D) = 0;
-}
-
-void fn_802607F8(u8* p) {
-    if (!U8(p, 0x1C)) {
-        U8(p, 0x1C) = 1;
-        U8(p, 0x1F) = 1;
-    }
-}
-
-void fn_80260814(u8* p) {
-    U8(p, 0x1D) = 0;
-}
-
-void fn_80260820(u8* p) {
-    if (!U8(p, 0x1C)) {
-        U8(p, 0x1E) = 1;
-        U8(p, 0x1C) = 1;
-    }
-}
-
-void fn_8026083C(u8* p) {
-    U8(p, 0x1C) = 0;
-}
-
-void fn_80260848(u8* p) {
-    U8(p, 0x1D) = 1;
-}
-
-u8* fn_80260854(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80345E28;
-        fn_80235380(PTR(p, 0x24));
-        U32(p, 0x24) = 0;
-        fn_802328D4(PTR(p, 0x28));
-        U32(p, 0x28) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_802608D4(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80345EA0;
-        fn_80235380(PTR(p, 0x20));
-        U32(p, 0x20) = 0;
-        fn_802328D4(PTR(p, 0x24));
-        U32(p, 0x24) = 0;
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
 }
 
 }  // extern "C"
@@ -965,7 +937,6 @@ void fn_80261AF0(u8* p, int difficulty) {
 }  // extern "C"
 
 void* operator new(size_t size, const char* tag);
-extern void* lbl_80345E28[];
 
 
 extern "C" {
@@ -981,36 +952,10 @@ void fn_80261C68(PathScreenBuf* s) {
     s->levels.count = 0;
     for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
         s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
-        u8* n = (u8*)operator new(0x2C, "pathcontrol");
-        if (n) {
-            ChalLevel* lv = lbl_8055F3E4->GetLevel(i);
-            S32(n, 0x14) = 0;
-            *(void**)n = lbl_80345E28;
-            S32(n, 0x20) = i;
-            PTR(n, 0x18) = (u8*)lv;
-            U8(n, 0x1C) = 0;
-            U8(n, 0x1D) = 1;
-            U8(n, 0x1E) = 0;
-            U8(n, 0x1F) = 0;
-            PTR(n, 0x24) = fn_8023512C("bar7.art");
-            PTR(n, 0x28) = fn_80232578("uifnt_o.gtx");
-        }
-        s->levels.Push((PathNode*)n);
+        s->levels.Push(new ("pathcontrol") LevelNode(lbl_8055F3E4->GetLevel(i), i));
         for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
             s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
-            u8* e = (u8*)operator new(0x28, "eventcontrol");
-            if (e) {
-                void* ev = lbl_8055F3E4->GetLevel(i)->GetEvent(j);
-                S32(e, 0x14) = 0;
-                *(void**)e = lbl_80345EA0;
-                PTR(e, 0x18) = (u8*)ev;
-                U8(e, 0x1E) = 0;
-                U8(e, 0x1C) = 0;
-                U8(e, 0x1D) = 1;
-                PTR(e, 0x20) = fn_8023512C("bar7.art");
-                PTR(e, 0x24) = fn_80232578("uifnt_o.gtx");
-            }
-            s->events.Push((PathNode*)e);
+            s->events.Push(new ("eventcontrol") EventNode(lbl_8055F3E4->GetLevel(i)->GetEvent(j)));
             s->numEvents++;
         }
     }
