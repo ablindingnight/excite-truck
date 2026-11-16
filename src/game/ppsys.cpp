@@ -530,8 +530,8 @@ static inline s32 PSysCount(PSys* s) {
 
 }
 template <class T>
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline T* AtP(T* p, int i) {
+/* Helper name unproven: the address of element i; the accessor boundary is needed (in place: fn_801C2694 100 -> 99.69) */
+static inline T* ElemAt(T* p, int i) {
     return &p[i];
 }
 extern "C" {
@@ -555,7 +555,7 @@ void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up,
     fn_801C1B60(s);
     s32 k = PSysCount(s);
     for (int j = 0; j < s->nPart; j++) {
-        Set(out, AtP(s->pos, j));
+        Set(out, ElemAt(s->pos, j));
         out++;
     }
     *n = k;
