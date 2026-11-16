@@ -1,6 +1,7 @@
 // Tire sounds (0x80209D4C-0x80209FFC): the squeal voice, loud with the wheels' slip past a
 // threshold, plus the car's road sounds. Names are guesses apart from the file names.
 #include "game/common.h"
+#include "game/carbody.h"
 
 class TireVoice {
 public:
@@ -53,19 +54,6 @@ TireVoice* fn_802077A4(const char* name, int flags, void* a, void* b);
 RoadSound* fn_8020CA3C(char* car);
 }
 
-// carbody.cpp's per-wheel state of the car body (4 at 0x23AC, stride 0x74); was named Wheel here, the name of wheel.cpp's 0x1FC physics wheel.
-struct CbWheel {
-    u8 pad0[0x68];
-    f32 slip;  // offset 0x68
-    s8 air;    // offset 0x6C
-    u8 pad6D[0x7];
-};
-
-struct Car {
-    u8 pad0[0x23AC];
-    CbWheel wheels[4];  // offset 0x23AC
-};
-
 class TireSound {
 public:
     TireSound(char* car) {
@@ -99,12 +87,12 @@ TireSound::~TireSound(void) {
 }
 
 void TireSound::Update(void) {
-    Car* c = (Car*)car;
+    CarBody* c = (CarBody*)car;
     f32 sum = 0.0f;
     CbWheel* w = c->wheels;
     for (int i = 0; i < 4; i++, w++) {
-        f32 s = w->slip - 0.8f;
-        if (w->air == 0 && s > 0.0f) {
+        f32 s = w->comp - 0.8f;
+        if (w->sound == 0 && s > 0.0f) {
             if (0.25f < s) {
                 s = 0.25f;
             }

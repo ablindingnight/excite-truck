@@ -5,6 +5,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/math_types.h"
+#include "game/carbody.h"
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -279,21 +280,6 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
-// carbody.cpp's per-wheel state of the car body (4 at 0x23AC, stride 0x74); was named Wheel here, the name of wheel.cpp's 0x1FC physics wheel.
-struct CbWheel {
-    u8 pad0[0x30];
-    V3 pos;  // offset 0x30
-    u8 pad3C[0x38];
-};
-
-struct CarRec {
-    u8 pad0[0x3C];
-    Mat3 rot;   // offset 0x3C
-    V3 pos;     // offset 0x60
-    u8 pad6C[0x2340];
-    CbWheel wheels[4];  // offset 0x23AC
-};
-
 static inline void SetVtx(BoostVtx* v, const V2* p) {
     v->pos.From((const Vec2&)*p);
     v->pos.y = fn_801DD88C(v->pos.x, v->pos.z);
@@ -456,7 +442,7 @@ static inline BoostArea& AreaAt(BoostArea* areas, int index) {
 
 extern "C" {
 
-static inline int InArea(BoostMan* m, CarRec* rec) {
+static inline int InArea(BoostMan* m, CarBody* rec) {
     int hit;
     CbWheel* ws;
     int i;
@@ -464,11 +450,11 @@ static inline int InArea(BoostMan* m, CarRec* rec) {
     ws = rec->wheels;
     for (i = 0; i < m->areas.count; i++) {
         for (j = 0; j < 4; j++) {
-            V3 p = ws[j].pos;
-            MulVec(&p, &p, &rec->rot);
-            p.x += rec->pos.x;
-            p.y += rec->pos.y;
-            p.z += rec->pos.z;
+            V3 p = *(const V3*)ws[j].local;
+            MulVec(&p, &p, (const Mat3*)&rec->mtx.rot);
+            p.x += rec->mtx.pos.x;
+            p.y += rec->mtx.pos.y;
+            p.z += rec->mtx.pos.z;
             hit = 0;
             if (AreaAt(m->areas.data, i).bound && fn_80139B70(m->areas.data[i].bound, p.x, p.z)) {
                 hit = 1;
@@ -487,7 +473,7 @@ int fn_801E1048(int car) {
     m = lbl_8055EA10;
     r = m != 0;
     if (r) {
-        r = InArea(m, (CarRec*)fn_8017960C(car));
+        r = InArea(m, (CarBody*)fn_8017960C(car));
     }
     return r;
 }
