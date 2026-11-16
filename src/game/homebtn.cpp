@@ -2,6 +2,12 @@
 // menu on request (stopping rumble), runs and draws it each frame, acts on its result (return to menu or
 // reset) and blocks the game loop while it is up. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/GX/GXAttr.h>
+#include <revolution/GX/GXLight.h>
+#include <revolution/GX/GXPixel.h>
+#include <revolution/GX/GXTev.h>
+#include <revolution/GX/GXTransform.h>
+#include <revolution/MTX/mtx44.h>
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -43,21 +49,6 @@ int HBMIsReassignedControllers(void);
 void HBMDeleteSound(void);
 void HBMUpdateSound(void);
 
-void GXClearVtxDesc(void);
-void GXSetVtxAttrFmt(int fmt, int attr, int cnt, int type, int frac);
-void GXSetVtxDesc(int attr, int type);
-void GXSetViewport(f32 x, f32 y, f32 w, f32 h, f32 n, f32 f);
-void GXSetScissor(u32 x, u32 y, u32 w, u32 h);
-void GXSetNumChans(int n);
-void GXSetNumTexGens(int n);
-void GXSetNumTevStages(int n);
-void GXSetTevOrder(int stage, int coord, int map, int color);
-void GXSetTevOp(int stage, int mode);
-void GXSetBlendMode(int type, int src, int dst, int op);
-void GXSetZMode(int test, int func, int update);
-void GXSetCurrentMtx(u32 id);
-void C_MTXOrtho(f32 m[4][4], f32 t, f32 b, f32 l, f32 r, f32 n, f32 f);
-void GXSetProjection(f32 m[4][4], int type);
 }
 
 void HBMCreateSound(const char* file, void* buf, u32 size);
@@ -286,28 +277,28 @@ void fn_802ECA48(void) {
         return;
     }
     GXClearVtxDesc();
-    GXSetVtxAttrFmt(4, 9, 0, 4, 0);
-    GXSetVtxAttrFmt(4, 11, 0, 1, 0);
-    GXSetVtxDesc(9, 1);
-    GXSetVtxDesc(11, 1);
+    GXSetVtxAttrFmt((GXVtxFmt)4, (GXAttr)9, (GXCompCnt)0, (GXCompType)4, (u8)0);
+    GXSetVtxAttrFmt((GXVtxFmt)4, (GXAttr)11, (GXCompCnt)0, (GXCompType)1, (u8)0);
+    GXSetVtxDesc((GXAttr)9, (GXAttrType)1);
+    GXSetVtxDesc((GXAttr)11, (GXAttrType)1);
     RenderMode* rm = (RenderMode*)fn_802D2D14();
     GXSetViewport(0.0f, 0.0f, rm->fbWidth, rm->efbHeight, 0.0f, 1.0f);
-    GXSetScissor(0, 0, rm->fbWidth, rm->efbHeight);
-    GXSetNumChans(1);
-    GXSetNumTexGens(0);
-    GXSetNumTevStages(1);
-    GXSetTevOrder(0, 0xFF, 0xFF, 4);
-    GXSetTevOp(0, 4);
-    GXSetBlendMode(0, 0, 0, 0);
-    GXSetZMode(1, 3, 1);
-    GXSetCurrentMtx(3);
+    GXSetScissor((u32)0, (u32)0, (u32)rm->fbWidth, (u32)rm->efbHeight);
+    GXSetNumChans((u8)1);
+    GXSetNumTexGens((u8)0);
+    GXSetNumTevStages((u8)1);
+    GXSetTevOrder((GXTevStageID)0, (GXTexCoordID)0xFF, (GXTexMapID)0xFF, (GXChannelID)4);
+    GXSetTevOp((GXTevStageID)0, (GXTevMode)4);
+    GXSetBlendMode((GXBlendMode)0, (GXBlendFactor)0, (GXBlendFactor)0, (GXLogicOp)0);
+    GXSetZMode((GXBool)1, (GXCompare)3, (GXBool)1);
+    GXSetCurrentMtx((u32)3);
     f32 m[4][4];
     if (fn_802EC4BC()) {
         C_MTXOrtho(m, 228.0f, -228.0f, -416.0f, 416.0f, 0.0f, 500.0f);
     } else {
         C_MTXOrtho(m, 228.0f, -228.0f, -304.0f, 304.0f, 0.0f, 500.0f);
     }
-    GXSetProjection(m, 1);
+    GXSetProjection(m, (GXProjectionType)1);
     if (lbl_805600E8) {
         HBMDraw();
     }
