@@ -5,11 +5,7 @@
 #include "game/common.h"
 #include "game/vec3_init.h"
 #include "game/rvec.h"
-
-struct RMtx {
-    RVec3 rot[3];  // offset 0x0
-    RVec3 pos;     // offset 0x24
-};
+#include "game/rmtx.h"
 
 // A distance constraint between two particles.
 struct PStick {
@@ -247,16 +243,16 @@ static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return 
 
 static inline void MulRotT(RVec3* dst, const RVec3& src, const RMtx* m) {
     if (dst == &src) {
-        f32 x = Dot3(src.x, m->rot[0].x, src.y, m->rot[0].y, src.z, m->rot[0].z);
-        f32 y = Dot3(src.x, m->rot[1].x, src.y, m->rot[1].y, src.z, m->rot[1].z);
-        f32 z = Dot3(src.x, m->rot[2].x, src.y, m->rot[2].y, src.z, m->rot[2].z);
+        f32 x = Dot3(src.x, m->rot.x.x, src.y, m->rot.x.y, src.z, m->rot.x.z);
+        f32 y = Dot3(src.x, m->rot.y.x, src.y, m->rot.y.y, src.z, m->rot.y.z);
+        f32 z = Dot3(src.x, m->rot.z.x, src.y, m->rot.z.y, src.z, m->rot.z.z);
         dst->x = x;
         dst->y = y;
         dst->z = z;
     } else {
-        dst->x = Dot3(src.x, m->rot[0].x, src.y, m->rot[0].y, src.z, m->rot[0].z);
-        dst->y = Dot3(src.x, m->rot[1].x, src.y, m->rot[1].y, src.z, m->rot[1].z);
-        dst->z = Dot3(src.x, m->rot[2].x, src.y, m->rot[2].y, src.z, m->rot[2].z);
+        dst->x = Dot3(src.x, m->rot.x.x, src.y, m->rot.x.y, src.z, m->rot.x.z);
+        dst->y = Dot3(src.x, m->rot.y.x, src.y, m->rot.y.y, src.z, m->rot.y.z);
+        dst->z = Dot3(src.x, m->rot.z.x, src.y, m->rot.z.y, src.z, m->rot.z.z);
     }
 }
 
@@ -329,16 +325,16 @@ void fn_801C1320(PSys* s) {
 // dst = rotation of m applied to src, with the aliasing guard of the inline.
 static inline void MulRot(RVec3* dst, const RVec3& src, const RMtx* m) {
     if (dst == &src) {
-        f32 x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
-        f32 y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
-        f32 z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
+        f32 x = Dot3(src.x, m->rot.x.x, src.y, m->rot.y.x, src.z, m->rot.z.x);
+        f32 y = Dot3(src.x, m->rot.x.y, src.y, m->rot.y.y, src.z, m->rot.z.y);
+        f32 z = Dot3(src.x, m->rot.x.z, src.y, m->rot.y.z, src.z, m->rot.z.z);
         dst->x = x;
         dst->y = y;
         dst->z = z;
     } else {
-        dst->x = Dot3(src.x, m->rot[0].x, src.y, m->rot[1].x, src.z, m->rot[2].x);
-        dst->y = Dot3(src.x, m->rot[0].y, src.y, m->rot[1].y, src.z, m->rot[2].y);
-        dst->z = Dot3(src.x, m->rot[0].z, src.y, m->rot[1].z, src.z, m->rot[2].z);
+        dst->x = Dot3(src.x, m->rot.x.x, src.y, m->rot.y.x, src.z, m->rot.z.x);
+        dst->y = Dot3(src.x, m->rot.x.y, src.y, m->rot.y.y, src.z, m->rot.z.y);
+        dst->z = Dot3(src.x, m->rot.x.z, src.y, m->rot.y.z, src.z, m->rot.z.z);
     }
 }
 

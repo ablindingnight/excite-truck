@@ -5,6 +5,7 @@
 // apart from the strings.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/rmtx.h"
 
 extern "C" {
 void* memset(void* dst, int c, u32 n);
@@ -25,30 +26,6 @@ double cos(double x);
 void* operator new[](size_t size, const char* tag);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-struct RMat33 {
-    RMat33(void) {}
-    RVec3 x;  // offset 0x0
-    RVec3 y;  // offset 0xC
-    RVec3 z;  // offset 0x18
-    void Transpose(void) {
-        f32 t;
-        t = x.y;
-        x.y = y.x;
-        y.x = t;
-        t = x.z;
-        x.z = z.x;
-        z.x = t;
-        t = y.z;
-        y.z = z.y;
-        z.y = t;
-    }
-};
-
-struct RMtx {
-    RMat33 rot;  // offset 0x0
-    RVec3 pos;   // offset 0x24
-};
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 

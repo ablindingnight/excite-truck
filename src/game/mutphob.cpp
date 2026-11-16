@@ -7,6 +7,7 @@
 #include "game/common.h"
 #include "game/collshape.h"
 #include "game/rvec.h"
+#include "game/rmtx.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -48,11 +49,6 @@ public:
     virtual ValueNodeV* FindChild(const char* name);  // 0x8
     virtual ValueNodeV* GetChild(int index);          // 0xC
     virtual int HasChild(const char* name);           // 0x10
-};
-
-struct RMtx {
-    RVec3 rot[3];  // offset 0x0
-    RVec3 pos;     // offset 0x24
 };
 
 struct RPacket;
@@ -425,9 +421,9 @@ void MutPhob::Reset(void) {
     home.pos.z = 0.0f;
     SetActive(0);
     f32 one = 1.0f;  // keeps 0.0 in f1 and 1.0 in f2, as in the target
-    home.rot[0].Set(one, 0.0f, 0.0f);
-    home.rot[1].Set(0.0f, 1.0f, 0.0f);
-    home.rot[2].Set(0.0f, 0.0f, 1.0f);
+    home.rot.x.Set(one, 0.0f, 0.0f);
+    home.rot.y.Set(0.0f, 1.0f, 0.0f);
+    home.rot.z.Set(0.0f, 0.0f, 1.0f);
     home.pos.Set(0.0f, -1000.0f, 0.0f);
     offset = RVec3(0.0f, 0.0f, 0.0f);
     CollVolume::vf20();
@@ -531,9 +527,9 @@ void fn_801D411C(MutPhob* p) {
     p->torque.Set(0.0f, 0.0f, 0.0f);
     p->accel.Set(0.0f, 0.0f, 0.0f);
     p->aaccel.Set(0.0f, 0.0f, 0.0f);
-    p->home.rot[0].Set(1.0f, 0.0f, 0.0f);
-    p->home.rot[1].Set(0.0f, 1.0f, 0.0f);
-    p->home.rot[2].Set(0.0f, 0.0f, 1.0f);
+    p->home.rot.x.Set(1.0f, 0.0f, 0.0f);
+    p->home.rot.y.Set(0.0f, 1.0f, 0.0f);
+    p->home.rot.z.Set(0.0f, 0.0f, 1.0f);
     p->home.pos.Set(0.0f, -1000.0f, 0.0f);
     p->offset = RVec3(0.0f, 0.0f, 0.0f);
     p->CollVolume::vf20();
@@ -594,11 +590,11 @@ static inline void AddScaled(RVec3* v, const RVec3* a, f32 s) {
 
 // A hinged chunk swings back upright; parked when it is and no car is near.
 void fn_801D4598(MutPhob* p, f32 now) {
-    f32 d = PSVECDotProduct(&p->mtx.rot[2], &p->home.rot[2]);
+    f32 d = PSVECDotProduct(&p->mtx.rot.z, &p->home.rot.z);
     if (now < p->time + p->maxLife || d < 0.99f ||
         (p->car && PSVECSquareDistance(&p->car->mtx.pos, &p->home.pos) < (1.0f + p->shapeRadius) * (1.0f + p->shapeRadius))) {
         RVec3 axis;
-        PSVECCrossProduct(&p->mtx.rot[2], &p->home.rot[2], &axis);
+        PSVECCrossProduct(&p->mtx.rot.z, &p->home.rot.z, &axis);
         p->vel.Set(0.0f, 0.0f, 0.0f);
         f32 k = d - 0.25f;
         k = (0.0f < k) ? 0.0f : k;

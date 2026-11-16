@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/collshape.h"
 #include "game/rvec.h"
+#include "game/rmtx.h"
 
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);
@@ -29,11 +30,6 @@ struct GVec3 {
 // The ground lookup's copy of a position (copied as raw words).
 struct GMtx3 {
     s32 v[3];
-};
-
-struct RMtx {
-    RVec3 rot[3];  // offset 0x0
-    RVec3 pos;     // offset 0x24
 };
 
 struct RPacket;
@@ -298,7 +294,7 @@ void Wheel::vf28(u8* buf) {
     p = (WheelPose*)(buf + a8);
     p->car = car;
     p->index = index;
-    p->spin = PSVECDotProduct(&avel, &mtx.rot[0]);
+    p->spin = PSVECDotProduct(&avel, &mtx.rot.x);
     p->live = live;
 }
 
@@ -345,9 +341,9 @@ void Wheel::Update(void) {
         if (spin > 0.01f) {
             RVec3 t;
             GVec3 pos;
-            f32 lean = mtx.rot[0].y;
+            f32 lean = mtx.rot.x.y;
             RVec3 up(0.0f, 1.0f, 0.0f);
-            PSVECCrossProduct(&mtx.rot[0], &up, &t);
+            PSVECCrossProduct(&mtx.rot.x, &up, &t);
             lean = 13.5725f * lean;
             f32 len = PSVECMag(&t);
             f32 k = lean / ((1.0f > len) ? 1.0f : len);
@@ -355,7 +351,7 @@ void Wheel::Update(void) {
             t.y *= k;
             t.z *= k;
             AddTorque(&t);
-            RVec3 t2(0.0f, 100.0f * (PSVECDotProduct(&mtx.rot[0], &vel) / spin), 0.0f);
+            RVec3 t2(0.0f, 100.0f * (PSVECDotProduct(&mtx.rot.x, &vel) / spin), 0.0f);
             AddTorque(&t2);
             *(GMtx3*)&pos = *(const GMtx3*)&mtx.pos;
             if (fn_801E9E30(hint, &pos)) {

@@ -5,11 +5,7 @@
 #include "game/common.h"
 #include "game/vec3_init.h"
 #include "game/rvec.h"
-
-struct RMtx {
-    RVec3 rot[3];  // offset 0x0
-    RVec3 pos;     // offset 0x24
-};
+#include "game/rmtx.h"
 
 struct Mat3 {
     f32 m[9];
@@ -464,7 +460,7 @@ const RVec3* fn_801BF754(Phob* car) { return (const RVec3*)((u8*)car + 0x124); }
 
 // out = a relative to b: a's basis times b's transposed basis, and a's position in b's frame.
 void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b) {
-    Mat3 t = *(const Mat3*)b->rot;
+    Mat3 t = *(const Mat3*)&b->rot;
     f32 s;
     s = t.m[1];
     t.m[1] = t.m[3];
@@ -476,12 +472,12 @@ void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b) {
     t.m[5] = t.m[7];
     t.m[7] = s;
     const Mat3* tp = &t;
-    MulM((Mat3*)out->rot, (const Mat3*)a->rot, tp);
+    MulM((Mat3*)&out->rot, (const Mat3*)&a->rot, tp);
     RVec3* op = &out->pos;
     op->x = a->pos.x - b->pos.x;
     op->y = a->pos.y - b->pos.y;
     op->z = a->pos.z - b->pos.z;
-    const RVec3* r = b->rot;
+    const RVec3* r = &b->rot.x;
     f32 x = Dot3(op->x, r[0].x, op->y, r[0].y, op->z, r[0].z);
     f32 y = Dot3(op->x, r[1].x, op->y, r[1].y, op->z, r[1].z);
     f32 z = Dot3(op->x, r[2].x, op->y, r[2].y, op->z, r[2].z);
@@ -493,20 +489,20 @@ void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b) {
 void fn_801BFB2C(PanelVol* p, RMtx* out, const RVec3* pts) {
     RMtx m;
     m.pos = pts[p->org];
-    Sub(&m.rot[0], &pts[p->e0b], &pts[p->e0a]);
-    Sub(&m.rot[1], &pts[p->e1b], &pts[p->e1a]);
-    PSVECCrossProduct(&m.rot[0], &m.rot[1], &m.rot[2]);
-    if (PSVECDotProduct(&m.rot[2], &m.rot[2]) > kAxisTolerance) {
-        Orthonormalize((Mat3*)m.rot);
+    Sub(&m.rot.x, &pts[p->e0b], &pts[p->e0a]);
+    Sub(&m.rot.y, &pts[p->e1b], &pts[p->e1a]);
+    PSVECCrossProduct(&m.rot.x, &m.rot.y, &m.rot.z);
+    if (PSVECDotProduct(&m.rot.z, &m.rot.z) > kAxisTolerance) {
+        Orthonormalize((Mat3*)&m.rot);
     } else {
-        Identity((Mat3*)m.rot);
+        Identity((Mat3*)&m.rot);
     }
     fn_801BFD34(&out->pos, &p->rest.pos, &m);
-    Mat3Mul((Mat3*)out->rot, (const Mat3*)p->rest.rot, (const Mat3*)m.rot);
+    Mat3Mul((Mat3*)&out->rot, (const Mat3*)&p->rest.rot, (const Mat3*)&m.rot);
 }
 
 void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m) {
-    MulVec(out, v, m->rot);
+    MulVec(out, v, &m->rot.x);
     out->x += m->pos.x;
     out->y += m->pos.y;
     out->z += m->pos.z;
@@ -535,7 +531,7 @@ void fn_801BFECC(CollVolume* v, const RMtx* m) {
 
 void fn_801BFF64(RMtx* m, const RVec3* v) {
     RVec3 t;
-    MulVec(&t, v, m->rot);
+    MulVec(&t, v, &m->rot.x);
     m->pos.x = m->pos.x + t.x;
     m->pos.y = m->pos.y + t.y;
     m->pos.z = m->pos.z + t.z;
@@ -639,15 +635,15 @@ void PanelVol::Reset(void) {
     }
     RigidBody::Reset();
     RMtx m;
-    m.rot[0].x = 1.0f;
-    m.rot[0].y = 0.0f;
-    m.rot[0].z = 0.0f;
-    m.rot[1].x = 0.0f;
-    m.rot[1].y = 1.0f;
-    m.rot[1].z = 0.0f;
-    m.rot[2].x = 0.0f;
-    m.rot[2].y = 0.0f;
-    m.rot[2].z = 1.0f;
+    m.rot.x.x = 1.0f;
+    m.rot.x.y = 0.0f;
+    m.rot.x.z = 0.0f;
+    m.rot.y.x = 0.0f;
+    m.rot.y.y = 1.0f;
+    m.rot.y.z = 0.0f;
+    m.rot.z.x = 0.0f;
+    m.rot.z.y = 0.0f;
+    m.rot.z.z = 1.0f;
     m.pos.x = 0.0f;
     m.pos.z = 0.0f;
     m.pos.y = -500.0f;
@@ -721,14 +717,14 @@ void PanelVol::Update(void) {
     RMtx m;
     __ct__10CamFrame34Fv(&m);
     fn_80144DAC(&m.pos, &pts[org]);
-    fn_801C0E60(&m.rot[0], &pts[e0b], &pts[e0a]);
-    fn_801C0E60(&m.rot[1], &pts[e1b], &pts[e1a]);
-    fn_801C0E4C(&m.rot[2], &m.rot[0], &m.rot[1]);
+    fn_801C0E60(&m.rot.x, &pts[e0b], &pts[e0a]);
+    fn_801C0E60(&m.rot.y, &pts[e1b], &pts[e1a]);
+    fn_801C0E4C(&m.rot.z, &m.rot.x, &m.rot.y);
     f32 eps = fn_80144CC8(0.01f);
-    if (fn_801C0E44(&m.rot[2]) > eps) {
-        fn_801C0D6C((Mat3*)m.rot);
+    if (fn_801C0E44(&m.rot.z) > eps) {
+        fn_801C0D6C((Mat3*)&m.rot);
     } else {
-        fn_801C0D3C((Mat3*)m.rot);
+        fn_801C0D3C((Mat3*)&m.rot);
     }
     fn_801C092C(&w, &rest, &m);
     mtx = w;
@@ -738,11 +734,11 @@ void PanelVol::Update(void) {
 extern "C" {
 
 void fn_801C092C(RMtx* out, const RMtx* a, const RMtx* b) {
-    MulVec(&out->pos, &a->pos, b->rot);
+    MulVec(&out->pos, &a->pos, &b->rot.x);
     out->pos.x += b->pos.x;
     out->pos.y += b->pos.y;
     out->pos.z += b->pos.z;
-    MulM((Mat3*)out->rot, (const Mat3*)a->rot, (const Mat3*)b->rot);
+    MulM((Mat3*)&out->rot, (const Mat3*)&a->rot, (const Mat3*)&b->rot);
 }
 
 void fn_801C0D3C(Mat3* m) { Identity(m); }
