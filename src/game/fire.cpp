@@ -3,7 +3,6 @@
 // textured cross quads, and event-driven torch fires. Names are guesses apart from the
 // allocation tags, value keys, file names and messages.
 #include "game/common.h"
-#include "game/rvec.h"
 #include "game/partparams.h"
 #include "game/vecmatrix.h"
 #include "game/math_types.h"
@@ -60,7 +59,17 @@ struct FColor {
     f32 b_;
 };
 
-// FVec: rvec.h's RVec3.
+struct FVec {
+    FVec(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
 class FXSequence {
 public:
     static FXSequence* Load(const char* name);
@@ -311,8 +320,6 @@ struct BoostEntry {
 class BoostFireMan {
 public:
     BoostEntry* Entry(int i);
-public:
-    void ScaleVelXZ(Vec& off, const Vec* vel, f32 f);
 public:
     BoostFireMan(void);
     ~BoostFireMan(void);
@@ -1102,7 +1109,7 @@ void GroundFire::Reset(void) {
     m.origin.x = 0.0f;
     m.origin.y = 0.0f;
     m.origin.z = 0.0f;
-    *(RVec3*)&off = RVec3(0.0f, 0.0f, 0.0f);
+    *(FVec*)&off = FVec(0.0f, 0.0f, 0.0f);
     car = -1;
     ring = -1;
 }
@@ -1159,7 +1166,7 @@ void GroundFire::Start(int idx) {
     const FireCar* c = fn_80287B24(idx);
     fn_802C77F0(fn_801EE0C8((u32)idx < 8 ? lbl_80488648[idx] : 0), box);
     m = *(const VecMatrix*)c;
-    *(RVec3*)&off = RVec3(box[0], box[2], box[4]);
+    *(FVec*)&off = FVec(box[0], box[2], box[4]);
     car = idx;
     Vec p;
     Vec e1;
@@ -1244,11 +1251,8 @@ void BoostFireMan::Reset(void) {
     }
 }
 
-/* Helper name unproven: off.x/off.z = vel * f. */
-inline void BoostFireMan::ScaleVelXZ(Vec& off, const Vec* vel, f32 f) {
-    off.z = vel->z * f;
-    off.x = vel->x * f;
-}
+/* Helper name unproven: the square with its operand by value (the time step is evaluated once, as a parameter). */
+static inline f32 SqF(f32 x) { return x * x; }
 
 /* Helper name unproven: the i-th boost entry. */
 inline BoostEntry* BoostFireMan::Entry(int i) {
@@ -1281,12 +1285,9 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
             n = MIN(n, 4);
             f32 step = dt / n;
             for (int k = 0; k < n; k++) {
-                f32 squared;
                 f32 f = -k * step;
                 Vec off;
-                ScaleVelXZ(off, vel, f);
-                squared = f * f;
-                off.y = vel->y * f + -0.5f * squared;
+                SetVec(&off, vel->x * f, vel->y * f + -0.5f * SqF(f), vel->z * f);
                 for (u32 j = 0; j < 2; j++) {
                     Vec p;
                     AddV(&p, &e->pts[j], &off);
