@@ -501,9 +501,11 @@ extern "C" {
 // Observed five-word initialized prefix only; complete object size and data ownership remain unresolved.
 typedef struct StartupSharedPrefixNew {unsigned long first,kind,third,fourth,fifth;} StartupSharedPrefixNew;
 typedef char StartupSharedPrefixSizeCheckNew[(sizeof(StartupSharedPrefixNew)==20)?1:-1];
-extern StartupSharedPrefixNew lbl_80490920;extern unsigned long lbl_8055EFB0[2],lbl_8055EFB8;void RegisterModuleTag__FP9ModuleTag(void*);
+extern StartupSharedPrefixNew lbl_80490920;extern unsigned long lbl_8055EFB0[2],lbl_8055EFB8;
 void fn_8022A594();
 }
+class ModuleTag;
+void RegisterModuleTag(ModuleTag* tag);  // version.cpp
 
 
 struct ProviderDrawMetrics {char unknown[0x70];float margin;};
@@ -3178,7 +3180,7 @@ inline int CDetect::Slot84(void) {int result=0;if(((WidgetFragment*)this)->flag1
 
 
 
-void fn_8022A594(){RegisterModuleTag__FP9ModuleTag(lbl_8055EFB0);StartupSharedPrefixNew* settings=&lbl_80490920;settings->kind=123;settings->fifth=settings->fourth=settings->third=settings->first=0;lbl_8055EFB8=0x7f000000;}
+void fn_8022A594(){RegisterModuleTag((ModuleTag*)lbl_8055EFB0);StartupSharedPrefixNew* settings=&lbl_80490920;settings->kind=123;settings->fifth=settings->fourth=settings->third=settings->first=0;lbl_8055EFB8=0x7f000000;}
 }
 
 // Allocation/offset guards for observed storage views, not recovered class declarations.
