@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/caricontable.h"
 #include "game/gamedb.h"
 #include "game/highscore.h"
 #include "game/menu.h"
@@ -87,37 +88,6 @@ static inline void CopyName(const char* src, int n, char* dst) {
     }
 }
 
-// One car icon's texture rectangles.
-struct IconEntry {
-    char name[0x20];  // offset 0x0, chassis
-    u8* tex;          // offset 0x20
-    u8* overlay;      // offset 0x24
-    f32 u0;           // offset 0x28
-    f32 v0;           // offset 0x2C
-    f32 u1;           // offset 0x30
-    f32 v1;           // offset 0x34
-};
-
-struct IconList {
-    IconEntry* data;  // offset 0x0
-    s32 count;        // offset 0x4
-};
-
-// The shared car icon table (caricons.val; also frname's and carpick's): loaded on first use, reference
-// counted through lbl_8055F2E8. CLEANUP: the original keeps this class in a shared header.
-template<int N> struct IconTail {
-    static void CopyTail(const char* s, int n, char* d) {
-        while ((*d++ = *s++) != 0) {
-            if (--n <= 0) { d[-1] = 0; break; }
-        }
-    }
-    static void Append(char* text, const char* s) {
-        char* d = text;
-        int n = N;
-        while (*d) { n--; d++; }
-        if (n > 0) { CopyTail(s, n, d); }
-    }
-};
 void* operator new(size_t n, const char* tag);
 void* operator new[](size_t n, const char* tag);
 void operator delete[](void* p);
@@ -129,48 +99,12 @@ extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" void gxForgetTexture(u8* tex);
 extern "C" u8* fn_8023512C(const char* name);
 
-struct CarIconTable : public IconList {
-    CarIconTable(void) {
-        ValueTable* t = fn_80131808("caricons.val");
-        count = 0;
-        data = new ("cicon") IconEntry[50];
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
-            if (strcmp(n->GetName(), "Car")) {
-                continue;
-            }
-            for (int k = 0; k < 2; k++) {
-                IconEntry* c = &data[count++];
-                CopyName(n->GetValue("chassis"), 32, c->name);
-                if (k) {
-                    IconTail<32>::Append(c->name, "_e");
-                }
-                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
-                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
-                c->u0 = n->GetFloat("u1");
-                c->v0 = n->GetFloat("v1");
-                c->u1 = n->GetFloat("u2");
-                c->v1 = n->GetFloat("v2");
-            }
-        }
-        fn_80131818(t);
-    }
-    ~CarIconTable(void) {
-        for (int i = 0; i < count; i++) {
-            IconEntry& e = data[i];
-            gxForgetTexture(e.tex);
-            gxForgetTexture(e.overlay);
-        }
-        delete[] data;
-    }
-};
-extern CarIconTable* lbl_8055F2E4;
 extern s32 lbl_8055F2E8;
 
 // Index of the car icon for chassis `name`, or -1.
-static inline int FindIcon(IconList* icons, const char* name) {
+static inline int FindIcon(CarIconTable* icons, const char* name) {
     for (int i = 0; i < icons->count; i++) {
-        if (strcasecmp(icons->data[i].name, name) == 0) {
+        if (strcasecmp(icons->icons[i].name, name) == 0) {
             return i;
         }
     }
@@ -191,7 +125,7 @@ public:
     virtual ~RecordIcon(void) { fn_80235380(art); }
     virtual void Draw(void);
 
-    IconList* icons;  // offset 0x18
+    CarIconTable* icons;  // offset 0x18
     s32 icon;         // offset 0x1C
     u8 visible;       // offset 0x20
     u32 color;        // offset 0x24
@@ -372,7 +306,7 @@ void RecordIcon::Draw(void) {
         return;
     }
     u32 c;
-    IconEntry* e;
+    CarIcon* e;
     f32 sx;
     f32 sy;
     f32 x;
@@ -389,13 +323,13 @@ void RecordIcon::Draw(void) {
     fh = (f32)h;
     f32 shadowY = 3.0f + sy;
     fn_802354A0(art, c, sx - 3.0f, shadowY, 0.0f, 6.0f + fw, 6.0f + fh, -1);
-    e = &icons->data[icon];
+    e = &icons->icons[icon];
     y = sy;
     x = sx;
-    u0 = e->u0;
-    v0 = e->v0;
-    u1 = e->u1;
-    v1 = e->v1;
+    u0 = e->u1;
+    v0 = e->v1;
+    u1 = e->u2;
+    v1 = e->v2;
     c = color;
     fn_80231220(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
     fn_80231220(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
