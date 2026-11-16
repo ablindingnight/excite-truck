@@ -7330,10 +7330,14 @@ void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
             t++;
         }
     }
+    // Pass 2: rows. Each output pixel is written twice across and the row twice down.
     t = tmp;
     for (i = 0; i < 8; i++) {
-        u32 o0, o1, o2, o3;
+        u32 o0, o1, o2, o3, o4;
+        u32 o5, o6, o7;
         u32 w0, w1, w2, w3;
+
+        // Even part
         tmp10 = t[0] + t[4];
         tmp11 = t[0] - t[4];
         tmp13 = t[2] + t[6];
@@ -7342,6 +7346,8 @@ void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
         tmp3 = tmp10 - tmp13;
         tmp1 = tmp11 + tmp12;
         tmp2 = tmp11 - tmp12;
+
+        // Odd part
         z13 = t[5] + t[3];
         z10 = t[5] - t[3];
         z11 = t[1] + t[7];
@@ -7354,14 +7360,22 @@ void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
         tmp6 = tmp12 - tmp7;
         tmp5 = tmp11 - tmp6;
         tmp4 = tmp10 + tmp5;
+
+        // Pixel packing: not the original statements yet (85.72). Retail computes the shift for pixels 0 and 2,
+        // computes-and-drops it for 1, 3, 4, 6 and has none for 5 and 7, so o5..o7 are kept unshifted here
+        // (see handoff/FACTS.md 2026-11-15).
         o0 = (tmp0 + tmp7 + 0x7F) >> 8;
+        o7 = tmp0 - tmp7 + 0x7F;
         o1 = (tmp1 + tmp6 + 0x7F) >> 8;
+        o6 = tmp1 - tmp6 + 0x7F;
         o2 = (tmp2 + tmp5 + 0x7F) >> 8;
+        o5 = tmp2 - tmp5 + 0x7F;
+        o4 = (tmp3 + tmp4 + 0x7F) >> 8;
         o3 = (tmp3 - tmp4 + 0x7F) >> 8;
         w0 = ((o0 & 0xFF) << 16) | (o1 & 0xFF);
         w1 = ((o2 & 0xFF) << 16) | (o3 & 0xFF);
-        w2 = (((tmp2 - tmp5 + 0x7F) >> 8) & 0xFF) | ((((tmp3 + tmp4 + 0x7F) >> 8) & 0xFF) << 16);
-        w3 = (((tmp0 - tmp7 + 0x7F) >> 8) & 0xFF) | ((((tmp1 - tmp6 + 0x7F) >> 8) & 0xFF) << 16);
+        w2 = ((o5 >> 8) & 0xFF) | ((o4 & 0xFF) << 16);
+        w3 = ((o7 >> 8) & 0xFF) | (((o6 >> 8) & 0xFF) << 16);
         w0 |= w0 << 8;
         w1 |= w1 << 8;
         w2 |= w2 << 8;
