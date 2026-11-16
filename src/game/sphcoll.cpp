@@ -360,7 +360,7 @@ public:
     virtual void vf14(void);
     virtual void vf28(void);
     // New slots 0x38-0x4C.
-    virtual void vf38(RVec3* lo, RVec3* hi) = 0;
+    virtual void vf38(RVec3* lo, RVec3* hi) const = 0;
     virtual f32 Radius(void) = 0;
     virtual void SetSurface(int m) { surface = m; }
     virtual void vf44(u32 v);
@@ -380,9 +380,64 @@ public:
 // MATCHING-AID (transitional): the derived shapes are still written as C and construct their CollShape base by
 // its linker name; this goes when they become real subclasses.
 extern "C" void __ct__9CollShapeFUlUl(u8* p, u32 data, u32 swap);
+
+// A sphere shape (vtable __vt__11SphereShape): radius 0x24, local centre 0x28, world centre 0x34.
+class SphereShape : public CollShape {
+public:
+    SphereShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    virtual void vf0C(void);
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf28(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~SphereShape(void) {}
+};
+
+// A flat sphere ('FLSR'; vtable __vt__15FlatSphereShape). Built only by obstacles' inlined constructor.
+class FlatSphereShape : public SphereShape {
+public:
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual ~FlatSphereShape(void) {}
+};
+
+// A sphere re-centred on its attachment (+0x54) each step (vtable 0x80333AA8). Nothing constructs it in retail;
+// its vtable is emitted because its members are defined here. Class name unproven.
+class AttachedSphereShape : public SphereShape {
+public:
+    virtual void vf0C(void);
+    virtual void vf14(void);
+    virtual void vf24(const RVec3* v);
+    virtual ~AttachedSphereShape(void) {}
+};
+
+// A sphere bounding a box, with the box half sizes and a 24-float cache (vtable 0x80333A58; built by fn_8019F564,
+// which mutphob calls). Class name unproven.
+class BoxSphereShape : public SphereShape {
+public:
+    virtual void vf14(void);
+    virtual void vf28(void);
+    virtual ~BoxSphereShape(void) {}
+};
+
+// A sphere whose local centre is reset from +0x54 (vtable 0x80333A08). Nothing constructs it in retail.
+// Class name unproven.
+class OffsetSphereShape : public SphereShape {
+public:
+    virtual void vf1C(void);
+    virtual void vf28(void);
+    virtual ~OffsetSphereShape(void) {}
+};
+
+// MATCHING-AID (transitional): constructors still written as C store these vtables, and sphcoll's file loader
+// builds a SphereShape in place, by their linker names.
+extern "C" void* __vt__11SphereShape[];
+extern "C" void* __vt__14BoxSphereShape[];
+extern "C" u8* __ct__11SphereShapeFUlUl(u8* p, u32 data, u32 swap);
 u8* fn_801A1520(u8* p, u32 a, u32 swap);
-void fn_8019F1A4(u8* p);
-void fn_8019F03C(u8* p);
 void fn_801A49FC(u8* p);
 void fn_801A49E8(u8* p);
 void fn_801A44D4(u8* l);
@@ -2301,12 +2356,9 @@ CollShape::CollShape(u32 a, u32 swap) {
     U32(p, 0xC) = a + 4;
 }
 
-extern void* __vt__11SphereShape[];
-
 // Sphere volume constructor from file data (byte-swapped when `swap`).
-u8* fn_8019EDB8(u8* p, u32 a, u32 swap) {
-    __ct__9CollShapeFUlUl(p, a, swap);
-    *(void**)p = __vt__11SphereShape;
+SphereShape::SphereShape(u32 a, u32 swap) : CollShape(a, swap) {
+    u8* p = (u8*)this;
     if (swap) {
         Swap32(p + 0x24);
         f32* w = (f32*)(p + 0x28);
@@ -2325,7 +2377,6 @@ u8* fn_8019EDB8(u8* p, u32 a, u32 swap) {
     F32(p, 0x44) = 0.0f;
     F32(p, 0x48) = 0.0f;
     F32(p, 0x50) = 0.0f;
-    return p;
 }
 
 void fn_8019EECC(u8* p, RVec3* v) {
@@ -2344,7 +2395,8 @@ struct CVolume {
 };
 
 // World centre = frame * local centre.
-void fn_8019EF00(CVolume* v) {
+void SphereShape::vf0C(void) {
+    CVolume* v = (CVolume*)this;
     CFrame* f = v->frame;
     MulVec(&v->world, &v->local, f);
     v->world.x = v->world.x + f->t.x;
@@ -2352,7 +2404,8 @@ void fn_8019EF00(CVolume* v) {
     v->world.z = v->world.z + f->t.z;
 }
 
-void fn_8019F03C(u8* p) {
+void SphereShape::vf28(void) {
+    u8* p = (u8*)this;
     U8(p, 0x4C) = 0;
     F32(p, 0x40) = 0.0f;
     F32(p, 0x44) = 0.0f;
@@ -2365,7 +2418,8 @@ void fn_8019F03C(u8* p) {
 void fn_802E317C(const char* fmt, ...);
 
 // Collides sphere `p` against volume `o` by its type tag.
-void fn_8019F064(u8* p, u8* o) {
+void SphereShape::vf10(u8* o) {
+    u8* p = (u8*)this;
     switch (S32(o, 0x18)) {
     case 'RAGD':
         break;
@@ -2399,25 +2453,30 @@ void fn_8019F064(u8* p, u8* o) {
     }
 }
 
-void fn_8019F1A4(u8* p) { fn_8019AC44(p, (f32*)(p + 0x34), (f32*)(p + 0x40), F32(p, 0x24)); }
+void SphereShape::vf14(void) {
+    u8* p = (u8*)this; fn_8019AC44(p, (f32*)(p + 0x34), (f32*)(p + 0x40), F32(p, 0x24)); }
 
-void fn_8019F1B4(u8* p, u32 a, u32 b, u32 c, u32 d) { fn_8019DDFC((f32*)a, (f32*)b, (f32*)c, (f32*)d, (f32*)(p + 0x34), F32(p, 0x24)); }
+int SphereShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
+    u8* p = (u8*)this;
+    return fn_8019DDFC((const f32*)from, (const f32*)dir, t, (f32*)n, (f32*)(p + 0x34), F32(p, 0x24));
+}
 
-void fn_8019F1D4(const u8* p, RVec3* lo, RVec3* hi) {
+void SphereShape::vf38(RVec3* lo, RVec3* hi) const {
     RVec3 c;
     RVec3 e;
-    f32 r = F32(p, 0x24);
+    f32 r = F32(((const u8*)this), 0x24);
     e.x = r;
     e.y = r;
     e.z = r;
-    c.x = F32(p, 0x34);
-    c.y = F32(p, 0x38);
-    c.z = F32(p, 0x3C);
+    c.x = F32(((const u8*)this), 0x34);
+    c.y = F32(((const u8*)this), 0x38);
+    c.z = F32(((const u8*)this), 0x3C);
     MulAdd(&lo->x, &c.x, &e.x, lbl_805622DC);
     MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
 }
 
-void fn_8019F248(u8* p) {
+void SphereShape::vf4C(void) {
+    u8* p = (u8*)this;
     f32 r = F32(p, 0x24);
     r = r > 0.2f ? r : 0.2f;
     fn_801E3FC8(p + 0x34, r, lbl_8055E598.value);
@@ -2426,7 +2485,8 @@ void fn_8019F248(u8* p) {
 void fn_802E30C8(const char* fmt, ...);
 
 // Collides flat sphere `p` against volume `o` by its type tag.
-void fn_8019F26C(u8* p, u8* o) {
+void FlatSphereShape::vf10(u8* o) {
+    u8* p = (u8*)this;
     switch (S32(o, 0x18)) {
     case 'RAGD':
         break;
@@ -2458,18 +2518,11 @@ void fn_8019F26C(u8* p, u8* o) {
     }
 }
 
-void fn_8019F3D0(u8* p) {}
-
-u8* fn_8019F3D4(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
+void FlatSphereShape::vf14(void) {}
 
 // Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
-void fn_8019F414(u8* p) {
+void AttachedSphereShape::vf0C(void) {
+    u8* p = (u8*)this;
     u8* o = PTR(p, 0x4);
     u8* m = PTR(p, 0x54);
     PVec3 t = *(PVec3*)(m + 0x30);
@@ -2483,28 +2536,28 @@ void fn_8019F414(u8* p) {
     if (o) {
         fn_8019EECC(o, (RVec3*)(p + 0x28));
     }
-    fn_8019EF00((CVolume*)p);
+    ((SphereShape*)p)->SphereShape::vf0C();
 }
 
 // Projects v onto the plane of p's frame row 1 (the result feeds a debug view that is compiled out).
-void fn_8019F4D4(u8* p, const RVec3* v) {
-    ((CollShape*)p)->CollShape::vf24(v);
-    f32 d = -PSVECDotProduct(&((CFrame*)PTR(p, 0xC))->m[3], v);
-    CFrame* f = (CFrame*)PTR(p, 0xC);
+void AttachedSphereShape::vf24(const RVec3* v) {
+    ((CollShape*)((u8*)this))->CollShape::vf24(v);
+    f32 d = -PSVECDotProduct(&((CFrame*)PTR(((u8*)this), 0xC))->m[3], v);
+    CFrame* f = (CFrame*)PTR(((u8*)this), 0xC);
     f32 x = v->x + f->m[3] * d;
     f32 y = v->y + f->m[4] * d;
     f32 z = v->z + f->m[5] * d;
     BoxCorner c(x, y, z);
 }
 
-void fn_8019F560(u8* p) { fn_8019F1A4(p); }
+void AttachedSphereShape::vf14(void) {
+    u8* p = (u8*)this; ((SphereShape*)p)->SphereShape::vf14(); }
 
 static inline void InitVolume(u8* s, u32 id, u32 owner) {
     U32(s, 0xC) = id;
     U32(s, 0x4) = owner;
 }
 
-extern void* lbl_80333A58[];
 
 // Box volume (half sizes hx, hy, hz): a sphere bounding the largest half size, then the box fields.
 u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f32 a, f32 hx, f32 hy, f32 hz) {
@@ -2537,7 +2590,7 @@ u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f3
     if (owner) {
         fn_8019EECC((u8*)owner, (RVec3*)(p + 0x28));
     }
-    *(void**)p = lbl_80333A58;
+    *(void**)p = __vt__14BoxSphereShape;
     F32(p, 0x54) = a;
     F32(p, 0x58) = 0.5f * hx;
     F32(p, 0x5C) = 0.5f * hy;
@@ -2569,8 +2622,9 @@ u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f3
     return p;
 }
 
-void fn_8019F6F0(u8* p) {
-    fn_8019F03C(p);
+void BoxSphereShape::vf28(void) {
+    u8* p = (u8*)this;
+    ((SphereShape*)p)->SphereShape::vf28();
     for (int i = 0; i < 24; i++) {
         ((SphCache*)p)->v[i] = 0.0f;
     }
@@ -2598,7 +2652,8 @@ static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  
 // the box floats instead: buoyancy from the submerged depth on a bobbing water line, and drag.
 #pragma push
 #pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
-void fn_8019F780(u8* p) {
+void BoxSphereShape::vf14(void) {
+    u8* p = (u8*)this;
     RVec3 at;
     RVec3 pos;
     RVec3 nrm;
@@ -2738,10 +2793,12 @@ void fn_8019F780(u8* p) {
 }
 #pragma pop
 
-void fn_8019FF88(u8* p) { ((CollShape*)p)->CollShape::vf1C(); }
+void OffsetSphereShape::vf1C(void) {
+    u8* p = (u8*)this; ((CollShape*)p)->CollShape::vf1C(); }
 
-void fn_8019FF8C(u8* p) {
-    fn_8019F03C(p);
+void OffsetSphereShape::vf28(void) {
+    u8* p = (u8*)this;
+    ((SphereShape*)p)->SphereShape::vf28();
     F32(p, 0x28) = F32(p, 0x54);
     F32(p, 0x2C) = F32(p, 0x58);
     F32(p, 0x30) = F32(p, 0x5C);
@@ -2815,8 +2872,6 @@ void fn_801A01E0(const u8* p, RVec3* lo, RVec3* hi) {
     MulAdd(&lo->x, &c.x, &e.x, lbl_805622DC);
     MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
 }
-
-extern void* __vt__11SphereShape[];
 
 void fn_801A0378(u8* p, u8* s);
 extern const f32 lbl_805622D0;  // 0.0
@@ -4282,7 +4337,7 @@ u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
         break;
     case 'SPHR':
         if (vol) {
-            vol = fn_8019EDB8(vol, (u32)o, swap);
+            vol = __ct__11SphereShapeFUlUl(vol, (u32)o, swap);
         }
         PTR(o, 0x3C) = vol;
         break;
@@ -4357,35 +4412,8 @@ u8* fn_801A4FC0(u8* p, int del) {
     return p;
 }
 
-u8* fn_801A5000(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_801A5040(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_801A5080(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_801A50C0(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-f32 fn_801A5100(u8* p) { return F32(p, 0x24); }
+f32 SphereShape::Radius(void) {
+    u8* p = (u8*)this; return F32(p, 0x24); }
 
 void fn_801A5108(u8* p) { S32(p, 0x180) = -1; }
 
@@ -4464,9 +4492,6 @@ void* lbl_80333868[22] = {(void*)0, (void*)0, (void*)fn_801A010C, (void*)fn_801A
 void* __vt__8BoxShape[22] = {(void*)0, (void*)0, (void*)fn_801A2434, (void*)vf0C__9CollShapeFv, (void*)fn_801A1DD4, (void*)vf14__9CollShapeFv, (void*)fn_801A1E7C, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)0};
 void* __vt__9TubeShape[20] = {(void*)0, (void*)0, (void*)fn_801A4FC0, (void*)vf0C__9CollShapeFv, (void*)fn_801A1ABC, (void*)fn_801A1B9C, (void*)fn_801A15CC, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A18D4, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A1CA0};
 void* lbl_80333968[20] = {(void*)0, (void*)0, (void*)fn_8019E834, (void*)vf0C__9CollShapeFv, (void*)0, (void*)vf14__9CollShapeFv, (void*)fn_801A15CC, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)0, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A17B8};
-void* lbl_803339B8[40] = {(void*)0, (void*)0, (void*)fn_801A0040, (void*)fn_801A014C, (void*)fn_801A0464, (void*)fn_801A0F10, (void*)fn_801A1148, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_801A1250, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A01E0, (void*)fn_801A2CA4, (void*)fn_801A1360, (void*)fn_801A12C4, (void*)fn_801A5108, (void*)fn_801A13F4, (void*)0, (void*)0, (void*)fn_801A5000, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F1A4, (void*)fn_8019F1B4, (void*)fn_8019FF88, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019FF8C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
-void* lbl_80333A58[40] = {(void*)0, (void*)0, (void*)fn_801A5040, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F780, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019F6F0, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248, (void*)0, (void*)0, (void*)fn_801A5080, (void*)fn_8019F414, (void*)fn_8019F064, (void*)fn_8019F560, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)fn_8019F4D4, (void*)fn_8019F03C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
-void* __vt__15FlatSphereShape[20] = {(void*)0, (void*)0, (void*)fn_801A50C0, (void*)fn_8019EF00, (void*)fn_8019F26C, (void*)fn_8019F3D0, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019F03C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
-void* __vt__11SphereShape[20] = {(void*)0, (void*)0, (void*)fn_8019F3D4, (void*)fn_8019EF00, (void*)fn_8019F064, (void*)fn_8019F1A4, (void*)fn_8019F1B4, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_8019F03C, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_8019F1D4, (void*)fn_801A5100, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_8019F248};
+void* lbl_803339B8[20] = {(void*)0, (void*)0, (void*)fn_801A0040, (void*)fn_801A014C, (void*)fn_801A0464, (void*)fn_801A0F10, (void*)fn_801A1148, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_801A1250, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A01E0, (void*)fn_801A2CA4, (void*)fn_801A1360, (void*)fn_801A12C4, (void*)fn_801A5108, (void*)fn_801A13F4};
 
 }
