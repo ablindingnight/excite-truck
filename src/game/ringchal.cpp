@@ -542,7 +542,7 @@ namespace {
 struct PlayerData;
 class Arena : public Preloader {
 public:
-    int Loop3_CountDynos(int n);
+    int Loop3_CountDynos(int n, int& i);
 public:
 public:
     Arena(void);
@@ -1292,13 +1292,13 @@ Arena::Arena(void) {
 PlayerList::PlayerList(void) : ArrayRef<PlayerData*>(storage, 8) {}
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline int Arena::Loop3_CountDynos(int n) {
-    int c;
-    int i;
-    for (i = 0; i < sets->count; i++) {
-        c = 0;
+inline int Arena::Loop3_CountDynos(int n, int& i) {
+    const int count = sets->count;
+    for (i = 0; i < count; i++) {
+        int c = 0;
+        const ObjSet& set = sets->data[i];
         int j;
-        for (j = 0; j < sets->data[i].infos->count; j++) {
+        for (j = 0; j < set.infos->count; j++) {
             if (sets->data[i].infos->data[j].type == 0) {
                 c++;
             }
@@ -1309,11 +1309,11 @@ inline int Arena::Loop3_CountDynos(int n) {
 }
 
 int Arena::CountDynos(void) {
-    int n;
-    n = 0;
+    int n = 0;
     int i;
-    return Loop3_CountDynos(n);
+    return Loop3_CountDynos(n, i);
 }
+
 
 void Arena::Spawn(void) {
     struct { ObjInfo* o; int j; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
