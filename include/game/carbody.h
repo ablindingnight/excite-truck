@@ -6,7 +6,8 @@
 
 // The car body (0x2700 bytes; vtable emitted by carbody.cpp): the rigid body every car, net car and trailer is.
 // One declaration for carbody, netcar, springcar and trailer (port ODR work, 2026-11-16). Most of carbody.cpp still
-// reaches the body through byte offsets; the named fields are the ones the other units read. Names unproven.
+// reaches the body through byte offsets; the fields from 0x1EC are the census of carbody's own accesses
+// (fXXXX = offset, typed by the accessor; 2026-11-16 offset census) plus the names the other units use. Names unproven.
 
 class StatsSrc;
 
@@ -41,6 +42,29 @@ struct CbWheel {
     u32 flags;       // offset 0x70
 };
 
+// A plain 3-vector (carbody's physics tables).
+// Plain 3-vector without constructors: copies move words.
+struct HVec {
+    f32 x, y, z;
+};
+
+// One wheel's setup inside CbSetup.
+struct CbWheelSetup {
+    s32 w[9];
+};
+
+// Tuned car setup (0x138 bytes): read from the car's physics tables, kept twice in the body (0x32C, 0x464).
+struct CbSetup {
+    f32 mass;                                                           // 0x00
+    f32 f04, f08, f0C, f10, f14, f18, f1C, f20, f24, f28, f2C, f30;    // 0x04
+    s32 i34;                                                            // 0x34
+    s32 i38[6];                                                         // 0x38
+    f32 f50, f54, f58, f5C, f60, f64, f68, f6C, f70, f74, f78, f7C;    // 0x50
+    CbWheelSetup wheels[4];                                             // 0x80
+    f32 f110, f114, f118, f11C, f120, f124, f128;                       // 0x110
+    HVec modelOffset;                                                   // 0x12C
+};
+
 // The state handed to a body's SetState (vtable 0x54).
 struct BodyState {
     RMtx mtx;   // offset 0x0
@@ -71,28 +95,172 @@ public:
     virtual void vf58(void);          // 0x58
     virtual void vf5C(void);          // 0x5C
 
-    s32 index;             // offset 0x1EC
-    u8 pad1F0[0x270 - 0x1F0];
-    StatsSrc* src;         // offset 0x270
-    u8 pad274[0x59C - 0x274];
-    s32 model;             // offset 0x59C
-    u8 pad5A0[0x23AC - 0x5A0];
-    CbWheel wheels[4];     // offset 0x23AC
-    u8 pad257C[0x25D4 - 0x257C];
-    f32 speed;             // offset 0x25D4
-    u8 pad25D8[0x2610 - 0x25D8];
-    s32 link;              // offset 0x2610
-    u8 pad2614[0x2620 - 0x2614];
-    s32 airborne;          // offset 0x2620
-    u8 pad2624[0x267C - 0x2624];
-    s32 f267C;             // offset 0x267C
-    u8 pad2680[0x268C - 0x2680];
-    s32 a268C;             // offset 0x268C
-    f32 f2690;             // offset 0x2690
-    f32 f2694;             // offset 0x2694
-    u8 pad2698[0x26B4 - 0x2698];
-    RVec3 push;            // offset 0x26B4
-    u8 pad26C0[0x2700 - 0x26C0];
+    s32 index;                   // offset 0x1EC
+    s32 f1F0;                    // offset 0x1F0
+    u8 pad1F4[0x25C - 0x1F4];
+    s32 f25C;                    // offset 0x25C
+    u8 f260;                     // offset 0x260
+    u8 pad261[0x268 - 0x261];
+    u8* f268;                    // offset 0x268
+    s32 f26C;                    // offset 0x26C
+    StatsSrc* src;               // offset 0x270
+    u8 pad274[0x2A4 - 0x274];
+    f32 f2A4;                    // offset 0x2A4
+    f32 f2A8;                    // offset 0x2A8
+    f32 f2AC;                    // offset 0x2AC
+    u8 pad2B0[0x2C8 - 0x2B0];
+    f32 f2C8;                    // offset 0x2C8
+    f32 f2CC;                    // offset 0x2CC
+    f32 f2D0;                    // offset 0x2D0
+    f32 f2D4;                    // offset 0x2D4
+    f32 f2D8;                    // offset 0x2D8
+    u8 pad2DC[0x2EC - 0x2DC];
+    f32 f2EC;                    // offset 0x2EC
+    u8 pad2F0[0x2F4 - 0x2F0];
+    f32 f2F4;                    // offset 0x2F4
+    f32 f2F8;                    // offset 0x2F8
+    f32 f2FC;                    // offset 0x2FC
+    u8 pad300[0x318 - 0x300];
+    f32 f318;                    // offset 0x318
+    u8 pad31C[0x328 - 0x31C];
+    u8* f328;                    // offset 0x328
+    CbSetup setupA;              // offset 0x32C
+    CbSetup setupB;              // offset 0x464
+    s32 model;                   // offset 0x59C
+    s32 f5A0;                    // offset 0x5A0
+    s32 f5A4;                    // offset 0x5A4
+    f32 f5A8;                    // offset 0x5A8
+    f32 f5AC;                    // offset 0x5AC
+    f32 f5B0;                    // offset 0x5B0
+    f32 f5B4;                    // offset 0x5B4
+    f32 f5B8;                    // offset 0x5B8
+    f32 f5BC;                    // offset 0x5BC
+    f32 f5C0;                    // offset 0x5C0
+    f32 f5C4;                    // offset 0x5C4
+    f32 f5C8;                    // offset 0x5C8
+    f32 f5CC;                    // offset 0x5CC
+    f32 f5D0;                    // offset 0x5D0
+    f32 f5D4;                    // offset 0x5D4
+    f32 f5D8;                    // offset 0x5D8
+    f32 f5DC;                    // offset 0x5DC
+    f32 f5E0;                    // offset 0x5E0
+    f32 f5E4;                    // offset 0x5E4
+    s32 f5E8;                    // offset 0x5E8
+    f32 f5EC;                    // offset 0x5EC
+    f32 f5F0;                    // offset 0x5F0
+    f32 f5F4;                    // offset 0x5F4
+    u8 pad5F8[0x1E3C - 0x5F8];
+    s32 f1E3C;                   // offset 0x1E3C
+    s32 f1E40;                   // offset 0x1E40
+    u8 pad1E44[0x20DC - 0x1E44];
+    s32 f20DC;                   // offset 0x20DC
+    u8 pad20E0[0x23AC - 0x20E0];
+    CbWheel wheels[4];           // offset 0x23AC
+    u8* f257C;                   // offset 0x257C
+    u8* f2580;                   // offset 0x2580
+    u8* f2584;                   // offset 0x2584
+    f32 f2588;                   // offset 0x2588
+    f32 f258C;                   // offset 0x258C
+    f32 f2590;                   // offset 0x2590
+    f32 f2594;                   // offset 0x2594
+    f32 f2598;                   // offset 0x2598
+    u8 f259C;                    // offset 0x259C
+    u8 f259D;                    // offset 0x259D
+    u8 pad259E[0x25A0 - 0x259E];
+    f32 f25A0;                   // offset 0x25A0
+    f32 f25A4;                   // offset 0x25A4
+    f32 f25A8;                   // offset 0x25A8
+    f32 f25AC;                   // offset 0x25AC
+    u8 pad25B0[0x25BC - 0x25B0];
+    f32 f25BC;                   // offset 0x25BC
+    u8 f25C0;                    // offset 0x25C0
+    u8 pad25C1[0x25C4 - 0x25C1];
+    f32 f25C4;                   // offset 0x25C4
+    u8 f25C8;                    // offset 0x25C8
+    u8 pad25C9[0x25CC - 0x25C9];
+    f32 f25CC;                   // offset 0x25CC
+    f32 f25D0;                   // offset 0x25D0
+    f32 speed;                   // offset 0x25D4
+    f32 f25D8;                   // offset 0x25D8
+    f32 f25DC;                   // offset 0x25DC
+    f32 f25E0;                   // offset 0x25E0
+    f32 f25E4;                   // offset 0x25E4
+    f32 f25E8;                   // offset 0x25E8
+    f32 f25EC;                   // offset 0x25EC
+    f32 f25F0;                   // offset 0x25F0
+    f32 f25F4;                   // offset 0x25F4
+    f32 f25F8;                   // offset 0x25F8
+    f32 f25FC;                   // offset 0x25FC
+    f32 f2600;                   // offset 0x2600
+    f32 f2604;                   // offset 0x2604
+    f32 f2608;                   // offset 0x2608
+    u8 f260C;                    // offset 0x260C
+    u8 f260D;                    // offset 0x260D
+    u8 f260E;                    // offset 0x260E
+    u8 pad260F[0x2610 - 0x260F];
+    s32 link;                    // offset 0x2610
+    f32 f2614;                   // offset 0x2614
+    f32 f2618;                   // offset 0x2618
+    f32 f261C;                   // offset 0x261C
+    s32 airborne;                // offset 0x2620
+    u8 f2624;                    // offset 0x2624
+    u8 f2625;                    // offset 0x2625
+    u8 pad2626[0x2628 - 0x2626];
+    f32 f2628;                   // offset 0x2628
+    f32 f262C;                   // offset 0x262C
+    f32 f2630;                   // offset 0x2630
+    f32 f2634;                   // offset 0x2634
+    s32 f2638;                   // offset 0x2638
+    s32 f263C;                   // offset 0x263C
+    u8 f2640;                    // offset 0x2640
+    u8 pad2641[0x2644 - 0x2641];
+    s32 f2644;                   // offset 0x2644
+    s32 f2648;                   // offset 0x2648
+    f32 f264C;                   // offset 0x264C
+    f32 f2650;                   // offset 0x2650
+    f32 f2654;                   // offset 0x2654
+    f32 f2658;                   // offset 0x2658
+    f32 f265C;                   // offset 0x265C
+    f32 f2660;                   // offset 0x2660
+    f32 f2664;                   // offset 0x2664
+    f32 f2668;                   // offset 0x2668
+    f32 f266C;                   // offset 0x266C
+    f32 f2670;                   // offset 0x2670
+    f32 f2674;                   // offset 0x2674
+    s32 f2678;                   // offset 0x2678
+    s32 f267C;                   // offset 0x267C
+    u8 f2680;                    // offset 0x2680
+    u8 pad2681[0x2684 - 0x2681];
+    f32 f2684;                   // offset 0x2684
+    f32 f2688;                   // offset 0x2688
+    s32 a268C;                   // offset 0x268C
+    f32 f2690;                   // offset 0x2690
+    f32 f2694;                   // offset 0x2694
+    f32 f2698;                   // offset 0x2698
+    f32 f269C;                   // offset 0x269C
+    u8 pad26A0[0x26A8 - 0x26A0];
+    f32 f26A8;                   // offset 0x26A8
+    u8 f26AC;                    // offset 0x26AC
+    u8 pad26AD[0x26B0 - 0x26AD];
+    s32 f26B0;                   // offset 0x26B0
+    RVec3 push;                  // offset 0x26B4
+    u8* f26C0;                   // offset 0x26C0
+    u8* f26C4;                   // offset 0x26C4
+    u8* f26C8;                   // offset 0x26C8
+    f32 f26CC;                   // offset 0x26CC
+    f32 f26D0;                   // offset 0x26D0
+    s32 f26D4;                   // offset 0x26D4
+    f32 f26D8;                   // offset 0x26D8
+    f32 f26DC;                   // offset 0x26DC
+    u8 f26E0;                    // offset 0x26E0
+    u8 pad26E1[0x26E4 - 0x26E1];
+    f32 f26E4;                   // offset 0x26E4
+    f32 f26E8;                   // offset 0x26E8
+    f32 f26EC;                   // offset 0x26EC
+    f32 f26F0;                   // offset 0x26F0
+    f32 f26F4;                   // offset 0x26F4
+    f32 f26F8;                   // offset 0x26F8
+    f32 f26FC;                   // offset 0x26FC
 };
 
 #endif

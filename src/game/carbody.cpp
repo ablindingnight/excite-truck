@@ -118,10 +118,6 @@ struct BVec {
     f32 x, y, z;
 };
 
-// Plain 3-vector without constructors: copies move words.
-struct HVec {
-    f32 x, y, z;
-};
 
 struct CollShape;
 
@@ -358,25 +354,27 @@ void fn_801819A0(u8* p, const u8* cfg, f32 a, f32 b, f32 c) {
 static f32 SafeInv(f32 x) { return 1.0f / FMax(x, 0.01f); } /* Helper name unproven */
 
 f32 fn_80181A14(u8* p) {
+    CarBody* cb = (CarBody*)p;
     f32 k;
-    if (U8(p, 0x259D)) {
+    if (cb->f259D) {
         k = driveTune.v[6];
     } else {
         k = landingTune.v[6];
     }
-    return F32(p, 0x2D8) * k;
+    return cb->f2D8 * k;
 }
 
 f32 fn_80181A48(u8* p) {
+    CarBody* cb = (CarBody*)p;
     f32 k;
-    if (U8(p, 0x259D)) {
+    if (cb->f259D) {
         k = driveTune.v[7];
     } else if (lbl_8055E4F4) {
         k = heatTune.v[13];
     } else {
         k = landingTune.v[7];
     }
-    return F32(p, 0x2D0) + k;
+    return cb->f2D0 + k;
 }
 
 f32 fn_80181A94(void) {
@@ -517,22 +515,7 @@ struct CbDescBlock {
     s32 w4C;    // 0x4C
 };
 
-// One wheel's setup inside CbSetup.
-struct CbWheelSetup {
-    s32 w[9];
-};
 
-// Tuned car setup (0x138 bytes): read from the car's physics tables, kept twice in the body (0x32C, 0x464).
-struct CbSetup {
-    f32 mass;                                                           // 0x00
-    f32 f04, f08, f0C, f10, f14, f18, f1C, f20, f24, f28, f2C, f30;    // 0x04
-    s32 i34;                                                            // 0x34
-    s32 i38[6];                                                         // 0x38
-    f32 f50, f54, f58, f5C, f60, f64, f68, f6C, f70, f74, f78, f7C;    // 0x50
-    CbWheelSetup wheels[4];                                             // 0x80
-    f32 f110, f114, f118, f11C, f120, f124, f128;                       // 0x110
-    HVec modelOffset;                                                   // 0x12C
-};
 
 struct ValVec3C {
     f32 x, y, z;
@@ -604,23 +587,24 @@ extern "C" {
 /* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
    member body, MWCC keeps this+K in an extra register and the code differs. */
 void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
+    CarBody* cb = (CarBody*)p;
     char path[0x50];
     CbSetup setup;
-    U8(p, 0x2680) = 0;
-    S32(p, 0x59C) = S32(desc, 0xE4);
-    S32(p, 0x5A4) = S32(desc, 0xE8);
-    S32(p, 0x5A0) = S32(desc, 0xDC);
-    if (S32(p, 0x5A0) == 0) {
-        S32(p, 0x5A0) = 0x0FF807FF;
+    cb->f2680 = 0;
+    cb->model = S32(desc, 0xE4);
+    cb->f5A4 = S32(desc, 0xE8);
+    cb->f5A0 = S32(desc, 0xDC);
+    if (cb->f5A0 == 0) {
+        cb->f5A0 = 0x0FF807FF;
     }
     if (U32(fn_801769CC(), 0x4) & 0x400) {
         U32(p, 0x5A0) |= 0x80000000;
     }
-    S32(p, 0x1EC) = S32(desc, 0xE0);
-    S32(p, 0x1F0) = S32(desc, 0x68);
+    cb->index = S32(desc, 0xE0);
+    cb->f1F0 = S32(desc, 0x68);
     *(CbIdent*)(p + 0x1F4) = *(CbIdent*)(desc + 0x6C);
-    S32(p, 0x26C) = fn_802792E4((char*)(p + 0x234));
-    s32 id = S32(p, 0x25C);
+    cb->f26C = fn_802792E4((char*)(p + 0x234));
+    s32 id = cb->f25C;
     *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)(desc + 0x18);
     S32(p, 0x328) = fn_80279874(id);
     if (!fn_8027AA48()) {
@@ -629,36 +613,36 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     fn_801345D8(path, 0x50, "%s.car/physics.val", (char*)(p + 0x234));
     CbValueTable* table = fn_80131808(path);
     CbValueNode* chassis = table->FindChild("Chassis");
-    F32(p, 0x5B4) = chassis->GetFloat("chase_camera_dist", 0.0f);
-    F32(p, 0x5B8) = chassis->GetFloat("chase_camera_height", 0.0f);
+    cb->f5B4 = chassis->GetFloat("chase_camera_dist", 0.0f);
+    cb->f5B8 = chassis->GetFloat("chase_camera_height", 0.0f);
     const ValVec3C& head = chassis->GetVec3("head_pos");
-    F32(p, 0x5C4) = head.x;
-    F32(p, 0x5C8) = head.y;
-    F32(p, 0x5D0) = 0.2f * head.x;
-    F32(p, 0x5D4) = head.y + 3.0f;
+    cb->f5C4 = head.x;
+    cb->f5C8 = head.y;
+    cb->f5D0 = 0.2f * head.x;
+    cb->f5D4 = head.y + 3.0f;
     ValVec3C back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
-    F32(p, 0x5CC) = head.z;
-    F32(p, 0x5D8) = head.z;
-    F32(p, 0x5D0) = back.x;
-    F32(p, 0x5D4) = back.y;
-    F32(p, 0x5C4) = F32(p, 0x5C4) * 0.0254f;
-    F32(p, 0x5C8) = F32(p, 0x5C8) * 0.0254f;
-    F32(p, 0x5CC) = F32(p, 0x5CC) * 0.0254f;
-    F32(p, 0x5D0) = back.x * 0.0254f;
-    F32(p, 0x5D4) = back.y * 0.0254f;
-    F32(p, 0x5D8) = back.z * 0.0254f;
-    F32(p, 0x5C0) = 0.0174f * chassis->GetFloat("head_pitch");
+    cb->f5CC = head.z;
+    cb->f5D8 = head.z;
+    cb->f5D0 = back.x;
+    cb->f5D4 = back.y;
+    cb->f5C4 = cb->f5C4 * 0.0254f;
+    cb->f5C8 = cb->f5C8 * 0.0254f;
+    cb->f5CC = cb->f5CC * 0.0254f;
+    cb->f5D0 = back.x * 0.0254f;
+    cb->f5D4 = back.y * 0.0254f;
+    cb->f5D8 = back.z * 0.0254f;
+    cb->f5C0 = 0.0174f * chassis->GetFloat("head_pitch");
     const char* treeClasses = "light\0medium\0heavy\0\0";
     const char* key = "treehit_class";
-    S32(p, 0x5E8) = chassis->Has(key) ? chassis->GetEnum(key, treeClasses) : 1;
-    GetPlayerLook((PlayerLook*)(p + 0x2C4), S32(p, 0x25C));
+    cb->f5E8 = chassis->Has(key) ? chassis->GetEnum(key, treeClasses) : 1;
+    GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->f25C);
     fn_801B86BC(S32(desc, 0xE0), p + 0x2C4);
-    U8(p, 0x25C0) = (U32(FindVehicle(S32(p, 0x25C)), 0xA0) >> 2) & 1;
+    cb->f25C0 = (U32(FindVehicle(cb->f25C), 0xA0) >> 2) & 1;
     fn_80279F58(&setup, table);
     fn_8027A8B4(&setup, fn_8027A798((char*)(p + 0x234)));
-    setup.mass = setup.mass * F32(p, 0x2EC);
-    setup.f110 = setup.f110 * (0.5f * (F32(p, 0x2F4) + F32(p, 0x2F8)));
-    setup.f114 = setup.f114 * F32(p, 0x2FC);
+    setup.mass = setup.mass * cb->f2EC;
+    setup.f110 = setup.f110 * (0.5f * (cb->f2F4 + cb->f2F8));
+    setup.f114 = setup.f114 * cb->f2FC;
     for (s32 i = 0; i < 4; i++) {
         CbValueNode* axle = table->FindChild((i == 0 || i == 1) ? "Front" : "Rear");
         F32(p + i * 0x74, 0x23E8) = F32(desc + i * 4, 0x10C);
@@ -670,32 +654,32 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     F32(desc, 0x10) = setup.f08 / 0.042279866f;
     F32(desc, 0x14) = setup.f0C / 0.042279866f;
     ((RigidBody*)p)->RigidBody::Init((BodyDesc*)desc);
-    PTR(p, 0x270) = fn_801B2EDC(S32(p, 0x1EC), p);
-    fn_801795D8(p, S32(p, 0x1EC));
-    F32(p, 0x5AC) = -(0.0254f * chassis->GetFloat("susp_y", 0.0f));
-    F32(p, 0x5B0) = setup.f128;
-    F32(p, 0x5A8) = 444.44446f;
+    ((u8*&)cb->src) = fn_801B2EDC(cb->index, p);
+    fn_801795D8(p, cb->index);
+    cb->f5AC = -(0.0254f * chassis->GetFloat("susp_y", 0.0f));
+    cb->f5B0 = setup.f128;
+    cb->f5A8 = 444.44446f;
     if (U32(fn_801769CC(), 0x4) != 0x180201) {
-        F32(p, 0x5A8) = 0.44444445f * (F32(p, 0x2C8) + chassis->GetFloat("speed_limiter", F32(p, 0x5A8)));
+        cb->f5A8 = 0.44444445f * (cb->f2C8 + chassis->GetFloat("speed_limiter", cb->f5A8));
     } else if (!lbl_8055E4F7) {
         lbl_8055E4F7 = 1;
         fn_802E30C8("%s", "CAR: Disabling speed limiter in zone mode.");
     }
-    F32(p, 0x5DC) = chassis->GetFloat("gravity_boost", 0.0f);
-    F32(p, 0x5E0) = chassis->GetFloat("down_gravity_boost", F32(p, 0x5DC));
-    U8(p, 0x26E0) = chassis->GetBool("squishy", 0);
-    F32(p, 0x30) = setup.modelOffset.x;
-    F32(p, 0x34) = setup.modelOffset.y;
-    F32(p, 0x38) = setup.modelOffset.z;
+    cb->f5DC = chassis->GetFloat("gravity_boost", 0.0f);
+    cb->f5E0 = chassis->GetFloat("down_gravity_boost", cb->f5DC);
+    cb->f26E0 = chassis->GetBool("squishy", 0);
+    cb->offset.x = setup.modelOffset.x;
+    cb->offset.y = setup.modelOffset.y;
+    cb->offset.z = setup.modelOffset.z;
     ((CollVolume*)p)->CollVolume::vf20();
     if (U32(p, 0x10) == 'ACAR') {
         setup.f2C = 0.75f;
     }
-    *(CbSetup*)(p + 0x32C) = setup;
-    *(CbSetup*)(p + 0x464) = *(CbSetup*)(p + 0x32C);
-    fn_801BDA74(S32(p, 0x1EC), p + 0x32C);
+    *(CbSetup*)&cb->setupA = setup;
+    *(CbSetup*)&cb->setupB = *(CbSetup*)&cb->setupA;
+    fn_801BDA74(cb->index, (u8*)&cb->setupA);
     u8* wheels = 0;
-    fn_801BEB30(S32(p, 0x1EC), &wheels);
+    fn_801BEB30(cb->index, &wheels);
     for (int w = 0; w < 4; w++) {
         *(BVec*)(p + 0x23DC + w * 0x74) = BVec(F32(wheels, w * 0x10), F32(wheels, w * 0x10 + 4), F32(wheels, w * 0x10 + 8));
     }
@@ -704,22 +688,22 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     fn_8018C5A0(p, desc);
     fn_8018A654(p, desc);
     bool player = S32(desc, 0x0) == 'PCAR';
-    PTR(p, 0x257C) = fn_80209448(p);
+    cb->f257C = fn_80209448(p);
     if (player) {
-        PTR(p, 0x2580) = fn_80209D4C(p);
+        cb->f2580 = fn_80209D4C(p);
     } else {
-        PTR(p, 0x2580) = 0;
+        cb->f2580 = 0;
     }
-    PTR(p, 0x2584) = fn_8020DE74(p);
-    fn_801D108C(S32(p, 0x1EC));
+    cb->f2584 = fn_8020DE74(p);
+    fn_801D108C(cb->index);
     fn_80131818(table);
     u8 trees = 0;
     if (player && fn_8020503C("player_destroys_trees")) {
         trees = 1;
     }
-    U8(p, 0x25C8) = trees;
+    cb->f25C8 = trees;
     if (U32(fn_801769CC(), 0x4) == 0x180304) {
-        U8(p, 0x25C8) = 1;
+        cb->f25C8 = 1;
     }
     fn_801838C8(p);
 }
@@ -779,6 +763,7 @@ static inline void AddBodySphere(u8* p, u8* g, f32 x, f32 y, f32 z, const BVec* 
 // Builds the body's collision: two wheel contact corners at the "wheel" joint, then a group of twelve spheres
 // sized from the model's bounding box (front, middle and rear rows) and a box around the whole body.
 void fn_80182DF4(u8* p) {
+    CarBody* cb = (CarBody*)p;
     f32 minX = 0.0f;
     f32 maxX = 0.0f;
     f32 minY = 0.0f;
@@ -793,31 +778,31 @@ void fn_80182DF4(u8* p) {
     f32 zRear;
     f32 zFront;
     damp = 0.3f;
-    fn_802C7760(S32(p, 0x59C), &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
-    s32 wheel = fn_801E3004(S32(p, 0x59C), "wheel", -1);
+    fn_802C7760(cb->model, &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
+    s32 wheel = fn_801E3004(cb->model, "wheel", -1);
     if (wheel) {
         HVec* o = fn_801E3630(wheel);
-        AddBodyCorner(p, o->x, maxY + F32(p, 0x34) + 0.1016f, o->z, 2.0f * stiff);
-        AddBodyCorner(p, -o->x, maxY + F32(p, 0x34) + 0.1016f, o->z, 2.0f * stiff);
+        AddBodyCorner(p, o->x, maxY + cb->offset.y + 0.1016f, o->z, 2.0f * stiff);
+        AddBodyCorner(p, -o->x, maxY + cb->offset.y + 0.1016f, o->z, 2.0f * stiff);
         fn_801E323C(wheel);
     }
     minY = FMax(minY, 0.2f);
-    HVec c = *(HVec*)(p + 0x30);
+    HVec c = *(HVec*)&cb->offset;
     minX += c.x;
     maxX += c.x;
     minY += c.y;
     maxY += c.y;
     minZ += c.z;
     maxZ += c.z;
-    if (S32(p, 0x1F0) == 84 && !(U32(fn_801769CC(), 0x4) & 0x1000)) {
+    if (cb->f1F0 == 84 && !(U32(fn_801769CC(), 0x4) & 0x1000)) {
         maxZ -= 30.0f * 0.0254f;  // 30 in
     }
-    F32(p, 0x5BC) = maxZ;
+    cb->f5BC = maxZ;
     u8* g = (u8*)operator new(0x184, "car-volume");
     if (g) {
-        g = __ct__11SphereGroupFUlUl(g, p + 0x3C, p);
+        g = __ct__11SphereGroupFUlUl(g, (u8*)&cb->mtx, p);
     }
-    PTR(p, 0x268) = g;
+    cb->f268 = g;
     BVec rear(0.7f, 0.1f, 1.0f);
     BVec mid(0.7f, 0.1f, 1.0f);
     BVec front(0.7f, 0.1f, 1.0f);
@@ -837,32 +822,32 @@ void fn_80182DF4(u8* p) {
     f32 xFront = maxX - 0.44999998f;
     f32 nb = -b;
     f32 yr = 0.254f + yRear;
-    AddBodySphere(p, PTR(p, 0x268), nb, yr, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), 0.0f, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), -a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), 0.8f * -xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), 0.8f * xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), -xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), -xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), 0.0f, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, PTR(p, 0x268), xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, nb, yr, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, 0.0f, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, -a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, 0.8f * -xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, 0.8f * xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, -xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, -xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, 0.0f, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
+    AddBodySphere(p, cb->f268, xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
     BVec center(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.5f * (minZ + maxZ));
     u8* box = (u8*)operator new(0x74, "car_box");
     if (box) {
-        box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, p + 0x3C, &center, p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
+        box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)&cb->mtx, &center, p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
                           0.5f * (maxZ - minZ));
     }
-    fn_801A0444(PTR(p, 0x268), box);
-    ((CollVolume*)p)->AddShape((CollShape*)PTR(p, 0x268));
-    U8(p, 0x1E8) = 1;
-    ((CbShapeV*)PTR(p, 0x268))->SetGroup(0x6D);
+    fn_801A0444(cb->f268, box);
+    ((CollVolume*)p)->AddShape((CollShape*)cb->f268);
+    cb->b1E8 = 1;
+    ((CbShapeV*)cb->f268)->SetGroup(0x6D);
     if (U32(p, 0x10) == 'PCAR') {
-        ((CbShapeV*)PTR(p, 0x268))->SetMask(1);
+        ((CbShapeV*)cb->f268)->SetMask(1);
     } else {
-        ((CbShapeV*)PTR(p, 0x268))->SetMask(6);
+        ((CbShapeV*)cb->f268)->SetMask(6);
     }
 }
 
@@ -1070,96 +1055,97 @@ void fn_8018F6F8(u8* p);
 // Puts the body back to its start state: clears the suspension/sway/damage state, the joints and the
 // wheels, re-places the car on its start pose and reapplies the tuned setup.
 void fn_801838C8(u8* p) {
-    F32(p, 0x5E4) = 0.0f;
+    CarBody* cb = (CarBody*)p;
+    cb->f5E4 = 0.0f;
     fn_8018BE54(p, 1.0f);
-    F32(p, 0x5EC) = 0.0f;
-    F32(p, 0x5F0) = 1.0f;
-    F32(p, 0x26E4) = 0.0f;
-    F32(p, 0x26E8) = 0.0f;
-    F32(p, 0x26EC) = 0.0f;
-    F32(p, 0x26F0) = 0.0f;
-    F32(p, 0x26F4) = 0.0f;
-    F32(p, 0x26F8) = 0.0f;
-    F32(p, 0x26FC) = 0.0f;
+    cb->f5EC = 0.0f;
+    cb->f5F0 = 1.0f;
+    cb->f26E4 = 0.0f;
+    cb->f26E8 = 0.0f;
+    cb->f26EC = 0.0f;
+    cb->f26F0 = 0.0f;
+    cb->f26F4 = 0.0f;
+    cb->f26F8 = 0.0f;
+    cb->f26FC = 0.0f;
     fn_80189C64(p);
-    S32(p, 0x24) = S32(p, 0x28);
+    cb->nAdded = cb->nSub;
     fn_8018B0D0(p, 0);
-    F32(p, 0x25E8) = 0.0f;
-    F32(p, 0x25D8) = 0.0f;
-    F32(p, 0x25D4) = 0.0f;
-    F32(p, 0x25D0) = 0.0f;
-    F32(p, 0x25CC) = 0.0f;
-    F32(p, 0x25EC) = 0.0f;
-    F32(p, 0x25E4) = 0.0f;
-    F32(p, 0x25E0) = 0.0f;
-    F32(p, 0x25DC) = 0.0f;
-    F32(p, 0x25E8) = 1.0f;
-    F32(p, 0x25F8) = 0.0f;
-    F32(p, 0x25F4) = 0.0f;
-    F32(p, 0x25F0) = 0.0f;
-    F32(p, 0x25FC) = 0.0f;
-    F32(p, 0x2604) = 0.0f;
-    F32(p, 0x2600) = 0.0f;
-    F32(p, 0x2608) = 0.0f;
-    U8(p, 0x260C) = 0;
-    U8(p, 0x260D) = 0;
-    U8(p, 0x260E) = 0;
-    F32(p, 0x2614) = 0.0f;
-    F32(p, 0x2618) = 0.0f;
-    F32(p, 0x2594) = 0.0f;
-    F32(p, 0x2598) = 0.0f;
-    F32(p, 0x261C) = 0.0f;
-    F32(p, 0x2588) = 0.0f;
-    F32(p, 0x2590) = 0.0f;
-    F32(p, 0x258C) = -5.0f;
-    U8(p, 0x259C) = 0;
-    U8(p, 0x259D) = 0;
-    F32(p, 0x25BC) = 0.0f;
-    F32(p, 0x25C4) = 0.0f;
-    F32(p, 0x25A0) = 0.0f;
-    F32(p, 0x25A4) = 0.0f;
-    F32(p, 0x25A8) = 1.0f;
-    F32(p, 0x25AC) = 0.0f;
-    S32(p, 0x2620) = 0;
-    F32(p, 0x2654) = 0.0f;
-    F32(p, 0x2658) = 0.0f;
-    F32(p, 0x265C) = 0.0f;
-    F32(p, 0x2660) = 0.0f;
-    F32(p, 0x2664) = 0.0f;
-    F32(p, 0x2668) = 0.0f;
-    F32(p, 0x266C) = 0.0f;
-    F32(p, 0x2670) = 0.0f;
-    F32(p, 0x2674) = 0.0f;
-    S32(p, 0x2678) = 0;
-    S32(p, 0x267C) = 0;
-    F32(p, 0x2688) = 0.0f;
-    S32(p, 0x268C) = 0;
-    F32(p, 0x2690) = 0.0f;
-    F32(p, 0x2694) = 0.0f;
-    F32(p, 0x2698) = 0.0f;
-    F32(p, 0x269C) = 0.0f;
-    F32(p, 0x26A8) = 0.0f;
+    cb->f25E8 = 0.0f;
+    cb->f25D8 = 0.0f;
+    cb->speed = 0.0f;
+    cb->f25D0 = 0.0f;
+    cb->f25CC = 0.0f;
+    cb->f25EC = 0.0f;
+    cb->f25E4 = 0.0f;
+    cb->f25E0 = 0.0f;
+    cb->f25DC = 0.0f;
+    cb->f25E8 = 1.0f;
+    cb->f25F8 = 0.0f;
+    cb->f25F4 = 0.0f;
+    cb->f25F0 = 0.0f;
+    cb->f25FC = 0.0f;
+    cb->f2604 = 0.0f;
+    cb->f2600 = 0.0f;
+    cb->f2608 = 0.0f;
+    cb->f260C = 0;
+    cb->f260D = 0;
+    cb->f260E = 0;
+    cb->f2614 = 0.0f;
+    cb->f2618 = 0.0f;
+    cb->f2594 = 0.0f;
+    cb->f2598 = 0.0f;
+    cb->f261C = 0.0f;
+    cb->f2588 = 0.0f;
+    cb->f2590 = 0.0f;
+    cb->f258C = -5.0f;
+    cb->f259C = 0;
+    cb->f259D = 0;
+    cb->f25BC = 0.0f;
+    cb->f25C4 = 0.0f;
+    cb->f25A0 = 0.0f;
+    cb->f25A4 = 0.0f;
+    cb->f25A8 = 1.0f;
+    cb->f25AC = 0.0f;
+    cb->airborne = 0;
+    cb->f2654 = 0.0f;
+    cb->f2658 = 0.0f;
+    cb->f265C = 0.0f;
+    cb->f2660 = 0.0f;
+    cb->f2664 = 0.0f;
+    cb->f2668 = 0.0f;
+    cb->f266C = 0.0f;
+    cb->f2670 = 0.0f;
+    cb->f2674 = 0.0f;
+    cb->f2678 = 0;
+    cb->f267C = 0;
+    cb->f2688 = 0.0f;
+    cb->a268C = 0;
+    cb->f2690 = 0.0f;
+    cb->f2694 = 0.0f;
+    cb->f2698 = 0.0f;
+    cb->f269C = 0.0f;
+    cb->f26A8 = 0.0f;
     memset(p + 0x26A0, 0, 8);
-    S32(p, 0x2648) = 0;
-    U8(p, 0x2624) = 0;
-    U8(p, 0x2625) = 0;
-    S32(p, 0x263C) = 0;
-    S32(p, 0x2638) = 0;
-    F32(p, 0x2628) = 0.0f;
-    F32(p, 0x262C) = 0.0f;
-    F32(p, 0x2630) = 0.0f;
-    F32(p, 0x2634) = 0.0f;
-    S32(p, 0x2644) = 0;
-    U8(p, 0x2640) = 0;
-    F32(p, 0x264C) = 0.0f;
-    F32(p, 0x2650) = 0.0f;
-    U8(p, 0x26AC) = 0;
+    cb->f2648 = 0;
+    cb->f2624 = 0;
+    cb->f2625 = 0;
+    cb->f263C = 0;
+    cb->f2638 = 0;
+    cb->f2628 = 0.0f;
+    cb->f262C = 0.0f;
+    cb->f2630 = 0.0f;
+    cb->f2634 = 0.0f;
+    cb->f2644 = 0;
+    cb->f2640 = 0;
+    cb->f264C = 0.0f;
+    cb->f2650 = 0.0f;
+    cb->f26AC = 0;
     fn_801BF1B8(PTR(p, 0x1EC), 0);
-    S32(p, 0x26B0) = -1;
-    F32(p, 0x26B4) = 0.0f;
-    F32(p, 0x26B8) = 0.0f;
-    F32(p, 0x26BC) = 0.0f;
-    fn_801BDA74(S32(p, 0x1EC), p + 0x32C);
+    cb->f26B0 = -1;
+    cb->push.x = 0.0f;
+    cb->push.y = 0.0f;
+    cb->push.z = 0.0f;
+    fn_801BDA74(cb->index, (u8*)&cb->setupA);
     CbSprings* sp = (CbSprings*)p;
     for (int i = 0; i < 162; i++) {
         memset(&sp->pts[i], 0, sizeof(BVec));
@@ -1183,9 +1169,9 @@ void fn_801838C8(u8* p) {
             j->q[k][3] = 0.0f;
         }
     }
-    S32(p, 0x1E3C) = 0;
-    S32(p, 0x1E40) = 0;
-    u8* w = p + 0x23AC;
+    cb->f1E3C = 0;
+    cb->f1E40 = 0;
+    u8* w = (u8*)&cb->wheels[0];
     for (int i = 0; i < 4; i++, w += 0x74) {
         F32(w, 0x8) = 0.0f;
         F32(w, 0x4) = 0.0f;
@@ -1215,22 +1201,22 @@ void fn_801838C8(u8* p) {
         U8(w, 0x6C) = 0;
         S32(w, 0x70) = 0;
     }
-    IdealFollower* f = fn_801B2ED0(S32(p, 0x1EC))->Follower();
+    IdealFollower* f = fn_801B2ED0(cb->index)->Follower();
     f->fC = 0;
-    fn_801B8100(p + 0x274, S32(p, 0x1EC), S32(p, 0x1F0));
+    fn_801B8100(p + 0x274, cb->index, cb->f1F0);
     ((CbBodyV*)p)->SetPose(p + 0x274);
     f->ClearFlag();
     fn_8018F2C0(p, !fn_801CF064() ? p + 0x1E44 : p + 0x20F8);
-    ((CbModel*)PTR(p, 0x268))->Reset();
+    ((CbModel*)cb->f268)->Reset();
     if (*fn_801E1F44() == 1) {
         fn_8018F6F8(p);
     }
-    F32(p, 0x26CC) = 1.0f;
-    F32(p, 0x26D0) = 1.0f;
-    S32(p, 0x26D4) = 0;
-    F32(p, 0x26D8) = -1000.0f;
-    F32(p, 0x26DC) = -1000.0f;
-    F32(p, 0x2684) = 9.81f;
+    cb->f26CC = 1.0f;
+    cb->f26D0 = 1.0f;
+    cb->f26D4 = 0;
+    cb->f26D8 = -1000.0f;
+    cb->f26DC = -1000.0f;
+    cb->f2684 = 9.81f;
     (*(CbFx**)(p + 0x2584))->Reset();
 }
 
@@ -3128,6 +3114,7 @@ f32 PSVECDotProduct(const void* a, const void* b);
 /* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
    member body, MWCC keeps this+K in an extra register and the code differs. */
 void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, int c) {
+    CarBody* cb = (CarBody*)p;
     fn_80189C64(p);
     f32 mag = PSVECMag(imp);
     int carHit = other && kind == 0x6D;
@@ -3141,7 +3128,7 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
             if (mag > 0.1f) {
                 PSVECNormalize(&dir, &dir);
             }
-            double a_d = __fabs(PSVECDotProduct(&dir, p + 0x118));
+            double a_d = __fabs(PSVECDotProduct(&dir, (u8*)&cb->vel));
             f32 a = a_d;
             f32 b = __fabs(PSVECDotProduct(&dir, other + 0x118));
             f32 d = b - a;
@@ -3150,16 +3137,16 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
             } else if (d < -6.6666665f && a > 1.5f * b) {
                 scale = FMax(b / FMax(a, 0.001f), 0.2f);
                 HVec local;
-                local.x = at->x - F32(p, 0x94);
-                local.y = at->y - F32(p, 0x98);
-                local.z = at->z - F32(p, 0x9C);
-                f32 x = HitDot(local.x, F32(p, 0x70), local.y, F32(p, 0x74), local.z, F32(p, 0x78));
-                f32 y = HitDot(local.x, F32(p, 0x7C), local.y, F32(p, 0x80), local.z, F32(p, 0x84));
-                f32 z = HitDot(local.x, F32(p, 0x88), local.y, F32(p, 0x8C), local.z, F32(p, 0x90));
+                local.x = at->x - cb->world.pos.x;
+                local.y = at->y - cb->world.pos.y;
+                local.z = at->z - cb->world.pos.z;
+                f32 x = HitDot(local.x, cb->world.rot.x.x, local.y, cb->world.rot.x.y, local.z, cb->world.rot.x.z);
+                f32 y = HitDot(local.x, cb->world.rot.y.x, local.y, cb->world.rot.y.y, local.z, cb->world.rot.y.z);
+                f32 z = HitDot(local.x, cb->world.rot.z.x, local.y, cb->world.rot.z.y, local.z, cb->world.rot.z.z);
                 local.x = x;
                 local.y = y;
                 local.z = z;
-                if (local.z < -0.508f && PSVECDotProduct(imp, p + 0x88) > 0.0f) {
+                if (local.z < -0.508f && PSVECDotProduct(imp, (u8*)&cb->world.rot.z) > 0.0f) {
                     scale = 0.0f;
                 }
             }
@@ -3172,11 +3159,11 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
         }
     }
     HVec hit = *imp;
-    f32 k = F32(p, 0x5F4);
+    f32 k = cb->f5F4;
     if (carHit) {
         k *= scale;
     } else if (kind != 0x70) {
-        k *= 0.4f * F32(p, 0x318);
+        k *= 0.4f * cb->f318;
     } else {
         k *= 7.0f;
     }
@@ -3187,9 +3174,9 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
     hit.y *= k;
     hit.z *= k;
     if (mag * k > 741.6667f) {
-        const HRot* rot = (const HRot*)(p + 0x3C);
-        const HVec* org = (const HVec*)(p + 0x60);
-        const HVec* com = (const HVec*)(p + 0x30);
+        const HRot* rot = (const HRot*)&cb->mtx;
+        const HVec* org = (const HVec*)&cb->mtx.pos;
+        const HVec* com = (const HVec*)&cb->offset;
         HFrame fr(*rot);
         if (&fr.pos == com) {
             f32 x = HitDot(com->x, rot->rows0.x, com->y, rot->rows1.x, com->z, rot->rows2.x);
@@ -3236,22 +3223,24 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
 }
 
 int fn_80189BDC(u8* p) {
+    CarBody* cb = (CarBody*)p;
     if (U32(p, 0x10) != 'TRLR') {
-        u8* o = ((VG*)PTR(p, 0x270))->v10();
+        u8* o = ((VG*)((u8*&)cb->src))->v10();
         if (o && (S32(o, 0x24) == 1 || S32(o, 0x24) == 3)) {
             return 0;
         }
     }
-    return fn_801B83A0()->sCC(S32(p, 0x1EC));
+    return fn_801B83A0()->sCC(cb->index);
 }
 
 
 void fn_80189C64(u8* p) {
-    if (U8(p, 0x26AC)) {
-        U8(p, 0x26AC) = 0;
+    CarBody* cb = (CarBody*)p;
+    if (cb->f26AC) {
+        cb->f26AC = 0;
         fn_801BF1B8(PTR(p, 0x1EC), 0);
     }
-    F32(p, 0x26A8) = 0.0f;
+    cb->f26A8 = 0.0f;
 }
 
 // A collision shape of the body (slots at 0x14, count at 0x24).
@@ -3390,17 +3379,19 @@ extern "C" void vf48__9CollShapeFv(void) {}
 void fn_8018A08C(u8* p) { F32(p, 0x26D8) = lbl_8055E3C8; }
 
 void fn_8018A098(u8* p, f32 t) {
-    U8(p, 0x259D) = 1;
-    f32 m = F32(p, 0x2CC) * fn_80181AEC();
-    F32(p, 0x258C) = F32(p, 0x3A0) * (LerpT(t, m, driveTune.v[0]));
+    CarBody* cb = (CarBody*)p;
+    cb->f259D = 1;
+    f32 m = cb->f2CC * fn_80181AEC();
+    cb->f258C = cb->setupA.f74 * (LerpT(t, m, driveTune.v[0]));
 }
 
 int fn_8018A100(u8* p) { return F32(p, 0x2618) > driveTune.v[1]; }
 
 void fn_8018A120(u8* p) {
+    CarBody* cb = (CarBody*)p;
     if (!fn_801B2F2C(PTR(p, 0x1EC))) {
-        F32(p, 0x25BC) = lbl_8055E4E0.a;
-        ((VR*)PTR(p, 0x2584))->v38();
+        cb->f25BC = lbl_8055E4E0.a;
+        ((VR*)cb->f2584)->v38();
     }
 }
 
@@ -3430,26 +3421,27 @@ static void KickReport(int id, f32 mph, f32 terr) {
 }
 
 void fn_8018A180(u8* p) {
-    if (PTR(p, 0x328)) {
-        fn_80279B28(PTR(p, 0x328), p + 0x1E44);
+    CarBody* cb = (CarBody*)p;
+    if (cb->f328) {
+        fn_80279B28(cb->f328, p + 0x1E44);
         fn_8018F2C0(p, p + 0x1E44);
-        if (S32(p, 0x20DC) < 9 && ((CarHost*)PTR(p, 0x270))->IsImpaired()) {
-            fn_802E30C8("car: unimpairing car %d", S32(p, 0x1EC));
-            ((CarHost*)PTR(p, 0x270))->Unimpair();
+        if (cb->f20DC < 9 && ((CarHost*)((u8*&)cb->src))->IsImpaired()) {
+            fn_802E30C8("car: unimpairing car %d", cb->index);
+            ((CarHost*)((u8*&)cb->src))->Unimpair();
             fn_8018AF04(p);
         }
     }
-    F32(p, 0x30) = F32(p, 0x458);
-    F32(p, 0x34) = F32(p, 0x45C);
-    F32(p, 0x38) = F32(p, 0x460);
+    cb->offset.x = cb->setupA.modelOffset.x;
+    cb->offset.y = cb->setupA.modelOffset.y;
+    cb->offset.z = cb->setupA.modelOffset.z;
     ((CollVolume*)p)->CollVolume::vf20();
-    ((RigidBody*)p)->SetMass(F32(p, 0x32C) / 0.4545f, F32(p, 0x330) / 0.042279866f, F32(p, 0x334) / 0.042279866f,
-                             F32(p, 0x338) / 0.042279866f);
-    F32(p, 0xD4) = F32(p, 0x32C);
-    F32(p, 0xE4) = 1.0f / F32(p, 0x32C);
-    fn_801BDA74(S32(p, 0x1EC), p + 0x32C);
-    ((CarElem*)(lbl_8055E908 + S32(p, 0x1EC) * 0x34))->Fetch(S32(p, 0x1EC));
-    ((CarGear*)(lbl_8055E918 + S32(p, 0x1EC) * 0x9C))->Fetch(S32(p, 0x1EC));
+    ((RigidBody*)p)->SetMass(cb->setupA.mass / 0.4545f, cb->setupA.f04 / 0.042279866f, cb->setupA.f08 / 0.042279866f,
+                             cb->setupA.f0C / 0.042279866f);
+    cb->mass = cb->setupA.mass;
+    cb->invMass = 1.0f / cb->setupA.mass;
+    fn_801BDA74(cb->index, (u8*)&cb->setupA);
+    ((CarElem*)(lbl_8055E908 + cb->index * 0x34))->Fetch(cb->index);
+    ((CarGear*)(lbl_8055E918 + cb->index * 0x9C))->Fetch(cb->index);
 }
 
 void DeityCar_vf78(u8* p) {}
@@ -3490,36 +3482,38 @@ void fn_8018A2C0(u8* p, TuneSink* t) {
 }
 
 void fn_8018A654(u8* p, const u8* cfg) {
+    CarBody* cb = (CarBody*)p;
     if (*(s8*)(cfg + 0xEC)) {
         u8* m = fn_801D2008((u8*)cfg + 0xEC);
-        PTR(p, 0x26C0) = m;
+        cb->f26C0 = m;
         if (S32(m, 0x10) > 0) {
             S32(p, 0x26C4) = fn_801C1C1C(m);
         } else {
             S32(p, 0x26C4) = 0;
         }
-        s32 n = S32(PTR(p, 0x26C0), 0xC8);
+        s32 n = S32(cb->f26C0, 0xC8);
         if (n > 0) {
             S32(p, 0x26C8) = fn_801C1BA4(n * 2, n, n);
         } else {
             S32(p, 0x26C8) = 0;
         }
     } else {
-        PTR(p, 0x26C0) = 0;
+        cb->f26C0 = 0;
         S32(p, 0x26C4) = 0;
         S32(p, 0x26C8) = 0;
     }
 }
 
 void fn_8018A6F4(u8* p) {
-    if (PTR(p, 0x26C8)) {
-        fn_801C1C7C(PTR(p, 0x26C8));
+    CarBody* cb = (CarBody*)p;
+    if (cb->f26C8) {
+        fn_801C1C7C(cb->f26C8);
     }
-    if (PTR(p, 0x26C4)) {
-        fn_801C1C7C(PTR(p, 0x26C4));
+    if (cb->f26C4) {
+        fn_801C1C7C(cb->f26C4);
     }
-    if (PTR(p, 0x26C0)) {
-        fn_801D21B4(PTR(p, 0x26C0));
+    if (cb->f26C0) {
+        fn_801D21B4(cb->f26C0);
     }
 }
 
@@ -3559,34 +3553,35 @@ extern "C" {
 
 // Builds the body's spring system: per attachment point a pinned particle and a free one, joined by an edge.
 void fn_8018A750(u8* p) {
-    if (PTR(p, 0x26C4)) {
-        fn_801C2170(PTR(p, 0x26C4), PTR(p, 0x26C0), p + 0x70);
+    CarBody* cb = (CarBody*)p;
+    if (cb->f26C4) {
+        fn_801C2170(cb->f26C4, cb->f26C0, (u8*)&cb->world);
     }
-    if (PTR(p, 0x26C8)) {
+    if (cb->f26C8) {
         SprVert verts[8];
         SprEdge edges[4];
         SprPin pins[4];
-        int n = S32(PTR(p, 0x26C0), 0xC8);
+        int n = S32(cb->f26C0, 0xC8);
         int nv = n * 2;
         if (n > 0) {
-            for (int i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
+            for (int i = 0; i < S32(cb->f26C0, 0xC8); i++) {
                 SprVert* v = &verts[i * 2];
-                v->pos.v[0] = F32(p, 0x94);
-                v->pos.v[1] = F32(p, 0x98);
-                v->pos.v[2] = F32(p, 0x9C);
+                v->pos.v[0] = cb->world.pos.x;
+                v->pos.v[1] = cb->world.pos.y;
+                v->pos.v[2] = cb->world.pos.z;
                 v->w34 = 1.0f;
                 v->w30 = 0.5f;
                 v[1] = v[0];
                 edges[i].b = i * 2 + 1;
                 edges[i].a = i * 2;
                 edges[i].extra = 0.0f;
-                edges[i].stiff = 1.0f - F32(PTR(p, 0x26C0) + i * 8, 0xA8);
+                edges[i].stiff = 1.0f - F32(cb->f26C0 + i * 8, 0xA8);
                 pins[i].idx = i * 2;
-                pins[i].mtx = p + 0x70;
+                pins[i].mtx = (u8*)&cb->world;
                 pins[i].at = 0;
             }
         }
-        fn_801C1CBC(PTR(p, 0x26C8), nv, verts, n, edges, n, pins);
+        fn_801C1CBC(cb->f26C8, nv, verts, n, edges, n, pins);
     }
 }
 
@@ -3598,19 +3593,20 @@ void fn_801C27D8(u8* sim, BVec* gravity, BVec* up, BVec* force, BVec* torque);
 
 // Feeds the flapping parts (flags/aerials at 0x26C4/0x26C8) their wind and motion input.
 void fn_8018A8A8(u8* p) {
+    CarBody* cb = (CarBody*)p;
     BVec gravity(0.0f, -10000.0f, 0.0f);
     BVec up(0.0f, 1.0f, 0.0f);
     BVec zero(0.0f, 0.0f, 0.0f);
-    if (PTR(p, 0x26C4)) {
+    if (cb->f26C4) {
         f32 t = lbl_8055E3C8;
         BVec wind(1681.65f * ((f32)fmod(t, 0.16f) - 0.08f), 1954.35f * ((f32)fmod(t, 0.14f) - 0.07f),
                   1363.5f * ((f32)fmod(t, 0.2f) - 0.1f));
-        fn_801C27D8(PTR(p, 0x26C4), &gravity, &up, &wind, &zero);
+        fn_801C27D8(cb->f26C4, &gravity, &up, &wind, &zero);
     }
-    if (PTR(p, 0x26C8)) {
+    if (cb->f26C8) {
         BVec v;
-        Scale(&v, (BVec*)(p + 0x118), -227.25f);
-        fn_801C27D8(PTR(p, 0x26C8), &gravity, &up, &v, &zero);
+        Scale(&v, (BVec*)&cb->vel, -227.25f);
+        fn_801C27D8(cb->f26C8, &gravity, &up, &v, &zero);
     }
 }
 
@@ -3635,38 +3631,39 @@ static inline void ToBody(u8* p, BVec* o, const BVec* v) {
 // Copies the flapping parts' simulated points (0x26C4 flag, 0x26C8 aerial) into the car model's point
 // list `m` (0xE24) in body space, then pins the four wheel points at the suspension heights.
 void fn_8018A9F0(u8* p, u8* m) {
-    if (PTR(p, 0x26C4)) {
+    CarBody* cb = (CarBody*)p;
+    if (cb->f26C4) {
         BVec* pos = 0;
         BVec* old = 0;
         s32 n = 0;
-        fn_801C2BDC(PTR(p, 0x26C4), &n, &pos, &old);
-        if (S32(PTR(p, 0x26C0), 0xA4) > 0) {
-            for (int i = 0; i < S32(PTR(p, 0x26C0), 0xA4); i++) {
-                u8* d = PTR(p, 0x26C0);
+        fn_801C2BDC(cb->f26C4, &n, &pos, &old);
+        if (S32(cb->f26C0, 0xA4) > 0) {
+            for (int i = 0; i < S32(cb->f26C0, 0xA4); i++) {
+                u8* d = cb->f26C0;
                 ToBody(p, (BVec*)(m + 0xE24) + (S32(d, 0xA0) + i), &pos[((s32*)(d + 0x20))[i]]);
             }
         }
     }
-    if (PTR(p, 0x26C8)) {
+    if (cb->f26C8) {
         BVec* pos = 0;
         BVec* old = 0;
         s32 n = 0;
-        fn_801C2BDC(PTR(p, 0x26C8), &n, &pos, &old);
-        if (S32(PTR(p, 0x26C0), 0xC8) > 0) {
-            for (s32 i = 0; i < S32(PTR(p, 0x26C0), 0xC8); i++) {
-                u8* d = PTR(p, 0x26C0);
+        fn_801C2BDC(cb->f26C8, &n, &pos, &old);
+        if (S32(cb->f26C0, 0xC8) > 0) {
+            for (s32 i = 0; i < S32(cb->f26C0, 0xC8); i++) {
+                u8* d = cb->f26C0;
                 ToBody(p, (BVec*)(m + 0xE24) + ((s32*)(d + 0xAC))[i * 2], &pos[i * 2 + 1]);
             }
         }
     }
     u8* x = 0;
-    fn_801BEB30(S32(p, 0x1EC), &x);
+    fn_801BEB30(cb->index, &x);
     CbVec4 h = *(CbSolVec*)(x + 0x70);
     for (int i = 0; i < 4; i++) {
-        BVec* o = (BVec*)(m + 0xE24) + ((s32*)(PTR(p, 0x26C0) + 0xCC))[i];
-        SetXYZ(o, 0.0f, F32(p, 0x5AC) + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]), 0.0f);
+        BVec* o = (BVec*)(m + 0xE24) + ((s32*)(cb->f26C0 + 0xCC))[i];
+        SetXYZ(o, 0.0f, cb->f5AC + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]), 0.0f);
     }
-    S32(m, 0xFA4) = S32(PTR(p, 0x26C0), 0xDC);
+    S32(m, 0xFA4) = S32(cb->f26C0, 0xDC);
 }
 
 void fn_8018ADA4(u8* p, f32 v) { F32(p, 0x25DC) = v; }
@@ -3713,13 +3710,14 @@ BodyTune* fn_8018AE5C(u8*) {
 }
 
 f32 fn_8018AE7C(u8* p) {
+    CarBody* cb = (CarBody*)p;
     if (U32(fn_801769CC(), 0x4) == 0x180304) {
         return 0.15f;
     }
-    if (Positive(F32(p, 0x25BC))) {
+    if (Positive(cb->f25BC)) {
         return 0.15f;
     }
-    if (F32(p, 0xD4) > 1363.5f) {
+    if (cb->mass > 1363.5f) {
         return 0.15f;
     }
     return 0.5f;
@@ -3754,6 +3752,7 @@ static inline f32 CbReattach(u8* w) {
     return F32(w, -0x34);
 }
 void fn_8018AF04(u8* p) {
+    CarBody* cb = (CarBody*)p;
     fn_8018F2C0(p, !fn_801CF064() ? p + 0x1E44 : p + 0x20F8);
     CVec4 load;
     u8* w = p + 0x241C;
@@ -3761,20 +3760,20 @@ void fn_8018AF04(u8* p) {
         (&load.x)[i] = CbReattach(w);
     }
     u8* x;
-    fn_801BEB30(S32(p, 0x1EC), &x);
+    fn_801BEB30(cb->index, &x);
     SetVec4(x + 0x70, load);
     SetVec4(x + 0x130, CVec4(0.0f, 0.0f, 0.0f, 0.0f));
     SetVec4(x + 0x140, CVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    if (S32(p, 0x26B0) >= 0) {
-        S32(p, 0x26B0) = -1;
+    if (cb->f26B0 >= 0) {
+        cb->f26B0 = -1;
     }
-    S32(p, 0x1E40) = 0;
+    cb->f1E40 = 0;
     if (*fn_801E1F44() == 1) {
         fn_8018F6F8(p);
     }
-    F32(p, 0x2650) = 0.0f;
-    F32(p, 0x264C) = 0.0f;
-    F32(p, 0x25C4) = 0.0f;
+    cb->f2650 = 0.0f;
+    cb->f264C = 0.0f;
+    cb->f25C4 = 0.0f;
 }
 
 u32 fn_8018B06C(u8* p) { return U32(lbl_8055E918 + S32(p, 0x1EC) * 0x9C, 0x14); }
@@ -3839,19 +3838,20 @@ void fn_801E9DD0(s16* surface, f32 x, f32 z);
 /* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
    member body, MWCC keeps this+K in an extra register and the code differs. */
 void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, const CbPacket* prev, s32* na, s32* nb) {
+    CarBody* cb = (CarBody*)p;
     int teleport = (prev->flags >> 9) & 1;
     if (teleport) {
         ((RigidBody*)p)->RigidBody::vf30(t, (RPacket*)cur, (const RPacket*)cur, na, nb);
     } else {
         ((RigidBody*)p)->RigidBody::vf30(t, (RPacket*)cur, (const RPacket*)prev, na, nb);
     }
-    F32(p, 0x25D4) = F32(p, 0x25CC) = F32(p, 0x25D8) = PSVECMag(p + 0x118);
+    cb->speed = cb->f25CC = cb->f25D8 = PSVECMag((u8*)&cb->vel);
     f32 v0 = PkUnpack(prev->rpm, 65535.0f, -2000.0f, 14000.0f);
     f32 v1 = PkUnpack(cur->rpm, 65535.0f, -2000.0f, 14000.0f);
-    F32(p, 0x25D0) = LerpT(t, v1, v0);
+    cb->f25D0 = LerpT(t, v1, v0);
     v0 = PkUnpack(prev->steer, 255.0f, -1.2f, 2.4f);
     v1 = PkUnpack(cur->steer, 255.0f, -1.2f, 2.4f);
-    F32(p, 0x25F0) = F32(p, 0x25DC) = LerpT(t, v1, v0);
+    cb->f25F0 = cb->f25DC = LerpT(t, v1, v0);
     if (cur->boost) {
         f32 boost;
         if (teleport) {
@@ -3861,11 +3861,11 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
             boost = PkNorm(cur->boost, 0.0f, 255.0f);
         }
     }
-    F32(p, 0x24A8) = 0.0f;
-    F32(p, 0x251C) = 0.0f;
-    F32(p, 0x25F8) = 1.0f;
-    F32(p, 0x25E8) = 1.0f;
-    F32(p, 0x2434) = F32(p, 0x23C0) = F32(p, 0x25F0) * F32(p, 0x5B0);
+    cb->wheels[2].steer = 0.0f;
+    cb->wheels[3].steer = 0.0f;
+    cb->f25F8 = 1.0f;
+    cb->f25E8 = 1.0f;
+    cb->wheels[1].steer = cb->wheels[0].steer = cb->f25F0 * cb->f5B0;
     v0 = PkUnpack(prev->throttle, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->throttle, 255.0f, 0.0f, 1.0f);
     fn_8018ADB4(p, LerpT(t, v1, v0));
@@ -3873,8 +3873,8 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
     v1 = PkUnpack(cur->brake, 255.0f, 0.0f, 1.0f);
     fn_8018ADBC(p, LerpT(t, v1, v0));
     U32(p, 0x4) = cur->flags | prev->flags;
-    U8(p, 0x260D) = (cur->flags >> 8) & 1;
-    u8* w = p + 0x23AC;
+    cb->f260D = (cur->flags >> 8) & 1;
+    u8* w = (u8*)&cb->wheels[0];
     const u8* c = cur->wheel[0];
     const u8* q = prev->wheel[0];
     for (int i = 0; i < 4; i++) {
@@ -3907,16 +3907,16 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
         c += 5;
         q += 5;
     }
-    u8* rec = lbl_8055E918 + S32(p, 0x1EC) * 0x9C;
+    u8* rec = lbl_8055E918 + cb->index * 0x9C;
     S32(rec, 0x14) = cur->gear;
     S32(rec, 0x8) = cur->gear;
-    S32(p, 0x2678) = cur->w40;
+    cb->f2678 = cur->w40;
     *nb = 0x44;
     *na = 0x44;
     f32 x, z;
     PkCopy(&x, prev->x, 4);
     PkCopy(&z, prev->z, 4);
-    fn_801E9DD0((s16*)(p + 0x6C), x, z);
+    fn_801E9DD0((s16*)&cb->hint, x, z);
 }
 
 }  // extern "C"
@@ -4014,20 +4014,21 @@ void CarBody::Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* b
 extern "C" {
 
 void fn_8018BE54(u8* p, f32 s) {
-    if ((f32)__fabs(F32(p, 0x5E4) - s) <= __float_epsilon[0]) {
+    CarBody* cb = (CarBody*)p;
+    if ((f32)__fabs(cb->f5E4 - s) <= __float_epsilon[0]) {
         return;
     }
-    F32(p, 0x5E4) = s;
-    fn_801A1474(PTR(p, 0x268), F32(p, 0x5E4));
-    f32 k = F32(p, 0x5E4);
+    cb->f5E4 = s;
+    fn_801A1474(cb->f268, cb->f5E4);
+    f32 k = cb->f5E4;
     f32 k2 = k * k;
-    F32(p, 0x330) = F32(p, 0x468) * k2;
-    F32(p, 0x334) = F32(p, 0x46C) * k2;
-    F32(p, 0x338) = F32(p, 0x470) * k2;
-    F32(p, 0x344) = F32(p, 0x47C) * k;
-    F32(p, 0x33C) = F32(p, 0x474) * k;
-    F32(p, 0x340) = F32(p, 0x478) * k;
-    F32(p, 0x34C) = F32(p, 0x484) * k;
+    cb->setupA.f04 = cb->setupB.f04 * k2;
+    cb->setupA.f08 = cb->setupB.f08 * k2;
+    cb->setupA.f0C = cb->setupB.f0C * k2;
+    cb->setupA.f18 = cb->setupB.f18 * k;
+    cb->setupA.f10 = cb->setupB.f10 * k;
+    cb->setupA.f14 = cb->setupB.f14 * k;
+    cb->setupA.f20 = cb->setupB.f20 * k;
     F32(p, 0x3AC) = k * F32(p, 0x4E4);
     F32(p, 0x3D0) = k * F32(p, 0x508);
     F32(p, 0x3F4) = k * F32(p, 0x52C);
