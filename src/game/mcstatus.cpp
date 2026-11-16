@@ -123,7 +123,11 @@ int fn_80245080(u8* p);
 
 // The status screen's menu (copied by MemCardDialogMgr::ShowMsg). Retail's .rodata and .data put it, and its
 // layout name, ahead of everything else in the unit.
-static const MenuDesc sStatusMenu = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
+/* Helper name unproven */
+static inline MenuDesc MakeStatusMenu(void) {
+    MenuDesc d = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
+    return d;
+}
 
 // A remote's status block.
 struct WpadInfo {
@@ -138,8 +142,6 @@ UnkStatic123s lbl_804988D8;
 extern "C" {
 
 }  // extern "C"
-
-MemCardDialogBg::~MemCardDialogBg(void) {}
 
 MemCardDialogMgr::~MemCardDialogMgr(void) { lbl_8055F244 = 0; }
 
@@ -502,7 +504,7 @@ void MemCardDialogMgr::ShowMsg(const McMsg* m) {
         MenuItem(lbl_80498890),
     };
     retries = 0;
-    MenuDesc desc = sStatusMenu;
+    MenuDesc desc = MakeStatusMenu();
     desc.items = items;
     fn_80216CA8();
     fn_802146BC(&desc, -999, -999, 1);

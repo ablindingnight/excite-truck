@@ -50,7 +50,7 @@ public:
     virtual void Unload(void);
     virtual int Setup(McDialogCfg* cfg);
     virtual void Show(const McMsg* m);
-    virtual ~MemCardDialogBg(void);  // out of line in mcstatus (retail menusel only refers to the table)
+    virtual ~MemCardDialogBg(void) {}
 
     u8* image;   // offset 0x4
     u8* image2;  // offset 0x8
