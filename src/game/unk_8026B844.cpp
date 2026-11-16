@@ -158,6 +158,8 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
     o[2] = z;
 }
+// Helper name unproven: 1 + t * k; as an inline its constant read is numbered above the clamp it follows (retail f2/f3).
+static inline f32 CamBlend(f32 t, f32 k) { return lbl_80563D94 + t * k; }
 void fn_8026B8A0(void) {
     FreePad pad;
     CamRot yawM;
@@ -195,7 +197,7 @@ void fn_8026B8A0(void) {
     if (fn_801298E8(&pad, 0)) {
         turn = 3.1415927f;
         f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
-        speed = lbl_80563D94 * (100.0f * (lbl_80563D94 + t * lbl_80563DA0));
+        speed = lbl_80563D94 * (100.0f * CamBlend(t, lbl_80563DA0));
         Loop1_fn_8026B8A0(pad, dt, turn, speed, in, move);
     }
     {
@@ -220,7 +222,7 @@ void fn_8026B8A0(void) {
     if (free) {
         f32 t = CamMax(CamMin(lbl_80563D94, (h - 20.0f) / 480.0f), lbl_80563D78);
         f32 px = lbl_80563D78;
-        f32 pan = 50.0f * (lbl_80563D94 + t * lbl_80563DC0);
+        f32 pan = 50.0f * CamBlend(t, lbl_80563DC0);
         f32 py = px;
         f32 a;
         f32 b;
