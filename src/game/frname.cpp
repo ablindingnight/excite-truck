@@ -2,6 +2,7 @@
 // icons ("caricona.art", "caricons0.tex", ...). Written against raw field offsets; the large screen
 // routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 
@@ -322,30 +323,8 @@ public:
     u8 pad[0x24];
 };
 
-struct EventInfo {
-    u8 pad0[0x4];
-    s32 track;        // offset 0x4
-    u8 pad8[0x18];
-    ValueNode* node;  // offset 0x20
-};
-
-// aiobst.cpp's Track (GetTrack), declared as far as this unit reads it
-struct Track {
-    u8 pad0[0x8];
-    char name[1];  // offset 0x8
-};
-
-struct VehicleInfo {
-    u8 pad0[0x2C];
-    char chassis[0x20];  // offset 0x2C
-    u8 pad4C[0x18];
-    u32 colors[12];      // offset 0x64
-};
-
 int IdentGetCurrentSlot(void);
 int GetNumEvents(void);
-EventInfo* GetEvent(int i);
-Track* GetTrack(int track);
 VehicleInfo* GetVehicle(int i);
 const char* StatsGetLabel(u32 type);
 const char* GetTrackFriendlyName(const char* name);

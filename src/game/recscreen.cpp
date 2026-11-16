@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 
@@ -219,27 +220,6 @@ struct VehicleChoice {
     u8 valid;     // offset 0x8
 };
 
-struct EventInfo {
-    u8 pad0[0x4];
-    s32 track;        // offset 0x4
-    u32 id;           // offset 0x8
-    u8 padC[0x14];
-    ValueNode* node;  // offset 0x20
-};
-
-// aiobst.cpp's Track (GetTrack), declared as far as this unit reads it
-struct Track {
-    u8 pad0[0x8];
-    char name[1];  // offset 0x8
-};
-
-struct VehicleInfo {
-    u8 pad0[0x2C];
-    char chassis[0x20];  // offset 0x2C
-    u8 pad4C[0x18];
-    u32 colors[12];      // offset 0x64
-};
-
 class Statistic {
 public:
     Statistic(int slot, u32 type, long event, int difficulty);
@@ -257,8 +237,6 @@ int IdentGetCurrentSlot(void);
 HighScore* StatsGetHighScore(int slot, long event, long difficulty, int rank);
 VehicleChoice StatsUnpackChoice(u32 packed);
 const char* GetGradeDisplayName(int grade);
-EventInfo* GetEvent(int i);
-Track* GetTrack(int track);
 VehicleInfo* GetVehicle(int i);
 const char* GetTrackFriendlyName(const char* name);
 extern "C" const char* fn_80131234(const char* key);
@@ -322,7 +300,7 @@ void fn_8025C204(int event, int difficulty) {
     }
     char location[1000];
     fn_801345D8(location, 1000, "%s - %s", track, e->node->GetValue("friendly_name") + 1);
-    int extra = GetEvent(event)->id != 0x180302;
+    int extra = GetEvent(event)->type != 0x180302;
     const char* head = fn_80131234("Records:TIME");
     if (extra) {
         head = fn_80131234("Records:EXTRA_TIME");

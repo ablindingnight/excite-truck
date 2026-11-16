@@ -1,6 +1,7 @@
 // Single events (0x8023B764-0x8023C2B4): sets up and runs one event, head-to-head sessions and
 // direct-to-track starts from the command line. Names are guesses apart from the messages.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int atoi(const char* s);
@@ -84,43 +85,10 @@ public:
     int other;
 };
 
-struct Track {
-    s32 index;          // offset 0x0
-    s32 league;         // offset 0x4
-    char track[0x20];   // offset 0x8
-    char name[0x40];    // offset 0x28
-    s32 sort_major;     // offset 0x68
-    s32 sort_minor;     // offset 0x6C
-    s32 num_contests;   // offset 0x70
-};
-
-struct Event {
-    s32 index;        // offset 0x0
-    s32 track;        // offset 0x4
-    u32 type;         // offset 0x8
-    u8 padC[0x14];
-    ValueNode* node;  // offset 0x20
-};
-
-struct DriverInfo {
-    s32 index;        // offset 0x0
-    s32 id;           // offset 0x4
-    char name[0x40];  // offset 0x8
-    s32 rank;         // offset 0x48
-    s32 vehicle;      // offset 0x4C
-    u32 color;        // offset 0x50
-};
-
-struct VehicleInfo {
-    s32 index;  // offset 0x0
-    s32 id;     // offset 0x4
-};
-
 BOOL OptDirectToTrack(void);
 void BuildDAVMap(DAVMap* out, s32 track);
 void BuildReversedMap(DAVMap* out, s32 event, const DAVMap* src);
 void SetNumPlayers(int n);
-DriverInfo* GetDriver(int i);
 VehicleInfo* GetVehicle(int i);
 void ClearPlayer(int slot);
 void SetPlayer(int slot, s32 id, s32 vehicle, u32 color);
@@ -131,9 +99,6 @@ const char* IdentGetSlotName(int slot);
 void UnloadEves(void);
 void LoadModeEves(int mode);
 void LoadArcadeEves(void);
-Event* GetEvent(int i);
-Track* GetTrack(int i);
-Event* FindTrackEvent(int track, int eve);
 const char* GetEventTypeDisplayName(u32 type);
 
 extern "C" {
@@ -365,9 +330,9 @@ void fn_8023BEB8(int track, int eve, RaceResult* out) { fn_8023B9EC(track, eve, 
 void fn_8023BEC4(int index, RaceResult* out) {
     s32 track = GetEvent(index)->track;
     int eve = -1;
-    int i = GetTrack(track)->num_contests;
+    int i = GetTrack(track)->events;
     while (i-- > 0) {
-        if (index == FindTrackEvent(track, i)->index) {
+        if (index == FindTrackEvent(track, i)->id) {
             eve = i;
         }
     }
@@ -392,10 +357,10 @@ void fn_8023BF68(const char* arg) {
 }
 
 void GameDoEve(int track, int eve) {
-    Track* t = GetTrack(track);
-    Event* e = FindTrackEvent(track, eve);
-    fn_802E30C8("GameDoEve: eve [%s] contest [%s] at %s", t->name,
-                e->node->GetString("name", GetEventTypeDisplayName(e->type)), t->track);
+    TrackInfo* t = GetTrack(track);
+    EventInfo* e = FindTrackEvent(track, eve);
+    fn_802E30C8("GameDoEve: eve [%s] contest [%s] at %s", t->title,
+                e->node->GetString("name", GetEventTypeDisplayName(e->type)), t->name);
     int i;
     int n = Abs(lbl_8055BB30);
     fn_80137C78(n);
@@ -414,8 +379,8 @@ void GameDoEve(int track, int eve) {
 }
 
 void fn_8023C0EC(RaceSetup* rs, int track, int eve) {
-    Track* t = GetTrack(track);
-    Event* e = FindTrackEvent(track, eve);
+    TrackInfo* t = GetTrack(track);
+    EventInfo* e = FindTrackEvent(track, eve);
     if (e->node->Has("track")) {
         const char* s = e->node->GetValue("track");
         int n = sizeof(rs->track);
@@ -427,7 +392,7 @@ void fn_8023C0EC(RaceSetup* rs, int track, int eve) {
             }
         }
     } else {
-        const char* s = t->track;
+        const char* s = t->name;
         int n = sizeof(rs->track);
         char* d = rs->track;
         while ((*d++ = *s++) != '\0') {
@@ -437,7 +402,7 @@ void fn_8023C0EC(RaceSetup* rs, int track, int eve) {
             }
         }
     }
-    fn_8000824C(&rs->event, e->index);
+    fn_8000824C(&rs->event, e->id);
 }
 
 }  // extern "C"

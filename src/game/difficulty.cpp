@@ -2,6 +2,7 @@
 // difficulty.val, with per-event overrides (the event's own node, then "<mode>_<key>" keys).
 // Names are guesses apart from the file names, level names and messages.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -12,19 +13,6 @@ ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 }
 
-struct Event {
-    s32 index;        // offset 0x0
-    s32 track;        // offset 0x4
-    u32 type;         // offset 0x8
-    s32 laps;         // offset 0xC
-    s32 drivers;      // offset 0x10
-    u32 terrain;      // offset 0x14
-    s32 rounds;       // offset 0x18
-    s32 purse;        // offset 0x1C
-    ValueNode* node;  // offset 0x20
-};
-
-Event* GetEvent(int i);
 int GetNumEvents(void);
 
 // world.cpp's EventCfg (fn_801E87A8), declared as far as this unit reads it

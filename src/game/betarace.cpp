@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #define COLLSHAPE_BASE_DECL  // MATCHING-AID: betarace emits the root shape table (see game/collshape.h)
@@ -1236,20 +1237,6 @@ public:
     s32 tex[3];          // offset 0xB4
 };
 
-struct TrackDesc {
-    u8 pad0[0x8];
-    char name[0x20];  // offset 0x8
-};
-
-struct EventInfo {
-    u8 pad0[0x4];
-    s32 track;        // offset 0x4
-    u8 pad8[0xC - 0x8];
-    s32 laps;         // offset 0xC
-    u8 pad10[0x20 - 0x10];
-    ValueNode* vals;  // offset 0x20
-};
-
 
 struct LocalCarDesc {
     s32 event;  // offset 0x0
@@ -1273,8 +1260,6 @@ Settings* fn_8000AC38(void);
 extern "C" {
 void fn_801679F0(void);
 }
-EventInfo* GetEvent(int event);
-TrackDesc* GetTrack(int track);
 
 static inline void InitCoins(Coins* c) {
     ValueNode* v;
@@ -1331,7 +1316,7 @@ struct RaceTimer {
 };
 
 static inline void InitTimer(RaceTimer* t) {
-    t->limit = GetEvent(fn_801769CC()->event)->vals->GetFloat("time_limit", 300.0f);
+    t->limit = GetEvent(fn_801769CC()->event)->node->GetFloat("time_limit", 300.0f);
     t->limit0 = t->limit;
     t->finishTimeout = fn_80204CFC("finish_timeout");
     t->tick = fn_80207848("clocktick.sfx", 1);
@@ -2734,15 +2719,15 @@ inline const char* HomeTrack(int i) {
 f32 fn_8014E7DC(int event, int a) {
     char buf[0x104];
     EventInfo* e;
-    TrackDesc* t;
+    TrackInfo* t;
     const char* key;
     fn_8012E81C("ghostcar.res");
     e = GetEvent(event);
     t = GetTrack(e->track);
     key = fn_80205268("time_limit_override_key", a, event);
-    if (!e->vals->Has(key)) {
-        f32 lim = e->vals->GetFloat("time_limit", 300.0f);
-        const char* res = e->vals->GetString("resource", "xxx");
+    if (!e->node->Has(key)) {
+        f32 lim = e->node->GetFloat("time_limit", 300.0f);
+        const char* res = e->node->GetString("resource", "xxx");
         ValueTable* vt;
         fn_8012E81C("ghostcar.res");
         fn_801345D8(buf, sizeof(buf), "%sa_%s.val", res, t->name);
@@ -2759,7 +2744,7 @@ f32 fn_8014E7DC(int event, int a) {
         }
         return lim;
     }
-    return e->vals->GetFloat(key);
+    return e->node->GetFloat(key);
 }
 
 }  // extern "C"
@@ -2990,7 +2975,7 @@ inline void BetaMaster::LoadLevel(void) {
             fn_802E30C8("betarace: score_factor = %1.2f", scoreFactor);
         }
     }
-    t = fn_80131810(GetEvent(fn_801769CC()->event)->vals->GetString("trigger_file", "triggers.val"));
+    t = fn_80131810(GetEvent(fn_801769CC()->event)->node->GetString("trigger_file", "triggers.val"));
     if (t) {
         ValueNode* n;
         for (i = 0; (n = t->GetChild(i)) != 0; i++) {
@@ -3006,7 +2991,7 @@ inline void BetaMaster::LoadLevel(void) {
         loaded = 0;
     }
     if (!loaded) {
-        ValueNode* ev = GetEvent(fn_801769CC()->event)->vals;
+        ValueNode* ev = GetEvent(fn_801769CC()->event)->node;
         ValueNode* n;
         for (i = 0; (n = ev->GetChildAt(i)) != 0; i++) {
             if (n->Has("bound0")) {
@@ -4405,7 +4390,7 @@ inline void BetaMaster::a2(void) {
     StopSound(timer.timeout);
     timer.b1C = 0;
     timer.limit = timer.limit0;
-    skipAt = GetEvent(fn_801769CC()->event)->vals->GetFloat("early_finish_t", -1.0f);
+    skipAt = GetEvent(fn_801769CC()->event)->node->GetFloat("early_finish_t", -1.0f);
     for (i = 0; i < ARRAY_COUNT(anims); i++) {
         anims[i].Reset();
     }
@@ -4479,7 +4464,7 @@ inline void BetaMaster::a1(void) {
         cars[i].tex[0] = fn_802CAC28("zonetex.tex", 0);
         cars[i].tex[1] = fn_802CAC28("zonetex4.tex", 0);
         {
-            TrackDesc* trk = GetTrack(GetEvent(fn_801769CC()->event)->track);
+            TrackInfo* trk = GetTrack(GetEvent(fn_801769CC()->event)->track);
             const char* set = 0;
             char key[0x40];
             fn_801345D8(key, sizeof(key), "icon_set");

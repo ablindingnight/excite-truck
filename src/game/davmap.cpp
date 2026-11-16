@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -20,56 +21,16 @@ int atoi(const char* s);
 #define MAX_RACERS 8
 #define MAX_LIST 50
 
-struct DriverInfo {
-    s32 index;        // offset 0x0
-    s32 id;           // offset 0x4
-    char name[0x40];  // offset 0x8
-    s32 rank;         // offset 0x48
-    s32 vehicle;      // offset 0x4C
-    u32 color;        // offset 0x50
-};
-
-struct VehicleInfo {
-    s32 index;                // offset 0x0
-    s32 id;                   // offset 0x4
-    s32 base;                 // offset 0x8
-    char display_name[0x20];  // offset 0xC
-    char chassis[0x20];       // offset 0x2C
-    char texture[0x10];       // offset 0x4C
-    char number[8];           // offset 0x5C
-    u32 colors[12];           // offset 0x64
-    s32 default_color;        // offset 0x94
-    s32 num_colors;           // offset 0x98
-    s32 unk9C;                // offset 0x9C
-    u32 flags;                // offset 0xA0
-};
-
-struct Track {
-    u8 unk0[0x70];
-    s32 num_eves;     // offset 0x70
-    u8 unk74[0xC];
-    ValueNode* node;  // offset 0x80
-};
-
-struct Eve {
-    u8 unk0[0x10];
-    s32 num_racers;  // offset 0x10
-};
-
 struct EventInfo;
 
 extern "C" {
 }
-Track* GetTrack(int track);
-Eve* FindTrackEvent(int track, int eve);
-Eve* GetEvent(int event);
 
 VehicleInfo* FindVehicle(s32 id);
 int GetNumPlayers(void);
 DriverInfo* GetPlayerDriver(int slot);
 VehicleInfo* GetVehicle(int i);
 void SetDriverColor(s32 id, u32 color);
-DriverInfo* GetDriver(int i);
 int GetNumDrivers(void);
 int GetNumVehicles(void);
 DriverInfo* FindDriver(s32 id);
@@ -309,13 +270,13 @@ int GetNumRacers(s32 track) {
         return GetNumPlayers();
     } else {
         int best = 0;
-        Track* t = GetTrack(track);
+        TrackInfo* t = GetTrack(track);
         int i;
 
-        for (i = 0; i < t->num_eves; i++) {
-            Eve* e = FindTrackEvent(track, i);
-            if (e->num_racers > best) {
-                best = e->num_racers;
+        for (i = 0; i < t->events; i++) {
+            EventInfo* e = FindTrackEvent(track, i);
+            if (e->drivers > best) {
+                best = e->drivers;
             }
         }
         return best;
@@ -415,7 +376,7 @@ void BuildDAVMap(DAVMap* out, s32 track) {
     fn_8013C8B8();
 }
 
-int GetNumRacersForEve(Eve* eve) {
+int GetNumRacersForEve(EventInfo* eve) {
     if (lbl_8055D560 != 0) {
         int n = GetNumPlayers();
         return n > lbl_8055D560 ? n : lbl_8055D560;
@@ -425,7 +386,7 @@ int GetNumRacersForEve(Eve* eve) {
 
         if (IsSinglePlayer()) {
             int n = GetNumPlayers();
-            result = n > eve->num_racers ? n : eve->num_racers;
+            result = n > eve->drivers ? n : eve->drivers;
         } else {
             result = GetNumPlayers();
         }

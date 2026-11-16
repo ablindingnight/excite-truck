@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 
 void FlagsInit(void);
 void FlagsShutdown(void);
@@ -122,23 +123,9 @@ void fn_8020A600(void);
 void GameDoEve(int eve, int track);
 }
 
-struct Eve {
-    u8 unk0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
-
-struct Track {
-    u8 unk0[0x8];
-    char name[0x20];   // offset 0x8
-    char name2[0x48];  // offset 0x28
-    s32 num_eves;      // offset 0x70
-};
-
 extern "C" {
 }
 int GetNumTracks(void);
-Track* GetTrack(int track);
-Eve* FindTrackEvent(int track, int eve);
 
 extern u32 lbl_8055D430;
 extern u8 lbl_8055F63C;
@@ -353,7 +340,7 @@ void SetDirectToTrackName(const char* name) {
 }
 
 int FindContest(int* out_track, int* out_eve, const char* name) {
-    Track* track;
+    TrackInfo* track;
     int found;
     int track_idx;
     int eve_idx;
@@ -361,8 +348,8 @@ int FindContest(int* out_track, int* out_eve, const char* name) {
     found = 0;
     for (track_idx = 0; track_idx < GetNumTracks(); track_idx++) {
         track = GetTrack(track_idx);
-        for (eve_idx = 0; eve_idx < track->num_eves; eve_idx++) {
-            if (strcasecmp(FindTrackEvent(track_idx, eve_idx)->vals->GetString("name", ""), name) == 0) {
+        for (eve_idx = 0; eve_idx < track->events; eve_idx++) {
+            if (strcasecmp(FindTrackEvent(track_idx, eve_idx)->node->GetString("name", ""), name) == 0) {
                 *out_track = track_idx;
                 found = 1;
                 *out_eve = eve_idx;
@@ -405,7 +392,7 @@ int FindEve(int* out_track, int* out_eve, const char* name) {
 
     found = 0;
     for (track_idx = 0; track_idx < GetNumTracks(); track_idx++) {
-        if (strcasecmp(GetTrack(track_idx)->name2, name) == 0) {
+        if (strcasecmp(GetTrack(track_idx)->title, name) == 0) {
             *out_track = track_idx;
             found = 1;
             *out_eve = 0;

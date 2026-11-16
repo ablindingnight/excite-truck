@@ -119,7 +119,7 @@ VehicleList* fn_8027DB40(u32 flags) {
                 unlocked = 0;
             }
             int special = 0;
-            if (!(v->flags & 2) && v->a8 != v->a4) {
+            if (!(v->flags & 2) && v->base != v->id) {
                 special = 1;
             }
             if (!unlocked && lockedOut) {
@@ -217,7 +217,7 @@ void fn_8027E024(void* out, int event, int which) {
 void fn_8027E0C8(Path* (*getPath)(int), int which) {
     s32 sel = -1;
     s32 driver = GetDriver(0)->id;
-    s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->a4;
+    s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->id;
     s32 x = GetDriver(0)->color;
     IPath* path = getPath(which);
     fn_802840F4();
@@ -259,7 +259,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
         int oldPaths = fn_8027BAB8(path);
         VehicleInfo* v = FindVehicle(vehicle);
         int special = !(v->flags & 2);
-        bool hadSpecial = special && IsSpecialChassisUnlocked(v->name);
+        bool hadSpecial = special && IsSpecialChassisUnlocked(v->chassis);
         int hadExtreme = IsExtremeChassisUnlocked();
         int hadCareer = IsCareerComplete();
         fn_802840F8();
@@ -285,7 +285,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
             fn_8027DA08();
             int newBest = path->Get(bi)->Get(ci)->Best();
             int hasSpecial = 0;
-            if (special && IsSpecialChassisUnlocked(v->name)) {
+            if (special && IsSpecialChassisUnlocked(v->chassis)) {
                 hasSpecial = 1;
             }
             AchQuery q;
@@ -295,8 +295,8 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
             AchievementsQuery(&q);
             VehicleList* list = fn_8025007C(2);
             if (!hadSpecial && hasSpecial) {
-                list->Add(GetSpecialChassis(v->name), 1, 0);
-                const char* why = ShowUnlockReason(v->name);
+                list->Add(GetSpecialChassis(v->chassis), 1, 0);
+                const char* why = ShowUnlockReason(v->chassis);
                 list->SetReason(list->Count() - 1, why);
             }
             if (!hadExtreme && AllExtremeCarsUnlocked2()) {

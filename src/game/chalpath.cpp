@@ -3,6 +3,7 @@
 // popup, the "%s/%s" progress counters and the list descriptors behind it. Written against raw field
 // offsets; the large screen routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 #include <string.h>
@@ -83,7 +84,6 @@ int fn_8025FE8C(void) {
 }  // extern "C"
 
 void SetNumPlayers(int n);
-u8* GetTrack(int i);
 
 class TrackTable {
 public:
@@ -405,32 +405,6 @@ struct PathItem {
     u32 w[5];
 };
 
-struct DriverInfo {
-    s32 index;        // offset 0x0
-    s32 id;           // offset 0x4
-    char name[0x40];  // offset 0x8
-    s32 rank;         // offset 0x48
-    s32 vehicle;      // offset 0x4C
-    u32 color;        // offset 0x50
-};
-
-struct VehicleInfo {
-    s32 index;        // offset 0x0
-    s32 id;           // offset 0x4
-    u8 pad8[0x2C - 0x8];
-    char name[0x74];  // offset 0x2C
-    u32 flags;        // offset 0xA0
-};
-
-struct EventInfo {
-    s32 id;     // offset 0x0
-    s32 track;  // offset 0x4
-};
-
-struct TrackEvent {
-    s32 event;  // offset 0x0
-};
-
 // What fn_8023BF4C races: the track, the event's index on it, and where the result goes.
 struct CareerRun {
     s32 track;  // offset 0x0
@@ -439,12 +413,9 @@ struct CareerRun {
     void* out;  // offset 0xC
 };
 
-DriverInfo* GetDriver(int i);
 VehicleInfo* GetVehicle(int i);
 VehicleInfo* FindVehicle(long id);
 int IsSpecialChassisUnlocked(const char* name);
-EventInfo* GetEvent(int i);
-TrackEvent* FindTrackEvent(int track, int i);
 void SetPlayer(int player, long driver, long vehicle, unsigned long color);
 int IdentGetCurrentSlot(void);
 const char* IdentGetSlotName(int slot);
@@ -557,10 +528,10 @@ int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
         return 1;
     }
     SetNumPlayers(1);
-    u8* t = GetTrack(track);
+    TrackInfo* t = GetTrack(track);
     u32 chassis = 0;
-    if (t && PTR(t, 0x80) && ((TrackTable*)PTR(t, 0x80))->HasTable("vehicle_map")) {
-        chassis = ((TrackTable*)PTR(t, 0x80))->GetTable("vehicle_map")->GetString("default_vehicle", 0);
+    if (t && t->node && ((TrackTable*)t->node)->HasTable("vehicle_map")) {
+        chassis = ((TrackTable*)t->node)->GetTable("vehicle_map")->GetString("default_vehicle", 0);
     } else {
         fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Expecting vehicle_map table and found none!");
     }
@@ -600,7 +571,7 @@ void fn_8026003C(void) {
     if (fn_8025FECC((u8*)&vehicle, (u8*)&color, track, arg)) {
         VehicleInfo* v = FindVehicle(vehicle);
         int special = !(v->flags & 2);
-        int hadSpecial = special && IsSpecialChassisUnlocked(v->name);
+        int hadSpecial = special && IsSpecialChassisUnlocked(v->chassis);
         bool wasComplete = SCREEN_BUF->AllComplete();
         SCREEN_BUF->Free();
         SetPlayer(0, driver, vehicle, color);
@@ -611,8 +582,8 @@ void fn_8026003C(void) {
         CareerRun run;
         run.track = track;
         run.index = -1;
-        for (int i = S32(GetTrack(track), 0x70); i-- > 0;) {
-            if (event == FindTrackEvent(track, i)->event) {
+        for (int i = GetTrack(track)->events; i-- > 0;) {
+            if (event == FindTrackEvent(track, i)->id) {
                 run.index = i;
             }
         }

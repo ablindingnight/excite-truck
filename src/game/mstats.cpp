@@ -2,24 +2,9 @@
 // in two lists, with the selected event's statistics beside them. Names are guesses apart from
 // the layout and element names.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" int strcasecmp(const char* a, const char* b);
-
-struct Track {
-    s32 index;          // offset 0x0
-    s32 league;         // offset 0x4
-    char track[0x20];   // offset 0x8
-    u8 pad28[0x48];
-    s32 num_contests;   // offset 0x70
-};
-
-struct Event {
-    s32 index;        // offset 0x0
-    s32 track;        // offset 0x4
-    u32 type;         // offset 0x8
-    u8 padC[0x14];
-    ValueNode* node;  // offset 0x20
-};
 
 class Statistic {
 public:
@@ -34,10 +19,7 @@ void UnloadEves(void);
 void LoadCareerEves(void);
 void LoadArcadeEves(void);
 int GetNumTracks(void);
-Track* GetTrack(int i);
-Event* FindTrackEvent(int track, int eve);
 int GetNumEvents(void);
-Event* GetEvent(int i);
 const char* GetTrackEnviron(const char* name);
 const char* GetTrackFriendlyName(const char* name);
 const char* GetEventTypeDisplayName(u32 type);
@@ -219,7 +201,7 @@ RecordsState::~RecordsState(void) {}
 
 void RecordsState::Enter(void) {
     int row;
-    Track* track;
+    TrackInfo* track;
     int found;
     int t;
     int e;
@@ -230,13 +212,13 @@ void RecordsState::Enter(void) {
     for (t = 0; t < GetNumTracks(); t++) {
         track = GetTrack(t);
         found = 0;
-        for (e = 0; !found && e < track->num_contests; e++) {
+        for (e = 0; !found && e < track->events; e++) {
             if (FindTrackEvent(t, e)->node->Has("name")) {
                 found = 1;
             }
         }
         if (found) {
-            env = GetTrackEnviron(track->track);
+            env = GetTrackEnviron(track->name);
             listed = 0;
             for (i = 0; !listed && i < tracks.rows; i++) {
                 if (strcasecmp(env, tracks.GetCell(i, 1, 0)) == 0) {
@@ -246,7 +228,7 @@ void RecordsState::Enter(void) {
             if (!listed) {
                 row = tracks.rows;
                 tracks.SetCell(row, 1, env, 0);
-                tracks.SetCell(row, 0, GetTrackFriendlyName(track->track), 0);
+                tracks.SetCell(row, 0, GetTrackFriendlyName(track->name), 0);
             }
         }
     }
@@ -255,17 +237,17 @@ void RecordsState::Enter(void) {
     tracksDirty = 1;
 }
 
-static inline void AddEventRow(RecordsState* s, Event* ev, const char* env, int row) {
-    if (strcasecmp(GetTrackEnviron(ev->node->GetString("track", GetTrack(ev->track)->track)), env) == 0) {
+static inline void AddEventRow(RecordsState* s, EventInfo* ev, const char* env, int row) {
+    if (strcasecmp(GetTrackEnviron(ev->node->GetString("track", GetTrack(ev->track)->name)), env) == 0) {
         row = s->events.rows;
         s->events.SetCell(row, 0, GetEventTypeDisplayName(ev->type), 0);
         s->events.SetCell(row, 1, GetEventTypeName(ev->type), 0);
-        s->eventIds[row] = ev->index;
+        s->eventIds[row] = ev->id;
     }
 }
 
 void RecordsState::Update(void) {
-    Event* ev;
+    EventInfo* ev;
     int row;
     const char* env;
     int i;

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -34,33 +35,6 @@ void IdentRegisterField(s32 a, s32 b, void** ptr, u32 size, IdentFieldClear clea
 #define VEHICLE_EXTREME 2
 #define VEHICLE_MAGICAL 4
 #define VEHICLE_NO_AI 8
-
-struct DriverInfo {
-    s32 index;        // offset 0x0
-    s32 id;           // offset 0x4, "number"
-    char name[0x40];  // offset 0x8
-    s32 rank;         // offset 0x48
-    s32 vehicle;      // offset 0x4C, vehicle id, then its index
-    u32 color;        // offset 0x50
-    s32 unk54;        // offset 0x54
-    ValueNode* node;  // offset 0x58
-};
-
-struct VehicleInfo {
-    s32 index;                     // offset 0x0
-    s32 id;                        // offset 0x4
-    s32 base;                      // offset 0x8, id of the non-extreme version
-    char display_name[0x20];       // offset 0xC
-    char chassis[0x20];            // offset 0x2C
-    char texture[0x10];            // offset 0x4C
-    char number[8];                // offset 0x5C
-    u32 colors[MAX_BODY_COLORS];   // offset 0x64
-    s32 default_color;             // offset 0x94
-    s32 num_colors;                // offset 0x98
-    s32 unk9C;                     // offset 0x9C
-    u32 flags;                     // offset 0xA0
-    u32 groups;                    // offset 0xA4
-};
 
 struct VehicleColor {
     s32 body;  // offset 0x0

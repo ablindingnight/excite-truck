@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #include "game/rigid.h"
@@ -44,30 +45,8 @@ struct EventDesc {
     s32 event;  // offset 0x0
 };
 
-struct Event {
-    s32 id;  // offset 0x0
-    u8 pad4[0x20 - 0x4];
-    ValueNode* vals;  // offset 0x20
-};
-
 extern "C" EventDesc* fn_801769CC(void);
-Event* GetEvent(int id);
 
-struct DriverInfo {
-    u8 pad0[0x4];
-    s32 id;  // offset 0x4
-    u8 pad8[0x50 - 0x8];
-    u32 color;  // offset 0x50
-};
-
-struct VehicleInfo {
-    u8 pad0[0x4];
-    s32 id;  // offset 0x4
-    u8 pad8[0x64 - 0x8];
-    u32 colors[1];  // offset 0x64
-};
-
-DriverInfo* GetDriver(int i);
 VehicleInfo* GetDriverVehicle(long driver);
 VehicleInfo* FindVehicleNamed(const char* name, int n);
 VehicleInfo* FindVehicle(long id);
@@ -902,12 +881,12 @@ int fn_80160CE4(void) { return lbl_8055A0B8 - lbl_8055A0C0; }
 
 void fn_80160CF4(void) {
     int i;
-    Event* e = GetEvent(fn_801769CC()->event);
+    EventInfo* e = GetEvent(fn_801769CC()->event);
     ValueNode* n;
     lbl_8055E300 = 0;
     lbl_8042FDEC.Push(new ("ChalList") ChalList);
     i = 0;
-    for (n = e->vals->GetChildAt(i++); n; n = e->vals->GetChildAt(i++)) {
+    for (n = e->node->GetChildAt(i++); n; n = e->node->GetChildAt(i++)) {
         if (strcasecmp(n->GetName(), "challenge") == 0) {
             const char* type = n->GetValue("type");
             if (strcasecmp(type, "stunt") == 0) {
@@ -954,7 +933,7 @@ void fn_80161438(const char* title, const char* msg) {
     }
 }
 
-Event* fn_80161E40(int n);
+EventInfo* fn_80161E40(int n);
 int fn_8016208C(int event);
 
 int fn_801615B4(int n) {
@@ -1140,7 +1119,7 @@ static inline int HasNode(ValueNode* n, const char* name) { return n->FindChild(
 extern "C" {
 
 CSubTaskMgr* fn_80161C94(void) {
-    ValueNode* v = GetEvent(fn_801769CC()->event)->vals;
+    ValueNode* v = GetEvent(fn_801769CC()->event)->node;
     if (HasNode(v, "challenge")) {
         return new ("chalsubtaskmgr") ChalSubTaskMgr;
     }
@@ -1162,8 +1141,8 @@ int fn_80161D50(void) {
     int total = 0;
     int i;
     for (i = 0; i < n; i++) {
-        Event* e = GetEvent((int)fn_80161E40(i));
-        if (e->vals->GetBool("mandatory", 0)) {
+        EventInfo* e = GetEvent((int)fn_80161E40(i));
+        if (e->node->GetBool("mandatory", 0)) {
             total += fn_8016208C(e->id);
         }
     }
@@ -1179,14 +1158,14 @@ void fn_80161DE4(void) {
     fn_80133348((u8*)IdentGetCurrentSlot() + 0xC, lbl_8055A0B0, bonus + 1);
 }
 
-Event* fn_80161E40(int n) {
+EventInfo* fn_80161E40(int n) {
     int i;
     for (i = 0; i < GetNumEvents(); i++) {
-        if (n == GetEvent(i)->vals->GetInt("tutorial", -999)) {
-            return (Event*)i;
+        if (n == GetEvent(i)->node->GetInt("tutorial", -999)) {
+            return (EventInfo*)i;
         }
     }
-    return (Event*)-1;
+    return (EventInfo*)-1;
 }
 
 int fn_80161ECC(void) {
@@ -1198,7 +1177,7 @@ int fn_80161ECC(void) {
 }
 
 void fn_80161F10(int n) {
-    Event* e;
+    EventInfo* e;
     u32 color;
     int ev;
     s32 driver;
@@ -1211,12 +1190,12 @@ void fn_80161F10(int n) {
     fn_80137C84(fn_802E4A10(), 0);
     driver = GetDriver(0)->id;
     vehicle = GetDriverVehicle(driver)->id;
-    if (e->vals->Has("player_car")) {
-        vehicle = FindVehicleNamed(e->vals->GetValue("player_car"), 0)->id;
+    if (e->node->Has("player_car")) {
+        vehicle = FindVehicleNamed(e->node->GetValue("player_car"), 0)->id;
     }
     color = GetDriver(driver)->color;
-    if (e->vals->Has("player_color")) {
-        s32 c = e->vals->GetIntValue("player_color");
+    if (e->node->Has("player_color")) {
+        s32 c = e->node->GetIntValue("player_color");
         color = FindVehicle(vehicle)->colors[c];
     }
     SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
@@ -1233,12 +1212,12 @@ void fn_80161F10(int n) {
 }
 
 int fn_8016208C(int event) {
-    Event* e = GetEvent(event);
+    EventInfo* e = GetEvent(event);
     int count = 0;
     int i = 0;
     ValueNode* n;
     for (;;) {
-        n = e->vals->GetChildAt(i++);
+        n = e->node->GetChildAt(i++);
         if (!n) {
             break;
         }
@@ -1774,7 +1753,7 @@ inline int ChalList::Draw(int a) {
     if (exit) {
         fn_80161438(fn_80131234("Tutorial:EXIT_HEAD"), fn_80131234("Tutorial:EXIT_BODY"));
     } else {
-        ::Event* e;
+        ::EventInfo* e;
         TextElem* e1;
         TextElem* e2;
         GartElem* but;
@@ -1785,7 +1764,7 @@ inline int ChalList::Draw(int a) {
         DrawBars();
         e = GetEvent(fn_801769CC()->event);
         fn_801476C4(lbl_8055E2E0->Find("mode_title"));
-        fn_801473F8(lbl_8055E2E0, "list_title", "%s", e->vals->GetString("friendly_name", GetEventDisplayName(e->id)));
+        fn_801473F8(lbl_8055E2E0, "list_title", "%s", e->node->GetString("friendly_name", GetEventDisplayName(e->id)));
         fn_801476C4(lbl_8055E2E0->Find("continue"));
         e1 = (TextElem*)lbl_8055E2E0->Find("elem1");
         e2 = (TextElem*)lbl_8055E2E0->Find("elem2");
