@@ -1,6 +1,7 @@
 // Small 2D vector helpers and stubs (0x80160B14-0x80160CE4), next to a 20-entry pointer list that nothing
 // here uses any more. Names are guesses.
 #include "game/common.h"
+#include "game/arrayref.h"
 
 // The game mode base (amaster.cpp); its empty vf44 lives here.
 class GameMode {
@@ -14,23 +15,6 @@ extern "C" {
 double sqrt(double x);
 void fn_80128658(void* p);  // MemFree
 }
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 struct V2 {
     f32 x;

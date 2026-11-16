@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/locstring.h"
 #include "game/raceprog.h"
 #include "game/joy.h"
@@ -178,23 +179,6 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline f32 Remap(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) { return Lerp(y0, y1, Unlerp(x0, x1, x)); }
 
 
-
-template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 // Respawn, CarPlace: game/respawn.h.
 struct ZoneResults {

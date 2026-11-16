@@ -2,6 +2,7 @@
 // sets with road textures and a sky model, plus a global_parameters node. Names are guesses apart
 // from the keys and messages.
 #include "game/common.h"
+#include "game/arrayref.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -32,24 +33,6 @@ void fn_802B5404(s32* tex);
 s32 fn_802B110C(TexLoader f, const char* name);
 void* fn_802B2C34(ModelLoader f, const char* name);
 }
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* Next(void) { return &data[count++]; }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 struct UMatTex {
     const char* name;  // offset 0x0

@@ -4,6 +4,7 @@
 // a driver projects the obstacles ahead into 64 lateral bins and picks the nearest free gap. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/vec3_init.h"
 #include "game/carbody.h"
 #include "game/math_types.h"
@@ -133,23 +134,6 @@ struct V2 {
     f32 y;
 };
 void SetV2(V2& d, const V2& s);
-
-template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 template <class T>
 struct DynArray {

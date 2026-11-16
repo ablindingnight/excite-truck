@@ -3,6 +3,7 @@
 // thresholds in stunts.val / stuntdef.val, award points and drive the HUD's stunt pop-up. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
@@ -123,23 +124,6 @@ inline f32 Clamp01(f32 x) {
     return r > 0.0f ? r : 0.0f;
 }
 inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 template <typename T, int N>
 struct FixedList {

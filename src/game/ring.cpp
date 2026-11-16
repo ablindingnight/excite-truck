@@ -3,6 +3,7 @@
 // "ring"s (radius + frame64). Sets are switched on and off by name; a car passes a ring by getting within its
 // radius, and rings fade in, flash and fade out. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/plainvec.h"
@@ -44,24 +45,6 @@ RaceCarRec* fn_8017960C(int id);
 }
 
 extern f32 lbl_8055E3C8;  // race time
-
-template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    int Count(void) const { return count; }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 template <class T>
 struct MechaSimpleArray : ArrayRef<T> {

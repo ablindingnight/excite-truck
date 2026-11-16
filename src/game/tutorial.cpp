@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/gart.h"
@@ -115,23 +116,6 @@ public:
     virtual int AllowExit(void) = 0;                      // 0x54
     virtual void Camera(void) = 0;                        // 0x58
     virtual const char* Title(void) = 0;                  // 0x5C
-};
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
 };
 
 template <typename T, int N>

@@ -1,6 +1,7 @@
 // Background boats (0x802C2298-0x802C26F0): reads boat models and positions from _boat.val and
 // draws them bobbing and rolling. Names are guesses apart from the value keys.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/math_types.h"
 
 extern "C" {
@@ -16,24 +17,6 @@ double sin(double x);
 
 struct Mtx33 {
     f32 m[9];
-};
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* Next(void) { return &data[count++]; }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
 };
 
 struct Boat {

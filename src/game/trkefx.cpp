@@ -1,29 +1,12 @@
 // Track effect tables (0x802AE2E0-0x802AE5E0): loads trkefx.val, sh_trkefx.val and race.res/efx.val
 // on first use and looks entries up across them. Names are guesses.
 #include "game/common.h"
+#include "game/arrayref.h"
 
 extern "C" {
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
 }
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* Next(void) { return &data[count++]; }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 struct TableList : ArrayRef<ValueTable*> {
     TableList(void) : ArrayRef<ValueTable*>(storage, 4) {}

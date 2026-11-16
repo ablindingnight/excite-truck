@@ -2,6 +2,7 @@
 // on at least the given lap drives into them, fire their "act_seq" sequence at the midpoint of the bound's
 // longest edge. Registered as a race listener. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 
@@ -74,23 +75,6 @@ public:
     void Draw(TdVec3* pts, int n, int c);
     s32 lite;  // offset 0x0
     s32 glow;  // offset 0x4
-};
-
-template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
 };
 
 template <class T, int N>

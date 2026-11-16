@@ -4,6 +4,7 @@
 // music ducked while one is up and an instruction sound per press. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 
 class Sound2D {
 public:
@@ -79,23 +80,6 @@ struct PopupDef {
     PopupDrawFn draw;     // offset 0x18
 };
 }  // namespace
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 template <typename T, int N>
 struct FixedArr : ArrayRef<T> {

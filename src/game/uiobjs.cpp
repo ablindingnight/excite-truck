@@ -2,6 +2,7 @@
 // each in a fixed list of 32 entries looked up by case-insensitive name, with drawing at an anchored
 // position, text style setup and sound playback. Names are guesses apart from the tags.
 #include "game/common.h"
+#include "game/arrayref.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -61,23 +62,6 @@ public:
 };
 
 extern "C" Sound2D* fn_80207848(const char* name, int flags);
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 template <typename T, int N>
 struct FixedArr : ArrayRef<T> {

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/locstring.h"
 #include "game/raceopts.h"
 #include "game/raceprog.h"
@@ -327,23 +328,6 @@ public:
     virtual void a2(void) = 0;
     virtual void a3(void) = 0;
     virtual void a4(void) = 0;
-};
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
 };
 
 template <typename T, int N>

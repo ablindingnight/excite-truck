@@ -6,6 +6,7 @@
 // and when the player cannot finish in time the "turtle" mode turns it all off. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 
@@ -111,23 +112,6 @@ OrbitCar* fn_801B2EC0(int id);
 LineSet* fn_80156A40(void);
 CarRec* fn_8017960C(int id);
 }
-
-template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 template <class T, int N>
 struct FixedArr : ArrayRef<T> {

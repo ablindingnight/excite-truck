@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/locstring.h"
 #include "game/raceprog.h"
 #include "game/respawn.h"
@@ -339,23 +340,6 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
     } while (0)
 
 
-
-template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 template <class T>
 struct RArray : ArrayRef<T> {
