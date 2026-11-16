@@ -4,6 +4,7 @@
 // "RealStatistic" and "IntStatistic" messages give the names; the rest are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/highscore.h"
 #include "game/vec3_init.h"
 
@@ -24,19 +25,6 @@ void fn_800122B4(s32 value, char* buf);
 
 void* operator new(size_t size, const char* tag);
 
-struct EventInfo {
-    s32 id;           // offset 0x0
-    s32 track;        // offset 0x4
-    s32 type;         // offset 0x8
-    s32 laps;         // offset 0xC
-    u8 unk10[0x10];
-    ValueNode* node;  // offset 0x20
-};
-
-struct VehicleInfo {
-    s32 index;  // offset 0x0
-};
-
 struct VehicleColor {
     s32 body;  // offset 0x0
     s32 trim;  // offset 0x4
@@ -48,7 +36,6 @@ struct Units {
     f32 speed_scale;  // offset 0x10
 };
 
-EventInfo* GetEvent(int event);
 extern "C" Units* lbl_8055E050;
 
 VehicleInfo* GetPlayerVehicle(int slot);

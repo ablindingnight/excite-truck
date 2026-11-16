@@ -5,11 +5,11 @@
 // done and then resets or stays finished; laps outside its active range park it. A rumble sound
 // and an on-screen text line are shared. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
-void* GetEvent(int event);
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -27,11 +27,6 @@ struct LocalCarDesc {
 };
 
 extern "C" LocalCarDesc* fn_801769CC(void);
-
-struct EventDesc {
-    u8 pad[0x20];
-    ValueNode* table;  // offset 0x20
-};
 
 struct LapInfo {
     u8 pad[0x4];
@@ -300,7 +295,7 @@ void fn_801D4734(void) {
         lbl_804422F0.snd->range = 100.0f;
     }
     fn_801D5520("actseq.val");
-    ValueNode* t = ((EventDesc*)GetEvent(fn_801769CC()->event))->table;
+    ValueNode* t = ((EventInfo*)GetEvent(fn_801769CC()->event))->node;
     if (t->Has("action_sequence_file")) {
         fn_801D5520(t->GetValue("action_sequence_file"));
     }

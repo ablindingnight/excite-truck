@@ -5,6 +5,7 @@
 // contests are passed by a grade (career) or a passing grade (challenge). Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/highscore.h"
 
 extern char CareerMissingName[4];
@@ -33,14 +34,7 @@ public:
     s32 passing;        // offset 0x14
 };
 
-struct EventInfo {
-    s32 id;  // offset 0x0
-    u8 pad4[0x20 - 0x4];
-    ValueNode* node;  // offset 0x20
-};
-
 // HighScore: game/highscore.h.
-EventInfo* GetEvent(int i);
 int GetNumEvents(void);
 int FindGrade(const char* name);
 int IdentGetCurrentSlot(void);

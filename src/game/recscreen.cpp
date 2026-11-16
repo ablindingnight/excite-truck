@@ -3,8 +3,8 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
-#include "game/highscore.h"
 #include "game/gamedb.h"
+#include "game/highscore.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 
@@ -231,7 +231,6 @@ int IdentGetCurrentSlot(void);
 HighScore* StatsGetHighScore(int slot, long event, long difficulty, int rank);
 VehicleChoice StatsUnpackChoice(u32 packed);
 const char* GetGradeDisplayName(int grade);
-VehicleInfo* GetVehicle(int i);
 const char* GetTrackFriendlyName(const char* name);
 extern "C" const char* fn_80131234(const char* key);
 extern f32 __float_max[];  // FLT_MAX (MSL)

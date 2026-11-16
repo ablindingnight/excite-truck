@@ -5,6 +5,7 @@
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
 // animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/highscore.h"
 #include "game/gart.h"
 
@@ -39,13 +40,6 @@ void StatsAddHighScore(int slot, long event, long difficulty, const char* name, 
 void* operator new(size_t size, const char* name);
 void operator delete(void* p);
 
-// HighScore: game/highscore.h.
-struct EventInfo {
-    u8 pad0[0x8];
-    u32 kind;  // offset 0x8
-};
-
-EventInfo* GetEvent(int event);
 int StatsGetHighScoreCount(int slot, long event, long difficulty);
 const char* GetGradeDisplayName(int grade);
 const char* IdentGetSlotName(int slot);
@@ -737,7 +731,7 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
         return;
     }
     RealStatistic rec(IdentGetCurrentSlot(), 0x20507, m->event, m->difficulty);
-    int normal = GetEvent(m->event)->kind == 0x180302;
+    int normal = GetEvent(m->event)->type == 0x180302;
     const char* newTitle = normal ? fn_80131234("RecordsAnim:NEW_TIME_RECORD")
                                   : fn_80131234("RecordsAnim:NEW_EXTRA_TIME_RECORD");
     const char* title = normal ? fn_80131234("RecordsAnim:TIME_RECORD")
