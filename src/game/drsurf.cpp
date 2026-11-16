@@ -1039,7 +1039,6 @@ void fn_802D657C(u32* p, u32 base) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 void fn_802D6594(u8* s) {
     u8 a = s[0x34];
     u8* p = s + 0x38;
