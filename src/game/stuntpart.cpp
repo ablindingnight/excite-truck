@@ -94,8 +94,12 @@ void fn_8028E080(void);
 void fn_8028E240(int a);
 void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
-void fn_8028E584(void* e, ValVec3 p, ValVec3 v);
-void fn_8028E590(void* e, ValVec3 p, ValVec3 v, f32 spin);
+void fn_8028E584(void* e, const ValVec3* p, const ValVec3* v);
+void fn_8028E590(void* e, const ValVec3* p, const ValVec3* v, f32 spin);
+// The stunt effects hand the emitters copies of the position and velocity (the Wii passes them as
+// by-value aggregates); partman takes const pointers.
+static inline void EmitCopy(void* e, ValVec3 p, ValVec3 v) { fn_8028E584(e, &p, &v); }
+static inline void EmitCopySpin(void* e, ValVec3 p, ValVec3 v, f32 spin) { fn_8028E590(e, &p, &v, spin); }
 u8 fn_802C2C00(u8 a);
 void fn_802C2B78(f32 a, f32 b, f32 c);
 void fn_802C2BB8(f32* a, f32* b, f32* c);
@@ -456,7 +460,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                     Vec q;
                     SetV3(&q, Lerp(p->pts[i * 2].x, p->pts[i * 2 + 1].x, r), Lerp(p->pts[i * 2].y, p->pts[i * 2 + 1].y, r), Lerp(p->pts[i * 2].z, p->pts[i * 2 + 1].z, r));
                     AddScaled(&q, &q, &car->axes[1], -1.0f);
-                    fn_8028E584(lbl_8055F924->e1, *(ValVec3*)&q, car->vel);
+                    EmitCopy(lbl_8055F924->e1, *(ValVec3*)&q, car->vel);
                 }
             }
         } else {
@@ -498,7 +502,7 @@ void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
         AddScaled(&pos, &pos, &car->axes[1], fn_80287BC8(0.0f, 2.0f * hy));
         vel = *(const WV3*)&car->vel;
         if (car->height >= 1.5f - __float_epsilon[0]) {
-            fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, *(ValVec3*)&vel, 1.0f);
+            EmitCopySpin(lbl_8055F924->e0, *(ValVec3*)&pos, *(ValVec3*)&vel, 1.0f);
         }
     }
 }
@@ -758,7 +762,7 @@ void fn_802ABC80(const StuntMtx* m, const ValVec3* vel, f32 a, f32 b, f32 c) {
     Vec pos;
     OffsetStuntPosition(pos, m, ang, a, b);
     AddScaled(&pos, &pos, (const Vec*)&m->rot[1], fn_80287BC8(0.0f, 2.0f * c));
-    fn_8028E590(lbl_8055F924->e0, *(ValVec3*)&pos, *vel, 1.0f);
+    EmitCopySpin(lbl_8055F924->e0, *(ValVec3*)&pos, *vel, 1.0f);
 }
 
 void fn_802ABE50(void) { fn_8028E240(0); }
