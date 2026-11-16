@@ -1496,60 +1496,66 @@ static inline void LinkRings(ZoneLevel* l) {
     }
 }
 
+/* Helper names unproven (BuildLevel, ReadScore, DefaultScore): the level pointer is each helper's parameter, passed as
+   &levels[lvl], so it is numbered as an inline object instead of a function local (retail r22 / r18). */
+static inline void BuildLevel(ZoneLevel* l, ZoneLevel* prev, ValueNode* child) {
+    s32 j;
+    if (prev) {
+        CopyLevel(l, prev, child);
+    } else {
+        int k;
+        f32 w;
+        ValueNode* g;
+        l->n = fn_8013DE7C(child, "Zone");
+        l->gates = new ("Zone[]") Gate[l->n];
+        w = fn_80204CFC("zone_gate_scale") * child->FindChild("config")->GetFloat("gate_scale", 1.0f);
+        k = 0;
+        for (j = 0; child->GetChildAt(j) != 0; j++) {
+            g = child->GetChildAt(j);
+            if (fn_8013CB44("Zone", g)) {
+                l->gates[k].Init(g, w);
+                k++;
+            }
+        }
+    }
+    LinkRings(l);
+    l->timeScale = fn_80204CFC("zone_time_scale");
+    l->mult = 1;
+    l->score = 10;
+}
+static inline void ReadScore(ZoneLevel* l, ValueNode* sn, int lvl) {
+    if (sn) {
+        l->mult = sn->GetInt("m", lvl + 1);
+        l->score = sn->GetInt("flag", 10);
+    } else {
+        l->mult = lvl + 1;
+        l->score = 10;
+    }
+    l->score = l->score * fn_80204CFC("score_scale");
+}
+static inline void DefaultScore(ZoneLevel* l, int lvl) {
+    l->mult = lvl + 1;
+    l->score = 10;
+    l->score = l->score * fn_80204CFC("score_scale");
+}
 ZoneLevels::ZoneLevels(ValueTable* t) {
+    int i;
     int lvl;
     ValueNode* child;
-    int i;
     n = fn_8013DDD4(t, "ZoneLevel");
     levels = new ("ZoneLevel[]") ZoneLevel[n];
+    i = 0;
     lvl = 0;
-    for (i = 0; t->GetChild(i) != 0; i++) {
+    for (; t->GetChild(i) != 0; i++) {
         child = t->GetChild(i);
         if (fn_8013CB44("ZoneLevel", child)) {
-            ValueNode* sn;
-            ZoneLevel* prev = lvl > 0 ? levels : 0;
-            ZoneLevel* l = &levels[lvl];
-            s32 j;
             char buf[32];
-            if (prev) {
-                CopyLevel(l, prev, child);
-            } else {
-                int k;
-                f32 w;
-                ValueNode* g;
-                l->n = fn_8013DE7C(child, "Zone");
-                l->gates = new ("Zone[]") Gate[l->n];
-                w = fn_80204CFC("zone_gate_scale") * child->FindChild("config")->GetFloat("gate_scale", 1.0f);
-                k = 0;
-                for (j = 0; child->GetChildAt(j) != 0; j++) {
-                    g = child->GetChildAt(j);
-                    if (fn_8013CB44("Zone", g)) {
-                        l->gates[k].Init(g, w);
-                        k++;
-                    }
-                }
-            }
-            LinkRings(l);
-            l->timeScale = fn_80204CFC("zone_time_scale");
-            l->mult = 1;
-            l->score = 10;
+            BuildLevel(&levels[lvl], lvl > 0 ? levels : 0, child);
             sprintf(buf, "scoring_level%d", lvl + 1);
             if (t->HasChild(buf)) {
-                sn = t->FindChild(buf);
-                l = &levels[lvl];
-                if (sn) {
-                    l->mult = sn->GetInt("m", lvl + 1);
-                    l->score = sn->GetInt("flag", 10);
-                } else {
-                    l->mult = lvl + 1;
-                    l->score = 10;
-                }
-                l->score = l->score * fn_80204CFC("score_scale");
+                ReadScore(&levels[lvl], t->FindChild(buf), lvl);
             } else {
-                l = &levels[lvl];
-                l->mult = lvl + 1;
-                l->score = 10;
-                l->score = l->score * fn_80204CFC("score_scale");
+                DefaultScore(&levels[lvl], lvl);
             }
             lvl++;
         }
