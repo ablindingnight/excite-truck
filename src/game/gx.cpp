@@ -109,25 +109,15 @@ void fn_802E3734(s32* fd);
 void fn_802E3A64(s32 fd, const void* buf, u32 n);
 void fn_801BFD34(V3* out, const V3* in, const RMtx* m);
 void fn_802C8588(void* out, const V3* a, const V3* b);
-void GXInitSpecularDirHA(GXLightObj* l, f32 nx, f32 ny, f32 nz, f32 hx, f32 hy, f32 hz);
 
-u32 VIGetNextField(void);
 extern GXRenderModeObj GXNtsc480IntDf;
 extern GXRenderModeObj GXNtsc480Prog;
 extern GXRenderModeObj GXPal528IntDf;
 extern GXRenderModeObj GXEurgb60Hz480IntDf;
 extern GXRenderModeObj GXMpal480IntDf;
-void GXAdjustForOverscan(const GXRenderModeObj* in, GXRenderModeObj* out, u16 h, u16 v);
-void GXSetDrawDone(void);
-void* GXGetFifoBase(const GXFifoObj* f);
-u32 GXGetFifoSize(const GXFifoObj* f);
-void GXReadXfRasMetric(u32* a, u32* b, u32* c, u32* d);
-u32 GXGetOverflowCount(void);
-u32 GXResetOverflowCount(void);
 void GXSetGPMetric(int a, int b);
 // GXCompare: the SDK's.
 // GXFogType: the SDK's.
-void GXPeekZ(u16 x, u16 y, u32* z);
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -466,7 +456,7 @@ void fn_802CEAC4(void) {
         fn_802E317C("gx: invalid TV format");
         break;
     }
-    GXAdjustForOverscan(lbl_8055FD64, &lbl_804C9724, 0, 0x10);
+    GXAdjustForOverscan((const GXRenderModeObj*)lbl_8055FD64, (GXRenderModeObj*)&lbl_804C9724, (u16)0, (u16)0x10);
     lbl_8055FD64 = &lbl_804C9724;
     lbl_804C9724.viWidth += 10;
     lbl_804C9724.viXOrigin -= 5;
@@ -528,8 +518,8 @@ void fn_802CED50(s32 x, s32 y, s32 w, s32 h) {
 void fn_802CED78(void) {
     u32 d0, c0, b0, a0, d1, c1, b1, a1;
     u8 readIdle, cmdIdle, overhi, underlow, brk;
-    GXReadXfRasMetric(&c0, &d0, &a0, &b0);
-    GXReadXfRasMetric(&c1, &d1, &a1, &b1);
+    GXReadXfRasMetric((u32*)&c0, (u32*)&d0, (u32*)&a0, (u32*)&b0);
+    GXReadXfRasMetric((u32*)&c1, (u32*)&d1, (u32*)&a1, (u32*)&b1);
     int clocks = d0 == d1;
     int vtx = c0 == c1;
     int xfWaitIn = (b1 - b0) != 0;
@@ -932,8 +922,8 @@ void fn_802CFCA0(void) {
 void fn_802CFD74(void) {
     GXFifoObj fifo;
     GXGetCPUFifo((GXFifoObj*)&fifo);
-    void* base = GXGetFifoBase(&fifo);
-    u32 size = GXGetFifoSize(&fifo);
+    void* base = GXGetFifoBase((const GXFifoObj*)&fifo);
+    u32 size = GXGetFifoSize((const GXFifoObj*)&fifo);
     GXAbortFrame();
     lbl_8055FD6C = GXInit((void*)base, (u32)size);
     fn_802CF850();
@@ -1578,7 +1568,7 @@ void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, GXColor color, f32
     d.x *= inv;
     d.y *= inv;
     d.z *= inv;
-    GXInitSpecularDirHA(l, cam->x, cam->y, -cam->z, d.x, d.y, -d.z);
+    GXInitSpecularDirHA((GXLightObj*)l, cam->x, cam->y, -cam->z, d.x, d.y, -d.z);
     GXInitLightAttn((GXLightObj*)l, 0.0f, 0.0f, 1.0f, radius / 2.0f, 0.0f, 1.0f - radius / 2.0f);
 }
 
@@ -2229,7 +2219,7 @@ void fn_802D3900(void) {
     for (int i = 0; i < lbl_804C9984.count; i++) {
         VisTest* t = lbl_804C9984.queue[i];
         u32 z;
-        GXPeekZ(t->x, t->y, &z);
+        GXPeekZ((u16)t->x, (u16)t->y, (u32*)&z);
         t->hit = t->z < z;
     }
     lbl_804C9984.count = 0;

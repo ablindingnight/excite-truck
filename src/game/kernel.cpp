@@ -25,7 +25,6 @@ void* radmalloc(u32 size);  // allocate
 void radfree(void* p);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);  // fatal
-void OSRestart(u32 code);
 int DVDCancelAll(void);
 void __WPADShutdown(void);
 s32 WPADGetStatus(void);
@@ -697,7 +696,7 @@ void fn_802E2E38(int mode) {
     if (mode == 0) {
         if (!fn_802D9BF0() || fn_802D9C04()) {
             fn_802E30C8("kernel: doing restart");
-            OSRestart(0);
+            OSRestart((u32)0);
         } else {
             fn_802E30C8("kernel: restart during disk error (go to menu)");
             OSReturnToMenu();

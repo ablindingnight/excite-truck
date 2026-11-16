@@ -22,6 +22,10 @@ void GXPixModeSync(void);
 GXDrawSyncCallback GXSetDrawSyncCallback(GXDrawSyncCallback);
 GXDrawDoneCallback GXSetDrawDoneCallback(GXDrawDoneCallback);
 
+void GXSetDrawDone(void);
+void GXPeekZ(u16 x, u16 y, u32* z);
+void GXReadXfRasMetric(u32* xfWaitIn, u32* xfWaitOut, u32* rasBusy, u32* clocks);
+
 #ifdef __cplusplus
 }
 #endif

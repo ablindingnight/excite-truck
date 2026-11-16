@@ -28,6 +28,11 @@ void GXDisableBreakPt(void);
 
 OSThread* GXGetCurrentGXThread(void);
 
+void* GXGetFifoBase(const GXFifoObj* fifo);
+u32 GXGetFifoSize(const GXFifoObj* fifo);
+u32 GXGetOverflowCount(void);
+u32 GXResetOverflowCount(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -49,6 +49,8 @@ void GXSetCopyFilter(GXBool, const u8 sample_pattern[12][2], GXBool,
 void GXCopyDisp(void*, GXBool);
 void GXCopyTex(void*, GXBool);
 
+void GXAdjustForOverscan(const GXRenderModeObj* rmin, GXRenderModeObj* rmout, u16 hor, u16 ver);
+
 #ifdef __cplusplus
 }
 #endif

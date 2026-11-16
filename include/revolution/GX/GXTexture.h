@@ -81,6 +81,9 @@ void GXSetTexCoordScaleManually(GXTexCoordID coord, GXBool enable, u16 ss,
 
 void GXSetTexCoordCylWrap(GXTexCoordID coord, GXBool s_enable, GXBool t_enable);
 
+void* GXGetTexObjData(const GXTexObj* obj);
+u16 GXGetTlutObjNumEntries(const GXTlutObj* tlut);
+
 #ifdef __cplusplus
 }
 #endif

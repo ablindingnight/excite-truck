@@ -82,6 +82,8 @@ u32 VIGetDTVStatus(void);
 
 BOOL VIEnableDimming(BOOL enable);
 
+u32 VIGetNextField(void);
+
 #ifdef __cplusplus
 }
 #endif

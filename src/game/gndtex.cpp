@@ -55,7 +55,6 @@ void fn_802D6B7C(struct GModel* m);
 
 // GXColor: the SDK's.
 
-void* GXGetTexObjData(const GXTexObj* obj);
 }
 
 union WGPipe {
@@ -565,7 +564,7 @@ void fn_802DC62C(void) {
     if (GXGetTexObjWidth((const GXTexObj*)&t->obj) != 0x200) {
         fn_802E317C("I only cpu-light from 512x512 textures");
     }
-    lbl_8055FEBC = (u8*)GXGetTexObjData(&t->obj) + 0x80000000;
+    lbl_8055FEBC = (u8*)GXGetTexObjData((const GXTexObj*)&t->obj) + 0x80000000;
 }
 
 u32 fn_802DC6AC(int x, int y) {

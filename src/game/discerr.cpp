@@ -2,6 +2,8 @@
 // power buttons from the retrace callback, and shows the disc error screens until the problem is
 // gone. Names are guesses apart from the messages.
 #include "game/common.h"
+#include <revolution/GX/GXTypes.h>
+#include <revolution/GX/GXFifo.h>
 #include <revolution/DVD/dvd.h>
 #include <revolution/OS/OSError.h>
 #include <revolution/OS/OSInterrupt.h>
@@ -9,8 +11,6 @@
 #include <revolution/VI/vi.h>
 
 extern "C" {
-BOOL OSGetResetButtonState(void);
-u32 GXGetOverflowCount(void);
 typedef void (*VIRetraceCallback)(u32 count);
 typedef void (*OSStateCallback)(void);
 void fn_802E30C8(const char* fmt, ...);  // debug print

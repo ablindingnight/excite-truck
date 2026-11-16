@@ -17,6 +17,8 @@ s32 __OSSetVIForceDimming(u32 arg0, u32 arg1, u32 arg2);
 s32 __OSSetIdleLEDMode(u32 mode);
 s32 __OSUnRegisterStateEvent(void);
 
+BOOL OSGetResetButtonState(void);
+
 #ifdef __cplusplus
 }
 #endif

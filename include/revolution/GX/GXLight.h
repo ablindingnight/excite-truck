@@ -32,6 +32,8 @@ void GXSetChanCtrl(GXChannelID chan, GXBool enable, GXColorSrc ambSrc,
                    GXColorSrc matSrc, GXLightID lightMask, GXDiffuseFn diffFn,
                    GXAttnFn attnFn);
 
+void GXInitSpecularDirHA(GXLightObj* light, f32 nx, f32 ny, f32 nz, f32 hx, f32 hy, f32 hz);
+
 #ifdef __cplusplus
 }
 #endif

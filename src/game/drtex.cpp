@@ -21,8 +21,6 @@ void* memset(void* p, int c, u32 n);
 void* memcpy(void* d, const void* s, u32 n);
 int strcasecmp(const char* a, const char* b);
 // GXCITexFmt: the SDK's.
-void* GXGetTexObjData(const GXTexObj* obj);
-u16 GXGetTlutObjNumEntries(const GXTlutObj* obj);
 u32 __cvt_fp2unsigned(double v);
 void fn_801282EC(int align);
 void fn_801282F4(void);
@@ -640,7 +638,7 @@ void fn_802D9340(GXTex* t) {
         DCFlushRange((const void*)t->data, (u32)t->dataSize);
     }
     if (t->lut && t->lutSize) {
-        fn_802D78D4(t->lut, t->lut2, t->srcPal, GXGetTlutObjNumEntries(&t->tlut));
+        fn_802D78D4(t->lut, t->lut2, t->srcPal, GXGetTlutObjNumEntries((const GXTlutObj*)&t->tlut));
         DCFlushRange((const void*)t->lut, (u32)t->lutSize);
     }
     if (t->lut2) {
@@ -665,7 +663,7 @@ void fn_802D9418(void) {
     GXSetTexCopyDst((u16)w, (u16)h, (GXTexFmt)(GXGetTexObjFmt(o)), (GXBool)0);
     GXSetZMode((GXBool)1, (GXCompare)7, (GXBool)1);
     GXSetColorUpdate((GXBool)1);
-    GXCopyTex((void*)(GXGetTexObjData(o)), (GXBool)1);
+    GXCopyTex((void*)(GXGetTexObjData((const GXTexObj*)o)), (GXBool)1);
     lbl_8055FE24 = 0;
     fn_802CFF50();
 }
@@ -674,9 +672,9 @@ GXTex* fn_802D94DC(void) { return lbl_8055FE18; }
 
 void fn_802D94E4(GXTex* dst, GXTex* a, GXTex* b, f32 t) {
     int n = GXGetTexObjHeight((const GXTexObj*)&dst->obj) * GXGetTexObjWidth((const GXTexObj*)&dst->obj) * 16 / 32;
-    u32* pd = (u32*)((u8*)GXGetTexObjData(&dst->obj) - 0x40000000);
-    u32* pa = (u32*)((u8*)GXGetTexObjData(&a->obj) - 0x40000000);
-    u32* pb = (u32*)((u8*)GXGetTexObjData(&b->obj) - 0x40000000);
+    u32* pd = (u32*)((u8*)GXGetTexObjData((const GXTexObj*)&dst->obj) - 0x40000000);
+    u32* pa = (u32*)((u8*)GXGetTexObjData((const GXTexObj*)&a->obj) - 0x40000000);
+    u32* pb = (u32*)((u8*)GXGetTexObjData((const GXTexObj*)&b->obj) - 0x40000000);
     u32 kb = __cvt_fp2unsigned(256.0f * t);
     u32 ka = 0x100 - kb;
     for (int i = 0; i < n; i++) {
@@ -708,7 +706,7 @@ void fn_802D9628(GXTex* t, int x, int y, u32 color) {
     int fmt = GXGetTexObjFmt((const GXTexObj*)&t->obj);
     w = GXGetTexObjWidth((const GXTexObj*)&t->obj);
     GXGetTexObjHeight((const GXTexObj*)&t->obj);
-    u8* data = (u8*)GXGetTexObjData(&t->obj) - 0x40000000;
+    u8* data = (u8*)GXGetTexObjData((const GXTexObj*)&t->obj) - 0x40000000;
     if (fmt == 0) {
         u8* p = data + (x / 8 + (y / 8) * (w / 8)) * 32 + ((y % 8) * 8 + x % 8) * 4 / 8;
         u8 v = color;
@@ -724,7 +722,7 @@ u32 fn_802D972C(GXTex* t, int x, int y) {
     int fmt = GXGetTexObjFmt((const GXTexObj*)&t->obj);
     int w = GXGetTexObjWidth((const GXTexObj*)&t->obj);
     GXGetTexObjHeight((const GXTexObj*)&t->obj);
-    u8* data = (u8*)GXGetTexObjData(&t->obj) - 0x40000000;
+    u8* data = (u8*)GXGetTexObjData((const GXTexObj*)&t->obj) - 0x40000000;
     if (fmt == 0) {
         u8* p = data + (x / 8 + (y / 8) * (w / 8)) * 32 + ((y % 8) * 8 + x % 8) * 4 / 8;
         u32 v = (x & 1) == 0 ? *p >> 4 & 0xF : *p & 0xF;
