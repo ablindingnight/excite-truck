@@ -368,6 +368,11 @@ static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+/* Helper name unproven */
+inline void DrawTitle(u32 color, const char* s) { fn_8000FF88(color, 12, "%s", 1.2f, 0.0f, 130.0f, s); }
+/* Helper name unproven */
+inline void DrawLine(u32 color, f32 y, const char* s) { fn_8000FF88(color, 12, "%s", 1.0f, 0.0f, y, s); }
+
 extern "C" void fn_801D490C(void) {
     f32 dur = lbl_80442310.duration;
     f32 start = lbl_80442310.start;
@@ -387,7 +392,7 @@ extern "C" void fn_801D490C(void) {
         }
         char* line;
         u32 color = (((int)(255.0f * a) << 24) | 0xFFFFFF) & ~0xFF;
-        fn_8000FF88(color, 12, "%s", 1.2f, 0.0f, 130.0f, lbl_80442310.title);
+        DrawTitle(color, lbl_80442310.title);
         char buf[0x40];
         CopyName(buf, lbl_80442310.text, 0x40);
         f32 y = 100.0f;
@@ -397,7 +402,7 @@ extern "C" void fn_801D490C(void) {
             if (nl) {
                 *nl = 0;
             }
-            fn_8000FF88(color, 12, "%s", 1.0f, 0.0f, y, line);
+            DrawLine(color, y, line);
             line = nl ? nl + 1 : NULL;
             y -= 15.0f;
         }
@@ -2084,7 +2089,7 @@ extern "C" void ActionSequenceCommand(const char* name) {
     if (!s) {
         fn_802E30C8("actseq is unknown; known sequences listed below");
         for (int i = 0; i < lbl_804423A4.count; i++) {
-            fn_802E30C8("%s", lbl_804423A4.data[i]->name);
+            fn_802E30C8(lbl_804423A4.data[i]->name);  // no "%s": retail .sdata has no third "%s" (this function is stripped)
         }
     } else {
         fn_802E30C8("starting actseq %s", name);
