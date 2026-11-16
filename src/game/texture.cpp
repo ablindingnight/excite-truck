@@ -145,32 +145,38 @@ struct SimpleHeap {
         }
         fn_802E30C8("\t%dK total", total2 >> 10);
     }
-    void Free(void* p) {
-        HeapBlock* b = (HeapBlock*)((u8*)p - (align + 1));
-        HeapBlock** pp;
+    void UnlinkUsedBlock(HeapBlock* b) {
         HeapBlock* q;
-        for (pp = &used; (q = *pp) != 0; pp = &q->next) {
-            if (b == q) {
+        for (HeapBlock** pp = &used; (q = *pp) != 0; pp = &q->next) {
+            if (q == b) {
                 *pp = b->next;
                 break;
             }
         }
+    }
+    HeapBlock** ReleaseBlock(void* p) {
+        HeapBlock* b = (HeapBlock*)((u8*)p - (align + 1));
+        UnlinkUsedBlock(b);
         b->next = free;
         free = b;
-        HeapBlock** bp = &free;
+        return &free;
+    }
+    void CoalesceFreeBlocks(HeapBlock**& bp) {
         int merged;
         do {
             merged = 0;
-            for (pp = &free; *pp; pp = &(*pp)->next) {
-                HeapBlock* m = *bp;
-                HeapBlock* o = *pp;
+            HeapBlock* m;
+            HeapBlock* o;
+            for (HeapBlock** pp = &free; (o = *pp) != 0; pp = &o->next) {
+                m = *bp;
                 int adj = 1;
-                if ((u8*)m + align + m->size + 1 != (u8*)o && (u8*)o + align + o->size + 1 != (u8*)m) {
+                if ((1 + ((u8*)m + align) + m->size) != (u8*)o &&
+                    (1 + ((u8*)o + align) + o->size) != (u8*)m) {
                     adj = 0;
                 }
                 if (adj) {
                     HeapBlock** first = bp;
-                    if ((u8*)o + align + o->size + 1 == (u8*)m) {
+                    if ((1 + ((u8*)o + align) + o->size) == (u8*)m) {
                         first = pp;
                         pp = bp;
                     }
@@ -182,6 +188,10 @@ struct SimpleHeap {
                 }
             }
         } while (merged);
+    }
+    void Free(void* p) {
+        HeapBlock** bp = ReleaseBlock(p);
+        CoalesceFreeBlocks(bp);
     }
 
     u8 strict;         // offset 0x0
@@ -1107,7 +1117,8 @@ static inline int fn_802CC10C(TexCache* c, s32 id, s32 frame, MipLoad* l) {
         fn_802CBD30(&c->discards, &c->freeDiscards, d);
         t->mip0 = 0;
         SimpleHeap* heap = c->heapRef->heap;
-        heap->Free(t->mip0Mem);
+        HeapBlock** cursor = heap->ReleaseBlock(t->mip0Mem);
+        heap->CoalesceFreeBlocks(cursor);
         t->mip0Mem = 0;
         ok = 1;
         fn_802CB3F8(t->name, "DISCARDING");
