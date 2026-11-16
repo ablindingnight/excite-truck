@@ -188,14 +188,20 @@ PopWarnValue lbl_80498958;
 extern "C" {
 int fn_8024762C(void);
 
+/* Helper name unproven */
+static inline MenuItem KioskVersionItem(void) {
+    return MenuItem("version", 3, lbl_80498908, 0x40, 0);
+}
+
 // Kiosk title screen: logo art and version text.
 int fn_80246AE8(void) {
     lbl_8055F25C = fn_802E2C20();
     MenuArt logo;
     lbl_80498908[0] = 0;
+    const char* logoName = "excite_truck";
     MenuItem items[] = {
-        MenuItem("excite_truck", 5, &logo, 0, 0),
-        MenuItem("version", 3, lbl_80498908, 0x40, 0),
+        MenuItem(logoName, 5, &logo, 0, 0),
+        KioskVersionItem(),
         MenuItem(lbl_8055B860, 6, (const void*)fn_80246938, -2, 13),
         MenuItem(lbl_804988F0),
     };
