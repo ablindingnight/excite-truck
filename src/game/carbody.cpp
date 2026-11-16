@@ -1028,18 +1028,6 @@ struct CbSprings {
     BVec vels[162];  // offset 0xD94
 };
 
-// One body joint (18 of them at 0x152C): six orientation keys and two scalars.
-struct CbJoint {
-    u8 pad0[0xC];
-    f32 fC;         // offset 0xC
-    f32 f10;        // offset 0x10
-    u8 pad14[4];
-    f32 q[6][4];    // offset 0x18
-    u8 b78;         // offset 0x78
-    u8 pad79[3];
-    s32 w7C;        // offset 0x7C
-};
-
 extern "C" {
 void fn_8018BE54(u8* p, f32 s);
 void fn_8018B0D0(u8* p, u32 v);
@@ -1156,7 +1144,7 @@ void fn_801838C8(u8* p) {
         sp->vels[i].y = 0.0f;
         sp->vels[i].z = 0.0f;
     }
-    CbJoint* j = (CbJoint*)(p + 0x152C);
+    CbJoint* j = ((CarBody*)p)->joints;
     for (int i = 0; i < 18; i++, j++) {
         j->f10 = 0.0f;
         j->fC = 0.0f;

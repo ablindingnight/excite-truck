@@ -66,6 +66,20 @@ struct CbSetup {
     HVec modelOffset;                                                   // 0x12C
 };
 
+// One body joint / detachable part slot (18 of them at 0x152C; cardmg reads the same 0x80-byte records as its
+// DmgSlot: part frame 0x0, angle 0xC, spin 0x10, current and previous frames 0x18/0x48 written here as six identity
+// rows q[6][4], valid 0x78, state 0x7C).
+struct CbJoint {
+    u8 pad0[0xC];
+    f32 fC;         // offset 0xC
+    f32 f10;        // offset 0x10
+    u8 pad14[4];
+    f32 q[6][4];    // offset 0x18
+    u8 b78;         // offset 0x78
+    u8 pad79[3];
+    s32 w7C;        // offset 0x7C
+};
+
 // The state handed to a body's SetState (vtable 0x54).
 struct BodyState {
     RMtx mtx;   // offset 0x0
@@ -152,7 +166,9 @@ public:
     f32 f5F0;                    // offset 0x5F0
     f32 f5F4;                    // offset 0x5F4
     s32 f5F8;                    // offset 0x5F8
-    u8 pad5FC[0x1E3C - 0x5FC];
+    u8 pad5FC[0x152C - 0x5FC];
+    CbJoint joints[18];          // offset 0x152C
+    u8 pad1E2C[0x1E3C - 0x1E2C];
     s32 f1E3C;                   // offset 0x1E3C
     s32 f1E40;                   // offset 0x1E40
     u8 pad1E44[0x20DC - 0x1E44];
