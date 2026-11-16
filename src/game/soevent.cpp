@@ -271,7 +271,7 @@ void fn_801D2AD4(const char* file);
 void fn_801D2B94(void);
 void fn_801D2C04(void);
 SoEvent* fn_801D2C20(int id);
-void fn_801D2C70(SoEffects* s, const Vec* pos, Car* car, int id);
+void fn_801D2C70(const SoEffects* s, const Vec* pos, Car* car, int id);
 void fn_801D2E38(SoSpawn* s, SObj* obj, const Vec* pos, const Vec* vel, f32 mass);
 
 void fn_801D21C0(void) {
@@ -440,7 +440,7 @@ SoEvent* fn_801D2C20(int id) {
 }
 
 // Plays the event's hit effects; the ones with a duration are held on the car.
-void fn_801D2C70(SoEffects* s, const Vec* pos, Car* car, int id) {
+void fn_801D2C70(const SoEffects* s, const Vec* pos, Car* car, int id) {
     HitMsg m;
     m.pos = *pos;
     m.vel = car->vel;
@@ -454,10 +454,10 @@ void fn_801D2C70(SoEffects* s, const Vec* pos, Car* car, int id) {
         fn_801796CC(10, &m, 0x20);
         if (IsCar(car)) {
             HeldEffect* held = &lbl_80438898[car->index];
-            f32 duration = s->effects[i].dur;
+            f32 now = lbl_8055E3C8;
+            const f32& duration = s->effects[i].dur;
             held->active = 1;
             held->effect = m.effect;
-            f32 now = lbl_8055E3C8;
             held->time = duration + now;
             held->pos.x = pos->x - car->origin.x;
             held->pos.y = pos->y - car->origin.y;
