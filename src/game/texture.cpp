@@ -125,6 +125,9 @@ struct SimpleHeap {
         }
     }
     void* Alloc(s32 n);
+    static void ReportAllocationFailure(s32 size) {
+        fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", size);
+    }
     void Dump(const char* who) {
         fn_802E30C8("SimpleHeap dump: %s", who);
         fn_802E30C8("Allocated:");
@@ -472,31 +475,31 @@ const char* fn_802CA72C(u32 type) {
     switch (type) {
     case 0:
         return "MMT_BASELAYER";
-    case 1:
-        return "MMT_BASELAYER_WITH_SIMPLE_SPECULAR";
     case 2:
-        return "MMT_CHROME";
+        return "MMT_BASELAYER_WITH_SIMPLE_SPECULAR";
     case 3:
-        return "MMT_ENVLAYER";
+        return "MMT_CHROME";
     case 4:
-        return "MMT_DECAL_LAYER";
+        return "MMT_ENVLAYER";
     case 5:
-        return "MMT_DECAL_ENVLAYER";
+        return "MMT_DECAL_LAYER";
     case 6:
-        return "MMT_ZWRITE";
+        return "MMT_DECAL_ENVLAYER";
     case 7:
-        return "MMT_GLASS";
+        return "MMT_ZWRITE";
     case 8:
-        return "MMT_GLASS_ENVLAYER";
+        return "MMT_GLASS";
     case 9:
-        return "MMT_GLASS_DECAL";
+        return "MMT_GLASS_ENVLAYER";
     case 10:
-        return "MMT_GLASS_DECAL_ENVLAYER";
+        return "MMT_GLASS_DECAL";
     case 11:
-        return "MMT_DIRT_LAYER";
+        return "MMT_GLASS_DECAL_ENVLAYER";
     case 12:
-        return "MMT_INVALID";
+        return "MMT_DIRT_LAYER";
     case 13:
+        return "MMT_INVALID";
+    case 1:
         return "MMT_UNTEXTURED_BASELAYER";
     case 14:
         return "MMT_UNKNOWN";
@@ -1171,7 +1174,7 @@ inline void* SimpleHeap::Alloc(s32 size) {
         res = (u8*)b + align + 1;
     }
     if (!res && strict) {
-        fn_802E317C("SimpleHeap: out of memory for %d byte allocation.", n);
+        ReportAllocationFailure(n);
     }
     return res;
 }
