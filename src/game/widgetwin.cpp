@@ -137,18 +137,29 @@ f32 lbl_8055EF94;  // fade
 u8 lbl_8055EF98;
 u8 lbl_8055EF99;
 
+// Projection helper names unproven.
+static inline f32 AddPlanarProducts(f32 productZ, const VecP& in, f32 x, f32 y) {
+    f32 xy = in.x * x + in.y * y;
+    return productZ + xy;
+}
+
+static inline f32 TransformCoordinate(const VecP& in, f32 x, f32 y, f32 z) {
+    f32 productZ = in.z * z;
+    return AddPlanarProducts(productZ, in, x, y);
+}
+
 static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
     if (out == in) {
-        f32 x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
-        f32 y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
-        f32 z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
+        f32 x = TransformCoordinate(*in, m->basis.m[0][0], m->basis.m[1][0], m->basis.m[2][0]);
+        f32 y = TransformCoordinate(*in, m->basis.m[0][1], m->basis.m[1][1], m->basis.m[2][1]);
+        f32 z = TransformCoordinate(*in, m->basis.m[0][2], m->basis.m[1][2], m->basis.m[2][2]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
-        out->y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
-        out->z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
+        out->x = TransformCoordinate(*in, m->basis.m[0][0], m->basis.m[1][0], m->basis.m[2][0]);
+        out->y = TransformCoordinate(*in, m->basis.m[0][1], m->basis.m[1][1], m->basis.m[2][1]);
+        out->z = TransformCoordinate(*in, m->basis.m[0][2], m->basis.m[1][2], m->basis.m[2][2]);
     }
 }
 
@@ -204,8 +215,7 @@ void fn_802161CC(int all) {
 }
 
 void fn_80216244(void) {
-    int i;
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
         if (lbl_804908C8[i]) {
             fn_802184D0(lbl_804908C8[i]);
         }
@@ -216,7 +226,7 @@ void fn_80216244(void) {
     fn_802C86E8(0xFF0000FF);
     fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
     fn_802C88BC(2);
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
         Window* w = lbl_804908C8[i];
         if (w) {
             UIXform m;
@@ -225,9 +235,7 @@ void fn_80216244(void) {
             fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
             fn_80230B5C(&m);
             fn_802C974C(1.0f, 1000.0f, 1.4398966f);
-            v.x = -(f32)w->x;
-            v.y = (f32)w->y;
-            v.z = 0.0f;
+            v.Set(-(f32)w->x, (f32)w->y, 0.0f);
             XformVec(&m, &v, &t);
             m.translation.v[0] += t.x;
             m.translation.v[1] += t.y;
