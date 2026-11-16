@@ -3,6 +3,8 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/carbody.h"
+#include "game/carinfo.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
@@ -60,28 +62,7 @@ struct CameraPose {
     Vec3 pos;     // offset 0x24
 };
 
-struct TruckState {
-    u8 pad0[0x18];
-    f32 dirX;  // offset 0x18
-    u8 pad1C[0x20 - 0x1C];
-    f32 dirZ;  // offset 0x20
-    u8 pad24[0x4C - 0x24];
-    f32 speed;  // offset 0x4C
-    u8 pad50[0x2C8 - 0x50];
-    f32 lapDist;  // offset 0x2C8
-};
-
-// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
-// declared (was named Racer here, a name world/carmodel use for a different class).
-struct CarInfo {
-    u8 pad0[0x8];
-    TruckState* truck;  // offset 0x8
-    u8 padC[0x1C - 0xC];
-    s32 lap;  // offset 0x1C
-    u8 pad20[0xAC - 0x20];
-    s32 driver;  // offset 0xAC
-};
-
+// CarInfo: game/carinfo.h.
 struct Truck {
     u8 pad0[0x60];
     Vec3 pos;  // offset 0x60
@@ -501,16 +482,16 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         f32 x = m.m[2][0];
         sf->unk10 = atan2(y, x);
     }
-    sf->lap = fn_801EA9A0(view)->lap;
+    sf->lap = fn_801EA9A0(view)->params.lap;
     draw = map->trucks;
     me = map->player;
     memset(draw->icons, 0, sizeof(draw->icons));
     draw->count = fn_801EA994();
     for (i = 0; i < draw->count; i++) {
         CarInfo* r = fn_801EA9A0(i);
-        draw->icons[i].part = FindDriver(r->driver)->color;  // the driver's colour picks its map icon
-        if (r->truck) {
-            draw->icons[i].angle = -Atan2F(r->truck->dirX, r->truck->dirZ);
+        draw->icons[i].part = FindDriver(r->setup.driver)->color;  // the driver's colour picks its map icon
+        if (r->draw) {
+            draw->icons[i].angle = -Atan2F(r->draw->pose.rot.m[6], r->draw->pose.rot.m[8]);
         }
     }
     {
@@ -522,10 +503,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     draw->self = view;
     {
-        f32 dist = fn_801EA9A0(view)->truck->lapDist;
+        f32 dist = fn_801EA9A0(view)->draw->lapDist;
         f32 t;
         scale = 1.0f / (map->width / 2.0f);
-        t = (fn_801EA9A0(view)->truck->speed / 0.44444445f - map->minSpeed) /
+        t = (fn_801EA9A0(view)->draw->speedXZ / 0.44444445f - map->minSpeed) /
             (map->maxSpeed - map->minSpeed);
         radius = LerpF(Max(Min(1.0f, t), 0.0f), map->minWidth, map->maxWidth);
         const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused

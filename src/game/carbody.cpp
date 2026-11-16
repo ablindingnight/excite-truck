@@ -2933,10 +2933,10 @@ void CarBody::vf28(u8* buf) {
     ((CarDrawState*)m)->vel[1] = this->vel.y;
     ((CarDrawState*)m)->vel[2] = this->vel.z;
     ((CarDrawState*)m)->speed = this->speed;
-    ((CarDrawState*)m)->f2C4 = this->f2588;
-    ((CarDrawState*)m)->f28C = this->f26E0 ? FMax(this->f2690, 0.01f) : this->f2690;
-    ((CarDrawState*)m)->f290 = this->f2694;
-    ((CarDrawState*)m)->f294 = this->f2698;
+    ((CarDrawState*)m)->overheat = this->f2588;
+    ((CarDrawState*)m)->damage[0] = this->f26E0 ? FMax(this->f2690, 0.01f) : this->f2690;
+    ((CarDrawState*)m)->damage[1] = this->f2694;
+    ((CarDrawState*)m)->damage[2] = this->f2698;
     ((CarDrawState*)m)->f298 = this->a268C;
     f32 v = this->f25BC;
     if (Positive(v)) {
@@ -2944,7 +2944,7 @@ void CarBody::vf28(u8* buf) {
     } else {
         ((CarDrawState*)m)->f2D4 = 0.0f;
     }
-    ((CarDrawState*)m)->f2A8 = this->f25A0;
+    ((CarDrawState*)m)->heat = this->f25A0;
     ((CarDrawState*)m)->f29C = this->f5A0;
     if (this->f25E4 > 0.1f && !(flags & 0x20)) {
         ((u32&)((CarDrawState*)m)->f29C) |= 0x20000000;
@@ -3007,7 +3007,7 @@ void CarBody::vf28(u8* buf) {
         w += 0x74;
         o += 0x6C;
     }
-    ((CarDrawState*)m)->f2C8 = F32(((CarHost*)((u8*&)this->src))->Info(), 0x48);
+    ((CarDrawState*)m)->lapDist = F32(((CarHost*)((u8*&)this->src))->Info(), 0x48);
     ((CarDrawState*)m)->f2CC = this->f26CC;
     ((CarDrawState*)m)->f2D0 = this->f5E4;
     ((CarDrawState*)m)->f2D8 = this->f26D4;

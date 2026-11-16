@@ -33,7 +33,7 @@ struct CarParams {
     f32 x1C;  // offset 0x1C
     f32 x20;  // offset 0x20
     s32 state;  // offset 0x24
-    u8 x28;   // offset 0x28
+    u8 impaired;  // offset 0x28
     f32 x2C;  // offset 0x2C
     u32 x30;  // offset 0x30
     u32 x34;  // offset 0x34

@@ -173,16 +173,15 @@ struct CarDrawState {
     f32 f23C;                 // offset 0x23C
     f32 f240;                 // offset 0x240
     u8 pad244[0x28C - 0x244];
-    f32 f28C;                 // offset 0x28C
-    f32 f290;                 // offset 0x290
-    f32 f294;                 // offset 0x294
+    f32 damage[3];            // offset 0x28C (racing: the dashboard damage colours)
     s32 f298;                 // offset 0x298
     s32 f29C;                 // offset 0x29C (flag bits 0x10000000/0x20000000)
     u8 pad2A0[0x2A8 - 0x2A0];
-    f32 f2A8;                 // offset 0x2A8
-    u8 pad2AC[0x2C4 - 0x2AC];
-    f32 f2C4;                 // offset 0x2C4
-    f32 f2C8;                 // offset 0x2C8
+    f32 heat;                 // offset 0x2A8
+    u8 pad2AC[0x2C0 - 0x2AC];
+    u32 raceFlags;            // offset 0x2C0: bits 0x10/0x20 read by overlay/racing /* Helper name unproven */
+    f32 overheat;             // offset 0x2C4
+    f32 lapDist;              // offset 0x2C8: distance along this lap
     f32 f2CC;                 // offset 0x2CC
     f32 f2D0;                 // offset 0x2D0
     f32 f2D4;                 // offset 0x2D4

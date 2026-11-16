@@ -4,6 +4,8 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/carbody.h"
+#include "game/carinfo.h"
 #include "game/raceopts.h"
 #include "game/dashhelper.h"
 #include "game/math_types.h"
@@ -56,21 +58,7 @@ struct ResultRacer {
     char name[1];  // offset 0x48
 };
 
-struct TruckState {
-    u8 pad0[0x34];
-    f32 unk34;  // offset 0x34
-    u8 pad38[0x4C - 0x38];
-    f32 speed;  // offset 0x4C
-    u8 pad50[0x28C - 0x50];
-    f32 damage[3];  // offset 0x28C
-    u8 pad298[0x2A8 - 0x298];
-    f32 heat;  // offset 0x2A8
-    u8 pad2AC[0x2C0 - 0x2AC];
-    u32 flags;     // offset 0x2C0
-    f32 overheat;  // offset 0x2C4
-    f32 lapDist;   // offset 0x2C8
-};
-
+// CarDrawState: game/carbody.h's CarDrawState.
 struct RacerStats {
     u32 flags;  // offset 0x0
     s32 place;  // offset 0x4
@@ -96,20 +84,11 @@ struct RaceInfo {
     u32 flags;            // offset 0x20
     s32 view;             // offset 0x24
     ResultRacer* racer;   // offset 0x28
-    TruckState* truck;    // offset 0x2C
+    CarDrawState* truck;    // offset 0x2C
     RacerStats* stats;    // offset 0x30
 };
 
-// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
-// declared (was named Racer here, a name world/carmodel use for a different class).
-struct CarInfo {
-    u8 human;  // offset 0x0
-    u8 pad1[0x8 - 0x1];
-    TruckState* truck;  // offset 0x8
-    u8 padC[0x1C - 0xC];
-    s32 lap;  // offset 0x1C
-};
-
+// CarInfo: game/carinfo.h.
 struct HitInfo {
     s32 id;  // offset 0x0
     u8 pad4[0x4];
@@ -558,7 +537,7 @@ void RacingOverlay::Draw(void) {
         if ((t > 0.25f && t < 10.0f) || t > 99.0f) {
             show = 1;
         }
-        ok = !(lbl_8055D350->truck->flags & 0x20);
+        ok = !(lbl_8055D350->truck->raceFlags & 0x20);
         draw = 0;
         if (show && ok) {
             draw = 1;
@@ -569,15 +548,15 @@ void RacingOverlay::Draw(void) {
     }
 }
 
-void RacingOverlay::Enter(void) { speed = lbl_8055D350->truck->speed; }
+void RacingOverlay::Enter(void) { speed = lbl_8055D350->truck->speedXZ; }
 
 void RacingOverlay::UpdateSpeed(void) {
     f32 k;
-    unkC = lbl_8055D350->truck->unk34;
-    k = 0.44444445f * ((f32)fabs(speed - lbl_8055D350->truck->speed) / 10.0f);
+    unkC = lbl_8055D350->truck->f34;
+    k = 0.44444445f * ((f32)fabs(speed - lbl_8055D350->truck->speedXZ) / 10.0f);
     k = Min(1.0f, k);
     k = Max(k, 0.05f);
-    speed = Lerp(speed, lbl_8055D350->truck->speed, k);
+    speed = Lerp(speed, lbl_8055D350->truck->speedXZ, k);
 }
 
 void RacingOverlay::DrawLapInfo(void) {
@@ -745,7 +724,7 @@ void RacingOverlay::Update(void) {
         DrawLapCounter(layout, lap < total ? lap : total, total, 1);
     }
     if (lbl_8055D350->flags & 0x10) {
-        TruckState* t = lbl_8055D350->truck;
+        CarDrawState* t = lbl_8055D350->truck;
         const char* text = "DAMAGE";
         int r = 100.0f * (1.0f - t->damage[0]);
         int g = 100.0f * (1.0f - t->damage[1]);
@@ -806,7 +785,7 @@ void RacingOverlay::Update(void) {
 
 int RacingOverlay::DrawWarnings(void) {
     int wrong;
-    if ((lbl_8055D350->flags & 0x400) && (lbl_8055D350->truck->flags & 0x10)) {
+    if ((lbl_8055D350->flags & 0x400) && (lbl_8055D350->truck->raceFlags & 0x10)) {
         fn_801476C4(layout->Find("reset"));
     }
     wrong = 0;
@@ -847,13 +826,13 @@ void RacingOverlay::DrawProgress(void) {
     lapLen = fn_8013672C();
     total = lapLen * fn_801E7E3C()->laps;
     for (i = 0; i < fn_801EA994(); i++) {
-        TruckState* truck = fn_801EA9A0(i)->truck;
+        CarDrawState* truck = fn_801EA9A0(i)->draw;
         f32 t = 0.0f;
-        int lap = fn_801EA9A0(i)->lap;
+        int lap = fn_801EA9A0(i)->params.lap;
         if (lap > 0) {
             t = (truck->lapDist + (lap - 1) * lapLen) / total;
         }
-        DrawMarker(t, fn_801EA9A0(i)->human ? n++ : -1, -165.0f, y, 330.0f, 5.0f);
+        DrawMarker(t, fn_801EA9A0(i)->active ? n++ : -1, -165.0f, y, 330.0f, 5.0f);
     }
 }
 

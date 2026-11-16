@@ -134,7 +134,7 @@ void fn_802059C0(void) {
         if (fn_801B8570(car)) {
             CarInfo* cp = fn_801EA9A0(car);
             int lap = cp->params.lap;
-            f32 dist = cp->draw->f2C8;
+            f32 dist = cp->draw->lapDist;
             if (lap == 0) {
                 lap = 1;
                 dist = 0.0f;

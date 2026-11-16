@@ -2,6 +2,8 @@
 // terchunk.val, streamed in a window around the nearest chunk to the camera, plus the far
 // models. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
+#include "game/carbody.h"
+#include "game/carinfo.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 
@@ -53,18 +55,7 @@ struct Camera {
     ValVec3 pos;  // offset 0x24
 };
 
-struct TrackState {
-    u8 pad0[0x30];
-    s16 unk30;  // offset 0x30
-};
-
-// carinfo.cpp's CarInfo (fn_801EA9A0), declared as far as this unit reads it
-struct CarInfo {
-    int Unk30(void) const { return state->unk30; }
-    u8 pad0[0x8];
-    TrackState* state;  // offset 0x8
-};
-
+// CarInfo: game/carinfo.h.
 extern "C" {
 Camera* fn_802C86DC(void);
 CarInfo* fn_801EA9A0(int i);
@@ -257,7 +248,7 @@ void fn_8020268C(void) {
 void fn_80202718(void) {
     lbl_804888E0.count = 0;
     if (lbl_8055ECD8) {
-        int lap = fn_801EA9A0(fn_801E86F8(-1))->state->unk30;
+        int lap = fn_801EA9A0(fn_801E86F8(-1))->draw->hint;
         if (lap >= 0) {
             fn_801DCEF0(lap);
         }

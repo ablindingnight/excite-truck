@@ -10,6 +10,8 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/carbody.h"
+#include "game/carinfo.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/dashhelper.h"
@@ -64,24 +66,7 @@ struct RacerState {
     u8 done;    // offset 0x34
 };
 
-struct RacerUnk8 {
-    u8 pad0[0x2C0];
-    u32 flags;  // offset 0x2C0
-};
-
-struct RacerUnkC {
-    u8 pad0[0x28];
-    u8 impaired;  // offset 0x28
-};
-
-// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
-// declared (was named Racer here, a name world/carmodel use for a different class).
-struct CarInfo {
-    u8 pad0[0x8];
-    RacerUnk8* unk8;  // offset 0x8
-    RacerUnkC unkC;   // offset 0xC
-};
-
+// CarInfo: game/carinfo.h.
 struct ResultRacer {
     u8 pad0[0xC];
     u32 flags;  // offset 0xC
@@ -207,8 +192,8 @@ struct RaceInfo {
     u32 flags;          // offset 0x20
     s32 unk24;          // offset 0x24
     CarInfo* racer;       // offset 0x28
-    RacerUnk8* unk2C;   // offset 0x2C
-    RacerUnkC* unk30;   // offset 0x30
+    CarDrawState* unk2C;   // offset 0x2C
+    CarParams* unk30;   // offset 0x30
 };
 
 struct FrameTimes {
@@ -655,8 +640,8 @@ void fn_80005740(int player) {
     lbl_8034EE84.unk24 = fn_801E866C(player);
     racer = fn_801EA9A0(lbl_8034EE84.unk24);
     lbl_8034EE84.racer = racer;
-    lbl_8034EE84.unk2C = racer->unk8;
-    lbl_8034EE84.unk30 = &racer->unkC;
+    lbl_8034EE84.unk2C = racer->draw;
+    lbl_8034EE84.unk30 = &racer->params;
     lbl_8034EE84.flags = fn_801B84D8(player);
     if (fn_80005564()) {
         fn_801B8570(lbl_8034EE84.unk24);
@@ -1120,7 +1105,7 @@ void ResultsOverlay::DrawTimes(void) {
 
 void KioskDeadDriverOverlay::Update(void) {
     char buf[0x48];
-    if (lbl_8055D350->unk2C->flags & 0x10) {
+    if (lbl_8055D350->unk2C->raceFlags & 0x10) {
         sprintf(buf, "Press %s to RESET", lbl_80558928);
         fn_80010074(0xFFFFFFFF, 0x14, "%s", 1.2f, 0.0f, 125.0f, buf);
     }
@@ -1255,8 +1240,8 @@ void fn_80007318(int) {
     lbl_8034EE84.player = 0;
     lbl_8034EE84.unk24 = fn_801E866C(0);
     lbl_8034EE84.racer = fn_801EA9A0(lbl_8055D350->unk24);
-    lbl_8034EE84.unk2C = lbl_8055D350->racer->unk8;
-    lbl_8034EE84.unk30 = &lbl_8055D350->racer->unkC;
+    lbl_8034EE84.unk2C = lbl_8055D350->racer->draw;
+    lbl_8034EE84.unk30 = &lbl_8055D350->racer->params;
     lbl_8034EE84.time = fn_801E7E18();
     lbl_8034EEB8.replay->Update();
     fn_800057BC();
@@ -1324,7 +1309,7 @@ inline void ClosureOverlay::Enter(void) {
 }
 
 inline void ClosureOverlay::Draw(void) {
-    if (!(lbl_8055D350->unk2C->flags & 0x20)) {
+    if (!(lbl_8055D350->unk2C->raceFlags & 0x20)) {
         fn_8000C630(0x20, lbl_8055D350->player);
     }
 }
