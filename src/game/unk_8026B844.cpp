@@ -129,10 +129,7 @@ static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
 // The free (debug) camera: stick yaw/pitch and movement, trigger boost, keys up/down, the pointer at a screen
 // edge pans (faster the higher the camera is), and the camera keeps its height above the ground.
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, CamVec& in, CamVec& move) {
-    f32 turn = 3.1415927f;
-    f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
-    f32 speed = lbl_80563D94 * (100.0f * (lbl_80563D94 + t * lbl_80563DA0));
+static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, f32 turn, f32 speed, CamVec& in, CamVec& move) {
     f32 x;
     f32 z;
     lbl_8055F4F4 += turn * (dt * fn_8026B844(pad.x0));
@@ -177,7 +174,9 @@ void fn_8026B8A0(void) {
     s32 my;
     s32 buttons;
     int free;
+    f32 turn;
     f32 dt;
+    f32 speed;
     f32 h;
     CamGate gate;
 
@@ -194,7 +193,10 @@ void fn_8026B8A0(void) {
     fwd = lbl_80499050.rot.axes[2];
     fwd.y = lbl_80563D78;
     if (fn_801298E8(&pad, 0)) {
-        Loop1_fn_8026B8A0(pad, dt, in, move);
+        turn = 3.1415927f;
+        f32 t = CamMax(CamMin(lbl_80563D94, (pad.y3 - lbl_80563D98) / 2.0f), lbl_80563D78);
+        speed = lbl_80563D94 * (100.0f * (lbl_80563D94 + t * lbl_80563DA0));
+        Loop1_fn_8026B8A0(pad, dt, turn, speed, in, move);
     }
     {
         f32 rate = 100.0f;
