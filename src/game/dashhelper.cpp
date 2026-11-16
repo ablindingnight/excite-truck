@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/dashhelper.h"
 
 extern const f32 kBarWidth;
@@ -66,11 +67,6 @@ struct Viewport {
     Viewport(int x, int y, int w, int h);
     ~Viewport(void);
     u8 data[0x10];
-};
-
-struct RaceProgress {
-    u8 pad0[0x10];
-    f32 elapsed;  // offset 0x10
 };
 
 // One row of a text-row list (0x40 bytes).
@@ -142,7 +138,6 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 f32 fn_801E7E18(void);
-RaceProgress* fn_801E7E3C(void);
 int fn_801E85A4(void);
 int fn_8023441C(const char* font);  // gtext.cpp: returns the loaded font (GTextFont*)
 void fn_80234470(void);
@@ -862,7 +857,7 @@ void fn_8000F4F0(void) {
     u8 alpha;
     f32 phase;
 
-    t = fn_801E7E3C()->elapsed;
+    t = fn_801E7E3C()->time;
     num = -1;
     char text[32] = {0};
     alpha = 255;

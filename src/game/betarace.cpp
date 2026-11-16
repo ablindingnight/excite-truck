@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/raceopts.h"
 #include "game/highscore.h"
 #include "game/gamedb.h"
@@ -4042,16 +4043,7 @@ inline void BetaMaster::vf60(int view) {
 
 inline int BetaMaster::vf88(void) const { return 1; }
 
-// The race progress record fn_801E7E3C returns (world.cpp racers[8]; was named RaceSetup here, not the setup).
-struct RaceProgress {
-    u8 pad0[0x8];
-    s32 laps;  // offset 0x8
-    u8 padC[0x10 - 0xC];
-    f32 time;  // offset 0x10 (time since the intro started)
-};
-
 extern "C" {
-RaceProgress* fn_801E7E3C(void);
 void fn_8000FBE4(void);
 s32 fn_80160A90(void);  // stars needed
 }  // extern "C"

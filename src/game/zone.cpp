@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 
@@ -977,11 +978,6 @@ class PathSet {
 public:
     virtual void vf08(void);
     virtual void* Get(int index);  // 0xC
-};
-
-struct RaceClock {
-    u8 pad0[0x10];
-    f32 t;  // offset 0x10
 };
 
 extern "C" void fn_801B8048(Cam* cam, LineFollower* it, f32 a, f32 b);  // placecar.cpp
@@ -2535,7 +2531,6 @@ void fn_801352B8(void* it);
 int fn_80135D60(void* it, int index);
 void fn_8013530C(void* it, int unk);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void* fn_801E7E3C(void);
 void fn_8000FBE4(void);
 int fn_80161C38(void);
 int fn_80160A74(void);
@@ -2955,7 +2950,7 @@ inline int ZoneMaster::vf8C(int p, int key) {
 }
 
 inline int ZoneMaster::vf3C(int p) {
-    f32 t = ((RaceClock*)fn_801E7E3C())->t;
+    f32 t = fn_801E7E3C()->time;
     f32 t0 = 6.75f;
     f32 t1 = t0 - 0.8f;
     f32 t2 = t1 - 0.3f;

@@ -3,6 +3,7 @@
 // to the current lap of the viewed car, with a short hold after each lap change. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 
@@ -61,14 +62,8 @@ struct CarLap {
     s32 lap;  // offset 0x1C
 };
 
-struct RaceLaps {
-    u8 pad0[0x8];
-    s32 laps;  // offset 0x8
-};
-
 extern "C" {
 CarLap* fn_801EA9A0(int car);
-RaceLaps* fn_801E7E3C(void);
 }
 
 ModuleTag lbl_8055F8E0;

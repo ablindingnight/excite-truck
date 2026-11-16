@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/respawn.h"
 #include <revolution/MTX/vec.h>
 #include "game/springcar.h"
@@ -101,11 +102,6 @@ public:
     virtual Box* FindBox(const char* name) = 0;
 };
 
-struct RaceSetup {
-    u8 pad0[0x10];
-    f32 time;  // offset 0x10
-};
-
 struct Binding {
     s32 type;          // offset 0x0
     const char* name;  // offset 0x4
@@ -123,7 +119,6 @@ static inline Binding Bind(s32 t, const char* n, void* p) {
 extern const Binding lbl_802FAA40;
 
 extern "C" {
-RaceSetup* fn_801E7E3C(void);
 void fn_8000FBE4(void);
 int fn_80161C38(void);
 }  // extern "C"

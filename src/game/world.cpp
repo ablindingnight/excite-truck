@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
@@ -684,7 +685,7 @@ s32 fn_801E7E2C(void) { return -1; }
 
 WorldState* fn_801E7E34(void) { return lbl_8055EB04; }
 
-void* fn_801E7E3C(void) { return lbl_8055EB04->racers[8]; }
+RaceProgress* fn_801E7E3C(void) { return (RaceProgress*)lbl_8055EB04->racers[8]; }
 
 static inline void SaveView(ViewState* s, WView* v) {
     if (fn_801E87A8()->flags & 2) {

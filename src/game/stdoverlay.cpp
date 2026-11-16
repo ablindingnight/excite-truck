@@ -3,6 +3,7 @@
 // layout sets. Class and function names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/carinfo.h"
 #include "macros.h"
 
@@ -30,14 +31,6 @@ public:
     virtual ~Layout(void);
     virtual LayoutItem* Find(const char* name);    // 0xC
     virtual LayoutArt* FindArt(const char* name);  // 0x10
-};
-
-// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
-// declared (was named Racer here, a name world/carmodel use for a different class).
-// CarInfo: game/carinfo.h.
-struct LapInfo {
-    u8 pad0[0x8];
-    s32 total;  // offset 0x8
 };
 
 struct Truck {
@@ -81,7 +74,6 @@ void fn_80232928(u32 color);
 void fn_80232930(void);
 CarInfo* fn_801EA9A0(int player);
 f32 fn_801E7E18(void);
-LapInfo* fn_801E7E3C(void);
 void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
 }
 
@@ -526,7 +518,7 @@ inline void LapTitleOverlay::Update(int player, int unused) {
     Layout* layout;
     int seg;
     f32 now;
-    LapInfo* info;
+    RaceProgress* info;
     int side;
     f32 t;
     LapState* s;
@@ -558,18 +550,18 @@ inline void LapTitleOverlay::Update(int player, int unused) {
         }
         info = fn_801E7E3C();
         if (s->lap != 1 && s->lap <= 3) {
-            if (s->lap < info->total) {
+            if (s->lap < info->laps) {
                 str = fn_80131234("BigText:LAP_LEFT");
                 CopyString(32, leftText, str);
                 fn_801345D8(key, sizeof(key), "BigText:LAP_RIGHT_%d", s->lap);
                 str = fn_80131234(key);
                 CopyString(32, rightText, str);
-            } else if (info->total == s->lap) {
+            } else if (info->laps == s->lap) {
                 str = fn_80131234("BigText:FINAL_LEFT");
                 CopyString(32, leftText, str);
                 str = fn_80131234("BigText:FINAL_RIGHT");
                 CopyString(32, rightText, str);
-            } else if (info->total + 1 == s->lap) {
+            } else if (info->laps + 1 == s->lap) {
                 return;
             } else {
                 return;
