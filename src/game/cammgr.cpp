@@ -46,8 +46,8 @@ struct PathPos {
 };
 
 extern "C" {
-void fn_80134E34(IdealFollower* f, f32 dist);
-void fn_80136468(PathPos* out, IdealFollower* f);
+f32 fn_80134E34(IdealFollower* f, f32 dist);  // aidriver: returns the follower's distance
+PathPos fn_80136468(IdealFollower* f, f32 m);  // idealline: returns the ILPos by value
 void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 k);
 }
 
@@ -418,7 +418,7 @@ struct CamXZ {
     f32 x, z;
 };
 
-void fn_80136594(CamTrackPos* out, CamTrack* trk, const CamXZ* xz);
+void fn_80136594(CamTrackPos* out, CamTrack* trk, const CamXZ* xz);  // PORT: idealline returns the ILPos by value (a by-value form here is not code-identical)
 int fn_8026A2C8(void);
 CamRacerObj* fn_801B2EC0(int i);
 f32 PSVECSquareDistance(const f32* a, const f32* b);
@@ -1369,9 +1369,8 @@ void fn_80268D94(void) {
 
 void fn_80268E00(void) {
     IdealFollower f;
-    PathPos pos;
-    fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), -1.0f);
-    fn_80136468(&pos, &f);
+    const PathPos& at = fn_80136468(&f, fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), -1.0f));
+    PathPos& pos = const_cast<PathPos&>(at);  // the returned temporary itself (not a const object)
     if (!pos.seg) {
         pos.seg = PTR(f.line, 0x1C);
     }

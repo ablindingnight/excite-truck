@@ -3190,6 +3190,7 @@ struct Seg {
 struct TrackSample {
     Seg* seg;  // offset 0x0
     f32 t;     // offset 0x4
+    s32 mode;  // offset 0x8
 };
 
 extern "C" {
@@ -3206,7 +3207,7 @@ void fn_801E9DC4(s16* h);
 void fn_801E9E30(s16* h, const f32* pos);
 s32 fn_80178C9C(void);
 void fn_802C77F0(s32 model, f32* box);
-void fn_80136594(TrackSample* out, s32 track, const f32* xz);
+TrackSample fn_80136594(s32 track, const f32* xz);  // idealline: returns the ILPos by value
 void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 double acos(double x);
 s32 fn_801FB1F4(int a);
@@ -3329,7 +3330,6 @@ inline Pickup::Pickup(ValueNode* n) {
         f32 box[6];
         f32 m[12];
         f32 xz[2];
-        TrackSample ts;
         f32 dir[2];
         f32 fwd[2];
         f32 a[3];
@@ -3345,7 +3345,7 @@ inline Pickup::Pickup(ValueNode* n) {
         m[11] = pos[2];
         xz[0] = pos[0];
         xz[1] = pos[2];
-        fn_80136594(&ts, trk, xz);
+        const TrackSample& ts = fn_80136594(trk, xz);
         {
             Seg* s0 = ts.seg;
             f32 len;

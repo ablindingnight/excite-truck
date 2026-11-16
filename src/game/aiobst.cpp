@@ -85,6 +85,7 @@ struct Track {
 struct TrackSample {
     Seg* seg;  // offset 0x0
     f32 t;     // offset 0x4
+    s32 mode;  // offset 0x8
 };
 
 class TrackPosOwner {
@@ -132,7 +133,7 @@ struct Group {
 
 extern "C" {
 Track* fn_80178C9C(void);
-void fn_80136594(TrackSample* out, Track* trk, const Vec2* xz);
+TrackSample fn_80136594(Track* trk, const Vec2* xz);  // idealline: returns the ILPos by value
 int fn_80179650(void);
 int fn_80179630(int view);
 RaceCarRec* fn_8017960C(int id);
@@ -212,8 +213,7 @@ static inline const char* Plural(int n) { return n == 1 ? "" : "s"; }
 extern "C" {
 
 void fn_8015EC50(Obst* o, Track* trk) {
-    TrackSample ts;
-    fn_80136594(&ts, trk, &o->pos);
+    const TrackSample& ts = fn_80136594(trk, &o->pos);
     o->seg = ts.seg - trk->path->segs;
 }
 
