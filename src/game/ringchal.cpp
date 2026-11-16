@@ -1578,10 +1578,8 @@ inline void Arena::Tally(void) {
                 break;
             }
             if (!NearZeroF(a)) {
-                f32 lo = 0.0f;
-                f32 t = ((lbl_8055E3C8 - stats->data[k].time) - lo) / (b - lo);
-                CLAMP01(t);
-                f32 v = a + t * (0.0f - a);
+                f32 t = Unlerp(0.0f, b, lbl_8055E3C8 - stats->data[k].time);
+                f32 v = Lerp(a, 0.0f, t);
                 RSound* cheer = sLongCheer;
                 if (v != cheer->vol) {
                     cheer->dirty = 1;
