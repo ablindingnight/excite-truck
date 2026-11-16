@@ -626,6 +626,7 @@ void fn_802B14B4(GMat* g) {
 }
 
 void fn_802B1758(GMat* g) {
+    int stripIndex;
     s32 tex;
     int n;
     f32 scale;
@@ -633,7 +634,6 @@ void fn_802B1758(GMat* g) {
     GStrip* s;
     f32 x;
     int k;
-    f32 near;
     f32 y;
     f32 far;
     f32 z;
@@ -651,8 +651,8 @@ void fn_802B1758(GMat* g) {
         for (GBlock* b = g->lists[0].head; b; b = b->next) {
             fn_802DC464(verts, n, (u16*)b->data, b->count);
         }
-        for (k = 0; k < g->strips.count; k++) {
-            s = &g->strips.data[k];
+        for (stripIndex = 0, k = 0; stripIndex < g->strips.count; k += sizeof(GStrip), ++stripIndex) {
+            s = (GStrip*)((u8*)g->strips.data + k);
             m.z = s->alpha;
             fn_802DAA18(fn_802DA704(1, &m, 1));
             fn_802DC464(verts, n, s->idx, s->idx[0] + 1);
@@ -674,11 +674,13 @@ void fn_802B1758(GMat* g) {
         fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
-        near = -2.0f + 1024.0f * kWorldScale / 2.0f;
+        const f32& nearRange = -2.0f + 1024.0f * kWorldScale / 2.0f;
         GVec* c = lbl_804BE190;
         for (k = 0; k < 4; k++, c++) {
-            x = near * (f32)((k & 1) ? -1 : 1);
-            z = near * (f32)((k & 2) ? -1 : 1);
+            f32 signX = (f32)((k & 1) ? -1 : 1);
+            x = signX * nearRange;
+            f32 signZ = (f32)((k & 2) ? -1 : 1);
+            z = signZ * nearRange;
             y = fn_801DCF48(0, x, z);
             c->x = x;
             c->y = y;
