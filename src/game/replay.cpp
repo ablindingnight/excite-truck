@@ -3,6 +3,7 @@
 // movie tool. Names come from the "Replay:" / "replay:" strings; function names are guesses.
 #include <stdio.h>
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/locstring.h"
 #include "game/raceopts.h"
 #include "game/joy.h"
@@ -41,11 +42,6 @@ public:
     T storage[N];  // offset 0xC
 };
 
-class Layout {
-public:
-    virtual ~Layout(void);
-};
-
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
 // JoyStatus: game/joy.h.
 struct Camera {
@@ -67,7 +63,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 const char* fn_80131234(const char* key);
-void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
+void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
 u32 fn_8026E20C(void);
 void fn_8026E204(u32 flags);
 int fn_801769F8(void);
@@ -117,7 +113,7 @@ int fn_80137CFC(int player);
 void fn_80129AEC(int pad);
 int fn_801E86F8(int player);
 void fn_801E86E8(int index, int unk);
-Layout* fn_80145E70(const char* name);
+ILayout* fn_80145E70(const char* name);
 int fn_802E2C20(void);
 void fn_80179588(void);
 void fn_801795B0(void);
@@ -194,7 +190,7 @@ PromptTimes lbl_8034F44C;
 u8 lbl_8055D36C;
 u8 lbl_8055D36D;  // replay running
 s32 lbl_8055D370;
-Layout* lbl_8055D374;
+ILayout* lbl_8055D374;
 bool lbl_8055D378[2];  // restart / replay requested
 u8 lbl_8055D37A;     // results menu up
 ReplayClock lbl_8055D380;

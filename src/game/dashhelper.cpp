@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/raceprog.h"
 #include "game/dashhelper.h"
 
@@ -28,12 +29,6 @@ struct LayoutItem {
     u32 unk14;  // offset 0x14
     u32 color;  // offset 0x18
     u32 unk1C;  // offset 0x1C
-};
-
-class Layout {
-public:
-    virtual ~Layout(void);
-    virtual LayoutItem* Find(const char* name);  // 0xC
 };
 
 class Sound {
@@ -153,7 +148,7 @@ void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, 
 int fn_802C6FC0(const char* name, int a, int b);
 void mrModelUnload(int model);
 Sound* fn_80207848(const char* name, int flags);
-Layout* fn_80145E70(const char* name);
+ILayout* fn_80145E70(const char* name);
 const char* fn_80131268(const char* key);
 void fn_80232928(u32 color);
 void fn_80232930(void);
@@ -345,7 +340,7 @@ s32 lbl_8055D4A0;  // number of views
 u8 lbl_8055D4A4;
 s32 lbl_8055D4A8;  // queued rects
 DashSoundPlayer* lbl_8055D4AC;
-Layout* lbl_8055D4B0;
+ILayout* lbl_8055D4B0;
 Sound* lbl_8055D4B4;
 Sound* lbl_8055D4B8;
 gArtSet* lbl_8055D4BC;
@@ -888,8 +883,8 @@ void fn_8000F4F0(void) {
     }
     lbl_80558A98 = num;
     if (lbl_8055D4B0) {
-        LayoutItem* in = lbl_8055D4B0->Find("321GO_in");
-        LayoutItem* out = lbl_8055D4B0->Find("321GO_out");
+        LayoutItem* in = (LayoutItem*)lbl_8055D4B0->Find("321GO_in");
+        LayoutItem* out = (LayoutItem*)lbl_8055D4B0->Find("321GO_out");
         if (in && out) {
             LayoutItem a;
             LayoutItem b;

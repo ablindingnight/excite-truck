@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/idealline.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -47,17 +48,7 @@ int GetNumEvents(void);
 
 VehicleInfo* GetDriverVehicle(long driver);
 
-// A loaded overlay layout (tutovr.val / challist.val).
-class Layout {
-public:
-    virtual ~Layout(void);
-    virtual void* Find(const char* name);   // 0x0C
-    virtual void* Art(const char* name);    // 0x10
-    virtual void* Elem(const char* name);   // 0x14
-    virtual gArtSet* Image(const char* name);  // 0x18
-};
-
-extern "C" Layout* fn_80145E70(const char* name);
+extern "C" ILayout* fn_80145E70(const char* name);
 
 struct TextBox {
     u8 pad0[0x4];
@@ -144,8 +135,8 @@ ModuleTag lbl_8055E2D0;
 UnkStatic7F lbl_8055E2D8;
 u8 lbl_8055E2DC;     // passed a new level
 u8 lbl_8055E2DD;     // skip requested
-Layout* lbl_8055E2E0;  // challist.val
-Layout* lbl_8055E2E4;  // tutovr.val
+ILayout* lbl_8055E2E0;  // challist.val
+ILayout* lbl_8055E2E4;  // tutovr.val
 s32 lbl_8055E2E8;  // bar1_top.tex
 s32 lbl_8055E2EC;  // bar1_bot.tex
 s32 lbl_8055E2F0;  // tut_pass.tex
@@ -290,7 +281,7 @@ void fn_802A95A8(const void* a, const void* b);
 void fn_802A95AC(int a);
 void fn_801476D8(void* art, s32 color, s32 tex);
 void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
-void fn_801475D0(Layout* l, const char* elem, const char* fmt, ...);
+void fn_801475D0(ILayout* l, const char* elem, const char* fmt, ...);
 const char* fn_80131234(const char* key);  // localize
 s32 fn_802C6FC0(const char* name, int a, int b);
 void fn_802C77F0(s32 model, f32* box);
@@ -308,7 +299,7 @@ s32 fn_802C9994(s32 a);
 void fn_802A96E8(void* pts, int n, u32 color, s32 tex, int a);
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
-Layout* fn_80146C2C(Layout* l, ValueNode* desc);
+ILayout* fn_80146C2C(ILayout* l, ValueNode* desc);
 }
 
 struct CamFrame {
@@ -321,7 +312,7 @@ extern "C" void fn_8026A2CC(CamFrame* cam, int a, f32 fov);
 // A help page: its text and its optional overlay layout.
 struct HelpPage {
     const char* desc;  // offset 0x0
-    Layout* lyt;       // offset 0x4
+    ILayout* lyt;       // offset 0x4
 };
 
 // A token to collect: a point (coin) or a line to cross.
@@ -556,7 +547,7 @@ public:
         f32 now = lbl_8055E3C8;
         if (now > Time() && !IsPassed()) {
             char buf[0x14];
-            fn_801476D8(lbl_8055E2E0->Art("timer_art"), -1, lbl_8055E2F8);
+            fn_801476D8(lbl_8055E2E0->FindArt("timer_art"), -1, lbl_8055E2F8);
             fn_801476C4(lbl_8055E2E0->Find("timer_title"));
             fn_80130980(buf, sizeof(buf), 3, limit - time);
             fn_801475D0(lbl_8055E2E0, "timer", "%s", buf);
@@ -893,16 +884,16 @@ int fn_801613E0(int key) {
 
 void fn_80161438(const char* title, const char* msg) {
     if (lbl_8055E2E0) {
-        void* box = lbl_8055E2E0->Elem("popup_box");
+        void* box = lbl_8055E2E0->FindBox("popup_box");
         TextBox* t;
         f32 x;
         f32 y;
         if (box) {
-            fn_80148070(box, 0x96FFFFFF, lbl_8055E2E0->Image("popup_box_art"));
+            fn_80148070(box, 0x96FFFFFF, lbl_8055E2E0->FindSet("popup_box_art"));
         }
-        t = (TextBox*)lbl_8055E2E0->Elem("popup_title");
+        t = (TextBox*)lbl_8055E2E0->FindBox("popup_title");
         if (t) {
-            fn_80148070(t, -1, lbl_8055E2E0->Image("popup_box_art"));
+            fn_80148070(t, -1, lbl_8055E2E0->FindSet("popup_box_art"));
         }
         t = (TextBox*)lbl_8055E2E0->Find("popup_msg");
         fn_80148134(&x, &y, t->x, t->y, t->mode);
@@ -1449,8 +1440,8 @@ inline void Challenge::Draw3D(void) {
 }
 
 static inline void DrawBars(void) {
-    fn_801476D8(lbl_8055E2E0->Art("bar_top"), -1, lbl_8055E2E8);
-    fn_801476D8(lbl_8055E2E0->Art("bar_bot"), -1, lbl_8055E2EC);
+    fn_801476D8(lbl_8055E2E0->FindArt("bar_top"), -1, lbl_8055E2E8);
+    fn_801476D8(lbl_8055E2E0->FindArt("bar_bot"), -1, lbl_8055E2EC);
 }
 
 inline int StuntChallenge::Draw(int a) { return Challenge::Draw(a); }
@@ -1461,11 +1452,11 @@ inline int StuntChallenge::DrawResults(int a) {
     TextBox* art;
     DrawBars();
     if (IsPassed()) {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F0);
+        fn_801476D8(lbl_8055E2E0->FindArt("results_art"), -1, lbl_8055E2F0);
         fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:PASSED_HEAD"));
         body = fn_80131234("Tutorial:PASSED_BODY");
     } else {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F4);
+        fn_801476D8(lbl_8055E2E0->FindArt("results_art"), -1, lbl_8055E2F4);
         fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:FAILED_HEAD"));
         if (result == 4) {
             body = fn_80131234("Tutorial:FAILED_BODY_STUNT");
@@ -1476,7 +1467,7 @@ inline int StuntChallenge::DrawResults(int a) {
         }
     }
     t = (TextBox*)lbl_8055E2E0->Find("results2");
-    art = (TextBox*)lbl_8055E2E0->Art("results_art");
+    art = (TextBox*)lbl_8055E2E0->FindArt("results_art");
     if (t && art) {
         f32 px;
         f32 py;
@@ -1495,11 +1486,11 @@ inline int FreestyleChallenge::DrawResults(int a) {
     TextBox* art;
     DrawBars();
     if (IsPassed()) {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F0);
+        fn_801476D8(lbl_8055E2E0->FindArt("results_art"), -1, lbl_8055E2F0);
         fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:PASSED_HEAD"));
         body = fn_80131234("Tutorial:PASSED_BODY");
     } else {
-        fn_801476D8(lbl_8055E2E0->Art("results_art"), -1, lbl_8055E2F4);
+        fn_801476D8(lbl_8055E2E0->FindArt("results_art"), -1, lbl_8055E2F4);
         fn_801473F8(lbl_8055E2E0, "results1", fn_80131234("Tutorial:FAILED_HEAD"));
         if (OutOfTime()) {
             body = fn_80131234("Tutorial:FAILED_BODY_TIME");
@@ -1510,7 +1501,7 @@ inline int FreestyleChallenge::DrawResults(int a) {
         }
     }
     t = (TextBox*)lbl_8055E2E0->Find("results2");
-    art = (TextBox*)lbl_8055E2E0->Art("results_art");
+    art = (TextBox*)lbl_8055E2E0->FindArt("results_art");
     if (t && art) {
         f32 px;
         f32 py;
@@ -1665,7 +1656,7 @@ struct GartElem : ElemHead {
 };
 
 extern "C" {
-void fn_80147940(Layout* l, GartElem* e, const char* set, int part);
+void fn_80147940(ILayout* l, GartElem* e, const char* set, int part);
 void fn_80230F78(u8* alpha, f32* pulse, u32* color, int a);
 }
 
@@ -1747,8 +1738,8 @@ inline int ChalList::Draw(int a) {
         fn_801476C4(lbl_8055E2E0->Find("continue"));
         e1 = (TextElem*)lbl_8055E2E0->Find("elem1");
         e2 = (TextElem*)lbl_8055E2E0->Find("elem2");
-        but = (GartElem*)lbl_8055E2E0->Elem("sel_but");
-        star = (GartElem*)lbl_8055E2E0->Elem("pass_star");
+        but = (GartElem*)lbl_8055E2E0->FindBox("sel_but");
+        star = (GartElem*)lbl_8055E2E0->FindBox("pass_star");
         if (e1 && e2) {
             struct {
                 int i;
