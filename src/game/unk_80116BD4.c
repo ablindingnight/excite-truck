@@ -1247,9 +1247,14 @@ StreamPlayer *BinkOpen(void *name, u32 flags) {
     for (track = 0; track < p->numTracks;) {
         StreamTrack *t;
         BinkAudioFlags8011 af;
+        /* MATCHING-AID: at the two places that copy a whole flags word, the track id is written through a cast of
+           its own address. That emits no code but makes the id a real value numbered below the audioFlags
+           load, as in retail (trackIds in r4, audioFlags in r3). The original form is unproven. */
+        s32 idx;
         p->tracks[track].ringStart = 0;
 #define AF (p->audioFlags[p->trackIds[track]])
-        af = AF;
+        *(s32 *)&idx = p->trackIds[track];
+        af = p->audioFlags[idx];
         if ((af.valid || af.dct) && lbl_8055DECC != 0) {
             u32 rate = af.rate;
             if (local.fpsNum != 0 && local.fpsDen != 0) {
@@ -1280,8 +1285,10 @@ StreamPlayer *BinkOpen(void *name, u32 flags) {
                         p->tracks[track].fillTarget = p->tracks[track].ringSize;
                     }
                     {
-                        BinkAudioFlags8011 f = AF;
+                        BinkAudioFlags8011 f;
                         int dct = 0;
+                        *(s32 *)&idx = p->trackIds[track];
+                        f = p->audioFlags[idx];
                         if (!f.valid && f.dct) {
                             dct = 1;
                         }
