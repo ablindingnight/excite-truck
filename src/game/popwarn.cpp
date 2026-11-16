@@ -98,6 +98,10 @@ u8 lbl_8055F271;
 s32 lbl_8055F274;
 u8* lbl_8055F278;
 
+extern "C" void fn_802E317C(const char* fmt, ...);
+
+inline void KioskLoadLog(void) { fn_802E317C("MenuShowKioskLoadIntoGame!"); }
+
 // A scrolling menu art widget that owns its image ("extruck.art").
 class MenuArt : public MenuState {
 public:
@@ -413,13 +417,10 @@ void fn_802E47E8(void);
 void fn_8023D7CC(void);
 int fn_80248668(void);
 int fn_80278A1C(const char* movie);
-void fn_802E317C(const char* fmt, ...);
 void fn_8020C91C(int song);
 void GameDoEve(int track, int eve);
 
 }  // extern "C"
-
-inline void KioskLoadLog(void) { fn_802E317C("MenuShowKioskLoadIntoGame!"); }
 
 extern "C" {
 
