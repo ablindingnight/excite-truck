@@ -2,6 +2,7 @@
 // on at least the given lap drives into them, fire their "act_seq" sequence at the midpoint of the bound's
 // longest edge. Registered as a race listener. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -30,11 +31,6 @@ struct Bound {
     s32 n;           // offset 0x0
     s32 cap;         // offset 0x4
     BoundPt pts[1];  // offset 0x8
-};
-
-struct V2 {
-    f32 x;
-    f32 z;
 };
 
 struct RaceCarRec;
@@ -207,22 +203,22 @@ inline void ActZone::Load(ValueNode* n) {
     {
         V2 e;
         e.x = b->pts[0].x - b->pts[2].x;
-        e.z = b->pts[0].z - b->pts[2].z;
-        best = e.x * e.x + e.z * e.z;
+        e.y = b->pts[0].z - b->pts[2].z;
+        best = e.x * e.x + e.y * e.y;
     }
     d.x = b->pts[0].x - b->pts[1].x;
-    d.z = b->pts[0].z - b->pts[1].z;
+    d.y = b->pts[0].z - b->pts[1].z;
     {
-        f32 len = d.x * d.x + d.z * d.z;
+        f32 len = d.x * d.x + d.y * d.y;
         if (len > best) {
             best = len;
             start = 0;
         }
     }
-    d.z = b->pts[1].z - b->pts[2].z;
+    d.y = b->pts[1].z - b->pts[2].z;
     f32 dx = b->pts[1].x - b->pts[2].x;
     d.x = dx;
-    if (d.x * d.x + d.z * d.z > best) {
+    if (d.x * d.x + d.y * d.y > best) {
         start = 1;
     }
     fn_801E9DC4(h);

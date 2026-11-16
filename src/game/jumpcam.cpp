@@ -2,6 +2,13 @@
 // player launches off one, the camera switches to a jump view with heart/whoosh sounds. Names are
 // guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/v2.h"
+
+// Was V2::Set here (x then the second component).
+static inline void SetV2(V2* v, f32 ax, f32 az) {
+    v->x = ax;
+    v->y = az;
+}
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/racer_camera_slot.h"
@@ -90,14 +97,6 @@ struct JumpState {
     f32 time;    // offset 0x4
     f32 blend;   // offset 0x8
     s32 jump;    // offset 0xC
-};
-
-struct V2 {
-    void Set(f32 ax, f32 az) {
-        x = ax;
-        z = az;
-    }
-    f32 x, z;
 };
 
 extern f32 lbl_8055E3C8;  // race clock
@@ -206,11 +205,11 @@ void fn_8026B3D4(int player) {
             int i;
             found = 0;
             p.x = c->x;
-            p.z = c->z;
+            p.y = c->z;
             for (i = 0, j = lbl_8049A028; i < lbl_8055F4C8 && !found; j++, i++) {
                 V2 d;
-                d.Set(p.x - j->x, p.z - j->z);
-                if (d.x * d.x + d.z * d.z < Sq(j->rad)) {
+                SetV2(&d, p.x - j->x, p.y - j->z);
+                if (d.x * d.x + d.y * d.y < Sq(j->rad)) {
                     s->jump = i;
                     found = 1;
                     s->time = now;

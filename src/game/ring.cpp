@@ -3,6 +3,7 @@
 // "ring"s (radius + frame64). Sets are switched on and off by name; a car passes a ring by getting within its
 // radius, and rings fade in, flash and fade out. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
@@ -30,11 +31,6 @@ void* operator new[](size_t size, const char* tag);
 struct Event {
     u8 pad0[0x20];
     ValueNode* vals;  // offset 0x20
-};
-
-struct V2 {
-    f32 x;
-    f32 z;
 };
 
 extern "C" {
@@ -448,7 +444,7 @@ V2 fn_8016A6B0(const char* name, int radius) {
     for (i = 0; i < lbl_80430340.count; i++) {
         if (strcasecmp(lbl_80430340.data[i].name, name) == 0 && radius == lbl_80430318.data[i].radius) {
             V2 p;
-            p.z = lbl_80430318.data[i].frame.origin.z;
+            p.y = lbl_80430318.data[i].frame.origin.z;
             p.x = lbl_80430318.data[i].frame.origin.x;
             return p;
         }
@@ -456,7 +452,7 @@ V2 fn_8016A6B0(const char* name, int radius) {
     {
         V2 p;
         p.x = 0.0f;
-        p.z = 0.0f;
+        p.y = 0.0f;
         return p;
     }
 }

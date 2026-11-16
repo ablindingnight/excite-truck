@@ -4,6 +4,7 @@
 // coins. Pickups are kept in groups (one per table, with a bounding circle) and drawn spinning; a car
 // collects a pickup when it falls in the car's footprint. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -32,11 +33,6 @@ void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
 
 void* operator new(size_t size, const char* tag);
 
-
-struct V2 {
-    f32 x;
-    f32 z;
-};
 
 typedef V2 BoundPt;
 
@@ -182,15 +178,15 @@ inline void PickupObjMan::BeginGroup(Bound* b, int id) {
         g->radius = 0.0f;
         for (i = 0; i < b->n; i++) {
             V2 d;
-            d.z = g->c.z - b->pts[i].z;
+            d.y = g->c.y - b->pts[i].y;
             d.x = g->c.x - b->pts[i].x;
-            g->radius = MAX(g->radius, d.x * d.x + d.z * d.z);
+            g->radius = MAX(g->radius, d.x * d.x + d.y * d.y);
         }
         g->radius = 1.1f * (f32)sqrt(g->radius);
     } else {
         g->hasBound = 0;
         g->c.x = 0.0f;
-        g->c.z = 0.0f;
+        g->c.y = 0.0f;
         g->radius = 0.0f;
     }
     g->first = objs.count;
@@ -207,7 +203,7 @@ inline void PickupObjMan::Add(int type, const V2& pos, f32 hover) {
     p->type = get_pickup_type_info(type);
     p->pos[0] = pos.x;
     p->pos[1] = 0.0f;
-    p->pos[2] = pos.z;
+    p->pos[2] = pos.y;
     p->hover = hover;
     fn_801E9E30(0, p->pos);
     p->pos[1] += p->type->yoff;
@@ -488,15 +484,15 @@ void fn_80168104(void) {
     int i;
     int j;
     c.x = cam->x;
-    c.z = cam->z;
+    c.y = cam->z;
     for (i = 0; i < lbl_8055E354->groups.count; i++) {
         g = &lbl_8055E354->groups.data[i];
         if (g->enabled) {
             if (g->hasBound) {
                 V2 d;
-                d.z = c.z - g->c.z;
+                d.y = c.y - g->c.y;
                 d.x = c.x - g->c.x;
-                f32 len = (f32)sqrt(d.x * d.x + d.z * d.z);
+                f32 len = (f32)sqrt(d.x * d.x + d.y * d.y);
                 f32 r = g->radius;
                 if (!(len - r < 600.0f)) {
                     continue;
@@ -575,11 +571,11 @@ PickupCounts fn_801683F4(int player) {
         CarModel* car;
         int i;
         pos.x = rec->mtx.pos.x;
-        pos.z = rec->mtx.pos.z;
+        pos.y = rec->mtx.pos.z;
         lo.x = 0.0f;
-        lo.z = 0.0f;
+        lo.y = 0.0f;
         hi.x = 0.0f;
-        hi.z = 0.0f;
+        hi.y = 0.0f;
         car = rec->nAdded > 0 ? (CarModel*)rec->sub[0] : 0;
         if (car) {
             f32 l[3];
@@ -590,14 +586,14 @@ PickupCounts fn_801683F4(int player) {
             f32 x = l[0];
             f32 w = dims->wid;
             lo.x = LoEdge(x, w);
-            lo.z = LoEdge(l[2], dims->len);
+            lo.y = LoEdge(l[2], dims->len);
             hi.x = HiEdge(l[0], dims->wid);
             const f32 edgeLen = dims->len;
             f32 upper = MAX(l[2], 0.0f);
             const f32 pad = 1.1f * edgeLen;
             const f32 len = dims->len;
             const f32 wid = dims->wid;
-            hi.z = upper + pad;
+            hi.y = upper + pad;
             const f32 lengthSquared = len * len;
             const f32 widthSquared = wid * wid;
             const f32 radiusSquared = widthSquared + lengthSquared;
@@ -611,9 +607,9 @@ PickupCounts fn_801683F4(int player) {
                 int j;
                 if (g->hasBound) {
                     V2 d;
-                    d.z = pos.z - g->c.z;
+                    d.y = pos.y - g->c.y;
                     d.x = pos.x - g->c.x;
-                    if (!((f32)sqrt(d.x * d.x + d.z * d.z) < r + g->radius)) {
+                    if (!((f32)sqrt(d.x * d.x + d.y * d.y) < r + g->radius)) {
                         continue;
                     }
                 }
@@ -627,7 +623,7 @@ PickupCounts fn_801683F4(int player) {
                             SubVec(l, p->pos, &rec->mtx.pos.x);
                             RotVec(l, &rec->mtx.rot.x.x, l);
                             rad = p->type ? p->type->radius : 0.0f;
-                            if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.z && l[2] - rad < hi.z) {
+                            if (l[0] + rad > lo.x && l[0] - rad < hi.x && l[2] + rad > lo.y && l[2] - rad < hi.y) {
                                 p->taken = 1;
                                 res.n[p->type ? p->type->type : 6]++;
                                 break;
@@ -657,15 +653,15 @@ void fn_801688FC(int id) {
 static inline V2 Lerp2(const V2& a, const V2& b, f32 t) {
     V2 r;
     r.x = a.x + t * (b.x - a.x);
-    r.z = a.z + t * (b.z - a.z);
+    r.y = a.y + t * (b.y - a.y);
     return r;
 }
 
 static inline f32 Dist(const BoundPt* a, const BoundPt* b) {
     V2 d;
-    d.z = b->z - a->z;
+    d.y = b->y - a->y;
     d.x = b->x - a->x;
-    return sqrt(d.x * d.x + d.z * d.z);
+    return sqrt(d.x * d.x + d.y * d.y);
 }
 
 inline int CoinStripPickupMaker::Match(const char* name) {
@@ -756,19 +752,19 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 t = 1.0f;
             }
             dir.x = seg[1].x - seg[0].x;
-            dir.z = seg[1].z - seg[0].z;
+            dir.y = seg[1].y - seg[0].y;
             {
                 V2 perp = dir;
                 f32 x = perp.x;
-                f32 zv = perp.z;
+                f32 zv = perp.y;
                 perp.x = zv;
-                perp.z = -x;
-                inv = 1.0f / (f32)sqrt(Len2_hm(perp.x, perp.z));
+                perp.y = -x;
+                inv = 1.0f / (f32)sqrt(Len2_hm(perp.x, perp.y));
                 perp.x *= inv;
                 base.x = seg[0].x + dir.x * t;
-                f32 z2 = dir.z;
-                perp.z *= inv;
-                base.z = seg[0].z + z2 * t;
+                f32 z2 = dir.y;
+                perp.y *= inv;
+                base.y = seg[0].y + z2 * t;
                 nrm = perp;
             }
             rt = rainbowTypes.t;
@@ -777,7 +773,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 f32 off = params[2] * (half + ((f32)c - half * (f32)count));
                 V2 p;
                 int ty;
-                p.z = base.z + nrm.z * off;
+                p.y = base.y + nrm.y * off;
                 p.x = base.x + nrm.x * off;
                 if (rainbow) {
                     ty = *rt;
