@@ -1498,7 +1498,7 @@ void fn_802D0EEC(void) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+/* Helper name unproven: the fitted field of view; the boundary is needed (in place: fn_802D14D8 100 -> 99.71) */
 static inline f32 FovFit(f32 half, f32 a) { return 2.0f * (f32)atan((f32)tan(half) / a); }
 
 static inline void Loop1_fn_802D14D8(f32 k) {
