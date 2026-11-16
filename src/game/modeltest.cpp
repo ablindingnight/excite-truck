@@ -52,7 +52,8 @@ struct MTMtx {
         basis[2].z = 1.0f;
         origin.x = 0.0f;
         origin.y = 0.0f;
-        origin.z = 0.0f - dist;
+        origin.z = 0.0f;
+        origin.z -= dist;
     }
     MTVec basis[3];
     MTVec origin;
