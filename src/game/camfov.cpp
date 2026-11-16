@@ -187,6 +187,8 @@ static inline f32 Ease(f32 x) {
 
 // Adjusts the camera position for the player's split-screen viewport: lifts it by `lift` scaled with
 // the viewport's height, then pulls it toward the target by its vertical placement.
+#pragma push
+#pragma peephole off  /* Setting unproven: recovers the viewport adjustment body. */
 void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
     CamRect* r = &lbl_8049A218[*cam];
     f32 e = Ease(r->v[3]);
@@ -204,6 +206,7 @@ void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
     pos[1] = target[1] + d.y * s;
     pos[2] = target[2] + d.z * s;
 }
+#pragma pop
 
 extern const f32 lbl_80563E84;  // ground sample spacing
 extern const f32 lbl_80563E88;
