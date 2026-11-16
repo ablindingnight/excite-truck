@@ -43,7 +43,6 @@ void fn_802D0E48(int pass);
 void fn_802D2614(void);
 void fn_802D2B0C(void);
 const V3* fn_802D2D04(void);  // light direction
-f32 PSVECDistance(const void* a, const void* b);
 void LCLoadData(void* dst, const void* src, u32 n);
 }
 
@@ -441,7 +440,7 @@ void fn_802D479C(Surf* s) {
 
 void fn_802D4988(Surf* s) {
     YMorphVtx* v = (YMorphVtx*)s->verts;
-    PSVECDistance(&lbl_804C56C0.pos, v);
+    PSVECDistance((const Vec*)&lbl_804C56C0.pos, (const Vec*)v);
     int n = s->nverts;
     lbl_8055FE00 += n;
     V3* out = (V3*)fn_802CFF64(n * 0xC);

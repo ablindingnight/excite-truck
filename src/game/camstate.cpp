@@ -276,7 +276,6 @@ void fn_80274660(u8* unused, u8* p) {
     cr->vel.v[1] = 0.0f;
 }
 
-f32 PSVECDistance(const f32* a, const f32* b);
 double tan(double x);
 double atan(double x);
 extern f32 __float_epsilon[];  // epsilon
@@ -309,14 +308,14 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     PSVECCrossProduct((const Vec*)&up.x, (const Vec*)((f32*)&cr->pose.rot.m[6]), (Vec*)((f32*)&cr->pose));
     PSVECCrossProduct((const Vec*)((f32*)&cr->pose.rot.m[6]), (const Vec*)((f32*)&cr->pose), (Vec*)((f32*)&cr->pose.rot.m[3]));
     Orthonormalize(p);
-    f32 d = PSVECDistance((f32*)&cr->pose.pos, (f32*)&cr->v4C);
+    f32 d = PSVECDistance((const Vec*)((f32*)&cr->pose.pos), (const Vec*)((f32*)&cr->v4C));
     if (dist > 0.0f) {
         f32 k = (lbl_80563FAC - stiff) * (d - dist);
         cr->pose.pos.v[0] = cr->pose.pos.v[0] + cr->pose.rot.m[6] * k;
         cr->pose.pos.v[1] = cr->pose.pos.v[1] + cr->pose.rot.m[7] * k;
         cr->pose.pos.v[2] = cr->pose.pos.v[2] + cr->pose.rot.m[8] * k;
     }
-    d = PSVECDistance((f32*)&cr->pose.pos, (f32*)&cr->v4C);
+    d = PSVECDistance((const Vec*)((f32*)&cr->pose.pos), (const Vec*)((f32*)&cr->v4C));
     f32 lo = 0.32724923f;
     f32 v = 1.9634954f;
     f32 half = 1.1780972f;
