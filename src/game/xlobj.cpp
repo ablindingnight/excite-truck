@@ -6,6 +6,10 @@
 // strings.
 #include "game/common.h"
 #include "game/vec3_init.h"
+// Shadow grid scale (name unproven): a named constant with external linkage defined before any code, retail's first
+// .sdata2 entry. BinShadows takes it by const reference, so its value is not folded into the divisions there.
+extern const f32 lbl_80564CB0;
+const f32 lbl_80564CB0 = 2.0f;
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
@@ -421,7 +425,6 @@ struct Grid {
     Pool<Item*>* pool;      // offset 0xC
 };
 
-extern const f32 lbl_80564CB0;
 
 ModuleTag lbl_8055FA60;
 static inline u32 XLWord(u32 v) { return v; }
@@ -483,6 +486,10 @@ TexEntry* fn_802B8EF0(int slot, const XScale* sc) {
     return lbl_804C0088[slot];
 }
 
+/* Helper unproven: retail creates the int-to-float bias constant BEFORE the literals of fn_802B8FE0, so an unused static
+   function with an int-to-float conversion was compiled here (dead static functions keep their constants). */
+static f32 ShadowCellSize(int n) { return (f32)n; }
+
 XScale* fn_802B8FE0(int i) {
     XScale* e = &lbl_804C004C.data[lbl_804C004C.count++];
     e->prio = 0;
@@ -507,7 +514,7 @@ int fn_802B9100(GroundCell* c) { return 0; }
 inline f32 Ceil(f32 x);
 inline s16 LowBit(s16 v);
 
-static inline void BinShadows(Grid& g, TexEntry* te, f32 s) {
+static inline void BinShadows(Grid& g, TexEntry* te, const f32& s) {
     f32 h = g.size * s;
     f32 step = 2.0f * h;
     for (Item* it = te->head; it; it = it->next) {
@@ -1151,7 +1158,6 @@ void fn_802BB674(const char* name, int slot) {
 
 }  // extern "C"
 
-const f32 lbl_80564CB0 = 2.0f;
 
 namespace {
 
