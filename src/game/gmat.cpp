@@ -285,6 +285,9 @@ extern bool lbl_8055FA59;  // draw debug
 InlineVec<GMat*, 32> lbl_804BE104;
 static GVec lbl_804BE190[8];  // ocean corners
 extern "C" const f32 kWorldScale;
+// Keep the world-scale load through its declaration while placing its definition first in the pool.
+static inline const f32& WorldScale() { return kWorldScale; }
+const f32 kWorldScale = 2.0f;
 
 static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
@@ -640,7 +643,7 @@ void fn_802B1758(GMat* g) {
         tex = g->worldmap;
         BVec m;
         m.z = 1.0f;
-        m.x = 1.0f / (1024.0f * kWorldScale);
+        m.x = 1.0f / (1024.0f * WorldScale());
         m.y = 0.0f;
         fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
@@ -662,9 +665,9 @@ void fn_802B1758(GMat* g) {
     if (g->crystal && g->oceanmap != -2) {
         tex = g->oceanmap;
         if (tex == g->worldmap) {
-            scale = 1.0f / (1024.0f * kWorldScale);
+            scale = 1.0f / (1024.0f * WorldScale());
         } else {
-            scale = 8.0f / (1024.0f * kWorldScale);
+            scale = 8.0f / (1024.0f * WorldScale());
         }
         BVec m;
         m.x = scale;
@@ -673,7 +676,7 @@ void fn_802B1758(GMat* g) {
         fn_802DAA18(fn_802DA704(1, &m, 1));
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
-        const f32& nearRange = -2.0f + 1024.0f * kWorldScale / 2.0f;
+        const f32& nearRange = -2.0f + 1024.0f * WorldScale() / 2.0f;
         GVec* c = lbl_804BE190;
         for (k = 0; k < 4; k++, c++) {
             f32 signX = (f32)((k & 1) ? -1 : 1);
@@ -685,7 +688,7 @@ void fn_802B1758(GMat* g) {
             c->y = y;
             c->z = z;
         }
-        far = 2048.0f * kWorldScale;
+        far = 2048.0f * WorldScale();
         c = &lbl_804BE190[4];
         for (k = 4; k < 8; k++, c++) {
             z = (f32)((k & 1) ? -1 : 1) * far;
@@ -701,35 +704,6 @@ void fn_802B1758(GMat* g) {
         fn_802C8D74();
     }
     g->strips.count = 0;
-}
-
-const f32 kWorldScale = 2.0f;
-
-void fn_802B1B60(GMat* g) {
-    BVec v[2];
-    InlineVec<GTex, 6>* texs = &g->layers.data->texs;
-    BVec* p = v;
-    for (int k = 0; k < texs->count; k++, p++) {
-        p->x = texs->data[k].u;
-        p->y = texs->data[k].v;
-        p->z = 1.0f / 2048.0f;
-    }
-    fn_802DAA18(fn_802DA704(1, v, 2));
-}
-
-void fn_802B1BEC(void) {}
-
-void fn_802B1BF0(GMat* g, GVec* out, int i) { *out = g->verts.data[i]; }
-
-int fn_802B1C14(GMat* g) { return g->layers.count; }
-
-const char* fn_802B1C1C(GMat* g, int i) { return g->LayerName(i); }
-
-s32 fn_802B1C50(GMat* g, int i, int offroad) {
-    if (i >= 0 && i < g->layers.count) {
-        return g->layers.data[i].surface[offroad];
-    }
-    return 0;
 }
 
 }  // extern "C"
@@ -754,10 +728,50 @@ inline T* InlineVec<T, N>::At(int i) {
     return &this->data[i];
 }
 
-inline GVec* GVerts::At(int i) { return &data[i]; }
+// Instantiate these accessors here so MWCC emits them at their retail link positions.
+template int InlineVec<GLayer, 6>::Count(void);
+template s16* IdxBlock<s16>::At(int i);
+template int IdxBlock<s16>::Count(void);
+GBlock* GList::Head(void) { return head; }
+bool GList::Empty(void) { return head == 0; }
+GVec* GVerts::At(int i) { return &data[i]; }
+template int InlineVec<GTex, 6>::Count(void);
+template GTex* InlineVec<GTex, 6>::At(int i);
+template GLayer* InlineVec<GLayer, 6>::At(int i);
 
-inline int GVerts::Count(void) { return count; }
+extern "C" {
 
-inline bool GList::Empty(void) { return head == 0; }
+void fn_802B1B60(GMat* g) {
+    BVec v[2];
+    InlineVec<GTex, 6>* texs = &g->layers.data->texs;
+    BVec* p = v;
+    for (int k = 0; k < texs->count; k++, p++) {
+        p->x = texs->data[k].u;
+        p->y = texs->data[k].v;
+        p->z = 1.0f / 2048.0f;
+    }
+    fn_802DAA18(fn_802DA704(1, v, 2));
+}
 
-inline GBlock* GList::Head(void) { return head; }
+}  // extern "C"
+
+int GVerts::Count(void) { return count; }
+
+extern "C" {
+
+void fn_802B1BEC(void) {}
+
+void fn_802B1BF0(GMat* g, GVec* out, int i) { *out = g->verts.data[i]; }
+
+int fn_802B1C14(GMat* g) { return g->layers.count; }
+
+const char* fn_802B1C1C(GMat* g, int i) { return g->LayerName(i); }
+
+s32 fn_802B1C50(GMat* g, int i, int offroad) {
+    if (i >= 0 && i < g->layers.count) {
+        return g->layers.data[i].surface[offroad];
+    }
+    return 0;
+}
+
+}  // extern "C"
