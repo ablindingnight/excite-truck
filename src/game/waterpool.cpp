@@ -726,35 +726,47 @@ void fn_8029D574(WaterPool* p) {
     fn_8029DDB8(p);
 }
 
-void fn_8029D644(WaterPool* p) {
-    int n = (p->ny - 1) * (p->nx * 2);
+#pragma push
+#pragma opt_common_subs off  /* Pragma unproven. Retail recomputes the active vertex address after the update call. */
+/* Helper name unproven. */
+static inline void RenderPool(WaterPool* p) {
+    int i = (p->ny - 1) * (p->nx * 2);
     const WaterFrame* cam = fn_802C86DC();
     p->eye.x = cam->pos.x;
     p->eye.y = cam->pos.y;
     p->eye.z = cam->pos.z;
     fn_802C8BD0(p->tex);
-    if (fn_802C8DBC(n)) {
+    if (fn_802C8DBC(i)) {
         PoolVtx* rows[2];
         rows[0] = p->verts;
         rows[1] = p->verts + p->nx;
-        for (int i = 0; i < p->nx; i++) {
+        for (i = 0; i < p->nx; i++) {
             fn_8029DB78(p, (PoolVtx*)((u8*)rows[0] + i * (int)sizeof(PoolVtx)), i, 0);
         }
         for (int j = 1; j < p->ny; j++) {
             PoolVtx* a = rows[j & 1];
             PoolVtx* b = rows[1 - (j & 1)];
-            for (int i = 0; i < p->nx; i++) {
-                PoolVtx* av = (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx));
-                fn_8029DB78(p, av, i, j);
-                PoolVtx* bv = (PoolVtx*)((u8*)b + i * (int)sizeof(PoolVtx));
-                fn_802C8E00(bv->pos.x, bv->pos.y, bv->pos.z, bv->s, bv->t, bv->color, i > 0);
-                fn_802C8E00(av->pos.x, av->pos.y, av->pos.z, av->s, av->t, av->color, i > 0);
+            for (i = 0; i < p->nx; i++) {
+                fn_8029DB78(p, (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx)), i, j);
+                const PoolVtx& vertexBack = *(const PoolVtx*)((const u8*)b + i * (int)sizeof(PoolVtx));
+                const f32 xBack = vertexBack.pos.x;
+                const f32 vBack = vertexBack.t;
+                const f32 uBack = vertexBack.s;
+                fn_802C8E00(xBack, vertexBack.pos.y, vertexBack.pos.z, uBack, vBack, vertexBack.color, i > 0);
+                const PoolVtx& vertexFront = *(const PoolVtx*)((const u8*)a + i * (int)sizeof(PoolVtx));
+                const f32 xFront = vertexFront.pos.x;
+                const f32 vFront = vertexFront.t;
+                const f32 uFront = vertexFront.s;
+                fn_802C8E00(xFront, vertexFront.pos.y, vertexFront.pos.z, uFront, vFront, vertexFront.color, i > 0);
             }
         }
         fn_802C8E48();
     }
     fn_802C8D74();
 }
+
+void fn_8029D644(WaterPool* p) { RenderPool(p); }
+#pragma pop
 
 void fn_8029E49C(WaterPool* p, WaterCar* car, int w);
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r);
@@ -832,8 +844,15 @@ void fn_8029DDB8(WaterPool* p) {
             int i = x + y * p->nx;
             s16* h = p->cur;
             s16* o = p->prev;
-            int sum = (h[i - 1] + h[i + 1]) + (h[x + (y + 1) * p->nx] + h[x + (y - 1) * p->nx]);
-            f32 f = damp * (a * h[i] + c * sum - o[i]);
+            const s16* center = &h[i];
+            const s16 previous = o[i];
+            const s16 height = h[i];
+            const s16 right = center[1];
+            const s16 left = center[-1];
+            const s16 belowHeight = h[x + (y + 1) * p->nx];
+            const s16 aboveHeight = h[x + (y - 1) * p->nx];
+            int sum = (belowHeight + aboveHeight) + (right + left);
+            f32 f = damp * (a * height + c * sum - previous);
             int v = MAX((int)f, -32768);
             o[i] = MIN(v, 32767);
         }
