@@ -3,6 +3,7 @@
 // checks and the angle/range helpers. Written against raw field offsets; the large routines and the
 // static-array initialiser are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/camrect.h"
 #include "game/camrec.h"
 #include "game/idealline.h"
@@ -497,7 +498,6 @@ struct CamFrame {
 
 extern "C" {
 void fn_802704D4(int to, u8* cam);
-f32 PSVECDotProduct(const f32* a, const f32* b);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
 extern s32 lbl_8055F548;
 extern u8 lbl_8055F480;
@@ -756,7 +756,7 @@ void fn_80271624(int mode, u8* p) {
                 d[0] = r->carFrame.pos.v[0] - r->pose.pos.v[0];
                 d[1] = r->carFrame.pos.v[1] - r->pose.pos.v[1];
                 d[2] = r->carFrame.pos.v[2] - r->pose.pos.v[2];
-                f32 focus = PSVECDotProduct(d, (f32*)&r->pose.rot.m[6]);
+                f32 focus = PSVECDotProduct((const Vec*)d, (const Vec*)((f32*)&r->pose.rot.m[6]));
                 focus = lbl_8055C598 < lbl_80563F48 ? focus : lbl_8055C598;
                 r->f1A0 = focus > 5.0f ? focus : 5.0f;
             }
@@ -1167,7 +1167,6 @@ public:
     virtual u8* Track(void);  // 0x18
 };
 
-f32 PSVECDistance(const u8* a, const u8* b);
 extern f32 lbl_8055F568;        // car heading
 extern const f32 lbl_80563F48;  // 0.0
 extern const f32 lbl_80563F50;  // 1.0
@@ -1193,7 +1192,7 @@ int CamRegion::Weight(u8* car, f32* weight, int type) {
         }
         ok = 0;
     }
-    f32 d = PSVECDistance(car + 0x60, r->cam) - F32(r->cam, 0xC);
+    f32 d = PSVECDistance((const Vec*)(car + 0x60), (const Vec*)r->cam) - F32(r->cam, 0xC);
     if (d <= lbl_80563F48) {
         *weight = lbl_80563F50;
     } else {
@@ -1405,7 +1404,6 @@ void fn_802735F4(int a, u8 b) {
     }
 }
 
-f32 PSVECMag(const f32* v);
 double sin(double x);
 double cos(double x);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
@@ -1417,7 +1415,7 @@ extern const f32 lbl_80563F4C;  // degrees to radians
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula (as camstate's).
 static inline void CamRotFromVec(Mat3* r, const f32* w) {
-    f32 a = PSVECMag(w);
+    f32 a = PSVECMag((const Vec*)w);
     if (a > lbl_80563F9C) {
         f32 x, s, y, z, c, k;
         f32 inv = lbl_80563F50 / a;
