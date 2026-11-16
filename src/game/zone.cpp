@@ -1480,6 +1480,48 @@ f32 fn_8013E300(const V2* v);
 
 }  // extern "C"
 
+/* Helper name unproven */
+static inline void CopyLevel(ZoneLevel* l, ZoneLevel* prev, ValueNode* child) {
+    s32 j;
+    l->n = prev->n;
+    l->gates = new ("zone[]") Gate[l->n];
+    {
+        ValPoint pt = child->FindChild("Zone")->GetPoint("tan");
+        f32 w = fn_8013E300((V2*)&pt) * 2.0f * fn_80204CFC("zone_gate_scale");
+        for (j = 0; j < l->n; j++) {
+            l->gates[j] = prev->gates[j];
+            l->gates[j].Scale(w);
+        }
+    }
+}
+
+/* Helper name unproven */
+static inline void LinkRings(ZoneLevel* l) {
+    s32 j;
+    for (j = 0; j < l->n; j++) {
+        Gate* gt = &l->gates[j];
+        if (gt->ring) {
+            int nn = l->n;
+            Gate* a = 0;
+            int k;
+            for (k = 1; k < nn; k++) {
+                a = &l->gates[(nn + (j - k)) % nn];
+                if (!a->ring) {
+                    break;
+                }
+            }
+            Gate* b = 0;
+            for (k = 1; k < nn; k++) {
+                b = &l->gates[(j + (nn + k)) % nn];
+                if (!b->ring) {
+                    break;
+                }
+            }
+            fn_8013DF24(gt, a, b);
+        }
+    }
+}
+
 ZoneLevels::ZoneLevels(ValueTable* t) {
     int lvl;
     ValueNode* child;
@@ -1496,16 +1538,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
             s32 j;
             char buf[32];
             if (prev) {
-                l->n = prev->n;
-                l->gates = new ("zone[]") Gate[l->n];
-                {
-                    ValPoint pt = child->FindChild("Zone")->GetPoint("tan");
-                    f32 w = fn_8013E300((V2*)&pt) * 2.0f * fn_80204CFC("zone_gate_scale");
-                    for (j = 0; j < l->n; j++) {
-                        l->gates[j] = prev->gates[j];
-                        l->gates[j].Scale(w);
-                    }
-                }
+                CopyLevel(l, prev, child);
             } else {
                 int k;
                 f32 w;
@@ -1522,28 +1555,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                     }
                 }
             }
-            for (j = 0; j < l->n; j++) {
-                Gate* gt = &l->gates[j];
-                if (gt->ring) {
-                    int nn = l->n;
-                    Gate* a = 0;
-                    int k;
-                    for (k = 1; k < nn; k++) {
-                        a = &l->gates[(nn + (j - k)) % nn];
-                        if (!a->ring) {
-                            break;
-                        }
-                    }
-                    Gate* b = 0;
-                    for (k = 1; k < nn; k++) {
-                        b = &l->gates[(j + (nn + k)) % nn];
-                        if (!b->ring) {
-                            break;
-                        }
-                    }
-                    fn_8013DF24(gt, a, b);
-                }
-            }
+            LinkRings(l);
             l->timeScale = fn_80204CFC("zone_time_scale");
             l->mult = 1;
             l->score = 10;
