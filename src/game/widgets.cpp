@@ -663,7 +663,6 @@ struct SelectionActionDispatch {virtual ~SelectionActionDispatch();virtual void 
 struct SelectionActionPrefix {char base[0x244];SelectionActionDispatch* child;char gap248[24];int token;int* focus;};
 extern "C" {
 
-void Finish__9MenuStateFi(void*,void* context);
 struct SelectBooleanNavigationRelativeNew {char base[0x2c8];int count;int* selected;bool available[33];};
 // Observed 33-slot navigation prefix. The local bounds array keeps the original position/count lifetimes.
 // The forward byte sum preserves PPC32 operand order; pointer-preserving alternative is retained for port work.
@@ -2189,7 +2188,19 @@ void ScrollBar::Slot28(void) {
 void fn_80221E7C(WidgetFragment* self){WidgetFragment* parent=(WidgetFragment*)self->kind;if(parent)WidgetMarkDirty(parent);}
 void fn_80221EA0(WidgetFragment* self,int key,void* value,int size){fn_80219440((WidgetFragment*)self->kind,key,value,size);}
 int fn_80221EA8(GroupSearchProxyNew* self){GroupSearchWordNew one=1;GroupSearchWordNew group=self->context->group;for(int index=0;index<32;index++){if(group==(one<<index))return index;}fn_802E317C("UICustomControl::GetGroup can't find group for %x!",group);return 0;}
-void Finish__9MenuStateFi(void*,void* context){fn_802168BC(reinterpret_cast<int>(context));}
+}  // extern "C"
+
+// MenuState::Finish (loadscrn and the menu states call it as a member): ends the running menu with result r.
+// The full class is in game/menustate.h; widgets.cpp cannot include it (its own u32 typedef clashes with
+// common.h), so the member is declared here on its own. Same mangled name, same class.
+class MenuState {
+public:
+    void Finish(int r);
+};
+
+void MenuState::Finish(int r) { fn_802168BC(r); }
+
+extern "C" {
 extern const u32 lbl_8055FBE4;
 // NonMatching: clean two-argument menu draw remains41 original-address words off.
 void MenuGrid::Slot24(void* context) {
