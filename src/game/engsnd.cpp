@@ -88,7 +88,9 @@ struct VehicleDef {
     virtual ValueNode* FindChild(const char* name);
 };
 
-struct CarSetup {
+// The car resource the car holds at 0x26C: carmodel.cpp's CarRes (its value table at 0x2134); was named
+// CarSetup here, the 0x138 setup record of carsetup/caruimod/masslist.
+struct CarRes {
     u8 pad0[0x2134];
     VehicleDef* def;  // offset 0x2134
 };
@@ -102,7 +104,7 @@ struct Car {
     u8 pad1F4[0x6C];
     u8 flags;           // offset 0x260
     u8 pad261[0xB];
-    CarSetup* setup;    // offset 0x26C
+    CarRes* setup;    // offset 0x26C
     u8 pad270[0x2360];
     f32 rpm;            // offset 0x25D0
     u8 pad25D4[0x28];
