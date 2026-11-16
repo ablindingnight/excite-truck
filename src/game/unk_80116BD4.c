@@ -7393,7 +7393,7 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
             s32 d4 = (s4 * quant[32]) >> 11;
             s32 d6 = (s6 * quant[48]) >> 11;
             s32 a0 = d0 + d4;
-            s32 a2 = d6 + d2;
+            s32 a2 = d2 + d6;
             s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
             s32 e3 = a0 - a2;
             s32 a1 = d0 - d4;
@@ -7408,8 +7408,8 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
             s32 a6 = d1 + d7;
             s32 a4 = d5 + d3;
             s32 a5 = d5 - d3;
-            s32 b0 = a4 + a6;
-            s32 b1 = BINK_MUL(BINK_A3, a7 + a5);
+            s32 b0 = a6 + a4;
+            s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
             s32 b3 = BINK_MUL(BINK_A1, a6 - a4);
             s32 b4 = BINK_MUL(BINK_A2, a7) - b1;
             s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
@@ -7430,6 +7430,10 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
     }
     t = tmp;
     for (i = 8; i != 0; --i) {
+        s32 e0;
+        s32 e1;
+        s32 e2;
+        s32 e3;
         s32 x0 = t[0];
         s32 x2 = t[2];
         s32 x6 = t[6];
@@ -7439,12 +7443,12 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
         s32 x7 = t[7];
         s32 a2 = x2 + x6;
         s32 a3 = BINK_MUL(BINK_A1, x2 - x6) - a2;
-        s32 a4 = x3 + x5;
-        s32 a6 = x7 + x1;
+        s32 a4 = x5 + x3;
+        s32 a6 = x1 + x7;
         s32 x4 = t[4];
         s32 b0 = a6 + a4;
         s32 b3 = BINK_MUL(BINK_A1, a6 - a4);
-        s32 a0 = x4 + x0;
+        s32 a0 = x0 + x4;
         s32 a7 = x1 - x7;
         s32 a5 = x5 - x3;
         s32 a1 = x0 - x4;
@@ -7453,14 +7457,18 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
         s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
         b3 -= b2;
         b4 += b3;
-        dst[0] = src[0] + ((a0 + a2 + b0 + 0x7F) >> 8);
-        dst[7] = src[7] + ((a0 + a2 - b0 + 0x7F) >> 8);
-        dst[1] = src[1] + ((a1 + a3 + b2 + 0x7F) >> 8);
-        dst[6] = src[6] + ((a1 + a3 - b2 + 0x7F) >> 8);
-        dst[2] = src[2] + ((a1 - a3 + b3 + 0x7F) >> 8);
-        dst[5] = src[5] + ((a1 - a3 - b3 + 0x7F) >> 8);
-        dst[3] = src[3] + ((a0 - a2 - b4 + 0x7F) >> 8);
-        dst[4] = src[4] + ((a0 - a2 + b4 + 0x7F) >> 8);
+        e0 = a0 + a2;
+        e1 = a1 + a3;
+        e2 = a1 - a3;
+        e3 = a0 - a2;
+        dst[0] = src[0] + ((e0 + b0 + 0x7F) >> 8);
+        dst[7] = src[7] + ((e0 - b0 + 0x7F) >> 8);
+        dst[1] = src[1] + ((e1 + b2 + 0x7F) >> 8);
+        dst[6] = src[6] + ((e1 - b2 + 0x7F) >> 8);
+        dst[2] = src[2] + ((e2 + b3 + 0x7F) >> 8);
+        dst[5] = src[5] + ((e2 - b3 + 0x7F) >> 8);
+        dst[3] = src[3] + ((e3 - b4 + 0x7F) >> 8);
+        dst[4] = src[4] + ((e3 + b4 + 0x7F) >> 8);
         src += srcStride;
         dst += stride;
         t += 8;
