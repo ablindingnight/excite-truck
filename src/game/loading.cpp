@@ -3,29 +3,17 @@
 // "tips:" messages give the subject; the names are guesses.
 #include <string.h>
 #include "game/common.h"
-#include "game/rvec.h"
+#include "game/rmtx.h"
 #include "game/locstring.h"
 #include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include <revolution/MTX/vec.h>
 
 // LdVec: rvec.h's RVec3.
-// A camera orientation and position.
-extern "C" {
-}
-
-// VecPOD: valvec3.h's ValVec3.
-struct CamFrame {
-    ValVec3 axes[2];  // offset 0x0: right, up
-    RVec3 fwd;       // offset 0x18
-    RVec3 pos;       // offset 0x24
-
-};
-
 // One leg of the tips camera sequence.
 struct TipCam {
-    CamFrame start;  // offset 0x0
-    CamFrame end;    // offset 0x30
+    RMtx start;  // offset 0x0
+    RMtx end;    // offset 0x30
     f32 start_fov;   // offset 0x60
     f32 end_fov;     // offset 0x64
     f32 duration;    // offset 0x68
@@ -85,11 +73,11 @@ void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f3
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
-int fn_80277960(const char* name, CamFrame* frame, f32* fov);
-void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t);
+int fn_80277960(const char* name, RMtx* frame, f32* fov);
+void fn_8026E22C(RMtx* out, const RMtx* a, const RMtx* b, f32 t);
 void fn_802A1120(f32* center, f32* dir);
 f32 fn_801EA0E8(f32 x, f32 z);
-void fn_8026A2CC(CamFrame* cam, int unk, f32 fov);
+void fn_8026A2CC(RMtx* cam, int unk, f32 fov);
 }  // extern "C"
 void fn_8000C630(long, int);
 extern "C" {
@@ -246,23 +234,23 @@ void GetTipKey(int idx, s32 type, char* buf, u32 size) {
     }
 }
 
-void OrthonormalizeFrame(CamFrame* f) {
+void OrthonormalizeFrame(RMtx* f) {
     RVec3 up(0.0f, 1.0f, 0.0f);
     RVec3 fwd;
     RVec3 newUp;
     RVec3 right;
 
-    PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->fwd, (Vec*)((RVec3*)&f->axes[0]));
-    PSVECCrossProduct((const Vec*)&f->fwd, (const Vec*)((RVec3*)&f->axes[0]), (Vec*)((RVec3*)&f->axes[1]));
-    right.Set(f->axes[0].x, f->axes[0].y, f->axes[0].z);
-    fwd.Set(f->fwd.x, f->fwd.y, f->fwd.z);
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->rot.z, (Vec*)&f->rot.x);
+    PSVECCrossProduct((const Vec*)&f->rot.z, (const Vec*)&f->rot.x, (Vec*)&f->rot.y);
+    right.Set(f->rot.x.x, f->rot.x.y, f->rot.x.z);
+    fwd.Set(f->rot.z.x, f->rot.z.y, f->rot.z.z);
     PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&right, (Vec*)&newUp);
     PSVECNormalize((const Vec*)&right, (Vec*)&right);
     PSVECNormalize((const Vec*)&newUp, (Vec*)&newUp);
     PSVECCrossProduct((const Vec*)&right, (const Vec*)&newUp, (Vec*)&fwd);
-    f->axes[0] = *(ValVec3*)&right;
-    f->axes[1] = *(ValVec3*)&newUp;
-    f->fwd = fwd;
+    f->rot.x = right;
+    f->rot.y = newUp;
+    f->rot.z = fwd;
 }
 
 void LoadingExit(void) {
@@ -343,24 +331,24 @@ static inline f32 LinStep(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) {
     return y0 + t * (y1 - y0);
 }
 
-void GetTipsCamera(CamFrame* out, f32* out_fov) {
-    CamFrame cam;
+void GetTipsCamera(RMtx* out, f32* out_fov) {
+    RMtx cam;
     f32 center[2];
     f32 dir[2];
     f32 k;
     f32 fov;
     s32 t;
 
-    RVec3* right = (RVec3*)&cam.axes[0];
+    Vec* right = (Vec*)&cam.rot.x;
     right->x = 1.0f;
     right->y = 0.0f;
     right->z = 0.0f;
-    cam.axes[1].x = 0.0f;
-    cam.axes[1].y = 1.0f;
-    cam.axes[1].z = 0.0f;
-    cam.fwd.x = 0.0f;
-    cam.fwd.y = 0.0f;
-    cam.fwd.z = 1.0f;
+    cam.rot.y.x = 0.0f;
+    cam.rot.y.y = 1.0f;
+    cam.rot.y.z = 0.0f;
+    cam.rot.z.x = 0.0f;
+    cam.rot.z.y = 0.0f;
+    cam.rot.z.z = 1.0f;
     cam.pos.x = 0.0f;
     cam.pos.y = 0.0f;
     cam.pos.z = 0.0f;
@@ -368,17 +356,17 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     cam.pos.x = center[0];
     cam.pos.y = 0.0f;
     cam.pos.z = center[1];
-    cam.fwd.x = dir[0];
-    cam.fwd.y = 0.0f;
-    cam.fwd.z = dir[1];
-    PSVECCrossProduct((const Vec*)((RVec3*)&cam.axes[1]), (const Vec*)&cam.fwd, (Vec*)right);
+    cam.rot.z.x = dir[0];
+    cam.rot.z.y = 0.0f;
+    cam.rot.z.z = dir[1];
+    PSVECCrossProduct((const Vec*)&cam.rot.y, (const Vec*)&cam.rot.z, right);
     t = fn_802E2C20() - lbl_8055D63C;
     f32 phase = (t % 50000) / 50000.0f;
     f32 angle = 6.2831855f * phase;
     k = 5.0f + 20.0f * (1.0f + -(f32)cos(angle));
-    cam.pos.x += cam.fwd.x * k;
-    cam.pos.y += cam.fwd.y * k;
-    cam.pos.z += cam.fwd.z * k;
+    cam.pos.x += cam.rot.z.x * k;
+    cam.pos.y += cam.rot.z.y * k;
+    cam.pos.z += cam.rot.z.z * k;
     cam.pos.y = 10.0f + fn_801EA0E8(cam.pos.x, cam.pos.z);
     fov = 1.5707964f;
     if (lbl_8055D630 > 0) {
@@ -412,7 +400,7 @@ void LoadingUpdate(void) {
         }
     }
     if (lbl_8055D644) {
-        CamFrame cam;
+        RMtx cam;
         f32 fov;
 
         GetTipsCamera(&cam, &fov);

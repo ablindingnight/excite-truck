@@ -3,7 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
-#include "game/rvec.h"
+#include "game/rmtx.h"
 #include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
@@ -276,12 +276,8 @@ void fn_80131818(ValueTable* t);
 ILayout* fn_80146C2C(ILayout* l, ValueNode* desc);
 }
 
-struct CamFrame {
-    u8 pad[0x30];
-};
-
-void GetTipsCamera(CamFrame* cam, f32* fov);
-extern "C" void fn_8026A2CC(CamFrame* cam, int a, f32 fov);
+void GetTipsCamera(RMtx* cam, f32* fov);
+extern "C" void fn_8026A2CC(RMtx* cam, int a, f32 fov);
 
 // A help page: its text and its optional overlay layout.
 struct HelpPage {
@@ -720,7 +716,7 @@ public:
     virtual int AllowPause(void) { return 0; }
     virtual int AllowExit(void) { return 0; }
     virtual void Camera(void) {
-        CamFrame cam;
+        RMtx cam;
         f32 fov;
         GetTipsCamera(&cam, &fov);
         fn_8026A2CC(&cam, 0, fov);
@@ -1381,7 +1377,7 @@ inline void Challenge::Shutdown(void) {
 inline void Challenge::Camera(void) {
     if (IsDone()) {
         if (lbl_8055E3C8 - resultTime > 4.0f) {
-            CamFrame cam;
+            RMtx cam;
             f32 fov;
             GetTipsCamera(&cam, &fov);
             fn_8026A2CC(&cam, 0, fov);
