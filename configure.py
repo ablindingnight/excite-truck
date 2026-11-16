@@ -1257,7 +1257,7 @@ config.libs.append(
             Object(Matching, "game/partemit.cpp"),
             Object(Matching, "game/fence.cpp"),
             Object(NonMatching, "game/sfline.cpp"),
-            Object(NonMatching, "game/trail.cpp"),
+            Object(Matching, "game/trail.cpp"),
             Object(NonMatching, "game/precip.cpp"),
             Object(NonMatching, "game/stuntpart.cpp"),
             Object(NonMatching, "game/artanim.cpp"),

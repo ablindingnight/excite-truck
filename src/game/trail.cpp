@@ -288,7 +288,7 @@ struct TBasis {
 
 // out = a * b
 static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
-    if (a == out || out == b) {
+    if (out == a || out == b) {
         f32 xx = Dot(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
         f32 yx = Dot(b->x.x, a->y.x, b->y.x, a->y.y, b->z.x, a->y.z);
         f32 zx = Dot(b->x.x, a->z.x, b->y.x, a->z.y, b->z.x, a->z.z);
@@ -299,13 +299,13 @@ static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
         f32 yz = Dot(b->x.z, a->y.x, b->y.z, a->y.y, b->z.z, a->y.z);
         f32 zz = Dot(b->x.z, a->z.x, b->y.z, a->z.y, b->z.z, a->z.z);
         out->x.x = xx;
-        out->x.y = xy;
-        out->x.z = xz;
         out->y.x = yx;
-        out->y.z = yz;
+        out->z.x = zx;
+        out->x.y = xy;
         out->y.y = yy;
         out->z.y = zy;
-        out->z.x = zx;
+        out->x.z = xz;
+        out->y.z = yz;
         out->z.z = zz;
     } else {
         out->x.x = Dot(b->x.x, a->x.x, b->y.x, a->x.y, b->z.x, a->x.z);
@@ -783,6 +783,7 @@ void DustTrail::Impact(const TrailEvent* e) {
     if (e->who >= 0 && n > 0 && st[e->who].lastHit + 0.01f < now) {
         TBasis m;
         TBasis rot;
+        TBasis* pr;
         TVec v;
         f32 h;
         f32 cs;
@@ -795,6 +796,7 @@ void DustTrail::Impact(const TrailEvent* e) {
         m.y = e->dir;
         PSVECCrossProduct(&m.y, &(const TVec&)TVec(0.0f, 0.0f, 1.0f), &m.x);
         PSVECCrossProduct(&m.x, &m.y, &m.z);
+        pr = &rot;
         cs = cos(3.1415927f / n);
         sn = sin(3.1415927f / n);
         vz = 0.5f * e->vel.z;
@@ -827,7 +829,7 @@ void DustTrail::Impact(const TrailEvent* e) {
             fn_8028E584(event, &q, &v2);
             MadV3(&q.x, &c.x, &m.x.x, - 0.5f);
             fn_8028E584(event, &q, &v2);
-            MulBasis(&m, &rot, &m);
+            MulBasis(&m, pr, &m);
         }
         st[e->who].lastHit = now;
     }
