@@ -2,10 +2,7 @@
 #define GAME_RACER_CAMERA_SLOT_H
 
 #include <types.h>
-
-struct Mat3 {
-    f32 m[9];
-};
+#include "game/math_types.h"
 
 struct SVec {
     f32 x, y, z;

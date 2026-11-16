@@ -8,6 +8,7 @@
 #include "game/rmtx.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/camframe34.h"
 #include "game/math_types.h"
 
 
@@ -134,10 +135,6 @@ extern const f32 kAxisTolerance;
 extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
-// The identity-initialised 3x4 frame (camera library), as far as this unit uses it: an RMtx with a constructor.
-struct CamFrame34 : RMtx {
-    CamFrame34(void);
-};
 // The race-car record (aiobst.cpp), declared as far as this unit uses it.
 class RaceCarRec {
 public:
@@ -352,8 +349,8 @@ static inline void SetupPanel(PanelVol* p, RigidBody* car, s32 part, const RVec3
         fn_80144DAC(&pts[k], &verts[k].p);
     }
     CamFrame34 frame;
-    fn_801BFB2C(p, &frame, pts);
-    fn_801BF75C(&p->rest, &m, &frame);
+    fn_801BFB2C(p, frame.Mtx(), pts);
+    fn_801BF75C(&p->rest, &m, frame.Mtx());
     PanelLink links[2];
     for (i = 0; i < n; ids++, i++) {
         links[i].id = *ids;
@@ -655,17 +652,17 @@ void PanelVol::Update(void) {
     }
     RMtx w;
     CamFrame34 m;
-    fn_80144DAC(&m.pos, &pts[org]);
-    fn_801C0E60(&m.rot.x, &pts[e0b], &pts[e0a]);
-    fn_801C0E60(&m.rot.y, &pts[e1b], &pts[e1a]);
-    fn_801C0E4C(&m.rot.z, &m.rot.x, &m.rot.y);
+    fn_80144DAC(&m.Mtx()->pos, &pts[org]);
+    fn_801C0E60(&m.Mtx()->rot.x, &pts[e0b], &pts[e0a]);
+    fn_801C0E60(&m.Mtx()->rot.y, &pts[e1b], &pts[e1a]);
+    fn_801C0E4C(&m.Mtx()->rot.z, &m.Mtx()->rot.x, &m.Mtx()->rot.y);
     f32 eps = fn_80144CC8(0.01f);
-    if (fn_801C0E44(&m.rot.z) > eps) {
-        fn_801C0D6C((Mat3*)&m.rot);
+    if (fn_801C0E44(&m.Mtx()->rot.z) > eps) {
+        fn_801C0D6C((Mat3*)&m.Mtx()->rot);
     } else {
-        fn_801C0D3C((Mat3*)&m.rot);
+        fn_801C0D3C((Mat3*)&m.Mtx()->rot);
     }
-    fn_801C092C(&w, &rest, &m);
+    fn_801C092C(&w, &rest, m.Mtx());
     mtx = w;
     Transform();
 }

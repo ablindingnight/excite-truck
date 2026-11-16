@@ -6,6 +6,7 @@
 #include "game/camframe34.h"
 #include <string.h>
 #include "game/camrec.h"
+#include "game/math_types.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -328,15 +329,7 @@ void fn_80276D3C(const char* name, int mode) {
 }  // extern "C"
 
 struct CamFrame;
-struct Mat3 {
-    f32 m[9];
-};
-struct Vec3 {
-    f32 x, y, z;
-};
 void GetTipsCamera(CamFrame* out, f32* fov);
-void Mat3FromEuler(Mat3* out, const Vec3* euler);
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 extern "C" {
 u8* fn_8017960C(int car);

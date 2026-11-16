@@ -14,6 +14,7 @@
 #include "game/common.h"
 #define COLLSHAPE_BASE_DECL  // MATCHING-AID: betarace emits the root shape table (see game/collshape.h)
 #include "game/shapes.h"
+#include "game/math_types.h"
 #include "game/vpos.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
@@ -3712,47 +3713,6 @@ inline void BetaMaster::vf48(void) {
 // gadget. The small colour/palette helpers are defined after their users, so the users call their weak
 // copies.
 
-struct Mat3 {
-    void SetRotX(f32 a) {
-        f32 c = cos(a);
-        f32 s = sin(a);
-        m[0][0] = 1.0f;
-        m[0][1] = 0.0f;
-        m[0][2] = 0.0f;
-        m[1][0] = 0.0f;
-        m[1][1] = c;
-        m[1][2] = s;
-        m[2][0] = 0.0f;
-        m[2][1] = -s;
-        m[2][2] = c;
-    }
-    void SetScale(f32 s) {
-        m[0][0] = s;
-        m[0][1] = 0.0f;
-        m[0][2] = 0.0f;
-        m[1][0] = 0.0f;
-        m[1][1] = s;
-        m[1][2] = 0.0f;
-        m[2][0] = 0.0f;
-        m[2][1] = 0.0f;
-        m[2][2] = s;
-    }
-    void SetRotY(f32 a) {
-        f32 c = cos(a);
-        f32 s = sin(a);
-        m[0][0] = c;
-        m[0][1] = 0.0f;
-        m[0][2] = -s;
-        m[1][0] = 0.0f;
-        m[1][1] = 1.0f;
-        m[1][2] = 0.0f;
-        m[2][0] = s;
-        m[2][1] = 0.0f;
-        m[2][2] = c;
-    }
-    f32 m[3][3];
-};
-
 struct Xform {
     void SetRotX(f32 a) { r.SetRotX(a); }
     void SetRotY(f32 a) { r.SetRotY(a); }
@@ -3977,9 +3937,9 @@ static inline void ScaleRot(Mat3* m, f32 s) {
     m->m[2][2] *= s;
 }
 
-class Vec3 : public V3 {  /* Helper name unproven */
+class V3Init : public V3 {  /* Helper name unproven */
 public:
-    Vec3(f32 x_, f32 y_, f32 z_) { x = x_; y = y_; z = z_; }
+    V3Init(f32 x_, f32 y_, f32 z_) { x = x_; y = y_; z = z_; }
 };
 
 static inline void Scale(V3* out, const V3* in, f32 s) { out->x = in->x * s; out->y = in->y * s; out->z = in->z * s; }  /* Helper name unproven */
@@ -3993,7 +3953,7 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     b = a;
     fn_802C77F0(lbl_80559ED8, box);
     f32 half = 0.5f;
-    Vec3 c(box[0] + half * (box[1] - box[0]), box[2] + half * (box[3] - box[2]), box[4] + half * (box[5] - box[4]));
+    V3Init c(box[0] + half * (box[1] - box[0]), box[2] + half * (box[3] - box[2]), box[4] + half * (box[5] - box[4]));
     V3 n;
     Scale(&n, &c, -1.0f);
     MulVec(&n, &n, &b.r);

@@ -13,10 +13,6 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-struct Vec3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-void Mat3FromEuler(Mat3* out, const Vec3* euler);
-
 extern s32 lbl_8055E3C4;  // frame counter
 extern f32 __float_epsilon[];
 
@@ -49,16 +45,16 @@ static inline void SumScaledV(SVec* o, const SVec* a, const SVec* v, f32 s) {
 }
 static inline void MulVec(const Mat3& m, const SVec& src, SVec* dst) {
     if (dst == &src) {
-        f32 x = Dot3(src.x, m.m[0], src.y, m.m[3], src.z, m.m[6]);
-        f32 y = Dot3(src.x, m.m[1], src.y, m.m[4], src.z, m.m[7]);
-        f32 z = Dot3(src.x, m.m[2], src.y, m.m[5], src.z, m.m[8]);
+        f32 x = Dot3(src.x, m.m[0][0], src.y, m.m[1][0], src.z, m.m[2][0]);
+        f32 y = Dot3(src.x, m.m[0][1], src.y, m.m[1][1], src.z, m.m[2][1]);
+        f32 z = Dot3(src.x, m.m[0][2], src.y, m.m[1][2], src.z, m.m[2][2]);
         dst->x = x;
         dst->y = y;
         dst->z = z;
     } else {
-        dst->x = Dot3(src.x, m.m[0], src.y, m.m[3], src.z, m.m[6]);
-        dst->y = Dot3(src.x, m.m[1], src.y, m.m[4], src.z, m.m[7]);
-        dst->z = Dot3(src.x, m.m[2], src.y, m.m[5], src.z, m.m[8]);
+        dst->x = Dot3(src.x, m.m[0][0], src.y, m.m[1][0], src.z, m.m[2][0]);
+        dst->y = Dot3(src.x, m.m[0][1], src.y, m.m[1][1], src.z, m.m[2][1]);
+        dst->z = Dot3(src.x, m.m[0][2], src.y, m.m[1][2], src.z, m.m[2][2]);
     }
 }
 
@@ -179,7 +175,7 @@ int fn_8026A698(u8* p, int i) {
         s->active = 1;
         s->frame = *(const SFrame*)(p + 0x88);
         s->fov = F32(p, 0x194);
-        s->yaw = atan2(s->frame.rot.m[6], s->frame.rot.m[8]);
+        s->yaw = atan2(s->frame.rot.m[2][0], s->frame.rot.m[2][2]);
         f32 turn = 2.3561945f;
         turn = PSVECDotProduct((f32*)(PTR(p, 0x140) + 0x118), (f32*)(p + 0xC0)) > 0.0f ? turn : -turn;
         s->spin = turn;
@@ -226,15 +222,15 @@ int fn_8026A698(u8* p, int i) {
     }
     SFrame f;
     f.pos = s->pos;
-    f.rot.m[0] = 1.0f;
-    f.rot.m[1] = 0.0f;
-    f.rot.m[2] = 0.0f;
-    f.rot.m[3] = 0.0f;
-    f.rot.m[4] = 1.0f;
-    f.rot.m[5] = 0.0f;
-    f.rot.m[6] = 0.0f;
-    f.rot.m[7] = 0.0f;
-    f.rot.m[8] = 1.0f;
+    f.rot.m[0][0] = 1.0f;
+    f.rot.m[0][1] = 0.0f;
+    f.rot.m[0][2] = 0.0f;
+    f.rot.m[1][0] = 0.0f;
+    f.rot.m[1][1] = 1.0f;
+    f.rot.m[1][2] = 0.0f;
+    f.rot.m[2][0] = 0.0f;
+    f.rot.m[2][1] = 0.0f;
+    f.rot.m[2][2] = 1.0f;
     f32 orbit[3];
     f32 orbit_1 = s->yaw + s->t * s->spin;
     orbit[0] = 0.0f;

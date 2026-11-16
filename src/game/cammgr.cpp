@@ -6,6 +6,7 @@
 #include <string.h>
 #include "game/camrec.h"
 #include "game/camview.h"
+#include "game/math_types.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -89,9 +90,6 @@ struct ShakeEntry {
 
 extern f32 lbl_8055C4C0;
 extern f32 lbl_8055F47C;
-
-struct Mat3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 // A scratch 3x4 matrix.
 struct Mtx34 {
