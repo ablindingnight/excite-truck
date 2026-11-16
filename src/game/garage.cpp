@@ -3,6 +3,7 @@
 // and the chassis list entries. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/caricontable.h"
 #include "game/locstring.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
@@ -127,46 +128,6 @@ static char lbl_80498C90[0x70];  // "#unlock_pts" text; its own object (third in
 extern u8* lbl_8055F2EC;
 
 
-// One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
-// Fixed-capacity name buffer (original class name unknown).
-// Append is a bounded concatenation that always terminates.
-template<int N> struct IconName {
-    char text[N];
-    operator char*() { return text; }
-    operator const char*() const { return text; }
-    static void CopyTail(const char* s, int n, char* d) {
-        while ((*d++ = *s++) != 0) {
-            if (--n <= 0) { d[-1] = 0; break; }
-        }
-    }
-    void Append(const char* s) {
-        char* d = text;
-        int n = N;
-        while (*d) { n--; d++; }
-        if (n > 0) { CopyTail(s, n, d); }
-    }
-};
-
-struct IconEntry {
-    IconName<32> name;  // offset 0x0
-    u8* tex;            // offset 0x20
-    u8* texE;           // offset 0x24
-    f32 u1;             // offset 0x28
-    f32 v1;             // offset 0x2C
-    f32 u2;             // offset 0x30
-    f32 v2;             // offset 0x34
-};
-
-static inline void CopyIconName(char* d, int n, const char* s) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
-
 extern "C" ValueTable* fn_80131808(const char* name);
 extern "C" void fn_80131818(ValueTable* t);
 extern "C" u8* fn_802CAC28(const char* name, int flags);
@@ -175,68 +136,28 @@ extern "C" int strcasecmp(const char* a, const char* b);
 
 // The car icon table (caricons.val): two icons per Car entry, plain and "_e"; shared by the car lists and
 // released with the last one.
-struct IconPool;
-extern IconPool* lbl_8055F2E4;
-struct IconPool {
-    IconPool(void) {
-        ValueTable* t = fn_80131808("caricons.val");
-        count = 0;
-        entries = new ("cicon") IconEntry[50];
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
-            if (strcmp(n->GetName(), "Car")) {
-                continue;
-            }
-            for (int k = 0; k < 2; k++) {
-                IconEntry* c = &entries[count++];
-                CopyIconName(c->name, 32, n->GetValue("chassis"));
-                if (k) {
-                    c->name.Append("_e");
-                }
-                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
-                c->texE = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
-                c->u1 = n->GetFloat("u1");
-                c->v1 = n->GetFloat("v1");
-                c->u2 = n->GetFloat("u2");
-                c->v2 = n->GetFloat("v2");
-            }
-        }
-        fn_80131818(t);
-    }
-    IconEntry* entries;  // offset 0x0
-    s32 count;           // offset 0x4
-    // Reference-counted: shared by the car menus (helper name unproven). A member, so "cimgr" is its own weak string
-    // after the constructor's, as in retail.
-    static IconPool* Acquire(void) {
-        if (lbl_8055F2E8 == 0) {
-            lbl_8055F2E4 = new ("cimgr") IconPool;
-        }
-        lbl_8055F2E8++;
-        return lbl_8055F2E4;
-    }
-};
-
-static inline int FindIcon(IconPool* pool, const char* name) {
+struct CarIconTable;
+static inline int FindIcon(CarIconTable* pool, const char* name) {
     for (int i = 0; i < pool->count; i++) {
-        if (strcasecmp(pool->entries[i].name, name) == 0) {
+        if (strcasecmp(pool->icons[i].name, name) == 0) {
             return i;
         }
     }
     return -1;
 }
 
-IconPool* lbl_8055F2E4;
+CarIconTable* lbl_8055F2E4;
 s32 lbl_8055F2E8;
 u8* lbl_8055F2EC;
 
-static inline void FreeIconPool(IconPool* pool) {
+static inline void FreeIconPool(CarIconTable* pool) {
     if (pool) {
         for (int i = 0; i < pool->count; i++) {
-            IconEntry* e = &pool->entries[i];
+            CarIcon* e = &pool->icons[i];
             gxForgetTexture(e->tex);
-            gxForgetTexture(e->texE);
+            gxForgetTexture(e->overlay);
         }
-        delete[] pool->entries;
+        delete[] pool->icons;
         operator delete(pool);
     }
 }
@@ -513,7 +434,7 @@ public:
     char name[0x40];    // offset 0x80
     s32 fC0;            // offset 0xC0
     u8 padC4[0x4];
-    IconPool* icons;    // offset 0xC8
+    CarIconTable* icons;    // offset 0xC8
     CarEntry* entries;  // offset 0xCC
     GarageList* list;   // offset 0xD0
 };
@@ -823,7 +744,7 @@ inline SlotStrip::SlotStrip(int n) {
 CarSlotList::CarSlotList(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) : SlotStrip(list->Count()) {
     u8* p = (u8*)this;
     F32(p, 0x28) = S32(p, 0x2C);
-    PTR(p, 0xC8) = (u8*)IconPool::Acquire();
+    PTR(p, 0xC8) = (u8*)CarIconTable::Acquire();
     PTR(p, 0xD0) = (u8*)list;
     PTR(p, 0x30) = (u8*)color;
     PTR(p, 0x34) = (u8*)car;
@@ -849,7 +770,7 @@ CarSlotList::CarSlotList(GarageList* list, s32* color, s32* car, StatPanel* pane
                 }
                 name = x->chassis;
             }
-            e->icon[k] = FindIcon((IconPool*)PTR(p, 0xC8), name);
+            e->icon[k] = FindIcon((CarIconTable*)PTR(p, 0xC8), name);
             if (e->icon[k] < 0) {
                 fn_802E317C("mvehicle: can't find %s in caricons.val", name);
             }
@@ -1297,14 +1218,14 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     }
     int k = shown > 0 ? shown : 0;
     k = k >= 1 ? 1 : k;
-    IconEntry* ic = &((IconPool*)PTR(p, 0xC8))->entries[e->icon[k]];
+    CarIcon* ic = &((CarIconTable*)PTR(p, 0xC8))->icons[e->icon[k]];
     f32 u1 = ic->u1;
     f32 v2 = ic->v2;
     f32 v1 = ic->v1;
     fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
                 0.8f * w, 0.8f * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, ic->u2, v2);
     fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
-                0.8f * w, 0.8f * h, ic->texE, TintColor(color, locked ? 0xFF000000 : -1), u1, v1,
+                0.8f * w, 0.8f * h, ic->overlay, TintColor(color, locked ? 0xFF000000 : -1), u1, v1,
                 ic->u2, v2);
 }
 
