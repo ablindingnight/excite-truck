@@ -535,8 +535,8 @@ void fn_802B67C8(const char* name) {
 
 }
 template <class T>
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline T* AtP(T* p, int i) {
+/* Helper name unproven: the address of element i; the accessor boundary is needed (in place: fn_802B6804 100 -> 99.56) */
+static inline T* ElemAt(T* p, int i) {
     return &p[i];
 }
 extern "C" {
@@ -548,7 +548,7 @@ void fn_802B6804(void) {
     TextElem* name = lbl_8055FA48->Find("stats_colname");
     f32 row = (lbl_8055FA48->FindBox("stats_col"))->h;
     for (int i = 0; i < lbl_804BFA70.count; i++) {
-        s = AtP(lbl_804BFA70.data, i);
+        s = ElemAt(lbl_804BFA70.data, i);
         if (s->peak < *s->value) {
             s->peak = *s->value;
         }
