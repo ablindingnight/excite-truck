@@ -2,17 +2,14 @@
 // read through an aligned bounce buffer with retries while the drive reports a problem. Names are
 // guesses apart from the messages.
 #include "game/common.h"
+#include <revolution/DVD/dvd.h>
+#include <revolution/DVD/dvdfs.h>
+#include <revolution/OS/OSError.h>
+#include <revolution/VI/vi.h>
 
-struct DVDCommandBlock {
-    u8 data[0x30];
-};
+// DVDCommandBlock: the SDK's.
 
-struct DVDFileInfo {
-    DVDCommandBlock block;  // offset 0x0
-    u32 offset;             // offset 0x30
-    u32 size;               // offset 0x34
-    void* callback;         // offset 0x38
-};
+// DVDFileInfo: the SDK's.
 
 extern "C" {
 int strncmp(const char* a, const char* b, size_t n);
@@ -21,16 +18,6 @@ void* memset(void* dst, int c, size_t n);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-void OSReport(const char* msg, ...);
-void DVDInit(void);
-int DVDOpen(const char* path, DVDFileInfo* info);
-int DVDClose(DVDFileInfo* info);
-s32 DVDReadPrio(DVDFileInfo* info, void* dst, s32 size, s32 offset, s32 prio);
-int DVDReadAsyncPrio(DVDFileInfo* info, void* dst, s32 size, s32 offset, void* cb, s32 prio);
-s32 DVDGetCommandBlockStatus(const DVDCommandBlock* block);
-s32 DVDGetDriveStatus(void);
-void VIFlush(void);
-void VIWaitForRetrace(void);
 void fn_80127464(void);  // idle while waiting
 }
 
@@ -65,7 +52,7 @@ extern u8 lbl_804DBAA0[0x20000];  // read buffer
 
 class FileCD;
 static inline void ReportDVDStartup(const char* message = "filecd: started DVD services") {
-    OSReport(message);
+    OSReport((const char*)message);
 }
 
 class FileDisk : public FileSystem {
@@ -81,7 +68,7 @@ public:
     virtual File* OpenWrite(const char* name);
     virtual File* OpenAppend(const char* name);
     virtual void Close(File* f) { delete f; }
-    virtual void Print(const char* s) { OSReport("%s", s); }
+    virtual void Print(const char* s) { OSReport((const char*)("%s"), s); }
     static void* operator new(size_t size, const char* tag);
     static void operator delete(void* p);
     FileCD* OpenCD(const char* name);
@@ -111,7 +98,7 @@ public:
         size = 0;
         char path[0x100];
         strcpy(path, this->name);
-        open = DVDOpen(path, &info) != 0;
+        open = DVDOpen((const char*)path, (DVDFileInfo*)&info) != 0;
         if (open) {
             size = info.size;
         }
@@ -130,12 +117,12 @@ public:
     void ReadSectors(s32 n, s32 aligned, s32& got, s32 retry) {
         for (;;) {
             if (retry) {
-                got = DVDReadPrio(&info, lbl_804DBAA0, n, aligned, 2);
+                got = DVDReadPrio((DVDFileInfo*)&info, (void*)lbl_804DBAA0, (s32)n, (s32)aligned, (s32)2);
             } else {
-                got = DVDReadAsyncPrio(&info, lbl_804DBAA0, n, aligned, NULL, 2);
+                got = DVDReadAsyncPrio((DVDFileInfo*)&info, (void*)lbl_804DBAA0, (s32)n, (s32)aligned, (DVDAsyncCallback)NULL, (s32)2);
                 if (got > 0) {
                     for (;;) {
-                        if (DVDGetCommandBlockStatus(&info.block) == 0) {
+                        if (DVDGetCommandBlockStatus((const DVDCommandBlock*)&info.block) == 0) {
                             break;
                         }
                         fn_80127464();
@@ -150,7 +137,7 @@ public:
             if (st == 0) {
                 break;
             }
-            OSReport("filecd: DVD status = %d\n", st);
+            OSReport((const char*)("filecd: DVD status = %d\n"), st);
             VIFlush();
             VIWaitForRetrace();
         }
@@ -188,13 +175,13 @@ public:
         return -1;
         }
     virtual int ReadAsync(void* dst, s32 len) {
-        if (DVDReadAsyncPrio(&info, dst, len, pos, NULL, 2) <= 0) {
+        if (DVDReadAsyncPrio((DVDFileInfo*)&info, (void*)dst, (s32)len, (s32)pos, (DVDAsyncCallback)NULL, (s32)2) <= 0) {
             fn_802E317C("filecd: DVDRead fails!");
         }
         pos += len;
         return 1;
     }
-    virtual int IsDone(void) { return DVDGetCommandBlockStatus(&info.block) == 0; }
+    virtual int IsDone(void) { return DVDGetCommandBlockStatus((const DVDCommandBlock*)&info.block) == 0; }
     virtual s32 Write(const void* src, s32 len) {
         fn_802E317C("filecd: write not supported (%s)", name);
         return -1;
@@ -281,7 +268,7 @@ static inline void ReportDVDCloseError(const char* path, const char* format = "f
 }
 
 inline FileCD::~FileCD(void) {
-    if (open && !DVDClose(&info)) {
+    if (open && !DVDClose((DVDFileInfo*)&info)) {
         ReportDVDCloseError(name);
     }
 }
