@@ -4,6 +4,7 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/gamemode.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/raceprog.h"
@@ -62,32 +63,6 @@ struct PlayerHits {
     u8 pad0[0x78];
     HitInfo hits[4];  // offset 0x78
     u8 padD8[0xE0 - 0xD8];
-};
-
-// The race UI / game controller returned by fn_801B83A0.
-class GameUI {
-public:
-    virtual ~GameUI(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(void);
-    virtual void vf50(void);
-    virtual void vf54(void);
-    virtual int vf58(void) { return 1; }
 };
 
 class TrackMap;

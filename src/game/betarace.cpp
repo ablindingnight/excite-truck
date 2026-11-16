@@ -12,6 +12,8 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/gamemode.h"
+#include "game/gamemodector.h"
 #include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/v2.h"
@@ -167,76 +169,6 @@ void fn_80147940(ILayout* l, GartElem* b, const char* set, int part);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 ILayout* fn_80145E70(const char* name);
 }
-
-// The base of every race mode; the defaults are shared weak copies.
-class GameMode {
-public:
-    int Reset(void);
-    virtual ~GameMode(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p) {}
-    virtual void vf18(void) {}
-    virtual int vf1C(int car) { return vf20(car); }
-    virtual int vf20(int car) const = 0;
-    virtual int vf24(void) const;
-    virtual int Started1C(int car);
-    virtual int Started20(int car);
-    virtual int vf30(void) { return 0; }
-    virtual int vf34(void) { return 0; }
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void) {}
-    virtual void vf44(void);
-    virtual void vf48(void) {}
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual int vf58(void);
-    virtual int vf5C(int p) const;
-    virtual void vf60(int view);
-    virtual int vf64(void);
-    virtual int vf68(void) const;
-    virtual void vf6C(void) {}
-    virtual void vf70(void) {}
-    virtual void vf74(void) {}
-    virtual void vf78(void) {}
-    virtual int vf7C(int p) { return 0; }
-    virtual int vf80(void) { return 0; }
-    virtual int vf84(void) { return 0; }
-    virtual int vf88(void) const { return 0; }
-    virtual int vf8C(int p, int key);
-    virtual void vf90(struct RaceCarRec* a, struct RaceCarRec* b, void* p, const f32* hit) {}
-    virtual void vf94(struct RaceCarRec* rc) {}
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other) {}
-    virtual int vfA0(int a, int b, int c);
-    virtual void vfA4(struct RaceCarRec* rc) {}
-    virtual void vfA8(int a, int b);
-    virtual void vfAC(int car);
-    virtual int vfB0(int a, int b, int c) { return 0; }
-    virtual void vfB4(int car, struct Damage* d) {}
-    virtual void vfB8(void* r) = 0;
-    virtual int vfBC(void) { return 0; }
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void) {}
-    virtual int vfCC(void) { return 1; }
-    virtual int vfD0(void) { return 0; }
-    virtual int vfD4(int car);
-    virtual int vfD8(void) { return 0; }
-    virtual int vfDC(void) { return 1; }
-    virtual int vfE0(void) { return 0; }
-    virtual int vfE4(void) { return 0; }
-    virtual void* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void) { return 0; }
-    virtual void vfF4(void) {}
-    virtual void vfF8(void);
-    virtual void vfFC(void);
-
-    void FillResults(void* r);  // 0x801B8A7C
-};
 
 struct ResultEntry {
     u8 pad0[0x10];
@@ -1280,7 +1212,7 @@ public:
     virtual void vfF4(void);
     virtual void vf10(void);
     virtual void vf0C(void);
-    virtual int vf54(void);
+    virtual int vf54(int p);
     virtual void vf9C(RaceCarRec* rc, int type, void* other);
     virtual void vfA4(RaceCarRec* rc);
     virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
@@ -1298,7 +1230,7 @@ public:
     virtual int vf88(void) const;
     virtual int vf3C(int p);
     virtual f32 vf38(void);
-    virtual void vfB8(void* r);
+    virtual void vfB8(ZoneResults* r);
     virtual int vf24(void) const;
     virtual void* vfE8(void);
     virtual int vfDC(void);
@@ -3485,7 +3417,7 @@ void fn_80167844(void);
 void fn_8016A438(void);
 }
 
-inline int BetaMaster::vf54(void) {
+inline int BetaMaster::vf54(int p) {
     int f;
     if (fn_80161C38()) {
         return 0x5608;
@@ -4083,7 +4015,7 @@ inline int BetaMaster::vf3C(int view) {
 
 inline f32 BetaMaster::vf38(void) { return GetNumPlayers() == 2 ? 5.0f : 9.0f; }
 
-inline void BetaMaster::vfB8(void* r) {
+inline void BetaMaster::vfB8(ZoneResults* r) {
     RaceResults* res = (RaceResults*)r;
     BetaCar* c;
     int i;
@@ -4142,11 +4074,8 @@ inline void BetaMaster::vf40(void) {
     }
 }
 
-inline int GameMode::vfA0(int a, int b, int c) { return 0; }
 
-inline void GameMode::vfC0(void) {}
 
-inline void GameMode::vfC4(void) {}
 
 inline void BetaMaster::a4(void) {}
 

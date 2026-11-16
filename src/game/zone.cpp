@@ -8,6 +8,8 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/gamemode.h"
+#include "game/gamemodector.h"
 #include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
@@ -703,155 +705,11 @@ public:
     s32 glow;  // offset 0x4
 };
 
-class GameUI {
-public:
-    virtual ~GameUI(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p);
-    virtual void vf18(void);
-    virtual int vf1C(int car);
-    virtual int vf20(int car) const;
-    virtual int vf24(void) const;
-    virtual int Started1C(int car);
-    virtual int Started20(int car);
-    virtual int vf30(void);
-    virtual int vf34(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual int vf58(void);
-    virtual int vf5C(int p) const;
-    virtual void vf60(int view);
-    virtual int vf64(void);
-    virtual int vf68(void) const;
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual int vf7C(int p);
-    virtual int vf80(void);
-    virtual int vf84(void);
-    virtual int vf88(void) const;
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d);
-    virtual void vf94(int p);
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(struct Cam* cam);
-    virtual void vfA4(int p);
-    virtual void vfA8(int car);
-    virtual void vfAC(int car);
-    virtual int vfB0(int a, int b, int c);
-    virtual void vfB4(int car, struct Damage* d);
-    virtual void vfB8(struct ZoneResults* r);
-    virtual int vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual int vfCC(void);
-    virtual int vfD0(void);
-    virtual int vfD4(int car);
-    virtual int vfD8(void);
-    virtual int vfDC(void);
-    virtual int vfE0(void);
-    virtual int vfE4(void);
-    virtual CSubTaskMgr* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void);
-    virtual void vfF4(void);
-    virtual void vfF8(void);
-    virtual void vfFC(void);
-};
-
 extern "C" int fn_801B8514(void);  // amaster.cpp: nonzero while the race is running
-
-class GameMode : public GameUI {
-public:
-    virtual ~GameMode(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p) {}
-    virtual void vf18(void) {}
-    virtual int vf1C(int car) { return vf20(car); }
-    virtual int vf20(int car) const = 0;
-    virtual int vf24(void) const;
-    virtual int Started1C(int car);
-    virtual int Started20(int car);
-    virtual int vf30(void) { return 0; }
-    virtual int vf34(void) { return 0; }
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void) {}
-    virtual void vf44(void);
-    virtual void vf48(void) {}
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual void vf6C(void) {}
-    virtual void vf70(void) {}
-    virtual void vf74(void) {}
-    virtual void vf78(void) {}
-    virtual int vf7C(int p) { return 0; }
-    virtual int vf80(void) { return 0; }
-    virtual int vf84(void) { return 0; }
-    virtual int vf88(void) const { return 0; }
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d) {}
-    virtual void vf94(int p) {}
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other) {}
-    virtual int vfA0(struct Cam* cam);
-    virtual void vfA4(int p) {}
-    virtual void vfA8(int car);
-    virtual void vfAC(int car);
-    virtual int vfB0(int a, int b, int c) { return 0; }
-    virtual void vfB4(int car, struct Damage* d) {}
-    virtual void vfB8(struct ZoneResults* r) = 0;
-    virtual int vfBC(void) { return 0; }
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void) {}
-    virtual int vfCC(void) { return 1; }
-    virtual int vfD0(void) { return 0; }
-    virtual int vfD4(int car) {
-        int r = 0;
-        if (fn_801B8514() && !vf20(car)) {
-            r = 1;
-        }
-        return r;
-    }
-    virtual int vfD8(void) { return 0; }
-    virtual int vfDC(void) { return 1; }
-    virtual int vfE0(void) { return 0; }
-    virtual int vfE4(void) { return 0; }
-    virtual CSubTaskMgr* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void) { return 0; }
-    virtual void vfF4(void) {}
-
-
-
-    s32 unk4;  // offset 0x4
-
-};
 
 extern "C" Gate* fn_8013D148(ZoneLevel* l, f32 x);
 extern "C" u32 fn_8013D18C(u32 i);
 
-struct Cam {
-    u8 pad0[0x18];
-    ZoneVec3 v18;  // offset 0x18
-    ZoneVec3 v24;
-    ZoneVec3 v30;  // offset 0x30
-    u8 pad3C[0x44 - 0x3C];
-    s32 i44;  // offset 0x44
-};
 
 struct ZoneResults {
     struct Entry {
@@ -893,7 +751,7 @@ public:
     virtual void* Get(int index);  // 0xC
 };
 
-extern "C" void fn_801B8048(Cam* cam, LineFollower* it, f32 a, f32 b);  // placecar.cpp
+extern "C" void fn_801B8048(Respawn* r, LineFollower* it, f32 a, f32 b);  // placecar.cpp
 
 static inline int Boosting(Truck* t) { return !NearZero(t->boost); }
 
@@ -916,11 +774,11 @@ public:
     virtual void vfB8(ZoneResults* r);
     virtual void vfC0(void);
     virtual void vfC4(void);
-    virtual int vf54(void);
-    virtual CSubTaskMgr* vfE8(void);
-    virtual int vfA0(Cam* cam);
+    virtual int vf54(int p);
+    virtual void* vfE8(void);
+    virtual int vfA0(Respawn* r, int idx, int c);
     virtual void vfAC(int car);
-    virtual void vfA8(int car);
+    virtual void vfA8(int car, int b);
     virtual int vf8C(int p, int key);
     virtual int vf3C(int p);
     virtual f32 vf38(void);
@@ -1015,6 +873,7 @@ public:
     void SetTotal(int car) { cars[car].total = cars[car].score; }
     void DrawHits(FixedArray<GateHit, 8>* hits);
 
+    s32 unk4;                                         // offset 0x4
     Wrap<Wrap<FixedArray<ILayout*, 16> > > layouts;  // offset 0x8
     void SaveLayouts(void);
     void ToggleLayoutEdit(void);
@@ -2768,18 +2627,18 @@ inline void ZoneMaster::vfC0(void) { b26C = 1; }
 
 inline void ZoneMaster::vfC4(void) { b26C = 0; }
 
-inline int ZoneMaster::vf54(void) { return 0x1008; }
+inline int ZoneMaster::vf54(int p) { return 0x1008; }
 
-inline CSubTaskMgr* ZoneMaster::vfE8(void) { return fn_8013D288(); }
+inline void* ZoneMaster::vfE8(void) { return fn_8013D288(); }
 
-inline int ZoneMaster::vfA0(Cam* cam) {
+inline int ZoneMaster::vfA0(Respawn* r, int idx, int c) {
     LineFollower it;
     Path* path;
     it.SetLine((CenterLine*)((PathSet*)fn_80156A40())->Get(0));
     path = it.path;
-    fn_801B8048(cam, &it, 0.0f, path->len - 25.0f - 35.0f);
-    ScaleV(&cam->v30, &cam->v18, 4.4444447f);
-    cam->i44 = 1;
+    fn_801B8048(r, &it, 0.0f, path->len - 25.0f - 35.0f);
+    ScaleV((ZoneVec3*)&r->vel, (const ZoneVec3*)&r->place.basis[2], 4.4444447f);
+    r->mode = 1;
     return 1;
 }
 
@@ -2793,7 +2652,7 @@ inline void ZoneMaster::vfAC(int car) {
     GameMode::vfAC(car);
 }
 
-inline void ZoneMaster::vfA8(int car) { vfAC(car); }
+inline void ZoneMaster::vfA8(int car, int b) { vfAC(car); }
 
 inline void ZoneMaster::SaveLayouts(void) {
     for (int i = 0; i < layouts.a.a.count; i++) {

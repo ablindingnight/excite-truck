@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamemode.h"
 #include "game/ilayout.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -632,133 +633,6 @@ struct ZoneResults {
     Entry entries[8];  // offset 0x10
 };
 
-class GameUI {
-public:
-    virtual ~GameUI(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p);
-    virtual void vf18(void);
-    virtual int vf1C(int car);
-    virtual int vf20(int car) const;
-    virtual int vf24(void) const;
-    virtual int vf28(void);
-    virtual int Started20(int car);
-    virtual int vf30(void);
-    virtual int vf34(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual int vf58(void);
-    virtual int vf5C(int p) const;
-    virtual void vf60(int view);
-    virtual int vf64(void);
-    virtual int vf68(void) const;
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual int vf7C(int p);
-    virtual int vf80(void);
-    virtual int vf84(void);
-    virtual int vf88(void) const;
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d);
-    virtual void vf94(int p);
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(struct Respawn* out, int idx);
-    virtual void vfA4(int p);
-    virtual void vfA8(int car);
-    virtual void vfAC(int car);
-    virtual int vfB0(int car, struct Respawn* r);
-    virtual void vfB4(int car, struct Damage* d);
-    virtual void vfB8(ZoneResults* r);
-    virtual int vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual int vfCC(void);
-    virtual int vfD0(void);
-    virtual int vfD4(int car);
-    virtual int vfD8(void);
-    virtual int vfDC(void);
-    virtual int vfE0(int car, u8* out);
-    virtual int vfE4(void);
-    virtual void* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void);
-    virtual void vfF4(void);
-    virtual void vfF8(void);
-    virtual void vfFC(void);
-};
-
-class GameMode : public GameUI {
-public:
-    GameMode(void);
-    virtual ~GameMode(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p);
-    virtual void vf18(void);
-    virtual int vf1C(int car);
-    virtual int vf20(int car) const = 0;
-    virtual int vf24(void) const;
-    virtual int vf28(void);
-    virtual int Started20(int car);
-    virtual int vf30(void);
-    virtual int vf34(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual int vf7C(int p);
-    virtual int vf80(void);
-    virtual int vf84(void);
-    virtual int vf88(void) const;
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d);
-    virtual void vf94(int p);
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(struct Respawn* out, int idx);
-    virtual void vfA4(int p);
-    virtual void vfA8(int car);
-    virtual void vfAC(int car);
-    virtual int vfB0(int car, struct Respawn* r);
-    virtual void vfB4(int car, struct Damage* d);
-    virtual void vfB8(ZoneResults* r);
-    virtual int vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual int vfCC(void);
-    virtual int vfD0(void);
-    virtual int vfD4(int car);
-    virtual int vfD8(void);
-    virtual int vfDC(void);
-    virtual int vfE0(int car, u8* out);
-    virtual int vfE4(void);
-    virtual void* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void);
-    virtual void vfF4(void);
-
-};
-
 namespace {
 class RingChalMaster : public GameMode {
 public:
@@ -775,17 +649,17 @@ public:
     virtual void vf50(int p);
     virtual void vf40(void);
     virtual void vf44(void);
-    virtual int vf54(void);
-    virtual int vfA0(struct Respawn* out, int idx);
+    virtual int vf54(int p);
+    virtual int vfA0(struct Respawn* out, int idx, int c);
     virtual void vf0C(void);
     virtual int vf24(void) const;
     virtual int vf68(void) const;
     virtual int vf64(void);
     virtual int vf5C(int p) const;
     virtual int vf8C(int p, int key);
-    virtual int vf28(void);
-    virtual void vfA8(int car);
-    virtual int vfB0(int car, struct Respawn* r);
+    virtual int Started1C(int car);
+    virtual void vfA8(int car, int b);
+    virtual int vfB0(int car, struct Respawn* r, int c);
     virtual int vfE0(int car, u8* out);
     void DrawRings(void) const;
     PlayerList players;       // offset 0x4
@@ -1934,7 +1808,7 @@ inline void RingChalMaster::vf44(void) {
 
 inline void RingChalMaster::vf50(int p) { vf4C(p); }
 
-inline int RingChalMaster::vf54(void) { return 0x1408; }
+inline int RingChalMaster::vf54(int p) { return 0x1408; }
 
 
 inline int RingChalMaster::vf24(void) const {
@@ -1997,9 +1871,9 @@ inline int RingChalMaster::vf8C(int p, int key) {
     return 0;
 }
 
-inline int RingChalMaster::vf28(void) { return !arena.b49; }
+inline int RingChalMaster::Started1C(int car) { return !arena.b49; }
 
-inline void RingChalMaster::vfA8(int car) { fn_801B0C78(car); }
+inline void RingChalMaster::vfA8(int car, int b) { fn_801B0C78(car); }
 
 static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
     o->x = a->x * k;
@@ -2007,7 +1881,7 @@ static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
     o->z = a->z * k;
 }
 
-inline int RingChalMaster::vfB0(int car, Respawn* r) {
+inline int RingChalMaster::vfB0(int car, Respawn* r, int c) {
     PlayerData* p = players.data[car];
     p->b8 = 0;
     p->fC = 0.0f;
@@ -2137,7 +2011,7 @@ static inline f32 PathLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 #pragma push
 #pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
-inline int RingChalMaster::vfA0(Respawn* out, int idx) {
+inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
     ValueNode* cfg = fn_8000AC38()->vals;
     if (cfg) {
         char name[0x10];
@@ -2563,3 +2437,6 @@ static inline f32 Time(void) { return lbl_8055E3C8; }
 // copy is betarace's).
 inline TextElem::TextElem(const TextElem& o)
     : name(o.name), pos(o.pos), elemJust(o.elemJust), scale(o.scale), just(o.just), color(o.color), defText(o.defText) {}
+
+// GameMode's constructor after its use: RingChalMaster's constructor calls the out-of-line copy.
+#include "game/gamemodector.h"

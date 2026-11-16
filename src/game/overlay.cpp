@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/gamemode.h"
 #include "game/textelem.h"
 #include "game/ilayout.h"
 #include "game/raceopts.h"
@@ -42,74 +43,6 @@ struct ResultRacer {
     f32 time;   // offset 0x18
     u8 pad1C[0x48 - 0x1C];
     char name[1];  // offset 0x48
-};
-
-// The race UI / game controller returned by fn_801B83A0 (its vtable lives elsewhere; these
-// defaults are inline in its header, so this unit emits the ones it calls).
-class GameUI {
-public:
-    virtual ~GameUI(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void) const;
-    virtual void vf24(void) const;
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(void) const;
-    virtual void vf50(void);
-    virtual void vf54(void);
-    virtual void vf58(void);
-    virtual int vf5C(int player) const { return 0; }
-    virtual void vf60(int player) {}
-    virtual int vf64(void) { return 0; }
-    virtual int vf68(void) const { return 1; }
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual void vf7C(void);
-    virtual void vf80(void);
-    virtual void vf84(void);
-    virtual void vf88(void) const;
-    virtual void vf8C(void);
-    virtual void vf90(void);
-    virtual void vf94(void);
-    virtual void vf98(void);
-    virtual void vf9C(void);
-    virtual void vfA0(void);
-    virtual void vfA4(void);
-    virtual void vfA8(void);
-    virtual void vfAC(void);
-    virtual void vfB0(void);
-    virtual void vfB4(void);
-    virtual void vfB8(void);
-    virtual void vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual void vfCC(void);
-    virtual void vfD0(void);
-    virtual void vfD4(void);
-    virtual void vfD8(void);
-    virtual void vfDC(void);
-    virtual void vfE0(void);
-    virtual void vfE4(void);
-    virtual void vfE8(void);
-    virtual void vfEC(void);
-    virtual void vfF0(void);
-    virtual void vfF4(void);
-    virtual void vfF8(void) {}
-    virtual void vfFC(void) {}
 };
 
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).

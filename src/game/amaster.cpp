@@ -2,6 +2,8 @@
 // event type, and the global functions that forward to it; a few GameMode helpers; and the null
 // master used when the event has none. Names are guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/gamemode.h"
+#include "game/gamemodector.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
 
@@ -35,135 +37,6 @@ struct Damage {
     f32 amount;  // offset 0x50
 };
 
-// The game mode interface; GameMode inherits these slots from it.
-class GameUI {
-public:
-    virtual ~GameUI(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p);
-    virtual void vf18(void);
-    virtual int vf1C(int car);
-    virtual int vf20(int car) const;
-    virtual int vf24(void) const;
-    virtual int Started1C(int car);
-    virtual int Started20(int car);
-    virtual int vf30(void);
-    virtual int vf34(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(int p);
-    virtual int vf58(void);
-    virtual int vf5C(int p) const;
-    virtual void vf60(int view);
-    virtual int vf64(void);
-    virtual int vf68(void) const;
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual int vf7C(int p);
-    virtual int vf80(void);
-    virtual int vf84(void);
-    virtual int vf88(void) const;
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d);
-    virtual void vf94(int p);
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(int a, int b, int c);
-    virtual void vfA4(int p);
-    virtual void vfA8(int a, int b);
-    virtual void vfAC(int car);
-    virtual int vfB0(int a, int b, int c);
-    virtual void vfB4(int car, Damage* d);
-    virtual void vfB8(int p);
-    virtual int vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual int vfCC(void);
-    virtual int vfD0(void);
-    virtual int vfD4(int car);
-    virtual int vfD8(void);
-    virtual int vfDC(void);
-    virtual int vfE0(void);
-    virtual int vfE4(void);
-    virtual void* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void);
-    virtual void vfF4(void);
-    virtual void vfF8(void);
-    virtual void vfFC(void);
-};
-
-class GameMode : public GameUI {
-public:
-    virtual ~GameMode(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p);
-    virtual void vf18(void);
-    virtual int vf1C(int car);
-    virtual int vf20(int car) const = 0;
-    virtual int vf24(void) const;
-    virtual int Started1C(int car);
-    virtual int Started20(int car);
-    virtual int vf30(void);
-    virtual int vf34(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(int p);
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual int vf7C(int p);
-    virtual int vf80(void);
-    virtual int vf84(void);
-    virtual int vf88(void) const;
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d);
-    virtual void vf94(int p);
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(int a, int b, int c);
-    virtual void vfA4(int p);
-    virtual void vfA8(int a, int b);
-    virtual void vfAC(int car);
-    virtual int vfB0(int a, int b, int c);
-    virtual void vfB4(int car, Damage* d);
-    virtual void vfB8(int p) = 0;
-    virtual int vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual int vfCC(void);
-    virtual int vfD0(void);
-    virtual int vfD4(int car);
-    virtual int vfD8(void);
-    virtual int vfDC(void);
-    virtual int vfE0(void);
-    virtual int vfE4(void);
-    virtual void* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void);
-    virtual void vfF4(void);
-
-    void FillResults(void* r);
-    int Reset(void);
-};
-
 // The master for events without one of their own.
 class NullArenaMaster : public GameMode {
 public:
@@ -174,7 +47,7 @@ public:
     virtual int vf20(int car) const { return 1; }
     virtual int vf24(void) const { return 0; }
     virtual void vf4C(int p) const {}
-    virtual void vfB8(int p) {}
+    virtual void vfB8(ZoneResults* r) {}
     virtual void vfC0(void) {}
     virtual void vfC4(void) {}
     virtual int Collide(int a, int b) {}
@@ -301,7 +174,7 @@ int fn_801B8570(int car) { return lbl_8055E744->Started20(car) && !fn_80161B94()
 
 int fn_801B85CC(void) { return lbl_8055E744->vf24(); }
 
-void fn_801B85E0(int a, int b, int c, int d) { lbl_8055E744->vf90(a, b, c, d); }
+void fn_801B85E0(int a, int b, int c, int d) { lbl_8055E744->vf90((RaceCarRec*)a, (RaceCarRec*)b, (void*)c, (const f32*)d); }
 
 void fn_801B8610(int a, int b) { lbl_8055E744->Collide(a, b); }
 
@@ -309,7 +182,7 @@ int fn_801B8630(int a, int b, int c) {
     if (fn_80161BDC(a, b, c)) {
         return 1;
     }
-    return lbl_8055E744->vfA0(a, b, c);
+    return lbl_8055E744->vfA0((Respawn*)a, b, c);
 }
 
 void fn_801B86A4(int car) { lbl_8055E744->vfAC(car); }
@@ -321,7 +194,7 @@ void fn_801B86BC(int car, Damage* d) {
 }
 
 int fn_801B8728(int p) {
-    lbl_8055E744->vfB8(p);
+    lbl_8055E744->vfB8((ZoneResults*)p);
     return lbl_8055E744->vfE4() == 0;
 }
 
@@ -368,7 +241,7 @@ int fn_801B8900(void) { return lbl_8055E744->vf80(); }
 
 int fn_801B8914(void) { return lbl_8055E744->vf30(); }
 
-int fn_801B8928(int a, int b, int c) { return lbl_8055E744->vfB0(a, b, c); }
+int fn_801B8928(int a, int b, int c) { return lbl_8055E744->vfB0(a, (Respawn*)b, c); }
 
 f32 fn_801B8950(int i) { return lbl_80436D08[i]; }
 

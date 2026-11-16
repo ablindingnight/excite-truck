@@ -2,15 +2,10 @@
 // flag distance, pit speed), creates per-car AI info, formats car numbers, and builds the driver object
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
+#include "game/gamemode.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/springcar.h"
-
-// The game mode base (amaster.cpp); its vfEC lives here.
-class GameMode {
-public:
-    int vfEC(void);
-};
 
 extern "C" {
 int sprintf(char* s, const char* fmt, ...);

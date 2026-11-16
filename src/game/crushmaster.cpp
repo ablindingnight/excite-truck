@@ -9,6 +9,8 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/gamemode.h"
+#include "game/gamemodector.h"
 #include "game/ilayout.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -420,133 +422,6 @@ struct LayoutRef {
 extern "C" int fn_80171EC0(int id);
 
 
-class GameUI {
-public:
-    virtual ~GameUI(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p);
-    virtual void vf18(void);
-    virtual int vf1C(int car);
-    virtual int vf20(int car) const;
-    virtual int vf24(void) const;
-    virtual int vf28(void);
-    virtual int Started20(int car);
-    virtual int vf30(void);
-    virtual int vf34(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual int vf58(void);
-    virtual int vf5C(int p) const;
-    virtual void vf60(int view);
-    virtual int vf64(void);
-    virtual int vf68(void) const;
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual int vf7C(int p);
-    virtual int vf80(void);
-    virtual int vf84(void);
-    virtual int vf88(void) const;
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d);
-    virtual void vf94(int p);
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(Respawn* out, int idx);
-    virtual void vfA4(int p);
-    virtual void vfA8(int car);
-    virtual void vfAC(int car);
-    virtual int vfB0(int a, int b, int c);
-    virtual void vfB4(int car, struct Damage* d);
-    virtual void vfB8(ZoneResults* r);
-    virtual int vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual int vfCC(void);
-    virtual int vfD0(void);
-    virtual int vfD4(int car);
-    virtual int vfD8(void);
-    virtual int vfDC(void);
-    virtual int vfE0(void);
-    virtual int vfE4(void);
-    virtual void* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void);
-    virtual void vfF4(void);
-    virtual void vfF8(void);
-    virtual void vfFC(void);
-};
-
-class GameMode : public GameUI {
-public:
-    GameMode(void) {}
-    virtual ~GameMode(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(int p);
-    virtual void vf18(void);
-    virtual int vf1C(int car);
-    virtual int vf20(int car) const = 0;
-    virtual int vf24(void) const;
-    virtual int vf28(void);
-    virtual int Started20(int car);
-    virtual int vf30(void);
-    virtual int vf34(void);
-    virtual f32 vf38(void);
-    virtual int vf3C(int p);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(int p) const;
-    virtual void vf50(int p);
-    virtual int vf54(void);
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual int vf7C(int p);
-    virtual int vf80(void);
-    virtual int vf84(void);
-    virtual int vf88(void) const;
-    virtual int vf8C(int p, int key);
-    virtual void vf90(int a, int b, int c, int d);
-    virtual void vf94(int p);
-    virtual int Collide(int a, int b);
-    virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(Respawn* out, int idx);
-    virtual void vfA4(int p);
-    virtual void vfA8(int car);
-    virtual void vfAC(int car);
-    virtual int vfB0(int a, int b, int c);
-    virtual void vfB4(int car, struct Damage* d);
-    virtual void vfB8(ZoneResults* r);
-    virtual int vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual int vfCC(void);
-    virtual int vfD0(void);
-    virtual int vfD4(int car);
-    virtual int vfD8(void);
-    virtual int vfDC(void);
-    virtual int vfE0(void);
-    virtual int vfE4(void);
-    virtual void* vfE8(void);
-    virtual int vfEC(void);
-    virtual int vfF0(void);
-    virtual void vfF4(void);
-
-};
-
 // The race's per-mode hooks (0x2C vtable, all pure).
 class ISubTaskMgr {
 public:
@@ -618,16 +493,16 @@ public:
     virtual ~CrushMaster(void);
     virtual void vfF8(void);
     virtual void vfFC(void);
-    virtual int vf28(void);
+    virtual int Started1C(int car);
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual int vf20(int car) const;
     virtual int vf24(void) const;
-    virtual int vf54(void);
-    virtual void vfA8(int car);
+    virtual int vf54(int p);
+    virtual void vfA8(int car, int b);
     virtual void vfB8(ZoneResults* r);
     virtual void vf44(void);
-    virtual int vfA0(Respawn* out, int idx);
+    virtual int vfA0(Respawn* out, int idx, int c);
     virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf3C(int view);
@@ -1156,7 +1031,7 @@ void LayoutRef::Free(void) {
     }
 }
 
-inline int CrushMaster::vf28(void) { return AliveAI() != 0; }
+inline int CrushMaster::Started1C(int car) { return AliveAI() != 0; }
 
 int IsLoadingActive(void);
 
@@ -1307,7 +1182,7 @@ inline int CrushMaster::vf20(int car) const {
 
 inline int CrushMaster::vf24(void) const { return finishTime > 0.0f; }
 
-inline int CrushMaster::vf54(void) { return 8; }
+inline int CrushMaster::vf54(int p) { return 8; }
 
 // Helper name unproven: a free spot near p, dropped onto the ground. The spot is copied out of the call's
 // temporary (the target keeps the returned pair above both locals and block-copies it).
@@ -1341,7 +1216,7 @@ static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
     o->z = a->z * k;
 }
 
-inline void CrushMaster::vfA8(int car) {
+inline void CrushMaster::vfA8(int car, int b) {
     f32 dz;
     f32 dy;
     f32 dx;
@@ -1445,7 +1320,7 @@ inline void CrushMaster::vf44(void) {
     }
 }
 
-inline int CrushMaster::vfA0(Respawn* out, int idx) {
+inline int CrushMaster::vfA0(Respawn* out, int idx, int c) {
     if (idx < spawns.count) {
         V2* p = &spawns.data[idx];
         V2 d;

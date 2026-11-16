@@ -1,16 +1,9 @@
 // Small 2D vector helpers and stubs (0x80160B14-0x80160CE4), next to a 20-entry pointer list that nothing
 // here uses any more. Names are guesses.
 #include "game/common.h"
+#include "game/gamemode.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
-
-// The game mode base (amaster.cpp); its empty vf44 lives here.
-class GameMode {
-public:
-    int vf24(void) const;  // slot 0x24 (virtual in amaster.cpp; declared plainly here so no vtable is emitted)
-    f32 vf38(void);  // slot 0x38
-    void vf44(void);
-};
 
 extern "C" {
 double sqrt(double x);
