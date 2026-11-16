@@ -224,10 +224,7 @@ Layout* lbl_8055D374;
 bool lbl_8055D378[2];  // restart / replay requested
 u8 lbl_8055D37A;     // results menu up
 ReplayClock lbl_8055D380;
-f32 lbl_8055D388;
-s32 lbl_8055D38C;
-u8 lbl_8055D390;
-u8 lbl_8055D391;
+
 
 bool lbl_805589B0 = 1;  // advanced overlay
 
@@ -235,7 +232,14 @@ void fn_80008390(void) {
     static const s32 multi[] = {0xF};
     static const s32 basic[] = {0x1, 0x15, 0x14, 0x13};
     static const s32 advanced[] = {0x1, 0x15, 0x14, 0x13, 0x10};
-    static const s32 dpad[] = {0x2, 0x3, 0x4, 0x5};
+    // The D-pad actions are stored with the remaining replay action IDs.
+    static const struct {
+        s32 dir[4];
+        s32 other[14];
+    } navigation = {
+        {0x2, 0x3, 0x4, 0x5},
+        {0xE, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B},
+    };
     s32 i;
     int j;
 
@@ -256,8 +260,8 @@ void fn_80008390(void) {
     }
     for (j = 0; j < lbl_8034F3D0.list.count; j++) {
         if (lbl_8034F3D0.list.data[j] == 1) {
-            for (i = 0; i < sizeof(dpad) / sizeof(dpad[0]); i++) {
-                lbl_8034F3D0.list.Add(dpad[i]);
+            for (i = 0; i < sizeof(navigation.dir) / sizeof(navigation.dir[0]); i++) {
+                lbl_8034F3D0.list.Add(navigation.dir[i]);
             }
             break;
         }
@@ -392,6 +396,10 @@ void fn_80008684(int camera) {
         fn_80011A2C();
     }
 }
+
+// The localized prompt guards precede these counters in the small-data section.
+f32 lbl_8055D388;
+s32 lbl_8055D38C;
 
 enum { CAM_LEFT = 12, CAM_RIGHT = 13 };
 
@@ -694,6 +702,8 @@ static inline int PromptsVisible(void) {
 }
 
 void fn_80009534(void) {
+    static u8 previousPadCapture;
+    static u8 resumeAfterCapture;
     int player;
     u32 paused;
     int exiting;
@@ -723,7 +733,7 @@ void fn_80009534(void) {
     lbl_805589B0 = 1;
     lbl_8055D380.Start();
     lbl_8034F44C.shown = -600;
-    lbl_8034F44C.touched = 0;
+    lbl_8034F44C.touched = lbl_8055D380.time;
     lbl_8034F44C.visible = 1;
     lbl_8055D370 = 0;
     fn_80176A00(1);
@@ -763,16 +773,16 @@ void fn_80009534(void) {
             }
         }
         q = fn_802ECC10();
-        if (q != lbl_8055D390) {
-            lbl_8055D390 = q;
+        if (q != previousPadCapture) {
+            previousPadCapture = q;
             if (q) {
                 if (!fn_801769F8()) {
-                    lbl_8055D391 = 1;
+                    resumeAfterCapture = 1;
                     fn_801769E0();
                 } else {
-                    lbl_8055D391 = 0;
+                    resumeAfterCapture = 0;
                 }
-            } else if (lbl_8055D391) {
+            } else if (resumeAfterCapture) {
                 fn_801769EC();
             }
         }

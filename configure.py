@@ -984,7 +984,7 @@ config.libs.append(
             Object(Matching, "game/stdoverlay.cpp"),
             Object(NonMatching, "game/overlay.cpp"),
             Object(Matching, "game/escape.cpp"),
-            Object(NonMatching, "game/replay.cpp"),
+            Object(Matching, "game/replay.cpp"),
             Object(Matching, "game/raceload.cpp"),
             Object(Matching, "game/gameloop.cpp"),
             Object(Matching, "game/racing.cpp"),
