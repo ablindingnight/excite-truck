@@ -19,7 +19,6 @@ u8* fn_8023512C(const char* name);
 
 void operator delete(void* p);
 
-extern char lbl_8055C3E0[1];
 
 // Copies at most n - 1 characters and always terminates.
 static inline void CopyName(const char* src, int n, char* dst) {
@@ -116,6 +115,9 @@ extern "C" u8* fn_802CAC28(const char* name, int flags);
 extern "C" int strcmp(const char* a, const char* b);
 extern "C" void gxForgetTexture(u8* tex);
 
+struct CarIconTable;
+extern CarIconTable* lbl_8055F2E4;
+extern s32 lbl_8055F2E8;
 struct CarIconTable : public IconList {
     CarIconTable(void) {
         ValueTable* t = fn_80131808("caricons.val");
@@ -149,6 +151,15 @@ struct CarIconTable : public IconList {
             gxForgetTexture(e.overlay);
         }
         delete[] data;
+    }
+    // Reference-counted: shared by the car menus (helper name unproven). A member, so "cimgr" is its own weak string
+    // after the constructor's, as in retail (garage emits the kept copy).
+    static CarIconTable* Acquire(void) {
+        if (lbl_8055F2E8 == 0) {
+            lbl_8055F2E4 = new ("cimgr") CarIconTable;
+        }
+        lbl_8055F2E8++;
+        return lbl_8055F2E4;
     }
 };
 extern CarIconTable* lbl_8055F2E4;
@@ -216,10 +227,7 @@ void fn_8025CE78(void) {
         LoadModeEves(0x130);
     }
     RecordLine lines[7];
-    if (lbl_8055F2E8 == 0) {
-        lbl_8055F2E4 = new ("cimgr") CarIconTable;
-    }
-    lbl_8055F2E8++;
+    CarIconTable::Acquire();
     lines[0].widget.icons = lbl_8055F2E4;
     lines[1].widget.icons = lbl_8055F2E4;
     lines[2].widget.icons = lbl_8055F2E4;
@@ -291,11 +299,11 @@ extern "C" {
 }  // extern "C"
 
 RecordLine::RecordLine(void) {
-    label = lbl_8055C3E0;
-    CopyName(lbl_8055C3E0, 0x14, value);
+    label = (char*)"";
+    CopyName((char*)"", 0x14, value);
     difficulty = 0;
     char* empty;
-    name = (empty = lbl_8055C3E0);
+    name = (empty = (char*)"");
     track = empty;
     text[0] = 0;
     widget.visible = 0;
