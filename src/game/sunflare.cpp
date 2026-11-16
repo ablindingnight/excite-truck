@@ -16,17 +16,7 @@ struct SunVecP {
     f32 z;
 };
 
-struct Rot {
-    SunVecP right;  // offset 0x0
-    SunVecP up;     // offset 0xC
-    SunVecP fwd;    // offset 0x18
-};
-
-struct Camera {
-    Rot rot;   // offset 0x0
-    SunVecP pos;  // offset 0x24
-};
-
+// Camera: common.h's PlainValMatrix.
 // WeatherDef: game/weather.h.
 // A camera-facing sprite; pos holds its projected screen position.
 struct Sprite {
@@ -63,7 +53,7 @@ ValueNode* fn_802AE414(const char* name);   // track effect table lookup
 WeatherDef* fn_801E1F44(void);
 f32 fn_801EC114(void);
 int fn_802C2C00(int on);
-Camera* fn_802C86DC(void);
+PlainValMatrix* fn_802C86DC(void);
 void fn_802C8C04(int a);
 void fn_802C8D74(void);
 void fn_802C8E70(const SunVecP* p, SunVecP* out);
@@ -229,13 +219,13 @@ void fn_80291C7C(const Sprite* s, int sun) {
 }
 
 void fn_80291E64(FlareSet* fs) {
-    Camera* c = fn_802C86DC();
+    PlainValMatrix* c = fn_802C86DC();
     SunVecP pivot;
     SunVecP dir;
     f32 pivotDepthv = fs->pivotDepth;
-    pivot.x = c->pos.x + c->rot.fwd.x * pivotDepthv;
-    pivot.y = c->pos.y + c->rot.fwd.y * fs->pivotDepth;
-    pivot.z = c->pos.z + c->rot.fwd.z * fs->pivotDepth;
+    pivot.x = c->origin.x + c->basis[2].x * pivotDepthv;
+    pivot.y = c->origin.y + c->basis[2].y * fs->pivotDepth;
+    pivot.z = c->origin.z + c->basis[2].z * fs->pivotDepth;
     dir.x = pivot.x - fs->sunPos.x;
     dir.y = pivot.y - fs->sunPos.y;
     dir.z = pivot.z - fs->sunPos.z;
@@ -359,11 +349,11 @@ void fn_8029227C(void) {
 void fn_8029231C(const SunVecP* dir) {
     if (lbl_8055F75C) {
         f32 dist = fn_801EC114();
-        Camera* c = fn_802C86DC();
+        PlainValMatrix* c = fn_802C86DC();
         SunVecP p;
-        p.x = c->pos.x + dir->x * dist;
-        p.y = c->pos.y + dir->y * dist;
-        p.z = c->pos.z + dir->z * dist;
+        p.x = c->origin.x + dir->x * dist;
+        p.y = c->origin.y + dir->y * dist;
+        p.z = c->origin.z + dir->z * dist;
         f32 depth = fn_80291784();
         fn_80291B14(&p, depth);
         fn_80291B9C(&lbl_804B3EC0, &p, depth);

@@ -2,13 +2,9 @@
 // camera's right/up axes, optionally mirrored. Names are guesses.
 #include "game/common.h"
 
-// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
-struct Camera {
-    f32 m[12];
-};
-
+// Camera: common.h's PlainValMatrix.
 extern "C" {
-Camera* fn_802C86DC(void);
+PlainValMatrix* fn_802C86DC(void);
 void fn_801E4F20(int n);
 void fn_801E4FF4(void);
 int fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
@@ -41,8 +37,8 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 }
 void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
     ValVec3 pos;
-    Camera* right;
-    Camera* up;
+    PlainValMatrix* right;
+    PlainValMatrix* up;
     int i;
     right = fn_802C86DC();
     up = fn_802C86DC();
@@ -55,9 +51,9 @@ void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
         f32 v = (i & 2) ? 1.0f : 0.0f;
         f32 a = size * ((2.0f * u - 1.0f) * sign[flags & 1]);
         ValVec3 p;
-        MadV3(&p.x, &pos.x, &right->m[0], a);
+        MadV3(&p.x, &pos.x, &right->basis[0].x, a);
         f32 b = size * ((1.0f + -2.0f * v) * sign[flags & 2]);
-        AddScaledV3(&p.x, &up->m[3], b);
+        AddScaledV3(&p.x, &up->basis[1].x, b);
         if (fn_801E4F3C(p.x, p.y, p.z, u, v, color, i >= 2)) {
             break;
         }

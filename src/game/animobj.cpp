@@ -20,13 +20,8 @@ s32 fn_802C7A40(int a, void* buf, int size, int b, const void* src, int c);
 extern const s16 lbl_80562E28;  // no flags
 extern u8 lbl_80488228[];
 
-struct Camera {
-    u8 pad[0x18];
-    Vec fwd;  // offset 0x18
-    Vec pos;  // offset 0x24
-};
-
-extern "C" Camera* fn_802C86DC(void);
+// Camera: vecmatrix.h's VecMatrix.
+extern "C" VecMatrix* fn_802C86DC(void);
 
 // Frame: vecmatrix.h's VecMatrix.
 // An animation slot.
@@ -161,12 +156,12 @@ AnimPoint::~AnimPoint(void) {}
 void AnimObj::vf1C(void) {}
 
 f32 AnimObj::Depth(void) {
-    Camera* c = fn_802C86DC();
+    VecMatrix* c = fn_802C86DC();
     Vec d;
-    d.x = frame.origin.x - c->pos.x;
-    d.y = frame.origin.y - c->pos.y;
-    d.z = frame.origin.z - c->pos.z;
-    return PSVECDotProduct((const Vec*)&d, (const Vec*)&c->fwd);
+    d.x = frame.origin.x - c->origin.x;
+    d.y = frame.origin.y - c->origin.y;
+    d.z = frame.origin.z - c->origin.z;
+    return PSVECDotProduct((const Vec*)&d, (const Vec*)&c->basis[2]);
 }
 
 ModuleTag lbl_8055EB80;
