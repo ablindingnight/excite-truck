@@ -537,15 +537,15 @@ void fn_802E56F0(void) {
     lbl_8055FFA5 = 0;
     fn_802E6B34();
     for (i = 0; i < 0x20; i++) {
-        if (SPU_VOICES[i * 0x2C + 0x20] != 0) {
-            fn_802E317C("Spu: channel %s still in use", *(void **)(SPU_VOICES + i * 0x2C + 0x1C));
+        if (SPU_VOICE_TABLE[i].active != 0) {
+            fn_802E317C("Spu: channel %s still in use", SPU_VOICE_TABLE[i].sample);
         }
-        AXFreeVoice(*(void **)(SPU_VOICES + i * 0x2C + 4));
-        *(void **)(SPU_VOICES + i * 0x2C + 4) = 0;
+        AXFreeVoice(SPU_VOICE_TABLE[i].vpb);
+        SPU_VOICE_TABLE[i].vpb = 0;
     }
     for (j = 0; j < 0x100; j++) {
-        if (*(int *)(lbl_8055FF90 + j * 0xB0 + 0x94) > 0) {
-            fn_802E317C("Spu: sample %s still in use", lbl_8055FF90 + j * 0xB0);
+        if (SPU_SAMPLES[j].refs > 0) {
+            fn_802E317C("Spu: sample %s still in use", SPU_SAMPLES[j].name);
         }
     }
     __dla__FPv(SPU_VOICES);
@@ -721,12 +721,13 @@ extern void *__nwa__FUlPCc(unsigned long size, const char *tag);  // operator ne
 
 // Drops a reference to a cached sample, freeing its data with the last one.
 void fn_802E5D5C(void *arg0) {
-    if (*(int *)((char *)arg0 + 0x94) == 1 && *(int *)((char *)arg0 + 0x98) > 0) {
-        fn_802E317C("Spu: sample %s still in use by %d channels", arg0, *(int *)((char *)arg0 + 0x98));
+    SpuSample *smp = (SpuSample *)arg0;
+    if (smp->refs == 1 && smp->users > 0) {
+        fn_802E317C("Spu: sample %s still in use by %d channels", smp, smp->users);
     }
-    if (--*(int *)((char *)arg0 + 0x94) == 0 && *(void **)((char *)arg0 + 0xAC) != 0) {
-        fn_8012C4D8(*(void **)((char *)arg0 + 0xAC));
-        *(void **)((char *)arg0 + 0xAC) = 0;
+    if (--smp->refs == 0 && smp->res != 0) {
+        fn_8012C4D8(smp->res);
+        smp->res = 0;
     }
 }
 
@@ -768,17 +769,18 @@ SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(vo
 
 // Free a stream's buffer (warns if channels still use it; the stream's name is at its start).
 void fn_802E5FE4(void *arg0) {
-    if (*(int *)((char *)arg0 + 0x98) > 0) {
-        fn_802E317C("Spu: stream %s still in use by %d channels", arg0, *(int *)((char *)arg0 + 0x98));
+    SpuSample *smp = (SpuSample *)arg0;
+    if (smp->users > 0) {
+        fn_802E317C("Spu: stream %s still in use by %d channels", smp, smp->users);
     }
-    delete[] *(unsigned char **)((char *)arg0 + 0x90);
-    *(int *)((char *)arg0 + 0x90) = 0;
-    *(int *)((char *)arg0 + 0x94) = 0;
+    delete[] smp->data;
+    smp->data = 0;
+    smp->refs = 0;
 }
 
 
 float fn_802E6040(void *arg0) {
-    if (arg0 != 0) return *(float *)((char *)arg0 + 0xA4);
+    if (arg0 != 0) return ((SpuSample *)arg0)->length;
     return 0.0f;
 }
 
@@ -815,54 +817,52 @@ SpuVoice *fn_802E6058(SpuSample *s) {
 }
 
 void fn_802E6138(void *arg0) {
-    if (((unsigned char *)arg0)[0x23] != 0) {
-        fn_802E317C("Spu: channel %d/%s is still playing", *(int *)arg0, *(void **)((char *)arg0 + 0x1C));
+    SpuVoice *v = (SpuVoice *)arg0;
+    if (v->play != 0) {
+        fn_802E317C("Spu: channel %d/%s is still playing", v->unk0, v->sample);
     }
-    {
-        void *temp_r4 = *(void **)((char *)arg0 + 0x1C);
-        *(int *)((char *)temp_r4 + 0x98) -= 1;
-    }
-    ((unsigned char *)arg0)[0x20] = 0;
+    v->sample->users -= 1;
+    v->active = 0;
     lbl_8055FF98 -= 1;
 }
 
 void fn_802E61A8(void *arg0) {
-    ((unsigned char *)arg0)[0x25] = 0;
-    ((unsigned char *)arg0)[0x23] = 1;
+    ((SpuVoice *)arg0)->loop = 0;
+    ((SpuVoice *)arg0)->play = 1;
 }
 
 void fn_802E61BC(void *arg0) {
-    if (((unsigned char *)arg0)[0x23] == 0) {
-        ((unsigned char *)arg0)[0x25] = 1;
-        ((unsigned char *)arg0)[0x23] = 1;
+    if (((SpuVoice *)arg0)->play == 0) {
+        ((SpuVoice *)arg0)->loop = 1;
+        ((SpuVoice *)arg0)->play = 1;
     }
 }
 
 void fn_802E61D8(void *arg0) {
-    ((unsigned char *)arg0)[0x23] = 0;
+    ((SpuVoice *)arg0)->play = 0;
 }
 
 void fn_802E61E4(void *arg0, float farg0) {
-    *(float *)((char *)arg0 + 8) = farg0;
+    ((SpuVoice *)arg0)->volume = farg0;
 }
 
 void fn_802E61EC(void *arg0, float farg0) {
     if (lbl_8055FF8C != 0) {
-        *(float *)((char *)arg0 + 0xC) = farg0;
+        ((SpuVoice *)arg0)->pan = farg0;
         return;
     }
-    *(float *)((char *)arg0 + 0xC) = 0.0f;
+    ((SpuVoice *)arg0)->pan = 0.0f;
 }
 
 void fn_802E620C(void *arg0, float farg0) {
     if (lbl_8055FF8C == 2) {
-        *(float *)((char *)arg0 + 0x14) = farg0;
+        ((SpuVoice *)arg0)->depth = farg0;
         return;
     }
-    *(float *)((char *)arg0 + 0x14) = 1.0f;
+    ((SpuVoice *)arg0)->depth = 1.0f;
 }
 
-void fn_802E622C(void *arg0, float farg0) { *(float *)((char *)arg0 + 0x10) = farg0; }
+void fn_802E622C(void *arg0, float farg0) { ((SpuVoice *)arg0)->pitch = farg0; }
 
 void fn_802E6234(void*, f32) {}
 
@@ -871,7 +871,7 @@ void fn_802E6238(void*, f32) {}
 void fn_802E623C(void*, f32) {}
 
 void fn_802E6240(void* arg0, int arg1) {
-    *(int*)((char*)arg0 + 0x18) = arg1;
+    ((SpuVoice *)arg0)->remotes = arg1;
 }
 
 void fn_802E6248(int arg0, float arg1) {
