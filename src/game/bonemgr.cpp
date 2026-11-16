@@ -102,7 +102,8 @@ public:
         copyWords = w;
     }
     ~BoneMgr(void) {}
-    BoneCmd* NewCmd(int start, const void* src, int n, int size, int mtx, BoneWords* words) {
+    BoneCmd* NewCmd(int start, const void* src, int n, int elemSize, int mtx, BoneWords* words) {
+        int size = n * elemSize;
         u8 flag = dirty;
         dirty = 0;
         BoneCmd* c = (BoneCmd*)alloc.Alloc(sizeof(BoneCmd) + size);
@@ -121,7 +122,7 @@ public:
             f32 zero[80][3];
             memset(zero, 0, sizeof(zero));
             dirty = 1;
-            rest = NewCmd(0, zero, 80, sizeof(zero), 0, 0);
+            rest = NewCmd(0, zero, 80, sizeof(zero[0]), 0, 0);
         }
         return rest;
     }
@@ -197,17 +198,17 @@ static inline BoneWords* NewWords(BoneMgr* m, int start, const u32* w, int n) {
 BoneCmd* fn_802DA550(int start, const BVec* v, int n, int wstart, const u32* w, int wn) {
     BoneMgr* m = lbl_8055FE5C;
     BoneWords* words = NewWords(m, wstart, w, wn);
-    return m->NewCmd(start, v, n, n * sizeof(BVec), 0, words);
+    return m->NewCmd(start, v, n, sizeof(BVec), 0, words);
 }
 
 BoneCmd* fn_802DA704(int start, const BVec* v, int n) {
     BoneMgr* m = lbl_8055FE5C;
-    return m->NewCmd(start, v, n, n * sizeof(BVec), 0, 0);
+    return m->NewCmd(start, v, n, sizeof(BVec), 0, 0);
 }
 
 BoneCmd* fn_802DA80C(int start, const CamFrame34* v, int n) {
     BoneMgr* m = lbl_8055FE5C;
-    return m->NewCmd(start, v, n, n * sizeof(CamFrame34), 1, 0);
+    return m->NewCmd(start, v, n, sizeof(CamFrame34), 1, 0);
 }
 
 BoneCmd* fn_802DA918(f32 a, f32 b, f32 c) {
@@ -225,7 +226,7 @@ static inline BoneCmd* CmdOrRest(BoneCmd* c, BoneMgr* m) {
             f32 zero[80][3];
             memset(zero, 0, sizeof(zero));
             m->dirty = 1;
-            m->rest = m->NewCmd(0, zero, 80, sizeof(zero), 0, 0);
+            m->rest = m->NewCmd(0, zero, 80, sizeof(zero[0]), 0, 0);
         }
         c = m->rest;
     }
