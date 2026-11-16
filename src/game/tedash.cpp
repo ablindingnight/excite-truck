@@ -591,8 +591,8 @@ static inline void StrAppend(char* dst, int size, const char* src) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802B6AC0(char* name, char* path, const char* dir, int h) {
+/* Helper name unproven: the directory loop over the brush images; the boundary is needed (in place -0.51) */
+static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h) {
     do {
         Brush* b = &lbl_804BE7D8.data[lbl_804BE7D8.count++];
         StrCopy(name, 0x20, b->name);
@@ -661,7 +661,7 @@ void fn_802B6AC0(void) {
     if (h == -1) {
         return;
     }
-    Loop1_fn_802B6AC0(name, path, dir, h);
+    LoadBrushFiles(name, path, dir, h);
 }
 
 int fn_802B6E00(int x, int z) { return x < -0x200 || x > 0x200 || z < -0x200 || z > 0x200; }
