@@ -155,15 +155,17 @@ void fn_8020A100(void) {
                     lbl_8055EDD4[i] = 1;
                 }
             }
-            MusicVoice* v = t->voice;
-            if (v) {
-                v->SetVolume(lbl_8055EDD8 * fade);
-                v->SetUnk64(0.0f);
-                v->SetUnk68(0.0f);
-                if (i == lbl_8055EDE0 && lbl_8055EDDC) {
-                    v->Play();
-                } else {
-                    v->Stop();
+            for (part = 0; part < 1; part++) {
+                MusicVoice* v = t->voice;
+                if (v) {
+                    v->SetVolume(lbl_8055EDD8 * fade);
+                    v->SetUnk64(0.0f);
+                    v->SetUnk68(0.0f);
+                    if (i == lbl_8055EDE0 && lbl_8055EDDC) {
+                        v->Play();
+                    } else {
+                        v->Stop();
+                    }
                 }
             }
         }
