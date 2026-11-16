@@ -4,6 +4,12 @@
 // cars and locks the finish order, and runs the race intro countdown ("green flag"). The per-car update, the
 // lap-crossing scan and the qualify helper are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
+// Lane offset of the grid columns (5.0f): this unit's FIRST .sdata2 entry in retail, negated at run time, so it is a
+// named constant defined before any code whose value is not folded. A one-field const struct gives exactly that
+// (type unproven; same idiom as placecar's lbl_80562650).
+struct GridTune { f32 laneOffset; };
+extern const GridTune lbl_805625B8;
+const GridTune lbl_805625B8 = {5.0f};
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -881,6 +887,8 @@ void fn_801B1A5C(DeityCar* c) {
 }  // extern "C"
 
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 extern "C" {
 u32 fn_801363A0(LineFollower* f, const ILPos* p);
@@ -961,9 +969,7 @@ void DeityCar::Update(void) {
                 }
             }
         }
-        f32 t = (lead - 2.0f) / 8.0f;
-        t = 1.0f < t ? 1.0f : t;
-        t = t > 0.0f ? t : 0.0f;
+        f32 t = MaxF(MinF(1.0f, (lead - 2.0f) / 8.0f), 0.0f);
         Car()->boost = LerpF(0.0f, 1.0f, t);
     }
 }
@@ -1218,7 +1224,6 @@ void fn_801B234C(f32 t);
 
 // Puts the cars on the grid: reset, place order from the start positions, then two columns (one if racing
 // alone), each car following the one ahead in its column.
-extern const f32 lbl_805625B8;  // 5.0f: lane offset
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_801B2910(void) {
@@ -1241,8 +1246,8 @@ void fn_801B2910(void) {
     f32 now = lbl_8055E3C8;
     fn_801B234C(0.033366702f + now);
     bool solo = lbl_8055E678 == 1;
-    f32 left = solo ? 0.0f : -lbl_805625B8;
-    f32 right = solo ? 0.0f : lbl_805625B8;
+    f32 left = solo ? 0.0f : -lbl_805625B8.laneOffset;
+    f32 right = solo ? 0.0f : lbl_805625B8.laneOffset;
     DCar* lastRight = 0;
     DCar* lastLeft = 0;
     for (int i = 0; i < lbl_8055E678; i++) {
