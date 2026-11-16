@@ -1431,7 +1431,6 @@ int fn_801E1048(s32 id);
 f32 fn_801DDC8C(void* q, f32 x, f32 z);  // heightfld; retail passes p + 0x6C first
 f32 fn_801DCF48(RVec3* n, f32 x, f32 z);
 void fn_802E30C8(const char* fmt, ...);
-extern char lbl_803325AC[];
 extern s32 lbl_8055E3C4;
 int fn_8014E708(s32 id);
 void fn_801DF074(int a, int b);
@@ -1881,7 +1880,7 @@ void fn_80183E7C(u8* p) {
                 f.z = 0.0f;
                 f.y = push * ((CarBody*)p)->mass / 0.016683351f;
                 ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
-                fn_802E30C8(lbl_803325AC, lbl_8055E3C4, push / 0.44444445f, floor / 0.44444445f);
+                fn_802E30C8("%d: terrain morph pants-kick: %.2f MPH, terr %.2f MPH", lbl_8055E3C4, push / 0.44444445f, floor / 0.44444445f);
                 if (NearZero(((CarBody*)p)->f2688)) {
                     fn_8014E61C(((CarBody*)p)->index, 8, 0.0f);
                 }
