@@ -8,11 +8,9 @@
 
 /* .data owned by this unit (0x80329DA8-0x80329E2C): the Huffman table pointers; the switch jump tables of
    ExpandPlane follow them. */
-u8 *lbl_80329DA8[16] = {
-    (u8 *)lbl_802F65C0, (u8 *)lbl_802F65D0, (u8 *)lbl_802F65F0, (u8 *)lbl_802F6610,
-    (u8 *)lbl_802F6630, (u8 *)lbl_802F6650, (u8 *)lbl_802F6670, (u8 *)lbl_802F6690,
-    (u8 *)lbl_802F66D0, (u8 *)lbl_802F6710, (u8 *)lbl_802F6750, (u8 *)lbl_802F6790,
-    (u8 *)lbl_802F67D0, (u8 *)lbl_802F6810, (u8 *)lbl_802F6890, (u8 *)lbl_802F6910
+// DUMP_DATA lbl_80329DA8 tableptr
+const u8* lbl_80329DA8[16] = {
+#include "dumpdata/lbl_80329DA8.inc"
 };
 
 void OpenReadBundle(s32 arg0, void *arg1, s32 arg2, u32 arg3, s32 arg4, s32 arg5, s32 arg6) {
@@ -83,7 +81,7 @@ s32 simpmergesort(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
         BINK_SKIP(v);                                 \
     }
 
-extern u8 *lbl_80329DA8[16];  // Bink Huffman lookup tables
+extern const u8* lbl_80329DA8[16];  // Bink Huffman lookup tables
 extern const u8 lbl_802F6990[];
 
 // Reads a Huffman tree: picks one of the 16 fixed code tables and reads the symbol order, either explicitly or as
@@ -103,7 +101,7 @@ void ReadHuffTable(BitReader8011 *bits, u8 **lookup, u32 *maxBits, u8 *syms) {
     next = bits->next;
     value = bits->value;
     BINK_GETBITS(table, 4);
-    *lookup = lbl_80329DA8[table];
+    *lookup = (u8*)lbl_80329DA8[table];
     *maxBits = lbl_802F6990[table];
     if (table == 0) {
         for (i = 0; i < 16; i++) {
