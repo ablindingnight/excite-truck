@@ -1444,7 +1444,7 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     Vertex(0xC0FFFFFF, 1, c[3], u1, v1);
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
+/* Helper name unproven: o = a + v * k; the boundary is needed (in place: DrawEdges 100 -> 96.58, DrawFaces -> 99.57) */
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 /* Helper name unproven */
 inline void ExhaustTorchMan::TransformTorchPart(int i, const PlainValMatrix* part) {
