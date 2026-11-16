@@ -2299,8 +2299,49 @@ void fn_80183E7C(u8* p) {
             ev.left = S32(p, 0x2638) == 1;
             fn_801796CC(17, &ev, sizeof(ev));
         }
-        if (!lbl_8055A3B4 || U32(p, 0x10) != 'PCAR' || F32(p, 0x2618) <= lbl_80561CDC || F32(p, 0x25D4) <= lbl_80561DD4 ||
-            S32(p, 0x2638)) {
+        if (lbl_8055A3B4 && U32(p, 0x10) == 'PCAR' && F32(p, 0x2618) > lbl_80561CDC && F32(p, 0x25D4) > lbl_80561DD4 &&
+            !S32(p, 0x2638)) {
+            int held = 0;
+            if (F32(p, 0x25E4) > lbl_80561D40 && U8(p, 0x260D)) {
+                held = 1;
+            }
+            if (F32(p, 0x25F0) < lbl_80561E2C) {
+                F32(p, 0x2628) = now;
+            }
+            if (F32(p, 0x25F0) > lbl_80561D64) {
+                F32(p, 0x262C) = now;
+            }
+            if (!held) {
+                F32(p, 0x2630) = now;
+            }
+            if (S32(p, 0x2644) == 0 && !held) {
+                F32(p, 0x2628) = lbl_80561D94;
+                F32(p, 0x262C) = lbl_80561D94;
+            }
+            f32 l = F32(p, 0x2628);
+            f32 r = F32(p, 0x262C);
+            f32 gap = l - r;
+            r = l < r ? l : r;
+            int side = F32(p, 0x2628) > F32(p, 0x262C) ? 1 : 2;
+            if ((f32)__fabs(gap) < lbl_80561D38 && now - r < lbl_80561CD0 && held &&
+                (S32(p, 0x263C) == 0 || side == S32(p, 0x263C))) {
+                S32(p, 0x2638) = side;
+                S32(p, 0x263C) = side;
+                U8(p, 0x2640) = 0;
+                f32 spin = PSVECDotProduct(p + 0x124, p + 0x48);
+                f32 sgn = lbl_80561CD0;
+                if (S32(p, 0x2638) == 1) {
+                    sgn = lbl_80561DE4;
+                }
+                if (sgn * spin < lbl_80561DE8 && S32(p, 0x2644) == 0) {
+                    S32(p, 0x2638) = 0;
+                } else {
+                    F32(p, 0x2628) = now;
+                    F32(p, 0x262C) = lbl_80561CAC;
+                    S32(p, 0x2644) = S32(p, 0x2644) + 1;
+                }
+            }
+        } else {
             if (S32(p, 0x2638)) {
                 f32 sgn = lbl_80561CD0;
                 if (S32(p, 0x2638) == 1) {
@@ -2322,47 +2363,6 @@ void fn_80183E7C(u8* p) {
                     F32(p, 0x2628) = lbl_80561CAC;
                     F32(p, 0x262C) = lbl_80561CAC;
                     F32(p, 0x2634) = now;
-                }
-            }
-        } else {
-            int held = 0;
-            if (F32(p, 0x25E4) > lbl_80561D40 && U8(p, 0x260D)) {
-                held = 1;
-            }
-            if (F32(p, 0x25F0) < lbl_80561E2C) {
-                F32(p, 0x2628) = now;
-            }
-            if (F32(p, 0x25F0) > lbl_80561D64) {
-                F32(p, 0x262C) = now;
-            }
-            if (!held) {
-                F32(p, 0x2630) = now;
-            }
-            if (S32(p, 0x2644) == 0 && !held) {
-                F32(p, 0x2628) = lbl_80561D94;
-                F32(p, 0x262C) = lbl_80561D94;
-            }
-            f32 l = F32(p, 0x2628);
-            f32 r = F32(p, 0x262C);
-            f32 gap = l - r;
-            r = r < l ? r : l;
-            int side = F32(p, 0x2628) > F32(p, 0x262C) ? 1 : 2;
-            if ((f32)__fabs(gap) < lbl_80561D38 && now - r < lbl_80561CD0 && held &&
-                (S32(p, 0x263C) == 0 || side == S32(p, 0x263C))) {
-                S32(p, 0x2638) = side;
-                S32(p, 0x263C) = side;
-                U8(p, 0x2640) = 0;
-                f32 spin = PSVECDotProduct(p + 0x124, p + 0x48);
-                f32 sgn = lbl_80561CD0;
-                if (S32(p, 0x2638) == 1) {
-                    sgn = lbl_80561DE4;
-                }
-                if (sgn * spin >= lbl_80561DE8 || S32(p, 0x2644)) {
-                    F32(p, 0x2628) = now;
-                    F32(p, 0x262C) = lbl_80561CAC;
-                    S32(p, 0x2644) = S32(p, 0x2644) + 1;
-                } else {
-                    S32(p, 0x2638) = 0;
                 }
             }
         }
