@@ -402,7 +402,8 @@ void fn_8019EECC(u8* owner, ObVec3* c);
 CollShape* __ct__11SphereGroupFUlUl(void* p, u8* frame, u8* owner);
 void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin, f32 m, f32 im);
 void fn_801A0444(CollShape* grp, CollShape* box);
-CollShape* fn_801A2354(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
+// OrientedBoxShape::OrientedBoxShape(frame, centre, owner, k, skin, hx, hy, hz) in sphcoll, called by its linker name.
+CollShape* __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
 CollShape* __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(void* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
 // MeshShape::MeshShape(frame, name, owner) in sphcoll, called by its linker name.
 CollShape* __ct__9MeshShapeFUlPCcUl(void* p, u8* frame, const char* name, u8* owner);
@@ -674,7 +675,7 @@ void Obstacle::Init(BodyDesc* d) {
         CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
             const f32& half = 0.5f;
-            s = fn_801A2354(s, (u8*)frame, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
+            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)frame, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
                             0.2f, q->a, half * q->b, q->a);
         }
         shape = s;
@@ -714,7 +715,7 @@ void Obstacle::Init(BodyDesc* d) {
                     RVec3(1.0f, 1.0f, 1.0f), r, k, skin, 1.0f, secondCenterXY);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
-            box = fn_801A2354(box, (u8*)frame, origin, (u8*)this, k, skin, 0.3f, 0.3f, 0.3f);
+            box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)frame, origin, (u8*)this, k, skin, 0.3f, 0.3f, 0.3f);
         }
         fn_801A0444(shape, box);
         corners = 0;
@@ -830,7 +831,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddShape(ball);
         CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
         if (s) {
-            s = fn_801A2354(s, (u8*)frame, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), (u8*)this, k, skin, hx, hy,
+            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)frame, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), (u8*)this, k, skin, hx, hy,
                             0.61f);
         }
         shape = s;

@@ -757,7 +757,8 @@ void fn_802C7760(s32 model, f32* x0, f32* x1, f32* y0, f32* y1, f32* z0, f32* z1
 // SphereGroup::SphereGroup(frame, owner) in sphcoll, called by its linker name.
 u8* __ct__11SphereGroupFUlUl(u8* p, u8* frame, u8* owner);
 void fn_801A0258(u8* grp, const HVec* c, const BVec* mat, f32 r, f32 k, f32 d, f32 m, f32 im);
-u8* fn_801A2354(u8* p, u8* frame, const BVec* c, u8* owner, f32 k, f32 d, f32 hx, f32 hy, f32 hz);
+// OrientedBoxShape::OrientedBoxShape(frame, centre, owner, k, skin, hx, hy, hz) in sphcoll, called by its linker name.
+u8* __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(u8* p, u8* frame, const BVec* c, u8* owner, f32 k, f32 d, f32 hx, f32 hy, f32 hz);
 void fn_801A0444(u8* grp, u8* box);
 }  // extern "C"
 void* operator new(unsigned long n, const char* tag);
@@ -866,7 +867,7 @@ void fn_80182DF4(u8* p) {
     BVec center(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.5f * (minZ + maxZ));
     u8* box = (u8*)operator new(0x74, "car_box");
     if (box) {
-        box = fn_801A2354(box, p + 0x3C, &center, p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
+        box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, p + 0x3C, &center, p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
                           0.5f * (maxZ - minZ));
     }
     fn_801A0444(PTR(p, 0x268), box);

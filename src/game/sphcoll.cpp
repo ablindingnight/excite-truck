@@ -483,6 +483,14 @@ public:
 class BoxShape : public CollShape {
 public:
     BoxShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    // Parameter form (half sizes x, y, z), inlined into OrientedBoxShape's constructor.
+    BoxShape(u32 frame, u32 owner, f32 k, f32 skin, f32 x, f32 y, f32 z) : CollShape(frame, owner, 'BOX ', k, skin) {
+        F32(this, 0x24) = x;
+        F32(this, 0x28) = y;
+        F32(this, 0x2C) = z;
+        U32(this, 0x34) = 0;
+        F32(this, 0x30) = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
+    }
     virtual void vf10(u8* other);
     virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
     virtual void vf38(RVec3* lo, RVec3* hi) const;
@@ -496,6 +504,7 @@ public:
 // by fn_801A2354). Adds slot vf54 (that rotation). Class name unproven.
 class OrientedBoxShape : public BoxShape {
 public:
+    OrientedBoxShape(u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
     virtual void vf0C(void);
     virtual u8* vf54(void);
     virtual ~OrientedBoxShape(void) {}
@@ -3673,29 +3682,11 @@ void BoxShape::vf4C(void) {
     fn_801E44F4((u8*)&x, cx, cy, cz, 0x50000000);
 }
 
-u8* fn_801A2354(u8* p, u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz) {
-    f32 z = hz - 0.2f;
-    f32 y = hy - 0.2f;
-    f32 x = hx - 0.2f;
-    F32(p, 0x10) = s0;
-    U32(p, 0xC) = a;
-    U32(p, 0x4) = b;
-    U32(p, 0x8) = 0;
-    S32(p, 0x18) = 'BOX ';
-    F32(p, 0x14) = s1;
-    S32(p, 0x20) = 100;
-    U32(p, 0x1C) = 0;
-    *(void**)p = __vt__8BoxShape;
-    F32(p, 0x24) = x;
-    F32(p, 0x28) = y;
-    F32(p, 0x2C) = z;
-    U32(p, 0x34) = 0;
-    F32(p, 0x30) = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
-    F32(p, 0x38) = c->x;
-    *(void**)p = __vt__16OrientedBoxShape;
-    F32(p, 0x3C) = c->y;
-    F32(p, 0x40) = c->z;
-    return p;
+OrientedBoxShape::OrientedBoxShape(u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz)
+    : BoxShape(a, b, s0, s1, hx - 0.2f, hy - 0.2f, hz - 0.2f) {
+    F32(this, 0x38) = c->x;
+    F32(this, 0x3C) = c->y;
+    F32(this, 0x40) = c->z;
 }
 
 // Takes the frame's rotation (0x44), then the world centre (0x68) = frame * local centre (0x38).
