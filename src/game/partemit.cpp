@@ -100,12 +100,7 @@ struct SpawnParams {
     ValPoint v;     // offset 0x24
 };
 
-// world.cpp's ViewState (fn_801E8718), declared as far as its camera frame at 0x0
-struct ViewState {
-    ValVec3 axes[3];  // offset 0x0
-    ValVec3 pos;      // offset 0x24
-};
-
+// ViewState: common.h's PlainValMatrix.
 template <class T>
 struct TArray {
     TArray(T* d, s32 c) {
@@ -147,7 +142,7 @@ void fn_80131818(ValueTable* t);
 int fn_801769F8(void);
 int fn_801E85A4(void);  // player views
 int fn_801E85AC(void);  // max player views
-ViewState* fn_801E8718(int i);
+PlainValMatrix* fn_801E8718(int i);
 void fn_801E88B4(s32* x, s32* y, s32* w, s32* h, int i);
 void fn_801E9DC4(s16* h);
 void fn_801EEFDC(EventHandler h, u8 type);
@@ -578,15 +573,15 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 void fn_802A042C(const EmitterDef* d, const Spawn* s) {
     f32 a;
     for (int i = 0; i < fn_801E85A4(); i++) {
-        ViewState v = *fn_801E8718(i);
+        PlainValMatrix v = *fn_801E8718(i);
         PartVec p;
         PartVec diff;
         p.x = s->pos.x + d->offset.x;
         p.y = s->pos.y + d->offset.y;
         p.z = s->pos.z + d->offset.z;
-        diff.x = p.x - v.pos.x;
-        diff.y = p.y - v.pos.y;
-        diff.z = p.z - v.pos.z;
+        diff.x = p.x - v.origin.x;
+        diff.y = p.y - v.origin.y;
+        diff.z = p.z - v.origin.z;
         f32 curRadius = d->radius;
         f32 r2 = curRadius * d->radius;
         f32 d2 = PSVECDotProduct((const Vec*)&diff, (const Vec*)&diff);

@@ -24,15 +24,10 @@ double tan(double x);
 // A point in a particle array (constructed by new[]).
 typedef Vec3Storage WPt;
 
-// Axes (rows) and the origin.
-struct WFrame {
-    ValVec3 axis[3];
-    ValVec3 pos;  // offset 0x24
-};
-
+// WFrame: common.h's PlainValMatrix.
 // A track object carrying droplet sources.
 struct DropObj {
-    WFrame frame;  // offset 0x0
+    PlainValMatrix frame;  // offset 0x0
     u8 pad30[4];
     ValVec3 vel;   // offset 0x34
 };
@@ -95,7 +90,7 @@ public:
     void Wobble(void);
     void Frustum(void);
     void Drift(void);
-    void Move(f32 turn, const WFrame* cam, const PVec* d);
+    void Move(f32 turn, const PlainValMatrix* cam, const PVec* d);
     void Add(const PVec* p);
     void Fill(void);
     void Spawn(void);
@@ -189,9 +184,9 @@ void fn_802C90F0(s32 tex);
 void fn_802C9124(int x0, int y0, int x1, int y1, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
 void fn_802C9118(void);
 int fn_801E85B4(void);
-const WFrame* fn_802C86DC(void);
+const PlainValMatrix* fn_802C86DC(void);
 void fn_802C9900(f32 a);
-void fn_802C744C(s32 model, const WFrame* f);
+void fn_802C744C(s32 model, const PlainValMatrix* f);
 void fn_802C9904(void);
 void fn_802E317C(const char* fmt, ...);
 void fn_8028E61C(PartParams* d);
@@ -204,11 +199,11 @@ int fn_80287B5C(int n);
 f32 fn_80287BC8(f32 lo, f32 hi);
 void fn_8028E584(s32 sys, const PVec* pos, const ValVec3* vel);
 ValueTable* fn_802AE4C8(int i);
-const WFrame* fn_801E8718(int view);
+const PlainValMatrix* fn_801E8718(int view);
 int fn_801E8758(int view);
 f32 fn_802C9A4C(f32 size);
 f32 fn_802C9A50(void);
-void fn_802C8B98(s32 tex, const WFrame* m);
+void fn_802C8B98(s32 tex, const PlainValMatrix* m);
 int fn_801E501C(int n, const ValVec3* vel, f32 a, u8 alpha);
 void fn_801E5174(f32 x, f32 y, f32 z);
 void fn_801E5348(void);
@@ -263,18 +258,18 @@ static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // The vector in the frame's axes (multiply by the transpose).
-static inline void MulT(const WFrame* m, const ValVec3* v, ValVec3* out) {
+static inline void MulT(const PlainValMatrix* m, const ValVec3* v, ValVec3* out) {
     if (out == v) {
-        f32 x = Dot3(v->x, m->axis[0].x, v->y, m->axis[0].y, v->z, m->axis[0].z);
-        f32 y = Dot3(v->x, m->axis[1].x, v->y, m->axis[1].y, v->z, m->axis[1].z);
-        f32 z = Dot3(v->x, m->axis[2].x, v->y, m->axis[2].y, v->z, m->axis[2].z);
+        f32 x = Dot3(v->x, m->basis[0].x, v->y, m->basis[0].y, v->z, m->basis[0].z);
+        f32 y = Dot3(v->x, m->basis[1].x, v->y, m->basis[1].y, v->z, m->basis[1].z);
+        f32 z = Dot3(v->x, m->basis[2].x, v->y, m->basis[2].y, v->z, m->basis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(v->x, m->axis[0].x, v->y, m->axis[0].y, v->z, m->axis[0].z);
-        out->y = Dot3(v->x, m->axis[1].x, v->y, m->axis[1].y, v->z, m->axis[1].z);
-        out->z = Dot3(v->x, m->axis[2].x, v->y, m->axis[2].y, v->z, m->axis[2].z);
+        out->x = Dot3(v->x, m->basis[0].x, v->y, m->basis[0].y, v->z, m->basis[0].z);
+        out->y = Dot3(v->x, m->basis[1].x, v->y, m->basis[1].y, v->z, m->basis[1].z);
+        out->z = Dot3(v->x, m->basis[2].x, v->y, m->basis[2].y, v->z, m->basis[2].z);
     }
 }
 
@@ -290,18 +285,18 @@ static inline void MulTSelf(const void* basis, ValVec3* v) {
 }
 
 // The vector out of the frame's axes.
-static inline void Mul(const WFrame* m, const ValVec3* v, ValVec3* out) {
+static inline void Mul(const PlainValMatrix* m, const ValVec3* v, ValVec3* out) {
     if (out == v) {
-        f32 x = Dot3(v->x, m->axis[0].x, v->y, m->axis[1].x, v->z, m->axis[2].x);
-        f32 y = Dot3(v->x, m->axis[0].y, v->y, m->axis[1].y, v->z, m->axis[2].y);
-        f32 z = Dot3(v->x, m->axis[0].z, v->y, m->axis[1].z, v->z, m->axis[2].z);
+        f32 x = Dot3(v->x, m->basis[0].x, v->y, m->basis[1].x, v->z, m->basis[2].x);
+        f32 y = Dot3(v->x, m->basis[0].y, v->y, m->basis[1].y, v->z, m->basis[2].y);
+        f32 z = Dot3(v->x, m->basis[0].z, v->y, m->basis[1].z, v->z, m->basis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(v->x, m->axis[0].x, v->y, m->axis[1].x, v->z, m->axis[2].x);
-        out->y = Dot3(v->x, m->axis[0].y, v->y, m->axis[1].y, v->z, m->axis[2].y);
-        out->z = Dot3(v->x, m->axis[0].z, v->y, m->axis[1].z, v->z, m->axis[2].z);
+        out->x = Dot3(v->x, m->basis[0].x, v->y, m->basis[1].x, v->z, m->basis[2].x);
+        out->y = Dot3(v->x, m->basis[0].y, v->y, m->basis[1].y, v->z, m->basis[2].y);
+        out->z = Dot3(v->x, m->basis[0].z, v->y, m->basis[1].z, v->z, m->basis[2].z);
     }
 }
 
@@ -437,20 +432,20 @@ void fn_802A4E08(void) {
         fn_802C9118();
     }
     if (!((f32)__fabs(s->lightning) <= __float_epsilon[0]) && lbl_8055F898 != -1) {
-        WFrame m;
-        m.pos = fn_802C86DC()->pos;
+        PlainValMatrix m;
+        m.origin = fn_802C86DC()->origin;
         f32 ang = *(f32*)(s + 1);
         f32 c = cos(ang);
         f32 sn = sin(ang);
-        m.axis[0].x = c;
-        m.axis[0].y = 0.0f;
-        m.axis[0].z = -sn;
-        m.axis[1].x = 0.0f;
-        m.axis[1].y = 1.0f;
-        m.axis[1].z = 0.0f;
-        m.axis[2].x = sn;
-        m.axis[2].y = 0.0f;
-        m.axis[2].z = c;
+        m.basis[0].x = c;
+        m.basis[0].y = 0.0f;
+        m.basis[0].z = -sn;
+        m.basis[1].x = 0.0f;
+        m.basis[1].y = 1.0f;
+        m.basis[1].z = 0.0f;
+        m.basis[2].x = sn;
+        m.basis[2].y = 0.0f;
+        m.basis[2].z = c;
         fn_802C9900(FMin(2.0f * s->lightning, 1.0f));
         fn_802C744C(lbl_8055F898, &m);
         fn_802C9904();
@@ -599,9 +594,9 @@ void fn_802A53B0(DropHit* hits, int n) {
                     f32 originZ = d->origin.z;
                     p.z = originZ + d->sv.z * a + d->tv.z * b;
                     Mul(&o->frame, &p, &p);
-                    p.x = p.x + o->frame.pos.x;
-                    p.y = p.y + o->frame.pos.y;
-                    p.z = p.z + o->frame.pos.z;
+                    p.x = p.x + o->frame.origin.x;
+                    p.y = p.y + o->frame.origin.y;
+                    p.z = p.z + o->frame.origin.z;
                     fn_8028E584(lbl_8055F894, (const PVec*)&p, &vel);
                 }
             }
@@ -713,7 +708,7 @@ static inline void SubV3(void* o_, const void* a_, const void* b_) {
     o[2] = a[2] - b[2];
 }
 void SnowSystem::Update(void) {
-    WFrame cam;
+    PlainValMatrix cam;
     cam = *fn_801E8718(view);
     Frustum();
     ValVec3 d;
@@ -725,20 +720,20 @@ void SnowSystem::Update(void) {
     MulT(&cam, &g, &grav);
     Scaled(&vel, &grav, 0.05f);
     if (!fn_801E8758(view)) {
-        d.x = lastPos.x - cam.pos.x;
-        d.y = lastPos.y - cam.pos.y;
-        d.z = lastPos.z - cam.pos.z;
-        MulTSelf(cam.axis, &d);
+        d.x = lastPos.x - cam.origin.x;
+        d.y = lastPos.y - cam.origin.y;
+        d.z = lastPos.z - cam.origin.z;
+        MulTSelf(cam.basis, &d);
         AddScaled(&vel, &d, 0.2f);
-        PSVECCrossProduct((const Vec*)&cam.axis[2], (const Vec*)&lastDir, (Vec*)&c);
-        Move(PSVECDotProduct((const Vec*)&cam.axis[1], (const Vec*)&c), &cam, (const PVec*)&d);
+        PSVECCrossProduct((const Vec*)&cam.basis[2], (const Vec*)&lastDir, (Vec*)&c);
+        Move(PSVECDotProduct((const Vec*)&cam.basis[1], (const Vec*)&c), &cam, (const PVec*)&d);
         Spawn();
         Drift();
     } else {
         Fill();
     }
-    lastPos = cam.pos;
-    lastDir = cam.axis[2];
+    lastPos = cam.origin;
+    lastDir = cam.basis[2];
 }
 
 static inline int GridYLimit(s32 height, int edge) {
@@ -802,7 +797,7 @@ void SnowSystem::Drift(void) {
     driftY = fn_80287BC8(-1.5f, 1.5f);
 }
 
-void SnowSystem::Move(f32 turn, const WFrame* cam, const PVec* d) {
+void SnowSystem::Move(f32 turn, const PlainValMatrix* cam, const PVec* d) {
     f32 tx = tanHalf / fn_802C9A50();
     f32 ty = tanHalf;
     f32 dt = fn_802A4AD4();
@@ -913,7 +908,7 @@ void RainSystem::Reset(void) {
 // Helper name unproven.
 
 void RainSystem::Update(void) {
-    const WFrame* cam = fn_801E8718(view);
+    const PlainValMatrix* cam = fn_801E8718(view);
     Frustum();
     ValVec3 d;
     ValVec3 g;
@@ -922,10 +917,10 @@ void RainSystem::Update(void) {
     g.z = 0.0f;
     MulT(cam, &g, &dir);
     if (!fn_801E8758(view)) {
-        d.x = lastPos.x - cam->pos.x;
-        d.y = lastPos.y - cam->pos.y;
-        d.z = lastPos.z - cam->pos.z;
-        MulTSelf(cam->axis, &d);
+        d.x = lastPos.x - cam->origin.x;
+        d.y = lastPos.y - cam->origin.y;
+        d.z = lastPos.z - cam->origin.z;
+        MulTSelf(cam->basis, &d);
         MadV(&vel, &dir, &d, -1.5f);
         f32 inv = 1.0f / (f32)sqrt(PSVECDotProduct((const Vec*)&vel, (const Vec*)&vel));
         vel.x = vel.x * (0.25f * inv);
@@ -939,7 +934,7 @@ void RainSystem::Update(void) {
         vel.z = dir.z / 4.0f;
         Fill();
     }
-    lastPos = cam->pos;
+    lastPos = cam->origin;
 }
 
 void RainSystem::Draw(void) {
@@ -1104,7 +1099,7 @@ void Mist::Reset(void) {
 
 void Mist::Update(void) {
     f32 z;
-    f32 d2 = PSVECSquareDistance((const Vec*)(&fn_801E8718(0)->pos), (const Vec*)&center);
+    f32 d2 = PSVECSquareDistance((const Vec*)(&fn_801E8718(0)->origin), (const Vec*)&center);
     f32 a;
     if (d2 > rad * rad) {
         f32 dt = fn_802A4AD4();
@@ -1148,7 +1143,7 @@ void Mist::Update(void) {
 }
 
 void Mist::Draw(void) {
-    int a = Alpha(0.01f * (255.0f * (PSVECDistance((const Vec*)(&fn_802C86DC()->pos), (const Vec*)&center) - 0.5f * rad)));
+    int a = Alpha(0.01f * (255.0f * (PSVECDistance((const Vec*)(&fn_802C86DC()->origin), (const Vec*)&center) - 0.5f * rad)));
     if (a > 0) {
         f32 old = fn_802C9A4C(pointScale);
         fn_802C8BD0(tex);

@@ -22,11 +22,7 @@ public:
     void Draw(const OFrame* f) const;
 };
 
-struct PickCam {
-    ValVec3 basis[3];
-    ValVec3 pos;  // offset 0x24
-};
-
+// PickCam: common.h's PlainValMatrix.
 ModuleTag lbl_8055ED20;
 
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
@@ -73,7 +69,7 @@ static inline void AddVertical(ValVec3& out, const ValVec3& up, f32 delta, f32 a
 }
 
 // Finds the terrain under screen point (sx, sy); returns 0 when there is none.
-int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam, int sx, int sy) {
+int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PlainValMatrix* cam, int sx, int sy) {
     ValVec3 dir;
     ValVec3 hit;
     ValVec3 normal;
@@ -109,9 +105,9 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam,
     int fail;
     int halved = 0;
     do {
-        p.x = cam->pos.x + dir.x * dist;
-        p.y = cam->pos.y + dir.y * dist;
-        p.z = cam->pos.z + dir.z * dist;
+        p.x = cam->origin.x + dir.x * dist;
+        p.y = cam->origin.y + dir.y * dist;
+        p.z = cam->origin.z + dir.z * dist;
         hit = p;
         int back = 0;
         fn_801E9DC4(hint);

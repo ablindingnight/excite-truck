@@ -383,12 +383,7 @@ static const char* const lbl_80562960 = "speech\0music";
 static const char* const lbl_80562964 = "world\0start\0car\0\0\0\0";
 static const char* const lbl_80562968 = "linear\0hermite\0\0\0\0";
 
-// A camera frame: axes (rows) and position, as in camframe.
-struct IFrame {
-    ValVec3 axes[3];  // offset 0x0
-    ValVec3 pos;      // offset 0x24
-};
-
+// IFrame: common.h's PlainValMatrix.
 struct IQuat {
     f32 x, y, z, w;
 };
@@ -432,10 +427,10 @@ static inline void RotToQuat(const Mat3* r, IQuat* q) {
     }
 }
 
-static inline void FrameToQuat(const IFrame* f, IQuat* q) { RotToQuat((const Mat3*)f, q); }
+static inline void FrameToQuat(const PlainValMatrix* f, IQuat* q) { RotToQuat((const Mat3*)f, q); }
 
 // The rotation of a unit quaternion.
-static inline void QuatToFrame(IFrame* f, const IQuat* q) {
+static inline void QuatToFrame(PlainValMatrix* f, const IQuat* q) {
     f32(*m)[3] = (f32(*)[3])f;
     f32 x2 = q->x + q->x;
     f32 y2 = q->y + q->y;
@@ -492,7 +487,7 @@ static inline void SetV(ValVec3* v, f32 x, f32 y, f32 z) {
     v->z = z;
 }
 
-void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
+void fn_801C2FF4(PlainValMatrix* out, const PlainValMatrix* a, const PlainValMatrix* b, f32 t) {
     IQuat qa;
     IQuat qb;
     IQuat q;
@@ -501,8 +496,8 @@ void fn_801C2FF4(IFrame* out, const IFrame* a, const IFrame* b, f32 t) {
     FrameToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToFrame(out, &q);
-    SetV(&pos, FrameLerp(a->pos.x, b->pos.x, t), FrameLerp(a->pos.y, b->pos.y, t), FrameLerp(a->pos.z, b->pos.z, t));
-    out->pos = pos;
+    SetV(&pos, FrameLerp(a->origin.x, b->origin.x, t), FrameLerp(a->origin.y, b->origin.y, t), FrameLerp(a->origin.z, b->origin.z, t));
+    out->origin = pos;
 }
 
 // Rounds to hundredths.
@@ -1684,7 +1679,7 @@ int fn_801C5B68(CamView* v, int idx) {
         if (lbl_80437D88.play.interpType == 1) {
             u = Ease(u);
         }
-        fn_801C2FF4((IFrame*)v, (IFrame*)&lbl_80437D88.prev, (IFrame*)v, u);
+        fn_801C2FF4((PlainValMatrix*)v, (PlainValMatrix*)&lbl_80437D88.prev, (PlainValMatrix*)v, u);
         lbl_80437D88.play.fov = lbl_80437D88.prevFov + u * (lbl_80437D88.play.fov - lbl_80437D88.prevFov);
     } else {
         lbl_80437D88.prev = *v;

@@ -24,11 +24,7 @@ struct StuntCar {
     Vec wheel3;  // offset 0x124
 };
 
-struct StuntMtx {
-    ValVec3 rot[3];  // offset 0x0
-    ValVec3 pos;     // offset 0x24
-};
-
+// StuntMtx: common.h's PlainValMatrix.
 struct SColor {
     SColor(void) {}
     SColor(f32 a, f32 b, f32 c) {
@@ -545,7 +541,7 @@ void fn_802AAD5C(void* cam, StuntPart* p, const StuntCar* car) {
 void fn_802AAF00(void* cam, StuntPart* p, const StuntCar* car) {}
 
 void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
-    StuntMtx m = *(const StuntMtx*)car;
+    PlainValMatrix m = *(const PlainValMatrix*)car;
     if (p->sparkAmt > 0.001f) {
         fn_802C8BD0(lbl_8055CC64);
         for (int k = 0; k < 2; k++) {
@@ -559,12 +555,12 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                 }
                 f32 cx = p->sizeZ * (f32)cos(ang) / 2.0f;
                 f32 sz = p->sizeZ * (f32)sin(ang) / 2.0f;
-                bx = m.pos.x + m.rot[0].x * cx;
-                by = m.pos.y + m.rot[0].y * cx;
-                bz = m.pos.z + m.rot[0].z * cx;
-                bx = bx + m.rot[2].x * sz;
-                by = by + m.rot[2].y * sz;
-                bz = bz + m.rot[2].z * sz;
+                bx = m.origin.x + m.basis[0].x * cx;
+                by = m.origin.y + m.basis[0].y * cx;
+                bz = m.origin.z + m.basis[0].z * cx;
+                bx = bx + m.basis[2].x * sz;
+                by = by + m.basis[2].y * sz;
+                bz = bz + m.basis[2].z * sz;
                 fj *= 0.25f;
                 Vec v[2];
                 for (int i = 0; i < 2; i++) {
@@ -572,7 +568,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                     v[i].y = by;
                     v[i].z = bz;
                     f32 h = i ? p->sizeY / 2.0f - 0.4f : 0.4f + p->sizeY / 2.0f;
-                    AddScaled(&v[i], &v[i], (const Vec*)&m.rot[1], h);
+                    AddScaled(&v[i], &v[i], (const Vec*)&m.basis[1], h);
                     u32 color = Round(255.0f * p->sparkAmt) << 24 | 0xFFFFFF;
                     fn_802C8E00(v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj, color, 1);
                 }
@@ -742,19 +738,19 @@ void fn_802ABC2C(void) {
 }
 
 /* Helper name unproven. */
-static inline void OffsetStuntPosition(Vec& pos, const StuntMtx* m, f32 ang, f32 a, f32 b) {
-    Vec x = *(const Vec*)&m->rot[0];
-    Vec z = *(const Vec*)&m->rot[2];
-    *(WV3*)&pos = *(const WV3*)&m->pos;
+static inline void OffsetStuntPosition(Vec& pos, const PlainValMatrix* m, f32 ang, f32 a, f32 b) {
+    Vec x = *(const Vec*)&m->basis[0];
+    Vec z = *(const Vec*)&m->basis[2];
+    *(WV3*)&pos = *(const WV3*)&m->origin;
     AddScaled(&pos, &pos, &x, a * (f32)cos(ang));
     AddScaled(&pos, &pos, &z, b * (f32)sin(ang));
 }
 
-void fn_802ABC80(const StuntMtx* m, const ValVec3* vel, f32 a, f32 b, f32 c) {
+void fn_802ABC80(const PlainValMatrix* m, const ValVec3* vel, f32 a, f32 b, f32 c) {
     f32 ang = fn_80287BC8(-3.1415927f, 3.1415927f);
     Vec pos;
     OffsetStuntPosition(pos, m, ang, a, b);
-    AddScaled(&pos, &pos, (const Vec*)&m->rot[1], fn_80287BC8(0.0f, 2.0f * c));
+    AddScaled(&pos, &pos, (const Vec*)&m->basis[1], fn_80287BC8(0.0f, 2.0f * c));
     EmitCopySpin(lbl_8055F924->e0, *(ValVec3*)&pos, *vel, 1.0f);
 }
 
