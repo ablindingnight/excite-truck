@@ -177,7 +177,7 @@ void* fn_801769CC(void);
 
 class BSound {
 public:
-    virtual void vf08(void);
+    virtual ~BSound(void);  // Sound family: destructor at 0x08
     u8 pad4[0x4];
     f32 vol;  // offset 0x8
     u8 padC[0x49 - 0xC];

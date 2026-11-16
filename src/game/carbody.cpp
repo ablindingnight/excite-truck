@@ -39,10 +39,10 @@ public:
     virtual void v38(void);
 };
 
-// A large interface reached through slot 0xCC.
+// The game mode (fn_801B83A0, GameMode family: destructor at 0x08), reached through slot 0xCC.
 class VBig {
 public:
-    virtual void s08(void);
+    virtual ~VBig(void);
     virtual void s0C(void);
     virtual void s10(void);
     virtual void s14(void);

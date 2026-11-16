@@ -211,7 +211,7 @@ struct SphCache {
 // The volume interface viewed through its two setters.
 class VSet {
 public:
-    virtual void s08(void);
+    virtual ~VSet(void);  // CollShape family: destructor at 0x08, SetSurface (SetA) at 0x40
     virtual void s0C(void);
     virtual void s10(void);
     virtual void s14(void);
@@ -261,9 +261,10 @@ static inline void SwapN(u8* p, int n) {
     }
 }
 
+// A collision shape (CollShape family: destructor at 0x08, vf20 friction, Radius 0x3C).
 class VEx {
 public:
-    virtual void v08(void);
+    virtual ~VEx(void);
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);

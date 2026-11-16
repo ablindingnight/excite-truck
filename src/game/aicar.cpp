@@ -27,6 +27,8 @@ struct V2 {
     f32 x, y;
 };
 
+// A mixed view: the car's DeityCar (car + 0x270, fn_801B2ED0; slot 0x08 = Reset) and the car's value table
+// (car + 0x2C0). Its 0x08 is NOT a destructor; the destructor-first classes use VFollow/VMode/VSelf below.
 class VIface {
 public:
     virtual void v08(void);
@@ -73,9 +75,10 @@ public:
     virtual void vAC(s32 a);
 };
 
+// The AI driver itself (lbl_80333348: AIDriver_vf08 is its destructor).
 class VSelf {
 public:
-    virtual void v08(void);
+    virtual ~VSelf(void);
     virtual void v0C(void);
     virtual void v10(void);
     virtual void v14(void);
@@ -86,6 +89,66 @@ public:
     virtual void v28(void);
     virtual void v2C(void);
     virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+};
+
+// The driver's two LineFollowers (d + 0x168 / 0x19C): destructor at 0x08, SetLine at 0x0C.
+class VFollow {
+public:
+    virtual ~VFollow(void);
+    virtual void SetLine(int line);
+};
+
+// The game mode (fn_801B83A0, GameMode family: destructor at 0x08).
+class VMode {
+public:
+    virtual ~VMode(void);
+    virtual void v0C(void);
+    virtual void v10(void);
+    virtual void v14(void);
+    virtual void v18(void);
+    virtual void v1C(void);
+    virtual void v20(void);
+    virtual void v24(void);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual void v38(void);
+    virtual void v3C(void);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+    virtual void v4C(void);
+    virtual void v50(void);
+    virtual void v54(void);
+    virtual void v58(void);
+    virtual void v5C(void);
+    virtual void v60(void);
+    virtual void v64(void);
+    virtual void v68(void);
+    virtual void v6C(void);
+    virtual void v70(void);
+    virtual void v74(void);
+    virtual void v78(void);
+    virtual void v7C(void);
+    virtual void v80(void);
+    virtual void v84(void);
+    virtual void v88(void);
+    virtual void v8C(void);
+    virtual void v90(void);
+    virtual void v94(void);
+    virtual void v98(void);
+    virtual void v9C(void);
+    virtual void vA0(void);
+    virtual void vA4(void);
+    virtual void vA8(void);
+    virtual void vAC(s32 a);
 };
 
 #define VI(p) ((VIface*)(p))
@@ -548,8 +611,8 @@ u8* fn_801938F4(u8* d) {
     __ct__12LineFollowerFv(m);
     __ct__12LineFollowerFv(m + 0x34);
     F32(m, 0x68) = -999.0f;
-    VI(m + 0x34)->v0C(0);
-    VI(m)->v0C(0);
+    ((VFollow*)(m + 0x34))->SetLine(0);
+    ((VFollow*)m)->SetLine(0);
     CAR(d) = 0;
     CARID(d) = -1000;
     return d;
@@ -756,8 +819,8 @@ void AIDriver_vf30(u8* d) {
         }
     }
     F32(d, 0x1D0) = -999.0f;
-    VI(d + 0x19C)->v0C(0);
-    VI(d + 0x168)->v0C(0);
+    ((VFollow*)(d + 0x19C))->SetLine(0);
+    ((VFollow*)(d + 0x168))->SetLine(0);
     fn_80195D80(d, t);
     S32(d, 0x268) = 6;
     U8(d, 0x2A6) = 0;
@@ -842,7 +905,7 @@ void fn_80194324(u8* d) {
         }
         if (!ok && F32(d, 0x1D8) >= lo) {
             void* w = fn_801B83A0();
-            VI(w)->vAC(CARID(d));
+            ((VMode*)w)->vAC(CARID(d));
             F32(d, 0x1D8) = 0.0f;
         }
     }
@@ -1866,7 +1929,7 @@ void fn_8019684C(void) {
         fn_801967FC(full.cars[k]);
     }
     for (k = 0; k < lbl_804349E0.count; k++) {
-        VI(lbl_804349E0.items[k])->v48();
+        ((VSelf*)lbl_804349E0.items[k])->v48();
     }
 }
 

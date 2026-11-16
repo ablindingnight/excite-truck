@@ -177,9 +177,10 @@ extern "C" {
 void fn_801B0C78(int car);
 }
 
+// The car's controller (car + 0x270C, Hybrid/IDriver family): destructor at 0x08.
 class CarCtl {
 public:
-    virtual void vf08(void);
+    virtual ~CarCtl(void);
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual u32 vf14(void);

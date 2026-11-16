@@ -125,9 +125,10 @@ public:
     f32 boost;   // offset 0x5EC: catch-up
 };
 
+// The AI sub-task manager (fn_8013C9F4, CSubTaskMgr family: destructor at 0x08).
 class DAI {
 public:
-    virtual void v08(void);
+    virtual ~DAI(void);
     virtual int v0C(void* a, void* b, int c, void* d, void* e);
     virtual int v10(void* a, void* b, int c, void* d, void* e);
     virtual int v14(int a, int b);

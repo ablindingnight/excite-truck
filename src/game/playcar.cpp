@@ -29,9 +29,11 @@ struct PFlags {
 
 #define PF(p) ((PFlags*)((u8*)(p) + 7))
 
+// The PhysDriver input interface (__vt__10PhysDriver: SetGear at 0x08, destructor LAST at 0x80), as seen
+// through the car's replay Recorder (lbl_80332F40 forwards every slot to its PhysDriver source).
 class VPx {
 public:
-    virtual void v08(void);
+    virtual void v08(void);  // SetGear (not a destructor)
     virtual void v0C(void);
     virtual void v10(u8* car);
     virtual u32 v14(void);
@@ -66,6 +68,31 @@ public:
 
 #define VP(p) ((VPx*)(p))
 
+// The player controller (lbl_80333018) and its drivers (IDriver family at +0x8/+0xC, active one at +0x10):
+// slot 0x08 is the destructor. Class name unproven.
+class VCtl {
+public:
+    virtual ~VCtl(void);
+    virtual void v0C(void);
+    virtual void v10(u8* car);
+    virtual u32 v14(void);
+    virtual int v18(int x);
+    virtual void v1C(s32 x, s32 y, s32* dx, s32* dy, f32 t);
+    virtual int v20(int x);
+    virtual void v24(int a);
+    virtual void v28(void);
+    virtual void v2C(void);
+    virtual void v30(void);
+    virtual void v34(void);
+    virtual int v38(void);
+    virtual void v3C(u32 a, u32 b, int c, u32 d);
+    virtual void v40(void);
+    virtual void v44(void);
+    virtual void v48(void);
+};
+
+#define VC(p) ((VCtl*)(p))
+
 class VDtor {
 public:
     virtual ~VDtor(void);
@@ -84,7 +111,7 @@ static inline void SetMode(u8* p, int on) {
 // The same interface viewed with an argument-less slot 0x24.
 class VPa {
 public:
-    virtual void s08(void);
+    virtual ~VPa(void);  // PlayerDriver_vf08 is the destructor
     virtual void s0C(void);
     virtual void s10(void);
     virtual void s14(void);
@@ -403,11 +430,18 @@ public:
     virtual u8 v68(void);
 };
 
-// Car controller interface (driver/hybrid at +0x8/+0xC, controller at +0x14).
+// The drivers at +0x8/+0xC (IDriver family: destructor at 0x08, Init at 0x0C).
 class CarCtl {
 public:
-    virtual void v08(void);
+    virtual ~CarCtl(void);
     virtual void Attach(u8* car, u8* q);
+};
+
+// The car's DeityCar (+0x14, fn_801B2EC0): Reset at 0x08 (not a destructor), State at 0x10, Ideal at 0x18.
+class DeityView {
+public:
+    virtual void Reset(void);
+    virtual void Update(void);
     virtual u8* Info(void);
     virtual void v14(void);
     virtual s32 v18(void);
@@ -415,7 +449,7 @@ public:
 
 extern "C" {
 ReplaySrc* fn_8018108C(s32 id);
-CarCtl* fn_801B2EC0(s32 id);
+DeityView* fn_801B2EC0(s32 id);
 }
 
 // The car's replay recorder (0x24): writes packets into the car's replay buffer.
@@ -460,7 +494,7 @@ void fn_8018FFC4(u8* p, u8* car, u8* q) {
     B8(p, 0x26) = S32(q, 0x5C) != 0;
     PTR(p, 0x20) = car;
     S32(p, 0x1C) = S32(car, 0x1EC);
-    CarCtl* c = fn_801B2EC0(S32(p, 0x1C));
+    DeityView* c = fn_801B2EC0(S32(p, 0x1C));
     PTR(p, 0x14) = (u8*)c;
     S32(p, 0x18) = c->v18();
     ((CarCtl*)PTR(p, 0x8))->Attach(car, q);
@@ -473,8 +507,8 @@ void fn_8018FFC4(u8* p, u8* car, u8* q) {
 void fn_80190184(u8* p, u8* car) {
     PTR(p, 0x20) = car;
     S32(p, 0x1C) = S32(car, 0x1EC);
-    VP(PTR(p, 0x8))->v10(car);
-    VP(PTR(p, 0xC))->v10(car);
+    VC(PTR(p, 0x8))->v10(car);
+    VC(PTR(p, 0xC))->v10(car);
 }
 
 u32 fn_801901F0(u8* p) {
@@ -483,7 +517,7 @@ u32 fn_801901F0(u8* p) {
             VP(PTR(p, 0x4))->v78(0);
         }
         if (PTR(p, 0x10)) {
-            u32 f = VP(PTR(p, 0x10))->v14();
+            u32 f = VC(PTR(p, 0x10))->v14();
             if (!U8(p, 0x34)) {
                 f |= 0x10;
             }
@@ -513,7 +547,7 @@ void fn_801902B4(u8* p) {
         U8(p, 0x38) = 0;
         fn_802793B0(PTR(p, 0x28));
     }
-    VP(p)->v30();
+    VC(p)->v30();
 }
 
 void fn_80190360(u8* p) { fn_80191084(p, 0); }
@@ -602,7 +636,7 @@ void fn_801B86A4(s32 car);
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 void fn_80190388(u8* p) {
-    u8* info = ((CarCtl*)PTR(p, 0x14))->Info();
+    u8* info = ((DeityView*)PTR(p, 0x14))->Info();
     f32 now = lbl_8055E3C8;
     Recorder* rec = (Recorder*)PTR(p, 0x4);
     f32 speed = ((RaceCarRec*)PTR(p, 0x20))->Speed();
@@ -658,7 +692,7 @@ void fn_80190388(u8* p) {
         fn_80191084(p, U32(p, 0xC));
     }
     if (PTR(p, 0x10) == PTR(p, 0xC)) {
-        VP(PTR(p, 0xC))->v48();
+        VC(PTR(p, 0xC))->v48();
     } else {
         VP(PTR(p, 0x4))->v78(0);
     }
@@ -760,7 +794,7 @@ u32 fn_80190E00(u8* p) { return U32(p, 0x8); }
 void fn_80190E08(void) {
     u8** a = lbl_804349A0;
     for (int i = 0; i < lbl_8055E518; i++) {
-        VP(*a)->v48();
+        VC(*a)->v48();
         a++;
     }
 }
@@ -770,7 +804,7 @@ void fn_80190E6C(void) { fn_80190E08(); }
 void fn_80190E70(u8* p) {
     u8* o = PTR(p, 0x10);
     if (o) {
-        VP(o)->v2C();
+        VC(o)->v2C();
     }
     fn_801B665C();
 }
@@ -785,8 +819,8 @@ void fn_80190EAC(u8* p) {
         lbl_8055E524 = z;
     }
     S32(o, 0x8) = S32(o, 0x18);
-    VP(PTR(p, 0x8))->v30();
-    VP(PTR(p, 0xC))->v30();
+    VC(PTR(p, 0x8))->v30();
+    VC(PTR(p, 0xC))->v30();
     fn_80191084(p, 0);
     fn_80191084(p, fn_80191100(p));
     fn_801B6658();
@@ -798,7 +832,7 @@ void fn_80190EAC(u8* p) {
 
 void fn_80190F90(u8* p) { fn_80191758(p); }
 
-void fn_80190F94(u8* p) { VP(PTR(p, 0x10))->v38(); }
+void fn_80190F94(u8* p) { VC(PTR(p, 0x10))->v38(); }
 
 void fn_80190FA8(u8* p, u32 a, u32 b, int c, u32 d) {
     if (!PTR(p, 0x10)) {
@@ -808,7 +842,7 @@ void fn_80190FA8(u8* p, u32 a, u32 b, int c, u32 d) {
         lbl_8055E520 = 1;
         fn_801797A8(PTR(p, 0x28), "Hit object!");
     }
-    VP(PTR(p, 0x10))->v3C(a, b, c, d);
+    VC(PTR(p, 0x10))->v3C(a, b, c, d);
 }
 
 void fn_80191060(u8* p) { fn_801B6664(p); }
@@ -816,7 +850,7 @@ void fn_80191060(u8* p) { fn_801B6664(p); }
 void fn_80191064(u8* p) {
     u8* o = PTR(p, 0x10);
     if (o) {
-        VP(o)->v44();
+        VC(o)->v44();
     }
 }
 
@@ -851,8 +885,8 @@ void fn_80191084(u8* p, u32 next) {
 u32 fn_80191100(u8* p) { return U32(p, 0xc); }
 
 int fn_80191108(u8* p, int x) {
-    int a = VP(PTR(p, 0xC))->v18(x);
-    return a + VP(PTR(p, 0x8))->v18(x + a);
+    int a = VC(PTR(p, 0xC))->v18(x);
+    return a + VC(PTR(p, 0x8))->v18(x + a);
 }
 
 void fn_80191178(u8* p, s32 x, s32 y, s32* outx, s32* outy, f32 t) {
@@ -860,8 +894,8 @@ void fn_80191178(u8* p, s32 x, s32 y, s32* outx, s32* outy, f32 t) {
     s32 ay;
     s32 bx;
     s32 by;
-    VP(PTR(p, 0xC))->v1C(x, y, &ax, &ay, t);
-    VP(PTR(p, 0x8))->v1C(x + ax, y + ay, &bx, &by, t);
+    VC(PTR(p, 0xC))->v1C(x, y, &ax, &ay, t);
+    VC(PTR(p, 0x8))->v1C(x + ax, y + ay, &bx, &by, t);
     *outx = ax + bx;
     *outy = ay + by;
     fn_801B6660();
@@ -869,8 +903,8 @@ void fn_80191178(u8* p, s32 x, s32 y, s32* outx, s32* outy, f32 t) {
 }
 
 int fn_80191240(u8* p, int x) {
-    int a = x + VP(PTR(p, 0xC))->v20(x);
-    a = a + VP(PTR(p, 0x8))->v20(a);
+    int a = x + VC(PTR(p, 0xC))->v20(x);
+    a = a + VC(PTR(p, 0x8))->v20(a);
     return a - x;
 }
 

@@ -108,9 +108,10 @@ public:
     virtual StatsHolder* Get(void);  // 0x1C
 };
 
+// The game mode (fn_801B83A0, GameMode family: destructor at 0x08).
 class Course {
 public:
-    virtual void vf08(void);
+    virtual ~Course(void);
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
