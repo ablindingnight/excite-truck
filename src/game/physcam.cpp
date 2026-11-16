@@ -17,7 +17,7 @@
 
 // A position on a camera path: the segment and how far along it.
 struct PathPos {
-    u8* seg;  // offset 0x0
+    IdealPoint* seg;  // offset 0x0 (idealline.h; the ILPos returned by value)
     f32 t;    // offset 0x4
     u32 w8;   // offset 0x8
 };
@@ -340,10 +340,10 @@ int find_best_region(u8* car, int type) {
         f32* heading = &lbl_8055F568;
         if (fn_801B526C()) {
             const PathPos& pos = fn_80136414(track, S32(car, 0x2678));
-            *heading = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
+            *heading = pos.seg->dist + pos.seg->len * pos.t;
         } else {
             const PathPos& pos = fn_80136414(track, fn_801363A0(track, track + 4));
-            *heading = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
+            *heading = pos.seg->dist + pos.seg->len * pos.t;
         }
     }
     r = lbl_8049F9D8;
@@ -906,7 +906,7 @@ extern "C" {
 void fn_802723B4(u8* src, f32* out, f32 at) {
     const PathPos& pos = fn_80136468(src, at);
     f32 t = pos.t;
-    u8* q = pos.seg;
+    u8* q = (u8*)pos.seg;
     f32 x = F32(q, 0x0);
     out[0] = x + t * (F32(PTR(q, 0x14), 0x0) - x);
     f32 y = F32(q, 0x4);
@@ -1035,20 +1035,20 @@ void CamRegion::Prepare(u8* line) {
     center.y = cy;
     f32 wrap;
     f32 rad = F32(cam, 0xC);
-    wrap = *(f32*)(PTR(line, 0x2C) + 8);
+    wrap = ((LineFollower*)line)->line->len[0];
     f32 r2 = rad * rad;
-    S32(line, 0xC) = fn_80270D1C(S32(cam, 0x5C));
-    u8* first = PTR(PTR(line, 0x2C), 0x1C);
-    u8* seg;
+    ((LineFollower*)line)->il.mode = fn_80270D1C(S32(cam, 0x5C));
+    IdealPoint* first = ((LineFollower*)line)->line->points;
+    IdealPoint* seg;
     int k = 0;
     int done = 0;
     seg = first;
     do {
         int n = 0;
-        s.x = F32(seg, 0x0) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x0) - F32(seg, 0x0));
-        e.x = F32(seg, 0x0) + lbl_80563F50 * (F32(PTR(seg, 0x14), 0x0) - F32(seg, 0x0));
-        s.y = F32(seg, 0x4) + lbl_80563F48 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
-        e.y = F32(seg, 0x4) + lbl_80563F50 * (F32(PTR(seg, 0x14), 0x4) - F32(seg, 0x4));
+        s.x = seg->pos.x + lbl_80563F48 * (seg->next->pos.x - seg->pos.x);
+        e.x = seg->pos.x + lbl_80563F50 * (seg->next->pos.x - seg->pos.x);
+        s.y = seg->pos.y + lbl_80563F48 * (seg->next->pos.y - seg->pos.y);
+        e.y = seg->pos.y + lbl_80563F50 * (seg->next->pos.y - seg->pos.y);
         dir.x = e.x - s.x;
         dir.y = e.y - s.y;
         f32 a = dir.x * dir.x + dir.y * dir.y;
@@ -1065,7 +1065,7 @@ void CamRegion::Prepare(u8* line) {
         }
         for (int j = 0; j < n; j++) {
             if (fn_802726EC(sol[j], lbl_80563F48, lbl_80563F50)) {
-                f32 v = F32(seg, 0x1C) + F32(seg, 0x18) * sol[j];
+                f32 v = seg->dist + seg->len * sol[j];
                 if (k < 4) {
                     (&lo1)[k++] = v;
                     fn_80270B00("  solution: %.3f", (&lo1)[k - 1]);
@@ -1074,8 +1074,8 @@ void CamRegion::Prepare(u8* line) {
                 }
             }
         }
-        u8* next = PTR(seg, 0x14);
-        u32 idx = U32(seg, 0x10);
+        IdealPoint* next = seg->next;
+        u32 idx = seg->ilpos;
         seg = next;
         if (next == first || k >= 4 || U32(next, 0x10) == 0) {
             done = 1;
@@ -1088,7 +1088,7 @@ void CamRegion::Prepare(u8* line) {
         fn_80270B00("failed to find intersection, using lame method");
         ILPos pos;
         ((LineFollower*)line)->Locate(&center, 0, &pos, 0);
-        f32 mid = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
+        f32 mid = pos.seg->dist + pos.seg->len * pos.t;
         f32 lo = mid - rad;
         if (rad > mid) {
             lo += wrap;
