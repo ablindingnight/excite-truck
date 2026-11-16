@@ -107,6 +107,10 @@ public:
     virtual void vf18(void) = 0;
 };
 
+// MWCC only: dead constructors whose vptr stores make this unit emit the two interface tables (retail strips them).
+// LongImpl/ShortImpl are placeholders with no defined virtuals, so a PC build would need their vtables; it gets the
+// interface tables from boostman/treehit instead.
+#ifdef __MWERKS__
 class LongImpl : public IRaceListener {
 public:
     LongImpl(void);
@@ -128,6 +132,7 @@ public:
 LongImpl::LongImpl(void) {}
 
 ShortImpl::ShortImpl(void) {}
+#endif
 
 // Stripped by the linker; keeps the constant pool in target order.
 extern "C" int fn_modeinl_Consts(f32 x) {
