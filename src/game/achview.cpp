@@ -8,6 +8,7 @@
 #include "game/menu.h"
 #include <string.h>
 #include "game/vec3_init.h"
+#include "game/math_types.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -736,14 +737,9 @@ struct ViewPad {
     u8 pad60[0x4];
 };
 
-struct Mat3 {
-    f32 m[9];
-};
 
 f32 Max(f32 a, f32 b);
 f32 Remap(f32 lo, f32 hi, f32 a, f32 b, f32 x);
-void Mat3RotY(Mat3* m, f32 a);
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 extern f32 lbl_8055F398;     // trophy spin angle
 extern f32 lbl_80498EAC[3];  // smoothed view direction

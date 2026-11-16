@@ -8,10 +8,8 @@
 #include "game/rmtx.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/math_types.h"
 
-struct Mat3 {
-    f32 m[9];
-};
 
 struct RPacket;
 class CollShape;
@@ -123,8 +121,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 static const PanelEdge lbl_802F98D0[6] = {
 #include "dumpdata/lbl_802F98D0.inc"
 };
-
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 void* operator new(size_t size, const char* name);
 void operator delete(void* p);
 
@@ -213,34 +209,34 @@ static inline void MulVec(RVec3* out, const RVec3* in, const RVec3* m) {
 
 static inline void MulM(Mat3* out, const Mat3* a, const Mat3* b) {
     if (out == a || out == b) {
-        f32 m0 = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        f32 m3 = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        f32 m6 = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        f32 m1 = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        f32 m4 = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        f32 m7 = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        f32 m2 = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        f32 m5 = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        f32 m8 = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
-        out->m[0] = m0;
-        out->m[3] = m3;
-        out->m[6] = m6;
-        out->m[1] = m1;
-        out->m[4] = m4;
-        out->m[7] = m7;
-        out->m[2] = m2;
-        out->m[5] = m5;
-        out->m[8] = m8;
+        f32 m0 = Dot(b->m[0][0], a->m[0][0], b->m[1][0], a->m[0][1], b->m[2][0], a->m[0][2]);
+        f32 m3 = Dot(b->m[0][0], a->m[1][0], b->m[1][0], a->m[1][1], b->m[2][0], a->m[1][2]);
+        f32 m6 = Dot(b->m[0][0], a->m[2][0], b->m[1][0], a->m[2][1], b->m[2][0], a->m[2][2]);
+        f32 m1 = Dot(b->m[0][1], a->m[0][0], b->m[1][1], a->m[0][1], b->m[2][1], a->m[0][2]);
+        f32 m4 = Dot(b->m[0][1], a->m[1][0], b->m[1][1], a->m[1][1], b->m[2][1], a->m[1][2]);
+        f32 m7 = Dot(b->m[0][1], a->m[2][0], b->m[1][1], a->m[2][1], b->m[2][1], a->m[2][2]);
+        f32 m2 = Dot(b->m[0][2], a->m[0][0], b->m[1][2], a->m[0][1], b->m[2][2], a->m[0][2]);
+        f32 m5 = Dot(b->m[0][2], a->m[1][0], b->m[1][2], a->m[1][1], b->m[2][2], a->m[1][2]);
+        f32 m8 = Dot(b->m[0][2], a->m[2][0], b->m[1][2], a->m[2][1], b->m[2][2], a->m[2][2]);
+        out->m[0][0] = m0;
+        out->m[1][0] = m3;
+        out->m[2][0] = m6;
+        out->m[0][1] = m1;
+        out->m[1][1] = m4;
+        out->m[2][1] = m7;
+        out->m[0][2] = m2;
+        out->m[1][2] = m5;
+        out->m[2][2] = m8;
     } else {
-        out->m[0] = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        out->m[3] = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        out->m[6] = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        out->m[1] = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        out->m[4] = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        out->m[7] = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        out->m[2] = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        out->m[5] = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        out->m[8] = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
+        out->m[0][0] = Dot(b->m[0][0], a->m[0][0], b->m[1][0], a->m[0][1], b->m[2][0], a->m[0][2]);
+        out->m[1][0] = Dot(b->m[0][0], a->m[1][0], b->m[1][0], a->m[1][1], b->m[2][0], a->m[1][2]);
+        out->m[2][0] = Dot(b->m[0][0], a->m[2][0], b->m[1][0], a->m[2][1], b->m[2][0], a->m[2][2]);
+        out->m[0][1] = Dot(b->m[0][1], a->m[0][0], b->m[1][1], a->m[0][1], b->m[2][1], a->m[0][2]);
+        out->m[1][1] = Dot(b->m[0][1], a->m[1][0], b->m[1][1], a->m[1][1], b->m[2][1], a->m[1][2]);
+        out->m[2][1] = Dot(b->m[0][1], a->m[2][0], b->m[1][1], a->m[2][1], b->m[2][1], a->m[2][2]);
+        out->m[0][2] = Dot(b->m[0][2], a->m[0][0], b->m[1][2], a->m[0][1], b->m[2][2], a->m[0][2]);
+        out->m[1][2] = Dot(b->m[0][2], a->m[1][0], b->m[1][2], a->m[1][1], b->m[2][2], a->m[1][2]);
+        out->m[2][2] = Dot(b->m[0][2], a->m[2][0], b->m[1][2], a->m[2][1], b->m[2][2], a->m[2][2]);
     }
 }
 
@@ -251,34 +247,34 @@ static inline void Sub(RVec3* out, const RVec3* a, const RVec3* b) {
 }
 
 static inline void Orthonormalize(Mat3* m) {
-    CVec a(m->m[0], m->m[1], m->m[2]);
+    CVec a(m->m[0][0], m->m[0][1], m->m[0][2]);
     CVec b;
-    CVec c(m->m[6], m->m[7], m->m[8]);
+    CVec c(m->m[2][0], m->m[2][1], m->m[2][2]);
     PSVECCrossProduct(&c, &a, &b);
     PSVECNormalize(&a, &a);
     PSVECNormalize(&b, &b);
     PSVECCrossProduct(&a, &b, &c);
-    m->m[0] = a.x;
-    m->m[1] = a.y;
-    m->m[2] = a.z;
-    m->m[3] = b.x;
-    m->m[4] = b.y;
-    m->m[5] = b.z;
-    m->m[6] = c.x;
-    m->m[7] = c.y;
-    m->m[8] = c.z;
+    m->m[0][0] = a.x;
+    m->m[0][1] = a.y;
+    m->m[0][2] = a.z;
+    m->m[1][0] = b.x;
+    m->m[1][1] = b.y;
+    m->m[1][2] = b.z;
+    m->m[2][0] = c.x;
+    m->m[2][1] = c.y;
+    m->m[2][2] = c.z;
 }
 
 static inline void Identity(Mat3* m) {
-    m->m[0] = 1.0f;
-    m->m[1] = 0.0f;
-    m->m[2] = 0.0f;
-    m->m[3] = 0.0f;
-    m->m[4] = 1.0f;
-    m->m[5] = 0.0f;
-    m->m[6] = 0.0f;
-    m->m[7] = 0.0f;
-    m->m[8] = 1.0f;
+    m->m[0][0] = 1.0f;
+    m->m[0][1] = 0.0f;
+    m->m[0][2] = 0.0f;
+    m->m[1][0] = 0.0f;
+    m->m[1][1] = 1.0f;
+    m->m[1][2] = 0.0f;
+    m->m[2][0] = 0.0f;
+    m->m[2][1] = 0.0f;
+    m->m[2][2] = 1.0f;
 }
 
 inline PanelVol::PanelVol(void) {
@@ -406,15 +402,15 @@ const RVec3* fn_801BF754(RigidBody* car) { return (const RVec3*)((u8*)car + 0x12
 void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b) {
     Mat3 t = *(const Mat3*)&b->rot;
     f32 s;
-    s = t.m[1];
-    t.m[1] = t.m[3];
-    t.m[3] = s;
-    s = t.m[2];
-    t.m[2] = t.m[6];
-    t.m[6] = s;
-    s = t.m[5];
-    t.m[5] = t.m[7];
-    t.m[7] = s;
+    s = t.m[0][1];
+    t.m[0][1] = t.m[1][0];
+    t.m[1][0] = s;
+    s = t.m[0][2];
+    t.m[0][2] = t.m[2][0];
+    t.m[2][0] = s;
+    s = t.m[1][2];
+    t.m[1][2] = t.m[2][1];
+    t.m[2][1] = s;
     const Mat3* tp = &t;
     MulM((Mat3*)&out->rot, (const Mat3*)&a->rot, tp);
     RVec3* op = &out->pos;

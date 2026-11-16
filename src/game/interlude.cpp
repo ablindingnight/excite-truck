@@ -4,6 +4,7 @@
 // re-timed and reordered, and export to "intrlude.txt"). Every function is written; the player state at
 // lbl_80437D88 is still addressed by offsets in places. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -46,9 +47,6 @@ struct IMtx {
     u32 w[12];
 };
 
-struct Mat3 {
-    f32 m[9];
-};
 
 // One timed event: 0x30C bytes, kept sorted by (time, order).
 struct Event {
@@ -229,9 +227,6 @@ struct EventTable {
 
 EventTable* GetEvent(int i);
 const char* GetEventTypeName(u32 type);
-struct Vec3;
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
 void* operator new[](size_t size, const char* name);
 void operator delete[](void* p);
 
@@ -719,25 +714,25 @@ static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
         f32 s = sin(ang);
         f32 c = cos(ang);
         f32 t = 1.0f - c;
-        m->m[0] = c + t * (x * x);
-        m->m[1] = y * (t * x) + s * z;
-        m->m[2] = z * (t * x) - s * y;
-        m->m[3] = y * (t * x) - s * z;
-        m->m[4] = c + t * (y * y);
-        m->m[6] = z * (t * x) + s * y;
-        m->m[5] = z * (t * y) + s * x;
-        m->m[7] = z * (t * y) - s * x;
-        m->m[8] = c + t * (z * z);
+        m->m[0][0] = c + t * (x * x);
+        m->m[0][1] = y * (t * x) + s * z;
+        m->m[0][2] = z * (t * x) - s * y;
+        m->m[1][0] = y * (t * x) - s * z;
+        m->m[1][1] = c + t * (y * y);
+        m->m[2][0] = z * (t * x) + s * y;
+        m->m[1][2] = z * (t * y) + s * x;
+        m->m[2][1] = z * (t * y) - s * x;
+        m->m[2][2] = c + t * (z * z);
     } else {
-        m->m[0] = 1.0f;
-        m->m[1] = 0.0f;
-        m->m[2] = 0.0f;
-        m->m[3] = 0.0f;
-        m->m[4] = 1.0f;
-        m->m[5] = 0.0f;
-        m->m[6] = 0.0f;
-        m->m[7] = 0.0f;
-        m->m[8] = 1.0f;
+        m->m[0][0] = 1.0f;
+        m->m[0][1] = 0.0f;
+        m->m[0][2] = 0.0f;
+        m->m[1][0] = 0.0f;
+        m->m[1][1] = 1.0f;
+        m->m[1][2] = 0.0f;
+        m->m[2][0] = 0.0f;
+        m->m[2][1] = 0.0f;
+        m->m[2][2] = 1.0f;
     }
 }
 
@@ -1023,15 +1018,15 @@ void fn_801C4BAC(void) {
 // Where a teleported car is put: its frame, velocity and line node (-1 = find one).
 struct CarPlace {
     CarPlace(void) : node(-1) {
-        frame.rot.m[0] = 1.0f;
-        frame.rot.m[1] = 0.0f;
-        frame.rot.m[2] = 0.0f;
-        frame.rot.m[3] = 0.0f;
-        frame.rot.m[4] = 1.0f;
-        frame.rot.m[5] = 0.0f;
-        frame.rot.m[6] = 0.0f;
-        frame.rot.m[7] = 0.0f;
-        frame.rot.m[8] = 1.0f;
+        frame.rot.m[0][0] = 1.0f;
+        frame.rot.m[0][1] = 0.0f;
+        frame.rot.m[0][2] = 0.0f;
+        frame.rot.m[1][0] = 0.0f;
+        frame.rot.m[1][1] = 1.0f;
+        frame.rot.m[1][2] = 0.0f;
+        frame.rot.m[2][0] = 0.0f;
+        frame.rot.m[2][1] = 0.0f;
+        frame.rot.m[2][2] = 1.0f;
         frame.pos.x = 0.0f;
         frame.pos.y = 0.0f;
         frame.pos.z = 0.0f;
@@ -1334,14 +1329,14 @@ void debug_event(void) {
                         Mat3FromEuler(&r, (const Vec3*)&euler);
                         Mat3Mul(&f.rot, &r, &f.rot);
                         f32 xv = off.x;
-                        f.pos.x += f.rot.m[0] * xv;
-                        f.pos.y += f.rot.m[1] * off.x;
-                        f.pos.z += f.rot.m[2] * off.x;
+                        f.pos.x += f.rot.m[0][0] * xv;
+                        f.pos.y += f.rot.m[0][1] * off.x;
+                        f.pos.z += f.rot.m[0][2] * off.x;
                         f32 yv = off.y;
-                        f.pos.x += f.rot.m[6] * yv;
-                        f.pos.y += f.rot.m[7] * off.y;
-                        f.pos.z += f.rot.m[8] * off.y;
-                        f32 yaw = atan2(f.rot.m[6], f.rot.m[8]);
+                        f.pos.x += f.rot.m[2][0] * yv;
+                        f.pos.y += f.rot.m[2][1] * off.y;
+                        f.pos.z += f.rot.m[2][2] * off.y;
+                        f32 yaw = atan2(f.rot.m[2][0], f.rot.m[2][2]);
                         V2 pt;
                         pt.y = f.pos.z;
                         pt.x = f.pos.x;
@@ -1353,7 +1348,7 @@ void debug_event(void) {
                     fn_802E317C("interlude: unhandled teleport where %d", tp->where);
                     break;
                 }
-                SetXYZ(&place.vel, place.frame.rot.m[6] * tp->speed, place.frame.rot.m[7] * tp->speed, tp->speed * place.frame.rot.m[8]);
+                SetXYZ(&place.vel, place.frame.rot.m[2][0] * tp->speed, place.frame.rot.m[2][1] * tp->speed, tp->speed * place.frame.rot.m[2][2]);
                 ((CarObj*)car)->Place(&place);
                 if (CarTypeIsReal(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
                     fn_801B8E28(i);
@@ -1545,34 +1540,34 @@ static inline f32 Ease(f32 t) {
 
 static inline void MulM(Mat3* out, const Mat3* a, const Mat3* b) {
     if (out == a || out == b) {
-        f32 m0 = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        f32 m3 = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        f32 m6 = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        f32 m1 = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        f32 m4 = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        f32 m7 = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        f32 m2 = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        f32 m5 = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        f32 m8 = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
-        out->m[0] = m0;
-        out->m[3] = m3;
-        out->m[6] = m6;
-        out->m[1] = m1;
-        out->m[4] = m4;
-        out->m[7] = m7;
-        out->m[2] = m2;
-        out->m[5] = m5;
-        out->m[8] = m8;
+        f32 m0 = Dot(b->m[0][0], a->m[0][0], b->m[1][0], a->m[0][1], b->m[2][0], a->m[0][2]);
+        f32 m3 = Dot(b->m[0][0], a->m[1][0], b->m[1][0], a->m[1][1], b->m[2][0], a->m[1][2]);
+        f32 m6 = Dot(b->m[0][0], a->m[2][0], b->m[1][0], a->m[2][1], b->m[2][0], a->m[2][2]);
+        f32 m1 = Dot(b->m[0][1], a->m[0][0], b->m[1][1], a->m[0][1], b->m[2][1], a->m[0][2]);
+        f32 m4 = Dot(b->m[0][1], a->m[1][0], b->m[1][1], a->m[1][1], b->m[2][1], a->m[1][2]);
+        f32 m7 = Dot(b->m[0][1], a->m[2][0], b->m[1][1], a->m[2][1], b->m[2][1], a->m[2][2]);
+        f32 m2 = Dot(b->m[0][2], a->m[0][0], b->m[1][2], a->m[0][1], b->m[2][2], a->m[0][2]);
+        f32 m5 = Dot(b->m[0][2], a->m[1][0], b->m[1][2], a->m[1][1], b->m[2][2], a->m[1][2]);
+        f32 m8 = Dot(b->m[0][2], a->m[2][0], b->m[1][2], a->m[2][1], b->m[2][2], a->m[2][2]);
+        out->m[0][0] = m0;
+        out->m[1][0] = m3;
+        out->m[2][0] = m6;
+        out->m[0][1] = m1;
+        out->m[1][1] = m4;
+        out->m[2][1] = m7;
+        out->m[0][2] = m2;
+        out->m[1][2] = m5;
+        out->m[2][2] = m8;
     } else {
-        out->m[0] = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        out->m[3] = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        out->m[6] = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        out->m[1] = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        out->m[4] = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        out->m[7] = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        out->m[2] = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        out->m[5] = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        out->m[8] = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
+        out->m[0][0] = Dot(b->m[0][0], a->m[0][0], b->m[1][0], a->m[0][1], b->m[2][0], a->m[0][2]);
+        out->m[1][0] = Dot(b->m[0][0], a->m[1][0], b->m[1][0], a->m[1][1], b->m[2][0], a->m[1][2]);
+        out->m[2][0] = Dot(b->m[0][0], a->m[2][0], b->m[1][0], a->m[2][1], b->m[2][0], a->m[2][2]);
+        out->m[0][1] = Dot(b->m[0][1], a->m[0][0], b->m[1][1], a->m[0][1], b->m[2][1], a->m[0][2]);
+        out->m[1][1] = Dot(b->m[0][1], a->m[1][0], b->m[1][1], a->m[1][1], b->m[2][1], a->m[1][2]);
+        out->m[2][1] = Dot(b->m[0][1], a->m[2][0], b->m[1][1], a->m[2][1], b->m[2][1], a->m[2][2]);
+        out->m[0][2] = Dot(b->m[0][2], a->m[0][0], b->m[1][2], a->m[0][1], b->m[2][2], a->m[0][2]);
+        out->m[1][2] = Dot(b->m[0][2], a->m[1][0], b->m[1][2], a->m[1][1], b->m[2][2], a->m[1][2]);
+        out->m[2][2] = Dot(b->m[0][2], a->m[2][0], b->m[1][2], a->m[2][1], b->m[2][2], a->m[2][2]);
     }
 }
 
@@ -1580,16 +1575,16 @@ static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return 
 
 static inline void MulVec(IVec3* out, const IVec3* in, Mat3* m) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
     }
 }
 
@@ -1667,15 +1662,15 @@ int fn_801C5B68(CamView* v, int idx) {
         CamPose f;
         switch (lbl_80437D88.play.camType) {
         case 0:
-            f.rot.m[0] = 1.0f;
-            f.rot.m[1] = 0.0f;
-            f.rot.m[2] = 0.0f;
-            f.rot.m[3] = 0.0f;
-            f.rot.m[4] = 1.0f;
-            f.rot.m[5] = 0.0f;
-            f.rot.m[6] = 0.0f;
-            f.rot.m[7] = 0.0f;
-            f.rot.m[8] = 1.0f;
+            f.rot.m[0][0] = 1.0f;
+            f.rot.m[0][1] = 0.0f;
+            f.rot.m[0][2] = 0.0f;
+            f.rot.m[1][0] = 0.0f;
+            f.rot.m[1][1] = 1.0f;
+            f.rot.m[1][2] = 0.0f;
+            f.rot.m[2][0] = 0.0f;
+            f.rot.m[2][1] = 0.0f;
+            f.rot.m[2][2] = 1.0f;
             f.pos.x = 0.0f;
             f.pos.y = 0.0f;
             f.pos.z = 0.0f;
@@ -1859,15 +1854,15 @@ void fn_801C6E40(void) {
 
 void fn_801C7254(Mat3* m) {
     f32 s;
-    s = m->m[1];
-    m->m[1] = m->m[3];
-    m->m[3] = s;
-    s = m->m[2];
-    m->m[2] = m->m[6];
-    m->m[6] = s;
-    s = m->m[5];
-    m->m[5] = m->m[7];
-    m->m[7] = s;
+    s = m->m[0][1];
+    m->m[0][1] = m->m[1][0];
+    m->m[1][0] = s;
+    s = m->m[0][2];
+    m->m[0][2] = m->m[2][0];
+    m->m[2][0] = s;
+    s = m->m[1][2];
+    m->m[1][2] = m->m[2][1];
+    m->m[2][1] = s;
 }
 
 void fn_801C7288(void) { fn_801C957C(0); }

@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large routines are still stubs. Names are guesses.
 #include "game/common.h"
 #include "game/camframe.h"
+#include "game/math_types.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -11,17 +12,8 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-struct Mat3 {
-    f32 m[9];
-};
-
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-
 extern const f32 lbl_80563FB4;  // pi/4
 extern const f32 lbl_80563FAC;
-
-struct Vec3;
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // Y, then X, then Z (racing.cpp)
 
 extern "C" {
 f32 PSVECMag(const f32* v);
@@ -473,25 +465,25 @@ static inline void RotFromVec(Mat3* r, const CamVec& w) {
         s = (f32)sin(a);
         c = (f32)cos(a);
         k = lbl_80563FAC - c;
-        r->m[1] = y * (k * x) + s * z;
-        r->m[2] = z * (k * x) - s * y;
-        r->m[3] = y * (k * x) - s * z;
-        r->m[4] = c + k * (y * y);
-        r->m[6] = z * (k * x) + s * y;
-        r->m[0] = c + k * (x * x);
-        r->m[5] = z * (k * y) + s * x;
-        r->m[8] = c + k * (z * z);
-        r->m[7] = z * (k * y) - s * x;
+        r->m[0][1] = y * (k * x) + s * z;
+        r->m[0][2] = z * (k * x) - s * y;
+        r->m[1][0] = y * (k * x) - s * z;
+        r->m[1][1] = c + k * (y * y);
+        r->m[2][0] = z * (k * x) + s * y;
+        r->m[0][0] = c + k * (x * x);
+        r->m[1][2] = z * (k * y) + s * x;
+        r->m[2][2] = c + k * (z * z);
+        r->m[2][1] = z * (k * y) - s * x;
     } else {
-        r->m[0] = lbl_80563FAC;
-        r->m[1] = 0.0f;
-        r->m[2] = 0.0f;
-        r->m[3] = 0.0f;
-        r->m[4] = lbl_80563FAC;
-        r->m[5] = 0.0f;
-        r->m[6] = 0.0f;
-        r->m[7] = 0.0f;
-        r->m[8] = lbl_80563FAC;
+        r->m[0][0] = lbl_80563FAC;
+        r->m[0][1] = 0.0f;
+        r->m[0][2] = 0.0f;
+        r->m[1][0] = 0.0f;
+        r->m[1][1] = lbl_80563FAC;
+        r->m[1][2] = 0.0f;
+        r->m[2][0] = 0.0f;
+        r->m[2][1] = 0.0f;
+        r->m[2][2] = lbl_80563FAC;
     }
 }
 
