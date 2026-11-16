@@ -173,7 +173,8 @@ struct TypeTable {
     TypeName t[3];
 };
 
-struct CarInfo {
+// carmodel.cpp's CarModel (lbl_80488648 holds the eight), declared as far as this unit reads it
+struct CarModel {
     u8 pad0[0x3EC];
     u32 color;  // offset 0x3EC
 };
@@ -216,7 +217,7 @@ int fn_801E9E78(s16* slot, PVec* hit, PVec* n, s32* id);
 }
 
 extern f32 __float_epsilon[];
-extern CarInfo* lbl_80488648[8];
+extern CarModel* lbl_80488648[8];
 
 const char* lbl_8055C958 = "Andrew";
 const char* lbl_8055C964 = "chunk";
@@ -536,7 +537,7 @@ static inline int Dim(u32 c) {
 static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 static inline u32 DimColor(u8 r, u8 g, u8 b) { return ARGB(0xFF, r, g, b); }
 
-static inline CarInfo* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
+static inline CarModel* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 inline void CarChunks::Loop1_InitColors(u32 i) {
