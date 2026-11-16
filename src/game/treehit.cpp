@@ -148,7 +148,9 @@ public:
     virtual void Hit(TreeObj* o, int car) = 0;
 };
 
-class IModelListener {
+// Same class as betarace's/actseq's IPickupListener (fn_801D0800 registers it): retail's vptr store points at
+// betarace's weak copy of the table, so the name must match for the linker to fold ours into it.
+class IPickupListener {
 public:
     virtual void Added(TreeObj* o) = 0;
     virtual void Gone(void) = 0;
@@ -159,14 +161,17 @@ public:
 extern "C" {
 void fn_801D0590(IHitListener* l);
 void fn_801D05B4(IHitListener* l);
-void fn_801D0800(IModelListener* l);
-void fn_801D0824(IModelListener* l);
+void fn_801D0800(IPickupListener* l);
+void fn_801D0824(IPickupListener* l);
 TreeClass* fn_802C110C(int id);
 void fn_802C1180(Shake* s);
 Shake* fn_802C120C(void);
 }
 
-class TreeHit : public IHitListener, public IModelListener {
+// Unnamed namespace: TreeHit's inline Added pools its "name" string with fn_802C1550's (retail has one copy).
+namespace {
+
+class TreeHit : public IHitListener, public IPickupListener {
 public:
     virtual void Added(void) {}
     virtual void Removed(void) {}
@@ -249,6 +254,8 @@ public:
     virtual void Changed(void) {}
     virtual void Hit(void) {}
 };
+
+}  // namespace
 
 TreeHit lbl_8055FB40;
 
@@ -358,13 +365,13 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[1] = y;
 }
 void fn_802C1550(void) {
+    TreeClass* c;
     int i;
-    int j;
     int n;
     const char* model;
-    const char* name;
-    TreeClass* c;
     ValueNode* d;
+    int j;
+    const char* name;
 
     c = lbl_804C0810;
     for (i = 0; i < lbl_8055FB28; c++, i++) {
@@ -376,10 +383,19 @@ void fn_802C1550(void) {
             n = d->GetIntValue("count");
             c->maxDrops = n;
             c->nDrops = 0;
-            c->drops = new ("tc_obst") TreeObj*[n];
+            c->drops = new ("tc_obst") TreeObj*[c->maxDrops];
             memset(c->drops, 0, c->maxDrops * 4);
             name = c->cfg->GetValue("name");
-            StrCopy(c->name, name, 0x20);
+            {
+                int k = 0x20;
+                char* p = c->name;
+                while ((*p++ = *name++) != 0) {
+                    if (--k <= 0) {
+                        p[-1] = 0;
+                        break;
+                    }
+                }
+            }
             for (j = 0; j < n; j++) {
                 TMtx m;
                 m.rot[0][0] = 1.0f;
