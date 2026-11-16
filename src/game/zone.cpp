@@ -1092,25 +1092,43 @@ void fn_8013CB90(ArtElem* a) {
 }
 
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
-    ZoneVec3 mid = g->Center();
-    ZoneVec3 at;
-    ZoneVec3 ring;
-    f32 half;
-    half = PSVECDistance((const Vec*)&g->a, (const Vec*)&g->b) / 2.0f;
-    ring.y = g->ringY;
-    f32 zv = mid.z;
-    ring.x = mid.x;
-    ring.z = zv;
-    f32 dtv = t->dt;
-    at.x = t->pos.x + t->vel.x * dtv;
-    at.y = t->pos.y + t->vel.y * dtv;
-    at.z = t->pos.z + t->vel.z * dtv;
-    if (PSVECSquareDistance((const Vec*)&at, (const Vec*)&ring) > half * half) {
-        r = 1;
-    }
-    return r;
+/* The 2D helpers below are invented (names unproven); their SHAPES are what retail's code fixes:
+   scalar parameters passed by value (arguments evaluated right to left, each expression argument is its own
+   object) for the sum of two products and for the squared length, and a V2C built from two differences inside
+   the distance helper. See handoff/FACTS.md, toughcases 2026-11-16 (fn_8013CBC0). */
+static inline f32 SumProd(f32 a, f32 b, f32 c, f32 d) { return a * b + c * d; }
+static inline f32 Dot(const V2& a, const V2& b) { return SumProd(a.x, b.x, a.y, b.y); }
+/* Dot of a turned a quarter (a.y, -a.x) with b. */
+static inline f32 Cross(const V2& a, const V2& b) { return SumProd(a.y, b.x, -a.x, b.y); }
+static inline f32 LenSq(f32 x, f32 y) { return x * x + y * y; }
+static inline f32 DistSq(const V2& a, const V2& b) {
+    V2C d(a.x - b.x, a.y - b.y);
+    return d.x * d.x + d.y * d.y;
+}
+static inline void AddScaled(V2& d, const V2& v, f32 s) {
+    d.x += v.x * s;
+    d.y += v.y * s;
+}
+static inline void Scale(V2& v, f32 s) {
+    v.x *= s;
+    v.y *= s;
+}
+static inline void Perp(V2& v) {
+    f32 t = v.x;
+    v.x = v.y;
+    v.y = -t;
+}
+static inline void Offset(V2& q, const V2& p, const V2& d, f32 s) {
+    q.x = p.x + d.x * s;
+    q.y = p.y + d.y * s;
+}
+/* The point a little behind the truck along its heading. */
+static inline void TailPoint(V2& q, const V2& p, Truck* t) {
+    V2C dir(t->dirX, t->dirZ);
+    Offset(q, p, dir, -0.083416760f);
+}
+static inline void CenterOf(ZoneVec3& out, const Gate* g) {
+    out.Set(Lerp(g->a.x, g->b.x, 0.5f), Lerp(g->a.y, g->b.y, 0.5f), Lerp(g->a.z, g->b.z, 0.5f));
 }
 
 // Seconds a gate adds (declared extern above). Defined here, between the first function that pools 0.5f and
@@ -1118,87 +1136,82 @@ static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
 // loader. Defining it above its users would let the compiler fold it into them.
 const f32 lbl_8056149C = 5.0f;
 
+// Did the truck's step (p = predicted position, q = a little behind it) cross the car's gate line?
+// 0 = no, 1 = crossed the line outside the posts (or missed the ring), 2 = through the gate.
 int fn_8013CBC0(ZoneCar* zm, int car) {
     Gate* g = zm->gate;
     int r = 0;
     Truck* t = fn_8017960C(car);
+    ZoneVec3 mid;  // declared ahead of pos: retail's frame has it above
     ZoneVec3 pos;
     V2 p;
     V2 q;
-    V2 ap;
     V2 a;
-    V2 qa;
-    V2 ab;
-    V2 perp;
     V2 b;
-    V2 pb;
-    V2 qb;
-    V2 dir;
-    V2 bp;
-    f32 wa;
-    f32 wb;
-    f32 len;
-    f32 c0;
-    f32 c1;
-    int nearA;
+    V2 ab;
     f32 dt = t->dt;
     pos.x = t->pos.x + t->vel.x * dt;
     pos.y = t->pos.y + t->vel.y * dt;
     pos.z = t->pos.z + t->vel.z * dt;
     p.x = pos.x;
-    dir.x = t->dirX;
-    dir.y = t->dirZ;
+    p.y = pos.z;
+    TailPoint(q, p, t);
     a.x = g->a.x;
     a.y = g->a.z;
     b.x = g->b.x;
-    p.y = pos.z;
-    ap.x = a.x - p.x;
-    q.x = p.x + dir.x * -0.083416760f;
-    q.y = p.y + dir.y * -0.083416760f;
     b.y = g->b.z;
-    ap.y = a.y - p.y;
-    bp.x = b.x - p.x;
-    bp.y = b.y - p.y;
     ab.x = a.x - b.x;
     ab.y = a.y - b.y;
-    nearA = ap.x * ap.x + ap.y * ap.y < bp.x * bp.x + bp.y * bp.y;
-    wa = nearA ? zm->gateWidth * 0.5f : 0.0f;
-    wb = !nearA ? zm->gateWidth * 0.5f : 0.0f;
-    len = sqrt(ab.x * ab.x + ab.y * ab.y);
+    int nearA = DistSq(a, p) < DistSq(b, p);
+    f32 wa = nearA ? zm->gateWidth * 0.5f : 0.0f;
+    f32 wb = !nearA ? zm->gateWidth * 0.5f : 0.0f;
+    f32 len = sqrt(LenSq(ab.x, ab.y));
     len = 0.01f > len ? 0.01f : len;
-    ab.x *= 1.0f / len;
-    ab.y *= 1.0f / len;
-    a.x += ab.x * (0.65f + wa);
+    Scale(ab, 1.0f / len);
+    AddScaled(a, ab, 0.65f + wa);
+    AddScaled(b, ab, -(0.65f + wb));
     V2 n = ab;
-    a.y += ab.y * (0.65f + wa);
-    ap.x = p.x - a.x;
-    b.x += n.x * -(0.65f + wb);
-    perp.x = n.y;
-    perp.y = -n.x;
+    Perp(n);
+    V2 pa;
+    pa.x = p.x - a.x;
+    pa.y = p.y - a.y;
+    V2 qa;
     qa.x = q.x - a.x;
-    ap.y = p.y - a.y;
-    c0 = perp.x * ap.x + ap.y * perp.y;
     qa.y = q.y - a.y;
-    b.y += n.y * -(0.65f + wb);
-    c1 = perp.x * qa.x + perp.y * qa.y;
-    if (c1 * c0 <= 0.0f) {
+    if (Dot(n, pa) * Dot(n, qa) <= 0.0f) {
         r = 1;
-        if (perp.y * ap.x + -perp.x * ap.y > 0.0f || qa.x * perp.y + -perp.x * qa.y > 0.0f) {
+        if (Cross(n, pa) > 0.0f || Cross(n, qa) > 0.0f) {
+            V2 pb;
             pb.x = p.x - b.x;
             pb.y = p.y - b.y;
+            V2 qb;
             qb.x = q.x - b.x;
-            f32 yv = q.y;
-            qb.y = yv - b.y;
-            if (perp.x * pb.y + -pb.x * perp.y > 0.0f || qb.y * perp.x + -qb.x * perp.y > 0.0f) {
+            qb.y = q.y - b.y;
+            if (Cross(pb, n) > 0.0f || Cross(qb, n) > 0.0f) {
                 r = 2;
             }
         }
     }
     if (r == 2 && g->ring) {
-        r = Loop1_fn_8013CBC0(g, t, r);
+        CenterOf(mid, g);
+        ZoneVec3 at;
+        ZoneVec3 ring;
+        f32 half = PSVECDistance((const Vec*)&g->a, (const Vec*)&g->b) / 2.0f;
+        ring.y = g->ringY;
+        f32 zv = mid.z;
+        ring.x = mid.x;
+        ring.z = zv;
+        f32 dtv = t->dt;
+        at.x = t->pos.x + t->vel.x * dtv;
+        at.y = t->pos.y + t->vel.y * dtv;
+        at.z = t->pos.z + t->vel.z * dtv;
+        if (PSVECSquareDistance((const Vec*)&at, (const Vec*)&ring) > half * half) {
+            r = 1;
+        }
     }
     return r;
 }
+
 
 struct Watcher {
     u8 pad0[0x18];
