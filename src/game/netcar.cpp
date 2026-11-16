@@ -367,20 +367,23 @@ static inline void QuatToMtx(RMtx* m, const TQuat* q) {
     m->rot.z.z = 1.0f - (xx + yy);
 }
 
+#pragma push
+#pragma opt_propagation off /* Pragma unproven: keeps the retail BodyState address across hint initialization. */
 void NetCar::Snap(void) {
     BodyState s;
-    s.hint = -1;
-    QuatToMtx(&s.mtx, (const TQuat*)&ptab[0].pose.rot);
+    BodyState* state = &s;
+    state->hint = -1;
+    QuatToMtx(&state->mtx, (const TQuat*)&ptab[0].pose.rot);
     const PVec* p = &ptab[0].pose.pos;
-    s.mtx.pos.x = p->v[0];
-    s.mtx.pos.y = p->v[1];
-    s.mtx.pos.z = p->v[2];
-    s.vel.x = 0.0f;
-    s.vel.y = 0.0f;
-    s.a3C = 0;
-    s.vel.z = 0.0f;
+    state->mtx.pos.x = p->v[0];
+    state->mtx.pos.y = p->v[1];
+    state->mtx.pos.z = p->v[2];
+    state->vel.x = 0.0f;
+    state->vel.y = 0.0f;
+    state->vel.z = 0.0f;
+    state->a3C = 0;
     fn_801E9DC4(&s.hint);
-    SetState(&s);
+    SetState(state);
     ptab[1] = ptab[2] = ptab[0];
     {
         // MATCHING-AID: retail's zero vector stores y, z, then x (the order of netcar's old TVec constructor).
@@ -401,6 +404,7 @@ void NetCar::Snap(void) {
         v[0].z = z.z;
     }
 }
+#pragma pop
 
 extern "C" f32 fn_801A70EC(TQuat* out, const Packet* a, const Packet* b, s32 frame) {
     f32 d = fn_801A63C4(b->frame, a->frame);
