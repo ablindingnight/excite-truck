@@ -3,6 +3,8 @@
 // icon), and the START/FINISH labels at the ends of the bars. Names are guesses apart from the
 // keys and the texture name.
 #include "game/common.h"
+#include "game/carbody.h"
+#include "game/carinfo.h"
 #include "game/plainvec.h"
 
 // A vertex position (constructed in place).
@@ -55,19 +57,7 @@ struct RaceSetupHdr {
     s32 laps;  // offset 0x8
 };
 
-struct CarBody {
-    u8 pad0[0x2C8];
-    f32 dist;  // offset 0x2C8: distance along this lap
-};
-
-// carinfo.cpp's CarInfo (fn_801EA9A0), declared as far as this unit reads it
-struct CarInfo {
-    u8 pad0[8];
-    CarBody* body;  // offset 0x8
-    u8 padC[0x10];
-    s32 lap;        // offset 0x1C
-};
-
+// CarInfo: game/carinfo.h; its draw state: game/carbody.h (0x2C8 = distance along this lap).
 extern "C" {
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
@@ -143,8 +133,8 @@ void fn_802059C0(void) {
         int car = fn_801E866C(i);
         if (fn_801B8570(car)) {
             CarInfo* cp = fn_801EA9A0(car);
-            int lap = cp->lap;
-            f32 dist = cp->body->dist;
+            int lap = cp->params.lap;
+            f32 dist = cp->draw->f2C8;
             if (lap == 0) {
                 lap = 1;
                 dist = 0.0f;

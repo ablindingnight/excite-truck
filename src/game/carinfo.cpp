@@ -57,12 +57,12 @@ void fn_801EA56C(void) {
     lbl_8055EB7C = 0;
 }
 
-void fn_801EA59C(int idx, s32 x8, const CarSetup* setup) {
+void fn_801EA59C(int idx, CarDrawState* draw, const CarSetup* setup) {
     CarInfo* c = &lbl_8055EB78->cars[idx];
     s32 type = setup->type;
     c->setup = *setup;
     c->active = IsDriven(idx, type);
-    c->x8 = x8;
+    c->draw = draw;
     c->index = idx;
     if (idx >= lbl_8055EB78->count) {
         lbl_8055EB78->count = idx + 1;
@@ -101,6 +101,6 @@ void fn_801EAA94(int idx, s32 type) {
     c->active = IsDriven(idx, type);
 }
 
-void fn_801EAB10(int idx, s32 x8) { lbl_8055EB78->cars[idx].x8 = x8; }
+void fn_801EAB10(int idx, CarDrawState* draw) { lbl_8055EB78->cars[idx].draw = draw; }
 
 }  // extern "C"

@@ -3,7 +3,9 @@
 
 #include "game/common.h"
 
-// carinfo.cpp's per-slot car record (0xBC; fn_801EA9A0 returns one of the eight). Names are guesses; lap, state,
+struct CarDrawState;  // game/carbody.h
+
+// carinfo.cpp's per-slot car record (0xBC; fn_801EA9A0 returns one of the eight). Names are guesses; draw, lap, state,
 // driver and slot come from the units that read them.
 
 struct CarSetup {
@@ -40,7 +42,7 @@ struct CarParams {
 struct CarInfo {
     u8 active;         // offset 0x0
     s32 index;         // offset 0x4
-    s32 x8;            // offset 0x8
+    CarDrawState* draw;  // offset 0x8: the car's draw state in the frame buffer (carmodel fn_801EECAC sets it)
     CarParams params;  // offset 0xC
     CarSetup setup;    // offset 0x44
 };
