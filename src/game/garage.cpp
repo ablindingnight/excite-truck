@@ -1157,14 +1157,14 @@ static inline void UpdateSlotAnims(u8* p) {
 }  // extern "C"
 
 void SlotStrip::Update(void) {
-    u8* p = (u8*)this;
+    SlotStrip* p = this;
     SlotAnim* e;
     f32 dt = fn_80214D48();
     int i;
     SlotAnim* slot;
-    F32(p, 0x28) = F32(p, 0x28) + 0.2f * ((f32)S32(p, 0x2C) - F32(p, 0x28));
-    for (i = 0; i < S32(p, 0x1C); i++) {
-        slot = &((SlotAnim*)PTR(p, 0x18))[i];
+    p->pos = p->pos + 0.2f * ((f32)p->sel - p->pos);
+    for (i = 0; i < p->count; i++) {
+        slot = &p->slots[i];
         e = slot;
         if (e->sel != e->shown) {
             e->t = e->t + 6.0f * dt;
@@ -1326,12 +1326,12 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
 
 
 void ColorPick::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
-    u8* p = (u8*)this;
-    s32 v = S32(PTR(p, 0xCC) + i * 0x14, 0x10);
-    fn_802354A0(PTR(p, 0x24), 0, x, y, 0.0f, w, h, -1);
+    ColorPick* p = this;
+    s32 v = S32(((u8*&)p->entries) + i * 0x14, 0x10);
+    fn_802354A0(p->art, 0, x, y, 0.0f, w, h, -1);
     fn_80216CB4();
-    fn_802354A0(PTR(p, 0x24), 3, x, y, 0.0f, w, h, v);
-    fn_802354A0(PTR(p, 0x24), 6, x, y, 0.0f, w, h, -1);
+    fn_802354A0(p->art, 3, x, y, 0.0f, w, h, v);
+    fn_802354A0(p->art, 6, x, y, 0.0f, w, h, -1);
 }
 
 extern "C" {
@@ -1385,27 +1385,27 @@ void fn_80214AF0(int s);
 }  // extern "C"
 
 void CarSlotList::Update(void) {
-    u8* p = (u8*)this;
+    CarSlotList* p = this;
     int on;
     SlotAnim* e;
     int i;
     u8* c;
-    S32(p, 0xC0) = U8(PTR(p, 0x4C), 0xDC) == 0;
-    for (i = 0; i < S32(p, 0x1C); i++) {
-        c = PTR(p, 0xCC) + i * 0x14;
+    p->fC0 = U8(((u8*&)p->ui), 0xDC) == 0;
+    for (i = 0; i < p->count; i++) {
+        c = ((u8*&)p->entries) + i * 0x14;
         on = 0;
         if (((u8*)GetVehicleColor(*(VehicleInfo**)(c + 8), 0))[8] && c[0xC]) {
             on = 1;
         }
-        SlotAnim* slot = &((SlotAnim*)PTR(p, 0x18))[i];
+        SlotAnim* slot = &p->slots[i];
         e = slot;
         if (on != e->sel) {
             e->sel = on;
             e->t = (f32)__fabs(e->t);
         }
     }
-    UpdateSlotAnims(p);
-    if (((GarageList*)PTR(p, 0xD0))->Unlocked(S32(p, 0x2C)) == 0) {
+    UpdateSlotAnims((u8*)p);
+    if (p->list->Unlocked(p->sel) == 0) {
         fn_80214A9C(2);
     } else {
         fn_80214AF0(2);
@@ -1426,19 +1426,19 @@ static inline double AbsD(double v) { return __fabs(v); }
 }  // extern "C"
 
 void SlotStrip::Draw(void) {
-    u8* p = (u8*)this;
+    SlotStrip* p = this;
     f32 top = lbl_8055CFF4 / 2 - 24.0f;
     f32 w = 1.7777778f * lbl_8055CFF0 / 1.3333334f;
-    fn_80231220(-0.5f * w, 225.0f, w, 66.0f, PTR(p, 0x20), -1, 0.0f, 0.0f, 10.0f, 1.0f);
+    fn_80231220(-0.5f * w, 225.0f, w, 66.0f, p->tex, -1, 0.0f, 0.0f, 10.0f, 1.0f);
     f32 fade = fn_80216CB4();
-    for (int i = 0; i < S32(p, 0x1C); i++) {
-        SlotAnim* e = &((SlotAnim*)PTR(p, 0x18))[i];
+    for (int i = 0; i < p->count; i++) {
+        SlotAnim* e = &p->slots[i];
         f32 s = 1.0f - (f32)__fabs(e->t);
         s = s < fade ? s : fade;
         f32 h = 48.0f * s;
-        f32 x = 82.5f * (i - F32(p, 0x28)) - 41.25f;
+        f32 x = 82.5f * (i - p->pos) - 41.25f;
         f32 y = top - 0.5f * (48.0f * (1.0f - s));
-        f32 d = (f32)AbsD(F32(p, 0x28) - i);
+        f32 d = (f32)AbsD(p->pos - i);
         if (1.0f < d) {
             d = 1.0f;
         }
@@ -1446,7 +1446,7 @@ void SlotStrip::Draw(void) {
         f32 alpha = 1.0f - d;
         DrawSlot(i, e->shown, x, y + 5.0f * s, 82.5f, h + 10.0f * s, alpha);
     }
-    fn_802354A0(PTR(p, 0x24), 2, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f, -1);
+    fn_802354A0(p->art, 2, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f, -1);
 }
 
 void UnlockScreen::Enter(void) {
