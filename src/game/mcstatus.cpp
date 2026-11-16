@@ -116,7 +116,14 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void operator delete(void* p);
 
-extern char lbl_80342FC0[];  // string pool
+extern "C" {
+int fn_802450D4(void);
+int fn_80245080(u8* p);
+}
+
+// The status screen's menu (copied by MemCardDialogMgr::ShowMsg). Retail's .rodata and .data put it, and its
+// layout name, ahead of everything else in the unit.
+static const MenuDesc sStatusMenu = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
 
 // A remote's status block.
 struct WpadInfo {
@@ -132,16 +139,17 @@ extern "C" {
 
 }  // extern "C"
 
+MemCardDialogBg::~MemCardDialogBg(void) {}
+
 MemCardDialogMgr::~MemCardDialogMgr(void) { lbl_8055F244 = 0; }
 
 void MemCardDialogBg::Load(void) {
-    const char* str = lbl_80342FC0;
-    if ((image = gxGetImage(str + 0x60)) == 0) {
-        fn_802E30C8(str + 0x78);
+    if ((image = gxGetImage("*uibig.res/backsplt.img")) == 0) {
+        fn_802E30C8("MemCardDialogMgr couldn't get background image backgnd1.img");
     }
     image2 = 0;
-    font2 = fn_80232578(str + 0xB4);
-    font = fn_80232578(str + 0xB4);
+    font2 = fn_80232578("uifnt.gtx");
+    font = fn_80232578("uifnt.gtx");
     fade = lbl_80563830;
 }
 
@@ -406,7 +414,6 @@ void MemCardDialogMgr::Close(void) {
 
 extern UnkStatic123s lbl_80498890;
 extern "C" void fn_80216CA8(void);
-extern const MenuDesc lbl_802FA364;
 extern const char lbl_8055BAC0[8];  // ""
 extern "C" void fn_80246210(void);
 
@@ -445,7 +452,7 @@ void MemCardDialogMgr::Setup(McDialogCfg* cfg) {
         MenuItem("#option_4", choices[3].title),
         MenuItem(lbl_80498890),
     };
-    MenuDesc desc = lbl_802FA364;
+    MenuDesc desc = {0, 0, (int (*)(int*))fn_80245080, 0, 0};
     desc.layout = cfg->layout ? cfg->layout : "mc_dialog.lyt";
     desc.items = items;
     fn_80216CA8();
@@ -495,7 +502,7 @@ void MemCardDialogMgr::ShowMsg(const McMsg* m) {
         MenuItem(lbl_80498890),
     };
     retries = 0;
-    MenuDesc desc = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
+    MenuDesc desc = sStatusMenu;
     desc.items = items;
     fn_80216CA8();
     fn_802146BC(&desc, -999, -999, 1);
