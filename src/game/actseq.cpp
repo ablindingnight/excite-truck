@@ -5,6 +5,7 @@
 // done and then resets or stays finished; laps outside its active range park it. A rumble sound
 // and an on-screen text line are shared. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
@@ -50,9 +51,10 @@ public:
 
 extern "C" DeityCar* fn_801B2EC0(int car);
 
-struct Vec {
-    Vec(void) {}
-    Vec(f32 x_, f32 y_, f32 z_) {
+// Unit-local vector with constructors (port ODR: the SDK and other units define a different Vec).
+struct ActVec {
+    ActVec(void) {}
+    ActVec(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
@@ -62,7 +64,7 @@ struct Vec {
         y = y_;
         z = z_;
     }
-    Vec& operator=(const ValVec3& v) {
+    ActVec& operator=(const ValVec3& v) {
         x = v.x;
         y = v.y;
         z = v.z;
@@ -112,7 +114,7 @@ public:
     f32 range;       // offset 0x6C
 };
 
-extern "C" Sound3D* fn_802077A4(const char* name, int cls, Vec* vel, Vec* pos);
+extern "C" Sound3D* fn_802077A4(const char* name, int cls, ActVec* vel, ActVec* pos);
 
 template <typename T>
 struct ArrayRef {
@@ -201,7 +203,7 @@ public:
     virtual void Added(Body* b) = 0;
     virtual void Removed(Body* b) = 0;
     virtual void Changed(void) = 0;
-    virtual void Hit(Body* b, const Vec* pos) = 0;
+    virtual void Hit(Body* b, const ActVec* pos) = 0;
 };
 
 class ActionSequenceEvent {
@@ -253,8 +255,8 @@ namespace {
 struct Rumble {
     Sound3D* snd;  // offset 0x0
     f32 time;      // offset 0x4
-    Vec vel;       // offset 0x8
-    Vec pos;       // offset 0x14
+    ActVec vel;       // offset 0x8
+    ActVec pos;       // offset 0x14
 };
 }  // namespace
 
@@ -289,7 +291,7 @@ void fn_801D57F0(void);
 ActionSequence* fn_801D5860(const char* name);
 void fn_801D597C(ActionSequence* s, int forward);
 int fn_801D5A68(ActionSequence* s);
-void fn_801D5454(ActionSequence* s, const Vec* pos);
+void fn_801D5454(ActionSequence* s, const ActVec* pos);
 
 void fn_801D4734(void) {
     lbl_8055E954 = 1;
@@ -327,7 +329,7 @@ void fn_801D483C(void) {
 
 ActionSequence* fn_801D4888(const char* name) { return fn_801D5860(name); }
 
-void fn_801D488C(ActionSequence* s, int a, int rumble, const Vec* pos) {
+void fn_801D488C(ActionSequence* s, int a, int rumble, const ActVec* pos) {
     fn_801D597C(s, a);
     if (rumble && fn_801D5A68(s)) {
         fn_801D5454(s, pos);
@@ -550,7 +552,7 @@ void ActionSequence::Start(int fwd) {
 
 extern "C" {
 
-void fn_801D5454(ActionSequence* s, const Vec* pos) {
+void fn_801D5454(ActionSequence* s, const ActVec* pos) {
     lbl_804422F0.pos = *pos;
     lbl_804422F0.time += 3.0f;
 }
@@ -706,8 +708,6 @@ int fn_801D5A68(ActionSequence* s) {
 }  // extern "C"
 
 extern "C" {
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* in, void* out);
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 void fn_801796CC(u8 type, const void* data, u32 n);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
@@ -724,11 +724,11 @@ public:
     virtual ValueNode* Desc(void);       // 0x08
     virtual void vf0C(void);
     virtual void vf10(void);
-    virtual Vec* Vel(void);              // 0x14
+    virtual ActVec* Vel(void);              // 0x14
     virtual s16 Surface(void);           // 0x18
     virtual void vf1C(void);
     virtual void Place(int a);           // 0x20
-    virtual void Throw(const Vec* vel, const Vec* at);  // 0x24
+    virtual void Throw(const ActVec* vel, const ActVec* at);  // 0x24
     virtual void vf28(void);
     virtual void Respawn(void);          // 0x2C
 };
@@ -740,8 +740,8 @@ void fn_801D0824(IPickupListener* l);
 
 // A collision message: where, how fast, the surface and the effect to play.
 struct HitMsg {
-    Vec pos;     // offset 0x0
-    Vec vel;     // offset 0xC
+    ActVec pos;     // offset 0x0
+    ActVec vel;     // offset 0xC
     s16 surf;    // offset 0x18
     s32 effect;  // offset 0x1C
 };
@@ -771,7 +771,7 @@ public:
     virtual void Changed(void) {}
     virtual int Begin(int reverse);
     virtual void Update(void);
-    virtual void Hit(Body* b, const Vec* pos);
+    virtual void Hit(Body* b, const ActVec* pos);
 
     int Matches(Body* b) {
         ValueNode* d = b->Desc();
@@ -787,9 +787,9 @@ public:
     s32 state;                             // offset 0x8
     s32 groupId;                           // offset 0xC
     FixedArr<ObstacleEffect, 4> effects;   // offset 0x10
-    Vec dir1;                              // offset 0x3C
-    Vec dir2;                              // offset 0x48
-    Vec throwPt;                           // offset 0x54
+    ActVec dir1;                              // offset 0x3C
+    ActVec dir2;                              // offset 0x48
+    ActVec throwPt;                           // offset 0x54
     f32 speed1;                            // offset 0x60
     f32 speed2;                            // offset 0x64
     s32 resetTimeout;                      // offset 0x68
@@ -1188,8 +1188,8 @@ public:
     s32 length;      // offset 0x8
     s32 delay;       // offset 0xC
     s32 startFrame;  // offset 0x10
-    Vec loc;         // offset 0x14
-    Vec v;           // offset 0x20
+    ActVec loc;         // offset 0x14
+    ActVec v;           // offset 0x20
     s32 effectId;    // offset 0x2C
     u8 runSolo;      // offset 0x30
 };
@@ -1281,8 +1281,8 @@ public:
     u8 runSolo;       // offset 0x14
     u8 looped;        // offset 0x15
     u8 forceMaxVol;   // offset 0x16
-    Vec loc;          // offset 0x18
-    Vec v;            // offset 0x24
+    ActVec loc;          // offset 0x18
+    ActVec v;            // offset 0x24
     Sound3D* snd;     // offset 0x30
 };
 
@@ -1582,7 +1582,7 @@ public:
             if (!s) {
                 fn_802E30C8("TriggerActionSequenceEvent: no action sequence found with name %s", seq);
             } else {
-                Vec zero(0.0f, 0.0f, 0.0f);
+                ActVec zero(0.0f, 0.0f, 0.0f);
                 fn_801D488C(s, 1, 0, &zero);
             }
             state = 3;
@@ -1655,15 +1655,15 @@ int Obstacle_ASE::Begin(int reverse) {
         for (int i = 0; i < bodies.count; i++) {
             f32 ts = fn_80129DC4(4, 0.0f, 1.0f);
             f32 td = fn_80129DC4(4, 0.0f, 1.0f);
-            Vec dir;
+            ActVec dir;
             dir.Set(Lerp(dir1.x, dir2.x, td), Lerp(dir1.y, dir2.y, td), Lerp(dir1.z, dir2.z, td));
             f32 speed = Lerp(speed1, speed2, ts);
-            Vec vel(0.0f, 0.0f, 0.0f);
-            if (MotionMagnitude(PSVECDotProduct(&dir, &dir)) <= __float_epsilon[0] ||
+            ActVec vel(0.0f, 0.0f, 0.0f);
+            if (MotionMagnitude(PSVECDotProduct((const Vec*)&dir, (const Vec*)&dir)) <= __float_epsilon[0] ||
                 MotionMagnitude(speed) <= __float_epsilon[0]) {
                 bodies.data[i]->Place(1);
             } else {
-                PSVECNormalize(&dir, &dir);
+                PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
                 vel.x = dir.x * speed;
                 vel.y = dir.y * speed;
                 vel.z = dir.z * speed;
@@ -1690,13 +1690,13 @@ void Obstacle_ASE::Update(void) {
     }
 }
 
-void Obstacle_ASE::Hit(Body* b, const Vec* pos) {
+void Obstacle_ASE::Hit(Body* b, const ActVec* pos) {
     if (effects.count > 0 && Matches(b)) {
         HitMsg m;
         m.pos = *pos;
         m.vel = *b->Vel();
         m.surf = b->Surface();
-        f32 v2 = PSVECDotProduct(&m.vel, &m.vel);
+        f32 v2 = PSVECDotProduct((const Vec*)&m.vel, (const Vec*)&m.vel);
         for (int i = 0; i < effects.count; i++) {
             ObstacleEffect* e = &effects.data[i];
             if (v2 < e->minV2) {
