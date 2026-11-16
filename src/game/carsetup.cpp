@@ -110,10 +110,13 @@ struct TweakMul {
     f32 slip;     // offset 0x20
 };
 
+// Unit-local (port ODR: other units define a different Tweak).
+namespace {
 struct Tweak {
     char name[0x20];  // offset 0x0
     TweakMul mul;     // offset 0x20
 };
+}  // namespace
 
 Tweak lbl_804A1968[32];
 ModuleTag lbl_8055F620;

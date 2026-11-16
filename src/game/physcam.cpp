@@ -36,6 +36,8 @@ void fn_80271624(int mode, u8* p);
 void operator delete(void* p);
 
 // One selectable camera view.
+// Unit-local (port ODR: other units define a different CamView).
+namespace {
 struct CamView {
     s32 type;       // offset 0x0
     u8 pad4[0x4];
@@ -46,6 +48,7 @@ struct CamView {
     u8 b25;         // offset 0x25
     u8 pad26[0x2];
 };
+}  // namespace
 
 const char* lbl_80346B24[3] = {"TV Set 1", "TV Set 2", "TV Set 3"};
 

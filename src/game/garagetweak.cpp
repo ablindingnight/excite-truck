@@ -41,6 +41,8 @@ public:
 };
 
 // A tunable value of the car.
+// Unit-local (port ODR: other units define a different Tweak).
+namespace {
 struct Tweak {
     const char* name;  // offset 0x0
     const char* unit;  // offset 0x4
@@ -50,6 +52,7 @@ struct Tweak {
     f32 max;           // offset 0x14
     f32 step;          // offset 0x18
 };
+}  // namespace
 
 class TweakVisitor {
 public:
