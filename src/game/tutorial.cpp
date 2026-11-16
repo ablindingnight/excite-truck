@@ -221,7 +221,8 @@ struct TPath {
     TVec2 pts[1];  // offset 0x8
 };
 
-struct CarState {
+// A car frame: rigid.cpp's RMtx (basis + origin, 0x30); was named RMtx here.
+struct RMtx {
     TVec3 basis[3];  // offset 0x0
     TVec3 origin;    // offset 0x24
 };
@@ -241,7 +242,7 @@ struct TCar {
     TVec3 fwd;  // offset 0x18
     u8 pad24[0x30 - 0x24];
     TVec3 vel;  // offset 0x30
-    CarState frame;  // offset 0x3C (origin = position, 0x60)
+    RMtx frame;  // offset 0x3C (origin = position, 0x60)
     u8 pad6C[0x118 - 0x6C];
     TVec3 v118;  // offset 0x118
 };
@@ -1665,7 +1666,7 @@ inline void ChalList::Update(void) {
     }
     for (i = 0; i < lbl_8055E4D0; i++) {
         TCar* car = lbl_804348E8[i];
-        CarState m;
+        RMtx m;
         TVec3 v;
         TVec3 w;
         fn_8018ADBC(car, 1.0f);

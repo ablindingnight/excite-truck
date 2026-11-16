@@ -378,8 +378,10 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 extern const f32 lbl_8056149C;  // 5.0: seconds a gate adds
 
-struct CarState {
-    CarState(void);
+// A car's gate-run state in the zone mode (0x12C); class name unproven. Was named CarState here, the name of
+// carstate.cpp's 0x2B4 physics state.
+struct ZoneCar {
+    ZoneCar(void);
     f32 BonusScale(void) {
         if (tC8.Active()) {
             return Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.5f, 1.0f, tC8.Progress())));
@@ -655,7 +657,7 @@ struct ZoneHud {
             it->b4A = 0;
         }
     }
-    int Update(CarState* c);
+    int Update(ZoneCar* c);
     void SetComplete(void) {
         StrCopyN(fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14, textC6);
         StrCopyN(fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14, textDA);
@@ -1028,18 +1030,18 @@ public:
         return g;
     }
     void DrawNextGate(void);
-    void DrawBonus(int p, CarState* c) const;
-    void DrawLevel(int p, CarState* c) const;
-    void DrawMissed(int p, CarState* c) const;
-    void DrawGateStar(int p, CarState* c) const;
+    void DrawBonus(int p, ZoneCar* c) const;
+    void DrawLevel(int p, ZoneCar* c) const;
+    void DrawMissed(int p, ZoneCar* c) const;
+    void DrawGateStar(int p, ZoneCar* c) const;
     void DrawHud(int p) const;
-    void DrawNothing(int p, CarState* c) const;
-    void DrawTimer(int p, CarState* c) const;
-    void DrawScore(int p, CarState* c) const;
-    void DrawMissedFlag(int p, CarState* c) const;
-    void DrawGateBonus(int p, CarState* c) const;
+    void DrawNothing(int p, ZoneCar* c) const;
+    void DrawTimer(int p, ZoneCar* c) const;
+    void DrawScore(int p, ZoneCar* c) const;
+    void DrawMissedFlag(int p, ZoneCar* c) const;
+    void DrawGateBonus(int p, ZoneCar* c) const;
     void DrawRing(const Gate* g, int c) const;
-    CarState* GetCar(int i) { return &cars[i]; }
+    ZoneCar* GetCar(int i) { return &cars[i]; }
     int Paused(f32 now) { return 0; }
     ZoneLevel* CurLevel(void) const { return &levels->levels[level]; }
     Gate* FirstGate(int car) const {
@@ -1061,13 +1063,13 @@ public:
         f32 bonus = lbl_8042FB3C.timeBonus * levels->levels[lvl].score;
         return Round(bonus * levels->levels[lvl].mult);
     }
-    int TimeBonusPoints(CarState* c) {
+    int TimeBonusPoints(ZoneCar* c) {
         if (lbl_8042FB3C.BonusAt(fn_8013CB3C() - c->bonusT) > 0.0f) {
             return Round(lbl_8042FB3C.timeBonus);
         }
         return 0;
     }
-    void ScoreGate(CarState* c) {
+    void ScoreGate(ZoneCar* c) {
         int pts;
         int mx;
         int bonus;
@@ -1124,7 +1126,7 @@ public:
     f32 f9C;  // offset 0x9C
     s32 tex[5];      // offset 0xA0
     s32 ringModel;   // offset 0xB4
-    CarState* cars;  // offset 0xB8
+    ZoneCar* cars;  // offset 0xB8
     s32 nCars;       // offset 0xBC
     Wrap<EventRing> events;  // offset 0xC0
     s32 nHumans;     // offset 0x130
@@ -1205,7 +1207,7 @@ static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
     return r;
 }
 
-int fn_8013CBC0(CarState* zm, int car) {
+int fn_8013CBC0(ZoneCar* zm, int car) {
     Gate* g = zm->gate;
     int r = 0;
     Truck* t = fn_8017960C(car);
@@ -1403,7 +1405,7 @@ ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f),
     n = race->nCars;
     lbl_8055E1C0 = this;
     nCars = n;
-    cars = new ("ZoneMaster::tab") CarState[n];
+    cars = new ("ZoneMaster::tab") ZoneCar[n];
     nHumans = 0;
     for (i = 0; i < nCars; i++) {
         cars[i].human = race->cars[i].kind == 0x50;
@@ -1732,7 +1734,7 @@ void fn_8013E3A8(Tune* t, ValueNode* n) {
 
 }  // extern "C"
 
-CarState::CarState(void)
+ZoneCar::ZoneCar(void)
     : t98(1.0f), tA0(1.25f), tA8(1.25f), tB0(1.25f), tB8(1.65f), tC0(1.0f), tC8(0.5f), tD0(0.5f), tD8(0.5f) {}
 
 ZoneMaster::~ZoneMaster(void) {
@@ -1767,7 +1769,7 @@ ZoneMaster::~ZoneMaster(void) {
 }
 
 extern "C" void fn_8013EB0C(ZoneMaster* zm, int car) {
-    CarState* c = &zm->cars[car];
+    ZoneCar* c = &zm->cars[car];
     if (c->human) {
         c->rating = 1;
     }
@@ -1818,7 +1820,7 @@ static inline void DrawGateBar(const PlainVec3& from, const PlainVec3& to, const
 
 void ZoneMaster::DrawNextGate(void) {
     f32 t = fn_8013CB3C() - nextT;
-    CarState* c = GetCar(fn_801E866C(0));
+    ZoneCar* c = GetCar(fn_801E866C(0));
     Gate* g = c->gate;
     if (g && lbl_8042FB3C.levelupGates - c->gates < 3) {
         int i;
@@ -1863,7 +1865,7 @@ inline void ZoneMaster::MarkHitGates(FixedArray<GateHit, 8>& hits) {
 }
 
 void ZoneMaster::vf44(void) {
-    CarState* c;
+    ZoneCar* c;
     struct { u32 k; int ok; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
     int i;
     f32 d2;
@@ -1971,7 +1973,7 @@ extern "C" void fn_zone_WideOpen(Layout* l, int mode, int mult, f32* out) {
     fn_801475D0(l, "wideopen_mult", "%d", mult);
 }
 
-void ZoneMaster::DrawBonus(int p, CarState* c) const {
+void ZoneMaster::DrawBonus(int p, ZoneCar* c) const {
     if (c->gate) {
         f32 k = c->BonusScale();
         f32 a = Lerp(1.0f, 0.0f, Clamp01(InvLerp(0.0f, lbl_8042FB3C.timeBonusLen,
@@ -2004,7 +2006,7 @@ void ZoneMaster::DrawBonus(int p, CarState* c) const {
     }
 }
 
-void ZoneMaster::DrawNothing(int p, CarState* c) const {}
+void ZoneMaster::DrawNothing(int p, ZoneCar* c) const {}
 
 extern "C" int fn_8013F438(f32 t) { return Lerp(200.0f, 0.0f, Clamp01(InvLerp(0.2f, 0.8f, t))); }
 
@@ -2035,7 +2037,7 @@ extern "C" void fn_zone_LevelTitle(Layout* l) {
     l->Find("level_fade_out");
 }
 
-void ZoneMaster::DrawLevel(int p, CarState* c) const {
+void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
     if (level > 0) {
         if (t74.Active()) {
             f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t74.Progress())));
@@ -2075,7 +2077,7 @@ void ZoneMaster::DrawLevel(int p, CarState* c) const {
     }
 }
 
-void ZoneMaster::DrawMissed(int p, CarState* c) const {
+void ZoneMaster::DrawMissed(int p, ZoneCar* c) const {
     if (c->tA8.Active()) {
         f32 t = c->tA8.Progress();
         u32 col = (fn_8013F438(t) << 24) | 0xFF7F00;
@@ -2095,7 +2097,7 @@ void ZoneMaster::DrawMissed(int p, CarState* c) const {
     }
 }
 
-void ZoneMaster::DrawGateStar(int p, CarState* c) const {
+void ZoneMaster::DrawGateStar(int p, ZoneCar* c) const {
     if (c->gate && !vf24()) {
         f32 k = c->BonusScale();
         LayoutArt* a = mainLyt->FindArt("gate_star_art");
@@ -2124,7 +2126,7 @@ int ZoneMaster::vf24(void) const {
 }
 
 int ZoneMaster::vf20(int car) const {
-    CarState* c = &cars[car];
+    ZoneCar* c = &cars[car];
     int r = 1;
     if (c->done) {
         if (!t74.Active()) {
@@ -2175,7 +2177,7 @@ static inline void DrawClock(const ZoneMaster* z, f32 t) {
     fn_8014784C(z->mainLyt, "stop_watch_art", "stop_watch_artset", 0);
 }
 
-void ZoneMaster::DrawTimer(int p, CarState* c) const {
+void ZoneMaster::DrawTimer(int p, ZoneCar* c) const {
     f32 age;
     if (lbl_8055E1BC) {
         fn_802C8BD0(tex[0]);
@@ -2249,7 +2251,7 @@ void ZoneMaster::DrawTimer(int p, CarState* c) const {
     }
 }
 
-void ZoneMaster::DrawScore(int p, CarState* c) const {
+void ZoneMaster::DrawScore(int p, ZoneCar* c) const {
     int score = c->score - c->timeBonus;
     if (c->t98.Active() && c->bonus > 50) {
         f32 f = 1.0f - c->t98.Progress();
@@ -2258,7 +2260,7 @@ void ZoneMaster::DrawScore(int p, CarState* c) const {
     UpdateScoreOverlays(fn_801E866C(p), score);
 }
 
-void ZoneMaster::DrawMissedFlag(int p, CarState* c) const {
+void ZoneMaster::DrawMissedFlag(int p, ZoneCar* c) const {
     if (!c->tA8.Active() && c->tA0.Active()) {
         LayoutItem* a = mainLyt->Find("missed_start");
         LayoutItem* b = mainLyt->Find("missed_end");
@@ -2267,7 +2269,7 @@ void ZoneMaster::DrawMissedFlag(int p, CarState* c) const {
     }
 }
 
-void ZoneMaster::DrawGateBonus(int p, CarState* c) const {
+void ZoneMaster::DrawGateBonus(int p, ZoneCar* c) const {
     if (c->tD8.Active()) {
         LayoutArt* a0;
         LayoutArt* a1;
@@ -2300,7 +2302,7 @@ void ZoneMaster::DrawGateBonus(int p, CarState* c) const {
 
 void ZoneMaster::DrawHud(int p) const {
     int i = fn_801E866C(p);
-    CarState* c = &cars[i];
+    ZoneCar* c = &cars[i];
     if (!fn_8013CB10(p)) {
         DrawBonus(p, c);
         DrawNothing(p, c);
@@ -2410,7 +2412,7 @@ public:
 };
 
 
-int ZoneHud::Update(CarState* c) {
+int ZoneHud::Update(ZoneCar* c) {
     int shown;
     int left;
     int final;
@@ -2580,7 +2582,7 @@ inline void ZoneMaster::vf0C(void) {
     }
     if (!vf24()) {
         int finished;
-        CarState* c;
+        ZoneCar* c;
         int i;
         for (i = 0; i < nCars; i++) {
             c = GetCar(i);
@@ -2734,7 +2736,7 @@ inline void ZoneMaster::vf0C(void) {
 #pragma dont_inline reset
 
 inline void ZoneMaster::vf10(void) {
-    CarState* c;
+    ZoneCar* c;
     void* tr;
     u32 k;
     Vec3* p;
@@ -2775,7 +2777,7 @@ inline void ZoneMaster::vf10(void) {
     t8C.start = -999.0f;
     i288 = fn_8013D18C(0);
     for (int i = 0, off = 0; i < nCars; off += sizeof(cars[0]), i++) {
-        c = (CarState*)((u8*)cars + off);
+        c = (ZoneCar*)((u8*)cars + off);
         memset(c->hits, 0, sizeof(c->hits));
         c->tC0.start = -999.0f;
         c->rating = 1;
@@ -2861,7 +2863,7 @@ inline int ZoneMaster::vfA0(Cam* cam) {
 }
 
 inline void ZoneMaster::vfAC(int car) {
-    CarState* c = &cars[car];
+    ZoneCar* c = &cars[car];
     if (c->human && vf20(car)) {
         c->gate = 0;
         c->EndCombo();
