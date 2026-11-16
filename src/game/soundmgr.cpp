@@ -155,16 +155,6 @@ public:
     void SortClasses(void);
     void Check(void);
     void Add(GameSound* s);
-    void InsertAt(int cls, GameSound* s) {
-        memmove(classes[cls].first + 1, classes[cls].first,
-                (all.count - (classes[cls].first - all.first)) * sizeof(GameSound*));
-        for (int c = cls + 1; c < 9; c++) {
-            classes[c].first++;
-        }
-        *classes[cls].first = s;
-        classes[cls].count++;
-        all.count++;
-    }
     void Add2(GameSound* s);
     void Add3(GameSound* s);
     int IsPositional(int cls);
@@ -432,7 +422,15 @@ void SoundManager::SortClasses(void) {
 void SoundManager::Check(void) {}
 
 void SoundManager::Add(GameSound* s) {
-    InsertAt(s->cls, s);
+    const struct { int index; } cls = { s->cls };
+    memmove(classes[cls.index].first + 1, classes[cls.index].first,
+            (all.count - (classes[cls.index].first - all.first)) * sizeof(GameSound*));
+    for (int c = cls.index + 1; c < 9; c++) {
+        classes[c].first++;
+    }
+    *classes[cls.index].first = s;
+    classes[cls.index].count++;
+    all.count++;
     Check();
 }
 
@@ -504,6 +502,4 @@ Sound* SoundManager::Create3(void* desc, int cls) { return Create(desc, cls); }
 
 void SoundManager::ReleaseSound(Sound* s) { s->vf0C(); }
 
-// NonMatching: Add and Remove use different registers in the compiler's unroll guard of the class-shift
-// loop, Allocate numbers some volatile registers differently, and the ctor schedules its float stores
-// differently.
+// NonMatching: The constructor schedules its float stores differently.
