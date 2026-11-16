@@ -52,7 +52,7 @@ inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
     arg1 = *(const int*)&r.hi;
 }
 
-// Helper name unproven; PROVISIONAL cast as in tunemenu/uioptions (aids audit 2026-11-16): each volume row reads
+// Helper name unproven; retail-proven cast (user 2026-11-16: genuine, spelling unproven) as in tunemenu/uioptions (aids audit 2026-11-16): each volume row reads
 // its own lo/hi stack slots back with lwz, the by-value inline form; 84.32 -> 84.84 over the MenuRange constructor.
 static inline MenuItem VolumeItem(const char* n, f32* v, f32 lo, f32 hi) {
     return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi);

@@ -17,7 +17,7 @@ struct TuneScales {
 };
 
 // A slider item (type 9): the range travels as the two floats' bit patterns in the int argument words.
-// PROVISIONAL (user 2026-11-16). Aids audit 2026-11-16: retail stores every row's lo/hi to its own stack slot and
+// Retail-proven cast (user 2026-11-16: genuine, spelling unproven). Aids audit 2026-11-16: retail stores every row's lo/hi to its own stack slot and
 // reads them back with lwz (one float object per row = by-value parameters of an inline). Every non-cast pun
 // compiles to the same instructions with other registers: union locals 91.11, a union parameter with a float
 // constructor (by value or const&) 91.36, a MenuItem(n, v, f32 lo, f32 hi) constructor doing the cast 91.36;

@@ -90,7 +90,7 @@ ModuleTag lbl_8055ED98;
 ValMatrix lbl_804891F8;
 ValVec3 lbl_80489228;
 
-// Identity pose (PROVISIONAL per the user 2026-11-16, listed in AIDS). Retail keeps one resolved base register for
+// Identity pose (retail-proven cast, user 2026-11-16: genuine, spelling unproven). Retail keeps one resolved base register for
 // all twelve stores; a plain m->basis[0].x store takes a split @ha/@l address for offset 0. Aids audit 2026-11-16:
 // the base must come through a pointer CAST: eleven cast-free spellings (direct members, m->basis decay,
 // &m->basis[0], row setter inline, accessor returning basis, reference parameter, Mat3::SetScale through Mat())
