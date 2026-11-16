@@ -31,26 +31,26 @@ void fn_80176A24(f32 t);
 int fn_80178CA4(void);
 int fn_801B8570(int car);
 int fn_8026A38C(void);
-int fn_801784AC(const SVec* from, const SVec* to, SVec* hit, SVec* n, void* a, void* b, int flags);
-int fn_801EA03C(u8* ground, SVec* p);
-void fn_8026E22C(u8* out, SFrame* from, SFrame* to, f32 t);
+int fn_801784AC(const ValVec3* from, const ValVec3* to, ValVec3* hit, ValVec3* n, void* a, void* b, int flags);
+int fn_801EA03C(u8* ground, ValVec3* p);
+void fn_8026E22C(u8* out, PlainValMatrix* from, PlainValMatrix* to, f32 t);
 }
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // dst = m * src (column-major rotation), with the aliasing guard of the inline.
 // Helper names unproven: scaled vector adds (the scale stays the right operand).
-static inline void AddScaledV(SVec* o, const SVec* v, f32 s) {
+static inline void AddScaledV(ValVec3* o, const ValVec3* v, f32 s) {
     o->x += v->x * s;
     o->y += v->y * s;
     o->z += v->z * s;
 }
-static inline void SumScaledV(SVec* o, const SVec* a, const SVec* v, f32 s) {
+static inline void SumScaledV(ValVec3* o, const ValVec3* a, const ValVec3* v, f32 s) {
     o->x = a->x + v->x * s;
     o->y = a->y + v->y * s;
     o->z = a->z + v->z * s;
 }
-static inline void MulVec(const Mat3& m, const SVec& src, SVec* dst) {
+static inline void MulVec(const Mat3& m, const ValVec3& src, ValVec3* dst) {
     if (dst == &src) {
         f32 x = Dot3(src.x, m.m[0][0], src.y, m.m[1][0], src.z, m.m[2][0]);
         f32 y = Dot3(src.x, m.m[0][1], src.y, m.m[1][1], src.z, m.m[2][1]);
@@ -158,15 +158,15 @@ int fn_8026A698(u8* p, int i) {
         f32 room[2] = {1000.0f, 1000.0f};
         r = room;
         for (int k = 0; k < 2; k++) {
-            SVec from = *(const SVec*)&((CamRec*)p)->carFrame.pos;
-            SVec side;
+            ValVec3 from = *(const ValVec3*)&((CamRec*)p)->carFrame.pos;
+            ValVec3 side;
             side.x = k ? -1.0f : 1.0f;
             side.y = 0.0f;
             side.z = 0.0f;
-            SVec dir;
-            SVec nrm;
-            SVec to;
-            SVec hit;
+            ValVec3 dir;
+            ValVec3 nrm;
+            ValVec3 to;
+            ValVec3 hit;
             u32 a;
             u32 b;
             MulVec(*(const Mat3*)&((CamRec*)p)->carFrame, side, &dir);
@@ -179,9 +179,9 @@ int fn_8026A698(u8* p, int i) {
         }
         ((CamRec*)p)->b138 = 1;
         s->active = 1;
-        s->frame = *(const SFrame*)&((CamRec*)p)->lastPose;
+        s->frame = *(const PlainValMatrix*)&((CamRec*)p)->lastPose;
         s->fov = ((CamRec*)p)->f194;
-        s->yaw = atan2(s->frame.rot.m[2][0], s->frame.rot.m[2][2]);
+        s->yaw = atan2(s->frame.basis[2].x, s->frame.basis[2].z);
         f32 turn = 2.3561945f;
         // p + 0xC0 = CamRec::carFrame (typed, together with the MulVec read above, it grows the frame by 16)
         turn = PSVECDotProduct((const Vec*)&((CarBody*)((CamRec*)p)->car)->vel, (const Vec*)((f32*)(p + 0xC0))) > 0.0f ? turn : -turn;
@@ -213,11 +213,11 @@ int fn_8026A698(u8* p, int i) {
     }
     s->t += 0.016683351f * (f32)(lbl_8055E3C4 - s->frameNo);
     if (lbl_8055E3C4 != s->frameNo) {
-        SVec at = *(const SVec*)&((CamRec*)p)->carFrame.pos;
-        AddScaledV(&at, (const SVec*)&((CamRec*)p)->carFrame.rot.m[3], 0.7f);
+        ValVec3 at = *(const ValVec3*)&((CamRec*)p)->carFrame.pos;
+        AddScaledV(&at, (const ValVec3*)&((CamRec*)p)->carFrame.rot.m[3], 0.7f);
         s->target = at;
-        SVec v;
-        SVec d;
+        ValVec3 v;
+        ValVec3 d;
         SetV3(&d, at.x - s->pos.x, at.y - s->pos.y, at.z - s->pos.z);
         f32 xv = s->vel.x;
         f32 blend = 0.2f;
@@ -227,17 +227,17 @@ int fn_8026A698(u8* p, int i) {
         s->pos.y += v.y * 1.0f;
         s->pos.z += v.z * 1.0f;
     }
-    SFrame f;
-    f.pos = s->pos;
-    f.rot.m[0][0] = 1.0f;
-    f.rot.m[0][1] = 0.0f;
-    f.rot.m[0][2] = 0.0f;
-    f.rot.m[1][0] = 0.0f;
-    f.rot.m[1][1] = 1.0f;
-    f.rot.m[1][2] = 0.0f;
-    f.rot.m[2][0] = 0.0f;
-    f.rot.m[2][1] = 0.0f;
-    f.rot.m[2][2] = 1.0f;
+    PlainValMatrix f;
+    f.origin = s->pos;
+    f.basis[0].x = 1.0f;
+    f.basis[0].y = 0.0f;
+    f.basis[0].z = 0.0f;
+    f.basis[1].x = 0.0f;
+    f.basis[1].y = 1.0f;
+    f.basis[1].z = 0.0f;
+    f.basis[2].x = 0.0f;
+    f.basis[2].y = 0.0f;
+    f.basis[2].z = 1.0f;
     f32 orbit[3];
     f32 orbit_1 = s->yaw + s->t * s->spin;
     orbit[0] = 0.0f;
@@ -245,35 +245,35 @@ int fn_8026A698(u8* p, int i) {
     orbit[2] = 0.0f;
     Mat3 m1;
     Mat3FromEuler(&m1, (const Vec3*)orbit);
-    Mat3Mul(&f.rot, &m1, &f.rot);
+    Mat3Mul(&f.Mat(), &m1, &f.Mat());
     f32 tilt[3];
     tilt[0] = 0.2617994f;
     tilt[1] = 0.0f;
     tilt[2] = 0.0f;
     Mat3 m2;
     Mat3FromEuler(&m2, (const Vec3*)tilt);
-    Mat3Mul(&f.rot, &m2, &f.rot);
-    SVec back;
+    Mat3Mul(&f.Mat(), &m2, &f.Mat());
+    ValVec3 back;
     back.x = 0.0f;
     back.y = 0.0f;
     back.z = -6.0f;
-    SVec off;
-    MulVec(f.rot, back, &off);
-    f.pos.x += off.x;
-    f.pos.y += off.y;
-    f.pos.z += off.z;
-    SVec g = f.pos;
+    ValVec3 off;
+    MulVec(f.Mat(), back, &off);
+    f.origin.x += off.x;
+    f.origin.y += off.y;
+    f.origin.z += off.z;
+    ValVec3 g = f.origin;
     if (fn_801EA03C((u8*)((CarBody*)((CamRec*)p)->car)->hint, &g)) {
         g.y += 1.0f;
-        f32 up = MAX(0.0f, g.y - f.pos.y);
-        f.pos.y += up;
+        f32 up = MAX(0.0f, g.y - f.origin.y);
+        f.origin.y += up;
         f32 euler[3];
         euler[0] = (f32)atan(up / 6.0f);
         euler[1] = 0.0f;
         euler[2] = 0.0f;
         Mat3 m3;
         Mat3FromEuler(&m3, (const Vec3*)euler);
-        Mat3Mul(&f.rot, &m3, &f.rot);
+        Mat3Mul(&f.Mat(), &m3, &f.Mat());
     }
     fn_80176A24(lbl_80563D08);
     fn_80176A00(2);
