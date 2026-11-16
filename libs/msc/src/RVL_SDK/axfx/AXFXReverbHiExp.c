@@ -9,23 +9,20 @@ static void __BzeroDelayLines(AXFX_REVERBHI_EXP* fx);
 static void __FreeDelayLine(AXFX_REVERBHI_EXP* fx);
 static BOOL __InitParams(AXFX_REVERBHI_EXP* fx);
 
-static u32 __EarlySizeTable[8][3] = {{157, 479, 829},    {317, 809, 1117},
-                                     {479, 941, 1487},   {641, 1259, 1949},
-                                     {797, 1667, 2579},  {967, 1901, 2903},
-                                     {1123, 2179, 3413}, {1279, 2477, 3889}};
+// DUMP_DATA __EarlySizeTable u32
+static u32 __EarlySizeTable[8][3] = {
+#include "dumpdata/__EarlySizeTable.inc"
+};
 
-static f32 __EarlyCoefTable[8][3] = {{0.4f, -1.0f, 0.3f}, {0.5f, -0.95f, 0.3f},
-                                     {0.6f, -0.9f, 0.3f}, {0.75f, -0.85f, 0.3f},
-                                     {-0.9f, 0.8f, 0.3f}, {-1.0f, 0.7f, 0.3f},
-                                     {-1.0f, 0.7f, 0.3f}, {-1.0f, 0.7f, 0.3f}};
+// DUMP_DATA __EarlyCoefTable f32
+static f32 __EarlyCoefTable[8][3] = {
+#include "dumpdata/__EarlyCoefTable.inc"
+};
 
-static u32 __FilterSizeTable[7][8] = {{1789, 1999, 2333, 433, 149, 47, 73, 67},
-                                      {149, 293, 449, 251, 103, 47, 73, 67},
-                                      {947, 1361, 1531, 433, 137, 47, 73, 67},
-                                      {1279, 1531, 1973, 509, 149, 47, 73, 67},
-                                      {1531, 1847, 2297, 563, 179, 47, 73, 67},
-                                      {1823, 2357, 2693, 571, 137, 47, 73, 67},
-                                      {1823, 2357, 2693, 571, 179, 47, 73, 67}};
+// DUMP_DATA __FilterSizeTable u32
+static u32 __FilterSizeTable[7][8] = {
+#include "dumpdata/__FilterSizeTable.inc"
+};
 
 u32 AXFXReverbHiExpGetMemSize(const AXFX_REVERBHI_EXP* fx) {
     u32 sum = 0;

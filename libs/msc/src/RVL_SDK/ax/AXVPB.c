@@ -67,10 +67,10 @@ static u32 __AXRecDspCycles = 0;
 static u32 __AXMaxDspCycles = 0;
 
 #ifdef GAME_REXE01
-static u32 __AXMixCycles[] = {0,    760,  760,  1470, 0,    1265, 1265, 2470,
-                              760,  1520, 1520, 2230, 760,  2025, 2025, 3230,
-                              0,    760,  760,  1470, 0,    1265, 1265, 2470,
-                              1265, 2025, 2025, 2735, 1265, 2530, 2530, 3735};
+// DUMP_DATA __AXMixCycles u32
+static u32 __AXMixCycles[] = {
+#include "dumpdata/__AXMixCycles.inc"
+};
 #else
 static u32 __AXMixCycles[] = {2,   408,  408,  810,  1404, 1404, 1404, 1404,
                               408, 816,  816,  1218, 1812, 1812, 1812, 1812,

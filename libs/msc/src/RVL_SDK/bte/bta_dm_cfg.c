@@ -77,13 +77,9 @@ tBTA_DM_RM const bta_dm_rm_cfg[] = {
     { BTA_ID_AV, BTA_ALL_APP_ID, BTA_AV_ROLE },
 };
 
+// DUMP_DATA bta_dm_compress_cfg {u8,u8,u8}
 tBTA_DM_COMPRESS const bta_dm_compress_cfg[] = {
-    { 0, 5, 0 },
-    { 10, 255, 1 },
-    { 8, 255, 1 },
-    { 6, 255, 1 },
-    { 7, 255, 1 },
-    { 18, 255, 2 },
+#include "dumpdata/bta_dm_compress_cfg.inc"
 };
 
 tBTA_DM_PM_CFG const bta_dm_pm_cfg[] = {

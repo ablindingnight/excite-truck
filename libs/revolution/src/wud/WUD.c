@@ -56,142 +56,9 @@ static u8 _discNumResps;
 static s8 _discRssi;
 
 // clang-format off
+// DUMP_DATA descriptor u8
 static u8 descriptor[] = {
-    0x05, 0x01, // Usage Page (Generic Desktop Ctrls)
-    0x09, 0x05, // Usage (Game Pad)
-
-    0xA1, 0x01, // Collection (Application)
-
-    0x85, 0x10,       // Report ID (16)
-    0x15, 0x00,       // Logical Minimum (0)
-    0x26, 0xFF, 0x00, // Logical Maximum (255)
-    0x75, 0x08,       // Report Size (8)
-    0x95, 0x01,       // Report Count (1)
-    0x06, 0x00, 0xFF, // Usage Page (Vendor Defined 0xFF00)
-    0x09, 0x01,       // Usage (0x01)
-    0x91, 0x00,       // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x11, // Report ID (17)
-    0x95, 0x01, // Report Count (1)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x12, // Report ID (18)
-    0x95, 0x02, // Report Count (2)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x13, // Report ID (19)
-    0x95, 0x01, // Report Count (1)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x14, // Report ID (20)
-    0x95, 0x01, // Report Count (1)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x15, // Report ID (21)
-    0x95, 0x01, // Report Count (1)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x16, // Report ID (22)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x17, // Report ID (23)
-    0x95, 0x06, // Report Count (6)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x18, // Report ID (24)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x19, // Report ID (25)
-    0x95, 0x01, // Report Count (1)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x1A, // Report ID (26)
-    0x95, 0x01, // Report Count (1)
-    0x09, 0x01, // Usage (0x01)
-    0x91, 0x00, // Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-
-    0x85, 0x20, // Report ID (32)
-    0x95, 0x06, // Report Count (6)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x21, // Report ID (33)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x22, // Report ID (34)
-    0x95, 0x04, // Report Count (4)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x30, // Report ID (48)
-    0x95, 0x02, // Report Count (2)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x31, // Report ID (49)
-    0x95, 0x05, // Report Count (5)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x32, // Report ID (50)
-    0x95, 0x0A, // Report Count (10)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x33, // Report ID (51)
-    0x95, 0x11, // Report Count (17)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x34, // Report ID (52)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x35, // Report ID (53)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x36, // Report ID (54)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x37, // Report ID (55)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x3D, // Report ID (61)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x3E, // Report ID (62)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0x85, 0x3F, // Report ID (63)
-    0x95, 0x15, // Report Count (21)
-    0x09, 0x01, // Usage (0x01)
-    0x81, 0x00, // Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
-
-    0xC0,       // End Collection
+#include "dumpdata/descriptor.inc"
 };
 
 // forward declarations: functions below are ordered to match the original binary
@@ -1751,25 +1618,9 @@ void reset_again(void) {
 }
 
 // clang-format off
+// DUMP_DATA patch_binary u8
 static u8 patch_binary[] = {
-    0x70, 0x99, 0x08, 0x00, // address (little-endian)
-    0x38, 0x00, 0x00, 0x00, // size (little-endian)
-
-    // patch data
-    0x88, 0x43, 0xD1, 0x07,
-    0x09, 0x0C, 0x08, 0x43,
-    0xA0, 0x62, 0x19, 0x23,
-    0xDB, 0x01, 0x33, 0x80,
-    0x7C, 0xF7, 0x88, 0xF8,
-    0x28, 0x76, 0x80, 0xF7,
-    0x17, 0xFF, 0x43, 0x78,
-    0xEB, 0x70, 0x19, 0x23,
-    0xDB, 0x01, 0x33, 0x87,
-    0x7C, 0xF7, 0xBC, 0xFB,
-    0x0B, 0x60, 0xA3, 0x7B,
-    0x01, 0x49, 0x0B, 0x60,
-    0x90, 0xF7, 0x96, 0xFB,
-    0xD8, 0x1D, 0x08, 0x00,
+#include "dumpdata/patch_binary.inc"
 };
 // clang-format on
 

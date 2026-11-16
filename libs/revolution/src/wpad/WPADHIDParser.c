@@ -65,10 +65,9 @@ void (*__a1_input_reports_array[])(u8 chan, u8* data) = {
     __a1_unused_report,     __a1_3d_data_type,  __a1_3e_data_type,  __a1_3f_data_type
 };
 
+// DUMP_DATA checkInvalidData u8
 static u8 checkInvalidData[21] = {
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff,
+#include "dumpdata/checkInvalidData.inc"
 };
 static u8 checkBuffer[21];
 

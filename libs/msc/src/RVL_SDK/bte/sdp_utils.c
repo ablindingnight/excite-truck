@@ -38,13 +38,10 @@
 #include "sdp_api.h"
 #include "sdpdefs.h"
 
+// DUMP_DATA sdp_base_uuid u8
 static UINT8 const sdp_base_uuid[LEN_UUID_128] =
 {
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00,
-	0x10, 0x00,
-	0x80, 0x00,
-	0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb
+#include "dumpdata/sdp_base_uuid.inc"
 };
 
 tCONN_CB *sdpu_find_ccb_by_cid(UINT16 cid)
