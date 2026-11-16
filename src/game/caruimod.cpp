@@ -518,7 +518,8 @@ struct CarPose {
     u8 pad31[0xF];
     f32 wheelY[4];   // offset 0x40
     f32 steer[4];    // offset 0x50
-    u8 pad60[0x18];
+    Vec shadow;      // offset 0x60 (Update: the shine offset, -13.33 along the pose's forward axis)
+    u8 pad6C[0xC];
 };
 
 class AsyncResourceSet {
@@ -1308,7 +1309,6 @@ void CarUIScreen::Deactivate(void) {
 }
 
 void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
-    Vec t;
     lbl_8055F334 = dt;
     if (fn_802D3EBC()) {
         dt = 0.0f;
@@ -1378,10 +1378,20 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         f32 box[6];
         fn_802C77F0(model->model, (Vec*)box);
         fn_802C7808(model->model);
+        // MATCHING-AID: the declaration order (dz, dy, dx, then the squares) sets the float registers; the diagonal is computed and discarded.
+        f32 dz;
         f32 dy;
-        f32 dx = box[1] - box[0];
+        f32 dx;
+        f32 xx;
+        f32 yy;
+        f32 zz;
         dy = box[3] - box[2];
-        sqrt(dx * dx + dy * dy + (box[5] - box[4]) * (box[5] - box[4]));
+        dx = box[1] - box[0];
+        dz = box[5] - box[4];
+        xx = dx * dx;
+        yy = dy * dy;
+        zz = dz * dz;
+        sqrt(xx + yy + zz);
         sqrt(2.0);
         if (index == 0) {
             fn_802AB9E0(lbl_8055F338);
@@ -1397,9 +1407,9 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
                             fn_80253004(i, &p);
                         } else {
                             fn_802545C4(&p, bg, model);
-                            Scale(&t, &p.frame.b.v[2], -13.333333f);
+                            Scale(&p.shadow, &p.frame.b.v[2], -13.333333f);
                         }
-                        off = t;
+                        off = p.shadow;
                     }
                     fn_802ABC80(&lbl_80498E28[i]->model->frame, &off, 1.0f, 2.5f, 1.0f);
                 }
