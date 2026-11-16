@@ -20,7 +20,6 @@ int fn_802E47B8(void);
 int fn_802E46F0(void);
 extern s32 lbl_8055CFF0;
 extern s32 lbl_8055CFF4;
-extern const f32 lbl_80563910;  // 10.0f: view distance
 }
 
 struct MTVec {
@@ -78,7 +77,7 @@ void fn_8024BE04(void) {
     MTMtx view;
     vp = &view;
     for (u32 frame = 0;; frame++) {
-        vp->SetView(lbl_80563910);
+        vp->SetView(10.0f);
         fn_802C8530();
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_802C86E8(0xFF7F7F7F);
