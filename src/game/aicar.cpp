@@ -4,6 +4,7 @@
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "macros.h"
 #include <string.h>
 
@@ -13,10 +14,6 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 #define VCALL(T, p, slot) ((T)(*(void**)(*(u8**)(p) + (slot))))
-
-struct RVec3 {
-    f32 x, y, z;
-};
 
 // A vector copied as words (array member).
 struct PVec3 {
