@@ -247,10 +247,11 @@ public:
         frame = 0;
     }
     virtual ~EvCupBar(void) {
-        if ((u32)lbl_8055F688 == (u32)this) {
+        EvCupBar* self = this;
+        if ((u32)lbl_8055F688 == (u32)self) {
             lbl_8055F688 = 0;
         }
-        lbl_804B3048.Remove(this);
+        lbl_804B3048.Remove(self);
     }
     virtual void Enter(void);
     virtual void Update(void);
