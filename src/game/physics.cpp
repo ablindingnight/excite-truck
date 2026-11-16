@@ -2,6 +2,7 @@
 // restart, post-race), the race mode requests with their screen fader, the frame clock and the physics
 // state listeners. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/raceopts.h"
 
 extern "C" {
@@ -63,11 +64,6 @@ f32 __cvt_sll_flt(s64 v);
 struct StatePacket {
     u8 pad0[0xDB0];
     s32 fade;  // offset 0xDB0
-};
-
-struct LocString {
-    LocString(const char* key);
-    u8 pad0[0x110];
 };
 
 struct RaceMode {
@@ -137,6 +133,7 @@ EventDesc lbl_804303E0;
 char lbl_804303F8[0x20];
 PendingCall lbl_80430418;
 LocString lbl_80430448("High_Scores:DNF");
+u8 lbl_80430454[0x104];  // unreferenced bytes after the DNF string (symbols.txt had them inside lbl_80430448)
 Fader lbl_80430558;
 PhysListener* lbl_80430570[8];
 
