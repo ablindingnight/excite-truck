@@ -166,6 +166,10 @@ extern const f32 kAxisTolerance;
 extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
+// The identity-initialised 3x4 frame (camera library), as far as this unit uses it: an RMtx with a constructor.
+struct CamFrame34 : RMtx {
+    CamFrame34(void);
+};
 // The race-car record (aiobst.cpp), declared as far as this unit uses it.
 class RaceCarRec {
 public:
@@ -176,7 +180,6 @@ void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144B54(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
-void __ct__10CamFrame34Fv(RMtx* m);
 void fn_8017E388(RMtx* m);
 // RagdollShape::RagdollShape(frame, strip, owner, r) in sphcoll, called by its linker name.
 CollShape* __ct__12RagdollShapeFUlUlUlf(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
@@ -380,8 +383,7 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
     for (int k = 0; k < 4; k++) {
         fn_80144DAC(&pts[k], &verts[k].p);
     }
-    RMtx frame;
-    __ct__10CamFrame34Fv(&frame);
+    CamFrame34 frame;
     fn_801BFB2C(p, &frame, pts);
     fn_801BF75C(&p->rest, &m, &frame);
     PanelLink links[2];
@@ -684,8 +686,7 @@ void PanelVol::Update(void) {
         DbgLine(a, b);
     }
     RMtx w;
-    RMtx m;
-    __ct__10CamFrame34Fv(&m);
+    CamFrame34 m;
     fn_80144DAC(&m.pos, &pts[org]);
     fn_801C0E60(&m.rot.x, &pts[e0b], &pts[e0a]);
     fn_801C0E60(&m.rot.y, &pts[e1b], &pts[e1a]);
