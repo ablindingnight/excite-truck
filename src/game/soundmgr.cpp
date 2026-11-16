@@ -118,19 +118,22 @@ ModuleTag lbl_8055ED98;
 ValMatrix lbl_804891F8;
 ValVec3 lbl_80489228;
 
+// MATCHING-AID (PROVISIONAL per the user 2026-11-16, listed in AIDS): the pose as four rows through a cast local pointer: retail keeps one resolved base register for all twelve
+// stores (a plain m->basis[0].x store takes a split @ha/@l address for offset 0).
 static inline void Ident(ValMatrix* m) {
-    m->basis[0].x = 1.0f;
-    m->basis[0].y = 0.0f;
-    m->basis[0].z = 0.0f;
-    m->basis[1].x = 0.0f;
-    m->basis[1].y = 1.0f;
-    m->basis[1].z = 0.0f;
-    m->basis[2].x = 0.0f;
-    m->basis[2].y = 0.0f;
-    m->basis[2].z = 1.0f;
-    m->origin.x = 0.0f;
-    m->origin.y = 0.0f;
-    m->origin.z = 0.0f;
+    ValVec3* r = (ValVec3*)m;
+    r[0].x = 1.0f;
+    r[0].y = 0.0f;
+    r[0].z = 0.0f;
+    r[1].x = 0.0f;
+    r[1].y = 1.0f;
+    r[1].z = 0.0f;
+    r[2].x = 0.0f;
+    r[2].y = 0.0f;
+    r[2].z = 1.0f;
+    r[3].x = 0.0f;
+    r[3].y = 0.0f;
+    r[3].z = 0.0f;
 }
 
 static inline void Zero(ValVec3* v) {
@@ -201,9 +204,9 @@ SoundManager::SoundManager(Mixer* mixer) {
     fn_80207960();
     all.first = new ("SoundManager::snd_tab") GameSound*[0xF0];
     all.count = 0;
+    this->mixer = mixer;
     memset(listeners, 0, sizeof(listeners));
     primaryOnly = 0;
-    this->mixer = mixer;
     Ident(&lbl_804891F8);
     Zero(&lbl_80489228);
     numListeners = 1;
