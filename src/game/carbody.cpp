@@ -2934,76 +2934,76 @@ static inline void LerpSnapshotMatrix(SnapPose* out, const SnapPose* previous, c
 
 void CarBody::vf28(u8* buf) {
     SnapPose tmp;
-    u8* m = buf + S32(((u8*)this), 0x8);
+    u8* m = buf + this->a8;
     memset(m, 0, 0xFA8);
-    SnapPose* pose = (SnapPose*)(buf + S32(((u8*)this), 0x8));
+    SnapPose* pose = (SnapPose*)(buf + this->a8);
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
-        *pose = *(SnapPose*)(((u8*)this) + 0x70);
+        *pose = *(SnapPose*)&this->world;
     } else {
-        LerpSnapshotMatrix(&tmp, (const SnapPose*)(((u8*)this) + 0xA0), (const SnapPose*)(((u8*)this) + 0x70), lbl_8055E460);
+        LerpSnapshotMatrix(&tmp, (const SnapPose*)&this->prev, (const SnapPose*)&this->world, lbl_8055E460);
         *pose = tmp;
     }
-    *(s16*)((u8*)pose + 0x30) = *(s16*)(((u8*)this) + 0x6C);
+    *(s16*)((u8*)pose + 0x30) = *(s16*)&this->hint;
     u16 flags = 0;
-    if (((CarHost*)PTR(((u8*)this), 0x270))->IsImpaired()) {
+    if (((CarHost*)((u8*&)this->src))->IsImpaired()) {
         flags |= 0x40;
     }
-    if (!NearZero(F32(((u8*)this), 0x2690))) {
+    if (!NearZero(this->f2690)) {
         flags |= 0x20;
     }
-    F32(m, 0x34) = F32(((u8*)this), 0x25D0);
-    const f32 speedZ = F32(((u8*)this), 0x120);
+    F32(m, 0x34) = this->f25D0;
+    const f32 speedZ = this->vel.z;
     const f32 zz = speedZ * speedZ;
-    const f32& speedX = F32(((u8*)this), 0x118);
+    const f32& speedX = this->vel.x;
     const f32 xx = speedX * speedX;
     F32(m, 0x4C) = sqrt(xx + zz);
-    F32(m, 0x3C) = F32(((u8*)this), 0x25F0);
-    F32(m, 0x38) = F32(((u8*)this), 0x25F4);
-    F32(m, 0x40) = F32(((u8*)this), 0x25E4);
-    F32(m, 0x44) = F32(((u8*)this), 0x25F8);
+    F32(m, 0x3C) = this->f25F0;
+    F32(m, 0x38) = this->f25F4;
+    F32(m, 0x40) = this->f25E4;
+    F32(m, 0x44) = this->f25F8;
     U32(m, 0x48) = fn_8018B06C(((u8*)this));
     F32(m, 0x50) = 100.0f;
-    if (lbl_8055E4F5 && S32(((u8*)this), 0x24) == 0) {
+    if (lbl_8055E4F5 && this->nAdded == 0) {
         F32(m, 0x22C) = (lbl_8055E3C4 & 4) ? 0.0f : 1.0f;
     } else {
         F32(m, 0x22C) = 1.0f;
     }
     U16(m, 0x6E) = flags;
-    F32(m, 0x70) = F32(((u8*)this), 0x118);
-    F32(m, 0x74) = F32(((u8*)this), 0x11C);
-    F32(m, 0x78) = F32(((u8*)this), 0x120);
-    F32(m, 0x64) = F32(((u8*)this), 0x25D4);
-    F32(m, 0x2C4) = F32(((u8*)this), 0x2588);
-    F32(m, 0x28C) = U8(((u8*)this), 0x26E0) ? FMax(F32(((u8*)this), 0x2690), 0.01f) : F32(((u8*)this), 0x2690);
-    F32(m, 0x290) = F32(((u8*)this), 0x2694);
-    F32(m, 0x294) = F32(((u8*)this), 0x2698);
-    S32(m, 0x298) = S32(((u8*)this), 0x268C);
-    f32 v = F32(((u8*)this), 0x25BC);
+    F32(m, 0x70) = this->vel.x;
+    F32(m, 0x74) = this->vel.y;
+    F32(m, 0x78) = this->vel.z;
+    F32(m, 0x64) = this->speed;
+    F32(m, 0x2C4) = this->f2588;
+    F32(m, 0x28C) = this->f26E0 ? FMax(this->f2690, 0.01f) : this->f2690;
+    F32(m, 0x290) = this->f2694;
+    F32(m, 0x294) = this->f2698;
+    S32(m, 0x298) = this->a268C;
+    f32 v = this->f25BC;
     if (Positive(v)) {
         F32(m, 0x2D4) = v;
     } else {
         F32(m, 0x2D4) = 0.0f;
     }
-    F32(m, 0x2A8) = F32(((u8*)this), 0x25A0);
-    S32(m, 0x29C) = S32(((u8*)this), 0x5A0);
-    if (F32(((u8*)this), 0x25E4) > 0.1f && !(flags & 0x20)) {
+    F32(m, 0x2A8) = this->f25A0;
+    S32(m, 0x29C) = this->f5A0;
+    if (this->f25E4 > 0.1f && !(flags & 0x20)) {
         U32(m, 0x29C) |= 0x20000000;
     } else {
         U32(m, 0x29C) |= 0x10000000;
     }
-    F32(m, 0x238) = F32(((u8*)this), 0x2660);
-    F32(m, 0x23C) = F32(((u8*)this), 0x2664);
-    F32(m, 0x240) = F32(((u8*)this), 0x2668);
+    F32(m, 0x238) = this->f2660;
+    F32(m, 0x23C) = this->f2664;
+    F32(m, 0x240) = this->f2668;
     f32 sink = 0.0f;
     u8* wheels = m + 0x7C;
     u8* w = ((u8*)this) + 0x23AC;
     u8* o = wheels;
     for (int i = 0; i < 4; i++) {
         HVec a = *(HVec*)(w + 0x30);
-        const f32 offsetY = a.y - F32(((u8*)this), 0x34);
-        a.x = a.x - F32(((u8*)this), 0x30);
+        const f32 offsetY = a.y - this->offset.y;
+        a.x = a.x - this->offset.x;
         a.y = offsetY;
-        a.z = a.z - F32(((u8*)this), 0x38);
+        a.z = a.z - this->offset.z;
         HVec b = a;
         a.y = a.y + ((CbWheel*)w)->slip;
         b.y = b.y + ((CbWheel*)w)->prevSlip;
@@ -3047,10 +3047,10 @@ void CarBody::vf28(u8* buf) {
         w += 0x74;
         o += 0x6C;
     }
-    F32(m, 0x2C8) = F32(((CarHost*)PTR(((u8*)this), 0x270))->Info(), 0x48);
-    F32(m, 0x2CC) = F32(((u8*)this), 0x26CC);
-    F32(m, 0x2D0) = F32(((u8*)this), 0x5E4);
-    S32(m, 0x2D8) = S32(((u8*)this), 0x26D4);
+    F32(m, 0x2C8) = F32(((CarHost*)((u8*&)this->src))->Info(), 0x48);
+    F32(m, 0x2CC) = this->f26CC;
+    F32(m, 0x2D0) = this->f5E4;
+    S32(m, 0x2D8) = this->f26D4;
     fn_8018DA5C(((u8*)this), m);
     if (sink > 0.01f) {
         F32(m, 0x24) = F32(m, 0x24) + F32(m, 0xC) * sink;
@@ -3943,21 +3943,21 @@ s32 fn_801363A0(u8* seg, u8* pos);
 
 s32 CarBody::vf34(RPacket* pk_) {
     ((RigidBody*)((u8*)this))->RigidBody::vf34((RPacket*)((u8*)pk_));
-    U16(((u8*)pk_), 0x20) = Pack(F32(((u8*)this), 0x25D0), -2000.0f, 12000.0f, 65535.0f);
-    U8(((u8*)pk_), 0x22) = Pack(F32(((u8*)this), 0x25F0), -1.2f, 1.2f, 255.0f);
-    U8(((u8*)pk_), 0x23) = Pack(F32(((u8*)this), 0x25F4), 0.0f, 1.0f, 255.0f);
-    const int control = Pack(F32(((u8*)this), 0x25E4), 0.0f, 1.0f, 255.0f);
+    U16(((u8*)pk_), 0x20) = Pack(this->f25D0, -2000.0f, 12000.0f, 65535.0f);
+    U8(((u8*)pk_), 0x22) = Pack(this->f25F0, -1.2f, 1.2f, 255.0f);
+    U8(((u8*)pk_), 0x23) = Pack(this->f25F4, 0.0f, 1.0f, 255.0f);
+    const int control = Pack(this->f25E4, 0.0f, 1.0f, 255.0f);
     U8(((u8*)pk_), 0x24) = control;
     f32 k = 1.0f;
     const int variation = (int)(0.5f + PackLerp(0.0f, 255.0f, k));
     U8(((u8*)pk_), 0x3C) = variation;
-    u8* seg = ((CarTrackPos*)PTR(((u8*)this), 0x270))->Segment();
+    u8* seg = ((CarTrackPos*)((u8*&)this->src))->Segment();
     S32(((u8*)pk_), 0x40) = fn_801363A0(seg, seg + 4);
     if (U8(((u8*)pk_), 0x3C) == 0) {
         U8(((u8*)pk_), 0x3C) = 1;
     }
-    U16(((u8*)pk_), 0x3A) = S32(((u8*)this), 0x4);
-    U8(((u8*)pk_), 0x25) = S32(lbl_8055E918 + S32(((u8*)this), 0x1EC) * 0x9C, 0x14);
+    U16(((u8*)pk_), 0x3A) = this->a4;
+    U8(((u8*)pk_), 0x25) = S32(lbl_8055E918 + this->index * 0x9C, 0x14);
     u8* w = ((u8*)this) + 0x23AC;
     u8* out = ((u8*)pk_) + 0x26;
     for (int i = 0; i < 4; i++) {
