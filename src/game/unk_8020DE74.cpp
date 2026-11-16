@@ -23,7 +23,7 @@ extern const float lbl_805633FC;
 #pragma cplusplus on
 extern char lbl_8033C7A0[];
 extern const float lbl_8056336C;
-void *operator new(unsigned long size, const char *tag);
+extern "C++" void *operator new(unsigned long size, const char *tag);
 extern "C" void *memset(void *, int, unsigned long);
 extern "C" void fn_801345D8(char *, int, const char *, ...);
 extern "C" void *fn_802077A4(const char *name, long kind, void *a, void *b);
@@ -121,11 +121,16 @@ public:
 };
 }  // namespace
 
+static inline HudPart *CreateFlash(HudPart *&slot, const char *name, void *res, void *res2) {
+    slot = (HudPart *)fn_802077A4(name, 5, res, res2);
+    return slot;
+}
+
 // Builds the sound parts for a vehicle; the extra ones exist only for the 'PCAR' type.
 inline CarSound::CarSound(unsigned char *vehicle) {
-    void *res;
     void *owner;
-    long isCar;
+    void *res;
+    bool isCar;
     char buf[0x20];
     unsigned long i;
     void *res2;
@@ -134,7 +139,8 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     res = vehicle + 0x118;
     res2 = vehicle + 0x60;
     owner = *(void **)(vehicle + 0x1EC);
-    isCar = *(long *)(vehicle + 0x10) == 0x50434152;
+    const long type = *(long *)(vehicle + 0x10);
+    isCar = type == 0x50434152;
     if (isCar) {
         this->p28 = (HudPart *)fn_802077A4("waterbounce.sfx", 5, res, res2);
         this->air = (HudPart *)fn_802077A4("airtime.sfx", 8, res, res2);
@@ -147,10 +153,8 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     memset(this->flashes, 0, 8);
     this->flash = 0;
     for (i = 0; i < 2; i++) {
-        HudPart *part;
         fn_801345D8(buf, 0x20, "boost%d.sfx", i + 1);
-        part = (HudPart *)fn_802077A4(buf, 5, res, res2);
-        this->flashes[i] = part;
+        HudPart *part = CreateFlash(this->flashes[i], buf, res, res2);
         if (part == 0) break;
         part->owner = owner;
         HudPart_SetLevel(this->flashes[i], lbl_80563368);
