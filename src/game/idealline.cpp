@@ -70,7 +70,7 @@ void LineFollower::Clear(void) {
 
 void LineFollower::Init(void) {
     Clear();
-    unk30 = 0;
+    link = 0;
 }
 
 int LineFollower::Update(V2* p) { return Step(p); }

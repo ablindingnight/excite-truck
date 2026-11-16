@@ -30,7 +30,7 @@ public:
     V2 pos;        // offset 0x20
     u8 wide;       // offset 0x28
     CenterLine* line;  // offset 0x2C
-    s32 unk30;     // offset 0x30
+    LineFollower* link;  // offset 0x30
 };
 
 struct TimeArray {

@@ -4,6 +4,7 @@
 // cars and locks the finish order, and runs the race intro countdown ("green flag"). The per-car update, the
 // lap-crossing scan and the qualify helper are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/deity.h"
 #include "game/centerline.h"
 #include "game/v2.h"
@@ -32,32 +33,6 @@ void operator delete[](void* p);
 extern f32 lbl_8055E3C8;    // time
 extern s32 lbl_8055E3C4;    // frame
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-class LineFollower {
-public:
-    LineFollower(void);
-    virtual ~LineFollower(void);
-    virtual int SetLine(CenterLine* line);
-    virtual void Attach(CenterLine* line, V2* pos, V2* dir);
-    void SetPosition(V2* pos, V2* dir, IdealPoint* start);
-    void Update(V2* pos);
-    ILPos il;          // offset 0x4
-    V2 dir;            // offset 0x10
-    V2 off;            // offset 0x18
-    f32 x20;           // offset 0x20
-    u8 pad24[0x2C - 0x24];
-    CenterLine* line;  // offset 0x2C
-    LineFollower* x30; // offset 0x30
-};
-
-class IdealFollower : public LineFollower {
-public:
-    IdealFollower(int withTimes, CenterLine* line);
-    void Reset(void);
-    void Start(V2* pos, V2* dir, int resetTimes, IdealPoint* start);
-    int Track(V2* pos, f32* progress);
-    u8 pad34[0x68 - 0x34];  // base, perp, lateral, ..., times, last, prev, flag (see idealline.cpp)
-};
 
 class PathSet {
 public:
@@ -685,7 +660,7 @@ void fn_801B179C(DeityCar* c, int index, DCar* car) {
     PathSet* ps = fn_80156A40();
     c->follower = new ("Deity:center_line") IdealFollower(1, ps->Center(index));
     c->line = new ("Deity:racing_line") LineFollower;
-    c->line->x30 = c->follower;
+    c->line->link = c->follower;
     c->line->SetLine(ps->Racing(index));
     if (car->type == 'PCAR') {
         lbl_8055E67C++;

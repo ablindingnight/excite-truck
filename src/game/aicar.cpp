@@ -4,6 +4,7 @@
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/centerline.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
@@ -334,13 +335,6 @@ static inline f32 Clamp01(f32 x) {
 class AIDriver {
 public:
     AIDriver(void);
-};
-
-// The race-line follower (idealline.cpp), declared as far as this unit uses it.
-class LineFollower {
-public:
-    virtual ~LineFollower(void);
-    void Update(V2* p);
 };
 
 extern "C" {
@@ -1127,27 +1121,6 @@ f32 fn_801B3064(void);
 f32 fn_80139048(void);
 f32 PSVECDistance(const u8* a, const u8* b);
 class LineFollower;
-// A position on the ideal line (idealline.cpp).
-struct ILPos {
-    ILPos(void) {
-        seg = 0;
-        mode = 10000;
-        t = 0.0f;
-    }
-    // Point and heading on the line at this position (method names unproven).
-    void Pos(V2* o) const {
-        o->x = LerpT(t, seg->pos.x, seg->next->pos.x);
-        o->y = LerpT(t, seg->pos.y, seg->next->pos.y);
-    }
-    void Dir(V2* o) const {
-        o->x = LerpT(t, seg->dir.x, seg->next->dir.x);
-        o->y = LerpT(t, seg->dir.y, seg->next->dir.y);
-    }
-    IdealPoint* seg;  // offset 0x0
-    f32 t;            // offset 0x4
-    s32 mode;         // offset 0x8
-};
-
 void fn_80135B9C(LineFollower* f, f32 dist, V2* outPos, V2* outDir, f32* outSpeed, ILPos* outIl);
 
 void fn_80194FD0(u8* d, u8* out, f32 t);
