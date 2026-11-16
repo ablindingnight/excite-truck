@@ -493,30 +493,6 @@ CarBody::CarBody(void) {
 
 extern "C" {
 
-// The car's identity block from its descriptor (0x6C..0xDF), kept at 0x1F4.
-struct CbIdent {
-    char name[0x40];   // 0x00
-    char model[0x20];  // 0x40 (0x234 in the body)
-    s32 w60;           // 0x60
-    s32 w64;           // 0x64
-    s32 vehicle;       // 0x68 (0x25C)
-    u8 b6C;            // 0x6C
-    s32 w70;           // 0x70
-};
-
-// Descriptor block 0x18..0x67, kept at 0x274.
-struct CbDescBlock {
-    s32 w[14];  // 0x00
-    s32 w38;    // 0x38
-    s32 w3C;    // 0x3C
-    s16 h40;    // 0x40
-    s32 w44;    // 0x44
-    s32 w48;    // 0x48
-    s32 w4C;    // 0x4C
-};
-
-
-
 struct ValVec3C {
     f32 x, y, z;
 };
@@ -604,7 +580,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     cb->f1F0 = S32(desc, 0x68);
     *(CbIdent*)(p + 0x1F4) = *(CbIdent*)(desc + 0x6C);
     cb->layout = fn_802792E4((char*)(p + 0x234));
-    s32 id = cb->f25C;
+    s32 id = cb->ident.vehicle;
     *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)(desc + 0x18);
     S32(p, 0x328) = fn_80279874(id);
     if (!fn_8027AA48()) {
@@ -635,9 +611,9 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     const char* treeClasses = "light\0medium\0heavy\0\0";
     const char* key = "treehit_class";
     cb->f5E8 = chassis->Has(key) ? chassis->GetEnum(key, treeClasses) : 1;
-    GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->f25C);
+    GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->ident.vehicle);
     fn_801B86BC(S32(desc, 0xE0), p + 0x2C4);
-    cb->f25C0 = (U32(FindVehicle(cb->f25C), 0xA0) >> 2) & 1;
+    cb->f25C0 = (U32(FindVehicle(cb->ident.vehicle), 0xA0) >> 2) & 1;
     fn_80279F58(&setup, table);
     fn_8027A8B4(&setup, fn_8027A798((char*)(p + 0x234)));
     setup.mass = setup.mass * cb->f2EC;
@@ -3310,9 +3286,9 @@ void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     vx = F32(s, 0x30);
     vy = F32(s, 0x34);
     vz = F32(s, 0x38);
-    ((CarBody*)p)->f2A4 = vx;
-    ((CarBody*)p)->f2A8 = vy;
-    ((CarBody*)p)->f2AC = vz;
+    ((CarBody*)p)->block.vel[0] = vx;
+    ((CarBody*)p)->block.vel[1] = vy;
+    ((CarBody*)p)->block.vel[2] = vz;
     ((CarBody*)p)->vel.x = vx;
     ((CarBody*)p)->vel.y = vy;
     ((CarBody*)p)->vel.z = vz;

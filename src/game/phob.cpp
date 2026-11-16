@@ -1263,7 +1263,7 @@ void fn_801795B0(void) {
 void fn_801795D8(RaceCarRec* r, int i) {
     lbl_80430830[i] = r;
     if (r->f1F0 == 0x50) {
-        lbl_80430590[r->f260 & 3] = i;
+        lbl_80430590[r->ident.b6C & 3] = i;
     }
 }
 

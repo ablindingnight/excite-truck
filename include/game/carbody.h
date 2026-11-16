@@ -183,6 +183,28 @@ struct CarDrawState {
 };
 typedef char CarDrawStateSize[sizeof(CarDrawState) == 0xFA8 ? 1 : -1];
 
+// The car's identity (name, model, vehicle): copied from its description (0x6C) into the body (0x1F4).
+struct CbIdent {
+    char name[0x40];   // 0x00
+    char model[0x20];  // 0x40 (0x234 in the body)
+    s32 w60;           // 0x60
+    s32 w64;           // 0x64
+    s32 vehicle;       // 0x68 (0x25C)
+    u8 b6C;            // 0x6C
+    s32 w70;           // 0x70
+};
+
+// A block of the car's description (0x18) kept in the body (0x274).
+struct CbDescBlock {
+    s32 w[12];   // 0x00
+    f32 vel[3];  // 0x30: the body velocity at SetState
+    s32 w3C;    // 0x3C
+    s16 h40;    // 0x40
+    s32 w44;    // 0x44
+    s32 w48;    // 0x48
+    s32 w4C;    // 0x4C
+};
+
 // The state handed to a body's SetState (vtable 0x54).
 struct BodyState {
     RMtx mtx;   // offset 0x0
@@ -215,18 +237,12 @@ public:
 
     s32 index;                   // offset 0x1EC
     s32 f1F0;                    // offset 0x1F0
-    u8 pad1F4[0x25C - 0x1F4];
-    s32 f25C;                    // offset 0x25C
-    u8 f260;                     // offset 0x260
-    u8 pad261[0x268 - 0x261];
+    CbIdent ident;               // offset 0x1F4
     u8* f268;                    // offset 0x268
     CarLayout* layout;           // offset 0x26C (carlayout.cpp; cardmg walks its deformable points)
     StatsSrc* src;               // offset 0x270
-    u8 pad274[0x2A4 - 0x274];
-    f32 f2A4;                    // offset 0x2A4
-    f32 f2A8;                    // offset 0x2A8
-    f32 f2AC;                    // offset 0x2AC
-    u8 pad2B0[0x2C8 - 0x2B0];
+    CbDescBlock block;           // offset 0x274
+    u8 pad2C4[0x2C8 - 0x2C4];
     f32 f2C8;                    // offset 0x2C8
     f32 f2CC;                    // offset 0x2CC
     f32 f2D0;                    // offset 0x2D0
