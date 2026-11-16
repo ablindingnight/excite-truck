@@ -5,6 +5,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/rigid.h"
 #include "macros.h"
 #include <string.h>
 
@@ -149,13 +150,6 @@ public:
 };
 
 #define VI(p) ((VIface*)(p))
-
-class RigidBody {
-public:
-    void AddImpulse(f32 s, const RVec3* a, const RVec3* b);
-    void AddTorque(const RVec3* t);
-    void AddForceAt(const RVec3* f, const RVec3* at);
-};
 
 // A pair of cars tracked by the proximity sorter (proxer.cpp).
 struct Pair {

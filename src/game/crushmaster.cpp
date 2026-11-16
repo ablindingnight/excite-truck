@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/rigid.h"
 #include <stdarg.h>
 
 // Art animation player (artanim.cpp).
@@ -1827,12 +1828,6 @@ public:
 };
 
 struct RVec3;
-// The car record starts with its rigid body (physics unit); only this method is used here.
-class RigidBody {
-public:
-    void AddForceAt(const RVec3* f, const RVec3* at);
-};
-
 extern "C" {
 CarBrain* fn_801B2EC0(int car);
 u8 fn_801B3050(int car);

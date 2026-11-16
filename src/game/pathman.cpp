@@ -4,6 +4,7 @@
 // command: "<object> <path>" or "<path>"). Every frame the active clients step along their path and
 // their pose, velocity and spin are pushed to the object. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rigid.h"
 
 struct V3 {
     f32 x;
@@ -33,11 +34,6 @@ public:
 
 struct RMtx;
 struct RVec3;
-
-class RigidBody {
-public:
-    void SetState(const RMtx* m, const RVec3* vel, const RVec3* angvel);
-};
 
 extern "C" {
 int strcmp(const char* a, const char* b);

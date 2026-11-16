@@ -6,6 +6,7 @@
 #include "game/rvec.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -63,29 +64,6 @@ struct CollShape;
 struct ObDesc;
 
 struct RPacket;
-
-// The rigid body (rigid.cpp); its vtable is emitted there.
-class RigidBody : public CollVolume {
-public:
-    RigidBody(void);
-    virtual void Init(BodyDesc* d);
-    virtual ~RigidBody(void) {}
-    virtual void Reset(void);
-    virtual void vf18(void);
-    virtual void Update(void);
-    virtual s32 vf2C(RPacket* p);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* p);
-    virtual RigidBody* vf3C(void);
-    virtual int vf40(void);
-    virtual void OnHit(const RVec3* v, const RVec3* at, int force, void* extra);                // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int force, void* extra, void* by);  // 0x4C
-    virtual void OnImpulses(RVec3* f, RVec3* t);                                              // 0x50
-    void Flush(RVec3* a, RVec3* b);
-    void VelAt(RVec3* out, const RVec3* at);
-    void AddForceAt(const RVec3* f, const RVec3* at);
-    u8 padD0[0x1EC - 0xD0];
-};
 
 extern "C" void fn_801AC240(u8* p);
 

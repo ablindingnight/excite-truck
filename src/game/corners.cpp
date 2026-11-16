@@ -4,19 +4,9 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 #include "macros.h"
 #include <revolution/MTX.h>
-
-class RigidBody : public CollVolume {
-public:
-    virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
-    void Push(CollShape* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c, f32 w);
-    void VelAt(RVec3* out, const RVec3* p);
-    u8 padD0[0xD4 - 0xD0];
-    f32 mass;  // offset 0xD4
-    u8 padD8[0x148 - 0xD8];
-    RMat33 worldInvI;  // offset 0x148
-};
 
 extern "C" {
 int fn_801E9EC4(s16* hint, RVec3* hit, RVec3* n, u32* flags, f32 x, f32 z);  // ground contact under a point

@@ -4,6 +4,7 @@
 // Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 #include <string.h>
 
 template <class T>
@@ -163,29 +164,6 @@ u8* fn_801D2008(u8* name);
 s32 fn_801C1C1C(const void*);  // const PSysDesc*
 s32 fn_801C1BA4(s32 a, s32 b, s32 c);
 }
-
-class RigidBody : public CollVolume {
-public:
-    RigidBody(void);
-    virtual void Init(BodyDesc* d);
-    virtual void Reset(void);
-    virtual void vf18(void);
-    virtual void Update(void);
-    virtual s32 vf2C(RPacket* pk);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* pk);
-    virtual int vf40(void);
-    virtual RigidBody* vf3C(void);
-    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
-    void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
-    void ClearImpulses(void);
-    void Flush(RVec3* force, RVec3* torque);
-    void AddForceAt(const RVec3* f, const RVec3* at);
-    void AddTorque(const RVec3* t);
-    void AddImpulse(f32 k, const RVec3* j, const RVec3* at);
-};
 
 class CarBody : public RigidBody {
 public:

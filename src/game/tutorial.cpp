@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/rigid.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -219,20 +220,6 @@ struct TPath {
     s32 count;  // offset 0x0
     u8 pad4[0x8 - 0x4];
     TVec2 pts[1];  // offset 0x8
-};
-
-// A car frame: rigid.cpp's RMtx (basis + origin, 0x30); was named RMtx here.
-struct RMtx {
-    TVec3 basis[3];  // offset 0x0
-    TVec3 origin;    // offset 0x24
-};
-
-// The rigid body every car is (rigid.cpp).
-struct RMtx;
-struct RVec3;
-class RigidBody {
-public:
-    void SetState(const RMtx* m, const RVec3* v, const RVec3* w);
 };
 
 struct TCar {
@@ -1311,7 +1298,7 @@ inline void Challenge::Collect(void) {
                             } else if (t->active) {
                                 t->crossed[i] = 0;
                             }
-                        } else if (PSVECSquareDistance(t, &car->frame.origin) < radius * radius) {
+                        } else if (PSVECSquareDistance(t, &car->frame.pos) < radius * radius) {
                             got++;
                             t->active = 0;
                             snd->Play();
@@ -1673,9 +1660,9 @@ inline void ChalList::Update(void) {
         fn_8018ADB4(car, 0.0f);
         fn_8018ADA4(car, 0.0f);
         m = car->frame;
-        m.origin.x = 0.0f;
-        m.origin.y = 999.0f + 20.0f * (f32)i;
-        m.origin.z = 0.0f;
+        m.pos.x = 0.0f;
+        m.pos.y = 999.0f + 20.0f * (f32)i;
+        m.pos.z = 0.0f;
         w.x = 0.0f;
         w.y = 0.0f;
         w.z = 0.0f;

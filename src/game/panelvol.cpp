@@ -7,6 +7,7 @@
 #include "game/rvec.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 
 struct Mat3 {
     f32 m[9];
@@ -28,29 +29,6 @@ class Phob {
 public:
     const RMtx* World(void);
     const RVec3* Vel(void);
-};
-
-class RigidBody : public CollVolume {
-public:
-    RigidBody(void);
-    ~RigidBody(void) {}
-    virtual void Init(BodyDesc* d);
-    virtual void Reset(void);
-    virtual void vf18(void);
-    virtual s32 vf2C(RPacket* p);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* p);
-    virtual RigidBody* vf3C(void);
-    virtual int vf40(void);
-    virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
-    void Flush(RVec3* f, RVec3* t);
-    u8 padD0[0x118 - 0xD0];
-    RVec3 vel;   // offset 0x118
-    RVec3 avel;  // offset 0x124
-    u8 pad130[0x1E8 - 0x130];
-    u8 b1E8;  // offset 0x1E8
 };
 
 // The render state, written at the body's offset in the frame buffer.

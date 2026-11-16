@@ -5,6 +5,7 @@
 // strings.
 #include "game/common.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT( f32 b, f32 a,f32 t) { return a + t * (b - a); }
@@ -388,18 +389,12 @@ public:
 
 struct BodyDesc;
 
-class RigidBody : public CollVolume {
-public:
-    RigidBody(void);
-    virtual ~RigidBody(void) {}
-    u8 padD0[0x29C - 0xD0];
-};
-
 // A rigid body whose shape can be mutated at run time (mutphob.cpp).
 class MutPhob : public RigidBody {
 public:
     MutPhob(void) {}
     virtual ~MutPhob(void);
+    u8 pad1EC[0x29C - 0x1EC];  // MutPhob's own fields (mutphob.cpp)
 };
 
 ModuleTag lbl_8055E408;

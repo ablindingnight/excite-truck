@@ -8,6 +8,7 @@
 #define COLLSHAPE_IFACE_DECL
 #include "game/collshape.h"
 #include "game/rvec.h"
+#include "game/rigid.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -100,15 +101,6 @@ struct W3 {
     u32 a, b, c;
 };
 
-struct Phob;
-
-class RigidBody {
-public:
-    void Push(Phob* who, void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
-    void VelAt(RVec3* out, const RVec3* at);
-    void AddTorque(const RVec3* t);
-    void AddForceAt(const RVec3* f, const RVec3* at);
-};
 
 class VGroup {
 public:
@@ -2386,7 +2378,7 @@ void CollShape::vf1C(void) {
 
 void CollShape::vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g) {
     if (owner) {
-        ((RigidBody*)owner)->Push((Phob*)this, a, b, c, d, e, f, g);
+        ((RigidBody*)owner)->Push(this, a, b, c, d, e, f, g);
     } else if (data) {
         fn_801A4A10(data, c, f, b);
     }
@@ -2395,10 +2387,8 @@ void CollShape::vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3
 // Forwards an impulse notice (RigidBody::Push records the shape) to the owner's slot 0x4C, RigidBody::OnImpulse,
 // with the same arguments (the call passes them through untouched in r4-r8).
 void CollShape::vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* by) {
-    u8* p = (u8*)this;
-    u8* o = PTR(p, 0x4);
-    if (o) {
-        VE(o)->v4C();
+    if (owner) {
+        ((RigidBody*)owner)->OnImpulse(v, at, kind, c, by);
     }
 }
 

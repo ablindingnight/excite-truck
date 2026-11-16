@@ -6,6 +6,7 @@
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 
 extern "C" {
 double sqrt(double x);
@@ -302,30 +303,6 @@ public:
 
 struct RPacket;
 
-
-class RigidBody : public CollVolume {
-public:
-    RigidBody(void);
-    virtual void Init(BodyDesc* d);
-    virtual void Reset(void);
-    virtual void vf18(void);
-    virtual void Update(void);
-    virtual s32 vf2C(RPacket* p);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* p);
-    virtual RigidBody* vf3C(void);
-    virtual int vf40(void);
-    virtual void OnHit(const RVec3* force, const RVec3* at, int kind, void* contact);
-    virtual void OnImpulse(const RVec3* force, const RVec3* at, int kind, void* contact, void* by);
-    virtual void OnImpulses(RVec3* force, RVec3* torque);
-    void Push(CollShape* a, void* b, const RVec3* imp, const RVec3* at, int kind, const RVec3* c, void* by, f32 k);
-    u8 padD0[0x118 - 0xD0];
-    RVec3 vel;
-    RVec3 avel;
-    u8 pad130[0x1E8 - 0x130];
-    u8 b1E8;
-    u8 b1E9;
-};
 
 class IBallListener {
 public:

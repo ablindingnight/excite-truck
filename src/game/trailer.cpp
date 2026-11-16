@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -67,18 +68,6 @@ struct RPacket;
 struct BodyState;
 struct BodyDesc;
 
-// The rigid body CarBody derives from (rigid.cpp).
-class RigidBody : public CollVolume {
-public:
-    void AddTorque(const RVec3* t);
-    virtual void vf18(void);
-    virtual RigidBody* vf3C(void);
-    virtual int vf40(void);
-    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
-};
-
 class CarBody : public RigidBody {
 public:
     CarBody(void);
@@ -99,10 +88,6 @@ public:
     virtual void vf58(void);          // 0x58
     virtual void vf5C(void);          // 0x5C
 
-    u8 padD0[0x118 - 0xD0];
-    RVec3 vel;       // offset 0x118
-    RVec3 avel;      // offset 0x124
-    u8 pad130[0x1EC - 0x130];
     s32 index;      // offset 0x1EC
     u8 pad1F0[0x59C - 0x1F0];
     s32 model;      // offset 0x59C

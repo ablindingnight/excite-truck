@@ -5,6 +5,7 @@
 // strings.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/rigid.h"
 #include <string.h>
 #include <revolution/MTX/vec.h>
 
@@ -1190,11 +1191,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 extern const f32 lbl_805620BC;  // 10
 extern const f32 lbl_805620F0;  // -2
 extern const f32 lbl_80562128;  // -0.05
-
-class RigidBody {
-public:
-    void AddForceAt(const RVec3* f, const RVec3* at);
-};
 
 extern "C" {
 f32* fn_8018AE5C(u8* car);

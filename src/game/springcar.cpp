@@ -5,6 +5,7 @@
 // Names are guesses apart from the message.
 #include "game/common.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 
 class SpringCar;
 
@@ -156,18 +157,6 @@ struct RPacket;
 struct BodyState;
 struct BodyDesc;
 
-// The rigid body CarBody derives from (rigid.cpp).
-class RigidBody : public CollVolume {
-public:
-    void AddForceAt(const RVec3* f, const RVec3* at);
-    virtual void vf18(void);
-    virtual RigidBody* vf3C(void);
-    virtual int vf40(void);
-    virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
-};
-
 class CarBody : public RigidBody {
 public:
     CarBody(void);
@@ -188,13 +177,6 @@ public:
     virtual void vf58(void);          // 0x58
     virtual void vf5C(void);          // 0x5C
 
-    u8 padD0[0xD4 - 0xD0];
-    f32 mass;    // offset 0xD4
-    u8 padD8[0x118 - 0xD8];
-    RVec3 vel;    // offset 0x118
-    f32 spin;    // offset 0x124
-    f32 roll;    // offset 0x128
-    u8 pad12C[0x1EC - 0x12C];
     s32 index;   // offset 0x1EC
     u8 pad1F0[0x270 - 0x1F0];
     StatsSrc* src;  // offset 0x270
@@ -443,7 +425,7 @@ void SpringWall::Apply(SpringCar* car, RVec3* acc) {
             f64 absWide = __fabs(pen);
             f32 absPen = (f32)absWide;
             at.y = 0.0f;
-            if (!(absPen <= __float_epsilon[0]) && PSVECDotProduct((RVec3*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
+            if (!(absPen <= __float_epsilon[0]) && PSVECDotProduct((RVec3*)&at, &n) < 0.0f && (f32)__fabs(car->avel.y) < 1.5707964f) {
                 f32 m = 17.777779f / pen;
                 m = 1.0f < m ? 1.0f : m;
                 m = 0.8f * m;
@@ -590,7 +572,7 @@ void SpringCar::vf28(u8* buf) {
 void Lift::Apply(SpringCar* car) {
     RVec3 at;
     RVec3 imp;
-    if (car->spin > 0.2617994f) {
+    if (car->avel.x > 0.2617994f) {
         f32 k = 2.0f * (-0.1f - car->mtx.rot.z.y);
         k = 0.0f > k ? 0.0f : k;
         at.x = car->mtx.pos.x + car->mtx.rot.z.x * k;

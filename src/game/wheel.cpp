@@ -8,6 +8,7 @@
 #include "game/rvec.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);
@@ -79,31 +80,6 @@ public:
     f32 f48;       // offset 0x48
     u8 b4C;        // offset 0x4C
     f32 f50;       // offset 0x50
-};
-
-class RigidBody : public CollVolume {
-public:
-    RigidBody(void);
-    ~RigidBody(void) {}
-    virtual void Init(BodyDesc* d);
-    virtual void Reset(void);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* p);
-    virtual void vf18(void);
-    virtual RigidBody* vf3C(void);
-    virtual int vf40(void);
-    virtual void OnHit(const RVec3* p, const RVec3* n, int i, void* o);  // 0x48
-    virtual void OnImpulse(const RVec3* p, const RVec3* n, int i, void* a, void* b);  // 0x4C
-    virtual void OnImpulses(RVec3* a, RVec3* b);  // 0x50
-    void Update(void);
-    void AddTorque(const RVec3* t);
-    u8 padD0[0x118 - 0xD0];
-    RVec3 vel;   // offset 0x118
-    RVec3 avel;  // offset 0x124
-    u8 pad130[0x1E4 - 0x130];
-    s32 nImp;  // offset 0x1E4
-    u8 b1E8;   // offset 0x1E8
-    u8 b1E9;   // offset 0x1E9
 };
 
 struct WheelDesc {

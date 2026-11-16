@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/rigid.h"
 #include "macros.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -302,12 +303,6 @@ void fn_8018C5A0(u8* p, u8* desc) {
 extern "C" f32 PSVECDotProduct(const f32* a, const f32* b);
 
 struct RVec3;
-class RigidBody {
-public:
-    void VelAt(RVec3* out, const RVec3* at);
-    void VelAt2(RVec3* out, const RVec3* at);
-};
-
 struct Mat3;
 struct Vec3;
 void Mat3FromEuler(Mat3* m, const Vec3* e);

@@ -9,6 +9,7 @@
 #include "game/rvec.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
+#include "game/rigid.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -130,39 +131,6 @@ public:
 extern "C" void fn_8019F564(CollShape* s, const RMtx* m, const RVec3* c, CollVolume* o, f32 k, f32 skin, f32 a,
                             f32 hx, f32 hy, f32 hz);
 
-class RigidBody : public CollVolume {
-public:
-    RigidBody(void);
-    ~RigidBody(void) {}
-    virtual void Init(BodyDesc* d);
-    virtual void Reset(void);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* p);
-    virtual void vf18(void);  // RigidBody overrides these three (vf14/vf24 are CollVolume's, phob.cpp)
-    virtual RigidBody* vf3C(void);
-    virtual int vf40(void);
-    virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
-    virtual void vf54(void) = 0;  // three pure virtuals the target vtable ends with
-    virtual void vf58(void) = 0;
-    virtual void vf5C(void) = 0;
-    void Update(void);
-    void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
-    u8 padD0[0x118 - 0xD0];
-    RVec3 vel;     // offset 0x118
-    RVec3 avel;    // offset 0x124
-    RVec3 force;   // offset 0x130
-    RVec3 torque;  // offset 0x13C
-    u8 pad148[0x16C - 0x148];
-    RVec3 accel;   // offset 0x16C
-    RVec3 aaccel;  // offset 0x178
-    u8 pad184[0x1E4 - 0x184];
-    s32 nImp;  // offset 0x1E4
-    u8 b1E8;   // offset 0x1E8
-    u8 b1E9;   // offset 0x1E9: ground test
-};
-
 static inline int IsCar(const CollVolume* o) {
     u32 t = o->type;
     int r = 0;
@@ -224,6 +192,11 @@ public:
     virtual s32 vf34(RPacket* p);
     virtual int vf44(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);
+    // Slots 0x54-0x5C: zero in retail's MutPhob table (__vt__9RigidBody ends at 0x50, so they start here or in a
+    // base shared with CarBody, whose table has SetState/vf58/vf5C at these slots). Names unproven.
+    virtual void vf54(void) = 0;
+    virtual void vf58(void) = 0;
+    virtual void vf5C(void) = 0;
     s32 model;        // offset 0x1EC
     s32 mask;         // offset 0x1F0
     RMtx home;        // offset 0x1F4
