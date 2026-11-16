@@ -61,6 +61,18 @@ static inline void HudPart_SetLevel(HudPart *part, float level) {
 class CarSoundBase {  /* Helper name unproven */
 public:
     virtual ~CarSoundBase() {}  // fn_801837DC (its weak copy sits after ~CarBody)
+    virtual void Update() = 0;  // the interface CarBody drives (pure slots are 0 in its table)
+    virtual void Reset() = 0;
+    virtual void vf14() = 0;
+    virtual void vf18() = 0;
+    virtual void vf1C() = 0;
+    virtual void vf20() = 0;
+    virtual void vf24() = 0;
+    virtual void vf28() = 0;
+    virtual void Land(float sink) = 0;
+    virtual void vf30() = 0;
+    virtual void vf34() = 0;
+    virtual void vf38() = 0;
 };
 
 namespace {  // private to this file: CarBody reaches it only through fn_8020DE74 and its own view
@@ -652,9 +664,8 @@ extern const float lbl_805633F8;
 extern const float lbl_805633FC;
 
 // .data (0x8033C7A0-0x8033C940): the constructor's sound-name strings, then the compiler's vtables for CarSound
-// (0x8033C8C4) and CarSoundBase (0x8033C900). OPEN: retail ends with a 0x34-byte zero block (0x8033C90C) we do not
-// emit. An all-pure CarSoundI (pure dtor + Update..vf30, between CarSoundBase and CarSound) gives the right size
-// but emits it BEFORE CarSoundBase's table (FACTS 2026-11-15 CarSound).
+// (0x8033C8C4) and the abstract CarSoundBase (0x8033C900: its inline dtor fn_801837DC, then 12 pure slots = zeros),
+// then 4 bytes of alignment padding.
 
 
 // The unit's .sdata2 constants (0x80563368-0x80563400), in address order.
