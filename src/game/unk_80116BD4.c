@@ -565,22 +565,24 @@ u32 fn_80116BCC(void) {
 
 // Returns a * b / d with a 64-bit intermediate (the quotient must fit in 32 bits): shifts for a power-of-two d,
 // divides directly when the product fits, else uses two-digit long division (Hacker's Delight divlu).
+#pragma push
+#pragma opt_lifetimes off
 u32 fn_80116BD4(u32 a, u32 b, u32 d) {
-    u32 remainderHigh;
-    u32 hi = __mulhwu(a, b);
-    u32 un10;
-    u32 lo = a * b;
-    u32 s;
+    u32 p;
+    u32 rhat;
+    u32 q1;
     u32 vn1;
     u32 vn0;
-    u32 un32;
     u32 un1;
-    u32 un0;
-    u32 un21;
-    u32 q1;
-    u32 q0;
     u32 r;
-    u32 p;
+    u32 un21;
+    u32 q0;
+    u32 p2;
+    u32 r2;
+    u32 hi = __mulhwu(a, b);
+    u32 lo = a * b;
+    u32 s;
+    u32 v;
     if ((d & (d - 1)) == 0) {
         s = __cntlzw(d);
         return (hi << (s + 1)) | (lo >> (31 - s));
@@ -589,38 +591,38 @@ u32 fn_80116BD4(u32 a, u32 b, u32 d) {
         return lo / d;
     }
     s = __cntlzw(d);
-    d <<= s;
-    un32 = (hi << s) + (lo >> (32 - s));
-    un10 = lo << s;
-    vn1 = d >> 16;
-    vn0 = d & 0xFFFF;
-    un1 = un10 >> 16;
-    q1 = un32 / vn1;
-    p = un32 - (q1 * vn1);
-    remainderHigh = p << 16;
-    r = remainderHigh | un1;
+    v = d << s;
+    hi = (hi << s) + (lo >> (32 - s));
+    lo <<= s;
+    vn1 = v >> 16;
+    vn0 = v & 0xFFFF;
+    un1 = lo >> 16;
+    q1 = hi / vn1;
+    rhat = hi - (q1 * vn1);
+    r = (rhat << 16) | un1;
     p = q1 * vn0;
     if (r < p) {
-        r += d;
+        r += v;
         q1--;
-        if ((r >= d) && (r < p)) {
-            r += d;
+        if ((r >= v) && (r < p)) {
+            r += v;
             q1--;
         }
     }
     un21 = r - p;
     q0 = un21 / vn1;
-    r = ((un21 - (q0 * vn1)) << 16) | (un10 & 0xFFFF);
-    p = q0 * vn0;
-    if (r < p) {
-        r += d;
+    r2 = ((un21 - (q0 * vn1)) << 16) | (lo & 0xFFFF);
+    p2 = q0 * vn0;
+    if (r2 < p2) {
+        r2 += v;
         q0--;
-        if ((r >= d) && (r < p)) {
+        if ((r2 >= v) && (r2 < p2)) {
             q0--;
         }
     }
     return (q1 << 16) | q0;
 }
+#pragma pop
 
 // Fills `size` bytes at dst with the 16-bit value v.
 void fn_80116CC4(u32 *dst, u16 v, u32 size) {
@@ -2713,18 +2715,32 @@ static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
     return d + 32767;
 }
 #pragma push  /* RAD built this routine without constant propagation or speculative unrolling (Process review) */
+#pragma opt_lifetimes off
 #pragma opt_propagation off
 #pragma opt_unroll_loops off
 #pragma ppc_unroll_speculative off
 void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
     u32 lo = 0x7FFF8000;
+    s16 *out = arg0 - 1;
     u32 hi = 0x80007FFF;
     u32 i;
     u32 v;
-    arg0--;
+    u32 d;
+    u64 t;
     for (i = 0; i < arg2; i++) {
-        v = (s32)(*arg1++ * farg0);
-        *++arg0 = Clamp16(v, lo, hi);
+        v = (s32)(*arg1 * farg0);
+        v ^= 0x80000000;
+        t = (u64)v - lo;
+        d = (u32)t;
+        d &= ~(u32)(t >> 32);
+        v = d - 32768;
+        v ^= 0x80000000;
+        t = (u64)v - hi;
+        d = (u32)t;
+        d &= (u32)(t >> 32);
+        v = d + 32767;
+        arg1++;
+        *++out = v;
     }
 }
 #pragma pop
