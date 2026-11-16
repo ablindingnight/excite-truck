@@ -1377,7 +1377,7 @@ DeityCar* fn_801B2EDC(int i, DCar* car) {
 
 s32 fn_801B2F24(void) { return lbl_8055E678; }
 
-u8 fn_801B2F2C(int i) { return lbl_8055E684[i].finished; }
+int fn_801B2F2C(int i) { return lbl_8055E684[i].finished; }
 
 int fn_801B2F40(int place) { return lbl_80435C30[place]; }
 
