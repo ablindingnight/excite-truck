@@ -2,18 +2,17 @@
 // power buttons from the retrace callback, and shows the disc error screens until the problem is
 // gone. Names are guesses apart from the messages.
 #include "game/common.h"
+#include <revolution/DVD/dvd.h>
+#include <revolution/OS/OSError.h>
+#include <revolution/OS/OSInterrupt.h>
+#include <revolution/OS/OSStateTM.h>
+#include <revolution/VI/vi.h>
 
 extern "C" {
-void OSReport(const char* fmt, ...);
-s32 DVDGetDriveStatus(void);
 BOOL OSGetResetButtonState(void);
 u32 GXGetOverflowCount(void);
-BOOL OSDisableInterrupts(void);
-BOOL OSEnableInterrupts(void);
 typedef void (*VIRetraceCallback)(u32 count);
-VIRetraceCallback VISetPostRetraceCallback(VIRetraceCallback callback);
 typedef void (*OSStateCallback)(void);
-OSStateCallback OSSetPowerCallback(OSStateCallback callback);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802D3DAC(void);
 void fn_802E2E38(int reason);
@@ -53,7 +52,7 @@ int lbl_8055FE4C;  // reset requests
 extern "C" {
 
 void fn_802D98F8(void) {
-    OSReport("POWER BUTTON!\n");
+    OSReport((const char*)("POWER BUTTON!\n"));
     lbl_8055FE41 = 1;
 }
 
@@ -90,7 +89,7 @@ void fn_802D992C(u32 count) {
     }
     if (lbl_8055FE3C != lbl_8055FE44) {
         lbl_8055FE44 = lbl_8055FE3C;
-        OSReport("DVDError: %d\n", lbl_8055FE3C);
+        OSReport((const char*)("DVDError: %d\n"), lbl_8055FE3C);
     }
     if (GXGetOverflowCount()) {
         fn_802D3DAC();
@@ -160,17 +159,17 @@ int fn_802D9BF0(void) { return lbl_8055FE3C != 0; }
 int fn_802D9C04(void) { return lbl_8055FE3C == 1; }
 
 void fn_802D9C18(void) {
-    VISetPostRetraceCallback(fn_802D992C);
-    OSSetPowerCallback(fn_802D98F8);
+    VISetPostRetraceCallback((VIRetraceCallback)fn_802D992C);
+    OSSetPowerCallback((OSStateCallback)fn_802D98F8);
 }
 
 // The disc-error reset request: never called in this build (the compiler drops it but keeps its string).
 static void QueueReset(void) {  /* Helper name unproven */
-    OSReport("drQueueReset!");
+    OSReport((const char*)("drQueueReset!"));
 }
 
 void fn_802D9C4C(void) {
-    VISetPostRetraceCallback(NULL);
+    VISetPostRetraceCallback((VIRetraceCallback)NULL);
 }
 
 }  // extern "C"
