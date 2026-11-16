@@ -528,6 +528,8 @@ s32 fn_802168E4(void);
 
 // "Cup completed" box: congratulations and the next cup (or what this one unlocked), with the cup's
 // marker easing in.
+#pragma push
+#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_8027F288(EvBracket* cup, EvBracket* next) {
     char msg[100];
     if (next) {
@@ -574,6 +576,7 @@ void fn_8027F288(EvBracket* cup, EvBracket* next) {
         fn_80214AF0(0x1F);
     }
 }
+#pragma pop
 
 int fn_8024739C(int* item);
 int fn_80280898(void);
