@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/mtx33.h"
 #include "game/rvec.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -244,11 +245,9 @@ void fn_8018C5A0(u8* p, u8* desc) {
 
 struct RVec3;
 
-// A rotation plus position, filled from euler angles (modeinl.cpp).
-struct Mtx33 {
-    void SetEuler(f32 y, f32 x, f32 z);
-    DMat3 rot;  // offset 0x0
-    EVec pos;   // offset 0x24
+// A rotation plus position, filled from euler angles (Mtx33::SetEuler, modeinl.cpp). Name unproven.
+struct EulerFrame : Mtx33 {
+    EVec pos;  // offset 0x24
 };
 
 extern "C" {
@@ -340,7 +339,7 @@ void fn_8018CB3C(u8* p) {
             }
             s->angle = s->angle + 0.016683351f * s->spin;
             s->angle = MaxF(s->angle, -0.044999998f);
-            Mtx33 m;
+            EulerFrame m;
             m.pos = s->on->pos;
             EVec* hub = (EVec*)(p + 0xD94) + s->hub;
             m.pos.x += hub->x;
@@ -364,7 +363,7 @@ void fn_8018CB3C(u8* p) {
                 s->angle = 2.0f * ClampF(s->angle, 0.0f, s->limit) - s->angle;
                 s->spin = -s->spin;
             }
-            Mtx33 m;
+            EulerFrame m;
             m.pos = s->on->pos;
             EVec* hub = (EVec*)(p + 0xD94) + s->hub;
             m.pos.x += hub->x;
@@ -1371,3 +1370,7 @@ void fn_8018FACC(void) {
 }
 
 }  // extern "C"
+
+// The race-start lead time (seconds). Defined here, read by racing (RacingOverlay::Draw): retail keeps it as the last
+// entry of this unit's .sdata2 and racing loads it from here. Name unproven.
+extern const f32 lbl_80562068 = 3.0f;

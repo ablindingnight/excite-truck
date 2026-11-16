@@ -4,6 +4,7 @@
 // packer and the sound stop helper. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/mtx33.h"
 #include "game/rvec.h"
 #include "game/sound.h"
 #include "game/vpos.h"
@@ -19,63 +20,7 @@ extern const u32 lbl_8055E1DC = Initial7FWord();
 
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 
-// VecC: rvec.h's RVec3.
-struct Mtx33 {
-    void SetRotX(f32 a) {
-        f32 c = cos(a);
-        f32 s = sin(a);
-        xx = 1.0f;
-        xy = 0.0f;
-        xz = 0.0f;
-        yx = 0.0f;
-        yy = c;
-        yz = s;
-        zx = 0.0f;
-        zy = -s;
-        zz = c;
-    }
-    void SetRotY(f32 a) {
-        f32 c = cos(a);
-        f32 s = sin(a);
-        xx = c;
-        xy = 0.0f;
-        xz = -s;
-        yx = 0.0f;
-        yy = 1.0f;
-        yz = 0.0f;
-        zx = s;
-        zy = 0.0f;
-        zz = c;
-    }
-    void SetRotZ(f32 a) {
-        f32 c = cos(a);
-        f32 s = sin(a);
-        xx = c;
-        xy = s;
-        xz = 0.0f;
-        yx = -s;
-        yy = c;
-        yz = 0.0f;
-        zx = 0.0f;
-        zy = 0.0f;
-        zz = 1.0f;
-    }
-    static Mtx33 RotX(f32 a) {
-        Mtx33 m;
-        m.SetRotX(a);
-        return m;
-    }
-    static Mtx33 RotZ(f32 a) {
-        Mtx33 m;
-        m.SetRotZ(a);
-        return m;
-    }
-    void SetEuler(f32 y, f32 x, f32 z);
-    f32 xx, xy, xz;
-    f32 yx, yy, yz;
-    f32 zx, zy, zz;
-};
-
+// Mtx33: mtx33.h.
 struct Mtx34 {
     f32 m[12];
 };

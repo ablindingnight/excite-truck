@@ -2,6 +2,7 @@
 // efx bone mesh read from the car's .car folder), its resource loader and the menu state that
 // draws it. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/mtx33.h"
 #include "game/menustate.h"
 #include "game/gamedb.h"
 #include "game/math_types.h"
@@ -27,10 +28,7 @@ struct Vec3a {
     f32 v[3];
 };
 
-struct Mtx33 {
-    f32 m[9];
-};
-
+// Mtx33: mtx33.h.
 class ValueTableV {
 public:
     virtual ValueNode* FindChild(const char* name);  // 0x8
@@ -816,34 +814,34 @@ static inline int LoaderReady(const char* name) {
 
 static inline void MulM(Mtx33* out, const Mtx33* a, const Mtx33* b) {
     if (out == a || out == b) {
-        f32 m0 = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        f32 m3 = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        f32 m6 = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        f32 m1 = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        f32 m4 = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        f32 m7 = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        f32 m2 = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        f32 m5 = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        f32 m8 = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
-        out->m[0] = m0;
-        out->m[3] = m3;
-        out->m[6] = m6;
-        out->m[1] = m1;
-        out->m[4] = m4;
-        out->m[7] = m7;
-        out->m[2] = m2;
-        out->m[5] = m5;
-        out->m[8] = m8;
+        f32 m0 = Dot(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
+        f32 m3 = Dot(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
+        f32 m6 = Dot(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
+        f32 m1 = Dot(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
+        f32 m4 = Dot(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
+        f32 m7 = Dot(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
+        f32 m2 = Dot(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
+        f32 m5 = Dot(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
+        f32 m8 = Dot(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
+        out->xx = m0;
+        out->yx = m3;
+        out->zx = m6;
+        out->xy = m1;
+        out->yy = m4;
+        out->zy = m7;
+        out->xz = m2;
+        out->yz = m5;
+        out->zz = m8;
     } else {
-        out->m[0] = Dot(b->m[0], a->m[0], b->m[3], a->m[1], b->m[6], a->m[2]);
-        out->m[3] = Dot(b->m[0], a->m[3], b->m[3], a->m[4], b->m[6], a->m[5]);
-        out->m[6] = Dot(b->m[0], a->m[6], b->m[3], a->m[7], b->m[6], a->m[8]);
-        out->m[1] = Dot(b->m[1], a->m[0], b->m[4], a->m[1], b->m[7], a->m[2]);
-        out->m[4] = Dot(b->m[1], a->m[3], b->m[4], a->m[4], b->m[7], a->m[5]);
-        out->m[7] = Dot(b->m[1], a->m[6], b->m[4], a->m[7], b->m[7], a->m[8]);
-        out->m[2] = Dot(b->m[2], a->m[0], b->m[5], a->m[1], b->m[8], a->m[2]);
-        out->m[5] = Dot(b->m[2], a->m[3], b->m[5], a->m[4], b->m[8], a->m[5]);
-        out->m[8] = Dot(b->m[2], a->m[6], b->m[5], a->m[7], b->m[8], a->m[8]);
+        out->xx = Dot(b->xx, a->xx, b->yx, a->xy, b->zx, a->xz);
+        out->yx = Dot(b->xx, a->yx, b->yx, a->yy, b->zx, a->yz);
+        out->zx = Dot(b->xx, a->zx, b->yx, a->zy, b->zx, a->zz);
+        out->xy = Dot(b->xy, a->xx, b->yy, a->xy, b->zy, a->xz);
+        out->yy = Dot(b->xy, a->yx, b->yy, a->yy, b->zy, a->yz);
+        out->zy = Dot(b->xy, a->zx, b->yy, a->zy, b->zy, a->zz);
+        out->xz = Dot(b->xz, a->xx, b->yz, a->xy, b->zz, a->xz);
+        out->yz = Dot(b->xz, a->yx, b->yz, a->yy, b->zz, a->yz);
+        out->zz = Dot(b->xz, a->zx, b->yz, a->zy, b->zz, a->zz);
     }
 }
 
@@ -990,15 +988,15 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             f32 c = cos(pitch);
             f32 s = sin(pitch);
             Mtx33 rx;
-            rx.m[1] = 0.0f;
-            rx.m[0] = 1.0f;
-            rx.m[2] = 0.0f;
-            rx.m[3] = 0.0f;
-            rx.m[4] = c;
-            rx.m[5] = s;
-            rx.m[6] = 0.0f;
-            rx.m[7] = -s;
-            rx.m[8] = c;
+            rx.xy = 0.0f;
+            rx.xx = 1.0f;
+            rx.xz = 0.0f;
+            rx.yx = 0.0f;
+            rx.yy = c;
+            rx.yz = s;
+            rx.zx = 0.0f;
+            rx.zy = -s;
+            rx.zz = c;
             f32 c2 = cos(yaw);
             f32 s2 = sin(yaw);
             cam.b.v[0].x = c2;

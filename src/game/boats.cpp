@@ -1,6 +1,7 @@
 // Background boats (0x802C2298-0x802C26F0): reads boat models and positions from _boat.val and
 // draws them bobbing and rolling. Names are guesses apart from the value keys.
 #include "game/common.h"
+#include "game/mtx33.h"
 #include "game/arrayref.h"
 #include "game/math_types.h"
 
@@ -15,10 +16,7 @@ void fn_802C744C(s32 model, const ValMatrix* m);
 double sin(double x);
 }
 
-struct Mtx33 {
-    f32 m[9];
-};
-
+// Mtx33: mtx33.h.
 struct Boat {
     Boat(void) {}
     s32 model;    // offset 0x0

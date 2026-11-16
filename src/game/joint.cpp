@@ -27,9 +27,7 @@ public:
     virtual ~JointPool(void) {}
 };
 
-struct Mtx33 {
-    ValVec3 basis[3];
-};
+// Mtx33: math_types.h's Mat3 (the joint's rotation rows).
 
 extern "C" {
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const ValMatrix* m);
@@ -81,7 +79,7 @@ static inline void Identity(ValMatrix* m) {
     m->origin.z = 0.0f;
 }
 
-static inline void RotZ(Mtx33* m, f32 angle) {
+static inline void RotZ(Mat3* m, f32 angle) {
     ValVec3* b = (ValVec3*)m;
     f32 c = cos(angle);
     f32 s = sin(angle);
@@ -252,19 +250,19 @@ void fn_801E34E4(const Joint* j, const ValMatrix* root) {
 
 s32 fn_801E3534(const Joint* j) { return j->inst; }
 
-void fn_801E35D4(Joint* j, const Mtx33* r);
+void fn_801E35D4(Joint* j, const Mat3* r);
 
 void fn_801E353C(Joint* j, f32 angle) {
-    Mtx33 r;
+    Mat3 r;
     RotZ(&r, angle);
     fn_801E35D4(j, &r);
 }
 
-void fn_801E35D4(Joint* j, const Mtx33* r) {
+void fn_801E35D4(Joint* j, const Mat3* r) {
     j->local.origin.x = 0.0f;
     j->local.origin.y = 0.0f;
     j->local.origin.z = 0.0f;
-    *(Mtx33*)j->local.basis = *r;
+    *(Mat3*)j->local.basis = *r;
 }
 
 ValVec3* fn_801E3630(Joint* j) { return &j->base.origin; }
