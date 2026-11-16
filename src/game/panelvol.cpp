@@ -6,6 +6,7 @@
 #include "game/vec3_init.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
+#include "game/collvol.h"
 
 struct Mat3 {
     f32 m[9];
@@ -29,41 +30,6 @@ public:
     const RVec3* Vel(void);
 };
 
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);   // 0x8
-    virtual ~CollVolume(void);        // 0xC
-    virtual void Reset(void);         // 0x10
-    virtual void vf14(void);          // 0x14
-    virtual void vf18(void);          // 0x18
-    virtual void Update(void);          // 0x1C
-    virtual void vf20(void);          // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
-    virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(RPacket* p);           // 0x2C
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* p);     // 0x34
-    virtual void vf38(u8* p);         // 0x38
-    virtual void vf3C(void);          // 0x3C
-    virtual int vf40(void);           // 0x40
-    virtual int vf44(void);           // 0x44
-    void Transform(void);  // the worker the 0x1C slot (Update) calls
-    void AddShape(CollShape* s);
-    s32 a4;             // offset 0x4
-    s32 a8;             // offset 0x8
-    void* desc;         // offset 0xC
-    u32 type;           // offset 0x10
-    CollShape* sub[4];  // offset 0x14
-    s32 nAdded;         // offset 0x24
-    s32 nSub;           // offset 0x28
-    f32 radius;         // offset 0x2C
-    RVec3 offset;       // offset 0x30
-    RMtx mtx;           // offset 0x3C
-    s16 hint[2];        // offset 0x6C
-    RMtx world;         // offset 0x70
-    RMtx prev;          // offset 0xA0
-};
-
 class RigidBody : public CollVolume {
 public:
     RigidBody(void);
@@ -74,7 +40,7 @@ public:
     virtual s32 vf2C(RPacket* p);
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual int vf40(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C

@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/collshape.h"
 #include "game/rmtx.h"
+#include "game/collvol.h"
 
 extern "C" {
 double sqrt(double x);
@@ -277,7 +278,7 @@ public:
     virtual void vf30(void);          // 0x30
     virtual void vf34(void);          // 0x34
     virtual void vf38(void);          // 0x38
-    virtual void vf3C(void);          // 0x3C
+    virtual RigidBody* vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
     virtual void vf44(void);          // 0x44
     void Xform(void);
@@ -302,35 +303,6 @@ public:
 struct RPacket;
 
 
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);
-    virtual ~CollVolume(void);
-    virtual void Reset(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void Update(void);
-    void Transform(void);  // the worker Update (0x1C) calls
-    virtual void vf20(void);
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
-    virtual void vf28(u8* buf);
-    virtual s32 vf2C(RPacket* p);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* p);
-    virtual void vf38(u8* out);
-    virtual void vf3C(void);
-    virtual int vf40(void);
-    virtual int vf44(void);
-    void AddShape(CollShape* s);
-    s32 a4;
-    s32 a8;
-    u8 padC[0x3C - 0xC];
-    RMtx mtx;
-    s16 hint[2];
-    RMtx world;
-    RMtx prev;
-};
-
 class RigidBody : public CollVolume {
 public:
     RigidBody(void);
@@ -341,7 +313,7 @@ public:
     virtual s32 vf2C(RPacket* p);
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual int vf40(void);
     virtual void OnHit(const RVec3* force, const RVec3* at, int kind, void* contact);
     virtual void OnImpulse(const RVec3* force, const RVec3* at, int kind, void* contact, void* by);

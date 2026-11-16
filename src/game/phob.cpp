@@ -4,6 +4,7 @@
 // sent to the renderer, the view->car map and the event message buffers. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/collvol.h"
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT( f32 b, f32 a,f32 t) { return a + t * (b - a); }
@@ -386,19 +387,11 @@ public:
 
 struct BodyDesc;
 
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
-    virtual ~CollVolume(void);       // 0xC
-    // Slot 0x24 (empty); declared without the slots before it, as this view only needs the definition below.
-    void Notify(const struct RVec3* v, const struct RVec3* at, int kind, void* c, void* by);
-};
-
 class RigidBody : public CollVolume {
 public:
     RigidBody(void);
     virtual ~RigidBody(void) {}
-    u8 pad4[0x29C - 0x4];
+    u8 padD0[0x29C - 0xD0];
 };
 
 // A rigid body whose shape can be mutated at run time (mutphob.cpp).
@@ -483,9 +476,9 @@ void fn_801778C0(void) {
     }
 }
 
-int vf40__10CollVolumeFv(Phob* p) { return 0; }  // CollVolume::vf40 (named so the vtables pair)
+int CollVolume::vf40(void) { return 0; }
 
-int vf44__10CollVolumeFv(Phob* p) { return 1; }  // CollVolume::vf44 (named so the vtables pair)
+int CollVolume::vf44(void) { return 1; }
 
 void fn_80177990(void) {
     int i;
@@ -692,7 +685,7 @@ void fn_80177F40(void) {
     }
 }
 
-PhobCar* vf3C__10CollVolumeFv(Phob* p) { return 0; }  // CollVolume::vf3C (named so the vtables pair)
+RigidBody* CollVolume::vf3C(void) { return 0; }
 
 int fn_801781C0(s32 x) {
     switch (x) {
@@ -1158,7 +1151,7 @@ void fn_80179140(void) {
     }
 }
 
-void vf14__10CollVolumeFv(Phob* p) {}  // CollVolume::vf14 (empty; in every collision vtable; C name = mangled name)
+void CollVolume::vf14(void) {}  // empty; in every collision vtable
 
 void fn_801791A8(void) {
     int i;
@@ -1394,7 +1387,11 @@ StatePacket* fn_80179824(void) {
     return p;
 }
 
-void vf28__10CollVolumeFPUc(const Phob* v, u8* buf) {  // CollVolume slot 0x28 (writes the draw state)
+// CollVolume::vf28, by its linker name. MATCHING-AID: retail's body reads the fields as through a const pointer
+// formal (a const member matches it exactly), but the slot is not const (PanelVol, MutPhob, Wheel and Ball override
+// it with a non-const this; their code changes under const), and no in-member const view reproduces it (const local,
+// const reference, inline helper with a const formal: all tried 2026-11-16). Port: CollVolume::vf28.
+void vf28__10CollVolumeFPUc(const Phob* v, u8* buf) {  // writes the draw state
     u8* o = buf + v->a8;
     PMtx* out = (PMtx*)o;
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {

@@ -5,6 +5,7 @@
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
+#include "game/collvol.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -63,43 +64,6 @@ struct ObDesc;
 
 struct RPacket;
 
-// The collision volume base (collvol.cpp). The slot names are the ones retail's tables use here; the
-// vtable itself is emitted by collvol.cpp.
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);  // 0x08
-    virtual ~CollVolume(void);       // 0x0C
-    virtual void Reset(void);        // 0x10
-    virtual void vf14(void);         // 0x14
-    virtual void vf18(void);         // 0x18
-    virtual void Update(void);       // 0x1C
-    void Transform(void);  // the worker Update (0x1C) calls
-    virtual void vf20(void);         // 0x20
-    virtual void Notify(const struct RVec3* v, const struct RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
-    virtual void vf28(u8* buf);      // 0x28 writes the draw state
-    virtual s32 vf2C(RPacket* p);          // 0x2C
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* p);    // 0x34
-    virtual void vf38(u8* p);        // 0x38
-    virtual void vf3C(void);         // 0x3C
-    virtual int vf40(void);          // 0x40
-    virtual int vf44(void);          // 0x44
-    void AddShape(CollShape* s);
-    // The i-th collision shape, or 0 when out of range.
-    CollShape* Shape(int i) {
-        if (i >= 0 && i < count) {
-            return shapes[i];
-        }
-        return 0;
-    }
-    u8 pad4[0x14 - 0x4];
-    CollShape* shapes[4];  // offset 0x14
-    s32 count;             // offset 0x24
-    u8 pad28[0x3C - 0x28];
-    RMtx frame;     // offset 0x3C
-    void Xform(RVec3* out, const RVec3* in);
-};
-
 // The rigid body (rigid.cpp); its vtable is emitted there.
 class RigidBody : public CollVolume {
 public:
@@ -112,7 +76,7 @@ public:
     virtual s32 vf2C(RPacket* p);
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual int vf40(void);
     virtual void OnHit(const RVec3* v, const RVec3* at, int force, void* extra);                // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int force, void* extra, void* by);  // 0x4C
@@ -120,7 +84,7 @@ public:
     void Flush(RVec3* a, RVec3* b);
     void VelAt(RVec3* out, const RVec3* at);
     void AddForceAt(const RVec3* f, const RVec3* at);
-    u8 pad6C[0x1EC - 0x6C];
+    u8 padD0[0x1EC - 0xD0];
 };
 
 extern "C" void fn_801AC240(u8* p);
@@ -597,7 +561,7 @@ void Obstacle::Init(BodyDesc* d) {
     U8(this, 0x234) = 0;
     F32(this, 0x238) = 0.0f;
     fn_801AC240((u8*)this);
-    *(ObRot*)((u8*)&frame) = q->rot;
+    *(ObRot*)((u8*)&mtx) = q->rot;
     *(ObPos*)((u8*)this + 0x60) = q->pos;
     CollVolume::Transform();
     *(RVec3*)((u8*)this + 0x30) = RVec3(0.0f, 0.0f, 0.0f);
@@ -642,7 +606,7 @@ void Obstacle::Init(BodyDesc* d) {
         CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
             const f32& half = 0.5f;
-            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&frame, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
+            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&mtx, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
                             0.2f, q->a, half * q->b, q->a);
         }
         shape = s;
@@ -670,7 +634,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddCornerV((u8*)this, c, spring);
         shape = (CollShape*)operator new(0x184, "horse-volume");
         if (shape) {
-            shape = __ct__11SphereGroupFUlUl(shape, (u8*)&frame, (u8*)this);
+            shape = __ct__11SphereGroupFUlUl(shape, (u8*)&mtx, (u8*)this);
         }
         const f32 directionComponent = 1.0f;
         f32 r = q->a * ScaleOperand(0.5f);
@@ -682,7 +646,7 @@ void Obstacle::Init(BodyDesc* d) {
                     RVec3(1.0f, 1.0f, 1.0f), r, k, skin, 1.0f, secondCenterXY);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
-            box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)&frame, origin, (u8*)this, k, skin, 0.3f, 0.3f, 0.3f);
+            box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)&mtx, origin, (u8*)this, k, skin, 0.3f, 0.3f, 0.3f);
         }
         fn_801A0444(shape, box);
         corners = 0;
@@ -773,7 +737,7 @@ void Obstacle::Init(BodyDesc* d) {
         fn_80131818(t);
         CollShape* s = (CollShape*)operator new(0xE0, "polyvol");
         if (s) {
-            s = __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(s, (u8*)&frame, pl, n, &lo, &hi, k, skin);
+            s = __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(s, (u8*)&mtx, pl, n, &lo, &hi, k, skin);
         }
         shape = s;
         U8(this, 0x221) = 1;
@@ -783,7 +747,7 @@ void Obstacle::Init(BodyDesc* d) {
     case 20: {
         CollShape* s = (CollShape*)operator new(0x40, "pmshvol");
         if (s) {
-            s = __ct__9MeshShapeFUlPCcUl(s, (u8*)&frame, (const char*)&q->a, (u8*)this);
+            s = __ct__9MeshShapeFUlPCcUl(s, (u8*)&mtx, (const char*)&q->a, (u8*)this);
         }
         shape = s;
         U8(this, 0x221) = 1;
@@ -798,7 +762,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddShape(ball);
         CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
         if (s) {
-            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&frame, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), (u8*)this, k, skin, hx, hy,
+            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&mtx, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), (u8*)this, k, skin, hx, hy,
                             0.61f);
         }
         shape = s;
@@ -876,7 +840,7 @@ void Obstacle::Init(BodyDesc* d) {
     for (BodyCorner* c = *(BodyCorner**)((u8*)this + 0xD0); c; c = c->next) {
         c->friction = 2.0f;
     }
-    *(Pose12*)((u8*)this + 0x1EC) = *(Pose12*)((u8*)&frame);
+    *(Pose12*)((u8*)this + 0x1EC) = *(Pose12*)((u8*)&mtx);
     S32(this, 0x224) = 0;
     if (q->flags & 1) {
         u32 group = q->flags & 2;
@@ -901,7 +865,7 @@ void Obstacle::Init(BodyDesc* d) {
         id = q->extra->GetString("path_id", q->extra->GetString("dyno", ""));
         fn_801DA758((u8*)this, id, path);
         U8(this, 0x222) = 1;
-        for (i = 0; i < count; i++) {
+        for (i = 0; i < nAdded; i++) {
             Shape(i)->SetSurface(0x72);
         }
     }
