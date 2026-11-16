@@ -248,12 +248,15 @@ public:
     FixedArr<ActionSequenceEvent*, 64> events;  // offset 0x30
 };
 
+// Unit-local (port ODR: other units define a different Rumble).
+namespace {
 struct Rumble {
     Sound3D* snd;  // offset 0x0
     f32 time;      // offset 0x4
     Vec vel;       // offset 0x8
     Vec pos;       // offset 0x14
 };
+}  // namespace
 
 struct ASText {
     ASText(void) {

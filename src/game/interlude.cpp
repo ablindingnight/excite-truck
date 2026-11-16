@@ -200,10 +200,13 @@ struct TrackNode {
 };
 }  // namespace
 
+// Unit-local (port ODR: other units define a different TrackList).
+namespace {
 struct TrackList {
     u8 pad0[0x20];
     TrackNode* first;  // offset 0x20
 };
+}  // namespace
 
 struct Track {
     u8 pad0[0x2C];

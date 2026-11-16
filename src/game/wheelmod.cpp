@@ -709,6 +709,8 @@ public:
 };
 
 // The animation slot of a wheel: the frame plus the car and wheel it belongs to.
+// Unit-local (port ODR: other units define a different WheelSlot).
+namespace {
 struct WheelSlot {
     ValMatrix frame;  // offset 0x0
     s16 flags;        // offset 0x30
@@ -717,6 +719,7 @@ struct WheelSlot {
     f32 f3C;          // offset 0x3C
     u8 attached;      // offset 0x40
 };
+}  // namespace
 
 class WheelAnim : public AnimObj {
 public:

@@ -45,11 +45,14 @@ struct TrackEntry {
     const char* environment;
 };
 
+// Unit-local (port ODR: other units define a different TrackList).
+namespace {
 struct TrackList {
     TrackEntry entries[40];  // offset 0x0
     u32 count;               // offset 0x1E0
     ValueTable* table;       // offset 0x1E4
 };
+}  // namespace
 
 struct Unk_8000822C {
     s32 id;     // offset 0x0

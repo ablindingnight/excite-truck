@@ -190,6 +190,8 @@ public:
     PlayerCarModel(Racer* r, CarDef* d);
 };
 
+// Unit-local (port ODR: other units define a different WheelSlot).
+namespace {
 struct WheelSlot {
     s32 tag;   // offset 0x0
     s32 size;  // offset 0x4
@@ -202,6 +204,7 @@ struct WheelSlot {
     f32 f20;
     f32 f24;
 };
+}  // namespace
 
 struct AnimSlot {
     s32 tag;   // offset 0x0
@@ -217,6 +220,8 @@ struct MutSlot {
     f32 f14;
 };
 
+// Unit-local (port ODR: other units define a different PlayerObj).
+namespace {
 class PlayerObj {
 public:
     virtual ~PlayerObj(void);  // 0x08 (a CarModel: slot 0 is __dt__8CarModel)
@@ -231,6 +236,7 @@ public:
     u8 f28[4];  // offset 0x28
     f32 fov;    // offset 0x2C
 };
+}  // namespace
 
 extern void* __vt__8BoxShape[];
 
