@@ -16,6 +16,14 @@ class CollShape;
 struct Corner;  // a contact point (corners.cpp)
 struct ImpRec;  // one pending impulse (rigid.cpp)
 
+// A rigid body's description: mass and the inertia diagonal after the BodyDesc head (Init passes them to SetMass).
+struct RigidDesc : BodyDesc {
+    f32 mass;  // offset 0x8
+    f32 ix;    // offset 0xC
+    f32 iy;    // offset 0x10
+    f32 iz;    // offset 0x14
+};
+
 class RigidBody : public CollVolume {
 public:
     RMat33* InvInertia(void);  // inline, defined in rigid.cpp

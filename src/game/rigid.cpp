@@ -70,15 +70,6 @@ struct RPacket {
     RVec3 vel;  // offset 0x14
 };
 
-struct BodyDesc {
-    u8 pad0[0x8];
-    f32 mass;   // offset 0x8
-    f32 ix;     // offset 0xC
-    f32 iy;     // offset 0x10
-    f32 iz;     // offset 0x14
-};
-
-
 // A contact point in body space (corners.cpp); the body keeps its corners in a list.
 class RigidBody;
 struct Corner {
@@ -110,7 +101,7 @@ RigidBody::RigidBody(void) {
 void RigidBody::Init(BodyDesc* d) {
     CollVolume::Init(d);
     contacts = 0;
-    SetMass(d->mass, d->ix, d->iy, d->iz);
+    SetMass(((RigidDesc*)d)->mass, ((RigidDesc*)d)->ix, ((RigidDesc*)d)->iy, ((RigidDesc*)d)->iz);
     cell = 0;
     ResetState();
 }

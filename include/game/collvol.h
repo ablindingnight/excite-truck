@@ -11,7 +11,12 @@
 
 class CollShape;
 class RigidBody;
-struct BodyDesc;
+// The head of a physics object description (file data): its kind and byte size; the kind-specific data follows
+// (RigidDesc in rigid.h, collvol.cpp's box volume). Names unproven.
+struct BodyDesc {
+    s32 kind;  // offset 0x0
+    s32 size;  // offset 0x4
+};
 struct RPacket;
 
 class CollVolume {

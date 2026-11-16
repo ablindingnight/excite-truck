@@ -204,13 +204,7 @@ extern "C" BSound* fn_802077A4(const char* name, int prio, const RVec3* vel, con
 
 struct RPacket;
 
-struct BodyDesc {
-    u8 pad0[0x8];
-    f32 mass;
-    f32 ix, iy, iz;
-};
-
-struct BallDesc : public BodyDesc {
+struct BallDesc : public RigidDesc {
     s32 car;        // offset 0x18
     u8 pad1C[0x4];
     f32 radius;     // offset 0x20

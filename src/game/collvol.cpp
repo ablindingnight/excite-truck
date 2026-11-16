@@ -24,9 +24,7 @@ void* operator new(size_t size, const char* tag);
 // The 3x3 rotation block: copied as one 36-byte struct (word copy), indexed like an array.
 /* Type shape from the target (one 9-word copy in CollVolume::Update, 2026-11-08); name and the conversion operator are guesses. */
 // The volume description (named as the RigidBody family names it; unproven).
-struct BodyDesc {
-    s32 type;     // offset 0x0
-    u8 pad4[0x4];
+struct BoxVolDesc : BodyDesc {
     RMtx mtx;     // offset 0x8
     s32 shape;    // offset 0x38
     RVec3 half;   // offset 0x3C
@@ -96,7 +94,7 @@ void CollVolume::Init(BodyDesc* d) {
     nAdded = 0;
     nSub = 0;
     radius = 0.0f;
-    type = d->type;
+    type = d->kind;
     a4 = 0;
     Identity(&mtx);
     fn_801E9DC4(hint);
@@ -320,11 +318,11 @@ PhobStatic::PhobStatic(void) {}
 
 void PhobStatic::Init(BodyDesc* d) {
     CollVolume::Init(d);
-    mtx = d->mtx;
+    mtx = ((BoxVolDesc*)d)->mtx;
     Transform();
-    switch (d->shape) {
+    switch (((BoxVolDesc*)d)->shape) {
     case 0: {
-        BoxShape* s = new ("box-volume") BoxShape(&mtx, d->half.x, d->half.y, d->half.z);
+        BoxShape* s = new ("box-volume") BoxShape(&mtx, ((BoxVolDesc*)d)->half.x, ((BoxVolDesc*)d)->half.y, ((BoxVolDesc*)d)->half.z);
         AddShape(s);
         break;
     }

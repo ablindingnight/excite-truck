@@ -15,15 +15,6 @@
 struct RPacket;
 class CollShape;
 
-struct BodyDesc {
-    s32 kind;  // offset 0x0
-    s32 size;  // offset 0x4
-    f32 mass;  // offset 0x8
-    f32 ix;    // offset 0xC
-    f32 iy;    // offset 0x10
-    f32 iz;    // offset 0x14
-};
-
 // The render state, written at the body's offset in the frame buffer.
 struct PanelPose {
     RMtx mtx;   // offset 0x0
@@ -534,7 +525,7 @@ void PanelVol::Init(BodyDesc* d) {
     RVec3 c;
     RVec3 b;
     RVec3 a;
-    BodyDesc desc;
+    RigidDesc desc;
     memset(&desc, 0, sizeof(desc));
     desc.size = sizeof(desc);
     desc.kind = d->kind;
