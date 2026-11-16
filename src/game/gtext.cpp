@@ -835,8 +835,8 @@ void fn_80232D3C(const char* text, GTextFont* f, u32 color, int align, const UIX
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop1_fn_80232DF4(f32 x0, int& i, u32& cc, u32 c) {
+/* Helper name unproven: resets the pen, the character index and the colour for one pass; the boundary is needed (in place: fn_80232DF4 100 -> 98.52) */
+static inline f32 RestartLine(f32 x0, int& i, u32& cc, u32 c) {
     f32 px;
     px = x0;
     i = 0;
@@ -862,7 +862,7 @@ void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
         for (passes = (f->outline != NULL) + 1; passes > 0; passes--) {
             GTextFont* ff;
             u32 cc;
-            px = Loop1_fn_80232DF4(x0, i, cc, c);
+            px = RestartLine(x0, i, cc, c);
             ff = f;
             if (passes == 2) {
                 ff = f->outline;
