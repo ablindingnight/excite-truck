@@ -495,7 +495,7 @@ u16 fn_802B127C(GMat* g, const GVec* v) {
     return g->verts.count - 1;
 }
 
-bool fn_802B12E0(GMat* g, GBatch* out, GBatch* in, int layer) {
+int fn_802B12E0(GMat* g, GBatch* out, GBatch* in, int layer) {
     if (!g) {
         return false;
     }
