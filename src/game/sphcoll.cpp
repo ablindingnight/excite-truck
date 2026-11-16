@@ -1879,7 +1879,7 @@ int fn_8019DC04(u8* p, u8* q) {
 }
 
 f32 TubeBase::Radius(void) {
-    u8* p = (u8*)this; return F32(p, 0x24) + F32(p, 0x28); }
+    u8* p = (u8*)this; return this->rad + this->half; }
 
 extern const f32 lbl_805622D0;  // 0.0
 
@@ -2182,7 +2182,7 @@ void fn_8019EB14(u8* tree, int i) {
 
 void CollShape::vf1C(void) {
     u8* p = (u8*)this;
-    u8* o = PTR(p, 0x4);
+    u8* o = ((u8*&)this->owner);
     if (o) {
         VE(o)->v48();
     }
@@ -2206,7 +2206,7 @@ void CollShape::vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* b
 
 void CollShape::vf2C(u8* q) {
     u8* p = (u8*)this;
-    PTR(p, 0x8) = q;
+    this->data = q;
     VE(p)->v34(q + 4);
 }
 
@@ -2234,22 +2234,22 @@ SphereShape::SphereShape(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
     if (swap) {
         Swap32(p + 0x24);
-        f32* w = (f32*)(p + 0x28);
+        f32* w = (f32*)&this->center;
         for (int i = 0; i < 3; i++) {
             Swap32((u8*)&w[i]);
         }
-        if (S32(p, 0x20) == 0x3EB) {
-            F32(p, 0x24) += 3.35f;
+        if (this->surface == 0x3EB) {
+            this->radius += 3.35f;
         }
     }
-    U8(p, 0x4C) = 0;
-    F32(p, 0x34) = 0.0f;
-    F32(p, 0x38) = 0.0f;
-    F32(p, 0x3C) = 0.0f;
-    F32(p, 0x40) = 0.0f;
-    F32(p, 0x44) = 0.0f;
-    F32(p, 0x48) = 0.0f;
-    F32(p, 0x50) = 0.0f;
+    this->b4C = 0;
+    this->f34 = 0.0f;
+    this->f38 = 0.0f;
+    this->f3C = 0.0f;
+    this->f40 = 0.0f;
+    this->f44 = 0.0f;
+    this->f48 = 0.0f;
+    this->f50 = 0.0f;
 }
 
 void fn_8019EECC(u8* p, RVec3* v) {
@@ -2279,13 +2279,13 @@ void SphereShape::vf0C(void) {
 
 void SphereShape::vf28(void) {
     u8* p = (u8*)this;
-    U8(p, 0x4C) = 0;
-    F32(p, 0x40) = 0.0f;
-    F32(p, 0x44) = 0.0f;
-    F32(p, 0x48) = 0.0f;
-    F32(p, 0x34) = 0.0f;
-    F32(p, 0x38) = 0.0f;
-    F32(p, 0x3C) = 0.0f;
+    this->b4C = 0;
+    this->f40 = 0.0f;
+    this->f44 = 0.0f;
+    this->f48 = 0.0f;
+    this->f34 = 0.0f;
+    this->f38 = 0.0f;
+    this->f3C = 0.0f;
 }
 
 void fn_802E317C(const char* fmt, ...);
@@ -2327,11 +2327,11 @@ void SphereShape::vf10(u8* o) {
 }
 
 void SphereShape::vf14(void) {
-    u8* p = (u8*)this; fn_8019AC44(p, (f32*)(p + 0x34), (f32*)(p + 0x40), F32(p, 0x24)); }
+    u8* p = (u8*)this; fn_8019AC44(p, (f32*)(p + 0x34), (f32*)(p + 0x40), this->radius); }
 
 int SphereShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
     u8* p = (u8*)this;
-    return fn_8019DDFC((const f32*)from, (const f32*)dir, t, (f32*)n, (f32*)(p + 0x34), F32(p, 0x24));
+    return fn_8019DDFC((const f32*)from, (const f32*)dir, t, (f32*)n, (f32*)(p + 0x34), this->radius);
 }
 
 void SphereShape::vf38(RVec3* lo, RVec3* hi) const {
@@ -2350,7 +2350,7 @@ void SphereShape::vf38(RVec3* lo, RVec3* hi) const {
 
 void SphereShape::vf4C(void) {
     u8* p = (u8*)this;
-    f32 r = F32(p, 0x24);
+    f32 r = this->radius;
     r = r > 0.2f ? r : 0.2f;
     fn_801E3FC8(p + 0x34, r, lbl_8055E598.value);
 }
@@ -2396,18 +2396,18 @@ void FlatSphereShape::vf14(void) {}
 // Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
 void AttachedSphereShape::vf0C(void) {
     u8* p = (u8*)this;
-    u8* o = PTR(p, 0x4);
+    u8* o = ((u8*&)this->owner);
     u8* m = PTR(p, 0x54);
     PVec3 t = *(PVec3*)(m + 0x30);
-    f32 lift = 0.06f + F32(p, 0x24) + F32(m, 0xC);
+    f32 lift = 0.06f + this->radius + F32(m, 0xC);
     t.v[0] = t.v[0] - F32(o, 0x30) + F32(p, 0x58);
     t.v[1] = t.v[1] - F32(o, 0x34) + lift;
     t.v[2] = t.v[2] - F32(o, 0x38);
-    F32(p, 0x30) = t.v[2];
-    F32(p, 0x28) = t.v[0];
-    F32(p, 0x2C) = t.v[1];
+    this->center.z = t.v[2];
+    this->center.x = t.v[0];
+    this->center.y = t.v[1];
     if (o) {
-        fn_8019EECC(o, (RVec3*)(p + 0x28));
+        fn_8019EECC(o, (RVec3*)&this->center);
     }
     ((SphereShape*)p)->SphereShape::vf0C();
 }
@@ -2673,9 +2673,9 @@ void OffsetSphereShape::vf1C(void) {
 void OffsetSphereShape::vf28(void) {
     u8* p = (u8*)this;
     ((SphereShape*)p)->SphereShape::vf28();
-    F32(p, 0x28) = F32(p, 0x54);
-    F32(p, 0x2C) = F32(p, 0x58);
-    F32(p, 0x30) = F32(p, 0x5C);
+    this->center.x = F32(p, 0x54);
+    this->center.y = F32(p, 0x58);
+    this->center.z = F32(p, 0x5C);
     U8(p, 0x78) = 0;
 }
 
@@ -2847,7 +2847,7 @@ void SphereGroup::vf10(u8* q) {
             (f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC) + 0x18)) < F32(q, 0x2C) + F32(p, 0x178)) {
             u8* pb;
             CFrame* f = (CFrame*)PTR(q, 0xC);
-            pb = PTR(p, 0x4);
+            pb = ((u8*&)this->owner);
             RVec3 l;
             l.x = F32(pb, 0x60) - f->t.x;
             l.y = F32(pb, 0x64) - f->t.y;
@@ -2863,7 +2863,7 @@ void SphereGroup::vf10(u8* q) {
                 fn_8019BD54((u8*)((SphGroup*)p)->vols[i], q, 0, &l);
             }
             u8* car;
-            if (S32(q, 0x20) < 8 && IsCarObj(car = PTR(p, 0x4))) {
+            if (S32(q, 0x20) < 8 && IsCarObj(car = ((u8*&)this->owner))) {
                 int id = S32(car, 0x1EC);
                 for (int w = 0; w < 4; w++) {
                     PVec3 wp;
@@ -2908,7 +2908,7 @@ void SphereGroup::vf10(u8* q) {
         }
     } else if (type == 'SPHR' || type == 'FLSR') {
         PVec3 c = *(PVec3*)(PTR(p, 0x17C) + 0x38);
-        u8* pb = PTR(p, 0x4);
+        u8* pb = ((u8*&)this->owner);
         if (pb) {
             c.v[0] = c.v[0] + F32(pb, 0x30);
             c.v[1] = c.v[1] + F32(pb, 0x34);
@@ -2935,7 +2935,7 @@ void SphereGroup::vf10(u8* q) {
         for (int i = 0; i < S32(p, 0x174); i++) {
             ((VGroup*)q)->v10((u8*)((SphGroup*)p)->vols[i]);
         }
-        car = PTR(p, 0x4);
+        car = ((u8*&)this->owner);
         if (IsCarObj(car)) {
             id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
@@ -2959,7 +2959,7 @@ void SphereGroup::vf10(u8* q) {
         for (int i = 0; i < S32(p, 0x174); i++) {
             ((VGroup*)q)->v10((u8*)((SphGroup*)p)->vols[i]);
         }
-        car = PTR(p, 0x4);
+        car = ((u8*&)this->owner);
         if (IsCarObj(car)) {
             int id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
@@ -3079,7 +3079,7 @@ void SphereGroup::vf44(u32 v) {
 }
 
 void CollShape::vf44(u32 v) {
-    u8* p = (u8*)this; U32(p, 0x1c) = v; }
+    u8* p = (u8*)this; this->x1C = v; }
 
 void SphereGroup::SetSurface(int v) {
     U32(((u8*)this), 0x20) = ((u32)v);
@@ -3139,8 +3139,8 @@ TubeBase::TubeBase(u32 a, u32 swap) : CollShape(a, swap) {
     if (swap) {
         Swap32(p + 0x24);
         Swap32(p + 0x28);
-        if (S32(p, 0x20) == 0x3EB) {
-            F32(p, 0x24) += 3.35f;
+        if (this->surface == 0x3EB) {
+            this->rad += 3.35f;
         }
     }
 }
@@ -3197,12 +3197,12 @@ void fn_801E41D8(f32* a, f32* b, u32 color, f32 r);
 // Debug-draws the tube as a capsule.
 void TubeBase::vf4C(void) {
     u8* p = (u8*)this;
-    TubeSeg s = *(TubeSeg*)(PTR(p, 0xC) + 0x18);
+    TubeSeg s = *(TubeSeg*)(((u8*&)this->frame) + 0x18);
     f32 a[3];
     f32 b[3];
-    MulAdd(a, s.mid, s.dir, F32(p, 0x28));
-    MulAdd(b, s.mid, s.dir, -F32(p, 0x28));
-    fn_801E41D8(a, b, 0x40FFFF00, lbl_8056234C * F32(p, 0x24));
+    MulAdd(a, s.mid, s.dir, this->half);
+    MulAdd(b, s.mid, s.dir, -this->half);
+    fn_801E41D8(a, b, 0x40FFFF00, lbl_8056234C * this->rad);
 }
 
 TubeShape::TubeShape(u32 a, u32 swap) : TubeBase(a, swap) {}
@@ -3320,7 +3320,7 @@ void TubeShape::vf4C(void) {
 BoxShape::BoxShape(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
     if (swap) {
-        Swap32(p + 0x24);
+        Swap32((u8*)&this->half);
         Swap32(p + 0x28);
         Swap32(p + 0x2C);
         Swap32(p + 0x30);
@@ -3348,9 +3348,9 @@ void BoxShape::vf10(u8* obj) {
 
 int BoxShape::vf18(const RVec3* a, const RVec3* b, f32* c, RVec3* out) {
     u8* p = (u8*)this;
-    f32 z = F32(p, 0x2C);
-    f32 y = F32(p, 0x28);
-    f32 x = F32(p, 0x24);
+    f32 z = this->half.z;
+    f32 y = this->half.y;
+    f32 x = this->half.x;
     if (fn_8019E2D0((RVec3*)((u8*)a), (RVec3*)((u8*)b), (f32*)((u8*)c), (CFrame*)((VEx*)p)->v50(), x, y, z)) {
         out->x = 0.0f;
         out->y = 1.0f;
@@ -3410,7 +3410,7 @@ void BoxShape::vf4C(void) {
     Xform x;
     x.rot = src->rot;
     x.pos = src->pos;
-    const RVec3* c = (const RVec3*)(p + 0x24);
+    const RVec3* c = (const RVec3*)&this->half;
     f32 cz = c->z;
     f32 cy = c->y;
     f32 cx = c->x;
@@ -3427,7 +3427,7 @@ OrientedBoxShape::OrientedBoxShape(u32 a, const RVec3* c, u32 b, f32 s0, f32 s1,
 // Takes the frame's rotation (0x44), then the world centre (0x68) = frame * local centre (0x38).
 void OrientedBoxShape::vf0C(void) {
     u8* p = (u8*)this;
-    CFrame* f = (CFrame*)PTR(p, 0xC);
+    CFrame* f = (CFrame*)((u8*&)this->frame);
     ((PVec3*)(p + 0x44))[0] = ((PVec3*)f->m)[0];
     ((PVec3*)(p + 0x44))[1] = ((PVec3*)f->m)[1];
     ((PVec3*)(p + 0x44))[2] = ((PVec3*)f->m)[2];
@@ -3510,7 +3510,7 @@ void RagdollShape::vf10(u8* o) {
         }
     };
     if (S32(o, 0x18) == 'GRUP') {
-        f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)PTR(o, 0xC))->t);
+        f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)PTR(o, 0xC))->t);
         f32 r = F32(p, 0x24) + VE(o)->v3C();
         if (dd < r * r) {
             u8* box = PTR(o, 0x17C);
@@ -3542,7 +3542,7 @@ void RagdollShape::vf10(u8* o) {
             }
         }
     } else if (S32(o, 0x18) == 'BOX ') {
-        f32 dd = DistSq(&((CFrame*)PTR(p, 0xC))->t, &((CFrame*)VE(o)->v50())->t);
+        f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)VE(o)->v50())->t);
         f32 r = F32(p, 0x24) + BoxRad(o);
         if (dd < r * r) {
             RVec3 vel;
@@ -3583,7 +3583,7 @@ f32 SphereGroup::Radius(void) {
     u8* p = (u8*)this; return F32(p, 0x178); }
 
 void RagdollShape::vf4C(void) {
-    u8* p = (u8*)this; fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
+    u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
 
 RingVol::RingVol(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
@@ -3657,7 +3657,7 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
 }
 
 void RingVol::vf4C(void) {
-    u8* p = (u8*)this; fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24) + F32(p, 0x28), lbl_8055E598.value); }
+    u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, this->inner + this->ring, lbl_8055E598.value); }
 
 PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape((const CFrame*)a, (CollVolume*)0, 'POLY', f1, f2) {
     u8* p = (u8*)this;
@@ -3828,13 +3828,13 @@ void PolyShape::vf4C(void) {
     RVec3 w;
     const f32* d = (const f32*)(p + 0x3C);
     u32 color = lbl_8055E598.value;
-    o = *(PVec3*)&((CFrame*)PTR(p, 0xC))->t;
+    o = *(PVec3*)&((CFrame*)((u8*&)this->frame))->t;
     for (int i = 0; i < S32(p, 0xBC); d += 4, i++) {
         f32 len = d[3];
         v.x = d[0] * len;
         v.y = d[1] * len;
         v.z = d[2] * len;
-        CFrame* f = (CFrame*)PTR(p, 0xC);
+        CFrame* f = (CFrame*)((u8*&)this->frame);
         MulVec(&w, &v, f);
         w.x = w.x + f->t.x;
         w.y = w.y + f->t.y;
@@ -3901,7 +3901,7 @@ int MeshShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
     RVec3 lf;
     RVec3 ld;
     RVec3 ln;
-    CFrame* f = (CFrame*)PTR(p, 0xC);
+    CFrame* f = (CFrame*)((u8*&)this->frame);
     lf.x = from->x - f->t.x;
     lf.y = from->y - f->t.y;
     lf.z = from->z - f->t.z;
@@ -3913,9 +3913,9 @@ int MeshShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
         lf.y = y;
         lf.z = z;
     }
-    MulVecT(&ld, dir, (CFrame*)PTR(p, 0xC));
+    MulVecT(&ld, dir, (CFrame*)((u8*&)this->frame));
     if (fn_801CF828(PTR(p, 0x24), (u32)&lf, (u32)&ld, (u32)t, (u32)&ln)) {
-        MulVec(n, &ln, (CFrame*)PTR(p, 0xC));
+        MulVec(n, &ln, (CFrame*)((u8*&)this->frame));
         return 1;
     }
     return 0;
@@ -4170,19 +4170,19 @@ int fn_801A4E88(u32 a, u32 b, u32 c, u32 d, s32* out) {
 }
 
 f32 SphereShape::Radius(void) {
-    u8* p = (u8*)this; return F32(p, 0x24); }
+    u8* p = (u8*)this; return this->radius; }
 
 void SphereGroup::vf48(void) {
     u8* p = (u8*)this; S32(p, 0x180) = -1; }
 
 f32 BoxShape::Radius(void) {
-    u8* p = (u8*)this; return F32(p, 0x30); }
+    u8* p = (u8*)this; return this->radius; }
 
 f32 RagdollShape::Radius(void) {
     u8* p = (u8*)this; return F32(p, 0x24); }
 
 f32 RingVol::Radius(void) {
-    u8* p = (u8*)this; return F32(p, 0x28); }
+    u8* p = (u8*)this; return this->ring; }
 
 int CollShape::vf18(const RVec3*, const RVec3*, f32*, RVec3*) { return 0; }
 
