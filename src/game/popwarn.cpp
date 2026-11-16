@@ -78,7 +78,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 extern "C" s32 lbl_8055BEA8;
 extern "C" s32 lbl_8055BEC0;
-extern void* lbl_803435A0[];
 extern char lbl_8055B860[8];
 extern char lbl_8055BAC0[4];  // ""
 extern char lbl_8055BABC[4];  // ""
@@ -102,16 +101,33 @@ extern "C" {
 
 }  // extern "C"
 
-// Waits on a controller channel while the warning is shown (vtable lbl_80343720).
-struct PadWait {
-    void* vt;        // offset 0x0
-    u8 pad4[0x10];   // offset 0x4
-    s32 f14;         // offset 0x14
-    s32 chan;        // offset 0x18
-    u8 pad1C[0x8];
+// A scrolling menu art widget that owns its image ("extruck.art").
+class MenuArt : public MenuState {
+public:
+    MenuArt(void) { image = fn_8023512C("extruck.art"); }
+    virtual ~MenuArt(void) { fn_80235380(image); }
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual void Draw(void);
+
+    u8* image;  // offset 0x18
+    f32 scroll; // offset 0x1C
 };
 
-extern void* lbl_80343720[];
+/* Class name unproven */
+// Waits on a controller channel (or card) while a warning is shown, then counts down before closing.
+class PadWait : public MenuState {
+public:
+    PadWait(s32 c) { chan = c; }
+    virtual ~PadWait(void) {}
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual int Key(int key);
+
+    s32 chan;  // offset 0x18
+    u8 done;   // offset 0x1C
+    f32 timer; // offset 0x20
+};
 
 extern "C" {
 int fn_802E4A10(void);
@@ -123,10 +139,7 @@ int fn_80246938(void) {
     if (chan >= 0 && chan < 4) {
         fn_80214A9C(0x1F);
         while (fn_802E8690((u8*)chan)) {
-            PadWait w;
-            w.f14 = 0;
-            w.vt = lbl_80343720;
-            w.chan = chan;
+            PadWait w(chan);
             MenuItem items[] = {
                 MenuItem(0, 5, &w, 0, 0),
                 MenuItem("title", fn_80131234("WARN:CAUTION_TITLE")),
@@ -142,28 +155,9 @@ int fn_80246938(void) {
     return 1;
 }
 
-u8* fn_80246AA8(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
 }  // extern "C"
 
 
-// A scrolling menu art widget that owns its image ("extruck.art").
-class MenuArt : public MenuState {
-public:
-    MenuArt(void) { image = fn_8023512C("extruck.art"); }
-    virtual ~MenuArt(void) { fn_80235380(image); }
-    virtual void Enter(void);
-    virtual void Update(void);
-    virtual void Draw(void);
-
-    u8* image;  // offset 0x18
-    f32 scroll; // offset 0x1C
-};
 
 char lbl_80498908[0x40];  // version text buffer
 
@@ -828,36 +822,46 @@ int fn_80247AD0(void) {
 
 }  // extern "C"
 
-// The demo menu's mode buttons list (vtable lbl_803435A0): up to 10 {id, locked} entries.
-struct ModeList {
+// A list header over inline storage; its destructor (and its base's) clears the header.
+template <class T>
+struct VecRef {
+    ~VecRef(void) {
+        data = 0;
+        count = 0;
+        cap = 0;
+    }
+    T* data;    // offset 0x0
+    s32 count;  // offset 0x4
+    s32 cap;    // offset 0x8
+};
+
+/* Class name unproven */
+template <class T, int N>
+struct FixedVec : VecRef<T> {
+    FixedVec(void) {
+        this->count = 0;
+        this->data = buf;
+        this->cap = N;
+    }
+    T buf[N];
+};
+
+/* Class name unproven */
+// The demo menu's mode buttons list: up to 10 {id, locked} entries.
+class ModeList : public MenuState {
+public:
     struct Entry {
         s32 id;  // offset 0x0
         u8 on;   // offset 0x4
     };
-    ModeList(void) {
-        f14 = 0;
-        count = 0;
-        vt = lbl_803435A0;
-        items = buf;
-        cap = 10;
-    }
-    ~ModeList(void) {
-        items = 0;
-        count = 0;
-        cap = 0;
-    }
+    virtual ~ModeList(void) {}
+    virtual void Enter(void);
     void Add(s32 id, u8 on) {
-        Entry& e = items[count++];
+        Entry& e = list.data[list.count++];
         e.id = id;
         e.on = on;
     }
-    void* vt;        // offset 0x0
-    u8 pad4[0x10];   // offset 0x4
-    s32 f14;         // offset 0x14
-    Entry* items;    // offset 0x18
-    s32 count;       // offset 0x1C
-    s32 cap;         // offset 0x20
-    Entry buf[10];   // offset 0x24
+    FixedVec<Entry, 10> list;  // offset 0x18
 };
 
 int IsUnlockAll(void);
@@ -954,22 +958,6 @@ int fn_80247C18(void) {
     }
 }
 
-u8* fn_80248140(u8* p, int del) {
-    if (p) {
-        u8* m = p + 0x18;
-        if (m) {
-            if (m) {
-                U32(p, 0x18) = 0;
-                U32(p, 0x1C) = 0;
-                U32(p, 0x20) = 0;
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
 
 double sin(double x);
 
@@ -1154,33 +1142,36 @@ void MenuArt::Draw(void) {
 extern "C" {
 
 
-void fn_80248BD0(u8* p) {
-    F32(p, 0x20) = 2.0f;
-    U8(p, 0x1C) = fn_802E8690(PTR(p, 0x18));
+}  // extern "C"
+
+void PadWait::Enter(void) {
+    timer = 2.0f;
+    done = fn_802E8690((u8*)chan);
 }
 
-void fn_80248C0C(u8* p) {
-    WaitPopup* w = (WaitPopup*)p;
-    w->done = fn_802E8690(w->card);
-    if (w->done) {
-        w->timer = 2.0f;
+void PadWait::Update(void) {
+    done = fn_802E8690((u8*)chan);
+    if (done) {
+        timer = 2.0f;
         fn_80214A9C(0x1E);
     } else {
-        w->timer -= fn_80214D48();
+        timer -= fn_80214D48();
         fn_80214AF0(0x1E);
     }
-    if (w->timer < __float_epsilon[0]) {
-        ((MenuState*)p)->Finish(0);
+    if (timer < __float_epsilon[0]) {
+        Finish(0);
     }
 }
 
-int fn_80248C94(u8* p, int key) {
-    if (!U8(p, 0x1C) && key == 0xD) {
-        ((MenuState*)p)->Finish(0);
+int PadWait::Key(int key) {
+    if (!done && key == 0xD) {
+        Finish(0);
         return 1;
     }
     return 0;
 }
+
+extern "C" {
 
 }  // extern "C"
 
@@ -1346,16 +1337,20 @@ int CupSelect::Key(int key) {
 extern "C" {
 
 
-void fn_802493E8(u8* p) {
-    for (int i = 0; i < S32(p, 0x1C); i++) {
-        u8* e = PTR(p, 0x18) + i * 8;
-        if (U8(e, 0x4)) {
-            fn_80214AF0(S32(e, 0x0));
+}  // extern "C"
+
+void ModeList::Enter(void) {
+    for (int i = 0; i < list.count; i++) {
+        Entry* e = &list.data[i];
+        if (e->on) {
+            fn_80214AF0(e->id);
         } else {
-            fn_80214A9C(S32(e, 0x0));
+            fn_80214A9C(e->id);
         }
     }
 }
+
+extern "C" {
 
 
 }  // extern "C"
