@@ -157,19 +157,49 @@ public:
 
 // The rigid body a car body is (rigid.cpp); CarBody below is still declared flat.
 struct RVec3;
-class RigidBody {
+
+struct RVec3;
+
+// The collision volume RigidBody derives from (collvol.cpp); declared as far as the CarBody slots need.
+class CollVolume {
 public:
-    void AddForceAt(const RVec3* f, const RVec3* at);
+    virtual void Init(void* desc);   // 0x08
+    virtual ~CollVolume(void);       // 0x0C
+    virtual void Reset(void);        // 0x10
+    virtual void vf14(void);         // 0x14
+    virtual void vf18(void);         // 0x18
+    virtual void vf1C(void);  // 0x1C
+    virtual void vf20(void);         // 0x20
+    virtual void vf24(void);         // 0x24
+    virtual void vf28(u8* buf);  // 0x28
+    virtual int vf2C(u8* buf);  // 0x2C
+    virtual void vf30(f32 t, int a, int b, int* na, int* nb);  // 0x30
+    virtual int vf34(u8* p);  // 0x34
+    virtual void vf38(u8* buf);      // 0x38
+    virtual void vf3C(void);         // 0x3C
+    virtual int vf40(void);          // 0x40
+    virtual void vf44(void);         // 0x44
 };
 
-class CarBody {
+// The rigid body CarBody derives from (rigid.cpp).
+class RigidBody : public CollVolume {
+public:
+    void AddForceAt(const RVec3* f, const RVec3* at);
+    virtual void vf18(void);
+    virtual void vf3C(void);
+    virtual int vf40(void);
+    virtual void vf48(const TVec* a, const TVec* b, int kind, int c);  // 0x48
+    virtual void vf4C(const TVec* a, const TVec* b, int kind, int c);  // 0x4C
+    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
+};
+
+class CarBody : public RigidBody {
 public:
     CarBody(void);
     virtual void Init(void* desc);   // 0x08
     virtual ~CarBody(void);          // 0x0C
     virtual void Reset(void);        // 0x10
     virtual void vf14(void);         // 0x14
-    virtual void vf18(void);
     virtual void vf1C(void);
     virtual void vf20(void);
     virtual void vf24(void);
@@ -177,13 +207,8 @@ public:
     virtual int vf2C(u8* buf);                                     // 0x2C
     virtual void vf30(f32 t, int a, int b, int* na, int* nb);      // 0x30
     virtual int vf34(u8* p);                                       // 0x34
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
     virtual void vf48(const TVec* a, const TVec* b, int kind, int c);  // 0x48
     virtual void vf4C(const TVec* a, const TVec* b, int kind, int c);  // 0x4C
-    virtual void vf50(void);
     virtual void vf54(void);   // 0x54
     virtual void vf58(void);   // 0x58
     virtual void Update(void); // 0x5C

@@ -92,9 +92,40 @@ struct BodyState {
     s16 hint;  // offset 0x40
 };
 
-class RigidBody {
+
+struct RVec3;
+
+// The collision volume RigidBody derives from (collvol.cpp); declared as far as the CarBody slots need.
+class CollVolume {
+public:
+    virtual void Init(void* desc);   // 0x08
+    virtual ~CollVolume(void);       // 0x0C
+    virtual void Reset(void);        // 0x10
+    virtual void vf14(void);         // 0x14
+    virtual void vf18(void);         // 0x18
+    virtual void Update(void);  // 0x1C
+    virtual void vf20(void);         // 0x20
+    virtual void vf24(void);         // 0x24
+    virtual void vf28(void);  // 0x28
+    virtual void vf2C(void);  // 0x2C
+    virtual void vf30(void);  // 0x30
+    virtual void vf34(void);  // 0x34
+    virtual void vf38(u8* buf);      // 0x38
+    virtual void vf3C(void);         // 0x3C
+    virtual int vf40(void);          // 0x40
+    virtual void vf44(void);         // 0x44
+};
+
+// The rigid body CarBody derives from (rigid.cpp).
+class RigidBody : public CollVolume {
 public:
     void AddTorque(const RVec3* t);
+    virtual void vf18(void);
+    virtual void vf3C(void);
+    virtual int vf40(void);
+    virtual void vf48(void);  // 0x48
+    virtual void vf4C(void);  // 0x4C
+    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
 };
 
 class CarBody : public RigidBody {
@@ -104,7 +135,6 @@ public:
     virtual ~CarBody(void);                // 0xC
     virtual void Reset(void);              // 0x10
     virtual void vf14(void);               // 0x14
-    virtual void vf18(void);               // 0x18
     virtual void Update(void);             // 0x1C
     virtual void vf20(void);               // 0x20
     virtual void vf24(void);               // 0x24
@@ -112,13 +142,8 @@ public:
     virtual void vf2C(void);               // 0x2C
     virtual void vf30(void);               // 0x30
     virtual void vf34(void);               // 0x34
-    virtual void vf38(void);               // 0x38
-    virtual void vf3C(void);               // 0x3C
-    virtual void vf40(void);               // 0x40
-    virtual void vf44(void);               // 0x44
     virtual void vf48(void);               // 0x48
     virtual void vf4C(void);               // 0x4C
-    virtual void vf50(void);               // 0x50
     virtual void SetState(const BodyState* s);  // 0x54
     virtual void vf58(void);               // 0x58
     virtual void vf5C(void);               // 0x5C
