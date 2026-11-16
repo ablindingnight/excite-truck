@@ -2,6 +2,7 @@
 // static and dynamic obstacle rigid bodies, the extents/plane/polyvol/pmshvol readers and the
 // fence-pole binding ("fencepole: binding to %p"). Some names are descriptive.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
@@ -46,8 +47,6 @@ struct Pose12 {
 extern s32 lbl_8055E3C4;
 
 extern "C" {
-f32 PSVECDotProduct(const f32* a, const f32* b);
-void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 }
 
 struct ObVec3 {
@@ -169,7 +168,6 @@ void fn_801D08C0(u8* p);
 void fn_801D0A24(u8* p, int a);
 void fn_801C1C7C(u8* p);
 void fn_802E30C8(const char* fmt, ...);
-f32 PSVECSquareDistance(const u8* a, const u8* b);
 void fn_801AC240(u8* p);
 void fn_801ABFF8(u8* p, VVisit* f);
 void fn_801ACF94(void);
@@ -739,7 +737,7 @@ extern "C" {
 
 void fn_801ABB54(u8* p) {
     Obstacle* ob = (Obstacle*)p;
-    f32 d = PSVECDotProduct((f32*)&ob->avel, (f32*)&ob->mtx.rot.z);
+    f32 d = PSVECDotProduct((const Vec*)((f32*)&ob->avel), (const Vec*)((f32*)&ob->mtx.rot.z));
     f32 imp = 0.0f;
     f32 ad = (f32)AbsD(d);
     f32 lim = ob->u238;
@@ -779,8 +777,8 @@ void Obstacle::Update(void) {
         ((RigidBody*)p)->Flush((RVec3*)&lin, (RVec3*)&ang);
         return;
     }
-    if (PSVECDotProduct((f32*)&p->vel, (f32*)&p->vel) > 0.1f * 0.1f ||
-        PSVECDotProduct((f32*)&p->avel, (f32*)&p->avel) > 0.1f * 0.1f) {
+    if (PSVECDotProduct((const Vec*)((f32*)&p->vel), (const Vec*)((f32*)&p->vel)) > 0.1f * 0.1f ||
+        PSVECDotProduct((const Vec*)((f32*)&p->avel), (const Vec*)((f32*)&p->avel)) > 0.1f * 0.1f) {
         if (p->mtx.pos.y > -500.0f) {
             fn_801AC240((u8*)p);
         }
@@ -963,7 +961,7 @@ void Obstacle::OnHit(const RVec3* v_, const RVec3* at_, int force, void* extra_)
         f32 r = F32(this, 0xD4);
         f32 k = 1.7777778f * r;
         f32 k2 = k * k;
-        if (PSVECDotProduct(((const f32*)v_), ((const f32*)v_)) > k2) {
+        if (PSVECDotProduct((const Vec*)(((const f32*)v_)), (const Vec*)(((const f32*)v_))) > k2) {
             HitVisit h(((const f32*)v_), ((const f32*)at_), force, ((u8*)extra_));
             fn_801ABFF8((u8*)this, &h);
         }
@@ -1032,7 +1030,7 @@ void FencePole::Init(BodyDesc* d) {
     if (idx > 0) {
         int last = idx - 1;
         u8* prev = lbl_80435628[last];
-        if (PSVECSquareDistance(prev + 0x60, (u8*)this + 0x60) < 16.0f) {
+        if (PSVECSquareDistance((const Vec*)(prev + 0x60), (const Vec*)((u8*)this + 0x60)) < 16.0f) {
             PTR(this, 0x23C) = prev;
             fn_802E30C8("fencepole: binding to %p", prev);
         }
@@ -1084,7 +1082,6 @@ struct FencePin {
 };
 
 extern "C" {
-f32 PSVECDistance(const void* a, const void* b);
 void fn_801A2674(u8* p, f32 r, u32 a, u32 b);
 void fn_801C1CBC(s32 sys, int nv, FenceVert* v, int ne, FenceEdge* e, int np, FencePin* pins);
 
@@ -1113,7 +1110,7 @@ void FencePole::Reset(void) {
             a.y += F32(o, 0x214);
             a.z += F32(o, 0x218);
             if (PTR(o, 0x23C)) {
-                f32 r = 0.5f + 1.1f * PSVECDistance(o + 0x210, PTR(o, 0x23C) + 0x210);
+                f32 r = 0.5f + 1.1f * PSVECDistance((const Vec*)(o + 0x210), (const Vec*)(PTR(o, 0x23C) + 0x210));
                 if (PTR(o, 0x240)) {
                     fn_801A2674(PTR(o, 0x240), r, nv, nv + 5);
                 }
@@ -1165,7 +1162,7 @@ void FencePole::Reset(void) {
             v->w30 = 1.0f;
         }
         for (int i = 0; i < ne; i++) {
-            PSVECDistance(&verts[edges[i].a], &verts[edges[i].b]);
+            PSVECDistance((const Vec*)&verts[edges[i].a], (const Vec*)&verts[edges[i].b]);
             edges[i].extra = 0.0f;
         }
         fn_801C1CBC(lbl_8055E5F0, nv, verts, ne, edges, np, pins);
@@ -1190,7 +1187,7 @@ void FencePole::Update(void) {
         F32(p, 0x128) *= 0.9f;
         F32(p, 0x12C) *= 0.9f;
         ObVec3 c;
-        PSVECCrossProduct((f32*)(p + 0x48), (f32*)(p + 0x1F8), &c.x);
+        PSVECCrossProduct((const Vec*)((f32*)(p + 0x48)), (const Vec*)((f32*)(p + 0x1F8)), (Vec*)&c.x);
         if (F32(p, 0x4C) < 0.92f) {
             AddScaled((ObVec3*)(p + 0x124), &c, 0.1f);
         }
@@ -1353,7 +1350,6 @@ void fn_801AD148(u8* p, const RVec3* a, u8* body, f32 x, f32 y) {
     fn_801AD0E0(p, (const f32*)&l, (s32)body, (const f32*)a, x, y);
 }
 
-f32 PSVECMag(const RVec3* v);
 
 // Links this joint between a point on our volume and one on `other` (or a world point).
 void fn_801AD28C(u8* p, const RVec3* a, CollVolume* other, const RVec3* b, f32 x, f32 y) {
@@ -1369,7 +1365,7 @@ void fn_801AD28C(u8* p, const RVec3* a, CollVolume* other, const RVec3* b, f32 x
     d.x = wb.x - wa.x;
     d.y = wb.y - wa.y;
     d.z = wb.z - wa.z;
-    ((Hitch*)p)->stretch = PSVECMag(&d);
+    ((Hitch*)p)->stretch = PSVECMag((const Vec*)&d);
     f32 len = ((Hitch*)p)->stretch;
     fn_801AD0E0(p, (const f32*)b, (s32)other, (const f32*)a, x, y);
     ((Hitch*)p)->stretch = len;
@@ -1394,7 +1390,7 @@ void fn_801AD394(u8* p) {
     d.x = wb.x - wa.x;
     d.y = wb.y - wa.y;
     d.z = wb.z - wa.z;
-    f32 len = PSVECMag(&d);
+    f32 len = PSVECMag((const Vec*)&d);
     const f32& dx = d.x;
     f32 dz = d.z;
     f32 hxx = dx * dx;

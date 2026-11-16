@@ -4,6 +4,7 @@
 // field offsets; the large collide routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 // MATCHING-AID: this unit emits CollShapeIface's table (see game/collshape.h).
 #define COLLSHAPE_IFACE_DECL
 #include "game/collshape.h"
@@ -193,7 +194,6 @@ struct SphGroupAll {
 extern "C" {
 void fn_801D2414(u8*, const RVec3*, void*);  // (SObj*, const Vec*, Car*) in soevent.cpp
 void fn_801D0738(u8* p, const RVec3* c, void* f, const RVec3* b);
-f32 PSVECMag(const f32* v);
 }
 
 // The per-volume cached values cleared on reset.
@@ -284,7 +284,6 @@ public:
 
 
 extern "C" {
-f32 PSVECDotProduct(const void* a, const void* b);
 double sqrt(double x);
 void fn_801E3FC8(u8* c, f32 r, u32 color);
 void fn_801E44F4(u8* m, f32 a, f32 b, f32 c, u32 color);
@@ -403,9 +402,9 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
 
     pl = ((PolyVol*)o)->planes;
     for (int i = 0; i < S32(o, 0xBC); pl++, i++) {
-        f64 mag = __fabs(PSVECDotProduct(&lv, &pl->n));
+        f64 mag = __fabs(PSVECDotProduct((const Vec*)&lv, (const Vec*)&pl->n));
         a = (f32)mag;
-        f32 distance = PSVECDotProduct(&lc, &pl->n) - pl->d;
+        f32 distance = PSVECDotProduct((const Vec*)&lc, (const Vec*)&pl->n) - pl->d;
         d = distance + a;
         if (d >= lbl_805622D4) {
             sum += d * d;
@@ -420,11 +419,11 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
         dd.x = lc.x - cv->center.x;
         dd.y = lc.y - cv->center.y;
         dd.z = lc.z - cv->center.z;
-        t = -PSVECDotProduct(&dd, &cv->axis);
+        t = -PSVECDotProduct((const Vec*)&dd, (const Vec*)&cv->axis);
         dd.x += cv->axis.x * t;
         dd.y += cv->axis.y * t;
         dd.z += cv->axis.z * t;
-        m = PSVECMag(&dd.x);
+        m = PSVECMag((const Vec*)&dd.x);
         pen = cv->radius - m;
         if (m > 0.01f && pen > lbl_805622D4) {
             q = &push[count++];
@@ -458,7 +457,7 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     dv.x = w.x - c[0];
     dv.y = w.y - c[1];
     dv.z = w.z - c[2];
-    m = PSVECMag(&dv.x);
+    m = PSVECMag((const Vec*)&dv.x);
     dep = r - m;
     *depth = dep;
     if (dep > lbl_805622D0) {
@@ -502,7 +501,7 @@ void fn_801996BC(RVec3* out, const RVec3* pt, const RVec3* n, u8* a, u8* b, f32 
     rel.x = va.x - vb.x;
     rel.y = va.y - vb.y;
     rel.z = va.z - vb.z;
-    f32 d = PSVECDotProduct(n, &rel);
+    f32 d = PSVECDotProduct((const Vec*)n, (const Vec*)&rel);
     dn.x = n->x * d;
     dn.y = n->y * d;
     dn.z = n->z * d;
@@ -515,7 +514,7 @@ void fn_801996BC(RVec3* out, const RVec3* pt, const RVec3* n, u8* a, u8* b, f32 
     f.x *= -1000.0f;
     f.y *= -1000.0f;
     f.z *= -1000.0f;
-    f32 mag = PSVECMag(&f.x);
+    f32 mag = PSVECMag((const Vec*)&f.x);
     f32 fb = ((CollShape*)b)->skin;
     f32 fa = ((CollShape*)a)->skin;
     f32 lim = 0.5f * mu * (fa + fb);
@@ -622,7 +621,6 @@ extern "C" {
 HitRules* fn_801B83A0(void);
 f32 fn_8018AE7C(u8* car);
 void fn_802C1A0C(PlayerCtx* c, int car);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 }
 
 // Resolves one contact between volumes p and q at point x along normal n (pointing into p) with compression s:
@@ -631,7 +629,7 @@ void PSVECCrossProduct(const void* a, const void* b, void* out);
 // event for hard enough player crashes.
 static inline f32 InvMass(f32 m) { return lbl_805622E0 / m; }
 
-static inline f32 VDot(const RVec3* a, const RVec3* b) { return PSVECDotProduct(a, b); }
+static inline f32 VDot(const RVec3* a, const RVec3* b) { return PSVECDotProduct((const Vec*)a, (const Vec*)b); }
 
 void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
     RVec3 pa;
@@ -728,7 +726,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     rel.x = va.x - vb.x;
     rel.y = va.y - vb.y;
     rel.z = va.z - vb.z;
-    f32 vn = PSVECDotProduct(&rel, n);
+    f32 vn = PSVECDotProduct((const Vec*)&rel, (const Vec*)n);
     f32 st = MaxF(((CollShape*)p)->stiff, ((CollShape*)q)->stiff);
     if (vn > lbl_805622D0) {
         st *= 0.8f;
@@ -756,8 +754,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     rb.y = pt->y - fq->t.y;
     rb.z = pt->z - fq->t.z;
     if (vn < lbl_805622D0) {
-        PSVECCrossProduct(&ra, n, &ca);
-        PSVECCrossProduct(&rb, n, &cb);
+        PSVECCrossProduct((const Vec*)&ra, (const Vec*)n, (Vec*)&ca);
+        PSVECCrossProduct((const Vec*)&rb, (const Vec*)n, (Vec*)&cb);
         if (pb) {
             MulVec(&ia, &ca, (CFrame*)((u8*)pb + 0x148));
         } else {
@@ -765,7 +763,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             ia.y = lbl_805622D0;
             ia.z = lbl_805622D0;
         }
-        PSVECCrossProduct(&ia, &ra, &ta);
+        PSVECCrossProduct((const Vec*)&ia, (const Vec*)&ra, (Vec*)&ta);
         if (qb) {
             MulVec(&ib, &cb, (CFrame*)((u8*)qb + 0x148));
         } else {
@@ -773,7 +771,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             ib.y = lbl_805622D0;
             ib.z = lbl_805622D0;
         }
-        PSVECCrossProduct(&ib, &rb, &tb);
+        PSVECCrossProduct((const Vec*)&ib, (const Vec*)&rb, (Vec*)&tb);
         tt.x = ta.x + tb.x;
         tt.y = ta.y + tb.y;
         tt.z = ta.z + tb.z;
@@ -783,7 +781,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         if (-vn < 8.888889f) {
             e = lbl_80562300;
         }
-        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct(rp, n) / (ima + imb + VDot(n, &tt));
+        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct((const Vec*)rp, (const Vec*)n) / (ima + imb + VDot(n, &tt));
         J.x = n->x * j;
         J.y = n->y * j;
         J.z = n->z * j;
@@ -793,14 +791,14 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         tv.x = rel.x + n->x * -vn;
         tv.y = rel.y + n->y * -vn;
         tv.z = rel.z + n->z * -vn;
-        f32 tl = PSVECMag(&tv.x);
+        f32 tl = PSVECMag((const Vec*)&tv.x);
         if (tl > lbl_80562308) {
             f32 inv = lbl_805622E0 / MaxF(tl, lbl_80562308);
             tv.x *= inv;
             tv.y *= inv;
             tv.z *= inv;
-            PSVECCrossProduct(&ra, &tv, &ca2);
-            PSVECCrossProduct(&rb, &tv, &cb2);
+            PSVECCrossProduct((const Vec*)&ra, (const Vec*)&tv, (Vec*)&ca2);
+            PSVECCrossProduct((const Vec*)&rb, (const Vec*)&tv, (Vec*)&cb2);
             if (pb) {
                 MulVec(&ia2, &ca2, (CFrame*)((u8*)pb + 0x148));
             } else {
@@ -808,7 +806,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
                 ia2.y = lbl_805622D0;
                 ia2.z = lbl_805622D0;
             }
-            PSVECCrossProduct(&ia2, &ra, &ta2);
+            PSVECCrossProduct((const Vec*)&ia2, (const Vec*)&ra, (Vec*)&ta2);
             if (qb) {
                 MulVec(&ib2, &cb2, (CFrame*)((u8*)qb + 0x148));
             } else {
@@ -816,11 +814,11 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
                 ib2.y = lbl_805622D0;
                 ib2.z = lbl_805622D0;
             }
-            PSVECCrossProduct(&ib2, &rb, &tb2);
+            PSVECCrossProduct((const Vec*)&ib2, (const Vec*)&rb, (Vec*)&tb2);
             tt2.x = ta2.x + tb2.x;
             tt2.y = ta2.y + tb2.y;
             tt2.z = ta2.z + tb2.z;
-            f32 jt = lbl_805622DC * PSVECDotProduct(rp, &tv) / (ima + imb + VDot(&tv, &tt2));
+            f32 jt = lbl_805622DC * PSVECDotProduct((const Vec*)rp, (const Vec*)&tv) / (ima + imb + VDot(&tv, &tt2));
             jt = ClampExt(jt, (f32)__fabs(j * mu));
             J.x = J.x + tv.x * jt;
             J.y = J.y + tv.y * jt;
@@ -835,7 +833,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
                     fast = 0;
                 }
             }
-            if ((fast || qk == 0x74) && PSVECDotProduct(&J, &J) >= 10000.0f &&
+            if ((fast || qk == 0x74) && PSVECDotProduct((const Vec*)&J, (const Vec*)&J) >= 10000.0f &&
                 F32(pb, 0x25D4) > 6.6666665f && VE(q)->v30()) {
                 f32 sc = fn_8018AE7C((u8*)pb);
                 J.x *= sc;
@@ -901,7 +899,7 @@ int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
     d.v[0] = c[0] - at->x;
     d.v[1] = c[1] - at->y;
     d.v[2] = c[2] - at->z;
-    f32 len = PSVECMag(d.v);
+    f32 len = PSVECMag((const Vec*)d.v);
     RigidBody* rb = (RigidBody*)((u8*&)((CollShape*)p)->owner);
     if (len > 0.001f && len < r) {
         f32 pen = r - len;
@@ -911,7 +909,7 @@ int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
         n.v[2] = d.v[2] * inv;
         rb->VelAt(&vel, at);
         f32 k = pen * ((CollShape*)p)->stiff;
-        PSVECDotProduct(&vel, n.v);
+        PSVECDotProduct((const Vec*)&vel, (const Vec*)n.v);
         imp.x = n.v[0] * k;
         imp.y = n.v[1] * k;
         imp.z = n.v[2] * k;
@@ -934,7 +932,6 @@ int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
 void fn_8019AA18(u8* p, u32 a, u32 b, u32 c) { fn_8019A820(p, (f32*)(p + 0x34), (RVec3*)a, b, c, F32(p, 0x24)); }
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
-void PSVECNormalize(const void* in, void* out);
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
@@ -952,7 +949,7 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
     f32 rs = r + s;
     int hit = 0;
     if (SphereMagnitude(dd.v[0]) < rs && AbsF(dd.v[2]) < rs && AbsF(dd.v[1]) < rs) {
-        f32 dist = PSVECMag(dd.v);
+        f32 dist = PSVECMag((const Vec*)dd.v);
         if (!(AbsF(dist) <= __float_epsilon[0])) {
             f32 pen = s + (-dist + r);
             if (pen > 0.0f) {
@@ -961,7 +958,7 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
                 n.v[1] = dd.v[1] * inv;
                 n.v[2] = dd.v[2] * inv;
                 n.v[1] *= 0.2f;
-                PSVECNormalize(n.v, n.v);
+                PSVECNormalize((const Vec*)n.v, (Vec*)n.v);
                 f32 k = -0.5f * ((r + dist) - s);
                 at.v[0] = cv[0] + n.v[0] * k;
                 at.v[1] = cv[1] + n.v[1] * k;
@@ -1020,10 +1017,10 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         dv.x = dx;
         dv.y = dy;
         dv.z = dz;
-        f32 depth = r - PSVECDotProduct(&nrm, &dv);
+        f32 depth = r - PSVECDotProduct((const Vec*)&nrm, (const Vec*)&dv);
         o->VelAt(&v, &pt);
         f32 k = depth * ((CollShape*)p)->stiff;
-        f32 vn = -PSVECDotProduct(&v, &nrm);
+        f32 vn = -PSVECDotProduct((const Vec*)&v, (const Vec*)&nrm);
         f32 ny = nrm.y;
         f32 nx = nrm.x;
         imp.x = nx * k;
@@ -1035,7 +1032,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         d[0] = d[0] + vt.x * lbl_8056231C;
         d[1] = d[1] + vt.y * lbl_8056231C;
         d[2] = d[2] + vt.z * lbl_8056231C;
-        f32 dm = PSVECMag(d);
+        f32 dm = PSVECMag((const Vec*)d);
         if (dm > 0.02f) {
             f32 s = 0.02f / dm;
             d[0] *= s;
@@ -1051,7 +1048,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         f.x = f.x + d[0] * m;
         f.y = f.y + d[1] * m;
         f.z = f.z + d[2] * m;
-        f32 fm = PSVECMag(&f.x);
+        f32 fm = PSVECMag((const Vec*)&f.x);
         f32 lim = k * ((CollShape*)p)->skin;
         lim = lim > 0.02f ? lim : 0.02f;
         if (fm > lim) {
@@ -1063,7 +1060,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         imp.x += f.x;
         imp.y += f.y;
         imp.z += f.z;
-        f32 w = -PSVECDotProduct((u8*)o + 0x124, &nrm);
+        f32 w = -PSVECDotProduct((const Vec*)((u8*)o + 0x124), (const Vec*)&nrm);
         w = lbl_8056232C * (w * k);
         t.x = nrm.x * w;
         t.y = nrm.y * w;
@@ -1141,7 +1138,7 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 n.x = l.x;
                 n.y = l.y;
                 n.z = 0.0f;
-                PSVECNormalize(&n.x, &n.x);
+                PSVECNormalize((const Vec*)&n.x, (Vec*)&n.x);
                 MulVec(&nw, &n, (CFrame*)((u8*&)((CollShape*)q)->frame));
                 nn = nw;
                 fn_8019A788(p, q, (u32)&w, &nn, 0, 0, r, 0.0f, 0.0f);
@@ -1196,7 +1193,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     d.y = cp.y - c->y;
     d.z = cp.z - c->z;
     f32 comp;
-    f32 len = sqrt(PSVECDotProduct(&d, &d));
+    f32 len = sqrt(PSVECDotProduct((const Vec*)&d, (const Vec*)&d));
     comp = lbl_80562300 + (-len + r);
     if (len < 0.01f) {
         if (debug) {
@@ -1207,7 +1204,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             d.x = F32(rb, 0x118) * lbl_805622DC;
             d.y = F32(rb, 0x11C) * lbl_805622DC;
             d.z = F32(rb, 0x120) * lbl_805622DC;
-            len = PSVECMag(&d.x);
+            len = PSVECMag((const Vec*)&d.x);
             if (debug) {
                 fn_802E30C8("tunneling: %1.2f", len);
             }
@@ -1245,7 +1242,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             d.x = back.x - c->x;
             d.y = back.y - c->y;
             d.z = back.z - c->z;
-            len = PSVECMag(&d.x);
+            len = PSVECMag((const Vec*)&d.x);
             if (len < 0.01f) {
                 if (debug) {
                     fn_802E30C8("-collide_explicit_sphere_box: (2) delta_length = %f", len);
@@ -1285,7 +1282,6 @@ u32 BoxShape::vf50(void) {
     u8* p = (u8*)this; return U32(p, 0xc); }
 
 extern const f32 lbl_805622E8;  // 0.5
-f32 PSVECSquareDistance(const void* a, const void* b);
 f32 lbl_8055A4C0 = 0.8f;           // 0.8, car-on-car friction
 extern const f32 lbl_80562308;     // 0.05
 extern const f32 lbl_80562340;     // 0.0016683352
@@ -1320,14 +1316,14 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RVec3 o;
     f32 d2;
     if (!off) {
-        d2 = PSVECSquareDistance(p + 0x34, VE(q)->v50() + 0x24);
+        d2 = PSVECSquareDistance((const Vec*)(p + 0x34), (const Vec*)(VE(q)->v50() + 0x24));
     } else {
         CFrame* m = (CFrame*)VE(q)->v50();
         MulVec(&w, off, m);
         w.x = w.x + m->t.x;
         w.y = w.y + m->t.y;
         w.z = w.z + m->t.z;
-        d2 = PSVECSquareDistance(p + 0x34, &w);
+        d2 = PSVECSquareDistance((const Vec*)(p + 0x34), (const Vec*)&w);
     }
     f32 rr = F32(p, 0x24) + F32(q, 0x30);
     if (d2 > rr * rr) {
@@ -1385,7 +1381,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
         dd.x = f.t.x - c.x;
         dd.y = f.t.y - c.y;
         dd.z = f.t.z - c.z;
-        if (PSVECDotProduct(&dd, &rv) > lbl_805622D4) {
+        if (PSVECDotProduct((const Vec*)&dd, (const Vec*)&rv) > lbl_805622D4) {
             ToBoxSpace(&l, &back, &f);
         }
     }
@@ -1396,7 +1392,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     d.x = cp.x - c.x;
     d.y = cp.y - c.y;
     d.z = cp.z - c.z;
-    f32 len = sqrt(PSVECDotProduct(&d, &d));
+    f32 len = sqrt(PSVECDotProduct((const Vec*)&d, (const Vec*)&d));
     if (len < lbl_80562308) {
         return 0;
     }
@@ -1416,7 +1412,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             bool pa = (pf & mask) != 0;
             if ((qa && IsCarObj((u8*)pb)) || (pa && IsCarObj((u8*)qb))) {
                 f32 fr = lbl_8055A4C0;
-                f32 t = 2.8f * (PSVECDotProduct((u8*)pb + 0x54, (u8*)qb + 0x54) - lbl_805622E8);
+                f32 t = 2.8f * (PSVECDotProduct((const Vec*)((u8*)pb + 0x54), (const Vec*)((u8*)qb + 0x54)) - lbl_805622E8);
                 fr *= MaxF(MinF(lbl_805622E0, t), lbl_805622D0);
                 if (pa) {
                     fp = fr;
@@ -1481,7 +1477,7 @@ int fn_8019C854(u8* p, u8* q) {
             n.x = l.x - a.x;
             n.y = l.y - a.y;
             n.z = l.z - a.z;
-            PSVECNormalize(&n.x, &n.x);
+            PSVECNormalize((const Vec*)&n.x, (Vec*)&n.x);
             a.z = l.z;
             CFrame* m = (CFrame*)((u8*&)((CollShape*)q)->frame);
             MulVec(&w, &a, m);
@@ -1529,7 +1525,6 @@ int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
 void fn_8019CE3C(u8* p, u32 a) { fn_8019CCCC(p, p + 0x34, (u8*)a, F32(p, 0x24)); }
 
 extern const f32 lbl_8056232C;  // small distance
-f32 PSVECSquareDistance(const void* a, const void* b);
 
 // Sets flat sphere q's radius from how edge-on it is to sphere p, then collides them.
 void fn_8019CE4C(u8* p, u8* q) {
@@ -1538,14 +1533,14 @@ void fn_8019CE4C(u8* p, u8* q) {
     d[0] = c[0] - ((FlatSphereShape*)q)->f34;
     d[1] = c[1] - ((FlatSphereShape*)q)->f38;
     d[2] = c[2] - ((FlatSphereShape*)q)->f3C;
-    f32 sq = PSVECSquareDistance(c, q + 0x34);
+    f32 sq = PSVECSquareDistance((const Vec*)c, (const Vec*)(q + 0x34));
     f32 r;
     if (sq > lbl_8056232C) {
         f32 inv = 1.0f / (f32)sqrt(sq);
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)q)->frame) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct((const Vec*)d, (const Vec*)(((u8*&)((CollShape*)q)->frame) + 0xC)));
         r = ((FlatSphereShape*)q)->across + k * (((FlatSphereShape*)q)->along - ((FlatSphereShape*)q)->across);
     } else {
         f32 b = ((FlatSphereShape*)q)->along;
@@ -1564,14 +1559,14 @@ void fn_8019CF60(u8* p, u8* q) {
     d[0] = F32(f, 0x24) - ((FlatSphereShape*)q)->f34;
     d[1] = F32(f, 0x28) - ((FlatSphereShape*)q)->f38;
     d[2] = F32(f, 0x2C) - ((FlatSphereShape*)q)->f3C;
-    f32 sq = PSVECSquareDistance(f + 0x24, q + 0x34);
+    f32 sq = PSVECSquareDistance((const Vec*)(f + 0x24), (const Vec*)(q + 0x34));
     f32 r;
     if (sq > lbl_8056232C) {
         f32 inv = 1.0f / (f32)sqrt(sq);
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 c = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)q)->frame) + 0xC));
+        f32 c = (f32)__fabs(PSVECDotProduct((const Vec*)d, (const Vec*)(((u8*&)((CollShape*)q)->frame) + 0xC)));
         r = ((FlatSphereShape*)q)->across + c * (((FlatSphereShape*)q)->along - ((FlatSphereShape*)q)->across);
     } else {
         f32 b = ((FlatSphereShape*)q)->along;
@@ -1592,14 +1587,14 @@ void fn_8019D06C(u8* p, u8* q, const RVec3* a, const RVec3* b) {
     d[0] = c.x - F32(p, 0x34);
     d[1] = c.y - F32(p, 0x38);
     d[2] = c.z - F32(p, 0x3C);
-    f32 sq = PSVECSquareDistance(&c, p + 0x34);
+    f32 sq = PSVECSquareDistance((const Vec*)&c, (const Vec*)(p + 0x34));
     f32 r;
     if (sq > lbl_8056232C) {
         f32 inv = 1.0f / (f32)sqrt(sq);
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)p)->frame) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct((const Vec*)d, (const Vec*)(((u8*&)((CollShape*)p)->frame) + 0xC)));
         r = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
     } else {
         f32 hi = F32(p, 0x58);
@@ -1618,13 +1613,13 @@ static inline void FlatRadius(u8* s, const f32* cp) {
     d[0] = c[0] - ((FlatSphereShape*)s)->f34;
     d[1] = c[1] - ((FlatSphereShape*)s)->f38;
     d[2] = c[2] - ((FlatSphereShape*)s)->f3C;
-    f32 sq = PSVECSquareDistance(c, s + 0x34);
+    f32 sq = PSVECSquareDistance((const Vec*)c, (const Vec*)(s + 0x34));
     if (sq > lbl_8056232C) {
         f32 inv = 1.0f / (f32)sqrt(sq);
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((FlatSphereShape*)s)->frame) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct((const Vec*)d, (const Vec*)(((u8*&)((FlatSphereShape*)s)->frame) + 0xC)));
         r = ((FlatSphereShape*)s)->across + k * (((FlatSphereShape*)s)->along - ((FlatSphereShape*)s)->across);
     } else {
         f32 hi = ((FlatSphereShape*)s)->along;
@@ -1648,14 +1643,14 @@ void fn_8019D378(u8* p, u8* q) {
     d[0] = c[0] - ((FlatSphereShape*)p)->f34;
     d[1] = c[1] - ((FlatSphereShape*)p)->f38;
     d[2] = c[2] - ((FlatSphereShape*)p)->f3C;
-    f32 sq = PSVECSquareDistance(c, p + 0x34);
+    f32 sq = PSVECSquareDistance((const Vec*)c, (const Vec*)(p + 0x34));
     f32 r;
     if (sq > lbl_8056232C) {
         f32 inv = 1.0f / (f32)sqrt(sq);
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)p)->frame) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct((const Vec*)d, (const Vec*)(((u8*&)((CollShape*)p)->frame) + 0xC)));
         r = ((FlatSphereShape*)p)->across + k * (((FlatSphereShape*)p)->along - ((FlatSphereShape*)p)->across);
     } else {
         f32 b = ((FlatSphereShape*)p)->along;
@@ -1666,7 +1661,6 @@ void fn_8019D378(u8* p, u8* q) {
     fn_8019C854(p, q);
 }
 
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 
 static inline f32 Det33(f32 m[3][3]) {
     return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) + m[0][1] * (m[1][2] * m[2][0] - m[1][0] * m[2][2]) +
@@ -1681,8 +1675,8 @@ int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32*
     w.v[0] = p1[0] - p0[0];
     w.v[1] = p1[1] - p0[1];
     w.v[2] = p1[2] - p0[2];
-    PSVECCrossProduct(d0, d1, n.v);
-    f32 nn = PSVECDotProduct(n.v, n.v);
+    PSVECCrossProduct((const Vec*)d0, (const Vec*)d1, (Vec*)n.v);
+    f32 nn = PSVECDotProduct((const Vec*)n.v, (const Vec*)n.v);
     if (nn > 0.0000010000001f) {
         m[0][0] = w.v[0];
         m[0][1] = d1[0];
@@ -1731,8 +1725,8 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     d.x = cb.x - ca.x;
     d.y = cb.y - ca.y;
     d.z = cb.z - ca.z;
-    PSVECCrossProduct(&da.x, &db.x, &n.x);
-    f32 nn = PSVECDotProduct(&n.x, &n.x);
+    PSVECCrossProduct((const Vec*)&da.x, (const Vec*)&db.x, (Vec*)&n.x);
+    f32 nn = PSVECDotProduct((const Vec*)&n.x, (const Vec*)&n.x);
     f32 la = F32(p, 0x28);
     f32 lb = ((TubeShape*)q)->half;
     if (nn < lbl_8056232C) {
@@ -1747,11 +1741,11 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
         w.x = mid.x - ca.x;
         w.y = mid.y - ca.y;
         w.z = mid.z - ca.z;
-        s = PSVECDotProduct(&da.x, &w.x);
+        s = PSVECDotProduct((const Vec*)&da.x, (const Vec*)&w.x);
         w.x = mid.x - cb.x;
         w.y = mid.y - cb.y;
         w.z = mid.z - cb.z;
-        t = PSVECDotProduct(&db.x, &w.x);
+        t = PSVECDotProduct((const Vec*)&db.x, (const Vec*)&w.x);
     } else {
         if (!((f32)__fabs(nn) <= __float_epsilon[0])) {
         m[0][0] = d.x;
@@ -1795,7 +1789,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     diff.x = pb.x - pa.x;
     diff.y = pb.y - pa.y;
     diff.z = pb.z - pa.z;
-    f32 dist = PSVECMag(&diff.x);
+    f32 dist = PSVECMag((const Vec*)&diff.x);
     if ((f32)__fabs(dist) <= __float_epsilon[0]) {
         return 0;
     }
@@ -1850,7 +1844,7 @@ int fn_8019DC04(u8* p, u8* q) {
     f32 rp = VE(p)->v3C();
     f32 r = rp + rq;
     f32 r2 = r * r;
-    if (PSVECDotProduct(d.v, d.v) < r2) {
+    if (PSVECDotProduct((const Vec*)d.v, (const Vec*)d.v) < r2) {
         bool hit = false;
         hit |= fn_8019DAB0(p, q);
         if (hit) {
@@ -1884,8 +1878,8 @@ int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f
     m.v[0] = from[0] - c[0];
     m.v[1] = from[1] - c[1];
     m.v[2] = from[2] - c[2];
-    f32 b = lbl_8056234C * PSVECDotProduct(m.v, dir);
-    f32 mm = PSVECDotProduct(m.v, m.v);
+    f32 b = lbl_8056234C * PSVECDotProduct((const Vec*)m.v, (const Vec*)dir);
+    f32 mm = PSVECDotProduct((const Vec*)m.v, (const Vec*)m.v);
     f32 disc = b * b - 4.0f * (mm - r * r);
     if (disc > 1e-5f) {
         f32 t0 = 0.5f * (-b - (f32)sqrt(disc));
@@ -1894,7 +1888,7 @@ int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f
             n[0] = m.v[0] + dir[0] * t0;
             n[1] = m.v[1] + dir[1] * t0;
             n[2] = m.v[2] + dir[2] * t0;
-            f32 len = PSVECMag(n);
+            f32 len = PSVECMag((const Vec*)n);
             f32 k = 0.0001f;
             f32 inv = 1.0f / (k > len ? k : len);
             n[0] *= inv;
@@ -1930,15 +1924,15 @@ f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, 
     r.v[1] = ry;
     r.v[2] = rz;
     nn = *(const PVec3A*)n;
-    if (PSVECDotProduct(&vel, n) < 0.0f) {
+    if (PSVECDotProduct((const Vec*)&vel, (const Vec*)n) < 0.0f) {
         un = nn;
-        PSVECNormalize(un.v, un.v);
-        PSVECCrossProduct(r.v, un.v, &rn);
+        PSVECNormalize((const Vec*)un.v, (Vec*)un.v);
+        PSVECCrossProduct((const Vec*)r.v, (const Vec*)un.v, (Vec*)&rn);
         MulVec(&t, &rn, (const CFrame*)iinv);
-        PSVECCrossProduct(&t, r.v, u.v);
-        f32 denom = 1.0f / mass + PSVECDotProduct(un.v, u.v);
+        PSVECCrossProduct((const Vec*)&t, (const Vec*)r.v, (Vec*)u.v);
+        f32 denom = 1.0f / mass + PSVECDotProduct((const Vec*)un.v, (const Vec*)u.v);
         if ((f32)__fabs(denom) > 1e-7f) {
-            f32 j = (-(1.0f + e) * PSVECDotProduct(&vel, un.v)) / denom;
+            f32 j = (-(1.0f + e) * PSVECDotProduct((const Vec*)&vel, (const Vec*)un.v)) / denom;
             f32 cap = 100000.0f;
             cap = cap < j ? cap : j;
             return cap;
@@ -2131,7 +2125,7 @@ int fn_8019E874(u8* p, u8* q) {
     f32 nh;
     f32 h = ((TubeShape*)p)->half;
     nh = -h;
-    f32 s = -PSVECDotProduct(&fp.m[6], &d);
+    f32 s = -PSVECDotProduct((const Vec*)&fp.m[6], (const Vec*)&d);
     f32 v = h < s ? h : s;
     v = v > nh ? v : nh;
     c.x = c.x + fp.m[6] * v;
@@ -2410,7 +2404,7 @@ void AttachedSphereShape::vf0C(void) {
 // Projects v onto the plane of p's frame row 1 (the result feeds a debug view that is compiled out).
 void AttachedSphereShape::vf24(const RVec3* v, const RVec3* at, int kind, void* ctx, void* by) {
     ((CollShape*)((u8*)this))->CollShape::vf24(v, at, kind, ctx, by);
-    f32 d = -PSVECDotProduct(&((CFrame*)((u8*&)this->frame))->m[3], v);
+    f32 d = -PSVECDotProduct((const Vec*)(&((CFrame*)((u8*&)this->frame))->m[3]), (const Vec*)v);
     CFrame* f = (CFrame*)((u8*&)this->frame);
     f32 x = v->x + f->m[3] * d;
     f32 y = v->y + f->m[4] * d;
@@ -2569,18 +2563,18 @@ void BoxSphereShape::vf14(void) {
                 d.y = pos.y - w.y;
                 f32 zv = pos.z;
                 d.z = zv - w.z;
-                f32 depth = PSVECDotProduct(&d, &nrm);
+                f32 depth = PSVECDotProduct((const Vec*)&d, (const Vec*)&nrm);
                 f32* acc = &((BoxSlip*)p)->slip[i].x;
                 if (depth > lbl_805622D0) {
                     rb->VelAt(&vel, &w);
-                    f32 vn = PSVECDotProduct(&vel, &nrm);
+                    f32 vn = PSVECDotProduct((const Vec*)&vel, (const Vec*)&nrm);
                     vt.x = vel.x + nrm.x * -vn;
                     vt.y = vel.y + nrm.y * -vn;
                     vt.z = vel.z + nrm.z * -vn;
                     acc[0] = acc[0] + vt.x * lbl_8056231C;
                     acc[1] = acc[1] + vt.y * lbl_8056231C;
                     acc[2] = acc[2] + vt.z * lbl_8056231C;
-                    f32 am = PSVECMag(acc);
+                    f32 am = PSVECMag((const Vec*)acc);
                     if (am > 0.02f) {
                         f32 s = 0.02f / am;
                         acc[0] *= s;
@@ -2599,7 +2593,7 @@ void BoxSphereShape::vf14(void) {
                     f.x = Lerp_hm(f.x, g, acc[0]);
                     f.y = f.y + acc[1] * g;
                     f.z = f.z + acc[2] * g;
-                    f32 fm = PSVECMag(&f.x);
+                    f32 fm = PSVECMag((const Vec*)&f.x);
                     f32 lim = k * this->halfBox.x;
                     if (fm > lim) {
                         f32 s = lim / fm;
@@ -2644,7 +2638,7 @@ void BoxSphereShape::vf14(void) {
             f32 r = this->radius;
             f32 area = 3.1415927f * (r * r);
             f32 vol = 0.4f * (4.1887903f * r * (r * r));
-            f32 dk = -area * (500.0f + lbl_805623AC * PSVECMag(&bv.x));
+            f32 dk = -area * (500.0f + lbl_805623AC * PSVECMag((const Vec*)&bv.x));
             drag.x = bv.x * dk;
             drag.y = bv.y * dk;
             drag.z = bv.z * dk;
@@ -2766,7 +2760,7 @@ void fn_801A0378(u8* p, u8* s) {
     e[2] = ((SphereShape*)s)->center.z;
     e[3] = ((SphereShape*)s)->radius;
     g->vols[g->count]->SetA(g->setA);
-    f32 m = PSVECMag((f32*)(s + 0x28));
+    f32 m = PSVECMag((const Vec*)((f32*)(s + 0x28)));
     f32 r = 0.5f + (m + ((SphereShape*)s)->radius);
     if (r > g->radius2) {
         g->radius2 = r;
@@ -2794,7 +2788,7 @@ static inline f32 CentreDist2(u8* p, u8* q) {
     d.x = fp->t.x - fq->t.x;
     d.y = fp->t.y - fq->t.y;
     d.z = fp->t.z - fq->t.z;
-    return PSVECDotProduct(&d, &d);
+    return PSVECDotProduct((const Vec*)&d, (const Vec*)&d);
 }
 
 // d = p's frame centre relative to box q's centre.
@@ -2838,8 +2832,8 @@ void SphereGroup::vf10(u8* q) {
     } else if (type == 'BOX ') {
         RVec3 d;
         FromBoxCentre(&d, p, q);
-        if ((f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC))) < F32(q, 0x24) + this->f178 &&
-            (f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC) + 0x18)) < F32(q, 0x2C) + this->f178) {
+        if ((f32)__fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC)))) < F32(q, 0x24) + this->f178 &&
+            (f32)__fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC) + 0x18))) < F32(q, 0x2C) + this->f178) {
             u8* pb;
             CFrame* f = (CFrame*)PTR(q, 0xC);
             pb = ((u8*&)this->owner);
@@ -2890,7 +2884,7 @@ void SphereGroup::vf10(u8* q) {
                     n.x = wp.v[0] - bw.x;
                     n.y = wp.v[1] - bw.y;
                     n.z = wp.v[2] - bw.z;
-                    f32 len = PSVECMag(&n.x);
+                    f32 len = PSVECMag((const Vec*)&n.x);
                     if (len > 0.01f) {
                         f32 inv = lbl_805622E0 / len;
                         n.x *= inv;
@@ -2975,7 +2969,7 @@ void SphereGroup::vf10(u8* q) {
                     d.v[0] = c.v[0] - h->x;
                     d.v[1] = c.v[1] - h->y;
                     d.v[2] = c.v[2] - h->z;
-                    f32 len = PSVECMag(d.v);
+                    f32 len = PSVECMag((const Vec*)d.v);
                     if (len > lbl_805622D4) {
                         f32 inv = lbl_805622E0 / len;
                         d.v[0] *= inv;
@@ -3019,7 +3013,7 @@ void SphereGroup::vf14(void) {
                     d.v[0] = c.v[0] - h->x;
                     d.v[1] = c.v[1] - h->y;
                     d.v[2] = c.v[2] - h->z;
-                    f32 len = PSVECMag(d.v);
+                    f32 len = PSVECMag((const Vec*)d.v);
                     if (len > 0.001f) {
                         f32 inv = lbl_805622E0 / len;
                         d.v[0] *= inv;
@@ -3040,7 +3034,7 @@ int SphereGroup::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* out) {
     d[0] = c[0] - ((const f32*)from)[0];
     d[1] = c[1] - ((const f32*)from)[1];
     d[2] = c[2] - ((const f32*)from)[2];
-    f32 proj = PSVECDotProduct(d, ((const f32*)dir));
+    f32 proj = PSVECDotProduct((const Vec*)d, (const Vec*)(((const f32*)dir)));
     f32 rad = this->f178;
     if (proj >= -rad && proj < *t + rad) {
         fn_801A0160(((u8*)this));
@@ -3160,13 +3154,13 @@ int TubeBase::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
         if (tr > 0.0f && tr < *t) {
             MulAdd(hit.v, ((const f32*)from), ((const f32*)dir), tr);
             MulAdd(on.v, org, axis, s);
-            f32 d2 = PSVECSquareDistance(hit.v, on.v);
+            f32 d2 = PSVECSquareDistance((const Vec*)hit.v, (const Vec*)on.v);
             f32 r = this->rad;
             if (d2 < r * r) {
                 ((f32*)n)[0] = hit.v[0] - on.v[0];
                 ((f32*)n)[1] = hit.v[1] - on.v[1];
                 ((f32*)n)[2] = hit.v[2] - on.v[2];
-                f32 len = PSVECMag(((f32*)n));
+                f32 len = PSVECMag((const Vec*)(((f32*)n)));
                 f32 k = lbl_805622D4;
                 f32 inv = 1.0f / (k > len ? k : len);
                 ((f32*)n)[0] *= inv;
@@ -3465,7 +3459,7 @@ static inline f32 DistSq(const RVec3* a, const RVec3* b) {
     d.x = a->x - b->x;
     d.y = a->y - b->y;
     d.z = a->z - b->z;
-    return PSVECDotProduct(&d, &d);
+    return PSVECDotProduct((const Vec*)&d, (const Vec*)&d);
 }
 
 // Moves frame x by c, given in its own axes.
@@ -3532,7 +3526,7 @@ void RagdollShape::vf10(u8* o) {
             RVec3 at;
             RVec3 push;
             fn_801C28A8(this->f30, &x, &(const RVec3C&)HalfExtents::Read(box), &vel, &spin, this->f28, this->f2C, &at, &push);
-            if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
+            if (PSVECDotProduct((const Vec*)&push, (const Vec*)&push) > lbl_805623AC) {
                 fn_801B34DC(o, 0, &at, &push, &((const RVec3C&)RVec3C(lbl_805622D0, lbl_805622E0, lbl_805622D0)).x, U32(p, 0x20));
             }
         }
@@ -3747,8 +3741,8 @@ void PolyShape::vf38(RVec3* lo, RVec3* hi) const {
 
 f32 PolyShape::Radius(void) {
     u8* p = (u8*)this;
-    f32 a = PSVECDotProduct((u8*)&this->hi, (u8*)&this->hi);
-    f32 b = PSVECDotProduct((u8*)&this->lo, (u8*)&this->lo);
+    f32 a = PSVECDotProduct((const Vec*)((u8*)&this->hi), (const Vec*)((u8*)&this->hi));
+    f32 b = PSVECDotProduct((const Vec*)((u8*)&this->lo), (const Vec*)((u8*)&this->lo));
     return (f32)sqrt(b > a ? b : a);
 }
 
@@ -3776,7 +3770,7 @@ void PolyShape::vf10(u8* p) {
         down.v[0] = 0.0f;
         down.v[1] = -1.0f;
         down.v[2] = 0.0f;
-        f32 k = (f32)__fabs(PSVECDotProduct(down.v, PTR(p, 0xC) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct((const Vec*)down.v, (const Vec*)(PTR(p, 0xC) + 0xC)));
         F32(p, 0x24) = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
     }
     case 'SPHR':
@@ -3923,8 +3917,8 @@ void MeshShape::vf38(RVec3* a, RVec3* b) const {
 
 f32 MeshShape::Radius(void) {
     u8* p = (u8*)this;
-    f32 a = PSVECDotProduct(p + 0x34, p + 0x34);
-    f32 b = PSVECDotProduct(p + 0x28, p + 0x28);
+    f32 a = PSVECDotProduct((const Vec*)(p + 0x34), (const Vec*)(p + 0x34));
+    f32 b = PSVECDotProduct((const Vec*)(p + 0x28), (const Vec*)(p + 0x28));
     return (f32)sqrt(b > a ? b : a);
 }
 

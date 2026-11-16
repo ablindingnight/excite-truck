@@ -4,6 +4,7 @@
 // unpacks the velocity into the state packet and keeps the body in its collision-grid cell. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/rvec.h"
 #include "game/rmtx.h"
 #include "game/collshape.h"
@@ -12,16 +13,12 @@
 
 extern "C" {
 void* memset(void* dst, int c, u32 n);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECDotProduct(const void* a, const void* b);
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
 void* fn_801B60F4(const void* pos, f32 r);                            // grid cell at
 void fn_801B6428(void* cell, void* body);                             // cell remove
 void fn_801B63E0(void* cell, void* body);                             // cell add
-void PSVECNormalize(const void* src, void* dst);
-f32 PSVECMag(const void* v);
 double sin(double x);
 double cos(double x);
 }
@@ -176,13 +173,13 @@ void RigidBody::SetMass(f32 m, f32 ix, f32 iy, f32 iz) {
 }
 
 void RigidBody::AddForceAt(const RVec3* f, const RVec3* at) {
-    if (!((f32)__fabs(PSVECDotProduct(f, f)) <= __float_epsilon[0])) {
+    if (!((f32)__fabs(PSVECDotProduct((const Vec*)f, (const Vec*)f)) <= __float_epsilon[0])) {
         RVec3 r;
         RVec3 t;
         r.x = at->x - mtx.pos.x;
         r.y = at->y - mtx.pos.y;
         r.z = at->z - mtx.pos.z;
-        PSVECCrossProduct(&r, f, &t);
+        PSVECCrossProduct((const Vec*)&r, (const Vec*)f, (Vec*)&t);
         force.x += f->x;
         force.y += f->y;
         force.z += f->z;
@@ -208,7 +205,7 @@ void RigidBody::AddImpulse(f32 w, const RVec3* v, const RVec3* at) {
     r.x = at->x - mtx.pos.x;
     r.y = at->y - mtx.pos.y;
     r.z = at->z - mtx.pos.z;
-    PSVECCrossProduct(&r, v, &t);
+    PSVECCrossProduct((const Vec*)&r, (const Vec*)v, (Vec*)&t);
     impT.x += t.x * w;
     impT.y += t.y * w;
     impT.z += t.z * w;
@@ -260,7 +257,7 @@ void RigidBody::VelAt(RVec3* out, const RVec3* p) {
     r.x = p->x - mtx.pos.x;
     r.y = p->y - mtx.pos.y;
     r.z = p->z - mtx.pos.z;
-    PSVECCrossProduct(&avel, &r, out);
+    PSVECCrossProduct((const Vec*)&avel, (const Vec*)&r, (Vec*)out);
     out->x += vel.x;
     out->y += vel.y;
     out->z += vel.z;
@@ -271,7 +268,7 @@ void RigidBody::VelAt2(RVec3* out, const RVec3* p) {
     r.x = p->x - mtx.pos.x;
     r.y = p->y - mtx.pos.y;
     r.z = p->z - mtx.pos.z;
-    PSVECCrossProduct(&aaccel, &r, out);
+    PSVECCrossProduct((const Vec*)&aaccel, (const Vec*)&r, (Vec*)out);
     out->x += accel.x;
     out->y += accel.y;
     out->z += accel.z;
@@ -418,8 +415,8 @@ void RigidBody::Update(void) {
     nImp = 0;
     AddScaled(&vel, &force, 0.0166833512f * invMass);
     Scaled(&accel, &force, invMass);
-    if (PSVECDotProduct(&vel, &vel) > 90000.0f) {
-        PSVECNormalize(&vel, &vel);
+    if (PSVECDotProduct((const Vec*)&vel, (const Vec*)&vel) > 90000.0f) {
+        PSVECNormalize((const Vec*)&vel, (Vec*)&vel);
         vel.x *= 300.0f;
         vel.y *= 300.0f;
         vel.z *= 300.0f;
@@ -427,8 +424,8 @@ void RigidBody::Update(void) {
     AddScaled(&mtx.pos, &vel, 0.0166833512f);
     MulVec(&aaccel, &torque, &worldInvI);
     AddScaled(&avel, &aaccel, 0.0166833512f);
-    if (PSVECDotProduct(&avel, &avel) > 100.0f) {
-        PSVECNormalize(&avel, &avel);
+    if (PSVECDotProduct((const Vec*)&avel, (const Vec*)&avel) > 100.0f) {
+        PSVECNormalize((const Vec*)&avel, (Vec*)&avel);
         avel.x *= 10.0f;
         avel.y *= 10.0f;
         avel.z *= 10.0f;
@@ -437,7 +434,7 @@ void RigidBody::Update(void) {
         RMtx r;
 
         Scaled(&dr, &avel, 0.0166833512f);
-        ang = PSVECMag(&dr);
+        ang = PSVECMag((const Vec*)&dr);
         if (ang > 0.0001f) {
             inv = 1.0f / ang;
             ax = inv * dr.x;

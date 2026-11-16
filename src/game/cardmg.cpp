@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/rigid.h"
 #include "game/math_types.h"
 #include "game/carbody.h"
@@ -155,14 +156,13 @@ void fn_8018C50C(void) {}
 
 void fn_8018C510(void) {}
 
-f32 PSVECDistance(const f32* a, const f32* b);
 
 // Index of the damage point nearest to pos (entry 0 is skipped).
 int fn_8018C514(u8* p, const f32* pos) {
     f32 best = 10000000.0f;
     int idx = 0;
     for (int i = 1; i < *(s32*)((u8*&)((CarBody*)p)->layout); i++) {
-        f32 d = PSVECDistance(pos, (f32*)(((u8*&)((CarBody*)p)->layout) + i * 0x34 + 0x20));
+        f32 d = PSVECDistance((const Vec*)pos, (const Vec*)((f32*)(((u8*&)((CarBody*)p)->layout) + i * 0x34 + 0x20)));
         if (d < best) {
             best = d;
             idx = i;
@@ -257,7 +257,6 @@ void fn_8018C5A0(u8* p, u8* desc) {
 }  // extern "C"
 
 
-extern "C" f32 PSVECDotProduct(const f32* a, const f32* b);
 
 struct RVec3;
 
@@ -269,7 +268,6 @@ struct Mtx33 {
 };
 
 extern "C" {
-void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 s32 fn_80129D18(int a, int b);
 u8* fn_801769CC(void);
 }
@@ -341,12 +339,12 @@ void fn_8018CB3C(u8* p) {
                 v2.z += v1.z * lbl_80561F98;
             }
             EVec torque;
-            PSVECCrossProduct(&arm.x, &v2.x, &torque.x);
+            PSVECCrossProduct((const Vec*)&arm.x, (const Vec*)&v2.x, (Vec*)&torque.x);
             EVec ax;
             MulVec(&ax, &d->axis, &s->on->rot);
             EVec axw;
             MulVec(&axw, &ax, (DMat3*)(p + 0x3C));
-            f32 t = -PSVECDotProduct(&torque.x, &axw.x);
+            f32 t = -PSVECDotProduct((const Vec*)&torque.x, (const Vec*)&axw.x);
             t = ClampF(t, -5.0f, 5.0f);
             f32 w = s->spin + t;
             s->spin = w - 0.0002f * (0.016683351f * w);
@@ -570,9 +568,6 @@ static inline f32 DentClamp(f32 v, f32 lo, f32 hi) {
     return v > lo ? v : lo;
 }
 
-f32 PSVECMag(const f32* v);
-void PSVECNormalize(const f32* v, f32* out);
-f32 PSVECDotProduct(const f32* a, const f32* b);
 
 // Dents point i of the body by `push`: moves its spring goal (pushing out only along the point's outward
 // direction is cancelled), clamps it to the point's box, then passes the push on to linked points (not back to
@@ -580,7 +575,7 @@ f32 PSVECDotProduct(const f32* a, const f32* b);
 void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
     DentPoint* pt = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
     f32 k = 10.0f * (0.0000068539325f * pt->soft);
-    f32 mag = PSVECMag(&push->x);
+    f32 mag = PSVECMag((const Vec*)&push->x);
     DentVec d;
     d.x = push->x * k;
     d.y = push->y * k;
@@ -588,10 +583,10 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
     d.y = d.y < 0.0f ? d.y : 0.0f;
     DentVec* g = (DentVec*)(p + 0x5FC) + pt->goal;
     g->AddScaled(d, 2.0f);
-    if (PSVECDotProduct(&g->x, &pt->pos.x) > 0.0f) {
+    if (PSVECDotProduct((const Vec*)&g->x, (const Vec*)&pt->pos.x) > 0.0f) {
         DentVec n = pt->pos;
-        PSVECNormalize(&n.x, &n.x);
-        f32 out = -PSVECDotProduct(&g->x, &n.x);
+        PSVECNormalize((const Vec*)&n.x, (Vec*)&n.x);
+        f32 out = -PSVECDotProduct((const Vec*)&g->x, (const Vec*)&n.x);
         g->x += n.x * out;
         g->y += n.y * out;
         g->z += n.z * out;
@@ -626,14 +621,14 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                 dir.x = op.x - at.x;
                 dir.y = op.y - at.y;
                 dir.z = op.z - at.z;
-                f32 len = PSVECMag(&dir.x);
+                f32 len = PSVECMag((const Vec*)&dir.x);
                 DentVec f;
                 if (len > 0.01f) {
                     f32 inv = 1.0f / len;
                     dir.x *= inv;
                     dir.y *= inv;
                     dir.z *= inv;
-                    f32 t = -PSVECDotProduct(&dir.x, &push->x);
+                    f32 t = -PSVECDotProduct((const Vec*)&dir.x, (const Vec*)&push->x);
                     f.x = push->x + dir.x * t;
                     f.y = push->y + dir.y * t;
                     f.z = push->z + dir.z * t;
@@ -641,7 +636,7 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                     f.x *= c;
                     f.y *= c;
                     f.z *= c;
-                    f32 s = l->along * PSVECDotProduct(&push->x, &dir.x);
+                    f32 s = l->along * PSVECDotProduct((const Vec*)&push->x, (const Vec*)&dir.x);
                     f.x += dir.x * s;
                     f.y += dir.y * s;
                     f.z += dir.z * s;
@@ -823,7 +818,6 @@ void fn_801796CC(int kind, void* msg, int size);
 void fn_801B8610(s32 car, s32 by);
 void fn_8018F76C(u8* p, int i);
 void fn_802E30C8(const char* fmt, ...);
-f32 PSVECSquareDistance(const f32* a, const f32* b);
 
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > __float_epsilon[0]; }
@@ -895,7 +889,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         di.v[2] *= lbl_80561FC4;
     }
     da = *at;
-    f32 mag = PSVECMag(di.v);
+    f32 mag = PSVECMag((const Vec*)di.v);
     if (!(U32(fn_801769CC(), 0x4) & 0x4000) && ((CarBody*)p)->f2690 < 0.001f) {
         if (mag < 1500.0f) {
             return;
@@ -908,7 +902,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         }
         h = di;
         h.v[1] = h.v[1] > lbl_80561F74 ? lbl_80561F74 : h.v[1];
-        f32 hm = PSVECMag(h.v);
+        f32 hm = PSVECMag((const Vec*)h.v);
         if (other >= 0) {
             hm *= lbl_80561F98;
             if (((CarBody*)p)->f1F0 != 0x50 && !Boosting(p)) {
@@ -942,7 +936,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             cand.x = d->pos.x + ((DentCar*)p)->goal[i].x * 1.8f;
             cand.y = d->pos.y + ((DentCar*)p)->goal[i].y * 1.8f;
             cand.z = d->pos.z + ((DentCar*)p)->goal[i].z * 1.8f;
-            f32 dd = PSVECSquareDistance(&cand.x, da.v);
+            f32 dd = PSVECSquareDistance((const Vec*)&cand.x, (const Vec*)da.v);
             if (dd < 2.25f && dd < bestD) {
                 best = d;
                 bestD = dd;
@@ -955,12 +949,12 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         nd.x = di.v[0] * lbl_80561FC4;
         nd.y = di.v[1] * lbl_80561FC4;
         nd.z = di.v[2] * lbl_80561FC4;
-        PSVECNormalize(&nd.x, &nd.x);
+        PSVECNormalize((const Vec*)&nd.x, (Vec*)&nd.x);
         DentVec* gb = (DentVec*)(p + 0x5FC) + best->goal;
         dg.x = g0.v[0] - gb->x;
         dg.y = g0.v[1] - gb->y;
         dg.z = g0.v[2] - gb->z;
-        f32 moved = (f32)AbsDbl(PSVECDotProduct(&nd.x, &dg.x));
+        f32 moved = (f32)AbsDbl(PSVECDotProduct((const Vec*)&nd.x, (const Vec*)&dg.x));
         gb = (DentVec*)(p + 0x5FC) + best->goal;
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
@@ -975,10 +969,10 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             r.x = w.x - c0.x;
             r.y = w.y - c0.y;
             r.z = w.z - c0.z;
-            f32 t = PSVECDotProduct(&nd.x, &r.x);
+            f32 t = PSVECDotProduct((const Vec*)&nd.x, (const Vec*)&r.x);
             f32 a = t < moved ? t : moved;
             if (a > lbl_80561F74) {
-                f32 r2 = PSVECDotProduct(&r.x, &r.x);
+                f32 r2 = PSVECDotProduct((const Vec*)&r.x, (const Vec*)&r.x);
                 if (0.1f > r2) {
                     r2 = 0.1f;
                 }
@@ -1001,8 +995,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         for (int i = 0; i < 17; i++) {
             if ((sl->on && sl->point > 0 && !sl->state) || sl->state == 2) {
                 DentVec* g = (DentVec*)(p + 0x5FC) + sl->point;
-                if (PSVECDotProduct(&g->x, &g->x) > t->size * t->size) {
-                    if (!((f32)__fabs(PSVECDotProduct(&t->axis.x, &t->axis.x)) <= __float_epsilon[0])) {
+                if (PSVECDotProduct((const Vec*)&g->x, (const Vec*)&g->x) > t->size * t->size) {
+                    if (!((f32)__fabs(PSVECDotProduct((const Vec*)&t->axis.x, (const Vec*)&t->axis.x)) <= __float_epsilon[0])) {
                         if ((u32)t->kind <= 1) {
                             if (sl->state != 2) {
                                 sl->state = 2;
@@ -1057,7 +1051,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             u8 pt = U8(p, 0x1E2C + idx);
             if (pt != 0xFF && !(((u32&)((CarBody*)p)->f1E3C) & bit)) {
                 DentVec* g = (DentVec*)(p + 0x5FC) + pt;
-                if (PSVECDotProduct(&g->x, &g->x) > l->radius * l->radius) {
+                if (PSVECDotProduct((const Vec*)&g->x, (const Vec*)&g->x) > l->radius * l->radius) {
                     ((u32&)((CarBody*)p)->f1E3C) |= bit;
                     if (l->point > 0) {
                         ((u32&)((CarBody*)p)->f1E40) |= 1 << l->point;
