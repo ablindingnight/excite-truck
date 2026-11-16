@@ -1384,6 +1384,10 @@ u32 fn_801B2F54(int i) { return *(u32*)((u8*)lbl_8055E684[i].State() + 0x10); }
 
 static inline double AbsD(double v) { return __fabs(v); }
 
+/* Helper name unproven */
+static inline s32 LapDiff(s32 hi, s32 lo) { return hi - lo; }
+#pragma push
+#pragma opt_dead_assignments off  /* Pragma unproven */
 f32 fn_801B2F90(int a, int b) {
     DeityCar* ca = &lbl_8055E684[a];
     DeityCar* cb = &lbl_8055E684[b];
@@ -1396,12 +1400,15 @@ f32 fn_801B2F90(int a, int b) {
         hi = cb;
         lo = ca;
     }
-    s32 d = *(s32*)((u8*)hi + 0x14) - *(s32*)((u8*)lo + 0x14) - ((u32)hi->rank < (u32)lo->rank);
+    const bool penalty = (u32)hi->rank < (u32)lo->rank;
+    const s32& delta = LapDiff(*(s32*)((u8*)hi + 0x14), *(s32*)((u8*)lo + 0x14));
+    s32 d = delta - penalty;
     if (d != 0) {
         return 500.0f * (f32)d;
     }
     return (f32)AbsD(fn_801365C4(lo->follower, hi->follower));
 }
+#pragma pop
 
 s32 fn_801B3050(int i) { return lbl_8055E684[i].start; }
 
