@@ -263,48 +263,40 @@ void fn_80292628(void) {
     }
 }
 
+/* Helper names unproven: one matrix row and a square, values by value (arguments right to left). */
+static inline void SetRow(RVec3& v, f32 x, f32 y, f32 z) {
+    v.x = x;
+    v.y = y;
+    v.z = z;
+}
+static inline f32 SqF(f32 x) { return x * x; }
+
 void fn_80292698(void) {
     f32 t = fn_801E7E18();
     Spin* s = lbl_804B4030;
     for (int i = 0; i < 6; i++, s++) {
         PVec v;
-        // MATCHING-AID: this declaration order and the three named products (yy, ky, zz) give retail's
-        // float registers and schedule (98.52); the source form is unproven.
+        // MATCHING-AID: the declaration order z, x, sn, y gives retail's saved float registers; the source form is
+        // unproven. The rows through by-value setters and the by-value square are the natural part (98.91).
         f32 z;
         f32 x;
         f32 sn;
-        f32 inv;
         f32 y;
-        f32 ang;
-        f32 yy;
-        f32 k;
-        f32 c;
-        f32 zz;
-        f32 ky;
         v.x = s->axis.x * (t * s->speed);
         v.y = s->axis.y * (t * s->speed);
         v.z = s->axis.z * (t * s->speed);
-        ang = PSVECMag((const Vec*)&v);
+        f32 ang = PSVECMag((const Vec*)&v);
         if (ang > 0.0001f) {
-            inv = 1.0f / ang;
+            f32 inv = 1.0f / ang;
             x = inv * v.x;
             y = inv * v.y;
             z = inv * v.z;
             sn = (f32)sin(ang);
-            c = cos(ang);
-            k = 1.0f - c;
-            yy = y * y;
-            ky = k * y;
-            zz = z * z;
-            s->rot.x.x = c + k * (x * x);
-            s->rot.x.y = sn * z + y * (k * x);
-            s->rot.x.z = z * (k * x) - sn * y;
-            s->rot.y.x = y * (k * x) - sn * z;
-            s->rot.y.y = c + k * yy;
-            s->rot.y.z = z * ky + sn * x;
-            s->rot.z.x = z * (k * x) + sn * y;
-            s->rot.z.y = z * ky - sn * x;
-            s->rot.z.z = c + k * zz;
+            f32 c = cos(ang);
+            f32 k = 1.0f - c;
+            SetRow(s->rot.x, c + k * SqF(x), sn * z + y * (k * x), z * (k * x) - sn * y);
+            SetRow(s->rot.y, y * (k * x) - sn * z, c + k * SqF(y), z * (k * y) + sn * x);
+            SetRow(s->rot.z, z * (k * x) + sn * y, z * (k * y) - sn * x, c + k * SqF(z));
         } else {
             s->rot.x.x = 1.0f;
             s->rot.x.y = 0.0f;
