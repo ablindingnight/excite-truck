@@ -468,13 +468,20 @@ int fn_8015F848(Bin* bins, f32 range) {
     return last >= 0;
 }
 
-f32 fn_8015F92C(Bin* bins, f32 x) {
-    Bin* b;
+static inline f32 WinMin(Bin* bins, f32 x) {  /* Helper name unproven */
+    int n = lbl_8055E2A8 / 2 + 1;
     int i;
-    for (i = 0, b = bins + 32; i < lbl_8055E2A8 / 2 + 1; b++, i++) {
-        x = MIN(x, b->dist);
+    Bin* b;
+    for (i = 0, b = bins; i < n; b++, i++) {
+        x = MIN(x, b[32].dist);
         x = MIN(x, bins[32 - i].dist);
     }
+    return x;
+}
+
+f32 fn_8015F92C(Bin* bins, f32 x) {
+    int i;
+    x = WinMin(bins, x);
     for (i = 0; i < 64; i++) {
         bins[i].dist = bins[i].dist + 1.5f * (bins[i].dist - x);
     }
