@@ -175,6 +175,8 @@ extern "C" int strcasecmp(const char* a, const char* b);
 
 // The car icon table (caricons.val): two icons per Car entry, plain and "_e"; shared by the car lists and
 // released with the last one.
+struct IconPool;
+extern IconPool* lbl_8055F2E4;
 struct IconPool {
     IconPool(void) {
         ValueTable* t = fn_80131808("caricons.val");
@@ -203,6 +205,15 @@ struct IconPool {
     }
     IconEntry* entries;  // offset 0x0
     s32 count;           // offset 0x4
+    // Reference-counted: shared by the car menus (helper name unproven). A member, so "cimgr" is its own weak string
+    // after the constructor's, as in retail.
+    static IconPool* Acquire(void) {
+        if (lbl_8055F2E8 == 0) {
+            lbl_8055F2E4 = new ("cimgr") IconPool;
+        }
+        lbl_8055F2E8++;
+        return lbl_8055F2E4;
+    }
 };
 
 static inline int FindIcon(IconPool* pool, const char* name) {
@@ -232,7 +243,6 @@ static inline void FreeIconPool(IconPool* pool) {
 extern s32 lbl_8055F2E8;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-extern char lbl_8055C0E8[4];  // ""
 
 static inline void CopyName(const char* s, int n, char* d) {
     while ((*d++ = *s++) != 0) {
@@ -809,18 +819,11 @@ inline SlotStrip::SlotStrip(int n) {
 }
 
 // Reference-counted car icon manager shared by the car menus.
-inline IconPool* AcquireCarIcons(void) {  /* Helper name unproven */
-    if (lbl_8055F2E8 == 0) {
-        lbl_8055F2E4 = new ("cimgr") IconPool;
-    }
-    lbl_8055F2E8++;
-    return lbl_8055F2E4;
-}
 
 CarSlotList::CarSlotList(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) : SlotStrip(list->Count()) {
     u8* p = (u8*)this;
     F32(p, 0x28) = S32(p, 0x2C);
-    PTR(p, 0xC8) = (u8*)AcquireCarIcons();
+    PTR(p, 0xC8) = (u8*)IconPool::Acquire();
     PTR(p, 0xD0) = (u8*)list;
     PTR(p, 0x30) = (u8*)color;
     PTR(p, 0x34) = (u8*)car;
@@ -1085,7 +1088,7 @@ public:
             const char* sp = GetSpecialChassis(name);
             CopyName(sp, 0x20, (char*)e + 0x21);
         } else {
-            CopyNameTo(lbl_8055C0E8, 0x20, (char*)e + 0x21);
+            CopyNameTo("", 0x20, (char*)e + 0x21);
         }
         if (U32(p, 0x1C) != lbl_8055E044) {
             fn_80131318((LocString*)(p + 0x14));  // a LocString at +0x14
