@@ -131,18 +131,20 @@ struct CamCycle {
     u8 pad10[0x4];  // offset 0x10
 };
 
-extern const f32 lbl_80563F9C;
-extern const f32 lbl_80563FA0;
-extern const f32 lbl_80563FA4;
 
 ModuleTag lbl_8055F538;
-f32 lbl_8055F540 = lbl_80563FA0;
-f32 lbl_8055F544 = lbl_80563FA4;
+static inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
+template <class O, class S> static inline void PcSegEnds(O* s, O* e, const S* seg, f32 t0, f32 t1) { s->x = seg->pos.x + t0 * (seg->next->pos.x - seg->pos.x); e->x = seg->pos.x + t1 * (seg->next->pos.x - seg->pos.x); s->y = seg->pos.y + t0 * (seg->next->pos.y - seg->pos.y); e->y = seg->pos.y + t1 * (seg->next->pos.y - seg->pos.y); }  /* Helper name unproven */
+static inline f32 PcSq(f32 v) { return v * v; }  /* Helper name unproven */
+static inline f32 PcMul(f32 a, f32 b) { return a * b; }  /* Helper name unproven */
+static inline f32 PcLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }  /* Helper name unproven */
+f32 lbl_8055F540 = DegToRad(18.75f);
+f32 lbl_8055F544 = DegToRad(112.5f);
 static CamCycle lbl_8049A258[5];
 static TvCamera lbl_8049A2C8[200];
 static RegionSphere lbl_8049EDC8[32];
 static CamRegion lbl_8049F9D8[32];
-extern const f32 lbl_8055F560 = lbl_80563F9C;
+extern const f32 lbl_8055F560 = PcSq(0.01f);
 
 extern "C" int fn_80273494(int x);
 
@@ -237,7 +239,6 @@ struct AngleRef {
 static inline f32* AngleLo(AngleRef* r) { return (f32*)(r->alt ? r->track + 0xC : r->track + 0x4); }
 static inline f32* AngleHi(AngleRef* r) { return (f32*)(r->alt ? r->track + 0x10 : r->track + 0x8); }
 
-extern const f32 lbl_80563F40;  // 0.5
 
 // Meets two adjacent windows halfway: a's end and b's start become their midpoint (mod wrap).
 void fn_80270DB0(AngleRef* a, AngleRef* b, f32 wrap) {
@@ -250,7 +251,7 @@ void fn_80270DB0(AngleRef* a, AngleRef* b, f32 wrap) {
         lo += wrap;
     }
     f32 v = *AngleLo(a);
-    f32 mid = lbl_80563F40 * (hi + lo);
+    f32 mid = 0.5f * (hi + lo);
     v = v > mid ? v : mid;
     if (v >= wrap) {
         v -= wrap;
@@ -316,7 +317,6 @@ int fn_801B526C(void);
 PathPos fn_80136414(u8* track, s32 node);  // idealline: returns the ILPos by value
 s32 fn_801363A0(u8* track, u8* cur);
 extern f32 lbl_8055F568;  // car heading
-extern const f32 lbl_80563F48;  // 0.0
 
 // The car's track controller (slot 0x18 returns its track).
 class CamCarCtl {
@@ -352,7 +352,7 @@ int find_best_region(u8* car, int type) {
     }
     r = lbl_8049F9D8;
     for (int i = 0; i < lbl_8055F554; i++) {
-        f32 w = lbl_80563F48;
+        f32 w = 0.0f;
         if (r->CamRegion::Weight(car, &w, type)) {
             if (!found || best < w) {
                 best = w;
@@ -457,9 +457,7 @@ void fn_80271578(void) {
     U32(c, 0xC) = keep;
 }
 
-extern const f32 lbl_80563F4C;  // degrees to radians
 
-static inline f32 DegToRad(f32 d) { return lbl_80563F4C * d; }
 
 static inline void VecToRad(f32* o, const f32* v) {
     f32 z = v[2];
@@ -474,7 +472,7 @@ void fn_802715C4(f32* out, u8* p) { VecToRad(out, (const f32*)(p + 0xC)); }
 
 f32 fn_802715F0(u8* p) {
     f32 a = F32(p, 0x18);
-    f32 v = lbl_80563F4C * a;
+    f32 v = 0.017453292f * a;
     f32 x;
     if (lbl_8055F544 < v) {
         x = lbl_8055F544;
@@ -504,8 +502,6 @@ void fn_802704D4(int to, u8* cam);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
 extern s32 lbl_8055F548;
 extern u8 lbl_8055F480;
-extern const f32 lbl_80563F50;  // 1.0
-extern const f32 lbl_80563F78;  // fallback height above ground
 extern f32 lbl_80499050[12];    // last camera frame
 int fn_80129D90(int seed, int lo, int hi);  // random int
 int fn_801769F8(void);
@@ -544,10 +540,10 @@ static inline f32 CamEase(f32 x) {
     if (x < -1.0f) {
         return -1.0f;
     }
-    if (x > lbl_80563F50) {
-        return lbl_80563F50;
+    if (x > 1.0f) {
+        return 1.0f;
     }
-    if (x > lbl_80563F48) {
+    if (x > 0.0f) {
         return -2.0f * x * x * x + 3.0f * x * x;
     }
     return -2.0f * x * x * x - 3.0f * x * x;
@@ -608,7 +604,7 @@ void fn_80271624(int mode, u8* p) {
             if (tv->moves) {
                 CamRegion* r = &lbl_8049F9D8[idx];
                 if (lbl_8055F564) {
-                    f32 f = lbl_80563F48;
+                    f32 f = 0.0f;
                     f32 h = lbl_8055F568;
                     f32 lo = r->lo1;
                     f32 hi = r->hi1;
@@ -667,9 +663,9 @@ void fn_80271624(int mode, u8* p) {
             r->pose.pos.v[0] = tv->pos[0];
             r->pose.pos.v[1] = tv->pos[1];
             r->pose.pos.v[2] = tv->pos[2];
-            r->vel.v[0] = lbl_80563F48;
-            r->vel.v[1] = lbl_80563F48;
-            r->vel.v[2] = lbl_80563F48;
+            r->vel.v[0] = 0.0f;
+            r->vel.v[1] = 0.0f;
+            r->vel.v[2] = 0.0f;
             if (lbl_8055F54C != tv->type) {
                 fn_801E9DC4((u8*)&r->h1EC);
             }
@@ -690,13 +686,13 @@ void fn_80271624(int mode, u8* p) {
             }
             switch (tv->type) {
             case 1:
-                fn_80274730(p, tv->fov * lbl_80563F4C, -1.0f, -1.0f, lbl_80563F48);
+                fn_80274730(p, PcMul(tv->fov, 0.017453292f), -1.0f, -1.0f, 0.0f);
                 break;
             case 5: {
                 f32 move[3];
                 move[0] = 0.4f;
-                move[1] = lbl_80563F50;
-                move[2] = lbl_80563F48;
+                move[1] = 1.0f;
+                move[2] = 0.0f;
                 lbl_8055F480 = 1;
                 fn_802749FC(p, move);
                 break;
@@ -738,7 +734,7 @@ void fn_80271624(int mode, u8* p) {
                 fn_80275938(p);
                 break;
             case 6:
-                fn_80275B9C(p, 6.0f, 1.9f, lbl_80563F50);
+                fn_80275B9C(p, 6.0f, 1.9f, 1.0f);
                 break;
             case 10:
                 fn_80275D0C(p);
@@ -760,36 +756,36 @@ void fn_80271624(int mode, u8* p) {
                 d[1] = r->carFrame.pos.v[1] - r->pose.pos.v[1];
                 d[2] = r->carFrame.pos.v[2] - r->pose.pos.v[2];
                 f32 focus = PSVECDotProduct((const Vec*)d, (const Vec*)((f32*)&r->pose.rot.m[6]));
-                focus = lbl_8055C598 < lbl_80563F48 ? focus : lbl_8055C598;
+                focus = lbl_8055C598 < 0.0f ? focus : lbl_8055C598;
                 r->f1A0 = focus > 5.0f ? focus : 5.0f;
             }
         } else if (idx != -10) {
             f32 off[3];
-            off[0] = lbl_80563F48;
+            off[0] = 0.0f;
             off[1] = 1000.0f;
-            off[2] = lbl_80563F48;
+            off[2] = 0.0f;
             Mat3 down;
-            down.m[0][0] = lbl_80563F50;
-            down.m[0][1] = lbl_80563F48;
-            down.m[0][2] = lbl_80563F48;
-            down.m[1][0] = lbl_80563F48;
-            down.m[1][1] = lbl_80563F48;
-            down.m[1][2] = lbl_80563F50;
-            down.m[2][0] = lbl_80563F48;
+            down.m[0][0] = 1.0f;
+            down.m[0][1] = 0.0f;
+            down.m[0][2] = 0.0f;
+            down.m[1][0] = 0.0f;
+            down.m[1][1] = 0.0f;
+            down.m[1][2] = 1.0f;
+            down.m[2][0] = 0.0f;
             down.m[2][1] = -1.0f;
-            down.m[2][2] = lbl_80563F48;
+            down.m[2][2] = 0.0f;
             fn_801BFD34((u8*)&r->pose.pos, off, (u8*)&r->carFrame);
             Mat3Mul((Mat3*)&r->pose, &down, (Mat3*)&r->carFrame);
             *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
         }
     } else {
-        r->pose.pos.v[0] = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + r->carFrame.pos.v[0] / 100.041f)) - 50.0f);
-        r->pose.pos.v[2] = 100.041f * ((f32)(int)(lbl_80563F40 + (50.0f + r->carFrame.pos.v[2] / 100.041f)) - 50.0f);
+        r->pose.pos.v[0] = 100.041f * ((f32)(int)(0.5f + (50.0f + r->carFrame.pos.v[0] / 100.041f)) - 50.0f);
+        r->pose.pos.v[2] = 100.041f * ((f32)(int)(0.5f + (50.0f + r->carFrame.pos.v[2] / 100.041f)) - 50.0f);
         fn_801E9DC4((u8*)&r->h1EC);
         if (!fn_801E9E30((u8*)&r->h1EC, (f32*)&r->pose.pos)) {
             r->pose.pos.v[1] = fn_801E9DDC((u8*)&r->h1EC, r->carFrame.pos.v[0], r->carFrame.pos.v[2]);
         }
-        r->pose.pos.v[1] = r->pose.pos.v[1] + lbl_80563F78;
+        r->pose.pos.v[1] += 1.5f;
         fn_80274E94(p);
         *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
     }
@@ -927,7 +923,7 @@ static inline double AbsD(double v) { return __fabs(v); }
 // Finds where the looping path `track` crosses the circle of squared radius `r2` around `c`, between
 // path positions a and b (b may have wrapped past the loop end), by bisection.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
-static inline f32 Half(f32 v) { return v * lbl_80563F40; }
+static inline f32 Half(f32 v) { return PcMul(v, 0.5f); }
 
 f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     TrackPt qa;
@@ -967,7 +963,7 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     f32 mid;
     if (a > b) {
         mid = Half(b + (a - wrap));
-        if (mid < lbl_80563F48) {
+        if (mid < 0.0f) {
             mid += wrap;
         }
     } else {
@@ -1011,7 +1007,6 @@ void fn_8027264C(const char* name, u8* src, f32 x);
 void* memmove(void* d, const void* s, u32 n);
 extern f32 __float_epsilon[];  // epsilon
 }
-extern const f32 lbl_80563F50;  // 1.0
 
 // Works out this region's heading windows on `line`: where the sphere's circle crosses the line
 // (two crossings = one window, four = two), falling back to the nearest line point +- radius.
@@ -1048,10 +1043,7 @@ void CamRegion::Prepare(u8* line) {
     seg = first;
     do {
         int n = 0;
-        s.x = seg->pos.x + lbl_80563F48 * (seg->next->pos.x - seg->pos.x);
-        e.x = seg->pos.x + lbl_80563F50 * (seg->next->pos.x - seg->pos.x);
-        s.y = seg->pos.y + lbl_80563F48 * (seg->next->pos.y - seg->pos.y);
-        e.y = seg->pos.y + lbl_80563F50 * (seg->next->pos.y - seg->pos.y);
+        PcSegEnds(&s, &e, seg, 0.0f, 1.0f);
         dir.x = e.x - s.x;
         dir.y = e.y - s.y;
         f32 a = dir.x * dir.x + dir.y * dir.y;
@@ -1060,14 +1052,14 @@ void CamRegion::Prepare(u8* line) {
         rel.y = s.y - yv;
         f32 b = 2.0f * (dir.x * rel.x + dir.y * rel.y);
         f32 disc = b * b - 4.0f * a * (rel.x * rel.x + rel.y * rel.y - r2);
-        if (!(AbsF(a) <= __float_epsilon[0]) && disc > lbl_80563F48) {
+        if (!(AbsF(a) <= __float_epsilon[0]) && disc > 0.0f) {
             f32 q = (f32)sqrt(disc);
             n = 2;
             sol[0] = (-b - q) / (2.0f * a);
             sol[1] = (-b + q) / (2.0f * a);
         }
         for (int j = 0; j < n; j++) {
-            if (fn_802726EC(sol[j], lbl_80563F48, lbl_80563F50)) {
+            if (fn_802726EC(sol[j], 0.0f, 1.0f)) {
                 f32 v = seg->dist + seg->len * sol[j];
                 if (k < 4) {
                     (&lo1)[k++] = v;
@@ -1116,12 +1108,12 @@ void CamRegion::Prepare(u8* line) {
     } else {
         dual = 0;
     }
-    fn_802723B4(line, &pt.x, lbl_80563F40 * ((&lo1)[0] + (&lo1)[1]));
+    fn_802723B4(line, &pt.x, 0.5f * ((&lo1)[0] + (&lo1)[1]));
     d1.y = pt.y - center.y;
     d1.x = pt.x - center.x;
     if (d1.x * d1.x + d1.y * d1.y > r2) {
         if (dual) {
-            fn_802723B4(line, &pt.x, lbl_80563F40 * ((&lo1)[1] + (&lo1)[2]));
+            fn_802723B4(line, &pt.x, 0.5f * ((&lo1)[1] + (&lo1)[2]));
             d2.y = pt.y - center.y;
             d2.x = pt.x - center.x;
             if (d2.x * d2.x + d2.y * d2.y > r2) {
@@ -1171,14 +1163,12 @@ public:
 };
 
 extern f32 lbl_8055F568;        // car heading
-extern const f32 lbl_80563F48;  // 0.0
-extern const f32 lbl_80563F50;  // 1.0
 
 // How strongly `r` applies to `car` (0..1 into *weight); returns whether the region is usable.
 }  // extern "C"
 int CamRegion::Weight(u8* car, f32* weight, int type) {
     CamRegion* r = this;
-    *weight = lbl_80563F48;
+    *weight = 0.0f;
     if (!S32(r->cam, 0x58)) {
         return 0;
     }
@@ -1190,16 +1180,16 @@ int CamRegion::Weight(u8* car, f32* weight, int type) {
         f32 wrap = F32(PTR(((CarCtl*)PTR(car, 0x270))->Track(), 0x2C), 0x8);
         if (fn_80272C24(lbl_8055F568, r->lo1, r->hi1, wrap) ||
             (r->dual && fn_80272C24(lbl_8055F568, r->lo2, r->hi2, wrap))) {
-            *weight = lbl_80563F50;
+            *weight = 1.0f;
             return 1;
         }
         ok = 0;
     }
     f32 d = PSVECDistance((const Vec*)(car + 0x60), (const Vec*)r->cam) - F32(r->cam, 0xC);
-    if (d <= lbl_80563F48) {
-        *weight = lbl_80563F50;
+    if (d <= 0.0f) {
+        *weight = 1.0f;
     } else {
-        *weight = lbl_80563F50 / (lbl_80563F50 + d);
+        *weight = 1.0f / (1.0f + d);
     }
     return ok;
 }
@@ -1220,9 +1210,9 @@ int TvCamera::Load(ValueNode* t) {
             fov = 0.75f * t->GetFloat("fov");
         }
         type = fn_80271FAC(t->GetValue("type"));
-        ex[0] = t->GetFloat("ex_1", lbl_80563F48);
-        ex[1] = t->GetFloat("ex_2", lbl_80563F48);
-        ex[2] = t->GetFloat("ex_3", lbl_80563F50);
+        ex[0] = t->GetFloat("ex_1", 0.0f);
+        ex[1] = t->GetFloat("ex_2", 0.0f);
+        ex[2] = t->GetFloat("ex_3", 1.0f);
         int funky = t->GetBool("funky_fov", 0);
         int shakey = t->GetBool("shakey", 0);
         int rumble = t->GetBool("rumble", 0);
@@ -1414,20 +1404,19 @@ void fn_80273BD0(u8* p);
 void fn_80274268(u8* p);
 void fn_802704D0(int to, int from, u8* cam);
 void fn_802704D4(int to, u8* cam);
-extern const f32 lbl_80563F4C;  // degrees to radians
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula (as camstate's).
 static inline void CamRotFromVec(Mat3* r, const f32* w) {
     f32 a = PSVECMag((const Vec*)w);
-    if (a > lbl_80563F9C) {
+    if (a > 0.0001f) {
         f32 x, s, y, z, c, k;
-        f32 inv = lbl_80563F50 / a;
+        f32 inv = 1.0f / a;
         y = inv * w[1];
         x = inv * w[0];
         z = inv * w[2];
         s = (f32)sin(a);
         c = (f32)cos(a);
-        k = lbl_80563F50 - c;
+        k = 1.0f - c;
         r->m[0][0] = c + k * (x * x);
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
@@ -1438,15 +1427,15 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
         r->m[2][2] = c + k * (z * z);
         r->m[2][1] = z * (k * y) - s * x;
     } else {
-        r->m[0][0] = lbl_80563F50;
-        r->m[0][1] = lbl_80563F48;
-        r->m[0][2] = lbl_80563F48;
-        r->m[1][0] = lbl_80563F48;
-        r->m[1][1] = lbl_80563F50;
-        r->m[1][2] = lbl_80563F48;
-        r->m[2][0] = lbl_80563F48;
-        r->m[2][1] = lbl_80563F48;
-        r->m[2][2] = lbl_80563F50;
+        r->m[0][0] = 1.0f;
+        r->m[0][1] = 0.0f;
+        r->m[0][2] = 0.0f;
+        r->m[1][0] = 0.0f;
+        r->m[1][1] = 1.0f;
+        r->m[1][2] = 0.0f;
+        r->m[2][0] = 0.0f;
+        r->m[2][1] = 0.0f;
+        r->m[2][2] = 1.0f;
     }
 }
 
@@ -1463,14 +1452,14 @@ void camera_car(u8* p, int ci) {
         f.pos[0] = v->off[0];
         f.pos[1] = v->off[1];
         f.pos[2] = v->off[2];
-        w[0] = lbl_80563F4C * v->rot[0];
-        w[1] = lbl_80563F4C * v->rot[1];
-        w[2] = lbl_80563F4C * v->rot[2];
+        w[0] = 0.017453292f * v->rot[0];
+        w[1] = 0.017453292f * v->rot[1];
+        w[2] = 0.017453292f * v->rot[2];
         CamRotFromVec(&f.rot, w);
         fn_801BFD34((u8*)&r->pose.pos, f.pos, (u8*)&r->carFrame);
         Mat3Mul((Mat3*)&r->pose, &f.rot, (Mat3*)&r->carFrame);
         f32 fovv = v->fov;
-        r->fov = lbl_80563F4C * fovv;
+        r->fov = 0.017453292f * fovv;
         break;
     }
     case 0:
