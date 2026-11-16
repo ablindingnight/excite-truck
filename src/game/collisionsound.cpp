@@ -12,7 +12,17 @@ struct Vec3 {float x,y,z;Vec3(float a,float b,float c):x(a),y(b),z(c){}};
 struct Body { char pad[0x10]; u32 tag; char pad14[0x6c-0x14]; short material; char pad6e[0x1ec-0x6e]; int id; };
 struct Contact { void* vtable; Body* body; char pad[0x18]; int kind; };
 struct Message { u32 words[14]; };
-struct Entry { void* vtable; float a,b,c,d,e,f; void* sound; u32 key1,key2; float time; };
+struct OwnedSound;
+// A collision-sound slot (vtable lbl_80335DAC; class name unproven). Its dtor (fn_801B3C98) is out-of-line after the
+// ctor; fn_801B3BD4, the element dtor handed to __construct_array, repeats its body (see the MATCHING-AID there).
+struct Entry {
+    Entry(void);  // fn_801B3C64
+    virtual ~Entry(void);
+    float a,b,c,d,e,f;
+    void* sound;
+    u32 key1,key2;
+    float time;
+};
 struct Pool { void* items; int count,index; };
 struct Node { u32 key; Pool* pool; Node* left; Node* right; };
 struct Manager { Pool pools[6]; Node nodes[43]; Node* root; Entry entries[16]; int next; };
@@ -64,7 +74,6 @@ void __destroy_arr(void*,void*,int,int);
 void* fn_802077A4(const char*,int,void*,void*);
 void qsort(void*,unsigned long,unsigned long,int(*)(const void*,const void*));
 extern char lbl_80335D3C[],lbl_80335D80[];extern int lbl_80435C50[8];
-extern u32 lbl_80335DAC[];
 extern Manager* lbl_8055E6C0;
 void* __nw__FUlPCc(unsigned long,const char*);
 void* memset(void*,int,size_t);
@@ -76,7 +85,8 @@ void __construct_array(void*,void*,void*,int,int);
 extern ModuleTag lbl_8055E6B8;
 Manager* fn_801B3B70(Manager*);
 void* fn_801B3BD4(Entry*,int);
-Entry* fn_801B3C64(Entry*);
+// MATCHING-AID (by name): the Manager ctor below hands the Entry ctor to __construct_array by its linker name.
+extern "C" Entry* __ct__5EntryFv(Entry*);
 Manager* fn_801B3D24(Manager*,int);
 void fn_801B3DBC(Manager*);
 void fn_801B3FD8(Manager*);
@@ -204,15 +214,18 @@ void fn_801B3B24(u8*, void*, void*){}
 
 void fn_801B3B28(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
 
-Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)fn_801B3C64,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
+Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)__ct__5EntryFv,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
 
-inline void EntryCleanup(Entry* self){if(self){self->vtable=lbl_80335DAC;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}}}
 
+// MATCHING-AID: retail repeats Entry's destructor body here (the element dtor handed to __construct_array); an explicit
+// self->Entry::~Entry() call is not inlined, so this stand-in stores the vtable by its linker name.
+extern "C" void* __vt__5Entry[];
+inline void EntryCleanup(Entry* self){if(self){*(void**)self=__vt__5Entry;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}}}
 void* fn_801B3BD4(Entry* self,int destroy){if(self){EntryCleanup(self);if(destroy>0)__dl__FPv(self);}return self;}
 
-Entry* fn_801B3C64(Entry* self){self->vtable=lbl_80335DAC;self->a=lbl_80562624;self->b=lbl_80562624;self->c=lbl_80562624;self->d=lbl_80562624;self->e=lbl_80562624;self->f=lbl_80562624;self->sound=0;return self;}
+Entry::Entry(void){a=lbl_80562624;b=lbl_80562624;c=lbl_80562624;d=lbl_80562624;e=lbl_80562624;f=lbl_80562624;sound=0;}
 
-void* fn_801B3C98(Entry* self,int destroy){if(self){self->vtable=lbl_80335DAC;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}if(destroy>0)__dl__FPv(self);}return self;}
+Entry::~Entry(void){if(sound){delete (OwnedSound*)sound;sound=0;}}
 
 Manager* fn_801B3D24(Manager* self,int destroy){if(self){for(int i=0;i<6;i++)__dla__FPv(self->pools[i].items);__destroy_arr(self->entries,(void*)fn_801B3BD4,0x2c,16);if(destroy>0)__dl__FPv(self);}return self;}
 
@@ -373,7 +386,6 @@ extern const KeyInfo lbl_802F96CC[43]={
 }
 
 extern "C" {
-u32 lbl_80335DAC[3]={0,0,(u32)fn_801B3C98};
 int lbl_80435C50[8];
 ModuleTag lbl_8055E6B8;
 Manager* lbl_8055E6C0;
