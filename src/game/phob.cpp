@@ -221,11 +221,7 @@ extern u32 lbl_8055D430;
 extern s32 lbl_8055E8F8;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-struct PMtx {
-    PVec3 rot[3];  // offset 0x0
-    PVec3 pos;     // offset 0x24
-};
-
+// PMtx: common.h's PlainValMatrix.
 struct PhobMsg {
     u32 type;  // offset 0x0
     s32 size;  // offset 0x4
@@ -255,10 +251,10 @@ public:
     s32 a4;          // offset 0x4
     s32 a8;          // offset 0x8
     u8 padC[0x3C - 0xC];
-    PMtx mtx;        // offset 0x3C
+    PlainValMatrix mtx;        // offset 0x3C
     s16 hint[2];     // offset 0x6C
-    PMtx world;      // offset 0x70
-    PMtx prev;       // offset 0xA0
+    PlainValMatrix world;      // offset 0x70
+    PlainValMatrix prev;       // offset 0xA0
 };
 
 struct PhobCar {
@@ -508,15 +504,15 @@ void fn_80177CEC(void) {
         PVec3 z;
         PVec3 y;
         PVec3 x;
-        x.Set(p->mtx.rot[0].x, p->mtx.rot[0].y, p->mtx.rot[0].z);
-        z.Set(p->mtx.rot[2].x, p->mtx.rot[2].y, p->mtx.rot[2].z);
+        x.Set(p->mtx.basis[0].x, p->mtx.basis[0].y, p->mtx.basis[0].z);
+        z.Set(p->mtx.basis[2].x, p->mtx.basis[2].y, p->mtx.basis[2].z);
         PSVECCrossProduct((const Vec*)&z, (const Vec*)&x, (Vec*)&y);
         PSVECNormalize((const Vec*)&x, (Vec*)&x);
         PSVECNormalize((const Vec*)&y, (Vec*)&y);
         PSVECCrossProduct((const Vec*)&x, (const Vec*)&y, (Vec*)&z);
-        p->mtx.rot[0] = x;
-        p->mtx.rot[1] = y;
-        p->mtx.rot[2] = z;
+        p->mtx.basis[0] = x;
+        p->mtx.basis[1] = y;
+        p->mtx.basis[2] = z;
     }
     lbl_8055E43C++;
 }
@@ -1363,17 +1359,17 @@ StatePacket* fn_80179824(void) {
 // const reference, inline helper with a const formal: all tried 2026-11-16). Port: CollVolume::vf28.
 void vf28__10CollVolumeFPUc(const Phob* v, u8* buf) {  // writes the draw state
     u8* o = buf + v->a8;
-    PMtx* out = (PMtx*)o;
+    PlainValMatrix* out = (PlainValMatrix*)o;
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         *out = v->world;
     } else {
-        PMtx t;
+        PlainValMatrix t;
         int i;
         const f32* b;
         const f32* a;
-        f32* d = &t.rot[0].x;
-        a = &v->world.rot[0].x;
-        b = &v->prev.rot[0].x;
+        f32* d = &t.basis[0].x;
+        a = &v->world.basis[0].x;
+        b = &v->prev.basis[0].x;
         f32 k = lbl_8055E460;
         for (i = 0; i < 2; i++) {
             d[0] = LerpT( a[0], b[0],k);

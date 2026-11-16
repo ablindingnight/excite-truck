@@ -7,11 +7,7 @@
 #include "game/rigid.h"
 #include "game/plainvec.h"
 
-struct PathMtx {
-    f32 m[3][3];  // offset 0x0
-    V3 pos;       // offset 0x24
-};
-
+// PathMtx: common.h's PlainValMatrix.
 struct PathFile;
 struct Path {
     char name[0x10];  // offset 0x0
@@ -44,7 +40,7 @@ Path* fn_801DA03C(PathFollower* p, int i);
 int fn_801DA064(PathFollower* p, const char* name);
 void fn_801DA0EC(PathFollower* p, f32 dt);
 void fn_801DA198(PathFollower* p, f32 t);
-int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel);
+int fn_801DA294(PathFollower* p, PlainValMatrix* m, V3* vel, V3* angvel);
 int fn_801DA648(PathFollower* p);
 int fn_801DA688(PathFollower* p);
 f32 fn_801DA6B8(PathFollower* p);
@@ -312,7 +308,7 @@ inline void PathMan::vf14(void) {
             if (c->active) {
                 fn_801DA0EC(c->follower, 0.016683352f * c->speed);
             }
-            PathMtx mtx;
+            PlainValMatrix mtx;
             V3 vel;
             V3 spin;
             if (fn_801DA294(c->follower, &mtx, &vel, &spin)) {
@@ -323,7 +319,7 @@ inline void PathMan::vf14(void) {
                 spin.y *= 59.94f;
                 spin.z *= 59.94f;
                 if (c->grounded) {
-                    mtx.pos.y = fn_801EA0E8(mtx.pos.x, mtx.pos.z) + c->groundOffset;
+                    mtx.origin.y = fn_801EA0E8(mtx.origin.x, mtx.origin.z) + c->groundOffset;
                 }
                 ((RigidBody*)c->obj)->SetState((const RMtx*)&mtx, (const RVec3*)&vel, (const RVec3*)&spin);
             } else if (!lbl_8055E980) {

@@ -43,11 +43,7 @@ struct Camera {
 
 extern "C" Camera* fn_801E8718(int);
 
-struct Frame {
-    V3 rows[3];  // offset 0x0
-    V3 pos;      // offset 0x24
-};
-
+// Frame: common.h's PlainValMatrix.
 ModuleTag lbl_8055E118;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
@@ -116,18 +112,18 @@ int fn_801392F8(u8* car) {
 
 }  // extern "C"
 
-static inline void MulVec(const Frame& m, const V3& src, V3* dst) {
+static inline void MulVec(const PlainValMatrix& m, const V3& src, V3* dst) {
     if (dst == &src) {
-        f32 x = Dot3(src.x, m.rows[0].x, src.y, m.rows[0].y, src.z, m.rows[0].z);
-        f32 y = Dot3(src.x, m.rows[1].x, src.y, m.rows[1].y, src.z, m.rows[1].z);
-        f32 z = Dot3(src.x, m.rows[2].x, src.y, m.rows[2].y, src.z, m.rows[2].z);
+        f32 x = Dot3(src.x, m.basis[0].x, src.y, m.basis[0].y, src.z, m.basis[0].z);
+        f32 y = Dot3(src.x, m.basis[1].x, src.y, m.basis[1].y, src.z, m.basis[1].z);
+        f32 z = Dot3(src.x, m.basis[2].x, src.y, m.basis[2].y, src.z, m.basis[2].z);
         dst->x = x;
         dst->y = y;
         dst->z = z;
     } else {
-        dst->x = Dot3(src.x, m.rows[0].x, src.y, m.rows[0].y, src.z, m.rows[0].z);
-        dst->y = Dot3(src.x, m.rows[1].x, src.y, m.rows[1].y, src.z, m.rows[1].z);
-        dst->z = Dot3(src.x, m.rows[2].x, src.y, m.rows[2].y, src.z, m.rows[2].z);
+        dst->x = Dot3(src.x, m.basis[0].x, src.y, m.basis[0].y, src.z, m.basis[0].z);
+        dst->y = Dot3(src.x, m.basis[1].x, src.y, m.basis[1].y, src.z, m.basis[1].z);
+        dst->z = Dot3(src.x, m.basis[2].x, src.y, m.basis[2].y, src.z, m.basis[2].z);
     }
 }
 
@@ -136,7 +132,7 @@ extern "C" {
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
-    Frame m;
+    PlainValMatrix m;
     V3 v;
     V3 p;
     LayoutArt* bg;
@@ -169,21 +165,21 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     len = 1.0f / (f32)sqrt(h.x * h.x + h.y * h.y);
     h.x *= len;
     h.y *= len;
-    m.rows[2].y = 0.0f;
-    m.rows[0].y = 0.0f;
-    m.rows[2].x = h.x;
-    m.rows[2].z = h.y;
+    m.basis[2].y = 0.0f;
+    m.basis[0].y = 0.0f;
+    m.basis[2].x = h.x;
+    m.basis[2].z = h.y;
     {
         f32 t = h.x;
         h.x = h.y;
         h.y = -t;
     }
-    m.rows[0].x = h.x;
-    m.rows[0].z = h.y;
-    m.rows[1].x = 0.0f;
-    m.rows[1].y = 1.0f;
-    m.rows[1].z = 0.0f;
-    m.pos = cam->pos;
+    m.basis[0].x = h.x;
+    m.basis[0].z = h.y;
+    m.basis[1].x = 0.0f;
+    m.basis[1].y = 1.0f;
+    m.basis[1].z = 0.0f;
+    m.origin = cam->pos;
     fn_802C8BD0(tex);
     if (fn_802C8DBC(0x20)) {
         for (i = lbl_8055E4D0 - 1; i >= 0; i--) {
@@ -202,9 +198,9 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
             len = 1.0f / len;
             d.x *= len;
             d.y *= len;
-            p.x = *(f32*)(car + 0x60) - m.pos.x;
-            p.y = *(f32*)(car + 0x64) - m.pos.y;
-            p.z = *(f32*)(car + 0x68) - m.pos.z;
+            p.x = *(f32*)(car + 0x60) - m.origin.x;
+            p.y = *(f32*)(car + 0x64) - m.origin.y;
+            p.z = *(f32*)(car + 0x68) - m.origin.z;
             MulVec(m, p, &p);
             dist = PSVECMag((const Vec*)&p);
             scale = LerpF(1.0f, 0.6f, Clamp01((dist - 0.7f * range) / (2.0f * range - 0.7f * range)));

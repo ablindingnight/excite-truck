@@ -42,11 +42,7 @@ struct PathFile {
     Path paths[1];  // offset 0x4
 };
 
-struct PathMtx {
-    f32 m[3][3];  // offset 0x0
-    V3 pos;       // offset 0x24
-};
-
+// PathMtx: common.h's PlainValMatrix.
 static inline void Swap32(void* v) {
     u8* p = (u8*)v;
     u8 t = p[0];
@@ -148,7 +144,7 @@ static inline void Normalize(Quat& q) {
     q.z *= inv;
     q.w *= inv;
 }
-static inline void ToMatrix(PathMtx* m, const Quat& q) {
+static inline void ToMatrix(PlainValMatrix* m, const Quat& q) {
     f32 y2 = q.y + q.y;
     f32 z2 = q.z + q.z;
     f32 x2 = q.x + q.x;
@@ -161,15 +157,15 @@ static inline void ToMatrix(PathMtx* m, const Quat& q) {
     f32 xz = q.x * z2;
     f32 xy = q.x * y2;
     f32 wz = q.w * z2;
-    m->m[0][0] = 1.0f - (yy + zz);
-    m->m[1][1] = 1.0f - (xx + zz);
-    m->m[2][0] = xz + wy;
-    m->m[1][0] = xy - wz;
-    m->m[0][1] = xy + wz;
-    m->m[2][1] = yz - wx;
-    m->m[0][2] = xz - wy;
-    m->m[1][2] = yz + wx;
-    m->m[2][2] = 1.0f - (xx + yy);
+    m->basis[0].x = 1.0f - (yy + zz);
+    m->basis[1].y = 1.0f - (xx + zz);
+    m->basis[2].x = xz + wy;
+    m->basis[1].x = xy - wz;
+    m->basis[0].y = xy + wz;
+    m->basis[2].y = yz - wx;
+    m->basis[0].z = xz - wy;
+    m->basis[1].z = yz + wx;
+    m->basis[2].z = 1.0f - (xx + yy);
 }
 static inline int MinI(int a, int b) { return (b < a) ? b : a; }
 static inline f32 MinF(f32 a, f32 b) { return (a < b) ? a : b; }
@@ -283,7 +279,7 @@ static inline void SubV3(void* o_, const void* a_, const void* b_) {
     o[1] = a[1] - b[1];
     o[2] = a[2] - b[2];
 }
-static inline void LerpPos(PathMtx* m, const PathKey* a, const PathKey* b, f32 f) {
+static inline void LerpPos(PlainValMatrix* m, const PathKey* a, const PathKey* b, f32 f) {
     V3 pos;
     pos.z = a->pos.z + f * (b->pos.z - a->pos.z);
     f32 y2 = b->pos.y;
@@ -293,9 +289,9 @@ static inline void LerpPos(PathMtx* m, const PathKey* a, const PathKey* b, f32 f
     f32 x_ = a->pos.x;
     xv = b->pos.x;
     pos.x = x_ + f * (xv - x_);
-    m->pos.z = pos.z;
-    m->pos.y = pos.y;
-    m->pos.x = pos.x;
+    m->origin.z = pos.z;
+    m->origin.y = pos.y;
+    m->origin.x = pos.x;
 }
 static inline void ScaleQ(Quat* o, const Quat* a, f32 k) {
     o->x = a->x * k;
@@ -304,7 +300,7 @@ static inline void ScaleQ(Quat* o, const Quat* a, f32 k) {
     o->w = a->w * k;
 }
 
-int fn_801DA294(PathFollower* p, PathMtx* m, V3* vel, V3* angvel) {
+int fn_801DA294(PathFollower* p, PlainValMatrix* m, V3* vel, V3* angvel) {
     PathKey* a = 0;
     PathKey* b = 0;
     f32 f = 0.0f;
