@@ -1,4 +1,4 @@
-// Wheel models (0x801EFF4C-0x801F1C24, "wheelmod"): wheel classes loaded from "<class>.val" (tire/rim
+// WheelMod models (0x801EFF4C-0x801F1C24, "wheelmod"): wheel classes loaded from "<class>.val" (tire/rim
 // diameter and width, up to 8 distance LODs of left/right models in slow- and fast-spin remaps, and a
 // shadow), the wheels of each car (registered per car and wheel slot), their pose from the car's wheel
 // state, LOD/shadow drawing, and an animation object that draws an attached car wheel. Names are
@@ -142,7 +142,8 @@ struct WheelState {
     u32 flags;     // offset 0x60
 };
 
-struct Wheel {
+// The wheel model this unit builds and draws (0x4C, alloc tag "wheel"); class name unproven. Was named Wheel, the name of wheel.cpp's 0x1FC physics wheel.
+struct WheelMod {
     WheelClass* cls;  // offset 0x0
     u32 state;        // offset 0x4: 3 = hidden, 0x10 = fast
     s32 car;          // offset 0x8
@@ -173,7 +174,7 @@ static inline f32 Angle(f32 a) { return a; }
 extern const f32 lbl_8055EBE8 = Angle(0.7853982f);
 WheelClass* lbl_8055EBEC;  // class table
 s32 lbl_8055EBF0;          // classes loaded
-Wheel* lbl_80488798[64];   // by car * 4 + wheel
+WheelMod* lbl_80488798[64];   // by car * 4 + wheel
 
 extern "C" {
 
@@ -181,20 +182,20 @@ void fn_801F0AA0(void);
 void fn_801F0CC4(void);
 void fn_801F17C8(void);
 void fn_801F17DC(void);
-Wheel* fn_801F0DC0(Wheel* w, const char* cls, s32 car, s32 index);
-Wheel* fn_801F0E88(Wheel* w, const char* cls);
-Wheel* fn_801F0F18(Wheel* w, int del);
+WheelMod* fn_801F0DC0(WheelMod* w, const char* cls, s32 car, s32 index);
+WheelMod* fn_801F0E88(WheelMod* w, const char* cls);
+WheelMod* fn_801F0F18(WheelMod* w, int del);
 WheelClass* fn_801F09FC(const char* name);
-void fn_801F1878(Wheel* w);
-void fn_801F18F0(Wheel* w);
-int fn_801F15A8(Wheel* w, const ValVec3* pos);
-void fn_801F163C(Wheel* w, int lod, f32 spin);
+void fn_801F1878(WheelMod* w);
+void fn_801F18F0(WheelMod* w);
+int fn_801F15A8(WheelMod* w, const ValVec3* pos);
+void fn_801F163C(WheelMod* w, int lod, f32 spin);
 s32 fn_801F196C(s32 car, s32 index);
 u32 fn_801F1978(u32 state);
-f32 fn_801F159C(Wheel* w);
-void fn_801F1394(Wheel* w, const ValMatrix* m);
-void fn_801F1494(Wheel* w, const ValMatrix* m, s16 hint);
-Wheel* fn_801F1848(s32 car, s32 index);
+f32 fn_801F159C(WheelMod* w);
+void fn_801F1394(WheelMod* w, const ValMatrix* m);
+void fn_801F1494(WheelMod* w, const ValMatrix* m, s16 hint);
+WheelMod* fn_801F1848(s32 car, s32 index);
 
 void fn_801EFF4C(void) {
     fn_801F0AA0();
@@ -206,22 +207,22 @@ void fn_801EFF70(void) {
     fn_801F0CC4();
 }
 
-Wheel* fn_801EFF94(const char* cls, s32 car, s32 index) {
-    Wheel* w = (Wheel*)operator new(sizeof(Wheel), "wheel");
+WheelMod* fn_801EFF94(const char* cls, s32 car, s32 index) {
+    WheelMod* w = (WheelMod*)operator new(sizeof(WheelMod), "wheel");
     if (w) {
         w = fn_801F0DC0(w, cls, car, index);
     }
     return w;
 }
 
-void fn_801EFFF8(Wheel* w) { fn_801F0F18(w, 1); }
+void fn_801EFFF8(WheelMod* w) { fn_801F0F18(w, 1); }
 
-void fn_801F0000(Wheel* w) { fn_801F0F18(w, -1); }
+void fn_801F0000(WheelMod* w) { fn_801F0F18(w, -1); }
 
-s32 fn_801F0008(void) { return sizeof(Wheel); }
+s32 fn_801F0008(void) { return sizeof(WheelMod); }
 
 // A detached wheel built in 'mem'.
-Wheel* fn_801F0010(const char* cls, Wheel* mem) {
+WheelMod* fn_801F0010(const char* cls, WheelMod* mem) {
     if (mem) {
         mem = fn_801F0E88(mem, cls);
     }
@@ -229,7 +230,7 @@ Wheel* fn_801F0010(const char* cls, Wheel* mem) {
 }
 
 // From a function the linker stripped (a heap-allocated detached wheel).
-Wheel* WheelModStripped0(const char* cls) { return fn_801F0010(cls, (Wheel*)operator new(sizeof(Wheel), "detached wheel")); }
+WheelMod* WheelModStripped0(const char* cls) { return fn_801F0010(cls, (WheelMod*)operator new(sizeof(WheelMod), "detached wheel")); }
 
 // Adds the material remaps for 'model' listed in 't' to remap set 'remap'.
 void fn_801F004C(const char* model, s32 remap, WNode* t) {
@@ -424,7 +425,7 @@ void fn_801F0CC4(void) {
     lbl_8055EBF0 = 0;
 }
 
-Wheel* fn_801F0DC0(Wheel* w, const char* cls, s32 car, s32 index) {
+WheelMod* fn_801F0DC0(WheelMod* w, const char* cls, s32 car, s32 index) {
     w->cls = fn_801F09FC(cls);
     int left = 0;
     w->state = left;
@@ -440,7 +441,7 @@ Wheel* fn_801F0DC0(Wheel* w, const char* cls, s32 car, s32 index) {
     return w;
 }
 
-Wheel* fn_801F0E88(Wheel* w, const char* cls) {
+WheelMod* fn_801F0E88(WheelMod* w, const char* cls) {
     w->cls = fn_801F09FC(cls);
     w->state = 0;
     w->car = -1;
@@ -451,7 +452,7 @@ Wheel* fn_801F0E88(Wheel* w, const char* cls) {
     return w;
 }
 
-Wheel* fn_801F0F18(Wheel* w, int del) {
+WheelMod* fn_801F0F18(WheelMod* w, int del) {
     if (w) {
         if (!w->detached) {
             fn_801F18F0(w);
@@ -493,7 +494,7 @@ static inline void AddVec(ValVec3* v, const ValVec3* a) {
 }
 
 // Poses wheel 'w' from its state 's' in the car frame 'm', scaled by 'scale'.
-void fn_801F0F78(Wheel* w, const WheelState* s, const ValMatrix* m, f32 scale) {
+void fn_801F0F78(WheelMod* w, const WheelState* s, const ValMatrix* m, f32 scale) {
     if (s->flags & 8) {
         w->state = 3;
         return;
@@ -539,23 +540,23 @@ void fn_801F0F78(Wheel* w, const WheelState* s, const ValMatrix* m, f32 scale) {
     }
 }
 
-void fn_801F131C(Wheel* w, f32 unused, int lod0) {
+void fn_801F131C(WheelMod* w, f32 unused, int lod0) {
     if (w->state != 3) {
         fn_801F163C(w, lod0 ? 0 : fn_801F15A8(w, &w->mtx.origin), w->spin);
     }
 }
 
-void fn_801F1378(Wheel* w, f32 unused) {
+void fn_801F1378(WheelMod* w, f32 unused) {
     if (w->state != 3) {
         fn_801F163C(w, 0, w->spin);
     }
 }
 
-void fn_801F1394(Wheel* w, const ValMatrix* m) {
+void fn_801F1394(WheelMod* w, const ValMatrix* m) {
     fn_802C70AC(w->cls->lods[0].slow[w->side], m, 0, fn_801F1978(0));
 }
 
-void fn_801F13F4(Wheel* w, f32 d2, f32 height) {
+void fn_801F13F4(WheelMod* w, f32 d2, f32 height) {
     WheelShadow* s = &w->cls->shadow;
     if (d2 > s->offDist2 || w->state == 3) {
         return;
@@ -569,7 +570,7 @@ void fn_801F13F4(Wheel* w, f32 d2, f32 height) {
     fn_802C7AE0(s->lods[i].model, &w->mtx, -1, s->baseLen + height);
 }
 
-void fn_801F1474(Wheel* w, const ValMatrix* m, f32 height) {
+void fn_801F1474(WheelMod* w, const ValMatrix* m, f32 height) {
     if (w->cls->shadow.count > 0) {
         fn_802C7AE0(w->cls->shadow.lods[0].model, m, -1, height);
     }
@@ -577,7 +578,7 @@ void fn_801F1474(Wheel* w, const ValMatrix* m, f32 height) {
 
 static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
-void fn_801F1494(Wheel* w, const ValMatrix* m, s16 hint) {
+void fn_801F1494(WheelMod* w, const ValMatrix* m, s16 hint) {
     WheelShadow* s = &w->cls->shadow;
     f32 zoom = fn_801E88F0(-1);
     zoom = zoom * zoom;
@@ -593,9 +594,9 @@ void fn_801F1494(Wheel* w, const ValMatrix* m, s16 hint) {
     }
 }
 
-f32 fn_801F159C(Wheel* w) { return w->cls->tireRadius; }
+f32 fn_801F159C(WheelMod* w) { return w->cls->tireRadius; }
 
-int fn_801F15A8(Wheel* w, const ValVec3* pos) {
+int fn_801F15A8(WheelMod* w, const ValVec3* pos) {
     f32 zoom = fn_801E88F0(-1);
     zoom = zoom * zoom;
     f32 d2 = Mul(fn_802C88E8(pos), zoom);
@@ -607,7 +608,7 @@ int fn_801F15A8(Wheel* w, const ValVec3* pos) {
     return w->cls->numLods - 1;
 }
 
-void fn_801F163C(Wheel* w, int lod, f32 spin) {
+void fn_801F163C(WheelMod* w, int lod, f32 spin) {
     int left = w->index == 0 || w->index == 2;
     u32 fast = (w->state >> 4) & 1;
     WheelLod* l = &w->cls->lods[lod];
@@ -644,9 +645,9 @@ void fn_801F17DC(void) {
     }
 }
 
-Wheel* fn_801F1848(s32 car, s32 index) { return lbl_80488798[fn_801F196C(car, index)]; }
+WheelMod* fn_801F1848(s32 car, s32 index) { return lbl_80488798[fn_801F196C(car, index)]; }
 
-void fn_801F1878(Wheel* w) {
+void fn_801F1878(WheelMod* w) {
     s32 i = fn_801F196C(w->car, w->index);
     if (lbl_80488798[i]) {
         fn_802E317C("wheelmod: duplicate wheel entry: car %d, wheel %d", w->car, w->index);
@@ -654,7 +655,7 @@ void fn_801F1878(Wheel* w) {
     lbl_80488798[i] = w;
 }
 
-void fn_801F18F0(Wheel* w) {
+void fn_801F18F0(WheelMod* w) {
     s32 i = fn_801F196C(w->car, w->index);
     if (!lbl_80488798[i]) {
         fn_802E317C("wheelmod: could not find wheel entry: car %d, wheel %d", w->car, w->index);
@@ -734,7 +735,7 @@ public:
     virtual void vf1C(void);
     virtual void Set(const AnimSlot* s);
     WheelSlot slot;  // offset 0x3C
-    Wheel* wheel;    // offset 0x80
+    WheelMod* wheel;    // offset 0x80
 };
 
 WheelAnim::WheelAnim(const char* name) {

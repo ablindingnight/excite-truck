@@ -12,7 +12,8 @@ struct RaceCarVec3 {
     f32 z;
 };
 
-struct Wheel {
+// carbody.cpp's per-wheel state of the car body (4 at 0x23AC, stride 0x74); was named Wheel here, the name of wheel.cpp's 0x1FC physics wheel.
+struct CbWheel {
     s32 contact;  // offset 0x0
     u8 pad4[0x74 - 0x4];
 };
@@ -31,7 +32,7 @@ struct RaceCarRec {
     s32 kind;   // offset 0x1F0
     u8 pad1F4[0x2410 - 0x1F4];
     union {
-        Wheel wheels[4];  // offset 0x2410 (the records overlap the fields below)
+        CbWheel wheels[4];  // offset 0x2410 (the records overlap the fields below)
         struct {
             u8 pad2410[0x258C - 0x2410];
             f32 f258C;  // offset 0x258C

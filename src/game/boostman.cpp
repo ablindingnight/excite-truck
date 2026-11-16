@@ -282,7 +282,8 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
-struct Wheel {
+// carbody.cpp's per-wheel state of the car body (4 at 0x23AC, stride 0x74); was named Wheel here, the name of wheel.cpp's 0x1FC physics wheel.
+struct CbWheel {
     u8 pad0[0x30];
     V3 pos;  // offset 0x30
     u8 pad3C[0x38];
@@ -293,7 +294,7 @@ struct CarRec {
     Mat3 rot;   // offset 0x3C
     V3 pos;     // offset 0x60
     u8 pad6C[0x2340];
-    Wheel wheels[4];  // offset 0x23AC
+    CbWheel wheels[4];  // offset 0x23AC
 };
 
 static inline void SetVtx(BoostVtx* v, const V2* p) {
@@ -460,7 +461,7 @@ extern "C" {
 
 static inline int InArea(BoostMan* m, CarRec* rec) {
     int hit;
-    Wheel* ws;
+    CbWheel* ws;
     int i;
     int j;
     ws = rec->wheels;

@@ -53,7 +53,8 @@ TireVoice* fn_802077A4(const char* name, int flags, void* a, void* b);
 RoadSound* fn_8020CA3C(char* car);
 }
 
-struct Wheel {
+// carbody.cpp's per-wheel state of the car body (4 at 0x23AC, stride 0x74); was named Wheel here, the name of wheel.cpp's 0x1FC physics wheel.
+struct CbWheel {
     u8 pad0[0x68];
     f32 slip;  // offset 0x68
     s8 air;    // offset 0x6C
@@ -62,7 +63,7 @@ struct Wheel {
 
 struct Car {
     u8 pad0[0x23AC];
-    Wheel wheels[4];  // offset 0x23AC
+    CbWheel wheels[4];  // offset 0x23AC
 };
 
 class TireSound {
@@ -100,7 +101,7 @@ TireSound::~TireSound(void) {
 void TireSound::Update(void) {
     Car* c = (Car*)car;
     f32 sum = 0.0f;
-    Wheel* w = c->wheels;
+    CbWheel* w = c->wheels;
     for (int i = 0; i < 4; i++, w++) {
         f32 s = w->slip - 0.8f;
         if (w->air == 0 && s > 0.0f) {
