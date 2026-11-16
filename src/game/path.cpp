@@ -63,14 +63,13 @@ static inline void Swap32(void* v) {
 }
 
 static inline void SwapKey(PathKey* k) {
-    Swap32(&k->t);
-    Swap32(&k->pos.x);
-    Swap32(&k->pos.y);
-    Swap32(&k->pos.z);
-    Swap32(&k->rot.x);
-    Swap32(&k->rot.y);
-    Swap32(&k->rot.z);
-    Swap32(&k->rot.w);
+    for (unsigned w = 0; w < 2; ++w) {
+        u8* words = (u8*)k + w * 16;
+        Swap32(words + 0);
+        Swap32(words + 4);
+        Swap32(words + 8);
+        Swap32(words + 12);
+    }
 }
 
 class PathFollower {
@@ -112,14 +111,7 @@ PathFile* fn_801D9CC4(const char* name) {
             p->keys = (PathKey*)((u8*)f + (u32)p->keys);
             for (j = 0; j < p->count; j++) {
                 k = &p->keys[j];
-                Swap32(&k->t);
-                Swap32(&k->pos.x);
-                Swap32(&k->pos.y);
-                Swap32(&k->pos.z);
-                Swap32(&k->rot.x);
-                Swap32(&k->rot.y);
-                Swap32(&k->rot.z);
-                Swap32(&k->rot.w);
+                SwapKey(k);
             }
         }
     }
