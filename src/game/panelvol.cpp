@@ -166,13 +166,17 @@ extern const f32 kAxisTolerance;
 extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
+// The race-car record (aiobst.cpp), declared as far as this unit uses it.
+class RaceCarRec {
+public:
+    const RMtx* Mtx(void);
+};
 extern "C" {
 void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144B54(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
 void __ct__10CamFrame34Fv(RMtx* m);
-const RMtx* Mtx__10RaceCarRecFv(Phob* car);
 void fn_8017E388(RMtx* m);
 // RagdollShape::RagdollShape(frame, strip, owner, r) in sphcoll, called by its linker name.
 CollShape* __ct__12RagdollShapeFUlUlUlf(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
@@ -383,12 +387,12 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
     PanelLink links[2];
     for (i = 0; i < n; ids++, i++) {
         links[i].id = *ids;
-        links[i].mtx = Mtx__10RaceCarRecFv(car);
+        links[i].mtx = ((RaceCarRec*)car)->Mtx();
         links[i].c = 0;
     }
     fn_801C1CBC(p->strip, 4, verts, 6, edges, n, links);
     av = fn_801BF754(car);
-    const RMtx* cm = Mtx__10RaceCarRecFv(car);
+    const RMtx* cm = ((RaceCarRec*)car)->Mtx();
     fn_801C256C(p->strip, car->Vel(), &cm->pos, av);
 }
 
