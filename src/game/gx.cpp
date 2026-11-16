@@ -400,6 +400,11 @@ void fn_802CF5D4(void);
 int fn_802CEC04(int reset);
 void fn_802CEC44(void);
 void fn_802CECF4(u16 token);
+static inline int DarkenPixel(int pixel) {
+    int chroma = pixel & 0xFF;
+    return chroma > (pixel - 0x400) ? chroma : (pixel - 0x400);
+}
+
 void fn_802CF10C(u32 count);
 
 GXColor fn_802CE9FC(u8 r, u8 g, u8 b, u8 a) {
@@ -614,40 +619,27 @@ void fn_802CF10C(u32 count) {
     int y = (lbl_8055FD4C >> 2) & 1;
     if (lbl_8055FD50) {
         for (; y < lbl_804C9760.h; y += 2) {
-            int i;
-            int d;
-            int x;
-            int lo;
-            for (x = 0; x < lbl_804C9760.w; x++) {
-                i = y * lbl_804C9760.w + x;
-                d = buf[i] - 0x400;
-                lo = buf[i] & 0xFF;
-                buf[i] = lo > d ? lo : d;
+            for (int x = 0; x < lbl_804C9760.w; x++) {
+                int i = y * lbl_804C9760.w + x;
+                buf[i] = DarkenPixel(buf[i]);
             }
         }
     }
     if (cap->active) {
         u16* dst = lbl_804C9760.cur;
         if (lbl_8055FD4C % 60 < 30) {
-            int y;
             int w = cap->w;
-            int k = 0;
-            for (y = 0; y < cap->h; y++) {
+            for (int y = 0; y < cap->h; y++) {
                 u16* d = &dst[lbl_804C9760.w * (cap->y + y) + cap->x];
-                u16* s = &cap->data[k];
-                int x;
-                u16* sp = s;
-                for (x = 0; x < w; sp++, x++) {
-                    d[x] = *sp;
+                u16* s = &cap->data[y * w];
+                for (int x = 0; x < w; x++) {
+                    d[x] = s[x];
                 }
-                k += w;
             }
         } else {
-            int y;
-            int w;
-            u16 c = cap->data[0];
-            w = cap->w;
-            for (y = 0; y < cap->h; y++) {
+            const u16 c = cap->data[0];
+            const int w = cap->w;
+            for (int y = 0; y < cap->h; y++) {
                 u16* d = &dst[lbl_804C9760.w * (cap->y + y) + cap->x];
                 int x;
                 for (x = 0; x < w; x++) {
