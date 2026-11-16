@@ -2764,7 +2764,9 @@ void fn_80198530(u8* d) {
         f32 lo = 1.3333334f + F32(d, 0x28);
         f32 t = Clamp01((speed - lo) / (hi - lo));
         grip = LerpF(0.0f, 1.0f, t);
-        if (AbsFlt(F32(d, 0x28)) <= __float_epsilon[0]) {
+        f64 absSpeed = __fabs(F32(d, 0x28));
+        f32 speedMagnitude = (f32)absSpeed;
+        if (speedMagnitude <= __float_epsilon[0]) {
             brake = 1.0f;
         }
     }
@@ -2889,9 +2891,10 @@ void fn_80198530(u8* d) {
         f32 over = MIN(0.88977873f, F32(d, 0x28) - v);
         over = MAX(over, 0.0f);
         if (over > 0.0f && (f32)__fabs(steer) < 0.05f && fn_80167728(S32(d, 0x290))) {
-            u8* c = CAR(d);
+            u8*& downhillCar = car;
+            downhillCar = CAR(d);
             RVec3 n;
-            fn_801DCF48(&n, F32(c, 0x60), F32(c, 0x68));
+            fn_801DCF48(&n, F32(downhillCar, 0x60), F32(downhillCar, 0x68));
             u8* p = PTR(d, 0x1A0);
             RVec3 dir;
             SetV3(&dir, F32(p, 0x8), 0.0f, F32(p, 0xC));
@@ -2909,7 +2912,7 @@ void fn_80198530(u8* d) {
             dir.x *= k;
             dir.y *= k;
             dir.z *= k;
-            (*(RigidBody**)(d + 0x294))->AddForceAt(&dir, (RVec3*)(c + 0x60));
+            (*(RigidBody**)(d + 0x294))->AddForceAt(&dir, (RVec3*)(downhillCar + 0x60));
         }
     }
 }
