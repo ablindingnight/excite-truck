@@ -651,8 +651,12 @@ int ShowTechDemo(void) {
         MenuItem("invalid2", 0, 0, 2, 0),
         MenuItem(lbl_804988F0),
     };
-    MenuDesc desc = {"techdemo.lyt", 0, 0, 0, 0};
+    MenuDesc desc;  // filled field by field: retail keeps no .rodata initializer for this stripped menu
+    desc.layout = "techdemo.lyt";
     desc.items = items;
+    desc.poll = 0;
+    desc.unkC = 0;
+    desc.unk10 = 0;
     return fn_802146BC(&desc, -999, -999, 1);
 }
 
@@ -669,10 +673,23 @@ int ShowMultiMenu(void) {
         MenuItem("multi", 0, 0, 8, 0),
         MenuItem(lbl_804988F0),
     };
-    MenuDesc desc = {"main_2.lyt", 0, 0, 0, 0};
+    MenuDesc desc;  // filled field by field: retail keeps no .rodata initializer for this stripped menu
+    desc.layout = "main_2.lyt";
     desc.items = items;
+    desc.poll = 0;
+    desc.unkC = 0;
+    desc.unk10 = 0;
     return fn_802146BC(&desc, -999, -999, 1);
 }
+
+// Per-mode menu layouts: player count, layout, menu entries (the multiplayer modes all use main_2.lyt).
+const ModeEntry lbl_802FA3B4[5] = {
+    {3, "main_2.lyt", 4},
+    {0, "main_2.lyt", 1},
+    {0, "main_2.lyt", 1},
+    {0, "main_2.lyt", 1},
+    {0, 0, 0},
+};
 
 u8 fn_80247624(void) { return lbl_8055F260; }
 
