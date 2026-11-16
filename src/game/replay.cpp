@@ -1000,7 +1000,7 @@ void fn_80009534(void) {
 
 void fn_80009C80(void) { fn_80009534(); }
 
-u8 fn_80009C84(void) { return lbl_8055D36D; }
+int fn_80009C84(void) { return lbl_8055D36D; }
 
 int fn_80009C8C(void) {
     int result = 0;
