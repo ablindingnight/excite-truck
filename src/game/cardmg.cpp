@@ -425,8 +425,10 @@ static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // Fills the model's damage pose: eases the wheel offsets toward their targets, bends the body points by the
 // lean/twist (when the deformation is on), hides the parts that are gone and lists the flying ones with their
 // frame interpolated to the tick.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8018DA5C(CbJoint* s, u8* m, DamagePart* tp, f32 t) {
+/* Helper name unproven: one damage part per joint - hides a part that is gone (state 3), lists a flying one (states 2, 4) with
+   its frame interpolated to the tick. Machine-extracted (loopext); the boundary is needed (in place: fn_8018DA5C 70 -> 102
+   diff rows, measured 2026-11-16) */
+static inline void ListDamagePart(CbJoint* s, u8* m, DamagePart* tp, f32 t) {
     if (s->state == 3) {
         U32(m, 0x29C) &= ~(1 << tp->bit);
     }
@@ -507,7 +509,7 @@ void fn_8018DA5C(u8* p, u8* m) {
     ((CarDrawState*)m)->nPoints = 0;
     for (int i = 0; i < 17; i++) {
         if (s->on && s->state != 0 && s->state != 1) {
-            Loop1_fn_8018DA5C(s, m, tp, t);
+            ListDamagePart(s, m, tp, t);
         }
         tp++;
         s++;
