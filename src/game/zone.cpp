@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/centerline.h"
 #include "game/gamemode.h"
 #include "game/gamemodector.h"
@@ -410,13 +411,6 @@ struct ZoneCar {
     f32 doneT;   // offset 0x120
     s32 lives;   // offset 0x124
     f32 gateWidth;  // offset 0x128
-};
-
-struct RacerInfo {
-    u8 pad0[0x4];
-    s32 place;  // offset 0x4
-    u8 pad8[0x10 - 0x8];
-    s32 rank;  // offset 0x10
 };
 
 class ISubTaskMgr {
@@ -1115,20 +1109,12 @@ u32 fn_8013D18C(u32 i) {
 }
 
 
-// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
-// was named Racer here, a name world/carmodel use for a different class).
-class DeityCar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual RacerInfo* GetInfo(void);
-};
 extern "C" DeityCar* fn_801B2EC0(int i);
 
 // Ring-hit pitch per ring in the current chain.
 const f32 lbl_802F93B0[5] = {0.7932f, 0.8904f, 0.9433f, 0.9994f, 1.0f};
 
-int fn_8013D1F0(int i) { return fn_801B2EC0(i)->GetInfo()->rank; }
+int fn_8013D1F0(int i) { return fn_801B2EC0(i)->State()->lap; }
 
 static inline f32 SignF(f32 x) { return x > 0.0f ? 1.0f : -1.0f; }
 
@@ -2311,16 +2297,6 @@ void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void
 extern s32 lbl_8055E3C4;
 }
 
-struct ILPos {
-    struct Seg {
-        u8 pad0[0x18];
-        f32 scale;  // offset 0x18
-        f32 base;   // offset 0x1C
-    }* seg;     // offset 0x0
-    f32 t;      // offset 0x4
-    f32 Dist(void) const { return seg->base + seg->scale * t; }
-    s32 mode;   // offset 0x8
-};
 extern "C" ILPos fn_80136594(void* f, V2* p);
 
 extern "C" void fn_80141454(void) {}
@@ -2614,7 +2590,7 @@ inline void ZoneMaster::vfB8(ZoneResults* r) {
     for (i = 0; i < nCars; i++) {
         ZoneResults::Entry* e = &r->entries[i];
         e->b10 = 0;
-        e->place = fn_801B2EC0(i)->GetInfo()->place;
+        e->place = fn_801B2EC0(i)->State()->place;
         e->score = cars[i].score;
     }
 }

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/gamemode.h"
 #include "game/gamemodector.h"
 #include "game/sound.h"
@@ -879,33 +880,15 @@ public:
     virtual void Fill(StuntList* l);                                   // 0x48
 };
 
-struct RacerState {
-    u32 flags;  // offset 0x0
-    s32 place;  // offset 0x4
-    u8 pad8[0x10 - 0x8];
-    s32 rank;   // offset 0x10
-    u8 pad14[0x24 - 0x14];
-    s32 state;  // offset 0x24
-    u8 out;     // offset 0x28
-};
 // Still in the race: not finished (state 3) and not knocked out.
-static inline bool StillRacing(RacerState* s) {
+static inline bool StillRacing(DState* s) {
     bool racing = false;
-    if (s->state != 3 && !s->out) {
+    if (s->mode != 3 && !s->hold) {
         racing = true;
     }
     return racing;
 }
 
-
-// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
-// was named Racer here, a name world/carmodel use for a different class).
-class DeityCar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual RacerState* GetInfo(void);
-};
 
 struct CoinFrame {
     s32 a;      // offset 0x0
@@ -1260,7 +1243,7 @@ public:
         return 1;
     }
     virtual int vf20(int car) const {
-        RacerState* s = fn_801B2ED0(car)->GetInfo();
+        DState* s = fn_801B2ED0(car)->State();
         int r = 0;
         if (StillRacing(s) && !(timer.now > timer.limit)) {
             r = 1;
@@ -1888,7 +1871,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     }
     wasFull = (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= __float_epsilon[0]);
     boosting = 0;
-    if (fn_801B2EC0(id)->GetInfo()->flags & 4) {
+    if (fn_801B2EC0(id)->State()->flags & 4) {
         meterObj->Start(rc);
         meterObj->Reset();
         boosting = 1;
@@ -1997,7 +1980,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         boosts++;
         maxBoosts = boosts > maxBoosts ? boosts : maxBoosts;
     }
-    if (fn_801B2EC0(id)->GetInfo()->state == 0 && rc->f1F0 == 0x50 && rc->speed > 44.444447f) {
+    if (fn_801B2EC0(id)->State()->mode == 0 && rc->f1F0 == 0x50 && rc->speed > 44.444447f) {
         fn_801DF074(4, 1);
     }
     f58 = 0.0f;

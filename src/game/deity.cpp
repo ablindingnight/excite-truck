@@ -4,6 +4,7 @@
 // cars and locks the finish order, and runs the race intro countdown ("green flag"). The per-car update, the
 // lap-crossing scan and the qualify helper are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/centerline.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
@@ -31,12 +32,6 @@ void operator delete[](void* p);
 extern f32 lbl_8055E3C8;    // time
 extern s32 lbl_8055E3C4;    // frame
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-struct ILPos {
-    IdealPoint* seg;  // offset 0x0
-    f32 t;            // offset 0x4
-    s32 mode;         // offset 0x8
-};
 
 class LineFollower {
 public:
@@ -74,44 +69,6 @@ public:
     virtual void v1C(void);
     virtual void Reset(void);                // 0x20
     virtual void Begin(void);                // 0x24
-};
-
-// The car a DeityCar oversees (offsets only).
-class DCar {
-public:
-    virtual void v08(void);
-    virtual ~DCar(void);  // 0x0C (CarBody family: Init at 0x08, destructor at 0x0C)
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
-    virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
-    virtual void v4C(void);
-    virtual void v50(void);
-    virtual void Teleport(void* info);  // 0x54
-    virtual void Lap(void);             // 0x58
-    u8 pad4[0x10 - 0x4];
-    u32 type;  // offset 0x10
-    u8 pad14[0x54 - 0x14];
-    f32 fwd[3];  // offset 0x54
-    u8 pad60[0x94 - 0x60];
-    f32 pos[3];  // offset 0x94
-    u8 padA0[0x1EC - 0xA0];
-    s32 il;      // offset 0x1EC
-    u8 pad1F0[0x5BC - 0x1F0];
-    f32 ahead;   // offset 0x5BC
-    u8 pad5C0[0x5EC - 0x5C0];
-    f32 boost;   // offset 0x5EC: catch-up
 };
 
 // The AI sub-task manager (fn_8013C9F4, CSubTaskMgr family: destructor at 0x08).
@@ -187,70 +144,6 @@ public:
     virtual void mE0(void);
     virtual void mE4(void);
     virtual DAI* GetAI(void);  // 0xE8
-};
-
-// Per-car race state (the vtable 0x10 accessor returns it). NOTE: the offset comments are relative
-// to the owning DeityCar (State() returns car + 4); subtract 4 for offsets within DState.
-// Grid slot: the car in front in the same column and the column offset.
-struct DGridSlot {
-    DCar* ahead;  // offset 0x0
-    f32 lane;     // offset 0x4
-};
-
-struct DState {
-    u32 flags;   // offset 0x4
-    s32 place;   // offset 0x8
-    s32 wC;      // offset 0xC
-    f32 f10;     // offset 0x10
-    s32 lap;     // offset 0x14
-    f32 f18;     // offset 0x18
-    f32 best;    // offset 0x1C
-    f32 last;    // offset 0x20
-    f32 qual;    // offset 0x24
-    s32 mode;    // offset 0x28
-    u8 hold;     // offset 0x2C
-    f32 holdTime;  // offset 0x30
-    DGridSlot grid;  // offset 0x34
-};
-
-class DeityCar {
-public:
-    DeityCar(void);
-    virtual void Reset(void);             // 0x08
-    virtual void Update(void);            // 0x0C
-    virtual DState* State(void);          // 0x10
-    virtual int v14(void);                // 0x14
-    virtual IdealFollower* Ideal(void);   // 0x18
-    virtual LineFollower* Line(void);     // 0x1C
-    virtual DCar* Car(void);              // 0x20
-    virtual void v24(void);               // 0x24
-    virtual void v28(void* a, void* b, s32* out);  // 0x28
-    virtual void v2C(void* a, void* b, s32* out);  // 0x2C
-    virtual void Hold(int who);           // 0x30
-    virtual void Release(void);           // 0x34
-    virtual u8 Held(void);                // 0x38
-    virtual ~DeityCar(void);              // 0x3C
-    virtual DState* State2(void);         // 0x40
-    void SetRank(s32 r) {
-        if (!locked) {
-            rank = r;
-        }
-    }
-    u8 state[0x38];        // offset 0x4
-    LineFollower* line;    // offset 0x3C
-    ILPos ideal;           // offset 0x40
-    ILPos racing;          // offset 0x4C
-    IdealFollower* follower;  // offset 0x58
-    DCar* car;             // offset 0x5C
-    s32 index;             // offset 0x60
-    s32 stuck;             // offset 0x64
-    s32 finishLap;         // offset 0x68
-    s32 start;             // offset 0x6C
-    f32 finishTime;        // offset 0x70
-    s32 rank;              // offset 0x74
-    u8 locked;             // offset 0x78
-    u8 finished;           // offset 0x79
-    s32 ai;                // offset 0x7C
 };
 
 #define DS(c) ((DState*)((u8*)(c)))
@@ -366,8 +259,7 @@ static inline void ScaleF3(f32* out, const f32* in, f32 s) {
     out[2] = in[2] * s;
 }
 void fn_801B07B4(TeleportInfo* t, const ILPos* at) {
-    ILPos p;
-    p = *at;
+    ILPos p = *at;
     while (fn_801B06D8(&p.seg->pos, &p.seg->dir)) {
         p.seg = p.seg->next;
     }

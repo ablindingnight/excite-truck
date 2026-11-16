@@ -4,36 +4,10 @@
 #include "game/common.h"
 #include "game/v2.h"
 #include "game/centerline.h"
+#include "game/ilpos.h"
 
 // The track's ideal/centre line and its followers (idealline.cpp), shared by its users (port: one definition of each
 // class). Moved verbatim from idealline.cpp, ObstaclesVtable 2026-11-16.
-
-static inline f32 ILerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
-
-struct ILPos {
-    ILPos(void) {
-        seg = 0;
-        mode = 10000;
-        t = 0.0f;
-    }
-    ILPos(IdealPoint* s, f32 f, s32 m) {
-        seg = s;
-        t = f;
-        mode = m;
-    }
-    // Point and heading on the line at this position (method names unproven).
-    void Pos(V2* o) const {
-        o->x = ILerpT(t, seg->pos.x, seg->next->pos.x);
-        o->y = ILerpT(t, seg->pos.y, seg->next->pos.y);
-    }
-    void Dir(V2* o) const {
-        o->x = ILerpT(t, seg->dir.x, seg->next->dir.x);
-        o->y = ILerpT(t, seg->dir.y, seg->next->dir.y);
-    }
-    IdealPoint* seg;  // offset 0x0
-    f32 t;            // offset 0x4
-    s32 mode;         // offset 0x8
-};
 
 class LineFollower {
 public:

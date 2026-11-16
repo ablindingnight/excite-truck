@@ -5,6 +5,7 @@
 // done and then resets or stays finished; laps outside its active range park it. A rumble sound
 // and an on-screen text line are shared. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/sound.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -25,22 +26,6 @@ u8* fn_8017960C(int car);
 int fn_801B2F24(void);  // racer count
 }
 
-
-struct LapInfo {
-    u8 pad[0x4];
-    s32 checkpoint;  // offset 0x4
-    u8 pad8[0x8];
-    s32 lap;         // offset 0x10
-};
-
-// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
-// was named Racer here, a name world/carmodel use for a different class).
-class DeityCar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual LapInfo* Laps(void);  // 0x10
-};
 
 extern "C" DeityCar* fn_801B2EC0(int car);
 
@@ -434,7 +419,7 @@ void ActionSequence::Update(void) {
         int lap = -1;
         for (int i = 0; i < fn_801B2F24(); i++) {
             if (*(s32*)(fn_8017960C(i) + 0x1F0) == 0x50) {
-                int l = fn_801B2EC0(i)->Laps()->lap;
+                int l = fn_801B2EC0(i)->State()->lap;
                 if (l > lap) {
                     lap = l;
                 }
@@ -1009,7 +994,7 @@ public:
                     car = fn_80179630(i);
                     inside = fn_80139B5C(fn_8017960C(car), killBound);
                     if (inside) {
-                        cp = fn_801B2EC0(car)->Laps()->checkpoint;
+                        cp = fn_801B2EC0(car)->State()->place;
                         fn_801B83A0()->Respawn(car, cp);
                     }
                     fn_802E30C8("Car %d was %s the kill bound.", car, inside ? "inside" : "outside");

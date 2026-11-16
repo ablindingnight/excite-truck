@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/idealline.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
@@ -27,18 +28,6 @@ class PathSet {
 public:
     virtual void vf08(void);
     virtual CenterLine* GetLine(int index);  // offset 0xC
-};
-
-// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
-// was named Racer here, a name world/carmodel use for a different class).
-class DeityCar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual LineFollower* Follower(void);  // 0x1C
 };
 
 struct League {
@@ -172,7 +161,7 @@ f32 fn_801B79AC(void) { return fn_80137C54(-1)->carLen; }
 #pragma push
 #pragma opt_lifetimes off
 void fn_801B79D4(Respawn* r, int car, int mode) {
-    LineFollower* f = fn_801B2ED0(car)->Follower();
+    LineFollower* f = fn_801B2ED0(car)->Line();
     f32 row = fn_80139048();
     f32 len = fn_801B79AC();
     row = 0.61f + (len + row);

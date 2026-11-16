@@ -2,6 +2,7 @@
 // and either a single ghost line or a "racingline_set" of lines with per-car switching between them, inside
 // "legal_transition_regions", every min_change_t..max_change_t seconds. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/centerline.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -16,20 +17,6 @@ UnkStaticFFFF lbl_8055E278;
 
 struct IdealLineRes;
 struct Region;
-struct RacerInfo {
-    u8 pad0[0x34];
-    f32 side;  // offset 0x34
-};
-
-// The car fn_801B2EC0/fn_801B2ED0 return: deity.cpp's DeityCar (only the slots used here are declared;
-// was named Racer here, a name world/carmodel use for a different class).
-class DeityCar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual RacerInfo* GetInfo(void);  // 0x10
-};
-
 
 extern "C" {
 char* strrchr(const char* s, int c);
@@ -146,7 +133,7 @@ public:
 };
 
 static inline int RightSide(DeityCar* r) {
-    if (r->GetInfo()->side > 0.0f) {
+    if (r->State()->grid.lane > 0.0f) {
         return 1;
     }
     return 0;
@@ -312,7 +299,7 @@ public:
         for (i = 0; i < n; i++) {
             FixedList<IdealLineRes*, 8> cand;
             LineSide right;
-            if (fn_801B2ED0(i)->GetInfo()->side > 0.0f) {
+            if (fn_801B2ED0(i)->State()->grid.lane > 0.0f) {
                 right = kRight;
             } else {
                 right = kLeft;
