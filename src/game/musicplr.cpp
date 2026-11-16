@@ -75,6 +75,8 @@ void fn_80207924(MusicVoice* v);
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 static inline f32 Ramp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+/* Helper name unproven */
+static inline f32 FadeRamp(s32 dt, f32 a, f32 b) { return MIN(1.0f, ((f32)dt / 400.0f - a) / (b - a)); }
 
 struct MusicTrack {
     MusicVoice* voice;  // offset 0x0
@@ -133,7 +135,7 @@ void fn_8020A100(void) {
             if (dt >= 400 || dt < 0 || lbl_8055EDE0 == -1) {
                 lbl_8055EDE0 = lbl_8055EDE4;
             } else {
-                f32 t = MIN(1.0f, Ramp((f32)dt / 400.0f, 0.0f, 0.7f));
+                f32 t = FadeRamp(dt, 0.0f, 0.7f);
                 fade = Lerp(1.0f, 0.0f, Max(t, 0.0f));
             }
         }
