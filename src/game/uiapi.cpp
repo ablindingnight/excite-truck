@@ -1895,17 +1895,17 @@ void UIImageRef::Extra(void) {
 }
 
 void UIImageRef::DrawAt(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
-    void * arg0 = (void *)this;
-    fn_8022BAD0(*(s32 *)((char *)arg0 + 8), arg1, arg2, 0, arg4, arg5, *(const char **)((char *)arg0 + 4), arg6, 0, 1.0f);
+    UIImageRef* arg0 = this;
+    fn_8022BAD0(arg0->flags, arg1, arg2, 0, arg4, arg5, arg0->name, arg6, 0, 1.0f);
 }
 
 void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* p_arg5, int* p_arg6) {
-    void * arg0 = (void *)this;
+    UIImageRef* arg0 = this;
     s32 arg3 = (s32)p_arg3;
     s32 arg4 = (s32)p_arg4;
     s32 arg5 = (s32)p_arg5;
     s32 arg6 = (s32)p_arg6;
-    fn_8022AC1C(*(s32 *)((char *)arg0 + 8), *(s32 *)((char *)arg0 + 4), arg1, arg2, arg3, arg4, arg5, arg6);
+    fn_8022AC1C(arg0->flags, (s32)arg0->name, arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 int UIImageRef::Frames(void) {
@@ -1923,9 +1923,9 @@ extern "C" unsigned long strlen(const char *);
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
 void StpImage::DrawFrame(int arg1, int arg2, int arg3) {
-    void * arg0 = (void *)this;
-    s32 rem = arg3 % fn_802C4F14(*(s32 *)((char *)arg0 + 4));
-    fn_802C4C90(*(s32 *)((char *)arg0 + 4), arg1, arg2, rem, 0);
+    StpImage* arg0 = this;
+    s32 rem = arg3 % fn_802C4F14(arg0->value);
+    fn_802C4C90(arg0->value, arg1, arg2, rem, 0);
 }
 
 extern "C" void fn_802C4F2C(int, int *, int *);
@@ -1933,23 +1933,23 @@ extern "C" int fn_802C4EE4(int);
 extern "C" int fn_802C4EFC(int);
 // Screen rectangle of an image drawn at (x, y), allowing for the image's origin.
 void StpImage::Rect(int x, int y, int* p_left, int* p_top, int* p_right, int* p_bottom) {
-    void* self = (void*)this;
+    StpImage* self = this;
     s32* left = (s32*)p_left;
     s32* top = (s32*)p_top;
     s32* right = (s32*)p_right;
     s32* bottom = (s32*)p_bottom;
     int ox = 0;
     int oy = 0;
-    fn_802C4F2C(((s32*)self)[1], &ox, &oy);
+    fn_802C4F2C(self->value, &ox, &oy);
     *left = x - ox;
     *top = y - oy;
-    *right = *left + fn_802C4EE4(((s32*)self)[1]);
-    *bottom = *top + fn_802C4EFC(((s32*)self)[1]);
+    *right = *left + fn_802C4EE4(self->value);
+    *bottom = *top + fn_802C4EFC(self->value);
 }
 
 int StpImage::Frames(void) {
-    void * arg0 = (void *)this;
-    return fn_802C4F14(*(s32*)((u8*)arg0 + 4));
+    StpImage* arg0 = this;
+    return fn_802C4F14(arg0->value);
 }
 
 extern "C" void fn_802C40E8(int, int, int);
@@ -1962,27 +1962,27 @@ CvsImage::~CvsImage(void) {
 }
 
 void CvsImage::DrawFrame(int arg1, int arg2, unsigned int arg3) {
-    int arg0 = (int)this;
-    unsigned int r7 = *(unsigned int *)(arg0 + 0xC);
-    int r8 = *(int *)(arg0 + 4);
+    CvsImage* arg0 = this;
+    unsigned int r7 = (unsigned int)arg0->divisor;
+    int r8 = (int)arg0->value;
     unsigned int rem = arg3 % r7;
-    if (r8 != 0) fn_802C40E8(r8, arg1, arg2 - *(int *)(arg0 + 8) * rem);
+    if (r8 != 0) fn_802C40E8(r8, arg1, arg2 - arg0->count * rem);
 }
 
 void CvsImage::Rect(int arg1, int arg2, int* arg3, int* arg4, int* arg5, int* arg6) {
-    void * arg0 = (void *)this;
+    CvsImage* arg0 = this;
     int var_r0;
     *arg3 = arg1;
     *arg4 = arg2;
-    int *temp = *(int **)((char *)arg0 + 4);
+    int *temp = (int *)arg0->value;
     var_r0 = temp != 0 ? temp[2] : 0;
     *arg5 = *arg3 + var_r0;
-    *arg6 = *arg4 + *(int *)((char *)arg0 + 8);
+    *arg6 = *arg4 + arg0->count;
 }
 
 int CvsImage::Frames(void) {
-    void * arg0 = (void *)this;
-    return ((s32 *)arg0)[0xC / 4];
+    CvsImage* arg0 = this;
+    return arg0->divisor;
 }
 
 void UIImage::Draw(int, int, int, unsigned int) {
