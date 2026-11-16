@@ -1715,7 +1715,7 @@ u32 fn_8026A344(int i) { return ((CamRec*)fn_80267EE4(i))->target; }
 
 u32 fn_8026A368(int i) { return ((CamRec*)fn_80267EE4(i))->mode; }
 
-u8 fn_8026A38C(void) { return lbl_8055F488; }
+int fn_8026A38C(void) { return lbl_8055F488; }
 
 extern const f32 lbl_80563CBC;
 extern const f32 lbl_80563C2C;
