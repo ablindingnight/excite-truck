@@ -204,10 +204,13 @@ void fn_8023E7A8(int status) {
     };
     MenuDesc desc = {"mem3line.lyt", items, fn_8023ECF8, 0, 0};
     int show;
-    if (status == 3) {
+    switch (status) {
+    case 3:
         show = 1;
-    } else {
+        break;
+    default:
         show = 1;
+        break;
     }
     if (show) {
         fn_802146BC(&desc, -999, -999, 1);
