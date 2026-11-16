@@ -1631,7 +1631,7 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVecT(V3* out, const V3* in, const Mat3* m) {
+static inline void MulVecT(V3* out, const V3* in, const Mat3* const& m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[0][1], in->z, m->m[0][2]);
         f32 y = Dot3(in->x, m->m[1][0], in->y, m->m[1][1], in->z, m->m[1][2]);
@@ -1681,6 +1681,28 @@ static inline void InvertR(PlainValMatrix* const& out, const PlainValMatrix* m) 
     out->origin.z *= -1.0f;
 }
 
+/* Helper name unproven. */
+static inline void LoadProjectedTexture(Mat3& rotv, const PlainValMatrix& pose) {
+    rotv = pose.Mat();
+    f32 t = rotv.m[0][1];
+    rotv.m[0][1] = rotv.m[1][0];
+    rotv.m[1][0] = t;
+    t = rotv.m[0][2];
+    rotv.m[0][2] = rotv.m[2][0];
+    rotv.m[2][0] = t;
+    t = rotv.m[1][2];
+    rotv.m[1][2] = rotv.m[2][1];
+    rotv.m[2][1] = t;
+    f32 m[2][4] = {{0.0f, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 0.0f, 0.5f}};
+    m[0][0] = 0.5f * rotv.m[0][0];
+    m[0][1] = 0.5f * rotv.m[0][1];
+    m[0][2] = 0.5f * rotv.m[0][2];
+    m[1][0] = 0.5f * rotv.m[1][0];
+    m[1][1] = 0.5f * rotv.m[1][1];
+    m[1][2] = 0.5f * rotv.m[1][2];
+    GXLoadTexMtxImm((const f32 (*)[4])(m), (u32)0x2A, (GXMtxType)1);
+}
+
 void fn_802D1C04(void) {
     if (!lbl_8055FD70) {
         return;
@@ -1724,24 +1746,8 @@ void fn_802D1C04(void) {
     }
     case 1:
     case 5: {
-        f32 m[2][4] = {{0.0f, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 0.0f, 0.5f}};
-        Mat3 rotv = lbl_804C5690.Mat();
-        f32 t = rotv.m[0][1];
-        rotv.m[0][1] = rotv.m[1][0];
-        rotv.m[1][0] = t;
-        t = rotv.m[0][2];
-        rotv.m[0][2] = rotv.m[2][0];
-        rotv.m[2][0] = t;
-        t = rotv.m[1][2];
-        rotv.m[1][2] = rotv.m[2][1];
-        rotv.m[2][1] = t;
-        m[0][0] = 0.5f * rotv.m[0][0];
-        m[0][1] = 0.5f * rotv.m[0][1];
-        m[0][2] = 0.5f * rotv.m[0][2];
-        m[1][0] = 0.5f * rotv.m[1][0];
-        m[1][1] = 0.5f * rotv.m[1][1];
-        m[1][2] = 0.5f * rotv.m[1][2];
-        GXLoadTexMtxImm((const f32 (*)[4])(m), (u32)0x2A, (GXMtxType)1);
+        Mat3 rotv;
+        LoadProjectedTexture(rotv, lbl_804C5690);
         break;
     }
     case 4:
