@@ -5,7 +5,7 @@
 
 // A menu value widget: an option cycler shown on a menu row (the vptr follows the base data, at +0xC).
 // MenuWidgetBase's virtuals vf08..vf14 (its 0x18 vtable is __vt__14MenuWidgetBase, 0x8033D750) and MenuWidget's
-// vf28/vf2C are the weak copies uiapi.cpp emits after its __sinit (vf10 is const); __vt__10MenuWidget is at 0x8033D720. Derived widgets:
+// HasPrevious/HasNext are the weak copies uiapi.cpp emits after its __sinit (vf10 is const); __vt__10MenuWidget is at 0x8033D720. Derived widgets:
 // controls' ControlsChoiceFields, popwarn's ValueLabel, setmenu's StringMulti, unitmenu's ValueMulti.
 //
 // This header only DECLARES the virtuals. A unit that also includes menuwidget_inl.h sees their inline bodies and
@@ -43,8 +43,8 @@ public:
     virtual const char* Current(void) = 0;  // the label shown for the current value
     virtual void Prev(void) = 0;
     virtual void Next(void) = 0;
-    virtual int vf28(void);
-    virtual int vf2C(void);
+    virtual int HasPrevious(void);  // 0x28 (default: always)
+    virtual int HasNext(void);      // 0x2C (default: always)
 };
 
 #endif

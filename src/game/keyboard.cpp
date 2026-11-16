@@ -53,7 +53,7 @@ public:
     virtual ~NameChooser(void);
     virtual void Enter(void);
     virtual void Exit(void);
-    virtual void Unk18(void);
+    virtual void Changed(int key, void* value);
     virtual void Draw(void);
     virtual int Key(int key);
     virtual void Accept(void);     // 0x60
@@ -263,7 +263,7 @@ void NameChooser::Exit(void) {
 
 NameChooser::~NameChooser(void) {}
 
-void NameChooser::Unk18(void) { fn_80221E7C(this); }
+void NameChooser::Changed(int key, void* value) { fn_80221E7C(this); }
 
 void NameChooser::Draw(void) {
     u32 sel;

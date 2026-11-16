@@ -5,6 +5,7 @@
 // guesses apart from the strings.
 #include "game/common.h"
 #include <stdarg.h>
+#include "game/menuwidget.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -17,7 +18,7 @@ public:
     virtual void Enter(void) = 0;
     virtual void Exit(void) = 0;
     virtual void Unk14(void) = 0;
-    virtual void Unk18(void) = 0;
+    virtual void Changed(int key, void* value) = 0;
     virtual void Update(void) = 0;
     virtual void Unk20(void) = 0;
     virtual void Unk24(struct gxCanvas*) = 0;
@@ -46,7 +47,7 @@ public:
     virtual void Enter(void);   // 0x0C
     virtual void Exit(void);    // 0x10
     virtual void Unk14(void);
-    virtual void Unk18(void);
+    virtual void Changed(int key, void* value);
     virtual void Update(void);  // 0x1C
     virtual void Unk20(void);
     virtual void Unk24(struct gxCanvas*);
@@ -205,28 +206,6 @@ struct OptValues {
     s32 icon;       // offset 0x20
 };
 
-// A list of choices drawn by the layout (vptr after the base data).
-class ChoiceBase {
-public:
-    ChoiceBase(void) {
-        b0 = 0;
-        f4 = -1;
-        b8 = 0;
-    }
-    u8 b0;
-    s32 f4;
-    u8 b8;
-    virtual void Base08(void);
-    virtual void Base0C(void);
-    virtual void Base10(void);
-    virtual void Base14(void);
-    virtual ~ChoiceBase(void) {}
-    virtual const char* Get(void) = 0;
-    virtual void Prev(void) = 0;
-    virtual void Next(void) = 0;
-    virtual int HasPrev(void) = 0;
-    virtual int HasNext(void) = 0;
-};
 
 // A choice list drawn with its own font (the aspect ratio).
 class VideoList : public MenuState {
@@ -276,7 +255,7 @@ public:
 };
 
 // A list of localized choices for one value.
-class ChoiceList : public ChoiceBase {
+class ChoiceList : public MenuWidget {
 public:
     ChoiceList(s32* v, const char* s, ...) {
         va_list ap;
@@ -298,9 +277,9 @@ public:
     virtual ~ChoiceList(void) { delete[] strs; }
     virtual void Prev(void) { *value = (count + *value - 1) % count; }
     virtual void Next(void) { *value = (*value + 1) % count; }
-    virtual int HasPrev(void) { return *value > 0; }
+    virtual int HasPrevious(void) { return *value > 0; }
     virtual int HasNext(void) { return *value < count - 1; }
-    virtual const char* Get(void) { return strs[*value]; }
+    virtual const char* Current(void) { return strs[*value]; }
 
     const char** strs;  // offset 0x10
     s32 count;          // offset 0x14
@@ -308,7 +287,7 @@ public:
 };
 
 // A choice list whose visible length can be cut down (the track music list).
-class ChoiceListVar : public ChoiceBase {
+class ChoiceListVar : public MenuWidget {
 public:
     ChoiceListVar(s32* v, const char* s, ...) {
         va_list ap;
@@ -331,9 +310,9 @@ public:
     virtual ~ChoiceListVar(void) { delete[] strs; }
     virtual void Prev(void) { *value = (count + *value - 1) % count; }
     virtual void Next(void) { *value = (*value + 1) % count; }
-    virtual int HasPrev(void) { return *value > 0; }
+    virtual int HasPrevious(void) { return *value > 0; }
     virtual int HasNext(void) { return *value < count - 1; }
-    virtual const char* Get(void) { return strs[*value]; }
+    virtual const char* Current(void) { return strs[*value]; }
     virtual void SetCount(s32 n) { count = n; }
     virtual void Set(s32 v) { *value = v; }
     virtual s32 Value(void) { return *value; }

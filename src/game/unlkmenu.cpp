@@ -75,7 +75,7 @@ public:
     virtual void Enter(void) = 0;
     virtual void Exit(void) = 0;
     virtual void Unk14(void) = 0;
-    virtual void Unk18(void) = 0;
+    virtual void Changed(int key, void* value) = 0;
     virtual void Update(void) = 0;
     virtual void Unk20(void) = 0;
     virtual void Unk24(struct gxCanvas*) = 0;
@@ -105,7 +105,7 @@ public:
     virtual void Enter(void);   // 0x0C
     virtual void Exit(void);    // 0x10
     virtual void Unk14(void);
-    virtual void Unk18(void);
+    virtual void Changed(int key, void* value);
     virtual void Update(void);  // 0x1C
     virtual void Unk20(void);
     virtual void Unk24(struct gxCanvas*);

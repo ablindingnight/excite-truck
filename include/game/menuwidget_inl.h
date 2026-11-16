@@ -20,8 +20,8 @@ inline int MenuWidgetBase::vf10(void) const {
 
 inline int MenuWidgetBase::vf14(void) { return 1; }
 
-inline int MenuWidget::vf28(void) { return 1; }
+inline int MenuWidget::HasPrevious(void) { return 1; }
 
-inline int MenuWidget::vf2C(void) { return 1; }
+inline int MenuWidget::HasNext(void) { return 1; }
 
 #endif

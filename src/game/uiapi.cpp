@@ -2250,7 +2250,7 @@ void MenuState::Unk14(void) {
 
 }
 
-void MenuState::Unk18(void) {
+void MenuState::Changed(int key, void* value) {
 	fn_80221E7C(this);
 }
 
@@ -2349,7 +2349,7 @@ extern "C" {
 void Draw__9MenuStateFv(void);
 void Exit__9MenuStateFv(void);
 void Unk14__9MenuStateFv(void);
-void Unk18__9MenuStateFv(void);
+void Changed__9MenuStateFiPv(void);
 void Unk20__9MenuStateFv(void);
 void Unk24__9MenuStateFP8gxCanvas(void);
 void Unk2C__9MenuStateFv(void);
