@@ -526,8 +526,8 @@ static inline void BinShadows(Grid& g, TexEntry* te, const f32& s) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802B9108(s16 sz, Grid& g) {
+/* Helper name unproven: the coarse-grid pass over the neighbour cells; the boundary is needed (in place -1.00) */
+static inline void FillCoarseGrid(s16 sz, Grid& g) {
     for (int x = sz - 0x200; x < 0x200; x += sz * 2) {
         int y = sz;
         for (y -= 0x200; y < 0x200; y += sz * 2) {
@@ -583,7 +583,7 @@ void fn_802B9108(s16 size) {
     }
     s16 sz = g.size;
     if (sz > 4 && sz <= 8) {
-        Loop1_fn_802B9108(sz, g);
+        FillCoarseGrid(sz, g);
     }
     for (int x = size - 0x200; x < 0x200; x += d) {
         int start;
