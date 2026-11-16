@@ -6,6 +6,7 @@
 #include <string.h>
 #include "game/camrec.h"
 #include "game/camview.h"
+#include "game/idealline.h"
 #include "game/math_types.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -26,15 +27,16 @@ struct Words12 {
 class CenterLine;
 
 
-// Walks the ideal racing line for camera placement.
-struct IdealFollower {
+// idealline.h's IdealFollowerData as plain storage (MATCHING-AID: built and destroyed by the linker-name ctor/dtor calls
+// below; a real IdealFollowerData local adds the class's destructor call and vptr stores retail lacks).
+struct IdealFollowerData {
     u8 pad0[0x4];    // offset 0x0
-    u8* seg;         // offset 0x4, current line segment
+    IdealPoint* seg; // offset 0x4, current line segment
     f32 t;           // offset 0x8, how far along it
     u8 padC[0x4];    // offset 0xC
     f32 dir[2];      // offset 0x10, heading (x, z)
     u8 pad18[0x14];  // offset 0x18
-    u8* line;        // offset 0x2C
+    CenterLine* line;  // offset 0x2C
     u8 pad30[0x20];  // offset 0x30
     u8* buf;         // offset 0x50
     u8 pad54[0x14];  // offset 0x54
@@ -42,24 +44,24 @@ struct IdealFollower {
 
 // A position on the ideal line: the segment and how far along it.
 struct PathPos {
-    u8* seg;       // offset 0x0
+    IdealPoint* seg;  // offset 0x0
     f32 t;         // offset 0x4
     u8 pad8[0x8];  // offset 0x8
 };
 
 extern "C" {
-f32 fn_80134E34(IdealFollower* f, f32 dist);  // aidriver: returns the follower's distance
-PathPos fn_80136468(IdealFollower* f, f32 m);  // idealline: returns the ILPos by value
-void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 k);
+f32 fn_80134E34(IdealFollowerData* f, f32 dist);  // aidriver: returns the follower's distance
+PathPos fn_80136468(IdealFollowerData* f, f32 m);  // idealline: returns the ILPos by value
+void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 k);
 }
 
 extern CamPose lbl_80499950;  // trackside camera frames
 extern CamPose lbl_80499920;
 
-extern "C" IdealFollower* __ct__13IdealFollowerFiP10CenterLine(IdealFollower* f, int mode, CenterLine* line);
+extern "C" IdealFollowerData* __ct__13IdealFollowerFiP10CenterLine(IdealFollowerData* f, int mode, CenterLine* line);
 // The base LineFollower destructor (idealline.cpp) that IdealFollower's inlined destructor ends with, by its
-// mangled name like the constructor above (IdealFollower is a flat struct here).
-extern "C" void __dt__12LineFollowerFv(IdealFollower* f, int del);
+// mangled name like the constructor above (IdealFollowerData is a flat struct here).
+extern "C" void __dt__12LineFollowerFv(IdealFollowerData* f, int del);
 
 extern "C" {
 void EventUnInstallHandler(void* cb);
@@ -381,13 +383,13 @@ static inline void ShakeRot(ShakeMat* r, const ShakeVec& w) {
 // The track a car is on, as the camera code sees it.
 struct CamTrack {
     u8 pad0[0x4];
-    u8* seg;       // offset 0x4
+    IdealPoint* seg;  // offset 0x4
     u8 pad8[0x24];
     u8* path;      // offset 0x2C
 };
 
 struct CamTrackPos {
-    u8* seg;       // offset 0x0
+    IdealPoint* seg;  // offset 0x0
     f32 t;         // offset 0x4
     u8 pad8[0x4];  // offset 0x8
 };
@@ -441,7 +443,7 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
     CamXZ xz(pose->pos.v[0], pose->pos.v[2]);
     CamTrackPos at;
     fn_80136594(&at, trk, &xz);
-    f32 camDist = lbl_8055C4CC + (F32(at.seg, 0x1C) + F32(at.seg, 0x18) * at.t);
+    f32 camDist = lbl_8055C4CC + (at.seg->dist + at.seg->len * at.t);
     int n = fn_8026A2C8();
     f32 best = lbl_8055F49C;
     u8* near = 0;
@@ -451,9 +453,9 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
         CamXZ rxz(rp[0], rp[2]);
         CamTrackPos rat;
         fn_80136594(&rat, trk, &rxz);
-        f32 d = (F32(rat.seg, 0x1C) + F32(rat.seg, 0x18) * rat.t) - camDist;
+        f32 d = (rat.seg->dist + rat.seg->len * rat.t) - camDist;
         if (d < lbl_80563C20) {
-            u32 lap = trk->seg ? U8(trk->seg, 0x34) : 3;
+            u32 lap = trk->seg ? trk->seg->type : 3;
             d += *(f32*)(trk->path + lap * 4 + 8);
         }
         if (d * d < lbl_8055F49C) {
@@ -500,7 +502,7 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
     CamXZ xz(c->pose.pos.v[0], c->pose.pos.v[2]);
     CamTrackPos at;
     fn_80136594(&at, trk, &xz);
-    f32 camDist = lbl_8055C4CC + (F32(at.seg, 0x1C) + F32(at.seg, 0x18) * at.t);
+    f32 camDist = lbl_8055C4CC + (at.seg->dist + at.seg->len * at.t);
     int n = fn_8026A2C8();
     f32 best = lbl_8055F49C;
     u8* near = 0;
@@ -510,9 +512,9 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
         CamXZ rxz(rp[0], rp[2]);
         CamTrackPos rat;
         fn_80136594(&rat, trk, &rxz);
-        f32 d = (F32(rat.seg, 0x1C) + F32(rat.seg, 0x18) * rat.t) - camDist;
+        f32 d = (rat.seg->dist + rat.seg->len * rat.t) - camDist;
         if (d < lbl_80563C20) {
-            u32 lap = trk->seg ? U8(trk->seg, 0x34) : 3;
+            u32 lap = trk->seg ? trk->seg->type : 3;
             d += *(f32*)(trk->path + lap * 4 + 8);
         }
         if (d * d < lbl_8055F49C) {
@@ -1211,10 +1213,10 @@ void fn_80268358(CamRec* c) {
             f32 z;
             f32 x;
             KFrame* r;
-            IdealFollower f;
+            IdealFollowerData f;
             __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
             p0 = (f32*)f.seg;
-            p1 = *(f32**)(f.seg + 0x14);
+            p1 = (f32*)f.seg->next;
             x = LerpK(f.t, p0[0], p1[0]);
             z = LerpK(f.t, p0[1], p1[1]);
             KVec3 v;
@@ -1316,24 +1318,24 @@ static inline void ScalePerpendicular(CamPt* d, f32 inv) {
 
 // Builds a fixed camera frame (rows right/up/forward + position) beside the track at path position
 // (seg, t): offset sideways by the segment width, set on the ground, looking `angle` off the track.
-void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
+void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
     f32 inv;
-    const u8* next;
-    next = PTR(seg, 0x14);
+    const IdealPoint* next;
+    next = seg->next;
     f32 sn;
     CamPt pos;
     CamPt d;
     CamPt pt;
-    pos.x = LerpK(t, F32(seg, 0x0), F32(next, 0x0));
-    pos.y = LerpK(t, F32(seg, 0x4), F32(next, 0x4));
-    d.x = LerpK(t, F32(seg, 0x8), F32(next, 0x8));
-    d.y = LerpK(t, F32(seg, 0xC), F32(next, 0xC));
+    pos.x = LerpK(t, seg->pos.x, next->pos.x);
+    pos.y = LerpK(t, seg->pos.y, next->pos.y);
+    d.x = LerpK(t, seg->dir.x, next->dir.x);
+    d.y = LerpK(t, seg->dir.y, next->dir.y);
     inv = lbl_80563C2C / (f32)sqrt(Dot4_hm(d.x, d.y, d.x, d.y));
     f32 px;
     f32 c;
     f32 off;
     ScalePerpendicular(&d, inv);
-    off = lbl_80563C8C * F32(seg, 0x28) - lbl_80563C90;
+    off = lbl_80563C8C * seg->width - lbl_80563C90;
     pt.x = pos.x + d.x * off;
     pt.y = pos.y + d.y * off;
     F32(rec, 0x28) = lbl_80563C20;
@@ -1356,9 +1358,9 @@ void fn_80268BD4(u8* rec, const u8* seg, f32 t, f32 angle) {
 }
 
 void fn_80268D94(void) {
-    IdealFollower f;
+    IdealFollowerData f;
     __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
-    fn_80268BD4((u8*)&lbl_80499920, PTR(f.line, 0x1C), 0.0f, 2.088f);
+    fn_80268BD4((u8*)&lbl_80499920, f.line->points, 0.0f, 2.088f);
     if (f.buf) {
         delete[] f.buf;
     }
@@ -1367,11 +1369,11 @@ void fn_80268D94(void) {
 }
 
 void fn_80268E00(void) {
-    IdealFollower f;
+    IdealFollowerData f;
     const PathPos& at = fn_80136468(&f, fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), -1.0f));
     PathPos& pos = const_cast<PathPos&>(at);  // the returned temporary itself (not a const object)
     if (!pos.seg) {
-        pos.seg = PTR(f.line, 0x1C);
+        pos.seg = f.line->points;
     }
     fn_80268BD4((u8*)&lbl_80499950, pos.seg, pos.t, 4.176f);
     if (f.buf) {
