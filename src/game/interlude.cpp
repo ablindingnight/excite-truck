@@ -7,6 +7,7 @@
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
+#include "game/respawn.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -141,12 +142,7 @@ struct CamEvent {
     f32 interpTime;  // offset 0x6C
 };
 
-// An editor camera: rotation rows, then position.
-struct CamPose {
-    Mat3 rot;   // offset 0x0
-    ValVec3 pos;  // offset 0x24
-};
-
+// CamPose: common.h's PlainValMatrix (rotation rows + origin; Mat() for the Mat3 helpers).
 // The camera move being played (the player state starts with it).
 struct CamPlay {
     f32 start;       // offset 0x0
@@ -271,7 +267,7 @@ Track* fn_80178C9C(void);
 u8* fn_8017960C(int car);
 int fn_80179630(int a);
 void fn_801B7C8C(void* a, void* b, const f32* dir);
-void fn_801B8054(Mat3* m, Track* t, f32 a, f32 h);
+void fn_801B8054(CarPlace* p, Track* t, f32 a, f32 h);
 void fn_8020C8F8(void);
 void fn_8020C8FC(void);
 void fn_8023895C(void);
@@ -354,13 +350,13 @@ struct AIOrder {
 // The interlude editor's state (this file's .bss, in address order).
 struct PlayerState {
     CamPlay play;  // offset 0x0
-    CamPose prev;  // offset 0x68: the pose blended from
+    PlainValMatrix prev;  // offset 0x68: the pose blended from
     f32 prevFov;   // offset 0x98
 };
 PlayerState lbl_80437D88;
 Message lbl_80437E24;
 AIOrder lbl_80437E30[8];       // each car's standing order
-CamPose lbl_80437ED0[4];       // each view's last camera pose
+PlainValMatrix lbl_80437ED0[4];       // each view's last camera pose
 ValVec3 lbl_80437F90[4];         // each view's car heading
 char lbl_80437FC0[0x130];      // status line
 char lbl_804380F0[0x100];      // input line
@@ -602,20 +598,20 @@ int fn_801C3A00(u32 mask) {
     return -1;
 }
 
-void fn_801C3A3C(Mat3* m, f32 h, f32 yaw) {
+void fn_801C3A3C(CarPlace* p, f32 h, f32 yaw) {
     Track* t = fn_80178C9C();
     TrackNode* n;
     for (n = t->list->first; n && n->skip; n = n->next) {
     }
     f32 y = n ? n->height : 0.0f;
-    fn_801B8054(m, t, 0.0f, y + h);
+    fn_801B8054(p, t, 0.0f, y + h);
     ValVec3 e;
     e.x = 0.0f;
     e.y = yaw;
     e.z = 0.0f;
     Mat3 r;
     Mat3FromEuler(&r, (const Vec3*)&e);
-    Mat3Mul(m, &r, m);
+    Mat3Mul(&p->place.Mat(), &r, &p->place.Mat());
 }
 
 void fn_801C3AF8(void* a, void* b, f32 ang) {
@@ -1010,34 +1006,23 @@ void fn_801C4BAC(void) {
     }
 }
 
-// Where a teleported car is put: its frame, velocity and line node (-1 = find one).
-struct CarPlace {
-    CarPlace(void) : node(-1) {
-        frame.rot.m[0][0] = 1.0f;
-        frame.rot.m[0][1] = 0.0f;
-        frame.rot.m[0][2] = 0.0f;
-        frame.rot.m[1][0] = 0.0f;
-        frame.rot.m[1][1] = 1.0f;
-        frame.rot.m[1][2] = 0.0f;
-        frame.rot.m[2][0] = 0.0f;
-        frame.rot.m[2][1] = 0.0f;
-        frame.rot.m[2][2] = 1.0f;
-        frame.pos.x = 0.0f;
-        frame.pos.y = 0.0f;
-        frame.pos.z = 0.0f;
-    }
-    CamPose frame;  // offset 0x0
-    ValVec3 vel;      // offset 0x30
-    u32 unk3C;      // offset 0x3C
-    s16 node;       // offset 0x40
-};
-
-// A car's start pose (the place plus more).
-// placecar.cpp's Respawn (fn_801B8100), declared as far as this unit reads it
-struct Respawn {
-    CarPlace place;
-    u32 w44[3];  // offset 0x44
-};
+// CarPlace, Respawn: game/respawn.h. A teleport target starts as the identity frame with no line hint (-1 = find
+// one): the constructor interlude's local had, as a helper so crushmaster's plain CarPlace stays constructor-free.
+static inline void ResetPlace(CarPlace* p) { /* Helper name unproven */
+    p->hint = -1;
+    p->place.basis[0].x = 1.0f;
+    p->place.basis[0].y = 0.0f;
+    p->place.basis[0].z = 0.0f;
+    p->place.basis[1].x = 0.0f;
+    p->place.basis[1].y = 1.0f;
+    p->place.basis[1].z = 0.0f;
+    p->place.basis[2].x = 0.0f;
+    p->place.basis[2].y = 0.0f;
+    p->place.basis[2].z = 1.0f;
+    p->place.origin.x = 0.0f;
+    p->place.origin.y = 0.0f;
+    p->place.origin.z = 0.0f;
+}
 
 
 // The parts of a car body the AI orders read.
@@ -1049,7 +1034,7 @@ struct ICar {
     ValVec3 pos;   // offset 0x60
     s16 id;       // offset 0x6C
     u8 pad6E[2];
-    CamPose frame;  // offset 0x70
+    ValMatrix frame;  // offset 0x70
     u8 padA0[0x118 - 0xA0];
     ValVec3 heading;  // offset 0x118
     u8 pad124[0x128 - 0x124];
@@ -1203,9 +1188,9 @@ void debug_event(void) {
                         ICar* car = (ICar*)fn_8017960C(i);
                         if (car) {
                             ValVec3 d;
-                            d.x = car->frame.pos.x - w->pt.x;
-                            d.y = car->frame.pos.y - w->pt.y;
-                            d.z = car->frame.pos.z - w->pt.z;
+                            d.x = car->frame.origin.x - w->pt.x;
+                            d.y = car->frame.origin.y - w->pt.y;
+                            d.z = car->frame.origin.z - w->pt.z;
                             if (PSVECDotProduct((const Vec*)&d, (const Vec*)&car->heading) > 0.1f) {
                                 blocked = 0;
                             }
@@ -1294,10 +1279,11 @@ void debug_event(void) {
                     break;
                 }
                 CarPlace place;
+                ResetPlace(&place);
                 pl = &place;
                 switch (tp->where) {
                 case 1:
-                    fn_801C3A3C(&pl->frame.rot, tp->pt.x + (f32)k * tp->pt.y, tp->yaw);
+                    fn_801C3A3C(pl, tp->pt.x + (f32)k * tp->pt.y, tp->yaw);
                     break;
                 case 0: {
                     V2 pt;
@@ -1311,30 +1297,30 @@ void debug_event(void) {
                     if (fn_801769CC()->type & 0x100) {
                         Respawn pose = car->pose;
                         fn_801B8100(&pose, i, car->player);
-                        place = pose.place;
+                        place = pose;
                     } else if (fn_801769CC()->type & 0x100) {
                         f32 spacing = 0.61f + (fn_80137C54(-1)->len + fn_80139048());
                         fn_801B8048(pl, fn_801B2ED0(i)->Follower(), 0.0f, off.y + -spacing * (f32)k);
                     } else {
-                        CamPose f;
-                        f = car->pose.place.frame;
+                        ValMatrix f;
+                        f = car->pose.place;
                         ValVec3 euler;
                         SetXYZ(&euler, 0.0f, tp->yaw, 0.0f);
                         Mat3 r;
                         Mat3FromEuler(&r, (const Vec3*)&euler);
-                        Mat3Mul(&f.rot, &r, &f.rot);
+                        Mat3Mul(&f.Mat(), &r, &f.Mat());
                         f32 xv = off.x;
-                        f.pos.x += f.rot.m[0][0] * xv;
-                        f.pos.y += f.rot.m[0][1] * off.x;
-                        f.pos.z += f.rot.m[0][2] * off.x;
+                        f.origin.x += f.basis[0].x * xv;
+                        f.origin.y += f.basis[0].y * off.x;
+                        f.origin.z += f.basis[0].z * off.x;
                         f32 yv = off.y;
-                        f.pos.x += f.rot.m[2][0] * yv;
-                        f.pos.y += f.rot.m[2][1] * off.y;
-                        f.pos.z += f.rot.m[2][2] * off.y;
-                        f32 yaw = atan2(f.rot.m[2][0], f.rot.m[2][2]);
+                        f.origin.x += f.basis[2].x * yv;
+                        f.origin.y += f.basis[2].y * off.y;
+                        f.origin.z += f.basis[2].z * off.y;
+                        f32 yaw = atan2(f.basis[2].x, f.basis[2].z);
                         V2 pt;
-                        pt.y = f.pos.z;
-                        pt.x = f.pos.x;
+                        pt.y = f.origin.z;
+                        pt.x = f.origin.x;
                         fn_801C3AF8(pl, &pt, yaw);
                     }
                     break;
@@ -1343,7 +1329,7 @@ void debug_event(void) {
                     fn_802E317C("interlude: unhandled teleport where %d", tp->where);
                     break;
                 }
-                SetXYZ(&place.vel, place.frame.rot.m[2][0] * tp->speed, place.frame.rot.m[2][1] * tp->speed, tp->speed * place.frame.rot.m[2][2]);
+                SetXYZ(&place.vel, place.place.basis[2].x * tp->speed, place.place.basis[2].y * tp->speed, tp->speed * place.place.basis[2].z);
                 ((CarObj*)car)->Place(&place);
                 if (CarTypeIsReal(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
                     fn_801B8E28(i);
@@ -1494,7 +1480,7 @@ void fn_801C56AC(void) {
 int fn_801C5B60(void) { return lbl_8055E7E2; }
 
 // A camera view handed to the camera manager (0xE0 bytes).
-struct CamView : CamPose {  // rot at 0x0, pos at 0x24
+struct CamView : PlainValMatrix {  // rot at 0x0, pos at 0x24
     f32 fov;         // offset 0x30
     u8 pad34[0x58 - 0x34];
     s32 modeB;       // offset 0x58
@@ -1509,13 +1495,13 @@ struct CamView : CamPose {  // rot at 0x0, pos at 0x24
 // What the listener hears from: the car and its saved view and heading.
 struct CamListen {
     s32 car;
-    CamPose* pose;
+    PlainValMatrix* pose;
     ValVec3* heading;
 };
 
 extern "C++" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);  // weak (C++ linkage; this part of the file sits in an extern "C" block)
 extern "C" {
-void fn_801BFD34(ValVec3* out, const ValVec3* p, const CamPose* m);
+void fn_801BFD34(ValVec3* out, const ValVec3* p, const ValMatrix* m);
 void fn_8020655C(CamListen* l, int a);
 }
 
@@ -1594,11 +1580,11 @@ int fn_801C5B68(CamView* v, int idx) {
         lbl_8055E800++;
     }
     if (fn_801C5B60() && !lbl_8055E80C) {
-        CamPose* cam = (CamPose*)&lbl_80499050;
-        cam->pos.x = lbl_80437D88.play.origin.x;
-        cam->pos.y = lbl_80437D88.play.origin.y;
-        cam->pos.z = lbl_80437D88.play.origin.z;
-        cam->rot = lbl_80437D88.play.rot;
+        PlainValMatrix* cam = (PlainValMatrix*)&lbl_80499050;
+        cam->origin.x = lbl_80437D88.play.origin.x;
+        cam->origin.y = lbl_80437D88.play.origin.y;
+        cam->origin.z = lbl_80437D88.play.origin.z;
+        cam->Mat() = lbl_80437D88.play.rot;
         lbl_8055F47C = lbl_80437D88.play.fov;
     }
     if (!fn_801C5B60() || lbl_8055E80C) {
@@ -1630,48 +1616,48 @@ int fn_801C5B68(CamView* v, int idx) {
             dt = e * len;
         }
     }
-    v->pos.x = lbl_80437D88.play.origin.x;
-    v->pos.y = lbl_80437D88.play.origin.y;
-    v->pos.z = lbl_80437D88.play.origin.z;
-    v->rot = lbl_80437D88.play.rot;
+    v->origin.x = lbl_80437D88.play.origin.x;
+    v->origin.y = lbl_80437D88.play.origin.y;
+    v->origin.z = lbl_80437D88.play.origin.z;
+    v->Mat() = lbl_80437D88.play.rot;
     ValVec3 move;
     move.x = lbl_80437D88.play.v.x * dt;
     move.y = lbl_80437D88.play.v.y * dt;
     move.z = lbl_80437D88.play.v.z * dt;
     ValVec3 d;
-    MulVec(&d, &move, &v->rot);
-    v->pos.x += d.x;
-    v->pos.y += d.y;
-    v->pos.z += d.z;
+    MulVec(&d, &move, &v->Mat());
+    v->origin.x += d.x;
+    v->origin.y += d.y;
+    v->origin.z += d.z;
     ValVec3 turn;
     turn.x = lbl_80437D88.play.av.x * dt;
     turn.y = lbl_80437D88.play.av.y * dt;
     turn.z = lbl_80437D88.play.av.z * dt;
     Mat3 r;
     AxisAngleToRot(&r, turn);
-    MulM(&v->rot, &r, &v->rot);
+    MulM(&v->Mat(), &r, &v->Mat());
     if (lbl_80437D88.play.target >= 0) {
-        CamPose rel;
-        rel.rot = v->rot;
-        rel.pos = v->pos;
-        CamPose f;
+        PlainValMatrix rel;
+        rel.Mat() = v->Mat();
+        rel.origin = v->origin;
+        ValMatrix f;
         switch (lbl_80437D88.play.camType) {
         case 0:
-            f.rot.m[0][0] = 1.0f;
-            f.rot.m[0][1] = 0.0f;
-            f.rot.m[0][2] = 0.0f;
-            f.rot.m[1][0] = 0.0f;
-            f.rot.m[1][1] = 1.0f;
-            f.rot.m[1][2] = 0.0f;
-            f.rot.m[2][0] = 0.0f;
-            f.rot.m[2][1] = 0.0f;
-            f.rot.m[2][2] = 1.0f;
-            f.pos.x = 0.0f;
-            f.pos.y = 0.0f;
-            f.pos.z = 0.0f;
+            f.basis[0].x = 1.0f;
+            f.basis[0].y = 0.0f;
+            f.basis[0].z = 0.0f;
+            f.basis[1].x = 0.0f;
+            f.basis[1].y = 1.0f;
+            f.basis[1].z = 0.0f;
+            f.basis[2].x = 0.0f;
+            f.basis[2].y = 0.0f;
+            f.basis[2].z = 1.0f;
+            f.origin.x = 0.0f;
+            f.origin.y = 0.0f;
+            f.origin.z = 0.0f;
             break;
         case 1:
-            f = c->pose.place.frame;
+            f = c->pose.place;
             break;
         case 2:
             f = c->frame;
@@ -1681,16 +1667,16 @@ int fn_801C5B68(CamView* v, int idx) {
             break;
         }
         if (lbl_80437D88.play.camType != 1) {
-            fn_801BFD34(&v->pos, &rel.pos, &f);
-            Mat3Mul(&v->rot, &rel.rot, &f.rot);
+            fn_801BFD34(&v->origin, &rel.origin, &f);
+            Mat3Mul(&v->Mat(), &rel.Mat(), &f.Mat());
         } else {
-            v->pos = f.pos;
-            MulM(&v->rot, &rel.rot, &f.rot);
+            v->origin = f.origin;
+            MulM(&v->Mat(), &rel.Mat(), &f.Mat());
             ValVec3 o;
-            MulVec(&o, &rel.pos, &v->rot);
-            v->pos.x += o.x;
-            v->pos.y += o.y;
-            v->pos.z += o.z;
+            MulVec(&o, &rel.origin, &v->Mat());
+            v->origin.x += o.x;
+            v->origin.y += o.y;
+            v->origin.z += o.z;
         }
     }
     if (!(AbsF(lbl_80437D88.play.interpTime) <= __float_epsilon[0]) && dt < lbl_80437D88.play.interpTime) {
@@ -1800,22 +1786,22 @@ static inline void RotToAxisAngle(const Mat3* m, ValVec3* out) {
     }
 }
 
-static inline void InitCameraEvent(CamEvent* e, CamPose* cur) {
+static inline void InitCameraEvent(CamEvent* e, PlainValMatrix* cur) {
     e->fov = lbl_8055E834;
-    e->origin.x = cur->pos.x;
-    e->origin.y = cur->pos.y;
-    e->origin.z = cur->pos.z;
-    e->rot = cur->rot;
+    e->origin.x = cur->origin.x;
+    e->origin.y = cur->origin.y;
+    e->origin.z = cur->origin.z;
+    e->rot = cur->Mat();
     e->end = e->time + lbl_8055E830;
     e->accel = 1;
     if (lbl_8055E830 > 0.01f) {
         ValVec3 dp;
         Mat3 d;
         Mat3 inv;
-        inv = cur->rot;
+        inv = cur->Mat();
         fn_801C7254(&inv);
-        Mat3Mul(&d, &((CamPose*)&lbl_80438220)->rot, &inv);
-        fn_80144CD0(&dp, &((CamPose*)&lbl_80438220)->pos, (const f32*)cur);
+        Mat3Mul(&d, &((PlainValMatrix*)&lbl_80438220)->Mat(), &inv);
+        fn_80144CD0(&dp, &((PlainValMatrix*)&lbl_80438220)->origin, (const f32*)cur);
         RotToAxisAngle(&d, &e->av);
         f32 inv1 = 1.0f / lbl_8055E830;
         e->av.x *= inv1;
@@ -1841,7 +1827,7 @@ void fn_801C6E40(void) {
     lbl_8055E830 = atof(lbl_804380F0);
     CamEvent* e = (CamEvent*)fn_801C3C80();
     e->type = 1;
-    InitCameraEvent(e, (CamPose*)&lbl_804381F0);
+    InitCameraEvent(e, (PlainValMatrix*)&lbl_804381F0);
     sprintf(lbl_80437FC0, "Camera added at %.2f seconds", e->time);
     qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
     fn_801C957C(0);
@@ -2942,8 +2928,8 @@ void fn_801CA67C(void) {
     fn_80238A74(10, 25, buf, -1);
     sprintf(buf, "E: %d/%d", lbl_8055E7F4, lbl_8055E7F0);
     fn_80238A74(110, 25, buf, -1);
-    const CamPose* cam = (const CamPose*)&lbl_80499050;
-    sprintf(buf, "C: %5.1f, %5.1f, %5.1f", cam->pos.x, cam->pos.y, cam->pos.z);
+    const PlainValMatrix* cam = (const PlainValMatrix*)&lbl_80499050;
+    sprintf(buf, "C: %5.1f, %5.1f, %5.1f", cam->origin.x, cam->origin.y, cam->origin.z);
     fn_80238A74(10, 50, buf, -1);
     sprintf(buf, "R: %5.2f, %5.2f, %5.2f", rot.x, rot.y, rot.z);
     fn_80238A74(10, 65, buf, 0xFFC0C0C0);

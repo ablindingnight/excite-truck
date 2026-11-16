@@ -85,10 +85,27 @@ static inline ValPoint CopyValPoint(ValPoint point) {
     return point;
 }
 
+struct Mat3;  // game/math_types.h
+
+// The game's 0x30 pose: three rotation rows, then the origin. Mat() is the rotation as math_types.h's Mat3 (same
+// 0x24 bytes) for the matrix helpers (Mat3Mul, Mat3FromEuler): retail hands one pointer to both (interlude
+// fn_801C3A3C -> placecar fn_801B8054(CarPlace*) and Mat3Mul). This is the one documented cast of the vector
+// unification (2026-11-16): a union changes the copy forms (rmtx.h test), and so does a constructor-less base class.
 struct ValMatrix {
     ValMatrix(void) {}
     ValVec3 basis[3];  // basis_x, basis_y, basis_z
     ValVec3 origin;
+    Mat3& Mat(void) { return *(Mat3*)basis; }
+    const Mat3& Mat(void) const { return *(const Mat3*)basis; }
+};
+
+// The same pose with no constructor, for objects retail never constructs (globals and members of globals that a
+// constructor would put in __sinit, e.g. interlude's camera poses).
+struct PlainValMatrix {
+    ValVec3 basis[3];  // basis_x, basis_y, basis_z
+    ValVec3 origin;
+    Mat3& Mat(void) { return *(Mat3*)basis; }
+    const Mat3& Mat(void) const { return *(const Mat3*)basis; }
 };
 
 // A node inside a .val table (an entry's key/value pairs).
