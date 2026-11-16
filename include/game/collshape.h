@@ -25,7 +25,20 @@ class CollVolume;
 #ifndef COLLSHAPE_IFACE_DECL
 #define COLLSHAPE_IFACE_DECL __declspec(novtable)
 #endif
-class COLLSHAPE_IFACE_DECL CollShapeIface {
+
+// The root of the shapes: only a virtual destructor. Retail's only table for it is a weak 0xC one in betarace
+// (__vt__13CollShapeBase, with the weak __dt__13CollShapeBaseFv), the one unit that builds a shape without the
+// parameter constructor; so it is novtable everywhere else, and betarace defines COLLSHAPE_BASE_DECL empty
+// (MATCHING-AID, as COLLSHAPE_IFACE_DECL in sphcoll). Class name unproven.
+#ifndef COLLSHAPE_BASE_DECL
+#define COLLSHAPE_BASE_DECL __declspec(novtable)
+#endif
+class COLLSHAPE_BASE_DECL CollShapeBase {
+public:
+    virtual ~CollShapeBase(void) {}
+};
+
+class COLLSHAPE_IFACE_DECL CollShapeIface : public CollShapeBase {
 public:
     virtual ~CollShapeIface(void) = 0;
     virtual void vf0C(void) = 0;
@@ -44,6 +57,7 @@ inline CollShapeIface::~CollShapeIface(void) {}
 
 class CollShape : public CollShapeIface {
 public:
+    CollShape(void) {}  // fields set by the builder (betarace's spin box)
     CollShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
     // Parameter form, inlined into every builder; store order as mutphob's copy (the only order that keeps
     // SphereGroup and PolyShape identical).

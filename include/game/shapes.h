@@ -192,6 +192,22 @@ public:
         a34 = 0;
         radius = 0.2f + (f32)sqrt(x * x + y * y + z * z);
     }
+    // Half sizes form with every field written here (betarace's spin volume; store order as retail).
+    BoxShape(f32 x, f32 y, f32 z) {
+        owner = 0;
+        data = 0;
+        frame = 0;
+        stiff = 0.0f;
+        skin = 0.0f;
+        type = 'BOX ';
+        x1C = 0;
+        surface = 100;
+        half.x = x;
+        half.y = y;
+        half.z = z;
+        a34 = 0;
+        radius = 0.2f + (f32)sqrt(x * x + (y * y + z * z));
+    }
     // Full sizes form, halved here (trackobj's object volumes).
     BoxShape(f32 k, f32 s, const f32* dims) : CollShape(0, 0, 'BOX ', k, s) {
         f32 h = 0.5f;

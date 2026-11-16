@@ -12,6 +12,8 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#define COLLSHAPE_BASE_DECL  // MATCHING-AID: betarace emits the root shape table (see game/collshape.h)
+#include "game/shapes.h"
 #include "game/vpos.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
@@ -565,12 +567,6 @@ struct CarResult {
     u8 dnf;            // offset 0x34
 };
 
-// The root of the collision shapes: only a virtual destructor.
-class CollShapeBase {
-public:
-    virtual ~CollShapeBase(void) {}
-};
-
 // One line of the stunt summary on the results screen.
 class StuntDisplay {
 public:
@@ -1085,7 +1081,6 @@ struct Palette {
 void UseColor(const Color& c);
 
 // A star or coin lying on the track; the models are shared by all of them.
-class BoxShape;
 namespace {
 struct Pickup {
     Pickup(ValueNode* n);
@@ -1119,7 +1114,7 @@ struct Pickup {
     u32 colors[15];        // offset 0x3C
     u8 pad78[0x8C - 0x78];
     u32 glow[10];          // offset 0x8C
-    class BoxShape* vol;  // offset 0xB4
+    BoxShape* vol;  // offset 0xB4
     s32 hB8;               // offset 0xB8
     f32 angle;             // offset 0xBC
     s32 hC0;               // offset 0xC0
@@ -3108,65 +3103,6 @@ inline void BetaMaster::LoadLevel(void) {
 inline void BetaMaster::vfF4(void) { LoadLevel(); }
 
 
-// The abstract collision shape (collvol.cpp's CollShape; shape tag at +0x18, mass at +0x20).
-class CollShape : public CollShapeBase {
-public:
-    virtual ~CollShape(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(void) = 0;
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void) = 0;
-    virtual f32 Radius(void) = 0;  // 0x3C
-    virtual void SetSurface(int m) { x20 = m; }  // 0x40 (surface/material id, 100 by default)
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(void);
-
-    s32 x4;       // offset 0x4
-    s32 x8;       // offset 0x8
-    s32 xC;       // offset 0xC
-    f32 x10;      // offset 0x10
-    f32 x14;      // offset 0x14
-    u32 type;     // offset 0x18
-    s32 x1C;      // offset 0x1C
-    s32 x20;      // offset 0x20
-};
-
-// A box shape (collvol.cpp's BoxShape), used here around a spin trigger.
-class BoxShape : public CollShape {
-public:
-    BoxShape(f32 x, f32 y, f32 z) {
-        x4 = 0;
-        x8 = 0;
-        xC = 0;
-        x10 = 0.0f;
-        x14 = 0.0f;
-        type = 'BOX ';
-        x1C = 0;
-        x20 = 100;
-        half[0] = x;
-        half[1] = y;
-        half[2] = z;
-        x34 = 0;
-        radius = 0.2f + (f32)sqrt(x * x + (y * y + z * z));
-    }
-    virtual void vf10(void);
-    virtual void vf38(void);
-    virtual f32 Radius(void);
-
-    f32 half[3];  // offset 0x24
-    f32 radius;   // offset 0x30
-    s32 x34;      // offset 0x34
-};
-
 struct Model {
     s32 nMats;  // offset 0x0
     u8* mats;   // offset 0x4
@@ -3380,9 +3316,9 @@ inline Pickup::Pickup(ValueNode* n) {
         hC0 = fn_801FB1F4(1);
         hB8 = fn_801FA8E0(vol, m, hC0);
         BoxShape* shape = vol;
-        shape->half[0] = hx;
-        shape->half[1] = hy;
-        shape->half[2] = hz;
+        shape->half.x = hx;
+        shape->half.y = hy;
+        shape->half.z = hz;
     }
 }
 
