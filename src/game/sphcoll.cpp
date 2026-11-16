@@ -465,8 +465,8 @@ public:
     virtual ~TubeShape(void) {}
 };
 
-// A box ('BOX '; vtable __vt__8BoxShape): half sizes from 0x24. Adds two slots; vf54 (the orientation the box
-// tests against) is pure here.
+// A box ('BOX '; vtable __vt__8BoxShape, 0x54 bytes + the 4-byte pad before TubeShape's 8-aligned table):
+// half sizes from 0x24. Adds slot vf50. The loader builds it directly, so it is concrete.
 class BoxShape : public CollShape {
 public:
     BoxShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
@@ -477,11 +477,10 @@ public:
     virtual void vf4C(void);
     virtual ~BoxShape(void) {}
     virtual u32 vf50(void);
-    virtual u8* vf54(void) = 0;
 };
 
 // A box that keeps its own copy of the frame's rotation (0x44) and world centre (0x68) (vtable 0x80333868; built
-// by fn_801A2354). Class name unproven.
+// by fn_801A2354). Adds slot vf54 (that rotation). Class name unproven.
 class OrientedBoxShape : public BoxShape {
 public:
     virtual void vf0C(void);
@@ -521,10 +520,11 @@ public:
     virtual ~PolyShape(void) {}
 };
 
-// A mesh volume ('PMSH'; vtable 0x80333728; built by fn_801A3DAC / fn_801A3F5C); owns its mesh at 0x24.
+// A mesh volume ('PMSH'; vtable 0x80333728; built by fn_801A3DAC and from file data); owns its mesh at 0x24.
 // Class name unproven.
 class MeshShape : public CollShape {
 public:
+    MeshShape(u32 data, u32 inPlace);  // from file data; the mesh is built in place at 0x40 when `inPlace`
     virtual ~MeshShape(void);
     virtual void vf10(u8* other);
     virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
@@ -533,10 +533,11 @@ public:
     virtual void vf4C(void);
 };
 
-// A static world object with a collision volume (vtable 0x803336F8; built by fn_801A4A8C / fn_801A4B5C from file
+// A static world object with a collision volume (vtable 0x803336F8; built by fn_801A4A8C, or from file
 // data): pose 0x04, mesh 0x3C, volume 0x48. Not a CollShape. Class and slot names unproven.
 class StaticCollObject {
 public:
+    StaticCollObject(bool swap, u8* vol);  // from file data; its volume is built in place at vol
     virtual u32 vf08(void);
     virtual void vf0C(void);
     virtual u8* vf10(void);
@@ -560,10 +561,6 @@ extern "C" void* __vt__12RagdollShape[];
 extern "C" void* __vt__9PolyShape[];
 extern "C" void* __vt__9MeshShape[];
 extern "C" void* __vt__16StaticCollObject[];
-extern "C" u8* __ct__8BoxShapeFUlUl(u8* p, u32 data, u32 swap);
-extern "C" u8* __ct__7RingVolFUlUl(u8* p, u32 data, u32 swap);
-extern "C" u8* __ct__9TubeShapeFUlUl(u8* p, u32 data, u32 swap);
-extern "C" u8* __ct__11SphereShapeFUlUl(u8* p, u32 data, u32 swap);
 void fn_801A49FC(u8* p);
 void fn_801A49E8(u8* p);
 void fn_801A44D4(u8* l);
@@ -4164,14 +4161,12 @@ u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
     return p;
 }
 
-u8* fn_801A3F5C(u8* p, u32 a, u32 b) {
-    __ct__9CollShapeFUlUl(p, a, b);
-    *(void**)p = __vt__9MeshShape;
+MeshShape::MeshShape(u32 a, u32 b) : CollShape(a, b) {
+    u8* p = (u8*)this;
     if (b) {
         PTR(p, 0x24) = p + 0x40;
         fn_801CFA48(p + 0x40);
     }
-    return p;
 }
 
 MeshShape::~MeshShape(void) {
@@ -4244,7 +4239,6 @@ void fn_801A44D4(u8* l) {
 void fn_801A4538(void* a) { fn_8012C4E4(a, (void*)fn_801A44D4, 0); }
 
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* swapped);  // res.cpp
-u8* fn_801A4B5C(u8* o, bool swap, u8* vol);
 void fn_801A4768(s32* p, s32 base);
 void fn_801A4780(s32* p, s32 base);
 void fn_801A4798(s32* p, s32 base);
@@ -4290,9 +4284,7 @@ u8* fn_801A4548(const char* name) {
             u8* o = ((u8**)PTR(l, 0x4))[i];
             bool sw = swapped;
             u8* vol = o + 0x4C;
-            if (o) {
-                fn_801A4B5C(o, sw, vol);
-            }
+            new (o) StaticCollObject(sw, vol);
         }
         PTR(l, 0x14) = (u8*)fn_801A4538;
     }
@@ -4416,8 +4408,8 @@ u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
 
 // Static object from file data (byte-swapped when `swap`); its collision volume is built in place at
 // vol according to the volume's tag.
-u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
-    *(void**)o = __vt__16StaticCollObject;
+StaticCollObject::StaticCollObject(bool swap, u8* vol) {
+    u8* o = (u8*)this;
     if (swap) {
         Swap32(o + 0x34);
         Swap32(o + 0x38);
@@ -4433,41 +4425,25 @@ u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
     }
     switch (tag) {
     case 'BOX ':
-        if (vol) {
-            vol = __ct__8BoxShapeFUlUl(vol, (u32)o, swap);
-        }
-        PTR(o, 0x3C) = vol;
+        PTR(o, 0x3C) = (u8*)new (vol) BoxShape((u32)o, swap);
         break;
     case 'SPHR':
-        if (vol) {
-            vol = __ct__11SphereShapeFUlUl(vol, (u32)o, swap);
-        }
-        PTR(o, 0x3C) = vol;
+        PTR(o, 0x3C) = (u8*)new (vol) SphereShape((u32)o, swap);
         break;
     case 'TUBE':
-        if (vol) {
-            vol = __ct__9TubeShapeFUlUl(vol, (u32)o, swap);
-        }
-        PTR(o, 0x3C) = vol;
+        PTR(o, 0x3C) = (u8*)new (vol) TubeShape((u32)o, swap);
         break;
     case 'RING':
-        if (vol) {
-            vol = __ct__7RingVolFUlUl(vol, (u32)o, swap);
-        }
-        PTR(o, 0x3C) = vol;
+        PTR(o, 0x3C) = (u8*)new (vol) RingVol((u32)o, swap);
         break;
     case 'PMSH':
-        if (vol) {
-            vol = fn_801A3F5C(vol, (u32)o, swap);
-        }
-        PTR(o, 0x3C) = vol;
+        PTR(o, 0x3C) = (u8*)new (vol) MeshShape((u32)o, swap);
         break;
     default:
         PTR(o, 0x3C) = 0;
         break;
     }
     fn_801A48E4(o);
-    return o;
 }
 
 void fn_801A4E28(void) { lbl_8055E5A0 = fn_801CFEAC("track.msh"); }
