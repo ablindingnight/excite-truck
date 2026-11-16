@@ -16,10 +16,7 @@ struct Box {
     f32 h;             // offset 0x14
 };
 
-struct Camera {
-    u8 data[0x30];
-};
-
+// Camera: common.h's PlainValMatrix.
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
 // JoyStatus: game/joy.h.
 extern "C" {
@@ -28,8 +25,8 @@ ILayout* fn_80145E70(const char* name);
 void fn_801476C4(TextElem* e);
 void fn_80147230(TextElem* e, const char* fmt, ...);
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
-void fn_80230B5C(Camera* cam);
-void fn_802C8638(Camera* cam);
+void fn_80230B5C(PlainValMatrix* cam);
+void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
 int fn_801298E8(JoyStatus* pad, int chan);
 void fn_80011A2C(void);
@@ -101,7 +98,7 @@ int fn_802044E8(void) {
     u32 selected;
     int first;
     int i;
-    Camera cam;
+    PlainValMatrix cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(1.0f, 1000.0f, 1.4396f);

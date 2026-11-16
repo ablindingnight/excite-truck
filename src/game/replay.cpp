@@ -42,12 +42,7 @@ public:
     T storage[N];  // offset 0xC
 };
 
-// joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
-// JoyStatus: game/joy.h.
-struct Camera {
-    u8 data[0x30];
-};
-
+// Camera: common.h's PlainValMatrix.
 // Pushes an offset onto the layout origin for the lifetime of the object (ovlayout.cpp).
 struct LayoutOffset {
     LayoutOffset(f32 dx, f32 dy);
@@ -83,8 +78,8 @@ void fn_802C8530(void);
 void fn_802C855C(void);
 void fn_802C87B4(int x, int y, int w, int h);
 void fn_801E81B8(int a, int b);
-void fn_80230B5C(Camera* cam);
-void fn_802C8638(Camera* cam);
+void fn_80230B5C(PlainValMatrix* cam);
+void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
 void fn_80278924(f32* a, f32* b);
 f32 fn_801E7E18(void);
@@ -479,7 +474,7 @@ static void WarnDiverged(void) { fn_802E30C8("Replay has diverged!"); }
 
 void fn_80008F98(void) {
     char name[80];
-    Camera cam;
+    PlainValMatrix cam;
     f32 a;
     f32 b;
     int done;
@@ -689,7 +684,7 @@ void fn_80009534(void) {
     int now;
     int t;
     u32 q;
-    Camera cam;
+    PlainValMatrix cam;
 
     lbl_8055D378[0] = 0;
     lbl_8055D378[1] = 0;

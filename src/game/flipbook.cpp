@@ -41,13 +41,8 @@ void* operator new[](size_t size, const char* tag);
 void operator delete(void* p);
 void operator delete[](void* p);
 
-// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
-struct Camera {
-    V3 right;  // offset 0x0
-    V3 up;     // offset 0xC
-};
-
-extern "C" const Camera* fn_802C86DC(void);
+// Camera: common.h's PlainValMatrix.
+extern "C" const PlainValMatrix* fn_802C86DC(void);
 
 struct FlipVert {
     V3 pos;     // offset 0x0
@@ -106,7 +101,7 @@ extern "C" {
 void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 v1, f32 v2) {
     f32 sz;
     f32 sy;
-    const Camera* m;
+    const PlainValMatrix* m;
     f32 w;
     int i;
     f32 sx;
@@ -114,12 +109,12 @@ void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 
     f32 uv[4][2];
     m = fn_802C86DC();
     FlipVert v[4];
-    d.x = m->right.x * -size;
-    d.y = m->right.y * -size;
-    d.z = m->right.z * -size;
-    sx = d.x + m->up.x * size;
-    sy = d.y + m->up.y * size;
-    sz = d.z + m->up.z * size;
+    d.x = m->basis[0].x * -size;
+    d.y = m->basis[0].y * -size;
+    d.z = m->basis[0].z * -size;
+    sx = d.x + m->basis[1].x * size;
+    sy = d.y + m->basis[1].y * size;
+    sz = d.z + m->basis[1].z * size;
     v[0].pos.x = p->x + sx;
     v[0].pos.y = p->y + sy;
     v[0].pos.z = p->z + sz;
@@ -127,9 +122,9 @@ void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 
     w = 2.0f * size;
     v[2].pos.x = p->x + sx * -1.0f;
     v[2].pos.y = p->y + -1.0f * sy;
-    d.x = sx + w * m->right.x;
-    d.y = sy + w * m->right.y;
-    d.z = sz + m->right.z * w;
+    d.x = sx + w * m->basis[0].x;
+    d.y = sy + w * m->basis[0].y;
+    d.z = sz + m->basis[0].z * w;
     v[1].pos.x = p->x + d.x;
     v[1].pos.y = p->y + d.y;
     v[1].pos.z = p->z + d.z;

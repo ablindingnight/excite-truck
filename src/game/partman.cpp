@@ -35,15 +35,8 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 typedef ValVec3 V3;
 
-// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
-struct Camera {
-    V3 right;  // offset 0x0
-    V3 up;     // offset 0xC
-    V3 fwd;    // offset 0x18
-    V3 pos;    // offset 0x24
-};
-
-extern "C" Camera* fn_802C86DC(void);
+// Camera: common.h's PlainValMatrix.
+extern "C" PlainValMatrix* fn_802C86DC(void);
 
 struct Particle {
     Particle(void);
@@ -631,15 +624,15 @@ static inline f32 Wave(f32 a) {
     return -(1.0f - t * t);
 }
 
-extern "C" void fn_8028F608(V3* a, V3* b, f32 angle, const Camera* m) {
+extern "C" void fn_8028F608(V3* a, V3* b, f32 angle, const PlainValMatrix* m) {
     f32 s = Wave(angle);
     f32 c = Wave(1.5707964f + angle);
-    a->x = c * m->right.x + s * m->up.x;
-    a->y = c * m->right.y + s * m->up.y;
-    a->z = c * m->right.z + s * m->up.z;
-    b->x = c * m->up.x - s * m->right.x;
-    b->y = c * m->up.y - s * m->right.y;
-    b->z = c * m->up.z - s * m->right.z;
+    a->x = c * m->basis[0].x + s * m->basis[1].x;
+    a->y = c * m->basis[0].y + s * m->basis[1].y;
+    a->z = c * m->basis[0].z + s * m->basis[1].z;
+    b->x = c * m->basis[1].x - s * m->basis[0].x;
+    b->y = c * m->basis[1].y - s * m->basis[0].y;
+    b->z = c * m->basis[1].z - s * m->basis[0].z;
 }
 
 static inline Particle* AllocParts(s32 n) { return new ("particles") Particle[n]; }
@@ -847,21 +840,21 @@ static inline void SetSpriteCorner(V3& out, f32 scale, const V3& d, const V3& p)
 
 void PartSys::DrawSprites(Particle* p, int n) {
     f32 t0;
-    Camera* cam;
+    PlainValMatrix* cam;
     f32 age;
-    Camera m;
+    PlainValMatrix m;
     f32 size;
     cam = fn_802C86DC();
     int i;
     t0 = lbl_8055F738;
     V3 d1;
     V3 d2;
-    d1.x = cam->up.x - cam->right.x;
-    d1.y = cam->up.y - cam->right.y;
-    d1.z = cam->up.z - cam->right.z;
-    d2.x = cam->up.x + cam->right.x;
-    d2.y = cam->up.y + cam->right.y;
-    d2.z = cam->up.z + cam->right.z;
+    d1.x = cam->basis[1].x - cam->basis[0].x;
+    d1.y = cam->basis[1].y - cam->basis[0].y;
+    d1.z = cam->basis[1].z - cam->basis[0].z;
+    d2.x = cam->basis[1].x + cam->basis[0].x;
+    d2.y = cam->basis[1].y + cam->basis[0].y;
+    d2.z = cam->basis[1].z + cam->basis[0].z;
     QuadBatch batch;
     for (i = 0; i < n; p++, i++) {
         f32 t;
@@ -877,9 +870,9 @@ void PartSys::DrawSprites(Particle* p, int n) {
         m = *fn_802C86DC();
         V3 d;
         u32 color;
-        d.x = m.pos.x - pos.x;
-        d.y = m.pos.y - pos.y;
-        d.z = m.pos.z - pos.z;
+        d.x = m.origin.x - pos.x;
+        d.y = m.origin.y - pos.y;
+        d.z = m.origin.z - pos.z;
         f32 ratio = PSVECDotProduct((const Vec*)&d, (const Vec*)&d) / (1.0f + farDist * farDist);
         fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         b = Byte(255.0f * (blueConst + blueRamp * t));
@@ -905,16 +898,16 @@ void PartSys::DrawSprites(Particle* p, int n) {
 }
 
 void PartSys::DrawAnimated(Particle* p, int n) {
-    Camera* cam = fn_802C86DC();
+    PlainValMatrix* cam = fn_802C86DC();
     f32 t0 = lbl_8055F738;
     V3 d1;
     V3 d2;
-    d1.x = cam->up.x - cam->right.x;
-    d1.y = cam->up.y - cam->right.y;
-    d1.z = cam->up.z - cam->right.z;
-    d2.x = cam->up.x + cam->right.x;
-    d2.y = cam->up.y + cam->right.y;
-    d2.z = cam->up.z + cam->right.z;
+    d1.x = cam->basis[1].x - cam->basis[0].x;
+    d1.y = cam->basis[1].y - cam->basis[0].y;
+    d1.z = cam->basis[1].z - cam->basis[0].z;
+    d2.x = cam->basis[1].x + cam->basis[0].x;
+    d2.y = cam->basis[1].y + cam->basis[0].y;
+    d2.z = cam->basis[1].z + cam->basis[0].z;
     QuadBatch batch;
     for (int i = 0; i < n; p++, i++) {
         f32 age = t0 - p->birth;
@@ -923,11 +916,11 @@ void PartSys::DrawAnimated(Particle* p, int n) {
         int frame = (p->frame + (int)(t * ((f32)frames * animRamp))) % frames;
         V3 pos;
         Integrate(&pos, p, age);
-        Camera m = *fn_802C86DC();
+        PlainValMatrix m = *fn_802C86DC();
         V3 d;
-        d.x = m.pos.x - pos.x;
-        d.y = m.pos.y - pos.y;
-        d.z = m.pos.z - pos.z;
+        d.x = m.origin.x - pos.x;
+        d.y = m.origin.y - pos.y;
+        d.z = m.origin.z - pos.z;
         f32 ratio = PSVECDotProduct((const Vec*)&d, (const Vec*)&d) / (1.0f + farDist * farDist);
         f32 fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         u8 b = Byte(255.0f * (blueConst + blueRamp * t));
@@ -967,7 +960,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 }
 
 void PartSys::DrawRotating(Particle* p, int n) {
-    Camera* cam = fn_802C86DC();
+    PlainValMatrix* cam = fn_802C86DC();
     f32 now = lbl_8055F738;
     f32 shade = 0.5f * shading;
     QuadBatch batch;
@@ -986,11 +979,11 @@ void PartSys::DrawRotating(Particle* p, int n) {
         V3 a;
         V3 b;
         fn_8028F608(&a, &b, ang, cam);
-        Camera m = *fn_802C86DC();
+        PlainValMatrix m = *fn_802C86DC();
         V3 d;
-        d.x = m.pos.x - pos.x;
-        d.y = m.pos.y - pos.y;
-        d.z = m.pos.z - pos.z;
+        d.x = m.origin.x - pos.x;
+        d.y = m.origin.y - pos.y;
+        d.z = m.origin.z - pos.z;
         f32 ratio = PSVECDotProduct((const Vec*)&d, (const Vec*)&d) / (1.0f + farDist * farDist);
         f32 fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         PVtx q[4];

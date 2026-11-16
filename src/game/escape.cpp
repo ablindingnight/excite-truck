@@ -7,15 +7,12 @@
 #include "game/textelem.h"
 #include "game/gart.h"
 
-struct Camera {
-    u8 data[0x30];
-};
-
+// Camera: common.h's PlainValMatrix.
 extern "C" {
 void fn_80230E90(int unk);
 void fn_80012158(void);
-void fn_80230B5C(Camera* cam);
-void fn_802C8638(Camera* cam);
+void fn_80230B5C(PlainValMatrix* cam);
+void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
 const char* fn_80131234(const char* key);
@@ -132,7 +129,7 @@ static void fn_8000C964(void) {
     const char** text;
     int i;
     f32 pulse;
-    Camera cam;
+    PlainValMatrix cam;
     char name[32];
     char label[32];
     int selected;
@@ -307,7 +304,7 @@ void fn_8000D19C(void) {
 
 void fn_8000D1DC(void) {
     u8 alpha;
-    Camera cam;
+    PlainValMatrix cam;
     const char** text;
     char name[32];
     f32 pulse;

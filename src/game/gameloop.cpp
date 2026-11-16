@@ -46,12 +46,7 @@ struct RaceResult {
     u8 padF[0xA4 - 0xF];
 };
 
-// joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
-// JoyStatus: game/joy.h.
-struct Camera {
-    u8 data[0x30];
-};
-
+// Camera: common.h's PlainValMatrix.
 class GameListener {
 public:
     virtual void Begin(void);                   // 0x8
@@ -158,8 +153,8 @@ int fn_801E89EC(void);
 int fn_8012742C(void);
 void fn_8017691C(void);
 void fn_801CB4DC(void);
-void fn_80230B5C(Camera* cam);
-void fn_802C8638(Camera* cam);
+void fn_80230B5C(PlainValMatrix* cam);
+void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
 void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 void fn_80011A2C(void);
@@ -962,7 +957,7 @@ void fn_8000C0E8(RaceSetup* rs) {
 }
 
 void fn_8000C5CC(void) {
-    Camera cam;
+    PlainValMatrix cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(DemoNear[0], DemoFar[0], DemoFov[0]);

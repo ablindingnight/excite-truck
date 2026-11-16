@@ -25,13 +25,8 @@ extern s32 lbl_8055E4D0;    // car count
 
 extern "C" void fn_801476D8(const ArtElem* art, u32 color, s32 tex);
 
-struct Camera {
-    u8 pad0[0x18];
-    V3 dir;  // offset 0x18
-    V3 pos;  // offset 0x24
-};
-
-extern "C" Camera* fn_801E8718(int);
+// Camera: common.h's PlainValMatrix.
+extern "C" PlainValMatrix* fn_801E8718(int);
 
 // Frame: common.h's PlainValMatrix.
 ModuleTag lbl_8055E118;
@@ -126,7 +121,7 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     V3 v;
     V3 p;
     ArtElem* bg;
-    Camera* cam;
+    PlainValMatrix* cam;
     int i;
     u8* car;
     f32 len;
@@ -147,11 +142,11 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     corner.x = origin.x + size.x;
     corner.y = origin.y + size.y;
     cam = fn_801E8718(fn_801392F8(fn_8017960C(self)));
-    if (AbsF(cam->dir.x) <= __float_epsilon[0] && AbsF(cam->dir.z) <= __float_epsilon[0]) {
+    if (AbsF(cam->basis[2].x) <= __float_epsilon[0] && AbsF(cam->basis[2].z) <= __float_epsilon[0]) {
         return;
     }
-    h.x = cam->dir.x;
-    h.y = cam->dir.z;
+    h.x = cam->basis[2].x;
+    h.y = cam->basis[2].z;
     len = 1.0f / (f32)sqrt(h.x * h.x + h.y * h.y);
     h.x *= len;
     h.y *= len;
@@ -169,7 +164,7 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     m.basis[1].x = 0.0f;
     m.basis[1].y = 1.0f;
     m.basis[1].z = 0.0f;
-    m.origin = cam->pos;
+    m.origin = cam->origin;
     fn_802C8BD0(tex);
     if (fn_802C8DBC(0x20)) {
         for (i = lbl_8055E4D0 - 1; i >= 0; i--) {

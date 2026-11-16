@@ -54,18 +54,12 @@ struct CarModel {
     CarDims* dims;  // offset 0x17C
 };
 
-struct Camera {
-    u8 pad0[0x24];
-    f32 x;  // offset 0x24
-    f32 y;  // offset 0x28
-    f32 z;  // offset 0x2C
-};
-
+// Camera: common.h's PlainValMatrix.
 extern "C" {
 Bound* fn_801399FC(ValueNode* n);
 V2 fn_80139C5C(Bound* b);
 RaceCarRec* fn_8017960C(int id);
-Camera* fn_802C86DC(void);
+PlainValMatrix* fn_802C86DC(void);
 int fn_802C9994(u32 c);
 u32 fn_802C9950(u32 c);
 void fn_802C9900(f32 a);
@@ -478,13 +472,13 @@ static inline void DrawPickup(int k) {
 }
 
 void fn_80168104(void) {
-    Camera* cam = fn_802C86DC();
+    PlainValMatrix* cam = fn_802C86DC();
     V2 c;
     PickupGroup* g;
     int i;
     int j;
-    c.x = cam->x;
-    c.y = cam->z;
+    c.x = cam->origin.x;
+    c.y = cam->origin.z;
     for (i = 0; i < lbl_8055E354->groups.count; i++) {
         g = &lbl_8055E354->groups.data[i];
         if (g->enabled) {

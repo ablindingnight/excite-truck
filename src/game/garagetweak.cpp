@@ -9,10 +9,7 @@
 #include "game/v2.h"
 #include "game/gart.h"
 
-struct Camera {
-    u8 pad[0x30];
-};
-
+// Camera: common.h's PlainValMatrix.
 // A tunable value of the car.
 // Unit-local (port ODR: other units define a different Tweak).
 namespace {
@@ -68,8 +65,8 @@ int fn_802E2C20(void);  // milliseconds
 int fn_80179630(int view);
 void fn_8018A2C0(RaceCar* car, TweakVisitor* v);  // visit the car's tweaks
 void fn_8018A180(RaceCar* car);                   // apply the car's tweaks
-void fn_80230B5C(Camera* c);
-void fn_802C8638(Camera* c);
+void fn_80230B5C(PlainValMatrix* c);
+void fn_802C8638(PlainValMatrix* c);
 void fn_802C974C(f32 nearZ, f32 farZ, f32 fov);
 void fn_80011A2C(void);
 extern RaceCar* lbl_804348E8[8];
@@ -153,7 +150,7 @@ void fn_801DE150(void) {}
 #pragma opt_loop_invariants off
 void fn_801DE154(void) {
     fn_801DDF0C();
-    Camera cam;
+    PlainValMatrix cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(1.0f, 1000.0f, 1.4396f);

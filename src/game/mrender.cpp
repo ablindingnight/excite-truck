@@ -77,19 +77,7 @@ struct MrVec {
     f32 z;
 };
 
-// The axes.
-struct Rot {
-    VecP right;  // offset 0x0
-    VecP up;     // offset 0xC
-    VecP fwd;    // offset 0x18
-};
-
-// Axes and position.
-struct Camera {
-    Rot rot;   // offset 0x0
-    VecP pos;  // offset 0x24
-};
-
+// Camera: common.h's PlainValMatrix.
 struct Viewport {
     s32 x;  // offset 0x0
     s32 y;  // offset 0x4
@@ -168,8 +156,8 @@ f32 lbl_8055D01C = 1.0f;        // light
 f32 lbl_8055D020 = 1.0f;        // horizontal squeeze
 f32 lbl_8055D024 = 1.0f;        // vertical squeeze
 s32 lbl_8055D028 = -1;          // prefs callback
-Camera lbl_804C13E0;  // saved camera
-Camera lbl_804C1410;  // camera
+PlainValMatrix lbl_804C13E0;  // saved camera
+PlainValMatrix lbl_804C1410;  // camera
 MrVec lbl_804C1440(0.0f, -1.0f, 0.0f);  // light direction
 // The saved near/far planes and the current field of view.
 struct FovState {
@@ -285,27 +273,27 @@ void fn_802C855C(void) {
     lbl_8055FC70 = 0;
 }
 
-void fn_802C8588(Camera* cam, const VecP* eye, const VecP* target) {
+void fn_802C8588(PlainValMatrix* cam, const VecP* eye, const VecP* target) {
     VecP up;
     up.x = 0.0f;
     up.y = 1.0f;
     up.z = 0.0f;
-    cam->pos = *eye;
-    cam->rot.fwd.x = target->x - eye->x;
-    cam->rot.fwd.y = target->y - eye->y;
-    cam->rot.fwd.z = target->z - eye->z;
-    PSVECNormalize((const Vec*)&cam->rot.fwd, (Vec*)&cam->rot.fwd);
-    PSVECCrossProduct((const Vec*)&up, (const Vec*)&cam->rot.fwd, (Vec*)&cam->rot.right);
-    PSVECNormalize((const Vec*)&cam->rot.right, (Vec*)&cam->rot.right);
-    PSVECCrossProduct((const Vec*)&cam->rot.fwd, (const Vec*)&cam->rot.right, (Vec*)&cam->rot.up);
+    cam->origin = *eye;
+    cam->basis[2].x = target->x - eye->x;
+    cam->basis[2].y = target->y - eye->y;
+    cam->basis[2].z = target->z - eye->z;
+    PSVECNormalize((const Vec*)&cam->basis[2], (Vec*)&cam->basis[2]);
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)&cam->basis[2], (Vec*)&cam->basis[0]);
+    PSVECNormalize((const Vec*)&cam->basis[0], (Vec*)&cam->basis[0]);
+    PSVECCrossProduct((const Vec*)&cam->basis[2], (const Vec*)&cam->basis[0], (Vec*)&cam->basis[1]);
 }
 
-void fn_802C8638(const Camera* cam) {
+void fn_802C8638(const PlainValMatrix* cam) {
     lbl_804C1410 = *cam;
     fn_802D03F4(&lbl_804C1410);
 }
 
-Camera* fn_802C86DC(void) { return &lbl_804C1410; }
+PlainValMatrix* fn_802C86DC(void) { return &lbl_804C1410; }
 
 void fn_802C86E8(u32 color) { lbl_8055D018 = color; }
 
@@ -343,48 +331,48 @@ void fn_802C88BC(int a) { fn_802D02F8(lbl_8055D018, a & 1); }
 
 void fn_802C88CC(u32 color) { fn_802D02F8(color, 1); }
 
-f32 fn_802C88D4(const VecP* p) { return PSVECDistance((const Vec*)&lbl_804C1410.pos, (const Vec*)p); }
+f32 fn_802C88D4(const VecP* p) { return PSVECDistance((const Vec*)&lbl_804C1410.origin, (const Vec*)p); }
 
-f32 fn_802C88E8(const VecP* p) { return PSVECSquareDistance((const Vec*)&lbl_804C1410.pos, (const Vec*)p); }
+f32 fn_802C88E8(const VecP* p) { return PSVECSquareDistance((const Vec*)&lbl_804C1410.origin, (const Vec*)p); }
 
 }  // extern "C"
 
 extern "C" {
 
-void fn_802C88FC(Camera* m) {
+void fn_802C88FC(PlainValMatrix* m) {
     f32 d = 0.5f * lbl_8055FC64 / lbl_8055FC44;
     d *= 1.0f / lbl_8055D020;
-    m->rot.right.x = 1.0f;
-    m->rot.right.y = 0.0f;
-    m->rot.right.z = 0.0f;
-    m->rot.up.x = 0.0f;
-    m->rot.up.y = -1.0f;
-    m->rot.up.z = 0.0f;
-    m->rot.fwd.x = 0.0f;
-    m->rot.fwd.y = 0.0f;
-    m->rot.fwd.z = 1.0f;
-    m->pos.Set(lbl_8055FC5C + 0.5f * lbl_8055FC64, lbl_8055FC60 + 0.5f * lbl_8055FC68, -d);
+    m->basis[0].x = 1.0f;
+    m->basis[0].y = 0.0f;
+    m->basis[0].z = 0.0f;
+    m->basis[1].x = 0.0f;
+    m->basis[1].y = -1.0f;
+    m->basis[1].z = 0.0f;
+    m->basis[2].x = 0.0f;
+    m->basis[2].y = 0.0f;
+    m->basis[2].z = 1.0f;
+    m->origin.Set(lbl_8055FC5C + 0.5f * lbl_8055FC64, lbl_8055FC60 + 0.5f * lbl_8055FC68, -d);
 }
 
-void fn_802C89E8(Camera* m) {
+void fn_802C89E8(PlainValMatrix* m) {
     f32 d = 0.5f * lbl_8055FC64 / lbl_8055FC44;
     if (!lbl_8055FC74) {
         d *= 1.0f / lbl_8055D020;
     }
     f32 sq = lbl_8055FC74 ? 1.0f : 1.0f / lbl_8055D020;
-    m->rot.right.x = sq;
-    m->rot.right.y = 0.0f;
-    m->rot.right.z = 0.0f;
-    m->rot.up.x = 0.0f;
-    m->rot.up.y = -1.0f;
-    m->rot.up.z = 0.0f;
-    m->rot.fwd.x = 0.0f;
-    m->rot.fwd.y = 0.0f;
-    m->rot.fwd.z = 1.0f;
-    m->pos.Set(lbl_8055FC5C + 0.5f * lbl_8055FC64, lbl_8055FC60 + 0.5f * lbl_8055FC68, -d);
+    m->basis[0].x = sq;
+    m->basis[0].y = 0.0f;
+    m->basis[0].z = 0.0f;
+    m->basis[1].x = 0.0f;
+    m->basis[1].y = -1.0f;
+    m->basis[1].z = 0.0f;
+    m->basis[2].x = 0.0f;
+    m->basis[2].y = 0.0f;
+    m->basis[2].z = 1.0f;
+    m->origin.Set(lbl_8055FC5C + 0.5f * lbl_8055FC64, lbl_8055FC60 + 0.5f * lbl_8055FC68, -d);
 }
 
-void fn_802C8B08(Camera* out) { *out = lbl_804C1410; }
+void fn_802C8B08(PlainValMatrix* out) { *out = lbl_804C1410; }
 
 void fn_802C8B70(int a) {
     fn_802CAD74(a);
@@ -402,7 +390,7 @@ void fn_802C8BD0(int a) {
 }
 
 void fn_802C8C04(int a) {
-    Camera m;
+    PlainValMatrix m;
     lbl_804C13E0 = lbl_804C1410;
     lbl_8055FC35 = 1;
     fn_802C89E8(&m);
@@ -411,7 +399,7 @@ void fn_802C8C04(int a) {
 }
 
 void fn_802C8CBC(int a) {
-    Camera m;
+    PlainValMatrix m;
     lbl_804C13E0 = lbl_804C1410;
     lbl_8055FC35 = 1;
     fn_802C88FC(&m);
@@ -564,25 +552,25 @@ int fn_802C94A0(const VecP* p, u8* visible, f32* depth, f32 r) {
     if (visible) {
         *visible = 1;
     }
-    Camera* c = &lbl_804C1410;
+    PlainValMatrix* c = &lbl_804C1410;
     VecP d;
-    d.x = p->x - c->pos.x;
-    d.y = p->y - c->pos.y;
-    d.z = p->z - c->pos.z;
-    f32 z = PSVECDotProduct((const Vec*)&d, (const Vec*)&c->rot.fwd);
+    d.x = p->x - c->origin.x;
+    d.y = p->y - c->origin.y;
+    d.z = p->z - c->origin.z;
+    f32 z = PSVECDotProduct((const Vec*)&d, (const Vec*)&c->basis[2]);
     if (z < lbl_8055FC38 - r || z > lbl_8055FC3C + r) {
         return 0;
     }
     if (z - r > lbl_8055FC3C - 0.15f * lbl_8055FC3C) {
         return 0;
     }
-    f32 x = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&c->rot.right));
+    f32 x = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&c->basis[0]));
     f32 lim = z * lbl_8055FC44;
     f32 m = Max(0.0f, lim);
     if (x > m + r * lbl_8055FC54) {
         return 0;
     }
-    f32 y = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&lbl_804C1410.rot.up));
+    f32 y = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&lbl_804C1410.basis[1]));
     lim = z * lbl_8055FC50;
     m = Max(0.0f, lim);
     if (y > m + r * lbl_8055FC58) {

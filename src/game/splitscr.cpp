@@ -21,17 +21,7 @@ struct VtxPos {
     f32 z;
 };
 
-struct Rot {
-    VecP right;  // offset 0x0
-    VecP up;     // offset 0xC
-    VecP fwd;    // offset 0x18
-};
-
-struct Camera {
-    Rot rot;   // offset 0x0
-    VecP pos;  // offset 0x24
-};
-
+// Camera: common.h's PlainValMatrix.
 class LocString;
 extern "C" {
 }
@@ -45,9 +35,9 @@ int fn_802C8DBC(int n);
 void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
-Camera* fn_802C86DC(void);
-void fn_802C88FC(Camera* m);
-void fn_802C8638(Camera* cam);
+PlainValMatrix* fn_802C86DC(void);
+void fn_802C88FC(PlainValMatrix* m);
+void fn_802C8638(PlainValMatrix* cam);
 void fn_80010188(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
@@ -182,13 +172,13 @@ void fn_80205D5C(void) {
 }
 
 void fn_80205FCC(void) {
-    Camera saved;
+    PlainValMatrix saved;
     saved = *fn_802C86DC();
-    Camera m;
+    PlainValMatrix m;
     fn_802C88FC(&m);
-    m.rot.up.x *= -1.0f;
-    m.rot.up.y *= -1.0f;
-    m.rot.up.z *= -1.0f;
+    m.basis[1].x *= -1.0f;
+    m.basis[1].y *= -1.0f;
+    m.basis[1].z *= -1.0f;
     fn_802C8638(&m);
     static LocString finish("SplitScreen:FINISH");
     static LocString start("SplitScreen:START");

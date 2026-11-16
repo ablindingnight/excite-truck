@@ -3,11 +3,7 @@
 #include "game/common.h"
 #include <stdarg.h>
 
-struct Camera {
-    u8 data[0x2C];
-    f32 dist;  // offset 0x2C
-};
-
+// Camera: common.h's PlainValMatrix.
 extern "C" {
 size_t strlen(const char* s);
 int vsprintf(char* buf, const char* fmt, va_list args);
@@ -20,8 +16,8 @@ void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags,
 s32 fn_80232578(const char* name);  // load font
 void fn_802328D4(s32 font);
 int fn_80232B70(int font);
-void fn_80230B5C(Camera* cam);
-void fn_802C8638(Camera* cam);
+void fn_80230B5C(PlainValMatrix* cam);
+void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
 void fn_802C8BD0(s32 tex);
 void fn_802C92DC(int x0, int y0, int x1, int y1, u32 color);
@@ -69,10 +65,10 @@ void fn_80238920(void) {
 }
 
 void fn_8023895C(void) {
-    Camera cam;
+    PlainValMatrix cam;
     fn_802C974C(1.0f, 1000.0f, 1.4398966f);
     fn_80230B5C(&cam);
-    cam.dist = -(lbl_8055CFF0 / 2) / lbl_8055FC88;
+    cam.origin.z = -(lbl_8055CFF0 / 2) / lbl_8055FC88;
     fn_802C8638(&cam);
     lbl_8055F0D8 = 1;
     fn_802344C4(1);

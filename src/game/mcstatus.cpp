@@ -103,13 +103,10 @@ public:
 
 #include "game/mcdialog.h"
 
-struct Camera {
-    u8 data[0x30];
-};
-
+// Camera: common.h's PlainValMatrix.
 extern "C" {
-void fn_80230B5C(Camera* cam);
-void fn_802C8638(Camera* cam);
+void fn_80230B5C(PlainValMatrix* cam);
+void fn_802C8638(PlainValMatrix* cam);
 }
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
@@ -189,7 +186,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
     const char* accept = "Accept";
     for (;;) {
         int r;
-        Camera cam;
+        PlainValMatrix cam;
         char text[0x200];
         fn_802C8530();
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
@@ -314,7 +311,7 @@ int MemCardDialogBg::Setup(McDialogCfg* cfg) { return RunChoices(this, cfg); }
 // space that does not break) and, when m->frac is set, a row of progress dots.
 static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
     char dots[0x40];
-    Camera cam;
+    PlainValMatrix cam;
     char text[0x200];
     fn_802C8530();
     fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
