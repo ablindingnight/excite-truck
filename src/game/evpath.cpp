@@ -13,12 +13,6 @@
 #endif
 #include <string.h>
 
-#define F32(p, o) (*(f32*)((u8*)(p) + (o)))
-#define S32(p, o) (*(s32*)((u8*)(p) + (o)))
-#define U32(p, o) (*(u32*)((u8*)(p) + (o)))
-#define U8(p, o) (*(u8*)((u8*)(p) + (o)))
-#define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
-
 // The screen's image/font/sound set (shared UIObjects implementation, see uiobjs.cpp).
 class UIObjects {
 public:
@@ -37,30 +31,6 @@ public:
     virtual void PlaySound(const char* name);  // 0x38
     virtual void StopSound(const char* name);  // 0x3C
 };
-
-class VR {
-public:
-    virtual ~VR(void);
-    virtual const char* v0C(void);  // display name
-    virtual const char* v10(void);  // id
-    virtual void v14(void);
-    virtual int v18(void);
-    virtual u8* v1C(s32 x);
-    virtual u8* v20(void);
-    virtual int v24(void);
-    virtual int v28(void);
-    virtual void v2C(void);
-    virtual void v30(int a);
-    virtual void v34(void);
-    virtual void v38(const char* s);
-    virtual int v3C(void);
-    virtual int v40(void);
-    virtual void v44(void);
-    virtual int v48(void);
-    virtual int v4C(void);
-};
-
-#define VR(p) ((VR*)(p))
 
 // A list with an inline buffer; the base destructor clears the header.
 template <typename T>
@@ -182,8 +152,6 @@ static EventUnlockFx lbl_804B3018;            // unlock flash widget
 static FixedArray<u32, 5> lbl_804B3048;       // events of the current path
 // Index of a cup bar in the current path's list (the bar is held as an s32 handle).
 static inline int BarIndex(const s32& bar) { return lbl_804B3048.Find((u8*)bar); }
-// Menu slot of an event: the bonus slot (5) or its place in the registry.
-static inline int EventSlot(u8* e) { return U8(e, 0x64) ? 5 : lbl_804B3048.Find(e); }
 static char lbl_804B3068[100];                // the selected cup's help text
 static FixedArray<u8*, 5> lbl_804B30D8;       // the event browser's events
 static char sBrowseTitle[32];                 // lbl_804B30D8 + 0x20
@@ -315,21 +283,9 @@ public:
 
 }  // namespace
 
-// An event's unlock condition (object at event + 0x60).
-class EvCond {
-public:
-    virtual ~EvCond(void);  // 0x08 (the event's Contest/Bracket: slot 0 is its destructor)
-    virtual const char* Title(void);  // 0x0C
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual const char* Desc(void);   // 0x1C
-    virtual s32 EventId(void);        // 0x20
-    virtual int Difficulty(void);     // 0x24
-    virtual void v28(void);
-    virtual int Done(void);          // 0x2C
-    virtual const char* Name(void);  // 0x30
-};
+// (The cup screen reads a bracket's slot 0x2C, Gated, as its done state; Text 0x30 is the help text.)
+// Menu slot of an event: the bonus slot (5) or its place in the registry.
+static inline int EventSlot(u8* e) { return ((EvCupBar*)e)->still ? 5 : lbl_804B3048.Find(e); }
 
 // Makes event i current (none when out of range) and copies its caption.
 static inline void SelectEvent(int i) {
@@ -338,7 +294,7 @@ static inline void SelectEvent(int i) {
         u8* e = (u8*)lbl_804B3048.data[i];
         lbl_8055F688 = (s32)e;
         if (e && ((EvCupBar*)e)->Cup()) {
-            CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
+            CopyName(100, lbl_804B3068, ((EvCupBar*)e)->cup->Text());
         }
     } else {
         lbl_8055F688 = 0;
@@ -522,7 +478,7 @@ void add_anim_to_wait_for(const char* name) {
     if (!l) {
         return;
     }
-    ArrayBase<AnimName>* anims = (ArrayBase<AnimName>*)(l + 0x40);
+    ArrayBase<AnimName>* anims = (ArrayBase<AnimName>*)(l + 0x40);  // ScoreAccumulator::anims (class defined below)
     if (anims->Count() + 1 <= anims->cap) {
         CopyName(30, anims->data[anims->count++].name, name);
         return;
@@ -689,7 +645,7 @@ int fn_802808D0(void) {
         int ok;
         u8* e = (u8*)lbl_804B3048.data[i];
         ok = 0;
-        if (((EvCupBar*)e)->Cup() && (IsUnlockAll() || ((VR*)PTR(e, 0x60))->v24())) {
+        if (((EvCupBar*)e)->Cup() && (IsUnlockAll() || ((EvCupBar*)e)->cup->Open())) {
             ok = 1;
         }
         if (ok) {
@@ -716,12 +672,12 @@ extern "C" {
 // When the current event is done, picks the first not-yet-done event as the next unlock.
 int fn_80280A38(void) {
     u8* cur = (u8*)lbl_8055F688;
-    if (cur && ((EvCupBar*)cur)->Cup() && ((EvCond*)PTR(cur, 0x60))->Done()) {
+    if (cur && ((EvCupBar*)cur)->Cup() && ((EvCupBar*)cur)->cup->Gated()) {
         lbl_8055F690 = lbl_8055F688;
         if (!lbl_8055F68C) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
                 EvCupBar* e = (EvCupBar*)lbl_804B3048.data[i];
-                if (e->cup && !((EvCond*)e->cup)->Done()) {
+                if (e->cup && !e->cup->Gated()) {
                     lbl_8055F68C = (s32)e;
                     break;
                 }
@@ -734,7 +690,7 @@ int fn_80280A38(void) {
                 u8* e = (u8*)lbl_804B3048.data[i];
                 lbl_8055F688 = (s32)e;
                 if (e && ((EvCupBar*)e)->Cup()) {
-                    CopyName(100, lbl_804B3068, ((EvCond*)PTR(e, 0x60))->Name());
+                    CopyName(100, lbl_804B3068, ((EvCupBar*)e)->cup->Text());
                 }
             } else {
                 lbl_8055F688 = 0;
@@ -753,12 +709,12 @@ void fn_80216D28(void);
 // While the current event is not done, picks the first done event as the one to show.
 int fn_80280C00(void) {
     u8* cur = (u8*)lbl_8055F688;
-    if (cur && ((EvCupBar*)cur)->Cup() && !((EvCond*)PTR(cur, 0x60))->Done()) {
+    if (cur && ((EvCupBar*)cur)->Cup() && !((EvCupBar*)cur)->cup->Gated()) {
         lbl_8055F68C = lbl_8055F688;
         if (!lbl_8055F690) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
                 EvCupBar* e = (EvCupBar*)lbl_804B3048.data[i];
-                if (e->cup && ((EvCond*)e->cup)->Done()) {
+                if (e->cup && e->cup->Gated()) {
                     lbl_8055F690 = (s32)e;
                     break;
                 }
@@ -777,12 +733,12 @@ int fn_80280DC8(void) {
         int i = BarIndex(lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
         if (((EvCupBar*)cur)->Cup()) {
-            u32 done = ((EvCond*)PTR(cur, 0x60))->Done();
+            u32 done = ((EvCupBar*)cur)->cup->Gated();
             int k;
             for (k = i + 1; k < lbl_804B3048.count; k++) {
                 u8* e = (u8*)lbl_804B3048.data[k];
-                EvCond* c = (EvCond*)((EvCupBar*)e)->Cup();
-                if (c && c->Done() == done) {
+                EvBracket* c = ((EvCupBar*)e)->Cup();
+                if (c && c->Gated() == done) {
                     break;
                 }
             }
@@ -802,12 +758,12 @@ int fn_80280F7C(void) {
         int i = BarIndex(lbl_8055F688);
         u8* cur = (u8*)lbl_804B3048.data[i];
         if (((EvCupBar*)cur)->Cup()) {
-            u32 done = ((EvCond*)PTR(cur, 0x60))->Done();
+            u32 done = ((EvCupBar*)cur)->cup->Gated();
             int k;
             for (k = i - 1; k >= 0; k--) {
                 u8* e = (u8*)lbl_804B3048.data[k];
-                EvCond* c = (EvCond*)((EvCupBar*)e)->Cup();
-                if (c && c->Done() == done) {
+                EvBracket* c = ((EvCupBar*)e)->Cup();
+                if (c && c->Gated() == done) {
                     break;
                 }
             }
@@ -870,26 +826,26 @@ extern "C" void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // form
 // description and best time.
 static inline void SelectBar(int i, bool select = true) {
     if (select) {
-        if (i >= 0 && i < lbl_804B30D8.Count() && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+        if (i >= 0 && i < lbl_804B30D8.Count() && ((EvEventBar*)lbl_804B30D8.data[i])->contest) {
             lbl_8055F698 = (u32)lbl_804B30D8.data[i];
         } else {
             lbl_8055F698 = 0;
         }
     }
     u8* e;
-    if (i >= 0 && i < lbl_804B30D8.Count() && PTR(e = (u8*)lbl_804B30D8.data[i], 0x60)) {
+    if (i >= 0 && i < lbl_804B30D8.Count() && ((EvEventBar*)(e = (u8*)lbl_804B30D8.data[i]))->contest) {
         if (e) {
-            CopyName(32, sBrowseTitle, ((EvCond*)PTR(e, 0x60))->Title());
-            CopyName(32, sBrowseDesc, ((EvCond*)PTR(e, 0x60))->Desc());
-            int difficulty = ((EvCond*)PTR(e, 0x60))->Difficulty();
-            s32 event = ((EvCond*)PTR(e, 0x60))->EventId();
+            CopyName(32, sBrowseTitle, ((EvEventBar*)e)->contest->TrackName());
+            CopyName(32, sBrowseDesc, ((EvEventBar*)e)->contest->FriendlyName());
+            int difficulty = ((EvEventBar*)e)->contest->Difficulty();
+            s32 event = ((EvEventBar*)e)->contest->EventId();
             RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
             if (best.HasValue()) {
                 fn_80130980(sBrowseBest, 20, 3, best.GetValue());
             } else {
                 CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
             }
-            lbl_8055C7E0 = ((EvCond*)PTR(e, 0x60))->EventId();
+            lbl_8055C7E0 = ((EvEventBar*)e)->contest->EventId();
         } else {
             sBrowseDesc[0] = 0;
             sBrowseTitle[0] = 0;
@@ -1298,8 +1254,8 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
 
 int fn_802839D0(void) {
     if (lbl_8055F684 && lbl_8055F698) {
-        s32 a = VR(PTR((u8*)lbl_8055F698, 0x60))->v24();
-        fn_8025C204(VR(PTR((u8*)lbl_8055F698, 0x60))->v20(), a);
+        s32 a = ((EvEventBar*)lbl_8055F698)->contest->Difficulty();
+        fn_8025C204((u8*)((EvEventBar*)lbl_8055F698)->contest->EventId(), a);
     } else {
         fn_80216D28();
     }
@@ -1316,7 +1272,7 @@ int fn_80283A50(void) {
 
 int fn_80283AC8(void) {
     int i = lbl_804B30D8.Find((u8*)lbl_8055F698);
-    if (i >= 0 && PTR((u8*)lbl_804B30D8.data[i], 0x60)) {
+    if (i >= 0 && ((EvEventBar*)lbl_804B30D8.data[i])->contest) {
         return 1;
     }
     fn_80216D28();
@@ -1345,7 +1301,7 @@ int fn_80283B58(void) {
             if (++i >= lbl_804B30D8.Count()) {
                 i = 0;
             }
-        } while (!PTR((u8*)AtR(lbl_804B30D8.data, i), 0x60) && i != cur);
+        } while (!((EvEventBar*)AtR(lbl_804B30D8.data, i))->contest && i != cur);
         SelectBar(i);
     } else {
         fn_80216D28();
@@ -1362,7 +1318,7 @@ int fn_80283E28(void) {
             if (--i < 0) {
                 i += lbl_804B30D8.Count();
             }
-        } while (!PTR((u8*)AtR(lbl_804B30D8.data, i), 0x60) && i != cur);
+        } while (!((EvEventBar*)AtR(lbl_804B30D8.data, i))->contest && i != cur);
         SelectBar(i);
     } else {
         fn_80216D28();
@@ -1548,14 +1504,14 @@ inline void EvCupBar::Enter(void) {
         p->f6C = x;
         p->timer = 0.0f;
         if (p->cup) {
-            if (VR(((u8*)p->cup))->v28() && !p->perfect) {
+            if (p->cup->AllDone() && !p->perfect) {
                 fn_80236954("cup_perfected");
                 add_anim_to_wait_for("cup_perfected");
             }
             int show = 0;
             p->style = (u8*)p == (u8*)lbl_8055F688 ? 6 : 7;
-            if (VR(((u8*)p->cup))->v24()) {
-                if (!VR(((u8*)p->cup))->v28() || fn_8023695C("cup_perfected")) {
+            if (p->cup->Open()) {
+                if (!p->cup->AllDone() || fn_8023695C("cup_perfected")) {
                     show = 1;
                 }
             }
@@ -1563,10 +1519,10 @@ inline void EvCupBar::Enter(void) {
             if (show) {
                 int i;
                 int done;
-                int n = VR(((u8*)p->cup))->v18();
+                int n = p->cup->Count();
                 done = 0;
                 for (i = 0; i < n; i++) {
-                    if (VR(VR(((u8*)p->cup))->v1C(i))->v40()) {
+                    if (p->cup->Get(i)->Unlocked()) {
                         done++;
                     }
                 }
@@ -1575,11 +1531,11 @@ inline void EvCupBar::Enter(void) {
                 p->progress[0] = 0;
             }
         }
-        const char* title = fn_8027ED70()->GetFile(VR(((u8*)p->cup))->v10());
+        const char* title = fn_8027ED70()->GetFile(p->cup->Id());
         if (title) {
             CopyName(50, (char*)(u8*)&p->title, title);
         }
-        p->frame = fn_8027ED70()->GetFrame(VR(((u8*)p->cup))->v10());
+        p->frame = fn_8027ED70()->GetFrame(p->cup->Id());
     } else {
         p->m.vis = 1;
     }
@@ -1856,24 +1812,22 @@ inline void EvEventBar::Update(void) {
 
 
 inline int ScoreAccumulator::Best(void) const {
-    const u8* p = (const u8*)this;
-    u8* o = PTR(p, 0x20);
+    ScoreTally* o = tally;
     if (o) {
-        s32 v = (s32)((f32)S32(o, 0x0) + F32(o, 0x10));
-        s32 m = S32(o, 0x4);
+        s32 v = (s32)((f32)o->from + o->acc);
+        s32 m = o->to;
         return v < m ? v : m;
     }
-    return VR(PTR(p, 0x1C))->v28();
+    return inner->Best();
 }
 
 
 inline int ScoreAccumulator::Key(int key) {
-    u8* p = (u8*)this;
     switch (key) {
     case 0xD: {
-        u8* o = PTR(p, 0x20);
-        if (o && !U8(p, 0x29)) {
-            F32(o, 0x10) = (f32)(S32(o, 0x4) - S32(o, 0x0));
+        ScoreTally* o = tally;
+        if (o && !counted) {
+            o->acc = (f32)(o->to - o->from);
             return 1;
         }
         break;
@@ -1965,20 +1919,19 @@ inline void ScoreAccumulator::Update(void) {
 
 
 inline void ScoreAccumulator::Enter(void) {
-    u8* p = (u8*)this;
-    u8* o = PTR(p, 0x20);
+    ScoreTally* o = tally;
     if (o) {
-        F32(o, 0x10) = 0.0f;
-        U8(p, 0x29) = 0;
-        U8(p, 0x2A) = 0;
-        U8(p, 0x28) = VR(p)->v40();
+        o->acc = 0.0f;
+        counted = 0;
+        shown = 0;
+        perfect = Unlocked();
         fn_8027ED70()->PlaySound("scoreup_tally");
         fn_80214A9C(0x1F);
-        F32(p, 0x178) = 1.0f;
+        wait = 1.0f;
     } else {
-        U8(p, 0x29) = 1;
-        U8(p, 0x2A) = 0;
-        F32(p, 0x178) = 0.0f;
+        counted = 1;
+        shown = 0;
+        wait = 0.0f;
     }
 }
 
