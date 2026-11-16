@@ -200,6 +200,7 @@ struct PickupObjMan {
             }
         }
     }
+    int GroupSize(int i) const { return groups.data[i].count; }  /* Helper name unproven */
     void Add(int type, const V2& pos, f32 hover);
     FixedArr<Pickup, 5000> objs;       // offset 0x0
     FixedArr<PickupGroup, 100> groups;  // offset 0x1D4CC
@@ -514,39 +515,34 @@ static inline void DrawPickup(int k) {
     }
 }
 
-/* Helper name unproven */
-static inline void DrawGroup(int i) {
-    int j;
-    for (j = 0; j < lbl_8055E354->groups.data[i].count; j++) {
-        DrawPickup(lbl_8055E354->groups.data[i].first + j);
-    }
-}
-
-#pragma push
-#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_80168104(void) {
     Camera* cam = fn_802C86DC();
     V2 c;
+    PickupGroup* g;
     int i;
+    int j;
     c.x = cam->x;
     c.z = cam->z;
     for (i = 0; i < lbl_8055E354->groups.count; i++) {
-        PickupGroup* g;
         g = &lbl_8055E354->groups.data[i];
         if (g->enabled) {
             if (g->hasBound) {
                 V2 d;
                 d.z = c.z - g->c.z;
                 d.x = c.x - g->c.x;
-                if (!((f32)sqrt(d.x * d.x + d.z * d.z) - g->radius < 600.0f)) {
+                f32 len = (f32)sqrt(d.x * d.x + d.z * d.z);
+                f32 r = g->radius;
+                if (!(len - r < 600.0f)) {
                     continue;
                 }
             }
-            DrawGroup(i);
+            // The const count read is not shared with the body's group read (retail reloads the manager).
+            for (j = 0; j < lbl_8055E354->GroupSize(i); j++) {
+                DrawPickup(lbl_8055E354->groups.data[i].first + j);
+            }
         }
     }
 }
-#pragma pop
 
 /* Helper name unproven */
 static inline void RefreshPickupGroup(PickupObjMan* m, PickupGroup* g) {
