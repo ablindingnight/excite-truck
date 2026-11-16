@@ -198,7 +198,7 @@ f32 fn_80287BC8(f32 lo, f32 hi);
 f32 fn_802C9A4C(f32 lod);
 void fn_802C8BD0(void* tex);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int cont, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int cont);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 int fn_802CDB20(void* ctx, s32 id);
@@ -735,11 +735,14 @@ void fn_801F6880(const Fabric* f) {
                 f32 y = p->y;
                 f32 z = p->z;
                 f32 v = d->v;
-                fn_802C8E00(d->color, c > 0, x, y, z, u, v);
+                fn_802C8E00(x, y, z, u, v, d->color, c > 0);
                 i = c + r * f->cols;
                 d = &f->draw[i];
                 p = &f->cur[i];
-                fn_802C8E00(d->color, c > 0, p->x, p->y, p->z, d->u, d->v);
+                const f32 secondY = p->y;
+                const f32 secondZ = p->z;
+                const f32 secondX = p->x;
+                fn_802C8E00(secondX, secondY, secondZ, d->u, d->v, d->color, c > 0);
             }
         }
         fn_802C8E48();

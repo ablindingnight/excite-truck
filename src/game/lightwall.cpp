@@ -11,7 +11,7 @@ void PSVECNormalize(const void* in, void* out);
 f32 fn_801E7E18(void);  // time
 void fn_802C8BD0(s32 tex);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 void fn_801E4F20(int n);
@@ -108,18 +108,18 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
                 v.x = p->x + right->x * s;
                 v.y = p->y + right->y * s;
                 v.z = p->z + right->z * s;
-                fn_802C8E00(c, 0, v.x, v.y, v.z, 0.0f, v0);
+                fn_802C8E00(v.x, v.y, v.z, 0.0f, v0, c, 0);
                 v.x += right->x * w;
                 v.y += right->y * w;
                 v.z += right->z * w;
-                fn_802C8E00(c, 0, v.x, v.y, v.z, 1.0f, v0);
+                fn_802C8E00(v.x, v.y, v.z, 1.0f, v0, c, 0);
                 v.y += 105.0f;
                 LAddScaled(&v, right, -w);
-                fn_802C8E00(color & 0xFFFFFF, 1, v.x, v.y, v.z, 0.0f, v1);
+                fn_802C8E00(v.x, v.y, v.z, 0.0f, v1, color & 0xFFFFFF, 1);
                 v.x += right->x * w;
                 v.y += right->y * w;
                 v.z += right->z * w;
-                fn_802C8E00(color & 0xFFFFFF, 1, v.x, v.y, v.z, 1.0f, v1);
+                fn_802C8E00(v.x, v.y, v.z, 1.0f, v1, color & 0xFFFFFF, 1);
             }
         }
         fn_802C8E48();
@@ -152,20 +152,20 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
                 v.y = pts->y + right->y * s;
                 v.z = pts->z + right->z * s;
                 LAddScaled(&v, &cam->fwd, 0.1f);
-                fn_802C8E00(c, 0, v.x, v.y, v.z, 0.0f, v0);
+                fn_802C8E00(v.x, v.y, v.z, 0.0f, v0, c, 0);
                 s = 4.0f * w;
                 v.x += right->x * s;
                 v.y += right->y * s;
                 v.z += right->z * s;
-                fn_802C8E00(c, 0, v.x, v.y, v.z, 1.0f, v0);
+                fn_802C8E00(v.x, v.y, v.z, 1.0f, v0, c, 0);
                 v.y += 105.0f;
                 LAddScaled(&v, right, 4.0f * -w);
-                fn_802C8E00(color & 0xFFFFFF, 1, v.x, v.y, v.z, 0.0f, v1);
+                fn_802C8E00(v.x, v.y, v.z, 0.0f, v1, color & 0xFFFFFF, 1);
                 s = 4.0f * w;
                 v.x += right->x * s;
                 v.y += right->y * s;
                 v.z += right->z * s;
-                fn_802C8E00(color & 0xFFFFFF, 1, v.x, v.y, v.z, 1.0f, v1);
+                fn_802C8E00(v.x, v.y, v.z, 1.0f, v1, color & 0xFFFFFF, 1);
             }
         }
         fn_802C8E48();

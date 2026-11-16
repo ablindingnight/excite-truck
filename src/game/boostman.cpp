@@ -170,7 +170,7 @@ s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
 void fn_802C8BD0(s32 tex);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 void fn_80160B14(void* p);
@@ -247,7 +247,7 @@ public:
 };
 }  // namespace
 
-static inline void Vertex(const u32& c, int idx, const Spot& p, f32 u, f32 v) { f32 x = p.x; f32 y = p.y; f32 z = p.z; fn_802C8E00(c, idx, x, y, z, u, v); }
+static inline void Vertex(const u32& c, int idx, const Spot& p, f32 u, f32 v) { f32 x = p.x; f32 y = p.y; f32 z = p.z; fn_802C8E00(x, y, z, u, v, c, idx); }
 
 inline void BoostVtx::Draw(int idx) {
     Vertex(color, idx, pos, u, v);

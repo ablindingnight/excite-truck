@@ -1169,7 +1169,7 @@ config.libs.append(
             Object(Matching, "game/uictx.cpp"),
             Object(Matching, "game/gback.cpp"),
             Object(Matching, "game/uidraw.cpp"),
-            Object(NonMatching, "game/gtext.cpp"),
+            Object(Matching, "game/gtext.cpp"),
             Object(Matching, "game/gart.cpp"),
             Object(Matching, "game/gtime.cpp"),
             Object(Matching, "game/uianime.cpp"),

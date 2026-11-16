@@ -77,7 +77,7 @@ extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 void fn_802C8CBC(int tex);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 Camera* fn_802C86DC(void);
@@ -112,7 +112,7 @@ void fn_802057A8(u32 color, int idx, f32 x, f32 y, f32 u, f32 v) {
     f32 px = (f32)lbl_8055CFF0 * Lerp(0.49f, 0.51f, (x - -1.0f) / 2.0f);
     f32 py = (f32)lbl_8055CFF4 * Lerp(0.93f, 0.07f, y);
     VtxPos p(px, py, 0.0f);
-    fn_802C8E00(color, idx, p.x, p.y, p.z, u, v);
+    fn_802C8E00(p.x, p.y, p.z, u, v, color, idx);
 }
 
 void fn_80205850(void) {
@@ -194,7 +194,7 @@ void fn_802059C0(void) {
 
 static inline void DividerVertex(u32 color, int idx, f32 x, f32 y) {
     VtxPos p(x, y, 0.0f);
-    fn_802C8E00(color, idx, p.x, p.y, p.z, 0.0f, 0.0f);
+    fn_802C8E00(p.x, p.y, p.z, 0.0f, 0.0f, color, idx);
 }
 
 void fn_80205D5C(void) {

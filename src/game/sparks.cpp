@@ -143,7 +143,7 @@ SparkNode* fn_802AE414(const char* name);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 const Vec* fn_802C9A40(void);
 f32 fn_802C9A4C(f32 lod);
@@ -859,10 +859,10 @@ void SparkSys::DrawAll(const SparkMtx* cam, const SparkMtx* prev) {
             AddScaled(&q[1], &s->pos, &cam->rot[0], 0.075f);
             AddScaled(&q[2], &p, &cam->rot[0], sign * -0.0375f);
             AddScaled(&q[3], &p, &cam->rot[0], 0.075f * sign);
-            fn_802C8E00(color, 0, q[0].x, q[0].y, q[0].z, 0.0f, 1.0f);
-            fn_802C8E00(color, 0, q[1].x, q[1].y, q[1].z, 1.0f, 1.0f);
-            fn_802C8E00(color, 1, q[2].x, q[2].y, q[2].z, 0.0f, 0.0f);
-            fn_802C8E00(color, 1, q[3].x, q[3].y, q[3].z, 1.0f, 0.0f);
+            fn_802C8E00(q[0].x, q[0].y, q[0].z, 0.0f, 1.0f, color, 0);
+            fn_802C8E00(q[1].x, q[1].y, q[1].z, 1.0f, 1.0f, color, 0);
+            fn_802C8E00(q[2].x, q[2].y, q[2].z, 0.0f, 0.0f, color, 1);
+            fn_802C8E00(q[3].x, q[3].y, q[3].z, 1.0f, 0.0f, color, 1);
         }
     }
     fn_802C8E48();
@@ -975,11 +975,11 @@ void ShardSys::Draw(void) {
             }
             color = ShadeColor(r, light);
             Vec p;
-            fn_802C8E00(color, 0, s->pos.x, s->pos.y, s->pos.z, 0.0f, 1.0f);
+            fn_802C8E00(s->pos.x, s->pos.y, s->pos.z, 0.0f, 1.0f, color, 0);
             AddScaled(&p, &s->pos, (const Vec*)r.m[0], 0.1f);
-            fn_802C8E00(color, 0, p.x, p.y, p.z, 1.0f, 1.0f);
+            fn_802C8E00(p.x, p.y, p.z, 1.0f, 1.0f, color, 0);
             AddScaled(&p, &s->pos, (const Vec*)r.m[2], 0.1f);
-            fn_802C8E00(color, 1, p.x, p.y, p.z, 0.0f, 0.0f);
+            fn_802C8E00(p.x, p.y, p.z, 0.0f, 0.0f, color, 1);
         }
         fn_802C8E48();
     }

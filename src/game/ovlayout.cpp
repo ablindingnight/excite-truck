@@ -428,7 +428,7 @@ void fn_802E3734(s32* f);                // close file
 int fn_80127A50(void* ev);               // next mouse event
 void fn_802C8BD0(s32 tex);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 f32 fn_800108C8(const char* text, f32 scale);
@@ -1146,10 +1146,10 @@ void fn_ovlayout_DrawTexturedRect(void) { fn_802E317C("warning: OVDrawTexturedRe
 void fn_801470B0(f32 x, f32 y, f32 w, f32 h, u32 color, s32 tex, int just, f32 u0, f32 v0, f32 u1, f32 v1) {
     fn_802C8BD0(tex);
     if (fn_802C8DBC(4)) {
-        fn_802C8E00(color, 0, fn_801451DC(x, just), fn_801452B4(y), 0.0f, u0, v0);
-        fn_802C8E00(color, 0, fn_801451DC(x + w, just), fn_801452B4(y), 0.0f, u1, v0);
-        fn_802C8E00(color, 1, fn_801451DC(x, just), fn_801452B4(y + h), 0.0f, u0, v1);
-        fn_802C8E00(color, 1, fn_801451DC(x + w, just), fn_801452B4(y + h), 0.0f, u1, v1);
+        fn_802C8E00(fn_801451DC(x, just), fn_801452B4(y), 0.0f, u0, v0, color, 0);
+        fn_802C8E00(fn_801451DC(x + w, just), fn_801452B4(y), 0.0f, u1, v0, color, 0);
+        fn_802C8E00(fn_801451DC(x, just), fn_801452B4(y + h), 0.0f, u0, v1, color, 1);
+        fn_802C8E00(fn_801451DC(x + w, just), fn_801452B4(y + h), 0.0f, u1, v1, color, 1);
         fn_802C8E48();
     }
     fn_802C8D74();
@@ -1247,12 +1247,10 @@ void fn_801476D8(const ArtElem* e, u32 color, s32 tex) {
     if (e) {
         fn_802C8BD0(tex);
         if (fn_802C8DBC(4)) {
-            fn_802C8E00(color, 0, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), 0.0f, e->u0, e->v0);
-            fn_802C8E00(color, 0, fn_801451DC(e->pos.x, e->elemJust) + fn_801452A0(e->w, e->elemJust),
-                        fn_801452B4(e->pos.y), 0.0f, e->u1, e->v0);
-            fn_802C8E00(color, 1, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y + e->h), 0.0f, e->u0, e->v1);
-            fn_802C8E00(color, 1, fn_801451DC(e->pos.x, e->elemJust) + fn_801452A0(e->w, e->elemJust),
-                        fn_801452B4(e->pos.y + e->h), 0.0f, e->u1, e->v1);
+            fn_802C8E00(fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), 0.0f, e->u0, e->v0, color, 0);
+            fn_802C8E00(fn_801451DC(e->pos.x, e->elemJust) + fn_801452A0(e->w, e->elemJust), fn_801452B4(e->pos.y), 0.0f, e->u1, e->v0, color, 0);
+            fn_802C8E00(fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y + e->h), 0.0f, e->u0, e->v1, color, 1);
+            fn_802C8E00(fn_801451DC(e->pos.x, e->elemJust) + fn_801452A0(e->w, e->elemJust), fn_801452B4(e->pos.y + e->h), 0.0f, e->u1, e->v1, color, 1);
             fn_802C8E48();
         }
         fn_802C8D74();

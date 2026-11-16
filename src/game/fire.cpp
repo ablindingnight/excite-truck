@@ -176,7 +176,7 @@ const FireMtx* fn_802C86DC(void);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 f32 fn_802C9A4C(f32 lod);
 s32 fn_802CAC28(const char* name, int flags);
@@ -1033,7 +1033,7 @@ void RingSlots::DrawSlot(int i) {
         for (int j = 0; j < 4; j++) {
             f32 u = (j & 1) ? 1.0f : 0.0f;
             f32 v = (j & 2) ? 0.0f : 1.0f;
-            fn_802C8E00(color, j > 1, s->pts[j].x, s->pts[j].y, s->pts[j].z, u, v);
+            fn_802C8E00(s->pts[j].x, s->pts[j].y, s->pts[j].z, u, v, color, j > 1);
         }
     }
 }
@@ -1475,13 +1475,13 @@ void ExhaustTorchMan::DrawEdge(const Vec* p, int frame, const Vec* a, const Vec*
     AddScaled(&c[1], &c[0], a, 2.0f * len);
     AddScaled(&c[2], &c[0], b, -len * 2.0f);
     AddScaled(&c[3], &c[1], b, -2.0f * len);
-    fn_802C8E00(0xC0FFFFFF, 0, c[0].x, c[0].y, c[0].z, u0, v0);
-    fn_802C8E00(0xC0FFFFFF, 0, c[1].x, c[1].y, c[1].z, u1, v0);
-    fn_802C8E00(0xC0FFFFFF, 1, c[2].x, c[2].y, c[2].z, u0, v1);
-    fn_802C8E00(0xC0FFFFFF, 1, c[3].x, c[3].y, c[3].z, u1, v1);
+    fn_802C8E00(c[0].x, c[0].y, c[0].z, u0, v0, 0xC0FFFFFF, 0);
+    fn_802C8E00(c[1].x, c[1].y, c[1].z, u1, v0, 0xC0FFFFFF, 0);
+    fn_802C8E00(c[2].x, c[2].y, c[2].z, u0, v1, 0xC0FFFFFF, 1);
+    fn_802C8E00(c[3].x, c[3].y, c[3].z, u1, v1, 0xC0FFFFFF, 1);
 }
 
-static inline void Vertex(u32 c, int idx, const Vec& p, f32 u, f32 v) { fn_802C8E00(c, idx, p.x, p.y, p.z, u, v); }  /* Helper name unproven */
+static inline void Vertex(u32 c, int idx, const Vec& p, f32 u, f32 v) { fn_802C8E00(p.x, p.y, p.z, u, v, c, idx); }  /* Helper name unproven */
 
 void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     Vec c[4];

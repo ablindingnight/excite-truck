@@ -79,7 +79,7 @@ void fn_802C8C04(s32 tex);
 void fn_802C8D74(void);
 void fn_802C8DB8(EVtx* v, int nv, const u16* idx, int ni);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int a, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int a);
 void fn_802C8E48(void);
 void fn_802C9294(s32 rt, int a);
 void fn_802C974C(f32 a, f32 b, f32 c);
@@ -286,14 +286,14 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         p.x = -181.01926f;
         p.y = 181.01926f;
         Rotate(&p, a);
-        fn_802C8E00(-1, 0, p.x, 0.0f, p.y, -0.20710647f, -0.20710647f);
+        fn_802C8E00(p.x, 0.0f, p.y, -0.20710647f, -0.20710647f, -1, 0);
         Rotate(&p, -1.5707963705062866);
-        fn_802C8E00(-1, 0, p.x, 0.0f, p.y, 1.2071065f, -0.20710647f);
+        fn_802C8E00(p.x, 0.0f, p.y, 1.2071065f, -0.20710647f, -1, 0);
         p.x *= -1.0f;
         p.y *= -1.0f;
-        fn_802C8E00(-1, 1, p.x, 0.0f, p.y, -0.20710647f, 1.2071065f);
+        fn_802C8E00(p.x, 0.0f, p.y, -0.20710647f, 1.2071065f, -1, 1);
         Rotate(&p, 1.5707963705062866);
-        fn_802C8E00(-1, 1, p.x, 0.0f, p.y, 1.2071065f, 1.2071065f);
+        fn_802C8E00(p.x, 0.0f, p.y, 1.2071065f, 1.2071065f, -1, 1);
         fn_802C8E48();
     }
     fn_802C8D74();
@@ -330,13 +330,13 @@ void fn_80203380(EFrame* m) {
                 EVec3 d;
                 ENV_PROJECT(m, w, d, sx, sy);
             }
-            fn_802C8E00(0xFF000000, 1, sx, 0.0f, sy, 0.0f, 0.0f);
+            fn_802C8E00(sx, 0.0f, sy, 0.0f, 0.0f, 0xFF000000, 1);
             w.y = -200.0f;
             {
                 EVec3 d;
                 ENV_PROJECT(m, w, d, sx, sy);
             }
-            fn_802C8E00(0xFF000000, 1, sx, 0.0f, sy, 0.0f, 0.0f);
+            fn_802C8E00(sx, 0.0f, sy, 0.0f, 0.0f, 0xFF000000, 1);
         }
     }
     fn_802C8E48();
@@ -426,7 +426,7 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
                     EnvProject(&lbl_80488B88, q, e, sx, sy);
                     f32 u = hi ? 1.0f : 0.0f;
                     f32 v = lo ? 1.0f : 0.0f;
-                    fn_802C8E00(0xFF404040, k >= 2, sx, 0.0f, sy, u, v);
+                    fn_802C8E00(sx, 0.0f, sy, u, v, 0xFF404040, k >= 2);
                 }
             }
         }

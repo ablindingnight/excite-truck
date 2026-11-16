@@ -104,7 +104,7 @@ void* fn_802C86DC(void);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 u32 fn_802C990C(u32 color);
 s32 fn_802CAC28(const char* name, int flags);
@@ -538,7 +538,7 @@ void fn_802AAD5C(void* cam, StuntPart* p, const StuntCar* car) {
             u8 g = lbl_8055CC78;
             u8 b = lbl_8055CC74;
             u32 color = TrailColor(Round(lbl_8055CC6C * (f * (255.0f * (p->alpha * p->facing)))), r, g, b);
-            fn_802C8E00(color, 1, v.x, v.y, v.z, (i % 2) ? 0.0f : 1.0f, phase - f);
+            fn_802C8E00(v.x, v.y, v.z, (i % 2) ? 0.0f : 1.0f, phase - f, color, 1);
         }
         fn_802C8E48();
     }
@@ -577,7 +577,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                     f32 h = i ? p->sizeY / 2.0f - 0.4f : 0.4f + p->sizeY / 2.0f;
                     AddScaled(&v[i], &v[i], (const Vec*)&m.rot[1], h);
                     u32 color = Round(255.0f * p->sparkAmt) << 24 | 0xFFFFFF;
-                    fn_802C8E00(color, 1, v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj);
+                    fn_802C8E00(v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj, color, 1);
                 }
             }
             fn_802C8E48();

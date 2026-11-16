@@ -463,7 +463,7 @@ int fn_802C8DBC(int prim) {
 
 extern "C" {
 
-void fn_802C8E00(u32 color, int strip, f32 x, f32 y, f32 z, f32 u, f32 v) {
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int strip) {
     u8 open = 0;
     if (lbl_8055FC8F && !((int (*)(void))fn_801E4F3C)()) {
         open = 1;

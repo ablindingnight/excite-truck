@@ -149,7 +149,7 @@ f32 fn_802C88E8(const Vec* p);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int idx, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 int fn_802C9640(const Vec* c, f32 r);
 s32 fn_802CAC28(const char* name, int flags);
@@ -738,8 +738,8 @@ void fn_8029D644(WaterPool* p) {
                 PoolVtx* av = (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx));
                 fn_8029DB78(p, av, i, j);
                 PoolVtx* bv = (PoolVtx*)((u8*)b + i * (int)sizeof(PoolVtx));
-                fn_802C8E00(bv->color, i > 0, bv->pos.x, bv->pos.y, bv->pos.z, bv->s, bv->t);
-                fn_802C8E00(av->color, i > 0, av->pos.x, av->pos.y, av->pos.z, av->s, av->t);
+                fn_802C8E00(bv->pos.x, bv->pos.y, bv->pos.z, bv->s, bv->t, bv->color, i > 0);
+                fn_802C8E00(av->pos.x, av->pos.y, av->pos.z, av->s, av->t, av->color, i > 0);
             }
         }
         fn_802C8E48();
@@ -998,7 +998,7 @@ void fn_8029E8E0(WaterShallow* s) {
             f32 m = 0.5f / (f32)sqrt(Sq(1.0f + r.y) + (Sq(r.x) + Sq(r.z)));
             f32 t = 0.5f + r.z * m;
             f32 u = 0.5f + r.x * m;
-            fn_802C8E00(-1, i > 1, c->x, c->y, c->z, u, t);
+            fn_802C8E00(c->x, c->y, c->z, u, t, -1, i > 1);
         }
         fn_802C8E48();
     }

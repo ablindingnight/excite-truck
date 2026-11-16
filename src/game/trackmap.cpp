@@ -189,7 +189,7 @@ void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 void fn_802C8DB8(Vertex* v, int nv, const u16* idx, int ni);
 void fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int flag, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int flag);
 void fn_802C8E48(void);
 PathSet* fn_80156A40(void);
 void fn_802D3050(int pass);
@@ -829,10 +829,10 @@ void fn_8001B478(int index, f32 width) {
             prev = node->dist;
             v.x = p.x + d.x * (-width / 2);
             v.y = p.y + d.y * (-width / 2);
-            fn_802C8E00(-1, flag, v.x, 0.0f, v.y, 0.0f, t);
+            fn_802C8E00(v.x, 0.0f, v.y, 0.0f, t, -1, flag);
             v.x = p.x + d.x * (width / 2);
             v.y = p.y + d.y * (width / 2);
-            fn_802C8E00(-1, flag, v.x, 0.0f, v.y, 1.0f, t);
+            fn_802C8E00(v.x, 0.0f, v.y, 1.0f, t, -1, flag);
             flag = 1;
         }
     }

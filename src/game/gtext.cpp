@@ -139,7 +139,7 @@ void fn_802C8C04(s32 tex);
 void fn_802C8D74(void);
 void fn_802C8DB8(UIVert* v, int nv, const u16* idx, int ni);
 int fn_802C8DBC(int n);
-void fn_802C8E00(u32 color, int row, f32 x, f32 y, f32 z, f32 u, f32 v);
+void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int row);
 void fn_802C8E48(void);
 }
 
@@ -399,10 +399,10 @@ void fn_80231780(const UIXform* m) {
             f32 y0 = it->y;
             f32 x1 = x0 + it->w;
             f32 y1 = y0 - it->h;
-            fn_802C8E00(color, 0, x0, y0, it->z, 0.0f, 0.0f);
-            fn_802C8E00(color, 0, x1, y0, it->z, 1.0f, 0.0f);
-            fn_802C8E00(color, 1, x0, y1, it->z, 0.0f, 1.0f);
-            fn_802C8E00(color, 1, x1, y1, it->z, 1.0f, 1.0f);
+            fn_802C8E00(x0, y0, it->z, 0.0f, 0.0f, color, 0);
+            fn_802C8E00(x1, y0, it->z, 1.0f, 0.0f, color, 0);
+            fn_802C8E00(x0, y1, it->z, 0.0f, 1.0f, color, 1);
+            fn_802C8E00(x1, y1, it->z, 1.0f, 1.0f, color, 1);
             fn_802C8E48();
             fn_802C8D74();
         }
@@ -1211,59 +1211,70 @@ int fn_80234654(void) {
     return total;
 }
 
+/* Helper name unproven */
+static inline const char* ItemText(TextItem* const& items, const int& idx) { return items[idx].text; }
+
+/* Helper name unproven */
+static inline u16 DecodeUTF8WithLength(const char* p, int& len) {
+    const char* next;
+    u16 c = DecodeUTF8(p, &next);
+    len = next - p;
+    return c;
+}
+
 void fn_802346C8(void) {
-    for (int passes = (lbl_8055F058.font->outline != NULL) + 1; passes > 0; passes--) {
+    struct DrawState {
         GTextFont* f;
         u32* cp;
-        TextItem* it;
+        int len;
+    } state;
+    TextItem* it;
+    int passes;
+    int i;
+    for (passes = (lbl_8055F058.font->outline != NULL) + 1; passes > 0; passes--) {
         if (passes == 2) {
-            f = lbl_8055F058.font->outline;
+            state.f = lbl_8055F058.font->outline;
         } else {
-            f = lbl_8055F058.font;
+            state.f = lbl_8055F058.font;
         }
-        fn_802C8BD0(f->tex);
+        fn_802C8BD0(state.f->tex);
         int n = fn_80234654() * 4;
         if (n > 0 && fn_802C8DBC(n)) {
-            for (int i = 0; i < lbl_8055F058.count; i++) {
+            for (i = 0; i < lbl_8055F058.count; i++) {
                 it = &lbl_8055F06C[i];
-                f32 h = f->height * it->scale;
+                f32 h = state.f->height * it->scale;
                 f32 y1;
                 f32 y0 = it->y;
                 y1 = h + y0;
                 int j;
                 if (passes == 2) {
-                    cp = &it->masked;
+                    state.cp = &it->masked;
                 } else {
-                    cp = &it->color;
+                    state.cp = &it->color;
                 }
                 f32 x = it->x;
-                strlen(lbl_8055F06C[i].text);
+                strlen(ItemText(lbl_8055F06C, i));
                 j = 0;
                 while (lbl_8055F06C[i].text[j]) {
                     f32 adv = h;
-                    int skip = EscDrawT(lbl_8055F06C[i].text + j, x, y1, 0.0f, h, *cp, &adv);
+                    int skip = EscDrawT(lbl_8055F06C[i].text + j, x, y1, 0.0f, h, *state.cp, &adv);
                     if (skip > 0) {
                         j += skip;
                         x += adv;
                         continue;
                     }
-                    const char* next;
-                    const char* p = lbl_8055F06C[i].text + j;
-                    u16 c = DecodeUTF8(p, &next);
-                    int len = next - p;
-                    x += it->xs * f->glyphs[c].pre;
-                    f32 x1 = x + it->scale * f->glyphs[c].width;
+                    u16 c = DecodeUTF8WithLength(lbl_8055F06C[i].text + j, state.len);
+                    x += it->xs * state.f->glyphs[c].pre;
+                    f32 x1 = x + it->scale * state.f->glyphs[c].width;
                     if (c != ' ') {
-                        f32 u0 = f->glyphs[c].u0;
-                        f32 v0 = f->glyphs[c].v0;
-                        fn_802C8E00(*cp, 0, x, y1, 0.0f, u0, v0);
-                        fn_802C8E00(*cp, 0, x1, y1, 0.0f, f->glyphs[c].u1, f->glyphs[c].v0);
-                        fn_802C8E00(*cp, 1, x, y0, 0.0f, f->glyphs[c].u0, f->glyphs[c].v1);
-                        fn_802C8E00(*cp, 1, x1, y0, 0.0f, f->glyphs[c].u1, f->glyphs[c].v1);
+                        fn_802C8E00(x, y1, 0.0f, state.f->glyphs[c].u0, state.f->glyphs[c].v0, *state.cp, 0);
+                        fn_802C8E00(x1, y1, 0.0f, state.f->glyphs[c].u1, state.f->glyphs[c].v0, *state.cp, 0);
+                        fn_802C8E00(x, y0, 0.0f, state.f->glyphs[c].u0, state.f->glyphs[c].v1, *state.cp, 1);
+                        fn_802C8E00(x1, y0, 0.0f, state.f->glyphs[c].u1, state.f->glyphs[c].v1, *state.cp, 1);
                     }
-                    j += len;
-                    x += it->scale * f->glyphs[c].width;
-                    x += it->xs * f->glyphs[c].post;
+                    j += state.len;
+                    x += it->scale * state.f->glyphs[c].width;
+                    x += it->xs * state.f->glyphs[c].post;
                 }
             }
             fn_802C8E48();
