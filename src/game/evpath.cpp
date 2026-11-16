@@ -1146,6 +1146,8 @@ int fn_80283E28(void);
 // The bracket's event screen: a bar per event (at most five) with best/pass and grade, the bracket's cup
 // marker, the selected event's title, best time and map; after a result the improved event's score counts
 // up first. Returns 1 when an event was picked (its index in *event).
+#pragma push
+#pragma opt_dead_assignments off  // Retain address calculations used by the inlined destructors.
 int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     int diff = br->Difficulty();
     ScoreAccumulator acc;
@@ -1283,6 +1285,7 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     lbl_8055C7E0 = -1;
     return picked;
 }
+#pragma pop
 
 int fn_802839D0(void) {
     if (lbl_8055F684 && lbl_8055F698) {
