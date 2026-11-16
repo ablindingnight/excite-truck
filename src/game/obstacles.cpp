@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/collshape.h"
 #include "game/rvec.h"
+#include "game/rmtx.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -56,10 +57,6 @@ namespace {
 class VVisit;
 }
 
-struct CVec3 {
-    f32 x, y, z;
-};
-
 struct BodyDesc;
 struct CollShape;
 struct ObDesc;
@@ -99,8 +96,8 @@ public:
     CollShape* shapes[4];  // offset 0x14
     s32 count;             // offset 0x24
     u8 pad28[0x3C - 0x28];
-    f32 frame[12];  // offset 0x3C
-    void Xform(CVec3* out, const CVec3* in);
+    RMtx frame;     // offset 0x3C
+    void Xform(RVec3* out, const RVec3* in);
 };
 
 // The rigid body (rigid.cpp); its vtable is emitted there.
@@ -442,8 +439,6 @@ static inline ObVec3 MakeVec(f32 x, f32 y, f32 z) {
     return v;
 }
 
-struct RMtx;
-
 // A sphere ('SPHR', 0x54 bytes).
 class SphereShape : public CollShape {
 public:
@@ -602,7 +597,7 @@ void Obstacle::Init(BodyDesc* d) {
     U8(this, 0x234) = 0;
     F32(this, 0x238) = 0.0f;
     fn_801AC240((u8*)this);
-    *(ObRot*)((u8*)frame) = q->rot;
+    *(ObRot*)((u8*)&frame) = q->rot;
     *(ObPos*)((u8*)this + 0x60) = q->pos;
     CollVolume::Transform();
     *(RVec3*)((u8*)this + 0x30) = RVec3(0.0f, 0.0f, 0.0f);
@@ -647,7 +642,7 @@ void Obstacle::Init(BodyDesc* d) {
         CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
             const f32& half = 0.5f;
-            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)frame, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
+            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&frame, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
                             0.2f, q->a, half * q->b, q->a);
         }
         shape = s;
@@ -675,7 +670,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddCornerV((u8*)this, c, spring);
         shape = (CollShape*)operator new(0x184, "horse-volume");
         if (shape) {
-            shape = __ct__11SphereGroupFUlUl(shape, (u8*)frame, (u8*)this);
+            shape = __ct__11SphereGroupFUlUl(shape, (u8*)&frame, (u8*)this);
         }
         const f32 directionComponent = 1.0f;
         f32 r = q->a * ScaleOperand(0.5f);
@@ -687,7 +682,7 @@ void Obstacle::Init(BodyDesc* d) {
                     RVec3(1.0f, 1.0f, 1.0f), r, k, skin, 1.0f, secondCenterXY);
         CollShape* box = (CollShape*)operator new(0x74, "horse-box");
         if (box) {
-            box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)frame, origin, (u8*)this, k, skin, 0.3f, 0.3f, 0.3f);
+            box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)&frame, origin, (u8*)this, k, skin, 0.3f, 0.3f, 0.3f);
         }
         fn_801A0444(shape, box);
         corners = 0;
@@ -778,7 +773,7 @@ void Obstacle::Init(BodyDesc* d) {
         fn_80131818(t);
         CollShape* s = (CollShape*)operator new(0xE0, "polyvol");
         if (s) {
-            s = __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(s, (u8*)frame, pl, n, &lo, &hi, k, skin);
+            s = __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(s, (u8*)&frame, pl, n, &lo, &hi, k, skin);
         }
         shape = s;
         U8(this, 0x221) = 1;
@@ -788,7 +783,7 @@ void Obstacle::Init(BodyDesc* d) {
     case 20: {
         CollShape* s = (CollShape*)operator new(0x40, "pmshvol");
         if (s) {
-            s = __ct__9MeshShapeFUlPCcUl(s, (u8*)frame, (const char*)&q->a, (u8*)this);
+            s = __ct__9MeshShapeFUlPCcUl(s, (u8*)&frame, (const char*)&q->a, (u8*)this);
         }
         shape = s;
         U8(this, 0x221) = 1;
@@ -803,7 +798,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddShape(ball);
         CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
         if (s) {
-            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)frame, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), (u8*)this, k, skin, hx, hy,
+            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&frame, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), (u8*)this, k, skin, hx, hy,
                             0.61f);
         }
         shape = s;
@@ -881,7 +876,7 @@ void Obstacle::Init(BodyDesc* d) {
     for (BodyCorner* c = *(BodyCorner**)((u8*)this + 0xD0); c; c = c->next) {
         c->friction = 2.0f;
     }
-    *(Pose12*)((u8*)this + 0x1EC) = *(Pose12*)((u8*)frame);
+    *(Pose12*)((u8*)this + 0x1EC) = *(Pose12*)((u8*)&frame);
     S32(this, 0x224) = 0;
     if (q->flags & 1) {
         u32 group = q->flags & 2;
@@ -1511,9 +1506,9 @@ void fn_801AD0E0(u8* p, const f32* a, s32 id, const f32* b, f32 x, f32 y) {
 }
 
 // Links this joint between a point on our volume and the same point in `body`'s local frame.
-void fn_801AD148(u8* p, const CVec3* a, u8* body, f32 x, f32 y) {
-    CVec3 w;
-    CVec3 l;
+void fn_801AD148(u8* p, const RVec3* a, u8* body, f32 x, f32 y) {
+    RVec3 w;
+    RVec3 l;
     ((CollVolume*)PTR(p, 0x34))->Xform(&w, a);
     if (body) {
         l.x = w.x - F32(body, 0x60);
@@ -1532,13 +1527,13 @@ void fn_801AD148(u8* p, const CVec3* a, u8* body, f32 x, f32 y) {
     fn_801AD0E0(p, (const f32*)&l, (s32)body, (const f32*)a, x, y);
 }
 
-f32 PSVECMag(const CVec3* v);
+f32 PSVECMag(const RVec3* v);
 
 // Links this joint between a point on our volume and one on `other` (or a world point).
-void fn_801AD28C(u8* p, const CVec3* a, CollVolume* other, const CVec3* b, f32 x, f32 y) {
-    CVec3 wa;
-    CVec3 wb;
-    CVec3 d;
+void fn_801AD28C(u8* p, const RVec3* a, CollVolume* other, const RVec3* b, f32 x, f32 y) {
+    RVec3 wa;
+    RVec3 wb;
+    RVec3 d;
     ((CollVolume*)PTR(p, 0x34))->Xform(&wa, a);
     if (other) {
         other->Xform(&wb, b);
@@ -1561,14 +1556,14 @@ static const struct { f32 value; u32 reserved; } MinJointLength = { 0.001f, 0 };
 
 // Applies the joint's spring (beyond the rest length) and damping between the two attachment points.
 void fn_801AD394(u8* p) {
-    CVec3 wa;
-    CVec3 wb;
-    CVec3 d;
-    ((CollVolume*)PTR(p, 0x34))->Xform(&wa, (const CVec3*)(p + 0x10));
+    RVec3 wa;
+    RVec3 wb;
+    RVec3 d;
+    ((CollVolume*)PTR(p, 0x34))->Xform(&wa, (const RVec3*)(p + 0x10));
     if (PTR(p, 0xC)) {
-        ((CollVolume*)PTR(p, 0xC))->Xform(&wb, (const CVec3*)p);
+        ((CollVolume*)PTR(p, 0xC))->Xform(&wb, (const RVec3*)p);
     } else {
-        wb = *(const CVec3*)p;
+        wb = *(const RVec3*)p;
     }
     d.x = wb.x - wa.x;
     d.y = wb.y - wa.y;
@@ -1582,11 +1577,11 @@ void fn_801AD394(u8* p) {
     f32 stretch = len - F32(p, 0x28);
     F32(p, 0x2C) = stretch;
     if (len > MinJointLength.value && len < F32(p, 0x28) + F32(p, 0x24)) {
-        CVec3 dir;
-        CVec3 force;
-        CVec3 va;
-        CVec3 vb;
-        CVec3 dv;
+        RVec3 dir;
+        RVec3 force;
+        RVec3 va;
+        RVec3 vb;
+        RVec3 dv;
         f32 inv = 1.0f / len;
         f32 zero = 0.0f;
         force.x = zero;

@@ -4,6 +4,7 @@
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/collshape.h"
+#include "game/rmtx.h"
 
 extern "C" {
 double sqrt(double x);
@@ -22,8 +23,7 @@ void __ct__10CamFrame34Fv(void* m);
 void __ct__4VPosFfff(void* v, f32 x, f32 y, f32 z);
 }
 
-struct BMtx;
-extern "C" void fn_8017E388(BMtx* m);
+extern "C" void fn_8017E388(RMtx* m);
 
 void* operator new(size_t size, const char* tag);
 
@@ -39,29 +39,6 @@ inline bool DbgFlag(u32 m) {
     }
     return r;
 }
-
-struct BVec3 {
-    BVec3(void) {}
-    BVec3(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    BVec3& operator+=(const BVec3& v) {
-        x += v.x;
-        y += v.y;
-        z += v.z;
-        return *this;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct BMtx {
-    BVec3 rot[3];  // offset 0x0
-    BVec3 pos;     // offset 0x24
-};
 
 struct BTrackStart {
     u8 pad0[0x1C];
@@ -220,15 +197,16 @@ public:
     static void operator delete(void* p);
 };
 
-extern "C" BSound* fn_802077A4(const char* name, int prio, const BVec3* vel, const BVec3* pos);
+extern "C" BSound* fn_802077A4(const char* name, int prio, const RVec3* vel, const RVec3* pos);
 
 struct RPacket;
 class Phob;
-extern "C" void fn_8019EECC(Phob* p, BVec3* v);
+extern "C" void fn_8019EECC(Phob* p, RVec3* v);
 
 class SphereShape : public CollShape {
 public:
-    SphereShape(Phob* o, const BMtx* m, f32 k, f32 s, f32 r, const BVec3& c) : CollShape((const CFrame*)m, (CollVolume*)o, 0x53504852, k, s), center(c) {
+    SphereShape(Phob* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c) : CollShape((const CFrame*)m, (CollVolume*)o, 0x53504852, k, s) {
+        center = c;
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;
@@ -255,7 +233,7 @@ public:
     virtual f32 Radius(void);
     virtual void vf4C(void);
     f32 radius;    // offset 0x24
-    BVec3 center;  // offset 0x28
+    RVec3 center;  // offset 0x28
     f32 f34;       // offset 0x34
     f32 f38;       // offset 0x38
     f32 f3C;       // offset 0x3C
@@ -281,7 +259,7 @@ struct BallDesc : public BodyDesc {
     f32 skin;       // offset 0x2C
     u8 explodable;  // offset 0x30
     u8 pad31[3];
-    BVec3 launch;   // offset 0x34
+    RVec3 launch;   // offset 0x34
 };
 
 class Phob {
@@ -305,25 +283,24 @@ public:
     void Xform(void);
     void AddShape(CollShape* s);
     const s16* Hint(void);
-    const BVec3* Vel(void);
-    const BMtx* World(void);
+    const RVec3* Vel(void);
+    const RMtx* World(void);
     s32 a4;       // offset 0x4
     s32 a8;       // offset 0x8
     u8 padC[0x3C - 0xC];
-    BMtx mtx;     // offset 0x3C
+    RMtx mtx;     // offset 0x3C
     s16 hint[2];  // offset 0x6C
-    BMtx world;   // offset 0x70
-    BMtx prev;    // offset 0xA0
+    RMtx world;   // offset 0x70
+    RMtx prev;    // offset 0xA0
     u8 padD0[0x118 - 0xD0];
-    BVec3 vel;    // offset 0x118
-    BVec3 avel;   // offset 0x124
+    RVec3 vel;    // offset 0x118
+    RVec3 avel;   // offset 0x124
     u8 pad130[0x1E8 - 0x130];
 };
 
-struct RVec3;  // rigid.cpp vector (same layout as BVec3)
 
 struct RPacket;
-struct RVec3;
+
 
 class CollVolume {
 public:
@@ -348,10 +325,10 @@ public:
     s32 a4;
     s32 a8;
     u8 padC[0x3C - 0xC];
-    BMtx mtx;
+    RMtx mtx;
     s16 hint[2];
-    BMtx world;
-    BMtx prev;
+    RMtx world;
+    RMtx prev;
 };
 
 class RigidBody : public CollVolume {
@@ -371,8 +348,8 @@ public:
     virtual void OnImpulses(RVec3* force, RVec3* torque);
     void Push(Phob* a, void* b, const RVec3* imp, const RVec3* at, int kind, const RVec3* c, void* by, f32 k);
     u8 padD0[0x118 - 0xD0];
-    BVec3 vel;
-    BVec3 avel;
+    RVec3 vel;
+    RVec3 avel;
     u8 pad130[0x1E8 - 0x130];
     u8 b1E8;
     u8 b1E9;
@@ -398,7 +375,7 @@ struct BallStrings {
 
 class Ball : public RigidBody, public IBallListener {
 public:
-    void PredictPos(BVec3& p, RigidBody* b, f32 k);
+    void PredictPos(RVec3& p, RigidBody* b, f32 k);
 public:
     Ball(void) {}
     virtual void Init(BodyDesc* d);
@@ -414,7 +391,7 @@ public:
     virtual void Status(const char** text, u8* flash);
     virtual void Input(Phob* src, u8* pressed);
     virtual bool GetPos(f32* xz, f32* vxz);
-    void Launch(const BMtx* m, const BVec3* v, s16 h, f32 k);
+    void Launch(const RMtx* m, const RVec3* v, s16 h, f32 k);
     f32 DropHeight(void);
     void PickDrop(f32* xz, s16* h);
     s32 state;          // offset 0x1F0
@@ -423,12 +400,12 @@ public:
     u8 resetPending;    // offset 0x1FC
     u8 explodable;      // offset 0x1FD
     u8 active;          // offset 0x1FE
-    BVec3 startPos;     // offset 0x200
-    BVec3 explPos;      // offset 0x20C
+    RVec3 startPos;     // offset 0x200
+    RVec3 explPos;      // offset 0x20C
     BSound* sndStart;   // offset 0x218
     BSound* sndRoll;    // offset 0x21C
     BSound* sndExpl;    // offset 0x220
-    BVec3 launch;       // offset 0x224
+    RVec3 launch;       // offset 0x224
 };
 
 static inline u32 MakeStartupWord(u32 value) { return value; }
@@ -441,10 +418,10 @@ extern const u32 lbl_8055E4A8 = MakeStartupWord(0x7F000000);
 
 extern "C" f32 fn_8017D378(void) { return lbl_8055E3C8; }
 
-BVec3 Home(int car) {
+RVec3 Home(int car) {
     BTrack* t = fn_80178C9C();
     f32* p = t->start->xz;
-    BVec3 v;
+    RVec3 v;
     v.x = p[0];
     v.y = 0.0f;
     v.z = p[1];
@@ -454,7 +431,7 @@ BVec3 Home(int car) {
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
-extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, int car) {
+extern "C" void fn_8017D404(f32 r, f32 force, const RVec3* c, RigidBody* self, int car) {
     RaceCarRec* by = fn_8017960C(car);
     struct Node {
         Phob* obj;
@@ -467,13 +444,13 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
     struct { Node* nd; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
     int n = 5;
     int i;
-    void fn_801B619C(List** out, int* n, const BVec3* c);
+    void fn_801B619C(List** out, int* n, const RVec3* c);
     fn_801B619C(lists, &n, c);
     for (i = 0; i < n; i++) {
         for (sp_.nd = lists[i]->head; sp_.nd; sp_.nd = sp_.nd->next) {
             RigidBody* b = sp_.nd->obj->vf40() ? (RigidBody*)sp_.nd->obj : 0;
             if (b) {
-                BVec3 d;
+                RVec3 d;
                 f32 d2;
                 d.x = c->x - b->mtx.pos.x;
                 d.y = c->y - b->mtx.pos.y;
@@ -481,8 +458,8 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                 d2 = PSVECDotProduct(&d, &d);
                 if (d2 < r * r && d2 > 0.0001f) {
                     f32 fall;
-                    BVec3 at;
-                    BVec3 imp;
+                    RVec3 at;
+                    RVec3 imp;
                     f32 k;
                     f32 rnd;
                     if (b == self) {
@@ -495,13 +472,13 @@ extern "C" void fn_8017D404(f32 r, f32 force, const BVec3* c, RigidBody* self, i
                     at.y = b->mtx.pos.y + d.y;
                     at.z = b->mtx.pos.z + d.z;
                     rnd = fn_80129DC4(3, -0.2f, 0.2f);
-                    at.x += b->mtx.rot[0].x * rnd;
-                    at.y += b->mtx.rot[0].y * rnd;
-                    at.z += b->mtx.rot[0].z * rnd;
+                    at.x += b->mtx.rot.x.x * rnd;
+                    at.y += b->mtx.rot.x.y * rnd;
+                    at.z += b->mtx.rot.x.z * rnd;
                     rnd = fn_80129DC4(3, -0.2f, 0.2f);
-                    at.x += b->mtx.rot[2].x * rnd;
-                    at.y += b->mtx.rot[2].y * rnd;
-                    at.z += b->mtx.rot[2].z * rnd;
+                    at.x += b->mtx.rot.z.x * rnd;
+                    at.y += b->mtx.rot.z.y * rnd;
+                    at.z += b->mtx.rot.z.z * rnd;
                     d.y -= 0.15f;
                     imp.x = d.x * (-fall * force);
                     f32 yv = d.y;
@@ -525,7 +502,7 @@ void Ball::Init(BodyDesc* desc) {
     f32 radius = 0.0254f * d->radius;
     f32 k = 4.45f * d->stiff / 0.0254f;
     f32 stiff = k * (kk * kk);
-    BVec3 c(0.0f, 0.0f, 0.0f);
+    RVec3 c(0.0f, 0.0f, 0.0f);
     car = d->car;
     mtx.pos = Home(car);
     CollVolume::Transform();
@@ -576,8 +553,8 @@ void Ball::OnHit(const RVec3* force, const RVec3* at, int kind, void* contact) {
     if (active && explodable) {
         if ((kind >= 100 || DbgFlag(0x90)) && kind < 1000) {
             struct {
-                BVec3 pos;
-                BVec3 vel;
+                RVec3 pos;
+                RVec3 vel;
             } ev;
             ev.pos = mtx.pos;
             ev.vel = vel;
@@ -601,8 +578,8 @@ void Ball::OnHit(const RVec3* force, const RVec3* at, int kind, void* contact) {
 inline void Ball::Drop(void) {
     s16 h;
     f32 xz[2];
-    BVec3 v;
-    BMtx m;
+    RVec3 v;
+    RMtx m;
     f32 up;
     __ct__4Vec2Fv(xz);
     PickDrop(xz, &h);
@@ -667,40 +644,40 @@ void Ball::Update(void) {
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-inline void Rotate(BVec3* out, const BMtx* m, const BVec3* v) {
+inline void Rotate(RVec3* out, const RMtx* m, const RVec3* v) {
     if (out == v) {
-        f32 x = Dot3(v->x, m->rot[0].x, v->y, m->rot[1].x, v->z, m->rot[2].x);
-        f32 y = Dot3(v->x, m->rot[0].y, v->y, m->rot[1].y, v->z, m->rot[2].y);
-        f32 z = Dot3(v->x, m->rot[0].z, v->y, m->rot[1].z, v->z, m->rot[2].z);
+        f32 x = Dot3(v->x, m->rot.x.x, v->y, m->rot.y.x, v->z, m->rot.z.x);
+        f32 y = Dot3(v->x, m->rot.x.y, v->y, m->rot.y.y, v->z, m->rot.z.y);
+        f32 z = Dot3(v->x, m->rot.x.z, v->y, m->rot.y.z, v->z, m->rot.z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(v->x, m->rot[0].x, v->y, m->rot[1].x, v->z, m->rot[2].x);
-        out->y = Dot3(v->x, m->rot[0].y, v->y, m->rot[1].y, v->z, m->rot[2].y);
-        out->z = Dot3(v->x, m->rot[0].z, v->y, m->rot[1].z, v->z, m->rot[2].z);
+        out->x = Dot3(v->x, m->rot.x.x, v->y, m->rot.y.x, v->z, m->rot.z.x);
+        out->y = Dot3(v->x, m->rot.x.y, v->y, m->rot.y.y, v->z, m->rot.z.y);
+        out->z = Dot3(v->x, m->rot.x.z, v->y, m->rot.y.z, v->z, m->rot.z.z);
     }
 }
 
 // Helper names unproven: vector operations written as inlines, as the target evaluates them.
-static inline void AddSB(BVec3* o, const BVec3* a, f32 s) {
+static inline void AddSB(RVec3* o, const RVec3* a, f32 s) {
     o->x += a->x * s;
     o->y += a->y * s;
     o->z += a->z * s;
 }
-static inline void ScaleB(BVec3* o, const BVec3* a, f32 s) {
+static inline void ScaleB(RVec3* o, const RVec3* a, f32 s) {
     o->x = a->x * s;
     o->y = a->y * s;
     o->z = a->z * s;
 }
-static inline void AccB(BVec3* o, const BVec3* a) {
+static inline void AccB(RVec3* o, const RVec3* a) {
     o->x += a->x;
     o->y += a->y;
     o->z += a->z;
 }
-void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
-    BMtx m;
-    BVec3 p;
+void Ball::Launch(const RMtx* in, const RVec3* v, s16 h, f32 k) {
+    RMtx m;
+    RVec3 p;
     fn_8017D378();
     avel.x = 0.0f;
     avel.y = 0.0f;
@@ -718,16 +695,16 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
         vel.y = -19.62f;
         vel.z = 0.0f;
     } else if (DbgFlag(0x10)) {
-        BVec3 d;
-        ScaleB(&d, &m.rot[2], 0.707f);
-        AddSB(&d, &m.rot[1], 0.707f * 0.7f);
+        RVec3 d;
+        ScaleB(&d, &m.rot.z, 0.707f);
+        AddSB(&d, &m.rot.y, 0.707f * 0.7f);
         ScaleB(&vel, &d, (128.0f / 3.6f) * k);
         AccB(&vel, v);
     } else {
         f32 s = 40.0f * k;
-        vel.x = v->x + mtx.rot[2].x * s;
-        vel.y = v->y + mtx.rot[2].y * s;
-        vel.z = v->z + mtx.rot[2].z * s;
+        vel.x = v->x + mtx.rot.z.x * s;
+        vel.y = v->y + mtx.rot.z.y * s;
+        vel.z = v->z + mtx.rot.z.z * s;
         if (DbgFlag(8)) {
             state = 0;
             timer = fn_8017D378() + 1.5f;
@@ -748,23 +725,23 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
 
 f32 Ball::DropHeight(void) { return 60.0f; }
 
-extern "C" void fn_8017E388(BMtx* m) {
-    m->rot[0].x = 1.0f;
-    m->rot[0].y = 0.0f;
-    m->rot[0].z = 0.0f;
-    m->rot[1].x = 0.0f;
-    m->rot[1].y = 1.0f;
-    m->rot[1].z = 0.0f;
-    m->rot[2].x = 0.0f;
-    m->rot[2].y = 0.0f;
-    m->rot[2].z = 1.0f;
+extern "C" void fn_8017E388(RMtx* m) {
+    m->rot.x.x = 1.0f;
+    m->rot.x.y = 0.0f;
+    m->rot.x.z = 0.0f;
+    m->rot.y.x = 0.0f;
+    m->rot.y.y = 1.0f;
+    m->rot.y.z = 0.0f;
+    m->rot.z.x = 0.0f;
+    m->rot.z.y = 0.0f;
+    m->rot.z.z = 1.0f;
     m->pos.x = 0.0f;
     m->pos.y = 0.0f;
     m->pos.z = 0.0f;
 }
 
 /* Helper name unproven: position k seconds ahead along the body velocity. */
-inline void Ball::PredictPos(BVec3& p, RigidBody* b, f32 k) {
+inline void Ball::PredictPos(RVec3& p, RigidBody* b, f32 k) {
     p.x = b->mtx.pos.x + b->vel.x * k;
     p.y = b->mtx.pos.y + b->vel.y * k;
     p.z = b->mtx.pos.z + b->vel.z * k;
@@ -773,11 +750,11 @@ inline void Ball::PredictPos(BVec3& p, RigidBody* b, f32 k) {
 void Ball::PickDrop(f32* xz, s16* h) {
     if (*(u32*)((u8*)fn_801769CC() + 4) & 0x10000) {
         RigidBody* b = (RigidBody*)fn_8017960C(car);
-        BVec3 p;
+        RVec3 p;
         f32 c;
         PredictPos(p, b, 2.0f);
         c = 10.0f;
-        p += BVec3(fn_80129DC4(4, -c, c), 0.0f, fn_80129DC4(4, -c, c));
+        p += RVec3(fn_80129DC4(4, -c, c), 0.0f, fn_80129DC4(4, -c, c));
         xz[0] = p.x;
         xz[1] = p.z;
         fn_801E9DC4(h);
@@ -796,7 +773,7 @@ void Ball::PickDrop(f32* xz, s16* h) {
         off = fn_80129DC4(4, -w / 2.0f, w / 2.0f);
         pp.Place(xz, off);
         {
-            BVec3 p;
+            RVec3 p;
             p.x = xz[0];
             p.y = 0.0f;
             p.z = xz[1];
@@ -809,7 +786,7 @@ void Ball::PickDrop(f32* xz, s16* h) {
     }
 }
 
-static inline void LerpMtx(BMtx* out, const BMtx* a, const BMtx* b, f32 t) {
+static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     f32* d = (f32*)out;
     const f32* x = (const f32*)a;
     const f32* y = (const f32*)b;
@@ -820,11 +797,11 @@ static inline void LerpMtx(BMtx* out, const BMtx* a, const BMtx* b, f32 t) {
 
 void Ball::vf28(u8* buf) {
     u8* o = buf + a8;
-    BMtx* out = (BMtx*)o;
+    RMtx* out = (RMtx*)o;
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         *out = world;
     } else {
-        BMtx t;
+        RMtx t;
         LerpMtx(&t, &prev, &world, lbl_8055E460);
         *out = t;
     }
@@ -888,5 +865,5 @@ void Ball::Input(Phob* src, u8* pressed) {
 }
 
 inline const s16* Phob::Hint(void) { return hint; }
-inline const BVec3* Phob::Vel(void) { return &vel; }
-inline const BMtx* Phob::World(void) { return &world; }
+inline const RVec3* Phob::Vel(void) { return &vel; }
+inline const RMtx* Phob::World(void) { return &world; }

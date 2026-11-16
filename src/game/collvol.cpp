@@ -3,6 +3,7 @@
 // the neighbouring physics object unit. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/collshape.h"
+#include "game/rmtx.h"
 
 extern "C" {
 f32 PSVECMag(const void* v);
@@ -18,40 +19,18 @@ void PSVECCrossProduct(const void* a, const void* b, void* out);
 
 void* operator new(size_t size, const char* tag);
 
-struct CVec3 {
-    void Set(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
 // The 3x3 rotation block: copied as one 36-byte struct (word copy), indexed like an array.
 /* Type shape from the target (one 9-word copy in CollVolume::Update, 2026-11-08); name and the conversion operator are guesses. */
-struct CRot {
-    operator CVec3*() { return r; }
-    operator const CVec3*() const { return r; }
-    CVec3 r[3];
-};
-
-struct CMtx {
-    CRot rot;      // offset 0x0
-    CVec3 pos;     // offset 0x24
-};
-
 class BoxShape : public CollShape {
 public:
-    BoxShape(const CMtx* m, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, 0, 'BOX ', 50000.0f, 0.2f) {
+    BoxShape(const RMtx* m, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, 0, 'BOX ', 50000.0f, 0.2f) {
         half.x = x;
         half.y = y;
         half.z = z;
         a34 = 0;
         radius = 0.2f + (f32)sqrt(x * x + y * y + z * z);
     }
-    CVec3 half;  // offset 0x24
+    RVec3 half;  // offset 0x24
     f32 radius;  // offset 0x30
     s32 a34;     // offset 0x34
     virtual void vf10(u8* other);
@@ -67,9 +46,9 @@ public:
 struct BodyDesc {
     s32 type;     // offset 0x0
     u8 pad4[0x4];
-    CMtx mtx;     // offset 0x8
+    RMtx mtx;     // offset 0x8
     s32 shape;    // offset 0x38
-    CVec3 half;   // offset 0x3C
+    RVec3 half;   // offset 0x3C
 };
 
 struct RVec3;
@@ -97,7 +76,7 @@ public:
     virtual int vf44(void);            // 0x44
     void Transform(void);  // the worker the 0x1C slot (Update) calls
     void AddShape(CollShape* s);
-    void Xform(CVec3* out, const CVec3* in);
+    void Xform(RVec3* out, const RVec3* in);
     s32 a4;              // offset 0x4
     s32 a8;              // offset 0x8
     BodyDesc* desc;      // offset 0xC
@@ -106,11 +85,11 @@ public:
     s32 nAdded;          // offset 0x24
     s32 nSub;            // offset 0x28
     f32 radius;          // offset 0x2C
-    CVec3 offset;        // offset 0x30
-    CMtx mtx;            // offset 0x3C
+    RVec3 offset;        // offset 0x30
+    RMtx mtx;            // offset 0x3C
     s16 hint[2];         // offset 0x6C
-    CMtx world;          // offset 0x70
-    CMtx prev;           // offset 0xA0
+    RMtx world;          // offset 0x70
+    RMtx prev;           // offset 0xA0
 };
 
 class PhobStatic : public CollVolume {
@@ -128,7 +107,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 struct RPacket {
     u16 rot[3];  // offset 0x0
     u8 pad6[2];
-    CVec3 pos;   // offset 0x8
+    RVec3 pos;   // offset 0x8
 };
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
@@ -141,16 +120,16 @@ static inline f32 Unlerp(f32 a, f32 b, f32 x) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline void Identity(CMtx* m) {
-    m->rot[0].x = 1.0f;
-    m->rot[0].y = 0.0f;
-    m->rot[0].z = 0.0f;
-    m->rot[1].x = 0.0f;
-    m->rot[1].y = 1.0f;
-    m->rot[1].z = 0.0f;
-    m->rot[2].x = 0.0f;
-    m->rot[2].y = 0.0f;
-    m->rot[2].z = 1.0f;
+static inline void Identity(RMtx* m) {
+    m->rot.x.x = 1.0f;
+    m->rot.x.y = 0.0f;
+    m->rot.x.z = 0.0f;
+    m->rot.y.x = 0.0f;
+    m->rot.y.y = 1.0f;
+    m->rot.y.z = 0.0f;
+    m->rot.z.x = 0.0f;
+    m->rot.z.y = 0.0f;
+    m->rot.z.z = 1.0f;
     m->pos.x = 0.0f;
     m->pos.y = 0.0f;
     m->pos.z = 0.0f;
@@ -226,13 +205,13 @@ static inline f32 Deq(u16 u) {
     return Lerp(-6.2831855f, 6.2831855f, t);
 }
 
-static inline void SetV(CVec3* v, f32 x, f32 y, f32 z) {
+static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
     v->x = x;
     v->y = y;
     v->z = z;
 }
 
-static inline void AxisAngle(CVec3* m, const CVec3* v) {
+static inline void AxisAngle(RVec3* m, const RVec3* v) {
     f32 a = PSVECMag(v);
     if (a > 0.0001f) {
         f32 inv = 1.0f / a;
@@ -271,19 +250,19 @@ static inline void AxisAngle(CVec3* m, const CVec3* v) {
     }
 }
 
-extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t);
+extern "C" void fn_8017AE94(RMtx* out, const RMtx* a, const RMtx* b, f32 t);
 
 void CollVolume::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
-    CMtx ma;
-    CMtx mb;
-    CVec3 va;
-    CVec3 vb;
+    RMtx ma;
+    RMtx mb;
+    RVec3 va;
+    RVec3 vb;
     fn_8017A008((u8*)&ma.pos, (u8*)&a->pos, 12);
     fn_8017A008((u8*)&mb.pos, (u8*)&b->pos, 12);
     SetV(&va, Deq(a->rot[0]), Deq(a->rot[1]), Deq(a->rot[2]));
     SetV(&vb, Deq(b->rot[0]), Deq(b->rot[1]), Deq(b->rot[2]));
-    AxisAngle(ma.rot, &va);
-    AxisAngle(mb.rot, &vb);
+    AxisAngle(&ma.rot.x, &va);
+    AxisAngle(&mb.rot.x, &vb);
     fn_8017AE94(&mtx, &ma, &mb, t);
     Transform();
     *nb = 0x14;
@@ -296,18 +275,18 @@ void CollVolume::vf20(void) {}
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(const CMtx* m, const CVec3* in, CVec3* out) {
+static inline void MulVec(const RMtx* m, const RVec3* in, RVec3* out) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->rot[0].x, in->y, m->rot[1].x, in->z, m->rot[2].x);
-        f32 y = Dot3(in->x, m->rot[0].y, in->y, m->rot[1].y, in->z, m->rot[2].y);
-        f32 z = Dot3(in->x, m->rot[0].z, in->y, m->rot[1].z, in->z, m->rot[2].z);
+        f32 x = Dot3(in->x, m->rot.x.x, in->y, m->rot.y.x, in->z, m->rot.z.x);
+        f32 y = Dot3(in->x, m->rot.x.y, in->y, m->rot.y.y, in->z, m->rot.z.y);
+        f32 z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->rot[0].x, in->y, m->rot[1].x, in->z, m->rot[2].x);
-        out->y = Dot3(in->x, m->rot[0].y, in->y, m->rot[1].y, in->z, m->rot[2].y);
-        out->z = Dot3(in->x, m->rot[0].z, in->y, m->rot[1].z, in->z, m->rot[2].z);
+        out->x = Dot3(in->x, m->rot.x.x, in->y, m->rot.y.x, in->z, m->rot.z.x);
+        out->y = Dot3(in->x, m->rot.x.y, in->y, m->rot.y.y, in->z, m->rot.z.y);
+        out->z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
     }
 }
 
@@ -337,7 +316,7 @@ s32 CollVolume::vf34(RPacket* p) {
     f32 th;
     f32 sn;
     p->pos = mtx.pos;
-    tr = mtx.rot[0].x + mtx.rot[1].y + mtx.rot[2].z;
+    tr = mtx.rot.x.x + mtx.rot.y.y + mtx.rot.z.z;
     if (tr > 0.0f) {
         f32 r = sqrt(1.0f + tr);
         f32 inv = 0.5f / r;
@@ -386,7 +365,7 @@ s32 CollVolume::vf34(RPacket* p) {
     return 0x14;
 }
 
-void CollVolume::Xform(CVec3* out, const CVec3* in) {
+void CollVolume::Xform(RVec3* out, const RVec3* in) {
     MulVec(&mtx, in, out);
     out->x += mtx.pos.x;
     out->y += mtx.pos.y;
@@ -411,14 +390,14 @@ void PhobStatic::Init(BodyDesc* d) {
     }
 }
 
-extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t) {
+extern "C" void fn_8017AE94(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     int i;
-    f32* o = &out->rot[0].x;
-    const f32* p = &a->rot[0].x;
-    const f32* q = &b->rot[0].x;
-    CVec3 z;
-    CVec3 y;
-    CVec3 x;
+    f32* o = &out->rot.x.x;
+    const f32* p = &a->rot.x.x;
+    const f32* q = &b->rot.x.x;
+    RVec3 z;
+    RVec3 y;
+    RVec3 x;
     for (i = 0; i < 2; i++) {
         o[0] = p[0] + t * (q[0] - p[0]);
         o[1] = p[1] + t * (q[1] - p[1]);
@@ -430,18 +409,18 @@ extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t) {
         p += 6;
         q += 6;
     }
-    PSVECNormalize(&out->rot[0], &out->rot[0]);
-    PSVECNormalize(&out->rot[1], &out->rot[1]);
-    PSVECNormalize(&out->rot[2], &out->rot[2]);
-    x.Set(out->rot[0].x, out->rot[0].y, out->rot[0].z);
-    z.Set(out->rot[2].x, out->rot[2].y, out->rot[2].z);
+    PSVECNormalize(&out->rot.x, &out->rot.x);
+    PSVECNormalize(&out->rot.y, &out->rot.y);
+    PSVECNormalize(&out->rot.z, &out->rot.z);
+    x.Set(out->rot.x.x, out->rot.x.y, out->rot.x.z);
+    z.Set(out->rot.z.x, out->rot.z.y, out->rot.z.z);
     PSVECCrossProduct(&z, &x, &y);
     PSVECNormalize(&x, &x);
     PSVECNormalize(&y, &y);
     PSVECCrossProduct(&x, &y, &z);
-    out->rot[0] = x;
-    out->rot[1] = y;
-    out->rot[2] = z;
+    out->rot.x = x;
+    out->rot.y = y;
+    out->rot.z = z;
 }
 
 PhobStatic::~PhobStatic(void) {}

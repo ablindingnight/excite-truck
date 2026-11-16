@@ -31,6 +31,12 @@ struct RVec3 : PlainRVec3 {
         y = b;
         z = c;
     }
+    RVec3& operator+=(const PlainRVec3& v) {
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        return *this;
+    }
 };
 
 #endif
