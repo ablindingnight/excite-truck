@@ -179,7 +179,7 @@ Truck* fn_8017960C(int index);
 PlayerObj* fn_802678E4(int player);
 EventInfo* fn_801E87A8(void);
 int fn_80178C9C(void);
-void fn_80136468(Vec3* out, int path, f32 dist);
+Vec3 fn_80136468(int path, f32 dist);  // idealline: returns the ILPos by value
 void PSVECNormalize(const Vec3* src, Vec3* dst);
 void PSVECCrossProduct(const Vec3* a, const Vec3* b, Vec3* out);
 f32 PSVECDotProduct(const Vec3* a, const Vec3* b);
@@ -496,7 +496,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     Vertex verts[41] __attribute__((aligned(16)));
     u16 idx[180];
     Basis basis;
-    Vec3 path;
     Vec2 dir;
     Vec2 tpos;
     SFMarker* sf;
@@ -546,7 +545,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         t = (fn_801EA9A0(view)->truck->speed / 0.44444445f - map->minSpeed) /
             (map->maxSpeed - map->minSpeed);
         radius = LerpF(Max(Min(1.0f, t), 0.0f), map->minWidth, map->maxWidth);
-        fn_80136468(&path, fn_80178C9C(), dist);
+        const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
     }
     {
         Truck* tr = fn_8017960C(view);

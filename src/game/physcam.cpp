@@ -23,7 +23,7 @@ extern "C" {
 u8* fn_801E87A8(void);
 int strcasecmp(const char* a, const char* b);
 u8* fn_80178C9C(void);
-void fn_80136468(PathPos* out, u8* src, f32 t);
+PathPos fn_80136468(u8* src, f32 t);  // idealline: returns the ILPos by value
 void fn_80270EC4(u8* c, u32 id);
 void fn_802712F8(const char* path);
 void fn_80271624(int mode, u8* p);
@@ -305,7 +305,7 @@ void fn_80270EC4(u8* car, u32 id) {
 
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801B526C(void);
-void fn_80136414(PathPos* out, u8* track, s32 node);
+PathPos fn_80136414(u8* track, s32 node);  // idealline: returns the ILPos by value
 s32 fn_801363A0(u8* track, u8* cur);
 extern f32 lbl_8055F568;  // car heading
 extern const f32 lbl_80563F44;
@@ -336,12 +336,10 @@ int find_best_region(u8* car, int type) {
         u8* track = ((CamCarCtl*)PTR(car, 0x270))->Track();
         f32* heading = &lbl_8055F568;
         if (fn_801B526C()) {
-            PathPos pos;
-            fn_80136414(&pos, track, S32(car, 0x2678));
+            const PathPos& pos = fn_80136414(track, S32(car, 0x2678));
             *heading = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
         } else {
-            PathPos pos;
-            fn_80136414(&pos, track, fn_801363A0(track, track + 4));
+            const PathPos& pos = fn_80136414(track, fn_801363A0(track, track + 4));
             *heading = F32(pos.seg, 0x1C) + F32(pos.seg, 0x18) * pos.t;
         }
     }
@@ -907,8 +905,7 @@ void RegionSphere::Reset(void) {
 extern "C" {
 
 void fn_802723B4(u8* src, f32* out, f32 at) {
-    PathPos pos;
-    fn_80136468(&pos, src, at);
+    const PathPos& pos = fn_80136468(src, at);
     f32 t = pos.t;
     u8* q = pos.seg;
     f32 x = F32(q, 0x0);
@@ -931,8 +928,6 @@ static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 static inline f32 Half(f32 v) { return v * lbl_80563F40; }
 
 f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
-    PathPos pa;
-    PathPos pb;
     TrackPt qa;
     TrackPt qb;
     TrackPt da;
@@ -949,7 +944,7 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
             return a;
         }
     }
-    fn_80136468(&pa, track, a);
+    const PathPos& pa = fn_80136468(track, a);
     qa.x = LerpT(pa.t, F32(pa.seg, 0x0), F32(PTR(pa.seg, 0x14), 0x0));
     qa.y = LerpT(pa.t, F32(pa.seg, 0x4), F32(PTR(pa.seg, 0x14), 0x4));
     da.y = qa.y - c[1];
@@ -958,7 +953,7 @@ f32 fn_80272428(u8* track, const f32* c, f32 a, f32 b, f32 r2) {
     if (ea < lbl_8055F560) {
         return a;
     }
-    fn_80136468(&pb, track, b);
+    const PathPos& pb = fn_80136468(track, b);
     qb.x = LerpT(pb.t, F32(pb.seg, 0x0), F32(PTR(pb.seg, 0x14), 0x0));
     qb.y = LerpT(pb.t, F32(pb.seg, 0x4), F32(PTR(pb.seg, 0x14), 0x4));
     db.y = qb.y - c[1];
