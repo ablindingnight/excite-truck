@@ -485,7 +485,7 @@ static inline void ApplyDamagePointDeformation(DmgCarView* car, u8* p, f32 roll,
 }
 
 #pragma push
-#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (pragcheck 2026-11-16: fn_8018DA5C 99.19 with it, 97.63 without) */
 void fn_8018DA5C(u8* p, u8* m) {
     DmgCarView* car = (DmgCarView*)p;
     f32 roll;
@@ -585,7 +585,9 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                 DentPoint* o = (DentPoint*)((u8*&)((CarBody*)p)->layout) + other;
                 DentVec* go = (DentVec*)(p + 0x5FC) + other;
                 DentVec op;
-                // MATCHING-AID: y read ahead of x (single-use reads); the target adds y first but stores x first.
+                // MATCHING-AID (kept, audited 2026-11-16): y read ahead of x (single-use reads); the target adds y first but stores x
+                // first. Natural forms measured in fn_8018DE94 (EXACT with this): plain sums 14 diff rows, y operands swapped 14,
+                // y first 18, reversed operands 18, copy then add 24, only go->y in a local 6.
                 f32 yv = go->y;
                 f32 y2 = o->pos.y;
                 op.x = o->pos.x + go->x;
