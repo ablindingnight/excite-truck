@@ -405,6 +405,14 @@ inline int SpringWall::Ramping(void) {
     return time < ramp;
 }
 
+/* Helper name unproven */
+static inline void AddScaledV(TVec* out, const TPos* a, const TVec* b, f32 k) {
+    out->x = a->x + b->x * k;
+    out->y = a->y + b->y * k;
+    out->z = a->z + b->z * k;
+}
+/* Helper name unproven */
+static inline f32 SignF(f32 x) { return 0.0f < x ? 1.0f : -1.0f; }
 void SpringWall::Apply(SpringCar* car, TVec* acc) {
     if (owner) {
         TVec v;
@@ -422,15 +430,13 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
         target = vel + t * (depth - vel);
-        f32 xv = v.x;
-        p.x = car->pos.x + xv * 0.016683351f;
-        p.y = car->pos.y + v.y * 0.016683351f;
-        p.z = car->pos.z + v.z * 0.016683351f;
+        AddScaledV(&p, &car->pos, &v, 0.016683351f);
         dist = PlaneDist(&n, &p, &owner->plane->origin);
         // Unused, as in retail: only its compare of the stored distance survives (what it fed is unproven).
-        f32 side = this->dist > 0.0f ? 1.0f : -1.0f;
+        f32 side = SignF(this->dist);
         ramping = Ramping();
         if (ramping) {
+            f32 climbMax;
             f32 pen = target - d;
             f32 extra;
             f32 total;
@@ -447,9 +453,8 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 pen = 0.0f;
             }
             total = extra + pen;
-            f32 yv = n.y;
-            f.y = yv * total;
             f.x = n.x * total;
+            f.y = n.y * total;
             f.z = n.z * total;
             acc->x = acc->x + f.x;
             acc->y = acc->y + f.y;
@@ -460,13 +465,14 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 imp.y = f.y * k;
                 imp.z = f.z * k;
             }
-            f32 climbMax = 0.44444445f;
+            climbMax = 0.44444445f;
             if (v.y > climbMax && car->airborne == 0) {
+                f32 mass = car->mass;
                 f32 q = 0.1f * v.y;
                 q = climbMax < q ? climbMax : q;
-                imp.y = -q * (car->mass / 0.016683351f);
+                imp.y = -q * (mass / 0.016683351f);
             }
-            pen = pen + extra;
+            pen += extra;
             TPos at = *(TPos*)&car->up;
             at.y = 0.0f;
             if (!NearZero(pen) && PSVECDotProduct((TVec*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
