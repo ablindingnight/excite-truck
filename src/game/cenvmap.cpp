@@ -376,6 +376,8 @@ static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx
 }
 #pragma push
 #pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
+static inline f32 SideLen(f32 x, f32 y) { return sqrt(x * x + y * y); }
+
 void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
     if (tex != lbl_8055ED1C) {
         lbl_8055ED1C = tex;
@@ -391,13 +393,13 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
             EVec3* p = (EVec3*)((u8*)pts + i * stride);
             EVec3 q;
             EVec3 d;
-            d.z = p->z - (&lbl_80488B88)->pos.z;
-            d.y = p->y - (&lbl_80488B88)->pos.y;
             d.x = p->x - (&lbl_80488B88)->pos.x;
+            d.y = p->y - (&lbl_80488B88)->pos.y;
+            d.z = p->z - (&lbl_80488B88)->pos.z;
             EVec2 side;
             side.x = d.z;
             side.y = -d.x;
-            f32 len = sqrt(d.z * d.z + side.y * side.y);
+            f32 len = SideLen(side.x, side.y);
             if (len > 0.1f) {
                 f32 s = 1.0f / len;
                 side.x *= s;
