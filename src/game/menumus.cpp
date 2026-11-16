@@ -192,20 +192,22 @@ void fn_8020C2AC(void) {
             loaded = &lbl_8055EE42;
             break;
         case 2:
-            loaded = &lbl_8055EE43;
             song = lbl_8055B5D4;
+            loaded = &lbl_8055EE43;
             break;
         }
         if (!*loaded && fn_8012E938(song)) {
             fn_8012E81C(song);
             HeapGuard guard;
             fn_802064D0(lbl_80489C50);
-            if (t->name[0]) {
-                t->snd = fn_80207848(t->name, 0);
-            }
-            if (t->snd) {
-                t->snd->SetPan(0.0f);
-                t->snd->SetDepth(0.0f);
+            for (int part = 0; part < 1; part++) {
+                if (t->name[0]) {
+                    t->snd = fn_80207848(t->name, 0);
+                }
+                if (t->snd) {
+                    t->snd->SetPan(0.0f);
+                    t->snd->SetDepth(0.0f);
+                }
             }
             *loaded = 1;
         }
