@@ -196,7 +196,8 @@ struct TrailerTargets {
     TrailerTarget t[3];
 };
 
-struct RaceEntry {
+// A racer's trailer state (0xE0; was named RaceEntry here, which recordmgr uses for its race entries).
+struct TrailerEntry {
     u8 pad0[0x60];
     s32 trailer;        // offset 0x60
     u8 pad64[0x74 - 0x64];
@@ -223,17 +224,17 @@ struct RaceEntry {
     }
 };
 
-struct RaceEntries {
+struct TrailerEntries {
     u8 pad0[0x4];
-    RaceEntry entries[4];  // offset 0x4
+    TrailerEntry entries[4];  // offset 0x4
     u8 pad384[0x394 - 0x384];
     s32 count;             // offset 0x394
 };
 
 // Points each racer entry's trailer fields at its trailer body.
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801B916C(RaceEntries* r) {
-    RaceEntry* e = r->entries;
+static inline void Loop1_fn_801B916C(TrailerEntries* r) {
+    TrailerEntry* e = r->entries;
     for (int i = 0; i < r->count; e++, i++) {
         Trailer* t;
         if (e->trailer >= 0 && e->trailer < lbl_8055E774) {
@@ -247,7 +248,7 @@ static inline void Loop1_fn_801B916C(RaceEntries* r) {
     }
 }
 
-void fn_801B916C(RaceEntries* r) {
+void fn_801B916C(TrailerEntries* r) {
     if (fn_801769CC()->flags & 0x400) {
         Loop1_fn_801B916C(r);
     }

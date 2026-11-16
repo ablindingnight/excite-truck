@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/raceprog.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
@@ -190,20 +191,6 @@ struct LocalCarDesc {
     s32 event;  // offset 0x0
 };
 extern "C" LocalCarDesc* fn_801769CC(void);
-
-// One car of the race setup (8 of them from 0x20): world.cpp's CarDef (0x78); was named RaceCar here, the
-// 0x25F8 car of carelem/cargear.
-struct CarDef {
-    u8 pad0[0x20];
-    s32 kind;  // offset 0x20
-    u8 pad24[0x78 - 0x24];
-};
-
-struct Race {
-    CarDef cars[8];
-    u8 pad3C0[0x3E0 - 0x3C0];
-    s32 nCars;  // offset 0x3E0
-};
 
 static inline ValPoint GetPt(ValueNode* n, const char* k) { return n->GetPoint(k); }
 static inline void ScaleV(ZoneVec3* d, const ZoneVec3* s, f32 k) {
@@ -989,7 +976,7 @@ class ZoneMaster : public GameMode {
 public:
     void MarkHitGates(FixedArray<GateHit, 8>& hits);
 public:
-    ZoneMaster(Race* race);
+    ZoneMaster(RaceSetup* race);
     virtual ~ZoneMaster(void);
     virtual int vf20(int car) const;
     virtual int vf24(void) const;
@@ -1380,7 +1367,7 @@ extern "C" CSubTaskMgr* fn_8013D288(void) { return new ("zstm") ZoneSubTask; }
 extern Tune lbl_8042FB3C;
 extern "C" void fn_8013E3A8(Tune* t, ValueNode* n);
 
-ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f), t8C(2.0f) {
+ZoneMaster::ZoneMaster(RaceSetup* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f), t8C(2.0f) {
     ValueTable* conf;
     int i;
     int n;
@@ -1400,13 +1387,13 @@ ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f),
     tex[2] = fn_802CAC28("zonelowt.tex", 0);
     tex[3] = fn_802CAC28("betatex2.tex", 0);
     tex[4] = fn_802CAC28("zonetex5.tex", 0);
-    n = race->nCars;
+    n = race->cars.count;
     lbl_8055E1C0 = this;
     nCars = n;
     cars = new ("ZoneMaster::tab") ZoneCar[n];
     nHumans = 0;
     for (i = 0; i < nCars; i++) {
-        cars[i].human = race->cars[i].kind == 0x50;
+        cars[i].human = race->cars.defs[i].type == 0x50;
         if (cars[i].human) {
             nHumans++;
         }
@@ -2557,7 +2544,7 @@ extern "C" void fn_80141454(void) {}
 
 extern "C" void fn_80141458(void) {}
 
-extern "C" GameMode* fn_8014145C(Race* race) { return new ("ZoneMaster") ZoneMaster(race); }
+extern "C" GameMode* fn_8014145C(RaceSetup* race) { return new ("ZoneMaster") ZoneMaster(race); }
 
 Glow::Glow(void) {
     lite = fn_802CAC28("zonelite.tex", 0);
