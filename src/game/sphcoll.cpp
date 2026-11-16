@@ -2721,11 +2721,11 @@ void BoxSphereShape::vf14(void) {
     RVec3 v;
     int surf;
     u8* p = (u8*)this;
-    RigidBody* rb = (RigidBody*)PTR(p, 0x4);
+    RigidBody* rb = (RigidBody*)owner;
     at.x = F32(p, 0x34);
     at.y = F32(p, 0x38);
     at.z = F32(p, 0x3C);
-    if (fn_801E9F08((u8*)rb + 0x6C, &at.x, &pos, &nrm, &surf, F32(p, 0x24) + lbl_80562380)) {
+    if (fn_801E9F08((u8*)rb->hint, &at.x, &pos, &nrm, &surf, F32(p, 0x24) + lbl_80562380)) {
         if (surf == 7) {
             if (!U8(p, 0x4C)) {
                 rb->VelAt(&v, &pos);
@@ -2757,7 +2757,7 @@ void BoxSphereShape::vf14(void) {
                 w.z = w.z + m->t.z;
                 pos.x = w.x;
                 pos.z = w.z;
-                pos.y = fn_801E9DDC((u8*)rb + 0x6C, w.x, w.z);
+                pos.y = fn_801E9DDC((u8*)rb->hint, w.x, w.z);
                 d.x = pos.x - w.x;
                 d.y = pos.y - w.y;
                 f32 zv = pos.z;
