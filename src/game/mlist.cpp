@@ -427,6 +427,8 @@ static inline void SetIdentity(MCam* m) {
     m->t.z = 0.0f;
 }
 
+#pragma push
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_801293C8("mlist: calc");
     MCam ident;
@@ -503,6 +505,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_801293DC(lbl_804C1480);
     fn_801293D0();
 }
+#pragma pop
 
 void fn_802CDAA8(void) { lbl_8055FCD8 = 0; }
 
