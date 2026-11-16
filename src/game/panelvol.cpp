@@ -25,12 +25,6 @@ struct BodyDesc {
     f32 iz;    // offset 0x14
 };
 
-class Phob {
-public:
-    const RMtx* World(void);
-    const RVec3* Vel(void);
-};
-
 // The render state, written at the body's offset in the frame buffer.
 struct PanelPose {
     RMtx mtx;   // offset 0x0
@@ -49,7 +43,7 @@ public:
     virtual void Update(void);
     virtual void vf28(u8* buf);
     virtual int vf44(void);
-    Phob* owner;   // offset 0x1EC
+    RigidBody* owner;   // offset 0x1EC
     s32 model;     // offset 0x1F0
     s32 part;      // offset 0x1F4
     s32 car;       // offset 0x1F8
@@ -185,13 +179,13 @@ u32 fn_801C00F0(CollShape* s);
 CollShape* fn_801C00F8(CollVolume* v, int i);
 void fn_801C0124(RVec3* out, const RVec3* v, f32 s);
 void fn_801C014C(CollVolume* v, const RVec3* off);
-s32 fn_801C0168(Phob* car);
-s32 fn_801C0170(Phob* car);
+s32 fn_801C0168(RigidBody* car);
+s32 fn_801C0170(RigidBody* car);
 f32 fn_801C0178(void);
 void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b);
 void fn_801BFB2C(PanelVol* p, RMtx* out, const RVec3* pts);
 void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
-const RVec3* fn_801BF754(Phob* car);
+const RVec3* fn_801BF754(RigidBody* car);
 void fn_801C092C(RMtx* out, const RMtx* a, const RMtx* b);
 void fn_801C0D3C(Mat3* m);
 void fn_801C0D6C(Mat3* m);
@@ -306,7 +300,7 @@ inline PanelVert::PanelVert(void) { fn_801BFEB0(this); }
 
 static inline f32 PanelSurfaceOffset(void) { return kPanelV; }
 
-static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32*& ids) {
+static inline void SetupPanel(PanelVol* p, RigidBody* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32*& ids) {
     int i;
     p->lastUsed = fn_801C0178();
     p->owner = car;
@@ -376,7 +370,7 @@ static inline void SetupPanel(PanelVol* p, Phob* car, s32 part, const RVec3* off
     fn_801C256C(p->strip, car->Vel(), &cm->pos, av);
 }
 
-int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32* ids) {
+int fn_801BF2A4(RigidBody* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32* ids) {
     if ((f32)__fabs(lo->x - hi->x) <= __float_epsilon[0] && (f32)__fabs(lo->y - hi->y) <= __float_epsilon[0] &&
         (f32)__fabs(lo->z - hi->z) <= __float_epsilon[0]) {
         return 0;
@@ -406,7 +400,7 @@ int fn_801BF2A4(Phob* car, s32 part, const RVec3* off, const RVec3* lo, const RV
     return 0;
 }
 
-const RVec3* fn_801BF754(Phob* car) { return (const RVec3*)((u8*)car + 0x124); }
+const RVec3* fn_801BF754(RigidBody* car) { return (const RVec3*)((u8*)car + 0x124); }
 
 // out = a relative to b: a's basis times b's transposed basis, and a's position in b's frame.
 void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b) {
@@ -517,9 +511,9 @@ void fn_801C014C(CollVolume* v, const RVec3* off) {
     v->CollVolume::vf20();
 }
 
-s32 fn_801C0168(Phob* car) { return *(s32*)((u8*)car + 0x5A4); }
+s32 fn_801C0168(RigidBody* car) { return *(s32*)((u8*)car + 0x5A4); }
 
-s32 fn_801C0170(Phob* car) { return *(s32*)((u8*)car + 0x59C); }
+s32 fn_801C0170(RigidBody* car) { return *(s32*)((u8*)car + 0x59C); }
 
 f32 fn_801C0178(void) { return lbl_8055E3C8; }
 

@@ -192,8 +192,10 @@ public:
     virtual s32 vf34(RPacket* p);
     virtual int vf44(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);
-    // Slots 0x54-0x5C: zero in retail's MutPhob table (__vt__9RigidBody ends at 0x50, so they start here or in a
-    // base shared with CarBody, whose table has SetState/vf58/vf5C at these slots). Names unproven.
+    // MATCHING-AID: retail's mutphob .data ends with 12 zero bytes after the 0x54-byte MutPhob table (the next unit
+    // starts at 0x80338460); three pure slots reproduce them. They are not real virtuals: phob news a MutPhob
+    // (fn_801782C8), which MWCC refuses for an abstract class, so no shared abstract base with CarBody's
+    // SetState/vf58/vf5C either (tested 2026-11-16). PORT: drop these three.
     virtual void vf54(void) = 0;
     virtual void vf58(void) = 0;
     virtual void vf5C(void) = 0;

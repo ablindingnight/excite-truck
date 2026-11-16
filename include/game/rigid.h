@@ -48,6 +48,7 @@ public:
     void Flush(RVec3* f, RVec3* t);
     void SetState(const RMtx* m, const RVec3* v, const RVec3* w);
     void UpdateCell(void);
+    const RVec3* Vel(void);  // inline, defined in ball.cpp after its first use (weak copy 0x8017EAFC)
     Corner* contacts;  // offset 0xD0
     f32 mass;           // offset 0xD4
     RVec3 inertia;      // offset 0xD8

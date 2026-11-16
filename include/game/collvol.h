@@ -38,6 +38,9 @@ public:
     void Transform(void);  // the worker Update calls
     void AddShape(CollShape* s);
     void Xform(RVec3* out, const RVec3* in);
+    // Inline accessors defined in ball.cpp after their first use (retail's weak copies sit there, 0x8017EAF4/0x8017EB04).
+    const s16* Hint(void);
+    const RMtx* World(void);
     void SetActive(int on) { nAdded = on ? nSub : 0; }
     // The first shape, or 0 when none is active.
     CollShape* Shape(void) { return (nAdded > 0) ? sub[0] : 0; }

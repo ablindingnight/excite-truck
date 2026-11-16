@@ -202,12 +202,11 @@ public:
 extern "C" BSound* fn_802077A4(const char* name, int prio, const RVec3* vel, const RVec3* pos);
 
 struct RPacket;
-class Phob;
-extern "C" void fn_8019EECC(Phob* p, RVec3* v);
+extern "C" void fn_8019EECC(CollVolume* p, RVec3* v);
 
 class SphereShape : public CollShape {
 public:
-    SphereShape(Phob* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c) : CollShape((const CFrame*)m, (CollVolume*)o, 0x53504852, k, s) {
+    SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c) : CollShape((const CFrame*)m, o, 0x53504852, k, s) {
         center = c;
         radius = r;
         f34 = 0.0f;
@@ -264,49 +263,12 @@ struct BallDesc : public BodyDesc {
     RVec3 launch;   // offset 0x34
 };
 
-class Phob {
-public:
-    virtual void Init(BallDesc* d);   // 0x8
-    virtual ~Phob(void);              // 0xC
-    virtual void Reset(void);         // 0x10
-    virtual void vf14(void);          // 0x14
-    virtual void vf18(void);          // 0x18
-    virtual void Update(void);        // 0x1C
-    virtual void vf20(void);          // 0x20
-    virtual void vf24(void);          // 0x24
-    virtual void vf28(u8* buf);       // 0x28
-    virtual void vf2C(RPacket* p);          // 0x2C
-    virtual void vf30(void);          // 0x30
-    virtual void vf34(void);          // 0x34
-    virtual void vf38(void);          // 0x38
-    virtual RigidBody* vf3C(void);          // 0x3C
-    virtual int vf40(void);           // 0x40
-    virtual void vf44(void);          // 0x44
-    void Xform(void);
-    void AddShape(CollShape* s);
-    const s16* Hint(void);
-    const RVec3* Vel(void);
-    const RMtx* World(void);
-    s32 a4;       // offset 0x4
-    s32 a8;       // offset 0x8
-    u8 padC[0x3C - 0xC];
-    RMtx mtx;     // offset 0x3C
-    s16 hint[2];  // offset 0x6C
-    RMtx world;   // offset 0x70
-    RMtx prev;    // offset 0xA0
-    u8 padD0[0x118 - 0xD0];
-    RVec3 vel;    // offset 0x118
-    RVec3 avel;   // offset 0x124
-    u8 pad130[0x1E8 - 0x130];
-};
-
-
 struct RPacket;
 
 
 class IBallListener {
 public:
-    virtual void Input(Phob* src, u8* pressed) = 0;
+    virtual void Input(RigidBody* src, u8* pressed) = 0;
     virtual void Status(const char** text, u8* flash) = 0;
     virtual bool GetPos(f32* xz, f32* vxz) = 0;
 };
@@ -338,7 +300,7 @@ public:
     virtual void vf28(u8* buf);
     virtual void OnHit(const RVec3* force, const RVec3* at, int kind, void* contact);
     virtual void Status(const char** text, u8* flash);
-    virtual void Input(Phob* src, u8* pressed);
+    virtual void Input(RigidBody* src, u8* pressed);
     virtual bool GetPos(f32* xz, f32* vxz);
     void Launch(const RMtx* m, const RVec3* v, s16 h, f32 k);
     f32 DropHeight(void);
@@ -383,7 +345,7 @@ static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 extern "C" void fn_8017D404(f32 r, f32 force, const RVec3* c, RigidBody* self, int car) {
     RaceCarRec* by = fn_8017960C(car);
     struct Node {
-        Phob* obj;
+        CollVolume* obj;
         Node* next;
     };
     struct List {
@@ -457,7 +419,7 @@ void Ball::Init(BodyDesc* desc) {
     CollVolume::Transform();
     explodable = d->explodable;
     launch = d->launch;
-    s = new (BallStrings::VolumeName()) SphereShape(reinterpret_cast<Phob*>(this), &mtx, stiff, skin, radius, c);
+    s = new (BallStrings::VolumeName()) SphereShape(this, &mtx, stiff, skin, radius, c);
     s->SetSurface(1001);
     AddShape(s);
     b1E8 = 1;
@@ -794,7 +756,7 @@ void Ball::Status(const char** text, u8* flash) {
     }
 }
 
-void Ball::Input(Phob* src, u8* pressed) {
+void Ball::Input(RigidBody* src, u8* pressed) {
     switch (state) {
     case 1:
         if (!*pressed) {
@@ -813,6 +775,6 @@ void Ball::Input(Phob* src, u8* pressed) {
     }
 }
 
-inline const s16* Phob::Hint(void) { return hint; }
-inline const RVec3* Phob::Vel(void) { return &vel; }
-inline const RMtx* Phob::World(void) { return &world; }
+inline const s16* CollVolume::Hint(void) { return hint; }
+inline const RVec3* RigidBody::Vel(void) { return &vel; }
+inline const RMtx* CollVolume::World(void) { return &world; }
