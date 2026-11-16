@@ -2,10 +2,7 @@
 // triangles (plane, per-edge inward planes, vertex/edge flags), with a sphere contact query, a raycast,
 // the endian swap/relocation on load and a back-face-culled wireframe debug draw. Names are guesses.
 #include "game/common.h"
-
-struct PVec3 {
-    f32 x, y, z;
-};
+#include "game/plainvec.h"
 
 struct PFrame {
     PVec3 x;    // offset 0x0

@@ -18,7 +18,7 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-struct PVec3 {
+struct PVec3A {
     f32 v[3];
 };
 
@@ -541,8 +541,8 @@ void fn_80199870(u8* p, void* w) {
 }
 
 extern const f32 lbl_805622E0;  // 1.0
-void fn_801BEAEC(int car, int wheel, PVec3* out);                       // wheel position (masslist.cpp)
-void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3* n);  // wheel contact (masslist.cpp)
+void fn_801BEAEC(int car, int wheel, PVec3A* out);                       // wheel position (masslist.cpp)
+void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3A* n);  // wheel contact (masslist.cpp)
 
 static inline int IsCarObj(const u8* o) {
     if (o) {
@@ -898,8 +898,8 @@ void fn_801B34DC(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u3
 
 // Sphere (c, r) of p against the point at: a spring push along the normal, then friction from the body.
 int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
-    PVec3 d;
-    PVec3 n;
+    PVec3A d;
+    PVec3A n;
     RVec3 vel;
     RVec3 imp;
     RVec3 fr;
@@ -948,9 +948,9 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 static inline f32 SphereMagnitude(f32 value) { f64 wide = __fabs(value); return (f32)wide; }
 
 int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r, f32 s) {
-    PVec3 dd;
-    PVec3 n;
-    PVec3 at;
+    PVec3A dd;
+    PVec3A n;
+    PVec3A at;
     dd.v[0] = cv[0] - dv[0];
     dd.v[1] = cv[1] - dv[1];
     dd.v[2] = cv[2] - dv[2];
@@ -1509,10 +1509,10 @@ static inline f32 LoadF(const f32* f) { return *f; }
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
     u8* m;
     f32 h;
-    PVec3 a;
-    PVec3 b;
-    PVec3 axis;
-    PVec3 org;
+    PVec3A a;
+    PVec3A b;
+    PVec3A axis;
+    PVec3A org;
     f32 rad;
     int hit;
     if (fn_8019B08C(p, (f32*)c, q, r)) {
@@ -1520,8 +1520,8 @@ int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
     }
     m = ((u8*&)((CollShape*)q)->frame);
     h = LoadF((f32*)(q + 0x28));
-    axis = *(PVec3*)(m + 0x18);
-    org = *(PVec3*)(m + 0x24);
+    axis = *(PVec3A*)(m + 0x18);
+    org = *(PVec3A*)(m + 0x24);
     rad = LoadF((f32*)(q + 0x24));
     MulAdd(a.v, org.v, axis.v, h);
     MulAdd(b.v, org.v, axis.v, -h);
@@ -1681,8 +1681,8 @@ static inline f32 Det33(f32 m[3][3]) {
 // Closest approach of the lines p0 + t*d0 and p1 + s*d1; 0 when they are parallel.
 int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32* t, f32* s) {
     f32 m[3][3];
-    PVec3 w;
-    PVec3 n;
+    PVec3A w;
+    PVec3A n;
     w.v[0] = p1[0] - p0[0];
     w.v[1] = p1[1] - p0[1];
     w.v[2] = p1[2] - p0[2];
@@ -1826,10 +1826,10 @@ int fn_8019DAB0(u8* p, u8* q) {
     if (hit) {
         return 1;
     }
-    PVec3 a;
-    PVec3 b;
-    PVec3 dir = *(PVec3*)(((u8*&)((CollShape*)p)->frame) + 0x18);
-    PVec3 mid = *(PVec3*)(((u8*&)((CollShape*)p)->frame) + 0x24);
+    PVec3A a;
+    PVec3A b;
+    PVec3A dir = *(PVec3A*)(((u8*&)((CollShape*)p)->frame) + 0x18);
+    PVec3A mid = *(PVec3A*)(((u8*&)((CollShape*)p)->frame) + 0x24);
     f32 h = F32(p, 0x28);
     f32 r = F32(p, 0x24);
     MulAdd(a.v, mid.v, dir.v, h);
@@ -1841,11 +1841,11 @@ int fn_8019DAB0(u8* p, u8* q) {
 
 // Capsule p against capsule q: bounding spheres, then the axis segments, then p's end spheres.
 int fn_8019DC04(u8* p, u8* q) {
-    PVec3 d;
-    PVec3 b;
-    PVec3 a;
-    PVec3 axis;
-    PVec3 org;
+    PVec3A d;
+    PVec3A b;
+    PVec3A a;
+    PVec3A axis;
+    PVec3A org;
     u8* fq = ((u8*&)((CollShape*)q)->frame);
     u8* fp = ((u8*&)((CollShape*)p)->frame);
     d.v[0] = F32(fp, 0x24) - F32(fq, 0x24);
@@ -1863,8 +1863,8 @@ int fn_8019DC04(u8* p, u8* q) {
         }
         u8* m = ((u8*&)((CollShape*)p)->frame);
         f32 h = F32(p, 0x28);
-        axis = *(PVec3*)(m + 0x18);
-        org = *(PVec3*)(m + 0x24);
+        axis = *(PVec3A*)(m + 0x18);
+        org = *(PVec3A*)(m + 0x24);
         f32 rad = F32(p, 0x24);
         MulAdd(b.v, org.v, axis.v, -h);
         MulAdd(a.v, org.v, axis.v, h);
@@ -1885,7 +1885,7 @@ extern const f32 lbl_805622D0;  // 0.0
 
 // Ray from + t*dir against the sphere (c, r): the nearer hit if it lies in [0, *t), with its normal.
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r) {
-    PVec3 m;
+    PVec3A m;
     m.v[0] = from[0] - c[0];
     m.v[1] = from[1] - c[1];
     m.v[2] = from[2] - c[2];
@@ -1915,12 +1915,12 @@ int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f
 // iinv, mass, restitution e) moving at v: -(1 + e) v.n / (1/mass + n.((iinv (r x n)) x r)), capped.
 f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, const f32* n, f32 mass, f32 e) {
     RVec3 vel;
-    PVec3 r;
-    PVec3 nn;
-    PVec3 un;
+    PVec3A r;
+    PVec3A nn;
+    PVec3A un;
     RVec3 rn;
     RVec3 t;
-    PVec3 u;
+    PVec3A u;
     f32 rx = at->x - F32(com, 0x0);
     f32 ry = at->y - F32(com, 0x4);
     f32 rz = at->z - F32(com, 0x8);
@@ -1934,7 +1934,7 @@ f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, 
     r.v[0] = rx;
     r.v[1] = ry;
     r.v[2] = rz;
-    nn = *(const PVec3*)n;
+    nn = *(const PVec3A*)n;
     if (PSVECDotProduct(&vel, n) < 0.0f) {
         un = nn;
         PSVECNormalize(un.v, un.v);
@@ -2008,7 +2008,7 @@ int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f3
 
 // One box half-axis: direction and extent.
 struct BoxAxis {
-    PVec3 dir;
+    PVec3A dir;
     f32 ext;
 };
 
@@ -2067,9 +2067,9 @@ int fn_8019E500(u8* p, u8* q) {
     TubeVol* t;
     CFrame fr = *(CFrame*)VE(q)->v50();
     BoxAxis ax[3] = {0};
-    ax[0].dir = *(PVec3*)&fr.m[0];
-    ax[1].dir = *(PVec3*)&fr.m[3];
-    ax[2].dir = *(PVec3*)&fr.m[6];
+    ax[0].dir = *(PVec3A*)&fr.m[0];
+    ax[1].dir = *(PVec3A*)&fr.m[3];
+    ax[2].dir = *(PVec3A*)&fr.m[6];
     ax[0].ext = F32(q, 0x24);
     ax[1].ext = F32(q, 0x28);
     ax[2].ext = F32(q, 0x2C);
@@ -2398,7 +2398,7 @@ void AttachedSphereShape::vf0C(void) {
     u8* p = (u8*)this;
     u8* o = ((u8*&)this->owner);
     u8* m = PTR(p, 0x54);
-    PVec3 t = *(PVec3*)(m + 0x30);
+    PVec3A t = *(PVec3A*)(m + 0x30);
     f32 lift = 0.06f + this->radius + F32(m, 0xC);
     t.v[0] = t.v[0] - F32(o, 0x30) + F32(p, 0x58);
     t.v[1] = t.v[1] - F32(o, 0x34) + lift;
@@ -2866,7 +2866,7 @@ void SphereGroup::vf10(u8* q) {
             if (S32(q, 0x20) < 8 && IsCarObj(car = ((u8*&)this->owner))) {
                 int id = S32(car, 0x1EC);
                 for (int w = 0; w < 4; w++) {
-                    PVec3 wp;
+                    PVec3A wp;
                     RVec3 bl;
                     RVec3 bw;
                     RVec3 n;
@@ -2901,13 +2901,13 @@ void SphereGroup::vf10(u8* q) {
                         n.x *= inv;
                         n.y *= inv;
                         n.z *= inv;
-                        fn_801BEB44(id, w, &bw, (PVec3*)&n);
+                        fn_801BEB44(id, w, &bw, (PVec3A*)&n);
                     }
                 }
             }
         }
     } else if (type == 'SPHR' || type == 'FLSR') {
-        PVec3 c = *(PVec3*)(PTR(p, 0x17C) + 0x38);
+        PVec3A c = *(PVec3A*)(PTR(p, 0x17C) + 0x38);
         u8* pb = ((u8*&)this->owner);
         if (pb) {
             c.v[0] = c.v[0] + F32(pb, 0x30);
@@ -2939,7 +2939,7 @@ void SphereGroup::vf10(u8* q) {
         if (IsCarObj(car)) {
             id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
-                PVec3 wp;
+                PVec3A wp;
                 RVec3 n;
                 RVec3 hit;
                 RVec3 vel;
@@ -2949,7 +2949,7 @@ void SphereGroup::vf10(u8* q) {
                 vel.y = F32(car, 0x40) * lbl_805623B8;
                 vel.z = F32(car, 0x44) * lbl_805623B8;
                 if (fn_80198F64(wp.v, (u32)q, &hit.x, &depth, &n.x, &vel.x, lbl_805622E0)) {
-                    fn_801BEB44(id, w, &hit, (PVec3*)&n);
+                    fn_801BEB44(id, w, &hit, (PVec3A*)&n);
                 }
             }
         }
@@ -2964,9 +2964,9 @@ void SphereGroup::vf10(u8* q) {
             int id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
                 RVec3 hits[64];
-                PVec3 wp;
-                PVec3 c;
-                PVec3 d;
+                PVec3A wp;
+                PVec3A c;
+                PVec3A d;
                 int n;
                 fn_801BEAEC(id, w, &wp);
                 c = wp;
@@ -2998,9 +2998,9 @@ void SphereGroup::vf10(u8* q) {
 // (moved by the car's velocity) is tested against the mesh and every hit reported to the car.
 void SphereGroup::vf14(void) {
     RVec3 hits[64];
-    PVec3 wp;
-    PVec3 c;
-    PVec3 d;
+    PVec3A wp;
+    PVec3A c;
+    PVec3A d;
     int n;
     u8* car;
     fn_801A0160(((u8*)this));
@@ -3153,8 +3153,8 @@ static inline f32 ClampF(f32 v, f32 lo, f32 hi) {
 }
 
 int TubeBase::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
-    PVec3 hit;
-    PVec3 on;
+    PVec3A hit;
+    PVec3A on;
     f32 tr = 0.0f;
     f32 s = 0.0f;
     u8* m = PTR(((u8*)this), 0xC);
@@ -3221,14 +3221,14 @@ static inline void SetLowerXY(RVec3* out, const RVec3& a, f32 k, f32 y) {
 }
 
 void TubeShape::vf38(RVec3* lo, RVec3* hi) const {
-    PVec3 org;
-    PVec3 axis;
+    PVec3A org;
+    PVec3A axis;
     RVec3 a;
     RVec3 b;
     u8* m = PTR(((const u8*)this), 0xC);
     f32 k = F32(((const u8*)this), 0x24);
-    org = *(PVec3*)(m + 0x24);
-    axis = *(PVec3*)(m + 0x18);
+    org = *(PVec3A*)(m + 0x24);
+    axis = *(PVec3A*)(m + 0x18);
     MulAdd(&a.x, org.v, axis.v, k);
     MulAdd(&b.x, org.v, axis.v, -k);
     {
@@ -3288,11 +3288,11 @@ void TubeShape::vf10(u8* o) {
 // Collides the tube's two end caps as spheres.
 void TubeShape::vf14(void) {
     u8* p = (u8*)this;
-    PVec3 a;
-    PVec3 b;
-    PVec3 zero;
-    PVec3 dir = *(PVec3*)(PTR(p, 0xC) + 0x18);
-    PVec3 mid = *(PVec3*)(PTR(p, 0xC) + 0x24);
+    PVec3A a;
+    PVec3A b;
+    PVec3A zero;
+    PVec3A dir = *(PVec3A*)(PTR(p, 0xC) + 0x18);
+    PVec3A mid = *(PVec3A*)(PTR(p, 0xC) + 0x24);
     f32 h = F32(p, 0x28);
     MulAdd(a.v, mid.v, dir.v, h);
     MulAdd(b.v, mid.v, dir.v, -h);
@@ -3362,7 +3362,7 @@ int BoxShape::vf18(const RVec3* a, const RVec3* b, f32* c, RVec3* out) {
 
 void fn_801A1F44(RVec3* out, u8* q) {
     u8* o = VE(q)->v50();
-    *(PVec3*)out = *(PVec3*)(o + 0x24);
+    *(PVec3A*)out = *(PVec3A*)(o + 0x24);
 }
 
 // Axis-aligned bounds of the box: its 8 corners (+-hx, +-hy, +-hz) through the volume's frame.
@@ -3428,9 +3428,9 @@ OrientedBoxShape::OrientedBoxShape(u32 a, const RVec3* c, u32 b, f32 s0, f32 s1,
 void OrientedBoxShape::vf0C(void) {
     u8* p = (u8*)this;
     CFrame* f = (CFrame*)((u8*&)this->frame);
-    ((PVec3*)(p + 0x44))[0] = ((PVec3*)f->m)[0];
-    ((PVec3*)(p + 0x44))[1] = ((PVec3*)f->m)[1];
-    ((PVec3*)(p + 0x44))[2] = ((PVec3*)f->m)[2];
+    ((PVec3A*)(p + 0x44))[0] = ((PVec3A*)f->m)[0];
+    ((PVec3A*)(p + 0x44))[1] = ((PVec3A*)f->m)[1];
+    ((PVec3A*)(p + 0x44))[2] = ((PVec3A*)f->m)[2];
     MulVec((RVec3*)(p + 0x68), (RVec3*)(p + 0x38), f);
     F32(p, 0x68) = F32(p, 0x68) + f->t.x;
     F32(p, 0x6C) = F32(p, 0x6C) + f->t.y;
@@ -3767,13 +3767,13 @@ struct OwnerBody {
 
 void PolyShape::vf10(u8* p) {
     RVec3 pt;
-    PVec3 n1;
-    PVec3 hit1;
-    PVec3 n2;
-    PVec3 hit2;
-    PVec3 vel1;
-    PVec3 vel2;
-    PVec3 down;
+    PVec3A n1;
+    PVec3A hit1;
+    PVec3A n2;
+    PVec3A hit2;
+    PVec3A vel1;
+    PVec3A vel2;
+    PVec3A down;
     f32 depth1;
     f32 depth2;
     switch (S32(p, 0x18)) {
@@ -3823,12 +3823,12 @@ void PolyShape::vf10(u8* p) {
 // Debug draw: a line from the frame origin along each of the volume's rays (direction * length, frame space).
 void PolyShape::vf4C(void) {
     u8* p = (u8*)this;
-    PVec3 o;
+    PVec3A o;
     RVec3 v;
     RVec3 w;
     const f32* d = (const f32*)(p + 0x3C);
     u32 color = lbl_8055E598.value;
-    o = *(PVec3*)&((CFrame*)((u8*&)this->frame))->t;
+    o = *(PVec3A*)&((CFrame*)((u8*&)this->frame))->t;
     for (int i = 0; i < S32(p, 0xBC); d += 4, i++) {
         f32 len = d[3];
         v.x = d[0] * len;

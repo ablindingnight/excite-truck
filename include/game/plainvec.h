@@ -43,4 +43,21 @@ struct PVec {
     f32 x, y, z;
 };
 
+// x, y, z with no constructor (phob's Set helper).
+struct PVec3 {
+    void Set(f32 x_, f32 y_, f32 z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+// x, y, z with no constructor.
+struct CVec3 {
+    f32 x, y, z;
+};
+
 #endif

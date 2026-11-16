@@ -483,14 +483,14 @@ void fn_801BEB30(int car, CrossSet** out) { *out = &lbl_8055E79C[car]; }
 
 // Post-update passes (placeholders).
 // A vector with a field-by-field copy (copied through float registers).
-struct CVec3 {
-    CVec3(void) {}
-    CVec3(f32 a, f32 b, f32 c) {
+struct MassVec3 {
+    MassVec3(void) {}
+    MassVec3(f32 a, f32 b, f32 c) {
         x = a;
         y = b;
         z = c;
     }
-    CVec3(const CVec3& o) {
+    MassVec3(const MassVec3& o) {
         x = o.x;
         y = o.y;
         z = o.z;
@@ -498,25 +498,25 @@ struct CVec3 {
     f32 x, y, z;
 };
 
-f32 PSVECDotProduct(const CVec3* a, const CVec3* b);
-void PSVECNormalize(const CVec3* src, CVec3* dst);
+f32 PSVECDotProduct(const MassVec3* a, const MassVec3* b);
+void PSVECNormalize(const MassVec3* src, MassVec3* dst);
 
 // Blends contact i's surface normal and anchor towards a new contact (point pt, normal n) when it lies close
 // to the old plane: fully replaced from 0.2 below the plane, unchanged above it.
 }
 extern "C" {
 
-void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
+void fn_801BEB44(int car, int i, const MassVec3* pt, const MassVec3* n) {
     ContactSet* cs = &lbl_8055E798[car];
-    CVec3 p(cs->pts[i].p.x, cs->pts[i].p.y, cs->pts[i].p.z);
-    CVec3 ref(((MVec4*)&cs->ref[i])->x, ((MVec4*)&cs->ref[i])->y, ((MVec4*)&cs->ref[i])->z);
-    CVec3 nrm(cs->nrm[i].p.x, cs->nrm[i].p.y, cs->nrm[i].p.z);
-    CVec3 d;
+    MassVec3 p(cs->pts[i].p.x, cs->pts[i].p.y, cs->pts[i].p.z);
+    MassVec3 ref(((MVec4*)&cs->ref[i])->x, ((MVec4*)&cs->ref[i])->y, ((MVec4*)&cs->ref[i])->z);
+    MassVec3 nrm(cs->nrm[i].p.x, cs->nrm[i].p.y, cs->nrm[i].p.z);
+    MassVec3 d;
     d.x = p.x - ref.x;
     d.y = p.y - ref.y;
     d.z = p.z - ref.z;
     f32 base = PSVECDotProduct(&d, &nrm);
-    CVec3 e;
+    MassVec3 e;
     e.x = p.x - pt->x;
     e.y = p.y - pt->y;
     e.z = p.z - pt->z;
@@ -527,10 +527,10 @@ void fn_801BEB44(int car, int i, const CVec3* pt, const CVec3* n) {
     f32 k = 2.5f * (0.2f + pen);
     k = 1.0f < k ? 1.0f : k;
     k = k > 0.0f ? k : 0.0f;
-    CVec3 nn(LerpT(k, n->x, nrm.x), LerpT(k, n->y, nrm.y), LerpT(k, n->z, nrm.z));
+    MassVec3 nn(LerpT(k, n->x, nrm.x), LerpT(k, n->y, nrm.y), LerpT(k, n->z, nrm.z));
     nrm = nn;
     PSVECNormalize(&nrm, &nrm);
-    CVec3 r(LerpT(k, pt->x, ref.x), LerpT(k, pt->y, ref.y), LerpT(k, pt->z, ref.z));
+    MassVec3 r(LerpT(k, pt->x, ref.x), LerpT(k, pt->y, ref.y), LerpT(k, pt->z, ref.z));
     ref = r;
     {
         MVec4 t(ref.x, ref.y, ref.z);

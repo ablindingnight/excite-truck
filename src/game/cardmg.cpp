@@ -6,6 +6,7 @@
 #include "game/rigid.h"
 #include "game/math_types.h"
 #include "game/carbody.h"
+#include "game/plainvec.h"
 #include "macros.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -1341,10 +1342,6 @@ struct WVec3 {
         y = o.y;
         z = o.z;
     }
-    f32 x, y, z;
-};
-
-struct PVec3 {
     f32 x, y, z;
 };
 

@@ -7,6 +7,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/springcar.h"
+#include "game/plainvec.h"
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT( f32 b, f32 a,f32 t) { return a + t * (b - a); }
@@ -220,17 +221,6 @@ extern s32 lbl_8055E488;
 extern u32 lbl_8055D430;
 extern s32 lbl_8055E8F8;
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-struct PVec3 {
-    void Set(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct PMtx {
     PVec3 rot[3];  // offset 0x0

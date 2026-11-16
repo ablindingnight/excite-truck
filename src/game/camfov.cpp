@@ -6,6 +6,7 @@
 #include "game/camframe.h"
 #include "game/camrect.h"
 #include "game/camrec.h"
+#include "game/plainvec.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -220,11 +221,6 @@ int fn_801784DC(f32* pos, f32* h, int a, int b, int (*filter)(int));
 f32 fn_8026A520(int i);
 int fn_8026F408(int n);
 
-// A plain (copyable) vector.
-struct CVec3 {
-    f32 x, y, z;
-};
-
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 // Raises a ground height to any obstacle top found at (x, z).
@@ -345,7 +341,7 @@ f32 PSVECMag(const f32* v);
 int fn_801EA03C(const s16* hint, f32* pos);
 
 // A vector copied as words (the original's struct copies of these move lwz/stw pairs).
-struct PVec3 {
+struct PVec3A {
     f32 v[3];
 };
 
@@ -360,7 +356,7 @@ static inline f32 MulF(f32 a, f32 b) { return a * b; }
 // A camera frame: its rows and its position.
 struct CamFrame {
     CamAxes axes;  // offset 0x0
-    PVec3 pos;     // offset 0x24
+    PVec3A pos;     // offset 0x24
 };
 
 // The chase/follow camera (fields used by fn_8026F420 and fn_802704E4; the rest is camstate's).
@@ -376,7 +372,7 @@ struct ChaseCam {
     u8 pad88[0x34];
     f32 fov;            // offset 0xBC
     CamAxes axes;       // offset 0xC0: the car's frame
-    PVec3 pos;          // offset 0xE4
+    PVec3A pos;          // offset 0xE4
     CamFrame tf;        // offset 0xF0: the trailing frame
     f32 move[3];        // offset 0x120
     f32 vel[3];         // offset 0x12C
@@ -593,13 +589,13 @@ static inline void SetZXY(CVec3* v, f32 x, f32 y, f32 z) {
 
 void fn_8026FCFC(int mode, int prev, u8* p) {
     ChaseCam* c = (ChaseCam*)p;
-    PVec3 target;
+    PVec3A target;
     CVec3 d;
     CVec3 q;
-    PVec3 f;
+    PVec3A f;
     CVec3 side;
-    PVec3 fw;
-    PVec3 eye;
+    PVec3A fw;
+    PVec3A eye;
     CVec3 r;
     int tv = (U32(fn_801769CC(), 0x4) >> 17) & 1;
     if ((fn_80178CA4() <= 4 && !tv) || mode != 4) {
@@ -673,7 +669,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f32 s = fn_8026FCE0(t, -0.5f);
         s = s + 0.9f * (c->smooth - s);
         c->smooth = s;
-        f = *(PVec3*)&c->axes.fwd;
+        f = *(PVec3A*)&c->axes.fwd;
         if (reverse) {
             f.v[0] *= -1.0f;
             f.v[1] *= -1.0f;
@@ -713,7 +709,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         c->tf.pos.v[0] = target.v[0] + forward->x * lbl_80563F18;
         c->tf.pos.v[1] = target.v[1] + forward->y * lbl_80563F18;
         c->tf.pos.v[2] = target.v[2] + forward->z * lbl_80563F18;
-        fw = *(PVec3*)&c->tf.axes.fwd;
+        fw = *(PVec3A*)&c->tf.axes.fwd;
         f32 out = -dist;
         c->view.pos.v[0] = c->pos.v[0] + fw.v[0] * out;
         c->view.pos.v[1] = c->pos.v[1] + fw.v[1] * out;
@@ -766,10 +762,10 @@ void fn_802704E4(u8* p) {
     f32 on;
     f32 s;
     f32 lift;
-    PVec3 target;
+    PVec3A target;
     CVec3 d;
-    PVec3 f;
-    PVec3 eye;
+    PVec3A f;
+    PVec3A eye;
     CVec3 r;
     int wide = fn_80178CA4() > 1;
     f32 dist = AddMul(wide ? 8.0f : 4.0f, lbl_80563E30 - MulF(0.35f, c->speedFrac), F32(c->car, 0x5B4));
@@ -809,7 +805,7 @@ void fn_802704E4(u8* p) {
         }
         s = k + 0.9f * (c->smooth - k);
         c->smooth = s;
-        f = *(PVec3*)&c->axes.fwd;
+        f = *(PVec3A*)&c->axes.fwd;
         if (moving) {
             f.v[0] *= -1.0f;
             f.v[1] *= -1.0f;

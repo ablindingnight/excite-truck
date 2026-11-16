@@ -5,6 +5,7 @@
 #include "game/camframe.h"
 #include "game/camrec.h"
 #include "game/math_types.h"
+#include "game/plainvec.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -47,10 +48,6 @@ void fn_80273B4C(u8* p) {
         Mat3Mul((Mat3*)&cr->pose, &rot, (Mat3*)&cr->pose);
     }
 }
-
-struct CVec3 {
-    f32 x, y, z;
-};
 
 // Rotation + translation (camera frame).
 struct CFrame {
