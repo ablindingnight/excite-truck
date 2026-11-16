@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/animobj.h"
 #include "game/raceprog.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
@@ -123,35 +124,26 @@ struct Racer {
     f32 wheelSize[4]; // offset 0x10C
 };
 
-class WObj {
-public:
-    virtual ~WObj(void);
-    virtual void Update(void) {}    // 0xC
-    virtual void Draw(void);      // 0x10
-    virtual void PostDraw(void) {}  // 0x14
-};
-
-class AnimObj : public WObj {
-public:
-    void Update(u8* buf);
-};
-
 class WheelAnim : public AnimObj {
 public:
     WheelAnim(const char* name);
-    u8 pad4[0x84 - 0x4];
+    virtual void Draw(void);  // wheelmod.cpp
+    u8 pad3C[0x84 - 0x3C];
 };
 
 class AnimPoint : public AnimObj {
 public:
     AnimPoint(const char* name);
-    u8 pad4[0x7C - 0x4];
+    virtual void Draw(void);  // animobj.cpp
+    u8 pad3C[0x7C - 0x3C];
 };
 
 class CarModel : public AnimObj {
 public:
     CarModel(Racer* r, const CarDef* d);
-    u8 pad4[0x4E4 - 0x4];
+    virtual void Draw(void);  // carmodel.cpp
+    virtual void vf24(void);  // 0x24: draws the car
+    u8 pad3C[0x4E4 - 0x3C];
 };
 
 class PlayerCarModel : public CarModel {
@@ -188,24 +180,6 @@ struct MutSlot {
     f32 f10;
     f32 f14;
 };
-
-// Unit-local (port ODR: other units define a different PlayerObj).
-namespace {
-class PlayerObj {
-public:
-    virtual ~PlayerObj(void);  // 0x08 (a CarModel: slot 0 is __dt__8CarModel)
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void Draw(void);  // 0x24
-    u8 pad4[0x28 - 0x4];
-    u8 f28[4];  // offset 0x28
-    f32 fov;    // offset 0x2C
-};
-}  // namespace
 
 extern void* __vt__8BoxShape[];
 
@@ -427,10 +401,10 @@ struct F4 {
     f32 v[4];
 };
 
-extern PlayerObj* lbl_80488648[8];
+extern CarModel* lbl_80488648[8];
 extern const F4 lbl_802F99F8 = {{1.0f, 1.0f, 2.0f, 2.0f}};  // aspect scale per split count
 
-static inline PlayerObj* GetPlayer(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
+static inline CarModel* GetPlayer(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
 ModuleTag lbl_8055EAF0;
 UnkStaticFFFF lbl_8055EAF8;
@@ -746,7 +720,7 @@ void fn_801E7E48(void) {
         lbl_8055EB3C[i]->Update();
     }
     if (lbl_8055EB2C == 1) {
-        fn_80202AD4(GetPlayer(fn_801E866C(0))->f28);
+        fn_80202AD4((u8*)&GetPlayer(fn_801E866C(0))->frame.origin);
     }
     fn_80202924();
     fn_80134994();
@@ -769,7 +743,7 @@ void fn_801E81B8(int unused, void (*cb)(void)) {
     lbl_8055EB1C++;
     fn_802A4CA8();
     fn_802C276C();
-    fn_80203E88(lbl_80487D00, GetPlayer(fn_801E866C(0))->f28, lbl_8055EB2C == 1);
+    fn_80203E88(lbl_80487D00, (u8*)&GetPlayer(fn_801E866C(0))->frame.origin, lbl_8055EB2C == 1);
     fn_8001A1F0();
     fn_801EA394();
     fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
@@ -842,12 +816,12 @@ void fn_801E8410(void) {
         fn_802C7AD4();
         fn_801FA618();
         {
-            PlayerObj** pp = lbl_80488648;
+            CarModel** pp = lbl_80488648;
             int i;
             for (i = 0; i < 8; i++, pp++) {
-                PlayerObj* p = (u32)i < 8 ? *pp : 0;
+                CarModel* p = (u32)i < 8 ? *pp : 0;
                 if (p) {
-                    p->Draw();
+                    p->vf24();
                 }
             }
         }
@@ -1247,7 +1221,7 @@ void fn_801E95DC(void) {
         m[3][2] = 0.0f;
         a = 1.0f - (f32)fmod(fn_801E7E18(), 1.0);
         b = 0.0f;
-        m[3][1] = GetPlayer(fn_801E866C(lbl_8055AF0C))->fov;
+        m[3][1] = GetPlayer(fn_801E866C(lbl_8055AF0C))->frame.origin.y;
         b -= m[3][1] / fn_80203FE0();
         {
             u32 f = fn_801E87A8()->flags;

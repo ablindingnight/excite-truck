@@ -4,6 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/animobj.h"
 #include "game/vecmatrix.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
@@ -23,29 +24,6 @@ void* operator new(size_t size, const char* tag);
 struct AnimSlot {
     VecMatrix frame;  // offset 0x0
     s16 flags;    // offset 0x30
-};
-
-class WObj {
-public:
-    virtual ~WObj(void) {}
-    virtual void Update(void) {}  // 0xC
-};
-
-class AnimObj : public WObj {
-public:
-    AnimObj(void);
-    virtual ~AnimObj(void) {}
-    virtual void Draw(void) = 0;
-    virtual void vf14(void) {}
-    virtual f32 Depth(void);
-    virtual void vf1C(void);
-    virtual void Set(const AnimSlot* s);
-    void Bind(const char* name);
-    s16 Flags(void);
-
-    VecMatrix frame;  // offset 0x4
-    s32 offset;   // offset 0x34
-    s16 flags;    // offset 0x38
 };
 
 struct WheelState {
@@ -185,7 +163,7 @@ public:
     CarModel(Racer* r, const CarDef* d);
     virtual ~CarModel(void);
     virtual void Draw(void);
-    virtual void vf14(void);
+    virtual void PostDraw(void);
     virtual void vf1C(void);
     virtual void Set(const AnimSlot* s);
     virtual void vf24(void);
@@ -820,7 +798,7 @@ void CarModel::vf24(void) {
 
 extern "C" void fn_801ED718(CarModel* m);
 
-void CarModel::vf14(void) {
+void CarModel::PostDraw(void) {
     if (index == fn_801E866C(-1) && fn_801E89C8(-1)) {
         lbl_80488668.alpha = fn_802C99E8(car->alpha);
         fn_801ED718(this);
