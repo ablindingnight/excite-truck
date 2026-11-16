@@ -420,10 +420,9 @@ void CarSound::Update() {
         float inv;
         int boost;
         int single;
-        v = h->vehicle;
-        speed = VF32(v, 0x2618);
+        speed = VF32(h->vehicle, 0x2618);
         if (speed > lbl_80563394) {
-            float a = lbl_80563370 + HudClamp01((VF32(v, 0x25D4) - lbl_80563398) / lbl_8056339C) * lbl_80563368;
+            float a = lbl_80563370 + HudClamp01((VF32(h->vehicle, 0x25D4) - lbl_80563398) / lbl_8056339C) * lbl_80563368;
             float b = lbl_80563370 + HudClamp01((speed - lbl_80563394) / lbl_805633A0) * lbl_80563368;
             HudPart_SetAlpha(h->air, b * a);
             HudPart_Show(h->air);
