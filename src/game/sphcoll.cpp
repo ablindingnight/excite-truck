@@ -25,6 +25,12 @@ struct PVec3A {
 };
 
 // o = c + d * k
+// Helpers unproven (names and existence): one constant load for three products, variable-first operands.
+template <class C> static inline void SphAheadXZY(f32* o, f32 x, const C* c, const f32* v, f32 k) { o[0] = x + v[0] * k; o[2] = c->z + v[2] * k; o[1] = c->y + v[1] * k; }
+static inline f32 SphAdd(f32 a, f32 b) { return a + b; }
+static inline f32 SphMul(f32 a, f32 b) { return a * b; }
+static inline void SphScale(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
+static inline void SphAddScaled(f32* o, const f32* a, const f32* d, f32 k) { o[0] = a[0] + d[0] * k; o[1] = a[1] + d[1] * k; o[2] = a[2] + d[2] * k; }
 static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
     o[0] = c[0] + d[0] * k;
     o[1] = c[1] + d[1] * k;
@@ -59,8 +65,6 @@ static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
 }
 
 // CFrame: rmtx.h's RMtx.
-extern "C" const f32 lbl_805622DC;  // -1.0
-extern "C" const f32 lbl_805622E0;  // 1.0
 
 static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
@@ -147,7 +151,6 @@ struct PolyVol {
     PolyPlane planes[8];   // offset 0x3C
 };
 
-extern const f32 lbl_8056234C;  // 2.0f
 
 struct Pose12s {
     u32 w[12];
@@ -412,16 +415,16 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
         if (m > 0.01f && pen > 0.001f) {
             q = &push[count++];
             sum += pen * pen;
-            q->n.x = dd.x * (lbl_805622DC / m);
-            q->n.y = dd.y * (lbl_805622DC / m);
-            q->n.z = dd.z * (lbl_805622DC / m);
+            q->n.x = dd.x * (-1.0f / m);
+            q->n.y = dd.y * (-1.0f / m);
+            q->n.z = dd.z * (-1.0f / m);
             q->d = pen;
         }
     }
     if (count == 0) {
         return 0;
     }
-    inv = lbl_805622E0 / sum;
+    inv = 1.0f / sum;
     RVec3 pc = lc;
     q = push;
     for (; count > 0; count--, q++) {
@@ -448,7 +451,7 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
 
         hit[0] = w.x;
         hit[1] = w.y;
-        k = lbl_805622DC / m;
+        k = -1.0f / m;
         hit[2] = w.z;
         n[0] = dv.x * k;
         n[1] = dv.y * k;
@@ -518,7 +521,6 @@ void fn_80199870(u8* p, void* w) {
     }
 }
 
-extern const f32 lbl_805622E0;  // 1.0
 void fn_801BEAEC(int car, int wheel, PVec3A* out);                       // wheel position (masslist.cpp)
 void fn_801BEB44(int car, int wheel, const RVec3* at, const PVec3A* n);  // wheel contact (masslist.cpp)
 
@@ -608,7 +610,7 @@ void fn_802C1A0C(PlayerCtx* c, int car);
 // volumes tagged 1000+ only report the touch; otherwise a spring push at heights clamped to +-5 ft, and while
 // closing, the restitution and clamped friction impulses through both bodies' inverse inertia, plus a car-hit
 // event for hard enough player crashes.
-static inline f32 InvMass(f32 m) { return lbl_805622E0 / m; }
+static inline f32 InvMass(f32 m) { return 1.0f / m; }
 
 static inline f32 VDot(const RVec3* a, const RVec3* b) { return PSVECDotProduct((const Vec*)a, (const Vec*)b); }
 
@@ -762,7 +764,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         if (-vn < 8.888889f) {
             e = 0.2f;
         }
-        f32 j = -(lbl_805622E0 + e) * PSVECDotProduct((const Vec*)rp, (const Vec*)n) / (ima + imb + VDot(n, &tt));
+        f32 j = -(1.0f + e) * PSVECDotProduct((const Vec*)rp, (const Vec*)n) / (ima + imb + VDot(n, &tt));
         J.x = n->x * j;
         J.y = n->y * j;
         J.z = n->z * j;
@@ -774,7 +776,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         tv.z = rel.z + n->z * -vn;
         f32 tl = PSVECMag((const Vec*)&tv.x);
         if (tl > 0.05f) {
-            f32 inv = lbl_805622E0 / MaxF(tl, 0.05f);
+            f32 inv = 1.0f / MaxF(tl, 0.05f);
             tv.x *= inv;
             tv.y *= inv;
             tv.z *= inv;
@@ -799,13 +801,13 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             tt2.x = ta2.x + tb2.x;
             tt2.y = ta2.y + tb2.y;
             tt2.z = ta2.z + tb2.z;
-            f32 jt = lbl_805622DC * PSVECDotProduct((const Vec*)rp, (const Vec*)&tv) / (ima + imb + VDot(&tv, &tt2));
+            f32 jt = -1.0f * PSVECDotProduct((const Vec*)rp, (const Vec*)&tv) / (ima + imb + VDot(&tv, &tt2));
             jt = ClampExt(jt, (f32)__fabs(j * mu));
             J.x = J.x + tv.x * jt;
             J.y = J.y + tv.y * jt;
             J.z = J.z + tv.z * jt;
         }
-        f32 w = lbl_805622E0;
+        f32 w = 1.0f;
         if (pb && IsCarObj((u8*)pb) && (u32)(qk - 0x73) <= 1) {
             int fast = 1;
             if (!U8(pb, 0x25C8)) {
@@ -832,9 +834,9 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             }
         }
         VE(p)->v20((u32)q, &J, &pa, U32(q, 0x20), (u32)pt, (u32)qb, w);
-        J.x *= lbl_805622DC;
-        J.y *= lbl_805622DC;
-        J.z *= lbl_805622DC;
+        J.x *= -1.0f;
+        J.y *= -1.0f;
+        J.z *= -1.0f;
         VE(q)->v20((u32)p, &J, &pq, U32(p, 0x20), (u32)pt, (u32)pb, w);
         if (a) {
             fn_801B34DC((u8*)a, (u8*)b, pt, &J, &n->x, U32(q, 0x20));
@@ -843,16 +845,15 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         }
     }
     VE(p)->v1C(&imp, &pa, U32(q, 0x20), (u32)qb);
-    imp.x *= lbl_805622DC;
-    imp.y *= lbl_805622DC;
-    imp.z *= lbl_805622DC;
+    imp.x *= -1.0f;
+    imp.y *= -1.0f;
+    imp.z *= -1.0f;
     VE(q)->v1C(&imp, &pq, U32(p, 0x20), (u32)pb);
 }
 
 u32 CollShape::vf30(void) {
     u8* p = (u8*)this; return U32(p, 0x8); }
 
-extern const f32 lbl_805622DC;  // -1.0
 
 // Contact between p and q along n; volumes without an owner hand the test to q with the normal flipped.
 void fn_8019A788(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
@@ -860,9 +861,7 @@ void fn_8019A788(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u
         fn_80199894(p, q, (const RVec3*)x, n, a, b, s, u, v);
     } else {
         RVec3 m;
-        m.x = n->x * lbl_805622DC;
-        m.y = n->y * lbl_805622DC;
-        m.z = n->z * lbl_805622DC;
+        SphScale(&m.x, &n->x, -1.0f);
         fn_80199894(q, p, (const RVec3*)x, &m, b, a, s, v, u);
     }
 }
@@ -959,8 +958,6 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
     return hit;
 }
 
-extern const f32 lbl_8056231C;
-extern const f32 lbl_80562324;
 extern "C" int fn_801E9F08(u8* hint, const f32* at, RVec3* pos, RVec3* n, int* surf, f32 maxDist);
 
 // Sphere (centre c, radius r) on the ground: every track-mesh hit pushes via fn_8019A820; then the
@@ -1007,9 +1004,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         vt.x = v.x + nx * vn;
         vt.y = v.y + ny * vn;
         vt.z = v.z + nrm.z * vn;
-        d[0] = d[0] + vt.x * lbl_8056231C;
-        d[1] = d[1] + vt.y * lbl_8056231C;
-        d[2] = d[2] + vt.z * lbl_8056231C;
+        SphAddScaled(d, d, &vt.x, 0.016683351f);
         f32 dm = PSVECMag((const Vec*)d);
         if (dm > 0.02f) {
             f32 s = 0.02f / dm;
@@ -1017,9 +1012,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
             d[1] *= s;
             d[2] *= s;
         }
-        f.x = vt.x * lbl_80562324;
-        f.y = vt.y * lbl_80562324;
-        f.z = vt.z * lbl_80562324;
+        SphScale(&f.x, &vt.x, -75000.0f);
         const f32 value = -2400.0f;
         f32 mass = F32(o, 0xD4);
         f32 m = mass * value;
@@ -1127,7 +1120,6 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
     return 0;
 }
 
-extern const f32 lbl_8056233C;  // 0.025025027
 extern "C" void fn_802E30C8(const char* fmt, ...);
 extern "C" void fn_802E317C(const char* fmt, ...);
 
@@ -1178,9 +1170,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
         }
         RigidBody* rb = (RigidBody*)((u8*&)((BoxShape*)q)->owner);
         if (rb) {
-            d.x = F32(rb, 0x118) * lbl_805622DC;
-            d.y = F32(rb, 0x11C) * lbl_805622DC;
-            d.z = F32(rb, 0x120) * lbl_805622DC;
+            SphScale(&d.x, &F32(rb, 0x118), -1.0f);
             len = PSVECMag((const Vec*)&d.x);
             if (debug) {
                 fn_802E30C8("tunneling: %1.2f", len);
@@ -1200,9 +1190,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             RVec3 v;
             rb->VelAt(&v, c);
             f32 xv = c->x;
-            cp.x = xv + v.x * lbl_8056233C;
-            cp.z = c->z + v.z * lbl_8056233C;
-            cp.y = c->y + v.y * lbl_8056233C;
+            SphAheadXZY(&cp.x, xv, c, &v.x, 0.025025027f);
             ToBoxSpace(&l, &cp, &f);
             if (debug) {
                 fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, ext->x, ext->y, ext->z);
@@ -1233,7 +1221,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     }
     if (comp > 0.0f) {
         RVec3 n;
-        f32 k = lbl_805622DC / len;
+        f32 k = -1.0f / len;
         n.x = d.x * k;
         n.y = d.y * k;
         n.z = d.z * k;
@@ -1259,7 +1247,6 @@ u32 BoxShape::vf50(void) {
     u8* p = (u8*)this; return U32(p, 0xc); }
 
 f32 lbl_8055A4C0 = 0.8f;           // 0.8, car-on-car friction
-extern const f32 lbl_80562340;     // 0.0016683352
 
 // Sphere p against box q (half extents 0x24..0x2C, bounding radius 0x30, end-cap flags at 0x34), the box
 // optionally offset by `off` in its own frame. Clamps the sphere centre into the box (`dir`, a direction in box
@@ -1275,6 +1262,9 @@ static inline void Clip(f32* v, f32 e, u32* in, u32 bit) {
     }
 }
 
+// A tenth of a frame, as a one-element const array defined here: fn_8019BD54 loads it like a global (velocity first,
+// then the constant), and it sits at this spot of .sdata2 in retail. Name and array form unproven.
+static const f32 kTenthStep[1] = {0.0016683352f};
 int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RMtx f;
     RVec3 w;
@@ -1350,9 +1340,9 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
         rv.x = va.x - vb.x;
         rv.y = va.y - vb.y;
         rv.z = va.z - vb.z;
-        back.x = c.x + rv.x * lbl_80562340;
-        back.y = c.y + rv.y * lbl_80562340;
-        back.z = c.z + rv.z * lbl_80562340;
+        back.x = c.x + rv.x * kTenthStep[0];
+        back.y = c.y + rv.y * kTenthStep[0];
+        back.z = c.z + rv.z * kTenthStep[0];
         dd.x = f.pos.x - c.x;
         dd.y = f.pos.y - c.y;
         dd.z = f.pos.z - c.z;
@@ -1375,7 +1365,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     f32 fq = 0.0f;
     if (fq < comp) {
         f32 fp = fq;
-        f32 k = lbl_805622DC / len;
+        f32 k = -1.0f / len;
         n.x = d.x * k;
         n.y = d.y * k;
         n.z = d.z * k;
@@ -1388,7 +1378,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             if ((qa && IsCarObj((u8*)pb)) || (pa && IsCarObj((u8*)qb))) {
                 f32 fr = lbl_8055A4C0;
                 f32 t = 2.8f * (PSVECDotProduct((const Vec*)((u8*)pb + 0x54), (const Vec*)((u8*)qb + 0x54)) - 0.5f);
-                fr *= MaxF(MinF(lbl_805622E0, t), 0.0f);
+                fr *= MaxF(MinF(1.0f, t), 0.0f);
                 if (pa) {
                     fp = fr;
                 }
@@ -1400,9 +1390,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
         if (pb) {
             fn_8019A788(p, q, (u32)&cp, &n, 0, 0, comp, fp, fq);
         } else {
-            n.x = n.x * lbl_805622DC;
-            n.y = n.y * lbl_805622DC;
-            n.z = n.z * lbl_805622DC;
+            SphScale(&n.x, &n.x, -1.0f);
             fn_8019A788(q, p, (u32)&cp, &n, 0, 0, comp, fq, fp);
         }
         return 1;
@@ -1850,7 +1838,7 @@ int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f
     m.v[0] = from[0] - c[0];
     m.v[1] = from[1] - c[1];
     m.v[2] = from[2] - c[2];
-    f32 b = lbl_8056234C * PSVECDotProduct((const Vec*)m.v, (const Vec*)dir);
+    f32 b = 2.0f * PSVECDotProduct((const Vec*)m.v, (const Vec*)dir);
     f32 mm = PSVECDotProduct((const Vec*)m.v, (const Vec*)m.v);
     f32 disc = b * b - 4.0f * (mm - r * r);
     if (disc > 1e-5f) {
@@ -2272,8 +2260,8 @@ void SphereShape::vf38(RVec3* lo, RVec3* hi) const {
     c.x = this->f34;
     c.y = this->f38;
     c.z = this->f3C;
-    MulAdd(&lo->x, &c.x, &e.x, lbl_805622DC);
-    MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
+    MulAdd(&lo->x, &c.x, &e.x, -1.0f);
+    MulAdd(&hi->x, &c.x, &e.x, 1.0f);
 }
 
 void SphereShape::vf4C(void) {
@@ -2407,7 +2395,6 @@ void BoxSphereShape::vf28(void) {
     }
 }
 
-extern const f32 lbl_80562380;  // 1.5
 extern f32 lbl_8055E3C8;  // race time
 extern "C" double fn_801E9DDC(u8* hint, f32 x, f32 z);
 extern "C" void fn_801B3B24(u8* p, const RVec3* at, const RVec3* v);
@@ -2438,7 +2425,7 @@ void BoxSphereShape::vf14(void) {
     at.x = this->f34;
     at.y = this->f38;
     at.z = this->f3C;
-    if (fn_801E9F08((u8*)rb->hint, &at.x, &pos, &nrm, &surf, this->radius + lbl_80562380)) {
+    if (fn_801E9F08((u8*)rb->hint, &at.x, &pos, &nrm, &surf, SphAdd(this->radius, 1.5f))) {
         if (surf == 7) {
             if (!this->b4C) {
                 rb->VelAt(&v, &pos);
@@ -2483,9 +2470,7 @@ void BoxSphereShape::vf14(void) {
                     vt.x = vel.x + nrm.x * -vn;
                     vt.y = vel.y + nrm.y * -vn;
                     vt.z = vel.z + nrm.z * -vn;
-                    acc[0] = acc[0] + vt.x * lbl_8056231C;
-                    acc[1] = acc[1] + vt.y * lbl_8056231C;
-                    acc[2] = acc[2] + vt.z * lbl_8056231C;
+                    SphAddScaled(acc, acc, &vt.x, 0.016683351f);
                     f32 am = PSVECMag((const Vec*)acc);
                     if (am > 0.02f) {
                         f32 s = 0.02f / am;
@@ -2493,7 +2478,7 @@ void BoxSphereShape::vf14(void) {
                         acc[1] *= s;
                         acc[2] *= s;
                     }
-                    f32 k = depth * this->stiff * (vn < 0.0f ? lbl_805622E0 : 0.2f);
+                    f32 k = depth * this->stiff * (vn < 0.0f ? 1.0f : 0.2f);
                     imp.x = nrm.x * k;
                     imp.y = nrm.y * k;
                     imp.z = nrm.z * k;
@@ -2545,7 +2530,7 @@ void BoxSphereShape::vf14(void) {
         rb->VelAt(&bv, (RVec3*)(p + 0x34));
         f32 ph = fmod(this->f34 + 6.2831855f * lbl_8055E3C8 / 2.0f, 6.2831854820251465);
         f32 s = sin(ph);
-        sub += 0.0254f * (lbl_805622E0 + s);
+        sub += 0.0254f * (1.0f + s);
         if (sub > 0.0f) {
             f32 r = this->radius;
             f32 area = 3.1415927f * (r * r);
@@ -2556,7 +2541,7 @@ void BoxSphereShape::vf14(void) {
             drag.z = bv.z * dk;
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
             f32 lift = 1000.0f + 0.1f * sub;
-            sub = MinF(sub, this->radius * lbl_8056234C);
+            sub = MinF(sub, SphMul(this->radius, 2.0f));
             up.y = 9.81f * (lift * (vol * sub));
             up.x = 0.0f;
             up.z = 0.0f;
@@ -2622,8 +2607,8 @@ void SphereGroup::vf38(RVec3* lo, RVec3* hi) const {
     c.x = F32(o, 0x24);
     c.y = F32(o, 0x28);
     c.z = F32(o, 0x2C);
-    MulAdd(&lo->x, &c.x, &e.x, lbl_805622DC);
-    MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
+    MulAdd(&lo->x, &c.x, &e.x, -1.0f);
+    MulAdd(&hi->x, &c.x, &e.x, 1.0f);
 }
 
 void fn_801A0378(u8* p, u8* s);
@@ -2660,8 +2645,6 @@ void fn_801A0444(u8* p, u8* q) {
 }
 
 
-extern const f32 lbl_805623B8;  // 0.3048 (feet to metres)
-extern const f32 lbl_805623BC;  // 1.1
 
 // Squared distance between the frame centres of p and q.
 static inline f32 CentreDist2(u8* p, u8* q) {
@@ -2769,7 +2752,7 @@ void SphereGroup::vf10(u8* q) {
                     n.z = wp.v[2] - bw.z;
                     f32 len = PSVECMag((const Vec*)&n.x);
                     if (len > 0.01f) {
-                        f32 inv = lbl_805622E0 / len;
+                        f32 inv = 1.0f / len;
                         n.x *= inv;
                         n.y *= inv;
                         n.z *= inv;
@@ -2817,10 +2800,8 @@ void SphereGroup::vf10(u8* q) {
                 RVec3 vel;
                 f32 depth;
                 fn_801BEAEC(id, w, &wp);
-                vel.x = F32(car, 0x3C) * lbl_805623B8;
-                vel.y = F32(car, 0x40) * lbl_805623B8;
-                vel.z = F32(car, 0x44) * lbl_805623B8;
-                if (fn_80198F64(wp.v, (u32)q, &hit.x, &depth, &n.x, &vel.x, lbl_805622E0)) {
+                SphScale(&vel.x, &F32(car, 0x3C), 0.3048f);
+                if (fn_80198F64(wp.v, (u32)q, &hit.x, &depth, &n.x, &vel.x, 1.0f)) {
                     fn_801BEB44(id, w, &hit, (PVec3A*)&n);
                 }
             }
@@ -2842,11 +2823,9 @@ void SphereGroup::vf10(u8* q) {
                 int n;
                 fn_801BEAEC(id, w, &wp);
                 c = wp;
-                c.v[0] = c.v[0] + F32(car, 0x48) * lbl_805623BC;
-                c.v[1] = c.v[1] + F32(car, 0x4C) * lbl_805623BC;
-                c.v[2] = c.v[2] + F32(car, 0x50) * lbl_805623BC;
+                SphAddScaled(c.v, c.v, &F32(car, 0x48), 1.1f);
                 n = 64;
-                fn_801CF080(PTR(q, 0x24), (RVec3*)c.v, hits, &n, U32(q, 0xC), lbl_8056234C);
+                fn_801CF080(PTR(q, 0x24), (RVec3*)c.v, hits, &n, U32(q, 0xC), 2.0f);
                 for (int k = 0; k < n; k++) {
                     h = &hits[k];
                     d.v[0] = c.v[0] - h->x;
@@ -2854,7 +2833,7 @@ void SphereGroup::vf10(u8* q) {
                     d.v[2] = c.v[2] - h->z;
                     f32 len = PSVECMag((const Vec*)d.v);
                     if (len > 0.001f) {
-                        f32 inv = lbl_805622E0 / len;
+                        f32 inv = 1.0f / len;
                         d.v[0] *= inv;
                         d.v[1] *= inv;
                         d.v[2] *= inv;
@@ -2886,11 +2865,9 @@ void SphereGroup::vf14(void) {
             for (int w = 0; w < 4; w++) {
                 fn_801BEAEC(id, w, &wp);
                 c = wp;
-                c.v[0] = c.v[0] + F32(car, 0x48) * lbl_805622E0;
-                c.v[1] = c.v[1] + F32(car, 0x4C) * lbl_805622E0;
-                c.v[2] = c.v[2] + F32(car, 0x50) * lbl_805622E0;
+                SphAddScaled(c.v, c.v, &F32(car, 0x48), 1.0f);
                 n = 64;
-                fn_801CF080(lbl_8055E5A0, (RVec3*)c.v, hits, &n, 0, lbl_8056234C);
+                fn_801CF080(lbl_8055E5A0, (RVec3*)c.v, hits, &n, 0, 2.0f);
                 for (int k = 0; k < n; k++) {
                     RVec3* h = &hits[k];
                     d.v[0] = c.v[0] - h->x;
@@ -2898,7 +2875,7 @@ void SphereGroup::vf14(void) {
                     d.v[2] = c.v[2] - h->z;
                     f32 len = PSVECMag((const Vec*)d.v);
                     if (len > 0.001f) {
-                        f32 inv = lbl_805622E0 / len;
+                        f32 inv = 1.0f / len;
                         d.v[0] *= inv;
                         d.v[1] *= inv;
                         d.v[2] *= inv;
@@ -3074,7 +3051,7 @@ void TubeBase::vf4C(void) {
     f32 b[3];
     MulAdd(a, s.mid, s.dir, this->half);
     MulAdd(b, s.mid, s.dir, -this->half);
-    fn_801E41D8(a, b, 0x40FFFF00, lbl_8056234C * this->rad);
+    fn_801E41D8(a, b, 0x40FFFF00, 2.0f * this->rad);
 }
 
 TubeShape::TubeShape(u32 a, u32 swap) : TubeBase(a, swap) {}
@@ -3309,7 +3286,7 @@ void OrientedBoxShape::vf0C(void) {
     this->world.z = this->world.z + f->pos.z;
 }
 
-RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape((const RMtx*)a, (CollVolume*)c, 'RAGD', lbl_805622E0, lbl_805622E0) {
+RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape((const RMtx*)a, (CollVolume*)c, 'RAGD', 1.0f, 1.0f) {
     u8* p = (u8*)this;
     ((u32&)this->f30) = b;
     fn_801A2674(p, r, 0, -1);
@@ -3325,9 +3302,9 @@ void RagdollShape::vf38(RVec3* lo, RVec3* hi) const {
     f32 r = this->radius;
     u8* o = ((u8*&)this->frame);
     RVec3 e;
-    e.x = lbl_805622E0;
-    e.y = lbl_805622E0;
-    e.z = lbl_805622E0;
+    e.x = 1.0f;
+    e.y = 1.0f;
+    e.z = 1.0f;
     MulAdd(&lo->x, (f32*)(o + 0x24), &e.x, -r);
     MulAdd(&hi->x, (f32*)(o + 0x24), &e.x, r);
 }
@@ -3409,7 +3386,7 @@ void RagdollShape::vf10(u8* o) {
             RVec3 push;
             fn_801C28A8(this->f30, &x, &(const RVec3C&)HalfExtents::Read(box), &vel, &spin, this->f28, this->f2C, &at, &push);
             if (PSVECDotProduct((const Vec*)&push, (const Vec*)&push) > 10.0f) {
-                fn_801B34DC(o, 0, &at, &push, &((const RVec3C&)RVec3C(0.0f, lbl_805622E0, 0.0f)).x, U32(p, 0x20));
+                fn_801B34DC(o, 0, &at, &push, &((const RVec3C&)RVec3C(0.0f, 1.0f, 0.0f)).x, U32(p, 0x20));
             }
         }
     } else if (((CollShape*)o)->type == 'BOX ') {
@@ -3749,7 +3726,7 @@ void MeshShape::vf10(u8* o) {
         int n = 64;
         u8* sph = o;
         f32 r = F32(sph, 0x24);
-        fn_801CF080(this->mesh, (RVec3*)(sph + 0x34), (RVec3*)hits, &n, U32(((u8*)this), 0xC), lbl_8056234C * r);
+        fn_801CF080(this->mesh, (RVec3*)(sph + 0x34), (RVec3*)hits, &n, U32(((u8*)this), 0xC), 2.0f * r);
         for (int i = 0; i < n; i++) {
             fn_8019AA18(sph, (u32)&hits[i], 0x6E, (u32)((u8*)this));
         }
@@ -3916,8 +3893,6 @@ void StaticCollObject::vf0C(void) {
     u8* p = (u8*)this; VE(this->vol)->v18("dyno", "unknown"); }
 
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
-extern const f32 lbl_805622DC;  // -1.0
-extern const f32 lbl_805622E0;  // 1.0
 
 // Refreshes the attached volume and drops it (and the anchor) onto the ground.
 void fn_801A48E4(u8* p) {
@@ -3930,7 +3905,7 @@ void fn_801A48E4(u8* p) {
         fn_801EA1E0(F32(p, 0x28), F32(p, 0x30), (f32*)(p + 0x2C), 0);
     }
     if (type == 'TUBE') {
-        f32 dir = F32(p, 0x20) > 0.0f ? lbl_805622DC : lbl_805622E0;
+        f32 dir = F32(p, 0x20) > 0.0f ? -1.0f : 1.0f;
         f32 len = F32(PTR(p, 0x3C), 0x28);
         f32 r = dir * len;
         f32 end[3];
