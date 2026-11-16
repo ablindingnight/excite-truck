@@ -3,31 +3,23 @@
 // with alpha along the curve). Names are guesses apart from the string.
 #include "game/common.h"
 
-struct TVec3 {
-    void Set(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x, y, z;
-};
-
+// TVec3: valvec3.h's ValVec3.
 struct TVtx {
-    TVec3 pos;  // offset 0x0
+    ValVec3 pos;  // offset 0x0
     u32 color;  // offset 0xC
     f32 u, v;   // offset 0x10
 };
 
 struct SkidQuad {
-    TVec3 dir;  // offset 0x0
+    ValVec3 dir;  // offset 0x0
     f32 half;   // offset 0xC
 };
 
 // The spline ribbon: the previous edge points, tangent and alpha.
 struct SkidSpline {
-    TVec3 p0;     // offset 0x0
-    TVec3 p1;     // offset 0xC
-    TVec3 tan;    // offset 0x18
+    ValVec3 p0;     // offset 0x0
+    ValVec3 p1;     // offset 0xC
+    ValVec3 tan;    // offset 0x18
     f32 alpha;    // offset 0x24
     s32 count;    // offset 0x28
     s32 max;      // offset 0x2C
@@ -111,7 +103,7 @@ void fn_801E4FF4(void) {
     lbl_8055EAB0 = 0;
 }
 
-int fn_801E501C(int unused, const TVec3* dir, f32 width, u8 alpha) {
+int fn_801E501C(int unused, const ValVec3* dir, f32 width, u8 alpha) {
     lbl_8055EAA8 = 0;
     lbl_8055EAAC = 0;
     u32 color = (alpha << 24) | 0xFFFFFF;
@@ -177,13 +169,13 @@ int fn_801E5370(int max, int subdiv, f32 scale) {
 
 // Adds a ribbon edge (p - side, p + side) with tangent tan; when drawing, the span from the previous
 // edge is tessellated with a Hermite curve.
-void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, f32 alpha) {
+void fn_801E53A8(const ValVec3* p, const ValVec3* tan, const ValVec3* side, int draw, f32 alpha) {
     if (lbl_80487C88.count >= lbl_80487C88.max) {
         fn_802E317C("tristrip: exceeded skid vert limit");
     }
     SkidSpline* s = &lbl_80487C88;
-    TVec3 a;
-    TVec3 b;
+    ValVec3 a;
+    ValVec3 b;
     a.x = p->x - side->x;
     a.y = p->y - side->y;
     b.x = p->x + side->x;
@@ -225,7 +217,7 @@ void fn_801E53A8(const TVec3* p, const TVec3* tan, const TVec3* side, int draw, 
             u32 c = (AlphaByte(s->alpha + t * (alpha - s->alpha)) << 24) | 0xFFFFFF;
             f32 h2 = t3 - 2.0f * t2 + t;
             h4 = t3 - t2;
-            TVec3 tp;
+            ValVec3 tp;
             tp.x = s->tan.x * h2 + tan->x * h4;
             tp.y = s->tan.y * h2 + tan->y * h4;
             f32 z2 = tan->z;
