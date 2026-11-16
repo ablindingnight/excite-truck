@@ -406,10 +406,10 @@ GroundHeader* fn_801DC9B0(void) {
 
 void fn_801DCA5C(void* p) { fn_8012C4D8(p); }
 
-static inline f32 Unit(f32 t) {
-    t = 1.0f < t ? 1.0f : t;
-    return t > 0.0f ? t : 0.0f;
-}
+/* Helper name unproven */
+static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
+/* Helper name unproven */
+static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 LerpK(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 static inline f32 SqI(int a) { return (f32)a * (f32)a; }
@@ -440,7 +440,7 @@ GroundHeader* fn_801DCA60(void) {
                 if (r > 40.625f) {
                     r = 40.625f - (r - 40.625f);
                 }
-                k = LerpK(Unit((r - 36.25f) / 1.875f), 1.0f, 0.8f);
+                k = LerpK(MaxF(MinF(1.0f, (r - 36.25f) / 1.875f), 0.0f), 1.0f, 0.8f);
             }
 
             f32 a = 15.0f;
