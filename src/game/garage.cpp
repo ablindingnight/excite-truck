@@ -273,7 +273,6 @@ static inline void CopyNameA(const char* s, int n, char* d) {
     }
 }
 
-extern "C" const f32 lbl_80563960;  // 0.0
 extern "C" u8* fn_8023512C(const char* name);
 extern "C" void fn_802E317C(const char* fmt, ...);
 
@@ -802,7 +801,7 @@ inline SlotStrip::SlotStrip(int n) {
         SlotAnim* s = &slots[i];
         s->sel = 0;
         s->shown = 0;
-        s->t = lbl_80563960;
+        s->t = 0.0f;
     }
     art = fn_8023512C("caricona.art");
     tex = fn_802CAC28("cariconb.tex", 0);
@@ -862,7 +861,7 @@ CarSlotList::CarSlotList(GarageList* list, s32* color, s32* car, StatPanel* pane
             s->t = (f32)__fabs(s->t);
         }
         s->shown = on;
-        s->t = lbl_80563960;
+        s->t = 0.0f;
         e->value = 0;
     }
     fn_80131818(t);
@@ -896,7 +895,6 @@ public:
 };
 
 extern "C" UIObjects* fn_80258354(void);
-extern "C" const f32 lbl_80563964;  // 1.0
 
 // The car unlock screen's state (vtable __vt__12UnlockScreen): walks `list`, revealing each unlocked car with the
 // trophy cue.
@@ -925,7 +923,7 @@ public:
         objects = fn_80258354();
         if (objects) {
             objects->AddSound("trophy_snd", "a_trophy1.sfx", 0);
-            objects->SetVolume("trophy_snd", lbl_80563964);
+            objects->SetVolume("trophy_snd", 1.0f);
         }
     }
     virtual ~UnlockScreen(void) {
@@ -975,12 +973,12 @@ public:
         }
         panel->SetCar(model);
         f32 t = wait - fn_80214D48();
-        wait = lbl_80563960 > t ? lbl_80563960 : t;
+        wait = 0.0f > t ? 0.0f : t;
         if (AbsF(wait) <= __float_epsilon[0]) {
             fn_80214AF0(0x1F);
         }
         t = hold - fn_80214D48();
-        hold = lbl_80563960 > t ? lbl_80563960 : t;
+        hold = 0.0f > t ? 0.0f : t;
         if (AbsF(hold) <= __float_epsilon[0]) {
             fn_80214AF0(0x1F);
         }
@@ -1109,8 +1107,6 @@ public:
 u8* fn_8025007C(int n) { return (u8*)new ("ChassisList") ChassisList(n); }
 
 f32 fn_80214D48(void);
-extern const f32 lbl_80563960;
-extern const f32 lbl_80563964;
 
 static inline void UpdateSlotAnims(u8* p) {
     SlotStrip* cp = (SlotStrip*)p;
@@ -1123,14 +1119,14 @@ static inline void UpdateSlotAnims(u8* p) {
         e = &((SlotAnim*)((u8*)cp->slots))[i];
         if (e->sel != e->shown) {
             e->t = e->t + 6.0f * dt;
-            if (e->t >= lbl_80563964) {
+            if (e->t >= 1.0f) {
                 e->shown = e->sel;
                 e->t = e->t - 2.0f;
             }
         } else {
             f32 t = e->t + 6.0f * dt;
-            if (lbl_80563960 < t) {
-                t = lbl_80563960;
+            if (0.0f < t) {
+                t = 0.0f;
             }
             e->t = t;
         }
@@ -1152,14 +1148,14 @@ void SlotStrip::Update(void) {
         e = slot;
         if (e->sel != e->shown) {
             e->t = e->t + 6.0f * dt;
-            if (e->t >= lbl_80563964) {
+            if (e->t >= 1.0f) {
                 e->shown = e->sel;
                 e->t = e->t - 2.0f;
             }
         } else {
             f32 t = e->t + 6.0f * dt;
-            if (lbl_80563960 < t) {
-                t = lbl_80563960;
+            if (0.0f < t) {
+                t = 0.0f;
             }
             e->t = t;
         }
@@ -1242,11 +1238,12 @@ static inline u32 PaintColor(CarEntry* e, s32 i) {
 }
 
 static inline f32 Clamp01(f32 v) {
-    f32 t = lbl_80563964 < v ? lbl_80563964 : v;
-    return t > lbl_80563960 ? t : lbl_80563960;
+    f32 t = 1.0f < v ? 1.0f : v;
+    return t > 0.0f ? t : 0.0f;
 }
 
-static inline int RoundF(f32 v) { return (int)(v < lbl_80563960 ? v - 0.5f : v + 0.5f); }
+static inline f32 SlotUnit(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }  /* Helper name unproven */
+static inline int RoundF(f32 v) { return (int)(v < 0.0f ? v - 0.5f : v + 0.5f); }
 
 // Scales `c` by the tint `t`, per channel.
 static inline u32 TintColor(u32 c, u32 t) {
@@ -1279,7 +1276,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     if (!locked && ((GarageList*)PTR(p, 0xD0))->IsExtreme(i)) {
         extreme = 1;
     }
-    fn_802354A0(PTR(p, 0x24), shown && extreme, x, y, lbl_80563960, w, h, locked ? 0xFF808080 : -1);
+    fn_802354A0(PTR(p, 0x24), shown && extreme, x, y, 0.0f, w, h, locked ? 0xFF808080 : -1);
     f32 fade = fn_80216CB4();
     if (extreme) {
         for (int k = 0; k < 2; k++) {
@@ -1287,12 +1284,12 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             if (k == 0) {
                 part = 4;
             }
-            f32 t = (alpha - lbl_80563960) / lbl_80563964;
+            f32 t = SlotUnit(alpha, 0.0f, 1.0f);
             f32 pw = fn_80235EF0(PTR(p, 0x24), part) * (0.5f + Clamp01(t) * 0.5f);
             f32 ph = fn_80235F64(PTR(p, 0x24), part) * (0.5f + Clamp01(t) * 0.5f);
             int a = RoundF(255.0f * fade);
             a = a > 0x13F ? 0x13F : a;
-            fn_802354A0(PTR(p, 0x24), part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, lbl_80563960, pw, ph, (a << 24) | 0xFFFFFF);
+            fn_802354A0(PTR(p, 0x24), part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, pw, ph, (a << 24) | 0xFFFFFF);
         }
     }
     int k = shown > 0 ? shown : 0;
