@@ -104,7 +104,7 @@ void fn_801EA404(int unused, int arg) {
     fn_801FC908(arg);
 }
 
-u8 fn_801EA470(void) { return lbl_8055EB58; }
+int fn_801EA470(void) { return lbl_8055EB58; }
 
 void fn_801EA478(int cam) { fn_801EA210(cam, fn_801E8738(cam)); }
 
