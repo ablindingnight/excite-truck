@@ -60,8 +60,9 @@ struct BoneFrame {
     u32 mask;     // offset 0x30
 };
 
-// The racer's physics/animation state the model is bound to.
-struct CarState {
+// The racer's physics/animation state the model is bound to: the same 0xFA8 buffer as carbody.h's CarDrawState
+// (CarBody::vf28 fills it). Distinct name for now; merge the two layouts later.
+struct CarDrawView {
     Frame frame;              // offset 0x0
     u8 pad30[4];
     f32 rpm;                  // offset 0x34
@@ -180,7 +181,8 @@ struct BoneSurf {
     u32 mask;   // offset 0x8
 };
 
-struct CarColors {
+// The car lighting colours (two packed colours and an alpha). Name unproven.
+struct CarTint {
     u32 c0;     // offset 0x0
     u32 c1;     // offset 0x4
     f32 alpha;  // offset 0x8
@@ -201,7 +203,7 @@ public:
     virtual void Set(const AnimSlot* s);
     virtual void vf24(void);
 
-    CarState* car;          // offset 0x3C
+    CarDrawView* car;          // offset 0x3C
     s32 index;              // offset 0x40
     s32 lodModels[16];      // offset 0x44
     s32 drawModels[16];     // offset 0x84
@@ -274,7 +276,7 @@ void fn_801EA59C(s32 index, int a, CarDef* d);
 void fn_801EAB10(int idx, s32 x8);  // carinfo.cpp
 void* fn_801EF1F0(void* p, const char* name);
 void fn_801EF428(void* p, int del);
-void fn_801EFC90(void* p, CarState* c, void** wheels);
+void fn_801EFC90(void* p, CarDrawView* c, void** wheels);
 void* fn_801EFF94(const char* cls, s32 index, int i);
 void fn_801EFFF8(void* w);
 void fn_801F0F78(void* w, WheelState* s, const Frame* f, f32 scale);
@@ -284,7 +286,7 @@ void fn_801F13F4(void* w, f32 a, f32 b);
 f32 fn_801F159C(void* w);
 void* fn_802002D4(const char* name, s32 model, s32 inst);
 void fn_8020095C(void* p);
-void fn_80201018(void* p, CarState* c, int a);
+void fn_80201018(void* p, CarDrawView* c, int a);
 void* fn_802792E4(const char* name);
 void fn_802792EC(void* p);
 void fn_80297988(CarModel* m);
@@ -342,7 +344,7 @@ static inline f32 Angle(f32 a) { return a; }
 static inline s32 Mask(s32 v) { return v; }
 
 CarModel* lbl_80488648[8];
-CarColors lbl_80488668;
+CarTint lbl_80488668;
 
 ModuleTag lbl_8055EBA8;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
@@ -418,7 +420,7 @@ void fn_801EC1D4(void) {
     lbl_80488668.c1 = 0x00FFF5D9;
 }
 
-CarColors* fn_801EC1F8(void) { return &lbl_80488668; }
+CarTint* fn_801EC1F8(void) { return &lbl_80488668; }
 
 u32* fn_801EC204(void) { return &lbl_80488668.c1; }
 
@@ -806,7 +808,7 @@ void fn_801ED354(CarModel* m) {
 
 void fn_801ED46C(CarModel* m) {
     if (m->xray != -1 && m->curLod <= 2) {
-        CarState* c = m->car;
+        CarDrawView* c = m->car;
         Vec v;
         MulVecT(&v, &fn_802C86DC()->axes[0], c->frame.axes);
         Vec* e = &m->car->effect[m->facingPos];
@@ -968,7 +970,7 @@ void CarModel::Set(const AnimSlot* s) {
     int i;
 
     AnimObj::Set((const AnimSlot*)car);
-    k = ((const CarState*)s)->scale;
+    k = ((const CarDrawView*)s)->scale;
     scale = k;
     if (Abs(k - 1.0f) <= __float_epsilon[0]) {
         scaled = frame;
@@ -1222,7 +1224,7 @@ void fn_801EEC68(CarModel* m) {
 f32 lbl_8055B088 = 12.3f;  // battery volts
 
 void fn_801EECAC(CarModel* m, u8* data) {
-    m->car = (CarState*)(data + m->offset);
+    m->car = (CarDrawView*)(data + m->offset);
     fn_801EAB10(m->index, (s32)m->car);
     ValueNode* ch = m->res->values->FindChild("Chassis");
     fn_801EC214(&m->volts, ch, m->chassis, "volt_gauge", 1.0f, 0.0f, &lbl_8055B088);
@@ -1256,7 +1258,7 @@ PlayerCarModel::PlayerCarModel(Racer* r, CarDef* d) : CarModel(r, d) {}
 PlayerCarModel::~PlayerCarModel(void) {}
 
 void PlayerCarModel::Set(const AnimSlot* s) {
-    CarModel* src = lbl_80488648[((const CarState*)s)->carIndex];
+    CarModel* src = lbl_80488648[((const CarDrawView*)s)->carIndex];
     models = src->lodModels;
     lods = src->lodTable;
     lodCount = &src->numLods;
