@@ -1356,6 +1356,56 @@ config.progress_report_args = [
     # "--config functionRelocDiffs=data_value",
 ]
 
+# Data tables regenerated from the player's own main.dol (tools/datagen.py).
+# A table marked `// DUMP_DATA <label> <type>` in source includes build/<ver>/include/dumpdata/<label>.inc.
+# A marker added to a file that had none needs a re-run of configure.py.
+def dumpdata_steps() -> None:
+    import subprocess
+
+    datagen = Path("tools") / "datagen.py"
+    listing = subprocess.run(
+        [sys.executable, str(datagen), "--list"], capture_output=True, text=True, check=True
+    ).stdout.splitlines()
+    if not listing:
+        return
+    out_dir = Path("build") / config.version / "include" / "dumpdata"
+    labels = sorted({row.split("\t")[0] for row in listing})
+    sources = sorted({row.split("\t")[2].rsplit(":", 1)[0] for row in listing})
+    dol = Path("orig") / config.version / "sys" / "main.dol"
+    symbols = Path("config") / config.version / "symbols.txt"
+    config.custom_build_rules = [
+        *(config.custom_build_rules or []),
+        {
+            "name": "datagen",
+            "command": f"$python {datagen} --version {config.version} --dol $dol --symbols $symbols --out $outdir --stamp $stamp",
+            "description": "DATAGEN $outdir",
+            "restat": True,
+        },
+    ]
+    stamp = out_dir / "datagen.stamp"
+    steps = config.custom_build_steps or {}
+    steps.setdefault("pre-compile", []).append(
+        {
+            "outputs": stamp,
+            "implicit_outputs": [out_dir / f"{label}.inc" for label in labels],
+            "rule": "datagen",
+            "inputs": [dol, symbols],
+            "implicit": [datagen, *sources],
+            "variables": {
+                "dol": dol,
+                "symbols": symbols,
+                "outdir": out_dir,
+                "stamp": stamp,
+            },
+        }
+    )
+    config.custom_build_steps = steps
+    # a new marker in an already-marked file is picked up by re-running datagen; re-configure too
+    config.reconfig_deps = [*(config.reconfig_deps or []), datagen]
+
+
+dumpdata_steps()
+
 if args.mode == "configure":
     # Write build.ninja and objdiff.json
     generate_build(config)
