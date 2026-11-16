@@ -9,6 +9,8 @@
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT( f32 b, f32 a,f32 t) { return a + t * (b - a); }
 
+BOOL OptProfile(void);  // cmdline.cpp
+
 extern "C" {
 void* memset(void* dst, int c, u32 n);
 void* memcpy(void* dst, const void* src, u32 n);
@@ -70,7 +72,6 @@ void fn_8012F448(s32 s, s32 pos);
 s32 fn_8012F3CC(s32 a);
 void fn_8012F43C(s32 s);
 void fn_8012F418(s32 s);
-int OptProfile__Fv(void);
 int fn_80278820(void);
 int fn_802787FC(void);
 s32 fn_80176A1C(void);
@@ -861,7 +862,7 @@ int fn_801787B4(PhysClock* c) {
     int n;
     int fixed;
     s32 mode;
-    if (OptProfile__Fv()) {
+    if (OptProfile()) {
         return 1;
     }
     if (fn_80278820()) {
