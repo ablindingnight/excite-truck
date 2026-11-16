@@ -404,7 +404,8 @@ void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 
 void fn_801A0444(CollShape* grp, CollShape* box);
 CollShape* fn_801A2354(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
 CollShape* __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(void* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
-CollShape* fn_801A3DAC(void* p, u8* frame, const char* name, u8* owner);
+// MeshShape::MeshShape(frame, name, owner) in sphcoll, called by its linker name.
+CollShape* __ct__9MeshShapeFUlPCcUl(void* p, u8* frame, const char* name, u8* owner);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 ObMesh* fn_802C6B44(const char* name);
@@ -814,7 +815,7 @@ void Obstacle::Init(BodyDesc* d) {
     case 20: {
         CollShape* s = (CollShape*)operator new(0x40, "pmshvol");
         if (s) {
-            s = fn_801A3DAC(s, (u8*)frame, (const char*)&q->a, (u8*)this);
+            s = __ct__9MeshShapeFUlPCcUl(s, (u8*)frame, (const char*)&q->a, (u8*)this);
         }
         shape = s;
         U8(this, 0x221) = 1;

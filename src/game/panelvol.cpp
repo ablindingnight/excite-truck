@@ -217,7 +217,8 @@ void fn_80144DAC(RVec3* dst, const RVec3* src);
 void __ct__10CamFrame34Fv(RMtx* m);
 const RMtx* Mtx__10RaceCarRecFv(Phob* car);
 void fn_8017E388(RMtx* m);
-CollShape* fn_801A25F8(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
+// RagdollShape::RagdollShape(frame, strip, owner, r) in sphcoll, called by its linker name.
+CollShape* __ct__12RagdollShapeFUlUlUlf(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
 void fn_8019EECC(CollVolume* v, RVec3* c);
 void* fn_801C1BA4(int verts, int edges, int links);
 void fn_801C1C7C(void* strip);
@@ -627,7 +628,7 @@ void PanelVol::Init(BodyDesc* d) {
     CollShape* s = (CollShape*)mem;
     if (mem) {
         f32 scale = 0.25f;
-        s = fn_801A25F8(mem, &mtx, strip, this, scale);
+        s = __ct__12RagdollShapeFUlUlUlf(mem, &mtx, strip, this, scale);
     }
     AddShape(s);
     b1E8 = 0;

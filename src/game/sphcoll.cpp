@@ -501,9 +501,10 @@ public:
     virtual ~OrientedBoxShape(void) {}
 };
 
-// A ragdoll limb volume ('RAGD'; vtable 0x80333818; built by fn_801A25F8). Class name unproven.
+// A ragdoll limb volume ('RAGD'; vtable 0x80333818; built by panelvol's strips). Class name unproven.
 class RagdollShape : public CollShape {
 public:
+    RagdollShape(u32 frame, u32 x30, u32 owner, f32 r);
     virtual void vf10(u8* other);
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
@@ -534,10 +535,11 @@ public:
     virtual ~PolyShape(void) {}
 };
 
-// A mesh volume ('PMSH'; vtable 0x80333728; built by fn_801A3DAC and from file data); owns its mesh at 0x24.
+// A mesh volume ('PMSH'; vtable 0x80333728; built from a named mesh by obstacles, or from file data); owns its mesh at 0x24.
 // Class name unproven.
 class MeshShape : public CollShape {
 public:
+    MeshShape(u32 frame, const char* name, u32 owner);  // from the named mesh
     MeshShape(u32 data, u32 inPlace);  // from file data; the mesh is built in place at 0x40 when `inPlace`
     virtual ~MeshShape(void);
     virtual void vf10(u8* other);
@@ -3709,19 +3711,10 @@ void OrientedBoxShape::vf0C(void) {
     F32(p, 0x70) = F32(p, 0x70) + f->t.z;
 }
 
-u8* fn_801A25F8(u8* p, u32 a, u32 b, u32 c, f32 r) {
-    U32(p, 0xC) = a;
+RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape(a, c, 'RAGD', lbl_805622E0, lbl_805622E0) {
+    u8* p = (u8*)this;
     U32(p, 0x30) = b;
-    U32(p, 0x4) = c;
-    U32(p, 0x8) = 0;
-    S32(p, 0x18) = 'RAGD';
-    F32(p, 0x10) = lbl_805622E0;
-    F32(p, 0x14) = lbl_805622E0;
-    S32(p, 0x20) = 100;
-    U32(p, 0x1C) = 0;
-    *(void**)p = __vt__12RagdollShape;
     fn_801A2674(p, r, 0, -1);
-    return p;
 }
 
 void fn_801A2674(u8* p, f32 r, u32 a, u32 b) {
@@ -4132,15 +4125,8 @@ struct MeshRes {
 };
 
 // Mesh volume ('PMSH') from the named mesh: bounding box min (0x28) / max (0x34) over its vertices.
-u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
-    U32(p, 0x8) = 0;
-    S32(p, 0x18) = 'PMSH';
-    InitVolume(p, id, owner);
-    F32(p, 0x10) = 1.0f;
-    F32(p, 0x14) = 1.0f;
-    S32(p, 0x20) = 100;
-    U32(p, 0x1C) = 0;
-    *(void**)p = __vt__9MeshShape;
+MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape(id, owner, 'PMSH', 1.0f, 1.0f) {
+    u8* p = (u8*)this;
     MeshRes* m = (MeshRes*)fn_801CFEAC(name);
     PTR(p, 0x24) = (u8*)m;
     RVec3* mn = (RVec3*)(p + 0x28);
@@ -4153,7 +4139,6 @@ u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
         BoxCorner hi = VMax(*mx, ((MeshRes*)PTR(p, 0x24))->verts[i]);
         *mx = *(RVec3*)&hi;
     }
-    return p;
 }
 
 MeshShape::MeshShape(u32 a, u32 b) : CollShape(a, b) {
