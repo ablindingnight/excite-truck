@@ -5,6 +5,7 @@
 #include "types.h"
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
+#include "game/carbody.h"
 
 // Compiled as C++ (2026-11-03): the unit owns a ModuleTag, registered by its static initializer (the 8-byte
 // function after the code, formerly the separate split unk_8020F3AC). The functions keep C linkage.
@@ -137,10 +138,10 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     void *res2;
 
     this->vehicle = vehicle;
-    res = vehicle + 0x118;
-    res2 = vehicle + 0x60;
-    owner = *(void **)(vehicle + 0x1EC);
-    const long type = *(long *)(vehicle + 0x10);
+    res = (unsigned char *)&((CarBody *)vehicle)->vel;
+    res2 = (unsigned char *)&((CarBody *)vehicle)->mtx.pos;
+    owner = (void *)((CarBody *)vehicle)->index;
+    const long type = ((CarBody *)vehicle)->type;
     isCar = type == 0x50434152;
     if (isCar) {
         this->p28 = (HudPart *)fn_802077A4("waterbounce.sfx", 5, res, res2);
@@ -216,7 +217,7 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     this->boostLevel = lbl_80563370;
     this->started = 0;
     this->startPending = 0;
-    this->b71 = (FindVehicle(*(long *)(vehicle + 0x25C))[0xA0 / 4] >> 2) & 1;
+    this->b71 = (FindVehicle(((CarBody *)vehicle)->ident.vehicle)[0xA0 / 4] >> 2) & 1;
 }
 
 extern "C" void *fn_8020DE74(unsigned char *vehicle) {
@@ -250,12 +251,6 @@ CarSound::~CarSound() {
 
 typedef struct HudVec { float x, y, z; } HudVec;
 
-// The vehicle fields read here by member (the rest by offset).
-struct HudCar {
-    unsigned char pad0[0x118];
-    HudVec vel; /* 0x118 */
-};
-
 __declspec(section ".data") extern float __float_epsilon;
 extern float lbl_8055E3C8;
 extern const float lbl_80563374, lbl_80563378, lbl_8056337C, lbl_80563380, lbl_80563384, lbl_80563388;
@@ -273,8 +268,6 @@ extern "C" long fn_802104B8(void);
 extern "C" long fn_802104FC(void);
 extern "C" int fn_802BF4F0(void);
 extern "C" float fn_802BF590(void);
-
-#define VF32(v, off) (*(float *)((v) + (off)))
 
 static inline float HudClamp01(float t) {
     float r = lbl_80563368 < t ? lbl_80563368 : t;
@@ -348,7 +341,7 @@ void CarSound::Update() {
                 h->startPending = 0;
             }
         } else {
-            int moving = VF32(h->vehicle, 0x25BC) > __float_epsilon;
+            int moving = ((CarBody *)h->vehicle)->f25BC > __float_epsilon;
             if (!moving) {
                 h->started = 0;
                 HudPart_Hide(h->start);
@@ -361,8 +354,8 @@ void CarSound::Update() {
         float t;
         float step;
         v = h->vehicle;
-        base = v[0x259C] == 0 ? lbl_80563374 : lbl_80563378;
-        t = HudClamp01((VF32(v, 0x25A0) - base) / ((lbl_8056337C + base) - base));
+        base = ((CarBody *)v)->f259C == 0 ? lbl_80563374 : lbl_80563378;
+        t = HudClamp01((((CarBody *)v)->f25A0 - base) / ((lbl_8056337C + base) - base));
         step = (lbl_80563370 + t * lbl_80563368) - h->boostLevel;
         step = lbl_80563380 < step ? lbl_80563380 : step;
         step = step > lbl_80563384 ? step : lbl_80563384;
@@ -376,7 +369,7 @@ void CarSound::Update() {
     }
 
     if (h->flash != 0) {
-        int hit = VF32(h->vehicle, 0x258C) > lbl_8056338C;
+        int hit = ((CarBody *)h->vehicle)->f258C > lbl_8056338C;
         if (hit) {
             h->flashLevel = lbl_80563368;
         } else {
@@ -401,10 +394,10 @@ void CarSound::Update() {
 
     if (h->speedLines != 0) {
         v = h->vehicle;
-        int enabled = v[0x259C];
+        int enabled = ((CarBody *)v)->f259C;
         h->speedAlpha = lbl_80563368;
         if (enabled) {
-            float x = VF32(v, 0x25A0);
+            float x = ((CarBody *)v)->f25A0;
             float level;
             HudPart_Show(h->speedLines);
             level = lbl_80563374 + lbl_80563374 * (x * x);
@@ -420,9 +413,9 @@ void CarSound::Update() {
         float ground;
         float mag;
         float inv;
-        speed = VF32(h->vehicle, 0x2618);
+        speed = ((CarBody *)h->vehicle)->f2618;
         if (speed > lbl_80563394) {
-            float airGain = HudClamp01((VF32(h->vehicle, 0x25D4) - lbl_80563398) / lbl_8056339C);
+            float airGain = HudClamp01((((CarBody *)h->vehicle)->speed - lbl_80563398) / lbl_8056339C);
             float airGainScale = lbl_80563368;
             float a = lbl_80563370 + airGain * airGainScale;
             float airSpeedGain = HudClamp01((speed - lbl_80563394) / lbl_805633A0);
@@ -433,8 +426,8 @@ void CarSound::Update() {
         } else {
             HudPart_Hide(h->air);
         }
-        ground = fn_801E9FDC((short *)(h->vehicle + 0x6C), VF32(h->vehicle, 0x60), VF32(h->vehicle, 0x68));
-        HudVec dir = ((HudCar *)h->vehicle)->vel;
+        ground = fn_801E9FDC((short *)((unsigned char *)&((CarBody *)h->vehicle)->hint), ((CarBody *)h->vehicle)->mtx.pos.x, ((CarBody *)h->vehicle)->mtx.pos.z);
+        HudVec dir = *(HudVec *)&((CarBody *)h->vehicle)->vel;
         mag = PSVECMag((const Vec*)&dir);
         mag = mag > lbl_80563388 ? mag : lbl_80563388;
         inv = lbl_80563368 / mag;
@@ -443,7 +436,7 @@ void CarSound::Update() {
         dir.z *= inv;
         single = fn_80178CA4() == 1;
         boost = 0;
-        if (!fn_801796C4() && single && VF32(h->vehicle, 0x64) - ground > lbl_805633A4 && speed > lbl_805633A8 &&
+        if (!fn_801796C4() && single && ((CarBody *)h->vehicle)->mtx.pos.y - ground > lbl_805633A4 && speed > lbl_805633A8 &&
             dir.y > lbl_805633AC && (!fn_802104B8() || fn_802104FC())) {
             boost = 1;
         }
@@ -457,7 +450,7 @@ void CarSound::Update() {
     }
 
     if (h->tilt != 0) {
-        float x = VF32(h->vehicle, 0x2588);
+        float x = ((CarBody *)h->vehicle)->f2588;
         int on = x > lbl_80563370;
         if (on) {
             if (x > lbl_805633BC) {
@@ -474,15 +467,15 @@ void CarSound::Update() {
     }
 
     underwater = 0;
-    wheel = h->vehicle + 0x23AC;
+    wheel = (unsigned char *)&((CarBody *)h->vehicle)->wheels;
     for (k = 0; k < 4; k++) {
         HudVec p;
         v = h->vehicle;
-        HudVec *in = (HudVec *)(wheel + 0x30);
-        HudXform(&p, in, (float *)(v + 0x3C));
-        p.x += VF32(v, 0x60);
-        p.y += VF32(v, 0x64);
-        p.z += VF32(v, 0x68);
+        HudVec *in = (HudVec *)((CbWheel *)wheel)->local;
+        HudXform(&p, in, (float *)((unsigned char *)&((CarBody *)v)->mtx));
+        p.x += ((CarBody *)v)->mtx.pos.x;
+        p.y += ((CarBody *)v)->mtx.pos.y;
+        p.z += ((CarBody *)v)->mtx.pos.z;
         if (p.y < fn_802BF590()) {
             underwater = 1;
             break;
@@ -493,7 +486,7 @@ void CarSound::Update() {
     if (h->splash != 0 && fn_802BF4F0()) {
         if (underwater) {
             float splashSpeedScale = lbl_805633C8;
-            float verticalSpeed = VF32(h->vehicle, 0x25D4);
+            float verticalSpeed = ((CarBody *)h->vehicle)->speed;
             float s = splashSpeedScale * verticalSpeed;
             float splashAlphaWeight = HudClamp01((s - lbl_80563370) / lbl_805633CC);
             float splashAlphaScale = lbl_805633D0;
@@ -518,10 +511,10 @@ void CarSound::Update() {
         int shown = 0;
         float spd;
         v = h->vehicle;
-        spd = VF32(v, 0x25D4);
-        if (AbsFlt(VF32(v, 0x2690)) <= __float_epsilon && spd > lbl_805633DC && *(long *)(v + 0x2620) > 1 &&
+        spd = ((CarBody *)v)->speed;
+        if (AbsFlt(((CarBody *)v)->f2690) <= __float_epsilon && spd > lbl_805633DC && ((CarBody *)v)->airborne > 1 &&
             !underwater) {
-            float dot = AbsFlt(PSVECDotProduct((const Vec*)((HudVec *)(v + 0x118)), (const Vec*)((HudVec *)(v + 0x3C))));
+            float dot = AbsFlt(PSVECDotProduct((const Vec*)((HudVec *)((unsigned char *)&((CarBody *)v)->vel)), (const Vec*)((HudVec *)((unsigned char *)&((CarBody *)v)->mtx))));
             float lim = spd * (AbsFlt(h->driftTime) <= __float_epsilon ? lbl_805633E0 : lbl_805633E4);
             shown = dot > lim;
             if (shown) {
@@ -547,124 +540,100 @@ extern void fn_80206750(void *, void *, long);
 
 // Applies the current mode (0 while fn_80009C84 is set, otherwise 2) to the three optional parts.
 void CarSound::Reset() {
-    void *arg0 = this;
-    void *owner = *(void **)((char *)*(void **)((char *)arg0 + 4) + 0x1EC);
+    void *owner = (void *)((CarBody *)vehicle)->index;
     long busy = fn_80009C84();
     long mode = 2;
     if (busy) mode = 0;
-    if (*(void **)((char *)arg0 + 0x48) != 0)
-        fn_80206750(*(void **)((char *)arg0 + 0x48), owner, mode);
-    if (*(void **)((char *)arg0 + 0x4C) != 0)
-        fn_80206750(*(void **)((char *)arg0 + 0x4C), owner, mode);
-    if (*(void **)((char *)arg0 + 0x50) != 0)
-        fn_80206750(*(void **)((char *)arg0 + 0x50), owner, mode);
+    if (boost != 0)
+        fn_80206750(boost, owner, mode);
+    if (tilt != 0)
+        fn_80206750(tilt, owner, mode);
+    if (p50 != 0)
+        fn_80206750(p50, owner, mode);
 }
 
 void CarSound::vf14() {
-    void *arg0 = this;
-    void *temp_r3;
-    temp_r3 = *(void **)((char *)arg0 + 0x50);
-    if (temp_r3 != 0) {
-        *(signed char *)((char *)temp_r3 + 0x49) = 1;
-        *(signed char *)((char *)temp_r3 + 0x4B) = 0;
-        *(signed char *)((char *)temp_r3 + 0x4A) = 0;
+    HudPart *p = p50;
+    if (p != 0) {
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 
 void CarSound::vf18() {
-    void *arg0 = this;
-    void *temp_r3;
-    temp_r3 = *(void **)((char *)arg0 + 0x28);
-    if (temp_r3 != 0) {
-        *(signed char *)((char *)temp_r3 + 0x49) = 1;
-        *(signed char *)((char *)temp_r3 + 0x4B) = 0;
-        *(signed char *)((char *)temp_r3 + 0x4A) = 0;
+    HudPart *p = p28;
+    if (p != 0) {
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 
 void CarSound::vf1C() {
-    void *arg0 = this;
-    void *p;
-    float value;
-    p = *(void **)((char *)arg0 + 8);
+    HudPart *p = p08;
     if (p != 0) {
-        value = lbl_80563368;
-        if (value != *(float *)((char *)p + 8)) {
-            *(signed char *)((char *)p + 0x4D) = 1;
-            *(float *)((char *)p + 8) = value;
+        float value = lbl_80563368;
+        if (value != p->alpha) {
+            p->alphaDirty = 1;
+            p->alpha = value;
         }
-        p = *(void **)((char *)arg0 + 8);
-        *(signed char *)((char *)p + 0x49) = 1;
-        *(signed char *)((char *)p + 0x4B) = 0;
-        *(signed char *)((char *)p + 0x4A) = 0;
+        p = p08;
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 void CarSound::Land(float farg0) {
-    void *arg0 = this;
-    float temp_f0;
-    float temp_f1;
-    float var_f2;
-    void *temp_r4;
-    void *temp_r4_2;
-    temp_r4 = *(void **)((char *)arg0 + 0x1C);
-    if (temp_r4 != 0) {
-        var_f2 = lbl_80563368;
-        temp_f0 = (farg0 - lbl_805633DC) / lbl_805633F4;
-        var_f2 = var_f2 < temp_f0 ? var_f2 : temp_f0;
-        var_f2 = var_f2 > lbl_80563370 ? var_f2 : lbl_80563370;
-        temp_f1 = lbl_805633F8 + (var_f2 * lbl_805633FC);
-        if (temp_f1 != *(float *)((char *)temp_r4 + 8)) {
-            *(signed char *)((char *)temp_r4 + 0x4D) = 1;
-            *(float *)((char *)temp_r4 + 8) = temp_f1;
+    HudPart *p = p1C;
+    if (p != 0) {
+        float t = lbl_80563368;
+        float r = (farg0 - lbl_805633DC) / lbl_805633F4;
+        t = t < r ? t : r;
+        t = t > lbl_80563370 ? t : lbl_80563370;
+        float alpha = lbl_805633F8 + (t * lbl_805633FC);
+        if (alpha != p->alpha) {
+            p->alphaDirty = 1;
+            p->alpha = alpha;
         }
-        temp_r4_2 = *(void **)((char *)arg0 + 0x1C);
-        *(signed char *)((char *)temp_r4_2 + 0x49) = 1;
-        *(char *)((char *)temp_r4_2 + 0x4B) = 0;
-        *(char *)((char *)temp_r4_2 + 0x4A) = 0;
+        p = p1C;
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 
 void CarSound::vf20() {
-    void *arg0 = this;
-    void *temp_r3;
-    temp_r3 = *(void **)((char *)arg0 + 0x24);
-    if (temp_r3 != 0) {
-        *(signed char *)((char *)temp_r3 + 0x49) = 1;
-        *(signed char *)((char *)temp_r3 + 0x4B) = 0;
-        *(signed char *)((char *)temp_r3 + 0x4A) = 0;
+    HudPart *p = p24;
+    if (p != 0) {
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 
 void CarSound::vf24() {
-    void *arg0 = this;
-    void *temp_r3;
-
-    temp_r3 = *(void **)((char *)arg0 + 0x20);
-    if (temp_r3 != 0) {
-        *(signed char *)((char *)temp_r3 + 0x49) = 1;
-        *(signed char *)((char *)temp_r3 + 0x4B) = 0;
-        *(signed char *)((char *)temp_r3 + 0x4A) = 0;
+    HudPart *p = p20;
+    if (p != 0) {
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 void CarSound::vf28() {
-    void *arg0 = this;
-    void *temp_r3;
-    temp_r3 = *(void **)((char *)arg0 + 0x2C);
-    if (temp_r3 != 0) {
-        *(signed char *)((char *)temp_r3 + 0x49) = 1;
-        *(signed char *)((char *)temp_r3 + 0x4B) = 0;
-        *(signed char *)((char *)temp_r3 + 0x4A) = 0;
+    HudPart *p = p2C;
+    if (p != 0) {
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 void CarSound::vf30() {
-    void *arg0 = this;
-    void *temp_r3;
-
-    temp_r3 = *(void **)((char *)arg0 + 0x44);
-    if (temp_r3 != 0) {
-        *(signed char *)((char *)temp_r3 + 0x49) = 1;
-        *(signed char *)((char *)temp_r3 + 0x4B) = 0;
-        *(signed char *)((char *)temp_r3 + 0x4A) = 0;
+    HudPart *p = p44;
+    if (p != 0) {
+        p->visible = 1;
+        p->shown = 0;
+        p->hidden = 0;
     }
 }
 void CarSound::vf34() {
@@ -672,8 +641,7 @@ void CarSound::vf34() {
 }
 
 void CarSound::vf38() {
-    void *arg0 = this;
-    *(signed char *)((char *)arg0 + 0x72) = 1;
+    startPending = 1;
 }
 extern const float lbl_80563368;
 extern const float lbl_80563370;
