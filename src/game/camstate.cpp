@@ -322,10 +322,15 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     F32(p, 0x70) = dx;
     F32(p, 0x74) = dy;
     F32(p, 0x78) = dz;
-    f32 eps = __float_epsilon[0];
-    if ((f32)__fabs(dx) <= eps && (f32)__fabs(dz) <= eps) {
-        F32(p, 0x70) = F32(p, 0xD8);
-        F32(p, 0x78) = F32(p, 0xE0);
+    f64 absX = __fabs(dx);
+    f32 absXFloat = (f32)absX;
+    if (absXFloat <= __float_epsilon[0]) {
+        f64 absZ = __fabs(dz);
+        f32 absZFloat = (f32)absZ;
+        if (absZFloat <= __float_epsilon[0]) {
+            F32(p, 0x70) = F32(p, 0xD8);
+            F32(p, 0x78) = F32(p, 0xE0);
+        }
     }
     CsVec up(0.0f, lbl_80563FAC, 0.0f);
     PSVECCrossProduct(&up.x, (f32*)(p + 0x70), (f32*)(p + 0x58));
