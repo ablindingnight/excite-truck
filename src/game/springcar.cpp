@@ -292,7 +292,6 @@ extern f32 lbl_8055E3C8;    // race clock
 extern u8 lbl_8055A518;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-#define NearZero(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
 ModuleTag lbl_8055E5A8;
 UnkStaticFFFF lbl_8055E5B0;
@@ -474,8 +473,10 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             }
             pen += extra;
             TPos at = *(TPos*)&car->up;
+            f64 absWide = __fabs(pen);
+            f32 absPen = (f32)absWide;
             at.y = 0.0f;
-            if (!NearZero(pen) && PSVECDotProduct((TVec*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
+            if (!(absPen <= __float_epsilon[0]) && PSVECDotProduct((TVec*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
                 f32 m = 17.777779f / pen;
                 m = 1.0f < m ? 1.0f : m;
                 m = 0.8f * m;
