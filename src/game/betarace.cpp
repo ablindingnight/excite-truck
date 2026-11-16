@@ -3451,8 +3451,9 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
     }
 }
 
-#pragma push
-#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+/* Helper names unproven */
+static inline f32 Wave(f32 time) { return (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * time, 1.0)); }
+static inline f32 Swing(f32 w, f32 amp) { return w * amp; }
 inline void BetaMaster::vf0C(void) {
     int found;
     f32 lead;
@@ -3460,24 +3461,25 @@ inline void BetaMaster::vf0C(void) {
         Pickup* t = stars.a.data[i];
         SpinBody* body = (SpinBody*)t->hB8;
         if (body) {
-            f32 ang = 0.5235988f * (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * lbl_8055E3C8, 1.0)) + t->angle;
+            f32 w = Swing(Wave(lbl_8055E3C8), 0.5235988f);
+            f32 ang = w + t->angle;
             f32 c;
             f32 s;
             body->pos[0] = t->pos[0];
             body->pos[1] = t->pos[1];
             body->pos[2] = t->pos[2];
-            body = (SpinBody*)t->hB8;
+            SpinBody* r = (SpinBody*)t->hB8;
             c = cos(ang);
             s = sin(ang);
-            body->rot[0] = c;
-            body->rot[1] = 0.0f;
-            body->rot[2] = -s;
-            body->rot[3] = 0.0f;
-            body->rot[4] = 1.0f;
-            body->rot[5] = 0.0f;
-            body->rot[6] = s;
-            body->rot[7] = 0.0f;
-            body->rot[8] = c;
+            r->rot[0] = c;
+            r->rot[1] = 0.0f;
+            r->rot[2] = -s;
+            r->rot[3] = 0.0f;
+            r->rot[4] = 1.0f;
+            r->rot[5] = 0.0f;
+            r->rot[6] = s;
+            r->rot[7] = 0.0f;
+            r->rot[8] = c;
         }
         if (fn_801D48F8(t->objs[t->which]) || fn_801D4904(t->objs[t->which])) {
             f32 r = t->respawn - 0.016683351f;
@@ -3588,7 +3590,6 @@ inline void BetaMaster::vf0C(void) {
         fn_80167684(0.0f > left ? 0.0f : left);
     }
 }
-#pragma pop
 
 extern "C" {
 f32 PSVECMag(const f32* v);
