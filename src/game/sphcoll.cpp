@@ -133,10 +133,6 @@ struct Xform {
     XVec3 pos;   // offset 0x24
 };
 
-extern "C" void* lbl_80333818[];
-extern "C" void* __vt__7RingVol[];
-extern "C" void* __vt__8BoxShape[];
-extern "C" void* lbl_80333868[];
 
 class VEx;
 
@@ -161,8 +157,6 @@ struct PolyVol {
     PolyPlane planes[8];   // offset 0x3C
 };
 
-extern "C" void* lbl_80333778[];
-extern "C" void* lbl_803336F8[];
 extern const f32 lbl_8056234C;  // 2.0f
 
 struct Pose12s {
@@ -471,11 +465,103 @@ public:
     virtual ~TubeShape(void) {}
 };
 
+// A box ('BOX '; vtable __vt__8BoxShape): half sizes from 0x24. Adds two slots; vf54 (the orientation the box
+// tests against) is pure here.
+class BoxShape : public CollShape {
+public:
+    BoxShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    virtual void vf10(u8* other);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~BoxShape(void) {}
+    virtual u32 vf50(void);
+    virtual u8* vf54(void) = 0;
+};
+
+// A box that keeps its own copy of the frame's rotation (0x44) and world centre (0x68) (vtable 0x80333868; built
+// by fn_801A2354). Class name unproven.
+class OrientedBoxShape : public BoxShape {
+public:
+    virtual void vf0C(void);
+    virtual u8* vf54(void);
+    virtual ~OrientedBoxShape(void) {}
+};
+
+// A ragdoll limb volume ('RAGD'; vtable 0x80333818; built by fn_801A25F8). Class name unproven.
+class RagdollShape : public CollShape {
+public:
+    virtual void vf10(u8* other);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~RagdollShape(void) {}
+};
+
+// A ring ('RING'; vtable __vt__7RingVol).
+class RingVol : public CollShape {
+public:
+    RingVol(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~RingVol(void) {}
+};
+
+// A convex polygon volume ('POLY'; vtable 0x80333778; built by fn_801A3190 / fn_801A324C). Class name unproven.
+class PolyShape : public CollShape {
+public:
+    virtual void vf10(u8* other);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~PolyShape(void) {}
+};
+
+// A mesh volume ('PMSH'; vtable 0x80333728; built by fn_801A3DAC / fn_801A3F5C); owns its mesh at 0x24.
+// Class name unproven.
+class MeshShape : public CollShape {
+public:
+    virtual ~MeshShape(void);
+    virtual void vf10(u8* other);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+};
+
+// A static world object with a collision volume (vtable 0x803336F8; built by fn_801A4A8C / fn_801A4B5C from file
+// data): pose 0x04, mesh 0x3C, volume 0x48. Not a CollShape. Class and slot names unproven.
+class StaticCollObject {
+public:
+    virtual u32 vf08(void);
+    virtual void vf0C(void);
+    virtual u8* vf10(void);
+    virtual u8 vf14(void);
+    virtual void vf18(u32 v);
+    virtual void vf1C(void);
+    virtual s32 vf20(void);
+    virtual u32 vf24(void);
+    virtual void vf28(u32 v);
+    virtual ~StaticCollObject(void) {}
+};
+
 // MATCHING-AID (transitional): constructors still written as C store these vtables, and sphcoll's file loader
 // builds a SphereShape in place, by their linker names.
 extern "C" void* __vt__11SphereShape[];
 extern "C" void* __vt__14BoxSphereShape[];
 extern "C" void* __vt__11SphereGroup[];
+extern "C" void* __vt__8BoxShape[];
+extern "C" void* __vt__16OrientedBoxShape[];
+extern "C" void* __vt__12RagdollShape[];
+extern "C" void* __vt__9PolyShape[];
+extern "C" void* __vt__9MeshShape[];
+extern "C" void* __vt__16StaticCollObject[];
+extern "C" u8* __ct__8BoxShapeFUlUl(u8* p, u32 data, u32 swap);
+extern "C" u8* __ct__7RingVolFUlUl(u8* p, u32 data, u32 swap);
 extern "C" u8* __ct__9TubeShapeFUlUl(u8* p, u32 data, u32 swap);
 extern "C" u8* __ct__11SphereShapeFUlUl(u8* p, u32 data, u32 swap);
 void fn_801A49FC(u8* p);
@@ -488,7 +574,6 @@ void* operator new(size_t size, const char* tag);
 void operator delete(void* p);
 
 extern "C" void* __vt__9TubeShape[];  // MATCHING-AID: TubeVol::Init stores it by name
-extern "C" void* lbl_80333728[];
 
 ModuleTag lbl_8055E590;
 UnkStaticFFFF lbl_8055E598;
@@ -1447,7 +1532,8 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     return 0;
 }
 
-u32 fn_8019BD4C(u8* p) { return U32(p, 0xc); }
+u32 BoxShape::vf50(void) {
+    u8* p = (u8*)this; return U32(p, 0xc); }
 
 extern const f32 lbl_805622E8;  // 0.5
 f32 PSVECSquareDistance(const void* a, const void* b);
@@ -2866,13 +2952,6 @@ SphereGroup::~SphereGroup(void) {
     delete *(VDel**)((u8*)this + 0x17C);
 }
 
-u8* fn_801A010C(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
 void SphereGroup::vf0C(void) {
     u8* p = (u8*)this; VE(PTR(p, 0x17C))->v0C(); }
 
@@ -3491,9 +3570,8 @@ void TubeShape::vf4C(void) {
     }
 }
 
-u8* fn_801A1CE4(u8* p, u32 a, u32 swap) {
-    __ct__9CollShapeFUlUl(p, a, swap);
-    *(void**)p = __vt__8BoxShape;
+BoxShape::BoxShape(u32 a, u32 swap) : CollShape(a, swap) {
+    u8* p = (u8*)this;
     if (swap) {
         Swap32(p + 0x24);
         Swap32(p + 0x28);
@@ -3501,10 +3579,10 @@ u8* fn_801A1CE4(u8* p, u32 a, u32 swap) {
         Swap32(p + 0x30);
         Swap32(p + 0x34);
     }
-    return p;
 }
 
-void fn_801A1DD4(u8* a, u8* obj) {
+void BoxShape::vf10(u8* obj) {
+    u8* a = (u8*)this;
     switch (S32(obj, 0x18)) {
     case 'FLSR':
         fn_8019D06C(obj, a, 0, 0);
@@ -3521,11 +3599,12 @@ void fn_801A1DD4(u8* a, u8* obj) {
     }
 }
 
-int fn_801A1E7C(u8* p, u8* a, u8* b, u8* c, RVec3* out) {
+int BoxShape::vf18(const RVec3* a, const RVec3* b, f32* c, RVec3* out) {
+    u8* p = (u8*)this;
     f32 z = F32(p, 0x2C);
     f32 y = F32(p, 0x28);
     f32 x = F32(p, 0x24);
-    if (fn_8019E2D0((RVec3*)a, (RVec3*)b, (f32*)c, (CFrame*)((VEx*)p)->v50(), x, y, z)) {
+    if (fn_8019E2D0((RVec3*)((u8*)a), (RVec3*)((u8*)b), (f32*)((u8*)c), (CFrame*)((VEx*)p)->v50(), x, y, z)) {
         out->x = 0.0f;
         out->y = 1.0f;
         out->z = 0.0f;
@@ -3557,14 +3636,14 @@ static inline void BoxCorners(RVec3* c, f32 hx, f32 hy, f32 hz) {
     c[7].x = nx; c[7].y = ny; c[7].z = nz;
 }
 
-void fn_801A1F98(const u8* p, RVec3* lo, RVec3* hi) {
+void BoxShape::vf38(RVec3* lo, RVec3* hi) const {
     RVec3 c[8];
-    BoxCorners(c, F32(p, 0x24), F32(p, 0x28), F32(p, 0x2C));
+    BoxCorners(c, F32(((const u8*)this), 0x24), F32(((const u8*)this), 0x28), F32(((const u8*)this), 0x2C));
     RVec3 w;
-    *lo = ((CFrame*)VE(p)->v50())->t;
-    *hi = ((CFrame*)VE(p)->v50())->t;
+    *lo = ((CFrame*)VE(((const u8*)this))->v50())->t;
+    *hi = ((CFrame*)VE(((const u8*)this))->v50())->t;
     for (int i = 0; i < 8; i++) {
-        CFrame* m = (CFrame*)VE(p)->v50();
+        CFrame* m = (CFrame*)VE(((const u8*)this))->v50();
         MulVec(&w, &c[i], m);
         w.x = w.x + m->t.x;
         w.y = w.y + m->t.y;
@@ -3578,7 +3657,8 @@ void fn_801A1F98(const u8* p, RVec3* lo, RVec3* hi) {
     }
 }
 
-void fn_801A22A4(u8* p) {
+void BoxShape::vf4C(void) {
+    u8* p = (u8*)this;
     Xform* src = (Xform*)((VEx*)p)->v50();
     Xform x;
     x.rot = src->rot;
@@ -3609,21 +3689,15 @@ u8* fn_801A2354(u8* p, u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32
     U32(p, 0x34) = 0;
     F32(p, 0x30) = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
     F32(p, 0x38) = c->x;
-    *(void**)p = lbl_80333868;
+    *(void**)p = __vt__16OrientedBoxShape;
     F32(p, 0x3C) = c->y;
     F32(p, 0x40) = c->z;
     return p;
 }
 
-u8* fn_801A2434(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
 // Takes the frame's rotation (0x44), then the world centre (0x68) = frame * local centre (0x38).
-void fn_801A2474(u8* p) {
+void OrientedBoxShape::vf0C(void) {
+    u8* p = (u8*)this;
     CFrame* f = (CFrame*)PTR(p, 0xC);
     ((PVec3*)(p + 0x44))[0] = ((PVec3*)f->m)[0];
     ((PVec3*)(p + 0x44))[1] = ((PVec3*)f->m)[1];
@@ -3644,7 +3718,7 @@ u8* fn_801A25F8(u8* p, u32 a, u32 b, u32 c, f32 r) {
     F32(p, 0x14) = lbl_805622E0;
     S32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
-    *(void**)p = lbl_80333818;
+    *(void**)p = __vt__12RagdollShape;
     fn_801A2674(p, r, 0, -1);
     return p;
 }
@@ -3655,9 +3729,9 @@ void fn_801A2674(u8* p, f32 r, u32 a, u32 b) {
     U32(p, 0x2C) = b;
 }
 
-void fn_801A2684(const u8* p, RVec3* lo, RVec3* hi) {
-    f32 r = F32(p, 0x24);
-    u8* o = PTR(p, 0xC);
+void RagdollShape::vf38(RVec3* lo, RVec3* hi) const {
+    f32 r = F32(((const u8*)this), 0x24);
+    u8* o = PTR(((const u8*)this), 0xC);
     RVec3 e;
     e.x = lbl_805622E0;
     e.y = lbl_805622E0;
@@ -3701,7 +3775,8 @@ struct RVec3C : RVec3 {
 static inline f32 BoxRad(u8* o) { return F32(o, 0x30); }
 
 
-void fn_801A26FC(u8* p, u8* o) {
+void RagdollShape::vf10(u8* o) {
+    u8* p = (u8*)this;
     // Reads the box half extents z first. The helper and its name are reconstructed from the load order.
     struct HalfExtents {
         static RVec3C Read(u8* shape) {
@@ -3781,35 +3856,35 @@ void fn_801A26FC(u8* p, u8* o) {
     }
 }
 
-u8* fn_801A2C9C(u8* p) { return p + 0x44; }
+u8* OrientedBoxShape::vf54(void) {
+    u8* p = (u8*)this; return p + 0x44; }
 
 f32 SphereGroup::Radius(void) {
     u8* p = (u8*)this; return F32(p, 0x178); }
 
-void fn_801A2CAC(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
+void RagdollShape::vf4C(void) {
+    u8* p = (u8*)this; fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
 
-u8* fn_801A2CC0(u8* p, u32 a, u32 swap) {
-    __ct__9CollShapeFUlUl(p, a, swap);
-    *(void**)p = __vt__7RingVol;
+RingVol::RingVol(u32 a, u32 swap) : CollShape(a, swap) {
+    u8* p = (u8*)this;
     if (swap) {
         Swap32(p + 0x24);
         Swap32(p + 0x28);
     }
-    return p;
 }
 
 
 // Collides ring `p` against volume `o` by its type tag.
-void fn_801A2D50(u8* p, u8* o) {
+void RingVol::vf10(u8* o) {
     switch (S32(o, 0x18)) {
     case 'POLY':
         break;
     case 'SPHR':
-        fn_8019C854(o, p);
+        fn_8019C854(o, ((u8*)this));
         break;
     case 'GRUP':
         for (int i = 0; i < S32(o, 0x174); i++) {
-            fn_8019C854((u8*)((SphGroupDel*)o)->vols[i], p);
+            fn_8019C854((u8*)((SphGroupDel*)o)->vols[i], ((u8*)this));
         }
         break;
     case 'BOX ':
@@ -3825,7 +3900,7 @@ void fn_801A2D50(u8* p, u8* o) {
         }
         break;
     case 'FLSR':
-        fn_8019D378(o, p);
+        fn_8019D378(o, ((u8*)this));
         break;
     default:
         fn_802E317C("Unsupported collision type: Ring-%x", S32(o, 0x18));
@@ -3833,21 +3908,21 @@ void fn_801A2D50(u8* p, u8* o) {
     }
 }
 
-void fn_801A2EC8(u8* p) {}
+void RingVol::vf14(void) {}
 
 // Axis-aligned bounds: the 8 corners of the local box (+-(r + h), +-(r + h), +-h) through the frame.
-void fn_801A2ECC(const u8* p, RVec3* lo, RVec3* hi) {
-    f32 h = F32(p, 0x28);
-    f32 a = F32(p, 0x24) + h;
+void RingVol::vf38(RVec3* lo, RVec3* hi) const {
+    f32 h = F32(((const u8*)this), 0x28);
+    f32 a = F32(((const u8*)this), 0x24) + h;
     RVec3 c[8] = {
         {-a, -a, -h}, {-a, -a, h}, {-a, a, -h}, {-a, a, h},
         {a, -a, -h},  {a, -a, h},  {a, a, -h},  {a, a, h},
     };
     RVec3 w;
-    *lo = ((CFrame*)PTR(p, 0xC))->t;
-    *hi = ((CFrame*)PTR(p, 0xC))->t;
+    *lo = ((CFrame*)PTR(((const u8*)this), 0xC))->t;
+    *hi = ((CFrame*)PTR(((const u8*)this), 0xC))->t;
     for (int i = 0; i < 8; i++) {
-        CFrame* m = (CFrame*)PTR(p, 0xC);
+        CFrame* m = (CFrame*)PTR(((const u8*)this), 0xC);
         MulVec(&w, &c[i], m);
         w.x = w.x + m->t.x;
         w.y = w.y + m->t.y;
@@ -3861,7 +3936,8 @@ void fn_801A2ECC(const u8* p, RVec3* lo, RVec3* hi) {
     }
 }
 
-void fn_801A3174(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24) + F32(p, 0x28), lbl_8055E598.value); }
+void RingVol::vf4C(void) {
+    u8* p = (u8*)this; fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24) + F32(p, 0x28), lbl_8055E598.value); }
 
 u8* fn_801A3190(u8* p, u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) {
     U32(p, 0xC) = a;
@@ -3872,7 +3948,7 @@ u8* fn_801A3190(u8* p, u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, c
     F32(p, 0x14) = f2;
     S32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
-    *(void**)p = lbl_80333778;
+    *(void**)p = __vt__9PolyShape;
     U32(p, 0xDC) = 0;
     S32(p, 0xBC) = n;
     for (int i = 0; i < S32(p, 0xBC); i++) {
@@ -3907,7 +3983,7 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
     F32(p, 0x14) = s1;
     S32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
-    *(void**)p = lbl_80333778;
+    *(void**)p = __vt__9PolyShape;
     t = fn_80131808(name);
     S32(p, 0xBC) = 0;
     S32(p, 0xDC) = 0;
@@ -3932,7 +4008,8 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
 }
 
 // Axis-aligned bounds of the extents (0x24 min, 0x30 max) through the frame, padded by 1.5 in x and z.
-void fn_801A34D0(u8* p, RVec3* lo, RVec3* hi) {
+void PolyShape::vf38(RVec3* lo, RVec3* hi) const {
+    u8* p = (u8*)this;
     RVec3 b;
     RVec3 a;
     CFrame* f = (CFrame*)PTR(p, 0xC);
@@ -3962,7 +4039,8 @@ void fn_801A34D0(u8* p, RVec3* lo, RVec3* hi) {
     lo->z -= 1.5f;
 }
 
-f32 fn_801A3880(u8* p) {
+f32 PolyShape::Radius(void) {
+    u8* p = (u8*)this;
     f32 a = PSVECDotProduct(p + 0x30, p + 0x30);
     f32 b = PSVECDotProduct(p + 0x24, p + 0x24);
     return (f32)sqrt(b > a ? b : a);
@@ -3976,7 +4054,7 @@ struct OwnerBody {
     CFrame frame;  // offset 0x3C
 };
 
-void fn_801A38E4(u32 world, u8* p) {
+void PolyShape::vf10(u8* p) {
     RVec3 pt;
     PVec3 n1;
     PVec3 hit1;
@@ -4015,8 +4093,8 @@ void fn_801A38E4(u32 world, u8* p) {
                     vel1.v[0] = 0.0f;
                     vel1.v[1] = 0.0f;
                     vel1.v[2] = 0.0f;
-                    if (fn_80198F64(&pt.x, world, hit1.v, &depth1, n1.v, vel1.v, 0.25f)) {
-                        fn_8019A788(p, (u8*)world, (u32)hit1.v, (RVec3*)n1.v, 0, 0, depth1, 0.0f, 0.0f);
+                    if (fn_80198F64(&pt.x, ((u32)this), hit1.v, &depth1, n1.v, vel1.v, 0.25f)) {
+                        fn_8019A788(p, (u8*)((u32)this), (u32)hit1.v, (RVec3*)n1.v, 0, 0, depth1, 0.0f, 0.0f);
                     }
                 }
             }
@@ -4024,15 +4102,16 @@ void fn_801A38E4(u32 world, u8* p) {
         vel2.v[0] = 0.0f;
         vel2.v[1] = 0.0f;
         vel2.v[2] = 0.0f;
-        if (fn_80198F64((f32*)(p + 0x34), world, hit2.v, &depth2, n2.v, vel2.v, F32(p, 0x24))) {
-            fn_8019A788(p, (u8*)world, (u32)hit2.v, (RVec3*)n2.v, 0, 0, depth2, 0.0f, 0.0f);
+        if (fn_80198F64((f32*)(p + 0x34), ((u32)this), hit2.v, &depth2, n2.v, vel2.v, F32(p, 0x24))) {
+            fn_8019A788(p, (u8*)((u32)this), (u32)hit2.v, (RVec3*)n2.v, 0, 0, depth2, 0.0f, 0.0f);
         }
     }
 }
 
 
 // Debug draw: a line from the frame origin along each of the volume's rays (direction * length, frame space).
-void fn_801A3BE0(u8* p) {
+void PolyShape::vf4C(void) {
+    u8* p = (u8*)this;
     PVec3 o;
     RVec3 v;
     RVec3 w;
@@ -4069,7 +4148,7 @@ u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
     F32(p, 0x14) = 1.0f;
     S32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
-    *(void**)p = lbl_80333728;
+    *(void**)p = __vt__9MeshShape;
     MeshRes* m = (MeshRes*)fn_801CFEAC(name);
     PTR(p, 0x24) = (u8*)m;
     RVec3* mn = (RVec3*)(p + 0x28);
@@ -4087,7 +4166,7 @@ u8* fn_801A3DAC(u8* p, u32 id, const char* name, u32 owner) {
 
 u8* fn_801A3F5C(u8* p, u32 a, u32 b) {
     __ct__9CollShapeFUlUl(p, a, b);
-    *(void**)p = lbl_80333728;
+    *(void**)p = __vt__9MeshShape;
     if (b) {
         PTR(p, 0x24) = p + 0x40;
         fn_801CFA48(p + 0x40);
@@ -4095,35 +4174,29 @@ u8* fn_801A3F5C(u8* p, u32 a, u32 b) {
     return p;
 }
 
-u8* fn_801A3FB8(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80333728;
-        fn_801CFF14(PTR(p, 0x24));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
+MeshShape::~MeshShape(void) {
+    fn_801CFF14(PTR(this, 0x24));
 }
 
-void fn_801A401C(u8* p, u8* o) {
+void MeshShape::vf10(u8* o) {
     if (S32(o, 0x18) == 'GRUP') {
-        ((VGroup*)o)->v10(p);
+        ((VGroup*)o)->v10(((u8*)this));
     } else if (S32(o, 0x18) == 'SPHR') {
         RVec3 hits[64];
         int n = 64;
         u8* sph = o;
         f32 r = F32(sph, 0x24);
-        fn_801CF080(PTR(p, 0x24), (RVec3*)(sph + 0x34), hits, &n, U32(p, 0xC), lbl_8056234C * r);
+        fn_801CF080(PTR(((u8*)this), 0x24), (RVec3*)(sph + 0x34), hits, &n, U32(((u8*)this), 0xC), lbl_8056234C * r);
         for (int i = 0; i < n; i++) {
-            fn_8019AA18(sph, (u32)&hits[i], 0x6E, (u32)p);
+            fn_8019AA18(sph, (u32)&hits[i], 0x6E, (u32)((u8*)this));
         }
     }
 }
 
 // Ray from + t*dir against the mesh volume, tested in the volume's frame; the hit normal is turned
 // back into world space.
-int fn_801A40F8(u8* p, const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
+int MeshShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
+    u8* p = (u8*)this;
     RVec3 lf;
     RVec3 ld;
     RVec3 ln;
@@ -4147,18 +4220,20 @@ int fn_801A40F8(u8* p, const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
     return 0;
 }
 
-void fn_801A442C(const u8* p, RVec3* a, RVec3* b) {
-    *a = *(const RVec3*)(p + 0x28);
-    *b = *(const RVec3*)(p + 0x34);
+void MeshShape::vf38(RVec3* a, RVec3* b) const {
+    *a = *(const RVec3*)(((const u8*)this) + 0x28);
+    *b = *(const RVec3*)(((const u8*)this) + 0x34);
 }
 
-f32 fn_801A4460(u8* p) {
+f32 MeshShape::Radius(void) {
+    u8* p = (u8*)this;
     f32 a = PSVECDotProduct(p + 0x34, p + 0x34);
     f32 b = PSVECDotProduct(p + 0x28, p + 0x28);
     return (f32)sqrt(b > a ? b : a);
 }
 
-void fn_801A44C4(u8* p) { fn_801CFF18(PTR(p, 0x24), U32(p, 0xC)); }
+void MeshShape::vf4C(void) {
+    u8* p = (u8*)this; fn_801CFF18(PTR(p, 0x24), U32(p, 0xC)); }
 
 void fn_801A44D4(u8* l) {
     for (int i = 0; i < S32(l, 0x0); i++) {
@@ -4277,7 +4352,8 @@ void fn_801A4868(u8* p, u32 v) {
     }
 }
 
-void fn_801A48C8(u8* p) { VE(PTR(p, 0x48))->v18("dyno", "unknown"); }
+void StaticCollObject::vf0C(void) {
+    u8* p = (u8*)this; VE(PTR(p, 0x48))->v18("dyno", "unknown"); }
 
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
 extern const f32 lbl_805622DC;  // -1.0
@@ -4328,7 +4404,7 @@ void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {
 
 u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
     U32(p, 0x38) = a;
-    *(void**)p = lbl_803336F8;
+    *(void**)p = __vt__16StaticCollObject;
     U32(p, 0x48) = c;
     U32(p, 0x34) = b;
     PTR(p, 0x3C) = mesh;
@@ -4341,7 +4417,7 @@ u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
 // Static object from file data (byte-swapped when `swap`); its collision volume is built in place at
 // vol according to the volume's tag.
 u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
-    *(void**)o = lbl_803336F8;
+    *(void**)o = __vt__16StaticCollObject;
     if (swap) {
         Swap32(o + 0x34);
         Swap32(o + 0x38);
@@ -4358,7 +4434,7 @@ u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
     switch (tag) {
     case 'BOX ':
         if (vol) {
-            vol = fn_801A1CE4(vol, (u32)o, swap);
+            vol = __ct__8BoxShapeFUlUl(vol, (u32)o, swap);
         }
         PTR(o, 0x3C) = vol;
         break;
@@ -4376,7 +4452,7 @@ u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
         break;
     case 'RING':
         if (vol) {
-            vol = fn_801A2CC0(vol, (u32)o, swap);
+            vol = __ct__7RingVolFUlUl(vol, (u32)o, swap);
         }
         PTR(o, 0x3C) = vol;
         break;
@@ -4411,64 +4487,45 @@ int fn_801A4E88(u32 a, u32 b, u32 c, u32 d, s32* out) {
     return 0;
 }
 
-u8* fn_801A4F00(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_801A4F40(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
-u8* fn_801A4F80(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
 f32 SphereShape::Radius(void) {
     u8* p = (u8*)this; return F32(p, 0x24); }
 
 void SphereGroup::vf48(void) {
     u8* p = (u8*)this; S32(p, 0x180) = -1; }
 
-f32 fn_801A5114(u8* p) { return F32(p, 0x30); }
+f32 BoxShape::Radius(void) {
+    u8* p = (u8*)this; return F32(p, 0x30); }
 
-f32 fn_801A511C(u8* p) { return F32(p, 0x24); }
+f32 RagdollShape::Radius(void) {
+    u8* p = (u8*)this; return F32(p, 0x24); }
 
-f32 fn_801A5124(u8* p) { return F32(p, 0x28); }
+f32 RingVol::Radius(void) {
+    u8* p = (u8*)this; return F32(p, 0x28); }
 
 int CollShape::vf18(const RVec3*, const RVec3*, f32*, RVec3*) { return 0; }
 
-u8* fn_801A5134(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
+u32 StaticCollObject::vf08(void) {
+    u8* p = (u8*)this; return U32(p, 0x48); }
 
-u32 fn_801A5174(u8* p) { return U32(p, 0x48); }
+u8* StaticCollObject::vf10(void) {
+    u8* p = (u8*)this; return p + 0x28; }
 
-u8* fn_801A517C(u8* p) { return p + 0x28; }
+u8 StaticCollObject::vf14(void) {
+    u8* p = (u8*)this; return U8(p, 0x40); }
 
-u8 fn_801A5184(u8* p) { return U8(p, 0x40); }
+void StaticCollObject::vf18(u32 v) {
+    u8* p = (u8*)this; fn_801A4868(p, v); }
 
-void fn_801A518C(u8* p, u32 v) { fn_801A4868(p, v); }
-
-void fn_801A5190(u8* p) {
+void StaticCollObject::vf1C(void) {
+    u8* p = (u8*)this;
     u8* o = PTR(p, 0x3C);
     if (o) {
         VE(o)->v40();
     }
 }
 
-s32 fn_801A51B0(u8* p) {
+s32 StaticCollObject::vf20(void) {
+    u8* p = (u8*)this;
     u8* o = PTR(p, 0x3C);
     if (o) {
         return S32(o, 0x20);
@@ -4476,9 +4533,11 @@ s32 fn_801A51B0(u8* p) {
     return -1;
 }
 
-u32 fn_801A51CC(u8* p) { return U32(p, 0x34); }
+u32 StaticCollObject::vf24(void) {
+    u8* p = (u8*)this; return U32(p, 0x34); }
 
-void fn_801A51D4(u8* p, u32 v) { U32(p, 0x34) = v; }
+void StaticCollObject::vf28(u32 v) {
+    u8* p = (u8*)this; U32(p, 0x34) = v; }
 
 u8 lbl_8055A518 = 1;  // unused in ET (its users are gone); last object of .sdata
 
@@ -4486,30 +4545,3 @@ u8 lbl_8055A518 = 1;  // unused in ET (its users are gone); last object of .sdat
 
 }  // extern "C"
 
-// The hand-built vtables of the collision shapes, in the target's .data order.
-extern "C" {
-// MATCHING-AID (transitional): the hand-written derived tables name CollShape's members by their linker names.
-void vf0C__9CollShapeFv(void);
-void vf14__9CollShapeFv(void);
-void vf28__9CollShapeFv(void);
-void vf48__9CollShapeFv(void);
-void vf4C__9CollShapeFv(void);
-void vf1C__9CollShapeFv(void);
-void vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf(void);
-void vf24__9CollShapeFPC5RVec3(void);
-void vf2C__9CollShapeFPUc(void);
-void vf30__9CollShapeFv(void);
-void vf34__9CollShapeFP6CFrame(void);
-void vf44__9CollShapeFUl(void);
-void vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3(void);
-void SetSurface__9CollShapeFi(void);
-void __dt__9CollShapeFv(void);
-void* lbl_803336F8[12] = {(void*)0, (void*)0, (void*)fn_801A5174, (void*)fn_801A48C8, (void*)fn_801A517C, (void*)fn_801A5184, (void*)fn_801A518C, (void*)fn_801A5190, (void*)fn_801A51B0, (void*)fn_801A51CC, (void*)fn_801A51D4, (void*)fn_801A5134};
-void* lbl_80333728[20] = {(void*)0, (void*)0, (void*)fn_801A3FB8, (void*)vf0C__9CollShapeFv, (void*)fn_801A401C, (void*)vf14__9CollShapeFv, (void*)fn_801A40F8, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A442C, (void*)fn_801A4460, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A44C4};
-void* lbl_80333778[20] = {(void*)0, (void*)0, (void*)fn_801A4F00, (void*)vf0C__9CollShapeFv, (void*)fn_801A38E4, (void*)vf14__9CollShapeFv, (void*)vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A34D0, (void*)fn_801A3880, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A3BE0};
-void* __vt__7RingVol[20] = {(void*)0, (void*)0, (void*)fn_801A4F40, (void*)vf0C__9CollShapeFv, (void*)fn_801A2D50, (void*)fn_801A2EC8, (void*)vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A2ECC, (void*)fn_801A5124, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A3174};
-void* lbl_80333818[20] = {(void*)0, (void*)0, (void*)fn_801A4F80, (void*)vf0C__9CollShapeFv, (void*)fn_801A26FC, (void*)vf14__9CollShapeFv, (void*)vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A2684, (void*)fn_801A511C, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A2CAC};
-void* lbl_80333868[22] = {(void*)0, (void*)0, (void*)fn_801A010C, (void*)fn_801A2474, (void*)fn_801A1DD4, (void*)vf14__9CollShapeFv, (void*)fn_801A1E7C, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)fn_801A2C9C};
-void* __vt__8BoxShape[22] = {(void*)0, (void*)0, (void*)fn_801A2434, (void*)vf0C__9CollShapeFv, (void*)fn_801A1DD4, (void*)vf14__9CollShapeFv, (void*)fn_801A1E7C, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)0};
-
-}
