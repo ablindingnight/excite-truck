@@ -4,6 +4,12 @@
 #include "game/common.h"
 #include <revolution/MTX.h>
 #include "game/vec3_init.h"
+// Cell size in world units (2.0f): retail's FIRST .sdata2 entry, multiplied at run time everywhere, so it is a named
+// constant defined before any code whose value is not folded. A one-field const struct gives exactly that (type
+// unproven; a plain `const f32` defined here folds into its users, fn_802AE7F4 100 -> 73).
+struct GroundTune { f32 cell; };
+extern const GroundTune lbl_80564AF0;
+const GroundTune lbl_80564AF0 = {2.0f};
 
 struct GroundFrame {
     Vec axes[3];  // offset 0x0
@@ -172,7 +178,6 @@ void* operator new[](size_t size, const char* name);
 
 static inline f32 QuarterPi(void) { return 0.7853982f; }
 
-extern const f32 lbl_80564AF0;  // cell size
 
 ModuleTag lbl_8055F960;
 UnkStaticFFFF lbl_8055F968;
@@ -296,21 +301,21 @@ void fn_802AE7F4(void) {
     waterLayer = fn_802B59CC()->GetInt("water_layer", -1);
     crystalMode = fn_802B59CC()->GetBool("crystal_mode", 0);
     f32 dist[8];
-    dist[0] = 10.0f * (2.0f * lbl_80564AF0);
-    dist[1] = 4.0f * (4.0f * lbl_80564AF0);
-    dist[2] = 4.0f * (8.0f * lbl_80564AF0);
-    dist[3] = 10.0f * (16.0f * lbl_80564AF0);
-    dist[4] = 4.0f * (32.0f * lbl_80564AF0);
-    dist[5] = 3.0f * (64.0f * lbl_80564AF0);
-    dist[6] = 2.0f * (128.0f * lbl_80564AF0);
-    dist[7] = 256.0f * lbl_80564AF0;
+    dist[0] = 10.0f * (2.0f * lbl_80564AF0.cell);
+    dist[1] = 4.0f * (4.0f * lbl_80564AF0.cell);
+    dist[2] = 4.0f * (8.0f * lbl_80564AF0.cell);
+    dist[3] = 10.0f * (16.0f * lbl_80564AF0.cell);
+    dist[4] = 4.0f * (32.0f * lbl_80564AF0.cell);
+    dist[5] = 3.0f * (64.0f * lbl_80564AF0.cell);
+    dist[6] = 2.0f * (128.0f * lbl_80564AF0.cell);
+    dist[7] = 256.0f * lbl_80564AF0.cell;
     f32 sum = dist[0];
     int scale = 2;
     f32* out = &lbl_804BE090[1];
     f32* next = &dist[1];
     for (int i = 0; i < 7; i++) {
         f32 size = *next;
-        f32 d = (1.4142f * (0.5f * lbl_80564AF0)) * (f32)(scale * 2 + scale);
+        f32 d = (1.4142f * (0.5f * lbl_80564AF0.cell)) * (f32)(scale * 2 + scale);
         *out = sum;
         sum += d > size ? d : size;
         scale *= 2;
@@ -538,8 +543,8 @@ static inline void DrawNode(GroundNode* n, GroundCell* cell) {
                 bag = 0;
             } else {
                 fn_802B1BF0(lbl_8055F974, &corner[i], *first);
-                corner[i].x = lbl_80564AF0 * (f32)(n->x + (s16)step * startX[i]);
-                corner[i].z = lbl_80564AF0 * (f32)(n->y + (s16)step * startY[i]);
+                corner[i].x = lbl_80564AF0.cell * (f32)(n->x + (s16)step * startX[i]);
+                corner[i].z = lbl_80564AF0.cell * (f32)(n->y + (s16)step * startY[i]);
                 fn_801C0E60(&corner[i], &corner[i], &corner[4]);
             }
         }
@@ -677,19 +682,19 @@ void fn_802AEB3C(const GroundFrame* cam) {
         }
         f32 dist = 0.0f;
         half = n->size / 2;
-        f32 radius = lbl_80564AF0 * half;
+        f32 radius = lbl_80564AF0.cell * half;
         Vec c;
         f32 blend;
         f32 k;
         if (half > 64) {
-            c.x = n->x * lbl_80564AF0;
-            c.z = n->y * lbl_80564AF0;
+            c.x = n->x * lbl_80564AF0.cell;
+            c.z = n->y * lbl_80564AF0.cell;
             c.y = fn_801DCF48(0, c.x, c.z);
             k = 2.1213f;
         } else {
-            c.x = n->x * lbl_80564AF0;
+            c.x = n->x * lbl_80564AF0.cell;
             int h = n->size / 2;
-            c.z = n->y * lbl_80564AF0;
+            c.z = n->y * lbl_80564AF0.cell;
             c.y = -12.0f + (f32)((cell->flags >> 14) & 0x1FF);
             k = (f32)(((cell->flags >> 10) & 0xF) + 1) * 1.5f;
             if (h < 4) {
@@ -706,7 +711,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
             blend = 1.0f;
             draw = 0;
         } else {
-            f32 e = lbl_8055F98C + (dist - 1.4142f * (n->size * lbl_80564AF0 / 2.0f));
+            f32 e = lbl_8055F98C + (dist - 1.4142f * (n->size * lbl_80564AF0.cell / 2.0f));
             if (0.0f > e) {
                 e = 0.0f;
             }
@@ -808,8 +813,8 @@ void fn_802AFF80(GroundBuf* b, u16 v) { b->Add(v); }
 
 u16 fn_802AFFA8(s16 x, s16 y) {
     Vec p;
-    p.x = x * lbl_80564AF0;
-    p.z = y * lbl_80564AF0;
+    p.x = x * lbl_80564AF0.cell;
+    p.z = y * lbl_80564AF0.cell;
     p.y = fn_801DCF48(0, p.x, p.z);
     return fn_802B127C(lbl_8055F974, &p);
 }
@@ -823,8 +828,8 @@ void fn_802B0024(GroundBuf* b, u16 v) {
 u16 fn_802B0070(const Vec* p) { return fn_802B127C(lbl_8055F974, p); }
 
 void fn_802B009C(Vec* out, int a, s16 x, s16 y) {
-    out->x = x * lbl_80564AF0;
-    out->z = y * lbl_80564AF0;
+    out->x = x * lbl_80564AF0.cell;
+    out->z = y * lbl_80564AF0.cell;
     out->y = fn_801DCF48(a, out->x, out->z);
 }
 
@@ -889,7 +894,7 @@ void fn_802B0288(GroundSet* g) {
 }
 
 static inline int InWorld(const Vec* p) {
-    f32 half = 1024.0f * lbl_80564AF0 / 2.0f;
+    f32 half = 1024.0f * lbl_80564AF0.cell / 2.0f;
     int in = 0;
     if (p->x > -half && p->x < half && p->z > -half && p->z < half) {
         in = 1;
@@ -898,7 +903,7 @@ static inline int InWorld(const Vec* p) {
 }
 
 // World position to grid cell; the name is ours.
-static inline int Grid(f32 v) { return v / lbl_80564AF0; }
+static inline int Grid(f32 v) { return v / lbl_80564AF0.cell; }
 static inline GroundCell* CellAt(const Vec* p) {
     int x = Grid(p->x);
     int z = Grid(p->z);
@@ -932,8 +937,8 @@ int fn_802B04D4(const Vec* p) {
     }
     if (waterLayer >= 0) {
         if (InWorld(p)) {
-            int x = p->x / lbl_80564AF0;
-            int z = p->z / lbl_80564AF0;
+            int x = p->x / lbl_80564AF0.cell;
+            int z = p->z / lbl_80564AF0.cell;
             return fn_802BBD38(x, z, waterLayer) > (u8)lbl_8055F97C;
         }
         return 1;
@@ -951,4 +956,3 @@ int fn_802B05EC(void) { return crystalMode; }
 
 }  // extern "C"
 
-const f32 lbl_80564AF0 = 2.0f;
