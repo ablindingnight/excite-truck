@@ -100,7 +100,6 @@ static inline void MulM(DMat3* out, const DMat3* a, const DMat3* b) {
 
 // Helpers unproven (names and existence): the forms that keep retail's single constant load, operand order and
 // unfolded identities where a plain literal does not.
-static inline f32 DmgMul(f32 a, f32 b) { return a * b; }
 static inline f32 DmgUnit(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }
 static inline void DmgScale3(f32* v, f32 k) { v[0] *= k; v[1] *= k; v[2] *= k; }
 template <class O> static inline void DmgScaleTo(O* o, const f32* v, f32 k) { o->x = v[0] * k; o->y = v[1] * k; o->z = v[2] * k; }
@@ -211,7 +210,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
         ValueNode* t = ((EventInfo*)GetEvent(fn_801769CC()->event))->node;
         ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * t->GetFloat("player_damage_tweak", 1.0f);
     }
-    ((CarBody*)p)->f5F4 = DmgMul(((CarBody*)p)->f5F4, 0.5f);
+    ((CarBody*)p)->f5F4 *= 0.5f;
     if (((CarBody*)p)->f328) {
         fn_80279B28(((CarBody*)p)->f328, (CarState*)(p + 0x1E44));
     } else {

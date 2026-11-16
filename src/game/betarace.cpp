@@ -3322,9 +3322,8 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l, int& i) {
     }
 }
 
-/* Helper names unproven */
+/* Helper name unproven */
 static inline f32 Wave(f32 time) { return (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * time, 1.0)); }
-static inline f32 Swing(f32 w, f32 amp) { return w * amp; }
 // The star loop body is an inline method called through stars.a.data[i] and the spin block a helper called with
 // the (PlainValMatrix*)hB8 expression: their parameters are inline objects, which puts the loop counter and its offset
 // in r30/r31 and the two body pointers in r23/r26 as in retail (2026-11-16 TC helper pushsim).
@@ -3333,7 +3332,8 @@ static inline void SpinStar(Pickup* t, PlainValMatrix* body) {  /* Helper name u
     f32 ang;
     f32 s;
     f32 w;
-    w = Swing(Wave(lbl_8055E3C8), 0.5235988f);
+    w = Wave(lbl_8055E3C8);
+    w *= 0.5235988f;
     ang = w + t->angle;
     body->origin.x = t->pos[0];
     body->origin.y = t->pos[1];
