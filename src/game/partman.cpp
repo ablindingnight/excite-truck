@@ -635,6 +635,19 @@ void fn_8028F5A4(void) {}
 
 struct PartTweak {
     virtual ~PartTweak(void);
+    virtual s32 vf0C(void);
+    virtual s32 vf10(void);
+    virtual int vf14(void);
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void vf20(void);
+    virtual void vf24(void);
+    virtual u8 vf28(void);
+
+    s32 f4;               // offset 0x4
+    u8 pad8[0x118 - 0x8];
+    s32 f118;             // offset 0x118
+    u8 on;                // offset 0x11C: set by vf20, cleared by vf24
 };
 
 extern "C" void fn_802916E4(PartTweak* t);
@@ -1053,9 +1066,9 @@ void PartSys::DrawRotating(Particle* p, int n) {
 
 PartTweak2::~PartTweak2(void) {}
 
-extern "C" {
+int PartTweak::vf14(void) { return 0; }
 
-int PartTweak_vf14(void* t) { return 0; }
+extern "C" {
 
 void fn_802916E4(PartTweak* t) {}
 
@@ -1063,18 +1076,18 @@ void fn_802916E8(void* t) {}
 
 void fn_802916EC(void* t) {}
 
-s32 PartTweak_vf0C(u8* t) { return *(s32*)(t + 0x4); }
-
-s32 PartTweak_vf10(u8* t) { return *(s32*)(t + 0x118); }
-
-void PartTweak_vf18(void* t) { fn_802916E8(t); }
-
-void PartTweak_vf1C(void* t) { fn_802916EC(t); }
-
-void PartTweak_vf20(u8* t) { t[0x11C] = 1; }
-
-void PartTweak_vf24(u8* t) { t[0x11C] = 0; }
-
-u8 PartTweak_vf28(u8* t) { return t[0x11C]; }
-
 }  // extern "C"
+
+s32 PartTweak::vf0C(void) { return f4; }
+
+s32 PartTweak::vf10(void) { return f118; }
+
+void PartTweak::vf18(void) { fn_802916E8(this); }
+
+void PartTweak::vf1C(void) { fn_802916EC(this); }
+
+void PartTweak::vf20(void) { on = 1; }
+
+void PartTweak::vf24(void) { on = 0; }
+
+u8 PartTweak::vf28(void) { return on; }
