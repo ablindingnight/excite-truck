@@ -713,24 +713,41 @@ static inline void Settle(TreeRec* tr) {
 }
 
 /* Helper name unproven */
-static inline void DrawTreeType(TreeType* t) {
+static inline void DrawTreeType(int i) {
+    // MATCHING-AID: one declaration list in this order (the type pointer t in the middle) gives the saved registers;
+    // t is a local of the helper, not its parameter.
+    TArray<TreeRec>* list;
+    TArray<TCell>* frames;
+    s32 id;
+    int j;
+    TCell* c;
+    TCell* c2;
+    TreeType* t;
+    TArray<TreeRec>* list2;
+    TArray<TCell>* near;
+    int n;
+    s32 tris;
+    int n2;
+    s32 tris2;
+    s32 id2;
+    int j2;
+    t = &lbl_804C00D4.data[i];
     if (t->set) {
-        TArray<TCell>* frames = t->set->frames;
-        TArray<TreeRec>* list = t->set->list;
-        TCell* c;
-        TArray<TCell>* near;
+        frames = t->set->frames;
+        list = t->set->list;
         fn_802C8BD0(fn_802C28C0());
         fn_802DC71C(t->nearId, t->nearTex);
-        for (int j = 0; j < frames->n; j++) {
+        for (j = 0; j < frames->n; j++) {
             c = &frames->data[j];
+            f32 one = 1.0f;
             f32 k = Step(c->fade, 0.375f, 0.475f);
-            k = (1.0f < k) ? 1.0f : k;
+            k = (one < k) ? one : k;
             k = (k > 0.0f) ? k : 0.0f;
             f32 a = Lerp(0.0f, 1.0f, k);
             if (Live(c) && a > 0.1f) {
-                s32 id = t->nearId;
-                s32 tris = t->nearTris;
-                for (int n = c->first; n < c->first + c->count; n++) {
+                id = t->nearId;
+                tris = t->nearTris;
+                for (n = c->first; n < c->first + c->count; n++) {
                     TreeRec* tr = &list->data[n];
                     Settle(tr);
                     fn_802DCAE4(id, &tr->mtx, a);
@@ -743,25 +760,26 @@ static inline void DrawTreeType(TreeType* t) {
         fn_802DC8B4();
         fn_802C8D74();
         near = t->set->near;
-        TArray<TreeRec>* list2 = t->set->list;
+        list2 = t->set->list;
         if (t->farTris <= 10) {
             fn_802C8BD0(fn_802C28C0());
             fn_802DC71C(t->farId, t->farTex);
-            RMtx m;
             RMtx cam;
+            RMtx m;
             fn_801F1C24(&cam);
-            for (int j = 0; j < near->n; j++) {
-                TCell* c = &near->data[j];
-                if (Live(c)) {
-                    f32 k = Step(c->fade, 0.525f, 0.625f);
-                    k = (1.0f < k) ? 1.0f : k;
+            for (j2 = 0; j2 < near->n; j2++) {
+                c2 = &near->data[j2];
+                if (Live(c2)) {
+                    f32 one = 1.0f;
+                    f32 k = Step(c2->fade, 0.525f, 0.625f);
+                    k = (one < k) ? one : k;
                     k = (k > 0.0f) ? k : 0.0f;
                     f32 a = Lerp(1.0f, 0.0f, k);
                     if (a > 0.1f) {
-                        s32 id = t->farId;
-                        s32 tris = t->farTris;
-                        for (int n = c->first; n < c->first + c->count; n++) {
-                            TreeRec* tr = &list2->data[n];
+                        id2 = t->farId;
+                        tris2 = t->farTris;
+                        for (n2 = c2->first; n2 < c2->first + c2->count; n2++) {
+                            TreeRec* tr = &list2->data[n2];
                             Settle(tr);
                             f32 s = tr->mtx.rot.y.y;
                             m.pos = tr->mtx.pos;
@@ -774,12 +792,12 @@ static inline void DrawTreeType(TreeType* t) {
                             m.rot.z.x = cam.rot.z.x * s;
                             m.rot.z.y = cam.rot.z.y * s;
                             m.rot.z.z = cam.rot.z.z * s;
-                            fn_802DCAE4(id, &m, a);
+                            fn_802DCAE4(id2, &m, a);
                             lbl_8055FAA8++;
-                            lbl_8055FAAC += tris;
+                            lbl_8055FAAC += tris2;
                         }
                     }
-                    c->fade = -1.0f;
+                    c2->fade = -1.0f;
                 }
             }
             fn_802DC8B4();
@@ -792,7 +810,7 @@ void fn_802BD814(void) {
     lbl_8055FAAC = 0;
     lbl_8055FAA8 = 0;
     for (int i = 0; i < lbl_804C00D4.n; i++) {
-        DrawTreeType(&lbl_804C00D4.data[i]);
+        DrawTreeType(i);
     }
 }
 
