@@ -47,8 +47,9 @@ public:
     virtual int Replays(void) = 0;
 };
 
-// One recorded frame (0xC).
-struct Frame {
+// One recorded frame (0xC), an element of FramePool::mFrames (its allocation tag). Was "Frame", a name other units use for
+// 0x30 poses (port ODR). /* Helper name unproven */
+struct ReplayFrame {
     s32 time;    // offset 0x0
     s32 unk4;    // offset 0x4
     s32 handle;  // offset 0x8
@@ -61,7 +62,7 @@ struct FramePool {
     s32 unkC;          // offset 0xC
     s32 unk10;         // offset 0x10
     s32 unk14;         // offset 0x14
-    Frame* frames;     // offset 0x18
+    ReplayFrame* frames;     // offset 0x18
     u32 count;         // offset 0x1C
     u32 head;          // offset 0x20
     u32 tail;          // offset 0x24
@@ -174,7 +175,7 @@ void fn_801B4720(FramePool* p);
 
 void fn_801B46BC(FramePool* p, u32 n, s32 size) {
     p->count = n;
-    p->frames = new ("FramePool::mFrames") Frame[n];
+    p->frames = new ("FramePool::mFrames") ReplayFrame[n];
     p->size = size;
     p->heap = fn_802E4CA4(size);
     fn_801B4720(p);
@@ -195,7 +196,7 @@ void fn_801B4720(FramePool* p) {
     p->heap->Reset();
 }
 
-Frame* fn_801B479C(FramePool* p, u32 i) { return &p->frames[i]; }
+ReplayFrame* fn_801B479C(FramePool* p, u32 i) { return &p->frames[i]; }
 
 u32 fn_801B47AC(FramePool* p) { return p->head; }
 
@@ -231,7 +232,7 @@ void fn_801B4820(Replay* r, s32* dataSize, s32* frames, u32 avail) {
     int secs = n / 9;
     *frames = 50;
     fn_802E30C8("replay: Allocing %d:%2.2ds (%dK) frames and %dK data (%dK avail)", secs / 60, secs % 60,
-                *frames * sizeof(Frame) / 1024, *dataSize / 1024, avail / 1024);
+                *frames * sizeof(ReplayFrame) / 1024, *dataSize / 1024, avail / 1024);
 }
 
 Replay* fn_801B4904(Replay* r) {
@@ -258,8 +259,8 @@ void fn_801B49C8(Replay* r) { r->enabled = 1; }
 
 int fn_801B4B44(Replay* r);
 int fn_801B4C1C(Replay* r, s32 time);
-Frame* fn_801B4C58(Replay* r, u32 i);
-Frame* fn_801B4C60(Replay* r, u32 i);
+ReplayFrame* fn_801B4C58(Replay* r, u32 i);
+ReplayFrame* fn_801B4C60(Replay* r, u32 i);
 u32 fn_801B4C9C(Replay* r, s32 time);
 f32 fn_801B4D10(Replay* r, s32 time);
 
@@ -302,9 +303,9 @@ s32 fn_801B4BDC(Replay* r) { return fn_801B479C(&r->pool, fn_801B47B4(&r->pool))
 
 int fn_801B4C1C(Replay* r, s32 time) { return time >= fn_801B4BDC(r); }
 
-Frame* fn_801B4C58(Replay* r, u32 i) { return fn_801B479C(&r->pool, i); }
+ReplayFrame* fn_801B4C58(Replay* r, u32 i) { return fn_801B479C(&r->pool, i); }
 
-Frame* fn_801B4C60(Replay* r, u32 i) { return fn_801B479C(&r->pool, fn_801B47BC(&r->pool, i)); }
+ReplayFrame* fn_801B4C60(Replay* r, u32 i) { return fn_801B479C(&r->pool, fn_801B47BC(&r->pool, i)); }
 
 u32 fn_801B4C9C(Replay* r, s32 time) {
     int d = time - fn_801B4B9C(r);

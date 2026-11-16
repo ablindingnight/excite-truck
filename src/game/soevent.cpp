@@ -102,22 +102,24 @@ static inline int IsCar(const Car* o) {
     return r;
 }
 
-struct Basis {
-    Basis(void) {}
-    Basis(const Basis& o) : x(o.x), y(o.y), z(o.z) {}
+// The scripted object's rotation rows and pose. Were "Basis"/"Xform", names other units use for different structs
+// (port ODR). /* Helper names unproven */
+struct SoBasis {
+    SoBasis(void) {}
+    SoBasis(const SoBasis& o) : x(o.x), y(o.y), z(o.z) {}
     ValVec3 x, y, z;
 };
 
-struct Xform {
-    Xform(const Basis& r) : rot(r) {}
-    Basis rot;  // offset 0x0
+struct SoXform {
+    SoXform(const SoBasis& r) : rot(r) {}
+    SoBasis rot;  // offset 0x0
     SoVec pos;    // offset 0x24
 };
 
 // The scripted object that was hit.
 struct SObj {
     u8 pad0[0x4];
-    Xform xf;  // offset 0x4
+    SoXform xf;  // offset 0x4
     s32 id;    // offset 0x34
 };
 
@@ -158,7 +160,7 @@ struct PhobConfig {
 extern "C" {
 void fn_801D334C(PhobConfig* c, ValueNodeV* t);
 void fn_801D3610(PhobConfig* c, const char* name);
-SpawnPhob* fn_801D32E0(int model, int chunk, const Xform* xf, const SoVec* offset, const PhobConfig* c, SObj* obj);
+SpawnPhob* fn_801D32E0(int model, int chunk, const SoXform* xf, const SoVec* offset, const PhobConfig* c, SObj* obj);
 }
 
 struct HitMsg {
@@ -460,7 +462,7 @@ void fn_801D2C70(const SoEffects* s, const SoVec* pos, Car* car, int id) {
 // Spawns the event's chunks at the object and throws them.
 void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass) {
     int i = 0;
-    Xform xf(obj->xf.rot);
+    SoXform xf(obj->xf.rot);
     SoVec v = *vel;
     Scale(&v, &v, mass / 0.016683351f);
     if (s->count > 0) {
