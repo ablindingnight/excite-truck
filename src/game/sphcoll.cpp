@@ -672,12 +672,12 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     CFrame* fq;
     RigidBody* pb;
     RigidBody* qb;
-    s32 pk = S32(p, 0x20);
-    s32 qk = S32(q, 0x20);
-    fp = (CFrame*)PTR(p, 0xC);
-    fq = (CFrame*)PTR(q, 0xC);
-    pb = (RigidBody*)PTR(p, 0x4);
-    qb = (RigidBody*)PTR(q, 0x4);
+    s32 pk = ((CollShape*)p)->surface;
+    s32 qk = ((CollShape*)q)->surface;
+    fp = (CFrame*)((u8*&)((CollShape*)p)->frame);
+    fq = (CFrame*)((u8*&)((CollShape*)q)->frame);
+    pb = (RigidBody*)((u8*&)((CollShape*)p)->owner);
+    qb = (RigidBody*)((u8*&)((CollShape*)q)->owner);
     if (qk == 0x3EA) {
         fn_80199870((u8*)pb, q);
         return;
@@ -711,8 +711,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     pq.y = pt->y;
     pq.z = pt->z;
     if (pb && qb) {
-        f32 ha = MaxF(MinF(1.5239999f, ((CFrame*)PTR(p, 0xC))->t.y - pt->y), -1.5239999f);
-        f32 hb = MaxF(MinF(1.5239999f, ((CFrame*)PTR(q, 0xC))->t.y - pt->y), -1.5239999f);
+        f32 ha = MaxF(MinF(1.5239999f, ((CFrame*)((u8*&)((CollShape*)p)->frame))->t.y - pt->y), -1.5239999f);
+        f32 hb = MaxF(MinF(1.5239999f, ((CFrame*)((u8*&)((CollShape*)q)->frame))->t.y - pt->y), -1.5239999f);
         pa.y = pt->y + 0.95f * ha;
         pq.y = pt->y + 0.95f * hb;
     }
@@ -734,7 +734,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     rel.y = va.y - vb.y;
     rel.z = va.z - vb.z;
     f32 vn = PSVECDotProduct(&rel, n);
-    f32 st = MaxF(F32(p, 0x10), F32(q, 0x10));
+    f32 st = MaxF(((CollShape*)p)->stiff, ((CollShape*)q)->stiff);
     if (vn > lbl_805622D0) {
         st *= 0.8f;
     }
@@ -792,8 +792,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         J.x = n->x * j;
         J.y = n->y * j;
         J.z = n->z * j;
-        f32 fq2 = F32(q, 0x14);
-        f32 fp2 = F32(p, 0x14);
+        f32 fq2 = ((CollShape*)q)->skin;
+        f32 fp2 = ((CollShape*)p)->skin;
         f32 mu = lbl_805622E8 * (fp2 + fq2);
         tv.x = rel.x + n->x * -vn;
         tv.y = rel.y + n->y * -vn;
@@ -852,7 +852,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
                 int now = ctx->Get();
                 if (was && !now) {
                     ctx->Set(was);
-                    fn_801A4A10(PTR(q, 0x8), pt, pb, &J);
+                    fn_801A4A10(((CollShape*)q)->data, pt, pb, &J);
                     ctx->Set(now);
                 }
             }
@@ -1100,7 +1100,7 @@ int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
 // Sphere (centre c, radius r) against the side of tube q: in tube space, within the half length and off
 // the axis, a contact at the tube surface with the radial normal.
 int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
-    CFrame* f = (CFrame*)PTR(q, 0xC);
+    CFrame* f = (CFrame*)((u8*&)((CollShape*)q)->frame);
     RVec3 l;
     l.x = c[0] - f->t.x;
     l.y = c[1] - f->t.y;
@@ -1138,7 +1138,7 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 s.x *= k;
                 s.z = l.z;
                 s.y *= k;
-                CFrame* m = (CFrame*)PTR(q, 0xC);
+                CFrame* m = (CFrame*)((u8*&)((CollShape*)q)->frame);
                 MulVec(&w, &s, m);
                 w.x += m->t.x;
                 w.y += m->t.y;
@@ -1147,7 +1147,7 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 n.y = l.y;
                 n.z = 0.0f;
                 PSVECNormalize(&n.x, &n.x);
-                MulVec(&nw, &n, (CFrame*)PTR(q, 0xC));
+                MulVec(&nw, &n, (CFrame*)((u8*&)((CollShape*)q)->frame));
                 nn = nw;
                 fn_8019A788(p, q, (u32)&w, &nn, 0, 0, r, 0.0f, 0.0f);
                 return 1;
@@ -1269,8 +1269,8 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
         n.y = d.y * k;
         n.z = d.z * k;
         if (debug) {
-            fn_802E30C8("colliding! cylinder_box(%p, %p: %d)", p, q, S32(p, 0x20));
-            CFrame* pf = (CFrame*)PTR(p, 0xC);
+            fn_802E30C8("colliding! cylinder_box(%p, %p: %d)", p, q, ((CollShape*)p)->surface);
+            CFrame* pf = (CFrame*)((u8*&)((CollShape*)p)->frame);
             fn_802E30C8("%f,%f,%f", pf->t.x, pf->t.y, pf->t.z);
             fn_802E30C8("comp = %f!", comp);
         }
@@ -1452,7 +1452,7 @@ int fn_8019C854(u8* p, u8* q) {
     RVec3 n;
     RVec3 w;
     RVec3 nw;
-    CFrame* f = (CFrame*)PTR(q, 0xC);
+    CFrame* f = (CFrame*)((u8*&)((CollShape*)q)->frame);
     l.x = F32(p, 0x34) - f->t.x;
     l.y = F32(p, 0x38) - f->t.y;
     l.z = F32(p, 0x3C) - f->t.z;
@@ -1488,12 +1488,12 @@ int fn_8019C854(u8* p, u8* q) {
             n.z = l.z - a.z;
             PSVECNormalize(&n.x, &n.x);
             a.z = l.z;
-            CFrame* m = (CFrame*)PTR(q, 0xC);
+            CFrame* m = (CFrame*)((u8*&)((CollShape*)q)->frame);
             MulVec(&w, &a, m);
             w.x += m->t.x;
             w.y += m->t.y;
             w.z += m->t.z;
-            MulVec(&nw, &n, (CFrame*)PTR(q, 0xC));
+            MulVec(&nw, &n, (CFrame*)((u8*&)((CollShape*)q)->frame));
             fn_8019A788(p, q, (u32)&w, &nw, 0, 0, pen, 0.0f, 0.0f);
             return 1;
         }
@@ -1518,7 +1518,7 @@ int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
     if (fn_8019B08C(p, (f32*)c, q, r)) {
         return 1;
     }
-    m = PTR(q, 0xC);
+    m = ((u8*&)((CollShape*)q)->frame);
     h = LoadF((f32*)(q + 0x28));
     axis = *(PVec3*)(m + 0x18);
     org = *(PVec3*)(m + 0x24);
@@ -1550,7 +1550,7 @@ void fn_8019CE4C(u8* p, u8* q) {
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(q, 0xC) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)q)->frame) + 0xC));
         r = F32(q, 0x54) + k * (F32(q, 0x58) - F32(q, 0x54));
     } else {
         f32 b = F32(q, 0x58);
@@ -1564,7 +1564,7 @@ void fn_8019CE4C(u8* p, u8* q) {
 
 // Sets flat sphere q's radius from how edge-on it is to p, then collides them.
 void fn_8019CF60(u8* p, u8* q) {
-    u8* f = PTR(p, 0xC);
+    u8* f = ((u8*&)((CollShape*)p)->frame);
     f32 d[3];
     d[0] = F32(f, 0x24) - F32(q, 0x34);
     d[1] = F32(f, 0x28) - F32(q, 0x38);
@@ -1576,7 +1576,7 @@ void fn_8019CF60(u8* p, u8* q) {
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 c = (f32)__fabs(PSVECDotProduct(d, PTR(q, 0xC) + 0xC));
+        f32 c = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)q)->frame) + 0xC));
         r = F32(q, 0x54) + c * (F32(q, 0x58) - F32(q, 0x54));
     } else {
         f32 b = F32(q, 0x58);
@@ -1604,7 +1604,7 @@ void fn_8019D06C(u8* p, u8* q, const RVec3* a, const RVec3* b) {
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(p, 0xC) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)p)->frame) + 0xC));
         r = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
     } else {
         f32 hi = F32(p, 0x58);
@@ -1648,7 +1648,7 @@ void fn_8019D19C(u8* p, u8* q) {
 
 // Sets flat sphere p's radius from how edge-on it is to ring q, then collides them.
 void fn_8019D378(u8* p, u8* q) {
-    f32* c = (f32*)(PTR(q, 0xC) + 0x24);
+    f32* c = (f32*)(((u8*&)((CollShape*)q)->frame) + 0x24);
     f32 d[3];
     d[0] = c[0] - F32(p, 0x34);
     d[1] = c[1] - F32(p, 0x38);
@@ -1660,7 +1660,7 @@ void fn_8019D378(u8* p, u8* q) {
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(p, 0xC) + 0xC));
+        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)p)->frame) + 0xC));
         r = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
     } else {
         f32 b = F32(p, 0x58);
@@ -1729,10 +1729,10 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     RVec3 nrm;
     f32 s;
     f32 t;
-    ca = *(RVec3*)(PTR(p, 0xC) + 0x24);
-    cb = *(RVec3*)(PTR(q, 0xC) + 0x24);
-    da = *(RVec3*)(PTR(p, 0xC) + 0x18);
-    db = *(RVec3*)(PTR(q, 0xC) + 0x18);
+    ca = *(RVec3*)(((u8*&)((CollShape*)p)->frame) + 0x24);
+    cb = *(RVec3*)(((u8*&)((CollShape*)q)->frame) + 0x24);
+    da = *(RVec3*)(((u8*&)((CollShape*)p)->frame) + 0x18);
+    db = *(RVec3*)(((u8*&)((CollShape*)q)->frame) + 0x18);
     d.x = cb.x - ca.x;
     d.y = cb.y - ca.y;
     d.z = cb.z - ca.z;
@@ -1828,8 +1828,8 @@ int fn_8019DAB0(u8* p, u8* q) {
     }
     PVec3 a;
     PVec3 b;
-    PVec3 dir = *(PVec3*)(PTR(p, 0xC) + 0x18);
-    PVec3 mid = *(PVec3*)(PTR(p, 0xC) + 0x24);
+    PVec3 dir = *(PVec3*)(((u8*&)((CollShape*)p)->frame) + 0x18);
+    PVec3 mid = *(PVec3*)(((u8*&)((CollShape*)p)->frame) + 0x24);
     f32 h = F32(p, 0x28);
     f32 r = F32(p, 0x24);
     MulAdd(a.v, mid.v, dir.v, h);
@@ -1846,8 +1846,8 @@ int fn_8019DC04(u8* p, u8* q) {
     PVec3 a;
     PVec3 axis;
     PVec3 org;
-    u8* fq = PTR(q, 0xC);
-    u8* fp = PTR(p, 0xC);
+    u8* fq = ((u8*&)((CollShape*)q)->frame);
+    u8* fp = ((u8*&)((CollShape*)p)->frame);
     d.v[0] = F32(fp, 0x24) - F32(fq, 0x24);
     d.v[1] = F32(fp, 0x28) - F32(fq, 0x28);
     d.v[2] = F32(fp, 0x2C) - F32(fq, 0x2C);
@@ -1861,7 +1861,7 @@ int fn_8019DC04(u8* p, u8* q) {
         if (hit) {
             return 1;
         }
-        u8* m = PTR(p, 0xC);
+        u8* m = ((u8*&)((CollShape*)p)->frame);
         f32 h = F32(p, 0x28);
         axis = *(PVec3*)(m + 0x18);
         org = *(PVec3*)(m + 0x24);
@@ -2120,7 +2120,7 @@ int fn_8019E500(u8* p, u8* q) {
 enum SphBodyType { SPH_TYPE_73 = 0x73, SPH_TYPE_74 = 0x74 };
 
 int fn_8019E874(u8* p, u8* q) {
-    if ((SphBodyType)S32(p, 0x20) == SPH_TYPE_73 || (SphBodyType)S32(p, 0x20) == SPH_TYPE_74) {
+    if ((SphBodyType)((CollShape*)p)->surface == SPH_TYPE_73 || (SphBodyType)((CollShape*)p)->surface == SPH_TYPE_74) {
         return fn_8019E500(p, q);
     }
     CFrame oq;
@@ -2128,7 +2128,7 @@ int fn_8019E874(u8* p, u8* q) {
     RVec3 c;
     RVec3 d;
     oq = *(CFrame*)VE(q)->v50();
-    fp = *(CFrame*)PTR(p, 0xC);
+    fp = *(CFrame*)((u8*&)((CollShape*)p)->frame);
     c = fp.t;
     d.x = c.x - oq.t.x;
     d.y = c.y - oq.t.y;
@@ -2148,7 +2148,7 @@ int fn_8019E874(u8* p, u8* q) {
 // Capsule p against q, with the centre offset kept for a debug view that is compiled out.
 int fn_8019EA7C(u8* p, u8* q) {
     CFrame* fq = (CFrame*)VE(q)->v50();
-    CFrame* fp = (CFrame*)PTR(p, 0xC);
+    CFrame* fp = (CFrame*)((u8*&)((CollShape*)p)->frame);
     f32 x = fp->t.x - fq->t.x;
     f32 y = fp->t.y - fq->t.y;
     f32 z = fp->t.z - fq->t.z;
@@ -2293,7 +2293,7 @@ void fn_802E317C(const char* fmt, ...);
 // Collides sphere `p` against volume `o` by its type tag.
 void SphereShape::vf10(u8* o) {
     u8* p = (u8*)this;
-    switch (S32(o, 0x18)) {
+    switch (((CollShape*)o)->type) {
     case 'RAGD':
         break;
     case 'FLSR':
@@ -2321,7 +2321,7 @@ void SphereShape::vf10(u8* o) {
         ((VGroup*)o)->v10(p);
         break;
     default:
-        fn_802E317C("Unsupported collision type: Sphere-%x", S32(o, 0x18));
+        fn_802E317C("Unsupported collision type: Sphere-%x", ((CollShape*)o)->type);
         break;
     }
 }
@@ -2360,7 +2360,7 @@ void fn_802E30C8(const char* fmt, ...);
 // Collides flat sphere `p` against volume `o` by its type tag.
 void FlatSphereShape::vf10(u8* o) {
     u8* p = (u8*)this;
-    switch (S32(o, 0x18)) {
+    switch (((CollShape*)o)->type) {
     case 'RAGD':
         break;
     case 'FLSR':
@@ -2384,7 +2384,7 @@ void FlatSphereShape::vf10(u8* o) {
         break;
     default: {
         char tag[5] = "fooo";
-        *(s32*)tag = S32(o, 0x18);
+        *(s32*)tag = ((CollShape*)o)->type;
         fn_802E30C8("flatsphere: Can't collide with type %s", tag);
         break;
     }
@@ -3259,7 +3259,7 @@ void fn_802E30C8(const char* fmt, ...);
 // Collides `p` against volume `o` by its type tag.
 void TubeShape::vf10(u8* o) {
     u8* p = (u8*)this;
-    switch (S32(o, 0x18)) {
+    switch (((CollShape*)o)->type) {
     case 'RAGD':
     case 'POLY':
     case 'RING':
@@ -3280,7 +3280,7 @@ void TubeShape::vf10(u8* o) {
         fn_8019EA7C(p, PTR(o, 0x17C));
         break;
     default:
-        fn_802E30C8("Unsupported collision type: Tube-%x", S32(o, 0x18));
+        fn_802E30C8("Unsupported collision type: Tube-%x", ((CollShape*)o)->type);
         break;
     }
 }
@@ -3509,8 +3509,8 @@ void RagdollShape::vf10(u8* o) {
             return RVec3C(x, y, z);
         }
     };
-    if (S32(o, 0x18) == 'GRUP') {
-        f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)PTR(o, 0xC))->t);
+    if (((CollShape*)o)->type == 'GRUP') {
+        f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)((u8*&)((CollShape*)o)->frame))->t);
         f32 r = F32(p, 0x24) + VE(o)->v3C();
         if (dd < r * r) {
             u8* box = PTR(o, 0x17C);
@@ -3524,7 +3524,7 @@ void RagdollShape::vf10(u8* o) {
             spin.y = lbl_805622D0;
             spin.z = lbl_805622D0;
             Xform x;
-            u8* body = PTR(o, 0x4);
+            u8* body = ((u8*&)((CollShape*)o)->owner);
             if (body) {
                 vel = *(RVec3*)(body + 0x118);
                 spin = *(RVec3*)(body + 0x124);
@@ -3541,7 +3541,7 @@ void RagdollShape::vf10(u8* o) {
                 fn_801B34DC(o, 0, &at, &push, &((const RVec3C&)RVec3C(lbl_805622D0, lbl_805622E0, lbl_805622D0)).x, U32(p, 0x20));
             }
         }
-    } else if (S32(o, 0x18) == 'BOX ') {
+    } else if (((CollShape*)o)->type == 'BOX ') {
         f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)VE(o)->v50())->t);
         f32 r = F32(p, 0x24) + BoxRad(o);
         if (dd < r * r) {
@@ -3553,14 +3553,14 @@ void RagdollShape::vf10(u8* o) {
             spin.x = lbl_805622D0;
             spin.y = lbl_805622D0;
             spin.z = lbl_805622D0;
-            u8* body = PTR(o, 0x4);
+            u8* body = ((u8*&)((CollShape*)o)->owner);
             if (body) {
                 vel = *(RVec3*)(body + 0x118);
                 spin = *(RVec3*)(body + 0x124);
             }
             fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &(const RVec3C&)HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
         }
-    } else if (S32(o, 0x18) == 'POLY') {
+    } else if (((CollShape*)o)->type == 'POLY') {
         s32 n = 0;
         RVec3* pts;
         s32 stride;
@@ -3596,7 +3596,7 @@ RingVol::RingVol(u32 a, u32 swap) : CollShape(a, swap) {
 
 // Collides ring `p` against volume `o` by its type tag.
 void RingVol::vf10(u8* o) {
-    switch (S32(o, 0x18)) {
+    switch (((CollShape*)o)->type) {
     case 'POLY':
         break;
     case 'SPHR':
@@ -3623,7 +3623,7 @@ void RingVol::vf10(u8* o) {
         fn_8019D378(o, ((u8*)this));
         break;
     default:
-        fn_802E317C("Unsupported collision type: Ring-%x", S32(o, 0x18));
+        fn_802E317C("Unsupported collision type: Ring-%x", ((CollShape*)o)->type);
         break;
     }
 }
@@ -3880,9 +3880,9 @@ MeshShape::~MeshShape(void) {
 }
 
 void MeshShape::vf10(u8* o) {
-    if (S32(o, 0x18) == 'GRUP') {
+    if (((CollShape*)o)->type == 'GRUP') {
         ((VGroup*)o)->v10(((u8*)this));
-    } else if (S32(o, 0x18) == 'SPHR') {
+    } else if (((CollShape*)o)->type == 'SPHR') {
         PlainRVec3 hits[64];  // plain storage: an array of the constructor type changes the registers
         int n = 64;
         u8* sph = o;
