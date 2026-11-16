@@ -1123,21 +1123,23 @@ void TexZHint(s32 id) {
 }  // extern "C"
 
 inline void* SimpleHeap::Alloc(s32 size) {
-    s32 n = (size + align) & ~align;
+    s32 mask;
+    s32 bestSize;
+    HeapBlock** l;
+    s32 spacing;
+    spacing = align;
+    mask = ~spacing;
+    s32 n = (size + spacing) & mask;
     void* res;
     HeapBlock* split;
-    HeapBlock* next;
-    HeapBlock* b;
     HeapBlock** best;
-    s32 rest;
     HeapBlock* s;
-    HeapBlock** l;
-    s32 bestSize;
+    s32 rest;
     res = 0;
     best = 0;
     bestSize = 0x7FFFFFFF;
     for (l = &free; *l; l = &(*l)->next) {
-        b = *l;
+        HeapBlock* b = *l;
         if (b->size >= n && bestSize > b->size) {
             best = l;
             bestSize = b->size;
@@ -1146,11 +1148,11 @@ inline void* SimpleHeap::Alloc(s32 size) {
     if (best) {
         HeapBlock* b = *best;
         split = 0;
-        next = b->next;
+        HeapBlock* next = b->next;
         rest = b->size - n;
-        s32 hdr = ~align & (align + 0x10);
+        s32 hdr = mask & (spacing + 0x10);
         if (rest > hdr + 0x20) {
-            s = (HeapBlock*)((u8*)b + align + n + 1);
+            s = (HeapBlock*)((u8*)b + spacing + (n + 1));
             s->magic = 0xABCFEED0;
             s->next = 0;
             s->size = rest - ((align + 0x10) & ~align);
