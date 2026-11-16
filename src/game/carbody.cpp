@@ -1702,7 +1702,7 @@ void fn_80183E7C(u8* p) {
             F32(p, 0x2614) = 0.0f;
         }
         if (!(F32(p, 0x2614) < 3.0f)) {
-            if (F32(p, 0x4C) > lbl_80561CDC) {
+            if (F32(p, 0x4C) > 0.5f) {
                 F32(p, 0x2614) = 0.0f;
             } else if (!(AbsNarrow(F32(p, 0x58)) > lbl_80561CDC)) {
                 f32 side = -F32(p, 0x40);
