@@ -4,34 +4,13 @@
 // from the layout names and labels.
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/menu.h"
 #include "game/menuwidget_inl.h"
 
 void* operator new[](size_t size, const char* tag);
 
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
-
+// MenuItem: game/menu.h.
+// MenuDesc: game/menu.h.
 // Steps *value through a NULL-terminated list of labels.
 class StringMulti : public MenuWidget {
 public:

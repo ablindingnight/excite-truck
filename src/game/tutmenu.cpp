@@ -1,32 +1,12 @@
 // Tutorial menu (0x80257FB8-0x80258354): picks a tutorial set, highlighting the sets already
 // passed, the current one and the locked ones. Names are guesses apart from the element names.
 #include "game/common.h"
+#include "game/menu.h"
 
 int IdentGetCurrentSlot(void);
 
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
+// MenuItem: game/menu.h.
+// MenuDesc: game/menu.h.
 // The highlighted set, remembered per identity slot.
 struct TutorialChoice {
     TutorialChoice(void) {

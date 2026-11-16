@@ -1,32 +1,11 @@
 // Speed units menu (0x8024C070-0x8024C370, "units.lyt"): one option cycler between MPH and KPH, kept
 // in the "units" option. Names are guesses apart from the layout, option and labels.
 #include "game/common.h"
+#include "game/menu.h"
 #include "game/menuwidget.h"
 
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
-
+// MenuItem: game/menu.h.
+// MenuDesc: game/menu.h.
 // Steps *out through a table of values, showing the matching label.
 class ValueMulti : public MenuWidget {
 public:

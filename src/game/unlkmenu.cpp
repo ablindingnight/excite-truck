@@ -2,6 +2,7 @@
 // unlockable cars and tracks, three at a time, each with its points and a lock icon. Names are
 // guesses apart from the layout and element names and the messages.
 #include "game/common.h"
+#include "game/menu.h"
 
 struct Unlockable {
     const char* type;  // offset 0x0
@@ -14,29 +15,8 @@ struct Unlockable {
 int GetUnlockableCount(void);
 Unlockable* GetUnlockable(int i);
 
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
+// MenuItem: game/menu.h.
+// MenuDesc: game/menu.h.
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
 char* strcpy(char* dst, const char* src);
