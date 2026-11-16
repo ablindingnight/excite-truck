@@ -686,6 +686,8 @@ static inline u8 gxBlend8(u32 ia, u32 dc, u32 a, u32 sc) {
     return t + (t >> 7);
 }
 
+#pragma push
+#pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
@@ -718,6 +720,7 @@ void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
         d += dskip;
     } while (--h > 0);
 }
+#pragma pop
 
 void fn_802C47B8(int x0, int y0, int x1, int y1, u32 color) {
     int dx = x1 - x0;
