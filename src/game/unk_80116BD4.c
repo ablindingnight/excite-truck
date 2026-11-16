@@ -4520,7 +4520,7 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
 // plane's data. Structure cross-checked against n100f's ExpandPlane (reference only).
-u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
+u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMapIn,
                  s32 blocksWide, u32 step, void **bufs, u32 flags, u32 *skipped) {
     BinkColorTrees8011 trees;
     s16 block[64];
@@ -4541,14 +4541,22 @@ u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     u32 *scaledMasks0;
     s32 x;
     u32 y;
-    s32 rowSkip;
-    void (*readColors)(void *b, void *bits, void *trees);
+    /* Local copies unproven as text, proven as numbering: retail colours dst, blockMap and prev between y and
+       skipCount (r22, r21, r20), above bufs/step/pitch, which only locals declared here do (Bink session). */
+    u8 *dst;
+    u8 *blockMap;
+    u8 *prev;
     u32 skipCount;
     u32 idx;
+    s32 rowSkip;
+    void (*readColors)(void *b, void *bits, void *trees);
     s32 i;
     u8 *tables;
 
     tables = (u8 *)lbl_802F65C0;
+    dst = dstIn;
+    prev = prevIn;
+    blockMap = blockMapIn;
     rowSkip = pitch * 8 - width;
     skipCount = 0;
     idx = 0;
