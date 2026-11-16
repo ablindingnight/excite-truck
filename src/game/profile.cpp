@@ -3,6 +3,11 @@
 #include "game/common.h"
 #include "game/menustate.h"
 
+// 1.0: a named object, first in .sdata2; a one-field const struct so its uses do not fold to a pooled literal.
+struct ProfOneT { f32 v; };
+extern const ProfOneT lbl_80563930;
+const ProfOneT lbl_80563930 = {1.0f};
+
 
 extern "C" void fn_802328D4(int);
 // Physical font payload and release sequence are observed at +0x34/+0x78.
@@ -167,7 +172,7 @@ struct ProfileTextDrawFields {
 };
 }
 
-inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text, font, x, y, color, alignment, scale, 1.0f, widthScale);}
+inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text, font, x, y, color, alignment, scale, lbl_80563930.v, widthScale);}
 
 extern "C" {
 
@@ -499,9 +504,6 @@ void fn_8024CFB4(void) {
 
 }
 
-/* Helper name unproven */
-static f32 ProfileUnitScale(void) { return 1.0f; }
-
 void ProfileTextState::Enter(void) {
     ProfileTextFields* self=(ProfileTextFields*)this;
     int fontHeight = fn_80232B70(self->font);
@@ -549,7 +551,7 @@ void ProfileTextState::Draw(void) {
     sprintf(prefix, "%*.*s", self->cursor, self->cursor, self->text);
     f32 width = fn_8023293C(self->font, prefix, self->widthScale) * self->scale;
     f32 cursorX = x + width;
-    fn_80230924(0xFFFFD03F, cursorX - 1.0f, y, 1.0f + cursorX,
+    fn_80230924(0xFFFFD03F, cursorX - lbl_80563930.v, y, lbl_80563930.v + cursorX,
                y - (f32)self->height, 0.0f);
 }
 
