@@ -547,11 +547,11 @@ void fn_8018DA5C(u8* p, u8* m) {
         lean = lean > -0.25f ? lean : -0.25f;
         ApplyDamagePointDeformation(car, p, roll, lean, twist, mdl);
     }
-    U32(m, 0x29C) |= ((u32&)((CarBody*)p)->f1E40);
+    ((u32&)((CarDrawState*)m)->f29C) |= ((u32&)((CarBody*)p)->f1E40);
     DamagePart* tp = lbl_80332840;
     CbJoint* s = (CbJoint*)&((CarBody*)p)->joints;
     f32 t = lbl_8055E460;
-    S32(m, 0xA78) = 0;
+    ((CarDrawState*)m)->nPoints = 0;
     for (int i = 0; i < 17; i++) {
         if (s->on && s->state != 0 && s->state != 1) {
             Loop1_fn_8018DA5C(s, m, tp, t);

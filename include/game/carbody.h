@@ -96,6 +96,93 @@ struct CbJoint {
     s32 state;      // offset 0x7C: 0 attached, 1 hanging, 2/4 flying, 3 gone
 };
 
+// The body pose in the render snapshot: rotation rows, then the position (copied block by block).
+struct SnapRot {
+    f32 m[9];
+};
+struct SnapPos {
+    f32 v[3];
+};
+struct SnapPose {
+    SnapRot rot;
+    SnapPos pos;
+};
+
+// One wheel in the car's draw state (0x6C bytes).
+struct CarDrawWheel {
+    f32 pos[3];     // offset 0x0: interpolated mount point
+    f32 ground[3];  // offset 0xC
+    f32 normal[3];  // offset 0x18
+    f32 slip;       // offset 0x24
+    f32 steer;      // offset 0x28
+    f32 v18;        // offset 0x2C
+    f32 load;       // offset 0x30
+    f32 spin;       // offset 0x34
+    f32 comp;       // offset 0x38
+    f32 nRight;     // offset 0x3C
+    f32 nFwd;       // offset 0x40
+    f32 v10;        // offset 0x44
+    f32 f48[6];     // offset 0x48
+    s32 flags;      // offset 0x60
+    u8 grounded;    // offset 0x64
+    u8 pad65[3];
+    s32 groundH;    // offset 0x68
+};
+
+// A deformable body point in the draw state (0x34 bytes; cardmg's damage points).
+struct CarDrawPoint {
+    u8 pad0[0x24];
+    f32 pos[3];  // offset 0x24
+    u8 pad30[0x34 - 0x30];
+};
+
+// The car's draw state: what CarBody::vf28 writes into the frame buffer at its a8 offset (0xFA8 bytes) for the
+// renderer and damage code. Field names unproven.
+struct CarDrawState {
+    SnapPose pose;            // offset 0x0
+    s16 hint;                 // offset 0x30
+    u8 pad32[0x34 - 0x32];
+    f32 f34;                  // offset 0x34
+    f32 f38;                  // offset 0x38
+    f32 f3C;                  // offset 0x3C
+    f32 f40;                  // offset 0x40
+    f32 f44;                  // offset 0x44
+    u32 f48;                  // offset 0x48
+    f32 speedXZ;              // offset 0x4C
+    f32 f50;                  // offset 0x50
+    u8 pad54[0x64 - 0x54];
+    f32 speed;                // offset 0x64
+    u8 pad68[0x6E - 0x68];
+    u16 flags;                // offset 0x6E
+    f32 vel[3];               // offset 0x70
+    CarDrawWheel wheels[4];   // offset 0x7C
+    f32 blink;                // offset 0x22C
+    u8 pad230[0x238 - 0x230];
+    f32 f238;                 // offset 0x238
+    f32 f23C;                 // offset 0x23C
+    f32 f240;                 // offset 0x240
+    u8 pad244[0x28C - 0x244];
+    f32 f28C;                 // offset 0x28C
+    f32 f290;                 // offset 0x290
+    f32 f294;                 // offset 0x294
+    s32 f298;                 // offset 0x298
+    s32 f29C;                 // offset 0x29C (flag bits 0x10000000/0x20000000)
+    u8 pad2A0[0x2A8 - 0x2A0];
+    f32 f2A8;                 // offset 0x2A8
+    u8 pad2AC[0x2C4 - 0x2AC];
+    f32 f2C4;                 // offset 0x2C4
+    f32 f2C8;                 // offset 0x2C8
+    f32 f2CC;                 // offset 0x2CC
+    f32 f2D0;                 // offset 0x2D0
+    f32 f2D4;                 // offset 0x2D4
+    s32 f2D8;                 // offset 0x2D8
+    u8 pad2DC[0xA78 - 0x2DC];
+    s32 nPoints;              // offset 0xA78
+    u8 points[0xFA4 - 0xA7C]; // offset 0xA7C: CarDrawPoint records
+    s32 fFA4;                 // offset 0xFA4
+};
+typedef char CarDrawStateSize[sizeof(CarDrawState) == 0xFA8 ? 1 : -1];
+
 // The state handed to a body's SetState (vtable 0x54).
 struct BodyState {
     RMtx mtx;   // offset 0x0

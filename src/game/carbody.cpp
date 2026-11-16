@@ -2899,19 +2899,6 @@ extern "C" {
 u32 DeityCar_vf7C(u8* p) { return 0; }
 
 
-// The body pose in the render snapshot: rotation rows, then the position (copied block by block).
-struct SnapRot {
-    f32 m[9];
-};
-struct SnapPos {
-    f32 v[3];
-};
-struct SnapPose {
-    SnapRot rot;
-    SnapPos pos;
-};
-
-
 extern f32 lbl_8055E460;  // render interpolation factor between the last two physics steps
 extern s32 lbl_8055E3C4;  // frame counter
 void fn_8018DA5C(u8* p, u8* m);
@@ -2951,51 +2938,51 @@ void CarBody::vf28(u8* buf) {
     if (!NearZero(this->f2690)) {
         flags |= 0x20;
     }
-    F32(m, 0x34) = this->f25D0;
+    ((CarDrawState*)m)->f34 = this->f25D0;
     const f32 speedZ = this->vel.z;
     const f32 zz = speedZ * speedZ;
     const f32& speedX = this->vel.x;
     const f32 xx = speedX * speedX;
-    F32(m, 0x4C) = sqrt(xx + zz);
-    F32(m, 0x3C) = this->f25F0;
-    F32(m, 0x38) = this->f25F4;
-    F32(m, 0x40) = this->f25E4;
-    F32(m, 0x44) = this->f25F8;
-    U32(m, 0x48) = fn_8018B06C(((u8*)this));
-    F32(m, 0x50) = 100.0f;
+    ((CarDrawState*)m)->speedXZ = sqrt(xx + zz);
+    ((CarDrawState*)m)->f3C = this->f25F0;
+    ((CarDrawState*)m)->f38 = this->f25F4;
+    ((CarDrawState*)m)->f40 = this->f25E4;
+    ((CarDrawState*)m)->f44 = this->f25F8;
+    ((CarDrawState*)m)->f48 = fn_8018B06C(((u8*)this));
+    ((CarDrawState*)m)->f50 = 100.0f;
     if (lbl_8055E4F5 && this->nAdded == 0) {
-        F32(m, 0x22C) = (lbl_8055E3C4 & 4) ? 0.0f : 1.0f;
+        ((CarDrawState*)m)->blink = (lbl_8055E3C4 & 4) ? 0.0f : 1.0f;
     } else {
-        F32(m, 0x22C) = 1.0f;
+        ((CarDrawState*)m)->blink = 1.0f;
     }
-    U16(m, 0x6E) = flags;
-    F32(m, 0x70) = this->vel.x;
-    F32(m, 0x74) = this->vel.y;
-    F32(m, 0x78) = this->vel.z;
-    F32(m, 0x64) = this->speed;
-    F32(m, 0x2C4) = this->f2588;
-    F32(m, 0x28C) = this->f26E0 ? FMax(this->f2690, 0.01f) : this->f2690;
-    F32(m, 0x290) = this->f2694;
-    F32(m, 0x294) = this->f2698;
-    S32(m, 0x298) = this->a268C;
+    ((CarDrawState*)m)->flags = flags;
+    ((CarDrawState*)m)->vel[0] = this->vel.x;
+    ((CarDrawState*)m)->vel[1] = this->vel.y;
+    ((CarDrawState*)m)->vel[2] = this->vel.z;
+    ((CarDrawState*)m)->speed = this->speed;
+    ((CarDrawState*)m)->f2C4 = this->f2588;
+    ((CarDrawState*)m)->f28C = this->f26E0 ? FMax(this->f2690, 0.01f) : this->f2690;
+    ((CarDrawState*)m)->f290 = this->f2694;
+    ((CarDrawState*)m)->f294 = this->f2698;
+    ((CarDrawState*)m)->f298 = this->a268C;
     f32 v = this->f25BC;
     if (Positive(v)) {
-        F32(m, 0x2D4) = v;
+        ((CarDrawState*)m)->f2D4 = v;
     } else {
-        F32(m, 0x2D4) = 0.0f;
+        ((CarDrawState*)m)->f2D4 = 0.0f;
     }
-    F32(m, 0x2A8) = this->f25A0;
-    S32(m, 0x29C) = this->f5A0;
+    ((CarDrawState*)m)->f2A8 = this->f25A0;
+    ((CarDrawState*)m)->f29C = this->f5A0;
     if (this->f25E4 > 0.1f && !(flags & 0x20)) {
-        U32(m, 0x29C) |= 0x20000000;
+        ((u32&)((CarDrawState*)m)->f29C) |= 0x20000000;
     } else {
-        U32(m, 0x29C) |= 0x10000000;
+        ((u32&)((CarDrawState*)m)->f29C) |= 0x10000000;
     }
-    F32(m, 0x238) = this->f2660;
-    F32(m, 0x23C) = this->f2664;
-    F32(m, 0x240) = this->f2668;
+    ((CarDrawState*)m)->f238 = this->f2660;
+    ((CarDrawState*)m)->f23C = this->f2664;
+    ((CarDrawState*)m)->f240 = this->f2668;
     f32 sink = 0.0f;
-    u8* wheels = m + 0x7C;
+    u8* wheels = (u8*)&((CarDrawState*)m)->wheels;
     u8* w = ((u8*)this) + 0x23AC;
     u8* o = wheels;
     for (int i = 0; i < 4; i++) {
@@ -3016,61 +3003,61 @@ void CarBody::vf28(u8* buf) {
         c.x = wheelX;
         c.y = wheelY;
         c.z = wheelZ;
-        F32(o, 0x0) = c.x;
-        F32(o, 0x4) = c.y;
-        F32(o, 0x8) = c.z;
+        ((CarDrawWheel*)o)->pos[0] = c.x;
+        ((CarDrawWheel*)o)->pos[1] = c.y;
+        ((CarDrawWheel*)o)->pos[2] = c.z;
         sink = FMax(sink, c.y - ((CbWheel*)w)->v40);
-        F32(o, 0xC) = ((CbWheel*)w)->plane.ground[0];
-        F32(o, 0x10) = ((CbWheel*)w)->plane.ground[1];
-        F32(o, 0x14) = ((CbWheel*)w)->plane.ground[2];
-        F32(o, 0x18) = ((CbWheel*)w)->normal[0];
-        F32(o, 0x1C) = ((CbWheel*)w)->normal[1];
-        F32(o, 0x20) = ((CbWheel*)w)->normal[2];
-        F32(o, 0x24) = ((CbWheel*)w)->slip;
-        F32(o, 0x28) = ((CbWheel*)w)->steer;
-        F32(o, 0x2C) = ((CbWheel*)w)->v18;
-        F32(o, 0x30) = ((CbWheel*)w)->load;
-        F32(o, 0x34) = ((CbWheel*)w)->spin + 0.016683351f * (((CbWheel*)w)->load * (lbl_8055E460 - 1.0f));
-        F32(o, 0x38) = ((CbWheel*)w)->comp;
-        F32(o, 0x3C) = ((CbWheel*)w)->plane.nRight;
-        F32(o, 0x40) = ((CbWheel*)w)->plane.nFwd;
-        F32(o, 0x44) = ((CbWheel*)w)->v10;
-        F32(o, 0x48) = 0.0f;
-        F32(o, 0x54) = 0.0f;
-        F32(o, 0x50) = 0.0f;
-        F32(o, 0x4C) = 0.0f;
-        F32(o, 0x58) = 0.0f;
-        F32(o, 0x5C) = 0.0f;
-        S32(o, 0x60) = S32(w, 0x70);
-        U8(o, 0x64) = ((CbWheel*)w)->grounded;
-        S32(o, 0x68) = ((CbWheel*)w)->groundH;
+        ((CarDrawWheel*)o)->ground[0] = ((CbWheel*)w)->plane.ground[0];
+        ((CarDrawWheel*)o)->ground[1] = ((CbWheel*)w)->plane.ground[1];
+        ((CarDrawWheel*)o)->ground[2] = ((CbWheel*)w)->plane.ground[2];
+        ((CarDrawWheel*)o)->normal[0] = ((CbWheel*)w)->normal[0];
+        ((CarDrawWheel*)o)->normal[1] = ((CbWheel*)w)->normal[1];
+        ((CarDrawWheel*)o)->normal[2] = ((CbWheel*)w)->normal[2];
+        ((CarDrawWheel*)o)->slip = ((CbWheel*)w)->slip;
+        ((CarDrawWheel*)o)->steer = ((CbWheel*)w)->steer;
+        ((CarDrawWheel*)o)->v18 = ((CbWheel*)w)->v18;
+        ((CarDrawWheel*)o)->load = ((CbWheel*)w)->load;
+        ((CarDrawWheel*)o)->spin = ((CbWheel*)w)->spin + 0.016683351f * (((CbWheel*)w)->load * (lbl_8055E460 - 1.0f));
+        ((CarDrawWheel*)o)->comp = ((CbWheel*)w)->comp;
+        ((CarDrawWheel*)o)->nRight = ((CbWheel*)w)->plane.nRight;
+        ((CarDrawWheel*)o)->nFwd = ((CbWheel*)w)->plane.nFwd;
+        ((CarDrawWheel*)o)->v10 = ((CbWheel*)w)->v10;
+        ((CarDrawWheel*)o)->f48[0] = 0.0f;
+        ((CarDrawWheel*)o)->f48[3] = 0.0f;
+        ((CarDrawWheel*)o)->f48[2] = 0.0f;
+        ((CarDrawWheel*)o)->f48[1] = 0.0f;
+        ((CarDrawWheel*)o)->f48[4] = 0.0f;
+        ((CarDrawWheel*)o)->f48[5] = 0.0f;
+        ((CarDrawWheel*)o)->flags = S32(w, 0x70);
+        ((CarDrawWheel*)o)->grounded = ((CbWheel*)w)->grounded;
+        ((CarDrawWheel*)o)->groundH = ((CbWheel*)w)->groundH;
         w += 0x74;
         o += 0x6C;
     }
-    F32(m, 0x2C8) = F32(((CarHost*)((u8*&)this->src))->Info(), 0x48);
-    F32(m, 0x2CC) = this->f26CC;
-    F32(m, 0x2D0) = this->f5E4;
-    S32(m, 0x2D8) = this->f26D4;
+    ((CarDrawState*)m)->f2C8 = F32(((CarHost*)((u8*&)this->src))->Info(), 0x48);
+    ((CarDrawState*)m)->f2CC = this->f26CC;
+    ((CarDrawState*)m)->f2D0 = this->f5E4;
+    ((CarDrawState*)m)->f2D8 = this->f26D4;
     fn_8018DA5C(((u8*)this), m);
     if (sink > 0.01f) {
-        F32(m, 0x24) = F32(m, 0x24) + F32(m, 0xC) * sink;
-        F32(m, 0x28) = F32(m, 0x28) + F32(m, 0x10) * sink;
-        F32(m, 0x2C) = F32(m, 0x2C) + F32(m, 0x14) * sink;
+        ((CarDrawState*)m)->pose.pos.v[0] = ((CarDrawState*)m)->pose.pos.v[0] + ((CarDrawState*)m)->pose.rot.m[3] * sink;
+        ((CarDrawState*)m)->pose.pos.v[1] = ((CarDrawState*)m)->pose.pos.v[1] + ((CarDrawState*)m)->pose.rot.m[4] * sink;
+        ((CarDrawState*)m)->pose.pos.v[2] = ((CarDrawState*)m)->pose.pos.v[2] + ((CarDrawState*)m)->pose.rot.m[5] * sink;
         for (int i = 0; i < 4; i++) {
             F32(wheels + i * 0x6C, 0x4) = FMax(F32(wheels + i * 0x6C, 0x4) - sink, -0.6096f);
         }
-        u8* e = m + 0xA7C;
-        for (int i = 0; i < S32(m, 0xA78); i++) {
-            F32(e, 0x24) = F32(e, 0x24) + F32(m, 0xC) * sink;
-            F32(e, 0x28) = F32(e, 0x28) + F32(m, 0x10) * sink;
-            F32(e, 0x2C) = F32(e, 0x2C) + F32(m, 0x14) * sink;
+        u8* e = (u8*)&((CarDrawState*)m)->points;
+        for (int i = 0; i < ((CarDrawState*)m)->nPoints; i++) {
+            ((CarDrawPoint*)e)->pos[0] = ((CarDrawPoint*)e)->pos[0] + ((CarDrawState*)m)->pose.rot.m[3] * sink;
+            ((CarDrawPoint*)e)->pos[1] = ((CarDrawPoint*)e)->pos[1] + ((CarDrawState*)m)->pose.rot.m[4] * sink;
+            ((CarDrawPoint*)e)->pos[2] = ((CarDrawPoint*)e)->pos[2] + ((CarDrawState*)m)->pose.rot.m[5] * sink;
             e += 0x34;
         }
     }
     if (S32(((u8*)this), 0x26C0)) {
         fn_8018A9F0(((u8*)this), m);
     } else {
-        S32(m, 0xFA4) = 0;
+        ((CarDrawState*)m)->fFA4 = 0;
     }
 }
 
@@ -3650,9 +3637,9 @@ void fn_8018A9F0(u8* p, u8* m) {
     CbVec4 h = *(CbSolVec*)(x + 0x70);
     for (int i = 0; i < 4; i++) {
         CbVec* o = (CbVec*)(m + 0xE24) + ((s32*)(cb->f26C0 + 0xCC))[i];
-        SetXYZ(o, 0.0f, cb->f5AC + (F32(m + 0x7C + i * 0x6C, 0x4) + h[i]), 0.0f);
+        SetXYZ(o, 0.0f, cb->f5AC + (F32((u8*)&((CarDrawState*)m)->wheels + i * 0x6C, 0x4) + h[i]), 0.0f);
     }
-    S32(m, 0xFA4) = S32(cb->f26C0, 0xDC);
+    ((CarDrawState*)m)->fFA4 = S32(cb->f26C0, 0xDC);
 }
 
 void fn_8018ADA4(u8* p, f32 v) { F32(p, 0x25DC) = v; }
