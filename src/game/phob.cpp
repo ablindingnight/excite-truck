@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/springcar.h"
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT( f32 b, f32 a,f32 t) { return a + t * (b - a); }
@@ -80,11 +81,6 @@ f32 fn_80176A2C(void);
 int fn_80265D64(void);
 s64 __div2i(s64 a, s64 b);
 void fn_8026A248(int car, int view);
-class Controller;
-class SpringCar {
-public:
-    void SetController(Controller* c);
-};
 void fn_801EAA94(int car, s32 kind);
 void fn_80177990(void);
 void fn_801D0CF0(void);
@@ -279,17 +275,6 @@ public:
 struct PhobCar {
     u8 pad0[0x1E4];
     s32 f1E4;  // offset 0x1E4
-};
-
-struct RaceCarRec {
-    u8 pad0[0x10];
-    s32 model;  // offset 0x10
-    u8 pad14[0x1F0 - 0x14];
-    s32 kind;  // offset 0x1F0
-    u8 pad1F4[0x260 - 0x1F4];
-    u8 slot;  // offset 0x260
-    u8 pad261[0x270C - 0x261];
-    Controller* ctl;  // offset 0x270C
 };
 
 struct CarStateOut {
@@ -1001,20 +986,20 @@ void fn_80178CAC(int a, int b) {
     }
     ra = fn_8017960C(a);
     rb = fn_8017960C(b);
-    ka = ra->kind;
-    kb = rb->kind;
-    ma = ra->model;
-    mb = rb->model;
-    xb = rb->ctl;
-    xa = ra->ctl;
+    ka = ra->f1F0;
+    kb = rb->f1F0;
+    ma = ra->type;
+    mb = rb->type;
+    xb = ((SpringCar*)rb)->ctl;
+    xa = ((SpringCar*)ra)->ctl;
     ((SpringCar*)ra)->SetController(0);
     ((SpringCar*)rb)->SetController(0);
     ((SpringCar*)ra)->SetController(xb);
     ((SpringCar*)rb)->SetController(xa);
-    ra->kind = kb;
-    rb->kind = ka;
-    ra->model = mb;
-    rb->model = ma;
+    ra->f1F0 = kb;
+    rb->f1F0 = ka;
+    ra->type = mb;
+    rb->type = ma;
     fn_801EAA94(a, kb);
     fn_801EAA94(b, ka);
 }
@@ -1287,8 +1272,8 @@ void fn_801795B0(void) {
 
 void fn_801795D8(RaceCarRec* r, int i) {
     lbl_80430830[i] = r;
-    if (r->kind == 0x50) {
-        lbl_80430590[r->slot & 3] = i;
+    if (r->f1F0 == 0x50) {
+        lbl_80430590[r->f260 & 3] = i;
     }
 }
 
