@@ -19,9 +19,6 @@ extern void *lbl_8055F4E0;
 extern void *lbl_8055F4E4;
 extern void *lbl_8055F4E8;
 extern const f32 lbl_80563D78;
-extern const f32 lbl_80563D7C;
-extern const f32 lbl_80563D80;
-extern const f32 lbl_80563D84;
 
 static __inline f32 CamMin(f32 a, f32 b) { return a < b ? a : b; }
 static __inline f32 CamMax(f32 a, f32 b) { return a > b ? a : b; }
@@ -31,9 +28,9 @@ void fn_8026B840(void) {}
 f32 fn_8026B844(f32 f) {
     f32 c = lbl_80563D78;
     if (f > c) {
-        return CamMax(c, (f - lbl_80563D7C) / lbl_80563D80);
+        return CamMax(c, (f - 0.2f) / 0.8f);
     }
-    return CamMin(c, (lbl_80563D7C + f) / lbl_80563D84);
+    return CamMin(c, (0.2f + f) / 1.2f);
 }
 
 // Camera frames (camframe.cpp's CamFrame: three axes and a position).
@@ -102,7 +99,6 @@ extern const f32 lbl_80563D9C;  // 0.5f
 extern const f32 lbl_80563DA0;  // 5.0f
 extern const f32 lbl_80563D94;  // 1.0f
 extern const f32 lbl_80563DB0;  // PI / 3
-extern const f32 lbl_80563DC0;  // 19.0f
 void fn_80127A84(s32* x, s32* y, s32* buttons);
 int fn_801298E8(FreePad* pad, int chan);
 u32 fn_802E2C20(void);
@@ -221,7 +217,7 @@ void fn_8026B8A0(void) {
     if (free) {
         f32 t = CamMax(CamMin(lbl_80563D94, (h - 20.0f) / 480.0f), lbl_80563D78);
         f32 px = lbl_80563D78;
-        f32 pan = 50.0f * CamBlend(t, lbl_80563DC0);
+        f32 pan = 50.0f * CamBlend(t, 19.0f);
         f32 py = px;
         f32 a;
         f32 b;
@@ -617,15 +613,15 @@ void fn_8026C014(int player) {
             }
             lbl_8055F47C = CamMax(CamMin(hi, lbl_8055F47C + dir * fovRate), lo);
         } else if (pad.keys[5]) {
-            speed *= lbl_80563D7C;
+            speed *= 0.2f;
         } else if (pad.keys[2]) {
             speed *= lbl_80563DA0;
         }
         yaw = lbl_8055F50C;
         if (pad.x0 > lbl_80563D78) {
-            s = CamMax(CamMin(lbl_80563D94, lbl_80563D84 * pad.x0 - lbl_80563D7C), lbl_80563D78);
+            s = CamMax(CamMin(lbl_80563D94, 1.2f * pad.x0 - 0.2f), lbl_80563D78);
         } else {
-            s = CamMax(CamMin(lbl_80563D78, lbl_80563D7C + lbl_80563D84 * pad.x0), lbl_80563D98);
+            s = CamMax(CamMin(lbl_80563D78, 0.2f + 1.2f * pad.x0), lbl_80563D98);
         }
         yaw += yawRate * s;
         target = pad.y0 * lbl_80563DB0;
@@ -977,9 +973,6 @@ void* fn_8026E214(void* value) {
 
 extern void *lbl_8055F4E8;
 extern const f32 lbl_80563D78;
-extern const f32 lbl_80563D7C;
-extern const f32 lbl_80563D80;
-extern const f32 lbl_80563D84;
 
 }  // extern "C"
 
