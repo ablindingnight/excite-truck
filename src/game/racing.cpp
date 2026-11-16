@@ -4,6 +4,7 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
 #include "game/raceopts.h"
@@ -43,14 +44,6 @@ public:
     virtual LayoutItem* Find(const char* name);    // 0xC
     virtual void* FindArt(const char* name);       // 0x10
     virtual LayoutBox* FindBox(const char* name);  // 0x14
-};
-
-struct RaceProgress {
-    s32 leaderLap;  // offset 0x0
-    u8 pad4[0x4];
-    s32 laps;     // offset 0x8
-    f32 start;    // offset 0xC
-    f32 elapsed;  // offset 0x10
 };
 
 struct ResultRacer {
@@ -182,7 +175,6 @@ void fn_801D490C(void);
 f32 fn_80011E60(void);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 f32 fn_8013672C(void);
-RaceProgress* fn_801E7E3C(void);
 CarInfo* fn_801EA9A0(int index);
 int fn_801EA994(void);
 ResultRacer* fn_801EA9B0(int index);
@@ -530,7 +522,7 @@ void RacingOverlay::Draw(void) {
             fn_8000C630(0x17, -1);
         }
     } else {
-        f32 t = lbl_8055D350->info->elapsed;
+        f32 t = lbl_8055D350->info->time;
         int show = 0;
         int ok;
         int draw;

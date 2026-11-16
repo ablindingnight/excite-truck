@@ -64,6 +64,7 @@ struct BoneFrame {
 
 // The racer's physics/animation state the model is bound to: the same 0xFA8 buffer as carbody.h's CarDrawState
 // (CarBody::vf28 fills it). Distinct name for now; merge the two layouts later.
+struct CarDrawState;
 struct CarDrawView {
     Frame frame;              // offset 0x0
     u8 pad30[4];
@@ -261,7 +262,7 @@ int fn_801E89A4(s32 a);
 int fn_801E89C8(s32 a);
 int fn_801E9E78(void* a, Vec* p, Vec* n, s32* c);
 void fn_801EA59C(s32 index, int a, CarDef* d);
-void fn_801EAB10(int idx, s32 x8);  // carinfo.cpp
+void fn_801EAB10(int idx, CarDrawState* draw);  // carinfo.cpp
 void* fn_801EF1F0(void* p, const char* name);
 void fn_801EF428(void* p, int del);
 void fn_801EFC90(void* p, CarDrawView* c, void** wheels);
@@ -1206,7 +1207,7 @@ f32 lbl_8055B088 = 12.3f;  // battery volts
 
 void fn_801EECAC(CarModel* m, u8* data) {
     m->car = (CarDrawView*)(data + m->offset);
-    fn_801EAB10(m->index, (s32)m->car);
+    fn_801EAB10(m->index, (CarDrawState*)m->car);  // CarDrawView = carbody.h CarDrawState
     ValueNode* ch = m->res->values->FindChild("Chassis");
     fn_801EC214(&m->volts, ch, m->chassis, "volt_gauge", 1.0f, 0.0f, &lbl_8055B088);
     fn_801EC214(&m->speedometer, ch, m->chassis, "speedometer", 0.44444445f, 0.0f, &m->car->speed);

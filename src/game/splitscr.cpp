@@ -3,6 +3,7 @@
 // icon), and the START/FINISH labels at the ends of the bars. Names are guesses apart from the
 // keys and the texture name.
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
 #include "game/plainvec.h"
@@ -52,11 +53,6 @@ public:
     u32 version;       // offset 0x8
 };
 
-struct RaceSetupHdr {
-    u8 pad0[8];
-    s32 laps;  // offset 0x8
-};
-
 // CarInfo: game/carinfo.h; its draw state: game/carbody.h (0x2C8 = distance along this lap).
 extern "C" {
 extern s32 lbl_8055CFF0;  // screen width
@@ -78,7 +74,6 @@ int fn_801E866C(int view);  // car of a view
 int fn_801B8570(int car);   // car is racing
 CarInfo* fn_801EA9A0(int car);
 f32 fn_8013672C(void);      // lap length
-RaceSetupHdr* fn_801E7E3C(void);
 }
 
 static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }

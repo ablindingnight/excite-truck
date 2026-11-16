@@ -3,6 +3,7 @@
 // movie tool. Names come from the "Replay:" / "replay:" strings; function names are guesses.
 #include <stdio.h>
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/joy.h"
 #include "macros.h"
 
@@ -54,12 +55,6 @@ public:
     virtual ~Layout(void);
 };
 
-// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
-struct RaceOpts {
-    u8 pad0[0x10];
-    u32 flags;  // offset 0x10
-};
-
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
 // JoyStatus: game/joy.h.
 struct Camera {
@@ -86,7 +81,6 @@ const char* fn_80131234(const char* key);
 void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
 u32 fn_8026E20C(void);
 void fn_8026E204(u32 flags);
-RaceOpts* fn_801E87A8(void);
 int fn_801769F8(void);
 void fn_80011A2C(void);
 int fn_802ECC10(void);

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/raceprog.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
 #include "game/raceopts.h"
@@ -184,7 +185,7 @@ struct RaceInfo {
     u8 active;          // offset 0x1
     s32 mode;           // offset 0x4
     RaceOpts* event;   // offset 0x8
-    void* info;         // offset 0xC
+    RaceProgress* info; // offset 0xC
     f32 time;           // offset 0x10
     s32 numPlayers;     // offset 0x14
     s32 numViews;       // offset 0x18
@@ -297,7 +298,6 @@ void fn_80209190(void* p, f32 value);
 void ResetOverlays(void);
 extern "C" {
 void fn_80011A50(void);
-void* fn_801E7E3C(void);
 f32 fn_801E7E18(void);
 void fn_80230B5C(Camera* cam);
 void fn_802C8638(Camera* cam);
