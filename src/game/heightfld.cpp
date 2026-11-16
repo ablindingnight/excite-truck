@@ -736,7 +736,7 @@ int fn_801DDA84(void* q, f32 x, f32 z, s32* out, f32 thr, int max) {
     return n;
 }
 
-f32 fn_801DDC8C(f32 x, f32 z) {
+f32 fn_801DDC8C(void* q, f32 x, f32 z) {  // q: the caller passes body+0x6C (unused here; retail r3)
     f32 h;
     f32 fz;
     GroundHeader* g;

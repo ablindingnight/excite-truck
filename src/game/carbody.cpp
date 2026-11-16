@@ -1543,7 +1543,7 @@ void fn_8014E61C(s32 id, int kind, f32 v);
 void fn_80161A38(int a, s32 id, int c);
 int fn_8018A100(u8* p);
 int fn_801E1048(s32 id);
-f32 fn_801DDC8C(f32 x, f32 z);
+f32 fn_801DDC8C(void* q, f32 x, f32 z);  // heightfld; retail passes p + 0x6C first
 f32 fn_801DCF48(BVec* n, f32 x, f32 z);
 void fn_802E30C8(const char* fmt, ...);
 extern char lbl_803325AC[];
@@ -2000,7 +2000,7 @@ void fn_80183E7C(u8* p) {
     if (U32(p, 0x10) == 'PCAR') {
         f32 x = F32(p, 0x60);
         f32 z = F32(p, 0x68);
-        f32 floor = fn_801DDC8C(F32(p, 0x60), F32(p, 0x68));
+        f32 floor = fn_801DDC8C(p + 0x6C, F32(p, 0x60), F32(p, 0x68));
         floor = floor > lbl_80561CAC ? floor : lbl_80561CAC;
         f32 t = F32(p, 0x2688) - lbl_80561DFC;
         t = t > lbl_80561CAC ? t : lbl_80561CAC;
