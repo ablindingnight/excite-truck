@@ -6,7 +6,11 @@
 #include "game/common.h"
 #include "game/menu.h"
 #include "game/logomover.h"
+// MWCC: retail evpath expands LogoMover's members inline. A PC build links popwarn's out-of-line definitions
+// instead, so the vtable and the members have one definition.
+#ifdef __MWERKS__
 #include "game/logomover_inl.h"
+#endif
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
