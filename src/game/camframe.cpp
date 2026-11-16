@@ -28,7 +28,9 @@ struct CamFrame {
     Vec pos;      // offset 0x24
 };
 
-struct Camera {
+// The camera record cammgr/namedcam call CamRec (0x88 here: its frame at 0x58); was named Camera here,
+// mrender's 0x30 render camera.
+struct CamRec {
     u8 pad[0x58];
     CamFrame frame;  // offset 0x58
 };
@@ -159,7 +161,7 @@ void fn_8026E688(CamFrame* out, const Vec* eye, const Vec* target, const Vec* up
     out->axes[2] = fwd;
 }
 
-void fn_8026E850(const Vec* eye, const Vec* target, Camera* cam, const Vec* up) {
+void fn_8026E850(const Vec* eye, const Vec* target, CamRec* cam, const Vec* up) {
     fn_8026E688(&cam->frame, eye, target, up);
 }
 
