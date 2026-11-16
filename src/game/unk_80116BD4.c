@@ -558,14 +558,20 @@ u32 mult64anddiv(u32 a, u32 b, u32 d) {
     u32 vn0;
     u32 un1;
     u32 r;
-    u32 un21;
     u32 q0;
+    u32 un21;
     u32 p2;
     u32 r2;
+    u32 rhat2;
     u32 hi = __mulhwu(a, b);
     u32 lo = a * b;
     u32 s;
     u32 v;
+    /* Remainder slot unproven. The textbook routine returns the remainder through a pointer; here both stores
+       (the first digit's partial remainder, then the final one) go to a local nobody reads and are dropped late.
+       They are what keeps rhat and r2 real values: rhat is coloured after p, and r2 stays in one register
+       through its correction, as in retail. */
+    u32 rem;
     if ((d & (d - 1)) == 0) {
         s = __cntlzw(d);
         return (hi << (s + 1)) | (lo >> (31 - s));
@@ -583,6 +589,7 @@ u32 mult64anddiv(u32 a, u32 b, u32 d) {
     q1 = hi / vn1;
     rhat = hi - (q1 * vn1);
     r = (rhat << 16) | un1;
+    *(u32 *)&rem = rhat;
     p = q1 * vn0;
     if (r < p) {
         r += v;
@@ -594,7 +601,8 @@ u32 mult64anddiv(u32 a, u32 b, u32 d) {
     }
     un21 = r - p;
     q0 = un21 / vn1;
-    r2 = ((un21 - (q0 * vn1)) << 16) | (lo & 0xFFFF);
+    rhat2 = un21 - (q0 * vn1);
+    r2 = (rhat2 << 16) | (lo & 0xFFFF);
     p2 = q0 * vn0;
     if (r2 < p2) {
         r2 += v;
@@ -603,6 +611,7 @@ u32 mult64anddiv(u32 a, u32 b, u32 d) {
             q0--;
         }
     }
+    *(u32 *)&rem = r2;
     return (q1 << 16) | q0;
 }
 #pragma pop
