@@ -1375,7 +1375,7 @@ static inline double AbsD(double v) { return __fabs(v); }
 /* Helper name unproven */
 static inline s32 LapDiff(s32 hi, s32 lo) { return hi - lo; }
 #pragma push
-#pragma opt_dead_assignments off  /* Pragma unproven */
+#pragma opt_dead_assignments off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_801B2F90 exact with it, 98.44 without */
 f32 fn_801B2F90(int a, int b) {
     DeityCar* ca = &lbl_8055E684[a];
     DeityCar* cb = &lbl_8055E684[b];

@@ -285,7 +285,7 @@ void fn_801EB128(void) {
 }
 
 #pragma push
-#pragma opt_propagation off  /* Pragma unproven */
+#pragma opt_propagation off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_801EB13C exact with it, 74.30 without */
 void fn_801EB13C(GModel* m) {
     GSwap32(&m->handle);
     GSwap32(&m->res);
