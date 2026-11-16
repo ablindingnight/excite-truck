@@ -32,6 +32,7 @@ struct RaceResult {
 };
 
 struct RaceSetup {
+    RaceSetup(void);  // world.cpp
     char track[0x20];     // offset 0x0
     u8 pad20[0x3C4];
     s32 event;            // offset 0x3E4
@@ -159,7 +160,6 @@ int fn_80128314(int heap);
 int fn_80265D58(void);
 int fn_80204024(void);
 void fn_8012BF28(void);
-void __ct__9RaceSetupFv(RaceSetup* rs);
 void fn_80129AEC(int a);
 int fn_802411CC(void);
 void fn_802411C8(void);
@@ -261,7 +261,6 @@ void fn_8023B9EC(int track, int eve, RaceResult* out, int difficulty, int skip) 
             fn_8012BF28();
         }
         RaceSetup rs;
-        __ct__9RaceSetupFv(&rs);
         fn_8023B7EC(&rs, track, eve, difficulty);
         rs.unk3F0 = 0;
         rs.difficulty = difficulty;
