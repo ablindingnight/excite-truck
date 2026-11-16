@@ -2747,22 +2747,51 @@ void quanttos16s(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
 
 // Interleaves two float channels (left at arg1, right after it) into clamped 16-bit stereo PCM.
 #pragma push
+#pragma opt_lifetimes off
 #pragma opt_propagation off
 #pragma opt_unroll_loops off
 #pragma ppc_unroll_speculative off
 void quanttos16chans2(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
+    u32 l;
+    f32 *right = arg1 + arg2;
+    u32 d;
+    s16 *out = arg0 - 1;
     u32 lo = 0x7FFF8000;
     u32 hi = 0x80007FFF;
-    f32 *right = arg1 + arg2;
-    u32 i;
-    u32 l;
     u32 r;
-    arg0--;
+    u64 t;
+    u64 t2;
+    u64 t3;
+    u64 t4;
+    u32 i;
     for (i = 0; i < arg2; i++) {
-        l = (s32)(*arg1++ * farg0);
-        r = (s32)(farg0 * *right++);
-        *++arg0 = Clamp16(l, lo, hi);
-        *++arg0 = Clamp16(r, lo, hi);
+        l = (s32)(*arg1 * farg0);
+        r = (s32)(farg0 * *right);
+        l ^= 0x80000000;
+        t = (u64)l - lo;
+        d = (u32)t;
+        d &= ~(u32)(t >> 32);
+        l = d - 32768;
+        l ^= 0x80000000;
+        t2 = (u64)l - hi;
+        d = (u32)t2;
+        d &= (u32)(t2 >> 32);
+        l = d + 32767;
+        r ^= 0x80000000;
+        t3 = (u64)r - lo;
+        d = (u32)t3;
+        d &= ~(u32)(t3 >> 32);
+        r = d - 32768;
+        r ^= 0x80000000;
+        t4 = (u64)r - hi;
+        d = (u32)t4;
+        d &= (u32)(t4 >> 32);
+        r = d + 32767;
+        out[1] = l;
+        right++;
+        arg1++;
+        out += 2;
+        *out = r;
     }
 }
 #pragma pop
@@ -7344,6 +7373,8 @@ void fn_80125CB4(void *arg0, void *arg1, void *arg2, s32 arg3) {
 
 extern const s32 lbl_802F7A40[];
 // Dequantizes (inter table `q`) and inverse-transforms a block, adding the result to the motion source src.
+#pragma push
+#pragma opt_lifetimes off
 void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride) {
     s32 tmp[64];
     s32 i;
@@ -7379,15 +7410,15 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
             s32 d4 = (s4 * quant[32]) >> 11;
             s32 d6 = (s6 * quant[48]) >> 11;
             s32 a0 = d0 + d4;
-            s32 a1 = d0 - d4;
             s32 a2 = d6 + d2;
             s32 a3 = BINK_MUL(BINK_A1, d2 - d6) - a2;
-            s32 e0 = a0 + a2;
             s32 e3 = a0 - a2;
-            s32 d1 = (s1 * quant[8]) >> 11;
-            s32 e1 = a1 + a3;
+            s32 a1 = d0 - d4;
+            s32 e0 = a0 + a2;
             s32 e2 = a1 - a3;
+            s32 e1 = a1 + a3;
             s32 d3 = (s3 * quant[24]) >> 11;
+            s32 d1 = (s1 * quant[8]) >> 11;
             s32 d5 = (s5 * quant[40]) >> 11;
             s32 d7 = (s7 * quant[56]) >> 11;
             s32 a7 = d1 - d7;
@@ -7396,9 +7427,11 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
             s32 a5 = d5 - d3;
             s32 b0 = a4 + a6;
             s32 b1 = BINK_MUL(BINK_A3, a7 + a5);
+            s32 b3 = BINK_MUL(BINK_A1, a6 - a4);
+            s32 b4 = BINK_MUL(BINK_A2, a7) - b1;
             s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-            s32 b3 = BINK_MUL(BINK_A1, a6 - a4) - b2;
-            s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;
+            b3 -= b2;
+            b4 += b3;
             block++;
             quant++;
             t[0] = e0 + b0;
@@ -7415,26 +7448,28 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
     t = tmp;
     for (i = 8; i != 0; --i) {
         s32 x0 = t[0];
-        s32 x1 = t[1];
         s32 x2 = t[2];
-        s32 x3 = t[3];
-        s32 x4 = t[4];
-        s32 x5 = t[5];
         s32 x6 = t[6];
+        s32 x5 = t[5];
+        s32 x3 = t[3];
+        s32 x1 = t[1];
         s32 x7 = t[7];
         s32 a2 = x2 + x6;
         s32 a3 = BINK_MUL(BINK_A1, x2 - x6) - a2;
-        s32 a5 = x5 - x3;
         s32 a4 = x3 + x5;
-        s32 a7 = x1 - x7;
         s32 a6 = x7 + x1;
-        s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
+        s32 x4 = t[4];
         s32 b0 = a6 + a4;
+        s32 b3 = BINK_MUL(BINK_A1, a6 - a4);
         s32 a0 = x4 + x0;
+        s32 a7 = x1 - x7;
+        s32 a5 = x5 - x3;
         s32 a1 = x0 - x4;
+        s32 b1 = BINK_MUL(BINK_A3, a5 + a7);
+        s32 b4 = BINK_MUL(BINK_A2, a7) - b1;
         s32 b2 = BINK_MUL(BINK_A4, a5) + b1 - b0;
-        s32 b3 = BINK_MUL(BINK_A1, a6 - a4) - b2;
-        s32 b4 = BINK_MUL(BINK_A2, a7) - b1 + b3;
+        b3 -= b2;
+        b4 += b3;
         dst[0] = src[0] + ((a0 + a2 + b0 + 0x7F) >> 8);
         dst[7] = src[7] + ((a0 + a2 - b0 + 0x7F) >> 8);
         dst[1] = src[1] + ((a1 + a3 + b2 + 0x7F) >> 8);
@@ -7448,6 +7483,7 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
         t += 8;
     }
 }
+#pragma pop
 
 // Reads the AC coefficients of an 8x8 DCT block (block[0], the DC, is set by the caller) bit plane by bit plane,
 // using the same coefficient list scheme as the residue reader, then stores them in natural order.
