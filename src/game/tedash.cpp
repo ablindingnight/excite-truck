@@ -20,12 +20,6 @@ public:
     }
 };
 
-struct BoxElem {
-    u8 pad0[0x14];
-    f32 h;      // offset 0x14
-    u32 color;  // offset 0x18
-};
-
 template <class T>
 void SafeDelete(T*& p) {
     if (p) {
@@ -175,7 +169,7 @@ void fn_802C21DC(s32 x, s32 z, s32 v);
 f32 fn_800108C8(const char* text, f32 scale);
 f32 fn_8001090C(f32 scale);
 void fn_80147230(TextElem* e, const char* fmt, ...);
-void fn_80147FF0(BoxElem* b, u32 color);
+void fn_80147FF0(GartElem* b, u32 color);
 void fn_801476C4(TextElem* e);
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
 ILayout* fn_80145E70(const char* name);
@@ -535,7 +529,7 @@ void fn_802B676C(void) {
 }
 
 void fn_802B67C8(const char* name) {
-    BoxElem* b = (BoxElem*)lbl_8055FA48->FindBox(name);
+    GartElem* b = lbl_8055FA48->FindBox(name);
     fn_80147FF0(b, b->color);
 }
 
@@ -552,7 +546,7 @@ void fn_802B6804(void) {
     fn_802B67C8("stats_box");
     TextElem* num = lbl_8055FA48->Find("stats_colnumber");
     TextElem* name = lbl_8055FA48->Find("stats_colname");
-    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("stats_col"))->h;
+    f32 row = (lbl_8055FA48->FindBox("stats_col"))->h;
     for (int i = 0; i < lbl_804BFA70.count; i++) {
         s = AtP(lbl_804BFA70.data, i);
         if (s->peak < *s->value) {
@@ -846,7 +840,7 @@ void fn_802B7884(const char* label) {
 }
 
 void fn_802B7918(void) {
-    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("matmap_col"))->h;
+    f32 row = (lbl_8055FA48->FindBox("matmap_col"))->h;
     TextElem t = *lbl_8055FA48->Find("brush_col");
     char nm[0x20];
     fn_802B6568(lbl_8055FA48->Find("brush_dropdown"), "Brushes");
@@ -872,7 +866,7 @@ void fn_802B7918(void) {
 }
 
 void fn_802B7B08(void) {
-    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("matmap_col"))->h;
+    f32 row = (lbl_8055FA48->FindBox("matmap_col"))->h;
     fn_802B6568(lbl_8055FA48->Find("layer_dropdown"), "Layers");
     TextElem t = *lbl_8055FA48->Find("layer_col");
     char nm[0x20];
@@ -922,7 +916,7 @@ void fn_802B7D4C(void) {
     fn_802B6568(lbl_8055FA48->Find("object_clump"), "%s", cl);
     TextElem num = *lbl_8055FA48->Find("objcolnumber");
     TextElem name = *lbl_8055FA48->Find("objcolname");
-    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("stats_col"))->h;
+    f32 row = (lbl_8055FA48->FindBox("stats_col"))->h;
     char nm[0x20];
     for (int i = 0; i < list.count; i++) {
         ObjItem* it = &list.data[i];

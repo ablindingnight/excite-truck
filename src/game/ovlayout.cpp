@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
+#include "game/artelemcopy.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/dashhelper.h"
@@ -42,31 +43,8 @@ struct GartElem;
 struct GartSet;
 extern "C" {
 void fn_801455B8(TextElem* e, ValueNode* n);
-void fn_80145438(ArtElem* e, ValueNode* n);
-void fn_80145538(GartElem* e, ValueNode* n);
 void fn_80145670(GartSet* s, ValueNode* n);
 }
-
-// Art element (0x28): a textured quad.
-// Elements with a size (art and boxes).
-struct BoxElem : ElemBase {
-    f32 w;  // offset 0x10
-    f32 h;  // offset 0x14
-};
-
-struct ArtElem : BoxElem {
-    void Read(ValueNode* n) { fn_80145438(this, n); }
-    f32 u0;            // offset 0x18
-    f32 v0;            // offset 0x1C
-    f32 u1;            // offset 0x20
-    f32 v1;            // offset 0x24
-};
-
-// Gart element (0x1C): a coloured box.
-struct GartElem : BoxElem {
-    void Read(ValueNode* n) { fn_80145538(this, n); }
-    u32 color;         // offset 0x18
-};
 
 // Gart set (0xC): a named art resource.
 struct GartSet {
@@ -252,7 +230,7 @@ void fn_80145368(ElemBase* e, ValueNode* n) {
 }
 
 void fn_80145438(ArtElem* e, ValueNode* n) {
-    fn_80145368(e, n);
+    fn_80145368((ElemBase*)e, n);
     e->w = n->GetFloat("wid");
     e->h = n->GetFloat("hit");
     e->u0 = fn_801452E0(n, "u0");
@@ -270,14 +248,14 @@ u32 fn_801454E8(ValueNode* n, const char* key) {
 }
 
 void fn_80145538(GartElem* e, ValueNode* n) {
-    fn_80145368(e, n);
+    fn_80145368((ElemBase*)e, n);
     e->w = n->GetFloat("wid");
     e->h = n->GetFloat("hit");
     e->color = fn_801454E8(n, "color");
 }
 
 void fn_801455B8(TextElem* e, ValueNode* n) {
-    fn_80145368(e, n);
+    fn_80145368((ElemBase*)e, n);
     e->just = fn_80144F40(n->GetValue("just"), lbl_8032CED8);
     e->scale = n->GetFloat("scale");
     e->color = fn_801454E8(n, "color");

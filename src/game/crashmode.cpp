@@ -13,23 +13,6 @@
 #include "game/carbody.h"
 #include "game/plainvec.h"
 
-struct ArtElem : ElemBase {
-    ArtElem(const ArtElem& o);
-    ArtElem& operator=(const ArtElem& o);
-    f32 w;   // offset 0x10
-    f32 h;   // offset 0x14
-    f32 u0;  // offset 0x18
-    f32 v0;  // offset 0x1C
-    f32 u1;  // offset 0x20
-    f32 v1;  // offset 0x24
-};
-
-struct GartElem : ElemBase {
-    f32 w;      // offset 0x10
-    f32 h;      // offset 0x14
-    u32 color;  // offset 0x18
-};
-
 class Sound2D {
 public:
     virtual ~Sound2D(void);
@@ -389,20 +372,11 @@ int fn_801DF93C(int view) {
 
 inline void DrawArt(ArtElem* e, s32 tex) { fn_801476D8(e, -1, tex); }
 
-// ArtElem's member-wise copy, defined after its uses as DrawArt above, so this unit calls the out-of-line weak copy
-// (retail's kept copy is betarace's).
-inline ArtElem::ArtElem(const ArtElem& o) : ElemBase(o), w(o.w), h(o.h), u0(o.u0), v0(o.v0), u1(o.u1), v1(o.v1) {}
+// ArtElem's copy, after its uses as DrawArt above, so this unit calls the out-of-line weak copy (retail's kept copy
+// is betarace's).
+#include "game/artelemcopy.h"
 
-inline ArtElem& ArtElem::operator=(const ArtElem& o) {
-    ElemBase::operator=(o);
-    w = o.w;
-    h = o.h;
-    u0 = o.u0;
-    v0 = o.v0;
-    u1 = o.u1;
-    v1 = o.v1;
-    return *this;
-}
+
 
 inline void DrawArt(ILayout* l, const char* name, s32 tex) { fn_801476D8(l->FindArt(name), -1, tex); }
 
