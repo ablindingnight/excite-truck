@@ -1056,11 +1056,7 @@ inline EvEventBar::~EvEventBar(void) {
 // accumulator while it counts.
 class BracketView : public EvBracket {
 public:
-    BracketView(EvBracket* b, EvContest* e, int i) {
-        br = b;
-        stand = e;
-        index = i;
-    }
+    BracketView(void) : br(0) {}
 
     virtual const char* Name(void) { return br->Name(); }
     virtual const char* Id(void) { return br->Id(); }
@@ -1212,7 +1208,10 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
         fn_801345D8(file, 33, "/%s.tex", SkipPrefix(((EventDesc*)GetEvent(c->EventId()))->table->GetValue("name"), "career_"));
         maps.Add(c->EventId(), file);
     }
-    BracketView view(br, res->improved ? &acc : 0, start);
+    BracketView view;
+    view.stand = res->improved ? &acc : 0;
+    view.index = start;
+    view.br = br;
     EvCupBar cup;
     cup.SetCup(&view, 1);
     MenuItem items[] = {
