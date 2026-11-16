@@ -65,7 +65,25 @@ void fn_80129AFC(void);
 double sin(double x);
 }
 
-// The save progress bar ("mem_bar.art"; vtable lbl_803430E8, dtor fn_80246428).
+/* Class name unproven */
+// The choice dialog's focus state: accept is focused first; without a custom layout the alternative choice
+// starts focused too.
+class McChoiceState : public MenuState {
+public:
+    McChoiceState(void) {
+        accept = 1;
+        alt = 1;
+    }
+    virtual ~McChoiceState(void) {}
+    virtual void Enter(void);
+    virtual void Unfocus(void);  // 0x60 /* name unproven */
+    virtual int Key(int key);
+
+    u8 accept;  // offset 0x18
+    u8 alt;     // offset 0x19
+};
+
+// The save progress bar ("mem_bar.art").
 class MemBar : public MenuState {
 public:
     MemBar(f32 f) {
@@ -386,20 +404,6 @@ void MemCardDialogMgr::Close(void) {
     fn_80214D50(4);
 }
 
-// The choice dialog's focus state (vtable lbl_80343148): accept is focused first; without a custom
-// layout the alternative choice starts focused too.
-struct McChoiceState {
-    void* vt;      // offset 0x0
-    s32 x;         // offset 0x4
-    s32 y;         // offset 0x8
-    s32 w;         // offset 0xC
-    s32 h;         // offset 0x10
-    int unk14;     // offset 0x14
-    u8 accept;     // offset 0x18
-    u8 alt;        // offset 0x19
-};
-
-extern void* lbl_80343148[];
 extern UnkStatic123s lbl_80498890;
 extern "C" void fn_80216CA8(void);
 extern const MenuDesc lbl_802FA364;
@@ -423,10 +427,6 @@ void MemCardDialogMgr::Setup(McDialogCfg* cfg) {
         choices[i].text = 0;
     }
     McChoiceState state;
-    state.vt = lbl_80343148;
-    state.unk14 = 0;
-    state.accept = 1;
-    state.alt = 1;
     if (cfg->layout) {
         state.alt = 0;
     }
@@ -457,13 +457,6 @@ void MemCardDialogMgr::Setup(McDialogCfg* cfg) {
 }
 
 extern "C" {
-
-u8* fn_802461D0(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
 
 void fn_80246210(void) {
     lbl_8055F244->bgShown = 0;
@@ -508,17 +501,14 @@ void MemCardDialogMgr::ShowMsg(const McMsg* m) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
-extern "C" {
+void McChoiceState::Enter(void) { fn_80214CB4(accept == 0); }
 
+void McChoiceState::Unfocus(void) { alt = 0; }
 
-void fn_80246498(u8* p) { fn_80214CB4(U8(p, 0x18) == 0); }
-
-void fn_802464A8(u8* p) { U8(p, 0x19) = 0; }
-
-int fn_802464B4(u8* p, int key) {
+int McChoiceState::Key(int key) {
     switch (key) {
     case 0x125:
-        if (!U8(p, 0x19)) {
+        if (!alt) {
             fn_80214CB4(0);
             fn_80230E90(0);
         } else {
@@ -526,7 +516,7 @@ int fn_802464B4(u8* p, int key) {
         }
         break;
     case 0x127:
-        if (!U8(p, 0x19)) {
+        if (!alt) {
             fn_80214CB4(1);
             fn_80230E90(0);
         } else {
@@ -534,7 +524,7 @@ int fn_802464B4(u8* p, int key) {
         }
         break;
     case 0x126:
-        if (U8(p, 0x19)) {
+        if (alt) {
             fn_80214CB4(0);
             fn_80230E90(0);
         } else {
@@ -542,7 +532,7 @@ int fn_802464B4(u8* p, int key) {
         }
         break;
     case 0x128:
-        if (U8(p, 0x19)) {
+        if (alt) {
             fn_80214CB4(1);
             fn_80230E90(0);
         } else {
@@ -554,8 +544,6 @@ int fn_802464B4(u8* p, int key) {
     }
     return 1;
 }
-
-}  // extern "C"
 
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
