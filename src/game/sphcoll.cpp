@@ -58,45 +58,40 @@ static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
     v->z = z;
 }
 
-// Rotation + translation of a collision frame.
-struct CFrame {
-    f32 m[9];   // offset 0x0, rows
-    RVec3 t;    // offset 0x24
-};
-
+// CFrame: rmtx.h's RMtx.
 extern "C" const f32 lbl_805622DC;  // -1.0
 extern "C" const f32 lbl_805622E0;  // 1.0
 
 static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(RVec3* out, const RVec3* in, const CFrame* m) {
+static inline void MulVec(RVec3* out, const RVec3* in, const RMtx* m) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        f32 x = Dot3(in->x, m->rot.x.x, in->y, m->rot.y.x, in->z, m->rot.z.x);
+        f32 y = Dot3(in->x, m->rot.x.y, in->y, m->rot.y.y, in->z, m->rot.z.y);
+        f32 z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = Dot3(in->x, m->rot.x.x, in->y, m->rot.y.x, in->z, m->rot.z.x);
+        out->y = Dot3(in->x, m->rot.x.y, in->y, m->rot.y.y, in->z, m->rot.z.y);
+        out->z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
     }
 }
 
-static inline void MulVecT(RVec3* out, const RVec3* in, const CFrame* m) {
+static inline void MulVecT(RVec3* out, const RVec3* in, const RMtx* m) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
-        f32 y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
-        f32 z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
+        f32 x = Dot3(in->x, m->rot.x.x, in->y, m->rot.x.y, in->z, m->rot.x.z);
+        f32 y = Dot3(in->x, m->rot.y.x, in->y, m->rot.y.y, in->z, m->rot.y.z);
+        f32 z = Dot3(in->x, m->rot.z.x, in->y, m->rot.z.y, in->z, m->rot.z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->m[0], in->y, m->m[1], in->z, m->m[2]);
-        out->y = Dot3(in->x, m->m[3], in->y, m->m[4], in->z, m->m[5]);
-        out->z = Dot3(in->x, m->m[6], in->y, m->m[7], in->z, m->m[8]);
+        out->x = Dot3(in->x, m->rot.x.x, in->y, m->rot.x.y, in->z, m->rot.x.z);
+        out->y = Dot3(in->x, m->rot.y.x, in->y, m->rot.y.y, in->z, m->rot.y.z);
+        out->z = Dot3(in->x, m->rot.z.x, in->y, m->rot.z.y, in->z, m->rot.z.z);
     }
 }
 
@@ -361,27 +356,27 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
     PolyPush* q;
     f32 t;
     f32 sum;
-    CFrame* g;
+    RMtx* g;
     f32 y;
     u8* o;
     f32 k;
     f32 a;
-    CFrame* f;
+    RMtx* f;
     int count;
     f32 pen;
     f32 z;
     f32 sq;
     f32 inv;
     o = (u8*)world;
-    f = (CFrame*)PTR(o, 0xC);
+    f = (RMtx*)PTR(o, 0xC);
     RVec3 lc;
-    lc.x = c[0] - f->t.x;
-    lc.y = c[1] - f->t.y;
-    lc.z = c[2] - f->t.z;
+    lc.x = c[0] - f->pos.x;
+    lc.y = c[1] - f->pos.y;
+    lc.z = c[2] - f->pos.z;
     {
-        x = Dot3(lc.x, f->m[0], lc.y, f->m[1], lc.z, f->m[2]);
-        y = Dot3(lc.x, f->m[3], lc.y, f->m[4], lc.z, f->m[5]);
-        z = Dot3(lc.x, f->m[6], lc.y, f->m[7], lc.z, f->m[8]);
+        x = Dot3(lc.x, f->rot.x.x, lc.y, f->rot.x.y, lc.z, f->rot.x.z);
+        y = Dot3(lc.x, f->rot.y.x, lc.y, f->rot.y.y, lc.z, f->rot.y.z);
+        z = Dot3(lc.x, f->rot.z.x, lc.y, f->rot.z.y, lc.z, f->rot.z.z);
         lc.x = x;
         lc.y = y;
         lc.z = z;
@@ -393,7 +388,7 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
         return 0;
     }
     RVec3 lv;
-    MulVecT(&lv, (const RVec3*)vel, (CFrame*)PTR(o, 0xC));
+    MulVecT(&lv, (const RVec3*)vel, (RMtx*)PTR(o, 0xC));
     sum = 0.0f;
     count = 0;
     PolyPush push[9];
@@ -446,11 +441,11 @@ int fn_80198F64(const f32* c, u32 world, f32* hit, f32* depth, f32* n, const f32
         pc.z += q->n.z * k;
     }
     RVec3 w;
-    g = (CFrame*)PTR(o, 0xC);
+    g = (RMtx*)PTR(o, 0xC);
     MulVec(&w, &pc, g);
-    w.x += g->t.x;
-    w.y += g->t.y;
-    w.z += g->t.z;
+    w.x += g->pos.x;
+    w.y += g->pos.y;
+    w.z += g->pos.z;
     RVec3 dv;
     dv.x = w.x - c[0];
     dv.y = w.y - c[1];
@@ -656,14 +651,14 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     RVec3 z2;
     RVec3 z3;
     RVec3 z4;
-    CFrame* fp;
-    CFrame* fq;
+    RMtx* fp;
+    RMtx* fq;
     RigidBody* pb;
     RigidBody* qb;
     s32 pk = ((CollShape*)p)->surface;
     s32 qk = ((CollShape*)q)->surface;
-    fp = (CFrame*)((u8*&)((CollShape*)p)->frame);
-    fq = (CFrame*)((u8*&)((CollShape*)q)->frame);
+    fp = (RMtx*)((u8*&)((CollShape*)p)->frame);
+    fq = (RMtx*)((u8*&)((CollShape*)q)->frame);
     pb = (RigidBody*)((u8*&)((CollShape*)p)->owner);
     qb = (RigidBody*)((u8*&)((CollShape*)q)->owner);
     if (qk == 0x3EA) {
@@ -699,8 +694,8 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     pq.y = pt->y;
     pq.z = pt->z;
     if (pb && qb) {
-        f32 ha = MaxF(MinF(1.5239999f, ((CFrame*)((u8*&)((CollShape*)p)->frame))->t.y - pt->y), -1.5239999f);
-        f32 hb = MaxF(MinF(1.5239999f, ((CFrame*)((u8*&)((CollShape*)q)->frame))->t.y - pt->y), -1.5239999f);
+        f32 ha = MaxF(MinF(1.5239999f, ((RMtx*)((u8*&)((CollShape*)p)->frame))->pos.y - pt->y), -1.5239999f);
+        f32 hb = MaxF(MinF(1.5239999f, ((RMtx*)((u8*&)((CollShape*)q)->frame))->pos.y - pt->y), -1.5239999f);
         pa.y = pt->y + 0.95f * ha;
         pq.y = pt->y + 0.95f * hb;
     }
@@ -742,17 +737,17 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
     imp.x += fr.x;
     imp.y += fr.y;
     imp.z += fr.z;
-    ra.x = pt->x - fp->t.x;
-    ra.y = pt->y - fp->t.y;
-    ra.z = pt->z - fp->t.z;
-    rb.x = pt->x - fq->t.x;
-    rb.y = pt->y - fq->t.y;
-    rb.z = pt->z - fq->t.z;
+    ra.x = pt->x - fp->pos.x;
+    ra.y = pt->y - fp->pos.y;
+    ra.z = pt->z - fp->pos.z;
+    rb.x = pt->x - fq->pos.x;
+    rb.y = pt->y - fq->pos.y;
+    rb.z = pt->z - fq->pos.z;
     if (vn < 0.0f) {
         PSVECCrossProduct((const Vec*)&ra, (const Vec*)n, (Vec*)&ca);
         PSVECCrossProduct((const Vec*)&rb, (const Vec*)n, (Vec*)&cb);
         if (pb) {
-            MulVec(&ia, &ca, (CFrame*)((u8*)pb + 0x148));
+            MulVec(&ia, &ca, (RMtx*)((u8*)pb + 0x148));
         } else {
             ia.x = 0.0f;
             ia.y = 0.0f;
@@ -760,7 +755,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         }
         PSVECCrossProduct((const Vec*)&ia, (const Vec*)&ra, (Vec*)&ta);
         if (qb) {
-            MulVec(&ib, &cb, (CFrame*)((u8*)qb + 0x148));
+            MulVec(&ib, &cb, (RMtx*)((u8*)qb + 0x148));
         } else {
             ib.x = 0.0f;
             ib.y = 0.0f;
@@ -795,7 +790,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             PSVECCrossProduct((const Vec*)&ra, (const Vec*)&tv, (Vec*)&ca2);
             PSVECCrossProduct((const Vec*)&rb, (const Vec*)&tv, (Vec*)&cb2);
             if (pb) {
-                MulVec(&ia2, &ca2, (CFrame*)((u8*)pb + 0x148));
+                MulVec(&ia2, &ca2, (RMtx*)((u8*)pb + 0x148));
             } else {
                 ia2.x = 0.0f;
                 ia2.y = 0.0f;
@@ -803,7 +798,7 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
             }
             PSVECCrossProduct((const Vec*)&ia2, (const Vec*)&ra, (Vec*)&ta2);
             if (qb) {
-                MulVec(&ib2, &cb2, (CFrame*)((u8*)qb + 0x148));
+                MulVec(&ib2, &cb2, (RMtx*)((u8*)qb + 0x148));
             } else {
                 ib2.x = 0.0f;
                 ib2.y = 0.0f;
@@ -1084,14 +1079,14 @@ int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
 // Sphere (centre c, radius r) against the side of tube q: in tube space, within the half length and off
 // the axis, a contact at the tube surface with the radial normal.
 int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
-    CFrame* f = (CFrame*)((u8*&)((CollShape*)q)->frame);
+    RMtx* f = (RMtx*)((u8*&)((CollShape*)q)->frame);
     RVec3 l;
-    l.x = c[0] - f->t.x;
-    l.y = c[1] - f->t.y;
-    l.z = c[2] - f->t.z;
-    f32 x = Dot3(l.x, f->m[0], l.y, f->m[1], l.z, f->m[2]);
-    f32 y = Dot3(l.x, f->m[3], l.y, f->m[4], l.z, f->m[5]);
-    f32 z = Dot3(l.x, f->m[6], l.y, f->m[7], l.z, f->m[8]);
+    l.x = c[0] - f->pos.x;
+    l.y = c[1] - f->pos.y;
+    l.z = c[2] - f->pos.z;
+    f32 x = Dot3(l.x, f->rot.x.x, l.y, f->rot.x.y, l.z, f->rot.x.z);
+    f32 y = Dot3(l.x, f->rot.y.x, l.y, f->rot.y.y, l.z, f->rot.y.z);
+    f32 z = Dot3(l.x, f->rot.z.x, l.y, f->rot.z.y, l.z, f->rot.z.z);
     l.x = x;
     l.y = y;
     l.z = z;
@@ -1107,9 +1102,9 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 cc.y = c[1];
                 cc.z = c[2];
                 RVec3 ct;
-                ct.x = f->t.x;
-                ct.y = f->t.y;
-                ct.z = f->t.z;
+                ct.x = f->pos.x;
+                ct.y = f->pos.y;
+                ct.z = f->pos.z;
                 RVec3 s;
                 RVec3 w;
                 RVec3 nw;
@@ -1122,16 +1117,16 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 s.x *= k;
                 s.z = l.z;
                 s.y *= k;
-                CFrame* m = (CFrame*)((u8*&)((CollShape*)q)->frame);
+                RMtx* m = (RMtx*)((u8*&)((CollShape*)q)->frame);
                 MulVec(&w, &s, m);
-                w.x += m->t.x;
-                w.y += m->t.y;
-                w.z += m->t.z;
+                w.x += m->pos.x;
+                w.y += m->pos.y;
+                w.z += m->pos.z;
                 n.x = l.x;
                 n.y = l.y;
                 n.z = 0.0f;
                 PSVECNormalize((const Vec*)&n.x, (Vec*)&n.x);
-                MulVec(&nw, &n, (CFrame*)((u8*&)((CollShape*)q)->frame));
+                MulVec(&nw, &n, (RMtx*)((u8*&)((CollShape*)q)->frame));
                 nn = nw;
                 fn_8019A788(p, q, (u32)&w, &nn, 0, 0, r, 0.0f, 0.0f);
                 return 1;
@@ -1146,13 +1141,13 @@ extern "C" void fn_802E30C8(const char* fmt, ...);
 extern "C" void fn_802E317C(const char* fmt, ...);
 
 // l = (p - frame origin) in the frame's axes.
-static inline void ToBoxSpace(RVec3* l, const RVec3* p, const CFrame* f) {
-    f32 dx = p->x - f->t.x;
-    f32 dy = p->y - f->t.y;
-    f32 dz = p->z - f->t.z;
-    l->x = Dot3(dx, f->m[0], dy, f->m[1], dz, f->m[2]);
-    l->y = Dot3(dx, f->m[3], dy, f->m[4], dz, f->m[5]);
-    l->z = Dot3(dx, f->m[6], dy, f->m[7], dz, f->m[8]);
+static inline void ToBoxSpace(RVec3* l, const RVec3* p, const RMtx* f) {
+    f32 dx = p->x - f->pos.x;
+    f32 dy = p->y - f->pos.y;
+    f32 dz = p->z - f->pos.z;
+    l->x = Dot3(dx, f->rot.x.x, dy, f->rot.x.y, dz, f->rot.x.z);
+    l->y = Dot3(dx, f->rot.y.x, dy, f->rot.y.y, dz, f->rot.y.z);
+    l->z = Dot3(dx, f->rot.z.x, dy, f->rot.z.y, dz, f->rot.z.z);
 }
 
 // Clamps box-space point l into the box of half extents ext.
@@ -1166,7 +1161,7 @@ static inline void ClampToBox(RVec3* l, const RVec3* ext) {
 // box point gives the compression; a sphere centre already inside the box ("delta_length" ~ 0) is treated as
 // tunneling and pushed back along the box body's velocity when it moves fast enough.
 int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
-    CFrame f = *(CFrame*)VE(q)->v50();
+    RMtx f = *(RMtx*)VE(q)->v50();
     const RVec3* ext = (const RVec3*)&((BoxShape*)q)->half;
     RVec3 l;
     RVec3 cp;
@@ -1177,9 +1172,9 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     }
     ClampToBox(&l, ext);
     MulVec(&cp, &l, &f);
-    cp.x = cp.x + f.t.x;
-    cp.y = cp.y + f.t.y;
-    cp.z = cp.z + f.t.z;
+    cp.x = cp.x + f.pos.x;
+    cp.y = cp.y + f.pos.y;
+    cp.z = cp.z + f.pos.z;
     d.x = cp.x - c->x;
     d.y = cp.y - c->y;
     d.z = cp.z - c->z;
@@ -1224,9 +1219,9 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             ClampToBox(&l, ext);
             RVec3 back;
             MulVec(&back, &l, &f);
-            back.x = back.x + f.t.x;
-            back.y = back.y + f.t.y;
-            back.z = back.z + f.t.z;
+            back.x = back.x + f.pos.x;
+            back.y = back.y + f.pos.y;
+            back.z = back.z + f.pos.z;
             if (debug) {
                 fn_802E30C8("backing up to %f, %f, %f", back.x, back.y, back.z);
             }
@@ -1253,8 +1248,8 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
         n.z = d.z * k;
         if (debug) {
             fn_802E30C8("colliding! cylinder_box(%p, %p: %d)", p, q, ((CollShape*)p)->surface);
-            CFrame* pf = (CFrame*)((u8*&)((CollShape*)p)->frame);
-            fn_802E30C8("%f,%f,%f", pf->t.x, pf->t.y, pf->t.z);
+            RMtx* pf = (RMtx*)((u8*&)((CollShape*)p)->frame);
+            fn_802E30C8("%f,%f,%f", pf->pos.x, pf->pos.y, pf->pos.z);
             fn_802E30C8("comp = %f!", comp);
         }
         fn_8019A788(p, q, (u32)&cp, &n, 0, 0, comp, 0.0f, 0.0f);
@@ -1290,7 +1285,7 @@ static inline void Clip(f32* v, f32 e, u32* in, u32 bit) {
 }
 
 int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
-    CFrame f;
+    RMtx f;
     RVec3 w;
     RVec3 cp;
     RVec3 l;
@@ -1307,23 +1302,23 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     if (!off) {
         d2 = PSVECSquareDistance((const Vec*)(p + 0x34), (const Vec*)(VE(q)->v50() + 0x24));
     } else {
-        CFrame* m = (CFrame*)VE(q)->v50();
+        RMtx* m = (RMtx*)VE(q)->v50();
         MulVec(&w, off, m);
-        w.x = w.x + m->t.x;
-        w.y = w.y + m->t.y;
-        w.z = w.z + m->t.z;
+        w.x = w.x + m->pos.x;
+        w.y = w.y + m->pos.y;
+        w.z = w.z + m->pos.z;
         d2 = PSVECSquareDistance((const Vec*)(p + 0x34), (const Vec*)&w);
     }
     f32 rr = F32(p, 0x24) + F32(q, 0x30);
     if (d2 > rr * rr) {
         return 0;
     }
-    f = *(CFrame*)VE(q)->v50();
+    f = *(RMtx*)VE(q)->v50();
     if (off) {
         MulVec(&o, off, &f);
-        f.t.x = f.t.x + o.x;
-        f.t.y = f.t.y + o.y;
-        f.t.z = f.t.z + o.z;
+        f.pos.x = f.pos.x + o.x;
+        f.pos.y = f.pos.y + o.y;
+        f.pos.z = f.pos.z + o.z;
     }
     RigidBody* pb = (RigidBody*)PTR(p, 0x4);
     RigidBody* qb = (RigidBody*)PTR(q, 0x4);
@@ -1367,17 +1362,17 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
         back.x = c.x + rv.x * lbl_80562340;
         back.y = c.y + rv.y * lbl_80562340;
         back.z = c.z + rv.z * lbl_80562340;
-        dd.x = f.t.x - c.x;
-        dd.y = f.t.y - c.y;
-        dd.z = f.t.z - c.z;
+        dd.x = f.pos.x - c.x;
+        dd.y = f.pos.y - c.y;
+        dd.z = f.pos.z - c.z;
         if (PSVECDotProduct((const Vec*)&dd, (const Vec*)&rv) > 0.001f) {
             ToBoxSpace(&l, &back, &f);
         }
     }
     MulVec(&cp, &l, &f);
-    cp.x = cp.x + f.t.x;
-    cp.y = cp.y + f.t.y;
-    cp.z = cp.z + f.t.z;
+    cp.x = cp.x + f.pos.x;
+    cp.y = cp.y + f.pos.y;
+    cp.z = cp.z + f.pos.z;
     d.x = cp.x - c.x;
     d.y = cp.y - c.y;
     d.z = cp.z - c.z;
@@ -1432,13 +1427,13 @@ int fn_8019C854(u8* p, u8* q) {
     RVec3 n;
     RVec3 w;
     RVec3 nw;
-    CFrame* f = (CFrame*)((u8*&)((CollShape*)q)->frame);
-    l.x = F32(p, 0x34) - f->t.x;
-    l.y = F32(p, 0x38) - f->t.y;
-    l.z = F32(p, 0x3C) - f->t.z;
-    f32 x = Dot3(l.x, f->m[0], l.y, f->m[1], l.z, f->m[2]);
-    f32 y = Dot3(l.x, f->m[3], l.y, f->m[4], l.z, f->m[5]);
-    f32 z = Dot3(l.x, f->m[6], l.y, f->m[7], l.z, f->m[8]);
+    RMtx* f = (RMtx*)((u8*&)((CollShape*)q)->frame);
+    l.x = F32(p, 0x34) - f->pos.x;
+    l.y = F32(p, 0x38) - f->pos.y;
+    l.z = F32(p, 0x3C) - f->pos.z;
+    f32 x = Dot3(l.x, f->rot.x.x, l.y, f->rot.x.y, l.z, f->rot.x.z);
+    f32 y = Dot3(l.x, f->rot.y.x, l.y, f->rot.y.y, l.z, f->rot.y.z);
+    f32 z = Dot3(l.x, f->rot.z.x, l.y, f->rot.z.y, l.z, f->rot.z.z);
     l.x = x;
     l.y = y;
     l.z = z;
@@ -1468,12 +1463,12 @@ int fn_8019C854(u8* p, u8* q) {
             n.z = l.z - a.z;
             PSVECNormalize((const Vec*)&n.x, (Vec*)&n.x);
             a.z = l.z;
-            CFrame* m = (CFrame*)((u8*&)((CollShape*)q)->frame);
+            RMtx* m = (RMtx*)((u8*&)((CollShape*)q)->frame);
             MulVec(&w, &a, m);
-            w.x += m->t.x;
-            w.y += m->t.y;
-            w.z += m->t.z;
-            MulVec(&nw, &n, (CFrame*)((u8*&)((CollShape*)q)->frame));
+            w.x += m->pos.x;
+            w.y += m->pos.y;
+            w.z += m->pos.z;
+            MulVec(&nw, &n, (RMtx*)((u8*&)((CollShape*)q)->frame));
             fn_8019A788(p, q, (u32)&w, &nw, 0, 0, pen, 0.0f, 0.0f);
             return 1;
         }
@@ -1914,7 +1909,7 @@ f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, 
         un = nn;
         PSVECNormalize((const Vec*)un.v, (Vec*)un.v);
         PSVECCrossProduct((const Vec*)r.v, (const Vec*)un.v, (Vec*)&rn);
-        MulVec(&t, &rn, (const CFrame*)iinv);
+        MulVec(&t, &rn, (const RMtx*)iinv);
         PSVECCrossProduct((const Vec*)&t, (const Vec*)r.v, (Vec*)u.v);
         f32 denom = 1.0f / mass + PSVECDotProduct((const Vec*)un.v, (const Vec*)u.v);
         if ((f32)__fabs(denom) > 1e-7f) {
@@ -1953,18 +1948,18 @@ int fn_8019E1F4(f32* tmin, f32* tmax, f32 o, f32 d, f32 r) {
 
 // Ray from + t*dir against the box (frame m, half sizes hx, hy, hz): slab test in box space; the entry
 // distance replaces *t when nearer.
-int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const CFrame* m, f32 hx, f32 hy, f32 hz) {
+int fn_8019E2D0(const RVec3* from, const RVec3* dir, f32* t, const RMtx* m, f32 hx, f32 hy, f32 hz) {
     RVec3 lp;
     RVec3 ld;
     f32 tmin;
     f32 tmax;
-    lp.x = from->x - m->t.x;
-    lp.y = from->y - m->t.y;
-    lp.z = from->z - m->t.z;
+    lp.x = from->x - m->pos.x;
+    lp.y = from->y - m->pos.y;
+    lp.z = from->z - m->pos.z;
     {
-        f32 x = Dot3(lp.x, m->m[0], lp.y, m->m[1], lp.z, m->m[2]);
-        f32 y = Dot3(lp.x, m->m[3], lp.y, m->m[4], lp.z, m->m[5]);
-        f32 z = Dot3(lp.x, m->m[6], lp.y, m->m[7], lp.z, m->m[8]);
+        f32 x = Dot3(lp.x, m->rot.x.x, lp.y, m->rot.x.y, lp.z, m->rot.x.z);
+        f32 y = Dot3(lp.x, m->rot.y.x, lp.y, m->rot.y.y, lp.z, m->rot.y.z);
+        f32 z = Dot3(lp.x, m->rot.z.x, lp.y, m->rot.z.y, lp.z, m->rot.z.z);
         lp.x = x;
         lp.y = y;
         lp.z = z;
@@ -2039,11 +2034,11 @@ extern "C" {
 
 int fn_8019E500(u8* p, u8* q) {
     TubeVol* t;
-    CFrame fr = *(CFrame*)VE(q)->v50();
+    RMtx fr = *(RMtx*)VE(q)->v50();
     BoxAxis ax[3] = {0};
-    ax[0].dir = *(PVec3A*)&fr.m[0];
-    ax[1].dir = *(PVec3A*)&fr.m[3];
-    ax[2].dir = *(PVec3A*)&fr.m[6];
+    ax[0].dir = *(PVec3A*)&fr.rot.x.x;
+    ax[1].dir = *(PVec3A*)&fr.rot.y.x;
+    ax[2].dir = *(PVec3A*)&fr.rot.z.x;
     ax[0].ext = ((BoxShape*)q)->half.x;
     ax[1].ext = ((BoxShape*)q)->half.y;
     ax[2].ext = ((BoxShape*)q)->half.z;
@@ -2069,7 +2064,7 @@ int fn_8019E500(u8* p, u8* q) {
         e.b.z = ab->dir.v[2];
         SetXYZ(&e.a, aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
         for (j = 0; j < 4; j++) {
-            e.pos = fr.t;
+            e.pos = fr.pos;
             f32 k = ea * ((j & 1) ? -1.0f : 1.0f);
             e.pos.x += aa->dir.v[0] * k;
             e.pos.y += aa->dir.v[1] * k;
@@ -2097,35 +2092,35 @@ int fn_8019E874(u8* p, u8* q) {
     if ((SphBodyType)((CollShape*)p)->surface == SPH_TYPE_73 || (SphBodyType)((CollShape*)p)->surface == SPH_TYPE_74) {
         return fn_8019E500(p, q);
     }
-    CFrame oq;
-    CFrame fp;
+    RMtx oq;
+    RMtx fp;
     RVec3 c;
     RVec3 d;
-    oq = *(CFrame*)VE(q)->v50();
-    fp = *(CFrame*)((u8*&)((CollShape*)p)->frame);
-    c = fp.t;
-    d.x = c.x - oq.t.x;
-    d.y = c.y - oq.t.y;
-    d.z = c.z - oq.t.z;
+    oq = *(RMtx*)VE(q)->v50();
+    fp = *(RMtx*)((u8*&)((CollShape*)p)->frame);
+    c = fp.pos;
+    d.x = c.x - oq.pos.x;
+    d.y = c.y - oq.pos.y;
+    d.z = c.z - oq.pos.z;
     f32 nh;
     f32 h = ((TubeShape*)p)->half;
     nh = -h;
-    f32 s = -PSVECDotProduct((const Vec*)&fp.m[6], (const Vec*)&d);
+    f32 s = -PSVECDotProduct((const Vec*)&fp.rot.z.x, (const Vec*)&d);
     f32 v = h < s ? h : s;
     v = v > nh ? v : nh;
-    c.x = c.x + fp.m[6] * v;
-    c.y = c.y + fp.m[7] * v;
-    c.z = c.z + fp.m[8] * v;
+    c.x = c.x + fp.rot.z.x * v;
+    c.y = c.y + fp.rot.z.y * v;
+    c.z = c.z + fp.rot.z.z * v;
     return fn_8019B4D8(p, q, &c, 0, ((TubeShape*)p)->rad);
 }
 
 // Capsule p against q, with the centre offset kept for a debug view that is compiled out.
 int fn_8019EA7C(u8* p, u8* q) {
-    CFrame* fq = (CFrame*)VE(q)->v50();
-    CFrame* fp = (CFrame*)((u8*&)((CollShape*)p)->frame);
-    f32 x = fp->t.x - fq->t.x;
-    f32 y = fp->t.y - fq->t.y;
-    f32 z = fp->t.z - fq->t.z;
+    RMtx* fq = (RMtx*)VE(q)->v50();
+    RMtx* fp = (RMtx*)((u8*&)((CollShape*)p)->frame);
+    f32 x = fp->pos.x - fq->pos.x;
+    f32 y = fp->pos.y - fq->pos.y;
+    f32 z = fp->pos.z - fq->pos.z;
     BoxCorner d(x, y, z);
     bool hit = false;
     hit |= fn_8019E874(p, q);
@@ -2184,7 +2179,7 @@ void CollShape::vf2C(u8* q) {
     VE(p)->v34(q + 4);
 }
 
-void CollShape::vf34(CFrame* p_v) {
+void CollShape::vf34(RMtx* p_v) {
     u8* p = (u8*)this;
     u32 v = (u32)p_v; U32(p, 0xc) = v; }
 
@@ -2235,7 +2230,7 @@ void fn_8019EECC(u8* p, RVec3* v) {
 
 struct CVolume {
     u8 pad0[0xC];
-    CFrame* frame;  // offset 0xC
+    RMtx* frame;  // offset 0xC
     u8 pad10[0x18];
     RVec3 local;    // offset 0x28
     RVec3 world;    // offset 0x34
@@ -2244,11 +2239,11 @@ struct CVolume {
 // World centre = frame * local centre.
 void SphereShape::vf0C(void) {
     CVolume* v = (CVolume*)this;
-    CFrame* f = v->frame;
+    RMtx* f = v->frame;
     MulVec(&v->world, &v->local, f);
-    v->world.x = v->world.x + f->t.x;
-    v->world.y = v->world.y + f->t.y;
-    v->world.z = v->world.z + f->t.z;
+    v->world.x = v->world.x + f->pos.x;
+    v->world.y = v->world.y + f->pos.y;
+    v->world.z = v->world.z + f->pos.z;
 }
 
 void SphereShape::vf28(void) {
@@ -2389,11 +2384,11 @@ void AttachedSphereShape::vf0C(void) {
 // Projects v onto the plane of p's frame row 1 (the result feeds a debug view that is compiled out).
 void AttachedSphereShape::vf24(const RVec3* v, const RVec3* at, int kind, void* ctx, void* by) {
     ((CollShape*)((u8*)this))->CollShape::vf24(v, at, kind, ctx, by);
-    f32 d = -PSVECDotProduct((const Vec*)(&((CFrame*)((u8*&)this->frame))->m[3]), (const Vec*)v);
-    CFrame* f = (CFrame*)((u8*&)this->frame);
-    f32 x = v->x + f->m[3] * d;
-    f32 y = v->y + f->m[4] * d;
-    f32 z = v->z + f->m[5] * d;
+    f32 d = -PSVECDotProduct((const Vec*)(&((RMtx*)((u8*&)this->frame))->rot.y.x), (const Vec*)v);
+    RMtx* f = (RMtx*)((u8*&)this->frame);
+    f32 x = v->x + f->rot.y.x * d;
+    f32 y = v->y + f->rot.y.y * d;
+    f32 z = v->z + f->rot.y.z * d;
     BoxCorner c(x, y, z);
 }
 
@@ -2533,11 +2528,11 @@ void BoxSphereShape::vf14(void) {
                 RVec3 imp;
                 RVec3 f;
                 RVec3 fr;
-                CFrame* m = (CFrame*)((u8*&)this->frame);
+                RMtx* m = (RMtx*)((u8*&)this->frame);
                 MulVec(&w, (RVec3*)corners + i, m);
-                w.x = w.x + m->t.x;
-                w.y = w.y + m->t.y;
-                w.z = w.z + m->t.z;
+                w.x = w.x + m->pos.x;
+                w.y = w.y + m->pos.y;
+                w.z = w.z + m->pos.z;
                 pos.x = w.x;
                 pos.z = w.z;
                 pos.y = fn_801E9DDC((u8*)rb->hint, w.x, w.z);
@@ -2650,7 +2645,7 @@ void OffsetSphereShape::vf28(void) {
     this->b78 = 0;
 }
 
-SphereGroup::SphereGroup(u32 a, u32 b) : CollShape((const CFrame*)a, (CollVolume*)b, 'GRUP', 0.0f, 0.0f) {
+SphereGroup::SphereGroup(u32 a, u32 b) : CollShape((const RMtx*)a, (CollVolume*)b, 'GRUP', 0.0f, 0.0f) {
     u8* p = (u8*)this;
     this->f170 = 0.0f;
     this->f178 = 0.0f;
@@ -2764,11 +2759,11 @@ extern const f32 lbl_805623BC;  // 1.1
 // Squared distance between the frame centres of p and q.
 static inline f32 CentreDist2(u8* p, u8* q) {
     RVec3 d;
-    CFrame* fq = (CFrame*)PTR(q, 0xC);
-    CFrame* fp = (CFrame*)((u8*&)((SphereGroup*)p)->frame);
-    d.x = fp->t.x - fq->t.x;
-    d.y = fp->t.y - fq->t.y;
-    d.z = fp->t.z - fq->t.z;
+    RMtx* fq = (RMtx*)PTR(q, 0xC);
+    RMtx* fp = (RMtx*)((u8*&)((SphereGroup*)p)->frame);
+    d.x = fp->pos.x - fq->pos.x;
+    d.y = fp->pos.y - fq->pos.y;
+    d.z = fp->pos.z - fq->pos.z;
     return PSVECDotProduct((const Vec*)&d, (const Vec*)&d);
 }
 
@@ -2776,10 +2771,10 @@ static inline f32 CentreDist2(u8* p, u8* q) {
 static inline void FromBoxCentre(RVec3* d, u8* p, u8* q) {
     RVec3 c;
     fn_801A1F44(&c, q);
-    CFrame* fp = (CFrame*)((u8*&)((SphereGroup*)p)->frame);
-    d->x = fp->t.x - c.x;
-    d->y = fp->t.y - c.y;
-    d->z = fp->t.z - c.z;
+    RMtx* fp = (RMtx*)((u8*&)((SphereGroup*)p)->frame);
+    d->x = fp->pos.x - c.x;
+    d->y = fp->pos.y - c.y;
+    d->z = fp->pos.z - c.z;
 }
 
 // Collides sphere group p against volume q by q's type tag: groups (the heavier side drives), boxes (each member
@@ -2816,15 +2811,15 @@ void SphereGroup::vf10(u8* q) {
         if ((f32)__fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC)))) < F32(q, 0x24) + this->f178 &&
             (f32)__fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC) + 0x18))) < F32(q, 0x2C) + this->f178) {
             u8* pb;
-            CFrame* f = (CFrame*)PTR(q, 0xC);
+            RMtx* f = (RMtx*)PTR(q, 0xC);
             pb = ((u8*&)this->owner);
             RVec3 l;
-            l.x = F32(pb, 0x60) - f->t.x;
-            l.y = F32(pb, 0x64) - f->t.y;
-            l.z = F32(pb, 0x68) - f->t.z;
-            f32 x = Dot3(l.x, f->m[0], l.y, f->m[1], l.z, f->m[2]);
-            f32 y = Dot3(l.x, f->m[3], l.y, f->m[4], l.z, f->m[5]);
-            f32 z = Dot3(l.x, f->m[6], l.y, f->m[7], l.z, f->m[8]);
+            l.x = F32(pb, 0x60) - f->pos.x;
+            l.y = F32(pb, 0x64) - f->pos.y;
+            l.z = F32(pb, 0x68) - f->pos.z;
+            f32 x = Dot3(l.x, f->rot.x.x, l.y, f->rot.x.y, l.z, f->rot.x.z);
+            f32 y = Dot3(l.x, f->rot.y.x, l.y, f->rot.y.y, l.z, f->rot.y.z);
+            f32 z = Dot3(l.x, f->rot.z.x, l.y, f->rot.z.y, l.z, f->rot.z.z);
             l.x = x;
             l.y = y;
             l.z = z;
@@ -2841,13 +2836,13 @@ void SphereGroup::vf10(u8* q) {
                     RVec3 bw;
                     RVec3 n;
                     fn_801BEAEC(id, w, &wp);
-                    CFrame* m = (CFrame*)PTR(q, 0xC);
-                    bl.x = wp.v[0] - m->t.x;
-                    bl.y = wp.v[1] - m->t.y;
-                    bl.z = wp.v[2] - m->t.z;
-                    f32 bx = Dot3(bl.x, m->m[0], bl.y, m->m[1], bl.z, m->m[2]);
-                    f32 by = Dot3(bl.x, m->m[3], bl.y, m->m[4], bl.z, m->m[5]);
-                    f32 bz = Dot3(bl.x, m->m[6], bl.y, m->m[7], bl.z, m->m[8]);
+                    RMtx* m = (RMtx*)PTR(q, 0xC);
+                    bl.x = wp.v[0] - m->pos.x;
+                    bl.y = wp.v[1] - m->pos.y;
+                    bl.z = wp.v[2] - m->pos.z;
+                    f32 bx = Dot3(bl.x, m->rot.x.x, bl.y, m->rot.x.y, bl.z, m->rot.x.z);
+                    f32 by = Dot3(bl.x, m->rot.y.x, bl.y, m->rot.y.y, bl.z, m->rot.y.z);
+                    f32 bz = Dot3(bl.x, m->rot.z.x, bl.y, m->rot.z.y, bl.z, m->rot.z.z);
                     bl.x = bx;
                     bl.y = by;
                     bl.z = bz;
@@ -2857,11 +2852,11 @@ void SphereGroup::vf10(u8* q) {
                     bl.x = ClampExt(bl.x, ex);
                     bl.y = ClampExt(bl.y, ey);
                     bl.z = ClampExt(bl.z, ez);
-                    m = (CFrame*)PTR(q, 0xC);
+                    m = (RMtx*)PTR(q, 0xC);
                     MulVec(&bw, &bl, m);
-                    bw.x = bw.x + m->t.x;
-                    bw.y = bw.y + m->t.y;
-                    bw.z = bw.z + m->t.z;
+                    bw.x = bw.x + m->pos.x;
+                    bw.y = bw.y + m->pos.y;
+                    bw.z = bw.z + m->pos.z;
                     n.x = wp.v[0] - bw.x;
                     n.y = wp.v[1] - bw.y;
                     n.z = wp.v[2] - bw.z;
@@ -3321,7 +3316,7 @@ int BoxShape::vf18(const RVec3* a, const RVec3* b, f32* c, RVec3* out) {
     f32 z = this->half.z;
     f32 y = this->half.y;
     f32 x = this->half.x;
-    if (fn_8019E2D0((RVec3*)((u8*)a), (RVec3*)((u8*)b), (f32*)((u8*)c), (CFrame*)((VEx*)p)->v50(), x, y, z)) {
+    if (fn_8019E2D0((RVec3*)((u8*)a), (RVec3*)((u8*)b), (f32*)((u8*)c), (RMtx*)((VEx*)p)->v50(), x, y, z)) {
         out->x = 0.0f;
         out->y = 1.0f;
         out->z = 0.0f;
@@ -3357,14 +3352,14 @@ void BoxShape::vf38(RVec3* lo, RVec3* hi) const {
     RVec3 c[8];
     BoxCorners(c, this->half.x, this->half.y, this->half.z);
     RVec3 w;
-    *lo = ((CFrame*)VE(((const u8*)this))->v50())->t;
-    *hi = ((CFrame*)VE(((const u8*)this))->v50())->t;
+    *lo = ((RMtx*)VE(((const u8*)this))->v50())->pos;
+    *hi = ((RMtx*)VE(((const u8*)this))->v50())->pos;
     for (int i = 0; i < 8; i++) {
-        CFrame* m = (CFrame*)VE(((const u8*)this))->v50();
+        RMtx* m = (RMtx*)VE(((const u8*)this))->v50();
         MulVec(&w, &c[i], m);
-        w.x = w.x + m->t.x;
-        w.y = w.y + m->t.y;
-        w.z = w.z + m->t.z;
+        w.x = w.x + m->pos.x;
+        w.y = w.y + m->pos.y;
+        w.z = w.z + m->pos.z;
         lo->x = lo->x < w.x ? lo->x : w.x;
         lo->y = lo->y < w.y ? lo->y : w.y;
         lo->z = lo->z < w.z ? lo->z : w.z;
@@ -3397,17 +3392,17 @@ OrientedBoxShape::OrientedBoxShape(u32 a, const RVec3* c, u32 b, f32 s0, f32 s1,
 // Takes the frame's rotation (0x44), then the world centre (0x68) = frame * local centre (0x38).
 void OrientedBoxShape::vf0C(void) {
     u8* p = (u8*)this;
-    CFrame* f = (CFrame*)((u8*&)this->frame);
-    ((PVec3A*)&this->rot)[0] = ((PVec3A*)f->m)[0];
-    ((PVec3A*)&this->rot)[1] = ((PVec3A*)f->m)[1];
-    ((PVec3A*)&this->rot)[2] = ((PVec3A*)f->m)[2];
+    RMtx* f = (RMtx*)((u8*&)this->frame);
+    ((PVec3A*)&this->rot)[0] = ((PVec3A*)&f->rot)[0];
+    ((PVec3A*)&this->rot)[1] = ((PVec3A*)&f->rot)[1];
+    ((PVec3A*)&this->rot)[2] = ((PVec3A*)&f->rot)[2];
     MulVec((RVec3*)&this->world, (RVec3*)&this->centre, f);
-    this->world.x = this->world.x + f->t.x;
-    this->world.y = this->world.y + f->t.y;
-    this->world.z = this->world.z + f->t.z;
+    this->world.x = this->world.x + f->pos.x;
+    this->world.y = this->world.y + f->pos.y;
+    this->world.z = this->world.z + f->pos.z;
 }
 
-RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape((const CFrame*)a, (CollVolume*)c, 'RAGD', lbl_805622E0, lbl_805622E0) {
+RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape((const RMtx*)a, (CollVolume*)c, 'RAGD', lbl_805622E0, lbl_805622E0) {
     u8* p = (u8*)this;
     ((u32&)this->f30) = b;
     fn_801A2674(p, r, 0, -1);
@@ -3445,7 +3440,7 @@ static inline f32 DistSq(const RVec3* a, const RVec3* b) {
 // Moves frame x by c, given in its own axes.
 static inline void Shift(Xform* x, const RVec3* c) {
     RVec3 w;
-    MulVec(&w, c, (CFrame*)x);
+    MulVec(&w, c, (RMtx*)x);
     x->pos.v[0] += w.x;
     x->pos.v[1] += w.y;
     x->pos.v[2] += w.z;
@@ -3479,7 +3474,7 @@ void RagdollShape::vf10(u8* o) {
         }
     };
     if (((CollShape*)o)->type == 'GRUP') {
-        f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)((u8*&)((CollShape*)o)->frame))->t);
+        f32 dd = DistSq(&((RMtx*)((u8*&)this->frame))->pos, &((RMtx*)((u8*&)((CollShape*)o)->frame))->pos);
         f32 r = this->radius + VE(o)->v3C();
         if (dd < r * r) {
             u8* box = PTR(o, 0x17C);
@@ -3511,7 +3506,7 @@ void RagdollShape::vf10(u8* o) {
             }
         }
     } else if (((CollShape*)o)->type == 'BOX ') {
-        f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)VE(o)->v50())->t);
+        f32 dd = DistSq(&((RMtx*)((u8*&)this->frame))->pos, &((RMtx*)VE(o)->v50())->pos);
         f32 r = this->radius + BoxRad(o);
         if (dd < r * r) {
             RVec3 vel;
@@ -3608,14 +3603,14 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
         RVec3(a, -a, -h),  RVec3(a, -a, h),  RVec3(a, a, -h),  RVec3(a, a, h),
     };
     RVec3 w;
-    *lo = ((CFrame*)((u8*&)this->frame))->t;
-    *hi = ((CFrame*)((u8*&)this->frame))->t;
+    *lo = ((RMtx*)((u8*&)this->frame))->pos;
+    *hi = ((RMtx*)((u8*&)this->frame))->pos;
     for (int i = 0; i < 8; i++) {
-        CFrame* m = (CFrame*)((u8*&)this->frame);
+        RMtx* m = (RMtx*)((u8*&)this->frame);
         MulVec(&w, &c[i], m);
-        w.x = w.x + m->t.x;
-        w.y = w.y + m->t.y;
-        w.z = w.z + m->t.z;
+        w.x = w.x + m->pos.x;
+        w.y = w.y + m->pos.y;
+        w.z = w.z + m->pos.z;
         lo->x = lo->x < w.x ? lo->x : w.x;
         lo->y = lo->y < w.y ? lo->y : w.y;
         lo->z = lo->z < w.z ? lo->z : w.z;
@@ -3628,7 +3623,7 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
 void RingVol::vf4C(void) {
     u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, this->inner + this->ring, lbl_8055E598.value); }
 
-PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape((const CFrame*)a, (CollVolume*)0, 'POLY', f1, f2) {
+PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape((const RMtx*)a, (CollVolume*)0, 'POLY', f1, f2) {
     u8* p = (u8*)this;
     ((u32&)this->fDC) = 0;
     this->n = n;
@@ -3692,17 +3687,17 @@ void PolyShape::vf38(RVec3* lo, RVec3* hi) const {
     u8* p = (u8*)this;
     RVec3 b;
     RVec3 a;
-    CFrame* f = (CFrame*)PTR(p, 0xC);
+    RMtx* f = (RMtx*)PTR(p, 0xC);
     MulVec(&a, (RVec3*)(p + 0x24), f);
-    a.x = a.x + f->t.x;
-    a.y = a.y + f->t.y;
-    a.z = a.z + f->t.z;
-    CFrame* g = (CFrame*)PTR(p, 0xC);
+    a.x = a.x + f->pos.x;
+    a.y = a.y + f->pos.y;
+    a.z = a.z + f->pos.z;
+    RMtx* g = (RMtx*)PTR(p, 0xC);
     MulVec(&b, (RVec3*)(p + 0x30), g);
     f32 lx = a.x;
-    b.x = b.x + g->t.x;
-    b.y = b.y + g->t.y;
-    b.z = b.z + g->t.z;
+    b.x = b.x + g->pos.x;
+    b.y = b.y + g->pos.y;
+    b.z = b.z + g->pos.z;
     *hi = a;
     *lo = *hi;
     lo->x = lx < b.x ? lx : b.x;
@@ -3731,7 +3726,7 @@ f32 PolyShape::Radius(void) {
 // The owner body as seen here: its frame at 0x3C and its attached points.
 struct OwnerBody {
     u8 pad0[0x3C];
-    CFrame frame;  // offset 0x3C
+    RMtx frame;  // offset 0x3C
 };
 
 void PolyShape::vf10(u8* p) {
@@ -3766,9 +3761,9 @@ void PolyShape::vf10(u8* p) {
                 for (; e; e = PTR(e, 0x0)) {
                     RVec3* lp = (RVec3*)(e + 0x4);
                     MulVec(&pt, lp, &owner->frame);
-                    pt.x = pt.x + owner->frame.t.x;
-                    pt.y = pt.y + owner->frame.t.y;
-                    pt.z = pt.z + owner->frame.t.z;
+                    pt.x = pt.x + owner->frame.pos.x;
+                    pt.y = pt.y + owner->frame.pos.y;
+                    pt.z = pt.z + owner->frame.pos.z;
                     pt.y += 0.25f;
                     vel1.v[0] = 0.0f;
                     vel1.v[1] = 0.0f;
@@ -3797,17 +3792,17 @@ void PolyShape::vf4C(void) {
     RVec3 w;
     const f32* d = (const f32*)(p + 0x3C);
     u32 color = lbl_8055E598.value;
-    o = *(PVec3A*)&((CFrame*)((u8*&)this->frame))->t;
+    o = *(PVec3A*)&((RMtx*)((u8*&)this->frame))->pos;
     for (int i = 0; i < this->n; d += 4, i++) {
         f32 len = d[3];
         v.x = d[0] * len;
         v.y = d[1] * len;
         v.z = d[2] * len;
-        CFrame* f = (CFrame*)((u8*&)this->frame);
+        RMtx* f = (RMtx*)((u8*&)this->frame);
         MulVec(&w, &v, f);
-        w.x = w.x + f->t.x;
-        w.y = w.y + f->t.y;
-        w.z = w.z + f->t.z;
+        w.x = w.x + f->pos.x;
+        w.y = w.y + f->pos.y;
+        w.z = w.z + f->pos.z;
         fn_801E41D8(o.v, &w.x, color, 0.3f);
     }
 }
@@ -3820,7 +3815,7 @@ struct MeshRes {
 };
 
 // Mesh volume ('PMSH') from the named mesh: bounding box min (0x28) / max (0x34) over its vertices.
-MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape((const CFrame*)id, (CollVolume*)owner, 'PMSH', 1.0f, 1.0f) {
+MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape((const RMtx*)id, (CollVolume*)owner, 'PMSH', 1.0f, 1.0f) {
     u8* p = (u8*)this;
     MeshRes* m = (MeshRes*)fn_801CFEAC(name);
     this->mesh = (u8*)m;
@@ -3870,21 +3865,21 @@ int MeshShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
     RVec3 lf;
     RVec3 ld;
     RVec3 ln;
-    CFrame* f = (CFrame*)((u8*&)this->frame);
-    lf.x = from->x - f->t.x;
-    lf.y = from->y - f->t.y;
-    lf.z = from->z - f->t.z;
+    RMtx* f = (RMtx*)((u8*&)this->frame);
+    lf.x = from->x - f->pos.x;
+    lf.y = from->y - f->pos.y;
+    lf.z = from->z - f->pos.z;
     {
-        f32 x = Dot3(lf.x, f->m[0], lf.y, f->m[1], lf.z, f->m[2]);
-        f32 y = Dot3(lf.x, f->m[3], lf.y, f->m[4], lf.z, f->m[5]);
-        f32 z = Dot3(lf.x, f->m[6], lf.y, f->m[7], lf.z, f->m[8]);
+        f32 x = Dot3(lf.x, f->rot.x.x, lf.y, f->rot.x.y, lf.z, f->rot.x.z);
+        f32 y = Dot3(lf.x, f->rot.y.x, lf.y, f->rot.y.y, lf.z, f->rot.y.z);
+        f32 z = Dot3(lf.x, f->rot.z.x, lf.y, f->rot.z.y, lf.z, f->rot.z.z);
         lf.x = x;
         lf.y = y;
         lf.z = z;
     }
-    MulVecT(&ld, dir, (CFrame*)((u8*&)this->frame));
+    MulVecT(&ld, dir, (RMtx*)((u8*&)this->frame));
     if (fn_801CF828(this->mesh, (u32)&lf, (u32)&ld, (u32)t, (u32)&ln)) {
-        MulVec(n, &ln, (CFrame*)((u8*&)this->frame));
+        MulVec(n, &ln, (RMtx*)((u8*&)this->frame));
         return 1;
     }
     return 0;

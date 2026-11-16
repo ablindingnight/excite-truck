@@ -27,7 +27,7 @@ public:
     // Parameter form, inlined into every builder (ball, mutphob, obstacles, trackobj, wheel). The owner test reads
     // the member: trackobj passes a null owner and retail still keeps the call.
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape((const CFrame*)m, o, 'SPHR', k, s) {
+        : CollShape(m, o, 'SPHR', k, s) {
         center = c;
         radius = r;
         f34 = 0.0f;
@@ -153,7 +153,7 @@ public:
 class TubeBase : public CollShape {
 public:
     TubeBase(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
-    TubeBase(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : CollShape((const CFrame*)m, o, 'TUBE', k, s) {
+    TubeBase(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : CollShape(m, o, 'TUBE', k, s) {
         rad = r;
         half = h;
     }
@@ -193,7 +193,7 @@ class BoxShape : public CollShape {
 public:
     BoxShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
     // Owner and frame form (obstacles; sphcoll's OrientedBoxShape constructor).
-    BoxShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, o, 'BOX ', k, s) {
+    BoxShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape(m, o, 'BOX ', k, s) {
         half.x = x;
         half.y = y;
         half.z = z;
@@ -201,7 +201,7 @@ public:
         radius = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
     }
     // Frame-only form with the default stiffness and skin (collvol's box volume).
-    BoxShape(const RMtx* m, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, 0, 'BOX ', 50000.0f, 0.2f) {
+    BoxShape(const RMtx* m, f32 x, f32 y, f32 z) : CollShape(m, 0, 'BOX ', 50000.0f, 0.2f) {
         half.x = x;
         half.y = y;
         half.z = z;

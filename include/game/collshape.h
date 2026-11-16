@@ -13,7 +13,7 @@
 // - vf18 is the first non-inline virtual and sphcoll defines it, so sphcoll emits the vtable, as retail does.
 
 struct RVec3;
-struct CFrame;
+struct RMtx;  // game/rmtx.h (the shape's frame; was CFrame)
 class CollVolume;
 
 // The all-pure interface the shape base derives from (its table is the 14 zero words after CollShape's, 0x80333BE8,
@@ -51,7 +51,7 @@ public:
     virtual void vf28(void) = 0;
     virtual void vf2C(u8* data) = 0;
     virtual u32 vf30(void) = 0;
-    virtual void vf34(CFrame* frame) = 0;
+    virtual void vf34(RMtx* frame) = 0;
 };
 inline CollShapeIface::~CollShapeIface(void) {}
 
@@ -61,8 +61,8 @@ public:
     CollShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
     // Parameter form, inlined into every builder; store order as mutphob's copy (the only order that keeps
     // SphereGroup and PolyShape identical).
-    CollShape(const CFrame* frame_, CollVolume* owner_, s32 type_, f32 k, f32 s) {
-        frame = (CFrame*)frame_;
+    CollShape(const RMtx* frame_, CollVolume* owner_, s32 type_, f32 k, f32 s) {
+        frame = (RMtx*)frame_;
         owner = owner_;
         data = 0;
         type = type_;
@@ -82,7 +82,7 @@ public:
     virtual void vf28(void) {}
     virtual void vf2C(u8* data);
     virtual u32 vf30(void);
-    virtual void vf34(CFrame* frame);
+    virtual void vf34(RMtx* frame);
     virtual void vf38(RVec3* lo, RVec3* hi) const = 0;
     virtual f32 Radius(void) = 0;
     virtual void SetSurface(int m) { surface = m; }
@@ -91,7 +91,7 @@ public:
     virtual void vf4C(void) {}
     CollVolume* owner;  // 0x04
     u8* data;           // 0x08
-    CFrame* frame;      // 0x0C
+    RMtx* frame;        // 0x0C
     f32 stiff;          // 0x10
     f32 skin;           // 0x14
     s32 type;           // 0x18
