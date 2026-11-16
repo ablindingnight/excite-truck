@@ -4,14 +4,7 @@
 // wheels. Also hands the car back to the course when it has been off the terrain for too long.
 // Names are guesses apart from the message.
 #include "game/common.h"
-
-struct TVec {
-    f32 x, y, z;
-};
-
-struct TPos {
-    f32 x, y, z;
-};
+#include "game/collvol.h"
 
 class SpringCar;
 
@@ -30,15 +23,15 @@ public:
     virtual void Update(void);                                           // 0x2C
     virtual void vf30(void);
     virtual void vf34(void);                                             // 0x34
-    virtual void vf38(const TVec* a, const TVec* b, int kind, int c);    // 0x38
-    virtual void vf3C(const TVec* a, const TVec* b, int kind, int c);    // 0x3C
+    virtual void vf38(const RVec3* a, const RVec3* b, int kind, int c);    // 0x38
+    virtual void vf3C(const RVec3* a, const RVec3* b, int kind, int c);    // 0x3C
     virtual void vf40(void);                                             // 0x40
     virtual void vf44(void);                                             // 0x44
 };
 
 struct WallPlane {
     u8 pad0[0x24];
-    TVec origin;  // offset 0x24
+    RVec3 origin;  // offset 0x24
 };
 
 struct WallObj {
@@ -65,11 +58,11 @@ struct Lift {
 struct SpringWall {
 public:
     int Ramping(void);
-    void Apply(SpringCar* car, TVec* acc);
+    void Apply(SpringCar* car, RVec3* acc);
     bool Free(void) const { return owner == 0; }
-    void Set(WallObj* w, SpringCar* car, const TVec* other);
+    void Set(WallObj* w, SpringCar* car, const RVec3* other);
 
-    TVec n;           // offset 0x0
+    RVec3 n;           // offset 0x0
     f32 vel;          // offset 0xC
     f32 depth;        // offset 0x10
     f32 dist;         // offset 0x14
@@ -124,7 +117,7 @@ public:
     virtual void vf30(void);
     virtual void vf34(void);
     virtual void vf38(void);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual void vf40(void);
     virtual void vf44(void);
     virtual void vf48(void);
@@ -163,33 +156,12 @@ struct RPacket;
 struct BodyState;
 struct BodyDesc;
 
-// The collision volume RigidBody derives from (collvol.cpp); declared as far as the CarBody slots need.
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);  // 0x08
-    virtual ~CollVolume(void);       // 0x0C
-    virtual void Reset(void);        // 0x10
-    virtual void vf14(void);         // 0x14
-    virtual void vf18(void);         // 0x18
-    virtual void Update(void);       // 0x1C
-    virtual void vf20(void);         // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);      // 0x28
-    virtual s32 vf2C(RPacket* pk);   // 0x2C: the packet size
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* pk);   // 0x34
-    virtual void vf38(u8* buf);      // 0x38
-    virtual void vf3C(void);         // 0x3C
-    virtual int vf40(void);          // 0x40
-    virtual int vf44(void);          // 0x44
-};
-
 // The rigid body CarBody derives from (rigid.cpp).
 class RigidBody : public CollVolume {
 public:
     void AddForceAt(const RVec3* f, const RVec3* at);
     virtual void vf18(void);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual int vf40(void);
     virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
@@ -216,16 +188,10 @@ public:
     virtual void vf58(void);          // 0x58
     virtual void vf5C(void);          // 0x5C
 
-    u8 pad4[0x8 - 0x4];
-    s32 slot;    // offset 0x8
-    u8 padC[0x54 - 0xC];
-    TVec up;     // offset 0x54
-    TPos pos;    // offset 0x60
-    s16 hint;    // offset 0x6C
-    u8 pad6E[0xD4 - 0x6E];
+    u8 padD0[0xD4 - 0xD0];
     f32 mass;    // offset 0xD4
     u8 padD8[0x118 - 0xD8];
-    TVec vel;    // offset 0x118
+    RVec3 vel;    // offset 0x118
     f32 spin;    // offset 0x124
     f32 roll;    // offset 0x128
     u8 pad12C[0x1EC - 0x12C];
@@ -239,7 +205,7 @@ public:
     u8 pad25D8[0x2620 - 0x25D8];
     s32 airborne;  // offset 0x2620
     u8 pad2624[0x26B4 - 0x2624];
-    TVec push;   // offset 0x26B4
+    RVec3 push;   // offset 0x26B4
     u8 pad26C0[0x2700 - 0x26C0];
 };
 
@@ -280,11 +246,11 @@ public:
 
 extern "C" {
 Course* fn_801B83A0(void);
-int fn_801E9E30(s16* h, TPos* pos);
+int fn_801E9E30(s16* h, RVec3* pos);
 void fn_80265D38(CarBody* b, s32 i);
 void fn_80265D3C(CarBody* b);
 void fn_802E30C8(const char* fmt, ...);
-f32 PSVECDotProduct(const TVec* a, const TVec* b);
+f32 PSVECDotProduct(const RVec3* a, const RVec3* b);
 }
 
 extern s32 lbl_8055E3C4;    // frame counter
@@ -296,15 +262,15 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 ModuleTag lbl_8055E5A8;
 UnkStaticFFFF lbl_8055E5B0;
 
-static f32 PlaneDist(const TVec* n, const TVec* p, const TVec* o);
+static f32 PlaneDist(const RVec3* n, const RVec3* p, const RVec3* o);
 
-static inline void AddScaled(TVec* o, const TPos* a, const TVec* b, f32 k) {
+static inline void AddScaled(RVec3* o, const RVec3* a, const RVec3* b, f32 k) {
     o->x = a->x + b->x * k;
     o->y = a->y + b->y * k;
     o->z = a->z + b->z * k;
 }
 
-static inline void Scale(TVec* v, f32 k) {
+static inline void Scale(RVec3* v, f32 k) {
     v->x = v->x * k;
     v->y = v->y * k;
     v->z = v->z * k;
@@ -347,8 +313,8 @@ void SpringCar::CheckLost(void) {
         return;
     }
     {
-        TPos p = pos;
-        if (!fn_801E9E30(&hint, &p)) {
+        RVec3 p = mtx.pos;
+        if (!fn_801E9E30(hint, &p)) {
             lost++;
         } else {
             lost = 0;
@@ -369,7 +335,7 @@ void SpringCar::vf5C(void) {
         lift.Step(this, src->Get()->stats->rate);
     }
     {
-        TVec acc;
+        RVec3 acc;
         acc.x = 0.0f;
         acc.y = 0.0f;
         acc.z = 0.0f;
@@ -405,17 +371,17 @@ inline int SpringWall::Ramping(void) {
 }
 
 /* Helper name unproven */
-static inline void AddScaledV(TVec* out, const TPos* a, const TVec* b, f32 k) {
+static inline void AddScaledV(RVec3* out, const RVec3* a, const RVec3* b, f32 k) {
     out->x = a->x + b->x * k;
     out->y = a->y + b->y * k;
     out->z = a->z + b->z * k;
 }
 /* Helper name unproven */
 static inline f32 AbsPos(f32 x) { return 0.0f < x ? x : -x; }
-void SpringWall::Apply(SpringCar* car, TVec* acc) {
+void SpringWall::Apply(SpringCar* car, RVec3* acc) {
     if (owner) {
-        TVec v;
-        TVec p;
+        RVec3 v;
+        RVec3 p;
         f32 d;
         f32 t;
         f32 target;
@@ -429,7 +395,7 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         t = 1.0f < t ? 1.0f : t;
         t = t > 0.0f ? t : 0.0f;
         target = vel + t * (depth - vel);
-        AddScaledV(&p, &car->pos, &v, 0.016683351f);
+        AddScaledV(&p, &car->mtx.pos, &v, 0.016683351f);
         dist = PlaneDist(&n, &p, &owner->plane->origin);
         // Unused, as in retail: only its compare of the stored distance survives (what it fed is unproven;
         // its arms create no new float literal - retail has no -1.0f in this function's pool).
@@ -440,9 +406,9 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
             f32 pen = target - d;
             f32 extra;
             f32 total;
-            TVec imp;
-            TVec f;
-            TVec pt;
+            RVec3 imp;
+            RVec3 f;
+            RVec3 pt;
             pen = 0.0f > pen ? 0.0f : pen;
             extra = 0.0f;
             if (d < 0.0f) {
@@ -473,21 +439,21 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
                 imp.y = -q * (mass / 0.016683351f);
             }
             pen += extra;
-            TPos at = *(TPos*)&car->up;
+            RVec3 at = *(RVec3*)&car->mtx.rot.z;
             f64 absWide = __fabs(pen);
             f32 absPen = (f32)absWide;
             at.y = 0.0f;
-            if (!(absPen <= __float_epsilon[0]) && PSVECDotProduct((TVec*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
+            if (!(absPen <= __float_epsilon[0]) && PSVECDotProduct((RVec3*)&at, &n) < 0.0f && (f32)__fabs(car->roll) < 1.5707964f) {
                 f32 m = 17.777779f / pen;
                 m = 1.0f < m ? 1.0f : m;
                 m = 0.8f * m;
-                pt.x = car->pos.x + at.x * m;
-                pt.y = car->pos.y + at.y * m;
-                pt.z = car->pos.z + at.z * m;
+                pt.x = car->mtx.pos.x + at.x * m;
+                pt.y = car->mtx.pos.y + at.y * m;
+                pt.z = car->mtx.pos.z + at.z * m;
             } else {
-                pt.x = car->pos.x;
-                pt.y = car->pos.y;
-                pt.z = car->pos.z;
+                pt.x = car->mtx.pos.x;
+                pt.y = car->mtx.pos.y;
+                pt.z = car->mtx.pos.z;
             }
             ((RigidBody*)car)->AddForceAt((const RVec3*)&imp, (const RVec3*)&pt);
             car->push.x = 0.0f;
@@ -501,20 +467,20 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
     }
 }
 
-static f32 PlaneDist(const TVec* n, const TVec* p, const TVec* o) {
-    TVec d;
+static f32 PlaneDist(const RVec3* n, const RVec3* p, const RVec3* o) {
+    RVec3 d;
     d.x = p->x - o->x;
     d.y = p->y - o->y;
     d.z = p->z - o->z;
     return PSVECDotProduct(n, &d);
 }
 
-void SpringWall::Set(WallObj* w, SpringCar* car, const TVec* other) {
+void SpringWall::Set(WallObj* w, SpringCar* car, const RVec3* other) {
     if (Free()) {
-        TVec p;
+        RVec3 p;
         f32 k;
-        n = *(TVec*)w->plane;
-        AddScaled(&p, &car->pos, &car->vel, -0.016683351f);
+        n = *(RVec3*)w->plane;
+        AddScaled(&p, &car->mtx.pos, &car->vel, -0.016683351f);
         if (other && PSVECDotProduct(other, &n) < 0.0f) {
             Scale(&n, -1.0f);
         }
@@ -552,7 +518,7 @@ void SpringCar::HitWall(WallObj* w) {
         fn_802E30C8("%5.5d: springwall: Out of walls!", lbl_8055E3C4);
     }
     {
-        TVec z;
+        RVec3 z;
         z.x = 0.0f;
         z.y = 0.0f;
         z.z = 0.0f;
@@ -561,8 +527,8 @@ void SpringCar::HitWall(WallObj* w) {
 }
 
 void SpringCar::OnHit(const RVec3* a_, const RVec3* b_, int kind, void* c_) {
-    const TVec* a = (const TVec*)a_;
-    const TVec* b = (const TVec*)b_;
+    const RVec3* a = (const RVec3*)a_;
+    const RVec3* b = (const RVec3*)b_;
     int c = (int)c_;
     CarBody::OnHit(a_, b_, kind, c_);
     ctl->vf38(a, b, kind, c);
@@ -572,8 +538,8 @@ void SpringCar::OnHit(const RVec3* a_, const RVec3* b_, int kind, void* c_) {
 }
 
 void SpringCar::OnImpulse(const RVec3* a_, const RVec3* b_, int kind, void* c_, void* by) {
-    const TVec* a = (const TVec*)a_;
-    const TVec* b = (const TVec*)b_;
+    const RVec3* a = (const RVec3*)a_;
+    const RVec3* b = (const RVec3*)b_;
     int c = (int)c_;
     CarBody::OnImpulse(a_, b_, kind, c_, by);
     ctl->vf3C(a, b, kind, c);
@@ -617,23 +583,23 @@ s32 SpringCar::vf34(RPacket* pk) {
 
 void SpringCar::vf28(u8* buf) {
     CarBody::vf28(buf);
-    SaveRec* r = (SaveRec*)(buf + slot);
+    SaveRec* r = (SaveRec*)(buf + a8);
     r->ctl = ctl->vf14();
 }
 
 void Lift::Apply(SpringCar* car) {
-    TVec at;
-    TVec imp;
+    RVec3 at;
+    RVec3 imp;
     if (car->spin > 0.2617994f) {
-        f32 k = 2.0f * (-0.1f - car->up.y);
+        f32 k = 2.0f * (-0.1f - car->mtx.rot.z.y);
         k = 0.0f > k ? 0.0f : k;
-        at.x = car->pos.x + car->up.x * k;
-        at.y = car->pos.y + car->up.y * k;
-        at.z = car->pos.z + car->up.z * k;
+        at.x = car->mtx.pos.x + car->mtx.rot.z.x * k;
+        at.y = car->mtx.pos.y + car->mtx.rot.z.y * k;
+        at.z = car->mtx.pos.z + car->mtx.rot.z.z * k;
     } else {
-        at.x = car->pos.x;
-        at.y = car->pos.y;
-        at.z = car->pos.z;
+        at.x = car->mtx.pos.x;
+        at.y = car->mtx.pos.y;
+        at.z = car->mtx.pos.z;
     }
     imp.y = f;
     imp.x = 0.0f;

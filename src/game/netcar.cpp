@@ -4,29 +4,13 @@
 // blended towards that each frame and snapped when a packet asks for it. Names are guesses apart
 // from the allocation tag.
 #include "game/common.h"
+#include "game/collvol.h"
 
 void* operator new[](size_t size, const char* tag);
-
-struct TVec {
-    TVec(void) {}
-    TVec(f32 ax, f32 ay, f32 az) {
-        y = ay;
-        z = az;
-        x = ax;
-    }
-    f32 x, y, z;
-};
 
 struct TQuat {
     TQuat(void) {}
     f32 x, y, z, w;
-};
-
-struct TMtx {
-    TVec x;    // offset 0x0
-    TVec y;    // offset 0xC
-    TVec z;    // offset 0x18
-    TVec pos;  // offset 0x24
 };
 
 struct ZVec {
@@ -66,15 +50,15 @@ struct Packet {
 
 // The state handed to a body's SetState (vtable 0x54).
 struct BodyState {
-    TMtx mtx;   // offset 0x0
-    TVec vel;   // offset 0x30
+    RMtx mtx;   // offset 0x0
+    RVec3 vel;   // offset 0x30
     s32 a3C;    // offset 0x3C
     s16 hint;   // offset 0x40
 };
 
 struct Blend {
     f32 k;    // offset 0x0
-    TVec at;  // offset 0x4
+    RVec3 at;  // offset 0x4
 };
 
 struct LinkState {
@@ -104,32 +88,11 @@ struct RPacket;
 struct BodyState;
 struct BodyDesc;
 
-// The collision volume RigidBody derives from (collvol.cpp); declared as far as the CarBody slots need.
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);  // 0x08
-    virtual ~CollVolume(void);       // 0x0C
-    virtual void Reset(void);        // 0x10
-    virtual void vf14(void);         // 0x14
-    virtual void vf18(void);         // 0x18
-    virtual void Update(void);       // 0x1C
-    virtual void vf20(void);         // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);      // 0x28
-    virtual s32 vf2C(RPacket* pk);   // 0x2C: the packet size
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* pk);   // 0x34
-    virtual void vf38(u8* buf);      // 0x38
-    virtual void vf3C(void);         // 0x3C
-    virtual int vf40(void);          // 0x40
-    virtual int vf44(void);          // 0x44
-};
-
 // The rigid body CarBody derives from (rigid.cpp).
 class RigidBody : public CollVolume {
 public:
     virtual void vf18(void);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual int vf40(void);
     virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
@@ -156,11 +119,9 @@ public:
     virtual void vf58(void);          // 0x58
     virtual void vf5C(void);          // 0x5C
 
-    u8 pad4[0x3C - 0x4];
-    TMtx mtx;    // offset 0x3C
-    u8 pad6C[0x118 - 0x6C];
-    TVec vel;    // offset 0x118
-    TVec avel;   // offset 0x124
+    u8 padD0[0x118 - 0xD0];
+    RVec3 vel;    // offset 0x118
+    RVec3 avel;   // offset 0x124
     u8 pad130[0x1E9 - 0x130];
     u8 b1E9;     // offset 0x1E9
     u8 pad1EA[0x1EC - 0x1EA];
@@ -196,7 +157,7 @@ public:
     f32 dt;           // offset 0x273C
     u8 waiting;       // offset 0x2740
     u8 first;         // offset 0x2741
-    TMtx home;        // offset 0x2744
+    RMtx home;        // offset 0x2744
     Link* linkObj;    // offset 0x2774
     s32 lastLink;     // offset 0x2778
     s32 time;         // offset 0x277C
@@ -213,14 +174,14 @@ void fn_8018ADC4(CarBody* b, f32 v);
 void fn_8018ADCC(CarBody* b, f32 v);
 void fn_8018ADD4(CarBody* b, s32 v);
 Link* fn_801B2EC0(int car);
-void fn_801BE168(int car, TMtx* m, TVec* vel, TVec* avel);
+void fn_801BE168(int car, RMtx* m, RVec3* vel, RVec3* avel);
 int fn_801E89EC(void);
 void fn_801E9DC4(s16* h);
 void fn_80265D40(CarBody* b, s32 i);
 void fn_80265D44(CarBody* b);
 Blend* fn_80265D98(void);
 s32 fn_802E2C20(void);  // milliseconds
-f32 PSVECDotProduct(const TVec* a, const TVec* b);
+f32 PSVECDotProduct(const RVec3* a, const RVec3* b);
 void Transform__10CollVolumeFv(CarBody* b);
 }
 
@@ -238,7 +199,7 @@ f32 fn_801A6390(s32 a, s32 b) { return 0.016683351f * (f32)(a - b); }
 f32 fn_801A63C4(s32 a, s32 b) { return 0.0192f * fn_801A6390(a, b) / 0.016683351f; }
 
 static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); } /* Helper name unproven */
-void fn_801A63F4(TVec* out, const TVec* a, const TVec* b, const TVec* t) {
+void fn_801A63F4(RVec3* out, const RVec3* a, const RVec3* b, const RVec3* t) {
     f32 startX;
     f32 endX;
     f32 xWeight;
@@ -302,15 +263,15 @@ void NetCar::Init(BodyDesc* desc) {
     waiting = 0;
     first = 1;
     Clear();
-    home.x.x = 1.0f;
-    home.x.y = 0.0f;
-    home.x.z = 0.0f;
-    home.y.x = 0.0f;
-    home.y.y = 1.0f;
-    home.y.z = 0.0f;
-    home.z.x = 0.0f;
-    home.z.y = 0.0f;
-    home.z.z = 1.0f;
+    home.rot.x.x = 1.0f;
+    home.rot.x.y = 0.0f;
+    home.rot.x.z = 0.0f;
+    home.rot.y.x = 0.0f;
+    home.rot.y.y = 1.0f;
+    home.rot.y.z = 0.0f;
+    home.rot.z.x = 0.0f;
+    home.rot.z.y = 0.0f;
+    home.rot.z.z = 1.0f;
     home.pos.x = 0.0f;
     home.pos.y = 0.0f;
     home.pos.z = 0.0f;
@@ -396,10 +357,10 @@ static inline double DL(double t, double ti, double tj, double tk) {
 void NetCar::Extrapolate(Blend* b) {
     s32 now = lbl_8055E3C4;
     f32 s = fn_801A63C4(now, ptab[0].frame);
-    TVec p;
-    TVec d;
-    TVec r;
-    TVec r2;
+    RVec3 p;
+    RVec3 d;
+    RVec3 r;
+    RVec3 r2;
     p.x = fn_801A6370(ptab[0].pos.v[0], v[0].x, acc.x, s);
     p.y = fn_801A6370(ptab[0].pos.v[1], v[0].y, acc.y, s);
     p.z = fn_801A6370(ptab[0].pos.v[2], v[0].z, acc.z, s);
@@ -421,7 +382,7 @@ void NetCar::Extrapolate(Blend* b) {
     vel = r2;
 }
 
-static inline void QuatToMtx(TMtx* m, const TQuat* q) {
+static inline void QuatToMtx(RMtx* m, const TQuat* q) {
     f32 x2 = q->x + q->x;
     f32 y2 = q->y + q->y;
     f32 z2 = q->z + q->z;
@@ -443,15 +404,15 @@ static inline void QuatToMtx(TMtx* m, const TQuat* q) {
     f32 xz1 = xz - wy;
     f32 yx = xy - wz;
     f32 xy1 = xy + wz;
-    m->x.x = m00;
-    m->y.y = m11;
-    m->z.y = zy;
-    m->z.x = zx;
-    m->y.x = yx;
-    m->x.y = xy1;
-    m->x.z = xz1;
-    m->y.z = yz1;
-    m->z.z = m22;
+    m->rot.x.x = m00;
+    m->rot.y.y = m11;
+    m->rot.z.y = zy;
+    m->rot.z.x = zx;
+    m->rot.y.x = yx;
+    m->rot.x.y = xy1;
+    m->rot.x.z = xz1;
+    m->rot.y.z = yz1;
+    m->rot.z.z = m22;
 }
 
 void NetCar::Snap(void) {
@@ -470,7 +431,11 @@ void NetCar::Snap(void) {
     SetState(&s);
     ptab[1] = ptab[2] = ptab[0];
     {
-        TVec z(0.0f, 0.0f, 0.0f);
+        // MATCHING-AID: retail's zero vector stores y, z, then x (the order of netcar's old TVec constructor).
+        RVec3 z;
+        z.y = 0.0f;
+        z.z = 0.0f;
+        z.x = 0.0f;
         ptab[1].frame--;
         ptab[2].frame -= 2;
         v[2].x = z.x;
@@ -506,7 +471,7 @@ void NetCar::Rotate(Blend* b) {
     fn_8012F57C(&q, &q2, &q1, t);
     k = b->k;
     t = t + dt;
-    tr = mtx.x.x + mtx.y.y + mtx.z.z;
+    tr = mtx.rot.x.x + mtx.rot.y.y + mtx.rot.z.z;
     f32(*m)[3] = (f32(*)[3])&mtx;
     if (tr > 0.0f) {
         f32 s = sqrt(1.0f + tr);

@@ -5,6 +5,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/collvol.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -25,18 +26,6 @@ TFlags* fn_801769CC(void);
 void fn_801796CC(u8 type, const void* data, u32 n);
 f32 PSVECDotProduct(const void* a, const void* b);
 }
-
-struct TRow {
-    f32 v[3];
-};
-
-struct TMtx {
-    union {
-        PlainRVec3 rot[3];  // offset 0x0 (constructor-less, so the union is legal C++)
-        TRow row[3];
-    };
-    RVec3 pos;     // offset 0x24
-};
 
 // The hitch constraint (a spring between two bodies, 0x8xxxx code).
 struct Hitch {
@@ -66,7 +55,7 @@ void fn_801AD394(Hitch* h);
 
 // The state handed to a body's SetState (vtable 0x54).
 struct BodyState {
-    TMtx mtx;  // offset 0x0
+    RMtx mtx;  // offset 0x0
     RVec3 vel;  // offset 0x30
     s32 a3C;   // offset 0x3C
     s16 hint;  // offset 0x40
@@ -78,33 +67,12 @@ struct RPacket;
 struct BodyState;
 struct BodyDesc;
 
-// The collision volume RigidBody derives from (collvol.cpp); declared as far as the CarBody slots need.
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);  // 0x08
-    virtual ~CollVolume(void);       // 0x0C
-    virtual void Reset(void);        // 0x10
-    virtual void vf14(void);         // 0x14
-    virtual void vf18(void);         // 0x18
-    virtual void Update(void);       // 0x1C
-    virtual void vf20(void);         // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);      // 0x28
-    virtual s32 vf2C(RPacket* pk);   // 0x2C: the packet size
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* pk);   // 0x34
-    virtual void vf38(u8* buf);      // 0x38
-    virtual void vf3C(void);         // 0x3C
-    virtual int vf40(void);          // 0x40
-    virtual int vf44(void);          // 0x44
-};
-
 // The rigid body CarBody derives from (rigid.cpp).
 class RigidBody : public CollVolume {
 public:
     void AddTorque(const RVec3* t);
     virtual void vf18(void);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual int vf40(void);
     virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
@@ -131,13 +99,7 @@ public:
     virtual void vf58(void);          // 0x58
     virtual void vf5C(void);          // 0x5C
 
-    u8 pad4[0x30 - 0x4];
-    RVec3 offset;    // offset 0x30
-    TMtx mtx;       // offset 0x3C
-    s16 hint;       // offset 0x6C
-    u8 pad6E[0x70 - 0x6E];
-    TMtx world;     // offset 0x70
-    u8 padA0[0x118 - 0xA0];
+    u8 padD0[0x118 - 0xD0];
     RVec3 vel;       // offset 0x118
     RVec3 avel;      // offset 0x124
     u8 pad130[0x1EC - 0x130];
@@ -236,20 +198,17 @@ inline void Trailer::Reglue(void) {
     BodyState s;
     s.hint = -1;
     CarBody* c = car;
-    MulVec(&s.mtx.pos, &d, c->world.rot);
+    MulVec(&s.mtx.pos, &d, &c->world.rot.x);
     s.mtx.pos.x += c->world.pos.x;
     s.mtx.pos.y += c->world.pos.y;
     s.mtx.pos.z += c->world.pos.z;
-    const TRow* src = car->world.row;
-    s.mtx.row[0] = src[0];
-    s.mtx.row[1] = src[1];
-    s.mtx.row[2] = src[2];
-    f32 v = PSVECDotProduct(&car->vel, &mtx.rot[2]);
-    s.vel.x = s.mtx.rot[2].x * v;
-    s.vel.y = s.mtx.rot[2].y * v;
-    s.vel.z = s.mtx.rot[2].z * v;
+    s.mtx.rot = car->world.rot;
+    f32 v = PSVECDotProduct(&car->vel, &mtx.rot.z);
+    s.vel.x = s.mtx.rot.z.x * v;
+    s.vel.y = s.mtx.rot.z.y * v;
+    s.vel.z = s.mtx.rot.z.z * v;
     s.a3C = 0;
-    s.hint = car->hint;
+    s.hint = car->hint[0];
     SetState(&s);
     hitch.owner = this;
     if (!low) {
@@ -444,11 +403,11 @@ void Trailer::Update(void) {
         l.x = c->mtx.pos.x - mtx.pos.x;
         l.y = c->mtx.pos.y - mtx.pos.y;
         l.z = c->mtx.pos.z - mtx.pos.z;
-        MulVecTSelf(&l, mtx.rot);
+        MulVecTSelf(&l, &mtx.rot.x);
         dv.x = vel.x - c->vel.x;
         dv.y = vel.y - c->vel.y;
         dv.z = vel.z - c->vel.z;
-        f32 a = 0.15f * PSVECDotProduct(&dv, &mtx.rot[2]);
+        f32 a = 0.15f * PSVECDotProduct(&dv, &mtx.rot.z);
         a = (0.25f < a) ? 0.25f : a;
         a = (a > -0.25f) ? a : -0.25f;
         f32 s = 0.2f * l.x - 0.3f * avel.y - a;
@@ -470,13 +429,13 @@ void Trailer::Update(void) {
     }
     if (low) {
         RVec3 a;
-        MulVec(&a, &hitchLocal, world.rot);
+        MulVec(&a, &hitchLocal, &world.rot.x);
         a.x += world.pos.x;
         a.y += world.pos.y;
         a.z += world.pos.z;
         RVec3 b;
         CarBody* c = car;
-        MulVec(&b, &hitchCar, c->world.rot);
+        MulVec(&b, &hitchCar, &c->world.rot.x);
         b.x += c->world.pos.x;
         b.y += c->world.pos.y;
         b.z += c->world.pos.z;
