@@ -4,6 +4,7 @@
 // line/arrow textures in a per-player colour (yellow while boosting). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/spot.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -33,13 +34,6 @@ public:
     Vec2& operator=(const Vec2& v);
 };
 
-// A ground position set from an x/z point (aiobst.cpp defines From: y = 0).
-struct Spot {
-    void From(const Vec2& v);
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct Bound {
     s32 n;      // offset 0x0

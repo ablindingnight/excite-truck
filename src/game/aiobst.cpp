@@ -4,6 +4,7 @@
 // a driver projects the obstacles ahead into 64 lateral bins and picks the nearest free gap. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/spot.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/vec3_init.h"
@@ -611,14 +612,12 @@ struct Bins {
     Bin bins[64];
 };
 
-struct Spot {
-    Vec3 pos;
-    void From(const Vec2& v) {
-        pos.x = v.v.x;
-        pos.y = 0.0f;
-        pos.z = v.v.y;
-    }
-};
+// Spot: game/spot.h. Its From is defined here (retail's one copy, called by aiobst, ball and boostman).
+void Spot::From(const Vec2& v) {
+    x = v.v.x;
+    y = 0.0f;
+    z = v.v.y;
+}
 
 inline int Abs(int x) { return x < 0 ? -x : x; }
 inline int MinI(int a, int b) { return b < a ? b : a; }
@@ -732,7 +731,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
                     if (steer) {
                         SetV2(*(V2*)steer, (const V2&)w);
                     }
-                    DefaultConstructVec3(&spot.pos);
+                    DefaultConstructVec3(&spot);
                     spot.From(w);
                 }
             }

@@ -3,6 +3,7 @@
 // hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/spot.h"
 #include "game/sound.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
@@ -55,11 +56,6 @@ struct BTrack {
     BTrackStart* start;  // offset 0x2C
 };
 
-class Vec2;
-// A ground position set from an x/z point (aiobst.cpp defines From: y = 0).
-struct Spot {
-    void From(const Vec2& v);
-};
 
 struct BRacerInfo {
     u8 pad0[0x24];
