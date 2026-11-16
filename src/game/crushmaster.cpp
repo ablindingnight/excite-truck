@@ -10,6 +10,7 @@
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
 #include "game/rigid.h"
+#include "game/carbody.h"
 #include <stdarg.h>
 
 // Art animation player (artanim.cpp).
@@ -248,42 +249,6 @@ struct ZoneResults {
     u8 bE;    // offset 0xE
     u8 padF;
     Entry entries[8];  // offset 0x10
-};
-
-class RaceCarRec {
-public:
-    virtual void v08(void);
-    virtual ~RaceCarRec(void);  // 0x0C (CarBody/RigidBody family: Init at 0x08, destructor at 0x0C)
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
-    virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
-    virtual void v4C(void);
-    virtual void v50(void);
-    virtual void Respawn(struct Respawn* r);  // 0x54
-    u8 pad4[0x10 - 0x4];
-    u32 model;        // offset 0x10
-    u8 pad14[0x3C - 0x14];
-    ValMatrix mtx;    // offset 0x3C
-    u8 pad6C[0xD4 - 0x6C];
-    f32 fD4;          // offset 0xD4
-    u8 padD8[0x118 - 0xD8];
-    ValVec3 center;   // offset 0x118
-    u8 pad124[0x25A0 - 0x124];
-    f32 turbo;        // offset 0x25A0
-    u8 pad25A4[0x25D4 - 0x25A4];
-    f32 speed;        // offset 0x25D4
 };
 
 extern "C" RaceCarRec* fn_8017960C(int id);
@@ -853,7 +818,7 @@ int fn_80171E3C(const V2& p) {
 }
 
 // Whether the car is a player's ('PCAR') rather than the AI's.
-int fn_80171EC0(int id) { return fn_8017960C(id)->model == 'PCAR'; }
+int fn_80171EC0(int id) { return (u32)fn_8017960C(id)->type == 'PCAR'; }
 
 static inline V2 LerpV(const V2* a, const V2* b, f32 t) {
     V2 r;
@@ -965,11 +930,11 @@ static inline ValVec3* CamPos(void) { return &fn_802C86DC()->pos; }
 
 void fn_8017248C(int id) {
     RaceCarRec* car = fn_8017960C(id);
-    f32 size = Remap(PSVECDistance(&car->mtx.origin, CamPos()), 200.0f, 700.0f, 14.0f, 28.0f);
+    f32 size = Remap(PSVECDistance((ValVec3*)&car->mtx.pos, CamPos()), 200.0f, 700.0f, 14.0f, 28.0f);
     ValVec3 p;
-    p.x = car->mtx.origin.x;
-    p.y = car->mtx.origin.y;
-    p.z = car->mtx.origin.z;
+    p.x = car->mtx.pos.x;
+    p.y = car->mtx.pos.y;
+    p.z = car->mtx.pos.z;
     {
         f32 lo = 4.0f;
         f32 h = 40.0f;
@@ -986,7 +951,7 @@ f32 fn_801725C8(f32 t) {
 int fn_80172624(int killer, int victim) {
     RaceCarRec* a = fn_8017960C(killer);
     RaceCarRec* b = fn_8017960C(victim);
-    f32 d = PSVECDistance(&a->center, &b->center);
+    f32 d = PSVECDistance((ValVec3*)&a->vel, (ValVec3*)&b->vel);
     f32 sp = a->speed;
     f32 f = lbl_8043038C.killDist * d + lbl_8043038C.killSpeed * sp;
     int r = 0;
@@ -1339,10 +1304,10 @@ inline void CrushMaster::vf0C(void) {
     }
     for (i = 0; i < nCars; i++) {
         if (cars[i].human && lbl_8043038C.infTurbo) {
-            fn_8017960C(i)->turbo = 0.0f;
+            fn_8017960C(i)->f25A0 = 0.0f;
         }
         if (!cars[i].human && !cars[i].active) {
-            fn_8017960C(i)->turbo = 0.9f;
+            fn_8017960C(i)->f25A0 = 0.9f;
         }
     }
     if (!vf24()) {
@@ -1467,13 +1432,13 @@ inline void CrushMaster::vfA8(int car) {
         r.path = -1;
         fn_801E9DC4(&r.path);
         r.flag = 0;
-        pos = &rec->mtx.origin;
-        r.m = rec->mtx;
+        pos = (ValVec3*)&rec->mtx.pos;
+        r.m = *(ValMatrix*)&rec->mtx;
         r.vel.x = 0.0f;
         r.vel.y = 0.0f;
         r.vel.z = 0.0f;
-        at.x = rec->mtx.origin.x;
-        at.y = rec->mtx.origin.z;
+        at.x = rec->mtx.pos.x;
+        at.y = rec->mtx.pos.z;
         if (fn_802B04D4(pos) || !fn_80171E3C(at)) {
             {
                 SpotDst(&dst, pos);
@@ -1491,9 +1456,9 @@ inline void CrushMaster::vfA8(int car) {
                 v.y = dy * k + 9.81f * t;
                 v.z = dz * k;
                 v.x = dx * k;
-                r.m.origin.x = rec->mtx.origin.x;
-                r.m.origin.y = rec->mtx.origin.y;
-                r.m.origin.z = rec->mtx.origin.z;
+                r.m.origin.x = rec->mtx.pos.x;
+                r.m.origin.y = rec->mtx.pos.y;
+                r.m.origin.z = rec->mtx.pos.z;
                 r.m.basis[1].x = 0.0f;
                 r.m.basis[1].y = 1.0f;
                 r.m.basis[1].z = 0.0f;
@@ -1513,13 +1478,13 @@ inline void CrushMaster::vfA8(int car) {
                 r.m.origin.y += 3.0f;
                 ScaleV(&r.vel, &r.m.basis[2], 8.888889f);
             }
-        } else if (rec->mtx.basis[1].y < 0.2f) {
-            fwd.x = rec->mtx.basis[2].x;
-            fwd.y = rec->mtx.basis[2].z;
+        } else if (rec->mtx.rot.y.y < 0.2f) {
+            fwd.x = rec->mtx.rot.z.x;
+            fwd.y = rec->mtx.rot.z.z;
             NormV2(&fwd);
             fn_801B7C8C(&r, &at, &fwd);
         }
-        rec->Respawn(&r);
+        rec->SetState((const BodyState*)&r);  // slot 0x54
     }
 }
 
@@ -1856,10 +1821,10 @@ static inline void PickTarget(CrushTarget* t, int car, f32 base, f32 a1, f32 a0)
         RaceCarRec* rec = fn_8017960C(car);
         V2 pos;
         V2 dir;
-        pos.x = rec->mtx.origin.x;
-        pos.y = rec->mtx.origin.z;
-        dir.x = rec->mtx.basis[2].x;
-        dir.y = rec->mtx.basis[2].z;
+        pos.x = rec->mtx.pos.x;
+        pos.y = rec->mtx.pos.z;
+        dir.x = rec->mtx.rot.z.x;
+        dir.y = rec->mtx.rot.z.z;
         {
             f32 len = sqrt(dir.x * dir.x + dir.y * dir.y);
             if (!(FAbs(len) <= __float_epsilon[0])) {
@@ -1869,8 +1834,8 @@ static inline void PickTarget(CrushTarget* t, int car, f32 base, f32 a1, f32 a0)
             }
         }
         Rotate(&dir, fn_80129DC4(3, ToRad(a0), ToRad(a1)));
-        tgt.x = rec->mtx.origin.x;
-        tgt.y = rec->mtx.origin.z;
+        tgt.x = rec->mtx.pos.x;
+        tgt.y = rec->mtx.pos.z;
         tgt.x += dir.x;
         tgt.y += dir.y;
         if (fn_80171EF8(&pos, &tgt)) {
@@ -1904,9 +1869,9 @@ extern const f32 lbl_80561AF0;  // 50.0f
 inline int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags) {
     RaceCarRec* rec = fn_8017960C(car);
     ValVec3 p;
-    p.x = rec->mtx.origin.x + rec->mtx.basis[2].x * lbl_80561AF0;
-    p.y = rec->mtx.origin.y + rec->mtx.basis[2].y * lbl_80561AF0;
-    p.z = rec->mtx.origin.z + rec->mtx.basis[2].z * lbl_80561AF0;
+    p.x = rec->mtx.pos.x + rec->mtx.rot.z.x * lbl_80561AF0;
+    p.y = rec->mtx.pos.y + rec->mtx.rot.z.y * lbl_80561AF0;
+    p.z = rec->mtx.pos.z + rec->mtx.rot.z.z * lbl_80561AF0;
     pos->x = p.x;
     pos->y = p.z;
     *flags = 0x21F;
@@ -1952,8 +1917,8 @@ static inline void SetD(V2* o, f32 x, f32 y) {
 static inline void Retarget(CrushTarget* t, int i) {
     V2 here;
     RaceCarRec* rec = fn_8017960C(i);
-    here.x = rec->mtx.origin.x;
-    here.y = rec->mtx.origin.z;
+    here.x = rec->mtx.pos.x;
+    here.y = rec->mtx.pos.z;
     if (fn_80171E3C(here)) {
         f32 now = lbl_8055E3C8;
         PickTarget(t, i, fn_801725C8(now), 20.0f, -20.0f);
@@ -1974,8 +1939,8 @@ inline void CrushSubTaskMgr::vf20(void) {
             RaceCarRec* rec = fn_8017960C(i);
             V2 pos;
             V2 d;
-            pos.x = rec->mtx.origin.x;
-            pos.y = rec->mtx.origin.z;
+            pos.x = rec->mtx.pos.x;
+            pos.y = rec->mtx.pos.z;
             SetD(&d, pos.x - t->x, pos.y - t->y);
             if (d.x * d.x + d.y * d.y < RadSq() || lbl_8055E3C8 > t->until) {
                 Retarget(t, i);
@@ -1996,15 +1961,15 @@ static inline void Punt(int a, int victim) {
     RaceCarRec* v;
     f32 len;
     ka = fn_8017960C(a);
-    f32 xv = ka->mtx.basis[2].x;
+    f32 xv = ka->mtx.rot.z.x;
     f32 ahead = 50.0f;
-    tgt.x = ka->mtx.origin.x + xv * ahead;
-    tgt.y = ka->mtx.origin.y + ka->mtx.basis[2].y * ahead;
-    tgt.z = ka->mtx.origin.z + ka->mtx.basis[2].z * ahead;
+    tgt.x = ka->mtx.pos.x + xv * ahead;
+    tgt.y = ka->mtx.pos.y + ka->mtx.rot.z.y * ahead;
+    tgt.z = ka->mtx.pos.z + ka->mtx.rot.z.z * ahead;
     v = fn_8017960C(victim);
-    imp.x = tgt.x - v->mtx.origin.x;
-    imp.y = tgt.y - v->mtx.origin.y;
-    imp.z = tgt.z - v->mtx.origin.z;
+    imp.x = tgt.x - v->mtx.pos.x;
+    imp.y = tgt.y - v->mtx.pos.y;
+    imp.z = tgt.z - v->mtx.pos.z;
     len = PSVECMag(&imp);
     len = 0.01f > len ? 0.01f : len;
     {
@@ -2014,15 +1979,15 @@ static inline void Punt(int a, int victim) {
         imp.z *= inv;
     }
     {
-        f32 curFD4 = v->fD4;
+        f32 curFD4 = v->mass;
         f32 kk = 40.0f * curFD4 / 0.0166833512f;
         imp.x *= kk;
         imp.y *= kk;
         imp.z *= kk;
     }
-    f32 fD4v = v->fD4;
+    f32 fD4v = v->mass;
     imp.y = 17.777779f * fD4v / 0.0166833512f;
-    ValVec3 at = v->mtx.origin;
+    ValVec3 at = *(ValVec3*)&v->mtx.pos;
     at.y += 0.5f;
     ((RigidBody*)v)->AddForceAt((const RVec3*)&imp, (const RVec3*)&at);
     fn_8018F9B4(v);
