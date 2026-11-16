@@ -3,14 +3,10 @@
 // last freed background is kept so that one created again with the same texture carries on where it
 // left off. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
 
-struct Mat3 {
-    ValVec3 x;
-    ValVec3 y;
-    ValVec3 z;
-};
 
 struct BMtx {
     Mat3 rot;     // offset 0x0
@@ -37,11 +33,6 @@ u32 fn_80230B9C(int color);
 void PSVECCrossProduct(const void* a, const void* b, void* out);
 void PSVECNormalize(const void* in, void* out);
 }
-
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
-void Mat3RotX(Mat3* m, f32 a);
-void Mat3RotY(Mat3* m, f32 a);
-void Mat3RotZ(Mat3* m, f32 a);
 
 struct Background {
     BMtx mtx;         // offset 0x0
@@ -353,15 +344,15 @@ static inline void Orthonormalize(Mat3* m) {
     ValVec3 x;
     ValVec3 y;
     ValVec3 z;
-    SetV3(&x, m->x.x, m->x.y, m->x.z);
-    SetV3(&z, m->z.x, m->z.y, m->z.z);
+    SetV3(&x, m->m[0][0], m->m[0][1], m->m[0][2]);
+    SetV3(&z, m->m[2][0], m->m[2][1], m->m[2][2]);
     PSVECCrossProduct(&z, &x, &y);
     PSVECNormalize(&x, &x);
     PSVECNormalize(&y, &y);
     PSVECCrossProduct(&x, &y, &z);
-    m->x = x;
-    m->y = y;
-    m->z = z;
+    *(ValVec3*)m->m[0] = x;
+    *(ValVec3*)m->m[1] = y;
+    *(ValVec3*)m->m[2] = z;
 }
 
 void fn_8022FD9C(Background* bg, f32 dt) {
@@ -399,15 +390,15 @@ void fn_8022FF10(Mat3* out, const ValVec3* a) {
 }
 
 void fn_8022FF90(Background* bg) {
-    bg->mtx.rot.x.x = 1.0f;
-    bg->mtx.rot.x.y = 0.0f;
-    bg->mtx.rot.x.z = 0.0f;
-    bg->mtx.rot.y.x = 0.0f;
-    bg->mtx.rot.y.y = 1.0f;
-    bg->mtx.rot.y.z = 0.0f;
-    bg->mtx.rot.z.x = 0.0f;
-    bg->mtx.rot.z.y = 0.0f;
-    bg->mtx.rot.z.z = 1.0f;
+    bg->mtx.rot.m[0][0] = 1.0f;
+    bg->mtx.rot.m[0][1] = 0.0f;
+    bg->mtx.rot.m[0][2] = 0.0f;
+    bg->mtx.rot.m[1][0] = 0.0f;
+    bg->mtx.rot.m[1][1] = 1.0f;
+    bg->mtx.rot.m[1][2] = 0.0f;
+    bg->mtx.rot.m[2][0] = 0.0f;
+    bg->mtx.rot.m[2][1] = 0.0f;
+    bg->mtx.rot.m[2][2] = 1.0f;
     bg->mtx.pos.x = 0.0f;
     bg->mtx.pos.y = 0.0f;
     bg->mtx.pos.z = 0.0f;

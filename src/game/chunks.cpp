@@ -4,6 +4,7 @@
 // tumble with one of six random spins, fall, bounce once on the ground and sink away. Car chunks are
 // tinted with a dimmed copy of each car's colour. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rmtx.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -32,9 +33,6 @@ struct PVec {
     f32 x, y, z;
 };
 
-struct Mat3 {
-    PVec x, y, z;
-};
 
 // The hit point is copied from p as a raw 12-byte block (word loads/stores), not field by field.
 struct PVecRaw {
@@ -46,7 +44,7 @@ struct Spin {
     Spin(void) {}
     PVec axis;  // offset 0x0
     f32 speed;  // offset 0xC
-    Mat3 rot;   // offset 0x10
+    RMat33 rot;   // offset 0x10
 };
 
 // Chunk::state: resting (sinking into the ground), bouncing (collides with the ground), falling (no collision).
@@ -54,7 +52,7 @@ enum ChunkState { CHUNK_RESTING = 1, CHUNK_BOUNCING = 2, CHUNK_FALLING = 3 };
 
 // A car or terrain chunk (0x4C).
 struct Chunk {
-    Mat3 rot;     // offset 0x0
+    RMat33 rot;     // offset 0x0
     PVec pos;     // offset 0x24
     PVec vel;     // offset 0x30
     f32 age;      // offset 0x3C
@@ -67,7 +65,7 @@ struct Chunk {
 
 // A wood chunk (0x44).
 struct WoodChunk {
-    Mat3 rot;   // offset 0x0
+    RMat33 rot;   // offset 0x0
     PVec pos;   // offset 0x24
     PVec vel;   // offset 0x30
     f32 age;    // offset 0x3C
@@ -619,7 +617,7 @@ void CarChunks::Step(void) {
         }
         out->pos = p;
         int fly = state == 2 || state == 3;
-        const Mat3* rot = fly ? &lbl_804B4030[spin].rot : &in->rot;
+        const RMat33* rot = fly ? &lbl_804B4030[spin].rot : &in->rot;
         out->rot = *rot;
         out->vel = v;
         out->age = nage;
@@ -766,7 +764,7 @@ void TerrainChunks::Step(void) {
         }
         out->pos = p;
         int fly = state == 2 || state == 3;
-        const Mat3* rot = fly ? &lbl_804B4030[spin].rot : &in->rot;
+        const RMat33* rot = fly ? &lbl_804B4030[spin].rot : &in->rot;
         out->rot = *rot;
         out->vel = v;
         out->age = nage;

@@ -4,6 +4,7 @@
 // state, LOD/shadow drawing, and an animation object that draws an attached car wheel. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -28,18 +29,8 @@ void fn_802C77F0(int model, f32* bounds);
 f32 fn_802C88E8(const ValVec3* p);  // squared distance to the camera
 f32 fn_801E88F0(int view);          // zoom
 int fn_801EA03C(s16* hint, ValVec3* p);  // ground below
-struct Mat3;
 void fn_80297988(void* obj);
 }
-
-struct Vec3;
-void Mat3FromEuler(Mat3* out, const Vec3* euler);  // weak, Y then X then Z (racing.cpp)
-
-struct Mat3 {
-    ValVec3 axis[3];
-};
-
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
