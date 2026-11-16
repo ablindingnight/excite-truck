@@ -34,7 +34,7 @@ public:
     virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) = 0;
     virtual void vf1C(void) = 0;
     virtual void vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g) = 0;
-    virtual void vf24(const RVec3* v) = 0;
+    virtual void vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* by) = 0;
     virtual void vf28(void) = 0;
     virtual void vf2C(u8* data) = 0;
     virtual u32 vf30(void) = 0;
@@ -64,7 +64,7 @@ public:
     virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
     virtual void vf1C(void);
     virtual void vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
-    virtual void vf24(const RVec3* v);
+    virtual void vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // impulse notice, forwarded to the owner (sphcoll)
     virtual void vf28(void) {}
     virtual void vf2C(u8* data);
     virtual u32 vf30(void);

@@ -7,12 +7,10 @@
 #include "macros.h"
 #include <revolution/MTX.h>
 
-class Phob;  // the type RigidBody::Push names its first parameter (really the first CollShape)
-
 class RigidBody : public CollVolume {
 public:
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
-    void Push(Phob* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c, f32 w);
+    void Push(CollShape* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c, f32 w);
     void VelAt(RVec3* out, const RVec3* p);
     u8 padD0[0xD4 - 0xD0];
     f32 mass;  // offset 0xD4
@@ -203,7 +201,7 @@ void Corner::Hit(RigidBody* b) {
             ji.x = n.x * j;
             ji.y = n.y * j;
             ji.z = n.z * j;
-            Phob* by = (Phob*)(b->nAdded > 0 ? b->sub[0] : 0);
+            CollShape* by = b->Shape();
             f32 w = 0.001f > depth ? 0.001f : depth;
             b->Push(by, 0, &ji, &p, flags, 0, 0, w);
             if (b->type == 'PCAR') {

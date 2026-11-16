@@ -345,7 +345,7 @@ class AttachedSphereShape : public SphereShape {
 public:
     virtual void vf0C(void);
     virtual void vf14(void);
-    virtual void vf24(const RVec3* v);
+    virtual void vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* by);
     virtual ~AttachedSphereShape(void) {}
 };
 
@@ -2392,7 +2392,9 @@ void CollShape::vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3
     }
 }
 
-void CollShape::vf24(const RVec3*) {
+// Forwards an impulse notice (RigidBody::Push records the shape) to the owner's slot 0x4C, RigidBody::OnImpulse,
+// with the same arguments (the call passes them through untouched in r4-r8).
+void CollShape::vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* by) {
     u8* p = (u8*)this;
     u8* o = PTR(p, 0x4);
     if (o) {
@@ -2609,8 +2611,8 @@ void AttachedSphereShape::vf0C(void) {
 }
 
 // Projects v onto the plane of p's frame row 1 (the result feeds a debug view that is compiled out).
-void AttachedSphereShape::vf24(const RVec3* v) {
-    ((CollShape*)((u8*)this))->CollShape::vf24(v);
+void AttachedSphereShape::vf24(const RVec3* v, const RVec3* at, int kind, void* ctx, void* by) {
+    ((CollShape*)((u8*)this))->CollShape::vf24(v, at, kind, ctx, by);
     f32 d = -PSVECDotProduct(&((CFrame*)PTR(((u8*)this), 0xC))->m[3], v);
     CFrame* f = (CFrame*)PTR(((u8*)this), 0xC);
     f32 x = v->x + f->m[3] * d;

@@ -318,7 +318,7 @@ public:
     virtual void OnHit(const RVec3* force, const RVec3* at, int kind, void* contact);
     virtual void OnImpulse(const RVec3* force, const RVec3* at, int kind, void* contact, void* by);
     virtual void OnImpulses(RVec3* force, RVec3* torque);
-    void Push(Phob* a, void* b, const RVec3* imp, const RVec3* at, int kind, const RVec3* c, void* by, f32 k);
+    void Push(CollShape* a, void* b, const RVec3* imp, const RVec3* at, int kind, const RVec3* c, void* by, f32 k);
     u8 padD0[0x118 - 0xD0];
     RVec3 vel;
     RVec3 avel;

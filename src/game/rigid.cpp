@@ -77,7 +77,6 @@ struct BodyDesc {
     f32 iz;     // offset 0x14
 };
 
-struct Phob;  // RigidBody::Push records the pushing object as a Phob*
 
 // A contact point in body space (corners.cpp); the body keeps its corners in a list.
 class RigidBody;
@@ -89,7 +88,7 @@ struct Corner {
 
 struct ImpRec {
     ImpRec(void);
-    CollVolume* obj;  // offset 0x0: the pushing object
+    CollShape* obj;  // offset 0x0: the pushing shape (notified through its slot 0x24)
     void* by;    // offset 0x4
     RVec3 v;     // offset 0x8
     RVec3 at;    // offset 0x14
@@ -121,7 +120,7 @@ public:
     void AddForceAt(const RVec3* f, const RVec3* at);
     void AddTorque(const RVec3* t);
     void AddImpulse(f32 w, const RVec3* v, const RVec3* at);
-    void Push(Phob* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c, f32 w);
+    void Push(CollShape* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c, f32 w);
     void ClearImpulses(void);
     void NotifyAll(void);
     void VelAt(RVec3* out, const RVec3* p);
@@ -285,12 +284,12 @@ static inline ImpRec* AllocImp(void) {
     return 0;
 }
 
-void RigidBody::Push(Phob* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c,
+void RigidBody::Push(CollShape* obj, void* by, const RVec3* v, const RVec3* at, int kind, const RVec3* at2, void* c,
                      f32 w) {
     if (nImp < 16) {
         ImpRec* p = AllocImp();
         if (p) {
-            p->obj = (CollVolume*)obj;
+            p->obj = obj;
             p->by = by;
             p->v.x = v->x * w;
             p->v.y = v->y * w;
@@ -397,7 +396,7 @@ inline void RigidBody::NotifyAll(void) {
         p->v.y *= k;
         p->v.z *= k;
         if (p->obj) {
-            p->obj->Notify(&p->v, &p->at, p->kind, p->c, p->by);
+            p->obj->vf24(&p->v, &p->at, p->kind, p->c, p->by);
         } else {
             OnImpulse(&p->v, &p->at, p->kind, p->c, p->by);
         }
