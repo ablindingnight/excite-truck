@@ -113,7 +113,7 @@ public:
     virtual void Update(void);           // 0x1C
     virtual void vf20(void);           // 0x20
     virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
-    virtual void vf28(void);           // 0x28
+    virtual void vf28(u8* buf);        // 0x28 writes the draw state (defined in phob.cpp)
     virtual s32 vf2C(void);            // 0x2C
     virtual void vf30(f32 t, struct RPacket* a, const struct RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(struct RPacket* p);  // 0x34
@@ -139,12 +139,12 @@ public:
     CMtx prev;           // offset 0xA0
 };
 
-class BoxVolume : public CollVolume {
+class PhobStatic : public CollVolume {
 public:
-    BoxVolume(void);
+    PhobStatic(void);
     virtual void Init(BodyDesc* d);
-    virtual ~BoxVolume(void);
-    virtual void vf28(void);
+    virtual ~PhobStatic(void);
+    virtual void vf28(u8* buf);
 };
 
 ModuleTag lbl_8055E478;
@@ -418,9 +418,9 @@ void CollVolume::Xform(CVec3* out, const CVec3* in) {
     out->z += mtx.pos.z;
 }
 
-BoxVolume::BoxVolume(void) {}
+PhobStatic::PhobStatic(void) {}
 
-void BoxVolume::Init(BodyDesc* d) {
+void PhobStatic::Init(BodyDesc* d) {
     CollVolume::Init(d);
     mtx = d->mtx;
     Transform();
@@ -469,9 +469,9 @@ extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t) {
     out->rot[2] = z;
 }
 
-BoxVolume::~BoxVolume(void) {}
+PhobStatic::~PhobStatic(void) {}
 
-void BoxVolume::vf28(void) {}
+void PhobStatic::vf28(u8* buf) {}
 
 s32 CollVolume::vf2C(void) { return 0x14; }
 

@@ -371,9 +371,9 @@ public:
     u8 pad0[0x2780];
 };
 
-class BoxVolume {
+class PhobStatic {
 public:
-    BoxVolume(void);
+    PhobStatic(void);
     u8 pad0[0xD0];
 };
 
@@ -482,7 +482,7 @@ void fn_801778C0(void) {
     }
 }
 
-int fn_80177980(Phob* p) { return 0; }
+int vf40__10CollVolumeFv(Phob* p) { return 0; }  // CollVolume::vf40 (named so the vtables pair)
 
 int vf44__10CollVolumeFv(Phob* p) { return 1; }  // CollVolume::vf44 (named so the vtables pair)
 
@@ -691,7 +691,7 @@ void fn_80177F40(void) {
     }
 }
 
-PhobCar* fn_801781B8(Phob* p) { return 0; }
+PhobCar* vf3C__10CollVolumeFv(Phob* p) { return 0; }  // CollVolume::vf3C (named so the vtables pair)
 
 int fn_801781C0(s32 x) {
     switch (x) {
@@ -714,7 +714,7 @@ char* fn_801781F4(u32 v) {
 
 Phob* fn_80178224(void) { return (Phob*)new ("NetCar") NetCar; }
 
-Phob* fn_80178258(void) { return (Phob*)new ("PhobStatic") BoxVolume; }
+Phob* fn_80178258(void) { return (Phob*)new ("PhobStatic") PhobStatic; }
 
 Phob* fn_80178290(void) { return (Phob*)new ("WheelPhob") Wheel; }
 
