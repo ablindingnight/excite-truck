@@ -329,7 +329,30 @@ void fn_80203380(EFrame* m) {
             w.x = p.x;
             {
                 EVec3 d;
-                ENV_PROJECT(m, w, d, sx, sy);
+                f32 dx = w.x - m->pos.x;
+                d.x = dx;
+                d.y = w.y - m->pos.y;
+                d.z = w.z - m->pos.z;
+                {
+                    f32 x = EDot3(dx, m->x.x, d.y, m->x.y, d.z, m->x.z);
+                    f32 y = EDot3(dx, m->y.x, d.y, m->y.y, d.z, m->y.z);
+                    f32 z = EDot3(dx, m->z.x, d.y, m->z.y, d.z, m->z.z);
+                    d.x = x;
+                    d.y = y;
+                    d.z = z;
+                }
+                {
+                    f32 len = PSVECMag(&d);
+                    if (0.01f > len) {
+                        len = 0.01f;
+                    }
+                    f32 s = 1.0f / len;
+                    d.x *= s;
+                    d.y *= s;
+                    d.z *= s;
+                }
+                sx = 73.98844f * d.x / (1.0f + d.y);
+                sy = 73.98844f * d.z / (1.0f + d.y);
             }
             fn_802C8E00(sx, 0.0f, sy, 0.0f, 0.0f, 0xFF000000, 1);
             w.y = -200.0f;
