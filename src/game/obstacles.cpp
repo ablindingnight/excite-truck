@@ -1747,11 +1747,11 @@ void Update__9RigidBodyFv(void);
 void fn_80179AF4(void);
 void vf14__10CollVolumeFv(void);
 void vf18__9RigidBodyFv(void);
-void vf24__10CollVolumeFv(void);
+void vf24__10CollVolumeFv(struct Phob* p);  // defined in phob.cpp
 void vf38__10CollVolumeFPUc(void);
 void vf3C__9RigidBodyFv(void);
 void vf40__9RigidBodyFv(void);
-void vf44__10CollVolumeFv(void);
+int vf44__10CollVolumeFv(struct Phob* p);  // defined in phob.cpp
 }
 
 // Dynamic obstacle, then its secondary interface at offset 0x54 in the table.
