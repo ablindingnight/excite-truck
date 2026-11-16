@@ -141,12 +141,13 @@ u8 lbl_8055EF98;
 u8 lbl_8055EF99;
 
 static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
-    if (in == out) {
-        VecP t;
-        t.x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
-        t.y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
-        t.z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
-        *out = t;
+    if (out == in) {
+        f32 x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
+        f32 y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
+        f32 z = in->z * m->basis.m[2][2] + (in->x * m->basis.m[0][2] + in->y * m->basis.m[1][2]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
     } else {
         out->x = in->z * m->basis.m[2][0] + (in->x * m->basis.m[0][0] + in->y * m->basis.m[1][0]);
         out->y = in->z * m->basis.m[2][1] + (in->x * m->basis.m[0][1] + in->y * m->basis.m[1][1]);
