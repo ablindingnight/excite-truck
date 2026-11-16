@@ -194,8 +194,10 @@ static KError lbl_8034CCE0[] = {
     {2, "DSI", 0},
 };
 
-static const f32 lbl_802FAE40[2][4] = {{0.5f, 0.0f, 0.0f, 0.0f}, {0.0625f, 0.0f, 0.0f, 0.0f}};
-static const f32 lbl_802FAE60[2][4] = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}};
+namespace {
+extern const f32 lbl_802FAE40[2][4];
+extern const f32 lbl_802FAE60[2][4];
+}
 
 ModuleTag lbl_8055FEF0;
 s64 lbl_8055FEF8;  // clock start
@@ -771,3 +773,9 @@ void fn_802E2E38(int mode) {
 void fn_802E300C(int code) { fn_802E317C("PlatExitProcess(%d)", code); }
 
 }  // extern "C"
+
+// Indirect-texture matrices share the alignment of the first table.
+namespace {
+const f32 lbl_802FAE40[2][4] __attribute__((aligned(16))) = {{0.5f, 0.0f, 0.0f, 0.0f}, {0.0625f, 0.0f, 0.0f, 0.0f}};
+const f32 lbl_802FAE60[2][4] = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}};
+}

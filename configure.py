@@ -1302,7 +1302,7 @@ config.libs.append(
             Object(Matching, "game/stub15.cpp"),
             Object(Matching, "game/gndtex.cpp"),
             Object(NonMatching, "game/glare.cpp"),
-            Object(NonMatching, "game/tevbink.cpp"),
+            Object(Matching, "game/tevbink.cpp"),
             Object(Matching, "game/kernel.cpp"),
             Object(Matching, "game/log.cpp"),
             Object(Matching, "game/file.cpp"),
