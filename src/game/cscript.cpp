@@ -112,7 +112,7 @@ void fn_80278318(void) {
     lbl_8055F5B9 = 0;
 }
 
-u8 fn_80278358(void) { return lbl_8055F5B8; }
+int fn_80278358(void) { return lbl_8055F5B8; }
 
 void fn_80278360(const ScriptCam* cam) {
     if (lbl_8055F5B8 && lbl_8055F5B4 == 0 && lbl_8055E3C4 > 10) {
@@ -203,7 +203,7 @@ void fn_802787E4(void) {
     lbl_8055F5B9 = 0;
 }
 
-u8 fn_802787F4(void) { return lbl_8055F5BA; }
+int fn_802787F4(void) { return lbl_8055F5BA; }
 
 int fn_802787FC(void) {
     int r = 0;
