@@ -348,17 +348,39 @@ struct ObMesh {
 
 extern f32 __float_epsilon[];      // FLT_EPSILON
 
+// The sphere-group shape (sphcoll.cpp), declared as far as its construction needs.
+class SphereGroup {
+public:
+    SphereGroup(u32 frame, u32 owner);
+    u8 pad[0x184];
+};
+// The other sphcoll shapes built here, likewise declared as far as their construction needs.
+struct PolyPlane;
+class OrientedBoxShape {
+public:
+    OrientedBoxShape(u32 frame, const RVec3* centre, u32 owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
+    u8 pad[0x74];
+};
+class PolyShape {
+public:
+    PolyShape(u32 frame, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 k, f32 skin);
+    u8 pad[0xE0];
+};
+class MeshShape {
+public:
+    MeshShape(u32 frame, const char* name, u32 owner);
+    u8 pad[0x40];
+};
+/* Helper name unproven */
+static inline const RVec3* VecAddr(const RVec3& v) { return &v; }  // OrientedBoxShape takes its centre by pointer
+
 extern "C" {
 void fn_8019EECC(u8* owner, ObVec3* c);
-// sphcoll constructors, called by their linker names: SphereGroup(frame, owner), PolyShape(frame, planes, n, lo, hi, k, skin).
-CollShape* __ct__11SphereGroupFUlUl(void* p, u8* frame, u8* owner);
 void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin, f32 m, f32 im);
 void fn_801A0444(CollShape* grp, CollShape* box);
-// OrientedBoxShape::OrientedBoxShape(frame, centre, owner, k, skin, hx, hy, hz) in sphcoll, called by its linker name.
+// MATCHING-AID: obstacle-wall:box still calls OrientedBoxShape's constructor by its linker name: its centre
+// argument reads a `const f32& half` temporary created inside the allocation check, which a new-expression cannot hold.
 CollShape* __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
-CollShape* __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(void* p, u8* frame, const ObPlane* planes, s32 n, const ValVec3* lo, const ValVec3* hi, f32 k, f32 skin);
-// MeshShape::MeshShape(frame, name, owner) in sphcoll, called by its linker name.
-CollShape* __ct__9MeshShapeFUlPCcUl(void* p, u8* frame, const char* name, u8* owner);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 ObMesh* fn_802C6B44(const char* name);
@@ -632,10 +654,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddCornerV((u8*)this, c, spring);
         c.z *= (-1.0f);
         AddCornerV((u8*)this, c, spring);
-        shape = (CollShape*)operator new(0x184, "horse-volume");
-        if (shape) {
-            shape = __ct__11SphereGroupFUlUl(shape, (u8*)&mtx, (u8*)this);
-        }
+        shape = (CollShape*)new ("horse-volume") SphereGroup((u32)&mtx, (u32)this);
         const f32 directionComponent = 1.0f;
         f32 r = q->a * ScaleOperand(0.5f);
         const f32 firstCenterXY = 0.0f;
@@ -644,10 +663,7 @@ void Obstacle::Init(BodyDesc* d) {
         const f32 secondCenterXY = 0.0f;
         fn_801A0258(shape, RVec3(secondCenterXY, secondCenterXY, q->c * ScaleOperand(0.5f) - r),
                     RVec3(1.0f, 1.0f, 1.0f), r, k, skin, 1.0f, secondCenterXY);
-        CollShape* box = (CollShape*)operator new(0x74, "horse-box");
-        if (box) {
-            box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)&mtx, origin, (u8*)this, k, skin, 0.3f, 0.3f, 0.3f);
-        }
+        CollShape* box = (CollShape*)new ("horse-box") OrientedBoxShape((u32)&mtx, &origin, (u32)this, k, skin, 0.3f, 0.3f, 0.3f);
         fn_801A0444(shape, box);
         corners = 0;
         break;
@@ -735,20 +751,14 @@ void Obstacle::Init(BodyDesc* d) {
             }
         }
         fn_80131818(t);
-        CollShape* s = (CollShape*)operator new(0xE0, "polyvol");
-        if (s) {
-            s = __ct__9PolyShapeFUlPC9PolyPlanelPC5RVec3PC5RVec3ff(s, (u8*)&mtx, pl, n, &lo, &hi, k, skin);
-        }
+        CollShape* s = (CollShape*)new ("polyvol") PolyShape((u32)&mtx, (const PolyPlane*)pl, n, (const RVec3*)&lo, (const RVec3*)&hi, k, skin);
         shape = s;
         U8(this, 0x221) = 1;
         corners = 0;
         break;
     }
     case 20: {
-        CollShape* s = (CollShape*)operator new(0x40, "pmshvol");
-        if (s) {
-            s = __ct__9MeshShapeFUlPCcUl(s, (u8*)&mtx, (const char*)&q->a, (u8*)this);
-        }
+        CollShape* s = (CollShape*)new ("pmshvol") MeshShape((u32)&mtx, (const char*)&q->a, (u32)this);
         shape = s;
         U8(this, 0x221) = 1;
         corners = 0;
@@ -760,11 +770,8 @@ void Obstacle::Init(BodyDesc* d) {
         RVec3 c(origin.x, 0.305f + q->c, q->f - 0.305f);
         CollShape* ball = new ("barrier-sphere") SphereShape(this, ObFrameOf((u8*)this), k, skin, 0.305f, c);
         AddShape(ball);
-        CollShape* s = (CollShape*)operator new(0x74, "barrier-wall");
-        if (s) {
-            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&mtx, RVec3(hx - q->a, hy - q->c, q->f - 0.305f), (u8*)this, k, skin, hx, hy,
-                            0.61f);
-        }
+        CollShape* s = (CollShape*)new ("barrier-wall") OrientedBoxShape((u32)&mtx, VecAddr(RVec3(hx - q->a, hy - q->c, q->f - 0.305f)),
+                                                                        (u32)this, k, skin, hx, hy, 0.61f);
         shape = s;
         AddCornerV((u8*)this, RVec3(q->a, q->c - 0.0254f, q->e), spring);
         AddCornerV((u8*)this, RVec3(q->b, q->c - 0.0254f, q->e), spring);
