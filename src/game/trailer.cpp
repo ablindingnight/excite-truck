@@ -8,6 +8,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
+#include "game/hitch.h"
 #include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
@@ -29,24 +30,6 @@ TFlags* fn_801769CC(void);
 void fn_801796CC(u8 type, const void* data, u32 n);
 f32 PSVECDotProduct(const void* a, const void* b);
 }
-
-// The hitch constraint (a spring between two bodies, 0x8xxxx code).
-struct Hitch {
-    Hitch(void) {
-        owner = 0;
-        a0C = 0;
-        stretch = 0.0f;
-        load = 0.0f;
-    }
-    u8 pad0[0xC];
-    s32 a0C;        // offset 0xC
-    u8 pad10[0x24 - 0x10];
-    f32 limit;      // offset 0x24
-    f32 stretch;    // offset 0x28
-    f32 load;       // offset 0x2C
-    f32 f30;        // offset 0x30
-    void* owner;    // offset 0x34
-};
 
 class CarBody;
 

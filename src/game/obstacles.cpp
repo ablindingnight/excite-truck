@@ -8,6 +8,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/shapes.h"
+#include "game/hitch.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -1315,26 +1316,26 @@ void fn_801ACF94(void) {
 
 void fn_801AD0E0(u8* p, const f32* a, s32 id, const f32* b, f32 x, f32 y) {
     f32 t = 0.02f * x;
-    S32(p, 0xC) = 0;
-    F32(p, 0x28) = 0.0f;
-    F32(p, 0x2C) = 0.0f;
-    F32(p, 0x0) = a[0];
-    F32(p, 0x4) = a[1];
-    F32(p, 0x8) = a[2];
-    S32(p, 0xC) = id;
-    F32(p, 0x10) = b[0];
-    F32(p, 0x14) = b[1];
-    F32(p, 0x18) = b[2];
-    F32(p, 0x1C) = x;
-    F32(p, 0x24) = y;
-    F32(p, 0x20) = 0.1f * t;
+    ((s32&)((Hitch*)p)->other) = 0;
+    ((Hitch*)p)->stretch = 0.0f;
+    ((Hitch*)p)->load = 0.0f;
+    ((Hitch*)p)->at.x = a[0];
+    ((Hitch*)p)->at.y = a[1];
+    ((Hitch*)p)->at.z = a[2];
+    ((s32&)((Hitch*)p)->other) = id;
+    ((Hitch*)p)->local.x = b[0];
+    ((Hitch*)p)->local.y = b[1];
+    ((Hitch*)p)->local.z = b[2];
+    ((Hitch*)p)->k = x;
+    ((Hitch*)p)->limit = y;
+    ((Hitch*)p)->damp = 0.1f * t;
 }
 
 // Links this joint between a point on our volume and the same point in `body`'s local frame.
 void fn_801AD148(u8* p, const RVec3* a, u8* body, f32 x, f32 y) {
     RVec3 w;
     RVec3 l;
-    ((CollVolume*)PTR(p, 0x34))->Xform(&w, a);
+    ((CollVolume*)((u8*&)((Hitch*)p)->owner))->Xform(&w, a);
     if (body) {
         l.x = w.x - F32(body, 0x60);
         l.y = w.y - F32(body, 0x64);
@@ -1359,7 +1360,7 @@ void fn_801AD28C(u8* p, const RVec3* a, CollVolume* other, const RVec3* b, f32 x
     RVec3 wa;
     RVec3 wb;
     RVec3 d;
-    ((CollVolume*)PTR(p, 0x34))->Xform(&wa, a);
+    ((CollVolume*)((u8*&)((Hitch*)p)->owner))->Xform(&wa, a);
     if (other) {
         other->Xform(&wb, b);
     } else {
@@ -1368,10 +1369,10 @@ void fn_801AD28C(u8* p, const RVec3* a, CollVolume* other, const RVec3* b, f32 x
     d.x = wb.x - wa.x;
     d.y = wb.y - wa.y;
     d.z = wb.z - wa.z;
-    F32(p, 0x28) = PSVECMag(&d);
-    f32 len = F32(p, 0x28);
+    ((Hitch*)p)->stretch = PSVECMag(&d);
+    f32 len = ((Hitch*)p)->stretch;
     fn_801AD0E0(p, (const f32*)b, (s32)other, (const f32*)a, x, y);
-    F32(p, 0x28) = len;
+    ((Hitch*)p)->stretch = len;
 }
 
 double sqrt(double x);
@@ -1384,9 +1385,9 @@ void fn_801AD394(u8* p) {
     RVec3 wa;
     RVec3 wb;
     RVec3 d;
-    ((CollVolume*)PTR(p, 0x34))->Xform(&wa, (const RVec3*)(p + 0x10));
-    if (PTR(p, 0xC)) {
-        ((CollVolume*)PTR(p, 0xC))->Xform(&wb, (const RVec3*)p);
+    ((CollVolume*)((u8*&)((Hitch*)p)->owner))->Xform(&wa, (const RVec3*)&((Hitch*)p)->local);
+    if (((u8*&)((Hitch*)p)->other)) {
+        ((CollVolume*)((u8*&)((Hitch*)p)->other))->Xform(&wb, (const RVec3*)p);
     } else {
         wb = *(const RVec3*)p;
     }
@@ -1398,10 +1399,10 @@ void fn_801AD394(u8* p) {
     f32 dz = d.z;
     f32 hxx = dx * dx;
     f32 hzz = dz * dz;
-    F32(p, 0x30) = (f32)sqrt(hxx + hzz);
-    f32 stretch = len - F32(p, 0x28);
-    F32(p, 0x2C) = stretch;
-    if (len > MinJointLength.value && len < F32(p, 0x28) + F32(p, 0x24)) {
+    ((Hitch*)p)->f30 = (f32)sqrt(hxx + hzz);
+    f32 stretch = len - ((Hitch*)p)->stretch;
+    ((Hitch*)p)->load = stretch;
+    if (len > MinJointLength.value && len < ((Hitch*)p)->stretch + ((Hitch*)p)->limit) {
         RVec3 dir;
         RVec3 force;
         RVec3 va;
@@ -1415,9 +1416,9 @@ void fn_801AD394(u8* p) {
         dir.x = d.x * inv;
         dir.y = d.y * inv;
         dir.z = d.z * inv;
-        ((RigidBody*)PTR(p, 0x34))->VelAt((RVec3*)&va, (const RVec3*)&wa);
-        if (PTR(p, 0xC)) {
-            ((RigidBody*)PTR(p, 0xC))->VelAt((RVec3*)&vb, (const RVec3*)&wb);
+        ((RigidBody*)((u8*&)((Hitch*)p)->owner))->VelAt((RVec3*)&va, (const RVec3*)&wa);
+        if (((u8*&)((Hitch*)p)->other)) {
+            ((RigidBody*)((u8*&)((Hitch*)p)->other))->VelAt((RVec3*)&vb, (const RVec3*)&wb);
         } else {
             vb.x = 0.0f;
             vb.y = 0.0f;
@@ -1426,22 +1427,22 @@ void fn_801AD394(u8* p) {
         dv.x = vb.x - va.x;
         dv.y = vb.y - va.y;
         dv.z = vb.z - va.z;
-        f32 c = F32(p, 0x20);
+        f32 c = ((Hitch*)p)->damp;
         force.x = dv.x * c;
         force.y = dv.y * c;
         force.z = dv.z * c;
-        if (len > F32(p, 0x28)) {
-            f32 k = F32(p, 0x1C) * (len - F32(p, 0x28));
+        if (len > ((Hitch*)p)->stretch) {
+            f32 k = ((Hitch*)p)->k * (len - ((Hitch*)p)->stretch);
             force.x = force.x + dir.x * k;
             force.y = force.y + dir.y * k;
             force.z = force.z + dir.z * k;
         }
-        ((RigidBody*)PTR(p, 0x34))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
-        if (PTR(p, 0xC)) {
+        ((RigidBody*)((u8*&)((Hitch*)p)->owner))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
+        if (((u8*&)((Hitch*)p)->other)) {
             force.x = force.x * ScaleOperand(-1.0f);
             force.y = force.y * ScaleOperand(-1.0f);
             force.z = force.z * ScaleOperand(-1.0f);
-            ((RigidBody*)PTR(p, 0xC))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
+            ((RigidBody*)((u8*&)((Hitch*)p)->other))->AddForceAt((const RVec3*)&force, (const RVec3*)&wa);
         }
     }
 }
