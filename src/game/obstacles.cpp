@@ -327,29 +327,8 @@ struct ObMesh {
 
 extern f32 __float_epsilon[];      // FLT_EPSILON
 
-// The sphere-group shape (sphcoll.cpp), declared as far as its construction needs.
-class SphereGroup {
-public:
-    SphereGroup(u32 frame, u32 owner);
-    u8 pad[0x184];
-};
 // The other sphcoll shapes built here, likewise declared as far as their construction needs.
 struct PolyPlane;
-class OrientedBoxShape {
-public:
-    OrientedBoxShape(u32 frame, const RVec3* centre, u32 owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
-    u8 pad[0x74];
-};
-class PolyShape {
-public:
-    PolyShape(u32 frame, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 k, f32 skin);
-    u8 pad[0xE0];
-};
-class MeshShape {
-public:
-    MeshShape(u32 frame, const char* name, u32 owner);
-    u8 pad[0x40];
-};
 /* Helper name unproven */
 static inline const RVec3* VecAddr(const RVec3& v) { return &v; }  // OrientedBoxShape takes its centre by pointer
 
@@ -409,68 +388,6 @@ static inline f32 ObAbsDiff(f32 a, f32 b) { return (f32)__fabs(a - b); }
 static inline const RMtx* ObFrameOf(u8* p) { return (const RMtx*)(p + 0x3C); }
 
 static inline f32 ObMax(f32 a, f32 b) { return a > b ? a : b; }
-
-// A flattened sphere ('FLSR', 0x5C bytes): radius a across, b along its axis; bounded by the larger.
-class FlatSphereShape : public SphereShape {
-public:
-    FlatSphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 a, f32 b, const RVec3& c)
-        : SphereShape(o, m, k, s, ObMax(a, b), c) {
-        across = a;
-        along = b;
-        type = 'FLSR';
-    }
-    virtual ~FlatSphereShape(void);
-    virtual void vf38(void);
-    f32 across;  // offset 0x54
-    f32 along;   // offset 0x58
-};
-
-// A box ('BOX ', 0x38 bytes) with half extents (hx, hy, hz) and a bounding radius.
-class BoxShape : public CollShape {
-public:
-    BoxShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, o, 'BOX ', k, s) {
-        hx = x;
-        hy = y;
-        hz = z;
-        a34 = 0;
-        bound = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
-    }
-    virtual void vf10(u8* other);
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    virtual ~BoxShape(void) {}
-    virtual u32 vf50(void);
-    f32 hx, hy, hz;  // offset 0x24
-    f32 bound;       // offset 0x30
-    s32 a34;         // offset 0x34
-};
-
-class TubeBase : public CollShape {
-public:
-    TubeBase(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : CollShape((const CFrame*)m, o, 'TUBE', k, s) {
-        rad = r;
-        half = h;
-    }
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    virtual ~TubeBase(void) {}
-    f32 rad;   // offset 0x24
-    f32 half;  // offset 0x28: half the length between the end spheres
-};
-
-// A tube ('TUBE', 0x2C bytes).
-class TubeShape : public TubeBase {
-public:
-    TubeShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : TubeBase(o, m, k, s, r, h) {}
-    virtual void vf10(u8* other);
-    virtual void vf14(void);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual void vf4C(void);
-    virtual ~TubeShape(void) {}
-};
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 

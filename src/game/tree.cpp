@@ -8,6 +8,7 @@
 #include "game/common.h"
 #include "game/collshape.h"
 #include "game/rmtx.h"
+#include "game/shapes.h"
 
 extern "C" {
 double sqrt(double x);
@@ -232,31 +233,6 @@ struct TPos2 {
 
 extern "C" void* fn_802BA580(ValueNode* cfg, const TPos2* p, f32 r);
 extern "C" void fn_802BAF98(void* p, u8 on);
-
-// The size fields sit in a base of their own: the derived vptr store comes after them.
-class TubeBase : public CollShape {
-public:
-    TubeBase(f32 k, f32 r, f32 h) : CollShape(0, 0, 'TUBE', k, 0.2f) {
-        rad = r;
-        half = h;
-    }
-    f32 rad;   // offset 0x24
-    f32 half;  // offset 0x28
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    virtual ~TubeBase(void) {}
-};
-
-class TubeShape : public TubeBase {
-public:
-    TubeShape(f32 k, f32 r, f32 h) : TubeBase(k, r, h) {}
-    virtual void vf10(u8* other);
-    virtual void vf14(void);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual void vf4C(void);
-    virtual ~TubeShape(void) {}
-};
 
 extern "C" TreeVol* fn_801FA8E0(CollShape* s, const RMtx* m, u8* hit);
 

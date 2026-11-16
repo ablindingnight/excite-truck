@@ -59,32 +59,6 @@ struct BodyDesc;
 class CollVolume;
 
 
-class TubeBase : public CollShape {
-public:
-    TubeBase(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : CollShape((const CFrame*)m, o, 'TUBE', k, s) {
-        rad = r;
-        half = h;
-    }
-    // key function: defined out of line in the original collision unit (not identified yet), so units
-    // that build tubes do not emit TubeBase's vtable (the target mutphob .data has none)
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    virtual ~TubeBase(void) {}
-    f32 rad;   // offset 0x24
-    f32 half;  // offset 0x28: half the length between the end spheres
-};
-
-class TubeShape : public TubeBase {
-public:
-    TubeShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : TubeBase(o, m, k, s, r, h) {}
-    virtual void vf10(u8* other);
-    virtual void vf14(void);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual void vf4C(void);
-    virtual ~TubeShape(void) {}
-};
-
 // Builds, in 's', a sphere bounding a box of half-size (hx, hy, hz).
 extern "C" void fn_8019F564(CollShape* s, const RMtx* m, const RVec3* c, CollVolume* o, f32 k, f32 skin, f32 a,
                             f32 hx, f32 hy, f32 hz);

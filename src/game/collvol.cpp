@@ -5,6 +5,7 @@
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
+#include "game/shapes.h"
 
 extern "C" {
 f32 PSVECMag(const void* v);
@@ -22,27 +23,6 @@ void* operator new(size_t size, const char* tag);
 
 // The 3x3 rotation block: copied as one 36-byte struct (word copy), indexed like an array.
 /* Type shape from the target (one 9-word copy in CollVolume::Update, 2026-11-08); name and the conversion operator are guesses. */
-class BoxShape : public CollShape {
-public:
-    BoxShape(const RMtx* m, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, 0, 'BOX ', 50000.0f, 0.2f) {
-        half.x = x;
-        half.y = y;
-        half.z = z;
-        a34 = 0;
-        radius = 0.2f + (f32)sqrt(x * x + y * y + z * z);
-    }
-    RVec3 half;  // offset 0x24
-    f32 radius;  // offset 0x30
-    s32 a34;     // offset 0x34
-    virtual void vf10(u8* other);
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    virtual ~BoxShape(void) {}
-    virtual u32 vf50(void);
-};
-
 // The volume description (named as the RigidBody family names it; unproven).
 struct BodyDesc {
     s32 type;     // offset 0x0
