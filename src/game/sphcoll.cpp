@@ -382,10 +382,6 @@ public:
     s32 surface;     // 0x20
 };
 
-// MATCHING-AID (transitional): the derived shapes are still written as C and construct their CollShape base by
-// its linker name; this goes when they become real subclasses.
-extern "C" void __ct__9CollShapeFUlUl(u8* p, u32 data, u32 swap);
-
 // A sphere shape (vtable __vt__11SphereShape): radius 0x24, local centre 0x28, world centre 0x34.
 class SphereShape : public CollShape {
 public:
@@ -575,15 +571,12 @@ public:
     virtual ~StaticCollObject(void) {}
 };
 
-// MATCHING-AID (transitional): constructors still written as C store these vtables, and sphcoll's file loader
-// builds a SphereShape in place, by their linker names.
+// MATCHING-AID (transitional): the builders still written as C store these vtables by their linker names
+// (BoxSphereShape: fn_8019F564 stays C, 94.9%; the sphere part fn_801A0258; trackobj's PolyShape and
+// StaticCollObject builders fn_801A324C / fn_801A4A8C, held while Codex works trackobj).
 extern "C" void* __vt__11SphereShape[];
 extern "C" void* __vt__14BoxSphereShape[];
-extern "C" void* __vt__8BoxShape[];
-extern "C" void* __vt__16OrientedBoxShape[];
-extern "C" void* __vt__12RagdollShape[];
 extern "C" void* __vt__9PolyShape[];
-extern "C" void* __vt__9MeshShape[];
 extern "C" void* __vt__16StaticCollObject[];
 void fn_801A49FC(u8* p);
 void fn_801A49E8(u8* p);
