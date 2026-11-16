@@ -1206,7 +1206,7 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
 #define BINK_DOUBLE2(w) (((w) << 8) | ((w) & 0xFF)) | (((w) << 16) & 0xFF000000)
 
 #pragma push
-#pragma global_optimizer off  /* Pragma unproven, strong evidence: only this keeps both arms of the readColors if/else as retail has them (each optimizer switch alone hoists one arm); it replaces the earlier lifetimes/propagation/common_subs/unroll/loop_invariants set (Bink session) */
+#pragma global_optimizer off  /* Proven by the pragma gate (aids audit 2026-11-16: ExpandPlane exact with it, 72.04 and 1857/1758 instructions without): only this keeps both arms of the readColors if/else as retail has them (each optimizer switch alone hoists one arm); it replaces the earlier lifetimes/propagation/common_subs/unroll/loop_invariants set (Bink session) */
 // Decodes one Bink plane (8x8 blocks, or 16x16 scaled blocks) into dst, using prev as the previous frame.
 // `step` is the block-map step per block (1 for luma, which shares map entries between block pairs, 2 for
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
