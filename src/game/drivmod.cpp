@@ -553,7 +553,7 @@ static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 struct RiderLinks {
     BoneLink l[6];
 };
-extern const f32 lbl_80563064;  // 0.0762 (3 in)
+template <class O, class D> static inline void DmPush(O* o, const D* d, f32 k) { o->x = o->x + d->x * k; o->y = o->y + d->y * k; o->z = o->z + d->z * k; }  /* Helper name unproven: three inches along an axis */
 
 extern "C" {
 extern const RiderLinks lbl_802F9D00;
@@ -729,12 +729,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     Mat3Mul((Mat3*)&pose[3].rot, (Mat3*)&tilt, (Mat3*)&pose[3].rot);
     links = lbl_802F9D00;
     fn_802009CC(pose, pts, links.l, 6, (u8*)bones, (BonePose*)&m);
-    pose[9].pos.x = pose[9].pos.x + pose[8].rot.rx.x * lbl_80563064;
-    pose[9].pos.y = pose[9].pos.y + pose[8].rot.rx.y * lbl_80563064;
-    pose[9].pos.z = pose[9].pos.z + pose[8].rot.rx.z * lbl_80563064;
-    pose[6].pos.x = pose[6].pos.x + pose[5].rot.rx.x * lbl_80563064;
-    pose[6].pos.y = pose[6].pos.y + pose[5].rot.rx.y * lbl_80563064;
-    pose[6].pos.z = pose[6].pos.z + pose[5].rot.rx.z * lbl_80563064;
+    DmPush(&pose[9].pos, &pose[8].rot.rx, 0.0762f);
+    DmPush(&pose[6].pos, &pose[5].rot.rx, 0.0762f);
     e2.x = d->yaw;
     e2.y = 0.0f;
     e2.z = 0.0f;
