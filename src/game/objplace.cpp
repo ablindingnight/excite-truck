@@ -350,9 +350,9 @@ extern "C" {
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 static inline void Loop1_fn_802B1FD4(SetPlacer* set) {
     ObjectPlacer*p;
+    int k;
     MatPlacer*m;
     int j;
-    int k;
     for (j = 0; j < set->count; j++) {
         m = set->data[j];
         if (m) {
@@ -370,18 +370,19 @@ static inline void Loop1_fn_802B1FD4(SetPlacer* set) {
     }
 }
 
+static inline void FreeSet(SetPlacer* set) { /* Helper name unproven */
+    if (set) {
+        Loop1_fn_802B1FD4(set);
+        set->count = 0;
+        ((InlineVec<MatPlacer*, 6>*)set)->~InlineVec();
+        operator delete(set);
+    }
+}
+
 void fn_802B1FD4(void) {
     SafeDelete(lbl_8055F9BC);
     for (int i = 0; i < lbl_804BE1FC.count; i++) {
-        SetPlacer* set = lbl_804BE1FC.data[i];
-        if (set) {
-            int j;
-            int k;
-            Loop1_fn_802B1FD4(set);
-            set->count = 0;
-            ((InlineVec<MatPlacer*, 6>*)set)->~InlineVec();
-            operator delete(set);
-        }
+        FreeSet(lbl_804BE1FC.data[i]);
     }
     lbl_804BE1FC.count = 0;
 }
