@@ -1,10 +1,10 @@
 // Stream banks (0x802E7578-0x802E7770): the global stream-bank manager and its forwarders; this build only
 // ever creates the "null" manager. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/OS/OS.h>
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-int OSGetConsoleType(void);
 }
 
 void* operator new(size_t size, const char* tag);
