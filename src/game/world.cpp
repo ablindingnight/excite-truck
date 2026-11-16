@@ -3,7 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
-#include "game/raceopts.h"
+#include "game/racesetup.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 
@@ -80,32 +80,6 @@ struct ViewState {
     WCam cam;    // offset 0x0
     u32 flags;   // offset 0x30
     u32 prev;    // offset 0x34
-};
-
-// One car of the race (0x78).
-struct CarDef {
-    CarDef(void) {}
-    s32 type;      // offset 0x0
-    u8 b4[0x40];   // offset 0x4
-    char name[0x20]; // offset 0x44
-    s32 f64;       // offset 0x64
-    s32 f68;       // offset 0x68
-    s32 f6C;       // offset 0x6C
-    u8 f70;        // offset 0x70
-    s32 f74;       // offset 0x74
-};
-
-struct RaceCars {
-    CarDef defs[8];  // offset 0x0
-    s32 count;       // offset 0x3C0
-};
-
-struct RaceSetup {
-    RaceSetup(void);
-    u8 pad0[0x20];
-    RaceCars cars;   // offset 0x20
-    s32 event;       // offset 0x3E4
-    u8 pad3E8[0x3F8 - 0x3E8];
 };
 
 struct StartOpts {
@@ -527,7 +501,7 @@ void fn_801E78D8(RaceSetup* s) {
         int j;
         for (j = 0; j < c->count; d++, j++) {
             if (d->type == 'P') {
-                fn_8020646C(d->f70 & 3, j);
+                fn_8020646C(d->flags & 3, j);
             }
         }
     }
@@ -577,14 +551,14 @@ void WorldBeginCommon(RaceSetup* s) {
     fn_801EA4C4();
     fn_801AEF28(s);
     fn_80127464();
-    fn_80176460(&s->event, s, &o);
+    fn_80176460(&s->opts.event, s, &o);
     if (!lbl_8055EB11) {
         fn_8000D7F0(s);
     }
     fn_801EA1D8();
     fn_80287780(s);
     fn_801F4CD8();
-    fn_801EA31C(&s->event);
+    fn_801EA31C(&s->opts.event);
     fn_801EA394();
     fn_801FFB6C();
     fn_8000A868();
@@ -596,7 +570,7 @@ void WorldBeginCommon(RaceSetup* s) {
     LoadTimerMark("load track", 500.0f);
     fn_801DCE0C(0);
     fn_801FC8DC(s);
-    fn_80139F5C(GetEvent(s->event));
+    fn_80139F5C(GetEvent(s->opts.event));
     fn_80127464();
     fn_801FA298(s);
     fn_801E96D8(s);
@@ -984,7 +958,7 @@ int fn_801E8758(int view) {
 
 RaceSetup* fn_801E879C(void) { return &lbl_80487DE0; }
 
-RaceOpts* fn_801E87A8(void) { return (RaceOpts*)&lbl_80487DE0.event; }
+RaceOpts* fn_801E87A8(void) { return &lbl_80487DE0.opts; }
 
 void fn_801E87B8(WObj* o) { lbl_8055EB3C[lbl_8055EB34++] = o; }
 
@@ -1291,7 +1265,7 @@ static inline ValPoint BoundPoint(ValueNode* nd, const char* key) { /* Helper na
 static inline f32 GroundY(const ValPoint& p) { return fn_801DCF48(0, p.x, p.y); }
 
 void fn_801E96D8(RaceSetup* s) {
-    EventInfo* ev = GetEvent(s->event);
+    EventInfo* ev = GetEvent(s->opts.event);
     const char* file = ev->node->GetString("wall_file", 0);
     if (file) {
         ValueNode* nd;

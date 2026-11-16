@@ -2,6 +2,7 @@
 // event type, and the global functions that forward to it; a few GameMode helpers; and the null
 // master used when the event has none. Names are guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -32,13 +33,6 @@ void* operator new(size_t size, const char* tag);
 struct Damage {
     u8 pad0[0x50];
     f32 amount;  // offset 0x50
-};
-
-// The race setup the master is created for.
-struct RaceSetup {
-    u8 pad0[0x3E4];
-    s32 event;  // offset 0x3E4
-    u32 type;   // offset 0x3E8
 };
 
 // The game mode interface; GameMode inherits these slots from it.
@@ -211,7 +205,7 @@ f32 lbl_80436D08[8];
 extern "C" {
 
 GameMode* fn_801B81E0(const RaceSetup* s) {
-    switch (s->type) {
+    switch (s->opts.type) {
     case 0x180201:
         return fn_8014145C(s);
     case 0x180303:
@@ -221,20 +215,20 @@ GameMode* fn_801B81E0(const RaceSetup* s) {
     case 0x180304:
         return fn_80172C28(s);
     default:
-        fn_802E317C("Can't create master for arena event 0x%x", s->type);
+        fn_802E317C("Can't create master for arena event 0x%x", s->opts.type);
         return NULL;
     }
 }
 
 void fn_801B826C(const RaceSetup* s) {
-    u32 type = s->type;
+    u32 type = s->opts.type;
     lbl_8055E74C = type;
     if (type & 0x200) {
         lbl_8055E744 = fn_801B81E0(s);
     } else {
         lbl_8055E744 = new ("null_amaster") NullArenaMaster;
     }
-    damageFactor = GetEvent(s->event)->node->GetFloat("damage_factor", 1.0f);
+    damageFactor = GetEvent(s->opts.event)->node->GetFloat("damage_factor", 1.0f);
     lbl_8055E748 = 0;
     fn_80161618();
     lbl_8055E750 = 0.0f;

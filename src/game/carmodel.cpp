@@ -4,7 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
-#include "game/raceopts.h"
+#include "game/racesetup.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/mtxtypes.h>  // Vec
 
@@ -113,13 +113,6 @@ struct Racer {
     s32 color;           // offset 0xE8
     char xrayMesh[32];   // offset 0xEC
     f32 wheelSize[4];    // offset 0x10C
-};
-
-struct CarDef {
-    u8 pad[0x44];
-    char name[0x24];  // offset 0x44
-    s32 driver;       // offset 0x68
-    s32 unk6C;        // offset 0x6C
 };
 
 struct CarRes {
@@ -527,10 +520,10 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
         fn_801EC1D4();
     }
     char buf[64];
-    StrCopy(buf, d->name, 64);
+    StrCopy(buf, d->vehicleName, 64);
     StrCat(buf, ".car", 64);
     fn_8012E81C(buf);
-    res = (CarRes*)fn_802792E4(d->name);
+    res = (CarRes*)fn_802792E4(d->vehicleName);
     fn_801EA59C(r->index, 0, (CarDef*)d);
     models = drawModels;
     lods = lodTable;
@@ -538,10 +531,10 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
     s32 driver = d->driver;
     s32 inst = driver >= 0 ? r->index : 0;
     char dir[64];
-    fn_801345D8(dir, 64, "%s.car", d->name);
-    fn_801EE0E0(this, d->name, d->unk6C, inst, dir);
+    fn_801345D8(dir, 64, "%s.car", d->vehicleName);
+    fn_801EE0E0(this, d->vehicleName, d->vehicle, inst, dir);
     fn_801EE974(this, r);
-    fn_801EEA64(this, r, d->name, dir);
+    fn_801EEA64(this, r, d->vehicleName, dir);
     s32 drv = d->driver;
     lbl_80488648[index] = this;
     r->lodModel = lodModels[1];

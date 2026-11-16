@@ -1,6 +1,7 @@
 // Single events (0x8023B764-0x8023C2B4): sets up and runs one event, head-to-head sessions and
 // direct-to-track starts from the command line. Names are guesses apart from the messages.
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -32,16 +33,9 @@ struct RaceResult {
     RaceResultEntry entries[8];  // offset 0x10
 };
 
-struct RaceSetup {
-    RaceSetup(void);  // world.cpp
-    char track[0x20];     // offset 0x0
-    u8 pad20[0x3C4];
-    s32 event;            // offset 0x3E4
-    u8 pad3E8[4];
-    s32 difficulty;       // offset 0x3EC
-    s32 unk3F0;           // offset 0x3F0
-    u32 flags;            // offset 0x3F4
-    DAVMap dav;           // offset 0x3F8
+// The setup gamedo runs an event with: the race setup, then its driver/vehicle map. Name unproven.
+struct GameDoSetup : RaceSetup {
+    DAVMap dav;  // offset 0x3F8
 };
 
 class GameListener {
@@ -175,7 +169,7 @@ void fn_8023B77C(void) {
 
 void fn_8023C0EC(RaceSetup* rs, int track, int eve);
 
-void fn_8023B7EC(RaceSetup* rs, int track, int eve, int difficulty) {
+void fn_8023B7EC(GameDoSetup* rs, int track, int eve, int difficulty) {
     fn_802ECC18(0);
     fn_802445FC(track, eve, difficulty);
     fn_8023B77C();
@@ -186,11 +180,11 @@ void fn_8023B7EC(RaceSetup* rs, int track, int eve, int difficulty) {
     BuildDAVMap(&rs->dav, track);
     fn_800126B4(rs, &rs->dav, 0, 1);
     DAVMap rev;
-    BuildReversedMap(&rev, rs->event, &rs->dav);
+    BuildReversedMap(&rev, rs->opts.event, &rs->dav);
     fn_8000AB48(rs, &rev);
 }
 
-void fn_8023B8AC(RaceSetup* rs) {
+void fn_8023B8AC(GameDoSetup* rs) {
     fn_8000ABE0(rs);
     fn_800126C0(rs, &rs->dav);
     fn_80244738();
@@ -202,7 +196,7 @@ void fn_8023B8AC(RaceSetup* rs) {
     fn_8020A600();
 }
 
-void fn_8023B904(RaceSetup* rs, RaceResult* out, int skip) {
+void fn_8023B904(GameDoSetup* rs, RaceResult* out, int skip) {
     if (!skip) {
         ResultListener listener;
         fn_8000BF20(rs, &listener);
@@ -224,13 +218,13 @@ void fn_8023B9EC(int track, int eve, RaceResult* out, int difficulty, int skip) 
         if (fn_80204024()) {
             fn_8012BF28();
         }
-        RaceSetup rs;
+        GameDoSetup rs;
         fn_8023B7EC(&rs, track, eve, difficulty);
-        rs.unk3F0 = 0;
-        rs.difficulty = difficulty;
-        if (fn_8023B764(difficulty, rs.event)) {
+        rs.opts.level = 0;
+        rs.opts.difficulty = difficulty;
+        if (fn_8023B764(difficulty, rs.opts.event)) {
             fn_802E30C8("Enabling Mirror Mode!!");
-            rs.flags |= 2;
+            rs.opts.flags |= 2;
         }
         fn_8023B904(&rs, out, skip);
         fn_8023B8AC(&rs);
@@ -401,7 +395,7 @@ void fn_8023C0EC(RaceSetup* rs, int track, int eve) {
             }
         }
     }
-    fn_8000824C(&rs->event, e->id);
+    fn_8000824C(&rs->opts.event, e->id);
 }
 
 }  // extern "C"

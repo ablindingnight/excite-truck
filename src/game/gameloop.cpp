@@ -4,6 +4,7 @@
 // are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/carinfo.h"
 #include "game/joy.h"
 
@@ -49,38 +50,6 @@ struct RaceResult {
 // JoyStatus: game/joy.h.
 struct Camera {
     u8 data[0x30];
-};
-
-struct RacerSlot {
-    s32 type;              // offset 0x0
-    char driverName[64];   // offset 0x4
-    char vehicleName[32];  // offset 0x44
-    struct {
-        f32 v;
-    } unk64;      // offset 0x64
-    s32 driver;   // offset 0x68
-    s32 vehicle;  // offset 0x6C
-    u8 flags;     // offset 0x70
-    s32 unk74;    // offset 0x74
-};
-
-struct RacerList {
-    RacerSlot slots[8];  // offset 0x0
-    s32 count;           // offset 0x3C0
-};
-
-// Event index and race flags (copied as one 8-byte block).
-struct RaceKind {
-    s32 event;  // offset 0x0
-    u32 flags;  // offset 0x4
-};
-
-struct RaceSetup {
-    char track[0x20];  // offset 0x0
-    RacerList racers;  // offset 0x20
-    RaceKind kind;     // offset 0x3E4
-    s32 unk3EC[2];     // offset 0x3EC
-    s32 unk3F4;        // offset 0x3F4: flags word (fn_8000C0E8 clears it, then sets bit 0)
 };
 
 class GameListener {
@@ -471,7 +440,7 @@ void gameloop_begin(RaceSetup* rs) {
     fn_802108C8();
     fn_802B8744();
     fn_801769EC();
-    fn_8000AF04(rs->kind.flags);
+    fn_8000AF04(rs->opts.type);
     for (i = 0, c = lbl_8034F5B8; i < 4; c++, i++) {
         memset(c, 0, sizeof(*c));
         cam = lbl_8034F5D8[0];
@@ -978,18 +947,18 @@ void fn_8000BF20(RaceSetup* rs, GameListener* listener) {
 }
 
 void fn_8000C0E8(RaceSetup* rs) {
-    RaceSetup copy;
+    RaceSetupData copy;  // no RaceSetup constructor call in retail
     copy = *rs;
     int i;
-    copy.unk3F4 = 0;
-    copy.unk3F4 |= 1;
-    copy.racers.count = 1;
-    for (i = 0; i < rs->racers.count; i++) {
-        if (rs->racers.slots[i].type == 'P') {
-            copy.racers.slots[0] = rs->racers.slots[i];
+    copy.opts.flags = 0;
+    copy.opts.flags |= 1;
+    copy.cars.count = 1;
+    for (i = 0; i < rs->cars.count; i++) {
+        if (rs->cars.defs[i].type == 'P') {
+            copy.cars.defs[0] = rs->cars.defs[i];
         }
     }
-    fn_8000BF20(&copy, NULL);
+    fn_8000BF20((RaceSetup*)&copy, NULL);
 }
 
 void fn_8000C5CC(void) {

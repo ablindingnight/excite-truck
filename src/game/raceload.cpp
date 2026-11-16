@@ -2,30 +2,8 @@
 // vehicles (plus "Trailer" slots), builds the track/resource/weather .trk names for the event and
 // loads/unloads the track, car and overlay resources. Names are guesses.
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/gamedb.h"
-
-struct RacerSlot {
-    s32 type;              // offset 0x0
-    char driverName[64];   // offset 0x4
-    char vehicleName[32];  // offset 0x44
-    struct { f32 v; } unk64;  // offset 0x64
-    s32 driver;            // offset 0x68
-    s32 vehicle;           // offset 0x6C
-    u8 flags;              // offset 0x70 (low two bits: player)
-    s32 unk74;             // offset 0x74
-};
-
-struct RacerList {
-    RacerSlot slots[8];  // offset 0x0
-    s32 count;           // offset 0x3C0
-};
-
-struct RaceSetup {
-    char track[0x20];  // offset 0x0
-    RacerList racers;  // offset 0x20
-    s32 event;         // offset 0x3E4
-    u32 flags;         // offset 0x3E8
-};
 
 struct DAVMap {
     s32 num_drivers;   // offset 0x0
@@ -89,16 +67,16 @@ static inline void CopyString(const char* s, int size, char* dst) {
 
 void fn_80009DC8(RaceSetup* rs) {
     s32 vehicle;
-    RacerSlot* s;
+    CarDef* s;
     int p;
-    RacerSlot tmp;
+    CarDef tmp;
     int i;
     DriverInfo* d;
-    RacerList* list = &rs->racers;
+    RaceCars* list = &rs->cars;
     int n = list->count;
     VehicleInfo* v;
 
-    for (i = 0, s = list->slots; i < n; s++, i++) {
+    for (i = 0, s = list->defs; i < n; s++, i++) {
         d = FindDriver(s->driver);
         v = FindVehicle(s->vehicle);
         s->flags = 0;
@@ -114,12 +92,12 @@ void fn_80009DC8(RaceSetup* rs) {
         }
         CopyString(d->name, 64, s->driverName);
     }
-    if (rs->flags & 0x1000) {
+    if (rs->opts.type & 0x1000) {
         for (i = list->count / 2; i < list->count; i++) {
-            list->slots[i].type = 'T';
+            list->defs[i].type = 'T';
         }
     }
-    if (rs->flags & 0x400) {
+    if (rs->opts.type & 0x400) {
         tmp.type = 'T';
         CopyString("Trailer", 64, tmp.driverName);
         CopyString("", 32, tmp.vehicleName);
@@ -128,7 +106,7 @@ void fn_80009DC8(RaceSetup* rs) {
         tmp.flags = 0;
         tmp.unk74 = 0;
         for (int i = 0; i < n; i++) {
-            RacerSlot* trailer = &list->slots[list->count++];
+            CarDef* trailer = &list->defs[list->count++];
             vehicle = FindVehicleByFlags(1, i)->id;
             *trailer = tmp;
             trailer->vehicle = vehicle;
@@ -138,13 +116,13 @@ void fn_80009DC8(RaceSetup* rs) {
 }
 
 void fn_8000A644(RaceSetup* rs, DAVMap* __restrict map) {
-    RacerSlot* s;
-    RacerList* list;
+    CarDef* s;
+    RaceCars* list;
     int i;
-    list = &rs->racers;
-    s = list->slots;
+    list = &rs->cars;
+    s = list->defs;
 
-    rs->racers.count = map->num_vehicles;
+    rs->cars.count = map->num_vehicles;
     for (i = 0; i < list->count; i++, s++) {
         s->driver = map->drivers[i];
         s->vehicle = map->vehicles[i];
@@ -209,7 +187,7 @@ void fn_8000A8C4(RaceSetup* rs) {
 
     fn_802E3D00();
     fn_801345D8(lbl_8034F4E0, sizeof(lbl_8034F4E0), "%s.trk", rs->track);
-    lbl_8055D3B8 = GetEvent(rs->event);
+    lbl_8055D3B8 = GetEvent(rs->opts.event);
     res = lbl_8055D3B8->node->GetString("resource", NULL);
     if (res) {
         lbl_8055D3B4 = 1;
@@ -261,8 +239,8 @@ void fn_8000AAE0(RaceSetup* rs) { fn_8000A808(); }
 
 void fn_8000AAE4(RaceSetup* rs) {
     int i;
-    for (i = 0; i < rs->racers.count; i++) {
-        fn_8000AABC(rs->racers.slots[i].vehicleName);
+    for (i = 0; i < rs->cars.count; i++) {
+        fn_8000AABC(rs->cars.defs[i].vehicleName);
     }
 }
 
@@ -273,8 +251,8 @@ void fn_8000AB48(RaceSetup* rs, DAVMap* map) {
     fn_8000A8C4(rs);
     fn_8000AADC(rs);
     fn_8000A644(rs, map);
-    for (i = 0; i < rs->racers.count; i++) {
-        fn_8000AA9C(rs->racers.slots[i].vehicleName);
+    for (i = 0; i < rs->cars.count; i++) {
+        fn_8000AA9C(rs->cars.defs[i].vehicleName);
     }
     fn_8012DDA8("overlays.res");
     fn_8020C920(rs);
