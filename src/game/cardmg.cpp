@@ -562,6 +562,8 @@ static inline void ApplyDamagePointDeformation(DmgCarView* car, u8* p, f32 roll,
     }
 }
 
+#pragma push
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_8018DA5C(u8* p, u8* m) {
     DmgCarView* car = (DmgCarView*)p;
     f32 roll;
@@ -591,6 +593,7 @@ void fn_8018DA5C(u8* p, u8* m) {
         s++;
     }
 }
+#pragma pop
 
 // A deformable point of the car body (0x34 bytes, from the model at car + 0x26C).
 struct DentVec {
