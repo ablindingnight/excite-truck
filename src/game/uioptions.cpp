@@ -4,6 +4,7 @@
 // sound effect sliders, the track music choice, the icon set and the erase-data button. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include <stdarg.h>
 #include "game/menuwidget.h"
 
@@ -73,23 +74,6 @@ public:
     int unk14;  // offset 0x14
 };
 
-// One menu widget binding: the layout element's name, its kind and kind-specific data.
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    MenuItem(const char* n, f32* v, const struct MenuRange& r);
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
 struct MenuRange {
     MenuRange(void) {}
     MenuRange(f32 a, f32 b) {
@@ -127,14 +111,6 @@ struct SliderItem {
     MenuRange range;
 };
 
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
 int IdentGetCurrentSlot(void);
 const char* IdentGetSlotName(int slot);
 void IdentClearSlot(void);
@@ -150,7 +126,6 @@ int fn_80214D04(void);
 void fn_80214CB4(int a);
 const char* fn_80131234(const char* key);  // localized string
 int fn_8021521C(const char* head, const char* body, int a);
-int fn_802146BC(const MenuDesc* desc, int x, int y, int a);
 void fn_80236914(int which, f32* out, f32 t);
 void fn_8023FCFC(int slot);
 void fn_8023D1C0(void);

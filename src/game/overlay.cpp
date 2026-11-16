@@ -294,7 +294,7 @@ public:
     virtual const char* GetName(void);
 };
 
-struct MenuItem {
+struct OverlayMenuRow {
     s32 index;           // offset 0x0
     f32 x;               // offset 0x4
     const char* text;    // offset 0x8
@@ -897,7 +897,7 @@ static inline f32 Clamp01(f32 x) {
 static inline f32 SlideIn(f32 t, f32 delay) { return Lerp(700.0f, 0.0f, Clamp01((t - delay) / 0.25f)); }
 
 void ResultsOverlay::DrawMenu(void) {
-    MenuItem* item;
+    OverlayMenuRow* item;
     u32 i;
     f32 elapsed;
     bool selected;
@@ -922,7 +922,7 @@ void ResultsOverlay::DrawMenu(void) {
         if (elapsed < 0.2f) {
             fn_80230E90(1);
         }
-        MenuItem items[3] = {
+        OverlayMenuRow items[3] = {
             {0, 0.0f, "continue_text", "continue_button"},
             {1, 0.0f, "restart_text", "restart_button"},
             {2, 0.0f, "replay_text", "replay_button"},

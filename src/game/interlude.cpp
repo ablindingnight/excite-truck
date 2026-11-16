@@ -166,7 +166,7 @@ struct Message {
     f32 time;           // offset 0x8: < 0 = none
 };
 
-struct MenuItem {
+struct DebugMenuEntry {
     const char* label;     // offset 0x0
     void (*fn)(void);      // offset 0x4
     s32 next;              // offset 0x8: menu to open, 0x22 = back
@@ -174,7 +174,7 @@ struct MenuItem {
 };
 
 struct Menu {
-    MenuItem* items;    // offset 0x0
+    DebugMenuEntry* items;    // offset 0x0
     const char* title;  // offset 0x4
     s32 count;          // offset 0x8
     s32 padC;
@@ -2294,7 +2294,7 @@ void fn_801C8500(void) {
     fn_801C7374();
 }
 
-static inline void SetItem(MenuItem* it, const char* label, void (*fn)(void), s32 next, bool* check) {
+static inline void SetItem(DebugMenuEntry* it, const char* label, void (*fn)(void), s32 next, bool* check) {
     it->label = label;
     it->fn = fn;
     it->next = next;
@@ -2309,7 +2309,7 @@ void fn_801C855C(void) {
     m = &lbl_8055E86C[0];
     m->title = "INTERLUDE EDITOR";
     m->count = 11;
-    m->items = new ("mi") MenuItem[11];
+    m->items = new ("mi") DebugMenuEntry[11];
     SetItem(&m->items[0], "Add text message...", fn_801C6CB4, 1, 0);
     SetItem(&m->items[1], "Set camera here...", fn_801C6D00, 2, 0);
     SetItem(&m->items[2], "Add effect...", fn_801C6CB0, 3, 0);
@@ -2324,56 +2324,56 @@ void fn_801C855C(void) {
     m = &lbl_8055E86C[9];
     m->title = "GLOBAL EVENT TIME";
     m->count = 3;
-    m->items = new ("mi") MenuItem[3];
+    m->items = new ("mi") DebugMenuEntry[3];
     SetItem(&m->items[0], "Set", fn_801C6CB4, 10, 0);
     SetItem(&m->items[1], "Turn Off", fn_801C84E0, 0, 0);
     SetItem(&m->items[2], "Cancel", fn_801C6CB0, 0, 0);
     m = &lbl_8055E86C[10];
     m->title = "SET GLOBAL TIME";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Set", fn_801C8500, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7374, 0, 0);
     m = &lbl_8055E86C[8];
     m->title = "REALLY RELOAD?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "No", fn_801C6CB0, 0, 0);
     SetItem(&m->items[1], "Yes, Reload", fn_801C8420, 0, 0);
     m = &lbl_8055E86C[12];
     m->title = "SET DURATION";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Set Duration", fn_801C83D0, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7374, 0, 0);
     m = &lbl_8055E86C[1];
     m->title = "ENTER MSG TO DISPLAY";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Set Message", fn_801C72F0, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7374, 0, 0);
     m = &lbl_8055E86C[3];
     m->title = "EFFECTS";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Add Fadeout", fn_801C7290, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C6CB0, 0, 0);
     m = &lbl_8055E86C[2];
     m->title = "MOVE CAM TO DEST";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Ok-I'm at the destination", fn_801C6D94, 32, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7288, 0, 0);
     m = &lbl_8055E86C[32];
     m->title = "TRANSITION TIME? (SECS)";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Set Camera", fn_801C6E40, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7288, 0, 0);
     m = &lbl_8055E86C[4];
     m->title = "TYPE OF SOUND";
     m->count = 7;
-    m->items = new ("mi") MenuItem[7];
+    m->items = new ("mi") DebugMenuEntry[7];
     SetItem(&m->items[0], "Music", fn_801C7798, 4, &lbl_8055E840);
     SetItem(&m->items[1], "Random", fn_801C77AC, 4, &lbl_8055E841);
     SetItem(&m->items[2], "Overlap", fn_801C7770, 4, &lbl_8055E83E);
@@ -2384,62 +2384,62 @@ void fn_801C855C(void) {
     m = &lbl_8055E86C[31];
     m->title = "SET SAMPLE ID";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Set Sample", fn_801C77C0, 4, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7374, 4, 0);
     m = &lbl_8055E86C[5];
     m->title = "TELEPORT TYPE";
     m->count = 3;
-    m->items = new ("mi") MenuItem[3];
+    m->items = new ("mi") DebugMenuEntry[3];
     SetItem(&m->items[0], "Starting positions", fn_801C791C, 13, 0);
     SetItem(&m->items[1], "World point", fn_801C7944, 16, 0);
     SetItem(&m->items[2], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[13];
     m->title = "OFFSET";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7A6C, 14, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[14];
     m->title = "TELEPORT WHO?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7AC4, 15, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[15];
     m->title = "EXCEPT WHO?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7B28, 19, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[16];
     m->title = "TELEPORT WHERE?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7990, 17, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[17];
     m->title = "FACING WHERE?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C79E0, 18, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[18];
     m->title = "WHERE IS 2ND CAR?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7A28, 14, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[19];
     m->title = "CAR SPEED?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7C04, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[6];
     m->title = "DO WHAT?";
     m->count = 6;
-    m->items = new ("mi") MenuItem[6];
+    m->items = new ("mi") DebugMenuEntry[6];
     SetItem(&m->items[0], "Move to point", fn_801C80C8, 23, 0);
     SetItem(&m->items[1], "Park", fn_801C80BC, 24, 0);
     SetItem(&m->items[2], "Use Line", fn_801C8190, 24, 0);
@@ -2449,61 +2449,61 @@ void fn_801C855C(void) {
     m = &lbl_8055E86C[23];
     m->title = "TO WHERE?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C819C, 24, 0);
     SetItem(&m->items[1], "Cancel", fn_801C8298, 0, 0);
     m = &lbl_8055E86C[27];
     m->title = "FOLLOW WHO?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C8150, 24, 0);
     SetItem(&m->items[1], "Cancel", fn_801C8298, 0, 0);
     m = &lbl_8055E86C[24];
     m->title = "WHO?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C81B8, 25, 0);
     SetItem(&m->items[1], "Cancel", fn_801C8298, 0, 0);
     m = &lbl_8055E86C[25];
     m->title = "EXCEPT?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C821C, 26, 0);
     SetItem(&m->items[1], "Cancel", fn_801C8298, 0, 0);
     m = &lbl_8055E86C[26];
     m->title = "SPEED";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C82E0, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C8298, 0, 0);
     m = &lbl_8055E86C[7];
     m->title = "WAIT TYPE";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Cross Point", fn_801C7EF4, 20, 0);
     SetItem(&m->items[1], "Cancel", fn_801C6CB0, 0, 0);
     m = &lbl_8055E86C[20];
     m->title = "WAIT FOR WHOM?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7F00, 21, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[21];
     m->title = "EXCEPT FOR WHOM?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Continue", fn_801C7F64, 22, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[22];
     m->title = "WHAT POINT?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Set wait point", fn_801C7FE4, 0, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7BA0, 0, 0);
     m = &lbl_8055E86C[11];
     m->title = "EVENT LIST";
     m->count = 6;
-    m->items = new ("mi") MenuItem[6];
+    m->items = new ("mi") DebugMenuEntry[6];
     SetItem(&m->items[0], "Move up", fn_801C73DC, 11, 0);
     SetItem(&m->items[1], "Move down", fn_801C7480, 11, 0);
     SetItem(&m->items[2], "Change time", fn_801C7524, 29, 0);
@@ -2513,19 +2513,19 @@ void fn_801C855C(void) {
     m = &lbl_8055E86C[28];
     m->title = "REALLY DELETE?";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Cancel", fn_801C6CB0, 11, 0);
     SetItem(&m->items[1], "Delete", fn_801C7394, 11, 0);
     m = &lbl_8055E86C[29];
     m->title = "SET TIME";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Set time", fn_801C756C, 11, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7374, 11, 0);
     m = &lbl_8055E86C[30];
     m->title = "SET TIME";
     m->count = 2;
-    m->items = new ("mi") MenuItem[2];
+    m->items = new ("mi") DebugMenuEntry[2];
     SetItem(&m->items[0], "Add time", fn_801C7698, 11, 0);
     SetItem(&m->items[1], "Cancel", fn_801C7374, 11, 0);
     lbl_8055E81C = 0;
@@ -2585,8 +2585,8 @@ void fn_801C95EC(void) {
     int m = lbl_8055E81C;
     const Menu& menu = lbl_8055E86C[m];
     const int i = lbl_8055E820;
-    const unsigned offset = static_cast<unsigned>(i) * sizeof(MenuItem);
-    const int n = reinterpret_cast<const MenuItem*>(reinterpret_cast<const u8*>(menu.items) + offset)->next;
+    const unsigned offset = static_cast<unsigned>(i) * sizeof(DebugMenuEntry);
+    const int n = reinterpret_cast<const DebugMenuEntry*>(reinterpret_cast<const u8*>(menu.items) + offset)->next;
     if (n == 0x22) {
         lbl_8055E81C = lbl_8055E870;
     } else {
@@ -2953,7 +2953,7 @@ void fn_801CA67C(void) {
     fn_801C94B8(400, 10, m->title, -1);
     y = lineH + 10;
     for (int i = 0; i < m->count; i++) {
-        MenuItem* it = &m->items[i];
+        DebugMenuEntry* it = &m->items[i];
         char line[0x100];
         if (it->check) {
             sprintf(line, "[%s] %s", *it->check ? "X" : "  ", it->label);

@@ -2,6 +2,7 @@
 // in two lists, with the selected event's statistics beside them. Names are guesses apart from
 // the layout and element names.
 #include "game/common.h"
+#include "game/menu.h"
 #include "game/gamedb.h"
 
 extern "C" int strcasecmp(const char* a, const char* b);
@@ -116,42 +117,6 @@ public:
     u8 eventsDirty;       // offset 0x88
     s32 eventIds[0x40];   // offset 0x8C
     StatsTable stats;     // offset 0x18C
-};
-
-struct CaptionContext {
-    int value;
-    CaptionContext(int v = 0) : value(v) {}
-};
-
-struct MenuItem {
-    // A text item (type 3).
-    MenuItem(const char* n, const char* t, CaptionContext context = CaptionContext()) {
-        type = 3;
-        name = n;
-        data = t;
-        arg0 = (int)context.value;
-        arg1 = 0;
-    }
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
-};
-
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
 };
 
 extern "C" {

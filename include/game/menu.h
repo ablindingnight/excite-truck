@@ -27,6 +27,7 @@ struct MenuItem {
         arg0 = (int)context.value;
         arg1 = 0;
     }
+    MenuItem(const char* n, f32* v, const struct MenuRange& r);  // a slider item (defined out of line)
     MenuItem(const char* n, int t, const void* d, int a0, int a1) {
         type = t;
         name = n;

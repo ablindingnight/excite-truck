@@ -2,6 +2,7 @@
 // announcer, tyre and video volumes, the sound quality and race music choices and the speaker mixer,
 // saved to option section 4. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/menu.h"
 #include "game/sound.h"
 #include "game/menustate.h"
 
@@ -14,23 +15,6 @@ class Mixer {
 public:
     virtual ~Mixer(void);
     virtual const char* Name(void);  // 0x0C
-};
-
-// One menu widget binding: the layout element's name, its kind and kind-specific data.
-struct MenuItem {
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
-        type = t;
-        name = n;
-        data = d;
-        arg0 = a0;
-        arg1 = a1;
-    }
-    MenuItem(const char* n, f32* v, const struct MenuRange& r);
-    const char* name;
-    int type;
-    const void* data;
-    int arg0;
-    int arg1;
 };
 
 struct MenuRange {
@@ -72,14 +56,6 @@ struct SliderItem {
     MenuRange range;
 };
 
-struct MenuDesc {
-    const char* layout;
-    MenuItem* items;
-    int (*poll)(int* result);
-    int unkC;
-    int unk10;
-};
-
 struct MenuStrList {
     u8 pad0[0x14];
 };
@@ -88,7 +64,6 @@ extern "C" {
 MenuStrList* fn_8022D228(MenuStrList* l, int count, int len);
 void fn_8022D2BC(MenuStrList* l, int flags);
 void fn_8022D350(MenuStrList* l, const char* s, int a);
-int fn_802146BC(const MenuDesc* desc, int x, int y, int a);
 void fn_80214A9C(int sound);
 void fn_80236900(void);
 void fn_80236914(int which, f32* out, f32 t);
