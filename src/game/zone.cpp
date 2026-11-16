@@ -1203,10 +1203,8 @@ static inline int Loop1_fn_8013CBC0(Gate* g, Truck* t, int r) {
     ring.z = zv;
     f32 dtv = t->dt;
     at.x = t->pos.x + t->vel.x * dtv;
-    f32 dt2 = t->dt;
-    at.y = t->pos.y + t->vel.y * dt2;
-    f32 dt_ = t->dt;
-    at.z = t->pos.z + t->vel.z * dt_;
+    at.y = t->pos.y + t->vel.y * dtv;
+    at.z = t->pos.z + t->vel.z * dtv;
     if (PSVECSquareDistance(&at, &ring) > half * half) {
         r = 1;
     }
