@@ -4,6 +4,22 @@
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/menu.h"
+// The car list interface the garage is handed (gamedo.cpp calls it SessionScreen). Only its destructor has a
+// body; the list classes implement the rest.
+class SessionScreen {
+public:
+    virtual ~SessionScreen(void) {}
+    virtual void Add(const char* name, u8 unlocked, u8 extreme) = 0;  // 0x0C
+    virtual void SetValue(int i, s32 v) = 0;          // 0x10
+    virtual int Count(void) = 0;                      // 0x14
+    virtual const char* Name(int i) = 0;              // 0x18
+    virtual int Unlocked(int i) = 0;                  // 0x1C
+    virtual const char* ExtremeName(int i) = 0;       // 0x20
+    virtual int IsExtreme(int i) = 0;                 // 0x24
+    virtual const char* Title(int i) = 0;             // 0x28
+};
+typedef SessionScreen GarageList;
+
 #include "game/menustate.h"
 #include <string.h>
 
@@ -37,6 +53,28 @@ public:
     u8 shine;         // offset 0x118
     f32 unk11C;       // offset 0x11C
     s32 mode;         // offset 0x120
+};
+
+// The header of a list over separately held storage; its destructor clears it.
+template <class T>
+struct VecHead {
+    ~VecHead(void) {
+        data = 0;
+        count = 0;
+        cap = 0;
+    }
+    T* data;    // offset 0x0
+    s32 count;  // offset 0x4
+    s32 cap;    // offset 0x8
+};
+
+// A localized string that refreshes when the language changes (text.cpp).
+class LocString {
+public:
+    LocString(const char* key);
+    const char* key;   // offset 0x0
+    const char* text;  // offset 0x4
+    u32 lang;          // offset 0x8
 };
 
 class VDel {
@@ -77,7 +115,6 @@ u32 fn_802E4A10(void);
 int fn_80129800(u32 ch, int feature);
 void fn_80216D28(void);
 void fn_80214D50(int s);
-void __ct__9LocStringFPCc(u8* p, const char* key);
 void fn_80235380(u8* p);
 void gxForgetTexture(u8* p);
 void fn_802354A0(u8* o, int kind, f32 x, f32 y, f32 z, f32 w, f32 h, s32 v);
@@ -98,17 +135,6 @@ static GarageFlags lbl_80498C48;
 static char lbl_80498C90[0x70];  // "#unlock_pts" text; its own object (third in .bss, so the menu shares one base)
 extern u8* lbl_8055F2EC;
 
-class VList {
-public:
-    virtual ~VList(void);  // 0x08 (the VehicleList (lbl_80344384): slot 0 fn_802522A8 is its destructor)
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual int v1C(u32 id);
-};
-extern void* lbl_8034453C[];
-extern void* lbl_803444D8[];
 
 // One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
 // Fixed-capacity name buffer (original class name unknown).
@@ -213,7 +239,6 @@ static inline void FreeIconPool(IconPool* pool) {
     }
 }
 extern s32 lbl_8055F2E8;
-extern void* lbl_80344384[];
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
 extern char lbl_8055C0E8[4];  // ""
@@ -379,18 +404,6 @@ struct StatPanel {
 
 extern char lbl_8055C0C0[];  // "%d/%d"
 
-class GarageList {
-public:
-    virtual ~GarageList(void);  // 0x08 (the VehicleList (lbl_80344384): slot 0 fn_802522A8 is its destructor)
-    virtual void Add(const char* name, u8 unlocked, u8 extreme);  // 0x0C
-    virtual void v10(void);
-    virtual int Count(void);                 // 0x14
-    virtual const char* Name(int i);      // 0x18
-    virtual int Unlocked(int i);          // 0x1C
-    virtual const char* ExtremeName(int i);  // 0x20
-    virtual int IsExtreme(int i);         // 0x24
-    virtual const char* Title(int i);     // 0x28
-};
 
 extern "C" {
 int fn_80129D18(int seed, int n);
@@ -426,8 +439,6 @@ void fn_8024DADC(u8* p) { fn_8024739C(p); }
 
 }  // extern "C"
 
-extern void* lbl_80344410[];
-extern void* lbl_80344474[];
 
 extern "C" {
 void fn_8013C804(void);
@@ -442,7 +453,6 @@ void fn_8024EBAC(u8* p, s32 v, int set);
 u32 fn_8024EBE4(u8* p);
 int fn_8024EC3C(void);
 int fn_8024ECD4(void);
-u8* fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui);
 u8* fn_8025007C(int n);
 int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar);
 }
@@ -469,53 +479,95 @@ public:
     int other;
 };
 
-// The car slot list's teardown (vtables lbl_803444D8, then lbl_8034453C): the slot entries, the shared icon
-// pool with the last list, then the strip's slot animations, widget and texture.
-static inline void DestroyCarSlots(u8* p) {
-    *(void**)p = lbl_803444D8;
-    delete[] PTR(p, 0xCC);
-    if (--lbl_8055F2E8 == 0) {
-        FreeIconPool(lbl_8055F2E4);
-        lbl_8055F2E4 = 0;
-    }
-    *(void**)p = lbl_8034453C;
-    delete[] PTR(p, 0x18);
-    fn_80235380(PTR(p, 0x24));
-    gxForgetTexture(PTR(p, 0x20));
-}
+namespace {
 
-// The car list (vtable lbl_80344474), the garage's current list while it runs.
-struct CarPick {
-    CarPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) {
-        fn_8024F17C(data, list, color, car, panel, ui);
-        *(void**)data = lbl_80344474;
-        lbl_8055F2EC = data;
+/* Class name unproven */
+// The slot strip: one animated slot per entry of a garage list, plus the icon frame art.
+class SlotStrip : public MenuState {
+public:
+    SlotStrip(int n);
+    virtual ~SlotStrip(void) {
+        delete[] slots;
+        fn_80235380(art);
+        gxForgetTexture(tex);
     }
-    ~CarPick(void) {
-        lbl_8055F2EC = 0;
-        DestroyCarSlots(data);
-    }
-    char* Chassis(void) { return (char*)data + 0x60; }
-    char* Name(void) { return (char*)data + 0x80; }
-    u8 data[0xD4];
+    virtual void Update(void);
+    virtual void Draw(void);
+    virtual void DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) = 0;  // 0x60
+
+    SlotAnim* slots;  // offset 0x18
+    s32 count;        // offset 0x1C
+    u8* tex;          // offset 0x20
+    u8* art;          // offset 0x24
+    f32 pos;          // offset 0x28: eased toward sel
+    s32 sel;          // offset 0x2C
 };
 
-// The paint list (vtable lbl_80344410): one entry per colour of the chosen car.
-struct ColorPick {
-    ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out) {
-        fn_8024F17C(data, list, color, car, panel, ui);
-        *(void**)data = lbl_80344410;
-        PTR(data, 0xD8) = (u8*)ui;
-        PTR(data, 0xD4) = (u8*)list;
-        PTR(data, 0xDC) = (u8*)out;
+/* Class name unproven */
+// The car slot list: one animated slot and one entry per car of `list`, starting on the car `car` points at.
+class CarSlotList : public SlotStrip {
+public:
+    CarSlotList(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui);
+    virtual ~CarSlotList(void) {
+        delete[] entries;
+        if (--lbl_8055F2E8 == 0) {
+            FreeIconPool(lbl_8055F2E4);
+            lbl_8055F2E4 = 0;
+        }
     }
-    ~ColorPick(void) {
-        *(void**)data = lbl_80344410;
-        delete (VDel*)PTR(data, 0xD4);
-        DestroyCarSlots(data);
-    }
-    u8 data[0x1E0];
+    virtual void Update(void);
+    virtual void DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha);
+    char* Chassis(void) { return chassis; }
+    char* Name(void) { return name; }
+
+    s32* color;         // offset 0x30
+    s32* car;           // offset 0x34
+    StatPanel* panel;   // offset 0x38
+    u8 pad3C[0x10];
+    CarUIScreen* ui;    // offset 0x4C
+    u8 pad50[0x10];
+    char chassis[0x20]; // offset 0x60
+    char name[0x40];    // offset 0x80
+    s32 fC0;            // offset 0xC0
+    u8 padC4[0x4];
+    IconPool* icons;    // offset 0xC8
+    CarEntry* entries;  // offset 0xCC
+    GarageList* list;   // offset 0xD0
 };
+
+/* Class name unproven */
+// The car list, the garage's current list while it runs.
+class CarPick : public CarSlotList {
+public:
+    CarPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui)
+        : CarSlotList(list, color, car, panel, ui) {
+        lbl_8055F2EC = (u8*)this;
+    }
+    virtual ~CarPick(void) { lbl_8055F2EC = 0; }
+    virtual int Key(int key);
+};
+
+/* Class name unproven */
+// The paint list: one entry per colour of the chosen car.
+class ColorPick : public CarSlotList {
+public:
+    ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out)
+        : CarSlotList(list, color, car, panel, ui) {
+        ui2 = ui;
+        colors = (VDel*)list;
+        this->out = out;
+    }
+    virtual ~ColorPick(void) { delete colors; }
+    virtual int Key(int key);
+    virtual void DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha);
+
+    VDel* colors;       // offset 0xD4
+    CarUIScreen* ui2;   // offset 0xD8
+    u32* out;           // offset 0xDC
+    u8 padE0[0x100];
+};
+
+}  // namespace
 
 // The garage: pick a car (unless the list has only one), then its paint; "3" opens the car's tuning screen.
 // Returns 0 when backed out.
@@ -557,11 +609,11 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#stat_text_5", panel.text[4]),
                     MenuItem("#stat_art_5", 2, &panel.stats.stats[4].value, 0, 0),
                     MenuItem("#unlock_pts", lbl_80498C90),
-                    MenuItem("#locker", 2, cars.data + 0xC0, 0, 0),
+                    MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
                     MenuItem("#car_bar_color", bars[bar]),
-                    MenuItem("#races_run", (char*)cars.data + 0x3C),
-                    MenuItem("#aaa", (char*)cars.data + 0x50),
-                    MenuItem(0, 5, cars.data, 0, 0),
+                    MenuItem("#races_run", (char*)(u8*)&cars + 0x3C),
+                    MenuItem("#aaa", (char*)(u8*)&cars + 0x50),
+                    MenuItem(0, 5, (u8*)&cars, 0, 0),
                     MenuItem(lbl_8055B860, 6, (const void*)fn_8024ECD4, 0, 0x72),
                     MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
                     MenuItem(lbl_8055B860, 6, (const void*)fn_8024EC3C, -2, 0xD),
@@ -582,25 +634,25 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 }
                 ColorPick paint(colors, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b,
                                 lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
-                fn_8024EBAC(paint.data, fn_8024EBE4(paint.data), 1);
-                u8* e = fn_8024EB9C(paint.data, 0);
-                for (int i = 0; i < fn_8024EB94(paint.data); i++) {
-                    e = fn_8024EB9C(paint.data, i);
+                fn_8024EBAC((u8*)&paint, fn_8024EBE4((u8*)&paint), 1);
+                u8* e = fn_8024EB9C((u8*)&paint, 0);
+                for (int i = 0; i < fn_8024EB94((u8*)&paint); i++) {
+                    e = fn_8024EB9C((u8*)&paint, i);
                     S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
                 }
-                fn_8024EA1C(paint.data);
+                fn_8024EA1C((u8*)&paint);
                 const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
                 MenuItem items[] = {
-                    MenuItem(0, 5, paint.data, 0, 0),
+                    MenuItem(0, 5, (u8*)&paint, 0, 0),
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
                     MenuItem("#car_model", cars.Chassis()),
                     MenuItem("#car_name", cars.Name()),
-                    MenuItem("#color_name", (char*)paint.data + 0xE0),
+                    MenuItem("#color_name", (char*)(u8*)&paint + 0xE0),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
-                    MenuItem("#locker", 2, cars.data + 0xC0, 0, 0),
+                    MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
                     MenuItem("#car_bar_color", bars[bar]),
-                    MenuItem("#races_run", (char*)cars.data + 0x3C),
-                    MenuItem("#aaa", (char*)cars.data + 0x50),
+                    MenuItem("#races_run", (char*)(u8*)&cars + 0x3C),
+                    MenuItem("#aaa", (char*)(u8*)&cars + 0x50),
                     MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
                     MenuItem(lbl_8055B860, 6, 0, -2, 0xD),
                     MenuItem(lbl_80498C30),
@@ -625,80 +677,6 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
     *vehicle = lbl_80498C48.alt ? lbl_80498C48.pairs[slot].c : lbl_80498C48.pairs[slot].a;
     return r != -1;
 }
-
-extern "C" {
-
-u8* fn_8024E6E4(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_80344410;
-        delete (VDel*)PTR(p, 0xD4);
-        if (p) {
-            *(void**)p = lbl_803444D8;
-            delete[] PTR(p, 0xCC);
-            if (--lbl_8055F2E8 == 0) {
-                FreeIconPool(lbl_8055F2E4);
-                lbl_8055F2E4 = 0;
-            }
-            if (p) {
-                *(void**)p = lbl_8034453C;
-                delete[] PTR(p, 0x18);
-                fn_80235380(PTR(p, 0x24));
-                gxForgetTexture(PTR(p, 0x20));
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_8024E818(u8* p, int del) {
-    if (p) {
-        lbl_8055F2EC = 0;
-        if (p) {
-            *(void**)p = lbl_803444D8;
-            delete[] PTR(p, 0xCC);
-            if (--lbl_8055F2E8 == 0) {
-                FreeIconPool(lbl_8055F2E4);
-                lbl_8055F2E4 = 0;
-            }
-            if (p) {
-                *(void**)p = lbl_8034453C;
-                delete[] PTR(p, 0x18);
-                fn_80235380(PTR(p, 0x24));
-                gxForgetTexture(PTR(p, 0x20));
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-u8* fn_8024E920(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_803444D8;
-        delete[] PTR(p, 0xCC);
-        if (--lbl_8055F2E8 == 0) {
-            FreeIconPool(lbl_8055F2E4);
-            lbl_8055F2E4 = 0;
-        }
-        if (p) {
-            *(void**)p = lbl_8034453C;
-            delete[] PTR(p, 0x18);
-            fn_80235380(PTR(p, 0x24));
-            gxForgetTexture(PTR(p, 0x20));
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-}  // extern "C"
 
 // Tints the car with the selected slot's animation, or its saved paint.
 static inline void ShowCarColor(u8* p) {
@@ -761,7 +739,7 @@ int fn_8024EC3C(void) {
     if (fn_80129800(fn_802E4A10(), 5) && fn_80129800(fn_802E4A10(), 6)) {
         ok = 1;
     }
-    if (ok || ((VList*)PTR(lbl_8055F2EC, 0xD0))->v1C(U32(lbl_8055F2EC, 0x2C))) {
+    if (ok || ((GarageList*)PTR(lbl_8055F2EC, 0xD0))->Unlocked(U32(lbl_8055F2EC, 0x2C))) {
         return 1;
     }
     fn_80216D28();
@@ -828,24 +806,20 @@ int fn_8024ECD4(void) {
     return 0;
 }
 
-// The slot strip (vtable lbl_8034453C): one animated slot per entry of `list`, plus the icon frame art.
-static inline void InitSlotStrip(u8* p, GarageList* list) {
-    S32(p, 0x1C) = list->Count();
-    *(void**)p = lbl_8034453C;
-    S32(p, 0x14) = 0;
-    PTR(p, 0x18) = (u8*)new ("icon") SlotAnim[S32(p, 0x1C)];
-    for (int i = 0; i < S32(p, 0x1C); i++) {
-        SlotAnim* s = &((SlotAnim*)PTR(p, 0x18))[i];
+inline SlotStrip::SlotStrip(int n) {
+    count = n;
+    slots = new ("icon") SlotAnim[count];
+    for (int i = 0; i < count; i++) {
+        SlotAnim* s = &slots[i];
         s->sel = 0;
         s->shown = 0;
         s->t = lbl_80563960;
     }
-    PTR(p, 0x24) = fn_8023512C("caricona.art");
-    PTR(p, 0x20) = fn_802CAC28("cariconb.tex", 0);
+    art = fn_8023512C("caricona.art");
+    tex = fn_802CAC28("cariconb.tex", 0);
+    sel = 0;
 }
 
-// The car slot list (vtable lbl_803444D8, over the slot strip lbl_8034453C): one animated slot and one entry
-// per car of `list`, starting on the car `car` points at.
 // Reference-counted car icon manager shared by the car menus.
 inline IconPool* AcquireCarIcons(void) {  /* Helper name unproven */
     if (lbl_8055F2E8 == 0) {
@@ -855,10 +829,8 @@ inline IconPool* AcquireCarIcons(void) {  /* Helper name unproven */
     return lbl_8055F2E4;
 }
 
-u8* fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) {
-    InitSlotStrip(p, list);
-    S32(p, 0x2C) = 0;
-    *(void**)p = lbl_803444D8;
+CarSlotList::CarSlotList(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui) : SlotStrip(list->Count()) {
+    u8* p = (u8*)this;
     F32(p, 0x28) = S32(p, 0x2C);
     PTR(p, 0xC8) = (u8*)AcquireCarIcons();
     PTR(p, 0xD0) = (u8*)list;
@@ -909,20 +881,6 @@ u8* fn_8024F17C(u8* p, GarageList* list, s32* color, s32* car, StatPanel* panel,
     F32(p, 0x28) = sel;
     ShowCar(p, sel);
     S32(p, 0xC0) = 1;
-    return p;
-}
-
-u8* fn_8024FB64(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_8034453C;
-        delete[] PTR(p, 0x18);
-        fn_80235380(PTR(p, 0x24));
-        gxForgetTexture(PTR(p, 0x20));
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
 }
 
 }  // extern "C"
@@ -1095,19 +1053,70 @@ void fn_8024FBD8(GarageList* list, u32* color) {
     fn_8013C8B8();
 }
 
-u8* fn_8025007C(int n) {
-    u8* o = (u8*)operator new(0x20, "ChassisList");
-    if (o) {
-        *(void**)o = lbl_80344384;
-        u8* buf = (u8*)operator new[](n * 0x48, "dsa_buf");
-        PTR(o, 0x4) = buf;
-        S32(o, 0xC) = n;
-        U32(o, 0x8) = 0;
-        PTR(o, 0x10) = buf;
-        __ct__9LocStringFPCc(o + 0x14, "EventPath:CONGRATULATIONS");
+namespace {
+
+// A car-list entry (0x48 bytes).
+struct ChassisEntry {
+    char name[0x20];      // offset 0x0
+    u8 unlocked;          // offset 0x20
+    char extreme[0x20];   // offset 0x21
+    u8 isExtreme;         // offset 0x41
+    s32 value;            // offset 0x44
+};
+
+/* Class name unproven */
+// An array that owns its heap storage.
+template <class T>
+struct OwnedVec : VecHead<T> {
+    OwnedVec(int n) {
+        T* b = (T*)operator new[](n * sizeof(T), "dsa_buf");
+        this->data = b;
+        this->cap = n;
+        this->count = 0;
+        alloc = b;
     }
-    return o;
-}
+    ~OwnedVec(void) { delete[] alloc; }
+    T* alloc;  // offset 0xC
+};
+
+}  // namespace
+
+/* Class name unproven */
+// The garage's list of cars ("ChassisList"), filled by the callers.
+class ChassisList : public GarageList {
+public:
+    ChassisList(int n) : list(n), title("EventPath:CONGRATULATIONS") {}
+    virtual ~ChassisList(void) {}
+    virtual void Add(const char* name, u8 a, u8 b) {
+        u8* p = (u8*)this;
+        u8* e = PTR(p, 4) + S32(p, 8)++ * 0x48;
+        CopyNameA(name, 0x20, (char*)e);
+        U8(e, 0x20) = a;
+        U8(e, 0x41) = b;
+        if (b) {
+            const char* sp = GetSpecialChassis(name);
+            CopyName(sp, 0x20, (char*)e + 0x21);
+        } else {
+            CopyNameTo(lbl_8055C0E8, 0x20, (char*)e + 0x21);
+        }
+        if (U32(p, 0x1C) != lbl_8055E044) {
+            fn_80131318(p + 0x14);
+        }
+        S32(e, 0x44) = S32(p, 0x18);
+    }
+    virtual void SetValue(int i, s32 v) { list.data[i].value = v; }
+    virtual int Count(void) { return list.count; }
+    virtual const char* Name(int i) { return list.data[i].name; }
+    virtual int Unlocked(int i) { return list.data[i].unlocked; }
+    virtual const char* ExtremeName(int i) { return list.data[i].extreme; }
+    virtual int IsExtreme(int i) { return list.data[i].isExtreme; }
+    virtual const char* Title(int i) { return (const char*)list.data[i].value; }
+
+    OwnedVec<ChassisEntry> list;  // offset 0x4
+    LocString title;              // offset 0x14
+};
+
+u8* fn_8025007C(int n) { return (u8*)new ("ChassisList") ChassisList(n); }
 
 f32 fn_80214D48(void);
 extern const f32 lbl_80563960;
@@ -1139,7 +1148,10 @@ static inline void UpdateSlotAnims(u8* p) {
 }
 
 // Same body as UpdateSlotAnims; the declaration order here (found by decomp-permuter) gives the target's registers.
-void fn_80250108(u8* p) {
+}  // extern "C"
+
+void SlotStrip::Update(void) {
+    u8* p = (u8*)this;
     SlotAnim* e;
     f32 dt = fn_80214D48();
     int i;
@@ -1164,11 +1176,16 @@ void fn_80250108(u8* p) {
     }
 }
 
+extern "C" {
+
 double fmod(double x, double y);
 
 // Car list input: left/right step through the cars (bumping an end plays the error cue); "2" swaps an
 // extreme car between its plain and extreme paint once its slot has settled (either of two keys).
-int fn_80250204(u8* p, int key) {
+}  // extern "C"
+
+int CarPick::Key(int key) {
+    u8* p = (u8*)this;
     s32 sel = S32(p, 0x2C);
     CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[sel];
     u8* paint = (u8*)GetVehicleColor(e->vehicle, 0);
@@ -1218,7 +1235,6 @@ int fn_80250204(u8* p, int key) {
     return 0;
 }
 
-}  // extern "C"
 
 extern "C" {
 f32 fn_80235EF0(u8* art, int part);
@@ -1258,7 +1274,10 @@ extern "C" {
 
 // Draws car slot `i`: its frame (greyed when locked), the two pulsing extreme stars, and the car icon painted
 // with its colour.
-void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
+}  // extern "C"
+
+void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
+    u8* p = (u8*)this;
     CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[i];
     u32* sel = GetVehicleColor(e->vehicle, 0);
     u32 color = PaintColor(e, lbl_80498C48.alt ? sel[0] : sel[1]);
@@ -1299,13 +1318,17 @@ void fn_80251078(u8* p, int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha)
                 ic->u2, v2);
 }
 
-void fn_802514B4(u8* p, int i, f32 x, f32 y, f32 w, f32 h) {
+
+void ColorPick::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
+    u8* p = (u8*)this;
     s32 v = S32(PTR(p, 0xCC) + i * 0x14, 0x10);
     fn_802354A0(PTR(p, 0x24), 0, x, y, 0.0f, w, h, -1);
     fn_80216CB4();
     fn_802354A0(PTR(p, 0x24), 3, x, y, 0.0f, w, h, v);
     fn_802354A0(PTR(p, 0x24), 6, x, y, 0.0f, w, h, -1);
 }
+
+extern "C" {
 
 // Colour list input: left/right pick the previous/next colour; bumping an end plays the error cue.
 static inline void ShowChangedColor(u8* p) {
@@ -1320,7 +1343,10 @@ static inline void ShowChangedColor(u8* p) {
     DisplaySelectedColor(p, v);
 }
 
-int fn_8025157C(u8* p, int key) {
+}  // extern "C"
+
+int ColorPick::Key(int key) {
+    u8* p = (u8*)this;
     switch (key) {
     case 0x125:
         if (S32(p, 0x2C) > 0) {
@@ -1346,9 +1372,14 @@ int fn_8025157C(u8* p, int key) {
     return 0;
 }
 
+extern "C" {
+
 void fn_80214AF0(int s);
 
-void fn_80251934(u8* p) {
+}  // extern "C"
+
+void CarSlotList::Update(void) {
+    u8* p = (u8*)this;
     int on;
     SlotAnim* e;
     int i;
@@ -1368,42 +1399,14 @@ void fn_80251934(u8* p) {
         }
     }
     UpdateSlotAnims(p);
-    if (((VList*)PTR(p, 0xD0))->v1C(S32(p, 0x2C)) == 0) {
+    if (((GarageList*)PTR(p, 0xD0))->Unlocked(S32(p, 0x2C)) == 0) {
         fn_80214A9C(2);
     } else {
         fn_80214AF0(2);
     }
 }
 
-}  // extern "C"
 
-// The garage screen's per-slot draw hook (vtable slot 0x60).
-class GarageSlotView {
-public:
-    virtual ~GarageSlotView(void);  // 0x08 (the slot strip (lbl_803444D8): slot 0 fn_8024E920 is its destructor)
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
-    virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
-    virtual void v4C(void);
-    virtual void v50(void);
-    virtual void v54(void);
-    virtual void v58(void);
-    virtual void v5C(void);
-    virtual void DrawSlot(int i, s32 value, f32 x, f32 y, f32 w, f32 h, f32 alpha);  // 0x60
-};
 
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
@@ -1414,7 +1417,10 @@ void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0,
 static inline double AbsD(double v) { return __fabs(v); }
 
 // Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
-void fn_80251B04(u8* p) {
+}  // extern "C"
+
+void SlotStrip::Draw(void) {
+    u8* p = (u8*)this;
     f32 top = lbl_8055CFF4 / 2 - 24.0f;
     f32 w = 1.7777778f * lbl_8055CFF0 / 1.3333334f;
     fn_80231220(-0.5f * w, 225.0f, w, 66.0f, PTR(p, 0x20), -1, 0.0f, 0.0f, 10.0f, 1.0f);
@@ -1432,10 +1438,12 @@ void fn_80251B04(u8* p) {
         }
         d = d > 0.0f ? d : 0.0f;
         f32 alpha = 1.0f - d;
-        ((GarageSlotView*)p)->DrawSlot(i, e->shown, x, y + 5.0f * s, 82.5f, h + 10.0f * s, alpha);
+        DrawSlot(i, e->shown, x, y + 5.0f * s, 82.5f, h + 10.0f * s, alpha);
     }
     fn_802354A0(PTR(p, 0x24), 2, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f, -1);
 }
+
+extern "C" {
 
 void fn_80251D0C(u8* p) {
     ((CarUIScreen*)PTR(p, 0x20))->UnloadModel();
@@ -1460,62 +1468,5 @@ int fn_80252238(u8* p, int key) {
     return 0;
 }
 
-u8* fn_802522A8(u8* p, int del) {
-    if (p) {
-        if (p + 4) {
-            delete[] PTR(p, 0x10);
-            if (p + 4) {
-                U32(p, 0x4) = 0;
-                U32(p, 0x8) = 0;
-                U32(p, 0xC) = 0;
-            }
-        }
-        if (del > 0) {
-            operator delete(p);
-        }
-    }
-    return p;
-}
-
-void fn_80252320(u8* p, const char* name, u8 a, u8 b) {
-    u8* e = PTR(p, 4) + S32(p, 8)++ * 0x48;
-    CopyNameA(name, 0x20, (char*)e);
-    U8(e, 0x20) = a;
-    U8(e, 0x41) = b;
-    if (b) {
-        const char* sp = GetSpecialChassis(name);
-        CopyName(sp, 0x20, (char*)e + 0x21);
-    } else {
-        CopyNameTo(lbl_8055C0E8, 0x20, (char*)e + 0x21);
-    }
-    if (U32(p, 0x1C) != lbl_8055E044) {
-        fn_80131318(p + 0x14);
-    }
-    S32(e, 0x44) = S32(p, 0x18);
-}
-
-void fn_80252454(u8* p, int i, s32 v) { S32(PTR(p, 0x4) + i * 0x48, 0x44) = v; }
-
-u32 fn_80252468(u8* p) { return U32(p, 0x8); }
-
-u8* fn_80252470(u8* p, int i) { return PTR(p, 0x4) + i * 0x48; }
-
-u8 fn_80252480(u8* p, int i) { return U8(PTR(p, 0x4) + i * 0x48, 0x20); }
-
-u8* fn_80252494(u8* p, int i) { return PTR(p, 0x4) + i * 0x48 + 0x21; }
-
-u8 fn_802524A8(u8* p, int i) { return U8(PTR(p, 0x4) + i * 0x48, 0x41); }
-
-s32 fn_802524BC(u8* p, int i) { return S32(PTR(p, 0x4) + i * 0x48, 0x44); }
 
 }  // extern "C"
-
-// The car stat/colour captions shared with mroll (dead in this unit; only their strings remain).
-/* Helper name unproven */
-void* LoadCaptionFont(const char* name);
-
-static void GarageCaptions(char* buf, int color, int stat, int line) {
-    fn_801345D8(buf, 0x20, "UICar:COLOR%d", color);
-    LoadCaptionFont("uifnt_o.gtx");
-    fn_801345D8(buf, 0x20, "UICar:STAT_%i_TEXT_%i", stat, line);
-}
