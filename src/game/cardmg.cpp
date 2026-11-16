@@ -185,7 +185,6 @@ void fn_80279B28(u8* block, CarState* out);
 void fn_80279CD8(CarState* s);
 }
 extern "C" const f32 lbl_80561F74;  // 0.0
-extern "C" const f32 lbl_80561F88;  // 1.0
 extern "C" const f32 lbl_80561F8C;  // 0.5
 
 extern "C" {
@@ -220,7 +219,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
     }
     if (((CarBody*)p)->f1F0 == 0x50) {
         ValueNode* t = ((EventInfo*)GetEvent(fn_801769CC()->event))->node;
-        ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * t->GetFloat("player_damage_tweak", lbl_80561F88);
+        ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * t->GetFloat("player_damage_tweak", 1.0f);
     }
     ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * lbl_80561F8C;
     if (((CarBody*)p)->f328) {
@@ -266,7 +265,6 @@ extern "C" {
 s32 fn_80129D18(int a, int b);
 }
 extern "C" const f32 lbl_80561F74;  // 0.0
-extern "C" const f32 lbl_80561F88;  // 1.0
 extern "C" const f32 lbl_80561F98;  // 0.3
 extern "C" const f32 lbl_80561FC4;  // -1.0
 
@@ -343,8 +341,8 @@ void fn_8018CB3C(u8* p) {
             f32 w = s->spin + t;
             s->spin = w - 0.0002f * (0.016683351f * w);
             s->spin = ClampF(s->spin, -20.0f, 20.0f);
-            if (s->angle > lbl_80561F88) {
-                s->angle = lbl_80561F88;
+            if (s->angle > 1.0f) {
+                s->angle = 1.0f;
                 s->spin = Lower(s->spin, lbl_80561F74);
             } else if (s->angle < 0.044999998f) {
                 if ((fn_801769CC()->type & 0x4000) && s->spin < lbl_80561F74 && fn_80129D18(4, 10) < 1) {
@@ -794,15 +792,8 @@ struct GlassMsg {
 };
 
 void fn_801BF2A4(u8* car, u32 mask, DVec* center, DVec* lo, DVec* hi, s32 kind, u8* fx);
-extern const f32 lbl_80561F88;  // 1.0
 extern const f32 lbl_80561F98;  // 0.3
 extern const f32 lbl_80561FC4;  // -1
-extern const f32 lbl_80562020;  // 300
-extern const f32 lbl_80562024;  // 0.35
-extern const f32 lbl_80562028;  // 1/150000
-extern const f32 lbl_8056202C;  // 0.6
-extern const f32 lbl_80562030;  // 0.03
-extern const f32 lbl_80562034;  // 0.9
 f32 lbl_8055A460 = 4.0f;  // 4
 extern f32 __float_epsilon[];      // FLT_EPSILON
 int fn_80189BDC(u8* p);
@@ -971,8 +962,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                     r2 = 0.1f;
                 }
                 f32 s = 0.2f / r2;
-                if (lbl_80561F88 < s) {
-                    s = lbl_80561F88;
+                if (1.0f < s) {
+                    s = 1.0f;
                 }
                 f32 m = -a * s;
                 g->x += nd.x * m;
@@ -1084,12 +1075,12 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         int hit = 0;
         s32 st = ((CarBody*)p)->a268C;
         if (st == 0) {
-            if (mag > lbl_80562020) {
-                f32 cap = kind != 0x70 ? 0.1f : lbl_80562024;
-                f32 add = lbl_80562028 * mag;
+            if (mag > 300.0f) {
+                f32 cap = kind != 0x70 ? 0.1f : 0.35f;
+                f32 add = 6.6666666e-06f * mag;
                 add = add < cap ? add : cap;
                 f32 v = ((CarBody*)p)->f2690 += add;
-                if (v > lbl_8056202C || (v > lbl_80561F8C && add > lbl_80562030)) {
+                if (v > 0.6f || (v > lbl_80561F8C && add > 0.03f)) {
                     if (fn_80129D18(4, 2) == 0) {
                         ((CarBody*)p)->a268C = 2;
                     } else {
@@ -1101,16 +1092,16 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                 }
             }
         } else if (st >= 1 && st <= 4) {
-            if (mag > lbl_80562020) {
-                f32 cap = kind != 0x70 ? 0.1f : lbl_80562024;
-                f32 add = lbl_80562028 * mag;
+            if (mag > 300.0f) {
+                f32 cap = kind != 0x70 ? 0.1f : 0.35f;
+                f32 add = 6.6666666e-06f * mag;
                 add = add < cap ? add : cap;
                 f32 v = ((CarBody*)p)->f2690 += add;
-                if (kind == 0x70 && other == ((CarBody*)p)->index && v > lbl_80562034) {
-                    ((CarBody*)p)->f2690 = was > lbl_80562034 ? was : lbl_80562034;
+                if (kind == 0x70 && other == ((CarBody*)p)->index && v > 0.9f) {
+                    ((CarBody*)p)->f2690 = was > 0.9f ? was : 0.9f;
                 }
-                if (((CarBody*)p)->f2690 > lbl_80561F88) {
-                    ((CarBody*)p)->f2690 = lbl_80561F88;
+                if (((CarBody*)p)->f2690 > 1.0f) {
+                    ((CarBody*)p)->f2690 = 1.0f;
                     switch (fn_80129D18(4, 3)) {
                     case 0:
                         ((CarBody*)p)->a268C = 10;
@@ -1150,7 +1141,6 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
 }  // extern "C"
 
 extern const f32 lbl_80562038;  // 255
-extern const f32 lbl_80561F88;  // 1.0
 static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -1164,7 +1154,7 @@ static inline u8 PackDent(f32 v) {
 
 // A packed dent byte back to its offset.
 static inline f32 UnpackDent(u32 b, f32 span) {
-    f32 t = DMG_MIN(lbl_80561F88, (b - lbl_80561F74) / lbl_80562038);
+    f32 t = DMG_MIN(1.0f, (b - lbl_80561F74) / lbl_80562038);
     t = FMax(t, lbl_80561F74);
     return -0.508f + t * span;
 }
