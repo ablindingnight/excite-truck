@@ -21,7 +21,6 @@ extern const float lbl_805633F8;
 extern const float lbl_805633FC;
 
 #pragma cplusplus on
-extern void *lbl_8033C8C4[];
 extern char lbl_8033C7A0[];
 extern const float lbl_8056336C;
 void *operator new(unsigned long size, const char *tag);
@@ -33,7 +32,7 @@ extern "C++" long *FindVehicle(s32);  /* driver.cpp (C++ linkage) */
 
 // A part created by fn_802077A4: owner at 0x10, a level at 0x04 with a dirty flag at 0x4E.
 struct HudPart {
-    long pad0;
+    virtual ~HudPart();     /* 0x00: vptr (the parts are deleted through slot 0) */
     float level;            /* 0x04 */
     float alpha;            /* 0x08 */
     long padC;
@@ -56,9 +55,32 @@ static inline void HudPart_SetLevel(HudPart *part, float level) {
     }
 }
 
-// The HUD object built by fn_8020DE74.
-struct Hud {
-    void *vtable;
+// The vehicle's sound set (the heap tag is "carsnd"): CarBody owns it at 0x2584 and drives it through the 13
+// virtual slots below. Class and method names are unproven (/* Helper name unproven */), except where carbody.cpp's
+// CbFx view already names a slot (Update 0x0C, Reset 0x10, Land 0x2C).
+class CarSoundBase {  /* Helper name unproven */
+public:
+    virtual ~CarSoundBase() {}  // fn_801837DC (its weak copy sits after ~CarBody)
+};
+
+namespace {  // private to this file: CarBody reaches it only through fn_8020DE74 and its own view
+class CarSound : public CarSoundBase {  /* Helper name unproven */
+public:
+    CarSound(unsigned char *vehicle);
+    virtual ~CarSound();        // 0x08
+    virtual void Update();      // 0x0C
+    virtual void Reset();       // 0x10
+    virtual void vf14();
+    virtual void vf18();
+    virtual void vf1C();
+    virtual void vf20();
+    virtual void vf24();
+    virtual void vf28();
+    virtual void Land(float sink);  // 0x2C
+    virtual void vf30();
+    virtual void vf34();
+    virtual void vf38();
+
     unsigned char *vehicle;  /* 0x04 */
     HudPart *p08;
     HudPart *flash;          /* 0x0C: the flash picked from flashes[] */
@@ -85,159 +107,127 @@ struct Hud {
     unsigned char b71;
     unsigned char startPending; /* 0x72 */
 };
+}  // namespace
 
-// Builds the HUD parts for a vehicle; the extra gauges exist only for the 'PCAR' type.
-extern "C" void *fn_8020DE74(unsigned char *vehicle) {
-    const char *names = lbl_8033C7A0;
-    Hud *hud = (Hud *)operator new(0x74, "carsnd");
-    if (hud != 0) {
-        long isCar;
-        void *res2;
-        void *owner;
-        void *res;
-        unsigned long i;
-        char buf[0x20];
+// Builds the sound parts for a vehicle; the extra ones exist only for the 'PCAR' type.
+inline CarSound::CarSound(unsigned char *vehicle) {
+    void *res;
+    void *owner;
+    long isCar;
+    char buf[0x20];
+    unsigned long i;
+    void *res2;
 
-        hud->vtable = lbl_8033C8C4;
-        hud->vehicle = vehicle;
-        res = vehicle + 0x118;
-        res2 = vehicle + 0x60;
-        owner = *(void **)(vehicle + 0x1EC);
-        isCar = *(long *)(vehicle + 0x10) == 0x50434152;
-        if (isCar) {
-            hud->p28 = (HudPart *)fn_802077A4("waterbounce.sfx", 5, res, res2);
-            hud->air = (HudPart *)fn_802077A4("airtime.sfx", 8, res, res2);
-        } else {
-            hud->p28 = 0;
-            hud->air = 0;
-        }
-        hud->p08 = (HudPart *)fn_802077A4("backfire.sfx", 5, res, res2);
-        hud->flashCount = 0;
-        memset(hud->flashes, 0, 8);
-        hud->flash = 0;
-        HudPart **slot = hud->flashes;
-        for (i = 0; i < 2; slot++, i++) {
-            HudPart *part;
-            fn_801345D8(buf, 0x20, "boost%d.sfx", i + 1);
-            part = (HudPart *)fn_802077A4(buf, 5, res, res2);
-            *slot = part;
-            if (part == 0) break;
-            part->owner = owner;
-            HudPart_SetLevel(*slot, lbl_80563368);
-            hud->flash = *slot;
-            hud->flashCount++;
-        }
-        if (isCar) {
-            hud->speedLines = (HudPart *)fn_802077A4("boost_manual.sfx", 5, res, res2);
-        } else {
-            hud->speedLines = 0;
-        }
-        if (hud->p08 != 0) {
-            hud->p08->owner = owner;
-            HudPart_SetLevel(hud->p08, lbl_8056336C);
-        }
-        if (hud->p28 != 0) hud->p28->owner = owner;
-        if (hud->air != 0) hud->air->owner = owner;
-        if (isCar) {
-            hud->p1C = (HudPart *)fn_802077A4("car_gnd1.sfx", 5, res, res2);
-        } else {
-            hud->p1C = 0;
-        }
-        hud->p20 = (HudPart *)fn_802077A4("badland.sfx", 5, res, res2);
-        hud->splash = (HudPart *)fn_802077A4("waterdrive.sfx", 5, res, res2);
-        if (isCar) {
-            hud->dive = (HudPart *)fn_802077A4("water_in.sfx", 5, res, res2);
-            hud->surface = (HudPart *)fn_802077A4("water_out.sfx", 5, res, res2);
-        } else {
-            hud->dive = 0;
-            hud->surface = 0;
-        }
-        if (hud->splash != 0) hud->splash->owner = owner;
-        if (hud->dive != 0) hud->dive->owner = owner;
-        if (hud->surface != 0) hud->surface->owner = owner;
-        hud->drift = (HudPart *)fn_802077A4("dirtskid.sfx", 5, res, res2);
-        if (hud->drift != 0) hud->drift->owner = owner;
-        if (isCar) {
-            hud->p24 = (HudPart *)fn_802077A4("niceland.sfx", 5, res, res2);
-            hud->p2C = (HudPart *)fn_802077A4("boost_turbotap.sfx", 5, res, res2);
-            hud->boost = (HudPart *)fn_802076A0("heatbeep.sfx", 1, owner, 2);
-            hud->tilt = (HudPart *)fn_802076A0("overheat.sfx", 1, owner, 2);
-            hud->p50 = (HudPart *)fn_802076A0("overheat_start.sfx", 1, owner, 2);
-            hud->p44 = (HudPart *)fn_802076A0("watersink.sfx", 1, owner, 0);
-            hud->start = (HudPart *)fn_802076A0("invulnerable.sfx", 1, owner, 0);
-        } else {
-            hud->p24 = 0;
-            hud->p2C = 0;
-            hud->boost = 0;
-            hud->tilt = 0;
-            hud->p50 = 0;
-            hud->p44 = 0;
-            hud->start = 0;
-        }
-        hud->driftTime = lbl_80563370;
-        hud->underwater = 0;
-        hud->flashLevel = lbl_80563370;
-        hud->speedAlpha = lbl_80563370;
-        hud->boostLevel = lbl_80563370;
-        hud->started = 0;
-        hud->startPending = 0;
-        hud->b71 = (FindVehicle(*(long *)(vehicle + 0x25C))[0xA0 / 4] >> 2) & 1;
+    this->vehicle = vehicle;
+    res = vehicle + 0x118;
+    res2 = vehicle + 0x60;
+    owner = *(void **)(vehicle + 0x1EC);
+    isCar = *(long *)(vehicle + 0x10) == 0x50434152;
+    if (isCar) {
+        this->p28 = (HudPart *)fn_802077A4("waterbounce.sfx", 5, res, res2);
+        this->air = (HudPart *)fn_802077A4("airtime.sfx", 8, res, res2);
+    } else {
+        this->p28 = 0;
+        this->air = 0;
     }
-    return hud;
+    this->p08 = (HudPart *)fn_802077A4("backfire.sfx", 5, res, res2);
+    this->flashCount = 0;
+    memset(this->flashes, 0, 8);
+    this->flash = 0;
+    for (i = 0; i < 2; i++) {
+        HudPart *part;
+        fn_801345D8(buf, 0x20, "boost%d.sfx", i + 1);
+        part = (HudPart *)fn_802077A4(buf, 5, res, res2);
+        this->flashes[i] = part;
+        if (part == 0) break;
+        part->owner = owner;
+        HudPart_SetLevel(this->flashes[i], lbl_80563368);
+        this->flash = this->flashes[i];
+        this->flashCount++;
+    }
+    if (isCar) {
+        this->speedLines = (HudPart *)fn_802077A4("boost_manual.sfx", 5, res, res2);
+    } else {
+        this->speedLines = 0;
+    }
+    if (this->p08 != 0) {
+        this->p08->owner = owner;
+        HudPart_SetLevel(this->p08, lbl_8056336C);
+    }
+    if (this->p28 != 0) this->p28->owner = owner;
+    if (this->air != 0) this->air->owner = owner;
+    if (isCar) {
+        this->p1C = (HudPart *)fn_802077A4("car_gnd1.sfx", 5, res, res2);
+    } else {
+        this->p1C = 0;
+    }
+    this->p20 = (HudPart *)fn_802077A4("badland.sfx", 5, res, res2);
+    this->splash = (HudPart *)fn_802077A4("waterdrive.sfx", 5, res, res2);
+    if (isCar) {
+        this->dive = (HudPart *)fn_802077A4("water_in.sfx", 5, res, res2);
+        this->surface = (HudPart *)fn_802077A4("water_out.sfx", 5, res, res2);
+    } else {
+        this->dive = 0;
+        this->surface = 0;
+    }
+    if (this->splash != 0) this->splash->owner = owner;
+    if (this->dive != 0) this->dive->owner = owner;
+    if (this->surface != 0) this->surface->owner = owner;
+    this->drift = (HudPart *)fn_802077A4("dirtskid.sfx", 5, res, res2);
+    if (this->drift != 0) this->drift->owner = owner;
+    if (isCar) {
+        this->p24 = (HudPart *)fn_802077A4("niceland.sfx", 5, res, res2);
+        this->p2C = (HudPart *)fn_802077A4("boost_turbotap.sfx", 5, res, res2);
+        this->boost = (HudPart *)fn_802076A0("heatbeep.sfx", 1, owner, 2);
+        this->tilt = (HudPart *)fn_802076A0("overheat.sfx", 1, owner, 2);
+        this->p50 = (HudPart *)fn_802076A0("overheat_start.sfx", 1, owner, 2);
+        this->p44 = (HudPart *)fn_802076A0("watersink.sfx", 1, owner, 0);
+        this->start = (HudPart *)fn_802076A0("invulnerable.sfx", 1, owner, 0);
+    } else {
+        this->p24 = 0;
+        this->p2C = 0;
+        this->boost = 0;
+        this->tilt = 0;
+        this->p50 = 0;
+        this->p44 = 0;
+        this->start = 0;
+    }
+    this->driftTime = lbl_80563370;
+    this->underwater = 0;
+    this->flashLevel = lbl_80563370;
+    this->speedAlpha = lbl_80563370;
+    this->boostLevel = lbl_80563370;
+    this->started = 0;
+    this->startPending = 0;
+    this->b71 = (FindVehicle(*(long *)(vehicle + 0x25C))[0xA0 / 4] >> 2) & 1;
 }
 
-extern "C" void *fn_8020E288(void *arg0, s32 arg1) {
-    struct Dummy { virtual ~Dummy(); };
-    void *child;
-    u8 *p;
-    u32 i;
-    if (arg0 != 0) {
-        child = *(void **)((u8 *)arg0 + 8);
-        *(void **)arg0 = lbl_8033C8C4;
-        if (child != 0) delete (Dummy *)child;
-        p = (u8 *)arg0;
-        i = 0;
-        do {
-            child = *(void **)(p + 0x10);
-            if (child != 0) delete (Dummy *)child;
-            p += 4;
-            i++;
-        } while (i < 2);
-        child = *(void **)((u8 *)arg0 + 0x18);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x28);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x30);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x1C);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x20);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x24);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x2C);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x48);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x4C);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x50);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x44);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x34);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x38);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x3C);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x40);
-        if (child != 0) delete (Dummy *)child;
-        child = *(void **)((u8 *)arg0 + 0x54);
-        if (child != 0) delete (Dummy *)child;
-        if (arg1 > 0) operator delete(arg0);
+extern "C" void *fn_8020DE74(unsigned char *vehicle) {
+    return new ("carsnd") CarSound(vehicle);
+}
+
+CarSound::~CarSound() {
+    unsigned long i;
+    if (p08 != 0) delete p08;
+    for (i = 0; i < 2; i++) {
+        if (flashes[i] != 0) delete flashes[i];
     }
-    return arg0;
+    if (speedLines != 0) delete speedLines;
+    if (p28 != 0) delete p28;
+    if (air != 0) delete air;
+    if (p1C != 0) delete p1C;
+    if (p20 != 0) delete p20;
+    if (p24 != 0) delete p24;
+    if (p2C != 0) delete p2C;
+    if (boost != 0) delete boost;
+    if (tilt != 0) delete tilt;
+    if (p50 != 0) delete p50;
+    if (p44 != 0) delete p44;
+    if (splash != 0) delete splash;
+    if (dive != 0) delete dive;
+    if (surface != 0) delete surface;
+    if (drift != 0) delete drift;
+    if (start != 0) delete start;
 }
 
 
@@ -315,10 +305,11 @@ static inline void HudXform(HudVec *out, const HudVec *in, const float *m) {
     }
 }
 
-// Per-frame HUD update: start prompt, boost glow, hit flashes, speed lines, air and water effects, drift meter.
+// Per-frame sound update (field names are from an earlier HUD reading; the parts are sounds, see the constructor).
 static inline float AbsFlt(float v) { return (float)__fabs(v); }
 
-extern "C" void fn_8020E598(Hud *h) {
+void CarSound::Update() {
+    CarSound *h = this;
     unsigned char *v;
     int underwater;
     unsigned char *wheel;
@@ -524,7 +515,8 @@ extern "C++" long fn_80009C84(void);  /* replay.cpp (C++ linkage) */
 extern void fn_80206750(void *, void *, long);
 
 // Applies the current mode (0 while fn_80009C84 is set, otherwise 2) to the three optional parts.
-void fn_8020F15C(void *arg0) {
+void CarSound::Reset() {
+    void *arg0 = this;
     void *owner = *(void **)((char *)*(void **)((char *)arg0 + 4) + 0x1EC);
     long busy = fn_80009C84();
     long mode = 2;
@@ -537,7 +529,8 @@ void fn_8020F15C(void *arg0) {
         fn_80206750(*(void **)((char *)arg0 + 0x50), owner, mode);
 }
 
-void fn_8020F1F8(void *arg0) {
+void CarSound::vf14() {
+    void *arg0 = this;
     void *temp_r3;
     temp_r3 = *(void **)((char *)arg0 + 0x50);
     if (temp_r3 != 0) {
@@ -547,7 +540,8 @@ void fn_8020F1F8(void *arg0) {
     }
 }
 
-void fn_8020F21C(void *arg0) {
+void CarSound::vf18() {
+    void *arg0 = this;
     void *temp_r3;
     temp_r3 = *(void **)((char *)arg0 + 0x28);
     if (temp_r3 != 0) {
@@ -557,7 +551,8 @@ void fn_8020F21C(void *arg0) {
     }
 }
 
-void fn_8020F240(void *arg0) {
+void CarSound::vf1C() {
+    void *arg0 = this;
     void *p;
     float value;
     p = *(void **)((char *)arg0 + 8);
@@ -573,7 +568,8 @@ void fn_8020F240(void *arg0) {
         *(signed char *)((char *)p + 0x4A) = 0;
     }
 }
-void fn_8020F284(void *arg0, float farg0) {
+void CarSound::Land(float farg0) {
+    void *arg0 = this;
     float temp_f0;
     float temp_f1;
     float var_f2;
@@ -597,7 +593,8 @@ void fn_8020F284(void *arg0, float farg0) {
     }
 }
 
-void fn_8020F30C(void *arg0) {
+void CarSound::vf20() {
+    void *arg0 = this;
     void *temp_r3;
     temp_r3 = *(void **)((char *)arg0 + 0x24);
     if (temp_r3 != 0) {
@@ -607,7 +604,8 @@ void fn_8020F30C(void *arg0) {
     }
 }
 
-void fn_8020F330(void *arg0) {
+void CarSound::vf24() {
+    void *arg0 = this;
     void *temp_r3;
 
     temp_r3 = *(void **)((char *)arg0 + 0x20);
@@ -617,7 +615,8 @@ void fn_8020F330(void *arg0) {
         *(signed char *)((char *)temp_r3 + 0x4A) = 0;
     }
 }
-void fn_8020F354(void *arg0) {
+void CarSound::vf28() {
+    void *arg0 = this;
     void *temp_r3;
     temp_r3 = *(void **)((char *)arg0 + 0x2C);
     if (temp_r3 != 0) {
@@ -626,7 +625,8 @@ void fn_8020F354(void *arg0) {
         *(signed char *)((char *)temp_r3 + 0x4A) = 0;
     }
 }
-void fn_8020F378(void *arg0) {
+void CarSound::vf30() {
+    void *arg0 = this;
     void *temp_r3;
 
     temp_r3 = *(void **)((char *)arg0 + 0x44);
@@ -636,11 +636,12 @@ void fn_8020F378(void *arg0) {
         *(signed char *)((char *)temp_r3 + 0x4A) = 0;
     }
 }
-void fn_8020F39C(void) {
+void CarSound::vf34() {
 
 }
 
-void fn_8020F3A0(void *arg0) {
+void CarSound::vf38() {
+    void *arg0 = this;
     *(signed char *)((char *)arg0 + 0x72) = 1;
 }
 extern const float lbl_80563368;
@@ -650,15 +651,13 @@ extern const float lbl_805633F4;
 extern const float lbl_805633F8;
 extern const float lbl_805633FC;
 
-// The Hud's .data (0x8033C7A0-0x8033C940): the sound/part name pool its constructor indexes, then the vtable
-// (two zero header words and the 13 methods), a second small table (fn_801837DC) and zero words.
-u8* fn_801837DC(u8* p, int del);
+// .data (0x8033C7A0-0x8033C940): the constructor's sound-name strings, then the compiler's vtables for CarSound
+// (0x8033C8C4) and CarSoundBase (0x8033C900). OPEN: retail ends with a 0x34-byte zero block (0x8033C90C) we do not
+// emit. An all-pure CarSoundI (pure dtor + Update..vf30, between CarSoundBase and CarSound) gives the right size
+// but emits it BEFORE CarSoundBase's table (FACTS 2026-11-15 CarSound).
 
-void *lbl_8033C8C4[31] = {
-    0, 0, (void *)fn_8020E288, (void *)fn_8020E598, (void *)fn_8020F15C, (void *)fn_8020F1F8, (void *)fn_8020F21C, (void *)fn_8020F240, (void *)fn_8020F30C, (void *)fn_8020F330, (void *)fn_8020F354, (void *)fn_8020F284, (void *)fn_8020F378, (void *)fn_8020F39C, (void *)fn_8020F3A0, 0, 0, (void *)fn_801837DC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
 
-// The Hud's .sdata2 constants (0x80563368-0x80563400), in address order.
+// The unit's .sdata2 constants (0x80563368-0x80563400), in address order.
 extern const float lbl_80563368 = 1.0f;
 extern const float lbl_8056336C = 2.0f;
 extern const float lbl_80563370 = 0.0f;

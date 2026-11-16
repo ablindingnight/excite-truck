@@ -974,7 +974,7 @@ CarBody::~CarBody(void) {
 
 extern "C" {
 
-u8* fn_801837DC(u8* p, int del) {
+u8* __dt__12CarSoundBaseFv(u8* p, int del) {  // ~CarSoundBase (unk_8020DE74), weak copy
     if (p && del > 0) {
         operator delete(p);
     }
