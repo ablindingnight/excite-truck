@@ -460,7 +460,7 @@ struct ModelFitBoundsNew {
  ModelAxisRangeNew x, y, z;
  inline float RadiusNew() const;
 };
-extern "C" {ModelFitMatrixNew* fn_802C86DC();void fn_802C77F0(int,ModelFitBoundsNew*);void fn_802C98DC(float*,float*,float*,float*);double sqrt(double);double atan(double);extern const float lbl_80563584;
+extern "C" {ModelFitMatrixNew* fn_802C86DC();void fn_802C77F0(int,ModelFitBoundsNew*);void fn_802C98DC(float*,float*,float*,float*);double sqrt(double);double atan(double);
 }
 // Rotation angles as a vector built from its three components.
 struct RotationVec3New : RotationVec {RotationVec3New(float ax,float ay,float az){x=ax;y=ay;z=az;}};
@@ -853,7 +853,7 @@ public:
     fn_802C98DC(&horizontal, &nearPlane, &unused, &vertical);
     float minimum = radius / vertical;
     float sine = (float) sin((float) atan((horizontal * ((float) height)) / ((float) width)));
-    float candidate = radius + (lbl_80563584 * nearPlane);
+    float candidate = radius + (1.1f * nearPlane);
     float distance = radius / sine;
     distance = (distance > candidate) ? (distance) : (candidate);
     minimum = (minimum > distance) ? (minimum) : (distance);
@@ -980,7 +980,7 @@ struct MapRendererNew {MapRendererTableNew* vtable;};
 struct MapViewportReceiverNew {MapReceiverTableNew* vtable;int left,top,right,bottom,kind;unsigned char flag18,flag19,shown,enabled;char gap1c[0x24c];MapRendererNew* renderer;unsigned char owned;char gap26d[3];int x,y,width,height;};
 struct MapRendererDispatchCppNew {virtual ~MapRendererDispatchCppNew();virtual void Slot0c();virtual void Slot10();virtual void Draw(int,int,int,int,float);};
 
-extern "C" {extern const float lbl_8056357C,lbl_80563580;
+extern "C" {
 void fn_80228AEC(WidgetFragment *source, float opacity);
 }
 
@@ -3030,17 +3030,17 @@ void fn_80228AEC(WidgetFragment *source, float opacity) {MapViewportReceiverNew*
     int displayWidth;
     int clippedHeight;
 
-    int mapped_x=(int)MapScopeNew((float)lbl_8055CFF0,(float)viewport->left,lbl_8056357C);viewport->x=MapIntegerMinNew(mapped_x,lbl_8055CFF0-2);
-    int mapped_y=(int)MapScopeNew((float)lbl_8055CFF4,(float)viewport->top,lbl_80563580);viewport->y=MapIntegerMinNew(mapped_y,lbl_8055CFF4-2);
+    int mapped_x=(int)MapScopeNew((float)lbl_8055CFF0,(float)viewport->left,640.0f);viewport->x=MapIntegerMinNew(mapped_x,lbl_8055CFF0-2);
+    int mapped_y=(int)MapScopeNew((float)lbl_8055CFF4,(float)viewport->top,480.0f);viewport->y=MapIntegerMinNew(mapped_y,lbl_8055CFF4-2);
     displayWidth = lbl_8055CFF0;
-    scaledWidth = ((float) displayWidth * (float) ((WidgetDispatch*)source)->Slot78()) / lbl_8056357C;
+    scaledWidth = ((float) displayWidth * (float) ((WidgetDispatch*)source)->Slot78()) / 640.0f;
     if (scaledWidth < (0.0f)) {
         roundedWidth = scaledWidth - (0.5f);
     } else {
         roundedWidth = (0.5f) + scaledWidth;
     }
 int boundWidth=displayWidth-viewport->x;int resultWidth=(int)roundedWidth;if(resultWidth<boundWidth)boundWidth=resultWidth;viewport->width=boundWidth;
-    scaledHeight = ((float) lbl_8055CFF4 * (float) (viewport->bottom - viewport->top)) / lbl_80563580;
+    scaledHeight = ((float) lbl_8055CFF4 * (float) (viewport->bottom - viewport->top)) / 480.0f;
     if (scaledHeight < (0.0f)) {
         roundedHeight = scaledHeight - (0.5f);
     } else {
