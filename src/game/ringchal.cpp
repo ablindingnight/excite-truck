@@ -2124,15 +2124,22 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
             V2 d;
             V2 a;
             V2 b;
-            int outside;
+            bool outside;
             int behind;
+            f32 dz;
+            f32 dx;
             a.x = t->mtx.origin.x;
             a.y = t->mtx.origin.z;
             b.x = c->pos.x;
-            d.x = a.x - b.x;
             b.y = c->pos.z;
-            d.y = a.y - b.y;
-            outside = (f32)sqrt(d.x * d.x + d.y * d.y) > t->radius;  /* retail: fcmpo sqrt,radius + GT bit */
+            dx = a.x - b.x;
+            dz = a.y - b.y;
+            d.x = dx;
+            d.y = dz;
+            f64 wide = sqrt(d.x * d.x + d.y * d.y);
+            f32 radius = t->radius;
+            f32 distance = (f32)wide;
+            outside = distance > radius;
             behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
             if (s->f10 == s->teles->count - 1 && outside) {
                 s->teles->data[s->f10].b30 = 0;
@@ -2596,14 +2603,17 @@ inline void ObjSet::CheckTeleport(Phob* car) {
         V2 a;
         V2 b;
         V2 d;
+        f32 dx;
         f32 dz;
         a.x = t->mtx.origin.x;
         a.y = t->mtx.origin.z;
         b.x = car->pos.x;
-        d.x = a.x - b.x;
         b.y = car->pos.z;
-        dz = a.y - b.y; d.y = dz;
-        f64 wide = sqrt(d.x * d.x + dz * dz);
+        dx = a.x - b.x;
+        dz = a.y - b.y;
+        d.x = dx;
+        d.y = dz;
+        f64 wide = sqrt(d.x * d.x + d.y * d.y);
         f32 distance = (f32)wide;
         f32 radius = t->radius;
         if (distance < radius) {
