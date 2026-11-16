@@ -76,7 +76,7 @@ u8 lbl_8055F63C;
 
 extern "C" {
 
-u8 fn_8027AA48(void) { return lbl_8055F634; }
+int fn_8027AA48(void) { return lbl_8055F634; }
 
 void fn_8027AA50(void) {
     if (lbl_8055F634) {
