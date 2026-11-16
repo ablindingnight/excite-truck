@@ -897,6 +897,11 @@ int fn_8029DFE0(WaterPool* p, const Vec* at) {
 
 static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 
+// Helper name unproven.
+static inline int NearestCell(f32 v) {
+    return (int)(v < 0.0f ? v - 0.5f : 0.5f + v);
+}
+
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     Vec base;
     Vec pos;
@@ -925,11 +930,10 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     q.y = yv + v.y * (depth * inv);
     f32 dxzv = p->dxz;
     f32 fu = q.x * p->dxx + q.y * dxzv;
-    int gy;
-    int gx = fu < 0.0f ? fu - 0.5f : 0.5f + fu;
+    int gx = NearestCell(fu);
     f32 dyzv = p->dyz;
     f32 fv = p->dyx * q.x + dyzv * q.y;
-    gy = fv < 0.0f ? fv - 0.5f : 0.5f + fv;
+    int gy = NearestCell(fv);
     if (gx < 1 || gx >= p->nx - 1 || gy < 1 || gy >= p->ny - 1) {
         return;
     }
