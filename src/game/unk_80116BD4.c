@@ -2712,28 +2712,34 @@ static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
     d &= (u32)(t >> 32);
     return d + 32767;
 }
-#pragma push  /* RAD built this routine without constant propagation or speculative unrolling (Process review) */
+// The 64-bit borrow of v - bound: d gets the low word of the difference and v becomes the borrow mask (0 or -1).
+// RAD wrote this as inline assembly on register variables (proof: retail's scheduler never moves anything across
+// the subfe, which only assembly statements cause; the mask lands in v's own register and the difference in d's).
+// The C form is the same arithmetic for other compilers.
+#ifdef __MWERKS__
+#define BINK_BORROW(d, bound, v) asm { subfc d, bound, v ; subfe v, v, v }
+#else
+#define BINK_BORROW(d, bound, v) { u64 t_ = (u64)(v) - (bound); (d) = (u32)t_; (v) = (u32)(t_ >> 32); }
+#endif
+#pragma push
 #pragma global_optimizer off  /* same code as lifetimes/propagation/unroll_loops off; see ExpandPlane */
 #pragma ppc_unroll_speculative off
 void quanttos16s(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
-    u32 lo = 0x7FFF8000;
-    s16 *out = arg0 - 1;
-    u32 hi = 0x80007FFF;
+    register u32 lo = 0x7FFF8000;
+    register s16 *out = arg0 - 1;
+    register u32 hi = 0x80007FFF;
     u32 i;
-    u32 v;
-    u32 d;
-    u64 t;
+    register u32 v;
+    register u32 d;
     for (i = 0; i < arg2; i++) {
         v = (s32)(*arg1 * farg0);
         v ^= 0x80000000;
-        t = (u64)v - lo;
-        d = (u32)t;
-        d &= ~(u32)(t >> 32);
+        BINK_BORROW(d, lo, v);
+        d &= ~v;
         v = d - 32768;
         v ^= 0x80000000;
-        t = (u64)v - hi;
-        d = (u32)t;
-        d &= (u32)(t >> 32);
+        BINK_BORROW(d, hi, v);
+        d &= v;
         v = d + 32767;
         arg1++;
         *++out = v;
