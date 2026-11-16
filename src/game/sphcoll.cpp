@@ -133,7 +133,6 @@ struct Xform {
     XVec3 pos;   // offset 0x24
 };
 
-extern "C" void* lbl_80333968[];
 extern "C" void* lbl_80333818[];
 extern "C" void* __vt__7RingVol[];
 extern "C" void* __vt__8BoxShape[];
@@ -432,12 +431,53 @@ public:
     virtual ~OffsetSphereShape(void) {}
 };
 
+// A group of collision volumes ('GRUP', 0x184 bytes; vtable 0x803339B8): parts at 0x178 (count 0x174) and a
+// child set at 0x17C. Built by fn_8019FFD8, which carbody and obstacles call. Class name unproven.
+class SphereGroup : public CollShape {
+public:
+    virtual ~SphereGroup(void);
+    virtual void vf0C(void);
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf28(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void SetSurface(int m);
+    virtual void vf44(u32 v);
+    virtual void vf48(void);
+    virtual void vf4C(void);
+};
+
+// The capsule base of TubeShape (vtable 0x80333968): radius 0x24, half length 0x28 along the frame's axis.
+// Abstract (vf10 and vf38 stay pure). Class name unproven.
+class TubeBase : public CollShape {
+public:
+    TubeBase(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~TubeBase(void) {}
+};
+
+// A tube ('TUBE'; vtable __vt__9TubeShape).
+class TubeShape : public TubeBase {
+public:
+    TubeShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual void vf4C(void);
+    virtual ~TubeShape(void) {}
+};
+
 // MATCHING-AID (transitional): constructors still written as C store these vtables, and sphcoll's file loader
 // builds a SphereShape in place, by their linker names.
 extern "C" void* __vt__11SphereShape[];
 extern "C" void* __vt__14BoxSphereShape[];
+extern "C" void* __vt__11SphereGroup[];
+extern "C" u8* __ct__9TubeShapeFUlUl(u8* p, u32 data, u32 swap);
 extern "C" u8* __ct__11SphereShapeFUlUl(u8* p, u32 data, u32 swap);
-u8* fn_801A1520(u8* p, u32 a, u32 swap);
 void fn_801A49FC(u8* p);
 void fn_801A49E8(u8* p);
 void fn_801A44D4(u8* l);
@@ -447,8 +487,7 @@ void fn_801A4868(u8* p, u32 v);
 void* operator new(size_t size, const char* tag);
 void operator delete(void* p);
 
-extern "C" void* lbl_803339B8[];
-extern "C" void* __vt__9TubeShape[];
+extern "C" void* __vt__9TubeShape[];  // MATCHING-AID: TubeVol::Init stores it by name
 extern "C" void* lbl_80333728[];
 
 ModuleTag lbl_8055E590;
@@ -1999,7 +2038,8 @@ int fn_8019DC04(u8* p, u8* q) {
     return 0;
 }
 
-f32 fn_8019DDEC(u8* p) { return F32(p, 0x24) + F32(p, 0x28); }
+f32 TubeBase::Radius(void) {
+    u8* p = (u8*)this; return F32(p, 0x24) + F32(p, 0x28); }
 
 extern const f32 lbl_805622D0;  // 0.0
 
@@ -2232,13 +2272,6 @@ int fn_8019E500(u8* p, u8* q) {
         }
     }
     return hit;
-}
-
-u8* fn_8019E834(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
 }
 
 // Capsule p against q: the point of p's axis nearest q's centre (clamped to +-half length 0x28) is
@@ -2814,7 +2847,7 @@ u8* fn_8019FFD8(u8* p, u32 a, u32 b) {
     F32(p, 0x14) = 0.0f;
     U32(p, 0x20) = 100;
     U32(p, 0x1C) = 0;
-    *(void**)p = lbl_803339B8;
+    *(void**)p = __vt__11SphereGroup;
     F32(p, 0x170) = 0.0f;
     F32(p, 0x178) = 0.0f;
     F32(p, 0x16C) = 0.0f;
@@ -2826,18 +2859,11 @@ u8* fn_8019FFD8(u8* p, u32 a, u32 b) {
     return p;
 }
 
-u8* fn_801A0040(u8* p, int del) {
-    if (p) {
-        *(void**)p = lbl_803339B8;
-        for (int i = 0; i < S32(p, 0x174); i++) {
-            delete ((SphGroupDel*)p)->vols[i];
-        }
-        delete *(VDel**)(p + 0x17C);
-        if (del > 0) {
-            operator delete(p);
-        }
+SphereGroup::~SphereGroup(void) {
+    for (int i = 0; i < S32(this, 0x174); i++) {
+        delete ((SphGroupDel*)this)->vols[i];
     }
-    return p;
+    delete *(VDel**)((u8*)this + 0x17C);
 }
 
 u8* fn_801A010C(u8* p, int del) {
@@ -2847,7 +2873,8 @@ u8* fn_801A010C(u8* p, int del) {
     return p;
 }
 
-void fn_801A014C(u8* p) { VE(PTR(p, 0x17C))->v0C(); }
+void SphereGroup::vf0C(void) {
+    u8* p = (u8*)this; VE(PTR(p, 0x17C))->v0C(); }
 
 void fn_801A0160(u8* p) {
     if (lbl_8055E3C4 != S32(p, 0x180)) {
@@ -2858,11 +2885,11 @@ void fn_801A0160(u8* p) {
     }
 }
 
-void fn_801A01E0(const u8* p, RVec3* lo, RVec3* hi) {
+void SphereGroup::vf38(RVec3* lo, RVec3* hi) const {
     RVec3 c;
     RVec3 e;
-    f32 r = F32(p, 0x178);
-    u8* o = PTR(p, 0xC);
+    f32 r = F32(((const u8*)this), 0x178);
+    u8* o = PTR(((const u8*)this), 0xC);
     e.x = r;
     e.y = r;
     e.z = r;
@@ -2981,7 +3008,8 @@ static inline void HitGroup(u8* p, u8* q) {
     }
 }
 
-void fn_801A0464(u8* p, u8* q) {
+void SphereGroup::vf10(u8* q) {
+    u8* p = (u8*)this;
     RVec3* h;
     s32 type = S32(q, 0x18);
     if (type == 'GRUP') {
@@ -3142,19 +3170,19 @@ void fn_801A0464(u8* p, u8* q) {
 
 // Per-frame update of the sphere group; with a track mesh loaded and a car owner, each of its 4 wheels
 // (moved by the car's velocity) is tested against the mesh and every hit reported to the car.
-void fn_801A0F10(u8* p) {
+void SphereGroup::vf14(void) {
     RVec3 hits[64];
     PVec3 wp;
     PVec3 c;
     PVec3 d;
     int n;
     u8* car;
-    fn_801A0160(p);
-    for (int i = 0; i < S32(p, 0x174); i++) {
-        ((SphGroup*)p)->vols[i]->v14();
+    fn_801A0160(((u8*)this));
+    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+        ((SphGroup*)((u8*)this))->vols[i]->v14();
     }
     if (lbl_8055E5A0) {
-        car = PTR(p, 0x4);
+        car = PTR(((u8*)this), 0x4);
         if (IsCarObj(car)) {
             int id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
@@ -3185,20 +3213,20 @@ void fn_801A0F10(u8* p) {
 }
 
 // Sweeps a ray against the group: a cheap slab test on the bounding sphere, then each member.
-int fn_801A1148(u8* p, const f32* from, const f32* dir, f32* t, f32* out) {
-    const f32* c = (const f32*)(PTR(p, 0xC) + 0x24);
+int SphereGroup::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* out) {
+    const f32* c = (const f32*)(PTR(((u8*)this), 0xC) + 0x24);
     f32 d[3];
-    d[0] = c[0] - from[0];
-    d[1] = c[1] - from[1];
-    d[2] = c[2] - from[2];
-    f32 proj = PSVECDotProduct(d, dir);
-    f32 rad = F32(p, 0x178);
+    d[0] = c[0] - ((const f32*)from)[0];
+    d[1] = c[1] - ((const f32*)from)[1];
+    d[2] = c[2] - ((const f32*)from)[2];
+    f32 proj = PSVECDotProduct(d, ((const f32*)dir));
+    f32 rad = F32(((u8*)this), 0x178);
     if (proj >= -rad && proj < *t + rad) {
-        fn_801A0160(p);
+        fn_801A0160(((u8*)this));
         int hit = 0;
-        for (int i = 0; i < S32(p, 0x174); i++) {
-            u8* s = (u8*)((SphGroupDel*)p)->vols[i];
-            if (fn_8019DDFC((f32*)from, (f32*)dir, t, out, (f32*)(s + 0x34), F32(s, 0x24))) {
+        for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+            u8* s = (u8*)((SphGroupDel*)((u8*)this))->vols[i];
+            if (fn_8019DDFC((f32*)((const f32*)from), (f32*)((const f32*)dir), t, ((f32*)out), (f32*)(s + 0x34), F32(s, 0x24))) {
                 hit = 1;
             }
         }
@@ -3207,38 +3235,38 @@ int fn_801A1148(u8* p, const f32* from, const f32* dir, f32* t, f32* out) {
     return 0;
 }
 
-void fn_801A1250(u8* p) {
-    u8* q = p;
-    for (int i = 0; i < S32(p, 0x174); i++) {
+void SphereGroup::vf28(void) {
+    u8* q = ((u8*)this);
+    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
         VE(PTR(q, 0x24))->v28();
         q += 4;
     }
-    S32(p, 0x180) = -1;
+    S32(((u8*)this), 0x180) = -1;
 }
 
-void fn_801A12C4(u8* p, u32 v) {
-    U32(p, 0x1C) = v;
-    ((VSet*)PTR(p, 0x17C))->SetB(v);
-    for (int i = 0; i < S32(p, 0x174); i++) {
-        ((SphGroupSet*)p)->vols[i]->SetB(v);
+void SphereGroup::vf44(u32 v) {
+    U32(((u8*)this), 0x1C) = v;
+    ((VSet*)PTR(((u8*)this), 0x17C))->SetB(v);
+    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+        ((SphGroupSet*)((u8*)this))->vols[i]->SetB(v);
     }
 }
 
 void CollShape::vf44(u32 v) {
     u8* p = (u8*)this; U32(p, 0x1c) = v; }
 
-void fn_801A1360(u8* p, u32 v) {
-    U32(p, 0x20) = v;
-    ((VSet*)PTR(p, 0x17C))->SetA(v);
-    for (int i = 0; i < S32(p, 0x174); i++) {
-        ((SphGroupSet*)p)->vols[i]->SetA(v);
+void SphereGroup::SetSurface(int v) {
+    U32(((u8*)this), 0x20) = ((u32)v);
+    ((VSet*)PTR(((u8*)this), 0x17C))->SetA(((u32)v));
+    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+        ((SphGroupSet*)((u8*)this))->vols[i]->SetA(((u32)v));
     }
 }
 
-void fn_801A13F4(u8* p) {
-    ((VEx*)PTR(p, 0x17C))->v4C();
-    for (int i = 0; i < S32(p, 0x174); i++) {
-        ((SphGroup*)p)->vols[i]->v4C();
+void SphereGroup::vf4C(void) {
+    ((VEx*)PTR(((u8*)this), 0x17C))->v4C();
+    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+        ((SphGroup*)((u8*)this))->vols[i]->v4C();
     }
 }
 
@@ -3280,9 +3308,8 @@ void fn_801A1474(SphGroupData* g, f32 s) {
     F32(b, 0x2C) = z;
 }
 
-u8* fn_801A1520(u8* p, u32 a, u32 swap) {
-    __ct__9CollShapeFUlUl(p, a, swap);
-    *(void**)p = lbl_80333968;
+TubeBase::TubeBase(u32 a, u32 swap) : CollShape(a, swap) {
+    u8* p = (u8*)this;
     if (swap) {
         Swap32(p + 0x24);
         Swap32(p + 0x28);
@@ -3290,7 +3317,6 @@ u8* fn_801A1520(u8* p, u32 a, u32 swap) {
             F32(p, 0x24) += 3.35f;
         }
     }
-    return p;
 }
 
 // Ray from + t*dir against the capsule's side (axis clamped to +-half length 0x28, radius 0x24):
@@ -3300,31 +3326,31 @@ static inline f32 ClampF(f32 v, f32 lo, f32 hi) {
     return v > lo ? v : lo;
 }
 
-int fn_801A15CC(u8* p, const f32* from, const f32* dir, f32* t, f32* n) {
+int TubeBase::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
     PVec3 hit;
     PVec3 on;
     f32 tr = 0.0f;
     f32 s = 0.0f;
-    u8* m = PTR(p, 0xC);
+    u8* m = PTR(((u8*)this), 0xC);
     f32* axis = (f32*)(m + 0x18);
     f32* org = (f32*)(m + 0x24);
-    if (fn_8019D484(from, dir, org, axis, &tr, &s)) {
-        s = ClampF(s, -F32(p, 0x28), F32(p, 0x28));
+    if (fn_8019D484(((const f32*)from), ((const f32*)dir), org, axis, &tr, &s)) {
+        s = ClampF(s, -F32(((u8*)this), 0x28), F32(((u8*)this), 0x28));
         if (tr > 0.0f && tr < *t) {
-            MulAdd(hit.v, from, dir, tr);
+            MulAdd(hit.v, ((const f32*)from), ((const f32*)dir), tr);
             MulAdd(on.v, org, axis, s);
             f32 d2 = PSVECSquareDistance(hit.v, on.v);
-            f32 r = F32(p, 0x24);
+            f32 r = F32(((u8*)this), 0x24);
             if (d2 < r * r) {
-                n[0] = hit.v[0] - on.v[0];
-                n[1] = hit.v[1] - on.v[1];
-                n[2] = hit.v[2] - on.v[2];
-                f32 len = PSVECMag(n);
+                ((f32*)n)[0] = hit.v[0] - on.v[0];
+                ((f32*)n)[1] = hit.v[1] - on.v[1];
+                ((f32*)n)[2] = hit.v[2] - on.v[2];
+                f32 len = PSVECMag(((f32*)n));
                 f32 k = lbl_805622D4;
                 f32 inv = 1.0f / (k > len ? k : len);
-                n[0] *= inv;
-                n[1] *= inv;
-                n[2] *= inv;
+                ((f32*)n)[0] *= inv;
+                ((f32*)n)[1] *= inv;
+                ((f32*)n)[2] *= inv;
                 *t = tr;
                 return 1;
             }
@@ -3343,7 +3369,8 @@ void fn_801E41D8(f32* a, f32* b, u32 color, f32 r);
 
 
 // Debug-draws the tube as a capsule.
-void fn_801A17B8(u8* p) {
+void TubeBase::vf4C(void) {
+    u8* p = (u8*)this;
     TubeSeg s = *(TubeSeg*)(PTR(p, 0xC) + 0x18);
     f32 a[3];
     f32 b[3];
@@ -3352,11 +3379,7 @@ void fn_801A17B8(u8* p) {
     fn_801E41D8(a, b, 0x40FFFF00, lbl_8056234C * F32(p, 0x24));
 }
 
-u8* fn_801A1898(u8* p, u32 a, u32 swap) {
-    fn_801A1520(p, a, swap);
-    *(void**)p = __vt__9TubeShape;
-    return p;
-}
+TubeShape::TubeShape(u32 a, u32 swap) : TubeBase(a, swap) {}
 
 // Axis-aligned bounds of the volume: both axis end points (org +- axis * k), widened by k.
 // Helper name unproven: arguments read right to left, stores go x, y, z.
@@ -3371,13 +3394,13 @@ static inline void SetLowerXY(RVec3* out, const RVec3& a, f32 k, f32 y) {
     out->y = y;
 }
 
-void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
+void TubeShape::vf38(RVec3* lo, RVec3* hi) const {
     PVec3 org;
     PVec3 axis;
     RVec3 a;
     RVec3 b;
-    u8* m = PTR(p, 0xC);
-    f32 k = F32(p, 0x24);
+    u8* m = PTR(((const u8*)this), 0xC);
+    f32 k = F32(((const u8*)this), 0x24);
     org = *(PVec3*)(m + 0x24);
     axis = *(PVec3*)(m + 0x18);
     MulAdd(&a.x, org.v, axis.v, k);
@@ -3408,7 +3431,8 @@ void fn_801A18D4(const u8* p, RVec3* lo, RVec3* hi) {
 void fn_802E30C8(const char* fmt, ...);
 
 // Collides `p` against volume `o` by its type tag.
-void fn_801A1ABC(u8* p, u8* o) {
+void TubeShape::vf10(u8* o) {
+    u8* p = (u8*)this;
     switch (S32(o, 0x18)) {
     case 'RAGD':
     case 'POLY':
@@ -3436,7 +3460,8 @@ void fn_801A1ABC(u8* p, u8* o) {
 }
 
 // Collides the tube's two end caps as spheres.
-void fn_801A1B9C(u8* p) {
+void TubeShape::vf14(void) {
+    u8* p = (u8*)this;
     PVec3 a;
     PVec3 b;
     PVec3 zero;
@@ -3453,7 +3478,8 @@ void fn_801A1B9C(u8* p) {
     fn_8019AC44(p, (f32*)&b, (f32*)&zero, r);
 }
 
-void fn_801A1CA0(const u8* p) {
+void TubeShape::vf4C(void) {
+    const u8* p = (const u8*)this;
     if (S32(p, 0x20) < 1000) {
         f32 x = F32(p, 0x24);
         f32 z = F32(p, 0x28);
@@ -3757,7 +3783,8 @@ void fn_801A26FC(u8* p, u8* o) {
 
 u8* fn_801A2C9C(u8* p) { return p + 0x44; }
 
-f32 fn_801A2CA4(u8* p) { return F32(p, 0x178); }
+f32 SphereGroup::Radius(void) {
+    u8* p = (u8*)this; return F32(p, 0x178); }
 
 void fn_801A2CAC(u8* p) { fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
 
@@ -4343,7 +4370,7 @@ u8* fn_801A4B5C(u8* o, bool swap, u8* vol) {
         break;
     case 'TUBE':
         if (vol) {
-            vol = fn_801A1898(vol, (u32)o, swap);
+            vol = __ct__9TubeShapeFUlUl(vol, (u32)o, swap);
         }
         PTR(o, 0x3C) = vol;
         break;
@@ -4405,17 +4432,11 @@ u8* fn_801A4F80(u8* p, int del) {
     return p;
 }
 
-u8* fn_801A4FC0(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
-}
-
 f32 SphereShape::Radius(void) {
     u8* p = (u8*)this; return F32(p, 0x24); }
 
-void fn_801A5108(u8* p) { S32(p, 0x180) = -1; }
+void SphereGroup::vf48(void) {
+    u8* p = (u8*)this; S32(p, 0x180) = -1; }
 
 f32 fn_801A5114(u8* p) { return F32(p, 0x30); }
 
@@ -4490,8 +4511,5 @@ void* __vt__7RingVol[20] = {(void*)0, (void*)0, (void*)fn_801A4F40, (void*)vf0C_
 void* lbl_80333818[20] = {(void*)0, (void*)0, (void*)fn_801A4F80, (void*)vf0C__9CollShapeFv, (void*)fn_801A26FC, (void*)vf14__9CollShapeFv, (void*)vf18__9CollShapeFPC5RVec3PC5RVec3PfP5RVec3, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A2684, (void*)fn_801A511C, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A2CAC};
 void* lbl_80333868[22] = {(void*)0, (void*)0, (void*)fn_801A010C, (void*)fn_801A2474, (void*)fn_801A1DD4, (void*)vf14__9CollShapeFv, (void*)fn_801A1E7C, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)fn_801A2C9C};
 void* __vt__8BoxShape[22] = {(void*)0, (void*)0, (void*)fn_801A2434, (void*)vf0C__9CollShapeFv, (void*)fn_801A1DD4, (void*)vf14__9CollShapeFv, (void*)fn_801A1E7C, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A1F98, (void*)fn_801A5114, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A22A4, (void*)fn_8019BD4C, (void*)0};
-void* __vt__9TubeShape[20] = {(void*)0, (void*)0, (void*)fn_801A4FC0, (void*)vf0C__9CollShapeFv, (void*)fn_801A1ABC, (void*)fn_801A1B9C, (void*)fn_801A15CC, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A18D4, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A1CA0};
-void* lbl_80333968[20] = {(void*)0, (void*)0, (void*)fn_8019E834, (void*)vf0C__9CollShapeFv, (void*)0, (void*)vf14__9CollShapeFv, (void*)fn_801A15CC, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)vf28__9CollShapeFv, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)0, (void*)fn_8019DDEC, (void*)SetSurface__9CollShapeFi, (void*)vf44__9CollShapeFUl, (void*)vf48__9CollShapeFv, (void*)fn_801A17B8};
-void* lbl_803339B8[20] = {(void*)0, (void*)0, (void*)fn_801A0040, (void*)fn_801A014C, (void*)fn_801A0464, (void*)fn_801A0F10, (void*)fn_801A1148, (void*)vf1C__9CollShapeFv, (void*)vf20__9CollShapeFPvPC5RVec3PC5RVec3iPC5RVec3Pvf, (void*)vf24__9CollShapeFPC5RVec3, (void*)fn_801A1250, (void*)vf2C__9CollShapeFPUc, (void*)vf30__9CollShapeFv, (void*)vf34__9CollShapeFP6CFrame, (void*)fn_801A01E0, (void*)fn_801A2CA4, (void*)fn_801A1360, (void*)fn_801A12C4, (void*)fn_801A5108, (void*)fn_801A13F4};
 
 }
