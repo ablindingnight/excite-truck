@@ -242,17 +242,17 @@ int fn_8026F408(int n);
 
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-// Raises a ground height to any obstacle top found at (x, z).
-static inline f32 OverObstacle(f32 h, f32 x, f32 y, f32 z) {
+// The ground height at (x, z), raised to any obstacle top found there.
+/* Helper name unproven: the result goes out through a reference (retail keeps it in the caller's variable), the point
+   is built with the by-value CsVec::Set. */
+static inline void GroundAt(f32& h, const s16* hint, f32 x, f32 y, f32 z) {
+    h = fn_801E9FDC(hint, x, z);
     CsVec q;
-    q.y = y;
-    q.z = z;
-    q.x = x;
+    q.Set(x, y, z);
     f32 top;
     if (fn_801784DC(&q.x, &top, 0, 0, fn_8026F408)) {
         h = h > top ? h : top;
     }
-    return h;
 }
 
 /* Helper name unproven */
@@ -306,14 +306,10 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
         CVec3 c = *(CVec3*)(car + 0x60);
         y = c.y;
         z = c.z;
-        h0 = fn_801E9FDC(hint, c.x + 10.0f, 10.0f + z);
-        h0 = OverObstacle(h0, 10.0f + c.x, y, 10.0f + z);
-        h1 = fn_801E9FDC(hint, c.x - 10.0f, 10.0f + z);
-        h1 = OverObstacle(h1, c.x - 10.0f, y, 10.0f + z);
-        h2 = fn_801E9FDC(hint, c.x - 10.0f, z - 10.0f);
-        h2 = OverObstacle(h2, c.x - 10.0f, y, z - 10.0f);
-        h3 = fn_801E9FDC(hint, c.x + 10.0f, z - 10.0f);
-        h3 = OverObstacle(h3, 10.0f + c.x, y, z - 10.0f);
+        GroundAt(h0, hint, c.x + 10.0f, y, z + 10.0f);
+        GroundAt(h1, hint, c.x - 10.0f, y, z + 10.0f);
+        GroundAt(h2, hint, c.x - 10.0f, y, z - 10.0f);
+        GroundAt(h3, hint, c.x + 10.0f, y, z - 10.0f);
         avg = 0.25f * (h0 + (h1 + (h2 + h3)));
         if (onGround) {
             r->v[0] = avg - c.y;
