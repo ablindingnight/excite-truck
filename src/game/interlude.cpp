@@ -1185,6 +1185,7 @@ void debug_event(void) {
     }
     Message* msg;
     u8* s;
+    CarPlace* pl;
     int blocked = 0;
     if (lbl_8055E7FC && lbl_8055E800 > 4 && !fn_80202B00()) {
         fn_802E30C8("interlude: reset completed");
@@ -1303,15 +1304,16 @@ void debug_event(void) {
                     break;
                 }
                 CarPlace place;
+                pl = &place;
                 switch (tp->where) {
                 case 1:
-                    fn_801C3A3C(&place.frame.rot, tp->pt.x + (f32)k * tp->pt.y, tp->yaw);
+                    fn_801C3A3C(&pl->frame.rot, tp->pt.x + (f32)k * tp->pt.y, tp->yaw);
                     break;
                 case 0: {
                     V2 pt;
                     pt.x = tp->pt.x + tp->offset.x * (f32)k;
                     pt.y = tp->pt.y + tp->offset.y * (f32)k;
-                    fn_801C3AF8(&place, &pt, tp->yaw);
+                    fn_801C3AF8(pl, &pt, tp->yaw);
                     break;
                 }
                 case 2: {
@@ -1322,7 +1324,7 @@ void debug_event(void) {
                         place = pose.place;
                     } else if (fn_801769CC()->type & 0x100) {
                         f32 spacing = 0.61f + (fn_80137C54(-1)->len + fn_80139048());
-                        fn_801B8048(&place, fn_801B2ED0(i)->Follower(), 0.0f, off.y + -spacing * (f32)k);
+                        fn_801B8048(pl, fn_801B2ED0(i)->Follower(), 0.0f, off.y + -spacing * (f32)k);
                     } else {
                         CamPose f;
                         f = car->pose.place.frame;
@@ -1343,7 +1345,7 @@ void debug_event(void) {
                         V2 pt;
                         pt.y = f.pos.z;
                         pt.x = f.pos.x;
-                        fn_801C3AF8(&place, &pt, yaw);
+                        fn_801C3AF8(pl, &pt, yaw);
                     }
                     break;
                 }
