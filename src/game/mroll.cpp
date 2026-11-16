@@ -861,26 +861,26 @@ static inline s32 StatOf(const u8* p) { return *(s32*)PTR(p, 0x24); }
 }  // extern "C"
 
 void StatBar::Draw(void) {
-    u8* p = (u8*)this;
+    StatBar* p = this;
     f32 x, y;
-    fn_80230C30(&x, &y, S32(p, 0x4), S32(p, 0x8));
-    if (S32(p, 0x1C) >= 0) {
+    fn_80230C30(&x, &y, p->x, p->y);
+    if (p->index >= 0) {
         int lvl = 0;
         for (int i = 0; i < 3; i++) {
-            s32 v = StatOf(p);
+            s32 v = StatOf((u8*)p);
             if (v && v >= lbl_802FA300[i]) {
                 lvl = i + 1;
             }
         }
         char buf[0x1E];
-        fn_801345D8(buf, 0x1E, RollStrings::StatKey(), S32(p, 0x1C), lvl);
+        fn_801345D8(buf, 0x1E, RollStrings::StatKey(), p->index, lvl);
         int align = 10;
         f32 size = lbl_8056375C;
-        if (*PTR(p, 0x20)) {
+        if (*p->flag) {
             size = lbl_80563760;
             align = 9;
         }
-        fn_80232BA4(fn_80131234(buf), PTR(p, 0x18), x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
+        fn_80232BA4(fn_80131234(buf), p->font, x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
     }
 }
 
@@ -1081,10 +1081,10 @@ extern "C" {
 }  // extern "C"
 
 u8* CarPicker::Item(void) {
-    u8* p = (u8*)this;
-    s32 i = S32(p, 0x28);
-    if (i >= 0 && i < ((VU*)PTR(p, 0x24))->v14()) {
-        return ((VU*)PTR(p, 0x24))->v1C(i);
+    CarPicker* p = this;
+    s32 i = p->index;
+    if (i >= 0 && i < p->list->v14()) {
+        return p->list->v1C(i);
     }
     return 0;
 }
