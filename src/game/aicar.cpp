@@ -4,6 +4,7 @@
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/rvec.h"
 #include "game/rigid.h"
 #include "macros.h"
@@ -211,7 +212,6 @@ u8* fn_8017960C(s32 id);
 void __ct__12LineFollowerFv(void* p);
 void fn_80134CD4(s32 car, void* out);
 f32* fn_80137C54(int a);
-void* fn_801769CC(void);
 int fn_801769B8(void);
 u32 fn_801769A8(void);
 f32 fn_80134B58(void* tune, f32 def);
@@ -682,7 +682,7 @@ void AIDriver_vf0C(u8* d, u8* car) {
         lbl_8055A488 = fn_80137C54(-1)[0];
         lbl_8055A48C = fn_80137C54(-1)[1];
         lbl_8055E580 = 1;
-        lbl_8055E540 = S32(fn_801769CC(), 4) != 0x180304;
+        lbl_8055E540 = fn_801769CC()->type != 0x180304;
         lbl_8055E554 = F32(PTR(PTR(d, 0x164), 0x2C), 0x8);
         lbl_8055E56C = fn_80134B58((void*)"moveout_timer_f", 1.0f);
         lbl_8055E568 = fn_80134B58((void*)"yellow_moveout_f", 1.0f);
@@ -1534,7 +1534,7 @@ void fn_80195B28(u8* d, f32 v) {
     if (!(w->next < w->now) && v == 0.0f) {
         return;
     }
-    bool on = S32(fn_801769CC(), 4) != 0x180201;
+    bool on = fn_801769CC()->type != 0x180201;
     if (on) {
         int one = w->mode == 1;
         f32* tbl;
@@ -2856,7 +2856,7 @@ void fn_80198530(u8* d) {
             F32(CAR(d), 0x25A0) = 0.0f;
         }
         f32 wait = 4.0f;
-        int on = (S32(fn_801769CC(), 4) >> 19) & 1;
+        int on = ((s32)fn_801769CC()->type >> 19) & 1;
         int late = 0;
         if (F32(d, 0x26C) > F32(d, 0x200) && S32(CAR(d), 0x1F0) != 0x50) {
             late = 1;

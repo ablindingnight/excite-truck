@@ -3,6 +3,7 @@
 // per-car tuning accessors. Written against raw field offsets; the large routines are still stubs.
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/collvol.h"
 #include "game/rigid.h"
@@ -242,7 +243,6 @@ void fn_801D1184(void);
 f32 fn_80129DC4(int stream, f32 lo, f32 hi);
 f32 fn_802798E8(u8* p);
 void fn_802799EC(u8* p, f32 v);
-u8* fn_801769CC(void);
 int fn_801769C4(void);
 void fn_801BD694(int n);
 void fn_801AFC28(void);
@@ -419,7 +419,7 @@ void fn_80181AFC(void) {
         heatTune.Reset(burn, e3);
         lbl_8055E4D8 = 1.7f;
     }
-    if (U32(fn_801769CC(), 0x4) & 0x100000) {
+    if (fn_801769CC()->type & 0x100000) {
         fn_802049DC("OK-Landing Min Air-time Required", &landingTune.v[1], 0.0f, 1.5f, 0.1f);
         fn_802049DC("OK-Landing Max Speed", &landingTune.v[7], 140.0f, 200.0f, 5.0f);
         fn_802049DC("OK-Landing Boost Strength", &landingTune.v[6], 0.25f, 6.0f, 0.25f);
@@ -427,7 +427,7 @@ void fn_80181AFC(void) {
         fn_802049DC("OK-Landing Boost Time += (Air-time X", &landingTune.v[2], 0.0f, 4.0f, 0.25f);
         fn_802049DC("OK Landing Max Boost Time", &landingTune.v[0], 1.0f, 12.0f, 1.0f);
     }
-    if (U32(fn_801769CC(), 0x4) & 0x80000) {
+    if (fn_801769CC()->type & 0x80000) {
         fn_802049DC("TEMP fade rate (ground)", &heatTune.v[0], 0.0f, 2.0f, 0.05f);
         fn_802049DC("TEMP fade rate (air)", &heatTune.v[1], 0.0f, 2.0f, 0.05f);
         fn_802049DC("TEMP burn rate", &heatTune.v[3], 0.0f, 2.0f, 0.05f);
@@ -457,7 +457,7 @@ void fn_80181EAC(u8* p) {
 
 void fn_80181F30(void) {
     static bool firstInit = true;
-    u32 flags = U32(fn_801769CC(), 0x4);
+    u32 flags = fn_801769CC()->type;
     lbl_8055E4F4 = (flags >> 19) & 1;
     lbl_8055E4D0 = 0;
     fn_801BD694(8);
@@ -574,7 +574,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     if (cb->f5A0 == 0) {
         cb->f5A0 = 0x0FF807FF;
     }
-    if (U32(fn_801769CC(), 0x4) & 0x400) {
+    if (fn_801769CC()->type & 0x400) {
         U32(p, 0x5A0) |= 0x80000000;
     }
     cb->index = ((CarDesc*)desc)->index;
@@ -636,7 +636,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     cb->f5AC = -(0.0254f * chassis->GetFloat("susp_y", 0.0f));
     cb->f5B0 = setup.f128;
     cb->f5A8 = 444.44446f;
-    if (U32(fn_801769CC(), 0x4) != 0x180201) {
+    if (fn_801769CC()->type != 0x180201) {
         cb->f5A8 = 0.44444445f * (cb->f2C8 + chassis->GetFloat("speed_limiter", cb->f5A8));
     } else if (!lbl_8055E4F7) {
         lbl_8055E4F7 = 1;
@@ -679,7 +679,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
         trees = 1;
     }
     cb->f25C8 = trees;
-    if (U32(fn_801769CC(), 0x4) == 0x180304) {
+    if (fn_801769CC()->type == 0x180304) {
         cb->f25C8 = 1;
     }
     fn_801838C8(p);
@@ -771,7 +771,7 @@ void fn_80182DF4(u8* p) {
     maxY += c.y;
     minZ += c.z;
     maxZ += c.z;
-    if (cb->f1F0 == 84 && !(U32(fn_801769CC(), 0x4) & 0x1000)) {
+    if (cb->f1F0 == 84 && !(fn_801769CC()->type & 0x1000)) {
         maxZ -= 30.0f * 0.0254f;  // 30 in
     }
     cb->f5BC = maxZ;
@@ -1529,7 +1529,7 @@ void fn_80183E7C(u8* p) {
     }
     ((CarBody*)p)->f2608 = LerpT(0.99f, ((CarBody*)p)->f25E0, ((CarBody*)p)->f2608);
     int still;
-    if (!(U32(fn_801769CC(), 4) & 0x4000)) {
+    if (!(fn_801769CC()->type & 0x4000)) {
         still = NearZero(((CarBody*)p)->f2690);
     } else {
         still = !(NearZero(((CarBody*)p)->f2690 - 1.0f));
@@ -1634,8 +1634,8 @@ void fn_80183E7C(u8* p) {
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
     }
     int stunts;
-    u32 ramp = (U32(fn_801769CC(), 4) >> 20) & 1;
-    u32 jump = (U32(fn_801769CC(), 4) >> 21) & 1;
+    u32 ramp = (fn_801769CC()->type >> 20) & 1;
+    u32 jump = (fn_801769CC()->type >> 21) & 1;
     stunts = 0;
     if (ramp || jump) {
         stunts = 1;
@@ -2652,7 +2652,7 @@ void fn_80186DE8(void) {
         water = (f32*)(lbl_8055E918 + i * 0x9C);
         f32* ground = (f32*)(lbl_8055E908 + i * 0x34);
         throttle = Clamp01(water[1] + ((CarBody*)car)->f25E0);
-        if (!(U32(fn_801769CC(), 4) & 0x4000) && !NearZero(((CarBody*)car)->f2690)) {
+        if (!(fn_801769CC()->type & 0x4000) && !NearZero(((CarBody*)car)->f2690)) {
             throttle = 0.0f;
             ((CarBody*)car)->f25E4 = 1.0f;
         }
@@ -2662,7 +2662,7 @@ void fn_80186DE8(void) {
                 ((CarBody*)car)->f25E4 = FMax(((CarBody*)car)->f25E4, heatTune.v[10]);
                 throttle = ((CarBody*)car)->f25E0 < heatTune.v[9] ? ((CarBody*)car)->f25E0 : heatTune.v[9];
             }
-        } else if ((U32(fn_801769CC(), 4) & 0x80000) && ((CarBody*)car)->f25A0 > 0.625f) {
+        } else if ((fn_801769CC()->type & 0x80000) && ((CarBody*)car)->f25A0 > 0.625f) {
             U32(car, 0x268C) = 6;
         } else {
             U32(car, 0x268C) = 0;
@@ -3113,7 +3113,7 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
     } else {
         k *= 7.0f;
     }
-    if (!(U32(fn_801769CC(), 0x4) & 0x4000)) {
+    if (!(fn_801769CC()->type & 0x4000)) {
         k *= 10.0f;
     }
     hit.x *= k;
@@ -3655,7 +3655,7 @@ BodyTune* fn_8018AE5C(u8*) {
 
 f32 fn_8018AE7C(u8* p) {
     CarBody* cb = (CarBody*)p;
-    if (U32(fn_801769CC(), 0x4) == 0x180304) {
+    if (fn_801769CC()->type == 0x180304) {
         return 0.15f;
     }
     if (Positive(cb->f25BC)) {

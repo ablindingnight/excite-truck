@@ -2,6 +2,7 @@
 // constructor and the distance-along-axis helper. The large update routine is still a stub. Names
 // are guesses.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/racer_camera_slot.h"
 #include "game/camrec.h"
@@ -25,7 +26,6 @@ extern f32 __float_epsilon[];
 
 extern "C" {
 int fn_801CF064(void);
-void* fn_801769CC(void);
 void fn_80176A00(int mode);
 void fn_80176A24(f32 t);
 int fn_80178CA4(void);
@@ -122,7 +122,7 @@ int fn_8026A698(u8* p, int i) {
             ok = 0;
         }
     }
-    if (fn_801CF064() || ((CamRec*)p)->mode == 0x11 || ((CamRec*)p)->mode == 0x15 || (S32(fn_801769CC(), 4) & 0x4000) || ok) {
+    if (fn_801CF064() || ((CamRec*)p)->mode == 0x11 || ((CamRec*)p)->mode == 0x15 || (fn_801769CC()->type & 0x4000) || ok) {
         if (s->active) {
             fn_80176A00(1);
         }

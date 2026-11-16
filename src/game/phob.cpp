@@ -4,6 +4,7 @@
 // sent to the renderer, the view->car map and the event message buffers. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/collvol.h"
 #include "game/rigid.h"
@@ -103,8 +104,7 @@ void fn_801B8B84(void);
 void fn_801CEC80(void);
 void fn_80181F30(void);
 void fn_801DE0A4(void);
-void* fn_801769CC(void);
-void fn_801B2024(void*);  // RaceInfo*
+void fn_801B2024(EventDesc* d);  // deity.cpp
 void fn_801C4AD0(void);
 void fn_8020C41C(void);
 void fn_8026B644(void);

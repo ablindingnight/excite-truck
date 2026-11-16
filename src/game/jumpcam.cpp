@@ -2,6 +2,7 @@
 // player launches off one, the camera switches to a jump view with heart/whoosh sounds. Names are
 // guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/racer_camera_slot.h"
 
@@ -16,7 +17,6 @@ int fn_8012C33C(const char* name);
 ValueTable* fn_80131808(const char* name);  // load value file
 void fn_80131818(ValueTable* t);
 void fn_801331C4(int section, const char* name, f32* v);  // register a tunable
-int* fn_801769CC(void);
 s32 fn_80178CA4(void);
 void fn_8020C900(int on);
 void fn_80206444(void);
@@ -145,7 +145,7 @@ void fn_8026B260(void) {
     char name[24];
     const char* file;
     lbl_8055F4C8 = 0;
-    file = GetEvent(*fn_801769CC())->node->GetString("jump_file", 0);
+    file = GetEvent(fn_801769CC()->event)->node->GetString("jump_file", 0);
     if (file) {
         char* dot;
         strncpy(name, file, 11);

@@ -3,6 +3,7 @@
 // hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rmtx.h"
@@ -141,7 +142,6 @@ extern "C" {
 BTrack* fn_80178C9C(void);
 RaceCarRec* fn_8017960C(int id);
 BRacer* fn_801B2EC0(int id);
-void* fn_801769CC(void);
 }
 
 class BSound {
@@ -600,7 +600,7 @@ inline void Ball::PredictPos(RVec3& p, RigidBody* b, f32 k) {
 }
 
 void Ball::PickDrop(f32* xz, s16* h) {
-    if (*(u32*)((u8*)fn_801769CC() + 4) & 0x10000) {
+    if (fn_801769CC()->type & 0x10000) {
         RigidBody* b = (RigidBody*)fn_8017960C(car);
         RVec3 p;
         f32 c;

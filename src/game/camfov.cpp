@@ -3,6 +3,7 @@
 // field offsets; the large routines and the initialiser are still stubs. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/camframe.h"
 #include "game/camrect.h"
@@ -573,7 +574,6 @@ f32 fn_8026FCE0(f32 t, f32 a) {
     return (1.0f - a) * t + a * sq;
 }
 
-u8* fn_801769CC(void);
 s32 fn_8018B06C(u8* car);
 void fn_802E30C8(const char* fmt, ...);
 
@@ -596,7 +596,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
     PVec3A fw;
     PVec3A eye;
     CVec3 r;
-    int tv = (U32(fn_801769CC(), 0x4) >> 17) & 1;
+    int tv = (fn_801769CC()->type >> 17) & 1;
     if ((fn_80178CA4() <= 4 && !tv) || mode != 4) {
         fn_8026F420(mode, prev, p);
     } else {

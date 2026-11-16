@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/rigid.h"
@@ -182,7 +183,6 @@ int fn_801E2CCC(s32 model, const char* name, DFrame** bone);
 void fn_802E317C(const char* fmt, ...);
 void fn_80279B28(u8* block, CarState* out);
 void fn_80279CD8(CarState* s);
-u8* fn_801769CC(void);
 }
 extern "C" const f32 lbl_80561F74;  // 0.0
 extern "C" const f32 lbl_80561F88;  // 1.0
@@ -219,7 +219,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
         ((CarBody*)p)->f5F4 = (f32)__fabs(((CarBody*)p)->f314);
     }
     if (((CarBody*)p)->f1F0 == 0x50) {
-        ValueNode* t = ((EventInfo*)GetEvent(*(s32*)fn_801769CC()))->node;
+        ValueNode* t = ((EventInfo*)GetEvent(fn_801769CC()->event))->node;
         ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * t->GetFloat("player_damage_tweak", lbl_80561F88);
     }
     ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * lbl_80561F8C;
@@ -264,7 +264,6 @@ struct Mtx33 {
 
 extern "C" {
 s32 fn_80129D18(int a, int b);
-u8* fn_801769CC(void);
 }
 extern "C" const f32 lbl_80561F74;  // 0.0
 extern "C" const f32 lbl_80561F88;  // 1.0
@@ -348,7 +347,7 @@ void fn_8018CB3C(u8* p) {
                 s->angle = lbl_80561F88;
                 s->spin = Lower(s->spin, lbl_80561F74);
             } else if (s->angle < 0.044999998f) {
-                if ((U32(fn_801769CC(), 0x4) & 0x4000) && s->spin < lbl_80561F74 && fn_80129D18(4, 10) < 1) {
+                if ((fn_801769CC()->type & 0x4000) && s->spin < lbl_80561F74 && fn_80129D18(4, 10) < 1) {
                     s->angle = lbl_80561F74;
                     s->spin = lbl_80561F74;
                     s->state = 0;
@@ -394,7 +393,7 @@ void fn_8018CB3C(u8* p) {
             MulVec(&er, &e, &s->on->rot);
             m.SetEuler(er.y, er.x, er.z);
             s->prev = s->cur;
-            if (U32(fn_801769CC(), 0x10) & 2) {
+            if (fn_801769CC()->flags & 2) {
                 DFrame cf = *(DFrame*)(p + 0x70);
                 cf.rot.m[0] *= lbl_80561FC4;
                 cf.rot.m[1] *= lbl_80561FC4;
@@ -885,7 +884,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     }
     da = *at;
     f32 mag = PSVECMag((const Vec*)di.v);
-    if (!(U32(fn_801769CC(), 0x4) & 0x4000) && ((CarBody*)p)->f2690 < 0.001f) {
+    if (!(fn_801769CC()->type & 0x4000) && ((CarBody*)p)->f2690 < 0.001f) {
         if (mag < 1500.0f) {
             return;
         }
@@ -918,7 +917,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                 return;
             }
         }
-        if (U32(fn_801769CC(), 0x4) == 0x180304 && ((CarBody*)p)->f1F0 == 0x50 && other >= 0) {
+        if (fn_801769CC()->type == 0x180304 && ((CarBody*)p)->f1F0 == 0x50 && other >= 0) {
             return;
         }
         fn_8018E330(p);
@@ -1081,7 +1080,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         }
     }
     f32 was = ((CarBody*)p)->f2690;
-    if (U32(fn_801769CC(), 0x4) & 0x4000) {
+    if (fn_801769CC()->type & 0x4000) {
         int hit = 0;
         s32 st = ((CarBody*)p)->a268C;
         if (st == 0) {

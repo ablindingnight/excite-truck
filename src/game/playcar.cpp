@@ -4,6 +4,7 @@
 // against raw field offsets; the large routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/rvec.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
@@ -274,7 +275,6 @@ public:
 void* operator new(unsigned long n, const char* tag);
 
 extern "C" {
-u8* fn_801769CC(void);
 PcGameMode* fn_801B83A0(void);
 u32 fn_80134E90(void);
 u32 fn_80134EC8(u32);
@@ -286,7 +286,7 @@ u8* fn_8018FD88(u8* p, u32 a, u32 b);
 SpringCar* fn_8018FB18(void) {
     u8* drv;
     u8* hyb;
-    u8* prof = fn_801769CC();
+    u8* prof = (u8*)fn_801769CC();
     u32 ctl = fn_801B83A0()->PlayerController();
     lbl_8055E522 = (U32(prof, 0x4) >> 8) & 1;
     if (U32(prof, 0x4) == 0x180304) {
@@ -1270,7 +1270,7 @@ void PlayerDriver_vf48(u8* p) {
     f32 ga;
     f32 engaged = ((Gearbox*)PTR(p, 0x38))->v64() ? kOne : kZero;
     f32 sum;
-    if (!((U32(fn_801769CC(), 0x10) & 2))) {
+    if (!((fn_801769CC()->flags & 2))) {
         dir = kOne;
     } else {
         dir = kNegOne;
@@ -1291,7 +1291,7 @@ void PlayerDriver_vf48(u8* p) {
         fn_8018ADB4(PTR(p, 0x34), kZero);
     }
     U8(PTR(p, 0x34), 0x260E) = ((Gearbox*)PTR(p, 0x38))->v30();
-    air = (U32(fn_801769CC(), 0x4) & 0x20000) ? kOne : 0.5f;
+    air = (fn_801769CC()->type & 0x20000) ? kOne : 0.5f;
     if (lbl_8055E3C4 - S32(p, 0xC) > 10 && F32(car = PTR(p, 0x34), 0x25F4) > 0.9f && fwd < 4.4444447f &&
         S32(car, 0x2620) >= 3 && !lbl_8055E52A) {
         f32 roll;
