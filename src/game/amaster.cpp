@@ -299,7 +299,7 @@ void fn_801B84F8(void) {
     lbl_8055E744->vf18();
 }
 
-u8 fn_801B8514(void) { return lbl_8055E748; }
+int fn_801B8514(void) { return lbl_8055E748; }
 
 int fn_801B851C(int car) {
     if (fn_80161BB8(car)) {
