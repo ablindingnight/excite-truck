@@ -1200,7 +1200,9 @@ void MenuTimer::Draw(void) {
     fn_802C942C((c << 24) | 0xFFFFFF);
 }
 
-void MenuTimer::Update(void) {
+/* Helper name unproven; the default argument times the "mdemo" string after the first vtable wave (Codex trace) */
+static inline void ReportEnding(int kind, const char* message = "mdemo: unhandled ending type %d") { fn_802E317C(message, kind); }
+inline void MenuTimer::Update(void) {
     if (dur == 0 && kind == 1) {
         return;
     }
@@ -1226,7 +1228,7 @@ void MenuTimer::Update(void) {
             Finish(-2);
             break;
         default:
-            fn_802E317C("mdemo: unhandled ending type %d", kind);
+            ReportEnding(kind);
             break;
         }
         if ((fade & kind) && fn_8020A640()) {
