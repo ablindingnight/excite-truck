@@ -376,7 +376,7 @@ u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 
 // TODO(unpool): pool labels still read by name. As literals these sites drop (x - 0.0f, x / 1.0f and
 // literal * literal fold away; creation order moves), so they need the original helper forms first.
-extern const f32 lbl_80561CA0, lbl_80561CAC, lbl_80561CB0, lbl_80561CB8, lbl_80561CC0, lbl_80561CCC, lbl_80561CD0, lbl_80561CDC, lbl_80561CFC, lbl_80561D00, lbl_80561D0C, lbl_80561D2C, lbl_80561D34, lbl_80561D38, lbl_80561D44, lbl_80561D60, lbl_80561D98, lbl_80561D9C, lbl_80561DA0, lbl_80561DA4, lbl_80561DB8, lbl_80561DBC, lbl_80561DC0, lbl_80561DD0, lbl_80561DEC, lbl_80561E10, lbl_80561E14, lbl_80561E1C, lbl_80561E38, lbl_80561E3C, lbl_80561E48, lbl_80561E4C, lbl_80561E5C, lbl_80561E6C, lbl_80561E70, lbl_80561E74, lbl_80561E78, lbl_80561E88, lbl_80561E8C, lbl_80561E98, lbl_80561E9C, lbl_80561EA8, lbl_80561EAC, lbl_80561EB0, lbl_80561EC4, lbl_80561EC8;
+extern const f32 lbl_80561CA0, lbl_80561CAC, lbl_80561CB0, lbl_80561CD0, lbl_80561CDC, lbl_80561D34, lbl_80561D38, lbl_80561D98, lbl_80561D9C, lbl_80561DA4, lbl_80561DB8, lbl_80561DBC, lbl_80561DC0, lbl_80561DD0, lbl_80561E10, lbl_80561E14, lbl_80561E48, lbl_80561E6C, lbl_80561E70;
 
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -1531,9 +1531,10 @@ extern u8* lbl_8055E908;
 }
 
 static inline f32 Clamp01(f32 x) {
-    f32 t = lbl_80561CD0 < x ? lbl_80561CD0 : x;
-    return t > lbl_80561CAC ? t : lbl_80561CAC;
+    f32 t = 1.0f < x ? 1.0f : x;
+    return t > 0.0f ? t : 0.0f;
 }
+static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); } /* Helper name unproven */
 
 static inline void AddScaled(f32* f, const u8* dir, f32 k) {
     f[0] = f[0] + F32(dir, 0) * k;
@@ -1645,9 +1646,9 @@ void fn_80183E7C(u8* p) {
         }
         f32 roll;
         if (S32(p, 0x2620) > 2 && (roll = PSVECDotProduct(p + 0x124, p + 0x48), (f32)__fabs(roll) < 2.0f)) {
-            f32 a = Clamp01((F32(p, 0x2650) - lbl_80561CAC) / lbl_80561CD0);
+            f32 a = Ramp(F32(p, 0x2650), 0.0f, 1.0f);
             f32 b = Clamp01((F32(p, 0x25D4) - 4.4444447f) / 8.888888f);
-            f32 k = (0.0f + b * 1.0f) * 0.305f * 9.81f * 100.0f * F32(p, 0xD4) *
+            f32 k = LerpT(b, 0.0f, 1.0f) * 0.305f * 9.81f * 100.0f * F32(p, 0xD4) *
                     (0.0f + a * 1.0f);
             BVec t;
             t.x = F32(p, 0x48) * (roll > 0.0f ? k : -k);
@@ -1688,14 +1689,14 @@ void fn_80183E7C(u8* p) {
     }
     if (still && (U32(p, 0x10) != 'PCAR' || ((CarHost*)PTR(p, 0x270))->v14())) {
         if (S32(p, 0x2620) <= 2 && F32(p, 0x4C) < 0.35f) {
-            if (S32(p, 0x2620) == 0 || !(AbsNarrow(F32(p, 0x2614)) <= __float_epsilon[0]) || F32(p, 0x4C) < lbl_80561CAC) {
+            if (S32(p, 0x2620) == 0 || !(AbsNarrow(F32(p, 0x2614)) <= __float_epsilon[0]) || F32(p, 0x4C) < 0.0f) {
                 f32 t = F32(p, 0x2614) + 0.016683351f;
                 F32(p, 0x2614) = t;
                 if (F32(p, 0x25D4) < 8.0f) {
                     F32(p, 0x2614) = t + lbl_80561DB8;
                 }
             } else {
-                F32(p, 0x2614) = lbl_80561CAC;
+                F32(p, 0x2614) = 0.0f;
             }
         } else {
             F32(p, 0x2614) = 0.0f;
@@ -1755,9 +1756,9 @@ void fn_80183E7C(u8* p) {
     b.y = F32(p, 0x2470) - F32(p, 0x24E4);
     b.z = F32(p, 0x2474) - F32(p, 0x24E8);
     PSVECCrossProduct(&a, &b, &up);
-    f32 nz = LerpT(lbl_80561D0C, F32(p, 0x25AC), up.z);
-    f32 ny = LerpT(lbl_80561D0C, F32(p, 0x25A8), up.y);
-    f32 nx = LerpT(lbl_80561D0C, F32(p, 0x25A4), up.x);
+    f32 nz = LerpT(0.05f, F32(p, 0x25AC), up.z);
+    f32 ny = LerpT(0.05f, F32(p, 0x25A8), up.y);
+    f32 nx = LerpT(0.05f, F32(p, 0x25A4), up.x);
     F32(p, 0x25A8) = ny;
     F32(p, 0x25A4) = nx;
     F32(p, 0x25AC) = nz;
@@ -2150,25 +2151,25 @@ void fn_80183E7C(u8* p) {
         BVec front;
         front.x = F32(p, 0x60) + F32(p, 0x54) * 2.0f;
         front.y = F32(p, 0x64) + F32(p, 0x58) * 2.0f;
-        f32 df = Clamp01((front.y - surf) / (surf - 0.4f - surf));
+        f32 df = Ramp(front.y, surf, surf - 0.4f);
         front.z = F32(p, 0x68) + F32(p, 0x5C) * 2.0f;
         f32 tf = Clamp01((F32(p, 0x25C4) - 0.0f) / 0.3f);
         BVec ff;
         ff.x = 0.0f;
         ff.z = 0.0f;
-        ff.y = (0.0f + df * 1.0f) * (0.2f + tf * 0.8f) * (0.5f * grow) * F32(p, 0xD4) /
+        ff.y = LerpT(df, 0.0f, 1.0f) * (0.2f + tf * 0.8f) * (0.5f * grow) * F32(p, 0xD4) /
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
         BVec back;
-        back.x = F32(p, 0x60) + F32(p, 0x54) * lbl_80561CB0;
-        back.y = F32(p, 0x64) + F32(p, 0x58) * lbl_80561CB0;
-        f32 db = Clamp01((back.y - surf) / (surf - 0.4f - surf));
+        back.x = F32(p, 0x60) + F32(p, 0x54) * -2.0f;
+        back.y = F32(p, 0x64) + F32(p, 0x58) * -2.0f;
+        f32 db = Ramp(back.y, surf, surf - 0.4f);
         back.z = F32(p, 0x68) + F32(p, 0x5C) * lbl_80561CB0;
         f32 tb = Clamp01((F32(p, 0x25C4) - 0.2f) / 0.6f);
         BVec fb;
         fb.x = 0.0f;
         fb.z = lbl_80561CAC;
-        fb.y = (lbl_80561CAC + db * lbl_80561CD0) * (lbl_80561D00 + tb * lbl_80561DD0) * (lbl_80561CB8 * grow) * F32(p, 0xD4) /
+        fb.y = (lbl_80561CAC + db * lbl_80561CD0) * (0.1f + tb * lbl_80561DD0) * (0.3f * grow) * F32(p, 0xD4) /
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
     } else {
@@ -2207,7 +2208,7 @@ void fn_80183E7C(u8* p) {
             if (!boosting || F32(p, 0x25E0) <= 0.5f) {
                 f32 vmax = F32(p, 0x5A8);
                 if (F32(p, 0x25D4) > vmax) {
-                    f32 over = Clamp01((F32(p, 0x25D4) - vmax) / (2.2222223f + vmax - vmax));
+                    f32 over = Ramp(F32(p, 0x25D4), vmax, 2.2222223f + vmax);
                     f32 k = heatTune.v[12] * lbl_80561D98 * -(lbl_80561CAC + over * lbl_80561CD0) * F32(p, 0xD4) /
                             F32(p, 0x25D4);
                     BVec f;
@@ -2238,7 +2239,7 @@ void fn_80183E7C(u8* p) {
     }
     f32 dv = want - vol;
     dv = dv < 0.033366702f ? dv : 0.033366702f;
-    f32 dvc = lbl_80561E1C;
+    f32 dvc = -0.033366702f;
     if (dv > -0.033366702f) {
         dvc = dv;
     }
@@ -2346,17 +2347,17 @@ void fn_80183E7C(u8* p) {
                 fwd.x = F32(p, 0x54);
                 yaw = 62.831856f * sgn;
                 fwd.z = F32(p, 0x5C);
-                fwd.y = lbl_80561CAC;
+                fwd.y = 0.0f;
                 BVec v;
                 v.x = dir.x;
                 v.z = dir.z;
-                v.y = lbl_80561CAC;
-                if (PSVECDotProduct(&fwd, &v) < lbl_80561CAC) {
+                v.y = 0.0f;
+                if (PSVECDotProduct(&fwd, &v) < 0.0f) {
                     U8(p, 0x2640) = 1;
                 } else if (U8(p, 0x2640)) {
                     S32(p, 0x2638) = 0;
-                    F32(p, 0x2628) = lbl_80561CAC;
-                    F32(p, 0x262C) = lbl_80561CAC;
+                    F32(p, 0x2628) = 0.0f;
+                    F32(p, 0x262C) = 0.0f;
                     F32(p, 0x2634) = now;
                 }
             }
@@ -2364,8 +2365,8 @@ void fn_80183E7C(u8* p) {
         f32 spin = PSVECDotProduct(p + 0x124, p + 0x48);
         f32 fs = Clamp01((F32(p, 0x25D4) - 6.6666665f) / 24.444445f);
         f32 fa = Clamp01((F32(p, 0x2618) - 0.1f) / 0.20000002f);
-        f32 k = lbl_80561E3C * F32(p, 0x5E4) * F32(p, 0x5E4) * (lbl_80561CD0 + fa * lbl_80561E14) *
-                (yaw * (lbl_80561CD0 + fs * lbl_80561E38) - spin);
+        f32 k = 30000.0f * F32(p, 0x5E4) * F32(p, 0x5E4) * (1.0f + fa * lbl_80561E14) *
+                (yaw * (1.0f + fs * -0.9f) - spin);
         BVec t;
         t.x = F32(p, 0x48) * k;
         t.y = F32(p, 0x4C) * k;
@@ -2383,7 +2384,7 @@ void fn_80183E7C(u8* p) {
             f32 pitch = F32(p, 0x2600);
             if (pitch < -0.01f) {
                 grav = LerpT(__fabsf(pitch), grav, 0.5f * grav);
-                gravUp = gravUp + AbsNarrow(pitch) * (0.5f * gravUp - gravUp);
+                gravUp = LerpT(AbsNarrow(pitch), gravUp, 0.5f * gravUp);
             } else if (pitch > 0.01f) {
                 grav = LerpT(__fabsf(pitch), grav, lbl_80561CDC + grav);
                 gravUp = gravUp + AbsNarrow(pitch) * (lbl_80561CDC + gravUp - gravUp);
@@ -2399,8 +2400,8 @@ void fn_80183E7C(u8* p) {
         }
         airLift = airLift + gravUp;
         BVec f;
-        f.x = lbl_80561CAC;
-        f.z = lbl_80561CAC;
+        f.x = 0.0f;
+        f.z = 0.0f;
         f.y = airLift * (9.81f * -F32(p, 0xD4));
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
         F32(p, 0x2684) = 9.81f * (1.0f + airLift);
@@ -2433,9 +2434,9 @@ void fn_80183E7C(u8* p) {
         BVec acc;
         ObRotateRows(&acc, (const f32*)(p + 0x3C), (const f32*)(p + 0x16C));
         f32 ay = sy + vy + 10.0f * F32(p, 0x26FC) * (1.0f - F32(p, 0x25F0) * F32(p, 0x25F0)) +
-                 acc.y * lbl_80561E4C;
-        ax = ax + acc.x * lbl_80561E4C;
-        f32 az = sz + vz + acc.z * lbl_80561E4C;
+                 acc.y * -0.02f;
+        ax = ax + acc.x * -0.02f;
+        f32 az = sz + vz + acc.z * -0.02f;
         f32 nvx = F32(p, 0x26F0) + ax * lbl_80561D9C;
         f32 nvy = F32(p, 0x26F4) + ay * lbl_80561D9C;
         f32 nvz = F32(p, 0x26F8) + az * lbl_80561D9C;
@@ -2499,7 +2500,7 @@ void fn_80186DE8(void) {
         CbSolMass* m = &mass[i];
         fn_80183E7C(car);
         U8(car, 0x1E9) = 1;
-        if (F32(car, 0x4C) < lbl_80561CAC) {
+        if (F32(car, 0x4C) < 0.0f) {
             Corner* c;
             for (c = *(Corner**)(car + 0xD0); c; c = c->next) {
                 c->Hit((RigidBody*)car);
@@ -2509,12 +2510,12 @@ void fn_80186DE8(void) {
         BVec t;
         ((RigidBody*)car)->Flush((RVec3*)&f, (RVec3*)&t);
         if (U8(car, 0x26AC)) {
-            f.x = lbl_80561CAC;
-            f.y = lbl_80561CAC;
-            f.z = lbl_80561CAC;
-            t.x = lbl_80561CAC;
-            t.y = lbl_80561CAC;
-            t.z = lbl_80561CAC;
+            f.x = 0.0f;
+            f.y = 0.0f;
+            f.z = 0.0f;
+            t.x = 0.0f;
+            t.y = 0.0f;
+            t.z = 0.0f;
         }
         BVec F(m->force.x, m->force.y, m->force.z);
         F.x += f.x;
@@ -2563,18 +2564,18 @@ void fn_80186DE8(void) {
         f32 cut;
         e = &cx[i];
         CbVec4 grip4 = CbVec4(x->vB0);
-        air = lbl_80561CD0 - F32(car, 0x25D4);
-        if (lbl_80561CD0 < air) {
-            air = lbl_80561CD0;
+        air = 1.0f - F32(car, 0x25D4);
+        if (1.0f < air) {
+            air = 1.0f;
         }
-        if (air > lbl_80561CAC) {
+        if (air > 0.0f) {
             air = air;
         } else {
-            air = lbl_80561CAC;
+            air = 0.0f;
         }
         f32 ds;
         f32 grip;
-        airK = lbl_80561CD0 + lbl_80561D44 * air;
+        airK = 1.0f + 3.0f * air;
         surf = 0;
         if (e->surface[0] > surf) {
             surf = e->surface[0];
@@ -2593,16 +2594,16 @@ void fn_80186DE8(void) {
         st = fn_801D04A8(surf);
         f32 bk;
         if (!NearZero(F32(car, 0x2650))) {
-            f32 d = (lbl_80561D2C - F32(car, 0x2650) - lbl_80561CFC) / lbl_80561CFC;
-            if (lbl_80561CD0 < d) {
-                d = lbl_80561CD0;
+            f32 d = (4.0f - F32(car, 0x2650) - 0.25f) / 0.25f;
+            if (1.0f < d) {
+                d = 1.0f;
             }
-            if (d > lbl_80561CAC) {
+            if (d > 0.0f) {
                 d = d;
             } else {
-                d = lbl_80561CAC;
+                d = 0.0f;
             }
-            wet = lbl_80561D00 + d * lbl_80561DD0;
+            wet = 0.1f + d * lbl_80561DD0;
         } else {
             wet = 1.0f;
         }
@@ -2612,46 +2613,46 @@ void fn_80186DE8(void) {
         f32 gas;
         f32 steerK;
         landing = 0;
-        if (lbl_8055E3C8 - F32(car, 0x26DC) < lbl_80561CDC && F32(car, 0x25D4) < lbl_80561DA0) {
+        if (lbl_8055E3C8 - F32(car, 0x26DC) < lbl_80561CDC && F32(car, 0x25D4) < 8.888889f) {
             landing = 1;
         }
         if (S32(car, 0x2620) >= 3 && !landing) {
             f32 k;
             f32 drag;
             f32 speed = PSVECMag(car + 0x118);
-            speed = speed > lbl_80561CD0 ? speed : lbl_80561CD0;
-            drag = lbl_80561D98 * (-st->drag * F32(car, 0xD4)) / speed;
+            speed = speed > 1.0f ? speed : 1.0f;
+            drag = 9.81f * (-st->drag * F32(car, 0xD4)) / speed;
             f32 force[3];
             force[0] = F32(car, 0x118) * drag;
             force[1] = F32(car, 0x11C) * drag;
             force[2] = F32(car, 0x120) * drag;
             fn_801769CC();
-            f32 top = lbl_80561D60 * fn_80181A48(car);
-            if (CarHot(car) && F32(car, 0x25D4) < top && F32(car, 0x25E4) < lbl_80561D00 &&
+            f32 top = 0.44444445f * fn_80181A48(car);
+            if (CarHot(car) && F32(car, 0x25D4) < top && F32(car, 0x25E4) < 0.1f &&
                 (s32)fn_8018B06C(car) > 0) {
-                f32 k = lbl_80561D98 * fn_80181A14(car) * F32(car, 0x25E0) * F32(car, 0xD4);
+                f32 k = 9.81f * fn_80181A14(car) * F32(car, 0x25E0) * F32(car, 0xD4);
                 AddScaled(force, 0x54 + car, k);
             }
-            if (F32(car, 0x5EC) > lbl_80561CCC && (s32)fn_8018B06C(car) > 0 && F32(car, 0x25E4) < lbl_80561D00 &&
+            if (F32(car, 0x5EC) > 0.01f && (s32)fn_8018B06C(car) > 0 && F32(car, 0x25E4) < 0.1f &&
                 F32(car, 0x25E0) > lbl_80561CDC) {
-                f32 k = lbl_80561D98 * (lbl_8055E4E8[1] * (F32(car, 0x25E0) * F32(car, 0xD4)));
+                f32 k = 9.81f * (lbl_8055E4E8[1] * (F32(car, 0x25E0) * F32(car, 0xD4)));
                 AddScaled(force, car + 0x54, k);
             }
-            if (F32(car, 0x258C) > lbl_80561CB0 || F32(car, 0x25E4) > lbl_80561CFC || F32(car, 0x5EC) > lbl_80561CCC) {
+            if (F32(car, 0x258C) > -2.0f || F32(car, 0x25E4) > 0.25f || F32(car, 0x5EC) > 0.01f) {
                 f32 fwd = PSVECDotProduct(car + 0x3C, car + 0x118);
                 f32 b = FMax(2.0f + F32(car, 0x258C), F32(car, 0x25E4));
                 f32 k = 0.55181247f * (-fwd * F32(car, 0xD4)) * Clamp01(b);
                 AddScaled(force, car + 0x3C, k);
             }
             speed = PSVECMag(car + 0x118);
-            speed = speed > lbl_80561CD0 ? speed : lbl_80561CD0;
-            k = lbl_80561D98 * (lbl_80561E5C * F32(car, 0xD4)) * F32(car, 0x25E4) / speed;
+            speed = speed > 1.0f ? speed : 1.0f;
+            k = 9.81f * (-1.5f * F32(car, 0xD4)) * F32(car, 0x25E4) / speed;
             force[0] = force[0] + F32(car, 0x118) * k;
             force[1] = force[1] + F32(car, 0x11C) * k;
             force[2] = force[2] + F32(car, 0x120) * k;
             if (U8(car, 0x259C) && F32(car, 0x25D4) < top) {
                 f32 t = (F32(car, 0x25D4) - 26.666666f) / 35.555557f;
-                f32 boost = (heatTune.v[5] * F32(car, 0x2D8) * F32(car, 0x39C)) * lbl_80561D98;
+                f32 boost = (heatTune.v[5] * F32(car, 0x2D8) * F32(car, 0x39C)) * 9.81f;
                 f32 lo = 2.4f * boost;
                 k = (LerpT(Clamp01(t), lo, lbl_80561D38 * boost)) * F32(car, 0x25E0) * F32(car, 0xD4);
                 AddScaled(force, car + 0x54, k);
@@ -2661,7 +2662,7 @@ void fn_80186DE8(void) {
         CbVec4 v = CbVec4(x->pts[6]);
         f32 brake;
         s6 = v.w;
-        if (F32(car, 0x2618) > lbl_80561CFC) {
+        if (F32(car, 0x2618) > 0.25f) {
             s6 = s6 * heatTune.v[4];
         }
         v.x = s6;
@@ -2678,10 +2679,10 @@ void fn_80186DE8(void) {
             a = F32(car, wh * 0x74 + 0x23B4);
             f32 s1[4] = {0};
             f32 s0[4] = {0};
-            s1[wh] = (a - lbl_80561E6C) * (a - lbl_80561E70) * (lbl_80561E74 * a) * lbl_80561E78;
+            s1[wh] = (a - lbl_80561E6C) * (a - lbl_80561E70) * (0.09829f * a) * 0.08726646f;
             b = fmod(1.5707964f + a, 6.2831854820251465);
             x->v130 = CbVec4(s1[0], s1[1], s1[2], s1[3]).Sol();
-            s0[wh] = -((b - lbl_80561E6C) * (b - lbl_80561E70) * (lbl_80561E74 * b)) * lbl_80561E78;
+            s0[wh] = -((b - lbl_80561E6C) * (b - lbl_80561E70) * (0.09829f * b)) * 0.08726646f;
             x->v140 = CbVec4(s0[0], s0[1], s0[2], s0[3]).Sol();
         }
         player = 0;
@@ -2709,12 +2710,12 @@ void fn_80186DE8(void) {
         int boosting;
         f32 vmax;
         f32 out;
-        F32(car, 0x16C) = lbl_80561E88 * vel.x + F32(car, 0x118) * lbl_80561E8C;
-        F32(car, 0x170) = vel.y * lbl_80561E88 + F32(car, 0x11C) * lbl_80561E8C;
-        F32(car, 0x174) = vel.z * lbl_80561E88 + F32(car, 0x120) * lbl_80561E8C;
-        F32(car, 0x178) = avel.x * lbl_80561E88 + F32(car, 0x124) * lbl_80561E8C;
-        F32(car, 0x17C) = avel.y * lbl_80561E88 + F32(car, 0x128) * lbl_80561E8C;
-        F32(car, 0x180) = avel.z * lbl_80561E88 + F32(car, 0x12C) * lbl_80561E8C;
+        F32(car, 0x16C) = 59.94f * vel.x + F32(car, 0x118) * -59.94f;
+        F32(car, 0x170) = vel.y * 59.94f + F32(car, 0x11C) * -59.94f;
+        F32(car, 0x174) = vel.z * 59.94f + F32(car, 0x120) * -59.94f;
+        F32(car, 0x178) = avel.x * 59.94f + F32(car, 0x124) * -59.94f;
+        F32(car, 0x17C) = avel.y * 59.94f + F32(car, 0x128) * -59.94f;
+        F32(car, 0x180) = avel.z * 59.94f + F32(car, 0x12C) * -59.94f;
         F32(car, 0x118) = vel.x;
         F32(car, 0x11C) = vel.y;
         F32(car, 0x120) = vel.z;
@@ -2733,7 +2734,7 @@ void fn_80186DE8(void) {
         CbVec4 rpm(c->pts[4]);
         CbVec4 w6(x->v70);
         CbWheel* w;
-        F32(car, 0x25D0) = rpm.x / lbl_80561CC0;
+        F32(car, 0x25D0) = rpm.x / 0.10471976f;
         F32(car, 0x25D4) = PSVECMag(0x118 + car);
         F32(car, 0x25D8) = PSVECDotProduct(car + 0x118, car + 0x54);
         F32(car, 0x25CC) = rpm.y;
@@ -2746,7 +2747,7 @@ void fn_80186DE8(void) {
             w->load = load;
             f32 spin = w1[j];
             w->spin = spin;
-            w->loadN = load / lbl_80561CC0;
+            w->loadN = load / 0.10471976f;
             w1[j] = fmod(lbl_80561E6C + spin, 6.2831854820251465);
             w->prevSlip = w->slip;
             w->slip = w2[j];
@@ -2768,10 +2769,10 @@ void fn_80186DE8(void) {
             f32 up = PSVECDotProduct(nrm, car + 0x54);
             w->plane.nRight = PSVECDotProduct(nrm, car + 0x3C);
             w->plane.nFwd = up;
-            w->grounded = nrm[1] > lbl_80561CCC;
+            w->grounded = nrm[1] > 0.01f;
             f32 comp = c->pts[5 + j].w;
             if (comp > 20000.0f) {
-                c->pts[5 + j] = CbSolVec4(lbl_80561CAC, lbl_80561CAC, lbl_80561CAC);
+                c->pts[5 + j] = CbSolVec4(0.0f, 0.0f, 0.0f);
                 CbVec4 half = CbVec4(c->v30);
                 half[j] = half[j] * lbl_80561CDC;
                 c->v30 = half.Sol();
@@ -2780,19 +2781,19 @@ void fn_80186DE8(void) {
             if (w->grounded) {
                 f32 d = comp - 1.4f;
                 grounded++;
-                w->comp = d > lbl_80561CAC ? d : lbl_80561CAC;
+                w->comp = d > 0.0f ? d : 0.0f;
                 int sid = e->surface[j];
                 w->groundH = fn_802B03C0(w->plane.ground);
                 w->sound = fn_801D04A8(sid)->sound;
             } else {
-                w->comp = lbl_80561CAC;
+                w->comp = 0.0f;
             }
             w->flags = fl;
         }
         S32(car, 0x2620) = grounded;
         c->v10 = w1.Sol();
         ds = F32(car, 0x25DC) - F32(car, 0x25F0);
-        lim = ds * F32(car, 0x25F0) > lbl_80561CAC ? lbl_80561E98 : lbl_80561E9C;
+        lim = ds * F32(car, 0x25F0) > 0.0f ? 0.12512514f : 0.25025028f;
         if (lim < ds) {
             ds = lim;
         }
@@ -2803,11 +2804,11 @@ void fn_80186DE8(void) {
         throttle = Clamp01(water[1] + F32(car, 0x25E0));
         if (!(U32(fn_801769CC(), 4) & 0x4000) && !NearZero(F32(car, 0x2690))) {
             throttle = 0.0f;
-            F32(car, 0x25E4) = lbl_80561CD0;
+            F32(car, 0x25E4) = 1.0f;
         }
         if (F32(car, 0x2588) > lbl_80561DC0) {
             U32(car, 0x268C) = 10;
-            if (F32(car, 0x25D4) > lbl_80561D60 * heatTune.v[11]) {
+            if (F32(car, 0x25D4) > 0.44444445f * heatTune.v[11]) {
                 F32(car, 0x25E4) = FMax(F32(car, 0x25E4), heatTune.v[10]);
                 throttle = F32(car, 0x25E0) < heatTune.v[9] ? F32(car, 0x25E0) : heatTune.v[9];
             }
@@ -2826,23 +2827,23 @@ void fn_80186DE8(void) {
             if (sp > 15.555555f) {
                 cl = sp;
                 cl = 44.444447f < cl ? 44.444447f : cl;
-                steerK = steerK * (LerpT(F32(car, 0x450), lbl_80561CD0, lbl_80561EA8 + lbl_80561EAC * cl));
+                steerK = steerK * (LerpT(F32(car, 0x450), 1.0f, 1.2692307f + -0.017307691f * cl));
             }
-            if (sp > lbl_80561CAC) {
-                t = Clamp01((sp / lbl_80561DEC) * lbl_80561D60);
-                steerK = steerK * (lbl_80561CD0 - lbl_80561CDC * t) * (lbl_80561CD0 - lbl_80561D38 * t);
+            if (sp > 0.0f) {
+                t = Clamp01((sp / 20.0f) * 0.44444445f);
+                steerK = steerK * (1.0f - lbl_80561CDC * t) * (1.0f - lbl_80561D38 * t);
             }
         }
-        slide = (f32)__fabs(F32(car, 0x25CC)) - lbl_80561EB0 * AbsNarrow(F32(car, 0x25D8)) - lbl_80561D44;
-        if (lbl_80561CAC > slide) {
-            slide = lbl_80561CAC;
+        slide = (f32)__fabs(F32(car, 0x25CC)) - 1.3f * AbsNarrow(F32(car, 0x25D8)) - 3.0f;
+        if (0.0f > slide) {
+            slide = 0.0f;
         }
         cut = 1.0f;
         if (player) {
             cut = 0.0f;
         } else {
             if (S32(car, 0x267C)) {
-                f32 s = lbl_80561D2C * steerK - lbl_80561D38 * F32(car, 0x128);
+                f32 s = 4.0f * steerK - lbl_80561D38 * F32(car, 0x128);
                 if (cut < s) {
                     s = cut;
                 }
@@ -2850,11 +2851,11 @@ void fn_80186DE8(void) {
             }
         }
         gas = throttle;
-        if (slide > lbl_80561CAC && down) {
-            gas = throttle < lbl_80561CD0 - cut ? throttle : lbl_80561CD0 - cut;
+        if (slide > 0.0f && down) {
+            gas = throttle < 1.0f - cut ? throttle : 1.0f - cut;
         }
         brake = F32(car, 0x25E8);
-        f32 rpmT = rpm.x / lbl_80561CC0;
+        f32 rpmT = rpm.x / 0.10471976f;
         throttle = FMax(gas, 0.0016666667f * (1800.0f - rpmT));
         if (rpmT > ground[12]) {
             throttle = 0.0f;
@@ -2862,14 +2863,14 @@ void fn_80186DE8(void) {
         hold = F32(car, 0x25EC);
         bk = Clamp01((rpmT - 1000.0f - 2000.0f * throttle) / 2000.0f);
         brake = bk < brake ? bk : brake;
-        if (F32(car, 0x25D4) > lbl_80561DA4 && F32(car, 0x25CC) > lbl_80561DA4 + lbl_80561EC4 * F32(car, 0x25D4)) {
+        if (F32(car, 0x25D4) > 4.4444447f && F32(car, 0x25CC) > 4.4444447f + 1.6f * F32(car, 0x25D4)) {
             throttle = 0.0f;
         }
         if (!NearZero(F32(car, 0x2650))) {
             throttle = 0.0f;
         }
-        if ((f32)!((f32)__fabs(water[6]) <= __float_epsilon[0]) != lbl_80561CAC) {  // a bool converted to float
-            brake = 0.0f;
+        if ((f32)!((f32)__fabs(water[6]) <= __float_epsilon[0]) != 0.0f) {  // a bool converted to float
+            brake = lbl_80561CAC;
         }
         boosting = 1;
         F32(car, 0x25FC) = throttle;
@@ -2878,9 +2879,9 @@ void fn_80186DE8(void) {
             boosting = 0;
         }
         if (boosting && CarOnGas(car)) {
-            vmax = lbl_80561D60 * fn_80181A48(car) - lbl_80561DA4;
+            vmax = 0.44444445f * fn_80181A48(car) - 4.4444447f;
         }
-        vmax = vmax + lbl_80561D60 * (F32(car, 0x5EC) * lbl_8055E4E8[0]);
+        vmax = vmax + 0.44444445f * (F32(car, 0x5EC) * lbl_8055E4E8[0]);
         off = fn_802B02C8(car + 0x60);
         wet2 = 0;
         if (fn_802BF4F0() && F32(car, 0x2558) < fn_802BF590()) {
@@ -2892,9 +2893,9 @@ void fn_80186DE8(void) {
             vmax = vmax * lbl_8055A3A4;
         }
         if (F32(car, 0x25D4) > vmax && brake > lbl_80561CDC && U32(car, 0x10) == 'PCAR') {
-            out = lbl_80561CD0 - lbl_80561EC8 * (F32(car, 0x25D4) - vmax);
-            if (lbl_80561CAC > out) {
-                out = lbl_80561CAC;
+            out = 1.0f - 0.225f * (F32(car, 0x25D4) - vmax);
+            if (0.0f > out) {
+                out = 0.0f;
             }
             if (throttle < out) {
                 out = throttle;
@@ -2904,7 +2905,7 @@ void fn_80186DE8(void) {
                 boosting = 0;
             }
             if (!boosting) {
-                throttle = LerpT(Clamp01(lbl_80561CD0 + F32(car, 0x258C)), out, throttle);
+                throttle = LerpT(Clamp01(1.0f + F32(car, 0x258C)), out, throttle);
             } else {
                 throttle = out;
             }
@@ -2915,7 +2916,8 @@ void fn_80186DE8(void) {
         a = CbVec4(x->pts[6]);
         a.w = F32(car, 0x34C) - F32(car, 0x350);
         if (!NearZero(F32(car, 0x2650))) {
-            a.w = a.w * lbl_80561CAC;
+            f32 off = 0.0f;
+            a.w = a.w * off;
         }
         x->pts[6] = a.Sol();
         rpm.x = rpm.x > 52.35988f ? rpm.x : 52.35988f;
@@ -2930,8 +2932,8 @@ void fn_80186DE8(void) {
         if (bk2 > hb) {
             hb = bk2;
         }
-        c->v1A0 = CbSolVec4(FMax(lbl_80561CAC, bk2), FMax(lbl_80561CAC, bk2), FMax(lbl_80561CAC, hb),
-                             FMax(lbl_80561CAC, hb));
+        c->v1A0 = CbSolVec4(FMax(0.0f, bk2), FMax(0.0f, bk2), FMax(0.0f, hb),
+                             FMax(0.0f, hb));
         fn_8018CB3C(car);
         ((CbStepV*)PTR(car, 0x270))->Step();
         ((CbTickV*)car)->Tick();
