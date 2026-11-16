@@ -70,9 +70,7 @@ struct GroundBuf {
 
 struct ViewFlags {
     u8 pad0[0x10];
-    u32 pad : 30;  // offset 0x10
-    u32 hires : 1;
-    u32 bit0 : 1;
+    u32 flags;  // offset 0x10: 2 = high resolution, 1 = bit0 (MWCC's MSB-first bitfields, as masks)
 };
 
 extern "C" int fn_802E2C20(void);                  // milliseconds
@@ -853,7 +851,7 @@ void fn_802B01A8(void) {
     fn_802DBE4C();
     ViewFlags* v = fn_801E87A8();
     int mode = 1;
-    if (v->hires) {
+    if ((v->flags >> 1) & 1) {
         mode = 2;
     }
     int old = fn_802C9C58(mode);

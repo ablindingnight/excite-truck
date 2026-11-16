@@ -475,11 +475,7 @@ public:
 }
 
 union ElemColor {
-    u32 all;
-    struct {
-        u32 a : 8;
-        u32 rgb : 24;
-    } ch;
+    u32 all;  // 0xAARRGGBB (alpha in the top byte)
 };
 
 struct TextElem {
