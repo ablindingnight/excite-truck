@@ -1350,15 +1350,16 @@ void fn_802733C8(void) {
 void fn_802733F0(void) {}
 
 void fn_802733F4(u8* p) {
-    if (!U8(p, 0x138) && lbl_8055F558) {
-        int t = fn_80273494(S32(p, 0x10));
+    CamRec* r = (CamRec*)p;
+    if (!r->b138 && lbl_8055F558) {
+        int t = fn_80273494(r->mode);
         if (t != 6) {
             CamCycle* c = &((CamCycle*)lbl_8049A258)[t];
             if (++c->cur >= c->count) {
                 c->cur = 0;
             }
             if (c->count > 1) {
-                U8(p, 0x138) = 1;
+                r->b138 = 1;
             }
         }
     }
@@ -1473,11 +1474,12 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
 
 // Applies the current view of camera cycle `ci` to camera `p`.
 void camera_car(u8* p, int ci) {
+    CamRec* r = (CamRec*)p;
     CamCycle* cyc = &lbl_8049A258[ci];
     CamView* v = &lbl_80346BA0[cyc->first + cyc->cur];
     switch (v->type) {
     case 34: {
-        *(Words12*)(p + 0x58) = *(Words12*)(p + 0xC0);
+        *(Words12*)&r->pose = *(Words12*)&r->carFrame;
         CamFrame f;
         f32 w[3];
         f.pos[0] = v->off[0];
@@ -1487,10 +1489,10 @@ void camera_car(u8* p, int ci) {
         w[1] = lbl_80563F4C * v->rot[1];
         w[2] = lbl_80563F4C * v->rot[2];
         CamRotFromVec(&f.rot, w);
-        fn_801BFD34(p + 0x7C, f.pos, p + 0xC0);
-        Mat3Mul((Mat3*)(p + 0x58), &f.rot, (Mat3*)(p + 0xC0));
+        fn_801BFD34((u8*)&r->pose.pos, f.pos, (u8*)&r->carFrame);
+        Mat3Mul((Mat3*)&r->pose, &f.rot, (Mat3*)&r->carFrame);
         f32 fovv = v->fov;
-        F32(p, 0xBC) = lbl_80563F4C * fovv;
+        r->fov = lbl_80563F4C * fovv;
         break;
     }
     case 0:
@@ -1502,7 +1504,7 @@ void camera_car(u8* p, int ci) {
     case 4:
     case 5:
     case 7: {
-        int t = fn_80273494(S32(p, 0x4));
+        int t = fn_80273494(r->w4);
         if (!(t == 6 || t == 0 || t == ci)) {
             CamCycle* o = &lbl_8049A258[t];
             fn_802704D0(v->type, lbl_80346BA0[o->first + o->cur].type, p);
