@@ -986,10 +986,10 @@ done:
 void fn_80267E40(u32 id, f32 strength) {
     f32 now = lbl_8055E3C8;
     for (int i = 0; i < 4; i++) {
-        u8* c = fn_80267EE4(i);
-        if (U32(c, 0x140) == id && strength > F32(c, 0x154) * (1.0f - (now - F32(c, 0x158)) / 0.5f)) {
-            F32(c, 0x158) = now;
-            F32(c, 0x154) = strength;
+        CamRec* c = (CamRec*)fn_80267EE4(i);
+        if ((u32)c->car == id && strength > c->f154 * (1.0f - (now - c->f158) / 0.5f)) {
+            c->f158 = now;
+            c->f154 = strength;
             return;
         }
     }
@@ -1687,11 +1687,11 @@ void fn_80269BB0(int idx, int type, CamPose* pose, f32* fov) {
 }
 
 void fn_8026A1F0(s32 a, int i, u8 b) {
-    S32(fn_80267EE4(i), 0x14) = a;
+    ((CamRec*)fn_80267EE4(i))->nextMode = a;
     fn_802735F4(i, b);
 }
 
-void fn_8026A248(s32 a, int i) { S32(fn_80267EE4(i), 0x24) = a; }
+void fn_8026A248(s32 a, int i) { ((CamRec*)fn_80267EE4(i))->nextTarget = a; }
 
 s32 fn_8026A27C(int i) {
     s32 v = lbl_80499E50[i];
@@ -1706,14 +1706,14 @@ void fn_8026A2B0(int i) { lbl_80499E50[i] = 1; }
 int fn_8026A2C8(void) { return fn_801EA994(); }
 
 void fn_8026A2CC(const Words12* s, int i, f32 v) {
-    u8* e = (u8*)lbl_80499080 + i * 0x228;
-    *(Words12*)(e + 0x1A4) = *s;
-    F32(e, 0x1D4) = v;
+    CamRec* e = &lbl_80499080[i];
+    *(Words12*)&e->saved = *s;  // copied as words
+    e->f1D4 = v;
 }
 
-u32 fn_8026A344(int i) { return U32(fn_80267EE4(i), 0x20); }
+u32 fn_8026A344(int i) { return ((CamRec*)fn_80267EE4(i))->target; }
 
-u32 fn_8026A368(int i) { return U32(fn_80267EE4(i), 0x10); }
+u32 fn_8026A368(int i) { return ((CamRec*)fn_80267EE4(i))->mode; }
 
 u8 fn_8026A38C(void) { return lbl_8055F488; }
 
