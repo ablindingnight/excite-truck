@@ -446,6 +446,21 @@ int fn_801DF93C(int view) {
 
 inline void DrawArt(ArtElem* e, s32 tex) { fn_801476D8(e, -1, tex); }
 
+// ArtElem's member-wise copy, defined after its uses as DrawArt above, so this unit calls the out-of-line weak copy
+// (retail's kept copy is betarace's).
+inline ArtElem::ArtElem(const ArtElem& o) : ElemBase(o), w(o.w), h(o.h), u0(o.u0), v0(o.v0), u1(o.u1), v1(o.v1) {}
+
+inline ArtElem& ArtElem::operator=(const ArtElem& o) {
+    ElemBase::operator=(o);
+    w = o.w;
+    h = o.h;
+    u0 = o.u0;
+    v0 = o.v0;
+    u1 = o.u1;
+    v1 = o.v1;
+    return *this;
+}
+
 inline void DrawArt(ILayout* l, const char* name, s32 tex) { fn_801476D8(l->FindArt(name), -1, tex); }
 
 inline f32 Fmod(f32 a, f32 b) { return fmod(a, b); }
