@@ -292,7 +292,7 @@ TexEntry* lbl_8055FCB0;
 s32 lbl_8055FCB4;     // null texture
 s32 lbl_8055FCB8;     // bound texture
 TexCache* lbl_8055FCBC;
-f32 lbl_8055FCC0;     // size scale
+extern f32 lbl_8055FCC0;
 
 const char* lbl_8055D038 = "null.tex";
 s32 lbl_8055D03C = -1;  // lightmap
@@ -1109,8 +1109,8 @@ void fn_802CC03C(TexCache* c, MipLoad* l, s32 id) {
     fn_802CBB9C(&c->loads, &c->freeLoads, l);
 }
 
-static inline int fn_802CC10C(TexCache* c, s32 id, s32 frame, MipLoad* l) {
-    int ok = 0;
+static inline void DiscardMip(TexCache* c, s32 id, s32 frame, MipLoad* l, HeapBlock**& cursor, int& ok) {
+    ok = 0;
     MipDiscard* d = c->freeDiscards;
     if (d) {
         TexEntry* t = &lbl_8055FCB0[id];
@@ -1120,13 +1120,19 @@ static inline int fn_802CC10C(TexCache* c, s32 id, s32 frame, MipLoad* l) {
         d->name = t->name;
         fn_802CBD30(&c->discards, &c->freeDiscards, d);
         t->mip0 = 0;
-        SimpleHeap* heap = c->heapRef->heap;
-        HeapBlock** cursor = heap->ReleaseBlock(t->mip0Mem);
+        SimpleHeap* heap = TextureHeap(c);
+        cursor = heap->ReleaseBlock(t->mip0Mem);
         heap->CoalesceFreeBlocks(cursor);
         t->mip0Mem = 0;
         ok = 1;
         fn_802CB3F8(t->name, "DISCARDING");
     }
+}
+
+static inline int fn_802CC10C(TexCache* c, s32 id, s32 frame, MipLoad* l) {
+    HeapBlock** cursor;
+    int ok;
+    DiscardMip(c, id, frame, l, cursor, ok);
     return ok;
 }
 
@@ -1269,6 +1275,8 @@ void fn_802CC60C(void) {
     }
 }
 
+f32 lbl_8055FCC0;     // size scale
+
 void fn_802CC73C(u8 on) { lbl_8055D07D = on; }
 
 int fn_802CC744(void) { return lbl_8055D07D; }
@@ -1302,38 +1310,38 @@ static inline void Rank(TexCache* c, MipSlot* s, f32 score) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802CC770(void) {
-    for (int i = 0; i < 512; i++) {
-        TexEntry* t = &lbl_8055FCB0[i];
-        int stream = t->mip0Bytes != 0;
-        if (t->refs > 0 && stream) {
-            if (t->uses > 0) {
-                s32 dim = fn_802CB3FC(i);
-                TexCache* c = lbl_8055FCBC;
-                MipSlot* s = &c->slots[i];
-                f32 score = (f32)(dim * 2) * t->size - 1.0f;
-                s->score = score;
-                if (s->state == 2) {
-                    s->frame = c->frame;
-                }
-                Rank(c, s, score);
-            } else {
-                TexCache* c = lbl_8055FCBC;
-                MipSlot* s = &c->slots[i];
-                f32 score = 4.0f;
-                s->score = score;
-                Rank(c, s, score);
+static inline f32 TextureRankScore(f32 a, const f32& b) { return a * b; }
+
+static inline void RankVisibleTexture(int i) {
+    TexEntry* t = &lbl_8055FCB0[i];
+    int stream = t->mip0Bytes != 0;
+    if (t->refs > 0 && stream) {
+        if (t->uses > 0) {
+            s32 dim = fn_802CB3FC(i);
+            TexCache* c = lbl_8055FCBC;
+            MipSlot* s = &c->slots[i];
+            f32 score = TextureRankScore((f32)(dim * 2), t->size) - 1.0f;
+            s->score = score;
+            if (s->state == 2) {
+                s->frame = c->frame;
             }
+            Rank(c, s, score);
+        } else {
+            TexCache* c = lbl_8055FCBC;
+            MipSlot* s = &c->slots[i];
+            f32 score = 4.0f;
+            s->score = score;
+            Rank(c, s, score);
         }
     }
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop3_fn_802CC770(TexCache* c) {
+static inline void Loop3_fn_802CC770(TexCache* c, HeapBlock**& cursor, int& ok) {
     for (MipSlot* s = c->resident; s; s = s->next) {
         if (s->state == 2) {
-            if (fn_802CC10C(c, s->tex, s->frame + 2, 0)) {
+            DiscardMip(c, s->tex, s->frame + 2, 0, cursor, ok);
+            if (ok) {
                 s->state = 0;
             }
             break;
@@ -1342,10 +1350,14 @@ static inline void Loop3_fn_802CC770(TexCache* c) {
 }
 
 void fn_802CC770(void) {
-    Loop1_fn_802CC770();
+    for (int i = 0; i < 512; i++) {
+        RankVisibleTexture(i);
+    }
     if (!lbl_8055D07D) {
         TexCache* c = lbl_8055FCBC;
-        Loop3_fn_802CC770(c);
+        HeapBlock** cursor;
+        int ok;
+        Loop3_fn_802CC770(c, cursor, ok);
     }
     TexCache* c = lbl_8055FCBC;
     fn_802CC410(c);
