@@ -178,6 +178,11 @@ public:
         fn_802328D4(font);
         font = 0;
     }
+    virtual void Enter(void);
+    virtual void Exit(void);
+    virtual void Update(void);
+    virtual void Draw(void);
+    virtual int Key(int key);
     virtual void Open(void) { open = 0; }
     virtual void Select(void) {
         if (!sel) {
@@ -216,6 +221,11 @@ public:
         fn_802328D4(font);
         font = 0;
     }
+    virtual void Enter(void);
+    virtual void Exit(void);
+    virtual void Update(void);
+    virtual void Draw(void);
+    virtual int Key(int key);
     virtual void Dim(void) { open = 1; }
     virtual void Focus(void) { f1E = 1; }  // 0x70
     virtual void Refresh(void) {
@@ -738,9 +748,6 @@ void fn_80260E04(Words5* d, const Words5* s) { *d = *s; }
 }  // extern "C"
 
 
-extern "C" {
-
-}  // extern "C"
 
 
 extern "C" {
@@ -992,15 +999,18 @@ inline NodeVec6::NodeVec6(void) {
     count = 0;
 }
 
-extern "C" {
 
-void fn_80262158(u8* p) {}
+void EventNode::Enter(void) {}
 
-void fn_8026215C(u8* p) {}
 
-u32 fn_80262160(u8* p) { return 0; }
+void EventNode::Exit(void) {}
 
-void fn_80262168(u8* p) {
+
+int EventNode::Key(int key) { return 0; }
+
+
+void EventNode::Update(void) {
+    u8* p = (u8*)this;
     if (U8(p, 0x1E) && lbl_8055F3E9 && !lbl_8055F3EA) {
         fn_80230E90(0);
         U8(p, 0x1E) = 0;
@@ -1012,7 +1022,6 @@ void fn_80262168(u8* p) {
     }
 }
 
-}  // extern "C"
 
 
 const char* GetGradeDisplayName(int grade);
@@ -1030,7 +1039,10 @@ extern const f32 lbl_80563B90;  // 0.0f
 // Event node: its tile (pulsing while selected), name, grade and "score/target".
 #pragma push
 #pragma opt_propagation off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
-void fn_802621F0(u8* p) {
+}  // extern "C"
+
+void EventNode::Draw(void) {
+    u8* p = (u8*)this;
     static f32 sTextY = -(f32)S32(p, 0x10) / 2.0f;
     char line[30];
     char target[30];
@@ -1080,22 +1092,29 @@ void fn_802621F0(u8* p) {
     }
     fn_80232BA4(line, PTR(p, 0x24), 350.0f + x, y + sTextY, color, 0x12, 0.65f, lbl_80563B90, 1.0f);
 }
+
+extern "C" {
 #pragma pop
 
-void fn_80262574(u8* p) {}
+}  // extern "C"
 
-void fn_80262578(u8* p) {}
+void LevelNode::Enter(void) {}
 
-u32 fn_8026257C(u8* p) { return 0; }
 
-void fn_80262584(u8* p) {
+void LevelNode::Exit(void) {}
+
+
+int LevelNode::Key(int key) { return 0; }
+
+
+void LevelNode::Update(void) {
+    u8* p = (u8*)this;
     if (U8(p, 0x1F) && lbl_8055F3E9) {
         fn_80230E90(0);
         U8(p, 0x1F) = 0;
     }
 }
 
-}  // extern "C"
 
 static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
@@ -1125,7 +1144,10 @@ f32 fn_8023659C(void);
 void fn_80230F6C(u32* color);
 
 // Difficulty node: its tile and label; while selected a highlight frame grows and shrinks around it.
-void fn_802625D4(u8* p) {
+}  // extern "C"
+
+void LevelNode::Draw(void) {
+    u8* p = (u8*)this;
     f32 x;
     f32 y;
     u32 color;
@@ -1193,6 +1215,5 @@ void fn_802625D4(u8* p) {
                 1.0f);
 }
 
-}  // extern "C"
 
 
