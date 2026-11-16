@@ -357,13 +357,20 @@ def elf_symbol_bytes(path: Path, names) -> Dict[str, bytes]:
 
 
 def verify_objects(ver: str, markers: List[Marker], syms, dol: "Dol") -> int:
+    # source -> object from build.ninja (libs/ sources compile to paths without their libs/... prefix)
+    ninja = (ROOT / "build.ninja").read_text(encoding="utf-8")
+    objs = {
+        src.replace("\\", "/"): obj.replace("\\", "/")
+        for obj, src in re.findall(r"^build (\S+\.o): mwcc\w* \$\n\s+(\S+)", ninja, re.M)
+    }
     bad = 0
     for m in markers:
         rel = m.src.relative_to(ROOT).as_posix()
-        for top in ("src/", "libs/"):
-            if rel.startswith(top):
-                rel = rel[len(top):]
-        obj = ROOT / "build" / ver / "src" / (rel.rsplit(".", 1)[0] + ".o")
+        if rel in objs:
+            obj = ROOT / objs[rel]
+        else:  # src/<unit>.c -> build/<ver>/src/<unit>.o
+            unit = rel[len("src/"):] if rel.startswith("src/") else rel
+            obj = ROOT / "build" / ver / "src" / (unit.rsplit(".", 1)[0] + ".o")
         if not obj.exists():
             print(f"?? {m.label}: no compiled object {obj.relative_to(ROOT).as_posix()}")
             bad += 1
