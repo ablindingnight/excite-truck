@@ -925,7 +925,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     AVec h;
     DentVec cand;
     AVec g0;
-    f32 inv = -0.1f / F32(p, 0xD4);
+    f32 mass = F32(p, 0xD4);
+    f32 inv = -0.1f / mass;
     F32(p, 0x26F0) += imp->v[0] * inv;
     F32(p, 0x26F4) += imp->v[1] * inv;
     F32(p, 0x26F8) += imp->v[2] * inv;
