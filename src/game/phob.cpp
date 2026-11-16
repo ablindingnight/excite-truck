@@ -1385,7 +1385,7 @@ StatePacket* fn_80179824(void) {
     return p;
 }
 
-void fn_80179AF4(const Phob* v, u8* buf) {
+void vf28__10CollVolumeFPUc(const Phob* v, u8* buf) {  // CollVolume slot 0x28 (writes the draw state)
     u8* o = buf + v->a8;
     PMtx* out = (PMtx*)o;
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
