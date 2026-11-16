@@ -655,3 +655,10 @@ void BoostMan::a3(void) {
 }
 
 void BoostMan::a4(void) {}
+
+// Vec2's member-wise assignment, defined after its uses, so this unit calls the out-of-line weak copy (retail's kept
+// copy is aiobst's).
+inline Vec2& Vec2::operator=(const Vec2& v) {
+    *(V2*)this = v;  // the base struct's word copy
+    return *this;
+}
