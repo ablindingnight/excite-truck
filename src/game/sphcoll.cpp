@@ -483,8 +483,8 @@ void fn_801996BC(RVec3* out, const RVec3* pt, const RVec3* n, u8* a, u8* b, f32 
     RVec3 va;
     RVec3 vb;
     RVec3 f;
-    RigidBody* ra = (RigidBody*)PTR(a, 0x4);
-    RigidBody* rb = (RigidBody*)PTR(b, 0x4);
+    RigidBody* ra = (RigidBody*)((u8*&)((CollShape*)a)->owner);
+    RigidBody* rb = (RigidBody*)((u8*&)((CollShape*)b)->owner);
     if (ra) {
         ra->VelAt(&va, pt);
     } else {
@@ -516,8 +516,8 @@ void fn_801996BC(RVec3* out, const RVec3* pt, const RVec3* n, u8* a, u8* b, f32 
     f.y *= -1000.0f;
     f.z *= -1000.0f;
     f32 mag = PSVECMag(&f.x);
-    f32 fb = F32(b, 0x14);
-    f32 fa = F32(a, 0x14);
+    f32 fb = ((CollShape*)b)->skin;
+    f32 fa = ((CollShape*)a)->skin;
     f32 lim = 0.5f * mu * (fa + fb);
     if (mag > lim) {
         f32 k = lim / mag;
@@ -902,7 +902,7 @@ int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
     d.v[1] = c[1] - at->y;
     d.v[2] = c[2] - at->z;
     f32 len = PSVECMag(d.v);
-    RigidBody* rb = (RigidBody*)PTR(p, 0x4);
+    RigidBody* rb = (RigidBody*)((u8*&)((CollShape*)p)->owner);
     if (len > 0.001f && len < r) {
         f32 pen = r - len;
         f32 inv = 1.0f / len;
@@ -910,7 +910,7 @@ int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
         n.v[1] = d.v[1] * inv;
         n.v[2] = d.v[2] * inv;
         rb->VelAt(&vel, at);
-        f32 k = pen * F32(p, 0x10);
+        f32 k = pen * ((CollShape*)p)->stiff;
         PSVECDotProduct(&vel, n.v);
         imp.x = n.v[0] * k;
         imp.y = n.v[1] * k;
@@ -1004,7 +1004,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
     RVec3 fr;
     int n;
     int surf;
-    RigidBody* o = (RigidBody*)PTR(p, 0x4);
+    RigidBody* o = (RigidBody*)((u8*&)((CollShape*)p)->owner);
     if (lbl_8055E5A0) {
         n = 64;
         fn_801CF080(lbl_8055E5A0, (const RVec3*)c, hits, &n, 0, r);
@@ -1022,7 +1022,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         dv.z = dz;
         f32 depth = r - PSVECDotProduct(&nrm, &dv);
         o->VelAt(&v, &pt);
-        f32 k = depth * F32(p, 0x10);
+        f32 k = depth * ((CollShape*)p)->stiff;
         f32 vn = -PSVECDotProduct(&v, &nrm);
         f32 ny = nrm.y;
         f32 nx = nrm.x;
@@ -1052,7 +1052,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
         f.y = f.y + d[1] * m;
         f.z = f.z + d[2] * m;
         f32 fm = PSVECMag(&f.x);
-        f32 lim = k * F32(p, 0x14);
+        f32 lim = k * ((CollShape*)p)->skin;
         lim = lim > 0.02f ? lim : 0.02f;
         if (fm > lim) {
             f32 s = lim / fm;
@@ -1088,8 +1088,8 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
 }
 
 int fn_8019B068(u8* p, u8* q, u32 a, u32 b) {
-    f32 s = F32(q, 0x24);
-    return fn_8019AA34(p, (f32*)(p + 0x34), q, (f32*)(q + 0x34), a, b, F32(p, 0x24), s);
+    f32 s = ((SphereShape*)q)->radius;
+    return fn_8019AA34(p, (f32*)(p + 0x34), q, (f32*)(q + 0x34), a, b, ((SphereShape*)p)->radius, s);
 }
 
 // Sphere (centre c, radius r) against the side of tube q: in tube space, within the half length and off
@@ -1106,11 +1106,11 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
     l.x = x;
     l.y = y;
     l.z = z;
-    f32 len = F32(q, 0x28);
+    f32 len = ((TubeShape*)q)->half;
     if (l.z < len && l.z > -len) {
         f32 dist = (f32)sqrt(Sq(l.x) + Sq(l.y));
         if (!((f32)__fabs(dist) <= __float_epsilon[0])) {
-            f32 R = F32(q, 0x24);
+            f32 R = ((TubeShape*)q)->rad;
             r += -dist + R;
             if (r > 0.0f) {
                 RVec3 cc;
@@ -1129,7 +1129,7 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 s.x = l.x;
                 s.y = l.y;
                 s.z = 0.0f;
-                f32 k = (F32(q, 0x24) - r) / dist;
+                f32 k = (((TubeShape*)q)->rad - r) / dist;
                 s.x *= k;
                 s.z = l.z;
                 s.y *= k;
@@ -1179,7 +1179,7 @@ static inline void ClampToBox(RVec3* l, const RVec3* ext) {
 // tunneling and pushed back along the box body's velocity when it moves fast enough.
 int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     CFrame f = *(CFrame*)VE(q)->v50();
-    const RVec3* ext = (const RVec3*)(q + 0x24);
+    const RVec3* ext = (const RVec3*)&((BoxShape*)q)->half;
     RVec3 l;
     RVec3 cp;
     RVec3 d;
@@ -1202,7 +1202,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
         if (debug) {
             fn_802E30C8("-collide_explicit_sphere_box: delta_length = %f", len);
         }
-        RigidBody* rb = (RigidBody*)PTR(q, 0x4);
+        RigidBody* rb = (RigidBody*)((u8*&)((BoxShape*)q)->owner);
         if (rb) {
             d.x = F32(rb, 0x118) * lbl_805622DC;
             d.y = F32(rb, 0x11C) * lbl_805622DC;
@@ -1535,9 +1535,9 @@ f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_8019CE4C(u8* p, u8* q) {
     f32* c = (f32*)(p + 0x34);
     f32 d[3];
-    d[0] = c[0] - F32(q, 0x34);
-    d[1] = c[1] - F32(q, 0x38);
-    d[2] = c[2] - F32(q, 0x3C);
+    d[0] = c[0] - ((FlatSphereShape*)q)->f34;
+    d[1] = c[1] - ((FlatSphereShape*)q)->f38;
+    d[2] = c[2] - ((FlatSphereShape*)q)->f3C;
     f32 sq = PSVECSquareDistance(c, q + 0x34);
     f32 r;
     if (sq > lbl_8056232C) {
@@ -1546,13 +1546,13 @@ void fn_8019CE4C(u8* p, u8* q) {
         d[1] *= inv;
         d[2] *= inv;
         f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)q)->frame) + 0xC));
-        r = F32(q, 0x54) + k * (F32(q, 0x58) - F32(q, 0x54));
+        r = ((FlatSphereShape*)q)->across + k * (((FlatSphereShape*)q)->along - ((FlatSphereShape*)q)->across);
     } else {
-        f32 b = F32(q, 0x58);
-        f32 a = F32(q, 0x54);
+        f32 b = ((FlatSphereShape*)q)->along;
+        f32 a = ((FlatSphereShape*)q)->across;
         r = a > b ? a : b;
     }
-    F32(q, 0x24) = r;
+    ((FlatSphereShape*)q)->radius = r;
     fn_8019B068(p, q, 0, 0);
 }
 
@@ -1561,9 +1561,9 @@ void fn_8019CE4C(u8* p, u8* q) {
 void fn_8019CF60(u8* p, u8* q) {
     u8* f = ((u8*&)((CollShape*)p)->frame);
     f32 d[3];
-    d[0] = F32(f, 0x24) - F32(q, 0x34);
-    d[1] = F32(f, 0x28) - F32(q, 0x38);
-    d[2] = F32(f, 0x2C) - F32(q, 0x3C);
+    d[0] = F32(f, 0x24) - ((FlatSphereShape*)q)->f34;
+    d[1] = F32(f, 0x28) - ((FlatSphereShape*)q)->f38;
+    d[2] = F32(f, 0x2C) - ((FlatSphereShape*)q)->f3C;
     f32 sq = PSVECSquareDistance(f + 0x24, q + 0x34);
     f32 r;
     if (sq > lbl_8056232C) {
@@ -1572,13 +1572,13 @@ void fn_8019CF60(u8* p, u8* q) {
         d[1] *= inv;
         d[2] *= inv;
         f32 c = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)q)->frame) + 0xC));
-        r = F32(q, 0x54) + c * (F32(q, 0x58) - F32(q, 0x54));
+        r = ((FlatSphereShape*)q)->across + c * (((FlatSphereShape*)q)->along - ((FlatSphereShape*)q)->across);
     } else {
-        f32 b = F32(q, 0x58);
-        f32 a = F32(q, 0x54);
+        f32 b = ((FlatSphereShape*)q)->along;
+        f32 a = ((FlatSphereShape*)q)->across;
         r = a > b ? a : b;
     }
-    F32(q, 0x24) = r;
+    ((FlatSphereShape*)q)->radius = r;
     fn_8019CE3C(q, (u32)p);
 }
 
@@ -1615,23 +1615,23 @@ static inline void FlatRadius(u8* s, const f32* cp) {
     const f32* c = cp;
     f32 d[3];
     f32 r;
-    d[0] = c[0] - F32(s, 0x34);
-    d[1] = c[1] - F32(s, 0x38);
-    d[2] = c[2] - F32(s, 0x3C);
+    d[0] = c[0] - ((FlatSphereShape*)s)->f34;
+    d[1] = c[1] - ((FlatSphereShape*)s)->f38;
+    d[2] = c[2] - ((FlatSphereShape*)s)->f3C;
     f32 sq = PSVECSquareDistance(c, s + 0x34);
     if (sq > lbl_8056232C) {
         f32 inv = 1.0f / (f32)sqrt(sq);
         d[0] *= inv;
         d[1] *= inv;
         d[2] *= inv;
-        f32 k = (f32)__fabs(PSVECDotProduct(d, PTR(s, 0xC) + 0xC));
-        r = F32(s, 0x54) + k * (F32(s, 0x58) - F32(s, 0x54));
+        f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((FlatSphereShape*)s)->frame) + 0xC));
+        r = ((FlatSphereShape*)s)->across + k * (((FlatSphereShape*)s)->along - ((FlatSphereShape*)s)->across);
     } else {
-        f32 hi = F32(s, 0x58);
-        f32 lo = F32(s, 0x54);
+        f32 hi = ((FlatSphereShape*)s)->along;
+        f32 lo = ((FlatSphereShape*)s)->across;
         r = lo > hi ? lo : hi;
     }
-    F32(s, 0x24) = r;
+    ((FlatSphereShape*)s)->radius = r;
 }
 
 // Sets both flat spheres' radii from how edge-on they are to each other, then collides them.
@@ -1645,9 +1645,9 @@ void fn_8019D19C(u8* p, u8* q) {
 void fn_8019D378(u8* p, u8* q) {
     f32* c = (f32*)(((u8*&)((CollShape*)q)->frame) + 0x24);
     f32 d[3];
-    d[0] = c[0] - F32(p, 0x34);
-    d[1] = c[1] - F32(p, 0x38);
-    d[2] = c[2] - F32(p, 0x3C);
+    d[0] = c[0] - ((FlatSphereShape*)p)->f34;
+    d[1] = c[1] - ((FlatSphereShape*)p)->f38;
+    d[2] = c[2] - ((FlatSphereShape*)p)->f3C;
     f32 sq = PSVECSquareDistance(c, p + 0x34);
     f32 r;
     if (sq > lbl_8056232C) {
@@ -1656,13 +1656,13 @@ void fn_8019D378(u8* p, u8* q) {
         d[1] *= inv;
         d[2] *= inv;
         f32 k = (f32)__fabs(PSVECDotProduct(d, ((u8*&)((CollShape*)p)->frame) + 0xC));
-        r = F32(p, 0x54) + k * (F32(p, 0x58) - F32(p, 0x54));
+        r = ((FlatSphereShape*)p)->across + k * (((FlatSphereShape*)p)->along - ((FlatSphereShape*)p)->across);
     } else {
-        f32 b = F32(p, 0x58);
-        f32 a = F32(p, 0x54);
+        f32 b = ((FlatSphereShape*)p)->along;
+        f32 a = ((FlatSphereShape*)p)->across;
         r = a > b ? a : b;
     }
-    F32(p, 0x24) = r;
+    ((FlatSphereShape*)p)->radius = r;
     fn_8019C854(p, q);
 }
 
@@ -1734,7 +1734,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     PSVECCrossProduct(&da.x, &db.x, &n.x);
     f32 nn = PSVECDotProduct(&n.x, &n.x);
     f32 la = F32(p, 0x28);
-    f32 lb = F32(q, 0x28);
+    f32 lb = ((TubeShape*)q)->half;
     if (nn < lbl_8056232C) {
         f32 zv;
         f32 yv;
@@ -1799,7 +1799,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     if ((f32)__fabs(dist) <= __float_epsilon[0]) {
         return 0;
     }
-    f32 pen = (F32(q, 0x24) + F32(p, 0x24)) - dist;
+    f32 pen = (((TubeShape*)q)->rad + F32(p, 0x24)) - dist;
     if (pen < 0.0f) {
         return 0;
     }
@@ -1825,8 +1825,8 @@ int fn_8019DAB0(u8* p, u8* q) {
     PVec3A b;
     PVec3A dir = *(PVec3A*)(((u8*&)((CollShape*)p)->frame) + 0x18);
     PVec3A mid = *(PVec3A*)(((u8*&)((CollShape*)p)->frame) + 0x24);
-    f32 h = F32(p, 0x28);
-    f32 r = F32(p, 0x24);
+    f32 h = ((TubeShape*)p)->half;
+    f32 r = ((TubeShape*)p)->rad;
     MulAdd(a.v, mid.v, dir.v, h);
     MulAdd(b.v, mid.v, dir.v, -h);
     hit |= fn_8019B08C(p, a.v, q, r);
@@ -1857,10 +1857,10 @@ int fn_8019DC04(u8* p, u8* q) {
             return 1;
         }
         u8* m = ((u8*&)((CollShape*)p)->frame);
-        f32 h = F32(p, 0x28);
+        f32 h = ((TubeShape*)p)->half;
         axis = *(PVec3A*)(m + 0x18);
         org = *(PVec3A*)(m + 0x24);
-        f32 rad = F32(p, 0x24);
+        f32 rad = ((TubeShape*)p)->rad;
         MulAdd(b.v, org.v, axis.v, -h);
         MulAdd(a.v, org.v, axis.v, h);
         hit |= fn_8019CCCC(p, (u8*)a.v, q, rad);
@@ -2065,9 +2065,9 @@ int fn_8019E500(u8* p, u8* q) {
     ax[0].dir = *(PVec3A*)&fr.m[0];
     ax[1].dir = *(PVec3A*)&fr.m[3];
     ax[2].dir = *(PVec3A*)&fr.m[6];
-    ax[0].ext = F32(q, 0x24);
-    ax[1].ext = F32(q, 0x28);
-    ax[2].ext = F32(q, 0x2C);
+    ax[0].ext = ((BoxShape*)q)->half.x;
+    ax[1].ext = ((BoxShape*)q)->half.y;
+    ax[2].ext = ((BoxShape*)q)->half.z;
     bool hit = false;
     int i;
     f32 r = 0.75f;
@@ -2101,7 +2101,7 @@ int fn_8019E500(u8* p, u8* q) {
             e.pos.z += ab->dir.v[2] * k;
             t = (TubeVol*)lbl_80435020;
             if (t) {
-                t->Init(&e, U32(q, 0x4), F32(q, 0x10), F32(q, 0x14), r, ai->ext);
+                t->Init(&e, U32(q, 0x4), ((BoxShape*)q)->stiff, ((BoxShape*)q)->skin, r, ai->ext);
             }
             hit |= fn_8019D618((u8*)t, p, 1, q);
         }
@@ -2129,7 +2129,7 @@ int fn_8019E874(u8* p, u8* q) {
     d.y = c.y - oq.t.y;
     d.z = c.z - oq.t.z;
     f32 nh;
-    f32 h = F32(p, 0x28);
+    f32 h = ((TubeShape*)p)->half;
     nh = -h;
     f32 s = -PSVECDotProduct(&fp.m[6], &d);
     f32 v = h < s ? h : s;
@@ -2137,7 +2137,7 @@ int fn_8019E874(u8* p, u8* q) {
     c.x = c.x + fp.m[6] * v;
     c.y = c.y + fp.m[7] * v;
     c.z = c.z + fp.m[8] * v;
-    return fn_8019B4D8(p, q, &c, 0, F32(p, 0x24));
+    return fn_8019B4D8(p, q, &c, 0, ((TubeShape*)p)->rad);
 }
 
 // Capsule p against q, with the centre offset kept for a debug view that is compiled out.
@@ -2790,7 +2790,7 @@ extern const f32 lbl_805623BC;  // 1.1
 static inline f32 CentreDist2(u8* p, u8* q) {
     RVec3 d;
     CFrame* fq = (CFrame*)PTR(q, 0xC);
-    CFrame* fp = (CFrame*)PTR(p, 0xC);
+    CFrame* fp = (CFrame*)((u8*&)((SphereGroup*)p)->frame);
     d.x = fp->t.x - fq->t.x;
     d.y = fp->t.y - fq->t.y;
     d.z = fp->t.z - fq->t.z;
@@ -2801,7 +2801,7 @@ static inline f32 CentreDist2(u8* p, u8* q) {
 static inline void FromBoxCentre(RVec3* d, u8* p, u8* q) {
     RVec3 c;
     fn_801A1F44(&c, q);
-    CFrame* fp = (CFrame*)PTR(p, 0xC);
+    CFrame* fp = (CFrame*)((u8*&)((SphereGroup*)p)->frame);
     d->x = fp->t.x - c.x;
     d->y = fp->t.y - c.y;
     d->z = fp->t.z - c.z;
@@ -2815,7 +2815,7 @@ static inline f32 GroupBodyMass(const u8* body) { return F32(body, 0xD4); }
 static inline void HitGroup(u8* p, u8* q) {
     u8* pb;
     u8* qb = PTR(q, 0x4);
-    if (qb && (pb = PTR(p, 0x4)) != 0 && GroupBodyMass(pb) < GroupBodyMass(qb)) {
+    if (qb && (pb = ((u8*&)((SphereGroup*)p)->owner)) != 0 && GroupBodyMass(pb) < GroupBodyMass(qb)) {
         ((VGroup*)q)->v10(p);
         return;
     }
