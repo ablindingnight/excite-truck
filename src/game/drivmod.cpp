@@ -567,10 +567,6 @@ struct RiderLinks {
     BoneLink l[6];
 };
 extern const f32 lbl_80563064;  // 0.0762 (3 in)
-extern const f32 lbl_8056307C;  // pi/3
-extern const f32 lbl_80563080;  // 10 deg
-extern const f32 lbl_80563090;  // 15 deg
-extern const f32 lbl_80563094;  // 8
 
 extern "C" {
 extern const RiderLinks lbl_802F9D00;
@@ -659,7 +655,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     } else {
         d->fC8 = oldx;
     }
-    fn_801E353C(d->wheel, -lbl_8056307C * F32(car, 0x3C));
+    f32 lock = 1.0471976f;  // pi/3; a local, so the negation stays at run time (retail pools +pi/3 only)
+    fn_801E353C(d->wheel, -lock * F32(car, 0x3C));
     fn_801E34E4(d->wheel, &m);
     cnt = 32;
     d->body = m;
@@ -669,7 +666,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     d->body.pos.y = d->body.pos.y + off.y;
     d->body.pos.z = d->body.pos.z + off.z;
     f32 roll = -F32(car, 0x238);
-    f32 lim = lbl_80563080;
+    f32 lim = 0.17453292f;
     if (lim < roll) {
         roll = lim;
     }
@@ -736,10 +733,10 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         pose[k].pos.y = yv + d->butt.y;
         pose[k].pos.z = pose[k].pos.z + d->butt.z;
     }
-    e1.y = F32(car, 0x3C) * lbl_80563090;
-    f32 lean = lbl_80563094 * F32(car, 0x23C);
     e1.z = 2.5f * -F32(car, 0x238) + F32(car, 0x3C) * -0.17453292f;
-    lean = MaxF(MinF(lbl_80563090, lean), -0.2617994f);
+    e1.y = F32(car, 0x3C) * 0.2617994f;
+    f32 lean = 8.0f * F32(car, 0x23C);
+    lean = MaxF(MinF(0.2617994f, lean), -0.2617994f);
     e1.x = 1.5f * F32(car, 0x240) - lean;
     Mat3FromEuler((Mat3*)&tilt, (Vec3*)&e1);
     Mat3Mul((Mat3*)&pose[3].rot, (Mat3*)&tilt, (Mat3*)&pose[3].rot);
