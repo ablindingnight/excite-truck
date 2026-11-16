@@ -117,8 +117,8 @@ static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
 
 // The free (debug) camera: stick yaw/pitch and movement, trigger boost, keys up/down, the pointer at a screen
 // edge pans (faster the higher the camera is), and the camera keeps its height above the ground.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8026B8A0(FreePad& pad, f32 dt, f32 turn, f32 speed, CamVec& in, CamVec& move) {
+/* Helper name unproven: stick look and move of the free camera; the boundary is needed (in place -1.58) */
+static inline void ReadFlyPad(FreePad& pad, f32 dt, f32 turn, f32 speed, CamVec& in, CamVec& move) {
     f32 x;
     f32 z;
     lbl_8055F4F4 += turn * (dt * fn_8026B844(pad.x0));
@@ -212,7 +212,7 @@ void fn_8026B8A0(void) {
         turn = 3.1415927f;
         f32 t = CamUnit(pad.y3, -1.0f, 1.0f);
         speed = CamSpeed(t, 1.0f);
-        Loop1_fn_8026B8A0(pad, dt, turn, speed, in, move);
+        ReadFlyPad(pad, dt, turn, speed, in, move);
     }
     {
         f32 rate = 100.0f;
