@@ -5,6 +5,7 @@
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
 // animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/highscore.h"
 #include "game/gart.h"
 
 extern "C" {
@@ -38,13 +39,7 @@ void StatsAddHighScore(int slot, long event, long difficulty, const char* name, 
 void* operator new(size_t size, const char* name);
 void operator delete(void* p);
 
-struct HighScore {
-    u8 pad0[0x4];
-    s32 score;  // offset 0x4
-    s32 grade;  // offset 0x8
-    f32 time;   // offset 0xC
-};
-
+// HighScore: game/highscore.h.
 struct EventInfo {
     u8 pad0[0x8];
     u32 kind;  // offset 0x8

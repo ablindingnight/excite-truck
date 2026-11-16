@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/highscore.h"
 #include "game/gamedb.h"
 #include "game/gart.h"
 #include <revolution/MTX/vec.h>
@@ -4258,11 +4259,7 @@ void fn_8018A120(RaceCarRec* rc);
 }
 
 
-struct HighScore {
-    u8 pad0[0x4];
-    s32 score;  // offset 0x4
-};
-
+// HighScore: game/highscore.h.
 int IdentGetCurrentSlot(void);
 HighScore* StatsGetHighScore(int slot, long event, long track, int a);
 

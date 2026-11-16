@@ -4,6 +4,7 @@
 // "RealStatistic" and "IntStatistic" messages give the names; the rest are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/highscore.h"
 #include "game/vec3_init.h"
 
 extern "C" {
@@ -102,14 +103,7 @@ public:
     StatValue values[NUM_STAT_SLOTS]; // offset 0x8
 };
 
-struct HighScore {
-    const char* name;  // offset 0x0
-    s32 score;         // offset 0x4
-    s32 grade;         // offset 0x8
-    f32 time;          // offset 0xC, tie-break
-    u32 choice;        // offset 0x10
-};
-
+// HighScore: game/highscore.h.
 struct HighScoreList {
     const char* name;                      // offset 0x0
     s32 key;                               // offset 0x4

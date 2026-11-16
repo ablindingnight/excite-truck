@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/highscore.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menustate.h"
@@ -206,14 +207,7 @@ struct ScoreRow {
     char time[20];      // offset 0x18
 };
 
-struct HighScore {
-    u8 pad0[0x4];
-    s32 score;   // offset 0x4
-    s32 grade;   // offset 0x8
-    f32 time;    // offset 0xC
-    u32 choice;  // offset 0x10
-};
-
+// HighScore: game/highscore.h.
 struct VehicleChoice {
     s32 vehicle;  // offset 0x0
     s32 color;    // offset 0x4
