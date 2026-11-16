@@ -1513,21 +1513,23 @@ inline void ExhaustTorchMan::TransformTorchPart(int i, const TorchPart* part) {
     Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
 }
 
+/* Helper name unproven */
+static inline const TorchEntry& TorchAt(const TorchEntry* p, int i) { return p[i]; }
+
 void ExhaustTorchMan::DrawEdges(void) {
-    TorchEntry* entry;
     const Vec* right = fn_802C86DC()->rot;
     const Vec* up = &fn_802C86DC()->rot[1];
     int i;
-    for (i = 0, entry = entries; i < fn_80287B14(); ++entry, ++i) {
-        if (entry->on) {
+    for (i = 0; i < fn_80287B14(); ++i) {
+        if (TorchAt(entries, i).on) {
             FireModel* model = fn_80288208(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
                 const TorchPart* part = fn_80288060(model, k);
                 TransformTorchPart(i, part);
                 Vec p;
-                TAddS(&p, &entries[i].pos, &entries[i].rot[1], entry->len);
-                DrawEdge(&p, entry->frame, right, up, 0.4f * entry->len);
+                TAddS(&p, &entries[i].pos, &entries[i].rot[1], TorchAt(entries, i).len);
+                DrawEdge(&p, TorchAt(entries, i).frame, right, up, 0.4f * TorchAt(entries, i).len);
             }
         }
     }
