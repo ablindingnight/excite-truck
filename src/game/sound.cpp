@@ -3,6 +3,7 @@
 // one player) and their state machine against the device sound, plus defaults of the Mixer and Sound
 // interfaces. Names are guesses apart from the class names, pool and messages.
 #include "game/common.h"
+#include "game/pool.h"
 #include <revolution/MTX/vec.h>
 
 extern "C" {
@@ -14,16 +15,6 @@ void fn_8020A400(void);   // music shutdown
 }
 
 void* operator new(size_t size, const char* tag);
-
-class Pool {
-public:
-    Pool(const char* name, s32 count, s32 size);
-    virtual ~Pool(void);
-    void* Alloc(void);
-    void Free(void* p);
-
-    u8 pad4[0x1C];
-};
 
 // A device sound (see mixer.cpp).
 class Sound {

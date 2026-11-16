@@ -125,8 +125,8 @@ struct LightSrc {
 };
 
 template <class T>
-struct Pool {
-    Pool(void) {
+struct ItemPool {
+    ItemPool(void) {
         data = 0;
         max = 0;
         count = 0;
@@ -197,12 +197,12 @@ f32 PSVECDistance(const MVec3* a, const MVec3* b);
 }
 
 ModuleTag lbl_8055FC18;
-Pool<RNode> lbl_804C1338;
+ItemPool<RNode> lbl_804C1338;
 Bin lbl_804C1348[9];
-Pool<TexNode*> lbl_804C1390;    // sorted texture nodes
-Pool<ModelNode> lbl_804C139C;   // model instances
-Pool<TexNode> lbl_804C13A8;     // texture nodes
-Pool<Remap> lbl_804C13B4;       // texture remaps
+ItemPool<TexNode*> lbl_804C1390;    // sorted texture nodes
+ItemPool<ModelNode> lbl_804C139C;   // model instances
+ItemPool<TexNode> lbl_804C13A8;     // texture nodes
+ItemPool<Remap> lbl_804C13B4;       // texture remaps
 LightSrc lbl_804C13C0;
 
 u8 lbl_8055FC20;   // queueing (draw later)

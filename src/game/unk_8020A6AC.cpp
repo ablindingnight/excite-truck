@@ -3,6 +3,7 @@
 // CC0; file src/auto/text_8020A6AC_.c) as C and rewritten as the classes its vtables prove. Unit name is provisional;
 // class names follow the unit's own strings ("VoiceSoundMixer::End", "VoiceSound::pool"); the rest are guesses.
 #include "game/common.h"
+#include "game/pool.h"
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -50,17 +51,6 @@ void fn_80131818(ValueTable* table);
 int OptNoSound(void);
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-// A fixed-size block pool (joint.cpp declares it too).
-class Pool {
-public:
-    Pool(const char* name, s32 count, s32 size);
-    virtual ~Pool(void);
-    void* Alloc(void);
-    void Free(void* p);
-
-    u8 pad4[0x1C];
-};
 
 // One entry of the sample table: a sample name and its volume.
 struct SoundSample {

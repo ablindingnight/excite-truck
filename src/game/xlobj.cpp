@@ -248,15 +248,15 @@ struct Chunk : VecBase<T> {
 
 // Not in the unnamed namespace: its "buffer_list[]" string has its own symbol in the original.
 template <class T>
-struct Pool {
-    Pool(int n) : arr(n) {
+struct BufPool {
+    BufPool(int n) : arr(n) {
         buf = new ("buffer_list[]") T[arr.cap * 4];
         for (int i = 0; i < arr.cap; i++) {
             arr.data[arr.count++].Init(buf + i * 4, 4);
         }
         arr.count = 0;
     }
-    ~Pool(void) { SafeDeleteArray(buf); }
+    ~BufPool(void) { SafeDeleteArray(buf); }
     Chunk<T>* Alloc(void) {
         Chunk<T>* c = 0;
         if (arr.CanAdd()) {
@@ -275,7 +275,7 @@ template <class T>
 struct Cell {
     Cell(void) { head = tail = 0; }
     void Clear(void) { head = tail = 0; }
-    T* Alloc(Pool<T>* pool) {
+    T* Alloc(BufPool<T>* pool) {
         T* slot = 0;
         if (tail == 0 || !tail->CanAdd()) {
             Chunk<T>* c = pool->Alloc();
@@ -395,7 +395,7 @@ struct Grid {
         int cnt = k * k;
         n = cnt;
         cells = new ("tmp") Cell<Item*>[cnt];
-        pool = new ("tmpalloc") Pool<Item*>(cnt * 6 / 4);
+        pool = new ("tmpalloc") BufPool<Item*>(cnt * 6 / 4);
     }
     ~Grid(void) {
         delete pool;
@@ -417,7 +417,7 @@ struct Grid {
     s16 size;               // offset 0x0
     Cell<Item*>* cells;     // offset 0x4
     s32 n;                  // offset 0x8
-    Pool<Item*>* pool;      // offset 0xC
+    BufPool<Item*>* pool;      // offset 0xC
 };
 
 
@@ -426,7 +426,7 @@ static inline u32 XLWord(u32 v) { return v; }
 u32 lbl_8055FA68 = XLWord(0xFFFF0000);
 s32 lbl_8055FA6C;  // triangles drawn
 s32 lbl_8055FA70;  // fans queued
-Pool<u16*>* lbl_8055FA74;
+BufPool<u16*>* lbl_8055FA74;
 Arr<Obj>* lbl_8055FA78;
 Arr<Shadow>* lbl_8055FA7C;
 Arr<Item*>* lbl_8055FA80;
@@ -673,7 +673,7 @@ void fn_802B9B68(void) {
     fn_802B8AE0("xlobj-tris", &lbl_8055FA6C);
     fn_802B8AE0("xlobj-fans", &lbl_8055FA70);
     memset(lbl_804C0088, 0, sizeof(lbl_804C0088));
-    lbl_8055FA74 = new ("XLOFanAlloc") Pool<u16*>(0x500);
+    lbl_8055FA74 = new ("XLOFanAlloc") BufPool<u16*>(0x500);
     lbl_8055FA7C = 0;
     lbl_8055FA78 = 0;
 }

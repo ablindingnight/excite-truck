@@ -26,9 +26,9 @@ struct Entry {
     u32 key1,key2;
     float time;
 };
-struct Pool { void* items; int count,index; };
-struct Node { u32 key; Pool* pool; Node* left; Node* right; };
-struct Manager { Pool pools[6]; Node nodes[43]; Node* root; Entry entries[16]; int next; };
+struct SndPool { void* items; int count,index; };
+struct Node { u32 key; SndPool* pool; Node* left; Node* right; };
+struct Manager { SndPool pools[6]; Node nodes[43]; Node* root; Entry entries[16]; int next; };
 typedef char EntrySize[(sizeof(Entry)==0x2c)?1:-1];
 typedef char ManagerSize[(sizeof(Manager)==0x5c0)?1:-1];
 struct SoundInfo { const char* name; int pool; float gain; };
@@ -302,7 +302,7 @@ Node* fn_801B447C(Manager* self,Node* nodes,int count){if(count==1)return nodes;
 
 Node* fn_801B4528(Manager* self,Node* node,u32 key){if(key<node->key){if(node->left)return fn_801B4528(self,node->left,key);return 0;}if(key>node->key){if(node->right)return fn_801B4528(self,node->right,key);return 0;}return node;}
 
-void* fn_801B4570(Manager* self,u32 key){Pool* pool=(Pool*)self;Node* node=fn_801B4528(self,self->root,key);if(node)pool=node->pool;SoundTuple* result=(SoundTuple*)pool->items+pool->index;pool->index=(pool->index+1)%pool->count;return result;}
+void* fn_801B4570(Manager* self,u32 key){SndPool* pool=(SndPool*)self;Node* node=fn_801B4528(self,self->root,key);if(node)pool=node->pool;SoundTuple* result=(SoundTuple*)pool->items+pool->index;pool->index=(pool->index+1)%pool->count;return result;}
 
 }  // extern "C"
 

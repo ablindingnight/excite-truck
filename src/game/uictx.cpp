@@ -2,6 +2,7 @@
 // values) pushed while menus draw, with pooled allocation for the contexts and stack nodes. Names
 // are guesses apart from the messages.
 #include "game/common.h"
+#include "game/pool.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -11,17 +12,6 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 }
 
 f32 Dot(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);  // a0*b0 + a1*b1 + a2*b2 (modeinl.cpp)
-
-// A fixed-size block pool.
-// Fixed-size block pool (pool.cpp).
-class Pool {
-public:
-    Pool(const char* name, s32 count, s32 size);
-    virtual ~Pool(void);
-    void* Alloc(void);
-    void Free(void* p);
-    u8 pad4[0x20 - 0x4];
-};
 
 #include "game/uicontext.h"
 

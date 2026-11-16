@@ -2,6 +2,7 @@
 // with a local and a base transform, and their world matrices. Names are guesses apart from the
 // messages.
 #include "game/common.h"
+#include "game/pool.h"
 #include "game/math_types.h"
 
 extern "C" {
@@ -19,17 +20,6 @@ void fn_802C744C(s32 inst, const ValMatrix* m);
 }
 
 void* operator new(size_t size, const char* tag);
-
-// A fixed-size block pool.
-class Pool {
-public:
-    Pool(const char* name, s32 count, s32 size);
-    virtual ~Pool(void);
-    void* Alloc(void);
-    void Free(void* p);
-
-    u8 pad4[0x1C];
-};
 
 class JointPool : public Pool {
 public:

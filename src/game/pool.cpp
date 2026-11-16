@@ -1,33 +1,13 @@
 // Fixed-size object pool (0x8012A13C-0x8012A388): a free list carved from one MemAlloc block (or a
 // caller-supplied buffer). Names are guesses.
 #include "game/common.h"
+#include "game/pool.h"
 
 extern "C" {
 void* fn_801284E8(const char* name, u32 size);  // MemAlloc
 void fn_80128658(void* p);                      // MemFree
 void fn_802E317C(const char* fmt, ...);         // fatal: print, then exit() -> PPCHalt (never returns)
 }
-
-class Pool {
-public:
-    Pool(const char* name, s32 count, s32 size);
-    virtual ~Pool(void);
-
-    void Init(const char* name, s32 count, s32 size, void* buffer);
-    void Reset(void);
-    void* Alloc(void);
-    void Free(void* p);
-    s32 ElemSize() const { return elemSize; }
-
-    u8 panic;          // offset 0x4
-    u8 external;       // offset 0x5
-    const char* name;  // offset 0x8
-    u8* mem;           // offset 0xC
-    void** free;       // offset 0x10
-    s32 elemSize;      // offset 0x14
-    s32 count;         // offset 0x18
-    s32 used;          // offset 0x1C
-};
 
 ModuleTag lbl_8055DFE8;
 

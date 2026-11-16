@@ -4,6 +4,7 @@
 // fullscreen and screen-rectangle fills, the "mrDrawList" pooled flare objects and the light
 // direction. Names are guesses apart from the messages.
 #include "game/common.h"
+#include "game/pool.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
@@ -105,14 +106,6 @@ struct Perspective {
     f32 near;  // offset 0x0
     f32 far;   // offset 0x4
     f32 fov;   // offset 0x8
-};
-
-struct Pool {
-    Pool(const char* name, s32 count, s32 size);
-    void* Alloc(void);
-    void Free(void* item);
-    virtual ~Pool(void);
-    u8 pad4[0x1C];
 };
 
 // A pooled flare.

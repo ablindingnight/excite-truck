@@ -3,6 +3,7 @@
 // loaded synchronously or through a background queue, plus double-buffered streaming of single
 // resources. Little-endian headers are byte-swapped on load. Names are guesses.
 #include "game/common.h"
+#include "game/pool.h"
 
 // These inline definitions keep the resource messages in their retail data order.
 struct ResStrings {
@@ -76,16 +77,6 @@ void fn_802E2D74(int ms);    // sleep
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-class Pool {
-public:
-    Pool(const char* name, s32 count, s32 size);
-    virtual ~Pool(void);
-    void* Alloc(void);
-    void Free(void* p);
-
-    u8 pad[0x1C];
-};
 
 class BgObject {
 public:
