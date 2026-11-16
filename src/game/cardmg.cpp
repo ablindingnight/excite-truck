@@ -281,17 +281,17 @@ void fn_8018C5A0(u8* p, u8* desc) {
     }
     LightPart* l = lbl_80332D08;
     for (int i = 0; i < 13; i++, l++) {
+        u8* const& point = &(p + l->index)[0x1E2C];
         DFrame* bone = 0;
-        u8* q = p + l->index;
         if (l->name[0] == '$') {
             if (l->name[1] == 'W') {
-                q[0x1E2C] = fn_8018C514(p, (f32*)(p + (l->name[2] - '0') * 0x74 + 0x23DC));
+                *point = fn_8018C514(p, (f32*)(p + (l->name[2] - '0') * 0x74 + 0x23DC));
             } else {
                 fn_802E317C("cardmg: unknown special helper %s", l->name);
             }
         }
         if (fn_801E2CCC(S32(p, 0x59C), l->name, &bone)) {
-            q[0x1E2C] = fn_8018C514(p, &bone->pos.x);
+            *point = fn_8018C514(p, &bone->pos.x);
         }
     }
 }
