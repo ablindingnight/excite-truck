@@ -889,8 +889,8 @@ void fn_801942F0(u8* d, int on) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline int Expr1_fn_80194324(f32 dt) {
+/* Helper name unproven: dt < 1.5f as a by-value test; the boundary is needed (in place: fn_80194324 98.17 -> 96.18) */
+static inline int ShortStep(f32 dt) {
     return dt < 1.5f;
 }
 
@@ -909,7 +909,7 @@ void fn_80194324(u8* d) {
         if (ok) {
             f32 dt = F32(d, 0x26C) - F32(d, 0x1D0);
             f32 v;
-            if (Expr1_fn_80194324(dt)) {
+            if (ShortStep(dt)) {
                 f32 b = Cross2(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x180), F32(d, 0x184));
                 v = b + (dt / 1.5f) * (Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8)) - b);
             } else {
@@ -2524,8 +2524,8 @@ void fn_80197BD0(u8* d, u8* out) {
 
 void fn_8019813C(u8* d, const u8* p, f32 a, f32 b);
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline int Loop2_fn_80197FE4(const u8* p, int c5) {
+/* Helper name unproven: clears the flag when the slot's object has byte 0x2A5 set; the boundary is needed (in place: fn_80197FE4 99.01 -> 98.66) */
+static inline int UnlessFlagged(const u8* p, int c5) {
     u8* o = lbl_804349C0[S32(p, 0x18)];
     if (o && U8(o, 0x2A5)) {
         c5 = 0;
@@ -2558,7 +2558,7 @@ int fn_80197FE4(u8* d, const u8* p) {
         }
         int c4 = (f32)__fabs(z) < hi;
         int c5 = 1;
-        c5 = Loop2_fn_80197FE4(p, c5);
+        c5 = UnlessFlagged(p, c5);
         if (c5 && c2 && c4) {
             fn_8019813C(d, p, F32(p, 0x8), x);
             r = 1;
@@ -2586,8 +2586,8 @@ void fn_8019813C(u8* d, const u8* p, f32 a, f32 b) {
 
 // Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
 // car is) and, when the pass slows down, nudges the lateral offset away from the other car.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801981A0(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
+/* Helper name unproven: the tail of fn_801981A0; in-place cost not measured (shadowed parameter names) */
+static inline void EaseAndNudge(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
     f32 y = F32(t, 0xC);
     F32(t, 0xC) = b + (y - b) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
     if (U8(d, 0x9C)) {
@@ -2637,7 +2637,7 @@ void fn_801981A0(u8* d, u8* t) {
             f32 x = F32(t, 0x8);
             a = F32(d, 0x130);
             F32(d, 0x120) = F32(t, 0x8) = a + (x - a) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
-            Loop1_fn_801981A0(t, F32(d, 0x134), d, lo, hi, x);
+            EaseAndNudge(t, F32(d, 0x134), d, lo, hi, x);
         }
     }
     U8(d, 0x154) = 0;
