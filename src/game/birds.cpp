@@ -358,8 +358,9 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
         to[1] *= k;
     }
     f32 steer;
-    const f32 directionZ = dir[1];
-    f32 dot = to[0] * dir[0] + to[1] * directionZ;
+    f32 directionZ = dir[1];
+    f32 directionX = dir[0];
+    f32 dot = to[0] * directionX + to[1] * directionZ;
     steer = fn_80287BC8(0.0f, 1.0f);
     f32 half = b->radius / 2.0f;
     if (d2 > half * half && dot > (f32)cos(0.05235988f)) {
@@ -374,8 +375,8 @@ void fn_802A8A4C(Boid* b, const BVec* target) {
     m[2] = -s;
     m[3] = 0.0f;
     m[4] = 1.0f;
-    m[6] = s;
     m[5] = 0.0f;
+    m[6] = s;
     m[7] = 0.0f;
     m[8] = c;
     MulM(m, &b->vel, &b->vel);
