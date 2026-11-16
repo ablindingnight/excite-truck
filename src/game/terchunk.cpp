@@ -46,12 +46,14 @@ int fn_802CE850(ModelSlot* s);
 
 void* operator new[](size_t size, const char* tag);
 
-struct DebugFlags {
+// world.cpp's EventCfg (fn_801E87A8), declared as far as this unit reads it
+struct EventCfg {
     u8 pad0[0x10];
     u32 flags;  // offset 0x10
 };
 
-struct ViewCam {
+// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
+struct Camera {
     f32 m[3][3];  // offset 0x0
     ValVec3 pos;  // offset 0x24
 };
@@ -61,16 +63,17 @@ struct TrackState {
     s16 unk30;  // offset 0x30
 };
 
-struct TrackInfo {
+// carinfo.cpp's CarInfo (fn_801EA9A0), declared as far as this unit reads it
+struct CarInfo {
     int Unk30(void) const { return state->unk30; }
     u8 pad0[0x8];
     TrackState* state;  // offset 0x8
 };
 
 extern "C" {
-DebugFlags* fn_801E87A8(void);
-ViewCam* fn_802C86DC(void);
-TrackInfo* fn_801EA9A0(int i);
+EventCfg* fn_801E87A8(void);
+Camera* fn_802C86DC(void);
+CarInfo* fn_801EA9A0(int i);
 }
 
 struct ChunkPos : ValVec3 {
@@ -123,7 +126,7 @@ static inline void Identity(ValMatrix* m) {
     m->origin.z = 0.0f;
 }
 
-static inline void Rotate(ValVec3* out, const ViewCam* m, const ValVec3* d) {
+static inline void Rotate(ValVec3* out, const Camera* m, const ValVec3* d) {
     out->x = Dot3YX(d->y, m->m[0][1], d->x, m->m[0][0], d->z, m->m[0][2]);
     out->y = Dot3YX(d->y, m->m[1][1], d->x, m->m[1][0], d->z, m->m[1][2]);
     out->z = Dot3YX(d->y, m->m[2][1], d->x, m->m[2][0], d->z, m->m[2][2]);
@@ -237,7 +240,7 @@ void fn_802025D8(void) {
 }
 
 void fn_8020268C(void) {
-    DebugFlags* f = fn_801E87A8();
+    EventCfg* f = fn_801E87A8();
     int mode = 2;
     if ((f->flags >> 1) & 1) {
         mode = 1;
@@ -270,7 +273,7 @@ void fn_80202718(void) {
         fn_8020268C();
         return;
     }
-    ViewCam* cam = fn_802C86DC();
+    Camera* cam = fn_802C86DC();
     int center = fn_802022E4(&cam->pos);
     lbl_804888D0[fn_801E85B4()] = center;
     TerrainChunk* next = &lbl_8055ECC4[(center + 1) % lbl_8055ECC0];

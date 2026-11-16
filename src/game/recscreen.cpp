@@ -227,7 +227,8 @@ struct EventInfo {
     ValueNode* node;  // offset 0x20
 };
 
-struct TrackInfo {
+// aiobst.cpp's Track (GetTrack), declared as far as this unit reads it
+struct Track {
     u8 pad0[0x8];
     char name[1];  // offset 0x8
 };
@@ -257,7 +258,7 @@ HighScore* StatsGetHighScore(int slot, long event, long difficulty, int rank);
 VehicleChoice StatsUnpackChoice(u32 packed);
 const char* GetGradeDisplayName(int grade);
 EventInfo* GetEvent(int i);
-TrackInfo* GetTrack(int track);
+Track* GetTrack(int track);
 VehicleInfo* GetVehicle(int i);
 const char* GetTrackFriendlyName(const char* name);
 extern "C" const char* fn_80131234(const char* key);

@@ -24,14 +24,15 @@ struct ShadowCam {
     ValVec3 pos;  // offset 0x24
 };
 
-struct DebugFlags {
+// world.cpp's EventCfg (fn_801E87A8), declared as far as this unit reads it
+struct EventCfg {
     u8 pad0[0x10];
     u32 flags;  // offset 0x10
 };
 
 extern "C" {
 ShadowCam* fn_802C86DC(void);
-DebugFlags* fn_801E87A8(void);
+EventCfg* fn_801E87A8(void);
 }
 
 class ShadowCaster {
