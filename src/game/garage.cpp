@@ -905,7 +905,6 @@ void fn_80236954(const char* event);
 void fn_80214AF0(int s);
 f32 fn_80214D48(void);
 }
-extern "C" const f32 lbl_80563970;  // 2.0
 
 static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 
@@ -971,7 +970,7 @@ public:
                 }
                 revealed = 1;
             } else {
-                wait = lbl_80563970;
+                wait = 2.0f;
             }
         }
         panel->SetCar(model);
@@ -1112,7 +1111,6 @@ u8* fn_8025007C(int n) { return (u8*)new ("ChassisList") ChassisList(n); }
 f32 fn_80214D48(void);
 extern const f32 lbl_80563960;
 extern const f32 lbl_80563964;
-extern const f32 lbl_80563970;
 
 static inline void UpdateSlotAnims(u8* p) {
     SlotStrip* cp = (SlotStrip*)p;
@@ -1127,7 +1125,7 @@ static inline void UpdateSlotAnims(u8* p) {
             e->t = e->t + 6.0f * dt;
             if (e->t >= lbl_80563964) {
                 e->shown = e->sel;
-                e->t = e->t - lbl_80563970;
+                e->t = e->t - 2.0f;
             }
         } else {
             f32 t = e->t + 6.0f * dt;
@@ -1156,7 +1154,7 @@ void SlotStrip::Update(void) {
             e->t = e->t + 6.0f * dt;
             if (e->t >= lbl_80563964) {
                 e->shown = e->sel;
-                e->t = e->t - lbl_80563970;
+                e->t = e->t - 2.0f;
             }
         } else {
             f32 t = e->t + 6.0f * dt;
