@@ -17,8 +17,8 @@ Unlockable* GetUnlockable(int i);
 struct MenuItem {
     MenuItem(const char* n, int t, const void* d, int a0, int a1) {
         type = t;
-        data = d;
         name = n;
+        data = d;
         arg0 = a0;
         arg1 = a1;
     }
@@ -224,20 +224,25 @@ extern "C" int fn_8024497C(void) {
     return 1;
 }
 
+#pragma push
+#pragma opt_propagation off  /* Pragma unproven */
 extern "C" void fn_802449A0(void) {
-    int arrows = 1;
     UnlockList list;
+    int arrows = 1;
+    int on = 2;
+    int listKind = 5;
     MenuItem items[] = {
         MenuItem("downarrow", 2, &arrows, 0, 0),
         MenuItem("#rating", 3, list.title, 0x80, 0),
-        MenuItem("unlockable_list", 5, &list, 0, 0),
+        MenuItem("unlockable_list", listKind, &list, 0, 0),
         MenuItem(lbl_8055B860, 6, (void*)fn_8024497C, -1, 27),
-        MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
+        MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, on, 0),
         *(MenuItem*)&lbl_80498878,
     };
     MenuDesc desc = {"unlock.lyt", items, NULL, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);
 }
+#pragma pop
 
 void UnlockList::Enter(void) { fn_8013C804(); }
 
