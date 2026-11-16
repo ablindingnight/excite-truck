@@ -225,13 +225,14 @@ void Proxer::Update(int i) {
     Follower* f = fn_801B2ED0(i)->GetFollower();
     if (r->active) {
         IdealPointP* s;
-        f32 x;
         f32 y;
+        f32 x;
         f32 old;
         u8 sec;
         r->flipped = 0;
         s = f->seg;
-        x = f->lateral + (s->lat + f->t * (s->next->lat - s->lat));
+        f32 delta = s->next->lat - s->lat;
+        x = f->lateral + (s->lat + f->t * delta);
         f32 curTravel = f->travel;
         y = curTravel + s->lon;
         if ((int)r->flipped > 0) {
@@ -334,7 +335,6 @@ void Proxer::Process(void) {
     int k;
     int n;
     fn_80137C54(-1);
-    f32 two = 2.0f;
     n = count * (count - 1) / 2;
     for (k = 0; k < n; k++) {
         CarRec* a = Rec(pairs[k].a);
@@ -355,6 +355,7 @@ void Proxer::Process(void) {
         }
         pairs[k].dpos.y = dy;
         close = 0;
+        f32 two = 2.0f;
         if (PxAbs(dy) < gap * two && fn_80137140(pairs[k].a, pairs[k].b)) {
             close = 1;
         }
