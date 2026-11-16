@@ -468,7 +468,6 @@ extern u8 lbl_8055F3E8;
 extern ChalPath* lbl_8055F3E4;
 }
 
-extern const f32 lbl_80563B88;  // 1.0f
 static inline int MinI(int a, int b) { return a >= b ? b : a; }
 
 extern "C" {
@@ -533,7 +532,7 @@ static inline void BuildMap(PathScreenBuf* s) {
     }
     s->sound = fn_80207848("a_levelup.sfx", 0);
     if (s->sound) {
-        s->sound->SetVolume(lbl_80563B88);
+        s->sound->SetVolume(1.0f);
     } else {
         fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
     }
@@ -893,7 +892,6 @@ void fn_80261AE8(u8* p, u32 v) { U32(p, 0x0) = v; }
 
 }  // extern "C"
 
-extern "C" const f32 lbl_80563B90;  // 0.0
 
 extern "C" f32 fn_8023659C(void);  // seconds
 
@@ -902,7 +900,7 @@ extern "C" f32 fn_8023659C(void);  // seconds
 // members (and its table) come out after the unit's __sinit, which builds the static instance.
 class UnlockAnim : public MenuState {
 public:
-    UnlockAnim(void) { start = lbl_80563B90; }
+    UnlockAnim(void) { start = 0.0f; }
     virtual ~UnlockAnim(void) {}
     virtual void Enter(void) {
         start = fn_8023659C();
@@ -978,7 +976,7 @@ void fn_80261C68(PathScreenBuf* s) {
     }
     s->sound = fn_80207848("a_levelup.sfx", 0);
     if (s->sound) {
-        s->sound->SetVolume(lbl_80563B88);
+        s->sound->SetVolume(1.0f);
     } else {
         fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
     }
@@ -1031,7 +1029,6 @@ void fn_80230F78(u8* alpha, f32* grow, u32* color, int a);
 void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
 void fn_801308F4(char* buf, s32 size, s32 value);
-extern const f32 lbl_80563B90;  // 0.0f
 
 #define EV ((ChalEvent*)p->ev)
 
@@ -1068,7 +1065,7 @@ void EventNode::Draw(void) {
         gradeColor = 0xFFFFFFFF;
         tile = 0xFFFFFFFF;
     }
-    fn_802354A0(p->art, part, x, y, lbl_80563B90, (f32)p->w, (f32)p->h, tile);
+    fn_802354A0(p->art, part, x, y, 0.0f, (f32)p->w, (f32)p->h, tile);
     if (p->sel && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
         u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
@@ -1076,12 +1073,12 @@ void EventNode::Draw(void) {
         f32 hh = (f32)p->h / 2.0f;
         f32 nx = x - grow * hw;
         f32 ny = y + grow * hh;
-        fn_802354A0(p->art, part, nx, ny, lbl_80563B90, (1.0f + grow) * (f32)p->w,
+        fn_802354A0(p->art, part, nx, ny, 0.0f, (1.0f + grow) * (f32)p->w,
                     (1.0f + grow) * (f32)p->h, c);
     }
-    fn_80232BA4(EV->Name(), p->font, 15.0f + x, y + sTextY, color, 0x11, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(EV->Name(), p->font, 15.0f + x, y + sTextY, color, 0x11, 0.65f, 0.0f, 1.0f);
     const char* grade = EV->Grade() != -1 ? GetGradeDisplayName(EV->Grade()) : "-";
-    fn_80232BA4(grade, p->font, 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(grade, p->font, 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, 0.0f, 1.0f);
     fn_801308F4(target, 30, EV->Target());
     if (EV->Score() <= 0) {
         fn_801345D8(line, 30, "0/%s", target + 1);
@@ -1089,7 +1086,7 @@ void EventNode::Draw(void) {
         fn_801308F4(line, 30, EV->Score());
         fn_801345D8(line, 30, "%s/%s", line, target + 1);
     }
-    fn_80232BA4(line, p->font, 350.0f + x, y + sTextY, color, 0x12, 0.65f, lbl_80563B90, 1.0f);
+    fn_80232BA4(line, p->font, 350.0f + x, y + sTextY, color, 0x12, 0.65f, 0.0f, 1.0f);
 }
 
 extern "C" {

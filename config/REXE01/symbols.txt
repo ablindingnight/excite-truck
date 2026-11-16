@@ -31978,7 +31978,6 @@ lbl_80563BA8 = .sdata2:0x80563BA8; // type:object size:0x8 align:8 data:double
 @1788 = .sdata2:0x80563BC0; // type:object size:0x4 scope:local align:4 data:float
 lbl_80563BC4 = .sdata2:0x80563BC4; // type:object size:0x4 align:4 data:float
 lbl_80563BC8 = .sdata2:0x80563BC8; // type:object size:0x4 align:4 data:float
-@21 = .sdata2:0x80563BCC; // type:object size:0x4 scope:local
 @589 = .sdata2:0x80563BD0; // type:object size:0x4 scope:local align:4 data:float
 @590 = .sdata2:0x80563BD4; // type:object size:0x4 scope:local align:4 data:float
 @681 = .sdata2:0x80563BD8; // type:object size:0x4 scope:local align:4 data:float
