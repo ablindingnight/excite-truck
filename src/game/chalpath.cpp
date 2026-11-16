@@ -888,24 +888,34 @@ void fn_80261AE8(u8* p, u32 v) { U32(p, 0x0) = v; }
 
 extern "C" const f32 lbl_80563B90;  // 0.0
 
-// Animated widget base (vtable lbl_8033D618).
-class AnimWidget {
-public:
-    AnimWidget(void) {
-        f18 = lbl_80563B90;
-        f14 = 0;
-    }
-    virtual ~AnimWidget(void) {}
-    u8 pad4[0x10];  // offset 0x4
-    s32 f14;        // offset 0x14
-    f32 f18;        // offset 0x18
-};
+extern "C" f32 fn_8023659C(void);  // seconds
 
-// The unlock animation shown in the challenge unlock box (vtable lbl_80345F70; its weak dtor is the last function of the unit).
-class UnlockAnim : public AnimWidget {
+/* Class name unproven */
+// The unlock animation shown in the challenge unlock box: it flashes briefly, then lets the box continue. Its
+// members (and its table) come out after the unit's __sinit, which builds the static instance.
+class UnlockAnim : public MenuState {
 public:
-    UnlockAnim(void) {}
+    UnlockAnim(void) { start = lbl_80563B90; }
     virtual ~UnlockAnim(void) {}
+    virtual void Enter(void) {
+        start = fn_8023659C();
+        done = 0;
+        fn_80214A9C(0x1D);
+    }
+    virtual void Update(void) {
+        f32 now = fn_8023659C();
+        f32 t0 = start;
+        if (now < t0 || now - t0 > 1.5f) {
+            done = 1;
+        }
+        if (done) {
+            fn_80214AF0(0x1D);
+        }
+    }
+    virtual int Key(int key) { return done == 0; }
+
+    f32 start;  // offset 0x18
+    u8 done;    // offset 0x1C
 };
 
 ModuleTag lbl_8055F3D8;
