@@ -239,7 +239,7 @@ public:
     virtual void vf34(void);
     virtual void vf38(void) = 0;
     virtual f32 Radius(void);    // 0x3C
-    virtual void SetId(int id);  // 0x40
+    virtual void SetSurface(int id);  // 0x40 (sphcoll SetSurface__9CollShapeFi)
     void* owner;      // offset 0x4
     s32 a8;           // offset 0x8
     const void* mtx;  // offset 0xC
@@ -1928,7 +1928,7 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
                 break;
             }
             if (s) {
-                s->SetId(phys.surface);
+                s->SetSurface(phys.surface);
                 sx = fn_801FBE1C(lbl_8055EC74, id, event, s, &o->frame, o->node);
             }
             StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, sx, id);

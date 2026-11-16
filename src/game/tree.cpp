@@ -268,7 +268,7 @@ public:
     virtual void vf34(void);
     virtual void vf38(void) = 0;
     virtual f32 Radius(void);    // 0x3C
-    virtual void SetId(int id);  // 0x40
+    virtual void SetSurface(int id);  // 0x40 (sphcoll SetSurface__9CollShapeFi)
     void* owner;       // offset 0x4
     s32 a8;            // offset 0x8
     const TMtx* mtx;   // offset 0xC
@@ -484,7 +484,7 @@ CollShape* fn_802BC9B0(const TCyl* c, int id, f32 scale) {
     f32 r = c->rad * scale;
     f32 h = c->half * scale;
     TubeShape* s = new ("tree-volume") TubeShape(k, r, h);
-    s->SetId(id);
+    s->SetSurface(id);
     return s;
 }
 

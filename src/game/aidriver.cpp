@@ -41,7 +41,6 @@ void fn_8013BC54(void);
 void fn_80166A24(void);
 u8* fn_8017960C(int i);
 u32 fn_801769A8(void);
-void* fn_801938F4(void* p);
 u8* fn_801792F8(void);
 void fn_8018ADBC(void* car, f32 v);
 void fn_8018ADB4(void* car, f32 v);

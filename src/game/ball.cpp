@@ -250,7 +250,7 @@ public:
     virtual void vf34(void);
     virtual void vf38(void) = 0;
     virtual f32 Radius(void);    // 0x3C
-    virtual void SetId(int id);  // 0x40
+    virtual void SetSurface(int id);  // 0x40 (sphcoll SetSurface__9CollShapeFi)
     Phob* owner;      // offset 0x4
     s32 a8;           // offset 0x8
     const BMtx* mtx;  // offset 0xC
@@ -559,7 +559,7 @@ void Ball::Init(BodyDesc* desc) {
     explodable = d->explodable;
     launch = d->launch;
     s = new (BallStrings::VolumeName()) SphereShape(reinterpret_cast<Phob*>(this), &mtx, stiff, skin, radius, c);
-    s->SetId(1001);
+    s->SetSurface(1001);
     AddShape(s);
     b1E8 = 1;
     b1E9 = 0;

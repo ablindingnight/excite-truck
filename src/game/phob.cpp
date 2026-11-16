@@ -355,10 +355,13 @@ struct PhobType {
     Phob* (*create)(void);  // offset 0x8
 };
 
-class CenterLine {
+class CenterLine;
+
+// The utility line follower (idealline.cpp, 0x68).
+class IdealFollower {
 public:
-    CenterLine(void* a, void* b);
-    virtual ~CenterLine(void);
+    IdealFollower(int withTimes, CenterLine* line);
+    virtual ~IdealFollower(void);
     u8 pad4[0x64];
 };
 
@@ -404,7 +407,7 @@ public:
 
 ModuleTag lbl_8055E408;
 UnkStaticFFFF lbl_8055E410;
-CenterLine* lbl_8055E414;
+IdealFollower* lbl_8055E414;
 s32 lbl_8055E418[2];
 s32 lbl_8055E420[2];
 s32 lbl_8055E428[2];
@@ -979,7 +982,7 @@ void vf24__10CollVolumeFv(Phob* p) {}  // CollVolume::vf24 (empty; in every coll
 
 PhysStats* fn_80178C90(void) { return &lbl_804305C0; }
 
-CenterLine* fn_80178C9C(void) { return lbl_8055E414; }
+IdealFollower* fn_80178C9C(void) { return lbl_8055E414; }
 
 s32 fn_80178CA4(void) { return lbl_8055E444; }
 
@@ -1054,7 +1057,7 @@ void fn_80178DD4(s32 stream) {
     fn_80177814(lbl_8055E418);
     fn_80177814(lbl_8055E420);
     fn_80177814(lbl_8055E428);
-    lbl_8055E414 = new ("util_centerline") CenterLine(0, 0);
+    lbl_8055E414 = new ("util_centerline") IdealFollower(0, 0);
     memset(lbl_80433880, 0, sizeof(lbl_80433880));
     Seeds();
     for (i = 0; i < 4; i++) {

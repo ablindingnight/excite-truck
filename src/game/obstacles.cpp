@@ -480,7 +480,7 @@ public:
     virtual void vf34(void);
     virtual void vf38(void) = 0;
     virtual f32 Radius(void);    // 0x3C
-    virtual void SetId(int id);  // 0x40
+    virtual void SetSurface(int id);  // 0x40 (sphcoll SetSurface__9CollShapeFi)
     CollVolume* owner;  // offset 0x4
     s32 a8;             // offset 0x8
     const RMtx* mtx;    // offset 0xC
@@ -902,7 +902,7 @@ void Obstacle::Init(BodyDesc* d) {
         corners = 0;
     }
     if (shape) {
-        shape->SetId(kind);
+        shape->SetSurface(kind);
         AddShape(shape);
         U8(this, 0x1E8) = corners;
     }
@@ -935,7 +935,7 @@ void Obstacle::Init(BodyDesc* d) {
         fn_801DA758((u8*)this, id, path);
         U8(this, 0x222) = 1;
         for (i = 0; i < count; i++) {
-            Shape(i)->SetId(0x72);
+            Shape(i)->SetSurface(0x72);
         }
     }
 }

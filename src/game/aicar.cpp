@@ -596,7 +596,8 @@ AICommand lbl_80333158[4] = {
 };
 
 
-u8* fn_801938F4(u8* d) {
+// AIDriver::AIDriver (fn_801938F4; aidriver.cpp's new AIDriver calls it by this name).
+u8* __ct__8AIDriverFv(u8* d) {
     S32(d, 0x68) = 0;
     *(void***)d = lbl_80333348;
     S32(d, 0x70) = 10000;
