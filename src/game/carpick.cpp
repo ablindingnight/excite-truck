@@ -2,6 +2,7 @@
 // with the chassis/uv fields. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/caricontable.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menustate.h"
@@ -110,7 +111,7 @@ struct CarPickScreen {
     CarChoiceList* all;       // offset 0x0
     CarChoiceList* lists[3];  // offset 0x4
     s32 cur;                  // offset 0x10
-    struct CarIconSet* set;   // offset 0x14
+    struct CarIconTable* set;   // offset 0x14
     CarNameSlot names[6];     // offset 0x18
     CupRecordRow rows[6];     // offset 0xF0
     CarIconWidget* icons[6];  // offset 0x300
@@ -163,36 +164,7 @@ static inline void CopyName(char* d, int n, const char* s) {
 extern "C" void gxForgetTexture(u8* tex);
 void operator delete[](void* p);
 
-// One car icon: its chassis name ("_e" suffix for the second, "e" texture set) and texture rectangle.
-// Fixed-capacity name buffer (original class name unknown).
-// Append is a bounded concatenation that always terminates.
-template<int N> struct IconName {
-    char text[N];
-    operator char*() { return text; }
-    operator const char*() const { return text; }
-    static void CopyTail(const char* s, int n, char* d) {
-        while ((*d++ = *s++) != 0) {
-            if (--n <= 0) { d[-1] = 0; break; }
-        }
-    }
-    void Append(const char* s) {
-        char* d = text;
-        int n = N;
-        while (*d) { n--; d++; }
-        if (n > 0) { CopyTail(s, n, d); }
-    }
-};
 typedef char CarIconNameSize32[(sizeof(IconName<32>) == 32) ? 1 : -1];
-
-struct CarIcon {
-    IconName<32> name;  // offset 0x0
-    u8* tex;        // offset 0x20
-    u8* overlay;    // offset 0x24
-    f32 u1;         // offset 0x28
-    f32 v1;         // offset 0x2C
-    f32 u2;         // offset 0x30
-    f32 v2;         // offset 0x34
-};
 
 static inline void AppendName(const char* s, int n, char* d) {
     while (*d) {
@@ -211,46 +183,6 @@ extern "C" void fn_80131818(ValueTable* t);
 extern "C" u8* fn_802CAC28(const char* name, int flags);
 extern "C" int strcmp(const char* a, const char* b);
 
-// The car icon table (caricons.val): two icons per Car entry, plain and "_e".
-struct CarIconSet {
-    CarIconSet(void) {
-        ValueTable* t = fn_80131808("caricons.val");
-        count = 0;
-        icons = new ("cicon") CarIcon[50];
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
-            if (strcmp(n->GetName(), "Car")) {
-                continue;
-            }
-            for (int k = 0; k < 2; k++) {
-                CarIcon* c = &icons[count++];
-                CopyName(c->name, 32, n->GetValue("chassis"));
-                if (k) {
-                    c->name.Append("_e");
-                }
-                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
-                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
-                c->u1 = n->GetFloat("u1");
-                c->v1 = n->GetFloat("v1");
-                c->u2 = n->GetFloat("u2");
-                c->v2 = n->GetFloat("v2");
-            }
-        }
-        fn_80131818(t);
-    }
-    ~CarIconSet(void) {
-        for (int i = 0; i < count; i++) {
-            CarIcon* c = &icons[i];
-            gxForgetTexture(c->tex);
-            gxForgetTexture(c->overlay);
-        }
-        delete[] icons;
-    }
-    CarIcon* icons;  // offset 0x0
-    s32 count;       // offset 0x4
-};
-
-extern CarIconSet* lbl_8055F2E4;
 extern s32 lbl_8055F2E8;
 
 
@@ -289,7 +221,7 @@ int GetEveMode(void);
 void UnloadEves(void);
 void LoadModeEves(int mode);
 extern "C" CarChoiceList* fn_8027B834(int i);
-extern "C" CarIconSet* fn_8025FA18(void);
+extern "C" CarIconTable* fn_8025FA18(void);
 extern "C" int fn_8025E678(int* key);
 extern "C" int fn_8025ECBC(int* key);
 extern "C" void fn_8025F274(u8* p);
@@ -544,13 +476,7 @@ extern "C" {
 extern "C" {
 
 // Loads the car icon table on first use; reference counted.
-CarIconSet* fn_8025FA18(void) {
-    if (lbl_8055F2E8 == 0) {
-        lbl_8055F2E4 = new ("cimgr") CarIconSet;
-    }
-    lbl_8055F2E8++;
-    return lbl_8055F2E4;
-}
+CarIconTable* fn_8025FA18(void) { return CarIconTable::Acquire(); }
 
 }  // extern "C"
 
