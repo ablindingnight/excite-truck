@@ -2332,13 +2332,13 @@ int SphereShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
 void SphereShape::vf38(RVec3* lo, RVec3* hi) const {
     RVec3 c;
     RVec3 e;
-    f32 r = F32(((const u8*)this), 0x24);
+    f32 r = this->radius;
     e.x = r;
     e.y = r;
     e.z = r;
-    c.x = F32(((const u8*)this), 0x34);
-    c.y = F32(((const u8*)this), 0x38);
-    c.z = F32(((const u8*)this), 0x3C);
+    c.x = this->f34;
+    c.y = this->f38;
+    c.z = this->f3C;
     MulAdd(&lo->x, &c.x, &e.x, lbl_805622DC);
     MulAdd(&hi->x, &c.x, &e.x, lbl_805622E0);
 }
@@ -2392,10 +2392,10 @@ void FlatSphereShape::vf14(void) {}
 void AttachedSphereShape::vf0C(void) {
     u8* p = (u8*)this;
     u8* o = ((u8*&)this->owner);
-    u8* m = PTR(p, 0x54);
+    u8* m = this->attach;
     PVec3A t = *(PVec3A*)(m + 0x30);
     f32 lift = 0.06f + this->radius + F32(m, 0xC);
-    t.v[0] = t.v[0] - F32(o, 0x30) + F32(p, 0x58);
+    t.v[0] = t.v[0] - F32(o, 0x30) + this->f58;
     t.v[1] = t.v[1] - F32(o, 0x34) + lift;
     t.v[2] = t.v[2] - F32(o, 0x38);
     this->center.z = t.v[2];
@@ -2410,8 +2410,8 @@ void AttachedSphereShape::vf0C(void) {
 // Projects v onto the plane of p's frame row 1 (the result feeds a debug view that is compiled out).
 void AttachedSphereShape::vf24(const RVec3* v, const RVec3* at, int kind, void* ctx, void* by) {
     ((CollShape*)((u8*)this))->CollShape::vf24(v, at, kind, ctx, by);
-    f32 d = -PSVECDotProduct(&((CFrame*)PTR(((u8*)this), 0xC))->m[3], v);
-    CFrame* f = (CFrame*)PTR(((u8*)this), 0xC);
+    f32 d = -PSVECDotProduct(&((CFrame*)((u8*&)this->frame))->m[3], v);
+    CFrame* f = (CFrame*)((u8*&)this->frame);
     f32 x = v->x + f->m[3] * d;
     f32 y = v->y + f->m[4] * d;
     f32 z = v->z + f->m[5] * d;
@@ -2529,19 +2529,19 @@ void BoxSphereShape::vf14(void) {
     int surf;
     u8* p = (u8*)this;
     RigidBody* rb = (RigidBody*)owner;
-    at.x = F32(p, 0x34);
-    at.y = F32(p, 0x38);
-    at.z = F32(p, 0x3C);
-    if (fn_801E9F08((u8*)rb->hint, &at.x, &pos, &nrm, &surf, F32(p, 0x24) + lbl_80562380)) {
+    at.x = this->f34;
+    at.y = this->f38;
+    at.z = this->f3C;
+    if (fn_801E9F08((u8*)rb->hint, &at.x, &pos, &nrm, &surf, this->radius + lbl_80562380)) {
         if (surf == 7) {
-            if (!U8(p, 0x4C)) {
+            if (!this->b4C) {
                 rb->VelAt(&v, &pos);
                 fn_801B3B24(p, &pos, &v);
-                U8(p, 0x4C) = 1;
+                this->b4C = 1;
             }
-            F32(p, 0x50) = pos.y;
+            this->f50 = pos.y;
         } else {
-            U8(p, 0x4C) = 0;
+            this->b4C = 0;
             const RVec3* h = (const RVec3*)(p + 0x58);
             BoxCorner corners[8] = {
                 BoxCorner(-h->x, -h->y, -h->z), BoxCorner(h->x, -h->y, -h->z),
@@ -2557,7 +2557,7 @@ void BoxSphereShape::vf14(void) {
                 RVec3 imp;
                 RVec3 f;
                 RVec3 fr;
-                CFrame* m = (CFrame*)PTR(p, 0xC);
+                CFrame* m = (CFrame*)((u8*&)this->frame);
                 MulVec(&w, (RVec3*)corners + i, m);
                 w.x = w.x + m->t.x;
                 w.y = w.y + m->t.y;
@@ -2587,7 +2587,7 @@ void BoxSphereShape::vf14(void) {
                         acc[1] *= s;
                         acc[2] *= s;
                     }
-                    f32 k = depth * F32(p, 0x10) * (vn < lbl_805622D0 ? lbl_805622E0 : lbl_80562300);
+                    f32 k = depth * this->stiff * (vn < lbl_805622D0 ? lbl_805622E0 : lbl_80562300);
                     imp.x = nrm.x * k;
                     imp.y = nrm.y * k;
                     imp.z = nrm.z * k;
@@ -2600,7 +2600,7 @@ void BoxSphereShape::vf14(void) {
                     f.y = f.y + acc[1] * g;
                     f.z = f.z + acc[2] * g;
                     f32 fm = PSVECMag(&f.x);
-                    f32 lim = k * F32(p, 0x54);
+                    f32 lim = k * this->halfBox.x;
                     if (fm > lim) {
                         f32 s = lim / fm;
                         f.x *= s;
@@ -2631,17 +2631,17 @@ void BoxSphereShape::vf14(void) {
             ((SphCache*)p)->v[i] = lbl_805622D0;
         }
     }
-    if (U8(p, 0x4C)) {
+    if (this->b4C) {
         RVec3 bv;
         RVec3 drag;
         RVec3 up;
-        f32 sub = F32(p, 0x50) - F32(p, 0x38) + F32(p, 0x24);
+        f32 sub = this->f50 - this->f38 + this->radius;
         rb->VelAt(&bv, (RVec3*)(p + 0x34));
-        f32 ph = fmod(F32(p, 0x34) + 6.2831855f * lbl_8055E3C8 / 2.0f, 6.2831854820251465);
+        f32 ph = fmod(this->f34 + 6.2831855f * lbl_8055E3C8 / 2.0f, 6.2831854820251465);
         f32 s = sin(ph);
         sub += 0.0254f * (lbl_805622E0 + s);
         if (sub > lbl_805622D0) {
-            f32 r = F32(p, 0x24);
+            f32 r = this->radius;
             f32 area = 3.1415927f * (r * r);
             f32 vol = 0.4f * (4.1887903f * r * (r * r));
             f32 dk = -area * (500.0f + lbl_805623AC * PSVECMag(&bv.x));
@@ -2650,13 +2650,13 @@ void BoxSphereShape::vf14(void) {
             drag.z = bv.z * dk;
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
             f32 lift = 1000.0f + lbl_8056232C * sub;
-            sub = MinF(sub, F32(p, 0x24) * lbl_8056234C);
+            sub = MinF(sub, this->radius * lbl_8056234C);
             up.y = 9.81f * (lift * (vol * sub));
             up.x = lbl_805622D0;
             up.z = lbl_805622D0;
             rb->AddForceAt(&up, (RVec3*)(p + 0x34));
         } else {
-            U8(p, 0x4C) = 0;
+            this->b4C = 0;
         }
     }
 }
@@ -2668,22 +2668,22 @@ void OffsetSphereShape::vf1C(void) {
 void OffsetSphereShape::vf28(void) {
     u8* p = (u8*)this;
     ((SphereShape*)p)->SphereShape::vf28();
-    this->center.x = F32(p, 0x54);
-    this->center.y = F32(p, 0x58);
-    this->center.z = F32(p, 0x5C);
-    U8(p, 0x78) = 0;
+    this->center.x = this->localOffset.x;
+    this->center.y = this->localOffset.y;
+    this->center.z = this->localOffset.z;
+    this->b78 = 0;
 }
 
 SphereGroup::SphereGroup(u32 a, u32 b) : CollShape((const CFrame*)a, (CollVolume*)b, 'GRUP', 0.0f, 0.0f) {
     u8* p = (u8*)this;
-    F32(p, 0x170) = 0.0f;
-    F32(p, 0x178) = 0.0f;
-    F32(p, 0x16C) = 0.0f;
-    F32(p, 0x168) = 0.0f;
-    F32(p, 0x164) = 0.0f;
-    U32(p, 0x174) = 0;
-    U32(p, 0x17C) = 0;
-    S32(p, 0x180) = -1;
+    this->f170 = 0.0f;
+    this->f178 = 0.0f;
+    this->f16C = 0.0f;
+    this->f168 = 0.0f;
+    this->f164 = 0.0f;
+    ((u32&)this->count) = 0;
+    ((u32&)this->child) = 0;
+    this->f180 = -1;
 }
 
 SphereGroup::~SphereGroup(void) {
@@ -2694,7 +2694,7 @@ SphereGroup::~SphereGroup(void) {
 }
 
 void SphereGroup::vf0C(void) {
-    u8* p = (u8*)this; VE(PTR(p, 0x17C))->v0C(); }
+    u8* p = (u8*)this; VE(this->child)->v0C(); }
 
 void fn_801A0160(u8* p) {
     if (lbl_8055E3C4 != S32(p, 0x180)) {
@@ -2708,8 +2708,8 @@ void fn_801A0160(u8* p) {
 void SphereGroup::vf38(RVec3* lo, RVec3* hi) const {
     RVec3 c;
     RVec3 e;
-    f32 r = F32(((const u8*)this), 0x178);
-    u8* o = PTR(((const u8*)this), 0xC);
+    f32 r = this->f178;
+    u8* o = ((u8*&)this->frame);
     e.x = r;
     e.y = r;
     e.z = r;
@@ -2820,11 +2820,11 @@ static inline void HitGroup(u8* p, u8* q) {
         return;
     }
     f32 dd = CentreDist2(p, q);
-    f32 r = F32(p, 0x178) + F32(q, 0x178);
+    f32 r = ((SphereGroup*)p)->f178 + F32(q, 0x178);
     if (dd < r * r) {
         fn_801A0160(q);
         for (int i = 0; i < S32(q, 0x174); i++) {
-            fn_8019BD54((u8*)((SphGroup*)q)->vols[i], PTR(p, 0x17C), 0, 0);
+            fn_8019BD54((u8*)((SphGroup*)q)->vols[i], ((SphereGroup*)p)->child, 0, 0);
         }
     }
 }
@@ -2838,8 +2838,8 @@ void SphereGroup::vf10(u8* q) {
     } else if (type == 'BOX ') {
         RVec3 d;
         FromBoxCentre(&d, p, q);
-        if ((f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC))) < F32(q, 0x24) + F32(p, 0x178) &&
-            (f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC) + 0x18)) < F32(q, 0x2C) + F32(p, 0x178)) {
+        if ((f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC))) < F32(q, 0x24) + this->f178 &&
+            (f32)__fabs(PSVECDotProduct(&d, PTR(q, 0xC) + 0x18)) < F32(q, 0x2C) + this->f178) {
             u8* pb;
             CFrame* f = (CFrame*)PTR(q, 0xC);
             pb = ((u8*&)this->owner);
@@ -2854,7 +2854,7 @@ void SphereGroup::vf10(u8* q) {
             l.y = y;
             l.z = z;
             fn_801A0160(p);
-            for (int i = 0; i < S32(p, 0x174); i++) {
+            for (int i = 0; i < this->count; i++) {
                 fn_8019BD54((u8*)((SphGroup*)p)->vols[i], q, 0, &l);
             }
             u8* car;
@@ -2902,7 +2902,7 @@ void SphereGroup::vf10(u8* q) {
             }
         }
     } else if (type == 'SPHR' || type == 'FLSR') {
-        PVec3A c = *(PVec3A*)(PTR(p, 0x17C) + 0x38);
+        PVec3A c = *(PVec3A*)(this->child + 0x38);
         u8* pb = ((u8*&)this->owner);
         if (pb) {
             c.v[0] = c.v[0] + F32(pb, 0x30);
@@ -2910,15 +2910,15 @@ void SphereGroup::vf10(u8* q) {
             c.v[2] = c.v[2] + F32(pb, 0x38);
         }
         if (S32(q, 0x18) == 'SPHR') {
-            fn_8019BD54(q, PTR(p, 0x17C), (RVec3*)&c, 0);
+            fn_8019BD54(q, this->child, (RVec3*)&c, 0);
         } else {
-            fn_8019D06C(q, PTR(p, 0x17C), (RVec3*)&c, 0);
+            fn_8019D06C(q, this->child, (RVec3*)&c, 0);
         }
     } else if (type == 'TUBE') {
-        fn_8019EA7C(q, PTR(p, 0x17C));
+        fn_8019EA7C(q, this->child);
     } else if (type == 'RING') {
         fn_801A0160(p);
-        for (int i = 0; i < S32(p, 0x174); i++) {
+        for (int i = 0; i < this->count; i++) {
             fn_8019C854((u8*)((SphGroup*)p)->vols[i], q);
         }
     } else if (type == 'RAGD') {
@@ -2927,7 +2927,7 @@ void SphereGroup::vf10(u8* q) {
         int id;
         u8* car;
         fn_801A0160(p);
-        for (int i = 0; i < S32(p, 0x174); i++) {
+        for (int i = 0; i < this->count; i++) {
             ((VGroup*)q)->v10((u8*)((SphGroup*)p)->vols[i]);
         }
         car = ((u8*&)this->owner);
@@ -2951,7 +2951,7 @@ void SphereGroup::vf10(u8* q) {
     } else if (type == 'PMSH') {
         u8* car;
         fn_801A0160(p);
-        for (int i = 0; i < S32(p, 0x174); i++) {
+        for (int i = 0; i < this->count; i++) {
             ((VGroup*)q)->v10((u8*)((SphGroup*)p)->vols[i]);
         }
         car = ((u8*&)this->owner);
@@ -2999,11 +2999,11 @@ void SphereGroup::vf14(void) {
     int n;
     u8* car;
     fn_801A0160(((u8*)this));
-    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+    for (int i = 0; i < this->count; i++) {
         ((SphGroup*)((u8*)this))->vols[i]->v14();
     }
     if (lbl_8055E5A0) {
-        car = PTR(((u8*)this), 0x4);
+        car = ((u8*&)this->owner);
         if (IsCarObj(car)) {
             int id = S32(car, 0x1EC);
             for (int w = 0; w < 4; w++) {
@@ -3035,17 +3035,17 @@ void SphereGroup::vf14(void) {
 
 // Sweeps a ray against the group: a cheap slab test on the bounding sphere, then each member.
 int SphereGroup::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* out) {
-    const f32* c = (const f32*)(PTR(((u8*)this), 0xC) + 0x24);
+    const f32* c = (const f32*)(((u8*&)this->frame) + 0x24);
     f32 d[3];
     d[0] = c[0] - ((const f32*)from)[0];
     d[1] = c[1] - ((const f32*)from)[1];
     d[2] = c[2] - ((const f32*)from)[2];
     f32 proj = PSVECDotProduct(d, ((const f32*)dir));
-    f32 rad = F32(((u8*)this), 0x178);
+    f32 rad = this->f178;
     if (proj >= -rad && proj < *t + rad) {
         fn_801A0160(((u8*)this));
         int hit = 0;
-        for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+        for (int i = 0; i < this->count; i++) {
             u8* s = (u8*)((SphGroupDel*)((u8*)this))->vols[i];
             if (fn_8019DDFC((f32*)((const f32*)from), (f32*)((const f32*)dir), t, ((f32*)out), (f32*)(s + 0x34), F32(s, 0x24))) {
                 hit = 1;
@@ -3058,17 +3058,17 @@ int SphereGroup::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* out) {
 
 void SphereGroup::vf28(void) {
     u8* q = ((u8*)this);
-    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+    for (int i = 0; i < this->count; i++) {
         VE(PTR(q, 0x24))->v28();
         q += 4;
     }
-    S32(((u8*)this), 0x180) = -1;
+    this->f180 = -1;
 }
 
 void SphereGroup::vf44(u32 v) {
-    U32(((u8*)this), 0x1C) = v;
-    ((VSet*)PTR(((u8*)this), 0x17C))->SetB(v);
-    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+    this->x1C = v;
+    ((VSet*)this->child)->SetB(v);
+    for (int i = 0; i < this->count; i++) {
         ((SphGroupSet*)((u8*)this))->vols[i]->SetB(v);
     }
 }
@@ -3078,15 +3078,15 @@ void CollShape::vf44(u32 v) {
 
 void SphereGroup::SetSurface(int v) {
     U32(((u8*)this), 0x20) = ((u32)v);
-    ((VSet*)PTR(((u8*)this), 0x17C))->SetA(((u32)v));
-    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+    ((VSet*)this->child)->SetA(((u32)v));
+    for (int i = 0; i < this->count; i++) {
         ((SphGroupSet*)((u8*)this))->vols[i]->SetA(((u32)v));
     }
 }
 
 void SphereGroup::vf4C(void) {
-    ((VEx*)PTR(((u8*)this), 0x17C))->v4C();
-    for (int i = 0; i < S32(((u8*)this), 0x174); i++) {
+    ((VEx*)this->child)->v4C();
+    for (int i = 0; i < this->count; i++) {
         ((SphGroup*)((u8*)this))->vols[i]->v4C();
     }
 }
@@ -3152,16 +3152,16 @@ int TubeBase::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
     PVec3A on;
     f32 tr = 0.0f;
     f32 s = 0.0f;
-    u8* m = PTR(((u8*)this), 0xC);
+    u8* m = ((u8*&)this->frame);
     f32* axis = (f32*)(m + 0x18);
     f32* org = (f32*)(m + 0x24);
     if (fn_8019D484(((const f32*)from), ((const f32*)dir), org, axis, &tr, &s)) {
-        s = ClampF(s, -F32(((u8*)this), 0x28), F32(((u8*)this), 0x28));
+        s = ClampF(s, -this->half, this->half);
         if (tr > 0.0f && tr < *t) {
             MulAdd(hit.v, ((const f32*)from), ((const f32*)dir), tr);
             MulAdd(on.v, org, axis, s);
             f32 d2 = PSVECSquareDistance(hit.v, on.v);
-            f32 r = F32(((u8*)this), 0x24);
+            f32 r = this->rad;
             if (d2 < r * r) {
                 ((f32*)n)[0] = hit.v[0] - on.v[0];
                 ((f32*)n)[1] = hit.v[1] - on.v[1];
@@ -3220,8 +3220,8 @@ void TubeShape::vf38(RVec3* lo, RVec3* hi) const {
     PVec3A axis;
     RVec3 a;
     RVec3 b;
-    u8* m = PTR(((const u8*)this), 0xC);
-    f32 k = F32(((const u8*)this), 0x24);
+    u8* m = ((u8*&)this->frame);
+    f32 k = this->rad;
     org = *(PVec3A*)(m + 0x24);
     axis = *(PVec3A*)(m + 0x18);
     MulAdd(&a.x, org.v, axis.v, k);
@@ -3301,14 +3301,14 @@ void TubeShape::vf14(void) {
 
 void TubeShape::vf4C(void) {
     const u8* p = (const u8*)this;
-    if (S32(p, 0x20) < 1000) {
-        f32 x = F32(p, 0x24);
-        f32 z = F32(p, 0x28);
-        fn_801E44F4(PTR(p, 0xC), x, x, z, 0x40FFFF00);
+    if (this->surface < 1000) {
+        f32 x = this->rad;
+        f32 z = this->half;
+        fn_801E44F4(((u8*&)this->frame), x, x, z, 0x40FFFF00);
     } else {
-        f32 x = F32(p, 0x24);
-        f32 z = F32(p, 0x28);
-        fn_801E44F4(PTR(p, 0xC), x, x, z, 0x4000FF80);
+        f32 x = this->rad;
+        f32 z = this->half;
+        fn_801E44F4(((u8*&)this->frame), x, x, z, 0x4000FF80);
     }
 }
 
@@ -3380,7 +3380,7 @@ static inline void BoxCorners(RVec3* c, f32 hx, f32 hy, f32 hz) {
 
 void BoxShape::vf38(RVec3* lo, RVec3* hi) const {
     RVec3 c[8];
-    BoxCorners(c, F32(((const u8*)this), 0x24), F32(((const u8*)this), 0x28), F32(((const u8*)this), 0x2C));
+    BoxCorners(c, this->half.x, this->half.y, this->half.z);
     RVec3 w;
     *lo = ((CFrame*)VE(((const u8*)this))->v50())->t;
     *hi = ((CFrame*)VE(((const u8*)this))->v50())->t;
@@ -3423,30 +3423,30 @@ OrientedBoxShape::OrientedBoxShape(u32 a, const RVec3* c, u32 b, f32 s0, f32 s1,
 void OrientedBoxShape::vf0C(void) {
     u8* p = (u8*)this;
     CFrame* f = (CFrame*)((u8*&)this->frame);
-    ((PVec3A*)(p + 0x44))[0] = ((PVec3A*)f->m)[0];
-    ((PVec3A*)(p + 0x44))[1] = ((PVec3A*)f->m)[1];
-    ((PVec3A*)(p + 0x44))[2] = ((PVec3A*)f->m)[2];
-    MulVec((RVec3*)(p + 0x68), (RVec3*)(p + 0x38), f);
-    F32(p, 0x68) = F32(p, 0x68) + f->t.x;
-    F32(p, 0x6C) = F32(p, 0x6C) + f->t.y;
-    F32(p, 0x70) = F32(p, 0x70) + f->t.z;
+    ((PVec3A*)&this->rot)[0] = ((PVec3A*)f->m)[0];
+    ((PVec3A*)&this->rot)[1] = ((PVec3A*)f->m)[1];
+    ((PVec3A*)&this->rot)[2] = ((PVec3A*)f->m)[2];
+    MulVec((RVec3*)&this->world, (RVec3*)&this->centre, f);
+    this->world.x = this->world.x + f->t.x;
+    this->world.y = this->world.y + f->t.y;
+    this->world.z = this->world.z + f->t.z;
 }
 
 RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape((const CFrame*)a, (CollVolume*)c, 'RAGD', lbl_805622E0, lbl_805622E0) {
     u8* p = (u8*)this;
-    U32(p, 0x30) = b;
+    ((u32&)this->f30) = b;
     fn_801A2674(p, r, 0, -1);
 }
 
 void fn_801A2674(u8* p, f32 r, u32 a, u32 b) {
-    F32(p, 0x24) = r;
+    ((RagdollShape*)p)->radius = r;
     U32(p, 0x28) = a;
     U32(p, 0x2C) = b;
 }
 
 void RagdollShape::vf38(RVec3* lo, RVec3* hi) const {
-    f32 r = F32(((const u8*)this), 0x24);
-    u8* o = PTR(((const u8*)this), 0xC);
+    f32 r = this->radius;
+    u8* o = ((u8*&)this->frame);
     RVec3 e;
     e.x = lbl_805622E0;
     e.y = lbl_805622E0;
@@ -3506,7 +3506,7 @@ void RagdollShape::vf10(u8* o) {
     };
     if (((CollShape*)o)->type == 'GRUP') {
         f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)((u8*&)((CollShape*)o)->frame))->t);
-        f32 r = F32(p, 0x24) + VE(o)->v3C();
+        f32 r = this->radius + VE(o)->v3C();
         if (dd < r * r) {
             u8* box = PTR(o, 0x17C);
             RVec3 c = *(RVec3*)(box + 0x38);
@@ -3531,14 +3531,14 @@ void RagdollShape::vf10(u8* o) {
             Shift(&x, &c);
             RVec3 at;
             RVec3 push;
-            fn_801C28A8(S32(p, 0x30), &x, &(const RVec3C&)HalfExtents::Read(box), &vel, &spin, S32(p, 0x28), S32(p, 0x2C), &at, &push);
+            fn_801C28A8(this->f30, &x, &(const RVec3C&)HalfExtents::Read(box), &vel, &spin, this->f28, this->f2C, &at, &push);
             if (PSVECDotProduct(&push, &push) > lbl_805623AC) {
                 fn_801B34DC(o, 0, &at, &push, &((const RVec3C&)RVec3C(lbl_805622D0, lbl_805622E0, lbl_805622D0)).x, U32(p, 0x20));
             }
         }
     } else if (((CollShape*)o)->type == 'BOX ') {
         f32 dd = DistSq(&((CFrame*)((u8*&)this->frame))->t, &((CFrame*)VE(o)->v50())->t);
-        f32 r = F32(p, 0x24) + BoxRad(o);
+        f32 r = this->radius + BoxRad(o);
         if (dd < r * r) {
             RVec3 vel;
             vel.x = lbl_805622D0;
@@ -3553,13 +3553,13 @@ void RagdollShape::vf10(u8* o) {
                 vel = *(RVec3*)(body + 0x118);
                 spin = *(RVec3*)(body + 0x124);
             }
-            fn_801C28A8(S32(p, 0x30), (Xform*)VE(o)->v50(), &(const RVec3C&)HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
+            fn_801C28A8(this->f30, (Xform*)VE(o)->v50(), &(const RVec3C&)HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
         }
     } else if (((CollShape*)o)->type == 'POLY') {
         s32 n = 0;
         RVec3* pts;
         s32 stride;
-        fn_801C2BDC(S32(p, 0x30), &n, &pts, &stride);
+        fn_801C2BDC(this->f30, &n, &pts, &stride);
         for (int i = 0; i < n; i++) {
             RVec3 hit;
             f32 depth;
@@ -3572,13 +3572,13 @@ void RagdollShape::vf10(u8* o) {
 }
 
 u8* OrientedBoxShape::vf54(void) {
-    u8* p = (u8*)this; return p + 0x44; }
+    u8* p = (u8*)this; return (u8*)&this->rot; }
 
 f32 SphereGroup::Radius(void) {
-    u8* p = (u8*)this; return F32(p, 0x178); }
+    u8* p = (u8*)this; return this->f178; }
 
 void RagdollShape::vf4C(void) {
-    u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, F32(p, 0x24), lbl_8055E598.value); }
+    u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, this->radius, lbl_8055E598.value); }
 
 RingVol::RingVol(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
@@ -3627,17 +3627,17 @@ void RingVol::vf14(void) {}
 
 // Axis-aligned bounds: the 8 corners of the local box (+-(r + h), +-(r + h), +-h) through the frame.
 void RingVol::vf38(RVec3* lo, RVec3* hi) const {
-    f32 h = F32(((const u8*)this), 0x28);
-    f32 a = F32(((const u8*)this), 0x24) + h;
+    f32 h = this->ring;
+    f32 a = this->inner + h;
     RVec3 c[8] = {
         RVec3(-a, -a, -h), RVec3(-a, -a, h), RVec3(-a, a, -h), RVec3(-a, a, h),
         RVec3(a, -a, -h),  RVec3(a, -a, h),  RVec3(a, a, -h),  RVec3(a, a, h),
     };
     RVec3 w;
-    *lo = ((CFrame*)PTR(((const u8*)this), 0xC))->t;
-    *hi = ((CFrame*)PTR(((const u8*)this), 0xC))->t;
+    *lo = ((CFrame*)((u8*&)this->frame))->t;
+    *hi = ((CFrame*)((u8*&)this->frame))->t;
     for (int i = 0; i < 8; i++) {
-        CFrame* m = (CFrame*)PTR(((const u8*)this), 0xC);
+        CFrame* m = (CFrame*)((u8*&)this->frame);
         MulVec(&w, &c[i], m);
         w.x = w.x + m->t.x;
         w.y = w.y + m->t.y;
@@ -3656,18 +3656,18 @@ void RingVol::vf4C(void) {
 
 PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape((const CFrame*)a, (CollVolume*)0, 'POLY', f1, f2) {
     u8* p = (u8*)this;
-    U32(p, 0xDC) = 0;
-    S32(p, 0xBC) = n;
-    for (int i = 0; i < S32(p, 0xBC); i++) {
+    ((u32&)this->fDC) = 0;
+    this->n = n;
+    for (int i = 0; i < this->n; i++) {
         ((PolyVol*)p)->planes[i].n = planes[i].n;
         ((PolyVol*)p)->planes[i].d = planes[i].d;
     }
-    F32(p, 0x24) = lo->x;
-    F32(p, 0x28) = lo->y;
-    F32(p, 0x2C) = lo->z;
-    F32(p, 0x30) = hi->x;
-    F32(p, 0x34) = hi->y;
-    F32(p, 0x38) = hi->z;
+    this->lo.x = lo->x;
+    this->lo.y = lo->y;
+    this->lo.z = lo->z;
+    this->hi.x = hi->x;
+    this->hi.y = hi->y;
+    this->hi.z = hi->z;
 }
 
 ValueTable* fn_80131808(const char* name);  // open a .val table
@@ -3684,26 +3684,26 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
     U32(p, 0xC) = id;
     U32(p, 0x4) = 0;
     U32(p, 0x8) = 0;
-    F32(p, 0x10) = s0;
-    S32(p, 0x18) = 'POLY';
-    F32(p, 0x14) = s1;
-    S32(p, 0x20) = 100;
-    U32(p, 0x1C) = 0;
+    ((PolyShape*)p)->stiff = s0;
+    ((PolyShape*)p)->type = 'POLY';
+    ((PolyShape*)p)->skin = s1;
+    ((PolyShape*)p)->surface = 100;
+    ((PolyShape*)p)->x1C = 0;
     *(void**)p = __vt__9PolyShape;
     t = fn_80131808(name);
-    S32(p, 0xBC) = 0;
-    S32(p, 0xDC) = 0;
+    ((PolyShape*)p)->n = 0;
+    ((PolyShape*)p)->fDC = 0;
     ext = t->FindChild("extents");
-    *(ValVec3*)(p + 0x24) = ext->GetVec3("min");
-    *(ValVec3*)(p + 0x30) = ext->GetVec3("max");
+    *(ValVec3*)&((PolyShape*)p)->lo = ext->GetVec3("min");
+    *(ValVec3*)&((PolyShape*)p)->hi = ext->GetVec3("max");
     for (i = 0; (n = (ValueNode*)t->GetChild(i)) != 0; i++) {
         if (strcmp(n->GetName(), "plane") == 0) {
-            pl = p + S32(p, 0xBC)++ * 0x10;
+            pl = p + ((PolyShape*)p)->n++ * 0x10;
             *(ValVec3*)(pl + 0x3C) = n->GetVec3("n");
             F32(pl, 0x48) = n->GetFloat("k");
         } else if (strcmp(n->GetName(), "curve") == 0) {
             u8* c;
-            c = p + S32(p, 0xDC)++ * 0x1C;
+            c = p + ((PolyShape*)p)->fDC++ * 0x1C;
             *(ValVec3*)(c + 0xC0) = n->GetVec3("center");
             *(ValVec3*)(c + 0xCC) = n->GetVec3("axis");
             F32(c, 0xD8) = n->GetFloat("radius");
@@ -3747,8 +3747,8 @@ void PolyShape::vf38(RVec3* lo, RVec3* hi) const {
 
 f32 PolyShape::Radius(void) {
     u8* p = (u8*)this;
-    f32 a = PSVECDotProduct(p + 0x30, p + 0x30);
-    f32 b = PSVECDotProduct(p + 0x24, p + 0x24);
+    f32 a = PSVECDotProduct((u8*)&this->hi, (u8*)&this->hi);
+    f32 b = PSVECDotProduct((u8*)&this->lo, (u8*)&this->lo);
     return (f32)sqrt(b > a ? b : a);
 }
 
@@ -3824,7 +3824,7 @@ void PolyShape::vf4C(void) {
     const f32* d = (const f32*)(p + 0x3C);
     u32 color = lbl_8055E598.value;
     o = *(PVec3A*)&((CFrame*)((u8*&)this->frame))->t;
-    for (int i = 0; i < S32(p, 0xBC); d += 4, i++) {
+    for (int i = 0; i < this->n; d += 4, i++) {
         f32 len = d[3];
         v.x = d[0] * len;
         v.y = d[1] * len;
@@ -3849,15 +3849,15 @@ struct MeshRes {
 MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape((const CFrame*)id, (CollVolume*)owner, 'PMSH', 1.0f, 1.0f) {
     u8* p = (u8*)this;
     MeshRes* m = (MeshRes*)fn_801CFEAC(name);
-    PTR(p, 0x24) = (u8*)m;
+    this->mesh = (u8*)m;
     RVec3* mn = (RVec3*)(p + 0x28);
     RVec3* mx = (RVec3*)(p + 0x34);
     *mx = m->verts[0];
     *mn = *mx;
-    for (int i = 1; i < ((MeshRes*)PTR(p, 0x24))->count; i++) {
-        BoxCorner lo = VMin(*mn, ((MeshRes*)PTR(p, 0x24))->verts[i]);
+    for (int i = 1; i < ((MeshRes*)this->mesh)->count; i++) {
+        BoxCorner lo = VMin(*mn, ((MeshRes*)this->mesh)->verts[i]);
         *mn = *(RVec3*)&lo;
-        BoxCorner hi = VMax(*mx, ((MeshRes*)PTR(p, 0x24))->verts[i]);
+        BoxCorner hi = VMax(*mx, ((MeshRes*)this->mesh)->verts[i]);
         *mx = *(RVec3*)&hi;
     }
 }
@@ -3882,7 +3882,7 @@ void MeshShape::vf10(u8* o) {
         int n = 64;
         u8* sph = o;
         f32 r = F32(sph, 0x24);
-        fn_801CF080(PTR(((u8*)this), 0x24), (RVec3*)(sph + 0x34), (RVec3*)hits, &n, U32(((u8*)this), 0xC), lbl_8056234C * r);
+        fn_801CF080(this->mesh, (RVec3*)(sph + 0x34), (RVec3*)hits, &n, U32(((u8*)this), 0xC), lbl_8056234C * r);
         for (int i = 0; i < n; i++) {
             fn_8019AA18(sph, (u32)&hits[i], 0x6E, (u32)((u8*)this));
         }
@@ -3909,7 +3909,7 @@ int MeshShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
         lf.z = z;
     }
     MulVecT(&ld, dir, (CFrame*)((u8*&)this->frame));
-    if (fn_801CF828(PTR(p, 0x24), (u32)&lf, (u32)&ld, (u32)t, (u32)&ln)) {
+    if (fn_801CF828(this->mesh, (u32)&lf, (u32)&ld, (u32)t, (u32)&ln)) {
         MulVec(n, &ln, (CFrame*)((u8*&)this->frame));
         return 1;
     }
@@ -3929,7 +3929,7 @@ f32 MeshShape::Radius(void) {
 }
 
 void MeshShape::vf4C(void) {
-    u8* p = (u8*)this; fn_801CFF18(PTR(p, 0x24), U32(p, 0xC)); }
+    u8* p = (u8*)this; fn_801CFF18(this->mesh, U32(p, 0xC)); }
 
 void fn_801A44D4(u8* l) {
     for (int i = 0; i < S32(l, 0x0); i++) {
@@ -4036,17 +4036,17 @@ struct OnMsg {
 };
 
 void fn_801A4868(u8* p, u32 v) {
-    if (U8(p, 0x40) != v) {
+    if (((StaticCollObject*)p)->b40 != v) {
         OnMsg m;
-        m.id = U32(p, 0x38);
+        m.id = ((StaticCollObject*)p)->f38;
         m.on = v;
         fn_801796EC(0xC, &m, 8);
-        U8(p, 0x40) = v;
+        ((StaticCollObject*)p)->b40 = v;
     }
 }
 
 void StaticCollObject::vf0C(void) {
-    u8* p = (u8*)this; VE(PTR(p, 0x48))->v18("dyno", "unknown"); }
+    u8* p = (u8*)this; VE(this->vol)->v18("dyno", "unknown"); }
 
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
 extern const f32 lbl_805622DC;  // -1.0
@@ -4096,11 +4096,11 @@ void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {
 }
 
 u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
-    U32(p, 0x38) = a;
+    ((StaticCollObject*)p)->f38 = a;
     *(void**)p = __vt__16StaticCollObject;
-    U32(p, 0x48) = c;
-    U32(p, 0x34) = b;
-    PTR(p, 0x3C) = mesh;
+    ((u32&)((StaticCollObject*)p)->vol) = c;
+    ((StaticCollObject*)p)->f34 = b;
+    ((u8*&)((StaticCollObject*)p)->shape) = mesh;
     *(Pose12s*)(p + 0x4) = *pose;
     ((VMesh*)mesh)->v2C(p);
     fn_801A48E4(p);
@@ -4168,13 +4168,13 @@ f32 SphereShape::Radius(void) {
     u8* p = (u8*)this; return this->radius; }
 
 void SphereGroup::vf48(void) {
-    u8* p = (u8*)this; S32(p, 0x180) = -1; }
+    u8* p = (u8*)this; this->f180 = -1; }
 
 f32 BoxShape::Radius(void) {
     u8* p = (u8*)this; return this->radius; }
 
 f32 RagdollShape::Radius(void) {
-    u8* p = (u8*)this; return F32(p, 0x24); }
+    u8* p = (u8*)this; return this->radius; }
 
 f32 RingVol::Radius(void) {
     u8* p = (u8*)this; return this->ring; }
@@ -4182,20 +4182,20 @@ f32 RingVol::Radius(void) {
 int CollShape::vf18(const RVec3*, const RVec3*, f32*, RVec3*) { return 0; }
 
 u32 StaticCollObject::vf08(void) {
-    u8* p = (u8*)this; return U32(p, 0x48); }
+    u8* p = (u8*)this; return ((u32&)this->vol); }
 
 u8* StaticCollObject::vf10(void) {
     u8* p = (u8*)this; return p + 0x28; }
 
 u8 StaticCollObject::vf14(void) {
-    u8* p = (u8*)this; return U8(p, 0x40); }
+    u8* p = (u8*)this; return this->b40; }
 
 void StaticCollObject::vf18(u32 v) {
     u8* p = (u8*)this; fn_801A4868(p, v); }
 
 void StaticCollObject::vf1C(void) {
     u8* p = (u8*)this;
-    u8* o = PTR(p, 0x3C);
+    u8* o = ((u8*&)this->shape);
     if (o) {
         VE(o)->v40();
     }
@@ -4203,7 +4203,7 @@ void StaticCollObject::vf1C(void) {
 
 s32 StaticCollObject::vf20(void) {
     u8* p = (u8*)this;
-    u8* o = PTR(p, 0x3C);
+    u8* o = ((u8*&)this->shape);
     if (o) {
         return S32(o, 0x20);
     }
@@ -4211,10 +4211,10 @@ s32 StaticCollObject::vf20(void) {
 }
 
 u32 StaticCollObject::vf24(void) {
-    u8* p = (u8*)this; return U32(p, 0x34); }
+    u8* p = (u8*)this; return this->f34; }
 
 void StaticCollObject::vf28(u32 v) {
-    u8* p = (u8*)this; U32(p, 0x34) = v; }
+    u8* p = (u8*)this; this->f34 = v; }
 
 u8 lbl_8055A518 = 1;  // unused in ET (its users are gone); last object of .sdata
 

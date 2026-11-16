@@ -92,6 +92,8 @@ public:
     virtual void vf14(void);
     virtual void vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* by);
     virtual ~AttachedSphereShape(void) {}
+    u8* attach;  // offset 0x54: the attachment
+    f32 f58;     // offset 0x58
 };
 
 // A sphere bounding a box, with the box half sizes and a 24-float cache (vtable 0x80333A58; built by fn_8019F564,
@@ -101,6 +103,9 @@ public:
     virtual void vf14(void);
     virtual void vf28(void);
     virtual ~BoxSphereShape(void) {}
+    PlainRVec3 halfBox;  // offset 0x54: the box half sizes
+    f32 cache[24];       // offset 0x60
+    f32 fC0;             // offset 0xC0
 };
 
 // A sphere whose local centre is reset from +0x54 (vtable 0x80333A08). Nothing constructs it in retail.
@@ -110,6 +115,9 @@ public:
     virtual void vf1C(void);
     virtual void vf28(void);
     virtual ~OffsetSphereShape(void) {}
+    PlainRVec3 localOffset;  // offset 0x54: the local centre is reset from here
+    u8 pad60[0x78 - 0x60];
+    u8 b78;                  // offset 0x78
 };
 
 // A group of collision volumes ('GRUP', 0x184 bytes; vtable 0x803339B8): parts at 0x178 (count 0x174) and a
@@ -129,7 +137,15 @@ public:
     virtual void vf44(u32 v);
     virtual void vf48(void);
     virtual void vf4C(void);
-    u8 pad24[0x184 - 0x24];
+    u8 pad24[0x164 - 0x24];
+    f32 f164;   // offset 0x164
+    f32 f168;   // offset 0x168
+    f32 f16C;   // offset 0x16C
+    f32 f170;   // offset 0x170
+    s32 count;  // offset 0x174: parts
+    f32 f178;   // offset 0x178
+    u8* child;  // offset 0x17C: the child set
+    s32 f180;   // offset 0x180
 };
 
 // The capsule base of TubeShape (vtable 0x80333968): radius 0x24, half length 0x28 along the frame's axis.
@@ -240,7 +256,9 @@ public:
     virtual void vf0C(void);
     virtual u8* vf54(void);
     virtual ~OrientedBoxShape(void) {}
-    u8 pad38[0x74 - 0x38];  // centre 0x38, rotation 0x44, world centre 0x68
+    PlainRVec3 centre;   // offset 0x38
+    f32 rot[9];          // offset 0x44: its own copy of the frame's rotation (vf54)
+    PlainRVec3 world;    // offset 0x68: world centre
 };
 
 // A ragdoll limb volume ('RAGD'; vtable 0x80333818; built by panelvol's strips). Class name unproven.
@@ -252,6 +270,10 @@ public:
     virtual f32 Radius(void);
     virtual void vf4C(void);
     virtual ~RagdollShape(void) {}
+    f32 radius;  // offset 0x24
+    s32 f28;     // offset 0x28
+    s32 f2C;     // offset 0x2C
+    s32 f30;     // offset 0x30
 };
 
 // A ring ('RING'; vtable __vt__7RingVol): inner radius 0x24, ring width 0x28.
@@ -284,7 +306,12 @@ public:
     virtual f32 Radius(void);
     virtual void vf4C(void);
     virtual ~PolyShape(void) {}
-    u8 pad24[0xE0 - 0x24];
+    PlainRVec3 lo;   // offset 0x24: bounds
+    PlainRVec3 hi;   // offset 0x30
+    u8 pad3C[0xBC - 0x3C];
+    s32 n;           // offset 0xBC: planes
+    u8 padC0[0xDC - 0xC0];
+    s32 fDC;         // offset 0xDC
 };
 
 // A mesh volume ('PMSH'; vtable 0x80333728; built from a named mesh by obstacles, or from file data); owns its mesh
@@ -299,7 +326,8 @@ public:
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
     virtual void vf4C(void);
-    u8 pad24[0x40 - 0x24];
+    u8* mesh;  // offset 0x24: its mesh (built in place at 0x40 from file data)
+    u8 pad28[0x40 - 0x28];
 };
 
 // A static world object with a collision volume (vtable 0x803336F8; built by fn_801A4A8C, or from file data):
@@ -318,10 +346,14 @@ public:
     virtual u32 vf24(void);
     virtual void vf28(u32 v);
     virtual ~StaticCollObject(void) {}
-    u8 pad4[0x3C - 0x4];
+    u8 pad4[0x34 - 0x4];
+    u32 f34;                 // offset 0x34
+    u32 f38;                 // offset 0x38
     CollShape* shape;        // offset 0x3C
-    u8 pad40[0x44 - 0x40];
+    u8 b40;                  // offset 0x40
+    u8 pad41[0x44 - 0x41];
     StaticCollObject* next;  // offset 0x44
+    u8* vol;                 // offset 0x48: its volume, built in place
 };
 
 #endif
