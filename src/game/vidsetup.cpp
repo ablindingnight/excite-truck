@@ -73,7 +73,7 @@ ClearColor lbl_804C1328;
 extern "C" {
 
 void fn_802C2B78(f32 r, f32 g, f32 b);
-u8 fn_802C2C00(u8 on);
+int fn_802C2C00(u8 on);
 
 void fn_802C2A48(s32 mode) {
     lbl_8055FBA4 = mode;
@@ -138,7 +138,7 @@ void fn_802C2BB8(f32* r, f32* g, f32* b) {
     }
 }
 
-u8 fn_802C2C00(u8 on) {
+int fn_802C2C00(u8 on) {
     u8 old = lbl_804C1328.on;
     lbl_804C1328.on = on;
     fn_802D0014(lbl_804C1328.r, lbl_804C1328.g, lbl_804C1328.on ? lbl_804C1328.b : 0.0f);
