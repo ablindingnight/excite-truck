@@ -6,15 +6,12 @@
 #include "game/common.h"
 #include "game/math_types.h"
 #include "game/vec3_init.h"
+#include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
 typedef Vec3Storage TVec;
-
-struct PVec {
-    f32 x, y, z;
-};
 
 struct TFrame {
     PVec x;    // offset 0x0

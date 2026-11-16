@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/rmtx.h"
 #include "game/vec3_init.h"
+#include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -15,10 +16,6 @@ void* memset(void* p, int c, u32 n);
 int strcasecmp(const char* a, const char* b);
 double fabs(double x);
 }
-
-struct PVec {
-    f32 x, y, z;
-};
 
 // One corner of a fabric quad (0x18).
 struct Corner {

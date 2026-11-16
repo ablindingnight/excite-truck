@@ -5,6 +5,7 @@
 // Hermite curves with slerped key orientations that loop, reverse (turning the key rotations around)
 // or restock at the end. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -18,10 +19,6 @@ double sin(double x);
 void* __construct_array(void* p, void* ctor, void* dtor, u32 size, u32 n);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 }
-
-struct PVec {
-    f32 x, y, z;
-};
 
 struct Quat {
     f32 x, y, z, w;

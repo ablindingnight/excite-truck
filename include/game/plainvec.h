@@ -28,4 +28,19 @@ struct ValV3 : ValVec3 {
     }
 };
 
+// x, y, z with no constructor; Set from three floats (precip) or from a ValVec3 (trackobj).
+struct PVec {
+    void Set(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+    void Set(const ValVec3& v) {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+    }
+    f32 x, y, z;
+};
+
 #endif

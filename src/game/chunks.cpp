@@ -5,6 +5,7 @@
 // tinted with a dimmed copy of each car's colour. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/rmtx.h"
+#include "game/plainvec.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -28,10 +29,6 @@ static inline void StrNCopy(char* dst, const char* src, int len) {
         }
     }
 }
-
-struct PVec {
-    f32 x, y, z;
-};
 
 
 // The hit point is copied from p as a raw 12-byte block (word loads/stores), not field by field.

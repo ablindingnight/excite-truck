@@ -8,6 +8,7 @@
 #include "game/rvec.h"
 #include "game/shapes.h"
 #include "game/math_types.h"
+#include "game/plainvec.h"
 #include <stdarg.h>
 
 void* operator new(size_t size, const char* tag);
@@ -46,15 +47,6 @@ static inline void StrNCat(char* d, const char* s, int n) {
         StrNCopy(d, s, n);
     }
 }
-
-struct PVec {
-    void Set(const ValVec3& v) {
-        x = v.x;
-        y = v.y;
-        z = v.z;
-    }
-    f32 x, y, z;
-};
 
 // An object's placement: three basis vectors and the origin (0x30).
 struct OFrame {

@@ -10,6 +10,7 @@
 extern const f32 lbl_80564D78;
 const f32 lbl_80564D78 = 2.0f;
 #include "game/math_types.h"
+#include "game/plainvec.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -29,10 +30,6 @@ double atan(double x);
 double atan2(double y, double x);
 double sqrt(double x);
 }
-
-struct PVec {
-    f32 x, y, z;
-};
 
 // Three basis vectors and the origin (0x30).
 struct Frame {
