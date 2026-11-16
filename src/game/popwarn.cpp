@@ -72,7 +72,7 @@ u8* fn_8023512C(const char* art);
 void operator delete(void* p);
 
 extern void* lbl_80343780[];
-extern const ModeEntry lbl_802FA3B4[5];
+extern "C" const ModeEntry lbl_802FA3B4[5];  // defined inside the extern "C" block below
 extern s32 lbl_8055BEF0;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
