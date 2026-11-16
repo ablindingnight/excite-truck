@@ -294,6 +294,6 @@ int fn_8026B768(int player, int cam) {
     return 0;
 }
 
-u8 fn_8026B7B4(int player) { return lbl_8049A0E8[player].active; }
+int fn_8026B7B4(int player) { return lbl_8049A0E8[player].active; }
 
 }  // extern "C"
