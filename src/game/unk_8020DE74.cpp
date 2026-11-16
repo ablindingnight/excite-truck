@@ -306,18 +306,19 @@ static inline void HudPart_SetAlpha(HudPart *p, float alpha) {
     }
 }
 
+static inline float HudDot3(float ax, float bx, float ay, float by, float az, float bz) { return ax * bx + ay * by + az * bz; }
 static inline void HudXform(HudVec *out, const HudVec *in, const float *m) {
     if (out == in) {
-        float y = in->y;
-        float x = in->x;
-        float z = in->z;
-        out->x = x * m[0] + y * m[3] + z * m[6];
-        out->y = x * m[1] + y * m[4] + z * m[7];
-        out->z = x * m[2] + y * m[5] + z * m[8];
+        float x = HudDot3(in->x, m[0], in->y, m[3], in->z, m[6]);
+        float y = HudDot3(in->x, m[1], in->y, m[4], in->z, m[7]);
+        float z = HudDot3(in->x, m[2], in->y, m[5], in->z, m[8]);
+        out->x = x;
+        out->y = y;
+        out->z = z;
     } else {
-        out->x = m[0] * in->x + in->y * m[3] + in->z * m[6];
-        out->y = m[1] * in->x + in->y * m[4] + in->z * m[7];
-        out->z = m[2] * in->x + in->y * m[5] + in->z * m[8];
+        out->x = HudDot3(in->x, m[0], in->y, m[3], in->z, m[6]);
+        out->y = HudDot3(in->x, m[1], in->y, m[4], in->z, m[7]);
+        out->z = HudDot3(in->x, m[2], in->y, m[5], in->z, m[8]);
     }
 }
 
@@ -470,7 +471,8 @@ void CarSound::Update() {
     for (k = 0; k < 4; k++) {
         HudVec p;
         v = h->vehicle;
-        HudXform(&p, (HudVec *)(wheel + 0x30), (float *)(v + 0x3C));
+        HudVec *in = (HudVec *)(wheel + 0x30);
+        HudXform(&p, in, (float *)(v + 0x3C));
         p.x += VF32(v, 0x60);
         p.y += VF32(v, 0x64);
         p.z += VF32(v, 0x68);
