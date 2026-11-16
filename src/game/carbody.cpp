@@ -22,6 +22,11 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+// Helpers unproven (names and existence): variable-first operands and one constant load per vector triple.
+static inline f32 CbMul(f32 a, f32 b) { return a * b; }
+template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; b->x = pos->x + vel->x * kb; a->z = pos->z + vel->z * ka; b->z = pos->z + vel->z * kb; a->y = pos->y + vel->y * ka; b->y = pos->y + vel->y * kb; }
+static inline f32 CbAdd(f32 a, f32 b) { return a + b; }
+static inline void CbScaleTo(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -303,7 +308,6 @@ u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 
 // TODO(unpool): pool labels still read by name. As literals these sites drop (x - 0.0f, x / 1.0f and
 // literal * literal fold away; creation order moves), so they need the original helper forms first.
-extern const f32 lbl_80561CA0, lbl_80561CAC, lbl_80561CB0, lbl_80561CD0, lbl_80561CDC, lbl_80561D34, lbl_80561D38, lbl_80561D98, lbl_80561D9C, lbl_80561DA4, lbl_80561DB8, lbl_80561DBC, lbl_80561DC0, lbl_80561DD0, lbl_80561E10, lbl_80561E14, lbl_80561E48, lbl_80561E6C, lbl_80561E70;
 
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -315,10 +319,10 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x1C) = v[1];
     F32(p, 0x18) = 1.3515152f * (v[5]);
     F32(p, 0x28) = v[3];
-    f32 hp = lbl_80561CA0 * (5252.0f * v[0] / FMax(v[1], 0.00001f));
+    f32 hp = 1.3515152f * (5252.0f * v[0] / FMax(v[1], 0.00001f));
     F32(p, 0x24) = 0.0f;
     f32 r0 = v[3];
-    f32 peak = v[2] * lbl_80561CA0;
+    f32 peak = CbMul(v[2], 1.3515152f);
     f32 d = F32(p, 0x1C) - r0;
     f32 a = (hp - peak) / FMax(d * d, 0.00001f);
     F32(p, 0x0) = a;
@@ -1523,7 +1527,7 @@ void fn_80183E7C(u8* p) {
                 f32 t = ((CarBody*)p)->f2614 + 0.016683351f;
                 ((CarBody*)p)->f2614 = t;
                 if (((CarBody*)p)->speed < 8.0f) {
-                    ((CarBody*)p)->f2614 = t + lbl_80561DB8;
+                    ((CarBody*)p)->f2614 = CbAdd(t, 0.025025027f);
                 }
             } else {
                 ((CarBody*)p)->f2614 = 0.0f;
@@ -1534,7 +1538,7 @@ void fn_80183E7C(u8* p) {
         if (!(((CarBody*)p)->f2614 < 3.0f)) {
             if (((CarBody*)p)->mtx.rot.y.y > 0.5f) {
                 ((CarBody*)p)->f2614 = 0.0f;
-            } else if (!(AbsNarrow(((CarBody*)p)->mtx.rot.z.y) > lbl_80561CDC)) {
+            } else if (!(AbsNarrow(((CarBody*)p)->mtx.rot.z.y) > 0.5f)) {
                 f32 side = -((CarBody*)p)->mtx.rot.x.y;
                 if ((f32)__fabs(-((CarBody*)p)->mtx.rot.x.y) < 0.01f) {
                     side = 0.1f;
@@ -1568,9 +1572,7 @@ void fn_80183E7C(u8* p) {
     }
     if (((CarBody*)p)->f2648 >= 1 && ((CarBody*)p)->f2648 <= 6) {
         RVec3 t;
-        t.x = ((CarBody*)p)->avel.x * lbl_80561DBC;
-        t.y = ((CarBody*)p)->avel.y * lbl_80561DBC;
-        t.z = ((CarBody*)p)->avel.z * lbl_80561DBC;
+        CbScaleTo(&t.x, &((CarBody*)p)->avel.x, -10000.0f);
         if (NearZero(((CarBody*)p)->f2650)) {
             ((RigidBody*)p)->AddTorque((const RVec3*)&t);
         }
@@ -1605,8 +1607,8 @@ void fn_80183E7C(u8* p) {
     }
     f32 dn;
     if (((CarBody*)p)->f2590 > 0.001f && (dn = PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118))) > 0.001f &&
-        dn < lbl_80561DA4 && ((CarBody*)p)->airborne > 0) {
-        f32 k = (lbl_80561DA4 - dn) * ((CarBody*)p)->mass / lbl_80561D9C;
+        dn < 4.4444447f && ((CarBody*)p)->airborne > 0) {
+        f32 k = (4.4444447f - dn) * ((CarBody*)p)->mass / 0.016683351f;
         RVec3 f;
         f.x = ((CarBody*)p)->f25A4 * k;
         f.y = ((CarBody*)p)->f25A8 * k;
@@ -1636,12 +1638,7 @@ void fn_80183E7C(u8* p) {
         f32 into = -PSVECDotProduct((const Vec*)&dir, (const Vec*)(p + 0x25A4));
         RVec3 behind;
         RVec3 ahead;
-        ahead.x = ((CarBody*)p)->mtx.pos.x + ((CarBody*)p)->vel.x * lbl_80561CDC;
-        behind.x = ((CarBody*)p)->mtx.pos.x + ((CarBody*)p)->vel.x * lbl_80561CB0;
-        ahead.z = ((CarBody*)p)->mtx.pos.z + ((CarBody*)p)->vel.z * lbl_80561CDC;
-        behind.z = ((CarBody*)p)->mtx.pos.z + ((CarBody*)p)->vel.z * lbl_80561CB0;
-        ahead.y = ((CarBody*)p)->mtx.pos.y + ((CarBody*)p)->vel.y * lbl_80561CDC;
-        behind.y = ((CarBody*)p)->mtx.pos.y + ((CarBody*)p)->vel.y * lbl_80561CB0;
+        CbProbe(&ahead, &behind, &((CarBody*)p)->mtx.pos, &((CarBody*)p)->vel, 0.5f, -2.0f);
         ahead.y = fn_801E9FDC((s16*)(p + 0x6C), ahead.x, ahead.z);
         behind.y = fn_801E9FDC((s16*)(p + 0x6C), behind.x, behind.z);
         RVec3 slope;
@@ -1932,7 +1929,7 @@ void fn_80183E7C(u8* p) {
         fn_801DF074(5, 1);
     }
     if (((CarBody*)p)->airborne == 0) {
-        ((CarBody*)p)->f2618 = ((CarBody*)p)->f2618 + lbl_80561D9C;
+        ((CarBody*)p)->f2618 += 0.016683351f;
     } else {
         ((CarBody*)p)->f2618 = 0.0f;
         sqrt(((CarBody*)p)->vel.x * ((CarBody*)p)->vel.x + ((CarBody*)p)->vel.z * ((CarBody*)p)->vel.z);
@@ -1994,12 +1991,12 @@ void fn_80183E7C(u8* p) {
         back.x = ((CarBody*)p)->mtx.pos.x + ((CarBody*)p)->mtx.rot.z.x * -2.0f;
         back.y = ((CarBody*)p)->mtx.pos.y + ((CarBody*)p)->mtx.rot.z.y * -2.0f;
         f32 db = Ramp(back.y, surf, surf - 0.4f);
-        back.z = ((CarBody*)p)->mtx.pos.z + ((CarBody*)p)->mtx.rot.z.z * lbl_80561CB0;
+        back.z = ((CarBody*)p)->mtx.pos.z + ((CarBody*)p)->mtx.rot.z.z * -2.0f;
         f32 tb = Clamp01((((CarBody*)p)->f25C4 - 0.2f) / 0.6f);
         RVec3 fb;
         fb.x = 0.0f;
-        fb.z = lbl_80561CAC;
-        fb.y = (lbl_80561CAC + db * lbl_80561CD0) * (0.1f + tb * lbl_80561DD0) * (0.3f * grow) * ((CarBody*)p)->mass /
+        fb.z = 0.0f;
+        fb.y = LerpT(db, 0.0f, 1.0f) * LerpT(tb, 0.1f, 1.0f) * (0.3f * grow) * ((CarBody*)p)->mass /
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
     } else {
@@ -2039,7 +2036,7 @@ void fn_80183E7C(u8* p) {
                 f32 vmax = ((CarBody*)p)->f5A8;
                 if (((CarBody*)p)->speed > vmax) {
                     f32 over = Ramp(((CarBody*)p)->speed, vmax, 2.2222223f + vmax);
-                    f32 k = heatTune.v[12] * lbl_80561D98 * -(lbl_80561CAC + over * lbl_80561CD0) * ((CarBody*)p)->mass /
+                    f32 k = CbMul(heatTune.v[12], 9.81f) * -LerpT(over, 0.0f, 1.0f) * ((CarBody*)p)->mass /
                             ((CarBody*)p)->speed;
                     RVec3 f;
                     f.x = ((CarBody*)p)->vel.x * k;
@@ -2195,7 +2192,7 @@ void fn_80183E7C(u8* p) {
         f32 spin = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48));
         f32 fs = Clamp01((((CarBody*)p)->speed - 6.6666665f) / 24.444445f);
         f32 fa = Clamp01((((CarBody*)p)->f2618 - 0.1f) / 0.20000002f);
-        f32 k = 30000.0f * ((CarBody*)p)->f5E4 * ((CarBody*)p)->f5E4 * (1.0f + fa * lbl_80561E14) *
+        f32 k = 30000.0f * ((CarBody*)p)->f5E4 * ((CarBody*)p)->f5E4 * (1.0f + CbMul(fa, -0.8f)) *
                 (yaw * (1.0f + fs * -0.9f) - spin);
         RVec3 t;
         t.x = ((CarBody*)p)->mtx.rot.y.x * k;
@@ -2216,8 +2213,8 @@ void fn_80183E7C(u8* p) {
                 grav = LerpT(__fabsf(pitch), grav, 0.5f * grav);
                 gravUp = LerpT(AbsNarrow(pitch), gravUp, 0.5f * gravUp);
             } else if (pitch > 0.01f) {
-                grav = LerpT(__fabsf(pitch), grav, lbl_80561CDC + grav);
-                gravUp = gravUp + AbsNarrow(pitch) * (lbl_80561CDC + gravUp - gravUp);
+                grav = LerpT(__fabsf(pitch), grav, 0.5f + grav);
+                gravUp = gravUp + AbsNarrow(pitch) * (0.5f + gravUp - gravUp);
             }
         }
         if (!((CarBody*)p)->f2625 && ((CarBody*)p)->f2618 >= 0.3f) {
@@ -2243,7 +2240,7 @@ void fn_80183E7C(u8* p) {
     if (fast || ((CarBody*)p)->f25F4 >= 0.1f || ((CarBody*)p)->f25E4 <= 0.9f) {
         ((CarBody*)p)->f26A8 = 0.0f;
     } else {
-        ((CarBody*)p)->f26A8 = ((CarBody*)p)->f26A8 + lbl_80561D9C;
+        ((CarBody*)p)->f26A8 += 0.016683351f;
     }
     u32 stuck = ((CarBody*)p)->f26A8 > 2.0f;
     if (stuck != ((CarBody*)p)->f26AC) {
@@ -2251,11 +2248,11 @@ void fn_80183E7C(u8* p) {
         fn_801BF1B8(PTR(p, 0x1EC), stuck);
     }
     if (((CarBody*)p)->f26E0) {
-        f32 sy = ((CarBody*)p)->f26E8 * lbl_80561E48;
-        f32 vy = ((CarBody*)p)->f26F4 * lbl_80561E10;
-        f32 sz = ((CarBody*)p)->f26EC * lbl_80561E48;
-        f32 vz = ((CarBody*)p)->f26F8 * lbl_80561E10;
-        f32 ax = ((CarBody*)p)->f26E4 * lbl_80561E48 + ((CarBody*)p)->f26F0 * lbl_80561E10;
+        f32 sy = ((CarBody*)p)->f26E8 * -30.0f;
+        f32 vy = ((CarBody*)p)->f26F4 * -3.0f;
+        f32 sz = ((CarBody*)p)->f26EC * -30.0f;
+        f32 vz = ((CarBody*)p)->f26F8 * -3.0f;
+        f32 ax = ((CarBody*)p)->f26E4 * -30.0f + ((CarBody*)p)->f26F0 * -3.0f;
         if (((CarBody*)p)->airborne > 0) {
             f32 r = 2.0f * ((CarBody*)p)->f2604;
             ((CarBody*)p)->f26FC = ((CarBody*)p)->f2600;
@@ -2267,15 +2264,15 @@ void fn_80183E7C(u8* p) {
                  acc.y * -0.02f;
         ax = ax + acc.x * -0.02f;
         f32 az = sz + vz + acc.z * -0.02f;
-        f32 nvx = ((CarBody*)p)->f26F0 + ax * lbl_80561D9C;
-        f32 nvy = ((CarBody*)p)->f26F4 + ay * lbl_80561D9C;
-        f32 nvz = ((CarBody*)p)->f26F8 + az * lbl_80561D9C;
-        f32 dx = nvx * lbl_80561D9C;
-        f32 dy = nvy * lbl_80561D9C;
+        f32 nvx = ((CarBody*)p)->f26F0 + CbMul(ax, 0.016683351f);
+        f32 nvy = ((CarBody*)p)->f26F4 + CbMul(ay, 0.016683351f);
+        f32 nvz = ((CarBody*)p)->f26F8 + CbMul(az, 0.016683351f);
+        f32 dx = CbMul(nvx, 0.016683351f);
+        f32 dy = CbMul(nvy, 0.016683351f);
         int lean = ((CarBody*)p)->f26FC > 0.3f;
         ((CarBody*)p)->f26F0 = nvx;
         ((CarBody*)p)->f26F4 = nvy;
-        f32 dz = nvz * lbl_80561D9C;
+        f32 dz = CbMul(nvz, 0.016683351f);
         ((CarBody*)p)->f26F8 = nvz;
         ((CarBody*)p)->f26E4 = ((CarBody*)p)->f26E4 + dx;
         ((CarBody*)p)->f26E8 = ((CarBody*)p)->f26E8 + dy;
@@ -2307,7 +2304,7 @@ extern "C" {
 // out the throttle/brake/steer limits (water, offroad, airborne, boost) before the drive model update.
 // MATCHING-AID: invented helpers (the target materialises these compares as values, mfcr); unproven.
 static inline int CarHot(u8* car) { return ((CarBody*)car)->f258C > 0.001f; }
-static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > lbl_80561CDC; }
+static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
 
 void fn_80186DE8(void) {
     CbSolMass* mass;
@@ -2356,9 +2353,7 @@ void fn_80186DE8(void) {
         m->torque = CbSolVec4(T.x, T.y, T.z);
         if (PSVECDotProduct((const Vec*)(car + 0x124), (const Vec*)(car + 0x124)) > 100.0f) {
             PSVECNormalize((const Vec*)(car + 0x124), (Vec*)(car + 0x124));
-            ((CarBody*)car)->avel.x = ((CarBody*)car)->avel.x * lbl_80561D34;
-            ((CarBody*)car)->avel.y = ((CarBody*)car)->avel.y * lbl_80561D34;
-            ((CarBody*)car)->avel.z = ((CarBody*)car)->avel.z * lbl_80561D34;
+            CbScaleTo(&((CarBody*)car)->avel.x, &((CarBody*)car)->avel.x, 10.0f);
         }
         m->pos = CbSolVec4(((CarBody*)car)->mtx.pos.x, ((CarBody*)car)->mtx.pos.y, ((CarBody*)car)->mtx.pos.z);
         m->vel = CbSolVec4(((CarBody*)car)->vel.x, ((CarBody*)car)->vel.y, ((CarBody*)car)->vel.z);
@@ -2433,7 +2428,7 @@ void fn_80186DE8(void) {
             } else {
                 d = 0.0f;
             }
-            wet = 0.1f + d * lbl_80561DD0;
+            wet = LerpT(d, 0.1f, 1.0f);
         } else {
             wet = 1.0f;
         }
@@ -2443,7 +2438,7 @@ void fn_80186DE8(void) {
         f32 gas;
         f32 steerK;
         landing = 0;
-        if (lbl_8055E3C8 - ((CarBody*)car)->f26DC < lbl_80561CDC && ((CarBody*)car)->speed < 8.888889f) {
+        if (lbl_8055E3C8 - ((CarBody*)car)->f26DC < 0.5f && ((CarBody*)car)->speed < 8.888889f) {
             landing = 1;
         }
         if (((CarBody*)car)->airborne >= 3 && !landing) {
@@ -2464,7 +2459,7 @@ void fn_80186DE8(void) {
                 AddScaled(force, 0x54 + car, k);
             }
             if (((CarBody*)car)->f5EC > 0.01f && (s32)fn_8018B06C(car) > 0 && ((CarBody*)car)->f25E4 < 0.1f &&
-                ((CarBody*)car)->f25E0 > lbl_80561CDC) {
+                ((CarBody*)car)->f25E0 > 0.5f) {
                 f32 k = 9.81f * (lbl_8055E4E8[1] * (((CarBody*)car)->f25E0 * ((CarBody*)car)->mass));
                 AddScaled(force, car + 0x54, k);
             }
@@ -2484,7 +2479,7 @@ void fn_80186DE8(void) {
                 f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
                 f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
                 f32 lo = 2.4f * boost;
-                k = (LerpT(Clamp01(t), lo, lbl_80561D38 * boost)) * ((CarBody*)car)->f25E0 * ((CarBody*)car)->mass;
+                k = (LerpT(Clamp01(t), lo, 0.6f * boost)) * ((CarBody*)car)->f25E0 * ((CarBody*)car)->mass;
                 AddScaled(force, car + 0x54, k);
             }
             ((RigidBody*)car)->AddForceAt((const RVec3*)force, (const RVec3*)(car + 0x60));
@@ -2509,10 +2504,10 @@ void fn_80186DE8(void) {
             a = F32(car, wh * 0x74 + 0x23B4);
             f32 s1[4] = {0};
             f32 s0[4] = {0};
-            s1[wh] = (a - lbl_80561E6C) * (a - lbl_80561E70) * (0.09829f * a) * 0.08726646f;
+            s1[wh] = (a - 6.2831855f) * (a - 3.1415927f) * (0.09829f * a) * 0.08726646f;
             b = fmod(1.5707964f + a, 6.2831854820251465);
             x->v130 = CbVec4(s1[0], s1[1], s1[2], s1[3]).Sol();
-            s0[wh] = -((b - lbl_80561E6C) * (b - lbl_80561E70) * (0.09829f * b)) * 0.08726646f;
+            s0[wh] = -((b - 6.2831855f) * (b - 3.1415927f) * (0.09829f * b)) * 0.08726646f;
             x->v140 = CbVec4(s0[0], s0[1], s0[2], s0[3]).Sol();
         }
         player = 0;
@@ -2578,7 +2573,7 @@ void fn_80186DE8(void) {
             f32 spin = w1[j];
             w->spin = spin;
             w->loadN = load / 0.10471976f;
-            w1[j] = fmod(lbl_80561E6C + spin, 6.2831854820251465);
+            w1[j] = fmod(6.2831855f + spin, 6.2831854820251465);
             w->prevSlip = w->slip;
             w->slip = w2[j];
             w->steer = asin(steer * w4[j] + w3[j]);
@@ -2604,7 +2599,7 @@ void fn_80186DE8(void) {
             if (comp > 20000.0f) {
                 c->pts[5 + j] = CbSolVec4(0.0f, 0.0f, 0.0f);
                 CbVec4 half = CbVec4(c->v30);
-                half[j] = half[j] * lbl_80561CDC;
+                half[j] = CbMul(half[j], 0.5f);
                 c->v30 = half.Sol();
             }
             fl = w->flags & 0xE;
@@ -2636,7 +2631,7 @@ void fn_80186DE8(void) {
             throttle = 0.0f;
             ((CarBody*)car)->f25E4 = 1.0f;
         }
-        if (((CarBody*)car)->f2588 > lbl_80561DC0) {
+        if (((CarBody*)car)->f2588 > 0.001f) {
             U32(car, 0x268C) = 10;
             if (((CarBody*)car)->speed > 0.44444445f * heatTune.v[11]) {
                 ((CarBody*)car)->f25E4 = FMax(((CarBody*)car)->f25E4, heatTune.v[10]);
@@ -2661,7 +2656,7 @@ void fn_80186DE8(void) {
             }
             if (sp > 0.0f) {
                 t = Clamp01((sp / 20.0f) * 0.44444445f);
-                steerK = steerK * (1.0f - lbl_80561CDC * t) * (1.0f - lbl_80561D38 * t);
+                steerK = steerK * (1.0f - 0.5f * t) * (1.0f - 0.6f * t);
             }
         }
         slide = (f32)__fabs(((CarBody*)car)->f25CC) - 1.3f * AbsNarrow(((CarBody*)car)->f25D8) - 3.0f;
@@ -2673,7 +2668,7 @@ void fn_80186DE8(void) {
             cut = 0.0f;
         } else {
             if (((CarBody*)car)->f267C) {
-                f32 s = 4.0f * steerK - lbl_80561D38 * ((CarBody*)car)->avel.y;
+                f32 s = 4.0f * steerK - 0.6f * ((CarBody*)car)->avel.y;
                 if (cut < s) {
                     s = cut;
                 }
@@ -2700,7 +2695,7 @@ void fn_80186DE8(void) {
             throttle = 0.0f;
         }
         if ((f32)!((f32)__fabs(water[6]) <= __float_epsilon[0]) != 0.0f) {  // a bool converted to float
-            brake = lbl_80561CAC;
+            brake = 0.0f;
         }
         boosting = 1;
         ((CarBody*)car)->f25FC = throttle;
@@ -2722,7 +2717,7 @@ void fn_80186DE8(void) {
         } else if (off) {
             vmax = vmax * lbl_8055A3A4;
         }
-        if (((CarBody*)car)->speed > vmax && brake > lbl_80561CDC && U32(car, 0x10) == 'PCAR') {
+        if (((CarBody*)car)->speed > vmax && brake > 0.5f && U32(car, 0x10) == 'PCAR') {
             out = 1.0f - 0.225f * (((CarBody*)car)->speed - vmax);
             if (0.0f > out) {
                 out = 0.0f;
@@ -2820,7 +2815,7 @@ void CarBody::vf20(void) {
         (*(CbFx**)(p + 0x2584))->Update();
     }
     if (F32(p, 0x269C) < 0.5f) {
-        F32(p, 0x269C) = F32(p, 0x269C) + lbl_80561D9C;
+        F32(p, 0x269C) += 0.016683351f;
     } else {
         F32(p, 0x2694) = SwayMin(F32(p, 0x2690), 0.008341676f + F32(p, 0x2694));
     }
