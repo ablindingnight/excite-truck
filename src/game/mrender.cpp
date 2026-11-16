@@ -39,7 +39,7 @@ void fn_802CAD68(void);
 struct ColVtx;
 void fn_802D68C4(ColVtx* verts, int unused, u16* idx, int n);
 int fn_801E4F20(int prim);
-void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int a);
+int fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int strip);  // tristrip: adds a vertex
 void fn_801E4FF4(void);
 void fn_802CB29C(int a);
 void fn_802D0368(f32 a, f32 b, f32 fov, f32 aspect);
@@ -465,7 +465,7 @@ extern "C" {
 
 void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int strip) {
     u8 open = 0;
-    if (lbl_8055FC8F && !((int (*)(void))fn_801E4F3C)()) {
+    if (lbl_8055FC8F && !fn_801E4F3C(x, y, z, u, v, color, strip)) {
         open = 1;
     }
     lbl_8055FC8F = open;
