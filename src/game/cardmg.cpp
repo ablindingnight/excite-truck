@@ -514,7 +514,9 @@ static inline void Loop1_fn_8018DA5C(DmgSlot* s, u8* m, DamagePart* tp, f32 t) {
     }
     if (s->state == 2 || s->state == 4) {
         DmgDraw* d = (DmgDraw*)(m + 0xA7C) + S32(m, 0xA78)++;
-        if ((f32)__fabs(t - 1.0f) <= __float_epsilon[0]) {
+        f64 absStep = __fabs(t - 1.0f);
+        f32 step = (f32)absStep;
+        if (step <= __float_epsilon[0]) {
             d->frame = s->cur;
         } else {
             DFrame f;
