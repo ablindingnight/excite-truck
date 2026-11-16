@@ -43,8 +43,8 @@ struct ArtXform {
     f32 pos[3];  // offset 0x4
 };
 
-// One animated element: a model (type 2) or a line of text (type 1).
-struct ArtElem {
+// One animated element ("animelem" allocations): a model (type 2) or a line of text (type 1).
+struct AnimElem {
     s32 type;     // offset 0x0
     s32* dst;     // offset 0x4, receives each key's signal
     ArtXform* xform;  // offset 0x8, attach transform
@@ -87,7 +87,7 @@ struct ArtAnim {
     char name[0x18];  // offset 0x0
     s32 refs;         // offset 0x18
     s32 nElems;       // offset 0x1C
-    ArtElem* elems;   // offset 0x20
+    AnimElem* elems;   // offset 0x20
     s32 nPaths;       // offset 0x24
     ArtPath* paths;   // offset 0x28
     f32 length;       // offset 0x2C
@@ -337,14 +337,14 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         }
     }
     a->nElems = nElems;
-    a->elems = new ("animelem") ArtElem[nElems];
+    a->elems = new ("animelem") AnimElem[nElems];
     a->nPaths = nPaths;
     a->paths = new ("animpath") ArtPath[nPaths];
     for (int i = 0; i < nElems; i++) {
         ValueNode* en = elems[i];
-        ArtElem* e = &a->elems[i];
+        AnimElem* e = &a->elems[i];
         const char* type = en->GetValue("type");
-        memset(e, 0, sizeof(ArtElem));
+        memset(e, 0, sizeof(AnimElem));
         if (!strcmp(type, "model")) {
             e->type = 2;
             const char* model = en->GetValue("model");
@@ -575,7 +575,7 @@ void fn_802AD30C(ArtAnim* a) {
     lbl_8055F93C--;
     int i;
     for (i = 0; i < a->nElems; i++) {
-        ArtElem* e = &a->elems[i];
+        AnimElem* e = &a->elems[i];
         if (e->type == 1) {
             fn_802328D4(e->handle);
         } else if (e->type == 2) {
@@ -714,7 +714,7 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 m[3][0] = pos[0] * ps;
                 m[3][1] = pos[1] * ps;
                 f32 alpha = k0->alpha + u * (k1->alpha - k0->alpha);
-                ArtElem* e = &a->elems[p->elem];
+                AnimElem* e = &a->elems[p->elem];
                 m[3][2] = pos[2] * ps;
                 scale[2] = k0->scale[2] + u * (k1->scale[2] - k0->scale[2]);
                 scale[1] = k0->scale[1] + u * (k1->scale[1] - k0->scale[1]);
