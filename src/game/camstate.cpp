@@ -443,6 +443,12 @@ extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FDC;
 void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
 
+// A camera frame offset: rotation then translation (one 48-byte local; helper name unproven).
+struct CamRotOff {
+    Mat3 rot;    // offset 0x0
+    CamVec pos;  // offset 0x24
+};
+
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
 static inline void RotFromVec(Mat3* r, const CamVec& w) {
     f32 a = PSVECMag(&w.x);
@@ -516,12 +522,12 @@ void fn_802751AC(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{0.0f, 1.1f, 0.9f}, {8.0f, 0.0f, 0.0f}, 86.25f};
     *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
-    Mat3 rot;
+    CamRotOff f;
     f32 z = c.off.z;
-    CamVec off(c.off.x, c.off.y, z);
-    RotFromVec(&rot, c.rot * 0.017453292f);
-    fn_801BFD34((u8*)&cr->pose.pos, &off, (u8*)&cr->carFrame);
-    Mat3Mul((Mat3*)&cr->pose, &rot, (Mat3*)&cr->carFrame);
+    f.pos.Set(c.off.x, c.off.y, z);
+    RotFromVec(&f.rot, c.rot * 0.017453292f);
+    fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
+    Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
     f32 fovv = c.fov;
     cr->fov = 0.017453292f * fovv;
 }
@@ -564,12 +570,12 @@ void fn_80275938(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{-1.0f, 0.9f, -3.2f}, {5.8f, 63.6f, 1.8f}, 87.75f};
     *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
-    Mat3 rot;
+    CamRotOff f;
     f32 z = c.off.z;
-    CamVec off(c.off.x, c.off.y, z);
-    RotFromVec(&rot, c.rot * 0.017453292f);
-    fn_801BFD34((u8*)&cr->pose.pos, &off, (u8*)&cr->carFrame);
-    Mat3Mul((Mat3*)&cr->pose, &rot, (Mat3*)&cr->carFrame);
+    f.pos.Set(c.off.x, c.off.y, z);
+    RotFromVec(&f.rot, c.rot * 0.017453292f);
+    fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
+    Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
     f32 fovv = c.fov;
     cr->fov = 0.017453292f * fovv;
 }
@@ -637,14 +643,14 @@ void fn_80275D0C(u8* p) {
     f.m[5] = 0.0f;
     PSVECCrossProduct(&f.m[3], &f.m[6], &f.m[0]);
     PSVECCrossProduct(&f.m[6], &f.m[0], &f.m[3]);
-    Mat3 rot;
+    CamRotOff g;
     f32 x = c.off.x;
     f32 y = c.off.y;
     f32 z = c.off.z;
-    CamVec off(x, y, z);
-    RotFromVec(&rot, c.rot * 0.017453292f);
-    fn_801BFD34((u8*)&cr->pose.pos, &off, (u8*)&f);
-    Mat3Mul((Mat3*)&cr->pose, &rot, (Mat3*)&f);
+    g.pos.Set(x, y, z);
+    RotFromVec(&g.rot, c.rot * 0.017453292f);
+    fn_801BFD34((u8*)&cr->pose.pos, &g.pos, (u8*)&f);
+    Mat3Mul((Mat3*)&cr->pose, &g.rot, (Mat3*)&f);
     f32 fovv = c.fov;
     cr->fov = 0.017453292f * fovv;
 }
