@@ -64,9 +64,16 @@ void fn_80204048(void*, void*) {}
 void fn_8020404C(void) {}
 void fn_80204050(void) {}
 
+// Helper name unproven. Add the vertical basis after forming the other two partial sums.
+static inline void AddVertical(ValVec3& out, const ValVec3& up, f32 delta, f32 a, f32 b, f32 c) {
+    f32 dy = -(f32)delta;
+    out.x = a + up.x * dy;
+    out.y = b + up.y * dy;
+    out.z = c + up.z * dy;
+}
+
 // Finds the terrain under screen point (sx, sy); returns 0 when there is none.
 int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam, int sx, int sy) {
-    f32 ay;
     ValVec3 dir;
     ValVec3 hit;
     ValVec3 normal;
@@ -76,17 +83,23 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PickCam* cam,
     int halfW = lbl_8055CFF0 / 2;
     f32 depth = halfW / lbl_8055FC88;
     f32 ax;
-    f32 az = cam->basis[2].z * depth;
+    f32 ay;
+    f32 az;
     ax = cam->basis[2].x * depth;
     ay = cam->basis[2].y * depth;
+    az = cam->basis[2].z * depth;
     f32 dx = sx - halfW;
-    f32 bx = cam->basis[0].x * dx;
-    f32 bz = cam->basis[0].z * dx;
-    f32 by = cam->basis[0].y * dx;
-    f32 dy = -(f32)(sy - lbl_8055CFF4 / 2);
-    dir.x = ax + bx + cam->basis[1].x * dy;
-    dir.y = ay + by + cam->basis[1].y * dy;
-    dir.z = az + bz + cam->basis[1].z * dy;
+    f32 bx;
+    f32 by;
+    f32 bz;
+    bx = cam->basis[0].x * dx;
+    by = cam->basis[0].y * dx;
+    bz = cam->basis[0].z * dx;
+    const f32 syDelta = sy - lbl_8055CFF4 / 2;
+    f32 abx = ax + bx;
+    f32 aby = ay + by;
+    f32 abz = az + bz;
+    AddVertical(dir, cam->basis[1], syDelta, abx, aby, abz);
     PSVECNormalize(&dir, &dir);
     if (hint == NULL) {
         hint = localHint;
