@@ -106,19 +106,7 @@ public:
 extern "C" void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b);
 
 // A rotation plus a translation.
-struct Mat3x3 {
-    f32 m[9];
-};
-
-struct XVec3 {
-    f32 v[3];
-};
-
-struct Xform {
-    Mat3x3 rot;  // offset 0x0
-    XVec3 pos;   // offset 0x24
-};
-
+// Xform: common.h's PlainValMatrix (it was Mat3x3 f32 m[9] + XVec3 f32 v[3]).
 
 class VEx;
 
@@ -3247,10 +3235,9 @@ void BoxShape::vf38(RVec3* lo, RVec3* hi) const {
 
 void BoxShape::vf4C(void) {
     u8* p = (u8*)this;
-    Xform* src = (Xform*)((VEx*)p)->v50();
-    Xform x;
-    x.rot = src->rot;
-    x.pos = src->pos;
+    PlainValMatrix* src = (PlainValMatrix*)((VEx*)p)->v50();
+    PlainValMatrix x;
+    x = *src;
     const RVec3* c = (const RVec3*)&this->half;
     f32 cz = c->z;
     f32 cy = c->y;
@@ -3302,7 +3289,7 @@ void RagdollShape::vf38(RVec3* lo, RVec3* hi) const {
 }
 
 void fn_801C2BDC(s32 sys, s32* n, RVec3** pts, s32* stride);
-void fn_801C28A8(s32 sys, const Xform* f, const RVec3* ext, const RVec3* vel, const RVec3* spin, s32 a, s32 b,
+void fn_801C28A8(s32 sys, const PlainValMatrix* f, const RVec3* ext, const RVec3* vel, const RVec3* spin, s32 a, s32 b,
                  RVec3* at, RVec3* push);
 
 static inline f32 DistSq(const RVec3* a, const RVec3* b) {
@@ -3314,12 +3301,12 @@ static inline f32 DistSq(const RVec3* a, const RVec3* b) {
 }
 
 // Moves frame x by c, given in its own axes.
-static inline void Shift(Xform* x, const RVec3* c) {
+static inline void Shift(PlainValMatrix* x, const RVec3* c) {
     RVec3 w;
     MulVec(&w, c, (RMtx*)x);
-    x->pos.v[0] += w.x;
-    x->pos.v[1] += w.y;
-    x->pos.v[2] += w.z;
+    x->origin.x += w.x;
+    x->origin.y += w.y;
+    x->origin.z += w.z;
 }
 
 // Particle sphere against an object: a group collides its box-shaped body (moving with the car, if any), a
@@ -3363,7 +3350,7 @@ void RagdollShape::vf10(u8* o) {
             spin.x = 0.0f;
             spin.y = 0.0f;
             spin.z = 0.0f;
-            Xform x;
+            PlainValMatrix x;
             u8* body = ((u8*&)((CollShape*)o)->owner);
             if (body) {
                 vel = *(RVec3*)(body + 0x118);
@@ -3372,7 +3359,7 @@ void RagdollShape::vf10(u8* o) {
                 c.y += F32(body, 0x34);
                 c.z += F32(body, 0x38);
             }
-            x = *(Xform*)VE(box)->v54();
+            x = *(PlainValMatrix*)VE(box)->v54();
             Shift(&x, &c);
             RVec3 at;
             RVec3 push;
@@ -3398,7 +3385,7 @@ void RagdollShape::vf10(u8* o) {
                 vel = *(RVec3*)(body + 0x118);
                 spin = *(RVec3*)(body + 0x124);
             }
-            fn_801C28A8(this->f30, (Xform*)VE(o)->v50(), &(const RVec3C&)HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
+            fn_801C28A8(this->f30, (PlainValMatrix*)VE(o)->v50(), &(const RVec3C&)HalfExtents::Read(o), &vel, &spin, 0, -1, 0, 0);
         }
     } else if (((CollShape*)o)->type == 'POLY') {
         s32 n = 0;
