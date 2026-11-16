@@ -379,6 +379,14 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 }
 extern "C" {
 
+/* Helper unproven: a function retail compiled here and the linker stripped (nothing calls it). It is known only by
+   its constants: -1, 1, 3, 2 enter the pool between fn_802AA0C8 and fn_802AA25C, and 3 is not read by fn_802AA25C.
+   The body (clamp to -1..1, then the 3 - 2t smoothing) is a guess that creates them in that order. */
+static f32 Smooth(f32 t) {
+    t = MIN(MAX(t, -1.0f), 1.0f);
+    return t * t * (3.0f - 2.0f * t);
+}
+
 void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
     if (p->power >= 0.35f && !p->hold && p->trig) {
