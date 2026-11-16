@@ -249,8 +249,9 @@ UnkStaticFFFF lbl_8055F9F8;
 UnkStatic123s lbl_804BE7B8;
 UnkStatic7F lbl_8055F9FC;
 s32 lbl_8055FA00;
-Timer lbl_8055FA08(2.0f);  // layer list
-Timer lbl_8055FA10(2.0f);  // brush list
+extern const f32 kWorldScale;
+Timer lbl_8055FA08(kWorldScale);  // layer list
+Timer lbl_8055FA10(kWorldScale);  // brush list
 Timer lbl_8055FA18(5.0f);  // brush rescan
 Timer lbl_8055FA20(0.05f);  // paint rate
 s32 lbl_8055FA28;  // current layer
@@ -337,6 +338,10 @@ int fn_802B5DD0(const char* s) {
     }
     return r;
 }
+
+/* Helper unproven: retail creates the pooled 2.0f BEFORE the -100.0f of the functions below, so an unused static
+   function with a 2.0f literal was compiled here (dead static functions keep their constants). */
+static f32 CellToWorld(f32 c) { return c * 2.0f; }
 
 void fn_802B5E24(const char* s) {
     lbl_8055FA28 = fn_802B5D2C("layer", s);
