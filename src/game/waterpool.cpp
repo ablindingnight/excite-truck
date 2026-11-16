@@ -723,8 +723,6 @@ void fn_8029D574(WaterPool* p) {
     fn_8029DDB8(p);
 }
 
-#pragma push
-#pragma opt_common_subs off  /* Pragma unproven. Retail recomputes the active vertex address after the update call. */
 /* Helper name unproven. */
 static inline void RenderPool(WaterPool* p) {
     int i = (p->ny - 1) * (p->nx * 2);
@@ -763,7 +761,6 @@ static inline void RenderPool(WaterPool* p) {
 }
 
 void fn_8029D644(WaterPool* p) { RenderPool(p); }
-#pragma pop
 
 void fn_8029E49C(WaterPool* p, WaterCar* car, int w);
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r);
