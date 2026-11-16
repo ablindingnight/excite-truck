@@ -550,8 +550,8 @@ void fn_80177EE4(void) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_80177F40(int net, u8 paused) {
+/* Helper name unproven: the per-frame block that runs unless a local game is paused; the boundary is needed (in place -0.41) */
+static inline void StepFrameSystems(int net, u8 paused) {
     if (net || !paused) {
         int i;
         s32 k;
@@ -638,7 +638,7 @@ void fn_80177F40(void) {
         fn_801EA1F0();
     }
     net = fn_801B526C();
-    Loop1_fn_80177F40(net, paused);
+    StepFrameSystems(net, paused);
     fn_801B24B8();
     fn_80265D88();
     if (!paused) {
