@@ -1532,56 +1532,56 @@ int fn_8023695C(const char* name);
 }  // extern "C"
 
 inline void EvCupBar::Enter(void) {
-    u8* p = (u8*)this;
-    if (!U8(p, 0x64)) {
-        U8(p, 0x18) = 1;
-        S32(p, 0x1C) = fn_80221EA8(p);
+    EvCupBar* p = this;
+    if (!p->still) {
+        p->m.active = 1;
+        p->m.idx = fn_80221EA8((u8*)p);
     }
-    if (PTR(p, 0x60)) {
-        S32(p, 0x20) = 0;
-        U8(p, 0x50) = 1;
+    if (((u8*&)p->cup)) {
+        p->m.vis = 0;
+        p->m.jumpOn = 1;
         s32 y;
-        s32 x = S32(p, 0x4);
-        y = S32(p, 0x8);
-        S32(p, 0x48) = x;
-        S32(p, 0x4C) = y;
-        S32(p, 0x6C) = x;
-        F32(p, 0x68) = 0.0f;
-        if (PTR(p, 0x60)) {
-            if (VR(PTR(p, 0x60))->v28() && !U8(p, 0xCC)) {
+        s32 x = p->x;
+        y = p->y;
+        p->m.jumpX = x;
+        p->m.jumpY = y;
+        p->f6C = x;
+        p->timer = 0.0f;
+        if (((u8*&)p->cup)) {
+            if (VR(((u8*&)p->cup))->v28() && !p->perfect) {
                 fn_80236954("cup_perfected");
                 add_anim_to_wait_for("cup_perfected");
             }
             int show = 0;
-            S32(p, 0x70) = p == (u8*)lbl_8055F688 ? 6 : 7;
-            if (VR(PTR(p, 0x60))->v24()) {
-                if (!VR(PTR(p, 0x60))->v28() || fn_8023695C("cup_perfected")) {
+            p->style = (u8*)p == (u8*)lbl_8055F688 ? 6 : 7;
+            if (VR(((u8*&)p->cup))->v24()) {
+                if (!VR(((u8*&)p->cup))->v28() || fn_8023695C("cup_perfected")) {
                     show = 1;
                 }
             }
-            U8(p, 0xCD) = show;
+            p->showStars = show;
             if (show) {
                 int i;
                 int done;
-                int n = VR(PTR(p, 0x60))->v18();
+                int n = VR(((u8*&)p->cup))->v18();
                 done = 0;
                 for (i = 0; i < n; i++) {
-                    if (VR(VR(PTR(p, 0x60))->v1C(i))->v40()) {
+                    if (VR(VR(((u8*&)p->cup))->v1C(i))->v40()) {
                         done++;
                     }
                 }
-                fn_801345D8((char*)p + 0x74, 10, "%d/%d", done, n);
+                fn_801345D8((char*)(u8*)&p->progress, 10, "%d/%d", done, n);
             } else {
-                U8(p, 0x74) = 0;
+                p->progress[0] = 0;
             }
         }
-        const char* title = fn_8027ED70()->GetFile(VR(PTR(p, 0x60))->v10());
+        const char* title = fn_8027ED70()->GetFile(VR(((u8*&)p->cup))->v10());
         if (title) {
-            CopyName(50, (char*)p + 0x7E, title);
+            CopyName(50, (char*)(u8*)&p->title, title);
         }
-        S32(p, 0xB0) = fn_8027ED70()->GetFrame(VR(PTR(p, 0x60))->v10());
+        p->frame = fn_8027ED70()->GetFrame(VR(((u8*&)p->cup))->v10());
     } else {
-        S32(p, 0x20) = 1;
+        p->m.vis = 1;
     }
 }
 
@@ -1636,7 +1636,7 @@ static inline void RefreshCup(EvCupBar* b) {
 }  // extern "C"
 
 inline void EvCupBar::Update(void) {
-    u8* p = (u8*)this;
+    EvCupBar* p = this;
     EvCupBar* b = (EvCupBar*)p;
     if (!b->still) {
         b->LogoMover::Update();
@@ -1792,7 +1792,7 @@ static inline void RefreshEvent(EvEventBar* b) {
 }  // extern "C"
 
 inline void EvEventBar::Enter(void) {
-    u8* p = (u8*)this;
+    EvEventBar* p = this;
     EvEventBar* b = (EvEventBar*)p;
     b->m.active = 1;
     b->m.idx = fn_80221EA8((u8*)b);
@@ -1820,7 +1820,7 @@ extern "C" {
 }  // extern "C"
 
 inline void EvEventBar::Update(void) {
-    u8* p = (u8*)this;
+    EvEventBar* p = this;
     EvEventBar* b = (EvEventBar*)p;
     b->LogoMover::Update();
     if (b->contest) {
