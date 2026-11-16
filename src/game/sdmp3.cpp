@@ -4,6 +4,8 @@
 // rate or channel count changes. Built-in tracks can also be played from 'MMP3' resources. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/OS/OSMutex.h>
+#include <revolution/OS/OSThread.h>
 #include <string.h>
 
 extern "C" {
@@ -14,13 +16,6 @@ int fn_801345D8(char* dst, int n, const char* fmt, ...);
 int fn_802E2C20(void);  // milliseconds
 int strcasecmp(const char* a, const char* b);
 char* strrchr(const char* s, int c);
-void OSSleepTicks(s64 ticks);
-void OSInitMutex(void* m);
-void OSLockMutex(void* m);
-void OSUnlockMutex(void* m);
-int OSTryLockMutex(void* m);
-int OSCreateThread(void* t, void* (*fn)(void*), void* arg, void* stack, u32 size, s32 prio, u16 attr);
-s32 OSResumeThread(void* t);
 s32 VFInit(u32 config);
 s32 VFSetMediaCallback(s32 drive, void (*ins)(int), void (*rem)(int));
 s32 VFAttachDrive(s32 a, s32 b, s32 c, void* drive);
@@ -370,7 +365,7 @@ void fn_802E9EB8(void) {
         }
         channelDrift = 0;
     }
-    if (OSTryLockMutex(lbl_805584A0)) {
+    if (OSTryLockMutex((OSMutex*)lbl_805584A0)) {
         if (lbl_80560070.Poll()) {
             lbl_80560080 = lbl_8056007C;
             for (int i = 0; i < lbl_80560080; i++) {
@@ -381,7 +376,7 @@ void fn_802E9EB8(void) {
                 fn_802E30C8("%d: \"%s\"", i, lbl_8052E658[i].name);
             }
         }
-        OSUnlockMutex(lbl_805584A0);
+        OSUnlockMutex((OSMutex*)lbl_805584A0);
     }
     if ((lbl_805600D1 || lbl_8055D264 != lbl_8055D260) && (lbl_805600BC >= 0x23FE0 || !lbl_805600D1)) {
         fn_802E30C8("mp3: starting at W%d (R%d, R%d)", lbl_805600B8, lbl_805600B0[0], lbl_805600B0[1]);
@@ -503,7 +498,7 @@ Mp3Reader* fn_802EA834(int idx, s32* size) {
     } else {
         fn_802E30C8("mp3: can't open track %d", idx);
         if (lbl_80560062) {
-            OSSleepTicks(OSMillisecondsToTicks(1000));
+            OSSleepTicks((s64)(OSMillisecondsToTicks(1000)));
         }
     }
     return r;
@@ -565,12 +560,12 @@ void* fn_802EAB28(void* arg) {
     s32 used;
     while (lbl_80560062) {
         if (decoded) {
-            OSSleepTicks(OSMillisecondsToTicks(5));
+            OSSleepTicks((s64)(OSMillisecondsToTicks(5)));
             decoded = 0;
         } else {
-            OSSleepTicks(OSMillisecondsToTicks(50));
+            OSSleepTicks((s64)(OSMillisecondsToTicks(50)));
         }
-        OSLockMutex(lbl_805584A0);
+        OSLockMutex((OSMutex*)lbl_805584A0);
         if (lbl_80560068.Poll()) {
             if (lbl_80560098) {
                 MP3_Delete(lbl_80560098);
@@ -746,11 +741,11 @@ void* fn_802EAB28(void* arg) {
                             if (errs > 16) {
                                 fn_802E30C8("mp3: info is invalid--aborting track");
                                 done = 1;
-                                OSSleepTicks(OSMillisecondsToTicks(100));
+                                OSSleepTicks((s64)(OSMillisecondsToTicks(100)));
                             } else {
                                 fn_802E30C8("mp3: header invalid, skipping forward to retry (%d)", errs);
                                 pos += 0x780;
-                                OSSleepTicks(OSMillisecondsToTicks(30));
+                                OSSleepTicks((s64)(OSMillisecondsToTicks(30)));
                             }
                         }
                     }
@@ -763,16 +758,16 @@ void* fn_802EAB28(void* arg) {
                     if (lbl_8055D25C != lbl_8055D260 || lbl_8055D268 != lbl_8055D26C || lbl_805600C9) {
                         fn_802E30C8("mp3: waiting for channel to starve");
                         while (lbl_805600C0[1] < 4 && !lbl_805600D1 && lbl_805600D0) {
-                            OSSleepTicks(OSMillisecondsToTicks(5));
+                            OSSleepTicks((s64)(OSMillisecondsToTicks(5)));
                         }
                         lbl_8055D26C = lbl_8055D268;
                         lbl_8055D264 = lbl_8055D25C;
                         fn_802E30C8("mp3: waiting for sample rate change");
                         while (lbl_8055D260 != lbl_8055D264 && !lbl_805600D1 && lbl_805600D0) {
-                            OSSleepTicks(OSMillisecondsToTicks(5));
+                            OSSleepTicks((s64)(OSMillisecondsToTicks(5)));
                         }
                         fn_802E30C8("mp3: completed sample rate change");
-                        OSSleepTicks(OSMillisecondsToTicks(50));
+                        OSSleepTicks((s64)(OSMillisecondsToTicks(50)));
                         lbl_805600C9 = 0;
                     }
                     used = 0;
@@ -860,7 +855,7 @@ void* fn_802EAB28(void* arg) {
                 lbl_805600C8 = 0;
             }
         }
-        OSUnlockMutex(lbl_805584A0);
+        OSUnlockMutex((OSMutex*)lbl_805584A0);
     }
     if (r) {
         fn_802E9BCC(r);
@@ -945,7 +940,7 @@ void fn_802EBD40(void) {
     fn_802E30C8("mp3: waiting for thread to end");
     int t = 0;
     while (!lbl_80560063) {
-        OSSleepTicks(OSMillisecondsToTicks(5));
+        OSSleepTicks((s64)(OSMillisecondsToTicks(5)));
         t += 5;
         if (t > 1000) {
             fn_802E30C8("mp3: timed out waiting for thread to end");
@@ -985,16 +980,16 @@ void fn_802EBE2C(void) {
         fn_802E61BC(lbl_80560090[i]);
     }
     lbl_805600D0 = 0;
-    OSInitMutex(lbl_805584A0);
+    OSInitMutex((OSMutex*)lbl_805584A0);
     fn_802E9CF0();
     fn_802E3DCC();
     lbl_80560062 = 1;
     lbl_80560063 = 0;
-    if (!OSCreateThread(lbl_805584B8, fn_802EAB28, 0, lbl_805544A0 + 0x3FE0, 0x3FE0, 14, 1)) {
+    if (!OSCreateThread((OSThread*)lbl_805584B8, (OSThreadFunc)fn_802EAB28, (void*)0, (void*)(lbl_805544A0 + 0x3FE0), (u32)0x3FE0, (s32)14, (u16)1)) {
         fn_802E317C("mp3: can't create thread");
     }
     fn_802E2E0C(fn_802EBE00, "mp3");
-    OSResumeThread(lbl_805584B8);
+    OSResumeThread((OSThread*)lbl_805584B8);
     fn_80127C90(fn_802E9EB8, "mp3");
 }
 
@@ -1063,7 +1058,7 @@ void fn_802EC1E4(void) {
             fn_802E30C8("mp3: timed out!");
             break;
         }
-        OSSleepTicks(OSMillisecondsToTicks(5));
+        OSSleepTicks((s64)(OSMillisecondsToTicks(5)));
     }
 }
 
