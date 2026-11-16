@@ -2,6 +2,9 @@
 typedef unsigned char u8;
 typedef unsigned int u32;
 class ModuleTag;void RegisterModuleTag(ModuleTag*);
+// The rigid body (rigid.cpp), declared as far as the contact velocity needs.
+struct RVec3;
+class RigidBody {public:void VelAt(RVec3* out,const RVec3* at);};
 class ModuleTag {public:ModuleTag(){RegisterModuleTag(this);}u8 flag;ModuleTag* next;};
 
 typedef unsigned long size_t;
@@ -114,7 +117,6 @@ typedef char SurfaceMessageSize[(sizeof(SurfaceMessage)==0x20)?1:-1];
 typedef char EffectMessageSize[(sizeof(EffectMessage)==0x30)?1:-1];
 typedef char SoundMessageSize[(sizeof(SoundMessage)==0x14)?1:-1];
 extern const float lbl_80562620,lbl_80562628,lbl_8056262C,lbl_80562634,lbl_80562638,lbl_8056263C,lbl_80562640,lbl_80562644,lbl_80562648;
-void VelAt__9RigidBodyFP5RVec3PC5RVec3(Body*,V3*,const V3*);
 float PSVECDotProduct(const V3*,const V3*);
 float PSVECMag(const V3*);
 void fn_801B5360(int,const void*,int);
@@ -155,8 +157,8 @@ void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inp
  V3 vectorA=*inputA;V3 vectorB=*inputB;
  if(!first->body){Contact* temp=first;first=second;second=temp;ScaleVInto(vectorA,lbl_80562620,vectorA);ScaleVInto(vectorB,lbl_80562620,vectorB);if(second)kind=second->kind;}
  V3 firstVelocity,relative,secondVelocity;
- VelAt__9RigidBodyFP5RVec3PC5RVec3(first->body,&firstVelocity,position);
- if(second&&second->body)VelAt__9RigidBodyFP5RVec3PC5RVec3(second->body,&secondVelocity,position);
+ ((RigidBody*)first->body)->VelAt((RVec3*)&firstVelocity,(const RVec3*)position);
+ if(second&&second->body)((RigidBody*)second->body)->VelAt((RVec3*)&secondVelocity,(const RVec3*)position);
  else{secondVelocity.x=lbl_80562624;secondVelocity.y=lbl_80562624;secondVelocity.z=lbl_80562624;}
  relative.x=firstVelocity.x-secondVelocity.x;relative.y=firstVelocity.y-secondVelocity.y;relative.z=firstVelocity.z-secondVelocity.z;
  float impact=PSVECDotProduct(&vectorB,&vectorA);
