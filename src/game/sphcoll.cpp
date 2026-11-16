@@ -3272,7 +3272,7 @@ void TubeShape::vf10(u8* o) {
         fn_8019DC04(p, o);
         break;
     case 'GRUP':
-        fn_8019EA7C(p, PTR(o, 0x17C));
+        fn_8019EA7C(p, ((SphereGroup*)o)->child);
         break;
     default:
         fn_802E30C8("Unsupported collision type: Tube-%x", ((CollShape*)o)->type);
@@ -3598,7 +3598,7 @@ void RingVol::vf10(u8* o) {
         fn_8019C854(o, ((u8*)this));
         break;
     case 'GRUP':
-        for (int i = 0; i < S32(o, 0x174); i++) {
+        for (int i = 0; i < ((SphereGroup*)o)->count; i++) {
             fn_8019C854((u8*)((SphGroupDel*)o)->vols[i], ((u8*)this));
         }
         break;
