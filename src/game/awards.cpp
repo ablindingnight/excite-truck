@@ -5,6 +5,7 @@
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
 // animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carinfo.h"
 #include "game/gamedb.h"
 #include "game/highscore.h"
 #include "game/gart.h"
@@ -53,15 +54,7 @@ struct EventDesc {
     s32 difficulty;  // offset 0x8
 };
 
-struct CarInfo {
-    u8 active;  // offset 0x0
-    u8 pad1[0x44 - 0x1];
-    s32 kind;   // offset 0x44
-    char name[0x40];   // offset 0x48
-    char model[0x2C];  // offset 0x88
-    u8 slot;    // offset 0xB4
-};
-
+// CarInfo: game/carinfo.h.
 extern "C" {
 EventDesc* fn_801769CC(void);
 CarInfo* fn_801EA9A0(int car);
@@ -366,7 +359,7 @@ AwardsMgr* lbl_8055E884;
 
 static inline int CarSlot(int car) {
     CarInfo* c = fn_801EA9A0(car);
-    return c->active ? (c->slot & 3) : -1;
+    return c->active ? (c->setup.slot & 3) : -1;
 }
 
 static inline u8 CarOff(AwardsMgr* m, int car) {
@@ -983,8 +976,8 @@ static inline void CommitAndRecordScore(AwardsMgr* m) {
     if (!fn_801CE898() && m->score != 0) {
         for (int i = 0; i < fn_801EA994(); i++) {
             CarInfo* c = fn_801EA9A0(i);
-            if (c->kind == 0x50) {
-                StatsAddHighScore(IdentGetCurrentSlot(), m->event, m->difficulty, c->name, m->score, m->grade,
+            if (c->setup.type == 0x50) {
+                StatsAddHighScore(IdentGetCurrentSlot(), m->event, m->difficulty, c->setup.name, m->score, m->grade,
                                   m->time);
                 break;
             }
@@ -1192,7 +1185,7 @@ void fn_801CD5B4(int car, long score, long grade) {
         if (m->grade == 0) {
             AchievementsAdd(2, 1);
         }
-        const char* model = fn_801EA9A0(car)->model;
+        const char* model = fn_801EA9A0(car)->setup.paint;
         AchievementsAddModelStat(0, model, 1);
         if (grade == 0) {
             AchievementsAddModelStat(1, model, 1);

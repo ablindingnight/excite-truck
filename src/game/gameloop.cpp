@@ -4,6 +4,7 @@
 // are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/carinfo.h"
 #include "game/joy.h"
 
 static const f32 DemoNear[] = {1.0f};
@@ -28,13 +29,7 @@ struct ViewCam {
 
 // The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
 // declared (was named Racer here, a name world/carmodel use for a different class).
-struct CarInfo {
-    u8 pad0[0x30];
-    s32 state;  // offset 0x30
-    u8 pad34[0xAC - 0x34];
-    s32 unkAC;  // offset 0xAC
-};
-
+// CarInfo: game/carinfo.h.
 struct RaceResultEntry {
     u8 pad0[0x10];
     s32 value;  // offset 0x10
@@ -538,7 +533,7 @@ void gameloop_postrace(RaceResult* res) {
         res->races = lbl_8055D3E8;
         fn_802E30C8("gameloop_postrace: Player ran %i consecutive races.", lbl_8055D3E8);
         for (i = 0, e = (RaceResultEntry*)res; i < res->count; i++, e++) {
-            e->value = fn_801EA9A0(i)->unkAC;
+            e->value = fn_801EA9A0(i)->setup.driver;
         }
     }
 }
@@ -732,7 +727,7 @@ void fn_8000B838(void) {
         if (fn_801E868C(i, &type, &arg)) {
             switch (type) {
             case 3:
-                if (fn_801EA9A0(fn_801E86F8(i))->state != 3) {
+                if (fn_801EA9A0(fn_801E86F8(i))->params.state != 3) {
                     if (fn_801E7DF0(i)) {
                         fn_801E7E04(i, 0);
                     } else {
@@ -741,7 +736,7 @@ void fn_8000B838(void) {
                 }
                 break;
             case 0:
-                if (fn_801EA9A0(fn_801E86F8(i))->state != 3) {
+                if (fn_801EA9A0(fn_801E86F8(i))->params.state != 3) {
                     fn_8000BD9C(i, 0, &c->cam);
                 }
                 break;

@@ -3,6 +3,7 @@
 // layout sets. Class and function names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/carinfo.h"
 #include "macros.h"
 
 void* operator new(size_t size, const char* tag);
@@ -33,11 +34,7 @@ public:
 
 // The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
 // declared (was named Racer here, a name world/carmodel use for a different class).
-struct CarInfo {
-    u8 pad0[0x1C];
-    s32 lap;  // offset 0x1C
-};
-
+// CarInfo: game/carinfo.h.
 struct LapInfo {
     u8 pad0[0x8];
     s32 total;  // offset 0x8
@@ -541,9 +538,9 @@ inline void LapTitleOverlay::Update(int player, int unused) {
     now = fn_801E7E18();
     s = &state[player];
 
-    if (racer->lap > s->lap) {
+    if (racer->params.lap > s->lap) {
         s->start = now;
-        s->lap = racer->lap;
+        s->lap = racer->params.lap;
     }
     layout = lbl_8055D604;
     elapsed = now - state[player].start;

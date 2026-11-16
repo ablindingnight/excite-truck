@@ -1,6 +1,7 @@
 // Car info table (0x801EA4C4-0x801EAB2C): per-slot car setup and driver parameters for up to eight
 // cars, plus the race order. Names are guesses apart from the allocation tag.
 #include "game/common.h"
+#include "game/carinfo.h"
 
 extern "C" {
 void* memset(void* p, int c, size_t n);
@@ -10,45 +11,7 @@ int CarTypeIsReal(u32 type, void* car);
 
 void* operator new(size_t size, const char* tag);
 
-struct CarSetup {
-    CarSetup(void) {}
-    s32 type;        // offset 0x0
-    char name[0x20];   // offset 0x4
-    char model[0x20];  // offset 0x24
-    char paint[0x20];  // offset 0x44
-    u32 x64;         // offset 0x64
-    u32 x68;         // offset 0x68
-    u32 x6C;         // offset 0x6C
-    u8 x70;          // offset 0x70
-    u32 x74;         // offset 0x74
-};
-
-struct CarParams {
-    CarParams(void) {}
-    u32 x0;   // offset 0x0
-    s32 pos;  // offset 0x4
-    u32 x8;   // offset 0x8
-    f32 xC;   // offset 0xC
-    u32 x10;  // offset 0x10
-    f32 x14;  // offset 0x14
-    f32 x18;  // offset 0x18
-    f32 x1C;  // offset 0x1C
-    f32 x20;  // offset 0x20
-    u32 x24;  // offset 0x24
-    u8 x28;   // offset 0x28
-    f32 x2C;  // offset 0x2C
-    u32 x30;  // offset 0x30
-    u32 x34;  // offset 0x34
-};
-
-struct CarInfo {
-    u8 active;         // offset 0x0
-    s32 index;         // offset 0x4
-    s32 x8;            // offset 0x8
-    CarParams params;  // offset 0xC
-    CarSetup setup;    // offset 0x44
-};
-
+// CarSetup, CarParams, CarInfo: game/carinfo.h.
 struct CarMgr {
     CarInfo cars[8];  // offset 0x0
     s32 count;        // offset 0x5E0
