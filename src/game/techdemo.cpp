@@ -245,7 +245,8 @@ inline void ActZone::Load(ValueNode* n) {
         }
     }
     d.z = b->pts[1].z - b->pts[2].z;
-    d.x = b->pts[1].x - b->pts[2].x;
+    f32 dx = b->pts[1].x - b->pts[2].x;
+    d.x = dx;
     if (d.x * d.x + d.z * d.z > best) {
         start = 1;
     }
