@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
+#include "game/collshape.h"
 
 extern "C" {
 void* memset(void* dst, int c, u32 n);
@@ -75,14 +76,6 @@ struct BodyDesc {
     f32 iz;     // offset 0x14
 };
 
-class RShape {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void Wake(void);  // 0x14
-};
-
 struct Phob;  // RigidBody::Push records the pushing object as a Phob*
 
 // The collision volume RigidBody derives from (collvol.cpp).
@@ -110,7 +103,7 @@ public:
     s32 a8;          // offset 0x8
     void* desc;      // offset 0xC
     s32 type;        // offset 0x10
-    RShape* sub[4];  // offset 0x14
+    CollShape* sub[4];  // offset 0x14
     s32 nAdded;      // offset 0x24
     s32 nSub;        // offset 0x28
     f32 radius;      // offset 0x2C
@@ -480,7 +473,7 @@ void RigidBody::Update(void) {
         c->Hit(this);
     }
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
-        (nAdded > 0 ? sub[0] : 0)->Wake();
+        (nAdded > 0 ? sub[0] : 0)->vf14();
     }
     if (!(AbsF(impW) <= __float_epsilon[0])) {
 
@@ -623,7 +616,7 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
     RMat33* wi;
     RMat33* rr;
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
-        (nAdded > 0 ? sub[0] : 0)->Wake();
+        (nAdded > 0 ? sub[0] : 0)->vf14();
     }
     if (!(AbsF(impW) <= __float_epsilon[0])) {
         int i;
