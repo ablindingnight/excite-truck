@@ -1514,8 +1514,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
                 ValueNode* g;
                 l->n = fn_8013DE7C(child, "Zone");
                 l->gates = new ("Zone[]") Gate[l->n];
-                w = child->FindChild("config")->GetFloat("gate_scale", 1.0f);
-                w = fn_80204CFC("zone_gate_scale") * w;
+                w = fn_80204CFC("zone_gate_scale") * child->FindChild("config")->GetFloat("gate_scale", 1.0f);
                 k = 0;
                 for (j = 0; child->GetChildAt(j) != 0; j++) {
                     g = child->GetChildAt(j);
