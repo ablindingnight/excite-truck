@@ -26,12 +26,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 
 // GXVtxDescList: the SDK's.
 
-// Skin matrix (rotation then translation).
-struct SkinMtx {
-    Mat3 rot;  // offset 0x0
-    V3 pos;    // offset 0x24
-};
-
+// SkinMtx: common.h's PlainValMatrix.
 extern "C" {
 void* memset(void* dst, int c, size_t n);
 void fn_802E317C(const char* fmt, ...);  // fatal
@@ -183,12 +178,12 @@ struct FatMesh {
 };
 
 extern Mat3 lbl_804C5650[1];
-extern SkinMtx lbl_804C5690;
-extern SkinMtx lbl_804C56C0;
+extern PlainValMatrix lbl_804C5690;
+extern PlainValMatrix lbl_804C56C0;
 extern V3 lbl_804C56F0;
 extern TexState lbl_804C5700;
 extern BVec lbl_804DB068[81];
-extern SkinMtx lbl_804DAC48[22];
+extern PlainValMatrix lbl_804DAC48[22];
 extern u8 lbl_8055FD19;
 extern u32 lbl_8055FD1C;
 extern u32 lbl_8055FD20;
@@ -440,7 +435,7 @@ void fn_802D479C(Surf* s) {
 
 void fn_802D4988(Surf* s) {
     YMorphVtx* v = (YMorphVtx*)s->verts;
-    PSVECDistance((const Vec*)&lbl_804C56C0.pos, (const Vec*)v);
+    PSVECDistance((const Vec*)&lbl_804C56C0.origin, (const Vec*)v);
     int n = s->nverts;
     lbl_8055FE00 += n;
     V3* out = (V3*)fn_802CFF64(n * 0xC);
@@ -593,7 +588,7 @@ void fn_802D5270(Surf* s) {
     int n;
     const SkinVtx* position;  // Position address used by the transform overlap check.
     V3* out;
-    const SkinMtx* ma;
+    const PlainValMatrix* ma;
     V3* o;
     const SkinVtx* v = (const SkinVtx*)s->verts;
     n = s->nverts;
@@ -606,19 +601,19 @@ void fn_802D5270(Surf* s) {
             f32 w1;
             f32 w0;
             V3 b, a;
-            const SkinMtx* mb;
+            const PlainValMatrix* mb;
             ma = &lbl_804DAC48[v->b0 >> 2];
             mb = &lbl_804DAC48[v->b1 >> 2];
             w0 = v->w0 * (1.0f / 255);
             w1 = v->w1 * (1.0f / 255);
-            MulVec(&a, v, &ma->rot, position);
-            a.x += ma->pos.x;
-            a.y = a.y + ma->pos.y;
-            a.z = a.z + ma->pos.z;
-            MulVec(&b, v, &mb->rot, position);
-            b.x = b.x + mb->pos.x;
-            b.y = b.y + mb->pos.y;
-            b.z += mb->pos.z;
+            MulVec(&a, v, &ma->Mat(), position);
+            a.x += ma->origin.x;
+            a.y = a.y + ma->origin.y;
+            a.z = a.z + ma->origin.z;
+            MulVec(&b, v, &mb->Mat(), position);
+            b.x = b.x + mb->origin.x;
+            b.y = b.y + mb->origin.y;
+            b.z += mb->origin.z;
             o->x = a.x * w0;
             o->y = a.y * w0;
             o->z = a.z * w0;
@@ -666,7 +661,7 @@ void fn_802D5838(Surf* s) {
     if (out) {
         V3 l;
         const V3* dir = fn_802D2D04();
-        const Mat3* rot = &lbl_804C5690.rot;
+        const Mat3* rot = &lbl_804C5690.Mat();
         MulVecR(&l, dir, rot);
         o = out;
         for (int i = 0; i < n; i++) {

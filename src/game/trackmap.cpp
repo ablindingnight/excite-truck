@@ -57,11 +57,7 @@ struct Perspective {
     f32 fov;   // offset 0x8
 };
 
-struct CameraPose {
-    f32 m[3][3];  // offset 0x0
-    Vec3 pos;     // offset 0x24
-};
-
+// CameraPose: common.h's PlainValMatrix.
 // CarInfo: game/carinfo.h.
 struct Truck {
     u8 pad0[0x60];
@@ -161,7 +157,7 @@ void fn_802D3050(int pass);
 void fn_802C9294(int rt, int unk);
 void fn_802C88CC(u32 color);
 int fn_802C2C00(int mode);
-void fn_802C8638(CameraPose* cam);
+void fn_802C8638(PlainValMatrix* cam);
 }
 
 
@@ -816,7 +812,7 @@ void fn_8001B754(f32 width) {
 void fn_8001B7B8(int pass) { fn_802D3050(pass); }
 
 void fn_8001B7BC(TrackMap* map) {
-    CameraPose cam;
+    PlainValMatrix cam;
     f32 fov;
     f32 dist;
     int old;
@@ -830,18 +826,18 @@ void fn_8001B7BC(TrackMap* map) {
     Viewport vp(0, 0, map->texSize, map->texSize);
     fn_802C88CC(0xFFFFFF);
     old = fn_802C2C00(0);
-    cam.pos.x = 0.0f;
-    cam.pos.y = dist;
-    cam.pos.z = 0.0f;
-    cam.m[0][0] = 1.0f;
-    cam.m[0][1] = 0.0f;
-    cam.m[0][2] = 0.0f;
-    cam.m[1][0] = 0.0f;
-    cam.m[1][1] = 0.0f;
-    cam.m[1][2] = 1.0f;
-    cam.m[2][0] = 0.0f;
-    cam.m[2][1] = -1.0f;
-    cam.m[2][2] = 0.0f;
+    cam.origin.x = 0.0f;
+    cam.origin.y = dist;
+    cam.origin.z = 0.0f;
+    cam.basis[0].x = 1.0f;
+    cam.basis[0].y = 0.0f;
+    cam.basis[0].z = 0.0f;
+    cam.basis[1].x = 0.0f;
+    cam.basis[1].y = 0.0f;
+    cam.basis[1].z = 1.0f;
+    cam.basis[2].x = 0.0f;
+    cam.basis[2].y = -1.0f;
+    cam.basis[2].z = 0.0f;
     fn_802C8638(&cam);
     fn_802C8BD0(map->lineTex);
     fn_8001B754(map->lineWidth);

@@ -49,15 +49,10 @@ int fn_802CE850(ModelSlot* s);
 
 void* operator new[](size_t size, const char* tag);
 
-// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
-struct Camera {
-    f32 m[3][3];  // offset 0x0
-    ValVec3 pos;  // offset 0x24
-};
-
+// Camera: common.h's PlainValMatrix.
 // CarInfo: game/carinfo.h.
 extern "C" {
-Camera* fn_802C86DC(void);
+PlainValMatrix* fn_802C86DC(void);
 CarInfo* fn_801EA9A0(int i);
 }
 
@@ -111,10 +106,10 @@ static inline void Identity(ValMatrix* m) {
     m->origin.z = 0.0f;
 }
 
-static inline void Rotate(ValVec3* out, const Camera* m, const ValVec3* d) {
-    out->x = Dot3YX(d->y, m->m[0][1], d->x, m->m[0][0], d->z, m->m[0][2]);
-    out->y = Dot3YX(d->y, m->m[1][1], d->x, m->m[1][0], d->z, m->m[1][2]);
-    out->z = Dot3YX(d->y, m->m[2][1], d->x, m->m[2][0], d->z, m->m[2][2]);
+static inline void Rotate(ValVec3* out, const PlainValMatrix* m, const ValVec3* d) {
+    out->x = Dot3YX(d->y, m->basis[0].y, d->x, m->basis[0].x, d->z, m->basis[0].z);
+    out->y = Dot3YX(d->y, m->basis[1].y, d->x, m->basis[1].x, d->z, m->basis[1].z);
+    out->z = Dot3YX(d->y, m->basis[2].y, d->x, m->basis[2].x, d->z, m->basis[2].z);
 }
 
 extern "C" {
@@ -258,17 +253,17 @@ void fn_80202718(void) {
         fn_8020268C();
         return;
     }
-    Camera* cam = fn_802C86DC();
-    int center = fn_802022E4(&cam->pos);
+    PlainValMatrix* cam = fn_802C86DC();
+    int center = fn_802022E4(&cam->origin);
     lbl_804888D0[fn_801E85B4()] = center;
     TerrainChunk* next = &lbl_8055ECC4[(center + 1) % lbl_8055ECC0];
-    f32 dx = next->pos.x - cam->pos.x;
-    f32 dy = next->pos.y - cam->pos.y;
-    f32 dz = next->pos.z - cam->pos.z;
+    f32 dx = next->pos.x - cam->origin.x;
+    f32 dy = next->pos.y - cam->origin.y;
+    f32 dz = next->pos.z - cam->origin.z;
     ValVec3 v;
-    v.x = Dot3YX(dy, cam->m[0][1], dx, cam->m[0][0], dz, cam->m[0][2]);
-    v.y = Dot3YX(dy, cam->m[1][1], dx, cam->m[1][0], dz, cam->m[1][2]);
-    v.z = Dot3YX(dy, cam->m[2][1], dx, cam->m[2][0], dz, cam->m[2][2]);
+    v.x = Dot3YX(dy, cam->basis[0].y, dx, cam->basis[0].x, dz, cam->basis[0].z);
+    v.y = Dot3YX(dy, cam->basis[1].y, dx, cam->basis[1].x, dz, cam->basis[1].z);
+    v.z = Dot3YX(dy, cam->basis[2].y, dx, cam->basis[2].x, dz, cam->basis[2].z);
     int dir = 1;
     if (v.z < 0.0f) {
         dir = -1;

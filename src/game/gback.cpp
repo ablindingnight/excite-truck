@@ -9,11 +9,7 @@
 void* operator new(size_t size, const char* tag);
 
 
-struct BMtx {
-    Mat3 rot;     // offset 0x0
-    ValVec3 pos;  // offset 0x24
-};
-
+// BMtx: common.h's PlainValMatrix.
 extern "C" {
 int strcmp(const char* a, const char* b);
 int strcasecmp(const char* a, const char* b);
@@ -27,14 +23,14 @@ int fn_80129D90(int seed, int lo, int hi);  // random int
 f32 fn_80214D48(void);                      // frame time
 const Mat3* fn_8022EDC4(void);              // camera
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const Mat3* m);
-void fn_802C8B98(int tex, const BMtx* m);
+void fn_802C8B98(int tex, const PlainValMatrix* m);
 void fn_802C8DB8(const void* verts, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
 u32 fn_80230B9C(int color);
 }
 
 struct Background {
-    BMtx mtx;         // offset 0x0
+    PlainValMatrix mtx;         // offset 0x0
     s32 tex;          // offset 0x30
     u32 color;        // offset 0x34
     s32 tint;         // offset 0x38
@@ -246,10 +242,10 @@ void fn_8022F824(Background* bg) {
 }
 
 // m in camera space.
-void fn_8022F868(BMtx* out, const BMtx* m) {
+void fn_8022F868(PlainValMatrix* out, const PlainValMatrix* m) {
     const Mat3* cam = fn_8022EDC4();
-    fn_801BFD34(&out->pos, &m->pos, cam);
-    Mat3Mul(&out->rot, &m->rot, cam);
+    fn_801BFD34(&out->origin, &m->origin, cam);
+    Mat3Mul(&out->Mat(), &m->Mat(), cam);
 }
 
 struct BackXY {
@@ -280,10 +276,10 @@ void fn_8022F8CC(Background* bg) {
     verts[2] = fn_80230A68(color, -w, -h, dist, 0.0f, scale);
     verts[3] = fn_80230A68(color, w, -h, dist, scale, scale);
     u16 idx[6] = {0, 1, 3, 0, 3, 2};
-    BMtx cm;
-    BMtx m = bg->mtx;
-    const BMtx* in = &m;
-    BMtx* out = &cm;
+    PlainValMatrix cm;
+    PlainValMatrix m = bg->mtx;
+    const PlainValMatrix* in = &m;
+    PlainValMatrix* out = &cm;
     fn_8022F868(out, in);
     fn_802C8B98(bg->tex, &cm);
     fn_802C8DB8(verts, 4, idx, 6);
@@ -306,14 +302,14 @@ void fn_8022FB6C(Background* bg) {
         }
     }
     if (bg->drifts) {
-        if (bg->mtx.pos.x > bg->driftLimit) {
+        if (bg->mtx.origin.x > bg->driftLimit) {
             bg->vx -= bg->driftJitter;
-        } else if (bg->mtx.pos.x < -bg->driftLimit) {
+        } else if (bg->mtx.origin.x < -bg->driftLimit) {
             bg->vx += bg->driftJitter;
         }
-        if (bg->mtx.pos.y > bg->driftLimit) {
+        if (bg->mtx.origin.y > bg->driftLimit) {
             bg->vy -= bg->driftJitter;
-        } else if (bg->mtx.pos.y < -bg->driftLimit) {
+        } else if (bg->mtx.origin.y < -bg->driftLimit) {
             bg->vy += bg->driftJitter;
         }
         bg->vx += Jitter(bg->driftJitter);
@@ -362,18 +358,18 @@ void fn_8022FD9C(Background* bg, f32 dt) {
     if (bg->spins) {
         Mat3 r;
         fn_8022FF10(&r, &turn);
-        Mat3Mul(&bg->mtx.rot, &bg->mtx.rot, &r);
+        Mat3Mul(&bg->mtx.Mat(), &bg->mtx.Mat(), &r);
     }
     ValVec3 v;
     v.x = bg->vx * dt;
     v.y = bg->vy * dt;
     v.z = 0.0f;
     if (bg->drifts) {
-        bg->mtx.pos.x += v.x;
-        bg->mtx.pos.y += v.y;
-        bg->mtx.pos.z += v.z;
+        bg->mtx.origin.x += v.x;
+        bg->mtx.origin.y += v.y;
+        bg->mtx.origin.z += v.z;
     }
-    Orthonormalize(&bg->mtx.rot);
+    Orthonormalize(&bg->mtx.Mat());
 }
 
 void fn_8022FF10(Mat3* out, const ValVec3* a) {
@@ -389,18 +385,18 @@ void fn_8022FF10(Mat3* out, const ValVec3* a) {
 }
 
 void fn_8022FF90(Background* bg) {
-    bg->mtx.rot.m[0][0] = 1.0f;
-    bg->mtx.rot.m[0][1] = 0.0f;
-    bg->mtx.rot.m[0][2] = 0.0f;
-    bg->mtx.rot.m[1][0] = 0.0f;
-    bg->mtx.rot.m[1][1] = 1.0f;
-    bg->mtx.rot.m[1][2] = 0.0f;
-    bg->mtx.rot.m[2][0] = 0.0f;
-    bg->mtx.rot.m[2][1] = 0.0f;
-    bg->mtx.rot.m[2][2] = 1.0f;
-    bg->mtx.pos.x = 0.0f;
-    bg->mtx.pos.y = 0.0f;
-    bg->mtx.pos.z = 0.0f;
+    bg->mtx.basis[0].x = 1.0f;
+    bg->mtx.basis[0].y = 0.0f;
+    bg->mtx.basis[0].z = 0.0f;
+    bg->mtx.basis[1].x = 0.0f;
+    bg->mtx.basis[1].y = 1.0f;
+    bg->mtx.basis[1].z = 0.0f;
+    bg->mtx.basis[2].x = 0.0f;
+    bg->mtx.basis[2].y = 0.0f;
+    bg->mtx.basis[2].z = 1.0f;
+    bg->mtx.origin.x = 0.0f;
+    bg->mtx.origin.y = 0.0f;
+    bg->mtx.origin.z = 0.0f;
     bg->color = 0xFF000000;
     bg->tint = -1;
     bg->spin = 0.0f;

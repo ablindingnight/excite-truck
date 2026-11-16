@@ -38,11 +38,7 @@ struct FireMtx {
     Vec pos;     // offset 0x24
 };
 
-struct TorchPart {
-    Mat3 rot;  // offset 0x0
-    Vec pos;   // offset 0x24
-};
-
+// TorchPart: common.h's PlainValMatrix.
 struct FireModel {
     u8 pad0[0x24];
     s32 nParts;  // offset 0x24
@@ -121,7 +117,7 @@ f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
-void fn_801BFD34(Vec* out, const Vec* v, const void* m);
+void fn_801BFD34(Vec* out, const ValVec3* v, const void* m);
 f32 fn_801E7E18(void);
 f32 fn_801E7E24(void);
 FireOpts* fn_801E87A8(void);
@@ -140,7 +136,7 @@ int fn_80287E20(FireModel* model, const char* name);
 ValueNode* fn_80287E80(FireModel* model, const char* name);
 ValVec3 fn_80287ED0(FireModel* model, const char* node, const char* key);
 ValVec3 fn_80287F90(FireModel* model, const char* node, const char* key, ValVec3 def);
-const TorchPart* fn_80288060(FireModel* model, int i);
+const PlainValMatrix* fn_80288060(FireModel* model, int i);
 FireModel* fn_80288208(s32 i);
 void fn_80288A40(const Vec* p, const Vec* v);
 void fn_80288A58(const Vec* p, const Vec* v);
@@ -384,14 +380,14 @@ struct TorchEntry {
 
 class ExhaustTorchMan {
 public:
-    void TransformTorchPart(int i, const TorchPart* part);
+    void TransformTorchPart(int i, const PlainValMatrix* part);
 public:
 public:
     ExhaustTorchMan(void);
     ~ExhaustTorchMan(void);
     void Reset(void);
     void Draw(void);
-    void Set(int i, const TorchPart* part);
+    void Set(int i, const PlainValMatrix* part);
     void CellUV(int idx, f32* u0, f32* u1, f32* v0, f32* v1);
     void Load(void);
     void DrawEdge(const Vec* p, int frame, const Vec* a, const Vec* b, f32 len);
@@ -415,7 +411,7 @@ struct BackfireEntry {
     f32 a;                 // offset 0x4
     f32 b;                 // offset 0x8
     s32 c;                 // offset 0xC
-    const TorchPart* d;    // offset 0x10
+    const PlainValMatrix* d;    // offset 0x10
 };
 
 struct BackfireEvt {
@@ -1410,13 +1406,13 @@ void ExhaustTorchMan::Draw(void) {
     }
 }
 
-void ExhaustTorchMan::Set(int i, const TorchPart* part) {
+void ExhaustTorchMan::Set(int i, const PlainValMatrix* part) {
     const FireCar* c;
     TorchEntry* e = &entries[i];
     if (part) {
         c = fn_80287B24(i);
-        fn_801BFD34(&e->pos, &part->pos, c);
-        Mat3Mul((Mat3*)e->rot, &part->rot, (const Mat3*)c);
+        fn_801BFD34(&e->pos, &part->origin, c);
+        Mat3Mul((Mat3*)e->rot, &part->Mat(), (const Mat3*)c);
         e->len = 0.1625f * sizes[i] * (1.0f + fn_80287BC8(-0.35f, 0.35f));
         e->frame = fn_80287B5C(16);
         if (!e->on) {
@@ -1494,10 +1490,10 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 /* Helper name unproven */
-inline void ExhaustTorchMan::TransformTorchPart(int i, const TorchPart* part) {
+inline void ExhaustTorchMan::TransformTorchPart(int i, const PlainValMatrix* part) {
     const FireCar* c = fn_80287B24(i);
-    fn_801BFD34(&entries[i].pos, &part->pos, c);
-    Mat3Mul((Mat3*)entries[i].rot, &part->rot, (const Mat3*)c);
+    fn_801BFD34(&entries[i].pos, &part->origin, c);
+    Mat3Mul((Mat3*)entries[i].rot, &part->Mat(), (const Mat3*)c);
 }
 
 /* Helper name unproven */
@@ -1512,7 +1508,7 @@ void ExhaustTorchMan::DrawEdges(void) {
             FireModel* model = fn_80288208(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
-                const TorchPart* part = fn_80288060(model, k);
+                const PlainValMatrix* part = fn_80288060(model, k);
                 TransformTorchPart(i, part);
                 Vec p;
                 TAddS(&p, &entries[i].pos, &entries[i].rot[1], TorchAt(entries, i).len);
@@ -1530,7 +1526,7 @@ void ExhaustTorchMan::DrawFaces(void) {
             FireModel* model = fn_80288208(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
-                const TorchPart* part = fn_80288060(model, k);
+                const PlainValMatrix* part = fn_80288060(model, k);
                 TransformTorchPart(i, part);
                 Vec p;
                 const f32 length = entry->len;
