@@ -205,6 +205,19 @@ struct CbDescBlock {
     s32 w4C;    // 0x4C
 };
 
+// A car's description (the BodyDesc CarBody::Init gets): the rigid-body mass and inertia, then the car's blocks.
+// Names unproven.
+struct CarDesc : RigidDesc {
+    CbDescBlock block;  // offset 0x18 (copied to the body's 0x274)
+    s32 f68;            // offset 0x68
+    CbIdent ident;      // offset 0x6C (copied to the body's 0x1F4)
+    s32 index;          // offset 0xE0
+    s32 model;          // offset 0xE4
+    s32 fE8;            // offset 0xE8
+    char part[0x20];    // offset 0xEC: the damage-part set name (empty: none)
+    f32 wheel[4];       // offset 0x10C
+};
+
 // The state handed to a body's SetState (vtable 0x54).
 struct BodyState {
     RMtx mtx;   // offset 0x0

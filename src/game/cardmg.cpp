@@ -234,7 +234,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
         }
     }
     ((CarBody*)p)->f5F8 = *(s32*)((u8*&)((CarBody*)p)->layout);
-    ((CarBody*)p)->f5F4 = 1818.0f / (0.4545f * F32(desc, 0x8));
+    ((CarBody*)p)->f5F4 = 1818.0f / (0.4545f * ((CarDesc*)desc)->mass);
     if (((CarBody*)p)->f314 >= -0.0001f) {
         ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * ((CarBody*)p)->f314;
     } else {

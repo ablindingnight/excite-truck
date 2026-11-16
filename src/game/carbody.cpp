@@ -567,21 +567,21 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     char path[0x50];
     CbSetup setup;
     cb->f2680 = 0;
-    cb->model = S32(desc, 0xE4);
-    cb->f5A4 = S32(desc, 0xE8);
-    cb->f5A0 = S32(desc, 0xDC);
+    cb->model = ((CarDesc*)desc)->model;
+    cb->f5A4 = ((CarDesc*)desc)->fE8;
+    cb->f5A0 = ((CarDesc*)desc)->ident.w70;
     if (cb->f5A0 == 0) {
         cb->f5A0 = 0x0FF807FF;
     }
     if (U32(fn_801769CC(), 0x4) & 0x400) {
         U32(p, 0x5A0) |= 0x80000000;
     }
-    cb->index = S32(desc, 0xE0);
-    cb->f1F0 = S32(desc, 0x68);
-    *(CbIdent*)(p + 0x1F4) = *(CbIdent*)(desc + 0x6C);
+    cb->index = ((CarDesc*)desc)->index;
+    cb->f1F0 = ((CarDesc*)desc)->f68;
+    *(CbIdent*)(p + 0x1F4) = *(CbIdent*)&((CarDesc*)desc)->ident;
     cb->layout = fn_802792E4((char*)(p + 0x234));
     s32 id = cb->ident.vehicle;
-    *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)(desc + 0x18);
+    *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)&((CarDesc*)desc)->block;
     S32(p, 0x328) = fn_80279874(id);
     if (!fn_8027AA48()) {
         S32(p, 0x328) = 0;
@@ -612,7 +612,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     const char* key = "treehit_class";
     cb->f5E8 = chassis->Has(key) ? chassis->GetEnum(key, treeClasses) : 1;
     GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->ident.vehicle);
-    fn_801B86BC(S32(desc, 0xE0), p + 0x2C4);
+    fn_801B86BC(((CarDesc*)desc)->index, p + 0x2C4);
     cb->f25C0 = (U32(FindVehicle(cb->ident.vehicle), 0xA0) >> 2) & 1;
     fn_80279F58(&setup, table);
     fn_8027A8B4(&setup, fn_8027A798((char*)(p + 0x234)));
@@ -625,10 +625,10 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
         F32(p + i * 0x74, 0x23EC) = 0.0254f * axle->GetFloat("max_compression", 8.0f) - F32(p + i * 0x74, 0x23E8);
         *(f32*)((u8*)&setup.wheels[i] + 0x18) = F32(p + i * 0x74, 0x23E8);
     }
-    F32(desc, 0x8) = setup.mass / 0.4545f;
-    F32(desc, 0xC) = setup.f04 / 0.042279866f;
-    F32(desc, 0x10) = setup.f08 / 0.042279866f;
-    F32(desc, 0x14) = setup.f0C / 0.042279866f;
+    ((CarDesc*)desc)->mass = setup.mass / 0.4545f;
+    ((CarDesc*)desc)->ix = setup.f04 / 0.042279866f;
+    ((CarDesc*)desc)->iy = setup.f08 / 0.042279866f;
+    ((CarDesc*)desc)->iz = setup.f0C / 0.042279866f;
     ((RigidBody*)p)->RigidBody::Init((BodyDesc*)desc);
     ((u8*&)cb->src) = fn_801B2EDC(cb->index, p);
     fn_801795D8(p, cb->index);
@@ -663,7 +663,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     fn_80182DF4(p);
     fn_8018C5A0(p, desc);
     fn_8018A654(p, desc);
-    bool player = S32(desc, 0x0) == 'PCAR';
+    bool player = ((CarDesc*)desc)->kind == 'PCAR';
     cb->f257C = fn_80209448(p);
     if (player) {
         cb->f2580 = fn_80209D4C(p);
@@ -3435,7 +3435,7 @@ void fn_8018A2C0(u8* p, TuneSink* t) {
 
 void fn_8018A654(u8* p, const u8* cfg) {
     CarBody* cb = (CarBody*)p;
-    if (*(s8*)(cfg + 0xEC)) {
+    if (*(s8*)(cfg + 0xEC)) {  // CarDesc::part (typed access reuses the address: lbzu)
         u8* m = fn_801D2008((u8*)cfg + 0xEC);
         cb->f26C0 = m;
         if (S32(m, 0x10) > 0) {
