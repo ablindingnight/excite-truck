@@ -4,6 +4,7 @@
 // - that the collision code walks. Touching box ends are flagged first so joined boxes collide smoothly.
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/shapes.h"
 
 extern "C" {
@@ -11,7 +12,6 @@ void* memset(void* p, int c, u32 n);
 void fn_802E317C(const char* fmt, ...);               // fatal: print, then exit() -> PPCHalt (never returns)
 void* fn_801284E8(const char* tag, s32 size);          // MemAlloc
 void fn_80128658(void* p);                             // MemFree
-f32 PSVECSquareDistance(const void* a, const void* b);
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -122,19 +122,19 @@ void fn_801B54B0(StaticCollObject* list) {
                     RVec3 a1;
                     RVec3 b1;
                     fn_801B5410(q->shape, &a1, &b1);
-                    if (PSVECSquareDistance(&a0, &a1) < 0.1f * 0.1f) {
+                    if (PSVECSquareDistance((const Vec*)&a0, (const Vec*)&a1) < 0.1f * 0.1f) {
                         ((BoxShape*)s)->a34 |= 1;
                         ((BoxShape*)t)->a34 |= 1;
                     }
-                    if (PSVECSquareDistance(&a0, &b1) < 0.1f * 0.1f) {
+                    if (PSVECSquareDistance((const Vec*)&a0, (const Vec*)&b1) < 0.1f * 0.1f) {
                         ((BoxShape*)s)->a34 |= 1;
                         ((BoxShape*)t)->a34 |= 2;
                     }
-                    if (PSVECSquareDistance(&b0, &a1) < 0.1f * 0.1f) {
+                    if (PSVECSquareDistance((const Vec*)&b0, (const Vec*)&a1) < 0.1f * 0.1f) {
                         ((BoxShape*)s)->a34 |= 2;
                         ((BoxShape*)t)->a34 |= 1;
                     }
-                    if (PSVECSquareDistance(&b0, &b1) < 0.1f * 0.1f) {
+                    if (PSVECSquareDistance((const Vec*)&b0, (const Vec*)&b1) < 0.1f * 0.1f) {
                         ((BoxShape*)s)->a34 |= 2;
                         ((BoxShape*)t)->a34 |= 2;
                     }

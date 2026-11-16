@@ -4,6 +4,7 @@
 // tumble with one of six random spins, fall, bounce once on the ground and sink away. Car chunks are
 // tinted with a dimmed copy of each car's colour. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/rmtx.h"
 #include "game/plainvec.h"
 
@@ -195,8 +196,6 @@ f32 fn_80129DC4(int seed, f32 lo, f32 hi);
 int fn_80129D18(int seed, int range);
 f32 fn_801E7E18(void);
 f32 fn_801E7E24(void);
-f32 PSVECMag(const PVec* v);
-f32 PSVECDotProduct(const PVec* a, const PVec* b);
 void fn_802E317C(const char* fmt, ...);
 ValueNode* fn_802AE414(const char* name);
 ModelInfo* fn_802C6B44(const char* model);
@@ -284,7 +283,7 @@ void fn_80292698(void) {
         v.x = s->axis.x * (t * s->speed);
         v.y = s->axis.y * (t * s->speed);
         v.z = s->axis.z * (t * s->speed);
-        ang = PSVECMag(&v);
+        ang = PSVECMag((const Vec*)&v);
         if (ang > 0.0001f) {
             inv = 1.0f / ang;
             x = inv * v.x;
@@ -382,9 +381,9 @@ int fn_80292BA8(PVec* pos, PVec* vel, const PVec* hit, const PVec* n) {
     d.x = pos->x - hit->x;
     d.y = pos->y - hit->y;
     d.z = pos->z - hit->z;
-    f32 dist = PSVECDotProduct(&d, n);
+    f32 dist = PSVECDotProduct((const Vec*)&d, (const Vec*)n);
     if (dist < 0.0f) {
-        f32 vn = PSVECDotProduct(vel, n);
+        f32 vn = PSVECDotProduct((const Vec*)vel, (const Vec*)n);
         f32 back = -dist;
         pos->x = pos->x + n->x * back;
         pos->y = pos->y + n->y * back;

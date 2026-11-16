@@ -3,6 +3,7 @@
 // and a debug viewer. Names are guesses apart from the allocation tags, value keys and messages.
 // The element player (fn_802AD4C4) is still a placeholder; the loader defines the element/key layouts.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "macros.h"
 
 void* operator new(size_t size, const char* name);
@@ -149,7 +150,6 @@ void* memset(void* p, int c, size_t n);
 double sqrt(double x);
 double sin(double x);
 double cos(double x);
-f32 PSVECDotProduct(const f32* a, const f32* b);
 s32 fn_802C2C00(s32 mode);
 void fn_8012F57C(f32* out, const f32* a, const f32* b, f32 t);  // slerp
 void fn_802C9900(f32 alpha);
@@ -434,7 +434,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 if (f->Has("spin")) {
                     ValVec3 axis;
                     SetV3(&axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
-                    f32 d = PSVECDotProduct(&axis.x, &axis.x);
+                    f32 d = PSVECDotProduct((const Vec*)&axis.x, (const Vec*)&axis.x);
                     if (!((f32)__fabs(d) <= __float_epsilon[0])) {
                         f32 len = sqrt(d);
                         f32 s;

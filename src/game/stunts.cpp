@@ -3,6 +3,7 @@
 // thresholds in stunts.val / stuntdef.val, award points and drive the HUD's stunt pop-up. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
@@ -704,7 +705,6 @@ struct RaceCarVec {
     f32 z;
 };
 
-extern "C" f32 PSVECDotProduct(const void* a, const void* b);
 
 inline void StopSound(Sound* s) {
     if (s) {
@@ -772,7 +772,7 @@ public:
         sliding = Sliding(rc, was, rc->speed);
         if (sliding) {
             spd = rc->speed;
-            f64 magnitude = __fabs(PSVECDotProduct(&rc->vel, &rc->mtx.rot.x));
+            f64 magnitude = __fabs(PSVECDotProduct((const Vec*)&rc->vel, (const Vec*)&rc->mtx.rot.x));
             side = (f32)magnitude;
             k = was ? 0.15f : 0.35f;
             fade = 1.0f - 8.0f * ground;
@@ -792,7 +792,7 @@ public:
 
     int Sliding(const RaceCarRec* rc, u8 was, f32 spd) {
         if (NearZero(rc->f2690) && spd > 5.0f && ground < 0.5f) {
-            double d = __fabs(PSVECDotProduct(&rc->vel, &rc->mtx.rot.x));
+            double d = __fabs(PSVECDotProduct((const Vec*)&rc->vel, (const Vec*)&rc->mtx.rot.x));
             f32 side = d;
             return side > spd * (was ? 0.15f : 0.35f);
         }

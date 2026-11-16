@@ -1,6 +1,7 @@
 // Car name tags and map gems (0x802A7BE8-0x802A81EC): draws each opponent's place/name above the car,
 // nearest last, and a gem for registered rivals. Names are guesses apart from the asset names.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "macros.h"
 
 struct TagObj {
@@ -50,7 +51,6 @@ int fn_802C8FF4(ValVec3* p, f32 margin);
 void fn_80235CBC(void* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 int fn_801E85B4(void);
 TagCam* fn_802678C0(int view);
-f32 PSVECSquareDistance(const void* a, const void* b);
 int fn_801CF064(void);
 int fn_801E866C(int view);
 const char* fn_800122B4(int place, char* buf);
@@ -124,10 +124,10 @@ int fn_802A7E08(const void* pa, const void* pb) {
     ValVec3 p = fn_801EA9A0(*(const int*)pa)->obj->pos;
     f32 da;
     p.y += 2.0f;
-    da = PSVECSquareDistance(&p, &cam->pos);
+    da = PSVECSquareDistance((const Vec*)&p, (const Vec*)&cam->pos);
     p = fn_801EA9A0(*(const int*)pb)->obj->pos;
     p.y += 2.0f;
-    if (da > PSVECSquareDistance(&p, &cam->pos)) {
+    if (da > PSVECSquareDistance((const Vec*)&p, (const Vec*)&cam->pos)) {
         return -1;
     }
     return 1;
@@ -174,7 +174,7 @@ void fn_802A7EEC(void) {
             ValVec3 scr;
             p.y += lift;
             fn_802C8E70(&p, &scr);
-            d = PSVECSquareDistance(&p, &fn_802678C0(fn_801E85B4())->pos);
+            d = PSVECSquareDistance((const Vec*)&p, (const Vec*)(&fn_802678C0(fn_801E85B4())->pos));
             if (fn_802C8FF4(&scr, 0.0f)) {
                 char buf[8];
                 u32 color = WhiteAlpha(Ramp(d, nearDist, farDist, 1.0f, 0.0f));

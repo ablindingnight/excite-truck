@@ -3,6 +3,7 @@
 // render objects. Calc culls everything against the camera once a frame and fills the shared visibility
 // bytes; Flush draws one texture-priority band. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -165,7 +166,6 @@ void fn_802DB2A0(void);
 u8* fn_802DB2A8(s32 n);
 void fn_802DB2B0(s32 n);
 void fn_802E317C(const char* fmt, ...);
-f32 PSVECDotProduct(const MVec3* a, const MVec3* b);
 }
 
 extern RenderCtx* lbl_8055DFC4;
@@ -250,7 +250,7 @@ u8 fn_802CCBC4(const MLBox* e, MVec4 eye, f32 a, f32 b) {
     d.x = eye.x - e->c.x;
     d.y = eye.y - e->c.y;
     d.z = eye.z - e->c.z;
-    f32 r = b * (a + PSVECDotProduct(&d, &d));
+    f32 r = b * (a + PSVECDotProduct((const Vec*)&d, (const Vec*)&d));
     MVec4 u = w;
     u32 code = 0;
     if (u.x > r) {

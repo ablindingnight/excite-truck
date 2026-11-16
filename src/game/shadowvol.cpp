@@ -2,11 +2,11 @@
 // camera, and the registered shadow casters drawn each frame. Names are guesses apart from the
 // messages.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 double sqrt(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-f32 PSVECSquareDistance(const ValVec3* a, const ValVec3* b);
 int fn_802C9C8C(u32 color);
 void fn_802C9CE0(void);
 void fn_802C7ADC(int flag);
@@ -159,7 +159,7 @@ void fn_80297AFC(void) {
         StaticShadow* s = &lbl_8055F7A8[i];
         f32 scale = fn_801E88F0(-1);
         scale *= scale;
-        f32 d2 = PSVECSquareDistance(&camPos, &s->mtx.origin);
+        f32 d2 = PSVECSquareDistance((const Vec*)&camPos, (const Vec*)&s->mtx.origin);
         d2 *= scale;
         f32 alpha;
         if (d2 > s->radius * s->radius) {

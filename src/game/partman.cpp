@@ -4,6 +4,7 @@
 // quads in batches of eight (plain, animated flipbook, and rotating/shaded variants). Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include <string.h>
 
 extern "C" {
@@ -23,7 +24,6 @@ void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 f32 fn_802C9A4C(f32 x);
 void fn_802C8DB8(void* verts, int nverts, const u16* idx, int n);
-f32 PSVECDotProduct(const void* a, const void* b);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -915,7 +915,7 @@ void PartSys::DrawSprites(Particle* p, int n) {
         d.x = m.pos.x - pos.x;
         d.y = m.pos.y - pos.y;
         d.z = m.pos.z - pos.z;
-        f32 ratio = PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist);
+        f32 ratio = PSVECDotProduct((const Vec*)&d, (const Vec*)&d) / (1.0f + farDist * farDist);
         fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         b = Byte(255.0f * (blueConst + blueRamp * t));
         g = Byte(255.0f * (greenConst + greenRamp * t));
@@ -963,7 +963,7 @@ void PartSys::DrawAnimated(Particle* p, int n) {
         d.x = m.pos.x - pos.x;
         d.y = m.pos.y - pos.y;
         d.z = m.pos.z - pos.z;
-        f32 ratio = PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist);
+        f32 ratio = PSVECDotProduct((const Vec*)&d, (const Vec*)&d) / (1.0f + farDist * farDist);
         f32 fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         u8 b = Byte(255.0f * (blueConst + blueRamp * t));
         u8 g = Byte(255.0f * (greenConst + greenRamp * t));
@@ -1026,7 +1026,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
         d.x = m.pos.x - pos.x;
         d.y = m.pos.y - pos.y;
         d.z = m.pos.z - pos.z;
-        f32 ratio = PSVECDotProduct(&d, &d) / (1.0f + farDist * farDist);
+        f32 ratio = PSVECDotProduct((const Vec*)&d, (const Vec*)&d) / (1.0f + farDist * farDist);
         f32 fade = Clamp01(nearAlpha + ratio * (1.0f - nearAlpha));
         PVtx q[4];
         f32 two = 2.0f * size;

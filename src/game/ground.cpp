@@ -1,10 +1,10 @@
 // Ground queries (0x801E9C80-0x801EA1FC): height, surface point and normal lookups on the track
 // collision mesh, with an optional cached triangle hint. Names are guesses.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 extern "C" {
-f32 PSVECDotProduct(const void* a, const void* b);
 int fn_801DCE14(s16* hint, const V3* pos, V3* outPos, V3* outNormal, int flags);
 void fn_801DCEF4(void);
 void fn_801DCF00(void);
@@ -29,7 +29,7 @@ int fn_801E9C84(const V3* from, const V3* at, V3* outPos, V3* outNormal, s16* hi
     d.x = at->x - p.x;
     d.y = at->y - p.y;
     d.z = at->z - p.z;
-    dist = PSVECDotProduct(&n, &d);
+    dist = PSVECDotProduct((const Vec*)&n, (const Vec*)&d);
     if ((f32)__fabs(dist) < maxDist) {
         f32 t = -dist;
         outPos->x = at->x + n.x * t;

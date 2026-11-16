@@ -3,6 +3,7 @@
 // one car reaches the other along the track, plus per-car sorted pair lists. Names are guesses apart
 // from "Proxer" (its allocation tag).
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 extern "C" {
@@ -12,7 +13,6 @@ void fn_80128658(void* p);                     // MemFree
 f32 fn_8013672C(void);                         // center line length
 u8* fn_8017960C(int i);
 void* fn_802C6C34(int id);
-f32 PSVECDotProduct(const void* a, const void* b);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -310,7 +310,7 @@ bool fn_80137078(const Body* a, const Body* b, f32 ta, f32 tb) {
     d.x = pa.x - pb.x;
     d.y = pa.y - pb.y;
     d.z = pa.z - pb.z;
-    return PSVECDotProduct(&d, &b->vel) > 0.0f;
+    return PSVECDotProduct((const Vec*)&d, (const Vec*)&b->vel) > 0.0f;
 }
 
 int fn_80137140(int i, int j) {

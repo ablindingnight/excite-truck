@@ -2,6 +2,7 @@
 // terchunk.val, streamed in a window around the nearest chunk to the camera, plus the far
 // models. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 // Dot product taking the y term first (x*mx + y*my + z*mz).
 static inline f32 Dot3YX(f32 ay, f32 by, f32 ax, f32 bx, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
@@ -22,7 +23,6 @@ void fn_802C7458(s32 inst, int a);
 void fn_802C70AC(s32 inst, const ValMatrix* m, s32 color, int flags);
 s32 fn_802C7A3C(f32 a, f32 b, f32 c);
 int fn_802C9C58(int mode);
-f32 PSVECSquareDistance(const ValVec3* a, const ValVec3* b);
 int fn_801E85A4(void);
 int fn_801E85B4(void);
 int fn_801E86F8(int a);
@@ -155,7 +155,7 @@ int fn_802022E4(const ValVec3* pos) {
     f32 best = 1e8f;
     int nearest = 0;
     for (int i = 0; i < lbl_8055ECC0; i++) {
-        f32 d = PSVECSquareDistance(pos, &lbl_8055ECC4[i].pos);
+        f32 d = PSVECSquareDistance((const Vec*)pos, (const Vec*)&lbl_8055ECC4[i].pos);
         if (d < best) {
             best = d;
             nearest = i;

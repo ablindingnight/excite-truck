@@ -3,12 +3,11 @@
 // one player) and their state machine against the device sound, plus defaults of the Mixer and Sound
 // interfaces. Names are guesses apart from the class names, pool and messages.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 char* strncpy(char* dst, const char* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-f32 PSVECMag(const ValVec3* v);
-f32 PSVECDotProduct(const ValVec3* a, const ValVec3* b);
 extern u32 lbl_8055D430;  // debug flags
 void fn_8020A368(void);   // music init
 void fn_8020A400(void);   // music shutdown
@@ -449,7 +448,7 @@ void Sound3D::operator delete(void* p) {
 static f32 Attenuation(const ValVec3* d, f32 radius) {
     f32 front = 0.75f * d->z;
     f32 ahead = (0.0f > front) ? 0.0f : front;
-    f32 dist = PSVECMag(d) - ahead;
+    f32 dist = PSVECMag((const Vec*)d) - ahead;
     return radius / ((dist > radius) ? dist : radius);
 }
 
@@ -475,7 +474,7 @@ void Sound3D::PreUpdate(Listener* l, int n) {
             d.x = nx;
             d.y = ny;
             d.z = nz;
-            if (PSVECDotProduct(&d, &d) < (200.0f + radius) * (200.0f + radius)) {
+            if (PSVECDotProduct((const Vec*)&d, (const Vec*)&d) < (200.0f + radius) * (200.0f + radius)) {
                 f32 v = volume;
                 audible = 1;
                 f32 r = ((const Sound3D*)this)->radius;  // const view: a separate expression, loaded here (a const getter in the original?)
@@ -510,7 +509,7 @@ void Sound3D::Update(Listener* l, int n) {
                     ValVec3 lv = *l->vel;
                     ValVec3 d;
                     Sub(&d, *pos, lp);
-                    f32 dist = PSVECMag(&d);
+                    f32 dist = PSVECMag((const Vec*)&d);
                     if (dist > 0.1f) {
                         f32 w = 1.0f / dist;
                         const ValVec3* right = &l->mtx->basis[0];
@@ -518,19 +517,19 @@ void Sound3D::Update(Listener* l, int n) {
                         d.y *= w;
                         d.z *= w;
                         wsum += w;
-                        f32 p = PSVECDotProduct(&d, right);
+                        f32 p = PSVECDotProduct((const Vec*)&d, (const Vec*)right);
                         if (dist < 1.5f) {
                             p *= dist / 1.5f;
                         }
                         pan += p * w;
-                        f32 q = PSVECDotProduct(&d, &l->mtx->basis[2]);
+                        f32 q = PSVECDotProduct((const Vec*)&d, (const Vec*)&l->mtx->basis[2]);
                         if (dist < 1.5f) {
                             q = 1.0f + (dist / 1.5f) * (q - 1.0f);
                         }
                         depth += q * w;
                         ValVec3 rv;
                         Sub(&rv, *vel, lv);
-                        f32 r = 339.97f / (339.97f + PSVECDotProduct(&rv, &d));
+                        f32 r = 339.97f / (339.97f + PSVECDotProduct((const Vec*)&rv, (const Vec*)&d));
                         doppler += r * w;
                     }
                 }

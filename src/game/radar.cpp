@@ -2,11 +2,11 @@
 // car, positioned by its offset from the camera rotated into the camera's heading, scaled and faded by
 // distance. Names are guesses apart from the art names.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 extern "C" {
 double sqrt(double x);
-f32 PSVECMag(const void* v);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, int mode);  // layout -> screen
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
@@ -216,11 +216,11 @@ void fn_80139318(Layout* l, s32 tex, int self, f32 range) {
             p.y = *(f32*)(car + 0x64) - m.pos.y;
             p.z = *(f32*)(car + 0x68) - m.pos.z;
             MulVec(m, p, &p);
-            dist = PSVECMag(&p);
+            dist = PSVECMag((const Vec*)&p);
             scale = LerpF(1.0f, 0.6f, Clamp01((dist - 0.7f * range) / (2.0f * range - 0.7f * range)));
             alpha = LerpF(1.0f, 0.3f, Clamp01((dist - 2.0f * range) / (6.0f * range - 2.0f * range)));
             if (dist > range) {
-                f32 mag = PSVECMag(&p);
+                f32 mag = PSVECMag((const Vec*)&p);
                 if (!((f32)__fabs(mag) <= __float_epsilon[0])) {
                     f32 k = range / mag;
                     p.x *= k;
