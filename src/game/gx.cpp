@@ -42,12 +42,7 @@ struct Row3 {
     f32 v[3];
 };
 
-// Rigid transform: rotation then position.
-struct RMtx {
-    Mat3 rot;  // offset 0x0
-    V3 pos;    // offset 0x24
-};
-
+// RMtx: common.h's PlainValMatrix.
 extern "C" {
 void* memset(void* dst, int c, size_t n);
 void* memcpy(void* dst, const void* src, size_t n);
@@ -107,7 +102,7 @@ void fn_802DF684(void);
 int fn_802E3D68(const char* name);
 void fn_802E3734(s32* fd);
 void fn_802E3A64(s32 fd, const void* buf, u32 n);
-void fn_801BFD34(V3* out, const V3* in, const RMtx* m);
+void fn_801BFD34(V3* out, const V3* in, const PlainValMatrix* m);
 void fn_802C8588(void* out, const V3* a, const V3* b);
 
 extern GXRenderModeObj GXNtsc480IntDf;
@@ -226,7 +221,7 @@ struct Light {
 
 struct GXLightSet {
     GXLightSet(void);
-    RMtx view;      // offset 0x0
+    PlainValMatrix view;      // offset 0x0
     GXColor amb;    // offset 0x30
     GXColor col;    // offset 0x34
     u8 alpha;       // offset 0x38
@@ -276,8 +271,8 @@ extern u8 lbl_8055FE39;
 extern u32 lbl_804DB458[4];
 
 f32 lbl_804C5650[4][4];      // loaded position matrix
-RMtx lbl_804C5690;           // view
-RMtx lbl_804C56C0;           // camera
+PlainValMatrix lbl_804C5690;           // view
+PlainValMatrix lbl_804C56C0;           // camera
 V3 lbl_804C56F0;             // camera side axis
 TexState lbl_804C5700;
 Capture lbl_804C5710;
@@ -322,7 +317,7 @@ u16 lbl_8055FD0A = BlendKey(0x405);
 u16 lbl_8055FD0C = BlendKey(0x401);
 PointLight lbl_804CA088[7];
 GXLightObj lbl_804CA118[7];
-RMtx lbl_804CA2D8;
+PlainValMatrix lbl_804CA2D8;
 s64 lbl_8055FD10;   // draw sync time
 u8 lbl_8055FD18;
 u8 lbl_8055FD19;
@@ -759,7 +754,7 @@ void fn_802D007C(f32 a);
 void fn_802D01B0(const V3* dir, f32 scale);
 void fn_802D01E0(s32 x, s32 y, s32 w, s32 h);
 void fn_802D0368(f32 n, f32 f, f32 fovy, f32 zoom);
-void fn_802D03F4(const RMtx* cam);
+void fn_802D03F4(const PlainValMatrix* cam);
 void fn_802D0610(u32 set);
 
 void fn_802CF850(void) {
@@ -831,19 +826,19 @@ void fn_802CF850(void) {
     fn_802D01B0(&dir, 1.0f);
     fn_802D01E0(0, 0, lbl_8055CFF0, lbl_8055CFF4);
     fn_802D0368(0.5f, 1000.0f, 1.5707964f, 1.0f);
-    RMtx cam;
-    cam.rot.m[0][0] = 1.0f;
-    cam.rot.m[0][1] = 0.0f;
-    cam.rot.m[0][2] = 0.0f;
-    cam.rot.m[1][0] = 0.0f;
-    cam.rot.m[1][1] = 1.0f;
-    cam.rot.m[1][2] = 0.0f;
-    cam.rot.m[2][0] = 0.0f;
-    cam.rot.m[2][1] = 0.0f;
-    cam.rot.m[2][2] = 1.0f;
-    cam.pos.x = 0.0f;
-    cam.pos.y = 0.0f;
-    cam.pos.z = 0.0f;
+    PlainValMatrix cam;
+    cam.basis[0].x = 1.0f;
+    cam.basis[0].y = 0.0f;
+    cam.basis[0].z = 0.0f;
+    cam.basis[1].x = 0.0f;
+    cam.basis[1].y = 1.0f;
+    cam.basis[1].z = 0.0f;
+    cam.basis[2].x = 0.0f;
+    cam.basis[2].y = 0.0f;
+    cam.basis[2].z = 1.0f;
+    cam.origin.x = 0.0f;
+    cam.origin.y = 0.0f;
+    cam.origin.z = 0.0f;
     fn_802D03F4(&cam);
     fn_802D0610(0);
     lbl_8055FD85 = 1;
@@ -1092,14 +1087,14 @@ void fn_802D0368(f32 n, f32 f, f32 fovy, f32 zoom) {
     lbl_804C97B0.dirty = 1;
 }
 
-void fn_802D03F4(const RMtx* cam) {
+void fn_802D03F4(const PlainValMatrix* cam) {
     fn_802D6C78();
     lbl_804C56C0 = *cam;
     V3 up;
     up.x = 0.0f;
     up.y = 1.0f;
     up.z = 0.0f;
-    PSVECCrossProduct((const Vec*)&up, (const Vec*)((const V3*)cam->rot.m[2]), (Vec*)&lbl_804C56F0);
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)&cam->basis[2], (Vec*)&lbl_804C56F0);
     f32 mag = PSVECMag((const Vec*)&lbl_804C56F0);
     mag = mag > 0.05f ? mag : 0.05f;
     f32 inv = 1.0f / mag;
@@ -1111,7 +1106,7 @@ void fn_802D03F4(const RMtx* cam) {
 
 void fn_802D050C(void* p) { lbl_8055FD54 = p; }
 
-s32 fn_802D0514(const RMtx* view) {
+s32 fn_802D0514(const PlainValMatrix* view) {
     s32 n = lbl_8055FDAC;
     if (n >= 0x800) {
         return 0;
@@ -1138,19 +1133,19 @@ void fn_802D0610(u32 set) {
         lbl_804C97D0.scale = s->scale;
         lbl_804C97D0.dirty = 1;
     } else {
-        RMtx m;
-        m.rot.m[0][0] = 1.0f;
-        m.rot.m[0][1] = 0.0f;
-        m.rot.m[0][2] = 0.0f;
-        m.rot.m[1][0] = 0.0f;
-        m.rot.m[1][1] = 1.0f;
-        m.rot.m[1][2] = 0.0f;
-        m.rot.m[2][0] = 0.0f;
-        m.rot.m[2][1] = 0.0f;
-        m.rot.m[2][2] = 1.0f;
-        m.pos.x = 0.0f;
-        m.pos.y = 0.0f;
-        m.pos.z = 0.0f;
+        PlainValMatrix m;
+        m.basis[0].x = 1.0f;
+        m.basis[0].y = 0.0f;
+        m.basis[0].z = 0.0f;
+        m.basis[1].x = 0.0f;
+        m.basis[1].y = 1.0f;
+        m.basis[1].z = 0.0f;
+        m.basis[2].x = 0.0f;
+        m.basis[2].y = 0.0f;
+        m.basis[2].z = 1.0f;
+        m.origin.x = 0.0f;
+        m.origin.y = 0.0f;
+        m.origin.z = 0.0f;
         lbl_804C5690 = m;
         lbl_8055FD70 = 1;
     }
@@ -1357,19 +1352,19 @@ void fn_802D0C98(void) {
     fn_802CFF50();
 }
 
-void fn_802D0DD4(f32 out[3][4], const RMtx* m) {
-    out[0][0] = m->rot.m[0][0];
-    out[1][0] = m->rot.m[0][1];
-    out[2][0] = -m->rot.m[0][2];
-    out[0][1] = m->rot.m[1][0];
-    out[1][1] = m->rot.m[1][1];
-    out[2][1] = -m->rot.m[1][2];
-    out[0][2] = m->rot.m[2][0];
-    out[1][2] = m->rot.m[2][1];
-    out[2][2] = -m->rot.m[2][2];
-    out[0][3] = m->pos.x;
-    out[1][3] = m->pos.y;
-    out[2][3] = -m->pos.z;
+void fn_802D0DD4(f32 out[3][4], const PlainValMatrix* m) {
+    out[0][0] = m->basis[0].x;
+    out[1][0] = m->basis[0].y;
+    out[2][0] = -m->basis[0].z;
+    out[0][1] = m->basis[1].x;
+    out[1][1] = m->basis[1].y;
+    out[2][1] = -m->basis[1].z;
+    out[0][2] = m->basis[2].x;
+    out[1][2] = m->basis[2].y;
+    out[2][2] = -m->basis[2].z;
+    out[0][3] = m->origin.x;
+    out[1][3] = m->origin.y;
+    out[2][3] = -m->origin.z;
 }
 
 void fn_802D0E48(int pass) {
@@ -1574,9 +1569,9 @@ void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, GXColor color, f32
 
 void fn_802D18E8(void) {
     V3 d;
-    d.x = lbl_804C5690.pos.x - lbl_804C56C0.pos.x;
-    d.y = lbl_804C5690.pos.y - lbl_804C56C0.pos.y;
-    d.z = lbl_804C5690.pos.z - lbl_804C56C0.pos.z;
+    d.x = lbl_804C5690.origin.x - lbl_804C56C0.origin.x;
+    d.y = lbl_804C5690.origin.y - lbl_804C56C0.origin.y;
+    d.z = lbl_804C5690.origin.z - lbl_804C56C0.origin.z;
     f32 mag = PSVECMag((const Vec*)&d);
     mag = mag > 0.001f ? mag : 0.001f;
     f32 inv = 1.0f / mag;
@@ -1613,9 +1608,9 @@ void fn_802D18E8(void) {
 
 void fn_802D1B58(void) {
     f32 m[2][4] = {{0.0f, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 0.0f, 0.5f}};
-    m[0][0] = 0.5f * -lbl_804C5690.rot.m[0][1];
-    m[0][1] = 0.5f * -lbl_804C5690.rot.m[1][1];
-    m[0][2] = 0.5f * -lbl_804C5690.rot.m[2][1];
+    m[0][0] = 0.5f * -lbl_804C5690.basis[0].y;
+    m[0][1] = 0.5f * -lbl_804C5690.basis[1].y;
+    m[0][2] = 0.5f * -lbl_804C5690.basis[2].y;
     GXLoadTexMtxImm((const f32 (*)[4])(m), (u32)0x21, (GXMtxType)1);
 }
 
@@ -1651,39 +1646,39 @@ static inline void MulVecT(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
-static inline void Invert(RMtx* out, const RMtx* m) {
+static inline void Invert(PlainValMatrix* out, const PlainValMatrix* m) {
     for (int i = 0; i < 3; i++) {
-        *(Row3*)out->rot.m[i] = *(const Row3*)m->rot.m[i];
+        *(Row3*)&out->basis[i] = *(const Row3*)&m->basis[i];
     }
-    f32 t = out->rot.m[0][1];
-    out->rot.m[0][1] = out->rot.m[1][0];
-    out->rot.m[1][0] = t;
-    t = out->rot.m[0][2];
-    out->rot.m[0][2] = out->rot.m[2][0];
-    out->rot.m[2][0] = t;
-    t = out->rot.m[1][2];
-    out->rot.m[1][2] = out->rot.m[2][1];
-    out->rot.m[2][1] = t;
-    MulVecT(&out->pos, &m->pos, &m->rot);
-    out->pos.x *= -1.0f;
-    out->pos.y *= -1.0f;
-    out->pos.z *= -1.0f;
+    f32 t = out->basis[0].y;
+    out->basis[0].y = out->basis[1].x;
+    out->basis[1].x = t;
+    t = out->basis[0].z;
+    out->basis[0].z = out->basis[2].x;
+    out->basis[2].x = t;
+    t = out->basis[1].z;
+    out->basis[1].z = out->basis[2].y;
+    out->basis[2].y = t;
+    MulVecT(&out->origin, &m->origin, &m->Mat());
+    out->origin.x *= -1.0f;
+    out->origin.y *= -1.0f;
+    out->origin.z *= -1.0f;
 }
-static inline void InvertR(RMtx* const& out, const RMtx* m) {  /* Helper name unproven: Invert with the destination by reference */
-    out->rot = m->rot;
-    f32 t = out->rot.m[0][1];
-    out->rot.m[0][1] = out->rot.m[1][0];
-    out->rot.m[1][0] = t;
-    t = out->rot.m[0][2];
-    out->rot.m[0][2] = out->rot.m[2][0];
-    out->rot.m[2][0] = t;
-    t = out->rot.m[1][2];
-    out->rot.m[1][2] = out->rot.m[2][1];
-    out->rot.m[2][1] = t;
-    MulVecT(&out->pos, &m->pos, &m->rot);
-    out->pos.x *= -1.0f;
-    out->pos.y *= -1.0f;
-    out->pos.z *= -1.0f;
+static inline void InvertR(PlainValMatrix* const& out, const PlainValMatrix* m) {  /* Helper name unproven: Invert with the destination by reference */
+    out->Mat() = m->Mat();
+    f32 t = out->basis[0].y;
+    out->basis[0].y = out->basis[1].x;
+    out->basis[1].x = t;
+    t = out->basis[0].z;
+    out->basis[0].z = out->basis[2].x;
+    out->basis[2].x = t;
+    t = out->basis[1].z;
+    out->basis[1].z = out->basis[2].y;
+    out->basis[2].y = t;
+    MulVecT(&out->origin, &m->origin, &m->Mat());
+    out->origin.x *= -1.0f;
+    out->origin.y *= -1.0f;
+    out->origin.z *= -1.0f;
 }
 
 void fn_802D1C04(void) {
@@ -1691,11 +1686,11 @@ void fn_802D1C04(void) {
         return;
     }
     lbl_8055FD70 = 0;
-    RMtx inv;
+    PlainValMatrix inv;
     Invert(&inv, &lbl_804C56C0);
-    RMtx w;
-    fn_801BFD34(&w.pos, &lbl_804C5690.pos, &inv);
-    Mat3Mul(&w.rot, &lbl_804C5690.rot, &inv.rot);
+    PlainValMatrix w;
+    fn_801BFD34(&w.origin, &lbl_804C5690.origin, &inv);
+    Mat3Mul(&w.Mat(), &lbl_804C5690.Mat(), &inv.Mat());
     fn_802D0DD4(lbl_804C5650, &w);
     GXLoadPosMtxImm((const f32 (*)[4])(lbl_804C5650), (u32)0);
     if (lbl_8055FD19) {
@@ -1707,17 +1702,17 @@ void fn_802D1C04(void) {
     case 3: {
         // Projected texture: express the model frame in the projector's look-at frame.
         f32 b[3][4];
-        RMtx look;
-        RMtx li;
-        RMtx lw;
+        PlainValMatrix look;
+        PlainValMatrix li;
+        PlainValMatrix lw;
         f32 m[3][4];
         f32 t[3][4];
         f32 s[3][4];
         f32 st[3][4];
-        fn_802C8588(&look, &lbl_804C56C0.pos, &lbl_804C5690.pos);
+        fn_802C8588(&look, &lbl_804C56C0.origin, &lbl_804C5690.origin);
         Invert(&li, &look);
-        fn_801BFD34(&lw.pos, &lbl_804C5690.pos, &li);
-        Mat3Mul(&lw.rot, &lbl_804C5690.rot, &li.rot);
+        fn_801BFD34(&lw.origin, &lbl_804C5690.origin, &li);
+        Mat3Mul(&lw.Mat(), &lbl_804C5690.Mat(), &li.Mat());
         fn_802D0DD4(m, &lw);
         PSMTXInvXpose((const f32 (*)[4])(m), (f32 (*)[4])(b));
         PSMTXScale((f32 (*)[4])(s), 0.5f, -0.5f, 0.0f);
@@ -1730,7 +1725,7 @@ void fn_802D1C04(void) {
     case 1:
     case 5: {
         f32 m[2][4] = {{0.0f, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 0.0f, 0.5f}};
-        Mat3 rotv = lbl_804C5690.rot;
+        Mat3 rotv = lbl_804C5690.Mat();
         f32 t = rotv.m[0][1];
         rotv.m[0][1] = rotv.m[1][0];
         rotv.m[1][0] = t;
@@ -1767,20 +1762,20 @@ void fn_802D2218(void) {
         return;
     }
     fn_802D1678();
-    RMtx id;
-    RMtx* const identity = &id;
-    identity->rot.m[0][0] = 1.0f;
-    identity->rot.m[0][1] = 0.0f;
-    identity->rot.m[0][2] = 0.0f;
-    identity->rot.m[1][0] = 0.0f;
-    identity->rot.m[1][1] = 1.0f;
-    identity->rot.m[1][2] = 0.0f;
-    identity->rot.m[2][0] = 0.0f;
-    identity->rot.m[2][1] = 0.0f;
-    identity->rot.m[2][2] = 1.0f;
-    identity->pos.x = 0.0f;
-    identity->pos.y = 0.0f;
-    identity->pos.z = 0.0f;
+    PlainValMatrix id;
+    PlainValMatrix* const identity = &id;
+    identity->basis[0].x = 1.0f;
+    identity->basis[0].y = 0.0f;
+    identity->basis[0].z = 0.0f;
+    identity->basis[1].x = 0.0f;
+    identity->basis[1].y = 1.0f;
+    identity->basis[1].z = 0.0f;
+    identity->basis[2].x = 0.0f;
+    identity->basis[2].y = 0.0f;
+    identity->basis[2].z = 1.0f;
+    identity->origin.x = 0.0f;
+    identity->origin.y = 0.0f;
+    identity->origin.z = 0.0f;
     f32 pm[3][4];
     fn_802D0DD4(pm, identity);
     GXLoadPosMtxImm((const f32 (*)[4])(pm), (u32)0);
@@ -1993,25 +1988,25 @@ V3* fn_802D2D04(void) { return &lbl_804C97D0.dir; }
 GXRenderModeObj* fn_802D2D14(void) { return lbl_8055FD64; }
 
 void fn_802D2D1C(void) {
-    const RMtx* camera = &lbl_804C56C0;
-    RMtx* const world = &lbl_804CA2D8;
+    const PlainValMatrix* camera = &lbl_804C56C0;
+    PlainValMatrix* const world = &lbl_804CA2D8;
     InvertR(world, camera);
     GXSetCurrentMtx((u32)0);
 }
 
-void fn_802D2ED8(const RMtx* m, int slot) {
+void fn_802D2ED8(const PlainValMatrix* m, int slot) {
     if (slot == 0) {
         lbl_8055FD70 = 1;
         lbl_8055FD8C = -1;
     }
-    RMtx t;
-    fn_801BFD34(&t.pos, &m->pos, &lbl_804CA2D8);
-    Mat3Mul(&t.rot, &m->rot, &lbl_804CA2D8.rot);
+    PlainValMatrix t;
+    fn_801BFD34(&t.origin, &m->origin, &lbl_804CA2D8);
+    Mat3Mul(&t.Mat(), &m->Mat(), &lbl_804CA2D8.Mat());
     fn_802D0DD4(lbl_804C5650, &t);
     GXLoadPosMtxImm((const f32 (*)[4])(lbl_804C5650), (u32)(slot * 3));
 }
 
-void fn_802D2F70(const RMtx* m) { fn_802D2ED8(m, 0); }
+void fn_802D2F70(const PlainValMatrix* m) { fn_802D2ED8(m, 0); }
 
 u16* fn_802D2F78(s32* w, s32* h) {
     GXDrawDone();
@@ -2120,20 +2115,20 @@ void fn_802D3360(void) {
 }
 
 void fn_802D3420(void) {
-    RMtx id;
-    RMtx* const identity = &id;
-    identity->rot.m[0][0] = 1.0f;
-    identity->rot.m[0][1] = 0.0f;
-    identity->rot.m[0][2] = 0.0f;
-    identity->rot.m[1][0] = 0.0f;
-    identity->rot.m[1][1] = 1.0f;
-    identity->rot.m[1][2] = 0.0f;
-    identity->rot.m[2][0] = 0.0f;
-    identity->rot.m[2][1] = 0.0f;
-    identity->rot.m[2][2] = 1.0f;
-    identity->pos.x = 0.0f;
-    identity->pos.y = 0.0f;
-    identity->pos.z = 0.0f;
+    PlainValMatrix id;
+    PlainValMatrix* const identity = &id;
+    identity->basis[0].x = 1.0f;
+    identity->basis[0].y = 0.0f;
+    identity->basis[0].z = 0.0f;
+    identity->basis[1].x = 0.0f;
+    identity->basis[1].y = 1.0f;
+    identity->basis[1].z = 0.0f;
+    identity->basis[2].x = 0.0f;
+    identity->basis[2].y = 0.0f;
+    identity->basis[2].z = 1.0f;
+    identity->origin.x = 0.0f;
+    identity->origin.y = 0.0f;
+    identity->origin.z = 0.0f;
     f32 pm[3][4];
     fn_802D0DD4(pm, identity);
     GXLoadPosMtxImm((const f32 (*)[4])(pm), (u32)0);
