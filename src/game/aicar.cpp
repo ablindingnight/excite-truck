@@ -2586,7 +2586,7 @@ void fn_8019813C(u8* d, const u8* p, f32 a, f32 b) {
 
 // Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
 // car is) and, when the pass slows down, nudges the lateral offset away from the other car.
-/* Helper name unproven: the tail of fn_801981A0; in-place cost not measured (shadowed parameter names) */
+/* Helper name unproven: the tail of fn_801981A0; the boundary is needed (in place: fn_801981A0 99.14 -> 98.84 with b as a local, 97.71 with F32(d, 0x134) written out) */
 static inline void EaseAndNudge(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
     f32 y = F32(t, 0xC);
     F32(t, 0xC) = b + (y - b) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
