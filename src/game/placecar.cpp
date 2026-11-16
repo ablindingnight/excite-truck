@@ -3,6 +3,12 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+// Lane offset of the grid columns (5.0f). A named constant defined before any code: retail keeps it as the FIRST
+// .sdata2 entry and negates it at run time, so its value is not folded where it is used. A one-field const struct
+// gives exactly that (type and name unproven; a plain `const f32` defined here folds -x into a second literal).
+struct GridTune { f32 laneOffset; };
+extern const GridTune lbl_80562650;
+const GridTune lbl_80562650 = {5.0f};
 
 extern "C" {
 double sqrt(double x);
@@ -212,7 +218,6 @@ void fn_801B78EC(Respawn* r, LineFollower* f, int byIlpos, f32 side, f32 dist, f
 
 f32 fn_801B79AC(void) { return fn_80137C54(-1)->carLen; }
 
-extern const f32 lbl_80562700;  // 5.0f: lane offset of the grid columns
 
 #pragma push
 #pragma opt_lifetimes off
@@ -226,9 +231,9 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
     }
     f32 side;
     if (car & 1) {
-        side = lbl_80562700;
+        side = lbl_80562650.laneOffset;
     } else {
-        side = -lbl_80562700;
+        side = -lbl_80562650.laneOffset;
     }
     row = -fn_801B79AC() / 2.0f - (f32)(car / 2) * row;
     f32 back = 100.0f;
@@ -288,6 +293,10 @@ static inline f32 AddMul_hm(f32 a, f32 b, f32 c) { return a + c * b; }  /* Helpe
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 extern "C" {
 static inline f32 Corner(f32 p, f32 d, f32 n) { return p + d * 0.5f + n * 0.5f; }  /* Helper name unproven */
+/* Helper unproven: retail creates the 10.0f of fn_801B7F4C BEFORE the literals of fn_801B7C8C, so an unused static
+   function with that literal was compiled here (dead static functions keep their constants). */
+static f32 SlotStart(f32 base) { return 10.0f + base; }
+
 void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
     V2 n = *dir;
     ValMatrix m;
