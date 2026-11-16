@@ -103,17 +103,10 @@ bool fn_802A9048(void) {
     return r;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void ZSub(ValVec3* d, const ValVec3* a, const ValVec3* b) {
-    d->x = a->x - b->x;
-    d->y = a->y - b->y;
-    d->z = a->z - b->z;
-}
-
 static inline f32 ZMax(const f32& a, const f32& b) { return a > b ? a : b; }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802A9090(const ValVec3& vb, PlainValMatrix* f) {
+/* Helper name unproven: the start-line frame from the two post points; the boundary is needed (in place -6.6, 50 forms) */
+static inline void BuildLineFrame(const ValVec3& vb, PlainValMatrix* f) {
     lbl_804BD704 = vb;
     f->origin = vb;
     f32 yBase = lbl_804BD6F8.y;
@@ -125,7 +118,9 @@ static inline void Loop1_fn_802A9090(const ValVec3& vb, PlainValMatrix* f) {
     f->origin.z *= 0.5f;
     f32 y = ZMax(lbl_804BD6F8.y, vb.y);
     f->origin.y = y;
-    ZSub(&f->basis[0], &lbl_804BD704, &lbl_804BD6F8);
+    f->basis[0].x = lbl_804BD704.x - lbl_804BD6F8.x;
+    f->basis[0].y = lbl_804BD704.y - lbl_804BD6F8.y;
+    f->basis[0].z = lbl_804BD704.z - lbl_804BD6F8.z;
     f->basis[0].y = 0.0f;
     f->basis[1].x = 0.0f;
     f->basis[1].y = 1.0f;
@@ -163,7 +158,7 @@ void fn_802A9090(const ZV2* pos, const ZV2* dir) {
     lbl_804BD6F8 = va;
     ValVec3 vb;
     fn_802A8FEC(&vb, &b);
-    Loop1_fn_802A9090(vb, &lbl_804BD760);
+    BuildLineFrame(vb, &lbl_804BD760);
 }
 
 void fn_802A92CC(void) {
