@@ -3,6 +3,8 @@
 // steering value and an analogue throttle, keeps a short history of the tilt angle, drives the rumble motor
 // with a PWM accumulator and watches the radio sensitivity. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/KPAD/KPAD.h>
+#include <revolution/WPAD/WPAD.h>
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -22,23 +24,12 @@ void fn_801282F4(void);
 void* fn_801284E8(const char* tag, u32 size);
 void fn_80128658(void* p);
 void fn_80128684(void);
-void KPADEnableDPD(s32 chan);
-void KPADDisableDPD(s32 chan);
-s32 KPADRead(s32 chan, void* status, u32 n);
 
 typedef void (*WPADConnectCallback)(s32 chan, s32 result);
 typedef void (*WPADInfoCallback)(s32 chan, s32 result);
-void WPADRegisterAllocator(void* (*alloc)(u32), int (*free)(void*));
 void PADInit(void);
-void KPADInit(void);
-s32 WPADGetStatus(void);
-WPADConnectCallback WPADSetConnectCallback(s32 chan, WPADConnectCallback cb);
-void WPADDisconnect(s32 chan);
 void __WPADShutdown(void);
 void __WPADReconnect(void);
-s32 WPADProbe(s32 chan, s32* type);
-s32 WPADGetInfoAsync(s32 chan, void* info, WPADInfoCallback cb);
-void WPADControlMotor(s32 chan, u32 cmd);
 u8 WPADGetRadioSensitivity(s32 chan);
 }
 
@@ -189,7 +180,7 @@ void fn_802E7920(s32 chanArg, s32 a) {
         cmd = 0;
         r->pwm = 0;
     }
-    WPADControlMotor(chan, cmd);
+    WPADControlMotor((s32)chan, (u32)cmd);
 }
 
 void* fn_802E7A14(u32 size) {
@@ -253,13 +244,13 @@ void fn_802E7C14(s32 chan, s32 result) {
 void fn_802E7C40(void) { lbl_80560008 = fn_802E9A24(); }
 
 void fn_802E7C64(void) {
-    WPADRegisterAllocator(fn_802E7A14, fn_802E7A70);
+    WPADRegisterAllocator((WPADAllocFunc)fn_802E7A14, (WPADFreeFunc)fn_802E7A70);
     PADInit();
     KPADInit();
     while (WPADGetStatus() != 3) {
     }
     for (int i = 0; i < 4; i++) {
-        lbl_80507268[i] = WPADSetConnectCallback(i, fn_802E7B6C);
+        lbl_80507268[i] = WPADSetConnectCallback((s32)i, (WPADConnectCallback)fn_802E7B6C);
     }
     fn_802E2E0C(fn_802E7AF4, "Joy");
     fn_802E7C40();
@@ -269,10 +260,10 @@ void fn_802E7C64(void) {
 void fn_802E7D0C(void) {
     int i;
     for (i = 0; i < 4; i++) {
-        WPADSetConnectCallback(i, lbl_80507268[i]);
+        WPADSetConnectCallback((s32)i, (WPADConnectCallback)(lbl_80507268[i]));
     }
     for (i = 0; i < 4; i++) {
-        WPADDisconnect(i);
+        WPADDisconnect((s32)i);
     }
     __WPADShutdown();
     fn_802E30C8("rjoy: waiting for WPAD to shut down");
@@ -362,9 +353,9 @@ void fn_802E7FD0(void) {
         lbl_80560009 = paused;
         for (int i = 0; i < 4; i++) {
             if (paused) {
-                KPADEnableDPD(i);
+                KPADEnableDPD((s32)i);
             } else {
-                KPADDisableDPD(i);
+                KPADDisableDPD((s32)i);
             }
         }
     }
@@ -386,7 +377,7 @@ void fn_802E7FD0(void) {
         if (!busy && now - r->lastInfo > 10000) {
             r->lastInfo = now;
             r->infoBusy = 1;
-            s32 res = WPADGetInfoAsync(chan, r->info, fn_802E7C14);
+            s32 res = WPADGetInfoAsync((s32)chan, (WPADInfo*)r->info, (WPADCallback)fn_802E7C14);
             if (res != 0) {
                 r->infoBusy = 0;
                 if (res == -1) {
@@ -394,8 +385,8 @@ void fn_802E7FD0(void) {
                 }
             }
         }
-        s32 probe = WPADProbe(chan, type);
-        if (KPADRead(chan, r->kpad, 1) >= 1 && probe == 0 && r->present) {
+        s32 probe = WPADProbe((s32)chan, (s32*)type);
+        if (KPADRead((s32)chan, (KPADStatus*)r->kpad, (s32)1) >= 1 && probe == 0 && r->present) {
             int err = r->kpad[0].err;
             if (err != *last) {
                 fn_802E30C8("rjoy: #%d: %s -> %s", chan, fn_802E77C0(*last), fn_802E77C0(err));

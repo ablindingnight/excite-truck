@@ -2,16 +2,11 @@
 // progressive scan, Wii Remote rumble and speaker volume) once and caches them. Names are guesses apart from
 // the message.
 #include "game/common.h"
+#include <revolution/SC/scapi.h>
+#include <revolution/SC/scsystem.h>
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);  // panic
-void SCInit(void);
-u32 SCCheckStatus(void);
-u8 SCGetAspectRatio(void);
-u8 SCGetSoundMode(void);
-u8 SCGetProgressiveMode(void);
-u8 SCGetWpadMotorMode(void);
-u8 SCGetWpadSpeakerVolume(void);
 }
 
 ModuleTag lbl_80560038;

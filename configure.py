@@ -1321,9 +1321,9 @@ config.libs.append(
             Object(Matching, "game/strmfile.cpp"),
             Object(Matching, "game/strmbank.cpp"),
             Object(Matching, "game/callhook.cpp"),
-            Object(Matching, "game/rjoy.cpp"),
+            Object(Matching, "game/rjoy.cpp", extra_cflags=["-ir include/revolution/BTE", "-DREVOLUTION", "-DVERSION_RSPE01_00"]),  # SDK WPAD/SC headers: BTE stack headers + the SDK variant defines (as cflags_rvl)
             Object(Matching, "game/rmemcard.cpp"),
-            Object(Matching, "game/sysconfig.cpp"),
+            Object(Matching, "game/sysconfig.cpp", extra_cflags=["-ir include/revolution/BTE", "-DREVOLUTION", "-DVERSION_RSPE01_00"]),  # SDK WPAD/SC headers: BTE stack headers + the SDK variant defines (as cflags_rvl)
             Object(NonMatching, "game/sdmp3.cpp"),
             Object(Matching, "game/homebtn.cpp"),
             Object(Matching, "game/movieinfo.cpp"),
