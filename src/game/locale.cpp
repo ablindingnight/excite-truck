@@ -2,6 +2,7 @@
 // japanese.res), metric/imperial unit systems tunable from units.val, LocString (cached lookups
 // keyed by a global version), and number/time/ordinal formatting. Names are guesses.
 #include "game/common.h"
+#include "game/locstring.h"
 #include <ctype.h>
 
 extern "C" {
@@ -24,7 +25,6 @@ void fn_80131818(ValueTable* table);
 }
 
 extern f32 __float_max[];  // FLT_MAX (MSL)
-extern u32 lbl_8055E044;
 
 struct Unit {
     const char* name;   // offset 0x0
@@ -99,28 +99,10 @@ struct Unk40 {
     u32 v;
 };
 
-class LocString {
-public:
-    LocString(const char* key);
-    const char* Get(void);
-
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 version;       // offset 0x8
-};
-
 extern "C" {
-void fn_80131318(LocString* s);
 const char* fn_801302E0(const char* key);
 const char* fn_80131234(const char* key);
 void fn_8013111C(int lang);
-}
-
-inline const char* LocString::Get(void) {
-    if (version != lbl_8055E044) {
-        fn_80131318(this);
-    }
-    return text;
 }
 
 ModuleTag lbl_8055E038;

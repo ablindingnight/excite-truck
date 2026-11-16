@@ -3,6 +3,7 @@
 // writing them as option strings and finding the control the player is pressing. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/joy.h"
 
 extern "C" {
@@ -10,12 +11,6 @@ char* strncpy(char* d, const char* s, u32 n);
 int strcasecmp(const char* a, const char* b);
 void* memset(void* p, int c, u32 n);
 }
-
-class LocString {
-public:
-    LocString(const char* key);
-    u8 pad[0xC];
-};
 
 // JoyInfo: game/joy.h.
 // JoyStatus: game/joy.h.

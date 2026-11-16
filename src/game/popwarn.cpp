@@ -3,6 +3,7 @@
 // timeouts. Written against raw field offsets; the large screen routines are still stubs. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/gamedb.h"
 #include "game/menuwidget_inl.h"
 #include "macros.h"
@@ -501,24 +502,7 @@ u32 fn_8024739C(u8* p) { return 0; }
 
 class LocString;
 extern "C" {
-extern u32 lbl_8055E044;  // localization version
-void fn_80131318(LocString* s);
 }
-
-// A localized string looked up by key and refreshed when the language changes.
-class LocString {
-public:
-    LocString(const char* key);
-    void Update(void) {
-        if (version != lbl_8055E044) {
-            fn_80131318(this);
-        }
-    }
-
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 version;       // offset 0x8
-};
 
 extern u32 lbl_8055D430;
 

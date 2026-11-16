@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/raceopts.h"
 #include "game/racesetup.h"
 #include "game/raceprog.h"
@@ -2382,24 +2383,7 @@ int fn_801609C4(int score);
 }
 const char* GetGradeDisplayName(int grade);
 
-extern u32 lbl_8055E044;  // localization version
 class LocString;
-extern "C" void fn_80131318(LocString* s);
-
-class LocString {
-public:
-    LocString(const char* key);
-    const char* Get(void) {
-        if (version != lbl_8055E044) {
-            fn_80131318(this);
-        }
-        return text;
-    }
-
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 version;       // offset 0x8
-};
 
 
 int ZoneHud::Update(ZoneCar* c) {

@@ -3,6 +3,7 @@
 // and the chassis list entries. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
 // The car list interface the garage is handed (gamedo.cpp calls it SessionScreen). Only its destructor has a
@@ -65,15 +66,6 @@ struct VecHead {
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8
-};
-
-// A localized string that refreshes when the language changes (text.cpp).
-class LocString {
-public:
-    LocString(const char* key);
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 lang;          // offset 0x8
 };
 
 class VDel {
@@ -241,8 +233,6 @@ extern s32 lbl_8055F2E8;
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
 extern char lbl_8055C0E8[4];  // ""
-extern u32 lbl_8055E044;
-extern "C" void fn_80131318(u8* p);
 
 static inline void CopyName(const char* s, int n, char* d) {
     while ((*d++ = *s++) != 0) {
@@ -1101,7 +1091,7 @@ public:
             CopyNameTo(lbl_8055C0E8, 0x20, (char*)e + 0x21);
         }
         if (U32(p, 0x1C) != lbl_8055E044) {
-            fn_80131318(p + 0x14);
+            fn_80131318((LocString*)(p + 0x14));  // a LocString at +0x14
         }
         S32(e, 0x44) = S32(p, 0x18);
     }

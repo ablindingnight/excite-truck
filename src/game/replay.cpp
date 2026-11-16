@@ -3,6 +3,7 @@
 // movie tool. Names come from the "Replay:" / "replay:" strings; function names are guesses.
 #include <stdio.h>
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/raceopts.h"
 #include "game/joy.h"
 #include "macros.h"
@@ -40,16 +41,6 @@ public:
     T storage[N];  // offset 0xC
 };
 
-class LocString {
-public:
-    LocString(const char* key);
-    const char* Get(void);
-
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 version;       // offset 0x8
-};
-
 class Layout {
 public:
     virtual ~Layout(void);
@@ -70,10 +61,8 @@ struct LayoutOffset {
 };
 
 extern "C" {
-extern u32 lbl_8055E044;  // localization version
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
-void fn_80131318(LocString* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
@@ -151,13 +140,6 @@ void DrawFade2(f32 t);
 void fn_80007210(void);
 void fn_800073D8(int selection);
 void fn_80007318(int unk);
-
-inline const char* LocString::Get(void) {
-    if (version != lbl_8055E044) {
-        fn_80131318(this);
-    }
-    return text;
-}
 
 struct ActionPrompt {
     s32 action;         // offset 0x0

@@ -2,6 +2,7 @@
 // the volume handles that scale it, plus the null mixer and its null sounds used when there is no
 // sound device. Names are guesses apart from the keys and messages.
 #include "game/common.h"
+#include "game/locstring.h"
 #include "macros.h"
 
 extern "C" {
@@ -25,25 +26,7 @@ void* operator new(size_t size, const char* tag);
 
 class LocString;
 extern "C" {
-extern u32 lbl_8055E044;  // localization version
-void fn_80131318(LocString* s);
 }
-
-// A localized string looked up by key and refreshed when the language changes.
-class LocString {
-public:
-    LocString(const char* key);
-    const char* Get(void) {
-        if (version != lbl_8055E044) {
-            fn_80131318(this);
-        }
-        return text;
-    }
-
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 version;       // offset 0x8
-};
 
 class Sound {
 public:

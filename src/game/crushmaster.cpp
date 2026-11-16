@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/raceprog.h"
 #include "game/joy.h"
 #include "game/respawn.h"
@@ -108,7 +109,6 @@ struct ConfigRoot {
 
 ConfigRoot* fn_8000AC38(void);
 
-extern s32 lbl_8055E044;  // language
 
 class RSound {
 public:
@@ -177,24 +177,7 @@ static inline f32 Unlerp(f32 a, f32 b, f32 x) {
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline f32 Remap(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) { return Lerp(y0, y1, Unlerp(x0, x1, x)); }
 
-class LocString {
-public:
-    LocString(const char* key);
-    void Refresh(void);  // fn_80131318
-    const char* Get(void) {
-        if (lang != lbl_8055E044) {
-            Refresh();
-        }
-        return text;
-    }
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 lang;          // offset 0x8
-};
 
-extern "C" void fn_80131318(LocString* s);
-
-inline void LocString::Refresh(void) { fn_80131318(this); }
 
 template <class T>
 struct ArrayRef {

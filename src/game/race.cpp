@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -19,12 +20,6 @@ void fn_80279488(void);
 void LoadArcadeEves(void);
 void UnloadEves(void);
 
-
-class LocString {
-public:
-    LocString(const char* key);
-    u8 unk0[0xC];
-};
 
 struct EventType {
     u32 id;

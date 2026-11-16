@@ -13,6 +13,7 @@
 #include "game/menuwidget_inl.h"
 #include "game/gxcanvas.h"
 #include "game/uiwidget.h"
+#include "game/locstring.h"
 
 extern "C" s32 fn_80218C14(s32, s32, s32);
 extern "C" s32 fn_802E317C(const char *, ...);
@@ -691,15 +692,6 @@ public:
         h->w = dx;
         h->h = dy;
     }
-};
-
-// This unit's statics, in address order. __sinit_uiapi_cpp builds them; the weak dtors after it follow.
-class LocString {
-public:
-    LocString(const char* key);
-    u32 version;
-    const char* text;
-    const char* key;
 };
 
 class OptionValue {

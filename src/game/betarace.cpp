@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/raceopts.h"
 #include "game/raceprog.h"
 #include "game/highscore.h"
@@ -1415,25 +1416,7 @@ public:
 
 class LocString;
 extern "C" {
-extern u32 lbl_8055E044;  // localization version
-void fn_80131318(LocString* s);
 }
-
-// A localized string looked up by key and refreshed when the language changes.
-class LocString {
-public:
-    LocString(const char* key);
-    const char* Get(void) {
-        if (version != lbl_8055E044) {
-            fn_80131318(this);
-        }
-        return text;
-    }
-
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 version;       // offset 0x8
-};
 
 struct StuntKind {
     s32 type;          // offset 0x0

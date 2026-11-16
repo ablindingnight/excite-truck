@@ -3,6 +3,7 @@
 // "tips:" messages give the subject; the names are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/locstring.h"
 #include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include <revolution/MTX/vec.h>
@@ -80,7 +81,6 @@ public:
 class LocString;
 
 extern "C" {
-extern u32 lbl_8055E044;  // localization version
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 int strcmp(const char* a, const char* b);
@@ -92,7 +92,6 @@ ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);
 const char* fn_80131234(const char* key);  // localize
 int fn_80131264(const char* key);          // localized key exists
-void fn_80131318(LocString* s);
 void fn_8012E81C(const char* name);
 void* fn_80232578(const char* name);  // load font
 void fn_802328D4(void* font);
@@ -133,21 +132,6 @@ f32 fn_8014E7DC(s32 event, s32 difficulty);
 int fn_80129D18(int lo, int hi);
 }
 const char* GetEventDisplayName(int event);
-
-class LocString {
-public:
-    LocString(const char* key);
-    const char* Get(void) {
-        if (version != lbl_8055E044) {
-            fn_80131318(this);
-        }
-        return text;
-    }
-
-    const char* key;   // offset 0x0
-    const char* text;  // offset 0x4
-    u32 version;       // offset 0x8
-};
 
 int IdentGetCurrentSlot(void);
 u32 StatsGetValue(int identity, u32 type, s32 event, int slot, u32 def);
