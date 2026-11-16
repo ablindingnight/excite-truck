@@ -312,7 +312,7 @@ void fn_802ECBF8(void) {
     lbl_805600EA = 1;
 }
 
-u8 fn_802ECC10(void) { return lbl_805600E8; }
+int fn_802ECC10(void) { return lbl_805600E8; }
 
 void fn_802ECC18(u8 idle) { lbl_805600E9 = idle; }
 
