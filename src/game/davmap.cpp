@@ -21,21 +21,16 @@ int atoi(const char* s);
 #define MAX_RACERS 8
 #define MAX_LIST 50
 
-struct EventInfo;
 
 extern "C" {
 }
 
-VehicleInfo* FindVehicle(s32 id);
 int GetNumPlayers(void);
 DriverInfo* GetPlayerDriver(int slot);
-VehicleInfo* GetVehicle(int i);
 void SetDriverColor(s32 id, u32 color);
 int GetNumDrivers(void);
 int GetNumVehicles(void);
-DriverInfo* FindDriver(s32 id);
 void SetListDriverColor(s32 id, u32 color);
-VehicleInfo* FindVehicleNamed(const char* chassis, int n);
 
 template <class T, int N>
 class FixedArray {

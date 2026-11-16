@@ -55,8 +55,6 @@ void fn_8020CA38(void);
 void fn_8020C920(RaceSetup* rs);
 void fn_802103B8(RaceSetup* rs);
 }
-DriverInfo* FindDriver(long id);
-VehicleInfo* FindVehicle(long id);
 VehicleInfo* FindVehicleByFlags(u32 flags, int n);
 int IsPlayerDriver(long id, int player);
 void LoadTimerBegin(const char* name, int a, int b, f32 total);

@@ -413,8 +413,6 @@ struct CareerRun {
     void* out;  // offset 0xC
 };
 
-VehicleInfo* GetVehicle(int i);
-VehicleInfo* FindVehicle(long id);
 int IsSpecialChassisUnlocked(const char* name);
 void SetPlayer(int player, long driver, long vehicle, unsigned long color);
 int IdentGetCurrentSlot(void);

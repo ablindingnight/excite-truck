@@ -53,7 +53,8 @@ public:
     virtual ~Layout(void);
 };
 
-struct EventInfo {
+// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
+struct RaceOpts {
     u8 pad0[0x10];
     u32 flags;  // offset 0x10
 };
@@ -89,7 +90,7 @@ const char* fn_80131234(const char* key);
 void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
 u32 fn_8026E20C(void);
 void fn_8026E204(u32 flags);
-EventInfo* fn_801E87A8(void);
+RaceOpts* fn_801E87A8(void);
 int fn_801769F8(void);
 void fn_80011A2C(void);
 int fn_802ECC10(void);

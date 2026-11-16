@@ -2,6 +2,7 @@
 // ("x, y" pairs), point-in-polygon tests against one bound or a whole set, and the per-event external
 // table lookup. Names are guesses apart from the message prefixes.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int sprintf(char* s, const char* fmt, ...);
@@ -93,13 +94,6 @@ struct V2 {
     }
     f32 x;
     f32 y;
-};
-
-struct EventInfo {
-    u8 pad0[8];
-    u32 type;           // offset 0x8
-    u8 padC[0x14];
-    ValueNode* values;  // offset 0x20
 };
 
 struct TableRef {
@@ -274,7 +268,7 @@ void fn_80139F5C(EventInfo* ev) {
     const char* name;
     bool full;
     sprintf(buf, "c_%s", GetEventTypeName(ev->type));
-    name = ev->values->GetString("external_table", buf);
+    name = ev->node->GetString("external_table", buf);
     full = strchr(name, '/') != 0;
     if (full) {
         strncpy(path, name, 0x80);
@@ -287,7 +281,7 @@ void fn_80139F5C(EventInfo* ev) {
         lbl_8055E138 = fn_80131810(path + 1);
     }
     strcpy(lbl_8042F7C0, path);
-    lbl_8055E13C = ev->values;
+    lbl_8055E13C = ev->node;
 }
 
 void fn_8013A074(void) {

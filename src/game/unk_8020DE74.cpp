@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
+#include "game/gamedb.h"
 
 // Compiled as C++ (2026-11-03): the unit owns a ModuleTag, registered by its static initializer (the 8-byte
 // function after the code, formerly the separate split unk_8020F3AC). The functions keep C linkage.
@@ -30,7 +31,6 @@ extern "C" void *memset(void *, int, unsigned long);
 extern "C" void fn_801345D8(char *, int, const char *, ...);
 extern "C" void *fn_802077A4(const char *name, long kind, void *a, void *b);
 extern "C" void *fn_802076A0(const char *name, long kind, void *owner, long mode);
-extern "C++" long *FindVehicle(s32);  /* driver.cpp (C++ linkage) */
 
 // A part created by fn_802077A4: owner at 0x10, a level at 0x04 with a dirty flag at 0x4E.
 struct HudPart {
@@ -217,7 +217,7 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     this->boostLevel = lbl_80563370;
     this->started = 0;
     this->startPending = 0;
-    this->b71 = (FindVehicle(((CarBody *)vehicle)->ident.vehicle)[0xA0 / 4] >> 2) & 1;
+    this->b71 = (FindVehicle(((CarBody *)vehicle)->ident.vehicle)->flags >> 2) & 1;
 }
 
 extern "C" void *fn_8020DE74(unsigned char *vehicle) {

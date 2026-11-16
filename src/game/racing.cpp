@@ -42,7 +42,8 @@ public:
     virtual LayoutBox* FindBox(const char* name);  // 0x14
 };
 
-struct EventInfo {
+// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
+struct RaceOpts {
     u32 unk0;  // offset 0x0
     u32 type;  // offset 0x4
 };
@@ -91,7 +92,7 @@ struct RaceInfo {
     u8 split;             // offset 0x0
     u8 active;            // offset 0x1
     s32 mode;             // offset 0x4
-    EventInfo* event;     // offset 0x8
+    RaceOpts* event;     // offset 0x8
     RaceProgress* info;   // offset 0xC
     f32 time;             // offset 0x10
     s32 numPlayers;       // offset 0x14
@@ -189,7 +190,7 @@ void fn_801DF93C(int player);
 void fn_8000FBE4(void);
 int fn_801E866C(int player);
 int fn_801E89C8(int player);
-EventInfo* fn_801E87A8(void);
+RaceOpts* fn_801E87A8(void);
 }  // extern "C"
 int fn_8000D75C(void);
 extern "C" {

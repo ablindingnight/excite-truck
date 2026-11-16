@@ -325,7 +325,6 @@ public:
 
 int IdentGetCurrentSlot(void);
 int GetNumEvents(void);
-VehicleInfo* GetVehicle(int i);
 const char* StatsGetLabel(u32 type);
 const char* GetTrackFriendlyName(const char* name);
 

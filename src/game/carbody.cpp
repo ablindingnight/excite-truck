@@ -7,6 +7,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
+#include "game/gamedb.h"
 #include <string.h>
 
 template <class T>
@@ -555,7 +556,6 @@ void fn_80182DF4(u8* p);
 struct PlayerLook;
 struct BodyDesc;
 void GetPlayerLook(PlayerLook* look, s32 vehicle);
-u8* FindVehicle(s32 vehicle);
 extern "C" {
 
 // CarBody::Init: copies the descriptor's identity and setup blocks, reads the chassis tuning from
@@ -614,7 +614,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     cb->f5E8 = chassis->Has(key) ? chassis->GetEnum(key, treeClasses) : 1;
     GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->ident.vehicle);
     fn_801B86BC(((CarDesc*)desc)->index, p + 0x2C4);
-    cb->f25C0 = (U32(FindVehicle(cb->ident.vehicle), 0xA0) >> 2) & 1;
+    cb->f25C0 = (FindVehicle(cb->ident.vehicle)->flags >> 2) & 1;
     fn_80279F58(&setup, table);
     fn_8027A8B4(&setup, fn_8027A798((char*)(p + 0x234)));
     setup.mass = setup.mass * cb->f2EC;

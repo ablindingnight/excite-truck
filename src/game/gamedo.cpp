@@ -89,7 +89,6 @@ BOOL OptDirectToTrack(void);
 void BuildDAVMap(DAVMap* out, s32 track);
 void BuildReversedMap(DAVMap* out, s32 event, const DAVMap* src);
 void SetNumPlayers(int n);
-VehicleInfo* GetVehicle(int i);
 void ClearPlayer(int slot);
 void SetPlayer(int slot, s32 id, s32 vehicle, u32 color);
 void SetPlayerName(const char* name, int slot);

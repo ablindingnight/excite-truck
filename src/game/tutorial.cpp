@@ -48,8 +48,6 @@ struct EventDesc {
 extern "C" EventDesc* fn_801769CC(void);
 
 VehicleInfo* GetDriverVehicle(long driver);
-VehicleInfo* FindVehicleNamed(const char* name, int n);
-VehicleInfo* FindVehicle(long id);
 
 // A loaded overlay layout (tutovr.val / challist.val).
 class Layout {
