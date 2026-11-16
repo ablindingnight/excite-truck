@@ -26,7 +26,8 @@ struct IdealPoint {
     f32 speed;         // offset 0x20
     u8 pad24[4];
     f32 width;         // offset 0x28
-    u8 pad2C[8];
+    f32 height;        // offset 0x2C (aicar)
+    u8 pad30[4];
     u8 type;           // offset 0x34
     u8 section;        // offset 0x35
     u8 pad36[6];
