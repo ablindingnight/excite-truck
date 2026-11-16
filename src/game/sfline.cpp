@@ -2,24 +2,12 @@
 // track where the racing line crosses its first node, faded out towards the edges. Names are
 // guesses apart from the config key and texture.
 #include "game/common.h"
-
-struct SFVec2 {
-    f32 x, y;
-};
-
-// SFVec3: valvec3.h's ValVec3.
-struct SFNode {
-    SFVec2 pos;  // offset 0x0
-    SFVec2 dir;  // offset 0x8
-    u8 pad10[0x14 - 0x10];
-    SFNode* next;  // offset 0x14
-    u8 pad18[0x3C - 0x18];
-};
+#include "game/centerline.h"
 
 struct SFPath {
     u8 pad0[0x18];
     u32 flags;  // offset 0x18: node count in the high half
-    SFNode* nodes;  // offset 0x1C
+    IdealPoint* nodes;  // offset 0x1C
 };
 
 class SFPathSet {
@@ -30,7 +18,7 @@ public:
 
 // A position on the ideal line (idealline.cpp).
 struct ILPos {
-    SFNode* node;  // offset 0x0
+    IdealPoint* node;  // offset 0x0
     f32 t;         // offset 0x4
     s32 max;       // offset 0x8
 };
@@ -83,7 +71,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : 0.5f + x; }
 
-static inline void SFCorner(SFVec2* q, SFVec2* o, SFVec2* a, SFVec2* b, f32 s, f32 t) {
+static inline void SFCorner(V2* q, V2* o, V2* a, V2* b, f32 s, f32 t) {
     q->x = o->x + a->x * s;
     q->y = o->y + a->y * s;
     q->x += b->x * t;
@@ -97,14 +85,14 @@ ModuleTag lbl_8055F838;
 DrawList* lbl_8055F840;
 s32 lbl_8055F844;
 f32 lbl_8055F848;
-SFVec2 lbl_8055F850;  // line centre
-SFVec2 lbl_8055F858;  // along the track
-SFVec2 lbl_8055F860;  // across the track
+V2 lbl_8055F850;  // line centre
+V2 lbl_8055F858;  // along the track
+V2 lbl_8055F860;  // across the track
 
 extern "C" {
 
 // NonMatching: the p.y = 0 store is scheduled one slot later than in the target.
-void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* __restrict b, f32 size, f32 alpha, int white) {
+void fn_802A0D60(s16* h, V2* o, V2* a, V2* __restrict b, f32 size, f32 alpha, int white) {
     int i;
     int al;
     u32 c;
@@ -114,7 +102,7 @@ void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* __restrict b, f32 size, f
         al = al < 255 ? al : 255;
         c = (u8)-white;
         for (i = 0; i < 4; i++) {
-            SFVec2 q;
+            V2 q;
             ValVec3 p;
             f32 u;
             f32 v;
@@ -131,8 +119,8 @@ void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* __restrict b, f32 size, f
 }
 
 // Projects (a - b) onto dir.
-f32 fn_802A0F7C(const SFVec2* dir, const SFVec2* a, const SFVec2* b) {
-    SFVec2 d;
+f32 fn_802A0F7C(const V2* dir, const V2* a, const V2* b) {
+    V2 d;
     d.x = a->x - b->x;
     d.y = a->y - b->y;
     f32 dx = dir->x;
@@ -147,7 +135,7 @@ int fn_802A0FBC(void) {
     return show && mode != 0x180304 && (mode & 0x100) && !fn_80161C38();
 }
 
-SFNode* fn_802A1040(SFNode* first, SFNode* n, SFPath* path) {
+IdealPoint* fn_802A1040(IdealPoint* first, IdealPoint* n, SFPath* path) {
     int i = 0;
     do {
         f32 d0 = fn_802A0F7C(&first->dir, &n->pos, &first->pos);
@@ -168,15 +156,15 @@ SFNode* fn_802A1040(SFNode* first, SFNode* n, SFPath* path) {
     return n;
 }
 
-void fn_802A1120(SFVec2* pos, SFVec2* dir) {
+void fn_802A1120(V2* pos, V2* dir) {
     SFPath* path;
     SFPath* line;
-    SFNode* n;
+    IdealPoint* n;
     ILPos h;
     f32 t;
     path = fn_80156A40()->GetPath(0);
     {
-        SFNode* f = path->nodes;
+        IdealPoint* f = path->nodes;
         dir->x = f->dir.x;
         dir->y = f->dir.y;
     }
@@ -228,8 +216,8 @@ void fn_802A1290(void) {
         range = half - inner;
         for (i = 0; i < n; i++) {
             for (j = 0; j < 3; j++) {
-                SFVec2 q;
-                SFVec2 d;
+                V2 q;
+                V2 d;
                 f32 a;
                 SFCorner(&q, &lbl_8055F850, &lbl_8055F858, &lbl_8055F860, 1.5f * j, 1.5f * i - half);
                 f32 dy = q.y - lbl_8055F850.y;

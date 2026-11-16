@@ -3,6 +3,7 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/centerline.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
 #include "game/raceopts.h"
@@ -81,22 +82,6 @@ struct PlayerObj {
 };
 }  // namespace
 
-struct PathNode {
-    Vec2 pos;   // offset 0x0
-    Vec2 dir;   // offset 0x8
-    u8 pad10[0x4];
-    PathNode* next;  // offset 0x14
-    u8 pad18[0x4];
-    f32 dist;  // offset 0x1C
-};
-
-struct Path {
-    u8 pad0[0x8];
-    f32 length;  // offset 0x8
-    u8 padC[0x1C - 0xC];
-    PathNode* first;  // offset 0x1C
-};
-
 // Ideal-line walker (idealline.cpp).
 struct CenterLine;
 class LineFollower {
@@ -105,7 +90,7 @@ public:
     virtual ~LineFollower(void);
     virtual int SetLine(CenterLine* line);
     u8 pad4[0x2C - 0x4];
-    Path* path;  // offset 0x2C: the line
+    CenterLine* path;  // offset 0x2C: the line
     u8 pad30[0x34 - 0x30];
 };
 
@@ -723,7 +708,7 @@ static inline f32 NLerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 // Squared length (name unproven): retail evaluates the squares inside an inline, which is what orders them
 // against the caller's other float work.
 static inline f32 MagSq(const Vec2& v) { return v.x * v.x + v.y * v.y; }
-static inline void NodeAt(const PathNode* n, f32 t, Vec2* p, Vec2* d) {
+static inline void NodeAt(const IdealPoint* n, f32 t, Vec2* p, Vec2* d) {
     p->x = NLerpT(t, n->pos.x, n->next->pos.x);
     p->y = NLerpT(t, n->pos.y, n->next->pos.y);
     d->x = NLerpT(t, n->dir.x, n->next->dir.x);
@@ -735,14 +720,14 @@ void fn_8001B478(int index, f32 width) {
     Vec2 p;
     Vec2 d;
     Vec2 v;
-    Path* path;
+    CenterLine* path;
     f32 len;
     f32 n;
     int segs;
     f32 vscale;
-    PathNode* node;
+    IdealPoint* node;
     int count;
-    PathNode* q;
+    IdealPoint* q;
     int flag;
     f32 prev;
     int i;
@@ -751,13 +736,13 @@ void fn_8001B478(int index, f32 width) {
         return;
     }
     path = it.path;
-    len = path->length;
+    len = path->len[0];
     n = len / width;
     segs = n;
     if (n - segs > 0.5f) {
         segs++;
     }
-    node = path->first;
+    node = path->points;
     count = 1;
     vscale = segs / len;
     for (q = node->next; q != node; q = q->next) {

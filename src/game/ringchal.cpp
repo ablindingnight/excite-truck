@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/centerline.h"
 #include "game/gamemode.h"
 #include "game/ilayout.h"
 #include "game/v2.h"
@@ -163,18 +164,9 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 #define NearZeroF(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
-struct PathPt {
-    f32 x;    // offset 0x0
-    f32 z;    // offset 0x4
-    f32 dx;   // offset 0x8
-    f32 dz;   // offset 0xC
-    u8 pad10[0x4];
-    PathPt* next;  // offset 0x14
-};
-
 // A position on a centre line (idealline): segment start and fraction.
 struct ILPos {
-    PathPt* pt;  // offset 0x0
+    IdealPoint* pt;  // offset 0x0
     f32 t;       // offset 0x4
     s32 f8;      // offset 0x8
 };
@@ -2068,10 +2060,10 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
                 pos.f8 = 10000;
                 pos.t = 0.0f;
                 lf.Locate(&mid, 0, &pos, 0);
-                mid.x = PathLerp(pos.pt->x, pos.pt->next->x, pos.t);
-                mid.y = PathLerp(pos.pt->z, pos.pt->next->z, pos.t);
-                dir.x = PathLerp(pos.pt->dx, pos.pt->next->dx, pos.t);
-                dir.y = PathLerp(pos.pt->dz, pos.pt->next->dz, pos.t);
+                mid.x = PathLerp(pos.pt->pos.x, pos.pt->next->pos.x, pos.t);
+                mid.y = PathLerp(pos.pt->pos.y, pos.pt->next->pos.y, pos.t);
+                dir.x = PathLerp(pos.pt->dir.x, pos.pt->next->dir.x, pos.t);
+                dir.y = PathLerp(pos.pt->dir.y, pos.pt->next->dir.y, pos.t);
                 Normalize(dir);
             }
             fn_801B7C8C(out, &mid, &dir);

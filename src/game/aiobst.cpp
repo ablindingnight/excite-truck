@@ -4,6 +4,7 @@
 // a driver projects the obstacles ahead into 64 lateral bins and picks the nearest free gap. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/centerline.h"
 #include "game/spot.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -63,26 +64,15 @@ struct Frame {
     Vec3 origin;    // offset 0x24
 };
 
-struct Seg {
-    u8 pad0[0x3C];
-};
-
-struct Path {
-    u8 pad0[0x18];
-    u32 countFlags;  // offset 0x18: count << 16 | flags, as sfline writes the word
-    int Count(void) const { return countFlags >> 16; }
-    Seg* segs;       // offset 0x1C
-};
-
 struct Track {
     u8 pad0[0x4];
-    Seg* seg;  // offset 0x4
+    IdealPoint* seg;  // offset 0x4
     u8 pad8[0x2C - 0x8];
-    Path* path;  // offset 0x2C
+    CenterLine* path;  // offset 0x2C
 };
 
 struct TrackSample {
-    Seg* seg;  // offset 0x0
+    IdealPoint* seg;  // offset 0x0
     f32 t;     // offset 0x4
     s32 mode;  // offset 0x8
 };
@@ -182,7 +172,7 @@ extern "C" {
 
 void fn_8015EC50(Obst* o, Track* trk) {
     const TrackSample& ts = fn_80136594(trk, &o->pos);
-    o->seg = ts.seg - trk->path->segs;
+    o->seg = ts.seg - trk->path->points;
 }
 
 static inline int IsTube(TrackObj* o) { return o->id < 1000 && o->tag == 'TUBE'; }
@@ -631,7 +621,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
     int found = 0;
     if (lbl_8055E2A0) {
         Track* trk = ((TrackPosOwner*)rc->src)->GetTrack();
-        int seg = trk->seg - trk->path->segs;
+        int seg = trk->seg - trk->path->points;
         Frame f;
         f32 range;
         Opts opts;
