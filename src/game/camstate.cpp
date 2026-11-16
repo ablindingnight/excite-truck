@@ -75,7 +75,6 @@ static inline void MulVec(CVec3* out, const CVec3* in, const CFrame* m) {
 int fn_801EA098(const s16* hint, f32* pos, f32* normal, int* flags, f32 x, f32 z);
 
 double cos(double x);
-extern const f32 lbl_80563FDC;
 
 f32 fn_8018AE3C(u8* car);
 f32 fn_8018AE44(u8* car);
@@ -83,8 +82,6 @@ f32 fn_8018AE4C(u8* car);
 extern const f32 lbl_80563FC4;
 extern const f32 lbl_80563FC8;
 extern const f32 lbl_80563FCC;
-extern const f32 lbl_80563FD8;
-extern const f32 lbl_80563FE0;
 
 // Chase camera: follows the car's camera mount (the second one when the car is flipped), levels the
 // up vector like fn_802749FC, and adds the car's bounce unless snapping.
@@ -163,7 +160,7 @@ void fn_80273BD0(u8* p) {
         c->pose.pos.v[0] = c->pose.pos.v[0] + c->carFrame.rot.m[6] * f;
         c->pose.pos.v[1] = c->pose.pos.v[1] + c->carFrame.rot.m[7] * f;
         c->pose.pos.v[2] = c->pose.pos.v[2] + c->carFrame.rot.m[8] * f;
-        f32 g = lbl_80563FD8 * (5.0f * (-0.005f * (fn_8018AE44(c->car) - lbl_80563FDC * c->v34.v[1])));
+        f32 g = 2.0f * (5.0f * (-0.005f * (fn_8018AE44(c->car) - 0.9f * c->v34.v[1])));
         c->pose.pos.v[0] = c->pose.pos.v[0] + c->carFrame.rot.m[3] * g;
         c->pose.pos.v[1] = c->pose.pos.v[1] + c->carFrame.rot.m[4] * g;
         c->pose.pos.v[2] = c->pose.pos.v[2] + c->carFrame.rot.m[5] * g;
@@ -176,7 +173,7 @@ void fn_80273BD0(u8* p) {
     Mat3Mul((Mat3*)&c->pose, &rot, (Mat3*)(const CFrame*)&c->pose);
     if (c->car[0x260C]) {
         flipEuler[0] = 0.0f;
-        flipEuler[1] = lbl_80563FE0;
+        flipEuler[1] = 3.1415927f;
         flipEuler[2] = 0.0f;
         Mat3FromEuler(&flip, (const Vec3*)flipEuler);
         Mat3Mul((Mat3*)&c->pose, &flip, (Mat3*)(const CFrame*)&c->pose);
@@ -185,7 +182,6 @@ void fn_80273BD0(u8* p) {
 
 
 void fn_80274460(u8* p);
-extern const f32 lbl_80563FEC;
 
 // Camera frame (0x58) = the car-relative frame (0xC0), moved by a lift that follows the car's 0x2458 value;
 // flag 0x260C on the car takes fn_80274460 instead.
@@ -206,7 +202,7 @@ void fn_80274268(u8* p) {
     CVec3 w;
     *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
     f32 h = F32(car, 0x2458) - 1.397f;
-    SetV3(&v, 0.0f, 0.8f, lbl_80563FEC + h);
+    SetV3(&v, 0.0f, 0.8f, -0.1f + h);
     MulVec(&w, &v, (CFrame*)&cr->pose);
     cr->pose.pos.v[0] = cr->pose.pos.v[0] + w.x;
     cr->pose.pos.v[1] = cr->pose.pos.v[1] + w.y;
@@ -216,9 +212,8 @@ void fn_80274268(u8* p) {
 
 void fn_8027445C(u8* p) { fn_80274268(p); }
 
-extern const f32 lbl_80563FE0;
 
-// Camera frame (0x58) = the car-relative frame (0xC0) turned about y by lbl_80563FE0 and lifted.
+// Camera frame (0x58) = the car-relative frame (0xC0) turned about y by pi and lifted.
 void fn_80274460(u8* p) {
     CamRec* cr = (CamRec*)p;
     Mat3 rot;
@@ -227,7 +222,7 @@ void fn_80274460(u8* p) {
     CVec3 w;
     *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
     euler[0] = 0.0f;
-    euler[1] = lbl_80563FE0;
+    euler[1] = 3.1415927f;
     euler[2] = 0.0f;
     Mat3FromEuler(&rot, (const Vec3*)euler);
     Mat3Mul((Mat3*)&cr->pose, &rot, (Mat3*)&cr->pose);
@@ -280,7 +275,6 @@ double tan(double x);
 double atan(double x);
 extern f32 __float_epsilon[];  // epsilon
 extern const f32 lbl_80563FC4;
-extern const f32 lbl_80563FD8;
 
 // Aims the camera frame (0x58) from its position (0x7C) at the look point (0x4C), with world y as up
 // (the car's forward axis when looking straight down). A positive `dist` pulls the camera toward that
@@ -321,7 +315,7 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     f32 half = 1.1780972f;
     f32 inv = zoom > 0.1f ? lbl_80563FAC / zoom : lbl_80563FAC;
     f32 w = 30.5f * inv;
-    f32 a = lbl_80563FD8 * (f32)atan(w / d * (f32)tan(half * lbl_80563FC4));
+    f32 a = 2.0f * (f32)atan(w / d * (f32)tan(half * lbl_80563FC4));
     v = v < a ? v : a;
     v = v > lo ? v : lo;
     if (fov > 0.0f) {
@@ -375,7 +369,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
         n.y = n.y + c->carFrame.rot.m[4] * (lbl_80563FAC - s);
         n.z = n.z + c->carFrame.rot.m[5] * (lbl_80563FAC - s);
     }
-    f32 k = c->b138 ? 0.0f : lbl_80563FDC;
+    f32 k = c->b138 ? 0.0f : 0.9f;
     c->v28.v[0] = c->v28.v[0] * k;
     c->v28.v[1] = c->v28.v[1] * k;
     c->v28.v[2] = c->v28.v[2] * k;
@@ -430,8 +424,6 @@ struct CamPreset {
     f32 fov;
 };
 
-extern const f32 lbl_80563FD8;
-extern const f32 lbl_80563FDC;
 void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
 
 // A camera frame offset: rotation then translation (one 48-byte local; helper name unproven).
@@ -546,7 +538,7 @@ void fn_802756A4(u8* p) {
     u8* car = cr->car;
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
     c = k;
-    CamVec off = *(CVec3*)(car + 0x2538) + CamVec(0.85f, lbl_80563FDC, lbl_80563FD8);
+    CamVec off = *(CVec3*)(car + 0x2538) + CamVec(0.85f, 0.9f, 2.0f);
     *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
     Mat3 rot;
     RotFromVec(&rot, c.rot * 0.017453292f);
@@ -576,7 +568,6 @@ double cos(double x);
 int fn_801E9E30(u8* ground, f32* pos);
 extern f32 lbl_8055E3C8;         // game time
 f32 lbl_8055F588;         // last ground height
-extern const f32 lbl_80563FD8;
 extern const f32 lbl_80563FC4;
 
 
@@ -597,7 +588,7 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     pos.y = cr->carFrame.pos.v[1] + off.y;
     pos.z = cr->carFrame.pos.v[2] + off.z;
     if (!fn_801E9E30((u8*)&cr->h1EC, &pos.x)) {
-        pos.y = lbl_80563FD8 + lbl_8055F588;
+        pos.y = 2.0f + lbl_8055F588;
         CsVec t(CsLerp(pos.x, cr->carFrame.pos.v[0], lbl_80563FC4), CsLerp(pos.y, cr->carFrame.pos.v[1], lbl_80563FC4),
                 CsLerp(pos.z, cr->carFrame.pos.v[2], lbl_80563FC4));
         pos = t;
