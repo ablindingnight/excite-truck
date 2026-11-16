@@ -1014,7 +1014,8 @@ void fn_802481A0(f32 x, f32 y, f32* outX, f32* outY) {
     f32 t = MIN(1.0f, (f32)ms / 1000.0f);
     t = MAX(t, 0.0f);
     f32 u = 1.0f - t;
-    *outX = x + 3.0f * (f32)sin(956.0f * u);
+    f32 sway = (f32)sin(956.0f * u);
+    *outX = x + 3.0f * sway;
     *outY = BobCurve(x, y, u);
 }
 
