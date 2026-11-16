@@ -786,6 +786,8 @@ void DustTrail::Impact(const TrailEvent* e) {
         TVec v;
         f32 h;
         f32 cs;
+        f32 vx;
+        f32 vz;
         f32 sn;
         int i;
         fn_80287B24(e->who);
@@ -795,20 +797,22 @@ void DustTrail::Impact(const TrailEvent* e) {
         PSVECCrossProduct(&m.x, &m.y, &m.z);
         cs = cos(3.1415927f / n);
         sn = sin(3.1415927f / n);
+        vz = 0.5f * e->vel.z;
+        vx = 0.5f * e->vel.x;
         rot.x.x = cs;
         rot.x.y = 0.0f;
         rot.x.z = -sn;
-        rot.y.y = 1.0f;
         rot.y.x = 0.0f;
+        rot.y.y = 1.0f;
         rot.y.z = 0.0f;
         rot.z.x = sn;
         rot.z.y = 0.0f;
         rot.z.z = cs;
-        TPos c = e->pos;
-        v.z = 0.5f * e->vel.z;
-        v.x = 0.5f * e->vel.x;
-        c.y += 0.35f;
+        v.x = vx;
         v.y = 0.0f;
+        v.z = vz;
+        TPos c = e->pos;
+        c.y += 0.35f;
         for (i = 0; i < n; i++) {
             TVec v1;
             TVec v2;
