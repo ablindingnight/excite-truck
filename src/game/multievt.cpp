@@ -403,8 +403,8 @@ class CourseTex : public DynoTex, public MenuState {
 public:
     CourseTex(int n) : DynoTex(n, 0) {}
     virtual ~CourseTex(void) {}
-    virtual void Update(void) { Pick(); }
     virtual void Enter(void) { Pick(); }
+    virtual void Update(void) { Pick(); }
     // Takes the chosen course from the event picker.
     void Pick(void) {
         EvPicker* c = picker;
