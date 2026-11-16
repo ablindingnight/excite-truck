@@ -699,14 +699,14 @@ int fn_802CAF8C(s32 id) {
     return *z != lbl_8055FCA8;
 }
 
-u8 fn_802CAFC8(s32 id) {
+int fn_802CAFC8(s32 id) {
     if (id == -1) {
         return 5;
     }
     return lbl_8055FCB0[id].res->prio;
 }
 
-u8 fn_802CAFF0(s32 id) {
+int fn_802CAFF0(s32 id) {
     if (id == -1) {
         return 50;
     }
@@ -1251,7 +1251,7 @@ void fn_802CC60C(void) {
 
 void fn_802CC73C(u8 on) { lbl_8055D07D = on; }
 
-u8 fn_802CC744(void) { return lbl_8055D07D; }
+int fn_802CC744(void) { return lbl_8055D07D; }
 
 int fn_802CC74C(void) {
     TexCache* c = lbl_8055FCBC;
