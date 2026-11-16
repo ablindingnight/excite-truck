@@ -86,6 +86,17 @@ ModuleTag lbl_8055E970;
 
 extern "C" {
 
+/* Helper name unproven. The count uses separate byte temporaries. */
+static inline void SwapPathCount(Path* path) {
+    u8* p = (u8*)&path->count;
+    u8 first = p[0];
+    p[0] = p[3];
+    p[3] = first;
+    u8 second = p[1];
+    p[1] = p[2];
+    p[2] = second;
+}
+
 PathFile* fn_801D9CC4(const char* name) {
     s32 version = 0;
     u8 swapped = 0;
@@ -104,9 +115,10 @@ PathFile* fn_801D9CC4(const char* name) {
         int i;
         int j;
         Swap32(&f->count);
-        for (i = 0; i < f->count; i++) {
-            p = &f->paths[i];
-            Swap32(&p->count);
+        u8* cursor = (u8*)f->paths;
+        for (i = 0; i < f->count; cursor += sizeof(Path), ++i) {
+            p = (Path*)cursor;
+            SwapPathCount(p);
             Swap32(&p->keys);
             p->keys = (PathKey*)((u8*)f + (u32)p->keys);
             for (j = 0; j < p->count; j++) {
