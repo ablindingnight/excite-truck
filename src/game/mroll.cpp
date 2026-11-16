@@ -150,12 +150,7 @@ const char* fn_802E85B8(s32 slot);
 class StatBar : public MenuState {
 public:
     StatBar(void);
-    virtual ~StatBar(void) {
-        value = 0;
-        flag = 0;
-        fn_802328D4(font);
-        font = 0;
-    }
+    virtual ~StatBar(void);
     virtual void Exit(void);
     virtual void Update(void);
     virtual void Draw(void);
@@ -705,9 +700,17 @@ int fn_8023FF1C(u8 flag) {
     return result;
 }
 
+}  // extern "C"
 
+// Out of line: garage.cpp destroys stat bars through this destructor (retail's copy is a global function here).
+StatBar::~StatBar(void) {
+    value = 0;
+    flag = 0;
+    fn_802328D4(font);
+    font = 0;
+}
 
-
+extern "C" {
 
 void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
 
