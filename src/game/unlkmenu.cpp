@@ -2,6 +2,7 @@
 // unlockable cars and tracks, three at a time, each with its points and a lock icon. Names are
 // guesses apart from the layout and element names and the messages.
 #include "game/common.h"
+#include "game/menustate.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
 
@@ -37,70 +38,6 @@ extern char lbl_8055BAB8[4];
 extern char lbl_8055B860[8];
 }
 
-// The menu state interface. Its all-pure vtable (24 zero words) is what follows each menu state's
-// vtable in the target's .data.
-class IMenuState {
-public:
-    IMenuState(void) {}
-    virtual ~IMenuState(void) = 0;
-    virtual void Enter(void) = 0;
-    virtual void Exit(void) = 0;
-    virtual void Unk14(void) = 0;
-    virtual void Changed(int key, void* value) = 0;
-    virtual void Update(void) = 0;
-    virtual void Unk20(void) = 0;
-    virtual void Unk24(struct gxCanvas*) = 0;
-    virtual void Draw(void) = 0;
-    virtual void Unk2C(void) = 0;
-    virtual void Unk30(void) = 0;
-    virtual void Unk34(void) = 0;
-    virtual void Unk38(void) = 0;
-    virtual void Unk3C(void) = 0;
-    virtual void Unk40(void) = 0;
-    virtual void Unk44(void) = 0;
-    virtual void Unk48(void) = 0;
-    virtual void Unk4C(void) = 0;
-    virtual void Unk50(void) = 0;
-    virtual void Unk54(void) = 0;
-    virtual int Key(int key) = 0;
-    virtual void Unk5C(void) = 0;
-};
-
-inline IMenuState::~IMenuState(void) {}
-
-// A menu state; most slots are empty defaults.
-class MenuState : public IMenuState {
-public:
-    MenuState(void) { unk14 = 0; }
-    virtual ~MenuState(void) {}
-    virtual void Enter(void);   // 0x0C
-    virtual void Exit(void);    // 0x10
-    virtual void Unk14(void);
-    virtual void Changed(int key, void* value);
-    virtual void Update(void);  // 0x1C
-    virtual void Unk20(void);
-    virtual void Unk24(struct gxCanvas*);
-    virtual void Draw(void);    // 0x28
-    virtual void Unk2C(void);
-    virtual void Unk30(void);
-    virtual void Unk34(void);
-    virtual void Unk38(void);
-    virtual void Unk3C(void);
-    virtual void Unk40(void);
-    virtual void Unk44(void);
-    virtual void Unk48(void);
-    virtual void Unk4C(void);
-    virtual void Unk50(void);
-    virtual void Unk54(void);
-    virtual int Key(int key);   // 0x58
-    virtual void Unk5C(void);
-
-    int x;      // offset 0x4
-    int y;      // offset 0x8
-    int width;  // offset 0xC
-    int unk10;  // offset 0x10
-    int unk14;  // offset 0x14
-};
 
 namespace {
 
@@ -135,7 +72,7 @@ public:
         f32 px;
         f32 py;
         fn_80230C30(&px, &py, x, y);
-        f32 w = width;
+        f32 w = this->w;
         f32 lockX = px + w - fn_802C51C0(image);
         f32 left = px;
         f32 ptsX = lockX - 15.0f;

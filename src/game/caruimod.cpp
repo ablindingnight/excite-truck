@@ -2,6 +2,7 @@
 // efx bone mesh read from the car's .car folder), its resource loader and the menu state that
 // draws it. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/menustate.h"
 #include "game/gamedb.h"
 #include "game/math_types.h"
 #include "macros.h"
@@ -613,66 +614,6 @@ public:
 
 inline IMenuCustomView::~IMenuCustomView(void) {}
 
-// The menu state interface (as in unlkmenu): its all-pure vtable is the 0x60 zero bytes that follow the item
-// vtables in .data.
-class IMenuState {
-public:
-    IMenuState(void) {}
-    virtual ~IMenuState(void) = 0;
-    virtual void Enter(void) = 0;
-    virtual void Exit(void) = 0;
-    virtual void Unk14(void) = 0;
-    virtual void Changed(int key, void* value) = 0;
-    virtual void Update(void) = 0;
-    virtual void Unk20(void) = 0;
-    virtual void Unk24(struct gxCanvas*) = 0;
-    virtual void Draw(void) = 0;
-    virtual void Unk2C(void) = 0;
-    virtual void Unk30(void) = 0;
-    virtual void Unk34(void) = 0;
-    virtual void Unk38(void) = 0;
-    virtual void Unk3C(void) = 0;
-    virtual void Unk40(void) = 0;
-    virtual void Unk44(void) = 0;
-    virtual void Unk48(void) = 0;
-    virtual void Unk4C(void) = 0;
-    virtual void Unk50(void) = 0;
-    virtual void Unk54(void) = 0;
-    virtual int Key(int key) = 0;
-    virtual void Unk5C(void) = 0;
-};
-
-inline IMenuState::~IMenuState(void) {}
-
-class MenuState : public IMenuState {
-public:
-    MenuState(void) { unk14 = 0; }
-    virtual ~MenuState(void) {}
-    virtual void Enter(void);
-    virtual void Exit(void);
-    virtual void Unk14(void);
-    virtual void Changed(int key, void* value);
-    virtual void Update(void);
-    virtual void Unk20(void);
-    virtual void Unk24(struct gxCanvas*);
-    virtual void Draw(void);
-    virtual void Unk2C(void);
-    virtual void Unk30(void);
-    virtual void Unk34(void);
-    virtual void Unk38(void);
-    virtual void Unk3C(void);
-    virtual void Unk40(void);
-    virtual void Unk44(void);
-    virtual void Unk48(void);
-    virtual void Unk4C(void);
-    virtual void Unk50(void);
-    virtual void Unk54(void);
-    virtual int Key(int key);
-    virtual void Unk5C(void);
-
-    s32 rect[4];  // offset 0x4
-    int unk14;    // offset 0x14
-};
 
 // The menu state the car view sits in; it only tracks whether it is active.
 class CarUIState : public MenuState {
@@ -1006,11 +947,11 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             pitch *= 3.0f;
         }
         if (state.active) {
-            f32 l = (f32)state.rect[0] - cx;
-            f32 t = (f32)state.rect[1] - cy;
+            f32 l = (f32)state.x - cx;
+            f32 t = (f32)state.y - cy;
             f32 b;
-            f32 r = l + (f32)state.rect[2];
-            b = t + (f32)state.rect[3];
+            f32 r = l + (f32)state.w;
+            b = t + (f32)state.h;
             f32 p = proj < 0.01f ? 0.01f : proj;
             f32 f = hw / p;
             f32 a1 = (f32)AbsD((f32)atan(l / f));
