@@ -2,12 +2,13 @@
 // camera's right/up axes, optionally mirrored. Names are guesses.
 #include "game/common.h"
 
-struct CamMtx {
+// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
+struct Camera {
     f32 m[12];
 };
 
 extern "C" {
-CamMtx* fn_802C86DC(void);
+Camera* fn_802C86DC(void);
 void fn_801E4F20(int n);
 void fn_801E4FF4(void);
 int fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
@@ -40,8 +41,8 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 }
 void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
     ValVec3 pos;
-    CamMtx* right;
-    CamMtx* up;
+    Camera* right;
+    Camera* up;
     int i;
     right = fn_802C86DC();
     up = fn_802C86DC();

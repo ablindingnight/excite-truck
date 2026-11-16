@@ -99,7 +99,8 @@ struct SpawnParams {
     ValPoint v;     // offset 0x24
 };
 
-struct CamView {
+// world.cpp's ViewState (fn_801E8718), declared as far as its camera frame at 0x0
+struct ViewState {
     ValVec3 axes[3];  // offset 0x0
     ValVec3 pos;      // offset 0x24
 };
@@ -145,7 +146,7 @@ void fn_80131818(ValueTable* t);
 int fn_801769F8(void);
 int fn_801E85A4(void);  // player views
 int fn_801E85AC(void);  // max player views
-CamView* fn_801E8718(int i);
+ViewState* fn_801E8718(int i);
 void fn_801E88B4(s32* x, s32* y, s32* w, s32* h, int i);
 void fn_801E9DC4(s16* h);
 void fn_801EEFDC(EventHandler h, u8 type);
@@ -578,7 +579,7 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 void fn_802A042C(const EmitterDef* d, const Spawn* s) {
     f32 a;
     for (int i = 0; i < fn_801E85A4(); i++) {
-        CamView v = *fn_801E8718(i);
+        ViewState v = *fn_801E8718(i);
         PVec p;
         PVec diff;
         p.x = s->pos.x + d->offset.x;

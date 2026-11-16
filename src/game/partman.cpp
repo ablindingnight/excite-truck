@@ -34,14 +34,15 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 typedef ValVec3 V3;
 
-struct CamMtx {
+// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
+struct Camera {
     V3 right;  // offset 0x0
     V3 up;     // offset 0xC
     V3 fwd;    // offset 0x18
     V3 pos;    // offset 0x24
 };
 
-extern "C" CamMtx* fn_802C86DC(void);
+extern "C" Camera* fn_802C86DC(void);
 
 struct PartParams {
     PartParams(void);
@@ -665,7 +666,7 @@ static inline f32 Wave(f32 a) {
     return -(1.0f - t * t);
 }
 
-extern "C" void fn_8028F608(V3* a, V3* b, f32 angle, const CamMtx* m) {
+extern "C" void fn_8028F608(V3* a, V3* b, f32 angle, const Camera* m) {
     f32 s = Wave(angle);
     f32 c = Wave(1.5707964f + angle);
     a->x = c * m->right.x + s * m->up.x;
@@ -881,9 +882,9 @@ static inline void SetSpriteCorner(V3& out, f32 scale, const V3& d, const V3& p)
 
 void PartSys::DrawSprites(Particle* p, int n) {
     f32 t0;
-    CamMtx* cam;
+    Camera* cam;
     f32 age;
-    CamMtx m;
+    Camera m;
     f32 size;
     cam = fn_802C86DC();
     int i;
@@ -939,7 +940,7 @@ void PartSys::DrawSprites(Particle* p, int n) {
 }
 
 void PartSys::DrawAnimated(Particle* p, int n) {
-    CamMtx* cam = fn_802C86DC();
+    Camera* cam = fn_802C86DC();
     f32 t0 = lbl_8055F738;
     V3 d1;
     V3 d2;
@@ -957,7 +958,7 @@ void PartSys::DrawAnimated(Particle* p, int n) {
         int frame = (p->frame + (int)(t * ((f32)frames * animRamp))) % frames;
         V3 pos;
         Integrate(&pos, p, age);
-        CamMtx m = *fn_802C86DC();
+        Camera m = *fn_802C86DC();
         V3 d;
         d.x = m.pos.x - pos.x;
         d.y = m.pos.y - pos.y;
@@ -1001,7 +1002,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 }
 
 void PartSys::DrawRotating(Particle* p, int n) {
-    CamMtx* cam = fn_802C86DC();
+    Camera* cam = fn_802C86DC();
     f32 now = lbl_8055F738;
     f32 shade = 0.5f * shading;
     QuadBatch batch;
@@ -1020,7 +1021,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
         V3 a;
         V3 b;
         fn_8028F608(&a, &b, ang, cam);
-        CamMtx m = *fn_802C86DC();
+        Camera m = *fn_802C86DC();
         V3 d;
         d.x = m.pos.x - pos.x;
         d.y = m.pos.y - pos.y;

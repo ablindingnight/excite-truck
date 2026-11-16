@@ -41,12 +41,13 @@ void* operator new[](size_t size, const char* tag);
 void operator delete(void* p);
 void operator delete[](void* p);
 
-struct CamMtx {
+// mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
+struct Camera {
     V3 right;  // offset 0x0
     V3 up;     // offset 0xC
 };
 
-extern "C" const CamMtx* fn_802C86DC(void);
+extern "C" const Camera* fn_802C86DC(void);
 
 struct FlipVert {
     V3 pos;     // offset 0x0
@@ -105,7 +106,7 @@ extern "C" {
 void fn_802960A0(const V3* p, u32 color, s32 tex, f32 size, f32 u1, f32 u2, f32 v1, f32 v2) {
     f32 sz;
     f32 sy;
-    const CamMtx* m;
+    const Camera* m;
     f32 w;
     int i;
     f32 sx;
