@@ -467,7 +467,7 @@ u8 fn_802E8364(RemoteOut* out, s32 chan) {
     return r->connected;
 }
 
-u8 fn_802E8504(s32 chan) { return lbl_80505978[chan].connected; }
+int fn_802E8504(s32 chan) { return lbl_80505978[chan].connected; }
 
 void fn_802E8528(s32 chan, f32 strength, f32 b);
 
