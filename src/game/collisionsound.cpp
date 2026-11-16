@@ -64,6 +64,17 @@ public:
     virtual float vf60(void);
 };
 
+#ifndef __MWERKS__
+/* PORT: MWCC path keeps retail's linker-name form, see FACTS 13e */
+// Outside the extern "C" block below: constructs the Manager's entries with Entry's constructor.
+#include <new>
+static void ConstructEntries(Entry* e, int n) {
+    for (int i = 0; i < n; i++) {
+        new (&e[i]) Entry;
+    }
+}
+#endif
+
 extern "C" {
 extern const SoundInfo lbl_802F9630[13];
 extern const KeyInfo lbl_802F96CC[43];
@@ -88,8 +99,10 @@ void __construct_array(void*,void*,void*,int,int);
 extern ModuleTag lbl_8055E6B8;
 Manager* fn_801B3B70(Manager*);
 void* fn_801B3BD4(Entry*,int);
+#ifdef __MWERKS__
 // MATCHING-AID (by name): the Manager ctor below hands the Entry ctor to __construct_array by its linker name.
 extern "C" Entry* __ct__5EntryFv(Entry*);
+#endif
 Manager* fn_801B3D24(Manager*,int);
 void fn_801B3DBC(Manager*);
 void fn_801B3FD8(Manager*);
@@ -216,6 +229,7 @@ void fn_801B3B24(u8*, void*, void*){}
 
 void fn_801B3B28(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
 
+#ifdef __MWERKS__
 Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)__ct__5EntryFv,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
 
 
@@ -224,6 +238,13 @@ Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)__ct_
 extern "C" void* __vt__5Entry[];
 inline void EntryCleanup(Entry* self){if(self){*(void**)self=__vt__5Entry;if(self->sound){delete (OwnedSound*)self->sound;self->sound=0;}}}
 void* fn_801B3BD4(Entry* self,int destroy){if(self){EntryCleanup(self);if(destroy>0)__dl__FPv(self);}return self;}
+#else
+/* PORT: MWCC path keeps retail's linker-name form, see FACTS 13e */
+// The same behaviour in plain C++: the entries are constructed with Entry's constructor, and the element dtor runs
+// Entry's destructor (Entry's vtable comes from its out-of-line virtual destructor).
+Manager* fn_801B3B70(Manager* self){ConstructEntries(self->entries,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
+void* fn_801B3BD4(Entry* self,int destroy){if(self){self->Entry::~Entry();if(destroy>0)__dl__FPv(self);}return self;}
+#endif
 
 Entry::Entry(void){a=lbl_80562624;b=lbl_80562624;c=lbl_80562624;d=lbl_80562624;e=lbl_80562624;f=lbl_80562624;sound=0;}
 
