@@ -33,14 +33,7 @@ double atan2(double y, double x);
 double sqrt(double x);
 }
 
-// Three basis vectors and the origin (0x30).
-struct Frame {
-    PVec x;    // offset 0x0
-    PVec y;    // offset 0xC
-    PVec z;    // offset 0x18
-    PVec pos;  // offset 0x24
-};
-
+// Frame: common.h's PlainValMatrix (x/y/z rows -> basis[0..2], pos -> origin).
 // A coloured, textured vertex (0x18).
 struct WVert {
     PVec pos;   // offset 0x0
@@ -99,14 +92,14 @@ void fn_802CB274(s32 target);
 void fn_802C9294(s32 target, int a);
 s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
-void fn_802C8B08(Frame* cam);
-void fn_802C8638(const Frame* cam);
+void fn_802C8B08(PlainValMatrix* cam);
+void fn_802C8638(const PlainValMatrix* cam);
 void fn_802C88BC(int mode);
 void fn_802C10C8(void);
 void fn_802BDD8C(f32 dist);
-void __ct__10CamFrame34Fv(Frame* f);
+void __ct__10CamFrame34Fv(PlainValMatrix* f);
 void fn_80144DAC(PVec* out, const PVec* in);
-void fn_802C8B98(s32 tex, const Frame* m);
+void fn_802C8B98(s32 tex, const PlainValMatrix* m);
 void fn_802C8DB8(const WVert* v, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
 void fn_802C98DC(f32* a, f32* b, f32* c, f32* d);
@@ -160,7 +153,7 @@ struct Skybox {
     }
     s32 faces[6];      // offset 0x0
     s32 sun;           // offset 0x18
-    Frame frames[6];   // offset 0x1C
+    PlainValMatrix frames[6];   // offset 0x1C
     WVert quad[4];     // offset 0x13C
     u16 idx[6];        // offset 0x19C
     u8 drawn;          // offset 0x1A8
@@ -174,7 +167,7 @@ public:
     virtual s32 Target(void) = 0;
     virtual int IsValid(void) = 0;
     virtual f32 Scale(void) = 0;
-    virtual void Mirror(Frame* out, const Frame* in, const PVec* up);
+    virtual void Mirror(PlainValMatrix* out, const PlainValMatrix* in, const PVec* up);
 };
 
 class WaterBase {
@@ -187,7 +180,7 @@ public:
 
 class WaterEnvMap : public EnvBase {
 public:
-    void RenderFaces(f32 h, Frame& m);
+    void RenderFaces(f32 h, PlainValMatrix& m);
     void RenderBody(void* cam, f32 fov);
 public:
     WaterEnvMap(void);
@@ -426,13 +419,13 @@ void fn_802BF598(void* cam, f32 fov) {
 }
 }
 
-void EnvBase::Mirror(Frame* out, const Frame* in, const PVec* up) {
+void EnvBase::Mirror(PlainValMatrix* out, const PlainValMatrix* in, const PVec* up) {
     *out = *in;
-    out->x.y *= -1.0f;
-    out->y.y *= -1.0f;
-    out->z.y *= -1.0f;
-    out->pos.y *= -1.0f;
-    out->pos.y = out->pos.y + 2.0f * waterHeight;
+    out->basis[0].y *= -1.0f;
+    out->basis[1].y *= -1.0f;
+    out->basis[2].y *= -1.0f;
+    out->origin.y *= -1.0f;
+    out->origin.y = out->origin.y + 2.0f * waterHeight;
 }
 
 extern "C" EnvBase* fn_802BF6AC(void) {
@@ -462,16 +455,16 @@ static inline void LoadTex(s32* out, const char* name) { /* Helper name unproven
     }
 }
 
-static inline void Identity(Frame* f) {
-    f->x.x = 1.0f;
-    f->x.y = 0.0f;
-    f->x.z = 0.0f;
-    f->y.x = 0.0f;
-    f->y.y = 1.0f;
-    f->y.z = 0.0f;
-    f->z.x = 0.0f;
-    f->z.y = 0.0f;
-    f->z.z = 1.0f;
+static inline void Identity(PlainValMatrix* f) {
+    f->basis[0].x = 1.0f;
+    f->basis[0].y = 0.0f;
+    f->basis[0].z = 0.0f;
+    f->basis[1].x = 0.0f;
+    f->basis[1].y = 1.0f;
+    f->basis[1].z = 0.0f;
+    f->basis[2].x = 0.0f;
+    f->basis[2].y = 0.0f;
+    f->basis[2].z = 1.0f;
 }
 
 
@@ -479,42 +472,42 @@ inline Skybox::Skybox(const char* sunTex) {
     LoadTex(&sun, sunTex);
     for (int i = 0; i < 6; i++) {
         faces[i] = fn_802CB128(0x100, 0x100, 0, 0x60);
-        Frame* f = &frames[i];
+        PlainValMatrix* f = &frames[i];
         Identity(f);
-        frames[i].pos.x = 0.0f;
-        frames[i].pos.y = 0.0f;
-        frames[i].pos.z = 0.0f;
+        frames[i].origin.x = 0.0f;
+        frames[i].origin.y = 0.0f;
+        frames[i].origin.z = 0.0f;
     }
-    frames[1].z.x = 0.0f;
-    frames[1].z.y = 0.0f;
-    frames[1].z.z = -1.0f;
-    frames[1].x.x = -1.0f;
-    frames[1].x.y = 0.0f;
-    frames[1].x.z = 0.0f;
-    frames[2].x.x = 0.0f;
-    frames[2].x.y = 0.0f;
-    frames[2].x.z = -1.0f;
-    frames[2].z.x = 1.0f;
-    frames[2].z.y = 0.0f;
-    frames[2].z.z = 0.0f;
-    frames[3].x.x = 0.0f;
-    frames[3].x.y = 0.0f;
-    frames[3].x.z = 1.0f;
-    frames[3].z.x = -1.0f;
-    frames[3].z.y = 0.0f;
-    frames[3].z.z = 0.0f;
-    frames[4].y.x = 0.0f;
-    frames[4].y.y = 0.0f;
-    frames[4].y.z = -1.0f;
-    frames[4].z.x = 0.0f;
-    frames[4].z.y = 1.0f;
-    frames[4].z.z = 0.0f;
-    frames[5].y.x = 0.0f;
-    frames[5].y.y = 0.0f;
-    frames[5].y.z = 1.0f;
-    frames[5].z.x = 0.0f;
-    frames[5].z.y = -1.0f;
-    frames[5].z.z = 0.0f;
+    frames[1].basis[2].x = 0.0f;
+    frames[1].basis[2].y = 0.0f;
+    frames[1].basis[2].z = -1.0f;
+    frames[1].basis[0].x = -1.0f;
+    frames[1].basis[0].y = 0.0f;
+    frames[1].basis[0].z = 0.0f;
+    frames[2].basis[0].x = 0.0f;
+    frames[2].basis[0].y = 0.0f;
+    frames[2].basis[0].z = -1.0f;
+    frames[2].basis[2].x = 1.0f;
+    frames[2].basis[2].y = 0.0f;
+    frames[2].basis[2].z = 0.0f;
+    frames[3].basis[0].x = 0.0f;
+    frames[3].basis[0].y = 0.0f;
+    frames[3].basis[0].z = 1.0f;
+    frames[3].basis[2].x = -1.0f;
+    frames[3].basis[2].y = 0.0f;
+    frames[3].basis[2].z = 0.0f;
+    frames[4].basis[1].x = 0.0f;
+    frames[4].basis[1].y = 0.0f;
+    frames[4].basis[1].z = -1.0f;
+    frames[4].basis[2].x = 0.0f;
+    frames[4].basis[2].y = 1.0f;
+    frames[4].basis[2].z = 0.0f;
+    frames[5].basis[1].x = 0.0f;
+    frames[5].basis[1].y = 0.0f;
+    frames[5].basis[1].z = 1.0f;
+    frames[5].basis[2].x = 0.0f;
+    frames[5].basis[2].y = -1.0f;
+    frames[5].basis[2].z = 0.0f;
     quad[0].pos.x = -1.0f;
     quad[0].pos.y = 1.0f;
     quad[0].pos.z = 1.0f;
@@ -591,20 +584,20 @@ WaterEnvMap::~WaterEnvMap(void) {
 
 extern "C" void fn_802C00A0(f32* fov);
 extern "C" void fn_802C0054(Mat3* out, const Mat3* in);
-extern "C" void fn_802BFE48(Skybox* s, const Frame* view, f32 scale);
+extern "C" void fn_802BFE48(Skybox* s, const PlainValMatrix* view, f32 scale);
 
 /* Helper name unproven: renders the six cube faces of the environment map. */
-inline void WaterEnvMap::RenderFaces(f32 h, Frame& m) {
+inline void WaterEnvMap::RenderFaces(f32 h, PlainValMatrix& m) {
     int i;
     f32 hf = h;
     Skybox* k = sky;
     fn_802C00A0(&hf);
     Perspective ps(0.1f, 2.0f, hf);
     for (i = 0; i < 6; i++) {
-        Frame f;
+        PlainValMatrix f;
         __ct__10CamFrame34Fv(&f);
         fn_802C0054((Mat3*)&f, (const Mat3*)&k->frames[i]);
-        fn_80144DAC(&f.pos, &m.pos);
+        fn_80144DAC(&f.origin, &m.origin);
         fn_802C8B98(k->faces[i], &f);
         fn_802C8DB8(k->quad, 4, k->idx, 6);
         fn_802C8D74();
@@ -623,7 +616,7 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
             Perspective p(1.0f, 2000.0f, 1.5707964f);
             Viewport vp;
             __ct__8ViewportFiiii(&vp, 0, 0, 0x100, 0x100);
-            Frame save;
+            PlainValMatrix save;
             fn_802C8B08(&save);
             fn_802C8638(&s->frames[i]);
             fn_802C88BC(3);
@@ -637,12 +630,12 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
     fn_802CB274(target);
     fn_802C9294(target, 1);
     PVec up;
-    Frame save;
-    Frame m;
+    PlainValMatrix save;
+    PlainValMatrix m;
     up.x = 0.0f;
     up.y = 1.0f;
     up.z = 0.0f;
-    Mirror(&m, (const Frame*)cam, &up);
+    Mirror(&m, (const PlainValMatrix*)cam, &up);
     f32 h = 2.0f * (f32)atan(scale * (f32)tan(0.5f * fov));
     Viewport vp;
     Perspective p(1.0f, 3000.0f, h);
@@ -669,7 +662,7 @@ void WaterEnvMap::Render(void* cam, f32 fov) { RenderBody(cam, fov); }
 
 extern "C" {
 
-void fn_802BFE48(Skybox* __restrict s, const Frame* view, f32 scale) {
+void fn_802BFE48(Skybox* __restrict s, const PlainValMatrix* view, f32 scale) {
     Mat3* mp;
     if (s->sun == -2) {
         return;
@@ -685,18 +678,18 @@ void fn_802BFE48(Skybox* __restrict s, const Frame* view, f32 scale) {
         v[i].v = (i & 2) ? 1.0f : 0.0f;
         v[i].color = 0xFFFFFFFF;
     }
-    Frame m;
+    PlainValMatrix m;
     mp = (Mat3*)&m;
-    m.pos = view->pos;
-    m.x.x = 1.0f;
-    m.x.y = 0.0f;
-    m.x.z = 0.0f;
-    m.y.x = 0.0f;
-    m.y.y = 1.0f;
-    m.y.z = 0.0f;
-    m.z.x = 0.0f;
-    m.z.y = 0.0f;
-    m.z.z = 1.0f;
+    m.origin = view->origin;
+    m.basis[0].x = 1.0f;
+    m.basis[0].y = 0.0f;
+    m.basis[0].z = 0.0f;
+    m.basis[1].x = 0.0f;
+    m.basis[1].y = 1.0f;
+    m.basis[1].z = 0.0f;
+    m.basis[2].x = 0.0f;
+    m.basis[2].y = 0.0f;
+    m.basis[2].z = 1.0f;
     PVec a;
     a.x = -0.5235988f;
     a.y = 0.0f;
@@ -799,15 +792,15 @@ static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 template <class O, class A, class D> static inline void AddScaledK(O* o, const A* a, const D* d, f32 s) { o->x = a->x + d->x * s; o->y = a->y + d->y * s; o->z = a->z + d->z * s; }  /* Helper name unproven */
 void WaterSystem::Draw(void) {
-    Frame cam;
+    PlainValMatrix cam;
     fn_802C8B08(&cam);
-    f32 h = cam.pos.y - lbl_8055FAF4;
+    f32 h = cam.origin.y - lbl_8055FAF4;
     f32 sx;
     f32 farZ;
     f32 nearZ;
     f32 dz;
     fn_802C98DC(&sx, &nearZ, &farZ, &dz);
-    f32 tilt = h * cam.z.y;
+    f32 tilt = h * cam.basis[2].y;
     f32 far = 0.95f * farZ;
     f32 nd = nearZ;
     sx = sx * (f32)sqrt(1.5625);
@@ -820,10 +813,10 @@ void WaterSystem::Draw(void) {
     f32 vh = fn_802C9C48();
     k = 640.0f / (vh * env->Scale());
     PVec fwd;
-    if (AbsFlt(cam.z.y) < 0.99f) {
-        fwd = cam.z;
+    if (AbsFlt(cam.basis[2].y) < 0.99f) {
+        fwd = cam.basis[2];
     } else {
-        fwd = cam.y;
+        fwd = cam.basis[1];
     }
     fwd.y = 0.0f;
     f32 inv = 1.0f / FMax(0.01f, PSVECMag((const Vec*)&fwd));
@@ -840,10 +833,10 @@ void WaterSystem::Draw(void) {
     f32 cy = 0.5f * (480.0f - vw);
     for (int r = 0; r < 64; r++) {
         f32 t = (f32)r / 63.0f * ((f32)r / 63.0f);
-        PVec p = cam.pos;
+        PVec p = cam.origin;
         p.y = lbl_8055FAF4;
         if (r == 63) {
-            p.y = cam.pos.y;
+            p.y = cam.origin.y;
         }
         f32 dist = nd + t * (far - nd) + tilt;
         p.x += fwd.x * dist;
@@ -852,10 +845,10 @@ void WaterSystem::Draw(void) {
         PVec lc;
         PVec rel;
         PVec d;
-        SetXYZ(&d, p.x - cam.pos.x, p.y - cam.pos.y, p.z - cam.pos.z);
-        lc.x = d.x * cam.x.x + d.y * cam.x.y + d.z * cam.x.z;
-        lc.y = d.x * cam.y.x + d.y * cam.y.y + d.z * cam.y.z;
-        lc.z = d.x * cam.z.x + d.y * cam.z.y + d.z * cam.z.z;
+        SetXYZ(&d, p.x - cam.origin.x, p.y - cam.origin.y, p.z - cam.origin.z);
+        lc.x = d.x * cam.basis[0].x + d.y * cam.basis[0].y + d.z * cam.basis[0].z;
+        lc.y = d.x * cam.basis[1].x + d.y * cam.basis[1].y + d.z * cam.basis[1].z;
+        lc.z = d.x * cam.basis[2].x + d.y * cam.basis[2].y + d.z * cam.basis[2].z;
         rel = d;
         f32 depth = lc.z;
         fn_802BED90(&rel);
@@ -880,7 +873,7 @@ void WaterSystem::Draw(void) {
     TexMtx m = {{{0.04f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.04f, 0.0f}}};
     m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
     fn_802D3D94(2, &m);
-    f32 sh = FMax(cam.pos.y / 4.0f, 1.0f);
+    f32 sh = FMax(cam.origin.y / 4.0f, 1.0f);
     u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
     fn_802C8BD0(env->Target());
     fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (1024.0f * lbl_80564D78[0]), deep, mask, deepCol);
@@ -888,18 +881,18 @@ void WaterSystem::Draw(void) {
     fn_802DD228();
     fn_802C8D74();
     fn_802DBECC();
-    Frame cam2;
+    PlainValMatrix cam2;
     fn_802C8B08(&cam2);
     f32 nz;
     f32 dummy;
     fn_802C98DC(&dummy, &nz, &dummy, &dummy);
     nz += 0.001f;
     PVec c;
-    MadV3(&c.x, &cam2.pos.x, &cam2.z.x, nz);
-    f32 sc = (lbl_8055FAF4 - c.y) / FMax(0.001f, cam2.y.y);
+    MadV3(&c.x, &cam2.origin.x, &cam2.basis[2].x, nz);
+    f32 sc = (lbl_8055FAF4 - c.y) / FMax(0.001f, cam2.basis[1].y);
     PVec q;
-    MadV3(&q.x, &c.x, &cam2.y.x, sc);
-    PVec ax = cam2.z;
+    MadV3(&q.x, &c.x, &cam2.basis[1].x, sc);
+    PVec ax = cam2.basis[2];
     ax.y = 0.0f;
     PVec upv;
     upv.x = 0.0f;
@@ -915,9 +908,9 @@ void WaterSystem::Draw(void) {
     WVert sv[4];
     for (int i = 0; i < 4; i++) {
         sv[i].pos = *((i & 1) ? &e1 : &e0);
-        sv[i].pos.x += cam2.y.x * ((i & 2) ? -10.0f : 0.0f);
-        sv[i].pos.y += cam2.y.y * ((i & 2) ? -10.0f : 0.0f);
-        sv[i].pos.z += cam2.y.z * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.x += cam2.basis[1].x * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.y += cam2.basis[1].y * ((i & 2) ? -10.0f : 0.0f);
+        sv[i].pos.z += cam2.basis[1].z * ((i & 2) ? -10.0f : 0.0f);
         sv[i].v = 0.0f;
         sv[i].u = 0.0f;
         sv[i].color = shimWaterColor;
