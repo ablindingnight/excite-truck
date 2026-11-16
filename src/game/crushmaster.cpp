@@ -1667,13 +1667,11 @@ inline int CrushSubTaskMgr::vf0C(V2* pos, f32* speed, int car, int d, u32* flags
     return 1;
 }
 
-extern const f32 lbl_80561AF0;  // 50.0f
+template <class O, class A, class D> static inline void CrushAhead(O* o, const A* a, const D* d, f32 k) { o->x = a->x + d->x * k; o->y = a->y + d->y * k; o->z = a->z + d->z * k; }  /* Helper name unproven */
 inline int CrushSubTaskMgr::vf10(V2* pos, f32* speed, int car, int d, u32* flags) {
     RaceCarRec* rec = fn_8017960C(car);
     ValVec3 p;
-    p.x = rec->mtx.pos.x + rec->mtx.rot.z.x * lbl_80561AF0;
-    p.y = rec->mtx.pos.y + rec->mtx.rot.z.y * lbl_80561AF0;
-    p.z = rec->mtx.pos.z + rec->mtx.rot.z.z * lbl_80561AF0;
+    CrushAhead(&p, &rec->mtx.pos, &rec->mtx.rot.z, 50.0f);
     pos->x = p.x;
     pos->y = p.z;
     *flags = 0x21F;
