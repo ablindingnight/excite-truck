@@ -3,6 +3,7 @@
 // per-car tuning accessors. Written against raw field offsets; the large routines are still stubs.
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/collvol.h"
 #include <string.h>
 
 template <class T>
@@ -154,29 +155,6 @@ struct BodyDesc;
 struct RPacket;
 struct BodyState;
 
-// The collision volume (collvol.cpp), declared as far as the CarBody slots need.
-class CollVolume {
-public:
-    virtual void Init(BodyDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
-    virtual ~CollVolume(void);       // 0xC
-    virtual void Reset(void);        // 0x10
-    virtual void vf14(void);         // 0x14
-    virtual void vf18(void);         // 0x18
-    virtual void Update(void);       // 0x1C
-    virtual void vf20(void);         // 0x20
-    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
-    virtual void vf28(u8* buf);      // 0x28
-    virtual s32 vf2C(RPacket* pk);   // 0x2C: the packet size
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(RPacket* pk);   // 0x34
-    virtual void vf38(u8* buf);      // 0x38
-    virtual void vf3C(void);         // 0x3C
-    virtual int vf40(void);          // 0x40
-    virtual int vf44(void);          // 0x44
-    void Transform(void);
-    void AddShape(CollShape* s);
-};
-
 extern "C" {
 void fn_801838C8(u8* p);
 void fn_801A1474(u8* p, f32 s);
@@ -197,7 +175,7 @@ public:
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* pk);
     virtual int vf40(void);
-    virtual void vf3C(void);
+    virtual RigidBody* vf3C(void);
     virtual void OnHit(const RVec3* a, const RVec3* b, int c, void* d);  // 0x48
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
     virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
