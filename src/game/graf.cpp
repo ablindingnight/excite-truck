@@ -76,11 +76,7 @@ struct GrafFactory {
     GModelHandler* (*create)(void);
 };
 
-struct GFrame {
-    f32 r[3][3];  // offset 0x0
-    f32 t[3];     // offset 0x24
-};
-
+// GFrame: common.h's PlainValMatrix.
 struct GObj {
     u8 pad[0xD8];
     f32 flash;  // offset 0xD8
@@ -114,9 +110,9 @@ void fn_802C703C(s32 h);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void mrModelUnload(s32 model);
 int fn_801E2CCC(s32 model, const char* name, f32** out);
-void fn_802C744C(s32 model, const GFrame* m);
-void fn_802C8B08(GFrame* cam);
-GFrame* fn_802C86DC(void);
+void fn_802C744C(s32 model, const PlainValMatrix* m);
+void fn_802C8B08(PlainValMatrix* cam);
+PlainValMatrix* fn_802C86DC(void);
 void fn_802C9474(u32 color);
 void fn_802C9900(f32 a);
 void fn_802C9904(void);
@@ -130,11 +126,11 @@ void fn_802C7A44(void);
 void fn_802C7A50(void);
 void fn_802C7A94(int a);
 void fn_802C7AD4(void);
-void fn_802C7730(GFrame* f);
+void fn_802C7730(PlainValMatrix* f);
 void fn_802C9648(f32 a);
 void fn_802C967C(void);
 void fn_80202718(void);
-void fn_801F1C24(GFrame* f);
+void fn_801F1C24(PlainValMatrix* f);
 int fn_801EA470(void);
 void fn_801FA6B8(void);
 void fn_8029790C(int a);
@@ -585,7 +581,7 @@ void fn_801EBD70(void) {
 
 void fn_801EBDCC(void) {
     if (lbl_8055EBA0) {
-        GFrame f;
+        PlainValMatrix f;
         fn_802C7A44();
         fn_80202718();
         fn_801F1C24(&f);
@@ -635,21 +631,21 @@ void fn_801EBF00(void) {
     if (lbl_8055EBA0) {
         lbl_804885E8[3]->Draw(0);
         if (lbl_8055AFB8 != -1) {
-            GFrame cam;
+            PlainValMatrix cam;
             fn_802C8B08(&cam);
             f32 s = 1.0f - lbl_8055EBA4;
-            cam.t[0] *= s;
-            cam.t[1] *= s;
-            cam.t[2] *= s;
-            cam.r[0][0] = 1.0f;
-            cam.r[0][1] = 0.0f;
-            cam.r[0][2] = 0.0f;
-            cam.r[1][0] = 0.0f;
-            cam.r[1][1] = 1.0f;
-            cam.r[1][2] = 0.0f;
-            cam.r[2][0] = 0.0f;
-            cam.r[2][1] = 0.0f;
-            cam.r[2][2] = 1.0f;
+            cam.origin.x *= s;
+            cam.origin.y *= s;
+            cam.origin.z *= s;
+            cam.basis[0].x = 1.0f;
+            cam.basis[0].y = 0.0f;
+            cam.basis[0].z = 0.0f;
+            cam.basis[1].x = 0.0f;
+            cam.basis[1].y = 1.0f;
+            cam.basis[1].z = 0.0f;
+            cam.basis[2].x = 0.0f;
+            cam.basis[2].y = 0.0f;
+            cam.basis[2].z = 1.0f;
             fn_802C744C(lbl_8055AFB8, &cam);
         }
         lbl_804885E8[6]->Draw(0);
@@ -662,23 +658,23 @@ void fn_801EBF00(void) {
                 c = a;
             }
             fn_802C9474(GColor(0xFF, c, c, c));
-            GFrame* cf = fn_802C86DC();
-            GFrame m;
-            m.t[0] = cf->t[0];
-            m.t[1] = cf->t[1];
-            m.t[2] = cf->t[2];
+            PlainValMatrix* cf = fn_802C86DC();
+            PlainValMatrix m;
+            m.origin.x = cf->origin.x;
+            m.origin.y = cf->origin.y;
+            m.origin.z = cf->origin.z;
             f32 ang = *(f32*)(o + 1);
             f32 co = cos(ang);
             f32 si = sin(ang);
-            m.r[0][0] = co;
-            m.r[0][1] = 0.0f;
-            m.r[0][2] = -si;
-            m.r[1][0] = 0.0f;
-            m.r[1][1] = 1.0f;
-            m.r[1][2] = 0.0f;
-            m.r[2][0] = si;
-            m.r[2][1] = 0.0f;
-            m.r[2][2] = co;
+            m.basis[0].x = co;
+            m.basis[0].y = 0.0f;
+            m.basis[0].z = -si;
+            m.basis[1].x = 0.0f;
+            m.basis[1].y = 1.0f;
+            m.basis[1].z = 0.0f;
+            m.basis[2].x = si;
+            m.basis[2].y = 0.0f;
+            m.basis[2].z = co;
             f32 k = 2.0f * o->flash;
             fn_802C9900(1.0f < k ? 1.0f : k);
             fn_802C744C(lbl_8055AFBC, &m);
