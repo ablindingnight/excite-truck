@@ -3,6 +3,7 @@
 // CC0; file src/auto/text_8020A6AC_.c) as C and rewritten as the classes its vtables prove. Unit name is provisional;
 // class names follow the unit's own strings ("VoiceSoundMixer::End", "VoiceSound::pool"); the rest are guesses.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/pool.h"
 
 extern "C" {
@@ -63,35 +64,6 @@ struct MixerCaps {
     u8 noPositional;  // offset 0x0
     s32 has3D;        // offset 0x4
     s32 hasPan;       // offset 0x8 (the voice mixer reports 0x20)
-};
-
-// A mixer's sound (only the slots this unit overrides are named; slot 0x14 rebinds a sound to another sample).
-class Sound {
-public:
-    Sound(void) {}
-    virtual ~Sound(void) {}
-    virtual void vf0C(void) { delete this; }
-    virtual int vf10(void) = 0;
-    virtual int vf14(const char* name);
-    virtual void Play(void) = 0;
-    virtual void Start(void) = 0;
-    virtual void Stop(void) = 0;
-    virtual int State(void) = 0;
-    virtual void Pause(void) = 0;
-    virtual void Resume(void) = 0;
-    virtual void SetPitch(f32 v) = 0;
-    virtual void SetVolume(f32 v) = 0;
-    virtual int Has3D(void) = 0;
-    virtual void SetPan(f32 v) = 0;
-    virtual void SetDepth(f32 v) = 0;
-    virtual void vf44(f32 v);
-    virtual void vf48(f32 v);
-    virtual void vf4C(f32 v);
-    virtual void vf50(u32 mask);
-    virtual void Set3D(void* vel, void* pos) = 0;
-    virtual void vf58(void) = 0;
-    virtual void Event(s32* ev) = 0;
-    virtual f32 vf60(void);
 };
 
 // A sound device (mixer.cpp). Slot signatures follow this unit's overrides (sound.cpp names slot 0x1C

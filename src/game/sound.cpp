@@ -3,6 +3,7 @@
 // one player) and their state machine against the device sound, plus defaults of the Mixer and Sound
 // interfaces. Names are guesses apart from the class names, pool and messages.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/pool.h"
 #include <revolution/MTX/vec.h>
 
@@ -15,34 +16,6 @@ void fn_8020A400(void);   // music shutdown
 }
 
 void* operator new(size_t size, const char* tag);
-
-// A device sound (see mixer.cpp).
-class Sound {
-public:
-    virtual ~Sound(void) {}
-    virtual void vf0C(void) { delete this; }
-    virtual int vf10(void) = 0;
-    virtual void vf14(void);
-    virtual void Play(void) = 0;
-    virtual void Start(void) = 0;
-    virtual void Stop(void) = 0;
-    virtual int State(void) = 0;
-    virtual void Pause(void) = 0;
-    virtual void Resume(void) = 0;
-    virtual void SetPitch(f32 v) = 0;
-    virtual void SetVolume(f32 v) = 0;
-    virtual int Has3D(void) = 0;
-    virtual void SetPan(f32 v) = 0;
-    virtual void SetDepth(f32 v) = 0;
-    virtual void vf44(f32 v);
-    virtual void vf48(f32 v);
-    virtual void vf4C(f32 v);
-    virtual void vf50(u32 mask);
-    virtual void Set3D(void* vel, void* pos) = 0;
-    virtual void vf58(void) = 0;
-    virtual void Event(s32* ev) = 0;
-    virtual f32 vf60(void);
-};
 
 class Mixer {
 public:

@@ -3,6 +3,7 @@
 // are freed when they stop, and creating device sounds through the mixer. Names are guesses apart
 // from the file name and messages.
 #include "game/common.h"
+#include "game/sound.h"
 #include "macros.h"
 
 extern "C" {
@@ -28,19 +29,6 @@ extern "C" {
 void fn_80127CF4(BgObject* obj, const char* name);
 void fn_80127E28(BgObject* obj);
 }
-
-// A device sound (see mixer.cpp).
-class Sound {
-public:
-    virtual ~Sound(void) {}
-    virtual void vf0C(void) { delete this; }
-    virtual int vf10(void) = 0;
-    virtual void vf14(void);
-    virtual void Play(void) = 0;
-    virtual void Start(void) = 0;
-    virtual void Stop(void) = 0;
-    virtual int State(void) = 0;
-};
 
 struct MixerCaps {
     u8 noPositional;  // offset 0x0
