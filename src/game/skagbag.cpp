@@ -266,6 +266,8 @@ void SkagDebug(SkagPoint* p, int q) {
     fn_802E30C8("back-to-skagpoint %.2f,%.2f", p->x, p->y);
 }
 
+#pragma push
+#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_802B40F8(void) {
     ValueTable* t = fn_80131810("skagbag.val");
     ValueNode* root = t->FindChild("skagbag_matrix");
@@ -292,6 +294,7 @@ void fn_802B40F8(void) {
     fn_80131818(t);
     lbl_8055F9C8 = -1;
 }
+#pragma pop
 
 SkagBag* fn_802B475C(const SkagVec<SkagBag*>* v) { return v->data[fn_80129D90(0, 0, v->count)]; }
 
