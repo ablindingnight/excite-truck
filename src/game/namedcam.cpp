@@ -175,22 +175,22 @@ static inline void QuatToPose(CamPose* p, const f32* q) {
     f32 y2 = q[1] + q[1];
     f32 z2 = q[2] + q[2];
     f32 xx = q[0] * x2;
-    f32 xy = q[0] * y2;
-    f32 xz = q[0] * z2;
     f32 yy = q[1] * y2;
-    f32 yz = q[1] * z2;
     f32 zz = q[2] * z2;
     f32 wx = q[3] * x2;
+    f32 yz = q[1] * z2;
     f32 wy = q[3] * y2;
+    f32 xz = q[0] * z2;
     f32 wz = q[3] * z2;
+    f32 xy = q[0] * y2;
     m[0][0] = 1.0f - (yy + zz);
     m[1][0] = xy - wz;
-    m[2][0] = wy + xz;
-    m[1][1] = 1.0f - (xx + zz);
+    m[2][0] = xz + wy;
     m[0][1] = xy + wz;
+    m[1][1] = 1.0f - (xx + zz);
     m[2][1] = yz - wx;
-    m[1][2] = wx + yz;
     m[0][2] = xz - wy;
+    m[1][2] = yz + wx;
     m[2][2] = 1.0f - (xx + yy);
 }
 
