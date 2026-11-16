@@ -48,7 +48,8 @@ struct Packet {
         PVec pos;     // offset 0x1E
         PQuat rot;    // offset 0x2A
     } pose;
-    u8 pad3A[0x48 - 0x3A];
+    u8 pad3A[0x47 - 0x3A];
+    u8 unk47;     // offset 0x47
     u8 snap;      // offset 0x48
     s32 f49;      // offset 0x49
 };
@@ -386,11 +387,10 @@ void NetCar::Snap(void) {
     SetState(state);
     ptab[1] = ptab[2] = ptab[0];
     {
-        // MATCHING-AID: retail's zero vector stores y, z, then x (the order of netcar's old TVec constructor).
         RVec3 z;
+        z.x = 0.0f;
         z.y = 0.0f;
         z.z = 0.0f;
-        z.x = 0.0f;
         ptab[1].frame--;
         ptab[2].frame -= 2;
         v[2].x = z.x;
