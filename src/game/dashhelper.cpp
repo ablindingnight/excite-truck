@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/textelem.h"
 #include "game/ilayout.h"
 #include "game/raceprog.h"
@@ -18,32 +19,6 @@ const f32 kBarWidth = 89.0f;
 const f32 kBarHeight = 17.0f;
 
 void* operator new(size_t size, const char* tag);
-
-class Sound {
-public:
-    virtual ~Sound(void);
-
-    void Play(void) {
-        play = 1;
-        stop = 0;
-        paused = 0;
-    }
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            dirty = 1;
-            volume = v;
-        }
-    }
-
-    u8 pad4[0x8 - 0x4];
-    f32 volume;  // offset 0x8
-    u8 padC[0x49 - 0xC];
-    u8 play;    // offset 0x49
-    u8 paused;  // offset 0x4A
-    u8 stop;    // offset 0x4B
-    u8 pad4C;
-    u8 dirty;  // offset 0x4D
-};
 
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
 struct Viewport {
@@ -135,7 +110,7 @@ void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, 
                  f32 alpha, ...);
 int fn_802C6FC0(const char* name, int a, int b);
 void mrModelUnload(int model);
-Sound* fn_80207848(const char* name, int flags);
+GameSound* fn_80207848(const char* name, int flags);
 ILayout* fn_80145E70(const char* name);
 const char* fn_80131268(const char* key);
 void fn_80232928(u32 color);
@@ -278,7 +253,7 @@ public:
     }
 
     s32 index;            // offset 0x0
-    Sound* sounds[2][3];  // offset 0x4
+    GameSound* sounds[2][3];  // offset 0x4
 };
 
 extern "C" {
@@ -329,8 +304,8 @@ u8 lbl_8055D4A4;
 s32 lbl_8055D4A8;  // queued rects
 DashSoundPlayer* lbl_8055D4AC;
 ILayout* lbl_8055D4B0;
-Sound* lbl_8055D4B4;
-Sound* lbl_8055D4B8;
+GameSound* lbl_8055D4B4;
+GameSound* lbl_8055D4B8;
 gArtSet* lbl_8055D4BC;
 gArtSet* lbl_8055D4C0;
 int lbl_8055D4C4;
@@ -1540,7 +1515,7 @@ void fn_800120BC(void) {
 
 void fn_80012158(void) {
     DashSoundPlayer* p = lbl_8055D4AC;
-    Sound* s = p->sounds[0][p->index];
+    GameSound* s = p->sounds[0][p->index];
     if (s) {
         s->Play();
         if (++p->index >= 3) {
@@ -1551,7 +1526,7 @@ void fn_80012158(void) {
 
 void fn_800121A4(void) {
     DashSoundPlayer* p = lbl_8055D4AC;
-    Sound* s = p->sounds[1][p->index];
+    GameSound* s = p->sounds[1][p->index];
     if (s) {
         s->Play();
         if (++p->index >= 3) {

@@ -2,6 +2,7 @@
 // each in a fixed list of 32 entries looked up by case-insensitive name, with drawing at an anchored
 // position, text style setup and sound playback. Names are guesses apart from the tags.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/arrayref.h"
 
 void* operator new(size_t size, const char* tag);
@@ -19,47 +20,6 @@ void fn_802328D4(GTextFont* font);
 int fn_80232B70(GTextFont* font);  // font height
 f32 fn_80209028(void);      // effects volume
 }
-
-class Sound2D {
-public:
-    virtual ~Sound2D(void);
-
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            volumeDirty = 1;
-            volume = v;
-        }
-    }
-    void Stop(void) {
-        stop = 1;
-        restart = 0;
-    }
-    void Restart(void) {
-        restart = 1;
-        stop = 0;
-    }
-    void Play(void) {
-        start = 1;
-        loop = 0;
-        stop = 0;
-    }
-    void PlayLoop(void) {
-        stop = 0;
-        loop = 1;
-        start = 1;
-    }
-
-    f32 pitch;      // offset 0x4
-    f32 volume;     // offset 0x8
-    u8 pad0C[0xD];
-    u8 playing;     // offset 0x19
-    u8 pad1A[0x2F];
-    u8 start;       // offset 0x49
-    u8 stop;        // offset 0x4A
-    u8 loop;        // offset 0x4B
-    u8 restart;     // offset 0x4C
-    u8 volumeDirty; // offset 0x4D
-};
 
 extern "C" Sound2D* fn_80207848(const char* name, int flags);
 

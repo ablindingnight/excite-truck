@@ -5,6 +5,7 @@
 // done and then resets or stays finished; laps outside its active range park it. A rumble sound
 // and an on-screen text line are shared. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -65,45 +66,6 @@ struct ActVec {
     f32 x;
     f32 y;
     f32 z;
-};
-
-class Sound3D {
-public:
-    virtual ~Sound3D(void);
-
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            volumeDirty = 1;
-            volume = v;
-        }
-    }
-    void Stop(void) {
-        stop = 1;
-        restart = 0;
-    }
-    void Play(void) {
-        start = 1;
-        loop = 0;
-        stop = 0;
-    }
-    void PlayLoop(void) {
-        stop = 0;
-        loop = 1;
-        start = 1;
-    }
-
-    f32 pitch;       // offset 0x4
-    f32 volume;      // offset 0x8
-    u8 pad0C[0xD];
-    u8 playing;      // offset 0x19
-    u8 pad1A[0x2F];
-    u8 start;        // offset 0x49
-    u8 stop;         // offset 0x4A
-    u8 loop;         // offset 0x4B
-    u8 restart;      // offset 0x4C
-    u8 volumeDirty;  // offset 0x4D
-    u8 pad4E[0x1E];
-    f32 range;       // offset 0x6C
 };
 
 extern "C" Sound3D* fn_802077A4(const char* name, int cls, ActVec* vel, ActVec* pos);
@@ -271,7 +233,7 @@ void fn_801D4734(void) {
     lbl_8055E954 = 1;
     lbl_804422F0.snd = fn_802077A4("rumble.sfx", 5, &lbl_804422F0.vel, &lbl_804422F0.pos);
     if (lbl_804422F0.snd) {
-        lbl_804422F0.snd->range = 100.0f;
+        lbl_804422F0.snd->radius = 100.0f;
     }
     fn_801D5520("actseq.val");
     ValueNode* t = ((EventInfo*)GetEvent(fn_801769CC()->event))->node;
@@ -1818,7 +1780,7 @@ int SoundEffect_ASE::Load(ValueNode* t) {
         Sound3D* s = fn_802077A4(name, 5, &v, &loc);
         snd = s;
         if (s) {
-            s->range = t->GetFloat("near_distance", 50.0f);
+            s->radius = t->GetFloat("near_distance", 50.0f);
         }
     } else {
         snd = fn_80207848(name, 1);

@@ -4,6 +4,7 @@
 // the shake prompt and the white-out flash with crashlyt.val. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
@@ -12,20 +13,6 @@
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/plainvec.h"
-
-class Sound2D {
-public:
-    virtual ~Sound2D(void);
-    void Play(void) {
-        start = 1;
-        loop = 0;
-        stop = 0;
-    }
-    u8 pad4[0x45];
-    u8 start;  // offset 0x49
-    u8 stop;   // offset 0x4A
-    u8 loop;   // offset 0x4B
-};
 
 class GameUI {
 public:

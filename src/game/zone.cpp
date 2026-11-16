@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/artelemcopy.h"
@@ -79,42 +80,13 @@ extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
 extern "C" ILayout* fn_80145E70(const char* name);
 
-// A loaded sound effect; playback flags are polled by the sound system.
-class Sound {
-public:
-    virtual ~Sound(void);
-    void Play(void) {
-        play = 1;
-        b4B = 0;
-        b4A = 0;
-    }
-    void SetPitch(f32 f) {
-        if (f != pitch) {
-            pitch = f;
-            dirty = 1;
-        }
-    }
-    int Active(void) { return active; }
-
-    f32 pitch;  // offset 0x4
-    u8 pad8[0x19 - 0x8];
-    u8 active;  // offset 0x19
-    u8 pad1A[0x49 - 0x1A];
-    u8 play;   // offset 0x49
-    u8 b4A;    // offset 0x4A
-    u8 b4B;    // offset 0x4B
-    u8 b4C;    // offset 0x4C
-    u8 pad4D;
-    u8 dirty;  // offset 0x4E
-};
-
-static inline void StopSound(Sound* s) {
+static inline void StopSound(GameSound* s) {
     if (s) {
-        s->b4A = 1;
-        s->b4C = 0;
+        s->stop = 1;
+        s->restart = 0;
     }
 }
-extern "C" Sound* fn_80207848(const char* name, int flags);
+extern "C" GameSound* fn_80207848(const char* name, int flags);
 
 class TruckPath {
 public:
@@ -584,18 +556,18 @@ struct ZoneHud {
             complete2 = 0;
         }
     }
-    static void Play(Sound* it) {
+    static void Play(GameSound* it) {
         if (it) {
-            it->play = 1;
-            it->b4B = 0;
-            it->b4A = 0;
+            it->start = 1;
+            it->loop = 0;
+            it->stop = 0;
         }
     }
-    static void Show(Sound* it) {
-        if (it && !it->active) {
-            it->play = 1;
-            it->b4B = 0;
-            it->b4A = 0;
+    static void Show(GameSound* it) {
+        if (it && !it->playing) {
+            it->start = 1;
+            it->loop = 0;
+            it->stop = 0;
         }
     }
     int Update(ZoneCar* c);
@@ -643,14 +615,14 @@ struct ZoneHud {
     ArtPlayer* anim;  // offset 0xC (0x140)
     u8 noBonus;            // offset 0x10
     u8 pad11[0x3];
-    Sound* timeBonusAnim;    // offset 0x14
-    Sound* noTimeBonusAnim;  // offset 0x18
-    Sound* ringAnim;         // offset 0x1C
+    GameSound* timeBonusAnim;    // offset 0x14
+    GameSound* noTimeBonusAnim;  // offset 0x18
+    GameSound* ringAnim;         // offset 0x1C
     u8 ringShown;               // offset 0x20
     u8 pad21[0x3];
-    Sound* outro;      // offset 0x24
-    Sound* complete1;  // offset 0x28
-    Sound* complete2;  // offset 0x2C
+    GameSound* outro;      // offset 0x24
+    GameSound* complete1;  // offset 0x28
+    GameSound* complete2;  // offset 0x2C
     char score[0x14];        // offset 0x30
     char bonus[0x14];        // offset 0x44
     char bonusTitle[0x14];   // offset 0x58
@@ -1068,15 +1040,15 @@ public:
     s32 nHumans;     // offset 0x130
     ZoneHud hud;     // offset 0x134
     f32 f250;         // offset 0x250
-    Sound* prerace;   // offset 0x254
+    GameSound* prerace;   // offset 0x254
     u8 b258;          // offset 0x258
     u8 pad259[0x268 - 0x259];
     f32 volume;      // offset 0x268
     u8 b26C;         // offset 0x26C
-    Sound* fcount;   // offset 0x270
-    Sound* ringhit;  // offset 0x274
-    Sound* levelup;  // offset 0x278
-    Sound* missflag;  // offset 0x27C
+    GameSound* fcount;   // offset 0x270
+    GameSound* ringhit;  // offset 0x274
+    GameSound* levelup;  // offset 0x278
+    GameSound* missflag;  // offset 0x27C
     Glow glow;       // offset 0x280
     s32 i288;        // offset 0x288
     Gate* nextGate;  // offset 0x28C
@@ -1086,7 +1058,7 @@ public:
 };
 }
 
-static inline void LoadSound(Sound*& s, const char* name) {
+static inline void LoadSound(GameSound*& s, const char* name) {
     s = fn_80207848(name, 1);
     if (!s) {
         fn_802E317C("%s does not exist", name);
@@ -2510,10 +2482,10 @@ inline void ZoneMaster::vf0C(void) {
     if (!b258 && t < 6.75f) {
         b258 = 1;
         if (prerace && !fn_80009C84()) {
-            Sound* p = prerace;
-            p->play = 1;
-            p->b4B = 0;
-            p->b4A = 0;
+            GameSound* p = prerace;
+            p->start = 1;
+            p->loop = 0;
+            p->stop = 0;
         }
     }
     if (!vf24()) {
@@ -2619,7 +2591,7 @@ inline void ZoneMaster::vf0C(void) {
                         }
                     }
                     c->clock = Max(Boosting(fn_8017960C(i)) ? 0.5f : 0.0f, c->clock - 0.016683351f);
-                    if (!c->AddTime(-0.016683351f) && !missflag->Active()) {
+                    if (!c->AddTime(-0.016683351f) && !missflag->Playing()) {
                         missflag->Play();
                     }
                     if (!lbl_8055E1BC && NearZero(c->clock)) {

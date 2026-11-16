@@ -3,6 +3,7 @@
 // layout sets. Class and function names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/raceprog.h"
@@ -19,11 +20,6 @@ struct Truck {
     f32 heatRate;  // offset 0x25A0
 };
 
-class Sound {
-public:
-    virtual ~Sound(void);
-};
-
 
 extern "C" {
 double sin(double x);
@@ -34,7 +30,7 @@ const char* fn_80131234(const char* key);  // localize
 ILayout* fn_80145E70(const char* name);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
-Sound* fn_80207848(const char* name, int flags);
+GameSound* fn_80207848(const char* name, int flags);
 int fn_801E85A4(void);
 int fn_80204CF0(void);
 void fn_8014784C(ILayout* layout, const char* name, const char* set, int index);
@@ -67,7 +63,7 @@ static inline s32 LoadScoreTex(void) {
     return fn_802CAC28("betatex2.tex", 0);
 }
 
-static inline Sound* LoadGradeSound(void) {
+static inline GameSound* LoadGradeSound(void) {
     return fn_80207848("gradeup.sfx", 1);
 }
 
@@ -135,7 +131,7 @@ public:
     virtual void Reset(void);
 
     s32 grades[8];    // offset 0x4
-    Sound* sound;     // offset 0x24
+    GameSound* sound;     // offset 0x24
     Timer popTimer;   // offset 0x28
     Timer fadeTimer;  // offset 0x30
 };

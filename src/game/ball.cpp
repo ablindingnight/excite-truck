@@ -3,6 +3,7 @@
 // hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
@@ -175,17 +176,6 @@ public:
         stop = 1;
         f4C = 0;
     }
-};
-
-class GameSound {
-public:
-    virtual ~GameSound(void);
-};
-
-class Sound3D : public GameSound {
-public:
-    virtual ~Sound3D(void) {}
-    static void operator delete(void* p);
 };
 
 extern "C" BSound* fn_802077A4(const char* name, int prio, const RVec3* vel, const RVec3* pos);

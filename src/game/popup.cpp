@@ -4,36 +4,11 @@
 // music ducked while one is up and an instruction sound per press. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
-
-class Sound2D {
-public:
-    virtual ~Sound2D(void);
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            volumeDirty = 1;
-            volume = v;
-        }
-    }
-    void Play(void) {
-        start = 1;
-        loop = 0;
-        stop = 0;
-    }
-    f32 pitch;   // offset 0x4
-    f32 volume;  // offset 0x8
-    u8 padC[0xD];
-    u8 active;   // offset 0x19
-    u8 pad1A[0x2F];
-    u8 start;        // offset 0x49
-    u8 stop;         // offset 0x4A
-    u8 loop;         // offset 0x4B
-    u8 restart;      // offset 0x4C
-    u8 volumeDirty;  // offset 0x4D
-};
 
 class PopupDrawer {
 public:
@@ -347,7 +322,7 @@ int fn_801DF238(int key) {
                 } else {
                     fn_801DEB10();
                 }
-                if (lbl_804874A8[lbl_8055E9F4] && !lbl_804874A8[lbl_8055E9F4]->active) {
+                if (lbl_804874A8[lbl_8055E9F4] && !lbl_804874A8[lbl_8055E9F4]->playing) {
                     f32 vol = 1.0f;
                     fn_801331C4(4, "effects_volume", &vol);
                     lbl_804874A8[lbl_8055E9F4]->SetVolume(vol);

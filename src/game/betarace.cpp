@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -76,41 +77,12 @@ static inline s32 NoModel(void) { return -1; }
 struct TextElem;
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);
 
-// A loaded sound effect; playback flags are polled by the sound system.
-class Sound {
-public:
-    virtual ~Sound(void);
-    void Play(void) {
-        play = 1;
-        b4B = 0;
-        b4A = 0;
-    }
-
-    void SetVolume(f32 v) {
-        if (v != vol) {
-            volDirty = 1;
-            vol = v;
-        }
-    }
-
-    f32 pitch;  // offset 0x4
-    f32 vol;    // offset 0x8
-    u8 padC[0x19 - 0xC];
-    u8 active;  // offset 0x19
-    u8 pad1A[0x49 - 0x1A];
-    u8 play;  // offset 0x49
-    u8 b4A;   // offset 0x4A
-    u8 b4B;   // offset 0x4B
-    u8 b4C;   // offset 0x4C
-    u8 volDirty;  // offset 0x4D
-};
-
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void StopSound(Sound* s) {
+static inline void StopSound(GameSound* s) {
     if (s) {
-        s->b4A = 1;
-        s->b4C = 0;
+        s->stop = 1;
+        s->restart = 0;
     }
 }
 
@@ -693,9 +665,9 @@ public:
     f32 bonusStart;         // offset 0x4
     ArtPlayer* anim;       // offset 0x8
     u8 go;                  // offset 0xC
-    Sound* bonusSnd;        // offset 0x10
-    Sound* noBonusSnd;      // offset 0x14
-    Sound* transitionSnd;   // offset 0x18
+    GameSound* bonusSnd;        // offset 0x10
+    GameSound* noBonusSnd;      // offset 0x14
+    GameSound* transitionSnd;   // offset 0x18
     s32 animArg;            // offset 0x1C
     s32 signal[3];          // offset 0x20
     FixedStr<0x14> place;   // offset 0x2C
@@ -906,8 +878,8 @@ public:
     StuntQueue free;       // offset 0x1244
     StuntQueue pending;    // offset 0x124C
     StuntEvent* current;   // offset 0x1254
-    Sound* bonusSnd;       // offset 0x1258
-    Sound* bigSnd;         // offset 0x125C
+    GameSound* bonusSnd;       // offset 0x1258
+    GameSound* bigSnd;         // offset 0x125C
     u8 played;             // offset 0x1260
     u8 pad1261[0x1268 - 0x1261];
     s32 racer;             // offset 0x1268
@@ -1208,8 +1180,8 @@ public:
     u8 bA9;              // offset 0xA9
     u8 bAA;              // offset 0xAA
     u8 bAB;              // offset 0xAB
-    Sound* starSnd;      // offset 0xAC
-    Sound* fullSnd;      // offset 0xB0
+    GameSound* starSnd;      // offset 0xAC
+    GameSound* fullSnd;      // offset 0xB0
     s32 tex[3];          // offset 0xB4
 };
 
@@ -1221,7 +1193,7 @@ struct Settings {
 
 extern "C" {
 f32 fn_80204CFC(const char* name);  // tuning value
-Sound* fn_80207848(const char* name, int flags);
+GameSound* fn_80207848(const char* name, int flags);
 }  // extern "C"
 Settings* fn_8000AC38(void);
 extern "C" {
@@ -1262,8 +1234,8 @@ struct RaceTimer {
     f32 limit;          // offset 0x8
     f32 limit0;         // offset 0xC
     u8 b10;             // offset 0x10
-    Sound* tick;        // offset 0x14
-    Sound* timeout;     // offset 0x18
+    GameSound* tick;        // offset 0x14
+    GameSound* timeout;     // offset 0x18
     u8 b1C;             // offset 0x1C
 
     int Finishing(void) const { return limit - now < finishTimeout; }
@@ -1369,9 +1341,9 @@ public:
     FixedList<Puddle*, 0x40> puddles;  // offset 0x220
     FixedList<Token*, 0x20> bumps;   // offset 0x32C
     FixedList<Token*, 0x20> bumps2;  // offset 0x3B8
-    Sound* coinSnd;                  // offset 0x444
-    Sound* starSnd;                  // offset 0x448
-    Sound* preraceSnd;               // offset 0x44C
+    GameSound* coinSnd;                  // offset 0x444
+    GameSound* starSnd;                  // offset 0x448
+    GameSound* preraceSnd;               // offset 0x44C
     u8 b450;                         // offset 0x450
     FinishAnimation anims[2];        // offset 0x454
     RaceTimer timer;                 // offset 0x8D4
@@ -1966,10 +1938,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         }
     }
     {
-        Sound* snd = fullSnd;
+        GameSound* snd = fullSnd;
         if (snd) {
-            snd->b4A = 1;
-            snd->b4C = 0;
+            snd->stop = 1;
+            snd->restart = 0;
         }
     }
     rc = fn_8017960C(id);
@@ -2065,11 +2037,11 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             }
             if (got) {
                 if (e->big) {
-                    Sound* snd = starSnd;
+                    GameSound* snd = starSnd;
                     if (snd) {
-                        snd->play = 1;
-                        snd->b4B = 0;
-                        snd->b4A = 0;
+                        snd->start = 1;
+                        snd->loop = 0;
+                        snd->stop = 0;
                     }
                 }
                 lastPos.x = e->pos[0];
@@ -3490,11 +3462,11 @@ inline void BetaMaster::vf0C(void) {
                 timer.timeout->Play();
                 timer.b1C = 1;
             }
-        } else if (timer.tick && timer.Finishing() && !timer.tick->active) {
-            Sound* tick = timer.tick;
-            tick->b4A = 0;
-            tick->b4B = 1;
-            tick->play = 1;
+        } else if (timer.tick && timer.Finishing() && !timer.tick->playing) {
+            GameSound* tick = timer.tick;
+            tick->stop = 0;
+            tick->loop = 1;
+            tick->start = 1;
         }
     }
     if (found) {
@@ -4197,7 +4169,7 @@ extern "C" int fn_80161BB8(void);
 extern "C" {
 // Where a car's sound plays: shared mix (0) or routed to that player's own output (2); sound.cpp tests it as a flag.
 enum SoundRoute { SOUND_ROUTE_MIX = 0, SOUND_ROUTE_PLAYER = 2 };
-void fn_80206750(Sound* s, int car, SoundRoute route);
+void fn_80206750(GameSound* s, int car, SoundRoute route);
 void fn_8018A120(RaceCarRec* rc);
 }
 
@@ -4337,7 +4309,7 @@ inline void BetaMaster::a2(void) {
 }
 
 extern "C" {
-Sound* fn_802076A0(const char* name, int flags, int car, int pan);  // 3D sound
+GameSound* fn_802076A0(const char* name, int flags, int car, int pan);  // 3D sound
 void fn_801332D0(void* prefs, const char* key, const char** out);
 char* strncpy(char* d, const char* s, size_t n);
 Meter* fn_801572A4(CarHud* hud, int car, f32* hispeed);

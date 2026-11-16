@@ -4,6 +4,7 @@
 // packer and the sound stop helper. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/vpos.h"
 #include "game/camframe34.h"
 #include "game/math_types.h"
@@ -169,16 +170,9 @@ f32 fn_80144BD8(f32 x) {
     return x * (x * -2.0f * x) - x * 3.0f * x;
 }
 
-struct Sound {
-    u8 pad0[0x4A];
-    u8 b4A;  // offset 0x4A
-    u8 pad4B;
-    u8 b4C;  // offset 0x4C
-};
-
-void fn_80144C54(Sound* s) {
-    s->b4A = 1;
-    s->b4C = 0;
+void fn_80144C54(GameSound* s) {
+    s->stop = 1;
+    s->restart = 0;
 }
 
 u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a) { return (r << 24) | (g << 16) | (b << 8) | a; }

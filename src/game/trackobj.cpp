@@ -4,6 +4,7 @@
 // object lists with their collision volumes, animated and sound objects, and drawing. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
@@ -174,27 +175,6 @@ struct AnimInst {
     s32 state;          // offset 0x60
     const char* name;   // offset 0x64
     AnimInst* next;     // offset 0x68
-};
-
-class Sound3D {
-public:
-    virtual ~Sound3D(void);
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            dirty = 1;
-            volume = v;
-        }
-    }
-    u8 pad4[4];
-    f32 volume;      // offset 0x8
-    u8 padC[0x49 - 0xC];
-    u8 f49;          // offset 0x49
-    u8 f4A;          // offset 0x4A
-    u8 f4B;          // offset 0x4B
-    u8 f4C;          // offset 0x4C
-    u8 dirty;        // offset 0x4D
-    u8 pad4E[0x6C - 0x4E];
-    f32 nearDist;    // offset 0x6C
 };
 
 // A placed sound (0x18).
@@ -1387,12 +1367,12 @@ void fn_801FA2C4(void) {
         snd = s->snd;
         if (snd) {
             if (s->tag == lbl_8055EC40.view) {
-                snd->f4A = 0;
-                snd->f4B = 1;
-                snd->f49 = 1;
+                snd->stop = 0;
+                snd->loop = 1;
+                snd->start = 1;
             } else {
-                snd->f4A = 1;
-                snd->f4C = 0;
+                snd->stop = 1;
+                snd->restart = 0;
             }
         }
     }
@@ -1935,7 +1915,7 @@ inline EWSound::EWSound(const PlacedObj* o) : pos(o->frame.pos) {
     snd = fn_802077A4(name, 8, &lbl_80488898, &pos);
     if (snd) {
         snd->SetVolume(vol);
-        snd->nearDist = node->GetFloat("near_distance", snd->nearDist);
+        snd->radius = node->GetFloat("near_distance", snd->radius);
     }
     tag = lbl_8055EC40.cur;
 }

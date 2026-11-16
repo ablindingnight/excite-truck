@@ -3,6 +3,7 @@
 // thresholds in stunts.val / stuntdef.val, award points and drive the HUD's stunt pop-up. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
@@ -11,48 +12,6 @@
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
 extern RaceCarRec* lbl_804348E8[];
-
-class Sound {
-public:
-    virtual ~Sound(void);
-    void SetPitch(f32 v) {
-        if (v != pitch) {
-            pitchDirty = 1;
-            pitch = v;
-        }
-    }
-    void SetVolume(f32 v) {
-        if (v != vol) {
-            volDirty = 1;
-            vol = v;
-        }
-    }
-    void Stop(void) {
-        b4A = 1;
-        b4C = 0;
-    }
-    void Play(void) {
-        play = 1;
-        b4B = 0;
-        b4A = 0;
-    }
-    void Loop(void) {
-        b4A = 0;
-        b4B = 1;
-        play = 1;
-    }
-    f32 pitch;  // offset 0x4
-    f32 vol;    // offset 0x8
-    u8 padC[0x19 - 0xC];
-    u8 b19;         // offset 0x19
-    u8 pad1A[0x49 - 0x1A];
-    u8 play;        // offset 0x49
-    u8 b4A;         // offset 0x4A
-    u8 b4B;         // offset 0x4B
-    u8 b4C;         // offset 0x4C
-    u8 volDirty;    // offset 0x4D
-    u8 pitchDirty;  // offset 0x4E
-};
 
 // The HUD's stunt pop-up (StuntEvent in betarace) and a results line share these slots.
 class StuntText {
@@ -95,7 +54,7 @@ ValueTable* fn_80131810(const char* name);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 const char* fn_80131234(const char* key);  // localize
-Sound* fn_802076A0(const char* name, int flags, int car, int pan);
+GameSound* fn_802076A0(const char* name, int flags, int car, int pan);
 f32 fn_80204CFC(const char* name);  // tuning value
 char* fn_8023139C(char* buf, int size, u32 value);  // format a score
 void fn_801CB6E4(u32 type, int car, long v);  // stop a rumble effect (awards.cpp)
@@ -687,23 +646,23 @@ struct RaceCarVec {
 };
 
 
-inline void StopSound(Sound* s) {
+inline void StopSound(GameSound* s) {
     if (s) {
-        s->b4A = 1;
-        s->b4C = 0;
+        s->stop = 1;
+        s->restart = 0;
     }
 }
 
-inline void PlaySound(Sound* s) {
-    s->play = 1;
-    s->b4B = 0;
-    s->b4A = 0;
+inline void PlaySound(GameSound* s) {
+    s->start = 1;
+    s->loop = 0;
+    s->stop = 0;
 }
 
-inline void LoopSound(Sound* s) {
-    s->b4A = 0;
-    s->b4B = 1;
-    s->play = 1;
+inline void LoopSound(GameSound* s) {
+    s->stop = 0;
+    s->loop = 1;
+    s->start = 1;
 }
 
 // Drift time; plays the skid sound while sliding fast enough sideways.
@@ -782,7 +741,7 @@ public:
 
     f32 ground;  // offset 0x270
     u8 sliding;  // offset 0x274
-    Sound* snd;  // offset 0x278
+    GameSound* snd;  // offset 0x278
 };
 }  // namespace
 
@@ -953,7 +912,7 @@ public:
     u8 b2D0;                 // offset 0x2D0
     u8 turbo;                // offset 0x2D1
     f32 turboTime;           // offset 0x2D4
-    Sound* snd;              // offset 0x2D8
+    GameSound* snd;              // offset 0x2D8
 };
 }  // namespace
 
@@ -1109,7 +1068,7 @@ f32 fn_801E7E24(void);
 }  // extern "C"
 int fn_80009C84(void);
 extern "C" {
-void fn_80206750(Sound* s, int car, int pan);
+void fn_80206750(GameSound* s, int car, int pan);
 }
 
 inline s32 Round(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
@@ -1495,7 +1454,7 @@ public:
     s32 pending;  // offset 0x26C
     s32 queued;   // offset 0x270
     s32 car2;     // offset 0x274
-    Sound* snd;   // offset 0x278
+    GameSound* snd;   // offset 0x278
 };
 }  // namespace
 
@@ -1756,7 +1715,7 @@ inline f32 RingTracker::Rate(const RaceCarRec* rc) {
         }
     }
     pending = 0;
-    if (play && !snd->b19) {
+    if (play && !snd->playing) {
         queued--;
         PlaySound(snd);
     }
@@ -1812,7 +1771,7 @@ struct CountSound {
     void Update(void) {
         if (s0) {
             if (on == 0) {
-                s0->Loop();
+                s0->PlayLoop();
             } else {
                 if (s1 && wasOn == 0) {
                     s1->Play();
@@ -1823,8 +1782,8 @@ struct CountSound {
         wasOn = on;
         on = 1;
     }
-    Sound* s0;  // offset 0x0
-    Sound* s1;  // offset 0x4
+    GameSound* s0;  // offset 0x0
+    GameSound* s1;  // offset 0x4
     s32 on;     // offset 0x8
     s32 wasOn;  // offset 0xC
 };

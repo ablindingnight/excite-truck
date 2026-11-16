@@ -3,6 +3,7 @@
 // popup, the "%s/%s" progress counters and the list descriptors behind it. Written against raw field
 // offsets; the large screen routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menustate.h"
@@ -298,22 +299,6 @@ public:
     virtual ChalLevel* GetLevel(int i);  // 0x10
 };
 
-class Sound {
-public:
-    virtual ~Sound(void);
-    void SetVolume(f32 v) {
-        if (v != vol) {
-            volDirty = 1;
-            vol = v;
-        }
-    }
-
-    f32 pitch;  // offset 0x4
-    f32 vol;    // offset 0x8
-    u8 padC[0x4D - 0xC];
-    u8 volDirty;  // offset 0x4D
-};
-
 struct PathScreenBuf;
 extern "C" void fn_80261C68(PathScreenBuf* s);
 
@@ -393,7 +378,7 @@ struct PathScreenBuf {
     s32 numEvents;       // offset 0x8
     s32 numLevels;       // offset 0xC
     s32 arg;             // offset 0x10
-    Sound* sound;        // offset 0x14: "a_levelup.sfx"
+    GameSound* sound;        // offset 0x14: "a_levelup.sfx"
     NodeVec6 events;     // offset 0x18
     NodeVec3 levels;     // offset 0x3C
     ChalLevel* lvObjs[3];  // offset 0x54
@@ -443,7 +428,7 @@ extern "C" {
 void* memset(void* d, int c, u32 n);
 u8* fn_8023512C(const char* art);
 u8* fn_80232578(const char* name);
-Sound* fn_80207848(const char* name, int flags);
+GameSound* fn_80207848(const char* name, int flags);
 }
 
 // Shows the event nodes of the selected difficulty (or all dimmed while picking a difficulty).

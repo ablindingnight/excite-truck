@@ -2,41 +2,10 @@
 // confirmation dialog and the "missing controller" popup, drawn from esclyt.val. "escape:" in its
 // debug message suggests escape.cpp; function names are guesses.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/gart.h"
-
-class GameSound {
-public:
-    virtual ~GameSound(void);
-};
-
-// The pause menu's 2D sounds (Sound2D, sound.cpp); escape is the first unit to emit the weak inline dtor.
-class Sound2D : public GameSound {
-public:
-    virtual ~Sound2D(void) {}
-
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            dirty = 1;
-            volume = v;
-        }
-    }
-    void Play(void) {
-        play = 1;
-        stop = 0;
-        paused = 0;
-    }
-
-    u8 pad4[0x8 - 0x4];
-    f32 volume;  // offset 0x8
-    u8 padC[0x49 - 0xC];
-    u8 play;    // offset 0x49
-    u8 paused;  // offset 0x4A
-    u8 stop;    // offset 0x4B
-    u8 pad4C;
-    u8 dirty;  // offset 0x4D
-};
 
 struct Camera {
     u8 data[0x30];

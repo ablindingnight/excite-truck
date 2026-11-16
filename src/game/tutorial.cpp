@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/idealline.h"
@@ -174,20 +175,6 @@ struct TCar {
     TVec3 v118;  // offset 0x118
 };
 
-class Sound {
-public:
-    virtual ~Sound(void);
-    void Play(void) {
-        play = 1;
-        b4B = 0;
-        b4A = 0;
-    }
-    u8 pad4[0x49 - 0x4];
-    u8 play;  // offset 0x49
-    u8 b4A;   // offset 0x4A
-    u8 b4B;   // offset 0x4B
-};
-
 class Arena {
 public:
     virtual ~Arena(void);  // the current GameMode: slot 0 is its destructor
@@ -276,7 +263,7 @@ void fn_801475D0(ILayout* l, const char* elem, const char* fmt, ...);
 const char* fn_80131234(const char* key);  // localize
 s32 fn_802C6FC0(const char* name, int a, int b);
 void fn_802C77F0(s32 model, f32* box);
-Sound* fn_80207848(const char* name, int flags);
+GameSound* fn_80207848(const char* name, int flags);
 int sscanf(const char* s, const char* fmt, ...);
 TPath* fn_801399FC(ValueNode* n);
 double sqrt(double x);
@@ -573,7 +560,7 @@ public:
     s32 tex;         // offset 0xD0
     u32 color;       // offset 0xD4
     u8 pillars;      // offset 0xD8
-    Sound* snd;      // offset 0xDC
+    GameSound* snd;      // offset 0xDC
     FixedArr<Token, 16> tokens;  // offset 0xE0
 };
 
