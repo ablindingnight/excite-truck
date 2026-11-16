@@ -58,27 +58,18 @@ void fn_801FFB70(void) {}
 
 }  // extern "C"
 
-// A plain vector (copyable aggregate) and a rotation + position matrix.
-struct DVec3 {
-    f32 x, y, z;
-};
-
-struct DMtx {
-    DVec3 row[3];  // offset 0x0
-    DVec3 pos;     // offset 0x24
-};
-
+// DMtx: common.h's PlainValMatrix (DVec3: valvec3.h's ValVec3).
 // One posed skeleton bone (fn_801E5998 output, 0x38 bytes).
 struct DBone {
-    DMtx m;        // offset 0x0
+    PlainValMatrix m;        // offset 0x0
     u8 pad30[0x8];
 };
 
 // Particle-system descriptors (ppsys.cpp).
 struct DVertDesc {
     DVertDesc(void) {}
-    DVertDesc(const DVec3& p, f32 a, f32 b) : pos(p), w34(a), w30(b) {}
-    DVec3 pos;  // offset 0x0
+    DVertDesc(const ValVec3& p, f32 a, f32 b) : pos(p), w34(a), w30(b) {}
+    ValVec3 pos;  // offset 0x0
     f32 w34;    // offset 0xC
     f32 w30;    // offset 0x10
 };
@@ -92,8 +83,8 @@ struct DEdgeDesc {
 
 struct DPinDesc {
     s32 idx;           // offset 0x0
-    const DMtx* mtx;   // offset 0x4
-    const DVec3* at;   // offset 0x8
+    const PlainValMatrix* mtx;   // offset 0x4
+    const ValVec3* at;   // offset 0x8
 };
 
 // The driver model: its ragdoll, model, skeleton and the bike helpers it hangs from.
@@ -102,16 +93,16 @@ struct DriverModel {
     u8 active;       // offset 0x4
     s32 model;       // offset 0x8
     u8* skel;        // offset 0xC
-    DVec3 butt;      // offset 0x10, seat offset from the root bone
+    ValVec3 butt;      // offset 0x10, seat offset from the root bone
     u8* wheel;       // offset 0x1C
     u8* lhand;       // offset 0x20
     u8* rhand;       // offset 0x24
     u8* hand;        // offset 0x28
     u8 pad2C[0x4];
     f32 yaw;         // offset 0x30
-    DMtx body;       // offset 0x34
-    DMtx wheelMtx;   // offset 0x64
-    DMtx rest;       // offset 0x94
+    PlainValMatrix body;       // offset 0x34
+    PlainValMatrix wheelMtx;   // offset 0x64
+    PlainValMatrix rest;       // offset 0x94
     f32 fC4;         // offset 0xC4
     f32 fC8;         // offset 0xC8
     f32 fCC;         // offset 0xCC
@@ -126,8 +117,8 @@ u8* fn_801E31D8(u8* node, const char* name, int a);
 s32 fn_802C6FC0(const char* name, int a, int b);
 u8* fn_801E592C(s32 model);
 void fn_801E5998(u8* skel, DBone* out, int* n);
-void fn_801E3488(DVec3* out, u8* helper);
-void fn_801E33E4(DMtx* out, u8* helper);
+void fn_801E3488(ValVec3* out, u8* helper);
+void fn_801E33E4(PlainValMatrix* out, u8* helper);
 void fn_802E317C(const char* fmt, ...);
 u8* fn_801C1BA4(int nPart, int nStick, int nAnchor);
 void fn_801C1CBC(u8* sys, int nv, const DVertDesc* v, int ne, const DEdgeDesc* e, int np, const DPinDesc* p);
@@ -136,23 +127,23 @@ void* operator new(size_t size, const char* name);
 
 // out = in * m (row vector), safe when out aliases in.
 /* Helper name unproven */ static inline f32 RowDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-static inline void MulVec(DVec3* out, const DVec3* in, const DMtx* m) {
+static inline void MulVec(ValVec3* out, const ValVec3* in, const PlainValMatrix* m) {
     if (out == in) {
-        f32 x = RowDot3(in->x, m->row[0].x, in->y, m->row[1].x, in->z, m->row[2].x);
-        f32 y = RowDot3(in->x, m->row[0].y, in->y, m->row[1].y, in->z, m->row[2].y);
-        f32 z = RowDot3(in->x, m->row[0].z, in->y, m->row[1].z, in->z, m->row[2].z);
+        f32 x = RowDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        f32 y = RowDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        f32 z = RowDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = RowDot3(in->x, m->row[0].x, in->y, m->row[1].x, in->z, m->row[2].x);
-        out->y = RowDot3(in->x, m->row[0].y, in->y, m->row[1].y, in->z, m->row[2].y);
-        out->z = RowDot3(in->x, m->row[0].z, in->y, m->row[1].z, in->z, m->row[2].z);
+        out->x = RowDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        out->y = RowDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        out->z = RowDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
     }
 }
 
-static inline DVec3 Mid(const DVec3& a, const DVec3& b) {
-    DVec3 r;
+static inline ValVec3 Mid(const ValVec3& a, const ValVec3& b) {
+    ValVec3 r;
     r.x = a.x + 0.5f * (b.x - a.x);
     r.y = a.y + (b.y - a.y) / 2.0f;
     r.z = a.z + 0.5f * (b.z - a.z);
@@ -164,7 +155,7 @@ extern "C" {
 // Builds the driver model on skeleton skel: finds the wheel/hand helpers, poses the model and turns its hips,
 // knees and feet (relative to the seat) into a 7-point ragdoll pinned to the bike.
 // Helper names unproven: vector operations written as inlines, as the target evaluates them.
-static inline void CopyD(DVec3* o, const DVec3* v) {
+static inline void CopyD(ValVec3* o, const ValVec3* v) {
     o->x = v->x;
     o->y = v->y;
     o->z = v->z;
@@ -184,15 +175,15 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->hand = fn_801E3004(skel, "hand", -1);
     d->model = fn_802C6FC0("driver01.mod", 0, 0);
     d->skel = fn_801E592C(d->model);
-    DVec3 lh;
+    ValVec3 lh;
     fn_801E3488(&lh, d->lhand);
-    DVec3 lfoot;
+    ValVec3 lfoot;
     lfoot.x = lh.x;
     lfoot.y = lh.y;
     lfoot.z = lh.z;
-    DVec3 rh;
+    ValVec3 rh;
     fn_801E3488(&rh, d->rhand);
-    DVec3 rfoot;
+    ValVec3 rfoot;
     rfoot.x = rh.x;
     rfoot.y = rh.y;
     rfoot.z = rh.z;
@@ -203,63 +194,63 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     if (!fn_801E2CCC(skel, "butt", &butt)) {
         fn_802E317C("drivmod: can't get butt helper from %s", name);
     }
-    CopyD(&d->butt, &((DMtx*)butt)->pos);
-    d->yaw = atan2(((DMtx*)butt)->row[1].z, ((DMtx*)butt)->row[1].y);
-    d->butt.x = d->butt.x - bones[0].m.pos.x;
-    d->butt.y = d->butt.y - bones[0].m.pos.y;
-    d->butt.z = d->butt.z - bones[0].m.pos.z;
-    DVec3 lhip;
-    lhip.x = bones[7].m.pos.x + d->butt.x;
-    lhip.y = bones[7].m.pos.y + d->butt.y;
-    lhip.z = bones[7].m.pos.z + d->butt.z;
-    DVec3 lknee;
-    lknee.x = bones[8].m.pos.x + d->butt.x;
-    lknee.y = bones[8].m.pos.y + d->butt.y;
-    lknee.z = bones[8].m.pos.z + d->butt.z;
-    DVec3 rhip;
-    rhip.x = bones[4].m.pos.x + d->butt.x;
-    rhip.y = bones[4].m.pos.y + d->butt.y;
-    rhip.z = bones[4].m.pos.z + d->butt.z;
-    DVec3 rknee;
-    rknee.x = bones[5].m.pos.x + d->butt.x;
-    rknee.y = bones[5].m.pos.y + d->butt.y;
-    rknee.z = bones[5].m.pos.z + d->butt.z;
-    lfoot = bones[9].m.pos;
-    DVec3 pelvis;
-    DVec3 m1;
+    CopyD(&d->butt, &((PlainValMatrix*)butt)->origin);
+    d->yaw = atan2(((PlainValMatrix*)butt)->basis[1].z, ((PlainValMatrix*)butt)->basis[1].y);
+    d->butt.x = d->butt.x - bones[0].m.origin.x;
+    d->butt.y = d->butt.y - bones[0].m.origin.y;
+    d->butt.z = d->butt.z - bones[0].m.origin.z;
+    ValVec3 lhip;
+    lhip.x = bones[7].m.origin.x + d->butt.x;
+    lhip.y = bones[7].m.origin.y + d->butt.y;
+    lhip.z = bones[7].m.origin.z + d->butt.z;
+    ValVec3 lknee;
+    lknee.x = bones[8].m.origin.x + d->butt.x;
+    lknee.y = bones[8].m.origin.y + d->butt.y;
+    lknee.z = bones[8].m.origin.z + d->butt.z;
+    ValVec3 rhip;
+    rhip.x = bones[4].m.origin.x + d->butt.x;
+    rhip.y = bones[4].m.origin.y + d->butt.y;
+    rhip.z = bones[4].m.origin.z + d->butt.z;
+    ValVec3 rknee;
+    rknee.x = bones[5].m.origin.x + d->butt.x;
+    rknee.y = bones[5].m.origin.y + d->butt.y;
+    rknee.z = bones[5].m.origin.z + d->butt.z;
+    lfoot = bones[9].m.origin;
+    ValVec3 pelvis;
+    ValVec3 m1;
     m1.x = lfoot.x + 0.5f * (lknee.x - lfoot.x);
     m1.y = lfoot.y + 0.5f * (lknee.y - lfoot.y);
     m1.z = lfoot.z + 0.5f * (lknee.z - lfoot.z);
     lfoot.x = m1.x;
     lfoot.y = m1.y;
     lfoot.z = m1.z;
-    DVec3 m2;
-    m2.x = bones[6].m.pos.x + 0.5f * (rknee.x - bones[6].m.pos.x);
-    m2.y = bones[6].m.pos.y + 0.5f * (rknee.y - bones[6].m.pos.y);
-    m2.z = bones[6].m.pos.z + 0.5f * (rknee.z - bones[6].m.pos.z);
+    ValVec3 m2;
+    m2.x = bones[6].m.origin.x + 0.5f * (rknee.x - bones[6].m.origin.x);
+    m2.y = bones[6].m.origin.y + 0.5f * (rknee.y - bones[6].m.origin.y);
+    m2.z = bones[6].m.origin.z + 0.5f * (rknee.z - bones[6].m.origin.z);
     rfoot.x = m2.x;
     rfoot.y = m2.y;
     rfoot.z = m2.z;
     pelvis.x = lhip.x * 0.5f + rhip.x * 0.5f;
     pelvis.y = lhip.y * 0.5f + rhip.y * 0.5f - 1.27f;
     pelvis.z = lhip.z * 0.5f + rhip.z * 0.5f;
-    d->body.row[0].x = 1.0f;
-    d->body.row[0].y = 0.0f;
-    d->body.row[1].x = 0.0f;
-    d->body.row[0].z = 0.0f;
-    d->body.row[1].z = 0.0f;
-    d->body.row[1].y = 1.0f;
-    d->body.row[2].z = 1.0f;
-    d->body.pos.x = 0.0f;
-    d->body.row[2].x = 0.0f;
-    d->body.row[2].y = 0.0f;
-    d->body.pos.y = 0.0f;
-    d->body.pos.z = 0.0f;
-    DVec3 off;
+    d->body.basis[0].x = 1.0f;
+    d->body.basis[0].y = 0.0f;
+    d->body.basis[1].x = 0.0f;
+    d->body.basis[0].z = 0.0f;
+    d->body.basis[1].z = 0.0f;
+    d->body.basis[1].y = 1.0f;
+    d->body.basis[2].z = 1.0f;
+    d->body.origin.x = 0.0f;
+    d->body.basis[2].x = 0.0f;
+    d->body.basis[2].y = 0.0f;
+    d->body.origin.y = 0.0f;
+    d->body.origin.z = 0.0f;
+    ValVec3 off;
     MulVec(&off, &d->butt, &d->body);
-    d->body.pos.x = d->body.pos.x + off.x;
-    d->body.pos.y = d->body.pos.y + off.y;
-    d->body.pos.z = d->body.pos.z + off.z;
+    d->body.origin.x = d->body.origin.x + off.x;
+    d->body.origin.y = d->body.origin.y + off.y;
+    d->body.origin.z = d->body.origin.z + off.z;
     d->rest = d->body;
     fn_801E33E4(&d->wheelMtx, d->wheel);
     DVertDesc verts[7] = {
@@ -305,22 +296,22 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     d->hand = fn_801E3004(skel, "hand", -1);
     d->model = fn_802C6FC0("driver01.mod", 0, 0);
     d->skel = fn_801E592C(d->model);
-    DVec3 ls = *(DVec3*)fn_801FFB08(skel, "lshoulder");
-    DVec3 lh;
+    ValVec3 ls = *(ValVec3*)fn_801FFB08(skel, "lshoulder");
+    ValVec3 lh;
     fn_801E3488(&lh, d->lhand);
-    DVec3 lmid;
+    ValVec3 lmid;
     lmid.x = 0.5f * lh.x + 0.5f * ls.x;
     lmid.y = lh.y / 2.0f + 0.5f * ls.y - 0.2032f;
     lmid.z = 0.5f * lh.z + 0.5f * ls.z;
-    DVec3 rs = *(DVec3*)fn_801FFB08(skel, "rshoulder");
-    DVec3 rh;
+    ValVec3 rs = *(ValVec3*)fn_801FFB08(skel, "rshoulder");
+    ValVec3 rh;
     fn_801E3488(&rh, d->rhand);
-    DVec3 rmid;
+    ValVec3 rmid;
     f32 xv = rs.x;
     rmid.x = 0.5f * rh.x + 0.5f * xv;
     rmid.y = rh.y / 2.0f + 0.5f * rs.y - 0.2032f;
     rmid.z = rh.z / 2.0f + 0.5f * rs.z;
-    DVec3 chest;
+    ValVec3 chest;
     chest.x = 0.5f * ls.x + 0.5f * rs.x;
     chest.y = 0.5f * ls.y + 0.5f * rs.y - 1.27f;
     f32 zv = ls.z;
@@ -328,27 +319,27 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     DBone bones[32];
     int n = 32;
     fn_801E5998(d->skel, bones, &n);
-    d->butt.x = rs.x - bones[4].m.pos.x;
-    d->butt.y = rs.y - bones[4].m.pos.y;
-    d->butt.z = rs.z - bones[4].m.pos.z;
+    d->butt.x = rs.x - bones[4].m.origin.x;
+    d->butt.y = rs.y - bones[4].m.origin.y;
+    d->butt.z = rs.z - bones[4].m.origin.z;
     d->butt.y += 0.0762f;
-    d->body.row[0].x = 1.0f;
-    d->body.row[0].y = 0.0f;
-    d->body.row[0].z = 0.0f;
-    d->body.row[1].x = 0.0f;
-    d->body.row[1].y = 1.0f;
-    d->body.row[1].z = 0.0f;
-    d->body.row[2].x = 0.0f;
-    d->body.row[2].y = 0.0f;
-    d->body.row[2].z = 1.0f;
-    d->body.pos.x = 0.0f;
-    d->body.pos.y = 0.0f;
-    d->body.pos.z = 0.0f;
-    DVec3 off;
+    d->body.basis[0].x = 1.0f;
+    d->body.basis[0].y = 0.0f;
+    d->body.basis[0].z = 0.0f;
+    d->body.basis[1].x = 0.0f;
+    d->body.basis[1].y = 1.0f;
+    d->body.basis[1].z = 0.0f;
+    d->body.basis[2].x = 0.0f;
+    d->body.basis[2].y = 0.0f;
+    d->body.basis[2].z = 1.0f;
+    d->body.origin.x = 0.0f;
+    d->body.origin.y = 0.0f;
+    d->body.origin.z = 0.0f;
+    ValVec3 off;
     MulVec(&off, &d->butt, &d->body);
-    d->body.pos.x = d->body.pos.x + off.x;
-    d->body.pos.y = d->body.pos.y + off.y;
-    d->body.pos.z = d->body.pos.z + off.z;
+    d->body.origin.x = d->body.origin.x + off.x;
+    d->body.origin.y = d->body.origin.y + off.y;
+    d->body.origin.z = d->body.origin.z + off.z;
     d->rest = d->body;
     fn_801E33E4(&d->wheelMtx, d->wheel);
     DVertDesc verts[7] = {
@@ -567,11 +558,11 @@ extern const f32 lbl_80563064;  // 0.0762 (3 in)
 extern "C" {
 extern const RiderLinks lbl_802F9D00;
 void fn_801E353C(u8* helper, f32 angle);
-void fn_801E34E4(u8* helper, DMtx* m);
-void fn_801E3284(DMtx* out, u8* helper, const DMtx* frame);
+void fn_801E34E4(u8* helper, PlainValMatrix* m);
+void fn_801E3284(PlainValMatrix* out, u8* helper, const PlainValMatrix* frame);
 void fn_801C2694(u8* sys, BVec* pts, int* n, const BVec* g, const BVec* up, const BVec* a, const BVec* b);
 s32 fn_801E65BC(u8* skel, BonePose* bones, int n, int x);
-void fn_802C70AC(s32 model, const DMtx* m, s32 a, int b);
+void fn_802C70AC(s32 model, const PlainValMatrix* m, s32 a, int b);
 
 // Per-frame rider update for car state `car`: steering lean, seat frame, the body twist from yaw and roll,
 // the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
@@ -580,13 +571,13 @@ static inline double AbsDbl(double v) { return __fabs(v); }
 
 static inline f32 Sq_hm(f32 v) { return v * v; }  /* Helper name unproven */
 void fn_80201018(DriverModel* d, const u8* car, int show) {
-    DVec3 off2;
+    ValVec3 off2;
     DBone bones[32];
     BVec pts[32];
     RiderLinks links;
-    DMtx m;
+    PlainValMatrix m;
     BRot rot;
-    DMtx m2;
+    PlainValMatrix m2;
     BRot tilt;
     BRot turn;
     BVec v;
@@ -596,14 +587,14 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     BVec a;
     BVec e1;
     BVec e2;
-    DVec3 off;
+    ValVec3 off;
     BonePose pose[32];
     int cnt;
     int n;
     if (!show || !d) {
         return;
     }
-    m = *(DMtx*)car;
+    m = *(PlainValMatrix*)car;
     f32 oldx = d->fC8;
     f32 oldy = d->fCC;
     d->fC8 = 0.0f;
@@ -658,9 +649,9 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     d->body = m;
     MulVec(&off, &d->butt, &d->body);
     f32 x2 = off.x;
-    d->body.pos.x = x2 + d->body.pos.x;
-    d->body.pos.y = d->body.pos.y + off.y;
-    d->body.pos.z = d->body.pos.z + off.z;
+    d->body.origin.x = x2 + d->body.origin.x;
+    d->body.origin.y = d->body.origin.y + off.y;
+    d->body.origin.z = d->body.origin.z + off.z;
     f32 roll = -F32(car, 0x238);
     f32 lim = 0.17453292f;
     if (lim < roll) {
@@ -692,8 +683,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     } else {
         SetIdentity(&rot.rx.x);
     }
-    MulM(&d->rest.row[0].x, &d->body.row[0].x, &rot.rx.x);
-    d->rest.pos = d->body.pos;
+    MulM(&d->rest.basis[0].x, &d->body.basis[0].x, &rot.rx.x);
+    d->rest.origin = d->body.origin;
     fn_801E3284(&d->wheelMtx, d->wheel, &m);
     a.x = 0.0f;
     a.y = 0.0f;
@@ -710,16 +701,16 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     fn_801C2694(d->sys, pts, &cnt, &g, &up, &b, &a);
     n = 32;
     fn_801E5998(d->skel, bones, &n);
-    DMtx rm;
+    PlainValMatrix rm;
     *(BRot*)&rm = rot;
-    rm.pos.x = 0.0f;
-    rm.pos.y = 0.0f;
-    rm.pos.z = 0.0f;
+    rm.origin.x = 0.0f;
+    rm.origin.y = 0.0f;
+    rm.origin.z = 0.0f;
     DBone* bone = bones;
     for (int k = 0; k < n; bone++, k++) {
         if (k) {
-            MulM(&pose[k].rot.rx.x, &bone->m.row[0].x, &rot.rx.x);
-            MulVec((DVec3*)&pose[k].pos, &bone->m.pos, &rm);
+            MulM(&pose[k].rot.rx.x, &bone->m.basis[0].x, &rot.rx.x);
+            MulVec(&pose[k].pos, &bone->m.origin, &rm);
         } else {
             pose[k] = *(BonePose*)bone;
         }
@@ -749,7 +740,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     e2.z = 0.0f;
     Mat3FromEuler((Mat3*)&turn, (Vec3*)&e2);
     Mat3Mul((Mat3*)&pose[0].rot, (Mat3*)&turn, (Mat3*)&pose[0].rot);
-    DVec3 root = *(DVec3*)&pose[0].pos;
+    ValVec3 root = pose[0].pos;
     for (int i = 0; i < n; i++) {
         pose[i].pos.x -= root.x;
         pose[i].pos.y -= root.y;
@@ -758,9 +749,9 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     s32 r = fn_801E65BC(d->skel, pose, n, 0);
     m2 = m;
     MulVec(&off2, &root, &m2);
-    m2.pos.x = m2.pos.x + off2.x;
-    m2.pos.y = m2.pos.y + off2.y;
-    m2.pos.z = m2.pos.z + off2.z;
+    m2.origin.x = m2.origin.x + off2.x;
+    m2.origin.y = m2.origin.y + off2.y;
+    m2.origin.z = m2.origin.z + off2.z;
     fn_802C70AC(d->model, &m2, r, -1);
 }
 

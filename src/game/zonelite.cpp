@@ -27,17 +27,7 @@ struct ZV2 {
     f32 y;
 };
 
-struct ZVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct ZFrame {
-    ZVec rot[3];  // offset 0x0
-    ZVec pos;     // offset 0x24
-};
-
+// ZFrame: common.h's PlainValMatrix (ZVec: valvec3.h's ValVec3).
 struct LapModel {
     LapModel(const char* n) : name(n), model(-1) {}
     ~LapModel(void) {
@@ -76,15 +66,15 @@ ZV2 lbl_8055F900;  // line normal
 ZV2 lbl_8055F908;  // line direction
 s32 lbl_8055CC58 = -2;  // light texture
 
-static ZVec lbl_804BD6F8;
-static ZVec lbl_804BD704;
+static ValVec3 lbl_804BD6F8;
+static ValVec3 lbl_804BD704;
 static LapModel lbl_804BD740[4] = {
     LapModel("start.mod"),
     LapModel("lap2.mod"),
     LapModel("lap3.mod"),
     LapModel("finish.mod"),
 };
-static ZFrame lbl_804BD760;
+static PlainValMatrix lbl_804BD760;
 static LapState lbl_804BD790[2];
 
 static inline void Perp(ZV2* v) {
@@ -97,7 +87,7 @@ extern "C" {
 
 void fn_802A9574(void);
 
-void fn_802A8FEC(ZVec* out, const ZV2* p) {
+void fn_802A8FEC(ValVec3* out, const ZV2* p) {
     f32 z = p->y;
     out->y = fn_801EA0E8(p->x, z);
     out->x = p->x;
@@ -114,7 +104,7 @@ bool fn_802A9048(void) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline void ZSub(ZVec* d, const ZVec* a, const ZVec* b) {
+static inline void ZSub(ValVec3* d, const ValVec3* a, const ValVec3* b) {
     d->x = a->x - b->x;
     d->y = a->y - b->y;
     d->z = a->z - b->z;
@@ -123,32 +113,32 @@ static inline void ZSub(ZVec* d, const ZVec* a, const ZVec* b) {
 static inline f32 ZMax(f32& a, const f32& b) { return a > b ? a : b; }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802A9090(const ZVec& vb, ZFrame* f) {
+static inline void Loop1_fn_802A9090(const ValVec3& vb, PlainValMatrix* f) {
     lbl_804BD704 = vb;
     f32 xv = vb.x;
-    f->pos.x = lbl_804BD6F8.x + xv;
+    f->origin.x = lbl_804BD6F8.x + xv;
     f32 yv = vb.y;
-    f->pos.y = lbl_804BD6F8.y + yv;
+    f->origin.y = lbl_804BD6F8.y + yv;
     f32 zv = vb.z;
-    f->pos.z = lbl_804BD6F8.z + zv;
-    f->pos.x *= 0.5f;
-    f->pos.y *= 0.5f;
-    f->pos.z *= 0.5f;
+    f->origin.z = lbl_804BD6F8.z + zv;
+    f->origin.x *= 0.5f;
+    f->origin.y *= 0.5f;
+    f->origin.z *= 0.5f;
     f32 y = ZMax(lbl_804BD6F8.y, vb.y);
-    ZSub(&f->rot[0], &lbl_804BD704, &lbl_804BD6F8);
-    f->pos.y = y;
-    f->rot[0].y = 0.0f;
-    f->rot[1].x = 0.0f;
-    f->rot[1].y = 1.0f;
-    f->rot[1].z = 0.0f;
-    PSVECCrossProduct((const Vec*)&f->rot[0], (const Vec*)&f->rot[1], (Vec*)&f->rot[2]);
-    PSVECNormalize((const Vec*)&f->rot[0], (Vec*)&f->rot[0]);
-    PSVECNormalize((const Vec*)&f->rot[2], (Vec*)&f->rot[2]);
-    PSVECCrossProduct((const Vec*)&f->rot[2], (const Vec*)&f->rot[0], (Vec*)&f->rot[1]);
+    ZSub(&f->basis[0], &lbl_804BD704, &lbl_804BD6F8);
+    f->origin.y = y;
+    f->basis[0].y = 0.0f;
+    f->basis[1].x = 0.0f;
+    f->basis[1].y = 1.0f;
+    f->basis[1].z = 0.0f;
+    PSVECCrossProduct((const Vec*)&f->basis[0], (const Vec*)&f->basis[1], (Vec*)&f->basis[2]);
+    PSVECNormalize((const Vec*)&f->basis[0], (Vec*)&f->basis[0]);
+    PSVECNormalize((const Vec*)&f->basis[2], (Vec*)&f->basis[2]);
+    PSVECCrossProduct((const Vec*)&f->basis[2], (const Vec*)&f->basis[0], (Vec*)&f->basis[1]);
     if (fn_801E87A8()->flags & 2) {
-        f->rot[0].x *= -1.0f;
-        f->rot[0].y *= -1.0f;
-        f->rot[0].z *= -1.0f;
+        f->basis[0].x *= -1.0f;
+        f->basis[0].y *= -1.0f;
+        f->basis[0].z *= -1.0f;
     }
 }
 
@@ -169,10 +159,10 @@ void fn_802A9090(const ZV2* pos, const ZV2* dir) {
     a.y = pos->y + n.y * -half;
     b.x = pos->x + n.x * half;
     b.y = pos->y + n.y * half;
-    ZVec va;
+    ValVec3 va;
     fn_802A8FEC(&va, &a);
     lbl_804BD6F8 = va;
-    ZVec vb;
+    ValVec3 vb;
     fn_802A8FEC(&vb, &b);
     Loop1_fn_802A9090(vb, &lbl_804BD760);
 }
