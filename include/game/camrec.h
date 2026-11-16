@@ -54,8 +54,8 @@ struct CamRec {
     s32 w1C;            // offset 0x1C
     s32 target;         // offset 0x20
     s32 nextTarget;     // offset 0x24
-    u32 w28[3];         // offset 0x28
-    u32 w34[3];         // offset 0x34
+    CamVec3 v28;        // offset 0x28
+    CamVec3 v34;        // offset 0x34
     CamVec3 eye;        // offset 0x40
     u32 w4C[3];         // offset 0x4C
     CamPose pose;       // offset 0x58
@@ -63,8 +63,7 @@ struct CamRec {
     s32 lastFrame;      // offset 0xB8
     f32 fov;            // offset 0xBC
     CamPose carFrame;   // offset 0xC0
-    u32 wF0[8];         // offset 0xF0
-    u32 w110[4];        // offset 0x110
+    CamPose poseF0;     // offset 0xF0
     CamVec3 vel;        // offset 0x120
     CamVec3 carVel;     // offset 0x12C
     u8 b138;            // offset 0x138
@@ -72,9 +71,9 @@ struct CamRec {
     f32 f13C;           // offset 0x13C
     u8* car;            // offset 0x140
     u8* lastCar;        // offset 0x144
-    u32 w148;           // offset 0x148
-    u32 w14C;           // offset 0x14C
-    u32 w150;           // offset 0x150
+    s32 w148;           // offset 0x148
+    s32 w14C;           // offset 0x14C (-1 = none)
+    s32 w150;           // offset 0x150 (-1 = none)
     f32 f154;           // offset 0x154
     f32 f158;           // offset 0x158
     f32 f15C;           // offset 0x15C
@@ -87,7 +86,7 @@ struct CamRec {
     f32 f198;           // offset 0x198
     f32 f19C;           // offset 0x19C
     f32 f1A0;           // offset 0x1A0
-    u32 w1A4[12];       // offset 0x1A4
+    CamPose saved;      // offset 0x1A4, the saved pose (fn_80276BE4)
     f32 f1D4;           // offset 0x1D4
     CamMountTime mount; // offset 0x1D8
     s16 h1EC;           // offset 0x1EC
