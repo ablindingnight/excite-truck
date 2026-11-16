@@ -507,7 +507,6 @@ public:
 class LayoutCmd : public EditHandler {
 public:
     LayoutCmd(Layout* o);
-    virtual void Drag(const V2* d, void* target) {}
     virtual u32 HoverColor(void) { return 0xC0C0C0C0; }
     virtual u32 Color(void) { return 0x40000000; }
     virtual void Click(void);
@@ -1421,6 +1420,8 @@ LayoutOffset::~LayoutOffset(void) {
 extern "C" void fn_80148218(void) {}
 
 extern "C" int fn_8014821C(int key) { return 0; }
+
+extern "C" void fn_80148224(void) {}
 
 extern "C" void fn_80148228(void) {}
 
