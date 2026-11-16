@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/centerline.h"
 #include "game/gamemode.h"
 #include "game/ilayout.h"
@@ -164,24 +165,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 #define NearZeroF(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
-// A position on a centre line (idealline): segment start and fraction.
-struct ILPos {
-    IdealPoint* pt;  // offset 0x0
-    f32 t;       // offset 0x4
-    s32 f8;      // offset 0x8
-};
-
 struct CenterLine;
-
-// Follows a centre line (idealline.cpp).
-class LineFollower {
-public:
-    LineFollower(void);
-    ~LineFollower(void);
-    void SetLine(CenterLine* line);
-    int Locate(V2* p, V2* dir, ILPos* out, int n) const;
-    u8 pad0[0x38];
-};
 
 class PathSet {
 public:
@@ -2056,14 +2040,14 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
                 LineFollower lf;
                 lf.SetLine(fn_80156A40()->Get(0));
                 ILPos pos;
-                pos.pt = 0;
-                pos.f8 = 10000;
+                pos.seg = 0;
+                pos.mode = 10000;
                 pos.t = 0.0f;
                 lf.Locate(&mid, 0, &pos, 0);
-                mid.x = PathLerp(pos.pt->pos.x, pos.pt->next->pos.x, pos.t);
-                mid.y = PathLerp(pos.pt->pos.y, pos.pt->next->pos.y, pos.t);
-                dir.x = PathLerp(pos.pt->dir.x, pos.pt->next->dir.x, pos.t);
-                dir.y = PathLerp(pos.pt->dir.y, pos.pt->next->dir.y, pos.t);
+                mid.x = PathLerp(pos.seg->pos.x, pos.seg->next->pos.x, pos.t);
+                mid.y = PathLerp(pos.seg->pos.y, pos.seg->next->pos.y, pos.t);
+                dir.x = PathLerp(pos.seg->dir.x, pos.seg->next->dir.x, pos.t);
+                dir.y = PathLerp(pos.seg->dir.y, pos.seg->next->dir.y, pos.t);
                 Normalize(dir);
             }
             fn_801B7C8C(out, &mid, &dir);

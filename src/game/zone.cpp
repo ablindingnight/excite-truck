@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/deity.h"
 #include "game/centerline.h"
 #include "game/gamemode.h"
@@ -725,16 +726,6 @@ struct ZoneResults {
 
 // Ideal-path walker from the track map unit (0x801352B8..).
 struct CenterLine;
-class LineFollower {
-public:
-    LineFollower(void);
-    ~LineFollower(void);
-    void SetLine(CenterLine* line);
-    u8 pad0[0x2C];
-    CenterLine* path;  // offset 0x2C
-    u8 pad30[0x38 - 0x30];
-};
-
 class PathSet {
 public:
     virtual void vf08(void);
@@ -2607,7 +2598,7 @@ inline int ZoneMaster::vfA0(Respawn* r, int idx, int c) {
     LineFollower it;
     CenterLine* path;
     it.SetLine((CenterLine*)((PathSet*)fn_80156A40())->Get(0));
-    path = it.path;
+    path = it.line;
     fn_801B8048(r, &it, 0.0f, path->len[0] - 25.0f - 35.0f);
     ScaleV((ZoneVec3*)&r->vel, (const ZoneVec3*)&r->place.basis[2], 4.4444447f);
     r->mode = 1;

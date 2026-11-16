@@ -2,6 +2,7 @@
 // track where the racing line crosses its first node, faded out towards the edges. Names are
 // guesses apart from the config key and texture.
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/centerline.h"
 
 struct SFPath {
@@ -16,25 +17,9 @@ public:
     virtual SFPath* GetLine(int i);  // 0x0C
 };
 
-// A position on the ideal line (idealline.cpp).
-struct ILPos {
-    IdealPoint* node;  // offset 0x0
-    f32 t;         // offset 0x4
-    s32 max;       // offset 0x8
-};
-
 // Ideal-line walker (idealline.cpp).
 struct V2;
 struct CenterLine;
-class LineFollower {
-public:
-    LineFollower(void);
-    virtual ~LineFollower(void);
-    virtual int SetLine(CenterLine* line);
-    void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
-    u8 pad4[0x34 - 0x4];
-};
-
 struct SFConfig {
     u8 pad0[0x8];
     u32 mode;  // offset 0x8
@@ -160,7 +145,6 @@ void fn_802A1120(V2* pos, V2* dir) {
     SFPath* path;
     SFPath* line;
     IdealPoint* n;
-    ILPos h;
     f32 t;
     path = fn_80156A40()->GetPath(0);
     {
@@ -171,11 +155,9 @@ void fn_802A1120(V2* pos, V2* dir) {
     LineFollower it;
     line = fn_80156A40()->GetLine(0);
     it.SetLine((CenterLine*)line);
-    h.node = 0;
-    h.max = 10000;
-    h.t = 0.0f;
+    ILPos h;
     it.Locate((V2*)path->nodes, 0, &h, 0);
-    n = fn_802A1040(path->nodes, h.node, line);
+    n = fn_802A1040(path->nodes, h.seg, line);
     for (t = 0.0f; t < 1.0f; t += 0.025f) {
         pos->x = n->pos.x + t * (n->next->pos.x - n->pos.x);
         pos->y = n->pos.y + t * (n->next->pos.y - n->pos.y);

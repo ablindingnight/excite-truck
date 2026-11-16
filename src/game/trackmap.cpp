@@ -3,6 +3,7 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/idealline.h"
 #include "game/centerline.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
@@ -84,16 +85,6 @@ struct PlayerObj {
 
 // Ideal-line walker (idealline.cpp).
 struct CenterLine;
-class LineFollower {
-public:
-    LineFollower(void);
-    virtual ~LineFollower(void);
-    virtual int SetLine(CenterLine* line);
-    u8 pad4[0x2C - 0x4];
-    CenterLine* path;  // offset 0x2C: the line
-    u8 pad30[0x34 - 0x30];
-};
-
 class PathSet {
 public:
     virtual void vf08(void);
@@ -735,7 +726,7 @@ void fn_8001B478(int index, f32 width) {
     if (!it.SetLine((CenterLine*)index)) {
         return;
     }
-    path = it.path;
+    path = it.line;
     len = path->len[0];
     n = len / width;
     segs = n;
