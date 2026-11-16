@@ -13,13 +13,16 @@
    stays). A one-field const struct read in Draw gives the same pool. */
 static f32 FarClip(void) { return 2250.0f; }
 
-struct Basis {
+// The car viewer's frame: SDK Vec rows + position, with an empty constructor (its constructor shapes the copies, so
+// it stays apart from vecmatrix.h's VecMatrix). Were "Basis"/"Frame", names other units use differently (port ODR).
+// /* Helper names unproven */
+struct CarUIBasis {
     Vec v[3];
 };
 
-struct Frame {
-    Frame(void) {}
-    Basis b;  // offset 0x0
+struct CarUIFrame {
+    CarUIFrame(void) {}
+    CarUIBasis b;  // offset 0x0
     Vec pos;  // offset 0x24
 };
 
@@ -70,19 +73,19 @@ void fn_801D21B4(void* p);
 void fn_801F0000(void* w);
 u32 fn_801F0008(void);
 void* fn_801F0010(const char* cls, void* buf);
-void fn_801F1394(void* w, const Frame* f);
-void fn_801F1474(void* w, const Frame* f, f32 a);
+void fn_801F1394(void* w, const CarUIFrame* f);
+void fn_801F1474(void* w, const CarUIFrame* f, f32 a);
 f32 fn_801F159C(void* w);
 f32 fn_8023659C(void);
 void fn_8027A714(CarSetup* s, const char* name);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
 void mrModelUnload(s32 model);
-void fn_802C70AC(s32 model, const Frame* f, s32 mat, u32 mask);
+void fn_802C70AC(s32 model, const CarUIFrame* f, s32 mat, u32 mask);
 s32 fn_802C7A34(int a, Vec* p, s32 n);
 s32 fn_802C7A40(int a, Vec* p, s32 n, int b, s32* c, int d);
-void fn_802C7AE0(s32 model, const Frame* f, s32 mat, f32 t);
+void fn_802C7AE0(s32 model, const CarUIFrame* f, s32 mat, f32 t);
 u32 fn_802C7830(const char* s);
-const Frame* fn_802C86DC(void);
+const CarUIFrame* fn_802C86DC(void);
 void fn_802C9A1C(const Vec* dir);
 void fn_802E317C(const char* fmt, ...);
 }
@@ -128,7 +131,7 @@ static inline void Lift(Vec* v, f32 y) {
     v->y = y;
 }
 
-static inline void Identity(Frame* f) {
+static inline void Identity(CarUIFrame* f) {
     f->b.v[0].x = 1.0f;
     f->b.v[0].y = 0.0f;
     f->b.v[0].z = 0.0f;
@@ -190,7 +193,7 @@ public:
     void Unload(void);
     void LoadEfx(const char* path);
     void UnloadEfx(void);
-    void SetPose(const Frame* f, const f32* wheelY, const f32* steer);
+    void SetPose(const CarUIFrame* f, const f32* wheelY, const f32* steer);
     void Draw(void);
     void DrawShadow(void);
     void DrawEfx(void);
@@ -217,9 +220,9 @@ public:
     Vec wheelPos[4];   // offset 0x42C
     CarSetup setup;    // offset 0x45C
     f32 rideHeight;    // offset 0x594
-    Frame frame;       // offset 0x598
+    CarUIFrame frame;       // offset 0x598
     f32 wheelY[4];     // offset 0x5C8
-    Frame wheels[4];   // offset 0x5D8
+    CarUIFrame wheels[4];   // offset 0x5D8
 };
 
 extern "C" {
@@ -397,8 +400,8 @@ void CarUIModel::UnloadEfx(void) {
     }
 }
 
-void CarUIModel::SetPose(const Frame* f, const f32* wy, const f32* steer) {
-    Frame w;
+void CarUIModel::SetPose(const CarUIFrame* f, const f32* wy, const f32* steer) {
+    CarUIFrame w;
     Mtx33 r;
     Mtx33 r2;
     ValVec3 a;
@@ -472,9 +475,9 @@ void CarUIModel::DrawShadow(void) {
 }
 
 void CarUIModel::DrawEfx(void) {
-    const Frame* f = &frame;
+    const CarUIFrame* f = &frame;
     if (efx != -1) {
-        const Frame* cam = fn_802C86DC();
+        const CarUIFrame* cam = fn_802C86DC();
         Vec p = cam->b.v[0];
         Vec* a = (Vec*)&bones[facingPos];
         a->x = p.x;
@@ -500,7 +503,7 @@ void CarUIModel::DrawEfx(void) {
 // The pose a car is shown in: its frame, wheel heights and steering.
 // minworld.cpp's MWSlot (fn_80253004)
 struct MWSlot {
-    Frame frame;     // offset 0x0
+    CarUIFrame frame;     // offset 0x0
     u8 valid;        // offset 0x30
     u8 pad31[0xF];
     f32 wheelY[4];   // offset 0x40
@@ -534,13 +537,13 @@ int fn_8012C33C(const char* name);
 void fn_8012E81C(const char* name);
 void fn_8012E96C(const char* name);
 f32 fn_801DCF48(void*, f32, f32);  // (GVec* normal, x, z) in heightfld.cpp: ground height
-void fn_801E2CCC(s32 model, const char* name, const Frame** f);
+void fn_801E2CCC(s32 model, const char* name, const CarUIFrame** f);
 void fn_801EFF4C(void);
 void fn_801EFF70(void);
 void fn_801F1C24(void* p);
 void fn_80203C50(int a);
 void fn_80203DC8(void);
-void fn_80203E88(const Frame* f, const Vec* target, int a);
+void fn_80203E88(const CarUIFrame* f, const Vec* target, int a);
 void fn_80252BC8(void);
 void fn_80252BF0(void);
 void fn_80252C78(void);
@@ -551,23 +554,23 @@ void fn_802AB9E0(f32 t);
 void fn_802AB9E4(void);
 void fn_802AB9E8(void);
 void fn_802ABC2C(void);
-void fn_802ABC80(const Frame* f, const Vec* off, f32 a, f32 b, f32 c);
+void fn_802ABC80(const CarUIFrame* f, const Vec* off, f32 a, f32 b, f32 c);
 void fn_802ABE50(void);
 void fn_802ABE58(f32* p, f32* a, u32* b, f32 dt);
 void fn_802ABFF8(f32 b, u32 a);
 void fn_802AC070(void);
 void fn_802AE9D0(void);
-void fn_802AEB3C(const Frame* f);
+void fn_802AEB3C(const CarUIFrame* f);
 void fn_802B016C(void);
 u8 fn_802C2C00(u8 a);
 void fn_802C2B78(f32 a, f32 b, f32 c);
 void fn_802C2BB8(f32* a, f32* b, f32* c);
-void fn_802C744C(s32 model, const Frame* f);
+void fn_802C744C(s32 model, const CarUIFrame* f);
 void fn_802C7730(void* p);
 void fn_802C77F0(s32 model, Vec* box);
 void fn_802C7808(s32 model);
 void fn_802C7A00(void);
-void fn_802C8638(const Frame* f);
+void fn_802C8638(const CarUIFrame* f);
 void fn_802C86E8(int a);
 void fn_802C87B4(int a, int b, s32 w, s32 h);
 void fn_802C88BC(int a);
@@ -670,7 +673,7 @@ public:
     f32 pitch;            // offset 0x9C
     f32 yaw;              // offset 0xA0
     f32 unkA4;            // offset 0xA4
-    Frame cam;            // offset 0xA8
+    CarUIFrame cam;            // offset 0xA8
     s32 unkD8;            // offset 0xD8
     u8 tint;              // offset 0xDC
     u8 nextTint;          // offset 0xDD
@@ -848,7 +851,7 @@ static inline void MulM(Mtx33* out, const Mtx33* a, const Mtx33* b) {
 extern "C" {
 
 void fn_80254568(Vec3a* out, s32 model, const char* name) {
-    const Frame* f = 0;
+    const CarUIFrame* f = 0;
     fn_801E2CCC(model, name, &f);
     *out = *(const Vec3a*)&f->pos;
 }
@@ -1393,7 +1396,7 @@ struct LightDirs {
 
 void CarUIScreen::DrawLights(void) {
     LightDirs dirs = {{{0.7f, -0.7f, 0.0f}, {0.0f, -0.7f, 0.7f}, {-0.7f, -0.7f, 0.0f}}};
-    Frame f;
+    CarUIFrame f;
     Vec l;
     Vec up;
     Vec z;
@@ -1444,8 +1447,8 @@ struct FloorVtx {
 void CarUIScreen::DrawFloor(f32 a, u32 color) {
     f32 z0;
     fn_802C942C(-1);
-    Frame saved = *fn_802C86DC();
-    Frame f = saved;
+    CarUIFrame saved = *fn_802C86DC();
+    CarUIFrame f = saved;
     f.pos.y *= -1.0f;
     CarUIModel* m = model;
     if (m->loaded) {
@@ -1537,7 +1540,7 @@ struct ColorState {
 };
 
 void CarUIScreen::Draw(void) {
-    Frame saved = *fn_802C86DC();
+    CarUIFrame saved = *fn_802C86DC();
     MWSlot p;
     if (lbl_8055F330) {
         fn_80253004(index, &p);
@@ -1570,9 +1573,9 @@ void CarUIScreen::Draw(void) {
         DrawFloor(refl, reflColor);
     }
     if (bg != -1) {
-        Frame id;
+        CarUIFrame id;
         Identity(&id);
-        Frame* f = &id;
+        CarUIFrame* f = &id;
         if (lbl_8055F330) {
             id.pos.x = cam.pos.x;
             id.pos.y = cam.pos.y;
@@ -1619,7 +1622,7 @@ void CarUIScreen::Draw(void) {
         fn_802C2C00(st.alpha);
     }
     if (bg != -1) {
-        Frame id;
+        CarUIFrame id;
         Identity(&id);
         fn_802C70AC(bg, &id, 0, 2);
     }
