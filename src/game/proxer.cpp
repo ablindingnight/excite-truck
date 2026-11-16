@@ -234,7 +234,7 @@ void Proxer::Update(int i) {
         x = f->lateral + (s->lat + f->t * (s->next->lat - s->lat));
         f32 curTravel = f->travel;
         y = curTravel + s->lon;
-        if (r->flipped) {
+        if ((int)r->flipped > 0) {
             y = lapLen - y;
         }
         r->vel.x = f->latSpeed;
