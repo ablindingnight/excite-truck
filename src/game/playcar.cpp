@@ -1276,7 +1276,7 @@ void PlayerDriver_vf48(u8* p) {
     fwd = VDot(car + 0x118, car + 0x54);
     f32 sp;
     f32 ga;
-    ((Gearbox*)PTR(p, 0x38))->v64();
+    f32 engaged = ((Gearbox*)PTR(p, 0x38))->v64() ? kOne : kZero;
     f32 sum;
     if (!((U32(fn_801769CC(), 0x10) & 2))) {
         dir = kOne;
