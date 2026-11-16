@@ -328,8 +328,8 @@ void fn_80276D3C(const char* name, int mode) {
 
 }  // extern "C"
 
-struct CamFrame;
-void GetTipsCamera(CamFrame* out, f32* fov);
+struct RMtx;  // game/rmtx.h: loading's tips camera frame
+void GetTipsCamera(RMtx* out, f32* fov);
 
 extern "C" {
 u8* fn_8017960C(int car);
@@ -603,7 +603,7 @@ void fn_80277A14(CamRec* c, int slot) {
     own = 0;
     fn_8026A51C(&lbl_804A0C60[slot], &own, slot);
     if (fn_801B89F8()) {
-        GetTipsCamera((CamFrame*)&c->pose, &c->fov);
+        GetTipsCamera((RMtx*)&c->pose, &c->fov);
         return;
     }
     f32 e = Ease(Clamp01(fn_80277704(slot)));

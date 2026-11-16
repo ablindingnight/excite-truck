@@ -13,20 +13,20 @@ void fn_802D07E4(const char* name, int a);
 
 void* operator new[](size_t size, const char* tag);
 
-struct CamFrame {
+struct ScriptCamFrame {
     ValMatrix mtx;  // offset 0x0
 };
 
 struct ScriptNode {
     ScriptNode(void) {}
-    CamFrame frame;  // offset 0x0
+    ScriptCamFrame frame;  // offset 0x0
     f32 fov;         // offset 0x30
     s32 tick;        // offset 0x34
 };
 
 struct ScriptCam {
     u8 pad0[0x58];
-    CamFrame frame;  // offset 0x58
+    ScriptCamFrame frame;  // offset 0x58
     u8 pad88[0xBC - 0x88];
     f32 fov;  // offset 0xBC
 };
@@ -37,7 +37,7 @@ struct ScriptPlayer {
 };
 
 extern "C" {
-void fn_8026E22C(CamFrame* out, const ScriptNode* a, const ScriptNode* b, f32 t);
+void fn_8026E22C(ScriptCamFrame* out, const ScriptNode* a, const ScriptNode* b, f32 t);
 ScriptPlayer* fn_802678E4(int player);
 }
 

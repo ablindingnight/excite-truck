@@ -364,7 +364,7 @@ struct CamAxes {
 static inline f32 AddMul(f32 a, f32 b, f32 c) { return a + c * b; }
 
 // A camera frame: its rows and its position.
-struct CamFrame {
+struct CamFovFrame {
     CamAxes axes;  // offset 0x0
     PVec3A pos;     // offset 0x24
 };
@@ -378,12 +378,12 @@ struct ChaseCam {
     u8 pad10[0x8];
     s32 lastMode;       // offset 0x18
     u8 pad1C[0x3C];
-    CamFrame view;      // offset 0x58: rows and eye (0x7C)
+    CamFovFrame view;      // offset 0x58: rows and eye (0x7C)
     u8 pad88[0x34];
     f32 fov;            // offset 0xBC
     CamAxes axes;       // offset 0xC0: the car's frame
     PVec3A pos;          // offset 0xE4
-    CamFrame tf;        // offset 0xF0: the trailing frame
+    CamFovFrame tf;        // offset 0xF0: the trailing frame
     f32 move[3];        // offset 0x120
     f32 vel[3];         // offset 0x12C
     u8 reset;           // offset 0x138
