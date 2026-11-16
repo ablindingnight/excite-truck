@@ -3511,6 +3511,8 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
     }
 }
 
+#pragma push
+#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 inline void BetaMaster::vf0C(void) {
     int found;
     f32 lead;
@@ -3646,6 +3648,7 @@ inline void BetaMaster::vf0C(void) {
         fn_80167684(0.0f > left ? 0.0f : left);
     }
 }
+#pragma pop
 
 extern "C" {
 f32 PSVECMag(const f32* v);
