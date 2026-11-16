@@ -708,6 +708,13 @@ void fn_801F6778(PVec* out, int n, f32 gravity, f32 wind, const PVec* random) {
     }
 }
 
+// Helper name unproven. Submit the second vertex of the pair.
+static inline void SubmitVertex(const DrawVert& vertex, const Vec3Storage& position, int c) {
+    const f32 v = vertex.v;
+    const f32 u = vertex.u;
+    fn_802C8E00(position.x, position.y, position.z, u, v, vertex.color, c > 0);
+}
+
 void fn_801F6880(const Fabric* f) {
     f32 old = fn_802C9A4C(f->lod);
     fn_802C8BD0(f->tex);
@@ -717,26 +724,19 @@ void fn_801F6880(const Fabric* f) {
             int c;
             for (c = 0; c < f->cols; c++) {
                 int i = c + (r - 1) * f->cols;
-                DrawVert* d = &f->draw[i];
-                Vec3Storage* p = &f->cur[i];
-                f32 u = d->u;
-                f32 x = p->x;
-                f32 y = p->y;
-                f32 z = p->z;
-                f32 v = d->v;
-                fn_802C8E00(x, y, z, u, v, d->color, c > 0);
+                const Vec3Storage* p = &f->cur[i];
+                const DrawVert* d = &f->draw[i];
+                const f32 x = p->x;
+                const f32 u = d->u;
+                const f32 v = d->v;
+                fn_802C8E00(x, p->y, p->z, u, v, d->color, c > 0);
                 i = c + r * f->cols;
-                d = &f->draw[i];
-                p = &f->cur[i];
-                const f32 secondY = p->y;
-                const f32 secondZ = p->z;
-                const f32 secondX = p->x;
-                fn_802C8E00(secondX, secondY, secondZ, d->u, d->v, d->color, c > 0);
+                SubmitVertex(f->draw[i], f->cur[i], c);
             }
         }
         fn_802C8E48();
-        fn_802C8D74();
     }
+    fn_802C8D74();
     fn_802C9A4C(old);
 }
 }
