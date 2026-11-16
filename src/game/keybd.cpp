@@ -50,7 +50,7 @@ void fn_802E46B0(void) {
 
 void fn_802E46E4(void) { lbl_8055D1C0[0] = -1; }
 
-u16 fn_802E46F0(void) {
+int fn_802E46F0(void) {
     fn_802E4A2C();
     u16 k = lbl_8055FF50[0];
     lbl_8055FF5A = k;
@@ -133,7 +133,7 @@ int fn_802E499C(const u16* seq) {
 
 u32 fn_802E4A10(void) { return (lbl_8055FF5A >> 12) & 0xF; }
 
-u8 fn_802E4A1C(int key) { return lbl_804FC458[key]; }
+int fn_802E4A1C(int key) { return lbl_804FC458[key]; }
 
 void fn_802E4A2C(void) {
     if (lbl_8055D1C0[0] >= 0) {
