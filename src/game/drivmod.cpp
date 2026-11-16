@@ -4,6 +4,7 @@
 // strings.
 #include "game/common.h"
 #include "game/math_types.h"
+#include "game/plainvec.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -388,10 +389,6 @@ void fn_8020095C(u8* p) {
 }
 
 }  // extern "C"
-
-struct BVec {
-    f32 x, y, z;
-};
 
 // A bone's rotation, as three rows.
 struct BRot {

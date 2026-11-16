@@ -4,6 +4,7 @@
 // (a CPU texel fetch from the 512x512 RGBA8 layer or a per-model texture matrix) and the indirect
 // ripple pass. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 void DCFlushRange(void* p, u32 n);
@@ -118,12 +119,6 @@ struct GModel {
     void* uv;    // offset 0x28
     u32 dlSize;  // offset 0x2C
     void* dl;    // offset 0x30
-};
-
-struct BVec {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 struct GXf {

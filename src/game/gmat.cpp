@@ -4,6 +4,7 @@
 // triangle batches into 65 lists keyed by layer mask; drawing walks the layers and their lists, then draws
 // the world map tint and the ocean quad. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -32,9 +33,6 @@ void fn_802DC078(void* verts, int nverts, u16* idx, int n, int first, int layer)
 void fn_802BB0FC(void* verts, int n);
 void fn_802BB3B8(void* verts, int n);
 struct BoneCmd;
-struct BVec {
-    f32 x, y, z;
-};
 BoneCmd* fn_802DA704(int start, const BVec* v, int n);
 void fn_802DAA18(BoneCmd* c);
 void fn_802DC3C0(s32 tex);

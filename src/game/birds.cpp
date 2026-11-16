@@ -32,9 +32,9 @@ void operator delete(void* p);
 extern f32 lbl_8055E3C8;    // time
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-struct BVec {
-    BVec(void) {}
-    BVec(f32 a, f32 b, f32 c) {
+struct BirdVec {
+    BirdVec(void) {}
+    BirdVec(f32 a, f32 b, f32 c) {
         x = a;
         y = b;
         z = c;
@@ -49,12 +49,12 @@ struct BoidDesc {
     f32 turn;      // offset 0x4
     f32 speedMin;  // offset 0x8
     f32 speedMax;  // offset 0xC
-    BVec pos;      // offset 0x10
+    BirdVec pos;      // offset 0x10
 };
 
 struct Boid {
-    BVec pos;      // offset 0x0
-    BVec vel;      // offset 0xC
+    BirdVec pos;      // offset 0x0
+    BirdVec vel;      // offset 0xC
     f32 radius;    // offset 0x18
     f32 turn;      // offset 0x1C
     f32 speedMin;  // offset 0x20
@@ -62,10 +62,10 @@ struct Boid {
 };
 
 struct BirdFrame {
-    BVec side;  // offset 0x0
-    BVec up;    // offset 0xC
-    BVec fwd;   // offset 0x18
-    BVec pos;   // offset 0x24
+    BirdVec side;  // offset 0x0
+    BirdVec up;    // offset 0xC
+    BirdVec fwd;   // offset 0x18
+    BirdVec pos;   // offset 0x24
 };
 
 struct ModelVec {
@@ -114,7 +114,7 @@ struct Flock {
     f32 birdSpeedMax;    // offset 0x54
     f32 flockTurn;       // offset 0x58
     f32 birdTurn;        // offset 0x5C
-    BVec pt;             // offset 0x60
+    BirdVec pt;             // offset 0x60
     BoidVec birds;       // offset 0x6C
     Boid birdBuf[32];    // offset 0x78
 };
@@ -166,7 +166,7 @@ static inline void InitBoid(Boid* b, const BoidDesc* d) {
 
 extern "C" {
 
-void fn_802A8A4C(Boid* b, const BVec* target);
+void fn_802A8A4C(Boid* b, const BirdVec* target);
 s32 fn_802A8A34(BoidVec* v);
 Boid* fn_802A8A3C(BoidVec* v, int i);
 
@@ -281,7 +281,7 @@ void fn_802A86A4(void) {
         r = f->birdRad / 4.0f;
         for (j = 0; j < f->birds.n; j++) {
             b = &f->birds.data[j];
-            BVec off(fn_80287BC8(-r, r), fn_80287BC8(-r, r), fn_80287BC8(-r, r));
+            BirdVec off(fn_80287BC8(-r, r), fn_80287BC8(-r, r), fn_80287BC8(-r, r));
             SetXYZ(&d.pos, f->lead.pos.x + off.x, f->lead.pos.y + off.y, f->lead.pos.z + off.z);
             InitBoid(b, &d);
         }
@@ -319,7 +319,7 @@ static inline f32 Clamp01(f32 x) {
 
 // Helper names unproven: vector operations written as inlines, as the target evaluates them.
 static inline f32 MDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-static inline void MulM(const f32* m, const BVec* v, BVec* out) {
+static inline void MulM(const f32* m, const BirdVec* v, BirdVec* out) {
     if (out == v) {
         f32 x = MDot3(v->x, m[0], v->y, m[3], v->z, m[6]);
         f32 y = MDot3(v->x, m[1], v->y, m[4], v->z, m[7]);
@@ -335,7 +335,7 @@ static inline void MulM(const f32* m, const BVec* v, BVec* out) {
 }
 static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 DegToRad_hm(f32 d) { return 0.017453292f * d; }  /* Helper name unproven */
-void fn_802A8A4C(Boid* b, const BVec* target) {
+void fn_802A8A4C(Boid* b, const BirdVec* target) {
     f32 dir[2];
     dir[0] = b->vel.x;
     dir[1] = b->vel.z;

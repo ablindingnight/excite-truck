@@ -60,4 +60,9 @@ struct CVec3 {
     f32 x, y, z;
 };
 
+// x, y, z with no constructor.
+struct BVec {
+    f32 x, y, z;
+};
+
 #endif

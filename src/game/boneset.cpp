@@ -5,10 +5,7 @@
 #include "game/common.h"
 #include "game/vec3_init.h"
 #include "game/math_types.h"
-
-struct BVec {
-    f32 x, y, z;
-};
+#include "game/plainvec.h"
 
 struct BMtx33 {
     f32 xx, xy, xz;

@@ -21,13 +21,6 @@ struct GXVtxDescList {
     int type;
 };
 
-// Bone delta (bonemgr).
-struct BVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
 // Skin matrix (rotation then translation).
 struct SkinMtx {
     Mat3 rot;  // offset 0x0
