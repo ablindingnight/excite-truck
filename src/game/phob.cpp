@@ -252,7 +252,7 @@ public:
     virtual void Reset(void);         // 0x10
     virtual void vf14(void);          // 0x14
     virtual void vf18(void);          // 0x18
-    virtual void vf1C(void);          // 0x1C
+    virtual void Update(void);          // 0x1C
     virtual void vf20(void);          // 0x20
     virtual void vf24(void);          // 0x24
     virtual void vf28(u8* buf);       // 0x28
@@ -562,7 +562,7 @@ void fn_80177E14(void) {
         fn_80186DE8();
         fn_801D0F38();
         for (i = 0; i < lbl_8055E464; i++) {
-            lbl_804340C0[i]->vf1C();
+            lbl_804340C0[i]->Update();
         }
         fn_801B535C(lbl_8055E434, lbl_8055E438);
     } else {

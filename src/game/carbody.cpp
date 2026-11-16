@@ -155,7 +155,7 @@ class CollVolume {
 public:
     virtual void Init(CollDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
     virtual ~CollVolume(void);       // 0xC
-    void Update(void);
+    void Transform(void);
     void AddShape(CollShape* s);
 };
 
@@ -985,7 +985,7 @@ u8* __dt__12CarSoundBaseFv(u8* p, int del) {  // ~CarSoundBase (unk_8020DE74), w
 
 void CarBody_vf10(u8* p) {
     *(CbPose*)(p + 0x3C) = *(CbPose*)(p + 0x274);
-    ((CollVolume*)p)->Update();
+    ((CollVolume*)p)->Transform();
     ((RigidBody*)p)->Reset();
     fn_801838C8(p);
 }
@@ -2658,7 +2658,7 @@ void fn_80186DE8(void) {
         fr.pos.y = m->pos.y;
         fr.pos.z = m->pos.z;
         *(CbFrame*)(car + 0x3C) = fr;
-        ((CollVolume*)car)->Update();
+        ((CollVolume*)car)->Transform();
         *(s16*)(car + 0x6C) = e->id;
         HVec o = *(HVec*)(car + 0x16C);
         BVec vel(m->vel.x, m->vel.y, m->vel.z);
@@ -3389,7 +3389,7 @@ void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     frame.pos.y = frame.pos.y + rotated.y;
     frame.pos.z = frame.pos.z + rotated.z;
     *(CbFrame*)(p + 0x3C) = frame;
-    ((CollVolume*)p)->Update();
+    ((CollVolume*)p)->Transform();
     f32 vz;
     f32 vy;
     f32 vx;

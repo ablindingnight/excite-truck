@@ -361,6 +361,7 @@ public:
     virtual void vf14(void);
     virtual void vf18(void);
     virtual void Update(void);
+    void Transform(void);  // the worker Update (0x1C) calls
     virtual void vf20(void);
     virtual void vf24(void);
     virtual void vf28(u8* buf);
@@ -555,7 +556,7 @@ void Ball::Init(BodyDesc* desc) {
     BVec3 c(0.0f, 0.0f, 0.0f);
     car = d->car;
     mtx.pos = Home(car);
-    CollVolume::Update();
+    CollVolume::Transform();
     explodable = d->explodable;
     launch = d->launch;
     s = new (BallStrings::VolumeName()) SphereShape(reinterpret_cast<Phob*>(this), &mtx, stiff, skin, radius, c);
@@ -589,7 +590,7 @@ Ball::~Ball(void) {
 void Ball::Reset(void) {
     RigidBody::Reset();
     mtx.pos = Home(car);
-    CollVolume::Update();
+    CollVolume::Transform();
     b1E9 = 0;
     if (DbgFlag(8)) {
         state = 0;
@@ -662,7 +663,7 @@ inline void Ball::CheckBounds(void) {
 
 inline void Ball::Rehome(void) {
     mtx.pos = Home(car);
-    CollVolume::Update();
+    CollVolume::Transform();
 }
 
 void Ball::Update(void) {
@@ -682,7 +683,7 @@ void Ball::Update(void) {
     }
     if (!DbgFlag(0x88)) {
         mtx.pos = Home(car);
-        CollVolume::Update();
+        CollVolume::Transform();
         vel.x = 0.0f;
         vel.y = 0.0f;
         vel.z = 0.0f;
@@ -739,7 +740,7 @@ void Ball::Launch(const BMtx* in, const BVec3* v, s16 h, f32 k) {
     p += m.pos;
     m.pos = p;
     mtx = m;
-    CollVolume::Update();
+    CollVolume::Transform();
     if (DbgFlag(0x80)) {
         vel.x = 0.0f;
         vel.y = -19.62f;

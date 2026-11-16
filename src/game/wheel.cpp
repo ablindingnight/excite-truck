@@ -123,7 +123,7 @@ public:
     virtual void Reset(void);         // 0x10
     virtual void vf14(void);          // 0x14
     virtual void vf18(void);          // 0x18
-    virtual void vf1C(void);          // 0x1C
+    virtual void Update(void);          // 0x1C
     virtual void vf20(void);          // 0x20
     virtual void vf24(void);          // 0x24
     virtual void vf28(u8* buf);       // 0x28
@@ -134,7 +134,7 @@ public:
     virtual void vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
     virtual void vf44(void);          // 0x44
-    void Update(void);
+    void Transform(void);  // the worker the 0x1C slot (Update) calls
     void AddShape(CollShape* s);
     void SetActive(int on) { nAdded = on ? nSub : 0; }
     CollShape* Shape(void) { return (nAdded > 0) ? sub[0] : 0; }
@@ -216,7 +216,7 @@ public:
     virtual void Init(BodyDesc* d);
     virtual ~Wheel(void);
     virtual void Reset(void);
-    virtual void vf1C(void);
+    virtual void Update(void);
     virtual void vf20(void);
     virtual void vf28(u8* buf);
     virtual s32 vf2C(RPacket* p);
@@ -285,7 +285,7 @@ void Wheel::Init(BodyDesc* bd) {
     RVec3 c(0.0f, 0.0f, 0.0f);
     f32 skin = d->skin;
     mtx.pos = RVec3(0.0f, -200.0f, 0.0f);
-    CollVolume::Update();
+    CollVolume::Transform();
     s = new ("wheel-volume") SphereShape(this, &mtx, stiff, skin, r, c);
     AddShape(s);
     b1E8 = 1;
@@ -349,7 +349,7 @@ void Wheel::Reset(void) {
     time = 0.0f;
     live = 0;
     mtx.pos = RVec3(0.0f, -500.0f, 0.0f);
-    CollVolume::Update();
+    CollVolume::Transform();
     SetActive(1);
     CollShape* s = Shape();
     if (s) {
@@ -360,7 +360,7 @@ void Wheel::Reset(void) {
     SetActive(0);
 }
 
-void Wheel::vf1C(void) {
+void Wheel::Update(void) {
     if (live) {
         RigidBody::Update();
         if (mtx.pos.y < -500.0f) {
@@ -404,7 +404,7 @@ void Wheel::vf1C(void) {
 
 extern "C" void fn_801B04B0(Wheel* w, const RMtx* m, const RVec3* v, const RVec3* av, const s16* hint) {
     w->mtx = *m;
-    w->CollVolume::Update();
+    w->CollVolume::Transform();
     w->vel = *v;
     w->avel = *av;
     w->hint[0] = *hint;

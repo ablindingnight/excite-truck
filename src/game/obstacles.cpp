@@ -74,6 +74,7 @@ public:
     virtual void vf14(void);         // 0x14
     virtual void vf18(void);         // 0x18
     virtual void Update(void);       // 0x1C
+    void Transform(void);  // the worker Update (0x1C) calls
     virtual void vf20(void);         // 0x20
     virtual void vf24(void);         // 0x24
     virtual void vf28(u8* buf);      // 0x28 writes the draw state
@@ -632,7 +633,7 @@ void Obstacle::Init(BodyDesc* d) {
     fn_801AC240((u8*)this);
     *(ObRot*)((u8*)frame) = q->rot;
     *(ObPos*)((u8*)this + 0x60) = q->pos;
-    CollVolume::Update();
+    CollVolume::Transform();
     *(RVec3*)((u8*)this + 0x30) = RVec3(0.0f, 0.0f, 0.0f);
     CollVolume::vf20();
     shape = 0;
@@ -1027,7 +1028,7 @@ void Obstacle::Update(void) {
             F32(p, 0x11C) = 0.0f;
             F32(p, 0x120) = 0.0f;
             *(Pose12*)(p + 0x3C) = *(Pose12*)(p + 0x1EC);
-            ((CollVolume*)p)->CollVolume::Update();
+            ((CollVolume*)p)->CollVolume::Transform();
         }
         if (F32(p, 0x64) < -500.0f) {
             ((Obstacle*)p)->Reset();
@@ -1147,7 +1148,7 @@ public:
     }
     virtual void SetState(const Pose12* pose, const ObVec3* lo, const ObVec3* hi) {
         *(Pose12*)((u8*)this + 0x3C) = *pose;
-        CollVolume::Update();
+        CollVolume::Transform();
         F32(this, 0x118) = lo->x;
         F32(this, 0x11C) = lo->y;
         F32(this, 0x120) = lo->z;
@@ -1182,7 +1183,7 @@ void Obstacle::Reset(void) {
     u8* p = (u8*)this;
     fn_801AC240(p);
     *(Pose12*)(p + 0x3C) = *(Pose12*)(p + 0x1EC);
-    ((CollVolume*)p)->CollVolume::Update();
+    ((CollVolume*)p)->CollVolume::Transform();
     ((RigidBody*)p)->RigidBody::Reset();
     U8(p, 0x223) = 1;
     U8(p, 0x234) = U8(p, 0x235);

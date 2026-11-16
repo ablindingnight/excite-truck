@@ -178,7 +178,7 @@ public:
     virtual void Reset(void);         // 0x10
     virtual void vf14(void);          // 0x14
     virtual void vf18(void);          // 0x18
-    virtual void vf1C(void);          // 0x1C
+    virtual void Update(void);          // 0x1C
     virtual void vf20(void);          // 0x20
     virtual void vf24(void);          // 0x24
     virtual void vf28(u8* buf);       // 0x28
@@ -189,7 +189,7 @@ public:
     virtual void vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
     virtual int vf44(void);           // 0x44
-    void Update(void);
+    void Transform(void);  // the worker the 0x1C slot (Update) calls
     void AddShape(CollShape* s);
     void SetActive(int on) { nAdded = on ? nSub : 0; }
     s32 a4;             // offset 0x4
@@ -294,7 +294,7 @@ public:
     virtual void Init(BodyDesc* d);
     virtual ~MutPhob(void);
     virtual void Reset(void);
-    virtual void vf1C(void);
+    virtual void Update(void);
     virtual void vf28(u8* buf);
     virtual s32 vf2C(RPacket* p);
     virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
@@ -470,11 +470,11 @@ void MutPhob::Reset(void) {
     offset = RVec3(0.0f, 0.0f, 0.0f);
     CollVolume::vf20();
     mtx = home;
-    CollVolume::Update();
+    CollVolume::Transform();
     RigidBody::Reset();
 }
 
-void MutPhob::vf1C(void) {
+void MutPhob::Update(void) {
     f32 now = lbl_8055E3C8;
     if (kind == MP_HINGED) {
         RigidBody::Update();
@@ -554,7 +554,7 @@ void fn_801D3FA4(MutPhob* p, int model, int mask, const RMtx* xf, const RVec3* o
     p->offset = *offset;
     p->CollVolume::vf20();
     p->mtx = *xf;
-    p->CollVolume::Update();
+    p->CollVolume::Transform();
 }
 
 // Parks chunk 'p' below the world.
@@ -576,7 +576,7 @@ void fn_801D411C(MutPhob* p) {
     p->offset = RVec3(0.0f, 0.0f, 0.0f);
     p->CollVolume::vf20();
     p->mtx = p->home;
-    p->CollVolume::Update();
+    p->CollVolume::Transform();
     p->SetActive(0);
     p->model = -1;
 }
@@ -647,7 +647,7 @@ void fn_801D4598(MutPhob* p, f32 now) {
         p->avel.z *= k;
         AddScaled(&p->avel, &axis, 0.2f);
         p->mtx.pos = p->home.pos;
-        p->CollVolume::Update();
+        p->CollVolume::Transform();
     } else {
         fn_801D411C(p);
     }

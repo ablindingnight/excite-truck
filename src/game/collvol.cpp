@@ -107,7 +107,7 @@ public:
     virtual void Reset(void);          // 0x10
     virtual void vf14(void);           // 0x14
     virtual void vf18(void);           // 0x18
-    virtual void vf1C(void);           // 0x1C
+    virtual void Update(void);           // 0x1C
     virtual void vf20(void);           // 0x20
     virtual void vf24(void);           // 0x24
     virtual void vf28(void);           // 0x28
@@ -118,7 +118,7 @@ public:
     virtual void vf3C(void);           // 0x3C
     virtual int vf40(void);            // 0x40
     virtual int vf44(void);            // 0x44
-    void Update(void);
+    void Transform(void);  // the worker the 0x1C slot (Update) calls
     void AddShape(CollShape* s);
     void Xform(CVec3* out, const CVec3* in);
     s32 a4;              // offset 0x4
@@ -182,7 +182,7 @@ static inline void Identity(CMtx* m) {
 CollVolume::CollVolume(void) {
     desc = 0;
     Identity(&mtx);
-    Update();
+    Transform();
     fn_801E9DC4(hint);
 }
 
@@ -208,7 +208,7 @@ void CollVolume::Reset(void) {
     for (i = 0; i < nSub; i++) {
         sub[i]->vf28();
     }
-    Update();
+    Transform();
     prev = world;
     fn_801E9DC4(hint);
 }
@@ -307,12 +307,12 @@ void CollVolume::vf30(f32 t, CollPacket* a, const CollPacket* b, s32* na, s32* n
     AxisAngle(ma.rot, &va);
     AxisAngle(mb.rot, &vb);
     fn_8017AE94(&mtx, &ma, &mb, t);
-    Update();
+    Transform();
     *nb = 0x14;
     *na = 0x14;
 }
 
-void CollVolume::vf1C(void) { Update(); }
+void CollVolume::Update(void) { Transform(); }
 
 void CollVolume::vf20(void) {}
 
@@ -333,7 +333,7 @@ static inline void MulVec(const CMtx* m, const CVec3* in, CVec3* out) {
     }
 }
 
-void CollVolume::Update(void) {
+void CollVolume::Transform(void) {
     prev = world;
     MulVec(&mtx, &offset, &world.pos);
     world.pos.x += mtx.pos.x;
@@ -420,7 +420,7 @@ BoxVolume::BoxVolume(void) {}
 void BoxVolume::Init(CollDesc* d) {
     CollVolume::Init(d);
     mtx = d->mtx;
-    Update();
+    Transform();
     switch (d->shape) {
     case 0: {
         BoxShape* s = new ("box-volume") BoxShape(&mtx, d->half.x, d->half.y, d->half.z);

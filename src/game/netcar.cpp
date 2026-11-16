@@ -192,7 +192,7 @@ void fn_80265D44(CarBody* b);
 Blend* fn_80265D98(void);
 s32 fn_802E2C20(void);  // milliseconds
 f32 PSVECDotProduct(const TVec* a, const TVec* b);
-void Update__10CollVolumeFv(CarBody* b);
+void Transform__10CollVolumeFv(CarBody* b);
 }
 
 extern s32 lbl_8055E3C4;  // frame counter
@@ -328,7 +328,7 @@ void NetCar::Update(void) {
         state = 0;
         waiting = 1;
         mtx = home;
-        Update__10CollVolumeFv(this);
+        Transform__10CollVolumeFv(this);
         vel.x = 0.0f;
         vel.y = 0.0f;
         vel.z = 0.0f;
@@ -387,7 +387,7 @@ void NetCar::Extrapolate(Blend* b) {
     }
     fn_801A63F4(&r, &mtx.pos, &p, &b->at);
     mtx.pos = r;
-    Update__10CollVolumeFv(this);
+    Transform__10CollVolumeFv(this);
     fn_801A63F4(&r2, &vel, &d, &b->at);
     vel = r2;
 }

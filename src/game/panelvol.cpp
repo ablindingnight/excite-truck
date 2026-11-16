@@ -45,7 +45,7 @@ public:
     virtual void Reset(void);         // 0x10
     virtual void vf14(void);          // 0x14
     virtual void vf18(void);          // 0x18
-    virtual void vf1C(void);          // 0x1C
+    virtual void Update(void);          // 0x1C
     virtual void vf20(void);          // 0x20
     virtual void vf24(void);          // 0x24
     virtual void vf28(u8* buf);       // 0x28
@@ -56,7 +56,7 @@ public:
     virtual void vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
     virtual int vf44(void);           // 0x44
-    void Update(void);
+    void Transform(void);  // the worker the 0x1C slot (Update) calls
     void AddShape(CollShape* s);
     s32 a4;             // offset 0x4
     s32 a8;             // offset 0x8
@@ -111,7 +111,7 @@ public:
     virtual void Init(BodyDesc* d);
     virtual ~PanelVol(void);
     virtual void Reset(void);
-    virtual void vf1C(void);
+    virtual void Update(void);
     virtual void vf28(u8* buf);
     virtual int vf44(void);
     Phob* owner;   // offset 0x1EC
@@ -535,7 +535,7 @@ void fn_801BFEBC(RVec3* v, f32 x, f32 y, f32 z) {
 
 void fn_801BFECC(CollVolume* v, const RMtx* m) {
     v->mtx = *m;
-    v->Update();
+    v->Transform();
 }
 
 void fn_801BFF64(RMtx* m, const RVec3* v) {
@@ -659,7 +659,7 @@ void PanelVol::Reset(void) {
     part = -1;
     car = 0;
     mtx = m;
-    Update();
+    Transform();
     vel.x = 0.0f;
     vel.y = 0.0f;
     vel.z = 0.0f;
@@ -684,7 +684,7 @@ static inline void AddScaled(RVec3* o, const RVec3* v, f32 s) {
     o->y += v->y * s;
     o->z += v->z * s;
 }
-void PanelVol::vf1C(void) {
+void PanelVol::Update(void) {
     if (!owner) {
         return;
     }
@@ -737,7 +737,7 @@ void PanelVol::vf1C(void) {
     }
     fn_801C092C(&w, &rest, &m);
     mtx = w;
-    Update();
+    Transform();
 }
 
 extern "C" {
