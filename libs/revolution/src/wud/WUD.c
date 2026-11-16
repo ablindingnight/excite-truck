@@ -56,6 +56,142 @@ static u8 _discNumResps;
 static s8 _discRssi;
 
 // clang-format off
+// descriptor layout (byte offsets; the bytes come from main.dol via datagen):
+//   +0x000  Usage Page (Generic Desktop Ctrls)
+//   +0x002  Usage (Game Pad)
+//
+//   +0x004  Collection (Application)
+//
+//   +0x006  Report ID (16)
+//   +0x008  Logical Minimum (0)
+//   +0x00A  Logical Maximum (255)
+//   +0x00D  Report Size (8)
+//   +0x00F  Report Count (1)
+//   +0x011  Usage Page (Vendor Defined 0xFF00)
+//   +0x014  Usage (0x01)
+//   +0x016  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x018  Report ID (17)
+//   +0x01A  Report Count (1)
+//   +0x01C  Usage (0x01)
+//   +0x01E  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x020  Report ID (18)
+//   +0x022  Report Count (2)
+//   +0x024  Usage (0x01)
+//   +0x026  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x028  Report ID (19)
+//   +0x02A  Report Count (1)
+//   +0x02C  Usage (0x01)
+//   +0x02E  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x030  Report ID (20)
+//   +0x032  Report Count (1)
+//   +0x034  Usage (0x01)
+//   +0x036  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x038  Report ID (21)
+//   +0x03A  Report Count (1)
+//   +0x03C  Usage (0x01)
+//   +0x03E  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x040  Report ID (22)
+//   +0x042  Report Count (21)
+//   +0x044  Usage (0x01)
+//   +0x046  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x048  Report ID (23)
+//   +0x04A  Report Count (6)
+//   +0x04C  Usage (0x01)
+//   +0x04E  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x050  Report ID (24)
+//   +0x052  Report Count (21)
+//   +0x054  Usage (0x01)
+//   +0x056  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x058  Report ID (25)
+//   +0x05A  Report Count (1)
+//   +0x05C  Usage (0x01)
+//   +0x05E  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x060  Report ID (26)
+//   +0x062  Report Count (1)
+//   +0x064  Usage (0x01)
+//   +0x066  Output (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+//
+//   +0x068  Report ID (32)
+//   +0x06A  Report Count (6)
+//   +0x06C  Usage (0x01)
+//   +0x06E  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x070  Report ID (33)
+//   +0x072  Report Count (21)
+//   +0x074  Usage (0x01)
+//   +0x076  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x078  Report ID (34)
+//   +0x07A  Report Count (4)
+//   +0x07C  Usage (0x01)
+//   +0x07E  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x080  Report ID (48)
+//   +0x082  Report Count (2)
+//   +0x084  Usage (0x01)
+//   +0x086  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x088  Report ID (49)
+//   +0x08A  Report Count (5)
+//   +0x08C  Usage (0x01)
+//   +0x08E  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x090  Report ID (50)
+//   +0x092  Report Count (10)
+//   +0x094  Usage (0x01)
+//   +0x096  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x098  Report ID (51)
+//   +0x09A  Report Count (17)
+//   +0x09C  Usage (0x01)
+//   +0x09E  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0A0  Report ID (52)
+//   +0x0A2  Report Count (21)
+//   +0x0A4  Usage (0x01)
+//   +0x0A6  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0A8  Report ID (53)
+//   +0x0AA  Report Count (21)
+//   +0x0AC  Usage (0x01)
+//   +0x0AE  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0B0  Report ID (54)
+//   +0x0B2  Report Count (21)
+//   +0x0B4  Usage (0x01)
+//   +0x0B6  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0B8  Report ID (55)
+//   +0x0BA  Report Count (21)
+//   +0x0BC  Usage (0x01)
+//   +0x0BE  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0C0  Report ID (61)
+//   +0x0C2  Report Count (21)
+//   +0x0C4  Usage (0x01)
+//   +0x0C6  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0C8  Report ID (62)
+//   +0x0CA  Report Count (21)
+//   +0x0CC  Usage (0x01)
+//   +0x0CE  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0D0  Report ID (63)
+//   +0x0D2  Report Count (21)
+//   +0x0D4  Usage (0x01)
+//   +0x0D6  Input (Data,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
+//
+//   +0x0D8  End Collection
 // DUMP_DATA descriptor u8
 static u8 descriptor[] = {
 #include "dumpdata/descriptor.inc"
@@ -1618,6 +1754,11 @@ void reset_again(void) {
 }
 
 // clang-format off
+// patch_binary layout (byte offsets; the bytes come from main.dol via datagen):
+//   +0x000  address (little-endian)
+//   +0x004  size (little-endian)
+//
+//   +0x008  -- patch data --
 // DUMP_DATA patch_binary u8
 static u8 patch_binary[] = {
 #include "dumpdata/patch_binary.inc"
