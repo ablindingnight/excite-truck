@@ -1795,10 +1795,10 @@ int UIHotKey::Slot64(int p_arg1) {
     UIHotKey* arg0 = this;
     u32 arg1 = (u32)p_arg1;
     s32 (*callback)(s32);
-    if (arg1 == *(u16 *)(char *)&arg0->key) {
-        callback = *(s32 (**)(s32))(char *)&arg0->action;
-        if (callback == 0 || callback(*(s32 *)(char *)&arg0->param) != 0) {
-            fn_802168BC(*(s32 *)(char *)&arg0->param);
+    if (arg1 == arg0->key) {
+        callback = (s32 (*)(s32))arg0->action;
+        if (callback == 0 || callback((s32)arg0->param) != 0) {
+            fn_802168BC((s32)arg0->param);
         }
         return 1;
     }
@@ -1827,17 +1827,17 @@ void UIWidget::Slot30(void) {
 
 void UIWidget::Slot34(void) {
     UIWidget* arg0 = this;
-    *(u8 *)(char *)&arg0->flag19 = 1;
-    if (*(u8 *)(char *)&arg0->flag1a != 0) {
-        *(u8 *)(char *)&arg0->dirty = 1;
+    arg0->flag19 = 1;
+    if (arg0->flag1a != 0) {
+        arg0->dirty = 1;
     }
 }
 
 void UIWidget::Slot38(void) {
     UIWidget* arg0 = this;
-    *(u8 *)(char *)&arg0->flag19 = 0;
-    if (*(u8 *)(char *)&arg0->flag1a != 0) {
-        *(u8 *)(char *)&arg0->dirty = 1;
+    arg0->flag19 = 0;
+    if (arg0->flag1a != 0) {
+        arg0->dirty = 1;
     }
 }
 
@@ -1863,12 +1863,12 @@ void UIWidget::Slot4C(int, int) {
 
 void UIWidget::Slot58(void) {
     UIWidget* arg0 = this;
-    *(u8*)(char *)&arg0->flag18 = 1;
+    arg0->flag18 = 1;
 }
 
 void UIWidget::Slot5C(void) {
     UIWidget* arg0 = this;
-    *(u8*)(char *)&arg0->flag18 = 0;
+    arg0->flag18 = 0;
 }
 
 void* UIWidget::Slot60(void) {
@@ -1881,8 +1881,8 @@ int UIWidget::Slot68(void) {
 
 void UIWidget::Slot74(int, void*) {
     UIWidget* arg0 = this;
-    if (*(u8 *)(char *)&arg0->flag1a != 0) {
-        *(u8 *)(char *)&arg0->dirty = 1;
+    if (arg0->flag1a != 0) {
+        arg0->dirty = 1;
     }
 }
 
@@ -2026,7 +2026,7 @@ int UIImage::Hit(int unused1, int unused2, int arg1, int arg2) {
 
 void UICustom::Slot0C(void) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf1();
 }
 
@@ -2040,76 +2040,76 @@ public:
 
 void UICustom::Slot10(void) {
     UICustom* arg0 = this;
-    Vf4Obj *obj = *(Vf4Obj **)(char *)&arg0->handler;
+    Vf4Obj *obj = (Vf4Obj *)arg0->handler;
     obj->vf2();
 }
 
 void UICustom::Slot14(void) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf3();
 }
 
 void UICustom::Slot7C(void) {
     UICustom* arg0 = this;
     UIWidget::Slot7C();
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf5();
+    ((VfObj *)(void *)arg0->handler)->vf5();
 }
 
 void UICustom::Slot80(void) {
     UICustom* arg0 = this;
     UIWidget::Slot80();
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf6();
+    ((VfObj *)(void *)arg0->handler)->vf6();
 }
 
 void UICustom::Slot3C(int x, int y) {
     UICustom* arg0 = this;
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf10(x, y);
+    ((VfObj *)(void *)arg0->handler)->vf10(x, y);
 }
 
 void UICustom::Slot40(int x, int y) {
     UICustom* arg0 = this;
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf11(x, y);
+    ((VfObj *)(void *)arg0->handler)->vf11(x, y);
 }
 
 void UICustom::Slot44(void) {
     UICustom* arg0 = this;
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf13();
+    ((VfObj *)(void *)arg0->handler)->vf13();
 }
 
 void UICustom::Slot48(void) {
     UICustom* arg0 = this;
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf14();
+    ((VfObj *)(void *)arg0->handler)->vf14();
 }
 
 void* UICustom::Slot60(void) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf19();
 }
 
 void UICustom::Slot74(int, void*) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf4();
 }
 
 void UICustom::Slot4C(int x, int y) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf12(x, y);
 }
 
 void UICustom::Slot58(void) {
     UICustom* arg0 = this;
-    *(u8 *)(char *)&arg0->flag18 = 1;
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf15();
+    arg0->flag18 = 1;
+    ((VfObj *)(void *)arg0->handler)->vf15();
 }
 
 void UICustom::Slot5C(void) {
     UICustom* arg0 = this;
-    *(u8 *)(char *)&arg0->flag18 = 0;
-    ((VfObj *)*(void **)(char *)&arg0->handler)->vf16();
+    arg0->flag18 = 0;
+    ((VfObj *)(void *)arg0->handler)->vf16();
 }
 
 void UICustom::Slot34(void) {
@@ -2142,40 +2142,40 @@ int UICustom::Slot64(int arg1) {
         virtual void f16(); virtual void f17(); virtual void f18(); virtual void f19();
         virtual s32 call(int key);  // 0x58: the handler's MenuState::Key
     };
-    Callback *obj = *(Callback **)(char *)&arg0->handler;
+    Callback *obj = (Callback *)arg0->handler;
     if (obj->call(arg1) != 0) return 1;
     return UIWidget::Slot64(arg1);
 }
 
 int UICustom::Slot68(void) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     return obj->vf21();
 }
 
 void UICustom::Slot24(void*) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf7();
 }
 
 void UICustom::Slot28(void) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf8();
 }
 
 void UICustom::Slot30(void) {
     UICustom* arg0 = this;
-    VfObj *obj = *(VfObj **)(char *)&arg0->handler;
+    VfObj *obj = (VfObj *)arg0->handler;
     obj->vf9();
 }
 
 void UICustom::Slot1C(int arg1, int arg2) {
     UICustom* arg0 = this;
     UIWidget::Slot1C(arg1, arg2);
-    ((void **)*(void ***)(char *)&arg0->handler)[1] = (void *)arg1;
-    ((void **)*(void ***)(char *)&arg0->handler)[2] = (void *)arg2;
+    ((void **)arg0->handler)[1] = (void *)arg1;
+    ((void **)arg0->handler)[2] = (void *)arg2;
 }
 
 int UIWidget::Slot18(void) {
@@ -2205,8 +2205,8 @@ int UIWidget::Slot70(int arg1, int arg2) {
     s32 var_r6;
 
     var_r6 = 0;
-    if (arg1 >= *(s32 *)(char *)&arg0->left && arg1 < *(s32 *)(char *)&arg0->right &&
-        arg2 >= *(s32 *)(char *)&arg0->top && arg2 < *(s32 *)(char *)&arg0->bottom) {
+    if (arg1 >= arg0->left && arg1 < arg0->right &&
+        arg2 >= arg0->top && arg2 < arg0->bottom) {
         var_r6 = 1;
     }
     return var_r6;
@@ -2214,7 +2214,7 @@ int UIWidget::Slot70(int arg1, int arg2) {
 
 int UIWidget::Slot78(void) {
     UIWidget* arg0 = this;
-    return *(s32 *)(char *)&arg0->right - *(s32 *)(char *)&arg0->left;
+    return arg0->right - arg0->left;
 }
 
 void UIYesNoHandler::Enter(void) {
