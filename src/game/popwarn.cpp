@@ -234,6 +234,19 @@ public:
     s32 fade;   // offset 0x28: kinds that also fade the screen
 };
 
+/* Class name unproven */
+// The wrist strap notice: leaves by itself after 15 s, or on any key after 1.5 s.
+class StrapScreen : public MenuState {
+public:
+    virtual ~StrapScreen(void) {}
+    virtual void Enter(void);
+    virtual void Update(void);
+    virtual int Key(int key);
+
+    s32 start;  // offset 0x18
+    u8 left;    // offset 0x1C
+};
+
 void fn_80216CA8(void);
 
 // Shows one boot logo layout for 2.5 s.
@@ -261,14 +274,21 @@ void fn_80246DF4(void) { fn_80246CB8("LogoMnst.lyt"); }
 
 void fn_80246E00(void) { fn_80246CB8("LogoDlby.lyt"); }
 
-// Not in the DOL (dead-stripped).
-void ShowWiiStrap(void) { fn_80246CB8("WiiStrap.lyt"); }
-
-u8* CupSelect_vf68(u8* p, int del) {
-    if (p && del > 0) {
-        operator delete(p);
-    }
-    return p;
+// Not in the DOL (dead-stripped): the wrist strap notice. Its screen's table and destructor are what remain.
+void ShowWiiStrap(void) {
+    StrapScreen s;
+    MenuItem items[] = {
+        MenuItem(0, 5, &s, 0, 0),
+        MenuItem(lbl_804988F0),
+    };
+    MenuDesc desc;
+    desc.layout = "WiiStrap.lyt";
+    desc.items = items;
+    desc.poll = 0;
+    desc.unkC = 0;
+    desc.unk10 = 0;
+    fn_80216CA8();
+    fn_802146BC(&desc, -999, -999, 1);
 }
 
 }  // extern "C"
@@ -1266,9 +1286,11 @@ int MenuTimer_vf58(u8* p, int key) {
     return 1;
 }
 
-void CupSelect_vf6C(u8* p) {
-    U8(p, 0x1C) = 0;
-    S32(p, 0x18) = fn_802E2C20();
+}  // extern "C"
+
+void StrapScreen::Enter(void) {
+    left = 0;
+    start = fn_802E2C20();
     if (fn_802C9A58()) {
         fn_80214A9C(1);
     } else {
@@ -1276,18 +1298,20 @@ void CupSelect_vf6C(u8* p) {
     }
 }
 
-void CupSelect_vf7C(u8* p) {
-    if (!U8(p, 0x1C) && fn_802E2C20() - S32(p, 0x18) >= 15000) {
+void StrapScreen::Update(void) {
+    if (!left && fn_802E2C20() - start >= 15000) {
         fn_802168BC(-2);
     }
 }
 
-int CupSelect_vfB8(u8* p) {
-    if (!U8(p, 0x1C) && fn_802E2C20() - S32(p, 0x18) >= 1500) {
+int StrapScreen::Key(int key) {
+    if (!left && fn_802E2C20() - start >= 1500) {
         fn_802168BC(-2);
     }
     return 1;
 }
+
+extern "C" {
 
 f32 fn_80235EF0(u8* art, int part);
 void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
