@@ -3,6 +3,8 @@
 // for each wheel in contact with the ground and by landing events, plus the "bilinear partsys"
 // ground marks used by the dust trail. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/partparams.h"
+#include "game/plainvec.h"
 #include <revolution/MTX/vec.h>
 
 void* operator new(size_t size, const char* tag);
@@ -62,38 +64,6 @@ struct TrailEvent {
     f32 force;    // offset 0x24
     s32 who;      // offset 0x28
     s32 surface;  // offset 0x2C
-};
-
-// Particle system description (PartParams in partman.cpp; the constructor fills in the defaults).
-struct PartParams {
-    PartParams(void);  // partman.cpp: fills in the defaults
-    s32 flags;   // offset 0x0
-    s32 max;     // offset 0x4
-    f32 f08;     // offset 0x8
-    f32 f0C;     // offset 0xC
-    TVec v10;    // offset 0x10
-    TVec v1C;    // offset 0x1C
-    f32 f28;     // offset 0x28
-    f32 f2C;     // offset 0x2C
-    f32 f30;     // offset 0x30
-    f32 f34;     // offset 0x34
-    u8 pad38[0x44 - 0x38];
-    s32 i44;     // offset 0x44
-    f32 f48;     // offset 0x48
-    u8 pad4C[0x50 - 0x4C];
-    f32 f50;     // offset 0x50
-    f32 f54;     // offset 0x54
-    f32 f58;     // offset 0x58
-    f32 f5C;     // offset 0x5C
-    f32 f60;     // offset 0x60
-    f32 f64;     // offset 0x64
-    f32 f68;     // offset 0x68
-    f32 f6C;     // offset 0x6C
-    f32 f70;     // offset 0x70
-    f32 f74;     // offset 0x74
-    f32 f78;     // offset 0x78
-    f32 f7C;     // offset 0x7C
-    u8 pad80[0x90 - 0x80];
 };
 
 // Ground-mark particle system description.
@@ -626,28 +596,28 @@ void fn_802A1CC4(void) {
     const char* tex = "splash.tex";
     if (DbgFlag(8)) {
         PartParams d;
-        d.max = 0x80;
-        d.f08 = 0.35f;
-        d.f0C = 1.0f;
-        d.flags = 0;
-        d.v10.x = 1.0f;
-        d.v10.y = 1.0f;
-        d.v10.z = 1.0f;
-        d.v1C.x = 1.0f;
-        d.v1C.y = 1.0f;
-        d.v1C.z = 1.0f;
-        d.f30 = 0.5f;
-        d.i44 = 5;
-        d.f50 = 1.0f;
-        d.f54 = 0.75f;
-        d.f58 = -0.25f;
-        d.f5C = 0.25f;
-        d.f70 = 0.0f;
-        d.f68 = 0.0f;
-        d.f60 = 0.0f;
-        d.f6C = 1.0f;
-        d.f64 = 1.0f;
-        d.f74 = 0.0f;
+        d.maxParticles = 0x80;
+        d.maxLife = 0.35f;
+        d.spewRate = 1.0f;
+        d.type = 0;
+        d.spread.x = 1.0f;
+        d.spread.y = 1.0f;
+        d.spread.z = 1.0f;
+        d.velScale.x = 1.0f;
+        d.velScale.y = 1.0f;
+        d.velScale.z = 1.0f;
+        d.gravity = 0.5f;
+        d.priority = 5;
+        d.sizeRamp = 1.0f;
+        d.sizeConst = 0.75f;
+        d.alphaRamp = -0.25f;
+        d.alphaConst = 0.25f;
+        d.blueRamp = 0.0f;
+        d.greenRamp = 0.0f;
+        d.redRamp = 0.0f;
+        d.greenConst = 1.0f;
+        d.redConst = 1.0f;
+        d.blueConst = 0.0f;
         lbl_8055F870 = fn_8028E2F8(&d, "paint trail", tex);
     } else {
         lbl_8055F870 = 0;
@@ -841,78 +811,78 @@ void DustTrail::Touch(const TrailEvent* e) {
 
 void DustTrail::InitSmall(const char* tex) {
     PartParams d;
-    d.max = 0x200;
-    d.f08 = 0.25f;
-    d.f0C = 1.0f;
-    d.flags = 0;
-    d.f48 = 0.9f;
-    d.i44 = 4;
-    d.v10 = TVec(0.6f, 0.4f, 0.6f);
-    d.v1C = TVec(0.9f, 0.5f, 0.9f);
-    d.f28 = 1.0f;
-    d.f2C = 4.25f;
-    d.f30 = 0.0f;
-    d.f34 = 0.25f;
-    d.f74 = 1.0f;
-    d.f6C = 1.0f;
-    d.f64 = 1.0f;
-    d.f58 = -1.0f;
-    d.f5C = 1.0f;
-    d.f50 = 2.5f;
-    d.f54 = 0.5f;
-    d.f78 = -0.2f;
-    d.f7C = 0.2f;
+    d.maxParticles = 0x200;
+    d.maxLife = 0.25f;
+    d.spewRate = 1.0f;
+    d.type = 0;
+    d.shading = 0.9f;
+    d.priority = 4;
+    d.spread = ValV3(0.6f, 0.4f, 0.6f);
+    d.velScale = ValV3(0.9f, 0.5f, 0.9f);
+    d.upKick = 1.0f;
+    d.angSpread = 4.25f;
+    d.gravity = 0.0f;
+    d.drag = 0.25f;
+    d.blueConst = 1.0f;
+    d.greenConst = 1.0f;
+    d.redConst = 1.0f;
+    d.alphaRamp = -1.0f;
+    d.alphaConst = 1.0f;
+    d.sizeRamp = 2.5f;
+    d.sizeConst = 0.5f;
+    d.angRamp = -0.2f;
+    d.angConst = 0.2f;
     small = fn_8028E2F8(&d, "small trail dust", tex);
 }
 
 void DustTrail::InitMedium(const char* tex) {
     PartParams d;
-    d.max = 0x200;
-    d.f08 = 1.0f;
-    d.f0C = 0.25f;
-    d.flags = 0;
-    d.f48 = 0.9f;
-    d.i44 = 4;
-    d.v10 = TVec(0.6f, 0.4f, 0.6f);
-    d.v1C = TVec(0.9f, 0.5f, 0.9f);
-    d.f28 = 2.0f;
-    d.f2C = 4.25f;
-    d.f30 = 0.0f;
-    d.f34 = 0.5f;
-    d.f74 = 1.0f;
-    d.f6C = 1.0f;
-    d.f64 = 1.0f;
-    d.f58 = -1.0f;
-    d.f5C = 1.0f;
-    d.f50 = 6.0f;
-    d.f54 = 0.5f;
-    d.f78 = -0.2f;
-    d.f7C = 0.2f;
+    d.maxParticles = 0x200;
+    d.maxLife = 1.0f;
+    d.spewRate = 0.25f;
+    d.type = 0;
+    d.shading = 0.9f;
+    d.priority = 4;
+    d.spread = ValV3(0.6f, 0.4f, 0.6f);
+    d.velScale = ValV3(0.9f, 0.5f, 0.9f);
+    d.upKick = 2.0f;
+    d.angSpread = 4.25f;
+    d.gravity = 0.0f;
+    d.drag = 0.5f;
+    d.blueConst = 1.0f;
+    d.greenConst = 1.0f;
+    d.redConst = 1.0f;
+    d.alphaRamp = -1.0f;
+    d.alphaConst = 1.0f;
+    d.sizeRamp = 6.0f;
+    d.sizeConst = 0.5f;
+    d.angRamp = -0.2f;
+    d.angConst = 0.2f;
     medium = fn_8028E2F8(&d, "medium trail dust", tex);
 }
 
 void DustTrail::InitEvent(const char* tex) {
     PartParams d;
-    d.max = 0x100;
-    d.f08 = 1.0f;
-    d.f0C = 1.0f;
-    d.flags = 0;
-    d.f48 = 0.9f;
-    d.i44 = 4;
-    d.v10 = TVec(0.6f, 0.4f, 0.6f);
-    d.v1C = TVec(1.0f, 1.0f, 1.0f);
-    d.f28 = 0.65f;
-    d.f30 = 0.0f;
-    d.f34 = 0.75f;
-    d.f74 = 1.0f;
-    d.f6C = 1.0f;
-    d.f64 = 1.0f;
-    d.f58 = -0.75f;
-    d.f5C = 0.75f;
-    d.f50 = 1.75f;
-    d.f54 = 0.75f;
-    d.f78 = -0.2f;
-    d.f7C = 0.2f;
+    d.maxParticles = 0x100;
+    d.maxLife = 1.0f;
+    d.spewRate = 1.0f;
+    d.type = 0;
+    d.shading = 0.9f;
+    d.priority = 4;
+    d.spread = ValV3(0.6f, 0.4f, 0.6f);
+    d.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    d.upKick = 0.65f;
+    d.gravity = 0.0f;
+    d.drag = 0.75f;
+    d.blueConst = 1.0f;
+    d.greenConst = 1.0f;
+    d.redConst = 1.0f;
+    d.alphaRamp = -0.75f;
+    d.alphaConst = 0.75f;
+    d.sizeRamp = 1.75f;
+    d.sizeConst = 0.75f;
+    d.angRamp = -0.2f;
+    d.angConst = 0.2f;
     event = fn_8028E2F8(&d, "event dust", tex);
 }
 
@@ -975,59 +945,59 @@ void AsphaltTrail::Emit(const TRacer* r, int wheel) {
 
 void AsphaltTrail::InitSmall(const char* tex) {
     PartParams d;
-    d.max = 0x80;
-    d.f08 = 1.0f;
-    d.f0C = 0.5f;
-    d.flags = 2;
-    d.f48 = 0.5f;
-    d.i44 = 4;
-    d.v10 = TVec(0.9f, 0.4f, 0.9f);
-    d.v1C = TVec(0.6f, 0.6f, 0.6f);
-    d.f28 = 0.35f;
-    d.f2C = 4.5f;
-    d.f30 = -0.05f;
-    d.f34 = 2.0f;
-    d.f70 = 0.1f;
-    d.f68 = 0.1f;
-    d.f60 = 0.1f;
-    d.f74 = 0.9f;
-    d.f6C = 0.9f;
-    d.f64 = 0.9f;
-    d.f58 = -0.8f;
-    d.f5C = 0.8f;
-    d.f50 = 2.5f;
-    d.f54 = 0.5f;
-    d.f78 = -0.5f;
-    d.f7C = 1.0f;
+    d.maxParticles = 0x80;
+    d.maxLife = 1.0f;
+    d.spewRate = 0.5f;
+    d.type = 2;
+    d.shading = 0.5f;
+    d.priority = 4;
+    d.spread = ValV3(0.9f, 0.4f, 0.9f);
+    d.velScale = ValV3(0.6f, 0.6f, 0.6f);
+    d.upKick = 0.35f;
+    d.angSpread = 4.5f;
+    d.gravity = -0.05f;
+    d.drag = 2.0f;
+    d.blueRamp = 0.1f;
+    d.greenRamp = 0.1f;
+    d.redRamp = 0.1f;
+    d.blueConst = 0.9f;
+    d.greenConst = 0.9f;
+    d.redConst = 0.9f;
+    d.alphaRamp = -0.8f;
+    d.alphaConst = 0.8f;
+    d.sizeRamp = 2.5f;
+    d.sizeConst = 0.5f;
+    d.angRamp = -0.5f;
+    d.angConst = 1.0f;
     small = fn_8028E2F8(&d, "small trail smoke", tex);
 }
 
 void AsphaltTrail::InitLarge(const char* tex) {
     PartParams d;
-    d.max = 0x40;
-    d.f08 = 4.0f;
-    d.f0C = 0.34f;
-    d.flags = 2;
-    d.f48 = 0.5f;
-    d.v10 = TVec(0.9f, 0.4f, 0.9f);
-    d.v1C = TVec(0.6f, 0.6f, 0.6f);
-    d.f28 = 0.6f;
-    d.f2C = 1.75f;
-    d.f30 = -0.05f;
-    d.f34 = 2.0f;
-    d.i44 = 4;
-    d.f70 = 0.1f;
-    d.f68 = 0.1f;
-    d.f60 = 0.1f;
-    d.f74 = 0.9f;
-    d.f6C = 0.9f;
-    d.f64 = 0.9f;
-    d.f58 = -0.87f;
-    d.f5C = 0.87f;
-    d.f50 = 7.0f;
-    d.f54 = 0.65f;
-    d.f78 = -1.0f;
-    d.f7C = 1.0f;
+    d.maxParticles = 0x40;
+    d.maxLife = 4.0f;
+    d.spewRate = 0.34f;
+    d.type = 2;
+    d.shading = 0.5f;
+    d.spread = ValV3(0.9f, 0.4f, 0.9f);
+    d.velScale = ValV3(0.6f, 0.6f, 0.6f);
+    d.upKick = 0.6f;
+    d.angSpread = 1.75f;
+    d.gravity = -0.05f;
+    d.drag = 2.0f;
+    d.priority = 4;
+    d.blueRamp = 0.1f;
+    d.greenRamp = 0.1f;
+    d.redRamp = 0.1f;
+    d.blueConst = 0.9f;
+    d.greenConst = 0.9f;
+    d.redConst = 0.9f;
+    d.alphaRamp = -0.87f;
+    d.alphaConst = 0.87f;
+    d.sizeRamp = 7.0f;
+    d.sizeConst = 0.65f;
+    d.angRamp = -1.0f;
+    d.angConst = 1.0f;
     large = fn_8028E2F8(&d, "large trail smoke", tex);
 }
 
@@ -1058,27 +1028,27 @@ void GrassTrail::Emit(const TRacer* r, int wheel) {
 
 void GrassTrail::Init(const char* tex) {
     PartParams d;
-    d.max = 0x12C;
-    d.f08 = 0.8f;
-    d.f0C = 0.5f;
-    d.flags = 2;
-    d.f48 = 0.6f;
-    d.i44 = 4;
-    d.v10 = TVec(2.5f, 1.7f, 2.5f);
-    d.v1C = TVec(1.0f, 0.65f, 1.0f);
-    d.f28 = 1.0f;
-    d.f2C = 8.0f;
-    d.f30 = 0.7f;
-    d.f34 = 1.0f;
-    d.f74 = 1.0f;
-    d.f6C = 1.0f;
-    d.f64 = 1.0f;
-    d.f58 = -1.5f;
-    d.f5C = 1.5f;
-    d.f50 = 0.6f;
-    d.f54 = 0.4f;
-    d.f78 = 0.0f;
-    d.f7C = 1.0f;
+    d.maxParticles = 0x12C;
+    d.maxLife = 0.8f;
+    d.spewRate = 0.5f;
+    d.type = 2;
+    d.shading = 0.6f;
+    d.priority = 4;
+    d.spread = ValV3(2.5f, 1.7f, 2.5f);
+    d.velScale = ValV3(1.0f, 0.65f, 1.0f);
+    d.upKick = 1.0f;
+    d.angSpread = 8.0f;
+    d.gravity = 0.7f;
+    d.drag = 1.0f;
+    d.blueConst = 1.0f;
+    d.greenConst = 1.0f;
+    d.redConst = 1.0f;
+    d.alphaRamp = -1.5f;
+    d.alphaConst = 1.5f;
+    d.sizeRamp = 0.6f;
+    d.sizeConst = 0.4f;
+    d.angRamp = 0.0f;
+    d.angConst = 1.0f;
     sys = fn_8028E2F8(&d, "trail grass", tex);
 }
 
@@ -1106,27 +1076,27 @@ void SandTrail::Emit(const TRacer* r, int wheel) {
 
 void SandTrail::Init(const char* tex) {
     PartParams d;
-    d.max = 0xC0;
-    d.f08 = 1.2f;
-    d.f0C = 0.6f;
-    d.flags = 2;
-    d.f48 = 0.5f;
-    d.i44 = 4;
-    d.v10 = TVec(2.2f, 0.75f, 2.2f);
-    d.v1C = TVec(1.0f, 1.0f, 1.0f);
-    d.f28 = 2.75f;
-    d.f2C = 4.25f;
-    d.f30 = 0.5f;
-    d.f34 = 0.5f;
-    d.f74 = 1.0f;
-    d.f6C = 1.0f;
-    d.f64 = 1.0f;
-    d.f58 = -0.8f;
-    d.f5C = 0.8f;
-    d.f50 = 2.75f;
-    d.f54 = 1.0f;
-    d.f78 = -0.75f;
-    d.f7C = 1.0f;
+    d.maxParticles = 0xC0;
+    d.maxLife = 1.2f;
+    d.spewRate = 0.6f;
+    d.type = 2;
+    d.shading = 0.5f;
+    d.priority = 4;
+    d.spread = ValV3(2.2f, 0.75f, 2.2f);
+    d.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    d.upKick = 2.75f;
+    d.angSpread = 4.25f;
+    d.gravity = 0.5f;
+    d.drag = 0.5f;
+    d.blueConst = 1.0f;
+    d.greenConst = 1.0f;
+    d.redConst = 1.0f;
+    d.alphaRamp = -0.8f;
+    d.alphaConst = 0.8f;
+    d.sizeRamp = 2.75f;
+    d.sizeConst = 1.0f;
+    d.angRamp = -0.75f;
+    d.angConst = 1.0f;
     sys = fn_8028E2F8(&d, "trail sand", tex);
 }
 
@@ -1164,24 +1134,24 @@ void WaterTrail::Emit(const TRacer* r, int wheel) {
 
 void WaterTrail::Init(const char* tex) {
     PartParams d;
-    d.flags = 2;
-    d.max = 0x100;
-    d.f08 = 0.5f;
-    d.f0C = 0.85f;
-    d.v10 = TVec(1.0f, 1.0f, 1.0f);
-    d.v1C = TVec(1.0f, 1.0f, 1.0f);
-    d.f30 = 0.75f;
-    d.f34 = 0.35f;
-    d.i44 = 5;
-    d.f48 = 0.75f;
-    d.f54 = 0.5f;
-    d.f50 = 0.2f;
-    d.f5C = 1.0f;
-    d.f58 = -1.0f;
-    d.f74 = 1.0f;
-    d.f6C = 1.0f;
-    d.f64 = 1.0f;
-    d.f7C = 1.0f;
+    d.type = 2;
+    d.maxParticles = 0x100;
+    d.maxLife = 0.5f;
+    d.spewRate = 0.85f;
+    d.spread = ValV3(1.0f, 1.0f, 1.0f);
+    d.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    d.gravity = 0.75f;
+    d.drag = 0.35f;
+    d.priority = 5;
+    d.shading = 0.75f;
+    d.sizeConst = 0.5f;
+    d.sizeRamp = 0.2f;
+    d.alphaConst = 1.0f;
+    d.alphaRamp = -1.0f;
+    d.blueConst = 1.0f;
+    d.greenConst = 1.0f;
+    d.redConst = 1.0f;
+    d.angConst = 1.0f;
     sys = fn_8028E2F8(&d, "trail water", tex);
 }
 
@@ -1233,24 +1203,24 @@ void MudTrail::Touch(const TrailEvent* e) {
 
 void MudTrail::Init(const char* tex) {
     PartParams d;
-    d.flags = 2;
-    d.max = 0x100;
-    d.f08 = 0.5f;
-    d.f0C = 0.85f;
-    d.v10 = TVec(1.0f, 1.0f, 1.0f);
-    d.v1C = TVec(1.0f, 1.0f, 1.0f);
-    d.f30 = 0.75f;
-    d.f34 = 0.35f;
-    d.i44 = 5;
-    d.f48 = 0.75f;
-    d.f54 = 0.3f;
-    d.f50 = 0.4f;
-    d.f5C = 1.0f;
-    d.f58 = -1.0f;
-    d.f74 = 1.0f;
-    d.f6C = 1.0f;
-    d.f64 = 1.0f;
-    d.f7C = 1.0f;
+    d.type = 2;
+    d.maxParticles = 0x100;
+    d.maxLife = 0.5f;
+    d.spewRate = 0.85f;
+    d.spread = ValV3(1.0f, 1.0f, 1.0f);
+    d.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    d.gravity = 0.75f;
+    d.drag = 0.35f;
+    d.priority = 5;
+    d.shading = 0.75f;
+    d.sizeConst = 0.3f;
+    d.sizeRamp = 0.4f;
+    d.alphaConst = 1.0f;
+    d.alphaRamp = -1.0f;
+    d.blueConst = 1.0f;
+    d.greenConst = 1.0f;
+    d.redConst = 1.0f;
+    d.angConst = 1.0f;
     sys = fn_8028E2F8(&d, "trail mud", tex);
 }
 

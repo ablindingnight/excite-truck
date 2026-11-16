@@ -2,6 +2,8 @@
 // height field drawn as an environment-mapped strip mesh) and flat shallows, with wheel and body
 // splashes from the cars. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/partparams.h"
+#include "game/plainvec.h"
 #include "game/vecmatrix.h"
 #include <revolution/MTX/vec.h>
 #include "macros.h"
@@ -467,37 +469,6 @@ struct SplashColor {
     f32 b_;
 };
 
-struct PartParams {
-    PartParams(void);  // partman.cpp: fills in the defaults
-    s32 kind;         // offset 0x0
-    s32 max;          // offset 0x4
-    f32 size0;        // offset 0x8
-    f32 size1;        // offset 0xC
-    SplashColor c0;   // offset 0x10
-    SplashColor c1;   // offset 0x1C
-    f32 gravity;      // offset 0x28
-    f32 unk2C;        // offset 0x2C
-    f32 life;         // offset 0x30
-    f32 drag;         // offset 0x34
-    u8 pad38[0x44 - 0x38];
-    s32 frames;       // offset 0x44
-    f32 shading;      // offset 0x48
-    u8 pad4C[0x50 - 0x4C];
-    f32 grow;         // offset 0x50
-    f32 fade;         // offset 0x54
-    f32 spinMin;      // offset 0x58
-    f32 spinMax;      // offset 0x5C
-    u8 pad60[0x64 - 0x60];
-    f32 a64;          // offset 0x64
-    u8 pad68[0x6C - 0x68];
-    f32 a6C;          // offset 0x6C
-    u8 pad70[0x74 - 0x70];
-    f32 a74;          // offset 0x74
-    u8 pad78[0x7C - 0x78];
-    f32 a7C;          // offset 0x7C
-    u8 pad80[0x90 - 0x80];
-};
-
 extern "C" void fn_8029CBA0(void) {
     const char* tex = "splash.tex";
     f32 shading = 0.75f;
@@ -508,25 +479,25 @@ extern "C" void fn_8029CBA0(void) {
     }
     if (fn_802BF4F0() || lbl_8055F7F0 > 0 || lbl_8055F7F4 > 0) {
         PartParams e;
-        e.kind = 2;
-        e.max = 0x200;
-        e.size0 = 0.75f;
-        e.size1 = 0.75f;
-        e.c0 = SplashColor(1.0f, 1.0f, 1.0f);
-        e.c1 = SplashColor(1.0f, 1.0f, 1.0f);
-        e.gravity = 0.5f;
-        e.life = 0.75f;
+        e.type = 2;
+        e.maxParticles = 0x200;
+        e.maxLife = 0.75f;
+        e.spewRate = 0.75f;
+        e.spread = ValV3(1.0f, 1.0f, 1.0f);
+        e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+        e.upKick = 0.5f;
+        e.gravity = 0.75f;
         e.drag = 0.5f;
-        e.frames = 5;
+        e.priority = 5;
         e.shading = shading;
-        e.fade = 0.75f;
-        e.grow = 0.25f;
-        e.spinMax = 1.0f;
-        e.spinMin = -1.0f;
-        e.a74 = 1.0f;
-        e.a6C = 1.0f;
-        e.a64 = 1.0f;
-        e.a7C = 1.0f;
+        e.sizeConst = 0.75f;
+        e.sizeRamp = 0.25f;
+        e.alphaConst = 1.0f;
+        e.alphaRamp = -1.0f;
+        e.blueConst = 1.0f;
+        e.greenConst = 1.0f;
+        e.redConst = 1.0f;
+        e.angConst = 1.0f;
         lbl_8055F7F8 = fn_8028E2F8(&e, "splash", tex);
     } else {
         lbl_8055F7F8 = 0;

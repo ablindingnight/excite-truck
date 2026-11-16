@@ -4,6 +4,7 @@
 // "mist" point clouds read from the track effect tables, a full-screen flash/tint and a lightning
 // model. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/partparams.h"
 #include <revolution/MTX/vec.h>
 #include "game/dropsource.h"
 #include "game/vec3_init.h"
@@ -52,32 +53,6 @@ struct ScreenFx {
     u8 pad0[0xD8];
     f32 lightning;  // offset 0xD8
     f32 flash;      // offset 0xDC
-};
-
-struct PartParams {
-    PartParams(void);
-    s32 a28;     // offset 0x0
-    s32 a2C;     // offset 0x4
-    f32 a30;     // offset 0x8
-    f32 a34;     // offset 0xC
-    f32 a38[3];  // offset 0x10
-    f32 a44[3];  // offset 0x1C
-    u8 pad50[8];
-    f32 a58;     // offset 0x30
-    u8 pad5C[0x10];
-    s32 a6C;     // offset 0x44
-    u8 pad70[8];
-    f32 a78;     // offset 0x50
-    f32 a7C;     // offset 0x54
-    f32 a80;     // offset 0x58
-    f32 a84;     // offset 0x5C
-    u8 pad88[4];
-    f32 a8C;     // offset 0x64
-    u8 pad90[4];
-    f32 a94;     // offset 0x6C
-    u8 pad98[4];
-    f32 a9C;     // offset 0x74
-    u8 padA0[0x14];
 };
 
 class SnowSystem {
@@ -475,25 +450,25 @@ int fn_802A4FA8(Droplet* d, ValueNode* vn) {
 void fn_802A50F8(void) {
     PartParams pd;
     char key[32];
-    pd.a28 = 0;
-    pd.a2C = 0x100;
-    pd.a30 = 0.35f;
-    pd.a34 = 1.0f;
-    pd.a38[0] = 1.65f;
-    pd.a38[1] = 1.65f;
-    pd.a38[2] = 1.65f;
-    pd.a44[0] = 1.0f;
-    pd.a44[1] = 1.0f;
-    pd.a44[2] = 1.0f;
-    pd.a58 = 1.0f;
-    pd.a6C = 5;
-    pd.a7C = 0.035f;
-    pd.a78 = 0.035f;
-    pd.a84 = 1.0f;
-    pd.a80 = -1.0f;
-    pd.a9C = 1.0f;
-    pd.a94 = 1.0f;
-    pd.a8C = 1.0f;
+    pd.type = 0;
+    pd.maxParticles = 0x100;
+    pd.maxLife = 0.35f;
+    pd.spewRate = 1.0f;
+    pd.spread.x = 1.65f;
+    pd.spread.y = 1.65f;
+    pd.spread.z = 1.65f;
+    pd.velScale.x = 1.0f;
+    pd.velScale.y = 1.0f;
+    pd.velScale.z = 1.0f;
+    pd.gravity = 1.0f;
+    pd.priority = 5;
+    pd.sizeConst = 0.035f;
+    pd.sizeRamp = 0.035f;
+    pd.alphaConst = 1.0f;
+    pd.alphaRamp = -1.0f;
+    pd.blueConst = 1.0f;
+    pd.greenConst = 1.0f;
+    pd.redConst = 1.0f;
     lbl_8055F894 = fn_8028E2F8(&pd, "droplets", "rain.tex");
     DropSource* s = lbl_804BCFB8;
     for (int i = 0; i < fn_80287B14(); s++, i++) {

@@ -2,6 +2,7 @@
 // re-entry puffs, the invincible-car sparks and the stunt fog colour, plus the menu copies of
 // the emitter setup. Names are guesses apart from the allocation tags and file names.
 #include "game/common.h"
+#include "game/partparams.h"
 #include "game/raceopts.h"
 #include "game/plainvec.h"
 #include "macros.h"
@@ -35,37 +36,6 @@ struct SColor {
     f32 r;
     f32 g;
     f32 b_;
-};
-
-struct PartParams {
-    PartParams(void);  // partman.cpp: fills in the defaults
-    s32 kind;       // offset 0x0
-    s32 max;        // offset 0x4
-    f32 size0;      // offset 0x8
-    f32 size1;      // offset 0xC
-    SColor c0;      // offset 0x10
-    SColor c1;      // offset 0x1C
-    f32 gravity;    // offset 0x28
-    f32 unk2C;      // offset 0x2C
-    f32 life;       // offset 0x30
-    f32 drag;       // offset 0x34
-    u8 pad38[0x44 - 0x38];
-    s32 frames;     // offset 0x44
-    f32 shading;    // offset 0x48
-    f32 a4C;        // offset 0x4C
-    f32 a50;        // offset 0x50
-    f32 a54;        // offset 0x54
-    f32 a58;        // offset 0x58
-    f32 a5C;        // offset 0x5C
-    f32 a60;        // offset 0x60
-    f32 a64;        // offset 0x64
-    f32 a68;        // offset 0x68
-    f32 a6C;        // offset 0x6C
-    f32 a70;        // offset 0x70
-    f32 a74;        // offset 0x74
-    f32 a78;        // offset 0x78
-    f32 a7C;        // offset 0x7C
-    u8 pad80[0x8C - 0x80];
 };
 
 extern "C" {
@@ -183,30 +153,30 @@ struct StuntEmitters {
     // Helper names unproven: the stack order shows each descriptor sits in its own inline.
     void MakeTrail(void) {
         PartParams r;
-        r.max = 0x60;
-        r.size0 = 0.5f;
-        r.size1 = 1.0f;
-        r.kind = 2;
+        r.maxParticles = 0x60;
+        r.maxLife = 0.5f;
+        r.spewRate = 1.0f;
+        r.type = 2;
         r.shading = 0.5f;
-        r.frames = 5;
-        r.c0 = SColor(0.0f, 0.0f, 0.0f);
-        r.c1 = SColor(1.0f, 1.0f, 1.0f);
+        r.priority = 5;
+        r.spread = ValV3(0.0f, 0.0f, 0.0f);
+        r.velScale = ValV3(1.0f, 1.0f, 1.0f);
+        r.upKick = 0.0f;
+        r.angSpread = 3.0f;
         r.gravity = 0.0f;
-        r.unk2C = 3.0f;
-        r.life = 0.0f;
         r.drag = 0.1f;
-        r.a70 = -0.2f;
-        r.a68 = -0.2f;
-        r.a60 = -0.2f;
-        r.a74 = 1.1f;
-        r.a6C = 1.1f;
-        r.a64 = 1.1f;
-        r.a58 = -0.2f;
-        r.a5C = 0.2f;
-        r.a50 = 0.2f;
-        r.a54 = 1.8f;
-        r.a78 = 0.8f;
-        r.a7C = 1.0f;
+        r.blueRamp = -0.2f;
+        r.greenRamp = -0.2f;
+        r.redRamp = -0.2f;
+        r.blueConst = 1.1f;
+        r.greenConst = 1.1f;
+        r.redConst = 1.1f;
+        r.alphaRamp = -0.2f;
+        r.alphaConst = 0.2f;
+        r.sizeRamp = 0.2f;
+        r.sizeConst = 1.8f;
+        r.angRamp = 0.8f;
+        r.angConst = 1.0f;
         e1 = fn_8028E2F8(&r, "reentry", "entrypuff.tex");
     }
     void MakeSpark(void) {
@@ -216,32 +186,32 @@ struct StuntEmitters {
         f32 t;
         t = 0.3f;
         t2 = t * t;
-        e.max = 300;
-        e.size0 = t;
-        e.size1 = 1.0f;
-        e.kind = 2;
+        e.maxParticles = 300;
+        e.maxLife = t;
+        e.spewRate = 1.0f;
+        e.type = 2;
         e.shading = 0.5f;
-        e.frames = 5;
-        e.c0 = SColor(0.0f, 1.0f, 0.0f);
-        e.c1 = SColor(1.05f, 1.0f, 1.05f);
+        e.priority = 5;
+        e.spread = ValV3(0.0f, 1.0f, 0.0f);
+        e.velScale = ValV3(1.05f, 1.0f, 1.05f);
+        e.upKick = 0.0f;
+        e.angSpread = 4.0f;
         e.gravity = 0.0f;
-        e.unk2C = 4.0f;
-        e.life = 0.0f;
         e.drag = 0.1f;
-        e.a60 = -0.2f;
-        e.a68 = -0.2f;
-        e.a70 = -0.2f;
-        e.a64 = 1.0f;
-        e.a6C = 1.0f;
-        e.a74 = 1.0f;
-        e.a58 = 0.0f;
-        e.a5C = 3.9f;
+        e.redRamp = -0.2f;
+        e.greenRamp = -0.2f;
+        e.blueRamp = -0.2f;
+        e.redConst = 1.0f;
+        e.greenConst = 1.0f;
+        e.blueConst = 1.0f;
+        e.alphaRamp = 0.0f;
+        e.alphaConst = 3.9f;
         g = -1.499f * (4.0f / t2);
-        e.a4C = g;
-        e.a50 = (-0.001f - 0.5f * g * t2) / t;
-        e.a54 = 0.001f;
-        e.a78 = 0.0f;
-        e.a7C = 2.0f;
+        e.sizeAccel = g;
+        e.sizeRamp = (-0.001f - 0.5f * g * t2) / t;
+        e.sizeConst = 0.001f;
+        e.angRamp = 0.0f;
+        e.angConst = 2.0f;
         e0 = fn_8028E2F8(&e, "invcblespark", "spark.tex");
     }
     StuntEmitters(void) {

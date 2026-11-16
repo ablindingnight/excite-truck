@@ -3,6 +3,8 @@
 // paint splats and the explosion sequences. Names are guesses apart from the allocation tags,
 // file names and value keys.
 #include "game/common.h"
+#include "game/partparams.h"
+#include "game/plainvec.h"
 #include "game/vecmatrix.h"
 #include "game/math_types.h"
 #include "macros.h"
@@ -77,37 +79,6 @@ public:
     static FXSequence* Load(const char* name);
     void Free(void);
     int Play(f32 t, const ValVec3* pos);
-};
-
-struct PartParams {
-    PartParams(void);  // partman.cpp: fills in the defaults
-    s32 kind;       // offset 0x0
-    s32 max;        // offset 0x4
-    f32 size0;      // offset 0x8
-    f32 size1;      // offset 0xC
-    Vec c0;         // offset 0x10
-    Vec c1;         // offset 0x1C
-    f32 gravity;    // offset 0x28
-    f32 unk2C;      // offset 0x2C
-    f32 life;       // offset 0x30
-    f32 drag;       // offset 0x34
-    u8 pad38[0x44 - 0x38];
-    s32 frames;     // offset 0x44
-    f32 shading;    // offset 0x48
-    f32 a4C;        // offset 0x4C
-    f32 a50;        // offset 0x50
-    f32 a54;        // offset 0x54
-    f32 a58;        // offset 0x58
-    f32 a5C;        // offset 0x5C
-    f32 a60;        // offset 0x60
-    f32 a64;        // offset 0x64
-    f32 a68;        // offset 0x68
-    f32 a6C;        // offset 0x6C
-    f32 a70;        // offset 0x70
-    f32 a74;        // offset 0x74
-    f32 a78;        // offset 0x78
-    f32 a7C;        // offset 0x7C
-    u8 pad80[0x8C - 0x80];
 };
 
 extern "C" {
@@ -566,28 +537,28 @@ void fn_8028B3CC(void) {
     const char* tex = "splash.tex";
     if (PaintOn()) {
         PartParams e;
-        e.max = 0x80;
-        e.size0 = 0.5f;
-        e.size1 = 1.0f;
-        e.kind = 0;
-        e.c0.x = 5.0f;
-        e.c0.y = 5.0f;
-        e.c0.z = 5.0f;
-        e.c1.x = 0.35f;
-        e.c1.y = 0.35f;
-        e.c1.z = 0.35f;
-        e.life = 0.5f;
-        e.frames = 5;
-        e.a50 = 2.5f;
-        e.a54 = 1.0f;
-        e.a58 = -1.5f;
-        e.a5C = 1.5f;
-        e.a70 = 0.0f;
-        e.a68 = 0.0f;
-        e.a60 = 0.0f;
-        e.a6C = 1.0f;
-        e.a64 = 1.0f;
-        e.a74 = 0.0f;
+        e.maxParticles = 0x80;
+        e.maxLife = 0.5f;
+        e.spewRate = 1.0f;
+        e.type = 0;
+        e.spread.x = 5.0f;
+        e.spread.y = 5.0f;
+        e.spread.z = 5.0f;
+        e.velScale.x = 0.35f;
+        e.velScale.y = 0.35f;
+        e.velScale.z = 0.35f;
+        e.gravity = 0.5f;
+        e.priority = 5;
+        e.sizeRamp = 2.5f;
+        e.sizeConst = 1.0f;
+        e.alphaRamp = -1.5f;
+        e.alphaConst = 1.5f;
+        e.blueRamp = 0.0f;
+        e.greenRamp = 0.0f;
+        e.redRamp = 0.0f;
+        e.greenConst = 1.0f;
+        e.redConst = 1.0f;
+        e.blueConst = 0.0f;
         lbl_8055F704 = fn_8028E2F8(&e, "paint splat", tex);
     } else {
         lbl_8055F704 = 0;

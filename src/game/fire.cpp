@@ -3,6 +3,7 @@
 // textured cross quads, and event-driven torch fires. Names are guesses apart from the
 // allocation tags, value keys, file names and messages.
 #include "game/common.h"
+#include "game/partparams.h"
 #include "game/vecmatrix.h"
 #include "game/math_types.h"
 #include "game/plainvec.h"
@@ -67,39 +68,6 @@ struct FVec {
     f32 x;
     f32 y;
     f32 z;
-};
-
-struct PartParams {
-    PartParams(void);  // partman.cpp: fills in the defaults
-    s32 kind;       // offset 0x0
-    s32 max;        // offset 0x4
-    f32 size0;      // offset 0x8
-    f32 size1;      // offset 0xC
-    FColor c0;      // offset 0x10
-    FColor c1;      // offset 0x1C
-    f32 gravity;    // offset 0x28
-    f32 unk2C;      // offset 0x2C
-    f32 life;       // offset 0x30
-    f32 drag;       // offset 0x34
-    u8 pad38[0x44 - 0x38];
-    s32 frames;     // offset 0x44
-    f32 shading;    // offset 0x48
-    u8 pad4C[0x50 - 0x4C];
-    f32 grow;       // offset 0x50
-    f32 fade;       // offset 0x54
-    f32 spinMin;    // offset 0x58
-    f32 spinMax;    // offset 0x5C
-    f32 a60;        // offset 0x60
-    f32 a64;        // offset 0x64
-    f32 a68;        // offset 0x68
-    f32 a6C;        // offset 0x6C
-    f32 a70;        // offset 0x70
-    f32 a74;        // offset 0x74
-    u8 pad78[0x80 - 0x78];
-    f32 a80;        // offset 0x80
-    s32 i84;        // offset 0x84
-    u8 b88;         // offset 0x88
-    u8 b89;         // offset 0x89
 };
 
 class FXSequence {
@@ -504,29 +472,29 @@ int fn_80297D90(s32* out, int n) {
 }
 
 void fn_80297DC8(PartParams* e) {
-    e->max = 0xC0;
-    e->size0 = 1.0f;
-    e->size1 = 0.25f;
-    e->kind = 1;
-    e->c0 = FColor(0.5f, 0.25f, 0.5f);
-    e->c1 = FColor(1.0f, 1.0f, 1.0f);
-    e->gravity = 0.0f;
-    e->life = -0.05f;
-    e->grow = 1.0f;
-    e->fade = 1.25f;
-    e->spinMin = -3.0f;
-    e->spinMax = 3.0f;
-    e->a70 = -0.4f;
-    e->a68 = -0.4f;
-    e->a60 = -0.4f;
-    e->a74 = 0.6f;
-    e->a6C = 0.6f;
-    e->a64 = 0.6f;
-    e->a80 = 1.0f;
-    e->i84 = 0x40;
-    e->b88 = 1;
-    e->frames = 2;
-    e->b89 = 1;
+    e->maxParticles = 0xC0;
+    e->maxLife = 1.0f;
+    e->spewRate = 0.25f;
+    e->type = 1;
+    e->spread = ValV3(0.5f, 0.25f, 0.5f);
+    e->velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e->upKick = 0.0f;
+    e->gravity = -0.05f;
+    e->sizeRamp = 1.0f;
+    e->sizeConst = 1.25f;
+    e->alphaRamp = -3.0f;
+    e->alphaConst = 3.0f;
+    e->blueRamp = -0.4f;
+    e->greenRamp = -0.4f;
+    e->redRamp = -0.4f;
+    e->blueConst = 0.6f;
+    e->greenConst = 0.6f;
+    e->redConst = 0.6f;
+    e->animRamp = 1.0f;
+    e->frames = 0x40;
+    e->randomFrame = 1;
+    e->priority = 2;
+    e->unk89 = 1;
 }
 
 void fn_80297E90(void) {
@@ -868,30 +836,30 @@ static f32 SparkFade(f32 a) {
 
 extern "C" void fn_802991BC(EngineFireMan* m) {
     PartParams e;
-    e.max = 0x80;
-    e.size0 = 0.4f;
-    e.size1 = 0.5f;
-    e.kind = 1;
-    e.frames = 2;
-    e.c0 = FColor(0.4f, 0.4f, 0.4f);
-    e.c1 = FColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 0.3f;
-    e.life = -0.1f;
+    e.maxParticles = 0x80;
+    e.maxLife = 0.4f;
+    e.spewRate = 0.5f;
+    e.type = 1;
+    e.priority = 2;
+    e.spread = ValV3(0.4f, 0.4f, 0.4f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 0.3f;
+    e.gravity = -0.1f;
     e.drag = 0.0f;
-    e.grow = 0.25f;
-    e.fade = 0.5f;
-    e.spinMin = -1.0f;
-    e.spinMax = 1.0f;
-    e.a70 = -0.4f;
-    e.a68 = -0.4f;
-    e.a60 = -0.4f;
-    e.a74 = 0.85f;
-    e.a6C = 0.85f;
-    e.a64 = 0.85f;
-    e.a80 = 0.5f;
-    e.i84 = 0x40;
-    e.b88 = 1;
-    e.b89 = 1;
+    e.sizeRamp = 0.25f;
+    e.sizeConst = 0.5f;
+    e.alphaRamp = -1.0f;
+    e.alphaConst = 1.0f;
+    e.blueRamp = -0.4f;
+    e.greenRamp = -0.4f;
+    e.redRamp = -0.4f;
+    e.blueConst = 0.85f;
+    e.greenConst = 0.85f;
+    e.redConst = 0.85f;
+    e.animRamp = 0.5f;
+    e.frames = 0x40;
+    e.randomFrame = 1;
+    e.unk89 = 1;
     m->emitter = fn_8028E2F8(&e, "engine fire", lbl_8055CA80);
 }
 
@@ -1040,29 +1008,29 @@ void BigRingMan::Spawn(const FireCar* m, f32 radius) {
 void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     PartParams e;
     Mat3 rot;
-    e.max = 0xA0;
-    e.size0 = 1.0f;
-    e.size1 = 1.0f;
-    e.kind = 1;
-    e.c0 = FColor(0.2f, 0.2f, 0.2f);
-    e.c1 = FColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 0.0f;
-    e.life = -0.05f;
-    e.grow = 0.75f;
-    e.fade = 0.35f;
-    e.spinMin = -3.0f;
-    e.spinMax = 3.0f;
-    e.a70 = -0.4f;
-    e.a68 = -0.4f;
-    e.a60 = -0.4f;
-    e.a74 = 0.6f;
-    e.a6C = 0.6f;
-    e.a64 = 0.6f;
-    e.a80 = 1.0f;
-    e.i84 = 0x40;
-    e.b88 = 1;
-    e.frames = 2;
-    e.b89 = 1;
+    e.maxParticles = 0xA0;
+    e.maxLife = 1.0f;
+    e.spewRate = 1.0f;
+    e.type = 1;
+    e.spread = ValV3(0.2f, 0.2f, 0.2f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 0.0f;
+    e.gravity = -0.05f;
+    e.sizeRamp = 0.75f;
+    e.sizeConst = 0.35f;
+    e.alphaRamp = -3.0f;
+    e.alphaConst = 3.0f;
+    e.blueRamp = -0.4f;
+    e.greenRamp = -0.4f;
+    e.redRamp = -0.4f;
+    e.blueConst = 0.6f;
+    e.greenConst = 0.6f;
+    e.redConst = 0.6f;
+    e.animRamp = 1.0f;
+    e.frames = 0x40;
+    e.randomFrame = 1;
+    e.priority = 2;
+    e.unk89 = 1;
     r->emitter = fn_8028E2F8(&e, "ring fire", lbl_8055CA80);
     int n = MIN((int)(4.0f * radius), 12);
     n = MAX(n, 1);
@@ -1240,29 +1208,29 @@ BoostFireMan::BoostFireMan(void) {
     Reset();
     PartParams e;
     memset(&e, 0, sizeof(e));
-    e.kind = 1;
-    e.max = 500;
-    e.size0 = 0.5f;
-    e.size1 = 1.0f;
-    e.c0 = FColor(0.0f, 0.0f, 0.0f);
-    e.c1 = FColor(1.0f, 1.0f, 1.0f);
-    e.life = -1.0f;
+    e.type = 1;
+    e.maxParticles = 500;
+    e.maxLife = 0.5f;
+    e.spewRate = 1.0f;
+    e.spread = ValV3(0.0f, 0.0f, 0.0f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.gravity = -1.0f;
     e.drag = 0.1f;
-    e.frames = 2;
-    e.grow = 1.0f;
-    e.fade = 1.0f;
-    e.spinMin = -1.0f;
-    e.spinMax = 1.0f;
-    e.a70 = -1.0f;
-    e.a68 = -1.0f;
-    e.a60 = -1.0f;
-    e.a74 = 1.0f;
-    e.a6C = 1.0f;
-    e.a64 = 1.0f;
-    e.a80 = 2.0f;
-    e.i84 = 0x40;
-    e.b88 = 1;
-    e.b89 = 1;
+    e.priority = 2;
+    e.sizeRamp = 1.0f;
+    e.sizeConst = 1.0f;
+    e.alphaRamp = -1.0f;
+    e.alphaConst = 1.0f;
+    e.blueRamp = -1.0f;
+    e.greenRamp = -1.0f;
+    e.redRamp = -1.0f;
+    e.blueConst = 1.0f;
+    e.greenConst = 1.0f;
+    e.redConst = 1.0f;
+    e.animRamp = 2.0f;
+    e.frames = 0x40;
+    e.randomFrame = 1;
+    e.unk89 = 1;
     emitter = fn_8028E2F8(&e, "boost fire", lbl_8055CA8C);
     fn_801EEFDC(fn_8029C054, 14);
     fn_801EEFDC(fn_8029C024, 13);
@@ -1665,29 +1633,29 @@ void TorchFireMan::Add(const TorchFire* ev) {
 
 void TorchFireMan::InitEmitter(void) {
     PartParams e;
-    e.max = 0xC0;
-    e.size0 = 0.5f;
-    e.size1 = 1.0f;
-    e.kind = 1;
-    e.c0 = FColor(0.2f, 0.2f, 0.2f);
-    e.c1 = FColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 0.0f;
-    e.life = -0.05f;
-    e.grow = 0.5f;
-    e.fade = 0.2f;
-    e.spinMin = -3.0f;
-    e.spinMax = 3.0f;
-    e.a70 = -0.4f;
-    e.a68 = -0.4f;
-    e.a60 = -0.4f;
-    e.a74 = 0.6f;
-    e.a6C = 0.6f;
-    e.a64 = 0.6f;
-    e.a80 = 1.0f;
-    e.i84 = 0x40;
-    e.b88 = 1;
-    e.frames = 2;
-    e.b89 = 1;
+    e.maxParticles = 0xC0;
+    e.maxLife = 0.5f;
+    e.spewRate = 1.0f;
+    e.type = 1;
+    e.spread = ValV3(0.2f, 0.2f, 0.2f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 0.0f;
+    e.gravity = -0.05f;
+    e.sizeRamp = 0.5f;
+    e.sizeConst = 0.2f;
+    e.alphaRamp = -3.0f;
+    e.alphaConst = 3.0f;
+    e.blueRamp = -0.4f;
+    e.greenRamp = -0.4f;
+    e.redRamp = -0.4f;
+    e.blueConst = 0.6f;
+    e.greenConst = 0.6f;
+    e.redConst = 0.6f;
+    e.animRamp = 1.0f;
+    e.frames = 0x40;
+    e.randomFrame = 1;
+    e.priority = 2;
+    e.unk89 = 1;
     emitter = fn_8028E2F8(&e, "torch fire", lbl_8055CA80);
 }
 

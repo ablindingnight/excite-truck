@@ -2,6 +2,8 @@
 // exhaust parts, fire smoke and radiator steam, plus the shared small/large fire smoke
 // emitters. Names are guesses apart from the allocation tags, emitter names and value keys.
 #include "game/common.h"
+#include "game/partparams.h"
+#include "game/plainvec.h"
 #include "game/vecmatrix.h"
 #include "macros.h"
 #include <revolution/MTX.h>
@@ -54,38 +56,6 @@ struct SVec {
     f32 x;
     f32 y;
     f32 z;
-};
-
-// The particle emitter description (PartParams in partman/precip); its constructor sets the defaults.
-struct PartParams {
-    PartParams(void);
-    s32 kind;       // offset 0x0
-    s32 max;        // offset 0x4
-    f32 size0;      // offset 0x8
-    f32 size1;      // offset 0xC
-    SColor c0;      // offset 0x10
-    SColor c1;      // offset 0x1C
-    f32 gravity;    // offset 0x28
-    f32 unk2C;      // offset 0x2C
-    f32 life;       // offset 0x30
-    f32 drag;       // offset 0x34
-    u8 pad38[0x44 - 0x38];
-    s32 frames;     // offset 0x44
-    f32 shading;    // offset 0x48
-    f32 a4C;        // offset 0x4C
-    f32 a50;        // offset 0x50
-    f32 a54;        // offset 0x54
-    f32 a58;        // offset 0x58
-    f32 a5C;        // offset 0x5C
-    f32 a60;        // offset 0x60
-    f32 a64;        // offset 0x64
-    f32 a68;        // offset 0x68
-    f32 a6C;        // offset 0x6C
-    f32 a70;        // offset 0x70
-    f32 a74;        // offset 0x74
-    f32 a78;        // offset 0x78
-    f32 a7C;        // offset 0x7C
-    u8 pad80[0x8C - 0x80];
 };
 
 class ValueNodeV {
@@ -369,88 +339,88 @@ void EngineSmokeMan::InitPos(void) {
 
 void EngineSmokeMan::InitLight(void) {
     PartParams e;
-    e.max = 0x60;
-    e.size0 = 1.5f;
-    e.size1 = 0.2f;
-    e.kind = 2;
+    e.maxParticles = 0x60;
+    e.maxLife = 1.5f;
+    e.spewRate = 0.2f;
+    e.type = 2;
     e.shading = 0.5f;
-    e.frames = 5;
-    e.c0 = SColor(0.9f, 0.9f, 0.9f);
-    e.c1 = SColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 0.0f;
-    e.unk2C = 3.0f;
-    e.life = -0.15f;
+    e.priority = 5;
+    e.spread = ValV3(0.9f, 0.9f, 0.9f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 0.0f;
+    e.angSpread = 3.0f;
+    e.gravity = -0.15f;
     e.drag = 1.0f;
-    e.a70 = 0.8f;
-    e.a68 = 0.8f;
-    e.a60 = 0.8f;
-    e.a74 = -0.1f;
-    e.a6C = -0.1f;
-    e.a64 = -0.1f;
-    e.a58 = -0.4f;
-    e.a5C = 0.4f;
-    e.a50 = 1.9f;
-    e.a54 = 0.8f;
-    e.a78 = -0.5f;
-    e.a7C = 1.0f;
+    e.blueRamp = 0.8f;
+    e.greenRamp = 0.8f;
+    e.redRamp = 0.8f;
+    e.blueConst = -0.1f;
+    e.greenConst = -0.1f;
+    e.redConst = -0.1f;
+    e.alphaRamp = -0.4f;
+    e.alphaConst = 0.4f;
+    e.sizeRamp = 1.9f;
+    e.sizeConst = 0.8f;
+    e.angRamp = -0.5f;
+    e.angConst = 1.0f;
     light = fn_8028E2F8(&e, "light engine smoke", lbl_8055C880);
 }
 
 void EngineSmokeMan::InitHeavy(void) {
     PartParams e;
-    e.max = 0xA0;
-    e.size0 = 1.5f;
-    e.size1 = 0.25f;
-    e.kind = 2;
+    e.maxParticles = 0xA0;
+    e.maxLife = 1.5f;
+    e.spewRate = 0.25f;
+    e.type = 2;
     e.shading = 0.7f;
-    e.frames = 5;
-    e.c0 = SColor(0.65f, 0.65f, 0.65f);
-    e.c1 = SColor(1.2f, 1.2f, 1.2f);
-    e.gravity = 0.75f;
-    e.unk2C = 2.5f;
-    e.life = -0.15f;
+    e.priority = 5;
+    e.spread = ValV3(0.65f, 0.65f, 0.65f);
+    e.velScale = ValV3(1.2f, 1.2f, 1.2f);
+    e.upKick = 0.75f;
+    e.angSpread = 2.5f;
+    e.gravity = -0.15f;
     e.drag = 0.1f;
-    e.a70 = 0.1f;
-    e.a68 = 0.1f;
-    e.a60 = 0.1f;
-    e.a74 = 0.2f;
-    e.a6C = 0.2f;
-    e.a64 = 0.2f;
-    e.a58 = -0.9f;
-    e.a5C = 0.9f;
-    e.a50 = 6.3f;
-    e.a54 = 1.7f;
-    e.a78 = -0.75f;
-    e.a7C = 1.0f;
+    e.blueRamp = 0.1f;
+    e.greenRamp = 0.1f;
+    e.redRamp = 0.1f;
+    e.blueConst = 0.2f;
+    e.greenConst = 0.2f;
+    e.redConst = 0.2f;
+    e.alphaRamp = -0.9f;
+    e.alphaConst = 0.9f;
+    e.sizeRamp = 6.3f;
+    e.sizeConst = 1.7f;
+    e.angRamp = -0.75f;
+    e.angConst = 1.0f;
     heavy = fn_8028E2F8(&e, "heavy engine smoke", lbl_8055C880);
 }
 
 void EngineSmokeMan::InitFire(void) {
     PartParams e;
-    e.max = 0x100;
-    e.size0 = 1.7f;
-    e.size1 = 0.4f;
-    e.kind = 2;
+    e.maxParticles = 0x100;
+    e.maxLife = 1.7f;
+    e.spewRate = 0.4f;
+    e.type = 2;
     e.shading = 0.98f;
-    e.frames = 5;
-    e.c0 = SColor(0.95f, 0.75f, 0.95f);
-    e.c1 = SColor(1.2f, 1.2f, 1.2f);
-    e.gravity = 0.75f;
-    e.unk2C = 2.5f;
-    e.life = -0.1f;
+    e.priority = 5;
+    e.spread = ValV3(0.95f, 0.75f, 0.95f);
+    e.velScale = ValV3(1.2f, 1.2f, 1.2f);
+    e.upKick = 0.75f;
+    e.angSpread = 2.5f;
+    e.gravity = -0.1f;
     e.drag = 0.2f;
-    e.a70 = 0.1f;
-    e.a68 = 0.1f;
-    e.a60 = 0.1f;
-    e.a74 = 0.1f;
-    e.a6C = 0.1f;
-    e.a64 = 0.1f;
-    e.a58 = -0.95f;
-    e.a5C = 0.95f;
-    e.a50 = 7.0f;
-    e.a54 = 2.3f;
-    e.a78 = -0.75f;
-    e.a7C = 1.0f;
+    e.blueRamp = 0.1f;
+    e.greenRamp = 0.1f;
+    e.redRamp = 0.1f;
+    e.blueConst = 0.1f;
+    e.greenConst = 0.1f;
+    e.redConst = 0.1f;
+    e.alphaRamp = -0.95f;
+    e.alphaConst = 0.95f;
+    e.sizeRamp = 7.0f;
+    e.sizeConst = 2.3f;
+    e.angRamp = -0.75f;
+    e.angConst = 1.0f;
     fire = fn_8028E2F8(&e, "engine fire smoke", lbl_8055C880);
 }
 
@@ -500,52 +470,52 @@ void ExhaustSmokeMan::Clear(void) {
 
 void ExhaustSmokeMan::InitLight(void) {
     PartParams e;
-    e.max = 0x80;
-    e.size0 = 0.2f;
-    e.size1 = 1.0f;
-    e.kind = 0;
+    e.maxParticles = 0x80;
+    e.maxLife = 0.2f;
+    e.spewRate = 1.0f;
+    e.type = 0;
     e.shading = 0.5f;
-    e.frames = 6;
-    e.c0 = SColor(0.25f, 0.25f, 0.25f);
-    e.c1 = SColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 0.0f;
-    e.life = -0.1f;
+    e.priority = 6;
+    e.spread = ValV3(0.25f, 0.25f, 0.25f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 0.0f;
+    e.gravity = -0.1f;
     e.drag = 1.0f;
-    e.a70 = -0.2f;
-    e.a68 = -0.2f;
-    e.a60 = -0.2f;
-    e.a74 = 0.9f;
-    e.a6C = 0.9f;
-    e.a64 = 0.9f;
-    e.a58 = -0.25f;
-    e.a5C = 0.25f;
-    e.a50 = 0.4f;
-    e.a54 = 0.1f;
+    e.blueRamp = -0.2f;
+    e.greenRamp = -0.2f;
+    e.redRamp = -0.2f;
+    e.blueConst = 0.9f;
+    e.greenConst = 0.9f;
+    e.redConst = 0.9f;
+    e.alphaRamp = -0.25f;
+    e.alphaConst = 0.25f;
+    e.sizeRamp = 0.4f;
+    e.sizeConst = 0.1f;
     light = fn_8028E2F8(&e, "light exhaust", lbl_8055C880);
 }
 
 void ExhaustSmokeMan::InitDark(void) {
     PartParams e;
-    e.max = 0x60;
-    e.size0 = 1.75f;
-    e.size1 = 1.0f;
-    e.kind = 0;
+    e.maxParticles = 0x60;
+    e.maxLife = 1.75f;
+    e.spewRate = 1.0f;
+    e.type = 0;
     e.shading = 0.5f;
-    e.frames = 6;
-    e.c0 = SColor(0.25f, 0.25f, 0.25f);
-    e.c1 = SColor(1.0f, 1.0f, 1.0f);
-    e.life = -0.1f;
+    e.priority = 6;
+    e.spread = ValV3(0.25f, 0.25f, 0.25f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.gravity = -0.1f;
     e.drag = 1.5f;
-    e.a6C = 0.15f;
-    e.a74 = 0.15f;
-    e.a64 = 0.15f;
-    e.a70 = 0.15f;
-    e.a68 = 0.15f;
-    e.a60 = 0.15f;
-    e.a58 = -0.25f;
-    e.a5C = 0.25f;
-    e.a50 = 1.5f;
-    e.a54 = 0.15f;
+    e.greenConst = 0.15f;
+    e.blueConst = 0.15f;
+    e.redConst = 0.15f;
+    e.blueRamp = 0.15f;
+    e.greenRamp = 0.15f;
+    e.redRamp = 0.15f;
+    e.alphaRamp = -0.25f;
+    e.alphaConst = 0.25f;
+    e.sizeRamp = 1.5f;
+    e.sizeConst = 0.15f;
     dark = fn_8028E2F8(&e, "dark exhaust", lbl_8055C880);
 }
 
@@ -575,59 +545,59 @@ FireSmokeMan::~FireSmokeMan(void) {
 
 void FireSmokeMan::InitSmall(void) {
     PartParams e;
-    e.max = 0x60;
-    e.size0 = 1.5f;
-    e.size1 = 0.15f;
-    e.kind = 0;
+    e.maxParticles = 0x60;
+    e.maxLife = 1.5f;
+    e.spewRate = 0.15f;
+    e.type = 0;
     e.shading = 0.5f;
-    e.frames = 1;
-    e.c0 = SColor(0.35f, 0.35f, 0.35f);
-    e.c1 = SColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 1.0f;
-    e.unk2C = 3.0f;
-    e.life = -0.15f;
+    e.priority = 1;
+    e.spread = ValV3(0.35f, 0.35f, 0.35f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 1.0f;
+    e.angSpread = 3.0f;
+    e.gravity = -0.15f;
     e.drag = 0.5f;
-    e.a70 = 0.0f;
-    e.a68 = 0.0f;
-    e.a60 = 0.0f;
-    e.a74 = 0.1f;
-    e.a6C = 0.1f;
-    e.a64 = 0.1f;
-    e.a58 = -0.65f;
-    e.a5C = 0.65f;
-    e.a50 = 2.0f;
-    e.a54 = 0.75f;
-    e.a78 = -0.75f;
-    e.a7C = 1.0f;
+    e.blueRamp = 0.0f;
+    e.greenRamp = 0.0f;
+    e.redRamp = 0.0f;
+    e.blueConst = 0.1f;
+    e.greenConst = 0.1f;
+    e.redConst = 0.1f;
+    e.alphaRamp = -0.65f;
+    e.alphaConst = 0.65f;
+    e.sizeRamp = 2.0f;
+    e.sizeConst = 0.75f;
+    e.angRamp = -0.75f;
+    e.angConst = 1.0f;
     small = fn_8028E2F8(&e, "small fire smoke", lbl_8055C880);
 }
 
 void FireSmokeMan::InitLarge(void) {
     PartParams e;
-    e.max = 0x80;
-    e.size0 = 2.75f;
-    e.size1 = 0.1f;
-    e.kind = 0;
+    e.maxParticles = 0x80;
+    e.maxLife = 2.75f;
+    e.spewRate = 0.1f;
+    e.type = 0;
     e.shading = 0.5f;
-    e.frames = 1;
-    e.c0 = SColor(0.5f, 0.5f, 0.5f);
-    e.c1 = SColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 1.0f;
-    e.unk2C = 3.0f;
-    e.life = -0.15f;
+    e.priority = 1;
+    e.spread = ValV3(0.5f, 0.5f, 0.5f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 1.0f;
+    e.angSpread = 3.0f;
+    e.gravity = -0.15f;
     e.drag = 0.25f;
-    e.a70 = 0.0f;
-    e.a68 = 0.0f;
-    e.a60 = 0.0f;
-    e.a74 = 0.1f;
-    e.a6C = 0.1f;
-    e.a64 = 0.1f;
-    e.a58 = -0.65f;
-    e.a5C = 0.65f;
-    e.a50 = 4.0f;
-    e.a54 = 3.0f;
-    e.a78 = -0.75f;
-    e.a7C = 1.0f;
+    e.blueRamp = 0.0f;
+    e.greenRamp = 0.0f;
+    e.redRamp = 0.0f;
+    e.blueConst = 0.1f;
+    e.greenConst = 0.1f;
+    e.redConst = 0.1f;
+    e.alphaRamp = -0.65f;
+    e.alphaConst = 0.65f;
+    e.sizeRamp = 4.0f;
+    e.sizeConst = 3.0f;
+    e.angRamp = -0.75f;
+    e.angConst = 1.0f;
     large = fn_8028E2F8(&e, "large fire smoke", lbl_8055C880);
 }
 
@@ -663,30 +633,30 @@ void RadiatorSmokeMan::Update(int i, int state) {
 
 void RadiatorSmokeMan::InitEmitter(void) {
     PartParams e;
-    e.max = 0x80;
-    e.size0 = 1.7f;
-    e.size1 = 0.4f;
-    e.kind = 2;
+    e.maxParticles = 0x80;
+    e.maxLife = 1.7f;
+    e.spewRate = 0.4f;
+    e.type = 2;
     e.shading = 0.5f;
-    e.frames = 6;
-    e.c0 = SColor(0.8f, 0.6f, 0.8f);
-    e.c1 = SColor(1.0f, 1.0f, 1.0f);
-    e.gravity = 0.0f;
-    e.unk2C = 5.0f;
-    e.life = -0.05f;
+    e.priority = 6;
+    e.spread = ValV3(0.8f, 0.6f, 0.8f);
+    e.velScale = ValV3(1.0f, 1.0f, 1.0f);
+    e.upKick = 0.0f;
+    e.angSpread = 5.0f;
+    e.gravity = -0.05f;
     e.drag = 1.05f;
-    e.a70 = 0.15f;
-    e.a68 = 0.15f;
-    e.a60 = 0.15f;
-    e.a74 = 0.85f;
-    e.a6C = 0.85f;
-    e.a64 = 0.85f;
-    e.a58 = -0.5f;
-    e.a5C = 0.5f;
-    e.a50 = 2.5f;
-    e.a54 = 0.25f;
-    e.a78 = -0.5f;
-    e.a7C = 1.0f;
+    e.blueRamp = 0.15f;
+    e.greenRamp = 0.15f;
+    e.redRamp = 0.15f;
+    e.blueConst = 0.85f;
+    e.greenConst = 0.85f;
+    e.redConst = 0.85f;
+    e.alphaRamp = -0.5f;
+    e.alphaConst = 0.5f;
+    e.sizeRamp = 2.5f;
+    e.sizeConst = 0.25f;
+    e.angRamp = -0.5f;
+    e.angConst = 1.0f;
     emitter = fn_8028E2F8(&e, "radiator smoke", lbl_8055C880);
 }
 
