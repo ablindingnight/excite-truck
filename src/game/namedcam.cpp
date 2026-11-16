@@ -328,8 +328,8 @@ void fn_80276D3C(const char* name, int mode) {
 
 }  // extern "C"
 
-struct RMtx;
-void GetTipsCamera(RMtx* out, f32* fov);
+struct CamFrame;
+void GetTipsCamera(CamFrame* out, f32* fov);
 
 extern "C" {
 u8* fn_8017960C(int car);
@@ -581,6 +581,11 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
 // race is over.
 // Helper name unproven: scale with the value on the left.
 static inline f32 MulK(f32 v, f32 k) { return v * k; }
+/* Helper name unproven: the clamp keeps its value in one variable (min, then max in place). */
+static inline f32 Clamp01(f32 x) {
+    f32 r = 1.0f < x ? 1.0f : x;
+    return r > 0.0f ? r : 0.0f;
+}
 void fn_80277A14(CamRec* c, int slot) {
     CamPose blend;
     CamPose frame;
@@ -598,10 +603,10 @@ void fn_80277A14(CamRec* c, int slot) {
     own = 0;
     fn_8026A51C(&lbl_804A0C60[slot], &own, slot);
     if (fn_801B89F8()) {
-        GetTipsCamera((RMtx*)&c->pose, &c->fov);
+        GetTipsCamera((CamFrame*)&c->pose, &c->fov);
         return;
     }
-    f32 e = Ease(MaxF(MinF(fn_80277704(slot), 1.0f), 0.0f));
+    f32 e = Ease(Clamp01(fn_80277704(slot)));
     frame.pos.v[0] = c->carFrame.pos.v[0];
     frame.pos.v[1] = c->carFrame.pos.v[1];
     frame.pos.v[2] = c->carFrame.pos.v[2];
