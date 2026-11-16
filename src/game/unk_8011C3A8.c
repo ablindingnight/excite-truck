@@ -1010,12 +1010,97 @@ void ExpandBundleSizes(void* arg0, u32 arg1) {
 
 extern const u8 lbl_802F65C0[];
 extern const u8 lbl_802F8A40[16][64];
-// Retail addresses these masks from lbl_802F65C0 (same bytes as lbl_802F6990 + 0x10..), so the original
-// tables were one object starting at lbl_802F65C0; the split labels only work in retail .rodata order.
-#define BINK_PAT_C1 ((u32 *)((u8 *)lbl_802F65C0 + 0x3E0))         // 4-pixel masks, 1 bit per pixel
-#define BINK_PAT_C0 ((u32 *)((u8 *)lbl_802F65C0 + 0x420))
-#define BINK_PAT2_C1 ((u32 *)((u8 *)lbl_802F65C0 + 0x460))        // doubled 2-pixel masks
-#define BINK_PAT2_C0 ((u32 *)((u8 *)lbl_802F65C0 + 0x470))
+// Huffman lookup table 0: bytes (a u32 initialiser would byte-reverse on a little-endian host).
+// DUMP_DATA lbl_802F65C0 u8
+const u8 lbl_802F65C0[16] = {
+#include "dumpdata/lbl_802F65C0.inc"
+};
+// DUMP_DATA lbl_802F65D0 u8
+const u8 lbl_802F65D0[32] = {
+#include "dumpdata/lbl_802F65D0.inc"
+};
+// DUMP_DATA lbl_802F65F0 u8
+const u8 lbl_802F65F0[32] = {
+#include "dumpdata/lbl_802F65F0.inc"
+};
+// DUMP_DATA lbl_802F6610 u8
+const u8 lbl_802F6610[32] = {
+#include "dumpdata/lbl_802F6610.inc"
+};
+// DUMP_DATA lbl_802F6630 u8
+const u8 lbl_802F6630[32] = {
+#include "dumpdata/lbl_802F6630.inc"
+};
+// DUMP_DATA lbl_802F6650 u8
+const u8 lbl_802F6650[32] = {
+#include "dumpdata/lbl_802F6650.inc"
+};
+// DUMP_DATA lbl_802F6670 u8
+const u8 lbl_802F6670[32] = {
+#include "dumpdata/lbl_802F6670.inc"
+};
+// DUMP_DATA lbl_802F6690 u8
+const u8 lbl_802F6690[64] = {
+#include "dumpdata/lbl_802F6690.inc"
+};
+// DUMP_DATA lbl_802F66D0 u8
+const u8 lbl_802F66D0[64] = {
+#include "dumpdata/lbl_802F66D0.inc"
+};
+// DUMP_DATA lbl_802F6710 u8
+const u8 lbl_802F6710[64] = {
+#include "dumpdata/lbl_802F6710.inc"
+};
+// DUMP_DATA lbl_802F6750 u8
+const u8 lbl_802F6750[64] = {
+#include "dumpdata/lbl_802F6750.inc"
+};
+// DUMP_DATA lbl_802F6790 u8
+const u8 lbl_802F6790[64] = {
+#include "dumpdata/lbl_802F6790.inc"
+};
+// DUMP_DATA lbl_802F67D0 u8
+const u8 lbl_802F67D0[64] = {
+#include "dumpdata/lbl_802F67D0.inc"
+};
+// DUMP_DATA lbl_802F6810 u8
+const u8 lbl_802F6810[128] = {
+#include "dumpdata/lbl_802F6810.inc"
+};
+// DUMP_DATA lbl_802F6890 u8
+const u8 lbl_802F6890[128] = {
+#include "dumpdata/lbl_802F6890.inc"
+};
+// DUMP_DATA lbl_802F6910 u8
+const u8 lbl_802F6910[128] = {
+#include "dumpdata/lbl_802F6910.inc"
+};
+// DUMP_DATA lbl_802F6990 u8
+const u8 lbl_802F6990[16] = {
+#include "dumpdata/lbl_802F6990.inc"
+};
+// Pattern masks: the pixels of a 4-bit (masks) or 2-bit (scaled masks) pattern nibble that take colour 1 / colour 0.
+// They are separate arrays defined above ExpandPlane: retail addresses each from the start of this unit's .rodata.
+// DUMP_DATA lbl_802F69A0 u32
+const u32 lbl_802F69A0[16] = {
+#include "dumpdata/lbl_802F69A0.inc"
+};
+// DUMP_DATA lbl_802F69E0 u32
+const u32 lbl_802F69E0[16] = {
+#include "dumpdata/lbl_802F69E0.inc"
+};
+// DUMP_DATA lbl_802F6A20 u32
+const u32 lbl_802F6A20[4] = {
+#include "dumpdata/lbl_802F6A20.inc"
+};
+// DUMP_DATA lbl_802F6A30 u32
+const u32 lbl_802F6A30[4] = {
+#include "dumpdata/lbl_802F6A30.inc"
+};
+#define bink_masks1 lbl_802F69A0   // 4-pixel masks, colour 1
+#define bink_masks0 lbl_802F69E0   // 4-pixel masks, colour 0
+#define bink_smasks1 lbl_802F6A20  // doubled 2-pixel masks, colour 1
+#define bink_smasks0 lbl_802F6A30  // doubled 2-pixel masks, colour 0
 
 void ReadBPLossless(s16 *block, BitReader8011 *bits);
 void ReadBPLossyWithMotion(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src, s32 srcStride);
@@ -1115,8 +1200,8 @@ void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32
     ((u32 *)(d))[3] = c
 #define BINK_PAT8(d, k)                                                         \
     p = *pattern.cur++;                                                         \
-    ((u32 *)(d))[0] = (c0 & masks0[p & 15]) | (c1 & masks1[p & 15]);  \
-    ((u32 *)(d))[1] = (c0 & masks0[p >> 4]) | (c1 & masks1[p >> 4])
+    ((u32 *)(d))[0] = (c0 & bink_masks0[p & 15]) | (c1 & bink_masks1[p & 15]);  \
+    ((u32 *)(d))[1] = (c0 & bink_masks0[p >> 4]) | (c1 & bink_masks1[p >> 4])
 // Doubles the two pixels of a u16 into four.
 #define BINK_DOUBLE2(w) (((w) << 8) | ((w) & 0xFF)) | (((w) << 16) & 0xFF000000)
 
@@ -1141,10 +1226,6 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
     Bundle8011 runs;
     u8 tmp[64];
     BitReader8011 bits;
-    u32 *masks1;
-    u32 *masks0;
-    u32 *scaledMasks1;
-    u32 *scaledMasks0;
     s32 x;
     u32 y;
     /* Local copies unproven as text, proven as numbering: retail colours dst, blockMap and prev between y and
@@ -1152,20 +1233,18 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
     u8 *dst;
     u8 *blockMap;
     u8 *prev;
-    u32 skipCount;
     u32 idx;
-    s32 rowSkip;
+    u32 skipCount;
     void (*readColors)(void *b, void *bits, void *trees);
+    s32 rowSkip;
     s32 i;
-    u8 *tables;
 
-    tables = (u8 *)lbl_802F65C0;
     dst = dstIn;
     prev = prevIn;
     blockMap = blockMapIn;
     rowSkip = pitch * 8 - width;
-    skipCount = 0;
     idx = 0;
+    skipCount = 0;
     bits.start = data;
     bits.next = data;
     bits.count = 0;
@@ -1191,10 +1270,6 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
     StartReadHuff4Bundle(&xOff, &bits);
     StartReadHuff4Bundle(&yOff, &bits);
     StartReadHuff4Bundle(&runs, &bits);
-    scaledMasks0 = (u32 *)(tables + 0x470);
-    scaledMasks1 = (u32 *)(tables + 0x460);
-    masks0 = (u32 *)(tables + 0x420);
-    masks1 = (u32 *)(tables + 0x3E0);
     for (y = 0; y < height; y += 8) {
         CheckReadRLEHuff4Bundle(&types, &bits);
         CheckReadRLEHuff4Bundle(&subTypes, &bits);
@@ -1210,8 +1285,8 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
             case 0: {  // skip: keep the previous frame's block
                 u8 *s0;
                 u8 *d0;
-                u8 *s1;
                 u8 *d1;
+                u8 *s1;
                 s0 = prev;
                 d0 = dst;
                 d1 = dst + pitch;
@@ -1226,40 +1301,38 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
                 if (!((y >> 3) & 1)) {
                     switch (*subTypes.cur++) {
                     case 3: {
-                        u32 value = bits.value;
-                        u32 *next = bits.next;
-                        u32 avail = bits.count;
-                        const u8 *scan;
-                        u32 v;
-                        u32 bit;
-                        u8 *d0;
-                        u8 *d1;
+                        u32 run;
+                        u32 w;
                         u16 *s;
+                        u8 *d1;
+                        u8 *d0;
+                        u32 *next = bits.next;
+                        u32 value = bits.value;
+                        u32 avail = bits.count;
+                        u32 v;
                         BINK_GETBITS(v, 4);
-                        scan = lbl_802F8A40[v];
+                        d0 = (u8 *)lbl_802F8A40[v];
                         i = 0;
                         do {
-                            u32 run;
-                            BINK_GETBIT(bit);
-                            if (bit & 1) {
+                            BINK_GETBIT(v);
+                            if (v & 1) {
                                 u8 c = *colors.cur++;
                                 for (run = *runs.cur++ + 1; run != 0; run--) {
-                                    tmp[scan[i++]] = c;
+                                    tmp[d0[i++]] = c;
                                 }
                             } else {
                                 for (run = *runs.cur++ + 1; run != 0; run--) {
-                                    tmp[scan[i++]] = *colors.cur++;
+                                    tmp[d0[i++]] = *colors.cur++;
                                 }
                             }
                         } while (i < 63);
                         if (i == 63) {
-                            tmp[scan[63]] = *colors.cur++;
+                            tmp[d0[63]] = *colors.cur++;
                         }
                         d0 = dst;
                         d1 = dst + pitch;
                         s = (u16 *)tmp;
                         for (i = 0; i < 8; i++) {
-                            u32 w;
                             w = s[0];
                             w = BINK_DOUBLE2(w);
                             ((u32 *)d0)[0] = w;
@@ -1329,16 +1402,16 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
                         for (i = 0; i < 8; i++) {
                             u32 p = *pattern.cur++;
                             u32 w;
-                            w = (c0 & scaledMasks0[p & 3]) | (c1 & scaledMasks1[p & 3]);
+                            w = (c0 & bink_smasks0[p & 3]) | (c1 & bink_smasks1[p & 3]);
                             ((u32 *)d0)[0] = w;
                             ((u32 *)d1)[0] = w;
-                            w = (c0 & scaledMasks0[(p >> 2) & 3]) | (c1 & scaledMasks1[(p >> 2) & 3]);
+                            w = (c0 & bink_smasks0[(p >> 2) & 3]) | (c1 & bink_smasks1[(p >> 2) & 3]);
                             ((u32 *)d0)[1] = w;
                             ((u32 *)d1)[1] = w;
-                            w = (c0 & scaledMasks0[(p >> 4) & 3]) | (c1 & scaledMasks1[(p >> 4) & 3]);
+                            w = (c0 & bink_smasks0[(p >> 4) & 3]) | (c1 & bink_smasks1[(p >> 4) & 3]);
                             ((u32 *)d0)[2] = w;
                             ((u32 *)d1)[2] = w;
-                            w = (c0 & scaledMasks0[p >> 6]) | (c1 & scaledMasks1[p >> 6]);
+                            w = (c0 & bink_smasks0[p >> 6]) | (c1 & bink_smasks1[p >> 6]);
                             ((u32 *)d0)[3] = w;
                             ((u32 *)d1)[3] = w;
                             d0 = d1 + pitch;
@@ -1347,26 +1420,34 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
                         break;
                     }
                     case 9: {
-                        u8 *d0 = dst;
-                        u8 *d1 = dst + pitch;
-                        s32 pitch2 = pitch + pitch;
+                        u32 w;
+                        s32 pitch2;
+                        u8 *d0;
+                        u8 *d1;
+                        u32 b;
+                        d0 = dst;
+                        d1 = dst + pitch;
+                        pitch2 = pitch + pitch;
                         if ((u32)colors.cur & 3) {
                             for (i = 0; i < 8; i++) {
-                                u32 w;
+                                b = colors.cur[0];
                                 w = colors.cur[1];
-                                w = (w | (w << 8)) | ((colors.cur[0] << 24) | (colors.cur[0] << 16));
+                                w = (w | (w << 8)) | ((b << 24) | (b << 16));
                                 ((u32 *)(d0))[0] = w;
                                 ((u32 *)(d1))[0] = w;
+                                b = colors.cur[2];
                                 w = colors.cur[3];
-                                w = (w | (w << 8)) | ((colors.cur[2] << 24) | (colors.cur[2] << 16));
+                                w = (w | (w << 8)) | ((b << 24) | (b << 16));
                                 ((u32 *)(d0))[1] = w;
                                 ((u32 *)(d1))[1] = w;
+                                b = colors.cur[4];
                                 w = colors.cur[5];
-                                w = (w | (w << 8)) | ((colors.cur[4] << 24) | (colors.cur[4] << 16));
+                                w = (w | (w << 8)) | ((b << 24) | (b << 16));
                                 ((u32 *)(d0))[2] = w;
                                 ((u32 *)(d1))[2] = w;
+                                b = colors.cur[6];
                                 w = colors.cur[7];
-                                w = (w | (w << 8)) | ((colors.cur[6] << 24) | (colors.cur[6] << 16));
+                                w = (w | (w << 8)) | ((b << 24) | (b << 16));
                                 ((u32 *)(d0))[3] = w;
                                 ((u32 *)(d1))[3] = w;
                                 colors.cur += 8;
@@ -1375,7 +1456,6 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
                             }
                         } else {
                             for (i = 0; i < 8; i++) {
-                                u32 w;
                                 w = ((u16 *)colors.cur)[0];
                                 w = BINK_DOUBLE2(w);
                                 ((u32 *)(d0))[0] = w;
@@ -1411,8 +1491,8 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
             case 2: {  // motion: copy a block of the previous frame
                 u8 *s0;
                 u8 *d0;
-                u8 *s1;
                 u8 *d1;
+                u8 *s1;
                 blockMap[idx >> 1] = 1;
                 s0 = prev + pitch * *(s8 *)yOff.cur++ + *(s8 *)xOff.cur++;
                 d0 = dst;
@@ -1428,21 +1508,19 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
                 break;
             }
             case 3: {  // run: runs of one color or of literal colors along a scan order
+                u32 run;
+                const u8 *scan;
+                u32 *next = bits.next;
                 u32 value = bits.value;
                 u32 avail = bits.count;
-                u32* nextv = bits.next;
-                u32 *next = nextv;
-                const u8 *scan;
                 u32 v;
-                u32 bit;
                 BINK_GETBITS(v, 4);
-                blockMap[idx >> 1] = 1;
                 scan = lbl_802F8A40[v];
+                blockMap[idx >> 1] = 1;
                 i = 0;
                 do {
-                    u32 run;
-                    BINK_GETBIT(bit);
-                    if (bit & 1) {
+                    BINK_GETBIT(v);
+                    if (v & 1) {
                         u8 c = *colors.cur++;
                         for (run = *runs.cur++ + 1; run != 0; run--) {
                             tmp[scan[i++]] = c;
@@ -1513,18 +1591,18 @@ u32 *ExpandPlane(u8 *dstIn, u8 *prevIn, u32 width, u32 height, s32 pitch, u32 *d
             case 8: {  // two-color pattern
                 u32 c0;
                 u32 c1;
-                u32 p;
                 u8 *d0;
                 u8 *d1;
+                u32 p;
                 d0 = dst;
                 d1 = dst + pitch;
                 c0 = *colors.cur++;
+                c1 = *colors.cur++;
+                blockMap[idx >> 1] = 1;
                 c0 |= c0 << 8;
                 c0 |= c0 << 16;
-                c1 = *colors.cur++;
                 c1 |= c1 << 8;
                 c1 |= c1 << 16;
-                blockMap[idx >> 1] = 1;
                 BINK_ROWS8_1(BINK_PAT8, d0, d1, pitch);
                 break;
             }
@@ -4749,75 +4827,6 @@ u32 lbl_80559950 = 0x20;
 
 /* .rodata tables owned by this unit (0x802F65C0-0x802F8E40): the Huffman and mask tables are defined above ExpandPlane
    (they must be: retail addresses them from the start of this unit's .rodata); the IDCT and scan tables follow here. */
-// Huffman lookup table 0: bytes (a u32 initialiser would byte-reverse on a little-endian host).
-// DUMP_DATA lbl_802F65C0 u8
-const u8 lbl_802F65C0[16] = {
-#include "dumpdata/lbl_802F65C0.inc"
-};
-// DUMP_DATA lbl_802F65D0 u8
-const u8 lbl_802F65D0[32] = {
-#include "dumpdata/lbl_802F65D0.inc"
-};
-// DUMP_DATA lbl_802F65F0 u8
-const u8 lbl_802F65F0[32] = {
-#include "dumpdata/lbl_802F65F0.inc"
-};
-// DUMP_DATA lbl_802F6610 u8
-const u8 lbl_802F6610[32] = {
-#include "dumpdata/lbl_802F6610.inc"
-};
-// DUMP_DATA lbl_802F6630 u8
-const u8 lbl_802F6630[32] = {
-#include "dumpdata/lbl_802F6630.inc"
-};
-// DUMP_DATA lbl_802F6650 u8
-const u8 lbl_802F6650[32] = {
-#include "dumpdata/lbl_802F6650.inc"
-};
-// DUMP_DATA lbl_802F6670 u8
-const u8 lbl_802F6670[32] = {
-#include "dumpdata/lbl_802F6670.inc"
-};
-// DUMP_DATA lbl_802F6690 u8
-const u8 lbl_802F6690[64] = {
-#include "dumpdata/lbl_802F6690.inc"
-};
-// DUMP_DATA lbl_802F66D0 u8
-const u8 lbl_802F66D0[64] = {
-#include "dumpdata/lbl_802F66D0.inc"
-};
-// DUMP_DATA lbl_802F6710 u8
-const u8 lbl_802F6710[64] = {
-#include "dumpdata/lbl_802F6710.inc"
-};
-// DUMP_DATA lbl_802F6750 u8
-const u8 lbl_802F6750[64] = {
-#include "dumpdata/lbl_802F6750.inc"
-};
-// DUMP_DATA lbl_802F6790 u8
-const u8 lbl_802F6790[64] = {
-#include "dumpdata/lbl_802F6790.inc"
-};
-// DUMP_DATA lbl_802F67D0 u8
-const u8 lbl_802F67D0[64] = {
-#include "dumpdata/lbl_802F67D0.inc"
-};
-// DUMP_DATA lbl_802F6810 u8
-const u8 lbl_802F6810[128] = {
-#include "dumpdata/lbl_802F6810.inc"
-};
-// DUMP_DATA lbl_802F6890 u8
-const u8 lbl_802F6890[128] = {
-#include "dumpdata/lbl_802F6890.inc"
-};
-// DUMP_DATA lbl_802F6910 u8
-const u8 lbl_802F6910[128] = {
-#include "dumpdata/lbl_802F6910.inc"
-};
-// DUMP_DATA lbl_802F6990 u8
-const u8 lbl_802F6990[176] = {
-#include "dumpdata/lbl_802F6990.inc"
-};
 // DUMP_DATA lbl_802F6A40 s32
 const s32 lbl_802F6A40[1024] = {
 #include "dumpdata/lbl_802F6A40.inc"
