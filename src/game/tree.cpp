@@ -912,11 +912,20 @@ void fn_802BDD58(void) {
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
+static inline void Loop1_fn_802BDD8C(int i, f32 range) {
+    TCell* c;
+    TreeType* t;
+    const TVec* eye;
+    int j;
+    s32 id;
+    int n;
+    TArray<TCell>* frames;
+    TArray<TreeRec>* list;
+    t = &lbl_804C00D4.data[i];
     if (t->set) {
         f32 r2;
-        TArray<TCell>* frames = t->set->frames;
-        TArray<TreeRec>* list = t->set->list;
+        frames = t->set->frames;
+        list = t->set->list;
         if (t->farTris <= 10) {
             fn_802C8BD0(fn_802C28C0());
             fn_802DC71C(t->farId, t->farTex);
@@ -926,12 +935,11 @@ static inline void Loop1_fn_802BDD8C(TreeType* t, f32 range) {
             span = r2 - in * in;
             TMtx cam;
             fn_801F1C24(&cam);
-            const TVec* eye = (const TVec*)(fn_801E8718(-1) + 0x24);
-            for (int j = 0; j < frames->n; j++) {
-                TCell* c = &frames->data[j];
+            eye = (const TVec*)(fn_801E8718(-1) + 0x24);
+            for (j = 0; j < frames->n; j++) {
+                c = &frames->data[j];
                 if (Live(c)) {
-                    int n;
-                    s32 id = t->farId;
+                    id = t->farId;
                     for (n = c->first; n < c->first + c->count; n++) {
                         TreeRec* tr = &list->data[n];
                         f32 d = PSVECSquareDistance(&tr->mtx.pos, eye);
@@ -967,7 +975,7 @@ void fn_802BDD8C(f32 range) {
         lbl_8055FAAC = 0;
         lbl_8055FAA8 = 0;
         for (int i = 0; i < lbl_804C00D4.n; i++) {
-            Loop1_fn_802BDD8C(&lbl_804C00D4.data[i], range);
+            Loop1_fn_802BDD8C(i, range);
         }
     }
     fn_802DBECC();
