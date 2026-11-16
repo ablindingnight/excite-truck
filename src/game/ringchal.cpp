@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/locstring.h"
@@ -90,14 +91,6 @@ struct Box {
     f32 w;             // offset 0x10
     f32 h;             // offset 0x14
     ElemColor color;   // offset 0x18
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void) {}
-    virtual TextElem* Find(const char* name) = 0;
-    virtual void* FindArt(const char* name) = 0;
-    virtual Box* FindBox(const char* name) = 0;
 };
 
 struct Binding {
@@ -2241,9 +2234,9 @@ inline void RingChalMaster::DrawRings(void) const {
     l = layout;
     arena.timer.Draw(l);
     setScore = l->Find("ring_set_score");
-    setIcon = l->FindBox("ring_set_icon");
-    arrowIcon = l->FindBox("arrow_icon");
-    starScore = l->FindBox("star_score");
+    setIcon = (Box*)l->FindBox("ring_set_icon");
+    arrowIcon = (Box*)l->FindBox("arrow_icon");
+    starScore = (Box*)l->FindBox("star_score");
     for (i = 0; i < arena.nSets; i++) {
         Box icon;
         icon = *setIcon;
@@ -2375,11 +2368,11 @@ inline void RingChalMaster::DrawRings(void) const {
     {
         Box tr;
         if (fn_802C9A58()) {
-            target = l->FindBox("target_ring_ws");
+            target = (Box*)l->FindBox("target_ring_ws");
         } else {
-            target = l->FindBox("target_ring");
+            target = (Box*)l->FindBox("target_ring");
         }
-        next = l->FindBox("next_ring");
+        next = (Box*)l->FindBox("next_ring");
         tr = *target;
         s = arena.curSet;
         if (arena.curSet > 0 && !arena.b49) {

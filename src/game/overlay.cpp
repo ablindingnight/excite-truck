@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/raceopts.h"
 #include "game/raceprog.h"
 #include "game/carbody.h"
@@ -51,15 +52,6 @@ struct LayoutArtItem {
 };
 
 class LayoutArt;
-
-// Its vtable (0x8032D260) lives in the layout unit; only the inline dtor is emitted here.
-class ILayout {
-public:
-    virtual ~ILayout(void) {}
-    virtual LayoutItem* Find(const char* name) = 0;            // 0xC
-    virtual LayoutArt* FindArt(const char* name) = 0;          // 0x10
-    virtual LayoutArtItem* FindArtItem(const char* name) = 0;  // 0x14
-};
 
 struct RacerState {
     u8 pad0[0x30];
@@ -1038,7 +1030,7 @@ void ResultsOverlay::DrawMenu(void) {
             if (item->index == 2) {
                 fn_8027AA48();
             }
-            text = *layout->Find(item->text);
+            text = *(LayoutItem*)layout->Find(item->text);
             text.pos.x += item->x;
             selected = selection == item->index;
             alpha = 0xFF;
@@ -1047,7 +1039,7 @@ void ResultsOverlay::DrawMenu(void) {
                 fn_80230F78(&alpha, &pulse, &text.color, 1);
             }
             frame = selected ? 1 : 2;
-            button = *layout->FindArtItem(item->button);
+            button = *(LayoutArtItem*)layout->FindBox(item->button);
             button.pos.x += item->x;
             fn_80147940(layout, &button, "menu_artset", frame);
             if (selected) {

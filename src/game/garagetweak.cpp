@@ -4,22 +4,13 @@
 // garage.val layout, fading out a few seconds after the last input. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
 #include "game/gart.h"
 
 struct Camera {
     u8 pad[0x30];
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void);
-    virtual TextElem* Find(const char* name) = 0;
-    virtual void* FindArt(const char* name) = 0;
-    virtual void* FindBox(const char* name) = 0;
-    virtual gArtSet* FindSet(const char* name) = 0;
-    virtual void Edit(void) = 0;
 };
 
 // A tunable value of the car.

@@ -5,6 +5,7 @@
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
 // animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/raceopts.h"
 #include "game/carinfo.h"
 #include "game/gamedb.h"
@@ -93,11 +94,6 @@ public:
 
     void* list;  // offset 0x0
     f32 t;       // offset 0x4
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void);
 };
 
 template <class T> void SafeDelete(T*& p) {

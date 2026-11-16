@@ -4,6 +4,7 @@
 // the shake prompt and the white-out flash with crashlyt.val. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
@@ -27,16 +28,6 @@ struct GartElem : ElemBase {
     f32 w;      // offset 0x10
     f32 h;      // offset 0x14
     u32 color;  // offset 0x18
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void);
-    virtual TextElem* Find(const char* name) = 0;
-    virtual ArtElem* FindArt(const char* name) = 0;
-    virtual GartElem* FindBox(const char* name) = 0;
-    virtual gArtSet* FindSet(const char* name) = 0;
-    virtual void Edit(void) = 0;
 };
 
 class Sound2D {

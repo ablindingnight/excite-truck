@@ -2,6 +2,7 @@
 // tunedash.val, edited with the arrow keys and faded out after a few seconds without input. Names
 // are guesses apart from the file names, element names and messages.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
 #include "game/joy.h"
@@ -13,16 +14,6 @@ struct Box {
     s32 c;             // offset 0xC
     f32 w;             // offset 0x10
     f32 h;             // offset 0x14
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void);
-    virtual TextElem* Find(const char* name) = 0;
-    virtual void* FindArt(const char* name) = 0;
-    virtual Box* FindBox(const char* name) = 0;
-    virtual gArtSet* FindSet(const char* name) = 0;
-    virtual void Edit(void) = 0;
 };
 
 struct Camera {
@@ -121,7 +112,7 @@ int fn_802044E8(void) {
             n1 = lbl_8055ED44->Find("name1");
             n2 = lbl_8055ED44->Find("name2");
             v1 = lbl_8055ED44->Find("value1");
-            list = lbl_8055ED44->FindBox("listbox");
+            list = (Box*)lbl_8055ED44->FindBox("listbox");
             if (n1 && n2 && v1 && list) {
                 normal = n1->color;
                 selected = n2->color;

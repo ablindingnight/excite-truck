@@ -4,6 +4,7 @@
 // apart from the keys, messages and allocation tags.
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -438,20 +439,6 @@ struct DynArray {
 template <typename T>
 void SafeDelete(T*& p);
 
-class ILayout {
-public:
-    ILayout(void);
-    virtual ~ILayout(void) {}
-    virtual TextElem* Find(const char* name) = 0;
-    virtual ArtElem* FindArt(const char* name) = 0;
-    virtual GartElem* FindBox(const char* name) = 0;
-    virtual gArtSet* FindSet(const char* name) = 0;
-    virtual void Edit(void) = 0;
-    virtual void ToggleEdit(void) = 0;
-    virtual u8 IsEditing(void) = 0;
-    virtual void Save(void) = 0;
-};
-
 class IOverlayCmd {
 public:
     virtual ~IOverlayCmd(void) {}
@@ -721,7 +708,7 @@ public:
                     e->pos.x, e->pos.y, e->w, e->h);
     }
     virtual void ToggleEdit(void) { editing = !editing; }
-    virtual u8 IsEditing(void) { return editing; }
+    virtual int IsEditing(void) { return editing; }
     virtual void Edit(void) {
         struct {
             int i;

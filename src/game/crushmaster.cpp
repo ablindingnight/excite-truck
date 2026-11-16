@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/locstring.h"
@@ -408,14 +409,6 @@ struct Box {
     f32 w;             // offset 0x10
     f32 h;             // offset 0x14
     ElemColor color;   // offset 0x18
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void) {}
-    virtual TextElem* Find(const char* name) = 0;
-    virtual void* FindArt(const char* name) = 0;
-    virtual Box* FindBox(const char* name) = 0;
 };
 
 // Owns the mode's HUD layout.
@@ -1495,8 +1488,8 @@ inline void CrushMaster::DrawKills(int car) const {
     int i;
     cc = &cars[car];
     n = nCars - 1;
-    icon = layout.p->FindBox("ring_set_icon");
-    hit = layout.p->FindBox("ring_set_hit");
+    icon = (Box*)layout.p->FindBox("ring_set_icon");
+    hit = (Box*)layout.p->FindBox("ring_set_hit");
     if (!hit) {
         hit = icon;
     }

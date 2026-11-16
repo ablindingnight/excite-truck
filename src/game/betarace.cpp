@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/locstring.h"
@@ -182,16 +183,6 @@ struct ArtElem : BoxElem {
 
 struct GartElem : BoxElem {
     u32 color;  // offset 0x18
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void) {}
-    virtual TextElem* Find(const char* name) = 0;
-    virtual ArtElem* FindArt(const char* name) = 0;
-    virtual GartElem* FindBox(const char* name) = 0;
-    virtual gArtSet* FindSet(const char* name) = 0;
-    virtual void Edit(void) = 0;
 };
 
 extern "C" {

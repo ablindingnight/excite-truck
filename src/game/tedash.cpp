@@ -3,6 +3,7 @@
 // and scales, dumping the world model, and the stats columns other units register. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
 #include "game/gart.h"
@@ -23,19 +24,6 @@ struct BoxElem {
     u8 pad0[0x14];
     f32 h;      // offset 0x14
     u32 color;  // offset 0x18
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void);
-    virtual TextElem* Find(const char* name) = 0;
-    virtual void* FindArt(const char* name) = 0;
-    virtual BoxElem* FindBox(const char* name) = 0;
-    virtual gArtSet* FindSet(const char* name) = 0;
-    virtual void Edit(void) = 0;
-    virtual void Toggle(void) = 0;
-    virtual int Busy(void) = 0;
-    virtual void Save(void) = 0;
 };
 
 template <class T>
@@ -547,7 +535,7 @@ void fn_802B676C(void) {
 }
 
 void fn_802B67C8(const char* name) {
-    BoxElem* b = lbl_8055FA48->FindBox(name);
+    BoxElem* b = (BoxElem*)lbl_8055FA48->FindBox(name);
     fn_80147FF0(b, b->color);
 }
 
@@ -564,7 +552,7 @@ void fn_802B6804(void) {
     fn_802B67C8("stats_box");
     TextElem* num = lbl_8055FA48->Find("stats_colnumber");
     TextElem* name = lbl_8055FA48->Find("stats_colname");
-    f32 row = lbl_8055FA48->FindBox("stats_col")->h;
+    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("stats_col"))->h;
     for (int i = 0; i < lbl_804BFA70.count; i++) {
         s = AtP(lbl_804BFA70.data, i);
         if (s->peak < *s->value) {
@@ -858,7 +846,7 @@ void fn_802B7884(const char* label) {
 }
 
 void fn_802B7918(void) {
-    f32 row = lbl_8055FA48->FindBox("matmap_col")->h;
+    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("matmap_col"))->h;
     TextElem t = *lbl_8055FA48->Find("brush_col");
     char nm[0x20];
     fn_802B6568(lbl_8055FA48->Find("brush_dropdown"), "Brushes");
@@ -884,7 +872,7 @@ void fn_802B7918(void) {
 }
 
 void fn_802B7B08(void) {
-    f32 row = lbl_8055FA48->FindBox("matmap_col")->h;
+    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("matmap_col"))->h;
     fn_802B6568(lbl_8055FA48->Find("layer_dropdown"), "Layers");
     TextElem t = *lbl_8055FA48->Find("layer_col");
     char nm[0x20];
@@ -934,7 +922,7 @@ void fn_802B7D4C(void) {
     fn_802B6568(lbl_8055FA48->Find("object_clump"), "%s", cl);
     TextElem num = *lbl_8055FA48->Find("objcolnumber");
     TextElem name = *lbl_8055FA48->Find("objcolname");
-    f32 row = lbl_8055FA48->FindBox("stats_col")->h;
+    f32 row = ((BoxElem*)lbl_8055FA48->FindBox("stats_col"))->h;
     char nm[0x20];
     for (int i = 0; i < list.count; i++) {
         ObjItem* it = &list.data[i];
@@ -1095,7 +1083,7 @@ void fn_802B8624(CursorState* in) {
 }
 
 void fn_802B869C(void) {
-    if (lbl_8055FA48->Busy() == 0) {
+    if (lbl_8055FA48->IsEditing() == 0) {
         CursorState c;
         if (fn_80127A50(&c)) {
             fn_802B8624(&c);
@@ -1199,7 +1187,7 @@ int fn_802B8998(u32 key) {
             lbl_804BFF80.clicked[0] = 0;
             break;
         case 5:
-            l->Toggle();
+            l->ToggleEdit();
             break;
         case 'e':
             fn_802B8510(6);

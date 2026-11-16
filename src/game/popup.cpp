@@ -4,6 +4,7 @@
 // music ducked while one is up and an instruction sound per press. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/ilayout.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 
@@ -31,13 +32,6 @@ public:
     u8 loop;         // offset 0x4B
     u8 restart;      // offset 0x4C
     u8 volumeDirty;  // offset 0x4D
-};
-
-class ILayout {
-public:
-    virtual ~ILayout(void);
-    virtual void* Find(const char* name) = 0;
-    virtual void* FindArt(const char* name) = 0;
 };
 
 struct ArtElem {
