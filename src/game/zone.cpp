@@ -1218,17 +1218,16 @@ int fn_8013CBC0(ZoneCar* zm, int car) {
     int r = 0;
     Truck* t = fn_8017960C(car);
     Vec3 pos;
-    V2 a;
     V2 p;
     V2 q;
+    V2 ap;
+    V2 a;
+    V2 qa;
+    V2 ab;
     V2 perp;
     V2 b;
-    V2 ab;
-    V2 qa;
-    V2 pa;
-    V2 qb;
     V2 pb;
-    V2 ap;
+    V2 qb;
     V2 dir;
     V2 bp;
     f32 wa;
@@ -1266,19 +1265,19 @@ int fn_8013CBC0(ZoneCar* zm, int car) {
     a.x += ab.x * (0.65f + wa);
     V2 n = ab;
     a.y += ab.y * (0.65f + wa);
-    pa.x = p.x - a.x;
+    ap.x = p.x - a.x;
     b.x += n.x * -(0.65f + wb);
     perp.x = n.y;
     perp.y = -n.x;
     qa.x = q.x - a.x;
-    pa.y = p.y - a.y;
-    c0 = perp.x * pa.x + pa.y * perp.y;
+    ap.y = p.y - a.y;
+    c0 = perp.x * ap.x + ap.y * perp.y;
     qa.y = q.y - a.y;
     b.y += n.y * -(0.65f + wb);
     c1 = perp.x * qa.x + perp.y * qa.y;
     if (c1 * c0 <= 0.0f) {
         r = 1;
-        if (perp.y * pa.x + -perp.x * pa.y > 0.0f || qa.x * perp.y + -perp.x * qa.y > 0.0f) {
+        if (perp.y * ap.x + -perp.x * ap.y > 0.0f || qa.x * perp.y + -perp.x * qa.y > 0.0f) {
             pb.x = p.x - b.x;
             pb.y = p.y - b.y;
             qb.x = q.x - b.x;
