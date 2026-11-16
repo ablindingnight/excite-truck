@@ -311,7 +311,6 @@ int fn_801B526C(void);
 PathPos fn_80136414(u8* track, s32 node);  // idealline: returns the ILPos by value
 s32 fn_801363A0(u8* track, u8* cur);
 extern f32 lbl_8055F568;  // car heading
-extern const f32 lbl_80563F44;
 extern const f32 lbl_80563F48;  // 0.0
 
 // The car's track controller (slot 0x18 returns its track).
@@ -328,7 +327,7 @@ public:
 // camera group `type` (-1 = any); regions that do not apply still win over nothing if their camera
 // is enabled.
 int find_best_region(u8* car, int type) {
-    f32 best = lbl_80563F44;
+    f32 best = -1.0f;
     f32 altBest = best;
     CamRegion* r;
     int found = 0;
@@ -501,7 +500,6 @@ f32 PSVECDotProduct(const f32* a, const f32* b);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
 extern s32 lbl_8055F548;
 extern u8 lbl_8055F480;
-extern const f32 lbl_80563F44;  // -1.0
 extern const f32 lbl_80563F50;  // 1.0
 extern const f32 lbl_80563F78;  // fallback height above ground
 extern f32 lbl_80499050[12];    // last camera frame
@@ -539,8 +537,8 @@ static inline int PitMode(u8* track) {
 
 // Smoothstep-style ease of a -1..1 fraction.
 static inline f32 CamEase(f32 x) {
-    if (x < lbl_80563F44) {
-        return lbl_80563F44;
+    if (x < -1.0f) {
+        return -1.0f;
     }
     if (x > lbl_80563F50) {
         return lbl_80563F50;
@@ -688,7 +686,7 @@ void fn_80271624(int mode, u8* p) {
             }
             switch (tv->type) {
             case 1:
-                fn_80274730(p, tv->fov * lbl_80563F4C, lbl_80563F44, lbl_80563F44, lbl_80563F48);
+                fn_80274730(p, tv->fov * lbl_80563F4C, -1.0f, -1.0f, lbl_80563F48);
                 break;
             case 5: {
                 f32 move[3];
@@ -774,7 +772,7 @@ void fn_80271624(int mode, u8* p) {
             down.m[1][1] = lbl_80563F48;
             down.m[1][2] = lbl_80563F50;
             down.m[2][0] = lbl_80563F48;
-            down.m[2][1] = lbl_80563F44;
+            down.m[2][1] = -1.0f;
             down.m[2][2] = lbl_80563F48;
             fn_801BFD34((u8*)&r->pose.pos, off, (u8*)&r->carFrame);
             Mat3Mul((Mat3*)&r->pose, &down, (Mat3*)&r->carFrame);
