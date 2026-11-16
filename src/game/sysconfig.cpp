@@ -73,7 +73,7 @@ s32 fn_802E9A0C(void) { return lbl_80560044; }
 
 s32 fn_802E9A14(void) { return lbl_80560048; }
 
-bool fn_802E9A1C(void) { return lbl_8056004C; }
+int fn_802E9A1C(void) { return lbl_8056004C; }
 
 bool fn_802E9A24(void) { return lbl_8056004D; }
 
