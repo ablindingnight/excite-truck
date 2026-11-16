@@ -357,7 +357,7 @@ void fn_801769EC(void) {
     fn_8013A208();
 }
 
-u8 fn_801769F8(void) { return lbl_8055E3BD; }
+int fn_801769F8(void) { return lbl_8055E3BD; }
 
 void fn_80176A00(s32 m) {
     lbl_8055A2F0 = m;
