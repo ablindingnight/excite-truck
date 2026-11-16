@@ -4,6 +4,7 @@
 // object lists with their collision volumes, animated and sound objects, and drawing. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
@@ -439,11 +440,6 @@ struct ViewState {
     PVec pos;  // offset 0x24
 };
 
-struct EventCfg {
-    u8 pad0[0x10];
-    u32 flags;  // offset 0x10
-};
-
 struct Settings {
     u8 pad0[0x20];
     ValueNode* vals;  // offset 0x20
@@ -500,7 +496,6 @@ int fn_80129D90(int a, int b, int n);
 f32 fn_801E7E24(void);
 ViewState* fn_801E8718(int view);
 int fn_801E7698(void);
-EventCfg* fn_801E87A8(void);
 void fn_801E87D4(AnimObj* o);
 f32 fn_801E88F0(int view);
 int fn_802C9C58(int mode);

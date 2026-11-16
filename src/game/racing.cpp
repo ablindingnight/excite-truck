@@ -4,6 +4,7 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/dashhelper.h"
 #include "game/math_types.h"
 
@@ -40,12 +41,6 @@ public:
     virtual LayoutItem* Find(const char* name);    // 0xC
     virtual void* FindArt(const char* name);       // 0x10
     virtual LayoutBox* FindBox(const char* name);  // 0x14
-};
-
-// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
-struct RaceOpts {
-    u32 unk0;  // offset 0x0
-    u32 type;  // offset 0x4
 };
 
 struct RaceProgress {
@@ -190,7 +185,6 @@ void fn_801DF93C(int player);
 void fn_8000FBE4(void);
 int fn_801E866C(int player);
 int fn_801E89C8(int player);
-RaceOpts* fn_801E87A8(void);
 }  // extern "C"
 int fn_8000D75C(void);
 extern "C" {

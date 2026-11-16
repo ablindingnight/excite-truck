@@ -2,6 +2,7 @@
 // difficulty.val, with per-event overrides (the event's own node, then "<mode>_<key>" keys).
 // Names are guesses apart from the file names, level names and messages.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -15,14 +16,6 @@ void fn_80131818(ValueTable* table);
 
 int GetNumEvents(void);
 
-// world.cpp's EventCfg (fn_801E87A8), declared as far as this unit reads it
-struct EventCfg {
-    s32 event;   // offset 0x0
-    u8 pad4[0x4];
-    s32 level;   // offset 0x8
-};
-
-extern "C" EventCfg* fn_801E87A8(void);
 
 void* operator new(size_t size, const char* tag);
 
@@ -147,8 +140,8 @@ int fn_80204BB4(const char* name) { return fn_80204B2C(name); }
 void fn_80204BB8(void) {
     lbl_8055ED58 = 1;
     lbl_8055ED5C = NULL;
-    EventCfg* f = fn_801E87A8();
-    lbl_8055ED5C = new ("difficulty") Difficulty(f->level, f->event);
+    RaceOpts* f = fn_801E87A8();
+    lbl_8055ED5C = new ("difficulty") Difficulty(f->difficulty, f->event);
 }
 
 int fn_80204CF0(void) { return lbl_8055ED5C->level; }

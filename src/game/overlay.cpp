@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include "macros.h"
@@ -55,12 +56,6 @@ public:
     virtual LayoutItem* Find(const char* name) = 0;            // 0xC
     virtual LayoutArt* FindArt(const char* name) = 0;          // 0x10
     virtual LayoutArtItem* FindArtItem(const char* name) = 0;  // 0x14
-};
-
-// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
-struct RaceOpts {
-    u32 unk0;  // offset 0x0
-    u32 type;  // offset 0x4
 };
 
 struct RacerState {
@@ -235,7 +230,6 @@ void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 int fn_801769B8(void);
 int fn_801EA994(void);
 int fn_802E2C20(void);
-RaceOpts* fn_801E87A8(void);
 int fn_801E86F8(int player);
 RacerState* fn_801EA9CC(int index);
 int fn_801B8570(int index);

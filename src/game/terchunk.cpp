@@ -2,6 +2,7 @@
 // terchunk.val, streamed in a window around the nearest chunk to the camera, plus the far
 // models. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 
 // Dot product taking the y term first (x*mx + y*my + z*mz).
@@ -46,12 +47,6 @@ int fn_802CE850(ModelSlot* s);
 
 void* operator new[](size_t size, const char* tag);
 
-// world.cpp's EventCfg (fn_801E87A8), declared as far as this unit reads it
-struct EventCfg {
-    u8 pad0[0x10];
-    u32 flags;  // offset 0x10
-};
-
 // mrender.cpp's Camera (fn_802C86DC), declared as far as this unit reads it
 struct Camera {
     f32 m[3][3];  // offset 0x0
@@ -71,7 +66,6 @@ struct CarInfo {
 };
 
 extern "C" {
-EventCfg* fn_801E87A8(void);
 Camera* fn_802C86DC(void);
 CarInfo* fn_801EA9A0(int i);
 }
@@ -240,7 +234,7 @@ void fn_802025D8(void) {
 }
 
 void fn_8020268C(void) {
-    EventCfg* f = fn_801E87A8();
+    RaceOpts* f = fn_801E87A8();
     int mode = 2;
     if ((f->flags >> 1) & 1) {
         mode = 1;

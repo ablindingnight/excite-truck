@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 
@@ -79,11 +80,6 @@ struct ViewState {
     WCam cam;    // offset 0x0
     u32 flags;   // offset 0x30
     u32 prev;    // offset 0x34
-};
-
-struct EventCfg {
-    u8 pad0[0x10];
-    u32 flags;  // offset 0x10
 };
 
 // One car of the race (0x78).
@@ -513,7 +509,6 @@ void fn_801E9564(RaceSetup* s);
 void fn_801E95DC(void);
 void fn_801E96D8(RaceSetup* s);
 void fn_801E9BE4(void);
-EventCfg* fn_801E87A8(void);
 void fn_801E88B4(s32* x, s32* y, s32* w, s32* h, int view);
 void fn_801E8148(void);
 f32 fn_801E7E18(void);
@@ -989,7 +984,7 @@ int fn_801E8758(int view) {
 
 RaceSetup* fn_801E879C(void) { return &lbl_80487DE0; }
 
-EventCfg* fn_801E87A8(void) { return (EventCfg*)&lbl_80487DE0.event; }
+RaceOpts* fn_801E87A8(void) { return (RaceOpts*)&lbl_80487DE0.event; }
 
 void fn_801E87B8(WObj* o) { lbl_8055EB3C[lbl_8055EB34++] = o; }
 

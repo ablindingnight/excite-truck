@@ -2,6 +2,7 @@
 // speed_factor, compare_car_pct), blends it by AI strength, and every eighth frame measures the gap
 // between the leader and the compared car to scale the AI's speed. Names are guesses apart from the keys.
 #include "game/common.h"
+#include "game/raceopts.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -15,13 +16,6 @@ int fn_801B2F40(int i);
 f32 fn_801B2F90(int a, int b);
 }
 
-struct Strength {
-    s32 event;
-    u8 pad4[8];
-    s32 level;  // offset 0xC
-};
-
-extern "C" Strength* fn_801E87A8(void);
 
 struct Racer {
     u8 pad0[4];

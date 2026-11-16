@@ -2,6 +2,7 @@
 // flag distance, pit speed), creates per-car AI info, formats car numbers, and builds the driver object
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/springcar.h"
 
@@ -17,7 +18,6 @@ char* strcpy(char* d, const char* s);
 double atof(const char* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-int* fn_801E87A8(void);
 void fn_8013B4E0(void* cars, void* race);
 f32 fn_8013672C(void);
 void fn_80137884(s32 count);
@@ -239,8 +239,8 @@ IDriver* fn_80134FF8(void);
 IDriver* fn_801350C0(void);
 
 void fn_8013472C(void) {
-    int* ev = fn_801E87A8();
-    EventInfo* info = GetEvent(*ev);
+    RaceOpts* ev = fn_801E87A8();
+    EventInfo* info = GetEvent(ev->event);
     lbl_8055E0AC = info->node->FindChild("ai");
 }
 
@@ -270,7 +270,7 @@ void fn_8013477C(AIRace* race) {
     fn_802E30C8("ai: pit_speed = %1.1f mph", lbl_8055E0A8 / 0.44444445f);
     lbl_8055E0A4 = fn_80134B58("rtt_greenflag_lon", fn_8013672C() / 2);
     fn_80137884(lbl_8055E0B0);
-    fn_80139044(fn_801E87A8());
+    fn_80139044((int*)fn_801E87A8());
     fn_8013BAE4(lbl_8055E0B0);
     fn_801663C8(lbl_8055E0B0, grid, race->extra);
     for (i = 0; i < grid->count; i++) {

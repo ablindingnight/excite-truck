@@ -3,6 +3,7 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
@@ -103,12 +104,6 @@ struct PlayerObj {
 };
 }  // namespace
 
-// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
-struct RaceOpts {
-    u8 pad0[0x10];
-    u32 flags;  // offset 0x10
-};
-
 struct PathNode {
     Vec2 pos;   // offset 0x0
     Vec2 dir;   // offset 0x8
@@ -170,7 +165,6 @@ CarInfo* fn_801EA9A0(int index);
 int fn_801EA994(void);
 Truck* fn_8017960C(int index);
 PlayerObj* fn_802678E4(int player);
-RaceOpts* fn_801E87A8(void);
 int fn_80178C9C(void);
 Vec3 fn_80136468(int path, f32 dist);  // idealline: returns the ILPos by value
 u32 fn_80230B9C(int unk);

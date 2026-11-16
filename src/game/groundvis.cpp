@@ -2,6 +2,7 @@
 // keeps the active ground set, and walks the terrain quadtree to build per-frame visibility masks.
 // Names are guesses apart from the value keys and messages.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX.h>
 #include "game/vec3_init.h"
 // Cell size in world units (2.0f): retail's FIRST .sdata2 entry, multiplied at run time everywhere, so it is a named
@@ -74,11 +75,6 @@ struct GroundBuf {
     }
 };
 
-struct ViewFlags {
-    u8 pad0[0x10];
-    u32 flags;  // offset 0x10: 2 = high resolution, 1 = bit0 (MWCC's MSB-first bitfields, as masks)
-};
-
 extern "C" int fn_802E2C20(void);                  // milliseconds
 extern "C" void fn_802E30C8(const char* fmt, ...);  // warning print
 
@@ -102,7 +98,6 @@ extern "C" {
 int fn_8012C33C(const char* name);
 f32 fn_801DCF48(int a, f32 x, f32 z);
 GroundFrame* fn_801E8718(s32 a);
-ViewFlags* fn_801E87A8(void);
 f32 fn_801EA0E8(f32 x, f32 z);
 void fn_801FA6B8(void);
 void fn_801FA738(void);
@@ -874,7 +869,7 @@ void fn_802B016C(void) {
 
 void fn_802B01A8(void) {
     fn_802DBE4C();
-    ViewFlags* v = fn_801E87A8();
+    RaceOpts* v = fn_801E87A8();
     int mode = 1;
     if ((v->flags >> 1) & 1) {
         mode = 2;

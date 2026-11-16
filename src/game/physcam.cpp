@@ -3,6 +3,7 @@
 // checks and the angle/range helpers. Written against raw field offsets; the large routines and the
 // static-array initialiser are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/camrect.h"
 #include "game/camrec.h"
@@ -24,7 +25,6 @@ struct PathPos {
 };
 
 extern "C" {
-u8* fn_801E87A8(void);
 int strcasecmp(const char* a, const char* b);
 u8* fn_80178C9C(void);
 PathPos fn_80136468(u8* src, f32 t);  // idealline: returns the ILPos by value
@@ -158,7 +158,7 @@ extern "C" {
 
 void fn_80270B00(const char* fmt, ...) {}
 
-u32 fn_80270B50(void) { return U32(fn_801E87A8(), 0x4); }
+u32 fn_80270B50(void) { return fn_801E87A8()->type; }
 
 void fn_80270B74(void) {
     for (int i = 0; i < 32; i++) {

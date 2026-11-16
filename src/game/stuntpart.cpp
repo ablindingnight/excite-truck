@@ -2,6 +2,7 @@
 // re-entry puffs, the invincible-car sparks and the stunt fog colour, plus the menu copies of
 // the emitter setup. Names are guesses apart from the allocation tags and file names.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/plainvec.h"
 #include "macros.h"
 #include <revolution/MTX.h>
@@ -77,11 +78,6 @@ f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 int fn_801E866C(int view);
 f32 fn_801E7E24(void);
 int fn_801E86F8(int view);
-struct StuntOpts {
-    s32 unk0;
-    u32 mode;  // offset 0x4
-};
-StuntOpts* fn_801E87A8(void);
 s32 fn_801EE0C8(void* model);
 void fn_801EEFDC(int (*h)(const void* ev), u8 type);
 void EventUnInstallHandler(int (*h)(const void* ev));
@@ -598,7 +594,7 @@ void fn_802AB21C(void) {
     fn_801EEFDC(fn_802A9F30, 15);
     fn_801EEFDC(fn_802A9F90, 16);
     fn_801EEFDC(fn_802A9FB0, 17);
-    lbl_8055F92C = fn_801E87A8()->mode == 0x180304;
+    lbl_8055F92C = fn_801E87A8()->type == 0x180304;
 }
 
 }  // extern "C"

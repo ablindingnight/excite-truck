@@ -3,11 +3,11 @@
 // to the current lap of the viewed car, with a short hold after each lap change. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 
 extern "C" {
 f32 fn_801EA0E8(f32 x, f32 z);  // ground height
-u32* fn_801E87A8(void);           // race options
 void fn_802A1120(void* pos, void* dir);
 int fn_8012C33C(const char* name);
 s32 fn_802C6FC0(const char* name, int a, int b);  // load a model
@@ -110,7 +110,7 @@ void fn_802A8FEC(ZVec* out, const ZV2* p) {
 }
 
 bool fn_802A9048(void) {
-    u32 f = fn_801E87A8()[1];
+    u32 f = fn_801E87A8()->type;
     bool r = false;
     if ((f & 0x100) && f != 0x180303 && f != 0x180304) {
         r = true;
@@ -150,7 +150,7 @@ static inline void Loop1_fn_802A9090(const ZVec& vb, ZFrame* f) {
     PSVECNormalize((const Vec*)&f->rot[0], (Vec*)&f->rot[0]);
     PSVECNormalize((const Vec*)&f->rot[2], (Vec*)&f->rot[2]);
     PSVECCrossProduct((const Vec*)&f->rot[2], (const Vec*)&f->rot[0], (Vec*)&f->rot[1]);
-    if (fn_801E87A8()[4] & 2) {
+    if (fn_801E87A8()->flags & 2) {
         f->rot[0].x *= -1.0f;
         f->rot[0].y *= -1.0f;
         f->rot[0].z *= -1.0f;

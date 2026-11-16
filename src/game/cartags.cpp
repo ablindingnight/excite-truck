@@ -1,6 +1,7 @@
 // Car name tags and map gems (0x802A7BE8-0x802A81EC): draws each opponent's place/name above the car,
 // nearest last, and a gem for registered rivals. Names are guesses apart from the asset names.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "macros.h"
 
@@ -43,7 +44,6 @@ void fn_802328D4(s32 font);
 void* fn_8023512C(const char* name);
 void fn_80235380(void* art);
 int fn_801C5B60(void);
-s32* fn_801E87A8(void);
 TagCar* fn_801EA9A0(int car);
 int fn_801EA994(void);
 void fn_802C8E70(const ValVec3* p, ValVec3* out);
@@ -88,7 +88,7 @@ void fn_802A7C64(void) {}
 void fn_802A7EEC(void);
 
 void fn_802A7C68(void) {
-    if (!fn_801C5B60() && fn_801E87A8()[1] != 0x180304) {
+    if (!fn_801C5B60() && fn_801E87A8()->type != 0x180304) {
         fn_802A7EEC();
     }
 }

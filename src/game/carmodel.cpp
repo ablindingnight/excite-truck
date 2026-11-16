@@ -4,6 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/mtxtypes.h>  // Vec
 
@@ -260,7 +261,6 @@ void fn_801E353C(Joint* bone, f32 angle);
 s32 fn_801E7E2C(void);
 s32 fn_801E866C(s32 a);
 f32 fn_801E8738(s32 a);
-struct ViewInfo* fn_801E87A8(void);
 f32 fn_801E88F0(s32 a);
 int fn_801E8954(s32 a);
 int fn_801E897C(s32 a);
@@ -318,13 +318,6 @@ const Vec* fn_802C9A40(void);
 void fn_802DAC54(void);
 void fn_802E317C(const char* fmt, ...);
 }
-
-struct ViewInfo {
-    u8 pad[4];
-    u32 mode;    // offset 0x4
-    u8 pad8[8];
-    u32 flags;   // offset 0x10
-};
 
 struct ModelInfo {
     u8 pad[0x1C];
@@ -560,7 +553,7 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
     if (*(u32*)r->name == 'PCAR') {
         fn_801333E8(1, "draw_player_wheel", &drawWheel);
     }
-    if (*(u32*)r->name == 'PCAR' && fn_801E87A8()->mode == 0x180304) {
+    if (*(u32*)r->name == 'PCAR' && fn_801E87A8()->type == 0x180304) {
         lbl_8055EBC8 = this;
     }
 }

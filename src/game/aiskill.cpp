@@ -3,6 +3,7 @@
 // speeds across that range in a shuffled order, with per-driver overrides. Names are guesses apart from
 // the value keys and messages.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -28,13 +29,6 @@ struct V2 {
     f32 y;
 };
 
-struct Strength {
-    s32 event;  // offset 0x0
-    u8 pad4[8];
-    s32 level;  // offset 0xC
-};
-
-extern "C" Strength* fn_801E87A8(void);
 
 struct SkillEntry {
     f32 start;  // offset 0x0
@@ -156,7 +150,7 @@ f32 fn_8013A90C(ValueNode* t, const char* key, int lvl, f32 frac) {
 
 void fn_8013B6C0(s32* lvl, f32* frac, s32 strength);
 
-int fn_8013A9C0(V2* out, ValueNode* t, Strength* s, const char* table) {
+int fn_8013A9C0(V2* out, ValueNode* t, RaceOpts* s, const char* table) {
     int r = t->Has("easy_skill_range");
     if (r) {
         s32 lvl;
@@ -168,7 +162,7 @@ int fn_8013A9C0(V2* out, ValueNode* t, Strength* s, const char* table) {
     return r;
 }
 
-f32 fn_8013AA68(ValueNode* t, const char* key, const char* table, Strength* s) {
+f32 fn_8013AA68(ValueNode* t, const char* key, const char* table, RaceOpts* s) {
     f32 v = 0.0f;
     if (fn_8013A760(t, key)) {
         s32 lvl;
@@ -180,7 +174,7 @@ f32 fn_8013AA68(ValueNode* t, const char* key, const char* table, Strength* s) {
     return v;
 }
 
-void fn_8013AB08(V2* out, Strength* s) {
+void fn_8013AB08(V2* out, RaceOpts* s) {
     EventInfo* ev = GetEvent(s->event);
     TrackInfo* trk = GetTrack(ev->track);
     if (!fn_8013A860(out, ev->node, "Contest Table") &&
@@ -197,7 +191,7 @@ void fn_8013AB08(V2* out, Strength* s) {
     }
 }
 
-f32 fn_8013AC2C(const Strength* s) {
+f32 fn_8013AC2C(const RaceOpts* s) {
     EventInfo* ev = GetEvent(s->event);
     TrackInfo* trk = GetTrack(ev->track);
     return trk->node->GetFloat("rtt_speed_factor", 1.0f);
@@ -207,7 +201,7 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
     DriverBonus bonus[50];
     SkillSlot slots[8];
     V2 sk;
-    Strength* s = fn_801E87A8();
+    RaceOpts* s = fn_801E87A8();
     s32 n = fn_80135108();
     int num;
     int nd;

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/highscore.h"
 #include "game/gamedb.h"
 #include "game/gart.h"
@@ -3315,11 +3316,6 @@ public:
 };
 
 
-struct ViewOpts {
-    u8 pad0[0x10];
-    u32 flags;  // offset 0x10
-};
-
 extern "C" {
 int fn_801D48F8(void* seq);
 int fn_801D4904(void* seq);
@@ -3335,7 +3331,6 @@ void fn_801688B4(int a);
 void fn_80167840(RaceCarRec* rc);
 s32 fn_8016A30C(int id);
 int fn_80179630(int view);
-ViewOpts* fn_801E87A8(void);
 void fn_80167684(f32 left);
 double floor(double x);
 double cos(double x);
@@ -3688,7 +3683,6 @@ void fn_802C74D8(s32 model, const Xform* m, s32 tex);
 int fn_802C9994(int on);
 void fn_802C744C(s32 model, const Xform* m);
 void* fn_802C86DC(void);
-ViewOpts* fn_801E87A8(void);
 f32 fn_80149650(void);
 }
 

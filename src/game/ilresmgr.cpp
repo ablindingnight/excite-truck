@@ -2,6 +2,7 @@
 // and either a single ghost line or a "racingline_set" of lines with per-car switching between them, inside
 // "legal_transition_regions", every min_change_t..max_change_t seconds. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/carbody.h"
 
@@ -12,10 +13,6 @@ UnkStaticFFFF lbl_8055E278;
 
 struct IdealLineRes;
 struct Region;
-struct Strength {
-    s32 event;  // offset 0x0
-};
-
 struct RacerInfo {
     u8 pad0[0x34];
     f32 side;  // offset 0x34
@@ -42,7 +39,6 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 void fn_802E30C8(const char* fmt, ...);                      // debug print
 void fn_802E317C(const char* fmt, ...);                      // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_8012E81C(const char* res);
-Strength* fn_801E87A8(void);
 const char* fn_801E879C(void);  // track name
 IdealLineRes* fn_80138968(const char* name);
 void fn_80138AD8(IdealLineRes** pr);
