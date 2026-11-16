@@ -312,6 +312,14 @@ struct AICarLink {
 #define LINK(d) ((const AICarLink*)(d))
 #define CARID(d) S32(d, 0x290)
 
+// Helpers unproven (names and existence): the forms that keep retail's unfolded identities, single constant loads
+// and operand order where a plain literal does not.
+static inline f32 AiUnit(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }
+static inline f32 AiRamp(f32 v, f32 lo, f32 range) { return (v - lo) / range; }
+static inline f32 AiSpan(f32 lo, f32 hi) { return hi - lo; }
+static inline f32 AiAdd(f32 a, f32 b) { return a + b; }
+static inline f32 AiMul(f32 a, f32 b) { return a * b; }
+static inline void AiScale(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
@@ -503,7 +511,6 @@ void AIDriver_vf44(u8* d) {
     F32(d, 0x22C) = lbl_8055E3C8;
 }
 
-extern const f32 lbl_8056216C;  // 22.2 (80 km/h)
 
 void AIDriver_vf38(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
     if (other) {
@@ -537,7 +544,7 @@ void AIDriver_vf38(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
         n.z *= inv;
         if ((f32)__fabs(PSVECDotProduct(&n, CAR(d) + 0x88)) > 0.5f) {
             f32 v = F32(d, 0x270);
-            if (v < lbl_8056216C) {
+            if (v < 22.222223f) {
                 if (kind != 0x6D || v < 2.2222223f) {
                     if (S32(d, 0x268) != 1 || kind != 0x6D) {
                         F32(d, 0x2A0) += 2.0f;
@@ -954,7 +961,6 @@ void fn_801944C0(u8* d) {
     }
 }
 
-extern "C" const f32 lbl_8056215C;  // 0.5
 
 void fn_80194590(u8* d) {
     if (S32(d, 0x260) == 0) {
@@ -963,7 +969,7 @@ void fn_80194590(u8* d) {
         if (S32(d, 0x18) == 1) {
             k = -1;
         }
-        F32(d, 0x264) = (f32)k * (F32(d, 0x284) + lbl_8055A488 * lbl_8056215C);
+        F32(d, 0x264) = (f32)k * (F32(d, 0x284) + lbl_8055A488 / 2.0f);
     }
 }
 
@@ -1173,7 +1179,6 @@ struct AITarget {
     f32 k;      // offset 0xC
 };
 
-extern "C" const f32 lbl_80562144;  // 0.0f
 
 void fn_80194C4C(u8* d, u8* out, f32 t) {
     AITarget* o = (AITarget*)out;
@@ -1185,8 +1190,8 @@ void fn_80194C4C(u8* d, u8* out, f32 t) {
     f32 speed = fn_80134C1C();
     if (fn_801769A8() & 0x400) {
         f32 now = lbl_8055E3C8;
-        f32 k = Clamp01(((now - fn_801B3064()) - lbl_80562144) / 7.0f);
-        speed = lbl_80562144 + k * (speed - lbl_80562144);
+        f32 k = Clamp01(AiUnit(now - fn_801B3064(), 0.0f, 7.0f));
+        speed = LerpF(0.0f, speed, k);
     }
     if (S32(g, 0x30) == 0) {
         o->speed = speed;
@@ -1240,14 +1245,6 @@ f32 fn_80194FC8(u8* d) { return fn_8013B744(CARID(d)); }
 
 }  // extern "C"
 
-extern "C" const f32 lbl_80562140;  // 1.0
-extern "C" const f32 lbl_80562144;  // 0.0
-extern "C" const f32 lbl_80562160;
-extern const f32 lbl_8056216C;
-extern "C" const f32 lbl_8056217C;
-extern const f32 lbl_805621C0;  // line switch length (1.5)
-extern const f32 lbl_805621F8;
-extern const f32 lbl_805621FC;
 extern u32 lbl_8055D430;  // debug flags
 f32 fn_801931AC(f32 t, f32 a, f32 b, f32 len);
 f32 fn_801948B0(u8* d, f32 t, int steer);
@@ -1267,7 +1264,7 @@ static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
 // are blended over the switch length.
 static inline void LineAhead(u8* d, f32 ahead, V2* pos, f32* speed, f32* height) {
     f32 at = F32(d, 0x26C);
-    int blend = at - F32(d, 0x1D0) < lbl_805621C0;
+    int blend = at - F32(d, 0x1D0) < 1.5f;
     if (blend) {
         ILPos a;
         ILPos b;
@@ -1280,15 +1277,15 @@ static inline void LineAhead(u8* d, f32 ahead, V2* pos, f32* speed, f32* height)
         fn_80135B9C((LineFollower*)(d + 0x168), ahead, &pa, &da, &sa, &a);
         fn_80135B9C((LineFollower*)(d + 0x19C), ahead, &pb, &db, &sb, &b);
         if (speed) {
-            *speed = sa + ((at - F32(d, 0x1D0)) / lbl_805621C0) * (sb - sa);
+            *speed = sa + ((at - F32(d, 0x1D0)) / 1.5f) * (sb - sa);
         }
         if (pos) {
-            *pos = LerpV2(pa, pb, (at - F32(d, 0x1D0)) / lbl_805621C0);
+            *pos = LerpV2(pa, pb, (at - F32(d, 0x1D0)) / 1.5f);
         }
         if (height) {
             f32 ha = LerpF(a.seg->height, a.seg->next->height, a.t);
             f32 hb = LerpF(b.seg->height, b.seg->next->height, b.t);
-            *height = ha + ((at - F32(d, 0x1D0)) / lbl_805621C0) * (hb - ha);
+            *height = ha + ((at - F32(d, 0x1D0)) / 1.5f) * (hb - ha);
         }
     } else if (height) {
         ILPos b;
@@ -1300,8 +1297,8 @@ static inline void LineAhead(u8* d, f32 ahead, V2* pos, f32* speed, f32* height)
 }
 
 static inline f32 Clamp01F(f32 v) {
-    f32 t = lbl_80562140 < v ? lbl_80562140 : v;
-    return t > lbl_80562144 ? t : lbl_80562144;
+    f32 t = 1.0f < v ? 1.0f : v;
+    return t > 0.0f ? t : 0.0f;
 }
 
 extern "C" {
@@ -1324,16 +1321,16 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     F32(out, 0x8) = F32(out, 0x8) * fn_80194FC8(d);
     if (U8(d, 0x2A6)) {
         f32 st = F32(d, 0x1EC);
-        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + lbl_8056217C) - st));
-        F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + (lbl_80562144 + k * lbl_80562140) * -0.19999999f);
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + 10.0f) - st));
+        F32(out, 0x8) = F32(out, 0x8) * LerpF(1.0f, 0.8f, LerpF(0.0f, 1.0f, k));
     }
     f32 side = fn_801948B0(d, t, 0);
     F32(out, 0x0) += F32(d, 0x58) * side;
     F32(out, 0x4) = F32(out, 0x4) + F32(d, 0x5C) * side;
     if (S32(d, 0x268) == 3) {
         f32 st = F32(d, 0x1DC);
-        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + lbl_805621F8) - st));
-        F32(out, 0x8) = F32(out, 0x8) * (lbl_80562140 + k * lbl_805621FC);
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + 12.0f) - st));
+        F32(out, 0x8) = F32(out, 0x8) * LerpF(1.0f, 0.7f, k);
     }
     int chase = (lbl_8055D430 & 1) && (lbl_8055D430 & 0x20);
     if (chase) {
@@ -1344,13 +1341,13 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
                 u8* car = fn_8017960C(lead);
                 V2 rel;
                 fn_80137788(pr, S32(d, 0x290), &rel);
-                if (rel.y > lbl_80562144) {
+                if (rel.y > 0.0f) {
                     F32(out, 0x0) = F32(car, 0x60);
                     F32(out, 0x4) = F32(car, 0x68);
-                    F32(out, 0x8) = F32(car, 0x25CC) + lbl_8056216C;
+                    F32(out, 0x8) = AiAdd(F32(car, 0x25CC), 22.222223f);
                 } else {
-                    f32 v = F32(car, 0x25CC) - lbl_80562160;
-                    F32(out, 0x8) = v > lbl_80562160 ? v : lbl_80562160;
+                    f32 v = F32(car, 0x25CC) - 4.4444447f;
+                    F32(out, 0x8) = v > 4.4444447f ? v : 4.4444447f;
                 }
             }
         }
@@ -1614,7 +1611,6 @@ public:
     virtual u8* Pos(void);  // 0x1C
 };
 
-extern const f32 lbl_805621C0;  // 1.5f
 
 extern "C" {
 u32 fn_801388F4(u32 a);
@@ -1635,7 +1631,7 @@ void fn_80195D80(u8* d, f32 t) {
         F32(d, 0x1D0) = lbl_8055E3C8;
     }
     *(LinePos*)(d + 0x1A0) = *(LinePos*)(pos + 0x4);
-    bool recent = t - F32(d, 0x1D0) < lbl_805621C0;
+    bool recent = t - F32(d, 0x1D0) < 1.5f;
     if (recent) {
         f32 s = F32(car, 0x5BC);
         RVec3 p;
@@ -1803,9 +1799,6 @@ void fn_801964D0(u8* d) {
 }
 
 void fn_801EA18C(RVec3* pos, const RVec3* dir, int a);
-extern const f32 lbl_80562140;  // 1.0f
-extern const f32 lbl_80562144;  // 0.0f
-extern const f32 lbl_80562248;  // -1.1f
 void fn_8018AE2C(u8* car, f32 pitch);
 void fn_8018AE34(u8* car, f32 roll);
 
@@ -1836,9 +1829,9 @@ void fn_801965AC(u8* d) {
         fn_8018AE34(CAR(d), MaxF(a, -1.0f));
     } else {
         f32 range = 1.0f;
-        f32 k = MinF(1.0f, ((f32)__fabs(F32(d, 0x23C)) - lbl_80562144) / range);
+        f32 k = MinF(1.0f, AiRamp((f32)__fabs(F32(d, 0x23C)), 0.0f, range));
         k = MaxF(k, 0.0f);
-        f32 a = gain * (F32(CAR(d), 0x58) - (0.7f + k * lbl_80562248));
+        f32 a = gain * (F32(CAR(d), 0x58) - LerpF(0.7f, -0.4f, k));
         a = MinF(1.0f, a);
         fn_8018AE2C(CAR(d), MaxF(a, -1.0f));
         fn_8018AE34(CAR(d), 0.0f);
@@ -1938,9 +1931,6 @@ void fn_80196A9C(u8* d) { fn_8019684C(); }
 
 extern const f32 lbl_80562250[2];  // phase ends: 0.1 s, 1 s
 const f32 lbl_80562250[2] = {0.1f, 1.0f};
-extern const f32 lbl_80562258;     // -44500
-extern const f32 lbl_8056225C;     // -31150
-extern const f32 lbl_80562160;     // 4.444
 void fn_8018ADD4(void* car, int v);
 void fn_8018ADC4(void* car, f32 v);
 
@@ -1961,9 +1951,7 @@ void fn_80196AA0(u8* d) {
     case 0: {
         u8* car = CAR(d);
         RVec3 f;
-        f.x = F32(car, 0x88) * lbl_80562258;
-        f.y = F32(car, 0x8C) * lbl_80562258;
-        f.z = F32(car, 0x90) * lbl_80562258;
+        AiScale(&f.x, &F32(car, 0x88), -44500.0f);
         (*(RigidBody**)(d + 0x294))->AddForceAt(&f, (RVec3*)(CAR(d) + 0x94));
     }
     case 1: {
@@ -1981,16 +1969,14 @@ void fn_80196AA0(u8* d) {
         fn_8018ADD4(CAR(d), -1);
         fn_8018ADBC(CAR(d), 0.0f);
         fn_8018ADC4(CAR(d), 1.0f);
-        if ((f32)__fabs(F32(d, 0x270)) < lbl_80562160) {
+        if ((f32)__fabs(F32(d, 0x270)) < 4.4444447f) {
             fn_8018ADB4(CAR(d), 1.0f);
         }
-        if (F32(d, 0x270) < lbl_80562160) {
+        if (F32(d, 0x270) < 4.4444447f) {
             fn_8018ADC4(CAR(d), 0.0f);
             u8* car = CAR(d);
             RVec3 g;
-            g.x = F32(car, 0x88) * lbl_8056225C;
-            g.y = F32(car, 0x8C) * lbl_8056225C;
-            g.z = F32(car, 0x90) * lbl_8056225C;
+            AiScale(&g.x, &F32(car, 0x88), -31149.998f);
             LINK(d)->Body()->AddForceAt(&g, (RVec3*)(CAR(d) + 0x94));
         }
         break;
@@ -2224,8 +2210,8 @@ void fn_8019724C(u8* d, V2* io) {
         dir.y *= inv;
         if (fn_8015FBCC(CAR(d), &hit, 0, o)) {
             f32 t = F32(d, 0x26C);
-            f32 hi = 0.066733405f + F32(d, 0x1F8);
             f32 lo = t - 0.9f;
+            f32 hi = 0.066733405f + F32(d, 0x1F8);
             t = t < hi ? t : hi;
             t = t > lo ? t : lo;
             F32(d, 0x1F8) = t;
@@ -2271,7 +2257,7 @@ void fn_8019743C(u8* d, u8* out) {
     if (any) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
-            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + F32(d, 0x84) * lbl_8056215C));
+            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + AiMul(F32(d, 0x84), 0.5f)));
             F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
         }
         if (U8(d, 0x9C)) {
@@ -2374,7 +2360,7 @@ void fn_8019743C(u8* d, u8* out) {
     if (F32(d, 0xE0) > 0.05f) {
         // The target still tests the line-switch blend (now - switch time < length) here and drops the result,
         // like the dead spin clamp in cardmg fn_8018F76C; the original's use of it is unknown.
-        int blend = F32(d, 0x26C) - F32(d, 0x1D0) < lbl_805621C0;
+        int blend = F32(d, 0x26C) - F32(d, 0x1D0) < 1.5f;
         f32 at = F32(d, 0xE4);
         if (blend) {
             at = F32(d, 0xE4);
@@ -2612,7 +2598,6 @@ void fn_8019813C(u8* d, const u8* p, f32 a, f32 b) {
     }
 }
 
-extern "C" const f32 lbl_8056217C;  // 10.0
 
 // Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
 // car is) and, when the pass slows down, nudges the lateral offset away from the other car.
@@ -2624,7 +2609,8 @@ static inline void Loop1_fn_801981A0(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x)
         S32(d, 0x140) = 30;
     }
     if (S32(d, 0x140) == 0 && S32(d, 0x268) != 3) {
-        f32 span = lbl_8056217C - lbl_80562140;
+        f32 hi = 10.0f;
+        f32 span = hi - 1.0f;
         f32 lim = 4.0f * lbl_8055A488 * lbl_8055E564;
         f32 r = span * ((x - F32(d, 0x130)) - 13.333333f) / 26.666666f;
         r = span < r ? span : r;
