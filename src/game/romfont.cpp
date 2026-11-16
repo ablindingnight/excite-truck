@@ -1,13 +1,10 @@
 // ROM font text (0x802DACD4-0x802DB2A0): loads the console's ROM font and draws boot-screen
 // messages with it straight onto a cleared screen. Names are guesses apart from the messages.
 #include "game/common.h"
+#include <revolution/OS/OSFont.h>
 #include "game/gxcanvas.h"
 
 extern "C" {
-u16 OSGetFontEncode(void);
-int OSInitFont(void* font);
-const char* OSGetFontTexture(const char* str, void** texOut, u32* xOut, u32* yOut, u32* widthOut);
-const char* OSGetFontWidth(const char* str, u32* widthOut);
 void* memset(void* dst, int c, size_t n);
 char* strcpy(char* dst, const char* src);
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -119,7 +116,7 @@ extern "C" {
 void fn_802DACD4(void) {
     fn_801282EC(32);
     lbl_8055FE78 = fn_801284E8("OSFontData", OSGetFontEncode() == 0 ? 0x20120 : 0x120F00);
-    int ok = OSInitFont(lbl_8055FE78);
+    int ok = OSInitFont((OSFontHeader*)lbl_8055FE78);
     if (OSGetFontEncode() == 0x120F00) {
         fn_802E30C8("bootscrn: using SJIS font encoding");
     }
