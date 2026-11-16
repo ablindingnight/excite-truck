@@ -1537,7 +1537,7 @@ inline void EvCupBar::Enter(void) {
         p->m.active = 1;
         p->m.idx = fn_80221EA8((u8*)p);
     }
-    if (((u8*&)p->cup)) {
+    if (p->cup) {
         p->m.vis = 0;
         p->m.jumpOn = 1;
         s32 y;
@@ -1547,15 +1547,15 @@ inline void EvCupBar::Enter(void) {
         p->m.jumpY = y;
         p->f6C = x;
         p->timer = 0.0f;
-        if (((u8*&)p->cup)) {
-            if (VR(((u8*&)p->cup))->v28() && !p->perfect) {
+        if (p->cup) {
+            if (VR(((u8*)p->cup))->v28() && !p->perfect) {
                 fn_80236954("cup_perfected");
                 add_anim_to_wait_for("cup_perfected");
             }
             int show = 0;
             p->style = (u8*)p == (u8*)lbl_8055F688 ? 6 : 7;
-            if (VR(((u8*&)p->cup))->v24()) {
-                if (!VR(((u8*&)p->cup))->v28() || fn_8023695C("cup_perfected")) {
+            if (VR(((u8*)p->cup))->v24()) {
+                if (!VR(((u8*)p->cup))->v28() || fn_8023695C("cup_perfected")) {
                     show = 1;
                 }
             }
@@ -1563,10 +1563,10 @@ inline void EvCupBar::Enter(void) {
             if (show) {
                 int i;
                 int done;
-                int n = VR(((u8*&)p->cup))->v18();
+                int n = VR(((u8*)p->cup))->v18();
                 done = 0;
                 for (i = 0; i < n; i++) {
-                    if (VR(VR(((u8*&)p->cup))->v1C(i))->v40()) {
+                    if (VR(VR(((u8*)p->cup))->v1C(i))->v40()) {
                         done++;
                     }
                 }
@@ -1575,11 +1575,11 @@ inline void EvCupBar::Enter(void) {
                 p->progress[0] = 0;
             }
         }
-        const char* title = fn_8027ED70()->GetFile(VR(((u8*&)p->cup))->v10());
+        const char* title = fn_8027ED70()->GetFile(VR(((u8*)p->cup))->v10());
         if (title) {
             CopyName(50, (char*)(u8*)&p->title, title);
         }
-        p->frame = fn_8027ED70()->GetFrame(VR(((u8*&)p->cup))->v10());
+        p->frame = fn_8027ED70()->GetFrame(VR(((u8*)p->cup))->v10());
     } else {
         p->m.vis = 1;
     }

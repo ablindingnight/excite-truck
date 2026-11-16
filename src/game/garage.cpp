@@ -1327,7 +1327,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
 
 void ColorPick::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
     ColorPick* p = this;
-    s32 v = S32(((u8*&)p->entries) + i * 0x14, 0x10);
+    s32 v = S32(((u8*)p->entries) + i * 0x14, 0x10);
     fn_802354A0(p->art, 0, x, y, 0.0f, w, h, -1);
     fn_80216CB4();
     fn_802354A0(p->art, 3, x, y, 0.0f, w, h, v);
@@ -1390,9 +1390,9 @@ void CarSlotList::Update(void) {
     SlotAnim* e;
     int i;
     u8* c;
-    p->fC0 = U8(((u8*&)p->ui), 0xDC) == 0;
+    p->fC0 = U8(((u8*)p->ui), 0xDC) == 0;
     for (i = 0; i < p->count; i++) {
-        c = ((u8*&)p->entries) + i * 0x14;
+        c = ((u8*)p->entries) + i * 0x14;
         on = 0;
         if (((u8*)GetVehicleColor(*(VehicleInfo**)(c + 8), 0))[8] && c[0xC]) {
             on = 1;
