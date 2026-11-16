@@ -268,6 +268,6 @@ void fn_802DABA4(const f32* p) {
 
 void fn_802DAC54(void) { lbl_8055FE5C->dirty = 1; }
 
-u8 fn_802DAC64(void) { return lbl_8055FE5C->flag; }
+int fn_802DAC64(void) { return lbl_8055FE5C->flag; }
 
 }  // extern "C"
