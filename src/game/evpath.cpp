@@ -1275,8 +1275,8 @@ extern "C" {
 // Selects the next event that has an unlock condition and shows its title, description and best time.
 }
 template <class T>
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline T& AtR(T* p, int i) {
+/* Helper name unproven: element i by reference; the accessor boundary is needed (written in place: fn_80283B58 / fn_80283E28 100 -> 98.47) */
+static inline T& ElemRef(T* p, int i) {
     return p[i];
 }
 extern "C" {
@@ -1289,7 +1289,7 @@ int fn_80283B58(void) {
             if (++i >= lbl_804B30D8.Count()) {
                 i = 0;
             }
-        } while (!((EvEventBar*)AtR(lbl_804B30D8.data, i))->contest && i != cur);
+        } while (!((EvEventBar*)ElemRef(lbl_804B30D8.data, i))->contest && i != cur);
         SelectBar(i);
     } else {
         fn_80216D28();
@@ -1306,7 +1306,7 @@ int fn_80283E28(void) {
             if (--i < 0) {
                 i += lbl_804B30D8.Count();
             }
-        } while (!((EvEventBar*)AtR(lbl_804B30D8.data, i))->contest && i != cur);
+        } while (!((EvEventBar*)ElemRef(lbl_804B30D8.data, i))->contest && i != cur);
         SelectBar(i);
     } else {
         fn_80216D28();
