@@ -939,6 +939,11 @@ void fn_80254568(Vec3a* out, s32 model, const char* name) {
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 static inline f32 LerpH(f32 a, f32 b, f32 t) { return a + t * (b - a); }  /* Helper name unproven */
 extern "C" {
+/* Helper name unproven */ static inline f32 MidHalf(f32 a, f32 b) {
+    const f32& difference = b - a;
+    return a + difference / 2.0f;
+}
+
 void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
     memset(p, 0, sizeof(CarPose));
     p->valid = 1;
@@ -960,7 +965,7 @@ void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
         Vec mid;
         mid.x = LerpH(l.x, r.x, 0.5f);
         mid.y = LerpH(l.y, r.y, 0.5f);
-        mid.z = LerpH(l.z, r.z, 0.5f);
+        mid.z = MidHalf(l.z, r.z);
         p->frame.b.v[2].x = mid.x - c.x;
         p->frame.b.v[2].y = mid.y - c.y;
         p->frame.b.v[2].z = mid.z - c.z;
