@@ -586,7 +586,7 @@ public:
 CbValueTable* fn_80131808(const char* name);
 void fn_80131818(CbValueTable* table);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
-s32 fn_802792E4(s32 vehicle);
+s32 fn_802792E4(const char* car);
 s32 fn_80279874(s32);
 int fn_8027AA48(void);
 void fn_80279F58(CbSetup* setup, CbValueTable* table);
@@ -634,7 +634,7 @@ void CarBody_vf08(u8* p, u8* desc) {
     S32(p, 0x1EC) = S32(desc, 0xE0);
     S32(p, 0x1F0) = S32(desc, 0x68);
     *(CbIdent*)(p + 0x1F4) = *(CbIdent*)(desc + 0x6C);
-    S32(p, 0x26C) = fn_802792E4(S32(p, 0x25C));
+    S32(p, 0x26C) = fn_802792E4((char*)(p + 0x234));
     s32 id = S32(p, 0x25C);
     *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)(desc + 0x18);
     S32(p, 0x328) = fn_80279874(id);
