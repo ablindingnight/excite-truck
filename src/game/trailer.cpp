@@ -228,8 +228,8 @@ struct TrailerEntries {
 };
 
 // Points each racer entry's trailer fields at its trailer body.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_801B916C(TrailerEntries* r) {
+/* Helper name unproven: the loop over the entries; the boundary is needed (in place -0.53) */
+static inline void AttachTrailers(TrailerEntries* r) {
     TrailerEntry* e = r->entries;
     for (int i = 0; i < r->count; e++, i++) {
         Trailer* t;
@@ -246,7 +246,7 @@ static inline void Loop1_fn_801B916C(TrailerEntries* r) {
 
 void fn_801B916C(TrailerEntries* r) {
     if (fn_801769CC()->type & 0x400) {
-        Loop1_fn_801B916C(r);
+        AttachTrailers(r);
     }
 }
 
