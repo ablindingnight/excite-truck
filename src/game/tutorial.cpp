@@ -1360,6 +1360,8 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
     v->z = z;
 }
 
+#pragma push
+#pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 inline void Challenge::Init(void) {
     ValueNode* n;
     const char* name = "growcoin.mod";
@@ -1459,6 +1461,7 @@ inline void Challenge::Init(void) {
         }
     }
 }
+#pragma pop
 
 inline void Challenge::Shutdown(void) {
     int i;
