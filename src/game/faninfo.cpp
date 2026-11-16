@@ -3,6 +3,11 @@
 // layer weights and terrain heights. Names are guesses apart from the file name and messages.
 #include "game/common.h"
 
+// World scale 2.0: a named object (first in .sdata2), read by reference so it does not fold.
+extern const f32 lbl_80564D50;
+const f32 lbl_80564D50 = 2.0f;
+static inline const f32& FanScale() { return lbl_80564D50; }
+
 extern "C" {
 void* memset(void* dst, int c, size_t n);
 double ceil(double x);
@@ -214,15 +219,13 @@ void fn_802BEAB0(void) {
     }
 }
 
-extern const f32 lbl_80564D50;  // 2.0
-
 void fn_802BEB70(void) {
     if (!lbl_8055FACC) {
         for (short s = 4; s <= 0x40; s *= 2) {
             for (short x = s - 0x200; x < 0x200; x += s * 2) {
                 for (short z = s - 0x200; z < 0x200; z += s * 2) {
                     FanCell* c = fn_802BE844(x, z, s);
-                    f32 h = fn_801DCF48(0, (f32)x * lbl_80564D50, (f32)z * lbl_80564D50) - -12.0f;
+                    f32 h = fn_801DCF48(0, (f32)x * FanScale(), (f32)z * FanScale()) - -12.0f;
                     int ih = (int)((h < 0.0f) ? h - 0.5f : 0.5f + h);
                     c->bits = (c->bits & ~0x7FC000) | (ih << 14);
                     c->bits = (c->bits & ~0x3C00) | ((int)((f32)ceil(4.0f / 3.0f) - 1.0f) << 10);
