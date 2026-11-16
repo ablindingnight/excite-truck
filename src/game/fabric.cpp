@@ -326,7 +326,7 @@ static inline ValVec3 White(void) {
     return w;
 }
 void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
-    PVec p = *(const PVec*)&NodeVec3(vn, "offset");
+    PVec p = *(const PVec*)&static_cast<const ValVec3&>(NodeVec3(vn, "offset"));  // address of the bound temporary
     ValPoint uv = NodePoint(vn, "uv");
     ValVec3 c = NodeVec3Or(vn, "color", White());
     MulVec(&out->pos, &p, m);

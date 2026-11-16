@@ -26,19 +26,13 @@ void fn_801796CC(u8 type, const void* data, u32 n);
 f32 PSVECDotProduct(const void* a, const void* b);
 }
 
-/* The vector without constructors (by-value copies are word copies). */
-struct TRot {
-    RVec3 axis[3];
-};
-
 struct TRow {
     f32 v[3];
 };
 
 struct TMtx {
     union {
-        RVec3 rot[3];  // offset 0x0
-        TRot r;
+        PlainRVec3 rot[3];  // offset 0x0 (constructor-less, so the union is legal C++)
         TRow row[3];
     };
     RVec3 pos;     // offset 0x24
@@ -194,7 +188,7 @@ Trailer* lbl_80436D28[8];  // by slot
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(RVec3* out, const RVec3* in, const RVec3* m) {
+static inline void MulVec(RVec3* out, const RVec3* in, const PlainRVec3* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
         f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
@@ -218,7 +212,7 @@ inline Trailer::Trailer(void) {
 
 static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
-static inline void MulVecTSelf(RVec3* v, const RVec3* m) {
+static inline void MulVecTSelf(RVec3* v, const PlainRVec3* m) {
     f32 x = Dot3(v->x, m[0].x, v->y, m[0].y, v->z, m[0].z);
     f32 y = Dot3(v->x, m[1].x, v->y, m[1].y, v->z, m[1].z);
     f32 z = Dot3(v->x, m[2].x, v->y, m[2].y, v->z, m[2].z);
