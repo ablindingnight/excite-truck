@@ -3308,8 +3308,10 @@ static inline void LaunchBump(Token* b) {
     Rest(b, m);
 }
 
-static inline void UpdateBumps(FixedList<Token*, 0x20>* l) {
-    int i;
+/* MATCHING-AID (unproven): the loop counter is the caller's local passed by reference - retail numbers both bump
+   counters as function locals declared after the car loop's j, while every other value of the loop stays an inline
+   object (pushsim/numsolve 2026-11-16). */
+static inline void UpdateBumps(FixedList<Token*, 0x20>* l, int& i) {
     for (i = 0; i < l->a.count; i++) {
         Token* b = l->a.data[i];
         if (b->active) {
@@ -3472,8 +3474,10 @@ inline void BetaMaster::vf0C(void) {
             }
         }
     }
-    UpdateBumps(&bumps);
-    UpdateBumps(&bumps2);
+    int k;
+    int k2;
+    UpdateBumps(&bumps, k);
+    UpdateBumps(&bumps2, k2);
     if (skipAt > 0.0f && lbl_8055E3C8 > skipAt) {
         timer.b10 = 1;
         timer.now = timer.limit - 30.0f;
