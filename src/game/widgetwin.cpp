@@ -162,6 +162,10 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
 extern "C" char lbl_8055B860[8] = "";
 #pragma explicit_zero_data off
 
+/* Helper unproven: retail creates 0.0f and the int-to-float bias BEFORE the other constants of fn_802160AC, so an
+   unused static function with those two was compiled here (dead static functions keep their constants). */
+static f32 CursorCoord(int n) { if (n < 0) return 0.0f; return (f32)n; }
+
 static inline f32 FadeMax(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 FadeMin(f32 a, f32 b) { return a < b ? a : b; }
 
