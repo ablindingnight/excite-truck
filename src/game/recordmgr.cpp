@@ -269,6 +269,11 @@ void fn_801AE874(u16* flags, int b) {
     }
 }
 
+/* Helper unproven: retail creates 86400.0f (a day, "no time yet") BEFORE the literals of fn_801AE894, although its
+   first user in the code is the later fn_801AE9E0, so an unused static function with that literal was compiled
+   here (dead static functions keep their constants). */
+static f32 NoTime(void) { return 86400.0f; }
+
 void fn_801AE894(RaceResult* r) {
     if (r->laps > 0 && r->time > 1.0f) {
         r->rate = lbl_8055E630 * r->laps / r->time;
