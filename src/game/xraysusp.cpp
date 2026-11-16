@@ -4,6 +4,7 @@
 // mounts are aimed at the wheel, the shock and shaft follow, and the spring is stretched between its
 // ends. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
@@ -29,8 +30,6 @@ f32 fn_801F159C(void* w);
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* in, void* out);
 double atan2(double y, double x);
 double cos(double x);
 double sin(double x);
@@ -226,28 +225,28 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     Madd(&p, &w.origin, &w.basis[1], 0.3f);
     fn_801E3440(&q, s->mountU, root);
     Sub(&d, &p, &q);
-    PSVECNormalize(&d, &d);
-    f32 a = Atan2F(PSVECDotProduct(&d, &root->basis[1]), s->side * PSVECDotProduct(&d, &root->basis[0]));
+    PSVECNormalize((const Vec*)&d, (Vec*)&d);
+    f32 a = Atan2F(PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[1]), s->side * PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[0]));
     fn_801E353C(s->mountU, s->side * a - s->side * quarter);
     Madd(&p, &w.origin, &w.basis[1], -0.2f);
     fn_801E3440(&q, s->mountL, root);
     Sub(&d, &p, &q);
-    PSVECNormalize(&d, &d);
-    a = (f32)atan2(PSVECDotProduct(&d, &root->basis[1]), s->side * PSVECDotProduct(&d, &root->basis[0]));
+    PSVECNormalize((const Vec*)&d, (Vec*)&d);
+    a = (f32)atan2(PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[1]), s->side * PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[0]));
     f32 lower = s->side * a;
     fn_801E353C(s->mountL, lower);
     fn_801E3440(&q, s->shaft, root);
     fn_801E3440(&p, s->shock, root);
     Sub(&d, &p, &q);
-    PSVECNormalize(&d, &d);
-    f32 shock = -s->side * (f32)atan2(s->side * PSVECDotProduct(&d, &root->basis[0]), PSVECDotProduct(&d, &root->basis[1]));
+    PSVECNormalize((const Vec*)&d, (Vec*)&d);
+    f32 shock = -s->side * (f32)atan2(s->side * PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[0]), PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[1]));
     fn_801E353C(s->shaft, shock - lower);
     fn_801E353C(s->shock, shock);
     fn_801E3440(&q, s->spring, root);
     fn_801E3440(&p, s->springEnd, root);
     Sub(&d, &p, &q);
     f32 c;
-    f32 stretch = PSVECDotProduct(&d, &root->basis[1]) / s->springLen;
+    f32 stretch = PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[1]) / s->springLen;
     pr = &rot;
     c = cos(-lower);
     f32 sn = sin(-lower);

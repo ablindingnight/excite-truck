@@ -4,6 +4,7 @@
 // mutable physics objects ("chunk%d", see mutphob) thrown off the object. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 extern "C" {
@@ -21,9 +22,6 @@ int fn_802C6FC0(const char* name, int a, int b);  // load a model
 void mrModelUnload(int model);
 int fn_802C7830(const char* name);  // chunk mask
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-f32 PSVECMag(const void* v);
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* in, void* out);
 }
 
 extern f32 lbl_8055E3C8;      // race time
@@ -306,7 +304,7 @@ void fn_801D2414(SObj* obj, const SoVec* pos, Car* car) {
     if (IsCar(car)) {
         SoEvent* e = fn_801D2C20(obj->id);
         if (e) {
-            f32 speed = PSVECMag(&car->vel);
+            f32 speed = PSVECMag((const Vec*)&car->vel);
             if (e->effect.enabled && speed > e->effect.minSpeed) {
                 fn_801D2C70(&e->effect, pos, car, obj->id);
             }
@@ -487,8 +485,8 @@ void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 
         f.z = c->throwVel.z * pm;
         p->Push(&f, &xf.pos, surf, 0);
         f.Set(fn_80129DC4(4, 0.0f, 1.0f), fn_80129DC4(4, 0.0f, 1.0f), fn_80129DC4(4, 0.0f, 1.0f));
-        if (!((f32)__fabs(PSVECDotProduct(&f, &f)) <= __float_epsilon[0])) {
-            PSVECNormalize(&f, &f);
+        if (!((f32)__fabs(PSVECDotProduct((const Vec*)&f, (const Vec*)&f)) <= __float_epsilon[0])) {
+            PSVECNormalize((const Vec*)&f, (Vec*)&f);
             f32 r = fn_80129DC4(4, 0.0f, c->randScale);
             f.x *= r;
             f.y *= r;

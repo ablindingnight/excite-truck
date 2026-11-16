@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -300,9 +301,6 @@ int strcmp(const char* a, const char* b);
 int strncasecmp(const char* a, const char* b, u32 n);
 char* strstr(const char* s, const char* t);
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
-void PSVECNormalize(const WVec* src, WVec* dst);
-f32 PSVECMag(const WVec* v);
-void PSVECCrossProduct(const WVec* a, const WVec* b, WVec* out);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
 s32 fn_802E2C20(void);  // milliseconds
@@ -1098,7 +1096,7 @@ void fn_801E89FC(void) {
     lbl_804881D8[0] = fn_80129DC4(0, -1.0f, 1.0f);
     lbl_804881D8[1] = fn_80129DC4(0, -0.33f, 0.33f);
     lbl_804881D8[2] = fn_80129DC4(0, -1.0f, 1.0f);
-    PSVECNormalize((WVec*)lbl_804881D8, (WVec*)lbl_804881D8);
+    PSVECNormalize((const Vec*)((WVec*)lbl_804881D8), (Vec*)((WVec*)lbl_804881D8));
     lbl_804881D8[3] = fn_80129DC4(0, 0.0f, 3.0f);
 }
 
@@ -1121,7 +1119,7 @@ void fn_801E8A84(void) {
         lbl_804881D8[1] = -0.33f;
         lbl_804881D8[2] += e * Sign(lbl_804881D8[2]);
     }
-    PSVECNormalize((WVec*)lbl_804881D8, (WVec*)lbl_804881D8);
+    PSVECNormalize((const Vec*)((WVec*)lbl_804881D8), (Vec*)((WVec*)lbl_804881D8));
     lbl_804881D8[3] = Max(Min(lbl_804881D8[3] + fn_80129DC4(0, -0.2f, 0.2f), 3.0f), 0.0f);
 }
 
@@ -1358,12 +1356,12 @@ void fn_801E96D8(RaceSetup* s) {
                         mtx.z.y = 0.0f;
                         mtx.z.z = cur.z - prev.z;
                         mtx.pos = c;
-                        len = PSVECMag(&mtx.z) * 0.5f;
-                        PSVECNormalize(&mtx.z, &mtx.z);
+                        len = PSVECMag((const Vec*)&mtx.z) * 0.5f;
+                        PSVECNormalize((const Vec*)&mtx.z, (Vec*)&mtx.z);
                         mtx.y.x = 0.0f;
                         mtx.y.y = 1.0f;
                         mtx.y.z = 0.0f;
-                        PSVECCrossProduct(&mtx.y, &mtx.z, &mtx.x);
+                        PSVECCrossProduct((const Vec*)&mtx.y, (const Vec*)&mtx.z, (Vec*)&mtx.x);
                         mtx.pos.y += 125.0f;
                         if (right) {
                             mtx.x.x *= -1.0f;

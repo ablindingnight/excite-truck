@@ -6,6 +6,7 @@
 // out between 0.525 and 0.625) and the shadow pass, plus the preload job. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/shapes.h"
@@ -14,10 +15,6 @@ extern "C" {
 double sqrt(double x);
 int strcmp(const char* a, const char* b);
 int strcasecmp(const char* a, const char* b);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-void PSVECNormalize(const void* src, void* dst);
-f32 PSVECMag(const void* v);
-f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 int fn_8012C33C(const char* name);       // resource exists
 void* fn_8012C370(const char* name, u32 magic, u32* version, int a, int b, u8* swapped);  // load resource
@@ -379,7 +376,7 @@ void fn_802BC588(RMtx* src, RMtx* dst, RVec3* normal, const TRot* r, const TreeT
     src->rot.y.x = 0.0f;
     src->rot.y.y = 1.0f;
     src->rot.y.z = 0.0f;
-    PSVECCrossProduct(&src->rot.y, &src->rot.z, &src->rot.x);
+    PSVECCrossProduct((const Vec*)&src->rot.y, (const Vec*)&src->rot.z, (Vec*)&src->rot.x);
     RVec3 up;
     up.x = 0.0f;
     up.y = 1.0f;
@@ -400,10 +397,10 @@ void fn_802BC588(RMtx* src, RMtx* dst, RVec3* normal, const TRot* r, const TreeT
     dst->rot.x.x = 1.0f;
     dst->rot.x.y = 0.0f;
     dst->rot.x.z = 0.0f;
-    PSVECCrossProduct(&dst->rot.z, &dst->rot.x, &dst->rot.y);
-    PSVECCrossProduct(&dst->rot.y, &dst->rot.z, &dst->rot.x);
-    PSVECNormalize(&dst->rot.y, &dst->rot.y);
-    PSVECNormalize(&dst->rot.x, &dst->rot.x);
+    PSVECCrossProduct((const Vec*)&dst->rot.z, (const Vec*)&dst->rot.x, (Vec*)&dst->rot.y);
+    PSVECCrossProduct((const Vec*)&dst->rot.y, (const Vec*)&dst->rot.z, (Vec*)&dst->rot.x);
+    PSVECNormalize((const Vec*)&dst->rot.y, (Vec*)&dst->rot.y);
+    PSVECNormalize((const Vec*)&dst->rot.x, (Vec*)&dst->rot.x);
     f32 s = r->scale;
     src->rot.x.x *= s;
     src->rot.x.y *= s;
@@ -464,8 +461,8 @@ static inline void ReadCyl(TreeType* t, ValueNode* n, RVec3& c) {
     t->cyl.axis.x = p1.x - p2.x;
     t->cyl.axis.y = p1.y - p2.y;
     t->cyl.axis.z = p1.z - p2.z;
-    t->cyl.half = PSVECMag(&t->cyl.axis) / 2.0f;
-    PSVECNormalize(&t->cyl.axis, &t->cyl.axis);
+    t->cyl.half = PSVECMag((const Vec*)&t->cyl.axis) / 2.0f;
+    PSVECNormalize((const Vec*)&t->cyl.axis, (Vec*)&t->cyl.axis);
 }
 
 void fn_802BCBDC(void) {
@@ -587,7 +584,7 @@ static inline void LoadTreeSet(TListEntry* e, TreeType* t) {
                 TRot r;
                 r.x = tr->mtx.pos.x;
                 r.z = tr->mtx.pos.z;
-                r.scale = PSVECMag(&tr->mtx.rot.z);
+                r.scale = PSVECMag((const Vec*)&tr->mtx.rot.z);
                 r.dx = tr->mtx.rot.z.x;
                 r.dz = tr->mtx.rot.z.z;
                 f32 inv = 1.0f / (f32)sqrt(r.dx * r.dx + r.dz * r.dz);
@@ -899,7 +896,7 @@ static inline void Loop1_fn_802BDD8C(int i, f32 range) {
                     id = t->farId;
                     for (n = c->first; n < c->first + c->count; n++) {
                         TreeRec* tr = &list->data[n];
-                        f32 d = PSVECSquareDistance(&tr->mtx.pos, eye);
+                        f32 d = PSVECSquareDistance((const Vec*)&tr->mtx.pos, (const Vec*)eye);
                         if (d <= r2) {
                             f32 a = (r2 - d) / span;
                             a = (1.0f < a) ? 1.0f : a;

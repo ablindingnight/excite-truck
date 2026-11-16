@@ -3,6 +3,7 @@
 // "cenvmap.tex"/"shwenv.tex" texture, and, in mode 2, the surrounding terrain silhouette and objects
 // projected onto the same hemisphere map. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 struct EVec3 {
     f32 x, y, z;
@@ -58,8 +59,6 @@ struct TFixed : TArray<T> {
 };
 
 extern "C" {
-void PSVECCrossProduct(const EVec3* a, const EVec3* b, EVec3* out);
-f32 PSVECMag(const EVec3* v);
 double asin(double x);
 double atan2(double y, double x);
 double cos(double x);
@@ -188,7 +187,7 @@ extern "C" {
 /* Helper name unproven */
 static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
 void fn_80202D50(EVec3 dir) {
-    f32 m = PSVECMag(&dir);
+    f32 m = PSVECMag((const Vec*)&dir);
     m = m > 0.001f ? m : 0.001f;
     f32 s = 1.0f / m;
     TMulEq(&dir, s);
@@ -238,7 +237,7 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         m.pos.y = 0.0f;
         m.pos.z = 0.0f;
         Flatten(&m.z, &d, -1.0f);
-        f32 len = PSVECMag(&m.z);
+        f32 len = PSVECMag((const Vec*)&m.z);
         len = 0.001f > len ? 0.001f : len;
         m.z.x *= (1.0f / len);
         m.z.y *= (1.0f / len);
@@ -247,7 +246,7 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         m.y.y = 1.0f;
         m.y.z = 0.0f;
         fn_80202D50(d);
-        PSVECCrossProduct(&m.y, &m.z, &m.x);
+        PSVECCrossProduct((const Vec*)&m.y, (const Vec*)&m.z, (Vec*)&m.x);
         fn_802C8B98(lbl_8055ED00, &m);
         *out = m;
         out->x.x *= -1.0f;
@@ -300,7 +299,7 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
 }
 
 /* Helper name unproven */ static inline f32 EDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = EDot3(d.x, (m)->x.x, d.y, (m)->x.y, d.z, (m)->x.z);             f32 y = EDot3(d.x, (m)->y.x, d.y, (m)->y.y, d.z, (m)->y.z);             f32 z = EDot3(d.x, (m)->z.x, d.y, (m)->z.y, d.z, (m)->z.z);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag(&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
+#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = EDot3(d.x, (m)->x.x, d.y, (m)->x.y, d.z, (m)->x.z);             f32 y = EDot3(d.x, (m)->y.x, d.y, (m)->y.y, d.z, (m)->y.z);             f32 z = EDot3(d.x, (m)->z.x, d.y, (m)->z.y, d.z, (m)->z.z);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag((const Vec*)&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
 
 // Terrain silhouette rings around the camera.
 /* Helper name unproven */ static inline f32 RingSubtract(f32 x, f32 origin) { return x - origin; }
@@ -344,7 +343,7 @@ void fn_80203380(EFrame* m) {
                     d.z = z;
                 }
                 {
-                    f32 len = PSVECMag(&d);
+                    f32 len = PSVECMag((const Vec*)&d);
                     if (0.01f > len) {
                         len = 0.01f;
                     }
@@ -387,7 +386,7 @@ static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx
     d.z = z;
     }
     {
-    f32 len = PSVECMag(&d);
+    f32 len = PSVECMag((const Vec*)&d);
     if (0.01f > len) {
     len = 0.01f;
     }

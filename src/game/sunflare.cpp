@@ -1,6 +1,7 @@
 // Sun and lens flare (0x80291784-0x802924E8, "flare.val", "burst.tex"): a sun sprite and up to 8 flare
 // sprites strung along a rod through the screen centre, shown only on clear days. Names are guesses.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include <math.h>
 
 struct SunVecP {
@@ -59,7 +60,6 @@ struct FlareSet {
 static inline f32 Mul(f32 b, f32 a) { return a * b; }
 
 extern "C" {
-void PSVECNormalize(const SunVecP* src, SunVecP* dst);
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
@@ -243,7 +243,7 @@ void fn_80291E64(FlareSet* fs) {
     dir.x = pivot.x - fs->sunPos.x;
     dir.y = pivot.y - fs->sunPos.y;
     dir.z = pivot.z - fs->sunPos.z;
-    PSVECNormalize(&dir, &dir);
+    PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
     f32 back = -(fs->rodLength - fs->pivotDepth);
     SunVecP start;
     SunVecP end;

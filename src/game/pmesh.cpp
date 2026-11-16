@@ -2,6 +2,7 @@
 // triangles (plane, per-edge inward planes, vertex/edge flags), with a sphere contact query, a raycast,
 // the endian swap/relocation on load and a back-face-culled wireframe debug draw. Names are guesses.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
 struct PFrame {
@@ -37,9 +38,6 @@ struct PMesh {
 };
 
 extern "C" {
-void PSVECCrossProduct(const PVec3* a, const PVec3* b, PVec3* out);
-f32 PSVECDotProduct(const PVec3* a, const PVec3* b);
-f32 PSVECSquareDistance(const PVec3* a, const PVec3* b);
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, u8* first, u8* swapped);
 void fn_8012C4D8(void* res);
 void fn_802C8B08(PFrame* cam);
@@ -112,13 +110,13 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
     int max = *count;
     for (int i = 0; i < mesh->numCells; i++) {
         PCell* c = &mesh->cells[i];
-        if (PSVECSquareDistance(&c->center, &lp) > (c->radius + radius) * (c->radius + radius)) {
+        if (PSVECSquareDistance((const Vec*)&c->center, (const Vec*)&lp) > (c->radius + radius) * (c->radius + radius)) {
             continue;
         }
         int j;
         for (j = c->first; j < c->end; j++) {
             PTri* t = &mesh->tris[j];
-            f32 dist = t->d - PSVECDotProduct(&lp, &t->n);
+            f32 dist = t->d - PSVECDotProduct((const Vec*)&lp, (const Vec*)&t->n);
             if (-dist > radius || -dist < 0.0f) {
                 continue;
             }
@@ -141,7 +139,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                 d.x = proj.x - tv[k].x;
                 d.y = proj.y - tv[k].y;
                 d.z = proj.z - tv[k].z;
-                f32 e = PSVECDotProduct(&d, &t->edge[k]);
+                f32 e = PSVECDotProduct((const Vec*)&d, (const Vec*)&t->edge[k]);
                 if (e > radius) {
                     goto next;
                 }
@@ -167,9 +165,9 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                     k1 = (k0 + 1) % 3;
                     PVec3 a = tv[k0];
                     PVec3 b = tv[k1];
-                    f32 dab = PSVECSquareDistance(&a, &b);
-                    f32 dca = PSVECSquareDistance(&cp, &a);
-                    f32 dcb = PSVECSquareDistance(&cp, &b);
+                    f32 dab = PSVECSquareDistance((const Vec*)&a, (const Vec*)&b);
+                    f32 dca = PSVECSquareDistance((const Vec*)&cp, (const Vec*)&a);
+                    f32 dcb = PSVECSquareDistance((const Vec*)&cp, (const Vec*)&b);
                     if (dca > dab) {
                         inside = k1 - 2;
                         outside = 2;
@@ -199,7 +197,7 @@ void fn_801CF080(PMesh* mesh, const PVec3* pos, PVec3* out, int* count, const PF
                     cp.y = proj.y + edge[k0].y * (-ed[k0]);
                     cp.z = proj.z + edge[k0].z * (-ed[k0]);
                 }
-                if (PSVECSquareDistance(&cp, &lp) < radius * radius && n < max) {
+                if (PSVECSquareDistance((const Vec*)&cp, (const Vec*)&lp) < radius * radius && n < max) {
                     PVec3 w;
                     if (xf) {
                         MulVec(&w, &cp, xf);
@@ -226,11 +224,11 @@ f32 fn_801CF778(const PVec3* p, const PVec3* o, const PVec3* dir) {
     d.x = p->x - o->x;
     d.y = p->y - o->y;
     d.z = p->z - o->z;
-    f32 t = -PSVECDotProduct(&d, dir);
+    f32 t = -PSVECDotProduct((const Vec*)&d, (const Vec*)dir);
     d.x += dir->x * t;
     d.y += dir->y * t;
     d.z += dir->z * t;
-    return PSVECDotProduct(&d, &d);
+    return PSVECDotProduct((const Vec*)&d, (const Vec*)&d);
 }
 
 // Ray against the mesh; *t holds the current best distance and is lowered on a hit.
@@ -251,11 +249,11 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
             PTri* tr = &mesh->tris[j];
             n = TriNormal(tr);
             f32 d = tr->d;
-            f32 dn = PSVECDotProduct(dir, n);
+            f32 dn = PSVECDotProduct((const Vec*)dir, (const Vec*)n);
             if ((f32)__fabs(dn) < 0.001f) {
                 continue;
             }
-            f32 s = (d - PSVECDotProduct(org, n)) / dn;
+            f32 s = (d - PSVECDotProduct((const Vec*)org, (const Vec*)n)) / dn;
             if (s >= 0.0f && s < *t) {
                 PVec3 p;
                 p.x = org->x + dir->x * s;
@@ -268,7 +266,7 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
                     e.x = p.x - v.x;
                     e.y = p.y - v.y;
                     e.z = p.z - v.z;
-                    if (PSVECDotProduct(&e, &tr->edge[k]) > __float_epsilon[0]) {
+                    if (PSVECDotProduct((const Vec*)&e, (const Vec*)&tr->edge[k]) > __float_epsilon[0]) {
                         in = 0;
                     }
                 }
@@ -396,11 +394,11 @@ void fn_801CFF18(PMesh* m, const PFrame* xf) {
         e2.x = v[2].x - v[0].x;
         e2.y = v[2].y - v[0].y;
         e2.z = v[2].z - v[0].z;
-        PSVECCrossProduct(&e1, &e2, &nrm);
+        PSVECCrossProduct((const Vec*)&e1, (const Vec*)&e2, (Vec*)&nrm);
         d.x = v[0].x - cam.pos.x;
         d.y = v[0].y - cam.pos.y;
         d.z = v[0].z - cam.pos.z;
-        if (PSVECDotProduct(&nrm, &d) > 0.0f) {
+        if (PSVECDotProduct((const Vec*)&nrm, (const Vec*)&d) > 0.0f) {
             continue;
         }
         fn_801E41D8(&v[0], &v[1], 0x80FFFF00, 0.2f);

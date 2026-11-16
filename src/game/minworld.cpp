@@ -2,6 +2,7 @@
 // ring of radius 325 around the origin and kept circling at a set speed. The slot table mirrors each
 // body for the caller. Names are guesses apart from the timeout message.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 struct MWVec2 {
     f32 x, y;
@@ -149,8 +150,6 @@ void fn_801BEDD4(void);
 void fn_801BF1B4(void);
 f32 fn_801DCF48(MWVec3* normal, f32 x, f32 z);  // terrain height
 void fn_802E30C8(const char* fmt, ...);
-f32 PSVECDotProduct(const MWVec4* a, const MWVec4* b);
-void PSVECCrossProduct(const MWVec3* a, const MWVec3* b, MWVec3* out);
 }
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
@@ -205,7 +204,7 @@ void fn_802526E0(MWMtx* m) {
     XZ(&m->x, &d);
     Perp(&d);
     XZ(&m->z, &d);
-    PSVECCrossProduct(&m->z, &m->x, &m->y);
+    PSVECCrossProduct((const Vec*)&m->z, (const Vec*)&m->x, (Vec*)&m->y);
 }
 
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
@@ -269,8 +268,8 @@ void fn_8025280C(MWBody* b, f32 speed) {
         depth = p.y - h;
         depth = 0.0f > depth ? 0.0f : depth;
         if (depth > 1.5f) {
-            f32 u = PSVECDotProduct(&n, &fwd);
-            f32 v = -PSVECDotProduct(&n, &up);
+            f32 u = PSVECDotProduct((const Vec*)&n, (const Vec*)&fwd);
+            f32 v = -PSVECDotProduct((const Vec*)&n, (const Vec*)&up);
             f32 v3 = v * v * v;
             f32 u3 = u * u * u;
             a.x = (a.x + up.x * u3 + fwd.x * v3) * 0.98f;

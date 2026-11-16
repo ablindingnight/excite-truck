@@ -3,6 +3,7 @@
 // 4-float records. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/vec3_init.h"
 
 template <class T>
@@ -498,8 +499,6 @@ struct MassVec3 {
     f32 x, y, z;
 };
 
-f32 PSVECDotProduct(const MassVec3* a, const MassVec3* b);
-void PSVECNormalize(const MassVec3* src, MassVec3* dst);
 
 // Blends contact i's surface normal and anchor towards a new contact (point pt, normal n) when it lies close
 // to the old plane: fully replaced from 0.2 below the plane, unchanged above it.
@@ -515,13 +514,13 @@ void fn_801BEB44(int car, int i, const MassVec3* pt, const MassVec3* n) {
     d.x = p.x - ref.x;
     d.y = p.y - ref.y;
     d.z = p.z - ref.z;
-    f32 base = PSVECDotProduct(&d, &nrm);
+    f32 base = PSVECDotProduct((const Vec*)&d, (const Vec*)&nrm);
     MassVec3 e;
     e.x = p.x - pt->x;
     e.y = p.y - pt->y;
     e.z = p.z - pt->z;
-    f32 pen = PSVECDotProduct(&e, n) - base;
-    if (pen > 0.2f || PSVECDotProduct(n, &nrm) < -0.2f) {
+    f32 pen = PSVECDotProduct((const Vec*)&e, (const Vec*)n) - base;
+    if (pen > 0.2f || PSVECDotProduct((const Vec*)n, (const Vec*)&nrm) < -0.2f) {
         return;
     }
     f32 k = 2.5f * (0.2f + pen);
@@ -529,7 +528,7 @@ void fn_801BEB44(int car, int i, const MassVec3* pt, const MassVec3* n) {
     k = k > 0.0f ? k : 0.0f;
     MassVec3 nn(LerpT(k, n->x, nrm.x), LerpT(k, n->y, nrm.y), LerpT(k, n->z, nrm.z));
     nrm = nn;
-    PSVECNormalize(&nrm, &nrm);
+    PSVECNormalize((const Vec*)&nrm, (Vec*)&nrm);
     MassVec3 r(LerpT(k, pt->x, ref.x), LerpT(k, pt->y, ref.y), LerpT(k, pt->z, ref.z));
     ref = r;
     {

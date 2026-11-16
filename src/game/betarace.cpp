@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #define COLLSHAPE_BASE_DECL  // MATCHING-AID: betarace emits the root shape table (see game/collshape.h)
 #include "game/shapes.h"
 #include "game/math_types.h"
@@ -1151,7 +1152,6 @@ void fn_801D488C(void* obj, int a, int b, V3* pos);
 void fn_8014E61C(int id, int kind, f32 v);
 void fn_801E1250(int id, int n);
 void fn_8018A098(RaceCarRec* rc, f32 v);
-f32 PSVECSquareDistance(const void* a, const void* b);
 }
 
 extern f32 lbl_80559EB8;
@@ -2122,7 +2122,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                 } else {
                     got = 0;
                 }
-            } else if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && PSVECSquareDistance(pos, e->pos) < 25.0f) {
+            } else if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && PSVECSquareDistance((const Vec*)pos, (const Vec*)e->pos) < 25.0f) {
                 e->respawn = fn_801D48F4(e->objs[e->which]);
                 got = 1;
             } else {
@@ -3120,7 +3120,6 @@ void fn_801E9E30(s16* h, const f32* pos);
 s32 fn_80178C9C(void);
 void fn_802C77F0(s32 model, f32* box);
 TrackSample fn_80136594(s32 track, const f32* xz);  // idealline: returns the ILPos by value
-void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 double acos(double x);
 s32 fn_801FB1F4(int a);
 s32 fn_801FA8E0(BoxShape* v, const f32* m, s32 h);
@@ -3277,7 +3276,7 @@ inline Pickup::Pickup(ValueNode* n) {
         b[0] = fwd[0];
         b[1] = 0.0f;
         b[2] = fwd[1];
-        PSVECCrossProduct(b, a, cr);
+        PSVECCrossProduct((const Vec*)b, (const Vec*)a, (Vec*)cr);
         bool ccw = cr[1] > 0.0f;
         if (ccw) {
             angle = acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
@@ -3566,7 +3565,6 @@ inline void BetaMaster::vf0C(void) {
 }
 
 extern "C" {
-f32 PSVECMag(const f32* v);
 int fn_801E85A4(void);
 int fn_801E86F8(int view);
 int fn_801E85B4(void);
@@ -3603,7 +3601,7 @@ inline void BetaMaster::vfA4(RaceCarRec* rc) {
 }
 
 inline void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {
-    f32 mag = PSVECMag(hit);
+    f32 mag = PSVECMag((const Vec*)hit);
     int fa = 1;
     int fb = 1;
     if (a->f1F0 == 0x50 && b->f1F0 == 0x50) {

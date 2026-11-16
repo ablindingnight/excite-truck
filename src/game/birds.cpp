@@ -3,6 +3,7 @@
 // distance band and speeds up the farther it is. Drawn with up to four bird models. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -11,9 +12,6 @@ int strcasecmp(const char* a, const char* b);
 double sqrt(double x);
 double cos(double x);
 double sin(double x);
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* in, void* out);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
 int fn_801345D8(char* dst, int n, const char* fmt, ...);
@@ -154,10 +152,10 @@ static inline void InitBoid(Boid* b, const BoidDesc* d) {
     b->vel.x = fn_80287BC8(-10.0f, 10.0f);
     b->vel.y = 0.0f;
     b->vel.z = z;
-    if ((f32)__fabs(PSVECDotProduct(&b->vel, &b->vel)) <= __float_epsilon[0]) {
+    if ((f32)__fabs(PSVECDotProduct((const Vec*)&b->vel, (const Vec*)&b->vel)) <= __float_epsilon[0]) {
         b->vel.x = 1.0f;
     }
-    PSVECNormalize(&b->vel, &b->vel);
+    PSVECNormalize((const Vec*)&b->vel, (Vec*)&b->vel);
     f32 s = b->speedMin;
     b->vel.x *= s;
     b->vel.y *= s;
@@ -380,7 +378,7 @@ void fn_802A8A4C(Boid* b, const BirdVec* target) {
     m[7] = 0.0f;
     m[8] = c;
     MulM(m, &b->vel, &b->vel);
-    PSVECNormalize(&b->vel, &b->vel);
+    PSVECNormalize((const Vec*)&b->vel, (Vec*)&b->vel);
     f32 spd = Lerp( Clamp01(Unlerp(d2, 0.0f, Sq(b->radius))),b->speedMin, b->speedMax);
     b->vel.x *= spd;
     b->vel.y *= spd;
@@ -409,16 +407,16 @@ void fn_802A8DE8(void) {
             m.fwd.x = b->vel.x;
             m.fwd.y = b->vel.y;
             m.fwd.z = b->vel.z;
-            if ((f32)__fabs(PSVECDotProduct(&m.fwd, &m.fwd)) <= __float_epsilon[0]) {
+            if ((f32)__fabs(PSVECDotProduct((const Vec*)&m.fwd, (const Vec*)&m.fwd)) <= __float_epsilon[0]) {
                 m.fwd.x = 0.0f;
                 m.fwd.y = 0.0f;
                 m.fwd.z = 1.0f;
             }
-            PSVECNormalize(&m.fwd, &m.fwd);
+            PSVECNormalize((const Vec*)&m.fwd, (Vec*)&m.fwd);
             m.up.x = 0.0f;
             m.up.y = 1.0f;
             m.up.z = 0.0f;
-            PSVECCrossProduct(&m.up, &m.fwd, &m.side);
+            PSVECCrossProduct((const Vec*)&m.up, (const Vec*)&m.fwd, (Vec*)&m.side);
             fn_802C744C(f->models.data[j % f->models.n], &m);
         }
     }

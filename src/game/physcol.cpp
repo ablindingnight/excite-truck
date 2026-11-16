@@ -4,6 +4,7 @@
 // back to a slow test of every object for near-horizontal rays. Names are guesses apart from the
 // message and the file name.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/collvol.h"
 
@@ -61,8 +62,6 @@ struct RayQuery {
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-f32 PSVECMag(const RVec3* v);
-f32 PSVECDotProduct(const RVec3* a, const RVec3* b);
 void fn_801B619C(PhobCell** out, int* n, const RVec3* pos);
 Group* fn_801A4548(const char* name);
 void fn_801A47FC(Group* g);
@@ -285,13 +284,13 @@ int fn_801E2640(const RVec3* from, const RVec3* to, RVec3* outPos, RVec3* outNor
     d.x = to->x - from->x;
     d.y = to->y - from->y;
     d.z = to->z - from->z;
-    f32 len = PSVECMag(&d);
+    f32 len = PSVECMag((const Vec*)&d);
     f32 inv = 1.0f / Max(0.01f, len);
     RVec3 dir;
     dir.x = d.x * inv;
     dir.y = d.y * inv;
     dir.z = d.z * inv;
-    f32 t = PSVECDotProduct(&dir, &d);
+    f32 t = PSVECDotProduct((const Vec*)&dir, (const Vec*)&d);
     int hit = 0;
     *outBody = 0;
     if ((f32)__fabs(dir.y) > 0.9f) {

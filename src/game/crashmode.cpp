@@ -4,6 +4,7 @@
 // the shake prompt and the white-out flash with crashlyt.val. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/plainvec.h"
 
@@ -114,8 +115,6 @@ public:
 extern "C" {
 int strcasecmp(const char* a, const char* b);
 double fmod(double x, double y);
-f32 PSVECMag(const V3* v);
-f32 PSVECDotProduct(const V3* a, const V3* b);
 ValueTable* fn_80131808(const char* name);  // load value file
 void fn_80131818(ValueTable* t);
 const char* fn_80131234(const char* key);  // localize
@@ -451,7 +450,7 @@ void fn_801DFF1C(int car) {
     s->elapsed = 0.0f;
     s->time = -100.0f;
     s->boosted = 0;
-    s->damage = 20.0f * (lbl_8055AE30 * PSVECMag((V3*)&rc->vel)) / 53.333332f;
+    s->damage = 20.0f * (lbl_8055AE30 * PSVECMag((const Vec*)((V3*)&rc->vel))) / 53.333332f;
     s->scored = 0;
     s->score = -1;
 }
@@ -573,8 +572,8 @@ void CrashMode::vf14(void) {
         }
         s->elapsed += 0.016683352f;
         if (!s->scored) {
-            f32 spin = PSVECMag((V3*)&rc->avel);
-            f32 speed = PSVECMag((V3*)&rc->vel);
+            f32 spin = PSVECMag((const Vec*)((V3*)&rc->avel));
+            f32 speed = PSVECMag((const Vec*)((V3*)&rc->vel));
             s->damage += 0.016683352f * (lbl_8055AE34 * speed + lbl_8055AE38 * spin);
             if (!IsTutorialCrash() && s->elapsed > lbl_8055AE3C) {
                 s->score = -1;
@@ -593,7 +592,7 @@ void CrashMode::vf14(void) {
         f32 now = lbl_8055E3C8;
         f32 since = now - rc->f26A0;
         f32 window = 1.5f;
-        if (speed > 3.5555556f || PSVECDotProduct((V3*)&rc->avel, (V3*)&rc->avel) > 0.2f * 0.2f) {
+        if (speed > 3.5555556f || PSVECDotProduct((const Vec*)((V3*)&rc->avel), (const Vec*)((V3*)&rc->avel)) > 0.2f * 0.2f) {
             window *= 1.5f;
         }
         done = 0;

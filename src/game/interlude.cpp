@@ -4,6 +4,7 @@
 // re-timed and reordered, and export to "intrlude.txt"). Every function is written; the player state at
 // lbl_80437D88 is still addressed by offsets in places. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 
 template <class T>
@@ -263,9 +264,7 @@ double cos(double x);
 int fn_8012C33C(const char* name);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
-f32 PSVECMag(const ValVec3* v);
 void fn_80144CD0(IVec3* out, const IVec3* p, const f32* m);
-f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_8000FC8C(const char* s);
 void fn_8000FDF0(const char* s);
 void fn_80128678(void);
@@ -709,7 +708,7 @@ static inline ValPoint ZeroPoint(void) {
 
 // The rotation of angle |v| about v.
 static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
-    f32 ang = PSVECMag(&v);
+    f32 ang = PSVECMag((const Vec*)&v);
     if (ang > 0.0001f) {
         f32 inv = 1.0f / ang;
         f32 y;
@@ -1105,7 +1104,6 @@ void fn_8018ADCC(ICar* car, f32 v);
 void fn_8018ADEC(ICar* car);
 void fn_80135B9C(LineFollower* f, f32 d, V2* outPos, V2* outDir, f32* outSpeed, void* outIl);
 f32 fn_80139030(IMotion* m);
-f32 PSVECDotProduct(const IVec3* a, const IVec3* b);
 }
 
 static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
@@ -1219,7 +1217,7 @@ void debug_event(void) {
                             d.x = car->frame.pos.x - w->pt.x;
                             d.y = car->frame.pos.y - w->pt.y;
                             d.z = car->frame.pos.z - w->pt.z;
-                            if (PSVECDotProduct(&d, &car->heading) > 0.1f) {
+                            if (PSVECDotProduct((const Vec*)&d, (const Vec*)&car->heading) > 0.1f) {
                                 blocked = 0;
                             }
                         }
@@ -1452,14 +1450,14 @@ void fn_801C56AC(void) {
                 to.x = tgt.x;
                 to.y = 0.0f;
                 to.z = tgt.y;
-                f32 side = PSVECDotProduct(&to, &car->side);
+                f32 side = PSVECDotProduct((const Vec*)&to, (const Vec*)&car->side);
                 fn_8018ADAC(car, ClampSigned(0.1f * side + 0.9f * -car->yawRate));
                 if (o->kind == 3 || o->kind == 4) {
                     IVec3 rel;
                     rel.x = lead->pos.x - car->pos.x;
                     rel.y = lead->pos.y - car->pos.y;
                     rel.z = lead->pos.z - car->pos.z;
-                    f32 gap = PSVECDotProduct(&rel, &car->fwd) - o->z;
+                    f32 gap = PSVECDotProduct((const Vec*)&rel, (const Vec*)&car->fwd) - o->z;
                     f32 carSpeed = car->speed;
                     f32 a = 0.5f + (o->speed - carSpeed);
                     IMotion m;
@@ -1771,7 +1769,7 @@ void fn_801C6B70(void) {
 int fn_801C6C28(const IVec3* p) {
     int found = -1;
     for (int i = 0; i < lbl_8055E804; i++) {
-        if (PSVECSquareDistance(fn_8017960C(i) + 0x60, p) < 2.25f) {
+        if (PSVECSquareDistance((const Vec*)(fn_8017960C(i) + 0x60), (const Vec*)p) < 2.25f) {
             found = i;
             break;
         }

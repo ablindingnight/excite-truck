@@ -3,6 +3,7 @@
 // "tips:" messages give the subject; the names are guesses.
 #include <string.h>
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 struct LdVec {
     LdVec(void) {}
@@ -24,8 +25,6 @@ struct LdVec {
 
 // A camera orientation and position.
 extern "C" {
-void PSVECCrossProduct(const LdVec* a, const LdVec* b, LdVec* out);
-void PSVECNormalize(const LdVec* in, LdVec* out);
 }
 
 struct VecPOD {
@@ -307,14 +306,14 @@ void OrthonormalizeFrame(CamFrame* f) {
     LdVec newUp;
     LdVec right;
 
-    PSVECCrossProduct(&up, &f->fwd, (LdVec*)&f->axes[0]);
-    PSVECCrossProduct(&f->fwd, (LdVec*)&f->axes[0], (LdVec*)&f->axes[1]);
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->fwd, (Vec*)((LdVec*)&f->axes[0]));
+    PSVECCrossProduct((const Vec*)&f->fwd, (const Vec*)((LdVec*)&f->axes[0]), (Vec*)((LdVec*)&f->axes[1]));
     right.Set(f->axes[0].x, f->axes[0].y, f->axes[0].z);
     fwd.Set(f->fwd.x, f->fwd.y, f->fwd.z);
-    PSVECCrossProduct(&fwd, &right, &newUp);
-    PSVECNormalize(&right, &right);
-    PSVECNormalize(&newUp, &newUp);
-    PSVECCrossProduct(&right, &newUp, &fwd);
+    PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&right, (Vec*)&newUp);
+    PSVECNormalize((const Vec*)&right, (Vec*)&right);
+    PSVECNormalize((const Vec*)&newUp, (Vec*)&newUp);
+    PSVECCrossProduct((const Vec*)&right, (const Vec*)&newUp, (Vec*)&fwd);
     f->axes[0] = *(VecPOD*)&right;
     f->axes[1] = *(VecPOD*)&newUp;
     f->fwd = fwd;
@@ -426,7 +425,7 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     cam.fwd.x = dir[0];
     cam.fwd.y = 0.0f;
     cam.fwd.z = dir[1];
-    PSVECCrossProduct((LdVec*)&cam.axes[1], &cam.fwd, right);
+    PSVECCrossProduct((const Vec*)((LdVec*)&cam.axes[1]), (const Vec*)&cam.fwd, (Vec*)right);
     t = fn_802E2C20() - lbl_8055D63C;
     f32 phase = (t % 50000) / 50000.0f;
     f32 angle = 6.2831855f * phase;

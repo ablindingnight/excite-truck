@@ -3,6 +3,7 @@
 // last freed background is kept so that one created again with the same texture carries on where it
 // left off. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
@@ -30,8 +31,6 @@ void fn_802C8B98(int tex, const BMtx* m);
 void fn_802C8DB8(const void* verts, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
 u32 fn_80230B9C(int color);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-void PSVECNormalize(const void* in, void* out);
 }
 
 struct Background {
@@ -346,10 +345,10 @@ static inline void Orthonormalize(Mat3* m) {
     ValVec3 z;
     SetV3(&x, m->m[0][0], m->m[0][1], m->m[0][2]);
     SetV3(&z, m->m[2][0], m->m[2][1], m->m[2][2]);
-    PSVECCrossProduct(&z, &x, &y);
-    PSVECNormalize(&x, &x);
-    PSVECNormalize(&y, &y);
-    PSVECCrossProduct(&x, &y, &z);
+    PSVECCrossProduct((const Vec*)&z, (const Vec*)&x, (Vec*)&y);
+    PSVECNormalize((const Vec*)&x, (Vec*)&x);
+    PSVECNormalize((const Vec*)&y, (Vec*)&y);
+    PSVECCrossProduct((const Vec*)&x, (const Vec*)&y, (Vec*)&z);
     *(ValVec3*)m->m[0] = x;
     *(ValVec3*)m->m[1] = y;
     *(ValVec3*)m->m[2] = z;

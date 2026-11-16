@@ -3,6 +3,7 @@
 // Written partly against raw field offsets (the camera record layout is in game/camrec.h). Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/camframe34.h"
 #include <string.h>
 #include "game/camrec.h"
@@ -90,7 +91,6 @@ int fn_80276068(int mode) {
     return r;
 }
 
-extern "C" f32 PSVECSquareDistance(const void* a, const void* b);
 extern "C" void fn_8026A49C(int slot, int type, CamPose* pose, f32* fov);
 extern "C" void fn_8012F57C(f32* out, const f32* a, const f32* b, f32 t);  // slerp
 extern "C" void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -102,15 +102,15 @@ static inline f32 AbsF(f32 x) { double a = __fabs(x); return a; }
 static inline int Near(f32 x) { return AbsF(x) <= __float_epsilon[0]; }
 
 static inline int SamePose(const CamPose* a, const CamPose* b) {
-    int same = Near(PSVECSquareDistance(&a->pos, &b->pos));
+    int same = Near(PSVECSquareDistance((const Vec*)&a->pos, (const Vec*)&b->pos));
     if (same) {
-        same = Near(PSVECSquareDistance(&a->rot.m[0], &b->rot.m[0]));
+        same = Near(PSVECSquareDistance((const Vec*)&a->rot.m[0], (const Vec*)&b->rot.m[0]));
     }
     if (same) {
-        same = Near(PSVECSquareDistance(&a->rot.m[3], &b->rot.m[3]));
+        same = Near(PSVECSquareDistance((const Vec*)&a->rot.m[3], (const Vec*)&b->rot.m[3]));
     }
     if (same) {
-        same = Near(PSVECSquareDistance(&a->rot.m[6], &b->rot.m[6]));
+        same = Near(PSVECSquareDistance((const Vec*)&a->rot.m[6], (const Vec*)&b->rot.m[6]));
     }
     return same;
 }
@@ -337,9 +337,6 @@ void fn_8026A51C(CamRec* c, u8* own, int idx);
 int fn_801B89F8(void);
 f32 fn_801EA0E8(f32 x, f32 z);  // ground height
 int fn_80178CA4(void);
-f32 PSVECMag(const void* v);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-void PSVECNormalize(const void* in, void* out);
 u8* fn_802678E4(int slot);
 f32 fn_802704E0(int mode, f32 t);
 void fn_801E9DC4(s16* h);
@@ -396,7 +393,7 @@ extern const CamOffset lbl_802FA818;
 
 // Rotation by |axis| radians about axis.
 static inline void AxisAngle(CamMat3* m, const CamVec3* axis) {
-    f32 angle = PSVECMag(axis);
+    f32 angle = PSVECMag((const Vec*)axis);
     if (angle > 0.0001f) {
         f32 inv = 1.0f / angle;
         f32 x = inv * axis->v[0];
@@ -453,10 +450,10 @@ void fn_80276DC8(int slot) {
         look.rot.m[3] = 0.0f;
         look.rot.m[4] = 1.0f;
         look.rot.m[5] = 0.0f;
-        PSVECCrossProduct(&look.rot.m[3], &look.rot.m[6], &look.rot.m[0]);
-        PSVECNormalize(&look.rot.m[0], &look.rot.m[0]);
-        PSVECCrossProduct(&look.rot.m[6], &look.rot.m[0], &look.rot.m[3]);
-        PSVECNormalize(&look.rot.m[3], &look.rot.m[3]);
+        PSVECCrossProduct((const Vec*)&look.rot.m[3], (const Vec*)&look.rot.m[6], (Vec*)&look.rot.m[0]);
+        PSVECNormalize((const Vec*)&look.rot.m[0], (Vec*)&look.rot.m[0]);
+        PSVECCrossProduct((const Vec*)&look.rot.m[6], (const Vec*)&look.rot.m[0], (Vec*)&look.rot.m[3]);
+        PSVECNormalize((const Vec*)&look.rot.m[3], (Vec*)&look.rot.m[3]);
     }
     car = lbl_804A0C60[slot].carFrame;
     car.rot.m[3] = 0.0f;
@@ -467,10 +464,10 @@ void fn_80276DC8(int slot) {
         car.rot.m[7] = 0.0f;
         car.rot.m[8] = 1.0f;
     }
-    PSVECCrossProduct(&car.rot.m[3], &car.rot.m[6], &car.rot.m[0]);
-    PSVECNormalize(&car.rot.m[0], &car.rot.m[0]);
-    PSVECCrossProduct(&car.rot.m[0], &car.rot.m[3], &car.rot.m[6]);
-    PSVECNormalize(&car.rot.m[6], &car.rot.m[6]);
+    PSVECCrossProduct((const Vec*)&car.rot.m[3], (const Vec*)&car.rot.m[6], (Vec*)&car.rot.m[0]);
+    PSVECNormalize((const Vec*)&car.rot.m[0], (Vec*)&car.rot.m[0]);
+    PSVECCrossProduct((const Vec*)&car.rot.m[0], (const Vec*)&car.rot.m[3], (Vec*)&car.rot.m[6]);
+    PSVECNormalize((const Vec*)&car.rot.m[6], (Vec*)&car.rot.m[6]);
     fn_801E9DC4(&rec->h1EC);
     o = lbl_802FA818;
     rel.pos = o.pos;
@@ -639,7 +636,7 @@ void fn_80277A14(CamRec* c, int slot) {
     frame.pos.v[1] += offset.v[1];
     frame.pos.v[2] += offset.v[2];
     CamVec3* vel = (CamVec3*)(c->car + 0x118);
-    f32 pitch = vel->v[1] / MaxF(PSVECMag(vel), 1.0f);
+    f32 pitch = vel->v[1] / MaxF(PSVECMag((const Vec*)vel), 1.0f);
     if (S32(c->car, 0x2620) == 0 && vel->v[1] < 0.0f) {
         f32 k = MaxF(MinF(Remap(-(c->carFrame.pos.v[1] - fn_801EA0E8(c->carFrame.pos.v[0], c->carFrame.pos.v[2])) / vel->v[1], pitch, 0.0f), 1.0f), 0.0f);
         pitch = Lerp(1.25f, 0.25f, k);

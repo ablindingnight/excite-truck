@@ -1,6 +1,7 @@
 // Camera frames (0x8026E22C-0x8026E870): blending two frames (orientation through quaternion slerp,
 // position linearly) and building a frame looking from one point at another. Names are guesses.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 double sqrt(double x);
@@ -36,9 +37,6 @@ struct CamRec {
 };
 
 extern "C" {
-void PSVECCrossProduct(const CfVec* a, const CfVec* b, CfVec* out);
-void PSVECNormalize(const CfVec* in, CfVec* out);
-f32 PSVECDotProduct(const CfVec* a, const CfVec* b);
 void fn_8012F57C(Quat* out, Quat* a, Quat* b, f32 t);  // slerp
 }
 
@@ -140,22 +138,22 @@ void fn_8026E688(CamFrame* out, const CfVec* eye, const CfVec* target, const CfV
     out->axes[2].x = 0.0f;
     out->axes[2].y = 0.0f;
     out->axes[2].z = 1.0f;
-    if (PSVECDotProduct(&d, &d) < 1.0f) {
+    if (PSVECDotProduct((const Vec*)&d, (const Vec*)&d) < 1.0f) {
         return;
     }
     if (fabsf(d.x) < 0.01f && fabsf(d.z) < 0.01f) {
         return;
     }
     out->axes[2] = d;
-    PSVECCrossProduct(up, &out->axes[2], &out->axes[0]);
-    PSVECCrossProduct(&out->axes[2], &out->axes[0], &out->axes[1]);
+    PSVECCrossProduct((const Vec*)up, (const Vec*)&out->axes[2], (Vec*)&out->axes[0]);
+    PSVECCrossProduct((const Vec*)&out->axes[2], (const Vec*)&out->axes[0], (Vec*)&out->axes[1]);
     CfVec right;
     right.Set(out->axes[0].x, out->axes[0].y, out->axes[0].z);
     fwd.Set(out->axes[2].x, out->axes[2].y, out->axes[2].z);
-    PSVECCrossProduct(&fwd, &right, &upv);
-    PSVECNormalize(&right, &right);
-    PSVECNormalize(&upv, &upv);
-    PSVECCrossProduct(&right, &upv, &fwd);
+    PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&right, (Vec*)&upv);
+    PSVECNormalize((const Vec*)&right, (Vec*)&right);
+    PSVECNormalize((const Vec*)&upv, (Vec*)&upv);
+    PSVECCrossProduct((const Vec*)&right, (const Vec*)&upv, (Vec*)&fwd);
     out->axes[0] = right;
     out->axes[1] = upv;
     out->axes[2] = fwd;

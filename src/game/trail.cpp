@@ -3,6 +3,7 @@
 // for each wheel in contact with the ground and by landing events, plus the "bilinear partsys"
 // ground marks used by the dust trail. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -206,7 +207,6 @@ int fn_802CE860(int n);
 void fn_802CE868(void);
 void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z);
 void fn_802E317C(const char* fmt, ...);  // fatal
-void PSVECCrossProduct(const TVec* a, const TVec* b, TVec* out);
 }
 
 extern u32 lbl_8055D430;
@@ -794,8 +794,8 @@ void DustTrail::Impact(const TrailEvent* e) {
         fn_80287B24(e->who);
         h = 0.5f * (f32)__fabs(e->vel.y);
         m.y = e->dir;
-        PSVECCrossProduct(&m.y, &(const TVec&)TVec(0.0f, 0.0f, 1.0f), &m.x);
-        PSVECCrossProduct(&m.x, &m.y, &m.z);
+        PSVECCrossProduct((const Vec*)&m.y, (const Vec*)(&(const TVec&)TVec(0.0f, 0.0f, 1.0f)), (Vec*)&m.x);
+        PSVECCrossProduct((const Vec*)&m.x, (const Vec*)&m.y, (Vec*)&m.z);
         pr = &rot;
         cs = cos(3.1415927f / n);
         sn = sin(3.1415927f / n);

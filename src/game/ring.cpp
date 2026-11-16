@@ -3,6 +3,7 @@
 // "ring"s (radius + frame64). Sets are switched on and off by name; a car passes a ring by getting within its
 // radius, and rings fade in, flash and fade out. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/plainvec.h"
 
@@ -21,8 +22,6 @@ void fn_802C70AC(s32 model, const ValMatrix* m, int a, int b);
 void fn_802C9900(f32 a);
 void fn_802C9904(void);
 f32 fn_801E7E18(void);
-f32 PSVECSquareDistance(const void* a, const void* b);
-f32 PSVECDotProduct(const void* a, const void* b);
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -298,7 +297,7 @@ inline void RingMaster::CheckOrder(RingSet* s) {
             d.x = q->frame.origin.x - p->frame.origin.x;
             d.y = q->frame.origin.y - p->frame.origin.y;
             d.z = q->frame.origin.z - p->frame.origin.z;
-            if (PSVECDotProduct(&d, &d0) < 0.0f) {
+            if (PSVECDotProduct((const Vec*)&d, (const Vec*)&d0) < 0.0f) {
                 fn_802E30C8("----------------------------------------------------");
                 fn_802E30C8("rings(%s): THESE RINGS ARE OUT OF ORDER", s->name);
                 fn_802E30C8("----------------------------------------------------");
@@ -331,7 +330,7 @@ inline int Ring::Check(RaceCarRec* rec) {
         if (radiusScoreMode) {
             rad += 1.0f;
         }
-        if (PSVECSquareDistance(&rec->mtx.pos, &frame.origin) < rad * rad) {
+        if (PSVECSquareDistance((const Vec*)&rec->mtx.pos, (const Vec*)&frame.origin) < rad * rad) {
             passed = 1;
             hit = 1;
             passTime = lbl_8055E3C8;
@@ -491,7 +490,7 @@ int fn_8016A780(const char* name, int player) {
                 d.x = r->frame.origin.x - rec->mtx.pos.x;
                 d.y = r->frame.origin.y - rec->mtx.pos.y;
                 d.z = r->frame.origin.z - rec->mtx.pos.z;
-                if (PSVECDotProduct(&d, &r->frame.basis[2]) < 0.0f) {
+                if (PSVECDotProduct((const Vec*)&d, (const Vec*)&r->frame.basis[2]) < 0.0f) {
                     n++;
                 }
             }

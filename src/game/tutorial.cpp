@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/rigid.h"
 
 extern "C" {
@@ -326,7 +327,6 @@ void fn_801DF074(int a, int b);
 void fn_801DF380(const char* title, const char* msg, void (*cb)(const char*, const char*), void* arg);
 int fn_801B2F24(void);
 int fn_80139B5C(TCar* car, TPath* path);
-f32 PSVECSquareDistance(const void* a, const void* b);
 void fn_80276DC8(int a);
 void fn_801EA140(void* p);
 void fn_802A95A8(const void* a, const void* b);
@@ -340,8 +340,6 @@ void fn_802C77F0(s32 model, f32* box);
 Sound* fn_80207848(const char* name, int flags);
 int sscanf(const char* s, const char* fmt, ...);
 TPath* fn_801399FC(ValueNode* n);
-void PSVECNormalize(const void* a, void* b);
-void PSVECCrossProduct(const void* a, const void* b, void* c);
 double sqrt(double x);
 void fn_80128658(void* p);  // MemFree
 void mrModelUnload(s32 model);
@@ -1298,7 +1296,7 @@ inline void Challenge::Collect(void) {
                             } else if (t->active) {
                                 t->crossed[i] = 0;
                             }
-                        } else if (PSVECSquareDistance(t, &car->frame.pos) < radius * radius) {
+                        } else if (PSVECSquareDistance((const Vec*)t, (const Vec*)&car->frame.pos) < radius * radius) {
                             got++;
                             t->active = 0;
                             snd->Play();
@@ -1420,9 +1418,9 @@ inline void Challenge::Init(void) {
                 e2.y = 0.0f;
                 e2.z = d2.z;
                 e1.z = d1.z;
-                PSVECNormalize(&e1, &e1);
-                PSVECNormalize(&e2, &e2);
-                PSVECCrossProduct(&e1, &e2, &n3);
+                PSVECNormalize((const Vec*)&e1, (Vec*)&e1);
+                PSVECNormalize((const Vec*)&e2, (Vec*)&e2);
+                PSVECCrossProduct((const Vec*)&e1, (const Vec*)&e2, (Vec*)&n3);
                 if (!(n3.y <= 0.0f)) {
                     t->dir.x = a.x - t->mid.x;
                     t->dir.z = a.z - t->mid.z;

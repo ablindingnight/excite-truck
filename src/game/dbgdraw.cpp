@@ -2,6 +2,7 @@
 // heads, camera-facing triangles, axis tripods and a scaled "sphere.mod" drawn at a point, all with the
 // "white_zr.tex" texture. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 struct DVec3 {
     f32 x, y, z;
@@ -30,8 +31,6 @@ struct DCam {
 };
 
 extern "C" {
-void PSVECCrossProduct(const DVec3* a, const DVec3* b, DVec3* out);
-f32 PSVECMag(const DVec3* v);
 s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
 s32 fn_802C6FC0(const char* name, int a, int b);
@@ -53,7 +52,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void SetLength(DVec3* v, f32 len) {
-    f32 m = PSVECMag(v);
+    f32 m = PSVECMag((const Vec*)v);
     if ((f32)__fabs(m) <= __float_epsilon[0]) {
         return;
     }
@@ -112,8 +111,8 @@ void fn_801E3640(const DVec3* dir, DBasis* out) {
         up.y = 1.0f;
         up.z = 0.0f;
     }
-    PSVECCrossProduct(&up, &out->z, &out->x);
-    PSVECCrossProduct(&out->z, &out->x, &out->y);
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)&out->z, (Vec*)&out->x);
+    PSVECCrossProduct((const Vec*)&out->z, (const Vec*)&out->x, (Vec*)&out->y);
 }
 
 u32 fn_801E36F0(u32 c) { return ((c >> 1) & 0x7F7F7F) | (c & 0xFF000000); }

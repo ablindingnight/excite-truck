@@ -2,6 +2,7 @@
 // constructor and the distance-along-axis helper. The large update routine is still a stub. Names
 // are guesses.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/racer_camera_slot.h"
 #include "macros.h"
 #include <string.h>
@@ -65,7 +66,6 @@ static inline void MulVec(const Mat3& m, const SVec& src, SVec* dst) {
 extern "C" {
 void fn_80265DD8(u8* p);
 void fn_80266120(u8* p);
-f32 PSVECDotProduct(const f32* a, const f32* b);
 }
 
 // The car's controller; slot 0x14 returns its option flags.
@@ -87,7 +87,7 @@ f32 fn_8026A63C(const f32* a, const f32* b, const f32* axis) {
     d[0] = a[0] - b[0];
     d[1] = a[1] - b[1];
     d[2] = a[2] - b[2];
-    return PSVECDotProduct(d, axis);
+    return PSVECDotProduct((const Vec*)d, (const Vec*)axis);
 }
 
 // The racer-slot (finish orbit) camera: when the race is over for this car, record its frame, find how far
@@ -181,7 +181,7 @@ int fn_8026A698(u8* p, int i) {
         s->fov = F32(p, 0x194);
         s->yaw = atan2(s->frame.rot.m[2][0], s->frame.rot.m[2][2]);
         f32 turn = 2.3561945f;
-        turn = PSVECDotProduct((f32*)(PTR(p, 0x140) + 0x118), (f32*)(p + 0xC0)) > 0.0f ? turn : -turn;
+        turn = PSVECDotProduct((const Vec*)((f32*)(PTR(p, 0x140) + 0x118)), (const Vec*)((f32*)(p + 0xC0))) > 0.0f ? turn : -turn;
         s->spin = turn;
         if (MIN(room[0], room[1]) < 10.0f) {
             if (room[0] > room[1]) {

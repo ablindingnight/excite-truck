@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 // Lane offset of the grid columns (5.0f). A named constant defined before any code: retail keeps it as the FIRST
 // .sdata2 entry and negates it at run time, so its value is not folded where it is used. A one-field const struct
 // gives exactly that (type and name unproven; a plain `const f32` defined here folds -x into a second literal).
@@ -112,8 +113,6 @@ struct ObjTeleport {
 extern "C" {
 void* memset(void* p, int c, u32 n);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-void PSVECCrossProduct(const V3* a, const V3* b, V3* out);
-void PSVECNormalize(const V3* a, V3* out);
 LocalCarDesc* fn_801769CC(void);
 int fn_801769B8(void);
 u32 fn_801769A8(void);
@@ -272,11 +271,11 @@ void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
     f.y = 0.0f;
     f.z = d->y;
     V3 rt;
-    PSVECCrossProduct(&u, &f, &rt);
-    PSVECCrossProduct(&rt, &u, &f);
-    PSVECNormalize(&rt, &rt);
-    PSVECNormalize(&u, &u);
-    PSVECNormalize(&f, &f);
+    PSVECCrossProduct((const Vec*)&u, (const Vec*)&f, (Vec*)&rt);
+    PSVECCrossProduct((const Vec*)&rt, (const Vec*)&u, (Vec*)&f);
+    PSVECNormalize((const Vec*)&rt, (Vec*)&rt);
+    PSVECNormalize((const Vec*)&u, (Vec*)&u);
+    PSVECNormalize((const Vec*)&f, (Vec*)&f);
     m->basis[0].x = rt.x;
     m->basis[0].y = rt.y;
     m->basis[0].z = rt.z;
@@ -344,8 +343,8 @@ void fn_801B7C8C(Respawn* r, const V2* pos, const V2* dir) {
         e2.x = pts[2].x - pts[0].x;
         e2.y = pts[2].y - pts[0].y;
         e2.z = pts[2].z - pts[0].z;
-        PSVECCrossProduct(&e2, &e1, &up);
-        PSVECNormalize(&up, &up);
+        PSVECCrossProduct((const Vec*)&e2, (const Vec*)&e1, (Vec*)&up);
+        PSVECNormalize((const Vec*)&up, (Vec*)&up);
     } else {
         fn_801E9DC4(&r->hint);
         fn_801E9E78(&r->hint, &m.origin, &up, &info);

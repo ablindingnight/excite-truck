@@ -4,6 +4,7 @@
 // textures, the facing test and its per-frame instances. Objects are created by name; their data is
 // byte-swapped on load. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
@@ -54,9 +55,6 @@ struct TNode {
 
 extern "C" {
 TCam* fn_802C86DC(void);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECDotProduct(const void* a, const void* b);
-void PSVECNormalize(const void* src, void* dst);
 void fn_802C7730(TFrame* f);
 void fn_802C7040(void* model);
 void* fn_802CAC28(const char* name, int a);
@@ -476,15 +474,15 @@ void fn_801F1C24(TFrame* f) {
     f->y.y = 1.0f;
     f->y.z = 0.0f;
     NegInto(&f->z, cam->dir, -1.0f);
-    PSVECCrossProduct(&f->y, &f->z, &f->x);
-    if (PSVECDotProduct(&f->x, &f->x) > 0.0001f) {
-        PSVECNormalize(&f->x, &f->x);
+    PSVECCrossProduct((const Vec*)&f->y, (const Vec*)&f->z, (Vec*)&f->x);
+    if (PSVECDotProduct((const Vec*)&f->x, (const Vec*)&f->x) > 0.0001f) {
+        PSVECNormalize((const Vec*)&f->x, (Vec*)&f->x);
     } else {
         f->x.x = 1.0f;
         f->x.y = 0.0f;
         f->x.z = 0.0f;
     }
-    PSVECCrossProduct(&f->z, &f->x, &f->y);
+    PSVECCrossProduct((const Vec*)&f->z, (const Vec*)&f->x, (Vec*)&f->y);
 }
 
 u8* fn_801F1CE8(TObj* o) { return (u8*)&o->d2C; }
@@ -499,7 +497,7 @@ int fn_801F1CF0(u8* d) {
     v.x = x - cam->pos[0];
     v.y = y - cam->pos[1];
     v.z = z - cam->pos[2];
-    return PSVECDotProduct(&v, d + 0x18) < 0.0f;
+    return PSVECDotProduct((const Vec*)&v, (const Vec*)(d + 0x18)) < 0.0f;
 }
 
 TrackMod* fn_801F1D68(void) { return new ("Generic") GenericTMH; }
@@ -684,7 +682,7 @@ void fn_801F3158(f32* dst, const f32* src) {
 
 f32 fn_801F3174(f32 y, f32 x) { return atan2(y, x); }
 
-void fn_801F3198(TVec* v) { PSVECNormalize(v, v); }
+void fn_801F3198(TVec* v) { PSVECNormalize((const Vec*)v, (Vec*)v); }
 }
 
 SkyTMH::~SkyTMH(void) { obj = 0; }
@@ -725,7 +723,7 @@ void SkyTMH::Draw(TObj* list) {
             half = 0.5f * (1.25f * fn_801E8738(-1));
             c = cone;
             for (i = 0; i < 32; i++, cone += 4, c += 4) {
-                d = PSVECDotProduct(cam->dir, cone);
+                d = PSVECDotProduct((const Vec*)cam->dir, (const Vec*)cone);
                 if (d > (f32)cos(half + c[3])) {
                     mask |= 1 << i;
                     visible++;
@@ -773,7 +771,7 @@ inline void SunTMH::Apply(void) {
     fn_802C9994(color);
     fn_802923C4(color);
     NegInto(&d, dir, -1.0f);
-    PSVECNormalize(&d, &d);
+    PSVECNormalize((const Vec*)&d, (Vec*)&d);
     h = sqrt(Sq(d.x) + Sq(d.z));
     f32 yy = d.y;
     ny = -yy;

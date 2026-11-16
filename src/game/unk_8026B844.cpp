@@ -7,6 +7,7 @@
 // which is still unexplained.
 #include "types.h"
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 
 // The unit's module tag, registered by its static initializer (the 8-byte function after the code, formerly the
@@ -293,8 +294,6 @@ extern const f32 lbl_80563D98;  // -1.0f
 extern const f32 lbl_80563D9C;  // 0.5f
 extern const f32 lbl_80563DA0;  // 5.0f
 double sqrt(double x);
-void PSVECNormalize(const CamVec* in, CamVec* out);
-void PSVECCrossProduct(const CamVec* a, const CamVec* b, CamVec* out);
 void fn_802E30C8(const char* fmt, ...);
 void fn_801E9DC4(s16* hint);
 
@@ -753,14 +752,14 @@ void fn_8026C014(int player) {
         CamSet(&up, lbl_80563D78, lbl_80563D94, lbl_80563D78);
         if (f->rot.axes[2].x * f->rot.axes[2].x + f->rot.axes[2].z * f->rot.axes[2].z > 0.01f) {
             CamRot r;
-            PSVECCrossProduct(&up, &f->rot.axes[2], &f->rot.axes[0]);
-            PSVECCrossProduct(&f->rot.axes[2], &f->rot.axes[0], &f->rot.axes[1]);
+            PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->rot.axes[2], (Vec*)&f->rot.axes[0]);
+            PSVECCrossProduct((const Vec*)&f->rot.axes[2], (const Vec*)&f->rot.axes[0], (Vec*)&f->rot.axes[1]);
             CamSet(&r.axes[0], f->rot.axes[0].x, f->rot.axes[0].y, f->rot.axes[0].z);
             CamSet(&r.axes[2], f->rot.axes[2].x, f->rot.axes[2].y, f->rot.axes[2].z);
-            PSVECCrossProduct(&r.axes[2], &r.axes[0], &r.axes[1]);
-            PSVECNormalize(&r.axes[0], &r.axes[0]);
-            PSVECNormalize(&r.axes[1], &r.axes[1]);
-            PSVECCrossProduct(&r.axes[0], &r.axes[1], &r.axes[2]);
+            PSVECCrossProduct((const Vec*)&r.axes[2], (const Vec*)&r.axes[0], (Vec*)&r.axes[1]);
+            PSVECNormalize((const Vec*)&r.axes[0], (Vec*)&r.axes[0]);
+            PSVECNormalize((const Vec*)&r.axes[1], (Vec*)&r.axes[1]);
+            PSVECCrossProduct((const Vec*)&r.axes[0], (const Vec*)&r.axes[1], (Vec*)&r.axes[2]);
             CamCopy(&f->rot.axes[0], &r.axes[0]);
             CamCopy(&f->rot.axes[1], &r.axes[1]);
             CamCopy(&f->rot.axes[2], &r.axes[2]);
@@ -913,8 +912,8 @@ void fn_8026DDD8(s32 mode) {
         lbl_8049A168.dir.x = lbl_80563D78 * lbl_80563D98;
         lbl_8049A168.dir.y = lbl_80563DA0 * lbl_80563D98;
         lbl_8049A168.dir.z = -10.0f * lbl_80563D98;
-        PSVECNormalize(&lbl_8049A168.dir, &lbl_8049A168.dir);
-        PSVECCrossProduct(&lbl_8049A168.dir, &lbl_8049A168.side, &lbl_8049A168.up);
+        PSVECNormalize((const Vec*)&lbl_8049A168.dir, (Vec*)&lbl_8049A168.dir);
+        PSVECCrossProduct((const Vec*)&lbl_8049A168.dir, (const Vec*)&lbl_8049A168.side, (Vec*)&lbl_8049A168.up);
         lbl_8049A168.car = fn_8026A344(0);
         car = fn_8017960C(lbl_8049A168.car);
         if (car) {

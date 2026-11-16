@@ -1,6 +1,7 @@
 // Sky (0x802C0D70-0x802C110C): the sky model and the sun direction, taken from the track's "sun"
 // object and clamped to a minimum elevation. Names are guesses apart from the messages and keys.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
 double sqrt(double x);
@@ -8,7 +9,6 @@ double atan(double x);
 double sin(double x);
 double cos(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void PSVECNormalize(const void* src, void* dst);
 int fn_8012C33C(const char* name);
 void* fn_802C6B44(const char* name);
 s32 fn_802C6DC4(const char* name, void* model, int a, int b);
@@ -100,7 +100,7 @@ void fn_802C0E68(s32 inst) {
             lbl_804C0800.z = -150.0f;
         }
         Scale(&dir, &lbl_804C0800, -1.0f);
-        PSVECNormalize(&dir, &dir);
+        PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
         fn_802C0D70(&dir);
         fn_802C9A1C(&dir);
     }

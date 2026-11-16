@@ -4,6 +4,7 @@
 // before the PC port. Tricks are tagged MATCHING-AID.
 #include "types.h"
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 // Compiled as C++ (2026-11-03): the unit owns a ModuleTag, registered by its static initializer (the 8-byte
 // function after the code, formerly the separate split unk_8020F3AC). The functions keep C linkage.
@@ -272,8 +273,6 @@ extern "C" long fn_802104B8(void);
 extern "C" long fn_802104FC(void);
 extern "C" int fn_802BF4F0(void);
 extern "C" float fn_802BF590(void);
-extern "C" float PSVECMag(const HudVec *);
-extern "C" float PSVECDotProduct(const HudVec *, const HudVec *);
 
 #define VF32(v, off) (*(float *)((v) + (off)))
 
@@ -436,7 +435,7 @@ void CarSound::Update() {
         }
         ground = fn_801E9FDC((short *)(h->vehicle + 0x6C), VF32(h->vehicle, 0x60), VF32(h->vehicle, 0x68));
         HudVec dir = ((HudCar *)h->vehicle)->vel;
-        mag = PSVECMag(&dir);
+        mag = PSVECMag((const Vec*)&dir);
         mag = mag > lbl_80563388 ? mag : lbl_80563388;
         inv = lbl_80563368 / mag;
         dir.x *= inv;
@@ -522,7 +521,7 @@ void CarSound::Update() {
         spd = VF32(v, 0x25D4);
         if (AbsFlt(VF32(v, 0x2690)) <= __float_epsilon && spd > lbl_805633DC && *(long *)(v + 0x2620) > 1 &&
             !underwater) {
-            float dot = AbsFlt(PSVECDotProduct((HudVec *)(v + 0x118), (HudVec *)(v + 0x3C)));
+            float dot = AbsFlt(PSVECDotProduct((const Vec*)((HudVec *)(v + 0x118)), (const Vec*)((HudVec *)(v + 0x3C))));
             float lim = spd * (AbsFlt(h->driftTime) <= __float_epsilon ? lbl_805633E0 : lbl_805633E4);
             shown = dot > lim;
             if (shown) {

@@ -3,10 +3,9 @@
 // to the current lap of the viewed car, with a short hold after each lap change. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 extern "C" {
-void PSVECNormalize(const void* in, void* out);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 f32 fn_801EA0E8(f32 x, f32 z);  // ground height
 u32* fn_801E87A8(void);           // race options
 void fn_802A1120(void* pos, void* dir);
@@ -147,10 +146,10 @@ static inline void Loop1_fn_802A9090(const ZVec& vb, ZFrame* f) {
     f->rot[1].x = 0.0f;
     f->rot[1].y = 1.0f;
     f->rot[1].z = 0.0f;
-    PSVECCrossProduct(&f->rot[0], &f->rot[1], &f->rot[2]);
-    PSVECNormalize(&f->rot[0], &f->rot[0]);
-    PSVECNormalize(&f->rot[2], &f->rot[2]);
-    PSVECCrossProduct(&f->rot[2], &f->rot[0], &f->rot[1]);
+    PSVECCrossProduct((const Vec*)&f->rot[0], (const Vec*)&f->rot[1], (Vec*)&f->rot[2]);
+    PSVECNormalize((const Vec*)&f->rot[0], (Vec*)&f->rot[0]);
+    PSVECNormalize((const Vec*)&f->rot[2], (Vec*)&f->rot[2]);
+    PSVECCrossProduct((const Vec*)&f->rot[2], (const Vec*)&f->rot[0], (Vec*)&f->rot[1]);
     if (fn_801E87A8()[4] & 2) {
         f->rot[0].x *= -1.0f;
         f->rot[0].y *= -1.0f;

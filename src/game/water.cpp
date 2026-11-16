@@ -5,6 +5,7 @@
 // the mirrored world and a shared sky cube ("skybox") into a 256x256 target. A gen_surf model adds
 // animated surface rings. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 // World units per grid cell (name unproven). A named constant with external linkage defined before any code: retail
 // keeps it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal (same pattern as heightfld).
 extern const f32 lbl_80564D78;
@@ -69,8 +70,6 @@ struct Perspective {
 };
 
 extern "C" {
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECMag(const void* v);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 void fn_802E30C8(const char* fmt, ...);
@@ -279,7 +278,7 @@ u32 fn_802BECE4(const char* s, u32 def) {
 }
 
 void fn_802BED90(PVec* v) {
-    f32 s = 1.0f / FMax(0.001f, PSVECMag(v));
+    f32 s = 1.0f / FMax(0.001f, PSVECMag((const Vec*)v));
     v->x *= s;
     v->y *= s;
     v->z *= s;
@@ -827,7 +826,7 @@ void WaterSystem::Draw(void) {
         fwd = cam.y;
     }
     fwd.y = 0.0f;
-    f32 inv = 1.0f / FMax(0.01f, PSVECMag(&fwd));
+    f32 inv = 1.0f / FMax(0.01f, PSVECMag((const Vec*)&fwd));
     fwd.x *= inv;
     fwd.y *= inv;
     fwd.z *= inv;
@@ -836,7 +835,7 @@ void WaterSystem::Draw(void) {
     up.y = 1.0f;
     up.z = 0.0f;
     PVec side;
-    PSVECCrossProduct(&fwd, &up, &side);
+    PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&up, (Vec*)&side);
     cx = 0.5f * (640.0f - vh);
     f32 cy = 0.5f * (480.0f - vw);
     for (int r = 0; r < 64; r++) {
@@ -907,7 +906,7 @@ void WaterSystem::Draw(void) {
     upv.y = 1.0f;
     upv.z = 0.0f;
     PVec fw;
-    PSVECCrossProduct(&upv, &ax, &fw);
+    PSVECCrossProduct((const Vec*)&upv, (const Vec*)&ax, (Vec*)&fw);
     PVec e0;
     PVec e1;
     e0.x = q.x + fw.x * lbl_80564E24;

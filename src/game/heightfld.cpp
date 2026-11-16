@@ -4,6 +4,7 @@
 // procedural fake heightfield used when there is no track, and deformation records that track how the
 // layer weights move a point. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 // World units per height-field cell. A named constant with external linkage, defined before any code: retail keeps
 // it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal of the spline helpers (name unproven).
 extern const f32 lbl_80562B60;
@@ -89,7 +90,6 @@ void fn_801D02B0(void);
 void fn_801D049C(void);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
-void PSVECNormalize(const GVec* src, GVec* dst);
 }
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
@@ -267,7 +267,7 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     n.y = 1.0f / lbl_8055E990->scaleX;
     n.z = -dz;
     n.x = n_x;
-    PSVECNormalize(&n, &n);
+    PSVECNormalize((const Vec*)&n, (Vec*)&n);
     *normal = n;
         return h;
     }
@@ -571,7 +571,7 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
         normal->x = -sx * hx;
         normal->z = -hz * sz;
         normal->y = __fabs(sx * sz);
-        PSVECNormalize(normal, normal);
+        PSVECNormalize((const Vec*)normal, (Vec*)normal);
         return h;
     }
     h = t->base + t->scale * t->h[lx][lz];

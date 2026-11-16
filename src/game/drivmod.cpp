@@ -3,6 +3,7 @@
 // against raw field offsets; the large routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include <string.h>
@@ -414,8 +415,6 @@ f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);
 extern "C" {
 double sin(double x);
 double cos(double x);
-f32 PSVECMag(const f32* v);
-void PSVECCrossProduct(const f32* a, const f32* b, f32* out);
 }
 
 static inline void MulM(f32* out, const f32* a, const f32* b) {
@@ -508,7 +507,7 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
             d.x = c.x - v.x;
             d.y = c.y - v.y;
             d.z = c.z - v.z;
-            f32 len = PSVECMag(&d.x);
+            f32 len = PSVECMag((const Vec*)&d.x);
             BRot m;
             if (len > 0.001f) {
                 f32 k = -1.0f / len;
@@ -516,8 +515,8 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                 d.y *= k;
                 d.z *= k;
                 BVec axis;
-                PSVECCrossProduct(&b->rx.x, &d.x, &axis.x);
-                f32 a = PSVECMag(&axis.x);
+                PSVECCrossProduct((const Vec*)&b->rx.x, (const Vec*)&d.x, (Vec*)&axis.x);
+                f32 a = PSVECMag((const Vec*)&axis.x);
                 BRot r;
                 if (a > 0.0001f) {
                     f32 inv = 1.0f / a;
@@ -671,7 +670,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     v.x = F32(car, 0x240) + d->yaw;
     v.y = 0.0f;
     v.z = roll;
-    f32 ang = PSVECMag(&v.x);
+    f32 ang = PSVECMag((const Vec*)&v.x);
     if (ang > 0.0001f) {
         f32 inv = 1.0f / ang;
         f32 ax = inv * v.x;

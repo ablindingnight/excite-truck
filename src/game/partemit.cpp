@@ -3,6 +3,7 @@
 // camera), the "emitter" instances placed by "partemit.val" (optionally attached to moving objects and
 // always on), and the world events that fire them. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 
 void* operator new[](size_t size, const char* tag);
 
@@ -164,8 +165,6 @@ void fn_802C92D0(void);
 void fn_802C92D8(void);
 void fn_802C92DC(s32 x, s32 y, s32 w, s32 h, u32 color);
 void fn_802E30C8(const char* fmt, ...);
-f32 PSVECMag(const PartVec* v);
-f32 PSVECDotProduct(const PartVec* a, const PartVec* b);
 }
 
 extern u8 lbl_8055F73C;
@@ -513,7 +512,7 @@ static inline void SetPV(PartVec* v, f32 x, f32 y, f32 z) {
 }
 
 void fn_802A0098(SpawnParams* p, const EmitterDef* d, const Spawn* s) {
-    f32 k = d->speedScale * PSVECMag(&s->vel);
+    f32 k = d->speedScale * PSVECMag((const Vec*)&s->vel);
     k = 1.0f < k ? 1.0f : k;
     p->count = d->spewK + d->spewM * k;
     p->pos.x = s->pos.x + d->offset.x;
@@ -590,7 +589,7 @@ void fn_802A042C(const EmitterDef* d, const Spawn* s) {
         diff.z = p.z - v.pos.z;
         f32 curRadius = d->radius;
         f32 r2 = curRadius * d->radius;
-        f32 d2 = PSVECDotProduct(&diff, &diff);
+        f32 d2 = PSVECDotProduct((const Vec*)&diff, (const Vec*)&diff);
         if (d2 < r2) {
             f32 t = d2 / r2;
             if (1.0f < t) {
