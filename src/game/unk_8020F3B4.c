@@ -889,11 +889,14 @@ extern "C" void fn_8021095C(void) {
             if (row == lbl_8055EEE0) {
                 PanelBox *cur = COURSE_LAYOUT->FindPane("item0_box");
                 if (cur != 0) {
-                    PanelBox b = *cur;
-                    float y_ = cursor.y;
-                    float xv = cursor.x;
-                    b.pos.x = nameBox.pos.x + xv;
-                    b.pos.y = nameBox.pos.y + y_;
+                    PanelBox b;
+                    b.color = cur->color;
+                    b.pos = cur->pos;
+                    b.w = cur->w;
+                    b.h = cur->h;
+                    b.unk18 = cur->unk18;
+                    b.pos.x = nameBox.pos.x + cursor.x;
+                    b.pos.y = nameBox.pos.y + cursor.y;
                     fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", 9, &b);
                 }
                 nameBox.color = hilite;
@@ -910,14 +913,16 @@ extern "C" void fn_8021095C(void) {
         {
             TextBox *opt = COURSE_LAYOUT->FindText("default_item");
             if (opt != 0) {
-                long style = 6;
+                long selected = 0;
+                long style;
                 TextBox box;
                 if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 0) {
-                    style = 3;
+                    selected = 1;
                 }
+                style = selected ? 3 : 6;
                 fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("default_box"));
                 box = *opt;
-                if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 0) {
+                if (selected) {
                     box.color = hilite;
                 }
                 fn_801476C4(&box);
@@ -926,14 +931,16 @@ extern "C" void fn_8021095C(void) {
         {
             TextBox *opt = COURSE_LAYOUT->FindText("default_all_item");
             if (opt != 0) {
-                long style = 6;
+                long selected = 0;
+                long style;
                 TextBox box;
                 if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 1) {
-                    style = 3;
+                    selected = 1;
                 }
+                style = selected ? 3 : 6;
                 fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("default_all_box"));
                 box = *opt;
-                if (lbl_8055EEE0 == -2 && lbl_8055EEEC == 1) {
+                if (selected) {
                     box.color = hilite;
                 }
                 fn_801476C4(&box);
@@ -943,14 +950,16 @@ extern "C" void fn_8021095C(void) {
             {
                 TextBox *opt = COURSE_LAYOUT->FindText("random_item");
                 if (opt != 0) {
-                    long style = 6;
+                    long selected = 0;
+                    long style;
                     TextBox box;
                     if (lbl_8055EEE0 == -1 && lbl_8055EEED == 0) {
-                        style = 3;
+                        selected = 1;
                     }
+                    style = selected ? 3 : 6;
                     fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("random_box"));
                     box = *opt;
-                    if (lbl_8055EEE0 == -1 && lbl_8055EEED == 0) {
+                    if (selected) {
                         box.color = hilite;
                     }
                     fn_801476C4(&box);
@@ -959,14 +968,16 @@ extern "C" void fn_8021095C(void) {
             {
                 TextBox *opt = COURSE_LAYOUT->FindText("random_all_item");
                 if (opt != 0) {
-                    long style = 6;
+                    long selected = 0;
+                    long style;
                     TextBox box;
                     if (lbl_8055EEE0 == -1 && lbl_8055EEED == 1) {
-                        style = 3;
+                        selected = 1;
                     }
+                    style = selected ? 3 : 6;
                     fn_802101F8(COURSE_LAYOUT, (long)"sdbar_art", style, COURSE_LAYOUT->FindPane("random_all_box"));
                     box = *opt;
-                    if (lbl_8055EEE0 == -1 && lbl_8055EEED == 1) {
+                    if (selected) {
                         box.color = hilite;
                     }
                     fn_801476C4(&box);
