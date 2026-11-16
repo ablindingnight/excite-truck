@@ -379,7 +379,7 @@ void fn_801B50B4(ReplayObj** list, int n) {
     }
 }
 
-u8 fn_801B526C(void) { return lbl_8055E6D0; }
+int fn_801B526C(void) { return lbl_8055E6D0; }
 
 void fn_801B5274(void) {
     memset(lbl_80435C70.handlers, 0, sizeof(lbl_80435C70.handlers));
