@@ -329,6 +329,13 @@ static inline f32 Clamp01(f32 x) {
     return x > 0.0f ? x : 0.0f;
 }
 
+// AIDriver (aidriver.cpp declares the class), seen here only for its constructor: the slot functions and the
+// table stay hand-written in this unit (user decision, as playcar), so no virtuals here. Port: same member name.
+class AIDriver {
+public:
+    AIDriver(void);
+};
+
 extern "C" {
 
 int fn_8019309C(u8* d, int car, int v) {
@@ -593,28 +600,31 @@ AICommand lbl_80333158[4] = {
 };
 
 
-// AIDriver::AIDriver (fn_801938F4; aidriver.cpp's new AIDriver calls it by this name).
-u8* __ct__8AIDriverFv(u8* d) {
-    S32(d, 0x68) = 0;
-    *(void***)d = lbl_80333348;
-    S32(d, 0x70) = 10000;
-    F32(d, 0x6C) = 0.0f;
-    S32(d, 0x78) = 0;
-    S32(d, 0x90) = -1;
-    U8(d, 0x8C) = 0;
-    S32(d, 0xA0) = 0;
-    S32(d, 0xB8) = -1;
-    U8(d, 0xB4) = 0;
-    u8* m = d + 0x168;
+}  // extern "C"
+
+// AIDriver::AIDriver (fn_801938F4; aidriver.cpp's new AIDriver calls it).
+AIDriver::AIDriver(void) {
+    S32(((u8*)this), 0x68) = 0;
+    *(void***)((u8*)this) = lbl_80333348;
+    S32(((u8*)this), 0x70) = 10000;
+    F32(((u8*)this), 0x6C) = 0.0f;
+    S32(((u8*)this), 0x78) = 0;
+    S32(((u8*)this), 0x90) = -1;
+    U8(((u8*)this), 0x8C) = 0;
+    S32(((u8*)this), 0xA0) = 0;
+    S32(((u8*)this), 0xB8) = -1;
+    U8(((u8*)this), 0xB4) = 0;
+    u8* m = ((u8*)this) + 0x168;
     __ct__12LineFollowerFv(m);
     __ct__12LineFollowerFv(m + 0x34);
     F32(m, 0x68) = -999.0f;
     ((VFollow*)(m + 0x34))->SetLine(0);
     ((VFollow*)m)->SetLine(0);
-    CAR(d) = 0;
-    CARID(d) = -1000;
-    return d;
+    CAR(((u8*)this)) = 0;
+    CARID(((u8*)this)) = -1000;
 }
+
+extern "C" {
 
 void fn_801942F0(u8* d, int on);
 void AIDriver_vf30(u8* d);
