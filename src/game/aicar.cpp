@@ -4,6 +4,7 @@
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/centerline.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/rvec.h"
@@ -1126,22 +1127,6 @@ f32 fn_801B3064(void);
 f32 fn_80139048(void);
 f32 PSVECDistance(const u8* a, const u8* b);
 class LineFollower;
-// A point of the ideal line (idealline.cpp).
-struct IdealPoint {
-    V2 pos;            // offset 0x0
-    V2 dir;            // offset 0x8
-    u32 ilpos;         // offset 0x10
-    IdealPoint* next;  // offset 0x14
-    u8 pad18[0xC];
-    f32 speed;         // offset 0x24
-    f32 width;         // offset 0x28
-    f32 height;        // offset 0x2C
-    u8 pad30[4];
-    u8 type;           // offset 0x34
-    u8 section;        // offset 0x35
-    u8 pad36[6];
-};
-
 // A position on the ideal line (idealline.cpp).
 struct ILPos {
     ILPos(void) {
@@ -1309,7 +1294,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     u8* prm = PTR(d, 0x2C8);
     ILPos il;
     fn_80135B9C((LineFollower*)PTR(d, 0x164), F32(prm, 0x70) + F32(prm, 0x6C) * F32(d, 0x270), 0, 0, 0, &il);
-    F32(out, 0xC) = F32(d, 0x2F0) * fn_801931AC(LerpF(il.seg->speed, il.seg->next->speed, il.t), F32(prm, 0x60),
+    F32(out, 0xC) = F32(d, 0x2F0) * fn_801931AC(LerpF(il.seg->unk24, il.seg->next->unk24, il.t), F32(prm, 0x60),
                                                  F32(prm, 0x64), F32(PTR(PTR(d, 0x164), 0x2C), 0x14));
     f32 ahead = F32(out, 0xC) * F32(d, 0x270);
     ahead = F32(PTR(d, 0x2C8), 0x68) > ahead ? F32(PTR(d, 0x2C8), 0x68) : ahead;

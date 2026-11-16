@@ -3,34 +3,10 @@
 
 #include "game/common.h"
 #include "game/v2.h"
+#include "game/centerline.h"
 
 // The track's ideal/centre line and its followers (idealline.cpp), shared by its users (port: one definition of each
 // class). Moved verbatim from idealline.cpp, ObstaclesVtable 2026-11-16.
-
-struct IdealPoint {
-    V2 pos;            // offset 0x0
-    V2 dir;            // offset 0x8
-    u32 ilpos;         // offset 0x10 (16.16)
-    IdealPoint* next;  // offset 0x14
-    f32 len;           // offset 0x18
-    f32 dist;          // offset 0x1C
-    f32 speed;         // offset 0x20
-    u8 pad24[4];
-    f32 width;         // offset 0x28
-    f32 height;        // offset 0x2C (aicar)
-    u8 pad30[4];
-    u8 type;           // offset 0x34
-    u8 section;        // offset 0x35
-    u8 pad36[6];
-};
-
-struct CenterLine {
-    u8 pad0[8];
-    f32 len[4];          // offset 0x8 (per point type)
-    u32 total;           // offset 0x18 (16.16)
-    IdealPoint* points;  // offset 0x1C
-    IdealPoint* start;   // offset 0x20
-};
 
 static inline f32 ILerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 

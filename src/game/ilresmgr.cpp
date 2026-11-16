@@ -2,6 +2,7 @@
 // and either a single ghost line or a "racingline_set" of lines with per-car switching between them, inside
 // "legal_transition_regions", every min_change_t..max_change_t seconds. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/centerline.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -165,13 +166,13 @@ public:
 
 extern "C" IdealLineRes* fn_801563BC(const char* name, LineSource* center);
 
-class CenterLine;
-static inline void InitCenter(CenterLine* c);
+class CenterSource;
+static inline void InitCenter(CenterSource* c);
 
-class CenterLine : public LineSource {
+class CenterSource : public LineSource {
 public:
-    CenterLine(void) { InitCenter(this); }
-    virtual ~CenterLine(void) { fn_80138AD8(&line); }
+    CenterSource(void) { InitCenter(this); }
+    virtual ~CenterSource(void) { fn_80138AD8(&line); }
     virtual IdealLineRes* Get(int car) { return line; }
     virtual IdealLineRes* GetLine(int i) { return line; }
     virtual void Reset(void) {}
@@ -402,7 +403,7 @@ IdealLineRes* fn_801563BC(const char* name, LineSource* center) {
 
 }  // extern "C"
 
-static inline void InitCenter(CenterLine* c) {
+static inline void InitCenter(CenterSource* c) {
     char buf[0x40];
     c->line = fn_80138968(fn_80156248(buf, sizeof(buf)));
     if (!c->line) {
@@ -476,7 +477,7 @@ void fn_801564B0(void) {
     LineSource* racing;
     ValueNode* set;
     fn_8012E81C("ghostcar.res");
-    center = new ("clp") CenterLine;
+    center = new ("clp") CenterSource;
     set = fn_8015621C()->FindChild("racingline_set");
     if (set) {
         racing = new ("rlp") LineSet(set, center);

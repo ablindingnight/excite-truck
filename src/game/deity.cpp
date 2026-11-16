@@ -4,6 +4,7 @@
 // cars and locks the finish order, and runs the race intro countdown ("green flag"). The per-car update, the
 // lap-crossing scan and the qualify helper are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/centerline.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/plainvec.h"
@@ -30,22 +31,6 @@ void operator delete[](void* p);
 extern f32 lbl_8055E3C8;    // time
 extern s32 lbl_8055E3C4;    // frame
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-struct IdealPoint {
-    V2 pos;            // offset 0x0
-    V2 dir;            // offset 0x8
-    u32 ilpos;         // offset 0x10 (16.16)
-    IdealPoint* next;  // offset 0x14
-    f32 len;           // offset 0x18
-    f32 dist;          // offset 0x1C
-};
-
-struct CenterLine {
-    u8 pad0[0x8];
-    f32 len[4];          // offset 0x8
-    u32 total;           // offset 0x18 (16.16)
-    IdealPoint* points;  // offset 0x1C
-};
 
 struct ILPos {
     IdealPoint* seg;  // offset 0x0

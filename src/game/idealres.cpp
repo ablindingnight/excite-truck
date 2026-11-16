@@ -3,6 +3,7 @@
 // extensions, and assigns each point its monotonic ilpos by driving an IdealFollower around the line.
 // Names are guesses apart from IdealLineRes (from its messages).
 #include "game/common.h"
+#include "game/centerline.h"
 #include "game/v2.h"
 
 extern "C" {
@@ -38,44 +39,10 @@ static inline void Swap2(void* v) {
     p[1] = t;
 }
 
-struct IdealPoint {
-    V2 pos;            // offset 0x0
-    V2 dir;            // offset 0x8
-    u32 ilpos;         // offset 0x10
-    IdealPoint* next;  // offset 0x14
-    f32 len;           // offset 0x18
-    f32 dist;          // offset 0x1C
-    f32 speed;         // offset 0x20
-    f32 unk24;         // offset 0x24
-    f32 width;         // offset 0x28
-    f32 lat;           // offset 0x2C
-    f32 lon;           // offset 0x30
-    u8 type;           // offset 0x34
-    u8 section;        // offset 0x35
-    u8 pad36[6];
-};
-
 struct ResExt {
     u32 type;      // offset 0x0
     ResExt* next;  // offset 0x4
     u32 data[1];   // offset 0x8
-};
-
-struct ResHeader {
-    u32 resSize;
-    u32 segSize;
-};
-
-struct IdealLineRes {
-    ResHeader hdr;       // offset 0x0
-    f32 len[4];          // offset 0x8
-    u32 total;           // offset 0x18
-    IdealPoint* points;  // offset 0x1C
-    IdealPoint* start;   // offset 0x20
-    ResExt* ext;         // offset 0x24
-    void* blips;         // offset 0x28
-    s32 nrelocs;         // offset 0x2C
-    u32 relocs[1];       // offset 0x30
 };
 
 struct ILPos {
@@ -138,7 +105,7 @@ void fn_80137D58(IdealPoint* p, IdealLineRes* res) {
     Swap4(&p->speed);
     Swap4(&p->unk24);
     Swap4(&p->width);
-    Swap4(&p->lat);
+    Swap4(&p->height);
     Swap4(&p->lon);
 }
 
@@ -308,7 +275,7 @@ void fn_801384A0(IdealLineRes* line, IdealLineRes* ref) {
     p = line->points;
     do {
         f.Track(&p->pos, 0);
-        p->lat = f.lateral;
+        p->height = f.lateral;
         p->ilpos = f.il.seg->ilpos;
         p = p->next;
     } while (p != line->points);
@@ -399,7 +366,7 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
                 V2 m = MakeV2(qx + 0.5f * (px - qx), y);
                 V2 n = m;
                 Perp(&n);
-                p->lat += (w * step);
+                p->height += (w * step);
                 p->pos.x += n.x * (w * step);
                 p->pos.y += n.y * (w * step);
             }
