@@ -4,6 +4,7 @@
 // with a small torque, and is parked below the world (y -500) when idle or off the ground. Also packs its
 // pose into the render buffer and its state into replay packets. Names are guesses apart from the string.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
@@ -12,9 +13,6 @@
 #include "game/shapes.h"
 
 extern "C" {
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECDotProduct(const void* a, const void* b);
-f32 PSVECMag(const void* v);
 int fn_801E9E30(s16* h, const void* pos);  // still on the ground
 }
 
@@ -192,7 +190,7 @@ void Wheel::vf28(u8* buf) {
     p = (WheelPose*)(buf + a8);
     p->car = car;
     p->index = index;
-    p->spin = PSVECDotProduct(&avel, &mtx.rot.x);
+    p->spin = PSVECDotProduct((const Vec*)&avel, (const Vec*)&mtx.rot.x);
     p->live = live;
 }
 
@@ -234,22 +232,22 @@ void Wheel::Update(void) {
         vel.x *= 0.99966633f;
         vel.y *= 0.99966633f;
         vel.z *= 0.99966633f;
-        f32 spin = PSVECMag(&avel);
+        f32 spin = PSVECMag((const Vec*)&avel);
         int park = 1;
         if (spin > 0.01f) {
             RVec3 t;
             GVec3 pos;
             f32 lean = mtx.rot.x.y;
             RVec3 up(0.0f, 1.0f, 0.0f);
-            PSVECCrossProduct(&mtx.rot.x, &up, &t);
+            PSVECCrossProduct((const Vec*)&mtx.rot.x, (const Vec*)&up, (Vec*)&t);
             lean = 13.5725f * lean;
-            f32 len = PSVECMag(&t);
+            f32 len = PSVECMag((const Vec*)&t);
             f32 k = lean / ((1.0f > len) ? 1.0f : len);
             t.x *= k;
             t.y *= k;
             t.z *= k;
             AddTorque(&t);
-            RVec3 t2(0.0f, 100.0f * (PSVECDotProduct(&mtx.rot.x, &vel) / spin), 0.0f);
+            RVec3 t2(0.0f, 100.0f * (PSVECDotProduct((const Vec*)&mtx.rot.x, (const Vec*)&vel) / spin), 0.0f);
             AddTorque(&t2);
             *(GMtx3*)&pos = *(const GMtx3*)&mtx.pos;
             if (fn_801E9E30(hint, &pos)) {

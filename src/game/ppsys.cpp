@@ -3,6 +3,7 @@
 // free flag) are joined by distance sticks and pinned to moving frames by anchors; a step integrates,
 // relaxes the constraints and resets the accelerations to gravity. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/vec3_init.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
@@ -111,11 +112,7 @@ void operator delete(void* p);
 void operator delete[](void* p);
 
 extern "C" {
-f32 PSVECDistance(const void* a, const void* b);
-f32 PSVECDotProduct(const void* a, const void* b);
-f32 PSVECMag(const void* v);
 double sqrt(double x);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 void fn_801C1218(PSys* s);
 void fn_801C1364(PSys* s);
 void fn_801C1320(PSys* s);
@@ -229,7 +226,7 @@ static inline void AddStick(PSys* s, s32 a, s32 b, f32 extra, f32 stiff) {
     PStick* k = &s->sticks[s->nStick++];
     k->a = a;
     k->b = b;
-    f32 distance = PSVECDistance(&s->pos[a], &s->pos[b]);
+    f32 distance = PSVECDistance((const Vec*)&s->pos[a], (const Vec*)&s->pos[b]);
     f64 absStiff = __fabs(stiff);
     k->rest = extra + distance;
     f32 roundedStiff = absStiff;
@@ -380,9 +377,9 @@ void fn_801C1364(PSys* s) {
             }
             MulRot(&axis, *(RVec3*)&l->d, (const RMtx*)l->g);
             Sub(&d, pb, pa);
-            f32 dot = PSVECDotProduct(&axis, &d);
+            f32 dot = PSVECDotProduct((const Vec*)&axis, (const Vec*)&d);
             Scale(&proj, &axis, dot);
-            f32 len = PSVECMag(&proj);
+            f32 len = PSVECMag((const Vec*)&proj);
             f32 den = len * (wb + wa);
             den = den > 0.0001f ? den : 0.0001f;
             f32 k = l->c * len / den;
@@ -402,7 +399,7 @@ void fn_801C1364(PSys* s) {
                 wa = 0.01f;
             }
             Sub(&d2, pb, pa);
-            f32 len = PSVECMag(&d2);
+            f32 len = PSVECMag((const Vec*)&d2);
             f32 den = len * (wb + wa);
             den = den > 0.0001f ? den : 0.0001f;
             f32 k = st->stiff * (len - st->rest) / den;
@@ -415,11 +412,11 @@ void fn_801C1364(PSys* s) {
             RVec3* p = &s->pos[i];
             Sub(&v, p, &s->old[i]);
             Sub(&r, p, &s->org);
-            f32 h = PSVECDotProduct(&r, &s->up) - s->w30[i];
+            f32 h = PSVECDotProduct((const Vec*)&r, (const Vec*)&s->up) - s->w30[i];
             if (h < 0.0f) {
                 AddScaled(p, p, &s->up, -h);
-                AddScaled(&v, &v, &s->up, -PSVECDotProduct(&s->up, &v));
-                f32 vv = PSVECDotProduct(&v, &v);
+                AddScaled(&v, &v, &s->up, -PSVECDotProduct((const Vec*)&s->up, (const Vec*)&v));
+                f32 vv = PSVECDotProduct((const Vec*)&v, (const Vec*)&v);
                 if (vv > 0.00001f * 0.00001f) {
                     f32 f = 0.0050000004f / (f32)sqrt(vv);
                     f = 1.0f < f ? 1.0f : f;
@@ -516,7 +513,7 @@ static inline void SetBodyVelocity(PSys* s, const RVec3* at, const RVec3* avel, 
     for (int i = 0; i < s->nPart; i++) {
         RVec3 v;
         Sub(&r, &s->pos[i], at);
-        PSVECCrossProduct(avel, &r, &v);
+        PSVECCrossProduct((const Vec*)avel, (const Vec*)&r, (Vec*)&v);
         AddTo(&v, vel);
         AddScaled(&s->old[i], &s->pos[i], &v, -(1.0f / 60.0f));
     }

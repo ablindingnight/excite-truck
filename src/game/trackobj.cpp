@@ -4,6 +4,7 @@
 // object lists with their collision volumes, animated and sound objects, and drawing. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/shapes.h"
@@ -472,9 +473,6 @@ struct EWState {
 VehicleInfo* FindVehicle(s32 id);
 
 extern "C" {
-void PSVECCrossProduct(const void* a, const void* b, void* out);
-f32 PSVECDotProduct(const void* a, const void* b);
-f32 PSVECSquareDistance(const void* a, const void* b);
 int fn_8012F9E8(void* out, int size, const char* text);
 s32 fn_80204BB4(const char* level);
 s32 fn_80204CF0(void);
@@ -602,7 +600,7 @@ static inline int FacingMode(const OFrame* f, const PVec* axis) {
     d.x = f->pos.x - cam->pos.x;
     d.y = f->pos.y - cam->pos.y;
     d.z = f->pos.z - cam->pos.z;
-    int behind = PSVECDotProduct(&d, axis) < 0.0f;
+    int behind = PSVECDotProduct((const Vec*)&d, (const Vec*)axis) < 0.0f;
     return (behind ? 0x10 : 0x20) | 1;
 }
 
@@ -613,8 +611,8 @@ int fn_801F7A0C(void) { return 1; }
 // Make the basis right-handed.
 void fn_801F7A14(OFrame* f) {
     PVec c;
-    PSVECCrossProduct(&f->x, &f->y, &c);
-    if (PSVECDotProduct(&c, &f->z) < 0.0f) {
+    PSVECCrossProduct((const Vec*)&f->x, (const Vec*)&f->y, (Vec*)&c);
+    if (PSVECDotProduct((const Vec*)&c, (const Vec*)&f->z) < 0.0f) {
         f->x.x *= -1.0f;
         f->x.y *= -1.0f;
         f->x.z *= -1.0f;
@@ -1365,7 +1363,7 @@ void fn_801FA2C4(void) {
     AnimInst* a;
     EWSound* s;
     for (a = lbl_8055EC5C; a; a = a->next) {
-        int near = PSVECSquareDistance(&fn_801E8718(0)->pos, &a->frame.pos) < a->liveRad2;
+        int near = PSVECSquareDistance((const Vec*)(&fn_801E8718(0)->pos), (const Vec*)&a->frame.pos) < a->liveRad2;
         int act;
         int state = a->state;
         if (state != 2) {
@@ -1704,7 +1702,7 @@ inline StaticOb::StaticOb(ObstacleObjDesc* d, const OFrame* f, OFrame* v, s32 i)
             for (; j < d->shadow.count; j++) {
                 PVec n;
                 RotVec(&frame, &d->shadow.groups[j].normal, &n);
-                if (PSVECDotProduct(light, &n) < 0.0f) {
+                if (PSVECDotProduct((const Vec*)light, (const Vec*)&n) < 0.0f) {
                     mask &= ~(1 << d->shadow.groups[j].id);
                 }
             }

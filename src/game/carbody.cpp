@@ -3,6 +3,7 @@
 // per-car tuning accessors. Written against raw field offsets; the large routines are still stubs.
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
@@ -1378,9 +1379,6 @@ void fn_8018CB3C(u8* p);
 u32 fn_8018B06C(u8* p);
 double asin(double x);
 double fmod(double x, double y);
-f32 PSVECMag(const void* v);
-void PSVECNormalize(const void* a, void* b);
-f32 PSVECDotProduct(const void* a, const void* b);
 extern u8* lbl_8055E908;
 }
 
@@ -1458,7 +1456,6 @@ void fn_801B8964(s32 id, f32 v);
 void fn_8018E330(u8* p);
 f32 fn_801DCEC0(void);
 double sqrt(double x);
-void PSVECCrossProduct(const void* a, const void* b, void* out);
 }
 
 extern "C" {
@@ -1499,7 +1496,7 @@ void fn_80183E7C(u8* p) {
             ((CarBody*)p)->f2650 = s;
         }
         f32 roll;
-        if (((CarBody*)p)->airborne > 2 && (roll = PSVECDotProduct(p + 0x124, p + 0x48), (f32)__fabs(roll) < 2.0f)) {
+        if (((CarBody*)p)->airborne > 2 && (roll = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48)), (f32)__fabs(roll) < 2.0f)) {
             f32 a = Ramp(((CarBody*)p)->f2650, 0.0f, 1.0f);
             f32 b = Clamp01((((CarBody*)p)->speed - 4.4444447f) / 8.888888f);
             f32 k = LerpT(b, 0.0f, 1.0f) * (((CarBody*)p)->mass * 100.0f * 9.81f * 0.305f * (0.0f + a * 1.0f));
@@ -1571,7 +1568,7 @@ void fn_80183E7C(u8* p) {
                 t.x = axis.x * k;
                 t.y = axis.y * k;
                 t.z = axis.z * k;
-                f32 spin = 5.0f * (PSVECDotProduct(p + 0x124, &axis) - 1.5f);
+                f32 spin = 5.0f * (PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)&axis) - 1.5f);
                 f32 damp = 1.0f - Clamp01(spin);
                 t.x = t.x * damp;
                 t.y = t.y * damp;
@@ -1608,14 +1605,14 @@ void fn_80183E7C(u8* p) {
     b.x = ((CarBody*)p)->wheels[1].plane.ground[0] - ((CarBody*)p)->wheels[2].plane.ground[0];
     b.y = ((CarBody*)p)->wheels[1].plane.ground[1] - ((CarBody*)p)->wheels[2].plane.ground[1];
     b.z = ((CarBody*)p)->wheels[1].plane.ground[2] - ((CarBody*)p)->wheels[2].plane.ground[2];
-    PSVECCrossProduct(&a, &b, &up);
+    PSVECCrossProduct((const Vec*)&a, (const Vec*)&b, (Vec*)&up);
     f32 nz = LerpT(0.05f, ((CarBody*)p)->f25AC, up.z);
     f32 ny = LerpT(0.05f, ((CarBody*)p)->f25A8, up.y);
     f32 nx = LerpT(0.05f, ((CarBody*)p)->f25A4, up.x);
     ((CarBody*)p)->f25A8 = ny;
     ((CarBody*)p)->f25A4 = nx;
     ((CarBody*)p)->f25AC = nz;
-    f32 len = PSVECMag(p + 0x25A4);
+    f32 len = PSVECMag((const Vec*)(p + 0x25A4));
     if (len > 0.01f) {
         f32 inv = 1.0f / len;
         ((CarBody*)p)->f25A4 = ((CarBody*)p)->f25A4 * inv;
@@ -1627,7 +1624,7 @@ void fn_80183E7C(u8* p) {
         ((CarBody*)p)->f25AC = 0.0f;
     }
     f32 dn;
-    if (((CarBody*)p)->f2590 > 0.001f && (dn = PSVECDotProduct(p + 0x25A4, p + 0x118)) > 0.001f &&
+    if (((CarBody*)p)->f2590 > 0.001f && (dn = PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118))) > 0.001f &&
         dn < lbl_80561DA4 && ((CarBody*)p)->airborne > 0) {
         f32 k = (lbl_80561DA4 - dn) * ((CarBody*)p)->mass / lbl_80561D9C;
         CbVec f;
@@ -1644,19 +1641,19 @@ void fn_80183E7C(u8* p) {
         stunts = 1;
     }
     if (stunts && ((CarBody*)p)->airborne && ((CarBody*)p)->f2618 > 0.35f) {
-        f32 sink = -PSVECDotProduct(p + 0x25A4, p + 0x118);
+        f32 sink = -PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118));
         f32 lim = LerpT(Clamp01((((CarBody*)p)->f2618 - 2.9f) / 0.099999905f), landingTune.v[5], landingTune.v[4]);
         if (jump) {
             lim = driveTune.v[4];
         }
         HVec dir = *(HVec*)(p + 0x118);
-        f32 sp = PSVECMag(p + 0x118);
+        f32 sp = PSVECMag((const Vec*)(p + 0x118));
         sp = sp > 1.0f ? sp : 1.0f;
         f32 inv = 1.0f / sp;
         dir.x = dir.x * inv;
         dir.y = dir.y * inv;
         dir.z = dir.z * inv;
-        f32 into = -PSVECDotProduct(&dir, p + 0x25A4);
+        f32 into = -PSVECDotProduct((const Vec*)&dir, (const Vec*)(p + 0x25A4));
         CbVec behind;
         CbVec ahead;
         ahead.x = ((CarBody*)p)->mtx.pos.x + ((CarBody*)p)->vel.x * lbl_80561CDC;
@@ -1671,18 +1668,18 @@ void fn_80183E7C(u8* p) {
         slope.x = ahead.x - behind.x;
         slope.y = ahead.y - behind.y;
         slope.z = ahead.z - behind.z;
-        f32 sl = PSVECMag(&slope);
+        f32 sl = PSVECMag((const Vec*)&slope);
         sl = sl > 0.01f ? sl : 0.01f;
         inv = 1.0f / sl;
         slope.x = slope.x * inv;
         slope.y = slope.y * inv;
         slope.z = slope.z * inv;
-        f32 flat = PSVECDotProduct(&slope, p + 0x25A4);
+        f32 flat = PSVECDotProduct((const Vec*)&slope, (const Vec*)(p + 0x25A4));
         int smooth = 0;
         if (0.5f * (flat / -0.2f + into / 0.4f) > 1.0f && lbl_8055E4F6) {
             smooth = 1;
         }
-        f32 tilt = PSVECDotProduct(p + 0x25A4, p + 0x48);
+        f32 tilt = PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x48));
         int bad = 0;
         int hard = 0;
         if (!smooth && tilt > lim && ((CarBody*)p)->f2618 > landingTune.v[1]) {
@@ -1723,7 +1720,7 @@ void fn_80183E7C(u8* p) {
         }
     }
     if (((CarBody*)p)->f2618 > 0.35f) {
-        f32 sink = -PSVECDotProduct(p + 0x25A4, p + 0x118);
+        f32 sink = -PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118));
         if (sink > 13.333333f &&
             (((CarBody*)p)->mtx.pos.y - ((CarBody*)p)->wheels[3].plane.ground[1] - 4.0f * 0.016683351f * sink < 0.0f || ((CarBody*)p)->airborne)) {
             f32 d = 0.0f;
@@ -1740,7 +1737,7 @@ void fn_80183E7C(u8* p) {
     }
     if (((CarBody*)p)->airborne && ((CarBody*)p)->f2618 > 0.35f) {
         HVec right = *(HVec*)(p + 0x3C);
-        f32 slide = -PSVECDotProduct(&right, p + 0x118);
+        f32 slide = -PSVECDotProduct((const Vec*)&right, (const Vec*)(p + 0x118));
         f32 t = Clamp01((((CarBody*)p)->f2618 - 0.35f) / 1.15f);
         f32 d = 0.0f;
         if (slide > 0.0f) {
@@ -1755,7 +1752,7 @@ void fn_80183E7C(u8* p) {
         f.x = right.x * k;
         f.y = right.y * k;
         f.z = right.z * k;
-        f32 n = -PSVECDotProduct(p + 0x25A4, &f);
+        f32 n = -PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)&f);
         f.x = f.x + ((CarBody*)p)->f25A4 * n;
         f.y = f.y + ((CarBody*)p)->f25A8 * n;
         f.z = f.z + ((CarBody*)p)->f25AC * n;
@@ -1769,23 +1766,23 @@ void fn_80183E7C(u8* p) {
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = 0.0f;
         f32 roll = ((CarBody*)p)->f2604;
-        f32 m = PSVECMag(&fl);
+        f32 m = PSVECMag((const Vec*)&fl);
         m = m > 1.0f ? m : 1.0f;
         f32 inv = 1.0f / m;
         fl.x = fl.x * inv;
         fl.y = fl.y * inv;
         fl.z = fl.z * inv;
-        if (PSVECDotProduct(&fl, p + 0x54) < -0.2f) {
+        if (PSVECDotProduct((const Vec*)&fl, (const Vec*)(p + 0x54)) < -0.2f) {
             fl.x = fl.x * -1.0f;
             fl.y = fl.y * -1.0f;
             fl.z = fl.z * -1.0f;
         }
-        f32 nose = PSVECDotProduct(&fl, p + 0x48);
+        f32 nose = PSVECDotProduct((const Vec*)&fl, (const Vec*)(p + 0x48));
         f32 wantR;
         f32 wantP = 0.25f * pitch - nose;
         wantR = -roll - ((CarBody*)p)->mtx.rot.x.y * (1.0f - AbsNarrow(((CarBody*)p)->mtx.rot.z.y));
-        f32 wp = PSVECDotProduct(p + 0x124, p + 0x3C);
-        f32 wr = PSVECDotProduct(p + 0x124, p + 0x54);
+        f32 wp = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x3C));
+        f32 wr = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x54));
         f32 gain = 0.25f;
         if (((CarBody*)p)->f2680) {
             gain = 1.0f;
@@ -1805,9 +1802,9 @@ void fn_80183E7C(u8* p) {
     if (((CarBody*)p)->f2648 == 7) {
         CbVec y(0.0f, 1.0f, 0.0f);
         CbVec side;
-        PSVECCrossProduct(&y, p + 0x54, &side);
+        PSVECCrossProduct((const Vec*)&y, (const Vec*)(p + 0x54), (Vec*)&side);
         side.y = 0.0f;
-        f32 k = 0.5f * -PSVECDotProduct(p + 0x118, &side) * ((CarBody*)p)->mass;
+        f32 k = 0.5f * -PSVECDotProduct((const Vec*)(p + 0x118), (const Vec*)&side) * ((CarBody*)p)->mass;
         CbVec f;
         f.x = side.x * k;
         f.y = side.y * k;
@@ -1874,7 +1871,7 @@ void fn_80183E7C(u8* p) {
         f32 want = target - 8.888889f * ((CarBody*)p)->f25E4;
         HVec dir = *(HVec*)(p + 0x118);
         dir.y = 0.0f;
-        f32 m = PSVECMag(&dir);
+        f32 m = PSVECMag((const Vec*)&dir);
         m = m > 0.01f ? m : 0.01f;
         f32 one = 1.0f;
         f32 inv = one / m;
@@ -2100,7 +2097,7 @@ void fn_80183E7C(u8* p) {
     int trick = 0;
     if (NearZero(((CarBody*)p)->f2690) && NearZero(((CarBody*)p)->f2650)) {
         f32 yaw = 0.33333334f * ((CarBody*)p)->f25D8 * ((CarBody*)p)->f25F0 * ((CarBody*)p)->f5B0;
-        f32 sp = PSVECMag(p + 0x118);
+        f32 sp = PSVECMag((const Vec*)(p + 0x118));
         f32 m = 1.0f;
         m = m > sp ? m : sp;
         CbVec dir;
@@ -2114,13 +2111,13 @@ void fn_80183E7C(u8* p) {
             d2.x = dir.x;
             d2.z = dir.z;
             CbVec side;
-            PSVECCrossProduct(&d2, p + 0x54, &side);
+            PSVECCrossProduct((const Vec*)&d2, (const Vec*)(p + 0x54), (Vec*)&side);
             f32 g = 1.0f;
             if ((s32)fn_8018B06C(p) < 0) {
                 g = 0.0f;
             }
             f32 st = ((CarBody*)p)->f25F0 * g;
-            f32 lat = PSVECDotProduct(&side, p + 0x48);
+            f32 lat = PSVECDotProduct((const Vec*)&side, (const Vec*)(p + 0x48));
             f32 t = Clamp01((((CarBody*)p)->speed - 22.222223f) / 48.888893f);
             yaw = LerpT(t, yaw, 3.0f * 20.0f * (0.6f * st - lat));
         }
@@ -2177,7 +2174,7 @@ void fn_80183E7C(u8* p) {
                 ((CarBody*)p)->f2638 = side;
                 ((CarBody*)p)->f263C = side;
                 ((CarBody*)p)->f2640 = 0;
-                f32 spin = PSVECDotProduct(p + 0x124, p + 0x48);
+                f32 spin = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48));
                 f32 sgn = 1.0f;
                 if (((CarBody*)p)->f2638 == 1) {
                     sgn = -1.0f;
@@ -2205,7 +2202,7 @@ void fn_80183E7C(u8* p) {
                 v.x = dir.x;
                 v.z = dir.z;
                 v.y = 0.0f;
-                if (PSVECDotProduct(&fwd, &v) < 0.0f) {
+                if (PSVECDotProduct((const Vec*)&fwd, (const Vec*)&v) < 0.0f) {
                     ((CarBody*)p)->f2640 = 1;
                 } else if (((CarBody*)p)->f2640) {
                     ((CarBody*)p)->f2638 = 0;
@@ -2215,7 +2212,7 @@ void fn_80183E7C(u8* p) {
                 }
             }
         }
-        f32 spin = PSVECDotProduct(p + 0x124, p + 0x48);
+        f32 spin = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48));
         f32 fs = Clamp01((((CarBody*)p)->speed - 6.6666665f) / 24.444445f);
         f32 fa = Clamp01((((CarBody*)p)->f2618 - 0.1f) / 0.20000002f);
         f32 k = 30000.0f * ((CarBody*)p)->f5E4 * ((CarBody*)p)->f5E4 * (1.0f + fa * lbl_80561E14) *
@@ -2377,8 +2374,8 @@ void fn_80186DE8(void) {
         CbVec T(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
         m->force = CbSolVec4(F.x, F.y, F.z);
         m->torque = CbSolVec4(T.x, T.y, T.z);
-        if (PSVECDotProduct(car + 0x124, car + 0x124) > 100.0f) {
-            PSVECNormalize(car + 0x124, car + 0x124);
+        if (PSVECDotProduct((const Vec*)(car + 0x124), (const Vec*)(car + 0x124)) > 100.0f) {
+            PSVECNormalize((const Vec*)(car + 0x124), (Vec*)(car + 0x124));
             ((CarBody*)car)->avel.x = ((CarBody*)car)->avel.x * lbl_80561D34;
             ((CarBody*)car)->avel.y = ((CarBody*)car)->avel.y * lbl_80561D34;
             ((CarBody*)car)->avel.z = ((CarBody*)car)->avel.z * lbl_80561D34;
@@ -2472,7 +2469,7 @@ void fn_80186DE8(void) {
         if (((CarBody*)car)->airborne >= 3 && !landing) {
             f32 k;
             f32 drag;
-            f32 speed = PSVECMag(car + 0x118);
+            f32 speed = PSVECMag((const Vec*)(car + 0x118));
             speed = speed > 1.0f ? speed : 1.0f;
             drag = 9.81f * (-st->drag * ((CarBody*)car)->mass) / speed;
             f32 force[3];
@@ -2492,12 +2489,12 @@ void fn_80186DE8(void) {
                 AddScaled(force, car + 0x54, k);
             }
             if (((CarBody*)car)->f258C > -2.0f || ((CarBody*)car)->f25E4 > 0.25f || ((CarBody*)car)->f5EC > 0.01f) {
-                f32 fwd = PSVECDotProduct(car + 0x3C, car + 0x118);
+                f32 fwd = PSVECDotProduct((const Vec*)(car + 0x3C), (const Vec*)(car + 0x118));
                 f32 b = FMax(2.0f + ((CarBody*)car)->f258C, ((CarBody*)car)->f25E4);
                 f32 k = 0.55181247f * (-fwd * ((CarBody*)car)->mass) * Clamp01(b);
                 AddScaled(force, car + 0x3C, k);
             }
-            speed = PSVECMag(car + 0x118);
+            speed = PSVECMag((const Vec*)(car + 0x118));
             speed = speed > 1.0f ? speed : 1.0f;
             k = 9.81f * (-1.5f * ((CarBody*)car)->mass) * ((CarBody*)car)->f25E4 / speed;
             force[0] = force[0] + ((CarBody*)car)->vel.x * k;
@@ -2588,8 +2585,8 @@ void fn_80186DE8(void) {
         CbVec4 w6(x->v70);
         CbWheel* w;
         ((CarBody*)car)->f25D0 = rpm.x / 0.10471976f;
-        ((CarBody*)car)->speed = PSVECMag(0x118 + car);
-        ((CarBody*)car)->f25D8 = PSVECDotProduct(car + 0x118, car + 0x54);
+        ((CarBody*)car)->speed = PSVECMag((const Vec*)(0x118 + car));
+        ((CarBody*)car)->f25D8 = PSVECDotProduct((const Vec*)(car + 0x118), (const Vec*)(car + 0x54));
         ((CarBody*)car)->f25CC = rpm.y;
         steer = ((CarBody*)car)->f25F0;
         f32* water;
@@ -2619,8 +2616,8 @@ void fn_80186DE8(void) {
             w->local[2] = x->pts[j].z;
             w->local[1] = x->pts[j].y - w6[j];
             u32 fl;
-            f32 up = PSVECDotProduct(nrm, car + 0x54);
-            w->plane.nRight = PSVECDotProduct(nrm, car + 0x3C);
+            f32 up = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x54));
+            w->plane.nRight = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x3C));
             w->plane.nFwd = up;
             w->grounded = nrm[1] > 0.01f;
             f32 comp = c->pts[5 + j].w;
@@ -3056,9 +3053,6 @@ static inline f32 HitDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { retur
 static inline f32 HitMin(f32 a, f32 b) { return a < b ? a : b; }
 
 void fn_8018E3EC(u8* p, const HVec* imp, const HVec* at, int a, s32 id, int kind, u8* other, int c);
-void PSVECNormalize(const void* a, void* b);
-f32 PSVECMag(const void* v);
-f32 PSVECDotProduct(const void* a, const void* b);
 
 // Collision response: scales the impulse `imp` at the world point `at` by the mass ratio of the two cars
 // for a car-on-car hit (and drops it when this car is the heavier one hit from the front), by the body
@@ -3068,7 +3062,7 @@ f32 PSVECDotProduct(const void* a, const void* b);
 void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, int c) {
     CarBody* cb = (CarBody*)p;
     fn_80189C64(p);
-    f32 mag = PSVECMag(imp);
+    f32 mag = PSVECMag((const Vec*)imp);
     int carHit = other && kind == 0x6D;
     f32 scale = 1.0f;
     s32 otherId = -1;
@@ -3078,11 +3072,11 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
             otherId = S32(other, 0x1EC);
             HVec dir = *imp;
             if (mag > 0.1f) {
-                PSVECNormalize(&dir, &dir);
+                PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
             }
-            double a_d = __fabs(PSVECDotProduct(&dir, (u8*)&cb->vel));
+            double a_d = __fabs(PSVECDotProduct((const Vec*)&dir, (const Vec*)((u8*)&cb->vel)));
             f32 a = a_d;
-            f32 b = __fabs(PSVECDotProduct(&dir, other + 0x118));
+            f32 b = __fabs(PSVECDotProduct((const Vec*)&dir, (const Vec*)(other + 0x118)));
             f32 d = b - a;
             if (d > 6.6666665f && b > 1.5f * a) {
                 scale = HitMin(b / FMax(a, 0.001f), 5.0f);
@@ -3098,7 +3092,7 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
                 local.x = x;
                 local.y = y;
                 local.z = z;
-                if (local.z < -0.508f && PSVECDotProduct(imp, (u8*)&cb->world.rot.z) > 0.0f) {
+                if (local.z < -0.508f && PSVECDotProduct((const Vec*)imp, (const Vec*)((u8*)&cb->world.rot.z)) > 0.0f) {
                     scale = 0.0f;
                 }
             }
@@ -3252,8 +3246,6 @@ void fn_801E9DD0(s16* surface, f32 x, f32 z);
 void fn_801BE400(s32 car, CbFrame* frame, f32 a);
 void fn_801B30C0(s32 car, s32 reset, void* start);
 void fn_8026A394(u8* car);
-f32 PSVECDotProduct(const void* a, const void* b);
-f32 PSVECMag(const void* v);
 void fn_8018A750(u8* p);
 
 // Puts the car down at `s` (a frame for the body origin, the velocity at 0x30, the start point at
@@ -3295,8 +3287,8 @@ void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     ((CarBody*)p)->avel.x = 0.0f;
     ((CarBody*)p)->avel.y = 0.0f;
     ((CarBody*)p)->avel.z = 0.0f;
-    ((CarBody*)p)->f25D8 = ((CarBody*)p)->f25CC = PSVECDotProduct(p + 0x118, p + 0x54);
-    ((CarBody*)p)->f261C = ((CarBody*)p)->speed = PSVECMag(p + 0x118);
+    ((CarBody*)p)->f25D8 = ((CarBody*)p)->f25CC = PSVECDotProduct((const Vec*)(p + 0x118), (const Vec*)(p + 0x54));
+    ((CarBody*)p)->f261C = ((CarBody*)p)->speed = PSVECMag((const Vec*)(p + 0x118));
     ((CarBody*)p)->accel.x = 0.0f;
     ((CarBody*)p)->accel.y = 0.0f;
     ((CarBody*)p)->accel.z = 0.0f;
@@ -3797,7 +3789,7 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
     } else {
         ((RigidBody*)p)->RigidBody::vf30(t, (RPacket*)cur, (const RPacket*)prev, na, nb);
     }
-    cb->speed = cb->f25CC = cb->f25D8 = PSVECMag((u8*)&cb->vel);
+    cb->speed = cb->f25CC = cb->f25D8 = PSVECMag((const Vec*)((u8*)&cb->vel));
     f32 v0 = PkUnpack(prev->rpm, 65535.0f, -2000.0f, 14000.0f);
     f32 v1 = PkUnpack(cur->rpm, 65535.0f, -2000.0f, 14000.0f);
     cb->f25D0 = LerpT(t, v1, v0);
