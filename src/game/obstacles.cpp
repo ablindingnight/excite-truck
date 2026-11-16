@@ -769,71 +769,71 @@ void fn_801796CC(int kind, void* msg, int size);
 
 // One frame of a sleeping/settled obstacle (rest pose at 0x1EC, rest timer at 0x21C).
 void Obstacle::Update(void) {
-    u8* p = (u8*)this;
-    if (U8(p, 0x222)) {
+    Obstacle* p = this;
+    if (p->u222) {
         ObVec3 lin;
         ObVec3 ang;
-        U8(p, 0x1E9) = 0;
+        p->b1E9 = 0;
         ((RigidBody*)p)->Flush((RVec3*)&lin, (RVec3*)&ang);
         return;
     }
-    if (PSVECDotProduct((f32*)(p + 0x118), (f32*)(p + 0x118)) > 0.1f * 0.1f ||
-        PSVECDotProduct((f32*)(p + 0x124), (f32*)(p + 0x124)) > 0.1f * 0.1f) {
-        if (F32(p, 0x64) > -500.0f) {
-            fn_801AC240(p);
+    if (PSVECDotProduct((f32*)&p->vel, (f32*)&p->vel) > 0.1f * 0.1f ||
+        PSVECDotProduct((f32*)&p->avel, (f32*)&p->avel) > 0.1f * 0.1f) {
+        if (p->mtx.pos.y > -500.0f) {
+            fn_801AC240((u8*)p);
         }
     }
-    if (U8(p, 0x220)) {
-        if (lbl_8055E3C4 == 1 || lbl_8055E3C8 > 1.0f + F32(p, 0x21C)) {
-            fn_801AC254(p);
-            F32(p, 0x124) = 0.0f;
-            F32(p, 0x128) = 0.0f;
-            F32(p, 0x12C) = 0.0f;
-            F32(p, 0x118) = 0.0f;
-            F32(p, 0x11C) = 0.0f;
-            F32(p, 0x120) = 0.0f;
-        } else if (!U8(p, 0x221)) {
+    if (p->asleep) {
+        if (lbl_8055E3C4 == 1 || lbl_8055E3C8 > 1.0f + p->sleepTime) {
+            fn_801AC254((u8*)p);
+            p->avel.x = 0.0f;
+            p->avel.y = 0.0f;
+            p->avel.z = 0.0f;
+            p->vel.x = 0.0f;
+            p->vel.y = 0.0f;
+            p->vel.z = 0.0f;
+        } else if (!p->u221) {
             ((RigidBody*)p)->RigidBody::Update();
-            F32(p, 0x118) *= 0.99983317f;
-            F32(p, 0x11C) *= 0.99983317f;
-            F32(p, 0x120) *= 0.99983317f;
-            F32(p, 0x124) *= 0.99983317f;
-            F32(p, 0x128) *= 0.99983317f;
-            F32(p, 0x12C) *= 0.99983317f;
-            if (F32(p, 0x238) > 0.0f) {
-                fn_801ABB54(p);
+            p->vel.x *= 0.99983317f;
+            p->vel.y *= 0.99983317f;
+            p->vel.z *= 0.99983317f;
+            p->avel.x *= 0.99983317f;
+            p->avel.y *= 0.99983317f;
+            p->avel.z *= 0.99983317f;
+            if (p->u238 > 0.0f) {
+                fn_801ABB54((u8*)p);
             }
             int up = 0;
-            if (U8(p, 0x234) && F32(p, 0x4C) > 0.5f) {
+            if (p->u234 && p->mtx.rot.y.y > 0.5f) {
                 up = 1;
             }
-            U8(p, 0x234) = up;
+            p->u234 = up;
         } else {
             ((RigidBody*)p)->RigidBody::Update();
-            F32(p, 0x124) = 0.0f;
-            F32(p, 0x128) = 0.0f;
-            F32(p, 0x12C) = 0.0f;
-            F32(p, 0x118) = 0.0f;
-            F32(p, 0x11C) = 0.0f;
-            F32(p, 0x120) = 0.0f;
-            *(Pose12*)(p + 0x3C) = *(Pose12*)(p + 0x1EC);
+            p->avel.x = 0.0f;
+            p->avel.y = 0.0f;
+            p->avel.z = 0.0f;
+            p->vel.x = 0.0f;
+            p->vel.y = 0.0f;
+            p->vel.z = 0.0f;
+            *(Pose12*)&p->mtx.rot.x = *(Pose12*)&p->restPose;
             ((CollVolume*)p)->CollVolume::Transform();
         }
-        if (F32(p, 0x64) < -500.0f) {
+        if (p->mtx.pos.y < -500.0f) {
             ((Obstacle*)p)->Reset();
         }
     }
-    if (U8(p, 0x235)) {
+    if (p->u235) {
         ObHitMsg m;
-        ObRotate(&m.pos, (f32*)(p + 0x70), (ObVec3*)(p + 0x228));
-        m.pos.x += F32(p, 0x94);
-        m.pos.y += F32(p, 0x98);
-        m.pos.z += F32(p, 0x9C);
-        m.obj = p;
-        m.flag = U8(p, 0x234);
+        ObRotate(&m.pos, (f32*)&p->world.rot.x, (ObVec3*)&p->hitOffset);
+        m.pos.x += p->world.pos.x;
+        m.pos.y += p->world.pos.y;
+        m.pos.z += p->world.pos.z;
+        m.obj = (u8*)p;
+        m.flag = p->u234;
         fn_801796CC(9, &m, sizeof(ObHitMsg));
     }
-    S32(p, 0x1E4) = 0;
+    p->nImp = 0;
 }
 
 void Obstacle::vf20(void) { CollVolume::vf20(); }
@@ -969,13 +969,13 @@ void Obstacle::OnHit(const RVec3* v_, const RVec3* at_, int force, void* extra_)
 }
 
 void Obstacle::Reset(void) {
-    u8* p = (u8*)this;
-    fn_801AC240(p);
-    *(Pose12*)(p + 0x3C) = *(Pose12*)(p + 0x1EC);
+    Obstacle* p = this;
+    fn_801AC240((u8*)p);
+    *(Pose12*)&p->mtx.rot.x = *(Pose12*)&p->restPose;
     ((CollVolume*)p)->CollVolume::Transform();
     ((RigidBody*)p)->RigidBody::Reset();
-    U8(p, 0x223) = 1;
-    U8(p, 0x234) = U8(p, 0x235);
+    p->chainArmed = 1;
+    p->u234 = p->u235;
 }
 
 extern "C" {
@@ -1001,13 +1001,13 @@ Obstacle::~Obstacle(void) { lbl_8055E5E4 = 0; }
 #pragma pop
 
 FencePole::FencePole(void) {
-    u8* p = (u8*)this;
+    FencePole* p = this;
     if (!lbl_8055E5EC) {
         lbl_8055E5F0 = 0;
     }
-    S32(p, 0x250) = lbl_8055E5EC++;
-    lbl_80435628[S32(p, 0x250)] = p;
-    S32(p, 0x254) = -1;
+    p->index = lbl_8055E5EC++;
+    lbl_80435628[p->index] = (u8*)p;
+    p->ropeIndex = -1;
 }
 
 FencePole::~FencePole(void) {
@@ -1093,9 +1093,9 @@ void fn_801C1CBC(s32 sys, int nv, FenceVert* v, int ne, FenceEdge* e, int np, Fe
 #pragma push
 #pragma opt_lifetimes off
 void FencePole::Reset(void) {
-    u8* p = (u8*)this;
+    FencePole* p = this;
     ((Obstacle*)p)->Obstacle::Reset();
-    if (S32(p, 0x250) == lbl_8055E5EC - 1 && lbl_8055E5F0) {
+    if (p->index == lbl_8055E5EC - 1 && lbl_8055E5F0) {
         FenceVert verts[320];
         FenceEdge edges[320];
         FencePin pins[64];
@@ -1234,16 +1234,16 @@ static inline void WriteFencePose(u8* buf, u8* p) {
 // Writes this obstacle's draw state into the frame buffer: its pose (blended from the previous one when the
 // draw falls between physics steps) and part id; links also work out both anchor points.
 void FencePole::vf28(u8* buf) {
-    u8* p = (u8*)this;
-    WriteFencePose(buf, p);
-    if (PTR(p, 0x23C)) {
+    FencePole* p = this;
+    WriteFencePose(buf, (u8*)p);
+    if (((u8*)p->prev)) {
         ObVec3 a;
-        ObRotate(&a, (f32*)(p + 0x3C), (ObVec3*)(p + 0x244));
-        a.x += F32(p, 0x60);
-        a.y += F32(p, 0x64);
-        a.z += F32(p, 0x68);
+        ObRotate(&a, (f32*)&p->mtx.rot.x, (ObVec3*)&p->anchor);
+        a.x += p->mtx.pos.x;
+        a.y += p->mtx.pos.y;
+        a.z += p->mtx.pos.z;
         const ObVec3* anchor;
-        u8* o = PTR(p, 0x23C);
+        u8* o = ((u8*)p->prev);
         ObVec3 b;
         anchor = (const ObVec3*)(o + 0x244);
         ObRotate(&b, (const f32*)(o + 0x3C), anchor);
