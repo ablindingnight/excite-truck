@@ -557,7 +557,7 @@ void fn_802B1BEC(void);
 
 void fn_802B14B4(GMat* g) {
     int c;
-    GList* lp;
+    GBlock* b;
     bool first;
     u32 m;
     int bit;
@@ -567,6 +567,7 @@ void fn_802B14B4(GMat* g) {
     int i;
     int k;
     s32 old;
+    GList* lp;
 
     fn_802B1BEC();
     if (g->verts.Count() > 0) {
@@ -596,7 +597,7 @@ void fn_802B14B4(GMat* g) {
             for (m = bit; m < 65; lp++, m++) {
                 if ((m & bit) && !lp->Empty()) {
                     first = ((bit - 1) & m) == 0;
-                    for (GBlock* b = lp->Head(); b; b = b->next) {
+                    for (b = lp->Head(); b; b = b->next) {
                         c = b->Count();
                         if (c > 0) {
                             fn_802DC078(verts, n, (u16*)b->At(0), c, first, i);
@@ -617,11 +618,9 @@ void fn_802B14B4(GMat* g) {
         fn_802DBF30();
         fn_802C8D74();
         fn_802C2C00(old);
-        n = g->verts.Count();
-        fn_802BB0FC(g->verts.At(0), n);
+        fn_802BB0FC(g->verts.At(0), g->verts.Count());
         fn_802B1758(g);
-        n = g->verts.Count();
-        fn_802BB3B8(g->verts.At(0), n);
+        fn_802BB3B8(g->verts.At(0), g->verts.Count());
     }
 }
 
