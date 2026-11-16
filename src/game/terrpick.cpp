@@ -12,6 +12,16 @@ extern s32 lbl_8055CFF4;  // screen height
 extern f32 lbl_8055FC88;  // projection scale
 }
 
+struct OFrame;
+struct PlacedObj;
+
+// The track object class (trackobj.cpp); its default Props/Draw slots are defined here.
+class ObjDesc {
+public:
+    void Props(void* p, PlacedObj* o);
+    void Draw(const OFrame* f) const;
+};
+
 struct PickCam {
     ValVec3 basis[3];
     ValVec3 pos;  // offset 0x24
@@ -42,8 +52,12 @@ void fn_8020401C(void*) {}
 void fn_80204020(void) {}
 int fn_80204024(void) { return 0; }
 int fn_8020402C(void) { return 0; }
-void fn_80204034(void) {}
-void fn_80204038(void) {}
+}  // extern "C"
+
+void ObjDesc::Props(void* p, PlacedObj* o) {}
+void ObjDesc::Draw(const OFrame* f) const {}
+
+extern "C" {
 int fn_8020403C(void) { return 1; }
 void fn_80204044(s32, f32, f32) {}
 void fn_80204048(void*, void*) {}
