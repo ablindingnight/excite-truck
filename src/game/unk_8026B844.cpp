@@ -443,14 +443,23 @@ static __inline void CamFly(CamFrame* f, const FreePad* pad, f32 turn, f32 roll,
 
 // The debug camera, once a frame: the mode button cycles keyboard / pad / free camera control of the saved
 // frame (the pad modes move whichever camera is current), then the replay cameras follow their car.
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline f32 Loop2_fn_8026C014(FreePad& pad, f32 z, f32 speed) {
-    if (pad.w40 & 1) {
-        z = speed;
-    } else if (pad.w40 & 4) {
-        z = -speed;
+/* Helper names unproven: one keyboard axis of the free camera from two key bits. The forward/back axis tests its
+   plus key first, the strafe axis its minus key first (retail's order of the two tests). */
+static inline f32 KeyAxis(FreePad& pad, f32 v, f32 speed, int plus, int minus) {
+    if (pad.w40 & plus) {
+        v = speed;
+    } else if (pad.w40 & minus) {
+        v = -speed;
     }
-    return z;
+    return v;
+}
+static inline f32 KeyAxisRev(FreePad& pad, f32 v, f32 speed, int minus, int plus) {
+    if (pad.w40 & minus) {
+        v = -speed;
+    } else if (pad.w40 & plus) {
+        v = speed;
+    }
+    return v;
 }
 
 void fn_8026C014(int player) {
@@ -650,12 +659,8 @@ void fn_8026C014(int player) {
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
         z = 0.0f;
         x = z;
-        z = Loop2_fn_8026C014(pad, z, speed);
-        if (pad.w40 & 8) {
-            x = -speed;
-        } else if (pad.w40 & 2) {
-            x = speed;
-        }
+        z = KeyAxis(pad, z, speed, 1, 4);
+        x = KeyAxisRev(pad, x, speed, 8, 2);
         CamSet(&v, x, 0.0f, z);
         CamMove(&lbl_80499050, &v);
         lbl_8055F50C = yaw;
