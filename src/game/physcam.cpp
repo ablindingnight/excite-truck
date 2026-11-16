@@ -118,9 +118,6 @@ public:
     s32 type;        // offset 0x58
     u8 pad5C[4];
 };
-extern s32 lbl_8055F54C;
-extern s32 lbl_8055F554;
-extern u8 lbl_8055F558;
 
 // A camera cycle: how many views it has and which one is current.
 struct CamCycle {
@@ -140,11 +137,18 @@ static inline f32 PcMul(f32 a, f32 b) { return a * b; }  /* Helper name unproven
 static inline f32 PcLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }  /* Helper name unproven */
 f32 lbl_8055F540 = DegToRad(18.75f);
 f32 lbl_8055F544 = DegToRad(112.5f);
+s32 lbl_8055F548;  // TV camera count
+s32 lbl_8055F54C;  // last TV camera type
+s32 lbl_8055F550;  // region spheres loaded
+s32 lbl_8055F554;  // regions prepared
+u8 lbl_8055F558;
 static CamCycle lbl_8049A258[5];
 static TvCamera lbl_8049A2C8[200];
 static RegionSphere lbl_8049EDC8[32];
 static CamRegion lbl_8049F9D8[32];
-extern const f32 lbl_8055F560 = PcSq(0.01f);
+extern const f32 lbl_8055F560;
+extern u8 lbl_8055F564;
+extern f32 lbl_8055F568;  // car heading
 
 extern "C" int fn_80273494(int x);
 
@@ -169,8 +173,6 @@ void fn_80270B74(void) {
     lbl_8055F554 = 0;
 }
 
-extern s32 lbl_8055F550;
-extern u8 lbl_8055F564;
 
 // Collects the camera regions usable for this event; falls back to region 0.
 void fn_80270C04(u8* car, u32 flags) {
@@ -316,7 +318,6 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801B526C(void);
 PathPos fn_80136414(u8* track, s32 node);  // idealline: returns the ILPos by value
 s32 fn_801363A0(u8* track, u8* cur);
-extern f32 lbl_8055F568;  // car heading
 
 // The car's track controller (slot 0x18 returns its track).
 class CamCarCtl {
@@ -391,7 +392,6 @@ int find_best_region(u8* car, int type) {
     return (u32)(lbl_8049F9D8[bestIdx].cam - (u8*)lbl_8049EDC8) / sizeof(RegionSphere);
 }
 
-extern s32 lbl_8055F548;  // TV camera count
 int fn_8012C33C(const char* name);  // file exists
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
@@ -500,7 +500,6 @@ struct CamFrame {
 extern "C" {
 void fn_802704D4(int to, u8* cam);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
-extern s32 lbl_8055F548;
 extern u8 lbl_8055F480;
 extern f32 lbl_80499050[12];    // last camera frame
 int fn_80129D90(int seed, int lo, int hi);  // random int
@@ -790,6 +789,12 @@ void fn_80271624(int mode, u8* p) {
         *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
     }
 }
+
+// Defined here, below the functions that own the warned* flags: retail's .sbss has those four static locals between
+// lbl_8055F558 and these three.
+extern const f32 lbl_8055F560 = PcSq(0.01f);
+u8 lbl_8055F564;
+f32 lbl_8055F568;  // car heading
 
 int fn_80271FAC(const char* name) {
     for (int i = 0; i < 18; i++) {
@@ -1162,7 +1167,6 @@ public:
     virtual u8* Track(void);  // 0x18
 };
 
-extern f32 lbl_8055F568;        // car heading
 
 // How strongly `r` applies to `car` (0..1 into *weight); returns whether the region is usable.
 }  // extern "C"
