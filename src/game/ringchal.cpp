@@ -458,7 +458,7 @@ namespace {
 struct PlayerData;
 class Arena : public Preloader {
 public:
-    int Loop3_CountDynos(int n, int& i);
+    int CountDynosIn(int n, int& i);
 public:
 public:
     Arena(void);
@@ -1080,8 +1080,8 @@ Arena::Arena(void) {
 
 PlayerList::PlayerList(void) : ArrayRef<PlayerData*>(storage, 8) {}
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-inline int Arena::Loop3_CountDynos(int n, int& i) {
+/* Helper name unproven: the counting loop with the caller's counter by reference; the boundary is needed (in place: CountDynos 100 -> 96.21) */
+inline int Arena::CountDynosIn(int n, int& i) {
     const int count = sets->count;
     for (i = 0; i < count; i++) {
         int c = 0;
@@ -1100,7 +1100,7 @@ inline int Arena::Loop3_CountDynos(int n, int& i) {
 int Arena::CountDynos(void) {
     int n = 0;
     int i;
-    return Loop3_CountDynos(n, i);
+    return CountDynosIn(n, i);
 }
 
 
