@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/camrect.h"
 #include "game/camrec.h"
+#include "game/math_types.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -483,15 +484,11 @@ f32 fn_802715F0(u8* p) {
 }
 
 }  // extern "C"
-struct Mat3 {
-    f32 m[9];
-};
 
 // A camera frame copied as 12 words (rotation rows + position).
 struct Words12 {
     u32 w[12];
 };
-void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);
 // A camera frame: rotation rows then position (the layout of Words12).
 struct CamFrame {
     Mat3 rot;
@@ -770,15 +767,15 @@ void fn_80271624(int mode, u8* p) {
             off[1] = 1000.0f;
             off[2] = lbl_80563F48;
             Mat3 down;
-            down.m[0] = lbl_80563F50;
-            down.m[1] = lbl_80563F48;
-            down.m[2] = lbl_80563F48;
-            down.m[3] = lbl_80563F48;
-            down.m[4] = lbl_80563F48;
-            down.m[5] = lbl_80563F50;
-            down.m[6] = lbl_80563F48;
-            down.m[7] = lbl_80563F44;
-            down.m[8] = lbl_80563F48;
+            down.m[0][0] = lbl_80563F50;
+            down.m[0][1] = lbl_80563F48;
+            down.m[0][2] = lbl_80563F48;
+            down.m[1][0] = lbl_80563F48;
+            down.m[1][1] = lbl_80563F48;
+            down.m[1][2] = lbl_80563F50;
+            down.m[2][0] = lbl_80563F48;
+            down.m[2][1] = lbl_80563F44;
+            down.m[2][2] = lbl_80563F48;
             fn_801BFD34((u8*)&r->pose.pos, off, (u8*)&r->carFrame);
             Mat3Mul((Mat3*)&r->pose, &down, (Mat3*)&r->carFrame);
             *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
@@ -1450,25 +1447,25 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
         s = (f32)sin(a);
         c = (f32)cos(a);
         k = lbl_80563F50 - c;
-        r->m[0] = c + k * (x * x);
-        r->m[1] = y * (k * x) + s * z;
-        r->m[2] = z * (k * x) - s * y;
-        r->m[3] = y * (k * x) - s * z;
-        r->m[4] = c + k * (y * y);
-        r->m[6] = z * (k * x) + s * y;
-        r->m[5] = z * (k * y) + s * x;
-        r->m[8] = c + k * (z * z);
-        r->m[7] = z * (k * y) - s * x;
+        r->m[0][0] = c + k * (x * x);
+        r->m[0][1] = y * (k * x) + s * z;
+        r->m[0][2] = z * (k * x) - s * y;
+        r->m[1][0] = y * (k * x) - s * z;
+        r->m[1][1] = c + k * (y * y);
+        r->m[2][0] = z * (k * x) + s * y;
+        r->m[1][2] = z * (k * y) + s * x;
+        r->m[2][2] = c + k * (z * z);
+        r->m[2][1] = z * (k * y) - s * x;
     } else {
-        r->m[0] = lbl_80563F50;
-        r->m[1] = lbl_80563F48;
-        r->m[2] = lbl_80563F48;
-        r->m[3] = lbl_80563F48;
-        r->m[4] = lbl_80563F50;
-        r->m[5] = lbl_80563F48;
-        r->m[6] = lbl_80563F48;
-        r->m[7] = lbl_80563F48;
-        r->m[8] = lbl_80563F50;
+        r->m[0][0] = lbl_80563F50;
+        r->m[0][1] = lbl_80563F48;
+        r->m[0][2] = lbl_80563F48;
+        r->m[1][0] = lbl_80563F48;
+        r->m[1][1] = lbl_80563F50;
+        r->m[1][2] = lbl_80563F48;
+        r->m[2][0] = lbl_80563F48;
+        r->m[2][1] = lbl_80563F48;
+        r->m[2][2] = lbl_80563F50;
     }
 }
 
