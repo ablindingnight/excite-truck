@@ -6,6 +6,7 @@
 // animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/ilayout.h"
+#include "game/textelem.h"
 #include "game/raceopts.h"
 #include "game/carinfo.h"
 #include "game/gamedb.h"
@@ -636,47 +637,15 @@ StatHandler* StatHandler_Create(u32 type, const StatDesc* d) {
 }  // extern "C"
 
 
-// Layout elements as the awards layouts return them (see betarace's TextElem/GartElem).
-struct AwPos {
-    f32 x, y;
-};
-
-struct AwText {
-    const char* name;     // offset 0x0
-    AwPos pos;            // offset 0x4
-    s32 elemJust;         // offset 0xC
-    f32 scale;            // offset 0x10
-    u32 just;             // offset 0x14
-    u32 color;            // offset 0x18
-    const char* defText;  // offset 0x1C
-};
-
-struct AwBox {
-    const char* name;  // offset 0x0
-    AwPos pos;         // offset 0x4
-    s32 elemJust;      // offset 0xC
-    f32 w;             // offset 0x10
-    f32 h;             // offset 0x14
-    u32 color;         // offset 0x18
-};
-
-class AwLayout {
-public:
-    virtual ~AwLayout(void);
-    virtual AwText* Find(const char* name);     // 0xC
-    virtual void* FindArt(const char* name);    // 0x10
-    virtual AwBox* FindBox(const char* name);   // 0x14
-};
-
 const char* StatsGetLabel(u32 type);
 
 extern "C" {
 f32 fn_801E7E24(void);
 int fn_8026B0C0(int player);
 int fn_80204CF0(void);
-void fn_80148070(AwBox* box, u32 color, gArtSet* art);
-void fn_80147230(AwText* e, const char* fmt, ...);
-void fn_801476C4(AwText* e);
+void fn_80148070(GartElem* box, u32 color, gArtSet* art);
+void fn_80147230(TextElem* e, const char* fmt, ...);
+void fn_801476C4(TextElem* e);
 }
 
 // The live update element for the current difficulty.
@@ -1281,8 +1250,8 @@ void fn_801CD970(int car) {
     if (!p) {
         return;
     }
-    AwText e;
-    AwBox* box = ((AwLayout*)m->layout)->FindBox("live_update_box");
+    TextElem e;
+    GartElem* box = m->layout->FindBox("live_update_box");
     if (!box) {
         return;
     }
@@ -1293,14 +1262,14 @@ void fn_801CD970(int car) {
     k = k > 0.0f ? k : 0.0f;
     f32 slide = AwLerp(out, 0.0f, k);
     if (box) {
-        AwBox b;
+        GartElem b;
         b = *box;
         b.pos.x += slide;
         fn_80148070(&b, -1, m->art);
     }
-    AwText* msg = ((AwLayout*)m->layout)->Find("live_update_message");
-    AwText* val = ((AwLayout*)m->layout)->Find(LiveValueName());
-    AwText* title = ((AwLayout*)m->layout)->Find("live_update_title");
+    TextElem* msg = m->layout->Find("live_update_message");
+    TextElem* val = m->layout->Find(LiveValueName());
+    TextElem* title = m->layout->Find("live_update_title");
     if (msg && val && title) {
         char num[0x14];
         char label[0x40];

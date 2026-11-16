@@ -4,47 +4,14 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/ilayout.h"
+#include "game/textelem.h"
 #include "game/raceprog.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
 #include "game/raceopts.h"
 #include "game/dashhelper.h"
 #include "game/math_types.h"
-
-// One element of a layout set (0x20 bytes); copied, moved and drawn.
-struct LayoutItem {
-    u32 unk0;  // offset 0x0
-    struct {
-        f32 x;
-        f32 y;
-    } pos;      // offset 0x4
-    u32 unkC;   // offset 0xC
-    f32 scale;  // offset 0x10
-    u32 unk14;  // offset 0x14
-    u32 color;  // offset 0x18
-    u32 unk1C;  // offset 0x1C
-};
-
-// A box element of a layout set (0x1C bytes).
-struct LayoutBox {
-    u32 unk0;  // offset 0x0
-    struct {
-        f32 x;
-        f32 y;
-    } pos;      // offset 0x4
-    s32 unkC;   // offset 0xC
-    f32 w;      // offset 0x10
-    f32 h;      // offset 0x14
-    u32 color;  // offset 0x18
-};
-
-class Layout {
-public:
-    virtual ~Layout(void);
-    virtual LayoutItem* Find(const char* name);    // 0xC
-    virtual void* FindArt(const char* name);       // 0x10
-    virtual LayoutBox* FindBox(const char* name);  // 0x14
-};
 
 struct ResultRacer {
     u8 pad0[0x48];
@@ -131,9 +98,9 @@ double sin(double x);
 double fmod(double x, double y);
 char* strcpy(char* dst, const char* src);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-void fn_801476C4(LayoutItem* item);
-void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
-void fn_80147230(LayoutItem* item, const char* fmt, ...);
+void fn_801476C4(TextElem* item);
+void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
+void fn_80147230(TextElem* item, const char* fmt, ...);
 void fn_80130FCC(char* buf, int size, s32 value);
 void fn_80130978(char* buf, int size, f32 value);
 const char* fn_80130FE0(s32 place);
@@ -147,7 +114,7 @@ void fn_801333E8(int type, const char* name, u8* out);
 TrackMap* fn_80019C68(int player);
 void fn_8001A04C(TrackMap* map);
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h);
-Layout* fn_80145E70(const char* name);
+ILayout* fn_80145E70(const char* name);
 }  // extern "C"
 void fn_8000C630(long, int);
 extern "C" {
@@ -187,7 +154,7 @@ void fn_801E4F20(int n);
 void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
 void fn_802C8D74(void);
-void fn_801478E0(Layout* layout, const char* name, gArtSet* art, int frame);
+void fn_801478E0(ILayout* layout, const char* name, gArtSet* art, int frame);
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
                  f32 v0, f32 u1, f32 v1);
 void fn_80011E04(int unk);
@@ -263,7 +230,7 @@ public:
     s32 zoneTex;      // offset 0x44
     TrackMap* map;    // offset 0x48
     u8 units;         // offset 0x4C
-    Layout* layout;   // offset 0x50
+    ILayout* layout;   // offset 0x50
 };
 
 // HUD colours (not referenced by the surviving code).
@@ -302,7 +269,7 @@ static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-void DrawLapCounter(Layout* layout, int lap, int total, int showTotal) {
+void DrawLapCounter(ILayout* layout, int lap, int total, int showTotal) {
     char num[20];
     char den[20];
 
@@ -346,17 +313,17 @@ f32 Ease(f32 t) {
 }
 
 // Stripped from ET; only its strings remain.
-LayoutItem* GetDash(int player, int i) {
+TextElem* GetDash(int player, int i) {
     char name[32];
     fn_801345D8(name, sizeof(name), "preferred_dash%d", i);
     return lbl_803577E0[player]->layout->Find(name);
 }
 
-LayoutItem* GetLapBody(int player) {
+TextElem* GetLapBody(int player) {
     return lbl_803577E0[player]->layout->Find("lap_body_0");
 }
 
-LayoutItem* GetLapBody1(int player) {
+TextElem* GetLapBody1(int player) {
     if (fn_802C9A58()) {
         return lbl_803577E0[player]->layout->Find("lap_body_1_ws");
     } else {
@@ -368,13 +335,13 @@ void DrawPlayerLapCounter(int player, int lap, int total) {
     DrawLapCounter(lbl_803577E0[player]->layout, lap < 1 ? 1 : lap, total, 0);
 }
 
-static inline void PrintInt(LayoutItem* item, s32 value) {
+static inline void PrintInt(TextElem* item, s32 value) {
     char buf[20];
     fn_80130FCC(buf, sizeof(buf), value);
     fn_80147230(item, buf);
 }
 
-static inline void PrintTime(LayoutItem* item, f32 value) {
+static inline void PrintTime(TextElem* item, f32 value) {
     char buf[20];
     fn_80130978(buf, sizeof(buf), value);
     fn_80147230(item, buf);
@@ -382,8 +349,8 @@ static inline void PrintTime(LayoutItem* item, f32 value) {
 
 void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, const char* label1,
                                  f32 time1, const char* label2, f32 time2) {
-    LayoutBox box;
-    LayoutBox* p;
+    GartElem box;
+    GartElem* p;
     int row;
 
     p = layout->FindBox("timer_box");
@@ -395,7 +362,7 @@ void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, cons
         box.pos.y = 130.0f;
         box.w = 174.0f;
         box.h = 20.0f;
-        box.unkC = 1;
+        box.elemJust = 1;
         box.color = -1;
     }
     fade = Ease(fade);
@@ -403,9 +370,9 @@ void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, cons
     row = 0;
     if (lbl_8055D350->active) {
         if (showLaps) {
-            LayoutItem* it = layout->Find("laps_to_go_title");
+            TextElem* it = layout->Find("laps_to_go_title");
             if (it) {
-                LayoutItem item;
+                TextElem item;
                 item = *it;
                 item.pos.x = box.pos.x;
                 item.pos.y = box.pos.y + box.h * row;
@@ -413,16 +380,16 @@ void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, cons
             }
             it = layout->Find("laps_to_go");
             if (it) {
-                LayoutItem item;
+                TextElem item;
                 item = *it;
                 item.pos.x = box.pos.x + box.w;
                 item.pos.y = box.pos.y + box.h * row;
                 PrintInt(&item, lbl_8055D350->info->laps - lbl_8055D350->stats->lap + 1);
             }
         } else {
-            LayoutItem* it = layout->Find("laps_to_go_last_lap");
+            TextElem* it = layout->Find("laps_to_go_last_lap");
             if (it) {
-                LayoutItem item;
+                TextElem item;
                 item = *it;
                 item.pos.x = box.pos.x;
                 item.pos.y = box.pos.y + box.h * row;
@@ -432,9 +399,9 @@ void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, cons
         row = 1;
     }
     if (label1 && *label1) {
-        LayoutItem* it = layout->Find("best_lap_title");
+        TextElem* it = layout->Find("best_lap_title");
         if (it) {
-            LayoutItem item;
+            TextElem item;
             item = *it;
             item.pos.x = box.pos.x;
             item.pos.y = box.pos.y + box.h * row;
@@ -442,7 +409,7 @@ void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, cons
         }
         it = layout->Find("best_lap");
         if (it) {
-            LayoutItem item;
+            TextElem item;
             item = *it;
             item.pos.x = box.pos.x + box.w;
             item.pos.y = box.pos.y + box.h * row;
@@ -451,9 +418,9 @@ void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, cons
         row++;
     }
     if (label2 && *label2) {
-        LayoutItem* it = layout->Find("timer_box_3_title");
+        TextElem* it = layout->Find("timer_box_3_title");
         if (it) {
-            LayoutItem item;
+            TextElem item;
             item = *it;
             item.pos.x = box.pos.x;
             item.pos.y = box.pos.y + box.h * row;
@@ -461,7 +428,7 @@ void RacingOverlay::DrawTimerBox(f32 fade, const char* title, int showLaps, cons
         }
         it = layout->Find("timer_box_3");
         if (it) {
-            LayoutItem item;
+            TextElem item;
             item = *it;
             item.pos.x = box.pos.x + box.w;
             item.pos.y = box.pos.y + box.h * row;
@@ -761,11 +728,11 @@ void RacingOverlay::Update(void) {
     }
     if (lbl_8055D350->flags & 0x1000) {
         if (map) {
-            LayoutBox* box = layout->FindBox("track_map");
+            GartElem* box = layout->FindBox("track_map");
             if (box) {
                 f32 x;
                 f32 y;
-                fn_80148134(&x, &y, box->pos.x, box->pos.y, box->unkC);
+                fn_80148134(&x, &y, box->pos.x, box->pos.y, box->elemJust);
                 fn_8001A1F4(map, x, y, box->w, box->h);
             }
         } else if (lbl_8055D350->player == 0) {
@@ -1029,8 +996,8 @@ void RacingOverlay::DrawHeat(void) {
     heat = lbl_8055D350->truck->heat;
     int on = (f32)fmod(lbl_8055D350->time, 1.0) > 0.5f;
     int blink = 0;
-    LayoutBox* box;
-    LayoutItem* label;
+    GartElem* box;
+    TextElem* label;
 
     if (heat > 0.66f && on) {
         blink = 1;
@@ -1052,12 +1019,12 @@ void RacingOverlay::DrawHeat(void) {
         f32 y;
         f32 x;
         f32 angle = start + heat * (end - start);
-        fn_80148134(&x, &y, box->pos.x, box->pos.y, box->unkC);
+        fn_80148134(&x, &y, box->pos.x, box->pos.y, box->elemJust);
         DrawNeedle(x, y, box->w, box->h, angle);
     }
     label = layout->Find("temp_gauge_label");
     if (label) {
-        LayoutItem item;
+        TextElem item;
         item = *label;
         if (blink) {
             item.color = 0x80FFFF00;

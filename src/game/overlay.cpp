@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/textelem.h"
 #include "game/ilayout.h"
 #include "game/raceopts.h"
 #include "game/raceprog.h"
@@ -25,33 +26,6 @@ void* operator new(size_t size, const char* tag);
 extern const f32 lbl_80560108 = 4.0f;
 extern const f32 lbl_8056010C = 4.0f;
 
-// One element of a layout set (0x20 bytes).
-struct LayoutPos {
-    f32 x;
-    f32 y;
-};
-
-struct LayoutItem {
-    u32 unk0;       // offset 0x0
-    LayoutPos pos;  // offset 0x4
-    u32 unkC;   // offset 0xC
-    f32 scale;  // offset 0x10
-    u32 unk14;  // offset 0x14
-    u32 color;  // offset 0x18
-    u32 unk1C;  // offset 0x1C
-};
-
-// A layout art element (0x1C bytes).
-struct LayoutArtItem {
-    u32 unk0;       // offset 0x0
-    LayoutPos pos;  // offset 0x4
-    u32 unkC;       // offset 0xC
-    f32 w;      // offset 0x10
-    f32 h;      // offset 0x14
-    u32 color;  // offset 0x18
-};
-
-class LayoutArt;
 
 struct RacerState {
     u8 pad0[0x30];
@@ -255,8 +229,8 @@ void fn_80011E90(void);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
 void fn_8014784C(ILayout* layout, const char* name, const char* set, int index);
 void fn_80230F78(u8* alpha, f32* scale, u32* color, int unk);
-void fn_80147940(ILayout* layout, LayoutArtItem* item, const char* set, int index);
-void fn_801476C4(LayoutItem* item);
+void fn_80147940(ILayout* layout, GartElem* item, const char* set, int index);
+void fn_801476C4(TextElem* item);
 }  // extern "C"
 void UpdateContinueOverlay(void);
 extern "C" {
@@ -998,8 +972,8 @@ void ResultsOverlay::DrawMenu(void) {
     f32 elapsed;
     bool selected;
     int frame;
-    LayoutItem text;
-    LayoutArtItem button;
+    TextElem text;
+    GartElem button;
     u8 alpha;
     f32 pulse;
 
@@ -1030,7 +1004,7 @@ void ResultsOverlay::DrawMenu(void) {
             if (item->index == 2) {
                 fn_8027AA48();
             }
-            text = *(LayoutItem*)layout->Find(item->text);
+            text = *layout->Find(item->text);
             text.pos.x += item->x;
             selected = selection == item->index;
             alpha = 0xFF;
@@ -1039,7 +1013,7 @@ void ResultsOverlay::DrawMenu(void) {
                 fn_80230F78(&alpha, &pulse, &text.color, 1);
             }
             frame = selected ? 1 : 2;
-            button = *(LayoutArtItem*)layout->FindBox(item->button);
+            button = *layout->FindBox(item->button);
             button.pos.x += item->x;
             fn_80147940(layout, &button, "menu_artset", frame);
             if (selected) {

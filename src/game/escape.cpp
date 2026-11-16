@@ -2,42 +2,9 @@
 // confirmation dialog and the "missing controller" popup, drawn from esclyt.val. "escape:" in its
 // debug message suggests escape.cpp; function names are guesses.
 #include "game/common.h"
+#include "game/ilayout.h"
+#include "game/textelem.h"
 #include "game/gart.h"
-
-struct LayoutPos {
-    f32 x;
-    f32 y;
-};
-
-// One element of a layout set (0x20 bytes).
-struct LayoutItem {
-    u32 unk0;       // offset 0x0
-    LayoutPos pos;  // offset 0x4
-    u32 unkC;       // offset 0xC
-    f32 scale;      // offset 0x10
-    u32 unk14;      // offset 0x14
-    u32 color;      // offset 0x18
-    u32 unk1C;      // offset 0x1C
-};
-
-// A layout art element (0x1C bytes).
-struct LayoutArtItem {
-    u32 unk0;       // offset 0x0
-    LayoutPos pos;  // offset 0x4
-    u32 unkC;       // offset 0xC
-    f32 w;          // offset 0x10
-    f32 h;          // offset 0x14
-    u32 color;      // offset 0x18
-};
-
-class Layout {
-public:
-    virtual ~Layout(void);
-    virtual LayoutItem* Find(const char* name);            // 0xC
-    virtual void* FindArt(const char* name);               // 0x10
-    virtual LayoutArtItem* FindArtItem(const char* name);  // 0x14
-    virtual gArtSet* FindArtSet(const char* name);            // 0x18
-};
 
 class GameSound {
 public:
@@ -83,12 +50,12 @@ void fn_802C8638(Camera* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
 const char* fn_80131234(const char* key);
-void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
+void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);
 void fn_80230F78(u8* alpha, f32* scale, u32* color, int unk);
-void fn_80147940(Layout* layout, LayoutArtItem* item, const char* set, int index);
-void fn_80147230(LayoutItem* item, const char* fmt, ...);
-void fn_801476C4(LayoutItem* item);
+void fn_80147940(ILayout* layout, GartElem* item, const char* set, int index);
+void fn_80147230(TextElem* item, const char* fmt, ...);
+void fn_801476C4(TextElem* item);
 void fn_80011A2C(void);
 void fn_802C9904(void);
 }  // extern "C"
@@ -97,12 +64,12 @@ extern "C" {
 int fn_80137CFC(int player);
 int fn_802E8504(int pad);
 int fn_80137C74(void);
-void fn_80148070(LayoutArtItem* item, u32 color, gArtSet* set);
+void fn_80148070(GartElem* item, u32 color, gArtSet* set);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, u32 unk);
 void fn_800103B8(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
 void* fn_802090D4(const char* name);
 void fn_80209190(void* p, f32 value);
-Layout* fn_80145E70(const char* name);
+ILayout* fn_80145E70(const char* name);
 Sound2D* fn_80207848(const char* name, int flags);
 void fn_80209110(void** p);
 f32 fn_80209028(void);
@@ -138,7 +105,7 @@ bool lbl_8055D407;                 // missing controller popup up
 int (*lbl_8055D408)(int item);     // item callback
 void (*lbl_8055D40C)(void);        // background draw callback
 void* lbl_8055D410;
-Layout* lbl_8055D414;
+ILayout* lbl_8055D414;
 Sound2D* lbl_8055D418;
 Sound2D* lbl_8055D41C;
 s32 lbl_8055D420;  // missing controller index
@@ -192,7 +159,7 @@ static int fn_8000C848(int key) {
 }
 
 static void fn_8000C964(void) {
-    LayoutArtItem* art;
+    GartElem* art;
     const char** text;
     int i;
     f32 pulse;
@@ -200,9 +167,9 @@ static void fn_8000C964(void) {
     char name[32];
     char label[32];
     int selected;
-    LayoutItem item;
+    TextElem item;
     u8 alpha;
-    LayoutArtItem button;
+    GartElem button;
 
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
@@ -225,7 +192,7 @@ static void fn_8000C964(void) {
             if (selected) {
                 fn_80230F78(&alpha, &pulse, &item.color, 1);
             }
-            art = lbl_8055D414->FindArtItem(name);
+            art = lbl_8055D414->FindBox(name);
             if (art) {
                 if (!fn_8000C840(i)) {
                     art->color = (art->color & 0xFFFFFF) | 0x80000000;
@@ -261,21 +228,21 @@ static int fn_8000CCB8(void) {
 }
 
 static void fn_8000CD24(void) {
-    LayoutArtItem* box;
-    LayoutItem* msg;
+    GartElem* box;
+    TextElem* msg;
     f32 x;
     f32 y;
     if (lbl_8055D414) {
-        box = lbl_8055D414->FindArtItem("popup_box");
+        box = lbl_8055D414->FindBox("popup_box");
         if (box) {
-            fn_80148070(box, 0x96FFFFFF, lbl_8055D414->FindArtSet("popup_box_art"));
+            fn_80148070(box, 0x96FFFFFF, lbl_8055D414->FindSet("popup_box_art"));
         }
         fn_801476C4(lbl_8055D414->Find("missing_ctrl_title"));
         msg = lbl_8055D414->Find("missing_ctrl_msg");
         if (msg) {
             const char* names[2] = {"Pause:MISSING_CTRL_0", "Pause:MISSING_CTRL_1"};
-            fn_80148134(&x, &y, msg->pos.x, msg->pos.y, msg->unkC);
-            fn_800103B8(msg->scale, msg->color, msg->unk14, x, y, box->w - 34.0f, "%s",
+            fn_80148134(&x, &y, msg->pos.x, msg->pos.y, msg->elemJust);
+            fn_800103B8(msg->scale, msg->color, msg->just, x, y, box->w - 34.0f, "%s",
                         fn_80131234(names[lbl_8055D420]));
             fn_80011A2C();
         }
@@ -378,9 +345,9 @@ void fn_8000D1DC(void) {
     int i;
     bool selected;
     char label[32];
-    LayoutItem item;
-    LayoutArtItem button;
-    LayoutArtItem* art;
+    TextElem item;
+    GartElem button;
+    GartElem* art;
 
     if (lbl_8055D405) {
         fn_8000C964();
@@ -413,7 +380,7 @@ void fn_8000D1DC(void) {
                 if (!fn_8000C840(i)) {
                     item.color = (item.color & 0xFFFFFF) | 0x80000000;
                 }
-                art = lbl_8055D414->FindArtItem(name);
+                art = lbl_8055D414->FindBox(name);
                 if (art) {
                     if (!fn_8000C840(i)) {
                         art->color = (art->color & 0xFFFFFF) | 0x80000000;

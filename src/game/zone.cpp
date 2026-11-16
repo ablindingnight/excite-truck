@@ -8,6 +8,9 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/ilayout.h"
+#include "game/textelem.h"
+#include "game/artelemcopy.h"
 #include "game/v2.h"
 #include "game/locstring.h"
 #include "game/raceopts.h"
@@ -74,49 +77,7 @@ extern u8 lbl_8055E1BC;  // timed-out-of-zone mode
 extern f32 lbl_8055E3C8;     // current race time
 extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
-// One text element of a layout set (0x20 bytes).
-struct LayoutItem {
-    u32 unk0;
-    struct {
-        f32 x;
-        f32 y;
-    } pos;      // offset 0x4
-    u32 unkC;   // offset 0xC
-    f32 scale;  // offset 0x10
-    u32 unk14;  // offset 0x14
-    u32 color;  // offset 0x18
-    u32 unk1C;  // offset 0x1C
-};
-
-// One art (textured quad) element of a layout set (0x28 bytes).
-struct LayoutArt {
-    u32 unk0;
-    struct {
-        f32 x;
-        f32 y;
-    } pos;   // offset 0x4
-    u32 unkC;
-    f32 w;   // offset 0x10
-    f32 h;   // offset 0x14
-    f32 u0;  // offset 0x18
-    f32 v0;  // offset 0x1C
-    f32 u1;  // offset 0x20
-    f32 v1;  // offset 0x24
-};
-
-class Layout {
-public:
-    virtual ~Layout(void);
-    virtual LayoutItem* Find(const char* name);    // 0xC
-    virtual LayoutArt* FindArt(const char* name);  // 0x10
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-};
-extern "C" Layout* fn_80145E70(const char* name);
+extern "C" ILayout* fn_80145E70(const char* name);
 
 // A loaded sound effect; playback flags are polled by the sound system.
 class Sound {
@@ -1082,12 +1043,12 @@ public:
     void SetTotal(int car) { cars[car].total = cars[car].score; }
     void DrawHits(FixedArray<GateHit, 8>* hits);
 
-    Wrap<Wrap<FixedArray<Layout*, 16> > > layouts;  // offset 0x8
-    void LayoutsVf28(void);
-    void LayoutsVf20(void);
-    Layout* mainLyt;     // offset 0x54
-    Layout* closureLyt;  // offset 0x58
-    Layout* resultLyt;   // offset 0x5C
+    Wrap<Wrap<FixedArray<ILayout*, 16> > > layouts;  // offset 0x8
+    void SaveLayouts(void);
+    void ToggleLayoutEdit(void);
+    ILayout* mainLyt;     // offset 0x54
+    ILayout* closureLyt;  // offset 0x58
+    ILayout* resultLyt;   // offset 0x5C
     Deletable* triggers;  // offset 0x60
     ZoneLevels* levels;  // offset 0x64
     s32 level;           // offset 0x68
@@ -1153,7 +1114,7 @@ f32 fn_8013CB3C(void) { return lbl_8055E3C8; }
 
 int fn_8013CB44(const char* name, ValueNode* n) { return strcmp(n->GetName(), name) == 0; }
 
-void fn_8013CB90(LayoutArt* a) {
+void fn_8013CB90(ArtElem* a) {
     a->pos.x -= a->w / 2;
     a->pos.y -= a->h / 2;
 }
@@ -1782,12 +1743,12 @@ void UpdateContinueOverlay(void);
 extern "C" {
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
                  f32 v0, f32 u1, f32 v1);
-void fn_80147EE0(LayoutArt* a, f32 s);
-void fn_801476D8(LayoutArt* a, u32 color, s32 tex);
+void fn_80147EE0(ArtElem* a, f32 s);
+void fn_801476D8(ArtElem* a, u32 color, s32 tex);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
-void fn_801476C4(LayoutItem* item);
-void fn_801479A8(LayoutItem* orig, LayoutItem* item, const char* fmt, f32 alpha, ...);
-void fn_80147BD0(LayoutArt* a, LayoutArt* b, int c, int d, s32 tex, f32 alpha);
+void fn_801476C4(TextElem* item);
+void fn_801479A8(TextElem* orig, TextElem* item, const char* fmt, f32 alpha, ...);
+void fn_80147BD0(ArtElem* a, ArtElem* b, int c, int d, s32 tex, f32 alpha);
 void fn_8000FF88(u32 color, int size, const char* text, f32 scale, f32 x, f32 y, ...);
 }
 
@@ -1946,14 +1907,14 @@ int ZoneMaster::vf68(void) const { return hud.state == 2; }
 
 void ZoneMaster::vf4C(int p) const { DrawHud(p); }
 
-extern "C" void fn_801475D0(Layout* l, const char* name, const char* fmt, ...);
+extern "C" void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...);
 
 // Stripped by the linker; keep their literals in place.
 extern "C" void fn_zone_TextElem(int len, const char* fmt) {
     fn_802E317C(" oversized text elem (len %d, fmt \"%s\")", len, fmt);
 }
 
-extern "C" void fn_zone_WideOpen(Layout* l, int mode, int mult, f32* out) {
+extern "C" void fn_zone_WideOpen(ILayout* l, int mode, int mult, f32* out) {
     out[0] = out[1] * 0.25f;
     out[2] = out[3] * 255.0f;
     const char* msg;
@@ -1973,7 +1934,7 @@ void ZoneMaster::DrawBonus(int p, ZoneCar* c) const {
         f32 k = c->BonusScale();
         f32 a = Lerp(1.0f, 0.0f, Clamp01(InvLerp(0.0f, lbl_8042FB3C.timeBonusLen,
                                                  fn_8013CB3C() - c->bonusT - lbl_8042FB3C.timeBonusStartT)));
-        LayoutArt* pie = mainLyt->FindArt("bonus_pie");
+        ArtElem* pie = mainLyt->FindArt("bonus_pie");
         f32 r = pie->w * k;
         f32 x = pie->pos.x;
         f32 y = pie->pos.y;
@@ -1989,7 +1950,7 @@ void ZoneMaster::DrawBonus(int p, ZoneCar* c) const {
         }
         mainLyt->FindArt("score_star_art");
         {
-            LayoutArt star;
+            ArtElem star;
             star = *mainLyt->FindArt("bonus_star_art");
             star.pos.x = pie->pos.x;
             star.pos.y = pie->pos.y;
@@ -2025,7 +1986,7 @@ extern "C" void fn_8013F498(f32 t, V2* a, V2* b) {
 }
 
 // Stripped by the linker; keeps its literals in place.
-extern "C" void fn_zone_LevelTitle(Layout* l) {
+extern "C" void fn_zone_LevelTitle(ILayout* l) {
     l->Find("level_title");
     l->Find("level_fade_in");
     l->Find("level_number");
@@ -2036,19 +1997,19 @@ void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
     if (level > 0) {
         if (t74.Active()) {
             f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t74.Progress())));
-            LayoutItem* it = mainLyt->Find("middle_message");
+            TextElem* it = mainLyt->Find("middle_message");
             if (it) {
-                LayoutItem m;
+                TextElem m;
                 m = *it;
                 m.scale *= 0.3f;
                 m.color = 0xFFFFFF;
                 fn_801479A8(it, &m, "PERFECT LEVEL", a);
             }
             {
-                LayoutArt* star = mainLyt->FindArt("perfect_star_art");
-                LayoutArt* score = mainLyt->FindArt("score_star_art");
+                ArtElem* star = mainLyt->FindArt("perfect_star_art");
+                ArtElem* score = mainLyt->FindArt("score_star_art");
                 if (star) {
-                    LayoutArt s;
+                    ArtElem s;
                     int i;
                     s = *star;
                     s.pos.x -= s.w / 2 * c->prev.perfect;
@@ -2060,9 +2021,9 @@ void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
             }
         } else if (t6C.Active()) {
             f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t6C.Progress())));
-            LayoutItem* it = mainLyt->Find("middle_message");
+            TextElem* it = mainLyt->Find("middle_message");
             if (it) {
-                LayoutItem m;
+                TextElem m;
                 m = *it;
                 m.scale *= 0.3f;
                 m.color = 0xFFFFFF;
@@ -2095,9 +2056,9 @@ void ZoneMaster::DrawMissed(int p, ZoneCar* c) const {
 void ZoneMaster::DrawGateStar(int p, ZoneCar* c) const {
     if (c->gate && !vf24()) {
         f32 k = c->BonusScale();
-        LayoutArt* a = mainLyt->FindArt("gate_star_art");
+        ArtElem* a = mainLyt->FindArt("gate_star_art");
         if (a) {
-            LayoutArt l;
+            ArtElem l;
             l = *a;
             fn_8013CB90(&l);
             fn_80147EE0(&l, k);
@@ -2138,13 +2099,13 @@ void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 void fn_80130980(char* buf, int size, int digits, f32 t);
-void fn_8014784C(Layout* l, const char* name, const char* set, int index);
-void fn_80147CEC(LayoutItem* out, LayoutItem* a, LayoutItem* b, f32 t);
-void fn_801474EC(LayoutItem* item, const char* fmt, ...);
+void fn_8014784C(ILayout* l, const char* name, const char* set, int index);
+void fn_80147CEC(TextElem* out, TextElem* a, TextElem* b, f32 t);
+void fn_801474EC(TextElem* item, const char* fmt, ...);
 }  // extern "C"
 void UpdateScoreOverlays(int, int);
 extern "C" {
-void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
+void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 void fn_802C70AC(int model, void* mtx, int a, int b);
 void fn_802A96E8(ZoneVec3* pts, int n, int c, s32 lite, s32 glow);
 }
@@ -2175,7 +2136,7 @@ void ZoneMaster::DrawTimer(int p, ZoneCar* c) const {
     if (lbl_8055E1BC) {
         fn_802C8BD0(tex[0]);
         if (fn_802C8DBC(0x10)) {
-            LayoutArt* bar = mainLyt->FindArt("timer_bar");
+            ArtElem* bar = mainLyt->FindArt("timer_bar");
             f32 x = fn_8013EFB0(bar->pos.x);
             f32 y = fn_8013EFBC(bar->pos.y);
             f32 h = bar->h;
@@ -2208,25 +2169,25 @@ void ZoneMaster::DrawTimer(int p, ZoneCar* c) const {
         DrawClock(this, c->clock);
         if (t7C.Active()) {
             f32 t = Ease(t7C.Progress());
-            LayoutItem* a = mainLyt->Find("timer_increase_0");
-            LayoutItem item;
+            TextElem* a = mainLyt->Find("timer_increase_0");
+            TextElem item;
             fn_80147CEC(&item, a, mainLyt->Find("timer_increase_1"), t);
             fn_801474EC(&item, "+%.0f", f98);
         }
         if (t84.Active()) {
             f32 t = Ease(t84.Progress());
-            LayoutItem* a = mainLyt->Find("timer_decrease_0");
-            LayoutItem item;
+            TextElem* a = mainLyt->Find("timer_decrease_0");
+            TextElem item;
             fn_80147CEC(&item, a, mainLyt->Find("timer_decrease_1"), t);
             fn_801474EC(&item, "-%.0f", f9C);
         }
         now = fn_8013CB3C();
         for (i = 0; events.a.Get(i); i++) {
             age = events.a.Get(i)->Age(now, 1.0f);
-            LayoutArt* s0 = mainLyt->FindArt("ring_bonus_star_0");
-            LayoutArt* s1 = mainLyt->FindArt("ring_bonus_star_1");
-            LayoutArt* s2 = mainLyt->FindArt("score_star_art");
-            LayoutArt* arts[3];
+            ArtElem* s0 = mainLyt->FindArt("ring_bonus_star_0");
+            ArtElem* s1 = mainLyt->FindArt("ring_bonus_star_1");
+            ArtElem* s2 = mainLyt->FindArt("score_star_art");
+            ArtElem* arts[3];
             arts[0] = s0;
             arts[1] = s1;
             arts[2] = s2;
@@ -2255,26 +2216,26 @@ void ZoneMaster::DrawScore(int p, ZoneCar* c) const {
 
 void ZoneMaster::DrawMissedFlag(int p, ZoneCar* c) const {
     if (!c->tA8.Active() && c->tA0.Active()) {
-        LayoutItem* a = mainLyt->Find("missed_start");
-        LayoutItem* b = mainLyt->Find("missed_end");
+        TextElem* a = mainLyt->Find("missed_start");
+        TextElem* b = mainLyt->Find("missed_end");
         f32 t = c->tA0.Progress();
-        fn_80147ABC(a, b, (const char*)a->unk1C, t * t);
+        fn_80147ABC(a, b, a->defText, t * t);
     }
 }
 
 void ZoneMaster::DrawGateBonus(int p, ZoneCar* c) const {
     if (c->tD8.Active()) {
-        LayoutArt* a0;
-        LayoutArt* a1;
-        LayoutArt* a2;
+        ArtElem* a0;
+        ArtElem* a1;
+        ArtElem* a2;
         c->tD8.Progress();
         a0 = mainLyt->FindArt("bonus_star_art");
         a1 = mainLyt->FindArt("gate_star_art");
         a2 = mainLyt->FindArt("score_star_art");
         if (a0 && a1 && a2) {
-            LayoutArt s0;
-            LayoutArt s1;
-            LayoutArt s2;
+            ArtElem s0;
+            ArtElem s1;
+            ArtElem s2;
             s0 = *a0;
             s1 = *a1;
             s2 = *a2;
@@ -2307,7 +2268,7 @@ void ZoneMaster::DrawHud(int p) const {
         DrawGateBonus(p, c);
         DrawMissedFlag(p, c);
         if (lbl_8055E1BC) {
-            LayoutArt* a = mainLyt->FindArt("sudden_death");
+            ArtElem* a = mainLyt->FindArt("sudden_death");
             if (a) {
                 fn_801476D8(a, -1, tex[0]);
             }
@@ -2504,7 +2465,7 @@ void fn_8000FBE4(void);
 int fn_80161C38(void);
 int fn_80160A74(void);
 int fn_80160998(int x);
-f32 fn_80147204(LayoutItem* item, const char* text);
+f32 fn_80147204(TextElem* item, const char* text);
 void fn_80130978(char* buf, int size, f32 t);
 void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void*));
 extern s32 lbl_8055E3C4;
@@ -2849,23 +2810,23 @@ inline void ZoneMaster::vfAC(int car) {
 
 inline void ZoneMaster::vfA8(int car) { vfAC(car); }
 
-inline void ZoneMaster::LayoutsVf28(void) {
+inline void ZoneMaster::SaveLayouts(void) {
     for (int i = 0; i < layouts.a.a.count; i++) {
-        layouts.a.a.data[i]->vf28();
+        layouts.a.a.data[i]->Save();
     }
 }
 
-inline void ZoneMaster::LayoutsVf20(void) {
+inline void ZoneMaster::ToggleLayoutEdit(void) {
     for (int i = 0; i < layouts.a.a.count; i++) {
-        layouts.a.a.data[i]->vf20();
+        layouts.a.a.data[i]->ToggleEdit();
     }
 }
 
 inline int ZoneMaster::vf8C(int p, int key) {
     if (key == 's') {
-        LayoutsVf28();
+        SaveLayouts();
     } else if (key == 'e') {
-        LayoutsVf20();
+        ToggleLayoutEdit();
     } else if (key == 9) {
         unk4 = (unk4 + 1) % 2;
     }
@@ -2926,20 +2887,20 @@ inline int ZoneMaster::vf3C(int p) {
     f32 t3 = t2 - 0.15f;
     f32 t4 = t3 - 0.8f;
     f32 t5 = t4 - 0.3f;
-    LayoutItem* h0 = mainLyt->Find("intro_head_0");
-    LayoutItem* h1 = mainLyt->Find("intro_head_1");
+    TextElem* h0 = mainLyt->Find("intro_head_0");
+    TextElem* h1 = mainLyt->Find("intro_head_1");
     if (t < t5) {
         fn_8000FBE4();
     }
     if (!fn_80161C38()) {
         if (t < t0) {
             f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(t1, t2, t)));
-            LayoutItem* b0 = mainLyt->Find("star_body_0");
-            LayoutItem* b1 = mainLyt->Find("star_body_1");
+            TextElem* b0 = mainLyt->Find("star_body_0");
+            TextElem* b1 = mainLyt->Find("star_body_1");
             UpdateScoreOverlays(fn_801E866C(p), 0);
             if (h0 && h1 && b0 && b1) {
                 char buf[0x14];
-                LayoutItem it;
+                TextElem it;
                 fn_801479A8(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(a));
                 fn_801308F4(buf, 0x14, fn_80160998(fn_80160A74()));
                 it = *b0;
@@ -2949,15 +2910,15 @@ inline int ZoneMaster::vf3C(int p) {
         }
         if (t < t3) {
             f32 a;
-            LayoutItem* tb;
-            LayoutItem* bt;
+            TextElem* tb;
+            TextElem* bt;
             fn_8014784C(mainLyt, "stop_watch_art", "stop_watch_artset", 0);
             a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(t4, t5, t)));
             tb = mainLyt->Find("time_body_0");
             bt = mainLyt->Find("big_timer");
             if (h0 && h1 && tb && bt) {
                 char buf[0x14];
-                LayoutItem it;
+                TextElem it;
                 fn_801479A8(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(a));
                 f32 t = GetCar(fn_801E866C(0))->clock;
                 fn_80130978(buf, 0x14, t);

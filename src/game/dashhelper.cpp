@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/textelem.h"
 #include "game/ilayout.h"
 #include "game/raceprog.h"
 #include "game/dashhelper.h"
@@ -17,19 +18,6 @@ const f32 kBarWidth = 89.0f;
 const f32 kBarHeight = 17.0f;
 
 void* operator new(size_t size, const char* tag);
-
-struct LayoutItem {
-    u32 unk0;  // offset 0x0
-    struct {
-        u32 a;
-        u32 b;
-    } unk4;     // offset 0x4
-    u32 unkC;   // offset 0xC
-    f32 scale;  // offset 0x10
-    u32 unk14;  // offset 0x14
-    u32 color;  // offset 0x18
-    u32 unk1C;  // offset 0x1C
-};
 
 class Sound {
 public:
@@ -152,7 +140,7 @@ ILayout* fn_80145E70(const char* name);
 const char* fn_80131268(const char* key);
 void fn_80232928(u32 color);
 void fn_80232930(void);
-void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
+void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 int fn_80137C74(void);
 void fn_80231380(Vertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 void fn_802C8DB8(Vertex* v, int nv, const u16* idx, int ni);
@@ -883,11 +871,11 @@ void fn_8000F4F0(void) {
     }
     lbl_80558A98 = num;
     if (lbl_8055D4B0) {
-        LayoutItem* in = (LayoutItem*)lbl_8055D4B0->Find("321GO_in");
-        LayoutItem* out = (LayoutItem*)lbl_8055D4B0->Find("321GO_out");
+        TextElem* in = lbl_8055D4B0->Find("321GO_in");
+        TextElem* out = lbl_8055D4B0->Find("321GO_out");
         if (in && out) {
-            LayoutItem a;
-            LayoutItem b;
+            TextElem a;
+            TextElem b;
             a = *in;
             b = *out;
             a.color = (alpha << 24) | (a.color & 0xFFFFFF);

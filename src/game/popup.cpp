@@ -5,6 +5,7 @@
 // strings.
 #include "game/common.h"
 #include "game/ilayout.h"
+#include "game/textelem.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 
@@ -32,14 +33,6 @@ public:
     u8 loop;         // offset 0x4B
     u8 restart;      // offset 0x4C
     u8 volumeDirty;  // offset 0x4D
-};
-
-struct ArtElem {
-    const char* name;  // offset 0x0
-    V2 pos;            // offset 0x4
-    s32 just;          // offset 0xC
-    f32 w;             // offset 0x10
-    f32 h;             // offset 0x14
 };
 
 class PopupDrawer {
@@ -163,7 +156,7 @@ void fn_801DE890(int id) {
         break;
     case 2:
         if (fn_802E2C20() / 500 % 2) {
-            ArtElem* a = (ArtElem*)d->layout->FindArt("stuntbar_bg_circle");
+            ArtElem* a = d->layout->FindArt("stuntbar_bg_circle");
             if (a) {
                 fn_801476D8(a, -1, d->tex);
                 DrawRing(a->pos.y + a->h / 2.0f, a->pos.x + a->w / 2.0f, 0.78f * (a->w / 2.0f));

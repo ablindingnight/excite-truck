@@ -2,6 +2,7 @@
 // car, positioned by its offset from the camera rotated into the camera's heading, scaled and faded by
 // distance. Names are guesses apart from the art names.
 #include "game/common.h"
+#include "game/textelem.h"
 #include "game/ilayout.h"
 #include "game/v2.h"
 #include <revolution/MTX/vec.h>
@@ -21,17 +22,6 @@ int fn_801B8570(int i);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 extern s32 lbl_8055E4D0;    // car count
-
-struct LayoutArt {
-    u8 pad0[4];
-    V2 pos;   // offset 0x4
-    u8 padC[4];
-    V2 size;  // offset 0x10
-    f32 u0;   // offset 0x18
-    f32 v0;   // offset 0x1C
-    f32 u1;   // offset 0x20
-    f32 v1;   // offset 0x24
-};
 
 extern "C" void fn_801476D8(const ArtElem* art, u32 color, s32 tex);
 
@@ -79,9 +69,9 @@ static inline f32 Remap(f32 x, f32 inLo, f32 inHi, f32 outLo, f32 outHi) {
 extern "C" {
 
 void fn_801390B0(ILayout* l, V2* pos, V2* dir, int focus, f32 scale, f32 alpha) {
-    LayoutArt* art = (LayoutArt*)l->FindArt(focus ? "focus_blip" : "other_blip");
-    f32 h = scale * art->size.y / 2;
-    f32 w = scale * art->size.x / 2;
+    ArtElem* art = l->FindArt(focus ? "focus_blip" : "other_blip");
+    f32 h = scale * art->h / 2;
+    f32 w = scale * art->w / 2;
     V2 fwd;
     V2 side;
     fwd.x = dir->x * h;
@@ -135,7 +125,7 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     PlainValMatrix m;
     V3 v;
     V3 p;
-    LayoutArt* bg;
+    ArtElem* bg;
     Camera* cam;
     int i;
     u8* car;
@@ -144,15 +134,15 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     f32 scale;
     f32 alpha;
     fn_801476D8(l->FindArt("radar_bg_art"), -1, tex);
-    bg = (LayoutArt*)l->FindArt("radar_rect");
+    bg = l->FindArt("radar_rect");
     V2 origin = bg->pos;
     V2 corner;
     V2 h;
     V2 d;
     V2 screen;
     V2 size;
-    f32 sizeY = bg->size.y;
-    size.x = bg->size.x;
+    f32 sizeY = bg->h;
+    size.x = bg->w;
     size.y = sizeY;
     corner.x = origin.x + size.x;
     corner.y = origin.y + size.y;

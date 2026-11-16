@@ -4,6 +4,7 @@
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
 #include "game/ilayout.h"
+#include "game/textelem.h"
 #include "game/idealline.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -30,11 +31,11 @@ void fn_80137C84(void* a, int b);
 void fn_80137C80(int a);
 void fn_8023BEC4(int event, void* out);
 void fn_802E7128(void);
-void fn_80148070(void* elem, u32 color, gArtSet* art);
+void fn_80148070(GartElem* elem, u32 color, gArtSet* art);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, s32 mode);
-void fn_800103B8(f32 x, s32 a, s32 b, f32 y, f32 w, f32 h, const char* fmt, ...);
+void fn_800103B8(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
 void fn_801473F8(void* layout, const char* elem, const char* fmt, ...);
-void fn_801476C4(void* elem);
+void fn_801476C4(TextElem* elem);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -49,16 +50,6 @@ int GetNumEvents(void);
 VehicleInfo* GetDriverVehicle(long driver);
 
 extern "C" ILayout* fn_80145E70(const char* name);
-
-struct TextBox {
-    u8 pad0[0x4];
-    f32 x;     // offset 0x4
-    f32 y;     // offset 0x8
-    s32 mode;  // offset 0xC
-    f32 w;     // offset 0x10
-    s32 b;     // offset 0x14
-    s32 a;     // offset 0x18
-};
 
 // Something told about every awarded stunt. These interfaces come before Task because the
 // compiler emits vtables in reverse declaration order (target .data: Task, ISubTaskMgr, StuntWatcher).
@@ -884,20 +875,21 @@ int fn_801613E0(int key) {
 
 void fn_80161438(const char* title, const char* msg) {
     if (lbl_8055E2E0) {
-        void* box = lbl_8055E2E0->FindBox("popup_box");
-        TextBox* t;
+        GartElem* box = lbl_8055E2E0->FindBox("popup_box");
+        GartElem* head;
+        TextElem* t;
         f32 x;
         f32 y;
         if (box) {
             fn_80148070(box, 0x96FFFFFF, lbl_8055E2E0->FindSet("popup_box_art"));
         }
-        t = (TextBox*)lbl_8055E2E0->FindBox("popup_title");
-        if (t) {
-            fn_80148070(t, -1, lbl_8055E2E0->FindSet("popup_box_art"));
+        head = lbl_8055E2E0->FindBox("popup_title");
+        if (head) {
+            fn_80148070(head, -1, lbl_8055E2E0->FindSet("popup_box_art"));
         }
-        t = (TextBox*)lbl_8055E2E0->Find("popup_msg");
-        fn_80148134(&x, &y, t->x, t->y, t->mode);
-        fn_800103B8(t->w, t->a, t->b, x, y, ((TextBox*)box)->w - 34.0f, "%s", msg);
+        t = lbl_8055E2E0->Find("popup_msg");
+        fn_80148134(&x, &y, t->pos.x, t->pos.y, t->elemJust);
+        fn_800103B8(t->scale, t->color, t->just, x, y, box->w - 34.0f, "%s", msg);
         fn_801473F8(lbl_8055E2E0, "popup_title_elem", "%s", title);
         fn_801476C4(lbl_8055E2E0->Find("continue"));
     }
@@ -1448,8 +1440,8 @@ inline int StuntChallenge::Draw(int a) { return Challenge::Draw(a); }
 
 inline int StuntChallenge::DrawResults(int a) {
     const char* body;
-    TextBox* t;
-    TextBox* art;
+    TextElem* t;
+    ArtElem* art;
     DrawBars();
     if (IsPassed()) {
         fn_801476D8(lbl_8055E2E0->FindArt("results_art"), -1, lbl_8055E2F0);
@@ -1466,13 +1458,13 @@ inline int StuntChallenge::DrawResults(int a) {
             body = fn_80131234("Tutorial:FAILED_BODY_TIME");
         }
     }
-    t = (TextBox*)lbl_8055E2E0->Find("results2");
-    art = (TextBox*)lbl_8055E2E0->FindArt("results_art");
+    t = lbl_8055E2E0->Find("results2");
+    art = lbl_8055E2E0->FindArt("results_art");
     if (t && art) {
         f32 px;
         f32 py;
-        fn_80148134(&px, &py, t->x, t->y, t->mode);
-        fn_800103B8(t->w, t->a, t->b, px, py, art->w - 100.0f, "%s", body);
+        fn_80148134(&px, &py, t->pos.x, t->pos.y, t->elemJust);
+        fn_800103B8(t->scale, t->color, t->just, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {
         fn_801476C4(lbl_8055E2E0->Find("continue"));
@@ -1482,8 +1474,8 @@ inline int StuntChallenge::DrawResults(int a) {
 
 inline int FreestyleChallenge::DrawResults(int a) {
     const char* body;
-    TextBox* t;
-    TextBox* art;
+    TextElem* t;
+    ArtElem* art;
     DrawBars();
     if (IsPassed()) {
         fn_801476D8(lbl_8055E2E0->FindArt("results_art"), -1, lbl_8055E2F0);
@@ -1500,13 +1492,13 @@ inline int FreestyleChallenge::DrawResults(int a) {
             body = fn_80131234("Tutorial:FAILED_BODY_STUNT");
         }
     }
-    t = (TextBox*)lbl_8055E2E0->Find("results2");
-    art = (TextBox*)lbl_8055E2E0->FindArt("results_art");
+    t = lbl_8055E2E0->Find("results2");
+    art = lbl_8055E2E0->FindArt("results_art");
     if (t && art) {
         f32 px;
         f32 py;
-        fn_80148134(&px, &py, t->x, t->y, t->mode);
-        fn_800103B8(t->w, t->a, t->b, px, py, art->w - 100.0f, "%s", body);
+        fn_80148134(&px, &py, t->pos.x, t->pos.y, t->elemJust);
+        fn_800103B8(t->scale, t->color, t->just, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {
         fn_801476C4(lbl_8055E2E0->Find("continue"));
@@ -1630,31 +1622,6 @@ inline void ChalList::Update(void) {
     }
 }
 
-struct ElemPos {
-    f32 x;
-    f32 y;
-};
-
-struct ElemHead {
-    ElemHead(void) {}
-    const char* name;  // offset 0x0
-    ElemPos pos;       // offset 0x4
-    s32 just;          // offset 0xC
-};
-
-struct TextElem : ElemHead {
-    f32 f10;     // offset 0x10
-    u32 w14;    // offset 0x14
-    u32 color;  // offset 0x18
-    const char* defText;  // offset 0x1C
-};
-
-struct GartElem : ElemHead {
-    f32 w;        // offset 0x10
-    f32 h;      // offset 0x14
-    u32 color;  // offset 0x18
-};
-
 extern "C" {
 void fn_80147940(ILayout* l, GartElem* e, const char* set, int part);
 void fn_80230F78(u8* alpha, f32* pulse, u32* color, int a);
@@ -1736,10 +1703,10 @@ inline int ChalList::Draw(int a) {
         fn_801476C4(lbl_8055E2E0->Find("mode_title"));
         fn_801473F8(lbl_8055E2E0, "list_title", "%s", e->node->GetString("friendly_name", GetEventDisplayName(e->id)));
         fn_801476C4(lbl_8055E2E0->Find("continue"));
-        e1 = (TextElem*)lbl_8055E2E0->Find("elem1");
-        e2 = (TextElem*)lbl_8055E2E0->Find("elem2");
-        but = (GartElem*)lbl_8055E2E0->FindBox("sel_but");
-        star = (GartElem*)lbl_8055E2E0->FindBox("pass_star");
+        e1 = lbl_8055E2E0->Find("elem1");
+        e2 = lbl_8055E2E0->Find("elem2");
+        but = lbl_8055E2E0->FindBox("sel_but");
+        star = lbl_8055E2E0->FindBox("pass_star");
         if (e1 && e2) {
             struct {
                 int i;
@@ -1749,7 +1716,7 @@ inline int ChalList::Draw(int a) {
                 char name[0xA];
                 TextElem* el;
                 fn_801345D8(name, sizeof(name), "elem%d", entry.i);
-                el = (TextElem*)lbl_8055E2E0->Find(name);
+                el = lbl_8055E2E0->Find(name);
                 if (el) {
                     DrawEntry(this, el, entry.i, e1, e2, but, star, entry.off);
                 } else if (!lbl_8055E308) {

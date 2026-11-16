@@ -3,35 +3,14 @@
 // layout sets. Class and function names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/ilayout.h"
+#include "game/textelem.h"
 #include "game/raceprog.h"
 #include "game/carinfo.h"
 #include "macros.h"
 
 void* operator new(size_t size, const char* tag);
 
-// One element of a layout set (0x20 bytes); copied, modified and drawn.
-struct LayoutItem {
-    u32 unk0;   // offset 0x0
-    struct {
-        u32 a;
-        u32 b;
-    } unk4;  // offset 0x4
-    u32 unkC;   // offset 0xC
-    f32 scale;  // offset 0x10
-    u32 unk14;  // offset 0x14
-    u32 color;  // offset 0x18
-    u32 unk1C;  // offset 0x1C
-};
-
-class LayoutArt;
-
-// A loaded layout set (.val).
-class Layout {
-public:
-    virtual ~Layout(void);
-    virtual LayoutItem* Find(const char* name);    // 0xC
-    virtual LayoutArt* FindArt(const char* name);  // 0x10
-};
 
 struct Truck {
     u8 pad0[0x2588];
@@ -52,29 +31,29 @@ double fabs(double x);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 const char* fn_80131234(const char* key);  // localize
-Layout* fn_80145E70(const char* name);
+ILayout* fn_80145E70(const char* name);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
 Sound* fn_80207848(const char* name, int flags);
 int fn_801E85A4(void);
 int fn_80204CF0(void);
-void fn_8014784C(Layout* layout, const char* name, const char* set, int index);
-void fn_801476D8(LayoutArt* art, u32 color, s32 tex);
+void fn_8014784C(ILayout* layout, const char* name, const char* set, int index);
+void fn_801476D8(ArtElem* art, u32 color, s32 tex);
 int fn_801609C4(int score);
-void fn_801476C4(LayoutItem* item);
+void fn_801476C4(TextElem* item);
 int fn_80160A90(void);
 void fn_801308F4(char* buf, int size, int value);
 void fn_801308F8(char* buf, int size, int value);
-void fn_801473F8(Layout* layout, const char* name, const char* fmt, ...);
-void fn_80147230(LayoutItem* item, const char* fmt, ...);
+void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
+void fn_80147230(TextElem* item, const char* fmt, ...);
 Truck* fn_8017960C(int player);
-void fn_80147CEC(LayoutItem* out, LayoutItem* a, LayoutItem* b, f32 t);
+void fn_80147CEC(TextElem* out, TextElem* a, TextElem* b, f32 t);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_80232928(u32 color);
 void fn_80232930(void);
 CarInfo* fn_801EA9A0(int player);
 f32 fn_801E7E18(void);
-void fn_80147ABC(LayoutItem* a, LayoutItem* b, const char* fmt, f32 t, ...);
+void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 }
 
 int GetNumPlayers(void);
@@ -120,7 +99,7 @@ public:
 
     s32 tex;  // offset 0x4
     u32 unk8;
-    void DrawStars(Layout* layout);
+    void DrawStars(ILayout* layout);
 };
 
 struct HeatState {
@@ -193,23 +172,23 @@ ModuleTag lbl_8055D5E8;
 static UnkStatic123 lbl_80358668;
 UnkStatic7F lbl_8055D5F0;
 
-Layout* lbl_8055D5F4;
-Layout* lbl_8055D5F8;
-Layout* lbl_8055D5FC;
-Layout* lbl_8055D600;
-Layout* lbl_8055D604;
+ILayout* lbl_8055D5F4;
+ILayout* lbl_8055D5F8;
+ILayout* lbl_8055D5FC;
+ILayout* lbl_8055D600;
+ILayout* lbl_8055D604;
 Overlay* lbl_80358680[6];
 
 static inline f32 InvLerp(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
-static inline Layout* GetLayout(void) {
+static inline ILayout* GetLayout(void) {
     return fn_801E85A4() == 2 ? lbl_8055D5F8 : lbl_8055D5F4;
 }
 
-static inline Layout* GetResLayout(void) {
+static inline ILayout* GetResLayout(void) {
     return fn_801E85A4() == 2 ? lbl_8055D600 : lbl_8055D5FC;
 }
 
-static inline LayoutItem* FindResItem(const char* name) {
+static inline TextElem* FindResItem(const char* name) {
     return GetResLayout()->Find(name);
 }
 
@@ -321,18 +300,18 @@ inline ScoreOverlay::~ScoreOverlay(void) {
 }
 
 /* Helper name unproven */
-inline void ScoreOverlay::DrawStars(Layout* layout) {
+inline void ScoreOverlay::DrawStars(ILayout* layout) {
     s32 t = tex;
     u32 color = layout->Find("star_color_1")->color;
     fn_801476D8(layout->FindArt("score_star_art"), color, t);
 }
 
 inline void ScoreOverlay::Update(int player, int score) {
-    Layout* layout = GetLayout();
+    ILayout* layout = GetLayout();
     int diff;
     int art;
-    LayoutItem* p;
-    LayoutItem item;
+    TextElem* p;
+    TextElem item;
     char total[20];
     char text[20];
 
@@ -377,14 +356,14 @@ inline OverheatOverlay::~OverheatOverlay(void) {}
 #pragma opt_propagation off
 inline void OverheatOverlay::Update(int player, int unused) {
     Truck* truck = fn_8017960C(player);
-    LayoutItem* a;
+    TextElem* a;
     s32 alpha;
-    LayoutItem warn;
+    TextElem warn;
     int hot;
     HeatState* s = &state[player];
-    LayoutItem* b;
-    Layout* layout;
-    LayoutItem item;
+    TextElem* b;
+    ILayout* layout;
+    TextElem item;
 
     hot = truck->heat > 0.0f;
     if (hot) {
@@ -443,15 +422,15 @@ inline GradeOverlay::~GradeOverlay(void) {
 
 inline void GradeOverlay::Update(int player, int score) {
     int grade = fn_801609C4(score);
-    Layout* layout = GetLayout();
+    ILayout* layout = GetLayout();
     f32 scale;
-    LayoutItem* p;
+    TextElem* p;
     const char* name;
     u32 color;
     int popping;
     f32 t;
-    LayoutItem title;
-    LayoutItem item;
+    TextElem title;
+    TextElem item;
 
     if (layout) {
         fn_8014784C(layout, "grade_circle", "grade_circle_artset", 0);
@@ -514,8 +493,8 @@ inline void LapTitleOverlay::Update(int player, int unused) {
     char leftText[32];
     char rightText[32];
     char key[30];
-    LayoutItem** items;
-    Layout* layout;
+    TextElem** items;
+    ILayout* layout;
     int seg;
     f32 now;
     RaceProgress* info;
@@ -538,8 +517,8 @@ inline void LapTitleOverlay::Update(int player, int unused) {
     elapsed = now - state[player].start;
     f32 keys[4] = {0.0f, 0.15f, 0.65f, 0.8f};
     if (layout && elapsed < keys[3]) {
-        LayoutItem* left[4];
-        LayoutItem* right[4];
+        TextElem* left[4];
+        TextElem* right[4];
 
         for (side = 0; side < 2; side++) {
             items = side == 0 ? left : right;
