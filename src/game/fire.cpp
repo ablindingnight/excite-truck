@@ -116,19 +116,6 @@ public:
     int Play(f32 t, const ValVec3* pos);
 };
 
-class ValueNodeV {
-public:
-    virtual const char* GetName(void);
-    virtual int Has(const char* key);
-    virtual int GetPair(int index, const char** key, const char** value);
-    virtual const char* GetValue(const char* key);
-    virtual const char* GetString(const char* key, const char* def);
-    virtual s32 GetIntValue(const char* key);
-    virtual s32 GetInt(const char* key, s32 def);
-    virtual f32 GetFloat(const char* key);
-    virtual f32 GetFloat(const char* key, f32 def);
-};
-
 extern "C" {
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 }  // extern "C"
@@ -150,7 +137,7 @@ void fn_80287B38(void (*cb)(FireCarEntry* e, int n));
 int fn_80287B5C(int n);
 f32 fn_80287BC8(f32 lo, f32 hi);
 int fn_80287E20(FireModel* model, const char* name);
-ValueNodeV* fn_80287E80(FireModel* model, const char* name);
+ValueNode* fn_80287E80(FireModel* model, const char* name);
 ValVec3 fn_80287ED0(FireModel* model, const char* node, const char* key);
 ValVec3 fn_80287F90(FireModel* model, const char* node, const char* key, ValVec3 def);
 const TorchPart* fn_80288060(FireModel* model, int i);

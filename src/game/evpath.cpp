@@ -1079,14 +1079,6 @@ public:
 
 extern "C" int fn_802054EC(const char* key, int level, int event);
 
-class ValueNodeV {
-public:
-    virtual const char* GetName(void);
-    virtual int Has(const char* key);
-    virtual int GetPair(int index, const char** key, const char** value);
-    virtual const char* GetValue(const char* key);
-};
-
 
 // s without a leading `prefix`.
 static inline const char* SkipPrefix(const char* s, const char* prefix) {
@@ -1168,7 +1160,7 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
             bars[i].SetContest(c);
         }
         char file[33];
-        fn_801345D8(file, 33, "/%s.tex", SkipPrefix(((ValueNodeV*)GetEvent(c->EventId())->node)->GetValue("name"), "career_"));
+        fn_801345D8(file, 33, "/%s.tex", SkipPrefix((GetEvent(c->EventId())->node)->GetValue("name"), "career_"));
         maps.Add(c->EventId(), file);
     }
     BracketView view;

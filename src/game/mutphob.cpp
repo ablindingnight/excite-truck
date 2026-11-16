@@ -29,26 +29,10 @@ extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-// ValueNode/ValueTable without the inline GetFloat(key, def) body (no weak copy here).
-class ValueNodeV {
-public:
-    virtual const char* GetName(void);
-    virtual int Has(const char* key);
-    virtual int GetPair(int index, const char** key, const char** value);
-    virtual const char* GetValue(const char* key);
-    virtual const char* GetString(const char* key, const char* def);
-    virtual s32 GetIntValue(const char* key);
-    virtual s32 GetInt(const char* key, s32 def);
-    virtual f32 GetFloat(const char* key);
-    virtual f32 GetFloat(const char* key, f32 def);
-    virtual s32 GetIntValue2(const char* key);
-    virtual int GetBool(const char* key, int def);
-};
-
 class ValueTableV {
 public:
-    virtual ValueNodeV* FindChild(const char* name);  // 0x8
-    virtual ValueNodeV* GetChild(int index);          // 0xC
+    virtual ValueNode* FindChild(const char* name);  // 0x8
+    virtual ValueNode* GetChild(int index);          // 0xC
     virtual int HasChild(const char* name);           // 0x10
 };
 
@@ -167,7 +151,7 @@ MutPhob* fn_801D32E0(int model, int mask, const RMtx* xf, const RVec3* offset, c
     return p;
 }
 
-void fn_801D334C(PhobConfig* c, ValueNodeV* t) {
+void fn_801D334C(PhobConfig* c, ValueNode* t) {
     c->maxLife = t->GetFloat("max_life");
     c->mass = t->GetFloat("mass");
     c->mx = t->GetFloat("mx");

@@ -39,24 +39,6 @@ public:
     s32 count;         // offset 0x180
 };
 
-// GetVec3Or takes its default by const reference.
-class ValueNodeV {
-public:
-    virtual const char* GetName(void);
-    virtual int Has(const char* key);
-    virtual int GetPair(int index, const char** key, const char** value);
-    virtual const char* GetValue(const char* key);
-    virtual const char* GetString(const char* key, const char* def);
-    virtual s32 GetIntValue(const char* key);
-    virtual s32 GetInt(const char* key, s32 def);
-    virtual f32 GetFloat(const char* key);
-    virtual f32 GetFloat(const char* key, f32 def);
-    virtual s32 GetIntValue2(const char* key);
-    virtual int GetBool(const char* key, int def);
-    virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);
-};
-
 struct LightVtx {
     Vec pos;    // offset 0x0
     u32 color;  // offset 0xC
@@ -76,7 +58,7 @@ f32 fn_801E88F0(s32 a);
 s32 fn_80287B14(void);
 LightCar* fn_80287B24(s32 i);
 int fn_80287E20(s32 model, const char* name);
-ValueNodeV* fn_80287E80(s32 model, const char* name);
+ValueNode* fn_80287E80(s32 model, const char* name);
 int fn_80288070(s32 model, const char* name, const LightFrame** frame);
 s32 fn_80288208(s32 i);
 const LightFrame* fn_802C86DC(void);
@@ -358,7 +340,7 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
     const LightFrame* frame;
     ValVec3 def = color;
     if (fn_80288070(model, name, &frame)) {
-        ValueNodeV* n;
+        ValueNode* n;
         f32 r;
         u32 c;
         f32 w;

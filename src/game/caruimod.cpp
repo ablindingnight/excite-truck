@@ -30,28 +30,10 @@ struct Mtx33 {
     f32 m[9];
 };
 
-// GetVec3Or takes its default by const reference.
-class ValueNodeV {
-public:
-    virtual const char* GetName(void);
-    virtual int Has(const char* key);
-    virtual int GetPair(int index, const char** key, const char** value);
-    virtual const char* GetValue(const char* key);
-    virtual const char* GetString(const char* key, const char* def);
-    virtual s32 GetIntValue(const char* key);
-    virtual s32 GetInt(const char* key, s32 def);
-    virtual f32 GetFloat(const char* key);
-    virtual f32 GetFloat(const char* key, f32 def);
-    virtual s32 GetIntValue2(const char* key);
-    virtual int GetBool(const char* key, int def);
-    virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);
-};
-
 class ValueTableV {
 public:
-    virtual ValueNodeV* FindChild(const char* name);  // 0x8
-    virtual ValueNodeV* GetChild(int index);          // 0xC
+    virtual ValueNode* FindChild(const char* name);  // 0x8
+    virtual ValueNode* GetChild(int index);          // 0xC
     virtual int HasChild(const char* name);          // 0x10
 };
 
@@ -342,7 +324,7 @@ void CarUIModel::LoadEfx(const char* path) {
     if (efx == -1) {
         const char** name;
         u8* boneCursor;
-        ValueNodeV* n;
+        ValueNode* n;
         char file[0x100];
         fn_801345D8(file, 0x100, "%s/efxmesh.val", path);
         ValueTableV* t = fn_80131810(file);
@@ -375,7 +357,7 @@ void CarUIModel::LoadEfx(const char* path) {
             zero.x = 0.0f;
             zero.y = 0.0f;
             zero.z = 0.0f;
-            ValueNodeV* r = t->FindChild("at_rest");
+            ValueNode* r = t->FindChild("at_rest");
             // Keep the bone member displacement in each vector store.
             boneCursor = reinterpret_cast<u8*>(this);
             const size_t bonesOffset = offsetof(CarUIModel, bones);
@@ -390,7 +372,7 @@ void CarUIModel::LoadEfx(const char* path) {
         }
         const char* susp[4] = {"lf", "rf", "lr", "rr"};
         if (t->HasChild("susp")) {
-            ValueNodeV* s = t->FindChild("susp");
+            ValueNode* s = t->FindChild("susp");
             name = susp;
             for (int j = 0; j < 4; name++, j++) {
                 s->GetInt(*name, -1);
@@ -1170,14 +1152,14 @@ void CarUIScreen::LoadView(const char* view) {
     if (fn_8012C33C(file)) {
         ValueTableV* t = fn_80131808(file);
         if (t->HasChild(view)) {
-            ValueNodeV* n = t->FindChild(view);
+            ValueNode* n = t->FindChild(view);
             dist = n->GetFloat("camera_dist", 6.0f);
             const ValVec3 zero = ViewDefault(0.0f, 0.0f, 0.0f);
             const ValVec3& v = n->GetVec3Or("camera_offset", ValVec3(zero));
             camOffset.x = v.x;
             camOffset.y = v.y;
             camOffset.z = v.z;
-            ValueNodeV* w = (ValueNodeV*)((ValueNode*)n)->FindChild("wheels");
+            ValueNode* w = ((ValueNode*)n)->FindChild("wheels");
             if (w) {
                 lbl_80344890[0].hit = w->GetFloat("lf_hit", 0.0f);
                 lbl_80344890[0].angle = w->GetFloat("lf_angle", 0.0f);
