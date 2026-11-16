@@ -988,8 +988,8 @@ void CountryScreen::Refresh(void) {
 }
 
 template <class T>
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline T* AtP(T* p, int i) {
+/* Helper name unproven: the address of element i; the accessor boundary is needed (in place: CountryScreen ctor 100 -> 98.62) */
+static inline T* ElemAt(T* p, int i) {
     return &p[i];
 }
 
@@ -999,7 +999,7 @@ CountryScreen::CountryScreen(EvList* l) {
     list = l;
     anyNew = 0;
     for (int i = 0; i < l->count; i++) {
-        EvEntry* e = AtP(l->items, i);
+        EvEntry* e = ElemAt(l->items, i);
         int isNew = 1;
         int j;
         for (j = 0; j < groups.Size(); j++) {
