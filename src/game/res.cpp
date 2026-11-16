@@ -1500,8 +1500,9 @@ static inline int TocHas(ResToc* toc, const char* name) {
     return in;
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline QueueNode* Loop1_fn_8012D908(QueueNode* n, QueueNode* found, const char* name) {
+/* Helper name unproven: the first pending set whose table of contents lists the file */
+static inline QueueNode* FindPendingWith(QueueNode* n, const char* name) {
+    QueueNode* found = 0;
     while (n && !found) {
         ResToc* toc = GetToc(n->name);
         bool present = false;
@@ -1523,9 +1524,7 @@ static inline QueueNode* Loop1_fn_8012D908(QueueNode* n, QueueNode* found, const
 extern "C" void fn_8012D908(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
-        QueueNode* found = 0;
-        QueueNode* n = q->pending.head;
-        found = Loop1_fn_8012D908(n, found, name);
+        QueueNode* found = FindPendingWith(q->pending.head, name);
         if (found) {
             fn_802E317C(ResStrings::WaitBeforeGetError(), found->name, name);
         }
