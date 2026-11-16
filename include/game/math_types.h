@@ -3,7 +3,10 @@
 
 // The game's plain 3-vector and 3x3 matrix (rows m[0..2]) and the matrix helpers racing.cpp defines (Mat3FromEuler:
 // Y, then X, then Z). One declaration for every unit (port ODR work, 2026-11-16). Names unproven.
-struct Vec3 {float x,y,z;};
+#include "game/valvec3.h"
+
+// Vec3 is the canonical plain 3-vector ValVec3 (vector unification, 2026-11-16).
+typedef ValVec3 Vec3;
 extern "C" {
 double cos(double x);
 double sin(double x);

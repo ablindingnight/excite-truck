@@ -4,6 +4,7 @@
 // an 8-byte object whose inline constructor links it into a global list, which
 // suggests a header-level static; the real names are unknown.
 #include <types.h>
+#include "game/valvec3.h"
 
 class ModuleTag;
 void RegisterModuleTag(ModuleTag* tag);
@@ -74,9 +75,7 @@ public:
     virtual int HasChild(const char* name);          // 0x10
 };
 
-struct ValVec3 {
-    f32 x, y, z;
-};
+// ValVec3: game/valvec3.h.
 
 struct ValPoint {
     f32 x, y;
