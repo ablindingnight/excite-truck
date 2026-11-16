@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/springcar.h"
 
 // Art animation player (artanim.cpp).
 class ArtPlayer {
@@ -172,31 +173,6 @@ void UpdateContinueOverlay(void);
 extern "C" {
 void fn_801B0C78(int car);
 }
-
-// The car's controller (car + 0x270C, Hybrid/IDriver family): destructor at 0x08.
-class CarCtl {
-public:
-    virtual ~CarCtl(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual u32 vf14(void);
-};
-
-struct RaceCarRec {
-    u8 pad0[0x10];
-    u32 model;        // offset 0x10
-    u8 pad14[0x54 - 0x14];
-    ValVec3 fwd;      // offset 0x54
-    ValVec3 pos;      // offset 0x60
-    u8 pad6C[0x1EC - 0x6C];
-    void* rings;      // offset 0x1EC
-    u8 pad1F0[0x2690 - 0x1F0];
-    f32 speed;        // offset 0x2690
-    u8 pad2694[0x270C - 0x2694];
-    CarCtl* ctl;      // offset 0x270C
-    void* Rings(void);
-    s32 Air(void) const;  // stunts.cpp
-};
 
 extern "C" RaceCarRec* fn_8017960C(int id);
 extern "C" f32 PSVECDotProduct(const void* a, const void* b);
@@ -2128,8 +2104,8 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
             f32 dx;
             a.x = t->mtx.origin.x;
             a.y = t->mtx.origin.z;
-            b.x = c->pos.x;
-            b.y = c->pos.z;
+            b.x = c->mtx.pos.x;
+            b.y = c->mtx.pos.z;
             dx = a.x - b.x;
             dz = a.y - b.y;
             d.x = dx;
@@ -2138,7 +2114,7 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
             f32 radius = t->radius;
             f32 distance = (f32)wide;
             outside = distance > radius;
-            behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
+            behind = PSVECDotProduct(&t->mtx.basis[2], (const ValVec3*)&c->mtx.rot.z) < 0.0f;
             if (s->f10 == s->teles->count - 1 && outside) {
                 s->teles->data[s->f10].b30 = 0;
             } else {
@@ -2170,16 +2146,16 @@ inline int RingChalMaster::vfE0(int car, u8* out) {
     int r = 0;
     f32 now = lbl_8055E3C8;
     if (now > vf38() && !arena.b48) {
-        if (Stopped(fn_8017960C(players.data[car]->index)->speed)) {
+        if (Stopped(fn_8017960C(players.data[car]->index)->f2690)) {
             r = TeleCheck(arena, players.data[car], out);
             if (!r) {
-                if (fn_8017960C(players.data[car]->index)->model == 'PCAR') {
+                if ((u32)fn_8017960C(players.data[car]->index)->type == 'PCAR') {
                     RaceCarRec* c = fn_8017960C(players.data[car]->index);
                     PlayerData* q;
-                    if ((c->ctl->vf14() & 0x10) && !(q = players.data[car])->b8) {
+                    if ((((SpringCar*)c)->ctl->vf14() & 0x10) && !(q = players.data[car])->b8) {
                         q->b8 = 1;
                         q->fC = 0.0f;
-                    } else if (!(c->ctl->vf14() & 0x10) && (q = players.data[car])->b8) {
+                    } else if (!(((SpringCar*)c)->ctl->vf14() & 0x10) && (q = players.data[car])->b8) {
                         q->b8 = 0;
                         q->fC = 0.0f;
                     }
@@ -2622,7 +2598,7 @@ inline void ObjSet::CheckTeleport(Phob* car) {
     }
 }
 
-inline void* RaceCarRec::Rings(void) { return rings; }
+inline void* RaceCarRec::Rings(void) { return (void*)index; }  // the ring record at 0x1EC
 
 inline f32 ArenaTimer::Get(void) { return t; }
 
