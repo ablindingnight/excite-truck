@@ -206,7 +206,7 @@ void StartReadHuff8Bundle(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011
     trees->last = 0;
 }
 
-extern const u8 lbl_80561208[8];
+const u8 lbl_80561208[8] = { 4, 8, 12, 32 };  // run lengths of the long-run symbols 12..15 (.sdata2)
 typedef struct BitWin8011 {
     u32 width;
     u32 mask;
