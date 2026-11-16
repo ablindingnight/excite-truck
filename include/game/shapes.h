@@ -190,6 +190,7 @@ public:
 
 // A box ('BOX '; vtable __vt__8BoxShape): half sizes 0x24, bounding radius 0x30. Adds slot vf50. Each builder
 // inlines its own constructor form (overloads below; their bodies differ in retail, e.g. the radius sum order).
+enum BoxWallForm { BOX_WALL };  // selects BoxShape's track wall constructor
 class BoxShape : public CollShape {
 public:
     BoxShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
@@ -236,6 +237,14 @@ public:
         half.z = halfZ;
         a34 = 0;
         radius = 0.2f + (f32)sqrt(half.x * half.x + half.y * half.y + half.z * half.z);
+    }
+    // Track wall form (world's "wallvol" boxes): width, height, length; the radius pads by the width.
+    BoxShape(BoxWallForm, f32 w, f32 h, f32 l) : CollShape(0, 0, 'BOX ', 0.0f, 0.0f) {
+        half.y = h;
+        half.x = w;
+        half.z = l;
+        a34 = 0;
+        radius = w + (f32)sqrt(half.x * half.x + half.y * half.y + half.z * half.z);
     }
     virtual void vf10(u8* other);
     virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);

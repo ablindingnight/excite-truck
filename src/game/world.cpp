@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/shapes.h"
 #include "game/animobj.h"
 #include "game/raceprog.h"
 #include "game/racesetup.h"
@@ -178,46 +179,11 @@ struct MutSlot {
     f32 f14;
 };
 
-extern void* __vt__8BoxShape[];
-
 extern "C" {
 double sqrt(double x);
 }
 
-// A box-shaped collision volume along a track wall (0x38).
-struct WallVol {
-    WallVol(f32 w, f32 h, f32 l) {
-        fC = 0;
-        f8 = 0;
-        f4 = 0;
-        f10 = 0.0f;
-        shape = 'BOX ';
-        f14 = 0.0f;
-        f20 = 100;
-        f1C = 0;
-        vtbl = __vt__8BoxShape;
-        height = h;
-        width = w;
-        length = l;
-        f34 = 0;
-        radius = w + (f32)sqrt(width * width + height * height + length * length);
-    }
-    void SetType(int t) { ((void (*)(WallVol*, int))vtbl[0x40 / 4])(this, t); }
-    void** vtbl;  // offset 0x0
-    s32 f4;
-    s32 f8;
-    s32 fC;
-    f32 f10;
-    f32 f14;
-    s32 shape;    // offset 0x18
-    s32 f1C;
-    s32 f20;
-    f32 width;    // offset 0x24
-    f32 height;   // offset 0x28
-    f32 length;   // offset 0x2C
-    f32 radius;   // offset 0x30
-    s32 f34;
-};
+// The track walls are shapes.h's BoxShape (wall form).
 
 static inline f32 Angle(f32 a) { return a; }
 static inline f32 Min(f32 a, f32 b) { return b < a ? b : a; }
@@ -385,7 +351,7 @@ ValueTable* fn_80131808(const char* file);
 void fn_80131818(ValueTable* t);
 f32 fn_801DCF48(int a, f32 x, f32 z);
 void fn_801345D8(char* buf, int n, const char* fmt, ...);
-void fn_801FA8E0(WallVol* w, WMtx* m, int a);
+void fn_801FA8E0(BoxShape* w, WMtx* m, int a);
 }
 
 extern s32 lbl_8055CFF0;
@@ -1281,7 +1247,7 @@ void fn_801E96D8(RaceSetup* s) {
                         WMtx mtx;
                         ValVec3 c;
                         f32 len;
-                        WallVol* wv;
+                        BoxShape* wv;
                         cur.x = p.x;
                         cur.y = 0.0f;
                         cur.z = p.y;
@@ -1308,8 +1274,8 @@ void fn_801E96D8(RaceSetup* s) {
                             mtx.z.y *= -1.0f;
                             mtx.z.z *= -1.0f;
                         }
-                        wv = new ("wallvol") WallVol(0.2f, 375.0f, len);
-                        wv->SetType(0x3EA);
+                        wv = new ("wallvol") BoxShape(BOX_WALL, 0.2f, 375.0f, len);
+                        wv->SetSurface(0x3EA);
                         fn_801FA8E0(wv, &mtx, -1);
                         prev = cur;
                         idx++;
