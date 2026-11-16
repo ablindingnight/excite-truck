@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/locstring.h"
 #include "game/raceopts.h"
 #include "game/racesetup.h"
@@ -221,11 +222,6 @@ static inline f32 Clamp01(f32 x) {
 }
 static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 Sum(f32 a, f32 b) { return a + b; }
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 // One gate: two posts on the ground plane, an optional ring height.
 class Gate {

@@ -4,16 +4,12 @@
 // the shake prompt and the white-out flash with crashlyt.val. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/plainvec.h"
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct ElemBase {
     const char* name;  // offset 0x0

@@ -4,12 +4,8 @@
 // garage.val layout, fading out a few seconds after the last input. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/gart.h"
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct Camera {
     u8 pad[0x30];

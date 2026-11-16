@@ -5,6 +5,7 @@
 // decals over it, which then draw them with their own texture matrix. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/vec3_init.h"
 #include "game/math_types.h"
 // Shadow grid scale (name unproven): a named constant with external linkage defined before any code, retail's first
@@ -68,11 +69,6 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 void operator delete(void* p);
 void operator delete[](void* p);
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 class Vec2 : public V2 {
 public:

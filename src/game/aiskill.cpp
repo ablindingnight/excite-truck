@@ -3,6 +3,7 @@
 // speeds across that range in a shuffled order, with per-driver overrides. Names are guesses apart from
 // the value keys and messages.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 
@@ -23,11 +24,6 @@ void fn_801E879C(void);
 }
 
 int GetNumDrivers(void);
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 
 struct SkillEntry {

@@ -2,6 +2,7 @@
 // and either a single ghost line or a "racingline_set" of lines with per-car switching between them, inside
 // "legal_transition_regions", every min_change_t..max_change_t seconds. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -26,11 +27,6 @@ public:
     virtual void vf08(void);
     virtual void vf0C(void);
     virtual RacerInfo* GetInfo(void);  // 0x10
-};
-
-struct V2 {
-    f32 x;
-    f32 y;
 };
 
 

@@ -4,6 +4,7 @@
 // line/arrow textures in a per-player colour (yellow while boosting). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -24,11 +25,6 @@ void fn_80131818(ValueTable* t);
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 class Vec2 : public V2 {
 public:

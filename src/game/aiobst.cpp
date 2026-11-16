@@ -4,6 +4,7 @@
 // a driver projects the obstacles ahead into 64 lateral bins and picks the nearest free gap. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/vec3_init.h"
 #include "game/carbody.h"
@@ -128,11 +129,6 @@ RaceCarRec* fn_8017960C(int id);
 void fn_8019321C(Vec2* out, const Vec2* local, Frame* f);
 }
 
-// betarace.cpp's 2D copy helper; retail calls its out-of-line weak copy (0x8014C75C) here.
-struct V2 {
-    f32 x;
-    f32 y;
-};
 void SetV2(V2& d, const V2& s);
 
 template <class T>

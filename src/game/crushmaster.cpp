@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/locstring.h"
 #include "game/raceprog.h"
@@ -66,11 +67,6 @@ extern "C" {
 int fn_801298E8(JoyStatus* out, int chan);
 s32* fn_801297F4(void);  // button mapping
 }
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct BoundSet;
 

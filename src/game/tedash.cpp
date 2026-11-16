@@ -3,15 +3,11 @@
 // and scales, dumping the world model, and the stats columns other units register. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/gart.h"
 #include "game/plainvec.h"
 #include <string.h>
 #include <stdarg.h>
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 // The 2D point class (retail weak __ct__4Vec2Fff): a plain V2 with an (x, y) constructor, arguments read right to left.
 class Vec2 : public V2 {

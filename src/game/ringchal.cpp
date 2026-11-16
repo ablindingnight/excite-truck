@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/locstring.h"
 #include "game/raceprog.h"
@@ -65,11 +66,6 @@ s32 fn_80179650(void);
 s32 fn_80145E70(const char* name);
 void fn_802ADDD8(void* p, int a);
 }
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 union ElemColor {
     u32 all;  // 0xAARRGGBB (alpha in the top byte)

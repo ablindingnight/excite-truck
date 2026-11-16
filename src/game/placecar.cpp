@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/respawn.h"
 #include <revolution/MTX/vec.h>
@@ -18,11 +19,6 @@ double sqrt(double x);
 double cos(double x);
 double sin(double x);
 }
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 typedef ValVec3 V3;
 

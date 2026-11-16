@@ -2,13 +2,9 @@
 // tunedash.val, edited with the arrow keys and faded out after a few seconds without input. Names
 // are guesses apart from the file names, element names and messages.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/joy.h"
 #include "game/gart.h"
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct TextElem {
     TextElem(void) {}

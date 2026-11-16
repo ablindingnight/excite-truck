@@ -4,6 +4,7 @@
 // apart from the keys, messages and allocation tags.
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/dashhelper.h"
 
@@ -43,12 +44,6 @@ void fn_80145438(ArtElem* e, ValueNode* n);
 void fn_80145538(GartElem* e, ValueNode* n);
 void fn_80145670(GartSet* s, ValueNode* n);
 }
-
-// Fields shared by every element type.
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct ElemBase {
     ElemBase(void) {}

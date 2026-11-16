@@ -4,6 +4,7 @@
 // cars and locks the finish order, and runs the race intro countdown ("green flag"). The per-car update, the
 // lap-crossing scan and the qualify helper are placeholders. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/plainvec.h"
 // Lane offset of the grid columns (5.0f): this unit's FIRST .sdata2 entry in retail, negated at run time, so it is a
@@ -29,11 +30,6 @@ void operator delete[](void* p);
 extern f32 lbl_8055E3C8;    // time
 extern s32 lbl_8055E3C4;    // frame
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct IdealPoint {
     V2 pos;            // offset 0x0

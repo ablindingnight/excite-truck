@@ -4,6 +4,7 @@
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/rvec.h"
 #include "game/rigid.h"
@@ -20,10 +21,6 @@
 // A vector copied as words (array member).
 struct PVec3 {
     f32 v[3];
-};
-
-struct V2 {
-    f32 x, y;
 };
 
 // A mixed view: the car's DeityCar (car + 0x270, fn_801B2ED0; slot 0x08 = Reset) and the car's value table

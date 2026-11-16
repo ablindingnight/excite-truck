@@ -1,6 +1,7 @@
 // Small 2D vector helpers and stubs (0x80160B14-0x80160CE4), next to a 20-entry pointer list that nothing
 // here uses any more. Names are guesses.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 
 // The game mode base (amaster.cpp); its empty vf44 lives here.
@@ -15,11 +16,6 @@ extern "C" {
 double sqrt(double x);
 void fn_80128658(void* p);  // MemFree
 }
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 ModuleTag lbl_8055E2C0;
 UnkStaticFFFF lbl_8055E2C8;

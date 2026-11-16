@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/locstring.h"
 #include "game/raceopts.h"
@@ -150,11 +151,6 @@ static inline f32 Clamp01(f32 x) {
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 // Layout elements (see ovlayout.cpp).
 struct BoxElem {

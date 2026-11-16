@@ -3,6 +3,7 @@
 // one car reaches the other along the track, plus per-car sorted pair lists. Names are guesses apart
 // from "Proxer" (its allocation tag).
 #include "game/common.h"
+#include "game/v2.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
@@ -17,11 +18,6 @@ void* fn_802C6C34(int id);
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct Body {
     u8 pad0[0x18];

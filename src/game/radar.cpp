@@ -2,6 +2,7 @@
 // car, positioned by its offset from the camera rotated into the camera's heading, scaled and faded by
 // distance. Names are guesses apart from the art names.
 #include "game/common.h"
+#include "game/v2.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 
@@ -19,11 +20,6 @@ int fn_801B8570(int i);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 extern s32 lbl_8055E4D0;    // car count
-
-struct V2 {
-    f32 x;
-    f32 y;
-};
 
 struct LayoutArt {
     u8 pad0[4];

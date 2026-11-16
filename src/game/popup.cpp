@@ -4,6 +4,7 @@
 // music ducked while one is up and an instruction sound per press. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/arrayref.h"
 
 class Sound2D {
@@ -37,11 +38,6 @@ public:
     virtual ~ILayout(void);
     virtual void* Find(const char* name) = 0;
     virtual void* FindArt(const char* name) = 0;
-};
-
-struct V2 {
-    f32 x;
-    f32 y;
 };
 
 struct ArtElem {
