@@ -158,6 +158,20 @@ static inline f32 CamUnit(f32 v, f32 lo, f32 hi) { return CamMax(CamMin(1.0f, (v
 static inline f32 CamMulF(f32 a, f32 b) { return a * b; }
 // CamSpeed: retail keeps the multiply by a scale of 1.0 (a literal 1.0f * x is folded away).
 static inline f32 CamSpeed(f32 t, f32 scale) { return scale * (100.0f * CamBlend(t, 5.0f)); }
+/* Helper name unproven; MATCHING-AID (unproven): the cast local pointer keeps one resolved base for the stores. */
+static inline void CamIdentityRows(CamRot* m) {
+    CamVec* r = (CamVec*)m;
+    r[0].x = 1.0f;
+    r[0].y = 0.0f;
+    r[0].z = 0.0f;
+    r[1].x = 0.0f;
+    r[1].y = 1.0f;
+    r[1].z = 0.0f;
+    r[2].x = 0.0f;
+    r[2].y = 0.0f;
+    r[2].z = 1.0f;
+}
+
 void fn_8026B8A0(void) {
     FreePad pad;
     CamRot yawM;
@@ -243,15 +257,7 @@ void fn_8026B8A0(void) {
         lbl_80499050.pos.z = nz + fwd.z * (dt * (-py * pan));
     }
     lbl_80499050.pos.y = lbl_80499050.pos.y + (h - (lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z)));
-    lbl_80499050.rot.axes[0].x = 1.0f;
-    lbl_80499050.rot.axes[0].y = 0.0f;
-    lbl_80499050.rot.axes[0].z = 0.0f;
-    lbl_80499050.rot.axes[1].x = 0.0f;
-    lbl_80499050.rot.axes[1].y = 1.0f;
-    lbl_80499050.rot.axes[1].z = 0.0f;
-    lbl_80499050.rot.axes[2].x = 0.0f;
-    lbl_80499050.rot.axes[2].y = 0.0f;
-    lbl_80499050.rot.axes[2].z = 1.0f;
+    CamIdentityRows(&lbl_80499050.rot);
     SetV3(&yawE, 0.0f, lbl_8055F4F4, 0.0f);
     Mat3FromEuler((Mat3*)&yawM, (const Vec3*)&yawE);
     Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&yawM, (const Mat3*)&lbl_80499050.rot);
