@@ -241,7 +241,7 @@ void fn_8020A600(void) {
 
 void fn_8020A634(void) { lbl_8055EDDC = 0; }
 
-u8 fn_8020A640(void) { return lbl_8055EDDC; }
+int fn_8020A640(void) { return lbl_8055EDDC; }
 
 void fn_8020A648(int song) {
     if (song != lbl_8055EDE4) {
