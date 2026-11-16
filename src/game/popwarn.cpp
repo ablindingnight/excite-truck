@@ -200,10 +200,8 @@ static inline MenuItem KioskVersionItem(void) {
 }
 
 // Kiosk title screen: logo art and version text.
-int fn_80246AE8(void) {
-    lbl_8055F25C = fn_802E2C20();
-    MenuArt logo;
-    lbl_80498908[0] = 0;
+/* Helper name unproven. */
+static inline void ShowKioskMenu(MenuArt& logo) {
     const char* logoName = "excite_truck";
     MenuItem items[] = {
         MenuItem(logoName, 5, &logo, 0, 0),
@@ -214,6 +212,13 @@ int fn_80246AE8(void) {
     MenuDesc desc = {"kiosk.lyt", 0, (int (*)(int*))fn_8024762C, 0, 0};
     desc.items = items;
     fn_802146BC(&desc, -999, -999, 1);
+}
+
+int fn_80246AE8(void) {
+    lbl_8055F25C = fn_802E2C20();
+    MenuArt logo;
+    lbl_80498908[0] = 0;
+    ShowKioskMenu(logo);
     return 1;
 }
 
