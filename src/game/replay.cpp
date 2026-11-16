@@ -3,6 +3,7 @@
 // movie tool. Names come from the "Replay:" / "replay:" strings; function names are guesses.
 #include <stdio.h>
 #include "game/common.h"
+#include "game/joy.h"
 #include "macros.h"
 
 template <class T, int N>
@@ -60,12 +61,7 @@ struct RaceOpts {
 };
 
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
-struct JoyStatus {
-    u8 pad0[0x40];
-    u32 dir;  // offset 0x40
-    u8 pad44[0x70 - 0x44];
-};
-
+// JoyStatus: game/joy.h.
 struct Camera {
     u8 data[0x30];
 };

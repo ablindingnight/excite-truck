@@ -4,6 +4,7 @@
 // are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/joy.h"
 
 static const f32 DemoNear[] = {1.0f};
 static const f32 DemoFar[] = {1000.0f};
@@ -50,12 +51,7 @@ struct RaceResult {
 };
 
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
-struct JoyStatus {
-    u8 pad0[0x20];
-    u8 buttons[8];  // offset 0x20
-    u8 pad28[0x68 - 0x28];
-};
-
+// JoyStatus: game/joy.h.
 struct Camera {
     u8 data[0x30];
 };

@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/joy.h"
 #include "game/respawn.h"
 #include <revolution/MTX/vec.h>
 #include "game/rigid.h"
@@ -57,14 +58,7 @@ int fn_801EA994(void);  // number of cars
 f32 fn_80129DC4(int n, f32 lo, f32 hi);  // random float
 }
 
-struct JoyStatus {
-    f32 x;           // offset 0x0
-    f32 y;           // offset 0x4
-    u8 pad8[0x20 - 0x8];
-    u8 buttons[32];  // offset 0x20
-    u8 pad40[0x70 - 0x40];
-};
-
+// JoyStatus: game/joy.h.
 extern "C" {
 int fn_801298E8(JoyStatus* out, int chan);
 s32* fn_801297F4(void);  // button mapping

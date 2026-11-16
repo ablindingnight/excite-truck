@@ -2,6 +2,7 @@
 // tunedash.val, edited with the arrow keys and faded out after a few seconds without input. Names
 // are guesses apart from the file names, element names and messages.
 #include "game/common.h"
+#include "game/joy.h"
 #include "game/gart.h"
 
 struct V2 {
@@ -43,12 +44,7 @@ struct Camera {
 };
 
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
-struct JoyStatus {
-    u8 pad0[0x20];
-    u8 buttons[8];  // offset 0x20
-    u8 pad28[0x68 - 0x28];
-};
-
+// JoyStatus: game/joy.h.
 extern "C" {
 s32 fn_802E2C20(void);  // milliseconds
 ILayout* fn_80145E70(const char* name);

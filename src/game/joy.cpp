@@ -2,23 +2,9 @@
 // turns button presses and stick directions into key events through two key maps, with key repeat.
 // Names are guesses.
 #include "game/common.h"
+#include "game/joy.h"
 
-struct JoyStatus {
-    f32 x;            // offset 0x0
-    f32 y;            // offset 0x4
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 buttons[32];   // offset 0x20
-    u32 dir;          // offset 0x40
-    s32 vals[6];      // offset 0x44
-    u32 unk5C;        // offset 0x5C
-    u8 connected;     // offset 0x60
-};
-
+// JoyStatus: game/joy.h.
 struct JoyPad {
     u32 lastTime;       // offset 0x0
     s32 repeat;         // offset 0x4

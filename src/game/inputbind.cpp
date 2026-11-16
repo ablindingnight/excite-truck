@@ -3,6 +3,7 @@
 // writing them as option strings and finding the control the player is pressing. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/joy.h"
 
 extern "C" {
 char* strncpy(char* d, const char* s, u32 n);
@@ -16,24 +17,8 @@ public:
     u8 pad[0xC];
 };
 
-struct JoyInfo {
-    u32 hold;  // offset 0x0
-    u32 bits;  // offset 0x4
-    s32 a;     // offset 0x8
-    s32 b;     // offset 0xC
-};
-
-struct JoyStatus {
-    f32 ax0, ax1, ax2, ax3, ax4, ax5, ax6, ax7;  // offset 0x0: separate members (struct copies use lfs/stfs; an array copies as words)
-    u8 buttons[32];  // offset 0x20
-    u32 dir;         // offset 0x40
-    JoyInfo info;    // offset 0x44
-    s32 f54;         // offset 0x54
-    s32 f58;         // offset 0x58
-    u32 f5C;         // offset 0x5C
-    u8 connected;    // offset 0x60
-};
-
+// JoyInfo: game/joy.h.
+// JoyStatus: game/joy.h.
 struct Mouse {
     f32 x;  // offset 0x0
     f32 y;  // offset 0x4
@@ -722,13 +707,13 @@ f32 fn_801A7F98(const Binding* b) {
     case 2:
         switch (b->code) {
         case 0:
-            return MaxZero(-p->ax0);
+            return MaxZero(-p->x);
         case 1:
-            return MaxZero(p->ax0);
+            return MaxZero(p->x);
         case 2:
-            return MaxZero(-p->ax1);
+            return MaxZero(-p->y);
         case 3:
-            return MaxZero(p->ax1);
+            return MaxZero(p->y);
         case 4:
             return MaxZero(-p->ax3);
         case 5:
@@ -754,9 +739,9 @@ f32 fn_801A7F98(const Binding* b) {
         case 15:
             return MaxZero(p->ax7);
         case 16:
-            return 0.5f * (1.0f - p->ax0);
+            return 0.5f * (1.0f - p->x);
         case 17:
-            return 0.5f * (1.0f - p->ax1);
+            return 0.5f * (1.0f - p->y);
         case 18:
             return 0.5f * (1.0f - p->ax3);
         case 19:
@@ -770,9 +755,9 @@ f32 fn_801A7F98(const Binding* b) {
         case 23:
             return 0.5f * (1.0f - p->ax7);
         case 24:
-            return 0.5f * (1.0f + p->ax0);
+            return 0.5f * (1.0f + p->x);
         case 25:
-            return 0.5f * (1.0f + p->ax1);
+            return 0.5f * (1.0f + p->y);
         case 26:
             return 0.5f * (1.0f + p->ax3);
         case 27:
