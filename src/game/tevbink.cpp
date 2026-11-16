@@ -555,6 +555,8 @@ struct SimpleHeap {
     }
     void* Alloc(u32 size) {
         s32 n = (size + align) & ~align;
+        s32 rest;
+        HeapBlock* split;
         HeapBlock** best = 0;
         s32 bestSize = 0x7FFFFFFF;
         void* res = 0;
@@ -566,8 +568,7 @@ struct SimpleHeap {
             }
         }
         if (best) {
-            HeapBlock* split = 0;
-            s32 rest;
+            split = 0;
             HeapBlock* b = *best;
             rest = b->size - n;
             HeapBlock* next = b->next;
