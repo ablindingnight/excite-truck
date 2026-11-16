@@ -1802,7 +1802,7 @@ void fn_801195A0(void *arg0) {
     *(s32 *)((u8 *)arg0 + 0x38) = 1;
 }
 
-extern f64 pow(f32, f64);
+extern f64 pow(f64, f64);
 extern void set_rate_volume_and_pan(void *);
 extern void clear(void *, u32, u32);
 extern void set_both_state(void *, s32);
@@ -1990,7 +1990,7 @@ void Pan(void *arg0, s32 arg1) {
     set_rate_volume_and_pan(arg0);
 }
 
-extern f64 pow(f32, f64);
+extern f64 pow(f64, f64);
 extern void set_rate_volume_and_pan(void *);
 extern void clear(void *, u32, u32);
 extern void set_both_state(void *, s32);
@@ -8120,7 +8120,7 @@ void ReadBPLossyWithMotion(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limi
     row[7] = block[63] + ref[7];
 }
 
-extern f64 pow(f32, f64);
+extern f64 pow(f64, f64);
 extern void set_rate_volume_and_pan(void *);
 extern void clear(void *, u32, u32);
 extern void set_both_state(void *, s32);
