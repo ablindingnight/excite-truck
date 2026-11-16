@@ -2114,58 +2114,62 @@ inline void RingChalMaster::vfFC(void) {
 
 static inline int Stopped(f32 speed) { return NearZeroF(speed); }
 
-inline int RingChalMaster::vfE0(int car, u8* out) {
+// The teleport test: 1 when the car is at or facing away from the current teleport (out = held long enough),
+// 0 otherwise; reaching the last teleport clears it. Its 'return 0' paths share one block in retail.
+/* Helper name unproven */
+static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
     ObjSet* s;
+    if (arena.curSet < arena.nFiles) {
+        s = &arena.sets->data[arena.curSet];
+        if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
+            RaceCarRec* c = fn_8017960C(p->index);
+            ObjTeleport* t = &s->teles->data[s->f10];
+            V2 d;
+            V2 a;
+            V2 b;
+            int inside;
+            int behind;
+            a.x = t->mtx.origin.x;
+            a.y = t->mtx.origin.z;
+            b.x = c->pos.x;
+            d.x = a.x - b.x;
+            b.y = c->pos.z;
+            d.y = a.y - b.y;
+            inside = t->radius > (f32)sqrt(d.x * d.x + d.y * d.y);
+            behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
+            if (s->f10 == s->teles->count - 1 && inside) {
+                s->teles->data[s->f10].b30 = 0;
+            } else {
+                if (inside || behind) {
+                    if (!p->b8) {
+                        p->b8 = 1;
+                        p->fC = 0.0f;
+                    }
+                    if (p->fC > 2.0f) {
+                        *out = 1;
+                    } else {
+                        *out = 0;
+                    }
+                } else {
+                    p->b8 = 0;
+                    p->fC = 0.0f;
+                    *out = 0;
+                }
+                return 1;
+            }
+        }
+        return 0;
+    }
+    return 0;
+}
+
+
+inline int RingChalMaster::vfE0(int car, u8* out) {
     int r = 0;
     f32 now = lbl_8055E3C8;
     if (now > vf38() && !arena.b48) {
         if (Stopped(fn_8017960C(players.data[car]->index)->speed)) {
-            PlayerData* p = players.data[car];
-            if (arena.curSet < arena.nFiles) {
-                s = &arena.sets->data[arena.curSet];
-                if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
-                    RaceCarRec* c = fn_8017960C(p->index);
-                    ObjTeleport* t = &s->teles->data[s->f10];
-                    V2 b;
-                    V2 a;
-                    V2 d;
-                    int inside;
-                    int behind;
-                    a.x = t->mtx.origin.x;
-                    a.y = t->mtx.origin.z;
-                    b.x = c->pos.x;
-                    d.x = a.x - b.x;
-                    b.y = c->pos.z;
-                    d.y = a.y - b.y;
-                    inside = t->radius > (f32)sqrt(d.x * d.x + d.y * d.y);
-                    behind = PSVECDotProduct(&t->mtx.basis[2], &c->fwd) < 0.0f;
-                    if (s->f10 == s->teles->count - 1 && inside) {
-                        r = 0;
-                        s->teles->data[s->f10].b30 = 0;
-                    } else {
-                        if (inside || behind) {
-                            if (!p->b8) {
-                                p->b8 = 1;
-                                p->fC = 0.0f;
-                            }
-                            if (p->fC > 2.0f) {
-                                *out = 1;
-                            } else {
-                                *out = 0;
-                            }
-                        } else {
-                            p->b8 = 0;
-                            p->fC = 0.0f;
-                            *out = 0;
-                        }
-                        r = 1;
-                    }
-                } else {
-                    r = 0;
-                }
-            } else {
-                r = 0;
-            }
+            r = TeleCheck(arena, players.data[car], out);
             if (!r) {
                 if (fn_8017960C(players.data[car]->index)->model == 'PCAR') {
                     RaceCarRec* c = fn_8017960C(players.data[car]->index);
