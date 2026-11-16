@@ -720,11 +720,11 @@ void fn_802C9A4C(f32) { fn_802D93E0(); }
 
 f32 fn_802C9A50(void) { return lbl_8055D020; }
 
-u8 fn_802C9A58(void) { return lbl_8055FC8C; }
+int fn_802C9A58(void) { return lbl_8055FC8C; }
 
-u8 fn_802C9A60(void) { return lbl_8055FC8D; }
+int fn_802C9A60(void) { return lbl_8055FC8D; }
 
-u8 fn_802C9A68(void) { return lbl_8055FC8E; }
+int fn_802C9A68(void) { return lbl_8055FC8E; }
 
 void fn_802C9A70(int bars) {
     lbl_8055FC74 = 1;
