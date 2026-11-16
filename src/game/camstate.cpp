@@ -8,6 +8,11 @@
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include <string.h>
+// Helpers unproven (names and existence): the forms that keep retail's operand order and unfolded identities where a
+// plain literal does not.
+static inline f32 CsMul(f32 a, f32 b) { return a * b; }
+static inline f32 CsMix(f32 a, f32 b, f32 k) { return a + k * (b - a); }
+static inline void CsAddScaled(f32* o, const f32* a, const f32* d, f32 s) { o[0] = a[0] + d[0] * s; o[1] = a[1] + d[1] * s; o[2] = a[2] + d[2] * s; }
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -15,8 +20,6 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-extern const f32 lbl_80563FB4;  // pi/4
-extern const f32 lbl_80563FAC;
 
 extern "C" {
 void fn_80276BE4(u8* a, u8* b);
@@ -37,9 +40,9 @@ void fn_80273B4C(u8* p) {
     u8* car = cr->car;
     if (car) {
         f32 euler[3];
-        f32 side = U8(car, 0x260C) ? -1.0f : lbl_80563FAC;
+        f32 side = U8(car, 0x260C) ? -1.0f : 1.0f;
         f32 zero = 0.0f;
-        f32 ang = zero * lbl_80563FB4;
+        f32 ang = CsMul(zero, 0.7853982f);
         euler[0] = zero;
         euler[1] = ang * side;
         euler[2] = zero;
@@ -74,9 +77,6 @@ double cos(double x);
 f32 fn_8018AE3C(u8* car);
 f32 fn_8018AE44(u8* car);
 f32 fn_8018AE4C(u8* car);
-extern const f32 lbl_80563FC4;
-extern const f32 lbl_80563FC8;
-extern const f32 lbl_80563FCC;
 
 // Chase camera: follows the car's camera mount (the second one when the car is flipped), levels the
 // up vector like fn_802749FC, and adds the car's bounce unless snapping.
@@ -103,7 +103,7 @@ void fn_80273BD0(u8* p) {
     CVec3 w;
     if (c->b138) {
         c->v28.v[0] = 0.0f;
-        c->v28.v[1] = lbl_80563FAC;
+        c->v28.v[1] = 1.0f;
         c->v28.v[2] = 0.0f;
         c->v34.v[0] = 0.0f;
         c->v34.v[1] = 0.0f;
@@ -122,35 +122,31 @@ void fn_80273BD0(u8* p) {
         n.y = c->carFrame.rot.m[4];
         n.z = c->carFrame.rot.m[5];
     } else {
-        f32 t = (PSVECDotProduct((const Vec*)&n.x, (const Vec*)&c->carFrame.rot.m[3]) - cosLimit) / (lbl_80563FAC - cosLimit);
+        f32 t = (PSVECDotProduct((const Vec*)&n.x, (const Vec*)&c->carFrame.rot.m[3]) - cosLimit) / (1.0f - cosLimit);
         f32 s = 0.0f > t ? 0.0f : t;
         n.x = n.x * s;
         n.y = n.y * s;
         n.z = n.z * s;
-        n.x = n.x + c->carFrame.rot.m[3] * (lbl_80563FAC - s);
-        n.y = n.y + c->carFrame.rot.m[4] * (lbl_80563FAC - s);
-        n.z = n.z + c->carFrame.rot.m[5] * (lbl_80563FAC - s);
+        n.x = n.x + c->carFrame.rot.m[3] * (1.0f - s);
+        n.y = n.y + c->carFrame.rot.m[4] * (1.0f - s);
+        n.z = n.z + c->carFrame.rot.m[5] * (1.0f - s);
     }
     f32 k = c->b138 ? 0.0f : 0.95f;
     c->v28.v[0] = c->v28.v[0] * k;
     c->v28.v[1] = c->v28.v[1] * k;
     c->v28.v[2] = c->v28.v[2] * k;
-    c->v28.v[0] = c->v28.v[0] + n.x * (lbl_80563FAC - k);
-    c->v28.v[1] = c->v28.v[1] + n.y * (lbl_80563FAC - k);
-    c->v28.v[2] = c->v28.v[2] + n.z * (lbl_80563FAC - k);
-    ScV(&c->pose.rot.m[3], &c->v28.v[0], lbl_80563FC4);
-    AddSV(&c->pose.rot.m[3], &c->carFrame.rot.m[3], lbl_80563FC4);
+    c->v28.v[0] = c->v28.v[0] + n.x * (1.0f - k);
+    c->v28.v[1] = c->v28.v[1] + n.y * (1.0f - k);
+    c->v28.v[2] = c->v28.v[2] + n.z * (1.0f - k);
+    ScV(&c->pose.rot.m[3], &c->v28.v[0], 0.5f);
+    AddSV(&c->pose.rot.m[3], &c->carFrame.rot.m[3], 0.5f);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[3], (const Vec*)&c->pose.rot.m[6], (Vec*)&c->pose.rot.m[0]);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[0], (const Vec*)&c->pose.rot.m[3], (Vec*)&c->pose.rot.m[6]);
     Orthonormalize(p);
     if (!c->b138) {
-        c->v34.v[0] = c->v34.v[0] * lbl_80563FC8;
-        c->v34.v[1] = c->v34.v[1] * lbl_80563FC8;
-        c->v34.v[2] = c->v34.v[2] * lbl_80563FC8;
+        ScV(c->v34.v, c->v34.v, 0.96f);
         bounce.Set(fn_8018AE3C(c->car), fn_8018AE44(c->car), fn_8018AE4C(c->car));
-        c->v34.v[0] = c->v34.v[0] + bounce.x * lbl_80563FCC;
-        c->v34.v[1] = c->v34.v[1] + bounce.y * lbl_80563FCC;
-        c->v34.v[2] = c->v34.v[2] + bounce.z * lbl_80563FCC;
+        CsAddScaled(c->v34.v, c->v34.v, &bounce.x, 0.04000002f);
         f32 f = 5.0f * (-0.005f * fn_8018AE4C(c->car));
         c->pose.pos.v[0] = c->pose.pos.v[0] + c->carFrame.rot.m[6] * f;
         c->pose.pos.v[1] = c->pose.pos.v[1] + c->carFrame.rot.m[7] * f;
@@ -233,7 +229,7 @@ void fn_80274460(u8* p) {
 void fn_80274660(u8* unused, u8* p) {
     CamRec* cr = (CamRec*)p;
     f32 zero = 0.0f;
-    f32 one = lbl_80563FAC;
+    f32 one = 1.0f;
     cr->pose.rot.m[1] = zero;
     cr->pose.rot.m[0] = one;
     cr->pose.rot.m[2] = zero;
@@ -269,12 +265,13 @@ void fn_80274660(u8* unused, u8* p) {
 double tan(double x);
 double atan(double x);
 extern f32 __float_epsilon[];  // epsilon
-extern const f32 lbl_80563FC4;
 
 // Aims the camera frame (0x58) from its position (0x7C) at the look point (0x4C), with world y as up
 // (the car's forward axis when looking straight down). A positive `dist` pulls the camera toward that
 // distance by `stiff`; the fov follows from `width` / `zoom` and the remaining distance unless `fov` is
 // given.
+static inline f32 CsTanHalf(f32 a) { return (f32)tan(a / 2.0f); }
+static inline f32 CsAtanTwice(f32 t) { return 2.0f * (f32)atan(t); }
 void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     CamRec* cr = (CamRec*)p;
     f32 dx = cr->v4C.v[0] - cr->pose.pos.v[0];
@@ -293,13 +290,13 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
             cr->pose.rot.m[8] = cr->carFrame.rot.m[8];
         }
     }
-    CsVec up(0.0f, lbl_80563FAC, 0.0f);
+    CsVec up(0.0f, 1.0f, 0.0f);
     PSVECCrossProduct((const Vec*)&up.x, (const Vec*)((f32*)&cr->pose.rot.m[6]), (Vec*)((f32*)&cr->pose));
     PSVECCrossProduct((const Vec*)((f32*)&cr->pose.rot.m[6]), (const Vec*)((f32*)&cr->pose), (Vec*)((f32*)&cr->pose.rot.m[3]));
     Orthonormalize(p);
     f32 d = PSVECDistance((const Vec*)((f32*)&cr->pose.pos), (const Vec*)((f32*)&cr->v4C));
     if (dist > 0.0f) {
-        f32 k = (lbl_80563FAC - stiff) * (d - dist);
+        f32 k = (1.0f - stiff) * (d - dist);
         cr->pose.pos.v[0] = cr->pose.pos.v[0] + cr->pose.rot.m[6] * k;
         cr->pose.pos.v[1] = cr->pose.pos.v[1] + cr->pose.rot.m[7] * k;
         cr->pose.pos.v[2] = cr->pose.pos.v[2] + cr->pose.rot.m[8] * k;
@@ -308,9 +305,9 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     f32 lo = 0.32724923f;
     f32 v = 1.9634954f;
     f32 half = 1.1780972f;
-    f32 inv = zoom > 0.1f ? lbl_80563FAC / zoom : lbl_80563FAC;
+    f32 inv = zoom > 0.1f ? 1.0f / zoom : 1.0f;
     f32 w = 30.5f * inv;
-    f32 a = 2.0f * (f32)atan(w / d * (f32)tan(half * lbl_80563FC4));
+    f32 a = CsAtanTwice(w / d * CsTanHalf(half));
     v = v < a ? v : a;
     v = v > lo ? v : lo;
     if (fov > 0.0f) {
@@ -318,7 +315,7 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
         cr->f194 = fov;
     } else {
         f32 prev = cr->f194;
-        f32 f = prev + lbl_80563FAC * (v - prev);
+        f32 f = CsMix(prev, v, 1.0f);
         cr->fov = f;
         cr->f194 = f;
     }
@@ -334,7 +331,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
     CamRec* c = (CamRec*)p;
     if (c->b138) {
         c->v28.v[0] = 0.0f;
-        c->v28.v[1] = lbl_80563FAC;
+        c->v28.v[1] = 1.0f;
         c->v28.v[2] = 0.0f;
         c->v34.v[0] = 0.0f;
         c->v34.v[1] = 0.0f;
@@ -355,24 +352,24 @@ void fn_802749FC(u8* p, const CVec3* move) {
         n.y = c->carFrame.rot.m[4];
         n.z = c->carFrame.rot.m[5];
     } else {
-        f32 t = (PSVECDotProduct((const Vec*)&n.x, (const Vec*)&c->carFrame.rot.m[3]) - cosLimit) / (lbl_80563FAC - cosLimit);
+        f32 t = (PSVECDotProduct((const Vec*)&n.x, (const Vec*)&c->carFrame.rot.m[3]) - cosLimit) / (1.0f - cosLimit);
         f32 s = 0.0f > t ? 0.0f : t;
         n.x = n.x * s;
         n.y = n.y * s;
         n.z = n.z * s;
-        n.x = n.x + c->carFrame.rot.m[3] * (lbl_80563FAC - s);
-        n.y = n.y + c->carFrame.rot.m[4] * (lbl_80563FAC - s);
-        n.z = n.z + c->carFrame.rot.m[5] * (lbl_80563FAC - s);
+        n.x = n.x + c->carFrame.rot.m[3] * (1.0f - s);
+        n.y = n.y + c->carFrame.rot.m[4] * (1.0f - s);
+        n.z = n.z + c->carFrame.rot.m[5] * (1.0f - s);
     }
     f32 k = c->b138 ? 0.0f : 0.9f;
     c->v28.v[0] = c->v28.v[0] * k;
     c->v28.v[1] = c->v28.v[1] * k;
     c->v28.v[2] = c->v28.v[2] * k;
-    c->v28.v[0] = c->v28.v[0] + n.x * (lbl_80563FAC - k);
-    c->v28.v[1] = c->v28.v[1] + n.y * (lbl_80563FAC - k);
-    c->v28.v[2] = c->v28.v[2] + n.z * (lbl_80563FAC - k);
-    ScV(&c->pose.rot.m[3], &c->v28.v[0], lbl_80563FC4);
-    AddSV(&c->pose.rot.m[3], &c->carFrame.rot.m[3], lbl_80563FC4);
+    c->v28.v[0] = c->v28.v[0] + n.x * (1.0f - k);
+    c->v28.v[1] = c->v28.v[1] + n.y * (1.0f - k);
+    c->v28.v[2] = c->v28.v[2] + n.z * (1.0f - k);
+    ScV(&c->pose.rot.m[3], &c->v28.v[0], 0.5f);
+    AddSV(&c->pose.rot.m[3], &c->carFrame.rot.m[3], 0.5f);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[3], (const Vec*)&c->pose.rot.m[6], (Vec*)&c->pose.rot.m[0]);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[0], (const Vec*)&c->pose.rot.m[3], (Vec*)&c->pose.rot.m[6]);
     Orthonormalize(p);
@@ -432,13 +429,13 @@ static inline void RotFromVec(Mat3* r, const CamVec& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > 0.0001f) {
         f32 x, s, y, z, c, k;
-        f32 inv = lbl_80563FAC / a;
+        f32 inv = 1.0f / a;
         x = inv * w.x;
         y = inv * w.y;
         z = inv * w.z;
         s = (f32)sin(a);
         c = (f32)cos(a);
-        k = lbl_80563FAC - c;
+        k = 1.0f - c;
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
         r->m[1][0] = y * (k * x) - s * z;
@@ -449,15 +446,15 @@ static inline void RotFromVec(Mat3* r, const CamVec& w) {
         r->m[2][2] = c + k * (z * z);
         r->m[2][1] = z * (k * y) - s * x;
     } else {
-        r->m[0][0] = lbl_80563FAC;
+        r->m[0][0] = 1.0f;
         r->m[0][1] = 0.0f;
         r->m[0][2] = 0.0f;
         r->m[1][0] = 0.0f;
-        r->m[1][1] = lbl_80563FAC;
+        r->m[1][1] = 1.0f;
         r->m[1][2] = 0.0f;
         r->m[2][0] = 0.0f;
         r->m[2][1] = 0.0f;
-        r->m[2][2] = lbl_80563FAC;
+        r->m[2][2] = 1.0f;
     }
 }
 
@@ -477,7 +474,7 @@ void fn_802750C4(u8* p, f32 k, f32 dist) {
     f32 d[3];
     f32 up[3];
     up[0] = 0.0f;
-    up[1] = lbl_80563FAC;
+    up[1] = 1.0f;
     up[2] = 0.0f;
     fn_8026E850((f32*)&cr->pose.pos, (f32*)&cr->carFrame.pos, p, up);
     d[0] = cr->carFrame.pos.v[0] - cr->pose.pos.v[0];
@@ -563,7 +560,6 @@ double cos(double x);
 int fn_801E9E30(u8* ground, f32* pos);
 extern f32 lbl_8055E3C8;         // game time
 f32 lbl_8055F588;         // last ground height
-extern const f32 lbl_80563FC4;
 
 
 // Orbits the camera around its target at `radius`, keeping it above the ground.
@@ -584,8 +580,8 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     pos.z = cr->carFrame.pos.v[2] + off.z;
     if (!fn_801E9E30((u8*)&cr->h1EC, &pos.x)) {
         pos.y = 2.0f + lbl_8055F588;
-        CsVec t(CsLerp(pos.x, cr->carFrame.pos.v[0], lbl_80563FC4), CsLerp(pos.y, cr->carFrame.pos.v[1], lbl_80563FC4),
-                CsLerp(pos.z, cr->carFrame.pos.v[2], lbl_80563FC4));
+        CsVec t(CsLerp(pos.x, cr->carFrame.pos.v[0], 0.5f), CsLerp(pos.y, cr->carFrame.pos.v[1], 0.5f),
+                CsLerp(pos.z, cr->carFrame.pos.v[2], 0.5f));
         pos = t;
     } else {
         lbl_8055F588 = pos.y;
@@ -593,7 +589,7 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     pos.y += height;
     f32 up[3];
     up[0] = 0.0f;
-    up[1] = lbl_80563FAC;
+    up[1] = 1.0f;
     up[2] = 0.0f;
     fn_8026E850(&pos.x, (f32*)&cr->carFrame.pos, p, up);
     cr->fov = 1.0471976f;
@@ -614,7 +610,7 @@ void fn_80275D0C(u8* p) {
     f.basis[2].y = cr->carFrame.rot.m[7];
     f.basis[2].z = cr->carFrame.rot.m[8];
     f.basis[1].x = 0.0f;
-    f.basis[1].y = lbl_80563FAC;
+    f.basis[1].y = 1.0f;
     f.basis[1].z = 0.0f;
     PSVECCrossProduct((const Vec*)&f.basis[1].x, (const Vec*)&f.basis[2].x, (Vec*)&f.basis[0].x);
     PSVECCrossProduct((const Vec*)&f.basis[2].x, (const Vec*)&f.basis[0].x, (Vec*)&f.basis[1].x);
