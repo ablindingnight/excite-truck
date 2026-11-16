@@ -3958,7 +3958,7 @@ game/camframe.cpp:
 	.sdata2     start:0x80563E20 end:0x80563E30
 
 game/camfov.cpp:
-	.text       start:0x8026E870 end:0x80270AE8
+	.text       start:0x8026E870 end:0x80270B00
 	.ctors      start:0x802ED498 end:0x802ED49C
 	.data       start:0x80346A90 end:0x80346AFC
 	.bss        start:0x8049A208 end:0x8049A258
@@ -3966,7 +3966,7 @@ game/camfov.cpp:
 	.sdata2     start:0x80563E30 end:0x80563F40
 
 game/physcam.cpp:
-	.text       start:0x80270AE8 end:0x80273B4C
+	.text       start:0x80270B00 end:0x80273B4C
 	.ctors      start:0x802ED49C end:0x802ED4A0
 	.data       start:0x80346B00 end:0x80347378
 	.bss        start:0x8049A258 end:0x8049FD58

@@ -152,13 +152,6 @@ extern f32 lbl_8055F568;  // car heading
 
 extern "C" int fn_80273494(int x);
 
-CamRect::CamRect(void) {
-    f32 z = 0.0f;
-    v[0] = z;
-    v[1] = z;
-    v[3] = z;
-    v[2] = z;
-}
 
 extern "C" {
 
