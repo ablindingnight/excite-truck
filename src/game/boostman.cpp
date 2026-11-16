@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/math_types.h"
 #include "game/carbody.h"
+#include "game/plainvec.h"
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
@@ -32,12 +33,6 @@ public:
     Vec2(void);
     Vec2(const V2& v) { *this = (const Vec2&)v; }
     Vec2& operator=(const Vec2& v);
-};
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 // A ground position set from an x/z point (aiobst.cpp defines From: y = 0).

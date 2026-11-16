@@ -5,6 +5,7 @@
 // helpers. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/math_types.h"
+#include "game/plainvec.h"
 #include "macros.h"
 
 struct GXColor {
@@ -39,10 +40,6 @@ struct GXRenderModeObj {
     u8 sample_pattern[12][2];  // offset 0x1A
     u8 vfilter[7];             // offset 0x32
     u8 pad39[3];
-};
-
-struct V3 {
-    f32 x, y, z;
 };
 
 // One matrix row as a block (retail copies Invert's rows as three 12-byte blocks: lfd+lwz each).

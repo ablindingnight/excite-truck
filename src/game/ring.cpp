@@ -4,6 +4,7 @@
 // radius, and rings fade in, flash and fade out. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/carbody.h"
+#include "game/plainvec.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -33,12 +34,6 @@ struct Event {
 
 struct V2 {
     f32 x;
-    f32 z;
-};
-
-struct V3 {
-    f32 x;
-    f32 y;
     f32 z;
 };
 

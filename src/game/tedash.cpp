@@ -3,6 +3,7 @@
 // and scales, dumping the world model, and the stats columns other units register. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 #include <string.h>
 #include <stdarg.h>
 
@@ -18,10 +19,6 @@ public:
         x = x_;
         y = y_;
     }
-};
-
-struct V3 {
-    f32 x, y, z;
 };
 
 struct TextElem {

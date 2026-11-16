@@ -2,6 +2,7 @@
 // car, positioned by its offset from the camera rotated into the camera's heading, scaled and faded by
 // distance. Names are guesses apart from the art names.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 double sqrt(double x);
@@ -22,12 +23,6 @@ extern s32 lbl_8055E4D0;    // car count
 struct V2 {
     f32 x;
     f32 y;
-};
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 struct LayoutArt {

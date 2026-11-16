@@ -4,6 +4,7 @@
 // allocation tags, value keys, file names and messages.
 #include "game/common.h"
 #include "game/math_types.h"
+#include "game/plainvec.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
@@ -73,15 +74,6 @@ struct FVec {
     f32 x;
     f32 y;
     f32 z;
-};
-
-// A vector passed by value (the default of the model vector lookup).
-struct V3 : ValVec3 {
-    V3(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
 };
 
 struct PartParams {
@@ -803,7 +795,7 @@ EngineFireMan::EngineFireMan(void) {
         FireModel* model = fn_80288208(i);
         if (fn_80287E20(model, "engine")) {
             cars[i].pos = fn_80287ED0(model, "engine", "arm");
-            cars[i].spread = fn_80287F90(model, "engine", "spread", V3(0.0f, 0.0f, 0.0f));
+            cars[i].spread = fn_80287F90(model, "engine", "spread", ValV3(0.0f, 0.0f, 0.0f));
             cars[i].has = 1;
         } else {
             cars[i].has = 0;

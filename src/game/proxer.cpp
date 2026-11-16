@@ -3,6 +3,7 @@
 // one car reaches the other along the track, plus per-car sorted pair lists. Names are guesses apart
 // from "Proxer" (its allocation tag).
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 void* memset(void* p, int c, size_t n);
@@ -20,12 +21,6 @@ void* operator new[](size_t size, const char* tag);
 struct V2 {
     f32 x;
     f32 y;
-};
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 struct Body {

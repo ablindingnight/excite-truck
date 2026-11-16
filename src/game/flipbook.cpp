@@ -4,6 +4,7 @@
 // reference counted. Drawing picks the frame at time t, eases towards the next one and draws a camera-facing
 // quad, cross-fading the two textures when "tex" blends. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -39,12 +40,6 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 void operator delete(void* p);
 void operator delete[](void* p);
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct CamMtx {
     V3 right;  // offset 0x0

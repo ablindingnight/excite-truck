@@ -3,6 +3,7 @@
 // across segments, look ahead, and keep per-segment pass times to compute gaps between cars. Names are
 // guesses apart from CenterLine::convert_meters_to_ilpos (from its message).
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 double sqrt(double x);
@@ -15,12 +16,6 @@ void fn_801569FC(void);
 void* operator new[](size_t size, const char* tag);
 
 extern f32 lbl_8055E3C8;  // current race time
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct V2 {
     V2(void) {}

@@ -5,16 +5,11 @@
 // strings.
 #include "game/common.h"
 #include "game/carbody.h"
+#include "game/plainvec.h"
 
 struct V2 {
     f32 x;
     f32 y;
-};
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 struct ElemBase {

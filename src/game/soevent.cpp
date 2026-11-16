@@ -4,6 +4,7 @@
 // mutable physics objects ("chunk%d", see mutphob) thrown off the object. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 int strncmp(const char* a, const char* b, size_t n);
@@ -44,15 +45,6 @@ struct Vec {
     f32 x;
     f32 y;
     f32 z;
-};
-
-// A vector passed by value (GetVec3Or's default).
-struct V3 : ValVec3 {
-    V3(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
 };
 
 // GetVec3Or takes its default by value.
@@ -371,8 +363,8 @@ void fn_801D26C8(SoSpawn* s, ValueNodeV* t) {
             }
             ValueNodeV* c = t->FindChild(key);
             SoChunk* k = &s->chunks[s->count];
-            k->offset = c->GetVec3Or("offset", V3(0.0f, 0.0f, 0.0f));
-            k->throwVel = c->GetVec3Or("throw", V3(0.0f, 0.0f, 0.0f));
+            k->offset = c->GetVec3Or("offset", ValV3(0.0f, 0.0f, 0.0f));
+            k->throwVel = c->GetVec3Or("throw", ValV3(0.0f, 0.0f, 0.0f));
             if (c->Has("mask")) {
                 k->mask = fn_802C7830(c->GetValue("mask"));
             } else {

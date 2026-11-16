@@ -17,6 +17,7 @@
 #include "game/math_types.h"
 #include "game/vpos.h"
 #include "game/carbody.h"
+#include "game/plainvec.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -1132,10 +1133,6 @@ struct PickupEvent {
     f32 vel[3];   // offset 0xC
     s16 heading;  // offset 0x18
     s32 sfx;      // offset 0x1C
-};
-
-struct V3 {
-    f32 x, y, z;
 };
 
 class Token;

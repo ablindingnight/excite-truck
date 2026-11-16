@@ -6,6 +6,7 @@
 // from the strings.
 #include "game/common.h"
 #include "game/math_types.h"
+#include "game/plainvec.h"
 #include "revolution/GX/GXTypes.h"
 
 template <class T>
@@ -18,12 +19,6 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 struct GXVtxDescList {
     int attr;
     int type;
-};
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 // Bone delta (bonemgr).

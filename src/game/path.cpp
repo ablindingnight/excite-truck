@@ -3,6 +3,7 @@
 // evaluates the pose, velocity and angular velocity between two keys. Names are guesses apart from
 // the messages.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" {
 double sqrt(double x);
@@ -14,12 +15,6 @@ void* fn_8012C370(const char* name, u32 magic, s32* version, int a, int b, u8* s
 void fn_8012C4D8(void* p);                                                               // free resource
 extern f32 __float_epsilon[];
 }
-
-struct V3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct Quat {
     f32 x;
