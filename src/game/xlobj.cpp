@@ -42,9 +42,9 @@ extern "C++" f32 Floor(f32 x);  // weak (C++ linkage; this part of the file sits
 void __ct__4Vec2Fv(class Vec2* v);
 void fn_80160BA0(struct V2* r, const struct V2* a, f32 s);
 void fn_80160B18(struct V2* v);
-void fn_80144D64(struct Vec3* d, const struct Vec3* s);
-const struct Vec3* fn_802C9A40(void);
-f32 fn_801DCF48(struct Vec3* n, f32 x, f32 z);  // ground height
+void fn_80144D64(Vec3* d, const Vec3* s);
+const Vec3* fn_802C9A40(void);
+f32 fn_801DCF48(Vec3* n, f32 x, f32 z);  // ground height
 }  // extern "C"
 f32 Remap(float, float, float, float, float);
 extern "C" {
