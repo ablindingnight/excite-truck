@@ -219,7 +219,8 @@ static inline f32 Unit01(f32 v, f32 lo, f32 hi) {
 #pragma push
 #pragma peephole off  /* Setting unproven: recovers the viewport adjustment body. */
 void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
-    CamRect* r = &lbl_8049A218[*cam];
+    CamRect* r = lbl_8049A218;  // the base stays in r3 and the scaled index is added to it (retail); &lbl[*cam] swaps the two
+    r += *cam;
     f32 e = Ease(r->v[3]);
     f32 t = Unit01(r->v[1], 0.0f, 20.0f);
     f32 k = LerpF(t, 0.0f, 1.0f);
