@@ -65,17 +65,17 @@ void fn_801282F4(void);
 int fn_802E36D8(const char* path);  // open
 void fn_802E3804(int fd, void* buf, u32 n);
 void fn_802E3734(int* fd);
-void* fn_8011770C(const char* name, u32 flags);  // BinkOpen
-void fn_80117618(void* bink, void* info);
-void fn_801176FC(void* bink, void* info);
-void fn_80118DC0(void* bink);  // BinkClose
-void fn_801186B8(void* bink);  // BinkDoFrame
-void fn_80118C44(void* bink);  // BinkNextFrame
+void* BinkOpen(const char* name, u32 flags);  // BinkOpen
+void BinkGetFrameBuffersInfo(void* bink, void* info);
+void BinkRegisterFrameBuffers(void* bink, void* info);
+void BinkClose(void* bink);  // BinkClose
+void BinkDoFrame(void* bink);  // BinkDoFrame
+void BinkNextFrame(void* bink);  // BinkNextFrame
 int fn_802ECC10(void);
 void fn_80119214(void* (*alloc)(u32), void (*free)(void*));
-void fn_80116E54(void* fn, void* arg);
+void BinkSetSoundSystem(void* fn, void* arg);
 struct StreamAllocator;
-void* fn_8011A168(StreamAllocator *allocator);
+void* BinkOpenAX(StreamAllocator *allocator);
 void fn_802E1728(void* tex);
 int fn_802E1BB4(void* tex);
 void fn_802E27B8(void* tex);
@@ -694,7 +694,7 @@ void fn_802E0D44(void* p) {
 void fn_802E0E60(BinkMovie* m) {
     if (m->bink) {
         fn_802E1728(m->tex);
-        fn_80118DC0(m->bink);
+        BinkClose(m->bink);
         m->bink = 0;
     }
 }
@@ -707,15 +707,15 @@ void fn_802E0EAC(BinkMovie* m) {
         fn_802E3804(fd, hdr, 0x20);
         fn_802E3734(&fd);
     }
-    m->bink = (u32*)fn_8011770C(m->name, 0x100400);
+    m->bink = (u32*)BinkOpen(m->name, 0x100400);
     if (m->bink) {
         fn_802E30C8("bink: opened %s", m->name);
-        fn_80117618(m->bink, m->info);
-        fn_80117618(m->bink, m->info);
+        BinkGetFrameBuffersInfo(m->bink, m->info);
+        BinkGetFrameBuffersInfo(m->bink, m->info);
         if (!fn_802E1BB4(m->tex)) {
             fn_802E317C("bmovie: can't create bink texture set");
         }
-        fn_801176FC(m->bink, m->info);
+        BinkRegisterFrameBuffers(m->bink, m->info);
         m->time = fn_802E2C20();
     } else {
         fn_802E30C8("bink: can't open %s", m->name);
@@ -726,7 +726,7 @@ void* lbl_8055D150[2] = {(void*)fn_802E0C04, (void*)fn_802E0D44};
 
 void fn_802E0F98(void) {
     fn_80119214(fn_802E0C04, fn_802E0D44);
-    fn_80116E54((void*)fn_8011A168, lbl_8055D150);
+    BinkSetSoundSystem((void*)BinkOpenAX, lbl_8055D150);
     fn_801282EC(0x80);
     fn_801282F4();
     lbl_8055FEEC = new ("bmemory") u8[0x600000];
@@ -806,7 +806,7 @@ void fn_802E12DC(BinkMovie* r) {
     }
     if (m->bink) {
         fn_802E27B8(m->tex);
-        fn_801186B8(m->bink);
+        BinkDoFrame(m->bink);
         int now = fn_802E2C20();
         if (now - m->time > 0x96) {
             fn_802E30C8("bmovie: resyncing timer");
@@ -814,7 +814,7 @@ void fn_802E12DC(BinkMovie* r) {
         }
         if (now - m->time > 0x1E) {
             if (!fn_802ECC10()) {
-                fn_80118C44(m->bink);
+                BinkNextFrame(m->bink);
             }
             m->time += 0x20;
         }

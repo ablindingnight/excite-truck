@@ -5,8 +5,8 @@
 #include "game/common.h"
 
 extern "C" {
-void* fn_8011FFC4(u32 size);  // allocate
-void fn_80120084(void* p);
+void* radmalloc(u32 size);  // allocate
+void radfree(void* p);
 void DCFlushRange(void* p, u32 n);
 void DCStoreRange(void* p, u32 n);
 void fn_802E30C8(const char* fmt, ...);
@@ -210,7 +210,7 @@ extern "C" {
 
 void fn_802E1728(Video* v) {
     if (v->mem) {
-        fn_80120084(v->mem);
+        radfree(v->mem);
         v->mem = 0;
     }
 }
@@ -344,7 +344,7 @@ void fn_802E1A9C(VidInfo* i, u32* offU, u32* offV, u32* offA, u32* frame, u32* r
 int fn_802E1BB4(Video* v) {
     u32 offU, offV, offA, frame, ramps, lumaW, chromaW;
     fn_802E1A9C(&v->info, &offU, &offV, &offA, &frame, &ramps, &lumaW, &chromaW);
-    void* mem = fn_8011FFC4(ramps + frame * v->info.count + 0x7F);
+    void* mem = radmalloc(ramps + frame * v->info.count + 0x7F);
     if (mem) {
         v->mem = mem;
         u8* p = (u8*)(((u32)mem + 0x7F) & ~0x7F);

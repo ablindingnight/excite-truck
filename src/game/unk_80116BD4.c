@@ -7,7 +7,7 @@
 extern f64 cos(f64);
 extern f64 sin(f64);
 /* .data tables owned by this unit (0x80329B50-0x80329DE8), in address order; the switch jump tables of */
-/* fn_8011E0B4 follow them. */
+/* ExpandPlane follow them. */
 extern const u8 lbl_802F65C0[];
 extern const u8 lbl_802F65D0[];
 extern const u8 lbl_802F65F0[];
@@ -65,7 +65,7 @@ u8 *lbl_80329DA8[16] = {
 };
 
 
-extern void fn_8011AF94(f32 *, s32, void *, f32 *, s32);
+extern void read_rle_samples(f32 *, s32, void *, f32 *, s32);
 typedef struct {
     u32 value;
     u32 *next;
@@ -252,7 +252,7 @@ typedef struct StreamPlayer {
     s32 setData;                        // 0xE4  start of the current set's data
     void *memoryData;                   // 0xE8  set when playing from memory
     s32 *setIndex;                      // 0xEC  file offset of each set (low bit is a flag)
-    // 0xF0: the file reader (fn_8011ACC4 for DVD files); its state follows its functions.
+    // 0xF0: the file reader (BinkFileOpen for DVD files); its state follows its functions.
     s32 (*readerRead)(void *reader, s32 pos, void *dst, u32 size);             // 0xF0
     s32 (*readerSeek)(void *reader, s32 set, s32 offset, s32 dst, s32 size);  // 0xF4
     u32 (*readerBufSize)(void *reader, u32 size);                              // 0xF8
@@ -350,29 +350,29 @@ typedef struct BinkAudio8011 {
     s16 *previous;     // 0x2C overlap from the last frame
     u32 flags;         // 0x30 bit 0: DCT (per channel) instead of RDFT (interleaved)
 } BinkAudio8011;
-void fn_8011B94C(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next);
-u32 fn_8011FC2C(void *arg0, s32 arg1, s32 arg2, s32 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
-void fn_80117330(void *arg0);
-void fn_80117074(StreamPlayer *p);
+void BinkAudioDecompress(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next);
+u32 ExpandBink(void *arg0, s32 arg1, s32 arg2, s32 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void inittimer(void *arg0);
+void checksound(StreamPlayer *p);
 
 extern void *lbl_8055DED4;
-u32 fn_8011C1E0(void *arg0, void *arg1);
-void fn_8011C2EC(void *arg0, void *arg1);
-s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes);
-void fn_80117074(StreamPlayer *p);
-void fn_80118C44(StreamPlayer *p);
-void fn_80118DC0(StreamPlayer *p);
-s32 fn_80118F78(StreamPlayer *p, s32 arg1);
-s32 fn_801190B0(StreamPlayer *p, s32 arg1);
-void fn_80118C1C(void *arg0, s32 arg1);
-void fn_80118F1C(void *arg0, s32 arg1);
-void fn_80117380(struct StreamPlayer *p, s32 next);
-u32 fn_80116F8C(struct StreamTrack *t);
-s32 fn_80116D30(void);
+u32 RADCB_try_to_suspend_callback(void *arg0, void *arg1);
+void RADCB_resume_callback(void *arg0, void *arg1);
+s8 *conv16to8(s8 *dst, s16 *src, u32 bytes);
+void checksound(StreamPlayer *p);
+void BinkNextFrame(StreamPlayer *p);
+void BinkClose(StreamPlayer *p);
+s32 BinkPause(StreamPlayer *p, s32 arg1);
+s32 BinkSetSoundOnOff(StreamPlayer *p, s32 arg1);
+void timeframe(void *arg0, s32 arg1);
+void endframe(void *arg0, s32 arg1);
+void GotoFrame(struct StreamPlayer *p, s32 next);
+u32 dosilence(struct StreamTrack *t);
+s32 RADTimerRead(void);
 void fn_8011BC48(s32 arg0);
-s32 fn_8011BFFC(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4);
-void fn_8011C274(void *arg0, void *arg1);
-void fn_80120084(void *arg0);
+s32 RADCB_unregister_2_callbacks(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4);
+void RADCB_suspend_callback(void *arg0, void *arg1);
+void radfree(void *arg0);
 extern void memset(void *, int, unsigned int);
 extern void *memcpy(void *, const void *, unsigned int);
 extern void *memmove(void *, const void *, unsigned int);
@@ -382,45 +382,45 @@ extern void *memmove(void *, const void *, unsigned int);
 // archived on 2001-04-19; the routines cftrec1/2, cftexp1/2 and cftfx42 were dropped in Sep. 2001), in a
 // float build: double -> f32, 0.5 -> 0.5f, and cos/sin -> MSL's cosf/sinf with atan(1.0) folded to
 // the float constant pi/4 (makewt, makect). Every routine below is otherwise Ooura's text.
-void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w);  // rdft
-void fn_8012023C(int n, int isgn, f32 *a, int *ip, f32 *w);  // ddct
-void fn_80120834(int nw, int *ip, f32 *w);                     // makewt
-void fn_80120B6C(int nc, int *ip, f32 *c);                     // makect
+void rdft(int n, int isgn, f32 *a, int *ip, f32 *w);  // rdft
+void ddct(int n, int isgn, f32 *a, int *ip, f32 *w);  // ddct
+void makewt(int nw, int *ip, f32 *w);                     // makewt
+void makect(int nc, int *ip, f32 *c);                     // makect
 void fn_80120CA4(int n, f32 *a, int *ip, int nw, f32 *w);    // cftfsub
 void fn_80120E14(int n, f32 *a, int *ip, int nw, f32 *w);    // cftbsub
-void fn_80120F84(int n, int *ip, f32 *a);                    // bitrv2
-void fn_80121400(int n, int *ip, f32 *a);                    // bitrv2conj
-void fn_80121848(f32 *a);                                    // bitrv216
-void fn_801219B4(f32 *a);                                    // bitrv216neg
-void fn_80121BB0(f32 *a);                                    // bitrv208
-void fn_80121BF4(f32 *a);                                    // bitrv208neg
-void fn_80121C68(int n, f32 *a, f32 *w);                     // cftf1st
-void fn_80122518(int n, f32 *a, f32 *w);                     // cftb1st
-void fn_80122E08(int n, f32 *a, int nw, f32 *w);             // cftrec1
-void fn_80122ED8(int n, f32 *a, int nw, f32 *w);             // cftrec2
-void fn_80122FA4(int n, f32 *a, int nw, f32 *w);             // cftexp1
-void fn_801231B8(int n, f32 *a, int nw, f32 *w);             // cftexp2
-void fn_801233F8(int n, f32 *a, f32 *w);                     // cftmdl1
-void fn_801237C4(int n, f32 *a, f32 *w);                     // cftmdl2
-void fn_80123CEC(int n, f32 *a, int nw, f32 *w);             // cftfx41
-void fn_80123DC0(int n, f32 *a, int nw, f32 *w);             // cftfx42
-void fn_80123E98(f32 *a, f32 *w);                            // cftf161
-void fn_8012440C(f32 *a, f32 *w);                            // cftf162
-void fn_80124AD8(f32 *a, f32 *w);                            // cftf081
-void fn_80124CE8(f32 *a, f32 *w);                            // cftf082
-void fn_80124F90(f32 *a);                                    // cftf040
-void fn_80125014(f32 *a);                                    // cftb040
-void fn_80125098(f32 *a);                                    // cftx020
-void fn_801250CC(int n, f32 *a, int nc, f32 *c);             // rftfsub
-void fn_801252D8(int n, f32 *a, int nc, f32 *c);             // rftbsub
-void fn_801254E4(int n, f32 *a, int nc, f32 *c);             // dctsub
+void bitrv2(int n, int *ip, f32 *a);                    // bitrv2
+void bitrv2conj(int n, int *ip, f32 *a);                    // bitrv2conj
+void bitrv216(f32 *a);                                    // bitrv216
+void bitrv216neg(f32 *a);                                    // bitrv216neg
+void bitrv208(f32 *a);                                    // bitrv208
+void bitrv208neg(f32 *a);                                    // bitrv208neg
+void cftf1st(int n, f32 *a, f32 *w);                     // cftf1st
+void cftb1st(int n, f32 *a, f32 *w);                     // cftb1st
+void cftrec1(int n, f32 *a, int nw, f32 *w);             // cftrec1
+void cftrec2(int n, f32 *a, int nw, f32 *w);             // cftrec2
+void cftexp1(int n, f32 *a, int nw, f32 *w);             // cftexp1
+void cftexp2(int n, f32 *a, int nw, f32 *w);             // cftexp2
+void cftmdl1(int n, f32 *a, f32 *w);                     // cftmdl1
+void cftmdl2(int n, f32 *a, f32 *w);                     // cftmdl2
+void cftfx41(int n, f32 *a, int nw, f32 *w);             // cftfx41
+void cftfx42(int n, f32 *a, int nw, f32 *w);             // cftfx42
+void cftf161(f32 *a, f32 *w);                            // cftf161
+void cftf162(f32 *a, f32 *w);                            // cftf162
+void cftf081(f32 *a, f32 *w);                            // cftf081
+void cftf082(f32 *a, f32 *w);                            // cftf082
+void cftf040(f32 *a);                                    // cftf040
+void cftb040(f32 *a);                                    // cftb040
+void cftx020(f32 *a);                                    // cftx020
+void rftfsub(int n, f32 *a, int nc, f32 *c);             // rftfsub
+void rftbsub(int n, f32 *a, int nc, f32 *c);             // rftbsub
+void dctsub(int n, f32 *a, int nc, f32 *c);             // dctsub
 
 #define M2C_FIELD(base, type, offset) (*(type)((u8 *)(base) + (offset)))
 
 extern void fn_802ECC74(void);
-extern void *fn_8011FFC4(s32);
+extern void *radmalloc(s32);
 extern f32 lbl_80329D48[];
-extern void fn_8011A330(void *);
+extern void CancelReadRequests(void *);
 void fn_8011FFB8(void *arg0, void *arg1);
 extern void *lbl_8055DEF8;
 extern void *lbl_8055DEFC;
@@ -428,7 +428,7 @@ extern void ***lbl_80559948;
 extern u32 *lbl_8055994C;
 extern void fn_80127F70(void);
 extern void fn_80127F94(void);
-extern s32 fn_8011A7CC(DVDFileInfo *);
+extern s32 BinkFileIdle(DVDFileInfo *);
 extern s32 OSDisableInterrupts(void);
 extern s32 OSEnableInterrupts(void);
 extern s32 OSRestoreInterrupts(s32);
@@ -567,7 +567,7 @@ u32 fn_80116BCC(void) {
 // divides directly when the product fits, else uses two-digit long division (Hacker's Delight divlu).
 #pragma push
 #pragma opt_lifetimes off
-u32 fn_80116BD4(u32 a, u32 b, u32 d) {
+u32 mult64anddiv(u32 a, u32 b, u32 d) {
     u32 p;
     u32 rhat;
     u32 q1;
@@ -625,7 +625,7 @@ u32 fn_80116BD4(u32 a, u32 b, u32 d) {
 #pragma pop
 
 // Fills `size` bytes at dst with the 16-bit value v.
-void fn_80116CC4(u32 *dst, u16 v, u32 size) {
+void radmemset16(u32 *dst, u16 v, u32 size) {
     u32 n = size >> 1;
     u32 val = v | (v << 16);
     while (n--) {
@@ -639,7 +639,7 @@ void fn_80116CC4(u32 *dst, u16 v, u32 size) {
 extern s64 OSGetTime(void);
 extern s64 lbl_8055DEC0;  // time of the first call
 // Milliseconds since the first call (60750 timer ticks per ms), divided without a 64-bit division.
-s32 fn_80116D30(void) {
+s32 RADTimerRead(void) {
     s64 now = OSGetTime();
     u64 delta;
     u64 ms;
@@ -654,16 +654,16 @@ s32 fn_80116D30(void) {
 }
 
 extern u32 fn_8011FF24(void);
-extern void *fn_8011FF2C(s32);
+extern void *popmalloc(s32);
 // Allocates `size` bytes for player p, counting them (plus allocator overhead) in its memory total.
-void *fn_80116DDC(void *p, s32 size) {
+void *bpopmalloc(void *p, s32 size) {
     u32 overhead = fn_8011FF24();
     s32 *fields = (s32 *)p;
     fields[0x290 / 4] += size + overhead;
-    return fn_8011FF2C(size);
+    return popmalloc(size);
 }
 
-void fn_80116E2C(const u8 *arg0) {
+void BinkSetError(const u8 *arg0) {
     const u8 *src = arg0;
     u8 *dst = lbl_8041D508;
     u8 c;
@@ -681,7 +681,7 @@ extern u8 lbl_8041D508[];
 extern s32 (*lbl_8055DEC8)(s32);
 extern s32 lbl_8055DECC;
 extern s32 lbl_8055DED0;
-s32 fn_80116E54(s32 (*arg0)(s32), s32 arg1) {
+s32 BinkSetSoundSystem(s32 (*arg0)(s32), s32 arg1) {
     s32 (*func)(s32);
     s32 result;
     if (arg0 == 0)
@@ -705,7 +705,7 @@ s32 fn_80116E54(s32 (*arg0)(s32), s32 arg1) {
 }
 
 // Converts `bytes` of 16-bit samples to 8-bit ones (high byte), returning the end of the output.
-s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes) {
+s8 *conv16to8(s8 *dst, s16 *src, u32 bytes) {
     u32 n;
     for (n = bytes >> 1; n != 0; n--) {
         *dst++ = *src++ >> 8;
@@ -715,7 +715,7 @@ s8 *fn_80116EE4(s8 *dst, s16 *src, u32 bytes) {
 
 // Tops a track's buffered data up to its fill target by inserting silence before the read position; returns the
 // milliseconds of silence added.
-u32 fn_80116F8C(StreamTrack *t) {
+u32 dosilence(StreamTrack *t) {
     u32 need;
     u32 ms;
     u32 wrap;
@@ -739,18 +739,18 @@ u32 fn_80116F8C(StreamTrack *t) {
     }
     return 0;
 }
-extern s32 fn_80116D30(void);
+extern s32 RADTimerRead(void);
 // Feeds every stream track: while a track is playing and has enough data buffered (or its deadline passed),
 // copies the next block out of its ring buffer into the buffer it hands out.
 // Feeds every stream track: while a track is playing and has enough data buffered (or its deadline passed),
 // copies the next block out of its ring buffer into the buffer it hands out.
-void fn_80117074(StreamPlayer *p) {
+void checksound(StreamPlayer *p) {
     u32 i;
     u8 *dst;
     u32 len;
     u32 first;
 
-    if (p->tracks[p->numTracks - 1].IsActive != 0 && fn_8011C1E0(lbl_8055DED4, p->queue) != 0) {
+    if (p->tracks[p->numTracks - 1].IsActive != 0 && RADCB_try_to_suspend_callback(lbl_8055DED4, p->queue) != 0) {
         for (i = 0; i < p->numTracks; i++) {
             while (p->tracks[i].IsActive(&p->tracks[i]) &&
                    (p->tracks[i].available > p->tracks[i].minimum ||
@@ -772,21 +772,21 @@ void fn_80117074(StreamPlayer *p) {
                 if (first < len) {
                     if (first != 0) {
                         if (p->tracks[i].eightBit) {
-                            dst = (u8 *)fn_80116EE4((s8 *)dst, (s16 *)p->tracks[i].readPtr, first);
+                            dst = (u8 *)conv16to8((s8 *)dst, (s16 *)p->tracks[i].readPtr, first);
                         } else {
                             memcpy(dst, p->tracks[i].readPtr, first);
                             dst += first;
                         }
                     }
                     if (p->tracks[i].eightBit) {
-                        fn_80116EE4((s8 *)dst, (s16 *)p->tracks[i].ringStart, len - first);
+                        conv16to8((s8 *)dst, (s16 *)p->tracks[i].ringStart, len - first);
                     } else {
                         memcpy(dst, p->tracks[i].ringStart, len - first);
                     }
                     p->tracks[i].readPtr = p->tracks[i].ringStart + (len - first);
                 } else {
                     if (p->tracks[i].eightBit) {
-                        fn_80116EE4((s8 *)dst, (s16 *)p->tracks[i].readPtr, len);
+                        conv16to8((s8 *)dst, (s16 *)p->tracks[i].readPtr, len);
                     } else {
                         memcpy(dst, p->tracks[i].readPtr, len);
                     }
@@ -798,13 +798,13 @@ void fn_80117074(StreamPlayer *p) {
                 p->tracks[i].Commit(&p->tracks[i], len);
             }
         }
-        fn_8011C2EC(lbl_8055DED4, p->queue);
+        RADCB_resume_callback(lbl_8055DED4, p->queue);
     }
 }
 
-void fn_80117330(void* arg0) {
+void inittimer(void* arg0) {
  if(*(s32*)((u8*)arg0+0x268)==0) {
-  s32 value=fn_80116D30();
+  s32 value=RADTimerRead();
   s32 count=*(s32*)((u8*)arg0+0x258);
   *(s32*)((u8*)arg0+0x268)=value;
   *(s32*)((u8*)arg0+0x26c)=count-1;
@@ -814,17 +814,17 @@ void fn_80117330(void* arg0) {
 
 // Moves a stream player to set `next` (1-based; 0 restarts the first): feeds the tracks, notes when the first set
 // starts (flagging a stall after 300000 ticks), and points the data at the set, in memory or through the reader.
-void fn_80117380(StreamPlayer *p, s32 next) {
+void GotoFrame(StreamPlayer *p, s32 next) {
     int set;
     s32 now;
     s32 base;
     set = next;
     if (next != 0) set = next - 1;
     p->unk2F8 = 0;
-    if (p->numTracks != 0) fn_80117074(p);
+    if (p->numTracks != 0) checksound(p);
     p->prevSet = p->curSet;
     if (set == 0) {
-        now = fn_80116D30();
+        now = RADTimerRead();
         if (p->firstTime == 0) p->firstTime = now;
         if ((u32)(now - p->firstTime) > 300000) {
             p->firstTime = now;
@@ -839,12 +839,12 @@ void fn_80117380(StreamPlayer *p, s32 next) {
         s32 b = p->setIndex[set + 1] & ~1;
         p->readerSeek(&p->readerRead, set, a, p->setData, b - a);
     }
-    if (p->numTracks != 0) fn_80117074(p);
+    if (p->numTracks != 0) checksound(p);
     p->curSet = set + 1;
 }
 
-u32 fn_80116BD4(u32 a, u32 b, u32 d);
-u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag) {
+u32 mult64anddiv(u32 a, u32 b, u32 d);
+u32 high1secrate(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag) {
     s32 i;
     u32 maxDiff = 0;
     s32 maxIndex = 0;
@@ -858,7 +858,7 @@ u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag)
         }
     }
     if (maxDiff == 0) {
-        maxDiff = fn_80116BD4(values[count] - values[0], offset, count);
+        maxDiff = mult64anddiv(values[count] - values[0], offset, count);
     }
     for (i = 0; i < count; i++) {
         if ((values[i] & 1) == 0) {
@@ -871,21 +871,21 @@ u32 fn_801174B0(s32 count, u32 *values, s32 offset, s32 *outIndex, s32 *outFlag)
     return maxDiff;
 }
 
-s32 fn_80117598(s32 arg0, s32 arg1) {
+s32 bink_get_priority_sound(s32 arg0, s32 arg1) {
     StreamPlayer *p = (StreamPlayer *)((u8 *)arg0 - ((u8 *)((StreamPlayer *)arg0)->queue - (u8 *)arg0));
     s32 v = p->tick;
     return v != arg1 ? -1 - v : 0;
 }
 
 // Queue callback: `arg0` is the player's queue entry; feeds the player's tracks and stores the tick.
-void fn_801175C4(s32 arg0, s32 arg1) {
+void bink_sound_callback(s32 arg0, s32 arg1) {
     // container-of: the player that owns this queue entry
     StreamPlayer *p = (StreamPlayer *)((u8 *)arg0 - ((u8 *)((StreamPlayer *)arg0)->queue - (u8 *)arg0));
-    if (p->numTracks) fn_80117074(p);
+    if (p->numTracks) checksound(p);
     p->tick = arg1;
 }
 
-void fn_80117618(void *arg0, void *arg1) {
+void BinkGetFrameBuffersInfo(void *arg0, void *arg1) {
     s32 *out = (s32 *)arg1;
     s32 temp_r5;
     u32 half;
@@ -918,17 +918,17 @@ void fn_80117618(void *arg0, void *arg1) {
     out[27] = temp_r5; out[28] = 0; out[29] = 0;
 }
 
-void fn_801176FC(void* arg0,s32 arg1){if(arg0)*(s32*)((u8*)arg0+0xb8)=arg1;}
+void BinkRegisterFrameBuffers(void* arg0,s32 arg1){if(arg0)*(s32*)((u8*)arg0+0xb8)=arg1;}
 
 struct BinkIO8011;
-s32 fn_8011ACC4(struct BinkIO8011 *reader, const char *name, u32 flags);
-BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags);
-void fn_8011FE20(void **slot, u32 amount);
-void fn_8011DFAC(void *arg0, u32 arg1);
-void *fn_8011BE48(s32 arg0);
-void fn_8011C120(void *arg0);
-void fn_8011BEC8(void *arg0, void *arg1, s32 arg2, s32 arg3);
-void fn_80120084(void *p);
+s32 BinkFileOpen(struct BinkIO8011 *reader, const char *name, u32 flags);
+BinkAudio8011 *BinkAudioDecompressOpen(u32 rate, u32 channels, u32 flags);
+void pushmalloc(void **slot, u32 amount);
+void ExpandBundleSizes(void *arg0, u32 arg1);
+void *RADCB_allocate_handler(s32 arg0);
+void RADCB_resume_handler(void *arg0);
+void RADCB_register_callback(void *arg0, void *arg1, s32 arg2, s32 arg3);
+void radfree(void *p);
 
 // Bink file header.
 typedef struct BinkHeader8011 {
@@ -952,7 +952,7 @@ typedef struct BinkPlane8011 {
     u32 pitch;
 } BinkPlane8011;
 
-// Frame buffer layout filled in by fn_80117618.
+// Frame buffer layout filled in by BinkGetFrameBuffersInfo.
 typedef struct BinkFrameBuffers8011 {
     s32 count;      // frames (1 or 2)
     u32 width;      // 0x04 luma width/height
@@ -980,7 +980,7 @@ typedef s32 (*BinkSoundOpen8011)(StreamTrack *t, u32 rate, s32 bits, s32 chans, 
 
 // BinkOpen: opens `name` (or a file image in memory with flag 0x04000000) and sets up the player, its frame
 // buffers, frame index, read buffer and sound tracks. Returns 0 on failure (the reason is in lbl_8041D508).
-StreamPlayer *fn_8011770C(void *name, u32 flags) {
+StreamPlayer *BinkOpen(void *name, u32 flags) {
     BinkHeader8011 hdr;
     BinkFrameBuffers8011 fb;
     StreamPlayer local;
@@ -995,13 +995,13 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     s32 f;
     void *buf;
 
-    open = (s32 (*)(void *, void *, u32))fn_8011ACC4;
+    open = (s32 (*)(void *, void *, u32))BinkFileOpen;
     if (!(flags & 0x4000)) {
         lbl_80559944 = 1;
         lbl_8041D608[0] = 0;
     }
     memset(&local, 0, sizeof(local));
-    local.openTime = fn_80116D30();
+    local.openTime = RADTimerRead();
     lbl_8041D508[0] = 0;
     fromMemory = flags & 0x04000000;
     if (fromMemory) {
@@ -1013,7 +1013,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         lbl_8055DED8 = 0;
         if (!open(&local.readerRead, name, flags)) {
             if ((s8)lbl_8041D508[0] == 0) {
-                fn_80116E2C((u8 *)lbl_802F6528);
+                BinkSetError((u8 *)lbl_802F6528);
             }
             return 0;
         }
@@ -1021,7 +1021,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     }
     if ((hdr.magic != 'fKIB' && hdr.magic != 'gKIB' && hdr.magic != 'hKIB' && hdr.magic != 'iKIB') ||
         local.unk110 != 0) {
-        fn_80116E2C((u8 *)lbl_802F6528 + 0x14);
+        BinkSetError((u8 *)lbl_802F6528 + 0x14);
     close:
         if (!(flags & 0x04000000)) {
             local.readerClose(&local.readerRead);
@@ -1029,7 +1029,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         return 0;
     }
     if (hdr.frames == 0) {
-        fn_80116E2C((u8 *)lbl_802F6528 + 0x25);
+        BinkSetError((u8 *)lbl_802F6528 + 0x25);
         goto close;
     }
     local.width = hdr.width;
@@ -1089,36 +1089,36 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     if (local.histSize == 0) {
         local.histSize = 1;
     }
-    fn_8011FE20((void **)&local.frameBuffer, local.frameBufferSize + 16);
-    fn_8011FE20((void **)&local.histFrameStart, local.histSize * 4);
-    fn_8011FE20((void **)&local.histIdle, local.histSize * 4);
-    fn_8011FE20((void **)&local.histDecode, local.histSize * 4);
-    fn_8011FE20((void **)&local.hist29C, local.histSize * 4);
-    fn_8011FE20((void **)&local.histRead, local.histSize * 4);
-    fn_8011FE20((void **)&local.hist128, local.histSize * 4);
-    fn_8011FE20((void **)&local.hist12C, local.histSize * 4);
-    fn_8011FE20((void **)&local.tracks, (lbl_80559944 != 0 ? lbl_80559944 : 1) * sizeof(StreamTrack));
-    fn_8011FE20((void **)&local.trackIds, lbl_80559944 * 4);
-    fn_8011DFAC(local.planeSizes, (local.width + 15) & ~15);
-    fn_8011FE20((void **)&local.planeSizes[0], local.planeSizes[0]);
-    fn_8011FE20((void **)&local.planeSizes[1], local.planeSizes[1]);
-    fn_8011FE20((void **)&local.planeSizes[2], local.planeSizes[2]);
-    fn_8011FE20((void **)&local.planeSizes[3], local.planeSizes[3]);
-    fn_8011FE20((void **)&local.planeSizes[4], local.planeSizes[4]);
-    fn_8011FE20((void **)&local.planeSizes[5], local.planeSizes[5]);
-    fn_8011FE20((void **)&local.planeSizes[6], local.planeSizes[6]);
-    fn_8011FE20((void **)&local.planeSizes[7], local.planeSizes[7]);
-    fn_8011FE20((void **)&local.planeSizes[8], local.planeSizes[8]);
+    pushmalloc((void **)&local.frameBuffer, local.frameBufferSize + 16);
+    pushmalloc((void **)&local.histFrameStart, local.histSize * 4);
+    pushmalloc((void **)&local.histIdle, local.histSize * 4);
+    pushmalloc((void **)&local.histDecode, local.histSize * 4);
+    pushmalloc((void **)&local.hist29C, local.histSize * 4);
+    pushmalloc((void **)&local.histRead, local.histSize * 4);
+    pushmalloc((void **)&local.hist128, local.histSize * 4);
+    pushmalloc((void **)&local.hist12C, local.histSize * 4);
+    pushmalloc((void **)&local.tracks, (lbl_80559944 != 0 ? lbl_80559944 : 1) * sizeof(StreamTrack));
+    pushmalloc((void **)&local.trackIds, lbl_80559944 * 4);
+    ExpandBundleSizes(local.planeSizes, (local.width + 15) & ~15);
+    pushmalloc((void **)&local.planeSizes[0], local.planeSizes[0]);
+    pushmalloc((void **)&local.planeSizes[1], local.planeSizes[1]);
+    pushmalloc((void **)&local.planeSizes[2], local.planeSizes[2]);
+    pushmalloc((void **)&local.planeSizes[3], local.planeSizes[3]);
+    pushmalloc((void **)&local.planeSizes[4], local.planeSizes[4]);
+    pushmalloc((void **)&local.planeSizes[5], local.planeSizes[5]);
+    pushmalloc((void **)&local.planeSizes[6], local.planeSizes[6]);
+    pushmalloc((void **)&local.planeSizes[7], local.planeSizes[7]);
+    pushmalloc((void **)&local.planeSizes[8], local.planeSizes[8]);
     if (!fromMemory) {
-        fn_8011FE20((void **)&local.setIndex, (local.numIndex + 1) * 4);
-        fn_8011FE20((void **)&local.audioMaxSize, local.numAudio * 4);
-        fn_8011FE20((void **)&local.audioFlags, local.numAudio * 4);
-        fn_8011FE20((void **)&local.audioIds, local.numAudio * 4);
+        pushmalloc((void **)&local.setIndex, (local.numIndex + 1) * 4);
+        pushmalloc((void **)&local.audioMaxSize, local.numAudio * 4);
+        pushmalloc((void **)&local.audioFlags, local.numAudio * 4);
+        pushmalloc((void **)&local.audioIds, local.numAudio * 4);
     }
-    p = fn_80116DDC(&local, sizeof(StreamPlayer));
+    p = bpopmalloc(&local, sizeof(StreamPlayer));
     if (p == 0) {
     nomem:
-        fn_80116E2C((u8 *)lbl_802F6528 + 0x59);
+        BinkSetError((u8 *)lbl_802F6528 + 0x59);
         goto close;
     }
     memcpy(p, &local, sizeof(StreamPlayer));
@@ -1140,33 +1140,33 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         p->readerRead(&p->readerRead, -1, p->audioIds, p->numAudio * 4);
         p->readerRead(&p->readerRead, -1, p->setIndex, (p->numIndex + 1) * 4);
         if (p->unk110) {
-            fn_80116E2C((u8 *)lbl_802F6528 + 0x68);
+            BinkSetError((u8 *)lbl_802F6528 + 0x68);
             goto close;
         }
     }
-    p->maxFrameSize = fn_801174B0(p->numSets, (u32 *)p->setIndex, p->histSize, (s32 *)&p->unkD8, &p->unk380);
+    p->maxFrameSize = high1secrate(p->numSets, (u32 *)p->setIndex, p->histSize, (s32 *)&p->unkD8, &p->unk380);
     if (!(flags & 0x400)) {
-        fn_80117618(p, &fb);
+        BinkGetFrameBuffersInfo(p, &fb);
         any = 0;
         for (f = 0; f < fb.count; f++) {
             u32 cPitch = (fb.cWidth + 15) & ~15;
             if (fb.frames[f].y.wanted) {
-                fn_8011FE20(&fb.frames[f].y.buffer, fb.width * fb.height);
+                pushmalloc(&fb.frames[f].y.buffer, fb.width * fb.height);
                 any = 1;
                 fb.frames[f].y.pitch = fb.width;
             }
             if (fb.frames[f].cr.wanted) {
-                fn_8011FE20(&fb.frames[f].cr.buffer, cPitch * fb.cHeight);
+                pushmalloc(&fb.frames[f].cr.buffer, cPitch * fb.cHeight);
                 fb.frames[f].cr.pitch = cPitch;
                 any = 1;
             }
             if (fb.frames[f].cb.wanted) {
-                fn_8011FE20(&fb.frames[f].cb.buffer, cPitch * fb.cHeight);
+                pushmalloc(&fb.frames[f].cb.buffer, cPitch * fb.cHeight);
                 fb.frames[f].cb.pitch = cPitch;
                 any = 1;
             }
             if (fb.frames[f].a.wanted) {
-                fn_8011FE20(&fb.frames[f].a.buffer, fb.width * fb.height);
+                pushmalloc(&fb.frames[f].a.buffer, fb.width * fb.height);
                 any = 1;
                 fb.frames[f].a.pitch = fb.width;
             }
@@ -1177,10 +1177,10 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
             fb.frames[f].y.buffer = 0;
         }
         if (any) {
-            p->extra = buf = fn_80116DDC(p, sizeof(fb));
+            p->extra = buf = bpopmalloc(p, sizeof(fb));
             if (buf == 0) {
             freeplayer:
-                fn_80120084(p);
+                radfree(p);
                 goto nomem;
             }
             p->video = buf;
@@ -1208,10 +1208,10 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         }
         if (flags & 0x2000) {
             n = p->fileSize + 8 - (p->setIndex[0] & ~1);
-            p->memoryData = fn_80116DDC(p, n);
+            p->memoryData = bpopmalloc(p, n);
             if (p->memoryData == 0) {
                 if (p->video != 0) {
-                    fn_80120084(p->video);
+                    radfree(p->video);
                 }
                 goto freeplayer;
             }
@@ -1220,8 +1220,8 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
             p->readerClose(&p->readerRead);
             p->readTime = 0;
         } else {
-            fn_8011FE20((void **)&p->setData, p->largestFrame);
-            p->readBuffer = fn_80116DDC(p, p->readBufSize);
+            pushmalloc((void **)&p->setData, p->largestFrame);
+            p->readBuffer = bpopmalloc(p, p->readBufSize);
             if (p->readBuffer == 0) {
                 p->readBufSize = 0;
             }
@@ -1231,13 +1231,13 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
     p->frameBuffer[p->frameBufferSize] = 0;
     p->curSet = -1;
     if (p->fpsNum != 0) {
-        p->unk270 = fn_80116BD4(2000, p->fpsDen, p->fpsNum);
+        p->unk270 = mult64anddiv(2000, p->fpsDen, p->fpsNum);
     } else {
         p->unk270 = 2000;
     }
     p->unk28C = 1;
-    fn_80117380(p, 1);
-    p->openTime = fn_80116D30() - p->openTime;
+    GotoFrame(p, 1);
+    p->openTime = RADTimerRead() - p->openTime;
     p->tracks->gain = 0x10000;
     p->numTracks = 0;
     if (p->numAudio != 0 && lbl_80559944 != 0) {
@@ -1271,7 +1271,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                     p->tracks[track].blockMask = -1;
                 }
                 p->tracks[track].ringSize = (p->audioMaxSize[p->trackIds[track]] + 0xFF) & ~0xFF;
-                p->tracks[track].ringStart = fn_80116DDC(p, p->tracks[track].ringSize);
+                p->tracks[track].ringStart = bpopmalloc(p, p->tracks[track].ringSize);
                 t = &p->tracks[track];
                 if (t->ringStart == 0) {
                     t->Close(t);
@@ -1284,7 +1284,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                     p->tracks[track].ringEnd = p->tracks[track].ringStart + p->tracks[track].ringSize;
                     p->tracks[track].writePtr = p->tracks[track].ringStart;
                     p->tracks[track].readPtr = p->tracks[track].ringStart;
-                    p->tracks[track].fillTarget = fn_80116BD4(rate * (AF.stereo + 1) * 2, latency, 1000) & ~3;
+                    p->tracks[track].fillTarget = mult64anddiv(rate * (AF.stereo + 1) * 2, latency, 1000) & ~3;
                     if (p->tracks[track].fillTarget > p->tracks[track].ringSize) {
                         p->tracks[track].fillTarget = p->tracks[track].ringSize;
                     }
@@ -1294,7 +1294,7 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
                         if (!f.valid && f.dct) {
                             dct = 1;
                         }
-                        p->tracks[track].handle = (s32)fn_8011B584(f.rate, f.stereo + 1, dct);
+                        p->tracks[track].handle = (s32)BinkAudioDecompressOpen(f.rate, f.stereo + 1, dct);
                     }
                     if (p->tracks[track].handle == 0) {
                         p->tracks[track].Close(&p->tracks[track]);
@@ -1321,13 +1321,13 @@ StreamPlayer *fn_8011770C(void *name, u32 flags) {
         p->running = 1;
         if (p->tracks[0].unk60 == 0) {
             if (lbl_8055DED4 == 0) {
-                lbl_8055DED4 = fn_8011BE48(-13);
+                lbl_8055DED4 = RADCB_allocate_handler(-13);
                 if (lbl_8055DED4 != 0) {
-                    fn_8011C120(lbl_8055DED4);
+                    RADCB_resume_handler(lbl_8055DED4);
                 }
             }
             if (lbl_8055DED4 != 0) {
-                fn_8011BEC8(lbl_8055DED4, p->queue, (s32)fn_80117598, (s32)fn_801175C4);
+                RADCB_register_callback(lbl_8055DED4, p->queue, (s32)bink_get_priority_sound, (s32)bink_sound_callback);
             }
         }
     }
@@ -1346,7 +1346,7 @@ static inline StreamTrack* SelectStreamTrack(StreamTrack* tracks, s32 index) {
 // Decodes the current frame of a stream player: updates the timing history, copies each audio track's decoded
 // packets into its ring (dropping the oldest data on overflow), then decodes the video. Returns 1 when playback is
 // done, otherwise 0.
-s32 fn_801186B8(StreamPlayer *p) {
+s32 BinkDoFrame(StreamPlayer *p) {
     s32 i;
     s32 old;
     u8 *data;
@@ -1372,8 +1372,8 @@ s32 fn_801186B8(StreamPlayer *p) {
     if (p->stalled) {
         p->stalled = 0;
         if (p->running) {
-            fn_801190B0(p, 0);
-            fn_801190B0(p, 1);
+            BinkSetSoundOnOff(p, 0);
+            BinkSetSoundOnOff(p, 1);
         }
         p->startTime = 0;
         p->pauseTime = 0;
@@ -1386,7 +1386,7 @@ s32 fn_801186B8(StreamPlayer *p) {
     }
     p->unk2F8 = 0;
     p->busy = 1;
-    p->frameStart = fn_80116D30();
+    p->frameStart = RADTimerRead();
     old = p->histPos;
     if (--p->histPos < 0) {
         p->histPos = p->histSize - 1;
@@ -1399,12 +1399,12 @@ s32 fn_801186B8(StreamPlayer *p) {
     p->hist128[p->histPos] = p->unk128;
     p->hist12C[p->histPos] = p->unk12C;
     if (p->unk25C == 0) {
-        p->histFrameStart[old] = p->frameStart - fn_80116BD4(1000, p->rateDen, p->rateNum);
+        p->histFrameStart[old] = p->frameStart - mult64anddiv(1000, p->rateDen, p->rateNum);
         p->unk25C = p->frameStart;
         p->unk12C = 0;
         p->unk128 = 0;
     } else if (p->numTracks != 0) {
-        fn_80117074(p);
+        checksound(p);
     }
     data = (u8 *)p->setData;
     p->unk274 = p->frameStart;
@@ -1430,14 +1430,14 @@ s32 fn_801186B8(StreamPlayer *p) {
             src += 4;
             if (!locked) {
                 locked = 1;
-                fn_8011C274(lbl_8055DED4, p->queue);
+                RADCB_suspend_callback(lbl_8055DED4, p->queue);
             }
             while (remaining != 0) {
                 uintptr_t writeOffset;
                 uintptr_t decodeOffset = (uintptr_t)j * sizeof(StreamTrack);
                 t = (StreamTrack *)(decodeOffset + (uintptr_t)p->tracks);
                 room = t->ringSize - t->available;
-                fn_8011B94C((BinkAudio8011 *)t->handle, &out, &len, src, &src);
+                BinkAudioDecompress((BinkAudio8011 *)t->handle, &out, &len, src, &src);
                 if (len > remaining) {
                     len = remaining;
                 }
@@ -1478,9 +1478,9 @@ s32 fn_801186B8(StreamPlayer *p) {
         data += size;
     }
     if (locked) {
-        fn_8011C2EC(lbl_8055DED4, p->queue);
+        RADCB_resume_callback(lbl_8055DED4, p->queue);
     }
-    now = fn_80116D30();
+    now = RADTimerRead();
     if (p->unk28C && p->video) {
         if (p->unk2F4 == 0) {
             memset(p->frameBuffer, 0, p->frameBufferSize);
@@ -1493,17 +1493,17 @@ s32 fn_801186B8(StreamPlayer *p) {
         }
         {
             u32 set = p->curSet - 1;
-            p->videoResult = fn_8011FC2C(p->video, (s32)p->frameBuffer, (s32)p->blocksWide, (s32 *)data,
+            p->videoResult = ExpandBink(p->video, (s32)p->frameBuffer, (s32)p->blocksWide, (s32 *)data,
                                          p->setIndex[set] & 1, (s32)p->planeSizes, p->flags, p->videoFlags);
         }
     }
     if (p->numTracks != 0) {
-        fn_80117074(p);
+        checksound(p);
     }
     p->unkB4 = -1;
     p->unk258++;
-    fn_80117330(p);
-    p->frameEnd = fn_80116D30();
+    inittimer(p);
+    p->frameEnd = RADTimerRead();
     p->idleTime += now - p->frameStart;
     p->decodeTime += p->frameEnd - now;
     p->unk2D4 = p->curSet;
@@ -1512,7 +1512,7 @@ s32 fn_801186B8(StreamPlayer *p) {
     return 0;
 }
 
-void fn_80118C1C(void *arg0, s32 arg1) {
+void timeframe(void *arg0, s32 arg1) {
     s32 temp_r0 = *(s32 *)((u8 *)arg0 + 0x264);
     if (temp_r0 != 0) {
         s32 temp_r5 = *(s32 *)((u8 *)arg0 + 0x29c);
@@ -1523,7 +1523,7 @@ void fn_80118C1C(void *arg0, s32 arg1) {
 
 // Per-frame update of a stream player: catches up tracks whose dirty flag is set, refills buffers and steps the
 // playback state.
-void fn_80118C44(StreamPlayer *p) {
+void BinkNextFrame(StreamPlayer *p) {
     s32 resync = 0;
     u32 i;
     if (p != 0) {
@@ -1540,8 +1540,8 @@ void fn_80118C44(StreamPlayer *p) {
         }
         if (resync) {
             p->resyncs++;
-            fn_8011C274(lbl_8055DED4, p->queue);
-            fn_801190B0(p, 0);
+            RADCB_suspend_callback(lbl_8055DED4, p->queue);
+            BinkSetSoundOnOff(p, 0);
             for (;;) {
                 u32 lim = (p->readerCapacity * 29) >> 5;
                 if (p->readerFilled >= lim || p->readerFill(&p->readerRead) == 0) {
@@ -1551,26 +1551,26 @@ void fn_80118C44(StreamPlayer *p) {
             p->startTime = 0;
             p->unk328 = 0;
             p->pauseTime = 0;
-            fn_801190B0(p, 1);
-            fn_8011C2EC(lbl_8055DED4, p->queue);
+            BinkSetSoundOnOff(p, 1);
+            RADCB_resume_callback(lbl_8055DED4, p->queue);
         }
         p->busy = 1;
         if (p->numTracks != 0) {
-            fn_80117074(p);
+            checksound(p);
         }
-        fn_80118C1C(p, fn_80116D30());
-        fn_80117380(p, p->curSet < p->numSets ? p->curSet + 1 : 1);
+        timeframe(p, RADTimerRead());
+        GotoFrame(p, p->curSet < p->numSets ? p->curSet + 1 : 1);
         p->busy = 0;
     }
 }
 
 // Destroys a stream player: closes its tracks, releases its file and buffers, and frees it.
 // Destroys a stream player: closes its tracks, releases its file and buffers, and frees it.
-void fn_80118DC0(StreamPlayer *p) {
+void BinkClose(StreamPlayer *p) {
     u32 i;
     if (p != 0) {
-        fn_80118F78(p, 1);
-        switch (fn_8011BFFC(0, (s32)p->request, p->numTracks != 0 ? lbl_8055DED4 : 0, (s32)p->queue, 1)) {
+        BinkPause(p, 1);
+        switch (RADCB_unregister_2_callbacks(0, (s32)p->request, p->numTracks != 0 ? lbl_8055DED4 : 0, (s32)p->queue, 1)) {
         case 2:
             lbl_8055DED4 = 0;
             break;
@@ -1582,26 +1582,26 @@ void fn_80118DC0(StreamPlayer *p) {
             p->tracks[i].Close(&p->tracks[i]);
             fn_8011BC48(p->tracks[i].handle);
             if (p->tracks[i].ringStart != 0) {
-                fn_80120084(p->tracks[i].ringStart);
+                radfree(p->tracks[i].ringStart);
             }
         }
         if (p->memoryData != 0) {
             if (!(p->flags & 0x04000000)) {
-                fn_80120084(p->memoryData);
+                radfree(p->memoryData);
             }
         } else {
             p->readerClose(&p->readerRead);
-            fn_80120084(p->readBuffer);
+            radfree(p->readBuffer);
         }
         if (p->extra != 0) {
-            fn_80120084(p->extra);
+            radfree(p->extra);
         }
         memset(p, 0, sizeof(StreamPlayer));
-        fn_80120084(p);
+        radfree(p);
     }
 }
 
-void fn_80118F1C(void *arg0, s32 arg1) {
+void endframe(void *arg0, s32 arg1) {
     s32 temp_r0 = *(s32*)((u8*)arg0 + 0x274);
     if (temp_r0 != 0) {
         u32 temp_r5 = *(u32*)((u8*)arg0 + 0x278);
@@ -1621,16 +1621,16 @@ void fn_80118F1C(void *arg0, s32 arg1) {
 
 // Pauses (arg1 != 0) or resumes a stream player and all its tracks; returns the new paused state.
 // Pauses (arg1 != 0) or resumes a stream player and all its tracks; returns the new paused state.
-s32 fn_80118F78(StreamPlayer *p, s32 arg1) {
+s32 BinkPause(StreamPlayer *p, s32 arg1) {
     s32 now;
     u32 i;
     s32 resumed = 0;
     if (p == 0) {
         return 0;
     }
-    now = fn_80116D30();
-    fn_80118C1C(p, now);
-    fn_80118F1C(p, now);
+    now = RADTimerRead();
+    timeframe(p, now);
+    endframe(p, now);
     if (arg1 == 0) {
         if (p->paused != 0) {
             resumed = 1;
@@ -1643,22 +1643,22 @@ s32 fn_80118F78(StreamPlayer *p, s32 arg1) {
         }
     }
     p->paused = arg1;
-    fn_8011C274(lbl_8055DED4, p->queue);
+    RADCB_suspend_callback(lbl_8055DED4, p->queue);
     for (i = 0; i < p->numTracks; i++) {
         p->tracks[i].SetPaused(&p->tracks[i], arg1);
     }
-    fn_8011C2EC(lbl_8055DED4, p->queue);
+    RADCB_resume_callback(lbl_8055DED4, p->queue);
     if (p->unk258 != 0 && p->numTracks != 0) {
-        fn_80117074(p);
+        checksound(p);
     }
     if (resumed) {
-        p->startTime = fn_80116D30() - p->pauseTime;
+        p->startTime = RADTimerRead() - p->pauseTime;
     }
     return p->paused;
 }
 
 // Stops (arg1 == 0) or restarts every track; when a stop empties the tracks their rings are reset.
-s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
+s32 BinkSetSoundOnOff(StreamPlayer *p, s32 arg1) {
     s32 any = 0;
     s32 locked;
     u32 i;
@@ -1669,7 +1669,7 @@ s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
             if (p->tracks[i].Run != 0) {
                 if (!locked) {
                     locked = 1;
-                    fn_8011C274(lbl_8055DED4, p->queue);
+                    RADCB_suspend_callback(lbl_8055DED4, p->queue);
                 }
                 r = p->tracks[i].Run(&p->tracks[i], arg1 ? 1 : 0);
                 if (r != 0) {
@@ -1680,7 +1680,7 @@ s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
                     p->tracks[i].readPtr = p->tracks[i].ringStart;
                     p->tracks[i].available = 0;
                     if (p->curSet != 1U || p->unk2D4 == p->curSet) {
-                        fn_80116F8C(&p->tracks[i]);
+                        dosilence(&p->tracks[i]);
                     }
                     p->running = 0;
                 } else if (r != 0 && p->running == 0) {
@@ -1692,7 +1692,7 @@ s32 fn_801190B0(StreamPlayer *p, s32 arg1) {
             }
         }
         if (locked) {
-            fn_8011C2EC(lbl_8055DED4, p->queue);
+            RADCB_resume_callback(lbl_8055DED4, p->queue);
         }
     }
     return any;
@@ -1703,7 +1703,7 @@ void fn_80119214(void *arg0, void *arg1) {
 }
 
 extern void memset(void *, int, unsigned int);
-void fn_80119218(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
+void SetStreamVolumePan(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     void *temp_r31 = (u8*)arg0 + 0x14C;
     memset(temp_r31, 0, 0x30);
     *(s16*)temp_r31 = arg2;
@@ -1714,18 +1714,18 @@ void fn_80119218(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     *(s32*)((u8*)arg0 + 0x1C) |= 0x212;
 }
 
-void fn_80119288(void *arg0) {
+void set_rate_volume_and_pan(void *arg0) {
     if (*(void **)((u8 *)arg0 + 0x7C) != 0) {
-        fn_80119218(*(void **)((u8 *)arg0 + 0x7C), *(s32 *)((u8 *)arg0 + 0xA4), *(s32 *)((u8 *)arg0 + 0xA8),
+        SetStreamVolumePan(*(void **)((u8 *)arg0 + 0x7C), *(s32 *)((u8 *)arg0 + 0xA4), *(s32 *)((u8 *)arg0 + 0xA8),
                     *(s32 *)((u8 *)arg0 + 0x78) == 1 ? *(s32 *)((u8 *)arg0 + 0xAC) : 0);
     }
     if (*(void **)((u8 *)arg0 + 0x80) != 0) {
-        fn_80119218(*(void **)((u8 *)arg0 + 0x80), *(s32 *)((u8 *)arg0 + 0xA4), 0, *(s32 *)((u8 *)arg0 + 0xAC));
+        SetStreamVolumePan(*(void **)((u8 *)arg0 + 0x80), *(s32 *)((u8 *)arg0 + 0xA4), 0, *(s32 *)((u8 *)arg0 + 0xAC));
     }
 }
 
 extern void DCFlushRange(void *, u32);
-void fn_80119300(void *arg0, u32 arg1, u32 arg2) {
+void clear(void *arg0, u32 arg1, u32 arg2) {
     u32 len;
     u32 n;
     len = arg2;
@@ -1758,7 +1758,7 @@ void fn_80119300(void *arg0, u32 arg1, u32 arg2) {
 }
 
 extern void AXSetVoiceState(void *vpb, s32 state);
-void fn_8011943C(void *arg0, s32 arg1) {
+void set_both_state(void *arg0, s32 arg1) {
     void *v;
     if ((v = *(void **)arg0) != NULL) {
         AXSetVoiceState(v, arg1);
@@ -1769,22 +1769,22 @@ void fn_8011943C(void *arg0, s32 arg1) {
 }
 
 void fn_80119498(void *arg0) {
-    fn_8011943C(arg0, 1);
+    set_both_state(arg0, 1);
     *(s32 *)((u8 *)arg0 + 0x38) = 0;
 }
 
-s32 fn_801194D0(void* arg0) {
+s32 get_pos(void* arg0) {
  return *(u16*)((u8*)arg0+0x1be) + (*(u16*)((u8*)arg0+0x1bc)<<16);
 }
 
-s32 fn_801194E4(void *arg0) {
+s32 GoodGetCurrentPosition(void *arg0) {
     s32 first;
     s32 current;
     s32 result;
     do {
-        first = fn_801194D0(*(void **)arg0);
-        fn_801194D0(*(void **)arg0);
-        result = fn_801194D0(*(void **)arg0);
+        first = get_pos(*(void **)arg0);
+        get_pos(*(void **)arg0);
+        result = get_pos(*(void **)arg0);
     } while ((u32)(result - first) >= 0x400);
     current = result * 2 - *(s32 *)((u8 *)arg0 + 0x10);
     if (*(s32 *)((u8 *)arg0 + 4) != 0)
@@ -1792,29 +1792,29 @@ s32 fn_801194E4(void *arg0) {
     return current;
 }
 
-void fn_80119558(void *arg0) {
+void start_streaming(void *arg0) {
     *(s32 *)((u8 *)arg0 + 0x34) = 1;
     fn_80119498(arg0);
-    *(s32 *)((u8 *)arg0 + 0x48) = fn_801194E4(arg0);
-    *(s32 *)((u8 *)arg0 + 0x50) = fn_80116D30();
+    *(s32 *)((u8 *)arg0 + 0x48) = GoodGetCurrentPosition(arg0);
+    *(s32 *)((u8 *)arg0 + 0x50) = RADTimerRead();
 }
 
 void fn_801195A0(void *arg0) {
-    fn_8011943C(arg0, 0);
+    set_both_state(arg0, 0);
     *(s32 *)((u8 *)arg0 + 0x38) = 1;
 }
 
 extern f64 pow(f32, f64);
-extern void fn_80119288(void *);
-extern void fn_80119300(void *, u32, u32);
-extern void fn_8011943C(void *, s32);
-extern void fn_801199A4(void *, s32);
+extern void set_rate_volume_and_pan(void *);
+extern void clear(void *, u32, u32);
+extern void set_both_state(void *, s32);
+extern void set_addrs(void *, s32);
 
 // Moves buffered data from a track's ring into its voice buffers, splitting interleaved stereo into the left and
 // right voices.
 #pragma push
 #pragma opt_dead_assignments off
-void fn_801195D8(StreamTrack *t) {
+void try_a_mix(StreamTrack *t) {
     u16 *src;
     u32 n;
     u16 *l;
@@ -1864,14 +1864,14 @@ void fn_801195D8(StreamTrack *t) {
         }
         t->pending -= n;
         if (t->ending == 0 && t->pending == 0 && t->stopping == 0) {
-            fn_80119558(t->voices);
+            start_streaming(t->voices);
         }
     }
 }
 #pragma pop
 
 // Keeps a track's voices fed: tops them up from the ring, or writes silence while the voices outrun the data.
-s32 fn_80119824(StreamTrack *t) {
+s32 Ready(StreamTrack *t) {
     u32 pos;
     u32 now;
     u32 space;
@@ -1879,16 +1879,16 @@ s32 fn_80119824(StreamTrack *t) {
         return 0;
     }
     if (t->ending == 0) {
-        fn_801195D8(t);
+        try_a_mix(t);
         return 0;
     }
     pos = t->lastPos;
-    if (fn_80116D30() - t->lastTime <= 12) {
+    if (RADTimerRead() - t->lastTime <= 12) {
         goto compute;
     }
     for (;;) {
-        pos = fn_801194E4(t->voices);
-        now = fn_80116D30();
+        pos = GoodGetCurrentPosition(t->voices);
+        now = RADTimerRead();
         t->lastPos = pos;
         if (now - t->lastTime >= t->interval) {
             t->lastTime = now;
@@ -1910,14 +1910,14 @@ s32 fn_80119824(StreamTrack *t) {
         }
     silence:
         t->dirty = 1;
-        fn_80119300(t->voices, t->writePos, t->chunk * 2);
+        clear(t->voices, t->writePos, t->chunk * 2);
         t->writePos += t->chunk * 2;
         if (t->writePos >= t->bufSize) {
             t->writePos -= t->bufSize;
         }
     }
     t->pending = space;
-    fn_801195D8(t);
+    try_a_mix(t);
 done:
     return 0;
 }
@@ -1926,7 +1926,7 @@ s32 fn_80119994(void) { return 0; }
 
 s32 fn_8011999C(void) { return 0; }
 
-void fn_801199A4(void* arg0, s32 arg1) {
+void set_addrs(void* arg0, s32 arg1) {
     extern void AXSetVoiceAddr(void*, s16*);
     s16 rect[8];
     u32 width;
@@ -1967,17 +1967,17 @@ void fn_801199A4(void* arg0, s32 arg1) {
     }
 }
 
-void fn_80119AB0(void *arg0, s32 arg1) {
+void Volume(void *arg0, s32 arg1) {
     s32 value = arg1;
     f32 temp;
     if (value < 0) value = 0;
     if (value > 0x7fff) value = 0x7fff;
     temp = (f32) pow((f32)value, 1.6666666f);
     *(s32 *)((u8 *)arg0 + 0xa4) = (s32)(0.000976582407f * temp);
-    fn_80119288(arg0);
+    set_rate_volume_and_pan(arg0);
 }
 
-void fn_80119B38(void *arg0, s32 arg1) {
+void Pan(void *arg0, s32 arg1) {
     s32 value = arg1;
     f32 temp_f31;
     f32 temp_f3;
@@ -1989,15 +1989,15 @@ void fn_80119B38(void *arg0, s32 arg1) {
     *(s32*)((u8*)arg0 + 0xa8) = (s32)(32768.0f * temp_f3);
     temp_f1 = (f32)pow(temp_f31, 0.3f);
     *(s32*)((u8*)arg0 + 0xac) = (s32)(32768.0f * temp_f1);
-    fn_80119288(arg0);
+    set_rate_volume_and_pan(arg0);
 }
 
 extern f64 pow(f32, f64);
-extern void fn_80119288(void *);
-extern void fn_80119300(void *, u32, u32);
-extern void fn_8011943C(void *, s32);
-extern void fn_801199A4(void *, s32);
-s32 fn_80119C0C(void *arg0, s32 arg1) {
+extern void set_rate_volume_and_pan(void *);
+extern void clear(void *, u32, u32);
+extern void set_both_state(void *, s32);
+extern void set_addrs(void *, s32);
+s32 SetOnOff(void *arg0, s32 arg1) {
     u8 *p = (u8 *)arg0;
     if (arg1 != 0 && *(s32 *)(p + 0x64) == 0) {
         *(s32 *)(p + 0xb0) = 0;
@@ -2005,15 +2005,15 @@ s32 fn_80119C0C(void *arg0, s32 arg1) {
         *(s32 *)(p + 0xb8) = 0;
         *(s32 *)(p + 0xbc) = *(s32 *)(p + 0xc0);
     } else if (arg1 == 0 && *(s32 *)(p + 0x64) != 0) {
-        fn_8011943C(p + 0x7c, 0);
-        fn_801199A4(p + 0x7c, 1);
-        fn_80119300(p + 0x7c, 0, *(s32 *)(p + 0x94));
+        set_both_state(p + 0x7c, 0);
+        set_addrs(p + 0x7c, 1);
+        clear(p + 0x7c, 0, *(s32 *)(p + 0x94));
         *(s32 *)(p + 0x64) = 0;
     }
     return *(s32 *)(p + 0x64);
 }
 
-s32 fn_80119CB0(void *arg0, s32 arg1) {
+s32 Pause(void *arg0, s32 arg1) {
     s32 *var_r3;
     if (arg1 != 0) {
         if (*(s32 *)((u8 *)arg0 + 0xb0) != 0) {
@@ -2024,7 +2024,7 @@ s32 fn_80119CB0(void *arg0, s32 arg1) {
     } else {
         if (*(s32 *)((u8 *)arg0 + 0xb0) == 0) {
             if (*(s32 *)((u8 *)arg0 + 0xbc) == 0) {
-                fn_80119558((u8 *)arg0 + 0x7c);
+                start_streaming((u8 *)arg0 + 0x7c);
             }
         } else {
             fn_80119498((u8 *)arg0 + 0x7c);
@@ -2038,7 +2038,7 @@ s32 fn_80119CB0(void *arg0, s32 arg1) {
 extern s32 lbl_8055DEE0[];
 extern s32 lbl_8055DEE8;
 struct BinkIO8011;
-extern void fn_8011A6A0(struct BinkIO8011 *);
+extern void ReadKickoff(struct BinkIO8011 *);
 extern void TRKGetFreeBuffer(void *);
 extern s32 lbl_8055DEE0[2];  // the sample buffer allocator: alloc, free
 extern s32 lbl_8055DEE8;
@@ -2046,11 +2046,11 @@ extern void AXFreeVoice(void *);
 typedef StreamTrack StreamChannel;  // the voice side of a track
 
 // Stops and releases the voices of a channel, then frees its sample buffer.
-void fn_80119D40(void *arg0) {
+void Close(void *arg0) {
     StreamChannel *ch = arg0;
     if (ch->voices[0] != 0) {
         ch->stopping = 1;
-        fn_8011943C(ch->voices, 0);
+        set_both_state(ch->voices, 0);
         if (ch->voices[0] != 0) {
             AXFreeVoice(ch->voices[0]);
         }
@@ -2079,17 +2079,17 @@ extern void AXSetVoiceSrcType(void *vpb, u32 type);
 extern void AXSetVoiceSrc(void *vpb, AXPBSRC *src);
 extern void AXSetVoiceSrcRatio(void *vpb, f32 ratio);
 extern void AXSetVoiceAdpcm(void *vpb, AXPBADPCM *adpcm);
-s32 fn_80119824(StreamTrack *t);
+s32 Ready(StreamTrack *t);
 s32 fn_80119994(void);
 s32 fn_8011999C(void);
-void fn_80119AB0(void *arg0, s32 arg1);
-void fn_80119B38(void *arg0, s32 arg1);
-s32 fn_80119CB0(void *arg0, s32 arg1);
-s32 fn_80119C0C(void *arg0, s32 arg1);
+void Volume(void *arg0, s32 arg1);
+void Pan(void *arg0, s32 arg1);
+s32 Pause(void *arg0, s32 arg1);
+s32 SetOnOff(void *arg0, s32 arg1);
 
 // Bink sound open for AX: sets up a track of `chans` 16-bit voices at `freq` Hz with a 600 ms buffer, prefilled with
 // up to the whole movie's sound, and installs the track callbacks. Returns 0 without an allocator or voices.
-s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkInfo8011 *bink) {
+s32 Open(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkInfo8011 *bink) {
     u32 bps;
     u32 total;
     u32 n;
@@ -2146,8 +2146,8 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     t->volume = 0x7FFF;
     t->panL = 0x67F8;
     t->panR = 0x67F8;
-    fn_80119288(t);
-    fn_801199A4(t->voices, 1);
+    set_rate_volume_and_pan(t);
+    set_addrs(t->voices, 1);
     voice = t->voices;
     for (i = 0; i < t->channels; i++) {
         AXPBADPCM adpcm;
@@ -2166,7 +2166,7 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
         AXSetVoiceSrcRatio(voice[i], t->rate / 32028.666666666668);
         AXSetVoiceAdpcm(voice[i], &adpcm);
     }
-    fn_80119300(t->voices, 0, t->bufSize);
+    clear(t->voices, 0, t->bufSize);
     n = t->bufSize;
     t->writePos = 0;
     t->ending = 0;
@@ -2177,14 +2177,14 @@ s32 fn_80119DD0(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkIn
     t->pending = n;
     t->stopping = 0;
     t->playing = 1;
-    t->IsActive = fn_80119824;
+    t->IsActive = Ready;
     t->GetBuffer = (s32 (*)(StreamTrack *, u8 **, u32 *))fn_80119994;
     t->Commit = (void (*)(StreamTrack *, u32))fn_8011999C;
-    t->SetVolume = (void (*)(StreamTrack *, s32))fn_80119AB0;
-    t->SetPan = (void (*)(StreamTrack *, s32))fn_80119B38;
-    t->SetPaused = (void (*)(StreamTrack *, s32))fn_80119CB0;
-    t->Run = (s32 (*)(StreamTrack *, s32))fn_80119C0C;
-    t->Close = (void (*)(StreamTrack *))fn_80119D40;
+    t->SetVolume = (void (*)(StreamTrack *, s32))Volume;
+    t->SetPan = (void (*)(StreamTrack *, s32))Pan;
+    t->SetPaused = (void (*)(StreamTrack *, s32))Pause;
+    t->Run = (s32 (*)(StreamTrack *, s32))SetOnOff;
+    t->Close = (void (*)(StreamTrack *))Close;
     lbl_8055DEE8++;
     return 1;
 }
@@ -2195,14 +2195,14 @@ typedef struct StreamAllocator {
 } StreamAllocator;
 
 // Installs the sample buffer allocator (0 clears it); returns the stream decode callback.
-void *fn_8011A168(StreamAllocator *allocator) {
+void *BinkOpenAX(StreamAllocator *allocator) {
     if (allocator == NULL) {
         lbl_8055DEE0[0] = 0;
         lbl_8055DEE0[1] = 0;
     } else {
         *(StreamAllocator *)lbl_8055DEE0 = *allocator;
     }
-    return (void *)fn_80119DD0;
+    return (void *)Open;
 }
 
 /* Helper name unproven. The byte-reversed load is inline asm with the zero index in a register, as in the GameCube
@@ -2220,7 +2220,7 @@ static inline u32 Swap32(register u32 *p) {
 }
 
 // intelendian: byte-swaps `size` bytes (rounded up to words) in place.
-void fn_8011A1A0(u32 *data, u32 size) {
+void intelendian(u32 *data, u32 size) {
     u32 count = (size + 3) >> 2;
     while (count--) {
         *data = Swap32(data);
@@ -2230,7 +2230,7 @@ void fn_8011A1A0(u32 *data, u32 size) {
 
 // Reads `len` bytes at `offset` into `dst` through an aligned stack buffer, waiting for each chunk.
 // Returns the bytes read, or 0 when the drive reports an error.
-u32 fn_8011A240(void *arg0, u32 arg1, s32 arg2, u32 arg3) {
+u32 radreadngc(void *arg0, u32 arg1, s32 arg2, u32 arg3) {
     u8 buf[0x400 + 31];
     u8 *aligned = (u8 *)(((u32)buf + 31) & ~31);
     u32 cap = ((u32)(buf + sizeof(buf)) - (u32)aligned) & ~31;
@@ -2272,7 +2272,7 @@ u32 fn_8011A240(void *arg0, u32 arg1, s32 arg2, u32 arg3) {
     return total;
 }
 
-void fn_8011A330(void *arg0) {
+void CancelReadRequests(void *arg0) {
     s32 status;
     *(volatile s32 *)((u8 *)arg0 + 0xC4) = 1;
     DVDCancel((DVDCommandBlock *)((u8 *)arg0 + 0x54));
@@ -2283,41 +2283,41 @@ void fn_8011A330(void *arg0) {
     *(volatile s32 *)((u8 *)arg0 + 0x24) = 0;
 }
 
-u32 fn_8011A388(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
-    extern u32 fn_8011A240(void*, u32, s32, u32);
-    extern void fn_8011A330(void*);
+u32 BinkFileReadHeader(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
+    extern u32 radreadngc(void*, u32, s32, u32);
+    extern void CancelReadRequests(void*);
     u32 result, current, remaining;
     if (arg1 != -1 && *(u32*)((u8*)arg0 + 0x90) != (u32)arg1) {
         *(u32*)((u8*)arg0 + 0x90) = (u32)arg1;
     }
-    result = fn_8011A240((u8*)arg0 + 0x54,
+    result = radreadngc((u8*)arg0 + 0x54,
                          *(u32*)((u8*)arg0 + 0x90) + *(u32*)((u8*)arg0 + 0xB4),
                          arg2, arg3);
     if (result != arg3) {
         *(s32*)((u8*)arg0 + 0x20) = 1;
-        fn_8011A330(arg0);
+        CancelReadRequests(arg0);
     }
     // MATCHING-AID?: the read position (0x90) and cap (0x40) are re-read like volatile fields; probably genuine
-    // async stream state (the 0xC0 counter in fn_8011A45C is volatile too). Revisit with a real struct.
+    // async stream state (the 0xC0 counter in dosimulate is volatile too). Revisit with a real struct.
     *(volatile u32*)((u8*)arg0 + 0x90) += result;
     current = *(volatile u32*)((u8*)arg0 + 0x90);
     *(u32*)((u8*)arg0 + 0x98) = current;
     remaining = *(u32*)((u8*)arg0 + 0xB8) - current;
     *(u32*)((u8*)arg0 + 0x48) = remaining < *(volatile u32*)((u8*)arg0 + 0x40) ? remaining : *(volatile u32*)((u8*)arg0 + 0x40);
-    fn_8011A1A0((u32*)arg2, result);
+    intelendian((u32*)arg2, result);
     return result;
 }
 
-void fn_8011A45C(void *arg0, s32 arg1, s32 arg2) {
+void dosimulate(void *arg0, s32 arg1, s32 arg2) {
     s32 temp_r0, temp_r31, temp_r3, temp_r3_2, temp_r4, var_r31;
     s32 *counter = (s32 *)((u8 *)arg0 + 0xC0);
-    temp_r31 = fn_80116BD4(arg1, 0x3E8, *(s32 *)((u8 *)arg0 + 0xBC));
-    temp_r3 = fn_80116D30();
+    temp_r31 = mult64anddiv(arg1, 0x3E8, *(s32 *)((u8 *)arg0 + 0xBC));
+    temp_r3 = RADTimerRead();
     var_r31 = temp_r3;
     *counter = *counter + (temp_r31 - (temp_r3 - arg2));
     while (*counter > 0) {
         do {
-            temp_r3_2 = fn_80116D30();
+            temp_r3_2 = RADTimerRead();
             temp_r0 = *counter;
             temp_r4 = temp_r3_2 - var_r31;
         } while (temp_r4 < temp_r0);
@@ -2377,7 +2377,7 @@ typedef struct BinkFile8011 {
     u32 fileSize;                 // 0x64
     u32 simulate;                 // 0x68 simulated read rate (bytes/s), 0 = off
     s32 simTime;                  // 0x6C
-    volatile u32 cancelling;      // 0x70 set while fn_8011A330 cancels the pending read
+    volatile u32 cancelling;      // 0x70 set while CancelReadRequests cancels the pending read
     u32 wasWorking;               // 0x74 io->working when the read started
     u32 readStart;                // 0x78 timer at the read's start, then its duration
     struct BinkIO8011 *io;        // 0x7C owner, for the DVD callback
@@ -2390,7 +2390,7 @@ typedef struct BinkFile8011 {
 // the next read unless the reader is suspended.
 static __inline u32 BinkLeft(BinkFile8011 *f) { return f->fileSize - f->filePos; }
 
-void fn_8011A4F8(s32 result, DVDFileInfo *fi) {
+void DVDReadCallback(s32 result, DVDFileInfo *fi) {
     BinkIO8011 *io = ((BinkFile8011 *)fi)->io;
 
     if (BINKFILE(io)->cancelling)
@@ -2422,9 +2422,9 @@ void fn_8011A4F8(s32 result, DVDFileInfo *fi) {
         io->bufHighUsed = io->curBufUsed;
 
     if (BINKFILE(io)->simulate)
-        fn_8011A45C(io, result, BINKFILE(io)->readStart);
+        dosimulate(io, result, BINKFILE(io)->readStart);
 
-    BINKFILE(io)->readStart = fn_80116D30() - BINKFILE(io)->readStart;
+    BINKFILE(io)->readStart = RADTimerRead() - BINKFILE(io)->readStart;
     io->totalTime += BINKFILE(io)->readStart;
     if (BINKFILE(io)->wasWorking || io->working)
         io->threadTime += BINKFILE(io)->readStart;
@@ -2433,13 +2433,13 @@ void fn_8011A4F8(s32 result, DVDFileInfo *fi) {
 
     io->doingRead = 0;
     if (io->unk50 == 0)
-        fn_8011A6A0(io);
+        ReadKickoff(io);
 }
 
 // ReadKickoff: flags a drive error, or (when the drive is idle and no cancel is in progress) starts the next
 // async read of up to 0x8000 bytes into the ring's tail; the file's last block is padded to 32 bytes by
 // starting the read earlier (`skip`). With no room or nothing left, the current size is what is buffered.
-void fn_8011A6A0(BinkIO8011 *io) {
+void ReadKickoff(BinkIO8011 *io) {
     s32 status = DVDGetDriveStatus();
     u32 left = BINKFILE(io)->fileSize - BINKFILE(io)->filePos;
 
@@ -2462,7 +2462,7 @@ void fn_8011A6A0(BinkIO8011 *io) {
     {
         if (BINKFILE(io)->bufEmpty >= 0x8000 && left) {
             BINKFILE(io)->wasWorking = io->working;
-            BINKFILE(io)->readStart = fn_80116D30();
+            BINKFILE(io)->readStart = RADTimerRead();
             io->doingRead = 1;
             if (left > 0x8000)
                 left = 0x8000;
@@ -2471,14 +2471,14 @@ void fn_8011A6A0(BinkIO8011 *io) {
                 left += BINKFILE(io)->skip;
             }
             DVDReadAsyncPrio(&BINKFILE(io)->fi, BINKFILE(io)->bufTail, left,
-                             BINKFILE(io)->filePos - BINKFILE(io)->skip + BINKFILE(io)->startOfs, fn_8011A4F8, 0);
+                             BINKFILE(io)->filePos - BINKFILE(io)->skip + BINKFILE(io)->startOfs, DVDReadCallback, 0);
         } else {
             io->curBufSize = io->curBufUsed;
         }
     }
 }
 
-s32 fn_8011A7CC(DVDFileInfo *info) {
+s32 BinkFileIdle(DVDFileInfo *info) {
     s32 *p = (s32 *)info;
     s32 status;
     if (p[0x20 / 4] != 0) return 0;
@@ -2486,7 +2486,7 @@ s32 fn_8011A7CC(DVDFileInfo *info) {
     status = DVDGetDriveStatus();
     switch (status) {
     case 0:  /* END */
-        fn_8011A6A0((struct BinkIO8011 *)info);  // info is the BinkIO8011 itself
+        ReadKickoff((struct BinkIO8011 *)info);  // info is the BinkIO8011 itself
         break;
     case -1: /* FATAL_ERROR */
     case 3:  /* COVER_CLOSED */
@@ -2504,7 +2504,7 @@ s32 fn_8011A7CC(DVDFileInfo *info) {
 }
 
 // 0x50 is a state flag the DVD callbacks also change: every access is volatile.
-s32 fn_8011A870(void *arg0, s32 arg1) {
+s32 BinkFileBGControl(void *arg0, s32 arg1) {
     if (arg1 & 1) {
         if (*(volatile s32 *)((char *)arg0 + 0x50) == 0)
             *(volatile s32 *)((char *)arg0 + 0x50) = 1;
@@ -2517,21 +2517,21 @@ s32 fn_8011A870(void *arg0, s32 arg1) {
         if ((u32)*(volatile s32 *)((char *)arg0 + 0x50) == 1U)
             *(volatile s32 *)((char *)arg0 + 0x50) = 0;
         if (arg1 & 0x80000000)
-            fn_8011A7CC(arg0);
+            BinkFileIdle(arg0);
     }
     return *(volatile s32 *)((char *)arg0 + 0x50);
 }
 
 
-extern u32 fn_8011A240(void *, u32, s32, u32);
-extern void fn_8011A45C(void *, s32, s32);
-extern void fn_8011A1A0(u32 *, u32);
+extern u32 radreadngc(void *, u32, s32, u32);
+extern void dosimulate(void *, s32, s32);
+extern void intelendian(u32 *, u32);
 // BinkFileReadFrame: reads `size` bytes of frame data at `offset` (-1 = the current position) into dest.
 // A seek inside the buffered window just drops the skipped bytes; any other seek cancels the pending reads
 // and restarts the ring there. Unbuffered files read directly (synchronously); buffered ones wait on the ring
-// (fn_8011A6A0 = ReadKickoff), copying out in at most two pieces around its end. Returns the bytes read,
+// (ReadKickoff = ReadKickoff), copying out in at most two pieces around its end. Returns the bytes read,
 // byte-swapped to little-endian words like the rest of the file.
-u32 fn_8011A8FC(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
+u32 BinkFileReadFrame(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
     u32 start, t, avail, chunk, x;
     BOOL enabled;
     u32 amt = 0;
@@ -2540,7 +2540,7 @@ u32 fn_8011A8FC(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
     if (io->readError)
         return 0;
 
-    start = fn_80116D30();
+    start = RADTimerRead();
 
     if (offset != -1 && BINKFILE(io)->bufPos != offset) {
         if ((u32)offset > BINKFILE(io)->bufPos && (u32)offset <= BINKFILE(io)->filePos) {
@@ -2554,7 +2554,7 @@ u32 fn_8011A8FC(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
                 BINKFILE(io)->bufHead -= io->bufSize;
             OSRestoreInterrupts(enabled);
         } else {
-            fn_8011A330(io);
+            CancelReadRequests(io);
             enabled = OSDisableInterrupts();
             BINKFILE(io)->filePos = offset;
             BINKFILE(io)->bufPos = offset;
@@ -2567,23 +2567,23 @@ u32 fn_8011A8FC(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
     }
 
     if (BINKFILE(io)->buf == 0) {
-        t = fn_80116D30();
-        amt = fn_8011A240(&BINKFILE(io)->fi, BINKFILE(io)->filePos, (s32)dest, size);
+        t = RADTimerRead();
+        amt = radreadngc(&BINKFILE(io)->fi, BINKFILE(io)->filePos, (s32)dest, size);
         if (amt < size) {
             io->readError = 1;
-            fn_8011A330(io);
+            CancelReadRequests(io);
         }
         BINKFILE(io)->filePos += amt;
         BINKFILE(io)->bufPos += amt;
         io->bytesRead += amt;
         if (BINKFILE(io)->simulate)
-            fn_8011A45C(io, amt, t);
-        x = fn_80116D30();
+            dosimulate(io, amt, t);
+        x = RADTimerRead();
         io->totalTime += x - t;
         io->foregroundTime += x - start;
     } else {
         while (size && !io->readError) {
-            fn_8011A6A0(io);
+            ReadKickoff(io);
             avail = io->curBufUsed;
             if (avail == 0)
                 continue;
@@ -2613,7 +2613,7 @@ u32 fn_8011A8FC(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
                 OSRestoreInterrupts(enabled);
             }
         }
-        io->foregroundTime += fn_80116D30() - start;
+        io->foregroundTime += RADTimerRead() - start;
     }
 
     x = BINKFILE(io)->fileSize - BINKFILE(io)->bufPos;
@@ -2621,7 +2621,7 @@ u32 fn_8011A8FC(BinkIO8011 *io, u32 frame, s32 offset, void *dest, u32 size) {
     if (io->curBufUsed + 0x8000 > io->curBufSize)
         io->curBufSize = io->curBufUsed;
 
-    fn_8011A1A0((u32 *)orig, amt);
+    intelendian((u32 *)orig, amt);
     return amt;
 }
 
@@ -2629,7 +2629,7 @@ s32 fn_8011AC04(s32 arg0, s32 arg1) {
     return (arg1 + 0x7FFF) & 0xFFFF8000;
 }
 
-void fn_8011AC10(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void BinkFileSetInfo(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32* p = (s32*)arg0;
     s32 level = OSDisableInterrupts();
     arg2 &= 0xFFFF8000;
@@ -2647,24 +2647,24 @@ void fn_8011AC10(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 
 extern f32 lbl_80329D48[];
-extern void fn_8011A330(void *);
-void fn_8011AC84(void *arg0) {
-    fn_8011A330(arg0);
+extern void CancelReadRequests(void *);
+void BinkFileClose(void *arg0) {
+    CancelReadRequests(arg0);
     if (*(s32 *)((u8 *)arg0 + 0xB0) == 0) {
         DVDClose((DVDFileInfo *)((u8 *)arg0 + 0x54));
     }
 }
 
-extern u32 fn_8011A388(void*, s32, s32, u32);
-extern u32 fn_8011A8FC(BinkIO8011 *, u32, s32, void *, u32);
+extern u32 BinkFileReadHeader(void*, s32, s32, u32);
+extern u32 BinkFileReadFrame(BinkIO8011 *, u32, s32, void *, u32);
 extern s32 fn_8011AC04(s32, s32);
-extern void fn_8011AC10(void*, s32, s32, s32, s32);
-extern s32 fn_8011A7CC(DVDFileInfo*);
-extern void fn_8011AC84(void*);
-extern s32 fn_8011A870(void*, s32);
+extern void BinkFileSetInfo(void*, s32, s32, s32, s32);
+extern s32 BinkFileIdle(DVDFileInfo*);
+extern void BinkFileClose(void*);
+extern s32 BinkFileBGControl(void*, s32);
 // BinkFileOpen: sets up `io` as a DVD file reader for `name`, or (flag 0x800000) for an already open
 // DVDFileInfo passed in place of the name, whose userData is the movie's offset in that file.
-s32 fn_8011ACC4(BinkIO8011 *io, const char *name, u32 flags) {
+s32 BinkFileOpen(BinkIO8011 *io, const char *name, u32 flags) {
     memset(io, 0, sizeof(BinkIO8011));
 
     if (flags & 0x800000) {
@@ -2679,17 +2679,17 @@ s32 fn_8011ACC4(BinkIO8011 *io, const char *name, u32 flags) {
             return 0;
     }
 
-    io->readHeader = (void *)fn_8011A388;
-    io->readFrame = (void *)fn_8011A8FC;
+    io->readHeader = (void *)BinkFileReadHeader;
+    io->readFrame = (void *)BinkFileReadFrame;
     io->getBufferSize = (void *)fn_8011AC04;
-    io->setInfo = (void *)fn_8011AC10;
-    io->idle = (void *)fn_8011A7CC;
-    io->close = (void *)fn_8011AC84;
-    io->unk18 = (void *)fn_8011A870;
+    io->setInfo = (void *)BinkFileSetInfo;
+    io->idle = (void *)BinkFileIdle;
+    io->close = (void *)BinkFileClose;
+    io->unk18 = (void *)BinkFileBGControl;
     return 1;
 }
 
-f32 fn_8011AE18(s32 arg0) {
+f32 fxptof(s32 arg0) {
     u32 bits = (u32)arg0;
     s32 magnitude = (bits & ~0x10000000U) >> 5;
     f32 temp = (f32)magnitude * lbl_80329D48[bits & 31U];
@@ -2719,7 +2719,7 @@ static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
 #pragma opt_propagation off
 #pragma opt_unroll_loops off
 #pragma ppc_unroll_speculative off
-void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
+void quanttos16s(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
     u32 lo = 0x7FFF8000;
     s16 *out = arg0 - 1;
     u32 hi = 0x80007FFF;
@@ -2750,7 +2750,7 @@ void fn_8011AE68(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
 #pragma opt_propagation off
 #pragma opt_unroll_loops off
 #pragma ppc_unroll_speculative off
-void fn_8011AED8(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
+void quanttos16chans2(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
     u32 lo = 0x7FFF8000;
     u32 hi = 0x80007FFF;
     f32 *right = arg1 + arg2;
@@ -2768,7 +2768,7 @@ void fn_8011AED8(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
 #pragma pop
 
 extern u8 lbl_80329B50[];
-void fn_8011AF94(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
+void read_rle_samples(f32 *arg0, s32 arg1, void *arg2, f32 *arg3, s32 arg4) {
     u32 var_r29;
     s32 var_r28;
     f32 *var_r27;
@@ -2943,7 +2943,7 @@ outer_test:
     ((BitReader8011 *)arg2)->count = var_r24;
 }
 
-s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 output, u32 *input, u32 bands, s32 arg8) {
+s32 Unquant(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4, s32 output, u32 *input, u32 bands, s32 arg8) {
     f32 buffer[4096];
     f32 factors[26];
     BitReader8011 bits;
@@ -2984,7 +2984,7 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
                 bits.value >>= 29;
             }
         }
-        p[0] = fn_8011AE18(index);
+        p[0] = fxptof(index);
         {
             u32 value;
             if (bits.count < 29) {
@@ -3001,7 +3001,7 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
                 bits.value >>= 29;
             }
         }
-        p[1] = fn_8011AE18(index);
+        p[1] = fxptof(index);
         q = factors;
         for (j = 0; j < bands; j++) {
             {
@@ -3024,19 +3024,19 @@ s32 fn_8011B2AC(s32 size, f32 gain, u32 channels, s32 flags, s32 arg3, s32 arg4,
             if (index > 95) index = 95;
             *q++ = lbl_80329BC8[index];
         }
-        fn_8011AF94(p, size, &bits, factors, arg8);
-        if (mode) fn_8012023C(size, 1, p, (int *)arg3, (f32 *)arg4);
-        else fn_801200BC(size, -1, p, (int *)arg3, (f32 *)arg4);
+        read_rle_samples(p, size, &bits, factors, arg8);
+        if (mode) ddct(size, 1, p, (int *)arg3, (f32 *)arg4);
+        else rdft(size, -1, p, (int *)arg3, (f32 *)arg4);
         p += size;
     }
-    if (channels == 1) fn_8011AE68((s16 *)output, buffer, size, gain);
-    else fn_8011AED8((s16 *)output, buffer, size, gain);
+    if (channels == 1) quanttos16s((s16 *)output, buffer, size, gain);
+    else quanttos16chans2((s16 *)output, buffer, size, gain);
     bits.count = 0;
     return ((u32)bits.next - (u32)bits.start) & 0x1fffffff;
 }
 
 
-void fn_8011FE20(void **slot, u32 amount);
+void pushmalloc(void **slot, u32 amount);
 extern u32 lbl_80329B60[];  // critical band frequencies (Hz)
 
 // MSL's inline sqrtf: three Newton steps from the frsqrte estimate.
@@ -3052,7 +3052,7 @@ static inline f32 Sqrtf8011(f32 x) {
 }
 
 // Opens a Bink audio decoder for `channels` channels at `rate` Hz; returns 0 when out of memory.
-BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags) {
+BinkAudio8011 *BinkAudioDecompressOpen(u32 rate, u32 channels, u32 flags) {
     u32 *bands;
     s32 *quant;
     void *transform;
@@ -3088,16 +3088,16 @@ BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags) {
             break;
         }
     }
-    fn_8011FE20((void **)&bands, (numBands + 1) * 4);
-    fn_8011FE20((void **)&quant, ((s32)Sqrtf8011(half) + 2) * 4);
+    pushmalloc((void **)&bands, (numBands + 1) * 4);
+    pushmalloc((void **)&quant, ((s32)Sqrtf8011(half) + 2) * 4);
     if (dct) {
-        fn_8011FE20(&transform, frameSize * 20 / 4);
+        pushmalloc(&transform, frameSize * 20 / 4);
     } else {
-        fn_8011FE20(&transform, half * 4 - 1);
+        pushmalloc(&transform, half * 4 - 1);
     }
-    fn_8011FE20((void **)&previous, frameBytes / 2);
-    fn_8011FE20((void **)&output, frameBytes);
-    a = fn_8011FF2C(sizeof(BinkAudio8011));
+    pushmalloc((void **)&previous, frameBytes / 2);
+    pushmalloc((void **)&output, frameBytes);
+    a = popmalloc(sizeof(BinkAudio8011));
     if (a == 0) {
         return 0;
     }
@@ -3128,8 +3128,8 @@ BinkAudio8011 *fn_8011B584(u32 rate, u32 channels, u32 flags) {
 
 // Decodes one Bink audio frame from `src`: returns the output samples (cross-faded with the previous frame's tail)
 // and their size, saves the new tail, and sets *next past the frame's data.
-void fn_8011B94C(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next) {
-    s32 used = fn_8011B2AC(a->frameSize, a->scale, a->channels, a->flags, (s32)a->quant, (s32)a->transform,
+void BinkAudioDecompress(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next) {
+    s32 used = Unquant(a->frameSize, a->scale, a->channels, a->flags, (s32)a->quant, (s32)a->transform,
                            (s32)a->output, (u32 *)src, a->numBands, (s32)a->bands);
     if (a->first) {
         a->first = 0;
@@ -3153,11 +3153,11 @@ void fn_8011B94C(BinkAudio8011 *a, s16 **out, u32 *outLen, u8 *src, u8 **next) {
 }
 
 void fn_8011BC48(s32 arg0) {
-    fn_80120084((void *)arg0);
+    radfree((void *)arg0);
 }
 
 // Unlink node from the singly linked list at +0x30 of owner (next pointer at +0). Returns 1 if it was there.
-s32 fn_8011BC4C(void *owner, void *node) {
+s32 remove_cb_from_list(void *owner, void *node) {
     void *p;
     if (owner == NULL) return 0;
     p = *(void **)((u8 *)owner + 0x30);
@@ -3175,7 +3175,7 @@ s32 fn_8011BC4C(void *owner, void *node) {
     return 0;
 }
 
-void fn_8011BCAC(void **head, void *node) {
+void add_sorted(void **head, void *node) {
     u32 key;
     void *cur = *head;
     if (cur == 0) {
@@ -3203,7 +3203,7 @@ void fn_8011BCAC(void **head, void *node) {
 }
 
 // Ticks every active request of the queue; finished ones are collected and then told so.
-void fn_8011BD20(void *arg0) {
+void call_callbacks(void *arg0) {
     void *done;
     void *n;
     *(s32 *)((u8 *)arg0 + 0x34) += 1;
@@ -3217,7 +3217,7 @@ void fn_8011BD20(void *arg0) {
             if (*(s32 *)((u8 *)n + 0xC) == 1) {
                 *(s32 *)((u8 *)n + 8) = (*(s32 (**)(void *, s32))((u8 *)n + 0x14))(n, *(s32 *)((u8 *)arg0 + 0x34));
                 if (*(s32 *)((u8 *)n + 8) != 0) {
-                    fn_8011BCAC(&done, n);
+                    add_sorted(&done, n);
                 }
             }
             n = *(void **)n;
@@ -3228,20 +3228,20 @@ void fn_8011BD20(void *arg0) {
     }
 }
 
-void fn_8011BDF0(s32 arg0) {
+void RAD_callback_timer(s32 arg0) {
     s32 temp;
     s32 old;
     temp = arg0 - 8;
     if (temp != 0 && *(s32 *)(temp + 0x30) != 0) {
         old = OSEnableInterrupts();
-        fn_8011BD20((void *)temp);
+        call_callbacks((void *)temp);
         OSRestoreInterrupts(old);
     }
 }
 
 // Creates a sound request queue for `count` entries (negative counts are taken as positive).
-void *fn_8011BE48(s32 count) {
-    void *q = fn_8011FFC4(0x40);
+void *RADCB_allocate_handler(s32 count) {
+    void *q = radmalloc(0x40);
     if (q != NULL) {
         memset(q, 0, 0x40);
         *(s32 *)((u8 *)q + 0x00) = 0;
@@ -3258,7 +3258,7 @@ void *fn_8011BE48(s32 count) {
 }
 
 // Queues request `arg1` (callbacks arg2/arg3) on `arg0` with interrupts disabled.
-void fn_8011BEC8(void *arg0, void *arg1, s32 arg2, s32 arg3) {
+void RADCB_register_callback(void *arg0, void *arg1, s32 arg2, s32 arg3) {
     s32 level = OSDisableInterrupts();
     *(s32 *)((u8 *)arg1 + 0xC) = 1;
     *(s32 *)((u8 *)arg1 + 0x14) = arg2;
@@ -3270,8 +3270,8 @@ void fn_8011BEC8(void *arg0, void *arg1, s32 arg2, s32 arg3) {
     OSRestoreInterrupts(level);
 }
 
-void fn_8011C364(s32 arg0);
-s32 fn_8011BF4C(s32 arg0, s32 arg1, s32 arg2) {
+void RADCB_free_handler(s32 arg0);
+s32 RADCB_unregister_callback(s32 arg0, s32 arg1, s32 arg2) {
     s32 result = 0;
     void *owner;
     void *node;
@@ -3280,10 +3280,10 @@ s32 fn_8011BF4C(s32 arg0, s32 arg1, s32 arg2) {
     node = (void *)arg1;
     if (arg0 != 0 && arg1 != 0 && *(s32 *)(arg1 + 0x18) != 0 && *(s32 *)(arg1 + 0x14) != 0) {
         level = OSDisableInterrupts();
-        if (fn_8011BC4C(owner, node) != 0) {
+        if (remove_cb_from_list(owner, node) != 0) {
             *(s32 *)(arg0 + 0x38) -= 1;
             if ((arg2 & 1) && *(s32 *)(arg0 + 0x30) == 0) {
-                fn_8011C364(arg0);
+                RADCB_free_handler(arg0);
                 result = 1;
             }
         }
@@ -3292,13 +3292,13 @@ s32 fn_8011BF4C(s32 arg0, s32 arg1, s32 arg2) {
     return result;
 }
 
-s32 fn_8011BFFC(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4) {
-    s32 temp = fn_8011BF4C((s32)arg2, arg3, arg4) << 1;
-    s32 result = fn_8011BF4C(arg0, arg1, arg4);
+s32 RADCB_unregister_2_callbacks(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4) {
+    s32 temp = RADCB_unregister_callback((s32)arg2, arg3, arg4) << 1;
+    s32 result = RADCB_unregister_callback(arg0, arg1, arg4);
     return result | temp;
 }
 
-u32 fn_8011C06C(void *arg0) {
+u32 RADCB_try_to_suspend_handler(void *arg0) {
     s32 oldInterrupts;
     s32 value;
     if (arg0 != NULL) {
@@ -3314,15 +3314,15 @@ u32 fn_8011C06C(void *arg0) {
     return 1;
 }
 
-// Waits (yielding) until fn_8011C06C reports the request finished.
-void fn_8011C0E0(void *arg0) {
-    while (fn_8011C06C(arg0) == 0) {
+// Waits (yielding) until RADCB_try_to_suspend_handler reports the request finished.
+void RADCB_suspend_handler(void *arg0) {
+    while (RADCB_try_to_suspend_handler(arg0) == 0) {
         OSYieldThread();
     }
 }
 
 // Releases one hold on the queue; the last release starts its periodic tick (`rate` per second).
-void fn_8011C120(void *arg0) {
+void RADCB_resume_handler(void *arg0) {
     s32 level;
     if (arg0 != 0) {
         level = OSDisableInterrupts();
@@ -3332,7 +3332,7 @@ void fn_8011C120(void *arg0) {
             if (*(s32 *)arg0 == 0) {
                 OSSetPeriodicAlarm((OSAlarm *)((u8 *)arg0 + 8), OSGetTime(),
                                    (1000 / *(u32 *)((u8 *)arg0 + 0x3C)) * (*(u32 *)0x800000F8 / 4 / 1000),
-                                   (OSAlarmHandler)fn_8011BDF0);
+                                   (OSAlarmHandler)RAD_callback_timer);
             }
             *(s32 *)arg0 = 1;
         }
@@ -3340,7 +3340,7 @@ void fn_8011C120(void *arg0) {
     }
 }
 
-u32 fn_8011C1E0(void *arg0, void *arg1) {
+u32 RADCB_try_to_suspend_callback(void *arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
@@ -3354,18 +3354,18 @@ u32 fn_8011C1E0(void *arg0, void *arg1) {
     return 1;
 }
 
-// Waits (yielding) until fn_8011C1E0 reports the request finished.
-void fn_8011C274(void *arg0, void *arg1) {
+// Waits (yielding) until RADCB_try_to_suspend_callback reports the request finished.
+void RADCB_suspend_callback(void *arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
-        while (fn_8011C1E0(arg0, arg1) == 0) {
+        while (RADCB_try_to_suspend_callback(arg0, arg1) == 0) {
             OSYieldThread();
         }
     }
 }
 
-void fn_8011C2EC(void *arg0, void *arg1) {
+void RADCB_resume_callback(void *arg0, void *arg1) {
     if (arg0 != 0 && arg1 != 0 &&
         *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
         *(s32 *)((u8 *)arg1 + 0x14) != 0) {
@@ -3378,15 +3378,15 @@ void fn_8011C2EC(void *arg0, void *arg1) {
     }
 }
 
-void fn_8011C364(s32 arg0) {
+void RADCB_free_handler(s32 arg0) {
     if (arg0 != 0) {
-        fn_8011C0E0((void *)arg0);
+        RADCB_suspend_handler((void *)arg0);
         OSCancelAlarm((OSAlarm *)(arg0 + 8));
-        fn_80120084((void *)arg0);
+        radfree((void *)arg0);
     }
 }
 
-void fn_8011C3A8(s32 arg0, void *arg1, s32 arg2, u32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+void OpenReadBundle(s32 arg0, void *arg1, s32 arg2, u32 arg3, s32 arg4, s32 arg5, s32 arg6) {
     *(s32 *)((u8 *)arg1 + 0x28) = 0x20 - __cntlzw((u16)(arg2 + ((arg3 >> 3) * arg5) - 1));
     *(s32 *)((u8 *)arg1 + 0) = 0;
     *(s32 *)((u8 *)arg1 + 4) = 0;
@@ -3398,7 +3398,7 @@ void fn_8011C3A8(s32 arg0, void *arg1, s32 arg2, u32 arg3, s32 arg4, s32 arg5, s
     *(s32 *)((u8 *)arg1 + 0x2C) = arg0;
 }
 
-s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
+s32 simpmergesort(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
     s32 var_r7 = arg4;
     s32 var_r8 = arg4;
     s32 var_r9 = 0;
@@ -3450,7 +3450,7 @@ s32 fn_8011C400(u32 arg0, u8 *arg1, u8 *arg2, u8 *arg3, s32 arg4) {
     {                                                 \
         u32 v;                                        \
         BINK_PEEK(v, width);                          \
-        v = fn_8011C400(v, dst, a, b, size);          \
+        v = simpmergesort(v, dst, a, b, size);          \
         BINK_SKIP(v);                                 \
     }
 
@@ -3459,7 +3459,7 @@ extern const u8 lbl_802F6990[];
 
 // Reads a Huffman tree: picks one of the 16 fixed code tables and reads the symbol order, either explicitly or as
 // a series of merge passes over the identity order.
-void fn_8011C4A0(BitReader8011 *bits, u8 **lookup, u32 *maxBits, u8 *syms) {
+void ReadHuffTable(BitReader8011 *bits, u8 **lookup, u32 *maxBits, u8 *syms) {
     u32 *next;
     u32 value;
     u32 avail;
@@ -3555,8 +3555,8 @@ void fn_8011C4A0(BitReader8011 *bits, u8 **lookup, u32 *maxBits, u8 *syms) {
 }
 
 // Reads a bundle's Huffman tree.
-void fn_8011CD78(Bundle8011 *b, BitReader8011 *bits) {
-    fn_8011C4A0(bits, &b->lookup, &b->maxBits, b->symbols);
+void StartReadHuff4Bundle(Bundle8011 *b, BitReader8011 *bits) {
+    ReadHuffTable(bits, &b->lookup, &b->maxBits, b->symbols);
 }
 
 // The 16 context trees used for colors (selected by the previous high nibble).
@@ -3568,12 +3568,12 @@ typedef struct BinkColorTrees8011 {
 } BinkColorTrees8011;
 
 // Reads the 16 color context trees, then the bundle's own tree.
-void fn_8011CD90(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
+void StartReadHuff8Bundle(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
     u32 i;
     for (i = 0; i < 16; i++) {
-        fn_8011C4A0(bits, &trees->lookup[i], &trees->maxBits[i], trees->symbols[i]);
+        ReadHuffTable(bits, &trees->lookup[i], &trees->maxBits[i], trees->symbols[i]);
     }
-    fn_8011C4A0(bits, &b->lookup, &b->maxBits, b->symbols);
+    ReadHuffTable(bits, &b->lookup, &b->maxBits, b->symbols);
     trees->last = 0;
 }
 
@@ -3583,7 +3583,7 @@ typedef struct BitWin8011 {
     u32 mask;
 } BitWin8011;
 
-void fn_8011CE18(void *arg0, void *arg1) {
+void CheckReadRLEHuff4Bundle(void *arg0, void *arg1) {
     u32 *bits;
     u32 fill;
     u32 value, bitCount, count, code, len, s, w;
@@ -3693,7 +3693,7 @@ void fn_8011CE18(void *arg0, void *arg1) {
 // Refills the colors bundle (newer format): each color is a high nibble from the context tree picked by the
 // previous high nibble and a low nibble from the bundle's tree, stored sign-magnitude around 128. A set first bit
 // means one color followed by a run of copies.
-void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
+void CheckReadHuff8Bundle(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
     u32 *next;
     u32 value;
     u32 count;
@@ -3814,8 +3814,8 @@ void fn_8011D0E8(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
     bits->count = count;
 }
 
-// Refills the colors bundle (older format): like fn_8011D0E8, with colors stored as plain bytes.
-void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
+// Refills the colors bundle (older format): like CheckReadHuff8Bundle, with colors stored as plain bytes.
+void NewCheckReadHuff8Bundle(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) {
     u32 *next;
     u32 value;
     u32 count;
@@ -3934,7 +3934,7 @@ void fn_8011D378(Bundle8011 *b, BitReader8011 *bits, BinkColorTrees8011 *trees) 
 // 4-bit value repeated.
 /* Helper name unproven */
 
-void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
+void CheckReadHuff4Bundle(Bundle8011 *b, BitReader8011 *bits) {
     u32 *next;
     u32 value;
     u32 count;
@@ -4026,7 +4026,7 @@ void fn_8011D5F0(Bundle8011 *b, BitReader8011 *bits) {
 
 // Refills an exhausted bundle of nibble pairs: reads the count, then that many bytes, each two Huffman-coded
 // nibbles (low first).
-void fn_8011D7F8(Bundle8011 *b, BitReader8011 *bits) {
+void CheckReadHuff4PairBundle(Bundle8011 *b, BitReader8011 *bits) {
     u32 len;
     u32 *next;
     u32 value;
@@ -4113,7 +4113,7 @@ void fn_8011D7F8(Bundle8011 *b, BitReader8011 *bits) {
     bits->count = count;
 }
 
-void fn_8011D9E4(Bundle8011 *b, BitReader8011 *bits) {
+void CheckReadHuff4SBundle(Bundle8011 *b, BitReader8011 *bits) {
     u32 *next;
     u32 value;
     u32 count;
@@ -4241,7 +4241,7 @@ void fn_8011D9E4(Bundle8011 *b, BitReader8011 *bits) {
     bits->count = count;
 }
 
-void fn_8011DC5C(void *arg0, void *arg1) {
+void CheckReadDelta16Bundle(void *arg0, void *arg1) {
     s32 n;
     u32 count;
     u32 *bits;
@@ -4342,7 +4342,7 @@ void fn_8011DC5C(void *arg0, void *arg1) {
                     dst++;
                 }
             } else {
-                fn_80116CC4((u32 *)dst, (u16)val, (n + n));
+                radmemset16((u32 *)dst, (u16)val, (n + n));
                 dst = (s16 *)((u8 *)dst + (n << 1));
             }
             count -= n;
@@ -4357,7 +4357,7 @@ void fn_8011DC5C(void *arg0, void *arg1) {
     *(u32 *)((u8 *)arg1 + 8) = bitCount;
 }
 
-s32 fn_8011DF68(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+s32 getbunsize(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     u32 var_r5 = arg2;
     u32 temp;
     if (var_r5 <= 8U) var_r5 = 8;
@@ -4366,17 +4366,17 @@ s32 fn_8011DF68(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     return (((u32)(arg0 * var_r5) >> 3) + ((temp * (arg1 >> 3)) >> 3) + 3) & 0xFFFFFFFC;
 }
 
-void fn_8011DFAC(void* arg0, u32 arg1) {
+void ExpandBundleSizes(void* arg0, u32 arg1) {
     s32* out = (s32*)arg0;
-    out[0] = fn_8011DF68(0x200, arg1, 4, 1);
-    out[1] = fn_8011DF68(0x200, arg1 >> 1, 4, 1);
-    out[2] = fn_8011DF68(0x200, arg1, 8, 0x40);
-    out[3] = fn_8011DF68(0x200, arg1, 8, 8);
-    out[4] = fn_8011DF68(0x200, arg1, 5, 1);
-    out[5] = fn_8011DF68(0x200, arg1, 5, 1);
-    out[6] = fn_8011DF68(0x200, arg1, 0xB, 1);
-    out[7] = fn_8011DF68(0x200, arg1, 0xB, 1);
-    out[8] = fn_8011DF68(0x200, arg1, 4, 0x30);
+    out[0] = getbunsize(0x200, arg1, 4, 1);
+    out[1] = getbunsize(0x200, arg1 >> 1, 4, 1);
+    out[2] = getbunsize(0x200, arg1, 8, 0x40);
+    out[3] = getbunsize(0x200, arg1, 8, 8);
+    out[4] = getbunsize(0x200, arg1, 5, 1);
+    out[5] = getbunsize(0x200, arg1, 5, 1);
+    out[6] = getbunsize(0x200, arg1, 0xB, 1);
+    out[7] = getbunsize(0x200, arg1, 0xB, 1);
+    out[8] = getbunsize(0x200, arg1, 4, 0x30);
 }
 
 extern const u8 lbl_802F65C0[];
@@ -4388,11 +4388,11 @@ extern const u8 lbl_802F8A40[16][64];
 #define BINK_PAT2_C1 ((u32 *)((u8 *)lbl_802F65C0 + 0x460))        // doubled 2-pixel masks
 #define BINK_PAT2_C0 ((u32 *)((u8 *)lbl_802F65C0 + 0x470))
 
-void fn_80126018(s16 *block, BitReader8011 *bits);
-void fn_80126EF0(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src, s32 srcStride);
+void ReadBPLossless(s16 *block, BitReader8011 *bits);
+void ReadBPLossyWithMotion(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src, s32 srcStride);
 void fn_80125CA0(void *dst, void *stride, void *block, s32 quant);
 void fn_80125CB4(void *dst, void *stride, void *block, s32 quant);
-void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride);
+void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride);
 
 // Reads `width` bits from reader *br into v.
 #define BINK_BR_GETBITS(br, v, width)                                               \
@@ -4500,7 +4500,7 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 // chroma). Stores the number of skipped blocks whose map entry was clear in *skipped and returns the end of the
 // plane's data. Structure cross-checked against n100f's ExpandPlane (reference only).
 #pragma opt_loop_invariants off  /* Keep the scaled-row test and stride in the block decoder. */
-u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
+u32 *ExpandPlane(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data, s32 keyframe, u8 *blockMap,
                  s32 blocksWide, u32 step, void **bufs, u32 flags, u32 *skipped) {
     BinkColorTrees8011 trees;
     s16 block[64];
@@ -4531,40 +4531,40 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
     bits.count = 0;
     bits.value = 0;
     if (flags & 0x8000) {
-        readColors = (void (*)(void *, void *, void *))fn_8011D0E8;
+        readColors = (void (*)(void *, void *, void *))CheckReadHuff8Bundle;
     } else {
-        readColors = (void (*)(void *, void *, void *))fn_8011D378;
+        readColors = (void (*)(void *, void *, void *))NewCheckReadHuff8Bundle;
     }
-    fn_8011C3A8((s32)bufs[0], &types, 0x200, width, 4, 1, 0);
-    fn_8011C3A8((s32)bufs[1], &subTypes, 0x200, width >> 1, 4, 1, 0);
-    fn_8011C3A8((s32)bufs[2], &colors, 0x200, width, 8, 64, 0);
-    fn_8011C3A8((s32)bufs[3], &pattern, 0x200, width, 8, 8, 0);
-    fn_8011C3A8((s32)bufs[4], &xOff, 0x200, width, 5, 1, 1);
-    fn_8011C3A8((s32)bufs[5], &yOff, 0x200, width, 5, 1, 1);
-    fn_8011C3A8((s32)bufs[6], &intraDC, 0x200, width, 11, 1, 0);
-    fn_8011C3A8((s32)bufs[7], &interDC, 0x200, width, 11, 1, 1);
-    fn_8011C3A8((s32)bufs[8], &runs, 0x200, width, 4, 48, 0);
-    fn_8011CD78(&types, &bits);
-    fn_8011CD78(&subTypes, &bits);
-    fn_8011CD90(&colors, &bits, &trees);
-    fn_8011CD78(&pattern, &bits);
-    fn_8011CD78(&xOff, &bits);
-    fn_8011CD78(&yOff, &bits);
-    fn_8011CD78(&runs, &bits);
+    OpenReadBundle((s32)bufs[0], &types, 0x200, width, 4, 1, 0);
+    OpenReadBundle((s32)bufs[1], &subTypes, 0x200, width >> 1, 4, 1, 0);
+    OpenReadBundle((s32)bufs[2], &colors, 0x200, width, 8, 64, 0);
+    OpenReadBundle((s32)bufs[3], &pattern, 0x200, width, 8, 8, 0);
+    OpenReadBundle((s32)bufs[4], &xOff, 0x200, width, 5, 1, 1);
+    OpenReadBundle((s32)bufs[5], &yOff, 0x200, width, 5, 1, 1);
+    OpenReadBundle((s32)bufs[6], &intraDC, 0x200, width, 11, 1, 0);
+    OpenReadBundle((s32)bufs[7], &interDC, 0x200, width, 11, 1, 1);
+    OpenReadBundle((s32)bufs[8], &runs, 0x200, width, 4, 48, 0);
+    StartReadHuff4Bundle(&types, &bits);
+    StartReadHuff4Bundle(&subTypes, &bits);
+    StartReadHuff8Bundle(&colors, &bits, &trees);
+    StartReadHuff4Bundle(&pattern, &bits);
+    StartReadHuff4Bundle(&xOff, &bits);
+    StartReadHuff4Bundle(&yOff, &bits);
+    StartReadHuff4Bundle(&runs, &bits);
     for (y = 0; y < height; y += 8) {
         u32 *masks0 = BINK_PAT_C0;
         u32 *masks1 = BINK_PAT_C1;
         u32 *scaledMasks0 = BINK_PAT2_C0;
         u32 *scaledMasks1 = BINK_PAT2_C1;
-        fn_8011CE18(&types, &bits);
-        fn_8011CE18(&subTypes, &bits);
+        CheckReadRLEHuff4Bundle(&types, &bits);
+        CheckReadRLEHuff4Bundle(&subTypes, &bits);
         readColors(&colors, &bits, &trees);
-        fn_8011D7F8(&pattern, &bits);
-        fn_8011D9E4(&xOff, &bits);
-        fn_8011D9E4(&yOff, &bits);
-        fn_8011DC5C(&intraDC, &bits);
-        fn_8011DC5C(&interDC, &bits);
-        fn_8011D5F0(&runs, &bits);
+        CheckReadHuff4PairBundle(&pattern, &bits);
+        CheckReadHuff4SBundle(&xOff, &bits);
+        CheckReadHuff4SBundle(&yOff, &bits);
+        CheckReadDelta16Bundle(&intraDC, &bits);
+        CheckReadDelta16Bundle(&interDC, &bits);
+        CheckReadHuff4Bundle(&runs, &bits);
         for (x = width; x != 0; x -= 8) {
             switch (*types.cur++) {
             case 0: {  // skip: keep the previous frame's block
@@ -4649,7 +4649,7 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                         s32 quant;
                         block[0] = *(s16 *)intraDC.cur;
                         intraDC.cur += 2;
-                        fn_80126018(block, &bits);
+                        ReadBPLossless(block, &bits);
                         BINK_BR_GETBITS(&bits, quant, 4);
                         fn_80125CB4(dst, (void *)pitch, block, quant);
                         break;
@@ -4831,7 +4831,7 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 blockMap[idx >> 1] = 1;
                 src = prev + pitch * *(s8 *)yOff.cur++ + *(s8 *)xOff.cur++;
                 BINK_BR_GETBITS(&bits, n, 7);
-                fn_80126EF0(dst, pitch, &bits, n, src, pitch);
+                ReadBPLossyWithMotion(dst, pitch, &bits, n, src, pitch);
                 break;
             }
             case 5: {  // intra DCT block
@@ -4839,7 +4839,7 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 blockMap[idx >> 1] = 1;
                 block[0] = *(s16 *)intraDC.cur;
                 intraDC.cur += 2;
-                fn_80126018(block, &bits);
+                ReadBPLossless(block, &bits);
                 BINK_BR_GETBITS(&bits, quant, 4);
                 fn_80125CA0(dst, (void *)pitch, block, quant);
                 break;
@@ -4864,9 +4864,9 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
                 src = prev + pitch * *(s8 *)yOff.cur++ + *(s8 *)xOff.cur++;
                 block[0] = *(s16 *)interDC.cur;
                 interDC.cur += 2;
-                fn_80126018(block, &bits);
+                ReadBPLossless(block, &bits);
                 BINK_BR_GETBITS(&bits, quant, 4);
-                fn_80125CC8(dst, pitch, block, quant, src, pitch);
+                FastmIDCT8x8WithMotion(dst, pitch, block, quant, src, pitch);
                 break;
             }
             case 8: {  // two-color pattern
@@ -4926,7 +4926,7 @@ u32 *fn_8011E0B4(u8 *dst, u8 *prev, u32 width, u32 height, s32 pitch, u32 *data,
 
 // Decodes a video frame into the next frame buffer (alpha, luma, then the two chroma planes); returns the number
 // of skipped blocks in the luma plane (in block pairs).
-u32 fn_8011FC2C(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyframe, s32 bufs, s32 flags,
+u32 ExpandBink(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyframe, s32 bufs, s32 flags,
                 s32 videoFlags) {
     s32 cur;
     BinkFrameBuffers8011 *v = video;
@@ -4940,7 +4940,7 @@ u32 fn_8011FC2C(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyfra
     result = 0;
     if (videoFlags & 0x100000) {
         if (flags & 0x100000) {
-            fn_8011E0B4(v->frames[cur].a.buffer, v->frames[old].a.buffer, v->width, v->height,
+            ExpandPlane(v->frames[cur].a.buffer, v->frames[old].a.buffer, v->width, v->height,
                         v->frames[old].a.pitch, (u32 *)(data + 1), keyframe, (u8 *)blockMap, blocksWide, 1,
                         (void **)bufs, flags, &result);
         }
@@ -4950,18 +4950,18 @@ u32 fn_8011FC2C(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyfra
     if (!(flags & 0x8000)) {
         data++;
     }
-    end = fn_8011E0B4(v->frames[cur].y.buffer, v->frames[old].y.buffer, v->width, v->height, v->frames[old].y.pitch,
+    end = ExpandPlane(v->frames[cur].y.buffer, v->frames[old].y.buffer, v->width, v->height, v->frames[old].y.pitch,
                       (u32 *)data, keyframe, (u8 *)blockMap, blocksWide, 1, (void **)bufs, flags, &result);
     if (!(flags & 0x8000)) {
         end = (u32 *)((u8 *)data + data[-1] - 4);
     }
     result >>= 2;
     if (!(flags & 0x20000)) {
-        end = fn_8011E0B4(v->frames[cur].cr.buffer, v->frames[old].cr.buffer, v->cWidth, v->cHeight,
+        end = ExpandPlane(v->frames[cur].cr.buffer, v->frames[old].cr.buffer, v->cWidth, v->cHeight,
                           v->frames[old].cr.pitch, end, keyframe, (u8 *)blockMap, blocksWide, 2, (void **)bufs,
                           flags, &result);
         result = 0;
-        fn_8011E0B4(v->frames[cur].cb.buffer, v->frames[old].cb.buffer, v->cWidth, v->cHeight,
+        ExpandPlane(v->frames[cur].cb.buffer, v->frames[old].cb.buffer, v->cWidth, v->cHeight,
                     v->frames[old].cb.pitch, end, keyframe, (u8 *)blockMap, blocksWide, 2, (void **)bufs, flags,
                     &result);
     }
@@ -4970,18 +4970,18 @@ u32 fn_8011FC2C(void *video, s32 blockMap, s32 blocksWide, s32 *data, s32 keyfra
 
 extern u32 lbl_8055DEF0;  // total size of the pushed allocations
 extern u32 lbl_8055DEF4;
-// pushmalloc: registers *slot for the next batched allocation (fn_8011FF2C = popmalloc). Sizes are rounded to
+// pushmalloc: registers *slot for the next batched allocation (popmalloc = popmalloc). Sizes are rounded to
 // 32 bytes and padded so consecutive buffers start in different cache sets; the registration arrays double
 // when full.
-void fn_8011FE20(void **slot, u32 amount) {
+void pushmalloc(void **slot, u32 amount) {
     if (lbl_80559950 == lbl_8055DEF4) {
-        void ***slots = fn_8011FFC4(lbl_80559950 * 16);
+        void ***slots = radmalloc(lbl_80559950 * 16);
         u32 *sizes = (u32 *)((u8 *)slots + lbl_80559950 * 8);
         memcpy(slots, lbl_80559948, lbl_80559950 * 4);
         memcpy(sizes, lbl_8055994C, lbl_80559950 * 4);
         lbl_80559950 *= 2;
         if (lbl_80559950 != 64) {
-            fn_80120084(lbl_80559948);
+            radfree(lbl_80559948);
         }
         lbl_80559948 = slots;
         lbl_8055994C = sizes;
@@ -4999,10 +4999,10 @@ u32 fn_8011FF24(void) {
 
 extern u32 lbl_8055DEF4;
 // Allocates one block for all the pending buffers, hands each its slice and returns the block.
-void *fn_8011FF2C(s32 arg0) {
+void *popmalloc(s32 arg0) {
     s32 size = (arg0 + 0x1F) & ~0x1F;
     u32 i;
-    u8 *block = fn_8011FFC4(lbl_8055DEF0 + size);
+    u8 *block = radmalloc(lbl_8055DEF0 + size);
     u8 *p;
     lbl_8055DEF0 = 0;
     if (block != 0) {
@@ -5028,8 +5028,8 @@ extern void ***lbl_80559948;
 extern u32 *lbl_8055994C;
 extern void *malloc(u32);
 extern void free(void *);
-extern void *fn_8011FFC4(s32);
-void *fn_8011FFC4(s32 arg0) {
+extern void *radmalloc(s32);
+void *radmalloc(s32 arg0) {
     s32 base;
     u8 offset;
     u32 mode;
@@ -5056,39 +5056,39 @@ got_memory:
     return (void *)result;
 }
 
-// Frees a block from fn_8011FFC4: the bytes before it hold the alignment offset and which allocator made it.
-void fn_80120084(void *arg0) {
+// Frees a block from radmalloc: the bytes before it hold the alignment offset and which allocator made it.
+void radfree(void *arg0) {
     u8 *ptr = arg0;
     if (ptr == 0) return;
     if (ptr[-2] == 3) ((void (*)(void *))*(void **)(ptr - 8))(ptr - ptr[-1]);
     else free(ptr - ptr[-1]);
 }
 
-void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w)
+void rdft(int n, int isgn, f32 *a, int *ip, f32 *w)
 {
-    void fn_80120834(int nw, int *ip, f32 *w);
-    void fn_80120B6C(int nc, int *ip, f32 *c);
+    void makewt(int nw, int *ip, f32 *w);
+    void makect(int nc, int *ip, f32 *c);
     void fn_80120CA4(int n, f32 *a, int *ip, int nw, f32 *w);
     void fn_80120E14(int n, f32 *a, int *ip, int nw, f32 *w);
-    void fn_801250CC(int n, f32 *a, int nc, f32 *c);
-    void fn_801252D8(int n, f32 *a, int nc, f32 *c);
+    void rftfsub(int n, f32 *a, int nc, f32 *c);
+    void rftbsub(int n, f32 *a, int nc, f32 *c);
     int nw, nc;
     f32 xi;
     
     nw = ip[0];
     if (n > (nw << 2)) {
         nw = n >> 2;
-        fn_80120834(nw, ip, w);
+        makewt(nw, ip, w);
     }
     nc = ip[1];
     if (n > (nc << 2)) {
         nc = n >> 2;
-        fn_80120B6C(nc, ip, w + nw);
+        makect(nc, ip, w + nw);
     }
     if (isgn >= 0) {
         if (n > 4) {
             fn_80120CA4(n, a, ip + 2, nw, w);
-            fn_801250CC(n, a, nc, w + nw);
+            rftfsub(n, a, nc, w + nw);
         } else if (n == 4) {
             fn_80120CA4(n, a, ip + 2, nw, w);
         }
@@ -5099,7 +5099,7 @@ void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w)
         a[1] = 0.5f * (a[0] - a[1]);
         a[0] -= a[1];
         if (n > 4) {
-            fn_801252D8(n, a, nc, w + nw);
+            rftbsub(n, a, nc, w + nw);
             fn_80120E14(n, a, ip + 2, nw, w);
         } else if (n == 4) {
             fn_80120E14(n, a, ip + 2, nw, w);
@@ -5107,27 +5107,27 @@ void fn_801200BC(int n, int isgn, f32 *a, int *ip, f32 *w)
     }
 }
 
-void fn_8012023C(int n, int isgn, f32 *a, int *ip, f32 *w)
+void ddct(int n, int isgn, f32 *a, int *ip, f32 *w)
 {
-    void fn_80120834(int nw, int *ip, f32 *w);
-    void fn_80120B6C(int nc, int *ip, f32 *c);
+    void makewt(int nw, int *ip, f32 *w);
+    void makect(int nc, int *ip, f32 *c);
     void fn_80120CA4(int n, f32 *a, int *ip, int nw, f32 *w);
     void fn_80120E14(int n, f32 *a, int *ip, int nw, f32 *w);
-    void fn_801250CC(int n, f32 *a, int nc, f32 *c);
-    void fn_801252D8(int n, f32 *a, int nc, f32 *c);
-    void fn_801254E4(int n, f32 *a, int nc, f32 *c);
+    void rftfsub(int n, f32 *a, int nc, f32 *c);
+    void rftbsub(int n, f32 *a, int nc, f32 *c);
+    void dctsub(int n, f32 *a, int nc, f32 *c);
     int j, nw, nc;
     f32 xr;
     
     nw = ip[0];
     if (n > (nw << 2)) {
         nw = n >> 2;
-        fn_80120834(nw, ip, w);
+        makewt(nw, ip, w);
     }
     nc = ip[1];
     if (n > nc) {
         nc = n;
-        fn_80120B6C(nc, ip, w + nw);
+        makect(nc, ip, w + nw);
     }
     if (isgn < 0) {
         xr = a[n - 1];
@@ -5138,17 +5138,17 @@ void fn_8012023C(int n, int isgn, f32 *a, int *ip, f32 *w)
         a[1] = a[0] - xr;
         a[0] += xr;
         if (n > 4) {
-            fn_801252D8(n, a, nc, w + nw);
+            rftbsub(n, a, nc, w + nw);
             fn_80120E14(n, a, ip + 2, nw, w);
         } else if (n == 4) {
             fn_80120E14(n, a, ip + 2, nw, w);
         }
     }
-    fn_801254E4(n, a, nc, w + nw);
+    dctsub(n, a, nc, w + nw);
     if (isgn >= 0) {
         if (n > 4) {
             fn_80120CA4(n, a, ip + 2, nw, w);
-            fn_801250CC(n, a, nc, w + nw);
+            rftfsub(n, a, nc, w + nw);
         } else if (n == 4) {
             fn_80120CA4(n, a, ip + 2, nw, w);
         }
@@ -5167,7 +5167,7 @@ void fn_8012023C(int n, int isgn, f32 *a, int *ip, f32 *w)
 inline float cosf(float x) { return cos(x); }
 inline float sinf(float x) { return sin(x); }
 
-void fn_80120834(int nw, int *ip, f32 *w)
+void makewt(int nw, int *ip, f32 *w)
 {
     int j, nwh, nw0, nw1;
     f32 delta, wn4r, wk1r, wk1i, wk3r, wk3i;
@@ -5218,7 +5218,7 @@ void fn_80120834(int nw, int *ip, f32 *w)
 }
 
 
-void fn_80120B6C(int nc, int *ip, f32 *c)
+void makect(int nc, int *ip, f32 *c)
 {
     int j, nch;
     f32 delta;
@@ -5241,95 +5241,95 @@ void fn_80120B6C(int nc, int *ip, f32 *c)
 
 void fn_80120CA4(int n, f32 *a, int *ip, int nw, f32 *w)
 {
-    void fn_80120F84(int n, int *ip, f32 *a);
-    void fn_80121848(f32 *a);
-    void fn_80121BB0(f32 *a);
-    void fn_80121C68(int n, f32 *a, f32 *w);
-    void fn_80122E08(int n, f32 *a, int nw, f32 *w);
-    void fn_80122ED8(int n, f32 *a, int nw, f32 *w);
-    void fn_80122FA4(int n, f32 *a, int nw, f32 *w);
-    void fn_80123CEC(int n, f32 *a, int nw, f32 *w);
-    void fn_80123E98(f32 *a, f32 *w);
-    void fn_80124AD8(f32 *a, f32 *w);
-    void fn_80124F90(f32 *a);
-    void fn_80125098(f32 *a);
+    void bitrv2(int n, int *ip, f32 *a);
+    void bitrv216(f32 *a);
+    void bitrv208(f32 *a);
+    void cftf1st(int n, f32 *a, f32 *w);
+    void cftrec1(int n, f32 *a, int nw, f32 *w);
+    void cftrec2(int n, f32 *a, int nw, f32 *w);
+    void cftexp1(int n, f32 *a, int nw, f32 *w);
+    void cftfx41(int n, f32 *a, int nw, f32 *w);
+    void cftf161(f32 *a, f32 *w);
+    void cftf081(f32 *a, f32 *w);
+    void cftf040(f32 *a);
+    void cftx020(f32 *a);
     int m;
     
     if (n > 32) {
         m = n >> 2;
-        fn_80121C68(n, a, &w[nw - m]);
+        cftf1st(n, a, &w[nw - m]);
         if (n > CDFT_RECURSIVE_N) {
-            fn_80122E08(m, a, nw, w);
-            fn_80122ED8(m, &a[m], nw, w);
-            fn_80122E08(m, &a[2 * m], nw, w);
-            fn_80122E08(m, &a[3 * m], nw, w);
+            cftrec1(m, a, nw, w);
+            cftrec2(m, &a[m], nw, w);
+            cftrec1(m, &a[2 * m], nw, w);
+            cftrec1(m, &a[3 * m], nw, w);
         } else if (m > 32) {
-            fn_80122FA4(n, a, nw, w);
+            cftexp1(n, a, nw, w);
         } else {
-            fn_80123CEC(n, a, nw, w);
+            cftfx41(n, a, nw, w);
         }
-        fn_80120F84(n, ip, a);
+        bitrv2(n, ip, a);
     } else if (n > 8) {
         if (n == 32) {
-            fn_80123E98(a, &w[nw - 8]);
-            fn_80121848(a);
+            cftf161(a, &w[nw - 8]);
+            bitrv216(a);
         } else {
-            fn_80124AD8(a, w);
-            fn_80121BB0(a);
+            cftf081(a, w);
+            bitrv208(a);
         }
     } else if (n == 8) {
-        fn_80124F90(a);
+        cftf040(a);
     } else if (n == 4) {
-        fn_80125098(a);
+        cftx020(a);
     }
 }
 
 void fn_80120E14(int n, f32 *a, int *ip, int nw, f32 *w)
 {
-    void fn_80121400(int n, int *ip, f32 *a);
-    void fn_801219B4(f32 *a);
-    void fn_80121BF4(f32 *a);
-    void fn_80122518(int n, f32 *a, f32 *w);
-    void fn_80122E08(int n, f32 *a, int nw, f32 *w);
-    void fn_80122ED8(int n, f32 *a, int nw, f32 *w);
-    void fn_80122FA4(int n, f32 *a, int nw, f32 *w);
-    void fn_80123CEC(int n, f32 *a, int nw, f32 *w);
-    void fn_80123E98(f32 *a, f32 *w);
-    void fn_80124AD8(f32 *a, f32 *w);
-    void fn_80125014(f32 *a);
-    void fn_80125098(f32 *a);
+    void bitrv2conj(int n, int *ip, f32 *a);
+    void bitrv216neg(f32 *a);
+    void bitrv208neg(f32 *a);
+    void cftb1st(int n, f32 *a, f32 *w);
+    void cftrec1(int n, f32 *a, int nw, f32 *w);
+    void cftrec2(int n, f32 *a, int nw, f32 *w);
+    void cftexp1(int n, f32 *a, int nw, f32 *w);
+    void cftfx41(int n, f32 *a, int nw, f32 *w);
+    void cftf161(f32 *a, f32 *w);
+    void cftf081(f32 *a, f32 *w);
+    void cftb040(f32 *a);
+    void cftx020(f32 *a);
     int m;
     
     if (n > 32) {
         m = n >> 2;
-        fn_80122518(n, a, &w[nw - m]);
+        cftb1st(n, a, &w[nw - m]);
         if (n > CDFT_RECURSIVE_N) {
-            fn_80122E08(m, a, nw, w);
-            fn_80122ED8(m, &a[m], nw, w);
-            fn_80122E08(m, &a[2 * m], nw, w);
-            fn_80122E08(m, &a[3 * m], nw, w);
+            cftrec1(m, a, nw, w);
+            cftrec2(m, &a[m], nw, w);
+            cftrec1(m, &a[2 * m], nw, w);
+            cftrec1(m, &a[3 * m], nw, w);
         } else if (m > 32) {
-            fn_80122FA4(n, a, nw, w);
+            cftexp1(n, a, nw, w);
         } else {
-            fn_80123CEC(n, a, nw, w);
+            cftfx41(n, a, nw, w);
         }
-        fn_80121400(n, ip, a);
+        bitrv2conj(n, ip, a);
     } else if (n > 8) {
         if (n == 32) {
-            fn_80123E98(a, &w[nw - 8]);
-            fn_801219B4(a);
+            cftf161(a, &w[nw - 8]);
+            bitrv216neg(a);
         } else {
-            fn_80124AD8(a, w);
-            fn_80121BF4(a);
+            cftf081(a, w);
+            bitrv208neg(a);
         }
     } else if (n == 8) {
-        fn_80125014(a);
+        cftb040(a);
     } else if (n == 4) {
-        fn_80125098(a);
+        cftx020(a);
     }
 }
 
-void fn_80120F84(int n, int *ip, f32 *a) {
+void bitrv2(int n, int *ip, f32 *a) {
     int j, j1, k, k1, l, m, m2;
     f32 xr, xi, yr, yi;
 
@@ -5427,7 +5427,7 @@ void fn_80120F84(int n, int *ip, f32 *a) {
     }
 }
 
-void fn_80121400(int n, int *ip, f32 *a) {
+void bitrv2conj(int n, int *ip, f32 *a) {
     int j, j1, k, k1, l, m, m2;
     f32 xr, xi, yr, yi;
 
@@ -5534,7 +5534,7 @@ void fn_80121400(int n, int *ip, f32 *a) {
     }
 }
 
-void fn_80121848(f32 *a)
+void bitrv216(f32 *a)
 {
     f32 x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i, 
         x5r, x5i, x7r, x7i, x8r, x8i, x10r, x10i, 
@@ -5590,7 +5590,7 @@ void fn_80121848(f32 *a)
     a[29] = x7i;
 }
 
-void fn_801219B4(f32 *a)
+void bitrv216neg(f32 *a)
 {
     f32 x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i, 
         x5r, x5i, x6r, x6i, x7r, x7i, x8r, x8i, 
@@ -5659,7 +5659,7 @@ void fn_801219B4(f32 *a)
     a[31] = x8i;
 }
 
-void fn_80121BB0(f32 *a)
+void bitrv208(f32 *a)
 {
     f32 x1r, x1i, x3r, x3i, x4r, x4i, x6r, x6i;
     
@@ -5681,7 +5681,7 @@ void fn_80121BB0(f32 *a)
     a[13] = x3i;
 }
 
-void fn_80121BF4(f32 *a)
+void bitrv208neg(f32 *a)
 {
     f32 x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i, 
         x5r, x5i, x6r, x6i, x7r, x7i;
@@ -5716,7 +5716,7 @@ void fn_80121BF4(f32 *a)
     a[15] = x4i;
 }
 
-void fn_80121C68(int n, f32 *a, f32 *w)
+void cftf1st(int n, f32 *a, f32 *w)
 {
     int j, j0, j1, j2, j3, k, m, mh;
     f32 wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i, 
@@ -5921,7 +5921,7 @@ void fn_80121C68(int n, f32 *a, f32 *w)
     a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-void fn_80122518(int n, f32 *a, f32 *w)
+void cftb1st(int n, f32 *a, f32 *w)
 {
     int j, j0, j1, j2, j3, k, m, mh;
     f32 wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i, 
@@ -6126,86 +6126,86 @@ void fn_80122518(int n, f32 *a, f32 *w)
     a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-void fn_80122E08(int n, f32 *a, int nw, f32 *w)
+void cftrec1(int n, f32 *a, int nw, f32 *w)
 {
-    void fn_80122E08(int n, f32 *a, int nw, f32 *w);
-    void fn_80122ED8(int n, f32 *a, int nw, f32 *w);
-    void fn_801233F8(int n, f32 *a, f32 *w);
-    void fn_80122FA4(int n, f32 *a, int nw, f32 *w);
+    void cftrec1(int n, f32 *a, int nw, f32 *w);
+    void cftrec2(int n, f32 *a, int nw, f32 *w);
+    void cftmdl1(int n, f32 *a, f32 *w);
+    void cftexp1(int n, f32 *a, int nw, f32 *w);
     int m;
     
     m = n >> 2;
-    fn_801233F8(n, a, &w[nw - 2 * m]);
+    cftmdl1(n, a, &w[nw - 2 * m]);
     if (n > CDFT_RECURSIVE_N) {
-        fn_80122E08(m, a, nw, w);
-        fn_80122ED8(m, &a[m], nw, w);
-        fn_80122E08(m, &a[2 * m], nw, w);
-        fn_80122E08(m, &a[3 * m], nw, w);
+        cftrec1(m, a, nw, w);
+        cftrec2(m, &a[m], nw, w);
+        cftrec1(m, &a[2 * m], nw, w);
+        cftrec1(m, &a[3 * m], nw, w);
     } else {
-        fn_80122FA4(n, a, nw, w);
+        cftexp1(n, a, nw, w);
     }
 }
 
-void fn_80122ED8(int n, f32 *a, int nw, f32 *w)
+void cftrec2(int n, f32 *a, int nw, f32 *w)
 {
-    void fn_80122E08(int n, f32 *a, int nw, f32 *w);
-    void fn_80122ED8(int n, f32 *a, int nw, f32 *w);
-    void fn_801237C4(int n, f32 *a, f32 *w);
-    void fn_801231B8(int n, f32 *a, int nw, f32 *w);
+    void cftrec1(int n, f32 *a, int nw, f32 *w);
+    void cftrec2(int n, f32 *a, int nw, f32 *w);
+    void cftmdl2(int n, f32 *a, f32 *w);
+    void cftexp2(int n, f32 *a, int nw, f32 *w);
     int m;
     
     m = n >> 2;
-    fn_801237C4(n, a, &w[nw - n]);
+    cftmdl2(n, a, &w[nw - n]);
     if (n > CDFT_RECURSIVE_N) {
-        fn_80122E08(m, a, nw, w);
-        fn_80122ED8(m, &a[m], nw, w);
-        fn_80122E08(m, &a[2 * m], nw, w);
-        fn_80122ED8(m, &a[3 * m], nw, w);
+        cftrec1(m, a, nw, w);
+        cftrec2(m, &a[m], nw, w);
+        cftrec1(m, &a[2 * m], nw, w);
+        cftrec2(m, &a[3 * m], nw, w);
     } else {
-        fn_801231B8(n, a, nw, w);
+        cftexp2(n, a, nw, w);
     }
 }
 
-void fn_80122FA4(int n, f32 *a, int nw, f32 *w)
+void cftexp1(int n, f32 *a, int nw, f32 *w)
 {
-    void fn_801233F8(int n, f32 *a, f32 *w);
-    void fn_801237C4(int n, f32 *a, f32 *w);
-    void fn_80123CEC(int n, f32 *a, int nw, f32 *w);
-    void fn_80123DC0(int n, f32 *a, int nw, f32 *w);
+    void cftmdl1(int n, f32 *a, f32 *w);
+    void cftmdl2(int n, f32 *a, f32 *w);
+    void cftfx41(int n, f32 *a, int nw, f32 *w);
+    void cftfx42(int n, f32 *a, int nw, f32 *w);
     int j, k, l;
     
     l = n >> 2;
     while (l > 128) {
         for (k = l; k < n; k <<= 2) {
             for (j = k - l; j < n; j += 4 * k) {
-                fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
-                fn_801237C4(l, &a[k + j], &w[nw - l]);
-                fn_801233F8(l, &a[2 * k + j], &w[nw - (l >> 1)]);
+                cftmdl1(l, &a[j], &w[nw - (l >> 1)]);
+                cftmdl2(l, &a[k + j], &w[nw - l]);
+                cftmdl1(l, &a[2 * k + j], &w[nw - (l >> 1)]);
             }
         }
-        fn_801233F8(l, &a[n - l], &w[nw - (l >> 1)]);
+        cftmdl1(l, &a[n - l], &w[nw - (l >> 1)]);
         l >>= 2;
     }
     for (k = l; k < n; k <<= 2) {
         for (j = k - l; j < n; j += 4 * k) {
-            fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
-            fn_80123CEC(l, &a[j], nw, w);
-            fn_801237C4(l, &a[k + j], &w[nw - l]);
-            fn_80123DC0(l, &a[k + j], nw, w);
-            fn_801233F8(l, &a[2 * k + j], &w[nw - (l >> 1)]);
-            fn_80123CEC(l, &a[2 * k + j], nw, w);
+            cftmdl1(l, &a[j], &w[nw - (l >> 1)]);
+            cftfx41(l, &a[j], nw, w);
+            cftmdl2(l, &a[k + j], &w[nw - l]);
+            cftfx42(l, &a[k + j], nw, w);
+            cftmdl1(l, &a[2 * k + j], &w[nw - (l >> 1)]);
+            cftfx41(l, &a[2 * k + j], nw, w);
         }
     }
-    fn_801233F8(l, &a[n - l], &w[nw - (l >> 1)]);
-    fn_80123CEC(l, &a[n - l], nw, w);
+    cftmdl1(l, &a[n - l], &w[nw - (l >> 1)]);
+    cftfx41(l, &a[n - l], nw, w);
 }
 
-void fn_801231B8(int n, f32 *a, int nw, f32 *w)
+void cftexp2(int n, f32 *a, int nw, f32 *w)
 {
-    void fn_801233F8(int n, f32 *a, f32 *w);
-    void fn_801237C4(int n, f32 *a, f32 *w);
-    void fn_80123CEC(int n, f32 *a, int nw, f32 *w);
-    void fn_80123DC0(int n, f32 *a, int nw, f32 *w);
+    void cftmdl1(int n, f32 *a, f32 *w);
+    void cftmdl2(int n, f32 *a, f32 *w);
+    void cftfx41(int n, f32 *a, int nw, f32 *w);
+    void cftfx42(int n, f32 *a, int nw, f32 *w);
     int j, k, l, m;
     
     m = n >> 1;
@@ -6213,33 +6213,33 @@ void fn_801231B8(int n, f32 *a, int nw, f32 *w)
     while (l > 128) {
         for (k = l; k < m; k <<= 2) {
             for (j = k - l; j < m; j += 2 * k) {
-                fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
-                fn_801233F8(l, &a[m + j], &w[nw - (l >> 1)]);
+                cftmdl1(l, &a[j], &w[nw - (l >> 1)]);
+                cftmdl1(l, &a[m + j], &w[nw - (l >> 1)]);
             }
             for (j = 2 * k - l; j < m; j += 4 * k) {
-                fn_801237C4(l, &a[j], &w[nw - l]);
-                fn_801237C4(l, &a[m + j], &w[nw - l]);
+                cftmdl2(l, &a[j], &w[nw - l]);
+                cftmdl2(l, &a[m + j], &w[nw - l]);
             }
         }
         l >>= 2;
     }
     for (k = l; k < m; k <<= 2) {
         for (j = k - l; j < m; j += 2 * k) {
-            fn_801233F8(l, &a[j], &w[nw - (l >> 1)]);
-            fn_80123CEC(l, &a[j], nw, w);
-            fn_801233F8(l, &a[m + j], &w[nw - (l >> 1)]);
-            fn_80123CEC(l, &a[m + j], nw, w);
+            cftmdl1(l, &a[j], &w[nw - (l >> 1)]);
+            cftfx41(l, &a[j], nw, w);
+            cftmdl1(l, &a[m + j], &w[nw - (l >> 1)]);
+            cftfx41(l, &a[m + j], nw, w);
         }
         for (j = 2 * k - l; j < m; j += 4 * k) {
-            fn_801237C4(l, &a[j], &w[nw - l]);
-            fn_80123DC0(l, &a[j], nw, w);
-            fn_801237C4(l, &a[m + j], &w[nw - l]);
-            fn_80123DC0(l, &a[m + j], nw, w);
+            cftmdl2(l, &a[j], &w[nw - l]);
+            cftfx42(l, &a[j], nw, w);
+            cftmdl2(l, &a[m + j], &w[nw - l]);
+            cftfx42(l, &a[m + j], nw, w);
         }
     }
 }
 
-void fn_801233F8(int n, f32 *a, f32 *w)
+void cftmdl1(int n, f32 *a, f32 *w)
 {
     int j, j0, j1, j2, j3, k, m, mh;
     f32 wn4r, wk1r, wk1i, wk3r, wk3i;
@@ -6348,7 +6348,7 @@ void fn_801233F8(int n, f32 *a, f32 *w)
     a[j3 + 1] = -wn4r * (x0i - x0r);
 }
 
-void fn_801237C4(int n, f32 *a, f32 *w)
+void cftmdl2(int n, f32 *a, f32 *w)
 {
     int j, j0, j1, j2, j3, k, kr, m, mh;
     f32 wn4r, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
@@ -6481,47 +6481,47 @@ void fn_801237C4(int n, f32 *a, f32 *w)
     a[j3 + 1] = y0i + y2i;
 }
 
-void fn_80123CEC(int n, f32 *a, int nw, f32 *w)
+void cftfx41(int n, f32 *a, int nw, f32 *w)
 {
-    void fn_80123E98(f32 *a, f32 *w);
-    void fn_8012440C(f32 *a, f32 *w);
-    void fn_80124AD8(f32 *a, f32 *w);
-    void fn_80124CE8(f32 *a, f32 *w);
+    void cftf161(f32 *a, f32 *w);
+    void cftf162(f32 *a, f32 *w);
+    void cftf081(f32 *a, f32 *w);
+    void cftf082(f32 *a, f32 *w);
     
     if (n == 128) {
-        fn_80123E98(a, &w[nw - 8]);
-        fn_8012440C(&a[32], &w[nw - 32]);
-        fn_80123E98(&a[64], &w[nw - 8]);
-        fn_80123E98(&a[96], &w[nw - 8]);
+        cftf161(a, &w[nw - 8]);
+        cftf162(&a[32], &w[nw - 32]);
+        cftf161(&a[64], &w[nw - 8]);
+        cftf161(&a[96], &w[nw - 8]);
     } else {
-        fn_80124AD8(a, &w[nw - 16]);
-        fn_80124CE8(&a[16], &w[nw - 16]);
-        fn_80124AD8(&a[32], &w[nw - 16]);
-        fn_80124AD8(&a[48], &w[nw - 16]);
+        cftf081(a, &w[nw - 16]);
+        cftf082(&a[16], &w[nw - 16]);
+        cftf081(&a[32], &w[nw - 16]);
+        cftf081(&a[48], &w[nw - 16]);
     }
 }
 
-void fn_80123DC0(int n, f32 *a, int nw, f32 *w)
+void cftfx42(int n, f32 *a, int nw, f32 *w)
 {
-    void fn_80123E98(f32 *a, f32 *w);
-    void fn_8012440C(f32 *a, f32 *w);
-    void fn_80124AD8(f32 *a, f32 *w);
-    void fn_80124CE8(f32 *a, f32 *w);
+    void cftf161(f32 *a, f32 *w);
+    void cftf162(f32 *a, f32 *w);
+    void cftf081(f32 *a, f32 *w);
+    void cftf082(f32 *a, f32 *w);
     
     if (n == 128) {
-        fn_80123E98(a, &w[nw - 8]);
-        fn_8012440C(&a[32], &w[nw - 32]);
-        fn_80123E98(&a[64], &w[nw - 8]);
-        fn_8012440C(&a[96], &w[nw - 32]);
+        cftf161(a, &w[nw - 8]);
+        cftf162(&a[32], &w[nw - 32]);
+        cftf161(&a[64], &w[nw - 8]);
+        cftf162(&a[96], &w[nw - 32]);
     } else {
-        fn_80124AD8(a, &w[nw - 16]);
-        fn_80124CE8(&a[16], &w[nw - 16]);
-        fn_80124AD8(&a[32], &w[nw - 16]);
-        fn_80124CE8(&a[48], &w[nw - 16]);
+        cftf081(a, &w[nw - 16]);
+        cftf082(&a[16], &w[nw - 16]);
+        cftf081(&a[32], &w[nw - 16]);
+        cftf082(&a[48], &w[nw - 16]);
     }
 }
 
-void fn_80123E98(f32 *a, f32 *w)
+void cftf161(f32 *a, f32 *w)
 {
     f32 wn4r, wk1r, wk1i, 
         x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, 
@@ -6679,7 +6679,7 @@ void fn_80123E98(f32 *a, f32 *w)
     a[7] = x1i - x3r;
 }
 
-void fn_8012440C(f32 *a, f32 *w)
+void cftf162(f32 *a, f32 *w)
 {
     f32 wn4r, wk1r, wk1i, wk2r, wk2i, wk3r, wk3i, 
         x0r, x0i, x1r, x1i, x2r, x2i, 
@@ -6861,7 +6861,7 @@ void fn_8012440C(f32 *a, f32 *w)
     a[31] = x1i - x2r;
 }
 
-void fn_80124AD8(f32 *a, f32 *w)
+void cftf081(f32 *a, f32 *w)
 {
     f32 wn4r, x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, 
         y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i, 
@@ -6922,7 +6922,7 @@ void fn_80124AD8(f32 *a, f32 *w)
     a[7] = y2i - y6r;
 }
 
-void fn_80124CE8(f32 *a, f32 *w)
+void cftf082(f32 *a, f32 *w)
 {
     f32 wn4r, wk1r, wk1i, x0r, x0i, x1r, x1i, 
         y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i, 
@@ -6993,7 +6993,7 @@ void fn_80124CE8(f32 *a, f32 *w)
     a[15] = x0i - x1r;
 }
 
-void fn_80124F90(f32 *a) {
+void cftf040(f32 *a) {
     f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
     x0r = a[0] + a[4];
@@ -7014,7 +7014,7 @@ void fn_80124F90(f32 *a) {
     a[7] = x1i - x3r;
 }
 
-void fn_80125014(f32 *a) {
+void cftb040(f32 *a) {
     f32 x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
     x0r = a[0] + a[4];
@@ -7035,7 +7035,7 @@ void fn_80125014(f32 *a) {
     a[7] = x1i + x3r;
 }
 
-void fn_80125098(f32 *a) {
+void cftx020(f32 *a) {
     f32 x0r, x0i;
 
     x0r = a[0] - a[2];
@@ -7046,7 +7046,7 @@ void fn_80125098(f32 *a) {
     a[3] = x0i;
 }
 
-void fn_801250CC(int n, f32 *a, int nc, f32 *c)
+void rftfsub(int n, f32 *a, int nc, f32 *c)
 {
     int j, k, kk, ks, m;
     f32 wkr, wki, xr, xi, yr, yi;
@@ -7070,7 +7070,7 @@ void fn_801250CC(int n, f32 *a, int nc, f32 *c)
     }
 }
 
-void fn_801252D8(int n, f32 *a, int nc, f32 *c)
+void rftbsub(int n, f32 *a, int nc, f32 *c)
 {
     int j, k, kk, ks, m;
     f32 wkr, wki, xr, xi, yr, yi;
@@ -7094,7 +7094,7 @@ void fn_801252D8(int n, f32 *a, int nc, f32 *c)
     }
 }
 
-void fn_801254E4(int n, f32 *a, int nc, f32 *c) {
+void dctsub(int n, f32 *a, int nc, f32 *c) {
     int j, k, kk, ks, m;
     f32 wkr, wki, xr;
 
@@ -7120,7 +7120,7 @@ void fn_801254E4(int n, f32 *a, int nc, f32 *c) {
 #define BINK_MUL(x, y) (((x) * (y)) >> 11)
 
 // Dequantizes and inverse-transforms an 8x8 block of coefficients (columns, then rows) into 8-bit pixels at dst.
-void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
+void fastidct8x8(u8* dst, s32 stride, s16* block, s32* quant) {
     s32 tmp[64];
     s32* t = tmp;
     s32 i;
@@ -7222,8 +7222,8 @@ void fn_80125664(u8* dst, s32 stride, s16* block, s32* quant) {
 
 }
 
-// Like fn_80125664, but draws the block at double size (16x16) into dst.
-void fn_80125960(u8 *dst, s32 stride, s16 *block, s32 *quant) {
+// Like fastidct8x8, but draws the block at double size (16x16) into dst.
+void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
     s32 tmp[64];
     s32 *t = tmp;
     s32 i;
@@ -7335,16 +7335,16 @@ void fn_80125960(u8 *dst, s32 stride, s16 *block, s32 *quant) {
 }
 
 void fn_80125CA0(void *arg0, void *arg1, void *arg2, s32 arg3) {
-    fn_80125664(arg0, (s32)arg1, arg2, (s32 *)((u8 *)&lbl_802F6A40 + (arg3 << 8)));
+    fastidct8x8(arg0, (s32)arg1, arg2, (s32 *)((u8 *)&lbl_802F6A40 + (arg3 << 8)));
 }
 
 void fn_80125CB4(void *arg0, void *arg1, void *arg2, s32 arg3) {
-    fn_80125960(arg0, (s32)arg1, arg2, (s32 *)((u8 *)&lbl_802F6A40 + (arg3 << 8)));
+    fastidct8x8d(arg0, (s32)arg1, arg2, (s32 *)((u8 *)&lbl_802F6A40 + (arg3 << 8)));
 }
 
 extern const s32 lbl_802F7A40[];
 // Dequantizes (inter table `q`) and inverse-transforms a block, adding the result to the motion source src.
-void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride) {
+void FastmIDCT8x8WithMotion(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride) {
     s32 tmp[64];
     s32 i;
     s32 *t = tmp;
@@ -7451,7 +7451,7 @@ void fn_80125CC8(u8 *dst, s32 stride, s16 *block, s32 q, u8 *src, s32 srcStride)
 
 // Reads the AC coefficients of an 8x8 DCT block (block[0], the DC, is set by the caller) bit plane by bit plane,
 // using the same coefficient list scheme as the residue reader, then stores them in natural order.
-void fn_80126018(s16 *block, BitReader8011 *bits) {
+void ReadBPLossless(s16 *block, BitReader8011 *bits) {
     u32 planes;
     u32 width;
     u8 *start;
@@ -7663,7 +7663,7 @@ void fn_80126018(s16 *block, BitReader8011 *bits) {
 // Reads the residue of an 8x8 block into `block` (signed bytes), bit plane by bit plane, stopping after
 // `limit` + 1 values. Each list entry is coefficient << 2 | mode: 0 = group of 16 untouched, 1 = group of 16 to
 // split, 2 = group of 4, 3 = single coefficient.
-void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
+void readlossy(s8* block, BitReader8011* bits, u32 limit) {
     s32 i;
     s32 planes;
     s32 nm;
@@ -7931,12 +7931,12 @@ void fn_80126A10(s8* block, BitReader8011* bits, u32 limit) {
 
 // Adds a residue read from the bitstream to an 8x8 block: dst = src + residue (the residue is stored in Bink's
 // coefficient order, 2x2 groups within 4x4 quadrants).
-void fn_80126EF0(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src, s32 srcStride) {
+void ReadBPLossyWithMotion(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src, s32 srcStride) {
     s8 block[64] = {0};
     u8 *row = dst;
     u8 *ref = src;
 
-    fn_80126A10(block, bits, limit);
+    readlossy(block, bits, limit);
     row[0] = block[0] + ref[0];
     row[1] = block[1] + ref[1];
     row[2] = block[4] + ref[2];
@@ -8018,10 +8018,10 @@ void fn_80126EF0(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limit, u8 *src
 }
 
 extern f64 pow(f32, f64);
-extern void fn_80119288(void *);
-extern void fn_80119300(void *, u32, u32);
-extern void fn_8011943C(void *, s32);
-extern void fn_801199A4(void *, s32);
+extern void set_rate_volume_and_pan(void *);
+extern void clear(void *, u32, u32);
+extern void set_both_state(void *, s32);
+extern void set_addrs(void *, s32);
 
 /* .sdata owned by this unit (0x80559938-0x80559954), in address order. */
 extern u8 lbl_8041D628[0x80];
