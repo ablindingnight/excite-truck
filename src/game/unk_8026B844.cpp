@@ -76,7 +76,9 @@ s32 fn_8026A344(s32 i);
 CamCar* fn_8017960C(s32 car);
 void fn_8026E688(CamFrame* out, const CamVec* eye, const CamVec* target, const CamVec* up);
 void fn_801BFD34(CamVec* out, const CamVec* v, const CamFrame* m);
-void Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(CamRot* out, const CamRot* a, const CamRot* b);
+struct Mat3;
+struct Vec3;
+void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b);  // racing.cpp
 
 // The pad as fn_801298E8 fills it (achview's ViewPad, keybd's KeyState): sticks, the analog trigger at 0x1C,
 // buttons, d-pad bits.
@@ -108,7 +110,7 @@ int fn_801298E8(FreePad* pad, int chan);
 u32 fn_802E2C20(void);
 int fn_802E4A1C(int key);
 f32 fn_801EA0E8(f32 x, f32 z);
-void Mat3FromEuler__FP4Mat3PC4Vec3(CamRot* out, const CamVec* euler);
+void Mat3FromEuler(Mat3* out, const Vec3* euler);  // racing.cpp
 
 static __inline f32 CamDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
@@ -255,13 +257,13 @@ void fn_8026B8A0(void) {
     lbl_80499050.rot.axes[2].y = lbl_80563D78;
     lbl_80499050.rot.axes[2].z = lbl_80563D94;
     SetV3(&yawE, lbl_80563D78, lbl_8055F4F4, lbl_80563D78);
-    Mat3FromEuler__FP4Mat3PC4Vec3(&yawM, &yawE);
-    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &yawM, &lbl_80499050.rot);
+    Mat3FromEuler((Mat3*)&yawM, (const Vec3*)&yawE);
+    Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&yawM, (const Mat3*)&lbl_80499050.rot);
     pitchE.x = -lbl_8055F4F8;
     pitchE.y = lbl_80563D78;
     pitchE.z = lbl_80563D78;
-    Mat3FromEuler__FP4Mat3PC4Vec3(&pitchM, &pitchE);
-    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &pitchM, &lbl_80499050.rot);
+    Mat3FromEuler((Mat3*)&pitchM, (const Vec3*)&pitchE);
+    Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
 }
 
 BOOL fn_8026BFF0(s32 x) {
@@ -434,8 +436,8 @@ static __inline void CamFly(CamFrame* f, const FreePad* pad, f32 turn, f32 roll,
     CamVec e;
     CamVec v;
     CamSet(&e, turn * -fn_8026B844(pad->y0), turn * fn_8026B844(pad->x0), roll * turn);
-    Mat3FromEuler__FP4Mat3PC4Vec3(&m, &e);
-    Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&f->rot, &m, &f->rot);
+    Mat3FromEuler((Mat3*)&m, (const Vec3*)&e);
+    Mat3Mul((Mat3*)&f->rot, (const Mat3*)&m, (const Mat3*)&f->rot);
     CamSet(&v, pad->y1 * speed, 0.1f * (lift * speed), -pad->x1 * speed);
     CamMove(f, &v);
 }
@@ -577,8 +579,8 @@ void fn_8026C014(int player) {
         lbl_80499050.pos.x = lbl_80499050.pos.x + w.x;
         lbl_80499050.pos.y = lbl_80499050.pos.y + w.y;
         lbl_80499050.pos.z = lbl_80499050.pos.z + w.z;
-        Mat3FromEuler__FP4Mat3PC4Vec3(&m, &lbl_8049A1FC);
-        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &m, &lbl_80499050.rot);
+        Mat3FromEuler((Mat3*)&m, (const Vec3*)&lbl_8049A1FC);
+        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&m, (const Mat3*)&lbl_80499050.rot);
     } else if (pad.w44[3] & 0x10) {
         // Orbit: the left stick turns about the vertical and tilts, the d-pad moves.
         CamRot yawM;
@@ -644,11 +646,11 @@ void fn_8026C014(int player) {
             b[2].z = lbl_80563D94;
         }
         CamSet(&yawE, lbl_80563D78, yaw, lbl_80563D78);
-        Mat3FromEuler__FP4Mat3PC4Vec3(&yawM, &yawE);
-        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &yawM, &lbl_80499050.rot);
+        Mat3FromEuler((Mat3*)&yawM, (const Vec3*)&yawE);
+        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&yawM, (const Mat3*)&lbl_80499050.rot);
         CamSet(&pitchE, -lbl_8055F510, lbl_80563D78, lbl_80563D78);
-        Mat3FromEuler__FP4Mat3PC4Vec3(&pitchM, &pitchE);
-        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, &pitchM, &lbl_80499050.rot);
+        Mat3FromEuler((Mat3*)&pitchM, (const Vec3*)&pitchE);
+        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
         z = lbl_80563D78;
         x = z;
         z = Loop2_fn_8026C014(pad, z, speed);
@@ -815,7 +817,7 @@ void fn_8026C014(int player) {
             lbl_8049A168.pos.z = lbl_80563D78;
         }
         fn_801BFD34(&lbl_80499050.pos, &lbl_8049A168.offset, &tgt);
-        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&lbl_80499050.rot, (CamRot*)&lbl_8049A168, &tgt.rot);
+        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)(CamRot*)&lbl_8049A168, (const Mat3*)&tgt.rot);
         if ((s32)lbl_8055F4E4 & 1) {
             f32 floor = lbl_80563D94 + fn_801E9DDC(&lbl_8049A168.hint, lbl_80499050.pos.x, lbl_80499050.pos.z);
             lbl_80499050.pos.y = CamMax(lbl_80499050.pos.y, floor);
@@ -873,7 +875,7 @@ void fn_8026DAA8(CamView* c) {
     case 4: {
         CamFrame* car = &fn_8017960C(fn_8026A344(0))->frame;
         fn_801BFD34(&c->frame.pos, &lbl_80499050.pos, car);
-        Mat3Mul__FP4Mat3PC4Mat3PC4Mat3(&c->frame.rot, &lbl_80499050.rot, &car->rot);
+        Mat3Mul((Mat3*)&c->frame.rot, (const Mat3*)&lbl_80499050.rot, (const Mat3*)&car->rot);
         break;
     }
     default:
