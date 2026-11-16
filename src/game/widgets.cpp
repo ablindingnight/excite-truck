@@ -379,7 +379,6 @@ struct SteppedFloatPrefix {char base[0x244];float* value;float minimum,maximum,s
 typedef char SteppedFloatPrefixObservedSize268[sizeof(SteppedFloatPrefix)==0x268?1:-1];
 extern "C" {
 extern float __float_epsilon[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
-void fn_802354A0(void*,int,float,float,float,float,float,u32);
 }
 static inline float ObservedProviderClamp(float value){float one=(1.0f);float limited=one<value?one:value;float zero=(0.0f);return limited>zero?limited:zero;}
 static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
@@ -511,7 +510,6 @@ struct ProviderDrawMetrics {char unknown[0x70];float margin;};
 extern "C" {
 extern ProviderDrawMetrics* lbl_8055E050;extern float __float_epsilon[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
 int fn_8022AB18(int,int,int);float fn_8022AAA8(int,const char*);int fn_8022AA84(int);
-void fn_802354A0(void*,int,float,float,float,float,float,u32);
 }
 static inline float ObservedAbsDecision(float value){return (float)__fabs(value);}
 extern "C" {
@@ -628,7 +626,7 @@ struct PairImage248 {char base[0x248];void* first;void* second;};
 struct PairImage25c {char base[0x25c];void* first;void* second;};
 struct ArtImage244Prefix {char base[0x244];gArtSet* image;};
 struct GXAssetImage244Prefix {char base[0x244];void* image;UIContext* asset;};
-struct SceneResourcePrefix {char base[0x244];void* model;float x,y,height,width;int frame;UIContext* asset;unsigned char owned;};
+struct SceneResourcePrefix {char base[0x244];gArtSet* model;float x,y,height,width;int frame;UIContext* asset;unsigned char owned;};
 struct ResourceHandlePrefix {char base[0x254];int handle;char gap258[8];UIContext* asset;};
 struct TripleResourcePrefix {char base[0x250];GTextFont* resource;gArtSet* first;gArtSet* second;};
 struct RichCaptionPrefix {char base[0x244];const char* label;char text[256];BitmapFont* renderer;};
@@ -991,7 +989,6 @@ typedef struct ImageFillGlobalNew {char gap0[0x70];float padding;} ImageFillGlob
 extern "C" {
 extern const float lbl_805634A8,lbl_805634C0,lbl_805634C4,lbl_805634C8,lbl_805634D8,lbl_805634DC,lbl_805634E0;extern const double lbl_805634D0;
 float fn_8023659C(void);double fmod(double,double);double sin(double);
-void fn_802354A0(void*,int,float,float,float,float,float,unsigned int);
 // Shared UIDraw declarations use one consistent source contract.
 // Remaining opaque graphics imports are bounded views, not recovered original headers.
 }
