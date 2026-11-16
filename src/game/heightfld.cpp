@@ -4,6 +4,10 @@
 // procedural fake heightfield used when there is no track, and deformation records that track how the
 // layer weights move a point. Names are guesses apart from the strings.
 #include "game/common.h"
+// World units per height-field cell. A named constant with external linkage, defined before any code: retail keeps
+// it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal of the spline helpers (name unproven).
+extern const f32 lbl_80562B60;
+const f32 lbl_80562B60 = 2.0f;
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -425,7 +429,7 @@ GroundHeader* fn_801DCA60(void) {
     memset(g, 0, sizeof(GroundHeader));
     int z;
     f32 size = 1024.0f;
-    size *= 2.0f;
+    size *= lbl_80562B60;
     g->offZ = g->offX = size / 2.0f;
     g->scaleX = g->scaleZ = lbl_80446F08.w / size;
     lbl_80446F08.data = new ("heightfield") f32[lbl_80446F08.w * lbl_80446F08.h];
