@@ -107,6 +107,10 @@ inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
     arg1 = *(const int*)&r.hi;
 }
 
+static inline MenuItem VolumeItem(const char* n, f32* v, f32 lo, f32 hi) {
+    return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi);
+}
+
 // A slider: the range is stored in the item's argument words.
 struct SliderItem {
     SliderItem(const char* n, f32* v, MenuRange r) {
@@ -742,9 +746,9 @@ extern "C" void fn_80239F74(void) {
                         MenuItem items[] = {
                             MenuItem(0, 5, &sound, 0, 0),
                             MenuItem("cvideo", 5, &aspect, 0, 0),
-                            MenuItem("music_volume", &sCur.music, MenuRange(0.0f, 1.0f)),
+                            VolumeItem("music_volume", &sCur.music, 0.0f, 1.0f),
                             MenuItem("mvcustom", 5, &music, 0, 0),
-                            MenuItem("sfx_volume", &sCur.sfx, MenuRange(0.0f, 1.0f)),
+                            VolumeItem("sfx_volume", &sCur.sfx, 0.0f, 1.0f),
                             MenuItem("sfxcustom", 5, &sfx, 0, 0),
                             MenuItem("audio", 16, 0, (int)&track, 0),
                             MenuItem("ascustom", 5, &trackCap, 0, 0),
