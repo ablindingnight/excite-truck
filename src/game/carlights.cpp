@@ -2,6 +2,7 @@
 // model's light nodes, drawn as camera-facing flares and car-aligned glow quads. Names are guesses
 // apart from the node names and value keys.
 #include "game/common.h"
+#include "game/weather.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 
@@ -69,7 +70,7 @@ struct QuadIdx {
 
 extern "C" {
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
-struct WeatherDef { s32 precip; u8 night; };
+// WeatherDef: game/weather.h.
 WeatherDef* fn_801E1F44(void);
 f32 fn_801E88F0(s32 a);
 s32 fn_80287B14(void);

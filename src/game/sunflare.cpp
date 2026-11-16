@@ -1,6 +1,7 @@
 // Sun and lens flare (0x80291784-0x802924E8, "flare.val", "burst.tex"): a sun sprite and up to 8 flare
 // sprites strung along a rod through the screen centre, shown only on clear days. Names are guesses.
 #include "game/common.h"
+#include "game/weather.h"
 #include <revolution/MTX/vec.h>
 #include <math.h>
 
@@ -26,12 +27,7 @@ struct Camera {
     SunVecP pos;  // offset 0x24
 };
 
-struct WeatherDef {
-    s32 precip;  // offset 0x0 (0 none, 1 rain, 2 snow)
-    u8 night;    // offset 0x4
-    int Clear(void) { return night == 0 && precip == 0; }
-};
-
+// WeatherDef: game/weather.h.
 // A camera-facing sprite; pos holds its projected screen position.
 struct Sprite {
     SunVecP pos;    // offset 0x0

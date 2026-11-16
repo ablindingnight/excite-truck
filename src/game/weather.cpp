@@ -2,6 +2,7 @@
 // "weather" table, the lightning flash state machine, and rain/thunder sounds. Names are guesses
 // apart from the value keys and sound names.
 #include "game/common.h"
+#include "game/weather.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -42,16 +43,7 @@ public:
 
 extern "C" RSound* fn_80207848(const char* name, int a);
 
-struct WeatherDef {
-    s32 precip;      // offset 0x0 (0 none, 1 rain, 2 snow)
-    u8 night;        // offset 0x4
-    u32 fogColor;    // offset 0x8
-    f32 fogStart;    // offset 0xC
-    f32 fogStop;     // offset 0x10
-    f32 fogDensity;  // offset 0x14
-    u8 hasFog;       // offset 0x18
-};
-
+// WeatherDef: game/weather.h.
 struct WeatherState {
     s32 lightning;   // offset 0x0 (0 off, 1 idle, 2 flash, 3 thunder)
     f32 flash;       // offset 0x4
