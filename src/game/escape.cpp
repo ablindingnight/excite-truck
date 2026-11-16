@@ -489,7 +489,7 @@ int fn_8000D540(int key) {
     return 1;
 }
 
-u8 fn_8000D75C(void) { return lbl_8055D404; }
+int fn_8000D75C(void) { return lbl_8055D404; }
 
 int fn_8000D764(void) {
     if (lbl_8055D404) {
