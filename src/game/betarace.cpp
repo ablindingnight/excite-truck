@@ -4599,7 +4599,7 @@ inline void BetaMaster::a1(void) {
     nCars = lbl_8055E4D0;
     if (nCars > 0) {
         for (; i < nCars; i++) {
-        int acar = lbl_804348E8[i]->model == 'ACAR';
+        bool acar = lbl_804348E8[i]->model == 'ACAR';
         cars[i].hud = new ("stuntdash") CarHud(i, acar);
         cars[i].stunts = new ("pr_stuntdash") StuntList;
         cars[i].master = this;

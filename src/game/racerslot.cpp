@@ -129,7 +129,7 @@ int fn_8026A698(u8* p, int i) {
         return 0;
     }
     int n = fn_80178CA4();
-    int multi = n > 1;
+    bool multi = n > 1;
     u8* c = PTR(p, 0x140);
     int done = !((f32)__fabs(F32(c, 0x2690)) <= __float_epsilon[0]) && fn_801B8570(S32(c, 0x1EC));
     if (!done) {
