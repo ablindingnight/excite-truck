@@ -85,6 +85,11 @@ public:
         }
     }
     int Playing(void) { return playing; }
+    // Back to the sample start (opsound): param[0] is the play position.
+    void Rewind(void) {
+        paramDirty[0] = 1;
+        param[0] = 0.0f;
+    }
 
     f32 pitch;        // offset 0x4
     f32 volume;       // offset 0x8

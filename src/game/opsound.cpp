@@ -1,52 +1,14 @@
-// Sound options menu (0x8023CA18-0x8023D4B8, "opsound.lyt" / "sound.lyt"): music, sound effect,
+// GameSound options menu (0x8023CA18-0x8023D4B8, "opsound.lyt" / "sound.lyt"): music, sound effect,
 // announcer, tyre and video volumes, the sound quality and race music choices and the speaker mixer,
 // saved to option section 4. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/menustate.h"
 
 extern "C" {
 char* strcpy(char* d, const char* s);
 }
 
-
-class Sound {
-public:
-    virtual ~Sound(void);
-    void Play(void) {
-        play = 1;
-        b4B = 0;
-        b4A = 0;
-    }
-    void Stop(void) {
-        b4A = 1;
-        b4C = 0;
-    }
-    void SetVolume(f32 v) {
-        if (v != vol) {
-            volDirty = 1;
-            vol = v;
-        }
-    }
-
-    // Rewinds the sample: restart flag set, play position back to 0.
-    void Rewind(void) {
-        restart = 1;
-        pos = 0.0f;
-    }
-
-    f32 pitch;  // offset 0x4
-    f32 vol;    // offset 0x8
-    u8 padC[0x28 - 0xC];
-    f32 pos;      // offset 0x28
-    u8 pad2C[0x34 - 0x2C];
-    u8 restart;   // offset 0x34
-    u8 pad35[0x49 - 0x35];
-    u8 play;      // offset 0x49
-    u8 b4A;       // offset 0x4A
-    u8 b4B;       // offset 0x4B
-    u8 b4C;       // offset 0x4C
-    u8 volDirty;  // offset 0x4D
-};
 
 class Mixer {
 public:
@@ -145,7 +107,7 @@ extern char lbl_8055BAB8[4];
 extern char lbl_8055B860[8];
 }
 
-// Sound options state behind the menu items.
+// GameSound options state behind the menu items.
 class SoundOptions : public MenuState {
 public:
     SoundOptions(f32* fx, f32* music, s32* quality, s32* mixer, char* mixerName, f32* announcer, f32* tire,
@@ -194,7 +156,7 @@ public:
     f32* announcer;   // offset 0x2C
     f32* tire;        // offset 0x30
     f32* video;       // offset 0x34
-    Sound* sound;     // offset 0x38
+    GameSound* sound;     // offset 0x38
 };
 
 s32 lbl_8055BB68 = 2;  // how the menu was opened
