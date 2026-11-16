@@ -60,7 +60,8 @@ struct CarBody {
     f32 dist;  // offset 0x2C8: distance along this lap
 };
 
-struct CarProgress {
+// carinfo.cpp's CarInfo (fn_801EA9A0), declared as far as this unit reads it
+struct CarInfo {
     u8 pad0[8];
     CarBody* body;  // offset 0x8
     u8 padC[0x10];
@@ -85,7 +86,7 @@ int fn_802C2C00(int on);
 int fn_801E85A4(void);       // player views
 int fn_801E866C(int view);  // car of a view
 int fn_801B8570(int car);   // car is racing
-CarProgress* fn_801EA9A0(int car);
+CarInfo* fn_801EA9A0(int car);
 f32 fn_8013672C(void);      // lap length
 RaceSetupHdr* fn_801E7E3C(void);
 }
@@ -141,7 +142,7 @@ void fn_802059C0(void) {
     for (int i = 0; i < n; i++) {
         int car = fn_801E866C(i);
         if (fn_801B8570(car)) {
-            CarProgress* cp = fn_801EA9A0(car);
+            CarInfo* cp = fn_801EA9A0(car);
             int lap = cp->lap;
             f32 dist = cp->body->dist;
             if (lap == 0) {

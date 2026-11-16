@@ -49,7 +49,8 @@ struct RaceResult {
     u8 padF[0xA4 - 0xF];
 };
 
-struct PadState {
+// joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
+struct JoyStatus {
     u8 pad0[0x20];
     u8 buttons[8];  // offset 0x20
     u8 pad28[0x68 - 0x28];
@@ -188,7 +189,7 @@ u32 fn_802E46F0(void);
 int fn_8020DE1C(void);
 void fn_80176780(int a, int b);
 int fn_802E2C20(void);
-int fn_801298E8(PadState* pad, int index);
+int fn_801298E8(JoyStatus* pad, int index);
 int fn_801E85AC(void);
 void fn_8026A1F0(int cam, int player, int unk);
 void fn_801E7E48(void);
@@ -805,7 +806,7 @@ int fn_8000BB08(void) {
     int active;
     int i;
     int j;
-    PadState pad;
+    JoyStatus pad;
     if (OptE3Demo()) {
         now = fn_802E2C20();
         active = 0;

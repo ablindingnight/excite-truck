@@ -58,7 +58,8 @@ struct EventInfo {
     u32 flags;  // offset 0x10
 };
 
-struct PadState {
+// joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
+struct JoyStatus {
     u8 pad0[0x40];
     u32 dir;  // offset 0x40
     u8 pad44[0x70 - 0x44];
@@ -92,7 +93,7 @@ EventInfo* fn_801E87A8(void);
 int fn_801769F8(void);
 void fn_80011A2C(void);
 int fn_802ECC10(void);
-int fn_801298E8(PadState* pad, int unk);
+int fn_801298E8(JoyStatus* pad, int unk);
 void fn_80176A00(int unk);
 void fn_80278894(int unk);
 void fn_801769E0(void);
@@ -406,7 +407,7 @@ enum { CAM_LEFT = 12, CAM_RIGHT = 13 };
 int fn_80008C5C(void) {
     static s32 camMode = 4;
     int prev = camMode;
-    PadState pad;
+    JoyStatus pad;
     u32 dir;
     int any;
 

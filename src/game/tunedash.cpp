@@ -41,7 +41,8 @@ struct Camera {
     u8 data[0x30];
 };
 
-struct PadState {
+// joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
+struct JoyStatus {
     u8 pad0[0x20];
     u8 buttons[8];  // offset 0x20
     u8 pad28[0x68 - 0x28];
@@ -56,7 +57,7 @@ void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
 void fn_80230B5C(Camera* cam);
 void fn_802C8638(Camera* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
-int fn_801298E8(PadState* pad, int chan);
+int fn_801298E8(JoyStatus* pad, int chan);
 void fn_80011A2C(void);
 }
 
@@ -182,7 +183,7 @@ int fn_802044E8(void) {
         }
     } else {
         fn_801476C4(lbl_8055ED44->Find("inactivity_message"));
-        PadState pad;
+        JoyStatus pad;
         if (fn_801298E8(&pad, 0) && pad.buttons[5]) {
             fn_80204330();
         }

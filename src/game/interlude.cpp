@@ -210,7 +210,8 @@ struct Track {
     TrackList* list;  // offset 0x2C
 };
 
-struct RaceSlot {
+// physics.cpp's EventDesc (fn_801769CC), declared as far as this unit reads it
+struct EventDesc {
     s32 event;  // offset 0x0
     u32 type;   // offset 0x4
 };
@@ -272,7 +273,7 @@ int fn_8013181C(const char* txt, const char* val, const char* qrs);
 void fn_80176610(void);
 void fn_80176780(int flags, int a);
 u32 fn_801769A8(void);
-RaceSlot* fn_801769CC(void);
+EventDesc* fn_801769CC(void);
 void fn_801769E0(void);
 void fn_801769EC(void);
 Track* fn_80178C9C(void);
@@ -1041,7 +1042,8 @@ struct CarPlace {
 };
 
 // A car's start pose (the place plus more).
-struct CarPose {
+// placecar.cpp's Respawn (fn_801B8100), declared as far as this unit reads it
+struct Respawn {
     CarPlace place;
     u32 w44[3];  // offset 0x44
 };
@@ -1064,7 +1066,7 @@ struct ICar {
     u8 pad12C[0x1F0 - 0x12C];
     s32 player;   // offset 0x1F0
     u8 pad1F4[0x274 - 0x1F4];
-    CarPose pose;  // offset 0x274
+    Respawn pose;  // offset 0x274
     u8 pad2C4[0x25D4 - 0x2C4];
     f32 speed;  // offset 0x25D4
 };
@@ -1149,7 +1151,7 @@ void fn_80176858(void);
 void fn_80129360(u32 sample, int a);
 void fn_8020C8F4(u32 sample);
 int CarTypeIsReal(s32 player, int a);
-void fn_801B8100(CarPose* pose, int car, s32 player);
+void fn_801B8100(Respawn* pose, int car, s32 player);
 f32 fn_80139048(void);
 RaceLen* fn_80137C54(int i);
 void fn_801B8048(CarPlace* p, LineFollower* line, f32 lat, f32 along);
@@ -1317,7 +1319,7 @@ void debug_event(void) {
                 case 2: {
                     V2 off = tp->pt;
                     if (fn_801769CC()->type & 0x100) {
-                        CarPose pose = car->pose;
+                        Respawn pose = car->pose;
                         fn_801B8100(&pose, i, car->player);
                         place = pose.place;
                     } else if (fn_801769CC()->type & 0x100) {

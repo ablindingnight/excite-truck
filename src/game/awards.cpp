@@ -58,7 +58,8 @@ const char* IdentGetSlotName(int slot);
 
 HighScore* StatsGetHighScore(int slot, long event, long difficulty, int a);
 
-struct RaceSlot {
+// physics.cpp's EventDesc (fn_801769CC), declared as far as this unit reads it
+struct EventDesc {
     s32 event;  // offset 0x0
     s32 a4;
     s32 difficulty;  // offset 0x8
@@ -74,7 +75,7 @@ struct CarInfo {
 };
 
 extern "C" {
-RaceSlot* fn_801769CC(void);
+EventDesc* fn_801769CC(void);
 CarInfo* fn_801EA9A0(int car);
 }
 
@@ -874,7 +875,7 @@ inline AwardsMgr::AwardsMgr(void) {
     layout = (ILayout*)fn_80145E70("awards_lyt.val");
     recLayout = (ILayout*)fn_80145E70("awards_pr.val");
     paused = 0;
-    RaceSlot* s = fn_801769CC();
+    EventDesc* s = fn_801769CC();
     event = s->event;
     difficulty = s->difficulty;
     off[0] = 1;

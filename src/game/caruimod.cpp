@@ -516,7 +516,8 @@ void CarUIModel::DrawEfx(void) {
 }
 
 // The pose a car is shown in: its frame, wheel heights and steering.
-struct CarPose {
+// minworld.cpp's MWSlot (fn_80253004)
+struct MWSlot {
     Frame frame;     // offset 0x0
     u8 valid;        // offset 0x30
     u8 pad31[0xF];
@@ -568,7 +569,7 @@ void fn_80252BC8(void);
 void fn_80252BF0(void);
 void fn_80252C78(void);
 void fn_80252F50(f32 dt);
-void fn_80253004(s32 index, struct CarPose* p);
+void fn_80253004(s32 index, struct MWSlot* p);
 void fn_80253104(s32 index, CarSetup* s);
 void fn_802AB9E0(f32 t);
 void fn_802AB9E4(void);
@@ -945,8 +946,8 @@ extern "C" {
     return a + difference / 2.0f;
 }
 
-void fn_802545C4(CarPose* p, s32 model, CarUIModel* m) {
-    memset(p, 0, sizeof(CarPose));
+void fn_802545C4(MWSlot* p, s32 model, CarUIModel* m) {
+    memset(p, 0, sizeof(MWSlot));
     p->valid = 1;
     if (m->loaded) {
         for (int i = 0; i < 4; i++) {
@@ -1058,7 +1059,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             offX = ((l + r) / 2.0f) * (proj * d) / hw;
             offY = (0.5f * (t + b)) * (-aspect * d) / hh;
         }
-        CarPose pose;
+        MWSlot pose;
         if (lbl_8055F330) {
             fn_80253004(index, &pose);
         } else {
@@ -1406,7 +1407,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
                     off.y = 0.0f;
                     off.z = 0.0f;
                     if (mode == 0) {
-                        CarPose p;
+                        MWSlot p;
                         if (lbl_8055F330) {
                             fn_80253004(i, &p);
                         } else {
@@ -1439,7 +1440,7 @@ void CarUIScreen::SetupCamera(void) {
     t.y = 0.0f;
     t.z = 0.0f;
     if (mode == 0) {
-        CarPose p;
+        MWSlot p;
         if (lbl_8055F330) {
             fn_80253004(index, &p);
         } else {
@@ -1621,7 +1622,7 @@ struct ColorState {
 
 void CarUIScreen::Draw(void) {
     Frame saved = *fn_802C86DC();
-    CarPose p;
+    MWSlot p;
     if (lbl_8055F330) {
         fn_80253004(index, &p);
         for (int i = 0; i < 4; i++) {
