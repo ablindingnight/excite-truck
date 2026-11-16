@@ -3,6 +3,7 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 
 template <class T>
@@ -14,10 +15,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 
 void* operator new(size_t size, const char* tag);
 
-struct Vec2 {
-    f32 x;
-    f32 y;
-};
+// Vec2: the SDK's (revolution/MTX/mtxtypes.h, same x/y layout).
 
 struct CirclePoint : public Vec3 {
     CirclePoint(void) {}
@@ -178,9 +176,6 @@ PlayerObj* fn_802678E4(int player);
 EventInfo* fn_801E87A8(void);
 int fn_80178C9C(void);
 Vec3 fn_80136468(int path, f32 dist);  // idealline: returns the ILPos by value
-void PSVECNormalize(const Vec3* src, Vec3* dst);
-void PSVECCrossProduct(const Vec3* a, const Vec3* b, Vec3* out);
-f32 PSVECDotProduct(const Vec3* a, const Vec3* b);
 u32 fn_80230B9C(int unk);
 void fn_80231380(Vertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 void fn_802C8BD0(s32 tex);
@@ -567,11 +562,11 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         basis.pos.z = 0.0f;
         SetXYZ(&basis.fwd, dir.x, dir.y, 0.0f);
     }
-    PSVECNormalize(&basis.fwd, &basis.fwd);
+    PSVECNormalize((const Vec*)&basis.fwd, (Vec*)&basis.fwd);
     basis.up.x = 0.0f;
     basis.up.y = 0.0f;
     basis.up.z = 1.0f;
-    PSVECCrossProduct(&basis.fwd, &basis.up, &basis.right);
+    PSVECCrossProduct((const Vec*)&basis.fwd, (const Vec*)&basis.up, (Vec*)&basis.right);
     if (fn_801E87A8()->flags & 2) {
         basis.right.x *= -1.0f;
         basis.right.y *= -1.0f;
@@ -653,10 +648,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             rel.y *= s;
             rel.z *= s;
         }
-        if (!(PSVECDotProduct(&rel, &rel) < (w / 2.0f) * (w * 0.5f))) {
+        if (!(PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) < (w / 2.0f) * (w * 0.5f))) {
             continue;
         }
-        fade = Ease(1.0f - PSVECDotProduct(&rel, &rel) / ((w / 2.0f) * (w * 0.5f)));
+        fade = Ease(1.0f - PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) / ((w / 2.0f) * (w * 0.5f)));
         d = map->trucks;
         part = i == d->self ? 1 : 3;
         {
@@ -689,8 +684,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
                     rel.y *= s;
                     rel.z *= s;
                 }
-                if (PSVECDotProduct(&rel, &rel) > (w * 0.5f) * (w * 0.5f)) {
-                    PSVECNormalize(&rel, &rel);
+                if (PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) > (w * 0.5f) * (w * 0.5f)) {
+                    PSVECNormalize((const Vec*)&rel, (Vec*)&rel);
                     rel.x *= w * 0.5f;
                     rel.y *= w * 0.5f;
                     rel.z *= w * 0.5f;
@@ -726,7 +721,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             rel.y *= s;
             rel.z *= s;
         }
-        if (!(PSVECDotProduct(&rel, &rel) >= (w / 2.0f) * (w * 0.5f))) {
+        if (!(PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) >= (w / 2.0f) * (w * 0.5f))) {
             Vec2 delta;
             f32 size;
             f32 fade;
@@ -734,7 +729,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             delta.x = tp.x - m->pos.x;
             delta.y = tp.y - m->pos.y;
             size = fn_80235EF0(m->art, 0);
-            fade = Ease(1.0f - PSVECDotProduct(&rel, &rel) / ((w / 2.0f) * (w * 0.5f)));
+            fade = Ease(1.0f - PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) / ((w / 2.0f) * (w * 0.5f)));
             a = 255.0f * fade;
             fn_80235AFC(m->art, 0, ((int)(a < 0.0f ? a - 0.5f : 0.5f + a) << 24) | 0xFF | 0xFFFF00,
                         c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->unk10 + m->angle);
