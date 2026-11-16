@@ -211,7 +211,7 @@ extern "C" void fn_802449A0(void) {
         MenuItem("unlockable_list", ListKind(), &list, 0, 0),
         MenuItem(lbl_8055B860, 6, (void*)fn_8024497C, -1, 27),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, on, 0),
-        *(MenuItem*)&lbl_80498878,
+        MenuItem(lbl_80498878),
     };
     MenuDesc desc = {"unlock.lyt", items, NULL, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);
