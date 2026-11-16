@@ -1292,11 +1292,11 @@ s32 fn_80179658(u32 type) {
     return -1;
 }
 
-u8 fn_801796B4(void) { return lbl_8055E45D; }
+int fn_801796B4(void) { return lbl_8055E45D; }
 
 void fn_801796BC(u8 v) { lbl_8055E45E = v; }
 
-u8 fn_801796C4(void) { return lbl_8055E45F; }
+int fn_801796C4(void) { return lbl_8055E45F; }
 
 void fn_801796CC(u8 type, const void* data, u32 n) { fn_8017873C(&lbl_80430870, type, data, n); }
 
