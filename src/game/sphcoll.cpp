@@ -38,24 +38,16 @@ static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
 }
 
 // A box corner built component-wise (its constructor arguments are evaluated z, y, x).
-struct BoxCorner {
-    f32 x, y, z;
-    BoxCorner(f32 ax, f32 ay, f32 az) {
-        x = ax;
-        y = ay;
-        z = az;
-    }
-};
-
+// BoxCorner: rvec.h's RVec3.
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
-static inline BoxCorner VMin(const RVec3& a, const RVec3& b) {
-    return BoxCorner(MinF(a.x, b.x), MinF(a.y, b.y), MinF(a.z, b.z));
+static inline RVec3 VMin(const RVec3& a, const RVec3& b) {
+    return RVec3(MinF(a.x, b.x), MinF(a.y, b.y), MinF(a.z, b.z));
 }
 
-static inline BoxCorner VMax(const RVec3& a, const RVec3& b) {
-    return BoxCorner(MaxF(a.x, b.x), MaxF(a.y, b.y), MaxF(a.z, b.z));
+static inline RVec3 VMax(const RVec3& a, const RVec3& b) {
+    return RVec3(MaxF(a.x, b.x), MaxF(a.y, b.y), MaxF(a.z, b.z));
 }
 
 static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
@@ -2068,7 +2060,7 @@ int fn_8019EA7C(u8* p, u8* q) {
     f32 x = fp->pos.x - fq->pos.x;
     f32 y = fp->pos.y - fq->pos.y;
     f32 z = fp->pos.z - fq->pos.z;
-    BoxCorner d(x, y, z);
+    RVec3 d(x, y, z);
     bool hit = false;
     hit |= fn_8019E874(p, q);
     return hit;
@@ -2336,7 +2328,7 @@ void AttachedSphereShape::vf24(const RVec3* v, const RVec3* at, int kind, void* 
     f32 x = v->x + f->rot.y.x * d;
     f32 y = v->y + f->rot.y.y * d;
     f32 z = v->z + f->rot.y.z * d;
-    BoxCorner c(x, y, z);
+    RVec3 c(x, y, z);
 }
 
 void AttachedSphereShape::vf14(void) {
@@ -2436,11 +2428,11 @@ void BoxSphereShape::vf14(void) {
         } else {
             this->b4C = 0;
             const RVec3* h = (const RVec3*)(p + 0x58);
-            BoxCorner corners[8] = {
-                BoxCorner(-h->x, -h->y, -h->z), BoxCorner(h->x, -h->y, -h->z),
-                BoxCorner(-h->x, h->y, -h->z),  BoxCorner(h->x, h->y, -h->z),
-                BoxCorner(-h->x, -h->y, h->z),  BoxCorner(h->x, -h->y, h->z),
-                BoxCorner(-h->x, h->y, h->z),   BoxCorner(h->x, h->y, h->z),
+            RVec3 corners[8] = {
+                RVec3(-h->x, -h->y, -h->z), RVec3(h->x, -h->y, -h->z),
+                RVec3(-h->x, h->y, -h->z),  RVec3(h->x, h->y, -h->z),
+                RVec3(-h->x, -h->y, h->z),  RVec3(h->x, -h->y, h->z),
+                RVec3(-h->x, h->y, h->z),   RVec3(h->x, h->y, h->z),
             };
             for (i = 0; i < 8; i++) {
                 RVec3 w;
@@ -3699,9 +3691,9 @@ MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape((const RMt
     *mx = m->verts[0];
     *mn = *mx;
     for (int i = 1; i < ((MeshRes*)this->mesh)->count; i++) {
-        BoxCorner lo = VMin(*mn, ((MeshRes*)this->mesh)->verts[i]);
+        RVec3 lo = VMin(*mn, ((MeshRes*)this->mesh)->verts[i]);
         *mn = *(RVec3*)&lo;
-        BoxCorner hi = VMax(*mx, ((MeshRes*)this->mesh)->verts[i]);
+        RVec3 hi = VMax(*mx, ((MeshRes*)this->mesh)->verts[i]);
         *mx = *(RVec3*)&hi;
     }
 }

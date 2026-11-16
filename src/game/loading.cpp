@@ -3,29 +3,13 @@
 // "tips:" messages give the subject; the names are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/locstring.h"
 #include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include <revolution/MTX/vec.h>
 
-struct LdVec {
-    LdVec(void) {}
-    LdVec(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    void Set(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// LdVec: rvec.h's RVec3.
 // A camera orientation and position.
 extern "C" {
 }
@@ -33,8 +17,8 @@ extern "C" {
 // VecPOD: valvec3.h's ValVec3.
 struct CamFrame {
     ValVec3 axes[2];  // offset 0x0: right, up
-    LdVec fwd;       // offset 0x18
-    LdVec pos;       // offset 0x24
+    RVec3 fwd;       // offset 0x18
+    RVec3 pos;       // offset 0x24
 
 };
 
@@ -263,13 +247,13 @@ void GetTipKey(int idx, s32 type, char* buf, u32 size) {
 }
 
 void OrthonormalizeFrame(CamFrame* f) {
-    LdVec up(0.0f, 1.0f, 0.0f);
-    LdVec fwd;
-    LdVec newUp;
-    LdVec right;
+    RVec3 up(0.0f, 1.0f, 0.0f);
+    RVec3 fwd;
+    RVec3 newUp;
+    RVec3 right;
 
-    PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->fwd, (Vec*)((LdVec*)&f->axes[0]));
-    PSVECCrossProduct((const Vec*)&f->fwd, (const Vec*)((LdVec*)&f->axes[0]), (Vec*)((LdVec*)&f->axes[1]));
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->fwd, (Vec*)((RVec3*)&f->axes[0]));
+    PSVECCrossProduct((const Vec*)&f->fwd, (const Vec*)((RVec3*)&f->axes[0]), (Vec*)((RVec3*)&f->axes[1]));
     right.Set(f->axes[0].x, f->axes[0].y, f->axes[0].z);
     fwd.Set(f->fwd.x, f->fwd.y, f->fwd.z);
     PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&right, (Vec*)&newUp);
@@ -367,7 +351,7 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     f32 fov;
     s32 t;
 
-    LdVec* right = (LdVec*)&cam.axes[0];
+    RVec3* right = (RVec3*)&cam.axes[0];
     right->x = 1.0f;
     right->y = 0.0f;
     right->z = 0.0f;
@@ -387,7 +371,7 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     cam.fwd.x = dir[0];
     cam.fwd.y = 0.0f;
     cam.fwd.z = dir[1];
-    PSVECCrossProduct((const Vec*)((LdVec*)&cam.axes[1]), (const Vec*)&cam.fwd, (Vec*)right);
+    PSVECCrossProduct((const Vec*)((RVec3*)&cam.axes[1]), (const Vec*)&cam.fwd, (Vec*)right);
     t = fn_802E2C20() - lbl_8055D63C;
     f32 phase = (t % 50000) / 50000.0f;
     f32 angle = 6.2831855f * phase;

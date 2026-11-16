@@ -1,6 +1,7 @@
 // Chainlink fences (0x802A0940-0x802A0D60): fence posts arrive as world events and are drawn as
 // textured strips between the posts. Names are guesses apart from the allocation tag and texture.
 #include "game/common.h"
+#include "game/rvec.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -11,11 +12,7 @@ void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 }
 
-struct FencePost {
-    FencePost(void) {}
-    f32 x, y, z;
-};
-
+// FencePost: rvec.h's RVec3.
 struct FenceVtx {
     ValVec3 pos;  // offset 0x0
     u32 color;    // offset 0xC
@@ -29,7 +26,7 @@ struct Fence {
     s32 type;            // offset 0x0
     s32 id;              // offset 0x4
     s32 count;           // offset 0x8
-    FencePost posts[6];  // offset 0xC
+    RVec3 posts[6];  // offset 0xC
 };
 
 typedef int (*EventHandler)(const Fence* e);

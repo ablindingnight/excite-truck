@@ -3,6 +3,7 @@
 // icon), and the START/FINISH labels at the ends of the bars. Names are guesses apart from the
 // keys and the texture name.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/locstring.h"
 #include "game/raceprog.h"
 #include "game/carbody.h"
@@ -10,17 +11,7 @@
 #include "game/plainvec.h"
 
 // A vertex position (constructed in place).
-struct VtxPos {
-    VtxPos(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// VtxPos: rvec.h's RVec3.
 // Camera: common.h's PlainValMatrix.
 class LocString;
 extern "C" {
@@ -65,7 +56,7 @@ extern "C" {
 void fn_802057A8(u32 color, int idx, f32 x, f32 y, f32 u, f32 v) {
     f32 px = (f32)lbl_8055CFF0 * Lerp(0.49f, 0.51f, (x - -1.0f) / 2.0f);
     f32 py = (f32)lbl_8055CFF4 * Lerp(0.93f, 0.07f, y);
-    VtxPos p(px, py, 0.0f);
+    RVec3 p(px, py, 0.0f);
     fn_802C8E00(p.x, p.y, p.z, u, v, color, idx);
 }
 
@@ -147,7 +138,7 @@ void fn_802059C0(void) {
 }
 
 static inline void DividerVertex(u32 color, int idx, f32 x, f32 y) {
-    VtxPos p(x, y, 0.0f);
+    RVec3 p(x, y, 0.0f);
     fn_802C8E00(p.x, p.y, p.z, 0.0f, 0.0f, color, idx);
 }
 

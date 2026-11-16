@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
@@ -1212,7 +1213,7 @@ void fn_8018F6F8(u8* p) {
 }  // extern "C"
 
 // The solver's 4-vector record and the game-side vector built from it (carbody CbVec4, minworld MWV4).
-/* Helper names unproven (CDSolVec, CDV3, CDF, CDVec4, Set, Sol) */
+/* Helper names unproven (CDSolVec, RVec3, CDF, CDVec4, Set, Sol) */
 struct CDSolVec {
     CDSolVec(void) {}
     f32 x, y, z, w;
@@ -1227,15 +1228,7 @@ static inline CDSolVec CDSolVec4(f32 x, f32 y, f32 z, f32 w) {
     return v;
 }
 
-struct CDV3 {
-    CDV3(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x, y, z;
-};
-
+// CDV3: rvec.h's RVec3.
 struct CDF {
     CDF(f32 a) { v = a; }
     f32 v;
@@ -1244,9 +1237,9 @@ struct CDF {
 struct CDVec4 {
     CDVec4(CDSolVec s) {
         CDF f(s.w);
-        Set(CDV3(s.x, s.y, s.z), f);
+        Set(RVec3(s.x, s.y, s.z), f);
     }
-    void Set(const CDV3& p, CDF w_) {
+    void Set(const RVec3& p, CDF w_) {
         x = p.x;
         y = p.y;
         z = p.z;

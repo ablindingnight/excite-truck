@@ -3,6 +3,7 @@
 // per-car tuning accessors. Written against raw field offsets; the large routines are still stubs.
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/collvol.h"
@@ -1303,17 +1304,9 @@ static inline CbSolVec CbSolVec4(f32 x, f32 y, f32 z, f32 w) {
     return v;
 }
 
-struct CbV3 {
-    CbV3(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x, y, z;
-};
-
+// CbV3: rvec.h's RVec3.
 // The game-side 4-vector: built from a solver record through its xyz and w, written back through a temporary.
-/* Helper names unproven (CbV3, CbF, CbVec4, Set, Sol, CbFrame): the shapes come from the target copies (2026-11-08), the names are guesses. CbF (a one-float value passed by value) gives retail's float store + word copy of the w lane (2026-11-14). */
+/* Helper names unproven (RVec3, CbF, CbVec4, Set, Sol, CbFrame): the shapes come from the target copies (2026-11-08), the names are guesses. CbF (a one-float value passed by value) gives retail's float store + word copy of the w lane (2026-11-14). */
 struct CbF {
     CbF(f32 a) { v = a; }
     f32 v;
@@ -1329,9 +1322,9 @@ struct CbVec4 {
     }
     CbVec4(CbSolVec s) {
         CbF f(s.w);
-        Set(CbV3(s.x, s.y, s.z), f);
+        Set(RVec3(s.x, s.y, s.z), f);
     }
-    void Set(const CbV3& p, CbF w_) {
+    void Set(const RVec3& p, CbF w_) {
         x = p.x;
         y = p.y;
         z = p.z;

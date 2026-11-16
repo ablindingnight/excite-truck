@@ -2,6 +2,7 @@
 // on at least the given lap drives into them, fire their "act_seq" sequence at the midpoint of the bound's
 // longest edge. Registered as a race listener. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -61,14 +62,14 @@ public:
     virtual void Draw(void) = 0;
 };
 
-struct TdVec3;
+struct RVec3;
 
 // The zone outline renderer (zone.cpp).
 class Glow {
 public:
     Glow(void);
     ~Glow(void);
-    void Draw(TdVec3* pts, int n, int c);
+    void Draw(RVec3* pts, int n, int c);
     s32 lite;  // offset 0x0
     s32 glow;  // offset 0x4
 };
@@ -79,13 +80,7 @@ struct FixedArr : ArrayRef<T> {
     T storage[N];
 };
 
-struct TdVec3 {
-    TdVec3(void) {}
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// TdVec3: rvec.h's RVec3.
 struct ActZone {
     void Load(ValueNode* n);
     void Check(int c);
@@ -93,7 +88,7 @@ struct ActZone {
         fn_80128658(bound);
         bound = 0;
     }
-    TdVec3 pt[2];    // offset 0x0
+    RVec3 pt[2];    // offset 0x0
     Bound* bound;  // offset 0x18
     s32 seq;       // offset 0x1C
     s32 lap;       // offset 0x20

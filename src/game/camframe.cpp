@@ -1,32 +1,22 @@
 // Camera frames (0x8026E22C-0x8026E870): blending two frames (orientation through quaternion slerp,
 // position linearly) and building a frame looking from one point at another. Names are guesses.
 #include "game/common.h"
+#include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 
 extern "C" {
 double sqrt(double x);
 }
 
-struct CfVec {
-    CfVec(void) {}
-    void Set(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// CfVec: rvec.h's RVec3.
 struct Quat {
     f32 x, y, z, w;
 };
 
 // Axes (rows) and position.
 struct CamFrame {
-    CfVec axes[3];  // offset 0x0
-    CfVec pos;      // offset 0x24
+    RVec3 axes[3];  // offset 0x0
+    RVec3 pos;      // offset 0x24
 };
 
 // The camera record cammgr/namedcam call CamRec (0x88 here: its frame at 0x58); was named Camera here,
@@ -112,7 +102,7 @@ void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
     Quat qa;
     Quat qb;
     Quat q;
-    CfVec pos;
+    RVec3 pos;
     MtxToQuat(a, &qa);
     MtxToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
@@ -121,10 +111,10 @@ void fn_8026E22C(CamFrame* out, const CamFrame* a, const CamFrame* b, f32 t) {
     out->pos = pos;
 }
 
-void fn_8026E688(CamFrame* out, const CfVec* eye, const CfVec* target, const CfVec* up) {
-    CfVec d;
-    CfVec fwd;
-    CfVec upv;
+void fn_8026E688(CamFrame* out, const RVec3* eye, const RVec3* target, const RVec3* up) {
+    RVec3 d;
+    RVec3 fwd;
+    RVec3 upv;
     out->pos = *eye;
     d.x = target->x - eye->x;
     d.y = target->y - eye->y;
@@ -147,7 +137,7 @@ void fn_8026E688(CamFrame* out, const CfVec* eye, const CfVec* target, const CfV
     out->axes[2] = d;
     PSVECCrossProduct((const Vec*)up, (const Vec*)&out->axes[2], (Vec*)&out->axes[0]);
     PSVECCrossProduct((const Vec*)&out->axes[2], (const Vec*)&out->axes[0], (Vec*)&out->axes[1]);
-    CfVec right;
+    RVec3 right;
     right.Set(out->axes[0].x, out->axes[0].y, out->axes[0].z);
     fwd.Set(out->axes[2].x, out->axes[2].y, out->axes[2].z);
     PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&right, (Vec*)&upv);
@@ -159,7 +149,7 @@ void fn_8026E688(CamFrame* out, const CfVec* eye, const CfVec* target, const CfV
     out->axes[2] = fwd;
 }
 
-void fn_8026E850(const CfVec* eye, const CfVec* target, CamRec* cam, const CfVec* up) {
+void fn_8026E850(const RVec3* eye, const RVec3* target, CamRec* cam, const RVec3* up) {
     fn_8026E688(&cam->frame, eye, target, up);
 }
 

@@ -3,6 +3,7 @@
 // textured cross quads, and event-driven torch fires. Names are guesses apart from the
 // allocation tags, value keys, file names and messages.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/partparams.h"
 #include "game/vecmatrix.h"
 #include "game/math_types.h"
@@ -59,17 +60,7 @@ struct FColor {
     f32 b_;
 };
 
-struct FVec {
-    FVec(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// FVec: rvec.h's RVec3.
 class FXSequence {
 public:
     static FXSequence* Load(const char* name);
@@ -1111,7 +1102,7 @@ void GroundFire::Reset(void) {
     m.origin.x = 0.0f;
     m.origin.y = 0.0f;
     m.origin.z = 0.0f;
-    *(FVec*)&off = FVec(0.0f, 0.0f, 0.0f);
+    *(RVec3*)&off = RVec3(0.0f, 0.0f, 0.0f);
     car = -1;
     ring = -1;
 }
@@ -1168,7 +1159,7 @@ void GroundFire::Start(int idx) {
     const FireCar* c = fn_80287B24(idx);
     fn_802C77F0(fn_801EE0C8((u32)idx < 8 ? lbl_80488648[idx] : 0), box);
     m = *(const VecMatrix*)c;
-    *(FVec*)&off = FVec(box[0], box[2], box[4]);
+    *(RVec3*)&off = RVec3(box[0], box[2], box[4]);
     car = idx;
     Vec p;
     Vec e1;

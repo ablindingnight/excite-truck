@@ -3,19 +3,16 @@
 // camera), the "emitter" instances placed by "partemit.val" (optionally attached to moving objects and
 // always on), and the world events that fire them. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 
 void* operator new[](size_t size, const char* tag);
 
-struct PartVec {
-    PartVec(void) {}
-    f32 x, y, z;
-};
-
+// PartVec: rvec.h's RVec3.
 // What an emitter fires from: position, velocity, a sound/slot handle and the emitter id.
 struct Spawn {
-    PartVec pos;   // offset 0x0
-    PartVec vel;   // offset 0xC
+    RVec3 pos;   // offset 0x0
+    RVec3 vel;   // offset 0xC
     s16 slot;   // offset 0x18
     s32 id;     // offset 0x1C
 };
@@ -33,7 +30,7 @@ public:
     virtual void Update(void);                                                   // 0xC
     virtual void vf10(void);
     virtual void vf14(void);
-    virtual void Spawn(const PartVec* pos, const PartVec* vel, int slot, int a);      // 0x18
+    virtual void Spawn(const RVec3* pos, const RVec3* vel, int slot, int a);      // 0x18
 };
 
 struct ParticleRef {
@@ -58,13 +55,13 @@ struct EmitterDef {
     ValPoint ptM;      // offset 0x18
     ValPoint vK;       // offset 0x20
     ValPoint vM;       // offset 0x28
-    PartVec offset;       // offset 0x30
+    RVec3 offset;       // offset 0x30
     ValPoint vScale;   // offset 0x3C
     f32 radius;        // offset 0x44
     f32 fogDensity;    // offset 0x48
     u32 fogColor;      // offset 0x4C
     s32 repeat;        // offset 0x50
-    PartVec dpos;         // offset 0x54
+    RVec3 dpos;         // offset 0x54
     ParticleRef part;  // offset 0x60
     ChunkRef chunk;    // offset 0x6C
 };
@@ -77,9 +74,9 @@ struct NameEntry {
 // A placed emitter (0x34).
 struct EmitterInst {
     s32 fx;          // offset 0x0
-    PartVec pos;        // offset 0x4
-    PartVec vel;        // offset 0x10
-    PartVec v;          // offset 0x1C
+    RVec3 pos;        // offset 0x4
+    RVec3 vel;        // offset 0x10
+    RVec3 v;          // offset 0x1C
     s32 emitter;     // offset 0x28
     s16 slot;        // offset 0x2C
     u8 alwaysOn;     // offset 0x2E
@@ -88,14 +85,14 @@ struct EmitterInst {
 
 struct Obj {
     u8 pad[0x60];
-    PartVec pos;  // offset 0x60
+    RVec3 pos;  // offset 0x60
 };
 
 // Spawn parameters for one firing.
 struct SpawnParams {
     s32 count;      // offset 0x0
-    PartVec pos;       // offset 0x4
-    PartVec vel;       // offset 0x10
+    RVec3 pos;       // offset 0x4
+    RVec3 vel;       // offset 0x10
     ValPoint pt;    // offset 0x1C
     ValPoint v;     // offset 0x24
 };
@@ -151,8 +148,8 @@ void fn_802029FC(void);
 f32 fn_80287BC8(f32 lo, f32 hi);  // random range
 s32 fn_8028E3F4(const char* name);
 void fn_8028E528(s32 sys);
-void fn_8028E584(s32 sys, const PartVec* pos, const PartVec* vel);
-void fn_8028E590(s32 sys, const PartVec* pos, const PartVec* vel, f32 a);
+void fn_8028E584(s32 sys, const RVec3* pos, const RVec3* vel);
+void fn_8028E590(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
 Chunks* fn_802929F8(const char* name);
 void fn_80292B48(Chunks* c);
 ValueTable* fn_802AE4C8(int i);
@@ -174,7 +171,7 @@ static inline void StrCopy(char* d, int n, const char* s) {
     }
 }
 
-static inline void ScaleAdd(PartVec* v, f32 k, const PartVec* a) {
+static inline void ScaleAdd(RVec3* v, f32 k, const RVec3* a) {
     v->x *= k;
     v->y *= k;
     v->z *= k;
@@ -500,7 +497,7 @@ void fn_802A002C(void) {
     }
 }
 
-static inline void SetPV(PartVec* v, f32 x, f32 y, f32 z) {
+static inline void SetPV(RVec3* v, f32 x, f32 y, f32 z) {
     v->x = x;
     v->y = y;
     v->z = z;
@@ -526,8 +523,8 @@ void fn_802A01C8(const EmitterDef* d, const Spawn* s) {
     SpawnParams p;
     fn_802A0098(&p, d, s);
     for (int i = 0; i < p.count; i++) {
-        PartVec pos;
-        PartVec vel;
+        RVec3 pos;
+        RVec3 vel;
         f32 z = p.pos.z + Rand(p.pt.x);
         f32 y = p.pos.y + Rand(p.pt.y);
         pos.x = p.pos.x + Rand(p.pt.x);
@@ -551,8 +548,8 @@ void fn_802A02F4(const EmitterDef* d, const Spawn* s) {
     fn_802A0098(&p, d, s);
     p.vel.y += d->chunk.upwards;
     for (int i = 0; i < p.count; i++) {
-        PartVec pos;
-        PartVec vel;
+        RVec3 pos;
+        RVec3 vel;
         f32 z = p.pos.z + Rand(p.pt.x);
         f32 y = p.pos.y + Rand(p.pt.y);
         pos.x = p.pos.x + Rand(p.pt.x);
@@ -574,8 +571,8 @@ void fn_802A042C(const EmitterDef* d, const Spawn* s) {
     f32 a;
     for (int i = 0; i < fn_801E85A4(); i++) {
         PlainValMatrix v = *fn_801E8718(i);
-        PartVec p;
-        PartVec diff;
+        RVec3 p;
+        RVec3 diff;
         p.x = s->pos.x + d->offset.x;
         p.y = s->pos.y + d->offset.y;
         p.z = s->pos.z + d->offset.z;

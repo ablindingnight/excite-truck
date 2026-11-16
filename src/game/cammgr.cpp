@@ -3,6 +3,7 @@
 // cues ("crash_vol", "cheer3.sfx") and the per-slot shake levels. Written against raw field offsets;
 // the large routines and the initialiser are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include <string.h>
 #include "game/camrec.h"
@@ -326,11 +327,7 @@ static inline void ShakeMul(ShakeMat* pd, const ShakeMat* pa, const ShakeMat* pb
     }
 }
 
-struct ShakeVec {
-    f32 x, y, z;
-    ShakeVec(f32 ax, f32 ay, f32 az) : x(ax), y(ay), z(az) {}
-};
-
+// ShakeVec: rvec.h's RVec3.
 extern "C" {
 int fn_8026B0C0(int view);
 double sin(double x);
@@ -346,7 +343,7 @@ extern const f32 lbl_80563CB4;
 extern const f32 lbl_80563CB8;  // wave weight
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
-static inline void ShakeRot(ShakeMat* r, const ShakeVec& w) {
+static inline void ShakeRot(ShakeMat* r, const RVec3& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > lbl_80563C40) {
         f32 x, s, y, z, c, k;
@@ -472,13 +469,13 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
         f32 move = lbl_8055C4D8 * k;
         f32 turn = lbl_8055C4DC * k;
         if (lbl_8055F498) {
-            ShakeVec j(fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move));
+            RVec3 j(fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move));
             pose->pos.v[0] += j.x;
             pose->pos.v[1] += j.y;
             pose->pos.v[2] += j.z;
         }
         if (lbl_8055C4C8) {
-            ShakeVec w(fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn));
+            RVec3 w(fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn));
             ShakeMat rot;
             ShakeRot(&rot, w);
             ShakeMul((ShakeMat*)&pose->rot, (ShakeMat*)&pose->rot, &rot);
@@ -531,13 +528,13 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
         f32 move = lbl_8055C4D8 * k;
         f32 turn = lbl_8055C4DC * k;
         if (lbl_8055F498) {
-            ShakeVec j(fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move));
+            RVec3 j(fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move), fn_80129DC4(6, -move, move));
             c->pose.pos.v[0] += j.x;
             c->pose.pos.v[1] += j.y;
             c->pose.pos.v[2] += j.z;
         }
         if (lbl_8055C4C8) {
-            ShakeVec w(fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn));
+            RVec3 w(fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn), fn_80129DC4(6, -turn, turn));
             ShakeMat rot;
             ShakeRot(&rot, w);
             ShakeMul((ShakeMat*)&c->pose.rot, (ShakeMat*)&c->pose.rot, &rot);
@@ -1150,15 +1147,7 @@ static inline ValVec3& CamMad(ValVec3& d, const f32* v, f32 k) {
     return d;
 }
 // A vector built from three values: the arguments evaluate right to left, so z loads first.
-struct KV3 {
-    KV3(f32 ax, f32 ay, f32 az) {
-        x = ax;
-        y = ay;
-        z = az;
-    }
-    f32 x, y, z;
-};
-
+// KV3: rvec.h's RVec3.
 // Helper name unproven: arguments read right to left, stores go x, y, z.
 static inline void SetM3(f32* o, f32 x, f32 y, f32 z) {
     o[0] = x;
@@ -1170,7 +1159,7 @@ static inline void SetM3(f32* o, f32 x, f32 y, f32 z) {
 static inline f32 LerpK(f32 k, f32 a, f32 b) { return a + k * (b - a); }
 
 void fn_80268358(CamRec* c) {
-    KV3 mv[4] = {KV3(lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2]), KV3(lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]), KV3(lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2]), KV3(lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2])};
+    RVec3 mv[4] = {RVec3(lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2]), RVec3(lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]), RVec3(lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2]), RVec3(lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2])};
     f32 (*m)[6] = (f32(*)[6])mv;
     MountView out[2];
     f32 zero;
@@ -1256,9 +1245,9 @@ void fn_80268358(CamRec* c) {
     ka = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F0) : t / lbl_8055C4F0;
     f32 kb;
     kb = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F4) : t / lbl_8055C4F4;
-    KV3 bl(CamLerp(out[0].b.x, out[1].b.x, ka), CamLerp(out[0].b.y, out[1].b.y, ka), CamLerp(out[0].b.z, out[1].b.z, ka));
-    KV3 al(CamLerp(out[0].a.x, out[1].a.x, kb), CamLerp(out[0].a.y, out[1].a.y, kb), CamLerp(out[0].a.z, out[1].a.z, kb));
-    KV3 up(CamLerp(out[0].up.x, out[1].up.x, ka), CamLerp(out[0].up.y, out[1].up.y, ka), CamLerp(out[0].up.z, out[1].up.z, ka));
+    RVec3 bl(CamLerp(out[0].b.x, out[1].b.x, ka), CamLerp(out[0].b.y, out[1].b.y, ka), CamLerp(out[0].b.z, out[1].b.z, ka));
+    RVec3 al(CamLerp(out[0].a.x, out[1].a.x, kb), CamLerp(out[0].a.y, out[1].a.y, kb), CamLerp(out[0].a.z, out[1].a.z, kb));
+    RVec3 up(CamLerp(out[0].up.x, out[1].up.x, ka), CamLerp(out[0].up.y, out[1].up.y, ka), CamLerp(out[0].up.z, out[1].up.z, ka));
     PSVECNormalize((const Vec*)&up.x, (Vec*)&up.x);
     c->fov = CamLerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
     fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
@@ -1391,7 +1380,7 @@ void fn_80268E94(CamRec* c, int idx) {
                 amp = c->f154 * ShakeEase((lbl_80563C6C - t) / lbl_80563C6C);
                 if (amp > lbl_80563CA0) {
                     twoPi = lbl_80563CA4;
-                    ShakeVec w(ShakeAxis(amp, lbl_80563CAC * t, twoPi), ShakeAxis(amp, lbl_80563C50 * (lbl_80563CAC * t), twoPi),
+                    RVec3 w(ShakeAxis(amp, lbl_80563CAC * t, twoPi), ShakeAxis(amp, lbl_80563C50 * (lbl_80563CAC * t), twoPi),
                                ShakeAxis(amp, lbl_80563CA8 * (lbl_80563CAC * t), twoPi));
                     ShakeMat rot;
                     ShakeRot(&rot, w);

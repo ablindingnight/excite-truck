@@ -2,6 +2,7 @@
 // update routines.
 // Written against raw field offsets; the large routines are still stubs. Names are guesses.
 #include "game/common.h"
+#include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/camframe.h"
 #include "game/camrec.h"
@@ -396,19 +397,9 @@ void fn_80274EA8(u8* p) {
 double sin(double x);
 double cos(double x);
 
-struct CamVec {
-    CamVec(void) {}
-    CamVec(f32 a, f32 b, f32 c) : x(a), y(b), z(c) {}
-    void Set(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x, y, z;
-};
-
-static inline CamVec operator*(const CVec3& v, f32 k) { return CamVec(k * v.x, k * v.y, k * v.z); }
-static inline CamVec operator+(CVec3 a, const CamVec& b) { return CamVec(a.x + b.x, a.y + b.y, a.z + b.z); }
+// CamVec: rvec.h's RVec3.
+static inline RVec3 operator*(const CVec3& v, f32 k) { return RVec3(k * v.x, k * v.y, k * v.z); }
+static inline RVec3 operator+(CVec3 a, const RVec3& b) { return RVec3(a.x + b.x, a.y + b.y, a.z + b.z); }
 
 struct CamPreset {
     CVec3 off;
@@ -416,16 +407,16 @@ struct CamPreset {
     f32 fov;
 };
 
-void fn_801BFD34(u8* out, const CamVec* v, const u8* frame);
+void fn_801BFD34(u8* out, const RVec3* v, const u8* frame);
 
 // A camera frame offset: rotation then translation (one 48-byte local; helper name unproven).
 struct CamRotOff {
     Mat3 rot;    // offset 0x0
-    CamVec pos;  // offset 0x24
+    RVec3 pos;  // offset 0x24
 };
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula; identity for a tiny angle.
-static inline void RotFromVec(Mat3* r, const CamVec& w) {
+static inline void RotFromVec(Mat3* r, const RVec3& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > 0.0001f) {
         f32 x, s, y, z, c, k;
@@ -462,7 +453,7 @@ static inline void RotFromVec(Mat3* r, const CamVec& w) {
 // tiny angle. t goes to 0xBC.
 void fn_80274F74(u8* p, const f32* w, f32 t) {
     CamRec* cr = (CamRec*)p;
-    RotFromVec((Mat3*)&cr->pose, *(const CamVec*)w);
+    RotFromVec((Mat3*)&cr->pose, *(const RVec3*)w);
     cr->fov = t;
 }
 
@@ -513,7 +504,7 @@ void fn_80275410(u8* p) {
     u8* car = cr->car;
     const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
     c = k;
-    CamVec off = *(CVec3*)(car + 0x2450) + CamVec(0.8f, 0.65f, -1.75f);
+    RVec3 off = *(CVec3*)(car + 0x2450) + RVec3(0.8f, 0.65f, -1.75f);
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     Mat3 rot;
     RotFromVec(&rot, c.rot * 0.017453292f);
@@ -530,7 +521,7 @@ void fn_802756A4(u8* p) {
     u8* car = cr->car;
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
     c = k;
-    CamVec off = *(CVec3*)(car + 0x2538) + CamVec(0.85f, 0.9f, 2.0f);
+    RVec3 off = *(CVec3*)(car + 0x2538) + RVec3(0.85f, 0.9f, 2.0f);
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     Mat3 rot;
     RotFromVec(&rot, c.rot * 0.017453292f);

@@ -2,6 +2,7 @@
 // ring of radius 325 around the origin and kept circling at a set speed. The slot table mirrors each
 // body for the caller. Names are guesses apart from the timeout message.
 #include "game/common.h"
+#include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 
 struct MWVec2 {
@@ -59,33 +60,25 @@ static inline MWSolVec MWSolVec4(f32 x, f32 y, f32 z, f32 w) {
     return v;
 }
 
-struct MWV3 {
-    MWV3(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x, y, z;
-};
-
+// MWV3: rvec.h's RVec3.
 struct MWF {
     MWF(f32 a) { v = a; }
     f32 v;
 };
 
-/* Helper names unproven (MWV3, MWF, MWV4, Set, Sol): the shapes are carbody's CbVec4 family; MWF (a one-float value) reproduces retail's float store + word copy of the w lane. */
+/* Helper names unproven (RVec3, MWF, MWV4, Set, Sol): the shapes are carbody's CbVec4 family; MWF (a one-float value) reproduces retail's float store + word copy of the w lane. */
 struct MWV4 {
     MWV4(void) {}
     MWV4(MWSolVec s) {
         MWF f(s.w);
-        Set(MWV3(s.x, s.y, s.z), f);
+        Set(RVec3(s.x, s.y, s.z), f);
     }
     MWV4& operator=(MWSolVec s) {
         MWF f(s.w);
-        Set(MWV3(s.x, s.y, s.z), f);
+        Set(RVec3(s.x, s.y, s.z), f);
         return *this;
     }
-    void Set(const MWV3& p, MWF w_) {
+    void Set(const RVec3& p, MWF w_) {
         x = p.x;
         y = p.y;
         z = p.z;
@@ -345,7 +338,7 @@ void fn_80252C90(void) {
         s->spin = w->spin;
         for (j = 0; j < 4; j++) {
             s->spin[j] = fmod(6.2831855f + s->spin[j], 6.2831855f);
-            MWV3 p(c[j].pos.x, c[j].pos.y, c[j].pos.z);
+            RVec3 p(c[j].pos.x, c[j].pos.y, c[j].pos.z);
             s->h[j] = drop[j] + p.y;
         }
         w->spin = s->spin.Sol();

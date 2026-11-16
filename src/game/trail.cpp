@@ -3,6 +3,7 @@
 // for each wheel in contact with the ground and by landing events, plus the "bilinear partsys"
 // ground marks used by the dust trail. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/partparams.h"
 #include "game/plainvec.h"
 #include <revolution/MTX/vec.h>
@@ -10,16 +11,7 @@
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-struct TVec {
-    TVec(void) {}
-    TVec(f32 ax, f32 ay, f32 az) {
-        x = ax;
-        y = ay;
-        z = az;
-    }
-    f32 x, y, z;
-};
-
+// TVec: rvec.h's RVec3.
 struct TMtx33 {
     f32 xx, xy, xz;
     f32 yx, yy, yz;
@@ -28,7 +20,7 @@ struct TMtx33 {
 
 // TPos: valvec3.h's ValVec3.
 struct TWheel {
-    TVec local;  // offset 0x0
+    RVec3 local;  // offset 0x0
     ValVec3 world;  // offset 0xC
     u8 pad18[0x24 - 0x18];
     f32 speed;  // offset 0x24
@@ -41,9 +33,9 @@ struct TWheel {
 
 struct TBody {
     TMtx33 m;  // offset 0x0
-    TVec pos;  // offset 0x24
+    RVec3 pos;  // offset 0x24
     u8 pad30[0x34 - 0x30];
-    TVec vel;  // offset 0x34
+    RVec3 vel;  // offset 0x34
     u8 pad40[0x50 - 0x40];
     f32 speed;  // offset 0x50
     u8 pad54[0x70 - 0x54];
@@ -59,8 +51,8 @@ struct TRacer {
 
 struct TrailEvent {
     ValVec3 pos;     // offset 0x0
-    TVec vel;     // offset 0xC
-    TVec dir;     // offset 0x18
+    RVec3 vel;     // offset 0xC
+    RVec3 dir;     // offset 0x18
     f32 force;    // offset 0x24
     s32 who;      // offset 0x28
     s32 surface;  // offset 0x2C
@@ -71,8 +63,8 @@ struct PaintDesc {
     s32 max;        // offset 0x0
     f32 life;       // offset 0x4
     f32 rate;       // offset 0x8
-    TVec velScale;  // offset 0xC
-    TVec jitter;    // offset 0x18
+    RVec3 velScale;  // offset 0xC
+    RVec3 jitter;    // offset 0x18
     f32 lift;       // offset 0x24
     f32 drag;       // offset 0x28
     f32 gravity;    // offset 0x2C
@@ -103,8 +95,8 @@ struct PaintCurve {
 
 struct Mark {
     Mark(void) {}
-    TVec pos;  // offset 0x0
-    TVec vel;  // offset 0xC
+    RVec3 pos;  // offset 0x0
+    RVec3 vel;  // offset 0xC
     f32 born;  // offset 0x18
     f32 alpha; // offset 0x1C
 };
@@ -113,7 +105,7 @@ struct Paint {
     Paint(const PaintDesc* d, const char* tex);
     ~Paint(void);
     void Reset(void);
-    void Add(const TVec* pos, const TVec* vel, f32 alpha);
+    void Add(const RVec3* pos, const RVec3* vel, f32 alpha);
     void Update(void);
     void Draw(void);
 
@@ -124,8 +116,8 @@ struct Paint {
     f32 invLife;     // offset 0x10
     f32 rate;        // offset 0x14
     f32 accum;       // offset 0x18
-    TVec velScale;   // offset 0x1C
-    TVec jitter;     // offset 0x28
+    RVec3 velScale;   // offset 0x1C
+    RVec3 jitter;     // offset 0x28
     f32 lift;        // offset 0x34
     f32 gravity;     // offset 0x38
     f32 drag;        // offset 0x3C
@@ -159,9 +151,9 @@ void fn_80287B38(RacerHook h);
 f32 fn_80287BC8(f32 lo, f32 hi);  // random range
 s32 fn_8028E2F8(PartParams* d, const char* name, const char* tex);
 void fn_8028E398(s32 sys);
-void fn_8028E584(s32 sys, const TVec* pos, const TVec* vel);
-void fn_8028E58C(s32 sys, const TVec* pos, const TVec* vel, f32 a);
-void fn_8028E590(s32 sys, const TVec* pos, const TVec* vel, f32 a);
+void fn_8028E584(s32 sys, const RVec3* pos, const RVec3* vel);
+void fn_8028E58C(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
+void fn_8028E590(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
 ValueNode* fn_802AE414(const char* name);  // track effect table lookup
 int fn_802BF4F0(void);                     // has water
 f32 fn_802BF590(void);                     // water level
@@ -200,7 +192,7 @@ static inline void Wrap(f32& v, f32 step) {
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(TVec* out, const TVec* in, const TMtx33* m) {
+static inline void MulVec(RVec3* out, const RVec3* in, const TMtx33* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->xx, in->y, m->yx, in->z, m->zx);
         f32 y = Dot3(in->x, m->xy, in->y, m->yy, in->z, m->zy);
@@ -250,7 +242,7 @@ static inline void MulMtx(TMtx33* out, const TMtx33* a, const TMtx33* b) {
 }
 
 struct TBasis {
-    TVec x, y, z;
+    RVec3 x, y, z;
 };
 
 // out = a * b
@@ -295,7 +287,7 @@ static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline void Scale(TVec* o, const f32* v, f32 k) {
+static inline void Scale(RVec3* o, const f32* v, f32 k) {
     o->x = v[0] * k;
     o->y = v[1] * k;
     o->z = v[2] * k;
@@ -427,7 +419,7 @@ ModuleTag lbl_8055F868;
 s32 lbl_8055F870;           // paint trail particles
 TrailSys* lbl_804BCF88[8];  // per terrain
 
-static inline void Xform(TVec* p, const TBody* b) {
+static inline void Xform(RVec3* p, const TBody* b) {
     MulVec(p, p, &b->m);
     p->x = p->x + b->pos.x;
     p->y = p->y + b->pos.y;
@@ -709,7 +701,7 @@ void DustTrail::Emit(const TRacer* r, int wheel) {
     {
         f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
         f32 back = wh->speed > 0.0f ? 1.0f : -1.0f;
-        TVec p(wh->local.x, 0.2f + wh->local.y, wh->local.z - 0.4f * back);
+        RVec3 p(wh->local.x, 0.2f + wh->local.y, wh->local.z - 0.4f * back);
         f32 t;
         Xform(&p, r->body);
         t = Ramp(MaxF(r->body->wheels[2].slip, r->body->wheels[3].slip), 0.0f, 2.7f);
@@ -751,7 +743,7 @@ void DustTrail::Impact(const TrailEvent* e) {
         TBasis m;
         TBasis rot;
         TBasis* pr;
-        TVec v;
+        RVec3 v;
         f32 h;
         f32 cs;
         f32 vx;
@@ -761,7 +753,7 @@ void DustTrail::Impact(const TrailEvent* e) {
         fn_80287B24(e->who);
         h = 0.5f * (f32)__fabs(e->vel.y);
         m.y = e->dir;
-        PSVECCrossProduct((const Vec*)&m.y, (const Vec*)(&(const TVec&)TVec(0.0f, 0.0f, 1.0f)), (Vec*)&m.x);
+        PSVECCrossProduct((const Vec*)&m.y, (const Vec*)(&(const RVec3&)RVec3(0.0f, 0.0f, 1.0f)), (Vec*)&m.x);
         PSVECCrossProduct((const Vec*)&m.x, (const Vec*)&m.y, (Vec*)&m.z);
         pr = &rot;
         cs = cos(3.1415927f / n);
@@ -783,9 +775,9 @@ void DustTrail::Impact(const TrailEvent* e) {
         ValVec3 c = e->pos;
         c.y += 0.35f;
         for (i = 0; i < n; i++) {
-            TVec v1;
-            TVec v2;
-            TVec q;
+            RVec3 v1;
+            RVec3 v2;
+            RVec3 q;
             MadV3(&v1.x, &v.x, &m.x.x, h);
             MadV3(&v2.x, &v.x, &m.x.x, - h);
             MadV3(&q.x, &c.x, &m.x.x, 0.15f);
@@ -804,7 +796,7 @@ void DustTrail::Impact(const TrailEvent* e) {
 
 void DustTrail::Touch(const TrailEvent* e) {
     if (Full(st[e->who].touch)) {
-        fn_8028E584(event, (TVec*)&e->pos, &e->vel);
+        fn_8028E584(event, (RVec3*)&e->pos, &e->vel);
     }
     Wrap(st[e->who].touch, 0.1f);
 }
@@ -930,15 +922,15 @@ void AsphaltTrail::Emit(const TRacer* r, int wheel) {
     }
     {
         bool left = wh->local.x < 0.0f;
-        TVec* vel = &b->vel;
+        RVec3* vel = &b->vel;
         ValVec3 p = wh->world;
         f32 s;
         p.y += 0.25f;
         s = 0.02f * wh->speed * (left ? 1 : -1);
         if (wh->slip > 37.5f) {
-            fn_8028E590(large, (TVec*)&p, vel, s);
+            fn_8028E590(large, (RVec3*)&p, vel, s);
         } else {
-            fn_8028E590(small, (TVec*)&p, vel, s);
+            fn_8028E590(small, (RVec3*)&p, vel, s);
         }
     }
 }
@@ -1013,7 +1005,7 @@ void GrassTrail::Emit(const TRacer* r, int wheel) {
     }
     {
         ValVec3 p = wh->world;
-        TVec v;
+        RVec3 v;
         f32 k;
         Scale(&v, &b->m.yx, 5.5f);
         v.x = v.x + Mul(b->vel.x, 0.8f);
@@ -1022,7 +1014,7 @@ void GrassTrail::Emit(const TRacer* r, int wheel) {
         k = 0.1f * b->speed;
         v.x = v.x + fn_80129DC4(0, -k, k);
         v.z = v.z + fn_80129DC4(0, -k, k);
-        fn_8028E590(sys, (TVec*)&p, &v, 5.0f);
+        fn_8028E590(sys, (RVec3*)&p, &v, 5.0f);
     }
 }
 
@@ -1063,14 +1055,14 @@ void SandTrail::Emit(const TRacer* r, int wheel) {
     }
     {
         f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
-        TVec v;
+        RVec3 v;
         f32 k;
         Scale(&v, &r->body->vel.x, 0.8f);
         k = 0.05f * (side * r->body->speed);
         v.x = v.x + r->body->m.xx * k;
         v.y = v.y + r->body->m.xy * k;
         v.z = v.z + r->body->m.xz * k;
-        fn_8028E590(sys, (TVec*)&wh->world, &v, 5.0f);
+        fn_8028E590(sys, (RVec3*)&wh->world, &v, 5.0f);
     }
 }
 
@@ -1112,8 +1104,8 @@ void WaterTrail::Emit(const TRacer* r, int wheel) {
     {
         f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
         f32 back = wh->speed > 0.0f ? 1.0f : -1.0f;
-        TVec p(wh->local.x, 0.25f + wh->local.y, wh->local.z - 0.4f * back);
-        TVec v;
+        RVec3 p(wh->local.x, 0.25f + wh->local.y, wh->local.z - 0.4f * back);
+        RVec3 v;
         TBody* b;
         f32 k;
         f32 up;
@@ -1174,8 +1166,8 @@ void MudTrail::Emit(const TRacer* r, int wheel) {
     {
         f32 side = wh->local.x > 0.0f ? 1.0f : -1.0f;
         f32 back = wh->speed > 0.0f ? 1.0f : -1.0f;
-        TVec p(wh->local.x, 0.25f + wh->local.y, wh->local.z - 0.4f * back);
-        TVec v;
+        RVec3 p(wh->local.x, 0.25f + wh->local.y, wh->local.z - 0.4f * back);
+        RVec3 v;
         TBody* b;
         f32 k;
         f32 up;
@@ -1196,7 +1188,7 @@ void MudTrail::Emit(const TRacer* r, int wheel) {
 
 void MudTrail::Touch(const TrailEvent* e) {
     if (Full(touch[e->who])) {
-        fn_8028E590(sys, (TVec*)&e->pos, &e->vel, fn_80287BC8(-3.1415927f, 3.1415927f));
+        fn_8028E590(sys, (RVec3*)&e->pos, &e->vel, fn_80287BC8(-3.1415927f, 3.1415927f));
     }
     Wrap(touch[e->who], 0.1f);
 }
@@ -1258,7 +1250,7 @@ void Paint::Reset(void) {
     accum = 0.0f;
 }
 
-void Paint::Add(const TVec* pos, const TVec* vel, f32 alpha) {
+void Paint::Add(const RVec3* pos, const RVec3* vel, f32 alpha) {
     if (n < cap && Full(accum)) {
         Mark* m = &marks[n];
         m->pos = *pos;
@@ -1281,7 +1273,7 @@ void Paint::Update(void) {
     for (i = 0; i < n; i++) {
         Mark* m = &marks[i];
         if (m->born > cutoff) {
-            TVec v;
+            RVec3 v;
             v.x = m->vel.x * k;
             v.y = m->vel.y * k;
             v.z = m->vel.z * k;

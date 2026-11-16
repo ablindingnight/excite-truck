@@ -3,6 +3,7 @@
 // 4-float records. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/vec3_init.h"
 
@@ -36,27 +37,19 @@ struct MVec4 {
     f32 w;
 };
 
-struct MLV3 {
-    MLV3(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    f32 x, y, z;
-};
-
+// MLV3: rvec.h's RVec3.
 struct MLF {
     MLF(f32 a) { v = a; }
     f32 v;
 };
 
-/* Helper names unproven (MLV3, MLF, MLVec4, Set): the solver-record 4-vector family (carbody CbVec4, minworld MWV4). */
+/* Helper names unproven (RVec3, MLF, MLVec4, Set): the solver-record 4-vector family (carbody CbVec4, minworld MWV4). */
 struct MLVec4 {
     MLVec4(MVec4 s) {
         MLF f(s.w);
-        Set(MLV3(s.x, s.y, s.z), f);
+        Set(RVec3(s.x, s.y, s.z), f);
     }
-    void Set(const MLV3& p, MLF w_) {
+    void Set(const RVec3& p, MLF w_) {
         x = p.x;
         y = p.y;
         z = p.z;
@@ -479,38 +472,24 @@ void fn_801BEB30(int car, CrossSet** out) { *out = &lbl_8055E79C[car]; }
 
 // Post-update passes (placeholders).
 // A vector with a field-by-field copy (copied through float registers).
-struct MassVec3 {
-    MassVec3(void) {}
-    MassVec3(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    MassVec3(const MassVec3& o) {
-        x = o.x;
-        y = o.y;
-        z = o.z;
-    }
-    f32 x, y, z;
-};
-
+// MassVec3: rvec.h's RVec3.
 
 // Blends contact i's surface normal and anchor towards a new contact (point pt, normal n) when it lies close
 // to the old plane: fully replaced from 0.2 below the plane, unchanged above it.
 }
 extern "C" {
 
-void fn_801BEB44(int car, int i, const MassVec3* pt, const MassVec3* n) {
+void fn_801BEB44(int car, int i, const RVec3* pt, const RVec3* n) {
     ContactSet* cs = &lbl_8055E798[car];
-    MassVec3 p(cs->pts[i].p.x, cs->pts[i].p.y, cs->pts[i].p.z);
-    MassVec3 ref(((MVec4*)&cs->ref[i])->x, ((MVec4*)&cs->ref[i])->y, ((MVec4*)&cs->ref[i])->z);
-    MassVec3 nrm(cs->nrm[i].p.x, cs->nrm[i].p.y, cs->nrm[i].p.z);
-    MassVec3 d;
+    RVec3 p(cs->pts[i].p.x, cs->pts[i].p.y, cs->pts[i].p.z);
+    RVec3 ref(((MVec4*)&cs->ref[i])->x, ((MVec4*)&cs->ref[i])->y, ((MVec4*)&cs->ref[i])->z);
+    RVec3 nrm(cs->nrm[i].p.x, cs->nrm[i].p.y, cs->nrm[i].p.z);
+    RVec3 d;
     d.x = p.x - ref.x;
     d.y = p.y - ref.y;
     d.z = p.z - ref.z;
     f32 base = PSVECDotProduct((const Vec*)&d, (const Vec*)&nrm);
-    MassVec3 e;
+    RVec3 e;
     e.x = p.x - pt->x;
     e.y = p.y - pt->y;
     e.z = p.z - pt->z;
@@ -521,10 +500,10 @@ void fn_801BEB44(int car, int i, const MassVec3* pt, const MassVec3* n) {
     f32 k = 2.5f * (0.2f + pen);
     k = 1.0f < k ? 1.0f : k;
     k = k > 0.0f ? k : 0.0f;
-    MassVec3 nn(LerpT(k, n->x, nrm.x), LerpT(k, n->y, nrm.y), LerpT(k, n->z, nrm.z));
+    RVec3 nn(LerpT(k, n->x, nrm.x), LerpT(k, n->y, nrm.y), LerpT(k, n->z, nrm.z));
     nrm = nn;
     PSVECNormalize((const Vec*)&nrm, (Vec*)&nrm);
-    MassVec3 r(LerpT(k, pt->x, ref.x), LerpT(k, pt->y, ref.y), LerpT(k, pt->z, ref.z));
+    RVec3 r(LerpT(k, pt->x, ref.x), LerpT(k, pt->y, ref.y), LerpT(k, pt->z, ref.z));
     ref = r;
     {
         MVec4 t(ref.x, ref.y, ref.z);

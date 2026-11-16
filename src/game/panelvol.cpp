@@ -65,18 +65,7 @@ struct SphereView {
     RVec3 center;        // offset 0x28
 };
 
-struct CVec {
-    CVec(void) {}
-    CVec(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// CVec: rvec.h's RVec3.
 struct PanelVert {
     PanelVert(void);
     RVec3 p;  // offset 0x0
@@ -229,9 +218,9 @@ static inline void Sub(RVec3* out, const RVec3* a, const RVec3* b) {
 }
 
 static inline void Orthonormalize(Mat3* m) {
-    CVec a(m->m[0][0], m->m[0][1], m->m[0][2]);
-    CVec b;
-    CVec c(m->m[2][0], m->m[2][1], m->m[2][2]);
+    RVec3 a(m->m[0][0], m->m[0][1], m->m[0][2]);
+    RVec3 b;
+    RVec3 c(m->m[2][0], m->m[2][1], m->m[2][2]);
     PSVECCrossProduct((const Vec*)&c, (const Vec*)&a, (Vec*)&b);
     PSVECNormalize((const Vec*)&a, (Vec*)&a);
     PSVECNormalize((const Vec*)&b, (Vec*)&b);

@@ -4,6 +4,7 @@
 // fullscreen and screen-rectangle fills, the "mrDrawList" pooled flare objects and the light
 // direction. Names are guesses apart from the messages.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/pool.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
@@ -65,18 +66,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 
-struct MrVec {
-    MrVec(void) {}
-    MrVec(f32 x, f32 y, f32 z) {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// MrVec: rvec.h's RVec3.
 // Camera: common.h's PlainValMatrix.
 struct Viewport {
     s32 x;  // offset 0x0
@@ -158,7 +148,7 @@ f32 lbl_8055D024 = 1.0f;        // vertical squeeze
 s32 lbl_8055D028 = -1;          // prefs callback
 PlainValMatrix lbl_804C13E0;  // saved camera
 PlainValMatrix lbl_804C1410;  // camera
-MrVec lbl_804C1440(0.0f, -1.0f, 0.0f);  // light direction
+RVec3 lbl_804C1440(0.0f, -1.0f, 0.0f);  // light direction
 // The saved near/far planes and the current field of view.
 struct FovState {
     f32 near;     // offset 0x0
@@ -686,12 +676,12 @@ f32 fn_802C99E8(f32 v) {
     return old;
 }
 
-void fn_802C9A1C(const MrVec* dir) {
+void fn_802C9A1C(const RVec3* dir) {
     lbl_804C1440 = *dir;
     fn_802C99D8();
 }
 
-MrVec* fn_802C9A40(void) { return &lbl_804C1440; }
+RVec3* fn_802C9A40(void) { return &lbl_804C1440; }
 
 void fn_802C9A4C(f32) { fn_802D93E0(); }
 

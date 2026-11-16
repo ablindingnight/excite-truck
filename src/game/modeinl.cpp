@@ -4,6 +4,7 @@
 // packer and the sound stop helper. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/sound.h"
 #include "game/vpos.h"
 #include "game/camframe34.h"
@@ -18,13 +19,7 @@ extern const u32 lbl_8055E1DC = Initial7FWord();
 
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 
-struct VecC {
-    VecC(void) {}
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// VecC: rvec.h's RVec3.
 struct Mtx33 {
     void SetRotX(f32 a) {
         f32 c = cos(a);

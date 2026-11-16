@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "game/sound.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
@@ -289,17 +290,11 @@ struct HelpPage {
 };
 
 // A token to collect: a point (coin) or a line to cross.
-struct EVec3 {
-    EVec3(void) {}
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// EVec3: rvec.h's RVec3.
 struct Token {
     Token(void) {}
     ValVec3 pos;      // offset 0x0
-    EVec3 ends[2];  // offset 0xC
+    RVec3 ends[2];  // offset 0xC
     TVec2 mid;      // offset 0x24
     TVec2 dir;      // offset 0x2C
     TPath* path;    // offset 0x34
