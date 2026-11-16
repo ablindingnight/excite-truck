@@ -411,7 +411,7 @@ static inline void AddScaledV(TVec* out, const TPos* a, const TVec* b, f32 k) {
     out->z = a->z + b->z * k;
 }
 /* Helper name unproven */
-static inline f32 SignF(f32 x) { return 0.0f < x ? 1.0f : -1.0f; }
+static inline f32 AbsPos(f32 x) { return 0.0f < x ? x : -x; }
 void SpringWall::Apply(SpringCar* car, TVec* acc) {
     if (owner) {
         TVec v;
@@ -431,8 +431,9 @@ void SpringWall::Apply(SpringCar* car, TVec* acc) {
         target = vel + t * (depth - vel);
         AddScaledV(&p, &car->pos, &v, 0.016683351f);
         dist = PlaneDist(&n, &p, &owner->plane->origin);
-        // Unused, as in retail: only its compare of the stored distance survives (what it fed is unproven).
-        f32 side = SignF(this->dist);
+        // Unused, as in retail: only its compare of the stored distance survives (what it fed is unproven;
+        // its arms create no new float literal - retail has no -1.0f in this function's pool).
+        f32 side = AbsPos(this->dist);
         ramping = Ramping();
         if (ramping) {
             f32 climbMax;
