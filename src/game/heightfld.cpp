@@ -219,23 +219,26 @@ int fn_801DB348(int x, int z, f32* out, s32* mat, u16* unused) {
 }
 
 /* Helper name unproven */
-static inline f32 Spline1(f32 p0, f32 p1, f32 p2, f32 p3, f32 t) {
-    f32 d = p2 - p1;
-    f32 t2 = t * t;
-    f32 t3 = t2 * t;
-    f32 m1 = 0.5f * (p2 - p0);
-    f32 m2 = 0.5f * (p3 - p1);
-    f32 c3 = m1 + m2 - 2.0f * d;
-    f32 c2 = 3.0f * d - 2.0f * m1 - m2;
+static inline f32 SplineP(const f32* p, int s, f32 t) {
+    f32 d, t2, t3, p3, p2, p1, p0, k, m1, m2, c3, c2;
+    k = 0.5f;
+    p2 = p[s * 2]; p0 = p[0]; p1 = p[s]; p3 = p[s * 3];
+    d = p2 - p1;
+    t2 = t * t;
+    t3 = t2 * t;
+    m1 = k * (p2 - p0);
+    m2 = k * (p3 - p1);
+    c3 = m1 + m2 - 2.0f * d;
+    c2 = 3.0f * d - 2.0f * m1 - m2;
     return p1 + (m1 * t + (c3 * t3 + c2 * t2));
 }
 
 f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
     f32 col[4];
     for (int i = 0; i < 4; i++) {
-        col[i] = Spline1(g[0][i], g[1][i], g[2][i], g[3][i], fx);
+        col[i] = SplineP(&g[0][i], 4, fx);
     }
-    return Spline1(col[0], col[1], col[2], col[3], fz);
+    return SplineP(col, 1, fz);
 }
 
 f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
