@@ -171,12 +171,7 @@ void SafeDelete(T*& p) {
 
 namespace {
 
-struct GVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// GVec: valvec3.h's ValVec3.
 struct GTex {
     s32 tex;    // offset 0x0
     f32 u;      // offset 0x4
@@ -214,9 +209,9 @@ struct GVerts {
             cap = 0;
         }
     }
-    GVec* At(int i);
+    ValVec3* At(int i);
     int Count(void);
-    GVec* data;  // offset 0x0
+    ValVec3* data;  // offset 0x0
     s32 count;   // offset 0x4
     s32 cap;     // offset 0x8
 };
@@ -281,7 +276,7 @@ s32 lbl_8055F99C;  // world map triangles
 GAllocator* lbl_8055F9A0;
 extern bool lbl_8055FA59;  // draw debug
 InlineVec<GMat*, 32> lbl_804BE104;
-static GVec lbl_804BE190[8];  // ocean corners
+static ValVec3 lbl_804BE190[8];  // ocean corners
 extern "C" const f32 kWorldScale;
 // Keep the world-scale load through its declaration while placing its definition first in the pool.
 static inline const f32& WorldScale() { return kWorldScale; }
@@ -468,7 +463,7 @@ GMat* fn_802B1138(const char* name) {
 void fn_802B11BC(GMat* g) {
     lbl_8055F99C = 0;
     lbl_8055F998 = 0;
-    g->verts.data = (GVec*)fn_802CFFA0(0x24000);
+    g->verts.data = (ValVec3*)fn_802CFFA0(0x24000);
     g->verts.cap = 0x3000;
     g->verts.count = 0;
     fn_802BAFA0();
@@ -485,7 +480,7 @@ void fn_802B11BC(GMat* g) {
     g->merged = merged;
 }
 
-u16 fn_802B127C(GMat* g, const GVec* v) {
+u16 fn_802B127C(GMat* g, const ValVec3* v) {
     if (!g) {
         return 0;
     }
@@ -563,7 +558,7 @@ void fn_802B14B4(GMat* g) {
     u32 m;
     int bit;
     int n;
-    GVec* verts;
+    ValVec3* verts;
     InlineVec<GTex, 6>* texs;
     int i;
     int k;
@@ -630,7 +625,7 @@ void fn_802B1758(GMat* g) {
     s32 tex;
     int n;
     f32 scale;
-    GVec* verts;
+    ValVec3* verts;
     GStrip* s;
     f32 x;
     int k;
@@ -675,7 +670,7 @@ void fn_802B1758(GMat* g) {
         fn_802C8BD0(fn_802C28C0());
         fn_802DC3C0(tex);
         const f32& nearRange = -2.0f + 1024.0f * WorldScale() / 2.0f;
-        GVec* c = lbl_804BE190;
+        ValVec3* c = lbl_804BE190;
         for (k = 0; k < 4; k++, c++) {
             f32 signX = (f32)((k & 1) ? -1 : 1);
             x = signX * nearRange;
@@ -732,7 +727,7 @@ template s16* IdxBlock<s16>::At(int i);
 template int IdxBlock<s16>::Count(void);
 GBlock* GList::Head(void) { return head; }
 bool GList::Empty(void) { return head == 0; }
-GVec* GVerts::At(int i) { return &data[i]; }
+ValVec3* GVerts::At(int i) { return &data[i]; }
 template int InlineVec<GTex, 6>::Count(void);
 template GTex* InlineVec<GTex, 6>::At(int i);
 template GLayer* InlineVec<GLayer, 6>::At(int i);
@@ -759,7 +754,7 @@ extern "C" {
 
 void fn_802B1BEC(void) {}
 
-void fn_802B1BF0(GMat* g, GVec* out, int i) { *out = g->verts.data[i]; }
+void fn_802B1BF0(GMat* g, ValVec3* out, int i) { *out = g->verts.data[i]; }
 
 int fn_802B1C14(GMat* g) { return g->layers.count; }
 

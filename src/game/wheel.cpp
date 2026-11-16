@@ -22,12 +22,7 @@ extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-struct GVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// GVec3: valvec3.h's ValVec3.
 // The ground lookup's copy of a position (copied as raw words).
 struct GMtx3 {
     s32 v[3];
@@ -236,7 +231,7 @@ void Wheel::Update(void) {
         int park = 1;
         if (spin > 0.01f) {
             RVec3 t;
-            GVec3 pos;
+            ValVec3 pos;
             f32 lean = mtx.rot.x.y;
             RVec3 up(0.0f, 1.0f, 0.0f);
             PSVECCrossProduct((const Vec*)&mtx.rot.x, (const Vec*)&up, (Vec*)&t);

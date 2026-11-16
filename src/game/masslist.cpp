@@ -16,12 +16,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
-struct MVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// MVec3: valvec3.h's ValVec3.
 struct MVec4 {
     MVec4(void) {}
     MVec4(f32 x_, f32 y_, f32 z_) {  // w left unset
@@ -84,7 +79,7 @@ struct MassSet {
 };
 
 struct ContactPt {
-    MVec3 p;
+    ValVec3 p;
     f32 w;
 };
 
@@ -174,31 +169,31 @@ double sqrt(double x);
 void fn_801E9DC4(CxEntry* e);
 void fn_801BDA70(CarSetup* out);
 void fn_801BDA74(int car, CarSetup* out);
-int fn_801E9E78(void* h, MVec3* p, MVec3* n, s32* surface);
+int fn_801E9E78(void* h, ValVec3* p, ValVec3* n, s32* surface);
 void fn_80279D40(CarSetup* out);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, s16 c);
-void __ct__4VPosFfff(MVec3* v, f32 x, f32 y, f32 z);
+void __ct__4VPosFfff(ValVec3* v, f32 x, f32 y, f32 z);
 s32 lbl_8055A920 = -1;
 MVec4* fn_801BF12C(MVec4* out, const MVec4* in);
 MVec4* fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w);
 MVec4* fn_801BF164(MVec4* out, const MVec4* in);
 MVec4* fn_801BF188(MVec4* out, f32 x, f32 y, f32 z);
-void fn_801BF198(MVec3* out, const MVec3* in);
-void fn_801BF0C4(MVec3* p, MVec3* n, void* h, s32* surface);
+void fn_801BF198(ValVec3* out, const ValVec3* in);
+void fn_801BF0C4(ValVec3* p, ValVec3* n, void* h, s32* surface);
 }
 
 void* operator new[](size_t size, const char* name);
 void operator delete[](void* p);
 
-static inline void SetV(MVec3* o, f32 x, f32 y, f32 z) {
+static inline void SetV(ValVec3* o, f32 x, f32 y, f32 z) {
     o->x = x;
     o->y = y;
     o->z = z;
 }
 
-static inline void SetVyxz(MVec3* o, f32 x, f32 y, f32 z) {
+static inline void SetVyxz(ValVec3* o, f32 x, f32 y, f32 z) {
     o->y = y;
     o->x = x;
     o->z = z;
@@ -206,7 +201,7 @@ static inline void SetVyxz(MVec3* o, f32 x, f32 y, f32 z) {
 
 extern "C" {
 
-int fn_801BD628(const MVec3* v) {
+int fn_801BD628(const ValVec3* v) {
     int r = 0;
     if (v->x >= -100000.0f && v->x <= 100000.0f && v->y >= -100000.0f && v->y <= 100000.0f &&
         v->z >= -100000.0f && v->z <= 100000.0f) {
@@ -384,7 +379,7 @@ static inline void MtxToQuat(const ValMatrix* r, MVec4* q) {
     }
 }
 
-void fn_801BE168(int car, const ValMatrix* mtx, const MVec3* vel, const MVec3* avel) {
+void fn_801BE168(int car, const ValMatrix* mtx, const ValVec3* vel, const ValVec3* avel) {
     MassSet* s = &lbl_8055E794[car];
     MVec4 q;
     s->pos = MVec4(mtx->origin.x, mtx->origin.y, mtx->origin.z);
@@ -396,7 +391,7 @@ void fn_801BE168(int car, const ValMatrix* mtx, const MVec3* vel, const MVec3* a
 
 static inline f32 Dot3(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
 
-static inline void MulVec(MVec3* out, const MVec3* in, const ValMatrix* m) {
+static inline void MulVec(ValVec3* out, const ValVec3* in, const ValMatrix* m) {
     const f32* r = &m->basis[0].x;
     if (out == in) {
         f32 x = Dot3(in->x, r[0], in->y, r[3], in->z, r[6]);
@@ -437,7 +432,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->rot[2] = MVec4(mtx->basis[2].x, mtx->basis[2].y, mtx->basis[2].z);
     s->vA0 = MVec4(0.0f, 0.0f, 0.0f);
     s->v90 = MVec4(0.0f, 0.0f, 0.0f);
-    MVec3 v;
+    ValVec3 v;
     TScale(&v, &mtx->basis[2], a);
     __typeof__(s->v60) s_v60 = MVec4(0.0f, 0.0f, 0.0f);
     __typeof__(c->v20) c_v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -459,9 +454,9 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         q[21] = MVec4(0.0f, -100.0f, 0.0f);
         q[13] = MVec4(0.0f, 0.0f, 0.0f);
         q[9] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-        MVec3 in;
+        ValVec3 in;
         SetXYZ(&in, x->row[i].x, x->row[i].y, x->row[i].z);
-        MVec3 out;
+        ValVec3 out;
         MulVec(&out, &in, mtx);
         out.x += mtx->origin.x;
         out.y += mtx->origin.y;
@@ -473,8 +468,8 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     lbl_8055E7A8 = 1;
 }
 
-void fn_801BEAEC(int car, int i, MVec3* out) {
-    const MVec3* p = &lbl_8055E798[car].pts[i].p;
+void fn_801BEAEC(int car, int i, ValVec3* out) {
+    const ValVec3* p = &lbl_8055E798[car].pts[i].p;
     SetV(out, p->x, p->y, p->z);
 }
 
@@ -555,7 +550,7 @@ void fn_801BEDA8(MassSet** m, ContactSet** cs, CrossSet** cc, CxEntry** cx, s32*
 static inline void PostUpdateCar(int car) {
     int i;
     s32 surface;
-    MVec3 p, up, pt, n;
+    ValVec3 p, up, pt, n;
     MVec4 t0, t1, t2, t3, t4, t5;
     memcpy(&lbl_80436D48[0], &lbl_8055E794[car], sizeof(MassSet));
     memcpy(&lbl_80436D48[0xB], &lbl_8055E798[car], sizeof(ContactSet));
@@ -571,7 +566,7 @@ static inline void PostUpdateCar(int car) {
     ContactSet* cs = &lbl_8055E798[car];
     MassSet* m = &lbl_8055E794[car];
     DefaultConstructVec3(&p);
-    fn_801BF198(&p, (MVec3*)&m->pos);
+    fn_801BF198(&p, (ValVec3*)&m->pos);
     if (!fn_801BD628(&p)) {
         fn_802E30C8("CarPostUpdate: illegal mass position (%f %f %f)", p.x, p.y, p.z);
         fn_801BF164(&m->pos, fn_801BF188(&t0, 0.0f, 100.0f, 0.0f));
@@ -579,10 +574,10 @@ static inline void PostUpdateCar(int car) {
         fn_801BF164(&m->vel, fn_801BF164(&m->v60, fn_801BF188(&t2, 0.0f, 0.0f, 0.0f)));
         fn_801BF12C(&cs->v0, fn_801BF12C(&cs->v10, fn_801BF12C(&cs->v20, fn_801BF12C(&cs->v30,
             fn_801BF150(&t3, 0.0f, 0.0f, 0.0f, 0.0f)))));
-        fn_801BF198(&p, (MVec3*)&m->pos);
+        fn_801BF198(&p, (ValVec3*)&m->pos);
     }
     DefaultConstructVec3(&up);
-    fn_801BF198(&up, (MVec3*)&m->rot[2]);
+    fn_801BF198(&up, (ValVec3*)&m->rot[2]);
     for (i = 0; i < 4; i++) {
         DefaultConstructVec3(&pt);
         fn_801BF198(&pt, &cs->pts[i].p);
@@ -601,7 +596,7 @@ void fn_801BEDD4(void) {
     }
 }
 
-void fn_801BF0C4(MVec3* p, MVec3* n, void* h, s32* surface) {
+void fn_801BF0C4(ValVec3* p, ValVec3* n, void* h, s32* surface) {
     if (!fn_801E9E78(h, p, n, surface)) {
         n->x = 0.0f;
         n->y = 1.0f;
@@ -641,7 +636,7 @@ MVec4* fn_801BF188(MVec4* out, f32 x, f32 y, f32 z) {
     return out;
 }
 
-void fn_801BF198(MVec3* out, const MVec3* in) { SetVyxz(out, in->x, in->y, in->z); }
+void fn_801BF198(ValVec3* out, const ValVec3* in) { SetVyxz(out, in->x, in->y, in->z); }
 
 void fn_801BF1B4(void) {}
 

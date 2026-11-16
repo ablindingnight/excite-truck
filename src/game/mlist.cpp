@@ -13,10 +13,7 @@ void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 double tan(double x);
 }
 
-struct MVec3 {
-    f32 x, y, z;
-};
-
+// MVec3: valvec3.h's ValVec3.
 struct MVec4 {
     f32 x, y, z, w;
 };
@@ -33,7 +30,7 @@ struct MMtx33 {
 
 struct MCam {
     MMtx33 r;  // offset 0x0
-    MVec3 t;   // offset 0x24
+    ValVec3 t;   // offset 0x24
 };
 
 struct F2 {
@@ -67,10 +64,10 @@ struct MLSphere {
 
 // B (0x20): a box tested against the eye, gated by its sphere.
 struct MLBox {
-    MVec3 ext;    // offset 0x0
+    ValVec3 ext;    // offset 0x0
     u16 sphere;   // offset 0xC
     u16 padE;
-    MVec3 c;      // offset 0x10
+    ValVec3 c;      // offset 0x10
     f32 pad1C;
 };
 
@@ -152,7 +149,7 @@ void fn_801293E8(void* buf);
 const MCam* fn_802C86DC(void);
 void fn_802C8B70(s32 tex);
 void fn_802C8D74(void);
-int fn_802C94A0(const MVec3* c, u8* clip, f32* dist, f32 r);
+int fn_802C94A0(const ValVec3* c, u8* clip, f32* dist, f32 r);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
@@ -224,7 +221,7 @@ static inline void SwapItems(T& a, T& b) {
 
 static inline u8 Cull(const MLSphere* sp) {
     MLSphere s = *sp;
-    MVec3 c;
+    ValVec3 c;
     u8 clip;
     c.x = s.x;
     c.y = s.y;
@@ -244,7 +241,7 @@ void fn_802CCBC0(const MMtx33* r, const F4& a, const F4& b, const F4& c) {}
 
 u8 fn_802CCBC4(const MLBox* e, MVec4 eye, f32 a, f32 b) {
     MVec4 w;
-    MVec3 d;
+    ValVec3 d;
     MVec4 v = *(MVec4*)&e->ext;
     memcpy(&w, &v, sizeof(w));
     d.x = eye.x - e->c.x;
@@ -384,7 +381,7 @@ void fn_802CD33C(MList* m, int i, int on) {
     }
 }
 
-static inline void MulVecT(MVec3* out, const MVec3* in, const MMtx33* m) {
+static inline void MulVecT(ValVec3* out, const ValVec3* in, const MMtx33* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->xx, in->y, m->xy, in->z, m->xz);
         f32 y = Dot3(in->x, m->yx, in->y, m->yy, in->z, m->yz);
@@ -449,7 +446,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     cam = lbl_804C5610 = *fn_802C86DC();
     MMtx33 rt = cam.r;
     Transpose(&rt);
-    MVec3 t;
+    ValVec3 t;
     MulVecT(&t, &cam.t, &cam.r);
     t.x *= -1.0f;
     t.y *= -1.0f;

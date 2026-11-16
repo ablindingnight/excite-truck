@@ -8,10 +8,7 @@ struct MWVec2 {
     f32 x, y;
 };
 
-struct MWVec3 {
-    f32 x, y, z;
-};
-
+// MWVec3: valvec3.h's ValVec3.
 struct MWVec4 {
     MWVec4(void) {}
     MWVec4(f32 ax, f32 ay, f32 az) {
@@ -23,10 +20,10 @@ struct MWVec4 {
 };
 
 struct MWMtx {
-    MWVec3 x;    // offset 0x0
-    MWVec3 y;    // offset 0xC
-    MWVec3 z;    // offset 0x18
-    MWVec3 pos;  // offset 0x24
+    ValVec3 x;    // offset 0x0
+    ValVec3 y;    // offset 0xC
+    ValVec3 z;    // offset 0x18
+    ValVec3 pos;  // offset 0x24
 };
 
 // A simulated body (0xB0).
@@ -42,7 +39,7 @@ struct MWBody {
 };
 
 struct MWWheel {
-    MWVec3 pos;  // offset 0x0
+    ValVec3 pos;  // offset 0x0
     u8 padC[0x10 - 0xC];
 };
 
@@ -116,16 +113,16 @@ struct MWSlot {
     MWSlot(void) {}
     MWMtx mtx;     // offset 0x0
     u8 valid;      // offset 0x30
-    MWVec3 f34;    // offset 0x34
+    ValVec3 f34;    // offset 0x34
     f32 h[4];      // offset 0x40
     MWV4 spin;     // offset 0x50
-    MWVec3 vel;    // offset 0x60
-    MWVec3 avel;   // offset 0x6C
+    ValVec3 vel;    // offset 0x60
+    ValVec3 avel;   // offset 0x6C
 };
 
 struct MWCar {
     u8 pad0[0x12C];
-    MWVec3 f12C;  // offset 0x12C
+    ValVec3 f12C;  // offset 0x12C
     
 };
 
@@ -149,7 +146,7 @@ void fn_801BE400(int i, MWMtx* m, f32 a);
 void fn_801BEDA8(MWBody** bodies, MWWheels** wheels, MWContacts** contacts, void* d, int* n);
 void fn_801BEDD4(void);
 void fn_801BF1B4(void);
-f32 fn_801DCF48(MWVec3* normal, f32 x, f32 z);  // terrain height
+f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z);  // terrain height
 void fn_802E30C8(const char* fmt, ...);
 }
 
@@ -179,13 +176,13 @@ static inline void Perp(MWVec2* v) {
     v->y = t;
 }
 
-static inline void XZ(MWVec3* o, const MWVec2* v) {
+static inline void XZ(ValVec3* o, const MWVec2* v) {
     o->x = v->x;
     o->y = 0.0f;
     o->z = v->y;
 }
 
-static inline void Scale3(MWVec3* o, f32 k) {
+static inline void Scale3(ValVec3* o, f32 k) {
     o->x *= k;
     o->y *= k;
     o->z *= k;
@@ -265,7 +262,7 @@ void fn_8025280C(MWBody* b, f32 speed) {
         a = b->accel;
         a.y = radial;
         up = MWVec4(b->x.x, b->x.y, b->x.z);
-        h = fn_801DCF48((MWVec3*)&n, p.x, p.z);
+        h = fn_801DCF48((ValVec3*)&n, p.x, p.z);
         depth = p.y - h;
         depth = 0.0f > depth ? 0.0f : depth;
         if (depth > 1.5f) {
@@ -310,7 +307,7 @@ void fn_80252C78(void) {
     lbl_8055F2F8--;
 }
 
-static inline void SetV3(MWVec3* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
+static inline void SetV3(ValVec3* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
     v->x = x;
     v->y = y;
     v->z = z;

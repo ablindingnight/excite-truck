@@ -14,27 +14,24 @@ void* operator new[](size_t size, const char* tag);
 
 extern "C" void* memset(void* p, int c, u32 n);
 
-struct WVec {
-    f32 x, y, z;
-};
-
+// WVec: valvec3.h's ValVec3.
 struct WMtx {
-    WVec x;    // offset 0x0
-    WVec y;    // offset 0xC
-    WVec z;    // offset 0x18
-    WVec pos;  // offset 0x24
+    ValVec3 x;    // offset 0x0
+    ValVec3 y;    // offset 0xC
+    ValVec3 z;    // offset 0x18
+    ValVec3 pos;  // offset 0x24
 };
 
 // The camera part of a view (0x30).
 struct WRot {
-    WVec right;  // offset 0x0
-    WVec up;     // offset 0xC
-    WVec dir;    // offset 0x18
+    ValVec3 right;  // offset 0x0
+    ValVec3 up;     // offset 0xC
+    ValVec3 dir;    // offset 0x18
 };
 
 struct WCam {
     WRot rot;    // offset 0x0
-    WVec pos;    // offset 0x24
+    ValVec3 pos;    // offset 0x24
 };
 
 // One view of the world as the renderer sees it (0xE0).
@@ -1036,7 +1033,7 @@ void fn_801E89FC(void) {
     lbl_804881D8[0] = fn_80129DC4(0, -1.0f, 1.0f);
     lbl_804881D8[1] = fn_80129DC4(0, -0.33f, 0.33f);
     lbl_804881D8[2] = fn_80129DC4(0, -1.0f, 1.0f);
-    PSVECNormalize((const Vec*)((WVec*)lbl_804881D8), (Vec*)((WVec*)lbl_804881D8));
+    PSVECNormalize((const Vec*)((ValVec3*)lbl_804881D8), (Vec*)((ValVec3*)lbl_804881D8));
     lbl_804881D8[3] = fn_80129DC4(0, 0.0f, 3.0f);
 }
 
@@ -1059,18 +1056,18 @@ void fn_801E8A84(void) {
         lbl_804881D8[1] = -0.33f;
         lbl_804881D8[2] += e * Sign(lbl_804881D8[2]);
     }
-    PSVECNormalize((const Vec*)((WVec*)lbl_804881D8), (Vec*)((WVec*)lbl_804881D8));
+    PSVECNormalize((const Vec*)((ValVec3*)lbl_804881D8), (Vec*)((ValVec3*)lbl_804881D8));
     lbl_804881D8[3] = Max(Min(lbl_804881D8[3] + fn_80129DC4(0, -0.2f, 0.2f), 3.0f), 0.0f);
 }
 
-void fn_801E8C84(WVec* out) {
+void fn_801E8C84(ValVec3* out) {
     f32 k = lbl_804881D8[3];
     out->x = lbl_804881D8[0] * k;
     out->y = lbl_804881D8[1] * k;
     out->z = lbl_804881D8[2] * k;
 }
 
-void fn_801E8CB8(WVec* dir, f32* strength) {
+void fn_801E8CB8(ValVec3* dir, f32* strength) {
     dir->x = lbl_804881D8[0];
     dir->y = lbl_804881D8[1];
     dir->z = lbl_804881D8[2];
@@ -1257,7 +1254,7 @@ void fn_801E96D8(RaceSetup* s) {
                 BOOL done = 0;
                 int idx = 1;
                 int count = 0;
-                WVec prev;
+                ValVec3 prev;
                 ValPoint p0 = BoundPoint(nd, "bound0");
                 prev.x = p0.x;
                 prev.y = 0.0f;
@@ -1280,9 +1277,9 @@ void fn_801E96D8(RaceSetup* s) {
                         done = 1;
                     }
                     if (ok) {
-                        WVec cur;
+                        ValVec3 cur;
                         WMtx mtx;
-                        WVec c;
+                        ValVec3 c;
                         f32 len;
                         WallVol* wv;
                         cur.x = p.x;

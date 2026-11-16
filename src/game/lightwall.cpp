@@ -17,31 +17,26 @@ int fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
 }
 
-struct LVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// LVec: valvec3.h's ValVec3.
 struct LCam {
-    LVec right;  // offset 0x0
-    LVec up;     // offset 0xC
-    LVec fwd;    // offset 0x18
-    LVec pos;    // offset 0x24
+    ValVec3 right;  // offset 0x0
+    ValVec3 up;     // offset 0xC
+    ValVec3 fwd;    // offset 0x18
+    ValVec3 pos;    // offset 0x24
 };
 
 extern "C" LCam* fn_802C86DC(void);
 
 struct LSeg {
     LSeg(void) {}
-    LSeg(const LVec* p, const LVec* q) : a(*p), b(*q) {}
+    LSeg(const ValVec3* p, const ValVec3* q) : a(*p), b(*q) {}
     f32 Length(void) const { return PSVECDistance((const Vec*)&a, (const Vec*)&b); } /* Helper name unproven */
-    void Set(const LVec* p, const LVec* q) {
+    void Set(const ValVec3* p, const ValVec3* q) {
         a = *p;
         b = *q;
     }
-    LVec a;
-    LVec b;
+    ValVec3 a;
+    ValVec3 b;
 };
 
 static inline f32 LRamp(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
@@ -49,17 +44,17 @@ static inline f32 LMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 LMax(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 LLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline void LAddScaled(LVec* v, const LVec* d, f32 k) {
+static inline void LAddScaled(ValVec3* v, const ValVec3* d, f32 k) {
     v->x += d->x * k;
     v->y += d->y * k;
     v->z += d->z * k;
 }
-static inline void LAddScaled2(LVec* v, const LVec* d, f32 k) {
+static inline void LAddScaled2(ValVec3* v, const ValVec3* d, f32 k) {
     v->x = v->x + k * d->x;
     v->y = v->y + k * d->y;
     v->z = v->z + k * d->z;
 }
-static inline void LAddScaled3(LVec* v, const LVec* d, f32 a, f32 b) {
+static inline void LAddScaled3(ValVec3* v, const ValVec3* d, f32 a, f32 b) {
     f32 k = a * b;
     v->x += d->x * k;
     v->y += d->y * k;
@@ -72,9 +67,9 @@ ModuleTag lbl_8055F910;
 
 extern "C" {
 
-void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
-    const LVec* eye = &fn_802C86DC()->pos;
-    const LVec* right = &fn_802C86DC()->right;
+void fn_802A96E8(const ValVec3* pts, int n, u32 color, s32 tex, s32 tex2) {
+    const ValVec3* eye = &fn_802C86DC()->pos;
+    const ValVec3* right = &fn_802C86DC()->right;
     LCam* cam = fn_802C86DC();
     fn_802C8BD0(tex);
     f32 t = fmod(fn_801E7E18(), 1.0);
@@ -83,7 +78,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
     if (fn_802C8DBC(n * 4)) {
         u32 rgb = color & 0xFFFFFF;
         for (int i = 0; i < n; i++) {
-            const LVec* p = &pts[i];
+            const ValVec3* p = &pts[i];
             f32 d = PSVECDistance((const Vec*)p, (const Vec*)eye);
             if (d < 225.0f) {
                 f32 k = 2.0f * d / 225.0f - 1.0f;
@@ -101,7 +96,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
                     w = 1.0f;
                 }
                 u32 c = (alpha << 24) | rgb;
-                LVec v;
+                ValVec3 v;
                 f32 s = 0.5f * -w;
                 v.x = p->x + right->x * s;
                 v.y = p->y + right->y * s;
@@ -144,7 +139,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
                     w = 1.0f;
                 }
                 u32 c = (alpha << 24) | (color & 0xFFFFFF);
-                LVec v;
+                ValVec3 v;
                 f32 s = 2.0f * -w;
                 v.x = pts->x + right->x * s;
                 v.y = pts->y + right->y * s;
@@ -171,7 +166,7 @@ void fn_802A96E8(const LVec* pts, int n, u32 color, s32 tex, s32 tex2) {
     }
 }
 
-void fn_802A9BFC(const LVec* from, const LVec* to, s32 tex, f32 fade, int u0, int v0, int u1, int v1) {
+void fn_802A9BFC(const ValVec3* from, const ValVec3* to, s32 tex, f32 fade, int u0, int v0, int u1, int v1) {
     LSeg seg(from, to);
     f32 top = seg.a.y > seg.b.y ? seg.a.y : seg.b.y;
     seg.b.y = 10.0f + top;
@@ -179,7 +174,7 @@ void fn_802A9BFC(const LVec* from, const LVec* to, s32 tex, f32 fade, int u0, in
     f32 len = 16.0f;
     if (PSVECSquareDistance((const Vec*)&seg.a, (const Vec*)&seg.b) < len * len) {
         len -= seg.Length();
-        LVec dir;
+        ValVec3 dir;
         dir.x = seg.a.x - seg.b.x;
         dir.y = seg.a.y - seg.b.y;
         dir.z = seg.a.z - seg.b.z;

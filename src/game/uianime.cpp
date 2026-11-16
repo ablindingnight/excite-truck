@@ -295,15 +295,12 @@ static inline ValPoint Lerp2(const ValPoint& a, const ValPoint& b, f32 f) {
 }
 
 // A row of the pose's 3x3 rotation.
-struct UiRow {
-    f32 x, y, z;
-};
-
+// UiRow: valvec3.h's ValVec3.
 /* Helper name unproven: identity rotation written through its rows. Retail keeps the pose address in a saved
    register outside the track loop, which only happens when the matrix is filled through a row-typed pointer
    (same fact as betarace IdentityRows). */
 static inline void IdentityRot(f32* m) {
-    UiRow* r = (UiRow*)m;
+    ValVec3* r = (ValVec3*)m;
     r[0].x = 1.0f;
     r[0].y = 0.0f;
     r[0].z = 0.0f;

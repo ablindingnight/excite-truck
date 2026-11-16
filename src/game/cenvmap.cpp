@@ -5,21 +5,18 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 
-struct EVec3 {
-    f32 x, y, z;
-};
-
+// EVec3: valvec3.h's ValVec3.
 struct EVec2 {
     f32 x, y;
 };
 
 struct EFrame {
     struct {
-        EVec3 x;    // offset 0x0
-        EVec3 y;    // offset 0xC
+        ValVec3 x;    // offset 0x0
+        ValVec3 y;    // offset 0xC
     };
-    EVec3 z;    // offset 0x18
-    EVec3 pos;  // offset 0x24
+    ValVec3 z;    // offset 0x18
+    ValVec3 pos;  // offset 0x24
 };
 
 struct EVtx {
@@ -67,7 +64,7 @@ double sqrt(double x);
 int fn_8012C33C(const char* name);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 f32 fn_801DCF48(int a, f32 x, f32 z);                          // terrain height
-void fn_802BE07C(const EVec3* pos, void (*cb)(s32, EVec3*, int, int, f32, f32));
+void fn_802BE07C(const ValVec3* pos, void (*cb)(s32, ValVec3*, int, int, f32, f32));
 void fn_802C8638(const EFrame* cam);
 void fn_802C86E8(u32 color);
 void fn_802C87B4(int x, int y, int w, int h);
@@ -82,7 +79,7 @@ void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int a);
 void fn_802C8E48(void);
 void fn_802C9294(s32 rt, int a);
 void fn_802C974C(f32 a, f32 b, f32 c);
-EVec3* fn_802C9A40(void);
+ValVec3* fn_802C9A40(void);
 void* fn_802CA294(s32 tex);
 s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
@@ -125,7 +122,7 @@ EFrame lbl_80488B88;
 static inline f32 EnvLerp(f32 lo, f32 span, f32 t) { return lo + t * span; }
 
 // Horizontal part of v, scaled.
-static inline void Flatten(EVec3* o, const EVec3* v, f32 k) {
+static inline void Flatten(ValVec3* o, const ValVec3* v, f32 k) {
     o->x = v->x * k;
     o->z = v->z * k;
     o->y = 0.0f;
@@ -186,7 +183,7 @@ template <class O> static inline void TMulEq(O* o, f32 k) { o->x *= k; o->y *= k
 extern "C" {
 /* Helper name unproven */
 static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
-void fn_80202D50(EVec3 dir) {
+void fn_80202D50(ValVec3 dir) {
     f32 m = PSVECMag((const Vec*)&dir);
     m = m > 0.001f ? m : 0.001f;
     f32 s = 1.0f / m;
@@ -218,17 +215,17 @@ void fn_80202D50(EVec3 dir) {
 }
 
 /* Helper name unproven */
-static inline EVec3 MakeVec3(f32 x, f32 y, f32 z) {
-    EVec3 r;
+static inline ValVec3 MakeVec3(f32 x, f32 y, f32 z) {
+    ValVec3 r;
     r.x = x;
     r.y = y;
     r.z = z;
     return r;
 }
 
-void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
+void fn_80202F58(const ValVec3* v, const EFrame* f, EFrame* out) {
     if ((f32)__fabs(f->z.y) < 0.999f) {
-        EVec3 d;
+        ValVec3 d;
         EFrame m;
         d.x = v->x - f->pos.x;
         d.y = v->y - f->pos.y;
@@ -269,7 +266,7 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
         out->pos.z = 0.0f;
     }
     if (fn_802C8DBC(4)) {
-        EVec3* c = fn_802C9A40();
+        ValVec3* c = fn_802C9A40();
         EVec2 h;
         h.x = c->x;
         h.y = c->z;
@@ -319,7 +316,7 @@ void fn_80203380(EFrame* m) {
             f32 sx, sy;
             a = 3.1415927f * (i * 2) / 20.0f;
             p.x = 0.0f;
-            EVec3 w;
+            ValVec3 w;
             p.y = dist;
             Rotate(&p, a);
             p.x += m->pos.x;
@@ -329,7 +326,7 @@ void fn_80203380(EFrame* m) {
             w.z = z;
             w.x = p.x;
             {
-                EVec3 d;
+                ValVec3 d;
                 f32 dx = RingSubtract(w.x, m->pos.x);
                 d.x = dx;
                 d.y = w.y - m->pos.y;
@@ -358,7 +355,7 @@ void fn_80203380(EFrame* m) {
             fn_802C8E00(sx, 0.0f, sy, 0.0f, 0.0f, 0xFF000000, 1);
             w.y = -200.0f;
             {
-                EVec3 d;
+                ValVec3 d;
                 ENV_PROJECT(m, w, d, sx, sy);
             }
             fn_802C8E00(sx, 0.0f, sy, 0.0f, 0.0f, 0xFF000000, 1);
@@ -372,7 +369,7 @@ void fn_80203380(EFrame* m) {
 #pragma opt_strength_reduction off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_802036E4 exact with it, 92.61 without */
 // Helper name unproven: ENV_PROJECT as an inline that reads the frame as twelve floats (the target addresses the
 // global frame through one register, with no folded offset-0 load).
-static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx, f32& sy) {
+static inline void EnvProject(const EFrame* m, const ValVec3& w, ValVec3& d, f32& sx, f32& sy) {
     const f32* f = (const f32*)m;
     d.x = w.x - f[9];
     d.y = w.y - f[10];
@@ -402,7 +399,7 @@ static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx
 #pragma opt_loop_invariants off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_802036E4 exact with it, 99.95 without */
 static inline f32 SideLen(f32 x, f32 y) { return sqrt(x * x + y * y); }
 
-void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
+void fn_802036E4(s32 tex, ValVec3* pts, int stride, int n, f32 w, f32 h) {
     if (tex != lbl_8055ED1C) {
         lbl_8055ED1C = tex;
         fn_802C8D74();
@@ -414,9 +411,9 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
         int hi;
         int lo;
         for (int i = 0; i < n; i++) {
-            EVec3* p = (EVec3*)((u8*)pts + i * stride);
-            EVec3 q;
-            EVec3 d;
+            ValVec3* p = (ValVec3*)((u8*)pts + i * stride);
+            ValVec3 q;
+            ValVec3 d;
             d.x = p->x - (&lbl_80488B88)->pos.x;
             d.y = p->y - (&lbl_80488B88)->pos.y;
             d.z = p->z - (&lbl_80488B88)->pos.z;
@@ -443,7 +440,7 @@ void fn_802036E4(s32 tex, EVec3* pts, int stride, int n, f32 w, f32 h) {
                     if (hi) {
                         q.y += h;
                     }
-                    EVec3 e;
+                    ValVec3 e;
                     EnvProject(&lbl_80488B88, q, e, sx, sy);
                     f32 u = hi ? 1.0f : 0.0f;
                     f32 v = lo ? 1.0f : 0.0f;
@@ -465,7 +462,7 @@ void fn_802039CC(const EFrame* cam, const EFrame* m) {
     fn_802C8D74();
 }
 
-void fn_80203A88(const EVec3* v, const EFrame* cam, EFrame* m) {
+void fn_80203A88(const ValVec3* v, const EFrame* cam, EFrame* m) {
     if (fn_80202BE4() == 0) {
         fn_802D3050(1);
         fn_802D306C(90);
@@ -477,7 +474,7 @@ void fn_80203A88(const EVec3* v, const EFrame* cam, EFrame* m) {
     }
 }
 
-void fn_80203B20(const EFrame* cam, const EVec3* v, int objects) {
+void fn_80203B20(const EFrame* cam, const ValVec3* v, int objects) {
     fn_802CB274(lbl_8055ECFC);
     if (lbl_8055ED08) {
         fn_802C9294(lbl_8055ECFC, 0);
@@ -562,7 +559,7 @@ void fn_80203DC8(void) {
     lbl_8048897C.n = 0;
 }
 
-void fn_80203E88(const EFrame* cam, const EVec3* v, int objects) {
+void fn_80203E88(const EFrame* cam, const ValVec3* v, int objects) {
     fn_80203B20(cam, v, objects);
     fn_802D9230(fn_802CA294(lbl_8055ECFC));
     fn_802D050C(fn_802CA294(lbl_8055ED04));

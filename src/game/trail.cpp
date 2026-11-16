@@ -24,13 +24,10 @@ struct TMtx33 {
     f32 zx, zy, zz;
 };
 
-struct TPos {
-    f32 x, y, z;
-};
-
+// TPos: valvec3.h's ValVec3.
 struct TWheel {
     TVec local;  // offset 0x0
-    TPos world;  // offset 0xC
+    ValVec3 world;  // offset 0xC
     u8 pad18[0x24 - 0x18];
     f32 speed;  // offset 0x24
     f32 slip;   // offset 0x28
@@ -59,7 +56,7 @@ struct TRacer {
 };
 
 struct TrailEvent {
-    TPos pos;     // offset 0x0
+    ValVec3 pos;     // offset 0x0
     TVec vel;     // offset 0xC
     TVec dir;     // offset 0x18
     f32 force;    // offset 0x24
@@ -813,7 +810,7 @@ void DustTrail::Impact(const TrailEvent* e) {
         v.x = vx;
         v.y = 0.0f;
         v.z = vz;
-        TPos c = e->pos;
+        ValVec3 c = e->pos;
         c.y += 0.35f;
         for (i = 0; i < n; i++) {
             TVec v1;
@@ -964,7 +961,7 @@ void AsphaltTrail::Emit(const TRacer* r, int wheel) {
     {
         bool left = wh->local.x < 0.0f;
         TVec* vel = &b->vel;
-        TPos p = wh->world;
+        ValVec3 p = wh->world;
         f32 s;
         p.y += 0.25f;
         s = 0.02f * wh->speed * (left ? 1 : -1);
@@ -1045,7 +1042,7 @@ void GrassTrail::Emit(const TRacer* r, int wheel) {
         return;
     }
     {
-        TPos p = wh->world;
+        ValVec3 p = wh->world;
         TVec v;
         f32 k;
         Scale(&v, &b->m.yx, 5.5f);

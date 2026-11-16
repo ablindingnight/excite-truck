@@ -4,30 +4,27 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 
-struct DVec3 {
-    f32 x, y, z;
-};
-
+// DVec3: valvec3.h's ValVec3.
 struct DBasis {
-    DVec3 x;  // offset 0x0
-    DVec3 y;  // offset 0xC
-    DVec3 z;  // offset 0x18
+    ValVec3 x;  // offset 0x0
+    ValVec3 y;  // offset 0xC
+    ValVec3 z;  // offset 0x18
 };
 
 // Three axes and a position.
 struct DbgFrame : DBasis {
-    DVec3 pos;  // offset 0x24
+    ValVec3 pos;  // offset 0x24
 };
 
 struct DVtx {
-    DVec3 pos;    // offset 0x0
+    ValVec3 pos;    // offset 0x0
     u32 color;    // offset 0xC
     f32 u, v;     // offset 0x10
 };
 
 struct DCam {
-    DVec3 right;  // offset 0x0
-    DVec3 up;     // offset 0xC
+    ValVec3 right;  // offset 0x0
+    ValVec3 up;     // offset 0xC
 };
 
 extern "C" {
@@ -51,7 +48,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void SetLength(DVec3* v, f32 len) {
+static inline void SetLength(ValVec3* v, f32 len) {
     f32 m = PSVECMag((const Vec*)v);
     if ((f32)__fabs(m) <= __float_epsilon[0]) {
         return;
@@ -62,7 +59,7 @@ static inline void SetLength(DVec3* v, f32 len) {
     v->z *= s;
 }
 
-static inline void MulVec(DVec3* out, const DVec3* in, const DbgFrame* m) {
+static inline void MulVec(ValVec3* out, const ValVec3* in, const DbgFrame* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->x.x, in->y, m->y.x, in->z, m->z.x);
         f32 y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
@@ -77,7 +74,7 @@ static inline void MulVec(DVec3* out, const DVec3* in, const DbgFrame* m) {
     }
 }
 
-static inline void AddScaled(DVtx* o, const DVec3* a, const DVec3* b, f32 k) {
+static inline void AddScaled(DVtx* o, const ValVec3* a, const ValVec3* b, f32 k) {
     o->pos.x = a->x + b->x * k;
     o->pos.y = a->y + b->y * k;
     o->pos.z = a->z + b->z * k;
@@ -93,12 +90,12 @@ s32 lbl_8055EA6C;
 
 extern "C" {
 
-void fn_801E41D8(const DVec3* a, const DVec3* b, u32 color, f32 width);
+void fn_801E41D8(const ValVec3* a, const ValVec3* b, u32 color, f32 width);
 
 static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
-void fn_801E3640(const DVec3* dir, DBasis* out) {
-    DVec3 up;
+void fn_801E3640(const ValVec3* dir, DBasis* out) {
+    ValVec3 up;
     out->z.x = dir->x;
     out->z.y = dir->y;
     out->z.z = dir->z;
@@ -119,7 +116,7 @@ u32 fn_801E36F0(u32 c) { return ((c >> 1) & 0x7F7F7F) | (c & 0xFF000000); }
 
 // Wire box of the unit cube [-1,1]^3 placed by the frame: c0 for the -z face, c1 for the edges along z
 // and the +z face.
-static inline void DbgStep(DVec3* p, const DVec3* d, f32 k) {
+static inline void DbgStep(ValVec3* p, const ValVec3* d, f32 k) {
     p->x += d->x * k;
     p->y += d->y * k;
     p->z += d->z * k;
@@ -128,8 +125,8 @@ static inline void DbgStep(DVec3* p, const DVec3* d, f32 k) {
 void fn_801E370C(const DbgFrame* m, u32 c0, u32 c1) {
     fn_802C8BD0(lbl_8055EA6C);
     if (fn_802C8DBC(0x11)) {
-        DVec3 pos;
-        DVec3 dir;
+        ValVec3 pos;
+        ValVec3 dir;
         pos.x = 0.0f;
         pos.y = 0.0f;
         pos.z = 0.0f;
@@ -180,13 +177,13 @@ void fn_801E3C88(void) {
 }
 
 // Arrow head (a four-sided pyramid) at pos pointing along dir.
-static inline void AddV(DVtx* o, const DVtx* a, const DVec3* b) {
+static inline void AddV(DVtx* o, const DVtx* a, const ValVec3* b) {
     o->pos.x = a->pos.x + b->x;
     o->pos.y = a->pos.y + b->y;
     o->pos.z = a->pos.z + b->z;
 }
 
-void fn_801E3CB4(const DVec3* pos, const DVec3* dir, f32 size, u32 color) {
+void fn_801E3CB4(const ValVec3* pos, const ValVec3* dir, f32 size, u32 color) {
     DBasis b;
     DVtx v[5];
     fn_801E3640(dir, &b);
@@ -231,7 +228,7 @@ static inline void ScaleFrame(DbgFrame* m, f32 s) {
     m->pos.z = 0.0f;
 }
 
-void fn_801E3FC8(const DVec3* pos, f32 radius, u32) {
+void fn_801E3FC8(const ValVec3* pos, f32 radius, u32) {
     DbgFrame m;
     ScaleFrame(&m, radius / lbl_8055EA68);
     m.pos.x = pos->x;
@@ -241,8 +238,8 @@ void fn_801E3FC8(const DVec3* pos, f32 radius, u32) {
 }
 
 // Box of the given width from a to b.
-void fn_801E4040(const DVec3* a, const DVec3* b, f32 width, u32 c0, u32 c1) {
-    DVec3 d;
+void fn_801E4040(const ValVec3* a, const ValVec3* b, f32 width, u32 c0, u32 c1) {
+    ValVec3 d;
     DbgFrame f;
     d.x = b->x - a->x;
     d.y = b->y - a->y;
@@ -259,10 +256,10 @@ void fn_801E4040(const DVec3* a, const DVec3* b, f32 width, u32 c0, u32 c1) {
     fn_801E370C(&f, c0, c1);
 }
 
-void fn_801E41D8(const DVec3* a, const DVec3* b, u32 color, f32 width) { fn_801E4040(a, b, width, color, color); }
+void fn_801E41D8(const ValVec3* a, const ValVec3* b, u32 color, f32 width) { fn_801E4040(a, b, width, color, color); }
 
 // Camera-facing triangle around pos.
-void fn_801E41E0(const DVec3* pos, f32 size, u32 color) {
+void fn_801E41E0(const ValVec3* pos, f32 size, u32 color) {
     DVtx t;
     DVtx v[3];
     t.v = 0.0f;
@@ -296,7 +293,7 @@ void fn_801E41E0(const DVec3* pos, f32 size, u32 color) {
 
 // Red/green/blue axis bars of the frame.
 void fn_801E43BC(const DbgFrame* m, f32 len, f32 width) {
-    DVec3 p;
+    ValVec3 p;
     p.x = m->pos.x + m->x.x * len;
     p.y = m->pos.y + m->x.y * len;
     p.z = m->pos.z + m->x.z * len;

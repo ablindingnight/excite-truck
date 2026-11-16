@@ -123,12 +123,9 @@ static inline int SwfChannel(int c, const s8& mul, const s8& add) {
     return v;
 }
 
-struct SwfPt {
-    f32 x, y, z;
-};
-
+// SwfPt: valvec3.h's ValVec3.
 void SwfAnim::DrawItem(const Sw2Item* it) {
-    SwfPt pts[4];
+    ValVec3 pts[4];
     SwfVtx v[4] __attribute__((aligned(16)));
     Sw2Shape* sh = &data->shapes[it->shape];
     const Sw2Cxform* cx = &data->cxforms[it->cxform];

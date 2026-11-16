@@ -639,12 +639,7 @@ inline void AirTracker::Stop(const RaceCarRec* rc) {
     }
 }
 
-struct RaceCarVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// RaceCarVec: valvec3.h's ValVec3.
 
 inline void StopSound(GameSound* s) {
     if (s) {

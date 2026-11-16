@@ -42,17 +42,12 @@ void operator delete[](void* p);
 
 namespace {
 
-struct OVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// OVec: valvec3.h's ValVec3.
 // One queued instance.
 struct ObjLoc {
     ObjLoc(void);
     u16 kind;   // offset 0x0: rotation index
-    OVec pos;   // offset 0x4
+    ValVec3 pos;   // offset 0x4
     f32 scale;  // offset 0x10
 };
 
@@ -231,14 +226,14 @@ struct ObjRot {
 
 // The rotation part of an ObjRot as three rows (copied row by row).
 struct ObjRows {
-    OVec r0;  // offset 0x0
-    OVec r1;  // offset 0xC
-    OVec r2;  // offset 0x18
+    ValVec3 r0;  // offset 0x0
+    ValVec3 r1;  // offset 0xC
+    ValVec3 r2;  // offset 0x18
 };
 
 struct ObjXform {
     ObjRows rot;  // offset 0x0
-    OVec pos;     // offset 0x24
+    ValVec3 pos;     // offset 0x24
 };
 
 struct ObjList {
@@ -781,7 +776,7 @@ ObjList* fn_802B3DA4(InlineVec<MatPlacer*, 6>* set, u16 id, int layer) {
     return r;
 }
 
-void fn_802B3E00(ObjList* list, const OVec* pos, u16 kind, f32 scale) {
+void fn_802B3E00(ObjList* list, const ValVec3* pos, u16 kind, f32 scale) {
     ObjAllocator* a = lbl_8055F9BC;
     ObjLoc* l = 0;
     ObjBlock* tail = list->tail;

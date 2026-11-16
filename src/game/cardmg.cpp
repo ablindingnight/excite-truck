@@ -724,10 +724,7 @@ void fn_8018E330(u8* p) {
     ((CarBody*)p)->f2628 = 0.0f;
 }
 
-struct DVec {
-    f32 x, y, z;
-};
-
+// DVec: valvec3.h's ValVec3.
 // The car's spring goals, one per body point.
 struct DentCar {
     u8 pad0[0x5FC];
@@ -752,8 +749,8 @@ struct DentNode {
 };
 
 struct BoneBox {
-    DVec lo;  // offset 0x0
-    DVec hi;  // offset 0xC
+    ValVec3 lo;  // offset 0x0
+    ValVec3 hi;  // offset 0xC
 };
 
 // Car model (partial).
@@ -769,7 +766,7 @@ struct GlassMsg {
     s16 car;   // offset 0x18
 };
 
-void fn_801BF2A4(u8* car, u32 mask, DVec* center, DVec* lo, DVec* hi, s32 kind, u8* fx);
+void fn_801BF2A4(u8* car, u32 mask, ValVec3* center, ValVec3* lo, ValVec3* hi, s32 kind, u8* fx);
 f32 lbl_8055A460 = 4.0f;  // 4
 extern f32 __float_epsilon[];      // FLT_EPSILON
 int fn_80189BDC(u8* p);
@@ -814,7 +811,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     DentVec c0;
     DentVec w;
     DentVec r;
-    DVec c;
+    ValVec3 c;
     GlassMsg msg;
     AVec di;
     AVec da;
@@ -988,8 +985,8 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         sl->valid = 0;
                     }
                     if (sl->state == 3) {
-                        DVec* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[t->bit].lo;
-                        DVec* hi = lo + 1;
+                        ValVec3* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[t->bit].lo;
+                        ValVec3* hi = lo + 1;
                         c.x = lo->x + (lo + 1)->x;
                         c.y = lo->y + hi->y;
                         c.z = lo->z + (lo + 1)->z;
@@ -1344,9 +1341,9 @@ void fn_8018F9B4(u8* p) {
     for (int i = 0; i < 17; i++) {
         if ((w->attached && w->hp > 0 && !w->state) || w->state == 2) {
             s32 bone = *(s32*)((u8*)t + 0x8);
-            DVec* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[bone].lo;
-            DVec* hi = lo + 1;
-            DVec c;
+            ValVec3* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[bone].lo;
+            ValVec3* hi = lo + 1;
+            ValVec3 c;
             c.x = lo->x + (lo + 1)->x;
             c.y = lo->y + hi->y;
             c.z = lo->z + (lo + 1)->z;

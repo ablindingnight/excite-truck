@@ -7,10 +7,7 @@ struct SFVec2 {
     f32 x, y;
 };
 
-struct SFVec3 {
-    f32 x, y, z;
-};
-
+// SFVec3: valvec3.h's ValVec3.
 struct SFNode {
     SFVec2 pos;  // offset 0x0
     SFVec2 dir;  // offset 0x8
@@ -65,7 +62,7 @@ SFConfig* fn_8000AC38(void);
 extern "C" {
 int fn_80161C38(void);
 SFPathSet* fn_80156A40(void);
-int fn_801E9E30(s16* h, SFVec3* pos);
+int fn_801E9E30(s16* h, ValVec3* pos);
 void fn_801E9DC4(s16* h);
 double log2(double x);
 double sqrt(double x);
@@ -118,7 +115,7 @@ void fn_802A0D60(s16* h, SFVec2* o, SFVec2* a, SFVec2* __restrict b, f32 size, f
         c = (u8)-white;
         for (i = 0; i < 4; i++) {
             SFVec2 q;
-            SFVec3 p;
+            ValVec3 p;
             f32 u;
             f32 v;
             SFCorner(&q, o, a, b, size * ((i & 1) == 0), size * ((i & 2) == 0));

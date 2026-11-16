@@ -21,10 +21,7 @@ double sin(double x);
 double cos(double x);
 }
 
-struct GVec {
-    f32 x, y, z;
-};
-
+// GVec: valvec3.h's ValVec3.
 // A 32x32 tile of the ground (0x894).
 struct GTile {
     f32 base;        // offset 0x0
@@ -245,7 +242,7 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
     return SplineP(col, 1, fz);
 }
 
-f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
+f32 fn_801DB514(const f32 g[4][4], ValVec3* normal, f32 fx, f32 fz) {
     f32 t3;
     f32 t2 = fx * fx;
     t3 = t2 * fx;
@@ -262,7 +259,7 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     s3 = (fz * fz) * fz;
     f32 dz;
     f32 h = SplineD(col[0], col[1], col[2], col[3], fz, (fz * fz), s3, &dz);
-    GVec n;
+    ValVec3 n;
     f32 n_x = -Spline(dcol[0], dcol[1], dcol[2], dcol[3], fz, (fz * fz), (fz * fz) * fz);
     n.y = 1.0f / lbl_8055E990->scaleX;
     n.z = -dz;
@@ -273,7 +270,7 @@ f32 fn_801DB514(const f32 g[4][4], GVec* normal, f32 fx, f32 fz) {
     }
 }
 
-int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, GVec* normal, f32 fx, f32 fz) {
+int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, ValVec3* normal, f32 fx, f32 fz) {
     f32 h0;
     if (!Sample(x, z, &h0, mat, unused) && !Sample(x + 1, z, &h0, mat, unused) && !Sample(x, z + 1, &h0, mat, unused) &&
         !Sample(x + 1, z + 1, &h0, mat, unused)) {
@@ -296,7 +293,7 @@ int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, GVec* normal, f32
     return 1;
 }
 
-int fn_801DC258(f32* out, s32* mat, u16* unused, GVec* normal, f32 x, f32 z) {
+int fn_801DC258(f32* out, s32* mat, u16* unused, ValVec3* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 fx = g->scaleX * (x + g->offX);
     f32 ix;
@@ -497,7 +494,7 @@ void fn_801DCE0C(int fake) { load_ground(fake); }
 
 void fn_801DCE10(void) {}
 
-int fn_801DCE14(u16* flags, const GVec* in, GVec* out, GVec* normal, s32* mat) {
+int fn_801DCE14(u16* flags, const ValVec3* in, ValVec3* out, ValVec3* normal, s32* mat) {
     if (flags) {
         *flags = 0;
     }
@@ -539,7 +536,7 @@ f32 fn_801DCF0C(f32 x, f32 z) {
 static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
 
 // MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* normal, int lx, int lz, f32 h) {
+static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, ValVec3* normal, int lx, int lz, f32 h) {
     GTile* t = TileAt(g, tx, tz);
     if (!t) {
         if (normal) {
@@ -586,7 +583,7 @@ static inline f32 Loop1_fn_801DCF48(GroundHeader* g, int tx, int tz, GVec* norma
 
 #pragma push
 #pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
-f32 fn_801DCF48(GVec* normal, f32 x, f32 z) {
+f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 h;
     if (!g->tiled) {

@@ -854,10 +854,7 @@ struct Perspective {
     f32 fov;   // offset 0x8
 };
 
-struct LightDir {
-    f32 x, y, z;
-};
-
+// LightDir: valvec3.h's ValVec3.
 static inline f32 DegToRad(f32 d) { return d * 3.1415927f / 180.0f; }
 ModuleTag lbl_8055F388;
 UnkStatic123s lbl_80498E98;
@@ -885,8 +882,8 @@ void fn_802E30C8(const char* fmt, ...);
 u32 fn_802C9950(u32 c);
 u32 fn_802C9994(u32 c);
 f32 fn_802C99E8(f32 v);
-LightDir* fn_802C9A40(void);
-void fn_802C9A1C(const LightDir* d);
+ValVec3* fn_802C9A40(void);
+void fn_802C9A1C(const ValVec3* d);
 void fn_802D7554(int on);
 void* fn_802CA294(s32 tex);
 void fn_802D9230(void*);
@@ -911,7 +908,7 @@ inline void AchievementTrophyModel::Draw(void) {
     Mat3 scale;
     TrophySizes sizes;
     f32 bounds[6];
-    LightDir dir;
+    ValVec3 dir;
     if (handle == -1 || !shown) {
         return;
     }
@@ -938,7 +935,7 @@ inline void AchievementTrophyModel::Draw(void) {
     u32 oldAmb = fn_802C9950(0xFF646464);
     u32 oldDiff = fn_802C9994(0xFFB4B4B4);
     f32 oldSpec = fn_802C99E8(1.0f);
-    LightDir saved = *fn_802C9A40();
+    ValVec3 saved = *fn_802C9A40();
     fn_802C9A1C(&dir);
     fn_802D7554(1);
     fn_802D9230(fn_802CA294((s32)env));

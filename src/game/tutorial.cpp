@@ -139,12 +139,7 @@ Task* lbl_8055E300;  // current task
 s32 lbl_8055E304;    // current challenge index
 TaskList lbl_8042FDEC;
 
-struct TVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// TVec3: valvec3.h's ValVec3.
 struct TVec2 {
     f32 x;
     f32 z;
@@ -167,12 +162,12 @@ struct TCar {
     u8 pad0[0x10];
     u32 model;  // offset 0x10
     u8 pad14[0x18 - 0x14];
-    TVec3 fwd;  // offset 0x18
+    ValVec3 fwd;  // offset 0x18
     u8 pad24[0x30 - 0x24];
-    TVec3 vel;  // offset 0x30
+    ValVec3 vel;  // offset 0x30
     RMtx frame;  // offset 0x3C (origin = position, 0x60)
     u8 pad6C[0x118 - 0x6C];
-    TVec3 v118;  // offset 0x118
+    ValVec3 v118;  // offset 0x118
 };
 
 class Arena {
@@ -303,7 +298,7 @@ struct EVec3 {
 
 struct Token {
     Token(void) {}
-    TVec3 pos;      // offset 0x0
+    ValVec3 pos;      // offset 0x0
     EVec3 ends[2];  // offset 0xC
     TVec2 mid;      // offset 0x24
     TVec2 dir;      // offset 0x2C
@@ -1324,9 +1319,9 @@ inline void Challenge::Init(void) {
                 TVec2 a = t->path->pts[(best - 1) % t->path->count];
                 TVec2 b = t->path->pts[best % t->path->count];
                 TVec2* c = &t->path->pts[(best + 1) % t->path->count];
-                TVec3 e1;
-                TVec3 e2;
-                TVec3 n3;
+                ValVec3 e1;
+                ValVec3 e2;
+                ValVec3 n3;
                 t->ends[0].y = 0.0f;
                 t->ends[0].x = a.x;
                 t->ends[0].z = a.z;
@@ -1579,8 +1574,8 @@ inline void ChalList::Update(void) {
     for (i = 0; i < lbl_8055E4D0; i++) {
         TCar* car = lbl_804348E8[i];
         RMtx m;
-        TVec3 v;
-        TVec3 w;
+        ValVec3 v;
+        ValVec3 w;
         fn_8018ADBC(car, 1.0f);
         fn_8018ADB4(car, 0.0f);
         fn_8018ADA4(car, 0.0f);

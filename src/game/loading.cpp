@@ -30,14 +30,9 @@ struct LdVec {
 extern "C" {
 }
 
-struct VecPOD {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
+// VecPOD: valvec3.h's ValVec3.
 struct CamFrame {
-    VecPOD axes[2];  // offset 0x0: right, up
+    ValVec3 axes[2];  // offset 0x0: right, up
     LdVec fwd;       // offset 0x18
     LdVec pos;       // offset 0x24
 
@@ -281,8 +276,8 @@ void OrthonormalizeFrame(CamFrame* f) {
     PSVECNormalize((const Vec*)&right, (Vec*)&right);
     PSVECNormalize((const Vec*)&newUp, (Vec*)&newUp);
     PSVECCrossProduct((const Vec*)&right, (const Vec*)&newUp, (Vec*)&fwd);
-    f->axes[0] = *(VecPOD*)&right;
-    f->axes[1] = *(VecPOD*)&newUp;
+    f->axes[0] = *(ValVec3*)&right;
+    f->axes[1] = *(ValVec3*)&newUp;
     f->fwd = fwd;
 }
 

@@ -1141,11 +1141,9 @@ void fn_802D6860(void) {
     fn_802E30C8("total ymorph verts = %d", lbl_8055FE00);
 }
 
-struct ColPos {
-    f32 x, y, z;
-};
+// ColPos: valvec3.h's ValVec3.
 struct ColVtx {
-    ColPos pos;  // offset 0x0
+    ValVec3 pos;  // offset 0x0
     u32 color;    // offset 0xC
     f32 u, v;     // offset 0x10
 };

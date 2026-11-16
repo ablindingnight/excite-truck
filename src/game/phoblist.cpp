@@ -24,10 +24,7 @@ struct PhobCell {
     PhobNode* head;  // offset 0x0
 };
 
-struct PhobPos {
-    f32 x, y, z;
-};
-
+// PhobPos: valvec3.h's ValVec3.
 static inline int CellIndex(f32 v) {
     int i;
     v += 1000.0f;
@@ -87,7 +84,7 @@ void fn_801B60A8(void) {
     delete[] lbl_8055E70C;
 }
 
-PhobCell* fn_801B60F4(const PhobPos* pos, f32 radius) {
+PhobCell* fn_801B60F4(const ValVec3* pos, f32 radius) {
     int x;
     int z;
     if (radius > 20.0f) {
@@ -98,7 +95,7 @@ PhobCell* fn_801B60F4(const PhobPos* pos, f32 radius) {
     return &lbl_8055E70C[z * 100 + x];
 }
 
-void fn_801B619C(PhobCell** out, int* n, const PhobPos* pos) {
+void fn_801B619C(PhobCell** out, int* n, const ValVec3* pos) {
     int x0 = CellIndex(pos->x - 9.5999994f);
     int x1 = CellIndex(9.5999994f + pos->x);
     int z0 = CellIndex(pos->z - 9.5999994f);

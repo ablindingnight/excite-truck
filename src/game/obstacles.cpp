@@ -49,10 +49,7 @@ extern s32 lbl_8055E3C4;
 extern "C" {
 }
 
-struct ObVec3 {
-    f32 x, y, z;
-};
-
+// ObVec3: valvec3.h's ValVec3.
 // A visitor called for each obstacle in a linked chain.
 class ObstacleSink;
 
@@ -82,7 +79,7 @@ public:
     virtual u8 IsAsleep(void) = 0;                                                      // 0x1C
     virtual void SetAwake(int on) = 0;                                                  // 0x20
     virtual void Push(f32* v, f32* off) = 0;                                            // 0x24
-    virtual void SetState(const Pose12* pose, const ObVec3* lo, const ObVec3* hi) = 0;  // 0x28
+    virtual void SetState(const Pose12* pose, const ValVec3* lo, const ValVec3* hi) = 0;  // 0x28
     virtual void Rest(void) = 0;                                                        // 0x2C
     u32 owner;  // offset 0x4
 };
@@ -242,7 +239,7 @@ struct BodyCorner {
     f32 spring;        // offset 0x10
     f32 friction;      // offset 0x14
     f32 damping;       // offset 0x18
-    ObVec3 vel;        // offset 0x1C
+    ValVec3 vel;        // offset 0x1C
 };
 
 extern "C" BodyCorner* fn_801AE180(void);  // new corner
@@ -360,7 +357,7 @@ static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
     *(BodyCorner**)(body + 0xD0) = c;
 }
 
-static inline void AddCornerV(u8* body, const ObVec3& v, f32 spring) {
+static inline void AddCornerV(u8* body, const ValVec3& v, f32 spring) {
     BodyCorner* c = fn_801AE180();
     c->pos = (const RVec3&)v;
     c->spring = spring;
@@ -373,8 +370,8 @@ static inline void AddCornerV(u8* body, const ObVec3& v, f32 spring) {
     *(BodyCorner**)(body + 0xD0) = c;
 }
 
-static inline ObVec3 MakeVec(f32 x, f32 y, f32 z) {
-    ObVec3 v;
+static inline ValVec3 MakeVec(f32 x, f32 y, f32 z) {
+    ValVec3 v;
     v.z = z;
     v.x = x;
     v.y = y;
@@ -391,7 +388,7 @@ static inline f32 ObMax(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // out = m * v (m: 3x3 rows at 0, 3, 6), safe when out aliases v.
-static inline void ObRotate(ObVec3* out, const f32* m, const ObVec3* v) {
+static inline void ObRotate(ValVec3* out, const f32* m, const ValVec3* v) {
     if (out == v) {
         f32 x = Dot3(v->x, m[0], v->y, m[3], v->z, m[6]);
         f32 y = Dot3(v->x, m[1], v->y, m[4], v->z, m[7]);
@@ -523,11 +520,11 @@ void Obstacle::Init(BodyDesc* d) {
         f32 w = q->b;
         f32 h = q->c;
         f32 r = q->a * ScaleOperand(0.5f);
-        ObVec3 start;
+        ValVec3 start;
         start.x = q->a;
         start.z = q->a;
         start.y = -h * ScaleOperand(0.5f);
-        ObVec3 v = start;
+        ValVec3 v = start;
         AddCornerV((u8*)this, v, spring);
         f32 m[9];
         cs = cos(1.5707963705062866);
@@ -667,7 +664,7 @@ void Obstacle::Init(BodyDesc* d) {
             if (part->tag == 'MRJT') {
                 pt = (u8*)part;
                 for (j = 0; j < part->count; j++) {
-                    AddCornerV((u8*)this, *(ObVec3*)(pt + 0x50), spring);
+                    AddCornerV((u8*)this, *(ValVec3*)(pt + 0x50), spring);
                     pt += 0x50;
                 }
             }
@@ -757,7 +754,7 @@ void fn_801ABB54(u8* p) {
 
 // Message sent when a solid obstacle wants its hit point reported.
 struct ObHitMsg {
-    ObVec3 pos;  // offset 0x0
+    ValVec3 pos;  // offset 0x0
     u8* obj;     // offset 0xC
     u8 flag;     // offset 0x10
 };
@@ -771,8 +768,8 @@ void fn_801796CC(int kind, void* msg, int size);
 void Obstacle::Update(void) {
     Obstacle* p = this;
     if (p->u222) {
-        ObVec3 lin;
-        ObVec3 ang;
+        ValVec3 lin;
+        ValVec3 ang;
         p->b1E9 = 0;
         ((RigidBody*)p)->Flush((RVec3*)&lin, (RVec3*)&ang);
         return;
@@ -825,7 +822,7 @@ void Obstacle::Update(void) {
     }
     if (p->u235) {
         ObHitMsg m;
-        ObRotate(&m.pos, (f32*)&p->world.rot.x, (ObVec3*)&p->hitOffset);
+        ObRotate(&m.pos, (f32*)&p->world.rot.x, (ValVec3*)&p->hitOffset);
         m.pos.x += p->world.pos.x;
         m.pos.y += p->world.pos.y;
         m.pos.z += p->world.pos.z;
@@ -936,7 +933,7 @@ public:
         at[2] = F32(this, 0x68) + off[2];
         OnHit((const RVec3*)push, (const RVec3*)at, 100, 0);
     }
-    virtual void SetState(const Pose12* pose, const ObVec3* lo, const ObVec3* hi) {
+    virtual void SetState(const Pose12* pose, const ValVec3* lo, const ValVec3* hi) {
         *(Pose12*)((u8*)this + 0x3C) = *pose;
         CollVolume::Transform();
         F32(this, 0x118) = lo->x;
@@ -1049,12 +1046,12 @@ void fn_801AC508(void) {
 
 }  // extern "C"
 
-static inline void Mix(ObVec3* o, const ObVec3* a, f32 ka, const ObVec3* b, f32 kb) {
+static inline void Mix(ValVec3* o, const ValVec3* a, f32 ka, const ValVec3* b, f32 kb) {
     o->x = a->x * ka + b->x * kb;
     o->y = a->y * ka + b->y * kb;
     o->z = a->z * ka + b->z * kb;
 }
-static inline void Mix2(ObVec3* o, const ObVec3* a, const ObVec3* b, f32 t) {
+static inline void Mix2(ValVec3* o, const ValVec3* a, const ValVec3* b, f32 t) {
     f32 s = 1.0f - t;
     o->x = a->x * s + b->x * t;
     o->y = a->y * s + b->y * t;
@@ -1063,7 +1060,7 @@ static inline void Mix2(ObVec3* o, const ObVec3* a, const ObVec3* b, f32 t) {
 
 // Cloth setup records for ppsys.
 struct FenceVert {
-    ObVec3 pos;  // offset 0x0
+    ValVec3 pos;  // offset 0x0
     f32 w34;     // offset 0xC
     f32 w30;     // offset 0x10
 };
@@ -1078,7 +1075,7 @@ struct FenceEdge {
 struct FencePin {
     s32 idx;       // offset 0x0
     u8* mtx;       // offset 0x4
-    ObVec3* at;    // offset 0x8
+    ValVec3* at;    // offset 0x8
 };
 
 extern "C" {
@@ -1104,8 +1101,8 @@ void FencePole::Reset(void) {
         int np = 0;
         for (int i = 0; i < lbl_8055E5EC; i++) {
             u8* o = lbl_80435628[i];
-            ObVec3 a;
-            ObRotate(&a, (f32*)(o + 0x1EC), (ObVec3*)(o + 0x244));
+            ValVec3 a;
+            ObRotate(&a, (f32*)(o + 0x1EC), (ValVec3*)(o + 0x244));
             a.x += F32(o, 0x210);
             a.y += F32(o, 0x214);
             a.z += F32(o, 0x218);
@@ -1115,8 +1112,8 @@ void FencePole::Reset(void) {
                     fn_801A2674(PTR(o, 0x240), r, nv, nv + 5);
                 }
                 u8* prev = PTR(o, 0x23C);
-                ObVec3 b;
-                ObVec3* lp = (ObVec3*)(prev + 0x244);
+                ValVec3 b;
+                ValVec3* lp = (ValVec3*)(prev + 0x244);
                 ObRotate(&b, (f32*)(prev + 0x1EC), lp);
                 b.x += F32(prev, 0x210);
                 b.y += F32(prev, 0x214);
@@ -1171,7 +1168,7 @@ void FencePole::Reset(void) {
 #pragma pop
 
 // Helper name unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
-static inline void AddScaled(ObVec3* o, const ObVec3* v, f32 s) {
+static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
     o->x += v->x * s;
     o->y += v->y * s;
     o->z += v->z * s;
@@ -1186,10 +1183,10 @@ void FencePole::Update(void) {
         F32(p, 0x124) *= 0.9f;
         F32(p, 0x128) *= 0.9f;
         F32(p, 0x12C) *= 0.9f;
-        ObVec3 c;
+        ValVec3 c;
         PSVECCrossProduct((const Vec*)((f32*)(p + 0x48)), (const Vec*)((f32*)(p + 0x1F8)), (Vec*)&c.x);
         if (F32(p, 0x4C) < 0.92f) {
-            AddScaled((ObVec3*)(p + 0x124), &c, 0.1f);
+            AddScaled((ValVec3*)(p + 0x124), &c, 0.1f);
         }
         F32(p, 0x60) = F32(p, 0x210);
         F32(p, 0x64) = F32(p, 0x214);
@@ -1202,7 +1199,7 @@ static inline f32 ObLerp( f32 a,f32 b, f32 t) { return a + t * (b - a); }
 // A pose as stored for drawing (rotation rows + position).
 struct ObPose {
     ObRot rot;   // offset 0x0
-    ObVec3 pos;  // offset 0x24
+    ValVec3 pos;  // offset 0x24
 };
 
 extern f32 lbl_8055E460;    // draw interpolation factor (1 = current frame)
@@ -1237,15 +1234,15 @@ void FencePole::vf28(u8* buf) {
     FencePole* p = this;
     WriteFencePose(buf, (u8*)p);
     if (((u8*)p->prev)) {
-        ObVec3 a;
-        ObRotate(&a, (f32*)&p->mtx.rot.x, (ObVec3*)&p->anchor);
+        ValVec3 a;
+        ObRotate(&a, (f32*)&p->mtx.rot.x, (ValVec3*)&p->anchor);
         a.x += p->mtx.pos.x;
         a.y += p->mtx.pos.y;
         a.z += p->mtx.pos.z;
-        const ObVec3* anchor;
+        const ValVec3* anchor;
         u8* o = ((u8*)p->prev);
-        ObVec3 b;
-        anchor = (const ObVec3*)(o + 0x244);
+        ValVec3 b;
+        anchor = (const ValVec3*)(o + 0x244);
         ObRotate(&b, (const f32*)(o + 0x3C), anchor);
         b.x += F32(o, 0x60);
         b.y += F32(o, 0x64);

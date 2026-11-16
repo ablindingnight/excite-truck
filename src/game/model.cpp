@@ -13,12 +13,9 @@ void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 void DCStoreRangeNoSync(void* p, u32 n);
 }
 
-struct MVec3 {
-    f32 x, y, z;
-};
-
+// MVec3: valvec3.h's ValVec3.
 struct MSphere {
-    MVec3 c;  // offset 0x0
+    ValVec3 c;  // offset 0x0
     f32 r;    // offset 0xC
 };
 
@@ -30,7 +27,7 @@ struct MMtx33 {
 
 struct MFrame {
     MMtx33 r;  // offset 0x0
-    MVec3 t;   // offset 0x24
+    ValVec3 t;   // offset 0x24
 };
 
 struct MPrim {
@@ -91,7 +88,7 @@ struct ModelInfo {
     MExtra** extras;      // offset 0x14
     s32 maxInst;          // offset 0x18
     f32 radius;           // offset 0x1C
-    MVec3 center;         // offset 0x20
+    ValVec3 center;         // offset 0x20
     f32 box[6];           // offset 0x2C
     u32 pad44;
 };
@@ -120,7 +117,7 @@ struct Bin {
 
 struct LightSrc {
     u32 mtx;        // offset 0x0
-    MVec3 pos;      // offset 0x4
+    ValVec3 pos;      // offset 0x4
     u8 pad[0x10];
 };
 
@@ -158,9 +155,9 @@ void fn_802C8B70(s32 tex);
 void fn_802C8B98(s32 tex, const MFrame* m);
 void fn_802C8D74(void);
 int fn_802C90E0(void);
-int fn_802C94A0(const MVec3* c, u8* clip, f32* dist, f32 r);
-int fn_802C9638(const MVec3* c, u8* clip, f32 r);
-const MVec3* fn_802C9A40(void);
+int fn_802C94A0(const ValVec3* c, u8* clip, f32* dist, f32 r);
+int fn_802C9638(const ValVec3* c, u8* clip, f32 r);
+const ValVec3* fn_802C9A40(void);
 s32 fn_802C9C58(s32 v);
 s32 fn_802CAC28(const char* name, s32 key);
 s32 fn_802CAC44(const char* name, s32 kind);
@@ -192,8 +189,8 @@ void fn_802DB2B8(void);
 void fn_802DB2BC(u8 clip);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
-f32 PSVECSquareDistance(const MVec3* a, const MVec3* b);
-f32 PSVECDistance(const MVec3* a, const MVec3* b);
+f32 PSVECSquareDistance(const ValVec3* a, const ValVec3* b);
+f32 PSVECDistance(const ValVec3* a, const ValVec3* b);
 }
 
 ModuleTag lbl_8055FC18;
@@ -224,7 +221,7 @@ static inline void Swap32(void* p) {
     b[2] = t;
 }
 
-static inline void SwapVec(MVec3* v) {
+static inline void SwapVec(ValVec3* v) {
     Swap32(&v->x);
     Swap32(&v->y);
     Swap32(&v->z);
@@ -266,7 +263,7 @@ static inline int IsQueued(u32 type) {
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(MVec3* out, const MVec3* in, const MMtx33* m) {
+static inline void MulVec(ValVec3* out, const ValVec3* in, const MMtx33* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->xx, in->y, m->yx, in->z, m->zx);
         f32 y = Dot3(in->x, m->xy, in->y, m->yy, in->z, m->zy);
@@ -281,7 +278,7 @@ static inline void MulVec(MVec3* out, const MVec3* in, const MMtx33* m) {
     }
 }
 
-static inline void Transform(MVec3* out, const MVec3* in, const MFrame* m) {
+static inline void Transform(ValVec3* out, const ValVec3* in, const MFrame* m) {
     MulVec(out, in, &m->r);
     out->x = out->x + m->t.x;
     out->y = out->y + m->t.y;
@@ -863,7 +860,7 @@ void fn_802C70AC(s32 i, const MFrame* f, u32 mat, u32 mask) {
         u32 old = lbl_8055D008;
         lbl_8055D008 = mask;
         ModelNode* slot = fn_802C5390(i);
-        MVec3 c;
+        ValVec3 c;
         Transform(&c, &slot->info->center, f);
         u8 clip;
         f32 dist;
@@ -935,7 +932,7 @@ void fn_802C7458(s32 i, u32 mask) {
 void fn_802C74D8(s32 i, const MFrame* f, s32 tex) {
     ModelNode* slot = fn_802C5390(i);
     ModelInfo* m = slot->Info();
-    MVec3 c;
+    ValVec3 c;
     Transform(&c, &slot->info->center, f);
     u8 clip;
     f32 dist;
@@ -1041,9 +1038,9 @@ void fn_802C7ADC(u8 on) { fn_802D754C(on); }
 void fn_802C7AE0(s32 i, const MFrame* f, u32 mask, f32 t) {
     ModelNode* slot = fn_802C5390(i);
     u8 clip = 1;
-    MVec3 c;
+    ValVec3 c;
     Transform(&c, &slot->info->center, f);
-    const MVec3* d = fn_802C9A40();
+    const ValVec3* d = fn_802C9A40();
     f32 k = 0.5f * t;
     c.x = c.x + d->x * k;
     c.y = c.y + d->y * k;
@@ -1079,7 +1076,7 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 a, f32 b, f32 range) {
     u32 old = lbl_8055D008;
     lbl_8055D008 = 8;
     ModelNode* slot = fn_802C5390(i);
-    MVec3 c;
+    ValVec3 c;
     Transform(&c, &slot->info->center, f);
     u8 clip;
     f32 dist;
@@ -1100,9 +1097,9 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 a, f32 b, f32 range) {
                     near = 1;
                 } else {
                     MSphere* sp = &slot->spheres[e];
-                    MVec3 w;
+                    ValVec3 w;
                     Transform(&w, &sp->c, f);
-                    const MVec3* eye = &fn_802C86DC()->t;
+                    const ValVec3* eye = &fn_802C86DC()->t;
                     near = PSVECDistance(&w, eye) - sp->r < range;
                 }
                 if (near) {

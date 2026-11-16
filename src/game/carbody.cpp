@@ -489,10 +489,7 @@ CarBody::CarBody(void) {
 
 extern "C" {
 
-struct ValVec3C {
-    f32 x, y, z;
-};
-
+// ValVec3C: valvec3.h's ValVec3.
 class CbValueNode {
 public:
     virtual const char* GetName(void);
@@ -506,8 +503,8 @@ public:
     virtual f32 GetFloat(const char* key, f32 def);
     virtual s32 GetIntValue2(const char* key);
     virtual int GetBool(const char* key, int def);
-    virtual ValVec3C GetVec3(const char* key);
-    virtual ValVec3C GetVec3Or(const char* key, ValVec3C def);
+    virtual ValVec3 GetVec3(const char* key);
+    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);
     virtual void v3C(void);
     virtual void v40(void);
     virtual void v44(void);
@@ -586,12 +583,12 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     CbValueNode* chassis = table->FindChild("Chassis");
     cb->f5B4 = chassis->GetFloat("chase_camera_dist", 0.0f);
     cb->f5B8 = chassis->GetFloat("chase_camera_height", 0.0f);
-    const ValVec3C& head = chassis->GetVec3("head_pos");
+    const ValVec3& head = chassis->GetVec3("head_pos");
     cb->f5C4 = head.x;
     cb->f5C8 = head.y;
     cb->f5D0 = 0.2f * head.x;
     cb->f5D4 = head.y + 3.0f;
-    ValVec3C back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3C*)(p + 0x5D0));
+    ValVec3 back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3*)(p + 0x5D0));
     cb->f5CC = head.z;
     cb->f5D8 = head.z;
     cb->f5D0 = back.x;
