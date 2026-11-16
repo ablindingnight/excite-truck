@@ -558,8 +558,8 @@ s32 fn_802BD0C8(TreeType* t) {
 
 }
 template <class T>
-// MATCHING-AID: machine-extracted inline helper (loopext/exprext); it raised the score but nothing proves the original had it.
-static inline T* AtP(T* p, int i) {
+/* Helper name unproven: the address of element i; the accessor boundary is needed (written in place -1.12 on fn_802BD0F4) */
+static inline T* ElemAt(T* p, int i) {
     return &p[i];
 }
 extern "C" {
@@ -569,7 +569,7 @@ void fn_802BD0F4(TreeType* t) {
     if (t->shadow && t->set) {
         int n = t->set->list->n;
         for (int i = 0; i < n; i++) {
-            tr = AtP(t->set->list->data, i);
+            tr = ElemAt(t->set->list->data, i);
             TPos2 p;
             p.x = tr->mtx.pos.x;
             p.z = tr->mtx.pos.z;
@@ -892,8 +892,8 @@ void fn_802BDD58(void) {
     }
 }
 
-// MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_802BDD8C(int i, f32 range) {
+/* Helper name unproven: the far-billboard pass of one tree type; the boundary is needed (in place -1.77) */
+static inline void DrawFarTrees(int i, f32 range) {
     TCell* c;
     TreeType* t;
     const RVec3* eye;
@@ -958,7 +958,7 @@ void fn_802BDD8C(f32 range) {
         lbl_8055FAAC = 0;
         lbl_8055FAA8 = 0;
         for (int i = 0; i < lbl_804C00D4.n; i++) {
-            Loop1_fn_802BDD8C(i, range);
+            DrawFarTrees(i, range);
         }
     }
     fn_802DBECC();
