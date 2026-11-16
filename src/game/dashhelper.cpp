@@ -5,6 +5,14 @@
 #include <math.h>
 #include "game/common.h"
 
+extern const f32 kBarWidth;
+extern const f32 kBarHeight;
+static inline const f32& GetBarWidth(void) { return kBarWidth; }
+static inline const f32& GetBarHeight(void) { return kBarHeight; }
+
+const f32 kBarWidth = 89.0f;
+const f32 kBarHeight = 17.0f;
+
 void* operator new(size_t size, const char* tag);
 
 struct LayoutItem {
@@ -373,28 +381,23 @@ int fn_8000DFA8(int type) { return lbl_802FC2A8[type].part; }
 
 int fn_8000DFC0(int type) { return lbl_802FC2A8[type].part2; }
 
-extern const f32 kBarWidth;
-extern const f32 kBarHeight;
 void fn_8000DFD8(const DashRow* row, u32 color, f32 x, f32 y) {
     if (row->c > 0 && row->type == 9) {
-        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + kBarHeight / 2.0f, kBarWidth, kBarHeight);
+        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + GetBarHeight() / 2.0f, GetBarWidth(), GetBarHeight());
     }
-    fn_800109E4(-1, x, y + kBarHeight / 2.0f, row->b * kBarWidth / 100.0f, kBarHeight);
-    fn_800109E4(color, x, y + kBarHeight / 2.0f, row->a * kBarWidth / 100.0f, kBarHeight);
-    fn_80010074(-1, 0x14, "%s", 1.0f, x + kBarWidth / 2.0f, y, row);
+    fn_800109E4(-1, x, y + GetBarHeight() / 2.0f, row->b * GetBarWidth() / 100.0f, GetBarHeight());
+    fn_800109E4(color, x, y + GetBarHeight() / 2.0f, row->a * GetBarWidth() / 100.0f, GetBarHeight());
+    fn_80010074(-1, 0x14, "%s", 1.0f, x + GetBarWidth() / 2.0f, y, row);
 }
 
 void fn_8000E15C(const DashRow* row, u32 color, f32 x, f32 y) {
     if (row->c > 0 && row->type == 9) {
-        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + kBarHeight / 2.0f, kBarWidth, kBarHeight);
+        fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + GetBarHeight() / 2.0f, GetBarWidth(), GetBarHeight());
     }
-    fn_800109E4(-1, x, y + kBarHeight / 2.0f, row->b * kBarWidth / 100.0f, kBarHeight);
-    fn_800109E4(color, x, y + kBarHeight / 2.0f, row->a * kBarWidth / 100.0f, kBarHeight);
+    fn_800109E4(-1, x, y + GetBarHeight() / 2.0f, row->b * GetBarWidth() / 100.0f, GetBarHeight());
+    fn_800109E4(color, x, y + GetBarHeight() / 2.0f, row->a * GetBarWidth() / 100.0f, GetBarHeight());
     fn_80010074(-1, 0x11, "%s", 1.0f, 4.0f + x, y, row);
 }
-
-const f32 kBarWidth = 89.0f;
-const f32 kBarHeight = 17.0f;
 
 u32 fn_8000E2D8(int kind) {
     switch (kind) {
@@ -514,11 +517,12 @@ void fn_8000E3B4(int player) {
             fn_8000DFD8(row, fn_8000E338(row->a), x5 + pad, ty);
             {
                 f32 bx = x5 + pad;
-                f32 fill = bx + MulQ(row->c, 89.0f) / 100.0f;
+                f32 fill = bx + MulQ(row->c, GetBarWidth()) / 100.0f;
                 f32 half;
-                f32 bh = 17.0f;
+                f32 bh = GetBarHeight();
                 half = 0.5f;
-                fn_800109E4(barColor, fill, ty + bh * half, 89.0f + bx - fill, bh);
+                const f32 width = GetBarWidth();
+                fn_800109E4(barColor, fill, ty + bh * half, width + bx - fill, bh);
             }
             break;
         case 8:
@@ -622,9 +626,9 @@ void fn_8000E874(int player) {
             fn_8000DFD8(row, fn_8000E338(row->a), x5, ty);
             {
                 bw = 2.0f;
-                bh = 17.0f;
+                bh = GetBarHeight();
                 half = 0.5f;
-                fn_800109E4(barColor, x5 + MulQ(row->c, 89.0f) / 100.0f - 1.0f, ty + bh * half, bw, bh);
+                fn_800109E4(barColor, x5 + MulQ(row->c, GetBarWidth()) / 100.0f - 1.0f, ty + bh * half, bw, bh);
             }
             break;
         case 8:
@@ -973,11 +977,10 @@ void fn_8000FB44(void) {
 
 void fn_8000FBE4(void) { fn_8000F4F0(); }
 
-extern const f32 lbl_80560264;  // 1
 void fn_8000FBE8(f32 x, f32 y, f32 scale) {
     f32 size;
     f32 bx;
-    y += lbl_80560264;
+    y += 1.0f;
     f32 h0 = fn_80235F64(lbl_8055D4CC, 4);
     f32 h = h0 * scale;
     f32 half = MulQ(h, 0.5f);

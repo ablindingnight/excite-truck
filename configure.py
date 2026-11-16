@@ -985,7 +985,7 @@ config.libs.append(
             Object(Matching, "game/raceload.cpp"),
             Object(Matching, "game/gameloop.cpp"),
             Object(Matching, "game/racing.cpp"),
-            Object(NonMatching, "game/dashhelper.cpp"),
+            Object(Matching, "game/dashhelper.cpp"),
             Object(NonMatching, "game/trackmap.cpp"),
             Object(NonMatching, "game/unk_80116BD4.c", mw_version="GC/3.0a5",
                    cflags=[*cflags_base, "-use_lmw_stmw on", "-str reuse,pool,readonly", "-fp_contract off", "-D_IEEE_LIBM", "-inline noauto"]),
