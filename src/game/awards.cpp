@@ -1232,6 +1232,8 @@ void fn_801CD730(s32* score, s32* grade) {
     }
 }
 
+#pragma push
+#pragma opt_strength_reduction off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_801CD7BC(int car, int valid, f32 t) {
     if (fn_801CE898()) {
         return;
@@ -1258,6 +1260,7 @@ void fn_801CD7BC(int car, int valid, f32 t) {
         fn_802E317C("Awards: race time was pushed to me twice: first %.2f, then %.2f!", m->time, t);
     }
 }
+#pragma pop
 
 // Live-update pop-up draw: the head of the queue slides in from the right for its first quarter second and
 // out for its last, showing the stat's label, its value (the art for the difficulty) and the title.
