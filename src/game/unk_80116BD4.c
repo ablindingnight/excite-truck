@@ -2698,20 +2698,6 @@ f32 fxptof(s32 arg0) {
 }
 
 // Scales float samples by `gain` into clamped 16-bit PCM.
-static inline u32 Clamp16(u32 v, u32 lo, u32 hi) {  /* Helper name unproven */
-    u64 t;
-    u32 d;
-    v ^= 0x80000000;
-    t = (u64)v - lo;
-    d = (u32)t;
-    d &= ~(u32)(t >> 32);
-    v = d - 32768;
-    v ^= 0x80000000;
-    t = (u64)v - hi;
-    d = (u32)t;
-    d &= (u32)(t >> 32);
-    return d + 32767;
-}
 // The 64-bit borrow of v - bound: d gets the low word of the difference and v becomes the borrow mask (0 or -1).
 // RAD wrote this as inline assembly on register variables (proof: retail's scheduler never moves anything across
 // the subfe, which only assembly statements cause; the mask lands in v's own register and the difference in d's).
@@ -2752,40 +2738,33 @@ void quanttos16s(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
 #pragma global_optimizer off  /* same code as lifetimes/propagation/unroll_loops off; see ExpandPlane */
 #pragma ppc_unroll_speculative off
 void quanttos16chans2(s16 *arg0, f32 *arg1, u32 arg2, f32 farg0) {
-    u32 l;
-    f32 *right = arg1 + arg2;
-    u32 d;
-    s16 *out = arg0 - 1;
-    u32 lo = 0x7FFF8000;
-    u32 hi = 0x80007FFF;
-    u32 r;
-    u64 t;
-    u64 t2;
-    u64 t3;
-    u64 t4;
+    register u32 l;
+    register f32 *right;
+    register u32 d;
+    register s16 *out = arg0 - 1;
+    register u32 lo = 0x7FFF8000;
+    register u32 hi = 0x80007FFF;
+    register u32 r;
     u32 i;
+    right = (f32 *)((arg2 << 2) + (u32)arg1);
     for (i = 0; i < arg2; i++) {
         l = (s32)(*arg1 * farg0);
         r = (s32)(farg0 * *right);
         l ^= 0x80000000;
-        t = (u64)l - lo;
-        d = (u32)t;
-        d &= ~(u32)(t >> 32);
+        BINK_BORROW(d, lo, l);
+        d &= ~l;
         l = d - 32768;
         l ^= 0x80000000;
-        t2 = (u64)l - hi;
-        d = (u32)t2;
-        d &= (u32)(t2 >> 32);
+        BINK_BORROW(d, hi, l);
+        d &= l;
         l = d + 32767;
         r ^= 0x80000000;
-        t3 = (u64)r - lo;
-        d = (u32)t3;
-        d &= ~(u32)(t3 >> 32);
+        BINK_BORROW(d, lo, r);
+        d &= ~r;
         r = d - 32768;
         r ^= 0x80000000;
-        t4 = (u64)r - hi;
-        d = (u32)t4;
-        d &= (u32)(t4 >> 32);
+        BINK_BORROW(d, hi, r);
+        d &= r;
         r = d + 32767;
         out[1] = l;
         right++;
