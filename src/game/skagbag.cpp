@@ -68,6 +68,11 @@ struct SkagTables {
     f32 scales[4][2];  // offset 0x40
 };
 
+// Root square size. Retail's .sdata2 starts with 2.0 and an unreferenced zero word, ahead of Place's map image, and
+// both constructors read the 2.0 from it: a const pair defined up here gives those bytes. Name and the meaning of
+// the second element are unproven.
+static const f32 kSpan[2] = {2.0f, 0.0f};
+
 static const SkagTables lbl_802FAAD0 = {
     {0, 1, 1, 0},
     {0, 0, 1, 1},
@@ -95,14 +100,16 @@ struct SkagBag : SkagVec<SkagPoint> {
     // A root bag: random points in a 2x2 square, kept apart.
     SkagBag(ValueNode* node)
         : SkagVec<SkagPoint>(RootCount(node)) {
+        f32 size = kSpan[0];
+        f32 half = size / 2;  /* MATCHING-AID: unused local, creates 0.5 ahead of the loop's 0.0 and 0.25 as in retail (unproven) */
         int j = 0;
         if (j < cap)
         for (; j < cap; j++) {
             SkagPoint* p = &data[count++];
             int tries = 0;
             while (Retry(tries, 500)) {
-                p->x = fn_80129DC4(0, 0.0f, 2.0f);
-                p->y = fn_80129DC4(0, 0.0f, 2.0f);
+                p->x = fn_80129DC4(0, 0.0f, kSpan[0]);
+                p->y = fn_80129DC4(0, 0.0f, kSpan[0]);
                 bool far = false;
                 for (int k = 0; !far && k < count - 1; k++) {
                     f32 d[2];
@@ -117,7 +124,6 @@ struct SkagBag : SkagVec<SkagPoint> {
             p->id = fn_802B4004();
             memset(p->slots, 0, sizeof(p->slots));
         }
-        f32 size = 2.0f;
         for (int k = 0; k < count; k++) {
             data[k].Place(&data[k].x, size);
         }
@@ -310,8 +316,8 @@ static inline int ChildCount(ValueNode* node, int rad) {
 
 SkagBag::SkagBag(SkagBag** src, ValueNode* node, int rad, s32** used)
     : SkagVec<SkagPoint>(ChildCount(node, rad)) {
-    f32 half = (rad / 2) * 2.0f;
-    f32 size = rad * 2.0f;
+    f32 half = (rad / 2) * kSpan[0];
+    f32 size = rad * kSpan[0];
     s32 taken[4] = {0, 0, 0, 0};
     int q = fn_80129D90(0, 0, 4);
     int i = 0;
