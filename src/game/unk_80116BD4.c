@@ -567,10 +567,9 @@ u32 mult64anddiv(u32 a, u32 b, u32 d) {
     u32 lo = a * b;
     u32 s;
     u32 v;
-    /* Remainder slot unproven. The textbook routine returns the remainder through a pointer; here both stores
-       (the first digit's partial remainder, then the final one) go to a local nobody reads and are dropped late.
-       They are what keeps rhat and r2 real values: rhat is coloured after p, and r2 stays in one register
-       through its correction, as in retail. */
+    /* MATCHING-AID: remainder slot written through a cast; the store emits no code but is removed after numbering,
+       which keeps rhat/r2 whole as in retail. It mirrors textbook divlu's *r out-parameter; a real u32* rem
+       parameter scores far worse. The original form is unproven. */
     u32 rem;
     if ((d & (d - 1)) == 0) {
         s = __cntlzw(d);
