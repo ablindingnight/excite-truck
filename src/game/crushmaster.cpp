@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/respawn.h"
 #include <revolution/MTX/vec.h>
 #include "game/rigid.h"
 #include "game/carbody.h"
@@ -217,20 +218,7 @@ struct ArrayRef {
     s32 cap;    // offset 0x8
 };
 
-struct Respawn {
-    ValMatrix m;  // offset 0x0
-    ValVec3 vel;  // offset 0x30
-    s32 flag;     // offset 0x3C
-    s16 path;     // offset 0x40
-};
-
-// A race start slot: the spawn transform plus how the car starts.
-struct StartPos : Respawn {
-    s32 f44;  // offset 0x44
-    s32 f48;  // offset 0x48
-    s32 f4C;  // offset 0x4C
-};
-
+// Respawn, CarPlace: game/respawn.h.
 struct ZoneResults {
     struct Entry {
         s32 car;    // offset 0x0
@@ -521,7 +509,7 @@ public:
     virtual void vf94(int p);
     virtual int Collide(int a, int b);
     virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(StartPos* out, int idx);
+    virtual int vfA0(Respawn* out, int idx);
     virtual void vfA4(int p);
     virtual void vfA8(int car);
     virtual void vfAC(int car);
@@ -583,7 +571,7 @@ public:
     virtual void vf94(int p);
     virtual int Collide(int a, int b);
     virtual void vf9C(struct RaceCarRec* rc, int type, void* other);
-    virtual int vfA0(StartPos* out, int idx);
+    virtual int vfA0(Respawn* out, int idx);
     virtual void vfA4(int p);
     virtual void vfA8(int car);
     virtual void vfAC(int car);
@@ -688,7 +676,7 @@ public:
     virtual void vfA8(int car);
     virtual void vfB8(ZoneResults* r);
     virtual void vf44(void);
-    virtual int vfA0(StartPos* out, int idx);
+    virtual int vfA0(Respawn* out, int idx);
     virtual void vf4C(int p) const;
     virtual void vf50(int p);
     virtual int vf3C(int view);
@@ -1256,7 +1244,7 @@ int fn_801E866C(int view);
 void fn_8018AF04(RaceCarRec* car);
 void fn_801E9DC4(s16* h);
 f32 fn_801DCF48(int a, f32 x, f32 z);  // ground height
-void fn_801B7C8C(Respawn* r, V2* pos, V2* dir);
+void fn_801B7C8C(CarPlace* r, V2* pos, V2* dir);
 f32 fn_801B306C(void);  // race time
 int fn_80161C38(void);
 int fn_80179650(void);
@@ -1418,7 +1406,7 @@ inline void CrushMaster::vfA8(int car) {
     RaceCarRec* rec;
     ValVec3* pos;
     if (cars[car].active) {
-        Respawn r;
+        CarPlace r;
         ValVec3 dst;
         ValVec3 v;
         V2 at;
@@ -1427,11 +1415,11 @@ inline void CrushMaster::vfA8(int car) {
         V2 fwd;
         rec = fn_8017960C(car);
         fn_8018AF04(rec);
-        r.path = -1;
-        fn_801E9DC4(&r.path);
-        r.flag = 0;
+        r.hint = -1;
+        fn_801E9DC4(&r.hint);
+        r.unk3C = 0;
         pos = (ValVec3*)&rec->mtx.pos;
-        r.m = *(ValMatrix*)&rec->mtx;
+        r.place = *(ValMatrix*)&rec->mtx;
         r.vel.x = 0.0f;
         r.vel.y = 0.0f;
         r.vel.z = 0.0f;
@@ -1454,17 +1442,17 @@ inline void CrushMaster::vfA8(int car) {
                 v.y = dy * k + 9.81f * t;
                 v.z = dz * k;
                 v.x = dx * k;
-                r.m.origin.x = rec->mtx.pos.x;
-                r.m.origin.y = rec->mtx.pos.y;
-                r.m.origin.z = rec->mtx.pos.z;
-                r.m.basis[1].x = 0.0f;
-                r.m.basis[1].y = 1.0f;
-                r.m.basis[1].z = 0.0f;
-                r.m.basis[2].x = v.x;
-                r.m.basis[2].y = 0.0f;
-                r.m.basis[2].z = v.z;
-                PSVECNormalize((const Vec*)&r.m.basis[2], (Vec*)&r.m.basis[2]);
-                SetV3(&r.m.basis[0], r.m.basis[2].z, 0.0f, -r.m.basis[2].x);
+                r.place.origin.x = rec->mtx.pos.x;
+                r.place.origin.y = rec->mtx.pos.y;
+                r.place.origin.z = rec->mtx.pos.z;
+                r.place.basis[1].x = 0.0f;
+                r.place.basis[1].y = 1.0f;
+                r.place.basis[1].z = 0.0f;
+                r.place.basis[2].x = v.x;
+                r.place.basis[2].y = 0.0f;
+                r.place.basis[2].z = v.z;
+                PSVECNormalize((const Vec*)&r.place.basis[2], (Vec*)&r.place.basis[2]);
+                SetV3(&r.place.basis[0], r.place.basis[2].z, 0.0f, -r.place.basis[2].x);
                 r.vel = v;
             } else {
                 to.x = dst.x;
@@ -1473,8 +1461,8 @@ inline void CrushMaster::vfA8(int car) {
                 d.y = dst.z - at.y;
                 NormV2(&d);
                 fn_801B7C8C(&r, &to, &d);
-                r.m.origin.y += 3.0f;
-                ScaleV(&r.vel, &r.m.basis[2], 8.888889f);
+                r.place.origin.y += 3.0f;
+                ScaleV(&r.vel, &r.place.basis[2], 8.888889f);
             }
         } else if (rec->mtx.rot.y.y < 0.2f) {
             fwd.x = rec->mtx.rot.z.x;
@@ -1512,7 +1500,7 @@ inline void CrushMaster::vf44(void) {
     }
 }
 
-inline int CrushMaster::vfA0(StartPos* out, int idx) {
+inline int CrushMaster::vfA0(Respawn* out, int idx) {
     if (idx < spawns.count) {
         V2* p = &spawns.data[idx];
         V2 d;
@@ -1521,9 +1509,9 @@ inline int CrushMaster::vfA0(StartPos* out, int idx) {
         d.y = p->y * k;
         NormV2(&d);
         fn_801B7C8C(out, p, &d);
-        out->f44 = 2;
-        out->f48 = 0;
-        out->f4C = 0;
+        out->mode = 2;
+        out->unk48 = 0;
+        out->unk4C = 0;
         return 1;
     }
     return 0;
