@@ -424,92 +424,94 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         }
         p->nKeys = nFrames;
         p->keys = new ("artframe") ArtKey[nFrames];
-        for (k = 0; k < nFrames; k++) {
-            ValueNode* f;
-            ArtKey* key = &p->keys[k];
-            ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
-            f = frames[k];
-            key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
-            if (f->Has("spin")) {
-                ValVec3 axis;
-                SetV3(&axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
-                f32 d = PSVECDotProduct(&axis.x, &axis.x);
-                if (!((f32)__fabs(d) <= __float_epsilon[0])) {
-                    f32 len = sqrt(d);
-                    f32 s;
-                    f32 half = 0.5f * len;
-                    s = sin(half);
-                    f32 w = cos(half);
-                    f32 k2 = s / len;
-                    key->q[0] = axis.x * k2;
-                    key->q[1] = axis.y * k2;
-                    key->q[2] = axis.z * k2;
-                    key->q[3] = w;
+        if (nFrames > 0) {
+            for (k = 0; k < nFrames; k++) {
+                ValueNode* f;
+                ArtKey* key = &p->keys[k];
+                ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
+                f = frames[k];
+                key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
+                if (f->Has("spin")) {
+                    ValVec3 axis;
+                    SetV3(&axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
+                    f32 d = PSVECDotProduct(&axis.x, &axis.x);
+                    if (!((f32)__fabs(d) <= __float_epsilon[0])) {
+                        f32 len = sqrt(d);
+                        f32 s;
+                        f32 half = 0.5f * len;
+                        s = sin(half);
+                        f32 w = cos(half);
+                        f32 k2 = s / len;
+                        key->q[0] = axis.x * k2;
+                        key->q[1] = axis.y * k2;
+                        key->q[2] = axis.z * k2;
+                        key->q[3] = w;
+                    } else {
+                        key->q[0] = 0.0f;
+                        key->q[1] = 0.0f;
+                        key->q[3] = 1.0f;
+                        key->q[2] = 0.0f;
+                    }
                 } else {
-                    key->q[0] = 0.0f;
-                    key->q[1] = 0.0f;
-                    key->q[3] = 1.0f;
-                    key->q[2] = 0.0f;
+                    const char* q = f->GetString("q", "0,0,0,1");
+                    if (sscanf(q, "%f,%f,%f,%f", &key->q[0], &key->q[1], &key->q[2], &key->q[3]) != 4) {
+                        fn_802E317C("artanim: bad quaternion %s in %s", q, name);
+                    }
                 }
-            } else {
-                const char* q = f->GetString("q", "0,0,0,1");
-                if (sscanf(q, "%f,%f,%f,%f", &key->q[0], &key->q[1], &key->q[2], &key->q[3]) != 4) {
-                    fn_802E317C("artanim: bad quaternion %s in %s", q, name);
-                }
-            }
-            if (f->Has("xy")) {
-                const ValPoint& raw = f->GetPoint("xy");
-                ValPoint v = raw;
-                v.x = v.x + pxy.x;
-                v.y = pxy.y + v.y;
-                key->pos[0] = v.x - 320.0f;
-                key->pos[1] = 240.0f - v.y;
-                key->pos[2] = 0.0f;
-            } else if (f->Has("offset")) {
-                const ValVec3& o = f->GetVec3("offset");
-                key->pos[0] = o.x;
-                key->pos[1] = o.y;
-                key->pos[2] = o.z;
-                key->pos[0] = key->pos[0] + (pxy.x - 320.0f);
-                key->pos[1] = key->pos[1] + (240.0f - pxy.y);
-            } else {
-                const f32* src;
-                f32 zero[3];
-                if (prev) {
-                    src = prev->pos;
+                if (f->Has("xy")) {
+                    const ValPoint& raw = f->GetPoint("xy");
+                    ValPoint v = raw;
+                    v.x = v.x + pxy.x;
+                    v.y = pxy.y + v.y;
+                    key->pos[0] = v.x - 320.0f;
+                    key->pos[1] = 240.0f - v.y;
+                    key->pos[2] = 0.0f;
+                } else if (f->Has("offset")) {
+                    const ValVec3& o = f->GetVec3("offset");
+                    key->pos[0] = o.x;
+                    key->pos[1] = o.y;
+                    key->pos[2] = o.z;
+                    key->pos[0] = key->pos[0] + (pxy.x - 320.0f);
+                    key->pos[1] = key->pos[1] + (240.0f - pxy.y);
                 } else {
-                    zero[0] = 0.0f;
-                    zero[1] = 0.0f;
-                    zero[2] = 0.0f;
-                    src = zero;
+                    const f32* src;
+                    f32 zero[3];
+                    if (prev) {
+                        src = prev->pos;
+                    } else {
+                        zero[0] = 0.0f;
+                        zero[1] = 0.0f;
+                        zero[2] = 0.0f;
+                        src = zero;
+                    }
+                    key->pos[0] = src[0];
+                    key->pos[1] = src[1];
+                    key->pos[2] = src[2];
                 }
-                key->pos[0] = src[0];
-                key->pos[1] = src[1];
-                key->pos[2] = src[2];
+                if (f->Has("scale3")) {
+                    const ValVec3& s = f->GetVec3("scale3");
+                    key->scale[0] = s.x;
+                    key->scale[1] = s.y;
+                    key->scale[2] = s.z;
+                } else if (f->Has("scale")) {
+                    f32 s = f->GetFloat("scale");
+                    key->scale[0] = s;
+                    key->scale[1] = s;
+                    key->scale[2] = s;
+                } else if (prev) {
+                    key->scale[0] = prev->scale[0];
+                    key->scale[1] = prev->scale[1];
+                    key->scale[2] = prev->scale[2];
+                } else {
+                    key->scale[0] = 1.0f;
+                    key->scale[1] = 1.0f;
+                    key->scale[2] = 1.0f;
+                }
+                key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
+                s32 curve = prev ? prev->curve : 0;
+                key->curve = f->Has("curve") ? f->GetEnum("curve", "linear\0hermite\0start\0stop\0") : curve;
+                key->signal = f->GetInt("signal", prev ? prev->signal : 0);
             }
-            if (f->Has("scale3")) {
-                const ValVec3& s = f->GetVec3("scale3");
-                key->scale[0] = s.x;
-                key->scale[1] = s.y;
-                key->scale[2] = s.z;
-            } else if (f->Has("scale")) {
-                f32 s = f->GetFloat("scale");
-                key->scale[0] = s;
-                key->scale[1] = s;
-                key->scale[2] = s;
-            } else if (prev) {
-                key->scale[0] = prev->scale[0];
-                key->scale[1] = prev->scale[1];
-                key->scale[2] = prev->scale[2];
-            } else {
-                key->scale[0] = 1.0f;
-                key->scale[1] = 1.0f;
-                key->scale[2] = 1.0f;
-            }
-            key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
-            s32 curve = prev ? prev->curve : 0;
-            key->curve = f->Has("curve") ? f->GetEnum("curve", "linear\0hermite\0start\0stop\0") : curve;
-            key->signal = f->GetInt("signal", prev ? prev->signal : 0);
         }
     }
     if (t->HasChild("global_transform")) {
