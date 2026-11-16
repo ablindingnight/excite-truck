@@ -2,19 +2,10 @@
 #define GAME_IDEALLINE_H
 
 #include "game/common.h"
+#include "game/v2.h"
 
 // The track's ideal/centre line and its followers (idealline.cpp), shared by its users (port: one definition of each
 // class). Moved verbatim from idealline.cpp, ObstaclesVtable 2026-11-16.
-
-struct V2 {
-    V2(void) {}
-    V2(f32 ax, f32 ay) {
-        x = ax;
-        y = ay;
-    }
-    f32 x;
-    f32 y;
-};
 
 struct IdealPoint {
     V2 pos;            // offset 0x0

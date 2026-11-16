@@ -2,6 +2,7 @@
 // ("x, y" pairs), point-in-polygon tests against one bound or a whole set, and the per-event external
 // table lookup. Names are guesses apart from the message prefixes.
 #include "game/common.h"
+#include "game/v2.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -84,16 +85,6 @@ struct BoundSet {
     }
     ValueTable* table;                // offset 0x0
     ArrayWrap<Bound*, 32> bounds;     // offset 0x4
-};
-
-struct V2 {
-    V2(void) {}
-    V2(f32 x_, f32 y_) {
-        x = x_;
-        y = y_;
-    }
-    f32 x;
-    f32 y;
 };
 
 struct TableRef {
@@ -204,7 +195,7 @@ int fn_80139B70(const Bound* b, f32 x, f32 y) {
             e.x = q->x - p->x;
             e.y = q->y - p->y;
             Perp(&e);
-            V2 a(x - p->x, y - p->y);
+            V2C a(x - p->x, y - p->y);
             const f32 side = e.y;
             if ((e.x * a.x + side * a.y < 0.0f) == up) {
                 c++;
@@ -218,8 +209,8 @@ int fn_80139B70(const Bound* b, f32 x, f32 y) {
 static inline f32 MidF(f32 a, f32 b) { return a + 0.5f * (b - a); }
 
 V2 fn_80139C5C(const Bound* b) {
-    V2 lo;
-    V2 hi;
+    V2C lo;
+    V2C hi;
     const BoundPt* p = &b->pts[1];
     int i;
     hi.x = b->pts[0].x;
@@ -233,7 +224,7 @@ V2 fn_80139C5C(const Bound* b) {
         hi.x = MaxF(p->x, hi.x);
         hi.y = MaxF(p->y, hi.y);
     }
-    return V2(MidF(lo.x, hi.x), MidF(lo.y, hi.y));
+    return V2C(MidF(lo.x, hi.x), MidF(lo.y, hi.y));
 }
 
 BoundSet* fn_80139D4C(const char* name) {

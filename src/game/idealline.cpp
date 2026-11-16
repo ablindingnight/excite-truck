@@ -18,7 +18,7 @@ void* operator new[](size_t size, const char* tag);
 
 extern f32 lbl_8055E3C8;  // current race time
 
-static inline V2 Sub(const V2& a, const V2& b) { return V2(a.x - b.x, a.y - b.y); }
+static inline V2 Sub(const V2& a, const V2& b) { return V2C(a.x - b.x, a.y - b.y); }
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 

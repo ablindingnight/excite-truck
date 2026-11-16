@@ -3,6 +3,7 @@
 // extensions, and assigns each point its monotonic ilpos by driving an IdealFollower around the line.
 // Names are guesses apart from IdealLineRes (from its messages).
 #include "game/common.h"
+#include "game/v2.h"
 
 extern "C" {
 double sqrt(double x);
@@ -24,21 +25,18 @@ static inline void Swap4(void* v) {
     p[2] = t;
 }
 
+// A V2 read from a big-endian file (was V2::Swap).
+static inline void SwapV2(V2* v) {
+    Swap4(&v->x);
+    Swap4(&v->y);
+}
+
 static inline void Swap2(void* v) {
     u8* p = (u8*)v;
     u8 t = p[0];
     p[0] = p[1];
     p[1] = t;
 }
-
-struct V2 {
-    void Swap(void) {
-        Swap4(&x);
-        Swap4(&y);
-    }
-    f32 x;
-    f32 y;
-};
 
 struct IdealPoint {
     V2 pos;            // offset 0x0
@@ -132,7 +130,7 @@ extern "C" {
 
 void fn_80137D58(IdealPoint* p, IdealLineRes* res) {
     for (int i = 0; i < 2; i++) {
-        (&p->pos)[i].Swap();
+        SwapV2(&(&p->pos)[i]);
     }
     Swap4(&p->ilpos);
     Swap4(&p->len);
