@@ -5,6 +5,10 @@
 #include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+/* Helper unproven: retail creates 2250.0f (the far clip passed in CarUIScreen::Draw) as the FIRST .sdata2 entry, so an
+   unused static function with that literal was compiled before any other code (the linker drops it; the constant
+   stays). A one-field const struct read in Draw gives the same pool. */
+static f32 FarClip(void) { return 2250.0f; }
 
 struct Basis {
     Vec v[3];
