@@ -4,6 +4,7 @@
 // line/arrow textures in a per-player colour (yellow while boosting). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/math_types.h"
 #include "game/carbody.h"
 #include "game/plainvec.h"
@@ -19,7 +20,6 @@ ValueTable* fn_80131810(const char* name);     // load value file, quiet
 void fn_80131818(ValueTable* t);
 }
 
-void* GetEvent(int event);
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
@@ -193,11 +193,6 @@ struct LocalCarDesc {
 };
 
 extern "C" LocalCarDesc* fn_801769CC(void);
-
-struct EventInfo {
-    u8 pad0[0x20];
-    ValueNode* values;  // offset 0x20
-};
 
 namespace {
 class BoostMan : public IRaceListener {
@@ -375,7 +370,7 @@ void fn_801E0890(BoostMan* m) {
     ValueTable* t;
     int i;
     ValueNode* n;
-    const char* name = ((EventInfo*)GetEvent(fn_801769CC()->event))->values->GetString("booster_file", "boosters.val");
+    const char* name = ((EventInfo*)GetEvent(fn_801769CC()->event))->node->GetString("booster_file", "boosters.val");
     t = fn_80131810(name);
     if (t) {
         for (i = 0; (n = t->GetChild(i)) != 0; i++) {

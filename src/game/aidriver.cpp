@@ -2,6 +2,7 @@
 // flag distance, pit speed), creates per-car AI info, formats car numbers, and builds the driver object
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/springcar.h"
 
 // The game mode base (amaster.cpp); its vfEC lives here.
@@ -48,7 +49,6 @@ void fn_8018ADB4(void* car, f32 v);
 void fn_8018ADA4(void* car, f32 v);
 }
 
-void* GetEvent(int event);
 
 // The AI proximity tracker (proxer.cpp).
 class Proxer {
@@ -240,8 +240,8 @@ IDriver* fn_801350C0(void);
 
 void fn_8013472C(void) {
     int* ev = fn_801E87A8();
-    u8* info = (u8*)GetEvent(*ev);
-    lbl_8055E0AC = (*(ValueNode**)(info + 0x20))->FindChild("ai");
+    EventInfo* info = GetEvent(*ev);
+    lbl_8055E0AC = info->node->FindChild("ai");
 }
 
 void fn_80134770(void) { lbl_8055E0AC = 0; }

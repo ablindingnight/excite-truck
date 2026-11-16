@@ -4,6 +4,7 @@
 // against raw field offsets; the large screen routines are still stubs. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/logomover.h"
 // MWCC: retail evpath expands LogoMover's members inline. A PC build links popwarn's out-of-line definitions
@@ -1085,12 +1086,6 @@ public:
     virtual const char* GetValue(const char* key);
 };
 
-struct EventDesc {
-    u8 pad[0x20];
-    ValueNodeV* table;  // offset 0x20
-};
-
-void* GetEvent(int event);
 
 // s without a leading `prefix`.
 static inline const char* SkipPrefix(const char* s, const char* prefix) {
@@ -1172,7 +1167,7 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
             bars[i].SetContest(c);
         }
         char file[33];
-        fn_801345D8(file, 33, "/%s.tex", SkipPrefix(((EventDesc*)GetEvent(c->EventId()))->table->GetValue("name"), "career_"));
+        fn_801345D8(file, 33, "/%s.tex", SkipPrefix(((ValueNodeV*)GetEvent(c->EventId())->node)->GetValue("name"), "career_"));
         maps.Add(c->EventId(), file);
     }
     BracketView view;
@@ -1331,12 +1326,6 @@ void fn_802840F4(u8* p) { fn_8027E908(); }
 void fn_802840F8(void) { fn_8027ED2C(); }
 
 }  // extern "C"
-
-struct Unlockable {
-    const char* type;  // offset 0x0
-    const char* name;  // offset 0x4
-    s32 points;        // offset 0x8
-};
 
 int GetUnlockableCount(void);
 Unlockable* GetUnlockable(int i);

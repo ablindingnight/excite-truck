@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 
 extern "C" {
@@ -64,7 +65,6 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 extern "C" f32 fn_8013CB3C(void);
 extern u8 lbl_8055E1BC;  // timed-out-of-zone mode
-void* GetEvent(int event);
 
 extern f32 lbl_8055E3C8;     // current race time
 extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
@@ -189,11 +189,6 @@ struct LocalCarDesc {
     s32 event;  // offset 0x0
 };
 extern "C" LocalCarDesc* fn_801769CC(void);
-
-struct EventDesc {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
 
 // One car of the race setup (8 of them from 0x20): world.cpp's CarDef (0x78); was named RaceCar here, the
 // 0x25F8 car of carelem/cargear.
@@ -1421,11 +1416,11 @@ ZoneMaster::ZoneMaster(Race* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f),
         }
     }
     triggers = 0;
-    if (((EventDesc*)GetEvent(fn_801769CC()->event))->vals->GetBool("use_triggers", 1)) {
+    if (((EventInfo*)GetEvent(fn_801769CC()->event))->node->GetBool("use_triggers", 1)) {
         triggers = (Deletable*)fn_80171698();
     }
     {
-        file = ((EventDesc*)GetEvent(fn_801769CC()->event))->vals->GetString("zonefile", "zones");
+        file = ((EventInfo*)GetEvent(fn_801769CC()->event))->node->GetString("zonefile", "zones");
         fn_801345D8(buf, sizeof(buf), "*%s/%s.va0", fn_8000AC2C(), file);
     }
     t = fn_80131810(buf);

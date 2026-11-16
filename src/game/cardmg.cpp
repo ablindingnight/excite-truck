@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/rigid.h"
 #include "game/math_types.h"
@@ -174,12 +175,6 @@ int fn_8018C514(u8* p, const f32* pos) {
 }  // extern "C"
 
 // The car's paint/flag state block (carstate.cpp).
-void* GetEvent(int event);
-
-struct EventDesc {
-    u8 pad[0x20];
-    ValueNode* table;  // offset 0x20
-};
 
 extern "C" {
 void* memset(void* p, int c, unsigned long n);
@@ -224,7 +219,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
         ((CarBody*)p)->f5F4 = (f32)__fabs(((CarBody*)p)->f314);
     }
     if (((CarBody*)p)->f1F0 == 0x50) {
-        ValueNode* t = ((EventDesc*)GetEvent(*(s32*)fn_801769CC()))->table;
+        ValueNode* t = ((EventInfo*)GetEvent(*(s32*)fn_801769CC()))->node;
         ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * t->GetFloat("player_damage_tweak", lbl_80561F88);
     }
     ((CarBody*)p)->f5F4 = ((CarBody*)p)->f5F4 * lbl_80561F8C;
