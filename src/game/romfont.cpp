@@ -24,11 +24,14 @@ public:
 
 inline s16 MakeS16(s16 v) { return v; }
 
+// Unit-local (port ODR: other units define a different TexImage).
+namespace {
 struct TexImage {
     u32 unk0;
     void* data;  // offset 0x4
     u8 pad8[0x18];
 };
+}  // namespace
 
 struct TexDesc {
     u32 format;  // offset 0x0

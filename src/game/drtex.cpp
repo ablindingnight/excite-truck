@@ -56,11 +56,14 @@ void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
 }
 
+// Unit-local (port ODR: other units define a different TexImage).
+namespace {
 struct TexImage {
     u32* pal;    // offset 0x0
     u8* tex;     // offset 0x4
     u8* alpha;   // offset 0x8
 };
+}  // namespace
 
 // What texture.cpp hands over (0x34).
 struct GXTexDesc {

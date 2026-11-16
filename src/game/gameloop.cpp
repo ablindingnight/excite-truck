@@ -17,10 +17,13 @@ struct GameMode {
     void (*leave)(void);        // offset 0x10
 };
 
+// Unit-local (port ODR: other units define a different ViewCam).
+namespace {
 struct ViewCam {
     s32 cam;       // offset 0x0
     s32 next;  // offset 0x4
 };
+}  // namespace
 
 // The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
 // declared (was named Racer here, a name world/carmodel use for a different class).

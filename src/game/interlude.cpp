@@ -188,6 +188,8 @@ struct Menu {
     s32 padC;
 };
 
+// Unit-local (port ODR: other units define a different TrackNode).
+namespace {
 struct TrackNode {
     u8 pad0[0x14];
     TrackNode* next;  // offset 0x14
@@ -196,6 +198,7 @@ struct TrackNode {
     u8 pad20[0x34 - 0x20];
     u8 skip;          // offset 0x34
 };
+}  // namespace
 
 struct TrackList {
     u8 pad0[0x20];

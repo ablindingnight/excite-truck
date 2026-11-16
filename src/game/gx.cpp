@@ -322,6 +322,8 @@ struct LightColors {
     u8 alpha;
 };
 
+// Unit-local (port ODR: other units define a different Light).
+namespace {
 struct Light {
     GXColor amb;    // offset 0x0
     GXColor color;  // offset 0x4
@@ -333,6 +335,7 @@ struct Light {
     u8 dirty;       // offset 0x5C
     u8 pad5D[3];
 };
+}  // namespace
 
 struct GXLightSet {
     GXLightSet(void);

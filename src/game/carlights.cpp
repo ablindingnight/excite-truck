@@ -17,6 +17,8 @@ struct LightCar {
     u32 flags;  // offset 0x68
 };
 
+// Unit-local (port ODR: other units define a different Light).
+namespace {
 struct Light {
     const LightFrame* frame;  // offset 0x0
     Vec off;                  // offset 0x4
@@ -27,6 +29,7 @@ struct Light {
     u8 b;                     // offset 0x1A
     s32 type;                 // offset 0x1C
 };
+}  // namespace
 
 class LightSet {
 public:

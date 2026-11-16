@@ -78,10 +78,13 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 /* Helper name unproven */
 static inline f32 FadeRamp(s32 dt, f32 a, f32 b) { return MIN(1.0f, ((f32)dt / 400.0f - a) / (b - a)); }
 
+// Unit-local (port ODR: other units define a different MusicTrack).
+namespace {
 struct MusicTrack {
     MusicVoice* voice;  // offset 0x0
     u8* buf;            // offset 0x4
 };
+}  // namespace
 
 ModuleTag lbl_8055EDC8;
 int lbl_8055B550 = -1;          // settings callback handle

@@ -95,10 +95,13 @@ public:
 
 extern "C" Sound2D* fn_80207848(const char* name, int flags);
 
+// Unit-local (port ODR: other units define a different MusicTrack).
+namespace {
 struct MusicTrack {
     char name[0x20];  // offset 0x0
     Sound2D* snd;     // offset 0x20
 };
+}  // namespace
 
 static inline f32 Ramp(f32 x, f32 lo, f32 range) { return (x - lo) / range; }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }

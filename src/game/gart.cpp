@@ -76,10 +76,13 @@ struct gArtSet {
     Picture* pictures;   // offset 0x88
 };
 
+// Unit-local (port ODR: other units define a different TrackNode).
+namespace {
 struct TrackNode {
     gArtSet* set;     // offset 0x0
     TrackNode* next;  // offset 0x4
 };
+}  // namespace
 
 
 #include "game/uivertex.h"
