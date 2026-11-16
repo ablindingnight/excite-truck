@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/camrect.h"
 #include "game/camrec.h"
+#include "game/idealline.h"
 #include "game/math_types.h"
 #include <string.h>
 
@@ -997,26 +998,7 @@ int fn_802726EC(f32 x, f32 a, f32 b) {
 }
 
 }  // extern "C"
-struct V2 {
-    f32 x, y;
-};
-
-// A position on an ideal line (idealline.cpp).
-struct ILPos {
-    ILPos(void) {
-        seg = 0;
-        mode = 10000;
-        t = lbl_80563F48;
-    }
-    u8* seg;   // offset 0x0
-    f32 t;     // offset 0x4
-    s32 mode;  // offset 0x8
-};
-
-class LineFollower {
-public:
-    void Locate(V2* pos, V2* dir, ILPos* out, int unused) const;
-};
+// V2, ILPos and LineFollower: game/idealline.h.
 
 extern "C" {
 double sqrt(double x);
