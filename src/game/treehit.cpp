@@ -5,6 +5,7 @@
 // events are posted; knocked-over trees are moved below the world and restored on reset. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/rmtx.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -20,41 +21,14 @@ void fn_801796EC(int type, const void* data, int size);   // post event
 void* operator new[](size_t size, const char* tag);
 void operator delete[](void* p);
 
-struct TVec {
-    TVec(void) {}
-    TVec(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct TPos {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct TMtx {
-    f32 rot[3][3];  // offset 0x0
-    TPos pos;       // offset 0x24
-};
-
 // A plain copy of a tree matrix (copied as words).
 struct TMtxRaw {
     s32 w[12];
 };
 
-struct TRot {
-    f32 m[3][3];
-};
-
 extern "C" {
-void fn_8022FF10(TRot* out, const TPos* axis);  // rotation from axis * angle
-void fn_802BDFF4(TMtx* tree, int a);
+void fn_8022FF10(RMat33* out, const RVec3* axis);  // rotation from axis * angle
+void fn_802BDFF4(RMtx* tree, int a);
 }
 
 struct Mat3;
@@ -64,7 +38,7 @@ struct CarRec {
     u8 pad0[0x6C];
     s16 hint;  // offset 0x6C
     u8 pad6E[0x118 - 0x6E];
-    TVec vel;  // offset 0x118
+    RVec3 vel;  // offset 0x118
 };
 
 extern "C" CarRec* fn_8017960C(int car);
@@ -79,10 +53,10 @@ public:
     virtual void vf1C(void);
     virtual s32 Type(void);    // 0x20
     virtual u8* Handle(void);  // 0x24
-    virtual void Throw(const TMtx* m, const TVec* vel, const TVec* spin);  // 0x28
+    virtual void Throw(const RMtx* m, const RVec3* vel, const RVec3* spin);  // 0x28
 };
 
-extern "C" void fn_801FA7F4(const char* model, const TMtx* m, ValueNode* cfg);
+extern "C" void fn_801FA7F4(const char* model, const RMtx* m, ValueNode* cfg);
 
 // A tree class (0x60).
 struct TreeClass {
@@ -102,9 +76,9 @@ struct TreeClass {
 struct Shake {
     Shake(void) {}
     s32 index;   // offset 0x0
-    TMtx* tree;  // offset 0x4
-    TMtx mtx;    // offset 0x8
-    TVec axis;   // offset 0x38
+    RMtx* tree;  // offset 0x4
+    RMtx mtx;    // offset 0x8
+    RVec3 axis;   // offset 0x38
     f32 start;   // offset 0x44
 };
 
@@ -114,8 +88,8 @@ struct LastHit {
 };
 
 struct TreeEvent {
-    TPos pos;  // offset 0x0
-    TVec vel;  // offset 0xC
+    RVec3 pos;  // offset 0x0
+    RVec3 vel;  // offset 0xC
     s16 hint;  // offset 0x18
     s32 id;    // offset 0x1C
 };
@@ -133,7 +107,7 @@ static inline void StrCopy(char* d, const char* s, int n) {
 ModuleTag lbl_8055FB20;
 s32 lbl_8055FB28;      // classes
 s32 lbl_8055FB2C;      // trees
-TMtx** lbl_8055FB30;   // trees by id
+RMtx** lbl_8055FB30;   // trees by id
 s32 lbl_8055FB34;      // next shake slot
 f32 lbl_8055FB38;      // time
 s32 lbl_8055CFA0 = -10000;  // handle base
@@ -179,8 +153,8 @@ public:
         int id = o->Handle() - (u8*)lbl_8055CFA0;
         if (id >= 0 && id < lbl_8055FB2C) {
             TreeClass* c = fn_802C110C(id);
-            TMtx** tbl = lbl_8055FB30;
-            TMtx* t = tbl[id];
+            RMtx** tbl = lbl_8055FB30;
+            RMtx* t = tbl[id];
             if (t) {
                 if (o->Type() == 1003) {
                     if (t->pos.y < -2000.0f) {
@@ -198,7 +172,7 @@ public:
                             s->index = id;
                             s->mtx = *t;
                             s->start = lbl_8055FB38;
-                            s->axis = TVec(1.0f, 0.0f, 0.0f);
+                            s->axis = RVec3(1.0f, 0.0f, 0.0f);
                         }
                         if (c->nDrops > 0) {
                             // MATCHING-AID: named offset walker and the repeated guard; the natural loop form is unknown.
@@ -208,23 +182,23 @@ public:
                                 off = 0;
                                 for (; i < c->nDrops; off += 4, i++) {
                                 TreeObj* d = *(TreeObj**)((u8*)c->drops + off);
-                                TMtx m;
+                                RMtx m;
                                 m.pos = t->pos;
                                 m.pos.x += fn_80129DC4(4, -2.0f, 2.0f);
                                 m.pos.z += fn_80129DC4(4, -2.0f, 2.0f);
                                 m.pos.y = m.pos.y + c->dropHit;
-                                m.rot[0][0] = 1.0f;
-                                m.rot[0][1] = 0.0f;
-                                m.rot[0][2] = 0.0f;
-                                m.rot[1][0] = 0.0f;
-                                m.rot[1][1] = 1.0f;
-                                m.rot[1][2] = 0.0f;
-                                m.rot[2][0] = 0.0f;
-                                m.rot[2][1] = 0.0f;
-                                m.rot[2][2] = 1.0f;
-                                TVec vel(fn_80129DC4(4, -2.0f, 2.0f), -3.0f + fn_80129DC4(4, -2.0f, 2.0f),
+                                m.rot.x.x = 1.0f;
+                                m.rot.x.y = 0.0f;
+                                m.rot.x.z = 0.0f;
+                                m.rot.y.x = 0.0f;
+                                m.rot.y.y = 1.0f;
+                                m.rot.y.z = 0.0f;
+                                m.rot.z.x = 0.0f;
+                                m.rot.z.y = 0.0f;
+                                m.rot.z.z = 1.0f;
+                                RVec3 vel(fn_80129DC4(4, -2.0f, 2.0f), -3.0f + fn_80129DC4(4, -2.0f, 2.0f),
                                          fn_80129DC4(4, -2.0f, 2.0f));
-                                TVec spin(fn_80129DC4(4, -7.0f, 7.0f), fn_80129DC4(4, -7.0f, 7.0f),
+                                RVec3 spin(fn_80129DC4(4, -7.0f, 7.0f), fn_80129DC4(4, -7.0f, 7.0f),
                                           fn_80129DC4(4, -7.0f, 7.0f));
                                 d->Throw(&m, &vel, &spin);
                             }
@@ -295,7 +269,7 @@ void fn_802C126C(void) {
     lbl_8055FB28 = 0;
     lbl_8055CFA0 = fn_801FB1F4(8000);
     lbl_8055FB38 = 0.0f;
-    lbl_8055FB30 = new ("treehittree") TMtx*[8000];
+    lbl_8055FB30 = new ("treehittree") RMtx*[8000];
     fn_801D0590(&lbl_8055FB40);
     fn_801D0800(&lbl_8055FB40);
     for (int i = 0; i < 16; i++) {
@@ -344,7 +318,7 @@ int fn_802C143C(ValueNode* cfg) {
     return n;
 }
 
-u8* fn_802C1500(TMtx* t, int cls) {
+u8* fn_802C1500(RMtx* t, int cls) {
     TreeClass* c = &lbl_804C0810[cls];
     int id = lbl_8055FB2C++;
     lbl_8055FB30[id] = t;
@@ -397,16 +371,16 @@ void fn_802C1550(void) {
                 }
             }
             for (j = 0; j < n; j++) {
-                TMtx m;
-                m.rot[0][0] = 1.0f;
-                m.rot[0][1] = 0.0f;
-                m.rot[0][2] = 0.0f;
-                m.rot[1][0] = 0.0f;
-                m.rot[1][1] = 1.0f;
-                m.rot[1][2] = 0.0f;
-                m.rot[2][0] = 0.0f;
-                m.rot[2][1] = 0.0f;
-                m.rot[2][2] = 1.0f;
+                RMtx m;
+                m.rot.x.x = 1.0f;
+                m.rot.x.y = 0.0f;
+                m.rot.x.z = 0.0f;
+                m.rot.y.x = 0.0f;
+                m.rot.y.y = 1.0f;
+                m.rot.y.z = 0.0f;
+                m.rot.z.x = 0.0f;
+                m.rot.z.y = 0.0f;
+                m.rot.z.z = 1.0f;
                 SetV3(&m.pos, 0.0f, -1000.0f, 0.0f);
                 fn_801FA7F4(model, &m, c->cfg);
             }
@@ -421,9 +395,9 @@ void fn_802C173C(f32 time) {
         if (s->tree) {
             f32 t = lbl_8055FB38 - s->start;
             if (t >= -0.01f && t < 2.0f) {
-                TMtx m = s->mtx;
-                TRot r;
-                TPos a;
+                RMtx m = s->mtx;
+                RMat33 r;
+                RVec3 a;
                 f32 w = (f32)sin(9.0f * ((t > 0.0f) ? t : 0.0f));
                 f32 k = (1.0f - t / 2.0f) * (0.17453292f * w);
                 a.x = s->axis.x * k;
@@ -471,7 +445,7 @@ void fn_802C1A0C(TreeObj* o, int car) {
     int id = ObjId(o);
     if (id >= 0 && id < lbl_8055FB2C) {
         TreeClass* c = fn_802C110C(id);
-        TMtx** tbl = lbl_8055FB30;
+        RMtx** tbl = lbl_8055FB30;
         if (tbl[id]->pos.y > -2000.0f) {
             CarRec* r = fn_8017960C(car);
             TreeEvent ev;

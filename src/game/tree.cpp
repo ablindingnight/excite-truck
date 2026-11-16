@@ -7,6 +7,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/collshape.h"
+#include "game/rmtx.h"
 
 extern "C" {
 double sqrt(double x);
@@ -49,17 +50,6 @@ s32 fn_801E8718(int i);
 void* operator new(size_t size, const char* tag);
 void operator delete(void* p);
 
-struct TVec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct TMtx {
-    TVec rot[3];  // offset 0x0
-    TVec pos;     // offset 0x24
-};
-
 struct TModel {
     u8 pad0[0x4];
     struct TModelData* data;  // offset 0x4
@@ -82,8 +72,8 @@ ModelInfo* fn_802C6B44(const char* name);
 void fn_802C6C20(TModel* m);
 s32 fn_802B1DA0(s32 id);
 ValueTable* fn_802B561C(ValueTable* (*load)(const char*), const char* name);
-void fn_802DCAE4(s32 model, const TMtx* m, f32 alpha);
-void fn_801F1C24(TMtx* m);
+void fn_802DCAE4(s32 model, const RMtx* m, f32 alpha);
+void fn_801F1C24(RMtx* m);
 }
 
 // A fan-grid draw cell (0x10): which placed trees it covers.
@@ -113,8 +103,8 @@ public:
 
 // A placed tree (0x44).
 struct Tree {
-    TVec normal;   // offset 0x0
-    TMtx mtx;      // offset 0xC
+    RVec3 normal;   // offset 0x0
+    RMtx mtx;      // offset 0xC
     f32 scale;     // offset 0x3C (in the file: radius)
     f32 drop;      // offset 0x40
 };
@@ -123,7 +113,7 @@ struct TreeRec {
     u8 pad0[0x4];
     void* hit;      // offset 0x4
     u8 pad8[0x4];
-    TMtx mtx;       // offset 0xC
+    RMtx mtx;       // offset 0xC
     TreeVol* vol;   // offset 0x3C
     f32 drop;       // offset 0x40
 };
@@ -174,8 +164,8 @@ struct TreeSet {
 
 // A trunk cylinder.
 struct TCyl {
-    TVec center;  // offset 0x0
-    TVec axis;    // offset 0xC
+    RVec3 center;  // offset 0x0
+    RVec3 axis;    // offset 0xC
     f32 half;     // offset 0x18
     f32 rad;      // offset 0x1C
 };
@@ -268,7 +258,7 @@ public:
     virtual ~TubeShape(void) {}
 };
 
-extern "C" TreeVol* fn_801FA8E0(CollShape* s, const TMtx* m, u8* hit);
+extern "C" TreeVol* fn_801FA8E0(CollShape* s, const RMtx* m, u8* hit);
 
 struct PListNode {
     PListNode* next;
@@ -370,7 +360,7 @@ s32 fn_802BC4E0(const TModel* m) {
     return fn_802B110C(fn_802BC334, name);
 }
 
-f32 fn_802BC540(const TVec* v, f32 k) {
+f32 fn_802BC540(const RVec3* v, f32 k) {
     f32 x;
     f32 z = v->z;
     f32 xx;
@@ -383,8 +373,8 @@ f32 fn_802BC540(const TVec* v, f32 k) {
 
 }  // extern "C"
 
-static inline void MulVec(TVec* out, const TMtx* mtx, const TVec* v) {
-    const TVec* m = mtx->rot;
+static inline void MulVec(RVec3* out, const RMtx* mtx, const RVec3* v) {
+    const RVec3* m = &mtx->rot.x;
     if (out == v) {
         f32 x = Dot3(v->x, m[0].x, v->y, m[1].x, v->z, m[2].x);
         f32 y = Dot3(v->x, m[0].y, v->y, m[1].y, v->z, m[2].y);
@@ -401,27 +391,27 @@ static inline void MulVec(TVec* out, const TMtx* mtx, const TVec* v) {
 
 extern "C" {
 
-void fn_801EA18C(const TVec* pos, TVec* normal, int a);
+void fn_801EA18C(const RVec3* pos, RVec3* normal, int a);
 
-void fn_802BC588(TMtx* src, TMtx* dst, TVec* normal, const TRot* r, const TreeType* t) {
+void fn_802BC588(RMtx* src, RMtx* dst, RVec3* normal, const TRot* r, const TreeType* t) {
     src->pos.x = r->x;
     src->pos.y = 0.0f;
     src->pos.z = r->z;
-    src->rot[2].x = r->dx;
-    src->rot[2].y = 0.0f;
-    src->rot[2].z = r->dz;
-    src->rot[1].x = 0.0f;
-    src->rot[1].y = 1.0f;
-    src->rot[1].z = 0.0f;
-    PSVECCrossProduct(&src->rot[1], &src->rot[2], &src->rot[0]);
-    TVec up;
+    src->rot.z.x = r->dx;
+    src->rot.z.y = 0.0f;
+    src->rot.z.z = r->dz;
+    src->rot.y.x = 0.0f;
+    src->rot.y.y = 1.0f;
+    src->rot.y.z = 0.0f;
+    PSVECCrossProduct(&src->rot.y, &src->rot.z, &src->rot.x);
+    RVec3 up;
     up.x = 0.0f;
     up.y = 1.0f;
     up.z = 0.0f;
     fn_801EA18C(&src->pos, &up, 0);
     *normal = up;
     src->pos.y -= fn_802BC540(&up, t->baseRad);
-    TVec c;
+    RVec3 c;
     MulVec(&c, src, &t->cyl.center);
     f32 curScale = r->scale;
     c.x *= curScale;
@@ -430,24 +420,24 @@ void fn_802BC588(TMtx* src, TMtx* dst, TVec* normal, const TRot* r, const TreeTy
     dst->pos.x = src->pos.x + c.x;
     dst->pos.y = src->pos.y + c.y;
     dst->pos.z = src->pos.z + c.z;
-    MulVec(&dst->rot[2], src, &t->cyl.axis);
-    dst->rot[0].x = 1.0f;
-    dst->rot[0].y = 0.0f;
-    dst->rot[0].z = 0.0f;
-    PSVECCrossProduct(&dst->rot[2], &dst->rot[0], &dst->rot[1]);
-    PSVECCrossProduct(&dst->rot[1], &dst->rot[2], &dst->rot[0]);
-    PSVECNormalize(&dst->rot[1], &dst->rot[1]);
-    PSVECNormalize(&dst->rot[0], &dst->rot[0]);
+    MulVec(&dst->rot.z, src, &t->cyl.axis);
+    dst->rot.x.x = 1.0f;
+    dst->rot.x.y = 0.0f;
+    dst->rot.x.z = 0.0f;
+    PSVECCrossProduct(&dst->rot.z, &dst->rot.x, &dst->rot.y);
+    PSVECCrossProduct(&dst->rot.y, &dst->rot.z, &dst->rot.x);
+    PSVECNormalize(&dst->rot.y, &dst->rot.y);
+    PSVECNormalize(&dst->rot.x, &dst->rot.x);
     f32 s = r->scale;
-    src->rot[0].x *= s;
-    src->rot[0].y *= s;
-    src->rot[0].z *= s;
-    src->rot[1].x *= s;
-    src->rot[1].y *= s;
-    src->rot[1].z *= s;
-    src->rot[2].x *= s;
-    src->rot[2].y *= s;
-    src->rot[2].z *= s;
+    src->rot.x.x *= s;
+    src->rot.x.y *= s;
+    src->rot.x.z *= s;
+    src->rot.y.x *= s;
+    src->rot.y.y *= s;
+    src->rot.y.z *= s;
+    src->rot.z.x *= s;
+    src->rot.z.y *= s;
+    src->rot.z.z *= s;
 }
 
 CollShape* fn_802BC9B0(const TCyl* c, int id, f32 scale) {
@@ -460,8 +450,8 @@ CollShape* fn_802BC9B0(const TCyl* c, int id, f32 scale) {
 }
 
 void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
-    TMtx m;
-    fn_802BC588(&tr->mtx, &m, (TVec*)tr, r, t);
+    RMtx m;
+    fn_802BC588(&tr->mtx, &m, (RVec3*)tr, r, t);
     u8* hit = fn_802C1500(&tr->mtx, t->cls);
     if (lbl_8055FAB0) {
         f32 s = r->scale;
@@ -483,13 +473,13 @@ void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
 
 static inline f32 MidF(f32 a, f32 b) { return a + 0.5f * (b - a); }
 
-static inline void SetV(TVec& v, f32 x, f32 y, f32 z) {
+static inline void SetV(RVec3& v, f32 x, f32 y, f32 z) {
     v.x = x;
     v.y = y;
     v.z = z;
 }
 
-static inline void ReadCyl(TreeType* t, ValueNode* n, TVec& c) {
+static inline void ReadCyl(TreeType* t, ValueNode* n, RVec3& c) {
     ValVec3 p1 = n->GetVec3("cyl_p1");
     ValVec3 p2 = n->GetVec3("cyl_p2");
     f32 firstX = p1.x;
@@ -524,7 +514,7 @@ void fn_802BCBDC(void) {
                 t->run = n->GetBool("tree_run", 1);
                 t->surf = fn_801D04D0(n->GetString("surf_type", "tree"));
                 t->cls = fn_802C143C(n);
-                TVec c;
+                RVec3 c;
                 ReadCyl(t, n, c);
                 t->cyl.rad = n->GetFloat("rad");
                 t->baseRad = n->GetFloat("base_rad");
@@ -581,7 +571,7 @@ void fn_802BD0F4(TreeType* t) {
             TPos2 p;
             p.x = tr->mtx.pos.x;
             p.z = tr->mtx.pos.z;
-            f32 s = tr->mtx.rot[1].y;
+            f32 s = tr->mtx.rot.y.y;
             tr->hit = fn_802BA580(t->shadow, &p, s);
         }
     }
@@ -621,9 +611,9 @@ static inline void LoadTreeSet(TListEntry* e, TreeType* t) {
                 TRot r;
                 r.x = tr->mtx.pos.x;
                 r.z = tr->mtx.pos.z;
-                r.scale = PSVECMag(&tr->mtx.rot[2]);
-                r.dx = tr->mtx.rot[2].x;
-                r.dz = tr->mtx.rot[2].z;
+                r.scale = PSVECMag(&tr->mtx.rot.z);
+                r.dx = tr->mtx.rot.z.x;
+                r.dz = tr->mtx.rot.z.z;
                 f32 inv = 1.0f / (f32)sqrt(r.dx * r.dx + r.dz * r.dz);
                 r.dx *= inv;
                 r.dz *= inv;
@@ -781,8 +771,8 @@ static inline void DrawTreeType(TreeType* t) {
         if (t->farTris <= 10) {
             fn_802C8BD0(fn_802C28C0());
             fn_802DC71C(t->farId, t->farTex);
-            TMtx m;
-            TMtx cam;
+            RMtx m;
+            RMtx cam;
             fn_801F1C24(&cam);
             for (int j = 0; j < near->n; j++) {
                 TCell* c = &near->data[j];
@@ -797,17 +787,17 @@ static inline void DrawTreeType(TreeType* t) {
                         for (int n = c->first; n < c->first + c->count; n++) {
                             TreeRec* tr = &list2->data[n];
                             Settle(tr);
-                            f32 s = tr->mtx.rot[1].y;
+                            f32 s = tr->mtx.rot.y.y;
                             m.pos = tr->mtx.pos;
-                            m.rot[0].x = cam.rot[0].x * s;
-                            m.rot[0].y = cam.rot[0].y * s;
-                            m.rot[0].z = cam.rot[0].z * s;
-                            m.rot[1].x = cam.rot[1].x * s;
-                            m.rot[1].y = cam.rot[1].y * s;
-                            m.rot[1].z = cam.rot[1].z * s;
-                            m.rot[2].x = cam.rot[2].x * s;
-                            m.rot[2].y = cam.rot[2].y * s;
-                            m.rot[2].z = cam.rot[2].z * s;
+                            m.rot.x.x = cam.rot.x.x * s;
+                            m.rot.x.y = cam.rot.x.y * s;
+                            m.rot.x.z = cam.rot.x.z * s;
+                            m.rot.y.x = cam.rot.y.x * s;
+                            m.rot.y.y = cam.rot.y.y * s;
+                            m.rot.y.z = cam.rot.y.z * s;
+                            m.rot.z.x = cam.rot.z.x * s;
+                            m.rot.z.y = cam.rot.z.y * s;
+                            m.rot.z.z = cam.rot.z.z * s;
                             fn_802DCAE4(id, &m, a);
                             lbl_8055FAA8++;
                             lbl_8055FAAC += tris;
@@ -886,7 +876,7 @@ void fn_802BDD58(void) {
 static inline void Loop1_fn_802BDD8C(int i, f32 range) {
     TCell* c;
     TreeType* t;
-    const TVec* eye;
+    const RVec3* eye;
     int j;
     s32 id;
     int n;
@@ -906,9 +896,9 @@ static inline void Loop1_fn_802BDD8C(int i, f32 range) {
             r2 = range * range;
             f32 in = range - fade;
             span = r2 - in * in;
-            TMtx cam;
+            RMtx cam;
             fn_801F1C24(&cam);
-            eye = (const TVec*)(fn_801E8718(-1) + 0x24);
+            eye = (const RVec3*)(fn_801E8718(-1) + 0x24);
             for (j = 0; j < frames->n; j++) {
                 c = &frames->data[j];
                 if (Live(c)) {
@@ -919,18 +909,18 @@ static inline void Loop1_fn_802BDD8C(int i, f32 range) {
                         if (d <= r2) {
                             f32 a = (r2 - d) / span;
                             a = (1.0f < a) ? 1.0f : a;
-                            TMtx m;
-                            f32 s = tr->mtx.rot[1].y;
+                            RMtx m;
+                            f32 s = tr->mtx.rot.y.y;
                             m.pos = tr->mtx.pos;
-                            m.rot[0].x = cam.rot[0].x * s;
-                            m.rot[0].y = cam.rot[0].y * s;
-                            m.rot[0].z = cam.rot[0].z * s;
-                            m.rot[1].x = cam.rot[1].x * s;
-                            m.rot[1].y = cam.rot[1].y * s;
-                            m.rot[1].z = cam.rot[1].z * s;
-                            m.rot[2].x = cam.rot[2].x * s;
-                            m.rot[2].y = cam.rot[2].y * s;
-                            m.rot[2].z = cam.rot[2].z * s;
+                            m.rot.x.x = cam.rot.x.x * s;
+                            m.rot.x.y = cam.rot.x.y * s;
+                            m.rot.x.z = cam.rot.x.z * s;
+                            m.rot.y.x = cam.rot.y.x * s;
+                            m.rot.y.y = cam.rot.y.y * s;
+                            m.rot.y.z = cam.rot.y.z * s;
+                            m.rot.z.x = cam.rot.z.x * s;
+                            m.rot.z.y = cam.rot.z.y * s;
+                            m.rot.z.z = cam.rot.z.z * s;
                             fn_802DCAE4(id, &m, a);
                         }
                     }
@@ -968,7 +958,7 @@ void fn_802BDFBC(FanCell* f, int lod, f32 blend) {
     }
 }
 
-void fn_802BDFF4(TMtx* m, u8 on) {
+void fn_802BDFF4(RMtx* m, u8 on) {
     TreeRec* tr = (TreeRec*)((u8*)m - 0xC);
     if (tr->hit) {
         fn_802BAF98(tr->hit, on);
@@ -994,9 +984,9 @@ TreeType* fn_802BE008(TCell* c) {
     return 0;
 }
 
-typedef void (*TreeQuery)(s32 handle, const TVec* pos, int size, int n, f32 r, f32 h);
+typedef void (*TreeQuery)(s32 handle, const RVec3* pos, int size, int n, f32 r, f32 h);
 
-void fn_802BE07C(const TVec* pos, TreeQuery cb) {
+void fn_802BE07C(const RVec3* pos, TreeQuery cb) {
     f32 x = pos->x;
     f32 size = 2.0f;
     s16 bx = ((s16)(int)(x / size) / 128) * 128 + 0x40;

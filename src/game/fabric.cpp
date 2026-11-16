@@ -4,6 +4,8 @@
 // a value table. FabricTMH is the track model handler that creates them from track objects. Names
 // are guesses apart from the strings.
 #include "game/common.h"
+#include "game/rmtx.h"
+#include "game/vec3_init.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -13,11 +15,6 @@ void* memset(void* p, int c, u32 n);
 int strcasecmp(const char* a, const char* b);
 double fabs(double x);
 }
-
-struct TVec {
-    TVec(void);
-    f32 x, y, z;
-};
 
 struct PVec {
     f32 x, y, z;
@@ -56,9 +53,9 @@ struct DrawVert {
 };
 
 struct Fabric {
-    TVec* verts;      // offset 0x0
-    TVec* cur;        // offset 0x4
-    TVec* prev;       // offset 0x8
+    Vec3Storage* verts;      // offset 0x0
+    Vec3Storage* cur;        // offset 0x4
+    Vec3Storage* prev;       // offset 0x8
     DrawVert* draw;   // offset 0xC
     s32 count;        // offset 0x10
     Stick* sticks;    // offset 0x14
@@ -79,11 +76,6 @@ struct Fabric {
 struct WindFabric {
     Fabric f;     // offset 0x0
     PVec random;  // offset 0x48
-};
-
-struct TMtx {
-    f32 m[3][3];
-    f32 t[3];
 };
 
 struct TObj {
@@ -128,7 +120,7 @@ public:
     ~ManualFabricMan(void);
     void Update(void);
     void Draw(void);
-    void Add(ValueNode* vn, TMtx* m);
+    void Add(ValueNode* vn, RMtx* m);
 
     Fabric fabrics[4];  // offset 0x0
     s32 count;          // offset 0x120
@@ -262,7 +254,7 @@ void fn_801F4DC4(void) { lbl_8055EC18->Update(); }
 
 void fn_801F4DCC(void) { lbl_8055EC18->Draw(); }
 
-void fn_801F4DD4(const char* table, TMtx* m) {
+void fn_801F4DD4(const char* table, RMtx* m) {
     ValueNode* vn = fn_802AE414(table);
     if (!vn) {
         fn_802E317C("mesh: could not find table %s", table);
@@ -300,18 +292,18 @@ u32 fn_801F4ECC(ValueNode* vn) {
 
 // Helper names unproven: frame transform with the alias test.
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-static inline void MulVec(PVec* out, const PVec* in, const TMtx* m) {
+static inline void MulVec(PVec* out, const PVec* in, const RMtx* m) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        f32 x = Dot3(in->x, m->rot.x.x, in->y, m->rot.y.x, in->z, m->rot.z.x);
+        f32 y = Dot3(in->x, m->rot.x.y, in->y, m->rot.y.y, in->z, m->rot.z.y);
+        f32 z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        out->x = Dot3(in->x, m->rot.x.x, in->y, m->rot.y.x, in->z, m->rot.z.x);
+        out->y = Dot3(in->x, m->rot.x.y, in->y, m->rot.y.y, in->z, m->rot.z.y);
+        out->z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
     }
 }
 /* Helper names unproven: NodeVec3 / NodePoint / NodeVec3Or / White (by-value wrappers, fn_801F4F9C) */
@@ -325,14 +317,14 @@ static inline ValVec3 White(void) {
     w.z = 1.0f;
     return w;
 }
-void fn_801F4F9C(Corner* out, ValueNode* vn, const TMtx* m) {
+void fn_801F4F9C(Corner* out, ValueNode* vn, const RMtx* m) {
     PVec p = *(const PVec*)&static_cast<const ValVec3&>(NodeVec3(vn, "offset"));  // address of the bound temporary
     ValPoint uv = NodePoint(vn, "uv");
     ValVec3 c = NodeVec3Or(vn, "color", White());
     MulVec(&out->pos, &p, m);
-    out->pos.x += m->t[0];
-    out->pos.y += m->t[1];
-    out->pos.z += m->t[2];
+    out->pos.x += m->pos.x;
+    out->pos.y += m->pos.y;
+    out->pos.z += m->pos.z;
     out->u = uv.x;
     out->v = uv.y;
     {
@@ -350,7 +342,7 @@ int fn_801F52BC(ValueNode* vn, const char* key, f32* out, int size) {
     return r;
 }
 
-void fn_801F5344(Quad* q, ValueNode* vn, const TMtx* m) {
+void fn_801F5344(Quad* q, ValueNode* vn, const RMtx* m) {
     if (!vn->FindChild("ul") || !vn->FindChild("ur") || !vn->FindChild("ll") || !vn->FindChild("lr")) {
         fn_802E317C("mesh: table %s is missing corner geometry");
     }
@@ -367,7 +359,7 @@ void fn_801F5344(Quad* q, ValueNode* vn, const TMtx* m) {
 }
 
 // Helper name unproven: one distance constraint between two particles.
-static inline void SetStick(Stick* s, const TVec* v, int a, int b) {
+static inline void SetStick(Stick* s, const Vec3Storage* v, int a, int b) {
     s->a = a;
     s->b = b;
     s->rest = PSVECSquareDistance(&v[a], &v[b]);
@@ -399,7 +391,7 @@ void fn_801F5508(Fabric* f) {
     f->numSticks = n;
 }
 
-static inline void SetAnchor(Anchor* a, const TVec* v, int i) {
+static inline void SetAnchor(Anchor* a, const Vec3Storage* v, int i) {
     a->index = i;
     a->pos = *(const PVec*)&v[i];
 }
@@ -502,7 +494,7 @@ static inline void LerpVert(DrawVert* out, Corner a, Corner b, f32 t) {
 extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
     int n = f->rows * f->cols;
     int r;
-    f->verts = new ("fabric verts") TVec[n * 2];
+    f->verts = new ("fabric verts") Vec3Storage[n * 2];
     f->cur = f->verts;
     f->prev = f->verts + n;
     f->draw = (DrawVert*)new ("fabric draw tab") u8[n * sizeof(DrawVert)];
@@ -598,8 +590,8 @@ static inline void ScaleP(PVec* o, const PVec* v, f32 k) {
 void fn_801F63F0(Fabric* f, const PVec* force, f32 drag) {
     f32 k1;
     PVec a;
-    TVec* c;
-    TVec* p;
+    Vec3Storage* c;
+    Vec3Storage* p;
     PVec t;
     f32 k2;
     int i;
@@ -607,7 +599,7 @@ void fn_801F63F0(Fabric* f, const PVec* force, f32 drag) {
     k1 = 2.0f - drag;
     ScaleP(&a, force, 0.0002777778f);
     for (i = 0; i < f->count; i++) {
-        TVec* c;
+        Vec3Storage* c;
         c = &f->cur[i];
         p = &f->prev[i];
         t.x = a.x + c->x * k1;
@@ -643,15 +635,15 @@ void fn_801F64E4(Fabric* f, const PVec* forces, f32 drag) {
     PVec t;
     int i;
     for (i = 0; i < f->count; i++, forces++) {
-        TVec* p;
-        TVec* c = &f->cur[i];
+        Vec3Storage* p;
+        Vec3Storage* c = &f->cur[i];
         p = &f->prev[i];
         ScaleP(&t, (const PVec*)c, k1);
         AddS(&t, (const PVec*)p, k2);
         AddS2((PVec*)p, &t, forces, step);
     }
     {
-        TVec* c = f->cur;
+        Vec3Storage* c = f->cur;
         f->cur = f->prev;
         f->prev = c;
     }
@@ -664,8 +656,8 @@ void fn_801F65D0(Fabric* f) {
     int i;
     for (i = 0; i < f->numSticks; i++) {
         Stick* s = &f->sticks[i];
-        TVec* a = &f->cur[s->a];
-        TVec* b = &f->cur[s->b];
+        Vec3Storage* a = &f->cur[s->a];
+        Vec3Storage* b = &f->cur[s->b];
         PVec d;
         f32 k;
         f32 kb;
@@ -729,7 +721,7 @@ void fn_801F6880(const Fabric* f) {
             for (c = 0; c < f->cols; c++) {
                 int i = c + (r - 1) * f->cols;
                 DrawVert* d = &f->draw[i];
-                TVec* p = &f->cur[i];
+                Vec3Storage* p = &f->cur[i];
                 f32 u = d->u;
                 f32 x = p->x;
                 f32 y = p->y;
@@ -920,7 +912,7 @@ void ManualFabricMan::Draw(void) {
     }
 }
 
-void ManualFabricMan::Add(ValueNode* vn, TMtx* m) {
+void ManualFabricMan::Add(ValueNode* vn, RMtx* m) {
     u32 flags;
     Fabric* f;
     const char* tex;
