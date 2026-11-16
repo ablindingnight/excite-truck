@@ -132,7 +132,7 @@ void fn_801C1CBC(u8* sys, int nv, const DVertDesc* v, int ne, const DEdgeDesc* e
 void* operator new(size_t size, const char* name);
 
 // out = in * m (row vector), safe when out aliases in.
-static inline f32 RowDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+/* Helper name unproven */ static inline f32 RowDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void MulVec(DVec3* out, const DVec3* in, const DMtx* m) {
     if (out == in) {
         f32 x = RowDot3(in->x, m->row[0].x, in->y, m->row[1].x, in->z, m->row[2].x);
