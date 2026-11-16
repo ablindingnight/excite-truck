@@ -327,9 +327,11 @@ static inline float AbsFlt(float v) { return (float)__fabs(v); }
 
 void CarSound::Update() {
     CarSound *h = this;
+    bool boost;
     unsigned char *v;
     int underwater;
     unsigned char *wheel;
+    bool single;
     int k;
 
     if (h->start != 0) {
@@ -400,8 +402,9 @@ void CarSound::Update() {
 
     if (h->speedLines != 0) {
         v = h->vehicle;
+        int enabled = v[0x259C];
         h->speedAlpha = lbl_80563368;
-        if (v[0x259C]) {
+        if (enabled) {
             float x = VF32(v, 0x25A0);
             float level;
             HudPart_Show(h->speedLines);
@@ -418,12 +421,14 @@ void CarSound::Update() {
         float ground;
         float mag;
         float inv;
-        int boost;
-        int single;
         speed = VF32(h->vehicle, 0x2618);
         if (speed > lbl_80563394) {
-            float a = lbl_80563370 + HudClamp01((VF32(h->vehicle, 0x25D4) - lbl_80563398) / lbl_8056339C) * lbl_80563368;
-            float b = lbl_80563370 + HudClamp01((speed - lbl_80563394) / lbl_805633A0) * lbl_80563368;
+            float airGain = HudClamp01((VF32(h->vehicle, 0x25D4) - lbl_80563398) / lbl_8056339C);
+            float airGainScale = lbl_80563368;
+            float a = lbl_80563370 + airGain * airGainScale;
+            float airSpeedGain = HudClamp01((speed - lbl_80563394) / lbl_805633A0);
+            float airSpeedScale = lbl_80563368;
+            float b = lbl_80563370 + airSpeedGain * airSpeedScale;
             HudPart_SetAlpha(h->air, b * a);
             HudPart_Show(h->air);
         } else {
@@ -444,7 +449,9 @@ void CarSound::Update() {
             boost = 1;
         }
         if (boost) {
-            fn_8020C910(lbl_80563368 + HudClamp01((speed - lbl_805633B0) / lbl_805633B4) * lbl_805633B8);
+            float boostWeight = HudClamp01((speed - lbl_805633B0) / lbl_805633B4);
+            float boostScale = lbl_805633B8;
+            fn_8020C910(lbl_80563368 + boostWeight * boostScale);
         } else if (speed < lbl_80563394) {
             fn_8020C910(lbl_80563368);
         }
@@ -457,7 +464,9 @@ void CarSound::Update() {
             if (x > lbl_805633BC) {
                 HudPart_SetAlpha(h->tilt, lbl_80563368);
             } else {
-                HudPart_SetAlpha(h->tilt, lbl_80563368 + HudClamp01((x - lbl_805633BC) / lbl_805633C0) * lbl_805633C4);
+                float tiltWeight = HudClamp01((x - lbl_805633BC) / lbl_805633C0);
+                float tiltScale = lbl_805633C4;
+                HudPart_SetAlpha(h->tilt, lbl_80563368 + tiltWeight * tiltScale);
             }
             HudPart_Show(h->tilt);
         } else {
@@ -484,9 +493,15 @@ void CarSound::Update() {
 
     if (h->splash != 0 && fn_802BF4F0()) {
         if (underwater) {
-            float s = VF32(h->vehicle, 0x25D4) * lbl_805633C8;
-            HudPart_SetAlpha(h->splash, lbl_80563370 + HudClamp01((s - lbl_80563370) / lbl_805633CC) * lbl_805633D0);
-            HudPart_SetLevel(h->splash, lbl_80563368 + HudClamp01((s - lbl_80563370) / lbl_805633D4) * lbl_805633D8);
+            float splashSpeedScale = lbl_805633C8;
+            float verticalSpeed = VF32(h->vehicle, 0x25D4);
+            float s = splashSpeedScale * verticalSpeed;
+            float splashAlphaWeight = HudClamp01((s - lbl_80563370) / lbl_805633CC);
+            float splashAlphaScale = lbl_805633D0;
+            HudPart_SetAlpha(h->splash, lbl_80563370 + splashAlphaWeight * splashAlphaScale);
+            float splashLevelWeight = HudClamp01((s - lbl_80563370) / lbl_805633D4);
+            float splashLevelScale = lbl_805633D8;
+            HudPart_SetLevel(h->splash, lbl_80563368 + splashLevelWeight * splashLevelScale);
             HudPart_Show(h->splash);
         } else {
             HudPart_Hide(h->splash);

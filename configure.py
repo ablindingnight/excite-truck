@@ -1153,7 +1153,7 @@ config.libs.append(
             Object(Matching, "game/menumus.cpp"),
             Object(Matching, "game/roadsnd.cpp"),
             Object(Matching, "game/unk_8020CF68.cpp"),
-            Object(NonMatching, "game/unk_8020DE74.cpp"),
+            Object(Matching, "game/unk_8020DE74.cpp"),
             Object(Matching, "game/unk_8020F3B4.c"),
             Object(Matching, "game/unk_800241DC.c", cflags=cflags_runtime, mw_version="GC/3.0a5.2", extra_cflags=["-Cpp_exceptions on"]),
             Object(Matching, "game/unk_8002B0A0.c"),
