@@ -6,6 +6,10 @@
 #include "macros.h"
 #include <string.h>
 #include <math.h>
+// Passed to fn_80176A24 (3.0f; name unproven). A named constant with external linkage defined before any code:
+// retail keeps it as the FIRST .sdata2 entry, separate from the pooled 3.0f literal used further down.
+extern const f32 lbl_80563D08;
+const f32 lbl_80563D08 = 3.0f;
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -268,7 +272,7 @@ int fn_8026A698(u8* p, int i) {
         Mat3FromEuler(&m3, (const Vec3*)euler);
         Mat3Mul(&f.rot, &m3, &f.rot);
     }
-    fn_80176A24(3.0f);
+    fn_80176A24(lbl_80563D08);
     fn_80176A00(2);
     f32 k = MIN(1.0f, 3000.0f * (3.0f * s->t));
     f32 e;
