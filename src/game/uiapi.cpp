@@ -532,10 +532,10 @@ extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
         name = name + 1;
     }
     sprintf(buf, "#%s", name);
-    while (*(s32 *)((char *)entry + 4) != 0x7B) {
-        if (*(s32 *)((char *)entry + 4) == arg2 && *(char **)entry != 0 &&
-            (strcasecmp(*(char **)entry, name) == 0 ||
-             strcasecmp(*(char **)entry, buf) == 0)) return entry;
+    while (((MenuItem *)entry)->type != 0x7B) {
+        if (((MenuItem *)entry)->type == arg2 && ((MenuItem *)entry)->name != 0 &&
+            (strcasecmp(((MenuItem *)entry)->name, name) == 0 ||
+             strcasecmp(((MenuItem *)entry)->name, buf) == 0)) return entry;
         entry = (char *)entry + 0x14;
     }
     return 0;
@@ -2218,8 +2218,8 @@ int UIWidget::Slot78(void) {
 }
 
 void UIYesNoHandler::Enter(void) {
-    void * arg0 = (void *)this;
-    fn_80214CB4(*(u8 *)((char *)arg0 + 0x18) == 0);
+    UIYesNoHandler* arg0 = this;
+    fn_80214CB4(arg0->defaultNo == 0);
 }
 
 int UIYesNoHandler::Key(int arg1) {
