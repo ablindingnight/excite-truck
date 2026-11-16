@@ -218,6 +218,7 @@ void fn_80246CAC(f32 v) { fn_8020A5F8(v * lbl_8055F264); }
 
 // Timed menu widget (vtable lbl_803436C0): closes the menu after dur ms.
 class MenuTimer : public MenuState {
+    static const f32 FadeMilliseconds;
 public:
     MenuTimer(s32 ms, s32 m) {
         dur = ms;
@@ -351,6 +352,11 @@ public:
     s32 sel;         // offset 0x28
     f32 pos;         // offset 0x2C: eases toward sel
     CupText* text;   // offset 0x30
+
+private:
+    // Helper names unproven.
+    static inline const char* MexicoName() { return "MEXICO"; }
+    static inline const char* FijiName() { return "FIJI"; }
 };
 
 extern "C" {
@@ -1210,7 +1216,7 @@ inline void MenuTimer::Update(void) {
     if ((fade & kind) && fn_8020A640()) {
         int t = now - start;
         if (t > dur - 400) {
-            f32 f = (f32)(dur - t) / 400.0f;
+            f32 f = (f32)(dur - t) / FadeMilliseconds;
             f = MIN(1.0f, f);
             f = MAX(f, 0.0f);
             fn_80246CAC(f);
@@ -1237,6 +1243,8 @@ inline void MenuTimer::Update(void) {
         }
     }
 }
+
+const f32 MenuTimer::FadeMilliseconds = 400.0f;
 
 int MenuTimer::Key(int key) {
     s32 now = fn_802E2C20();
@@ -1313,7 +1321,7 @@ void CupSelect::Draw(void) {
         fn_802354A0(tracks, i, 30.0f + off, 70.0f, 0.0f, 140.0f, 140.0f, cur ? 0xFFFFFF00 : 0xC0202020);
         CupText* tx = text;
         tx->color = cur ? 0xFFFFFF00 : 0xC0202020;
-        fn_80234AFC(text, 100.0f + off - 20.0f, -86.0f, i == 0 ? "MEXICO" : "FIJI");
+        fn_80234AFC(text, 100.0f + off - 20.0f, -86.0f, i == 0 ? FijiName() : MexicoName());
     }
     f32 p = pos;
     pos = p + 0.05f * ((f32)sel - p);
