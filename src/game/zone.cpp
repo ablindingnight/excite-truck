@@ -1234,9 +1234,10 @@ int fn_8013CBC0(ZoneCar* zm, int car) {
     f32 c0;
     f32 c1;
     int nearA;
-    pos.x = t->pos.x + t->dt * t->vel.x;
-    pos.y = t->pos.y + t->vel.y * t->dt;
-    pos.z = t->pos.z + t->vel.z * t->dt;
+    f32 dt = t->dt;
+    pos.x = t->pos.x + t->vel.x * dt;
+    pos.y = t->pos.y + t->vel.y * dt;
+    pos.z = t->pos.z + t->vel.z * dt;
     p.x = pos.x;
     dir.x = t->dirX;
     dir.y = t->dirZ;
