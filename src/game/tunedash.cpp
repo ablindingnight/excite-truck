@@ -2,20 +2,10 @@
 // tunedash.val, edited with the arrow keys and faded out after a few seconds without input. Names
 // are guesses apart from the file names, element names and messages.
 #include "game/common.h"
+#include "game/textelem.h"
 #include "game/v2.h"
 #include "game/joy.h"
 #include "game/gart.h"
-
-struct TextElem {
-    TextElem(void) {}
-    const char* name;  // offset 0x0
-    V2 pos;            // offset 0x4
-    s32 elemJust;      // offset 0xC
-    f32 scale;         // offset 0x10
-    u32 just;          // offset 0x14
-    u32 color;         // offset 0x18
-    const char* defText;  // offset 0x1C
-};
 
 struct Box {
     const char* name;  // offset 0x0

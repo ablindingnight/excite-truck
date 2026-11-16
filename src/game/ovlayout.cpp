@@ -4,6 +4,7 @@
 // apart from the keys, messages and allocation tags.
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/textelem.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/dashhelper.h"
@@ -44,22 +45,6 @@ void fn_80145438(ArtElem* e, ValueNode* n);
 void fn_80145538(GartElem* e, ValueNode* n);
 void fn_80145670(GartSet* s, ValueNode* n);
 }
-
-struct ElemBase {
-    ElemBase(void) {}
-    const char* name;  // offset 0x0
-    V2 pos;            // offset 0x4
-    s32 elemJust;      // offset 0xC
-};
-
-// Text element (0x20).
-struct TextElem : ElemBase {
-    void Read(ValueNode* n) { fn_801455B8(this, n); }
-    f32 scale;            // offset 0x10
-    u32 just;             // offset 0x14
-    u32 color;            // offset 0x18
-    const char* defText;  // offset 0x1C
-};
 
 // Art element (0x28): a textured quad.
 // Elements with a size (art and boxes).

@@ -4,26 +4,12 @@
 // garage.val layout, fading out a few seconds after the last input. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/textelem.h"
 #include "game/v2.h"
 #include "game/gart.h"
 
 struct Camera {
     u8 pad[0x30];
-};
-
-struct ElemBase {
-    ElemBase(void) {}
-    const char* name;  // offset 0x0
-    V2 pos;            // offset 0x4
-    s32 elemJust;      // offset 0xC
-};
-
-// A text element of a layout (0x20).
-struct TextElem : ElemBase {
-    f32 scale;         // offset 0x10
-    u32 just;          // offset 0x14
-    u32 color;         // offset 0x18
-    const char* text;  // offset 0x1C
 };
 
 class ILayout {

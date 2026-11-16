@@ -3,6 +3,7 @@
 // and scales, dumping the world model, and the stats columns other units register. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/textelem.h"
 #include "game/v2.h"
 #include "game/gart.h"
 #include "game/plainvec.h"
@@ -16,17 +17,6 @@ public:
         x = x_;
         y = y_;
     }
-};
-
-struct TextElem {
-    TextElem(void) {}
-    const char* name;     // offset 0x0
-    V2 pos;               // offset 0x4
-    s32 elemJust;         // offset 0xC
-    f32 scale;            // offset 0x10
-    u32 just;             // offset 0x14
-    u32 color;            // offset 0x18
-    const char* defText;  // offset 0x1C
 };
 
 struct BoxElem {
