@@ -52,10 +52,7 @@ struct Viewport {
     u8 data[0x10];
 };
 
-struct Camera {
-    u8 data[0x30];
-};
-
+// Camera: common.h's PlainValMatrix.
 class GameOverlay {
 public:
     virtual ~GameOverlay(void) {}
@@ -197,8 +194,8 @@ void ResetOverlays(void);
 extern "C" {
 void fn_80011A50(void);
 f32 fn_801E7E18(void);
-void fn_80230B5C(Camera* cam);
-void fn_802C8638(Camera* cam);
+void fn_80230B5C(PlainValMatrix* cam);
+void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
 void fn_80161C18(void);
 int fn_801DF110(void);
@@ -1102,7 +1099,7 @@ void fn_80007210(void) {
 }
 
 void fn_80007238(void) {
-    Camera cam;
+    PlainValMatrix cam;
     lbl_8034EE84.info = fn_801E7E3C();
     lbl_8034EE84.time = fn_801E7E18();
     lbl_8034EE84.numViews = fn_801E85A4();
@@ -1130,7 +1127,7 @@ void fn_80007238(void) {
 }
 
 void fn_80007318(int) {
-    Camera cam;
+    PlainValMatrix cam;
     fn_80005C20();
     fn_80230B5C(&cam);
     fn_802C8638(&cam);

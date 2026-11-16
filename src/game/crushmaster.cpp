@@ -201,13 +201,9 @@ struct ZoneResults {
 
 extern "C" RaceCarRec* fn_8017960C(int id);
 
-struct Camera {
-    u8 pad0[0x24];
-    ValVec3 pos;  // offset 0x24
-};
-
+// Camera: common.h's PlainValMatrix.
 extern "C" {
-Camera* fn_802C86DC(void);
+PlainValMatrix* fn_802C86DC(void);
 void fn_8018F76C(RaceCarRec* car, int wheel);
 }
 
@@ -739,7 +735,7 @@ static inline f32 Parab(f32 t, f32 w) {
     return 1.0f - x * x / (w * w);
 }
 
-static inline ValVec3* CamPos(void) { return &fn_802C86DC()->pos; }
+static inline ValVec3* CamPos(void) { return &fn_802C86DC()->origin; }
 
 void fn_8017248C(int id) {
     RaceCarRec* car = fn_8017960C(id);
