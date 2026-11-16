@@ -56,23 +56,6 @@ public:
     virtual void vf44(void);
 };
 
-// A game sound.
-struct GameSound {
-    virtual ~GameSound(void);
-
-    u8 pad4[0x8];
-    Sound* dev;  // offset 0xC
-    s32 player;     // offset 0x10
-    u8 pad14[0x4];
-    u8 active;      // offset 0x18
-    u8 pad19[0x1E];
-    char name[0xD];  // offset 0x37
-    s32 cls;        // offset 0x44
-    u8 muted;       // offset 0x48
-    u8 pad49[0x1F];
-    f32 priority;   // offset 0x68
-};
-
 extern "C" {
 void fn_802067C8(GameSound* s, void* listeners, s32 n);
 void fn_80206824(GameSound* s, void* listeners, s32 n);
@@ -335,13 +318,13 @@ void SoundManager::Allocate(void) {
             GameSound* s = l->first[k];
             if (s->active) {
                 if (got[c] == 0) {
-                    s->muted = 1;
+                    s->paused = 1;
                 } else {
                     got[c]--;
-                    s->muted = 0;
+                    s->paused = 0;
                 }
             } else {
-                s->muted = 1;
+                s->paused = 1;
             }
         }
     }
@@ -361,8 +344,8 @@ void SoundManager::CheckPlaying(void) {
 }
 
 static int Louder(GameSound* a, GameSound* b) {
-    f32 pb = b->priority;
-    f32 pa = a->priority;
+    f32 pb = ((Sound3D*)b)->gain;
+    f32 pa = ((Sound3D*)a)->gain;
     int gt = pa > pb;
     if (a->cls == b->cls && (u32)(a->cls - 3) <= 1) {
         int p = fn_8026A344(0);

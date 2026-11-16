@@ -2,6 +2,7 @@
 // three sounds, which one plays depending on loading and race state, the goal-line sting after a race,
 // and the master volume fade. Names are guesses apart from the file names.
 #include "game/common.h"
+#include "game/sound.h"
 
 BOOL IsLoadingActive(void);
 BOOL IsLoadingFading(void);
@@ -33,65 +34,6 @@ void fn_8012E498(const char* name);
 void fn_8012DDA8(const char* name);
 s32 fn_802E2C20(void);  // milliseconds
 }
-
-class Sound2D {
-public:
-    virtual ~Sound2D(void);
-
-    void SetPitch(f32 v) {
-        if (v != pitch) {
-            pitchDirty = 1;
-            pitch = v;
-        }
-    }
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            volumeDirty = 1;
-            volume = v;
-        }
-    }
-    void SetPan(f32 v) {
-        if (v != pan) {
-            panDirty = 1;
-            pan = v;
-        }
-    }
-    void SetDepth(f32 v) {
-        if (v != depth) {
-            depthDirty = 1;
-            depth = v;
-        }
-    }
-    void Stop(void) {
-        stop = 1;
-        restart = 0;
-    }
-    void Play(void) {
-        start = 1;
-        loop = 0;
-        stop = 0;
-    }
-    void PlayLoop(void) {
-        stop = 0;
-        loop = 1;
-        start = 1;
-    }
-
-    f32 pitch;          // offset 0x4
-    f32 volume;         // offset 0x8
-    u8 pad0C[0x3D];
-    u8 start;           // offset 0x49
-    u8 stop;            // offset 0x4A
-    u8 loop;            // offset 0x4B
-    u8 restart;         // offset 0x4C
-    u8 volumeDirty;     // offset 0x4D
-    u8 pitchDirty;      // offset 0x4E
-    u8 pad4F[0x15];
-    f32 pan;            // offset 0x64
-    f32 depth;          // offset 0x68
-    u8 panDirty;        // offset 0x6C
-    u8 depthDirty;      // offset 0x6D
-};
 
 extern "C" Sound2D* fn_80207848(const char* name, int flags);
 

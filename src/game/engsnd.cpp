@@ -3,6 +3,7 @@
 // car, and all faded out while loading or after the race. Names are guesses apart from the keys and
 // messages.
 #include "game/common.h"
+#include "game/sound.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -20,64 +21,6 @@ int fn_80137C74(void);   // sound output mode
 
 int IsLoadingActive(void);
 void* operator new(size_t size, const char* tag);
-
-// A game sound (see sound.cpp).
-class GameSound {
-public:
-    virtual ~GameSound(void);
-    void SetPitch(f32 v) {
-        if (v != pitch) {
-            pitchDirty = 1;
-            pitch = v;
-        }
-    }
-    void SetVolume(f32 v) {
-        if (v != volume) {
-            volumeDirty = 1;
-            volume = v;
-        }
-    }
-    void Play(void) {
-        stop = 0;
-        loop = 1;
-        start = 1;
-    }
-
-    f32 pitch;   // offset 0x4
-    f32 volume;  // offset 0x8
-    void* dev;   // offset 0xC
-    s32 player;  // offset 0x10
-    u8 pad14[0x34];
-    u8 paused;        // offset 0x48
-    u8 start;         // offset 0x49
-    u8 stop;          // offset 0x4A
-    u8 loop;          // offset 0x4B
-    u8 restart;       // offset 0x4C
-    u8 volumeDirty;   // offset 0x4D
-    u8 pitchDirty;    // offset 0x4E
-    u8 pad4F[0x15];
-};
-
-class Sound2D : public GameSound {
-public:
-    void SetPan(f32 v) {
-        if (v != pan) {
-            panDirty = 1;
-            pan = v;
-        }
-    }
-    void SetDepth(f32 v) {
-        if (v != depth) {
-            depthDirty = 1;
-            depth = v;
-        }
-    }
-
-    f32 pan;        // offset 0x64
-    f32 depth;      // offset 0x68
-    u8 panDirty;    // offset 0x6C
-    u8 depthDirty;  // offset 0x6D
-};
 
 extern "C" {
 GameSound* fn_802077A4(const char* name, int cls, void* vel, void* pos);
@@ -286,7 +229,7 @@ inline void EngineSound::UpdateSample(f32 r, EngineSample* e, f32 t, f32 vol) {
     f32 gb = sb * e->throttle.gain;
     const struct { f32 value; } masterGain = {lbl_8055EDB8 * ga};
     f32 level = masterGain.value * gb;
-    e->snd->Play();
+    e->snd->PlayLoop();
     f32 pitch = r * e->invRpm;
     e->snd->SetPitch(pitch);
     f32 d = level - e->level;
