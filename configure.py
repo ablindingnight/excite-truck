@@ -1143,7 +1143,7 @@ config.libs.append(
             Object(NonMatching, "game/drone.cpp"),
             Object(NonMatching, "game/drivmod.cpp"),
             Object(NonMatching, "game/terchunk.cpp"),
-            Object(NonMatching, "game/cenvmap.cpp"),
+            Object(Matching, "game/cenvmap.cpp"),
             Object(NonMatching, "game/terrpick.cpp"),
             Object(Matching, "game/tunedash.cpp"),
             Object(Matching, "game/difficulty.cpp", extra_cflags=["-opt nocse"]),
