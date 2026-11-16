@@ -652,29 +652,33 @@ void fn_802E0D44(void* p) {
     SimpleHeap* h = lbl_8055FEE8;
     HeapBlock* b = (HeapBlock*)((u8*)p - (h->align + 1));
     HeapBlock** l;
-    HeapBlock* a;
-    HeapBlock** m;
     int merged;
-    HeapBlock* c;
+    HeapBlock** m;
     int adj;
+    HeapBlock* c;
+    HeapBlock* a;
     u32 al;
     HeapBlock** dst;
-    for (l = &h->used; *l; l = &(*l)->next) {
-        if (*l == b) {
-            *l = b->next;
+    HeapBlock** used;
+    for (used = &h->used; *used; used = &(*used)->next) {
+        if (*used == b) {
+            *used = b->next;
             break;
         }
     }
-    b->next = h->free;
-    h->free = b;
-    l = &h->free;
+    HeapBlock** seed = &h->free;
+    b->next = *seed;
+    *seed = b;
+    l = seed;
     do {
         merged = 0;
-        for (m = &h->free; *m; m = &(*m)->next) {
+        for (m = &h->free; (c = *m) != 0; m = &c->next) {
             a = *l;
             al = h->align;
-            c = *m;
-            adj = (u8*)a + al + 1 + a->size == (u8*)c || (u8*)c + al + 1 + c->size == (u8*)a;
+            adj = 1;
+            if ((u8*)a + al + 1 + a->size != (u8*)c && (u8*)c + al + 1 + c->size != (u8*)a) {
+                adj = 0;
+            }
             if (adj) {
                 dst = l;
                 if ((u8*)c + al + 1 + c->size == (u8*)a) {
