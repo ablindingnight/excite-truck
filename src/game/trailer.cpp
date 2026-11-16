@@ -4,6 +4,7 @@
 // for 5 seconds while the car is moving it is reglued behind the car. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -26,21 +27,6 @@ f32 PSVECDotProduct(const void* a, const void* b);
 }
 
 /* The vector without constructors (by-value copies are word copies). */
-struct PlainRVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct RVec3 : PlainRVec3 {
-    RVec3(void) {}
-    RVec3(f32 x_, f32 y_, f32 z_) {
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-};
-
 struct TRot {
     RVec3 axis[3];
 };

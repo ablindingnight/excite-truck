@@ -5,6 +5,7 @@
 // guesses apart from the strings.
 #include "game/common.h"
 #include "game/collshape.h"
+#include "game/rvec.h"
 #include <stdarg.h>
 
 void* operator new(size_t size, const char* tag);
@@ -214,16 +215,6 @@ struct EWSound {
     EWSound* next;   // offset 0x14
 };
 
-struct RVec3 {
-    RVec3(void) {}
-    RVec3(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x, y, z;
-};
-
 extern "C" void fn_8019EECC(void* v, RVec3* c);
 
 // The size fields sit in a base of their own: the derived vptr store comes after them.
@@ -270,7 +261,7 @@ public:
 class SphereShape : public CollShape {
 public:
     SphereShape(void* o, const void* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape((const CFrame*)m, (CollVolume*)o, 0x53504852, k, s), center(c) {
+        : CollShape((const CFrame*)m, (CollVolume*)o, 0x53504852, k, s) {
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;

@@ -3,6 +3,7 @@
 // fence-pole binding ("fencepole: binding to %p"). Some names are descriptive.
 #include "game/common.h"
 #include "game/collshape.h"
+#include "game/rvec.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -100,18 +101,6 @@ public:
     u8 pad28[0x3C - 0x28];
     f32 frame[12];  // offset 0x3C
     void Xform(CVec3* out, const CVec3* in);
-};
-
-struct RVec3 {
-    RVec3(void) {}
-    RVec3(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
 };
 
 // The rigid body (rigid.cpp); its vtable is emitted there.
@@ -459,7 +448,8 @@ struct RMtx;
 class SphereShape : public CollShape {
 public:
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape((const CFrame*)m, o, 'SPHR', k, s), center(c) {
+        : CollShape((const CFrame*)m, o, 'SPHR', k, s) {
+        center = c;
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;

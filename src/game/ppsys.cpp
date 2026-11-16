@@ -4,12 +4,7 @@
 // relaxes the constraints and resets the accelerations to gravity. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/vec3_init.h"
-
-struct RVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
+#include "game/rvec.h"
 
 struct RMtx {
     RVec3 rot[3];  // offset 0x0

@@ -4,6 +4,7 @@
 // against raw field offsets; the large routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/rvec.h"
 #include <string.h>
 #include <revolution/MTX/vec.h>
 
@@ -13,10 +14,6 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define B8(p, o) (*(bool*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
-
-struct RVec3 {
-    f32 x, y, z;
-};
 
 struct PFlags {
     u8 lvl : 3;

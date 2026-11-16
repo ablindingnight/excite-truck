@@ -4,12 +4,7 @@
 // is reused when free, else the oldest one is taken. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/vec3_init.h"
-
-struct RVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
+#include "game/rvec.h"
 
 struct RMtx {
     RVec3 rot[3];  // offset 0x0

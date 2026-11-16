@@ -2,14 +2,9 @@
 // the ground with spring/friction impulses, allocated from a pooled free store. Names are
 // guesses apart from the messages.
 #include "game/common.h"
+#include "game/rvec.h"
 #include "macros.h"
 #include <revolution/MTX.h>
-
-struct RVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct RMat33 {
     f32 m[3][3];

@@ -4,6 +4,7 @@
 // unpacks the velocity into the state packet and keeps the body in its collision-grid cell. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/rvec.h"
 
 extern "C" {
 void* memset(void* dst, int c, u32 n);
@@ -24,12 +25,6 @@ double cos(double x);
 void* operator new[](size_t size, const char* tag);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-struct RVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct RMat33 {
     RMat33(void) {}

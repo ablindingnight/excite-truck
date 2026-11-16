@@ -6,6 +6,7 @@
 // car is touching it. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/collshape.h"
+#include "game/rvec.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -49,23 +50,6 @@ public:
     virtual int HasChild(const char* name);           // 0x10
 };
 
-struct RVec3 {
-    RVec3(void) {}
-    RVec3(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    void Set(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
 struct RMtx {
     RVec3 rot[3];  // offset 0x0
     RVec3 pos;     // offset 0x24
@@ -80,7 +64,8 @@ extern "C" void fn_8019EECC(CollVolume* v, RVec3* c);
 class SphereShape : public CollShape {
 public:
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape((const CFrame*)m, o, 0x53504852, k, s), center(c) {
+        : CollShape((const CFrame*)m, o, 0x53504852, k, s) {
+        center = c;
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;

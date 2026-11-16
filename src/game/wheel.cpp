@@ -5,6 +5,7 @@
 // pose into the render buffer and its state into replay packets. Names are guesses apart from the string.
 #include "game/common.h"
 #include "game/collshape.h"
+#include "game/rvec.h"
 
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);
@@ -18,18 +19,6 @@ void* operator new(size_t size, const char* tag);
 extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-struct RVec3 {
-    RVec3(void) {}
-    RVec3(f32 a, f32 b, f32 c) {
-        x = a;
-        y = b;
-        z = c;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct GVec3 {
     f32 x;
@@ -56,7 +45,8 @@ extern "C" void fn_8019EECC(CollVolume* v, RVec3* c);
 class SphereShape : public CollShape {
 public:
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape((const CFrame*)m, o, 0x53504852, k, s), center(c) {
+        : CollShape((const CFrame*)m, o, 0x53504852, k, s) {
+        center = c;
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;

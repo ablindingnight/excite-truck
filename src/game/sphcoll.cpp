@@ -7,6 +7,7 @@
 // MATCHING-AID: this unit emits CollShapeIface's table (see game/collshape.h).
 #define COLLSHAPE_IFACE_DECL
 #include "game/collshape.h"
+#include "game/rvec.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -14,10 +15,6 @@
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
-
-struct RVec3 {
-    f32 x, y, z;
-};
 
 struct PVec3 {
     f32 v[3];
@@ -3831,8 +3828,8 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
     f32 h = F32(((const u8*)this), 0x28);
     f32 a = F32(((const u8*)this), 0x24) + h;
     RVec3 c[8] = {
-        {-a, -a, -h}, {-a, -a, h}, {-a, a, -h}, {-a, a, h},
-        {a, -a, -h},  {a, -a, h},  {a, a, -h},  {a, a, h},
+        RVec3(-a, -a, -h), RVec3(-a, -a, h), RVec3(-a, a, -h), RVec3(-a, a, h),
+        RVec3(a, -a, -h),  RVec3(a, -a, h),  RVec3(a, a, -h),  RVec3(a, a, h),
     };
     RVec3 w;
     *lo = ((CFrame*)PTR(((const u8*)this), 0xC))->t;
@@ -4079,11 +4076,11 @@ void MeshShape::vf10(u8* o) {
     if (S32(o, 0x18) == 'GRUP') {
         ((VGroup*)o)->v10(((u8*)this));
     } else if (S32(o, 0x18) == 'SPHR') {
-        RVec3 hits[64];
+        PlainRVec3 hits[64];  // plain storage: an array of the constructor type changes the registers
         int n = 64;
         u8* sph = o;
         f32 r = F32(sph, 0x24);
-        fn_801CF080(PTR(((u8*)this), 0x24), (RVec3*)(sph + 0x34), hits, &n, U32(((u8*)this), 0xC), lbl_8056234C * r);
+        fn_801CF080(PTR(((u8*)this), 0x24), (RVec3*)(sph + 0x34), (RVec3*)hits, &n, U32(((u8*)this), 0xC), lbl_8056234C * r);
         for (int i = 0; i < n; i++) {
             fn_8019AA18(sph, (u32)&hits[i], 0x6E, (u32)((u8*)this));
         }
