@@ -41,10 +41,6 @@ struct BodyDesc;
 class CollVolume;
 
 
-// Builds, in 's', a sphere bounding a box of half-size (hx, hy, hz).
-extern "C" void fn_8019F564(CollShape* s, const RMtx* m, const RVec3* c, CollVolume* o, f32 k, f32 skin, f32 a,
-                            f32 hx, f32 hy, f32 hz);
-
 static inline int IsCar(const CollVolume* o) {
     u32 t = o->type;
     int r = 0;
@@ -422,9 +418,7 @@ void fn_801D4294(MutPhob* p, const PhobConfig* c) {
         f32 h = 0.5f * c->a;
         p->shapeType = 0x53504852;
         p->shapeRadius = h;
-        if (p->shape) {
-            fn_8019F564(p->shape, &p->mtx, &center, p, c->spring, c->friction, 1.0f, h, h, h);
-        }
+        new (p->shape) BoxSphereShape(&p->mtx, &center, p, c->spring, c->friction, 1.0f, h, h, h);
         break;
     }
     default:

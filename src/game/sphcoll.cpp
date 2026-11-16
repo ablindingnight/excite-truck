@@ -298,13 +298,6 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r);
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
 // CollShape and its interface are declared in game/collshape.h.
 
-// MATCHING-AID (transitional): the builders still written as C store these vtables by their linker names
-// (BoxSphereShape: fn_8019F564 stays C, 94.9%; the sphere part fn_801A0258; trackobj's PolyShape and
-// StaticCollObject builders fn_801A324C / fn_801A4A8C, held while Codex works trackobj).
-extern "C" void* __vt__11SphereShape[];
-extern "C" void* __vt__14BoxSphereShape[];
-extern "C" void* __vt__9PolyShape[];
-extern "C" void* __vt__16StaticCollObject[];
 void fn_801A49FC(u8* p);
 void fn_801A49E8(u8* p);
 void fn_801A44D4(u8* l);
@@ -313,8 +306,6 @@ void fn_801A4868(u8* p, u32 v);
 
 void* operator new(size_t size, const char* tag);
 void operator delete(void* p);
-
-extern "C" void* __vt__9TubeShape[];  // MATCHING-AID: TubeVol::Init stores it by name
 
 ModuleTag lbl_8055E590;
 UnkStaticFFFF lbl_8055E598;
@@ -1991,36 +1982,6 @@ struct EdgeFrame {
 
 u8 lbl_80435020[0x30];  // scratch tube volume for box edges
 
-// Placement-constructs a tube volume (radius r, half length len) on frame f.
-// A tube volume built on the fly (same layout as the file tubes).
-struct TubeVol {
-    void* vt;           // offset 0x0
-    u32 owner;          // offset 0x4
-    u32 f8;             // offset 0x8
-    EdgeFrame* frame;   // offset 0xC
-    f32 f10;            // offset 0x10
-    f32 f14;            // offset 0x14
-    s32 type;           // offset 0x18
-    u32 f1C;            // offset 0x1C
-    s32 f20;            // offset 0x20
-    f32 r;              // offset 0x24
-    f32 len;            // offset 0x28
-
-    void Init(EdgeFrame* f, u32 o, f32 a, f32 b, f32 rr, f32 l) {
-        frame = f;
-        owner = o;
-        f8 = 0;
-        type = 'TUBE';
-        f10 = a;
-        f14 = b;
-        f20 = 100;
-        f1C = 0;
-        r = rr;
-        len = l;
-        vt = __vt__9TubeShape;
-    }
-};
-
 // p against box q's edges: the four edges along each of q's x and z axes are tested as tubes of
 // radius 0.75 inset by that radius.
 }
@@ -2033,7 +1994,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 extern "C" {
 
 int fn_8019E500(u8* p, u8* q) {
-    TubeVol* t;
+    TubeShape* t;
     RMtx fr = *(RMtx*)VE(q)->v50();
     BoxAxis ax[3] = {0};
     ax[0].dir = *(PVec3A*)&fr.rot.x.x;
@@ -2073,10 +2034,8 @@ int fn_8019E500(u8* p, u8* q) {
             e.pos.x += ab->dir.v[0] * k;
             e.pos.y += ab->dir.v[1] * k;
             e.pos.z += ab->dir.v[2] * k;
-            t = (TubeVol*)lbl_80435020;
-            if (t) {
-                t->Init(&e, U32(q, 0x4), ((BoxShape*)q)->stiff, ((BoxShape*)q)->skin, r, ai->ext);
-            }
+            t = new (lbl_80435020) TubeShape((CollVolume*)U32(q, 0x4), (const RMtx*)&e, ((BoxShape*)q)->stiff,
+                                             ((BoxShape*)q)->skin, r, ai->ext);
             hit |= fn_8019D618((u8*)t, p, 1, q);
         }
     }
@@ -2402,66 +2361,42 @@ static inline void InitVolume(u8* s, u32 id, u32 owner) {
 
 
 // Box volume (half sizes hx, hy, hz): a sphere bounding the largest half size, then the box fields.
-u8* fn_8019F564(u8* p, u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f32 a, f32 hx, f32 hy, f32 hz) {
+static inline f32 BoxBound(f32 hx, f32 hy, f32 hz) {  /* Helper name unproven */
     f32 big = hy > hz ? hy : hz;
-    big = hx > big ? hx : big;
-    f32 cy;
-    f32 cz = c->z;
-    cy = c->y;
-    f32 cx = c->x;
-    InitVolume(p, frame, owner);
-    ((BoxSphereShape*)p)->type = 'SPHR';
-    U32(p, 0x8) = 0;
-    ((BoxSphereShape*)p)->stiff = k;
-    ((BoxSphereShape*)p)->skin = skin;
-    ((BoxSphereShape*)p)->surface = 100;
-    ((BoxSphereShape*)p)->x1C = 0;
-    *(void**)p = __vt__11SphereShape;
-    ((BoxSphereShape*)p)->radius = 0.5f * big;
-    ((BoxSphereShape*)p)->f34 = 0.0f;
-    ((BoxSphereShape*)p)->f38 = 0.0f;
-    ((BoxSphereShape*)p)->f3C = 0.0f;
-    ((BoxSphereShape*)p)->f40 = 0.0f;
-    ((BoxSphereShape*)p)->f44 = 0.0f;
-    ((BoxSphereShape*)p)->f48 = 0.0f;
-    ((BoxSphereShape*)p)->b4C = 0;
-    ((BoxSphereShape*)p)->f50 = 0.0f;
-    ((BoxSphereShape*)p)->center.x = cx;
-    ((BoxSphereShape*)p)->center.y = cy;
-    ((BoxSphereShape*)p)->center.z = cz;
-    if (owner) {
-        fn_8019EECC((u8*)owner, (RVec3*)(p + 0x28));
-    }
-    *(void**)p = __vt__14BoxSphereShape;
-    ((BoxSphereShape*)p)->halfBox.x = a;
-    ((BoxSphereShape*)p)->halfBox.y = 0.5f * hx;
-    ((BoxSphereShape*)p)->halfBox.z = 0.5f * hy;
-    ((BoxSphereShape*)p)->cache[0] = 0.5f * hz;
-    ((BoxSphereShape*)p)->cache[1] = 0.0f;
-    ((BoxSphereShape*)p)->cache[2] = 0.0f;
-    ((BoxSphereShape*)p)->cache[3] = 0.0f;
-    ((BoxSphereShape*)p)->cache[4] = 0.0f;
-    ((BoxSphereShape*)p)->cache[5] = 0.0f;
-    ((BoxSphereShape*)p)->cache[6] = 0.0f;
-    ((BoxSphereShape*)p)->cache[7] = 0.0f;
-    ((BoxSphereShape*)p)->cache[8] = 0.0f;
-    ((BoxSphereShape*)p)->cache[9] = 0.0f;
-    ((BoxSphereShape*)p)->cache[10] = 0.0f;
-    ((BoxSphereShape*)p)->cache[11] = 0.0f;
-    ((BoxSphereShape*)p)->cache[12] = 0.0f;
-    ((BoxSphereShape*)p)->cache[13] = 0.0f;
-    ((BoxSphereShape*)p)->cache[14] = 0.0f;
-    ((BoxSphereShape*)p)->cache[15] = 0.0f;
-    ((BoxSphereShape*)p)->cache[16] = 0.0f;
-    ((BoxSphereShape*)p)->cache[17] = 0.0f;
-    ((BoxSphereShape*)p)->cache[18] = 0.0f;
-    ((BoxSphereShape*)p)->cache[19] = 0.0f;
-    ((BoxSphereShape*)p)->cache[20] = 0.0f;
-    ((BoxSphereShape*)p)->cache[21] = 0.0f;
-    ((BoxSphereShape*)p)->cache[22] = 0.0f;
-    ((BoxSphereShape*)p)->cache[23] = 0.0f;
-    ((BoxSphereShape*)p)->fC0 = 0.0f;
-    return p;
+    return hx > big ? hx : big;
+}
+
+BoxSphereShape::BoxSphereShape(const RMtx* m, const RVec3* c, CollVolume* o, f32 k, f32 skin, f32 a, f32 hx, f32 hy,
+                               f32 hz)
+    : SphereShape(o, m, k, skin, 0.5f * BoxBound(hx, hy, hz), *c) {
+    halfBox.x = a;
+    halfBox.y = 0.5f * hx;
+    halfBox.z = 0.5f * hy;
+    cache[0] = 0.5f * hz;
+    cache[1] = 0.0f;
+    cache[2] = 0.0f;
+    cache[3] = 0.0f;
+    cache[4] = 0.0f;
+    cache[5] = 0.0f;
+    cache[6] = 0.0f;
+    cache[7] = 0.0f;
+    cache[8] = 0.0f;
+    cache[9] = 0.0f;
+    cache[10] = 0.0f;
+    cache[11] = 0.0f;
+    cache[12] = 0.0f;
+    cache[13] = 0.0f;
+    cache[14] = 0.0f;
+    cache[15] = 0.0f;
+    cache[16] = 0.0f;
+    cache[17] = 0.0f;
+    cache[18] = 0.0f;
+    cache[19] = 0.0f;
+    cache[20] = 0.0f;
+    cache[21] = 0.0f;
+    cache[22] = 0.0f;
+    cache[23] = 0.0f;
+    fC0 = 0.0f;
 }
 
 void BoxSphereShape::vf28(void) {
@@ -2695,36 +2630,8 @@ void fn_801A0378(u8* p, u8* s);
 
 // Adds a sphere part (radius r) at c to the group.
 void fn_801A0258(u8* grp, const RVec3* c, const void*, f32 r, f32 s0, f32 s1, f32, f32) {
-    u8* s = (u8*)operator new(0x54, "SphereGroupPart");
-    if (s) {
-        f32 cz = c->z;
-        f32 cy = c->y;
-        f32 cx = c->x;
-        InitVolume(s, U32(grp, 0xC), U32(grp, 0x4));
-        U32(s, 0x8) = 0;
-        ((SphereShape*)s)->type = 'SPHR';
-        ((SphereShape*)s)->stiff = s0;
-        ((SphereShape*)s)->skin = s1;
-        ((SphereShape*)s)->surface = 100;
-        ((SphereShape*)s)->x1C = 0;
-        *(void**)s = __vt__11SphereShape;
-        ((SphereShape*)s)->radius = r;
-        ((SphereShape*)s)->f34 = 0.0f;
-        ((SphereShape*)s)->f38 = 0.0f;
-        ((SphereShape*)s)->f3C = 0.0f;
-        ((SphereShape*)s)->f40 = 0.0f;
-        ((SphereShape*)s)->f44 = 0.0f;
-        ((SphereShape*)s)->f48 = 0.0f;
-        ((SphereShape*)s)->b4C = 0;
-        ((SphereShape*)s)->f50 = 0.0f;
-        ((SphereShape*)s)->center.x = cx;
-        ((SphereShape*)s)->center.y = cy;
-        ((SphereShape*)s)->center.z = cz;
-        if (U32(s, 0x4)) {
-            fn_8019EECC((u8*)U32(s, 0x4), (RVec3*)(s + 0x28));
-        }
-    }
-    fn_801A0378(grp, s);
+    SphereShape* s = new ("SphereGroupPart") SphereShape((CollVolume*)U32(grp, 0x4), (const RMtx*)U32(grp, 0xC), s0, s1, r, *c);
+    fn_801A0378(grp, (u8*)s);
 }
 
 void fn_801A0378(u8* p, u8* s) {
@@ -3644,21 +3551,13 @@ void fn_80131818(ValueTable* table);        // release it
 
 // Polyhedron volume ('POLY') from the named table: extents, then its "plane" (n, k) and
 // "curve" (center, axis, radius) entries.
-u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
+PolyShape::PolyShape(u32 id, const char* name, f32 s0, f32 s1) : CollShape((const RMtx*)id, 0, 'POLY', s0, s1) {
+    u8* p = (u8*)this;
     u8* pl;
     ValueNode* n;
     ValueTable* t;
     ValueNode* ext;
     int i;
-    U32(p, 0xC) = id;
-    U32(p, 0x4) = 0;
-    U32(p, 0x8) = 0;
-    ((PolyShape*)p)->stiff = s0;
-    ((PolyShape*)p)->type = 'POLY';
-    ((PolyShape*)p)->skin = s1;
-    ((PolyShape*)p)->surface = 100;
-    ((PolyShape*)p)->x1C = 0;
-    *(void**)p = __vt__9PolyShape;
     t = fn_80131808(name);
     ((PolyShape*)p)->n = 0;
     ((PolyShape*)p)->fDC = 0;
@@ -3679,7 +3578,6 @@ u8* fn_801A324C(u8* p, u32 id, const char* name, f32 s0, f32 s1) {
         }
     }
     fn_80131818(t);
-    return p;
 }
 
 // Axis-aligned bounds of the extents (0x24 min, 0x30 max) through the frame, padded by 1.5 in x and z.
@@ -4064,16 +3962,15 @@ void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {
     }
 }
 
-u8* fn_801A4A8C(u8* p, u32 a, u32 b, u8* mesh, const Pose12s* pose, u32 c) {
-    ((StaticCollObject*)p)->f38 = a;
-    *(void**)p = __vt__16StaticCollObject;
-    ((u32&)((StaticCollObject*)p)->vol) = c;
-    ((StaticCollObject*)p)->f34 = b;
-    ((u8*&)((StaticCollObject*)p)->shape) = mesh;
-    *(Pose12s*)(p + 0x4) = *pose;
-    ((VMesh*)mesh)->v2C(p);
+StaticCollObject::StaticCollObject(u32 a, u32 b, CollShape* s, const PlainValMatrix* f, ValueNode* c) {
+    u8* p = (u8*)this;
+    f38 = a;
+    ((u32&)vol) = (u32)c;
+    f34 = b;
+    shape = s;
+    *(Pose12s*)(p + 0x4) = *(const Pose12s*)f;
+    ((VMesh*)s)->v2C(p);
     fn_801A48E4(p);
-    return p;
 }
 
 // Static object from file data (byte-swapped when `swap`); its collision volume is built in place at

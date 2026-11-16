@@ -485,7 +485,6 @@ void fn_802C7AD4(void);
 PVec* fn_802C9A40(void);
 OFrame* fn_802C86DC(void);
 f32 fn_802C88E8(const PVec* p);
-SolObj* fn_801A4A8C(SolObj* o, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node);
 void* fn_801B5D30(SolBuilder* b);
 void fn_801792F4(void*);
 SolFile* fn_801A4548(const char* name);
@@ -495,17 +494,13 @@ void fn_8029798C(const char* model, const OFrame* f, u32 mask, f32 extend, f32 c
 void fn_80297988(StaticObject* o);
 void fn_802981EC(const PlacedObj* o, f32 a);
 void fn_801F4DD4(const char* table, const PlacedObj* o);
-CollShape* fn_801A324C(void* p, void* o, const char* file, f32 k, f32 s);
 Sound3D* fn_802077A4(const char* name, int cls, const RVec3* vel, const PVec* pos);
 }
 
 // A new solid object, tagged for the allocator.
 inline SolObj* NewSolObj(s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node) {
-    SolObj* o = (SolObj*)operator new(sizeof(SolObj), "StaticObject");
-    if (o) {
-        o = fn_801A4A8C(o, id, event, s, f, node);
-    }
-    return o;
+    // SolObj is this unit's view of shapes.h's StaticCollObject; OFrame is the same 0x30 pose as PlainValMatrix.
+    return (SolObj*)new ("StaticObject") StaticCollObject(id, event, s, (const PlainValMatrix*)f, node);
 }
 
 extern f32 __float_epsilon[];
@@ -1831,11 +1826,7 @@ CollShape* fn_801FBF48(const ObstacleDesc* d) {
 
 CollShape* fn_801FBFE8(ObstacleDesc* d) {
     f32 k = 50000.0f;
-    void* p = operator new(0xE0, "ewcv:polyvol");
-    if (p) {
-        p = fn_801A324C(p, 0, d->shape.name, k, d->friction);
-    }
-    return (CollShape*)p;
+    return new ("ewcv:polyvol") PolyShape(0, d->shape.name, k, d->friction);
 }
 
 CollShape* fn_801FC048(const ObstacleDesc* d) {

@@ -96,10 +96,11 @@ public:
     f32 f58;     // offset 0x58
 };
 
-// A sphere bounding a box, with the box half sizes and a 24-float cache (vtable 0x80333A58; built by fn_8019F564,
+// A sphere bounding a box, with the box half sizes and a 24-float cache (vtable 0x80333A58; constructor at 0x8019F564,
 // which mutphob calls). Class name unproven.
 class BoxSphereShape : public SphereShape {
 public:
+    BoxSphereShape(const RMtx* m, const RVec3* c, CollVolume* o, f32 k, f32 skin, f32 a, f32 hx, f32 hy, f32 hz);
     virtual void vf14(void);
     virtual void vf28(void);
     virtual ~BoxSphereShape(void) {}
@@ -296,11 +297,12 @@ public:
 
 struct PolyPlane;  // a plane: normal + distance (sphcoll)
 
-// A convex polygon volume ('POLY', 0xE0 bytes; vtable 0x80333778; built by fn_801A3190 / fn_801A324C). Class name
+// A convex polygon volume ('POLY', 0xE0 bytes; vtable 0x80333778; built by fn_801A3190 / the named-table constructor at 0x801A324C). Class name
 // unproven.
 class PolyShape : public CollShape {
 public:
     PolyShape(u32 frame, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 k, f32 skin);
+    PolyShape(u32 frame, const char* name, f32 k, f32 skin);  // from the named .val table (trackobj)
     virtual void vf10(u8* other);
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
@@ -330,12 +332,13 @@ public:
     u8 pad28[0x40 - 0x28];
 };
 
-// A static world object with a collision volume (vtable 0x803336F8; built by fn_801A4A8C, or from file data):
+// A static world object with a collision volume (vtable 0x803336F8; built by the constructor at 0x801A4A8C, or from file data):
 // pose 0x04, its collision shape 0x3C (sol bounds and deletes it through it), the next object 0x44. Not a CollShape.
 // Declared last, as in sphcoll. Class and slot names unproven.
 class StaticCollObject {
 public:
     StaticCollObject(bool swap, u8* vol);  // from file data; its volume is built in place at vol
+    StaticCollObject(u32 a, u32 b, CollShape* s, const PlainValMatrix* f, ValueNode* c);  // trackobj's solid objects
     virtual u32 vf08(void);
     virtual void vf0C(void);
     virtual u8* vf10(void);
