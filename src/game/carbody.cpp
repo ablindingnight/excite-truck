@@ -1146,15 +1146,16 @@ void fn_801838C8(u8* p) {
     }
     CbJoint* j = ((CarBody*)p)->joints;
     for (int i = 0; i < 18; i++, j++) {
-        j->f10 = 0.0f;
-        j->fC = 0.0f;
-        j->w7C = 0;
-        j->b78 = 0;
+        j->spin = 0.0f;
+        j->angle = 0.0f;
+        j->state = 0;
+        j->valid = 0;
+        f32 (*q)[4] = (f32 (*)[4])&j->cur;  // both frames as six identity rows
         for (int k = 0; k < 6; k++) {
-            j->q[k][0] = 1.0f;
-            j->q[k][1] = 0.0f;
-            j->q[k][2] = 0.0f;
-            j->q[k][3] = 0.0f;
+            q[k][0] = 1.0f;
+            q[k][1] = 0.0f;
+            q[k][2] = 0.0f;
+            q[k][3] = 0.0f;
         }
     }
     cb->f1E3C = 0;

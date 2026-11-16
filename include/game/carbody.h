@@ -66,18 +66,34 @@ struct CbSetup {
     HVec modelOffset;                                                   // 0x12C
 };
 
-// One body joint / detachable part slot (18 of them at 0x152C; cardmg reads the same 0x80-byte records as its
-// DmgSlot: part frame 0x0, angle 0xC, spin 0x10, current and previous frames 0x18/0x48 written here as six identity
-// rows q[6][4], valid 0x78, state 0x7C).
+struct EVec {
+    f32 x, y, z;
+};
+
+struct DMat3 {
+    DMat3(void) {}
+    f32 m[9];
+};
+
+// A part's transform (rotation + position).
+struct DFrame {
+    DMat3 rot;  // offset 0x0
+    EVec pos;   // offset 0x24
+};
+
+// One body joint / detachable part slot (18 of them at 0x152C, 0x80 bytes; cardmg's damage parts). carbody resets
+// the two frames as six identity rows.
 struct CbJoint {
-    u8 pad0[0xC];
-    f32 fC;         // offset 0xC
-    f32 f10;        // offset 0x10
-    u8 pad14[4];
-    f32 q[6][4];    // offset 0x18
-    u8 b78;         // offset 0x78
-    u8 pad79[3];
-    s32 w7C;        // offset 0x7C
+    DFrame* on;     // offset 0x0, the part's bone frame (0: no such part)
+    s32 point;      // offset 0x4
+    s32 hub;        // offset 0x8, body point the hinge rides on
+    f32 angle;      // offset 0xC
+    f32 spin;       // offset 0x10
+    f32 limit;      // offset 0x14
+    DFrame cur;     // offset 0x18
+    DFrame prev;    // offset 0x48
+    u8 valid;       // offset 0x78
+    s32 state;      // offset 0x7C: 0 attached, 1 hanging, 2/4 flying, 3 gone
 };
 
 // The state handed to a body's SetState (vtable 0x54).

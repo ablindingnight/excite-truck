@@ -14,21 +14,6 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-struct EVec {
-    f32 x, y, z;
-};
-
-struct DMat3 {
-    DMat3(void) {}
-    f32 m[9];
-};
-
-// A part's transform (rotation + position).
-struct DFrame {
-    DMat3 rot;  // offset 0x0
-    EVec pos;   // offset 0x24
-};
-
 // One entry of the damageable part table.
 struct DamagePart {
     s32 kind;          // offset 0x0
@@ -141,20 +126,6 @@ static inline void MulVec(EVec* out, const EVec* in, const DMat3* m) {
     }
 }
 
-// A detachable part's live state (0x80 bytes from car + 0x152C).
-struct DmgSlot {
-    DFrame* on;     // offset 0x0, the part's bone frame (0: no such part)
-    s32 point;      // offset 0x4
-    s32 hub;        // offset 0x8, body point the hinge rides on
-    f32 angle;      // offset 0xC
-    f32 spin;       // offset 0x10
-    f32 limit;      // offset 0x14
-    DFrame cur;     // offset 0x18
-    DFrame prev;    // offset 0x48
-    u8 valid;       // offset 0x78
-    s32 state;      // offset 0x7C: 0 attached, 1 hanging, 2/4 flying, 3 gone
-};
-
 // A point of frame f in its parent's space.
 static inline void ToWorld(EVec* out, const EVec* in, const DFrame* f) {
     MulVec(out, in, &f->rot);
@@ -246,7 +217,7 @@ extern "C" {
 void fn_8018C5A0(u8* p, u8* desc) {
     memset(p + 0x152C, 0, 0x900);
     DamagePart* d = lbl_80332840;
-    DmgSlot* s = (DmgSlot*)(p + 0x152C);
+    CbJoint* s = (CbJoint*)(p + 0x152C);
     for (int i = 0; i < 17; i++, d++, s++) {
         if (fn_801E2CCC(((CarBody*)p)->model, d->name, &s->on)) {
             EVec v;
@@ -347,7 +318,7 @@ static inline void TurnEuler(DMat3* m, const EVec* e) {
 // wind and car motion about its hinge, damped and limited, and may snap shut and reattach; a bouncing
 // part (4) swings freely between its stops. Both rebuild the part frame on the car each tick.
 void fn_8018CB3C(u8* p) {
-    DmgSlot* s = (DmgSlot*)(p + 0x152C);
+    CbJoint* s = (CbJoint*)(p + 0x152C);
     const DamagePart* d = lbl_80332840;
     for (int i = 0; i < 17; i++, s++, d++) {
         if (s->on && s->state == 2) {
@@ -501,7 +472,7 @@ static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // lean/twist (when the deformation is on), hides the parts that are gone and lists the flying ones with their
 // frame interpolated to the tick.
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
-static inline void Loop1_fn_8018DA5C(DmgSlot* s, u8* m, DamagePart* tp, f32 t) {
+static inline void Loop1_fn_8018DA5C(CbJoint* s, u8* m, DamagePart* tp, f32 t) {
     if (s->state == 3) {
         U32(m, 0x29C) &= ~(1 << tp->bit);
     }
@@ -577,7 +548,7 @@ void fn_8018DA5C(u8* p, u8* m) {
     }
     U32(m, 0x29C) |= U32(p, 0x1E40);
     DamagePart* tp = lbl_80332840;
-    DmgSlot* s = (DmgSlot*)(p + 0x152C);
+    CbJoint* s = (CbJoint*)(p + 0x152C);
     f32 t = lbl_8055E460;
     S32(m, 0xA78) = 0;
     for (int i = 0; i < 17; i++) {
@@ -1050,7 +1021,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             }
         }
         LightPart* l;
-        DmgSlot* sl = (DmgSlot*)(p + 0x152C);
+        CbJoint* sl = (CbJoint*)(p + 0x152C);
         DamagePart* t = lbl_80332840;
         for (int i = 0; i < 17; i++) {
             if ((sl->on && sl->point > 0 && !sl->state) || sl->state == 2) {
@@ -1132,7 +1103,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         } else {
                             ((CarBody*)p)->a268C = 3;
                         }
-                        DmgSlot* hood = (DmgSlot*)(p + 0x152C);
+                        CbJoint* hood = (CbJoint*)(p + 0x152C);
                         if (hood->state != 3) {
                             hood->state = 2;
                             hood->valid = 0;
