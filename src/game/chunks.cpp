@@ -268,38 +268,48 @@ void fn_80292628(void) {
     }
 }
 
-static inline f32 SinF(f32 v) { return (f32)sin(v); }
-
-static inline f32 Term_hm(f32 n, f32 f, f32 k) { return n * (f * k); }  /* Helper name unproven */
 void fn_80292698(void) {
     f32 t = fn_801E7E18();
     Spin* s = lbl_804B4030;
     for (int i = 0; i < 6; i++, s++) {
         PVec v;
+        // MATCHING-AID: this declaration order and the three named products (yy, ky, zz) give retail's
+        // float registers and schedule (98.52); the source form is unproven.
+        f32 z;
+        f32 x;
+        f32 sn;
+        f32 inv;
+        f32 y;
+        f32 ang;
+        f32 yy;
+        f32 k;
+        f32 c;
+        f32 zz;
+        f32 ky;
         v.x = s->axis.x * (t * s->speed);
         v.y = s->axis.y * (t * s->speed);
         v.z = s->axis.z * (t * s->speed);
-        f32 ang = PSVECMag(&v);
+        ang = PSVECMag(&v);
         if (ang > 0.0001f) {
-            f32 inv = 1.0f / ang;
-            f32 x = inv * v.x;
-            f32 z;
-            f32 y = inv * v.y;
+            inv = 1.0f / ang;
+            x = inv * v.x;
+            y = inv * v.y;
             z = inv * v.z;
-            f32 sn = SinF(ang);
-            f32 k;
-            f32 c = cos(ang);
+            sn = (f32)sin(ang);
+            c = cos(ang);
             k = 1.0f - c;
-            f32 s_rot_x_y = y * (k * x) + z * sn;
+            yy = y * y;
+            ky = k * y;
+            zz = z * z;
             s->rot.x.x = c + k * (x * x);
-            s->rot.x.y = s_rot_x_y;
+            s->rot.x.y = sn * z + y * (k * x);
             s->rot.x.z = z * (k * x) - sn * y;
             s->rot.y.x = y * (k * x) - sn * z;
-            s->rot.y.y = c + k * (y * y);
-            s->rot.y.z = z * (k * y) + sn * x;
+            s->rot.y.y = c + k * yy;
+            s->rot.y.z = z * ky + sn * x;
             s->rot.z.x = z * (k * x) + sn * y;
-            s->rot.z.z = c + Term_hm(k, z, z);
-            s->rot.z.y = z * (k * y) - sn * x;
+            s->rot.z.y = z * ky - sn * x;
+            s->rot.z.z = c + k * zz;
         } else {
             s->rot.x.x = 1.0f;
             s->rot.x.y = 0.0f;
