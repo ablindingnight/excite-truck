@@ -7,6 +7,7 @@
 #include "game/rmtx.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/shapes.h"
 
 extern "C" {
 double sqrt(double x);
@@ -202,48 +203,6 @@ public:
 extern "C" BSound* fn_802077A4(const char* name, int prio, const RVec3* vel, const RVec3* pos);
 
 struct RPacket;
-extern "C" void fn_8019EECC(CollVolume* p, RVec3* v);
-
-class SphereShape : public CollShape {
-public:
-    SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c) : CollShape((const CFrame*)m, o, 0x53504852, k, s) {
-        center = c;
-        radius = r;
-        f34 = 0.0f;
-        f38 = 0.0f;
-        f3C = 0.0f;
-        f40 = 0.0f;
-        f44 = 0.0f;
-        f48 = 0.0f;
-        b4C = 0;
-        f50 = 0.0f;
-        center.x = c.x;
-        center.y = c.y;
-        center.z = c.z;
-        if (o) {
-            fn_8019EECC(o, &center);
-        }
-    }
-    virtual ~SphereShape(void);
-    virtual void vf0C(void);
-    virtual void vf10(u8* other);
-    virtual void vf14(void);
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual void vf28(void);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    f32 radius;    // offset 0x24
-    RVec3 center;  // offset 0x28
-    f32 f34;       // offset 0x34
-    f32 f38;       // offset 0x38
-    f32 f3C;       // offset 0x3C
-    f32 f40;       // offset 0x40
-    f32 f44;       // offset 0x44
-    f32 f48;       // offset 0x48
-    u8 b4C;        // offset 0x4C
-    f32 f50;       // offset 0x50
-};
 
 struct BodyDesc {
     u8 pad0[0x8];

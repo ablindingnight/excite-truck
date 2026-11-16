@@ -7,6 +7,7 @@
 #include "game/rmtx.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/shapes.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -353,7 +354,6 @@ public:
 static inline const RVec3* VecAddr(const RVec3& v) { return &v; }  // OrientedBoxShape takes its centre by pointer
 
 extern "C" {
-void fn_8019EECC(u8* owner, ObVec3* c);
 void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 k, f32 skin, f32 m, f32 im);
 void fn_801A0444(CollShape* grp, CollShape* box);
 // MATCHING-AID: obstacle-wall:box still calls OrientedBoxShape's constructor by its linker name: its centre
@@ -402,49 +402,6 @@ static inline ObVec3 MakeVec(f32 x, f32 y, f32 z) {
     v.y = y;
     return v;
 }
-
-// A sphere ('SPHR', 0x54 bytes).
-class SphereShape : public CollShape {
-public:
-    SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape((const CFrame*)m, o, 'SPHR', k, s) {
-        center = c;
-        radius = r;
-        f34 = 0.0f;
-        f38 = 0.0f;
-        f3C = 0.0f;
-        f40 = 0.0f;
-        f44 = 0.0f;
-        f48 = 0.0f;
-        b4C = 0;
-        f50 = 0.0f;
-        center.x = c.x;
-        center.y = c.y;
-        center.z = c.z;
-        if (o) {
-            fn_8019EECC((u8*)o, (ObVec3*)&center);
-        }
-    }
-    virtual void vf0C(void);
-    virtual void vf10(u8* other);
-    virtual void vf14(void);
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual void vf28(void);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    virtual ~SphereShape(void) {}
-    f32 radius;     // offset 0x24
-    RVec3 center;   // offset 0x28
-    f32 f34;        // offset 0x34
-    f32 f38;        // offset 0x38
-    f32 f3C;        // offset 0x3C
-    f32 f40;        // offset 0x40
-    f32 f44;        // offset 0x44
-    f32 f48;        // offset 0x48
-    u8 b4C;         // offset 0x4C
-    f32 f50;        // offset 0x50
-};
 
 static inline f32 ObAbsDiff(f32 a, f32 b) { return (f32)__fabs(a - b); }
 

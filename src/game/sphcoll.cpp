@@ -9,6 +9,7 @@
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/rigid.h"
+#include "game/shapes.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -307,21 +308,6 @@ int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
 void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r);
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
 // CollShape and its interface are declared in game/collshape.h.
-
-// A sphere shape (vtable __vt__11SphereShape): radius 0x24, local centre 0x28, world centre 0x34.
-class SphereShape : public CollShape {
-public:
-    SphereShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
-    virtual void vf0C(void);
-    virtual void vf10(u8* other);
-    virtual void vf14(void);
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual void vf28(void);
-    virtual void vf38(RVec3* lo, RVec3* hi) const;
-    virtual f32 Radius(void);
-    virtual void vf4C(void);
-    virtual ~SphereShape(void) {}
-};
 
 // A flat sphere ('FLSR'; vtable __vt__15FlatSphereShape). Built only by obstacles' inlined constructor.
 class FlatSphereShape : public SphereShape {
