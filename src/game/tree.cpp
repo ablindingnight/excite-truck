@@ -6,6 +6,7 @@
 // out between 0.525 and 0.625) and the shadow pass, plus the preload job. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/collshape.h"
 
 extern "C" {
 double sqrt(double x);
@@ -242,59 +243,29 @@ struct TPos2 {
 extern "C" void* fn_802BA580(ValueNode* cfg, const TPos2* p, f32 r);
 extern "C" void fn_802BAF98(void* p, u8 on);
 
-class CollShape {
-public:
-    CollShape(u32 t, f32 k, f32 s) {
-        mtx = 0;
-        owner = 0;
-        a8 = 0;
-        type = t;
-        stiff = k;
-        skin = s;
-        a20 = 100;
-        a1C = 0;
-    }
-    virtual ~CollShape(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void) = 0;
-    virtual f32 Radius(void);    // 0x3C
-    virtual void SetSurface(int id);  // 0x40 (sphcoll SetSurface__9CollShapeFi)
-    void* owner;       // offset 0x4
-    s32 a8;            // offset 0x8
-    const TMtx* mtx;   // offset 0xC
-    f32 stiff;         // offset 0x10
-    f32 skin;          // offset 0x14
-    u32 type;          // offset 0x18
-    s32 a1C;           // offset 0x1C
-    s32 a20;           // offset 0x20
-};
-
 // The size fields sit in a base of their own: the derived vptr store comes after them.
 class TubeBase : public CollShape {
 public:
-    TubeBase(f32 k, f32 r, f32 h) : CollShape('TUBE', k, 0.2f) {
+    TubeBase(f32 k, f32 r, f32 h) : CollShape(0, 0, 'TUBE', k, 0.2f) {
         rad = r;
         half = h;
     }
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~TubeBase(void) {}
 };
 
 class TubeShape : public TubeBase {
 public:
     TubeShape(f32 k, f32 r, f32 h) : TubeBase(k, r, h) {}
-    virtual ~TubeShape(void);
-    virtual void vf38(void);
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual void vf4C(void);
+    virtual ~TubeShape(void) {}
 };
 
 extern "C" TreeVol* fn_801FA8E0(CollShape* s, const TMtx* m, u8* hit);

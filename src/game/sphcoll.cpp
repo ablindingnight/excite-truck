@@ -4,6 +4,9 @@
 // field offsets; the large collide routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+// MATCHING-AID: this unit emits CollShapeIface's table (see game/collshape.h).
+#define COLLSHAPE_IFACE_DECL
+#include "game/collshape.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -314,74 +317,7 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r);
 void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r);
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
-// The collision-shape interface: twelve pure slots (the destructor and vf0C-vf34). Its vtable is the 14 zero
-// words after CollShape's (0x80333BE8); nothing stores it (its inlined constructor's vptr store is dead).
-// Class and method names unproven.
-class CollShapeIface {
-public:
-    virtual ~CollShapeIface(void) = 0;
-    virtual void vf0C(void) = 0;
-    virtual void vf10(u8* other) = 0;
-    virtual void vf14(void) = 0;
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) = 0;
-    virtual void vf1C(void) = 0;
-    virtual void vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g) = 0;
-    virtual void vf24(const RVec3* v) = 0;
-    virtual void vf28(void) = 0;
-    virtual void vf2C(u8* data) = 0;
-    virtual u32 vf30(void) = 0;
-    virtual void vf34(CFrame* frame) = 0;
-};
-inline CollShapeIface::~CollShapeIface(void) {}
-
-// A collision shape (vtable __vt__9CollShape). The empty slots live in other units: vf0C and vf28 in collvol,
-// vf14 in rigid, vf48 in carbody, vf4C in phob; the inline dtor and SetSurface have their kept copies in betarace.
-class CollShape : public CollShapeIface {
-public:
-    CollShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
-    // Parameter form, inlined into every builder; store order as mutphob's copy (the only order that keeps
-    // SphereGroup and PolyShape identical).
-    CollShape(u32 frame_, u32 owner_, s32 type_, f32 k, f32 s) {
-        frame = (CFrame*)frame_;
-        owner = (u8*)owner_;
-        data = 0;
-        type = type_;
-        stiff = k;
-        skin = s;
-        surface = 100;
-        x1C = 0;
-    }
-    // Overrides of the interface slots (their order here does not change the layout). One defined in this unit
-    // comes first, so this unit emits the vtable, as retail does.
-    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
-    virtual void vf1C(void);
-    virtual void vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
-    virtual void vf24(const RVec3* v);
-    virtual void vf2C(u8* data);
-    virtual u32 vf30(void);
-    virtual void vf34(CFrame* frame);
-    virtual ~CollShape(void) {}
-    virtual void vf0C(void);
-    virtual void vf10(u8* other) = 0;
-    virtual void vf14(void);
-    virtual void vf28(void);
-    // New slots 0x38-0x4C.
-    virtual void vf38(RVec3* lo, RVec3* hi) const = 0;
-    virtual f32 Radius(void) = 0;
-    virtual void SetSurface(int m) { surface = m; }
-    virtual void vf44(u32 v);
-    virtual void vf48(void);
-    virtual void vf4C(void);
-
-    u8* owner;       // 0x04
-    u8* data;        // 0x08
-    CFrame* frame;   // 0x0C
-    f32 stiff;       // 0x10
-    f32 skin;        // 0x14
-    s32 type;        // 0x18
-    u32 x1C;         // 0x1C
-    s32 surface;     // 0x20
-};
+// CollShape and its interface are declared in game/collshape.h.
 
 // A sphere shape (vtable __vt__11SphereShape): radius 0x24, local centre 0x28, world centre 0x34.
 class SphereShape : public CollShape {
@@ -481,7 +417,7 @@ class BoxShape : public CollShape {
 public:
     BoxShape(u32 data, u32 swap);  // from file data, byte-swapped when `swap`
     // Parameter form (half sizes x, y, z), inlined into OrientedBoxShape's constructor.
-    BoxShape(u32 frame, u32 owner, f32 k, f32 skin, f32 x, f32 y, f32 z) : CollShape(frame, owner, 'BOX ', k, skin) {
+    BoxShape(u32 frame, u32 owner, f32 k, f32 skin, f32 x, f32 y, f32 z) : CollShape((const CFrame*)frame, (CollVolume*)owner, 'BOX ', k, skin) {
         F32(this, 0x24) = x;
         F32(this, 0x28) = y;
         F32(this, 0x2C) = z;
@@ -2940,7 +2876,7 @@ void OffsetSphereShape::vf28(void) {
     U8(p, 0x78) = 0;
 }
 
-SphereGroup::SphereGroup(u32 a, u32 b) : CollShape(a, b, 'GRUP', 0.0f, 0.0f) {
+SphereGroup::SphereGroup(u32 a, u32 b) : CollShape((const CFrame*)a, (CollVolume*)b, 'GRUP', 0.0f, 0.0f) {
     u8* p = (u8*)this;
     F32(p, 0x170) = 0.0f;
     F32(p, 0x178) = 0.0f;
@@ -3697,7 +3633,7 @@ void OrientedBoxShape::vf0C(void) {
     F32(p, 0x70) = F32(p, 0x70) + f->t.z;
 }
 
-RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape(a, c, 'RAGD', lbl_805622E0, lbl_805622E0) {
+RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape((const CFrame*)a, (CollVolume*)c, 'RAGD', lbl_805622E0, lbl_805622E0) {
     u8* p = (u8*)this;
     U32(p, 0x30) = b;
     fn_801A2674(p, r, 0, -1);
@@ -3919,7 +3855,7 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
 void RingVol::vf4C(void) {
     u8* p = (u8*)this; fn_801E3FC8(PTR(p, 0xC) + 0x24, F32(p, 0x24) + F32(p, 0x28), lbl_8055E598.value); }
 
-PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape(a, 0, 'POLY', f1, f2) {
+PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape((const CFrame*)a, (CollVolume*)0, 'POLY', f1, f2) {
     u8* p = (u8*)this;
     U32(p, 0xDC) = 0;
     S32(p, 0xBC) = n;
@@ -4111,7 +4047,7 @@ struct MeshRes {
 };
 
 // Mesh volume ('PMSH') from the named mesh: bounding box min (0x28) / max (0x34) over its vertices.
-MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape(id, owner, 'PMSH', 1.0f, 1.0f) {
+MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape((const CFrame*)id, (CollVolume*)owner, 'PMSH', 1.0f, 1.0f) {
     u8* p = (u8*)this;
     MeshRes* m = (MeshRes*)fn_801CFEAC(name);
     PTR(p, 0x24) = (u8*)m;

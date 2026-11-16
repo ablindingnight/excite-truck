@@ -2,6 +2,7 @@
 // transform (and last frame's), plus the box volume ("box-volume" shapes). Some CollVolume virtuals live in
 // the neighbouring physics object unit. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/collshape.h"
 
 extern "C" {
 f32 PSVECMag(const void* v);
@@ -41,45 +42,9 @@ struct CMtx {
     CVec3 pos;     // offset 0x24
 };
 
-class CollShape {
-public:
-    CollShape(const CMtx* m) {
-        mtx = m;
-        owner = 0;
-        a8 = 0;
-        f18 = 0x424F5820;
-        stiff = 50000.0f;
-        skin = 0.2f;
-        a20 = 100;
-        a1C = 0;
-    }
-    virtual ~CollShape(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void);
-    virtual f32 Radius(void);  // 0x3C
-    class CollVolume* owner;  // offset 0x4
-    s32 a8;          // offset 0x8
-    const CMtx* mtx;  // offset 0xC
-    f32 stiff;       // offset 0x10
-    f32 skin;        // offset 0x14
-    u32 f18;         // offset 0x18
-    s32 a1C;         // offset 0x1C
-    s32 a20;         // offset 0x20
-};
-
 class BoxShape : public CollShape {
 public:
-    BoxShape(const CMtx* m, f32 x, f32 y, f32 z) : CollShape(m) {
+    BoxShape(const CMtx* m, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, 0, 'BOX ', 50000.0f, 0.2f) {
         half.x = x;
         half.y = y;
         half.z = z;
@@ -89,6 +54,13 @@ public:
     CVec3 half;  // offset 0x24
     f32 radius;  // offset 0x30
     s32 a34;     // offset 0x34
+    virtual void vf10(u8* other);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~BoxShape(void) {}
+    virtual u32 vf50(void);
 };
 
 // The volume description (named as the RigidBody family names it; unproven).
@@ -216,7 +188,8 @@ void CollVolume::Reset(void) {
     fn_801E9DC4(hint);
 }
 
-void CollShape::vf28(void) {}  // empty; slot 0x28 of every sphcoll shape table
+// CollShape::vf28 (inline, game/collshape.h): retail keeps its weak copy here (0x80179EE4), this unit being the
+// first linked one whose vtable needs it.
 
 CollVolume::~CollVolume(void) {
     int i;
@@ -351,7 +324,7 @@ void CollVolume::Transform(void) {
     }
 }
 
-void CollShape::vf0C(void) {}  // empty; slot 0x0C of the non-sphere shape tables
+// CollShape::vf0C (inline, game/collshape.h): retail keeps its weak copy here (0x8017A800).
 
 s32 CollVolume::vf34(RPacket* p) {
     f32 v[3];

@@ -4,6 +4,7 @@
 // with a small torque, and is parked below the world (y -500) when idle or off the ground. Also packs its
 // pose into the render buffer and its state into replay packets. Names are guesses apart from the string.
 #include "game/common.h"
+#include "game/collshape.h"
 
 extern "C" {
 void PSVECCrossProduct(const void* a, const void* b, void* out);
@@ -52,41 +53,10 @@ class CollVolume;
 
 extern "C" void fn_8019EECC(CollVolume* v, RVec3* c);
 
-class CollShape {
-public:
-    CollShape(CollVolume* o, const RMtx* m, u32 t, f32 k, f32 s) {
-        mtx = m;
-        owner = o;
-        a8 = 0;
-        type = t;
-        stiff = k;
-        skin = s;
-        a20 = 100;
-        a1C = 0;
-    }
-    virtual ~CollShape(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void Wake(void);  // 0x28
-    CollVolume* owner;  // offset 0x4
-    s32 a8;             // offset 0x8
-    const RMtx* mtx;    // offset 0xC
-    f32 stiff;          // offset 0x10
-    f32 skin;           // offset 0x14
-    u32 type;           // offset 0x18
-    s32 a1C;            // offset 0x1C
-    s32 a20;            // offset 0x20
-};
-
 class SphereShape : public CollShape {
 public:
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape(o, m, 0x53504852, k, s), center(c) {
+        : CollShape((const CFrame*)m, o, 0x53504852, k, s), center(c) {
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;
@@ -103,7 +73,15 @@ public:
             fn_8019EECC(o, &center);
         }
     }
-    virtual ~SphereShape(void);
+    virtual void vf0C(void);
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf28(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~SphereShape(void) {}
     f32 radius;    // offset 0x24
     RVec3 center;  // offset 0x28
     f32 f34;       // offset 0x34
@@ -353,7 +331,7 @@ void Wheel::Reset(void) {
     SetActive(1);
     CollShape* s = Shape();
     if (s) {
-        s->Wake();
+        s->vf28();  // slot 0x28 (wakes the shape)
         ((SphereShape*)s)->radius = 1.0f;
     }
     lbl_8055E654 = 0;

@@ -2,6 +2,7 @@
 // static and dynamic obstacle rigid bodies, the extents/plane/polyvol/pmshvol readers and the
 // fence-pole binding ("fencepole: binding to %p"). Some names are descriptive.
 #include "game/common.h"
+#include "game/collshape.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -454,49 +455,11 @@ static inline ObVec3 MakeVec(f32 x, f32 y, f32 z) {
 
 struct RMtx;
 
-// A collision shape on a volume's frame (same layout as in mutphob).
-class CollShape {
-public:
-    CollShape(CollVolume* o, const RMtx* m, u32 t, f32 k, f32 s) {
-        mtx = m;
-        owner = o;
-        a8 = 0;
-        type = t;
-        stiff = k;
-        skin = s;
-        a20 = 100;
-        a1C = 0;
-    }
-    virtual ~CollShape(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void) = 0;
-    virtual f32 Radius(void);    // 0x3C
-    virtual void SetSurface(int id);  // 0x40 (sphcoll SetSurface__9CollShapeFi)
-    CollVolume* owner;  // offset 0x4
-    s32 a8;             // offset 0x8
-    const RMtx* mtx;    // offset 0xC
-    f32 stiff;          // offset 0x10
-    f32 skin;           // offset 0x14
-    u32 type;           // offset 0x18
-    s32 a1C;            // offset 0x1C
-    s32 a20;            // offset 0x20
-};
-
 // A sphere ('SPHR', 0x54 bytes).
 class SphereShape : public CollShape {
 public:
     SphereShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, const RVec3& c)
-        : CollShape(o, m, 'SPHR', k, s), center(c) {
+        : CollShape((const CFrame*)m, o, 'SPHR', k, s), center(c) {
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;
@@ -513,8 +476,15 @@ public:
             fn_8019EECC((u8*)o, (ObVec3*)&center);
         }
     }
-    virtual ~SphereShape(void);
-    virtual void vf38(void);
+    virtual void vf0C(void);
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf28(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~SphereShape(void) {}
     f32 radius;     // offset 0x24
     RVec3 center;   // offset 0x28
     f32 f34;        // offset 0x34
@@ -552,15 +522,20 @@ public:
 // A box ('BOX ', 0x38 bytes) with half extents (hx, hy, hz) and a bounding radius.
 class BoxShape : public CollShape {
 public:
-    BoxShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape(o, m, 'BOX ', k, s) {
+    BoxShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 x, f32 y, f32 z) : CollShape((const CFrame*)m, o, 'BOX ', k, s) {
         hx = x;
         hy = y;
         hz = z;
         a34 = 0;
         bound = 0.2f + (f32)sqrt(z * z + (x * x + y * y));
     }
-    virtual ~BoxShape(void);
-    virtual void vf38(void);
+    virtual void vf10(u8* other);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~BoxShape(void) {}
+    virtual u32 vf50(void);
     f32 hx, hy, hz;  // offset 0x24
     f32 bound;       // offset 0x30
     s32 a34;         // offset 0x34
@@ -568,11 +543,14 @@ public:
 
 class TubeBase : public CollShape {
 public:
-    TubeBase(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : CollShape(o, m, 'TUBE', k, s) {
+    TubeBase(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : CollShape((const CFrame*)m, o, 'TUBE', k, s) {
         rad = r;
         half = h;
     }
-    virtual ~TubeBase(void);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
+    virtual ~TubeBase(void) {}
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28: half the length between the end spheres
 };
@@ -581,8 +559,11 @@ public:
 class TubeShape : public TubeBase {
 public:
     TubeShape(CollVolume* o, const RMtx* m, f32 k, f32 s, f32 r, f32 h) : TubeBase(o, m, k, s, r, h) {}
-    virtual ~TubeShape(void);
-    virtual void vf38(void);
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual void vf4C(void);
+    virtual ~TubeShape(void) {}
 };
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }

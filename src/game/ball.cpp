@@ -3,6 +3,7 @@
 // hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/collshape.h"
 
 extern "C" {
 double sqrt(double x);
@@ -224,46 +225,9 @@ extern "C" BSound* fn_802077A4(const char* name, int prio, const BVec3* vel, con
 class Phob;
 extern "C" void fn_8019EECC(Phob* p, BVec3* v);
 
-class CollShape {
-public:
-    CollShape(Phob* o, const BMtx* m, u32 t, f32 k, f32 s) {
-        mtx = m;
-        owner = o;
-        a8 = 0;
-        type = t;
-        stiff = k;
-        skin = s;
-        a20 = 100;
-        a1C = 0;
-    }
-    virtual ~CollShape(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void) = 0;
-    virtual f32 Radius(void);    // 0x3C
-    virtual void SetSurface(int id);  // 0x40 (sphcoll SetSurface__9CollShapeFi)
-    Phob* owner;      // offset 0x4
-    s32 a8;           // offset 0x8
-    const BMtx* mtx;  // offset 0xC
-    f32 stiff;        // offset 0x10
-    f32 skin;         // offset 0x14
-    u32 type;         // offset 0x18
-    s32 a1C;          // offset 0x1C
-    s32 a20;          // offset 0x20
-};
-
 class SphereShape : public CollShape {
 public:
-    SphereShape(Phob* o, const BMtx* m, f32 k, f32 s, f32 r, const BVec3& c) : CollShape(o, m, 0x53504852, k, s), center(c) {
+    SphereShape(Phob* o, const BMtx* m, f32 k, f32 s, f32 r, const BVec3& c) : CollShape((const CFrame*)m, (CollVolume*)o, 0x53504852, k, s), center(c) {
         radius = r;
         f34 = 0.0f;
         f38 = 0.0f;
@@ -281,7 +245,14 @@ public:
         }
     }
     virtual ~SphereShape(void);
-    virtual void vf38(void);
+    virtual void vf0C(void);
+    virtual void vf10(u8* other);
+    virtual void vf14(void);
+    virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
+    virtual void vf28(void);
+    virtual void vf38(RVec3* lo, RVec3* hi) const;
+    virtual f32 Radius(void);
+    virtual void vf4C(void);
     f32 radius;    // offset 0x24
     BVec3 center;  // offset 0x28
     f32 f34;       // offset 0x34
