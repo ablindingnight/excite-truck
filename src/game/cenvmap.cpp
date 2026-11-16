@@ -299,7 +299,8 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
     fn_802C8D74();
 }
 
-#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = d.z * (m)->x.z + (d.y * (m)->x.y + d.x * (m)->x.x);             f32 y = d.z * (m)->y.z + (d.y * (m)->y.y + d.x * (m)->y.x);             f32 z = d.z * (m)->z.z + (d.y * (m)->z.y + d.x * (m)->z.x);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag(&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
+/* Helper name unproven */ static inline f32 EDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
+#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = EDot3(d.x, (m)->x.x, d.y, (m)->x.y, d.z, (m)->x.z);             f32 y = EDot3(d.x, (m)->y.x, d.y, (m)->y.y, d.z, (m)->y.z);             f32 z = EDot3(d.x, (m)->z.x, d.y, (m)->z.y, d.z, (m)->z.z);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag(&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
 
 // Terrain silhouette rings around the camera.
 void fn_80203380(EFrame* m) {
@@ -353,15 +354,9 @@ static inline void EnvProject(const EFrame* m, const EVec3& w, EVec3& d, f32& sx
     d.y = w.y - f[10];
     d.z = w.z - f[11];
     {
-    f32 rx = f[0];
-    f32 ry = f[1];
-    f32 x = d.z * f[2] + (d.y * ry + d.x * rx);
-    f32 ux = f[3];
-    f32 uy = f[4];
-    f32 y = d.z * f[5] + (d.y * uy + d.x * ux);
-    f32 vx = f[6];
-    f32 vy = f[7];
-    f32 z = d.z * f[8] + (d.y * vy + d.x * vx);
+    f32 x = EDot3(d.x, f[0], d.y, f[1], d.z, f[2]);
+    f32 y = EDot3(d.x, f[3], d.y, f[4], d.z, f[5]);
+    f32 z = EDot3(d.x, f[6], d.y, f[7], d.z, f[8]);
     d.x = x;
     d.y = y;
     d.z = z;
