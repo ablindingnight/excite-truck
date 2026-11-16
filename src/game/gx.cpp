@@ -48,6 +48,11 @@ struct Mat3 {
     f32 m[3][3];
 };
 
+// One matrix row as a block (retail copies Invert's rows as three 12-byte blocks: lfd+lwz each).
+struct Row3 {
+    f32 v[3];
+};
+
 // Rigid transform: rotation then position.
 struct RMtx {
     Mat3 rot;  // offset 0x0
@@ -1766,7 +1771,9 @@ static inline void MulVecT(V3* out, const V3* in, const Mat3* m) {
 }
 
 static inline void Invert(RMtx* out, const RMtx* m) {
-    out->rot = m->rot;
+    for (int i = 0; i < 3; i++) {
+        *(Row3*)out->rot.m[i] = *(const Row3*)m->rot.m[i];
+    }
     f32 t = out->rot.m[0][1];
     out->rot.m[0][1] = out->rot.m[1][0];
     out->rot.m[1][0] = t;
