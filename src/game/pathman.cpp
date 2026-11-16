@@ -1,28 +1,15 @@
-// Path manager (0x801DA6EC-0x801DB348): objects register with a path file ("pathman" clients); paths
+// RecPath manager (0x801DA6EC-0x801DB348): objects register with a path file ("pathman" clients); paths
 // that contain "loop" restart forever, others are started by name - from action sequences through
 // path groups (all clients of an object, or "*", that have the path) or from the console ("pathman"
 // command: "<object> <path>" or "<path>"). Every frame the active clients step along their path and
 // their pose, velocity and spin are pushed to the object. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/recpath.h"
 #include "game/rigid.h"
 #include "game/plainvec.h"
 
 // PathMtx: common.h's PlainValMatrix.
 struct PathFile;
-struct Path {
-    char name[0x10];  // offset 0x0
-};
-
-class PathFollower {
-public:
-    PathFollower(void);
-    ~PathFollower(void);
-    PathFile* file;  // offset 0x0
-    Path* path;      // offset 0x4
-    s32 idx;         // offset 0x8
-    f32 t;           // offset 0xC
-};
-
 struct RMtx;
 struct RVec3;
 
@@ -36,7 +23,7 @@ PathFile* fn_801D9CC4(const char* name);
 void fn_801D9F24(PathFile* f);
 void fn_801D9F84(PathFollower* p, PathFile* f);
 int fn_801D9FC4(PathFollower* p, const char* name);
-Path* fn_801DA03C(PathFollower* p, int i);
+RecPath* fn_801DA03C(PathFollower* p, int i);
 int fn_801DA064(PathFollower* p, const char* name);
 void fn_801DA0EC(PathFollower* p, f32 dt);
 void fn_801DA198(PathFollower* p, f32 t);
@@ -170,7 +157,7 @@ void fn_801DA758(void* obj, const char* name, const char* file) {
     c->loop = 0;
     i = 0;
     for (;;) {
-        Path* p = fn_801DA03C(c->follower, i++);
+        RecPath* p = fn_801DA03C(c->follower, i++);
         if (!p) {
             break;
         }

@@ -3,6 +3,7 @@
 // evaluates the pose, velocity and angular velocity between two keys. Names are guesses apart from
 // the messages.
 #include "game/common.h"
+#include "game/recpath.h"
 #include "game/plainvec.h"
 
 extern "C" {
@@ -30,18 +31,6 @@ struct PathKey {
     Quat rot;  // offset 0x10
 };
 
-// A named path (0x18).
-struct Path {
-    char name[0x10];  // offset 0x0
-    s32 count;        // offset 0x10
-    PathKey* keys;    // offset 0x14
-};
-
-struct PathFile {
-    s32 count;      // offset 0x0
-    Path paths[1];  // offset 0x4
-};
-
 // PathMtx: common.h's PlainValMatrix.
 static inline void Swap32(void* v) {
     u8* p = (u8*)v;
@@ -63,22 +52,12 @@ static inline void SwapKey(PathKey* k) {
     }
 }
 
-class PathFollower {
-public:
-    PathFollower(void);
-    ~PathFollower(void);
-    PathFile* file;  // offset 0x0
-    Path* path;      // offset 0x4
-    s32 idx;         // offset 0x8
-    f32 t;           // offset 0xC
-};
-
 ModuleTag lbl_8055E970;
 
 extern "C" {
 
 /* Helper name unproven. The count uses separate byte temporaries. */
-static inline void SwapPathCount(Path* path) {
+static inline void SwapPathCount(RecPath* path) {
     u8* p = (u8*)&path->count;
     u8 first = p[0];
     p[0] = p[3];
@@ -101,14 +80,14 @@ PathFile* fn_801D9CC4(const char* name) {
         return 0;
     }
     if (swapped) {
-        Path* p;
+        RecPath* p;
         PathKey* k;
         int i;
         int j;
         Swap32(&f->count);
         u8* cursor = (u8*)f->paths;
-        for (i = 0; i < f->count; cursor += sizeof(Path), ++i) {
-            p = (Path*)cursor;
+        for (i = 0; i < f->count; cursor += sizeof(RecPath), ++i) {
+            p = (RecPath*)cursor;
             SwapPathCount(p);
             Swap32(&p->keys);
             p->keys = (PathKey*)((u8*)f + (u32)p->keys);
@@ -134,9 +113,9 @@ PathFollower::PathFollower(void) {
 
 PathFollower::~PathFollower(void) {}
 
-static inline Path* GetPath(PathFile* f, int i) { return &f->paths[i]; }
-static inline int Match(Path* p, const char* name) { return strcmp(p->name, name) == 0; }
-static inline PathKey* Last(Path* p) { return &p->keys[p->count - 1]; }
+static inline RecPath* GetPath(PathFile* f, int i) { return &f->paths[i]; }
+static inline int Match(RecPath* p, const char* name) { return strcmp(p->name, name) == 0; }
+static inline PathKey* Last(RecPath* p) { return &p->keys[p->count - 1]; }
 static inline void Normalize(Quat& q) {
     f32 inv = 1.0f / (f32)sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
     q.x *= inv;
@@ -190,14 +169,14 @@ int fn_801D9FC4(PathFollower* p, const char* name) {
     int i;
     n = f->count;
     for (i = 0; i < n; i++) {
-        if (strcmp((char*)f + i * (int)sizeof(Path) + 4, name) == 0) {  // signed stride from the file, then the header
+        if (strcmp((char*)f + i * (int)sizeof(RecPath) + 4, name) == 0) {  // signed stride from the file, then the header
             return 1;
         }
     }
     return 0;
 }
 
-Path* fn_801DA03C(PathFollower* p, int i) {
+RecPath* fn_801DA03C(PathFollower* p, int i) {
     PathFile* f = p->file;
     if (i < f->count) {
         return &f->paths[i];
@@ -208,9 +187,9 @@ Path* fn_801DA03C(PathFollower* p, int i) {
 int fn_801DA064(PathFollower* p, const char* name) {
     PathFile* f = p->file;
     int n = f->count;
-    Path* paths = f->paths;
+    RecPath* paths = f->paths;
     for (int i = 0; i < n; i++) {
-        if (strcmp((char*)paths + i * (int)sizeof(Path), name) == 0) {  // signed stride: a plain paths[i] walks a pointer instead of an offset
+        if (strcmp((char*)paths + i * (int)sizeof(RecPath), name) == 0) {  // signed stride: a plain paths[i] walks a pointer instead of an offset
             p->path = &paths[i];
             return 1;
         }
