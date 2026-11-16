@@ -353,8 +353,9 @@ int fn_80129D18(int seed, int range);
 ValueNode* fn_802AE414(const char* name);
 void fn_802CD320(void* scene, TrackInst* inst);
 void fn_8012F57C(Quat* out, Quat* a, Quat* b, f32 t);
-f32 fn_80144514(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 }
+
+f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);  // a*b + c*d + e*f: modeinl's weak copy (0x80144514)
 
 extern f32 __float_epsilon[];
 
@@ -368,8 +369,6 @@ struct DroneColor {
 static DroneColor lbl_8055EC90;
 LinearPools* lbl_8055EC94;
 HermitePools* lbl_8055EC98;
-
-static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return fn_80144514(a, b, c, d, e, f); }
 
 // d = a * b
 static inline void MtxMul(BMtx33* d, const BMtx33* const& a, const BMtx33* b) {
