@@ -33,7 +33,7 @@ struct SkagPoint {
     u16 quad;      // offset 0xA
     s32 slots[6];  // offset 0xC
 
-    void Place(const f32* pt, f32 size);
+    void Place(const f32* pt, f32 size, f32 mid);
     void Unplace(f32* out, f32 size) const;
 };
 
@@ -100,8 +100,7 @@ struct SkagBag : SkagVec<SkagPoint> {
     // A root bag: random points in a 2x2 square, kept apart.
     SkagBag(ValueNode* node)
         : SkagVec<SkagPoint>(RootCount(node)) {
-        f32 size = kSpan[0];
-        f32 half = size / 2;  /* MATCHING-AID: unused local, creates 0.5 ahead of the loop's 0.0 and 0.25 as in retail (unproven) */
+        f32 mid = 0.5f;  /* centre of the square as a fraction of its size, passed to Place (parameter unproven) */
         int j = 0;
         if (j < cap)
         for (; j < cap; j++) {
@@ -124,8 +123,9 @@ struct SkagBag : SkagVec<SkagPoint> {
             p->id = fn_802B4004();
             memset(p->slots, 0, sizeof(p->slots));
         }
+        f32 size = kSpan[0];
         for (int k = 0; k < count; k++) {
-            data[k].Place(&data[k].x, size);
+            data[k].Place(&data[k].x, size, mid);
         }
     }
     SkagBag(SkagBag** src, ValueNode* node, int rad, s32** used);
@@ -181,9 +181,9 @@ SkagVec<SkagBag*>* lbl_8055F9D0;  // root bags
 SkagGrid* lbl_804BE248[128];      // by radius
 
 // Moves a point of a size x size square into the frame of its quadrant.
-inline void SkagPoint::Place(const f32* pt, f32 size) {
+inline void SkagPoint::Place(const f32* pt, f32 size, f32 mid) {
     f32 s[2];
-    f32 c = size / 2;
+    f32 c = size * mid;
     f32 dx = pt[0] - c;
     f32 dy = pt[1] - c;
     u16 q = 0;
@@ -337,7 +337,7 @@ SkagBag::SkagBag(SkagBag** src, ValueNode* node, int rad, s32** used)
         at[0] = pt[0] + half * lbl_802FAAD0.dx[q];
         at[1] = pt[1] + half * lbl_802FAAD0.dy[q];
         taken[q]++;
-        p->Place(at, size);
+        p->Place(at, size, 0.5f);
     }
     for (int k = 0; k < 4; k++) {
         *used[k] = taken[k];
