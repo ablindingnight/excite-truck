@@ -303,6 +303,8 @@ void fn_80202F58(const EVec3* v, const EFrame* f, EFrame* out) {
 #define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = EDot3(d.x, (m)->x.x, d.y, (m)->x.y, d.z, (m)->x.z);             f32 y = EDot3(d.x, (m)->y.x, d.y, (m)->y.y, d.z, (m)->y.z);             f32 z = EDot3(d.x, (m)->z.x, d.y, (m)->z.y, d.z, (m)->z.z);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag(&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
 
 // Terrain silhouette rings around the camera.
+/* Helper name unproven */ static inline f32 RingSubtract(f32 x, f32 origin) { return x - origin; }
+
 void fn_80203380(EFrame* m) {
     u32 r;
     int i;
@@ -329,7 +331,7 @@ void fn_80203380(EFrame* m) {
             w.x = p.x;
             {
                 EVec3 d;
-                f32 dx = w.x - m->pos.x;
+                f32 dx = RingSubtract(w.x, m->pos.x);
                 d.x = dx;
                 d.y = w.y - m->pos.y;
                 d.z = w.z - m->pos.z;
