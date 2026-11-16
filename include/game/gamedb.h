@@ -34,6 +34,8 @@ struct Unlockable {
     const char* type;  // offset 0x0
     const char* name;  // offset 0x4
     s32 points;        // offset 0x8
+    u8 unlocked;       // offset 0xC
+    s32 order;         // offset 0x10
 };
 
 // A vehicle (driver.cpp's table).
@@ -68,5 +70,11 @@ EventInfo* GetEvent(int i);
 TrackInfo* GetTrack(int i);
 EventInfo* FindTrackEvent(int track, int i);
 DriverInfo* GetDriver(int i);
+DriverInfo* FindDriver(s32 id);
+VehicleInfo* GetVehicle(int i);
+VehicleInfo* FindVehicle(s32 id);
+VehicleInfo* FindVehicleNamed(const char* chassis, int n);
+Unlockable* GetUnlockable(int i);
+int GetUnlockableCount(void);
 
 #endif

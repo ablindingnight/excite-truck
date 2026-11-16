@@ -3,6 +3,7 @@
 // paths that explain an unlock. Names are guesses except where the messages give them.
 #include <string.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -49,14 +50,6 @@ public:
     ~FixedArray(void) {}
 
     T storage[N];  // offset 0xC
-};
-
-struct Unlockable {
-    const char* type;  // offset 0x0
-    const char* name;  // offset 0x4
-    s32 points;        // offset 0x8
-    u8 unlocked;       // offset 0xC
-    s32 order;         // offset 0x10
 };
 
 struct UnlockReq {

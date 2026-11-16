@@ -5,6 +5,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/gamedb.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/logomover.h"
 // MWCC: retail evpath expands LogoMover's members inline. A PC build links popwarn's out-of-line definitions
@@ -1327,8 +1328,6 @@ void fn_802840F8(void) { fn_8027ED2C(); }
 
 }  // extern "C"
 
-int GetUnlockableCount(void);
-Unlockable* GetUnlockable(int i);
 
 class VehicleList {
 public:

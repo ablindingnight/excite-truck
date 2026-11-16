@@ -4,6 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/mtxtypes.h>  // Vec
 
 extern "C" {
@@ -102,12 +103,6 @@ struct CarDrawView {
     s32 carIndex;             // offset 0xFA8
 };
 
-struct DriverInfo {
-    u8 pad[0x50];
-    s32 color;  // offset 0x50
-};
-
-DriverInfo* FindDriver(s32 id);
 
 // The racer description the model is built for.
 struct Racer {

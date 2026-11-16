@@ -4,6 +4,7 @@
 // object lists with their collision volumes, animated and sound objects, and drawing. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rvec.h"
@@ -433,11 +434,6 @@ struct RaceDesc {
     RaceSlotList list;    // offset 0x20
 };
 
-struct VehicleInfo {
-    u8 pad0[0xA0];
-    u32 flags;  // offset 0xA0
-};
-
 struct ViewState {
     u8 pad0[0x24];
     PVec pos;  // offset 0x24
@@ -470,7 +466,6 @@ struct EWState {
     u8 view;  // tag being shown
 };
 
-VehicleInfo* FindVehicle(s32 id);
 
 extern "C" {
 int fn_8012F9E8(void* out, int size, const char* text);

@@ -2,6 +2,7 @@
 // with the chassis/uv fields. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 
@@ -272,15 +273,7 @@ public:
     u8 pad[0x24];
 };
 
-struct VehicleInfo {
-    u8 pad0[0x2C];
-    char chassis[0x20];  // offset 0x2C
-    u8 pad4C[0x18];
-    u32 colors[12];      // offset 0x64
-};
-
 int IdentGetCurrentSlot(void);
-VehicleInfo* GetVehicle(int i);
 
 // Index of the car icon for chassis `name`, or -1.
 static inline int FindIcon(IconTable* icons, const char* name) {

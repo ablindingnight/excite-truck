@@ -3,6 +3,7 @@
 // and the list selection state. Written against raw field offsets; the large routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 
 // Stat level thresholds (defined first: its .rodata precedes the unit's initialiser templates).
 extern const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
@@ -162,18 +163,6 @@ public:
     s32* value;  // offset 0x24
 };
 
-struct VehicleInfo {
-    s32 index;                // offset 0x0
-    s32 id;                   // offset 0x4
-    s32 base;                 // offset 0x8
-    char display_name[0x20];  // offset 0xC
-    u8 pad2C[0x38];           // offset 0x2C
-    u32 colors[12];           // offset 0x64
-    s32 default_color;        // offset 0x94
-    s32 num_colors;           // offset 0x98
-    s32 unk9C;                // offset 0x9C
-};
-
 struct VehicleColor {
     s32 body;  // offset 0x0
     s32 trim;  // offset 0x4
@@ -202,7 +191,6 @@ public:
     u8 pad118[0xC];
 };
 
-VehicleInfo* FindVehicleNamed(const char* chassis, int n);
 VehicleColor* GetVehicleColor(VehicleInfo* v, int slot);
 CarStats* CarStatsLookup(const char* chassis);
 

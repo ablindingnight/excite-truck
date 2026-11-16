@@ -3,6 +3,7 @@
 // and the chassis list entries. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 // The car list interface the garage is handed (gamedo.cpp calls it SessionScreen). Only its destructor has a
 // body; the list classes implement the rest.
@@ -29,8 +30,6 @@ typedef SessionScreen GarageList;
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-struct VehicleInfo;
-VehicleInfo* FindVehicleNamed(const char* name, int i);
 u32* GetVehicleColor(VehicleInfo* v, int i);
 const char* GetSpecialChassis(const char* name);
 
@@ -295,21 +294,6 @@ struct SlotAnim {
     f32 t;      // offset 0x8
 };
 
-struct VehicleInfo {
-    s32 index;                // offset 0x0
-    s32 id;                   // offset 0x4
-    s32 base;                 // offset 0x8
-    char display_name[0x20];  // offset 0xC
-    char chassis[0x20];       // offset 0x2C
-    u8 pad4C[0x18];
-    u32 colors[12];           // offset 0x64
-    s32 default_color;        // offset 0x94
-    s32 num_colors;           // offset 0x98
-    s32 unk9C;                // offset 0x9C
-    u32 flags;                // offset 0xA0, 2: extreme, 4: shiny
-};
-
-VehicleInfo* FindVehicle(s32 id);
 
 // One list entry: its two icons (plain, extreme), the car, and the colour value shown for it.
 struct CarEntry {

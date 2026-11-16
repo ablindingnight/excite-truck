@@ -2,18 +2,9 @@
 // unlockable cars and tracks, three at a time, each with its points and a lock icon. Names are
 // guesses apart from the layout and element names and the messages.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/menu.h"
 
-struct Unlockable {
-    const char* type;  // offset 0x0
-    const char* name;  // offset 0x4
-    s32 points;        // offset 0x8
-    u8 unlocked;       // offset 0xC
-    s32 order;         // offset 0x10
-};
-
-int GetUnlockableCount(void);
-Unlockable* GetUnlockable(int i);
 
 // MenuItem: game/menu.h.
 // MenuDesc: game/menu.h.

@@ -3,6 +3,7 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 
@@ -85,11 +86,6 @@ struct Truck {
     Vec3 pos;  // offset 0x60
 };
 
-struct DriverInfo {
-    u8 pad0[0x50];
-    s32 mapIcon;  // offset 0x50
-};
-
 struct PlayerCtrl {
     u8 pad0[0x260C];
     u8 reversed;  // offset 0x260C
@@ -107,7 +103,8 @@ struct PlayerObj {
 };
 }  // namespace
 
-struct EventInfo {
+// The race options record fn_801E87A8 returns (was named EventInfo here; not the gamedb event). Name unproven.
+struct RaceOpts {
     u8 pad0[0x10];
     u32 flags;  // offset 0x10
 };
@@ -173,7 +170,7 @@ CarInfo* fn_801EA9A0(int index);
 int fn_801EA994(void);
 Truck* fn_8017960C(int index);
 PlayerObj* fn_802678E4(int player);
-EventInfo* fn_801E87A8(void);
+RaceOpts* fn_801E87A8(void);
 int fn_80178C9C(void);
 Vec3 fn_80136468(int path, f32 dist);  // idealline: returns the ILPos by value
 u32 fn_80230B9C(int unk);
@@ -192,7 +189,6 @@ int fn_802C2C00(int mode);
 void fn_802C8638(CameraPose* cam);
 }
 
-DriverInfo* FindDriver(long id);
 
 // Start/finish marker shared by all maps.
 static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
@@ -518,7 +514,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     draw->count = fn_801EA994();
     for (i = 0; i < draw->count; i++) {
         CarInfo* r = fn_801EA9A0(i);
-        draw->icons[i].part = FindDriver(r->driver)->mapIcon;
+        draw->icons[i].part = FindDriver(r->driver)->color;  // the driver's colour picks its map icon
         if (r->truck) {
             draw->icons[i].angle = -Atan2F(r->truck->dirX, r->truck->dirZ);
         }

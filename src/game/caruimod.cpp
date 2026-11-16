@@ -2,6 +2,7 @@
 // efx bone mesh read from the car's .car folder), its resource loader and the menu state that
 // draws it. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/gamedb.h"
 #include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
@@ -533,12 +534,6 @@ public:
     int Status(void);
 };
 
-struct VehicleInfo {
-    u8 pad0[0xA0];
-    u32 flags;  // offset 0xA0
-};
-
-VehicleInfo* FindVehicleNamed(const char* chassis, int n);
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
