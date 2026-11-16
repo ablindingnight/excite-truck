@@ -384,6 +384,6 @@ void ClearUnlockAll(void) {
     lbl_8055D588 = 0;
 }
 
-u8 IsUnlockAll(void) {
+int IsUnlockAll(void) {
     return lbl_8055D588;
 }
