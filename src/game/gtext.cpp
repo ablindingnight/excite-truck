@@ -143,9 +143,11 @@ void fn_802C8E00(u32 color, int row, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802C8E48(void);
 }
 
-static inline u16 DecodeUTF8(const char* s, const char** next, const u8& b) {
-    u16 r;
+template <bool HasFirstByte>
+static inline u16 DecodeUTF8Impl(const char* s, const char** next, const u8* first) {
+    const u8& b = HasFirstByte ? *first : reinterpret_cast<const u8*>(s)[0];
     const char* n;
+    u16 r;
     if ((b & 0xF0) == 0xE0) {
         r = ((b & 0xF) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F);
         n = s + 3;
@@ -160,9 +162,12 @@ static inline u16 DecodeUTF8(const char* s, const char** next, const u8& b) {
     return r;
 }
 
+static inline u16 DecodeUTF8(const char* s, const char** next, const u8& b) {
+    return DecodeUTF8Impl<true>(s, next, &b);
+}
+
 static inline u16 DecodeUTF8(const char* s, const char** next) {
-    const u8 firstByte = s[0];
-    return DecodeUTF8(s, next, firstByte);
+    return DecodeUTF8Impl<false>(s, next, NULL);
 }
 
 static inline const char* ReadUTF8(const char* s, u16* c) {
@@ -761,10 +766,9 @@ struct GTextAdv {
 };
 
 f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
-    double adv;
     f32 h;
-    f32 gaps;
     f32 w;
+    f32 gaps;
     if (s == NULL) {
         return 0.0f;
     }
@@ -774,12 +778,13 @@ f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
     i = 0;
     strlen(s);
     while (s[i]) {
-        adv = (f32)f->height;
+        GTextAdv adv;
+        adv.v = (f32)f->height;
         h = f->height;
-        int skip = EscWidth(s, i, h, adv);
+        int skip = EscWidth(s, i, h, adv.v);
         if (skip) {
             i += skip;
-            w += (f32)adv;
+            w += (f32)adv.v;
             continue;
         }
         const char* next;
