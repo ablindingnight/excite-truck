@@ -1141,16 +1141,18 @@ static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 // Sphere (c, r) of p against sphere (d, s) of q: reports the contact (normal flattened in y) to the
 // volume that has an owner.
+static inline f32 SphereMagnitude(f32 value) { f64 wide = __fabs(value); return (f32)wide; }
+
 int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r, f32 s) {
     PVec3 dd;
     PVec3 n;
     PVec3 at;
     dd.v[0] = cv[0] - dv[0];
-    f32 rs = r + s;
     dd.v[1] = cv[1] - dv[1];
     dd.v[2] = cv[2] - dv[2];
+    f32 rs = r + s;
     int hit = 0;
-    if (AbsF(dd.v[0]) < rs && AbsF(dd.v[2]) < rs && AbsF(dd.v[1]) < rs) {
+    if (SphereMagnitude(dd.v[0]) < rs && AbsF(dd.v[2]) < rs && AbsF(dd.v[1]) < rs) {
         f32 dist = PSVECMag(dd.v);
         if (!(AbsF(dist) <= __float_epsilon[0])) {
             f32 pen = s + (-dist + r);
