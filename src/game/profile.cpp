@@ -116,7 +116,6 @@ struct ProfileTextFields {
 
 }
 
-
 extern "C" {
 
 
@@ -131,7 +130,6 @@ struct ProfileCursorFields {
     u8 dirty;
 };
 }
-
 
 extern "C" {
 
@@ -151,11 +149,6 @@ struct ProfileKeyboardFitFields {
 };
 }
 
-extern "C" {extern const f32 lbl_80563944,lbl_80563948,lbl_8056394C;}
-extern "C" const f32 lbl_80563944;
-extern "C" const f32 lbl_80563948;
-extern "C" const f32 lbl_8056394C;
-
 extern "C" {
 
 
@@ -174,8 +167,7 @@ struct ProfileTextDrawFields {
 };
 }
 
-extern "C" {extern const f32 lbl_80563930,lbl_80563940;}
-inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text, font, x, y, color, alignment, scale, lbl_80563930, widthScale);}
+inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text, font, x, y, color, alignment, scale, 1.0f, widthScale);}
 
 extern "C" {
 
@@ -192,7 +184,6 @@ struct ProfileKeyboardCleanupFields {
     int font;
 };
 }
-
 
 extern "C" {
 }
@@ -224,8 +215,6 @@ extern const char lbl_80344148[40];
 // Its first two FP values are drawing coordinates, not format substitutions.
 void fn_80234AFC(const void*, f32, f32, const char*, ...);
 }
-
-extern const f32 lbl_80563954;  // 0.5
 
 extern "C" {
 
@@ -278,7 +267,6 @@ struct ProfileKeyboardInputFields {
     bool upper; char shiftLabel[10]; u8 pad77;
 };
 }
-
 
 extern "C" {
 
@@ -511,6 +499,9 @@ void fn_8024CFB4(void) {
 
 }
 
+/* Helper name unproven */
+static f32 ProfileUnitScale(void) { return 1.0f; }
+
 void ProfileTextState::Enter(void) {
     ProfileTextFields* self=(ProfileTextFields*)this;
     int fontHeight = fn_80232B70(self->font);
@@ -547,7 +538,7 @@ void ProfileTextState::Draw(void) {
         self->color = 0xFF000000;
         int height = self->height;
         f32 width = fn_8023293C(self->font, self->text, self->widthScale);
-        width=self->scale*width;fn_80230924(0xFFFFFFFF, x, y, x+width, y - (f32)height, lbl_80563940);
+        width=self->scale*width;fn_80230924(0xFFFFFFFF, x, y, x+width, y - (f32)height, 0.0f);
     }
     // Use the observed font payload through a typed inline call.
     // The original method name and inline boundary remain unknown.
@@ -558,16 +549,16 @@ void ProfileTextState::Draw(void) {
     sprintf(prefix, "%*.*s", self->cursor, self->cursor, self->text);
     f32 width = fn_8023293C(self->font, prefix, self->widthScale) * self->scale;
     f32 cursorX = x + width;
-    fn_80230924(0xFFFFD03F, cursorX - lbl_80563930, y, lbl_80563930 + cursorX,
-               y - (f32)self->height, lbl_80563940);
+    fn_80230924(0xFFFFD03F, cursorX - 1.0f, y, 1.0f + cursorX,
+               y - (f32)self->height, 0.0f);
 }
 
 void ProfileKeyboardState::Enter(void) {
     ProfileKeyboardFitFields* self=(ProfileKeyboardFitFields*)this;
-    f32 cellWidth;f32 width=(f32)self->width;f32 cellHeight=(f32)self->height*lbl_80563944;cellWidth=width/lbl_80563948;
+    f32 cellWidth;f32 width=(f32)self->width;f32 cellHeight=(f32)self->height/4.0f;cellWidth=width/10.0f;
     f32 textWidth = fn_8023293C(self->font, "BS", self->widthScale);
-    textWidth=self->scale*textWidth;f32 fitWidth=(cellWidth-lbl_8056394C)/textWidth;
-    int fontHeight=fn_80232B70(self->font);f32 heightGap=cellHeight-lbl_8056394C;f32 fitHeight=heightGap/(f32)fontHeight;
+    textWidth=self->scale*textWidth;f32 fitWidth=(cellWidth-5.5f)/textWidth;
+    int fontHeight=fn_80232B70(self->font);f32 heightGap=cellHeight-5.5f;f32 fitHeight=heightGap/(f32)fontHeight;
     self->scale = fitHeight < fitWidth ? fitHeight : fitWidth;
     self->upper=0;self->upper=!self->upper;
     const char* key = self->upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
@@ -648,8 +639,9 @@ void ProfileKeyboardState::Draw(void) {
     fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, border + (top - cellHeight), 0.0f);
     fn_80230924(0xFFAF7F00, left, top, left + border, top - cellHeight, 0.0f);
     fn_80230924(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - border, top - cellHeight, 0.0f);
-    y = y - cellHeight * lbl_80563954;
-    f32 startX = x + cellWidth * lbl_80563954;
+    f32 half = 0.5f;
+    y = y - cellHeight * half;
+    f32 startX = x + cellWidth * half;
     for (int row = 0; row < 4; row++) {
         x = startX;
         for (int column = 0; column < 10; column++) {
