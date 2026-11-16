@@ -26,11 +26,11 @@ public:
     s32 id;  // offset 0x20: surface/owner id
 };
 
-struct CollDesc;
+struct BodyDesc;
 
 class Phob {
 public:
-    virtual void Init(CollDesc* d);  // 0x8 (CollVolume::Init; retail slot order: Init, then the destructor)
+    virtual void Init(BodyDesc* d);  // 0x8 (CollVolume::Init; retail slot order: Init, then the destructor)
     virtual ~Phob(void);             // 0xC
     virtual void vf10(void);
     virtual void vf14(void);

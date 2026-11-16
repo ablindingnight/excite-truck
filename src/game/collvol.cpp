@@ -91,7 +91,8 @@ public:
     s32 a34;     // offset 0x34
 };
 
-struct CollDesc {
+// The volume description (named as the RigidBody family names it; unproven).
+struct BodyDesc {
     s32 type;     // offset 0x0
     u8 pad4[0x4];
     CMtx mtx;     // offset 0x8
@@ -99,21 +100,23 @@ struct CollDesc {
     CVec3 half;   // offset 0x3C
 };
 
+struct RVec3;
+
 class CollVolume {
 public:
     CollVolume(void);
-    virtual void Init(CollDesc* d);    // 0x8
+    virtual void Init(BodyDesc* d);    // 0x8
     virtual ~CollVolume(void);         // 0xC
     virtual void Reset(void);          // 0x10
     virtual void vf14(void);           // 0x14
     virtual void vf18(void);           // 0x18
     virtual void Update(void);           // 0x1C
     virtual void vf20(void);           // 0x20
-    virtual void vf24(void);           // 0x24
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
     virtual void vf28(void);           // 0x28
     virtual s32 vf2C(void);            // 0x2C
-    virtual void vf30(f32 t, struct CollPacket* a, const struct CollPacket* b, s32* na, s32* nb);  // 0x30
-    virtual s32 vf34(struct CollPacket* p);  // 0x34
+    virtual void vf30(f32 t, struct RPacket* a, const struct RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual s32 vf34(struct RPacket* p);  // 0x34
     virtual void vf38(u8* out);  // 0x38
     virtual void vf3C(void);           // 0x3C
     virtual int vf40(void);            // 0x40
@@ -123,7 +126,7 @@ public:
     void Xform(CVec3* out, const CVec3* in);
     s32 a4;              // offset 0x4
     s32 a8;              // offset 0x8
-    CollDesc* desc;      // offset 0xC
+    BodyDesc* desc;      // offset 0xC
     s32 type;            // offset 0x10
     CollShape* sub[4];   // offset 0x14
     s32 nAdded;          // offset 0x24
@@ -139,7 +142,7 @@ public:
 class BoxVolume : public CollVolume {
 public:
     BoxVolume(void);
-    virtual void Init(CollDesc* d);
+    virtual void Init(BodyDesc* d);
     virtual ~BoxVolume(void);
     virtual void vf28(void);
 };
@@ -148,7 +151,7 @@ ModuleTag lbl_8055E478;
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-struct CollPacket {
+struct RPacket {
     u16 rot[3];  // offset 0x0
     u8 pad6[2];
     CVec3 pos;   // offset 0x8
@@ -188,7 +191,7 @@ CollVolume::CollVolume(void) {
 
 extern "C" void fn_80179D8C(CollVolume* v, s32 a) { v->a8 = a; }
 
-void CollVolume::Init(CollDesc* d) {
+void CollVolume::Init(BodyDesc* d) {
     desc = d;
     offset.x = 0.0f;
     offset.y = 0.0f;
@@ -295,7 +298,7 @@ static inline void AxisAngle(CVec3* m, const CVec3* v) {
 
 extern "C" void fn_8017AE94(CMtx* out, const CMtx* a, const CMtx* b, f32 t);
 
-void CollVolume::vf30(f32 t, CollPacket* a, const CollPacket* b, s32* na, s32* nb) {
+void CollVolume::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
     CMtx ma;
     CMtx mb;
     CVec3 va;
@@ -350,7 +353,7 @@ void CollVolume::Transform(void) {
 
 void CollShape::vf0C(void) {}  // empty; slot 0x0C of the non-sphere shape tables
 
-s32 CollVolume::vf34(CollPacket* p) {
+s32 CollVolume::vf34(RPacket* p) {
     f32 v[3];
     f32 q[4];
     f32* qp;
@@ -417,7 +420,7 @@ void CollVolume::Xform(CVec3* out, const CVec3* in) {
 
 BoxVolume::BoxVolume(void) {}
 
-void BoxVolume::Init(CollDesc* d) {
+void BoxVolume::Init(BodyDesc* d) {
     CollVolume::Init(d);
     mtx = d->mtx;
     Transform();

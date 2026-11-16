@@ -111,11 +111,14 @@ public:
     virtual void Wake(void);  // 0x14
 };
 
-class Phob {
+struct Phob;  // RigidBody::Push records the pushing object as a Phob*
+
+// The collision volume RigidBody derives from (collvol.cpp).
+class CollVolume {
 public:
-    Phob(void);
+    CollVolume(void);
     virtual void Init(BodyDesc* d);   // 0x8
-    virtual ~Phob(void);              // 0xC
+    virtual ~CollVolume(void);        // 0xC
     virtual void Reset(void);         // 0x10
     virtual void vf14(void);          // 0x14
     virtual void vf18(void);          // 0x18
@@ -124,14 +127,13 @@ public:
     virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
     virtual void vf28(u8* buf);       // 0x28
     virtual s32 vf2C(void);           // 0x2C
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(RPacket* p);     // 0x34
-    virtual void vf38(void);          // 0x38
+    virtual void vf38(u8* buf);       // 0x38
     virtual void vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
     virtual void vf44(void);          // 0x44
-    void Xform(void);
-    void Xform2(void);
+    void Transform(void);  // the worker Update (0x1C) calls
     s32 a4;          // offset 0x4
     s32 a8;          // offset 0x8
     void* desc;      // offset 0xC
@@ -157,7 +159,7 @@ struct Corner {
 
 struct ImpRec {
     ImpRec(void);
-    Phob* obj;   // offset 0x0
+    CollVolume* obj;  // offset 0x0: the pushing object
     void* by;    // offset 0x4
     RVec3 v;     // offset 0x8
     RVec3 at;    // offset 0x14
@@ -165,7 +167,7 @@ struct ImpRec {
     void* c;     // offset 0x24
 };
 
-class RigidBody : public Phob {
+class RigidBody : public CollVolume {
 public:
     RMat33* InvInertia(void);
 public:
@@ -177,7 +179,7 @@ public:
     virtual void vf18(void) {}
     virtual void Update(void);
     virtual s32 vf2C(void) { return 0x20; }
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual int vf40(void) { return 1; }
     virtual void vf3C(void) {}
@@ -231,7 +233,7 @@ RigidBody::RigidBody(void) {
 }
 
 void RigidBody::Init(BodyDesc* d) {
-    Phob::Init(d);
+    CollVolume::Init(d);
     contacts = 0;
     SetMass(d->mass, d->ix, d->iy, d->iz);
     cell = 0;
@@ -239,7 +241,7 @@ void RigidBody::Init(BodyDesc* d) {
 }
 
 void RigidBody::Reset(void) {
-    Phob::Reset();
+    CollVolume::Reset();
     ResetState();
 }
 
@@ -358,7 +360,7 @@ void RigidBody::Push(Phob* obj, void* by, const RVec3* v, const RVec3* at, int k
     if (nImp < 16) {
         ImpRec* p = AllocImp();
         if (p) {
-            p->obj = obj;
+            p->obj = (CollVolume*)obj;
             p->by = by;
             p->v.x = v->x * w;
             p->v.y = v->y * w;
@@ -633,7 +635,7 @@ void RigidBody::Update(void) {
     torque.x = 0.0f;
     torque.y = 0.0f;
     torque.z = 0.0f;
-    Xform2();
+    CollVolume::Update();
     UpdateCell();
 }
 
@@ -697,13 +699,13 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
             Mul(wi, &tmp, rr);
         }
     }
-    Xform2();
+    CollVolume::Update();
     UpdateCell();
 }
 
 void RigidBody::SetState(const RMtx* m, const RVec3* v, const RVec3* w) {
     mtx = *m;
-    Xform();
+    Transform();
     vel = *v;
     avel = *w;
 }
@@ -727,11 +729,11 @@ extern "C" void fn_8017D140(u8* dst, const u8* src, int n) {
     }
 }
 
-void RigidBody::vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb) {
+void RigidBody::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
     RVec3 va;
     RVec3 vb;
     nImp = 0;
-    Phob::vf30(t, a, b, na, nb);
+    CollVolume::vf30(t, a, b, na, nb);
     fn_8017D140((u8*)&va, (u8*)&a->vel, 12);
     fn_8017D140((u8*)&vb, (u8*)&b->vel, 12);
     SetV(&vel, Lerp(va.x, vb.x, t), Lerp(va.y, vb.y, t), Lerp(va.z, vb.z, t));
@@ -746,7 +748,7 @@ void RigidBody::vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb) {
 }
 
 s32 RigidBody::vf34(RPacket* p) {
-    Phob::vf34(p);
+    CollVolume::vf34(p);
     p->vel = vel;
     return 0x20;
 }

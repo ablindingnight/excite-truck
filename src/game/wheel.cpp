@@ -125,10 +125,10 @@ public:
     virtual void vf18(void);          // 0x18
     virtual void Update(void);          // 0x1C
     virtual void vf20(void);          // 0x20
-    virtual void vf24(void);          // 0x24
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
     virtual void vf28(u8* buf);       // 0x28
     virtual s32 vf2C(RPacket* p);     // 0x2C
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(RPacket* p);     // 0x34
     virtual void vf38(u8* buf);       // 0x38
     virtual void vf3C(void);          // 0x3C
@@ -159,7 +159,7 @@ public:
     ~RigidBody(void) {}
     virtual void Init(BodyDesc* d);
     virtual void Reset(void);
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual void vf18(void);
     virtual void vf3C(void);
@@ -220,7 +220,7 @@ public:
     virtual void vf20(void);
     virtual void vf28(u8* buf);
     virtual s32 vf2C(RPacket* p);
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     f32 time;   // offset 0x1EC
     s32 car;    // offset 0x1F0
@@ -427,14 +427,14 @@ s32 Wheel::vf34(RPacket* p) {
     return 1;
 }
 
-void Wheel::vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* __restrict nb) {
+void Wheel::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* __restrict nb) {
     *na = vf2C(a);
-    *nb = vf2C(b);
+    *nb = vf2C((RPacket*)b);
     if (*(u8*)a && *(u8*)b) {
         s32 sa;
         s32 sb;
         live = 1;
-        RigidBody::vf30(t, (RPacket*)((u8*)a + 1), (RPacket*)((u8*)b + 1), &sa, &sb);
+        RigidBody::vf30(t, (RPacket*)((u8*)a + 1), (const RPacket*)((const u8*)b + 1), &sa, &sb);
     } else {
         live = 0;
         mtx.pos.y = -500.5f;

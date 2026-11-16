@@ -363,10 +363,10 @@ public:
     virtual void Update(void);
     void Transform(void);  // the worker Update (0x1C) calls
     virtual void vf20(void);
-    virtual void vf24(void);
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
     virtual void vf28(u8* buf);
     virtual s32 vf2C(void);
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual void vf38(u8* out);
     virtual void vf3C(void);
@@ -390,7 +390,7 @@ public:
     virtual void vf18(void);
     virtual void Update(void);
     virtual s32 vf2C(void);
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual void vf3C(void);
     virtual int vf40(void);

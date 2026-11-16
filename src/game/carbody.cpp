@@ -149,11 +149,11 @@ struct CbPose {
     u32 w[12];
 };
 
-struct CollDesc;
+struct BodyDesc;
 
 class CollVolume {
 public:
-    virtual void Init(CollDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
+    virtual void Init(BodyDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
     virtual ~CollVolume(void);       // 0xC
     void Transform(void);
     void AddShape(CollShape* s);
@@ -684,7 +684,7 @@ void CarBody_vf08(u8* p, u8* desc) {
     F32(desc, 0xC) = setup.f04 / 0.042279866f;
     F32(desc, 0x10) = setup.f08 / 0.042279866f;
     F32(desc, 0x14) = setup.f0C / 0.042279866f;
-    ((RigidBody*)p)->Init((BodyDesc*)desc);
+    ((RigidBody*)p)->RigidBody::Init((BodyDesc*)desc);
     PTR(p, 0x270) = fn_801B2EDC(S32(p, 0x1EC), p);
     fn_801795D8(p, S32(p, 0x1EC));
     F32(p, 0x5AC) = -(0.0254f * chassis->GetFloat("susp_y", 0.0f));
@@ -3878,7 +3878,7 @@ static inline void PkCopy(void* dst, const void* src, int n) {
     }
 }
 
-int vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(u8* p, f32 t, const CbPacket* a, const CbPacket* b, s32* na, s32* nb);
+int vf30__9RigidBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* a, const CbPacket* b, s32* na, s32* nb);
 void fn_8018ADB4(u8* p, f32 v);
 void fn_8018ADBC(u8* p, f32 v);
 void fn_801E9DD0(s16* surface, f32 x, f32 z);
@@ -3889,9 +3889,9 @@ void fn_801E9DD0(s16* surface, f32 x, f32 z);
 void vf30__7CarBodyFv(u8* p, f32 t, const CbPacket* cur, const CbPacket* prev, s32* na, s32* nb) {
     int teleport = (prev->flags >> 9) & 1;
     if (teleport) {
-        vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, cur, na, nb);
+        vf30__9RigidBodyFfP7RPacketPC7RPacketPlPl(p, t, cur, cur, na, nb);
     } else {
-        vf30__9RigidBodyFfP7RPacketP7RPacketPlPl(p, t, cur, prev, na, nb);
+        vf30__9RigidBodyFfP7RPacketPC7RPacketPlPl(p, t, cur, prev, na, nb);
     }
     F32(p, 0x25D4) = F32(p, 0x25CC) = F32(p, 0x25D8) = PSVECMag(p + 0x118);
     f32 v0 = PkUnpack(prev->rpm, 65535.0f, -2000.0f, 14000.0f);

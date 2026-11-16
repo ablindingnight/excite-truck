@@ -47,10 +47,10 @@ public:
     virtual void vf18(void);          // 0x18
     virtual void Update(void);          // 0x1C
     virtual void vf20(void);          // 0x20
-    virtual void vf24(void);          // 0x24
+    virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
     virtual void vf28(u8* buf);       // 0x28
     virtual s32 vf2C(void);           // 0x2C
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);  // 0x30
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(RPacket* p);     // 0x34
     virtual void vf38(u8* p);         // 0x38
     virtual void vf3C(void);          // 0x3C
@@ -81,7 +81,7 @@ public:
     virtual void Reset(void);
     virtual void vf18(void);
     virtual s32 vf2C(void);
-    virtual void vf30(f32 t, RPacket* a, RPacket* b, s32* na, s32* nb);
+    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual void vf3C(void);
     virtual int vf40(void);

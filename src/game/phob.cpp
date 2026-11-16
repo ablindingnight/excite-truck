@@ -383,12 +383,14 @@ public:
     u8 pad0[0x1FC];
 };
 
-struct CollDesc;
+struct BodyDesc;
 
 class CollVolume {
 public:
-    virtual void Init(CollDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
+    virtual void Init(BodyDesc* d);  // 0x8 (retail slot order: Init, then the destructor)
     virtual ~CollVolume(void);       // 0xC
+    // Slot 0x24 (empty); declared without the slots before it, as this view only needs the definition below.
+    void Notify(const struct RVec3* v, const struct RVec3* at, int kind, void* c, void* by);
 };
 
 class RigidBody : public CollVolume {
@@ -978,7 +980,7 @@ extern "C" void vf4C__9CollShapeFv(void) {
     const char* dump[] = {"PhysTaskDumpCars: %2d - (%3.2f, %3.2f, %3.2f) tri %d"};
 }
 
-void vf24__10CollVolumeFv(Phob* p) {}  // CollVolume::vf24 (empty; in every collision vtable; C name = mangled name)
+void CollVolume::Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by) {}  // empty; in every collision vtable
 
 PhysStats* fn_80178C90(void) { return &lbl_804305C0; }
 
