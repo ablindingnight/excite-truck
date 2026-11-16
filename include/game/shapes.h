@@ -286,4 +286,26 @@ public:
     u8 pad24[0x40 - 0x24];
 };
 
+// A static world object with a collision volume (vtable 0x803336F8; built by fn_801A4A8C, or from file data):
+// pose 0x04, its collision shape 0x3C (sol bounds and deletes it through it), the next object 0x44. Not a CollShape.
+// Declared last, as in sphcoll. Class and slot names unproven.
+class StaticCollObject {
+public:
+    StaticCollObject(bool swap, u8* vol);  // from file data; its volume is built in place at vol
+    virtual u32 vf08(void);
+    virtual void vf0C(void);
+    virtual u8* vf10(void);
+    virtual u8 vf14(void);
+    virtual void vf18(u32 v);
+    virtual void vf1C(void);
+    virtual s32 vf20(void);
+    virtual u32 vf24(void);
+    virtual void vf28(u32 v);
+    virtual ~StaticCollObject(void) {}
+    u8 pad4[0x3C - 0x4];
+    CollShape* shape;        // offset 0x3C
+    u8 pad40[0x44 - 0x40];
+    StaticCollObject* next;  // offset 0x44
+};
+
 #endif

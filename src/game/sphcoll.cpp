@@ -309,23 +309,6 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r);
 int fn_8019DDFC(const f32* from, const f32* dir, f32* t, f32* n, const f32* c, f32 r);
 // CollShape and its interface are declared in game/collshape.h.
 
-// A static world object with a collision volume (vtable 0x803336F8; built by fn_801A4A8C, or from file
-// data): pose 0x04, mesh 0x3C, volume 0x48. Not a CollShape. Class and slot names unproven.
-class StaticCollObject {
-public:
-    StaticCollObject(bool swap, u8* vol);  // from file data; its volume is built in place at vol
-    virtual u32 vf08(void);
-    virtual void vf0C(void);
-    virtual u8* vf10(void);
-    virtual u8 vf14(void);
-    virtual void vf18(u32 v);
-    virtual void vf1C(void);
-    virtual s32 vf20(void);
-    virtual u32 vf24(void);
-    virtual void vf28(u32 v);
-    virtual ~StaticCollObject(void) {}
-};
-
 // MATCHING-AID (transitional): the builders still written as C store these vtables by their linker names
 // (BoxSphereShape: fn_8019F564 stays C, 94.9%; the sphere part fn_801A0258; trackobj's PolyShape and
 // StaticCollObject builders fn_801A324C / fn_801A4A8C, held while Codex works trackobj).
