@@ -2,31 +2,26 @@
 // as up to four soft-edged quads (one per screen quadrant or half) at growing scales over five passes
 // to make the bloom/glare streaks. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/GX/GXTypes.h>
+#include <revolution/GX/GXAttr.h>
+#include <revolution/GX/GXFrameBuf.h>
+#include <revolution/GX/GXGeometry.h>
+#include <revolution/GX/GXLight.h>
+#include <revolution/GX/GXPixel.h>
+#include <revolution/GX/GXTev.h>
+#include <revolution/GX/GXTexture.h>
+#include <revolution/GX/GXTransform.h>
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, const f32& a, f32 b) { return a + t * (b - a); }
 
-struct GXTexObj {
-    u32 dummy[8];
-};
+// GXTexObj: the SDK's.
 
-struct GXRenderModeObj {
-    s32 viTVmode;     // offset 0x0
-    u16 fbWidth;      // offset 0x4
-    u16 efbHeight;    // offset 0x6
-};
+// GXRenderModeObj: the SDK's.
 
-struct GXVtxDescList {
-    int attr;
-    int type;
-};
+// GXVtxDescList: the SDK's.
 
-struct GXVtxAttrFmtList {
-    int attr;
-    int cnt;
-    int type;
-    u8 frac;
-};
+// GXVtxAttrFmtList: the SDK's.
 
 extern "C" {
 GXRenderModeObj* fn_802D2D14(void);
@@ -34,26 +29,6 @@ void* fn_802CFF64(u32 size);  // frame allocation
 void fn_802DEE88(void);
 void fn_802DEF70(void);
 void fn_802D3360(void);
-void GXInitTexObj(GXTexObj* obj, void* image, u16 w, u16 h, int fmt, int ws, int wt, u8 mip);
-void GXInitTexObjFilter(GXTexObj* obj, int minf, int magf);
-void GXLoadTexObj(const GXTexObj* obj, int map);
-void GXSetTexCopySrc(u16 l, u16 t, u16 w, u16 h);
-void GXSetTexCopyDst(u16 w, u16 h, int fmt, u8 mip);
-void GXCopyTex(void* dst, u8 clear);
-void GXClearVtxDesc(void);
-void GXSetVtxDescv(const GXVtxDescList* list);
-void GXSetVtxAttrFmtv(int fmt, const GXVtxAttrFmtList* list);
-void GXSetViewport(f32 x, f32 y, f32 w, f32 h, f32 n, f32 f);
-void GXSetProjection(const f32 m[4][4], int type);
-void GXLoadPosMtxImm(const f32 m[3][4], u32 id);
-void GXSetCurrentMtx(u32 id);
-void GXSetNumChans(u8 n);
-void GXSetChanCtrl(int chan, u8 enable, int amb, int mat, u32 lights, int diff, int attn);
-void GXSetColorUpdate(u8 on);
-void GXSetZMode(u8 test, int func, u8 update);
-void GXSetAlphaCompare(int c0, u8 r0, int op, int c1, u8 r1);
-void GXSetArray(int attr, const void* base, u8 stride);
-void GXBegin(int prim, int fmt, u16 n);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -74,8 +49,8 @@ struct BlurTex {
             h = fh;
         }
         data = new ("gc_texture") u8[h * (w * 2)];
-        GXInitTexObj(&obj, data, w, h, 4, 0, 0, 0);
-        GXInitTexObjFilter(&obj, 1, 1);
+        GXInitTexObj((GXTexObj*)&obj, (void*)data, (u16)w, (u16)h, (GXTexFmt)4, (GXTexWrapMode)0, (GXTexWrapMode)0, (GXBool)0);
+        GXInitTexObjFilter((GXTexObj*)&obj, (GXTexFilter)1, (GXTexFilter)1);
         valid = 0;
     }
     GXTexObj obj;  // offset 0x0
@@ -204,11 +179,11 @@ void fn_802DD754(void) {
         fn_802DE788();
         for (pass = 0; pass < 5; pass++) {
             t = lbl_8055FED8;
-            GXSetTexCopySrc(0, 0, lbl_8055FED0, lbl_8055FED4);
-            GXSetTexCopyDst(t->w, t->h, 4, t->mip);
-            GXCopyTex(t->data, 0);
+            GXSetTexCopySrc((u16)0, (u16)0, (u16)lbl_8055FED0, (u16)lbl_8055FED4);
+            GXSetTexCopyDst((u16)t->w, (u16)t->h, (GXTexFmt)4, (GXBool)t->mip);
+            GXCopyTex((void*)t->data, (GXBool)0);
             t->valid = 1;
-            GXLoadTexObj(&lbl_8055FED8->obj, 0);
+            GXLoadTexObj((const GXTexObj*)&lbl_8055FED8->obj, (GXTexMapID)0);
             s = lbl_804DB6A0.s;
             for (j = 0; j < lbl_804DB6A0.count; j++) {
                 fn_802DD898(s, pass, (f32)(1 << pass), 0.5f);
@@ -275,10 +250,10 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
     GlareVtx(buf, &n, s, 0.3f, 0.9f, 0, du, dv);
     GlareVtx(buf, &n, s, 0.7f, 0.3f, 0, du, dv);
     GlareVtx(buf, &n, s, 0.7f, 0.9f, 0, du, dv);
-    GXSetArray(9, buf, 0x18);
-    GXSetArray(0xD, &buf->u, 0x18);
-    GXSetArray(0xB, &buf->color, 0x18);
-    GXBegin(0x98, 0, 0x18);
+    GXSetArray((GXAttr)9, (const void*)buf, (u8)0x18);
+    GXSetArray((GXAttr)0xD, (const void*)&buf->u, (u8)0x18);
+    GXSetArray((GXAttr)0xB, (const void*)&buf->color, (u8)0x18);
+    GXBegin((GXPrimitive)0x98, (GXVtxFmt)0, (u16)0x18);
     for (int i = 0; i < n; i++) {
         WGPIPE = i;
         WGPIPE = i;
@@ -289,25 +264,25 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
 void fn_802DE774(void) { lbl_804DB6A0.count = 0; }
 
 void fn_802DE788(void) {
-    GXVtxDescList desc[4] = {{9, 2}, {0xD, 2}, {0xB, 2}, {0xFF, 0}};
+    GXVtxDescList desc[4] = {{(GXAttr)9, (GXAttrType)2}, {(GXAttr)0xD, (GXAttrType)2}, {(GXAttr)0xB, (GXAttrType)2}, {(GXAttr)0xFF, (GXAttrType)0}};
     GXClearVtxDesc();
     GXSetVtxDescv(desc);
-    GXVtxAttrFmtList fmt[4] = {{9, 1, 4, 0}, {0xD, 1, 4, 0}, {0xB, 1, 5, 0}, {0xFF, 0, 0, 0}};
-    GXSetVtxAttrFmtv(0, fmt);
+    GXVtxAttrFmtList fmt[4] = {{(GXAttr)9, (GXCompCnt)1, (GXCompType)4, 0}, {(GXAttr)0xD, (GXCompCnt)1, (GXCompType)4, 0}, {(GXAttr)0xB, (GXCompCnt)1, (GXCompType)5, 0}, {(GXAttr)0xFF, (GXCompCnt)0, (GXCompType)0, 0}};
+    GXSetVtxAttrFmtv((GXVtxFmt)0, (const GXVtxAttrFmtList*)fmt);
     GXSetViewport(0.0f, 0.0f, lbl_8055FED0, lbl_8055FED4, 0.0f, 1.0f);
     f32 proj[4][4] = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, -0.5f},
                       {0.0f, 0.0f, 0.0f, 1.0f}};
-    GXSetProjection(proj, 1);
+    GXSetProjection((const f32 (*)[4])(proj), (GXProjectionType)1);
     f32 m[3][4] = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}};
-    GXLoadPosMtxImm(m, 0);
-    GXSetCurrentMtx(0);
-    GXSetNumChans(1);
-    GXSetChanCtrl(4, 0, 1, 1, 0, 0, 2);
-    GXSetChanCtrl(5, 0, 1, 1, 0, 0, 2);
+    GXLoadPosMtxImm((const f32 (*)[4])(m), (u32)0);
+    GXSetCurrentMtx((u32)0);
+    GXSetNumChans((u8)1);
+    GXSetChanCtrl((GXChannelID)4, (GXBool)0, (GXColorSrc)1, (GXColorSrc)1, (GXLightID)0, (GXDiffuseFn)0, (GXAttnFn)2);
+    GXSetChanCtrl((GXChannelID)5, (GXBool)0, (GXColorSrc)1, (GXColorSrc)1, (GXLightID)0, (GXDiffuseFn)0, (GXAttnFn)2);
     fn_802DEE88();
-    GXSetColorUpdate(1);
-    GXSetZMode(0, 7, 0);
-    GXSetAlphaCompare(4, 0, 0, 7, 0xFF);
+    GXSetColorUpdate((GXBool)1);
+    GXSetZMode((GXBool)0, (GXCompare)7, (GXBool)0);
+    GXSetAlphaCompare((GXCompare)4, (u8)0, (GXAlphaOp)0, (GXCompare)7, (u8)0xFF);
 }
 
 void fn_802DEA6C(void) {
