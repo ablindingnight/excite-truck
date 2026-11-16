@@ -158,7 +158,9 @@ static inline f32 CamUnit(f32 v, f32 lo, f32 hi) { return CamMax(CamMin(1.0f, (v
 static inline f32 CamMulF(f32 a, f32 b) { return a * b; }
 // CamSpeed: retail keeps the multiply by a scale of 1.0 (a literal 1.0f * x is folded away).
 static inline f32 CamSpeed(f32 t, f32 scale) { return scale * (100.0f * CamBlend(t, 5.0f)); }
-/* Helper name unproven; MATCHING-AID (unproven): the cast local pointer keeps one resolved base for the stores. */
+/* Helper name unproven. The cast is retail evidence (aids audit 2026-11-16): the stores keep one resolved base only
+   when the pointer comes through a cast; (CamVec*)m, (Mat3*)m and (f32*)m tie, the cast-free m->axes scores lower
+   (same result as the SoundManager ctor, where 11 cast-free forms fail). Which cast retail had is unknown. */
 static inline void CamIdentityRows(CamRot* m) {
     CamVec* r = (CamVec*)m;
     r[0].x = 1.0f;

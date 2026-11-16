@@ -107,6 +107,8 @@ inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
     arg1 = *(const int*)&r.hi;
 }
 
+// PROVISIONAL (user 2026-11-16): same form as tunemenu's Slider (see the aids audit note there); union locals and
+// the MenuItem(n, v, MenuRange) constructor both give 99.82, the cast on the parameters is exact.
 static inline MenuItem VolumeItem(const char* n, f32* v, f32 lo, f32 hi) {
     return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi);
 }

@@ -17,6 +17,12 @@ struct TuneScales {
 };
 
 // A slider item (type 9): the range travels as the two floats' bit patterns in the int argument words.
+// PROVISIONAL (user 2026-11-16). Aids audit 2026-11-16: retail stores every row's lo/hi to its own stack slot and
+// reads them back with lwz (one float object per row = by-value parameters of an inline). Every non-cast pun
+// compiles to the same instructions with other registers: union locals 91.11, a union parameter with a float
+// constructor (by value or const&) 91.36, a MenuItem(n, v, f32 lo, f32 hi) constructor doing the cast 91.36;
+// only the pointer cast on the inline's own parameters is exact. JP build: identical code. opsound's volume rows
+// show the same stack-slot pattern (and rise with the same helper).
 /* Helper name unproven */
 static inline MenuItem Slider(const char* n, f32* v, f32 lo, f32 hi) { return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi); }
 

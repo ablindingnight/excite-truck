@@ -52,6 +52,12 @@ inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
     arg1 = *(const int*)&r.hi;
 }
 
+// Helper name unproven; PROVISIONAL cast as in tunemenu/uioptions (aids audit 2026-11-16): each volume row reads
+// its own lo/hi stack slots back with lwz, the by-value inline form; 84.32 -> 84.84 over the MenuRange constructor.
+static inline MenuItem VolumeItem(const char* n, f32* v, f32 lo, f32 hi) {
+    return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi);
+}
+
 // A slider: the range is stored in the item's argument words.
 struct SliderItem {
     SliderItem(const char* n, f32* v, MenuRange r) {
@@ -254,11 +260,11 @@ void fn_8023CC84(const char* layout) {
                 MenuItem(lbl_8055BAC0, 8, (void*)fn_8023CA18, 0, 0),
                 MenuItem(0, 5, &opts, 0, 0),
                 MenuItem("default", 0, (void*)fn_8023CB54, 0, 0),
-                MenuItem("video_volume", &lbl_8055F174, MenuRange(0.0f, 1.0f)),
-                MenuItem("sfx_volume", &lbl_8055F16C, MenuRange(0.0f, 1.0f)),
-                MenuItem("announcer_volume", &lbl_8055F168, MenuRange(0.0f, 1.0f)),
-                MenuItem("music_volume", &lbl_8055F164, MenuRange(0.0f, 1.0f)),
-                MenuItem("tire_volume", &lbl_8055F170, MenuRange(0.0f, 1.0f)),
+                VolumeItem("video_volume", &lbl_8055F174, 0.0f, 1.0f),
+                VolumeItem("sfx_volume", &lbl_8055F16C, 0.0f, 1.0f),
+                VolumeItem("announcer_volume", &lbl_8055F168, 0.0f, 1.0f),
+                VolumeItem("music_volume", &lbl_8055F164, 0.0f, 1.0f),
+                VolumeItem("tire_volume", &lbl_8055F170, 0.0f, 1.0f),
                 MenuItem("back", 0, 0, -1, 0),
                 MenuItem("quality", 7, &lbl_8055F17C, (int)qualities, 0),
                 MenuItem("race_music", 7, &lbl_8055F178, (int)raceMusic, 0),
