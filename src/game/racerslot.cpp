@@ -4,6 +4,8 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/racer_camera_slot.h"
+#include "game/camrec.h"
+#include "game/carbody.h"
 #include "macros.h"
 #include <string.h>
 #include <math.h>
@@ -111,16 +113,16 @@ extern "C" {
 
 int fn_8026A698(u8* p, int i) {
     f32* r;
-    u8* car = PTR(p, 0x140);
+    u8* car = ((CamRec*)p)->car;
     CameraRacerSlot* s = &lbl_80499E60[i];
     int ok = 1;
-    if (U32(car, 0x10) == 'PCAR') {
+    if (((CarBody*)car)->type == 'PCAR') {
         u8* ctl = PTR(car, 0x270C);
         if (((Ctl*)ctl)->Flags() & 0x20) {
             ok = 0;
         }
     }
-    if (fn_801CF064() || S32(p, 0x10) == 0x11 || S32(p, 0x10) == 0x15 || (S32(fn_801769CC(), 4) & 0x4000) || ok) {
+    if (fn_801CF064() || ((CamRec*)p)->mode == 0x11 || ((CamRec*)p)->mode == 0x15 || (S32(fn_801769CC(), 4) & 0x4000) || ok) {
         if (s->active) {
             fn_80176A00(1);
         }
@@ -130,14 +132,14 @@ int fn_8026A698(u8* p, int i) {
     }
     int n = fn_80178CA4();
     bool multi = n > 1;
-    u8* c = PTR(p, 0x140);
-    int done = !((f32)__fabs(F32(c, 0x2690)) <= __float_epsilon[0]) && fn_801B8570(S32(c, 0x1EC));
+    u8* c = ((CamRec*)p)->car;
+    int done = !((f32)__fabs(((CarBody*)c)->f2690) <= __float_epsilon[0]) && fn_801B8570(((CarBody*)c)->index);
     if (!done) {
         s->t = 0.0f;
         if (s->active) {
             s->active = 0;
             if (!multi) {
-                U8(p, 0x138) = 1;
+                ((CamRec*)p)->b138 = 1;
             }
             fn_80176A00(1);
         }
@@ -156,7 +158,7 @@ int fn_8026A698(u8* p, int i) {
         f32 room[2] = {1000.0f, 1000.0f};
         r = room;
         for (int k = 0; k < 2; k++) {
-            SVec from = *(const SVec*)(p + 0xE4);
+            SVec from = *(const SVec*)&((CamRec*)p)->carFrame.pos;
             SVec side;
             side.x = k ? -1.0f : 1.0f;
             side.y = 0.0f;
@@ -167,7 +169,7 @@ int fn_8026A698(u8* p, int i) {
             SVec hit;
             u32 a;
             u32 b;
-            MulVec(*(const Mat3*)(p + 0xC0), side, &dir);
+            MulVec(*(const Mat3*)&((CamRec*)p)->carFrame, side, &dir);
             AddScaledV(&from, &dir, -0.5f);
             SumScaledV(&to, &from, &dir, 5.0f);
             if (fn_801784AC(&from, &to, &hit, &nrm, &a, &b, 0)) {
@@ -175,13 +177,14 @@ int fn_8026A698(u8* p, int i) {
             }
             r++;
         }
-        U8(p, 0x138) = 1;
+        ((CamRec*)p)->b138 = 1;
         s->active = 1;
-        s->frame = *(const SFrame*)(p + 0x88);
-        s->fov = F32(p, 0x194);
+        s->frame = *(const SFrame*)&((CamRec*)p)->lastPose;
+        s->fov = ((CamRec*)p)->f194;
         s->yaw = atan2(s->frame.rot.m[2][0], s->frame.rot.m[2][2]);
         f32 turn = 2.3561945f;
-        turn = PSVECDotProduct((const Vec*)((f32*)(PTR(p, 0x140) + 0x118)), (const Vec*)((f32*)(p + 0xC0))) > 0.0f ? turn : -turn;
+        // p + 0xC0 = CamRec::carFrame (typed, together with the MulVec read above, it grows the frame by 16)
+        turn = PSVECDotProduct((const Vec*)&((CarBody*)((CamRec*)p)->car)->vel, (const Vec*)((f32*)(p + 0xC0))) > 0.0f ? turn : -turn;
         s->spin = turn;
         if (MIN(room[0], room[1]) < 10.0f) {
             if (room[0] > room[1]) {
@@ -197,21 +200,21 @@ int fn_8026A698(u8* p, int i) {
             s->yaw -= swing;
         }
         s->spin *= -0.1f;
-        s->target.x = F32(p, 0xE4);
-        s->target.y = F32(p, 0xE8);
-        s->target.z = F32(p, 0xEC);
+        s->target.x = ((CamRec*)p)->carFrame.pos.v[0];
+        s->target.y = ((CamRec*)p)->carFrame.pos.v[1];
+        s->target.z = ((CamRec*)p)->carFrame.pos.v[2];
         s->pos = s->target;
         s->vel.x = 0.0f;
         s->vel.y = 0.0f;
         s->vel.z = 0.0f;
         s->frameNo = lbl_8055E3C4;
     } else {
-        U8(p, 0x138) = 0;
+        ((CamRec*)p)->b138 = 0;
     }
     s->t += 0.016683351f * (f32)(lbl_8055E3C4 - s->frameNo);
     if (lbl_8055E3C4 != s->frameNo) {
-        SVec at = *(const SVec*)(p + 0xE4);
-        AddScaledV(&at, (const SVec*)(p + 0xCC), 0.7f);
+        SVec at = *(const SVec*)&((CamRec*)p)->carFrame.pos;
+        AddScaledV(&at, (const SVec*)&((CamRec*)p)->carFrame.rot.m[3], 0.7f);
         s->target = at;
         SVec v;
         SVec d;
@@ -260,7 +263,7 @@ int fn_8026A698(u8* p, int i) {
     f.pos.y += off.y;
     f.pos.z += off.z;
     SVec g = f.pos;
-    if (fn_801EA03C(PTR(p, 0x140) + 0x6C, &g)) {
+    if (fn_801EA03C((u8*)((CarBody*)((CamRec*)p)->car)->hint, &g)) {
         g.y += 1.0f;
         f32 up = MAX(0.0f, g.y - f.pos.y);
         f.pos.y += up;
@@ -285,9 +288,9 @@ int fn_8026A698(u8* p, int i) {
     } else {
         e = k * (-2.0f * k * k) - 3.0f * k * k;
     }
-    fn_8026E22C(p + 0x58, &s->frame, &f, e);
-    F32(p, 0xBC) = s->fov + e * (1.3089969f - s->fov);
-    S32(p, 0x10) = 5;
+    fn_8026E22C((u8*)&((CamRec*)p)->pose, &s->frame, &f, e);
+    ((CamRec*)p)->fov = s->fov + e * (1.3089969f - s->fov);
+    ((CamRec*)p)->mode = 5;
     s->frameNo = lbl_8055E3C4;
     return 1;
 }
