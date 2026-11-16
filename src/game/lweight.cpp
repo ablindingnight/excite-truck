@@ -155,7 +155,7 @@ void fn_802BBCC4(void) {
     }
 }
 
-u8 fn_802BBD38(short x, short z, int layer) {
+int fn_802BBD38(short x, short z, int layer) {
     if (lbl_8055FA90) {
         return layer == 1 ? 0xFF : 0;
     }
