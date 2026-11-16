@@ -4,6 +4,7 @@
 // coins. Pickups are kept in groups (one per table, with a bounding circle) and drawn spinning; a car
 // collects a pickup when it falls in the car's footprint. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/carbody.h"
@@ -83,28 +84,11 @@ struct SpinXform {
 
 extern "C" void fn_802C744C(s32 model, const SpinXform* m);
 
-template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T& At(int i) { return data[i]; }
-    T& Back(void) { return At(count - 1); }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
-
 template <class T, int N>
 struct FixedArr : ArrayRef<T> {
     FixedArr(void) : ArrayRef<T>(storage, N) {}
+    T& At(int i) { return this->data[i]; }
+    T& Back(void) { return At(this->count - 1); }
     T storage[N];
 };
 

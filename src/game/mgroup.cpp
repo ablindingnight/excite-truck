@@ -2,6 +2,7 @@
 // terrain regions over its time window) and the water/lava overlay model lists that blend between
 // the groups' states. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
+#include "game/arrayref.h"
 
 namespace {
 extern char kOverlay[];
@@ -31,33 +32,6 @@ void fn_80178DBC(int region, f32 t);
 }
 
 void* operator new(size_t size, const char* tag);
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* Next(void) { return &data[count++]; }
-    int Find(T v) const {
-        int i;
-        for (i = 0; i < count; i++) {
-            if (data[i] == v) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
 
 void fn_802E317C(const char* fmt, ...);
 
@@ -90,6 +64,15 @@ struct MorphGroup;
 
 struct GroupRefs : ArrayRef<MorphGroup*> {
     GroupRefs(void) : ArrayRef<MorphGroup*>(storage, 2) {}
+    int Find(MorphGroup* v) const {
+        int i;
+        for (i = 0; i < count; i++) {
+            if (data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
     MorphGroup* storage[2];
 };
 

@@ -5,6 +5,7 @@
 // done and then resets or stays finished; laps outside its active range park it. A rumble sound
 // and an on-screen text line are shared. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
@@ -107,25 +108,17 @@ public:
 
 extern "C" Sound3D* fn_802077A4(const char* name, int cls, ActVec* vel, ActVec* pos);
 
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
+template <typename T, int N>
+struct FixedArr : ArrayRef<T> {
+    FixedArr(void) : ArrayRef<T>(storage, N) {}
+    ~FixedArr(void) {}
     void Push(T v) {
-        T* p = &data[count++];
+        T* p = &this->data[this->count++];
         *p = v;
     }
     int Find(T v) {
-        for (int i = 0; i < Count(); i++) {
-            if (data[i] == v) {
+        for (int i = 0; i < this->Count(); i++) {
+            if (this->data[i] == v) {
                 return i;
             }
         }
@@ -136,32 +129,22 @@ struct ArrayRef {
         if (i == -1) {
             return;
         }
-        if (i >= 0 && i < count) {
-            int last = count - 1;
+        if (i >= 0 && i < this->count) {
+            int last = this->count - 1;
             if (i != last) {
-                data[i] = data[last];
+                this->data[i] = this->data[last];
             }
-            count--;
+            this->count--;
         }
     }
-    int Count(void) const { return count; }
     void RemoveAt(int i) {
-        if (i >= 0 && i < count) {
-            if (i != count - 1) {
-                data[i] = data[count - 1];
+        if (i >= 0 && i < this->count) {
+            if (i != this->count - 1) {
+                this->data[i] = this->data[this->count - 1];
             }
-            count--;
+            this->count--;
         }
     }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
-
-template <typename T, int N>
-struct FixedArr : ArrayRef<T> {
-    FixedArr(void) : ArrayRef<T>(storage, N) {}
-    ~FixedArr(void) {}
     T storage[N];
 };
 

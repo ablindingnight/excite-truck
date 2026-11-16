@@ -3,6 +3,7 @@
 // paths that explain an unlock. Names are guesses except where the messages give them.
 #include <string.h>
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/gamedb.h"
 
 extern "C" {
@@ -22,32 +23,17 @@ extern "C" {
 int fn_8027DE68(int);
 }
 
-// A counted array over storage it does not own; clearing it on destruction.
-template <class T>
-class ArrayRef {
-public:
-    ~ArrayRef(void) {
-        data = NULL;
-        count = 0;
-        capacity = 0;
-    }
-    s32 Size(void) const { return count; }
-    T* Add(void) { return &data[count++]; }
-
-    T* data;       // offset 0x0
-    s32 count;     // offset 0x4
-    s32 capacity;  // offset 0x8
-};
-
 template <class T, int N>
 class FixedArray : public ArrayRef<T> {
 public:
     FixedArray(void) {
         this->data = storage;
-        this->capacity = N;
+        this->cap = N;
         this->count = 0;
     }
     ~FixedArray(void) {}
+    s32 Size(void) const { return this->count; }
+    T* Add(void) { return &this->data[this->count++]; }
 
     T storage[N];  // offset 0xC
 };

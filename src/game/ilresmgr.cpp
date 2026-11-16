@@ -2,6 +2,7 @@
 // and either a single ghost line or a "racingline_set" of lines with per-car switching between them, inside
 // "legal_transition_regions", every min_change_t..max_change_t seconds. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/carbody.h"
@@ -88,24 +89,12 @@ static inline void StrCatN(char* d, int n, const char* s) {
     }
 }
 
+// The lists' helpers (unit-local).
 template <class T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    int Full(void) const { return count + 1 > cap; }
-    T* Add(void) { return &data[count++]; }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
+static inline int RefFull(const ArrayRef<T>* a) { return a->count + 1 > a->cap; }
+
+template <class T>
+static inline T* RefAdd(ArrayRef<T>* a) { return &a->data[a->count++]; }
 
 template <class T, int N>
 struct FixedList {
@@ -332,10 +321,10 @@ public:
                 right = kLeft;
             }
             int j;
-            for (j = 0; j < lines.a.count && !cand.a.Full(); j++) {
+            for (j = 0; j < lines.a.count && !RefFull(&cand.a); j++) {
                 e = &lines.a.data[j];
                 if (right == e->side) {
-                    *cand.a.Add() = e->line;
+                    *RefAdd(&cand.a) = e->line;
                 }
             }
             if (cand.a.count > 0) {
@@ -441,10 +430,10 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
         const char* side;
         fn_801345D8(key, sizeof(key), "%s%d", prefix, i);
         name = set->GetString(key, 0);
-        if (!name || s->lines.a.Full()) {
+        if (!name || RefFull(&s->lines.a)) {
             break;
         }
-        e = s->lines.a.Add();
+        e = RefAdd(&s->lines.a);
         e->line = fn_801563BC(name, center);
         StrCopyN(sideKey, sizeof(sideKey), key);
         StrCatN(sideKey, sizeof(sideKey), "_side");
@@ -472,7 +461,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
         ValueNode* regs = set->FindChild("legal_transition_regions");
         if (regs) {
             ValueNode* r;
-            for (i = 0; (r = regs->GetChildAt(i)) != 0 && !s->regions.a.Full(); i++) {
+            for (i = 0; (r = regs->GetChildAt(i)) != 0 && !RefFull(&s->regions.a); i++) {
                 s->regions.a.data[s->regions.a.count++] = fn_801399FC(r);
             }
         }

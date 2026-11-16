@@ -1,48 +1,7 @@
 // Two listener registries (0x801D0590-0x801D0BE4): objects add themselves and get broadcast
 // callbacks; car events are only forwarded for car-type objects. Names are guesses.
 #include "game/common.h"
-
-template <typename T>
-struct ArrayRef {
-    ArrayRef(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~ArrayRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* Next(void) { return &data[count++]; }
-    int Find(T v) const {
-        int i;
-        for (i = 0; i < count; i++) {
-            if (data[i] == v) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    void RemoveAt(int i) {
-        if (i >= 0 && i < count) {
-            int last = count - 1;
-            if (i != last) {
-                data[i] = data[last];
-            }
-            count--;
-        }
-    }
-    void Remove(T v) {
-        int i = Find(v);
-        if (i != -1) {
-            RemoveAt(i);
-        }
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
+#include "game/arrayref.h"
 
 struct CarObj {
     u8 pad0[0x10];
@@ -75,13 +34,62 @@ public:
     virtual void OnD(int a, int b);  // 0x14
 };
 
+// The lists' own lookup helpers (unit-local: their bodies differ from other units').
 struct CarListenerList : ArrayRef<CarListener*> {
     CarListenerList(void) : ArrayRef<CarListener*>(storage, 16) {}
+    int Find(CarListener* v) const {
+        int i;
+        for (i = 0; i < count; i++) {
+            if (data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    void RemoveAt(int i) {
+        if (i >= 0 && i < count) {
+            int last = count - 1;
+            if (i != last) {
+                data[i] = data[last];
+            }
+            count--;
+        }
+    }
+    void Remove(CarListener* v) {
+        int i = Find(v);
+        if (i != -1) {
+            RemoveAt(i);
+        }
+    }
     CarListener* storage[16];
 };
 
 struct RaceListenerList : ArrayRef<RaceListener*> {
     RaceListenerList(void) : ArrayRef<RaceListener*>(storage, 16) {}
+    int Find(RaceListener* v) const {
+        int i;
+        for (i = 0; i < count; i++) {
+            if (data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    void RemoveAt(int i) {
+        if (i >= 0 && i < count) {
+            int last = count - 1;
+            if (i != last) {
+                data[i] = data[last];
+            }
+            count--;
+        }
+    }
+    void Remove(RaceListener* v) {
+        int i = Find(v);
+        if (i != -1) {
+            RemoveAt(i);
+        }
+    }
     RaceListener* storage[16];
 };
 
