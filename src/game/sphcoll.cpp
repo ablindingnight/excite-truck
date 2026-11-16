@@ -10,6 +10,7 @@
 #include "game/rvec.h"
 #include "game/rigid.h"
 #include "game/shapes.h"
+#include "game/springcar.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -281,12 +282,6 @@ public:
 
 #define VE(p) ((VEx*)(p))
 
-struct WallObj;  // springcar.cpp
-
-class SpringCar {
-public:
-    void HitWall(WallObj* w);
-};
 
 extern "C" {
 f32 PSVECDotProduct(const void* a, const void* b);

@@ -2,6 +2,7 @@
 // flag distance, pit speed), creates per-car AI info, formats car numbers, and builds the driver object
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
+#include "game/springcar.h"
 
 // The game mode base (amaster.cpp); its vfEC lives here.
 class GameMode {
@@ -56,13 +57,6 @@ public:
     void Update(int i);
     void UpdateAll(void);
     void Process(void);
-};
-
-class Controller;
-class SpringCar {
-public:
-    SpringCar(Controller* c);
-    u8 data[0x2844];
 };
 
 class IDriver;
