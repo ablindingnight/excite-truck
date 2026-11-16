@@ -1551,8 +1551,7 @@ void fn_80183E7C(u8* p) {
         if (S32(p, 0x2620) > 2 && (roll = PSVECDotProduct(p + 0x124, p + 0x48), (f32)__fabs(roll) < 2.0f)) {
             f32 a = Ramp(F32(p, 0x2650), 0.0f, 1.0f);
             f32 b = Clamp01((F32(p, 0x25D4) - 4.4444447f) / 8.888888f);
-            f32 k = LerpT(b, 0.0f, 1.0f) * 0.305f * 9.81f * 100.0f * F32(p, 0xD4) *
-                    (0.0f + a * 1.0f);
+            f32 k = LerpT(b, 0.0f, 1.0f) * (F32(p, 0xD4) * 100.0f * 9.81f * 0.305f * (0.0f + a * 1.0f));
             BVec t;
             t.x = F32(p, 0x48) * (roll > 0.0f ? k : -k);
             t.y = F32(p, 0x4C) * (roll > 0.0f ? k : -k);
@@ -1898,7 +1897,7 @@ void fn_80183E7C(u8* p) {
             }
             nosedive = 1;
             F32(p, 0x264C) = st;
-            dive = 0.9f + Clamp01((st - 0.5f) / 0.5f) * -1.4f;
+            dive = LerpT(Ramp(st, 0.5f, 1.0f), 0.9f, -0.5f);
         }
         f32 lean = 6.0f * dive;
         lean = lean < 1.0f ? lean : 1.0f;
@@ -1911,15 +1910,15 @@ void fn_80183E7C(u8* p) {
             fn_801796CC(15, &ev, sizeof(ev));
         }
         f32 target;
-        if (lean >= 0.0f) {
+        if (lean < 0.0f) {
+            f32 t = Ramp(lean, 0.0f, -0.35f);
+            target = LerpT(t, F32(p, 0x261C), 0.9f * F32(p, 0x261C));
+            airLift = airLift + lbl_8055A3B0 * -lean;
+        } else {
             if (1.1f * F32(p, 0x261C) < top) {
                 top = 1.1f * F32(p, 0x261C);
             }
-            target = LerpT(Clamp01((lean - 0.0f) / 0.35f), F32(p, 0x261C), top);
-        } else {
-            airLift = airLift + lbl_8055A3B0 * -lean;
-            f32 t = Clamp01((lean - 0.0f) / -0.35f);
-            target = LerpT(t, F32(p, 0x261C), 0.9f * F32(p, 0x261C));
+            target = LerpT(Ramp(lean, 0.0f, 0.35f), F32(p, 0x261C), top);
         }
         f32 want = target - 8.888889f * F32(p, 0x25E4);
         HVec dir = *(HVec*)(p + 0x118);
