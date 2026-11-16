@@ -376,7 +376,7 @@ u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 
 // TODO(unpool): pool labels still read by name. As literals these sites drop (x - 0.0f, x / 1.0f and
 // literal * literal fold away; creation order moves), so they need the original helper forms first.
-extern const f32 lbl_80561CA0, lbl_80561CAC, lbl_80561CB0, lbl_80561CB8, lbl_80561CC0, lbl_80561CCC, lbl_80561CD0, lbl_80561CD8, lbl_80561CDC, lbl_80561CF4, lbl_80561CFC, lbl_80561D00, lbl_80561D0C, lbl_80561D2C, lbl_80561D34, lbl_80561D38, lbl_80561D44, lbl_80561D60, lbl_80561D98, lbl_80561D9C, lbl_80561DA0, lbl_80561DA4, lbl_80561DAC, lbl_80561DB8, lbl_80561DBC, lbl_80561DC0, lbl_80561DD0, lbl_80561DEC, lbl_80561E10, lbl_80561E14, lbl_80561E1C, lbl_80561E38, lbl_80561E3C, lbl_80561E48, lbl_80561E4C, lbl_80561E5C, lbl_80561E6C, lbl_80561E70, lbl_80561E74, lbl_80561E78, lbl_80561E88, lbl_80561E8C, lbl_80561E98, lbl_80561E9C, lbl_80561EA8, lbl_80561EAC, lbl_80561EB0, lbl_80561EC4, lbl_80561EC8;
+extern const f32 lbl_80561CA0, lbl_80561CAC, lbl_80561CB0, lbl_80561CB8, lbl_80561CC0, lbl_80561CCC, lbl_80561CD0, lbl_80561CDC, lbl_80561CFC, lbl_80561D00, lbl_80561D0C, lbl_80561D2C, lbl_80561D34, lbl_80561D38, lbl_80561D44, lbl_80561D60, lbl_80561D98, lbl_80561D9C, lbl_80561DA0, lbl_80561DA4, lbl_80561DB8, lbl_80561DBC, lbl_80561DC0, lbl_80561DD0, lbl_80561DEC, lbl_80561E10, lbl_80561E14, lbl_80561E1C, lbl_80561E38, lbl_80561E3C, lbl_80561E48, lbl_80561E4C, lbl_80561E5C, lbl_80561E6C, lbl_80561E70, lbl_80561E74, lbl_80561E78, lbl_80561E88, lbl_80561E8C, lbl_80561E98, lbl_80561E9C, lbl_80561EA8, lbl_80561EAC, lbl_80561EB0, lbl_80561EC4, lbl_80561EC8;
 
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
@@ -408,6 +408,7 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x14) = peak2 + b * (top * top);
     F32(p, 0x10) = F32(p, 0x18) + -2.0f * b * top;
 }
+static f32 RpmFromRad(f32 w) { return w / 0.10472f; } /* Helper name unproven */
 
 
 void fn_801819A0(u8* p, const u8* cfg, f32 a, f32 b, f32 c) {
@@ -420,6 +421,7 @@ void fn_801819A0(u8* p, const u8* cfg, f32 a, f32 b, f32 c) {
     v[5] = F32(cfg, 0x60);
     fn_8018185C(p, v);
 }
+static f32 SafeInv(f32 x) { return 1.0f / FMax(x, 0.01f); } /* Helper name unproven */
 
 f32 fn_80181A14(u8* p) {
     f32 k;
@@ -1710,7 +1712,7 @@ void fn_80183E7C(u8* p) {
                 axis.x = F32(p, 0x54) * side;
                 axis.y = F32(p, 0x58) * side;
                 axis.z = F32(p, 0x5C) * side;
-                f32 k = lbl_80561DAC * lbl_80561CF4 * lbl_80561D98 * F32(p, 0xD4);
+                f32 k = F32(p, 0xD4) * 9.81f * 30.0f * 0.305f;
                 BVec t;
                 t.x = axis.x * k;
                 t.y = axis.y * k;
@@ -2448,7 +2450,7 @@ void fn_80183E7C(u8* p) {
         F32(p, 0x26E8) = F32(p, 0x26E8) + dy;
         F32(p, 0x26EC) = F32(p, 0x26EC) + dz;
         if (lean) {
-            f32 k = lbl_80561CD8 * lbl_80561D98 * nvy * F32(p, 0xD4);
+            f32 k = nvy * F32(p, 0xD4) * 9.81f * 2.0f;
             BVec f;
             f.x = F32(p, 0x48) * k;
             f.y = F32(p, 0x4C) * k;
