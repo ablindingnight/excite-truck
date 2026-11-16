@@ -2632,7 +2632,7 @@ void fn_80186DE8(void) {
             force[2] = F32(car, 0x120) * drag;
             fn_801769CC();
             f32 top = lbl_80561D60 * fn_80181A48(car);
-            if (F32(car, 0x258C) > lbl_80561DC0 && F32(car, 0x25D4) < top && F32(car, 0x25E4) < lbl_80561D00 &&
+            if (CarHot(car) && F32(car, 0x25D4) < top && F32(car, 0x25E4) < lbl_80561D00 &&
                 (s32)fn_8018B06C(car) > 0) {
                 f32 k = lbl_80561D98 * fn_80181A14(car) * F32(car, 0x25E0) * F32(car, 0xD4);
                 AddScaled(force, 0x54 + car, k);
@@ -2932,14 +2932,11 @@ void fn_80186DE8(void) {
         c->v190 = CbSolVec4(steerK, out, brake, water[0]);
         bk2 = F32(car, 0x25E4);
         hb = lbl_80561D50 * hold;
-        if (hb > bk2) {
-            hb = hb;
-        } else {
+        if (bk2 > hb) {
             hb = bk2;
         }
-        hb = hb > lbl_80561CAC ? hb : lbl_80561CAC;
-        bk2 = bk2 > lbl_80561CAC ? bk2 : lbl_80561CAC;
-        c->v1A0 = CbSolVec4(bk2, bk2, hb, hb);
+        c->v1A0 = CbSolVec4(FMax(lbl_80561CAC, bk2), FMax(lbl_80561CAC, bk2), FMax(lbl_80561CAC, hb),
+                             FMax(lbl_80561CAC, hb));
         fn_8018CB3C(car);
         ((CbStepV*)PTR(car, 0x270))->Step();
         ((CbTickV*)car)->Tick();
