@@ -3251,12 +3251,7 @@ inline void BetaMaster::vf10(void) {
     b450 = 0;
 }
 
-// Physics body of a spin trigger.
-struct SpinBody {
-    f32 rot[9];  // offset 0x0
-    f32 pos[3];  // offset 0x24
-};
-
+// SpinBody: common.h's PlainValMatrix.
 class ReadyFlag {
 public:
     virtual int Ready(void);  // 0x8
@@ -3359,35 +3354,35 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l, int& i) {
 static inline f32 Wave(f32 time) { return (f32)sin(6.2831855f * (f32)fmod(lbl_80559EC8 * time, 1.0)); }
 static inline f32 Swing(f32 w, f32 amp) { return w * amp; }
 // The star loop body is an inline method called through stars.a.data[i] and the spin block a helper called with
-// the (SpinBody*)hB8 expression: their parameters are inline objects, which puts the loop counter and its offset
+// the (PlainValMatrix*)hB8 expression: their parameters are inline objects, which puts the loop counter and its offset
 // in r30/r31 and the two body pointers in r23/r26 as in retail (2026-11-16 TC helper pushsim).
-static inline void SpinStar(Pickup* t, SpinBody* body) {  /* Helper name unproven */
+static inline void SpinStar(Pickup* t, PlainValMatrix* body) {  /* Helper name unproven */
     f32 c;
     f32 ang;
     f32 s;
     f32 w;
     w = Swing(Wave(lbl_8055E3C8), 0.5235988f);
     ang = w + t->angle;
-    body->pos[0] = t->pos[0];
-    body->pos[1] = t->pos[1];
-    body->pos[2] = t->pos[2];
-    SpinBody* r = (SpinBody*)t->hB8;
+    body->origin.x = t->pos[0];
+    body->origin.y = t->pos[1];
+    body->origin.z = t->pos[2];
+    PlainValMatrix* r = (PlainValMatrix*)t->hB8;
     c = cos(ang);
     s = sin(ang);
-    r->rot[0] = c;
-    r->rot[1] = 0.0f;
-    r->rot[2] = -s;
-    r->rot[3] = 0.0f;
-    r->rot[4] = 1.0f;
-    r->rot[5] = 0.0f;
-    r->rot[6] = s;
-    r->rot[7] = 0.0f;
-    r->rot[8] = c;
+    r->basis[0].x = c;
+    r->basis[0].y = 0.0f;
+    r->basis[0].z = -s;
+    r->basis[1].x = 0.0f;
+    r->basis[1].y = 1.0f;
+    r->basis[1].z = 0.0f;
+    r->basis[2].x = s;
+    r->basis[2].y = 0.0f;
+    r->basis[2].z = c;
 }
 
 inline void Pickup::Update(void) {  /* Helper name unproven */
     if (hB8) {
-        SpinStar(this, (SpinBody*)hB8);
+        SpinStar(this, (PlainValMatrix*)hB8);
     }
     if (fn_801D48F8(objs[which]) || fn_801D4904(objs[which])) {
         f32 r = respawn - 0.016683351f;

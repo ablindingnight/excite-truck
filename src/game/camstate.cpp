@@ -49,26 +49,21 @@ void fn_80273B4C(u8* p) {
     }
 }
 
-// Rotation + translation (camera frame).
-struct CFrame {
-    f32 m[9];  // offset 0x0, rows
-    CVec3 t;   // offset 0x24
-};
-
+// CFrame: common.h's PlainValMatrix.
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void MulVec(CVec3* out, const CVec3* in, const CFrame* m) {
+static inline void MulVec(CVec3* out, const CVec3* in, const PlainValMatrix* m) {
     if (out == in) {
-        f32 x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        f32 y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        f32 z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        f32 x = Dot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        f32 y = Dot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        f32 z = Dot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        out->y = Dot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        out->z = Dot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = Dot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        out->y = Dot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        out->z = Dot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
     }
 }
 
@@ -116,7 +111,7 @@ void fn_80273BD0(u8* p) {
     }
     c->pose = c->carFrame;
     u8* car = c->car;
-    MulVec(&w, car[0x260C] ? (const CVec3*)(car + 0x5D0) : (const CVec3*)(car + 0x5C4), (const CFrame*)&c->pose);
+    MulVec(&w, car[0x260C] ? (const CVec3*)(car + 0x5D0) : (const CVec3*)(car + 0x5C4), (const PlainValMatrix*)&c->pose);
     c->pose.pos.v[0] = c->pose.pos.v[0] + w.x;
     c->pose.pos.v[1] = c->pose.pos.v[1] + w.y;
     c->pose.pos.v[2] = c->pose.pos.v[2] + w.z;
@@ -170,13 +165,13 @@ void fn_80273BD0(u8* p) {
     euler[1] = 0.0f;
     euler[2] = 0.0f;
     Mat3FromEuler(&rot, (const Vec3*)euler);
-    Mat3Mul((Mat3*)&c->pose, &rot, (Mat3*)(const CFrame*)&c->pose);
+    Mat3Mul((Mat3*)&c->pose, &rot, (Mat3*)(const PlainValMatrix*)&c->pose);
     if (c->car[0x260C]) {
         flipEuler[0] = 0.0f;
         flipEuler[1] = 3.1415927f;
         flipEuler[2] = 0.0f;
         Mat3FromEuler(&flip, (const Vec3*)flipEuler);
-        Mat3Mul((Mat3*)&c->pose, &flip, (Mat3*)(const CFrame*)&c->pose);
+        Mat3Mul((Mat3*)&c->pose, &flip, (Mat3*)(const PlainValMatrix*)&c->pose);
     }
 }
 
@@ -200,10 +195,10 @@ void fn_80274268(u8* p) {
     }
     CVec3 v;
     CVec3 w;
-    *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
+    *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     f32 h = F32(car, 0x2458) - 1.397f;
     SetV3(&v, 0.0f, 0.8f, -0.1f + h);
-    MulVec(&w, &v, (CFrame*)&cr->pose);
+    MulVec(&w, &v, (PlainValMatrix*)&cr->pose);
     cr->pose.pos.v[0] = cr->pose.pos.v[0] + w.x;
     cr->pose.pos.v[1] = cr->pose.pos.v[1] + w.y;
     cr->pose.pos.v[2] = cr->pose.pos.v[2] + w.z;
@@ -220,7 +215,7 @@ void fn_80274460(u8* p) {
     f32 euler[3];
     CVec3 v;
     CVec3 w;
-    *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
+    *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     euler[0] = 0.0f;
     euler[1] = 3.1415927f;
     euler[2] = 0.0f;
@@ -229,7 +224,7 @@ void fn_80274460(u8* p) {
     v.x = 0.0f;
     v.y = 0.8f;
     v.z = 0.0f;
-    MulVec(&w, &v, (CFrame*)&cr->pose);
+    MulVec(&w, &v, (PlainValMatrix*)&cr->pose);
     cr->pose.pos.v[0] = cr->pose.pos.v[0] + w.x;
     cr->pose.pos.v[1] = cr->pose.pos.v[1] + w.y;
     cr->pose.pos.v[2] = cr->pose.pos.v[2] + w.z;
@@ -349,7 +344,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
     CVec3 pos;
     CVec3 w;
     c->pose = c->carFrame;
-    MulVec(&w, move, (const CFrame*)&c->pose);
+    MulVec(&w, move, (const PlainValMatrix*)&c->pose);
     c->pose.pos.v[0] = c->pose.pos.v[0] + w.x;
     c->pose.pos.v[1] = c->pose.pos.v[1] + w.y;
     c->pose.pos.v[2] = c->pose.pos.v[2] + w.z;
@@ -503,7 +498,7 @@ void fn_802750C4(u8* p, f32 k, f32 dist) {
 void fn_802751AC(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{0.0f, 1.1f, 0.9f}, {8.0f, 0.0f, 0.0f}, 86.25f};
-    *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
+    *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     CamRotOff f;
     f32 z = c.off.z;
     f.pos.Set(c.off.x, c.off.y, z);
@@ -522,7 +517,7 @@ void fn_80275410(u8* p) {
     const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
     c = k;
     CamVec off = *(CVec3*)(car + 0x2450) + CamVec(0.8f, 0.65f, -1.75f);
-    *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
+    *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     Mat3 rot;
     RotFromVec(&rot, c.rot * 0.017453292f);
     fn_801BFD34((u8*)&cr->pose.pos, &off, (u8*)&cr->carFrame);
@@ -539,7 +534,7 @@ void fn_802756A4(u8* p) {
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
     c = k;
     CamVec off = *(CVec3*)(car + 0x2538) + CamVec(0.85f, 0.9f, 2.0f);
-    *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
+    *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     Mat3 rot;
     RotFromVec(&rot, c.rot * 0.017453292f);
     fn_801BFD34((u8*)&cr->pose.pos, &off, (u8*)&cr->carFrame);
@@ -551,7 +546,7 @@ void fn_802756A4(u8* p) {
 void fn_80275938(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{-1.0f, 0.9f, -3.2f}, {5.8f, 63.6f, 1.8f}, 87.75f};
-    *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
+    *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     CamRotOff f;
     f32 z = c.off.z;
     f.pos.Set(c.off.x, c.off.y, z);
@@ -610,19 +605,19 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
 void fn_80275D0C(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{-28.5f, 9.1f, -9.1f}, {16.3f, 70.4f, -13.4f}, 18.75f};
-    *(CFrame*)&cr->pose = *(CFrame*)&cr->carFrame;
-    CFrame f;
-    f.t.x = cr->carFrame.pos.v[0];
-    f.t.y = cr->carFrame.pos.v[1];
-    f.t.z = cr->carFrame.pos.v[2];
-    f.m[6] = cr->carFrame.rot.m[6];
-    f.m[7] = cr->carFrame.rot.m[7];
-    f.m[8] = cr->carFrame.rot.m[8];
-    f.m[3] = 0.0f;
-    f.m[4] = lbl_80563FAC;
-    f.m[5] = 0.0f;
-    PSVECCrossProduct((const Vec*)&f.m[3], (const Vec*)&f.m[6], (Vec*)&f.m[0]);
-    PSVECCrossProduct((const Vec*)&f.m[6], (const Vec*)&f.m[0], (Vec*)&f.m[3]);
+    *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
+    PlainValMatrix f;
+    f.origin.x = cr->carFrame.pos.v[0];
+    f.origin.y = cr->carFrame.pos.v[1];
+    f.origin.z = cr->carFrame.pos.v[2];
+    f.basis[2].x = cr->carFrame.rot.m[6];
+    f.basis[2].y = cr->carFrame.rot.m[7];
+    f.basis[2].z = cr->carFrame.rot.m[8];
+    f.basis[1].x = 0.0f;
+    f.basis[1].y = lbl_80563FAC;
+    f.basis[1].z = 0.0f;
+    PSVECCrossProduct((const Vec*)&f.basis[1].x, (const Vec*)&f.basis[2].x, (Vec*)&f.basis[0].x);
+    PSVECCrossProduct((const Vec*)&f.basis[2].x, (const Vec*)&f.basis[0].x, (Vec*)&f.basis[1].x);
     CamRotOff g;
     f32 x = c.off.x;
     f32 y = c.off.y;

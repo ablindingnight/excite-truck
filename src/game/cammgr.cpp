@@ -567,30 +567,21 @@ void fn_80267130(CamView* p) {
     p->farZ = lbl_8055F484 * (fn_80178CA4() == 1 ? 1.0f : 0.8f);
 }
 
-struct KVec3 {
-    f32 x, y, z;
-};
-
-// Rotation + translation (camera frame).
-struct KFrame {
-    f32 m[9];  // offset 0x0, rows
-    KVec3 t;   // offset 0x24
-};
-
+// KFrame: common.h's PlainValMatrix.
 static inline f32 KDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void KMulVec(KVec3* out, const KVec3* in, const KFrame* m) {
+static inline void KMulVec(ValVec3* out, const ValVec3* in, const PlainValMatrix* m) {
     if (out == in) {
-        f32 x = KDot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        f32 y = KDot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        f32 z = KDot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        f32 x = KDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        f32 y = KDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        f32 z = KDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = KDot3(in->x, m->m[0], in->y, m->m[3], in->z, m->m[6]);
-        out->y = KDot3(in->x, m->m[1], in->y, m->m[4], in->z, m->m[7]);
-        out->z = KDot3(in->x, m->m[2], in->y, m->m[5], in->z, m->m[8]);
+        out->x = KDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        out->y = KDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        out->z = KDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
     }
 }
 
@@ -599,8 +590,8 @@ extern f32 lbl_8055D020;        // aspect
 
 // Keeps the camera's near plane above the ground: lifts it by the deepest corner (not in modes 17/21).
 void fn_802671CC(CamView* p) {
-    KVec3 v;
-    KVec3 w;
+    ValVec3 v;
+    ValVec3 w;
     f32 nearZ = p->nearZ;
     f32 s = nearZ * p->tanHalf;
     f32 hx = s / lbl_8055D020;
@@ -612,7 +603,7 @@ void fn_802671CC(CamView* p) {
         v.x = cx;
         v.y = cy;
         v.z = nearZ;
-        KMulVec(&w, &v, (KFrame*)p);
+        KMulVec(&w, &v, (PlainValMatrix*)p);
         w.x += p->pos.v[0];
         w.y += p->pos.v[1];
         w.z += p->pos.v[2];
@@ -1092,7 +1083,7 @@ void fn_802682B0(u8* p) {
 }
 
 void fn_8026E850(f32* pos, const f32* target, u8* cam, const f32* up);
-int fn_801E9E78(void* ground, KVec3* p, KVec3* n, s32* hit);
+int fn_801E9E78(void* ground, ValVec3* p, ValVec3* n, s32* hit);
 extern f32 lbl_8055C4F0;  // mount blend time (aim, up, fov)
 extern f32 lbl_8055C4F4;  // mount blend time (position)
 
@@ -1141,9 +1132,9 @@ extern const CamMount lbl_803467E8[3] = {
 extern "C" {
 // Mount camera points averaged over the ideal-line frames: two points in the frame, and its up vector.
 struct MountView {
-    KVec3 a;   // offset 0x0
-    KVec3 b;   // offset 0xC
-    KVec3 up;  // offset 0x18
+    ValVec3 a;   // offset 0x0
+    ValVec3 b;   // offset 0xC
+    ValVec3 up;  // offset 0x18
 };
 
 // Fixed mount camera on the ideal line: for the current and the next mount, place both mount points in
@@ -1152,7 +1143,7 @@ static inline f32 CamLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 // d += v * k. Returns d: chained calls reload through the returned reference, which the optimizer cannot forward
 // (the target's frsp right after each stfs).
-static inline KVec3& CamMad(KVec3& d, const f32* v, f32 k) {
+static inline ValVec3& CamMad(ValVec3& d, const f32* v, f32 k) {
     d.x += v[0] * k;
     d.y += v[1] * k;
     d.z += v[2] * k;
@@ -1200,65 +1191,65 @@ void fn_80268358(CamRec* c) {
         o->up.x = zero;
         o->up.y = zero;
         o->up.z = zero;
-        KFrame fr[2];
+        PlainValMatrix fr[2];
         for (j = 0; j < 2; j++) {
             f32* p1;
             s32 hit;
             f32* p0;
             f32 z;
             f32 x;
-            KFrame* r;
+            PlainValMatrix* r;
             IdealFollowerData f;
             __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
             p0 = (f32*)f.seg;
             p1 = (f32*)f.seg->next;
             x = LerpK(f.t, p0[0], p1[0]);
             z = LerpK(f.t, p0[1], p1[1]);
-            KVec3 v;
+            ValVec3 v;
             CamXZ xz(x, z);
             v.x = xz.x;
             v.y = lbl_80563C20;
             v.z = xz.z;
-            KVec3 n;
+            ValVec3 n;
             hit = 0;
             fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
             r = &fr[j];
-            SetM3(&r->m[6], f.dir[0], lbl_80563C20, f.dir[1]);
-            PSVECNormalize((const Vec*)&r->m[6], (Vec*)&r->m[6]);
-            PSVECCrossProduct((const Vec*)&n.x, (const Vec*)&r->m[6], (Vec*)&r->m[0]);
-            PSVECNormalize((const Vec*)&r->m[0], (Vec*)&r->m[0]);
-            PSVECCrossProduct((const Vec*)&r->m[6], (const Vec*)&r->m[0], (Vec*)&r->m[3]);
-            PSVECNormalize((const Vec*)&r->m[3], (Vec*)&r->m[3]);
-            r->t = v;
+            SetM3(&r->basis[2].x, f.dir[0], lbl_80563C20, f.dir[1]);
+            PSVECNormalize((const Vec*)&r->basis[2].x, (Vec*)&r->basis[2].x);
+            PSVECCrossProduct((const Vec*)&n.x, (const Vec*)&r->basis[2].x, (Vec*)&r->basis[0].x);
+            PSVECNormalize((const Vec*)&r->basis[0].x, (Vec*)&r->basis[0].x);
+            PSVECCrossProduct((const Vec*)&r->basis[2].x, (const Vec*)&r->basis[0].x, (Vec*)&r->basis[1].x);
+            PSVECNormalize((const Vec*)&r->basis[1].x, (Vec*)&r->basis[1].x);
+            r->origin = v;
             if (f.buf) {
                 delete[] f.buf;
             }
             f.buf = 0;
             __dt__12LineFollowerFv(&f, 0);
         }
-        KVec3 in = *(KVec3*)&m[i][0];
+        ValVec3 in = *(ValVec3*)&m[i][0];
         for (int k = 0; k < 2; k++) {
-            KVec3 res;
+            ValVec3 res;
             KMulVec(&res, &in, &fr[k]);
-            res.x += fr[k].t.x;
-            res.y += fr[k].t.y;
-            res.z += fr[k].t.z;
+            res.x += fr[k].origin.x;
+            res.y += fr[k].origin.y;
+            res.z += fr[k].origin.z;
             o->a.x += res.x * half;
             o->a.y += res.y * half;
             o->a.z += res.z * half;
         }
-        KVec3 in2 = *(KVec3*)&m[i][3];
+        ValVec3 in2 = *(ValVec3*)&m[i][3];
         for (k = 0; k < 2; k++) {
-            KVec3 res2;
+            ValVec3 res2;
             KMulVec(&res2, &in2, &fr[k]);
-            res2.x += fr[k].t.x;
-            res2.y += fr[k].t.y;
-            res2.z += fr[k].t.z;
+            res2.x += fr[k].origin.x;
+            res2.y += fr[k].origin.y;
+            res2.z += fr[k].origin.z;
             o->b.x += res2.x * half;
             o->b.y += res2.y * half;
             o->b.z += res2.z * half;
         }
-        CamMad(CamMad(o->up, &fr[0].m[3], half), &fr[1].m[3], half);
+        CamMad(CamMad(o->up, &fr[0].basis[1].x, half), &fr[1].basis[1].x, half);
     }
     t = lbl_8055E3C8 - c->mount.start;
     f32 ka;
@@ -1462,7 +1453,7 @@ static inline f32 RumbleForSpeed(f32 speed) {
 // shake from the car's impact speed. Sets *own for types that fill the sound pose themselves.
 void fn_802693F4(CamRec* c, u8* own, int idx) {
     u8* car = c->car;
-    const KVec3* off = (const KVec3*)(car + 0x30);
+    const ValVec3* off = (const ValVec3*)(car + 0x30);
     c->carFrame = *(CamPose*)(car + 0x3C);
     c->carVel.v[0] = F32(car, 0x118);
     c->carVel.v[1] = F32(car, 0x11C);
@@ -1470,8 +1461,8 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
     c->vel.v[0] = c->carVel.v[0];
     c->vel.v[1] = c->carVel.v[1];
     c->vel.v[2] = c->carVel.v[2];
-    KVec3 d;
-    KMulVec(&d, off, (const KFrame*)&c->carFrame);
+    ValVec3 d;
+    KMulVec(&d, off, (const PlainValMatrix*)&c->carFrame);
     c->carFrame.pos.v[0] += d.x;
     c->carFrame.pos.v[1] += d.y;
     c->carFrame.pos.v[2] += d.z;
