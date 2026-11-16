@@ -126,13 +126,13 @@ public:
     virtual void vf20(void);          // 0x20
     virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24
     virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(void);           // 0x2C
+    virtual s32 vf2C(RPacket* p);           // 0x2C
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(RPacket* p);     // 0x34
     virtual void vf38(u8* buf);       // 0x38
     virtual void vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
-    virtual void vf44(void);          // 0x44
+    virtual int vf44(void);          // 0x44
     void Transform(void);  // the worker Update (0x1C) calls
     s32 a4;          // offset 0x4
     s32 a8;          // offset 0x8
@@ -178,7 +178,7 @@ public:
     virtual void Reset(void);
     virtual void vf18(void) {}
     virtual void Update(void);
-    virtual s32 vf2C(void) { return 0x20; }
+    virtual s32 vf2C(RPacket* p) { return 0x20; }
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual int vf40(void) { return 1; }

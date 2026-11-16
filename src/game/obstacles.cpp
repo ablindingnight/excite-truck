@@ -79,7 +79,7 @@ public:
     virtual void vf20(void);         // 0x20
     virtual void Notify(const struct RVec3* v, const struct RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
     virtual void vf28(u8* buf);      // 0x28 writes the draw state
-    virtual s32 vf2C(void);          // 0x2C
+    virtual s32 vf2C(RPacket* p);          // 0x2C
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(RPacket* p);    // 0x34
     virtual void vf38(u8* p);        // 0x38
@@ -123,7 +123,7 @@ public:
     virtual void Reset(void);
     virtual void vf18(void);
     virtual void Update(void);
-    virtual s32 vf2C(void);
+    virtual s32 vf2C(RPacket* p);
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual void vf3C(void);
@@ -171,7 +171,7 @@ class ObstacleBody : public RigidBody {
 public:
     ObstacleBody(void) {}
     virtual ~ObstacleBody(void);
-    virtual s32 vf2C(void) { return 0; }
+    virtual s32 vf2C(RPacket* p) { return 0; }
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
         *nb = 0;
         *na = 0;

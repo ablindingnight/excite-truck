@@ -111,7 +111,7 @@ public:
     virtual void vf38(u8* buf);       // 0x38
     virtual void vf3C(void);          // 0x3C
     virtual int vf40(void);           // 0x40
-    virtual void vf44(void);          // 0x44
+    virtual int vf44(void);          // 0x44
     void Transform(void);  // the worker the 0x1C slot (Update) calls
     void AddShape(CollShape* s);
     void SetActive(int on) { nAdded = on ? nSub : 0; }

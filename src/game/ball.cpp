@@ -222,6 +222,7 @@ public:
 
 extern "C" BSound* fn_802077A4(const char* name, int prio, const BVec3* vel, const BVec3* pos);
 
+struct RPacket;
 class Phob;
 extern "C" void fn_8019EECC(Phob* p, BVec3* v);
 
@@ -294,7 +295,7 @@ public:
     virtual void vf20(void);          // 0x20
     virtual void vf24(void);          // 0x24
     virtual void vf28(u8* buf);       // 0x28
-    virtual void vf2C(void);          // 0x2C
+    virtual void vf2C(RPacket* p);          // 0x2C
     virtual void vf30(void);          // 0x30
     virtual void vf34(void);          // 0x34
     virtual void vf38(void);          // 0x38
@@ -336,7 +337,7 @@ public:
     virtual void vf20(void);
     virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
     virtual void vf28(u8* buf);
-    virtual s32 vf2C(void);
+    virtual s32 vf2C(RPacket* p);
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual void vf38(u8* out);
@@ -360,7 +361,7 @@ public:
     virtual void Reset(void);
     virtual void vf18(void);
     virtual void Update(void);
-    virtual s32 vf2C(void);
+    virtual s32 vf2C(RPacket* p);
     virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
     virtual s32 vf34(RPacket* p);
     virtual void vf3C(void);

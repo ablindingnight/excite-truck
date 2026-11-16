@@ -74,6 +74,8 @@ struct BodyDesc {
 
 struct RVec3;
 
+struct RPacket;
+
 class CollVolume {
 public:
     CollVolume(void);
@@ -86,7 +88,7 @@ public:
     virtual void vf20(void);           // 0x20
     virtual void Notify(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x24 (empty in the base)
     virtual void vf28(u8* buf);        // 0x28 writes the draw state (defined in phob.cpp)
-    virtual s32 vf2C(void);            // 0x2C
+    virtual s32 vf2C(RPacket* p);            // 0x2C
     virtual void vf30(f32 t, struct RPacket* a, const struct RPacket* b, s32* na, s32* nb);  // 0x30
     virtual s32 vf34(struct RPacket* p);  // 0x34
     virtual void vf38(u8* out);  // 0x38
@@ -446,6 +448,6 @@ PhobStatic::~PhobStatic(void) {}
 
 void PhobStatic::vf28(u8* buf) {}
 
-s32 CollVolume::vf2C(void) { return 0x14; }
+s32 CollVolume::vf2C(RPacket* p) { return 0x14; }
 
 void CollVolume::vf38(u8* out) { *out = 0; }

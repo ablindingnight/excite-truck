@@ -245,6 +245,7 @@ struct PhobMsg {
     s32 f50;  // offset 0x50
 };
 
+struct RPacket;
 class Phob {
 public:
     virtual void Init(PhobMsg* m);    // 0x8
@@ -256,7 +257,7 @@ public:
     virtual void vf20(void);          // 0x20
     virtual void vf24(void);          // 0x24
     virtual void vf28(u8* buf);       // 0x28
-    virtual s32 vf2C(void);           // 0x2C
+    virtual s32 vf2C(RPacket* p);           // 0x2C
     virtual void vf30(void);          // 0x30
     virtual void vf34(void);          // 0x34
     virtual void vf38(void);          // 0x38
