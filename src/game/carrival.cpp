@@ -38,7 +38,6 @@ extern "C" {
 RegUser* fn_8027ABF8(s32 id);
 s32 fn_8027AC08(RegUser* u, s32 key);
 void fn_8013CA3C(int a, int b);  // empty in the shipped game
-void __ct__9RaceSetupFv(void* setup);   // race setup init
 }
 
 // One car of the race setup (8 of them from 0x20): world.cpp's CarDef (0x78); was named RaceCar here, the
@@ -49,8 +48,9 @@ struct CarDef {
     u8 pad6C[0xC];
 };
 
-struct ArrivalRaceSetup {
-    ArrivalRaceSetup(void) { __ct__9RaceSetupFv(this); }
+// The race setup (world.cpp), as far as the rival race uses it.
+struct RaceSetup {
+    RaceSetup(void);  // world.cpp
     char track[0x20];  // offset 0x0
     CarDef cars[8];   // offset 0x20
     s32 numCars;       // offset 0x3E0
@@ -59,7 +59,7 @@ struct ArrivalRaceSetup {
 
 struct RivalRace {
     u8 pad0[0xC];
-    ArrivalRaceSetup setup;  // offset 0xC
+    RaceSetup setup;  // offset 0xC
 };
 
 ModuleTag lbl_8055F628;
