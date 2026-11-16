@@ -4,6 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
+#include <revolution/MTX/mtxtypes.h>  // Vec
 
 extern "C" {
 int sscanf(const char* s, const char* fmt, ...);
@@ -14,12 +15,6 @@ f32 PSVECMag(const void* v);
 }
 
 void* operator new(size_t size, const char* tag);
-
-struct Vec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct Frame {
     Vec axes[3];  // offset 0x0

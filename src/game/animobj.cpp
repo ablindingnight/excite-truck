@@ -2,6 +2,7 @@
 // data block, which copies the slot's frame (and flags) into the object every update. A model
 // object draws a loaded model at the frame; a point object draws a sprite. Names are guesses.
 #include "game/common.h"
+#include <revolution/MTX/mtxtypes.h>  // Vec
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -17,12 +18,6 @@ f32 PSVECDotProduct(const void* a, const void* b);
 
 extern const s16 lbl_80562E28;  // no flags
 extern u8 lbl_80488228[];
-
-struct Vec {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 struct Camera {
     u8 pad[0x18];

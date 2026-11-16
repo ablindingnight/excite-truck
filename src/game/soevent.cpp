@@ -29,14 +29,14 @@ void PSVECNormalize(const void* in, void* out);
 extern f32 lbl_8055E3C8;      // race time
 extern f32 __float_epsilon[];    // FLT_EPSILON
 
-struct Vec {
-    Vec(void) {}
+struct SoVec {
+    SoVec(void) {}
     void Set(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
     }
-    Vec& operator=(const ValVec3& v) {
+    SoVec& operator=(const ValVec3& v) {
         x = v.x;
         y = v.y;
         z = v.z;
@@ -84,13 +84,13 @@ struct Car {
     u8 pad0[0x10];
     u32 type;  // offset 0x10
     u8 pad14[0x3C - 0x14];
-    Vec rot[3];     // offset 0x3C
-    Vec origin;     // offset 0x60
+    SoVec rot[3];     // offset 0x3C
+    SoVec origin;     // offset 0x60
     s16 surf;       // offset 0x6C
     u8 pad6E[0xD4 - 0x6E];
     f32 mass;       // offset 0xD4
     u8 padD8[0x118 - 0xD8];
-    Vec vel;        // offset 0x118
+    SoVec vel;        // offset 0x118
     u8 pad124[0x1EC - 0x124];
     s32 index;      // offset 0x1EC
 };
@@ -113,7 +113,7 @@ struct Basis {
 struct Xform {
     Xform(const Basis& r) : rot(r) {}
     Basis rot;  // offset 0x0
-    Vec pos;    // offset 0x24
+    SoVec pos;    // offset 0x24
 };
 
 // The scripted object that was hit.
@@ -142,7 +142,7 @@ public:
     virtual void vf3C(void);
     virtual void vf40(void);
     virtual void vf44(void);
-    virtual void Push(const Vec* force, const Vec* at, int surf, int a);  // 0x48
+    virtual void Push(const SoVec* force, const SoVec* at, int surf, int a);  // 0x48
 
     u8 pad[0xD4 - 0x4];
     f32 mass;  // offset 0xD4
@@ -160,25 +160,25 @@ struct PhobConfig {
 extern "C" {
 void fn_801D334C(PhobConfig* c, ValueNodeV* t);
 void fn_801D3610(PhobConfig* c, const char* name);
-SpawnPhob* fn_801D32E0(int model, int chunk, const Xform* xf, const Vec* offset, const PhobConfig* c, SObj* obj);
+SpawnPhob* fn_801D32E0(int model, int chunk, const Xform* xf, const SoVec* offset, const PhobConfig* c, SObj* obj);
 }
 
 struct HitMsg {
-    Vec pos;     // offset 0x0
-    Vec vel;     // offset 0xC
+    SoVec pos;     // offset 0x0
+    SoVec vel;     // offset 0xC
     s16 surf;    // offset 0x18
     s32 effect;  // offset 0x1C
 };
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline void Scale(Vec* out, const Vec* in, f32 s) {
+static inline void Scale(SoVec* out, const SoVec* in, f32 s) {
     out->x = in->x * s;
     out->y = in->y * s;
     out->z = in->z * s;
 }
 
-static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
+static inline void MulVec(SoVec* out, const SoVec* in, const SoVec* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
         f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
@@ -194,7 +194,7 @@ static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
 }
 
 // v = transpose(m) * v, in place.
-static inline void MulVecTSelf(Vec* v, const Vec* m) {
+static inline void MulVecTSelf(SoVec* v, const SoVec* m) {
     f32 x = Dot3(v->x, m[0].x, v->y, m[0].y, v->z, m[0].z);
     f32 y = Dot3(v->x, m[1].x, v->y, m[1].y, v->z, m[1].z);
     f32 z = Dot3(v->x, m[2].x, v->y, m[2].y, v->z, m[2].z);
@@ -208,7 +208,7 @@ struct HeldEffect {
     u8 active;   // offset 0x0
     s32 effect;  // offset 0x4
     f32 time;    // offset 0x8
-    Vec pos;     // offset 0xC
+    SoVec pos;     // offset 0xC
 };
 
 struct SoEffect {
@@ -229,8 +229,8 @@ struct SoEffects : SoTrigger {
 struct SoChunk {
     u8 ownConfig;       // offset 0x0
     PhobConfig config;  // offset 0x4
-    Vec offset;         // offset 0x38
-    Vec throwVel;       // offset 0x44
+    SoVec offset;         // offset 0x38
+    SoVec throwVel;       // offset 0x44
     f32 forceScale;     // offset 0x50
     f32 randScale;      // offset 0x54
     s32 mask;           // offset 0x58
@@ -263,8 +263,8 @@ void fn_801D2AD4(const char* file);
 void fn_801D2B94(void);
 void fn_801D2C04(void);
 SoEvent* fn_801D2C20(int id);
-void fn_801D2C70(const SoEffects* s, const Vec* pos, Car* car, int id);
-void fn_801D2E38(SoSpawn* s, SObj* obj, const Vec* pos, const Vec* vel, f32 mass);
+void fn_801D2C70(const SoEffects* s, const SoVec* pos, Car* car, int id);
+void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass);
 
 void fn_801D21C0(void) {
     lbl_8055E930 = 0;
@@ -302,7 +302,7 @@ void fn_801D2214(void) {
 }
 
 // A car hit scripted object 'obj' at 'pos'.
-void fn_801D2414(SObj* obj, const Vec* pos, Car* car) {
+void fn_801D2414(SObj* obj, const SoVec* pos, Car* car) {
     if (IsCar(car)) {
         SoEvent* e = fn_801D2C20(obj->id);
         if (e) {
@@ -432,7 +432,7 @@ SoEvent* fn_801D2C20(int id) {
 }
 
 // Plays the event's hit effects; the ones with a duration are held on the car.
-void fn_801D2C70(const SoEffects* s, const Vec* pos, Car* car, int id) {
+void fn_801D2C70(const SoEffects* s, const SoVec* pos, Car* car, int id) {
     HitMsg m;
     m.pos = *pos;
     m.vel = car->vel;
@@ -460,27 +460,27 @@ void fn_801D2C70(const SoEffects* s, const Vec* pos, Car* car, int id) {
 }
 
 // Spawns the event's chunks at the object and throws them.
-void fn_801D2E38(SoSpawn* s, SObj* obj, const Vec* pos, const Vec* vel, f32 mass) {
+void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass) {
     int i = 0;
     Xform xf(obj->xf.rot);
-    Vec v = *vel;
+    SoVec v = *vel;
     Scale(&v, &v, mass / 0.016683351f);
     if (s->count > 0) {
     for (; i < s->count; i++) {
         SoChunk* c = &s->chunks[i];
-        Vec at;
+        SoVec at;
         Scale(&at, &c->offset, -1.0f);
-        MulVec(&xf.pos, &c->offset, (const Vec*)&obj->xf.rot);
+        MulVec(&xf.pos, &c->offset, (const SoVec*)&obj->xf.rot);
         xf.pos.x += obj->xf.pos.x;
         xf.pos.y += obj->xf.pos.y;
         xf.pos.z += obj->xf.pos.z;
         const PhobConfig* cfg = c->ownConfig ? &c->config : &s->config;
         int surf = c->ownConfig ? c->config.surf : s->config.surf;
         SpawnPhob* p = fn_801D32E0(s->model, c->mask, &xf, &at, cfg, obj);
-        Vec f;
+        SoVec f;
         Scale(&f, &v, c->forceScale);
         ValVec3 hit = *(const ValVec3*)pos;
-        p->Push(&f, (const Vec*)&hit, surf, 0);
+        p->Push(&f, (const SoVec*)&hit, surf, 0);
         f32 pm = p->mass / 0.016683351f;
         f.x = c->throwVel.x * pm;
         f.y = c->throwVel.y * pm;

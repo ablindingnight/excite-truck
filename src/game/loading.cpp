@@ -4,9 +4,9 @@
 #include <string.h>
 #include "game/common.h"
 
-struct Vec {
-    Vec(void) {}
-    Vec(f32 x_, f32 y_, f32 z_) {
+struct LdVec {
+    LdVec(void) {}
+    LdVec(f32 x_, f32 y_, f32 z_) {
         x = x_;
         y = y_;
         z = z_;
@@ -24,8 +24,8 @@ struct Vec {
 
 // A camera orientation and position.
 extern "C" {
-void PSVECCrossProduct(const Vec* a, const Vec* b, Vec* out);
-void PSVECNormalize(const Vec* in, Vec* out);
+void PSVECCrossProduct(const LdVec* a, const LdVec* b, LdVec* out);
+void PSVECNormalize(const LdVec* in, LdVec* out);
 }
 
 struct VecPOD {
@@ -36,8 +36,8 @@ struct VecPOD {
 
 struct CamFrame {
     VecPOD axes[2];  // offset 0x0: right, up
-    Vec fwd;       // offset 0x18
-    Vec pos;       // offset 0x24
+    LdVec fwd;       // offset 0x18
+    LdVec pos;       // offset 0x24
 
 };
 
@@ -302,13 +302,13 @@ void GetTipKey(int idx, s32 type, char* buf, u32 size) {
 }
 
 void OrthonormalizeFrame(CamFrame* f) {
-    Vec up(0.0f, 1.0f, 0.0f);
-    Vec fwd;
-    Vec newUp;
-    Vec right;
+    LdVec up(0.0f, 1.0f, 0.0f);
+    LdVec fwd;
+    LdVec newUp;
+    LdVec right;
 
-    PSVECCrossProduct(&up, &f->fwd, (Vec*)&f->axes[0]);
-    PSVECCrossProduct(&f->fwd, (Vec*)&f->axes[0], (Vec*)&f->axes[1]);
+    PSVECCrossProduct(&up, &f->fwd, (LdVec*)&f->axes[0]);
+    PSVECCrossProduct(&f->fwd, (LdVec*)&f->axes[0], (LdVec*)&f->axes[1]);
     right.Set(f->axes[0].x, f->axes[0].y, f->axes[0].z);
     fwd.Set(f->fwd.x, f->fwd.y, f->fwd.z);
     PSVECCrossProduct(&fwd, &right, &newUp);
@@ -406,7 +406,7 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     f32 fov;
     s32 t;
 
-    Vec* right = (Vec*)&cam.axes[0];
+    LdVec* right = (LdVec*)&cam.axes[0];
     right->x = 1.0f;
     right->y = 0.0f;
     right->z = 0.0f;
@@ -426,7 +426,7 @@ void GetTipsCamera(CamFrame* out, f32* out_fov) {
     cam.fwd.x = dir[0];
     cam.fwd.y = 0.0f;
     cam.fwd.z = dir[1];
-    PSVECCrossProduct((Vec*)&cam.axes[1], &cam.fwd, right);
+    PSVECCrossProduct((LdVec*)&cam.axes[1], &cam.fwd, right);
     t = fn_802E2C20() - lbl_8055D63C;
     f32 phase = (t % 50000) / 50000.0f;
     f32 angle = 6.2831855f * phase;
