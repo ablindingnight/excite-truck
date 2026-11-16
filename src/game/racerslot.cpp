@@ -292,6 +292,6 @@ int fn_8026A698(u8* p, int i) {
     return 1;
 }
 
-u8 fn_8026B0C0(int i) { return lbl_80499E60[i].active; }
+int fn_8026B0C0(int i) { return lbl_80499E60[i].active; }
 
 }  // extern "C"
