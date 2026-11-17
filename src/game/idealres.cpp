@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/centerline.h"
 #include "game/v2.h"
+#include "game/byteswap.h"
 
 extern "C" {
 double sqrt(double x);
@@ -16,27 +17,10 @@ void* fn_8013BFE8(const char* name);
 void fn_8013C428(void* p);
 }
 
-static inline void Swap4(void* v) {
-    u8* p = (u8*)v;
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 // A V2 read from a big-endian file (was V2::Swap).
 static inline void SwapV2(V2* v) {
-    Swap4(&v->x);
-    Swap4(&v->y);
-}
-
-static inline void Swap2(void* v) {
-    u8* p = (u8*)v;
-    u8 t = p[0];
-    p[0] = p[1];
-    p[1] = t;
+    SwapWord(&v->x);
+    SwapWord(&v->y);
 }
 
 struct ResExt {
@@ -99,27 +83,27 @@ void fn_80137D58(IdealPoint* p, IdealLineRes* res) {
     for (int i = 0; i < 2; i++) {
         SwapV2(&(&p->pos)[i]);
     }
-    Swap4(&p->ilpos);
-    Swap4(&p->len);
-    Swap4(&p->dist);
-    Swap4(&p->speed);
-    Swap4(&p->unk24);
-    Swap4(&p->width);
-    Swap4(&p->height);
-    Swap4(&p->lon);
+    SwapWord(&p->ilpos);
+    SwapWord(&p->len);
+    SwapWord(&p->dist);
+    SwapWord(&p->speed);
+    SwapWord(&p->unk24);
+    SwapWord(&p->width);
+    SwapWord(&p->height);
+    SwapWord(&p->lon);
 }
 
 void fn_80137F2C(void* p) {}
 
 void fn_80137F30(ResExt* e) {
-    Swap4(&e->data[0]);
-    Swap4(&e->data[1]);
+    SwapWord(&e->data[0]);
+    SwapWord(&e->data[1]);
 }
 
 void fn_80137F74(u32* v) {
-    Swap4(&v[0]);
-    Swap4(&v[1]);
-    Swap4(&v[2]);
+    SwapWord(&v[0]);
+    SwapWord(&v[1]);
+    SwapWord(&v[2]);
 }
 
 // MATCHING-AID: machine-extracted inline helper (loopext); it raised the score but nothing proves the original had it.
@@ -127,15 +111,15 @@ void fn_80137F74(u32* v) {
 /* Helper and record names unproven */
 struct IrRec { u16 a; u16 b; u32 c; };
 static inline void IrItem(IrRec* r) {
-    Swap2(&r->a);
-    Swap2(&r->b);
-    Swap4(&r->c);
+    SwapHalf(&r->a);
+    SwapHalf(&r->b);
+    SwapWord(&r->c);
 }
 void fn_80137FF0(ResExt* e) {
     int i;
-    Swap4(&e->data[0]);
-    Swap4(&e->data[1]);
-    Swap4(&e->data[2]);
+    SwapWord(&e->data[0]);
+    SwapWord(&e->data[1]);
+    SwapWord(&e->data[2]);
     for (i = 0; i < (s32)e->data[0]; i++) {
         IrItem(&((IrRec*)&e->data[3])[i]);
     }
@@ -166,7 +150,7 @@ void fn_801380DC(ResExt* e) {
 }
 
 void fn_80138144(ResExt* e) {
-    Swap4(&e->type);
+    SwapWord(&e->type);
     switch (e->type) {
     case 0:
         fn_80137F30(e);
@@ -195,22 +179,22 @@ void fn_801381B4(IdealLineRes* res) {
     int t;
     IdealPoint* p;
     ResExt* e;
-    Swap4(&res->hdr.resSize);
-    Swap4(&res->hdr.segSize);
-    Swap4(&res->len[0]);
-    Swap4(&res->len[1]);
-    Swap4(&res->len[2]);
-    Swap4(&res->len[3]);
-    Swap4(&res->total);
-    Swap4(&res->nrelocs);
+    SwapWord(&res->hdr.resSize);
+    SwapWord(&res->hdr.segSize);
+    SwapWord(&res->len[0]);
+    SwapWord(&res->len[1]);
+    SwapWord(&res->len[2]);
+    SwapWord(&res->len[3]);
+    SwapWord(&res->total);
+    SwapWord(&res->nrelocs);
     if (res->nrelocs > 0) {
         for (i = 0; i < res->nrelocs; i++) {
-            Swap4(&res->relocs[i]);
+            SwapWord(&res->relocs[i]);
         }
     }
     for (i = 0; i < res->nrelocs; i++) {
         u32* r = (u32*)((u8*)res + res->relocs[i]);
-        Swap4(r);
+        SwapWord(r);
         *r += (u32)res;
     }
     fn_80138434(&res->points);
@@ -427,8 +411,8 @@ IdealLineRes* fn_80138968(const char* name) {
                 seg = r->hdr.segSize;
                 res = r->hdr.resSize;
                 if (swap) {
-                    Swap4(&seg);
-                    Swap4(&res);
+                    SwapWord(&seg);
+                    SwapWord(&res);
                 }
                 if (seg == sizeof(IdealPoint) && res == 0x30) {
                     if (swap) {
