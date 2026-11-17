@@ -65,7 +65,7 @@ struct FixedArr : ArrayRef<T> {
 };
 
 struct ActZone {
-    void Load(ValueNode* n);
+    void Load(ValueNode* n, int& k, int& start);
     void Check(int c);
     void Free(void) {
         fn_80128658(bound);
@@ -157,23 +157,31 @@ static char SequenceKey[] = "act_seq";
 static char LapKey[] = "lap";
 static char BoundsTag[] = "bound";
 
+// PROVISIONAL matching helper. Caller-owned counters recover the retail GPR order.
+// The original helper boundary and parameter names remain unconfirmed.
+static inline void LoadActZone(FixedArr<ActZone, 64>& zones, ValueNode* n) {
+    ActZone* zone;
+    int start;
+    int k;
+    zone = &zones.data[zones.count++];
+    zone->Load(n, k, start);
+}
+
 inline void TechDemoMaster::a1(void) {
     ValueNode* vals = GetEvent(fn_801769CC()->event)->node;
     int i;
     ValueNode* n;
     for (i = 0; (n = vals->GetChildAt(i)) != 0; i++) {
         if (strcmp(n->GetName(), ActZoneTag) == 0) {
-            zones.data[zones.count++].Load(n);
+            LoadActZone(zones, n);
         }
     }
     fn_802E30C8("TechDemoMaster: Loaded %d actzones", zones.count);
 }
 
-inline void ActZone::Load(ValueNode* n) {
+inline void ActZone::Load(ValueNode* n, int& k, int& start) {
     f32* p;
-    int k;
     Bound* b;
-    int start;
     f32 best;
     s16 h[4];
     V2 d;
@@ -185,14 +193,14 @@ inline void ActZone::Load(ValueNode* n) {
     done = 0;
     {
         V2 e;
-        e.x = b->pts[0].x - b->pts[2].x;
         e.y = b->pts[0].y - b->pts[2].y;
+        e.x = b->pts[0].x - b->pts[2].x;
         best = e.x * e.x + e.y * e.y;
     }
-    d.x = b->pts[0].x - b->pts[1].x;
     d.y = b->pts[0].y - b->pts[1].y;
+    d.x = b->pts[0].x - b->pts[1].x;
     {
-        f32 len = d.x * d.x + d.y * d.y;
+        f32 len = d.y * d.y + d.x * d.x;
         if (len > best) {
             best = len;
             start = 0;
