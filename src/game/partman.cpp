@@ -505,19 +505,19 @@ s32 fn_8028F0C0(SysList* buckets, int i, s32 tex) {
     return -2;
 }
 
-static inline bool ContainsTexture(PartSys* const* items, int count, s32 tex) {
-    bool found = 0;
-    for (int i = 0; !found && i < count; ++i) {
-        found = items[i]->tex == tex;
+static inline bool ContainsTexture(PartSys* const* items, int n, s32 tex) {
+    bool found = false;
+    for (int k = 0; !found && k < n; ++k) {
+        found = items[k]->tex == tex;
     }
     return found;
 }
 
-static inline void AppendTexturePeers(const SysList* list, int start, s32 tex, PartSys** m, int& nMid) {
-    for (int k = start; k < list->count; ++k) {
-        PartSys* p = list->items[k];
-        if (p->tex == tex) {
-            *m++ = p;
+static inline void AppendTexturePeers(SysList* l, int k, PartSys** m, int& nMid, s32 t) {
+    for (; k < l->count; ++k) {
+        PartSys* peer = l->items[k];
+        if (peer->tex == t) {
+            *m++ = peer;
             nMid++;
         }
     }
@@ -545,7 +545,8 @@ void fn_8028F114(SysList* l, s32 first, s32 last) {
     }
     if (last != -2) {
         for (int j = 0; j < l->count; j++) {
-            if (l->items[j]->tex == last) {
+            const s32 tex = l->items[j]->tex;
+            if (tex == last) {
                 out[l->count - nLast - 1] = l->items[j];
                 nLast++;
             }
@@ -558,8 +559,10 @@ void fn_8028F114(SysList* l, s32 first, s32 last) {
         if (t != first && t != last) {
             bool found = ContainsTexture(mid, nMid, t);
             if (!found) {
-                mid[nMid++] = s;
-                AppendTexturePeers(l, j + 1, t, &mid[nMid], nMid);
+                int k = j + 1;
+                mid[nMid] = s;
+                nMid++;
+                AppendTexturePeers(l, k, &mid[nMid], nMid, t);
             }
         }
     }
