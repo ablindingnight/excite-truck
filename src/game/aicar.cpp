@@ -2468,6 +2468,20 @@ static inline int UnlessFlagged(const u8* p, int c5) {
     return c5;
 }
 
+static inline int AdmissionWindow(f32 x, f32 limit, int forward) {
+    int result = 0;
+    int within = 0;
+    if (x < limit && x > -5.0f * lbl_8055A48C) {
+        within = 1;
+    }
+    if (within && forward) {
+        result = 1;
+    }
+    return result;
+}
+
+static inline f32 PredictedComponent(f32 position, f32 velocity, f32 time) { return position + time * velocity; }
+
 int fn_80197FE4(u8* d, const u8* p) {
     int r = 0;
     if (!(S32(d, 0x2D0) & 4)) {
@@ -2479,19 +2493,13 @@ int fn_80197FE4(u8* d, const u8* p) {
             b = 0;
         }
         f32 k = b ? 0.5f : 1.0f;
-        f32 z = F32(p, 0x4) + k * F32(p, 0xC);
+        f32 lateralVelocity = F32(p, 0xC);
+        f32 z = PredictedComponent(F32(p, 0x4), lateralVelocity, k);
         F32(d, 0x134) = k;
-        f32 x = F32(p, 0x8) + k * F32(p, 0x10);
+        f32 x = PredictedComponent(F32(p, 0x8), F32(p, 0x10), k);
         int c1 = F32(p, 0x8) > 0.5f * lbl_8055A48C;
-        int c2 = 0;
-        int c3 = 0;
-        if (x < lim && x > -5.0f * lbl_8055A48C) {
-            c3 = 1;
-        }
-        if (c3 && c1) {
-            c2 = 1;
-        }
-        int c4 = (f32)__fabs(z) < hi;
+        int c2 = AdmissionWindow(x, lim, c1);
+        bool c4 = (f32)__fabs(z) < hi;
         int c5 = 1;
         c5 = UnlessFlagged(p, c5);
         if (c5 && c2 && c4) {
