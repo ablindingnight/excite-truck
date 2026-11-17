@@ -402,6 +402,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         p->keys = new ("artframe") ArtKey[nFrames];
         k = 0;
         if (nFrames > 0) {
+            const char* curveKey = "curve";
             for (; k < nFrames; k++) {
                 ValueNode* f;
                 ArtKey* key = &p->keys[k];
@@ -486,7 +487,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 }
                 key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
                 s32 curve = prev ? prev->curve : 0;
-                key->curve = f->Has("curve") ? f->GetEnum("curve", "linear\0hermite\0start\0stop\0") : curve;
+                key->curve = f->Has(curveKey) ? f->GetEnum(curveKey, "linear\0hermite\0start\0stop\0") : curve;
                 key->signal = f->GetInt("signal", prev ? prev->signal : 0);
             }
         }
