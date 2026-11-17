@@ -1154,6 +1154,7 @@ struct RaceTimer {
 
     int Finishing(void) const { return limit - now < finishTimeout; }
     f32 FinishTimeout(void) const { return finishTimeout; }
+    f32 Limit(void) const { return limit; }
     /* Helper name unproven */
     f32 Left(void) const {
         f32 l = limit - now;
@@ -3229,6 +3230,11 @@ static inline void LaunchBump(Token* b) {
     Rest(b, m);
 }
 
+/* Helper names unproven */
+static inline f32 BumpAngle(f32 radiansPerSecond, f32 time) { return fmod(radiansPerSecond * time, kBetaFullTurn.value); }
+
+static inline f32 BumpCosine(f32 a) { return (f32)cos(a); }
+
 /* Helper name unproven */
 // One bump token per call; the two loops over the bump lists are in BetaMaster::vf0C with their own counters
 // (aids audit 2, 2026-11-17: replaces a list helper whose counter was the caller's local passed by reference).
@@ -3244,8 +3250,8 @@ static inline void UpdateBump(Token* b) {
         m[9] = b->pos[0];
         m[10] = b->pos[1];
         m[11] = b->pos[2];
-        a = fmod(kBetaHalfTurn.value * lbl_8055E3C8, kBetaFullTurn.value);
-        c = cos(a);
+        a = BumpAngle(kBetaHalfTurn.value, lbl_8055E3C8);
+        c = BumpCosine(a);
         s = sin(a);
         m[0] = c;
         m[1] = 0.0f;
@@ -3327,6 +3333,9 @@ inline void Pickup::Update(void) {  /* Helper name unproven */
     }
 }
 
+/* Helper name unproven */
+static inline f32 FloorSeconds(f32 left) { return (f32)floor(left); }
+
 inline void BetaMaster::vf0C(void) {
     int found;
     f32 lead;
@@ -3385,7 +3394,7 @@ inline void BetaMaster::vf0C(void) {
                         } else {
                             f32 left = timer.limit - timer.now;
                             left = 0.0f > left ? 0.0f : left;
-                            c->result.SetFinish(timer.limit - ((f32)floor(left) - 0.1f));
+                            c->result.SetFinish(timer.Limit() - (FloorSeconds(left) - 0.1f));
                         }
                     }
                 }
