@@ -2,6 +2,7 @@
 // bounds from its .car directory, shared by name and reference counted. Names are guesses apart
 // from the keys and messages.
 #include "game/common.h"
+#include "game/carlayout.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -17,50 +18,6 @@ void fn_80131818(ValueTable* table);
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-struct LayoutBone {
-    int id;           // offset 0x0
-    ValVec3 min;      // offset 0x4: travel limits, in metres
-    ValVec3 max;      // offset 0x10
-    ValVec3 center;   // offset 0x1C
-    f32 dmgDist;      // offset 0x28
-    f32 weakness;     // offset 0x2C
-    u8 welded;        // offset 0x30
-};
-
-struct LayoutLink {
-    int i;       // offset 0x0
-    int j;       // offset 0x4
-    f32 linear;  // offset 0x8
-    f32 planar;  // offset 0xC
-    f32 pop;     // offset 0x10
-};
-
-struct LayoutWheel {
-    int boneId;  // offset 0x0
-    f32 xScale;  // offset 0x4
-    f32 yScale;  // offset 0x8
-    f32 zScale;  // offset 0xC
-};
-
-struct LayoutBounds {
-    ValVec3 min;  // offset 0x0
-    ValVec3 max;  // offset 0xC
-};
-
-struct CarLayout {
-    int numBones;               // offset 0x0
-    LayoutBone bones[162];      // offset 0x4, indexed from 1
-    LayoutLink* links;          // offset 0x20EC
-    int numLinks;               // offset 0x20F0
-    LayoutWheel wheels[4];      // offset 0x20F4
-    ValueTable* physics;        // offset 0x2134
-    LayoutBounds bounds[32];    // offset 0x2138
-    ValueTable* physicsTable;   // offset 0x2438
-    char name[0x20];            // offset 0x243C
-    int refs;                   // offset 0x245C
-    CarLayout* next;            // offset 0x2460
-};
 
 ModuleTag lbl_8055F5E8;
 CarLayout* lbl_8055F5F0;  // loaded layouts

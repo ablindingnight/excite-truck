@@ -4,6 +4,7 @@
 // coins. Pickups are kept in groups (one per table, with a bounding circle) and drawn spinning; a car
 // collects a pickup when it falls in the car's footprint. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/shapes.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -40,18 +41,6 @@ struct Bound {
     s32 n;           // offset 0x0
     s32 cap;         // offset 0x4
     BoundPt pts[1];  // offset 0x8
-};
-
-struct CarDims {
-    u8 pad0[0x24];
-    f32 wid;  // offset 0x24
-    u8 pad28[0x4];
-    f32 len;  // offset 0x2C
-};
-
-struct CarModel {
-    u8 pad0[0x17C];
-    CarDims* dims;  // offset 0x17C
 };
 
 // Camera: common.h's PlainValMatrix.
@@ -562,7 +551,7 @@ PickupCounts fn_801683F4(int player) {
         V2 pos;
         V2 lo;
         V2 hi;
-        CarModel* car;
+        SphereGroup* car;
         int i;
         pos.x = rec->mtx.pos.x;
         pos.y = rec->mtx.pos.z;
@@ -570,23 +559,23 @@ PickupCounts fn_801683F4(int player) {
         lo.y = 0.0f;
         hi.x = 0.0f;
         hi.y = 0.0f;
-        car = rec->nAdded > 0 ? (CarModel*)rec->sub[0] : 0;
+        car = rec->nAdded > 0 ? (SphereGroup*)rec->sub[0] : 0;
         if (car) {
             f32 l[3];
-            CarDims* dims;
+            BoxShape* dims;
             SubVec(l, lbl_80430260[player].pos, &rec->mtx.pos.x);
             RotVec(l, &rec->mtx.rot.x.x, l);
-            dims = car->dims;
+            dims = (BoxShape*)car->child;
             f32 x = l[0];
-            f32 w = dims->wid;
+            f32 w = dims->half.x;
             lo.x = LoEdge(x, w);
-            lo.y = LoEdge(l[2], dims->len);
-            hi.x = HiEdge(l[0], dims->wid);
-            const f32 edgeLen = dims->len;
+            lo.y = LoEdge(l[2], dims->half.z);
+            hi.x = HiEdge(l[0], dims->half.x);
+            const f32 edgeLen = dims->half.z;
             f32 upper = MAX(l[2], 0.0f);
             const f32 pad = 1.1f * edgeLen;
-            const f32 len = dims->len;
-            const f32 wid = dims->wid;
+            const f32 len = dims->half.z;
+            const f32 wid = dims->half.x;
             hi.y = upper + pad;
             const f32 lengthSquared = len * len;
             const f32 widthSquared = wid * wid;

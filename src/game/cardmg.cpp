@@ -3,6 +3,7 @@
 // raw field offsets; the large routines and the initialiser are still stubs. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/carlayout.h"
 #include "game/mtx33.h"
 #include "game/rvec.h"
 #include "game/raceopts.h"
@@ -752,17 +753,6 @@ struct DentNode {
     u8 pad31[0x3];
 };
 
-struct BoneBox {
-    ValVec3 lo;  // offset 0x0
-    ValVec3 hi;  // offset 0xC
-};
-
-// Car model (partial).
-struct CarModel {
-    u8 pad0[0x2138];
-    BoneBox boxes[1];  // offset 0x2138, one per bone
-};
-
 // A breaking-glass event: where, how fast, which car.
 struct GlassMsg {
     EVec pos;  // offset 0x0
@@ -989,7 +979,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         sl->valid = 0;
                     }
                     if (sl->state == 3) {
-                        ValVec3* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[t->bit].lo;
+                        ValVec3* lo = &((CarBody*)p)->layout->bounds[t->bit].min;
                         ValVec3* hi = lo + 1;
                         c.x = lo->x + (lo + 1)->x;
                         c.y = lo->y + hi->y;
@@ -1337,7 +1327,7 @@ void fn_8018F9B4(u8* p) {
     for (int i = 0; i < 17; i++) {
         if ((w->attached && w->hp > 0 && !w->state) || w->state == 2) {
             s32 bone = *(s32*)((u8*)t + 0x8);
-            ValVec3* lo = &((CarModel*)((u8*&)((CarBody*)p)->layout))->boxes[bone].lo;
+            ValVec3* lo = &((CarBody*)p)->layout->bounds[bone].min;
             ValVec3* hi = lo + 1;
             ValVec3 c;
             c.x = lo->x + (lo + 1)->x;
