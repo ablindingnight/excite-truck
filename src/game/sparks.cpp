@@ -898,6 +898,11 @@ inline u32 ShardSys::ShadeColor(Mat3& r, Vec& light) {
 }
 
 void ShardSys::Draw(void) {
+    // The rotation axis and the sine, declared ahead of everything else: they then take retail's saved registers.
+    f32 z;
+    f32 y;
+    f32 x;
+    f32 sn;
     if (count < 1) {
         return;
     }
@@ -915,11 +920,9 @@ void ShardSys::Draw(void) {
             f32 ang = PSVECMag(&a);
             if (ang > 0.0001f) {
                 f32 inv = 1.0f / ang;
-                f32 y;
-                f32 x = inv * a.x;
+                x = inv * a.x;
                 y = inv * a.y;
-                f32 sn;
-                f32 z = inv * a.z;
+                z = inv * a.z;
                 sn = sin(ang);
                 f32 cs = cos(ang);
                 f32 t = 1.0f - cs;
