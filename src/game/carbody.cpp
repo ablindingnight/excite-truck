@@ -1483,8 +1483,8 @@ void fn_80183E7C(u8* p) {
     fn_801BEB1C(cb->index, &sol);
     CbWheel* w = (CbWheel*)(p + 0x23AC);
     for (int i = 0; i < 4; i++, w++) {
-        *(HVec*)w->plane.ground = *(HVec*)&sol->v150[i];
-        *(HVec*)w->normal = *(HVec*)&sol->v110[i];
+        ((RVec3*)w->plane.ground)->Set(sol->v150[i].x, sol->v150[i].y, sol->v150[i].z);
+        ((RVec3*)w->normal)->Set(sol->v110[i].x, sol->v110[i].y, sol->v110[i].z);
     }
     if (cb->f260D) {
         cb->f2598 = CbAdd(cb->f2598, 0.016683351f);
