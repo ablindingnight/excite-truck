@@ -4,7 +4,7 @@
 // Opaque reference-counted 2D art set; also backs the null-safe image API. Not a font record.
 // Built-in types only (some units define their own u32). The gArt API (gart.cpp), one declaration for every caller. The handle is a gArtSet* everywhere: units that kept it
 // in an int/u32 field truncate it on a 64-bit PC (port hazard C2, 2026-11-16). Every function is null-safe on the set.
-struct gArtSet;
+typedef struct gArtSet gArtSet;  // C units (unk_8020F3B4.c) need the typedef
 #ifdef __cplusplus
 extern "C" {
 #endif

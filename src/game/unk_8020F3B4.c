@@ -3,6 +3,7 @@
 // CLEANUP: automated-decompiler source with raw offsets and placeholder types; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
   
+#include "game/gart.h"
 #pragma cplusplus on
 // Fixed list with its storage inline: two instances, each its own class (their weak dtors are distinct).
 struct Unk_804900AC {
@@ -451,7 +452,6 @@ extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined he
 #endif
 #pragma pop
 
-extern float fn_80235EF0(long, long);
 extern void fn_80147940(void *, void *, long, long);
 typedef struct PanelPos {
     float x;
@@ -489,13 +489,13 @@ public:
     virtual TextBox *FindText(const char *name);
     virtual void vf10(void);
     virtual PanelBox *FindPane(const char *name);
-    virtual long GetFont(void);
+    virtual gArtSet* GetFont(void);  // the panel's art set (gart.h)
 };
 
 extern "C" void fn_802101F8(PanelWidget *arg0, long arg1, long arg2, void *arg3) {
     PanelBox *src = (PanelBox *)arg3;
     PanelBox b;
-    long font;
+    gArtSet* font;
     long i;
 
     if (arg0 == 0 || src == 0) return;
