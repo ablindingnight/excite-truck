@@ -12,6 +12,7 @@
 #include "game/shapes.h"
 #include "game/hitch.h"
 #include <string.h>
+#include "game/mathutil.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -377,9 +378,7 @@ static inline f32 ObAbsDiff(f32 a, f32 b) { return (f32)__fabs(a - b); }
 // The frame (pose matrix) a body's collision shapes hang off.
 static inline const RMtx* ObFrameOf(u8* p) { return (const RMtx*)(p + 0x3C); }
 
-static inline f32 ObMax(f32 a, f32 b) { return a > b ? a : b; }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // out = m * v (m: 3x3 rows at 0, 3, 6), safe when out aliases v.
 static inline void ObRotate(ValVec3* out, const f32* m, const ValVec3* v) {
@@ -728,7 +727,6 @@ void Obstacle::Init(BodyDesc* d) {
 
 
 
-static inline double AbsD(double v) { return __fabs(v); }
 
 extern "C" {
 
@@ -1194,7 +1192,6 @@ void FencePole::Update(void) {
     }
 }
 
-static inline f32 ObLerp( f32 a,f32 b, f32 t) { return a + t * (b - a); }
 
 // A pose as stored for drawing (rotation rows + position).
 struct ObPose {
@@ -1210,7 +1207,7 @@ static inline void BlendFencePose(ObPose* dest, const ObPose* previous, const Ob
     const f32* prev = (const f32*)previous;
     const f32* cur = (const f32*)current;
     for (int i = 0; i < 12; i++) {
-        *d++ = ObLerp(*prev++, *cur++, f);
+        *d++ = Lerp(*prev++, *cur++, f);
     }
 }
 
@@ -1475,7 +1472,6 @@ public:
 
 extern "C" {
 
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
     v[0] = x;
     v[1] = y;

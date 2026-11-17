@@ -4,9 +4,8 @@
 // event, and the loop that plays career contests and reports what a run unlocked. Names are guesses apart
 // from the strings.
 #include "game/pathcareer.h"
+#include "game/mathutil.h"
 
-static inline int PMax(int a, int b) { return a > b ? a : b; }
-static inline int PMin(int a, int b) { return a < b ? a : b; }
 
 ModuleTag lbl_8055F660;
 UnkStatic123s lbl_804B2FC0;
@@ -53,7 +52,7 @@ void fn_8027DA08(void) {
         got += total;
         all += max;
     }
-    s->percent = PMin(PMax(got * 100 / all, 0), 100);
+    s->percent = MinI(MaxI(got * 100 / all, 0), 100);
 }
 
 void fn_8027DAF4(void) {

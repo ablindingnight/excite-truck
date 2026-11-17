@@ -7,6 +7,7 @@
 #include "game/partparams.h"
 #include <revolution/MTX/vec.h>
 #include <string.h>
+#include "game/mathutil.h"
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);  // fatal
@@ -833,7 +834,6 @@ static inline u8 Byte(f32 x) {
     return v < 0xFF ? v : 0xFF;
 }
 
-static inline f32 Sq(f32 x) { return x * x; }
 
 /* Helper name unproven */
 static inline void SetSpriteCorner(V3& out, f32 scale, const V3& d, const V3& p) {

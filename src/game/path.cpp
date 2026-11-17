@@ -6,6 +6,7 @@
 #include "game/recpath.h"
 #include "game/plainvec.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -137,9 +138,6 @@ static inline void ToMatrix(PlainValMatrix* m, const Quat& q) {
     m->basis[1].z = yz + wx;
     m->basis[2].z = 1.0f - (xx + yy);
 }
-static inline int MinI(int a, int b) { return (b < a) ? b : a; }
-static inline f32 MinF(f32 a, f32 b) { return (a < b) ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return (a > b) ? a : b; }
 
 extern "C" {
 
@@ -218,7 +216,7 @@ void fn_801DA198(PathFollower* p, f32 t) {
 
 int fn_801DA1F8(PathFollower* p, PathKey** a, PathKey** b, f32* frac) {
     if (p->path) {
-        int i = MinI(p->idx, p->path->count - 2);
+        int i = MinIRev(p->idx, p->path->count - 2);
         PathKey* k1 = &p->path->keys[i + 1];
         PathKey* k0 = &p->path->keys[i];
         f32 t = MinF(p->t, k1->t);

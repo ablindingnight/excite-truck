@@ -12,6 +12,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/shapes.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -301,7 +302,6 @@ void MutPhob::Update(void) {
     }
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     f32* d = (f32*)out;

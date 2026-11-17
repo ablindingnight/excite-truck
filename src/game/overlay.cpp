@@ -53,6 +53,7 @@ struct Viewport {
 };
 
 #include "game/gameoverlay.h"
+#include "game/mathutil.h"
 
 class RacingOverlay : public GameOverlay {
 public:
@@ -872,7 +873,6 @@ int ResultsOverlay::HandleMenuKey(int player, u32 type, int key) {
     return handled;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline f32 Clamp01(f32 x) {
     f32 v = MIN(1.0f, x);

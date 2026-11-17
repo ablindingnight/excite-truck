@@ -6,6 +6,7 @@
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -172,8 +173,6 @@ static inline void ScaleAdd(RVec3* v, f32 k, const RVec3* a) {
     v->z += a->z;
 }
 
-/* Helper name unproven */
-static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 
 
 ModuleTag lbl_8055F810;
@@ -552,7 +551,6 @@ void fn_802A02F4(const EmitterDef* d, const Spawn* s) {
 }
 
 // Fogs each player view by its distance to the emitter.
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_802A042C(const EmitterDef* d, const Spawn* s) {
     f32 a;

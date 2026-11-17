@@ -12,6 +12,7 @@
 #include "game/camframe34.h"
 #include "game/math_types.h"
 #include "game/carbody.h"
+#include "game/mathutil.h"
 
 
 struct RPacket;
@@ -161,7 +162,6 @@ void fn_801C0E4C(RVec3* out, const RVec3* a, const RVec3* b);
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RVec3* m) {
     if (out == in) {
@@ -659,7 +659,6 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
     v->z = z;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     f32* d = (f32*)out;
