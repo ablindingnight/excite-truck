@@ -3,6 +3,7 @@
 // another object's pool. Unit name is provisional. CLEANUP: automated-decompiler source; rewrite with real types
 // before the PC port. Tricks are tagged MATCHING-AID.
 #include "game/bink_internal.h"
+#include "game/ptrint.h"
 
 /* .data tables owned by this unit (0x80329B50-0x80329DA8), in address order. */
 // DUMP_DATA lbl_80329B50 u8
@@ -489,133 +490,160 @@ void fn_8011BC48(s32 arg0) {
     radfree((void *)arg0);
 }
 
-// Unlink node from the singly linked list at +0x30 of owner (next pointer at +0). Returns 1 if it was there.
-s32 remove_cb_from_list(void *owner, void *node) {
-    void *p;
+// RAD's callback handler: a periodic alarm that ticks a list of registered requests (0x40 bytes). Names unproven.
+typedef struct RadCbNode RadCbNode;
+typedef s32 (*RadCbTick)(RadCbNode *n, s32 tick);
+typedef void (*RadCbDone)(RadCbNode *n, s32 tick);
+struct RadCbNode {
+    RadCbNode *next;      // 0x00 the handler's list
+    RadCbNode *doneNext;  // 0x04 the finished list (add_sorted)
+    s32 result;           // 0x08 the tick's result; finished requests sort by it, highest first
+    s32 state;            // 0x0C 1 = active, 2 = suspended
+    s32 suspends;         // 0x10 suspend count (shared with interrupt-time code)
+    RadCbTick tick;       // 0x14
+    RadCbDone done;       // 0x18
+};
+typedef struct RadCbHandler {
+    s32 state;            // 0x00 0 = new, 1 = running, 2 = suspended
+    s32 holds;            // 0x04 suspend count (shared with the alarm handler)
+    u8 alarm[0x28];       // 0x08 an OSAlarm of the SDK RAD was built against (0x28 bytes; this SDK's is 0x30)
+    RadCbNode *list;      // 0x30
+    s32 ticks;            // 0x34
+    s32 count;            // 0x38 registered requests
+    u32 rate;             // 0x3C ticks per second
+} RadCbHandler;
+
+// Unlink node from the handler's list. Returns 1 if it was there.
+s32 remove_cb_from_list(RadCbHandler *owner, RadCbNode *node) {
+    RadCbNode *p;
     if (owner == NULL) return 0;
-    p = *(void **)((u8 *)owner + 0x30);
+    p = owner->list;
     if (p == node) {
-        *(void **)((u8 *)owner + 0x30) = *(void **)p;
+        owner->list = p->next;
         return 1;
     }
-    while (*(void **)p != NULL) {
-        if (*(void **)p == node) {
-            *(void **)p = *(void **)node;
+    while (p->next != NULL) {
+        if (p->next == node) {
+            p->next = node->next;
             return 1;
         }
-        p = *(void **)p;
+        p = p->next;
     }
     return 0;
 }
 
-void add_sorted(void **head, void *node) {
+void add_sorted(RadCbNode **head, RadCbNode *node) {
     u32 key;
-    void *cur = *head;
+    RadCbNode *cur = *head;
     if (cur == 0) {
-        *(void **)((u8 *)node + 4) = 0;
+        node->doneNext = 0;
         *head = node;
         return;
     }
-    key = *(u32 *)((u8 *)node + 8);
-    if (key >= *(u32 *)((u8 *)cur + 8)) {
-        *(void **)((u8 *)node + 4) = cur;
+    key = node->result;
+    if (key >= (u32)cur->result) {
+        node->doneNext = cur;
         *head = node;
         return;
     }
-    while (*(void **)((u8 *)cur + 4) != 0) {
-        void *next = *(void **)((u8 *)cur + 4);
-        if (key >= *(u32 *)((u8 *)next + 8)) {
-            *(void **)((u8 *)node + 4) = next;
-            *(void **)((u8 *)cur + 4) = node;
+    while (cur->doneNext != 0) {
+        RadCbNode *next = cur->doneNext;
+        if (key >= (u32)next->result) {
+            node->doneNext = next;
+            cur->doneNext = node;
             return;
         }
         cur = next;
     }
-    *(void **)((u8 *)node + 4) = 0;
-    *(void **)((u8 *)cur + 4) = node;
+    node->doneNext = 0;
+    cur->doneNext = node;
 }
 
 // Ticks every active request of the queue; finished ones are collected and then told so.
-void call_callbacks(void *arg0) {
-    void *done;
-    void *n;
-    *(s32 *)((u8 *)arg0 + 0x34) += 1;
-    if (*(s32 *)arg0 == 1) {
-        n = *(void **)((u8 *)arg0 + 0x30);
+void call_callbacks(RadCbHandler *h) {
+    RadCbNode *done;
+    RadCbNode *n;
+    h->ticks += 1;
+    if (h->state == 1) {
+        n = h->list;
         done = 0;
         while (n != 0) {
-            if (*(s32 *)arg0 != 1) {
+            if (h->state != 1) {
                 return;
             }
-            if (*(s32 *)((u8 *)n + 0xC) == 1) {
-                *(s32 *)((u8 *)n + 8) = (*(s32 (**)(void *, s32))((u8 *)n + 0x14))(n, *(s32 *)((u8 *)arg0 + 0x34));
-                if (*(s32 *)((u8 *)n + 8) != 0) {
+            if (n->state == 1) {
+                n->result = n->tick(n, h->ticks);
+                if (n->result != 0) {
                     add_sorted(&done, n);
                 }
             }
-            n = *(void **)n;
+            n = n->next;
         }
-        for (n = done; n != 0; n = *(void **)((u8 *)n + 4)) {
-            (*(void (**)(void *, s32))((u8 *)n + 0x18))(n, *(s32 *)((u8 *)arg0 + 0x34));
+        for (n = done; n != 0; n = n->doneNext) {
+            n->done(n, h->ticks);
         }
     }
 }
 
-void RAD_callback_timer(s32 arg0) {
-    s32 temp;
+void RAD_callback_timer(OSAlarm *alarm) {
+    RadCbHandler *h;
     s32 old;
-    temp = arg0 - 8;
-    if (temp != 0 && *(s32 *)(temp + 0x30) != 0) {
+    h = (RadCbHandler *)((u8 *)alarm - 8);  // the handler holding this alarm (RadCbHandler::alarm)
+    if (h != 0 && h->list != 0) {
         old = OSEnableInterrupts();
-        call_callbacks((void *)temp);
+        call_callbacks(h);
         OSRestoreInterrupts(old);
     }
 }
 
 // Creates a sound request queue for `count` entries (negative counts are taken as positive).
 void *RADCB_allocate_handler(s32 count) {
-    void *q = radmalloc(0x40);
+    RadCbHandler *q = radmalloc(0x40);
     if (q != NULL) {
         memset(q, 0, 0x40);
-        *(s32 *)((u8 *)q + 0x00) = 0;
-        *(s32 *)((u8 *)q + 0x04) = 1;
-        *(s32 *)((u8 *)q + 0x30) = 0;
-        *(s32 *)((u8 *)q + 0x34) = 1;
-        *(s32 *)((u8 *)q + 0x38) = 0;
+        q->state = 0;
+        q->holds = 1;
+        q->list = 0;
+        q->ticks = 1;
+        q->count = 0;
         if (count < 0) {
             count = -count;
         }
-        *(s32 *)((u8 *)q + 0x3C) = count;
+        q->rate = count;
     }
     return q;
 }
 
 // Queues request `arg1` (callbacks arg2/arg3) on `arg0` with interrupts disabled.
 void RADCB_register_callback(void *arg0, void *arg1, s32 arg2, s32 arg3) {
+    RadCbHandler *h = (RadCbHandler *)arg0;
+    RadCbNode *n = (RadCbNode *)arg1;
     s32 level = OSDisableInterrupts();
-    *(s32 *)((u8 *)arg1 + 0xC) = 1;
-    *(s32 *)((u8 *)arg1 + 0x14) = arg2;
-    *(s32 *)((u8 *)arg1 + 0x18) = arg3;
-    *(s32 *)((u8 *)arg1 + 0x10) = 0;
-    *(void **)arg1 = *(void **)((u8 *)arg0 + 0x30);
-    *(void **)((u8 *)arg0 + 0x30) = arg1;
-    *(s32 *)((u8 *)arg0 + 0x38) += 1;
+    n->state = 1;
+    n->tick = (RadCbTick)arg2;
+    n->done = (RadCbDone)arg3;
+    n->suspends = 0;
+    n->next = h->list;
+    h->list = n;
+    h->count += 1;
     OSRestoreInterrupts(level);
 }
 
-s32 RADCB_unregister_callback(s32 arg0, s32 arg1, s32 arg2) {
+// The handler and request come in as integers (PtrInt): retail's register order needs int-typed formals copied to
+// pointer locals (pointer formals colour differently, tried 2026-11-16).
+s32 RADCB_unregister_callback(PtrInt arg0, PtrInt arg1, s32 flags) {
     s32 result = 0;
-    void *owner;
-    void *node;
+    RadCbHandler *owner;
+    RadCbNode *node;
     s32 level;
-    owner = (void *)arg0;
-    node = (void *)arg1;
-    if (arg0 != 0 && arg1 != 0 && *(s32 *)(arg1 + 0x18) != 0 && *(s32 *)(arg1 + 0x14) != 0) {
+    owner = (RadCbHandler *)arg0;
+    node = (RadCbNode *)arg1;
+    if (arg0 != 0 && arg1 != 0 && node->done != 0 && node->tick != 0) {
         level = OSDisableInterrupts();
         if (remove_cb_from_list(owner, node) != 0) {
-            *(s32 *)(arg0 + 0x38) -= 1;
-            if ((arg2 & 1) && *(s32 *)(arg0 + 0x30) == 0) {
-                RADCB_free_handler(arg0);
+            owner->count -= 1;
+            if ((flags & 1) && owner->list == 0) {
+                RADCB_free_handler(owner);
                 result = 1;
             }
         }
@@ -625,22 +653,23 @@ s32 RADCB_unregister_callback(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 s32 RADCB_unregister_2_callbacks(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4) {
-    s32 temp = RADCB_unregister_callback((s32)arg2, arg3, arg4) << 1;
+    s32 temp = RADCB_unregister_callback((PtrInt)arg2, arg3, arg4) << 1;
     s32 result = RADCB_unregister_callback(arg0, arg1, arg4);
     return result | temp;
 }
 
 u32 RADCB_try_to_suspend_handler(void *arg0) {
+    RadCbHandler *h = (RadCbHandler *)arg0;
     s32 oldInterrupts;
     s32 value;
-    if (arg0 != NULL) {
+    if (h != NULL) {
         oldInterrupts = OSDisableInterrupts();
-        if (*(s32 *)arg0 == 1)
-            *(s32 *)arg0 = 2;
-        value = *(s32 *)((char *)arg0 + 4);
-        *(s32 *)((char *)arg0 + 4) = value + 1;
+        if (h->state == 1)
+            h->state = 2;
+        value = h->holds;
+        h->holds = value + 1;
         OSRestoreInterrupts(oldInterrupts);
-        value = *(s32 *)arg0;
+        value = h->state;
         return (u32)((1 - value) | (value - 1)) >> 31;
     }
     return 1;
@@ -655,42 +684,45 @@ void RADCB_suspend_handler(void *arg0) {
 
 // Releases one hold on the queue; the last release starts its periodic tick (`rate` per second).
 void RADCB_resume_handler(void *arg0) {
+    RadCbHandler *h = (RadCbHandler *)arg0;
     s32 level;
-    if (arg0 != 0) {
+    if (h != 0) {
         level = OSDisableInterrupts();
         // hold count, shared with the alarm handler
-        *(volatile s32 *)((u8 *)arg0 + 4) -= 1;
-        if (*(volatile s32 *)((u8 *)arg0 + 4) == 0) {
-            if (*(s32 *)arg0 == 0) {
-                OSSetPeriodicAlarm((OSAlarm *)((u8 *)arg0 + 8), OSGetTime(),
-                                   (1000 / *(u32 *)((u8 *)arg0 + 0x3C)) * (*(u32 *)0x800000F8 / 4 / 1000),
+        *(volatile s32 *)&h->holds -= 1;
+        if (*(volatile s32 *)&h->holds == 0) {
+            if (h->state == 0) {
+                OSSetPeriodicAlarm((OSAlarm *)h->alarm, OSGetTime(),
+                                   (1000 / h->rate) * (*(u32 *)0x800000F8 / 4 / 1000),
                                    (OSAlarmHandler)RAD_callback_timer);
             }
-            *(s32 *)arg0 = 1;
+            h->state = 1;
         }
         OSRestoreInterrupts(level);
     }
 }
 
 u32 RADCB_try_to_suspend_callback(void *arg0, void *arg1) {
-    if (arg0 != 0 && arg1 != 0 &&
-        *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
-        *(s32 *)((u8 *)arg1 + 0x14) != 0) {
+    RadCbNode *n = (RadCbNode *)arg1;
+    if (arg0 != 0 && n != 0 &&
+        n->done != 0 &&
+        n->tick != 0) {
         s32 level = OSDisableInterrupts();
-        if (*(s32 *)((u8 *)arg1 + 0xC) == 1)
-            *(s32 *)((u8 *)arg1 + 0xC) = 2;
-        *(s32 *)((u8 *)arg1 + 0x10) += 1;
+        if (n->state == 1)
+            n->state = 2;
+        n->suspends += 1;
         OSRestoreInterrupts(level);
-        return *(s32 *)((u8 *)arg1 + 0xC) != 1;
+        return n->state != 1;
     }
     return 1;
 }
 
 // Waits (yielding) until RADCB_try_to_suspend_callback reports the request finished.
 void RADCB_suspend_callback(void *arg0, void *arg1) {
-    if (arg0 != 0 && arg1 != 0 &&
-        *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
-        *(s32 *)((u8 *)arg1 + 0x14) != 0) {
+    RadCbNode *n = (RadCbNode *)arg1;
+    if (arg0 != 0 && n != 0 &&
+        n->done != 0 &&
+        n->tick != 0) {
         while (RADCB_try_to_suspend_callback(arg0, arg1) == 0) {
             OSYieldThread();
         }
@@ -698,22 +730,24 @@ void RADCB_suspend_callback(void *arg0, void *arg1) {
 }
 
 void RADCB_resume_callback(void *arg0, void *arg1) {
-    if (arg0 != 0 && arg1 != 0 &&
-        *(s32 *)((u8 *)arg1 + 0x18) != 0 &&
-        *(s32 *)((u8 *)arg1 + 0x14) != 0) {
+    RadCbNode *n = (RadCbNode *)arg1;
+    if (arg0 != 0 && n != 0 &&
+        n->done != 0 &&
+        n->tick != 0) {
         s32 level = OSDisableInterrupts();
         // pending-request count, shared with interrupt-time code
-        *(volatile s32 *)((u8 *)arg1 + 0x10) -= 1;
-        if (*(volatile s32 *)((u8 *)arg1 + 0x10) == 0)
-            *(s32 *)((u8 *)arg1 + 0xC) = 1;
+        *(volatile s32 *)&n->suspends -= 1;
+        if (*(volatile s32 *)&n->suspends == 0)
+            n->state = 1;
         OSRestoreInterrupts(level);
     }
 }
 
-void RADCB_free_handler(s32 arg0) {
-    if (arg0 != 0) {
-        RADCB_suspend_handler((void *)arg0);
-        OSCancelAlarm((OSAlarm *)(arg0 + 8));
-        radfree((void *)arg0);
+void RADCB_free_handler(void *arg0) {
+    RadCbHandler *h = (RadCbHandler *)arg0;
+    if (h != 0) {
+        RADCB_suspend_handler(h);
+        OSCancelAlarm((OSAlarm *)h->alarm);
+        radfree(h);
     }
 }

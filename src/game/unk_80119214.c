@@ -264,18 +264,18 @@ void set_addrs(void* arg0, s32 arg1) {
     }
 }
 
-void Volume(void *arg0, s32 arg1) {
-    s32 value = arg1;
+void Volume(StreamTrack *t, s32 volume) {
+    s32 value = volume;
     f32 temp;
     if (value < 0) value = 0;
     if (value > 0x7fff) value = 0x7fff;
     temp = (f32) pow((f32)value, 1.6666666f);
-    *(s32 *)((u8 *)arg0 + 0xa4) = (s32)(0.000976582407f * temp);
-    set_rate_volume_and_pan(arg0);
+    t->volume = (s32)(0.000976582407f * temp);
+    set_rate_volume_and_pan(t);
 }
 
-void Pan(void *arg0, s32 arg1) {
-    s32 value = arg1;
+void Pan(StreamTrack *t, s32 pan) {
+    s32 value = pan;
     f32 temp_f31;
     f32 temp_f3;
     f32 temp_f1;
@@ -283,46 +283,45 @@ void Pan(void *arg0, s32 arg1) {
     if (value > 0x10000) value = 0x10000;
     temp_f31 = (f32)value / 65536.0f;
     temp_f3 = (f32)pow(1.0f - temp_f31, 0.3f);
-    *(s32*)((u8*)arg0 + 0xa8) = (s32)(32768.0f * temp_f3);
+    t->panL = (s32)(32768.0f * temp_f3);
     temp_f1 = (f32)pow(temp_f31, 0.3f);
-    *(s32*)((u8*)arg0 + 0xac) = (s32)(32768.0f * temp_f1);
-    set_rate_volume_and_pan(arg0);
+    t->panR = (s32)(32768.0f * temp_f1);
+    set_rate_volume_and_pan(t);
 }
 
-s32 SetOnOff(void *arg0, s32 arg1) {
-    u8 *p = (u8 *)arg0;
-    if (arg1 != 0 && *(s32 *)(p + 0x64) == 0) {
-        *(s32 *)(p + 0xb0) = 0;
-        *(s32 *)(p + 0x64) = 1;
-        *(s32 *)(p + 0xb8) = 0;
-        *(s32 *)(p + 0xbc) = *(s32 *)(p + 0xc0);
-    } else if (arg1 == 0 && *(s32 *)(p + 0x64) != 0) {
-        set_both_state(p + 0x7c, 0);
-        set_addrs(p + 0x7c, 1);
-        clear(p + 0x7c, 0, *(s32 *)(p + 0x94));
-        *(s32 *)(p + 0x64) = 0;
+s32 SetOnOff(StreamTrack *t, s32 run) {
+    if (run != 0 && t->playing == 0) {
+        t->ending = 0;
+        t->playing = 1;
+        t->writePos = 0;
+        t->pending = t->prefill;
+    } else if (run == 0 && t->playing != 0) {
+        set_both_state(t->voices, 0);
+        set_addrs(t->voices, 1);
+        clear(t->voices, 0, t->bufSize);
+        t->playing = 0;
     }
-    return *(s32 *)(p + 0x64);
+    return t->playing;
 }
 
-s32 Pause(void *arg0, s32 arg1) {
+s32 Pause(StreamTrack *t, s32 paused) {
     s32 *var_r3;
-    if (arg1 != 0) {
-        if (*(s32 *)((u8 *)arg0 + 0xb0) != 0) {
-            fn_801195A0((u8 *)arg0 + 0x7c);
+    if (paused != 0) {
+        if (t->ending != 0) {
+            fn_801195A0(t->voices);
         }
-        var_r3 = (s32 *)((u8 *)arg0 + 0xb4);
-        *(s32 *)((u8 *)arg0 + 0xb4) = 1;
+        var_r3 = &t->stopping;
+        t->stopping = 1;
     } else {
-        if (*(s32 *)((u8 *)arg0 + 0xb0) == 0) {
-            if (*(s32 *)((u8 *)arg0 + 0xbc) == 0) {
-                start_streaming((u8 *)arg0 + 0x7c);
+        if (t->ending == 0) {
+            if (t->pending == 0) {
+                start_streaming(t->voices);
             }
         } else {
-            fn_80119498((u8 *)arg0 + 0x7c);
+            fn_80119498(t->voices);
         }
-        var_r3 = (s32 *)((u8 *)arg0 + 0xb4);
-        *(s32 *)((u8 *)arg0 + 0xb4) = 0;
+        var_r3 = &t->stopping;
+        t->stopping = 0;
     }
     return *var_r3;
 }
@@ -440,10 +439,10 @@ s32 Open(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkInfo8011 
     t->IsActive = Ready;
     t->GetBuffer = (s32 (*)(StreamTrack *, u8 **, u32 *))fn_80119994;
     t->Commit = (void (*)(StreamTrack *, u32))fn_8011999C;
-    t->SetVolume = (void (*)(StreamTrack *, s32))Volume;
-    t->SetPan = (void (*)(StreamTrack *, s32))Pan;
+    t->SetVolume = Volume;
+    t->SetPan = Pan;
     t->SetPaused = (void (*)(StreamTrack *, s32))Pause;
-    t->Run = (s32 (*)(StreamTrack *, s32))SetOnOff;
+    t->Run = SetOnOff;
     t->Close = (void (*)(StreamTrack *))Close;
     lbl_8055DEE8++;
     return 1;

@@ -535,10 +535,10 @@ extern void AXSetVoiceAdpcm(void *vpb, AXPBADPCM *adpcm);
 s32 Ready(StreamTrack *t);
 s32 fn_80119994(void);
 s32 fn_8011999C(void);
-void Volume(void *arg0, s32 arg1);
-void Pan(void *arg0, s32 arg1);
-s32 Pause(void *arg0, s32 arg1);
-s32 SetOnOff(void *arg0, s32 arg1);
+void Volume(StreamTrack *t, s32 volume);
+void Pan(StreamTrack *t, s32 pan);
+s32 Pause(StreamTrack *t, s32 paused);
+s32 SetOnOff(StreamTrack *t, s32 run);
 
 typedef struct StreamAllocator {
     void *(*alloc)(u32 size);
@@ -635,6 +635,6 @@ extern u8 lbl_80329B50[];
 void pushmalloc(void **slot, u32 amount);
 extern u32 lbl_80329B60[];  // critical band frequencies (Hz)
 
-void RADCB_free_handler(s32 arg0);
+void RADCB_free_handler(void *handler);
 
 #endif
