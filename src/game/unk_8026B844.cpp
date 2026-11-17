@@ -440,6 +440,7 @@ static inline f32 KeyAxisRev(FreePad& pad, f32 v, f32 speed, int minus, int plus
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
+    CamFrame tgt;
     if (fn_802D3EBC()) {
         return;
     }
@@ -752,7 +753,6 @@ void fn_8026C014(int player) {
     } else if ((s32)lbl_8055F4E0 == 2 && player) {
         s32 id = fn_8026A344(0);
         CamCar* car = fn_8017960C(id);
-        CamFrame tgt;
         if (car && ((s32)lbl_8055F4E4 & 4)) {
             tgt = car->frame;
         } else if (car) {
