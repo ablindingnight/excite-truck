@@ -2818,29 +2818,27 @@ inline void BetaMaster::vfFC(void) {
 // constructor a call - no dont_inline pragma needed.
 inline void BetaMaster::LoadLevel(void) {
     int loaded;
-    int i;
-    ValueTable* t;
     hispeedThresh = kBetaDefaultSpeed.value;
     {
         TableRef ref("betarace", "info");
-        ValueNode* n = ref.node;
+        ValueNode* const n = ref.node;
         if (n) {
             hispeedThresh = kBetaSpeedScale.value * n->GetFloat("hispeed_thresh", kBetaSpeedOption.value);
             scoreFactor = n->GetFloat("score_factor", 1.0f);
             fn_802E30C8("betarace: score_factor = %1.2f", scoreFactor);
         }
     }
-    t = fn_80131810(GetEvent(fn_801769CC()->event)->node->GetString("trigger_file", "triggers.val"));
-    if (t) {
+    ValueTable* triggerFile = fn_80131810(GetEvent(fn_801769CC()->event)->node->GetString("trigger_file", "triggers.val"));
+    if (triggerFile) {
         ValueNode* n;
-        for (i = 0; (n = t->GetChild(i)) != 0; i++) {
+        for (int triggerIndex = 0; (n = triggerFile->GetChild(triggerIndex)) != 0; triggerIndex++) {
             int d = fn_80204CF0();
             int nd = n->Has("difficulty_level") ? fn_80204BB4(n->GetValue("difficulty_level")) : d;
             if (nd == d) {
                 stars.Add(new ("trigger") Pickup(n));
             }
         }
-        fn_80131818(t);
+        fn_80131818(triggerFile);
         loaded = 1;
     } else {
         loaded = 0;
@@ -2848,17 +2846,17 @@ inline void BetaMaster::LoadLevel(void) {
     if (!loaded) {
         ValueNode* ev = GetEvent(fn_801769CC()->event)->node;
         ValueNode* n;
-        for (i = 0; (n = ev->GetChildAt(i)) != 0; i++) {
+        for (int fallbackIndex = 0; (n = ev->GetChildAt(fallbackIndex)) != 0; fallbackIndex++) {
             if (n->Has("bound0")) {
                 Pickup* p = new ("trigger") Pickup(n);
                 stars.Add(p);
             }
         }
     }
-    t = fn_80131810("puddles.val");
-    if (t) {
+    ValueTable* puddleFile = fn_80131810("puddles.val");
+    if (puddleFile) {
         ValueNode* n;
-        for (i = 0; (n = t->GetChild(i)) != 0; i++) {
+        for (int puddleIndex = 0; (n = puddleFile->GetChild(puddleIndex)) != 0; puddleIndex++) {
             V2 pts[32];
             char buf[0x20];
             f32 pos[3];
@@ -2913,7 +2911,7 @@ inline void BetaMaster::LoadLevel(void) {
             Puddle** slot = &puddles.a.data[puddles.a.count++];
             *slot = q;
         }
-        fn_80131818(t);
+        fn_80131818(puddleFile);
     }
 }
 
