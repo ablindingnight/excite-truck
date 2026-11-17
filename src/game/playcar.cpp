@@ -23,6 +23,11 @@
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define B8(p, o) (*(bool*)((u8*)(p) + (o)))
+// The meter flag at +0x34 is a VOLATILE field (form provisional; user-approved 2026-11-17). Retail keeps a store that
+// MWCC's post-schedule peephole deletes unless volatile, and volatile at all 11 accesses changes no other function
+// (fable-rules FACTS 2026-11-17; Codex verified). It replaces a one-site volatile cast (fb0251d59).
+#define VU8(p, o) (*(volatile u8*)((u8*)(p) + (o)))
+#define VB8(p, o) (*(volatile bool*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 struct PFlags {
@@ -536,7 +541,7 @@ u32 fn_801901F0(u8* p) {
         }
         if (PTR(p, 0x10)) {
             u32 f = VC(PTR(p, 0x10))->v14();
-            if (!U8(p, 0x34)) {
+            if (!VU8(p, 0x34)) {
                 f |= 0x10;
             }
             if (lbl_8055E521) {
@@ -710,7 +715,7 @@ void fn_80190388(u8* p) {
     }
     bool off = false;
     if (fn_801B83A0()->vE0(S32(p, 0x1C), &off)) {
-        if ((B8(p, 0x34) = !off)) {
+        if ((VB8(p, 0x34) = !off)) {
             F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
         }
     } else {
@@ -725,29 +730,29 @@ void fn_80190388(u8* p) {
             stopped = now - F32(car, 0x26D8) >= 5.0f;
         }
         if (lap && stopped) {
-            U8(p, 0x34) = 0;
+            VU8(p, 0x34) = 0;
         } else if (moved > 106.66667f || moved < -500.0f || !stopped || !fn_802B02C8(car + 0x60)) {
             F32(p, 0x30) = dist;
             F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
-            U8(p, 0x34) = 1;
+            VU8(p, 0x34) = 1;
         } else if (now - F32(p, 0x2C) > kSix) {
-            U8(p, 0x34) = 0;
+            VU8(p, 0x34) = 0;
             F32(p, 0x2C) = 1.0f + (now - kSix);
             F32(p, 0x30) = 17.777779f + (dist - 106.66667f);
         }
     }
     if (fn_801796C4() || !lbl_8055E522) {
         F32(p, 0x2C) = now;
-        U8(p, 0x34) = 1;
+        VU8(p, 0x34) = 1;
     }
-    if (!U8(p, 0x34) && landed) {
-        U8(p, 0x34) = 1;
+    if (!VU8(p, 0x34) && landed) {
+        VU8(p, 0x34) = 1;
         F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
         fn_801B86A4(S32(p, 0x1C));
     }
     if (!U8(p, 0x26)) {
         u8* other = PTR(PTR(p, 0x18), 0x4);
-        if ((other ? U8(other, 0x34) : 3) == 0) {
+        if ((other ? VU8(other, 0x34) : 3) == 0) {
             U8(p, 0x26) = 1;
             S32(PTR(p, 0x18), 0xC) = 0;
         }
@@ -823,10 +828,9 @@ void fn_80190EAC(u8* p) {
     fn_80191084(p, 0);
     fn_80191084(p, fn_80191100(p));
     fn_801B6658();
-    // Preserve the retail flag clear before the meter fields are initialized.
-    *(volatile u8*)(p + 0x34) = 0;
+    VU8(p, 0x34) = 0;
     F32(p, 0x30) = 0.0f;
-    U8(p, 0x34) = 1;
+    VU8(p, 0x34) = 1;
     F32(p, 0x2C) = 10.0f;
 }
 
