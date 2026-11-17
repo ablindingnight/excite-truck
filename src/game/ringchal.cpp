@@ -1979,6 +1979,15 @@ static inline f32 PathLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 #pragma push
 #pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+/* Helper name unproven */
+static inline void ReadBound(ValueNode* n, int k, V2* w) {
+    char b[0x10];
+    fn_801345D8(b, 0x10, "bound%d", k);
+    ValPoint p = n->GetPoint(b);
+    w->x = p.x;
+    w->y = p.y;
+}
+
 inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
     int i;
     int k;
@@ -2001,11 +2010,7 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
             dir.y = 0.0f;
             w = pts;
             for (i = 0; i < 3; i++, w++) {
-                char b[0x10];
-                fn_801345D8(b, 0x10, "bound%d", i);
-                ValPoint p = sp->GetPoint(b);
-                w->x = p.x;
-                w->y = p.y;
+                ReadBound(sp, i, w);
             }
             k = 2;
             {

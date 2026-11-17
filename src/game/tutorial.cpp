@@ -1689,6 +1689,15 @@ extern "C" {
 PathSet* fn_80156A40(void);
 }
 
+/* Helper name unproven */
+static inline void ReadBound(ValueNode* n, int k, TVec2* w) {
+    char key[0x10];
+    fn_801345D8(key, sizeof(key), "bound%d", k);
+    ValPoint p = n->GetPoint(key);
+    w->x = p.x;
+    w->z = p.y;
+}
+
 inline int ChallengeBase::Query(void* carp, int idx, int c) {
     speed[idx] = 0.0f;
     if (node) {
@@ -1710,11 +1719,7 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             dir.z = 0.0f;
             TVec2* w = pts;
             for (k = 0; k < 3; w++, k++) {
-                char key[0x10];
-                fn_801345D8(key, sizeof(key), "bound%d", k);
-                ValPoint p = place->GetPoint(key);
-                w->x = p.x;
-                w->z = p.y;
+                ReadBound(place, k, w);
             }
             {
                 Delta2 d;
