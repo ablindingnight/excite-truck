@@ -12,6 +12,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/shapes.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int fn_801E9E30(s16* h, const void* pos);  // still on the ground
@@ -117,7 +118,7 @@ Wheel::Wheel(void) {
 
 Wheel::~Wheel(void) {}
 
-static inline f32 Sq_hm(f32 v) { return v * v; }  /* Helper name unproven */
+  /* Helper name unproven */
 void Wheel::Init(BodyDesc* bd) {
     WheelDesc* d = (WheelDesc*)bd;
     SphereShape* s;
@@ -125,7 +126,7 @@ void Wheel::Init(BodyDesc* bd) {
     f32 kk = d->stiffK;
     f32 r = 0.0254f * d->radius;
     f32 k = 4.45f * d->stiff / 0.0254f;
-    f32 stiff = k * (Sq_hm(kk));
+    f32 stiff = k * (Sq(kk));
     RVec3 c(0.0f, 0.0f, 0.0f);
     f32 skin = d->skin;
     mtx.pos = RVec3(0.0f, -200.0f, 0.0f);
@@ -137,7 +138,6 @@ void Wheel::Init(BodyDesc* bd) {
     lbl_80435BA8[lbl_8055E650++] = this;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void LerpV(RVec3* d, const RVec3* a, const RVec3* b, f32 t) {
     f32 x = Lerp(a->x, b->x, t);

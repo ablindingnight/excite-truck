@@ -4,9 +4,8 @@
 // objects by anim_index as the screen transitions in or out. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
-// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);

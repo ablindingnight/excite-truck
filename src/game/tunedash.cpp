@@ -7,6 +7,7 @@
 #include "game/v2.h"
 #include "game/joy.h"
 #include "game/gart.h"
+#include "game/mathutil.h"
 
 // Camera: common.h's PlainValMatrix.
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
@@ -24,9 +25,7 @@ int fn_801298E8(JoyStatus* pad, int chan);
 void fn_80011A2C(void);
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline int Min(int a, int b) { return (b < a) ? b : a; }
 
 // A tweakable value: a float stepped between min and max, or an on/off switch.
 struct TuneItem {
@@ -162,7 +161,7 @@ int fn_80204870(u32 key) {
             lbl_8055ED40 = MAX(0, lbl_8055ED40 - 1);
             break;
         case 0x128:
-            lbl_8055ED40 = Min(lbl_8055ED40 + 1, lbl_8055ED3C - 1);
+            lbl_8055ED40 = MinIRev(lbl_8055ED40 + 1, lbl_8055ED3C - 1);
             break;
         case 0x125:
         case 0x127:

@@ -13,6 +13,7 @@ extern const f32 lbl_80564D78[1];
 const f32 lbl_80564D78[1] = {2.0f};
 #include "game/math_types.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 
 void* operator new(size_t size, const char* tag);
@@ -246,9 +247,6 @@ Skybox* lbl_8055FB00;
 f32 lbl_8055FB04;
 WaterBase* lbl_804C07F0[4];
 
-static inline f32 Mul(f32 a, f32 b) { return a * b; }
-static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
 extern "C" {
 
@@ -266,7 +264,7 @@ u32 fn_802BECE4(const char* s, u32 def) {
 }
 
 void fn_802BED90(PVec* v) {
-    f32 s = 1.0f / FMax(0.001f, PSVECMag((const Vec*)v));
+    f32 s = 1.0f / MaxF(0.001f, PSVECMag((const Vec*)v));
     v->x *= s;
     v->y *= s;
     v->z *= s;
@@ -298,15 +296,15 @@ void fn_802BEDFC(void) {
 f32 fn_802BEFB4(void) {
     u8* c = fn_801EA9A0(fn_801E866C(-1));
     f32 h = *(f32*)(*(u8**)(c + 8) + 0x64);
-    f32 t = FMax(FMin((h - 22.222223f) / 44.444443f, 1.0f), 0.0f);
+    f32 t = MaxF(MinFRev((h - 22.222223f) / 44.444443f, 1.0f), 0.0f);
     return 0.7f + Mul(t, 1.3f);
 }
 
-static inline f32 Unlerp_hm(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }  /* Helper name unproven */
+  /* Helper name unproven */
 // Maps x from [x0, x1] onto [y0, y1], clamped to the segment.
 /* Helper name unproven */
 static inline f32 MapClamped_hm(f32 x0, f32 x1, f32 y0, f32 y1, f32 x) {
-    f32 u = FMax(FMin(Unlerp_hm(x, x0, x1), 1.0f), 0.0f);
+    f32 u = MaxF(MinFRev(Unlerp(x, x0, x1), 1.0f), 0.0f);
     return y0 + u * (y1 - y0);
 }
 f32 fn_802BF02C(f32 x) {
@@ -322,7 +320,6 @@ f32 fn_802BF02C(f32 x) {
     return t.p[6].y;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_802BF160(void) {
     if (lbl_8055CF6C == -1) {
@@ -340,7 +337,7 @@ void fn_802BF160(void) {
         f32 w;
         f32 c = cos(a);
         w = 1.0f - rings.r[i].scale;
-        f32 s = FMax(FMin((c - -1.0f) / 2.0f, 1.0f), 0.0f);
+        f32 s = MaxF(MinFRev((c - -1.0f) / 2.0f, 1.0f), 0.0f);
         f32 h = Lerp(0.0f, w, s);
         TexMtx m = {{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}}};
         f32 top = h + rings.r[i].scale;
@@ -782,7 +779,6 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
     o[1] = a[1] + b[1] * s;
     o[2] = a[2] + b[2] * s;
 }
-static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 template <class O, class A, class D> static inline void AddScaledK(O* o, const A* a, const D* d, f32 s) { o->x = a->x + d->x * s; o->y = a->y + d->y * s; o->z = a->z + d->z * s; }  /* Helper name unproven */
 void WaterSystem::Draw(void) {
@@ -807,13 +803,13 @@ void WaterSystem::Draw(void) {
     f32 vh = fn_802C9C48();
     k = 640.0f / (vh * env->Scale());
     PVec fwd;
-    if (AbsFlt(cam.basis[2].y) < 0.99f) {
+    if (FAbs(cam.basis[2].y) < 0.99f) {
         fwd = cam.basis[2];
     } else {
         fwd = cam.basis[1];
     }
     fwd.y = 0.0f;
-    f32 inv = 1.0f / FMax(0.01f, PSVECMag((const Vec*)&fwd));
+    f32 inv = 1.0f / MaxF(0.01f, PSVECMag((const Vec*)&fwd));
     fwd.x *= inv;
     fwd.y *= inv;
     fwd.z *= inv;
@@ -846,7 +842,7 @@ void WaterSystem::Draw(void) {
         rel = d;
         f32 depth = lc.z;
         fn_802BED90(&rel);
-        f32 f = FMax(FMin(1.0f - -rel.y, 1.0f), 0.0f);
+        f32 f = MaxF(MinFRev(1.0f - -rel.y, 1.0f), 0.0f);
         u32 col = fn_802C03E0(fn_80147C50(farWaterColor, nearWaterColor, f * f));
         for (int c = 0; c < 16; c++) {
             WVert* v = &verts[r * 16 + c];
@@ -867,7 +863,7 @@ void WaterSystem::Draw(void) {
     TexMtx m = {{{0.04f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.04f, 0.0f}}};
     m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
     fn_802D3D94(2, &m);
-    f32 sh = FMax(cam.origin.y / 4.0f, 1.0f);
+    f32 sh = MaxF(cam.origin.y / 4.0f, 1.0f);
     u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
     fn_802C8BD0(env->Target());
     fn_802DCFCC(env->Target(), lbl_8055CF74, 1.0f / (1024.0f * lbl_80564D78[0]), deep, mask, deepCol);
@@ -883,7 +879,7 @@ void WaterSystem::Draw(void) {
     nz += 0.001f;
     PVec c;
     MadV3(&c.x, &cam2.origin.x, &cam2.basis[2].x, nz);
-    f32 sc = (lbl_8055FAF4 - c.y) / FMax(0.001f, cam2.basis[1].y);
+    f32 sc = (lbl_8055FAF4 - c.y) / MaxF(0.001f, cam2.basis[1].y);
     PVec q;
     MadV3(&q.x, &c.x, &cam2.basis[1].x, sc);
     PVec ax = cam2.basis[2];

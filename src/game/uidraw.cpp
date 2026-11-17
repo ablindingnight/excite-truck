@@ -11,6 +11,7 @@
 
 
 #include "game/uivertex.h"
+#include "game/mathutil.h"
 
 void UIContextBegin(void);
 void UIContextEnd(void);
@@ -420,7 +421,6 @@ static inline f32 Clamp01(f32 t) {
 }
 
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_80230F78(u8* alpha, f32* grow, u32* color, int real) {
     f32 p = fn_80230EF4(real);

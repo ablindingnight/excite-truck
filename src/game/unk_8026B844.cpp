@@ -9,6 +9,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
+#include "game/mathutil.h"
 
 // The unit's module tag, registered by its static initializer (the 8-byte function after the code, formerly the
 // separate split unk_8026E224).
@@ -20,17 +21,15 @@ extern void *lbl_8055F4E0;
 extern void *lbl_8055F4E4;
 extern void *lbl_8055F4E8;
 
-static __inline f32 CamMin(f32 a, f32 b) { return a < b ? a : b; }
-static __inline f32 CamMax(f32 a, f32 b) { return a > b ? a : b; }
 
 void fn_8026B840(void) {}
 
 f32 fn_8026B844(f32 f) {
     f32 c = 0.0f;
     if (f > c) {
-        return CamMax(c, (f - 0.2f) / 0.8f);
+        return MaxF(c, (f - 0.2f) / 0.8f);
     }
-    return CamMin(c, (0.2f + f) / 1.2f);
+    return MinF(c, (0.2f + f) / 1.2f);
 }
 
 // Camera frames (camframe.cpp's CamFrame: three axes and a position).
@@ -99,19 +98,18 @@ u32 fn_802E2C20(void);
 int fn_802E4A1C(int key);
 f32 fn_801EA0E8(f32 x, f32 z);
 
-static __inline f32 CamDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static __inline void CamMulVec(CamVec* out, const CamVec* in, const CamRot* m) {
     if (out == in) {
-        f32 x = CamDot3(in->x, m->axes[0].x, in->y, m->axes[1].x, in->z, m->axes[2].x);
-        f32 y = CamDot3(in->x, m->axes[0].y, in->y, m->axes[1].y, in->z, m->axes[2].y);
-        f32 z = CamDot3(in->x, m->axes[0].z, in->y, m->axes[1].z, in->z, m->axes[2].z);
+        f32 x = Dot3(in->x, m->axes[0].x, in->y, m->axes[1].x, in->z, m->axes[2].x);
+        f32 y = Dot3(in->x, m->axes[0].y, in->y, m->axes[1].y, in->z, m->axes[2].y);
+        f32 z = Dot3(in->x, m->axes[0].z, in->y, m->axes[1].z, in->z, m->axes[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = CamDot3(in->x, m->axes[0].x, in->y, m->axes[1].x, in->z, m->axes[2].x);
-        out->y = CamDot3(in->x, m->axes[0].y, in->y, m->axes[1].y, in->z, m->axes[2].y);
-        out->z = CamDot3(in->x, m->axes[0].z, in->y, m->axes[1].z, in->z, m->axes[2].z);
+        out->x = Dot3(in->x, m->axes[0].x, in->y, m->axes[1].x, in->z, m->axes[2].x);
+        out->y = Dot3(in->x, m->axes[0].y, in->y, m->axes[1].y, in->z, m->axes[2].y);
+        out->z = Dot3(in->x, m->axes[0].z, in->y, m->axes[1].z, in->z, m->axes[2].z);
     }
 }
 
@@ -127,7 +125,7 @@ static inline void ReadFlyPad(FreePad& pad, f32 dt, f32 turn, f32 speed, CamVec&
     } else if (lbl_8055F4F4 < -6.2831855f) {
         lbl_8055F4F4 += 6.2831855f;
     }
-    lbl_8055F4F8 = CamMax(CamMin(1.0471976f, lbl_8055F4F8 + turn * (dt * fn_8026B844(pad.y0))), -1.0471976f);
+    lbl_8055F4F8 = MaxF(MinF(1.0471976f, lbl_8055F4F8 + turn * (dt * fn_8026B844(pad.y0))), -1.0471976f);
     z = speed * (dt * -fn_8026B844(pad.x1));
     x = speed * (dt * fn_8026B844(pad.y1));
     in.x = x;
@@ -145,10 +143,9 @@ static inline f32 CamBlend(f32 t, f32 k) { return 1.0f + t * k; }
 // The constants this unit reads are its own literals (its .sdata2 is created in retail order by the forms below).
 // Helpers unproven (names and existence): each is the form that reproduces retail where a plain literal does not.
 // CamUnit: v mapped from lo..hi to 0..1; retail creates 1.0 before lo and 1/(hi-lo).
-static inline f32 CamUnit(f32 v, f32 lo, f32 hi) { return CamMax(CamMin(1.0f, (v - lo) / (hi - lo)), 0.0f); }
+static inline f32 CamUnit(f32 v, f32 lo, f32 hi) { return MaxF(MinF(1.0f, (v - lo) / (hi - lo)), 0.0f); }
 // CamMulF: a product whose constant arrives as an inline parameter. A literal written in the multiply is always
 // emitted as the first operand; retail has the variable first at these sites.
-static inline f32 CamMulF(f32 a, f32 b) { return a * b; }
 // CamSpeed: retail keeps the multiply by a scale of 1.0 (a literal 1.0f * x is folded away).
 static inline f32 CamSpeed(f32 t, f32 scale) { return scale * (100.0f * CamBlend(t, 5.0f)); }
 void fn_8026B8A0(void) {
@@ -179,7 +176,7 @@ void fn_8026B8A0(void) {
     if (gate && !gate(mx, my)) {
         free = 0;
     }
-    dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F4FC) / 1000.0f, 0.033333335f);
+    dt = MinF((f32)(s32)(fn_802E2C20() - lbl_8055F4FC) / 1000.0f, 0.033333335f);
     lbl_8055F4FC = fn_802E2C20();
     right = lbl_80499050.rot.axes[0];
     right.y = 0.0f;
@@ -211,7 +208,7 @@ void fn_8026B8A0(void) {
     }
     h = lbl_80499050.pos.y - fn_801EA0E8(lbl_80499050.pos.x, lbl_80499050.pos.z);
     if (free) {
-        f32 t = CamMax(CamMin(1.0f, (h - 20.0f) / 480.0f), 0.0f);
+        f32 t = MaxF(MinF(1.0f, (h - 20.0f) / 480.0f), 0.0f);
         f32 px = 0.0f;
         f32 py = 0.0f;
         f32 pan = 50.0f * CamBlend(t, 19.0f);
@@ -490,7 +487,7 @@ void fn_8026C014(int player) {
             CamSet(&lbl_8049A1FC, 0.0f, 0.0f, 0.0f);
             lbl_8055F502 = 1;
         }
-        dt = CamMin((f32)(s32)(fn_802E2C20() - lbl_8055F504) / 1000.0f, 0.033333335f);
+        dt = MinF((f32)(s32)(fn_802E2C20() - lbl_8055F504) / 1000.0f, 0.033333335f);
         lbl_8055F504 = fn_802E2C20();
         CamScl(&lbl_8049A1F0, 0.7f);
         CamScl(&lbl_8049A1FC, 0.7f);
@@ -514,27 +511,27 @@ void fn_8026C014(int player) {
             move.x = -speed;
         }
         if (fn_802E4A1C(0x53)) {
-            move.y = CamMulF(speed, 0.5f);
+            move.y = Mul(speed, 0.5f);
         } else if (fn_802E4A1C(0x52)) {
-            move.y = CamMulF(-speed, 0.5f);
+            move.y = Mul(-speed, 0.5f);
         }
         if (fn_802E4A1C(0x4D)) {
             if (fn_802E4A1C(0x4F)) {
-                spin.y = CamMulF(turn, 0.5f);
+                spin.y = Mul(turn, 0.5f);
             } else {
                 spin.y = turn;
             }
         } else if (fn_802E4A1C(0x4B)) {
             if (fn_802E4A1C(0x51)) {
-                spin.y = CamMulF(-turn, 0.5f);
+                spin.y = Mul(-turn, 0.5f);
             } else {
                 spin.y = -turn;
             }
         }
         if (fn_802E4A1C(0x48)) {
-            spin.x = CamMulF(turn, 0.5f);
+            spin.x = Mul(turn, 0.5f);
         } else if (fn_802E4A1C(0x50)) {
-            spin.x = CamMulF(-turn, 0.5f);
+            spin.x = Mul(-turn, 0.5f);
         }
         if (fn_802E4A1C(0x47)) {
             spin.z = turn;
@@ -550,7 +547,7 @@ void fn_8026C014(int player) {
             } else if (fn_802E4A1C(0xB5)) {
                 lbl_8055F47C -= step;
             }
-            lbl_8055F47C = CamMax(CamMin(hi, lbl_8055F47C), lo);
+            lbl_8055F47C = MaxF(MinF(hi, lbl_8055F47C), lo);
         }
         if (!CamIsZero(&spin)) {
             CamCopy(&lbl_8049A1FC, &spin);
@@ -587,9 +584,9 @@ void fn_8026C014(int player) {
         f32 z;
         lbl_8055F508 = now;
         dt = CAM_MAX(0.001f * (f32)(now - last), 0.1f);
-        yawRate = CamMulF(dt, 0.5235988f);
+        yawRate = Mul(dt, 0.5235988f);
         speed = 4.0f * (0.25f * (10.0f * dt));
-        fovRate = CamMulF(dt, 0.034906585f);
+        fovRate = Mul(dt, 0.034906585f);
         lo = 0.2617994f;
         hi = 2.443461f;
         if (pad.keys[4]) {
@@ -602,7 +599,7 @@ void fn_8026C014(int player) {
             if (pad.w40 & 4) {
                 dir = 1.0f;
             }
-            lbl_8055F47C = CamMax(CamMin(hi, lbl_8055F47C + dir * fovRate), lo);
+            lbl_8055F47C = MaxF(MinF(hi, lbl_8055F47C + dir * fovRate), lo);
         } else if (pad.keys[5]) {
             speed *= 0.2f;
         } else if (pad.keys[2]) {
@@ -610,12 +607,12 @@ void fn_8026C014(int player) {
         }
         yaw = lbl_8055F50C;
         if (pad.x0 > 0.0f) {
-            s = CamMax(CamMin(1.0f, 1.2f * pad.x0 - 0.2f), 0.0f);
+            s = MaxF(MinF(1.0f, 1.2f * pad.x0 - 0.2f), 0.0f);
         } else {
-            s = CamMax(CamMin(0.0f, 0.2f + 1.2f * pad.x0), -1.0f);
+            s = MaxF(MinF(0.0f, 0.2f + 1.2f * pad.x0), -1.0f);
         }
         yaw += yawRate * s;
-        target = CamMulF(pad.y0, 1.0471976f);
+        target = Mul(pad.y0, 1.0471976f);
         lbl_8055F510 = target + 0.95f * (lbl_8055F510 - target);
         {
             CamVec* b = (CamVec*)&lbl_80499050;
@@ -660,7 +657,7 @@ void fn_8026C014(int player) {
         dt = CAM_MAX(0.001f * (f32)(now - last), 0.1f);
         turn = dt * 0.5235988f;
         speed = 0.25f * (10.0f * dt);
-        fovRate = CamMulF(dt, 0.034906585f);
+        fovRate = Mul(dt, 0.034906585f);
         lo = 0.2617994f;
         hi = 2.443461f;
         t = CamUnit(pad.y3, -1.0f, 1.0f);
@@ -674,17 +671,17 @@ void fn_8026C014(int player) {
         if (pad.w40 & 8) {
             roll = speed;
         } else if (pad.w40 & 2) {
-            roll = CamMulF(-1.0f, speed);
+            roll = Mul(-1.0f, speed);
         }
         lift = 0.0f;
         if (pad.w40 & 1) {
             lift = speed;
         }
         if (pad.w40 & 4) {
-            lift = CamMulF(-1.0f, speed);
+            lift = Mul(-1.0f, speed);
         }
         if (pad.keys[5]) {
-            lbl_8055F47C = CamMax(CamMin(hi, lbl_8055F47C + pad.y0 * fovRate), lo);
+            lbl_8055F47C = MaxF(MinF(hi, lbl_8055F47C + pad.y0 * fovRate), lo);
         } else {
             switch ((s32)lbl_8055F4E0) {
             case 0:
@@ -800,7 +797,7 @@ void fn_8026C014(int player) {
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)(CamRot*)&lbl_8049A168, (const Mat3*)&tgt.rot);
         if ((s32)lbl_8055F4E4 & 1) {
             f32 floor = 1.0f + fn_801E9DDC(&lbl_8049A168.hint, lbl_80499050.pos.x, lbl_80499050.pos.z);
-            lbl_80499050.pos.y = CamMax(lbl_80499050.pos.y, floor);
+            lbl_80499050.pos.y = MaxF(lbl_80499050.pos.y, floor);
         }
         lbl_8049A168.car = id;
     } else if ((s32)lbl_8055F4E0 == 3 && player && lbl_8055F4F0 >= 0) {

@@ -7,6 +7,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/gamedb.h"
+#include "game/mathutil.h"
 
 // Compiled as C++ (2026-11-03): the unit owns a ModuleTag, registered by its static initializer (the 8-byte
 // function after the code, formerly the separate split unk_8020F3AC). The functions keep C linkage.
@@ -298,24 +299,22 @@ static inline void HudPart_SetAlpha(HudPart *p, float alpha) {
     }
 }
 
-static inline float HudDot3(float ax, float bx, float ay, float by, float az, float bz) { return ax * bx + ay * by + az * bz; }
 static inline void HudXform(HudVec *out, const HudVec *in, const float *m) {
     if (out == in) {
-        float x = HudDot3(in->x, m[0], in->y, m[3], in->z, m[6]);
-        float y = HudDot3(in->x, m[1], in->y, m[4], in->z, m[7]);
-        float z = HudDot3(in->x, m[2], in->y, m[5], in->z, m[8]);
+        float x = Dot3(in->x, m[0], in->y, m[3], in->z, m[6]);
+        float y = Dot3(in->x, m[1], in->y, m[4], in->z, m[7]);
+        float z = Dot3(in->x, m[2], in->y, m[5], in->z, m[8]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = HudDot3(in->x, m[0], in->y, m[3], in->z, m[6]);
-        out->y = HudDot3(in->x, m[1], in->y, m[4], in->z, m[7]);
-        out->z = HudDot3(in->x, m[2], in->y, m[5], in->z, m[8]);
+        out->x = Dot3(in->x, m[0], in->y, m[3], in->z, m[6]);
+        out->y = Dot3(in->x, m[1], in->y, m[4], in->z, m[7]);
+        out->z = Dot3(in->x, m[2], in->y, m[5], in->z, m[8]);
     }
 }
 
 // Per-frame sound update (field names are from an earlier HUD reading; the parts are sounds, see the constructor).
-static inline float AbsFlt(float v) { return (float)__fabs(v); }
 
 void CarSound::Update() {
     CarSound *h = this;
@@ -512,10 +511,10 @@ void CarSound::Update() {
         float spd;
         v = h->vehicle;
         spd = ((CarBody *)v)->speed;
-        if (AbsFlt(((CarBody *)v)->f2690) <= __float_epsilon && spd > lbl_805633DC && ((CarBody *)v)->airborne > 1 &&
+        if (FAbs(((CarBody *)v)->f2690) <= __float_epsilon && spd > lbl_805633DC && ((CarBody *)v)->airborne > 1 &&
             !underwater) {
-            float dot = AbsFlt(PSVECDotProduct((const Vec*)((HudVec *)((unsigned char *)&((CarBody *)v)->vel)), (const Vec*)((HudVec *)((unsigned char *)&((CarBody *)v)->mtx))));
-            float lim = spd * (AbsFlt(h->driftTime) <= __float_epsilon ? lbl_805633E0 : lbl_805633E4);
+            float dot = FAbs(PSVECDotProduct((const Vec*)((HudVec *)((unsigned char *)&((CarBody *)v)->vel)), (const Vec*)((HudVec *)((unsigned char *)&((CarBody *)v)->mtx))));
+            float lim = spd * (FAbs(h->driftTime) <= __float_epsilon ? lbl_805633E0 : lbl_805633E4);
             shown = dot > lim;
             if (shown) {
                 float t = HudClamp01(lbl_805633DC * (dot / lim - lbl_80563368));

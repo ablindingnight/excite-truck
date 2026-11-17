@@ -3,6 +3,7 @@
 // apart from the value keys and sound names.
 #include "game/common.h"
 #include "game/weather.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -73,8 +74,6 @@ extern f32 __float_epsilon[];   // FLT_EPSILON
 
 #define NearZero(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
-static inline int MaxI(int a, int b) { return a > b ? a : b; }
-static inline int MinI(int a, int b) { return a < b ? a : b; }
 static inline int ColorByte(const f32& f) {
     int v = f * 255.0f;
     v = v > 0 ? v : 0;
@@ -125,7 +124,6 @@ void fn_801E1894(void) {
     lbl_8055EA20 = 1;
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_801E1B30(void) {
     WeatherState* w = &lbl_804874B8;
@@ -146,7 +144,7 @@ void fn_801E1B30(void) {
     }
     lbl_8055EA21 = 0;
     if (w->lightning != 1) {
-        if (AbsF(w->flash - w->target) < 0.001f) {
+        if (FAbs(w->flash - w->target) < 0.001f) {
             if (!NearZero(w->target)) {
                 w->target = 0.0f;
             } else {
