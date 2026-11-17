@@ -2252,7 +2252,8 @@ inline void RingChalMaster::vf0C(void) {
         arena.Tally();
     }
     if (vf24() && !(lbl_8055E3C8 - fA0 < 2.25f)) {
-        results.Update(arena.f30 + (int)arena.timer.t, arena.f30, (int)arena.timer.t);
+        int secs = (int)arena.timer.t;
+        results.Update(arena.f30 + secs, arena.f30, secs);
     }
 }
 
