@@ -1,6 +1,7 @@
 // String tables (0x8012F150-0x8012F31C): 'STAB' resources holding fixed-stride rows of strings with one
 // column per language, byte-swapped on first load. Names are guesses.
 #include "game/common.h"
+#include "game/byteswap.h"
 
 struct StringTable {
     u32 count;        // offset 0x0
@@ -18,15 +19,6 @@ int fn_8012C4D8(void* p);
 
 ModuleTag lbl_8055E018;
 
-static inline void Swap4(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 extern "C" {
 
 StringTable* fn_8012F150(const char* name) {
@@ -41,12 +33,12 @@ StringTable* fn_8012F150(const char* name) {
     }
     if (swap) {
         int i;
-        Swap4((u8*)&t->count);
-        Swap4((u8*)&t->unk4);
+        SwapWordB((u8*)&t->count);
+        SwapWordB((u8*)&t->unk4);
         for (i = 0; i < 16; i++) {
-            Swap4((u8*)&t->column[i]);
+            SwapWordB((u8*)&t->column[i]);
         }
-        Swap4((u8*)&t->stride);
+        SwapWordB((u8*)&t->stride);
     }
     return t;
 }
