@@ -32,12 +32,9 @@ void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 // A track object instance handed to its handler.
 #include "game/tobj.h"
 
-// Every handler's base (vtable slots 0x8-0x2C).
 // drone keeps its dead weak TrackMod and TrackInst tables (zero blocks after its own; FACTS 2026-11-17 08:29).
 #define TRACKMOD_DECL
 #define TRACKINST_DECL
-#include "game/trackmod.h"
-
 #include "game/trackinst.h"
 
 // One key of a linear path (0x20).
@@ -248,6 +245,10 @@ struct LinearPathSlot {
     const LinearPathData* data;  // offset 0x0
     f32 timer;             // offset 0x4
 };
+
+// Every handler's base (vtable slots 0x8-0x2C). Included here, after the drone managers: retail's zero block for its
+// table sits right after LinearPathTMH's, before the managers' tables (tables come in reverse declaration order).
+#include "game/trackmod.h"
 
 class LinearPathTMH : public TrackMod {
 public:
