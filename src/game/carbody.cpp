@@ -2129,12 +2129,11 @@ void fn_80183E7C(u8* p) {
             }
         }
         f32 spin = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48));
-        f32 fs = Clamp01((cb->speed - 6.6666665f) / 24.444445f);
-        f32 sk = 1.0f + fs * -0.9f;
-        f32 m2 = 30000.0f * (cb->f5E4 * cb->f5E4);
-        f32 fa = Clamp01((cb->f2618 - 0.1f) / 0.20000002f);
-        f32 d = yaw * sk - spin;
-        f32 k = m2 * LerpT(fa, 1.0f, 0.2f) * d;
+        f32 sk = LerpT(RampW(cb->speed, 6.6666665f, 24.444445f), 1.0f, 0.1f);
+        f32 e = cb->f5E4;
+        f32 m2 = Mul(30000.0f, Sq(e));
+        f32 lt = LerpT(RampW(cb->f2618, 0.1f, 0.20000002f), 1.0f, 0.2f);
+        f32 k = m2 * lt * (yaw * sk - spin);
         t.x = cb->mtx.rot.y.x * k;
         t.y = cb->mtx.rot.y.y * k;
         t.z = cb->mtx.rot.y.z * k;
