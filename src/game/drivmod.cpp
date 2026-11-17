@@ -460,6 +460,42 @@ extern "C" {
 }
 template <class O, class A, class B> static inline void TSub(O* o, const A* a, const B* b) { o->x = a->x - b->x; o->y = a->y - b->y; o->z = a->z - b->z; }  /* Helper name unproven */
 extern "C" {
+/* Helper names unproven. The bone's rotation rows as their own inline, in rigid's exact form (0fccfbd8b).
+   What retail's registers say about its shape (numsolve: the first Dot3 block's z, kept in f24 across the calls, is
+   coloured after the axis components and before the sine):
+   - the axis components are PARAMETER objects of a statement-level inline (created before the Dot3 temporaries),
+     given as expressions and in the order z, y, x (the first parameter is numbered highest: az f26, ay f25, ax f24;
+     arguments are evaluated right to left, so x is still computed first);
+   - the sine comes through an expression inline (SinF), whose result object is created after the Dot3 temporaries.
+   The locals are declared in the turned-round order an inline needs (they number upward). */
+static inline f32 SinF(f32 x) { return (f32)sin(x); }
+static inline void AxisAngleRows(BRot& r, f32 az, f32 ay, f32 ax, f32 a) {
+    f32 cs;
+    f32 zz;
+    f32 yy;
+    f32 xx;
+    f32 zDiag;
+    f32 yDiag;
+    f32 t;
+    f32 sn;
+    sn = SinF(a);
+    cs = cos(a);
+    xx = ax * ax;
+    yy = ay * ay;
+    zz = az * az;
+    t = 1.0f - cs;
+    r.rx.x = cs + t * xx;
+    r.rx.y = ay * (t * ax) + sn * az;
+    r.rx.z = az * (t * ax) - sn * ay;
+    yDiag = cs + t * yy;
+    r.ry.x = ay * (t * ax) - sn * az;
+    r.ry.y = yDiag;
+    r.ry.z = az * (t * ay) + sn * ax;
+    zDiag = cs + t * zz;
+    r.rz.x = az * (t * ax) + sn * ay;
+    r.rz.y = az * (t * ay) - sn * ax;
+    r.rz.z = zDiag;
+}
 void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, const u8* bind, const BonePose* f) {
     int i = 0;
     if (n <= 0) {
@@ -511,36 +547,7 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                 BRot r;
                 if (a > 0.0001f) {
                     f32 inv = 1.0f / a;
-                    f32 az;
-                    f32 ay;
-                    f32 ax;
-                    ax = inv * axis.x;
-                    ay = inv * axis.y;
-                    az = inv * axis.z;
-                    f32 t;
-                    f32 yDiag;
-                    f32 zDiag;
-                    f32 xx;
-                    f32 yy;
-                    f32 zz;
-                    f32 cs;
-                    f32 sn = sin(a);
-                    cs = cos(a);
-                    xx = ax * ax;
-                    yy = ay * ay;
-                    zz = az * az;
-                    t = 1.0f - cs;
-                    r.rx.x = cs + t * xx;
-                    r.rx.y = ay * (t * ax) + sn * az;
-                    r.rx.z = az * (t * ax) - sn * ay;
-                    yDiag = cs + t * yy;
-                    r.ry.x = ay * (t * ax) - sn * az;
-                    r.ry.y = yDiag;
-                    r.ry.z = az * (t * ay) + sn * ax;
-                    zDiag = cs + t * zz;
-                    r.rz.x = az * (t * ax) + sn * ay;
-                    r.rz.y = az * (t * ay) - sn * ax;
-                    r.rz.z = zDiag;
+                    AxisAngleRows(r, inv * axis.z, inv * axis.y, inv * axis.x, a);
                 } else {
                     SetIdentity(&r.rx.x);
                 }
