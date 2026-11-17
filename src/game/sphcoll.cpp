@@ -246,7 +246,7 @@ void fn_801CFA48(u8* p);
 void fn_801CFF14(u8* p);
 void fn_801CFF18(u8* p, u32 a);
 u8* fn_801CFEAC(const char* name);
-int fn_801CF828(u8* m, u32 a, u32 b, u32 c, u32 d);
+int fn_801CF828(u8* m, const RVec3* org, const RVec3* dir, f32* t, RVec3* nrm);  // pmesh.cpp (PMesh*, PVec3: same layouts)
 void fn_8012C4E4(void* a, void* fn, int b);
 void fn_801796EC(int kind, void* msg, int size);
 void fn_801D0650(u8* p);
@@ -813,13 +813,13 @@ u32 CollShape::vf30(void) {
 
 
 // Contact between p and q along n; volumes without an owner hand the test to q with the normal flipped.
-void fn_8019A788(u8* p, u8* q, u32 x, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
+void fn_8019A788(u8* p, u8* q, const RVec3* x, const RVec3* n, u32 a, u32 b, f32 s, f32 u, f32 v) {
     if (U32(p, 0x4) || a) {
-        fn_80199894(p, q, (const RVec3*)x, n, a, b, s, u, v);
+        fn_80199894(p, q, x, n, a, b, s, u, v);
     } else {
         RVec3 m;
         SphScale(&m.x, &n->x, -1.0f);
-        fn_80199894(q, p, (const RVec3*)x, &m, b, a, s, v, u);
+        fn_80199894(q, p, x, &m, b, a, s, v, u);
     }
 }
 
@@ -901,12 +901,12 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
                 at.v[1] = cv[1] + n.v[1] * k;
                 at.v[2] = cv[2] + n.v[2] * k;
                 if (U32(p, 0x4)) {
-                    fn_8019A788(p, q, (u32)at.v, (RVec3*)n.v, a, b, pen, 0.0f, 0.0f);
+                    fn_8019A788(p, q, (const RVec3*)at.v, (RVec3*)n.v, a, b, pen, 0.0f, 0.0f);
                 } else {
                     n.v[0] *= -1.0f;
                     n.v[1] *= -1.0f;
                     n.v[2] *= -1.0f;
-                    fn_8019A788(q, p, (u32)at.v, (RVec3*)n.v, a, b, pen, 0.0f, 0.0f);
+                    fn_8019A788(q, p, (const RVec3*)at.v, (RVec3*)n.v, a, b, pen, 0.0f, 0.0f);
                 }
                 hit = 1;
             }
@@ -1069,7 +1069,7 @@ int fn_8019B08C(u8* p, const f32* c, u8* q, f32 r) {
                 PSVECNormalize((const Vec*)&n.x, (Vec*)&n.x);
                 MulVec(&nw, &n, (RMtx*)((u8*&)((CollShape*)q)->frame));
                 nn = nw;
-                fn_8019A788(p, q, (u32)&w, &nn, 0, 0, r, 0.0f, 0.0f);
+                fn_8019A788(p, q, &w, &nn, 0, 0, r, 0.0f, 0.0f);
                 return 1;
             }
         }
@@ -1188,7 +1188,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             fn_802E30C8("%f,%f,%f", pf->pos.x, pf->pos.y, pf->pos.z);
             fn_802E30C8("comp = %f!", comp);
         }
-        fn_8019A788(p, q, (u32)&cp, &n, 0, 0, comp, 0.0f, 0.0f);
+        fn_8019A788(p, q, &cp, &n, 0, 0, comp, 0.0f, 0.0f);
         if (debug) {
             fn_802E30C8("-collide_explicit_sphere_box: COLLIDE!");
         }
@@ -1345,10 +1345,10 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             }
         }
         if (pb) {
-            fn_8019A788(p, q, (u32)&cp, &n, 0, 0, comp, fp, fq);
+            fn_8019A788(p, q, &cp, &n, 0, 0, comp, fp, fq);
         } else {
             SphScale(&n.x, &n.x, -1.0f);
-            fn_8019A788(q, p, (u32)&cp, &n, 0, 0, comp, fq, fp);
+            fn_8019A788(q, p, &cp, &n, 0, 0, comp, fq, fp);
         }
         return 1;
     }
@@ -1405,7 +1405,7 @@ int fn_8019C854(u8* p, u8* q) {
             w.y += m->pos.y;
             w.z += m->pos.z;
             MulVec(&nw, &n, (RMtx*)((u8*&)((CollShape*)q)->frame));
-            fn_8019A788(p, q, (u32)&w, &nw, 0, 0, pen, 0.0f, 0.0f);
+            fn_8019A788(p, q, &w, &nw, 0, 0, pen, 0.0f, 0.0f);
             return 1;
         }
     }
@@ -1722,7 +1722,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     at.y = (pa.y + pb.y) / 2.0f;
     nrm.z = diff.z * k;
     at.z = (pa.z + pb.z) / 2.0f;
-    fn_8019A788(who ? who : p, q, (u32)&at.x, &nrm, 0, 0, pen, 0.0f, 0.0f);
+    fn_8019A788(who ? who : p, q, (const RVec3*)&at.x, &nrm, 0, 0, pen, 0.0f, 0.0f);
     return 1;
 }
 
@@ -3587,7 +3587,7 @@ void PolyShape::vf10(u8* p) {
                     vel1.v[1] = 0.0f;
                     vel1.v[2] = 0.0f;
                     if (fn_80198F64(&pt.x, ((u32)this), hit1.v, &depth1, n1.v, vel1.v, 0.25f)) {
-                        fn_8019A788(p, (u8*)((u32)this), (u32)hit1.v, (RVec3*)n1.v, 0, 0, depth1, 0.0f, 0.0f);
+                        fn_8019A788(p, (u8*)((u32)this), (const RVec3*)hit1.v, (RVec3*)n1.v, 0, 0, depth1, 0.0f, 0.0f);
                     }
                 }
             }
@@ -3596,7 +3596,7 @@ void PolyShape::vf10(u8* p) {
         vel2.v[1] = 0.0f;
         vel2.v[2] = 0.0f;
         if (fn_80198F64((f32*)(p + 0x34), ((u32)this), hit2.v, &depth2, n2.v, vel2.v, F32(p, 0x24))) {
-            fn_8019A788(p, (u8*)((u32)this), (u32)hit2.v, (RVec3*)n2.v, 0, 0, depth2, 0.0f, 0.0f);
+            fn_8019A788(p, (u8*)((u32)this), (const RVec3*)hit2.v, (RVec3*)n2.v, 0, 0, depth2, 0.0f, 0.0f);
         }
     }
 }
@@ -3696,7 +3696,7 @@ int MeshShape::vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n) {
         lf.z = z;
     }
     MulVecT(&ld, dir, (RMtx*)((u8*&)this->frame));
-    if (fn_801CF828(this->mesh, (u32)&lf, (u32)&ld, (u32)t, (u32)&ln)) {
+    if (fn_801CF828(this->mesh, &lf, &ld, t, &ln)) {
         MulVec(n, &ln, (RMtx*)((u8*&)this->frame));
         return 1;
     }
@@ -3934,7 +3934,7 @@ void fn_801A4E54(void) {
     }
 }
 
-int fn_801A4E88(u32 a, u32 b, u32 c, u32 d, s32* out) {
+int fn_801A4E88(const RVec3* a, const RVec3* b, f32* c, RVec3* d, s32* out) {
     if (lbl_8055E5A0 && fn_801CF828(lbl_8055E5A0, a, b, c, d)) {
         *out = 0x6E;
         return 1;
