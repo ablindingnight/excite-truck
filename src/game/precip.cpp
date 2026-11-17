@@ -9,6 +9,7 @@
 #include "game/dropsource.h"
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -223,14 +224,9 @@ DropSource lbl_804BCFB8[8];
 
 
 
-// Helper name unproven: a square through an inline.
-static inline f32 Sq(f32 v) { return v * v; }
 // Helper name unproven: the near*far term of the frustum quadratic.
 static inline f32 Term(f32 n, f32 f, f32 k) { return n * (f * k); }
-static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // The vector in the frame's axes (multiply by the transpose).
 static inline void MulT(const PlainValMatrix* m, const ValVec3* v, ValVec3* out) {
@@ -394,13 +390,12 @@ void fn_802A4D08(void) {
     }
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_802A4E08(void) {
     // MATCHING-AID: one variable holds the byte offset, then the pointer; plain &a[i] keeps the offset in its own register.
     ScreenFx* s = (ScreenFx*)(fn_801E85B4() * (int)sizeof(ScreenFx));
     s = (ScreenFx*)((u8*)fn_801E7E34() + (int)s);
-    if (!(AbsF(s->flash) <= __float_epsilon[0])) {
+    if (!(FAbs(s->flash) <= __float_epsilon[0])) {
         int a = Alpha(255.0f * s->flash);
         fn_802C90F0(lbl_8055F89C);
         fn_802C9124(0, 0, lbl_8055CFF0, lbl_8055CFF4, 0.0f, 0.0f, 1.0f, 1.0f, a << 24 | 0xE6F0FF);
@@ -421,7 +416,7 @@ void fn_802A4E08(void) {
         m.basis[2].x = sn;
         m.basis[2].y = 0.0f;
         m.basis[2].z = c;
-        fn_802C9900(FMin(2.0f * s->lightning, 1.0f));
+        fn_802C9900(MinFRev(2.0f * s->lightning, 1.0f));
         fn_802C744C(lbl_8055F898, &m);
         fn_802C9904();
     }
@@ -487,14 +482,14 @@ void fn_802A50F8(void) {
 }
 
 void fn_802A5270(f32 density) {
-    f32 d = FMax(FMin(density, 1.0f), 0.0f);
+    f32 d = MaxF(MinFRev(density, 1.0f), 0.0f);
     int n = 512.0f * d;
     lbl_8055F88C = new ("rain system") RainSystem(n, 0);
     fn_802A50F8();
 }
 
 void fn_802A52FC(f32 density) {
-    f32 d = FMax(FMin(density, 1.0f), 0.0f);
+    f32 d = MaxF(MinFRev(density, 1.0f), 0.0f);
     int n = 512.0f * d;
     lbl_8055F888 = new ("snow system") SnowSystem(n, 0);
 }
@@ -978,7 +973,6 @@ void RainSystem::Fill(void) {
     }
 }
 
-static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 void RainSystem::Spawn(void) {
     f32 asp = fn_802C9A50();
     f32 ty = tanHalf;
@@ -1005,7 +999,7 @@ void RainSystem::Spawn(void) {
     } else {
         while (count < max) {
             f32 r = fn_80287BC8(0.0f, 1.0f);
-            f32 z = LerpF(r + -vel.z * (Sq(r) - r), near, far);
+            f32 z = LerpT(r + -vel.z * (Sq(r) - r), near, far);
             f32 a = fn_80287BC8(-z, z);
             f32 b = fn_80287BC8(-z, z);
             PVec p;
@@ -1021,8 +1015,6 @@ static inline int ClampA(f32 v, int a) {
     return b < a ? b : a;
 }
 
-/* Helper name unproven */
-static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 static inline u32 MistColor(u8 r, u8 g, u8 b) { return ARGB(0xFF, r, g, b); }
 
 static inline u32 MistColorV(const ValVec3& c) { return MistColor(Alpha(c.x), Alpha(c.y), Alpha(c.z)); }  /* Helper name unproven */

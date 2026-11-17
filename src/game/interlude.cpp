@@ -8,6 +8,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 #include "game/respawn.h"
+#include "game/mathutil.h"
 
 
 // A ground-plane (x, z) vector.
@@ -472,7 +473,6 @@ f32 fn_801C2F58(int n, f32 x) {
 }
 
 // Blends two camera frames: orientation through quaternion slerp, position linearly.
-static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 
 void fn_801C2FF4(PlainValMatrix* out, const PlainValMatrix* a, const PlainValMatrix* b, f32 t) {
@@ -484,7 +484,7 @@ void fn_801C2FF4(PlainValMatrix* out, const PlainValMatrix* a, const PlainValMat
     FrameToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToFrame(out, &q);
-    pos.Set(FrameLerp(a->origin.x, b->origin.x, t), FrameLerp(a->origin.y, b->origin.y, t), FrameLerp(a->origin.z, b->origin.z, t));
+    pos.Set(Lerp(a->origin.x, b->origin.x, t), Lerp(a->origin.y, b->origin.y, t), Lerp(a->origin.z, b->origin.z, t));
     out->origin = pos;
 }
 
@@ -1063,9 +1063,7 @@ void fn_80135B9C(LineFollower* f, f32 d, V2* outPos, V2* outDir, f32* outSpeed, 
 f32 fn_80139030(IMotion* m);
 }
 
-static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 Clamp(f32 v, f32 lo, f32 hi) { return Max(Min(hi, v), lo); }
+static inline f32 Clamp(f32 v, f32 lo, f32 hi) { return MaxF(MinF(hi, v), lo); }
 static inline f32 ClampSigned(f32 v) { return Clamp(v, -1.0f, 1.0f); }
 static inline f32 Clamp01(f32 v) { return Clamp(v, 0.0f, 1.0f); }
 
@@ -1537,7 +1535,6 @@ static inline void MulM(Mat3* out, const Mat3* a, const Mat3* b) {
     }
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(ValVec3* out, const ValVec3* in, Mat3* m) {
     if (out == in) {
@@ -1554,7 +1551,6 @@ static inline void MulVec(ValVec3* out, const ValVec3* in, Mat3* m) {
     }
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 // The interlude camera for view idx while an interlude plays (and the editor is not flying it): the
 // current camera move at the current time, relative to the world, the start line or a car, blended in
@@ -1664,7 +1660,7 @@ int fn_801C5B68(CamView* v, int idx) {
             v->origin.z += o.z;
         }
     }
-    if (!(AbsF(lbl_80437D88.play.interpTime) <= __float_epsilon[0]) && dt < lbl_80437D88.play.interpTime) {
+    if (!(FAbs(lbl_80437D88.play.interpTime) <= __float_epsilon[0]) && dt < lbl_80437D88.play.interpTime) {
         f32 u = dt / lbl_80437D88.play.interpTime;
         if (lbl_80437D88.play.interpType == 1) {
             u = Ease(u);

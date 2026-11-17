@@ -10,6 +10,7 @@ void OptE3Demo(void);
 
 #include "game/uicontext.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 // Fade timing a window reports for its open and close.
 struct WinFade {
@@ -178,8 +179,6 @@ extern "C" char lbl_8055B860[8] = "";
    unused static function with those two was compiled here (dead static functions keep their constants). */
 static f32 CursorCoord(int n) { if (n < 0) return 0.0f; return (f32)n; }
 
-static inline f32 FadeMax(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 FadeMin(f32 a, f32 b) { return a < b ? a : b; }
 
 extern "C" {
 
@@ -425,7 +424,7 @@ s32 fn_802168F0(Window* w) {
     fn_80217734(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
     fn_80211F64();
     fn_80211F64();
-    rate = 1.0f / FadeMax(fade.in, 0.01f);
+    rate = 1.0f / MaxF(fade.in, 0.01f);
     t = (f32)__fabs(fade.in) <= __float_epsilon[0] ? 1.0f : 0.0f;
     started = 0;
     lbl_8055EF94 = t;
@@ -452,7 +451,7 @@ s32 fn_802168F0(Window* w) {
         }
         fn_8021662C();
         t += rate * fn_80214D48();
-        lbl_8055EF94 = FadeMin(t, 1.0f);
+        lbl_8055EF94 = MinF(t, 1.0f);
         if (fn_8012742C()) {
             lbl_8055EF74 = -1;
             break;
@@ -465,7 +464,7 @@ s32 fn_802168F0(Window* w) {
         fn_802368D0();
     }
     fn_8021747C(w, 0, &fade, 0.0f);
-    rateOut = 1.0f / FadeMax(fade.out, 0.01f);
+    rateOut = 1.0f / MaxF(fade.out, 0.01f);
     tOut = 1.0f;
     if ((f32)__fabs(fade.out) <= __float_epsilon[0]) {
         tOut = 0.0f;
@@ -478,7 +477,7 @@ s32 fn_802168F0(Window* w) {
     }
     zero = 0.0f;
     for (;;) {
-        tOut = FadeMax(zero, tOut);
+        tOut = MaxF(zero, tOut);
         lbl_8055EF94 = tOut;
         if (fn_8012742C()) {
             lbl_8055EF74 = -1;

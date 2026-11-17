@@ -10,6 +10,7 @@
 #include "game/racesetup.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -174,9 +175,6 @@ double sqrt(double x);
 // The track walls are shapes.h's BoxShape (wall form).
 
 static inline f32 Angle(f32 a) { return a; }
-static inline f32 Min(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 DMin(f32 a, f32 b) { return b < a ? b : a; }
 static inline double DMax(f32 a, f32 b) { return a > b ? a : b; }
 
 int GetNumPlayers(void);
@@ -628,7 +626,7 @@ static inline void SaveView(ViewState* s, WView* v) {
 static inline WorldState* ReadWorldState(void) {
     WorldState* w;
     w = PhysicsGetStatePacked();
-    lbl_8055EB14 = Max(DMax(DMin(w->views[0].time - lbl_8055EB18, 0.5f), -0.5f), 0.0f);
+    lbl_8055EB14 = MaxF(DMax(MinFRev(w->views[0].time - lbl_8055EB18, 0.5f), -0.5f), 0.0f);
     lbl_8055EB18 = w->views[0].time;
     return w;
 }
@@ -1011,7 +1009,7 @@ void fn_801E8A84(void) {
         lbl_804881D8[2] += e * Sign(lbl_804881D8[2]);
     }
     PSVECNormalize((const Vec*)((ValVec3*)lbl_804881D8), (Vec*)((ValVec3*)lbl_804881D8));
-    lbl_804881D8[3] = Max(Min(lbl_804881D8[3] + fn_80129DC4(0, -0.2f, 0.2f), 3.0f), 0.0f);
+    lbl_804881D8[3] = MaxF(MinFRev(lbl_804881D8[3] + fn_80129DC4(0, -0.2f, 0.2f), 3.0f), 0.0f);
 }
 
 void fn_801E8C84(ValVec3* out) {

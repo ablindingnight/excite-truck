@@ -24,6 +24,7 @@ struct MMtx {
 };
 
 #include "game/mmtx33.h"
+#include "game/mathutil.h"
 
 struct MCam {
     MMtx33 r;  // offset 0x0
@@ -182,7 +183,6 @@ f32 lbl_8055D0A4 = 1000.0f;
 template <class T>
 inline void Relocate(T*& p, u32 base);
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 template <class T>
 static inline void SwapItems(T& a, T& b) {
