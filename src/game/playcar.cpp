@@ -1485,7 +1485,6 @@ void PlayerDriver_vf48(u8* p) {
     odd = (lbl_8055E3C4 >> 1) & 1;
     if (!fn_801796B4() && fn_801CF050() && !fn_801796C4() &&
         NearZero(F32(PTR(p, 0x34), 0x2690))) {
-        f32 a;
         const f32* v;
         f32 buzz;
         f32 str;
@@ -1504,18 +1503,21 @@ void PlayerDriver_vf48(u8* p) {
         }
         str *= MaxF(sr, 0.0f);
         PcScaleTo(&w, &F32(c5, 0x124), -0.05f);
-        a = VMag(&w);
+        /* The spin vector's length reuses mag (the wobble sum above is finished): a second lifetime of a reused
+           variable is numbered above every named local, which is where retail colours it (f24, obtained before
+           cl / grip / yaw / initialSteer take it). */
+        mag = VMag(&w);
         f32 slip;
-        if (a > 0.0001f) {
+        if (mag > 0.0001f) {
             f32 cs;
             f32 inv;
-            inv = 1.0f / a;
+            inv = 1.0f / mag;
             f32 t;
             ax = inv * w.x;
             ay = inv * w.y;
             az = inv * w.z;
-            sn = sin(a);
-            cs = cos(a);
+            sn = sin(mag);
+            cs = cos(mag);
             t = 1.0f - cs;
             f32 yy = ay * ay;
             f32 zz = az * az;
