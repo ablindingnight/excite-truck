@@ -1344,7 +1344,7 @@ public:
 extern "C" {
 void fn_80190E6C(void);
 int fn_801C5B60(void);
-void fn_80196A9C(u8* p);
+void fn_80196A9C(void);  // aicar.cpp defines it with an unused u8* parameter; retail's call here passes nothing
 void fn_801C56AC(void);
 void fn_801BEDA8(CbSolMass** m, CbSolContact** c, CbSolCross** x, CbSolCx** cx, s32* n);
 void fn_801BEDD4(void);
@@ -2279,7 +2279,7 @@ void fn_80186DE8(void) {
     s32 i;
     fn_80190E6C();
     if (fn_801C5B60() == 0) {
-        fn_80196A9C(0);
+        fn_80196A9C();
     }
     fn_801C56AC();
     fn_801B83A0()->sC8();
@@ -2517,9 +2517,10 @@ void fn_80186DE8(void) {
         CbVec4 w0(c->v30);
         CbVec4 w1(c->v10);
         CbVec4 w2(c->v0);
-        CbVec4 w3(x->v130);
         CbVec4 w4(x->v120);
+        CbVec4 w3(x->v130);
         CbVec4 w5(x->v140);
+        CbVec4 ctl(c->v190);  // never read: retail copies c->v190 here too (dead stores in its frame); name unproven
         CbVec4 rpm(c->pts[4]);
         CbVec4 w6(x->v70);
         CbWheel* w;
