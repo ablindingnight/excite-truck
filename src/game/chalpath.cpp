@@ -114,9 +114,11 @@ public:
     bool HasTable(const char* key) { return GetTable(key) != 0; }
 };
 
-class ChassisList {
+// garage.cpp's ChassisList as chalpath sees it (made by fn_8025007C, filled by fn_8024DAE0, deleted here); a
+// distinct name until chalpath can include garage's class.
+class GarageChassisList {
 public:
-    virtual ~ChassisList(void);                               // 0x08
+    virtual ~GarageChassisList(void);                               // 0x08
     virtual void Add(u32 chassis, int a, int b);              // 0x0C
 };
 
@@ -501,8 +503,8 @@ static f32 kShrink = 0.5f;
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);
-ChassisList* fn_8025007C(int n);
-int fn_8024DAE0(u8* a, u8* b, int c, ChassisList* list, u32 d);
+GarageChassisList* fn_8025007C(int n);
+int fn_8024DAE0(u8* a, u8* b, int c, GarageChassisList* list, u32 d);
 
 // Challenge mode: picks the vehicle through the garage, limited to the track's default vehicle.
 int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
@@ -517,7 +519,7 @@ int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
     } else {
         fn_802E317C("MenuDoChallengeMode::ChooseVehicle - Expecting vehicle_map table and found none!");
     }
-    ChassisList* list = 0;
+    GarageChassisList* list = 0;
     if (chassis) {
         list = fn_8025007C(1);
         list->Add(chassis, 1, 0);
