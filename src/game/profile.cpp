@@ -219,7 +219,13 @@ extern const char lbl_80344120[40];
 extern const char lbl_80344148[40];
 // The callee's va_list starts after two GPR and two FP fixed arguments.
 // Its first two FP values are drawing coordinates, not format substitutions.
+#ifdef __MWERKS__
 void fn_80234AFC(const void*, f32, f32, const char*, ...);
+#else
+// PORT: gtext's definition takes (st, fmt, x, y, ...): reorder for the x86 stack (PPC floats ride in FPRs).
+void fn_80234AFC(const void*, const char*, f32, f32, ...);
+#define fn_80234AFC(st, x, y, fmt, ...) (fn_80234AFC)(st, fmt, x, y, ##__VA_ARGS__)
+#endif
 }
 
 extern "C" {

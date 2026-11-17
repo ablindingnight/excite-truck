@@ -29,7 +29,7 @@ void fn_801476D8(const ArtElem* a, u32 color, s32 tex);
 u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a);
 f32 fn_80144BD8(f32 x);  // ease in/out
 u32 fn_80147C50(u32 a, u32 b, f32 t);
-void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, ...);
+void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);  // t is named in ovlayout's definition
 void fn_80148100(GartElem* e);
 void fn_8014E61C(int id, int kind, f32 v);
 f32 fn_80176A2C(void);

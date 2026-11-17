@@ -26,9 +26,20 @@ int fn_802C9A58(void);  // widescreen
 int fn_802C9A60(void);
 s32 fn_802C9C38(void);  // screen height
 s32 fn_802C9C48(void);  // screen width
+#ifdef __MWERKS__
 void fn_8000FF88(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_800104B0(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_8001027C(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
+#else
+// PORT: dashhelper's definitions take (color, flags, fmt, scale, x, y, ...); on the PPC the floats travel in FPRs
+// whatever their position, on x86 every argument is a stack slot. Same calls, reordered for the definition.
+void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void fn_800104B0(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void fn_8001027C(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+#define fn_8000FF88(s, x, y, c, f, fmt, ...) (fn_8000FF88)(c, f, fmt, s, x, y, ##__VA_ARGS__)
+#define fn_800104B0(s, x, y, c, f, fmt, ...) (fn_800104B0)(c, f, fmt, s, x, y, ##__VA_ARGS__)
+#define fn_8001027C(s, x, y, c, f, fmt, ...) (fn_8001027C)(c, f, fmt, s, x, y, ##__VA_ARGS__)
+#endif
 }
 
 extern f32 lbl_8055D020;  // widescreen x stretch

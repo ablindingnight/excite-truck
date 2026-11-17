@@ -1284,7 +1284,13 @@ extern "C" {
 f32 fn_80235EF0(u8* art, int part);
 void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
 void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
+#ifdef __MWERKS__
 void fn_80234AFC(CupText* st, f32 x, f32 y, const char* fmt, ...);
+#else
+// PORT: gtext's definition takes (st, fmt, x, y, ...): reorder for the x86 stack (PPC floats ride in FPRs).
+void fn_80234AFC(CupText* st, const char* fmt, f32 x, f32 y, ...);
+#define fn_80234AFC(st, x, y, fmt, ...) (fn_80234AFC)(st, fmt, x, y, ##__VA_ARGS__)
+#endif
 
 }  // extern "C"
 
