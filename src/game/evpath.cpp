@@ -15,6 +15,7 @@
 #include "game/logomover_inl.h"
 #endif
 #include <string.h>
+#include "game/strcopy.h"
 
 // The screen's image/font/sound set (shared UIObjects implementation, see uiobjs.cpp).
 class UIObjects {
@@ -866,14 +867,6 @@ const char* GetGradeDisplayName(int grade);
 
 
 // Copies s to d, at most n bytes in all, always terminating.
-static inline void CopyTail(const char* s, int n, char* d) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 // Appends s to the string in d (n bytes in all), always terminating.
 static inline void AppendName(const char* s, int n, char* d) {
@@ -882,7 +875,7 @@ static inline void AppendName(const char* s, int n, char* d) {
         d++;
     }
     if (n > 0) {
-        CopyTail(s, n, d);
+        SafeStrCopy(d, s, n);
     }
 }
 
