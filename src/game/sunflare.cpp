@@ -28,12 +28,12 @@ struct Sprite {
     f32 radius;  // offset 0x1C
 };
 
-struct Flare : Sprite {
+struct SunFlare : Sprite {
     f32 slide;  // offset 0x20
 };
 
 struct FlareSet {
-    Flare flares[8];  // offset 0x0
+    SunFlare flares[8];  // offset 0x0
     s32 count;        // offset 0x120
     f32 pivotDepth;   // offset 0x124
     f32 rodLength;    // offset 0x128
@@ -97,7 +97,7 @@ void fn_802917C0(FlareSet* fs, ValueNode* node) {
         f32 alpha = fn_80129DC4(0, 0.1f, 0.5f);
         f32 slide = fn_80129DC4(0, -0.5f, 0.5f);
         alpha = c->GetFloat("alpha", alpha);
-        Flare* f = &fs->flares[fs->count];
+        SunFlare* f = &fs->flares[fs->count];
         f->pos.x = 0.0f;
         f->pos.y = 0.0f;
         f->pos.z = 0.0f;
@@ -116,7 +116,7 @@ void fn_802917C0(FlareSet* fs, ValueNode* node) {
 }
 
 void fn_802919AC(FlareSet* fs) {
-    Flare* f = fs->flares;
+    SunFlare* f = fs->flares;
     for (int i = 0; i < fs->count; f++, i++) {
         gxForgetTexture(f->tex);
         f->tex = -1;
@@ -164,13 +164,13 @@ void fn_80291B9C(FlareSet* fs, const SunVecP* p, f32 depth) {
     fs->screen.z = depth;
     if (fn_802C8FF4(&fs->screen, fs->maxRadius)) {
         fs->visible = fs->count > 0;
-        Flare* f = fs->flares;
+        SunFlare* f = fs->flares;
         for (int i = 0; i < fs->count; f++, i++) {
             f->visible = 1;
         }
     } else {
         fs->visible = 0;
-        Flare* f = fs->flares;
+        SunFlare* f = fs->flares;
         for (int i = 0; i < fs->count; f++, i++) {
             f->visible = 0;
         }
@@ -244,7 +244,7 @@ void fn_80291E64(FlareSet* fs) {
     f32 startZ;
     f32 slideK = fs->screen.x / lbl_8055CFF0;
     f32 step = 1.0f / fs->count;
-    Flare* f = fs->flares;
+    SunFlare* f = fs->flares;
     for (int i = 0; i < fs->count; f++, i++) {
         f32 t = i * step + f->slide * slideK;
         t = (1.0f < t) ? 1.0f : t;
@@ -319,7 +319,7 @@ void fn_802921F4(void) {
 
 void fn_8029222C(void) {
     if (lbl_8055F75C) {
-        Flare* f = lbl_804B3EC0.flares;
+        SunFlare* f = lbl_804B3EC0.flares;
         for (int i = 0; i < lbl_804B3EC0.count; f++, i++) {
             f->visible = 0;
         }
@@ -371,7 +371,7 @@ void fn_802923EC(f32 a) {
         a = (1.0f < a) ? 1.0f : a;
         a = (a > 0.0f) ? a : 0.0f;
         lbl_804B4010.color = ((int)(255.0f * a) << 24) | (lbl_804B4010.color & 0xFFFFFF);
-        Flare* f = lbl_804B3EC0.flares;
+        SunFlare* f = lbl_804B3EC0.flares;
         for (int i = 0; i < lbl_804B3EC0.count; f++, i++) {
             f->color = ((int)(a * (f->color >> 24)) << 24) | (f->color & 0xFFFFFF);
         }

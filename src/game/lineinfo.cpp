@@ -38,7 +38,7 @@ struct Name64 {
     char s[64];
 };
 
-struct LineEntry {
+struct LineCacheEntry {
     LineInfo* info;  // offset 0x0
     Name64 name;     // offset 0x4
     s32 refs;        // offset 0x44
@@ -46,7 +46,7 @@ struct LineEntry {
 
 struct LineCache {
     LineCache(void) { count = 0; }
-    LineEntry e[8];
+    LineCacheEntry e[8];
     s32 count;  // offset 0x240
 };
 
@@ -124,8 +124,8 @@ void fn_8013BFE4(LineInfo* li) {}
 
 }  // extern "C"
 
-static inline LineEntry* CacheAdd(LineInfo* li, Name64 n) {
-    LineEntry* e = &lbl_8042F8C8.e[lbl_8042F8C8.count++];
+static inline LineCacheEntry* CacheAdd(LineInfo* li, Name64 n) {
+    LineCacheEntry* e = &lbl_8042F8C8.e[lbl_8042F8C8.count++];
     e->info = li;
     e->name = n;
     e->refs = 0;
@@ -135,7 +135,7 @@ static inline LineEntry* CacheAdd(LineInfo* li, Name64 n) {
 extern "C" {
 
 /* Helper name unproven: loads the line info on a cache miss and returns the cached copy. */
-static inline LineInfo* LoadCached(LineEntry* found, Name64& name) {
+static inline LineInfo* LoadCached(LineCacheEntry* found, Name64& name) {
     LineInfo* li;
     ValueTable* t;
     if (!found) {
@@ -175,7 +175,7 @@ LineInfo* fn_8013BFE8(const char* full) {
     int n;
     int i;
     Name64 name;
-    LineEntry* found;
+    LineCacheEntry* found;
     ValueTable* t;
     LineInfo* li;
     SafeStrCopy(name.s, full, 64);
