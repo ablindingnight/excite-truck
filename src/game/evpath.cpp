@@ -37,50 +37,7 @@ public:
 };
 
 // A list with an inline buffer; the base destructor clears the header.
-template <typename T>
-class ArrayBase {
-public:
-    ~ArrayBase(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    int Count(void) const { return count; }
-    void Add(T v) {
-        int n = count++;
-        data[n] = v;
-    }
-    T& AppendSlot(void) {
-        return data[count++];
-    }
-    template <typename V>
-    int Find(V* key) {
-        V* v = key;
-        for (int i = 0; i < Count(); i++) {
-            if ((V*)data[i] == v) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    template <typename V>
-    void Remove(V* v) {
-        int i = Find(v);
-        if (i == -1) {
-            return;
-        }
-        if (i >= 0 && i < count) {
-            int last = count - 1;
-            if (i != last) {
-                data[i] = data[last];
-            }
-            count--;
-        }
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
+#include "game/arraybase.h"
 
 template <typename T, int N>
 class FixedArray : public ArrayBase<T> {

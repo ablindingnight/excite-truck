@@ -61,18 +61,7 @@ struct CarIconTable;
 extern s32 lbl_8055F2E8;
 extern s32 lbl_8055F2E8;
 
-template <class T>
-class ArrayBase {
-public:
-    ~ArrayBase(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    int count;  // offset 0x4
-    int cap;    // offset 0x8
-};
+#include "game/arraybase.h"
 
 template <class T>
 class SimpleArray : public ArrayBase<T> {};

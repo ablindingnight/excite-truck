@@ -79,18 +79,7 @@ struct UIVert {
     f32 data[6];
 };
 
-template <class T>
-class ArrayBase {
-public:
-    ~ArrayBase(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    int count;  // offset 0x4
-    int cap;    // offset 0x8
-};
+#include "game/arraybase.h"
 
 template <class T, int N>
 class FixedArray : public ArrayBase<T> {
