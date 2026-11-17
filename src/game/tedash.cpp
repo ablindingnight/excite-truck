@@ -105,8 +105,10 @@ struct Cursor {
     CursorState prev;     // offset 0x54
 };
 
-struct Timer {
-    Timer(f32 p) {
+// A rate limiter on the wall clock: waits period seconds after each Reset (not timer.h's one-shot Timer).
+// Name unproven.
+struct Cooldown {
+    Cooldown(f32 p) {
         last = -100.0f;
         period = p;
     }
@@ -200,7 +202,7 @@ void __register_global_object(void* obj, void* dtor, void* chain);
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 
-inline f32 Timer::Now(void) { return (f32)fn_802E2C20() / 1000.0f; }
+inline f32 Cooldown::Now(void) { return (f32)fn_802E2C20() / 1000.0f; }
 
 
 ModuleTag lbl_8055F9F0;
@@ -209,10 +211,10 @@ UnkStatic123s lbl_804BE7B8;
 UnkStatic7F lbl_8055F9FC;
 s32 lbl_8055FA00;
 extern const f32 lbl_80564C88;
-Timer lbl_8055FA08(lbl_80564C88);  // layer list
-Timer lbl_8055FA10(lbl_80564C88);  // brush list
-Timer lbl_8055FA18(5.0f);  // brush rescan
-Timer lbl_8055FA20(0.05f);  // paint rate
+Cooldown lbl_8055FA08(lbl_80564C88);  // layer list
+Cooldown lbl_8055FA10(lbl_80564C88);  // brush list
+Cooldown lbl_8055FA18(5.0f);  // brush rescan
+Cooldown lbl_8055FA20(0.05f);  // paint rate
 s32 lbl_8055FA28;  // current layer
 s32 lbl_8055FA2C;  // current brush
 u8 lbl_8055FA30;   // show peaks
