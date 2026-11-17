@@ -31,18 +31,22 @@ struct MCam {
     ValVec3 t;   // offset 0x24
 };
 
-struct F2 {
+// The pair without constructors: F4 holds two of these, so each half is copied as one 8-byte block (lfd/stfd), which
+// is how retail moves them (11 block moves in fn_802CD37C). F2 adds the constructors. Names unproven.
+struct F2Plain {
+    f32 a, b;
+};
+struct F2 : F2Plain {
     F2(f32 x) { a = x; }
     F2(f32 x, f32 y) {
         a = x;
         b = y;
     }
-    f32 a, b;
 };
 
 struct F4 {
     F4(const F2& l, const F2& h) : lo(l), hi(h) {}
-    F2 lo, hi;
+    F2Plain lo, hi;
 };
 
 class MList;
