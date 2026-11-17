@@ -22,9 +22,7 @@ void fn_801E9E30(s16* h, f32* pos);
 
 void* operator new(size_t size, const char* tag);
 
-
 #include "game/bound.h"
-
 
 struct RaceCarRec;
 
@@ -57,7 +55,6 @@ public:
     virtual void Draw(void) = 0;
 };
 
-
 template <class T, int N>
 struct FixedArr : ArrayRef<T> {
     FixedArr(void) : ArrayRef<T>(storage, N) {}
@@ -65,7 +62,7 @@ struct FixedArr : ArrayRef<T> {
 };
 
 struct ActZone {
-    void Load(ValueNode* n, int& k, int& start, f32& dy);
+    void Load(ValueNode* n);
     void Check(int c);
     void Free(void) {
         fn_80128658(bound);
@@ -157,66 +154,60 @@ static char SequenceKey[] = "act_seq";
 static char LapKey[] = "lap";
 static char BoundsTag[] = "bound";
 
-// PROVISIONAL matching helper. Caller-owned counters and a shared edge component
-// recover the retail allocation order. The float component belongs to a1.
-// The original helper boundary and parameter names remain unconfirmed.
-static inline void LoadActZone(FixedArr<ActZone, 64>& zones, ValueNode* n, f32& dy) {
-    ActZone* zone;
-    int start;
-    int k;
-    zone = &zones.data[zones.count++];
-    zone->Load(n, k, start, dy);
-}
-
 inline void TechDemoMaster::a1(void) {
     f32 dy;
+    f32 dx;
+    f32 best;
+    int k;
+    int start;
+    ActZone* zone;
+    f32* p;
     ValueNode* vals = GetEvent(fn_801769CC()->event)->node;
     int i;
     ValueNode* n;
     for (i = 0; (n = vals->GetChildAt(i)) != 0; i++) {
         if (strcmp(n->GetName(), ActZoneTag) == 0) {
-            LoadActZone(zones, n, dy);
+            zone = &zones.data[zones.count++];
+            Bound* b;
+            zone->Load(n);
+            b = zone->bound;
+            start = 2;
+            zone->done = 0;
+            {
+                V2C e(b->pts[0].x - b->pts[2].x, b->pts[0].y - b->pts[2].y);
+                best = e.x * e.x + e.y * e.y;
+            }
+            V2 d;
+            s16 h[4];
+            for (int edge = 0; edge < 2; edge++) {
+                dy = b->pts[edge].y - b->pts[edge + 1].y;
+                dx = b->pts[edge].x - b->pts[edge + 1].x;
+                d.x = dx;
+                d.y = dy;
+                f32 len = d.x * d.x + d.y * d.y;
+                if (len > best) {
+                    best = len;
+                    start = edge;
+                }
+            }
+            fn_801E9DC4(h);
+            p = &zone->pt[0].x;
+            for (k = 0; k < 2; k++) {
+                BoundPt* q = &zone->bound->pts[(start + k) % 3];
+                p[0] = q->x;
+                p[1] = 0.0f;
+                p[2] = q->y;
+                fn_801E9E30(h, p);
+                p += 3;
+            }
         }
     }
     fn_802E30C8("TechDemoMaster: Loaded %d actzones", zones.count);
 }
 
-inline void ActZone::Load(ValueNode* n, int& k, int& start, f32& dy) {
-    f32* p;
-    Bound* b;
-    f32 best;
-    f32 dx;
-    s16 h[4];
-    V2 d;
+inline void ActZone::Load(ValueNode* n) {
     seq = fn_801D4888(n->GetValue(SequenceKey));
     draw = n->GetBool("should_draw", 1);
     lap = n->GetInt(LapKey, 0);
-    b = bound = fn_801399FC(n->FindChild(BoundsTag));
-    start = 2;
-    done = 0;
-    {
-        V2C e(b->pts[0].x - b->pts[2].x, b->pts[0].y - b->pts[2].y);
-        best = e.x * e.x + e.y * e.y;
-    }
-    for (int edge = 0; edge < 2; edge++) {
-        dy = b->pts[edge].y - b->pts[edge + 1].y;
-        dx = b->pts[edge].x - b->pts[edge + 1].x;
-        d.x = dx;
-        d.y = dy;
-        f32 len = d.x * d.x + d.y * d.y;
-        if (len > best) {
-            best = len;
-            start = edge;
-        }
-    }
-    fn_801E9DC4(h);
-    p = &pt[0].x;
-    for (k = 0; k < 2; k++) {
-        BoundPt* q = &bound->pts[(start + k) % 3];
-        p[0] = q->x;
-        p[1] = 0.0f;
-        p[2] = q->y;
-        fn_801E9E30(h, p);
-        p += 3;
-    }
+    bound = fn_801399FC(n->FindChild(BoundsTag));
 }
