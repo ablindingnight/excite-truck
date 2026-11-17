@@ -330,30 +330,6 @@ extern "C" s32 fn_802B8E50(const char* name);
 
 static inline s32 LoadTex(const char* name) { return *name ? fn_802B110C(fn_802B8E50, name) : -2; }
 
-struct TexEntry {
-    TexEntry(const char* n, int p) {
-        name = n;
-        tex = LoadTex(n);
-        if (tex == -2 && *n) {
-            fn_802E317C("XLFanEmitter: Can't find texture %s", n);
-        }
-        head = 0;
-        prio = p;
-    }
-    void SetName(const char* n) {
-        tex = -2;
-        tex = LoadTex(n);
-        name = n;
-        if (tex == -2 && *name) {
-            fn_802E317C("XLFanEmitter: Can't find texture %s", name);
-        }
-    }
-    const char* name;  // offset 0x0
-    s32 tex;           // offset 0x4
-    s32 prio;          // offset 0x8
-    Item* head;        // offset 0xC
-};
-
 struct Grid {
     Grid(s16 s) {
         int d = s * 2;
@@ -385,6 +361,32 @@ struct Grid {
     Cell<Item*>* cells;     // offset 0x4
     s32 n;                  // offset 0x8
     BufPool<Item*>* pool;      // offset 0xC
+};
+
+// Defined after Grid, SetName above the constructor: weak strings come out in reverse definition order of their
+// owners, and retail has SetName's, the constructor's, then BufPool<Item*>'s and Grid's.
+struct TexEntry {
+    void SetName(const char* n) {
+        tex = -2;
+        tex = LoadTex(n);
+        name = n;
+        if (tex == -2 && *name) {
+            fn_802E317C("XLFanEmitter: Can't find texture %s", name);
+        }
+    }
+    TexEntry(const char* n, int p) {
+        name = n;
+        tex = LoadTex(n);
+        if (tex == -2 && *n) {
+            fn_802E317C("XLFanEmitter: Can't find texture %s", n);
+        }
+        head = 0;
+        prio = p;
+    }
+    const char* name;  // offset 0x0
+    s32 tex;           // offset 0x4
+    s32 prio;          // offset 0x8
+    Item* head;        // offset 0xC
 };
 
 
