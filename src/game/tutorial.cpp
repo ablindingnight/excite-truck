@@ -387,9 +387,14 @@ public:
     virtual ~Challenge(void) {}
     virtual void Init(void);
     virtual void Shutdown(void);
+    // The end-of-challenge car loop's counter belongs to the virtual and is lent to Collect (as Start lends its
+    // counter to StartTokens): here it is Update's own local and is coloured last (r23); in the Stunt/Freestyle
+    // Updates, which expand this function, it is an inline's object and is coloured early. That is retail's
+    // "walker above the counter only in Challenge::Update" (FACTS 2026-11-17 fable-rules2).
     virtual void Update(void) {
+        int i;
         ChallengeBase::Update();
-        Collect();
+        Collect(i);
     }
     void StartTokens(int& i) {
         TutorialToken* t;
@@ -489,7 +494,7 @@ public:
     virtual void Camera(void);
     virtual int TimedOut(void) { return time > limit; }
 
-    void Collect(void);
+    void Collect(int& i);
 
     s32 needed;      // offset 0x80
     f32 limit;       // offset 0x84
@@ -1135,21 +1140,21 @@ struct Delta2 {
     f32 z;
 };
 
-inline void Challenge::Collect(void) {
+inline void Challenge::Collect(int& i) {
     if (!IsDone()) {
-        int i;
+        int n;
         TCar* car;
         TutorialToken* t;
         int j;
-        for (i = 0; i < fn_801B2F24(); i++) {
-            car = lbl_804348E8[i];
+        for (n = 0; n < fn_801B2F24(); n++) {
+            car = lbl_804348E8[n];
             if (car->model == 'PCAR') {
                 for (j = 0; j < tokens.count; j++) {
                     t = &tokens.data[j];
                     if (t->active) {
                         if (t->path) {
                             if (fn_80139B5C(car, t->path)) {
-                                if (!t->crossed[i]) {
+                                if (!t->crossed[n]) {
                                     Delta2 v;
                                     v.x = car->v118.x;
                                     v.z = car->v118.z;
@@ -1164,10 +1169,10 @@ inline void Challenge::Collect(void) {
                                         }
                                     }
                                 }
-                                t->crossed[i] = 1;
+                                t->crossed[n] = 1;
                                 break;
                             } else if (t->active) {
-                                t->crossed[i] = 0;
+                                t->crossed[n] = 0;
                             }
                         } else if (PSVECSquareDistance((const Vec*)t, (const Vec*)&car->frame.pos) < radius * radius) {
                             got++;
@@ -1189,7 +1194,6 @@ inline void Challenge::Collect(void) {
         }
     } else {
         if ((f32)__fabs(endTime) <= __float_epsilon[0]) {
-            int i;
             fn_80276DC8(0);
             for (i = 0; i < fn_801B2F24(); i++) {
                 fn_801B83A0()->vf94((RaceCarRec*)lbl_804348E8[i], i);
