@@ -14,13 +14,7 @@ void fn_801D0DFC(void);                // unregister
 
 #include "game/updatable.h"
 
-class Drawable : public Updatable {
-public:
-    Drawable(void);
-    virtual ~Drawable(void);
-    virtual void vf1C(s32 a) = 0;
-    virtual void vf20(s32 a) = 0;
-};
+#include "game/drawable.h"
 
 struct CarCurveSrc {
     u8 pad0[0x64];

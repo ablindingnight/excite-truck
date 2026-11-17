@@ -18,13 +18,7 @@ ModuleTag lbl_8055E8F0;
 s32 lbl_8055E8F8;
 s32 lbl_8055E8FC;
 
-class Drawable : public Updatable {
-public:
-    Drawable(void);
-    virtual ~Drawable(void);
-    virtual void vf1C(s32 a) = 0;
-    virtual void vf20(s32 a) = 0;
-};
+#include "game/drawable.h"
 
 Drawable::Drawable(void) { lbl_80438858[lbl_8055E8FC++] = this; }
 

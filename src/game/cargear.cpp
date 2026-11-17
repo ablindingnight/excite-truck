@@ -16,13 +16,7 @@ int abs(int x);
 
 #include "game/updatable.h"
 
-class Drawable : public Updatable {
-public:
-    Drawable(void);
-    virtual ~Drawable(void);
-    virtual void vf1C(s32 a) = 0;
-    virtual void vf20(s32 a) = 0;
-};
+#include "game/drawable.h"
 
 struct GearSrc {
     u8 pad0[0x2C];
