@@ -200,6 +200,9 @@ static inline f32 Clamp01(f32 v) {
 }
 
 // Odd smoothstep over [-1, 1]: 3t^2 - 2t^3 mirrored for negative t.
+extern "C" const f32 lbl_80563774;
+extern "C" const f32 lbl_80563778;
+
 static inline f32 Ease(f32 t) {
     if (t < lbl_80563770) {
         return lbl_80563770;
@@ -207,10 +210,14 @@ static inline f32 Ease(f32 t) {
     if (t > lbl_80563764) {
         return lbl_80563764;
     }
-    if (t > 0.0f) {
-        return -2.0f * t * t * t + 3.0f * t * t;
+    if (t > lbl_80563758) {
+        const f32 cubic = lbl_80563774 * t;
+        const f32 quadratic = lbl_80563778 * t;
+        return cubic * t * t + quadratic * t;
     }
-    return -2.0f * t * t * t - 3.0f * t * t;
+    const f32 cubic = lbl_80563774 * t;
+        const f32 quadratic = lbl_80563778 * t;
+        return cubic * t * t - quadratic * t;
 }
 
 // The body colour chooser of the car picker: a menu value widget (MenuWidgetBase at +0) that is also a menu
@@ -758,8 +765,8 @@ ColorPick::ColorPick(u32* rgb, s32* sel, CarUIScreen* scr) : MenuWidgetBase(1) {
     screen = scr;
     slot = lbl_8055F1F4++;
     art = fn_8023512C("caricona.art");
-    rightFlash = 0.0f;
-    leftFlash = 0.0f;
+    rightFlash = lbl_80563758;
+    leftFlash = lbl_80563758;
     label[0] = 0;
 }
 
@@ -1172,7 +1179,6 @@ int JoinLeaveWidget::Key(int key) {
 extern "C" {
 
 // .sdata2 constants owned by this unit (0x80563750-0x80563798), in address order.
-extern const double lbl_80563750 = 4503601774854144.0;
 extern const float lbl_80563758 = 0.0f;
 extern const float lbl_8056375C = 0.43f;
 extern const float lbl_80563760 = 0.37f;
