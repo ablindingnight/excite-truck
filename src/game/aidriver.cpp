@@ -48,9 +48,12 @@ void fn_8018ADA4(void* car, f32 v);
 
 
 class IDriver;
-class Arena {
+// The current game mode as fn_801B83A0 returns it: a view of gamemode.h's GameMode (destructor at 0x08). Merge
+// into GameMode once slot 0x94 is settled (gamemode.h has vf94(RaceCarRec*); tutorial's retail call passes two
+// arguments). Not ringchal's Arena. View name unproven.
+class CurrentMode {
 public:
-    virtual ~Arena(void);  // the current GameMode: slot 0 is its destructor
+    virtual ~CurrentMode(void);  // 0x08
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
@@ -109,7 +112,7 @@ public:
     virtual void vfE8(void);
     virtual IDriver* CreateDriver(void);  // offset 0xEC
 };
-extern "C" Arena* fn_801B83A0(void);
+extern "C" CurrentMode* fn_801B83A0(void);
 void* operator new(size_t size, const char* tag);
 
 struct AIGrid {

@@ -171,9 +171,12 @@ struct TCar {
     ValVec3 v118;  // offset 0x118
 };
 
-class Arena {
+// The current game mode as fn_801B83A0 returns it: a view of gamemode.h's GameMode (destructor at 0x08). Merge
+// into GameMode once slot 0x94 is settled (gamemode.h has vf94(RaceCarRec*); tutorial's retail call passes two
+// arguments). Not ringchal's Arena. View name unproven.
+class CurrentMode {
 public:
-    virtual ~Arena(void);  // the current GameMode: slot 0 is its destructor
+    virtual ~CurrentMode(void);  // 0x08
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
@@ -218,7 +221,7 @@ int fn_80160CE4(void);
 int fn_80161D50(void);
 void fn_8015857C(class StuntWatcher* w);  // remove stunt watcher
 void fn_8016D294(int a, int b, int c);
-Arena* fn_801B83A0(void);
+CurrentMode* fn_801B83A0(void);
 struct MenuState* fn_801E7E34(void);
 void fn_80230E90(int a);
 void fn_801796BC(int a);
