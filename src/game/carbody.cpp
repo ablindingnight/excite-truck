@@ -2689,9 +2689,7 @@ void fn_80186DE8(void) {
         rpm.x = rpm.x > 52.35988f ? rpm.x : 52.35988f;
         rpm.w = ground[0];
         c->pts[4] = rpm.Sol();
-        if (rpmT >= 9500.0f) {
-            out = 0.0f;
-        }
+        out = rpmT < 9500.0f ? out : 0.0f;
         c->v190 = CbSolVec4(steerK, out, brake, water[0]);
         bk2 = ((CarBody*)car)->f25E4;
         hb = 8.0f * hold;
