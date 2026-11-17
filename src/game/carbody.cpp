@@ -3673,10 +3673,11 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
     if (cur->boost) {
         f32 boost;
         if (teleport) {
-            boost = PkNorm(cur->boost, 0.0f, 255.0f);
+            boost = PkUnpack(cur->boost, 255.0f, 0.0f, 1.0f);
         } else {
-            boost = PkNorm(prev->boost, 0.0f, 255.0f);
-            boost = PkNorm(cur->boost, 0.0f, 255.0f);
+            v0 = PkUnpack(prev->boost, 255.0f, 0.0f, 1.0f);
+            v1 = PkUnpack(cur->boost, 255.0f, 0.0f, 1.0f);
+            boost = LerpT(t, v1, v0);
         }
     }
     f32 steer = cb->f25F0 * cb->f5B0;
