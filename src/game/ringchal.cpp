@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/mathutil.h"
 #include "game/phob.h"
 #include "game/pathset.h"
 #include "game/valuebinding.h"
@@ -226,13 +227,10 @@ static inline void StrCopyN(char* dst, const char* src, int len) {
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
-static inline f32 MinI(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxI(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 Unlerp(f32 a, f32 b, f32 x) {
-    return MaxI(MinI(1.0f, (x - a) / (b - a)), 0.0f);
+/* Helper name unproven */
+static inline f32 UnlerpClamped(f32 a, f32 b, f32 x) {
+    return MaxF(MinF(1.0f, (x - a) / (b - a)), 0.0f);
 }
-
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 
 
@@ -568,7 +566,7 @@ void RingResults::Update(int score, int rings, int bonus) {
         n = 0;
         if (bonus && start > 0.0f) {
             f32 now = lbl_8055E3C8;
-            f32 t = Unlerp(0.0f, 1.0f, now - start);
+            f32 t = UnlerpClamped(0.0f, 1.0f, now - start);
             n = Lerp(0.0f, 0.5f + bonus, t);
             shown = bonus - n;
         }
@@ -1202,7 +1200,7 @@ inline void Arena::Tally(void) {
         if (f34 < f30 && stats->data[k].done) {
             SetStat* st = &stats->data[k];
             f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (f30 - f34));
-            int n = Lerp(0.0f, 1.0f, Unlerp(lo, 0.25f + lo, Time() - st->time));
+            int n = Lerp(0.0f, 1.0f, UnlerpClamped(lo, 0.25f + lo, Time() - st->time));
             if (n) {
                 f34 += n;
                 GameSound* tally = sTally;
@@ -1248,7 +1246,7 @@ inline void Arena::Tally(void) {
                 break;
             }
             if (!NearZeroF(a)) {
-                f32 t = Unlerp(0.0f, b, lbl_8055E3C8 - stats->data[k].time);
+                f32 t = UnlerpClamped(0.0f, b, lbl_8055E3C8 - stats->data[k].time);
                 f32 v = Lerp(a, 0.0f, t);
                 GameSound* cheer = sLongCheer;
                 if (v != cheer->volume) {
@@ -1635,7 +1633,7 @@ inline void RingChalMaster::vf40(void) {
         } else if (!s->active) {
             f32 t = lbl_8055E3C8 - s->time;
             if (t < 0.25f) {
-                f32 a = Lerp(1.0f, 0.0f, Unlerp(0.0f, 0.25f, t));
+                f32 a = Lerp(1.0f, 0.0f, UnlerpClamped(0.0f, 0.25f, t));
                 if (a > 0.01f) {
                     int off;
                     int j;
@@ -2191,7 +2189,7 @@ inline void RingChalMaster::vf4C(int view) const {
 
 inline void ArenaTimer::Draw(ILayout* l) const {
     char buf[0x20];
-    f32 shown = MaxI(0.0f, t);
+    f32 shown = MaxF(0.0f, t);
     fn_80130978(buf, 0x20, shown);
     fn_8014784C(l, "stop_watch_art", "stop_watch_artset", 0);
     fn_801475D0(l, "timer", "%s", buf);
