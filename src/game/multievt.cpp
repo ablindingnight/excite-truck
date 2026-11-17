@@ -683,17 +683,22 @@ static inline int EveIndex(EventInfo* ev) {
 }
 
 // Fills the course list with the events at tracks in environment env.
+static inline EvPair& PairAtByte(EvPairs* pairs, int offset) { return *(EvPair*)((u8*)pairs->items + offset); }
+
 inline void EvPicker::SetEnv(EvPairs** pairs, const char* env_) {
     EvPicker* p = this;
-    EventInfo* ev;
     int i;
+    EventInfo* ev;
+    int offset;
     int j;
     p->env = env_;
     p->cur = 0;
     p->count = 0;
-    for (i = 0; i < (*pairs)->count; i++) {
-        if (!strcasecmp(GetTrackEnviron((*pairs)->items[i].track), p->env)) {
-            ev = (*pairs)->items[i].ev;
+    i = 0;
+    offset = 0;
+    for (; i < (*pairs)->count; offset += sizeof(EvPair), ++i) {
+        if (!strcasecmp(GetTrackEnviron(PairAtByte(*pairs, offset).track), p->env)) {
+            ev = PairAtByte(*pairs, offset).ev;
             p->ents[p->count].track = ev->track;
             p->ents[p->count].eve = EveIndex(ev);
             j = FindUnlock(ev, lbl_8055F28C);
