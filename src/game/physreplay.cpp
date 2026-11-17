@@ -32,7 +32,7 @@ extern "C" PacketHeap* fn_802E4CA4(s32 size);
 class ReplayObj {
 public:
     virtual void vf08(void) = 0;
-    virtual void vf0C(void) = 0;
+    virtual ~ReplayObj(void) {}  // 0x0C: the RigidBody family's destructor (Init at 0x08); two slots on the PC Itanium ABI
     virtual void vf10(void) = 0;
     virtual void vf14(void) = 0;
     virtual void vf18(void) = 0;

@@ -1447,7 +1447,7 @@ void fn_801AD5F0(void) { fn_801ACF94(); }
 class ObstacleSink {
 public:
     virtual void v08(void);
-    virtual void v0C(void);
+    virtual ~ObstacleSink(void) {}  // 0x0C: Obstacle's destructor (Init at 0x08); two slots on the PC Itanium ABI
     virtual void v10(void);
     virtual void v14(void);
     virtual void v18(void);

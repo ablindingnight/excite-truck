@@ -485,7 +485,7 @@ typedef struct TextBox {
 
 class PanelWidget {
 public:
-    virtual void vf08(void);
+    virtual ~PanelWidget(void) {}  // 0x08: the layout's destructor (ILayout); two slots on the PC Itanium ABI
     virtual TextBox *FindText(const char *name);
     virtual void vf10(void);
     virtual PanelBox *FindPane(const char *name);
