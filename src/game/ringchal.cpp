@@ -2064,7 +2064,6 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
 #define ALPHA(c, v) ((c).all = ((int)(255.0f * (v)) << 24) | ((c).all & 0xFFFFFF))
 
 // The set list and the ring graphics. Everything but the score overlay; the stack puts its locals in rising order.
-#pragma dont_inline on
 inline void RingChalMaster::DrawRings(void) const {
     TextElem* setScore;
     Box* setIcon;
@@ -2285,7 +2284,6 @@ inline void RingChalMaster::DrawRings(void) const {
         }
     }
 }
-#pragma dont_inline reset
 
 inline void RingChalMaster::vf4C(int view) const {
     {
