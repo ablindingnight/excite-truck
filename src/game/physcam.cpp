@@ -8,6 +8,7 @@
 #include "game/camrect.h"
 #include "game/camrec.h"
 #include "game/idealline.h"
+#include "game/deity.h"
 #include "game/math_types.h"
 #include <string.h>
 
@@ -312,16 +313,6 @@ int fn_801B526C(void);
 PathPos fn_80136414(u8* track, s32 node);  // idealline: returns the ILPos by value
 s32 fn_801363A0(u8* track, u8* cur);
 
-// The car's track controller (slot 0x18 returns its track).
-class CamCarCtl {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual u8* Track(void);
-};
-
 // find_best_region: the camera record (index into lbl_8049EDC8) whose region suits `car` best for
 // camera group `type` (-1 = any); regions that do not apply still win over nothing if their camera
 // is enabled.
@@ -334,7 +325,7 @@ int find_best_region(u8* car, int type) {
     int bestIdx = -1;
     int altIdx = -1;
     if (lbl_8055F564) {
-        u8* track = ((CamCarCtl*)PTR(car, 0x270))->Track();
+        u8* track = (u8*)((DeityCar*)PTR(car, 0x270))->Ideal();
         f32* heading = &lbl_8055F568;
         if (fn_801B526C()) {
             const PathPos& pos = fn_80136414(track, S32(car, 0x2678));
@@ -546,7 +537,7 @@ static inline void UpdateFixedTvCamera(u8* p, f32 fov, TvCamera* tv) {
 
 void fn_80271624(int mode, u8* p) {
     CamRec* r = (CamRec*)p;
-    u8* track = ((CamCarCtl*)PTR(r->car, 0x270))->Track();
+    u8* track = (u8*)((DeityCar*)PTR(r->car, 0x270))->Ideal();
     int group;
     switch (PitMode(track)) {
     case 1:
@@ -1143,15 +1134,6 @@ int fn_80272C24(f32 x, f32 a, f32 b, f32 m) {
     return x >= a && x <= b;
 }
 
-class CarCtl {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual u8* Track(void);  // 0x18
-};
-
 
 // How strongly `r` applies to `car` (0..1 into *weight); returns whether the region is usable.
 }  // extern "C"
@@ -1166,7 +1148,7 @@ int CamRegion::Weight(u8* car, f32* weight, int type) {
     }
     int ok = 1;
     if (lbl_8055F564) {
-        f32 wrap = F32(PTR(((CarCtl*)PTR(car, 0x270))->Track(), 0x2C), 0x8);
+        f32 wrap = F32(PTR((u8*)((DeityCar*)PTR(car, 0x270))->Ideal(), 0x2C), 0x8);
         if (fn_80272C24(lbl_8055F568, r->lo1, r->hi1, wrap) ||
             (r->dual && fn_80272C24(lbl_8055F568, r->lo2, r->hi2, wrap))) {
             *weight = 1.0f;
