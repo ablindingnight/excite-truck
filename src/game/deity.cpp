@@ -1308,7 +1308,7 @@ void fn_801B3284(void) {}
 
 }  // extern "C"
 
-u8 DeityCar::Held(void) { return *(u8*)((u8*)this + 0x2C); }
+int DeityCar::Held(void) { return *(u8*)((u8*)this + 0x2C); }
 
 int DeityCar::v14(void) { return 1; }
 

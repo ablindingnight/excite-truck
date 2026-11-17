@@ -87,7 +87,7 @@ public:
     virtual void v2C(void* a, void* b, s32* out);  // 0x2C
     virtual void Hold(int who);           // 0x30
     virtual void Release(void);           // 0x34
-    virtual u8 Held(void);                // 0x38
+    virtual int Held(void);               // 0x38 (a u8 flag; callers read r3 whole)
     virtual ~DeityCar(void);              // 0x3C
     virtual DState* State2(void);         // 0x40
     void SetRank(s32 r) {

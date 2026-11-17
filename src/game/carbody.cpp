@@ -10,6 +10,8 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
+#include "game/deity.h"
+#include "game/idealline.h"
 #include "game/rmtx.h"
 #include "game/shapes.h"
 #include "game/gamedb.h"
@@ -858,23 +860,6 @@ void fn_801836DC(void) {}
 
 }  // extern "C"
 
-class CarHost {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual int v14(void);
-    virtual u8* Info(void);  // 0x18
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void Unimpair(void);   // 0x34
-    virtual int IsImpaired(void);  // 0x38
-};
-
 static inline void Scale(RVec3* o, const RVec3* a, f32 k) {
     o->x = a->x * k;
     o->y = a->y * k;
@@ -967,24 +952,6 @@ void CarBody::Reset(void) {
 }
 
 
-// The AI line follower of a car (deity.cpp).
-class IdealFollower {
-public:
-    void ClearFlag(void);
-    u8 pad0[0xC];
-    s32 fC;  // offset 0xC
-};
-
-// A car's driver as seen by the race (slot 0x18: its line follower).
-class CbDriver {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual IdealFollower* Follower(void);  // 0x18
-};
-
 // The body's own virtuals (CollVolume/RigidBody slots); 0x54 places it at a pose.
 class CbBodyV {
 public:
@@ -1034,7 +1001,7 @@ struct CbSprings {
 extern "C" {
 void fn_8018BE54(u8* p, f32 s);
 void fn_8018B0D0(u8* p, u32 v);
-CbDriver* fn_801B2ED0(int id);
+DeityCar* fn_801B2ED0(int id);
 void fn_801B8100(u8* pose, s32 car, s32 player);
 void fn_80189C64(u8* p);
 void fn_801BDA74(s32 id, u8* mass);
@@ -1193,8 +1160,8 @@ void fn_801838C8(u8* p) {
         U8(w, 0x6C) = 0;
         S32(w, 0x70) = 0;
     }
-    IdealFollower* f = fn_801B2ED0(cb->index)->Follower();
-    f->fC = 0;
+    IdealFollower* f = fn_801B2ED0(cb->index)->Ideal();
+    f->il.mode = 0;
     fn_801B8100(p + 0x274, cb->index, cb->f1F0);
     ((CbBodyV*)p)->SetPose(p + 0x274);
     f->ClearFlag();
@@ -1566,7 +1533,7 @@ void fn_80183E7C(u8* p) {
     if (!NearZero(cb->f2650)) {
         still = 0;
     }
-    if (still && (U32(p, 0x10) != 'PCAR' || ((CarHost*)((u8*&)cb->src))->v14())) {
+    if (still && (U32(p, 0x10) != 'PCAR' || ((DeityCar*)cb->src)->v14())) {
         if (cb->airborne <= 2 && cb->mtx.rot.y.y < 0.35f) {
             if (cb->airborne == 0 || !(AbsNarrow(cb->f2614) <= __float_epsilon[0]) || cb->mtx.rot.y.y < 0.0f) {
                 f32 t = cb->f2614 + 0.016683351f;
@@ -2767,7 +2734,7 @@ void CarBody::vf20(void) {
     RVec3 f;
     ((CollVolume*)p)->CollVolume::vf20();
     if (*(CbPart**)(p + 0x257C)) {
-        (*(CbPart**)(p + 0x257C))->Update(((CarHost*)PTR(p, 0x270))->IsImpaired());
+        (*(CbPart**)(p + 0x257C))->Update(((DeityCar*)((CarBody*)p)->src)->Held());
     }
     if (*(CbFx**)(p + 0x2580)) {
         (*(CbFx**)(p + 0x2580))->Update();
@@ -2841,7 +2808,7 @@ void CarBody::vf28(u8* buf) {
     }
     ((CarDrawState*)pose)->hint = *(s16*)&this->hint;
     u16 flags = 0;
-    if (((CarHost*)((u8*&)this->src))->IsImpaired()) {
+    if (((DeityCar*)this->src)->Held()) {
         flags |= 0x40;
     }
     if (!NearZero(this->f2690)) {
@@ -2943,7 +2910,7 @@ void CarBody::vf28(u8* buf) {
         w += 0x74;
         o += 0x6C;
     }
-    ((CarDrawState*)m)->lapDist = F32(((CarHost*)((u8*&)this->src))->Info(), 0x48);
+    ((CarDrawState*)m)->lapDist = ((DeityCar*)this->src)->Ideal()->travel;
     ((CarDrawState*)m)->f2CC = this->f26CC;
     ((CarDrawState*)m)->f2D0 = this->f5E4;
     ((CarDrawState*)m)->f2D8 = this->f26D4;
@@ -3305,9 +3272,9 @@ void fn_8018A180(u8* p) {
     if (cb->f328) {
         fn_80279B28(cb->f328, (u8*)&cb->state);
         fn_8018F2C0(p, (u8*)&cb->state);
-        if (cb->state.x298 < 9 && ((CarHost*)((u8*&)cb->src))->IsImpaired()) {
+        if (cb->state.x298 < 9 && ((DeityCar*)cb->src)->Held()) {
             fn_802E30C8("car: unimpairing car %d", cb->index);
-            ((CarHost*)((u8*&)cb->src))->Unimpair();
+            ((DeityCar*)cb->src)->Release();
             fn_8018AF04(p);
         }
     }
