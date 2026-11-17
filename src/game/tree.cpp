@@ -407,10 +407,9 @@ static inline void SetV(RVec3& v, f32 x, f32 y, f32 z) {
 }
 
 static inline void ReadCyl(TreeType* t, ValueNode* n, RVec3& c) {
-    ValVec3 p1 = n->GetVec3("cyl_p1");
-    ValVec3 p2 = n->GetVec3("cyl_p2");
-    f32 firstX = p1.x;
-    SetV(c, MidF(firstX, p2.x), MidF(p1.y, p2.y), MidF(p1.z, p2.z));
+    const ValVec3 p1 = n->GetVec3("cyl_p1");
+    const ValVec3 p2 = n->GetVec3("cyl_p2");
+    SetV(c, MidF(p1.x, p2.x), MidF(p1.y, p2.y), MidF(p1.z, p2.z));
     t->cyl.center = c;
     t->cyl.axis.x = p1.x - p2.x;
     t->cyl.axis.y = p1.y - p2.y;

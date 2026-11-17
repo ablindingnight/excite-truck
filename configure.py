@@ -1254,7 +1254,7 @@ config.libs.append(
             Object(NonMatching, "game/flipbook.cpp"),
             Object(Matching, "game/roadopac.cpp", extra_cflags=["-opt nopropagation"]),
             Object(Matching, "game/treehit.cpp"),
-            Object(NonMatching, "game/tree.cpp"),
+            Object(Matching, "game/tree.cpp"),
             Object(Matching, "game/fxseq.cpp"),
             Object(Matching, "game/shadowvol.cpp"),
             Object(Matching, "game/fire.cpp"),
