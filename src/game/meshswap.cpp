@@ -1,43 +1,34 @@
 // Car mesh fix-up (0x801D1C68-0x801D2008): byte-swaps a loaded 'CMsh' resource's vertex, face,
 // strip and bone tables and turns their file offsets into pointers. Names are guesses.
 #include "game/common.h"
-
-static inline void Swap4(void* v) {
-    u8* p = (u8*)v;
-    s8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
+#include "game/byteswap.h"
 
 struct MeshVert {
     void Swap(void) {
-        Swap4(&w[0]);
-        Swap4(&w[1]);
-        Swap4(&w[2]);
-        Swap4(&w[3]);
-        Swap4(&w[4]);
+        SwapWord(&w[0]);
+        SwapWord(&w[1]);
+        SwapWord(&w[2]);
+        SwapWord(&w[3]);
+        SwapWord(&w[4]);
     }
     u32 w[5];
 };
 
 struct MeshFace {
     void Swap(void) {
-        Swap4(&w[0]);
-        Swap4(&w[1]);
-        Swap4(&w[2]);
-        Swap4(&w[3]);
+        SwapWord(&w[0]);
+        SwapWord(&w[1]);
+        SwapWord(&w[2]);
+        SwapWord(&w[3]);
     }
     u32 w[4];
 };
 
 struct MeshStrip {
     void Swap(void) {
-        Swap4(&w[0]);
-        Swap4(&w[1]);
-        Swap4(&vert);
+        SwapWord(&w[0]);
+        SwapWord(&w[1]);
+        SwapWord(&vert);
     }
     u32 w[2];
     MeshVert* vert;  // offset 0x8
@@ -45,13 +36,13 @@ struct MeshStrip {
 
 struct MeshBone {
     void Swap(void) {
-        Swap4(&w[0]);
-        Swap4(&w[1]);
-        Swap4(&w[2]);
-        Swap4(&w[3]);
-        Swap4(&w[4]);
-        Swap4(&w[5]);
-        Swap4(&w[6]);
+        SwapWord(&w[0]);
+        SwapWord(&w[1]);
+        SwapWord(&w[2]);
+        SwapWord(&w[3]);
+        SwapWord(&w[4]);
+        SwapWord(&w[5]);
+        SwapWord(&w[6]);
     }
     u32 w[7];
 };
