@@ -89,6 +89,7 @@ struct BoundSet {
 };
 
 #include "game/tableref.h"
+#include "game/mathutil.h"
 
 ModuleTag lbl_8055E130;
 ValueTable* lbl_8055E138;  // external bound table
@@ -111,8 +112,6 @@ static inline void Perp(V2* v) {
     v->x = x;
 }
 
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 extern "C" {
 

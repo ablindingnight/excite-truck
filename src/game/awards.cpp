@@ -13,6 +13,7 @@
 #include "game/highscore.h"
 #include "game/gart.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -663,8 +664,6 @@ const char* fn_801CE6CC(FixedStr<20>* s);
 Cmd fn_801CE6D0(const char* name, s32* v);
 extern const Cmd lbl_802FAA40;  // list terminator
 
-static inline f32 MinF(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 // Records animation update: fills the texts once, then plays the bar in, pauses it at the new place and
 // grows the record rows.
@@ -763,8 +762,8 @@ void fn_801CBD48(Results* r, AwardsMgr* m) {
         }
         break;
     case 2: {
-        r->t = MinF(0.08341675f + r->t, 1.0f);
-        if (AbsF(r->t - 1.0f) <= __float_epsilon[0]) {
+        r->t = MinFRev(0.08341675f + r->t, 1.0f);
+        if (FAbs(r->t - 1.0f) <= __float_epsilon[0]) {
             r->state = 3;
         }
         break;
@@ -1195,8 +1194,6 @@ void fn_801CD7BC(int car, int valid, f32 t) {
 
 // Live-update pop-up draw: the head of the queue slides in from the right for its first quarter second and
 // out for its last, showing the stat's label, its value (the art for the difficulty) and the title.
-static inline f32 AwLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 AwUnlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 
 static inline Popup* NextPopup(AwardsMgr* m, int car, f32 dt) {
     while (m->q.head) {
@@ -1248,10 +1245,10 @@ void fn_801CD970(int car) {
     }
     f32 t = p->time < 0.25f ? p->time : 3.0f - p->time;
     f32 out = box->w + (640.0f - (box->pos.x + box->w));
-    f32 k = AwUnlerp(t, 0.0f, 0.25f);
+    f32 k = Unlerp(t, 0.0f, 0.25f);
     k = 1.0f < k ? 1.0f : k;
     k = k > 0.0f ? k : 0.0f;
-    f32 slide = AwLerp(out, 0.0f, k);
+    f32 slide = Lerp(out, 0.0f, k);
     if (box) {
         GartElem b;
         b = *box;

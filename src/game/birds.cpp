@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -291,32 +292,27 @@ s32 fn_802A8A34(BoidVec* v) { return v->n; }
 
 Boid* fn_802A8A3C(BoidVec* v, int i) { return &v->data[i]; }
 
-static inline f32 Lerp( f32 t,f32 a, f32 b) { return a + t * (b - a); }
-static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 static inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
     r = r > 0.0f ? r : 0.0f;
     return r;
 }
 
-// Helper names unproven: vector operations written as inlines, as the target evaluates them.
-static inline f32 MDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void MulM(const f32* m, const RVec3* v, RVec3* out) {
     if (out == v) {
-        f32 x = MDot3(v->x, m[0], v->y, m[3], v->z, m[6]);
-        f32 y = MDot3(v->x, m[1], v->y, m[4], v->z, m[7]);
-        f32 z = MDot3(v->x, m[2], v->y, m[5], v->z, m[8]);
+        f32 x = Dot3(v->x, m[0], v->y, m[3], v->z, m[6]);
+        f32 y = Dot3(v->x, m[1], v->y, m[4], v->z, m[7]);
+        f32 z = Dot3(v->x, m[2], v->y, m[5], v->z, m[8]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = MDot3(v->x, m[0], v->y, m[3], v->z, m[6]);
-        out->y = MDot3(v->x, m[1], v->y, m[4], v->z, m[7]);
-        out->z = MDot3(v->x, m[2], v->y, m[5], v->z, m[8]);
+        out->x = Dot3(v->x, m[0], v->y, m[3], v->z, m[6]);
+        out->y = Dot3(v->x, m[1], v->y, m[4], v->z, m[7]);
+        out->z = Dot3(v->x, m[2], v->y, m[5], v->z, m[8]);
     }
 }
-static inline f32 Sq(f32 x) { return x * x; }
-static inline f32 DegToRad_hm(f32 d) { return 0.017453292f * d; }  /* Helper name unproven */
+  /* Helper name unproven */
 void fn_802A8A4C(Boid* b, const RVec3* target) {
     f32 dir[2];
     dir[0] = b->vel.x;
@@ -348,7 +344,7 @@ void fn_802A8A4C(Boid* b, const RVec3* target) {
     if (d2 > half * half && dot > (f32)cos(0.05235988f)) {
         steer = 0.0f;
     }
-    steer = lbl_8055F8D4 * (Lerp( Clamp01(Unlerp(d2, Sq(b->radius / 3.0f), Sq(b->radius))),0.0f, steer) * (DegToRad_hm(b->turn)));
+    steer = lbl_8055F8D4 * (LerpT( Clamp01(Unlerp(d2, Sq(b->radius / 3.0f), Sq(b->radius))),0.0f, steer) * (DegToRad(b->turn)));
     f32 c = cos(steer);
     f32 s = sin(steer);
     f32 m[9];
@@ -363,7 +359,7 @@ void fn_802A8A4C(Boid* b, const RVec3* target) {
     m[8] = c;
     MulM(m, &b->vel, &b->vel);
     PSVECNormalize((const Vec*)&b->vel, (Vec*)&b->vel);
-    f32 spd = Lerp( Clamp01(Unlerp(d2, 0.0f, Sq(b->radius))),b->speedMin, b->speedMax);
+    f32 spd = LerpT( Clamp01(Unlerp(d2, 0.0f, Sq(b->radius))),b->speedMin, b->speedMax);
     b->vel.x *= spd;
     b->vel.y *= spd;
     b->vel.z *= spd;

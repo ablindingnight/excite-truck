@@ -13,6 +13,7 @@
 #include "game/rigid.h"
 #include "game/shapes.h"
 #include "game/carbody.h"
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -93,7 +94,6 @@ struct BVec2 {
     f32 z;
 };
 
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 struct BPathPos {
     BPathPos(const BPathPos& o) {
         pt = o.pt;
@@ -480,7 +480,6 @@ void Ball::Update(void) {
     RigidBody::Update();
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 inline void Rotate(RVec3* out, const RMtx* m, const RVec3* v) {
     if (out == v) {

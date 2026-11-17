@@ -6,6 +6,7 @@
 #include <revolution/MTX/vec.h>
 #include "macros.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
@@ -606,7 +607,6 @@ void fn_802AD414(ArtAnim* a, f32 t) {
     }
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
 static inline f32 Ease(f32 x) {
@@ -622,20 +622,18 @@ static inline f32 Ease(f32 x) {
 }
 
 // out = in * m (row vector; m's first three rows), safe when out aliases in.
-/* Helper name unproven */
-static inline f32 ArtDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void MulVec(f32* out, const f32* in, f32 m[4][3]) {
     if (out == in) {
-        f32 x = ArtDot3(in[0], m[0][0], in[1], m[1][0], in[2], m[2][0]);
-        f32 y = ArtDot3(in[0], m[0][1], in[1], m[1][1], in[2], m[2][1]);
-        f32 z = ArtDot3(in[0], m[0][2], in[1], m[1][2], in[2], m[2][2]);
+        f32 x = Dot3(in[0], m[0][0], in[1], m[1][0], in[2], m[2][0]);
+        f32 y = Dot3(in[0], m[0][1], in[1], m[1][1], in[2], m[2][1]);
+        f32 z = Dot3(in[0], m[0][2], in[1], m[1][2], in[2], m[2][2]);
         out[0] = x;
         out[1] = y;
         out[2] = z;
     } else {
-        out[0] = ArtDot3(in[0], m[0][0], in[1], m[1][0], in[2], m[2][0]);
-        out[1] = ArtDot3(in[0], m[0][1], in[1], m[1][1], in[2], m[2][1]);
-        out[2] = ArtDot3(in[0], m[0][2], in[1], m[1][2], in[2], m[2][2]);
+        out[0] = Dot3(in[0], m[0][0], in[1], m[1][0], in[2], m[2][0]);
+        out[1] = Dot3(in[0], m[0][1], in[1], m[1][1], in[2], m[2][1]);
+        out[2] = Dot3(in[0], m[0][2], in[1], m[1][2], in[2], m[2][2]);
     }
 }
 

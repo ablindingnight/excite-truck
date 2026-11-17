@@ -81,7 +81,6 @@ static inline s32 NoModel(void) { return -1; }
 struct TextElem;
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void StopSound(GameSound* s) {
     if (s) {
@@ -117,7 +116,6 @@ static inline f32 Clamp01(f32 x) {
 
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Layout elements (see ovlayout.cpp).
 struct BoxElem {
@@ -1094,6 +1092,7 @@ public:
 
 #include "game/settings.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 extern "C" {
 f32 fn_80204CFC(const char* name);  // tuning value
@@ -2125,7 +2124,6 @@ inline void DrawBonanza(Coins* co, CoinCar* car) {
 }  // namespace
 
 #pragma inline_depth(1)
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void BetaCar::DrawHud(ILayout* l, int view) const {
     RaceCarRec* rc = fn_8017960C(id);
@@ -2200,16 +2198,16 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
             const char* s;
             s = 0;
             a = 0.0f;
-            if (!(AbsF(flash[3]) <= __float_epsilon[0])) {
+            if (!(FAbs(flash[3]) <= __float_epsilon[0])) {
                 a = flash[3];
                 s = sThrown.Get();
-            } else if (!(AbsF(flash[2]) <= __float_epsilon[0])) {
+            } else if (!(FAbs(flash[2]) <= __float_epsilon[0])) {
                 a = flash[2];
                 s = sTurbo.Get();
-            } else if (!(AbsF(flash[1]) <= __float_epsilon[0])) {
+            } else if (!(FAbs(flash[1]) <= __float_epsilon[0])) {
                 a = flash[1];
                 s = sNice.Get();
-            } else if (!(AbsF(flash[4]) <= __float_epsilon[0])) {
+            } else if (!(FAbs(flash[4]) <= __float_epsilon[0])) {
                 a = flash[4];
                 s = sSpin.Get();
             }
@@ -2332,8 +2330,6 @@ void fn_801CB648(int id, int done, f32 t);
 void fn_801CB5DC(int id, s32 total, s32 grade);
 }
 
-// Helper name unproven: the square that keeps 1.0f in the lower register.
-static inline f32 Sq(f32 v) { return v * v; }
 
 void BetaCar::DrawBonusStar(ILayout* l, int n) {
     f32 left = master->timer.limit - master->timer.now;
@@ -4343,7 +4339,7 @@ inline void BetaMaster::b2Body(StuntEvt* e, int car) {
             if (h == e->Id()) {
                 t = *(Pickup**)((u8*)stars.a.data + off);
                 if ((f32)__fabs(t->respawn) <= __float_epsilon[0] &&
-                    AbsF(lbl_804348E8[car]->f2690) <= __float_epsilon[0] && !fn_80161BB8()) {
+                    FAbs(lbl_804348E8[car]->f2690) <= __float_epsilon[0] && !fn_80161BB8()) {
                     t->hit[car] = 1;
                 }
             }

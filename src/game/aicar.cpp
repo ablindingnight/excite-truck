@@ -13,6 +13,7 @@
 #include "game/rigid.h"
 #include "macros.h"
 #include <string.h>
+#include "game/mathutil.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -281,14 +282,10 @@ struct AICarLink {
 
 // Helpers unproven (names and existence): the forms that keep retail's unfolded identities, single constant loads
 // and operand order where a plain literal does not.
-static inline f32 AiUnit(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }
 static inline f32 AiRamp(f32 v, f32 lo, f32 range) { return (v - lo) / range; }
 static inline f32 AiSpan(f32 lo, f32 hi) { return hi - lo; }
 static inline f32 AiAdd(f32 a, f32 b) { return a + b; }
-static inline f32 AiMul(f32 a, f32 b) { return a * b; }
 static inline void AiScale(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
-static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 static inline f32 Clamp01(f32 x) {
     x = 1.0f < x ? 1.0f : x;
@@ -1113,8 +1110,8 @@ void fn_80194C4C(u8* d, u8* out, f32 t) {
     f32 speed = fn_80134C1C();
     if (fn_801769A8() & 0x400) {
         f32 now = lbl_8055E3C8;
-        f32 k = Clamp01(AiUnit(now - fn_801B3064(), 0.0f, 7.0f));
-        speed = LerpF(0.0f, speed, k);
+        f32 k = Clamp01(Unlerp(now - fn_801B3064(), 0.0f, 7.0f));
+        speed = Lerp(0.0f, speed, k);
     }
     if (S32(g, 0x30) == 0) {
         o->speed = speed;
@@ -1177,9 +1174,9 @@ extern "C" void fn_80137788(Pair* p, int car, V2* out);
 
 static inline V2 LerpV2(const V2& a, const V2& b, f32 t) {
     V2 r;
-    r.x = LerpF(a.x, b.x, t);
+    r.x = Lerp(a.x, b.x, t);
     f32 fromY = a.y;
-    r.y = LerpF(fromY, b.y, t);
+    r.y = Lerp(fromY, b.y, t);
     return r;
 }
 
@@ -1206,14 +1203,14 @@ static inline void LineAhead(u8* d, f32 ahead, V2* pos, f32* speed, f32* height)
             *pos = LerpV2(pa, pb, (at - F32(d, 0x1D0)) / 1.5f);
         }
         if (height) {
-            f32 ha = LerpF(a.seg->height, a.seg->next->height, a.t);
-            f32 hb = LerpF(b.seg->height, b.seg->next->height, b.t);
+            f32 ha = Lerp(a.seg->height, a.seg->next->height, a.t);
+            f32 hb = Lerp(b.seg->height, b.seg->next->height, b.t);
             *height = ha + ((at - F32(d, 0x1D0)) / 1.5f) * (hb - ha);
         }
     } else if (height) {
         ILPos b;
         fn_80135B9C((LineFollower*)(d + 0x19C), ahead, pos, 0, speed, &b);
-        *height = LerpF(b.seg->height, b.seg->next->height, b.t);
+        *height = Lerp(b.seg->height, b.seg->next->height, b.t);
     } else {
         fn_80135B9C((LineFollower*)(d + 0x19C), ahead, pos, 0, speed, 0);
     }
@@ -1232,7 +1229,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     u8* prm = PTR(d, 0x2C8);
     ILPos il;
     fn_80135B9C((LineFollower*)PTR(d, 0x164), F32(prm, 0x70) + F32(prm, 0x6C) * F32(d, 0x270), 0, 0, 0, &il);
-    F32(out, 0xC) = F32(d, 0x2F0) * fn_801931AC(LerpF(il.seg->unk24, il.seg->next->unk24, il.t), F32(prm, 0x60),
+    F32(out, 0xC) = F32(d, 0x2F0) * fn_801931AC(Lerp(il.seg->unk24, il.seg->next->unk24, il.t), F32(prm, 0x60),
                                                  F32(prm, 0x64), F32(PTR(PTR(d, 0x164), 0x2C), 0x14));
     f32 ahead = F32(out, 0xC) * F32(d, 0x270);
     ahead = F32(PTR(d, 0x2C8), 0x68) > ahead ? F32(PTR(d, 0x2C8), 0x68) : ahead;
@@ -1245,7 +1242,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     if (U8(d, 0x2A6)) {
         f32 st = F32(d, 0x1EC);
         f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + 10.0f) - st));
-        F32(out, 0x8) = F32(out, 0x8) * LerpF(1.0f, 0.8f, LerpF(0.0f, 1.0f, k));
+        F32(out, 0x8) = F32(out, 0x8) * Lerp(1.0f, 0.8f, Lerp(0.0f, 1.0f, k));
     }
     f32 side = fn_801948B0(d, t, 0);
     F32(out, 0x0) += F32(d, 0x58) * side;
@@ -1253,7 +1250,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     if (S32(d, 0x268) == 3) {
         f32 st = F32(d, 0x1DC);
         f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + 12.0f) - st));
-        F32(out, 0x8) = F32(out, 0x8) * LerpF(1.0f, 0.7f, k);
+        F32(out, 0x8) = F32(out, 0x8) * Lerp(1.0f, 0.7f, k);
     }
     int chase = (lbl_8055D430 & 1) && (lbl_8055D430 & 0x20);
     if (chase) {
@@ -1313,12 +1310,12 @@ void fn_80195654(u8* d, u8* out) {
         u8* b = PTR(d, 0x16C);
         u8* an = PTR(a, 0x14);
         u8* bn = PTR(b, 0x14);
-        f32 va = LerpF(F32(a, 0x24), F32(an, 0x24), F32(d, 0x1A4));
-        f32 vb = LerpF(F32(b, 0x24), F32(bn, 0x24), F32(d, 0x170));
-        t = LerpF(vb, va, k);
+        f32 va = Lerp(F32(a, 0x24), F32(an, 0x24), F32(d, 0x1A4));
+        f32 vb = Lerp(F32(b, 0x24), F32(bn, 0x24), F32(d, 0x170));
+        t = Lerp(vb, va, k);
     } else {
         u8* a = PTR(d, 0x1A0);
-        t = LerpF(F32(a, 0x24), F32(PTR(a, 0x14), 0x24), F32(d, 0x1A4));
+        t = Lerp(F32(a, 0x24), F32(PTR(a, 0x14), 0x24), F32(d, 0x1A4));
     }
     if (S32(d, 0x268) == 1) {
         fn_80194C4C(d, out, t);
@@ -1634,8 +1631,6 @@ void fn_801961FC(u8* d) {
     }
 }
 
-static inline double AbsD(double v) { return __fabs(v); }
-static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 void fn_80196250(f32* outA, f32* outB, s32* sign, f32 a, f32 b, f32 c) {
     f32 x = (1.3333334f + (a - b)) / c;
@@ -1725,8 +1720,6 @@ void fn_801EA18C(RVec3* pos, const RVec3* dir, int a);
 void fn_8018AE2C(u8* car, f32 pitch);
 void fn_8018AE34(u8* car, f32 roll);
 
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 // Steers the truck's attitude: in the air level it against up; on the ground pitch from height and speed.
 void fn_801965AC(u8* d) {
@@ -1754,7 +1747,7 @@ void fn_801965AC(u8* d) {
         f32 range = 1.0f;
         f32 k = MinF(1.0f, AiRamp((f32)__fabs(F32(d, 0x23C)), 0.0f, range));
         k = MaxF(k, 0.0f);
-        f32 a = gain * (F32(CAR(d), 0x58) - LerpF(0.7f, -0.4f, k));
+        f32 a = gain * (F32(CAR(d), 0x58) - Lerp(0.7f, -0.4f, k));
         a = MinF(1.0f, a);
         fn_8018AE2C(CAR(d), MaxF(a, -1.0f));
         fn_8018AE34(CAR(d), 0.0f);
@@ -2180,7 +2173,7 @@ void fn_8019743C(u8* d, u8* out) {
     if (any) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
-            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + AiMul(F32(d, 0x84), 0.5f)));
+            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + Mul(F32(d, 0x84), 0.5f)));
             F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
         }
         if (U8(d, 0x9C)) {
@@ -2264,7 +2257,7 @@ void fn_8019743C(u8* d, u8* out) {
             }
             F32(d, 0xE4) = F32(d, 0x278) + diff;
             F32(d, 0xE8) = 0.0f;
-            f32 t = AbsFlt(diff) / 0.61f;
+            f32 t = FAbs(diff) / 0.61f;
             t = Clamp01(t);
             f32 cur = F32(d, 0xE0);
             if (cur < t) {
@@ -2380,13 +2373,12 @@ void fn_80197AB8(u8* d, s32 id, f32 a, f32 b, f32 c) {
 }
 
 static inline int SignDiffers(f32 a, f32 b) { return (s32)(*(u32*)&b & 0x80000000) != (s32)(*(u32*)&a & 0x80000000); }
-static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 
 static inline void UpdateFollowLine(u8* d, f32 gap, f32 dir, f32 cur) {
     f32 to = F32(d, 0xF8) - gap * dir;
     f32 from = F32(d, 0x278);
     f32 t = Clamp01(Unlerp(cur, 0.0f, F32(d, 0xEC)));
-    F32(d, 0xF4) = LerpF(from, to, t);
+    F32(d, 0xF4) = Lerp(from, to, t);
 }
 
 // Following: while the driver tails another car (0xFC), pick the side to pass on, ease the lateral line toward a
@@ -2399,7 +2391,7 @@ void fn_80197BD0(u8* d, u8* out) {
     if (U8(d, 0xFC)) {
         if (F32(d, 0xEC) < 4.0f || S32(d, 0x100) > 1) {
             fn_8019315C(d, S32(d, 0x114));
-            f32 w = lo + AbsFlt(F32(d, 0x104)) * (hi - lo);
+            f32 w = lo + FAbs(F32(d, 0x104)) * (hi - lo);
             int mine = 0;
             u8* o = lbl_804349C0[S32(d, 0x114)];
             if (o && S32(d, 0x290) == S32(o, 0x114)) {
@@ -2408,7 +2400,7 @@ void fn_80197BD0(u8* d, u8* out) {
             f32 off;
             f32 side = F32(d, 0xF8);
             off = side - F32(d, 0x108);
-            int wide = AbsFlt(side) > F32(d, 0x274) - 0.6f * (lbl_8055A488 + w);
+            int wide = FAbs(side) > F32(d, 0x274) - 0.6f * (lbl_8055A488 + w);
             if (wide && SignDiffers(off, side) && !mine) {
                 off = side > 0.0f ? 1.0f : -1.0f;
             }
@@ -2420,7 +2412,7 @@ void fn_80197BD0(u8* d, u8* out) {
                 F32(d, 0x10C) = off;
             }
             f32 gap = 0.915f + 0.5f * (w + lbl_8055A488);
-            if (AbsFlt(off) < gap) {
+            if (FAbs(off) < gap) {
                 int busy = 0;
                 if (U8(d, 0x9C) || U8(d, 0x74)) {
                     busy = 1;
@@ -2432,10 +2424,10 @@ void fn_80197BD0(u8* d, u8* out) {
                 f32 dir = F32(d, 0x10C) > 0.0f ? 1.0f : -1.0f;
                 UpdateFollowLine(d, gap, dir, currentOffset.value);
                 f32 u = Clamp01((F32(d, 0xEC) - 4.0f) / -3.3f);
-                F32(d, 0xF0) = LerpF(F32(d, 0xF0), LerpF(0.0f, 1.0f, u), 0.5f);
+                F32(d, 0xF0) = Lerp(F32(d, 0xF0), Lerp(0.0f, 1.0f, u), 0.5f);
                 if (!fn_80193184(d, S32(d, 0x114))) {
                     f32 base = F32(d, 0x270) + F32(d, 0x110);
-                    F32(out, 0x8) = LerpF(F32(out, 0x8), LerpF(base, F32(out, 0x8), 0.9f / (f32)S32(d, 0x100)),
+                    F32(out, 0x8) = Lerp(F32(out, 0x8), Lerp(base, F32(out, 0x8), 0.9f / (f32)S32(d, 0x100)),
                                           F32(d, 0xF0));
                 }
                 fade = 0;
@@ -2639,7 +2631,7 @@ void fn_80198530(u8* d) {
         f32 lat = ControlsLateral(v, d);
         if (rev) {
             f32 t = Clamp01(Ramp((f32)__fabs(stopped), 0.0f, 0.05f));
-            throttle = LerpF(1.0f, 0.0f, t);
+            throttle = Lerp(1.0f, 0.0f, t);
             steer = (lat + 0.9f * F32(CAR(d), 0x128)) / F32(d, 0x24C);
             steer = MIN(1.0f, steer);
             steer = MAX(steer, -1.0f);
@@ -2671,7 +2663,7 @@ void fn_80198530(u8* d) {
         f32 hi = 3.5555556f + F32(d, 0x28);
         f32 lo = 1.3333334f + F32(d, 0x28);
         f32 t = Clamp01((speed - lo) / (hi - lo));
-        grip = LerpF(0.0f, 1.0f, t);
+        grip = Lerp(0.0f, 1.0f, t);
         f64 absSpeed = __fabs(F32(d, 0x28));
         f32 speedMagnitude = (f32)absSpeed;
         if (speedMagnitude <= __float_epsilon[0]) {

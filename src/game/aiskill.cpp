@@ -7,6 +7,7 @@
 #include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
+#include "game/mathutil.h"
 
 extern "C" {
 char* strcpy(char* d, const char* s);
@@ -64,7 +65,6 @@ struct ResExt {
 extern "C" DeityCar* fn_801B2ED0(int i);
 extern "C" ResExt* fn_80138B1C(void* res);
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 ModuleTag lbl_8055E158;
 u8 lbl_8055E160;  // active
