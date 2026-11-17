@@ -60,31 +60,6 @@ extern CarIconTable* lbl_8055F2E4;  // the shared table
 extern s32 lbl_8055F2E8;            // its reference count
 
 struct CarIconTable {
-    CarIconTable(void) {
-        ValueTable* t = fn_80131808("caricons.val");
-        count = 0;
-        icons = new ("cicon") CarIcon[50];
-        ValueNode* n;
-        for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
-            if (strcmp(n->GetName(), "Car")) {
-                continue;
-            }
-            for (int k = 0; k < 2; k++) {
-                CarIcon* c = &icons[count++];
-                CopyIconName(c->name, 32, n->GetValue("chassis"));
-                if (k) {
-                    c->name.Append("_e");
-                }
-                c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
-                c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
-                c->u1 = n->GetFloat("u1");
-                c->v1 = n->GetFloat("v1");
-                c->u2 = n->GetFloat("u2");
-                c->v2 = n->GetFloat("v2");
-            }
-        }
-        fn_80131818(t);
-    }
     ~CarIconTable(void) {
         for (int i = 0; i < count; i++) {
             CarIcon* c = &icons[i];
@@ -93,19 +68,57 @@ struct CarIconTable {
         }
         delete[] icons;
     }
-    // Reference-counted share (released by the menus when the count drops to zero). A static member defined in the
-    // class body AFTER the ctor and dtor: "cimgr" is then its own weak string after the constructor's, as in retail
-    // garage's .sdata (Bink session, 2026-11-16).
-    static CarIconTable* Acquire(void) {
-        if (lbl_8055F2E8 == 0) {
-            lbl_8055F2E4 = new ("cimgr") CarIconTable;
-        }
-        lbl_8055F2E8++;
-        return lbl_8055F2E4;
-    }
+    static CarIconTable* Acquire(void);
+
 
     CarIcon* icons;  // offset 0x0
     s32 count;       // offset 0x4
+
+private:
+    friend class IconPool;
+    CarIconTable(void) {}
 };
+
+// The constructor name appears in the shared allocation and texture-string symbols.
+class IconPool {
+public:
+    IconPool(void) {
+        if (lbl_8055F2E8 == 0) {
+            CarIconTable* table = new ("cimgr") CarIconTable;
+            if (table) {
+                ValueTable* t = fn_80131808("caricons.val");
+                table->count = 0;
+                table->icons = new ("cicon") CarIcon[50];
+                ValueNode* n;
+                for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
+                    if (strcmp(n->GetName(), "Car")) {
+                        continue;
+                    }
+                    for (int k = 0; k < 2; k++) {
+                        CarIcon* c = &table->icons[table->count++];
+                        CopyIconName(c->name, 32, n->GetValue("chassis"));
+                        if (k) {
+                            c->name.Append("_e");
+                        }
+                        c->tex = fn_802CAC28(k ? "caricons0e.tex" : "caricons0.tex", 0);
+                        c->overlay = fn_802CAC28(k ? "caricons1e.tex" : "caricons1.tex", 0);
+                        c->u1 = n->GetFloat("u1");
+                        c->v1 = n->GetFloat("v1");
+                        c->u2 = n->GetFloat("u2");
+                        c->v2 = n->GetFloat("v2");
+                    }
+                }
+                fn_80131818(t);
+            }
+            lbl_8055F2E4 = table;
+        }
+        lbl_8055F2E8++;
+    }
+};
+
+inline CarIconTable* CarIconTable::Acquire(void) {
+    IconPool pool;
+    return lbl_8055F2E4;
+}
 
 #endif
