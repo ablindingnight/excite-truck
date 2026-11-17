@@ -3,6 +3,7 @@
 // the groups' states. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
 #include "game/arrayref.h"
+#include "game/mathutil.h"
 
 namespace {
 extern char kOverlay[];
@@ -111,7 +112,6 @@ struct MorphGroup {
 
 extern "C" MorphGroup* fn_801D9260(int i);
 
-static inline int Min(int a, int b) { return (a < b) ? a : b; }
 
 // Models blended by the states of up to two morph groups.
 struct OmlList {
@@ -127,7 +127,7 @@ struct OmlList {
             MorphGroup* gp = fn_801D9260(g);
             *groups.Next() = gp;
         }
-        int n = Min(1 << groups.count, models.cap);
+        int n = MinI(1 << groups.count, models.cap);
         for (int k = 0; k < n; k++) {
             fn_801345D8(modelKey, sizeof(modelKey), kModelNameFmt, k);
             s32 m = fn_802C6FC0(node->GetValue(modelKey), 0, 0);

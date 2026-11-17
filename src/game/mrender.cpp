@@ -8,6 +8,7 @@
 #include "game/pool.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 BOOL OptWidescreen(void);
 
@@ -105,7 +106,6 @@ static inline f32 fabsf(f32 x) { return __fabs(x); }
 
 static inline BOOL Equal(f32 a, f32 b) { return fabsf(a - b) <= __float_epsilon[0]; }
 
-static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 
 ModuleTag lbl_8055FC28;
 s32 lbl_8055FC30;  // depth mode
@@ -556,13 +556,13 @@ int fn_802C94A0(const VecP* p, u8* visible, f32* depth, f32 r) {
     }
     f32 x = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&c->basis[0]));
     f32 lim = z * lbl_8055FC44;
-    f32 m = Max(0.0f, lim);
+    f32 m = MaxF(0.0f, lim);
     if (x > m + r * lbl_8055FC54) {
         return 0;
     }
     f32 y = fabsf(PSVECDotProduct((const Vec*)&d, (const Vec*)&lbl_804C1410.basis[1]));
     lim = z * lbl_8055FC50;
-    m = Max(0.0f, lim);
+    m = MaxF(0.0f, lim);
     if (y > m + r * lbl_8055FC58) {
         return 0;
     }

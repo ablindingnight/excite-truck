@@ -3,6 +3,7 @@
 // and the master volume fade. Names are guesses apart from the file names.
 #include "game/common.h"
 #include "game/sound.h"
+#include "game/mathutil.h"
 
 BOOL IsLoadingActive(void);
 BOOL IsLoadingFading(void);
@@ -46,9 +47,6 @@ struct MusicTrack {
 }  // namespace
 
 static inline f32 Ramp(f32 x, f32 lo, f32 range) { return (x - lo) / range; }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
 ModuleTag lbl_8055EE30;
 Sound2D* lbl_8055EE38;  // goal line sting
@@ -255,12 +253,12 @@ void fn_8020C59C(void) {
         if (now >= lbl_8055EE3C && now < lbl_8055EE3C + 4000) {
             track = 0;
             f32 k = Ramp(now - lbl_8055EE3C, 0.0f, 1000.0f);
-            k = Max(Min(k, 1.0f), 0.0f);
+            k = MaxF(MinFRev(k, 1.0f), 0.0f);
             lbl_8055EE54 = Lerp(1.0f, 0.0f, k);
         }
     }
-    f32 d = Max(Min(lbl_8055EE50 - lbl_8055EE4C, 0.2f), -0.2f);
-    lbl_8055EE4C = Max(Min(lbl_8055EE4C + d, 1.0f), 0.0f);
+    f32 d = MaxF(MinFRev(lbl_8055EE50 - lbl_8055EE4C, 0.2f), -0.2f);
+    lbl_8055EE4C = MaxF(MinFRev(lbl_8055EE4C + d, 1.0f), 0.0f);
     fn_8020C140();
     t = lbl_80489BE0;
     for (int i = 0; i < 3; i++, t++) {

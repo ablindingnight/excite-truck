@@ -10,6 +10,7 @@
 #include "game/gamedb.h"
 #include "game/dashhelper.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 // LdVec: rvec.h's RVec3.
 // One leg of the tips camera sequence.
@@ -755,9 +756,6 @@ BOOL IsLoadingDone(void) {
     return !(lbl_8055D644 && !lbl_8055D645);
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) {
-    return a + t * (b - a);
-}
 
 void LoadingFadeOut(void) {
     if (lbl_8055D648) {

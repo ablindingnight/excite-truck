@@ -23,6 +23,7 @@ struct MSphere {
 
 #include "game/mmtx33.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 struct MFrame {
     MMtx33 r;  // offset 0x0
@@ -227,7 +228,6 @@ static inline int IsQueued(u32 type) {
     return ok;
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(ValVec3* out, const ValVec3* in, const MMtx33* m) {
     if (out == in) {

@@ -2,6 +2,7 @@
 // matmap2_b/g/r), editor painting into them, and saving them back as two .tga images. Names are
 // guesses apart from the file names and messages.
 #include "game/common.h"
+#include "game/mathutil.h"
 
 extern "C" {
 char* strchr(const char* s, int c);
@@ -39,7 +40,6 @@ u8 lbl_8055FA90;        // weights fixed (one layer everywhere)
 s32 lbl_804C0098[6];    // weight texture handles
 void* lbl_804C00B0[6];  // weight textures
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 extern "C" {
 

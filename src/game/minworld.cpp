@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 struct MWVec2 {
     f32 x, y;
@@ -50,7 +51,7 @@ struct MWSolVec {
     f32 x, y, z, w;
 };
 
-static inline f32 LenSq2(f32 x, f32 y) { return x * x + y * y; } /* Helper name unproven */
+ /* Helper name unproven */
 static inline MWSolVec MWSolVec4(f32 x, f32 y, f32 z, f32 w) {
     MWSolVec v;
     v.y = y;
@@ -211,7 +212,7 @@ void fn_8025280C(MWBody* b, f32 speed) {
         d.x = 1.0f;
         d.y = 0.0f;
     }
-    len = sqrt(LenSq2(d.x, d.y));
+    len = sqrt(Len2(d.x, d.y));
     if (!NearZero(len)) {
         f32 k = 325.0f / len;
         d.x = d.x * k;
