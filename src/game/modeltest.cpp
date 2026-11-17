@@ -63,6 +63,18 @@ void fn_802C8638(MTMtx* m);
 void fn_802C8DB8(MTVtx* v, int nv, const u16* idx, int ni);
 }
 
+// Builds the view matrix in m and hands it back (0 for no matrix).
+/* Helper name unproven: the guard is what retail shows. Its result has two definitions (0 or m), so the pointer
+   stays a variable set at the top of the loop body and its address is hoisted behind the index table address;
+   &view assigned to a local is propagated away or scheduled a slot early (FACTS 2026-11-17 14:00). */
+static inline MTMtx* ViewAt(MTMtx* m, f32 dist) {
+    if (!m) {
+        return 0;
+    }
+    m->SetView(dist);
+    return m;
+}
+
 ModuleTag lbl_8055F2A0;
 
 extern "C" {
@@ -70,15 +82,12 @@ extern "C" {
 // The model/texture test viewer: draws leather.tex on a unit quad until ESC is pressed.
 // Each vertex starts as a copy of an earlier one (v[1] = v[0], v[2] = v[0], v[3] = v[2]: retail's lfd/stfd pair
 // + word moves of the position), then takes its own position and u/v; the MTVec temporaries stay on the stack.
-// Left: the idx table address is scheduled one slot later than retail.
 void fn_8024BE04(void) {
     fn_802E30C8("ModelTest!");
-    MTMtx* vp;
     s32 tex = fn_802CAC28("leather.tex", 0);
-    MTMtx view;
-    vp = &view;
     for (u32 frame = 0;; frame++) {
-        vp->SetView(10.0f);
+        MTMtx view;
+        MTMtx* vp = ViewAt(&view, 10.0f);
         fn_802C8530();
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_802C86E8(0xFF7F7F7F);
