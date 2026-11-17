@@ -10,9 +10,8 @@
 #include "game/rigid.h"
 #include "game/springcar.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
-// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
-static inline f32 LerpT( f32 b, f32 a,f32 t) { return a + t * (b - a); }
 
 BOOL OptProfile(void);  // cmdline.cpp
 
@@ -1378,14 +1377,14 @@ void vf28__10CollVolumeFPUc(const Phob* v, u8* buf) {  // writes the draw state
         b = &v->prev.basis[0].x;
         f32 k = lbl_8055E460;
         for (i = 0; i < 2; i++) {
-            d[0] = LerpT( a[0], b[0],k);
+            d[0] = LerpRev( a[0], b[0],k);
             f32 a1 = a[1];
             f32 b1 = b[1];
-            d[1] = LerpT( a1, b1,k);
-            d[2] = LerpT( a[2], b[2],k);
-            d[3] = LerpT( a[3], b[3],k);
-            d[4] = LerpT( a[4], b[4],k);
-            d[5] = LerpT( a[5], b[5],k);
+            d[1] = LerpRev( a1, b1,k);
+            d[2] = LerpRev( a[2], b[2],k);
+            d[3] = LerpRev( a[3], b[3],k);
+            d[4] = LerpRev( a[4], b[4],k);
+            d[5] = LerpRev( a[5], b[5],k);
             d += 6;
             a += 6;
             b += 6;

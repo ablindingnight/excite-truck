@@ -2,6 +2,7 @@
 // object and clamped to a minimum elevation. Names are guesses apart from the messages and keys.
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -37,7 +38,6 @@ void* fn_802B2C34(ModelLoader f, const char* name);
 SkyCam* fn_802C86DC(void);
 }
 
-static inline f32 DegToRad(f32 d) { return d * 0.017453292f; }
 
 static inline void Scale(ValVec3* out, const ValVec3* v, f32 s) {
     out->x = v->x * s;
@@ -63,14 +63,13 @@ struct SkyMtx {
 };
 
 ModuleTag lbl_8055FB08;
-extern const f32 lbl_8055FB10 = DegToRad(45.0f);  // minimum sun elevation
+extern const f32 lbl_8055FB10 = DegToRadRev(45.0f);  // minimum sun elevation
 s32 lbl_8055FB14;                    // current sky instance
 s32 lbl_8055FB18;                    // loaded sky instance
 ValVec3 lbl_804C0800;                // sun position
 
 extern "C" {
 
-static inline f32 Sq(f32 x) { return x * x; }
 
 void fn_802C0D70(ValVec3* d) {
     f32 h = sqrt(Sq(d->x) + Sq(d->z));

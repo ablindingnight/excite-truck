@@ -13,6 +13,10 @@
 inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // the same blend with t first in the argument list
 inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+// the blend with the two end points the other way round in the argument list (b first)
+inline f32 LerpRev(f32 b, f32 a, f32 t) { return a + t * (b - a); }
+// a + t * d (a step along d)
+inline f32 AddScaledF(f32 a, f32 d, f32 t) { return a + t * d; }
 // v mapped from lo..hi to 0..1 (no clamp), and the same with v last
 inline f32 Unlerp(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }
 inline f32 InvLerp(f32 lo, f32 hi, f32 v) { return (v - lo) / (hi - lo); }
@@ -24,6 +28,8 @@ inline f32 Sq(f32 x) { return x * x; }
 // a product whose second factor arrives as an inline parameter (keeps the variable first)
 inline f32 Mul(f32 a, f32 b) { return a * b; }
 inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
+// the same conversion with the variable first (operand order sets the generated fmuls)
+inline f32 DegToRadRev(f32 d) { return d * 0.017453292f; }
 
 inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }

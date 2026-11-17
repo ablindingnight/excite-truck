@@ -5,6 +5,7 @@
 // C++ (it has a static initializer and calls through vtables); the fn_ functions keep C linkage.
 
 #include "game/common.h"
+#include "game/mathutil.h"
 
 // gameloop.cpp (C++ linkage in retail: fn_8000C69C__Fv etc., found by linkcheck).
 const char* fn_8000C69C(void);
@@ -210,8 +211,6 @@ static inline unsigned long HalveAlpha(unsigned long color) {
 // Draws the sound menu: music volume, effects volume and the third item, the selection highlight,
 // and the left/right arrows that fade out at the ends of a slider.
 /* Helper name unproven */
-static inline float Lerp(float a, float d, float t) { return a + t * d; }
-/* Helper name unproven */
 static inline float Ramp(float now, float start, float delay, float len) {
     float t = (now - start - delay) / len;
     t = 1.0f < t ? 1.0f : t;
@@ -324,11 +323,11 @@ void fn_8020D2D4(void) {
                 rightColor = 0xFFFFFFFF;
                 if (!canDec) {
                     t = Ramp(now, lbl_8055EE98, 0.0f, 0.2f);
-                    leftColor = ((unsigned long)(int)Lerp(255.0f, -255.0f, t) << 24) | 0x00FFFFFF;
+                    leftColor = ((unsigned long)(int)AddScaledF(255.0f, -255.0f, t) << 24) | 0x00FFFFFF;
                 }
                 if (!canInc) {
                     t = Ramp(now, lbl_8055EE9C, 0.0f, 0.2f);
-                    rightColor = ((unsigned long)(int)Lerp(255.0f, -255.0f, t) << 24) | 0x00FFFFFF;
+                    rightColor = ((unsigned long)(int)AddScaledF(255.0f, -255.0f, t) << 24) | 0x00FFFFFF;
                 }
                 fn_801345D8(arrowName, 0x20, "%s_left_arrow", textName);
                 arrow = ((SoundMenuLayout *)lbl_8055EEA0)->FindPane(arrowName);
@@ -337,7 +336,7 @@ void fn_8020D2D4(void) {
                     a = *arrow;
                     t = Ramp(now, lbl_8055EE98, 0.4f, -0.4f);
                     a.color = leftColor;
-                    a.pos.v[0] = a.pos.v[0] - Lerp(0.0f, 10.0f, t);
+                    a.pos.v[0] = a.pos.v[0] - AddScaledF(0.0f, 10.0f, t);
                     fn_80147940(lbl_8055EEA0, &a, "left_arrow_art", 1);
                 }
                 fn_801345D8(arrowName, 0x20, "%s_right_arrow", textName);
@@ -347,7 +346,7 @@ void fn_8020D2D4(void) {
                     a = *arrow;
                     t = Ramp(now, lbl_8055EE9C, 0.4f, -0.4f);
                     a.color = rightColor;
-                    a.pos.v[0] = a.pos.v[0] + Lerp(0.0f, 10.0f, t);
+                    a.pos.v[0] = a.pos.v[0] + AddScaledF(0.0f, 10.0f, t);
                     fn_80147940(lbl_8055EEA0, &a, "right_arrow_art", 1);
                 }
             }

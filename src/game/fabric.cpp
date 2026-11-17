@@ -8,6 +8,7 @@
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -206,9 +207,7 @@ NonUniformFabricInst* lbl_8055EC20;
 
 static const char* lbl_8033AC9C[5] = {"top corners", "all corners", "top row", "left corners", "left column"};
 
-static inline f32 FMin(f32 a, f32 b) { return a < b ? a : b; }
 
-static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
 static inline int ClampI(int v, int lo, int hi) {
     int a = v > lo ? v : lo;
@@ -220,8 +219,6 @@ static inline int ToByte(const f32& x) {
     v = v > 0 ? v : 0;
     return v < 0xFF ? v : 0xFF;
 }
-// Helper names unproven: MaxI re-evaluates its argument; only the last channel of the colour does that.
-static inline int MaxI(int a, int b) { return a > b ? a : b; }
 static inline int ToByte2(f32 x) {
     int v = MaxI((int)(255.0f * x), 0);
     return v < 0xFF ? v : 0xFF;
@@ -288,8 +285,6 @@ u32 fn_801F4ECC(ValueNode* vn) {
     return flags;
 }
 
-// Helper names unproven: frame transform with the alias test.
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void MulVec(PVec* out, const PVec* in, const RMtx* m) {
     if (out == in) {
         f32 x = Dot3(in->x, m->rot.x.x, in->y, m->rot.y.x, in->z, m->rot.z.x);
@@ -467,7 +462,6 @@ void fn_801F5664(Fabric* f, int style) {
 
 Anchor::Anchor(void) {}
 
-static inline f32 Lerp( f32 b,f32 a, f32 t) { return a + t * (b - a); }
 
 static inline int LerpB(f32 a, f32 b, f32 t) { return b + t * (a - b); }
 
@@ -484,14 +478,14 @@ static inline u32 LerpColor( u32 b,u32 a, f32 t) {
 }
 
 static inline void LerpPos(PVec* out, const PVec* a, const PVec* b, f32 t) {
-    out->x = Lerp( b->x,a->x, t);
-    out->y = Lerp( b->y,a->y, t);
-    out->z = Lerp( b->z,a->z, t);
+    out->x = LerpRev( b->x,a->x, t);
+    out->y = LerpRev( b->y,a->y, t);
+    out->z = LerpRev( b->z,a->z, t);
 }
 
 static inline void LerpVert(DrawVert* out, FabricCorner a, FabricCorner b, f32 t) {
-    out->u = Lerp( b.u,a.u, t);
-    out->v = Lerp( b.v,a.v, t);
+    out->u = LerpRev( b.u,a.u, t);
+    out->v = LerpRev( b.v,a.v, t);
     out->color = LerpColor( b.color,a.color, t);
 }
 
@@ -521,8 +515,8 @@ extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
             LerpPos(&p, &lp, &rp, s);
             *(PVec*)&f->cur[i] = p;
             f->prev[i] = f->cur[i];
-            f->draw[i].u = Lerp( rd.u,ld.u, s);
-            f->draw[i].v = Lerp( rd.v,ld.v, s);
+            f->draw[i].u = LerpRev( rd.u,ld.u, s);
+            f->draw[i].v = LerpRev( rd.v,ld.v, s);
             f->draw[i].color = LerpColor( rd.color,ld.color, s);
         }
     }
@@ -558,15 +552,15 @@ void fn_801F602C(Fabric* f, const Quad* q, const char* tex, int style, u32 flags
         f->cols = ClampI((int)(3.0f * (w * q->colDensity)), 2, 8);
         f->rows = ClampI((int)(3.0f * (h * q->rowDensity)), 2, 4);
     }
-    umin = FMin(q->c[0].u, FMin(q->c[1].u, FMin(q->c[2].u, q->c[3].u)));
-    umax = FMax(q->c[0].u, FMax(q->c[1].u, FMax(q->c[2].u, q->c[3].u)));
-    vmin = FMin(q->c[0].v, FMin(q->c[1].v, FMin(q->c[2].v, q->c[3].v)));
-    vmax = FMax(q->c[0].v, FMax(q->c[1].v, FMax(q->c[2].v, q->c[3].v)));
+    umin = MinF(q->c[0].u, MinF(q->c[1].u, MinF(q->c[2].u, q->c[3].u)));
+    umax = MaxF(q->c[0].u, MaxF(q->c[1].u, MaxF(q->c[2].u, q->c[3].u)));
+    vmin = MinF(q->c[0].v, MinF(q->c[1].v, MinF(q->c[2].v, q->c[3].v)));
+    vmax = MaxF(q->c[0].v, MaxF(q->c[1].v, MaxF(q->c[2].v, q->c[3].v)));
     f->tex = fn_802CAC28(tex, 0);
     f64 dv = __fabs(vmax - vmin);
     f64 du = __fabs(umax - umin);
-    span = FMax((f32)du, (f32)dv);
-    f->lod = log2(span / FMax(w, h));
+    span = MaxF((f32)du, (f32)dv);
+    f->lod = log2(span / MaxF(w, h));
     fn_801F5970(f, q);
     fn_801F5508(f);
     fn_801F5664(f, style);

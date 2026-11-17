@@ -4,6 +4,7 @@
 // Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/math_types.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -241,7 +242,6 @@ void fn_801E6CD0(AnimInst* a, AnimRes* r, f32 t) {
     }
 }
 
-static inline f32 Lerp(f32 lo, f32 range, f32 t) { return lo + t * range; }
 
 static inline f32 Dequant(u32 v, f32 lo, f32 range) { return ((f32)v - lo) / range; }
 
@@ -273,23 +273,23 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                 u32 tv = ((u32)(v >> 6) & 0x3FF) << 6;
                 f32 c = AMIN(1.0f, Dequant(tv, 0.0f, 65535.0f));
                 c = c > 0.0f ? c : 0.0f;
-                k.t = Lerp(0.0f, 17.05f, c);
+                k.t = AddScaledF(0.0f, 17.05f, c);
                 if (b6 != 0) {
                     u32 qz = ((u32)(v >> 32) >> 4) & 0xFFF0;
                     u32 qy = ((u32)(v >> 28) & 0xFFF) << 4;
                     u32 qw = ((u32)(v >> 32) >> 16) & 0xFFF0;
                     c = AMIN(1.0f, Dequant((((u32)(v >> 16) & 0xFFF) << 4), 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
-                    k.q.x = Lerp(-1.0f, 2.0f, c);
+                    k.q.x = AddScaledF(-1.0f, 2.0f, c);
                     c = AMIN(1.0f, Dequant(qy, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
-                    k.q.y = Lerp(-1.0f, 2.0f, c);
+                    k.q.y = AddScaledF(-1.0f, 2.0f, c);
                     c = AMIN(1.0f, Dequant(qz, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
-                    k.q.z = Lerp(-1.0f, 2.0f, c);
+                    k.q.z = AddScaledF(-1.0f, 2.0f, c);
                     c = AMIN(1.0f, Dequant(qw, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
-                    k.q.w = Lerp(-1.0f, 2.0f, c);
+                    k.q.w = AddScaledF(-1.0f, 2.0f, c);
                 } else {
                     u32 pz;
                     u32 py = (u32)(v >> 32) & 0xFFFF;
@@ -297,13 +297,13 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
                     u32 px = (u32)(v >> 16) & 0xFFFF;
                     c = AMIN(1.0f, Dequant(px, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
-                    k.q.x = 20.0f * (Lerp(-1.0f, 2.0f, c));
+                    k.q.x = 20.0f * (AddScaledF(-1.0f, 2.0f, c));
                     c = AMIN(1.0f, Dequant(py, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
-                    k.q.y = 20.0f * (Lerp(-1.0f, 2.0f, c));
+                    k.q.y = 20.0f * (AddScaledF(-1.0f, 2.0f, c));
                     c = AMIN(1.0f, Dequant(pz, 0.0f, 65535.0f));
                     c = c > 0.0f ? c : 0.0f;
-                    k.q.z = 20.0f * (Lerp(-1.0f, 2.0f, c));
+                    k.q.z = 20.0f * (AddScaledF(-1.0f, 2.0f, c));
                 }
                 a->cur = k;
                 a->lastFrame = a->frame;
