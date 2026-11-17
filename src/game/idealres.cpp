@@ -123,6 +123,9 @@ void fn_80137FF0(ResExt* e) {
 }
 
 void fn_801380DC(ResExt* e) {
+#if !defined(__MWERKS__) && !defined(GAME_FILE_DATA_NEEDS_SWAP)
+    return;  // PORT: this extension's hand-written swap; the data is already native on a little-endian host
+#endif
     u8* n = (u8*)&e->data[0];
     u8 a = n[0];
     u8* p = (u8*)&e->data[1];
