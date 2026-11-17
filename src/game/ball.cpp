@@ -3,6 +3,7 @@
 // hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/lerpmtx.h"
 #include "game/sqrtf.h"
 #include "game/spot.h"
 #include "game/sound.h"
@@ -621,14 +622,6 @@ void Ball::PickDrop(f32* xz, s16* h) {
     }
 }
 
-static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
-    f32* d = (f32*)out;
-    const f32* x = (const f32*)a;
-    const f32* y = (const f32*)b;
-    for (int i = 0; i < 12; i++) {
-        *d++ = LerpT(t, *x++, *y++);
-    }
-}
 
 // The ball's draw state in the frame buffer (Ball::vf28 writes it). Name unproven.
 struct BallPose {

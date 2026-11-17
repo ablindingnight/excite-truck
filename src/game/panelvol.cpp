@@ -3,6 +3,7 @@
 // simulation (fn_801C1BA4 handle) and is re-fitted to the simulated corners every update. A body
 // is reused when free, else the oldest one is taken. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/lerpmtx.h"
 #include <revolution/MTX/vec.h>
 #include "game/vec3_init.h"
 #include "game/rvec.h"
@@ -660,14 +661,6 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 }
 
 
-static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
-    f32* d = (f32*)out;
-    const f32* x = (const f32*)a;
-    const f32* y = (const f32*)b;
-    for (int i = 0; i < 12; i++) {
-        *d++ = Lerp(*x++, *y++, t);
-    }
-}
 
 void PanelVol::vf28(u8* buf) {
     PanelPose* out = (PanelPose*)(buf + a8);

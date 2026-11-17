@@ -4,6 +4,7 @@
 // against raw field offsets; the large routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/axisrow.h"
 #include "game/proxer.h"
 #include "game/raceopts.h"
 #include "game/rvec.h"
@@ -15,12 +16,6 @@
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
 
-/* Helper name unproven: three values stored through by-value parameters (one matrix row). */
-static inline void AxisRow(f32& a, f32& b, f32& c, f32 x, f32 y, f32 z) {
-    a = x;
-    b = y;
-    c = z;
-}
 
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))

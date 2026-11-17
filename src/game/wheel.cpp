@@ -4,6 +4,7 @@
 // with a small torque, and is parked below the world (y -500) when idle or off the ground. Also packs its
 // pose into the render buffer and its state into replay packets. Names are guesses apart from the string.
 #include "game/common.h"
+#include "game/lerpmtx.h"
 #include "game/wheel.h"
 #include "game/carbody.h"
 #include <revolution/MTX/vec.h>
@@ -134,14 +135,6 @@ static inline RVec3 LerpV(const RVec3& a, const RVec3& b, f32 t) {
     return RVec3(Lerp(a.x, b.x, t), Lerp(a.y, b.y, t), Lerp(a.z, b.z, t));
 }
 
-static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
-    f32* d = (f32*)out;
-    const f32* x = (const f32*)a;
-    const f32* y = (const f32*)b;
-    for (int i = 0; i < 12; i++) {
-        *d++ = Lerp(*x++, *y++, t);
-    }
-}
 
 void Wheel::vf28(u8* buf) {
     WheelPose* p = (WheelPose*)(buf + a8);
