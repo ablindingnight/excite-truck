@@ -2,6 +2,7 @@
 // restart, post-race), the race mode requests with their screen fader, the frame clock and the physics
 // state listeners. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/statepacket.h"
 #include "game/locstring.h"
 #include "game/raceopts.h"
 
@@ -60,11 +61,6 @@ int fn_801CF050(void);
 int fn_802ECC10(void);
 f32 __cvt_sll_flt(s64 v);
 }
-
-struct StatePacket {
-    u8 pad0[0xDB0];
-    s32 fade;  // offset 0xDB0
-};
 
 struct RaceMode {
     void Clear(void) {
