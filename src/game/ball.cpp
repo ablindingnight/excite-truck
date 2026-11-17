@@ -10,6 +10,7 @@
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/camframe34.h"
+#include "game/vpos.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/shapes.h"
@@ -27,7 +28,6 @@ void fn_801D0C84(void* l);                  // unregister listener
 // Vec2's empty constructor, which retail calls out of line in Drop, by its mangled name (xz stays a plain array:
 // PickDrop takes an f32*).
 void __ct__4Vec2Fv(f32* v);
-void __ct__4VPosFfff(void* v, f32 x, f32 y, f32 z);
 }
 
 extern "C" void fn_8017E388(RMtx* m);
@@ -416,7 +416,6 @@ void Ball::OnHit(const RVec3* force, const RVec3* at, int kind, void* contact) {
 inline void Ball::Drop(void) {
     s16 h;
     f32 xz[2];
-    RVec3 v;
     f32 up;
     __ct__4Vec2Fv(xz);
     PickDrop(xz, &h);
@@ -426,7 +425,7 @@ inline void Ball::Drop(void) {
     up = DropHeight();
     f32 base = fn_8017960C(car)->Mtx()->pos.y;
     m.pos.y = base + up;
-    __ct__4VPosFfff(&v, 0.0f, 0.0f, 0.0f);
+    VPos v(0.0f, 0.0f, 0.0f);
     Launch(&m, &v, h, 0.0f);
 }
 

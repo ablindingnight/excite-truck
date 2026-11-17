@@ -10,6 +10,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/camframe34.h"
+#include "game/vpos.h"
 #include "game/math_types.h"
 #include "game/carbody.h"
 #include "game/mathutil.h"
@@ -119,7 +120,6 @@ extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
-void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144B54(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
@@ -302,8 +302,7 @@ static inline void SetupPanel(PanelVol* p, RigidBody* car, s32 part, const RVec3
         xb = 4;
     }
     for (i = 0; i < 4; i++) {
-        RVec3 c;
-        __ct__4VPosFfff(&c, (i & xb) ? a.x : b.x, (i & yb) ? a.y : b.y, (i & zb) ? a.z : b.z);
+        VPos c((i & xb) ? a.x : b.x, (i & yb) ? a.y : b.y, (i & zb) ? a.z : b.z);
         fn_801BFD34(&verts[i].p, &c, &m);
         verts[i].u = kPanelU;
         verts[i].v = kPanelV;
