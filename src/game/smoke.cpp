@@ -34,6 +34,7 @@ struct SmokeModel {
 #include "game/mathutil.h"
 #include "game/tadds.h"
 #include "game/tscale.h"
+#include "game/vecmul.h"
 
 struct SVec {
     SVec(void) {
@@ -101,20 +102,6 @@ void* operator new[](size_t size, const char* name);
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
 
-static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        f32 z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        out->y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        out->z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-    }
-}
 
 
 

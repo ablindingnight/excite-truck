@@ -78,6 +78,7 @@ public:
 #include "game/fxseq.h"
 #include "game/tadds.h"
 #include "game/tscale.h"
+#include "game/vecmul.h"
 
 extern "C" {
 double log2(double x);
@@ -123,28 +124,9 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 extern u32 lbl_8055D430;    // debug flags
 
 
-static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        f32 z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        out->y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        out->z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-    }
-}
 
 
 
-static inline void SetVec(Vec* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 // out = b * a, through a temporary when out aliases an input.
 static inline void MulMat(Mat3* out, const Mat3* a, const Mat3* b) {

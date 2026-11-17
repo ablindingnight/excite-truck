@@ -75,6 +75,7 @@ struct FireVec {
 #include "game/fxseq.h"
 #include "game/clamp01.h"
 #include "game/tscale.h"
+#include "game/vecmul.h"
 
 extern "C" {
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
@@ -130,20 +131,6 @@ extern void* lbl_80488648[];  // car models
 extern f32 __float_epsilon[];    // FLT_EPSILON
 
 
-static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        f32 z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        out->y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        out->z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-    }
-}
 
 
 
@@ -1052,11 +1039,6 @@ void BigRingMan::Free(BigRing* r) {
     r->emitter = 0;
 }
 
-static inline void SetVec(Vec* o, f32 x, f32 y, f32 z) {
-    o->x = x;
-    o->y = y;
-    o->z = z;
-}
 static inline void MixVec(Vec* o, const Vec* a, const Vec* b, f32 t) {
     SetVec(o, LerpT(t, a->x, b->x), LerpT(t, a->y, b->y), LerpT(t, a->z, b->z));
 }

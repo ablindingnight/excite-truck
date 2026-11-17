@@ -8,6 +8,7 @@
 #include "macros.h"
 #include <revolution/MTX.h>
 #include "game/mathutil.h"
+#include "game/vecmul.h"
 
 // LightFrame: vecmatrix.h's VecMatrix.
 struct LightCar {
@@ -50,26 +51,7 @@ void gxForgetTexture(s32 tex);
 }
 
 
-static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        f32 z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        out->y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        out->z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-    }
-}
 
-static inline void SetVec(Vec* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 static inline void Rotate(Vec* out, const LightCar* c, f32 x, f32 y, f32 z) {
     Vec v;

@@ -81,6 +81,7 @@ struct CarDrawView {
 #include "game/carres.h"
 #include "game/makeilpos.h"
 #include "game/strcat.h"
+#include "game/vecmul.h"
 
 struct Joint;
 
@@ -185,20 +186,6 @@ CarModel* lbl_8055EBC8;  // the player's own car
 u8 lbl_8055AFC8 = 1;      // draw the cockpit
 
 
-static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        f32 z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        out->y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        out->z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-    }
-}
 
 static inline void MulVecT(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {
