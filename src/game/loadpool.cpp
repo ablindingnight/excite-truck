@@ -1,8 +1,8 @@
 // Load pool (0x8013420C-0x801345D8): fixed-size buffer slots filled by asynchronous resource streams
 // (at most three in flight), with a completion callback per slot. Names are guesses.
 #include "game/common.h"
+#include "game/asyncres.h"
 
-class AsyncResource;
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -10,14 +10,6 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 AsyncResource* ResourceGetStream(const char* name, u32 type, u32* info);  // ResourceGetStream
 void fn_8012C958(AsyncResource* r);                                 // ResourceStreamClose
 }
-
-class AsyncResource {
-public:
-    s32 Span(void);
-    void Load(u8* dst, s32 n, s32 offs);
-    u8* Poll(s32* sizeOut);
-    void Cancel(void);
-};
 
 void* operator new[](size_t size, const char* tag);
 

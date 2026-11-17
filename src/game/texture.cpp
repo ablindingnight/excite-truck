@@ -4,19 +4,12 @@
 // on-screen size, discarding the least useful ones a couple of frames later. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/asyncres.h"
 #include "game/byteswap.h"
 #include "game/strcopy.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-class AsyncResource {
-public:
-    s32 Span(void);
-    void Load(u8* dst, s32 n, s32 offs);
-    u8* Poll(s32* sizeOut);
-    void Cancel(void);
-};
 
 // A tt_texture header ("TEX " resource, version 15).
 struct TTHeader {
