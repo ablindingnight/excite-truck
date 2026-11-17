@@ -3,6 +3,7 @@
 // are freed when they stop, and creating device sounds through the mixer. Names are guesses apart
 // from the file name and messages.
 #include "game/common.h"
+#include "game/mixer.h"
 #include "game/sound.h"
 #include "game/math_types.h"
 #include "macros.h"
@@ -30,32 +31,6 @@ extern "C" {
 void fn_80127CF4(BgObject* obj, const char* name);
 void fn_80127E28(BgObject* obj);
 }
-
-struct MixerCaps {
-    u8 noPositional;  // offset 0x0
-    s32 has3D;        // offset 0x4
-    s32 hasPan;       // offset 0x8
-};
-
-class Mixer {
-public:
-    virtual ~Mixer(void);
-    virtual const char* Name(void) = 0;
-    virtual MixerCaps* Caps(void) = 0;
-    virtual int vf14(void);
-    virtual int Usable(void) = 0;
-    virtual Sound* CreateSound(void* desc, int mode, int loop) = 0;
-    virtual void SetListeners(void* listeners) = 0;
-    virtual void Shutdown(void) = 0;
-    virtual void vf28(void);
-    virtual void vf2C(int a);
-    virtual void vf30(void);
-    virtual void vf34(int a);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-};
 
 extern "C" {
 void fn_802067C8(GameSound* s, void* listeners, s32 n);
@@ -465,13 +440,13 @@ Sound* SoundManager::Create(void* desc, int cls) {
                 mode = 1;
             }
         }
-        d = mixer->CreateSound(desc, mode, loop);
+        d = mixer->CreateSound((const char*)desc, mode, loop);
         if (mode == 0 && d == NULL) {
             fn_802E30C8("Creating 3d sound failed.  Supposed to be impossible.");
-            d = mixer->CreateSound(desc, 1, loop);
+            d = mixer->CreateSound((const char*)desc, 1, loop);
         }
     } else {
-        d = mixer->CreateSound(desc, 2, loop);
+        d = mixer->CreateSound((const char*)desc, 2, loop);
     }
     return d;
 }

@@ -2,6 +2,7 @@
 // announcer, tyre and video volumes, the sound quality and race music choices and the speaker mixer,
 // saved to option section 4. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/mixer.h"
 #include "game/menu.h"
 #include "game/sound.h"
 #include "game/menustate.h"
@@ -10,12 +11,6 @@ extern "C" {
 char* strcpy(char* d, const char* s);
 }
 
-
-class Mixer {
-public:
-    virtual ~Mixer(void);
-    virtual const char* Name(void);  // 0x0C
-};
 
 struct MenuRange {
     MenuRange(void) {}

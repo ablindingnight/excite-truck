@@ -2,6 +2,7 @@
 // the volume handles that scale it, plus the null mixer and its null sounds used when there is no
 // sound device. Names are guesses apart from the keys and messages.
 #include "game/common.h"
+#include "game/mixer.h"
 #include "game/locstring.h"
 #include "macros.h"
 
@@ -92,29 +93,6 @@ public:
     s32 state;  // offset 0x8
 };
 
-class Mixer {
-public:
-    Mixer(void) {}
-    virtual ~Mixer(void) {}
-    virtual const char* Name(void) = 0;
-    virtual void* Data(void) = 0;
-    virtual int vf14(void);
-    virtual int Usable(void) = 0;
-    virtual Sound* CreateSound(void) = 0;
-    virtual void vf20(void) = 0;
-    virtual void Activate(void) = 0;
-    virtual void vf28(void);
-    virtual void vf2C(int a);
-    virtual void vf30(void);
-    virtual void vf34(int a);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-
-    u32 data[3];  // offset 0x4
-};
-
 ModuleTag lbl_8055EDA0;
 extern LocString lbl_8048929C;
 
@@ -124,12 +102,14 @@ public:
     NullMixer(void) { memset(data, 0, sizeof(data)); }
     virtual ~NullMixer(void);
     virtual const char* Name(void) { return lbl_8048929C.Get(); }
-    virtual void* Data(void) { return data; }
+    virtual MixerCaps* Caps(void) { return (MixerCaps*)data; }
     virtual int vf14(void) { return 1; }
     virtual int Usable(void) { return 1; }
-    virtual void vf20(void) {}
-    virtual void Activate(void) {}
-    virtual Sound* CreateSound(void) { return new ("Null Sound") NullSound; }
+    virtual void SetListeners(void* listeners) {}
+    virtual void Shutdown(void) {}
+    virtual Sound* CreateSound(const char* name, int mode, int unscaled) { return new ("Null Sound") NullSound; }
+
+    u32 data[3];  // offset 0x4: the caps
 };
 
 struct VolumeHandle {
@@ -271,7 +251,7 @@ void fn_80208E90(Mixer* m, int dontCare) {
         int ok = dontCare == 0;
         if (dontCare == 1 && m->Usable()) {
             ok = 1;
-            m->Activate();
+            m->Shutdown();
         }
         if (ok) {
             lbl_80489238.list[lbl_80489238.count++] = m;

@@ -3,6 +3,7 @@
 // CC0; file src/auto/text_8020A6AC_.c) as C and rewritten as the classes its vtables prove. Unit name is provisional;
 // class names follow the unit's own strings ("VoiceSoundMixer::End", "VoiceSound::pool"); the rest are guesses.
 #include "game/common.h"
+#include "game/mixer.h"
 #include "game/sound.h"
 #include "game/pool.h"
 
@@ -59,36 +60,6 @@ struct SoundSample {
     f32 volume;       // offset 0x20
 };
 
-// What a mixer supports (field names from soundmgr.cpp; guesses).
-struct MixerCaps {
-    u8 noPositional;  // offset 0x0
-    s32 has3D;        // offset 0x4
-    s32 hasPan;       // offset 0x8 (the voice mixer reports 0x20)
-};
-
-// A sound device (mixer.cpp). Slot signatures follow this unit's overrides (sound.cpp names slot 0x1C
-// CreateSound(desc, mode, loop) and declares vf30/vf34 with other parameters).
-class Mixer {
-public:
-    Mixer(void) {}
-    virtual ~Mixer(void) {}
-    virtual const char* Name(void) = 0;
-    virtual MixerCaps* Caps(void) = 0;
-    virtual int vf14(void);
-    virtual int Usable(void) = 0;
-    virtual Sound* CreateSound(const char* name, int mode, u8 unscaled) = 0;
-    virtual void SetListeners(void* listeners) = 0;
-    virtual void Shutdown(void) = 0;
-    virtual void vf28(void);
-    virtual void vf2C(int a);
-    virtual void vf30(int a, int b);
-    virtual void vf34(void* a);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-};
-
 extern "C" {
 extern MixerCaps lbl_80489BD0;
 extern int lbl_8055EDF8;
@@ -118,7 +89,7 @@ public:
         return caps;
     }
     virtual int Usable(void);
-    virtual Sound* CreateSound(const char* name, int mode, u8 unscaled);
+    virtual Sound* CreateSound(const char* name, int mode, int unscaled);
     virtual void SetListeners(void* listeners);
     virtual void Shutdown(void);
     virtual void vf28(void);
@@ -629,7 +600,7 @@ inline VoiceSound::VoiceSound(const char* name, int slot, u8 unscaled) {
 }
 
 // Creates a voice in the first free slot and initialises it.
-Sound* VoiceSoundMixer::CreateSound(const char* name, int mode, u8 unscaled) {
+Sound* VoiceSoundMixer::CreateSound(const char* name, int mode, int unscaled) {
     VoiceSound* voice;
     int i;
     for (i = 0; i < 0x200; i++) {

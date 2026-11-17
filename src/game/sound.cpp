@@ -3,6 +3,7 @@
 // one player) and their state machine against the device sound, plus defaults of the Mixer and Sound
 // interfaces. Names are guesses apart from the class names, pool and messages.
 #include "game/common.h"
+#include "game/mixer.h"
 #include "game/sound.h"
 #include "game/pool.h"
 #include <revolution/MTX/vec.h>
@@ -16,26 +17,6 @@ void fn_8020A400(void);   // music shutdown
 }
 
 void* operator new(size_t size, const char* tag);
-
-class Mixer {
-public:
-    virtual ~Mixer(void);
-    virtual const char* Name(void) = 0;
-    virtual void* Caps(void) = 0;
-    virtual int vf14(void);
-    virtual int Usable(void) = 0;
-    virtual Sound* CreateSound(void* desc, int mode, int loop) = 0;
-    virtual void SetListeners(void* listeners) = 0;
-    virtual void Shutdown(void) = 0;
-    virtual void vf28(void);
-    virtual void vf2C(int a);
-    virtual void vf30(void);
-    virtual void vf34(int a);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-};
 
 struct Listener {
     s32 id;          // offset 0x0
@@ -136,11 +117,11 @@ extern "C" void fn_80206484(int a) { fn_80208D4C(fn_80208D70())->vf2C(a); }
 
 void Mixer::vf2C(int a) {}
 
-void Mixer::vf30(void) {}
+void Mixer::vf30(int a, int b) {}
 
-extern "C" void fn_802064D0(int a) { fn_80208D4C(fn_80208D70())->vf34(a); }
+extern "C" void fn_802064D0(int a) { fn_80208D4C(fn_80208D70())->vf34((void*)a); }
 
-void Mixer::vf34(int a) {}
+void Mixer::vf34(void* a) {}
 
 extern "C" void fn_80206518(void) { fn_80208D4C(fn_80208D70())->vf38(); }
 
