@@ -1310,9 +1310,7 @@ struct CbVec4 {
         w = w_;
     }
     CbVec4(CbSolPlain s) {
-        RVec3 p(s.x, s.y, s.z);
-        CbF f(s.w);
-        Set(p, f);
+        Set(RVec3(s.x, s.y, s.z), CbF(s.w));
     }
     void Set(const RVec3& p, CbF w_) {
         x = p.x;
