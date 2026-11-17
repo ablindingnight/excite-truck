@@ -1980,6 +1980,9 @@ static inline f32 PathLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 #pragma push
 #pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
+    int i;
+    int k;
+    V2* w;
     ValueNode* cfg = fn_8000AC38()->vals;
     if (cfg) {
         char name[0x10];
@@ -1990,15 +1993,13 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
             V2 pts[3];
             V2 mid;
             V2 dir;
-            int i;
-            int k;
             f32 best;
             f32 l;
             mid.x = 0.0f;
             mid.y = 0.0f;
             dir.x = 0.0f;
             dir.y = 0.0f;
-            V2* w = pts;
+            w = pts;
             for (i = 0; i < 3; i++, w++) {
                 char b[0x10];
                 fn_801345D8(b, 0x10, "bound%d", i);
