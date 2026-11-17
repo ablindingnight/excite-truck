@@ -695,10 +695,11 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 scale[0] = k0->scale[0] + u * (k1->scale[0] - k0->scale[0]);
                 f32 es = 1.0f;
                 if (e->xform) {
-                    m[3][0] = m[3][0] + e->xform->pos[0] * ps;
-                    m[3][1] = m[3][1] + e->xform->pos[1] * ps;
-                    m[3][2] = m[3][2] + e->xform->pos[2] * ps;
-                    es = 1.0f * e->xform->scale;
+                    ArtXform* xf = e->xform;
+                    m[3][0] = m[3][0] + xf->pos[0] * ps;
+                    m[3][1] = m[3][1] + xf->pos[1] * ps;
+                    m[3][2] = m[3][2] + xf->pos[2] * ps;
+                    es *= e->xform->scale;
                 }
                 if (e->type == 2) {
                     MulVec(off, e->model.off, m);
