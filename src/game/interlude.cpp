@@ -698,30 +698,44 @@ static inline void CopyP(V2* d, const ValPoint& s) {
 static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
     f32 ang = PSVECMag((const Vec*)&v);
     if (ang > 0.0001f) {
-        f32 inv = 1.0f / ang;
+        // The camera turn's rows in rigid's exact form (0fccfbd8b): squares named, t*x and t*y written in each
+        // entry, the y and z diagonals named ahead of their rows. Declaration order unproven: an inline's locals
+        // number upward in declaration order, and this order leaves x and s among the values coloured first
+        // (retail f31, f30, ahead of the caller's dt) while y and z fall under the 32-neighbour limit and are
+        // coloured late (f24, f23).
+        f32 c;
+        f32 zz;
+        f32 yy;
+        f32 xx;
+        f32 zDiag;
+        f32 yDiag;
+        f32 t;
+        f32 inv;
+        f32 s;
         f32 y;
         f32 z;
         f32 x;
+        inv = 1.0f / ang;
         x = inv * v.x;
         y = inv * v.y;
         z = inv * v.z;
-        f32 s = sin(ang);
-        f32 c = cos(ang);
-        f32 t = 1.0f - c;
-        f32 yy = y * y;
-        f32 zz = z * z;
-        f32 tx = t * x;
-        f32 xx = x * x;
-        f32 ty = t * y;
+        s = sin(ang);
+        c = cos(ang);
+        xx = x * x;
+        yy = y * y;
+        zz = z * z;
+        t = 1.0f - c;
         m->m[0][0] = c + t * xx;
-        m->m[0][1] = y * tx + s * z;
-        m->m[0][2] = z * tx - s * y;
-        m->m[1][0] = y * tx - s * z;
-        m->m[1][1] = c + t * yy;
-        m->m[1][2] = z * ty + s * x;
-        m->m[2][0] = z * tx + s * y;
-        m->m[2][1] = z * ty - s * x;
-        m->m[2][2] = c + t * zz;
+        m->m[0][1] = y * (t * x) + s * z;
+        m->m[0][2] = z * (t * x) - s * y;
+        yDiag = c + t * yy;
+        m->m[1][0] = y * (t * x) - s * z;
+        m->m[1][1] = yDiag;
+        m->m[1][2] = z * (t * y) + s * x;
+        zDiag = c + t * zz;
+        m->m[2][0] = z * (t * x) + s * y;
+        m->m[2][1] = z * (t * y) - s * x;
+        m->m[2][2] = zDiag;
     } else {
         m->m[0][0] = 1.0f;
         m->m[0][1] = 0.0f;
