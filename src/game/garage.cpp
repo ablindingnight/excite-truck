@@ -1146,10 +1146,11 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     f32 u1 = ic->u1;
     f32 v2 = ic->v2;
     f32 v1 = ic->v1;
+    u32 tint = TintColor(color, locked ? 0xFF000000 : -1);
     fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
                 0.8f * w, 0.8f * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, ic->u2, v2);
     fn_80231220(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
-                0.8f * w, 0.8f * h, ic->overlay, TintColor(color, locked ? 0xFF000000 : -1), u1, v1,
+                0.8f * w, 0.8f * h, ic->overlay, tint, u1, v1,
                 ic->u2, v2);
 }
 
