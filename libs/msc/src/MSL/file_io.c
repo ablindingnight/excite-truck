@@ -84,6 +84,8 @@ int fflush(FILE* file)
     return 0;
 }
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (fopen: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 FILE* fopen(const char* filename, const char* mode)
 {
     FILE* file;
@@ -94,7 +96,10 @@ FILE* fopen(const char* filename, const char* mode)
 
     return file;
 }
+#endif
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (freopen: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 FILE* freopen(const char* filename, const char* mode, FILE* file)
 {
     file_modes modes;
@@ -134,7 +139,10 @@ FILE* freopen(const char* filename, const char* mode, FILE* file)
 
     return file;
 }
+#endif
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (__get_file_modes: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 int __get_file_modes(const char* mode, file_modes* modes)
 {
     int mode_char;
@@ -209,6 +217,7 @@ int __get_file_modes(const char* mode, file_modes* modes)
     modes->io_mode = io_mode;
     return 1;
 }
+#endif
 
 int __msl_strnicmp(const char* str1, const char* str2, int n)
 {
@@ -233,6 +242,8 @@ int __msl_strnicmp(const char* str1, const char* str2, int n)
     return 0;
 }
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (__msl_itoa: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 char* __msl_itoa(int value, char* str, unsigned int base)
 {
     int var_r7;
@@ -279,3 +290,4 @@ char* __msl_itoa(int value, char* str, unsigned int base)
 
     return str;
 }
+#endif

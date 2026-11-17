@@ -50,6 +50,8 @@ int __wctomb_noconv(char* pSrc, wchar_t cr)
     return 1;
 }
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (mbstowcs: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 size_t mbstowcs(wchar_t* pDest, const char* pSrc, size_t num)
 {
     int res;
@@ -93,6 +95,7 @@ size_t mbstowcs(wchar_t* pDest, const char* pSrc, size_t num)
 
     return count;
 }
+#endif
 
 size_t wcstombs(char* pSrc, const wchar_t* pwcs, size_t n)
 {

@@ -11,6 +11,8 @@ void __prep_buffer(FILE* file)
     return;
 }
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (__load_buffer: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 int __load_buffer(FILE* file, size_t* bytes_loaded, int alignment)
 {
     FILE* f;
@@ -64,6 +66,7 @@ int __load_buffer(FILE* file, size_t* bytes_loaded, int alignment)
 
     return __no_io_error;
 }
+#endif
 
 int __flush_buffer(FILE* file, size_t* length)
 {
@@ -93,6 +96,8 @@ int __flush_buffer(FILE* file, size_t* length)
     return 0;
 }
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (setvbuf: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 int setvbuf(FILE* file, char* buff, int mode, size_t size)
 {
     int kind;
@@ -144,3 +149,4 @@ int setvbuf(FILE* file, char* buff, int mode, size_t size)
 
     return 0;
 }
+#endif

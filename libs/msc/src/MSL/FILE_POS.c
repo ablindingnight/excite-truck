@@ -117,6 +117,8 @@ int _fseek(FILE* file, fpos_t offset, int whence)
     return 0;
 }
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (fseek: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 int fseek(FILE* stream, long offset, int whence)
 {
     int code;
@@ -126,10 +128,14 @@ int fseek(FILE* stream, long offset, int whence)
     __end_critical_region(stdin_access);
     return code;
 }
+#endif
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (rewind: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 void rewind(FILE* stream)
 {
     stream->file_state.error = 0;
     _fseek(stream, 0, SEEK_SET);
     stream->file_state.error = 0;
 }
+#endif

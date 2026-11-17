@@ -7,6 +7,8 @@
 #include "string_api.h"
 #include "wchar_io.h"
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (fread: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 size_t fread(void* buffer, size_t size, size_t count, FILE* stream)
 {
     size_t retval;
@@ -17,7 +19,10 @@ size_t fread(void* buffer, size_t size, size_t count, FILE* stream)
 
     return retval;
 }
+#endif
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (__fread: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 size_t __fread(void* buffer, size_t size, size_t count, FILE* stream)
 {
     int always_buffer, ioresult;
@@ -177,7 +182,10 @@ size_t __fread(void* buffer, size_t size, size_t count, FILE* stream)
 
     return bytes_read / size;
 }
+#endif
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (fwrite: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 size_t fwrite(const void* buffer, size_t size, size_t count, FILE* stream)
 {
     size_t retval;
@@ -188,6 +196,7 @@ size_t fwrite(const void* buffer, size_t size, size_t count, FILE* stream)
 
     return retval;
 }
+#endif
 
 size_t __fwrite(const void* buffer, size_t size, size_t count, FILE* stream)
 {
