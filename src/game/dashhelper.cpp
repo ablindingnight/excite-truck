@@ -79,6 +79,7 @@ struct ViewLayout {
 
 #include "game/vertex.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -314,11 +315,7 @@ gArtSet* lbl_8055D4D0;
 gArtSet* lbl_8055D4D4;
 f32 lbl_8055D4D8;  // centre text wrap width
 
-static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 InvLerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
-static inline f32 Clamp01(f32 x) { return Max(Min(1.0f, x), 0.0f); }
+static inline f32 Clamp01(f32 x) { return MaxF(MinF(1.0f, x), 0.0f); }
 
 static inline DashRow* AddRow(DashRowList* list) { return &list->rows[list->count++]; }
 
@@ -372,8 +369,6 @@ u32 fn_8000E338(int value) {
     return value <= 70 ? 0xFFE5A703 : 0xFF278F27;
 }
 
-// Helper name unproven: value left of the literal in the fmuls.
-static inline f32 MulQ(f32 a, f32 b) { return a * b; }
 void fn_8000E3B4(int player) {
     DashRowList* list = &lbl_80350F88;
     f32 top;
@@ -393,7 +388,7 @@ void fn_8000E3B4(int player) {
     } else {
         top = fn_80011DC0(player);
     }
-    y = Min(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80350F88.art, fn_8000DFA8(0)));
+    y = MinF(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80350F88.art, fn_8000DFA8(0)));
     y = y + top - 50.0f;
     if (player < 0) {
         right = fn_80011E34();
@@ -420,7 +415,7 @@ void fn_8000E3B4(int player) {
         x5 = 5.0f + x;
         xr = x + w - 5.0f;
         x10 = 5.0f + x5;
-        ty = 1.0f + (y - MulQ(h, 0.5f));
+        ty = 1.0f + (y - Mul(h, 0.5f));
         switch (row->type) {
         case 1:
             fn_80010074(fn_8000E2D8(row->a), 0x11, "%s", 1.0f, x10, ty, row);
@@ -462,7 +457,7 @@ void fn_8000E3B4(int player) {
             fn_8000DFD8(row, fn_8000E338(row->a), x5 + pad, ty);
             {
                 f32 bx = x5 + pad;
-                f32 fill = bx + MulQ(row->c, GetBarWidth()) / 100.0f;
+                f32 fill = bx + Mul(row->c, GetBarWidth()) / 100.0f;
                 f32 half;
                 f32 bh = GetBarHeight();
                 half = 0.5f;
@@ -477,7 +472,7 @@ void fn_8000E3B4(int player) {
             fn_8000DFD8(row, 0xFF2D2DC8, x5 + pad, ty);
             break;
         }
-        maxSlide = Max(maxSlide, row->slide);
+        maxSlide = MaxF(maxSlide, row->slide);
         y -= h - 1.0f;
     }
 }
@@ -505,7 +500,7 @@ void fn_8000E874(int player) {
     } else {
         top = fn_80011DC0(player);
     }
-    y = Min(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80351214.art, fn_8000DFA8(0)));
+    y = MinF(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80351214.art, fn_8000DFA8(0)));
     y = y + top;
     pad = lbl_80351214.wide ? 56.0f : 0.0f;
     maxSlide = 0.0f;
@@ -573,7 +568,7 @@ void fn_8000E874(int player) {
                 bw = 2.0f;
                 bh = GetBarHeight();
                 half = 0.5f;
-                fn_800109E4(barColor, x5 + MulQ(row->c, GetBarWidth()) / 100.0f - 1.0f, ty + bh * half, bw, bh);
+                fn_800109E4(barColor, x5 + Mul(row->c, GetBarWidth()) / 100.0f - 1.0f, ty + bh * half, bw, bh);
             }
             break;
         case 8:
@@ -591,7 +586,7 @@ void fn_8000E874(int player) {
             }
             break;
         }
-        maxSlide = Max(maxSlide, row->slide);
+        maxSlide = MaxF(maxSlide, row->slide);
         y -= h - 1.0f;
     }
     {
@@ -824,7 +819,7 @@ void fn_8000F4F0(void) {
         if (lbl_80558A98 != 0) {
             lbl_8055D4B8->Play();
         }
-        phase = Lerp(0.0f, 1.0f, Clamp01(InvLerp(-t, 0.5f, 1.5f)));
+        phase = Lerp(0.0f, 1.0f, Clamp01(Unlerp(-t, 0.5f, 1.5f)));
         left = 1.5f - -t;
         if (left < 0.7f) {
             f32 fade = left / 0.7f;
@@ -917,7 +912,7 @@ void fn_8000FBE8(f32 x, f32 y, f32 scale) {
     y += 1.0f;
     f32 h0 = fn_80235F64(lbl_8055D4CC, 4);
     f32 h = h0 * scale;
-    f32 half = MulQ(h, 0.5f);
+    f32 half = Mul(h, 0.5f);
     size = 10.0f + h;
     f32 by = 5.0f + (y + half);
     bx = x - 5.0f;

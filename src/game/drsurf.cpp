@@ -17,6 +17,7 @@
 #include "game/plainvec.h"
 #include "revolution/GX/GXTypes.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -209,7 +210,6 @@ u8* lbl_8055FDF8;   // format DL cursor
 u8 lbl_8055FDFC;
 s32 lbl_8055FE00;   // y-morph vertices
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 template <class Position>
 static inline void MulVec(V3* out, const Position* in, const Mat3* m, const void* pos) {

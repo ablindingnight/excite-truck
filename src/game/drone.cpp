@@ -27,6 +27,7 @@ struct Quat {
 };
 
 #include "game/oframe.h"
+#include "game/mathutil.h"
 
 struct BMtx33 {
     f32 xx, xy, xz;
@@ -528,7 +529,6 @@ void LinearDrone::Start(LinearPathData* d) {
 extern "C" void fn_801FEA28(LinearDrone* d);
 
 
-static inline f32 LerpU(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 void LinearDrone::Advance(f32 dt) {
     const LinearKey* k = &path->keys[seg];
@@ -580,10 +580,10 @@ void LinearDrone::Advance(f32 dt) {
         d2.z = p2->z - p1->z;
         f32 u = inv * PSVECDistance((const Vec*)&frame.pos, (const Vec*)p0);
         PVec up;
-        up.Set(LerpU(u, ((const LinearKey*)p0)->up.x, ((const LinearKey*)p1)->up.x), LerpU(u, ((const LinearKey*)p0)->up.y, ((const LinearKey*)p1)->up.y), LerpU(u, ((const LinearKey*)p0)->up.z, ((const LinearKey*)p1)->up.z));
+        up.Set(LerpT(u, ((const LinearKey*)p0)->up.x, ((const LinearKey*)p1)->up.x), LerpT(u, ((const LinearKey*)p0)->up.y, ((const LinearKey*)p1)->up.y), LerpT(u, ((const LinearKey*)p0)->up.z, ((const LinearKey*)p1)->up.z));
         frame.x = up;
         PVec dir;
-        dir.Set(LerpU(u, d.x, d2.x), LerpU(u, d.y, d2.y), LerpU(u, d.z, d2.z));
+        dir.Set(LerpT(u, d.x, d2.x), LerpT(u, d.y, d2.y), LerpT(u, d.z, d2.z));
         frame.z = dir;
         PSVECNormalize((const Vec*)&frame.z, (Vec*)&frame.z);
     } else {

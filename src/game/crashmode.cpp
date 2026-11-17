@@ -180,7 +180,6 @@ f32 lbl_8055AE38 = 100.0f;
 f32 lbl_8055AE3C = 0.1f;   // minimum time before a crash is scored
 f32 lbl_8055AE40 = 1.5f;   // crash recovery window
 
-static inline f32 Min1(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max2(f32 a, f32 b) {
     f32 r = a;
     if (!(r > b)) {
@@ -188,9 +187,7 @@ static inline f32 Max2(f32 a, f32 b) {
     }
     return r;
 }
-static inline f32 Max1(f32 a, f32 b) { return (a > b) ? a : b; }
 static inline int IsTutorialCrash(void) { return fn_801769CC()->type == 0x180201; }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 inline RaceCarRec* Car(int i);
 inline void DrawArt(ArtElem* e, s32 tex);
@@ -318,6 +315,7 @@ inline void DrawArt(ArtElem* e, s32 tex) { fn_801476D8(e, -1, tex); }
 // ArtElem's copy, after its uses as DrawArt above, so this unit calls the out-of-line weak copy (retail's kept copy
 // is betarace's).
 #include "game/artelemcopy.h"
+#include "game/mathutil.h"
 
 
 
@@ -358,7 +356,7 @@ void fn_801DFFB4(void) {
         left = (left > x) ? left : x;
         if (!((f32)__fabs(left) <= __float_epsilon[0])) {
             e = m->layout->FindBox("whiteout");
-            f32 t = Max1(Min1((left - dur / 2.0f) / (0.1f - dur / 2.0f), 1.0f), 0.0f);
+            f32 t = MaxF(MinFRev((left - dur / 2.0f) / (0.1f - dur / 2.0f), 1.0f), 0.0f);
             e->color = ((int)Lerp(0.0f, 255.0f, t) << 24) | 0xFFFFFF;
             e->w = (f32)lbl_8055CFF0 / fn_802C9A50();
             fn_80148100(e);
@@ -428,11 +426,11 @@ inline void CrashMode::PumpStep(CrashState* s, RaceCarRec* rc, f32 since, f32 wi
                 failSnd->Play();
             }
         } else {
-            s->pump = Max1(s->pump - 0.0027805585f, 0.15f);
+            s->pump = MaxF(s->pump - 0.0027805585f, 0.15f);
         }
     } else {
         if (!s->boosted) {
-            s->pump = Max1(s->pump - 0.011122234f, 0.0f);
+            s->pump = MaxF(s->pump - 0.011122234f, 0.0f);
         }
         if (now - s->time > lbl_8055AE40 / 3.0f) {
             done = 1;

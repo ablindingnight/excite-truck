@@ -7,6 +7,7 @@
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include <string.h>
+#include "game/mathutil.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -455,7 +456,6 @@ static inline void SetIdentity(f32* m) {
 
 extern "C" {
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 // Poses the rider's bones on the skeleton points: each bone sits on its point (in the model's frame f)
 // and, when it has a child, is turned from its bind direction to aim at the child.
 }
@@ -546,8 +546,6 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
 
 }  // extern "C"
 
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 // The six rider bones aimed by the ragdoll (fn_802009CC).
 struct RiderLinks {
@@ -567,9 +565,8 @@ void fn_802C70AC(s32 model, const PlainValMatrix* m, s32 a, int b);
 // Per-frame rider update for car state `car`: steering lean, seat frame, the body twist from yaw and roll,
 // the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
 // bent by speed and pitch) drawn at the car.
-static inline double AbsDbl(double v) { return __fabs(v); }
 
-static inline f32 Sq_hm(f32 v) { return v * v; }  /* Helper name unproven */
+  /* Helper name unproven */
 void fn_80201018(DriverModel* d, const u8* car, int show) {
     ValVec3 off2;
     DBone bones[32];
@@ -635,7 +632,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     }
     f32 ny = d->fCC;
     d->fCC = 0.5f * ny + 0.5f * oldy;
-    if ((f32)AbsDbl(d->fCC) < 0.1f || ny * oldy > 0.0f) {
+    if ((f32)AbsD(d->fCC) < 0.1f || ny * oldy > 0.0f) {
         if (S32(car, 0x48) == 0) {
             d->fC8 = 0.9f * oldx;
         }
@@ -679,7 +676,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         rot.rz.x = az * (t * ax) + sn * ay;
         rot.ry.z = az * (t * ay) + sn * ax;
         rot.rz.y = az * (t * ay) - sn * ax;
-        rot.rz.z = cs + t * (Sq_hm(az));
+        rot.rz.z = cs + t * (Sq(az));
     } else {
         SetIdentity(&rot.rx.x);
     }

@@ -3,6 +3,7 @@
 // "white_zr.tex" texture. Names are guesses apart from the strings.
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 // DVec3: valvec3.h's ValVec3.
 struct DBasis {
@@ -46,7 +47,6 @@ DCam* fn_802C86DC(void);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void SetLength(ValVec3* v, f32 len) {
     f32 m = PSVECMag((const Vec*)v);
@@ -80,10 +80,9 @@ static inline void AddScaled(DVtx* o, const ValVec3* a, const ValVec3* b, f32 k)
     o->pos.z = a->z + b->z * k;
 }
 
-static inline u32 DbgColor(u8 a, u8 r, u8 g, u8 b) { return (a << 24) | (r << 16) | (g << 8) | b; }
 
 ModuleTag lbl_8055EA58;
-u32 lbl_8055EA60 = DbgColor(0xFF, 0xFF, 0, 0);
+u32 lbl_8055EA60 = ARGB(0xFF, 0xFF, 0, 0);
 s32 lbl_8055EA64;
 f32 lbl_8055EA68;
 s32 lbl_8055EA6C;
@@ -92,14 +91,13 @@ extern "C" {
 
 void fn_801E41D8(const ValVec3* a, const ValVec3* b, u32 color, f32 width);
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_801E3640(const ValVec3* dir, DBasis* out) {
     ValVec3 up;
     out->z.x = dir->x;
     out->z.y = dir->y;
     out->z.z = dir->z;
-    if (AbsF(dir->x) < 0.01f && AbsF(dir->z) < 0.01f) {
+    if (FAbs(dir->x) < 0.01f && FAbs(dir->z) < 0.01f) {
         up.x = 0.0f;
         up.y = 0.0f;
         up.z = 1.0f;

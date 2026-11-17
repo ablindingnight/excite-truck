@@ -10,6 +10,7 @@
 #include "game/rmtx.h"
 #include "game/plainvec.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -249,7 +250,6 @@ static inline void SetRow(RVec3& v, f32 x, f32 y, f32 z) {
     v.y = y;
     v.z = z;
 }
-static inline f32 SqF(f32 x) { return x * x; }
 
 void fn_80292698(void) {
     f32 t = fn_801E7E18();
@@ -274,9 +274,9 @@ void fn_80292698(void) {
             sn = (f32)sin(ang);
             f32 c = cos(ang);
             f32 k = 1.0f - c;
-            SetRow(s->rot.x, c + k * SqF(x), sn * z + y * (k * x), z * (k * x) - sn * y);
-            SetRow(s->rot.y, y * (k * x) - sn * z, c + k * SqF(y), z * (k * y) + sn * x);
-            SetRow(s->rot.z, z * (k * x) + sn * y, z * (k * y) - sn * x, c + k * SqF(z));
+            SetRow(s->rot.x, c + k * Sq(x), sn * z + y * (k * x), z * (k * x) - sn * y);
+            SetRow(s->rot.y, y * (k * x) - sn * z, c + k * Sq(y), z * (k * y) + sn * x);
+            SetRow(s->rot.z, z * (k * x) + sn * y, z * (k * y) - sn * x, c + k * Sq(z));
         } else {
             s->rot.x.x = 1.0f;
             s->rot.x.y = 0.0f;
@@ -505,8 +505,6 @@ static inline int Dim(u32 c) {
     return v > 0xFF ? 0xFF : v;
 }
 
-/* Helper name unproven */
-static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 static inline u32 DimColor(u8 r, u8 g, u8 b) { return ARGB(0xFF, r, g, b); }
 
 static inline CarModel* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }

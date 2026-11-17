@@ -8,6 +8,7 @@
 #include "game/rigid.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+#include "game/mathutil.h"
 
 extern "C" {
 int fn_801E9EC4(s16* hint, RVec3* hit, RVec3* n, u32* flags, f32 x, f32 z);  // ground contact under a point
@@ -18,7 +19,6 @@ void fn_802E30C8(const char* fmt, ...);
 extern f32 __float_epsilon[];  // FLT_EPSILON
 extern s32 lbl_8055E3C4;    // frame counter
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
     if (out == in) {
