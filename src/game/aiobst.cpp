@@ -605,7 +605,7 @@ struct Bins {
 };
 
 // Spot: game/spot.h. Its From is defined here (retail's one copy, called by aiobst, ball and boostman).
-void Spot::From(const Vec2& v) {
+inline void Spot::From(const Vec2& v) {
     x = v.v.x;
     y = 0.0f;
     z = v.v.y;
@@ -714,13 +714,12 @@ static inline void FindGap(RaceCarRec* rc, void* steer, u8 side, int flatten, in
             }
             if (found) {
                 Vec2 w;
-                Spot spot;
                 fn_8019321C(&w, &target, &f);
                 if (steer) {
                     SetV2(*(V2*)steer, (const V2&)w);
                 }
-                DefaultConstructVec3(&spot);
-                spot.From(w);
+                Vec3Storage spot;
+                ((Spot*)&spot)->From(w);
             }
         }
     }
