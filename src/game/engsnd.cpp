@@ -28,16 +28,10 @@ GameSound* fn_802077A4(const char* name, int cls, void* vel, void* pos);
 Sound2D* fn_80207848(const char* name, int cls);
 }
 
-struct VehicleDef {
-    virtual ValueNode* FindChild(const char* name);
-};
 
 // The car resource the car holds at 0x26C: carmodel.cpp's CarRes (its value table at 0x2134); was named
 // CarSetup here, the 0x138 setup record of carsetup/caruimod/masslist.
-struct CarRes {
-    u8 pad0[0x2134];
-    VehicleDef* def;  // offset 0x2134
-};
+#include "game/carres.h"
 
 struct Car {
     u8 pad0[0x60];
@@ -105,7 +99,7 @@ public:
         this->car = car;
         count = 0;
         ValueTable* table = fn_80131808(
-            car->setup->def->FindChild("EngineNormal")->GetString("engine_sound", lbl_8055B4F8));
+            car->setup->values->FindChild("EngineNormal")->GetString("engine_sound", lbl_8055B4F8));
         ValueNode* global = table->FindChild("global");
         rpmFactor = global->GetFloat("rpm_factor", 1.0f);
         focusVolume = global->GetFloat("focus_volume");

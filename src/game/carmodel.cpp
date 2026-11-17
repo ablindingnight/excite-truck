@@ -78,11 +78,7 @@ struct CarDrawView {
 
 
 // The racer description the model is built for.
-struct CarRes {
-    s32 numBones;           // offset 0x0
-    u8 pad4[0x2130];
-    ValueTable* values;     // offset 0x2134
-};
+#include "game/carres.h"
 
 struct Joint;
 
