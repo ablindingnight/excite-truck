@@ -2281,9 +2281,7 @@ void fn_8019743C(u8* d, u8* out) {
             at = F32(d, 0xE4);
         }
         U8(d, 0x250) = 1;
-        V2 tgt;
-        tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
-        tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * at;
+        V2C tgt(F32(d, 0x48) + F32(d, 0x58) * at, F32(d, 0x4C) + F32(d, 0x5C) * at);
         f32 xv = ((V2*)out)->x;
         f32 yv = ((V2*)out)->y;
         V2 c = LerpV2(F32(d, 0xE0), xv, yv, tgt);
