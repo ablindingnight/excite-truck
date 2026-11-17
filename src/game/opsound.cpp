@@ -65,11 +65,11 @@ class SoundOptions : public MenuState {
 public:
     SoundOptions(f32* fx, f32* music, s32* quality, s32* mixer, char* mixerName, f32* announcer, f32* tire,
                  f32* video) {
+        this->mixer = mixer;
+        this->mixerName = mixerName;
         this->fx = fx;
         this->music = music;
         this->quality = quality;
-        this->mixer = mixer;
-        this->mixerName = mixerName;
         this->announcer = announcer;
         this->tire = tire;
         this->video = video;
@@ -189,6 +189,8 @@ void fn_8023CC84(const char* layout) {
         lbl_8055F164 = 0.0f;
     }
     {
+        const char* qualityChoices = qualities;
+        const char* musicChoices = raceMusic;
         s32 mixer = fn_80208D70();
         char mixerName[0x100];
         SoundOptions opts(&lbl_8055F16C, &lbl_8055F164, &lbl_8055F17C, &mixer, mixerName, &lbl_8055F168,
@@ -213,15 +215,15 @@ void fn_8023CC84(const char* layout) {
                 VolumeItem("music_volume", &lbl_8055F164, 0.0f, 1.0f),
                 VolumeItem("tire_volume", &lbl_8055F170, 0.0f, 1.0f),
                 MenuItem("back", 0, 0, -1, 0),
-                MenuItem("quality", 7, &lbl_8055F17C, (int)qualities, 0),
-                MenuItem("race_music", 7, &lbl_8055F178, (int)raceMusic, 0),
+                MenuItem("quality", 7, &lbl_8055F17C, (int)qualityChoices, 0),
+                MenuItem("race_music", 7, &lbl_8055F178, (int)musicChoices, 0),
                 MenuItem("mixer", 2, &mixer, 0, 0),
                 MenuItem("mixer_name", 3, mixerName, 0x100, 0),
                 MenuItem("circle_list", 10, &list, 0, 0),
                 MenuItem(lbl_8055B860, 6, (void*)fn_8023CB80, -1, 0x1B),
                 MenuItem(lbl_8055BABC, 8, (void*)fn_8023CA50, 1, 0),
                 MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
-                *(MenuItem*)&lbl_804987A0,
+                MenuItem(lbl_804987A0),
             };
             MenuDesc desc = {layout, items, 0, 0, 0};
             if (fn_802146BC(&desc, -999, -999, 1) == -2) {
