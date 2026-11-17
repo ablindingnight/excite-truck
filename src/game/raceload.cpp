@@ -5,6 +5,7 @@
 #include "game/davmap.h"
 #include "game/racesetup.h"
 #include "game/gamedb.h"
+#include "game/strcopy.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -48,16 +49,6 @@ u8 lbl_8055D3B4;               // resource track used
 u8 lbl_8055D3B5;               // weather track used
 EventInfo* lbl_8055D3B8;
 
-static inline void CopyString(const char* s, int size, char* dst) {
-    char* d = dst;
-    int n = size;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 void fn_80009DC8(RaceSetup* rs) {
     s32 vehicle;
@@ -76,7 +67,7 @@ void fn_80009DC8(RaceSetup* rs) {
         s->flags = 0;
         s->unk74 = v->groups;
         s->unk64.v = 0.0f;
-        CopyString(v->chassis, 32, s->vehicleName);
+        SafeStrCopy(s->vehicleName, v->chassis, 32);
         s->type = 'Q';
         for (p = 0; p < fn_80137C74(); p++) {
             if (IsPlayerDriver(s->driver, p)) {
@@ -84,7 +75,7 @@ void fn_80009DC8(RaceSetup* rs) {
                 s->flags = (s->flags & ~3) | (p & 3);
             }
         }
-        CopyString(d->name, 64, s->driverName);
+        SafeStrCopy(s->driverName, d->name, 64);
     }
     if (rs->opts.type & 0x1000) {
         for (i = list->count / 2; i < list->count; i++) {
@@ -93,8 +84,8 @@ void fn_80009DC8(RaceSetup* rs) {
     }
     if (rs->opts.type & 0x400) {
         tmp.type = 'T';
-        CopyString("Trailer", 64, tmp.driverName);
-        CopyString("", 32, tmp.vehicleName);
+        SafeStrCopy(tmp.driverName, "Trailer", 64);
+        SafeStrCopy(tmp.vehicleName, "", 32);
         tmp.driver = -31;
         tmp.vehicle = -31;
         tmp.flags = 0;
@@ -104,7 +95,7 @@ void fn_80009DC8(RaceSetup* rs) {
             vehicle = FindVehicleByFlags(1, i)->id;
             *trailer = tmp;
             trailer->vehicle = vehicle;
-            CopyString(FindVehicle(vehicle)->chassis, 32, trailer->vehicleName);
+            SafeStrCopy(trailer->vehicleName, FindVehicle(vehicle)->chassis, 32);
         }
     }
 }
