@@ -234,19 +234,6 @@ static inline f32 Unlerp(f32 a, f32 b, f32 x) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-// MATCHING-AID: expanded form of Stop for vf10, which is still under #pragma dont_inline (the original inlines Stop
-// there but calls the Arena methods). The real mechanism is known now: inline callees of an inlined helper stay calls
-// when the helper's expanded body is over the compiler's size limit (see vf0C's Arena::Step); vf10's helper split
-// has not been found yet (an Arena reset helper comes out just under the limit and expands everything).
-#define STOP_SOUND(s_)                                                                                                 \
-    do {                                                                                                               \
-        GameSound* snd_ = (s_);                                                                                           \
-        if (snd_) {                                                                                                    \
-            snd_->stop = 1;                                                                                            \
-            snd_->restart = 0;                                                                                             \
-        }                                                                                                              \
-    } while (0)
-
 
 
 template <class T>
@@ -524,6 +511,7 @@ public:
     RingChalMaster(Race* race);
     virtual ~RingChalMaster(void);
     virtual void vf10(void);
+    void ResetGame(void);
     virtual int vf20(int car) const;
     virtual int vf3C(int view);
     virtual f32 vf38(void);
@@ -1272,11 +1260,14 @@ inline void Arena::Tally(void) {
     }
 }
 
-#pragma dont_inline on
-inline void RingChalMaster::vf10(void) {
+/* Helper name unproven */
+inline void RingChalMaster::ResetGame(void) {
     int i;
-    for (i = 0; i < players.count; i++) {
-        PlayerData* pd = players.data[i];
+    u32 playerOffset;
+    i = 0;
+    playerOffset = 0;
+    for (; i < players.count; i++, playerOffset += sizeof(PlayerData*)) {
+        PlayerData* pd = *reinterpret_cast<PlayerData**>(reinterpret_cast<u8*>(players.data) + playerOffset);
         pd->score = 0;
         pd->b8 = 0;
         pd->fC = 0.0f;
@@ -1338,31 +1329,16 @@ inline void RingChalMaster::vf10(void) {
     if (arena.sFail) {
         fn_80144C54(arena.sFail);
     }
+}
+
+inline void RingChalMaster::vf10(void) {
+    ResetGame();
     b9C = 1;
     fA0 = -100.0f;
-    results.state = 0;
-    results.start = -1.0f;
-    results.b8 = 1;
-    results.b9 = 0;
-    results.noBonus = 0;
-    results.fF8 = 0;
-    results.fFC = 0;
-    results.f100 = 0;
-    results.f104 = 0;
-    if (results.layout) {
-        ((ArtPlayer*)(results.layout))->StopAll();
-    }
-    STOP_SOUND(results.sBonus);
-    STOP_SOUND(results.sNoBonus);
-    STOP_SOUND(results.s1C);
-    results.b20 = 0;
-    STOP_SOUND(results.s24);
-    STOP_SOUND(results.s28);
-    STOP_SOUND(results.s2C);
-    STOP_SOUND(sPreRace);
+    results.Reset();
+    Stop(sPreRace);
     bA8 = 0;
 }
-#pragma dont_inline reset
 
 
 inline int Arena::PointValue(void) {
