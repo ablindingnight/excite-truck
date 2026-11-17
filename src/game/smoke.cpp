@@ -32,6 +32,7 @@ struct SmokeModel {
 
 #include "game/scolor.h"
 #include "game/mathutil.h"
+#include "game/tadds.h"
 
 struct SVec {
     SVec(void) {
@@ -120,11 +121,6 @@ static inline void Scale(Vec* out, const Vec* in, f32 s) {
     out->z = in->z * s;
 }
 
-static inline void AddScaled(Vec* out, const Vec* in, const Vec* d, f32 s) {
-    out->x = in->x + d->x * s;
-    out->y = in->y + d->y * s;
-    out->z = in->z + d->z * s;
-}
 
 class EngineSmokeMan {
 public:
@@ -519,7 +515,7 @@ void ExhaustSmokeMan::Emit(void* e, int car, int part) {
     p.y = p.y + c->pos.y;
     p.z = p.z + c->pos.z;
     MulVec(&d, &pt->basis[1], c->axes);
-    AddScaled(&d, &c->vel, &d, 1.75f);
+    TAddS(&d, &c->vel, &d, 1.75f);
     fn_8028E584(e, &p, &d);
 }
 

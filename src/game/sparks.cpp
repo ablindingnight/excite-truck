@@ -76,6 +76,7 @@ public:
 };
 
 #include "game/fxseq.h"
+#include "game/tadds.h"
 
 extern "C" {
 double log2(double x);
@@ -142,11 +143,6 @@ static inline void Scale(Vec* out, const Vec* in, f32 s) {
     out->z = in->z * s;
 }
 
-static inline void AddScaled(Vec* out, const Vec* in, const Vec* d, f32 s) {
-    out->x = in->x + d->x * s;
-    out->y = in->y + d->y * s;
-    out->z = in->z + d->z * s;
-}
 
 static inline void SetVec(Vec* v, f32 x, f32 y, f32 z) {
     v->x = x;
@@ -483,7 +479,7 @@ void fn_8028ADF4(SparkEntry* e, int n) {
                 Vec d;
                 Vec v;
                 Scale(&d, &car->axes[1], fn_80287BC8(0.2f, 1.0f));
-                AddScaled(&d, &d, &car->axes[2], fn_80287BC8(-0.2f, -1.0f));
+                TAddS(&d, &d, &car->axes[2], fn_80287BC8(-0.2f, -1.0f));
                 PSVECNormalize(&d, &d);
                 Scale(&d, &d, w->size);
                 p.x = p.x + d.x;
@@ -491,7 +487,7 @@ void fn_8028ADF4(SparkEntry* e, int n) {
                 p.z = p.z + d.z;
                 Scale(&v, &car->vel, 0.87f);
                 v.y += 3.0f;
-                AddScaled(&v, &v, &car->axes[0], w->pos.x > 0.0f ? 1.0f : -1.0f);
+                TAddS(&v, &v, &car->axes[0], w->pos.x > 0.0f ? 1.0f : -1.0f);
                 f32 s = 0.033333335f * w->speed;
                 v.x = v.x + fn_80287BC8(-s, s);
                 v.z = v.z + fn_80287BC8(-s, s);
@@ -507,10 +503,10 @@ void fn_8028ADF4(SparkEntry* e, int n) {
                 p.y = p.y + car->pos.y;
                 p.z = p.z + car->pos.z;
                 Scale(&v, &car->axes[2], -1.0f);
-                AddScaled(&v, &v, &car->axes[1], fn_80287BC8(0.5f, 1.0f));
+                TAddS(&v, &v, &car->axes[1], fn_80287BC8(0.5f, 1.0f));
                 Scale(&v, &v, w->speed * fn_80287BC8(0.1f, 0.175f));
-                AddScaled(&v, &v, &car->vel, 0.65f);
-                AddScaled(&v, &v, &car->axes[0], w->pos.x > 0.0f ? 1.0f : -1.0f);
+                TAddS(&v, &v, &car->vel, 0.65f);
+                TAddS(&v, &v, &car->axes[0], w->pos.x > 0.0f ? 1.0f : -1.0f);
                 f32 s = 0.033333335f * w->speed;
                 v.x = v.x + fn_80287BC8(-s, s);
                 v.z = v.z + fn_80287BC8(-s, s);
@@ -592,7 +588,7 @@ int fn_8028B500(const void* evp) {
             f32 s = -dot + fn_80287BC8(-1.5f, 3.0f);
             s = MIN(cap, s);
             s = MAX(s, 0.0f);
-            AddScaled(&d, &d, &ev->normal, s);
+            TAddS(&d, &d, &ev->normal, s);
             lbl_8055F6FC->Spawn(&ev->pos, &d, hint, ev->car);
         }
         int m = 1.5f * n;
@@ -620,7 +616,7 @@ int fn_8028B500(const void* evp) {
             d.z = d.z + fn_80287BC8(-spread, spread);
             f32 s = -PSVECDotProduct(&ev->normal, &d);
             s = MAX(zero, s);
-            AddScaled(&d, &d, &ev->normal, s);
+            TAddS(&d, &d, &ev->normal, s);
             sys->Spawn(&ev->pos, &d, hint, ev->car);
         }
     }
@@ -802,7 +798,7 @@ void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
             f32 a = invLife * (now - s->t);
             // opaque white with the given alpha; the shared ARGB inline is the boundary (in place: DrawAll 100 -> 99.58)
             color = ARGB((int)(255.0f * (1.0f - a * a)), 0xFF, 0xFF, 0xFF);
-            AddScaled(&p, &s->pos, &s->vel, 5.0f * -dt);
+            TAddS(&p, &s->pos, &s->vel, 5.0f * -dt);
             p.x -= prev->origin.x;
             p.y -= prev->origin.y;
             p.z -= prev->origin.z;
@@ -819,14 +815,14 @@ void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
             u.x = cam->basis[1].x * sign;
             u.y = cam->basis[1].y * sign;
             u.z = cam->basis[1].z * sign;
-            AddScaled(&q[0], &s->pos, &u, -0.0375f);
-            AddScaled(&q[0], &q[0], &cam->basis[0], -0.0375f);
-            AddScaled(&q[1], &q[0], &cam->basis[0], 0.075f);
+            TAddS(&q[0], &s->pos, &u, -0.0375f);
+            TAddS(&q[0], &q[0], &cam->basis[0], -0.0375f);
+            TAddS(&q[1], &q[0], &cam->basis[0], 0.075f);
             q[2].x = q[0].x + d.x;
             q[2].y = q[0].y + d.y;
             q[2].z = q[0].z + d.z;
-            AddScaled(&q[2], &q[2], &u, 0.075f);
-            AddScaled(&q[3], &q[2], &cam->basis[0], 0.075f);
+            TAddS(&q[2], &q[2], &u, 0.075f);
+            TAddS(&q[3], &q[2], &cam->basis[0], 0.075f);
             fn_802C8E00(q[0].x, q[0].y, q[0].z, 0.0f, 1.0f, color, 0);
             fn_802C8E00(q[1].x, q[1].y, q[1].z, 1.0f, 1.0f, color, 0);
             fn_802C8E00(q[2].x, q[2].y, q[2].z, 0.0f, 0.0f, color, 1);
@@ -947,9 +943,9 @@ void ShardSys::Draw(void) {
             color = ShadeColor(r, light);
             Vec p;
             fn_802C8E00(s->pos.x, s->pos.y, s->pos.z, 0.0f, 1.0f, color, 0);
-            AddScaled(&p, &s->pos, (const Vec*)r.m[0], 0.1f);
+            TAddS(&p, &s->pos, (const Vec*)r.m[0], 0.1f);
             fn_802C8E00(p.x, p.y, p.z, 1.0f, 1.0f, color, 0);
-            AddScaled(&p, &s->pos, (const Vec*)r.m[2], 0.1f);
+            TAddS(&p, &s->pos, (const Vec*)r.m[2], 0.1f);
             fn_802C8E00(p.x, p.y, p.z, 0.0f, 0.0f, color, 1);
         }
         fn_802C8E48();

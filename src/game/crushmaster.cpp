@@ -140,6 +140,7 @@ void fn_8018F76C(RaceCarRec* car, int wheel);
 #include "game/clamp01.h"
 #include "game/nearzero.h"
 #include "game/round.h"
+#include "game/tadds.h"
 
 // Arrow/marker vertex.
 struct MarkVtx {
@@ -173,11 +174,6 @@ static inline void Add(ValVec3* out, const ValVec3* a, const ValVec3* b) {
     out->z = a->z + b->z;
 }
 
-static inline void AddScaled(ValVec3* out, const ValVec3* a, const ValVec3* b, f32 k) {
-    out->x = a->x + b->x * k;
-    out->y = a->y + b->y * k;
-    out->z = a->z + b->z * k;
-}
 
 // "crush_table" settings.
 struct CrushTuning {
@@ -619,10 +615,10 @@ void fn_801720FC(const ValVec3* at, u32 color, f32 size) {
     v[0].pos.x = 0.0f;
     v[0].pos.y = 0.0f;
     v[0].pos.z = 0.0f;
-    AddScaled(&v[1].pos, &up, &side, -1.0f);
-    AddScaled(&v[2].pos, &up, &side, 1.0f);
-    AddScaled(&v[3].pos, &up, &fwd, -1.0f);
-    AddScaled(&v[4].pos, &up, &fwd, 1.0f);
+    TAddS(&v[1].pos, &up, &side, -1.0f);
+    TAddS(&v[2].pos, &up, &side, 1.0f);
+    TAddS(&v[3].pos, &up, &fwd, -1.0f);
+    TAddS(&v[4].pos, &up, &fwd, 1.0f);
     dark = fn_801720E0(color);
     for (i = 0; i < 5; i++) {
         v[i].color = color;

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/mathutil.h"
+#include "game/tadds.h"
 // Passed to fn_80176A24 (3.0f; name unproven). A named constant with external linkage defined before any code:
 // retail keeps it as the FIRST .sdata2 entry, separate from the pooled 3.0f literal used further down.
 extern const f32 lbl_80563D08;
@@ -44,11 +45,6 @@ static inline void AddScaledV(ValVec3* o, const ValVec3* v, f32 s) {
     o->x += v->x * s;
     o->y += v->y * s;
     o->z += v->z * s;
-}
-static inline void SumScaledV(ValVec3* o, const ValVec3* a, const ValVec3* v, f32 s) {
-    o->x = a->x + v->x * s;
-    o->y = a->y + v->y * s;
-    o->z = a->z + v->z * s;
 }
 static inline void MulVec(const Mat3& m, const ValVec3& src, ValVec3* dst) {
     if (dst == &src) {
@@ -158,7 +154,7 @@ int fn_8026A698(u8* p, int i) {
             u32 b;
             MulVec(*(const Mat3*)&((CamRec*)p)->carFrame, side, &dir);
             AddScaledV(&from, &dir, -0.5f);
-            SumScaledV(&to, &from, &dir, 5.0f);
+            TAddS(&to, &from, &dir, 5.0f);
             if (fn_801784AC(&from, &to, &hit, &nrm, &a, &b, 0)) {
                 *r = fn_8026A63C(&hit.x, &from.x, &dir.x);
             }

@@ -144,11 +144,6 @@ static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     }
 }
 
-static inline void AddScaled(Vec* out, const Vec* in, const Vec* d, f32 s) {
-    out->x = in->x + d->x * s;
-    out->y = in->y + d->y * s;
-    out->z = in->z + d->z * s;
-}
 
 static inline void Scale(Vec* out, const Vec* in, f32 s) {
     out->x = in->x * s;
@@ -709,8 +704,8 @@ void RingFireMan::Tick(FireRing* r, f32 dt) {
     v.x = 0.0f;
     v.y = 0.0f;
     v.z = 0.0f;
-    AddScaled(&p, &r->p0, &r->e1, a);
-    AddScaled(&p, &p, &r->e2, b);
+    TAddS(&p, &r->p0, &r->e1, a);
+    TAddS(&p, &p, &r->e2, b);
     p.y += 0.125f;
     fn_8028E584(emitter, &p, &v);
     fn_80288A40(&p, &v);
@@ -877,9 +872,9 @@ void RingSlots::Add(int id, const Vec* p, const Vec* e1, const Vec* e2, s16 hint
         c[0].x += e2->x;
         c[0].y += e2->y;
         c[0].z += e2->z;
-        AddScaled(&c[1], &c[0], e1, -2.0f);
-        AddScaled(&c[2], &c[0], e2, -2.0f);
-        AddScaled(&c[3], &c[2], e1, -2.0f);
+        TAddS(&c[1], &c[0], e1, -2.0f);
+        TAddS(&c[2], &c[0], e2, -2.0f);
+        TAddS(&c[3], &c[2], e1, -2.0f);
         fn_801E9DD4(lbl_8055CA70, lbl_8055CA7C);
         for (int i = 0; i < 4; i++) {
             fn_801E9E30(&hint, &c[i]);
@@ -1399,11 +1394,11 @@ void ExhaustTorchMan::DrawEdge(const Vec* p, int frame, const Vec* a, const Vec*
     f32 v0;
     f32 v1;
     CellUV(frame, &u0, &u1, &v0, &v1);
-    AddScaled(&c[0], p, a, -len);
-    AddScaled(&c[0], &c[0], b, len);
-    AddScaled(&c[1], &c[0], a, 2.0f * len);
-    AddScaled(&c[2], &c[0], b, -2.0f * len);
-    AddScaled(&c[3], &c[1], b, -2.0f * len);
+    TAddS(&c[0], p, a, -len);
+    TAddS(&c[0], &c[0], b, len);
+    TAddS(&c[1], &c[0], a, 2.0f * len);
+    TAddS(&c[2], &c[0], b, -2.0f * len);
+    TAddS(&c[3], &c[1], b, -2.0f * len);
     Vertex(0xC0FFFFFF, 0, c[0], u0, v0);
     Vertex(0xC0FFFFFF, 0, c[1], u1, v0);
     Vertex(0xC0FFFFFF, 1, c[2], u0, v1);
@@ -1417,18 +1412,18 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     f32 v0;
     f32 v1;
     CellUV(frame, &u0, &u1, &v0, &v1);
-    AddScaled(&c[0], &m->pos, &m->rot[2], -len);
-    AddScaled(&c[1], &c[0], &m->rot[1], 2.0f * len);
-    AddScaled(&c[2], &c[0], &m->rot[2], 2.0f * len);
-    AddScaled(&c[3], &c[1], &m->rot[2], 2.0f * len);
+    TAddS(&c[0], &m->pos, &m->rot[2], -len);
+    TAddS(&c[1], &c[0], &m->rot[1], 2.0f * len);
+    TAddS(&c[2], &c[0], &m->rot[2], 2.0f * len);
+    TAddS(&c[3], &c[1], &m->rot[2], 2.0f * len);
     Vertex(0xC0FFFFFF, 0, c[0], u0, v0);
     Vertex(0xC0FFFFFF, 0, c[1], u1, v0);
     Vertex(0xC0FFFFFF, 1, c[2], u0, v1);
     Vertex(0xC0FFFFFF, 1, c[3], u1, v1);
-    AddScaled(&c[0], &m->pos, &m->rot[0], -len);
-    AddScaled(&c[1], &c[0], &m->rot[1], 2.0f * len);
-    AddScaled(&c[2], &c[0], &m->rot[0], 2.0f * len);
-    AddScaled(&c[3], &c[1], &m->rot[0], 2.0f * len);
+    TAddS(&c[0], &m->pos, &m->rot[0], -len);
+    TAddS(&c[1], &c[0], &m->rot[1], 2.0f * len);
+    TAddS(&c[2], &c[0], &m->rot[0], 2.0f * len);
+    TAddS(&c[3], &c[1], &m->rot[0], 2.0f * len);
     Vertex(0xC0FFFFFF, 0, c[0], u0, v0);
     Vertex(0xC0FFFFFF, 0, c[1], u1, v0);
     Vertex(0xC0FFFFFF, 1, c[2], u0, v1);

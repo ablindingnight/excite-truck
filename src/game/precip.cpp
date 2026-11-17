@@ -10,6 +10,7 @@
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
 #include "game/mathutil.h"
+#include "game/tadds.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -505,11 +506,6 @@ void fn_802A5384(WeatherCfg* c) {
     }
 }
 
-static inline void MadV(ValVec3* o, const ValVec3* a, const ValVec3* b, f32 s) {
-    o->x = a->x + b->x * s;
-    o->y = a->y + b->y * s;
-    o->z = a->z + b->z * s;
-}
 void fn_802A53B0(DropHit* hits, int n) {
     int k2;
     if ((f32)__fabs(fn_802A4AD4()) <= __float_epsilon[0] || !lbl_8055F894) {
@@ -544,7 +540,7 @@ void fn_802A53B0(DropHit* hits, int n) {
             }
             f32 k = -2.0f * dot;
             vel.Set(dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
-            MadV(&vel, &hits->obj->vel, &vel, 3.0f);
+            TAddS(&vel, &hits->obj->vel, &vel, 3.0f);
             {
                 int m = fn_80287B5C(cnt) + 1;
                 k2 = 0;
@@ -886,7 +882,7 @@ void RainSystem::Update(void) {
         d.y = lastPos.y - cam->origin.y;
         d.z = lastPos.z - cam->origin.z;
         MulTSelf(cam->basis, &d);
-        MadV(&vel, &dir, &d, -1.5f);
+        TAddS(&vel, &dir, &d, -1.5f);
         f32 inv = 1.0f / (f32)sqrt(PSVECDotProduct((const Vec*)&vel, (const Vec*)&vel));
         vel.x = vel.x * (0.25f * inv);
         vel.y = vel.y * (0.25f * inv);

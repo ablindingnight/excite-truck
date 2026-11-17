@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
+#include "game/tadds.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -178,11 +179,6 @@ XraySusp* fn_801EF428(XraySusp* x, int del) {
 
 }  // extern "C"
 
-static inline void Madd(ValVec3* out, const ValVec3* a, const ValVec3* b, f32 k) {
-    out->x = a->x + b->x * k;
-    out->y = a->y + b->y * k;
-    out->z = a->z + b->z * k;
-}
 
 static inline void Sub(ValVec3* out, const ValVec3* a, const ValVec3* b) {
     out->x = a->x - b->x;
@@ -222,13 +218,13 @@ void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     }
     fn_802C744C(s->hub, &hub);
     f32 quarter = 0.7853982f;
-    Madd(&p, &w.origin, &w.basis[1], 0.3f);
+    TAddS(&p, &w.origin, &w.basis[1], 0.3f);
     fn_801E3440(&q, s->mountU, root);
     Sub(&d, &p, &q);
     PSVECNormalize((const Vec*)&d, (Vec*)&d);
     f32 a = Atan2F(PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[1]), s->side * PSVECDotProduct((const Vec*)&d, (const Vec*)&root->basis[0]));
     fn_801E353C(s->mountU, s->side * a - s->side * quarter);
-    Madd(&p, &w.origin, &w.basis[1], -0.2f);
+    TAddS(&p, &w.origin, &w.basis[1], -0.2f);
     fn_801E3440(&q, s->mountL, root);
     Sub(&d, &p, &q);
     PSVECNormalize((const Vec*)&d, (Vec*)&d);
@@ -294,12 +290,12 @@ extern "C" void fn_801EFC90(XraySusp* x, const ValMatrix* carMtx, void** __restr
     f32 up = fn_801F159C(wheels[1]) - 0.3556f;
     f32 half;
     half = car->track - 0.76835f;
-    Madd(&m.origin, &m.origin, &m.basis[2], back);
-    Madd(&m.origin, &m.origin, &m.basis[1], up);
+    TAddS(&m.origin, &m.origin, &m.basis[2], back);
+    TAddS(&m.origin, &m.origin, &m.basis[1], up);
     ValMatrix left = m;
-    Madd(&left.origin, &m.origin, &m.basis[0], -half);
+    TAddS(&left.origin, &m.origin, &m.basis[0], -half);
     ValMatrix right = m;
-    Madd(&right.origin, &m.origin, &m.basis[0], half);
+    TAddS(&right.origin, &m.origin, &m.basis[0], half);
     ValVec3 ends[2];
     ends[0].x = half;
     ends[0].y = 0.0f;

@@ -8,6 +8,7 @@
 #include "game/rvec.h"
 #include "game/rmtx.h"
 #include "game/mathutil.h"
+#include "game/tadds.h"
 
 // A distance constraint between two particles.
 struct PStick {
@@ -192,11 +193,6 @@ static inline void Set(RVec3* out, const RVec3* v) {
     out->z = v->z;
 }
 
-static inline void AddScaled(RVec3* out, const RVec3* v, const RVec3* d, f32 k) {
-    out->x = v->x + d->x * k;
-    out->y = v->y + d->y * k;
-    out->z = v->z + d->z * k;
-}
 
 static inline void Sub(RVec3* out, const RVec3* a, const RVec3* b) {
     out->x = a->x - b->x;
@@ -383,8 +379,8 @@ void fn_801C1364(PSys* s) {
             f32 den = len * (wb + wa);
             den = den > 0.0001f ? den : 0.0001f;
             f32 k = l->c * len / den;
-            AddScaled(pa, pa, &proj, wb * k);
-            AddScaled(pb, pb, &proj, -wa * k);
+            TAddS(pa, pa, &proj, wb * k);
+            TAddS(pb, pb, &proj, -wa * k);
         }
         for (i = 0; i < s->nStick; i++) {
             PStick* st = &s->sticks[i];
@@ -404,8 +400,8 @@ void fn_801C1364(PSys* s) {
             den = den > 0.0001f ? den : 0.0001f;
             f32 k = st->stiff * (len - st->rest) / den;
             if (!st->slack || k > 0.0f) {
-                AddScaled(pa, pa, &d2, wb * k);
-                AddScaled(pb, pb, &d2, -wa * k);
+                TAddS(pa, pa, &d2, wb * k);
+                TAddS(pb, pb, &d2, -wa * k);
             }
         }
         for (i = 0; i < s->nPart; i++) {
@@ -414,13 +410,13 @@ void fn_801C1364(PSys* s) {
             Sub(&r, p, &s->org);
             f32 h = PSVECDotProduct((const Vec*)&r, (const Vec*)&s->up) - s->w30[i];
             if (h < 0.0f) {
-                AddScaled(p, p, &s->up, -h);
-                AddScaled(&v, &v, &s->up, -PSVECDotProduct((const Vec*)&s->up, (const Vec*)&v));
+                TAddS(p, p, &s->up, -h);
+                TAddS(&v, &v, &s->up, -PSVECDotProduct((const Vec*)&s->up, (const Vec*)&v));
                 f32 vv = PSVECDotProduct((const Vec*)&v, (const Vec*)&v);
                 if (vv > 0.00001f * 0.00001f) {
                     f32 f = 0.0050000004f / (f32)sqrt(vv);
                     f = 1.0f < f ? 1.0f : f;
-                    AddScaled(p, p, &v, -f);
+                    TAddS(p, p, &v, -f);
                 } else {
                     p->x = p->x - v.x;
                     p->y = p->y - v.y;
@@ -515,7 +511,7 @@ static inline void SetBodyVelocity(PSys* s, const RVec3* at, const RVec3* avel, 
         Sub(&r, &s->pos[i], at);
         PSVECCrossProduct((const Vec*)avel, (const Vec*)&r, (Vec*)&v);
         AddTo(&v, vel);
-        AddScaled(&s->old[i], &s->pos[i], &v, -(1.0f / 60.0f));
+        TAddS(&s->old[i], &s->pos[i], &v, -(1.0f / 60.0f));
     }
 }
 
