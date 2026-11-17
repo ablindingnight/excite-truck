@@ -4,6 +4,7 @@
 // coins. Pickups are kept in groups (one per table, with a bounding circle) and drawn spinning; a car
 // collects a pickup when it falls in the car's footprint. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/sqrtf.h"
 #include "game/shapes.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -519,8 +520,6 @@ void fn_80168328(void) {
     }
 }
 
-/* Helper name unproven */
-static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 static inline void RotVec(f32* out, const f32* m, const f32* in) {
     f32 x = Dot3(in[0], m[0], in[1], m[1], in[2], m[2]);

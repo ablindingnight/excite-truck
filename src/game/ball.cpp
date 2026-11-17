@@ -3,6 +3,7 @@
 // hit, pushing every body within range away (BallStrings::ExplodeSound()). Also registered as a status/input listener for
 // its car. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/sqrtf.h"
 #include "game/spot.h"
 #include "game/sound.h"
 #include "game/raceopts.h"
@@ -267,7 +268,6 @@ RVec3 Home(int car) {
     return v;
 }
 
-static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 extern "C" void fn_8017D404(f32 r, f32 force, const RVec3* c, RigidBody* self, int car) {
     RaceCarRec* by = fn_8017960C(car);

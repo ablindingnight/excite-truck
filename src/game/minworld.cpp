@@ -2,6 +2,7 @@
 // ring of radius 325 around the origin and kept circling at a set speed. The slot table mirrors each
 // body for the caller. Names are guesses apart from the timeout message.
 #include "game/common.h"
+#include "game/sqrtf.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
@@ -199,7 +200,6 @@ void fn_802526E0(MWMtx* m) {
     PSVECCrossProduct((const Vec*)&m->z, (const Vec*)&m->x, (Vec*)&m->y);
 }
 
-static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 /* Helper name unproven */ static inline void Scale3(MWVec4* v, f32 k) { v->x = v->x * k; v->y = v->y * k; v->z = v->z * k; }
 void fn_8025280C(MWBody* b, f32 speed) {
