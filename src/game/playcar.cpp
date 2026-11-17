@@ -1231,6 +1231,36 @@ static inline void SpinXform(f32* out, const f32* in, const f32* m) {
         out[2] = Dot3(in[0], m[2], in[1], m[5], in[2], m[8]);
     }
 }
+/* Helper name unproven: the nose-down push while boosting, as its own inline. Retail colours `lean` second of all
+   saved FPRs (f30, before dir): an inline's objects number above the caller's locals, and lean is the first one
+   declared here. The -3000 * air factor is written in each product: retail's factor is a code-generation temporary
+   (f2), not a named value. Open: retail also keeps `air` alive up to the lean load (native replay, see
+   handoff/dossier/native_lane/playcar_vf48.md). */
+static inline void NoseDown(u8* p, f32 air, f32 fwd, RVec3& f, RVec3& at2) {
+    f32 lean;
+    f32 q;
+    u8* c3;
+    c3 = PTR(p, 0x34);
+    lean = F32(c3, 0x25F0);
+    PcAddScaled(&f, &F32(c3, 0x54), &F32(c3, 0x48), 0.0f);
+    f32 b;
+    f.x *= -3000.0f * air;
+    f.y *= -3000.0f * air;
+    f.z *= -3000.0f * air;
+    b = ((Gearbox*)PTR(p, 0x38))->Speed();
+    q = lean * lean;
+    f.x *= b;
+    f.y *= b;
+    f.z *= b;
+    q = 1.0f - q;
+    f.x *= q;
+    f.y *= q;
+    f.z *= q;
+    PcAddScaled(&at2, &F32(c3, 0x60), &F32(c3, 0x54), -2.0f);
+    if (fwd > -3.5555556f) {
+        ((RigidBody*)PTR(p, 0x34))->AddForceAt(&f, &at2);
+    }
+}
 void PlayerDriver_vf48(u8* p) {
     RVec3 rx;
     f32 cl;
@@ -1245,6 +1275,7 @@ void PlayerDriver_vf48(u8* p) {
     f32 side;
     f32 st;
     f32 air;
+    f32 sn;
     f32 s;
     u8* car;
     RVec3 f2;
@@ -1291,7 +1322,11 @@ void PlayerDriver_vf48(u8* p) {
         fn_8018ADB4(PTR(p, 0x34), 0.0f);
     }
     U8(PTR(p, 0x34), 0x260E) = ((Gearbox*)PTR(p, 0x38))->v30();
-    air = (fn_801769CC()->type & 0x20000) ? 1.0f : 0.5f;
+    if (fn_801769CC()->type & 0x20000) {
+        air = 1.0f;
+    } else {
+        air = 0.5f;
+    }
     if (lbl_8055E3C4 - S32(p, 0xC) > 10 && F32(car = PTR(p, 0x34), 0x25F4) > 0.9f && fwd < 4.4444447f &&
         S32(car, 0x2620) >= 3 && !lbl_8055E52A) {
         f32 roll;
@@ -1306,10 +1341,13 @@ void PlayerDriver_vf48(u8* p) {
         c2 = PTR(p, 0x34);
         boost = MinF(1.0f, (F32(c2, 0x25D4) - 1.7777778f) / 3.5555556f);
         boost = MaxF(boost, 0.0f);
-        f32 high = 1.0f;
-        f32 low = 0.0f;
+        f32 low;
+        f32 high;
+        high = 1.0f;
+        low = 0.0f;
         f32 range = high - low;
-        roll = MaxF(MinF(1.0f, (steer * -F32(c2, 0x128)) * -20.0f), 0.0f);
+        f32 pr = steer * -F32(c2, 0x128);
+        roll = MaxF(MinF(1.0f, pr * -20.0f), 0.0f);
         k = 1.0f - (range * roll) * (steer * steer);
         rx.x *= k;
         rx.y *= k;
@@ -1320,7 +1358,8 @@ void PlayerDriver_vf48(u8* p) {
         rx.x += F32(car, 0x3C) * g;
         rx.y = rx.y + F32(car, 0x40) * g;
         rx.z = rx.z + F32(car, 0x44) * g;
-        m = 30000.0f * air * F32(PTR(p, 0x34), 0x25F8);
+        f32 tr = F32(PTR(p, 0x34), 0x25F8);
+        m = 30000.0f * air * tr;
         rx.x *= m;
         rx.y *= m;
         rx.z *= m;
@@ -1339,31 +1378,7 @@ void PlayerDriver_vf48(u8* p) {
         ((RigidBody*)PTR(p, 0x34))->AddForceAt(&rx, &at);
     }
     if (S32(PTR(p, 0x34), 0x2620) >= 3 && ((Gearbox*)PTR(p, 0x38))->Speed() > 0.1f) {
-        f32 lean;
-        f32 q;
-        u8* c3;
-        f32 k;
-        c3 = PTR(p, 0x34);
-        lean = F32(c3, 0x25F0);
-        PcAddScaled(&f, &F32(c3, 0x54), &F32(c3, 0x48), 0.0f);
-        f32 b;
-        k = -3000.0f * air;
-        f.x *= k;
-        f.y *= k;
-        f.z *= k;
-        b = ((Gearbox*)PTR(p, 0x38))->Speed();
-        q = lean * lean;
-        f.x *= b;
-        f.y *= b;
-        f.z *= b;
-        q = 1.0f - q;
-        f.x *= q;
-        f.y *= q;
-        f.z *= q;
-        PcAddScaled(&at2, &F32(c3, 0x60), &F32(c3, 0x54), -2.0f);
-        if (fwd > -3.5555556f) {
-            ((RigidBody*)PTR(p, 0x34))->AddForceAt(&f, &at2);
-        }
+        NoseDown(p, air, fwd, f, at2);
     }
     if (S32(p, 0x30) != 3) {
         fn_8018ADBC(PTR(p, 0x34), ((Gearbox*)PTR(p, 0x38))->Speed());
@@ -1495,7 +1510,6 @@ void PlayerDriver_vf48(u8* p) {
             f32 cs;
             f32 inv;
             inv = 1.0f / a;
-            f32 sn;
             f32 t;
             ax = inv * w.x;
             ay = inv * w.y;
