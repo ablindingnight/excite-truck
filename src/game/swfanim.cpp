@@ -3,6 +3,7 @@
 // played back at the file's frame rate and drawn in 640x480 screen space. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/byteswap.h"
 
 extern "C" {
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, u8* first, u8* swapped);
@@ -98,24 +99,6 @@ ModuleTag lbl_8055F0E0;
 static UnkStatic123 lbl_804986C8;
 u32 lbl_8055F0E8 = SwfColor(0, 0, 0, 0x7F);
 
-static inline void SwfSwap16(void* p) {
-    u8 t;
-    t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[1];
-    ((u8*)p)[1] = t;
-}
-
-static inline void SwfSwap32(void* p) {
-    u8 t;
-    u8* b = (u8*)p;
-    t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
 static inline int SwfChannel(int c, const s8& mul, const s8& add) {
     int v = mul * c / 255 + add * 2;
     v = v > 0 ? v : 0;
@@ -186,11 +169,11 @@ void SwfAnim::Reset() {
 
 /* Helper name unproven */
 inline void SwfAnim::SwapShapeData(u32 i) {
-    SwfSwap16(&data->shapes[i].tex);
-    SwfSwap32(&data->shapes[i].color);
+    SwapHalfV(&data->shapes[i].tex);
+    SwapWordT(&data->shapes[i].color);
     for (int j = 0; j < 4; j++) {
-        SwfSwap32(&data->shapes[i].pts[j][0]);
-        SwfSwap32(&data->shapes[i].pts[j][1]);
+        SwapWordT(&data->shapes[i].pts[j][0]);
+        SwapWordT(&data->shapes[i].pts[j][1]);
     }
 }
 
@@ -222,16 +205,16 @@ void SwfAnim::LoadFile(const char* name) {
         return;
     }
     u8* base = (u8*)data;
-    SwfSwap32(&data->fps);
-    SwfSwap32(&data->numFrames);
-    SwfSwap32(&data->numTextures);
-    SwfSwap32(&data->numShapes);
-    SwfSwap32(&data->unk10);
-    SwfSwap32(&data->unk14);
-    SwfSwap32(&data->textures);
-    SwfSwap32(&data->shapes);
-    SwfSwap32(&data->cxforms);
-    SwfSwap32(&data->frames);
+    SwapWordT(&data->fps);
+    SwapWordT(&data->numFrames);
+    SwapWordT(&data->numTextures);
+    SwapWordT(&data->numShapes);
+    SwapWordT(&data->unk10);
+    SwapWordT(&data->unk14);
+    SwapWordT(&data->textures);
+    SwapWordT(&data->shapes);
+    SwapWordT(&data->cxforms);
+    SwapWordT(&data->frames);
     data->textures = (Sw2Texture*)(base + (u32)data->textures);
     data->shapes = (Sw2Shape*)(base + (u32)data->shapes);
     data->cxforms = (Sw2Cxform*)(base + (u32)data->cxforms);
@@ -244,7 +227,7 @@ void SwfAnim::LoadFile(const char* name) {
         }
     }
     for (u32 n = 0; n < data->numTextures; n++) {
-        SwfSwap32(&data->textures[n].handle);
+        SwapWordT(&data->textures[n].handle);
     }
     i = 0;
     if (data->numShapes != 0) {
@@ -255,15 +238,15 @@ void SwfAnim::LoadFile(const char* name) {
     for (frameIndex = 0, frameOffset = 0; frameIndex < (current = data)->numFrames;
          frameOffset += sizeof(Sw2Frame), ++frameIndex) {
         frame = (Sw2Frame*)((u8*)current->frames + frameOffset);
-        SwfSwap16(&frame->count);
+        SwapHalfV(&frame->count);
 
         for (itemIndex = 0, itemOffset = 0; itemIndex < frame->count;
              ++itemIndex, itemOffset += sizeof(Sw2Item)) {
             item = (Sw2Item*)((u8*)frame->items + itemOffset);
-            SwfSwap16(&item->shape);
-            SwfSwap16(&item->cxform);
+            SwapHalfV(&item->shape);
+            SwapHalfV(&item->cxform);
             for (component = 0; component < 6; ++component) {
-                SwfSwap32(&item->m[component]);
+                SwapWordT(&item->m[component]);
             }
         }
     }
