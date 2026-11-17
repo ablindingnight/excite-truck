@@ -11,6 +11,7 @@
 #include "game/carbody.h"
 #include <string.h>
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -138,8 +139,6 @@ static inline f32 PadRange(u32 v, f32 inLo, f32 inHi, f32 outLo, f32 outHi) {
     t = CMAX(t, 0.0f);
     return outLo + t * (outHi - outLo);
 }
-// Helpers unproven (names and existence): one constant load for three products, variable-first multiply.
-static inline f32 PcMulF(f32 a, f32 b) { return a * b; }
 static inline f32 PcFade(f32 hi, f32 lo, f32 a, f32 b) { return hi - (hi - lo) * a * b; }
 static inline f32 PcAddF(f32 a, f32 b) { return a + b; }
 template <class O> static inline void PcScaleTo(O* o, const f32* v, f32 k) { o->x = v[0] * k; o->y = v[1] * k; o->z = v[2] * k; }
@@ -149,7 +148,6 @@ static inline f32 Clamp01(f32 x) {
     return x > 0.0f ? x : 0.0f;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 extern "C" {
 s32 fn_80137C74(void);
@@ -1203,16 +1201,12 @@ double cos(double x);
 
 static inline f32 VDot(const void* a, const void* b) { return PSVECDotProduct((const Vec*)a, (const Vec*)b); }
 static inline f32 VMag(const void* v) { return PSVECMag((const Vec*)v); }
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline BOOL OptRumble(void) { return (lbl_8055D430 & 1) && (lbl_8055D430 & 8); }
 
 // The player driver's frame: reads the controller into steering, throttle, brake and clutch, applies the
 // arcade assists (in-air pitch and roll control, a nose-down push while boosting) and the replay/rumble hooks,
 // then works out the force-feedback wobble from the wheels and the car's spin.
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 /* Helper name unproven */
 static inline void SpinXform(f32* out, const f32* in, const f32* m) {
     if (out == in) {
@@ -1307,7 +1301,7 @@ void PlayerDriver_vf48(u8* p) {
         f32 slow;
         rx.z *= k;
         slow = MaxF(MinF(1.0f, 1.0f - F32(PTR(p, 0x34), 0x25D4) / 17.777779f), 0.0f);
-        g = slow * (-0.1f * (steer * AbsF(steer)));
+        g = slow * (-0.1f * (steer * FAbs(steer)));
         rx.x += F32(car, 0x3C) * g;
         rx.y = rx.y + F32(car, 0x40) * g;
         rx.z = rx.z + F32(car, 0x44) * g;
@@ -1448,7 +1442,7 @@ void PlayerDriver_vf48(u8* p) {
     c4 = PTR(p, 0x34);
     grip = F32(c4, 0x2570) + F32(c4, 0x24FC);
     rough = VMag(c4 + 0x26B4);
-    lim = MinF(1.0f, PcMulF(F32(PTR(p, 0x34), 0x264C), 10.0f));
+    lim = MinF(1.0f, Mul(F32(PTR(p, 0x34), 0x264C), 10.0f));
     ga = 0.033000004f * rough + lim;
     F32(p, 0x40) = 0.8f * F32(p, 0x40) + 0.0039600004f * rough;
     gb = F32(p, 0x40) + 0.2f * MaxF(MinF(1.0f, grip), 0.0f);

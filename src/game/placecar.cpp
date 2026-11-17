@@ -9,6 +9,7 @@
 #include "game/raceopts.h"
 #include "game/respawn.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 // Lane offset of the grid columns (5.0f). A named constant defined before any code: retail keeps it as the FIRST
 // .sdata2 entry and negates it at run time, so its value is not folded where it is used. A one-field const struct
 // gives exactly that (type and name unproven; a plain `const f32` defined here folds -x into a second literal).
@@ -114,7 +115,6 @@ int fn_801B7688(int mode) {
     return r;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_801B7760(CarPlace* r, const ILPos* p, f32 side, f32 angle) {
     f32 nx;
@@ -315,7 +315,6 @@ void fn_801B8048(CarPlace* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC
 
 void fn_801B8054(CarPlace* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC(r, f, 1, side, dist, 0.0f); }
 
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
 void fn_801B8060(CarPlace* r, const ObjTeleport* t) {
     V2 pos;
@@ -324,7 +323,7 @@ void fn_801B8060(CarPlace* r, const ObjTeleport* t) {
     pos.y = t->z;
     dir.x = t->dx;
     dir.y = t->dz;
-    f32 inv = 1.0f / Max(0.01f, (f32)sqrt(dir.x * dir.x + dir.y * dir.y));
+    f32 inv = 1.0f / MaxF(0.01f, (f32)sqrt(dir.x * dir.x + dir.y * dir.y));
     dir.x *= inv;
     dir.y *= inv;
     fn_801B7C8C(r, &pos, &dir);

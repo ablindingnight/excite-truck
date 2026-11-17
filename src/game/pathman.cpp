@@ -8,6 +8,7 @@
 #include "game/rigid.h"
 #include "game/plainvec.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 // PathMtx: common.h's PlainValMatrix.
 struct PathFile;
@@ -212,7 +213,6 @@ PathMover* fn_801DA8C8(const char* object, const char* path) {
 
 inline PathGroup::~PathGroup(void) { delete[] data; }
 
-static inline f32 MaxF(f32 a, f32 b) { return (a > b) ? a : b; }
 
 inline f32 PathGroup::Length(void) {
     f32 r = 0.0f;

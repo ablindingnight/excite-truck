@@ -10,6 +10,7 @@
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/carbody.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -516,11 +517,9 @@ void fn_80168328(void) {
     }
 }
 
-static inline f32 Len2_hm(f32 x, f32 y) { return x * x + y * y; }  /* Helper name unproven */
+  /* Helper name unproven */
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
-/* Helper name unproven: rotates v by the 3x3 matrix m (out may be v). */
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void RotVec(f32* out, const f32* m, const f32* in) {
     f32 x = Dot3(in[0], m[0], in[1], m[1], in[2], m[2]);
     f32 y = Dot3(in[0], m[3], in[1], m[4], in[2], m[5]);
@@ -742,7 +741,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
                 f32 zv = perp.y;
                 perp.x = zv;
                 perp.y = -x;
-                inv = 1.0f / (f32)sqrt(Len2_hm(perp.x, perp.y));
+                inv = 1.0f / (f32)sqrt(Len2(perp.x, perp.y));
                 perp.x *= inv;
                 base.x = seg[0].x + dir.x * t;
                 f32 z2 = dir.y;

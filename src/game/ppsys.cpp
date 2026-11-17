@@ -7,6 +7,7 @@
 #include "game/vec3_init.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
+#include "game/mathutil.h"
 
 // A distance constraint between two particles.
 struct PStick {
@@ -236,7 +237,6 @@ static inline void AddStick(PSys* s, s32 a, s32 b, f32 extra, f32 stiff) {
 
 // Reconstructed from the target: the name and the split into a helper are unproven.
 // dst = transpose of m's rotation applied to src (src may be dst).
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulRotT(RVec3* dst, const RVec3& src, const RMtx* m) {
     if (dst == &src) {

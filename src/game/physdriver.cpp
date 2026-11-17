@@ -4,6 +4,7 @@
 // and config functions (fn_8017ED00, fn_8017F718, fn_8017FF4C, fn_801808DC, fn_8018108C) are not written.
 #include "game/common.h"
 #include "game/joy.h"
+#include "game/mathutil.h"
 
 struct DButton;
 
@@ -576,7 +577,6 @@ extern "C" void fn_8017ED00(f32 dt) {
 }
 
 
-static inline f32 Abs(f32 x) { return (f32)__fabs(x); }
 
 extern "C" {
 
@@ -586,7 +586,7 @@ void fn_8017F628(PhysDriver* d) {
         fn_802E85AC(d->ch, d->rumA[2] + d->rumA[0] * k, d->rumA[1] * k);
         f32 b1 = d->rumB[1];
         fn_802E85A8(d->ch, d->rumB[0] * k, b1, d->rumB[2] * k);
-        fn_802E8528(d->ch, 0.4f * Abs(d->rumC[0] * k), Abs(d->rumC[1]));
+        fn_802E8528(d->ch, 0.4f * FAbs(d->rumC[0] * k), FAbs(d->rumC[1]));
     } else {
         fn_802E8518(d->ch);
     }

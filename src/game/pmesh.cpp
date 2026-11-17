@@ -5,6 +5,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 struct PFrame {
     PVec3 x;    // offset 0x0
@@ -47,7 +48,6 @@ void fn_801E41D8(const PVec3* a, const PVec3* b, u32 color, f32 width);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(PVec3* out, const PVec3* in, const PFrame* m) {
     if (out == in) {
@@ -64,10 +64,9 @@ static inline void MulVec(PVec3* out, const PVec3* in, const PFrame* m) {
     }
 }
 
-static inline u32 PColor(u8 a, u8 r, u8 g, u8 b) { return (a << 24) | (r << 16) | (g << 8) | b; }
 
 ModuleTag lbl_8055E8A8;
-u32 lbl_8055E8B0 = PColor(0xFF, 0xFF, 0, 0);
+u32 lbl_8055E8B0 = ARGB(0xFF, 0xFF, 0, 0);
 
 extern "C" {
 

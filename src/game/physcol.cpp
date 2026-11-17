@@ -7,6 +7,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/collvol.h"
+#include "game/mathutil.h"
 
 
 
@@ -154,7 +155,6 @@ void fn_801E2294(void) {
     }
 }
 
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
 static inline void QuadCollide(Group* g, CollVolume* p, f32 scale) {
     int x = (int)(scale * p->mtx.pos.x);
@@ -285,7 +285,7 @@ int fn_801E2640(const RVec3* from, const RVec3* to, RVec3* outPos, RVec3* outNor
     d.y = to->y - from->y;
     d.z = to->z - from->z;
     f32 len = PSVECMag((const Vec*)&d);
-    f32 inv = 1.0f / Max(0.01f, len);
+    f32 inv = 1.0f / MaxF(0.01f, len);
     RVec3 dir;
     dir.x = d.x * inv;
     dir.y = d.y * inv;
