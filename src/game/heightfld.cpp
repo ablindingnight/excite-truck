@@ -172,16 +172,6 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     return 0;
 }
 
-static inline f32 Spline(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3) {
-    f32 m1 = 0.5f * (p2 - p0);
-    f32 d;
-    f32 m2 = 0.5f * (p3 - p1);
-    d = p2 - p1;
-    f32 c2 = 3.0f * d - 2.0f * m1 - m2;
-    f32 c3 = m1 + m2 - 2.0f * d;
-    return p1 + (m1 * t + (c3 * t3 + c2 * t2));
-}
-
 static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3, f32* deriv) {
     f32 m1 = 0.5f * (p2 - p0);
     f32 d = p2 - p1;
@@ -229,6 +219,24 @@ f32 fn_801DB398(const f32 g[4][4], f32 fx, f32 fz) {
     return SplineP(col, 1, fz);
 }
 
+/* Helper name unproven */
+static inline f32 SplinePD(const f32* p, int s, f32 t, f32* deriv) {
+    f32 d, t2, t3, p3, p2, p1, p0, k, m1, m2, c3, c2;
+    k = 0.5f;
+    p2 = p[s * 2]; p0 = p[0]; p1 = p[s]; p3 = p[s * 3];
+    d = p2 - p1;
+    t2 = t * t;
+    t3 = t2 * t;
+    m1 = k * (p2 - p0);
+    m2 = k * (p3 - p1);
+    c3 = m1 + m2 - 2.0f * d;
+    c2 = 3.0f * d - 2.0f * m1 - m2;
+    if (deriv) {
+        *deriv = m1 + (2.0f * c2 * t + 3.0f * c3 * t2);
+    }
+    return p1 + (m1 * t + (c3 * t3 + c2 * t2));
+}
+
 f32 fn_801DB514(const f32 g[4][4], ValVec3* normal, f32 fx, f32 fz) {
     f32 t3;
     f32 t2 = fx * fx;
@@ -241,20 +249,16 @@ f32 fn_801DB514(const f32 g[4][4], ValVec3* normal, f32 fx, f32 fz) {
         f32 p3 = g[3][i];
         col[i] = SplineD(g[0][i], p1, p2, p3, fx, t2, t3, &dcol[i]);
     }
-    {
-    f32 s3;
-    s3 = (fz * fz) * fz;
     f32 dz;
-    f32 h = SplineD(col[0], col[1], col[2], col[3], fz, (fz * fz), s3, &dz);
+    f32 h = SplinePD(col, 1, fz, &dz);
     ValVec3 n;
-    f32 n_x = -Spline(dcol[0], dcol[1], dcol[2], dcol[3], fz, (fz * fz), (fz * fz) * fz);
+    f32 n_x = -SplineP(dcol, 1, fz);
     n.y = 1.0f / lbl_8055E990->scaleX;
     n.z = -dz;
     n.x = n_x;
     PSVECNormalize((const Vec*)&n, (Vec*)&n);
     *normal = n;
-        return h;
-    }
+    return h;
 }
 
 int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, ValVec3* normal, f32 fx, f32 fz) {
