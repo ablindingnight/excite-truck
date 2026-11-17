@@ -580,7 +580,7 @@ void fn_802CDDC8(MList* m, u32 base) {
     }
     w = (u32*)m->ranges;
     for (int i = 0; i < 20; i++) {
-        SwapWord(&w[i]);
+        SwapWordV(&w[i]);
     }
     SwapWord(&m->numObjs);
     SwapWord(&m->maxObjs);
@@ -590,8 +590,7 @@ void fn_802CDDC8(MList* m, u32 base) {
     Relocate(m->c.p, base);
     Relocate(m->d.p, base);
     int i;
-    int count = m->d.n;
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < m->d.n; i++) {
         MLStrip* s = &m->d.p[i];
         SwapHalf(&s->ref);
         SwapHalf(&s->flags);

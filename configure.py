@@ -1292,10 +1292,15 @@ config.libs.append(
             Object(Matching, "game/vidsetup.cpp"),
             Object(NonMatching, "game/gxcanvas.cpp"),
             Object(Matching, "game/image.cpp"),
-            Object(NonMatching, "game/model.cpp"),
+            # Per-file unroll limit (unproven, GENUINE_DEBT 2026-11-16): model.cpp and mlist.cpp fully unroll their
+            # 10-word byte-swap loops in retail (pairs kept in order) and unroll the 20-word one 4x5. A unit-wide
+            # ppc_unroll_instructions_limit >= 88 is the only setting that reproduces both units' loop shapes and it
+            # changes no other function in either unit; compiler versions (verscore) and standard flags (-proc,
+            # -inline, -O3/-O4,s, -opt speed, -fp_contract) were ruled out (unit sprint flag probe).
+            Object(NonMatching, "game/model.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"']),
             Object(Matching, "game/mrender.cpp"),
             Object(Matching, "game/texture.cpp"),
-            Object(NonMatching, "game/mlist.cpp"),
+            Object(NonMatching, "game/mlist.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"']),  # see model.cpp
             Object(Matching, "game/vidmode.cpp"),
             Object(Matching, "game/modelpool.cpp"),
             Object(Matching, "game/billboard.cpp"),
