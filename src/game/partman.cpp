@@ -238,19 +238,23 @@ void fn_8028E1D0(void) {
     }
 }
 
+/* Helper name unproven: bind texture t unless it is already current. Replaces a one-field local struct (aids audit 2,
+   2026-11-16): the inline parameter is numbered as an inline object like the struct field was (code identical); a
+   plain local t misses 20-30 rows. */
+static inline void SwitchTex(s32& cur, s32 t) {
+    if (t != cur) {
+        fn_802C8D74();
+        fn_802C8BD0(t);
+        cur = t;
+    }
+}
 void fn_8028E240(int) {
-    struct { s32 t; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
     if (lbl_8055F740) {
         f32 old = fn_802C9A4C(0.0f);
         s32 tex = lbl_8055F740->tex;
         fn_802C8BD0(tex);
         for (int i = 0; i < lbl_804B34B0.count; i++) {
-            sp_.t = lbl_804B34B0.items[i]->tex;
-            if (sp_.t != tex) {
-                fn_802C8D74();
-                fn_802C8BD0(sp_.t);
-                tex = sp_.t;
-            }
+            SwitchTex(tex, lbl_804B34B0.items[i]->tex);
             lbl_804B34B0.items[i]->Draw();
         }
         fn_802C8D74();
