@@ -262,7 +262,8 @@ int fn_8026A698(u8* p, int i) {
         Mat3FromEuler(&m3, (const Vec3*)euler);
         Mat3Mul(&f.Mat(), &m3, &f.Mat());
     }
-    fn_80176A24(lbl_80563D08);
+    const f32& duration = lbl_80563D08;
+    fn_80176A24(duration);
     fn_80176A00(2);
     f32 k = MIN(1.0f, 3000.0f * (3.0f * s->t));
     f32 e;
