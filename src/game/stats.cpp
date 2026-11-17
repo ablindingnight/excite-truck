@@ -173,11 +173,7 @@ struct StatTypeInfo {
     const char* loc_key;  // offset 0x8
 };
 
-struct VehicleChoice {
-    s32 vehicle;  // offset 0x0
-    s32 color;    // offset 0x4
-    bool flag;    // offset 0x8
-};
+#include "game/vehchoice.h"
 
 class Statistic {
 public:

@@ -117,11 +117,7 @@ struct ScoreRow {
 };
 
 // HighScore: game/highscore.h.
-struct VehicleChoice {
-    s32 vehicle;  // offset 0x0
-    s32 color;    // offset 0x4
-    u8 valid;     // offset 0x8
-};
+#include "game/vehchoice.h"
 
 class Statistic {
 public:
@@ -183,7 +179,7 @@ void fn_8025C204(int event, int difficulty) {
             icons[i].visible = 1;
             VehicleChoice c = StatsUnpackChoice(hs->choice);
             int color = c.color;
-            icons[i].valid = c.valid;
+            icons[i].valid = c.flag;
             VehicleInfo* v = GetVehicle(c.vehicle);
             icons[i].icon = FindIcon(icons[i].icons, v->chassis);
             icons[i].color = v->colors[color];
