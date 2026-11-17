@@ -77,10 +77,7 @@ struct WindFabric {
     PVec random;  // offset 0x48
 };
 
-struct TObj {
-    u8 pad0[8];
-    void** model;  // offset 0x8
-};
+#include "game/tobj.h"
 
 // Track object data for a fabric: corner records indexed by the three corner fields.
 struct FabricData {
@@ -966,7 +963,7 @@ void fn_801F75A4(TObj* o, u8* data, void* scene, s32 id) {
     if (!vn) {
         fn_802E317C("mesh: could not find table %s", data);
     }
-    tex = fn_802C9C24(o->model[1]);
+    tex = fn_802C9C24(o->models[1]);
     fn_801F7400(&q, data, vn);
     if (!(fn_801F4ECC(vn) & 1)) {
         lbl_8055EC10->Add(&q, tex, vn, id);

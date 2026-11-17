@@ -36,14 +36,7 @@ struct BMtx33 {
 };
 
 // A track object instance handed to its handler.
-struct TObj {
-    u8 pad0[4];
-    void* model;  // offset 0x4
-    u8 pad8[4];
-    TObj* next;   // offset 0xC
-    u8 pad10[0x2C - 0x10];
-    u8 data[1];   // offset 0x2C
-};
+#include "game/tobj.h"
 
 // Every handler's base (vtable slots 0x8-0x2C).
 #include "game/trackmod.h"
@@ -850,7 +843,7 @@ LinearPathTMH::LinearPathTMH(void) {
 }
 
 void LinearPathTMH::Swap(TObj* o) {
-    LinearPathData* d = (LinearPathData*)o->data;
+    LinearPathData* d = (LinearPathData*)o->Data();
     SwapBytes16((u8*)d->name);
     SwapKeys((u8*)d->keys, 32);
     SwapWord((u8*)&d->count);
@@ -859,7 +852,7 @@ void LinearPathTMH::Swap(TObj* o) {
 }
 
 void LinearPathTMH::Init(TObj* o) {
-    const LinearPathData* d = (const LinearPathData*)o->data;
+    const LinearPathData* d = (const LinearPathData*)o->Data();
     if (count >= 6) {
         fn_802E317C("exceeded limit of %d paths", 6);
     }
@@ -895,7 +888,7 @@ void LinearPathTMH::Draw(TObj* list) {
 HermitePathTMH::HermitePathTMH(void) { count = 0; }
 
 void HermitePathTMH::Swap(TObj* o) {
-    HermitePathData* d = (HermitePathData*)o->data;
+    HermitePathData* d = (HermitePathData*)o->Data();
     SwapBytes16((u8*)d->name);
     SwapKeys((u8*)d->keys, 72);
     SwapWord((u8*)&d->count);
@@ -904,7 +897,7 @@ void HermitePathTMH::Swap(TObj* o) {
 extern "C" void fn_801FE88C(HermitePathTMH* t, HermiteEntry* e);
 
 void HermitePathTMH::Init(TObj* o) {
-    HermitePathData* d = (HermitePathData*)o->data;
+    HermitePathData* d = (HermitePathData*)o->Data();
     if (count >= 4) {
         fn_802E317C("path: exceeded hermite path limit");
     }
@@ -1051,7 +1044,7 @@ void fn_801FEDA4(HermiteEntry* e) {
 }
 
 void LinearDroneTMH::Add(void* scene, const TObj* o, s32 id) {
-    LinearPathData* d = (LinearPathData*)o->data;
+    LinearPathData* d = (LinearPathData*)o->Data();
     if (!man) {
         man = new ("DroneManager") LinearDroneMan;
         fn_802CD320(scene, man);
@@ -1080,7 +1073,7 @@ static inline void DroneTeardown(void* man) {}
 LinearDroneTMH::~LinearDroneTMH(void) { DroneTeardown(man); }
 
 void HermiteDroneTMH::Add(void* scene, const TObj* o, s32 id) {
-    HermitePathData* d = (HermitePathData*)o->data;
+    HermitePathData* d = (HermitePathData*)o->Data();
     if (!man) {
         man = new ("DroneManager") HermiteDroneMan;
         fn_802CD320(scene, man);

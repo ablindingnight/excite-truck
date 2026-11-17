@@ -36,19 +36,7 @@ struct TCam {
 };
 
 // A track object instance handed to its handler.
-struct TObj {
-    u8 pad0[4];
-    void* model;  // offset 0x4
-    u8 pad8[4];
-    TObj* next;   // offset 0xC
-    u8 pad10[4];
-    s32 slot;     // offset 0x14
-    u8 pad18[8];
-    f32 pos[3];   // offset 0x20
-    s32 d2C;      // offset 0x2C
-    f32 d30;      // offset 0x30
-    Mat3 rot;    // offset 0x34
-};
+#include "game/tobj.h"
 
 struct TNode {
     TObj* obj;     // offset 0x0
