@@ -3,6 +3,7 @@
 // thresholds in stunts.val / stuntdef.val, award points and drive the HUD's stunt pop-up. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/mathutil.h"
 #include "game/sound.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -50,14 +51,12 @@ void AchievementsAdd(int category, s32 value);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 #define NearZero(x) ((f32)__fabs(x) <= __float_epsilon[0])
-// SpinTracker::Rate tests its angle through a float abs inline (the call copy gives fabs its own register);
+// SpinTracker::Rate tests its angle through the float abs inline FAbs (mathutil.h; the call copy gives fabs its own register);
 // the other trackers use the macro above. Exact original spelling unknown.
-static inline f32 AbsF(f32 x) { return (f32)__fabs(x); }
 inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
     return r > 0.0f ? r : 0.0f;
 }
-inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 template <typename T, int N>
 struct FixedList {
@@ -1132,7 +1131,6 @@ public:
 };
 }  // namespace
 
-static inline f32 HitMax(f32 a, f32 b) { return a > b ? a : b; }
 
 struct CarHit {
     CarHit(void) { timer = 0.0f; }
@@ -1176,7 +1174,7 @@ public:
         for (i = 0; i < 8; i++) {
             if (hits[i].Active()) {
                 int w;
-                f28C = HitMax(f28C, hits[i].mag);
+                f28C = MaxF(f28C, hits[i].mag);
                 if (hits[i].Active()) {
                     hits[i].timer -= 0.016683351f;
                 }
@@ -1184,7 +1182,7 @@ public:
                 if (w || !hits[i].Active()) {
                     hits[i].timer = 0.0f;
                     wrecked = w;
-                    f290 = HitMax(f290, hits[i].mag);
+                    f290 = MaxF(f290, hits[i].mag);
                 }
             }
         }
@@ -1606,7 +1604,7 @@ inline f32 ThrowTracker::Rate(const RaceCarRec* rc) {
 inline f32 SpinTracker::Rate(const RaceCarRec* rc) {
     f32 r;
     int full;
-    if (!(AbsF(angle) <= __float_epsilon[0])) {
+    if (!(FAbs(angle) <= __float_epsilon[0])) {
         spins += rolls;
         if (Round(angle) > 0) {
             int add = rolls ? 0 : Round(angle);
