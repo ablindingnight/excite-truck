@@ -169,13 +169,17 @@ int fn_80145140(ValueTable* t, const char* name) {
     return n;
 }
 
+extern const f32 kLayoutRightLimit;
+extern const f32 kLayoutLeftLimit;
+extern const f32 kLayoutWideOffset;
+
 f32 fn_801451DC(f32 x, int just) {
     x -= 320.0f;
     if (fn_802C9A58() || fn_802C9A60()) {
         if (just == 0) {
-            if (x < -180.0f) {
+            if (x < kLayoutLeftLimit) {
                 just = 2;
-            } else if (x > 180.0f) {
+            } else if (x > kLayoutRightLimit) {
                 just = 1;
             } else {
                 just = 3;
@@ -183,10 +187,10 @@ f32 fn_801451DC(f32 x, int just) {
         }
         switch (just & ~0x20) {
         case 2:
-            x -= 106.0f;
+            x -= kLayoutWideOffset;
             break;
         case 1:
-            x += 106.0f;
+            x += kLayoutWideOffset;
             break;
         case 3:
             break;
@@ -195,6 +199,11 @@ f32 fn_801451DC(f32 x, int just) {
     x += lbl_8055E200;
     return x;
 }
+
+extern const f32 kLayoutRightLimit = 180.0f;
+extern const f32 kLayoutLeftLimit = -180.0f;
+extern const f32 kLayoutWideOffset = 106.0f;
+
 
 f32 fn_801452A0(f32 v, u32 flags) {
     if (flags & 0x20) {
