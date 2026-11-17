@@ -1945,7 +1945,7 @@ void fn_80183E7C(u8* p) {
         f.z = cb->vel.z * k;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
         f32 surf = 0.35f + fn_802BF590();
-        f32 grow = 1.0f + Clamp01((cb->f25C4 - 0.7f) / 0.8f) * -0.8f;
+        f32 grow = LerpT(RampW(cb->f25C4, 0.7f, 0.8f), 1.0f, 0.2f);
         RVec3 front;
         CbAddScaled(&front, &cb->mtx.pos, &cb->mtx.rot.z, 2.0f);
         f32 df = Ramp(front.y, surf, surf - 0.4f);
@@ -2042,7 +2042,7 @@ void fn_80183E7C(u8* p) {
             f32 st = cb->f25F0 * g;
             f32 lat = PSVECDotProduct((const Vec*)&side, (const Vec*)(p + 0x48));
             f32 want = 3.0f * (20.0f * (0.6f * st - lat));
-            f32 t = Clamp01((cb->speed - 22.222223f) / 48.888893f);
+            f32 t = RampW(cb->speed, 22.222223f, 48.888893f);
             yaw = LerpT(t, yaw, want);
         }
         f32 now = lbl_8055E3C8;
