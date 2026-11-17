@@ -70,28 +70,7 @@ struct Sw2 {
     Sw2Frame* frames;       // offset 0x24
 };
 
-class SwfAnim {
-public:
-    void SwapShapeData(u32 i);
-    SwfAnim();
-    ~SwfAnim();
-    void DrawItem(const Sw2Item* it);
-    void DrawFrame(u32 frame);
-    void Reset();
-    void LoadFile(const char* name);
-    void Update();
-    void Draw();
-    void Load(const char* name);
-    void Unload();
-
-    u32 lastTime;  // offset 0x0
-    u8 playing;    // offset 0x4
-    u8 loop;       // offset 0x5
-    u32 frame;     // offset 0x8
-    u32 first;     // offset 0xC
-    u32 last;      // offset 0x10
-    Sw2* data;     // offset 0x14
-};
+#include "game/swfanim.h"
 
 static inline u32 SwfColor(u8 r, u8 g, u8 b, u8 a) { return (a << 24) | (r << 16) | (g << 8) | b; }
 

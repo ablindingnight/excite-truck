@@ -210,7 +210,7 @@ extern const float lbl_805634C4;
 }
 
 
-class SwfAnim {char observedAllocation[0x18];public:SwfAnim();~SwfAnim();void Load(const char*);void Unload();void Draw();void Update();};
+#include "game/swfanim.h"
 #include "game/dynotex.h"
 void* operator new(unsigned long,const char*);
 struct SwfWidgetPrefix {char base[0x244];SwfAnim* animation;unsigned char owned;};
