@@ -14,7 +14,7 @@ void fn_801616FC(void);
 void fn_801619A8(void);
 void fn_80161A18(void);
 void fn_80161A70(void);
-void fn_80161B70(void);
+f32 fn_80161B70(void);
 int fn_80161B0C(int a, int b);
 int fn_80161B94(void);
 int fn_80161BB8(int car);
@@ -229,11 +229,11 @@ int fn_801B8874(void) {
     return lbl_8055E744->vf88();
 }
 
-void fn_801B88BC(void) {
+f32 fn_801B88BC(void) {
     if (fn_80161C38()) {
-        fn_80161B70();
+        return fn_80161B70();
     } else {
-        lbl_8055E744->vf38();
+        return lbl_8055E744->vf38();
     }
 }
 

@@ -98,7 +98,7 @@ void fn_802C8D74(void);
 void fn_801478E0(ILayout* layout, const char* name, gArtSet* art, int frame);
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
                  f32 v0, f32 u1, f32 v1);
-void fn_80011E04(int unk);
+f32 fn_80011E04(int unk);
 void fn_80010FDC(const char* text, int flags);
 extern u8 lbl_8055E520;
 }

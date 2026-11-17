@@ -76,7 +76,7 @@ void gxForgetTexture(s32 tex);
 u32 fn_802E2C20(void);  // milliseconds
 void fn_80176734(void);
 void fn_80232BA4(const char* text, void* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
-void fn_8023293C(void* font, const char* text, f32 scale);
+f32 fn_8023293C(void* font, const char* text, f32 scale);
 void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f32 x, f32 y, f32 width,
                  f32 scale, f32 a, f32 b);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);

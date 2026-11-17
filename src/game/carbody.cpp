@@ -3119,7 +3119,7 @@ static inline void PlaceRotate(RVec3* out, const RVec3* v, const RMtx* m) {
     }
 }
 
-void fn_801E9DD0(s16* surface, f32 x, f32 z);
+f32 fn_801E9DD0(s16* surface, f32 x, f32 z);
 void fn_801BE400(s32 car, RMtx* frame, f32 a);
 void fn_801B30C0(s32 car, s32 reset, void* start);
 void fn_8026A394(u8* car);
@@ -3648,7 +3648,7 @@ static inline void PkCopy(void* dst, const void* src, int n) {
 
 void fn_8018ADB4(u8* p, f32 v);
 void fn_8018ADBC(u8* p, f32 v);
-void fn_801E9DD0(s16* surface, f32 x, f32 z);
+f32 fn_801E9DD0(s16* surface, f32 x, f32 z);
 
 // CarBody::vf30: applies a state packet interpolated between `cur` and `prev` (t = 0 is cur): the rigid body
 // part, engine speed, steering, pedals, gear and the four wheels (suspension, spin with 2 pi wrap, slip, skid,

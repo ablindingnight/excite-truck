@@ -50,7 +50,7 @@ void fn_802CB29C(int a);
 void fn_802D0368(f32 a, f32 b, f32 fov, f32 aspect);
 void fn_802D007C(f32 a);
 void fn_802D01B0(void* v, f32 a);
-void fn_802D93E0(void);
+f32 fn_802D93E0(void);
 int fn_802D31D8(int a);
 void fn_802D362C(int a);
 void fn_802D3304(void);
@@ -668,7 +668,7 @@ void fn_802C9A1C(const RVec3* dir) {
 
 RVec3* fn_802C9A40(void) { return &lbl_804C1440; }
 
-void fn_802C9A4C(f32) { fn_802D93E0(); }
+f32 fn_802C9A4C(f32) { return fn_802D93E0(); }
 
 f32 fn_802C9A50(void) { return lbl_8055D020; }
 
