@@ -872,11 +872,7 @@ struct CVec4 {
     f32 x, y, z, w;
 };
 
-class CarGear {
-public:
-    void Fetch(int id);
-    void Clear(int id);
-};
+#include "game/cargear.h"
 
 // A sub-object owned by the body, destroyed through its virtual destructor.
 class CbPart {
