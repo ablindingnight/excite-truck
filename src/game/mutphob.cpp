@@ -31,13 +31,6 @@ extern f32 lbl_8055E3C8;    // time
 extern f32 lbl_8055E460;    // tick alpha
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-class ValueTableV {
-public:
-    virtual ValueNode* FindChild(const char* name);  // 0x8
-    virtual ValueNode* GetChild(int index);          // 0xC
-    virtual int HasChild(const char* name);           // 0x10
-};
-
 struct RPacket;
 struct BodyDesc;
 class CollVolume;
@@ -180,7 +173,7 @@ void fn_801D334C(PhobConfig* c, ValueNode* t) {
 void fn_801D3610(PhobConfig* c, const char* name) {
     const char* files[2] = {"trk_sobj.val", "race.res/sobj.val"};
     for (u32 i = 0; i < 2; i++) {
-        ValueTableV* t = (ValueTableV*)fn_80131810(files[i]);
+        ValueTable* t = (ValueTable*)fn_80131810(files[i]);
         if (t) {
             if (t->HasChild(name)) {
                 fn_801D334C(c, t->FindChild(name));

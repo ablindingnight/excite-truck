@@ -74,7 +74,8 @@ public:
     virtual ValueNodeV* FindChild(const char* name);
 };
 
-class ValueTableV {
+// soevent's view of a .val file root (common.h ValueTable), with ValueNodeV entries.
+class SoValueTable {
 public:
     virtual ValueNodeV* FindChild(const char* name);  // 0x8
     virtual ValueNodeV* GetChild(int index);          // 0xC
@@ -392,7 +393,7 @@ void fn_801D2A24(ValueNodeV* t) {
 }
 
 void fn_801D2AD4(const char* file) {
-    ValueTableV* table = (ValueTableV*)fn_80131810(file);
+    SoValueTable* table = (SoValueTable*)fn_80131810(file);
     if (table) {
         for (int i = 0; table->GetChild(i); i++) {
             ValueNodeV* t = table->GetChild(i);

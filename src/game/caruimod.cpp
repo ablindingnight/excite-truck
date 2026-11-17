@@ -34,12 +34,6 @@ struct Vec3a {
 };
 
 // Mtx33: mtx33.h.
-class ValueTableV {
-public:
-    virtual ValueNode* FindChild(const char* name);  // 0x8
-    virtual ValueNode* GetChild(int index);          // 0xC
-    virtual int HasChild(const char* name);          // 0x10
-};
 
 #include "game/carsetup.h"
 #include "game/mathutil.h"
@@ -49,9 +43,9 @@ int sprintf(char* buf, const char* fmt, ...);
 void* memset(void* dst, int c, size_t n);
 void* fn_801284E8(const char* name, u32 size);  // alloc
 void fn_80128658(void* p);                      // free
-ValueTableV* fn_80131808(const char* name);
-ValueTableV* fn_80131810(const char* name);
-void fn_80131818(ValueTableV* t);
+ValueTable* fn_80131808(const char* name);
+ValueTable* fn_80131810(const char* name);
+void fn_80131818(ValueTable* t);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 s32 fn_80147C50(s32 a, s32 b, f32 t);
 void fn_8018BF44(u32* flags);
@@ -257,7 +251,7 @@ void CarUIModel::Load(const char* carName) {
     fn_801345D8(file, 0x20, "%s/shadow1.mod", path);
     shadow = fn_802C6FC0(file, 0, path);
     fn_801345D8(file, 0x20, "%s/physics.val", path);
-    ValueTableV* t = fn_80131808(file);
+    ValueTable* t = fn_80131808(file);
     fwheels = fn_801F0010(t->FindChild("front")->GetValue("wheel_class"), fwheelBuf);
     rwheels = fn_801F0010(t->FindChild("rear")->GetValue("wheel_class"), rwheelBuf);
     fn_8027A714(&setup, carName);
@@ -303,7 +297,7 @@ void CarUIModel::LoadEfx(const char* path) {
         ValueNode* n;
         char file[0x100];
         fn_801345D8(file, 0x100, "%s/efxmesh.val", path);
-        ValueTableV* t = fn_80131810(file);
+        ValueTable* t = fn_80131810(file);
         if (!t) {
             efx = -1;
             numBones = 0;
@@ -1063,7 +1057,7 @@ static inline ValVec3 ViewDefault(f32 x, f32 y, f32 z) {
 void CarUIScreen::LoadView(const char* view) {
     const char* file = "carview.val";
     if (fn_8012C33C(file)) {
-        ValueTableV* t = fn_80131808(file);
+        ValueTable* t = fn_80131808(file);
         if (t->HasChild(view)) {
             ValueNode* n = t->FindChild(view);
             dist = n->GetFloat("camera_dist", 6.0f);
