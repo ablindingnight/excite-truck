@@ -4,6 +4,7 @@
 // on-screen size, discarding the least useful ones a couple of frames later. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/byteswap.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -430,30 +431,13 @@ void* fn_802CA4E0(const TTHeader* h, const char* name, int rt, u32 data, s32 kin
     return drCreateTexture(&d, name);
 }
 
-static inline void Swap16(void* p) {
-    u8* b = (u8*)p;
-    u8 t = b[0];
-    b[0] = b[1];
-    b[1] = t;
-}
-
-static inline void Swap32(void* p) {
-    u8* b = (u8*)p;
-    u8 t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
 void fn_802CA57C(TTHeader* h, const char* name, u32 data, s32 kind) {
     if (!(h->flags & 0x80)) {
         GXTexDesc d;
-        Swap32(&h->data);
-        Swap16(&h->w);
-        Swap16(&h->h);
-        Swap16(&h->zhint);
+        SwapWord(&h->data);
+        SwapHalf(&h->w);
+        SwapHalf(&h->h);
+        SwapHalf(&h->zhint);
         h->data = (u32)((u8*)h + h->data);  // offset -> pointer
         fn_802CA3F4(&d, h, 0, data, kind);
         fn_802D8DCC(&d, name);
