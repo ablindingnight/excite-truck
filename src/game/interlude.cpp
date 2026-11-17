@@ -121,6 +121,14 @@ struct ShowEvent {
     char text[0x200];   // offset 0x10C
 };
 
+// A rotation as three rows. Retail copies the camera rotation as three runs of three words, and MWCC copies a struct
+// one top-level member at a time (FACTS 2026-11-17 03:10), so the copied type has three row members. Name unproven.
+struct MatRows {
+    ValVec3 x;
+    ValVec3 y;
+    ValVec3 z;
+};
+
 struct CamEvent {
     f32 time;
     s32 order;
@@ -1176,7 +1184,7 @@ void debug_event(void) {
             p->origin.x = c->origin.x;
             p->origin.y = c->origin.y;
             p->origin.z = c->origin.z;
-            p->rot = c->rot;
+            *(MatRows*)&p->rot = *(const MatRows*)&c->rot;
             p->v.x = c->v.x;
             p->v.y = c->v.y;
             p->v.z = c->v.z;
@@ -1194,9 +1202,9 @@ void debug_event(void) {
         case 2:
             blocked = 1;
             if (!lbl_8055E7E8) {
+                lbl_8055E7E8 = 1;
                 lbl_8055E7EC = fn_80179318();
                 fn_80176858();
-                lbl_8055E7E8 = 1;
             } else if (lbl_8055E7EC != fn_80179318()) {
                 blocked = 0;
             }
@@ -1253,7 +1261,8 @@ void debug_event(void) {
                     break;
                 }
                 case 2: {
-                    V2 off = tp->pt;
+                    // Retail copies the point as two words: a constructor-less copy (V2's copy constructor moves floats).
+                    ValPoint off = *(const ValPoint*)&tp->pt;
                     if (fn_801769CC()->type & 0x100) {
                         Respawn pose = car->pose;
                         fn_801B8100(&pose, i, car->player);
@@ -1269,15 +1278,15 @@ void debug_event(void) {
                         Mat3 r;
                         Mat3FromEuler(&r, (const Vec3*)&euler);
                         Mat3Mul(&f.Mat(), &r, &f.Mat());
-                        f32 xv = off.x;
-                        f.origin.x += f.basis[0].x * xv;
+                        f.origin.x += f.basis[0].x * off.x;
                         f.origin.y += f.basis[0].y * off.x;
                         f.origin.z += f.basis[0].z * off.x;
-                        f32 yv = off.y;
-                        f.origin.x += f.basis[2].x * yv;
+                        f.origin.x += f.basis[2].x * off.y;
                         f.origin.y += f.basis[2].y * off.y;
                         f.origin.z += f.basis[2].z * off.y;
-                        f32 yaw = atan2(f.basis[2].x, f.basis[2].z);
+                        // Retail reads the two entries again for atan2: a const view is not merged with the reads above.
+                        const ValMatrix& cf = f;
+                        f32 yaw = atan2(cf.basis[2].x, cf.basis[2].z);
                         V2 pt;
                         pt.y = f.origin.z;
                         pt.x = f.origin.x;
@@ -1744,14 +1753,6 @@ static inline void RotToAxisAngle(const Mat3* m, ValVec3* out) {
         out->z = 0.0f;
     }
 }
-
-// A rotation as three rows. Retail copies the camera rotation as three runs of three words, and MWCC copies a struct
-// one top-level member at a time (FACTS 2026-11-17 03:10), so the copied type has three row members. Name unproven.
-struct MatRows {
-    ValVec3 x;
-    ValVec3 y;
-    ValVec3 z;
-};
 
 static inline void InitCameraEvent(CamEvent* e, PlainValMatrix* cur) {
     e->fov = lbl_8055E834;
