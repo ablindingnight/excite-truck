@@ -432,7 +432,6 @@ void fn_80276DC8(int slot) {
     CamPose car;
     CamPose rel;
     CamMat3 inv;
-    CamOffset o;
     CamVec3 axis;
     CamRec* src = (CamRec*)fn_802678E4(slot);
     lbl_804A0C60[slot] = *src;
@@ -470,15 +469,23 @@ void fn_80276DC8(int slot) {
     PSVECCrossProduct((const Vec*)&car.rot.m[0], (const Vec*)&car.rot.m[3], (Vec*)&car.rot.m[6]);
     PSVECNormalize((const Vec*)&car.rot.m[6], (Vec*)&car.rot.m[6]);
     fn_801E9DC4(&rec->h1EC);
-    o = lbl_802FA818;
-    rel.pos = o.pos;
-    axis.v[0] = 0.017453292f * o.rot.v[0];
-    axis.v[1] = 0.017453292f * o.rot.v[1];
-    axis.v[2] = 0.017453292f * o.rot.v[2];
+    // The offset is copied whole at its declaration (retail moves all seven words, the fov float included; an
+    // assignment to an earlier declaration moves the fov with lfs/stfs). The axis is stored after the position.
+    // DegToRad (mathutil.h) takes the angle by value, so retail reads the angle before the constant.
+    CamOffset o = lbl_802FA818;
+    f32 rx = DegToRad(o.rot.v[0]);
+    f32 ry = DegToRad(o.rot.v[1]);
+    f32 rz = DegToRad(o.rot.v[2]);
+    rel.pos.v[0] = o.pos.v[0];
+    rel.pos.v[1] = o.pos.v[1];
+    rel.pos.v[2] = o.pos.v[2];
     f32 scale = F32(src->car, 0x5E4);
     rel.pos.v[0] *= scale;
     rel.pos.v[1] *= scale;
     rel.pos.v[2] *= scale;
+    axis.v[0] = rx;
+    axis.v[1] = ry;
+    axis.v[2] = rz;
     AxisAngle(&rel.rot, &axis);
     RMtx* frame = &lbl_804A1500[slot];
     CamVec3* framePos = (CamVec3*)&frame->pos;
@@ -488,7 +495,7 @@ void fn_80276DC8(int slot) {
     fn_801C7254((Mat3*)&inv);
     Mat3Mul((Mat3*)frame, (Mat3*)frame, (Mat3*)&inv);
     fn_80144CD0(framePos, framePos, &look);
-    fn_80276098(&src->pose, &rel, slot, 0x22, src->fov, 0.017453292f * o.fov, 2.0f);
+    fn_80276098(&src->pose, &rel, slot, 0x22, src->fov, DegToRad(o.fov), 2.0f);
 }
 
 
