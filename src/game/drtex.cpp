@@ -9,6 +9,7 @@
 #include <revolution/GX/GXPixel.h>
 #include <revolution/GX/GXTexture.h>
 #include <revolution/OS/OSCache.h>
+#include "game/byteswap.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -119,15 +120,6 @@ static inline void StrCopy(char* d, const char* s, int n) {
             p[-1] = 0;
             break;
         }
-    }
-}
-
-static inline void Swap32(void* p) {
-    u8* b = (u8*)p;
-    for (int k = 0; k < 2; k++) {
-        u8 t = b[k];
-        b[k] = b[3 - k];
-        b[3 - k] = t;
     }
 }
 
@@ -386,7 +378,7 @@ void fn_802D81C4(GXTexDesc* d) {
     }
     u32* pal = img->pal;
     for (i = 0; i < 16; i++) {
-        Swap32(&pal[i]);
+        SwapWordV(&pal[i]);
     }
     int row = w / 2;
     fn_801282EC(0x20);
@@ -413,7 +405,7 @@ void fn_802D86BC(GXTexDesc* d) {
     u8* tex = img->tex;
     u32* pal = img->pal;
     for (int i = 0; i < 256; i++) {
-        Swap32(&pal[i]);
+        SwapWordV(&pal[i]);
     }
     fn_801282EC(0x20);
     u8* tmp = new ("pal8_tmp") u8[w * h];
@@ -486,7 +478,7 @@ void fn_802D8DA0(void) {
 }
 
 static inline void Fix(u8** p, TexImage* img) {
-    Swap32(p);
+    SwapWordV(p);
     if (*p) {
         *p = (u8*)img + (u32)*p;
     }
