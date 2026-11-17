@@ -386,27 +386,12 @@ struct IQuat {
 extern "C" double sqrt(double x);
 extern "C" void fn_8012F57C(IQuat* out, IQuat* a, IQuat* b, f32 t);  // slerp
 
-static inline void FrameToQuatAxis(f32 (*m)[3], IQuat* q) {
-    f32* v = &q->x;
-    int i = 0;
-    if (m[1][1] > m[0][0]) {
-        i = 1;
-    }
-    if (m[2][2] > m[i][i]) {
-        i = 2;
-    }
-    int j = (i + 1) % 3;
-    int k = (j + 1) % 3;
-    f32 s = sqrt(m[i][i] - (m[j][j] + m[k][k]) + 1.0f);
-    v[i] = 0.5f * s;
-    s = 0.5f / s;
-    q->w = (m[j][k] - m[k][j]) * s;
-    v[j] = (m[i][j] + m[j][i]) * s;
-    v[k] = (m[i][k] + m[k][i]) * s;
-}
-
 static inline void RotToQuat(const Mat3* r, IQuat* q) {
     const f32(*m)[3] = (const f32(*)[3])r;
+    f32* v;
+    int i;
+    int j;
+    int k;
     f32 tr = m[2][2] + (m[0][0] + m[1][1]);
     if (tr > 0.0f) {
         f32 s = sqrt(tr + 1.0f);
@@ -416,9 +401,26 @@ static inline void RotToQuat(const Mat3* r, IQuat* q) {
         q->y = (m[2][0] - m[0][2]) * s;
         q->z = (m[0][1] - m[1][0]) * s;
     } else {
-        // MATCHING-AID: one-use copy of q; it ranks the register above m. The real form is unknown.
-        IQuat* p = q;
-        FrameToQuatAxis((f32(*)[3])m, p);
+        // The largest diagonal entry picks the axis. Retail reads m[0][0] and m[1][1] again here, which MWCC does
+        // only through a pointer that is not const (interlude fn_801C6E40 EXACT, 2026-11-17); one helper with m
+        // declared before v/i/j/k, not a nested one.
+        f32 (*a)[3] = (f32(*)[3])r;
+        v = &q->x;
+        i = 0;
+        if (a[1][1] > a[0][0]) {
+            i = 1;
+        }
+        if (a[2][2] > a[i][i]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        f32 s = sqrt(a[i][i] - (a[j][j] + a[k][k]) + 1.0f);
+        v[i] = 0.5f * s;
+        s = 0.5f / s;
+        q->w = (a[j][k] - a[k][j]) * s;
+        v[j] = (a[i][j] + a[j][i]) * s;
+        v[k] = (a[i][k] + a[k][i]) * s;
     }
 }
 
@@ -1773,31 +1775,38 @@ static inline void RotToAxisAngle(const Mat3* m, ValVec3* out) {
     }
 }
 
+// A rotation as three rows. Retail copies the camera rotation as three runs of three words, and MWCC copies a struct
+// one top-level member at a time (FACTS 2026-11-17 03:10), so the copied type has three row members. Name unproven.
+struct MatRows {
+    ValVec3 x;
+    ValVec3 y;
+    ValVec3 z;
+};
+
 static inline void InitCameraEvent(CamEvent* e, PlainValMatrix* cur) {
     e->fov = lbl_8055E834;
     e->origin.x = cur->origin.x;
     e->origin.y = cur->origin.y;
     e->origin.z = cur->origin.z;
-    e->rot = cur->Mat();
+    *(MatRows*)&e->rot = *(const MatRows*)cur->basis;
     e->end = e->time + lbl_8055E830;
     e->accel = 1;
     if (lbl_8055E830 > 0.01f) {
-        ValVec3 dp;
-        Mat3 d;
         Mat3 inv;
+        PlainValMatrix rel;  // the destination pose in the current camera's frame (one 0x30 object in retail)
         inv = cur->Mat();
         fn_801C7254(&inv);
-        Mat3Mul(&d, &((PlainValMatrix*)&lbl_80438220)->Mat(), &inv);
-        fn_80144CD0(&dp, &((PlainValMatrix*)&lbl_80438220)->origin, (const f32*)cur);
-        RotToAxisAngle(&d, &e->av);
+        Mat3Mul(&rel.Mat(), &((PlainValMatrix*)&lbl_80438220)->Mat(), &inv);
+        fn_80144CD0(&rel.origin, &((PlainValMatrix*)&lbl_80438220)->origin, (const f32*)cur);
+        RotToAxisAngle(&rel.Mat(), &e->av);
         f32 inv1 = 1.0f / lbl_8055E830;
         e->av.x *= inv1;
         e->av.y *= inv1;
         e->av.z *= inv1;
         f32 inv2 = 1.0f / lbl_8055E830;
-        e->v.x = dp.x * inv2;
-        e->v.y = dp.y * inv2;
-        e->v.z = dp.z * inv2;
+        e->v.x = rel.origin.x * inv2;
+        e->v.y = rel.origin.y * inv2;
+        e->v.z = rel.origin.z * inv2;
     } else {
         e->av.x = 0.0f;
         e->av.y = 0.0f;
