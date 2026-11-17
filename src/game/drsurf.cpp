@@ -980,11 +980,70 @@ static inline void SwapHeader(u8* const& b) {
     SwapWordRef(b + 0x10);
 }
 
+#ifndef __MWERKS__
+// PORT: model files carry their vertex arrays big-endian (GX-ready; the CPU-side header fields are little-endian and
+// the Wii swaps those). Skinned, morphing and wind-swayed surfaces are read by the CPU (Skin2, morph and bone-delta
+// loops), so a little-endian host converts those surfaces' source vertices to host order at load; GX only reads
+// them through the CPU-built output arrays, or directly as positions. nf = floats from offset 0, then ns s16s from
+// offset so (the u8 bone indices/weights and morph indices need nothing).
+static void PortHostOrderVerts(Surf* s, int stride, int nf, int so, int ns) {
+    u8* p = (u8*)s->verts;
+    if (!p) {
+        return;
+    }
+    for (int i = 0; i < s->nverts; i++, p += stride) {
+        for (int k = 0; k < nf; k++) {
+            u8* w = p + k * 4;
+            u8 t0 = w[0], t1 = w[1];
+            w[0] = w[3];
+            w[1] = w[2];
+            w[2] = t1;
+            w[3] = t0;
+        }
+        for (int k = 0; k < ns; k++) {
+            u8* h = p + so + k * 2;
+            u8 t = h[0];
+            h[0] = h[1];
+            h[1] = t;
+        }
+    }
+}
+
+static void PortHostOrderSurf(Surf* s) {
+    switch (s->fmt) {
+    case 0xD: case 0xE: case 0xF: case 0x10: case 0x12: case 0x13:
+        PortHostOrderVerts(s, sizeof(SkinVtx), 3, 0, 0);
+        break;
+    case 0x1A:
+        PortHostOrderVerts(s, sizeof(DirVtx), 4, 0, 0);
+        break;
+    case 0x15:
+        PortHostOrderVerts(s, sizeof(MorphVtx), 3, 0xC, 6);
+        break;
+    case 0x18:
+        PortHostOrderVerts(s, sizeof(YMorphVtx), 3, 0xC, 2);
+        break;
+    case 0x16:
+        PortHostOrderVerts(s, sizeof(SkinMorphVtx), 3, 0x10, 6);
+        break;
+    case 0x19:
+        PortHostOrderVerts(s, sizeof(SkinYMorphVtx), 3, 0x10, 2);
+        break;
+    case 0x1B:
+        PortHostOrderVerts(s, sizeof(DirYMorphVtx), 4, 0x10, 2);
+        break;
+    }
+}
+#endif
+
 void fn_802D63FC(Surf* s, u32 base) {
     SwapHeader((u8*)s);
     fn_802D657C((u32*)&s->verts, base);
     fn_802D657C((u32*)&s->attr, base);
     fn_802D657C((u32*)&s->uv, base);
+#ifndef __MWERKS__
+    PortHostOrderSurf(s);  // PORT: CPU-read vertex arrays to host byte order
+#endif
     u32 size;
     fn_802D62FC(s, &s->fmtDL, &size);
     size >>= 5;
