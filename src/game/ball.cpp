@@ -9,6 +9,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rmtx.h"
+#include "game/camframe34.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/shapes.h"
@@ -26,7 +27,6 @@ void fn_801D0C84(void* l);                  // unregister listener
 // Vec2's empty constructor, which retail calls out of line in Drop, by its mangled name (xz stays a plain array:
 // PickDrop takes an f32*).
 void __ct__4Vec2Fv(f32* v);
-void __ct__10CamFrame34Fv(void* m);
 void __ct__4VPosFfff(void* v, f32 x, f32 y, f32 z);
 }
 
@@ -417,11 +417,10 @@ inline void Ball::Drop(void) {
     s16 h;
     f32 xz[2];
     RVec3 v;
-    RMtx m;
     f32 up;
     __ct__4Vec2Fv(xz);
     PickDrop(xz, &h);
-    __ct__10CamFrame34Fv(&m);
+    CamFrame34 m;
     fn_8017E388(&m);
     ((Spot*)&m.pos)->From(*(const Vec2*)xz);
     up = DropHeight();
