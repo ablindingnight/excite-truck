@@ -1562,7 +1562,6 @@ static int FacingNone(const OFrame* f);
 static int FacingZ(const OFrame* f);
 static int FacingX(const OFrame* f);
 extern "C" {
-void fn_801FBCF4(StaticOb** list, StaticOb* o);
 OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node);
 CollShape* fn_801FBEA8(const ObstacleDesc* d);
 CollShape* fn_801FBF48(const ObstacleDesc* d);
@@ -1652,6 +1651,10 @@ static inline int IsVolume(s32 kind) {
     return 0;
 }
 
+template <class T> void PushObject(T** list, T* o) {
+    o->next = *list;
+    *list = o;
+}
 /* Helper name unproven: creates the static obstacle for a placed object. */
 static inline StaticOb* CreateWallGob(ObstacleObjDesc* desc, const OFrame* frame, OFrame* solid, s32 id, const char* tag = "wall-gob") {
     return new (tag) StaticOb(desc, frame, solid, id);
@@ -1664,6 +1667,39 @@ static inline void ReportObstacleKind(unsigned int kind, const char* format = "e
 
 static inline const char* ObstaclePathKey(const char* key = "path") { return key; }
 static inline const char* SolidIdKey(const char* const& key = "sol_id") { return key; }
+
+static inline OFrame* MakeVolume(ObstacleObjDesc* d, const PlacedObj* o, s32 id) {
+    OFrame* vol = 0;
+    CollShape* shape;
+    switch (d->phys.kind) {
+    case 6:
+    case 15:
+        shape = fn_801FC12C(&d->phys);
+        break;
+    case 14:
+    case 19:
+        shape = fn_801FC048(&d->phys);
+        break;
+    case 10:
+        shape = fn_801FBFE8(&d->phys);
+        break;
+    case 9:
+        shape = fn_801FBF48(&d->phys);
+        break;
+    case 22:
+        shape = fn_801FBEA8(&d->phys);
+        break;
+    default:
+        fn_802E317C("eventwob: unhandled static object subtype %x", static_cast<unsigned int>(d->phys.kind));
+        shape = 0;
+        break;
+    }
+    if (shape) {
+        shape->SetSurface(d->phys.surface);
+        vol = fn_801FBE1C(lbl_8055EC74, id, d->event, shape, &o->frame, o->node);
+    }
+    return vol;
+}
 
 inline void ObstacleObjDesc::Create(const PlacedObj* o) {
     s32 sol = -1;
@@ -1682,66 +1718,12 @@ inline void ObstacleObjDesc::Create(const PlacedObj* o) {
         if (vol) {
             OFrame* sx;
             s32 id = lbl_8055EC78++;
-            sx = 0;
-            struct {
-                CollShape* shape;
-            } result;
-            switch (phys.kind) {
-            case 6:
-            case 15:
-                {
-                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FC12C;
-                    result.shape = build(&phys);
-                }
-                break;
-            case 14:
-            case 19:
-                {
-                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FC048;
-                    result.shape = build(&phys);
-                }
-                break;
-            case 10:
-                {
-                    CollShape* (*const build)(ObstacleDesc*) = fn_801FBFE8;
-                    result.shape = build(&phys);
-                }
-                break;
-            case 9:
-                {
-                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FBF48;
-                    result.shape = build(&phys);
-                }
-                break;
-            case 22:
-                {
-                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FBEA8;
-                    result.shape = build(&phys);
-                }
-                break;
-            default:
-                ReportObstacleKind(static_cast<unsigned int>(phys.kind));
-                result.shape = 0;
-                break;
-            }
-            if (result.shape) {
-                result.shape->SetSurface(phys.surface);
-                {
-                    OFrame* (*const fn)(SolBuilder*, s32, s32, CollShape*, const OFrame*, ValueNode*) = fn_801FBE1C;
-                    sx = fn(lbl_8055EC74, id, event, result.shape, &o->frame, o->node);
-                }
-            }
+            sx = MakeVolume(this, o, id);
             StaticOb* so = CreateWallGob(this, &o->frame, sx, id);
             if (flags & 0x80) {
-                {
-                    void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
-                    fn(&lbl_8055EC50, so);
-                }
+                PushObject(&lbl_8055EC50, so);
             } else {
-                {
-                    void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
-                    fn(&lbl_8055EC4C, so);
-                }
+                PushObject(&lbl_8055EC4C, so);
             }
             if (flags & 2) {
                 fn_802981EC(o, phys.shape.f[0]);
@@ -1765,15 +1747,9 @@ inline void ObstacleObjDesc::Create(const PlacedObj* o) {
         sol = o->node ? o->node->GetInt(SolidIdKey(), -1) : -1;
         StaticOb* so = CreateWallGob(this, &o->frame, 0, sol);
         if (flags & 0x80) {
-            {
-                void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
-                fn(&lbl_8055EC50, so);
-            }
+            PushObject(&lbl_8055EC50, so);
         } else {
-            {
-                void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
-                fn(&lbl_8055EC4C, so);
-            }
+            PushObject(&lbl_8055EC4C, so);
         }
         if (flags & 2) {
             fn_802981EC(o, phys.shape.f[0]);
@@ -1786,10 +1762,7 @@ inline void ObstacleObjDesc::Create(const PlacedObj* o) {
 
 extern "C" {
 
-inline void fn_801FBCF4(StaticOb** list, StaticOb* o) {
-    o->next = *list;
-    *list = o;
-}
+
 }
 
 static inline int FacingNone(const OFrame* f) { return -15; }
@@ -1847,8 +1820,8 @@ static inline void AnimDescTeardown(const char* model) {}
 
 inline AnimDesc::~AnimDesc(void) { AnimDescTeardown(animModel); }
 
-extern "C" void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a);
-extern "C" void fn_801FC644(EWSound** list, EWSound* s);
+
+
 
 // The frame as retail copies it: a 36-byte rotation block and the position (copy = 4 word pairs + 1, then 1 pair + 1).
 // OFrame itself (four PVec members) copies 12+12+12+12. Names unproven.
@@ -1888,17 +1861,11 @@ inline void AnimDesc::Create(const PlacedObj* o) {
     if (a) {
         AnimSetup(a, this, o->node);
     }
-    {
-        void (*const fn)(TrackAnimObj**, TrackAnimObj*) = fn_801FC4D8;
-        fn(&lbl_8055EC5C, a);
-    }
+    PushObject(&lbl_8055EC5C, a);
 }
 
 extern "C" {
-inline void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a) {
-    a->next = *list;
-    *list = a;
-}
+
 }
 
 static inline const char* ObstacleVolumeKey() { return "volume"; }
@@ -1923,17 +1890,11 @@ static inline const char* EventSoundTag(const char* tag = "EWSound") { return ta
 
 inline void SoundDesc::Create(const PlacedObj* o) {
     EWSound* s = new (EventSoundTag()) EWSound(o);
-    {
-        void (*const fn)(EWSound**, EWSound*) = fn_801FC644;
-        fn(&lbl_8055EC6C, s);
-    }
+    PushObject(&lbl_8055EC6C, s);
 }
 
 extern "C" {
-inline void fn_801FC644(EWSound** list, EWSound* s) {
-    s->next = *list;
-    *list = s;
-}
+
 }
 
 inline void SoundDesc::Props(void* p, PlacedObj* o) { fn_80204014(p, o->node, lbl_8055EC70); }
