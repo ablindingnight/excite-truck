@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/idealline.h"
 #include "game/centerline.h"
 #include "game/gamemode.h"
@@ -51,8 +52,6 @@ int fn_801609C4(int score);                                // grade for a score
 ValueTable* fn_80131808(const char* name);  // open .val table
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);  // close .val table
-void* fn_8023512C(const char* name);
-void fn_80235380(void* art);
 s32 fn_80204CF0(void);
 s32 fn_80204EA0(const char* key);
 void mrModelUnload(s32 model);
@@ -466,7 +465,7 @@ public:
     TableRef dynos;                // offset 0x14
     RArray<ObjSet>* sets;          // offset 0x18
     RArray<SetStat>* stats;        // offset 0x1C
-    void* art;                     // offset 0x20
+    gArtSet* art;                     // offset 0x20
     s32 f24;                       // offset 0x24
     f32 f28;                       // offset 0x28
     s32 curSet;                    // offset 0x2C
