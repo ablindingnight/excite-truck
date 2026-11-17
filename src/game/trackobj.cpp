@@ -130,7 +130,7 @@ typedef int (*FacingFn)(const OFrame* f);
 
 // A static object drawn from the lists (0x48).
 struct StaticOb {
-    StaticOb(ObstacleObjDesc* d, const OFrame* f, OFrame* v, s32 i, u32& fl);
+    StaticOb(ObstacleObjDesc* d, const OFrame* f, OFrame* v, s32 i);
     ~StaticOb(void) { mrModelUnload(model); }
     void* model;       // offset 0x0
     OFrame frame;      // offset 0x4
@@ -1596,9 +1596,9 @@ static inline void RotVec(const OFrame* m, const PVec* v, PVec* out) {
     }
 }
 
-inline StaticOb::StaticOb(ObstacleObjDesc* d, const OFrame* f, OFrame* v, s32 i, u32& fl) {
-    fl = d->flags;
-    FacingFn fn = PickFacing(fl);
+inline StaticOb::StaticOb(ObstacleObjDesc* d, const OFrame* f, OFrame* v, s32 i) {
+    FacingFn fn = PickFacing(d->flags);
+    u32 fl = d->flags;
     model = fn_802C6FC0(d->model, 0, 0);
     frame = *f;
     hidden = (fl >> 9) & 1;
@@ -1656,10 +1656,8 @@ template <class T> void PushObject(T** list, T* o) {
     *list = o;
 }
 /* Helper name unproven: creates the static obstacle for a placed object. */
-// Provisional matching aid. The constructor borrows the caller-owned flags snapshot.
-// Its original ownership remains unproven.
-static inline StaticOb* CreateWallGob(ObstacleObjDesc* desc, const OFrame* frame, OFrame* solid, s32 id, u32& flags, const char* tag = "wall-gob") {
-    return new (tag) StaticOb(desc, frame, solid, id, flags);
+static inline StaticOb* CreateWallGob(ObstacleObjDesc* desc, const OFrame* frame, OFrame* solid, s32 id, const char* tag = "wall-gob") {
+    return new (tag) StaticOb(desc, frame, solid, id);
 }
 static inline const char* EventObjectTag(const char* tag = "EWObject") { return tag; }
 
@@ -1704,7 +1702,6 @@ static inline OFrame* MakeVolume(ObstacleObjDesc* d, const PlacedObj* o, s32 id)
 }
 
 inline void ObstacleObjDesc::Create(const PlacedObj* o) {
-    u32 constructorFlags;
     s32 sol = -1;
     phys.solId = sol;
     if (flags & 4) {
@@ -1722,7 +1719,7 @@ inline void ObstacleObjDesc::Create(const PlacedObj* o) {
             OFrame* sx;
             s32 id = lbl_8055EC78++;
             sx = MakeVolume(this, o, id);
-            StaticOb* so = CreateWallGob(this, &o->frame, sx, id, constructorFlags);
+            StaticOb* so = CreateWallGob(this, &o->frame, sx, id);
             if (flags & 0x80) {
                 PushObject(&lbl_8055EC50, so);
             } else {
@@ -1748,7 +1745,7 @@ inline void ObstacleObjDesc::Create(const PlacedObj* o) {
         }
     } else {
         sol = o->node ? o->node->GetInt(SolidIdKey(), -1) : -1;
-        StaticOb* so = CreateWallGob(this, &o->frame, 0, sol, constructorFlags);
+        StaticOb* so = CreateWallGob(this, &o->frame, 0, sol);
         if (flags & 0x80) {
             PushObject(&lbl_8055EC50, so);
         } else {
