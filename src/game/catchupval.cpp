@@ -2,6 +2,7 @@
 // speed_factor, compare_car_pct), blends it by AI strength, and every eighth frame measures the gap
 // between the leader and the compared car to scale the AI's speed. Names are guesses apart from the keys.
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/raceopts.h"
 
 extern "C" {
@@ -22,14 +23,7 @@ struct Racer {
     s32 place;  // offset 0x4
 };
 
-class AICar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual Racer* GetRacer(void);  // offset 0x10
-};
-
-extern "C" AICar* fn_801B2ED0(int i);
+extern "C" DeityCar* fn_801B2ED0(int i);
 
 struct Catchup {
     f32 begin;    // offset 0x0
@@ -103,12 +97,12 @@ void fn_8013B950(void) {
         id = -1;
         for (i = fn_801B2F24() - 1; i >= 0; i--) {
             id = fn_801B2F40(i);
-            found = fn_801B2ED0(id)->GetRacer();
+            found = ((Racer*)fn_801B2ED0(id)->State());
             if (--k <= 0) {
                 break;
             }
         }
-        if (found && fn_801B2ED0(leader)->GetRacer()->place > found->place) {
+        if (found && ((Racer*)fn_801B2ED0(leader)->State())->place > found->place) {
             f32 d = fn_801B2F90(leader, id);
             lbl_8042F8A8.dist = d;
             lbl_8042F8A8.car = id;

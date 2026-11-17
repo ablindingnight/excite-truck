@@ -2,6 +2,7 @@
 // flag distance, pit speed), creates per-car AI info, formats car numbers, and builds the driver object
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/proxer.h"
 #include "game/gamemode.h"
 #include "game/raceopts.h"
@@ -111,13 +112,8 @@ public:
 extern "C" Arena* fn_801B83A0(void);
 void* operator new(size_t size, const char* tag);
 
-struct AICar {
-    s32 type;  // offset 0x0 ('S' = spectator slot)
-    u8 pad[0x74];
-};
-
 struct AIGrid {
-    AICar cars[8];  // offset 0x0
+    CarDef cars[8];  // offset 0x0
     s32 count;      // offset 0x3C0
 };
 

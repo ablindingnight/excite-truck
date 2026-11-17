@@ -3,6 +3,7 @@
 // speeds across that range in a shuffled order, with per-driver overrides. Names are guesses apart from
 // the value keys and messages.
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -60,17 +61,7 @@ struct ResExt {
     f32 data[2];
 };
 
-class AICar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual u8* GetLine(void);  // offset 0x1C
-};
-
-extern "C" AICar* fn_801B2ED0(int i);
+extern "C" DeityCar* fn_801B2ED0(int i);
 extern "C" ResExt* fn_80138B1C(void* res);
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
@@ -319,7 +310,7 @@ void fn_8013B56C(void) { lbl_8055E160 = 0; }
 SkillEntry* fn_8013B578(int i) { return &lbl_8042F858.entries[i]; }
 
 f32 fn_8013B590(int car) {
-    ResExt* e = fn_80138B1C(*(void**)(fn_801B2ED0(car)->GetLine() + 0x2C));
+    ResExt* e = fn_80138B1C(*(void**)((u8*)fn_801B2ED0(car)->Line() + 0x2C));
     if (e) {
         return e->data[1];
     }

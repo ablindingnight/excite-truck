@@ -3,6 +3,7 @@
 // one car reaches the other along the track, plus per-car sorted pair lists. Names are guesses apart
 // from "Proxer" (its allocation tag).
 #include "game/common.h"
+#include "game/deity.h"
 #include "game/carbody.h"
 #include "game/modelinfo.h"
 #include "game/proxer.h"
@@ -67,18 +68,7 @@ struct CarPhys {
     f32 vz;  // offset 0x120
 };
 
-class AICar {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual Follower* GetFollower(void);  // offset 0x18
-    virtual void vf1C(void);
-    virtual CarPhys* GetPhys(void);       // offset 0x20
-};
-
-extern "C" AICar* fn_801B2ED0(int i);
+extern "C" DeityCar* fn_801B2ED0(int i);
 
 inline void Pair::SetPos(const CarRec* a, const CarRec* b) {
     dpos.x = b->pos.x - a->pos.x;
@@ -149,7 +139,7 @@ static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void Proxer::Update(int i) {
     CarRec* r = Rec(i);
-    Follower* f = fn_801B2ED0(i)->GetFollower();
+    Follower* f = (Follower*)fn_801B2ED0(i)->Ideal();
     if (r->active) {
         IdealPointP* s;
         f32 y;
@@ -206,7 +196,7 @@ void Proxer::UpdateAll(void) {
     int k;
     for (i = 0; i < count; i++) {
         CarRec* r = Rec(i);
-        CarPhys* c = fn_801B2ED0(i)->GetPhys();
+        CarPhys* c = (CarPhys*)fn_801B2ED0(i)->Car();
         r->pos.x = c->x;
         r->pos.y = c->z;
         r->vel.x = c->vx;
