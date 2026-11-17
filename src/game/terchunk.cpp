@@ -261,9 +261,12 @@ void fn_80202718(void) {
     f32 dy = next->pos.y - cam->origin.y;
     f32 dz = next->pos.z - cam->origin.z;
     ValVec3 v;
-    v.x = Dot3YX(dy, cam->basis[0].y, dx, cam->basis[0].x, dz, cam->basis[0].z);
-    v.y = Dot3YX(dy, cam->basis[1].y, dx, cam->basis[1].x, dz, cam->basis[1].z);
-    v.z = Dot3YX(dy, cam->basis[2].y, dx, cam->basis[2].x, dz, cam->basis[2].z);
+    f32 planarX = dx * cam->basis[0].x + dy * cam->basis[0].y;
+    f32 planarY = dx * cam->basis[1].x + dy * cam->basis[1].y;
+    f32 planarZ = dx * cam->basis[2].x + dy * cam->basis[2].y;
+    v.x = planarX + dz * cam->basis[0].z;
+    v.y = planarY + dz * cam->basis[1].z;
+    v.z = planarZ + dz * cam->basis[2].z;
     int dir = 1;
     if (v.z < 0.0f) {
         dir = -1;
