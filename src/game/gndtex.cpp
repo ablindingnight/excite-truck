@@ -134,7 +134,14 @@ u8 lbl_8055FEBB;  // batched models
 u8* lbl_8055FEBC;  // lightmap texels
 u8 lbl_8055FEC0;   // ripple on
 f32 lbl_8055D148 = 1.0f;
+#ifdef __MWERKS__
 GXTex* lbl_804DB468[3];
+#else
+// PORT: fn_802DBDE8(i, tex) is called with i up to 5. Retail's 3-entry table at 0x804DB468 is followed by the
+// 12-byte local at 0x804DB474, which takes stages 3-5; on the host the next object was overwritten. Give the
+// array the six slots retail effectively has.
+GXTex* lbl_804DB468[6];
+#endif
 Batch lbl_804DB480;
 
 extern "C" {
