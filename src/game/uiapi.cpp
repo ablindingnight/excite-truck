@@ -1834,7 +1834,7 @@ void UIWidget::Slot74(int, void*) {
     }
 }
 
-int UIImage::Frames(void) { return 1; }
+
 
 UIImageRef::~UIImageRef(void) {}
 
@@ -1933,44 +1933,8 @@ int CvsImage::Frames(void) {
     return arg0->divisor;
 }
 
-void UIImage::Draw(int, int, int, unsigned int) {
 
-}
 
-void UIImage::DrawAt(int p_arg1, int p_arg2, int p_arg3, int p_arg4, int p_arg5, int p_arg6) {
-    void * self = (void *)this;
-    void * arg1 = (void *)p_arg1;
-    void * arg2 = (void *)p_arg2;
-    void * arg3 = (void *)p_arg3;
-    void * arg4 = (void *)p_arg4;
-    void * arg5 = (void *)p_arg5;
-    void * arg6 = (void *)p_arg6;
-    struct Obj {
-        virtual ~Obj();  // slot 0 of the widget vtables (lbl_8033D504...) is the destructor
-        virtual void v1();
-        virtual void v2(void *, void *, void *, void *);
-    };
-    ((Obj *)self)->v2(arg1, arg2, arg3, arg6);
-}
-
-int UIImage::Hit(int unused1, int unused2, int arg1, int arg2) {
-    void * arg0 = (void *)this;
-    struct Local {
-        virtual ~Local();  // slot 0 of the widget vtables (lbl_8033D504...) is the destructor
-        virtual void f1();
-        virtual void f2();
-        virtual void call(s32, s32, s32*, s32*, s32*, s32*);
-    };
-    s32 sp14;
-    s32 sp10;
-    s32 spC;
-    s32 sp8;
-    s32 result;
-    ((Local*)arg0)->call(unused1, unused2, &sp14, &sp10, &spC, &sp8);
-    result = 0;
-    if (arg1 >= sp14 && arg1 < spC && arg2 >= sp10 && arg2 < sp8) result=1;
-    return result;
-}
 
 void UICustom::Slot0C(void) {
     UICustom* arg0 = this;
