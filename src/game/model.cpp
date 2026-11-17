@@ -358,18 +358,25 @@ void fn_802C5720(int pri) {
 
 MPrim* fn_802C57B0(MPrim* p) { return p; }
 
+/* Helper name unproven: draws the queued surfaces of one element. */
+static inline void DrawElemSurfs(MElem* el, int inst, void* mtx, u32 mat, u8 cl, f32 dist) {
+    MSurfList* sl = el->list;
+    for (int j = 0; j < sl->n; j++) {
+        if (IsQueued(sl->surfs[j]->type)) {
+            TexNode* t = sl->surfs[j]->tex[inst];
+            fn_802C53C4(el, t, mtx, mat, cl);
+            fn_802CC550(t->tex, dist, fn_802C57B0(el->prim)->size);
+        }
+    }
+}
+
 void fn_802C57B4(s32 i, void* mtx, u32 mat, u8 clip, f32 dist) {
-    u8 cl;
-    MSurf* s;
     ModelNode* slot;
     s32 inst;
-    int j;
     u8 c;
-    MSurfList* sl;
     ModelInfo* info;
     int e;
     MElem* el;
-    TexNode* t;
 
     slot = fn_802C5390(i);
     info = slot->info;
@@ -385,16 +392,7 @@ void fn_802C57B4(s32 i, void* mtx, u32 mat, u8 clip, f32 dist) {
             if (slot->spheres && !fn_802C9638(&slot->spheres[e].c, &c, slot->spheres[e].r)) {
                 continue;
             }
-            cl = c;
-            sl = el->list;
-            for (j = 0; j < sl->n; j++) {
-                s = sl->surfs[j];
-                if (IsQueued(s->type)) {
-                    t = s->tex[inst];
-                    fn_802C53C4(el, t, mtx, mat, cl);
-                    fn_802CC550(t->tex, dist, fn_802C57B0(el->prim)->size);
-                }
-            }
+            DrawElemSurfs(el, inst, mtx, mat, c, dist);
         }
     }
     if (!lbl_8055FC20) {
@@ -1026,17 +1024,6 @@ void fn_802C7AE0(s32 i, const MFrame* f, u32 mask, f32 t) {
     }
 }
 
-/* Helper name unproven: draws the queued surfaces of one element. */
-static inline void DrawElemSurfs(MElem* el, int inst, void* mtx, u32 mat, u8 cl, f32 dist) {
-    MSurfList* sl = el->list;
-    for (int j = 0; j < sl->n; j++) {
-        if (IsQueued(sl->surfs[j]->type)) {
-            TexNode* t = sl->surfs[j]->tex[inst];
-            fn_802C53C4(el, t, mtx, mat, cl);
-            fn_802CC550(t->tex, dist, fn_802C57B0(el->prim)->size);
-        }
-    }
-}
 
 void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 a, f32 b, f32 range) {
     u32 mat = (u32)fn_802C7A3C(a, b, range);
