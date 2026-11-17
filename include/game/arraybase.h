@@ -52,7 +52,7 @@ public:
     template <typename V>
     int IndexOf(const V& v) {
         for (int i = 0; i < Count(); i++) {
-            if ((V)data[i] == v) {
+            if ((u8*)data[i] == (u8*)v) {  // a pointer compare (cmplw, element first), as in Find
                 return i;
             }
         }
