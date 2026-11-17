@@ -551,8 +551,10 @@ u32 BinkFileReadHeader(void* arg0, s32 arg1, s32 arg2, u32 arg3) {
         *(s32*)((u8*)arg0 + 0x20) = 1;
         CancelReadRequests(arg0);
     }
-    // MATCHING-AID?: the read position (0x90) and cap (0x40) are re-read like volatile fields; probably genuine
-    // async stream state (the 0xC0 counter in dosimulate is volatile too). Revisit with a real struct.
+    // The read position (0x90) and cap (0x40) are volatile fields (async stream state, like 0x24/0x50/0xC4/0xC0):
+    // retail reloads the position right after storing it and reads the cap on both arms of the min. Every
+    // non-volatile spelling merges those loads (22 rows, 2 instructions short); a struct with volatile pos/cap
+    // fields is EXACT (aids audit 2, 2026-11-17). Genuine, not an aid.
     *(volatile u32*)((u8*)arg0 + 0x90) += result;
     current = *(volatile u32*)((u8*)arg0 + 0x90);
     *(u32*)((u8*)arg0 + 0x98) = current;
