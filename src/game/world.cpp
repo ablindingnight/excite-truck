@@ -1172,10 +1172,6 @@ void fn_801E95DC(void) {
     }
 }
 
-static inline ValPoint BoundPoint(ValueNode* nd, const char* key) { /* Helper name unproven */
-    return nd->GetPoint(key);
-}
-
 static inline f32 GroundY(const ValPoint& p) { return fn_801DCF48(0, p.x, p.y); }
 
 void fn_801E96D8(RaceSetup* s) {
@@ -1196,7 +1192,9 @@ void fn_801E96D8(RaceSetup* s) {
                 int idx = 1;
                 int count = 0;
                 ValVec3 prev;
-                ValPoint p0 = BoundPoint(nd, "bound0");
+                // Through common.h's by-value copy: retail has this result slot above the two later GetPoint slots
+                // (statement order) and copies it with one 8-byte move; a returning helper put it at the bottom.
+                ValPoint p0 = CopyValPoint(nd->GetPoint("bound0"));
                 prev.x = p0.x;
                 prev.y = 0.0f;
                 prev.z = p0.y;
