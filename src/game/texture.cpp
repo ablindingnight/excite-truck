@@ -5,6 +5,7 @@
 // from the strings.
 #include "game/common.h"
 #include "game/byteswap.h"
+#include "game/strcopy.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -273,15 +274,6 @@ struct TexCache {
 
 }  // namespace
 
-static inline void StrCopy(char* d, const char* s, int n) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline u16 TexShort(int v) { return v; }
 
@@ -367,7 +359,7 @@ void* fn_802CA294(s32 id) { return lbl_8055FCB0[id].gx; }
 
 // name.ext -> name.tm0
 char* fn_802CA2A8(char* dst, int n, const char* name) {
-    StrCopy(dst, name, n);
+    SafeStrCopy(dst, name, n);
     char* dot = strrchr(dst, '.');
     *dot = 0;
     const char* ext = ".tm0";
@@ -377,7 +369,7 @@ char* fn_802CA2A8(char* dst, int n, const char* name) {
         p++;
     }
     if (n > 0) {
-        StrCopy(p, ext, n);
+        SafeStrCopy(p, ext, n);
     }
     return dst;
 }
@@ -571,7 +563,7 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
     t->uses = 0;
     t->key = key;
     if (!fn_802CA7DC(name)) {
-        StrCopy(t->name, name, 32);
+        SafeStrCopy(t->name, name, 32);
         s32 span = shared ? 0 : fn_802CA380(name);
         t->mip0Bytes = span;
         if (span < 16000) {
@@ -580,7 +572,7 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
     } else {
         fn_802E30C8("texture: WARNING: extraction texture %s", name);
         const char* src = fn_802CA824(name);
-        StrCopy(t->name, src, 32);
+        SafeStrCopy(t->name, src, 32);
         t->mip0Bytes = 0;
     }
     t->mip0 = 0;
@@ -677,7 +669,7 @@ const char* fn_802CAE34(s32 id) {
 
 void fn_802CAE98(s32 id, const char* name) {
     if (fn_802CAE00(id)) {
-        StrCopy(lbl_8055FCB0[id].name, name, 32);
+        SafeStrCopy(lbl_8055FCB0[id].name, name, 32);
     }
 }
 
