@@ -157,7 +157,7 @@ struct EvPair {
 
 // The event/track pairs the pickers choose from.
 struct EvPairs {
-    EvPairs();
+    EvPairs(const char* tag = "dsa_buf");
     ~EvPairs() { items = 0; count = 0; cap = 0; }
     void Trim();
     EvPair* items;  // offset 0x0
@@ -302,6 +302,27 @@ public:
         MoviePath(movie, list.data[cur].env);
     }
 
+    /* Helper name unproven */
+    // Adds one row per track environment of the pairs (the loop counters number below the walkers in retail:
+    // an inline helper, FACTS 2026-11-17 05:50).
+    void Build(void) {
+        for (int i = 0; i < (*pairs)->count; i++) {
+            const char* name = (*pairs)->items[i].track;
+            const char* env = GetTrackEnviron(name);
+            int found = 0;
+            for (int j = 0; j < list.count; j++) {
+                if (!strcasecmp(list.data[j].env, env)) {
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) {
+                LocEntry* e = &list.data[list.count++];
+                e->name = GetTrackFriendlyName(name);
+                e->env = env;
+            }
+        }
+    }
     FixedVec<LocEntry, 0x20> list;  // offset 0x10
     s32 cur;                        // offset 0x11C
     EvPairs** pairs;                // offset 0x120
@@ -313,7 +334,15 @@ public:
 // Difficulty picker page.
 class DiffPicker : public MenuWidget {
 public:
-    DiffPicker(void) { cur = 0; }
+    DiffPicker(s32 d) {
+        cur = 0;
+        for (int i = 0; i < 3; i++) {
+            if (d == lbl_802FA4B0[i].id) {
+                cur = i;
+                break;
+            }
+        }
+    }
     virtual ~DiffPicker(void) {}
     virtual void Prev(void) {
         s32 v = cur - 1;
@@ -349,7 +378,18 @@ public:
 // Course texture page: a DynoTex of the event pictures plus the chosen course.
 class CourseTex : public DynoTex, public MenuState {
 public:
-    CourseTex(int n) : DynoTex(n, 0) {}
+    CourseTex(UnlockList* unlocks) : DynoTex(unlocks->count, 0) {
+        for (int i = 0; i < unlocks->count; i++) {
+            char buf[0x21];
+            const char* name = ((VN*)GetEvent(unlocks->entries[i].id)->node)->v14("name");
+            const char* prefix = "career_";
+            if (!strncmp(name, prefix, strlen(prefix))) {
+                name += strlen(prefix);
+            }
+            fn_801345D8(buf, 0x21, "/%s.tex", name);
+            Add(unlocks->entries[i].id, buf);
+        }
+    }
     virtual ~CourseTex(void) {}
     virtual void Enter(void) { Pick(); }
     virtual void Update(void) { Pick(); }
@@ -500,9 +540,9 @@ void fn_80249744(void) { fn_80214CB4(lbl_8055BF34); }
 // The multiplayer event menu: location, course, event count and AI strength, with the course picture,
 // preview movie and stats. Starts from the remembered choices and remembers the new ones; returns 0 when
 // backed out. In testing mode only the unlocked multiplayer events are offered.
-inline EvPairs::EvPairs() {
+inline EvPairs::EvPairs(const char* tag) {
     int n = GetNumEvents();
-    EvPair* b = new ("dsa_buf") EvPair[n];
+    EvPair* b = new (tag) EvPair[n];
     items = b;
     cap = n;
     count = 0;
@@ -546,22 +586,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     s32 lastEve = *eve;
     s32 lastTrack = *track;
     LocPicker loc(&pairs.p, &events);
-    for (int i = 0; i < (*loc.pairs)->count; i++) {
-        const char* name = (*loc.pairs)->items[i].track;
-        const char* env = GetTrackEnviron(name);
-        int found = 0;
-        for (int j = 0; j < loc.list.count; j++) {
-            if (!strcasecmp(loc.list.data[j].env, env)) {
-                found = 1;
-                break;
-            }
-        }
-        if (!found) {
-            LocEntry* e = &loc.list.data[loc.list.count++];
-            e->name = GetTrackFriendlyName(name);
-            e->env = env;
-        }
-    }
+    loc.Build();
     fn_80265DCC(loc.list.data, loc.list.count, sizeof(LocEntry), (int (*)(u8*, u8*))fn_8024A4B8);
     if (lastTrack >= 0 && lastTrack < GetNumTracks()) {
         const char* env = GetTrackEnviron(GetTrack(lastTrack)->name);
@@ -573,20 +598,12 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         }
     }
     loc.events->SetEnv(loc.pairs, loc.list.data[loc.cur].env);
-    loc.events->Select(lastTrack, lastEve);
+    /* Form unproven: retail calls Select virtually through a pointer known to be &events */
+    EvPicker* pe = &events;
+    pe->Select(lastTrack, lastEve);
     MoviePath(loc.movie, loc.list.data[loc.cur].env);
     UnlockList* unlocks = lbl_8055F28C;
-    CourseTex tex(unlocks->count);
-    for (int i = 0; i < unlocks->count; i++) {
-        char buf[0x21];
-        const char* name = ((VN*)GetEvent(unlocks->entries[i].id)->node)->v14("name");
-        const char* prefix = "career_";
-        if (!strncmp(name, prefix, strlen(prefix))) {
-            name += strlen(prefix);
-        }
-        fn_801345D8(buf, 0x21, "/%s.tex", name);
-        tex.Add(unlocks->entries[i].id, buf);
-    }
+    CourseTex tex(unlocks);
     tex.picker = &events;
     tex.id = -1;
     tex.name[0] = 0;
@@ -595,13 +612,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     } else {
         *diff = 0;
     }
-    DiffPicker level;
-    for (int i = 0; i < 3; i++) {
-        if (*diff == lbl_802FA4B0[i].id) {
-            level.cur = i;
-            break;
-        }
-    }
+    DiffPicker level(*diff);
     StatsPage stats(&events);
     lbl_8055F294 = stats.text;
     MenuItem items[] = {
@@ -624,7 +635,8 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_80236914, 2, 0),
         MenuItem(lbl_80498998),
     };
-    MenuDesc desc = {testing ? "multi_evt.lyt" : "track1.lyt", (MenuItem*)items, (int (*)(int*))fn_80249668, 0, 0};
+    const char* lyt = testing ? "multi_evt.lyt" : "track1.lyt";
+    MenuDesc desc = {lyt, (MenuItem*)items, (int (*)(int*))fn_80249668, 0, 0};
     int r = fn_802146BC(&desc, -999, -999, 3);
     *track = events.ents[events.cur].track;
     *eve = events.ents[events.cur].eve;
