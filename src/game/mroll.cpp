@@ -154,11 +154,6 @@ public:
 #include "game/carstat.h"
 #include "game/strcopy.h"
 
-struct CarStats {
-    const char* chassis;  // offset 0x0
-    CarStat stats[5];     // offset 0x4
-};
-
 class CarUIScreen {
 public:
     CarUIScreen(int mode);

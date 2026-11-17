@@ -181,11 +181,6 @@ struct CarEntry {
 
 #include "game/carstat.h"
 
-struct CarStats {
-    const char* chassis;  // offset 0x0
-    CarStat stats[5];     // offset 0x4
-};
-
 CarStats* CarStatsLookup(const char* chassis);
 BOOL GetUnlockReq(const char* name, s32* races_run, s32* aaas);
 s32 AchievementsGetModelStat(int category, const char* model);

@@ -18,11 +18,6 @@ void* operator new[](size_t size, const char* tag);
 
 #include "game/carstat.h"
 
-struct CarStats {
-    const char* chassis;               // offset 0x0
-    CarStat stats[MAX_CAR_STATS];      // offset 0x4
-};
-
 ModuleTag lbl_8055D568;
 u8 lbl_8055D570;
 ValueTable* lbl_8055D574;
