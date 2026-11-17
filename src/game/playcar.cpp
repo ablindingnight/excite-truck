@@ -280,12 +280,7 @@ public:
     virtual u32 PlayerController(void);  // 0xEC
 };
 
-class Controller;
-class SpringCar {
-public:
-    SpringCar(Controller* c);
-    u8 data[0x2844];
-};
+#include "game/springcar.h"
 
 void* operator new(unsigned long n, const char* tag);
 
