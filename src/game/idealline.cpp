@@ -178,7 +178,8 @@ inline f32 LineFollower::Project(IdealPoint* s, f32 t, V2* p) {
     f32 one = 1.0f;
     f32 inv = one / len;
     f32 dx = dir.x * inv;
-    f32 dy = dir.y * inv;
+    f32 dy = dir.y;
+    dy *= inv;
     f32 ox = p->x - pos.x;
     f32 oy = p->y - pos.y;
     dir.x = dx;
@@ -187,7 +188,9 @@ inline f32 LineFollower::Project(IdealPoint* s, f32 t, V2* p) {
     off.y = oy;
     f32 x = (f32)AbsD(oy * dx + -ox * dy);
     f32 half = 0.5f;
-    wide = x > kIdealLaneMargin + il.seg->width * half;
+    f32 width = il.seg->width * half;
+    f32 margin = kIdealLaneMargin;
+    wide = x > margin + width;
     return (dx * ox + dy * oy) / s->len;
 }
 
@@ -212,17 +215,21 @@ int LineFollower::Step(V2* p) {
                 if (s->ilpos == 0) {
                     r = 0;
                 }
+                f32 sx = s->pos.x;
+                f32 oy, ox;
                 f32 px = p->x;
-                pos.x = s->pos.x;
-                f32 ox = px - pos.x;
+                pos.x = sx;
+                ox = px - sx;
                 f32 py = p->y;
-                pos.y = s->pos.y;
-                f32 oy = py - pos.y;
+                f32 sy = s->pos.y;
+                pos.y = sy;
+                oy = py - sy;
                 dir.x = s->dir.x;
-                dir.y = s->dir.y;
+                f32 headingY = s->dir.y;
+                dir.y = headingY;
                 off.x = ox;
                 off.y = oy;
-                a = (dir.x * ox + dir.y * oy) / s->len;
+                a = (dir.x * ox + headingY * oy) / s->len;
                 if (a < 1.0f) {
                     t = t > a ? t : a;
                     break;
