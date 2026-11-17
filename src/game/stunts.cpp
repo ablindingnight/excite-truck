@@ -1767,11 +1767,137 @@ struct CountSound {
     s32 wasOn;  // offset 0xC
 };
 
-extern "C" void fn_80157560(Tracker* t);
 void* operator new(size_t size, const char* tag);
 
 
 // All of a car's trackers behind one Meter.
+// The tracker constructors, the CountSound one, Unused2 and the per-tracker setup are inlines. The TrackerArray
+// constructor, which uses them all, is over the 512-unit nested-inline budget (FACTS 2026-11-17 11:16), so inside
+// fn_801572A4 every one of them stays a call and their copies follow it in reverse first-use order. That is
+// the retail order to the function (Count, the setup, Name, At, Ring ... Drift, Push, Air, CountSound, Unused2,
+// the list and Meter constructors); defined after the factory as ordinary functions they needed
+// #pragma inline_depth(1) and still came out in another order. The setup is static: its strings are
+// ordinary strings of the unit.
+inline void Unused2(f32** p) {}
+
+inline RingTracker::RingTracker(StuntFactory* h, int c) : CountTracker(h, c, 2.0f, 0) {
+    int ok;
+    car2 = c;
+    ok = !fn_80157278(c);
+    if (ok) {
+        snd = fn_802076A0("ringhit.sfx", 1, c, 2);
+    } else {
+        snd = 0;
+    }
+}
+
+inline CrashTracker::CrashTracker(StuntFactory* h, int c) : ValueTracker(h, c) {}
+
+inline CarHitTracker::CarHitTracker(StuntFactory* h, int c) : Tracker(h, c) {
+    int i;
+    hits[0].timer = 0.0f;
+    car2 = c;
+    f290 = 0.0f;
+    f28C = 0.0f;
+    wrecked = 0;
+    for (i = 0; i < 8; i++) {
+        hits[i].timer = 0.0f;
+    }
+}
+
+inline JumpComboTracker::JumpComboTracker(StuntFactory* h, int c) : CountTracker(h, c, 0.001f, 0) {}
+
+inline ThrowTracker::ThrowTracker(StuntFactory* h, int c) : CountTracker(h, c, 0.5f, 0) {
+    handle = 0;
+    active = 0;
+}
+
+inline SpinTracker::SpinTracker(StuntFactory* h, int c) : CountTracker(h, c, 999.0f, 0) {
+    car2 = c;
+    f27C = 0.0f;
+}
+
+inline CloseCallTracker::CloseCallTracker(StuntFactory* h, int c, CountSound* cs) : CountTracker(h, c, 2.5f, 0x41206) {
+    snd = fn_802076A0("missflag.sfx", 1, car, 0);
+    flags = 0;
+}
+
+inline DriftTracker::DriftTracker(StuntFactory* h, int c, CountSound* cs) : TimedTracker(h, c, 15.0f, 0x40902) {
+    snd = 0;
+    if (snd) {
+        snd->SetVolume(f254);
+    }
+    blip = 0;
+}
+
+inline AirTracker::AirTracker(StuntFactory* h, int c, CountSound* cs) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
+
+inline CountSound::CountSound(const char* a, const char* b, int car) {
+    int ok = !fn_80157278(car);
+    s1 = 0;
+    s0 = 0;
+    if (ok) {
+        s0 = fn_802076A0(a, 1, car, 0);
+        if (s0) {
+            s0->SetPitch(1.2f);
+            s0->SetVolume(1.0f);
+        }
+        s1 = fn_802076A0(b, 1, car, 0);
+        if (s1) {
+            s1->SetPitch(1.2f);
+            s1->SetVolume(1.0f);
+        }
+    }
+    on = 1;
+}
+
+extern "C" {
+static inline void fn_80157560(Tracker* t) {
+    ValueTable* vt = fn_80131810("stunts.val");
+    ValueTable* def = fn_80131808("stuntdef.val");
+    ValueNode* node;
+    const char* name;
+    if (!vt) {
+        vt = def;
+    }
+    name = t->Name();
+    if (vt->HasChild(name)) {
+        node = vt->FindChild(name);
+    } else if (def->HasChild(name)) {
+        node = def->FindChild(name);
+    } else {
+        node = def->FindChild("default");
+    }
+    if (node) {
+        ValueNode* r;
+        int i;
+        for (r = node->GetChildAt(0), i = 0; r; r = node->GetChildAt(++i)) {
+            s32 rank = r->GetIntValue("rank");
+            const char* adj = r->GetString("adj", "");
+            s32 thresh = r->GetInt("thresh", 0);
+            f32 pts = r->GetFloat("pts", 0.0f);
+            struct Rank* e;
+            if (pts < 0.0f) {
+                pts = def->FindChild("default")->GetChildAt(i)->GetFloat("pts");
+            }
+            t->ranks.a.count++;
+            e = &t->ranks.a.data[rank];
+            e->count = 0;
+            e->scored = 0;
+            e->natural = 0;
+            e->total = 0.0f;
+            e->pts = pts;
+            e->thresh = thresh;
+            fn_801345D8(e->adj, sizeof(e->adj), "%s ", adj);
+        }
+    }
+    if (vt != def) {
+        fn_80131818(vt);
+    }
+    fn_80131818(def);
+}
+}
+
 namespace {
 class TrackerArray : public Meter {
 public:
@@ -1932,133 +2058,18 @@ extern "C" {
 
 int fn_80157278(int car) { return (u32)lbl_804348E8[car]->type == 'ACAR'; }
 
-void fn_80157560(Tracker* t);
 
-#pragma inline_depth(1)
 Meter* fn_801572A4(StuntFactory* hud, int car, f32* hispeed) {
     lbl_8042FD08[car] = 1.0f;
     return new ("arraytracker") TrackerArray(hud, car, hispeed);
 }
-#pragma inline_depth(smart)
 
 
 }  // extern "C"
 
-void fn_80157560(Tracker* t) {
-    ValueTable* vt = fn_80131810("stunts.val");
-    ValueTable* def = fn_80131808("stuntdef.val");
-    ValueNode* node;
-    const char* name;
-    if (!vt) {
-        vt = def;
-    }
-    name = t->Name();
-    if (vt->HasChild(name)) {
-        node = vt->FindChild(name);
-    } else if (def->HasChild(name)) {
-        node = def->FindChild(name);
-    } else {
-        node = def->FindChild("default");
-    }
-    if (node) {
-        ValueNode* r;
-        int i;
-        for (r = node->GetChildAt(0), i = 0; r; r = node->GetChildAt(++i)) {
-            s32 rank = r->GetIntValue("rank");
-            const char* adj = r->GetString("adj", "");
-            s32 thresh = r->GetInt("thresh", 0);
-            f32 pts = r->GetFloat("pts", 0.0f);
-            struct Rank* e;
-            if (pts < 0.0f) {
-                pts = def->FindChild("default")->GetChildAt(i)->GetFloat("pts");
-            }
-            t->ranks.a.count++;
-            e = &t->ranks.a.data[rank];
-            e->count = 0;
-            e->scored = 0;
-            e->natural = 0;
-            e->total = 0.0f;
-            e->pts = pts;
-            e->thresh = thresh;
-            fn_801345D8(e->adj, sizeof(e->adj), "%s ", adj);
-        }
-    }
-    if (vt != def) {
-        fn_80131818(vt);
-    }
-    fn_80131818(def);
-}
 
-RingTracker::RingTracker(StuntFactory* h, int c) : CountTracker(h, c, 2.0f, 0) {
-    int ok;
-    car2 = c;
-    ok = !fn_80157278(c);
-    if (ok) {
-        snd = fn_802076A0("ringhit.sfx", 1, c, 2);
-    } else {
-        snd = 0;
-    }
-}
 
-CrashTracker::CrashTracker(StuntFactory* h, int c) : ValueTracker(h, c) {}
 
-CarHitTracker::CarHitTracker(StuntFactory* h, int c) : Tracker(h, c) {
-    int i;
-    hits[0].timer = 0.0f;
-    car2 = c;
-    f290 = 0.0f;
-    f28C = 0.0f;
-    wrecked = 0;
-    for (i = 0; i < 8; i++) {
-        hits[i].timer = 0.0f;
-    }
-}
-
-JumpComboTracker::JumpComboTracker(StuntFactory* h, int c) : CountTracker(h, c, 0.001f, 0) {}
-
-ThrowTracker::ThrowTracker(StuntFactory* h, int c) : CountTracker(h, c, 0.5f, 0) {
-    handle = 0;
-    active = 0;
-}
-
-SpinTracker::SpinTracker(StuntFactory* h, int c) : CountTracker(h, c, 999.0f, 0) {
-    car2 = c;
-    f27C = 0.0f;
-}
-
-CloseCallTracker::CloseCallTracker(StuntFactory* h, int c, CountSound* cs) : CountTracker(h, c, 2.5f, 0x41206) {
-    snd = fn_802076A0("missflag.sfx", 1, car, 0);
-    flags = 0;
-}
-
-DriftTracker::DriftTracker(StuntFactory* h, int c, CountSound* cs) : TimedTracker(h, c, 15.0f, 0x40902) {
-    snd = 0;
-    if (snd) {
-        snd->SetVolume(f254);
-    }
-    blip = 0;
-}
-
-AirTracker::AirTracker(StuntFactory* h, int c, CountSound* cs) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
-
-CountSound::CountSound(const char* a, const char* b, int car) {
-    int ok = !fn_80157278(car);
-    s1 = 0;
-    s0 = 0;
-    if (ok) {
-        s0 = fn_802076A0(a, 1, car, 0);
-        if (s0) {
-            s0->SetPitch(1.2f);
-            s0->SetVolume(1.0f);
-        }
-        s1 = fn_802076A0(b, 1, car, 0);
-        if (s1) {
-            s1->SetPitch(1.2f);
-            s1->SetVolume(1.0f);
-        }
-    }
-    on = 1;
-}
 
 extern "C" {
 
@@ -2132,7 +2143,6 @@ s32 RaceCarRec::Air(void) const { return airborne; }
 
 void Unused(const RaceCarRec** p) {}
 
-void Unused2(f32** p) {}
 
 void CountTracker::StopEffect(void) {
     if (playing > 0) {
