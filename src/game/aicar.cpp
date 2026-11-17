@@ -1264,7 +1264,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
                 if (rel.y > 0.0f) {
                     F32(out, 0x0) = F32(car, 0x60);
                     F32(out, 0x4) = F32(car, 0x68);
-                    F32(out, 0x8) = AiAdd(F32(car, 0x25CC), 22.222223f);
+                    F32(out, 0x8) = AiAdd(22.222223f, F32(car, 0x25CC));
                 } else {
                     f32 v = F32(car, 0x25CC) - 4.4444447f;
                     F32(out, 0x8) = v > 4.4444447f ? v : 4.4444447f;
@@ -2173,11 +2173,11 @@ void fn_8019743C(u8* d, u8* out) {
     if (any) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
-            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + Mul(F32(d, 0x84), 0.5f)));
+            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + Mul(0.5f, F32(d, 0x84))));
             F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
         }
         if (U8(d, 0x9C)) {
-            f32 hi = (F32(d, 0x278) + (F32(d, 0xA4) + F32(d, 0xAC) / 2.0f)) - (0.61f + lbl_8055A488);
+            f32 hi = (F32(d, 0x278) + (F32(d, 0xA4) + Mul(0.5f, F32(d, 0xAC)))) - (0.61f + lbl_8055A488);
             F32(d, 0xC8) = F32(d, 0xC8) < hi ? F32(d, 0xC8) : hi;
         }
         f32 push = F32(d, 0xE8);
@@ -2391,7 +2391,8 @@ void fn_80197BD0(u8* d, u8* out) {
     if (U8(d, 0xFC)) {
         if (F32(d, 0xEC) < 4.0f || S32(d, 0x100) > 1) {
             fn_8019315C(d, S32(d, 0x114));
-            f32 w = lo + FAbs(F32(d, 0x104)) * (hi - lo);
+            f32 k = FAbs(F32(d, 0x104));
+            f32 w = lo + k * (hi - lo);
             int mine = 0;
             u8* o = lbl_804349C0[S32(d, 0x114)];
             if (o && S32(d, 0x290) == S32(o, 0x114)) {
@@ -2519,7 +2520,8 @@ void fn_8019813C(u8* d, const u8* p, f32 a, f32 b) {
 /* Helper name unproven: the tail of fn_801981A0; the boundary is needed (in place: fn_801981A0 99.14 -> 98.84 with b as a local, 97.71 with F32(d, 0x134) written out) */
 static inline void EaseAndNudge(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
     f32 y = F32(t, 0xC);
-    F32(t, 0xC) = b + (y - b) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+    f32 k = Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+    F32(t, 0xC) = b + (y - b) * k;
     if (U8(d, 0x9C)) {
         S32(d, 0x140) = 30;
     }
@@ -2566,7 +2568,8 @@ void fn_801981A0(u8* d, u8* t) {
         if (S32(d, 0x138) != S32(d, 0x2C4) && ok && (f32)__fabs(F32(d, 0x12C)) < lbl_8055E570 * lbl_8055A488) {
             f32 x = F32(t, 0x8);
             a = F32(d, 0x130);
-            F32(d, 0x120) = F32(t, 0x8) = a + (x - a) * Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+            f32 k = Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+            F32(d, 0x120) = F32(t, 0x8) = a + (x - a) * k;
             EaseAndNudge(t, F32(d, 0x134), d, lo, hi, x);
         }
     }
