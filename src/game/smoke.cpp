@@ -31,6 +31,7 @@ struct SmokeModel {
 };
 
 #include "game/scolor.h"
+#include "game/mathutil.h"
 
 struct SVec {
     SVec(void) {
@@ -97,7 +98,6 @@ void* operator new[](size_t size, const char* name);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {

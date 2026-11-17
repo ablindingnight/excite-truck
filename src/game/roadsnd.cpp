@@ -2,6 +2,7 @@
 // speed with the surface under the car's wheels. Names are guesses apart from the keys and messages.
 #include "game/common.h"
 #include "game/carbody.h"
+#include "game/mathutil.h"
 
 extern "C" int strcmp(const char* a, const char* b);
 
@@ -52,10 +53,7 @@ RoadSoundVoice* fn_802077A4(const char* name, int flags, void* a, void* b);
 SurfaceInfo* fn_801D04A8(int surface);
 }
 
-static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
-static inline f32 Clamp01(f32 t) { return Max(Min(t, 1.0f), 0.0f); }
-static inline f32 Lerp(f32 t, f32 a, f32 b) { return a + t * (b - a); }
+static inline f32 Clamp01(f32 t) { return MaxF(MinFRev(t, 1.0f), 0.0f); }
 
 struct RoadSoundEntry {
     RoadSoundVoice* voice;  // offset 0x0
@@ -142,7 +140,7 @@ RoadSound::~RoadSound(void) {
 
 static inline f32 Ramp_hm(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }  /* Helper name unproven */
 static inline f32 BlendRoadVolume(f32 speed, f32 lo, f32 hi, f32 firstVol, f32 lastVol, f32 firstSpeed, f32 lastSpeed) {
-    return Lerp(Max(Min((speed - firstSpeed) / (lastSpeed - firstSpeed), hi), lo), firstVol, lastVol);
+    return LerpT(MaxF(MinFRev((speed - firstSpeed) / (lastSpeed - firstSpeed), hi), lo), firstVol, lastVol);
 }
 
 void RoadSound::Update(void) {
@@ -170,7 +168,7 @@ void RoadSound::Update(void) {
                                                 entries[i].speed1, entries[i].speed2)
                               : BlendRoadVolume(speed, lo, hi, entries[i].vol2, entries[i].vol3,
                                                 entries[i].speed2, entries[i].speed3);
-                f32 pitch = Lerp(Ramp_hm(speed, entries[i].speed1, entries[i].speed3), entries[i].pitch1, entries[i].pitch3);
+                f32 pitch = LerpT(Ramp_hm(speed, entries[i].speed1, entries[i].speed3), entries[i].pitch1, entries[i].pitch3);
                 v->unk4A = 0;
                 v->unk4B = 1;
                 v->unk49 = 1;

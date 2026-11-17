@@ -9,6 +9,7 @@
 #include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+#include "game/mathutil.h"
 
 // SparkMtx: vecmatrix.h's VecMatrix.
 struct SparkWheel {
@@ -124,7 +125,6 @@ void* operator new[](size_t size, const char* name);
 extern f32 __float_epsilon[];  // FLT_EPSILON
 extern u32 lbl_8055D430;    // debug flags
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {
@@ -572,14 +572,11 @@ void fn_8028B4CC(void) {
     }
 }
 
-/* Helper names unproven */
-static inline int IMaxS(int a, int b) { return a > b ? a : b; }
-static inline int IMinS(int a, int b) { return a < b ? a : b; }
 
 int fn_8028B500(const void* evp) {
     const ImpactEv* ev = (const ImpactEv*)evp;
     f32 mag = PSVECMag(&ev->v18);
-    int n = IMinS(IMaxS((int)(0.002f * mag), 0), 0x60);
+    int n = MinI(MaxI((int)(0.002f * mag), 0), 0x60);
     s16 hint = fn_80287B24(ev->car)->hint;
     if (n > 0) {
         f32 k = 0.0003f * mag;

@@ -9,6 +9,7 @@
 #include "game/carbody.h"
 #include "game/carinfo.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 // A vertex position (constructed in place).
 // VtxPos: rvec.h's RVec3.
@@ -40,11 +41,8 @@ CarInfo* fn_801EA9A0(int car);
 f32 fn_8013672C(void);      // lap length
 }
 
-static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
-static inline f32 Clamp01(f32 x) { return Max(Min(x, 1.0f), 0.0f); }
+static inline f32 Clamp01(f32 x) { return MaxF(MinFRev(x, 1.0f), 0.0f); }
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 ModuleTag lbl_8055ED60;
 UnkStaticFFFF lbl_8055ED68;
@@ -99,7 +97,7 @@ void fn_802059C0(void) {
                 dist = 0.0f;
             }
             f32 p = (dist + (f32)(lap - 1) * lapLen) / total;
-            p = Min(p, 1.0f);
+            p = MinFRev(p, 1.0f);
             int a = (int)Lerp(0.0f, 255.0f, Ramp(p, 0.0f, 0.02f));
             u32 color = (a << 24) | ((i == 0 ? 0xFFFF0000 : 0xFF0000FF) & 0xFFFFFF);
             u32 dark = color & 0xFF7F7F7F;
@@ -113,10 +111,10 @@ void fn_802059C0(void) {
                 fn_802C8DBC(6);
                 fn_802057A8(color & 0xFFFFFF, 0, side, y, 0.0f, 0.0f);
                 fn_802057A8(dark & 0xFFFFFF, 0, 0.0f, y, 0.0f, 0.0f);
-                f32 y2 = Max(0.0f, y - 0.05f);
+                f32 y2 = MaxF(0.0f, y - 0.05f);
                 fn_802057A8(color, 1, side, y2, 0.0f, 0.0f);
                 fn_802057A8(dark, 1, 0.0f, y2, 0.0f, 0.0f);
-                y2 = Max(0.0f, y2 - Lerp(0.07f, 0.25f, Ramp(y2, 0.1f, 0.5f)));
+                y2 = MaxF(0.0f, y2 - Lerp(0.07f, 0.25f, Ramp(y2, 0.1f, 0.5f)));
                 fn_802057A8(color & 0xFFFFFF, 1, side, y2, 0.0f, 0.0f);
                 fn_802057A8(dark & 0xFFFFFF, 1, 0.0f, y2, 0.0f, 0.0f);
                 fn_802C8E48();

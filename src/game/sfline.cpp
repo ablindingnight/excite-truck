@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/idealline.h"
 #include "game/centerline.h"
+#include "game/mathutil.h"
 
 struct SFPath {
     u8 pad0[0x18];
@@ -62,7 +63,6 @@ static inline void SFCorner(V2* q, V2* o, V2* a, V2* b, f32 s, f32 t) {
     q->x += b->x * t;
     q->y += b->y * t;
 }
-static inline f32 SFMul(f32 a, f32 b) { return a * b; }
 
 static inline int OddCount(f32 len, f32 size) { return (int)(len / size) | 1; }
 
@@ -193,7 +193,7 @@ void fn_802A1290(void) {
         lbl_8055F860.x = lbl_8055F860.y;
         lbl_8055F860.y = -t;
         fn_801E9DC4(&h);
-        half = SFMul(width, 0.5f);
+        half = Mul(width, 0.5f);
         inner = 0.5f * (0.75f * width);
         range = half - inner;
         for (i = 0; i < n; i++) {
@@ -210,7 +210,7 @@ void fn_802A1290(void) {
                     a = 1.0f;
                 }
                 a = a > 0.0f ? a : 0.0f;
-                fn_802A0D60(&h, &q, &lbl_8055F858, &lbl_8055F860, 1.5f, 1.0f + SFMul(a, -1.0f), (i + j) & 1);
+                fn_802A0D60(&h, &q, &lbl_8055F858, &lbl_8055F860, 1.5f, 1.0f + Mul(a, -1.0f), (i + j) & 1);
             }
         }
     } else {

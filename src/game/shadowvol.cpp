@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -50,8 +51,6 @@ public:
 };
 
 static inline f32 MakeF32(f32 v) { return v; }
-static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
 namespace {
 extern const f32 kFadeUpper;
@@ -160,7 +159,7 @@ void fn_80297AFC(void) {
             f32 dist = sqrt(d2);
             alpha = s->alpha;
             f32 t = (dist - s->radius - zero) / range;
-            t = Max(Min(t, one), zero);
+            t = MaxF(MinFRev(t, one), zero);
             alpha = alpha + t * (zero - alpha);
         } else {
             alpha = s->alpha;

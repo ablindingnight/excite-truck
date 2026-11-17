@@ -19,6 +19,7 @@ void fn_8020A400(void);   // music shutdown
 void* operator new(size_t size, const char* tag);
 
 #include "game/listener.h"
+#include "game/mathutil.h"
 
 class GameSound;
 
@@ -327,7 +328,6 @@ static f32 Attenuation(const ValVec3* d, f32 radius) {
     return radius / ((dist > radius) ? dist : radius);
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void Sub(ValVec3* out, const ValVec3& a, const ValVec3& b) {
     out->x = a.x - b.x;
     out->y = a.y - b.y;

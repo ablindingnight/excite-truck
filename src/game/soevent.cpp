@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strncmp(const char* a, const char* b, size_t n);
@@ -170,7 +171,6 @@ struct HitMsg {
     s32 effect;  // offset 0x1C
 };
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void Scale(SoVec* out, const SoVec* in, f32 s) {
     out->x = in->x * s;
