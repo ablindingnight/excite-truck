@@ -30,20 +30,7 @@ struct PadPos {
 class Window;
 class Widget;
 
-class Window {
-public:
-    Window(const char* bg, s32 x, s32 y, s32 w, s32 h, s32 f);
-    ~Window(void);
-
-    u8 pad0[0x434];
-    void (*update)(Window* w);  // offset 0x434
-    u8 pad438[0x454 - 0x438];
-    s32 x;                      // offset 0x454
-    s32 y;                      // offset 0x458
-    u8 pad45C[0xDE4 - 0x45C];
-    u8 noSound;                 // offset 0xDE4
-    u8 padDE5[0xDE8 - 0xDE5];
-};
+#include "game/window.h"
 
 extern "C" {
 

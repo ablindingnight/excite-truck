@@ -1286,15 +1286,7 @@ struct UIMapping {
     UILayout* layout;   // 0x0C
     UILayout* back;     // 0x10
 };
-class Window {
-public:
-    Window(const char* name, long x, long y, long w, long h, long flags);
-
-    u8 pad0[0x434];
-    void* update;       // 0x434 per-frame dialog update
-    void* funcs[4];     // 0x438 mapped UI functions (0x440 = back)
-    u8 pad448[0xDE8 - 0x448];
-};
+#include "game/window.h"
 
 extern "C" UILayout* fn_8022E0EC(const char*);
 extern "C" UILayout* fn_8022E4C0(UIMapping*);
@@ -1399,17 +1391,17 @@ extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flag
         case 8:
             switch ((int)s->arg1) {
             case 0:
-                win->funcs[0] = s->value;
+                win->open = (void (*)(void))s->value;
                 break;
             case 1:
-                win->funcs[1] = s->value;
+                win->close = (void (*)(void))s->value;
                 break;
             case 2:
                 haveBack = 1;
-                win->funcs[2] = s->value;
+                win->fade = (void (*)(int, void*, f32))s->value;
                 break;
             case 3:
-                win->funcs[3] = s->value;
+                win->fadeStyle = (void (*)(Style*, u32, s32, s32, s32, s32, int, f32))s->value;
                 break;
             default:
                 ((s32 (*)(const char *, ...))fn_802E317C)("UIMAP_FUNC: bad func %d", s->arg1);
@@ -1429,7 +1421,7 @@ extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flag
         }
     }
     if (!haveBack) {
-        win->funcs[2] = (void*)fn_80236914;
+        win->fade = (void (*)(int, void*, f32))fn_80236914;
     }
 }
 
@@ -1456,7 +1448,7 @@ extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
     fn_80218D54(win, 0);
     lbl_8055EF0C = (s32 (*)(s32*))desc->poll;
     const char* layout = desc->layout;
-    win->update = (void*)fn_80211FF0;
+    win->update = (void (*)(Window*))fn_80211FF0;
     fn_80236918(layout);
     result = fn_802168F0(win);
     if (lbl_8055EF40) {
