@@ -1779,9 +1779,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                 cc->flash[i] -= 0.016683351f;
             }
         }
-        gain = f.count * co->value;
+        const s32 count = f.count;
+        gain = count * co->value;
         cc->count += gain;
-        for (i = 0; i < f.count; i++) {
+        for (i = 0; i < count; i++) {
             cc->flash[cc->next] = 0.6f;
             cc->next = (cc->next + 1) % 4;
         }
@@ -1800,7 +1801,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                         if (NearZero(fn_8017960C(h->racer)->F2690()) || it->Type() == 13) {
                             h->played = 0;
                             h->current = it.Get();
-                            if (Round(h->current->Value()) == 5 && h->bigSnd) {
+                            if (fn_80144C90(h->current->Value()) == 5 && h->bigSnd) {
                                 h->bigSnd->Play();
                             }
                             it.Remove();
@@ -1925,11 +1926,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         if (puddles->count > 0) {
             for (; j < puddles->count; j++) {
                 Puddle* p = puddles->items[j];
-                f32 zv = p->z;
-                f32 dz = rc->mtx.pos.z - zv;
-                f32 xv = p->x;
-                f32 dx = rc->mtx.pos.x - xv;
-                if (dx * dx + dz * dz < p->r * p->r ? rc->airborne > 0 : 0) {
+                f32 dz = rc->mtx.pos.z - p->z;
+                f32 dx = rc->mtx.pos.x - p->x;
+                const f32 radius = p->r;
+                if (dx * dx + dz * dz < radius * radius ? rc->airborne > 0 : 0) {
                     f32 v = rc->f25A0 - 0.1f;
                     rc->f25A0 = 0.0f > v ? 0.0f : v;
                 }
