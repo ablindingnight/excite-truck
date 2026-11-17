@@ -121,16 +121,16 @@ int fn_80144C90(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 
 f32 fn_80144CC8(f32 x) { return x * x; }
 
-/* Helper name unproven: a * b + c * d with the four scalars by value (same shape as zone's 2D helpers). */
-static inline f32 SumProd(f32 a, f32 b, f32 c, f32 d) { return a * b + c * d; }
+/* Helper name and argument grouping unproven. The matrix row is passed y before x. */
+static inline f32 SumProd(f32 x, f32 y, f32 rowY, f32 rowX) { return x * rowX + y * rowY; }
 
 void fn_80144CD0(Vec3* out, const Vec3* p, const f32* m) {
     const RMtx& frame = *(const RMtx*)m;
     f32 dx = p->x - frame.pos.x;
     f32 dy = p->y - frame.pos.y;
-    const f32 xXY = SumProd(dx, frame.rot.x.x, dy, frame.rot.x.y);
-    const f32 yXY = SumProd(dx, frame.rot.y.x, dy, frame.rot.y.y);
-    const f32 zXY = SumProd(dx, frame.rot.z.x, dy, frame.rot.z.y);
+    const f32 xXY = SumProd(dx, dy, frame.rot.x.y, frame.rot.x.x);
+    const f32 yXY = SumProd(dx, dy, frame.rot.y.y, frame.rot.y.x);
+    const f32 zXY = SumProd(dx, dy, frame.rot.z.y, frame.rot.z.x);
     f32 dz = p->z - frame.pos.z;
     out->y = dz * frame.rot.y.z + yXY;
     out->x = dz * frame.rot.x.z + xXY;
