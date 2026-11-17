@@ -473,6 +473,18 @@ static inline void TrophyViewShow(AchievementTrophyModel* v, u8* row) {
     }
 }
 
+// The default caption context of a text item.
+/* Helper name and form unproven: stands in for the header's default context until menu.h is settled
+   (handoff FACTS 2026-11-17 04:32); then the items go back to MenuItem(name, text). */
+struct NoCaption {
+    union {
+        int value;
+        const void* ptr;
+    };
+    NoCaption(void) { value = 0; }
+    operator int() const { return (int)ptr; }
+};
+
 struct AchQuery3 {
     s32 category;  // offset 0x0
     s32 value;     // offset 0x4
@@ -536,49 +548,49 @@ int fn_8025978C(u8* p) {
         MenuItem(0, 5, &frontFace, 0, 0),
         MenuItem(0, 5, &backFace, 0, 0),
         MenuItem("trophy", 0x13, &front, 0, 0),
-        MenuItem("trophy", (const char*)(frontFace.owner + 0x60)),
+        MenuItem("trophy", (const char*)(frontFace.owner + 0x60), (int)NoCaption()),
         MenuItem("back_trophy", 0x13, &back, 0, 0),
-        MenuItem("back_trophy", (const char*)(backFace.owner + 0x60)),
-        MenuItem("achievement_icon", lbl_80344EA0[av->index].name),
-        MenuItem("achievement_title", AchievementsGetCategoryName(av->q.category)),
-        MenuItem("achievement_value", (const char*)&av->valueText),
-        MenuItem("next_level_value", (const char*)&av->nextText),
-        MenuItem("increment_amt", toNext),
+        MenuItem("back_trophy", (const char*)(backFace.owner + 0x60), (int)NoCaption()),
+        MenuItem("achievement_icon", lbl_80344EA0[av->index].name, (int)NoCaption()),
+        MenuItem("achievement_title", AchievementsGetCategoryName(av->q.category), (int)NoCaption()),
+        MenuItem("achievement_value", (const char*)&av->valueText, (int)NoCaption()),
+        MenuItem("next_level_value", (const char*)&av->nextText, (int)NoCaption()),
+        MenuItem("increment_amt", toNext, (int)NoCaption()),
         MenuItem("back_1", 0x14, &barColor[0], 0, 0),
         MenuItem("icon_1", 0x14, &iconColor[0], 0, 0),
         MenuItem("bars_1", 2, vals[0], 0, 0),
-        MenuItem("icon_1", lbl_80344EA0[0].name),
-        MenuItem("title_1", AchievementsGetCategoryName(lbl_80344EA0[0].category)),
+        MenuItem("icon_1", lbl_80344EA0[0].name, (int)NoCaption()),
+        MenuItem("title_1", AchievementsGetCategoryName(lbl_80344EA0[0].category), (int)NoCaption()),
         MenuItem("back_2", 0x14, &barColor[1], 0, 0),
         MenuItem("icon_2", 0x14, &iconColor[1], 0, 0),
         MenuItem("bars_2", 2, vals[1], 0, 0),
-        MenuItem("icon_2", lbl_80344EA0[1].name),
-        MenuItem("title_2", AchievementsGetCategoryName(lbl_80344EA0[1].category)),
+        MenuItem("icon_2", lbl_80344EA0[1].name, (int)NoCaption()),
+        MenuItem("title_2", AchievementsGetCategoryName(lbl_80344EA0[1].category), (int)NoCaption()),
         MenuItem("back_3", 0x14, &barColor[2], 0, 0),
         MenuItem("icon_3", 0x14, &iconColor[2], 0, 0),
         MenuItem("bars_3", 2, vals[2], 0, 0),
-        MenuItem("icon_3", lbl_80344EA0[2].name),
-        MenuItem("title_3", AchievementsGetCategoryName(lbl_80344EA0[2].category)),
+        MenuItem("icon_3", lbl_80344EA0[2].name, (int)NoCaption()),
+        MenuItem("title_3", AchievementsGetCategoryName(lbl_80344EA0[2].category), (int)NoCaption()),
         MenuItem("back_4", 0x14, &barColor[3], 0, 0),
         MenuItem("icon_4", 0x14, &iconColor[3], 0, 0),
         MenuItem("bars_4", 2, vals[3], 0, 0),
-        MenuItem("icon_4", lbl_80344EA0[3].name),
-        MenuItem("title_4", AchievementsGetCategoryName(lbl_80344EA0[3].category)),
+        MenuItem("icon_4", lbl_80344EA0[3].name, (int)NoCaption()),
+        MenuItem("title_4", AchievementsGetCategoryName(lbl_80344EA0[3].category), (int)NoCaption()),
         MenuItem("back_5", 0x14, &barColor[4], 0, 0),
         MenuItem("icon_5", 0x14, &iconColor[4], 0, 0),
         MenuItem("bars_5", 2, vals[4], 0, 0),
-        MenuItem("icon_5", lbl_80344EA0[4].name),
-        MenuItem("title_5", AchievementsGetCategoryName(lbl_80344EA0[4].category)),
+        MenuItem("icon_5", lbl_80344EA0[4].name, (int)NoCaption()),
+        MenuItem("title_5", AchievementsGetCategoryName(lbl_80344EA0[4].category), (int)NoCaption()),
         MenuItem("back_6", 0x14, &barColor[5], 0, 0),
         MenuItem("icon_6", 0x14, &iconColor[5], 0, 0),
         MenuItem("bars_6", 2, vals[5], 0, 0),
-        MenuItem("icon_6", lbl_80344EA0[5].name),
-        MenuItem("title_6", AchievementsGetCategoryName(lbl_80344EA0[5].category)),
+        MenuItem("icon_6", lbl_80344EA0[5].name, (int)NoCaption()),
+        MenuItem("title_6", AchievementsGetCategoryName(lbl_80344EA0[5].category), (int)NoCaption()),
         MenuItem("back_7", 0x14, &barColor[6], 0, 0),
         MenuItem("icon_7", 0x14, &iconColor[6], 0, 0),
         MenuItem("bars_7", 2, vals[6], 0, 0),
-        MenuItem("icon_7", lbl_80344EA0[6].name),
-        MenuItem("title_7", AchievementsGetCategoryName(lbl_80344EA0[6].category)),
+        MenuItem("icon_7", lbl_80344EA0[6].name, (int)NoCaption()),
+        MenuItem("title_7", AchievementsGetCategoryName(lbl_80344EA0[6].category), (int)NoCaption()),
         MenuItem(lbl_80498E98),
     };
     MenuDesc desc = {av->counting ? "ep_achieve.lyt" : "ach_viewer.lyt", items, 0, 0, 0};
