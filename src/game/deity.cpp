@@ -7,6 +7,7 @@
 #include "game/idealline.h"
 #include "game/deity.h"
 #include "game/centerline.h"
+#include "game/pathset.h"
 #include "game/v2.h"
 #include "game/raceopts.h"
 #include "game/plainvec.h"
@@ -33,18 +34,6 @@ void operator delete[](void* p);
 extern f32 lbl_8055E3C8;    // time
 extern s32 lbl_8055E3C4;    // frame
 extern f32 __float_epsilon[];  // FLT_EPSILON
-
-class PathSet {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual CenterLine* Center(int i);  // 0x10
-    virtual CenterLine* Racing(int i);  // 0x14
-    virtual void Locate(int il, void* pos);  // 0x18
-    virtual void v1C(void);
-    virtual void Reset(void);                // 0x20
-    virtual void Begin(void);                // 0x24
-};
 
 // The AI sub-task manager (fn_8013C9F4, CSubTaskMgr family: destructor at 0x08).
 class DAI {
@@ -183,7 +172,7 @@ int fn_800081F0(EventDesc* r);
 DMaster* fn_801B83A0(void);
 DAI* fn_8013C9F4(int a);
 void fn_80204A1C(const char* key, u8* out);
-PathSet* fn_80156A40(void);
+
 int fn_801B8928(int car, TeleportInfo* t, int a);
 int fn_801B526C(void);
 int fn_8026A344(int);
@@ -658,10 +647,10 @@ void fn_801B179C(DeityCar* c, int index, DCar* car) {
     c->start = index;
     *(s32*)((u8*)c + 0x8) = index + 1;
     PathSet* ps = fn_80156A40();
-    c->follower = new ("Deity:center_line") IdealFollower(1, ps->Center(index));
+    c->follower = new ("Deity:center_line") IdealFollower(1, (CenterLine*)ps->CenterFor(index));
     c->line = new ("Deity:racing_line") LineFollower;
     c->line->link = c->follower;
-    c->line->SetLine(ps->Racing(index));
+    c->line->SetLine((CenterLine*)ps->LineFor(index));
     if (car->type == 'PCAR') {
         lbl_8055E67C++;
     }
@@ -687,7 +676,7 @@ void fn_801B18B8(DeityCar* c, int reset, IdealPoint* start) {
 
 void fn_801B196C(DeityCar* c) {
     DCar* car = c->car;
-    fn_80156A40()->Locate(car->il, (u8*)car + 0x60);
+    fn_80156A40()->Snap(car->il, (const f32*)((u8*)car + 0x60));
     DCar* k = c->car;
     f32 q[3];
     f32 a = k->ahead;
@@ -697,7 +686,7 @@ void fn_801B196C(DeityCar* c) {
     V2 p;
     p.x = q[0];
     p.y = q[2];
-    c->line->Attach(fn_80156A40()->Racing(c->index), &p, 0);
+    c->line->Attach((CenterLine*)fn_80156A40()->LineFor(c->index), &p, 0);
     LineFollower* l = c->line;
     c->racing.seg = l->il.seg;
     c->racing.t = l->il.t;
@@ -706,8 +695,8 @@ void fn_801B196C(DeityCar* c) {
 
 void fn_801B1A5C(DeityCar* c) {
     PathSet* ps = fn_80156A40();
-    c->follower->SetLine(ps->Center(c->index));
-    c->line->SetLine(ps->Racing(c->index));
+    c->follower->SetLine((CenterLine*)ps->CenterFor(c->index));
+    c->line->SetLine((CenterLine*)ps->LineFor(c->index));
     c->follower->Reset();
     LineFollower* l = c->line;
     IdealFollower* f = c->follower;
@@ -748,8 +737,8 @@ void DeityCar::Update(void) {
     p.x = q[0];
     p.y = q[2];
     PathSet* ps = fn_80156A40();
-    follower->Attach(ps->Center(index), &p, 0);
-    line->Attach(ps->Racing(index), &p, 0);
+    follower->Attach((CenterLine*)ps->CenterFor(index), &p, 0);
+    line->Attach((CenterLine*)ps->LineFor(index), &p, 0);
     int free = fn_801B1130(index) && !lbl_8055E692;
     f32 back = 0.0f;
     int r = follower->Track(&p, &back);
@@ -1098,7 +1087,7 @@ void fn_801B2910(void) {
             lastLeft = c->Car();
         }
     }
-    fn_80156A40()->Begin();
+    fn_80156A40()->Assign();
 }
 
 }  // extern "C"

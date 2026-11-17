@@ -8,6 +8,7 @@
 #include "game/common.h"
 #include "game/racesetup.h"
 #include "game/carbody.h"
+#include "game/pathset.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -85,16 +86,6 @@ public:
     virtual CarPhysics* Physics(void);    // 0x1C
 };
 
-class LineSet {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void SetCrazy(int car, int on);  // 0x1C
-};
-
 struct RaceDesc {
     u8 pad0[0x4];
     s32 type;  // offset 0x4
@@ -102,7 +93,7 @@ struct RaceDesc {
 
 extern "C" {
 OrbitCar* fn_801B2EC0(int id);
-LineSet* fn_80156A40(void);
+
 CarBody* fn_8017960C(int id);
 }
 
@@ -557,9 +548,9 @@ static inline void UpdateCar(OrbitCarState* s, OrbitCar* car) {
         crazy = diff > lbl_8042FE38.crazyLon;
         if (diff > lbl_8042FE38.switchLon && fn_80166F78(&s->laneTime)) {
             if (crazy) {
-                fn_80156A40()->SetCrazy(s->id, 1);
+                fn_80156A40()->Switch(s->id, 1);
             } else {
-                fn_80156A40()->SetCrazy(s->id, 0);
+                fn_80156A40()->Switch(s->id, 0);
             }
             fn_80166F3C(&s->laneTime, 7.0f, 15.0f);
         }

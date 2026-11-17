@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/deity.h"
 #include "game/centerline.h"
+#include "game/pathset.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -108,20 +109,6 @@ char* fn_801562BC(char* buf, int size, const char* name, int ghost) {
 }
 
 }  // extern "C"
-
-// The set of lines the AI follows.
-class PathSet {
-public:
-    virtual IdealLineRes* GetLine(int i) = 0;              // 0x08 centre line
-    virtual IdealLineRes* GetRacingLine(int i) = 0;        // 0x0C
-    virtual IdealLineRes* CenterFor(int car) = 0;          // 0x10
-    virtual IdealLineRes* LineFor(int car) = 0;            // 0x14
-    virtual void Snap(int car, const f32* pos) = 0;        // 0x18
-    virtual void Switch(int car) = 0;                      // 0x1C
-    virtual void Reset(void) {}                            // 0x20
-    virtual void Assign(void) = 0;                         // 0x24
-    virtual ~PathSet(void) {}                              // 0x28
-};
 
 static inline int RightSide(DeityCar* r) {
     if (r->State()->grid.lane > 0.0f) {
@@ -349,7 +336,7 @@ public:
         racing->Reset();
     }
     virtual void Snap(int car, const f32* pos) { racing->Snap(car, pos); }
-    virtual void Switch(int car) { racing->Switch(car); }
+    virtual void Switch(int car, int on) { racing->Switch(car); }
     virtual void Assign(void) { racing->Assign(); }
 
     LineSource* racing;  // offset 0x4
