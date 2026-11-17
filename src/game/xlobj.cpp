@@ -180,7 +180,6 @@ static inline void LoadRoadTexMtx(void) {
 
 namespace {
 
-extern const char kRoadInhibitsSkags[];
 
 template <class T>
 struct Chunk : VecBase<T> {
@@ -263,6 +262,9 @@ struct Item : Cell<u16*> {
     int Type(void);
     struct Shadow* AsShadow(void);
     struct Obj* AsObj(void);
+    // Helper unproven: retail has "road_inhibits_skags" as a weak string after Grid's, so it lives in an in-class
+    // inline member of a global class; Item is the likeliest owner.
+    int InhibitsSkags(void) { return fn_802B59CC()->GetBool("road_inhibits_skags", 1); }
     u32 type;    // offset 0x8
     u8 on;       // offset 0xC
     Item* next;  // offset 0x10
@@ -556,7 +558,7 @@ void fn_802B9108(s16 size) {
                     }
                     lbl_8055FA80->Next() = it;
                     int inhibit = 0;
-                    if (it->type == 2 && fn_802B59CC()->GetBool(kRoadInhibitsSkags, 1)) {
+                    if (it->type == 2 && it->InhibitsSkags()) {
                         inhibit = 1;
                     }
                     if (inhibit) {
@@ -1093,7 +1095,6 @@ void fn_802BB674(const char* name, int slot) {
 
 namespace {
 
-const char kRoadInhibitsSkags[] = "road_inhibits_skags";
 
 }  // namespace
 
