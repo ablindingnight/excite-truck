@@ -8,7 +8,7 @@ void fn_80119214(void *arg0, void *arg1) {
     fn_8011FFB8(arg0, arg1);
 }
 
-void SetStreamVolumePan(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
+static void SetStreamVolumePan(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     void *temp_r31 = (u8*)arg0 + 0x14C;
     memset(temp_r31, 0, 0x30);
     *(s16*)temp_r31 = arg2;
@@ -19,7 +19,7 @@ void SetStreamVolumePan(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     *(s32*)((u8*)arg0 + 0x1C) |= 0x212;
 }
 
-void set_rate_volume_and_pan(void *arg0) {
+static void set_rate_volume_and_pan(void *arg0) {
     if (*(void **)((u8 *)arg0 + 0x7C) != 0) {
         SetStreamVolumePan(*(void **)((u8 *)arg0 + 0x7C), *(s32 *)((u8 *)arg0 + 0xA4), *(s32 *)((u8 *)arg0 + 0xA8),
                     *(s32 *)((u8 *)arg0 + 0x78) == 1 ? *(s32 *)((u8 *)arg0 + 0xAC) : 0);
@@ -29,7 +29,7 @@ void set_rate_volume_and_pan(void *arg0) {
     }
 }
 
-void clear(void *arg0, u32 arg1, u32 arg2) {
+static void clear(void *arg0, u32 arg1, u32 arg2) {
     u32 len;
     u32 n;
     len = arg2;
@@ -61,7 +61,7 @@ void clear(void *arg0, u32 arg1, u32 arg2) {
     }
 }
 
-void set_both_state(void *arg0, s32 arg1) {
+static void set_both_state(void *arg0, s32 arg1) {
     void *v;
     if ((v = *(void **)arg0) != NULL) {
         AXSetVoiceState(v, arg1);
@@ -71,16 +71,16 @@ void set_both_state(void *arg0, s32 arg1) {
     }
 }
 
-void fn_80119498(void *arg0) {
+static void fn_80119498(void *arg0) {
     set_both_state(arg0, 1);
     *(s32 *)((u8 *)arg0 + 0x38) = 0;
 }
 
-s32 get_pos(void* arg0) {
+static s32 get_pos(void* arg0) {
  return *(u16*)((u8*)arg0+0x1be) + (*(u16*)((u8*)arg0+0x1bc)<<16);
 }
 
-s32 GoodGetCurrentPosition(void *arg0) {
+static s32 GoodGetCurrentPosition(void *arg0) {
     s32 first;
     s32 current;
     s32 result;
@@ -95,14 +95,14 @@ s32 GoodGetCurrentPosition(void *arg0) {
     return current;
 }
 
-void start_streaming(void *arg0) {
+static void start_streaming(void *arg0) {
     *(s32 *)((u8 *)arg0 + 0x34) = 1;
     fn_80119498(arg0);
     *(s32 *)((u8 *)arg0 + 0x48) = GoodGetCurrentPosition(arg0);
     *(s32 *)((u8 *)arg0 + 0x50) = RADTimerRead();
 }
 
-void fn_801195A0(void *arg0) {
+static void fn_801195A0(void *arg0) {
     set_both_state(arg0, 0);
     *(s32 *)((u8 *)arg0 + 0x38) = 1;
 }
@@ -111,7 +111,7 @@ void fn_801195A0(void *arg0) {
 // right voices.
 #pragma push
 #pragma opt_dead_assignments off
-void try_a_mix(StreamTrack *t) {
+static void try_a_mix(StreamTrack *t) {
     u16 *src;
     u32 n;
     u16 *l;
@@ -168,7 +168,7 @@ void try_a_mix(StreamTrack *t) {
 #pragma pop
 
 // Keeps a track's voices fed: tops them up from the ring, or writes silence while the voices outrun the data.
-s32 Ready(StreamTrack *t) {
+static s32 Ready(StreamTrack *t) {
     u32 pos;
     u32 now;
     u32 space;
@@ -223,7 +223,7 @@ s32 fn_80119994(void) { return 0; }
 
 s32 fn_8011999C(void) { return 0; }
 
-void set_addrs(void* arg0, s32 arg1) {
+static void set_addrs(void* arg0, s32 arg1) {
     extern void AXSetVoiceAddr(void*, s16*);
     s16 rect[8];
     u32 width;
@@ -264,7 +264,7 @@ void set_addrs(void* arg0, s32 arg1) {
     }
 }
 
-void Volume(StreamTrack *t, s32 volume) {
+static void Volume(StreamTrack *t, s32 volume) {
     s32 value = volume;
     f32 temp;
     if (value < 0) value = 0;
@@ -274,7 +274,7 @@ void Volume(StreamTrack *t, s32 volume) {
     set_rate_volume_and_pan(t);
 }
 
-void Pan(StreamTrack *t, s32 pan) {
+static void Pan(StreamTrack *t, s32 pan) {
     s32 value = pan;
     f32 temp_f31;
     f32 temp_f3;
@@ -289,7 +289,7 @@ void Pan(StreamTrack *t, s32 pan) {
     set_rate_volume_and_pan(t);
 }
 
-s32 SetOnOff(StreamTrack *t, s32 run) {
+static s32 SetOnOff(StreamTrack *t, s32 run) {
     if (run != 0 && t->playing == 0) {
         t->ending = 0;
         t->playing = 1;
@@ -304,7 +304,7 @@ s32 SetOnOff(StreamTrack *t, s32 run) {
     return t->playing;
 }
 
-s32 Pause(StreamTrack *t, s32 paused) {
+static s32 Pause(StreamTrack *t, s32 paused) {
     s32 *var_r3;
     if (paused != 0) {
         if (t->ending != 0) {
@@ -327,7 +327,7 @@ s32 Pause(StreamTrack *t, s32 paused) {
 }
 
 // Stops and releases the voices of a channel, then frees its sample buffer.
-void Close(void *arg0) {
+static void Close(void *arg0) {
     StreamChannel *ch = arg0;
     if (ch->voices[0] != 0) {
         ch->stopping = 1;
@@ -348,7 +348,7 @@ void Close(void *arg0) {
 
 // Bink sound open for AX: sets up a track of `chans` 16-bit voices at `freq` Hz with a 600 ms buffer, prefilled with
 // up to the whole movie's sound, and installs the track callbacks. Returns 0 without an allocator or voices.
-s32 Open(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkInfo8011 *bink) {
+static s32 Open(StreamTrack *t, u32 freq, s32 bits, s32 chans, u32 flags, BinkInfo8011 *bink) {
     u32 bps;
     u32 total;
     u32 n;
