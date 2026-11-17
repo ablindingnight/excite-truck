@@ -3677,10 +3677,11 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
             boost = PkNorm(cur->boost, 0.0f, 255.0f);
         }
     }
+    f32 steer = cb->f25F0 * cb->f5B0;
     cb->wheels[2].steer = 0.0f;
     cb->wheels[3].steer = 0.0f;
     cb->f25F8 = 1.0f;
-    cb->wheels[1].steer = cb->wheels[0].steer = cb->f25F0 * cb->f5B0;
+    cb->wheels[1].steer = cb->wheels[0].steer = steer;
     cb->f25E8 = 1.0f;
     v0 = PkUnpack(prev->throttle, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->throttle, 255.0f, 0.0f, 1.0f);
