@@ -3,6 +3,7 @@
 // of every physics object's packets and of the event packets (up to 16 installed handlers, by type).
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -112,7 +113,6 @@ extern s32 lbl_8055E3C4;  // game time
 
 #define RP_MIN(a, b) (((a) < (b)) ? (a) : (b))
 
-static inline f32 Norm(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }
 namespace {
 
 extern const f32 kUnitMax;
@@ -122,7 +122,7 @@ extern const f32 kReplayXSpan;
 }  // namespace
 
 static inline f32 ReplayFraction(const u16& v) {
-    f32 f = RP_MIN(kUnitMax, Norm(v, 0.0f, 65535.0f));
+    f32 f = RP_MIN(kUnitMax, Unlerp(v, 0.0f, 65535.0f));
     f = (f > 0.0f) ? f : 0.0f;
     return f;
 }
@@ -139,9 +139,8 @@ static inline f32 UnpackSpan(const u16& v, const f32& lo, f32 span) {
 
 static inline f32 UnpackX(const u16& v) { return UnpackSpan(v, kReplayXMin, kReplayXSpan); }
 
-static inline int MinI(int a, int b) { return (a < b) ? a : b; }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) {
+static inline f32 LerpScaleFirst(f32 a, f32 b, f32 t) {
     b = t * (b - a);
     return a + b;
 }
@@ -331,9 +330,9 @@ const f32 kReplayXSpan = 600.0f;
 void fn_801B4D80(Header* h, const HeaderPacket* a, const HeaderPacket* b, f32 t) {
     h->unk0 = a->unk0;
     h->unk4 = a->unk4;
-    h->x = Lerp(UnpackX(a->x), UnpackX(b->x), t);
-    h->y = Lerp(Unpack(a->y, -4.0f, 4.0f), Unpack(b->y, -4.0f, 4.0f), t);
-    h->z = Lerp(Unpack(a->z, -4.0f, 4.0f), Unpack(b->z, -4.0f, 4.0f), t);
+    h->x = LerpScaleFirst(UnpackX(a->x), UnpackX(b->x), t);
+    h->y = LerpScaleFirst(Unpack(a->y, -4.0f, 4.0f), Unpack(b->y, -4.0f, 4.0f), t);
+    h->z = LerpScaleFirst(Unpack(a->z, -4.0f, 4.0f), Unpack(b->z, -4.0f, 4.0f), t);
 }
 
 void fn_801B5060(const HeaderPacket* a, const HeaderPacket* b, f32 t) { fn_801B4D80(fn_80178C90(), a, b, t); }

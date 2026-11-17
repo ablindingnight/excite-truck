@@ -9,6 +9,7 @@
 #include "game/menu.h"
 #include "game/menustate.h"
 #include <string.h>
+#include "game/mathutil.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -421,7 +422,7 @@ extern u8 lbl_8055F3E8;
 extern ChalPath* lbl_8055F3E4;
 }
 
-static inline int MinI(int a, int b) { return a >= b ? b : a; }
+static inline int MinIGe(int a, int b) { return a >= b ? b : a; }
 
 extern "C" {
 void* memset(void* d, int c, u32 n);
@@ -473,10 +474,10 @@ static inline void BuildMap(PathScreenBuf* s) {
     memset(s->lvObjs, 0, sizeof(s->lvObjs));
     s->events.count = 0;
     s->levels.count = 0;
-    for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
+    for (i = 0; i < MinIGe(lbl_8055F3E4->NumLevels(), 3); i++) {
         s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
         s->levels.Push(new ("pathcontrol") LevelNode(lbl_8055F3E4->GetLevel(i), i));
-        for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
+        for (j = 0; j < MinIGe(s->lvObjs[i]->NumEvents(), 6); j++) {
             s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
             s->events.Push(new ("eventcontrol") EventNode(lbl_8055F3E4->GetLevel(i)->GetEvent(j)));
             s->numEvents++;
@@ -923,10 +924,10 @@ void fn_80261C68(PathScreenBuf* s) {
     memset(s->lvObjs, 0, sizeof(s->lvObjs));
     s->events.count = 0;
     s->levels.count = 0;
-    for (i = 0; i < MinI(lbl_8055F3E4->NumLevels(), 3); i++) {
+    for (i = 0; i < MinIGe(lbl_8055F3E4->NumLevels(), 3); i++) {
         s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
         s->levels.Push(new ("pathcontrol") LevelNode(lbl_8055F3E4->GetLevel(i), i));
-        for (j = 0; j < MinI(s->lvObjs[i]->NumEvents(), 6); j++) {
+        for (j = 0; j < MinIGe(s->lvObjs[i]->NumEvents(), 6); j++) {
             s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
             s->events.Push(new ("eventcontrol") EventNode(lbl_8055F3E4->GetLevel(i)->GetEvent(j)));
             s->numEvents++;
@@ -1068,8 +1069,6 @@ void LevelNode::Update(void) {
 }
 
 
-static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
 static inline f32 Ease(f32 x) {

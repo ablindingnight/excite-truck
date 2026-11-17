@@ -8,6 +8,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -163,13 +164,10 @@ MechaSimpleArray<RingSet> lbl_80430340;
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
-static inline f32 MinI(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxI(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 Unlerp(f32 a, f32 b, f32 x) {
-    return MaxI(MinI(1.0f, (x - a) / (b - a)), 0.0f);
+static inline f32 UnlerpClamp01(f32 a, f32 b, f32 x) {
+    return MaxF(MinF(1.0f, (x - a) / (b - a)), 0.0f);
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void StrCopyN(char* d, const char* s) {
     const char* src = s;
@@ -395,7 +393,7 @@ static inline void UpdateRings(int k, RingSet* s) {
         r = &lbl_80430318.data[s->first + k];
         if (r->valid) {
             now = fn_801E7E18();
-            f32 a = Lerp(0.0f, 1.0f, Unlerp(0.0f, 0.25f, now - r->fadeTime));
+            f32 a = Lerp(0.0f, 1.0f, UnlerpClamp01(0.0f, 0.25f, now - r->fadeTime));
             a = r->active ? a : 1.0f - a;
             if (a > 0.01f) {
                 ValMatrix m;

@@ -7,6 +7,7 @@
 #include "game/rmtx.h"
 #include "game/collvol.h"
 #include "game/shapes.h"
+#include "game/mathutil.h"
 
 extern "C" {
 double cos(double x);
@@ -52,13 +53,12 @@ struct RPacket {
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
-static inline f32 Unlerp(f32 a, f32 b, f32 x) {
+static inline f32 UnlerpClamped(f32 a, f32 b, f32 x) {
     f32 t = MIN(1.0f, (x - a) / (b - a));
     t = MAX(t, 0.0f);
     return t;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void Identity(RMtx* m) {
     m->rot.x.x = 1.0f;
@@ -137,10 +137,9 @@ extern "C" void fn_8017A008(u8* dst, const u8* src, int n) {
     }
 }
 
-static inline f32 Frac(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
 
 static inline f32 Deq(u16 u) {
-    f32 t = MIN(1.0f, Frac(u, 0.0f, 65535.0f));
+    f32 t = MIN(1.0f, Unlerp(u, 0.0f, 65535.0f));
     t = MAX(t, 0.0f);
     return Lerp(-6.2831855f, 6.2831855f, t);
 }
@@ -208,7 +207,6 @@ void CollVolume::Update(void) { Transform(); }
 
 void CollVolume::vf20(void) {}
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(const RMtx* m, const RVec3* in, RVec3* out) {
     if (out == in) {
@@ -294,9 +292,9 @@ s32 CollVolume::vf34(RPacket* p) {
         v[1] = 0.0f;
         v[2] = 0.0f;
     }
-    p->rot[0] = 0.5f + Lerp(0.0f, 65535.0f, Unlerp(-6.2831855f, 6.2831855f, v[0]));
-    p->rot[1] = 0.5f + Lerp(0.0f, 65535.0f, Unlerp(-6.2831855f, 6.2831855f, v[1]));
-    p->rot[2] = 0.5f + Lerp(0.0f, 65535.0f, Unlerp(-6.2831855f, 6.2831855f, v[2]));
+    p->rot[0] = 0.5f + Lerp(0.0f, 65535.0f, UnlerpClamped(-6.2831855f, 6.2831855f, v[0]));
+    p->rot[1] = 0.5f + Lerp(0.0f, 65535.0f, UnlerpClamped(-6.2831855f, 6.2831855f, v[1]));
+    p->rot[2] = 0.5f + Lerp(0.0f, 65535.0f, UnlerpClamped(-6.2831855f, 6.2831855f, v[2]));
     return 0x14;
 }
 

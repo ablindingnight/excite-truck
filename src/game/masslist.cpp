@@ -8,8 +8,6 @@
 #include "game/vec3_init.h"
 
 
-// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 // MVec3: valvec3.h's ValVec3.
 struct MVec4 {
@@ -121,6 +119,7 @@ struct WheelSetup {
 };
 
 #include "game/carsetup.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* p, int c, size_t n);
@@ -340,21 +339,21 @@ void fn_801BE168(int car, const ValMatrix* mtx, const ValVec3* vel, const ValVec
     s->v60 = MVec4(avel->x, avel->y, avel->z);
 }
 
-static inline f32 Dot3(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
+static inline f32 Dot3Rev(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
 
 static inline void MulVec(ValVec3* out, const ValVec3* in, const ValMatrix* m) {
     const f32* r = &m->basis[0].x;
     if (out == in) {
-        f32 x = Dot3(in->x, r[0], in->y, r[3], in->z, r[6]);
-        f32 y = Dot3(in->x, r[1], in->y, r[4], in->z, r[7]);
-        f32 z = Dot3(in->x, r[2], in->y, r[5], in->z, r[8]);
+        f32 x = Dot3Rev(in->x, r[0], in->y, r[3], in->z, r[6]);
+        f32 y = Dot3Rev(in->x, r[1], in->y, r[4], in->z, r[7]);
+        f32 z = Dot3Rev(in->x, r[2], in->y, r[5], in->z, r[8]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = Dot3(in->x, r[0], in->y, r[3], in->z, r[6]);
-        out->y = Dot3(in->x, r[1], in->y, r[4], in->z, r[7]);
-        out->z = Dot3(in->x, r[2], in->y, r[5], in->z, r[8]);
+        out->x = Dot3Rev(in->x, r[0], in->y, r[3], in->z, r[6]);
+        out->y = Dot3Rev(in->x, r[1], in->y, r[4], in->z, r[7]);
+        out->z = Dot3Rev(in->x, r[2], in->y, r[5], in->z, r[8]);
     }
 }
 

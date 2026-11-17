@@ -12,6 +12,7 @@
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -242,12 +243,11 @@ struct OrbitCarState {
 
 #define NearEq(a, b) ((f32)__fabs((a) - (b)) <= __float_epsilon[0])
 
-static inline f32 Unlerp(f32 a, f32 b, f32 x) {
+static inline f32 InvLerpClamped(f32 a, f32 b, f32 x) {
     f32 t = (x - a) / (b - a);
     CLAMP01(t);
     return t;
 }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline f32 RampValue(const Ramp* r) {
     f32 t1 = r->t1;
@@ -668,7 +668,7 @@ f32 fn_801671FC(int i) {
                     boost = 0.5f;
                 }
             } else {
-                f32 t = Unlerp(0.0f, 0.002f, fn_801B2EC0(i)->Physics()->engine->throttle);
+                f32 t = InvLerpClamped(0.0f, 0.002f, fn_801B2EC0(i)->Physics()->engine->throttle);
                 boost = Lerp(0.6f, 0.0f, t);
             }
             lbl_8055E32C->a.data[i].boost = boost;

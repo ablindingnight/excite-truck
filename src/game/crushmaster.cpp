@@ -100,6 +100,7 @@ void* operator new(size_t size, const char* tag);
 
 #include "game/configroot.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 ConfigRoot* fn_8000AC38(void);
 
@@ -151,14 +152,13 @@ static inline void Stop(RSound* s) {
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
-static inline f32 Unlerp(f32 a, f32 b, f32 x) {
+static inline f32 InvLerpClamped(f32 a, f32 b, f32 x) {
     f32 t = (x - a) / (b - a);
     CLAMP01(t);
     return t;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 Remap(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) { return Lerp(y0, y1, Unlerp(x0, x1, x)); }
+static inline f32 Remap(f32 x, f32 x0, f32 x1, f32 y0, f32 y1) { return Lerp(y0, y1, InvLerpClamped(x0, x1, x)); }
 
 
 
@@ -770,7 +770,7 @@ void CrushResults::Update(int score, int kills, int bonus) {
         n = 0;
         if (bonus && start > 0.0f) {
             f32 now = lbl_8055E3C8;
-            f32 t = Unlerp(0.0f, 1.0f, now - start);
+            f32 t = InvLerpClamped(0.0f, 1.0f, now - start);
             n = Lerp(0.0f, 0.5f + bonus, t);
             shown = bonus - n;
         }
@@ -1581,15 +1581,7 @@ void fn_8018F9B4(RaceCarRec* car);
 
 static inline int Round(f32 v) { return v < 0.0f ? v - 0.5f : 0.5f + v; }
 
-// Helper name unproven: degrees to radians.
-static inline f32 ToRad(f32 d) {
-    return 0.017453292f * d;
-}
 
-// Helper name unproven: float absolute value.
-static inline f32 FAbs(f32 x) {
-    return (f32)__fabs(x);
-}
 
 static inline void PickTarget(CrushTarget* t, int car, f32 base, f32 a1, f32 a0) {
     f32 dur = 10.0f;
@@ -1613,7 +1605,7 @@ static inline void PickTarget(CrushTarget* t, int car, f32 base, f32 a1, f32 a0)
                 dir.y *= k;
             }
         }
-        Rotate(&dir, fn_80129DC4(3, ToRad(a0), ToRad(a1)));
+        Rotate(&dir, fn_80129DC4(3, DegToRad(a0), DegToRad(a1)));
         tgt.x = rec->mtx.pos.x;
         tgt.y = rec->mtx.pos.z;
         tgt.x += dir.x;

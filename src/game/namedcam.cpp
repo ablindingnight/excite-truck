@@ -9,6 +9,7 @@
 #include <string.h>
 #include "game/camrec.h"
 #include "game/math_types.h"
+#include "game/mathutil.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -353,15 +354,11 @@ double sin(double x);
 
 f32 lbl_804A15C0[4];  // smoothed pitch per slot
 
-static inline f32 MinF(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 MaxF(f32 a, f32 b) { return b > a ? b : a; }
-// Helper name unproven (clampsig 2026-11-16): retail compares the first operand first at the frame-height floor.
-static inline f32 MaxF2(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 MaxFRev(f32 a, f32 b) { return b > a ? b : a; }
 static inline f32 Atan2F(f32 y, f32 x) { return atan2(y, x); }
 static inline f32 CosF(f32 x) { return cos(x); }
 static inline f32 SinF(f32 x) { return sin(x); }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(CamVec3* out, const CamVec3* in, const CamPose* m) {
     if (out == in) {
@@ -379,9 +376,7 @@ static inline void MulVec(CamVec3* out, const CamVec3* in, const CamPose* m) {
 }
 
 // Where x lies between a and b (0 at a, 1 at b).
-static inline f32 Remap(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // A camera placed relative to the car: position, rotation (axis times angle, in degrees) and field of
 // view (degrees).
@@ -581,8 +576,6 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
 // Camera for slot `slot` in the chase modes: behind and above the car, swinging round with the
 // transition and pitched by the car's climb, blended from the slot's camera; the tips camera once the
 // race is over.
-// Helper name unproven: scale with the value on the left.
-static inline f32 MulK(f32 v, f32 k) { return v * k; }
 /* Helper name unproven: the clamp keeps its value in one variable (min, then max in place). */
 static inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
@@ -626,7 +619,7 @@ void fn_80277A14(CamRec* c, int slot) {
     frame.rot.m[7] = 0.0f;
     frame.rot.m[8] = cy;
     swing.x = 0.0f;
-    swing.y = MulK(e, 2.6179938f);
+    swing.y = Mul(e, 2.6179938f);
     swing.z = 0.0f;
     Mat3FromEuler(&swingRot, &swing);
     Mat3Mul(rot, &swingRot, rot);
@@ -643,16 +636,16 @@ void fn_80277A14(CamRec* c, int slot) {
     frame.pos.v[1] += offset.v[1];
     frame.pos.v[2] += offset.v[2];
     CamVec3* vel = (CamVec3*)(c->car + 0x118);
-    f32 pitch = vel->v[1] / MaxF(PSVECMag((const Vec*)vel), 1.0f);
+    f32 pitch = vel->v[1] / MaxFRev(PSVECMag((const Vec*)vel), 1.0f);
     if (S32(c->car, 0x2620) == 0 && vel->v[1] < 0.0f) {
-        f32 k = MaxF(0.0f, MinF(Remap(-(c->carFrame.pos.v[1] - fn_801EA0E8(c->carFrame.pos.v[0], c->carFrame.pos.v[2])) / vel->v[1], pitch, 0.0f), 1.0f));
+        f32 k = MaxFRev(0.0f, MinFRev(Unlerp(-(c->carFrame.pos.v[1] - fn_801EA0E8(c->carFrame.pos.v[0], c->carFrame.pos.v[2])) / vel->v[1], pitch, 0.0f), 1.0f));
         pitch = Lerp(1.25f, 0.25f, k);
     }
     f32 s = lbl_804A15C0[slot];
     s = Lerp(s, pitch, 0.1f);
     lbl_804A15C0[slot] = s;
     frame.pos.v[1] += 0.65f * (8.0f * s);
-    frame.pos.v[1] = MaxF2(frame.pos.v[1], fn_801EA0E8(frame.pos.v[0], frame.pos.v[2]) + 4.0f);
+    frame.pos.v[1] = MaxF(frame.pos.v[1], fn_801EA0E8(frame.pos.v[0], frame.pos.v[2]) + 4.0f);
     up.v[0] = 0.0f;
     up.v[1] = 1.0f;
     up.v[2] = 0.0f;
