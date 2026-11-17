@@ -2642,8 +2642,16 @@ void SphereGroup::vf10(u8* q) {
     } else if (type == 'BOX ') {
         RVec3 d;
         FromBoxCentre(&d, p, q);
-        if ((f32)__fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC)))) < F32(q, 0x24) + this->f178 &&
-            (f32)__fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC) + 0x18))) < F32(q, 0x2C) + this->f178) {
+        f32 xDistance = __fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC))));
+        f32 xExtent = F32(q, 0x24);
+        f32 xLimit = this->f178 + xExtent;
+        if (!(xDistance < xLimit)) {
+            return;
+        }
+        f32 zDistance = __fabs(PSVECDotProduct((const Vec*)&d, (const Vec*)(PTR(q, 0xC) + 0x18)));
+        f32 zExtent = F32(q, 0x2C);
+        f32 zLimit = this->f178 + zExtent;
+        if (zDistance < zLimit) {
             u8* pb;
             RMtx* f = (RMtx*)PTR(q, 0xC);
             pb = ((u8*&)this->owner);
