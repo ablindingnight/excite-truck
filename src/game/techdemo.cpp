@@ -197,20 +197,14 @@ inline void ActZone::Load(ValueNode* n, int& k, int& start) {
         e.x = b->pts[0].x - b->pts[2].x;
         best = e.x * e.x + e.y * e.y;
     }
-    d.y = b->pts[0].y - b->pts[1].y;
-    d.x = b->pts[0].x - b->pts[1].x;
-    {
-        f32 len = d.y * d.y + d.x * d.x;
+    for (int edge = 0; edge < 2; edge++) {
+        d.y = b->pts[edge].y - b->pts[edge + 1].y;
+        d.x = b->pts[edge].x - b->pts[edge + 1].x;
+        f32 len = d.x * d.x + d.y * d.y;
         if (len > best) {
             best = len;
-            start = 0;
+            start = edge;
         }
-    }
-    d.y = b->pts[1].y - b->pts[2].y;
-    f32 dx = b->pts[1].x - b->pts[2].x;
-    d.x = dx;
-    if (d.x * d.x + d.y * d.y > best) {
-        start = 1;
     }
     fn_801E9DC4(h);
     p = &pt[0].x;
