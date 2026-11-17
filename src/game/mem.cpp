@@ -432,10 +432,8 @@ void StackHeap::Dump(int flags) {
         off = 0;
         wasted = 0;
         count = 0;
-        // MATCHING-AID: the pointer local moves this down the register order (selfloop.py). The real form is unknown.
-        StackHeap* self = this;
-        while (off < self->used) {
-            StackBlock* b = (StackBlock*)(self->base + off);
+        while (off < used) {
+            StackBlock* b = (StackBlock*)(base + off);
             bool internal;
             if (b->cookie != STACK_COOKIE) {
                 fn_802E317C("MemDump fails %x", b);
@@ -451,8 +449,10 @@ void StackHeap::Dump(int flags) {
                 fn_802E2D74(1);
             }
         }
-        fn_802E30C8("Stack Used: %dK/%dK   Free: %dK   Wasted: %dK", used / 1024, size / 1024,
-                    (size - used) / 1024, wasted / 1024);
+        s32 inUse = used;
+        s32 total = size;
+        fn_802E30C8("Stack Used: %dK/%dK   Free: %dK   Wasted: %dK", inUse / 1024, total / 1024,
+                    (total - inUse) / 1024, wasted / 1024);
         fn_802E30C8(" %d allocations", count);
         fn_802E30C8("=======================================================");
     }
