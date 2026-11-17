@@ -3222,9 +3222,9 @@ void OrientedBoxShape::vf0C(void) {
     this->world.z = this->world.z + f->pos.z;
 }
 
-RagdollShape::RagdollShape(u32 a, u32 b, u32 c, f32 r) : CollShape((const RMtx*)a, (CollVolume*)c, 'RAGD', 1.0f, 1.0f) {
+RagdollShape::RagdollShape(const RMtx* frame, void* strip, CollVolume* owner, f32 r) : CollShape(frame, owner, 'RAGD', 1.0f, 1.0f) {
     u8* p = (u8*)this;
-    ((u32&)this->f30) = b;
+    ((void*&)this->f30) = strip;
     fn_801A2674(p, r, 0, -1);
 }
 

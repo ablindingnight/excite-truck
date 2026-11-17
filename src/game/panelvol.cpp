@@ -124,8 +124,9 @@ void fn_80144B54(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
 void fn_8017E388(RMtx* m);
-// RagdollShape::RagdollShape(frame, strip, owner, r) in sphcoll, called by its linker name.
-CollShape* __ct__12RagdollShapeFUlUlUlf(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
+// RagdollShape::RagdollShape(frame, strip, owner, r) in sphcoll, called by its linker name: retail loads the 0.25
+// scale before strip, which a new-expression does not (4 rows, aids audit 2 2026-11-17).
+CollShape* __ct__12RagdollShapeFPC4RMtxPvP10CollVolumef(void* mem, const RMtx* m, void* strip, CollVolume* o, f32 r);
 void fn_8019EECC(CollVolume* v, RVec3* c);
 void* fn_801C1BA4(int verts, int edges, int links);
 void fn_801C1C7C(void* strip);
@@ -519,7 +520,7 @@ void PanelVol::Init(BodyDesc* d) {
     CollShape* s = (CollShape*)mem;
     if (mem) {
         f32 scale = 0.25f;
-        s = __ct__12RagdollShapeFUlUlUlf(mem, &mtx, strip, this, scale);
+        s = __ct__12RagdollShapeFPC4RMtxPvP10CollVolumef(mem, &mtx, strip, this, scale);
     }
     AddShape(s);
     b1E8 = 0;

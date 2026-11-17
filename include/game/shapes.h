@@ -274,7 +274,7 @@ public:
 // A ragdoll limb volume ('RAGD'; vtable 0x80333818; built by panelvol's strips). Class name unproven.
 class RagdollShape : public CollShape {
 public:
-    RagdollShape(u32 frame, u32 x30, u32 owner, f32 r);
+    RagdollShape(const RMtx* frame, void* strip, CollVolume* owner, f32 r);
     virtual void vf10(u8* other);
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
