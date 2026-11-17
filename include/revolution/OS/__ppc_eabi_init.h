@@ -12,7 +12,9 @@ DECL_SECTION(".init") void __flush_cache(void*, size_t);
 void __init_user(void);
 void __init_cpp(void);
 void __fini_cpp(void);
+#ifdef __MWERKS__
 DECL_WEAK void exit(void);
+#endif  // PC: clashes with the C library's exit(int); the game never calls it
 void _ExitProcess(void);
 
 /**
