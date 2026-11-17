@@ -361,6 +361,7 @@ public:
     virtual void Load(void);       // 0xC: spawns them
     virtual ~Arena(void);          // 0x10
     void Init(void);
+    void Setup(void);
     int CountFiles(ValueNode* cfg);
     int CountRingSets(void);
     void Step(PlayerData* pd);
@@ -710,10 +711,11 @@ T* RArray<T>::Add(void) {
     return &this->data[this->count++];
 }
 
-void Arena::Init(void) {
-    int i;
-    ValueNode* n;
-    ValueTable* t;
+// Reads the time limit, loads every object file, counts the ring sets and builds the per-set stats.
+/* Helper name unproven: Arena::Init is this one inline body. Retail numbers its locals as an expanded inline's
+   objects (declared at first use), with the new-expression's pointer temporary between cfg and t; as Init's own
+   locals they are numbered ahead of every temporary (8 rows, FACTS 2026-11-17 13:20). */
+inline void Arena::Setup(void) {
     ValueNode* cfg = fn_8000AC38()->vals;
     char name[0x1E];
     if (cfg->Has("time_limit")) {
@@ -724,9 +726,10 @@ void Arena::Init(void) {
     fn_801345D8(name, 0x1E, "object_file_0");
     sets = new ("rc_object_sets") RArray<ObjSet>(CountFiles(cfg), "rc_object_files");
     while (cfg->Has(name)) {
-        t = fn_80131810(cfg->GetValue(name));
+        ValueTable* t = fn_80131810(cfg->GetValue(name));
         if (t) {
-            for (i = 0; (n = t->GetChild(i)) != 0; i++) {
+            ValueNode* n;
+            for (int i = 0; (n = t->GetChild(i)) != 0; i++) {
                 sets->Add()->Load(n, &dynos.t);
             }
             fn_80131818(t);
@@ -739,7 +742,7 @@ void Arena::Init(void) {
     nFiles = sets->Count();
     nSets = CountRingSets();
     stats = new ("rc_ringsetstats") RArray<SetStat>(nSets, "rc_ringsetstats");
-    for (i = 0; i < nSets; i++) {
+    for (int i = 0; i < nSets; i++) {
         SetStat st;
         st.done = 0;
         st.best = -1;
@@ -748,6 +751,8 @@ void Arena::Init(void) {
         stats->Push(st);
     }
 }
+
+void Arena::Init(void) { Setup(); }
 
 int Arena::CountRingSets(void) {
     ValueNode* cfg = fn_8000AC38()->vals;
