@@ -1464,10 +1464,14 @@ struct CamView : PlainValMatrix {  // rot at 0x0, pos at 0x24
 };
 
 // What the listener hears from: the car and its saved view and heading.
+/* The listener only reads the pose and heading, so its pointers are const. That matters for the code: taking
+   `&table[idx]` as a const pointer is a different expression from the plain store address, so the optimizer does not
+   share one address temporary with the copies, and the first store of each copy stays indexed (retail's
+   `stwx` / `stfsx base,idx` followed by `add` for the remaining members). */
 struct CamListen {
     s32 car;
-    PlainValMatrix* pose;
-    ValVec3* heading;
+    const PlainValMatrix* pose;
+    const ValVec3* heading;
 };
 
 extern "C++" f32 Dot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz);  // weak (C++ linkage; this part of the file sits in an extern "C" block)
