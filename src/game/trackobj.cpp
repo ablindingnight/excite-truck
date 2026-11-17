@@ -418,12 +418,7 @@ struct ViewState {
 
 #include "game/settings.h"
 
-struct TableRef {
-    TableRef(void) { node = 0; }
-    TableRef(const char* what, const char* name);
-    ~TableRef(void);
-    ValueNode* node;
-};
+#include "game/tableref.h"
 
 struct ObjMsg {
     s32 id;      // offset 0x0

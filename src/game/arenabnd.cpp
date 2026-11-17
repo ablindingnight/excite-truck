@@ -88,12 +88,7 @@ struct BoundSet {
     ArrayWrap<Bound*, 32> bounds;     // offset 0x4
 };
 
-struct TableRef {
-    TableRef(void) { node = 0; }
-    TableRef(const char* what, const char* name);
-    ~TableRef(void);
-    ValueNode* node;
-};
+#include "game/tableref.h"
 
 ModuleTag lbl_8055E130;
 ValueTable* lbl_8055E138;  // external bound table
