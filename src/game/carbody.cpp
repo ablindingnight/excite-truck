@@ -2442,16 +2442,10 @@ void fn_80186DE8(void) {
             player = 1;
         }
         RMtx fr;
+        fr.pos.Set(m->pos.x, m->pos.y, m->pos.z);
         fr.rot.x.Set(m->rot[0].x, m->rot[0].y, m->rot[0].z);
-        fr.rot.y.x = m->rot[1].x;
-        fr.rot.y.y = m->rot[1].y;
-        fr.rot.y.z = m->rot[1].z;
-        fr.rot.z.x = m->rot[2].x;
-        fr.rot.z.y = m->rot[2].y;
-        fr.rot.z.z = m->rot[2].z;
-        fr.pos.x = m->pos.x;
-        fr.pos.y = m->pos.y;
-        fr.pos.z = m->pos.z;
+        fr.rot.y.Set(m->rot[1].x, m->rot[1].y, m->rot[1].z);
+        fr.rot.z.Set(m->rot[2].x, m->rot[2].y, m->rot[2].z);
         *(RMtx*)(car + 0x3C) = fr;
         ((CollVolume*)car)->Transform();
         *((CollVolume*)car)->hint = e->id;
