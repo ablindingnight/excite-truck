@@ -4,6 +4,7 @@
 // (a CPU texel fetch from the 512x512 RGBA8 layer or a per-model texture matrix) and the indirect
 // ripple pass. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/surf.h"
 #include <revolution/GX/GXTypes.h>
 #include <revolution/GX/GXAttr.h>
 #include <revolution/GX/GXBump.h>
@@ -48,9 +49,9 @@ void fn_802D0E48(int pass);
 s32 fn_802CA294(s32 tex);
 void fn_802D3DF8(s32 tex, f32 u, f32 v, int scale);
 void fn_802D3E88(void);
-void fn_802D6B54(struct GModel* m);
-void fn_802D6B78(struct GModel* m);
-void fn_802D6B7C(struct GModel* m);
+void fn_802D6B54(struct Surf* m);
+void fn_802D6B78(struct Surf* m);
+void fn_802D6B7C(struct Surf* m);
 
 // GXTexObj: the SDK's.
 
@@ -80,17 +81,6 @@ struct GXTex {
     void* heap;     // offset 0xE8
     u32 lastFrame;  // offset 0xEC
     u32 uses;       // offset 0xF0
-};
-
-struct GModel {
-    u8 pad0[8];
-    u8 type;     // offset 0x8
-    u8 pad9[0x17];
-    void* pos;   // offset 0x20
-    u8 pad24[4];
-    void* uv;    // offset 0x28
-    u32 dlSize;  // offset 0x2C
-    void* dl;    // offset 0x30
 };
 
 struct GXf {
@@ -136,7 +126,7 @@ struct Inst {
 struct Batch {
     ~Batch(void) {}
     InlineVec<Inst, 10> list;  // offset 0x0
-    GModel* model;             // offset 0x214
+    Surf* model;             // offset 0x214
     u8 pending;                // offset 0x218
 };
 
@@ -166,7 +156,7 @@ s32 lbl_8055FEA4;  // bound layers
 void* lbl_8055FEA8;  // bound vertex array
 s32 lbl_8055FEAC;
 u8 lbl_8055FEB0;      // two-pass models
-GModel* lbl_8055FEB4;  // last model
+Surf* lbl_8055FEB4;  // last model
 u8 lbl_8055FEB8;
 u8 lbl_8055FEB9;  // cpu lighting
 u8 lbl_8055FEBA;  // depth prepass
@@ -553,7 +543,7 @@ void fn_802DC464(void* verts, int nverts, const u16* idx, int n) {
     }
 }
 
-GModel* fn_802DC628(GModel* m) { return m; }
+Surf* fn_802DC628(Surf* m) { return m; }
 
 void fn_802DC62C(void) {
     GXTex* t = lbl_804DB468[0];
@@ -571,14 +561,14 @@ u32 fn_802DC6AC(int x, int y) {
     return (p[0] << 16) | p[0x10];
 }
 
-void fn_802DC71C(GModel* model, s32 tex) {
+void fn_802DC71C(Surf* model, s32 tex) {
     fn_802DBD88();
     lbl_8055FEB4 = 0;
     fn_802CADD0(tex, 1);
     fn_802D2D1C();
     const GXTex* t = lbl_804DB468[1];
     u8 hasAlpha = t->hasAlpha;
-    lbl_8055FEBB = fn_802DC628(model)->type == 0x1D ? 1 : 0;
+    lbl_8055FEBB = fn_802DC628(model)->fmt == 0x1D ? 1 : 0;
     lbl_8055FEB9 = GXGetTexObjWidth((const GXTexObj*)&lbl_804DB468[0]->obj) == 0x200 ? 1 : 0;
     GXLoadTexObj((const GXTexObj*)&lbl_804DB468[0]->obj, (GXTexMapID)0);
     GXLoadTexObj((const GXTexObj*)&t->obj, (GXTexMapID)1);
@@ -626,7 +616,7 @@ static inline void FlushBatch(void) {
         if (lbl_804DB480.pending) {
             fn_802D6B54(lbl_804DB480.model);
         }
-        GModel* m = fn_802DC628(lbl_804DB480.model);
+        Surf* m = fn_802DC628(lbl_804DB480.model);
         int n = lbl_804DB480.list.count;
         int i;
         for (i = 0; i < n; i++) {
@@ -645,7 +635,7 @@ static inline void FlushBatch(void) {
             }
         }
         if (lbl_804DB480.pending) {
-            GXSetArray((GXAttr)9, (const void*)m->pos, (u8)0xC);
+            GXSetArray((GXAttr)9, (const void*)m->verts, (u8)0xC);
             GXSetArray((GXAttr)0xD, (const void*)m->uv, (u8)4);
         }
         GXSetArray((GXAttr)0xB, (const void*)colors, (u8)4);
@@ -665,7 +655,7 @@ void fn_802DC8B4(void) {
     fn_802DBDD8();
 }
 
-void fn_802DCAE4(GModel* model, const GXf* xf, f32 alpha) {
+void fn_802DCAE4(Surf* model, const GXf* xf, f32 alpha) {
     if (lbl_8055FEBB) {
         lbl_804DB480.model = model;
         Inst* e = &lbl_804DB480.list.data[lbl_804DB480.list.count++];

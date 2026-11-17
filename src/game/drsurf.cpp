@@ -5,6 +5,7 @@
 // surfaces and builds and caches the per-format vertex descriptor display lists. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/surf.h"
 #include "game/texstate.h"
 #include <revolution/GX/GXAttr.h>
 #include <revolution/GX/GXDisplayList.h>
@@ -54,28 +55,6 @@ union WGPipe {
 };
 
 #define WGPIPE (*(volatile WGPipe*)0xCC008000)
-
-struct Surf {
-    u32 magic;     // offset 0x0
-    u8 pad4[4];
-    u8 fmt;        // offset 0x8
-    u8 b9;         // offset 0x9
-    u8 flags;      // offset 0xA
-    u8 dlBlocks;   // offset 0xB
-    u32 vfmt;      // offset 0xC
-    void* fmtDL;   // offset 0x10
-    u32 tex;       // offset 0x14
-    u8 pad18[4];
-    s32 nverts;    // offset 0x1C
-    void* verts;   // offset 0x20
-    void* attr;    // offset 0x24
-    void* uv;      // offset 0x28
-    u32 dlSize;    // offset 0x2C
-    void* dl;      // offset 0x30
-    s32 nfacing;   // offset 0x34: facing entries (4 bytes each from 0x38; fn_802D6594 swaps them)
-    f32 off0;      // offset 0x38
-    f32 off1;      // offset 0x3C
-};
 
 // Two-bone weighted vertex.
 struct SkinVtx {
