@@ -830,17 +830,7 @@ int fn_80247AD0(void) {
 }  // extern "C"
 
 // A list header over inline storage; its destructor (and its base's) clears the header.
-template <class T>
-struct VecRef {
-    ~VecRef(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
+#include "game/vecref.h"
 
 /* Class name unproven */
 template <class T, int N>

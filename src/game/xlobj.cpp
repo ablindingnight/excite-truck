@@ -136,38 +136,7 @@ struct XSeg {
 
 #include "game/scopetimer.h"
 
-template <class T>
-struct VecBase {
-    VecBase(void) {
-        data = 0;
-        cap = 0;
-        count = 0;
-    }
-    VecBase(T* d, int n) {
-        data = d;
-        cap = n;
-        count = 0;
-    }
-    ~VecBase(void) {
-        data = 0;
-        count = 0;
-        cap = 0;
-    }
-    T& Next(void) { return data[count++]; }
-    int Size(void) const { return count; }
-    int CanAdd(void) const { return count + 1 <= cap; }
-    int Find(const T& v) const {
-        for (int j = 0; j < count; j++) {
-            if (data[j] == v) {
-                return j;
-            }
-        }
-        return -1;
-    }
-    T* data;    // offset 0x0
-    s32 count;  // offset 0x4
-    s32 cap;    // offset 0x8
-};
+#include "game/vecbase.h"
 
 template <class T, int N>
 struct InlineVec : VecBase<T> {
