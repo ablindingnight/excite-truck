@@ -2954,7 +2954,9 @@ inline Pickup::Pickup(ValueNode* n) {
     tex.h = fn_802CAC28("trigglow.tex", 0);
     name = n->GetName();
     objs[0] = fn_801D4888(n->GetName());
-    kind = n->Has("type") ? n->GetEnum("type", "bank\0jump\0misc\0spin\0multi") : 2;
+    const char* types = "bank\0jump\0misc\0spin\0multi";
+    const char* key = "type";
+    kind = n->Has(key) ? n->GetEnum(key, types) : 2;
     big = n->GetBool("visible", 1);
     kind = 3;
     if (kind == 4) {
