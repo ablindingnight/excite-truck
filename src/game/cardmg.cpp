@@ -837,6 +837,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         }
         fn_8018E330(p);
     }
+    /* dead local kept like retail's stores; name/form unproven */
     DentVec bp;
     bp.x = 0.0f;
     bp.y = 0.0f;
