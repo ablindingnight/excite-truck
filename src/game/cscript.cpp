@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/camblend.h"
 #include "macros.h"
+#include "game/strcopy.h"
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -41,17 +42,6 @@ extern "C" {
 ScriptPlayer* fn_802678E4(int player);
 }
 
-static inline void StrCopyN(char* dst, const char* src, int len) {
-    char* d = dst;
-    int n = len;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 #define ROUND(x) ((x) < 0.0f ? (x) - 0.5f : (x) + 0.5f)
 
@@ -193,7 +183,7 @@ void fn_80278778(const char* name) {
         fn_802E30C8("script: can't make a movie while recording!");
         return;
     }
-    StrCopyN(lbl_804A15D0, name, sizeof(lbl_804A15D0));
+    SafeStrCopy(lbl_804A15D0, name, sizeof(lbl_804A15D0));
     lbl_8055F5B9 = 1;
     lbl_8055F5BA = 0;
 }
