@@ -16,12 +16,9 @@
 #include "game/shapes.h"
 #include "game/gamedb.h"
 #include <string.h>
+#include "game/mathutil.h"
 
 
-// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
-// Helpers unproven (names and existence): variable-first operands and one constant load per vector triple.
-static inline f32 CbMul(f32 a, f32 b) { return a * b; }
 template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; a->y = pos->y + vel->y * ka; a->z = pos->z + vel->z * ka; b->x = pos->x + vel->x * kb; b->y = pos->y + vel->y * kb; b->z = pos->z + vel->z * kb; }
 static inline f32 CbAdd(f32 a, f32 b) { return a + b; }
 static inline void CbScaleTo(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
@@ -307,8 +304,6 @@ u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 // TODO(unpool): pool labels still read by name. As literals these sites drop (x - 0.0f, x / 1.0f and
 // literal * literal fold away; creation order moves), so they need the original helper forms first.
 
-static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 FMin(f32 a, f32 b) { return a < b ? a : b; }
 
 extern "C" {
 
@@ -318,12 +313,12 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x1C) = v[1];
     F32(p, 0x18) = 1.3515152f * (v[5]);
     F32(p, 0x28) = v[3];
-    f32 hp = 1.3515152f * (5252.0f * v[0] / FMax(v[1], 0.00001f));
+    f32 hp = 1.3515152f * (5252.0f * v[0] / MaxF(v[1], 0.00001f));
     F32(p, 0x24) = 0.0f;
     f32 r0 = v[3];
-    f32 peak = CbMul(v[2], 1.3515152f);
+    f32 peak = Mul(v[2], 1.3515152f);
     f32 d = F32(p, 0x1C) - r0;
-    f32 a = (hp - peak) / FMax(d * d, 0.00001f);
+    f32 a = (hp - peak) / MaxF(d * d, 0.00001f);
     F32(p, 0x0) = a;
     F32(p, 0x8) = peak + a * (r0 * r0);
     f32 low = 1.3515152f * (0.3f * v[2]);
@@ -333,7 +328,7 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x20) = hp / 8000.0f;
     f32 red = v[4];
     d = red - top;
-    f32 b = (low - peak2) / FMax(d * d, 0.0001f);
+    f32 b = (low - peak2) / MaxF(d * d, 0.0001f);
     F32(p, 0xC) = b;
     F32(p, 0x14) = peak2 + b * (top * top);
     F32(p, 0x10) = F32(p, 0x18) + -2.0f * b * top;
@@ -351,7 +346,7 @@ void fn_801819A0(u8* p, const u8* cfg, f32 a, f32 b, f32 c) {
     v[5] = F32(cfg, 0x60);
     fn_8018185C(p, v);
 }
-static f32 SafeInv(f32 x) { return 1.0f / FMax(x, 0.01f); } /* Helper name unproven */
+static f32 SafeInv(f32 x) { return 1.0f / MaxF(x, 0.01f); } /* Helper name unproven */
 
 f32 fn_80181A14(u8* p) {
     CarBody* cb = (CarBody*)p;
@@ -751,7 +746,7 @@ void fn_80182DF4(u8* p) {
         }
         fn_801E323C(wheel);
     }
-    minY = FMax(minY, 0.2f);
+    minY = MaxF(minY, 0.2f);
     HVec c = *(HVec*)&cb->offset;
     minX += c.x;
     maxX += c.x;
@@ -1493,10 +1488,10 @@ void fn_80183E7C(u8* p) {
     } else {
         cb->f2598 = 0.0f;
     }
-    cb->f2650 = FMax(0.0f, cb->f2650 - 0.016683351f);
+    cb->f2650 = MaxF(0.0f, cb->f2650 - 0.016683351f);
     if (!NearZero(cb->f2650)) {
         if (cb->speed < 8.888889f) {
-            cb->f2650 = FMin(cb->f2650, 0.5f);
+            cb->f2650 = MinF(cb->f2650, 0.5f);
         }
         f32 roll;
         if (cb->airborne > 2 && (roll = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48)), (f32)__fabs(roll) < 2.0f)) {
@@ -1643,7 +1638,7 @@ void fn_80183E7C(u8* p) {
             lim = driveTune.v[4];
         }
         HVec dir = *(HVec*)(p + 0x118);
-        f32 inv = 1.0f / FMax(1.0f, PSVECMag((const Vec*)(p + 0x118)));
+        f32 inv = 1.0f / MaxF(1.0f, PSVECMag((const Vec*)(p + 0x118)));
         dir.x = dir.x * inv;
         dir.y = dir.y * inv;
         dir.z = dir.z * inv;
@@ -1658,7 +1653,7 @@ void fn_80183E7C(u8* p) {
         slope.x = ahead.x - behind.x;
         slope.y = ahead.y - behind.y;
         slope.z = ahead.z - behind.z;
-        inv = 1.0f / FMax(0.01f, PSVECMag((const Vec*)&slope));
+        inv = 1.0f / MaxF(0.01f, PSVECMag((const Vec*)&slope));
         slope.x = slope.x * inv;
         slope.y = slope.y * inv;
         slope.z = slope.z * inv;
@@ -1690,7 +1685,7 @@ void fn_80183E7C(u8* p) {
                     f32 boost = landingTune.v[0];
                     b2 = cb->f2618 * fn_80181A94();
                     b2 = cb->f2CC * fn_80181AC0() + b2;
-                    boost = FMin(b2, boost);
+                    boost = MinF(b2, boost);
                     cb->f258C = cb->setupA.f74 * boost;
                     fn_8014E61C(cb->index, 1, sink);
                     fn_80161A38(2, cb->index, 0);
@@ -1711,7 +1706,7 @@ void fn_80183E7C(u8* p) {
         f32 sink = -PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118));
         if (sink > 13.333333f &&
             (cb->mtx.pos.y - cb->wheels[3].plane.ground[1] - 4.0f * (0.016683351f * sink) < 0.0f || cb->airborne)) {
-            f32 k = FMax(sink - 13.333333f, 0.0f) * cb->mass / 0.016683351f;
+            f32 k = MaxF(sink - 13.333333f, 0.0f) * cb->mass / 0.016683351f;
             RVec3 f;
             f.x = cb->f25A4 * k;
             f.y = cb->f25A8 * k;
@@ -1726,9 +1721,9 @@ void fn_80183E7C(u8* p) {
         f32 lt = LerpT(t, 0.0f, 0.5f);
         f32 d;
         if (slide > 0.0f) {
-            d = FMax(slide - 2.2222223f, 0.0f);
+            d = MaxF(slide - 2.2222223f, 0.0f);
         } else {
-            d = FMin(2.2222223f + slide, 0.0f);
+            d = MinF(2.2222223f + slide, 0.0f);
         }
         f32 k = lt * d * cb->mass / 0.016683351f;
         RVec3 f;
@@ -1743,12 +1738,12 @@ void fn_80183E7C(u8* p) {
     }
     if (NearZero(cb->f2690) && cb->f2618 > 0.15f &&
         NearZero(cb->f2650)) {
-        f32 stall = FMin(1.0f, 10.0f * cb->f264C);
+        f32 stall = MinF(1.0f, 10.0f * cb->f264C);
         f32 pitch = cb->f2600 + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = 0.0f;
         f32 roll = cb->f2604;
-        f32 m = FMax(1.0f, PSVECMag((const Vec*)&fl));
+        f32 m = MaxF(1.0f, PSVECMag((const Vec*)&fl));
         f32 inv = 1.0f / m;
         fl.x = fl.x * inv;
         fl.y = fl.y * inv;
@@ -1810,16 +1805,16 @@ void fn_80183E7C(u8* p) {
             KickUp(p, 10.0f * cb->mass);
         }
         f32 top = 0.44444445f * fn_80181A48(p);
-        cb->f261C = FMin(cb->f261C, 0.9f * top);
+        cb->f261C = MinF(cb->f261C, 0.9f * top);
         f32 flat = sqrt(cb->vel.x * cb->vel.x + cb->vel.z * cb->vel.z);
         int nosedive = 0;
         f32 dive = -cb->f2600;
         if (lbl_8055A3AC && U32(p, 0x10) == 'PCAR' && dive > 0.0f && dive > 0.9f) {
-            cb->f264C = FMin(0.016683351f + stalled, 1.0f);
+            cb->f264C = MinF(0.016683351f + stalled, 1.0f);
             nosedive = 1;
             dive = LerpT(Ramp(cb->f264C, 0.5f, 1.0f), 0.9f, -0.5f);
         }
-        f32 lean = FMin(1.0f, 6.0f * dive);
+        f32 lean = MinF(1.0f, 6.0f * dive);
         lean = lean > -1.0f ? lean : -1.0f;
         if (cb->f2618 > 1.0f) {
             CbLeanEvent ev;
@@ -1834,12 +1829,12 @@ void fn_80183E7C(u8* p) {
             target = LerpT(t, cb->f261C, 0.9f * cb->f261C);
             airLift = airLift + lbl_8055A3B0 * -lean;
         } else {
-            target = LerpT(Ramp(lean, 0.0f, 0.35f), cb->f261C, FMin(1.1f * cb->f261C, top));
+            target = LerpT(Ramp(lean, 0.0f, 0.35f), cb->f261C, MinF(1.1f * cb->f261C, top));
         }
         f32 want = target - 8.888889f * cb->f25E4;
         HVec dir = *(HVec*)(p + 0x118);
         dir.y = 0.0f;
-        f32 m = FMax(0.01f, PSVECMag((const Vec*)&dir));
+        f32 m = MaxF(0.01f, PSVECMag((const Vec*)&dir));
         f32 one = 1.0f;
         f32 inv = one / m;
         dir.x = dir.x * inv;
@@ -1858,8 +1853,8 @@ void fn_80183E7C(u8* p) {
     if (U32(p, 0x10) == 'PCAR') {
         f32 x = cb->mtx.pos.x;
         f32 z = cb->mtx.pos.z;
-        f32 floor = FMax(0.0f, fn_801DDC8C(p + 0x6C, cb->mtx.pos.x, cb->mtx.pos.z));
-        cb->f2688 = FMax(0.0f, cb->f2688 - 0.033366702f);
+        f32 floor = MaxF(0.0f, fn_801DDC8C(p + 0x6C, cb->mtx.pos.x, cb->mtx.pos.z));
+        cb->f2688 = MaxF(0.0f, cb->f2688 - 0.033366702f);
         int high = floor > 6.6666665f;
         if (high) {
             RVec3 f;
@@ -1892,12 +1887,12 @@ void fn_80183E7C(u8* p) {
         s32 id = cb->index;
         fn_801796CC(14, &id, 4);
     }
-    cb->f2588 = FMax(0.0f, cb->f2588 - 0.016683351f);
-    cb->f2590 = FMax(0.0f, cb->f2590 - 0.016683351f);
-    cb->f258C = FMax(-3.0f, cb->f258C - 0.016683351f);
+    cb->f2588 = MaxF(0.0f, cb->f2588 - 0.016683351f);
+    cb->f2590 = MaxF(0.0f, cb->f2590 - 0.016683351f);
+    cb->f258C = MaxF(-3.0f, cb->f258C - 0.016683351f);
     if (cb->f25BC > __float_epsilon[0]) {
-        cb->f258C = FMax(cb->f258C, cb->f25BC);
-        cb->f25BC = FMax(cb->f25BC - 0.016683351f, 0.0f);
+        cb->f258C = MaxF(cb->f258C, cb->f25BC);
+        cb->f25BC = MaxF(cb->f25BC - 0.016683351f, 0.0f);
         if (!fn_8014E708(cb->index)) {
             s32 id = cb->index;
             fn_801796CC(16, &id, 4);
@@ -1991,17 +1986,17 @@ void fn_80183E7C(u8* p) {
     } else {
         cool = heatTune.v[1];
     }
-    f32 heat = FMax(0.0f, cb->f25A0 - 0.016683351f * cool);
+    f32 heat = MaxF(0.0f, cb->f25A0 - 0.016683351f * cool);
     cb->f25A0 = heat;
     cb->f259C = 0;
     if (lbl_8055E4F4) {
         if (!NearZero(cb->f2690) && U32(p, 0x10) == 'PCAR') {
-            cb->f25A0 = FMin(cb->f25A0, heatTune.v[7]);
+            cb->f25A0 = MinF(cb->f25A0, heatTune.v[7]);
         }
         if (cb->f258C < 0.1f && cb->f260D && cb->f2618 < 0.2f &&
             cb->f25A0 < 1.001f && cb->f2588 < 0.001f &&
             NearZero(cb->f2690)) {
-            cb->f25A0 = FMin(1.0f, cb->f25A0 + 0.016683351f * (cb->setupA.f6C * (heatTune.v[3] * cb->f2D4)));
+            cb->f25A0 = MinF(1.0f, cb->f25A0 + 0.016683351f * (cb->setupA.f6C * (heatTune.v[3] * cb->f2D4)));
             cb->f259C = 1;
         }
         if (cb->airborne >= 3) {
@@ -2037,13 +2032,13 @@ void fn_80183E7C(u8* p) {
         loud = 1;
     }
     f32 want = loud ? 1.0f : 0.0f;
-    f32 dvc = FMax(FMin(0.033366702f, want - vol), -0.033366702f);
+    f32 dvc = MaxF(MinF(0.033366702f, want - vol), -0.033366702f);
     fn_801B8964(cb->index, vol + dvc);
     int trick = 0;
     if (NearZero(cb->f2690) && NearZero(cb->f2650)) {
         f32 yaw = 0.33333334f * (cb->f25D8 * (cb->f25F0 * cb->f5B0));
         f32 sp = PSVECMag((const Vec*)(p + 0x118));
-        f32 m = FMax(sp, 1.0f);
+        f32 m = MaxF(sp, 1.0f);
         RVec3 t;
         RVec3 dir;
         f32 inv = 1.0f / m;
@@ -2110,7 +2105,7 @@ void fn_80183E7C(u8* p) {
             f32 l = cb->f2628;
             f32 r = cb->f262C;
             f32 gap = AbsNarrow(l - r);
-            r = FMin(l, r);
+            r = MinF(l, r);
             int side = cb->f2628 > cb->f262C ? 1 : 2;
             if (gap < 0.6f && now - r < 1.0f && held &&
                 (cb->f263C == 0 || side == cb->f263C)) {
@@ -2152,7 +2147,7 @@ void fn_80183E7C(u8* p) {
         f32 sk = 1.0f + fs * -0.9f;
         f32 m2 = 30000.0f * (cb->f5E4 * cb->f5E4);
         f32 fa = Clamp01((cb->f2618 - 0.1f) / 0.20000002f);
-        f32 k = m2 * (1.0f + CbMul(fa, -0.8f)) * (yaw * sk - spin);
+        f32 k = m2 * (1.0f + Mul(fa, -0.8f)) * (yaw * sk - spin);
         t.x = cb->mtx.rot.y.x * k;
         t.y = cb->mtx.rot.y.y * k;
         t.z = cb->mtx.rot.y.z * k;
@@ -2405,7 +2400,7 @@ void fn_80186DE8(void) {
             }
             if (((CarBody*)car)->f258C > -2.0f || ((CarBody*)car)->f25E4 > 0.25f || ((CarBody*)car)->f5EC > 0.01f) {
                 f32 fwd = PSVECDotProduct((const Vec*)(car + 0x3C), (const Vec*)(car + 0x118));
-                f32 b = FMax(2.0f + ((CarBody*)car)->f258C, ((CarBody*)car)->f25E4);
+                f32 b = MaxF(2.0f + ((CarBody*)car)->f258C, ((CarBody*)car)->f25E4);
                 f32 k = 0.55181247f * (-fwd * ((CarBody*)car)->mass) * Clamp01(b);
                 AddScaled(force, car + 0x3C, k);
             }
@@ -2540,7 +2535,7 @@ void fn_80186DE8(void) {
             if (comp > 20000.0f) {
                 c->pts[5 + j] = CbSolVec4(0.0f, 0.0f, 0.0f);
                 CbVec4 half = CbVec4(c->v30);
-                half[j] = CbMul(half[j], 0.5f);
+                half[j] = Mul(half[j], 0.5f);
                 c->v30 = half.Sol();
             }
             fl = w->flags & 0xE;
@@ -2563,7 +2558,7 @@ void fn_80186DE8(void) {
         if (lim < ds) {
             ds = lim;
         }
-        ds = FMax(ds, -lim);
+        ds = MaxF(ds, -lim);
         ((CarBody*)car)->f25F0 = ((CarBody*)car)->f25F0 + ds;
         water = (f32*)(lbl_8055E918 + i * 0x9C);
         f32* ground = (f32*)(lbl_8055E908 + i * 0x34);
@@ -2575,7 +2570,7 @@ void fn_80186DE8(void) {
         if (((CarBody*)car)->f2588 > 0.001f) {
             U32(car, 0x268C) = 10;
             if (((CarBody*)car)->speed > 0.44444445f * heatTune.v[11]) {
-                ((CarBody*)car)->f25E4 = FMax(((CarBody*)car)->f25E4, heatTune.v[10]);
+                ((CarBody*)car)->f25E4 = MaxF(((CarBody*)car)->f25E4, heatTune.v[10]);
                 throttle = ((CarBody*)car)->f25E0 < heatTune.v[9] ? ((CarBody*)car)->f25E0 : heatTune.v[9];
             }
         } else if ((fn_801769CC()->type & 0x80000) && ((CarBody*)car)->f25A0 > 0.625f) {
@@ -2613,7 +2608,7 @@ void fn_80186DE8(void) {
                 if (cut < s) {
                     s = cut;
                 }
-                steerK = FMax(s, -1.0f);
+                steerK = MaxF(s, -1.0f);
             }
         }
         gas = throttle;
@@ -2622,7 +2617,7 @@ void fn_80186DE8(void) {
         }
         brake = ((CarBody*)car)->f25E8;
         f32 rpmT = rpm.x / 0.10471976f;
-        throttle = FMax(gas, 0.0016666667f * (1800.0f - rpmT));
+        throttle = MaxF(gas, 0.0016666667f * (1800.0f - rpmT));
         if (rpmT > ground[12]) {
             throttle = 0.0f;
         }
@@ -2696,8 +2691,8 @@ void fn_80186DE8(void) {
         if (bk2 > hb) {
             hb = bk2;
         }
-        c->v1A0 = CbSolVec4(FMax(0.0f, bk2), FMax(0.0f, bk2), FMax(0.0f, hb),
-                             FMax(0.0f, hb));
+        c->v1A0 = CbSolVec4(MaxF(0.0f, bk2), MaxF(0.0f, bk2), MaxF(0.0f, hb),
+                             MaxF(0.0f, hb));
         fn_8018CB3C(car);
         ((CbStepV*)((u8*&)((CarBody*)car)->src))->Step();
         ((CbTickV*)car)->Tick();
@@ -2707,9 +2702,6 @@ void fn_80186DE8(void) {
 
 
 
-static inline f32 SwayMin(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 SwayMax(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 SwayDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // o = a + b * k
 static inline void AddScaled(RVec3* o, const RVec3* a, const RVec3* b, f32 k) {
@@ -2721,16 +2713,16 @@ static inline void AddScaled(RVec3* o, const RVec3* a, const RVec3* b, f32 k) {
 // v times the body rotation (rows at 0x3C).
 static inline void SwayRotate(RVec3* out, const RVec3* v, const f32* m) {
     if (out == v) {
-        f32 x = SwayDot(v->x, m[0], v->y, m[1], v->z, m[2]);
-        f32 y = SwayDot(v->x, m[3], v->y, m[4], v->z, m[5]);
-        f32 z = SwayDot(v->x, m[6], v->y, m[7], v->z, m[8]);
+        f32 x = Dot3(v->x, m[0], v->y, m[1], v->z, m[2]);
+        f32 y = Dot3(v->x, m[3], v->y, m[4], v->z, m[5]);
+        f32 z = Dot3(v->x, m[6], v->y, m[7], v->z, m[8]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = SwayDot(v->x, m[0], v->y, m[1], v->z, m[2]);
-        out->y = SwayDot(v->x, m[3], v->y, m[4], v->z, m[5]);
-        out->z = SwayDot(v->x, m[6], v->y, m[7], v->z, m[8]);
+        out->x = Dot3(v->x, m[0], v->y, m[1], v->z, m[2]);
+        out->y = Dot3(v->x, m[3], v->y, m[4], v->z, m[5]);
+        out->z = Dot3(v->x, m[6], v->y, m[7], v->z, m[8]);
     }
 }
 
@@ -2756,7 +2748,7 @@ void CarBody::vf20(void) {
     if (F32(p, 0x269C) < 0.5f) {
         F32(p, 0x269C) += 0.016683351f;
     } else {
-        F32(p, 0x2694) = SwayMin(F32(p, 0x2690), 0.008341676f + F32(p, 0x2694));
+        F32(p, 0x2694) = MinF(F32(p, 0x2690), 0.008341676f + F32(p, 0x2694));
     }
     RVec3* vel = (RVec3*)(p + 0x2654);
     RVec3* ang = (RVec3*)(p + 0x2660);
@@ -2776,9 +2768,9 @@ void CarBody::vf20(void) {
     acc->y = 0.0f;
     if (ang->z < -0.04363323f) {
         ang->z = -0.04363323f;
-        vel->z = SwayMax(vel->z, 0.0f);
+        vel->z = MaxF(vel->z, 0.0f);
     }
-    ang->z = SwayMin(0.2617994f, ang->z);
+    ang->z = MinF(0.2617994f, ang->z);
 }
 
 extern "C" {
@@ -2848,7 +2840,7 @@ void CarBody::vf28(u8* buf) {
     ((CarDrawState*)m)->vel[2] = this->vel.z;
     ((CarDrawState*)m)->speed = this->speed;
     ((CarDrawState*)m)->overheat = this->f2588;
-    ((CarDrawState*)m)->damage[0] = this->f26E0 ? FMax(this->f2690, 0.01f) : this->f2690;
+    ((CarDrawState*)m)->damage[0] = this->f26E0 ? MaxF(this->f2690, 0.01f) : this->f2690;
     ((CarDrawState*)m)->damage[1] = this->f2694;
     ((CarDrawState*)m)->damage[2] = this->f2698;
     ((CarDrawState*)m)->f298 = this->a268C;
@@ -2893,7 +2885,7 @@ void CarBody::vf28(u8* buf) {
         ((CarDrawWheel*)o)->pos[0] = c.x;
         ((CarDrawWheel*)o)->pos[1] = c.y;
         ((CarDrawWheel*)o)->pos[2] = c.z;
-        sink = FMax(sink, c.y - ((CbWheel*)w)->v40);
+        sink = MaxF(sink, c.y - ((CbWheel*)w)->v40);
         ((CarDrawWheel*)o)->ground[0] = ((CbWheel*)w)->plane.ground[0];
         ((CarDrawWheel*)o)->ground[1] = ((CbWheel*)w)->plane.ground[1];
         ((CarDrawWheel*)o)->ground[2] = ((CbWheel*)w)->plane.ground[2];
@@ -2931,7 +2923,7 @@ void CarBody::vf28(u8* buf) {
         ((CarDrawState*)m)->pose.pos.v[1] = ((CarDrawState*)m)->pose.pos.v[1] + ((CarDrawState*)m)->pose.rot.m[4] * sink;
         ((CarDrawState*)m)->pose.pos.v[2] = ((CarDrawState*)m)->pose.pos.v[2] + ((CarDrawState*)m)->pose.rot.m[5] * sink;
         for (int i = 0; i < 4; i++) {
-            F32(wheels + i * 0x6C, 0x4) = FMax(F32(wheels + i * 0x6C, 0x4) - sink, -0.6096f);
+            F32(wheels + i * 0x6C, 0x4) = MaxF(F32(wheels + i * 0x6C, 0x4) - sink, -0.6096f);
         }
         u8* e = (u8*)&((CarDrawState*)m)->points;
         for (int i = 0; i < ((CarDrawState*)m)->nPoints; i++) {
@@ -2963,8 +2955,6 @@ struct HFrame {
     HVec pos;
 };
 
-static inline f32 HitDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-static inline f32 HitMin(f32 a, f32 b) { return a < b ? a : b; }
 
 void fn_8018E3EC(u8* p, const HVec* imp, const HVec* at, int a, s32 id, int kind, u8* other, int c);
 
@@ -2993,16 +2983,16 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
             f32 b = __fabs(PSVECDotProduct((const Vec*)&dir, (const Vec*)(other + 0x118)));
             f32 d = b - a;
             if (d > 6.6666665f && b > 1.5f * a) {
-                scale = HitMin(b / FMax(a, 0.001f), 5.0f);
+                scale = MinF(b / MaxF(a, 0.001f), 5.0f);
             } else if (d < -6.6666665f && a > 1.5f * b) {
-                scale = FMax(b / FMax(a, 0.001f), 0.2f);
+                scale = MaxF(b / MaxF(a, 0.001f), 0.2f);
                 HVec local;
                 local.x = at->x - cb->world.pos.x;
                 local.y = at->y - cb->world.pos.y;
                 local.z = at->z - cb->world.pos.z;
-                f32 x = HitDot(local.x, cb->world.rot.x.x, local.y, cb->world.rot.x.y, local.z, cb->world.rot.x.z);
-                f32 y = HitDot(local.x, cb->world.rot.y.x, local.y, cb->world.rot.y.y, local.z, cb->world.rot.y.z);
-                f32 z = HitDot(local.x, cb->world.rot.z.x, local.y, cb->world.rot.z.y, local.z, cb->world.rot.z.z);
+                f32 x = Dot3(local.x, cb->world.rot.x.x, local.y, cb->world.rot.x.y, local.z, cb->world.rot.x.z);
+                f32 y = Dot3(local.x, cb->world.rot.y.x, local.y, cb->world.rot.y.y, local.z, cb->world.rot.y.z);
+                f32 z = Dot3(local.x, cb->world.rot.z.x, local.y, cb->world.rot.z.y, local.z, cb->world.rot.z.z);
                 local.x = x;
                 local.y = y;
                 local.z = z;
@@ -3039,16 +3029,16 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
         const HVec* com = (const HVec*)&cb->offset;
         HFrame fr(*rot);
         if (&fr.pos == com) {
-            f32 x = HitDot(com->x, rot->rows0.x, com->y, rot->rows1.x, com->z, rot->rows2.x);
-            f32 y = HitDot(com->x, rot->rows0.y, com->y, rot->rows1.y, com->z, rot->rows2.y);
-            f32 z = HitDot(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
+            f32 x = Dot3(com->x, rot->rows0.x, com->y, rot->rows1.x, com->z, rot->rows2.x);
+            f32 y = Dot3(com->x, rot->rows0.y, com->y, rot->rows1.y, com->z, rot->rows2.y);
+            f32 z = Dot3(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
             fr.pos.x = x;
             fr.pos.y = y;
             fr.pos.z = z;
         } else {
-            fr.pos.x = HitDot(com->x, rot->rows0.x, com->y, rot->rows1.x, com->z, rot->rows2.x);
-            fr.pos.y = HitDot(com->x, rot->rows0.y, com->y, rot->rows1.y, com->z, rot->rows2.y);
-            fr.pos.z = HitDot(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
+            fr.pos.x = Dot3(com->x, rot->rows0.x, com->y, rot->rows1.x, com->z, rot->rows2.x);
+            fr.pos.y = Dot3(com->x, rot->rows0.y, com->y, rot->rows1.y, com->z, rot->rows2.y);
+            fr.pos.z = Dot3(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
         }
         fr.pos.x = fr.pos.x + org->x;
         f32 yv = fr.pos.y;
@@ -3061,22 +3051,22 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
         f32 dy = y2 - fr.pos.y;
         f32 dz = at->z - fr.pos.z;
         HVec lp;
-        f32 lp_y = HitDot(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
-        lp.x = HitDot(dx, fr.rot.rows0.x, dy, fr.rot.rows0.y, dz, fr.rot.rows0.z);
+        f32 lp_y = Dot3(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
+        lp.x = Dot3(dx, fr.rot.rows0.x, dy, fr.rot.rows0.y, dz, fr.rot.rows0.z);
         lp.y = lp_y;
-        lp.z = HitDot(dx, fr.rot.rows2.x, dy, fr.rot.rows2.y, dz, fr.rot.rows2.z);
+        lp.z = Dot3(dx, fr.rot.rows2.x, dy, fr.rot.rows2.y, dz, fr.rot.rows2.z);
         HVec li;
         if (&li == &hit) {
-            f32 x = HitDot(hit.x, fr.rot.rows0.x, hit.y, fr.rot.rows0.y, hit.z, fr.rot.rows0.z);
-            f32 y = HitDot(hit.x, fr.rot.rows1.x, hit.y, fr.rot.rows1.y, hit.z, fr.rot.rows1.z);
-            f32 z = HitDot(hit.x, fr.rot.rows2.x, hit.y, fr.rot.rows2.y, hit.z, fr.rot.rows2.z);
+            f32 x = Dot3(hit.x, fr.rot.rows0.x, hit.y, fr.rot.rows0.y, hit.z, fr.rot.rows0.z);
+            f32 y = Dot3(hit.x, fr.rot.rows1.x, hit.y, fr.rot.rows1.y, hit.z, fr.rot.rows1.z);
+            f32 z = Dot3(hit.x, fr.rot.rows2.x, hit.y, fr.rot.rows2.y, hit.z, fr.rot.rows2.z);
             li.x = x;
             li.y = y;
             li.z = z;
         } else {
-            li.x = HitDot(hit.x, fr.rot.rows0.x, hit.y, fr.rot.rows0.y, hit.z, fr.rot.rows0.z);
-            li.y = HitDot(hit.x, fr.rot.rows1.x, hit.y, fr.rot.rows1.y, hit.z, fr.rot.rows1.z);
-            li.z = HitDot(hit.x, fr.rot.rows2.x, hit.y, fr.rot.rows2.y, hit.z, fr.rot.rows2.z);
+            li.x = Dot3(hit.x, fr.rot.rows0.x, hit.y, fr.rot.rows0.y, hit.z, fr.rot.rows0.z);
+            li.y = Dot3(hit.x, fr.rot.rows1.x, hit.y, fr.rot.rows1.y, hit.z, fr.rot.rows1.z);
+            li.z = Dot3(hit.x, fr.rot.rows2.x, hit.y, fr.rot.rows2.y, hit.z, fr.rot.rows2.z);
         }
         fn_8018E3EC(p, &li, &lp, 0, otherId, kind, other, c);
     }
@@ -3139,20 +3129,19 @@ static inline CbShape* ShapeAt(u8* p, int i) {
 
 // A 3x4 frame: rotation rows, then the position.
 
-static inline f32 PlaceDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void PlaceRotate(RVec3* out, const RVec3* v, const RMtx* m) {
     if (out == v) {
-        f32 x = PlaceDot(v->x, m->rot.x.x, v->y, m->rot.y.x, v->z, m->rot.z.x);
-        f32 y = PlaceDot(v->x, m->rot.x.y, v->y, m->rot.y.y, v->z, m->rot.z.y);
-        f32 z = PlaceDot(v->x, m->rot.x.z, v->y, m->rot.y.z, v->z, m->rot.z.z);
+        f32 x = Dot3(v->x, m->rot.x.x, v->y, m->rot.y.x, v->z, m->rot.z.x);
+        f32 y = Dot3(v->x, m->rot.x.y, v->y, m->rot.y.y, v->z, m->rot.z.y);
+        f32 z = Dot3(v->x, m->rot.x.z, v->y, m->rot.y.z, v->z, m->rot.z.z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = PlaceDot(v->x, m->rot.x.x, v->y, m->rot.y.x, v->z, m->rot.z.x);
-        out->y = PlaceDot(v->x, m->rot.x.y, v->y, m->rot.y.y, v->z, m->rot.z.y);
-        out->z = PlaceDot(v->x, m->rot.x.z, v->y, m->rot.y.z, v->z, m->rot.z.z);
+        out->x = Dot3(v->x, m->rot.x.x, v->y, m->rot.y.x, v->z, m->rot.z.x);
+        out->y = Dot3(v->x, m->rot.x.y, v->y, m->rot.y.y, v->z, m->rot.z.y);
+        out->z = Dot3(v->x, m->rot.x.z, v->y, m->rot.y.z, v->z, m->rot.z.z);
     }
 }
 
@@ -3472,16 +3461,15 @@ void fn_8018A8A8(u8* p) {
 void fn_801C2BDC(u8* sim, s32* n, RVec3** pos, RVec3** old);
 void fn_801BEB30(s32 car, u8** out);
 
-static inline f32 FlagDot(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // v in the body frame (rotation rows at 0x70, position at 0x94), in place.
 static inline void ToBody(u8* p, RVec3* o, const RVec3* v) {
     o->x = v->x - F32(p, 0x94);
     o->y = v->y - F32(p, 0x98);
     o->z = v->z - F32(p, 0x9C);
-    f32 x = FlagDot(o->x, F32(p, 0x70), o->y, F32(p, 0x74), o->z, F32(p, 0x78));
-    f32 y = FlagDot(o->x, F32(p, 0x7C), o->y, F32(p, 0x80), o->z, F32(p, 0x84));
-    f32 z = FlagDot(o->x, F32(p, 0x88), o->y, F32(p, 0x8C), o->z, F32(p, 0x90));
+    f32 x = Dot3(o->x, F32(p, 0x70), o->y, F32(p, 0x74), o->z, F32(p, 0x78));
+    f32 y = Dot3(o->x, F32(p, 0x7C), o->y, F32(p, 0x80), o->z, F32(p, 0x84));
+    f32 z = Dot3(o->x, F32(p, 0x88), o->y, F32(p, 0x8C), o->z, F32(p, 0x90));
     o->x = x;
     o->y = y;
     o->z = z;
@@ -3784,10 +3772,7 @@ static inline f32 PackClamp01(f32 x) {
     x = 1.0f < x ? 1.0f : x;
     return x > 0.0f ? x : 0.0f;
 }
-static inline f32 PackMin(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 PackMax(f32 a, f32 b) { return a > b ? a : b; }
 
-static inline f32 PackLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // The car's track position tracker (car + 0x270).
 class CarTrackPos {
@@ -3801,7 +3786,7 @@ public:
 
 // Quantises x from [lo, hi] to 0..range (rounded).
 static inline int Pack(f32 x, f32 lo, f32 hi, f32 range) {
-    return (int)(0.5f + PackLerp(0.0f, range, PackMax(PackMin(1.0f, (x - lo) / (hi - lo)), 0.0f)));
+    return (int)(0.5f + Lerp(0.0f, range, MaxF(MinF(1.0f, (x - lo) / (hi - lo)), 0.0f)));
 }
 
 extern "C" {
@@ -3819,7 +3804,7 @@ s32 CarBody::vf34(RPacket* pk_) {
     const int control = Pack(this->f25E4, 0.0f, 1.0f, 255.0f);
     U8(((u8*)pk_), 0x24) = control;
     f32 k = 1.0f;
-    const int variation = (int)(0.5f + PackLerp(0.0f, 255.0f, k));
+    const int variation = (int)(0.5f + Lerp(0.0f, 255.0f, k));
     U8(((u8*)pk_), 0x3C) = variation;
     u8* seg = ((CarTrackPos*)((u8*&)this->src))->Segment();
     S32(((u8*)pk_), 0x40) = fn_801363A0(seg, seg + 4);
