@@ -460,13 +460,9 @@ void CarUIModel::DrawEfx(void) {
         const CarUIFrame* cam = fn_802C86DC();
         Vec p = cam->b.v[0];
         Vec* a = (Vec*)&bones[facingPos];
-        a->x = p.x;
-        a->y = p.y;
-        a->z = p.z;
+        *a = p;
         Vec* b = (Vec*)&bones[facingNeg];
-        b->x = p.x * -1.0f;
-        b->y = p.y * -1.0f;
-        b->z = p.z * -1.0f;
+        Scale(b, &p, -1.0f);
         s32* bs = boneset;
         if (bs) {
             const f32 wheelHeight = wheelY[0];
