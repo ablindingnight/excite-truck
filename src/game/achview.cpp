@@ -603,6 +603,14 @@ int fn_8025978C(u8* p) {
 
 }  // extern "C"
 
+// A category index handed over by value, and the test "is there a category left to tally".
+/* Helper names unproven, and so is what the original tested (see the note in the tally run below). */
+struct CategoryIndex {
+    int i;
+    CategoryIndex(int n) : i(n) {}
+};
+static inline bool CategoryLeft(CategoryIndex c) { return c.i != 7; }
+
 extern "C" {
 void fn_80259148(void);
 void fn_802591D8(void);
@@ -617,12 +625,21 @@ void fn_8025A204(void) {
     lbl_80498EAC[1] = -1.0f;
     lbl_80498EAC[2] = 0.0f;
     lbl_8055F398 = 0.31415927f;
-    for (int i = 0; i < 7; i++) {
-        AchView v(i, lbl_80344EA0[i].category, lbl_80344EA0[i].category == 0 ? 500.0f : 12.0f);
-        v.counting = 1;
-        if (v.q.best != v.q.value) {
-            lbl_8055F394->PlaySound("achieve_enter");
-            fn_8025978C((u8*)&v);
+    int i = 0;
+    /* Form unproven; the mechanism is compiler-verified (FACTS 2026-11-17). Between `i = 0` and the loop retail
+       compared a constant that the front end could not see through (a value that went through memory: an object
+       passed by value, or a local array) for equality. The back end folds such a compare only after its first
+       scheduling pass, so the statements up to `i = 0` are scheduled apart from the loop setup, which is what puts
+       retail's `li r26,0` ahead of the table address. Exact with this test, 6 rows without. What the original
+       tested there is unknown; this stands in for it. */
+    if (CategoryLeft(CategoryIndex(i))) {
+        for (; i < 7; i++) {
+            AchView v(i, lbl_80344EA0[i].category, lbl_80344EA0[i].category == 0 ? 500.0f : 12.0f);
+            v.counting = 1;
+            if (v.q.best != v.q.value) {
+                lbl_8055F394->PlaySound("achieve_enter");
+                fn_8025978C((u8*)&v);
+            }
         }
     }
     fn_802591D8();
