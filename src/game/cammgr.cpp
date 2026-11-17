@@ -370,7 +370,7 @@ extern const f32 lbl_80563CB8;  // wave weight
 static inline void ShakeRot(ShakeMat* r, const RVec3& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > lbl_80563C40) {
-        f32 x, s, y, z, c, k;
+        f32 y, z, s, x, c, k;
         f32 inv = lbl_80563C2C.value / a;
         x = inv * w.x;
         y = inv * w.y;
@@ -378,12 +378,12 @@ static inline void ShakeRot(ShakeMat* r, const RVec3& w) {
         s = (f32)sin(a);
         c = (f32)cos(a);
         k = lbl_80563C2C.value - c;
-        r->m[0][0] = c + k * (x * x);
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
         r->m[1][0] = y * (k * x) - s * z;
         r->m[1][1] = c + k * (y * y);
         r->m[2][0] = z * (k * x) + s * y;
+        r->m[0][0] = c + k * (x * x);
         r->m[1][2] = z * (k * y) + s * x;
         r->m[2][2] = c + k * (z * z);
         r->m[2][1] = z * (k * y) - s * x;
