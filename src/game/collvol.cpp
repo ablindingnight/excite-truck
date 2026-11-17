@@ -160,17 +160,15 @@ static inline void AxisAngle(RVec3* m, const RVec3* v) {
         s = sin(a);
         c = cos(a);
         f32 t = 1.0f - c;
-        f32 tx = t * x;
-        f32 ty = t * y;
-        m[0].x = c + t * (x * x);
-        m[1].x = y * tx - s * z;
-        m[0].y = y * tx + s * z;
-        m[0].z = z * tx - s * y;
-        m[2].x = z * tx + s * y;
+        m[0].y = y * (t * x) + s * z;
+        m[0].z = z * (t * x) - s * y;
+        m[1].x = y * (t * x) - s * z;
         m[1].y = c + t * (y * y);
-        m[1].z = z * ty + s * x;
-        m[2].y = z * ty - s * x;
+        m[2].x = z * (t * x) + s * y;
+        m[0].x = c + t * (x * x);
+        m[1].z = z * (t * y) + s * x;
         m[2].z = c + t * (z * z);
+        m[2].y = z * (t * y) - s * x;
     } else {
         m[0].x = 1.0f;
         m[0].y = 0.0f;
