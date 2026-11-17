@@ -250,8 +250,8 @@ struct HelpPage {
 
 // A token to collect: a point (coin) or a line to cross.
 // EVec3: rvec.h's RVec3.
-struct Token {
-    Token(void) {}
+struct TutorialToken {
+    TutorialToken(void) {}
     ValVec3 pos;      // offset 0x0
     RVec3 ends[2];  // offset 0xC
     TVec2 mid;      // offset 0x24
@@ -395,7 +395,7 @@ public:
         Collect();
     }
     void StartTokens(int& i) {
-        Token* t;
+        TutorialToken* t;
         int j;
         got = 0;
         time = 0.0f;
@@ -510,7 +510,7 @@ public:
     u32 color;       // offset 0xD4
     u8 pillars;      // offset 0xD8
     GameSound* snd;      // offset 0xDC
-    FixedArr<Token, 16> tokens;  // offset 0xE0
+    FixedArr<TutorialToken, 16> tokens;  // offset 0xE0
 };
 
 // A stunt challenge: also do the listed stunts (only stunts: the stunts alone pass it).
@@ -1142,7 +1142,7 @@ inline void Challenge::Collect(void) {
     if (!IsDone()) {
         int i;
         TCar* car;
-        Token* t;
+        TutorialToken* t;
         int j;
         for (i = 0; i < fn_801B2F24(); i++) {
             car = lbl_804348E8[i];
@@ -1246,7 +1246,7 @@ inline void Challenge::Init(void) {
         n = node;
         tokens.count = 0;
         if (n && HasNode(n, "end")) {
-            Token* t = &tokens.data[tokens.count++];
+            TutorialToken* t = &tokens.data[tokens.count++];
             TPath* p;
             int i;
             t->path = p = fn_801399FC(n->FindChild("end"));
@@ -1351,7 +1351,7 @@ inline void Challenge::Draw3D(void) {
     if (model != -1) {
         int i;
         for (i = 0; i < tokens.count; i++) {
-            Token* t = &tokens.data[i];
+            TutorialToken* t = &tokens.data[i];
             if (t->active && t->path && pillars) {
                 fn_802A96E8(t->ends, 2, color, tex, 0);
             }
