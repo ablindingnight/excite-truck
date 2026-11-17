@@ -199,11 +199,9 @@ int fn_8026A698(u8* p, int i) {
         d.Set(at.x - s->pos.x, at.y - s->pos.y, at.z - s->pos.z);
         f32 xv = s->vel.x;
         f32 blend = 0.2f;
-        s->vel.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
-        v = s->vel;
-        s->pos.x += v.x * 1.0f;
-        s->pos.y += v.y * 1.0f;
-        s->pos.z += v.z * 1.0f;
+        v.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
+        s->vel = v;
+        TAddSTo(&s->pos, &v, 1.0f);
     }
     PlainValMatrix f;
     f.origin = s->pos;
