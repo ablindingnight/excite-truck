@@ -23,16 +23,8 @@ void fn_801E9E30(s16* h, f32* pos);
 void* operator new(size_t size, const char* tag);
 
 
-struct BoundPt {
-    f32 x;
-    f32 z;
-};
+#include "game/bound.h"
 
-struct Bound {
-    s32 n;           // offset 0x0
-    s32 cap;         // offset 0x4
-    BoundPt pts[1];  // offset 0x8
-};
 
 struct RaceCarRec;
 
@@ -191,11 +183,11 @@ inline void ActZone::Load(ValueNode* n) {
     {
         V2 e;
         e.x = b->pts[0].x - b->pts[2].x;
-        e.y = b->pts[0].z - b->pts[2].z;
+        e.y = b->pts[0].y - b->pts[2].y;
         best = e.x * e.x + e.y * e.y;
     }
     d.x = b->pts[0].x - b->pts[1].x;
-    d.y = b->pts[0].z - b->pts[1].z;
+    d.y = b->pts[0].y - b->pts[1].y;
     {
         f32 len = d.x * d.x + d.y * d.y;
         if (len > best) {
@@ -203,7 +195,7 @@ inline void ActZone::Load(ValueNode* n) {
             start = 0;
         }
     }
-    d.y = b->pts[1].z - b->pts[2].z;
+    d.y = b->pts[1].y - b->pts[2].y;
     f32 dx = b->pts[1].x - b->pts[2].x;
     d.x = dx;
     if (d.x * d.x + d.y * d.y > best) {
@@ -215,7 +207,7 @@ inline void ActZone::Load(ValueNode* n) {
         BoundPt* q = &bound->pts[(start + k) % 3];
         p[0] = q->x;
         p[1] = 0.0f;
-        p[2] = q->z;
+        p[2] = q->y;
         fn_801E9E30(h, p);
         p += 3;
     }

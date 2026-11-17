@@ -36,13 +36,8 @@ void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
 void* operator new(size_t size, const char* tag);
 
 
-typedef V2 BoundPt;
 
-struct Bound {
-    s32 n;           // offset 0x0
-    s32 cap;         // offset 0x4
-    BoundPt pts[1];  // offset 0x8
-};
+#include "game/bound.h"
 
 // Camera: common.h's PlainValMatrix.
 extern "C" {

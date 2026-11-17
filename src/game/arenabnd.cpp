@@ -46,16 +46,8 @@ public:
     T storage[N];
 };
 
-struct BoundPt {
-    f32 x;
-    f32 y;
-};
+#include "game/bound.h"
 
-struct Bound {
-    s32 n;           // offset 0x0
-    s32 cap;         // offset 0x4
-    BoundPt pts[1];  // offset 0x8
-};
 
 extern "C" Bound* fn_801399FC(ValueNode* n);
 

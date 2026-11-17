@@ -35,11 +35,7 @@ public:
 };
 
 
-struct Bound {
-    s32 n;      // offset 0x0
-    s32 cap;    // offset 0x4
-    V2 pts[1];  // offset 0x8
-};
+#include "game/bound.h"
 
 // One grid vertex of a boost area.
 struct BoostVtx {
