@@ -1619,9 +1619,7 @@ void fn_80183E7C(u8* p) {
             lim = driveTune.v[4];
         }
         HVec dir = *(HVec*)(p + 0x118);
-        f32 sp = PSVECMag((const Vec*)(p + 0x118));
-        sp = sp > 1.0f ? sp : 1.0f;
-        f32 inv = 1.0f / sp;
+        f32 inv = 1.0f / FMax(1.0f, PSVECMag((const Vec*)(p + 0x118)));
         dir.x = dir.x * inv;
         dir.y = dir.y * inv;
         dir.z = dir.z * inv;
@@ -1635,9 +1633,7 @@ void fn_80183E7C(u8* p) {
         slope.x = ahead.x - behind.x;
         slope.y = ahead.y - behind.y;
         slope.z = ahead.z - behind.z;
-        f32 sl = PSVECMag((const Vec*)&slope);
-        sl = sl > 0.01f ? sl : 0.01f;
-        inv = 1.0f / sl;
+        inv = 1.0f / FMax(0.01f, PSVECMag((const Vec*)&slope));
         slope.x = slope.x * inv;
         slope.y = slope.y * inv;
         slope.z = slope.z * inv;
@@ -1669,7 +1665,7 @@ void fn_80183E7C(u8* p) {
                     f32 boost = landingTune.v[0];
                     b2 = cb->f2618 * fn_80181A94();
                     b2 = cb->f2CC * fn_80181AC0() + b2;
-                    boost = boost < b2 ? boost : b2;
+                    boost = FMin(b2, boost);
                     cb->f258C = cb->setupA.f74 * boost;
                     fn_8014E61C(cb->index, 1, sink);
                     fn_80161A38(2, cb->index, 0);
@@ -1721,14 +1717,12 @@ void fn_80183E7C(u8* p) {
     }
     if (NearZero(cb->f2690) && cb->f2618 > 0.15f &&
         NearZero(cb->f2650)) {
-        f32 stall = 10.0f * cb->f264C;
-        stall = stall < 1.0f ? stall : 1.0f;
+        f32 stall = FMin(1.0f, 10.0f * cb->f264C);
         f32 pitch = cb->f2600 + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = 0.0f;
         f32 roll = cb->f2604;
-        f32 m = PSVECMag((const Vec*)&fl);
-        m = m > 1.0f ? m : 1.0f;
+        f32 m = FMax(1.0f, PSVECMag((const Vec*)&fl));
         f32 inv = 1.0f / m;
         fl.x = fl.x * inv;
         fl.y = fl.y * inv;
@@ -1801,8 +1795,7 @@ void fn_80183E7C(u8* p) {
             nosedive = 1;
             dive = LerpT(Ramp(cb->f264C, 0.5f, 1.0f), 0.9f, -0.5f);
         }
-        f32 lean = 6.0f * dive;
-        lean = lean < 1.0f ? lean : 1.0f;
+        f32 lean = FMin(1.0f, 6.0f * dive);
         lean = lean > -1.0f ? lean : -1.0f;
         if (cb->f2618 > 1.0f) {
             CbLeanEvent ev;
@@ -1822,8 +1815,7 @@ void fn_80183E7C(u8* p) {
         f32 want = target - 8.888889f * cb->f25E4;
         HVec dir = *(HVec*)(p + 0x118);
         dir.y = 0.0f;
-        f32 m = PSVECMag((const Vec*)&dir);
-        m = m > 0.01f ? m : 0.01f;
+        f32 m = FMax(0.01f, PSVECMag((const Vec*)&dir));
         f32 one = 1.0f;
         f32 inv = one / m;
         dir.x = dir.x * inv;
@@ -1881,7 +1873,7 @@ void fn_80183E7C(u8* p) {
     cb->f258C = FMax(-3.0f, cb->f258C - 0.016683351f);
     if (cb->f25BC > __float_epsilon[0]) {
         cb->f258C = FMax(cb->f258C, cb->f25BC);
-        cb->f25BC = FMax(0.0f, cb->f25BC - 0.016683351f);
+        cb->f25BC = FMax(cb->f25BC - 0.016683351f, 0.0f);
         if (!fn_8014E708(cb->index)) {
             s32 id = cb->index;
             fn_801796CC(16, &id, 4);
@@ -2027,8 +2019,7 @@ void fn_80183E7C(u8* p) {
     if (NearZero(cb->f2690) && NearZero(cb->f2650)) {
         f32 yaw = 0.33333334f * cb->f25D8 * cb->f25F0 * cb->f5B0;
         f32 sp = PSVECMag((const Vec*)(p + 0x118));
-        f32 m = 1.0f;
-        m = m > sp ? m : sp;
+        f32 m = FMax(sp, 1.0f);
         RVec3 dir;
         f32 inv = 1.0f / m;
         dir.x = cb->vel.x * inv;
