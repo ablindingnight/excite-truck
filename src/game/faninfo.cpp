@@ -2,6 +2,7 @@
 // dominant material, the materials present and a height), loaded from faninfo.fnf or computed from the
 // layer weights and terrain heights. Names are guesses apart from the file name and messages.
 #include "game/common.h"
+#include "game/ptrint.h"
 
 // World scale 2.0: a named object (first in .sdata2), read by reference so it does not fold.
 extern const f32 lbl_80564D50;
@@ -29,7 +30,7 @@ struct FanData {
         bits = 0;
     }
 
-    u32 a;     // offset 0x0
+    PtrInt a;  // offset 0x0 (the default cell points it at lbl_8055FAC8)
     u32 b;     // offset 0x4
     u32 bits;  // offset 0x8
 };
@@ -143,7 +144,7 @@ void fn_802BE7F4(void) {}
 
 /* Helper name unproven: resets the cell used outside the map. */
 static inline void InitDefault(FanCell* def) {
-    def->a = (u32)&lbl_8055FAC8;
+    def->a = (PtrInt)&lbl_8055FAC8;
     def->b = 0;
     def->bits = 0x200;
     def->bits |= 0x84;
