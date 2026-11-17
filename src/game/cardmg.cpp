@@ -639,50 +639,7 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
 
 }  // extern "C"
 
-// The running game mode (only the slot used here is named).
-class GameMode {
-public:
-    virtual ~GameMode(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
-    virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
-    virtual void v4C(void);
-    virtual void v50(void);
-    virtual void v54(void);
-    virtual void v58(void);
-    virtual void v5C(void);
-    virtual void v60(void);
-    virtual void v64(void);
-    virtual void v68(void);
-    virtual void v6C(void);
-    virtual void v70(void);
-    virtual void v74(void);
-    virtual void v78(void);
-    virtual void v7C(void);
-    virtual void v80(void);
-    virtual void v84(void);
-    virtual void v88(void);
-    virtual void v8C(void);
-    virtual void v90(void);
-    virtual void v94(void);
-    virtual void v98(void);
-    virtual void v9C(void);
-    virtual void vA0(void);
-    virtual void ResetCar(u8* car);  // 0xA4
-};
+#include "game/gamemode.h"
 
 class DmgModel {
 public:
@@ -708,7 +665,7 @@ void fn_801DFF1C(u8* car);
 extern f32 lbl_8055E3C8;
 
 void fn_8018E330(u8* p) {
-    fn_801B83A0()->ResetCar(p);
+    static_cast<GameUI*>(fn_801B83A0())->vfA4((RaceCarRec*)p);  // reset the car, through the mode interface (retail emits no GameMode inline here)
     fn_80161A38(0, ((u8*&)((CarBody*)p)->index), 0);
     fn_801DFF1C(((u8*&)((CarBody*)p)->index));
     f32 zero = 0.0f;
