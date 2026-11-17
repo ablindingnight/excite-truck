@@ -13,6 +13,7 @@
 #include "game/shapes.h"
 #include "game/springcar.h"
 #include <string.h>
+#include "game/byteswap.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -213,25 +214,6 @@ struct SphGroup {
 };
 extern s32 lbl_8055E3C4;
 extern "C" void fn_801A2674(u8* p, f32 r, u32 a, u32 b);
-
-static inline void Swap32(u8* b) {
-    u8 t;
-    t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
-static inline void SwapN(u8* p, int n) {
-    int i;
-    for (i = 0; i < n / 2; i++) {
-        u8 t = p[i];
-        p[i] = p[n - 1 - i];
-        p[n - 1 - i] = t;
-    }
-}
 
 // A collision shape (CollShape family: destructor at 0x08, vf20 friction, Radius 0x3C).
 class VEx {
@@ -2114,11 +2096,11 @@ void CollShape::vf34(RMtx* p_v) {
 CollShape::CollShape(u32 a, u32 swap) {
     u8* p = (u8*)this;
     if (swap) {
-        Swap32(p + 0x18);
-        Swap32(p + 0x10);
-        Swap32(p + 0x14);
-        Swap32(p + 0x20);
-        Swap32(p + 0x1C);
+        SwapWordB(p + 0x18);
+        SwapWordB(p + 0x10);
+        SwapWordB(p + 0x14);
+        SwapWordB(p + 0x20);
+        SwapWordB(p + 0x1C);
     }
     U32(p, 0x8) = a;
     U32(p, 0x4) = 0;
@@ -2129,10 +2111,10 @@ CollShape::CollShape(u32 a, u32 swap) {
 SphereShape::SphereShape(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
     if (swap) {
-        Swap32(p + 0x24);
+        SwapWordB(p + 0x24);
         f32* w = (f32*)&this->center;
         for (int i = 0; i < 3; i++) {
-            Swap32((u8*)&w[i]);
+            SwapWordB((u8*)&w[i]);
         }
         if (this->surface == 0x3EB) {
             this->radius += 3.35f;
@@ -2966,8 +2948,8 @@ void fn_801A1474(SphGroupData* g, f32 s) {
 TubeBase::TubeBase(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
     if (swap) {
-        Swap32(p + 0x24);
-        Swap32(p + 0x28);
+        SwapWordB(p + 0x24);
+        SwapWordB(p + 0x28);
         if (this->surface == 0x3EB) {
             this->rad += 3.35f;
         }
@@ -3149,11 +3131,11 @@ void TubeShape::vf4C(void) {
 BoxShape::BoxShape(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
     if (swap) {
-        Swap32((u8*)&this->half);
-        Swap32(p + 0x28);
-        Swap32(p + 0x2C);
-        Swap32(p + 0x30);
-        Swap32(p + 0x34);
+        SwapWordB((u8*)&this->half);
+        SwapWordB(p + 0x28);
+        SwapWordB(p + 0x2C);
+        SwapWordB(p + 0x30);
+        SwapWordB(p + 0x34);
     }
 }
 
@@ -3415,8 +3397,8 @@ void RagdollShape::vf4C(void) {
 RingVol::RingVol(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
     if (swap) {
-        Swap32(p + 0x24);
-        Swap32(p + 0x28);
+        SwapWordB(p + 0x24);
+        SwapWordB(p + 0x28);
     }
 }
 
@@ -3768,20 +3750,14 @@ void fn_801A4780(s32* p, s32 base);
 void fn_801A4798(s32* p, s32 base);
 void fn_801A47B0(s32* p, s32 base);
 
-static inline void Swap16(u8* b) {
-    u8 t = b[0];
-    b[0] = b[1];
-    b[1] = t;
-}
-
 /* Helper name unproven */
 static inline void SwapStaticObjectHeader(u8* l) {
     u8* objs = l + 0x4;
-    Swap32(l + 0x0);
-    Swap32(l + 0x8);
-    Swap32(objs);
-    Swap32(l + 0xC);
-    Swap32(l + 0x10);
+    SwapWordB(l + 0x0);
+    SwapWordB(l + 0x8);
+    SwapWordB(objs);
+    SwapWordB(l + 0xC);
+    SwapWordB(l + 0x10);
     fn_801A4768((s32*)objs, (s32)l);
     fn_801A4780((s32*)(l + 0x10), (s32)l);
     fn_801A4798((s32*)(l + 0xC), (s32)l);
@@ -3797,11 +3773,11 @@ u8* fn_801A4548(const char* name) {
         SwapStaticObjectHeader(l);
         int i;
         for (i = 0; i < S32(l, 0x0); i++) {
-            Swap32(PTR(l, 0x4) + i * 4);
+            SwapWordB(PTR(l, 0x4) + i * 4);
             fn_801A47B0((s32*)(PTR(l, 0x4) + i * 4), (s32)l);
         }
         for (i = 0; i < S32(l, 0x8); i++) {
-            Swap16(PTR(l, 0xC) + i * 2);
+            SwapHalfB(PTR(l, 0xC) + i * 2);
         }
         fn_8019EB14(PTR(l, 0x10), 0);
         for (i = 0; i < S32(l, 0x0); i++) {
@@ -3932,17 +3908,17 @@ StaticCollObject::StaticCollObject(u32 a, u32 b, CollShape* s, const PlainValMat
 StaticCollObject::StaticCollObject(bool swap, u8* vol) {
     u8* o = (u8*)this;
     if (swap) {
-        Swap32(o + 0x34);
-        Swap32(o + 0x38);
+        SwapWordB(o + 0x34);
+        SwapWordB(o + 0x38);
         f32* w = (f32*)(o + 0x4);
         for (int i = 0; i < 12; i++) {
-            Swap32((u8*)&w[i]);
+            SwapWordB((u8*)&w[i]);
         }
     }
     U32(o, 0x48) = 0;
     s32 tag = S32(vol, 0x18);
     if (swap) {
-        Swap32((u8*)&tag);
+        SwapWordB((u8*)&tag);
     }
     switch (tag) {
     case 'BOX ':
