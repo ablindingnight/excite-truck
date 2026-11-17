@@ -43,16 +43,7 @@ void fn_801D0DFC(class Updatable* u);  // unregister
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-// A path follower made by the path manager.
-class PathMover {
-public:
-    virtual ~PathMover(void) {}
-    virtual f32 Length(void) = 0;
-    virtual f32 Time(void) = 0;
-    virtual void Start(f32 speed) = 0;
-    virtual int Done(void) = 0;
-    virtual void Reset(void) = 0;
-};
+#include "game/pathmover.h"
 
 class Updatable {
 public:

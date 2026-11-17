@@ -861,16 +861,7 @@ public:
 
 }  // namespace
 
-// A path follower made by the path manager.
-class PathMover {
-public:
-    virtual ~PathMover(void) {}
-    virtual void vf0C(void) = 0;
-    virtual void vf10(void) = 0;
-    virtual void Start(f32 dir) = 0;
-    virtual void vf18(void) = 0;
-    virtual void Reset(void) = 0;
-};
+#include "game/pathmover.h"
 
 #include "game/gamemode.h"
 
