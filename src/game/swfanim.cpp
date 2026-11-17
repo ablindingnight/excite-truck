@@ -162,8 +162,8 @@ void SwfAnim::LoadFile(const char* name) {
     u32 frameOffset;
     u32 itemOffset;
     u32 frameIndex;
-    int itemIndex;
     Sw2Frame* frame;
+    int itemIndex;
     Sw2Item* item;
     int component;
     Sw2* current;
@@ -225,7 +225,7 @@ void SwfAnim::LoadFile(const char* name) {
             SwapHalfV(&item->shape);
             SwapHalfV(&item->cxform);
             for (component = 0; component < 6; ++component) {
-                SwapWordT(&item->m[component]);
+                SwapWordV(&item->m[component]);
             }
         }
     }
