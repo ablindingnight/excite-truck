@@ -168,7 +168,9 @@ volatile u8 lbl_805600D1;  // restart
 
 namespace {
 
-struct Mp3Reader {
+// MATCHING-AID (novtable, plausible original): no Mp3Reader table exists in retail, and this unit's .data is addressed
+// from the section start, so a dead weak copy would have stayed as a zero block (FACTS 2026-11-17 08:29); it never was emitted.
+struct __declspec(novtable) Mp3Reader {
     virtual ~Mp3Reader(void) {}
     virtual int Seek(int pos) = 0;
     virtual int Size(void) = 0;
