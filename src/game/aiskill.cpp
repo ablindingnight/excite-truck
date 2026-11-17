@@ -56,11 +56,7 @@ struct StrengthDef {
     f32 frac;
 };
 
-struct ResExt {
-    u32 type;
-    ResExt* next;
-    f32 data[2];
-};
+#include "game/resext.h"
 
 extern "C" DeityCar* fn_801B2ED0(int i);
 extern "C" ResExt* fn_80138B1C(void* res);
@@ -312,7 +308,7 @@ SkillEntry* fn_8013B578(int i) { return &lbl_8042F858.entries[i]; }
 f32 fn_8013B590(int car) {
     ResExt* e = fn_80138B1C(*(void**)((u8*)fn_801B2ED0(car)->Line() + 0x2C));
     if (e) {
-        return e->data[1];
+        return e->fdata[1];
     }
     return 60.0f;
 }

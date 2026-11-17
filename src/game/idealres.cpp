@@ -23,11 +23,7 @@ static inline void SwapV2(V2* v) {
     SwapWord(&v->y);
 }
 
-struct ResExt {
-    u32 type;      // offset 0x0
-    ResExt* next;  // offset 0x4
-    u32 data[1];   // offset 0x8
-};
+#include "game/resext.h"
 
 struct ILPos {
     IdealPoint* seg;
