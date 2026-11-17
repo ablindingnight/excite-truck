@@ -441,6 +441,11 @@ void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
     CamFrame tgt;
+    CamVec spin;
+    CamVec move;
+    CamVec up;
+    CamQuat q;
+    CamQuat qs;
     if (fn_802D3EBC()) {
         return;
     }
@@ -465,8 +470,6 @@ void fn_8026C014(int player) {
         return;
     }
     if (lbl_8055F4EC == 0) {
-        CamVec spin;
-        CamVec move;
         CamVec w;
         CamRot m;
         f32 dt;
@@ -727,7 +730,6 @@ void fn_8026C014(int player) {
     if ((s32)lbl_8055F4E0 == 1 && player) {
         CamCar* car = fn_8017960C(fn_8026A344(0));
         CamFrame* f;
-        CamVec up;
         if (!car) {
             return;
         }
@@ -756,11 +758,10 @@ void fn_8026C014(int player) {
         if (car && ((s32)lbl_8055F4E4 & 4)) {
             tgt = car->frame;
         } else if (car) {
-            CamQuat q;
             MtxToQuat(&car->frame, &q);
             if (id == lbl_8049A168.car) {
                 CamVec p;
-                CamQuat qs;
+
                 fn_8012F57C(&qs, &lbl_8049A168.rot, &q, 0.05f);
                 if (!((s32)lbl_8055F4E4 & 2)) {
                     QuatToMtx(&qs, &tgt.rot);
