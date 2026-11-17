@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/phob.h"
 #include "game/pathset.h"
 #include "game/valuebinding.h"
 #include "game/gart.h"
@@ -136,11 +137,6 @@ void DrawText(ILayout*, const char*);
 extern "C" {
 void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...);
 }
-
-struct Phob {
-    u8 pad0[0x60];
-    ValVec3 pos;  // offset 0x60
-};
 
 // Respawn, CarPlace: game/respawn.h.
 extern "C" {
@@ -2338,8 +2334,8 @@ inline void ObjSet::CheckTeleport(Phob* car) {
         f32 dz;
         a.x = t->mtx.origin.x;
         a.y = t->mtx.origin.z;
-        b.x = car->pos.x;
-        b.y = car->pos.z;
+        b.x = car->mtx.origin.x;
+        b.y = car->mtx.origin.z;
         dx = a.x - b.x;
         dz = a.y - b.y;
         d.x = dx;
