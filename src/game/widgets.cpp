@@ -2207,17 +2207,17 @@ extern "C" {
 extern const u32 lbl_8055FBE4;
 // NonMatching: clean two-argument menu draw remains41 original-address words off.
 void MenuGrid::Slot24(void* context) {
+    int color;
+    int background;
+    int highlight;
     MenuEntryCountPrefix* list;
     struct {
         int ty;
     } row;
     int top;
     int i;
-    int y;
-    int color;
-    int background;
-    int highlight;
     int col;
+    int y;
     int x;
     MenuSelectionPrefix* f;
     int w;
