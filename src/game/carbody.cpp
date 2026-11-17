@@ -1956,22 +1956,14 @@ void fn_80183E7C(u8* p) {
         f32 df = Ramp(front.y, surf, surf - 0.4f);
         f32 lf = LerpT(df, 0.0f, 1.0f);
         f32 tf = RampW(cb->f25C4, 0.0f, 0.3f);
-        RVec3 ff;
-        ff.x = 0.0f;
-        ff.z = 0.0f;
-        ff.y = lf * ((0.2f + tf * 0.8f) * (0.5f * grow)) * cb->mass /
-               0.016683351f;
+        RVec3 ff(0.0f, lf * (LerpT(tf, 0.2f, 1.0f) * (0.5f * grow)) * cb->mass / 0.016683351f, 0.0f);
         ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
         RVec3 back;
         CbAddScaled(&back, &cb->mtx.pos, &cb->mtx.rot.z, -2.0f);
         f32 db = Ramp(back.y, surf, surf - 0.4f);
         f32 lb = LerpT(db, 0.0f, 1.0f);
         f32 tb = Clamp01((cb->f25C4 - 0.2f) / 0.6f);
-        RVec3 fb;
-        fb.x = 0.0f;
-        fb.z = 0.0f;
-        fb.y = lb * (LerpT(tb, 0.1f, 1.0f) * (0.3f * grow)) * cb->mass /
-               0.016683351f;
+        RVec3 fb(0.0f, lb * (LerpT(tb, 0.1f, 1.0f) * (0.3f * grow)) * cb->mass / 0.016683351f, 0.0f);
         ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
     } else {
         cb->f25C4 = 0.0f;
