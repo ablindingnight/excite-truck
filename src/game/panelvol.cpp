@@ -236,17 +236,6 @@ static inline void Orthonormalize(Mat3* m) {
     m->m[2][2] = c.z;
 }
 
-static inline void Identity(Mat3* m) {
-    m->m[0][0] = 1.0f;
-    m->m[0][1] = 0.0f;
-    m->m[0][2] = 0.0f;
-    m->m[1][0] = 0.0f;
-    m->m[1][1] = 1.0f;
-    m->m[1][2] = 0.0f;
-    m->m[2][0] = 0.0f;
-    m->m[2][1] = 0.0f;
-    m->m[2][2] = 1.0f;
-}
 
 inline PanelVol::PanelVol(void) {
     owner = 0;
@@ -406,7 +395,7 @@ void fn_801BFB2C(PanelVol* p, RMtx* out, const RVec3* pts) {
     if (PSVECDotProduct((const Vec*)&m.rot.z, (const Vec*)&m.rot.z) > kAxisTolerance) {
         Orthonormalize((Mat3*)&m.rot);
     } else {
-        Identity((Mat3*)&m.rot);
+        ((Mat3*)&m.rot)->SetScale(1.0f);
     }
     fn_801BFD34(&out->pos, &p->rest.pos, &m);
     Mat3Mul((Mat3*)&out->rot, (const Mat3*)&p->rest.rot, (const Mat3*)&m.rot);
@@ -651,7 +640,7 @@ void fn_801C092C(RMtx* out, const RMtx* a, const RMtx* b) {
     MulM((Mat3*)&out->rot, (const Mat3*)&a->rot, (const Mat3*)&b->rot);
 }
 
-void fn_801C0D3C(Mat3* m) { Identity(m); }
+void fn_801C0D3C(Mat3* m) { m->SetScale(1.0f); }
 
 void fn_801C0D6C(Mat3* m) { Orthonormalize(m); }
 
