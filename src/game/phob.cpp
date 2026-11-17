@@ -481,16 +481,47 @@ void fn_80177EE4(void) {
     }
 }
 
-/* Helper name unproven: the per-frame block that runs unless a local game is paused; the boundary is needed (in place -0.41) */
-static inline void StepFrameSystems(int net, u8 paused) {
+/* Helper name unproven. A one-byte flag read through a const by-value formal: the read is wrapped in a
+   conversion, so it is loaded into a code-generation temporary and the local that receives it is only a copy
+   (retail numbers saved and paused among the temporaries, in statement order: FACTS 2026-11-17, push90-C, "const read = temporary"). */
+static inline u8 FlagValue(const u8 f) { return f; }
+
+void fn_80177F40(void) {
+    u8 saved;
+    int busy;
+    u8 paused;
+    int net;
+    fn_80176A6C();
+    fn_80177A54();
+    lbl_8055E458 = lbl_8055E3BD ? 0 : lbl_8055E458 + 1;
+    fn_8026C014(1);
+    lbl_8055E45D = lbl_8055E45C;
+    lbl_8055E45F = lbl_8055E45E;
+    fn_80177AE4(0);
+    saved = FlagValue(lbl_8055E3BD);
+    busy = fn_802D3EBC();
+    if (busy) {
+        lbl_8055E3BD = 1;
+    }
+    paused = FlagValue(lbl_8055E3BD);
+    lbl_80430870.len = 0;
+    fn_80265D84();
+    fn_801B2364();
+    fn_8026B6E4();
+    fn_801CEDDC();
+    fn_801D2214();
+    fn_8020C59C();
+    fn_801DEFE0();
+    if (paused) {
+        fn_801EA1F0();
+    }
+    net = fn_801B526C();
     if (net || !paused) {
-        int i;
-        s32 k;
-        for (i = 0; i < 75; i++) {
+        for (int i = 0; i < 75; i++) {
             fn_801DCEDC(i, 59.94f * (lbl_804305D4[i] - lbl_80430700[i]));
             lbl_80430700[i] = lbl_804305D4[i];
         }
-        k = lbl_8055A300;
+        s32 k = lbl_8055A300;
         if (k >= 0 && k < 75) {
             f32 now = lbl_8055E3C8;
             f32 sn = sin(6.2831855f * (0.25f * now));
@@ -519,7 +550,7 @@ static inline void StepFrameSystems(int net, u8 paused) {
             fn_801E22D0(lbl_804340C0, lbl_8055E464);
         }
         fn_80177E14();
-        for (i = 0; i < lbl_8055E438; i++) {
+        for (int i = 0; i < lbl_8055E438; i++) {
             PhobCar* c = lbl_8055E434[i]->vf3C();
             if (c) {
                 c->f1E4 = 0;
@@ -530,46 +561,6 @@ static inline void StepFrameSystems(int net, u8 paused) {
     } else {
         fn_8017FF4C(0.016683351f);
     }
-}
-
-/* Helper name unproven */
-static inline u8 EnterPhysicsPause(int& busy, u8& paused) {
-    u8 saved;
-    saved = lbl_8055E3BD;
-    busy = fn_802D3EBC();
-    if (busy) {
-        lbl_8055E3BD = 1;
-    }
-    paused = lbl_8055E3BD;
-    return saved;
-}
-
-void fn_80177F40(void) {
-    u8 saved;
-    int busy;
-    u8 paused;
-    int net;
-    fn_80176A6C();
-    fn_80177A54();
-    lbl_8055E458 = lbl_8055E3BD ? 0 : lbl_8055E458 + 1;
-    fn_8026C014(1);
-    lbl_8055E45D = lbl_8055E45C;
-    lbl_8055E45F = lbl_8055E45E;
-    fn_80177AE4(0);
-    saved = EnterPhysicsPause(busy, paused);
-    lbl_80430870.len = 0;
-    fn_80265D84();
-    fn_801B2364();
-    fn_8026B6E4();
-    fn_801CEDDC();
-    fn_801D2214();
-    fn_8020C59C();
-    fn_801DEFE0();
-    if (paused) {
-        fn_801EA1F0();
-    }
-    net = fn_801B526C();
-    StepFrameSystems(net, paused);
     fn_801B24B8();
     fn_80265D88();
     if (!paused) {
