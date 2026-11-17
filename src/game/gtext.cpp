@@ -71,6 +71,7 @@ struct IngameText {
 
 #include "game/uicontext.h"
 #include "game/plainvec.h"
+#include "game/byteswap.h"
 
 
 struct UIVert {
@@ -181,24 +182,6 @@ static inline const char* ReadUTF8(const char* s, u16* c) {
 }
 
 static inline f32 Mul(f32 a, f32 b) { return a * b; }
-
-static inline void Swap16(void* p) {
-    u8* b = (u8*)p;
-    u8 t = b[0];
-    b[0] = b[1];
-    b[1] = t;
-}
-
-static inline void Swap32(void* p) {
-    u8 t;
-    u8* b = (u8*)p;
-    t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
 
 class UnkStaticFF00 {
 public:
@@ -706,17 +689,17 @@ GTextFont* fn_80232578(const char* name) {
         return NULL;
     }
     if (swapped) {
-        Swap16(&f->count);
-        Swap32(&f->unk14);
-        Swap32(&f->glyphs);
-        Swap32(&f->texName);
+        SwapHalf(&f->count);
+        SwapWordV(&f->unk14);
+        SwapWordV(&f->glyphs);
+        SwapWordV(&f->texName);
         f->glyphs = (Glyph*)((u8*)f->glyphs + (u32)f);
         f->texName = (char*)((u8*)f->texName + (u32)f);
         for (int i = 0; i < f->count; i++) {
             SwapUV(&f->glyphs[i]);
-            Swap32(&f->glyphs[i].pre);
-            Swap32(&f->glyphs[i].post);
-            Swap32(&f->glyphs[i].width);
+            SwapWordV(&f->glyphs[i].pre);
+            SwapWordV(&f->glyphs[i].post);
+            SwapWordV(&f->glyphs[i].width);
         }
     }
     char tex[24];
