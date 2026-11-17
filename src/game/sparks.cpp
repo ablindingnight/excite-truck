@@ -803,8 +803,8 @@ void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
         for (int i = 0; i < count; i++) {
             u32 color;
             Spark* s = &pts[i];
-            Vec d;
             Vec p;
+            Vec d;
             f32 yv = s->pos.y;
             p.x = s->pos.x + s->vel.x * (5.0f * -dt) - prev->origin.x;
             p.y = yv + s->vel.y * (5.0f * -dt) - prev->origin.y;
@@ -820,10 +820,18 @@ void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
             d.z = p.z - s->pos.z;
             f32 sign = PSVECDotProduct(&cam->basis[1], &d) > 0.0f ? 1.0f : -1.0f;
             Vec q[4];
-            AddScaled(&q[0], &s->pos, &cam->basis[0], -0.0375f);
-            AddScaled(&q[1], &s->pos, &cam->basis[0], 0.075f);
-            AddScaled(&q[2], &p, &cam->basis[0], sign * -0.0375f);
-            AddScaled(&q[3], &p, &cam->basis[0], 0.075f * sign);
+            Vec u;
+            u.x = cam->basis[1].x * sign;
+            u.y = cam->basis[1].y * sign;
+            u.z = cam->basis[1].z * sign;
+            AddScaled(&q[0], &s->pos, &u, -0.0375f);
+            AddScaled(&q[0], &q[0], &cam->basis[0], -0.0375f);
+            AddScaled(&q[1], &q[0], &cam->basis[0], 0.075f);
+            q[2].x = q[0].x + d.x;
+            q[2].y = q[0].y + d.y;
+            q[2].z = q[0].z + d.z;
+            AddScaled(&q[2], &q[2], &u, 0.075f);
+            AddScaled(&q[3], &q[2], &cam->basis[0], 0.075f);
             fn_802C8E00(q[0].x, q[0].y, q[0].z, 0.0f, 1.0f, color, 0);
             fn_802C8E00(q[1].x, q[1].y, q[1].z, 1.0f, 1.0f, color, 0);
             fn_802C8E00(q[2].x, q[2].y, q[2].z, 0.0f, 0.0f, color, 1);
