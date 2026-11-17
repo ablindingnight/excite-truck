@@ -491,7 +491,10 @@ void fn_802751AC(u8* p) {
 }
 
 // As fn_802751AC, but the offset follows the car's first point (0x2450) instead of the preset's.
-void fn_80275410(u8* p) {
+// Form unproven: the record comes in through a CONST formal (cast back for the writes). Retail hoists the preset
+// copy's loads above the pose stores, which only the const formal's alias class gives (FACTS 2026-11-17 10:45);
+// the real parameter type is unknown (u8* is a stand-in). Same for the twin fn_802756A4.
+void fn_80275410(const u8* p) {
     CamRec* cr = (CamRec*)p;
     u8* car = cr->car;
     const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
@@ -507,7 +510,7 @@ void fn_80275410(u8* p) {
 }
 
 // As fn_802751AC, but the offset follows the car's second point (0x2538) instead of the preset's.
-void fn_802756A4(u8* p) {
+void fn_802756A4(const u8* p) {  // Form unproven: const formal, see fn_80275410
     CamRec* cr = (CamRec*)p;
     u8* car = cr->car;
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
