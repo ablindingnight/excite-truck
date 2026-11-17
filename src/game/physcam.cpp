@@ -1192,7 +1192,10 @@ int TvCamera::Load(ValueNode* t) {
         int shakey = t->GetBool("shakey", 0);
         int rumble = t->GetBool("rumble", 0);
         int blur = t->GetBool("focus_blur", 0);
-        flags = funky | (rumble ? 4 : 0) | (shakey ? 2 : 0) | (blur ? 8 : 0);
+        int s = shakey ? 2 : 0;
+        int r = rumble ? 4 : 0;
+        int b = blur ? 8 : 0;
+        flags = funky | s | r | b;
         switch (type) {
         case 13:
             type = 1;
