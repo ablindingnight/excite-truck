@@ -1257,7 +1257,7 @@ config.libs.append(
             Object(NonMatching, "game/tree.cpp"),
             Object(Matching, "game/fxseq.cpp"),
             Object(Matching, "game/shadowvol.cpp"),
-            Object(NonMatching, "game/fire.cpp"),
+            Object(Matching, "game/fire.cpp"),
             Object(Matching, "game/waterpool.cpp"),
             Object(Matching, "game/drawline.cpp"),
             Object(Matching, "game/partemit.cpp"),
