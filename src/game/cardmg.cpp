@@ -4,6 +4,7 @@
 // from the strings.
 #include "game/common.h"
 #include "game/carlayout.h"
+#include "game/buildquery.h"
 #include "game/mtx33.h"
 #include "game/rvec.h"
 #include "game/raceopts.h"
@@ -756,17 +757,6 @@ static inline int HitCorner(const AVec* at) {
 // raises the car's impairment.
 static inline double AbsDbl(double v) { return __fabs(v); }
 
-/* PROVISIONAL stand-in, form unproven (FACTS 2026-11-17 02:20, the achview fn_8025A204 / playcar vf48 mechanism).
-   Retail's `kind == 0x74` exit is `bne next; b epilogue`, not the single `beq epilogue` a plain `if (...) return;`
-   gives: the branch-over-branch was still separated when branches were tidied, i.e. the if body held a test that only
-   the back end folds (a constant that went through memory, compared for equality), after its first scheduling pass.
-   The test below is always true (0 != 3) and leaves no instruction. What the original tested is unknown. */
-struct DentIndex {
-    int i;
-    DentIndex(int n) : i(n) {}
-};
-static inline bool DentLeft(DentIndex c) { return c.i != 3; }
-
 void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind, u8*, int) {
     DentVec nd;
     DentVec dg;
@@ -800,7 +790,10 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         }
     }
     if (kind == 0x74) {
-        if (DentLeft(DentIndex(0))) {
+        /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail's exit here is `bne next;
+           b epilogue`, not the single `beq epilogue` of a plain return: the if body still held a test when
+           branches were tidied. What the original tested is unknown. */
+        if (BuildMode() == kBuildRetail) {
             return;
         }
     }
