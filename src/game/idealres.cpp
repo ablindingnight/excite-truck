@@ -24,6 +24,7 @@ static inline void SwapV2(V2* v) {
 }
 
 #include "game/resext.h"
+#include "game/makeilpos.h"
 
 struct ILPos {
     IdealPoint* seg;
@@ -478,7 +479,6 @@ void fn_80138BA0(IdealLineRes* a, IdealLineRes* b) {
 
 }  // extern "C"
 
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 extern const u32 lbl_8055E0F0 = MakeILPos(0xFFFF, 0);
 u32 lbl_8055E0F4 = MakeILPos(0x7F00, 0);

@@ -54,6 +54,7 @@ int fn_801609C4(s32 score);  // grade for a score
 // The results-screen art animation player.
 struct ArtXform;  // artanim.cpp
 #include "game/artplayer.h"
+#include "game/makeilpos.h"
 
 const char* GetGradeDisplayName(int grade);
 
@@ -63,7 +64,6 @@ extern f32 lbl_8055E3C8;  // race clock
 ModuleTag lbl_8055E228;
 UnkStaticFFFF lbl_8055E230;
 static UnkStatic123s lbl_8042FC70;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055E234 = MakeILPos(0x7F00, 0);
 static inline s32 NoModel(void) { return -1; }
 

@@ -79,6 +79,7 @@ struct CarDrawView {
 
 // The racer description the model is built for.
 #include "game/carres.h"
+#include "game/makeilpos.h"
 
 struct Joint;
 
@@ -171,7 +172,6 @@ CarModel* lbl_80488648[8];
 CarTint lbl_80488668;
 
 ModuleTag lbl_8055EBA8;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055EBB0 = MakeILPos(0xFFFF, 0);
 extern const f32 lbl_8055EBB4 = Angle(0.7853982f);
 extern const u32 lbl_8055EBB8 = MakeILPos(0x7F00, 0);

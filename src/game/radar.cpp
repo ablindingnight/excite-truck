@@ -10,6 +10,7 @@
 #include "game/plainvec.h"
 #include "game/mathutil.h"
 #include "game/clamp01.h"
+#include "game/makeilpos.h"
 
 extern "C" {
 double sqrt(double x);
@@ -33,7 +34,6 @@ extern "C" PlainValMatrix* fn_801E8718(int);
 
 // Frame: common.h's PlainValMatrix.
 ModuleTag lbl_8055E118;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 extern const u32 lbl_8055E120 = MakeILPos(0xFFFF, 0);
 static UnkStatic123 lbl_8042F7A8;

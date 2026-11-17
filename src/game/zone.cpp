@@ -640,6 +640,7 @@ extern "C" u32 fn_8013D18C(u32 i);
 
 
 #include "game/zoneresults.h"
+#include "game/makeilpos.h"
 
 // Ideal-path walker from the track map unit (0x801352B8..).
 struct CenterLine;
@@ -817,7 +818,6 @@ static inline void LoadSound(GameSound*& s, const char* name) {
 }
 
 ModuleTag lbl_8055E1A8;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 u32 lbl_8055E1B0 = MakeILPos(0xFFFF, 0);
 u32 lbl_8055E1B4 = MakeILPos(0xFFFF, 0);

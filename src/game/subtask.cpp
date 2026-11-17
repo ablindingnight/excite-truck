@@ -1,6 +1,7 @@
 // Sub-task manager stub (0x8013C9F4-0x8013CAD8): factory for the default ("csubtasktmgr") manager,
 // whose virtual methods all do nothing. Names are guesses apart from the allocation tag.
 #include "game/common.h"
+#include "game/makeilpos.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -18,7 +19,6 @@ public:
 };
 
 ModuleTag lbl_8055E190;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 extern const u32 lbl_8055E198 = MakeILPos(0xFFFF, 0);
 static UnkStatic123 lbl_8042FB10;

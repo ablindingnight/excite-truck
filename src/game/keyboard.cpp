@@ -42,9 +42,9 @@ int lbl_8055BE0C = -1;  // the column remembered when moving between rows
 int lbl_8055BE10 = -1;  // the column it was moved to
 
 #include "game/namechooser.h"
+#include "game/makeilpos.h"
 
 ModuleTag lbl_8055F208;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 static UnkStatic123 lbl_80498848;
 extern const u32 lbl_8055F210 = MakeILPos(0x7F00, 0);

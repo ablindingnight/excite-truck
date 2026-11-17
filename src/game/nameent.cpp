@@ -18,6 +18,7 @@ void IdentSetDefaultName(const char* name, int slot);
 #include "game/namechooser.h"
 
 #include "game/menustrlist.h"
+#include "game/makeilpos.h"
 
 extern "C" {
 void fn_80214A9C(int sound);
@@ -38,7 +39,6 @@ static inline MenuItem Text(const char* name, const char* text, const CaptionCon
     return MenuItem(context, name, text);
 }
 ModuleTag lbl_8055F1D0;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 static UnkStatic123 lbl_804987F8;
 extern const u32 lbl_8055F1D8 = MakeILPos(0x7F00, 0);
