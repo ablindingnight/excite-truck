@@ -939,18 +939,17 @@ void fn_801F7400(Quad* q, const u8* data, ValueNode* vn) {
     const FabricCorner& c0 = mesh->corners[mesh->indices[0]];
     q->c[0] = c0;
     const FabricCorner& c1 = mesh->corners[mesh->indices[1]];
-    const f32 u1 = c1.u;
     q->c[1] = c1;
     const FabricCorner& c2 = mesh->corners[mesh->indices[2]];
     q->c[2] = c2;
-    const f32 sumX = q->c[2].pos.x + q->c[1].pos.x;
-    const f32 sumY = q->c[2].pos.y + q->c[1].pos.y;
-    const f32 sumZ = q->c[2].pos.z + q->c[1].pos.z;
-    q->c[3].pos.x = sumX - q->c[0].pos.x;
-    q->c[3].pos.y = sumY - q->c[0].pos.y;
-    q->c[3].pos.z = sumZ - q->c[0].pos.z;
-    q->c[3].u = u1 + c2.u - c0.u;
-    q->c[3].v = c2.v + c1.v - c0.v;
+    q->c[3].pos.x = q->c[2].pos.x + q->c[1].pos.x;
+    q->c[3].pos.y = q->c[2].pos.y + q->c[1].pos.y;
+    q->c[3].pos.z = q->c[2].pos.z + q->c[1].pos.z;
+    q->c[3].pos.x -= q->c[0].pos.x;
+    q->c[3].pos.y -= q->c[0].pos.y;
+    q->c[3].pos.z -= q->c[0].pos.z;
+    q->c[3].u = q->c[2].u + q->c[1].u - q->c[0].u;
+    q->c[3].v = q->c[2].v + q->c[1].v - q->c[0].v;
     q->c[3].color = c1.color;
     if (!fn_801F52BC(vn, "col_density", &q->colDensity, 4)) {
         q->colDensity = 0.6f;
