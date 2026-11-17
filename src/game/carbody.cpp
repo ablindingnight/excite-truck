@@ -1369,12 +1369,12 @@ struct CbEvent {
 struct CbLeanEvent {
     s32 id;
     f32 lean;
-    s32 dive;
+    u8 dive;  // retail stores a byte (stb); the event stays 12 bytes
 };
 
 struct CbSpinEvent {
     s32 id;
-    u8 left;
+    bool left;  // retail stores the compare result unmasked (srwi + stb)
 };
 
 // out = v[0] * row0 + v[1] * row1 + v[2] * row2 (m: rows at 0, 3, 6), safe when out aliases v.
@@ -1916,9 +1916,8 @@ void fn_80183E7C(u8* p) {
     int sunk = 0;
     if (fn_802BF4F0()) {
         sunk = 1;
-        CbWheel* wh = (CbWheel*)(p + 0x23AC);
-        for (int i = 0; i < 4; i++, wh++) {
-            CbWheel c = *wh;
+        for (int i = 0; i < 4; i++) {
+            CbWheel c = cb->wheels[i];
             RVec3 pt;
             ObRotateRows(&pt, (const f32*)(p + 0x3C), c.local);
             pt.x = pt.x + cb->mtx.pos.x;
