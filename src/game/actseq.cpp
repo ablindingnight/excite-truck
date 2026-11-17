@@ -13,6 +13,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -273,9 +274,6 @@ int fn_801D4908(ActionSequence* s, const int* ids, int n) { return fn_801D5A2C(s
 
 }  // extern "C"
 
-static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 /* Helper name unproven */
 inline void DrawTitle(u32 color, const char* s) { fn_8000FF88(color, 12, "%s", 1.2f, 0.0f, 130.0f, s); }
@@ -291,11 +289,11 @@ extern "C" void fn_801D490C(void) {
         if (dur > 0.5f) {
             f32 in = now - start;
             if (in < 0.25f) {
-                a = Lerp(0.0f, 1.0f, Max(Min(in / ((start + 0.25f) - start), 1.0f), 0.0f));
+                a = Lerp(0.0f, 1.0f, MaxF(MinFRev(in / ((start + 0.25f) - start), 1.0f), 0.0f));
             } else {
                 f32 out = (start + dur) - 0.25f;
                 if (now > out) {
-                    a = Lerp(1.0f, 0.0f, Max(Min((now - out) / ((start + dur) - out), 1.0f), 0.0f));
+                    a = Lerp(1.0f, 0.0f, MaxF(MinFRev((now - out) / ((start + dur) - out), 1.0f), 0.0f));
                 }
             }
         }
@@ -476,7 +474,7 @@ void fn_801D5488(void) {
     }
     if (lbl_804422F0.time > 0.0f) {
         lbl_804422F0.time -= 0.016683351f;
-        lbl_804422F0.snd->SetVolume(Min(lbl_804422F0.time, 1.0f));
+        lbl_804422F0.snd->SetVolume(MinFRev(lbl_804422F0.time, 1.0f));
         lbl_804422F0.snd->PlayLoop();
     } else {
         s->Stop();
@@ -742,7 +740,7 @@ int fn_801D9B28(void* group, int index);  // morph group contains index
 void fn_80178DBC(int index, f32 t);      // set world morph position
 }
 
-static inline f32 Clamp01(f32 x) { return Max(Min(x, 1.0f), 0.0f); }
+static inline f32 Clamp01(f32 x) { return MaxF(MinFRev(x, 1.0f), 0.0f); }
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 
 namespace {
@@ -1539,10 +1537,6 @@ int Obstacle_ASE::Load(ValueNode* t) {
     return ok;
 }
 
-/* Helper name unproven */
-static inline f32 MotionMagnitude(f32 value) {
-    return (f32)__fabs(value);
-}
 
 int Obstacle_ASE::Begin(int reverse) {
     if (state == 1) {
@@ -1553,8 +1547,8 @@ int Obstacle_ASE::Begin(int reverse) {
             dir.Set(Lerp(dir1.x, dir2.x, td), Lerp(dir1.y, dir2.y, td), Lerp(dir1.z, dir2.z, td));
             f32 speed = Lerp(speed1, speed2, ts);
             ActVec vel(0.0f, 0.0f, 0.0f);
-            if (MotionMagnitude(PSVECDotProduct((const Vec*)&dir, (const Vec*)&dir)) <= __float_epsilon[0] ||
-                MotionMagnitude(speed) <= __float_epsilon[0]) {
+            if (FAbs(PSVECDotProduct((const Vec*)&dir, (const Vec*)&dir)) <= __float_epsilon[0] ||
+                FAbs(speed) <= __float_epsilon[0]) {
                 bodies.data[i]->Place(1);
             } else {
                 PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
