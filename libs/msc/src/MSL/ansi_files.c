@@ -83,6 +83,8 @@ FILE __files[4] = {
     },
 };
 
+/* Excite Truck: the linker dead-stripped __find_unopened_file and __init_file (absent from the retail DOL); left out so the exception tables match. */
+#if 0
 FILE* __find_unopened_file(void)
 {
     FILE* file = __files[2].next_file;
@@ -140,6 +142,7 @@ void __init_file(FILE* file, file_modes mode, char* buff, size_t size)
 
     file->idle_fn = 0;
 }
+#endif
 
 void __close_all(void)
 {
@@ -171,6 +174,8 @@ void __close_all(void)
     }
 }
 
+/* Excite Truck: the linker dead-stripped __flush_line_buffered_output_files (absent from the retail DOL); left out so the exception tables match. */
+#if 0
 int __flush_line_buffered_output_files(void)
 {
     int result = 0;
@@ -190,6 +195,7 @@ int __flush_line_buffered_output_files(void)
 
     return result;
 }
+#endif
 
 unsigned int __flush_all(void)
 {
