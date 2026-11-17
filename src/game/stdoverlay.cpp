@@ -64,15 +64,7 @@ static inline GameSound* LoadGradeSound(void) {
 }
 
 // Interval timer on the race clock; its inline methods are shared with zone and crushmaster.
-class Timer {
-public:
-    Timer(f32 duration);
-    f32 Now(void) const;
-    f32 Progress(void) const;
-
-    f32 duration;  // offset 0x0
-    f32 start;     // offset 0x4
-};
+#include "game/timer.h"
 
 namespace {
 
@@ -200,7 +192,7 @@ f32 PulseFast(void) {
 }
 
 Timer::Timer(f32 duration) {
-    this->duration = duration;
+    this->len = duration;
 }
 
 f32 Timer::Now(void) const {
@@ -208,7 +200,7 @@ f32 Timer::Now(void) const {
 }
 
 f32 Timer::Progress(void) const {
-    return Clamp01((Now() - start) / duration);
+    return Clamp01((Now() - start) / len);
 }
 
 void InitOverlays(void) {
@@ -438,7 +430,7 @@ inline void GradeOverlay::Update(int player, int score) {
                     name = GetGradeDisplayName(grade);
                     t = popTimer.Now() - popTimer.start;
                     popping = 0;
-                    if (t >= 0.0f && t < popTimer.duration) {
+                    if (t >= 0.0f && t < popTimer.len) {
                         popping = 1;
                     }
                     if (popping) {

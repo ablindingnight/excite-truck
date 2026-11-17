@@ -205,21 +205,7 @@ struct Tune {
 };
 
 // Interval timer on the race clock (0x8001DAE0..): length, start time.
-class Timer {
-public:
-    Timer(f32 len);
-    f32 Now(void) const;
-    f32 Progress(void) const;
-
-    void Start(void) { start = Now(); }
-    int Active(void) const {
-        f32 t = Now() - start;
-        return t >= 0.0f && t < len;
-    }
-
-    f32 len;    // offset 0x0
-    f32 start;  // offset 0x4
-};
+#include "game/timer.h"
 
 template <typename T, int N>
 class FixedArray {
