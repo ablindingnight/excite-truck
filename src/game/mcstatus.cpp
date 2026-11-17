@@ -177,7 +177,8 @@ inline void MemCardDialogBg::Close(void) {
 }
 
 // The "Accept" hint at (x, y): the A button art when loaded, else "A - Accept".
-static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y, const char* label) {
+static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y) {
+    const char* label = "Accept";
     if (bg->image2) {
         fn_802C5310(bg->image2, 0, 4.0f + (x + 0.5f * fn_8023293C(bg->font2, label, 1.0f)), 3.0f + y, lbl_80563830);
         fn_802337A0(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, lbl_80563830, 0.5f, 1.0f, label);
@@ -188,7 +189,7 @@ static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y, const char* lab
 
 // The choice dialog without a layout: draws the message and the choices (the selected one pulses) until
 // one is accepted or the check callback reports a result.
-static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
+static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& choiceIndex) {
     int sel = cfg->select;
     f32 ax;
     f32 ay;
@@ -196,6 +197,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
     for (;;) {
         f32 y;
         int r;
+        const char* brk;
         PlainValMatrix cam;
         char text[0x200];
         fn_802C8530();
@@ -215,18 +217,21 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
             fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
             fn_802C92D8();
         }
-        const char* title = cfg->title;
-        const char* msg = cfg->text;
+
+        // Read the title, then walk the mutable message copy with the same cursor.
+        p = const_cast<char*>(cfg->title);
+        brk = cfg->text;
         y = 145.0f;
-        if (strlen(title)) {
-            fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
-            fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
+        if (strlen(p)) {
+            fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
+            fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
         }
         y = y - 40.0f;
-        strcpy(text, msg);
+        strcpy(text, brk);
         p = text;
+        // Break positions in this loop always refer to the local copy.
         while (strlen(p)) {
-            char* brk = 0;
+            brk = 0;
             char line[0x200] = {0};
             char* d = line;
             u32 i = 0;
@@ -247,39 +252,39 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
                     brk = &p[i];
                     keep = p[i];
                 }
-                *brk = 0;
+                *const_cast<char*>(brk) = 0;
             } else {
-                brk = &p[i] - 1;
+                brk = &p[(int)i - 1];
             }
             fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
             fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
+            char* split = const_cast<char*>(brk);
             if (!keep) {
-                p = brk + 1;
+                p = split + 1;
             } else {
-                *brk = keep;
-                p = brk;
+                *split = keep;
+                p = split;
             }
             y -= 20.0f;
         }
         y = -70.0f;
-        for (int i = 0; i < cfg->count; i++) {
+        for (choiceIndex = 0; choiceIndex < cfg->count; choiceIndex++) {
             f32 angle = 3.0f * (f32)fn_802E2C20() / 1000.0f;
             f32 pulse = 255.0f * (0.75f + 0.25f * (f32)sin(angle));
-            fn_80232BA4(cfg->entries[i].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
+            fn_80232BA4(cfg->entries[choiceIndex].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
             u32 color;
-            if (sel == i) {
+            if (sel == choiceIndex) {
                 const u32 selected = ((u32)(int)pulse << 24) | 0xFFD03F;
                 color = selected;
             } else {
                 color = 0xC8646464;
             }
-            fn_80232BA4(cfg->entries[i].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
+            fn_80232BA4(cfg->entries[choiceIndex].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
             y -= 20.0f;
         }
-        const char* acceptLabel = "Accept";
         ay = -140.0f;
         ax = 155.0f;
-        DrawAccept(bg, ax, ay, acceptLabel);
+        DrawAccept(bg, ax, ay);
         fn_802C9A70(1);
         fn_802C855C();
         fn_802C2B48();
@@ -316,7 +321,10 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
 
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
-inline int MemCardDialogBg::Setup(const McDialogCfg* cfg) { return RunChoices(this, cfg); }
+inline int MemCardDialogBg::Setup(const McDialogCfg* cfg) {
+    int choiceIndex;
+    return RunChoices(this, cfg, choiceIndex);
+}
 #pragma pop
 
 /* Helper name unproven */
