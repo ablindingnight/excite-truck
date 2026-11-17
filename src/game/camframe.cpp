@@ -12,9 +12,7 @@ double sqrt(double x);
 }
 
 // CfVec: rvec.h's RVec3.
-struct Quat {
-    f32 x, y, z, w;
-};
+#include "game/quat.h"
 
 // CamFrame: rmtx.h's RMtx.
 // The camera record (cammgr/namedcam): game/camrec.h's CamRec (its pose at 0x58).

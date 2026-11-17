@@ -9,9 +9,7 @@ double sin(double x);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
-struct Quat {
-    f32 x, y, z, w;
-};
+#include "game/quat.h"
 
 static inline void QuatCopy(Quat* d, const Quat* s) {
     f32 x = s->x;

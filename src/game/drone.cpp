@@ -22,9 +22,7 @@ void* __construct_array(void* p, void* ctor, void* dtor, u32 size, u32 n);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 }
 
-struct Quat {
-    f32 x, y, z, w;
-};
+#include "game/quat.h"
 
 #include "game/oframe.h"
 #include "game/mathutil.h"

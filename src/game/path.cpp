@@ -19,12 +19,7 @@ void fn_8012C4D8(void* p);                                                      
 extern f32 __float_epsilon[];
 }
 
-struct Quat {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-};
+#include "game/quat.h"
 
 // One key of a path (0x20).
 struct PathKey {
