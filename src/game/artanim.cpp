@@ -416,8 +416,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         }
         p->nKeys = nFrames;
         p->keys = new ("artframe") ArtKey[nFrames];
+        k = 0;
         if (nFrames > 0) {
-            for (k = 0; k < nFrames; k++) {
+            for (; k < nFrames; k++) {
                 ValueNode* f;
                 ArtKey* key = &p->keys[k];
                 ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
