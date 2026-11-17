@@ -1243,6 +1243,8 @@ static inline void SpinXform(f32* out, const f32* in, const f32* m) {
    (f2), not a named value. Open: retail also keeps `air` alive up to the lean load (native replay, see
    handoff/dossier/native_lane/playcar_vf48.md). */
 static inline void NoseDown(u8* p, f32 air, f32 fwd, RVec3& f, RVec3& at2) {
+    // Coefficient name unproven: this named scale preserves retail's first-pass load order.
+    f32 forceScale = -3000.0f;
     f32 lean;
     f32 q;
     u8* c3;
@@ -1251,9 +1253,9 @@ static inline void NoseDown(u8* p, f32 air, f32 fwd, RVec3& f, RVec3& at2) {
     if (BuildMode() == kBuildRetail) {
         PcAddScaled(&f, &F32(c3, 0x54), &F32(c3, 0x48), 0.0f);
         f32 b;
-        f.x *= -3000.0f * air;
-        f.y *= -3000.0f * air;
-        f.z *= -3000.0f * air;
+        f.x *= forceScale * air;
+        f.y *= forceScale * air;
+        f.z *= forceScale * air;
         b = ((Gearbox*)PTR(p, 0x38))->Speed();
         q = lean * lean;
         f.x *= b;
