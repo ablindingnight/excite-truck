@@ -417,10 +417,9 @@ extern const char lbl_8055BAC0[8];  // ""
 extern "C" void fn_80246210(void);
 
 // Runs a memory card choice dialog (up to four options) on the layout, or on the plain background.
-void MemCardDialogMgr::Setup(McDialogCfg* cfg) {
+int MemCardDialogMgr::Setup(McDialogCfg* cfg) {
     if (!layout) {
-        bg.Setup(cfg);
-        return;
+        return bg.Setup(cfg);
     }
     this->cfg = cfg;
     McChoice choices[4];
@@ -458,8 +457,9 @@ void MemCardDialogMgr::Setup(McDialogCfg* cfg) {
     if (cfg->layout) {
         fn_80214D50(5);
     }
-    fn_802146BC(&desc, -999, -999, 1);
+    int result = fn_802146BC(&desc, -999, -999, 1);
     this->cfg = 0;
+    return result;
 }
 
 extern "C" {

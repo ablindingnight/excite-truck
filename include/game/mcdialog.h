@@ -72,7 +72,7 @@ public:
     }
     virtual void Open(void);
     virtual void Close(void);
-    virtual void Setup(McDialogCfg* cfg);
+    virtual int Setup(McDialogCfg* cfg);
     virtual void ShowMsg(const McMsg* m);
     virtual ~MemCardDialogMgr(void);
 
