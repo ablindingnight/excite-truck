@@ -195,7 +195,7 @@ struct RPacket;
 
 class IBallListener {
 public:
-    virtual void Input(RigidBody* src, u8* pressed) = 0;
+    virtual void Input(RigidBody* src, u8* pressed);  /* not pure: the key function lives elsewhere (no vtable here, as in retail) */
     virtual void Status(const char** text, u8* flash) = 0;
     virtual bool GetPos(f32* xz, f32* vxz) = 0;
 };
