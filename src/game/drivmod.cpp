@@ -127,19 +127,18 @@ void fn_801C1CBC(u8* sys, int nv, const DVertDesc* v, int ne, const DEdgeDesc* e
 void* operator new(size_t size, const char* name);
 
 // out = in * m (row vector), safe when out aliases in.
-/* Helper name unproven */ static inline f32 RowDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 static inline void MulVec(ValVec3* out, const ValVec3* in, const PlainValMatrix* m) {
     if (out == in) {
-        f32 x = RowDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
-        f32 y = RowDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
-        f32 z = RowDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
+        f32 x = Dot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        f32 y = Dot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        f32 z = Dot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = RowDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
-        out->y = RowDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
-        out->z = RowDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
+        out->x = Dot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        out->y = Dot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        out->z = Dot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
     }
 }
 
