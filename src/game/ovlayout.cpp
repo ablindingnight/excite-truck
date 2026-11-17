@@ -778,7 +778,7 @@ public:
             for (edit.i = 0; edit.i < arts->a.count; off += sizeof(arts->a.data[0]), edit.i++) {
                 a = (ArtElem*)((u8*)arts->a.data + off);
                 c = ctx;
-                other = c->hover && a == c->hover->target ? 0 : 1;
+                other = !c->hover || a != c->hover->target;
                 col = other ? 0x70FFFFFF : 0xC0FFFFFF;
                 fn_80010B80(fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y), a->w, a->h, col);
                 if (c->active && a == c->active->target) {
@@ -788,7 +788,7 @@ public:
             for (edit.i = 0; edit.i < garts->a.count; edit.i++) {
                 g = &garts->a.data[edit.i];
                 c = ctx;
-                other = c->hover && g == c->hover->target ? 0 : 1;
+                other = !c->hover || g != c->hover->target;
                 if (other) {
                     col = (g->color & 0xFFFFFF) | 0x70000000;
                 } else {
