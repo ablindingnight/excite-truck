@@ -625,7 +625,9 @@ int fn_801F80FC(const char* type) { return strcasecmp(type, "composite") == 0; }
 
 int fn_801F812C(const char* type) { return strcasecmp(type, "animation") == 0; }
 
-int fn_801F815C(const char* type) { return strcasecmp(type, "sound") == 0; }
+static inline const char* ObstacleSoundKey() { return "sound"; }
+
+int fn_801F815C(const char* type) { return strcasecmp(type, ObstacleSoundKey()) == 0; }
 
 ObjDesc* fn_801F9338(ValueNode* vn);
 ObjDesc* fn_801F83E4(ValueNode* vn);
@@ -1166,7 +1168,7 @@ void fn_801F9E04(RaceDesc* r) {
     lbl_8055EC78 = 10000;
     lbl_8055EC64 = 0;
     lbl_8055EC68 = fn_801F96B8("anim");
-    lbl_8055EC70 = fn_801F96B8("sound");
+    lbl_8055EC70 = fn_801F96B8(ObstacleSoundKey());
     fn_8020401C(r);
     fn_801EEFDC(fn_801F9CF8, 0xC);
 }
@@ -1832,12 +1834,14 @@ void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a) {
 }
 }
 
+static inline const char* ObstacleVolumeKey() { return "volume"; }
+
 inline EWSound::EWSound(const PlacedObj* o) : pos(o->frame.pos) {
     f32 vol;
     const char* name;
     ValueNode* node = o->node;
-    name = node->GetString("sound", lbl_8055EC70->GetValue("sound"));
-    vol = node->GetFloat("volume", lbl_8055EC70->GetFloat("volume"));
+    name = node->GetString(ObstacleSoundKey(), lbl_8055EC70->GetValue(ObstacleSoundKey()));
+    vol = node->GetFloat(ObstacleVolumeKey(), lbl_8055EC70->GetFloat(ObstacleVolumeKey()));
     snd = fn_802077A4(name, 8, &lbl_80488898, &pos);
     if (snd) {
         snd->SetVolume(vol);
