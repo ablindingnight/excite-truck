@@ -4,7 +4,7 @@
 // a driver projects the obstacles ahead into 64 lateral bins and picks the nearest free gap. Names are
 // guesses apart from the strings.
 #include "game/common.h"
-#include "game/centerline.h"
+#include "game/idealline.h"
 #include "game/spot.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
@@ -64,12 +64,6 @@ struct Frame {
     Vec3 origin;    // offset 0x24
 };
 
-struct Track {
-    u8 pad0[0x4];
-    IdealPoint* seg;  // offset 0x4
-    u8 pad8[0x2C - 0x8];
-    CenterLine* path;  // offset 0x2C
-};
 
 struct TrackSample {
     IdealPoint* seg;  // offset 0x0
@@ -83,7 +77,7 @@ public:
     virtual void vf0C(void);
     virtual void vf10(void);
     virtual void vf14(void);
-    virtual Track* GetTrack(void);  // 0x18
+    virtual IdealFollower* GetTrack(void);  // 0x18
 };
 
 // The racer's frame accessor (carbody.h's RaceCarRec; retail keeps its weak copy here).
@@ -112,8 +106,8 @@ struct Group {
 };
 
 extern "C" {
-Track* fn_80178C9C(void);
-TrackSample fn_80136594(Track* trk, const Vec2* xz);  // idealline: returns the ILPos by value
+IdealFollower* fn_80178C9C(void);
+TrackSample fn_80136594(IdealFollower* trk, const Vec2* xz);  // idealline: returns the ILPos by value
 int fn_80179650(void);
 int fn_80179630(int view);
 RaceCarRec* fn_8017960C(int id);
@@ -170,9 +164,9 @@ static inline const char* Plural(int n) { return n == 1 ? "" : "s"; }
 
 extern "C" {
 
-void fn_8015EC50(Obst* o, Track* trk) {
+void fn_8015EC50(Obst* o, IdealFollower* trk) {
     const TrackSample& ts = fn_80136594(trk, &o->pos);
-    o->seg = ts.seg - trk->path->points;
+    o->seg = ts.seg - trk->line->points;
 }
 
 static inline int IsTube(TrackObj* o) { return o->id < 1000 && o->tag == 'TUBE'; }
@@ -205,7 +199,7 @@ int fn_8015ED90(ValueNode* list) {
     return count;
 }
 
-void fn_8015EE14(ValueNode* list, Track* trk) {
+void fn_8015EE14(ValueNode* list, IdealFollower* trk) {
     if (list) {
         ValueNode* n;
         for (int i = 0; (n = list->GetChildAt(i)) != 0; i++) {
@@ -309,7 +303,7 @@ void fn_8015F1E4(Obst* o, const TrackObj* t) {
     o->type = 0;
 }
 
-void fn_8015F320(Group** groups, int n, Track* trk) {
+void fn_8015F320(Group** groups, int n, IdealFollower* trk) {
     int i;
     for (i = 0; i < n; i++) {
         Group* g = groups[i];
@@ -329,13 +323,13 @@ void fn_8015F320(Group** groups, int n, Track* trk) {
 
 int fn_8015F3EC(const void* a, const void* b) { return ((const Obst*)a)->seg - ((const Obst*)b)->seg; }
 
-void fn_8015F3FC(Track* trk) {
+void fn_8015F3FC(IdealFollower* trk) {
     if (lbl_8055E29C->Size() > 0) {
         int nseg;
         int j;
         int s;
         fn_80265DCC(lbl_8055E29C->a.data, lbl_8055E29C->a.count, sizeof(Obst), fn_8015F3EC);
-        nseg = trk->path->Count();
+        nseg = trk->line->Count();
         lbl_8055E2A0 = new ("ai-obsindex") DynArray<Obst*>(nseg);
         j = 0;
         for (s = 0; s < nseg; s++) {
@@ -371,7 +365,7 @@ void fn_8015F558(void) {
 }
 
 void fn_8015F670(Group** groups, int n) {
-    Track* trk = fn_80178C9C();
+    IdealFollower* trk = fn_80178C9C();
     ValueTable* vt = fn_80131810("aiobst.val");
     ValueNode* objs;
     int total;
@@ -611,7 +605,7 @@ void Spot::From(const Vec2& v) {
 
 inline int Abs(int x) { return x < 0 ? -x : x; }
 inline int MinI(int a, int b) { return b < a ? b : a; }
-inline Track* GetTrack(RaceCarRec* rc) { return ((TrackPosOwner*)rc->src)->GetTrack(); }
+inline IdealFollower* GetTrack(RaceCarRec* rc) { return ((TrackPosOwner*)rc->src)->GetTrack(); }
 
 extern "C" {
 
@@ -620,8 +614,8 @@ extern "C" {
 int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
     int found = 0;
     if (lbl_8055E2A0) {
-        Track* trk = ((TrackPosOwner*)rc->src)->GetTrack();
-        int seg = trk->seg - trk->path->points;
+        IdealFollower* trk = ((TrackPosOwner*)rc->src)->GetTrack();
+        int seg = trk->il.seg - trk->line->points;
         Frame f;
         f32 range;
         Opts opts;

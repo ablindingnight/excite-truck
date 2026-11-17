@@ -64,7 +64,7 @@ struct MP3Info {
     s32 pcmBytes;     // offset 0x10
 };
 
-struct Track {
+struct Mp3Track {
     char dir[0x200];   // offset 0x0
     char file[0x208];  // offset 0x200
     char name[0x208];  // offset 0x408
@@ -131,8 +131,8 @@ static Drive lbl_805076B8;
 static DriveCache lbl_805076C4;
 static u8 lbl_805076D8[0x140];
 static u8 lbl_80507818[0x1000];
-static Track lbl_80508818[100];  // scanned on the thread
-static Track lbl_8052E658[100];  // the main thread's copy
+static Mp3Track lbl_80508818[100];  // scanned on the thread
+static Mp3Track lbl_8052E658[100];  // the main thread's copy
 static u8 lbl_805544A0[0x4000] __attribute__((aligned(32)));  // thread stack
 static u8 lbl_805584A0[0x18];    // OSMutex
 static u8 lbl_805584B8[0x328];   // OSThread
@@ -414,7 +414,7 @@ int fn_802EA5D4(const char* dir, int depth) {
     char* shortName;
     char* name;
     char* ext;
-    Track* t;
+    Mp3Track* t;
     int r;
     fn_801345D8(pat, 0x100, "%s/*", dir);
     r = VFFindFirst(pat, 0x71, &fd);
