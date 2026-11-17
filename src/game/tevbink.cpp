@@ -9,6 +9,7 @@
 #include <revolution/GX/GXPixel.h>
 #include <revolution/GX/GXTev.h>
 #include <revolution/GX/GXTexture.h>
+#include "game/strcopy.h"
 
 // GXTexObj: the SDK's.
 
@@ -737,15 +738,6 @@ void fn_802E1058(void) {
 }
 
 /* Bounded copy and append (n = buffer size), the same pair as carmodel's. */
-static inline void StrCopy(char* d, const char* s, int n) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void StrCat(char* d, const char* s, int n) {
     while (*d) {
@@ -753,7 +745,7 @@ static inline void StrCat(char* d, const char* s, int n) {
         d++;
     }
     if (n > 0) {
-        StrCopy(d, s, n);
+        SafeStrCopy(d, s, n);
     }
 }
 
