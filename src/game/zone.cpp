@@ -140,7 +140,13 @@ static inline f32 Clamp01(f32 x) {
 static inline f32 Sum(f32 a, f32 b) { return a + b; }
 
 // One gate: two posts on the ground plane, an optional ring height.
-class Gate {
+// The end points: retail copies them as one 24-byte block in Gate::operator=, so they form one struct.
+struct GateSeg {
+    ZoneVec3 a;     // offset 0x0
+    ZoneVec3 b;     // offset 0xC
+};
+
+class Gate : public GateSeg {
 public:
     Gate(void);
     void Init(ValueNode* node, f32 w);
@@ -148,8 +154,6 @@ public:
     Gate& operator=(const Gate& o);
     ZoneVec3 Center(void) const { return ZoneVec3(LerpDiffFirst(a.x, b.x, 0.5f), LerpDiffFirst(a.y, b.y, 0.5f), LerpDiffFirst(a.z, b.z, 0.5f)); }
 
-    ZoneVec3 a;     // offset 0x0
-    ZoneVec3 b;     // offset 0xC
     f32 t;      // offset 0x18
     s16 h;      // offset 0x1C
     u8 ring;    // offset 0x1E
@@ -1410,15 +1414,8 @@ void Gate::Scale(f32 f) {
 #undef s
 }
 
-// MATCHING-AID: the target copies both end points as one 24-byte block (six lwz, six stw), which means
-// a and b were probably one segment struct in the original. GateSeg stands in for that type.
-struct GateSeg {
-    ZoneVec3 a;
-    ZoneVec3 b;
-};
-
 Gate& Gate::operator=(const Gate& o) {
-    *(GateSeg*)&a = *(const GateSeg*)&o.a;
+    GateSeg::operator=(o);
     t = o.t;
     h = o.h;
     ring = o.ring;
