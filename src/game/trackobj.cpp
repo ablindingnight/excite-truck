@@ -123,16 +123,16 @@ void fn_801E6B98(void* anim);
 }
 
 // A loaded class file (8).
-struct FileEntry {
-    FileEntry(const char* path) { table = fn_80131810(path); }
-    ~FileEntry(void) {
+struct ClassFile {
+    ClassFile(const char* path) { table = fn_80131810(path); }
+    ~ClassFile(void) {
         if (table) {
             fn_80131818(table);
         }
         table = 0;
     }
     ValueTable* table;  // offset 0x0
-    FileEntry* next;    // offset 0x4
+    ClassFile* next;    // offset 0x4
 };
 
 typedef int (*FacingFn)(const OFrame* f);
@@ -204,16 +204,9 @@ struct SolBuilder {
     SolObj* head;  // offset 0x0
 };
 
-struct SolEntry {
-    u8 pad0[4];
-    OFrame frame;  // offset 0x4
-    u8 pad34[4];
-    s32 id;        // offset 0x38
-};
-
 struct SolFile {
     s32 count;          // offset 0x0
-    SolEntry** ents;    // offset 0x4
+    StaticCollObject** ents;    // offset 0x4
     u8 pad8[0x14 - 0x8];
     void (*done)(void);  // offset 0x14
 };
@@ -505,7 +498,7 @@ ObjDesc* lbl_8055EC38;
 u8 lbl_8055EC3C;
 EWState lbl_8055EC40;
 u8 lbl_8055EC42;
-FileEntry* lbl_8055EC44;
+ClassFile* lbl_8055EC44;
 StaticObject* lbl_8055EC48;
 StaticOb* lbl_8055EC4C;
 StaticOb* lbl_8055EC50;
@@ -985,7 +978,7 @@ void fn_801F94CC(const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vsprintf(buf, fmt, ap);
-    FileEntry* e = new ("class_file") FileEntry(buf);
+    ClassFile* e = new ("class_file") ClassFile(buf);
     if (e->table) {
         e->next = lbl_8055EC44;
         lbl_8055EC44 = e;
@@ -996,7 +989,7 @@ void fn_801F94CC(const char* fmt, ...) {
 
 ValueNode* fn_801F95C4(int (*pred)(ValueNode*), const char* name) {
     ValueNode* n = 0;
-    FileEntry* e = lbl_8055EC44;
+    ClassFile* e = lbl_8055EC44;
     while (!n && e) {
         int i = 0;
         while ((n = e->table->GetChild(i)) != 0) {
@@ -1217,7 +1210,7 @@ void fn_801F9E04(RaceDesc* r) {
 
 void fn_801F9FA0(StaticOb** list);
 void fn_801FA010(AnimInst** list);
-void fn_801FA0B0(FileEntry** list);
+void fn_801FA0B0(ClassFile** list);
 void fn_801FA138(EWSound** list);
 
 void fn_801F9F08(void) {
@@ -1258,10 +1251,10 @@ void fn_801FA010(AnimInst** list) {
     *list = 0;
 }
 
-void fn_801FA0B0(FileEntry** list) {
-    FileEntry* c = *list;
+void fn_801FA0B0(ClassFile** list) {
+    ClassFile* c = *list;
     while (c) {
-        FileEntry* n = c->next;
+        ClassFile* n = c->next;
         delete c;
         c = n;
     }
@@ -1449,9 +1442,9 @@ void fn_801FA9AC(void) {
         for (int i = 0; i < lbl_8055EC58; i++) {
             StaticOb* s = lbl_8055EC54[i];
             for (int j = 0; j < f->count; j++) {
-                SolEntry* e = f->ents[j];
-                if (e->id == s->id) {
-                    s->vol = &e->frame;
+                StaticCollObject* e = f->ents[j];
+                if ((s32)e->f38 == s->id) {
+                    s->vol = (OFrame*)e->pad4;
                     break;
                 }
             }
