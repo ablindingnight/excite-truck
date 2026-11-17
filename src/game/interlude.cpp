@@ -1187,10 +1187,12 @@ void debug_event(void) {
             }
             break;
         }
-        case 0:
-            fn_802E30C8("debug_event: %s", ((DebugEvent*)e)->msg);
-            fn_80179758("%s", ((DebugEvent*)e)->msg);
+        case 0: {
+            DebugEvent* d = (DebugEvent*)e;
+            fn_802E30C8("debug_event: %s", d->msg);
+            fn_80179758("%s", d->msg);
             break;
+        }
         case 1: {
             CamEvent* c = (CamEvent*)e;
             CamPlay* p = (CamPlay*)s;
