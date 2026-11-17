@@ -816,7 +816,7 @@ void fn_8029DDB8(WaterPool* p) {
             const s16 left = center[-1];
             const s16 belowHeight = h[x + (y + 1) * p->nx];
             const s16 aboveHeight = h[x + (y - 1) * p->nx];
-            int sum = (belowHeight + aboveHeight) + (right + left);
+            int sum = aboveHeight + left + right + belowHeight;
             f32 f = damp * (a * height + c * sum - previous);
             int v = MAX((int)f, -32768);
             o[i] = MIN(v, 32767);
