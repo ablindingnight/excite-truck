@@ -11,14 +11,7 @@ ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
 }
 
-struct SurfType {
-    f32 grip;      // offset 0x0
-    f32 slip;      // offset 0x4
-    f32 drag;      // offset 0x8
-    s8 sound;      // offset 0xC
-    u8 effect;     // offset 0xD
-    s32 soundType;  // offset 0x10
-};
+#include "game/surftype.h"
 
 struct SurfName {
     const char* name;

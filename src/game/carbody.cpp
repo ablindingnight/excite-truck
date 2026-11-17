@@ -1226,12 +1226,7 @@ struct CbSolCx {
     s32 surface[4];     // offset 0x4, per wheel
 };
 
-struct SurfType {
-    f32 grip;   // offset 0x0
-    f32 slip;   // offset 0x4
-    f32 drag;   // offset 0x8
-    s8 sound;   // offset 0xC
-};
+#include "game/surftype.h"
 
 class CbFlagsV {
 public:
