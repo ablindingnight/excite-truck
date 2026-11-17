@@ -837,18 +837,23 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         }
         fn_8018E330(p);
     }
+    DentVec bp;
+    bp.x = 0.0f;
+    bp.y = 0.0f;
+    bp.z = 0.0f;
     DentNode* best = 0;
     f32 bestD = 100000.0f;
     for (int i = 1; i < ((CarBody*)p)->f5F8; i++) {
         DentNode* d = (DentNode*)(((u8*&)((CarBody*)p)->layout) + 4) + i;
         if (!d->fixed) {
-            cand.x = d->pos.x + ((DentCar*)p)->goal[i].x * 1.8f;
-            cand.y = d->pos.y + ((DentCar*)p)->goal[i].y * 1.8f;
-            cand.z = d->pos.z + ((DentCar*)p)->goal[i].z * 1.8f;
+            DmgAddScaled(&cand, &d->pos, &((DentCar*)p)->goal[i], 1.8f);
             f32 dd = PSVECSquareDistance((const Vec*)&cand.x, (const Vec*)da.v);
             if (dd < 2.25f && dd < bestD) {
                 best = d;
                 bestD = dd;
+                bp.x = cand.x;
+                bp.y = cand.y;
+                bp.z = cand.z;
             }
         }
     }
