@@ -25,6 +25,7 @@
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -153,13 +154,11 @@ static inline int ClampI(int x, int lo, int hi) {
 f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 f32 Min(f32 a, f32 b) { return a < b ? a : b; }
 inline f32 Floor(f32 x) { return floor(x); }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
-static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
+static inline f32 LerpDiffFirst(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
 static inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;
     return r > 0.0f ? r : 0.0f;
 }
-static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 Sum(f32 a, f32 b) { return a + b; }
 
 // One gate: two posts on the ground plane, an optional ring height.
@@ -169,7 +168,7 @@ public:
     void Init(ValueNode* node, f32 w);
     void Scale(f32 f);
     Gate& operator=(const Gate& o);
-    ZoneVec3 Center(void) const { return ZoneVec3(Lerp(a.x, b.x, 0.5f), Lerp(a.y, b.y, 0.5f), Lerp(a.z, b.z, 0.5f)); }
+    ZoneVec3 Center(void) const { return ZoneVec3(LerpDiffFirst(a.x, b.x, 0.5f), LerpDiffFirst(a.y, b.y, 0.5f), LerpDiffFirst(a.z, b.z, 0.5f)); }
 
     ZoneVec3 a;     // offset 0x0
     ZoneVec3 b;     // offset 0xC
@@ -219,7 +218,7 @@ struct Tune {
 
     f32 BonusAt(f32 t) const {
         f32 v = timeBonus;
-        return Lerp(v, 0.0f, Clamp01(InvLerp(0.0f, timeBonusLen, t - timeBonusStartT)));
+        return LerpDiffFirst(v, 0.0f, Clamp01(InvLerp(0.0f, timeBonusLen, t - timeBonusStartT)));
     }
 };
 
@@ -293,7 +292,6 @@ static inline int NearZero(f32 x) {
     return value <= __float_epsilon[0];
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 extern const f32 lbl_8056149C;  // 5.0: seconds a gate adds
 
@@ -303,7 +301,7 @@ struct ZoneCar {
     ZoneCar(void);
     f32 BonusScale(void) {
         if (tC8.Active()) {
-            return Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.5f, 1.0f, tC8.Progress())));
+            return LerpDiffFirst(0.0f, 1.0f, Clamp01(InvLerp(0.5f, 1.0f, tC8.Progress())));
         }
         return 1.0f;
     }
@@ -327,7 +325,7 @@ struct ZoneCar {
             timeLeft = Clamp01(old + dt / lbl_8056149C);
             if (old < timeLeft) {
                 gainT = timeLeft - old;
-            } else if (NearZero(timeLeft) && !(AbsF(old) <= __float_epsilon[0])) {
+            } else if (NearZero(timeLeft) && !(FAbs(old) <= __float_epsilon[0])) {
                 EndCombo();
                 EndStreak();
                 tA8.Start();
@@ -932,7 +930,6 @@ static inline f32 SumProd(f32 a, f32 b, f32 c, f32 d) { return a * b + c * d; }
 static inline f32 Dot(const V2& a, const V2& b) { return SumProd(a.x, b.x, a.y, b.y); }
 /* Dot of a turned a quarter (a.y, -a.x) with b. */
 static inline f32 Cross(const V2& a, const V2& b) { return SumProd(a.y, b.x, -a.x, b.y); }
-static inline f32 LenSq(f32 x, f32 y) { return x * x + y * y; }
 static inline f32 DistSq(const V2& a, const V2& b) {
     V2C d(a.x - b.x, a.y - b.y);
     return d.x * d.x + d.y * d.y;
@@ -960,7 +957,7 @@ static inline void TailPoint(V2& q, const V2& p, Truck* t) {
     Offset(q, p, dir, -0.083416760f);
 }
 static inline void CenterOf(ZoneVec3& out, const Gate* g) {
-    out.Set(Lerp(g->a.x, g->b.x, 0.5f), Lerp(g->a.y, g->b.y, 0.5f), Lerp(g->a.z, g->b.z, 0.5f));
+    out.Set(LerpDiffFirst(g->a.x, g->b.x, 0.5f), LerpDiffFirst(g->a.y, g->b.y, 0.5f), LerpDiffFirst(g->a.z, g->b.z, 0.5f));
 }
 
 // Seconds a gate adds (declared extern above). Defined here, between the first function that pools 0.5f and
@@ -997,7 +994,7 @@ int fn_8013CBC0(ZoneCar* zm, int car) {
     int nearA = DistSq(a, p) < DistSq(b, p);
     f32 wa = nearA ? zm->gateWidth * 0.5f : 0.0f;
     f32 wb = !nearA ? zm->gateWidth * 0.5f : 0.0f;
-    f32 len = sqrt(LenSq(ab.x, ab.y));
+    f32 len = sqrt(Len2(ab.x, ab.y));
     len = 0.01f > len ? 0.01f : len;
     Scale(ab, 1.0f / len);
     AddScaled(a, ab, 0.65f + wa);
@@ -1741,7 +1738,7 @@ extern "C" void fn_zone_WideOpen(ILayout* l, int mode, int mult, f32* out) {
 void ZoneMaster::DrawBonus(int p, ZoneCar* c) const {
     if (c->gate) {
         f32 k = c->BonusScale();
-        f32 a = Lerp(1.0f, 0.0f, Clamp01(InvLerp(0.0f, lbl_8042FB3C.timeBonusLen,
+        f32 a = LerpDiffFirst(1.0f, 0.0f, Clamp01(InvLerp(0.0f, lbl_8042FB3C.timeBonusLen,
                                                  fn_8013CB3C() - c->bonusT - lbl_8042FB3C.timeBonusStartT)));
         ArtElem* pie = mainLyt->FindArt("bonus_pie");
         f32 r = pie->w * k;
@@ -1765,7 +1762,7 @@ void ZoneMaster::DrawBonus(int p, ZoneCar* c) const {
             star.pos.y = pie->pos.y;
             fn_8013CB90(&star);
             fn_80147EE0(&star, k);
-            fn_801476D8(&star, fn_80147C50(0xFFFFFF, 0xFFFFFFFF, Lerp(1.0f, 0.0f, Clamp01(InvLerp(0.2f, 0.0f, a)))),
+            fn_801476D8(&star, fn_80147C50(0xFFFFFF, 0xFFFFFFFF, LerpDiffFirst(1.0f, 0.0f, Clamp01(InvLerp(0.2f, 0.0f, a)))),
                         tex[3]);
         }
     }
@@ -1773,15 +1770,15 @@ void ZoneMaster::DrawBonus(int p, ZoneCar* c) const {
 
 void ZoneMaster::DrawNothing(int p, ZoneCar* c) const {}
 
-extern "C" int fn_8013F438(f32 t) { return Lerp(200.0f, 0.0f, Clamp01(InvLerp(0.2f, 0.8f, t))); }
+extern "C" int fn_8013F438(f32 t) { return LerpDiffFirst(200.0f, 0.0f, Clamp01(InvLerp(0.2f, 0.8f, t))); }
 
 extern "C" void fn_8013F498(f32 t, V2* a, V2* b) {
-    f32 s = Lerp(150.0f, 50.0f, Clamp01(InvLerp(0.0f, 1.0f, t)));
+    f32 s = LerpDiffFirst(150.0f, 50.0f, Clamp01(InvLerp(0.0f, 1.0f, t)));
     f32 h = s / 4;
     V2 c;
     V2 d1;
     V2 d2;
-    f32 y = Lerp(0.0f, 50.0f, Clamp01(InvLerp(0.0f, 1.0f, t * t)));
+    f32 y = LerpDiffFirst(0.0f, 50.0f, Clamp01(InvLerp(0.0f, 1.0f, t * t)));
     c.x = 0.0f;
     c.y = y;
     d1.x = -s;
@@ -1805,7 +1802,7 @@ extern "C" void fn_zone_LevelTitle(ILayout* l) {
 void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
     if (level > 0) {
         if (t74.Active()) {
-            f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t74.Progress())));
+            f32 a = LerpDiffFirst(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t74.Progress())));
             TextElem* it = mainLyt->Find("middle_message");
             if (it) {
                 TextElem m;
@@ -1829,7 +1826,7 @@ void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
                 }
             }
         } else if (t6C.Active()) {
-            f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t6C.Progress())));
+            f32 a = LerpDiffFirst(0.0f, 1.0f, Clamp01(InvLerp(0.6f, 1.0f, t6C.Progress())));
             TextElem* it = mainLyt->Find("middle_message");
             if (it) {
                 TextElem m;
@@ -1850,7 +1847,7 @@ void ZoneMaster::DrawMissed(int p, ZoneCar* c) const {
         V2 b;
         f32 s;
         fn_8013F498(t, &a, &b);
-        s = Lerp(1.8f, 1.0f, Clamp01(InvLerp(0.4f, 0.9f, t)));
+        s = LerpDiffFirst(1.8f, 1.0f, Clamp01(InvLerp(0.4f, 0.9f, t)));
         fn_8000FF88(col, 12, "TIME MISSED", s, 0.0f, fn_8013EFBC(a.y));
     }
     if (c->timeLeft < lbl_8042FB3C.lowTimeWarnT) {
@@ -2009,7 +2006,7 @@ void ZoneMaster::DrawTimer(int p, ZoneCar* c) const {
             if (k == 2) {
                 col = 0xFFFFFF;
             }
-            fn_80147BD0(arts[k - 1], arts[k], -1, col, tex[3], Ease(Lerp(0.0f, 1.0f, Clamp01(InvLerp(keys[k - 1], keys[k], age)))));
+            fn_80147BD0(arts[k - 1], arts[k], -1, col, tex[3], Ease(LerpDiffFirst(0.0f, 1.0f, Clamp01(InvLerp(keys[k - 1], keys[k], age)))));
         }
     }
 }
@@ -2052,9 +2049,9 @@ void ZoneMaster::DrawGateBonus(int p, ZoneCar* c) const {
             fn_8013CB90(&s0);
             if (c->stats.bonus > 0) {
                 fn_80147BD0(&s0, &s2, -1, 0xFFFFFF, tex[3],
-                            Lerp(0.0f, 1.0f, Clamp01(InvLerp(0.0f, c->tD8.len / 2, fn_8013CB3C() - c->tD8.start))));
+                            LerpDiffFirst(0.0f, 1.0f, Clamp01(InvLerp(0.0f, c->tD8.len / 2, fn_8013CB3C() - c->tD8.start))));
                 fn_80147BD0(&s1, &s2, -1, 0xFFFFFF, tex[3],
-                            Lerp(0.0f, 1.0f,
+                            LerpDiffFirst(0.0f, 1.0f,
                                  Clamp01(InvLerp(c->tD8.len / 2, c->tD8.len, fn_8013CB3C() - c->tD8.start))));
             } else {
                 fn_80147BD0(&s1, &s2, -1, 0xFFFFFF, tex[3], Clamp01(c->tD8.Progress() * 2.0f));
@@ -2180,7 +2177,7 @@ int ZoneHud::Update(ZoneCar* c) {
     if (tb && t > 0.0f) {
         f32 now = lbl_8055E3C8;
         f32 u = Clamp01(InvLerp(0.0f, 1.0f, now - t));
-        shown = Lerp(0.0f, tb + 0.5f, u);
+        shown = LerpDiffFirst(0.0f, tb + 0.5f, u);
         left = tb - shown;
     }
     fn_801345D8(bonus, 0x14, "%d", shown);
@@ -2693,7 +2690,7 @@ inline int ZoneMaster::vf3C(int p) {
     }
     if (!fn_80161C38()) {
         if (t < t0) {
-            f32 a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(t1, t2, t)));
+            f32 a = LerpDiffFirst(0.0f, 1.0f, Clamp01(InvLerp(t1, t2, t)));
             TextElem* b0 = mainLyt->Find("star_body_0");
             TextElem* b1 = mainLyt->Find("star_body_1");
             UpdateScoreOverlays(fn_801E866C(p), 0);
@@ -2712,7 +2709,7 @@ inline int ZoneMaster::vf3C(int p) {
             TextElem* tb;
             TextElem* bt;
             fn_8014784C(mainLyt, "stop_watch_art", "stop_watch_artset", 0);
-            a = Lerp(0.0f, 1.0f, Clamp01(InvLerp(t4, t5, t)));
+            a = LerpDiffFirst(0.0f, 1.0f, Clamp01(InvLerp(t4, t5, t)));
             tb = mainLyt->Find("time_body_0");
             bt = mainLyt->Find("big_timer");
             if (h0 && h1 && tb && bt) {

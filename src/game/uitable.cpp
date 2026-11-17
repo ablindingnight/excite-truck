@@ -69,17 +69,15 @@ public:
 };
 
 #include "game/uilists.h"
+#include "game/mathutil.h"
 
 
 
 static inline f32 Snap(f32 v, f32 s) { return s * (f32)(int)(0.5f + v / s); }
 static inline int NearEq(f32 a, f32 b) { return (f32)__fabs(a - b) <= __float_epsilon[0]; }
 static inline bool NearEq2(f32 a, f32 b) { return (f32)__fabs(a - b) <= __float_epsilon[0]; }
-static inline int MinI(int a, int b) { return (b < a) ? b : a; }
-static inline int MaxI(int a, int b) { return (b > a) ? b : a; }
-static inline int MinI2(int a, int b) { return (a < b) ? a : b; }
-static inline int MaxI2(int a, int b) { return (a > b) ? a : b; }
-static inline int ClampI(int v, int lo, int hi) { return MaxI(lo, MinI(hi, v)); }
+static inline int MaxIRev(int a, int b) { return (b > a) ? b : a; }
+static inline int ClampI(int v, int lo, int hi) { return MaxIRev(lo, MinIRev(hi, v)); }
 
 ModuleTag lbl_8055EFD8;
 UnkStatic123 lbl_80497DF8;
