@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/menu.h"
 #include "game/menustate.h"
 extern "C" {
@@ -26,7 +27,6 @@ void fn_80230E90(int a);
 void fn_80214AF0(int s);
 void fn_80214B44(int i);
 void fn_80214A9C(int s);
-void fn_80235380(u8* p);
 s32 fn_80129AF4(void);
 int fn_801298E8(void* info, s32 ch);
 void fn_80214FD8(const char* title, const char* msg);
@@ -35,7 +35,6 @@ void fn_802328D4(u8* p);
 u8* gxGetImage(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 u8* fn_80232578(const char* name);
-u8* fn_8023512C(const char* art);
 void fn_802C8530(void);
 void fn_802C87B4(int a, int b, s32 w, s32 h);
 void fn_802C88BC(int a);
@@ -98,7 +97,7 @@ public:
     virtual void Draw(void);
 
     f32 frac;  // offset 0x18
-    u8* art;   // offset 0x1C
+    gArtSet* art;  // offset 0x1C
 };
 
 #include "game/mcdialog.h"
@@ -553,11 +552,6 @@ int McChoiceState::Key(int key) {
 
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
-f32 fn_80235EF0(u8* art, int part);
-f32 fn_80235F64(u8* art, int part);
-void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
-void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
-void fn_80235758(u8* art, int part, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
 void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
 }
 
