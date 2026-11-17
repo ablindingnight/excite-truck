@@ -853,7 +853,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             return;
         }
         h = di;
-        h.v[1] = h.v[1] > 0.0f ? 0.0f : h.v[1];
+        h.v[1] = MinF(h.v[1], 0.0f);
         f32 hm = PSVECMag((const Vec*)h.v);
         if (other >= 0) {
             hm *= 0.3f;
