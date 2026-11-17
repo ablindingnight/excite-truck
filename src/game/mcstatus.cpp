@@ -316,16 +316,16 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
 
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
-#pragma push
-#pragma opt_propagation off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 inline int MemCardDialogBg::Setup(const McDialogCfg* cfg) { return RunChoices(this, cfg); }
 #pragma pop
-#pragma pop
 
-// Draws the background (or a black screen), the title, the message word-wrapped at 480 units ('^' is a
-// space that does not break) and, when m->frac is set, a row of progress dots.
-static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
-    char dots[0x40];
+/* Helper name unproven */
+static inline void ClearProgressDots(char* dots) { strcpy(dots, ""); }
+/* Helper name unproven */
+static inline void AppendProgressDot(char* dots) { strcat(dots, "."); }
+
+/* Helper name unproven */
+static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
     PlainValMatrix cam;
     char text[0x200];
     fn_802C8530();
@@ -358,7 +358,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
     }
     y -= 40.0f;
     strcpy(text, msg);
-    char* p = text;
+    p = text;
     while (strlen(p)) {
         struct { char* brk; } wrap = { 0 };
         char line[0x200] = {0};
@@ -383,7 +383,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
             }
             *wrap.brk = 0;
         } else {
-            wrap.brk = &p[i] - 1;
+            wrap.brk = &p[(int)i - 1];
         }
         fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
         fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
@@ -395,20 +395,26 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
         }
         y -= 20.0f;
     }
+}
+
+// Draws the plain dialog and its progress dots.
+inline void MemCardDialogBg::ShowMsg(const McMsg* m) {
+    char* p;
+    DrawDialog(this, m, p);
+    char dots[0x40];
     f32 frac = m->frac;
     if (!(AbsF(frac) <= __float_epsilon[0])) {
-        strcpy(dots, "");
+        ClearProgressDots(dots);
         for (int n = 0; n < (int)(30.0f * frac); n++) {
-            strcat(dots, ".");
+            AppendProgressDot(dots);
         }
-        fn_802335F0(dots, bg->font2, -270.0f, -138.0f);
+        fn_802335F0(dots, this->font2, -270.0f, -138.0f);
     }
     fn_802C9A70(1);
     fn_802C855C();
     fn_802C2B48();
 }
 
-inline void MemCardDialogBg::ShowMsg(const McMsg* m) { DrawDialog(this, m); }
 /* Helper name unproven */
 static inline void OpenDialog(MemCardDialogMgr* self) {
     self->open = 1;
