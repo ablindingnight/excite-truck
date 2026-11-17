@@ -613,7 +613,9 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     {
         TruckDraw* d = map->trucks;
         int part = view == d->self ? 1 : 3;
-        f32 size = 1.0f * fn_80235EF0(d->art, part);
+        f32 size = fn_80235EF0(d->art, part);
+        f32 one = 1.0f;
+        size = one * size;  // retail keeps the 1.0f multiply (fmuls after the call)
         fn_80235AFC(d->art, part, -1, x + w / 2.0f, y - h / 2.0f, 0.0f, size, size, d->icons[view].angle);
     }
     {
