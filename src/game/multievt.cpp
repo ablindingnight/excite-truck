@@ -632,12 +632,11 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         *diff = 0;
     }
     DiffPicker level;
-    if (*diff == lbl_802FA4B0[0].id) {
-        level.cur = 0;
-    } else if (*diff == lbl_802FA4B0[1].id) {
-        level.cur = 1;
-    } else if (*diff == lbl_802FA4B0[2].id) {
-        level.cur = 2;
+    for (int i = 0; i < 3; i++) {
+        if (*diff == lbl_802FA4B0[i].id) {
+            level.cur = i;
+            break;
+        }
     }
     StatsPage stats(&events);
     lbl_8055F294 = stats.text;
