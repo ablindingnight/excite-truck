@@ -27,6 +27,11 @@ struct StuntCar {
 
 #include "game/scolor.h"
 #include "game/mathutil.h"
+#include "game/vecmul.h"
+#include "game/tscale.h"
+#include "game/tadds.h"
+#include "game/round.h"
+#include "game/nearzero.h"
 
 extern "C" {
 int fn_80129D90(int seed, int lo, int hi);  // random int
@@ -78,37 +83,11 @@ extern void* lbl_80488648[];  // car models
 extern f32 __float_epsilon[];    // FLT_EPSILON
 
 
-static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
-    if (out == in) {
-        f32 x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        f32 y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        f32 z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-        out->x = x;
-        out->y = y;
-        out->z = z;
-    } else {
-        out->x = Dot3(in->x, m[0].x, in->y, m[1].x, in->z, m[2].x);
-        out->y = Dot3(in->x, m[0].y, in->y, m[1].y, in->z, m[2].y);
-        out->z = Dot3(in->x, m[0].z, in->y, m[1].z, in->z, m[2].z);
-    }
-}
-
-static inline void Scale(Vec* out, const Vec* in, f32 s) {
-    out->x = in->x * s;
-    out->y = in->y * s;
-    out->z = in->z * s;
-}
-
-static inline void AddScaled(Vec* out, const Vec* in, const Vec* d, f32 s) {
-    out->x = in->x + d->x * s;
-    out->y = in->y + d->y * s;
-    out->z = in->z + d->z * s;
-}
 
 
-static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
-static inline int IsZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
+
+
 
 static inline u32 TrailColor(int a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 
@@ -303,8 +282,8 @@ void fn_802AA100(Vec* out, const Vec* v, const Vec* a, const Vec* b) {
     f32 db = PSVECDotProduct(v, b);
     Vec ta;
     Vec tb;
-    Scale(&ta, a, da);
-    Scale(&tb, b, db);
+    TScale(&ta, a, da);
+    TScale(&tb, b, db);
     out->x = ta.x + tb.x;
     out->y = ta.y + tb.y;
     out->z = ta.z + tb.z;
@@ -344,8 +323,6 @@ static f32 Smooth(f32 t) {
     return t * t * (3.0f - 2.0f * t);
 }
 
-// Pass the scale by value to retain the retail single-precision multiply.
-static inline f32 TrailWeight(f32 scale, f32 value) { return scale * value; }
 
 static inline f32 TrailAlpha(f32 growth, f32 power) {
     f32 fraction = MIN(1.0f, (power - 0.35f) / 0.65f);
@@ -393,7 +370,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                 if (d > best) {
                     best = d;
                     s[0] = w[j];
-                    Scale(&s[1], &w[j], -1.0f);
+                    TScale(&s[1], &w[j], -1.0f);
                 }
             }
             p->pts[0].x = s[0].x + car->pos.x;
@@ -410,19 +387,20 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                 f32 m = -PSVECMag((const Vec*)&car->vel);
                 f32 unitWeight = 1.0f;
                 f32 k = m * lbl_8055CC68;
-                Scale(&a, &a, TrailWeight(unitWeight, t * k));
-                Scale(&b, &b, TrailWeight(unitWeight, (1.0f - t) * k));
+                // the scale arrives as an inline parameter (mathutil Mul) to keep the retail single-precision multiply
+                TScale(&a, &a, Mul(unitWeight, t * k));
+                TScale(&b, &b, Mul(unitWeight, (1.0f - t) * k));
                 sum.x = b.x + a.x;
                 sum.y = b.y + a.y;
                 sum.z = b.z + a.z;
-                AddScaled(&p->pts[i * 2], &p->pts[i * 2 - 2], &sum, 0.125f);
-                AddScaled(&p->pts[i * 2 + 1], &p->pts[i * 2 - 1], &sum, 0.125f);
+                TAddS(&p->pts[i * 2], &p->pts[i * 2 - 2], &sum, 0.125f);
+                TAddS(&p->pts[i * 2 + 1], &p->pts[i * 2 - 1], &sum, 0.125f);
                 if (!(stepTime <= __float_epsilon[0]) && fn_80287BC8(0.0f, 1.0f) < p->alpha * p->facing &&
                     fn_80287BC8(0.0f, 1.0f) > t) {
                     f32 r = fn_80287BC8(0.25f, 0.75f);
                     Vec q;
                     SetV3(&q, Lerp(p->pts[i * 2].x, p->pts[i * 2 + 1].x, r), Lerp(p->pts[i * 2].y, p->pts[i * 2 + 1].y, r), Lerp(p->pts[i * 2].z, p->pts[i * 2 + 1].z, r));
-                    AddScaled(&q, &q, &car->axes[1], -1.0f);
+                    TAddS(&q, &q, &car->axes[1], -1.0f);
                     EmitCopy(lbl_8055F924->e1, *(ValVec3*)&q, car->vel);
                 }
             }
@@ -436,8 +414,8 @@ static inline void BoxPoint(Vec* pos, const StuntCar* car, f32 ang, f32 hx, f32 
     Vec x = *(const Vec*)&car->axes[0];
     Vec z = *(const Vec*)&car->axes[2];
     *(WV3*)pos = *(const WV3*)&car->pos;
-    AddScaled(pos, pos, &x, hx * (f32)cos(ang));
-    AddScaled(pos, pos, &z, hz * (f32)sin(ang));
+    TAddS(pos, pos, &x, hx * (f32)cos(ang));
+    TAddS(pos, pos, &z, hz * (f32)sin(ang));
 }
 
 void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
@@ -458,7 +436,7 @@ void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
         Vec pos;
         WV3 vel;
         BoxPoint(&pos, car, ang, hx, hz);
-        AddScaled(&pos, &pos, &car->axes[1], fn_80287BC8(0.0f, 2.0f * hy));
+        TAddS(&pos, &pos, &car->axes[1], fn_80287BC8(0.0f, 2.0f * hy));
         vel = *(const WV3*)&car->vel;
         if (car->height >= 1.5f - __float_epsilon[0]) {
             EmitCopySpin(lbl_8055F924->e0, *(ValVec3*)&pos, *(ValVec3*)&vel, 1.0f);
@@ -539,7 +517,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                     v[i].y = by;
                     v[i].z = bz;
                     f32 h = i ? p->sizeY / 2.0f - 0.4f : 0.4f + p->sizeY / 2.0f;
-                    AddScaled(&v[i], &v[i], (const Vec*)&m.basis[1], h);
+                    TAddS(&v[i], &v[i], (const Vec*)&m.basis[1], h);
                     u32 color = Round(255.0f * p->sparkAmt) << 24 | 0xFFFFFF;
                     fn_802C8E00(v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj, color, 1);
                 }
@@ -663,7 +641,7 @@ void fn_802AB770(int idx) {
         p->fogT = p->fogT + 0.25f * dt;
     }
     jump = 0.0f;
-    if (!IsZero(dt)) {
+    if (!NearZero(dt)) {
         jump = 500.0f * (int)fn_80287BC8(0.0f, 1.0f);
     }
     low = h < 3.0f;
@@ -713,15 +691,15 @@ static inline void OffsetStuntPosition(Vec& pos, const PlainValMatrix* m, f32 an
     Vec x = *(const Vec*)&m->basis[0];
     Vec z = *(const Vec*)&m->basis[2];
     *(WV3*)&pos = *(const WV3*)&m->origin;
-    AddScaled(&pos, &pos, &x, a * (f32)cos(ang));
-    AddScaled(&pos, &pos, &z, b * (f32)sin(ang));
+    TAddS(&pos, &pos, &x, a * (f32)cos(ang));
+    TAddS(&pos, &pos, &z, b * (f32)sin(ang));
 }
 
 void fn_802ABC80(const PlainValMatrix* m, const ValVec3* vel, f32 a, f32 b, f32 c) {
     f32 ang = fn_80287BC8(-3.1415927f, 3.1415927f);
     Vec pos;
     OffsetStuntPosition(pos, m, ang, a, b);
-    AddScaled(&pos, &pos, (const Vec*)&m->basis[1], fn_80287BC8(0.0f, 2.0f * c));
+    TAddS(&pos, &pos, (const Vec*)&m->basis[1], fn_80287BC8(0.0f, 2.0f * c));
     EmitCopySpin(lbl_8055F924->e0, *(ValVec3*)&pos, *vel, 1.0f);
 }
 
@@ -739,7 +717,7 @@ void fn_802ABE58(f32* t, f32* out, u32* color, f32 dt) {
         *t = *t + 0.25f * dt;
     }
     f32 jump = 0.0f;
-    if (!IsZero(dt)) {
+    if (!NearZero(dt)) {
         jump = 500.0f * (int)fn_80287BC8(0.0f, 1.0f);
     }
     int low = h < 3.0f;
