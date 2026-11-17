@@ -86,7 +86,7 @@ struct IconTable {
 // One car icon on the pick screen: a menu state (menu items "car_icon_N" point at it) that draws the chosen car's
 // icon in a frame. Its vtable is lbl_80345A30 (__vt__13CarIconWidget), followed in .data by the zero-filled space
 // of this unit's weak IMenuState copy.
-struct StatChoice;
+#include "game/statchoice.h"
 class Statistic;
 class CarIconWidget : public MenuState {
 public:
@@ -181,15 +181,7 @@ extern s32 lbl_8055F2E8;
 #include "game/statchoice.h"
 #include "game/mathutil.h"
 
-class Statistic {
-public:
-    Statistic(int slot, u32 type, long event, int difficulty);
-    int HasValue(void);
-    int IsBetterThan(const Statistic* o) const;
-    void Format(char* buf, int n);
-    StatChoice GetChoice(void);
-    u8 pad[0x24];
-};
+#include "game/statistic.h"
 
 int IdentGetCurrentSlot(void);
 
@@ -298,7 +290,7 @@ CarIconWidget::~CarIconWidget(void) { fn_80235380(art); }
 // Shows the car and colour a record was set with (an inline member: its `this` ranks above the loop walkers).
 inline void CarIconWidget::SetChoice(StatChoice c) {
     color = c.color;
-    valid = c.valid;
+    valid = c.flag;
     VehicleInfo* v = GetVehicle(c.vehicle);
     index = FindIcon(set, v->chassis);
     tint = v->colors[color];

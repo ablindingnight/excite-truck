@@ -57,32 +57,9 @@ extern "C" {
 CarInfo* fn_801EA9A0(int car);
 }
 
-class Statistic {
-public:
-    Statistic(int slot, u32 type, long event, int difficulty);
-    int GetType(void);
-    int HasValue(void);
-    int IsBetterThan(const Statistic* o) const;
-    void Revert(void);
-    void Commit(void);
-    void Format(char* buf, int n);
-    u8 pad[0x24];
-};
+#include "game/statistic.h"
 
-class IntStatistic : public Statistic {
-public:
-    IntStatistic(int slot, u32 type, long event, int difficulty);
-    int IsNewRecord(long v);
-    void SetValue(long v);
-};
 
-class RealStatistic : public Statistic {
-public:
-    RealStatistic(int slot, u32 type, long event, int difficulty);
-    f32 GetValue(void);
-    int IsNewRecord(f32 v);
-    void SetValue(f32 v);
-};
 
 struct ArtXform;  // artanim.cpp
 class ArtPlayer {
@@ -520,7 +497,7 @@ int fn_801CB8FC(void) { return fn_801CE8CC(); }
 
 int fn_801CB900(StatHandler* h, int type) {
     int r = 0;
-    if (h && type == h->stat->GetType()) {
+    if (h && type == (int)h->stat->GetType()) {
         r = 1;
     }
     return r;

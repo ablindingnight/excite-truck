@@ -213,15 +213,7 @@ extern "C" {
 #include "game/statchoice.h"
 #include "game/mathutil.h"
 
-class Statistic {
-public:
-    Statistic(int slot, u32 type, long event, int difficulty);
-    int HasValue(void);
-    int IsBetterThan(const Statistic* o) const;
-    void Format(char* buf, int n);
-    StatChoice GetChoice(void);
-    u8 pad[0x24];
-};
+#include "game/statistic.h"
 
 int IdentGetCurrentSlot(void);
 int GetNumEvents(void);
@@ -289,7 +281,7 @@ void fn_8025DAEC(RecordLine* r, u32 type) {
         fn_801345D8(r->text, 1000, "%s - %s", r->track, r->name + 1);
         StatChoice c = s.GetChoice();
         int color = c.color;
-        r->widget.valid = c.valid;
+        r->widget.valid = c.flag;
         VehicleInfo* v = GetVehicle(c.vehicle);
         r->widget.icon = FindIcon(r->widget.icons, v->chassis);
         r->widget.color = v->colors[color];

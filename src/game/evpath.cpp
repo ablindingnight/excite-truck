@@ -810,17 +810,8 @@ struct EvResult {
     u8 newly[7];    // offset 0xC: [4] tier, [5] path done, [6] career done
 };
 
-class Statistic {
-public:
-    int HasValue(void);
-    u8 pad[0x24];
-};
+#include "game/statistic.h"
 
-class RealStatistic : public Statistic {
-public:
-    RealStatistic(int slot, u32 type, long event, int difficulty);
-    f32 GetValue(void);
-};
 
 int IdentGetCurrentSlot(void);
 

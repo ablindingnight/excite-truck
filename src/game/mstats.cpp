@@ -7,14 +7,7 @@
 
 extern "C" int strcasecmp(const char* a, const char* b);
 
-class Statistic {
-public:
-    Statistic(int identity, u32 type, s32 event, int slot);
-    BOOL HasValue(void);
-    char* Format(char* buf, int size);
-
-    u8 pad0[0x24];
-};
+#include "game/statistic.h"
 
 void UnloadEves(void);
 void LoadCareerEves(void);

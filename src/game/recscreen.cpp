@@ -119,18 +119,8 @@ struct ScoreRow {
 // HighScore: game/highscore.h.
 #include "game/vehchoice.h"
 
-class Statistic {
-public:
-    Statistic(int slot, u32 type, long event, int difficulty);
-    int HasValue(void);
-    u8 pad[0x24];
-};
+#include "game/statistic.h"
 
-class RealStatistic : public Statistic {
-public:
-    RealStatistic(int slot, u32 type, long event, int difficulty);
-    f32 GetValue(void);
-};
 
 int IdentGetCurrentSlot(void);
 HighScore* StatsGetHighScore(int slot, long event, long difficulty, int rank);
