@@ -293,7 +293,7 @@ void fn_80276B8C(void) {
 }
 
 void fn_80276BE4(CamPose* out, f32* fov) {
-    if (((u8*)lbl_8049FD58)[0]) {
+    if (lbl_8049FD58[0].active) {
         fn_8027656C(&lbl_8049FE98.pose, &lbl_8049FE98.fov, 0);
     }
     out->rot = lbl_8049FE98.pose.rot;
@@ -310,7 +310,7 @@ void fn_80276CB0(const char* name, int blend) {
         fn_80276098(&lbl_8049FE98.pose, &c->pose, 0, 0x22, lbl_8049FE98.fov, c->fov, 1.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
-        ((u8*)lbl_8049FD58)[0] = 0;
+        lbl_8049FD58[0].active = 0;
     }
 }
 
@@ -323,7 +323,7 @@ void fn_80276D3C(const char* name, int mode) {
         fn_80276098((CamPose*)pose, &c->pose, 0, 0x22, fov, c->fov, 2.0f);
     } else {
         memcpy(&lbl_8049FE98, c, 0x48);
-        ((u8*)lbl_8049FD58)[0] = 0;
+        lbl_8049FD58[0].active = 0;
     }
 }
 
