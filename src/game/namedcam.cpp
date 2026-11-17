@@ -12,6 +12,7 @@
 #include "game/math_types.h"
 #include "game/mathutil.h"
 #include "game/clamp01.h"
+#include "game/ease.h"
 
 
 
@@ -201,20 +202,6 @@ static inline void QuatToPose(CamPose* p, const f32* q) {
     m[2][2] = 1.0f - (xx + yy);
 }
 
-// Smoothstep on [0, 1], mirrored for negative t and clamped to [-1, 1].
-static inline f32 Ease(f32 t) {
-    f32 e;
-    if (t < -1.0f) {
-        e = -1.0f;
-    } else if (t > 1.0f) {
-        e = 1.0f;
-    } else if (t > 0.0f) {
-        e = t * (-2.0f * t * t) + 3.0f * t * t;
-    } else {
-        e = t * (-2.0f * t * t) - 3.0f * t * t;
-    }
-    return e;
-}
 
 // The current pose and field of view of transition `slot`; follows a moving target unless the transition
 // is to a fixed camera (kind 0x22), and ends the transition once it is complete.

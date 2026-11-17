@@ -14,6 +14,7 @@
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/mathutil.h"
+#include "game/ease.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -259,17 +260,6 @@ static inline f32 RampValue(const Ramp* r) {
     }
 }
 
-static inline f32 Smooth(f32 t) {
-    if (t < -1.0f) {
-        return -1.0f;
-    } else if (t > 1.0f) {
-        return 1.0f;
-    } else if (t > 0.0f) {
-        return t * (-2.0f * t * t) + 3.0f * t * t;
-    } else {
-        return t * (-2.0f * t * t) - 3.0f * t * t;
-    }
-}
 
 static inline f32 OscValue(const Osc* o) {
     const f32 period = o->Period();
@@ -279,7 +269,7 @@ static inline f32 OscValue(const Osc* o) {
         t = 2.0f * o->half - t;
     }
     t /= o->half;
-    f32 factor = Smooth(t);
+    f32 factor = Ease(t);
     return Lerp(o->min, o->max, factor);
 }
 

@@ -127,6 +127,7 @@ struct ArtList : public ArtListBase {
 };
 
 #include "game/artplayer.h"
+#include "game/ease.h"
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" ValueTable* fn_80131808(const char* name);
@@ -594,18 +595,6 @@ void fn_802AD414(ArtAnim* a, f32 t) {
 }
 
 
-// Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
-static inline f32 Ease(f32 x) {
-    if (x < -1.0f) {
-        return -1.0f;
-    } else if (x > 1.0f) {
-        return 1.0f;
-    } else if (x > 0.0f) {
-        return x * (-2.0f * x * x) + 3.0f * x * x;
-    } else {
-        return x * (-2.0f * x * x) - 3.0f * x * x;
-    }
-}
 
 // out = in * m (row vector; m's first three rows), safe when out aliases in.
 static inline void MulVec(f32* out, const f32* in, f32 m[4][3]) {

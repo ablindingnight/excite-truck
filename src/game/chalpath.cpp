@@ -10,6 +10,7 @@
 #include "game/menustate.h"
 #include <string.h>
 #include "game/mathutil.h"
+#include "game/ease.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -1072,18 +1073,6 @@ void LevelNode::Update(void) {
 
 
 
-// Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
-static inline f32 Ease(f32 x) {
-    if (x < -1.0f) {
-        return -1.0f;
-    } else if (x > 1.0f) {
-        return 1.0f;
-    } else if (x > 0.0f) {
-        return x * (-2.0f * x * x) + 3.0f * x * x;
-    } else {
-        return x * (-2.0f * x * x) - 3.0f * x * x;
-    }
-}
 
 // The node's label source (slot 0xC returns the text).
 class NodeText {

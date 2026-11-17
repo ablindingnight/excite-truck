@@ -468,6 +468,7 @@ f32 fn_802715F0(u8* p) {
 }  // extern "C"
 
 #include "game/words12.h"
+#include "game/ease.h"
 // CamFrame: common.h's PlainValMatrix.
 extern "C" {
 void fn_802704D4(int to, u8* cam);
@@ -504,20 +505,6 @@ void fn_80275D0C(u8* p);
 static inline int PitMode(u8* track) {
     u8* r = PTR(track, 0x4);
     return r ? U8(r, 0x34) : 3;
-}
-
-// Smoothstep-style ease of a -1..1 fraction.
-static inline f32 CamEase(f32 x) {
-    if (x < -1.0f) {
-        return -1.0f;
-    }
-    if (x > 1.0f) {
-        return 1.0f;
-    }
-    if (x > 0.0f) {
-        return -2.0f * x * x * x + 3.0f * x * x;
-    }
-    return -2.0f * x * x * x - 3.0f * x * x;
 }
 
 // Per-frame TV (replay) camera: picks the best region's camera on a region change, eases moving cameras
@@ -628,7 +615,7 @@ void fn_80271624(int mode, u8* p) {
                             f = (h - lo) / (hi - lo);
                         }
                     }
-                    f32 e = CamEase(f);
+                    f32 e = Ease(f);
                     TvLerp3(tv->pos, tv->from, tv->to, e);
                     TvLerp3(tv->ex, tv->exFrom, tv->exTo, e);
                     tv->fov = TvLerp(tv->fovFrom, tv->fovTo, e);
