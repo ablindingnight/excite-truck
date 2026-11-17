@@ -3,6 +3,7 @@
 // with per-instance texture nodes, and the render queue: surfaces are bucketed per texture node, sorted by
 // priority band and drawn texture by texture. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/byteswap.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -211,20 +212,10 @@ s32 lbl_8055D00C = 1;
 template <class T>
 inline void Relocate(T*& p, u32 base);
 
-static inline void Swap32(void* p) {
-    u8* b = (u8*)p;
-    u8 t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
 static inline void SwapVec(ValVec3* v) {
-    Swap32(&v->x);
-    Swap32(&v->y);
-    Swap32(&v->z);
+    SwapWord(&v->x);
+    SwapWord(&v->y);
+    SwapWord(&v->z);
 }
 
 static inline void StrCopy(char* d, const char* s, int n) {
@@ -606,63 +597,63 @@ void mrModelFixup(ModelInfo* m, const char* name) {
         return;
     }
     u32 base = (u32)m;
-    Swap32(&m->nElems);
-    Swap32(&m->elems);
-    Swap32(&m->nLists);
-    Swap32(&m->lists);
-    Swap32(&m->nExtras);
-    Swap32(&m->extras);
-    Swap32(&m->maxInst);
+    SwapWord(&m->nElems);
+    SwapWord(&m->elems);
+    SwapWord(&m->nLists);
+    SwapWord(&m->lists);
+    SwapWord(&m->nExtras);
+    SwapWord(&m->extras);
+    SwapWord(&m->maxInst);
     f32* f = &m->radius;
     for (int k = 0; k < 10; k++) {
-        Swap32(&f[k]);
+        SwapWord(&f[k]);
     }
-    Swap32(&m->pad44);
+    SwapWord(&m->pad44);
     Relocate(m->elems, base);
     int i;
     for (i = 0; i < m->nElems; i++) {
         MElem* e = &m->elems[i];
-        Swap32((u32*)&e->bit);
-        Swap32(&e->flags);
-        Swap32(&e->list);
-        Swap32(&e->prim);
+        SwapWord((u32*)&e->bit);
+        SwapWord(&e->flags);
+        SwapWord(&e->list);
+        SwapWord(&e->prim);
         Relocate(e->prim, base);
         fn_802D6B80(e->prim, base, name);
         Relocate(e->list, base);
     }
     Relocate(m->extras, base);
     for (i = 0; i < m->nExtras; i++) {
-        Swap32(&m->extras[i]);
+        SwapWord(&m->extras[i]);
         Relocate(m->extras[i], base);
         MExtra* x = m->extras[i];
-        Swap32(&x->tag);
-        Swap32(&x->size);
+        SwapWord(&x->tag);
+        SwapWord(&x->size);
         switch (x->tag) {
         case 'MRJT': {
-            Swap32(&x->n);
+            SwapWord(&x->n);
             int j;
             u8* p = (u8*)x + 0x2C;
             for (j = 0; j < x->n; j++) {
                 u32* q = (u32*)p;
                 u32* w = q;
                 for (int k = 0; k < 12; w++, k++) {
-                    Swap32(w);
+                    SwapWord(w);
                 }
                 p += 0x50;
             }
             break;
         }
         case 'MRBN': {
-            Swap32(&x->n);
+            SwapWord(&x->n);
             int j;
             u8* p = (u8*)x + 0x10;
             for (j = 0; j < x->n; j++) {
                 u32* q = (u32*)p;
                 for (int k = 0; k < 12; k++) {
-                    Swap32(&q[k]);
+                    SwapWord(&q[k]);
                 }
-                Swap32(p + 0x30);
-                Swap32(p + 0x34);
+                SwapWord(p + 0x30);
+                SwapWord(p + 0x34);
                 p += 0x38;
             }
             break;
@@ -671,10 +662,10 @@ void mrModelFixup(ModelInfo* m, const char* name) {
             int j;
             MSphere* s = (MSphere*)&x->n;
             for (j = 0; j < m->nElems; j++) {
-                Swap32(&s->c.x);
-                Swap32(&s->c.y);
-                Swap32(&s->c.z);
-                Swap32(&s->r);
+                SwapWord(&s->c.x);
+                SwapWord(&s->c.y);
+                SwapWord(&s->c.z);
+                SwapWord(&s->r);
                 s++;
             }
             break;
@@ -686,14 +677,14 @@ void mrModelFixup(ModelInfo* m, const char* name) {
     }
     Relocate(m->lists, base);
     for (i = 0; i < m->nLists; i++) {
-        Swap32(&m->lists[i]);
+        SwapWord(&m->lists[i]);
         Relocate(m->lists[i], base);
         MSurfList* l = m->lists[i];
         Relocate(l->surfs, base);
         for (int j = 0; j < l->n; j++) {
-            Swap32(&l->surfs[j]);
+            SwapWord(&l->surfs[j]);
             Relocate(l->surfs[j], base);
-            Swap32(&l->surfs[j]->type);
+            SwapWord(&l->surfs[j]->type);
         }
     }
 }
