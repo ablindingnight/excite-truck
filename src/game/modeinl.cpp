@@ -139,9 +139,7 @@ void fn_80144CD0(Vec3* out, const Vec3* p, const f32* m) {
     out->z = dz * frame.rot.z.z + zXY;
 }
 
-struct W3 {
-    u32 a, b, c;
-};
+#include "game/w3.h"
 void fn_80144D64(W3* d, const W3* s) { *d = *s; }
 
 void fn_80144D80(Mtx33* m, f32 x, f32 y, f32 z) {

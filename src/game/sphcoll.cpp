@@ -85,9 +85,7 @@ static inline void MulVecT(RVec3* out, const RVec3* in, const RMtx* m) {
     }
 }
 
-struct W3 {
-    u32 a, b, c;
-};
+#include "game/w3.h"
 
 
 class VGroup {
