@@ -3045,11 +3045,11 @@ inline Pickup::Pickup(ValueNode* n) {
             c[1] += p.y;
         }
     }
-    c[0] = c[0] * 1.0f / k;
-    pos[1] = 0.0f;
+    c[0] *= 1.0f / k;
     pos[0] = c[0];
     c[1] *= 1.0f / k;
     pos[2] = c[1];
+    pos[1] = 0.0f;
     fn_801EA140(this);
     fn_801EA1E0(pos[0], pos[2], &pos[1], 1);
     mid[0] = c[0];
