@@ -4,6 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/cardrawwheel.h"
 #include "game/modelinfo.h"
 #include "game/carmodel.h"
 #include "game/racer.h"
@@ -27,12 +28,6 @@ void* operator new(size_t size, const char* tag);
 #include "game/animslot.h"
 #include "game/mathutil.h"
 
-struct WheelState {
-    u8 pad0[0x34];
-    f32 spin;  // offset 0x34
-    u8 pad38[0x34];
-};
-
 struct BoneFrame {
     VecMatrix frame;  // offset 0x0
     u32 mask;     // offset 0x30
@@ -54,7 +49,7 @@ struct CarDrawView {
     u8 pad50[0x1E];
     u16 flags6E;              // offset 0x6E
     u8 pad70[0xC];
-    WheelState wheels[4];     // offset 0x7C
+    CarDrawWheel wheels[4];     // offset 0x7C
     f32 x22C;                 // offset 0x22C
     u8 pad230[0x5C];
     f32 x28C;                 // offset 0x28C
@@ -125,7 +120,7 @@ void fn_801EF428(void* p, int del);
 void fn_801EFC90(void* p, CarDrawView* c, void** wheels);
 void* fn_801EFF94(const char* cls, s32 index, int i);
 void fn_801EFFF8(void* w);
-void fn_801F0F78(void* w, WheelState* s, const VecMatrix* f, f32 scale);
+void fn_801F0F78(void* w, CarDrawWheel* s, const VecMatrix* f, f32 scale);
 void fn_801F131C(void* w, f32 spin, int mine);
 void fn_801F1378(void* w, f32 spin);
 void fn_801F13F4(void* w, f32 a, f32 b);

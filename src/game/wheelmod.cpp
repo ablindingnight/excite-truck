@@ -4,6 +4,7 @@
 // state, LOD/shadow drawing, and an animation object that draws an attached car wheel. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/cardrawwheel.h"
 #include "game/remap.h"
 #include "game/math_types.h"
 
@@ -112,18 +113,6 @@ struct WheelClass {
     WheelLod lods[8];    // offset 0x28
     s32 numLods;         // offset 0xE8
     WheelShadow shadow;  // offset 0xEC
-};
-
-// A car's wheel state (the physics side).
-struct WheelState {
-    ValVec3 pos;   // offset 0x0
-    u8 padC[0x28 - 0xC];
-    f32 steer;     // offset 0x28
-    f32 roll;      // offset 0x2C
-    f32 speed;     // offset 0x30
-    f32 spin;      // offset 0x34
-    u8 pad38[0x60 - 0x38];
-    u32 flags;     // offset 0x60
 };
 
 // The wheel model this unit builds and draws (0x4C, alloc tag "wheel"); class name unproven. Was named Wheel, the name of wheel.cpp's 0x1FC physics wheel.
@@ -473,7 +462,7 @@ static inline void AddVec(ValVec3* v, const ValVec3* a) {
 }
 
 // Poses wheel 'w' from its state 's' in the car frame 'm', scaled by 'scale'.
-void fn_801F0F78(WheelMod* w, const WheelState* s, const ValMatrix* m, f32 scale) {
+void fn_801F0F78(WheelMod* w, const CarDrawWheel* s, const ValMatrix* m, f32 scale) {
     if (s->flags & 8) {
         w->state = 3;
         return;
@@ -484,10 +473,10 @@ void fn_801F0F78(WheelMod* w, const WheelState* s, const ValMatrix* m, f32 scale
     } else {
         w->state = 0;
     }
-    if (s->speed > 30.0f) {
+    if (s->load > 30.0f) {
         w->state |= 0x10;
     }
-    ValVec3 pos = s->pos;
+    ValVec3 pos = *(const ValVec3*)s->pos;
     pos.y += fn_801F159C(w);
     w->spin = s->spin;
     int left = w->index == 0 || w->index == 2;
@@ -497,7 +486,7 @@ void fn_801F0F78(WheelMod* w, const WheelState* s, const ValMatrix* m, f32 scale
     w->mtx.origin.z += m->origin.z;
     *(Mat3*)w->mtx.basis = *(const Mat3*)m->basis;
     ValVec3 roll;
-    roll.Set(0.0f, 0.0f, s->roll);
+    roll.Set(0.0f, 0.0f, s->v18);
     Mat3 r;
     Mat3FromEuler(&r, (const Vec3*)&roll);
     Mat3Mul((Mat3*)&w->mtx, &r, (Mat3*)&w->mtx);
