@@ -1046,9 +1046,7 @@ struct IMotion {
     f32 p2, v2, a2;
 };
 
-// idealline.h's LineFollower seen through its Update (fn_801B2ED0(i)->Follower()); a distinct name until interlude's
-// own V2 (user copy constructor) is reconciled with v2.h so this unit can include idealline.h.
-class IlLineFollower {
+class LineFollower {
 public:
     void Update(V2* p);
 };
@@ -1059,7 +1057,7 @@ public:
     virtual void v04(void);
     virtual void v08(void);
     virtual void v0C(void);
-    virtual IlLineFollower* Follower(void);  // 0x18
+    virtual LineFollower* Follower(void);  // 0x18
 };
 
 
@@ -1071,7 +1069,7 @@ void fn_8018ADBC(ICar* car, f32 v);  // brake
 void fn_8018ADC4(ICar* car, f32 v);
 void fn_8018ADCC(ICar* car, f32 v);
 void fn_8018ADEC(ICar* car);
-void fn_80135B9C(IlLineFollower* f, f32 d, V2* outPos, V2* outDir, f32* outSpeed, void* outIl);
+void fn_80135B9C(LineFollower* f, f32 d, V2* outPos, V2* outDir, f32* outSpeed, void* outIl);
 f32 fn_80139030(IMotion* m);
 }
 
@@ -1097,7 +1095,7 @@ int CarTypeIsReal(s32 player, int a);
 void fn_801B8100(Respawn* pose, int car, s32 player);
 f32 fn_80139048(void);
 RaceLen* fn_80137C54(int i);
-void fn_801B8048(CarPlace* p, IlLineFollower* line, f32 lat, f32 along);
+void fn_801B8048(CarPlace* p, LineFollower* line, f32 lat, f32 along);
 void fn_801B8E28(int car);
 }
 
@@ -1358,7 +1356,7 @@ void fn_801C56AC(void) {
             fn_8018ADC4(car, 1.0f);
             fn_8018ADEC(car);
             fn_8018ADAC(car, 0.0f);
-            IlLineFollower* line = fn_801B2ED0(i)->Follower();
+            LineFollower* line = fn_801B2ED0(i)->Follower();
             V2 pos;
             pos.x = car->pos.x;
             pos.y = car->pos.z;
