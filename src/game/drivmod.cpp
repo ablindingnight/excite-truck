@@ -519,17 +519,20 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
                     f32 sn = sin(a);
                     f32 cs = cos(a);
                     f32 t = 1.0f - cs;
-                    f32 r_ry_y = cs + t * (ay * ay);
-                    f32 r_ry_x = ay * (t * ax) - sn * az;
-                    r.rx.x = cs + t * (ax * ax);
-                    r.rx.y = ay * (t * ax) + sn * az;
-                    r.rx.z = az * (t * ax) - sn * ay;
-                    r.ry.x = r_ry_x;
-                    r.ry.y = r_ry_y;
-                    r.rz.x = az * (t * ax) + sn * ay;
-                    r.ry.z = az * (ay * t) + sn * ax;
-                    r.rz.z = cs + t * (az * az);
-                    r.rz.y = az * (t * ay) - sn * ax;
+                    f32 yy = ay * ay;
+                    f32 zz = az * az;
+                    f32 tx = t * ax;
+                    f32 xx = ax * ax;
+                    f32 ty = t * ay;
+                    r.rx.x = cs + t * xx;
+                    r.rx.y = sn * az + ay * tx;
+                    r.rx.z = az * tx - sn * ay;
+                    r.ry.x = ay * tx - sn * az;
+                    r.ry.y = cs + t * yy;
+                    r.rz.x = az * tx + sn * ay;
+                    r.ry.z = az * ty + sn * ax;
+                    r.rz.y = az * ty - sn * ax;
+                    r.rz.z = cs + t * zz;
                 } else {
                     SetIdentity(&r.rx.x);
                 }
@@ -668,15 +671,20 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         sn = sin(ang);
         f32 cs = cos(ang);
         f32 t = 1.0f - cs;
-        rot.rx.x = cs + t * (ax * ax);
-        rot.rx.y = ay * (t * ax) + sn * az;
-        rot.rx.z = az * (t * ax) - sn * ay;
-        rot.ry.x = ay * (t * ax) - sn * az;
-        rot.ry.y = cs + t * (ay * ay);
-        rot.rz.x = az * (t * ax) + sn * ay;
-        rot.ry.z = az * (t * ay) + sn * ax;
-        rot.rz.y = az * (t * ay) - sn * ax;
-        rot.rz.z = cs + t * (Sq(az));
+        f32 yy = ay * ay;
+        f32 zz = az * az;
+        f32 tx = t * ax;
+        f32 xx = ax * ax;
+        f32 ty = t * ay;
+        rot.rx.x = cs + t * xx;
+        rot.rx.y = sn * az + ay * tx;
+        rot.rx.z = az * tx - sn * ay;
+        rot.ry.x = ay * tx - sn * az;
+        rot.ry.y = cs + t * yy;
+        rot.rz.x = az * tx + sn * ay;
+        rot.ry.z = az * ty + sn * ax;
+        rot.rz.y = az * ty - sn * ax;
+        rot.rz.z = cs + t * zz;
     } else {
         SetIdentity(&rot.rx.x);
     }
