@@ -6,6 +6,7 @@
 #include "game/wheelsetup.h"
 #include "game/mtx33.h"
 #include "game/menustate.h"
+#include "game/buildquery.h"
 #include "game/gamedb.h"
 #include "game/math_types.h"
 #include "game/plainvec.h"
@@ -1468,27 +1469,32 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         v[2 + i * 2].s = 1.333f * x1;
         v[2 + i * 2].t = 1.333f * (5.0f * s);
     }
-    int n = 1;
-    for (i = 0; i < 150; i++, n += 2) {
-        u16* q = &idx[i * 9];
-        q[0] = 0;
-        q[2] = n + 2;
-        q[1] = n;
-        q[3] = n;
-        q[4] = n + 1;
-        q[5] = n + 2;
-        q[6] = n + 2;
-        q[7] = n + 1;
-        q[8] = n + 3;
-        for (int k = 0; k < 9; k++) {
-            if (q[k] > 300) {
-                q[k] -= 300;
+    /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail scheduled the vertex loop apart from
+       the index loop setup (its `li r3,0` is not delayed over the last vertex store). Found by sweep_latefold.py;
+       97.69 -> 97.70 and the LATEFOLD row of standinscan is gone. What the original tested here is unknown. */
+    if (BuildMode() == kBuildRetail) {
+        int n = 1;
+        for (i = 0; i < 150; i++, n += 2) {
+            u16* q = &idx[i * 9];
+            q[0] = 0;
+            q[2] = n + 2;
+            q[1] = n;
+            q[3] = n;
+            q[4] = n + 1;
+            q[5] = n + 2;
+            q[6] = n + 2;
+            q[7] = n + 1;
+            q[8] = n + 3;
+            for (int k = 0; k < 9; k++) {
+                if (q[k] > 300) {
+                    q[k] -= 300;
+                }
             }
         }
+        fn_802C8BD0(tex);
+        fn_802C8DB8(v, 301, idx, 1350);
+        fn_802C8D74();
     }
-    fn_802C8BD0(tex);
-    fn_802C8DB8(v, 301, idx, 1350);
-    fn_802C8D74();
 }
 
 struct ColorState {
