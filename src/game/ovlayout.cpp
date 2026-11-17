@@ -287,6 +287,8 @@ static inline void WriteElemLine(const char* dt, char* q, TextElem* e, char* jus
                 e->scale, js, e->name, dt);
 }
 
+static inline const char* LayoutFileEnd() { return "end\r\n"; }
+
 void fn_801456E8(ElemList<TextElem>* l, void* f) {
     char q[0x130];
     TextElem* e;
@@ -298,7 +300,7 @@ void fn_801456E8(ElemList<TextElem>* l, void* f) {
     for (i = 0; i < l->count; i++) {
         WriteElemLine(dt, q, &l->data[i], just, f);
     }
-    fn_802E3AD0(f, "end\r\n");
+    fn_802E3AD0(f, LayoutFileEnd());
 }
 
 void fn_801457D0(ElemList<ArtElem>* l, void* f) {
@@ -310,7 +312,7 @@ void fn_801457D0(ElemList<ArtElem>* l, void* f) {
         fn_802E3AD0(f, "\t%5.1f %5.1f %5.1f %5.1f %f %f %f %f %d %s\r\n", e->pos.x, e->pos.y, e->w, e->h, e->u0, e->v0,
                     e->u1, e->v1, e->elemJust, e->name);
     }
-    fn_802E3AD0(f, "end\r\n");
+    fn_802E3AD0(f, LayoutFileEnd());
 }
 
 void fn_8014589C(ElemList<GartElem>* l, void* f) {
@@ -322,7 +324,7 @@ void fn_8014589C(ElemList<GartElem>* l, void* f) {
         fn_802E3AD0(f, "\t%5.1f %5.1f %5.1f %5.1f #%8.8X %d %s\r\n", e->pos.x, e->pos.y, e->w, e->h, e->color,
                     e->elemJust, e->name);
     }
-    fn_802E3AD0(f, "end\r\n");
+    fn_802E3AD0(f, LayoutFileEnd());
 }
 
 void fn_8014595C(ElemList<GartSet>* l, void* f) {
@@ -333,7 +335,7 @@ void fn_8014595C(ElemList<GartSet>* l, void* f) {
         GartSet* s = &l->data[i];
         fn_802E3AD0(f, "\t%s %s\r\n", s->resource, s->name);
     }
-    fn_802E3AD0(f, "end\r\n");
+    fn_802E3AD0(f, LayoutFileEnd());
 }
 
 f32 fn_80145A08(f32 a, f32 b, f32 c, f32 d, f32 x) {
@@ -369,9 +371,12 @@ void fn_80145C08(const TextElem* e, const char* text) {
     fn_800104B0(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, text);
 }
 
+
+static inline const char* LayoutTextFormat() { return "%s"; }
+
 void fn_80145C7C(const TextElem* e, const char* text) {
     f32 y = fn_801452B4(e->pos.y);
-    fn_8001027C(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, "%s", text);
+    fn_8001027C(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, LayoutTextFormat(), text);
 }
 
 void fn_80145CF4(const GartElem* e, gArtSet* art, int part) {
@@ -445,13 +450,25 @@ public:
     virtual const char* Label(void) { return 0; }
 };
 
+namespace {
+extern char kLayoutSave[];
+extern char kLayoutBlue[];
+extern char kLayoutGreen[];
+extern char kLayoutRed[];
+extern char kLayoutAlpha[];
+extern char kLayoutMove[];
+extern char kLayoutResize[];
+extern char kLayoutScale[];
+extern char kLayoutExtension[5];
+}
+
 class LayoutCmd : public EditHandler {
 public:
     LayoutCmd(Layout* o);
     virtual u32 HoverColor(void) { return 0xC0C0C0C0; }
     virtual u32 Color(void) { return 0x40000000; }
     virtual void Click(void);
-    virtual const char* Label(void) { return "Save"; }
+    virtual const char* Label(void) { return kLayoutSave; }
     Layout* owner;  // offset 0x4
 };
 
@@ -464,7 +481,7 @@ public:
         e->pos.y += d->y;
     }
     virtual u32 Color(void) { return 0xFF00FF00; }
-    virtual const char* Label(void) { return "Move"; }
+    virtual const char* Label(void) { return kLayoutMove; }
 };
 
 class ResizeHandler : public EditHandler {
@@ -477,7 +494,7 @@ public:
         e->h -= d->y;
     }
     virtual u32 Color(void) { return 0xFF0000FF; }
-    virtual const char* Label(void) { return "Resize"; }
+    virtual const char* Label(void) { return kLayoutResize; }
 };
 
 class ScaleHandler : public EditHandler {
@@ -489,7 +506,7 @@ public:
         e->scale = s > 0.05f ? s : 0.05f;
     }
     virtual u32 Color(void) { return 0xFFC0D9D9; }
-    virtual const char* Label(void) { return "Scale"; }
+    virtual const char* Label(void) { return kLayoutScale; }
 };
 
 template <typename T>
@@ -510,7 +527,7 @@ public:
     }
     virtual void Click(void) { idx = (idx + 1) % 4; }
     virtual const char* Label(void) {
-        const char* names[4] = {"Blue", "Green", "Red", "Alpha"};
+        const char* names[4] = {kLayoutBlue, kLayoutGreen, kLayoutRed, kLayoutAlpha};
         return names[idx];
     }
     s32 idx;  // offset 0x4
@@ -673,7 +690,7 @@ public:
     virtual void Save(void) {
         s32 f;
         char* base;
-        strcpy(strrchr(name, '.'), ".txt");
+        strcpy(strrchr(name, '.'), kLayoutExtension);
         base = name;
         if (strchr(base, '/')) {
             base = strchr(base, '/') + 1;
@@ -685,7 +702,7 @@ public:
             fn_801456E8((ElemList<TextElem>*)texts, (void*)f);
             fn_8014589C((ElemList<GartElem>*)garts, (void*)f);
             fn_8014595C((ElemList<GartSet>*)sets, (void*)f);
-            fn_802E3AD0((void*)f, "end\r\n");
+            fn_802E3AD0((void*)f, LayoutFileEnd());
             fn_802E3734(&f);
         }
     }
@@ -762,13 +779,13 @@ public:
                     label = r->handler->Label();
                     if (label) {
                         if (!r->target) {
-                            fn_8000FF88(0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), -1, 9, "%s", label);
+                            fn_8000FF88(0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), -1, 9, LayoutTextFormat(), label);
                         } else if (r == c->hover) {
                             fn_8000FF88(0.6f, fn_801451DC(((ElemBase*)r->target)->pos.x + r->r.x, 4),
                                         fn_801452B4(r->r.y + ((ElemBase*)r->target)->pos.y - 10.0f), -1, 12,
-                                        "%s", label);
+                                        LayoutTextFormat(), label);
                             fn_80010B80(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
-                            fn_8000FF88(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, "%s",
+                            fn_8000FF88(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, LayoutTextFormat(),
                                         ((ElemBase*)r->target)->name);
                         }
                     }
@@ -1243,7 +1260,7 @@ void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, .
         fn_802E317C("ovedit: oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
     }
     fn_80147CEC(&e, a, b, t);
-    fn_80147230(&e, "%s", buf);
+    fn_80147230(&e, LayoutTextFormat(), buf);
 }
 
 void fn_80147ABC(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...) {
@@ -1257,7 +1274,7 @@ void fn_80147ABC(const TextElem* a, const TextElem* b, const char* fmt, f32 t, .
         fn_802E317C("ovedit: oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
     }
     fn_80147CEC(&e, a, b, t);
-    fn_80147314(&e, "%s", buf);
+    fn_80147314(&e, LayoutTextFormat(), buf);
 }
 
 void fn_80147BD0(const ArtElem* a, const ArtElem* b, u32 c0, u32 c1, s32 tex, f32 t) {
@@ -1383,7 +1400,20 @@ void OverlayCmd::Draw(void) {
     }
     for (i = 0; i < texts->a.count; i++) {
         TextCmd* c = &texts->a.data[i];
-        fn_801473F8(layout, c->elem, "%s", c->text);
+        fn_801473F8(layout, c->elem, LayoutTextFormat(), c->text);
     }
+}
+
+
+namespace {
+char kLayoutSave[] = "Save";char kLayoutExtension[5] = ".txt";
+
+char kLayoutBlue[] = "Blue";
+char kLayoutGreen[] = "Green";
+char kLayoutRed[] = "Red";
+char kLayoutAlpha[] = "Alpha";
+char kLayoutMove[] = "Move";
+char kLayoutResize[] = "Resize";
+char kLayoutScale[] = "Scale";
 }
 
