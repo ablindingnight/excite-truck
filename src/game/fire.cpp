@@ -382,7 +382,7 @@ struct BackfireEvt {
 
 class BackfireMan {
 public:
-    void Fire(BackfireEvt* ev);
+    void Fire(const BackfireEvt* ev);
 public:
     BackfireMan(void);
     ~BackfireMan(void);
@@ -1512,8 +1512,9 @@ void BackfireMan::Reset(void) {
 
 void BackfireMan::Draw(void) { torch->Draw(); }
 
-// MATCHING-AID: whole body as an inline (early returns join at the end); raises 78.86 to 89.06, unproven.
-inline void BackfireMan::Fire(BackfireEvt* ev) {
+// Event's body is this inline member: its early returns join at the inline's end, which retail's branch layout
+// needs (written directly in Event: 19 rows; Event EXACT this way, aids audit 2 2026-11-17). Name unproven.
+inline void BackfireMan::Fire(const BackfireEvt* ev) {
     if (ev->Car() < 0) {
         return;
     }
@@ -1551,7 +1552,7 @@ inline void BackfireMan::Fire(BackfireEvt* ev) {
 }
 
 void BackfireMan::Event(const BackfireEvt* ev) {
-    Fire((BackfireEvt*)ev);
+    Fire(ev);
 }
 
 void BackfireMan::Tick(int i, int on) {
