@@ -274,7 +274,7 @@ void fn_80292698(void) {
             sn = (f32)sin(ang);
             f32 c = cos(ang);
             f32 k = 1.0f - c;
-            SetRow(s->rot.x, c + k * Sq(x), sn * z + y * (k * x), z * (k * x) - sn * y);
+            SetRow(s->rot.x, c + k * Sq(x), y * (k * x) + sn * z, z * (k * x) - sn * y);
             SetRow(s->rot.y, y * (k * x) - sn * z, c + k * Sq(y), z * (k * y) + sn * x);
             SetRow(s->rot.z, z * (k * x) + sn * y, z * (k * y) - sn * x, c + k * Sq(z));
         } else {
