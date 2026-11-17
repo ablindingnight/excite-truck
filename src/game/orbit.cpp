@@ -6,6 +6,7 @@
 // and when the player cannot finish in time the "turtle" mode turns it all off. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -93,15 +94,6 @@ public:
     virtual void SetCrazy(int car, int on);  // 0x1C
 };
 
-struct CarRec {
-    u8 pad0[0x60];
-    f32 x;  // offset 0x60
-    u8 pad64[0x4];
-    f32 z;  // offset 0x68
-    u8 pad6C[0x25CC - 0x6C];
-    f32 speed;  // offset 0x25CC
-};
-
 struct RaceDesc {
     u8 pad0[0x4];
     s32 type;  // offset 0x4
@@ -110,7 +102,7 @@ struct RaceDesc {
 extern "C" {
 OrbitCar* fn_801B2EC0(int id);
 LineSet* fn_80156A40(void);
-CarRec* fn_8017960C(int id);
+CarBody* fn_8017960C(int id);
 }
 
 template <class T, int N>
@@ -439,9 +431,9 @@ f32 fn_8016618C(OrbitCar* car) {
 
 f32 fn_80166274(void) {
     CarPhysics* ph = fn_801B2EC0(fn_80179630(-1))->Physics();
-    CarRec* rec = fn_8017960C(fn_80179630(-1));
+    CarBody* rec = fn_8017960C(fn_80179630(-1));
     f32 top = ph->engine->topSpeed;
-    f32 speed = rec->speed;
+    f32 speed = rec->f25CC;
     f32 m = 1.0f;
     m = MAX(m, top);
     f32 r = speed / m;
@@ -684,8 +676,8 @@ f32 fn_801671FC(int i) {
         f32 boost = 0.0f;
         if (top && behind) {
             if (lbl_8055E330) {
-                CarRec* rec = fn_8017960C(i);
-                if (lbl_8055E330 && fn_80139EC4(lbl_8055E330, rec->x, rec->z)) {
+                CarBody* rec = fn_8017960C(i);
+                if (lbl_8055E330 && fn_80139EC4(lbl_8055E330, rec->mtx.pos.x, rec->mtx.pos.z)) {
                     boost = 0.5f;
                 }
             } else {

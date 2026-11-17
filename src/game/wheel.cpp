@@ -4,6 +4,7 @@
 // with a small torque, and is parked below the world (y -500) when idle or off the ground. Also packs its
 // pose into the render buffer and its state into replay packets. Names are guesses apart from the string.
 #include "game/common.h"
+#include "game/carbody.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rvec.h"
@@ -51,19 +52,7 @@ struct WheelPose {
     u8 live;    // offset 0x40
 };
 
-struct CarWheel {
-    f32 radius;  // offset 0x0
-    u8 pad4[0x70];
-};
-
-struct CarRec {
-    u8 pad0[0x6C];
-    s16 hint;  // offset 0x6C
-    u8 pad6E[0x23E8 - 0x6E];
-    CarWheel wheels[4];  // offset 0x23E8
-};
-
-extern "C" CarRec* fn_8017960C(int car);
+extern "C" CarBody* fn_8017960C(int car);
 
 class Wheel : public RigidBody {
 public:
@@ -102,15 +91,15 @@ void fn_801AFC38(void) { lbl_8055E650 = 0; }
 void fn_801AFC44(int car, int index, const RMtx* m, const RVec3* v, const RVec3* av) {
     if (lbl_8055E650 >= 1) {
         Wheel* w = lbl_80435BA8[lbl_8055E654];
-        CarRec* c = fn_8017960C(car);
-        fn_801B04B0(w, m, v, av, &c->hint);
+        CarBody* c = fn_8017960C(car);
+        fn_801B04B0(w, m, v, av, &c->hint[0]);
         f32 now = lbl_8055E3C8;
         w->car = car;
         w->index = index;
         w->time = now;
         w->SetActive(1);
         SphereShape* s = (SphereShape*)w->Shape();
-        f32 radiusv = c->wheels[index].radius;
+        f32 radiusv = c->wheels[index].v3C;
         s->radius = radiusv;
         if (++lbl_8055E654 >= lbl_8055E650) {
             lbl_8055E654 = 0;

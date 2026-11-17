@@ -5,6 +5,7 @@
 // events are posted; knocked-over trees are moved below the world and restored on reset. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/rmtx.h"
 #include "game/math_types.h"
 
@@ -32,14 +33,7 @@ void fn_8022FF10(RMat33* out, const RVec3* axis);  // rotation from axis * angle
 void fn_802BDFF4(RMtx* tree, int a);
 }
 
-struct CarRec {
-    u8 pad0[0x6C];
-    s16 hint;  // offset 0x6C
-    u8 pad6E[0x118 - 0x6E];
-    RVec3 vel;  // offset 0x118
-};
-
-extern "C" CarRec* fn_8017960C(int car);
+extern "C" CarBody* fn_8017960C(int car);
 
 class TreeObj {
 public:
@@ -445,10 +439,10 @@ void fn_802C1A0C(TreeObj* o, int car) {
         TreeClass* c = fn_802C110C(id);
         RMtx** tbl = lbl_8055FB30;
         if (tbl[id]->pos.y > -2000.0f) {
-            CarRec* r = fn_8017960C(car);
+            CarBody* r = fn_8017960C(car);
             TreeEvent ev;
             ev.vel = r->vel;
-            ev.hint = r->hint;
+            ev.hint = r->hint[0];
             for (u32 j = 0; j < 8; j++) {
                 if (c->events[j] >= 0) {
                     ev.pos = tbl[id]->pos;
