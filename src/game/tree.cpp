@@ -8,6 +8,11 @@
 #include "game/common.h"
 #include "game/faninfo.h"
 #include <revolution/MTX/vec.h>
+// tree.cpp builds trunk TubeShapes through the inline constructors, so it emits the root shape table (weak, 0xC).
+// Nothing refers to it after the dead vptr store is removed; the linker keeps its bytes (this .data is addressed
+// from the section start) without the relocation: the 12 zero bytes behind __vt__13TreePreloader. The header's
+// novtable default is the stand-in for units where the linker strips the table. FACTS 2026-11-17 "zero blocks".
+#define COLLSHAPE_BASE_DECL
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/shapes.h"
