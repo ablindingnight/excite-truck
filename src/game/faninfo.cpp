@@ -64,7 +64,11 @@ void fn_802BE38C(void) {
     if (data) {
         if (version == 2) {
             u32* rec = data;
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
             if (swapped) {
+#else
+            if (0 && swapped) {  // PORT: FINF data is little-endian on disc: already native on a little-endian host
+#endif
                 u8* p = (u8*)data;
                 for (u32 i = 0; i < size / 4; i++) {
                     u8 t = p[0];
