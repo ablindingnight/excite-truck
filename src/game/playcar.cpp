@@ -1269,6 +1269,9 @@ static inline void NoseDown(u8* p, f32 air, f32 fwd, RVec3& f, RVec3& at2) {
         }
     }
 }
+// Helper name unproven: a by-value double parameter owns the wheel-sample abs result;
+// narrowing its return preserves retail's FRSP temporaries in the real four-sample loop.
+static inline f32 NarrowSample(f64 absolute) { return absolute; }
 void PlayerDriver_vf48(u8* p) {
     RVec3 rx;
     f32 cl;
@@ -1474,7 +1477,7 @@ void PlayerDriver_vf48(u8* p) {
         f32 h;
         h = ((f32*)(p + 0x20))[i];
         sum = sum + h;
-        mag = mag + (f32)__fabs(h);
+        mag = mag + NarrowSample(__fabs(h));
     }
     wob = (sum > 0.0f ? 1.0f : kNegOne) * mag;
     u8* c5;
