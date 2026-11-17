@@ -1119,8 +1119,14 @@ void fn_801CD730(s32* score, s32* grade) {
 }
 
 #pragma push
-#pragma opt_strength_reduction off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+#pragma opt_propagation off  /* Pragma PROVEN: EXACT with it, 94 rows without. It keeps the named constant
+   `base` (0x20000) a variable: retail holds it in r30 and adds 0x507 at the search call (FACTS 2026-11-17 14:05). */
 void fn_801CD7BC(int car, int valid, f32 t) {
+    u32 base;
+    u32 type;
+    int i;
+    int off;
+    s32 s;
     if (fn_801CE898()) {
         return;
     }
@@ -1138,10 +1144,34 @@ void fn_801CD7BC(int car, int valid, f32 t) {
         return;
     }
     if (m->time < 0.0f) {
-        m->handlers.data[FindHandler(m, 0x20507)]->PushReal(t);
+        base = 0x20000;
+        type = base + 0x507;
+        i = 0;
+        off = 0;
+        while (i < m->handlers.n) {
+            switch (fn_801CB900(*(StatHandler**)((u8*)m->handlers.data + off), base + 0x507)) {
+            case 0:
+                off += 4;
+                i++;
+                break;
+            default:
+                goto found;
+            }
+        }
+        i = -1;
+    found:
+        if (i < 0) {
+            fn_802E317C("Awards: can't find stat info for type %d!", type);
+        }
+        m->handlers.data[i]->PushReal(t);
         m->time = t;
         m->hasTime = 1;
-        UpdateRank(m);
+        if (m->rank < 0 && m->hasTime) {
+            s = m->score;
+            if (s >= 0) {
+                m->rank = StatsGetHighScoreRank(IdentGetCurrentSlot(), m->event, m->difficulty, s, m->time);
+            }
+        }
     } else {
         fn_802E317C("Awards: race time was pushed to me twice: first %.2f, then %.2f!", m->time, t);
     }
