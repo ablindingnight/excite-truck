@@ -8,6 +8,7 @@
 #include "game/carbody.h"
 #include "game/rmtx.h"
 #include "game/math_types.h"
+#include "game/strcopy.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -86,15 +87,6 @@ struct TreeEvent {
     s32 id;    // offset 0x1C
 };
 
-static inline void StrCopy(char* d, const char* s, int n) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 ModuleTag lbl_8055FB20;
 s32 lbl_8055FB28;      // classes
@@ -266,7 +258,7 @@ void fn_802C126C(void) {
     fn_801D0800(&lbl_8055FB40);
     for (int i = 0; i < 16; i++) {
         memset(&lbl_804C0810[i], 0, sizeof(TreeClass));
-        StrCopy(lbl_804C0810[i].name, "???INVALID???", 0x20);
+        SafeStrCopy(lbl_804C0810[i].name, "???INVALID???", 0x20);
     }
     for (int i = 0; i < 8; i++) {
         memset(&lbl_804C0E10[i], 0, sizeof(Shake));
