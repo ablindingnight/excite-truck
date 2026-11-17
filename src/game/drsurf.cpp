@@ -5,6 +5,7 @@
 // surfaces and builds and caches the per-format vertex descriptor display lists. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/texstate.h"
 #include <revolution/GX/GXAttr.h>
 #include <revolution/GX/GXDisplayList.h>
 #include <revolution/GX/GXGeometry.h>
@@ -164,14 +165,6 @@ struct DeformJob {
 struct DeformQueue {
     DeformJob jobs[0x400];  // offset 0x0
     s32 count;              // offset 0x4000
-};
-
-struct TexState {
-    u8 pad0[4];
-    s32 mode;   // offset 0x4
-    u8 base2;   // offset 0x8
-    u8 b9;      // offset 0x9
-    u8 padA[6];
 };
 
 struct FatMesh {
@@ -926,7 +919,7 @@ void fn_802D6170(Surf* s) {
 
 void fn_802D61BC(Surf* s) {
     lbl_8055FD25 = (s->flags >> 3) & 1;
-    lbl_804C5700.b9 = (s->flags >> 4) & 1;
+    lbl_804C5700.env = (s->flags >> 4) & 1;
     lbl_804C5700.mode = 6;
     switch (s->fmt) {
     case 0x10:
@@ -1142,7 +1135,7 @@ struct ColVtx {
 
 void fn_802D68C4(ColVtx* __restrict verts, int unused, u16* __restrict idx, int n) {
     lbl_8055FD25 = 0;
-    lbl_804C5700.b9 = 0;
+    lbl_804C5700.env = 0;
     lbl_804C5700.mode = 0;
     fn_802D2614();
     fn_802D2B0C();

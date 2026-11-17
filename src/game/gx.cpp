@@ -4,6 +4,7 @@
 // texture-environment presets, region screenshots, visibility (z peek) tests and a couple of debug
 // helpers. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/texstate.h"
 #include <revolution/GX/GXTypes.h>
 #include <revolution/GX/GXAttr.h>
 #include <revolution/GX/GXBump.h>
@@ -127,17 +128,6 @@ union WGPipe {
 };
 
 #define WGPIPE (*(volatile WGPipe*)0xCC008000)
-
-struct TexState {
-    u8 dirty;   // offset 0x0
-    s32 mode;   // offset 0x4
-    u8 base2;   // offset 0x8
-    u8 env;     // offset 0x9
-    u8 envA;    // offset 0xA
-    u8 bB;      // offset 0xB
-    u8 lmap;    // offset 0xC
-    u8 ind;     // offset 0xD
-};
 
 struct Capture {
     u8 pending;     // offset 0x0
