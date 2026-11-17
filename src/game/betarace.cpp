@@ -1587,7 +1587,11 @@ namespace {
 static char kCleanRaceName[] = "Clean Race";
 }  // namespace
 
-char lbl_80559F0C[] = "";
+namespace {
+extern char kBetaDash[2];
+} // namespace
+
+extern char lbl_80559F0C[1];
 
 /* Helper name unproven */
 inline const StuntLine* FinishAnimation::LineAt(const StuntList* s, int i) {
@@ -1627,18 +1631,18 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         s32 basePts = tot - b;
         fn_801308F4(base.s, 0x14, basePts);
         fn_801308F8(total.s, 0x14, tot);
-        fn_801345D8(count.s, 0x14, r->timeLeft ? "%d" : "-", r->timeLeft);
+        fn_801345D8(count.s, 0x14, r->timeLeft ? "%d" : kBetaDash, r->timeLeft);
         int g = fn_801609C4(basePts);
         if (g != -1) {
             grade.Set(GetGradeDisplayName(g));
         } else {
-            grade.Set("");
+            grade.Set(lbl_80559F0C);
         }
     }
     if (r->grade != -1) {
         grade2.Set(GetGradeDisplayName(r->grade));
     } else {
-        grade2.Set("");
+        grade2.Set(lbl_80559F0C);
     }
     for (i = 0; i < s->lines.a.count; i++) {
         l = LineAt(s, i);
@@ -1738,6 +1742,19 @@ f32 CarResult::SinceFinish(const BetaCar* c) {
     }
     return t;
 }
+
+namespace {
+char kBetaDash[2] = "-";
+} // namespace
+
+#ifdef __MWERKS__
+#pragma push
+#pragma explicit_zero_data on
+#endif
+char lbl_80559F0C[1] = "";
+#ifdef __MWERKS__
+#pragma pop
+#endif
 
 #pragma dont_inline on
 void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
@@ -2679,8 +2696,8 @@ struct AnimBinding {
 
 extern const AnimBinding lbl_802FAA40;  // end of a binding table
 
-static inline const char* OptNot(int off, const char* str) { return off ? "" : str; }
-static inline const char* Opt(int on, const char* str) { return on ? str : ""; }
+static inline const char* OptNot(int off, const char* str) { return off ? lbl_80559F0C : str; }
+static inline const char* Opt(int on, const char* str) { return on ? str : lbl_80559F0C; }
 
 static inline AnimBinding Bind(s32 t, const char* n, const void* p) {
     AnimBinding b;
@@ -2733,7 +2750,7 @@ inline void FinishAnimation::Setup(void) {
         Bind(1, "total_score", total.s),
         Bind(1, "grade_no_bonus", grade.s),
         Bind(1, "grade", OptNot(multi, grade2.s)),
-        Bind(1, "grade_title", multi ? "" : fn_80131234("ResultsOverlay:GRADE")),
+        Bind(1, "grade_title", multi ? lbl_80559F0C : fn_80131234("ResultsOverlay:GRADE")),
         Bind(1, "stunt_label_1", stuntLabel[0].s),
         Bind(1, "stunt_value_1", stuntValue[0].s),
         Bind(1, "stunt_label_2", stuntLabel[1].s),
