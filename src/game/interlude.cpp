@@ -1717,7 +1717,10 @@ int fn_801C5B68(CamView* v, int idx) {
             Mat3Mul(&v->Mat(), &rel.Mat(), &f.Mat());
         } else {
             v->origin = f.origin;
-            MulM(&v->Mat(), &rel.Mat(), &f.Mat());
+            // The frame's rotation is taken into a local first: retail forms its address before MulM's first
+            // alias test branches (an address written in the call is only formed where the second test needs it).
+            const Mat3* fm = &f.Mat();
+            MulM(&v->Mat(), &rel.Mat(), fm);
             AddRotated(&v->origin, &rel.origin, &v->Mat());
         }
     }
