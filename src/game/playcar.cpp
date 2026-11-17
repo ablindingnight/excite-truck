@@ -1460,7 +1460,8 @@ void PlayerDriver_vf48(u8* p) {
         if (1.0f < sr) {
             sr = 1.0f;
         }
-        str = 1.0f * MaxF(sr, 0.0f);
+        str = 1.0f;
+        str *= MaxF(sr, 0.0f);
         PcScaleTo(&w, &F32(c5, 0x124), -0.05f);
         a = VMag(&w);
         f32 slip;
