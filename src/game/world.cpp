@@ -4,6 +4,7 @@
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/carmodel.h"
+#include "game/racer.h"
 #include "game/shapes.h"
 #include "game/animobj.h"
 #include "game/raceprog.h"
@@ -98,31 +99,19 @@ struct CarTypeMap {
 extern "C" CarTypeMap* fn_801E8EA4(int type);
 extern "C" void fn_801E9DC4(void* p);
 
-// What a car model is built from (0x11C; carmodel.cpp's Racer names the tail). Declared in full for the port:
+// What a car model is built from (game/racer.h; 0x11C). Its constructor is inline here:
 // retail's fn_801E8F10 keeps it at sp+0x8 with the next slot at sp+0x124. Our fn_801E8F10 frame (768) still
 // differs from retail's (592): retail builds `Racer r(*d, i)` directly and its CarDef copy goes through one
 // 4-byte stack temporary per copied byte (0x124..0x1F4, ~52 slots), while ours copies *d into a CarDef local
 // first; writing `Racer r(*d, i)` gives a plain byte copy (frame 320, 30%). Open puzzle; objdiff is unchanged
 // either way (69.44).
-struct Racer {
-    Racer(const CarDef& d, int i) : def(d), index(i) {
-        CarTypeMap* m = fn_801E8EA4(d.type);
-        model = m->f8;
-        tag = m->tag;
-        memset(zero, 0, sizeof(zero));
-        fn_801E9DC4(zero + 0x40);
-    }
-    s32 tag;          // offset 0x0
-    s32 model;        // offset 0x4
-    u8 pad8[0x10];
-    u8 zero[0x50];    // offset 0x18
-    CarDef def;       // offset 0x68
-    s32 index;        // offset 0xE0
-    s32 lodModel;     // offset 0xE4
-    s32 color;        // offset 0xE8
-    char xrayMesh[32]; // offset 0xEC
-    f32 wheelSize[4]; // offset 0x10C
-};
+inline Racer::Racer(const CarDef& d, int i) : def(d), index(i) {
+    CarTypeMap* m = fn_801E8EA4(d.type);
+    model = m->f8;
+    tag = m->tag;
+    memset(zero, 0, sizeof(zero));
+    fn_801E9DC4(zero + 0x40);
+}
 
 class WheelAnim : public AnimObj {
 public:

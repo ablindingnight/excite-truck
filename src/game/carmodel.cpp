@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include "game/modelinfo.h"
 #include "game/carmodel.h"
+#include "game/racer.h"
 #include "game/animobj.h"
 #include "game/vecmatrix.h"
 #include "game/racesetup.h"
@@ -82,15 +83,6 @@ struct CarDrawView {
 
 
 // The racer description the model is built for.
-struct Racer {
-    char name[0xE0];     // offset 0x0
-    s32 index;           // offset 0xE0
-    s32 lodModel;        // offset 0xE4
-    s32 color;           // offset 0xE8
-    char xrayMesh[32];   // offset 0xEC
-    f32 wheelSize[4];    // offset 0x10C
-};
-
 struct CarRes {
     s32 numBones;           // offset 0x0
     u8 pad4[0x2130];
@@ -391,12 +383,12 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
     s32 c = FindDriver(drv)->color;
     color = c;
     r->color = c;
-    Bind(r->name);
+    Bind((const char*)&r->tag);
     drawWheel = 1;
-    if (*(u32*)r->name == 'PCAR') {
+    if (r->tag == 'PCAR') {
         fn_801333E8(1, "draw_player_wheel", &drawWheel);
     }
-    if (*(u32*)r->name == 'PCAR' && fn_801E87A8()->type == 0x180304) {
+    if (r->tag == 'PCAR' && fn_801E87A8()->type == 0x180304) {
         lbl_8055EBC8 = this;
     }
 }

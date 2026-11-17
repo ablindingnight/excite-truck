@@ -19,11 +19,6 @@ f32 fn_801B2F90(int a, int b);
 }
 
 
-struct Racer {
-    u8 pad0[4];
-    s32 place;  // offset 0x4
-};
-
 extern "C" DeityCar* fn_801B2ED0(int i);
 
 struct Catchup {
@@ -86,7 +81,7 @@ void fn_8013B950(void) {
     lbl_8042F8A8.active = 0;
     leader = fn_80179630(0);
     if (leader >= 0) {
-        Racer* found;
+        DState* found;
         int k;
         int i;
         int id;
@@ -95,12 +90,12 @@ void fn_8013B950(void) {
         id = -1;
         for (i = fn_801B2F24() - 1; i >= 0; i--) {
             id = fn_801B2F40(i);
-            found = ((Racer*)fn_801B2ED0(id)->State());
+            found = fn_801B2ED0(id)->State();
             if (--k <= 0) {
                 break;
             }
         }
-        if (found && ((Racer*)fn_801B2ED0(leader)->State())->place > found->place) {
+        if (found && fn_801B2ED0(leader)->State()->place > found->place) {
             f32 d = fn_801B2F90(leader, id);
             lbl_8042F8A8.dist = d;
             lbl_8042F8A8.car = id;
