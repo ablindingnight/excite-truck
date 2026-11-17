@@ -3223,10 +3223,7 @@ void fn_8018A174(u8* p) { F32(p, 0x2650) = 4.0f; }
 
 }  // extern "C"
 
-class CarElem {
-public:
-    void Fetch(int id);
-};
+#include "game/carelem.h"
 
 
 
@@ -3752,16 +3749,6 @@ static inline f32 PackClamp01(f32 x) {
 }
 
 
-// The car's track position tracker (car + 0x270).
-class CarTrackPos {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual u8* Segment(void);  // 0x18
-};
-
 // Quantises x from [lo, hi] to 0..range (rounded).
 static inline int Pack(f32 x, f32 lo, f32 hi, f32 range) {
     return (int)(0.5f + Lerp(0.0f, range, MaxF(MinF(1.0f, (x - lo) / (hi - lo)), 0.0f)));
@@ -3784,7 +3771,7 @@ s32 CarBody::vf34(RPacket* pk_) {
     f32 k = 1.0f;
     const int variation = (int)(0.5f + Lerp(0.0f, 255.0f, k));
     U8(((u8*)pk_), 0x3C) = variation;
-    u8* seg = ((CarTrackPos*)((u8*&)this->src))->Segment();
+    u8* seg = (u8*)this->src->Ideal();
     S32(((u8*)pk_), 0x40) = fn_801363A0(seg, seg + 4);
     if (U8(((u8*)pk_), 0x3C) == 0) {
         U8(((u8*)pk_), 0x3C) = 1;
