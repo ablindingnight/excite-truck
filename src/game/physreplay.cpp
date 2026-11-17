@@ -41,7 +41,11 @@ public:
     virtual void vf24(void) = 0;
     virtual void vf28(void) = 0;
     virtual void vf2C(void) = 0;
-    virtual void Play(u8* a, u8* b, f32 t, s32* sizeA, s32* sizeB) = 0;
+#ifdef __MWERKS__
+    virtual void Play(u8* a, u8* b, f32 t, s32* sizeA, s32* sizeB) = 0;  // PPC: f32 travels in f1 whatever its position
+#else
+    virtual void Play(f32 t, u8* a, u8* b, s32* sizeA, s32* sizeB) = 0;  // retail vf30__9RigidBodyFfP7RPacketPC7RPacketPlPl order (x86 stack ABI)
+#endif
     virtual void vf34(void) = 0;
     virtual void vf38(void) = 0;
     virtual void vf3C(void) = 0;
@@ -354,7 +358,11 @@ void fn_801B50B4(ReplayObj** list, int n) {
             if (o && o->Replays()) {
                 s32 sizeA = -1;
                 s32 sizeB = -1;
+#ifdef __MWERKS__
                 o->Play(a, b, t, &sizeA, &sizeB);
+#else
+                o->Play(t, a, b, &sizeA, &sizeB);
+#endif
                 a += sizeA;
                 b += sizeB;
             }
