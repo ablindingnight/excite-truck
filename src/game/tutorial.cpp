@@ -1147,8 +1147,10 @@ inline void Challenge::Collect(int& i) {
         TutorialToken* t;
         int j;
         for (n = 0; n < fn_801B2F24(); n++) {
-            car = lbl_804348E8[n];
-            if (car->model == 'PCAR') {
+            // The test reads the table and the car pointer is taken inside. MWCC merges the two loads into one
+            // late temporary, so the car is coloured after both loop walkers (retail r23).
+            if (lbl_804348E8[n]->model == 'PCAR') {
+                car = lbl_804348E8[n];
                 for (j = 0; j < tokens.count; j++) {
                     t = &tokens.data[j];
                     if (t->active) {
