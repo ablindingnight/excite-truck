@@ -489,7 +489,7 @@ public:
     virtual TextBox *FindText(const char *name);
     virtual void vf10(void);
     virtual PanelBox *FindPane(const char *name);
-    virtual gArtSet* GetFont(void);  // the panel's art set (gart.h)
+    virtual gArtSet* GetFont(const char* set);  // Layout::FindSet: the panel's art set by name (gart.h)
 };
 
 extern "C" void fn_802101F8(PanelWidget *arg0, long arg1, long arg2, void *arg3) {
@@ -500,7 +500,7 @@ extern "C" void fn_802101F8(PanelWidget *arg0, long arg1, long arg2, void *arg3)
 
     if (arg0 == 0 || src == 0) return;
     {
-        font = arg0->GetFont();
+        font = arg0->GetFont((const char*)arg1);  // retail leaves arg1 in r4
         i = 0;
         b.color = src->color;
         b.pos = src->pos;
