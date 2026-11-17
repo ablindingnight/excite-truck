@@ -31,8 +31,10 @@ public:
         }
         return -1;
     }
+    // MWCC: the key is a const REFERENCE. A destructor that passes `this` here gets a real object for `this`
+    // when it is inlined, so its `this != 0` tests survive for stack objects (evpath, FACTS 2026-11-17 G5).
     template <typename V>
-    void Remove(V* v) {
+    void Remove(V* const& v) {
         int i = Find(v);
         if (i == -1) {
             return;

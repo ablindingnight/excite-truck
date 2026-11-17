@@ -184,7 +184,7 @@ public:
         if ((UPtrInt)lbl_8055F688 == (UPtrInt)self) {
             lbl_8055F688 = 0;
         }
-        lbl_804B3048.Remove(self);
+        lbl_804B3048.Remove(this);
     }
     virtual void Enter(void);
     virtual void Update(void);
