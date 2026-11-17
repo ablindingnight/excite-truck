@@ -3,6 +3,7 @@
 // with per-instance texture nodes, and the render queue: surfaces are bucketed per texture node, sorted by
 // priority band and drawn texture by texture. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/modelinfo.h"
 #include "game/byteswap.h"
 
 void* operator new[](size_t size, const char* tag);
@@ -75,20 +76,6 @@ struct MExtra {
     u32 tag;     // offset 0x0
     u32 size;    // offset 0x4
     s32 n;       // offset 0x8
-};
-
-struct ModelInfo {
-    s32 nElems;           // offset 0x0
-    MElem* elems;         // offset 0x4
-    s32 nLists;           // offset 0x8
-    MSurfList** lists;    // offset 0xC
-    s32 nExtras;          // offset 0x10
-    MExtra** extras;      // offset 0x14
-    s32 maxInst;          // offset 0x18
-    f32 radius;           // offset 0x1C
-    ValVec3 center;         // offset 0x20
-    f32 box[6];           // offset 0x2C
-    u32 pad44;
 };
 
 struct ModelNode {

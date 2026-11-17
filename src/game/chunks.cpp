@@ -4,6 +4,7 @@
 // tumble with one of six random spins, fall, bounce once on the ground and sink away. Car chunks are
 // tinted with a dimmed copy of each car's colour. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/modelinfo.h"
 #include "game/carmodel.h"
 #include <revolution/MTX/vec.h>
 #include "game/rmtx.h"
@@ -161,11 +162,6 @@ struct TypeName {
 
 struct TypeTable {
     TypeName t[3];
-};
-
-struct ModelInfo {
-    s32 count;   // offset 0x0
-    u8* texs;    // offset 0x4
 };
 
 // A texture remap request (0x2C).
@@ -380,8 +376,8 @@ void fn_80292CD8(const char* model, int id, const char* tex) {
     memset(&r, 0, sizeof(r));
     SafeStrCopy(r.newName, tex, 16);
     r.id = id;
-    for (int i = 0; i < m->count; i++) {
-        SafeStrCopy(r.name, fn_802C9C24(m->texs + i * 0x10), 16);
+    for (int i = 0; i < m->nElems; i++) {
+        SafeStrCopy(r.name, fn_802C9C24((u8*)m->elems + i * 0x10), 16);
         fn_802C7888(&r, 1);
     }
     fn_802C6C20(m);

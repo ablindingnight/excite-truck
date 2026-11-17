@@ -4,6 +4,7 @@
 // water, fuel, volt needles and the speedo slider). Car 0 draws every car each pass, the player's own
 // car last. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/modelinfo.h"
 #include "game/carmodel.h"
 #include "game/animobj.h"
 #include "game/vecmatrix.h"
@@ -156,7 +157,7 @@ int fn_8012C33C(const char* name);
 int fn_801333E8(int a, const char* name, u8* flag);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 void* fn_80179CB0(void);
-struct ModelInfo* fn_802C6C34(s32 model);
+ModelInfo* fn_802C6C34(s32 model);
 void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
 void fn_802C70AC(s32 model, const VecMatrix* f, s32 mat, u32 mask);
@@ -179,12 +180,6 @@ const Vec* fn_802C9A40(void);
 void fn_802DAC54(void);
 void fn_802E317C(const char* fmt, ...);
 }
-
-struct ModelInfo {
-    u8 pad[0x1C];
-    f32 radius;  // offset 0x1C
-    Vec center;  // offset 0x20
-};
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 extern u8 lbl_8055E614;
@@ -946,7 +941,7 @@ void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir
         m->numShadows = i;
         if (i > 0) {
             ModelInfo* mi = fn_802C6C34(m->shadows[0].model);
-            m->shadowRadius = mi->radius + PSVECMag(&mi->center);
+            m->shadowRadius = mi->radius + PSVECMag((const Vec*)&mi->center);
             fn_80297988(m);
         } else {
             m->shadowRadius = 0.0f;

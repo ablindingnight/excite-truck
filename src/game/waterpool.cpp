@@ -2,6 +2,7 @@
 // height field drawn as an environment-mapped strip mesh) and flat shallows, with wheel and body
 // splashes from the cars. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/modelinfo.h"
 #include "game/partparams.h"
 #include "game/plainvec.h"
 #include "game/vecmatrix.h"
@@ -31,12 +32,6 @@ struct WaterCarEntry {
     u32 index;      // offset 0x4
     f32 dist;       // offset 0x8
     u8 active;      // offset 0xC
-};
-
-struct ModelInfo {
-    u8 pad0[0x1C];
-    f32 radius;  // offset 0x1C
-    Vec center;  // offset 0x20
 };
 
 struct PoolDesc {
@@ -772,7 +767,7 @@ void fn_8029D7D0(WaterPool* p, const WaterCarEntry* e) {
     ModelInfo* m = fn_802C6C34(fn_801EE0C8(e->index < 8 ? lbl_80488648[e->index] : 0));
     WaterCar* car = e->car;
     Vec c;
-    MulVec(&c, &m->center, car->axes);
+    MulVec(&c, (Vec*)&m->center, car->axes);
     c.x = c.x + car->pos.x;
     c.y = c.y + car->pos.y;
     c.z = c.z + car->pos.z;
