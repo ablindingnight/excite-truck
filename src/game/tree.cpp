@@ -12,6 +12,7 @@
 #include "game/rmtx.h"
 #include "game/shapes.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 // Query cell scale. The name is unproven.
 extern const f32 kTreeCellScale;
@@ -287,10 +288,7 @@ static TreeTypeCleanup sTreeTypeCleanup;
 #endif
 
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline f32 Step(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 extern "C" {
 
@@ -746,7 +744,7 @@ static inline void DrawTreeType(int i) {
         for (j = 0; j < frames->n; j++) {
             c = &frames->data[j];
             f32 one = 1.0f;
-            f32 k = Step(c->fade, 0.375f, 0.475f);
+            f32 k = Unlerp(c->fade, 0.375f, 0.475f);
             k = (one < k) ? one : k;
             k = (k > 0.0f) ? k : 0.0f;
             f32 a = Lerp(0.0f, 1.0f, k);
@@ -777,7 +775,7 @@ static inline void DrawTreeType(int i) {
                 c2 = &near->data[j2];
                 if (Live(c2)) {
                     f32 one = 1.0f;
-                    f32 k = Step(c2->fade, 0.525f, 0.625f);
+                    f32 k = Unlerp(c2->fade, 0.525f, 0.625f);
                     k = (one < k) ? one : k;
                     k = (k > 0.0f) ? k : 0.0f;
                     f32 a = Lerp(1.0f, 0.0f, k);

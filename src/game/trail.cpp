@@ -7,6 +7,7 @@
 #include "game/partparams.h"
 #include "game/plainvec.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -190,7 +191,6 @@ static inline void Wrap(f32& v, f32 step) {
     v = v + step;
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(RVec3* out, const RVec3* in, const TMtx33* m) {
     if (out == in) {
@@ -281,11 +281,8 @@ static inline void MulBasis(TBasis* out, const TBasis* a, const TBasis* b) {
 
 static inline f32 Ramp(f32 x, f32 lo, f32 range) { return (x - lo) / range; }
 
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
-static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void Scale(RVec3* o, const f32* v, f32 k) {
     o->x = v[0] * k;

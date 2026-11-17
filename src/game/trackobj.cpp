@@ -419,6 +419,7 @@ struct ViewState {
 #include "game/settings.h"
 
 #include "game/tableref.h"
+#include "game/mathutil.h"
 
 struct ObjMsg {
     s32 id;      // offset 0x0
@@ -1612,7 +1613,6 @@ CollShape* fn_801FC12C(const ObstacleDesc* d);
 
 static inline FacingFn PickFacing(u32 fl) { return (fl & 0x20) ? FacingX : (fl & 1) ? FacingZ : FacingNone; }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void RotVec(const OFrame* m, const PVec* v, PVec* out) {
     if (out == v) {
@@ -1929,16 +1929,12 @@ void StaticObject::Draw(void) {
     }
 }
 
-static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 Unlerp(f32 x, f32 a, f32 b) { return (x - a) / (b - a); }
 
 static inline f32 FadeShadowExtent(f32 distance, f32 cutoff, f32 extent) {
     f32 delta = distance - cutoff;
     f32 ratio = Unlerp(delta, 0.0f, 5.0f);
-    f32 t = FMax(FMin(ratio, 1.0f), 0.0f);
+    f32 t = MaxF(MinFRev(ratio, 1.0f), 0.0f);
     return Lerp(extent, 0.0f, t);
 }
 

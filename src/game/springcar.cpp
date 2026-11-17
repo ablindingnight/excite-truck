@@ -11,6 +11,7 @@
 #include "game/deity.h"
 #include "game/idealline.h"
 #include "game/centerline.h"
+#include "game/mathutil.h"
 
 
 struct SaveRec {
@@ -191,7 +192,6 @@ void SpringCar::vf14(void) {
     ctl->vf34();
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 /* Helper name unproven: whether the wall is still ramping. */
 inline int SpringWall::Ramping(void) {

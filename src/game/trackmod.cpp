@@ -9,6 +9,7 @@
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -437,11 +438,9 @@ void* fn_802C7A3C(f32 u, f32 v, f32 w);
 extern u16 lbl_802F9B20[6];
 }
 
-static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 
-static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
-static inline f32 Clamp01(f32 a) { return FMax(FMin(a, 1.0f), 0.0f); }
+static inline f32 Clamp01(f32 a) { return MaxF(MinFRev(a, 1.0f), 0.0f); }
 
 static inline void NegInto(PVec* o, const f32* v, f32 k) {
     o->x = v[0] * k;
@@ -747,7 +746,6 @@ void SunTMH::Init(TObj* o) {
     dir[2] = ((f32*)d)[3];
 }
 
-static inline f32 Sq(f32 a) { return a * a; }
 
 inline void SunTMH::Apply(void) {
     PVec d;

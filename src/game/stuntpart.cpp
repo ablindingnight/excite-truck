@@ -26,6 +26,7 @@ struct StuntCar {
 };
 
 #include "game/scolor.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int fn_80129D90(int seed, int lo, int hi);  // random int
@@ -76,7 +77,6 @@ void* operator new[](size_t size, const char* name);
 extern void* lbl_80488648[];  // car models
 extern f32 __float_epsilon[];    // FLT_EPSILON
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {
@@ -105,7 +105,6 @@ static inline void AddScaled(Vec* out, const Vec* in, const Vec* d, f32 s) {
     out->z = in->z + d->z * s;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
@@ -320,7 +319,6 @@ void fn_802AA1D0(int idx) {
     p->sizeZ = box[5] - box[4];
 }
 
-static inline double AbsD(double v) { return __fabs(v); }
 
 // Helper name unproven: arguments read right to left, stores go x, y, z.
 static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {

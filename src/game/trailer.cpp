@@ -12,6 +12,7 @@
 #include "game/carbody.h"
 #include "game/hitch.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -73,7 +74,6 @@ UnkStaticFFFF lbl_8055E770;
 s32 lbl_8055E774;          // trailers
 Trailer* lbl_80436D28[8];  // by slot
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(RVec3* out, const RVec3* in, const PlainRVec3* m) {
     if (out == in) {
@@ -97,7 +97,6 @@ inline Trailer::Trailer(void) {
     detached = 0;
 }
 
-static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
 static inline void MulVecTSelf(RVec3* v, const PlainRVec3* m) {
     f32 x = Dot3(v->x, m[0].x, v->y, m[0].y, v->z, m[0].z);
