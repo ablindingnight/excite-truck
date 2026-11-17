@@ -412,7 +412,7 @@ struct CamRotOff {
 static inline void RotFromVec(Mat3* r, const RVec3& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > 0.0001f) {
-        f32 x, s, y, z, c, k;
+        f32 y, z, s, x, c, k;  // retail keeps x, s, z, y in f31..f28: the reverse of this order
         f32 inv = 1.0f / a;
         x = inv * w.x;
         y = inv * w.y;
@@ -585,6 +585,7 @@ void fn_80275D0C(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{-28.5f, 9.1f, -9.1f}, {16.3f, 70.4f, -13.4f}, 18.75f};
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
+    CamRotOff g;  // declared before f: retail has f below g on the stack
     PlainValMatrix f;
     f.origin.x = cr->carFrame.pos.v[0];
     f.origin.y = cr->carFrame.pos.v[1];
@@ -597,12 +598,8 @@ void fn_80275D0C(u8* p) {
     f.basis[1].z = 0.0f;
     PSVECCrossProduct((const Vec*)&f.basis[1].x, (const Vec*)&f.basis[2].x, (Vec*)&f.basis[0].x);
     PSVECCrossProduct((const Vec*)&f.basis[2].x, (const Vec*)&f.basis[0].x, (Vec*)&f.basis[1].x);
-    CamRotOff g;
-    f32 x = c.off.x;
-    f32 y = c.off.y;
-    f32 z = c.off.z;
-    g.pos.Set(x, y, z);
-    RotFromVec(&g.rot, c.rot * 0.017453292f);
+    g.pos.Set(c.off.x, c.off.y, c.off.z);
+    RotFromVec(&g.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
     fn_801BFD34((u8*)&cr->pose.pos, &g.pos, (u8*)&f);
     Mat3Mul((Mat3*)&cr->pose, &g.rot, (Mat3*)&f);
     f32 fovv = c.fov;
