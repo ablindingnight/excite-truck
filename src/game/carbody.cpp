@@ -3666,7 +3666,7 @@ static inline f32 PkNorm(u32 v, f32 lo, f32 range) {
     f32 x = PK_MIN(1.0f, ((f32)v - lo) / range);
     return PK_MAX(x, 0.0f);
 }
-static inline f32 PkUnpack(u32 v, f32 q, f32 lo, f32 span) { return lo + PkNorm(v, 0.0f, q) * span; }
+static inline f32 PkUnpack(u32 v, f32 q, f32 lo, f32 span) { f32 r = PkNorm(v, 0.0f, q); return lo + r * span; }
 
 static inline void PkCopy(void* dst, const void* src, int n) {
     u8* d = (u8*)dst;
@@ -3699,7 +3699,7 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
     cb->f25D0 = LerpT(t, v1, v0);
     v0 = PkUnpack(prev->steer, 255.0f, -1.2f, 2.4f);
     v1 = PkUnpack(cur->steer, 255.0f, -1.2f, 2.4f);
-    cb->f25F0 = cb->f25DC = LerpT(t, v1, v0);
+    cb->f25DC = cb->f25F0 = LerpT(t, v1, v0);
     if (cur->boost) {
         f32 boost;
         if (teleport) {
@@ -3712,8 +3712,8 @@ void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, 
     cb->wheels[2].steer = 0.0f;
     cb->wheels[3].steer = 0.0f;
     cb->f25F8 = 1.0f;
-    cb->f25E8 = 1.0f;
     cb->wheels[1].steer = cb->wheels[0].steer = cb->f25F0 * cb->f5B0;
+    cb->f25E8 = 1.0f;
     v0 = PkUnpack(prev->throttle, 255.0f, 0.0f, 1.0f);
     v1 = PkUnpack(cur->throttle, 255.0f, 0.0f, 1.0f);
     fn_8018ADB4(p, LerpT(t, v1, v0));
