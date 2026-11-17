@@ -2369,7 +2369,7 @@ void BoxSphereShape::vf14(void) {
     at.x = this->f34;
     at.y = this->f38;
     at.z = this->f3C;
-    if (fn_801E9F08((u8*)rb->hint, &at.x, &pos, &nrm, &surf, SphAdd(this->radius, 1.5f))) {
+    if (fn_801E9F08((u8*)rb->hint, &at.x, &pos, &nrm, &surf, SphAdd(1.5f, this->radius))) {
         if (surf == 7) {
             if (!this->b4C) {
                 rb->VelAt(&v, &pos);
@@ -2485,7 +2485,7 @@ void BoxSphereShape::vf14(void) {
             drag.z = bv.z * dk;
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
             f32 lift = 1000.0f + 0.1f * sub;
-            sub = MinF(sub, SphMul(this->radius, 2.0f));
+            sub = MinF(sub, SphMul(2.0f, this->radius));
             up.y = 9.81f * (lift * (vol * sub));
             up.x = 0.0f;
             up.z = 0.0f;
