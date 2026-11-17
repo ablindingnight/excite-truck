@@ -863,13 +863,7 @@ inline f32 fn_8025ADF4(f32 x) { return (f32)sqrt(x); }
 
 }  // extern "C"
 
-struct Perspective {
-    Perspective(f32 near, f32 far, f32 fov);
-    ~Perspective(void);
-    f32 near;  // offset 0x0
-    f32 far;   // offset 0x4
-    f32 fov;   // offset 0x8
-};
+#include "game/viewport.h"
 
 // LightDir: valvec3.h's ValVec3.
 static inline f32 DegToRad(f32 d) { return d * 3.1415927f / 180.0f; }
