@@ -14,6 +14,7 @@
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include <stdarg.h>
+#include "game/byteswap.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -592,21 +593,12 @@ int fn_801F7A88(ValueNode* vn, const char* key, void* out, int size) {
     return r;
 }
 
-static inline void Swap32(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 void fn_801F7B10(OFrame* f, ValueNode* vn, const char* key) {
     if (fn_801F7A88(vn, key, f, sizeof(OFrame))) {
         int i;
         u32* w = (u32*)f;
         for (i = 0; i < 12; i++) {
-            Swap32((u8*)&w[i]);
+            SwapWordB((u8*)&w[i]);
         }
     } else {
         f->x.Set(vn->GetVec3("basis_x"));
