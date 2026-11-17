@@ -197,14 +197,33 @@ void fn_802DD754(void) {
 
 // One vertex of a streak quad: position and texture coordinate at fraction (fx, fy) of the streak,
 // with the texture inset by (du, dv).
+enum GlareVertexForm {
+    GlareVertexDirect,
+    GlareVertexNamedX,
+    GlareVertexNamedVEnd
+};
+
+// The named values place the vertex calculations at the same compiler block boundaries as retail.
+template <GlareVertexForm Form>
 static inline void WriteGlareVtx(GVtx* v, Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
-    v->x = LerpT(fx, s->x0, s->x1);
+    if (Form == GlareVertexNamedX) {
+        const f32 x = LerpT(fx, s->x0, s->x1);
+        v->x = x;
+    } else {
+        v->x = LerpT(fx, s->x0, s->x1);
+    }
     v->y = LerpT(fy, s->y0, s->y1);
     v->z = 0.5f;
     f32 u1 = s->u1 - du;
     f32 u0 = s->u0 + du;
     v->u = LerpT(fx, u0, u1);
-    f32 v1 = s->v1 - dv;
+    f32 v1;
+    if (Form == GlareVertexNamedVEnd) {
+        const f32 vEnd = s->v1;
+        v1 = vEnd - dv;
+    } else {
+        v1 = s->v1 - dv;
+    }
     f32 v0 = s->v0 + dv;
     v->v = LerpT(fy, v0, v1);
     v->color = color;
@@ -212,20 +231,26 @@ static inline void WriteGlareVtx(GVtx* v, Streak* s, f32 fx, f32 fy, u32 color, 
 
 static inline void GlareVtx(GVtx* buf, int* n, Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
     GVtx* v = &buf[(*n)++];
-    WriteGlareVtx(v, s, fx, fy, color, du, dv);
+    WriteGlareVtx<GlareVertexDirect>(v, s, fx, fy, color, du, dv);
 }
 
 // Helper names unproven. Compute the address before advancing the count.
 static inline void GlareVtxAdvance(GVtx* buf, int* n, Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
     GVtx* v = buf + *n;
     ++(*n);
-    WriteGlareVtx(v, s, fx, fy, color, du, dv);
+    WriteGlareVtx<GlareVertexDirect>(v, s, fx, fy, color, du, dv);
 }
 
 static inline void GlareVtxPair(GVtx* buf, int* n, Streak* s, f32 x0, f32 y0, u32 color,
                                 f32 x1, f32 y1, f32 du, f32 dv) {
     GlareVtxAdvance(buf, n, s, x0, y0, color, du, dv);
     GlareVtx(buf, n, s, x1, y1, color, du, dv);
+}
+
+template <GlareVertexForm Form>
+static inline void GlareVtx(GVtx* buf, int* n, Streak* s, f32 fx, f32 fy, u32 color, f32 du, f32 dv) {
+    GVtx* v = &buf[(*n)++];
+    WriteGlareVtx<Form>(v, s, fx, fy, color, du, dv);
 }
 
 // Draws one light streak as a framed quad: an outer ring (lit at the edge, faded inside) as a strip.
@@ -248,13 +273,13 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
     GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
     GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
     GlareVtx(buf, &n, s, 0.3f, 0.3f, 0, du, dv);
-    GlareVtx(buf, &n, s, 0.09f, 0.97f, color, du, dv);
+    GlareVtx<GlareVertexNamedX>(buf, &n, s, 0.09f, 0.97f, color, du, dv);
     GlareVtx(buf, &n, s, 0.3f, 0.9f, 0, du, dv);
     GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.97f, color, du, dv);
     GlareVtx(buf, &n, s, 0.7f, 0.9f, 0, du, dv);
     GlareVtx(buf, &n, s, 1.0f - 0.09f, 0.09f, color, du, dv);
-    GlareVtx(buf, &n, s, 0.7f, 0.3f, 0, du, dv);
-    GlareVtx(buf, &n, s, 0.09f, 0.09f, color, du, dv);
+    GlareVtx<GlareVertexNamedX>(buf, &n, s, 0.7f, 0.3f, 0, du, dv);
+    GlareVtx<GlareVertexNamedVEnd>(buf, &n, s, 0.09f, 0.09f, color, du, dv);
     GlareVtx(buf, &n, s, 0.3f, 0.3f, 0, du, dv);
     GlareVtx(buf, &n, s, 0.3f, 0.3f, 0, du, dv);
     GlareVtx(buf, &n, s, 0.3f, 0.9f, 0, du, dv);
@@ -264,13 +289,10 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
     GXSetArray((GXAttr)0xD, (const void*)&buf->u, (u8)0x18);
     GXSetArray((GXAttr)0xB, (const void*)&buf->color, (u8)0x18);
     GXBegin((GXPrimitive)0x98, (GXVtxFmt)0, (u16)0x18);
-    int i = 0;
-    if (n > 0) {
-        for (; i < n; i++) {
-            WGPIPE = i;
-            WGPIPE = i;
-            WGPIPE = i;
-        }
+    for (int i = 0; i < n; ++i) {
+        WGPIPE = i;
+        WGPIPE = i;
+        WGPIPE = i;
     }
 }
 

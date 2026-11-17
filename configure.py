@@ -1312,7 +1312,7 @@ config.libs.append(
             Object(Matching, "game/romfont.cpp"),
             Object(Matching, "game/stub15.cpp"),
             Object(Matching, "game/gndtex.cpp"),
-            Object(NonMatching, "game/glare.cpp"),
+            Object(Matching, "game/glare.cpp"),
             Object(Matching, "game/tevbink.cpp"),
             Object(Matching, "game/kernel.cpp"),
             Object(Matching, "game/log.cpp"),
