@@ -12,14 +12,7 @@
 
 
 
-struct PhobNode {
-    CollVolume* phob;      // offset 0x0
-    PhobNode* next;  // offset 0x4
-};
-
-struct PhobCell {
-    PhobNode* head;  // offset 0x0
-};
+#include "game/phobnode.h"
 
 // Walk over the objects of a set of grid cells: the object, its list node and the cell.
 struct PhobIter {  /* Helper name unproven */

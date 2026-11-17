@@ -8,21 +8,7 @@ extern "C" void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit()
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-class Phob;
-
-struct PhobNode {
-    PhobNode(void) {
-        phob = 0;
-        next = 0;
-    }
-    Phob* phob;      // offset 0x0
-    PhobNode* next;  // offset 0x4
-};
-
-struct PhobCell {
-    PhobCell(void) { head = 0; }
-    PhobNode* head;  // offset 0x0
-};
+#include "game/phobnode.h"
 
 // PhobPos: valvec3.h's ValVec3.
 static inline int CellIndex(f32 v) {
@@ -123,14 +109,14 @@ void fn_801B619C(PhobCell** out, int* n, const ValVec3* pos) {
     out[(*n)++] = lbl_8055E714;
 }
 
-void fn_801B63E0(PhobCell* c, Phob* p) {
+void fn_801B63E0(PhobCell* c, CollVolume* p) {
     PhobNode* n = fn_801B5F40();
     n->phob = p;
     n->next = c->head;
     c->head = n;
 }
 
-void fn_801B6428(PhobCell* c, Phob* p) {
+void fn_801B6428(PhobCell* c, CollVolume* p) {
     PhobNode* prev = c->head;
     PhobNode* n;
     if (prev->phob == p) {
