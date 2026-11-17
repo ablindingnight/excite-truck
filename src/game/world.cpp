@@ -100,11 +100,9 @@ extern "C" CarTypeMap* fn_801E8EA4(int type);
 extern "C" void fn_801E9DC4(void* p);
 
 // What a car model is built from (game/racer.h; 0x11C). Its constructor is inline here:
-// retail's fn_801E8F10 keeps it at sp+0x8 with the next slot at sp+0x124. Our fn_801E8F10 frame (768) still
-// differs from retail's (592): retail builds `Racer r(*d, i)` directly and its CarDef copy goes through one
-// 4-byte stack temporary per copied byte (0x124..0x1F4, ~52 slots), while ours copies *d into a CarDef local
-// first; writing `Racer r(*d, i)` gives a plain byte copy (frame 320, 30%). Open puzzle; objdiff is unchanged
-// either way (69.44).
+// retail's fn_801E8F10 builds `Racer r(*d, i)` at sp+0x8. Its CarDef copy has every byte load hoisted above the
+// stores (one 4-byte spill slot per byte, frame 592): that happens because the setup comes in through a CONST
+// formal (FACTS: const formals are their own alias class, so loads are not held behind the stores into r).
 inline Racer::Racer(const CarDef& d, int i) : def(d), index(i) {
     CarTypeMap* m = fn_801E8EA4(d.type);
     model = m->f8;
@@ -392,7 +390,7 @@ void fn_801E8CE4(void);
 void fn_801E8D48(void);
 void fn_801E8DD4(void);
 void fn_801E8E38(void);
-void fn_801E8F10(RaceSetup* s);
+void fn_801E8F10(const RaceSetup* s);
 void fn_801E9564(RaceSetup* s);
 void fn_801E95DC(void);
 void fn_801E96D8(RaceSetup* s);
@@ -1091,9 +1089,9 @@ CarTypeMap* fn_801E8EA4(int type) {
     return m;
 }
 
-void fn_801E8F10(RaceSetup* s) {
-    RaceCars* cars;
-    CarDef* d;
+void fn_801E8F10(const RaceSetup* s) {
+    const RaceCars* cars;
+    const CarDef* d;
     int i;
     fn_8012E81C("hobbyset.res");
     fn_8012E81C("part.res");
@@ -1106,11 +1104,10 @@ void fn_801E8F10(RaceSetup* s) {
         fn_80127464();
         LoadTimerMark(lbl_804881E8, 500.0f);
         {
-            CarDef def = *d;
-            Racer r(def, i);
+            Racer r(*d, i);
             switch (d->type) {
             case 'S':
-                m = new ("GhostCarObject") PlayerCarModel(&r, d);
+                m = new ("GhostCarObject") PlayerCarModel(&r, (CarDef*)d);
                 break;
             default:
                 m = new ("CarObject") CarModel(&r, d);
