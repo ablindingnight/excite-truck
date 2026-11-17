@@ -502,7 +502,11 @@ void KernelErrorHandler(u16 err) {
 
 void stack_check(void) {
     u32 here;
+#ifdef __MWERKS__
     lbl_804DB780.size = 0x7400;
+#else
+    lbl_804DB780.size = 0x40000;  // PORT: host (x86) frames are larger than the Wii's; give the overrun check 256K
+#endif
     lbl_804DB780.top = &here;
     fn_802E30C8("stack_check: hoping stack size %dK from 0x%p", lbl_804DB780.size / 1024, &here);
     int n = lbl_804DB780.size / 4;
