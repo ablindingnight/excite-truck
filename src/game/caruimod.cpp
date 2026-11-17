@@ -8,6 +8,7 @@
 #include "game/math_types.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+#include "game/strcopy.h"
 /* Helper unproven: retail creates 2250.0f (the far clip passed in CarUIScreen::Draw) as the FIRST .sdata2 entry, so an
    unused static function with that literal was compiled before any other code (the linker drops it; the constant
    stays). A one-field const struct read in Draw gives the same pool. */
@@ -147,16 +148,6 @@ static inline void Identity(CarUIFrame* f) {
 }
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(char* dst, const char* src, int n) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline int IsFront(int i) { return i == 0 || i == 1; }
 static inline int IsLeft(int i) {
@@ -277,7 +268,7 @@ void CarUIModel::Load(const char* carName) {
     char path[0x100];
     char file[0x20];
     fn_801345D8(path, 0x100, "%s.car", carName);
-    CopyName(name, carName, 0x20);
+    SafeStrCopy(name, carName, 0x20);
     fn_801345D8(file, 0x20, "%s/low1.mod", path);
     model = fn_802C6FC0(file, 0, path);
     fn_801345D8(file, 0x20, "%s/shadow1.mod", path);
@@ -772,7 +763,7 @@ static inline void ReleaseLoader(const char* name) {
             ResourceLoader* l = lbl_80498E08[i];
             if (--l->refs == 0) {
                 l->set->Finish();
-                CopyName(l->name, "", 0x20);
+                SafeStrCopy(l->name, "", 0x20);
             }
             return;
         }
@@ -791,13 +782,13 @@ static inline int AcquireLoader(const char* name) {
         }
     }
     l = lbl_80498E08[idle];
-    CopyName(l->name, name, 0x20);
+    SafeStrCopy(l->name, name, 0x20);
     if (fn_8012CC20(l->set, l->name)) {
         l->refs = 1;
         return 1;
     }
     fn_802E30C8("caruimod: failed to load %s (too big?)", l->name);
-    CopyName(l->name, "", 0x20);
+    SafeStrCopy(l->name, "", 0x20);
     l->refs = 0;
     return 0;
 }
@@ -1173,7 +1164,7 @@ void CarUIScreen::SetCar(const char* name) {
         ReleaseLoader(loading);
         loading[0] = 0;
     }
-    CopyName(carName, name, 0x20);
+    SafeStrCopy(carName, name, 0x20);
     pending = 1;
     if (loaded[0]) {
         requestTime = fn_8023659C();
@@ -1251,7 +1242,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
     if (ready && !loading[0]) {
         pending = 0;
         fn_801345D8(loading, 0x20, "%s.car", carName);
-        CopyName(loadName, carName, 0x20);
+        SafeStrCopy(loadName, carName, 0x20);
         if (!AcquireLoader(loading)) {
             fn_802E30C8("caruimod: load failed (%s)", loading);
             loading[0] = 0;
@@ -1266,7 +1257,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         if (lbl_8055F330) {
             fn_80253104(index, &model->setup);
         }
-        CopyName(loaded, loading, 0x20);
+        SafeStrCopy(loaded, loading, 0x20);
         loading[0] = 0;
         CarUIModel* nm = model;
         loadName[0] = 0;
