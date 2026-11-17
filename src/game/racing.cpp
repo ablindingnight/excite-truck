@@ -4,6 +4,7 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/raceinfo.h"
 #include "game/gart.h"
 #include "game/gamemode.h"
 #include "game/ilayout.h"
@@ -18,36 +19,6 @@
 struct ResultRacer {
     u8 pad0[0x48];
     char name[1];  // offset 0x48
-};
-
-// CarDrawState: game/carbody.h's CarDrawState.
-struct RacerStats {
-    u32 flags;  // offset 0x0
-    s32 place;  // offset 0x4
-    u8 pad8[0x10 - 0x8];
-    s32 lap;      // offset 0x10
-    f32 lapTime;  // offset 0x14
-    f32 best;     // offset 0x18
-    f32 last;     // offset 0x1C
-    u8 pad20[0x24 - 0x20];
-    s32 state;  // offset 0x24
-};
-
-struct RaceInfo {
-    u8 split;             // offset 0x0
-    u8 active;            // offset 0x1
-    s32 mode;             // offset 0x4
-    RaceOpts* event;     // offset 0x8
-    RaceProgress* info;   // offset 0xC
-    f32 time;             // offset 0x10
-    s32 numPlayers;       // offset 0x14
-    s32 numViews;         // offset 0x18
-    s32 player;           // offset 0x1C
-    u32 flags;            // offset 0x20
-    s32 view;             // offset 0x24
-    ResultRacer* racer;   // offset 0x28
-    CarDrawState* truck;    // offset 0x2C
-    RacerStats* stats;    // offset 0x30
 };
 
 // CarInfo: game/carinfo.h.
@@ -633,8 +604,8 @@ void RacingOverlay::Update(void) {
         }
     }
     if (lbl_8055D350->flags & 2) {
-        fn_801473F8(layout, "place_numerator", "%d", lbl_8055D350->stats->place);
-        fn_801473F8(layout, "place_suffix", "%s", fn_80130FE0(lbl_8055D350->stats->place));
+        fn_801473F8(layout, "place_numerator", "%d", lbl_8055D350->stats->pos);
+        fn_801473F8(layout, "place_suffix", "%s", fn_80130FE0(lbl_8055D350->stats->pos));
     }
     if (lbl_8055D350->flags & 1) {
         int total = lbl_8055D350->info->laps;
@@ -756,7 +727,7 @@ void RacingOverlay::DrawProgress(void) {
 
 void RacingOverlay::DrawStandings(void) {
     int n = fn_801EA994();
-    int place = lbl_8055D350->stats->place;
+    int place = lbl_8055D350->stats->pos;
     int before = 2;
     int after = 2;
     int i;
@@ -773,14 +744,14 @@ void RacingOverlay::DrawStandings(void) {
     i = place - before;
     after = after < 0 ? 0 : after;
     y = 85.0f;
-    for (i = i < 1 ? 1 : i; i < lbl_8055D350->stats->place; i++) {
+    for (i = i < 1 ? 1 : i; i < lbl_8055D350->stats->pos; i++) {
         fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->name);
         y -= 20.0f;
     }
-    fn_8000FF88(-0x100, 9, "%d. %s", 1.0f, -280.0f, y, lbl_8055D350->stats->place,
-                lbl_8055D350->racer->name);
+    fn_8000FF88(-0x100, 9, "%d. %s", 1.0f, -280.0f, y, lbl_8055D350->stats->pos,
+                lbl_8055D350->racer->setup.name);
     y -= 20.0f;
-    for (i = lbl_8055D350->stats->place + 1; i <= lbl_8055D350->stats->place + after && i <= fn_801EA994();
+    for (i = lbl_8055D350->stats->pos + 1; i <= lbl_8055D350->stats->pos + after && i <= fn_801EA994();
          i++) {
         fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->name);
         y -= 20.0f;

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/raceinfo.h"
 #include "game/gamemode.h"
 #include "game/textelem.h"
 #include "game/ilayout.h"
@@ -59,23 +60,6 @@ public:
     RacingOverlay(int player);
     virtual void Update(void);
     u8 pad4[0x54 - 0x4];
-};
-
-struct RaceInfo {
-    u8 split;           // offset 0x0
-    u8 active;          // offset 0x1
-    s32 mode;           // offset 0x4
-    RaceOpts* event;   // offset 0x8
-    RaceProgress* info; // offset 0xC
-    f32 time;           // offset 0x10
-    s32 numPlayers;     // offset 0x14
-    s32 numViews;       // offset 0x18
-    s32 player;         // offset 0x1C
-    u32 flags;          // offset 0x20
-    s32 unk24;          // offset 0x24
-    CarInfo* racer;       // offset 0x28
-    CarDrawState* unk2C;   // offset 0x2C
-    CarParams* unk30;   // offset 0x30
 };
 
 struct FrameTimes {
@@ -541,14 +525,14 @@ void fn_800056E0(GameOverlay* overlay) {
 void fn_80005740(int player) {
     CarInfo* racer;
     lbl_8034EE84.player = player;
-    lbl_8034EE84.unk24 = fn_801E866C(player);
-    racer = fn_801EA9A0(lbl_8034EE84.unk24);
+    lbl_8034EE84.view = fn_801E866C(player);
+    racer = fn_801EA9A0(lbl_8034EE84.view);
     lbl_8034EE84.racer = racer;
-    lbl_8034EE84.unk2C = racer->draw;
-    lbl_8034EE84.unk30 = &racer->params;
+    lbl_8034EE84.truck = racer->draw;
+    lbl_8034EE84.stats = &racer->params;
     lbl_8034EE84.flags = fn_801B84D8(player);
     if (fn_80005564()) {
-        fn_801B8570(lbl_8034EE84.unk24);
+        fn_801B8570(lbl_8034EE84.view);
     }
 }
 
@@ -696,7 +680,7 @@ inline int ClosureOverlay::IsDone(void) { return done; }
 
 inline void ClosureOverlay::ShowMessage(int player) {
     const char* msg = 0;
-    if (lbl_8055D350->unk30->impaired) {
+    if (lbl_8055D350->stats->impaired) {
         msg = "Your car is impaired";
     }
     if (msg) {
@@ -1036,7 +1020,7 @@ void ResultsOverlay::DrawTimes(void) {
 
 void KioskDeadDriverOverlay::Update(void) {
     char buf[0x48];
-    if (lbl_8055D350->unk2C->raceFlags & 0x10) {
+    if (lbl_8055D350->truck->raceFlags & 0x10) {
         sprintf(buf, "Press %s to RESET", lbl_80558928);
         fn_80010074(0xFFFFFFFF, 0x14, "%s", kOverlayKioskLabelScale.value, 0.0f, 125.0f, buf);
     }
@@ -1169,10 +1153,10 @@ void fn_80007318(int) {
     fn_802C8638(&cam);
     fn_802C974C(kOverlayFullScale.value, 1000.0f, 1.4398966f);
     lbl_8034EE84.player = 0;
-    lbl_8034EE84.unk24 = fn_801E866C(0);
-    lbl_8034EE84.racer = fn_801EA9A0(lbl_8055D350->unk24);
-    lbl_8034EE84.unk2C = lbl_8055D350->racer->draw;
-    lbl_8034EE84.unk30 = &lbl_8055D350->racer->params;
+    lbl_8034EE84.view = fn_801E866C(0);
+    lbl_8034EE84.racer = fn_801EA9A0(lbl_8055D350->view);
+    lbl_8034EE84.truck = lbl_8055D350->racer->draw;
+    lbl_8034EE84.stats = &lbl_8055D350->racer->params;
     lbl_8034EE84.time = fn_801E7E18();
     lbl_8034EEB8.replay->Update();
     fn_800057BC();
@@ -1240,7 +1224,7 @@ inline void ClosureOverlay::Enter(void) {
 }
 
 inline void ClosureOverlay::Draw(void) {
-    if (!(lbl_8055D350->unk2C->raceFlags & 0x20)) {
+    if (!(lbl_8055D350->truck->raceFlags & 0x20)) {
         fn_8000C630(0x20, lbl_8055D350->player);
     }
 }

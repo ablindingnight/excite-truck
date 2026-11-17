@@ -23,14 +23,14 @@ struct CarSetup {
 
 struct CarParams {
     CarParams(void) {}
-    u32 x0;   // offset 0x0
+    u32 flags;  // offset 0x0
     s32 pos;  // offset 0x4
     u32 x8;   // offset 0x8
     f32 xC;   // offset 0xC
     s32 lap;  // offset 0x10
-    f32 x14;  // offset 0x14
-    f32 x18;  // offset 0x18
-    f32 x1C;  // offset 0x1C
+    f32 lapTime;  // offset 0x14
+    f32 best;  // offset 0x18: best lap
+    f32 last;  // offset 0x1C: last lap
     f32 x20;  // offset 0x20
     s32 state;  // offset 0x24
     u8 impaired;  // offset 0x28
