@@ -344,16 +344,22 @@ static f32 Smooth(f32 t) {
     return t * t * (3.0f - 2.0f * t);
 }
 
+// Pass the scale by value to retain the retail single-precision multiply.
+static inline f32 TrailWeight(f32 scale, f32 value) { return scale * value; }
+
+static inline f32 TrailAlpha(f32 growth, f32 power) {
+    f32 fraction = MIN(1.0f, (power - 0.35f) / 0.65f);
+    fraction = MAX(fraction, 0.0f);
+    return Lerp(0.0f, growth, fraction);
+}
+
 void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
     if (p->power >= 0.35f && !p->hold && p->trig) {
         p->trig = 0;
-        const struct { f32 value;
-        } growth = {MIN(p->grow + 2.0f * dt, 1.0f)};
-        p->grow = growth.value;
-        f32 s = MIN(1.0f, (p->power - 0.35f) / 0.65f);
-        s = MAX(s, 0.0f);
-        p->alpha = Lerp(0.0f, growth.value, s);
+        f32 growth = MIN(p->grow + 2.0f * dt, 1.0f);
+        p->grow = growth;
+        p->alpha = TrailAlpha(p->grow, p->power);
     } else {
         p->grow = MAX(p->grow - 5.0f * dt, 0.0f);
         p->alpha = MAX(p->alpha - 5.0f * dt, 0.0f);
@@ -371,10 +377,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
         Vec c;
         Vec sum;
         SetXYZ(&w[0], car->wheel1.x, 0.0f, car->wheel1.z);
-        w[1].x = car->wheel3.x;
-        w[1].y = 0.0f;
-        f32 wheel3Z = car->wheel3.z;
-        w[1].z = wheel3Z;
+        SetXYZ(&w[1], car->wheel3.x, 0.0f, car->wheel3.z);
         MulVec(&w[0], &w[0], car->axes);
         MulVec(&w[1], &w[1], car->axes);
         fn_802AA100(&n, (const Vec*)&car->spin, &car->axes[0], &car->axes[2]);
@@ -406,8 +409,8 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                 Vec b = n;
                 f32 m = -PSVECMag((const Vec*)&car->vel);
                 f32 k = m * lbl_8055CC68;
-                Scale(&a, &a, 1.0f * (t * k));
-                Scale(&b, &b, 1.0f * (k * (1.0f - t)));
+                Scale(&a, &a, TrailWeight(1.0f, t * k));
+                Scale(&b, &b, TrailWeight(1.0f, (1.0f - t) * k));
                 sum.x = b.x + a.x;
                 sum.y = b.y + a.y;
                 sum.z = b.z + a.z;
