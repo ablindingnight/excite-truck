@@ -32,23 +32,7 @@ struct ViewCam {
 
 #include "game/raceresultentry.h"
 
-struct RaceResult {
-    s32 count;     // offset 0x0
-    s32 unk4;      // offset 0x4
-    s32 races;     // offset 0x8
-    u8 unkC;       // offset 0xC
-    u8 finished;   // offset 0xD
-    u8 aborted;    // offset 0xE
-    u8 padF[0xA4 - 0xF];
-};
-
-// Camera: common.h's PlainValMatrix.
-class GameListener {
-public:
-    virtual void Begin(void);                   // 0x8
-    virtual void End(RaceResult* result);       // 0xC
-    virtual void Finish(void);                  // 0x10
-};
+#include "game/gamelistener.h"
 
 struct Vec3 {
     f32 x;
