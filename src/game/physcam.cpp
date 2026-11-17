@@ -531,8 +531,8 @@ static inline f32 TvLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 static inline void UpdateFixedTvCamera(u8* p, f32 fov, TvCamera* tv) {
     f32 w[3];
-    fn_80274F74(p, w, fov);
     fn_802715C4(w, (u8*)tv);
+    fn_80274F74(p, w, fov);
 }
 
 void fn_80271624(int mode, u8* p) {
