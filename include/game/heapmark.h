@@ -4,6 +4,10 @@
 // 2026-11-16 (samesize.py). Names unproven.
 #include "game/common.h"
 
+// Self-contained for the PC build (port ODR check, 2026-11-17).
+extern "C" int fn_80128314(int heap);  // heap use
+extern "C" int fn_80265D58(void);
+
 // Heap use at the start of an event, for leak checks.
 class HeapMark {
 public:

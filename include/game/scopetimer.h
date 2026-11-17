@@ -4,6 +4,10 @@
 // 2026-11-16 (samesize.py). Names unproven.
 #include "game/common.h"
 
+// Self-contained for the PC build (port ODR check, 2026-11-17).
+extern "C" int fn_802E2C20(void);                  // milliseconds
+extern "C" void fn_802E30C8(const char* fmt, ...);  // warning print
+
 // Times a block and reports it when it runs long.
 struct ScopeTimer {
     ScopeTimer(const char* n) {

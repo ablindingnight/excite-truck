@@ -4,6 +4,9 @@
 // 2026-11-16 (samesize.py). Names unproven.
 #include "game/common.h"
 
+// Self-contained for the PC build (port ODR check, 2026-11-17).
+extern u32 lbl_8055D430;  // debug flags (the units that include this declare it the same way)
+
 class FlagGuard {
 public:
     FlagGuard(void) {
