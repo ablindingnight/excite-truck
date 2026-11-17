@@ -680,23 +680,7 @@ public:
 
 #include "game/optionvalue.h"
 
-class FloatValue : public OptionValue {
-public:
-    FloatValue(f32* v, f32 lo, f32 hi, f32 step, f32 min, f32 max);
-    virtual ~FloatValue(void) {}
-    virtual void GetPtr(void** p, int* size);
-    virtual void Format(char* buf);
-    virtual void Inc(void);
-    virtual void Dec(void);
-    virtual int CanInc(void);
-    virtual int CanDec(void);
-    virtual f32 GetFrac(void);
-    virtual void SetFrac(f32 f);
-
-    f32 lo, hi, min, max, step;
-    f32* value;
-    s32 decimals;
-};
+#include "game/floatvalue.h"
 
 class UIBox {
 public:
