@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/strcopy.h"
 #include "game/mathutil.h"
+#include "game/strcat.h"
 
 
 extern "C" {
@@ -121,15 +122,6 @@ struct AnimState {
 };
 
 
-static inline void StrCat(char* d, const char* s, int n) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        SafeStrCopy(d, s, n);
-    }
-}
 
 inline void LoadTrack(UiAnimTrack* tr, ValueNode* sub) {
     if (sub) {
@@ -450,7 +442,7 @@ void fn_802369A8(char* dst, int n, const char* name) {
     if (dot) {
         *dot = 0;
     }
-    StrCat(dst, ".val", n);
+    StrNCat(dst, ".val", n);
 }
 
 void fn_80236A5C(const char* name, const char* parent) {

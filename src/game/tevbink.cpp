@@ -10,6 +10,7 @@
 #include <revolution/GX/GXTev.h>
 #include <revolution/GX/GXTexture.h>
 #include "game/strcopy.h"
+#include "game/strcat.h"
 
 // GXTexObj: the SDK's.
 
@@ -739,15 +740,6 @@ void fn_802E1058(void) {
 
 /* Bounded copy and append (n = buffer size), the same pair as carmodel's. */
 
-static inline void StrCat(char* d, const char* s, int n) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        SafeStrCopy(d, s, n);
-    }
-}
 
 BinkMovie* fn_802E11A4(const char* name, u8 loop) {
     BinkMovie* r = fn_802E0BA8();
@@ -759,7 +751,7 @@ BinkMovie* fn_802E11A4(const char* name, u8 loop) {
     if (dot) {
         *dot = 0;
     }
-    StrCat(m->name, ".bik", 0x40);
+    StrNCat(m->name, ".bik", 0x40);
     fn_802E0EAC(m);
     return r;
 }

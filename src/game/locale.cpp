@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include "game/byteswap.h"
 #include "game/strcopy.h"
+#include "game/strcat.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -160,15 +161,6 @@ static LocString s_lbsAbbr("Units:PoundsAbbreviation");
 static UnitSystem s_custom = lbl_8032B14C;
 
 
-static inline void StrNCat(char* d, const char* s, int n) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        SafeStrCopy(d, s, n);
-    }
-}
 
 static inline void ReadUnit(ValueNode* n, Unit* u) {
     u->name = n->GetString("name", u->name);

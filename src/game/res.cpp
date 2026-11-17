@@ -7,6 +7,7 @@
 #include "game/pool.h"
 #include "game/byteswap.h"
 #include "game/strcopy.h"
+#include "game/strcat.h"
 
 // These inline definitions keep the resource messages in their retail data order.
 struct ResStrings {
@@ -174,15 +175,6 @@ static inline void FourCC(char* s, u32 v) {
 }
 
 
-static inline void StrNCat(char* d, const char* s, int n) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        SafeStrCopy(d, s, n);
-    }
-}
 
 inline ResToc* GetToc(const char* name) {
     u32 i;
