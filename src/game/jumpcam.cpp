@@ -12,6 +12,7 @@ static inline void SetV2(V2* v, f32 ax, f32 az) {
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/racer_camera_slot.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -175,7 +176,6 @@ void fn_8026B260(void) {
 }
 
 // Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
-static inline f32 Sq(f32 x) { return x * x; }
 
 void fn_8026B3D4(int player) {
     f32 now = lbl_8055E3C8;

@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 // World units per height-field cell. A named constant with external linkage, defined before any code: retail keeps
 // it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal of the spline helpers (name unproven).
 extern const f32 lbl_80562B60;
@@ -391,11 +392,6 @@ GroundHeader* fn_801DC9B0(void) {
 
 void fn_801DCA5C(void* p) { fn_8012C4D8(p); }
 
-/* Helper name unproven */
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-/* Helper name unproven */
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 LerpK(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 static inline f32 SqI(int a) { return (f32)a * (f32)a; }
 
@@ -425,7 +421,7 @@ GroundHeader* fn_801DCA60(void) {
                 if (r > 40.625f) {
                     r = 40.625f - (r - 40.625f);
                 }
-                k = LerpK(MaxF(MinF(1.0f, (r - 36.25f) / 1.875f), 0.0f), 1.0f, 0.8f);
+                k = LerpT(MaxF(MinF(1.0f, (r - 36.25f) / 1.875f), 0.0f), 1.0f, 0.8f);
             }
 
             f32 a = 15.0f;
@@ -589,7 +585,6 @@ f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
 }
 #pragma pop
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     Deform* d = &lbl_80446F18[lbl_8055E9A8[0]++];
@@ -620,7 +615,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
         int j;
         lbl_804424B0[i] = 1.0f;
         dh = fn_801DCF0C(x, z) - h0;
-        if (!(AbsF(dh) <= __float_epsilon[0])) {
+        if (!(FAbs(dh) <= __float_epsilon[0])) {
             if (n >= 3) {
                 k = -1;
                 m = 0.0f;
@@ -630,7 +625,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                         m = d->terms[j].k;
                     }
                 }
-                if (AbsF(d->terms[k].k) < AbsF(dh)) {
+                if (FAbs(d->terms[k].k) < FAbs(dh)) {
                     d->terms[k].k = dh;
                     d->terms[k].weight = i;
                 }

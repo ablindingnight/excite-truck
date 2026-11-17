@@ -75,6 +75,7 @@ extern "C" int fn_802E2C20(void);                  // milliseconds
 extern "C" void fn_802E30C8(const char* fmt, ...);  // warning print
 
 #include "game/scopetimer.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int fn_8012C33C(const char* name);
@@ -265,7 +266,6 @@ f32 Remap(f32 lo, f32 hi, f32 outLo, f32 outHi, f32 v);
 
 extern "C" {
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 
 // Is the distance of a node from the view plane through this axis inside the view cone?

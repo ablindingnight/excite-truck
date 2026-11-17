@@ -72,6 +72,7 @@ struct IngameText {
 #include "game/uicontext.h"
 #include "game/plainvec.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 
 struct UIVert {
@@ -181,7 +182,6 @@ static inline const char* ReadUTF8(const char* s, u16* c) {
     return s + 1;
 }
 
-static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
 class UnkStaticFF00 {
 public:
@@ -313,7 +313,6 @@ GTextFont* fn_80231730(const char* name) {
     return NULL;
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
     if (out == in) {

@@ -3,6 +3,7 @@
 // are guesses.
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 extern "C" {
 double fmod(double x, double y);
@@ -39,10 +40,6 @@ struct LSeg {
     ValVec3 b;
 };
 
-static inline f32 LRamp(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
-static inline f32 LMin(f32 a, f32 b) { return b < a ? b : a; }
-static inline f32 LMax(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 LLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline void LAddScaled(ValVec3* v, const ValVec3* d, f32 k) {
     v->x += d->x * k;
@@ -182,8 +179,8 @@ void fn_802A9BFC(const ValVec3* from, const ValVec3* to, s32 tex, f32 fade, int 
         LAddScaled(&seg.a, &dir, len / 2);
         LAddScaled(&seg.b, &dir, -len / 2);
     }
-    f32 m = LMax(LMin(LRamp(fade, 0.0f, 0.5f), 1.0f), 0.0f);
-    int alpha = (int)LLerp(0.0f, 200.0f, m);
+    f32 m = MaxF(MinFRev(Unlerp(fade, 0.0f, 0.5f), 1.0f), 0.0f);
+    int alpha = (int)Lerp(0.0f, 200.0f, m);
     u32 c = (alpha << 24) | 0xFFFFFFF;
     f32 fu0 = u0 / 256.0f;
     f32 fu1 = u1 / 256.0f;

@@ -26,6 +26,7 @@
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include "macros.h"
+#include "game/mathutil.h"
 
 // GXColor: the SDK's.
 
@@ -1621,7 +1622,6 @@ static inline void MulVec(V3* out, const V3* in, const Mat3* m) {
     }
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVecT(V3* out, const V3* in, const Mat3* const& m) {
     if (out == in) {
@@ -2238,7 +2238,6 @@ VisTest* fn_802D39A4(void*, f32 rate) {
 
 void fn_802D3A50(VisTest* t) { t->used = 0; }
 
-static inline f32 VisLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 int fn_802D3A5C(VisTest* t, const V3* p) {
     int x = p->x;
@@ -2259,7 +2258,7 @@ int fn_802D3A5C(VisTest* t, const V3* p) {
     } else {
         t->hit = 0;
     }
-    t->vis = VisLerp(t->vis, target, t->rate);
+    t->vis = Lerp(t->vis, target, t->rate);
     return t->vis >= 0.007843138f;
 }
 

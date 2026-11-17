@@ -4,6 +4,7 @@
 // lightning flash overlay. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/byteswap.h"
+#include "game/mathutil.h"
 
 struct GModel {
     s32 kind;    // offset 0x0 (1: typed model)
@@ -161,7 +162,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 
 static inline f32 GFloat(f32 x) { return x; }
 
-static inline u32 GColor(u8 a, u8 r, u8 g, u8 b) { return (a << 24) | (r << 16) | (g << 8) | b; }
 
 extern "C" {
 GModelHandler* fn_801F1D68(void);
@@ -206,7 +206,7 @@ s32 lbl_8055AFB8 = -1;  // psky.mod
 s32 lbl_8055AFBC = -1;  // litening.mod
 
 ModuleTag lbl_8055EB88;
-u32 lbl_8055EB90 = GColor(0xFF, 0xFF, 0, 0);
+u32 lbl_8055EB90 = ARGB(0xFF, 0xFF, 0, 0);
 extern const f32 lbl_8055EB94 = GFloat(0.7853982f);
 f32 lbl_8055EB98[2];   // display list fog/lod parameters
 GrafRes* lbl_8055EBA0;
@@ -615,7 +615,6 @@ void fn_801EBDCC(void) {
 
 void fn_801EBEF4(f32 v) { lbl_8055EB98[0] = v * v; }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_801EBF00(void) {
     if (lbl_8055EBA0) {
@@ -640,14 +639,14 @@ void fn_801EBF00(void) {
         }
         lbl_804885E8[6]->Draw(0);
         GObj* o = &fn_801E7E34()[fn_801E85B4()];
-        if (!(AbsF(o->flash) <= __float_epsilon[0])) {
+        if (!(FAbs(o->flash) <= __float_epsilon[0])) {
             int a = (int)(255.0f * o->flash);
             a = a > 0 ? a : 0;
             int c = 0xFF;
             if (a < 0xFF) {
                 c = a;
             }
-            fn_802C9474(GColor(0xFF, c, c, c));
+            fn_802C9474(ARGB(0xFF, c, c, c));
             PlainValMatrix* cf = fn_802C86DC();
             PlainValMatrix m;
             m.origin.x = cf->origin.x;

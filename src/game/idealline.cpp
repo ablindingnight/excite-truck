@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/plainvec.h"
 #include "game/idealline.h"
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -20,7 +21,6 @@ extern f32 lbl_8055E3C8;  // current race time
 
 static inline V2 Sub(const V2& a, const V2& b) { return V2C(a.x - b.x, a.y - b.y); }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 class PathSet {
 public:
@@ -38,9 +38,7 @@ ModuleTag lbl_8055E0B8;
 extern "C" {
 
 static inline f32 Dot4(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }
-static inline f32 Sq(f32 x) { return x * x; }
 static inline f32 Sum(f32 a, f32 b) { return a + b; }
-static inline f32 Len2(f32 x, f32 y) { return x * x + y * y; }
 f32 fn_80135278(const V2* dir, const V2* p, const V2* origin) {
     V2 d;
     d.x = p->x - origin->x;
@@ -130,8 +128,6 @@ int fn_801355B8(const LineFollower* f, V2* p, IdealPoint** seg, f32* t) { return
 
 }  // extern "C"
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
-static inline double AbsD(double v) { return __fabs(v); }
 
 void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
     out->mode = il.mode;
@@ -158,7 +154,7 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
             v.x = p->x - pt.x;
             v.y = p->y - pt.y;
             a = dv.x * v.x + dv.y * v.y;
-            if (AbsF(a) < 0.0005f) {
+            if (FAbs(a) < 0.0005f) {
                 break;
             }
             if (a < 0.0f) {
