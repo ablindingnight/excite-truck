@@ -9,6 +9,7 @@
 #include <string.h>
 #include "game/vec3_init.h"
 #include "game/math_types.h"
+#include "game/mat3_inl.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -240,7 +241,8 @@ public:
     virtual void Load(const char* name);
     virtual void Update(f32 dt);
     virtual void Draw(void);
-    void DrawVisible(ValVec3& dir, ValVec3& saved);
+    void Turn(f32 dt);  // Helper name unproven: Update's inlined body
+    void Place(void);   // Helper name unproven: the first half of Draw
 
     char model[50];    // offset 0x4
     char level[20];    // offset 0x36
@@ -787,30 +789,37 @@ inline f32 fn_8025ADF4(f32 x);
 
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-// Bind the shared empty vector constructor even in the no-inline update.
+// Bind the shared empty vector constructor directly: inside Turn (an inline body over the compiler's inline budget,
+// see game/mat3_inl.h) a wrapper around it would itself stay a call.
 #ifdef __MWERKS__
 #define InitTrophyVec3 __ct__11Vec3StorageFv
 #else
 #define InitTrophyVec3 DefaultConstructVec3
 #endif
 
-// Turns the trophy: the +/- buttons spin it, the stick or pointer tilts it, then the frame at p + 0x84
-// (right, up, forward) is rebuilt around the tilted up vector.
-#pragma push
-#pragma dont_inline on
+// The visibility test stays in the virtual; the work is one inline body (Turn). Turn calls Mat3Mul twice, and
+// Mat3Mul alone is over MWCC's nested-inline budget (FACTS 2026-11-17 fable-rules2), so every helper Turn uses
+// stays a call and the weak copies follow Update in reverse first-use order. No pragma is involved.
 inline void AchievementTrophyModel::Update(f32 dt) {
-    ViewPad pad;
-    Mat3 spin;
-    f32 r[3];
-    f32 c[3];
-    f32 b[3];
-    f32 a[3];
-    f32 fwd[3];
-    f32 side[3];
-    f32 v[3];
     if (handle == -1 || !shown) {
         return;
     }
+    Turn(dt);
+}
+
+// Turns the trophy: the +/- buttons spin it, the stick or pointer tilts it, then the frame at p + 0x84
+// (right, up, forward) is rebuilt around the tilted up vector. Locals are declared in order of use: an inlined
+// body's stack slots ascend in declaration order, which is retail's layout (v 8, side 20, ... r 80, spin 92).
+inline void AchievementTrophyModel::Turn(f32 dt) {
+    ViewPad pad;
+    f32 v[3];
+    f32 side[3];
+    f32 fwd[3];
+    f32 a[3];
+    f32 b[3];
+    f32 c[3];
+    f32 r[3];
+    Mat3 spin;
     if (fn_801298E8(&pad, 0)) {
         f32 plus = (pad.hold & 2) ? 1.0f : 0.0f;
         f32 minus = (pad.hold & 8) ? -1.0f : 0.0f;
@@ -849,7 +858,6 @@ inline void AchievementTrophyModel::Update(f32 dt) {
     Mat3Mul((Mat3*)rot, &spin, (Mat3*)rot);
     Mat3Mul((Mat3*)rot, (Mat3*)rot, fn_802C86DC());
 }
-#pragma pop
 
 static inline void SetVec3(f32* v, f32 x, f32 y, f32 z) {
     v[0] = x;
@@ -916,8 +924,10 @@ void fn_802C744C(s32 model, u8* m);
 
 #undef InitTrophyVec3
 
-// Draw the visible trophy and restore the lighting and perspective.
-inline void AchievementTrophyModel::DrawVisible(ValVec3& dir, ValVec3& saved) {
+// Places the trophy: scaled to the view and moved in front of the camera so its size class fills the screen.
+// An inline body (its locals take the low stack slots in declaration order); its one Mat3Mul puts it over the
+// nested-inline budget, so its helpers stay calls and their weak copies follow Draw.
+inline void AchievementTrophyModel::Place(void) {
     Mat3 scale;
     f32 bounds[6];
     fn_8025B0E8((Words9*)xform, (Words9*)fn_8025B134((u8*)rot));
@@ -941,18 +951,22 @@ inline void AchievementTrophyModel::DrawVisible(ValVec3& dir, ValVec3& saved) {
         fn_801C0E60(&xform[9], &xform[9], &c.x);
         fn_801BFE7C(&xform[9], &xform[9], (f32*)(cam + 0x24));
     }
+}
+
+// Draws the placed trophy lit from a fixed direction, then restores the lighting and the perspective.
+inline void AchievementTrophyModel::Draw(void) {
+    if (handle == -1 || !shown) {
+        return;
+    }
+    Place();
+    ValVec3 dir;
     dir.x = 0.2f;
     dir.y = -0.7f;
     dir.z = 0.7f;
-    u32 oldDiff, oldAmb;
-    oldAmb = fn_802C9950(0xFF646464);
-    oldDiff = fn_802C9994(0xFFB4B4B4);
+    u32 oldAmb = fn_802C9950(0xFF646464);
+    u32 oldDiff = fn_802C9994(0xFFB4B4B4);
     f32 oldSpec = fn_802C99E8(1.0f);
-#ifdef __MWERKS__
-    __memcpy(&saved, fn_802C9A40(), sizeof(saved));
-#else
-    saved = *fn_802C9A40();
-#endif
+    ValVec3 saved = *fn_802C9A40();
     fn_802C9A1C(&dir);
     fn_802D7554(1);
     fn_802D9230(fn_802CA294((s32)env));
@@ -963,15 +977,6 @@ inline void AchievementTrophyModel::DrawVisible(ValVec3& dir, ValVec3& saved) {
     fn_802C99E8(oldSpec);
     fn_802C9994(oldDiff);
     fn_802C9950(oldAmb);
-}
-
-inline void AchievementTrophyModel::Draw(void) {
-    if (handle == -1 || !shown) {
-        return;
-    }
-    ValVec3 dir;
-    ValVec3 saved;
-    DrawVisible(dir, saved);
 }
 
 extern "C" {
@@ -1196,9 +1201,3 @@ inline void TrophyFace::Update(void) {
         view->shown = 1;
     }
 }
-
-// MATCHING-AID: the deferred Draw uses this nested inline budget to keep
-// the four trophy helpers as direct calls. The original setting is unproven.
-#ifdef __MWERKS__
-#pragma inline_max_size(200)
-#endif
