@@ -1,6 +1,7 @@
 // Unified research draft. Four bodies remain provisional; no Matching promotion.
 // Partial UIStyle research source. No unit registration or promotion claim.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/uistyle.h"
 #include "game/gtext.h"
 #include "game/fonttext.h"
@@ -11,7 +12,9 @@ struct UIStyleRecordFields {
     int field38;
     u32 field3C_0,field3C_1,field3C_2,field3C_3,field3C_4,field3C_5,field3C_6,field3C_7;
     f32 field5C,field60;
-    u32 field64_0,field64_1,field64_2,field64_3;
+    u32 field64_0,field64_1;
+    gArtSet* field64_2;  // art sets (gArt)
+    gArtSet* field64_3;
 };
 typedef char CheckUIStyleRecord[sizeof(UIStyleRecordFields)==0x74?1:-1];
 
@@ -45,9 +48,7 @@ void fn_8022C520(void);
 
 void fn_802C4C80(int);
 void fn_802C519C(int);
-void fn_80235380(int);
 int gxGetImage(const char*);
-int fn_8023512C(const char*);
 int fn_802C49E8(const char*);
 
 
@@ -238,10 +239,6 @@ f32 fn_8023659C(void);
 double fmod(double,double);
 double sin(double);
 void fn_802C5310(u32,u32,f32,f32,f32);
-u32 fn_80235FD8(u32);
-f32 fn_80235F64(u32,int);
-f32 fn_80235EF0(u32,int);
-void fn_802354A0(u32,int,f32,f32,f32,f32,f32,u32);
 void fn_80230924(u32,f32,f32,f32,f32,f32);
 
 
