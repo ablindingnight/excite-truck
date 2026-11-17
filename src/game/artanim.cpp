@@ -488,8 +488,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                     key->scale[2] = 1.0f;
                 }
                 key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
+                const char* curveNames = "linear\0hermite\0start\0stop\0";
                 s32 curve = prev ? prev->curve : 0;
-                key->curve = f->Has(curveKey) ? f->GetEnum(curveKey, "linear\0hermite\0start\0stop\0") : curve;
+                key->curve = f->Has(curveKey) ? f->GetEnum(curveKey, curveNames) : curve;
                 key->signal = f->GetInt("signal", prev ? prev->signal : 0);
             }
         }
