@@ -680,11 +680,18 @@ static inline ValVec3 ZeroVec3(void) {
     return v;
 }
 
-static inline ValPoint ZeroPoint(void) {
-    ValPoint p;
-    p.x = 0.0f;
-    p.y = 0.0f;
-    return p;
+// Default point, a temporary built in place (the two-float twin of XV3 below).
+struct XP : ValPoint {
+    XP(f32 a, f32 b) {
+        x = a;
+        y = b;
+    }
+};
+
+// Helper name unproven: copies a point read from the table (the result stays a plain temporary).
+static inline void CopyP(V2* d, const ValPoint& s) {
+    d->x = s.x;
+    d->y = s.y;
 }
 
 // The rotation of angle |v| about v.
@@ -715,6 +722,55 @@ static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
         m->m[2][0] = z * tx + s * y;
         m->m[2][1] = z * ty - s * x;
         m->m[2][2] = c + t * zz;
+    } else {
+        m->m[0][0] = 1.0f;
+        m->m[0][1] = 0.0f;
+        m->m[0][2] = 0.0f;
+        m->m[1][0] = 0.0f;
+        m->m[1][1] = 1.0f;
+        m->m[1][2] = 0.0f;
+        m->m[2][0] = 0.0f;
+        m->m[2][1] = 0.0f;
+        m->m[2][2] = 1.0f;
+    }
+}
+
+// Helper name unproven: one matrix row through by-value arguments (chunks fn_80292698 has the same rows).
+static inline void SetRow3(f32* row, f32 x, f32 y, f32 z) {
+    row[0] = x;
+    row[1] = y;
+    row[2] = z;
+}
+
+// The rotation of angle |v| about v, written row by row: the form that is exact for the event loader. The
+// camera turn in fn_801C5B68 still uses AxisAngleToRot above (this body gives it fewer differing rows, 234 -> 178,
+// but a lower objdiff score); the two are one function in the original.
+static inline void AxisAngleRows(Mat3* m, const ValVec3& v) {
+    f32 ang = PSVECMag((const Vec*)&v);
+    if (ang > 0.0001f) {
+        // Declaration order unproven: it gives retail's float registers (t, c, zz in f8, f9, f10, and y
+        // coloured after the caller's `last` because zz, c, t and inv are numbered below it).
+        f32 zz;
+        f32 c;
+        f32 t;
+        f32 inv;
+        f32 y;
+        f32 s;
+        f32 x;
+        f32 z;
+        f32 diagonal;
+        inv = 1.0f / ang;
+        x = inv * v.x;
+        y = inv * v.y;
+        z = inv * v.z;
+        s = sin(ang);
+        c = cos(ang);
+        t = 1.0f - c;
+        SetRow3(m->m[0], c + t * Sq(x), y * (t * x) + s * z, z * (t * x) - s * y);
+        SetRow3(m->m[1], y * (t * x) - s * z, c + t * Sq(y), z * (t * y) + s * x);
+        zz = z * z;
+        diagonal = c + t * zz;
+        SetRow3(m->m[2], z * (t * x) + s * y, z * (t * y) - s * x, diagonal);
     } else {
         m->m[0][0] = 1.0f;
         m->m[0][1] = 0.0f;
@@ -811,7 +867,7 @@ void fn_801C3D88(const char* name) {
             c->origin.z = o.z;
             // Bound here, not in a helper: retail keeps this result right below o's on the stack.
             const ValVec3& dir = n->GetVec3("dir");
-            AxisAngleToRot(&c->rot, dir);
+            AxisAngleRows(&c->rot, dir);
             CopyV(&c->v, n->GetVec3Or("v", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
             CopyV(&c->av, n->GetVec3Or("av", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
             c->end = fn_801C3450(c->time + n->GetFloat("duration", 9999.0f));
@@ -845,20 +901,17 @@ void fn_801C3D88(const char* name) {
                 t->yaw = n->GetFloat("yaw", 0.0f);
                 break;
             case 0: {
-                const ValPoint& p = n->GetPoint("pt");
-                t->pt.x = p.x;
-                t->pt.y = p.y;
+                // The point objects are all temporaries, so retail's stack holds them in statement order:
+                // result, the by-value default (CopyValPoint stands in for a by-value `def` parameter, as in
+                // partemit and uianime), then the default built in place.
+                CopyP(&t->pt, n->GetPoint("pt"));
                 t->yaw = n->GetFloat("yaw");
-                const ValPoint& d = n->GetPointOr("offset", ZeroPoint());
-                t->offset.x = d.x;
-                t->offset.y = d.y;
+                CopyP(&t->offset, n->GetPointOr("offset", CopyValPoint(ValPoint(XP(0.0f, 0.0f)))));
                 break;
             }
             case 2: {
                 t->yaw = n->GetFloat("yaw", 0.0f);
-                const ValPoint& d = n->GetPointOr("offset", ZeroPoint());
-                t->pt.x = d.x;
-                t->pt.y = d.y;
+                CopyP(&t->pt, n->GetPointOr("offset", CopyValPoint(ValPoint(XP(0.0f, 0.0f)))));
                 break;
             }
             default:
@@ -879,8 +932,7 @@ void fn_801C3D88(const char* name) {
             t->z = n->GetFloat("lon", 0.0f);
             t->param = n->GetInt("param", 0);
             if (t->kind == 2) {
-                ValPoint r = n->GetPoint("pt");
-                ValPoint p = r;
+                ValPoint p = CopyValPoint(n->GetPoint("pt"));
                 t->x = p.x;
                 t->z = p.y;
             }
