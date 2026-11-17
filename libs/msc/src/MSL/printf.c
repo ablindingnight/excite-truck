@@ -1278,6 +1278,8 @@ static void* __StringWrite(void* pCtrl, const char* pBuffer, size_t char_num) {
     return (void*)1;
 }
 
+/* Excite Truck: printf is dead-stripped in the retail DOL; left out so the exception tables match. */
+#if 0
 int printf(const char* format, ...) {
     va_list args;
 
@@ -1288,7 +1290,10 @@ int printf(const char* format, ...) {
     va_start(args, format);
     return __pformatter(&__FileWrite, (void*)&__files[1], format, args);
 }
+#endif
 
+/* Excite Truck: fprintf is dead-stripped in the retail DOL; left out so the exception tables match. */
+#if 0
 int fprintf(FILE* file, const char* format, ...) {
     int res;
 
@@ -1303,6 +1308,7 @@ int fprintf(FILE* file, const char* format, ...) {
         return res;
     }
 }
+#endif
 
 int vprintf(const char* pFormat, va_list arg) {
     int ret;
