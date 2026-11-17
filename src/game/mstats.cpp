@@ -55,35 +55,7 @@ static inline int Rows(UITable* t) { return t->used; }  // an inline getter in r
 #include "game/statstable.h"
 
 // A menu state; most slots are empty defaults.
-class MenuState {
-public:
-    MenuState(void) { unk14 = 0; }
-    virtual ~MenuState(void) {}
-    virtual void Enter(void);   // 0x0C
-    virtual void Exit(void);    // 0x10
-    virtual void Unk14(void);
-    virtual void Changed(int key, void* value);
-    virtual void Update(void);  // 0x1C
-    virtual void Unk20(void);
-    virtual void Unk24(struct gxCanvas*);
-    virtual void Draw(void);    // 0x28
-    virtual void Unk2C(void);
-    virtual void Unk30(void);
-    virtual void Unk34(void);
-    virtual void Unk38(void);
-    virtual void Unk3C(void);
-    virtual void Unk40(void);
-    virtual void Unk44(void);
-    virtual void Unk48(void);
-    virtual void Unk4C(void);
-    virtual void Unk50(void);
-    virtual void Unk54(void);
-    virtual int HandleKey(u32 key);  // 0x58
-    virtual void Unk5C(void);
-
-    u8 pad4[0x10];
-    int unk14;
-};
+#include "game/menustate.h"
 
 class RecordsState : public MenuState {
 public:
@@ -92,7 +64,7 @@ public:
     virtual ~RecordsState(void);
     virtual void Enter(void);
     virtual void Update(void);
-    virtual int HandleKey(u32 key);
+    virtual int Key(int key);
 
     int focus;            // offset 0x18: 0 = tracks, 1 = events
     UITable tracks;     // offset 0x1C
@@ -231,7 +203,8 @@ void RecordsState::Update(void) {
 
 static void Wrap(int* v, int delta, int n);
 
-int RecordsState::HandleKey(u32 key) {
+int RecordsState::Key(int k) {
+    u32 key = k;
     switch (key) {
     case 0x125:
         if (focus == 1) {
