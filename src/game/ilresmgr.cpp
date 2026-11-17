@@ -9,6 +9,7 @@
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include "game/carbody.h"
+#include "game/strcopy.h"
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -44,16 +45,6 @@ void* operator new(size_t size, const char* tag);
 
 extern f32 lbl_8055E3C8;  // race clock
 
-static inline void StrCopyN(char* d, int n, const char* s) {
-    char* p = d;
-    int k = n;
-    while ((*p++ = *s++) != 0) {
-        if (--k <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void StrCatN(char* d, int n, const char* s) {
     char* p = d;
@@ -106,7 +97,7 @@ char* fn_80156248(char* buf, int size) {
 
 char* fn_801562BC(char* buf, int size, const char* name, int ghost) {
     char track[0x20];
-    StrCopyN(track, sizeof(track), fn_801E879C());
+    SafeStrCopy(track, fn_801E879C(), sizeof(track));
     fn_801561E8(track);
     if (ghost) {
         fn_801345D8(buf, size, "*ghostcar.res/%s%s%s.il0", name, *name ? "_" : "", track);
@@ -419,7 +410,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
         }
         e = RefAdd(&s->lines.a);
         e->line = fn_801563BC(name, center);
-        StrCopyN(sideKey, sizeof(sideKey), key);
+        SafeStrCopy(sideKey, key, sizeof(sideKey));
         StrCatN(sideKey, sizeof(sideKey), "_side");
         side = set->GetString(sideKey, "");
         {
