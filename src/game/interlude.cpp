@@ -42,7 +42,7 @@ struct IMtx {
 
 
 // One timed event: 0x30C bytes, kept sorted by (time, order).
-struct Event {
+struct InterludeEvent {
     f32 time;   // offset 0x0: < -1 = deleted
     s32 order;  // offset 0x4: tie-break between events at the same time
     s32 type;   // offset 0x8
@@ -302,7 +302,7 @@ extern s32 lbl_8055E7EC;  // fade frame
 extern u8 lbl_8055E7E9;
 extern s32 lbl_8055E7F0;    // events
 extern s32 lbl_8055E7F4;
-extern Event* lbl_8055E7F8; // the event list
+extern InterludeEvent* lbl_8055E7F8; // the event list
 extern u8 lbl_8055E7FC;
 extern s32 lbl_8055E800;
 extern s32 lbl_8055E804;    // cars
@@ -470,10 +470,10 @@ void fn_801C3D88(const char* name);
 void fn_801C7254(Mat3* m);
 void fn_801C855C(void);
 void fn_801C957C(int on);
-void fn_801C9920(const Event* e, int fd);
+void fn_801C9920(const InterludeEvent* e, int fd);
 const char* fn_801C98F4(const char* s, int n);
 void fn_801C94B8(int x, int y, const char* s, int color);
-void fn_801CA1C4(const Event* e, int x, int y, int h);
+void fn_801CA1C4(const InterludeEvent* e, int x, int y, int h);
 
 f32 fn_801C2F58(int n, f32 x) {
     f32 r = 1.0f;
@@ -622,8 +622,8 @@ f32 fn_801C3B6C(void) {
 }
 
 int fn_801C3B7C(const void* pa, const void* pb) {
-    const Event* a = (const Event*)pa;
-    const Event* b = (const Event*)pb;
+    const InterludeEvent* a = (const InterludeEvent*)pa;
+    const InterludeEvent* b = (const InterludeEvent*)pb;
     if (b->time < -1.0f) {
         return -1;
     }
@@ -640,14 +640,14 @@ int fn_801C3B7C(const void* pa, const void* pb) {
 }
 
 void fn_801C3C14(int i) {
-    memset(&lbl_8055E7F8[i], 0, sizeof(Event));
+    memset(&lbl_8055E7F8[i], 0, sizeof(InterludeEvent));
     lbl_8055E7F8[i].time = -999.0f;
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
     lbl_8055E7F0--;
 }
 
-Event* fn_801C3C80(void) {
-    Event* e = &lbl_8055E7F8[lbl_8055E7F0++];
+InterludeEvent* fn_801C3C80(void) {
+    InterludeEvent* e = &lbl_8055E7F8[lbl_8055E7F0++];
     if (lbl_8055E80D) {
         e->time = lbl_8055E810;
     } else {
@@ -745,7 +745,7 @@ static inline void CopyV(ValVec3* d, const ValVec3& s) {
 }
 
 void fn_801C3D88(const char* name) {
-    memset(lbl_8055E7F8, 0, 64 * sizeof(Event));
+    memset(lbl_8055E7F8, 0, 64 * sizeof(InterludeEvent));
     for (int i = 0; i < 64; i++) {
         lbl_8055E7F8[i].time = -999.0f;
     }
@@ -785,7 +785,7 @@ void fn_801C3D88(const char* name) {
         if (lbl_8055E7F0 >= 64) {
             fn_802E317C("intrlude: too many events!");
         }
-        Event* e = &lbl_8055E7F8[lbl_8055E7F0++];
+        InterludeEvent* e = &lbl_8055E7F8[lbl_8055E7F0++];
         int type = n->GetEnum("type", lbl_80562950);
         e->type = type;
         e->time = fn_801C3450(n->GetFloat("t", last));
@@ -935,7 +935,7 @@ void fn_801C4AD0(void) {
 void fn_801C4B10(void) {
     for (lbl_8055E804 = 0; fn_8017960C(lbl_8055E804); lbl_8055E804++) {
     }
-    lbl_8055E7F8 = new ("action_list") Event[64];
+    lbl_8055E7F8 = new ("action_list") InterludeEvent[64];
     fn_801C3D88("intrlude.val");
 }
 
@@ -1138,7 +1138,7 @@ void debug_event(void) {
     s = (u8*)&lbl_80437D88;
     msg = (Message*)&lbl_80437E24;
     while (!blocked && lbl_8055E7F4 < lbl_8055E7F0) {
-        Event* e = &lbl_8055E7F8[lbl_8055E7F4];
+        InterludeEvent* e = &lbl_8055E7F8[lbl_8055E7F4];
         if (!(t >= e->time)) {
             break;
         }
@@ -1796,7 +1796,7 @@ void fn_801C6E40(void) {
     e->type = 1;
     InitCameraEvent(e, (PlainValMatrix*)&lbl_804381F0);
     sprintf(lbl_80437FC0, "Camera added at %.2f seconds", e->time);
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
     fn_801C957C(0);
 }
 
@@ -1816,10 +1816,10 @@ void fn_801C7254(Mat3* m) {
 void fn_801C7288(void) { fn_801C957C(0); }
 
 void fn_801C7290(void) {
-    Event* e = fn_801C3C80();
+    InterludeEvent* e = fn_801C3C80();
     e->type = 2;
     sprintf(lbl_80437FC0, "Fadeout added at %.2f seconds", e->time);
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
 }
 
 void fn_801C72F0(void) {
@@ -1827,7 +1827,7 @@ void fn_801C72F0(void) {
     e->type = 7;
     strncpy(e->text, lbl_804380F0, 0x1FF);
     sprintf(lbl_80437FC0, "Text message added at %.2f seconds", e->time);
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
     fn_801C957C(0);
 }
 
@@ -1852,11 +1852,11 @@ void fn_801C73DC(void) {
     int n = lbl_8055E7F0;
     if (n != 0 && other >= 0 && other < n) {
         if (fn_801C34CC(lbl_8055E7F8[sel].time, lbl_8055E7F8[other].time)) {
-            Event* b = &lbl_8055E7F8[other];
+            InterludeEvent* b = &lbl_8055E7F8[other];
             int t = lbl_8055E7F8[sel].order;
             lbl_8055E7F8[sel].order = b->order;
             b->order = t;
-            qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+            qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
         }
     }
 }
@@ -1867,11 +1867,11 @@ void fn_801C7480(void) {
     int n = lbl_8055E7F0;
     if (n != 0 && other >= 0 && other < n) {
         if (fn_801C34CC(lbl_8055E7F8[sel].time, lbl_8055E7F8[other].time)) {
-            Event* b = &lbl_8055E7F8[other];
+            InterludeEvent* b = &lbl_8055E7F8[other];
             int t = lbl_8055E7F8[sel].order;
             lbl_8055E7F8[sel].order = b->order;
             b->order = t;
-            qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+            qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
         }
     }
 }
@@ -1882,7 +1882,7 @@ void fn_801C7524(void) {
 }
 
 /* Helper name unproven */
-static inline CamEvent* AsCameraEvent(Event* events, int index) {
+static inline CamEvent* AsCameraEvent(InterludeEvent* events, int index) {
     return (CamEvent*)&events[index];
 }
 
@@ -1895,7 +1895,7 @@ void fn_801C756C(void) {
                 order = lbl_8055E7F8[i].order;
             }
         }
-        Event* events = lbl_8055E7F8;
+        InterludeEvent* events = lbl_8055E7F8;
         const int index = lbl_8055E828;
         CamEvent* e = AsCameraEvent(events, index);
         if (e->type == 1) {
@@ -1903,7 +1903,7 @@ void fn_801C756C(void) {
         }
         lbl_8055E7F8[lbl_8055E828].time = fn_801C3450(t);
         lbl_8055E7F8[lbl_8055E828].order = order + 1;
-        qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+        qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
     }
     fn_801C957C(0);
 }
@@ -1918,7 +1918,7 @@ void fn_801C7698(void) {
             for (; i < lbl_8055E7F0; i++) {
                 lbl_8055E7F8[i].time = fn_801C3450(d + lbl_8055E7F8[i].time);
             }
-            qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+            qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
         }
     }
     fn_801C957C(0);
@@ -1956,7 +1956,7 @@ void fn_801C77FC(void) {
         sprintf(buf, "%u", lbl_8055E844);
     }
     sprintf(lbl_80437FC0, "Sound sample %s added at %.2f seconds", buf, e->time);
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
 }
 
 void fn_801C78D8(void) {
@@ -2098,7 +2098,7 @@ void fn_801C7C04(void) {
     }
     sprintf(lbl_80437FC0, "Added teleport to (%.2f, %.2f) at %.2f", lbl_80438480.x, lbl_80438480.z, e->time);
     fn_801C7BA0();
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
 }
 
 void fn_801C7EF4(void) {
@@ -2138,7 +2138,7 @@ void fn_801C7FE4(void) {
     e->pt.y = lbl_80438268.y;
     e->pt.z = lbl_80438268.z;
     sprintf(lbl_80437FC0, "Added wait at %.2f", e->time);
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
 }
 
 void fn_801C80BC(void) {
@@ -2226,7 +2226,7 @@ void fn_801C82E0(void) {
     e->speed = lbl_8055E858;
     e->param = lbl_8055E864;
     sprintf(lbl_80437FC0, "Added AI Think at %.2f", e->time);
-    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(Event), fn_801C3B7C);
+    qsort(lbl_8055E7F8, lbl_8055E7F0, sizeof(InterludeEvent), fn_801C3B7C);
     fn_801C8298();
 }
 
@@ -2641,7 +2641,7 @@ const char* fn_801C98F4(const char* s, int n) {
 }
 
 // Writes one event as an "action" table of the interlude .val file.
-void fn_801C9920(const Event* e, int fd) {
+void fn_801C9920(const InterludeEvent* e, int fd) {
     fn_802E3AD0(fd, "\ttable action\r\n");
     fn_802E3AD0(fd, "\t\tt\t%.2f\r\n", e->time);
     switch (e->type) {
@@ -2774,7 +2774,7 @@ void fn_801CA070(const char* name) {
     }
 }
 
-void fn_801CA1C4(const Event* e, int x, int y, int h) {
+void fn_801CA1C4(const InterludeEvent* e, int x, int y, int h) {
     char buf[256];
     if (lbl_8055E7F0 == 0 || lbl_8055E828 >= lbl_8055E7F0) {
         return;
@@ -2859,7 +2859,7 @@ void fn_801CA5A8(void) {
     char buf[256];
     if (lbl_8055E7F0 != 0) {
         int h = fn_80238A20();
-        Event* e = &lbl_8055E7F8[lbl_8055E828];
+        InterludeEvent* e = &lbl_8055E7F8[lbl_8055E828];
         sprintf(buf, "type: %s", fn_801C98F4(lbl_80562950, e->type));
         fn_801C94B8(400, 180, buf, -1);
         int y = 180 + h;
@@ -2907,7 +2907,7 @@ void fn_801CA67C(void) {
         f32 dur = lbl_8055A958 > 0.01f ? lbl_8055A958 : 0.01f;
         f32 scale = 250.0f / dur;
         for (int i = 0; i < lbl_8055E7F0; i++) {
-            Event* ev = lbl_8055E7F8;
+            InterludeEvent* ev = lbl_8055E7F8;
             int color = fn_801C34CC(ev[i].time, ev[lbl_8055E828].time) ? -1 : 0xFF000000;
             f32 timev = ev[i].time;
             int x = (int)(0.5f + timev * scale) + 10;
@@ -3000,7 +3000,7 @@ void fn_801CA67C(void) {
     if (lbl_8055E7F0 > 0 && lbl_8055E828 < lbl_8055E7F0) {
         fn_802C8638(fn_801E8718(0));
         fn_801EA478(0);
-        Event ev = lbl_8055E7F8[lbl_8055E828];
+        InterludeEvent ev = lbl_8055E7F8[lbl_8055E828];
         switch (ev.type) {
         case 6:
             fn_801E3FC8(&((WaitEvent*)&ev)->pt, 2.0f, 0xFFFFFF00);
@@ -3121,7 +3121,7 @@ u8 lbl_8055E7E9;
 s32 lbl_8055E7EC;  // fade frame
 s32 lbl_8055E7F0;    // events
 s32 lbl_8055E7F4;
-Event* lbl_8055E7F8; // the event list
+InterludeEvent* lbl_8055E7F8; // the event list
 u8 lbl_8055E7FC;
 s32 lbl_8055E800;
 s32 lbl_8055E804;    // cars
