@@ -1261,34 +1261,42 @@ inline void Challenge::Init(void) {
                 }
             }
             {
-                TVec2 a = t->path->pts[(best - 1) % t->path->count];
-                TVec2 b = t->path->pts[best % t->path->count];
-                TVec2* c = &t->path->pts[(best + 1) % t->path->count];
                 ValVec3 e1;
                 ValVec3 e2;
                 ValVec3 n3;
+                TVec2* pa = &t->path->pts[(best - 1) % t->path->count];
+                t->ends[0].x = pa->x;
                 t->ends[0].y = 0.0f;
-                t->ends[0].x = a.x;
-                t->ends[0].z = a.z;
-                t->ends[1].Set(b.x, 0.0f, b.z);
+                t->ends[0].z = pa->z;
+                TVec2 a;
+                a.x = t->ends[0].x;
+                a.z = t->ends[0].z;
+                TVec2* pb = &t->path->pts[best % t->path->count];
+                t->ends[1].x = pb->x;
+                t->ends[1].y = 0.0f;
+                t->ends[1].z = pb->z;
+                TVec2 b;
+                b.z = t->ends[1].z;
+                b.x = t->ends[1].x;
                 t->mid.x = (a.x + b.x) * 0.5f;
                 t->mid.z = (a.z + b.z) / 2.0f;
+                Delta2 d2;
+                d2.x = a.x - b.x;
+                d2.z = a.z - b.z;
+                TVec2* c = &t->path->pts[(best + 1) % t->path->count];
                 Delta2 d1;
                 d1.x = c->x - b.x;
                 d1.z = c->z - b.z;
-                Delta2 d2;
-                d2.x = a.x - b.x;
                 e1.x = d1.x;
                 e1.y = 0.0f;
-                d2.z = a.z - b.z;
+                e1.z = d1.z;
                 e2.x = d2.x;
                 e2.y = 0.0f;
                 e2.z = d2.z;
-                e1.z = d1.z;
                 PSVECNormalize((const Vec*)&e1, (Vec*)&e1);
                 PSVECNormalize((const Vec*)&e2, (Vec*)&e2);
                 PSVECCrossProduct((const Vec*)&e1, (const Vec*)&e2, (Vec*)&n3);
-                if (!(n3.y <= 0.0f)) {
+                if (n3.y > 0.0f) {
                     t->dir.x = a.x - t->mid.x;
                     t->dir.z = a.z - t->mid.z;
                 } else {
@@ -1302,7 +1310,7 @@ inline void Challenge::Init(void) {
                 f32 inv;
                 t->dir.x = x;
                 t->dir.z = z;
-                inv = 1.0f / (f32)sqrt(x * x + z * z);
+                inv = 1.0f / (f32)sqrt(t->dir.x * t->dir.x + t->dir.z * t->dir.z);
                 t->dir.x *= inv;
                 t->dir.z *= inv;
             }
