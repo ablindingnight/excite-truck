@@ -1,6 +1,7 @@
 // Road sounds (0x8020CA30-0x8020CF68): per-surface rolling sounds from roadsnd.val, blended by
 // speed with the surface under the car's wheels. Names are guesses apart from the keys and messages.
 #include "game/common.h"
+#include "game/carbody.h"
 
 extern "C" int strcmp(const char* a, const char* b);
 
@@ -94,7 +95,7 @@ public:
                 e = &entries[count++];
                 name = node->GetValue("sound");
                 e->voice = fn_802077A4(name, 4, c + 0x118, c + 0x60);
-                if (e->voice == NULL && *(s32*)(c + 0x1EC) == 0) {
+                if (e->voice == NULL && ((CarBody*)c)->index == 0) {
                     fn_802E30C8(MissingVoiceFormat(), name);
                 }
                 e->surface = node->GetIntValue(SurfaceKey());
@@ -152,11 +153,11 @@ void RoadSound::Update(void) {
     f32 lo;
     int surface = 0;
     for (int w = 0; w < 4; w++) {
-        s32 s = *(s32*)(c + 0x2410 + w * 0x74);
+        s32 s = ((CarBody*)c)->wheels[w].groundH;
         surface = s > surface ? s : surface;
     }
-    gain = 0.25f * *(s32*)(c + 0x2620);
-    speed = *(f32*)(c + 0x25D4);
+    gain = 0.25f * ((CarBody*)c)->airborne;
+    speed = ((CarBody*)c)->speed;
     hi = 1.0f;
     lo = 0.0f;
     for (int i = 0; i < count; i++) {
