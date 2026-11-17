@@ -1004,13 +1004,6 @@ public:
 extern "C" int fn_802054EC(const char* key, int level, int event);
 
 
-// s without a leading `prefix`.
-static inline const char* SkipPrefix(const char* s, const char* prefix) {
-    if (!strncmp(s, prefix, strlen(prefix))) {
-        s += strlen(prefix);
-    }
-    return s;
-}
 void* operator new(unsigned long n, const char* tag);
 
 extern "C" {
@@ -1023,6 +1016,15 @@ int fn_80283E28(void);
 // The bracket's event screen: a bar per event (at most five) with best/pass and grade, the bracket's cup
 // marker, the selected event's title, best time and map; after a result the improved event's score counts
 // up first. Returns 1 when an event was picked (its index in *event).
+// The improved event counts up from its old best (helper name unproven).
+static inline void StartTally(ScoreAccumulator& acc, EvContest* c, int delta) {
+    if (delta > 0) {
+        int best = c->Best();
+        ScoreTally* t = new ("ScoreAccumulator") ScoreTally(best - delta, best);
+        acc.tally = t;
+        t->acc = 0.0f;
+    }
+}
 int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     int diff = br->Difficulty();
     ScoreAccumulator acc;
@@ -1066,23 +1068,22 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     for (int i = 0; i < n; i++) {
         EvContest* c = br->Get(i);
         if (res->improved && c->EventId() == res->event) {
-            int delta = res->delta;
             start = i;
             acc.inner = c;
             acc.sel = i;
-            if (delta > 0) {
-                int best = c->Best();
-                ScoreTally* t = new ("ScoreAccumulator") ScoreTally(best - delta, best);
-                acc.tally = t;
-                t->acc = 0.0f;
-            }
+            StartTally(acc, c, res->delta);
             acc.next = cur;
             bars[i].SetContest(&acc);
         } else {
             bars[i].SetContest(c);
         }
         char file[33];
-        fn_801345D8(file, 33, "/%s.tex", SkipPrefix((GetEvent(c->EventId())->node)->GetValue("name"), "career_"));
+        const char* name = (GetEvent(c->EventId())->node)->GetValue("name");
+        const char* prefix = "career_";
+        if (!strncmp(name, prefix, strlen(prefix))) {
+            name += strlen(prefix);
+        }
+        fn_801345D8(file, 33, "/%s.tex", name);
         maps.Add(c->EventId(), file);
     }
     BracketView view;
