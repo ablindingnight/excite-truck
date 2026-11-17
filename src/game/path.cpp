@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/recpath.h"
 #include "game/plainvec.h"
+#include "game/byteswap.h"
 
 extern "C" {
 double sqrt(double x);
@@ -32,23 +33,13 @@ struct PathKey {
 };
 
 // PathMtx: common.h's PlainValMatrix.
-static inline void Swap32(void* v) {
-    u8* p = (u8*)v;
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 static inline void SwapKey(PathKey* k) {
     for (unsigned w = 0; w < 2; ++w) {
         u8* words = (u8*)k + w * 16;
-        Swap32(words + 0);
-        Swap32(words + 4);
-        Swap32(words + 8);
-        Swap32(words + 12);
+        SwapWord(words + 0);
+        SwapWord(words + 4);
+        SwapWord(words + 8);
+        SwapWord(words + 12);
     }
 }
 
@@ -84,12 +75,12 @@ PathFile* fn_801D9CC4(const char* name) {
         PathKey* k;
         int i;
         int j;
-        Swap32(&f->count);
+        SwapWord(&f->count);
         u8* cursor = (u8*)f->paths;
         for (i = 0; i < f->count; cursor += sizeof(RecPath), ++i) {
             p = (RecPath*)cursor;
             SwapPathCount(p);
-            Swap32(&p->keys);
+            SwapWord(&p->keys);
             p->keys = (PathKey*)((u8*)f + (u32)p->keys);
             for (j = 0; j < p->count; j++) {
                 k = &p->keys[j];
