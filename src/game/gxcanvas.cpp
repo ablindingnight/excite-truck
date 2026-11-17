@@ -5,6 +5,7 @@
 // values (565 in the high half, 555 in the low half). Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/gxcanvas.h"
+#include "game/byteswap.h"
 
 extern "C" {
 void* fn_801284E8(const char* tag, s32 size);  // MemAlloc
@@ -48,16 +49,6 @@ struct gxStamp {
 static inline s8 gxFmt(const gxCanvas* c) { return c->fmt; }
 static inline int gxIs16(s8 fmt) { return fmt != 5 && fmt != 6; }
 static inline int gxBpp(s8 fmt) { return fmt == 5 ? 4 : 2; }
-
-static inline void gxSwap32(void* p) {
-    u8 t;
-    t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[3];
-    ((u8*)p)[3] = t;
-    t = ((u8*)p)[1];
-    ((u8*)p)[1] = ((u8*)p)[2];
-    ((u8*)p)[2] = t;
-}
 
 static inline u16 gxPack555(int r, int g, int b) { return ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3); }
 static inline u16 gxPack565(int r, int g, int b) { return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3); }
@@ -123,14 +114,14 @@ gxCanvas* fn_802C2DD4(const char* name) {
     if (c) {
         if (ver == 1) {
             if (swapped) {
-                gxSwap32(&c->data);
-                gxSwap32(&c->w);
-                gxSwap32(&c->h);
-                gxSwap32(&c->stride);
-                gxSwap32(&c->cx0);
-                gxSwap32(&c->cy0);
-                gxSwap32(&c->cx1);
-                gxSwap32(&c->cy1);
+                SwapWordV(&c->data);
+                SwapWordV(&c->w);
+                SwapWordV(&c->h);
+                SwapWordV(&c->stride);
+                SwapWordV(&c->cx0);
+                SwapWordV(&c->cy0);
+                SwapWordV(&c->cx1);
+                SwapWordV(&c->cy1);
                 u32* p = (u32*)(c + 1);
                 c->data = p;
                 for (int y = 0; y < c->h; y++) {
@@ -766,22 +757,22 @@ gxStamp* fn_802C49E8(const char* name) {
             fn_802E317C("Wrong stamp version in \"%s\": %x (expecting %x)", name, ver, 3);
         }
         if (swapped) {
-            gxSwap32(&st->w);
-            gxSwap32(&st->h);
-            gxSwap32(&st->ox);
-            gxSwap32(&st->oy);
-            gxSwap32(&st->frames);
-            gxSwap32(&st->rows);
-            gxSwap32(&st->runs);
+            SwapWordV(&st->w);
+            SwapWordV(&st->h);
+            SwapWordV(&st->ox);
+            SwapWordV(&st->oy);
+            SwapWordV(&st->frames);
+            SwapWordV(&st->rows);
+            SwapWordV(&st->runs);
             u8** rows = (u8**)(st + 1);
             st->rows = rows;
             st->runs = (u8*)rows + st->h * st->frames * 4;
             for (int i = 0; i < st->h * st->frames; i++) {
-                gxSwap32(&st->rows[i]);
+                SwapWordV(&st->rows[i]);
                 st->rows[i] += (u32)st->runs;
             }
             for (int i = 0; i < 256; i++) {
-                gxSwap32(&st->pal8888[i]);
+                SwapWordV(&st->pal8888[i]);
             }
         }
         return st;
