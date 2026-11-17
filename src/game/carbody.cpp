@@ -1847,9 +1847,9 @@ void fn_80183E7C(u8* p) {
             RVec3 f;
             if (cb->mtx.pos.y - 0.915f < fn_801DCF48(&f, x, z) && cb->vel.y < floor) {
                 f32 push = 24.525002f + (floor - cb->vel.y);
+                f.y = push * cb->mass / 0.016683351f;
                 f.x = 0.0f;
                 f.z = 0.0f;
-                f.y = push * cb->mass / 0.016683351f;
                 ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
                 fn_802E30C8("%d: terrain morph pants-kick: %.2f MPH, terr %.2f MPH", lbl_8055E3C4, push / 0.44444445f, floor / 0.44444445f);
                 if ((f32)__fabs(cb->f2688) <= __float_epsilon[0]) {
