@@ -61,24 +61,17 @@ struct SkagVec {
     T* buf;     // offset 0xC
 };
 
-struct SkagTables {
-    s32 dx[4];         // offset 0x0
-    s32 dy[4];         // offset 0x10
-    f32 axes[4][2];    // offset 0x20
-    f32 scales[4][2];  // offset 0x40
-};
-
 // Root square size. Retail's .sdata2 starts with 2.0 and an unreferenced zero word, ahead of Place's map image, and
 // both constructors read the 2.0 from it: a const pair defined up here gives those bytes. Name and the meaning of
 // the second element are unproven.
 static const f32 kSpan[2] = {2.0f, 0.0f};
 
-static const SkagTables lbl_802FAAD0 = {
-    {0, 1, 1, 0},
-    {0, 0, 1, 1},
-    {{1.0f, 1.0f}, {-1.0f, 1.0f}, {-1.0f, -1.0f}, {1.0f, -1.0f}},
-    {{1.5f, 1.0f}, {1.0f, 1.5f}, {1.0f, 0.5f}, {0.5f, 1.0f}},
-};
+// Quadrant tables: four separate arrays (retail hoists a base pointer per array in the SkagBag constructor);
+// names unproven.
+static const s32 kDx[4] = {0, 1, 1, 0};
+static const s32 kDy[4] = {0, 0, 1, 1};
+static const f32 kAxes[4][2] = {{1.0f, 1.0f}, {-1.0f, 1.0f}, {-1.0f, -1.0f}, {1.0f, -1.0f}};
+static const f32 kScales[4][2] = {{1.5f, 1.0f}, {1.0f, 1.5f}, {1.0f, 0.5f}, {0.5f, 1.0f}};
 
 extern "C" u16 fn_802B4004(void);
 
@@ -199,8 +192,8 @@ inline void SkagPoint::Place(const f32* pt, f32 size, f32 mid) {
     quad = map[q];
     s[1] = (pt[1] - c) / size;
     s[0] = (pt[0] - c) / size;
-    const f32* v = lbl_802FAAD0.axes[(quad + 1) & 3];
-    const f32* u = lbl_802FAAD0.axes[quad];
+    const f32* v = kAxes[(quad + 1) & 3];
+    const f32* u = kAxes[quad];
     x = u[0] * s[0] + u[1] * s[1];
     y = v[0] * s[0] + v[1] * s[1];
 }
@@ -209,8 +202,8 @@ inline void SkagPoint::Place(const f32* pt, f32 size, f32 mid) {
 inline void SkagPoint::Unplace(f32* out, f32 size) const {
     f32 c = size / 2.0f;
     f32 sx = x * size;
-    const f32* v = lbl_802FAAD0.axes[(quad + 1) & 3];
-    const f32* u = lbl_802FAAD0.axes[quad];
+    const f32* v = kAxes[(quad + 1) & 3];
+    const f32* u = kAxes[quad];
     out[1] = c + u[1] * (sx / 2) + v[1] * ((y * size) / 2);
     out[0] = c + u[0] * (sx / 2) + v[0] * ((y * size) / 2);
 }
@@ -224,7 +217,7 @@ inline SkagGrid::SkagGrid(ValueNode* node, int rad) {
             SkagBag* bags[4];
             s32* used[4];
             for (int k = 0; k < 4; k++) {
-                SkagCell* pc = parent->At(x + rad * lbl_802FAAD0.dx[k] / 2, y + rad * lbl_802FAAD0.dy[k] / 2);
+                SkagCell* pc = parent->At(x + rad * kDx[k] / 2, y + rad * kDy[k] / 2);
                 bags[k] = pc->bag;
                 used[k] = &pc->used;
             }
@@ -334,8 +327,8 @@ SkagBag::SkagBag(SkagBag** src, ValueNode* node, int rad, s32** used)
         f32 at[2];
         f32 pt[2];
         s->Unplace(pt, half);
-        at[0] = pt[0] + half * lbl_802FAAD0.dx[q];
-        at[1] = pt[1] + half * lbl_802FAAD0.dy[q];
+        at[0] = pt[0] + half * kDx[q];
+        at[1] = pt[1] + half * kDy[q];
         taken[q]++;
         p->Place(at, size, 0.5f);
     }
