@@ -1200,7 +1200,7 @@ config.libs.append(
             Object(Matching, "game/unlkmenu.cpp"),
             Object(Matching, "game/popwarn.cpp"),
             Object(NonMatching, "game/multievt.cpp"),
-            Object(NonMatching, "game/modeltest.cpp"),
+            Object(Matching, "game/modeltest.cpp"),
             Object(Matching, "game/unitmenu.cpp", extra_cflags=["-opt nopropagation"]),
             Object(NonMatching, "game/profile.cpp"),
             Object(NonMatching, "game/garage.cpp"),
