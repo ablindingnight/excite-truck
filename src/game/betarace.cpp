@@ -1187,7 +1187,7 @@ public:
     virtual void vf9C(RaceCarRec* rc, int type, void* other);
     virtual void vfA4(RaceCarRec* rc);
     virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
-    virtual void vf94(RaceCarRec* rc);
+    virtual void vf94(RaceCarRec* rc, int i);
     virtual int vf8C(int p, int key);
     virtual void vf48(void);
     virtual void vf44(void);
@@ -3441,7 +3441,7 @@ inline void BetaMaster::vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* h
     }
 }
 
-inline void BetaMaster::vf94(RaceCarRec* rc) {
+inline void BetaMaster::vf94(RaceCarRec* rc, int idx) {
     BetaCar* c = CarFor(rc);
     if (c) {
         c->Finish(rc);

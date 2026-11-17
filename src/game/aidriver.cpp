@@ -48,71 +48,7 @@ void fn_8018ADA4(void* car, f32 v);
 
 
 class IDriver;
-// The current game mode as fn_801B83A0 returns it: a view of gamemode.h's GameMode (destructor at 0x08). Merge
-// into GameMode once slot 0x94 is settled (gamemode.h has vf94(RaceCarRec*); tutorial's retail call passes two
-// arguments). Not ringchal's Arena. View name unproven.
-class CurrentMode {
-public:
-    virtual ~CurrentMode(void);  // 0x08
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(void);
-    virtual void vf50(void);
-    virtual void vf54(void);
-    virtual void vf58(void);
-    virtual void vf5C(void);
-    virtual void vf60(void);
-    virtual void vf64(void);
-    virtual void vf68(void);
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual void vf7C(void);
-    virtual void vf80(void);
-    virtual void vf84(void);
-    virtual void vf88(void);
-    virtual void vf8C(void);
-    virtual void vf90(void);
-    virtual void vf94(void);
-    virtual void vf98(void);
-    virtual void vf9C(void);
-    virtual void vfA0(void);
-    virtual void vfA4(void);
-    virtual void vfA8(void);
-    virtual void vfAC(void);
-    virtual void vfB0(void);
-    virtual void vfB4(void);
-    virtual void vfB8(void);
-    virtual void vfBC(void);
-    virtual void vfC0(void);
-    virtual void vfC4(void);
-    virtual void vfC8(void);
-    virtual void vfCC(void);
-    virtual void vfD0(void);
-    virtual void vfD4(void);
-    virtual void vfD8(void);
-    virtual void vfDC(void);
-    virtual void vfE0(void);
-    virtual void vfE4(void);
-    virtual void vfE8(void);
-    virtual IDriver* CreateDriver(void);  // offset 0xEC
-};
-extern "C" CurrentMode* fn_801B83A0(void);
+extern "C" GameMode* fn_801B83A0(void);
 void* operator new(size_t size, const char* tag);
 
 struct AIGrid {
@@ -416,7 +352,7 @@ f32 fn_80134E34(void*, f32 d) {
 IDriver* fn_80134E90(void) { return new ("AIDriver") AIDriver; }
 
 IDriver* fn_80134EC8(u32 type) {
-    IDriver* d = fn_801B83A0()->CreateDriver();
+    IDriver* d = fn_801B83A0()->vfEC();
     if (!d) {
         switch (type) {
         case 0x180201:
@@ -431,7 +367,7 @@ IDriver* fn_80134EC8(u32 type) {
     return d;
 }
 
-int GameMode::vfEC(void) { return 0; }
+IDriver* GameMode::vfEC(void) { return 0; }
 
 void* fn_80134F48(void) {
     EventDesc* desc = fn_801769CC();

@@ -14,6 +14,7 @@
 #include "game/gart.h"
 #include <revolution/MTX/vec.h>
 #include "game/rigid.h"
+#include "game/gamemode.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -171,48 +172,6 @@ struct TCar {
     ValVec3 v118;  // offset 0x118
 };
 
-// The current game mode as fn_801B83A0 returns it: a view of gamemode.h's GameMode (destructor at 0x08). Merge
-// into GameMode once slot 0x94 is settled (gamemode.h has vf94(RaceCarRec*); tutorial's retail call passes two
-// arguments). Not ringchal's Arena. View name unproven.
-class CurrentMode {
-public:
-    virtual ~CurrentMode(void);  // 0x08
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-    virtual void vf28(void);
-    virtual void vf2C(void);
-    virtual void vf30(void);
-    virtual void vf34(void);
-    virtual void vf38(void);
-    virtual void vf3C(void);
-    virtual void vf40(void);
-    virtual void vf44(void);
-    virtual void vf48(void);
-    virtual void vf4C(void);
-    virtual void vf50(void);
-    virtual void vf54(void);
-    virtual void vf58(void);
-    virtual void vf5C(void);
-    virtual void vf60(void);
-    virtual void vf64(void);
-    virtual void vf68(void);
-    virtual void vf6C(void);
-    virtual void vf70(void);
-    virtual void vf74(void);
-    virtual void vf78(void);
-    virtual void vf7C(void);
-    virtual void vf80(void);
-    virtual void vf84(void);
-    virtual void vf88(void);
-    virtual void vf8C(void);
-    virtual void vf90(void);
-    virtual void Reset(TCar* car, int i);  // 0x94
-};
 
 
 extern "C" {
@@ -221,7 +180,7 @@ int fn_80160CE4(void);
 int fn_80161D50(void);
 void fn_8015857C(class StuntWatcher* w);  // remove stunt watcher
 void fn_8016D294(int a, int b, int c);
-CurrentMode* fn_801B83A0(void);
+GameMode* fn_801B83A0(void);
 struct MenuState* fn_801E7E34(void);
 void fn_80230E90(int a);
 void fn_801796BC(int a);
@@ -1235,7 +1194,7 @@ inline void Challenge::Collect(void) {
             int i;
             fn_80276DC8(0);
             for (i = 0; i < fn_801B2F24(); i++) {
-                fn_801B83A0()->Reset(lbl_804348E8[i], i);
+                fn_801B83A0()->vf94((RaceCarRec*)lbl_804348E8[i], i);
             }
         }
         endTime += 0.016683351f;

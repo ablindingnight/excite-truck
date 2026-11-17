@@ -10,6 +10,7 @@
 #include "game/respawn.h"
 
 struct RaceCarRec;
+class IDriver;
 struct Damage;
 struct ZoneResults;
 extern "C" int fn_801B8514(void);
@@ -51,7 +52,7 @@ public:
     virtual int vf88(void) const;
     virtual int vf8C(int p, int key);
     virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit);
-    virtual void vf94(RaceCarRec* rc);
+    virtual void vf94(RaceCarRec* rc, int i);  // i: the car's index (tutorial passes it)
     virtual int Collide(int a, int b);
     virtual void vf9C(RaceCarRec* rc, int type, void* other);
     virtual int vfA0(Respawn* out, int idx, int c);
@@ -73,7 +74,7 @@ public:
     virtual int vfE0(int car, u8* out);
     virtual int vfE4(void);
     virtual void* vfE8(void);
-    virtual int vfEC(void);
+    virtual IDriver* vfEC(void);  // the mode's AI driver (aidriver.cpp; GameMode's returns 0)
     virtual int vfF0(void);
     virtual void vfF4(void);
     virtual void vfF8(void) {}
@@ -113,7 +114,7 @@ public:
     virtual int vf88(void) const { return 0; }
     virtual int vf8C(int p, int key);
     virtual void vf90(RaceCarRec* a, RaceCarRec* b, void* p, const f32* hit) {}
-    virtual void vf94(RaceCarRec* rc) {}
+    virtual void vf94(RaceCarRec* rc, int i) {}
     virtual int Collide(int a, int b);
     virtual void vf9C(RaceCarRec* rc, int type, void* other) {}
     virtual int vfA0(Respawn* out, int idx, int c) { return 0; }
@@ -141,7 +142,7 @@ public:
     virtual int vfE0(int car, u8* out) { return 0; }
     virtual int vfE4(void) { return 0; }
     virtual void* vfE8(void);
-    virtual int vfEC(void);
+    virtual IDriver* vfEC(void);  // the mode's AI driver (aidriver.cpp; GameMode's returns 0)
     virtual int vfF0(void) { return 0; }
     virtual void vfF4(void) {}
 
