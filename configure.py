@@ -996,7 +996,7 @@ config.libs.append(
                    cflags=[*cflags_base, "-use_lmw_stmw on", "-str reuse,pool,readonly", "-fp_contract off", "-D_IEEE_LIBM", "-inline noauto"]),
             Object(Matching, "game/unk_8011AE18.c", mw_version="GC/3.0a5",
                    cflags=[*cflags_base, "-use_lmw_stmw on", "-str reuse,pool,readonly", "-fp_contract off", "-D_IEEE_LIBM", "-inline noauto"]),
-            Object(NonMatching, "game/unk_8011C3A8.c", mw_version="GC/3.0a5",
+            Object(Matching, "game/unk_8011C3A8.c", mw_version="GC/3.0a5",
                    cflags=[*cflags_base, "-use_lmw_stmw on", "-str reuse,pool,readonly", "-fp_contract off", "-D_IEEE_LIBM", "-inline noauto"]),
             Object(Matching, "game/unk_80127398.cpp"),
             Object(Matching, "game/prof.cpp"),
