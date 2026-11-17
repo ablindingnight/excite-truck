@@ -453,6 +453,7 @@ struct GateHit {
 };
 
 // Plays a list of art animations (artanim.cpp); allocated with the "ArtAnimManager" tag.
+struct ArtXform;  // artanim.cpp
 class ArtPlayer {
 public:
     ArtPlayer(int n);
@@ -464,7 +465,7 @@ public:
     void StopAll(void);
     void Rewind(void);
     void Update(void);
-    void Draw(int flags);
+    void Draw(ArtXform* xf);  // the art transform (or 0)
 
     void* list;  // offset 0x0
     f32 t;       // offset 0x4

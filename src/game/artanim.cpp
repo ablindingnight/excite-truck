@@ -135,7 +135,7 @@ public:
     void StopAll(void);
     void Rewind(void);
     void Update(void);
-    void Draw(int flags);
+    void Draw(ArtXform* xf);  // the art transform (or 0)
 
     ArtList* list;  // offset 0x0
     f32 t;          // offset 0x4
@@ -916,11 +916,11 @@ void ArtPlayer::Update(void) {
     }
 }
 
-void ArtPlayer::Draw(int flags) {
+void ArtPlayer::Draw(ArtXform* xf) {
     for (int i = 0; i < list->count; i++) {
         ArtItem* item = &list->items[i];
         if (item->active) {
-            fn_802AD4C4(item->anim, t - item->t0, (ArtXform*)flags);
+            fn_802AD4C4(item->anim, t - item->t0, xf);
         }
     }
 }

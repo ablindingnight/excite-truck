@@ -51,6 +51,7 @@ int fn_801609C4(s32 score);  // grade for a score
 }
 
 // The results-screen art animation player.
+struct ArtXform;  // artanim.cpp
 class ArtPlayer {
 public:
     ArtPlayer(int n);
@@ -61,7 +62,7 @@ public:
     void Resume(int i);
     void StopAll(void);
     void Update(void);
-    void Draw(int flags);
+    void Draw(ArtXform* xf);  // the art transform (or 0)
     u8 pad0[0x8];
 };
 
@@ -2295,7 +2296,7 @@ void BetaCar::SetResultsView(FinishAnimation* a) {
             r[2] = 39.0f;
             r[3] = 0.0f;
             if (h) {
-                h->Draw((int)r);
+                h->Draw((ArtXform*)r);
             }
         } else if (a->anim) {
             a->anim->Draw(0);

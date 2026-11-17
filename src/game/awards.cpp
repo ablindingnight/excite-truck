@@ -82,6 +82,7 @@ public:
     void SetValue(f32 v);
 };
 
+struct ArtXform;  // artanim.cpp
 class ArtPlayer {
 public:
     ArtPlayer(int n);
@@ -91,7 +92,7 @@ public:
     void Pause(int i);
     void StopAll(void);
     void Update(void);
-    void Draw(int a);
+    void Draw(ArtXform* xf);  // the art transform (or 0)
 
     void* list;  // offset 0x0
     f32 t;       // offset 0x4
@@ -1390,7 +1391,7 @@ void fn_801CE6F8(void) {
     AwardsMgr* m = lbl_8055E884;
     fn_801CBD48(&m->results, m);
     if (m->results.anim) {
-        m->results.anim->Draw((int)&m->results.nameScale);
+        m->results.anim->Draw((ArtXform*)&m->results.nameScale);
     }
     if (m->results.state == 3) {
         UpdateContinueOverlay();
