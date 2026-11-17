@@ -12,6 +12,7 @@
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
+#include "game/strcopy.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -96,16 +97,6 @@ struct FixedArr : ArrayRef<T> {
 };
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(char* dst, const char* src, int n) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 class Body;
 class SurfBody;
@@ -312,7 +303,7 @@ extern "C" void fn_801D490C(void) {
         u32 color = (((int)(255.0f * a) << 24) | 0xFFFFFF) & ~0xFF;
         DrawTitle(color, lbl_80442310.title);
         char buf[0x40];
-        CopyName(buf, lbl_80442310.text, 0x40);
+        SafeStrCopy(buf, lbl_80442310.text, 0x40);
         f32 y = 100.0f;
         line = buf;
         while (line && *line) {
@@ -339,7 +330,7 @@ ActionSequence::~ActionSequence(void) {
             delete e;
         }
     }
-    CopyName(name, "UNLOADED_SEQUENCE", 0x14);
+    SafeStrCopy(name, "UNLOADED_SEQUENCE", 0x14);
 }
 
 int ActionSequence::Load(ValueNode* t) {
@@ -347,7 +338,7 @@ int ActionSequence::Load(ValueNode* t) {
         fn_802E30C8("ActionSequence: required value \"name\" is not present in the table");
         return 0;
     }
-    CopyName(name, t->GetValue("name"), 0x14);
+    SafeStrCopy(name, t->GetValue("name"), 0x14);
     ValueNode* c;
     for (int i = 0; (c = t->GetChildAt(i)) != 0; i++) {
         if (strcasecmp(c->GetName(), "event") == 0) {
@@ -967,8 +958,8 @@ public:
             fn_802E30C8("PhysPathActionSequenceEvent: no \"path\" was found in the table!");
             return 0;
         }
-        CopyName(path, t->GetValue("path"), 0x14);
-        CopyName(object, t->GetString("object", "*"), 0x14);
+        SafeStrCopy(path, t->GetValue("path"), 0x14);
+        SafeStrCopy(object, t->GetString("object", "*"), 0x14);
         ValueNode* kb = t->FindChild("kill_bound");
         killBound = !kb ? 0 : fn_801399FC(kb);
         delay = (int)(59.94f * t->GetFloat("delay", 0.0f));
@@ -1459,7 +1450,7 @@ public:
     Trigger_ASE(void) { state = 0; }
     virtual ~Trigger_ASE(void) { state = 0; }
     virtual int Load(ValueNode* t) {
-        CopyName(seq, t->GetString("actseq", ""), 0x14);
+        SafeStrCopy(seq, t->GetString("actseq", ""), 0x14);
         if (!seq[0]) {
             fn_802E30C8("TriggerActionSequenceEvent: no actseq value found");
             return 0;
@@ -1833,8 +1824,8 @@ Text_ASE::~Text_ASE(void) { state = 0; }
 
 int Text_ASE::Load(ValueNode* t) {
     length = t->GetFloat("length", 5.0f);
-    CopyName(title, t->GetString("title", ""), 0x40);
-    CopyName(text, t->GetString("text", ""), 0x40);
+    SafeStrCopy(title, t->GetString("title", ""), 0x40);
+    SafeStrCopy(text, t->GetString("text", ""), 0x40);
     state = 1;
     return 1;
 }
@@ -1848,8 +1839,8 @@ int Text_ASE::Begin(int reverse) {
         lbl_80442310.duration = length;
         const f32 start = lbl_8055E3C8;
         lbl_80442310.start = start;
-        CopyName(lbl_80442310.title, title, 0x40);
-        CopyName(lbl_80442310.text, text, 0x40);
+        SafeStrCopy(lbl_80442310.title, title, 0x40);
+        SafeStrCopy(lbl_80442310.text, text, 0x40);
         state = 3;
         return 1;
     }
@@ -1882,7 +1873,7 @@ int RingMaster_ASE::Load(ValueNode* t) {
         fn_802E30C8("RingMasterActionSequenceEvent: required value \"name\" is missing");
         return 0;
     }
-    CopyName(name, t->GetValue("name"), 0x1E);
+    SafeStrCopy(name, t->GetValue("name"), 0x1E);
     delay = t->GetFloat("delay", 0.0f);
     length = t->GetFloat("length", -1.0f);
     state = 1;
