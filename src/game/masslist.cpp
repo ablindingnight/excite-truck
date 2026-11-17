@@ -11,24 +11,7 @@
 
 
 // MVec3: valvec3.h's ValVec3.
-struct MVec4 {
-    MVec4(void) {}
-    MVec4(f32 x_, f32 y_, f32 z_) {  // w left unset
-        x = x_;
-        y = y_;
-        z = z_;
-    }
-    MVec4(f32 x_, f32 y_, f32 z_, f32 w_) {
-        x = x_;
-        y = y_;
-        z = z_;
-        w = w_;
-    }
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-};
+#include "game/mvec4.h"
 
 // MLV3: rvec.h's RVec3.
 struct MLF {

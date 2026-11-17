@@ -10,9 +10,7 @@
 
 #include "game/common.h"
 
-struct MVec4 {
-    f32 x, y, z, w;
-};
+#include "game/mvec4.h"
 
 // The by-value vector the original was written with: the user copy constructor copies xyz only. The vector macros
 // below declare their result (no braces) so the locals keep the target's slot order.
