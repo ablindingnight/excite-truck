@@ -110,9 +110,9 @@ f32 lbl_8055A468 = 7.5f;
 f32 lbl_8055A46C = 12.5f;
 
 static inline void SetMode(u8* p, int on) {
+    U8(p, 0x24) = 1;
     B8(p, 0x25) = on;
     B8(p, 0x26) = !B8(p, 0x25);
-    U8(p, 0x24) = 1;
 }
 
 // The same interface viewed with an argument-less slot 0x24.
@@ -815,7 +815,8 @@ void fn_80190EAC(u8* p) {
     fn_80191084(p, 0);
     fn_80191084(p, fn_80191100(p));
     fn_801B6658();
-    U8(p, 0x34) = 0;
+    // Preserve the retail flag clear before the meter fields are initialized.
+    *(volatile u8*)(p + 0x34) = 0;
     F32(p, 0x30) = 0.0f;
     U8(p, 0x34) = 1;
     F32(p, 0x2C) = 10.0f;
