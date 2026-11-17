@@ -402,21 +402,22 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
             p->pts[1].x = s[1].x + car->pos.x;
             p->pts[1].y = s[1].y + car->pos.y;
             p->pts[1].z = s[1].z + car->pos.z;
-            dt = (f32)AbsD(dt);
+            const f32 stepTime = (f32)AbsD(dt);
             for (int i = 1; i < 8; i++) {
                 Vec a = *(const Vec*)&car->spin;
                 f32 t = i / 8.0f;
                 Vec b = n;
                 f32 m = -PSVECMag((const Vec*)&car->vel);
+                f32 unitWeight = 1.0f;
                 f32 k = m * lbl_8055CC68;
-                Scale(&a, &a, TrailWeight(1.0f, t * k));
-                Scale(&b, &b, TrailWeight(1.0f, (1.0f - t) * k));
+                Scale(&a, &a, TrailWeight(unitWeight, t * k));
+                Scale(&b, &b, TrailWeight(unitWeight, (1.0f - t) * k));
                 sum.x = b.x + a.x;
                 sum.y = b.y + a.y;
                 sum.z = b.z + a.z;
                 AddScaled(&p->pts[i * 2], &p->pts[i * 2 - 2], &sum, 0.125f);
                 AddScaled(&p->pts[i * 2 + 1], &p->pts[i * 2 - 1], &sum, 0.125f);
-                if (!(dt <= __float_epsilon[0]) && fn_80287BC8(0.0f, 1.0f) < p->alpha * p->facing &&
+                if (!(stepTime <= __float_epsilon[0]) && fn_80287BC8(0.0f, 1.0f) < p->alpha * p->facing &&
                     fn_80287BC8(0.0f, 1.0f) > t) {
                     f32 r = fn_80287BC8(0.25f, 0.75f);
                     Vec q;
