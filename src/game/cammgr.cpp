@@ -642,8 +642,9 @@ int fn_8026A554(s32* p);
 extern const f32 lbl_80563C54;  // default view angle
 
 // Camera manager start-up: initialises the four camera records, the named/fixed cameras, the crash
-// volume handle and the cheer sound, then resets.
-void fn_80267420(void) {
+/// volume handle and the cheer sound, then resets. phob's start-up passes the view count (the clamp result is built
+// in r3 there); nothing here reads it.
+void fn_80267420(int /* nViews */) {
     fn_801769CC();
     CamRec* c = lbl_80499080;
     for (int i = 0; i < 4;) {

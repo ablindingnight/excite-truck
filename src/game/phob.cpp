@@ -125,7 +125,7 @@ void fn_801AE4C4(void);
 void fn_801B52CC(void);
 void fn_801E21BC(void);
 void fn_8017D2CC(int n);
-void fn_80267420(void);
+void fn_80267420(int nViews);  // camera manager start-up; retail passes the view count, the callee ignores it
 void* fn_801284E8(const char* tag, s32 size);
 void fn_801AD5EC(void);
 void fn_801B2320(void);
@@ -932,8 +932,6 @@ static inline void Seeds(void) {
     fn_80129C80(5, lbl_8055E428[0], lbl_8055E428[1]);
 }
 
-#pragma push
-#pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_80178DD4(s32 stream) {
     int i;
     s32 s;
@@ -1016,9 +1014,10 @@ void fn_80178DD4(s32 stream) {
     fn_801E21BC();
     fn_80127464();
     fn_8017D2CC(0x200);
+    int n = lbl_8055E430;
     lbl_8055E448 = 0;
-    lbl_8055E444 = lbl_8055E440 = lbl_8055E430 > 1 ? lbl_8055E430 : 1;
-    fn_80267420();
+    lbl_8055E444 = lbl_8055E440 = n > 1 ? n : 1;
+    fn_80267420(lbl_8055E444);
     lbl_8055E450 = (StatePacket*)fn_801284E8("PhysMessage", lbl_8055E3CC + 0x2EE8);
     fn_801AD5EC();
     fn_80127464();
@@ -1032,7 +1031,6 @@ void fn_80178DD4(s32 stream) {
     fn_80127464();
     fn_80179320();
 }
-#pragma pop
 
 void fn_80179110(void) {
     fn_801B2C6C();
