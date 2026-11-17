@@ -860,9 +860,9 @@ void WaterSystem::Draw(void) {
         f32 dx = p.x - cam.origin.x;
         f32 dy = p.y - cam.origin.y;
         f32 dz = p.z - cam.origin.z;
-        lc.x = dx * cam.basis[0].x + dy * cam.basis[0].y + dz * cam.basis[0].z;
-        lc.y = dx * cam.basis[1].x + dy * cam.basis[1].y + dz * cam.basis[1].z;
-        lc.z = dx * cam.basis[2].x + dy * cam.basis[2].y + dz * cam.basis[2].z;
+        lc.x = Dot3(dx, cam.basis[0].x, dy, cam.basis[0].y, dz, cam.basis[0].z);
+        lc.y = Dot3(dx, cam.basis[1].x, dy, cam.basis[1].y, dz, cam.basis[1].z);
+        lc.z = Dot3(dx, cam.basis[2].x, dy, cam.basis[2].y, dz, cam.basis[2].z);
         rel.Set(dx, dy, dz);
         f32 depth = lc.z;
         fn_802BED90(&rel);
