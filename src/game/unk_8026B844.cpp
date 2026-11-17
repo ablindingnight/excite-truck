@@ -439,18 +439,34 @@ static inline f32 KeyAxisRev(FreePad& pad, f32 v, f32 speed, int minus, int plus
 
 /* Helper name unproven */
 static __inline void CamOrthonormal(CamRot& d) {
-    CamRot r;
-    CamSet(&r.axes[0], d.axes[0].x, d.axes[0].y, d.axes[0].z);
-    CamSet(&r.axes[2], d.axes[2].x, d.axes[2].y, d.axes[2].z);
-    PSVECCrossProduct((const Vec*)&r.axes[2], (const Vec*)&r.axes[0], (Vec*)&r.axes[1]);
-    PSVECNormalize((const Vec*)&r.axes[0], (Vec*)&r.axes[0]);
-    PSVECNormalize((const Vec*)&r.axes[1], (Vec*)&r.axes[1]);
-    PSVECCrossProduct((const Vec*)&r.axes[0], (const Vec*)&r.axes[1], (Vec*)&r.axes[2]);
-    CamCopy(&d.axes[0], &r.axes[0]);
-    CamCopy(&d.axes[1], &r.axes[1]);
-    CamCopy(&d.axes[2], &r.axes[2]);
+    CamVec a0;
+    CamVec a1;
+    CamVec a2;
+    CamSet(&a0, d.axes[0].x, d.axes[0].y, d.axes[0].z);
+    CamSet(&a2, d.axes[2].x, d.axes[2].y, d.axes[2].z);
+    PSVECCrossProduct((const Vec*)&a2, (const Vec*)&a0, (Vec*)&a1);
+    PSVECNormalize((const Vec*)&a0, (Vec*)&a0);
+    PSVECNormalize((const Vec*)&a1, (Vec*)&a1);
+    PSVECCrossProduct((const Vec*)&a0, (const Vec*)&a1, (Vec*)&a2);
+    CamCopy(&d.axes[0], &a0);
+    CamCopy(&d.axes[1], &a1);
+    CamCopy(&d.axes[2], &a2);
 }
 
+/* Helper name unproven */
+static __inline void CamAddRotated(CamVec& pos, const CamVec& v, const CamRot* rot) {
+    CamVec w;
+    CamMulVec(&w, &v, rot);
+    pos.x = pos.x + w.x;
+    pos.y = pos.y + w.y;
+    pos.z = pos.z + w.z;
+}
+
+/* Padding unproven (user-approved 2026-11-17; retail frame is 4 bytes larger under m; replace if a real 40-byte type is found) */
+struct CamRot40 {
+    CamRot r;
+    u32 pad;
+};
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
@@ -484,8 +500,7 @@ void fn_8026C014(int player) {
         return;
     }
     if (lbl_8055F4EC == 0) {
-        CamVec w;
-        CamRot m;
+        CamRot40 m;
         f32 dt;
         int shift;
         int ctrl;
@@ -574,12 +589,9 @@ void fn_8026C014(int player) {
             CamCopy(&lbl_8049A1F0, &move);
         }
         const CamRot* rot = &lbl_80499050.rot;
-        CamMulVec(&w, &lbl_8049A1F0, rot);
-        lbl_80499050.pos.x = lbl_80499050.pos.x + w.x;
-        lbl_80499050.pos.y = lbl_80499050.pos.y + w.y;
-        lbl_80499050.pos.z = lbl_80499050.pos.z + w.z;
-        Mat3FromEuler((Mat3*)&m, (const Vec3*)&lbl_8049A1FC);
-        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&m, (const Mat3*)&lbl_80499050.rot);
+        CamAddRotated(lbl_80499050.pos, lbl_8049A1F0, rot);
+        Mat3FromEuler((Mat3*)&m.r, (const Vec3*)&lbl_8049A1FC);
+        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&m.r, (const Mat3*)&lbl_80499050.rot);
     } else if (pad.w44[3] & 0x10) {
         // Orbit: the left stick turns about the vertical and tilts, the d-pad moves.
         CamRot yawM;
@@ -704,7 +716,16 @@ void fn_8026C014(int player) {
             switch ((s32)lbl_8055F4E0) {
             case 0:
             case 4:
-                CamFly(&lbl_80499050, &pad, turn, roll, speed, lift);
+                {
+                    CamRot m;
+                    CamVec e;
+                    CamVec v;
+                    CamSet(&e, turn * -fn_8026B844(pad.y0), turn * fn_8026B844(pad.x0), roll * turn);
+                    Mat3FromEuler((Mat3*)&m, (const Vec3*)&e);
+                    Mat3Mul((Mat3*)&(&lbl_80499050)->rot, (const Mat3*)&m, (const Mat3*)&(&lbl_80499050)->rot);
+                    CamSet(&v, pad.y1 * speed, 0.1f * (lift * speed), -pad.x1 * speed);
+                    CamMove((&lbl_80499050), &v);
+                }
                 break;
             case 1: {
                 CamVec v;
@@ -733,7 +754,16 @@ void fn_8026C014(int player) {
                 break;
             }
             case 2:
-                CamFly((CamFrame*)&lbl_8049A168, &pad, turn, roll, speed, lift);
+                {
+                    CamRot m;
+                    CamVec e;
+                    CamVec v;
+                    CamSet(&e, turn * -fn_8026B844(pad.y0), turn * fn_8026B844(pad.x0), roll * turn);
+                    Mat3FromEuler((Mat3*)&m, (const Vec3*)&e);
+                    Mat3Mul((Mat3*)&((CamFrame*)&lbl_8049A168)->rot, (const Mat3*)&m, (const Mat3*)&((CamFrame*)&lbl_8049A168)->rot);
+                    CamSet(&v, pad.y1 * speed, 0.1f * (lift * speed), -pad.x1 * speed);
+                    CamMove(((CamFrame*)&lbl_8049A168), &v);
+                }
                 break;
             default:
                 fn_802E317C("blimpcam: invalid mode %d", lbl_8055F4E0);
