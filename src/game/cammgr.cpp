@@ -57,15 +57,11 @@ struct IdealFollowerData {
 };
 
 // A position on the ideal line: the segment and how far along it.
-struct PathPos {
-    IdealPoint* seg;  // offset 0x0
-    f32 t;         // offset 0x4
-    u8 pad8[0x8];  // offset 0x8
-};
+#include "game/ilpos.h"
 
 extern "C" {
 f32 fn_80134E34(IdealFollowerData* f, f32 dist);  // aidriver: returns the follower's distance
-PathPos fn_80136468(IdealFollowerData* f, f32 m);  // idealline: returns the ILPos by value
+ILPos fn_80136468(IdealFollowerData* f, f32 m);  // idealline: returns the ILPos by value
 void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 k);
 }
 
@@ -1343,8 +1339,8 @@ void fn_80268D94(void) {
 
 void fn_80268E00(void) {
     IdealFollowerData f;
-    const PathPos& at = fn_80136468(&f, fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), lbl_80563C28.value));
-    PathPos& pos = const_cast<PathPos&>(at);  // the returned temporary itself (not a const object)
+    const ILPos& at = fn_80136468(&f, fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), lbl_80563C28.value));
+    ILPos& pos = const_cast<ILPos&>(at);  // the returned temporary itself (not a const object)
     if (!pos.seg) {
         pos.seg = f.line->points;
     }
