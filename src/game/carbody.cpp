@@ -10,6 +10,7 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
+#include "game/carelem.h"
 #include "game/deity.h"
 #include "game/idealline.h"
 #include "game/rmtx.h"
@@ -1340,7 +1341,7 @@ void fn_8018CB3C(u8* p);
 u32 fn_8018B06C(u8* p);
 double asin(double x);
 double fmod(double x, double y);
-extern u8* lbl_8055E908;
+extern CarElem* lbl_8055E908;  // carelem.cpp: one per car
 }
 
 static inline f32 Clamp01(f32 x) {
@@ -2538,7 +2539,7 @@ void fn_80186DE8(void) {
         ds = MaxF(ds, -lim);
         ((CarBody*)car)->f25F0 = ((CarBody*)car)->f25F0 + ds;
         water = (f32*)(lbl_8055E918 + i * 0x9C);
-        f32* ground = (f32*)(lbl_8055E908 + i * 0x34);
+        f32* ground = &lbl_8055E908[i].f0;
         throttle = Clamp01(water[1] + ((CarBody*)car)->f25E0);
         if (!(fn_801769CC()->type & 0x4000) && !NearZero(((CarBody*)car)->f2690)) {
             throttle = 0.0f;
@@ -3223,11 +3224,10 @@ void fn_8018A174(u8* p) { F32(p, 0x2650) = 4.0f; }
 
 }  // extern "C"
 
-#include "game/carelem.h"
 
 
 
-extern u8* lbl_8055E908;
+extern CarElem* lbl_8055E908;  // carelem.cpp: one per car
 
 extern "C" {
 void fn_8018F2C0(u8* p, u8* q);
@@ -3261,7 +3261,7 @@ void fn_8018A180(u8* p) {
     cb->mass = cb->setupA.mass;
     cb->invMass = 1.0f / cb->setupA.mass;
     fn_801BDA74(cb->index, (u8*)&cb->setupA);
-    ((CarElem*)(lbl_8055E908 + cb->index * 0x34))->Fetch(cb->index);
+    lbl_8055E908[cb->index].Fetch(cb->index);
     ((CarGear*)(lbl_8055E918 + cb->index * 0x9C))->Fetch(cb->index);
 }
 
