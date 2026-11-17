@@ -707,6 +707,13 @@ WaterBase* fn_802C00A4(void) {
 }
 }
 
+/* Helper names and scoped auto-inline setting unproven. */
+#pragma push
+#pragma auto_inline on
+static double WaterScrollOffset(f32 ticks) { return fmod(0.39999998f * ticks, 1.0); }
+static f32 WaterCoordinate(int index) { return (f32)index; }
+#pragma pop
+
 WaterSystem::WaterSystem(void) {
     const char* mskName = "watermsk.tex";
     const char* deepName = "gen_waterd.tex";
@@ -824,7 +831,7 @@ void WaterSystem::Draw(void) {
     WVert* verts = fn_802DD42C(0x6000);
     f32 k;
     f32 vx = fn_802C9C50();
-    f32 vy = fn_802C9C40();
+    f32 vy = WaterCoordinate(fn_802C9C40());
     f32 vw = fn_802C9C38();
     f32 cx;
     f32 vh = fn_802C9C48();
@@ -843,7 +850,6 @@ void WaterSystem::Draw(void) {
     PVec side;
     CrossUpR(&side, &fwd);
     cx = 0.5f * (640.0f - vh);
-    f32 cy = 0.5f * (480.0f - vw);
     for (int r = 0; r < 64; r++) {
         f32 t = (f32)r / 63.0f * ((f32)r / 63.0f);
         PVec p = cam.origin;
@@ -880,7 +886,7 @@ void WaterSystem::Draw(void) {
             PVec s;
             fn_802C8E70(&v->pos, &s);
             v->u = (s.x - vx + cx) / 640.0f;
-            v->v = (s.y - vy + cy) / 480.0f;
+            v->v = (s.y - vy + 0.5f * (480.0f - vw)) / 480.0f;
             v->u = 0.5f + (v->u - 0.5f) * k;
             v->v = 0.5f + 0.75f * ((v->v - 0.5f) * k);
         }
@@ -889,7 +895,7 @@ void WaterSystem::Draw(void) {
     WaterPt anchor(cam.origin.x, 0.0f, cam.origin.z);
     fn_802DBE4C();
     TexMtx m = {{{0.04f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.04f, 0.0f}}};
-    m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
+    m.m[0][3] = WaterScrollOffset(fn_801E7E18());
     fn_802D3D94(2, &m);
     f32 sh = MaxF(cam.origin.y / 4.0f, 1.0f);
     u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
