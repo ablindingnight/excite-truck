@@ -7,12 +7,6 @@
 #include <revolution/MTX/vec.h>
 #include "game/vec3_init.h"
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
@@ -180,17 +174,7 @@ void fn_801BF0C4(ValVec3* p, ValVec3* n, void* h, s32* surface);
 void* operator new[](size_t size, const char* name);
 void operator delete[](void* p);
 
-static inline void SetV(ValVec3* o, f32 x, f32 y, f32 z) {
-    o->x = x;
-    o->y = y;
-    o->z = z;
-}
 
-static inline void SetVyxz(ValVec3* o, f32 x, f32 y, f32 z) {
-    o->y = y;
-    o->x = x;
-    o->z = z;
-}
 
 extern "C" {
 
@@ -448,7 +432,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         q[13] = MVec4(0.0f, 0.0f, 0.0f);
         q[9] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
         ValVec3 in;
-        SetXYZ(&in, x->row[i].x, x->row[i].y, x->row[i].z);
+        in.Set(x->row[i].x, x->row[i].y, x->row[i].z);
         ValVec3 out;
         MulVec(&out, &in, mtx);
         out.x += mtx->origin.x;
@@ -463,7 +447,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
 
 void fn_801BEAEC(int car, int i, ValVec3* out) {
     const ValVec3* p = &lbl_8055E798[car].pts[i].p;
-    SetV(out, p->x, p->y, p->z);
+    out->Set(p->x, p->y, p->z);
 }
 
 void fn_801BEB1C(int car, ContactSet** out) { *out = &lbl_8055E798[car]; }
@@ -615,7 +599,7 @@ MVec4* fn_801BF188(MVec4* out, f32 x, f32 y, f32 z) {
     return out;
 }
 
-void fn_801BF198(ValVec3* out, const ValVec3* in) { SetVyxz(out, in->x, in->y, in->z); }
+void fn_801BF198(ValVec3* out, const ValVec3* in) { out->Set(in->x, in->y, in->z); }
 
 void fn_801BF1B4(void) {}
 

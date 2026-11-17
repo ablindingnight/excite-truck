@@ -232,12 +232,6 @@ void fn_802A85C8(void) {
 
 }
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 extern "C" {
 
@@ -256,7 +250,7 @@ void fn_802A86A4(void) {
         BoidDesc d;
         f = FlockAt(i);
         memset(&d, 0, 0);
-        SetXYZ(&d.pos, f->pt.x, f->pt.y, f->pt.z);
+        d.pos.Set(f->pt.x, f->pt.y, f->pt.z);
         d.turn = f->flockTurn;
         d.radius = f->flockRad;
         d.speedMax = f->flockSpeed;
@@ -270,7 +264,7 @@ void fn_802A86A4(void) {
         for (j = 0; j < f->birds.n; j++) {
             b = &f->birds.data[j];
             RVec3 off(fn_80287BC8(-r, r), fn_80287BC8(-r, r), fn_80287BC8(-r, r));
-            SetXYZ(&d.pos, f->lead.pos.x + off.x, f->lead.pos.y + off.y, f->lead.pos.z + off.z);
+            d.pos.Set(f->lead.pos.x + off.x, f->lead.pos.y + off.y, f->lead.pos.z + off.z);
             InitBoid(b, &d);
         }
     }

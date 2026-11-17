@@ -276,11 +276,6 @@ void RigidBody::VelAt2(RVec3* out, const RVec3* p) {
 
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
     if (out == in) {
@@ -363,7 +358,7 @@ void RigidBody::Update(void) {
     RVec3 g;
     RVec3 dr;
 
-    SetV(&g, 0.0f, 9.81f * -mass, 0.0f);
+    g.Set(0.0f, 9.81f * -mass, 0.0f);
     force.x += g.x;
     force.y += g.y;
     force.z += g.z;
@@ -395,7 +390,7 @@ void RigidBody::Update(void) {
                         p->v.x += q->v.x;
                         p->v.y += q->v.y;
                         p->v.z += q->v.z;
-                        SetV(&mid, Lerp(p->at.x, q->at.x, 0.5f), Lerp(p->at.y, q->at.y, 0.5f), Lerp(p->at.z, q->at.z, 0.5f));
+                        mid.Set(Lerp(p->at.x, q->at.x, 0.5f), Lerp(p->at.y, q->at.y, 0.5f), Lerp(p->at.z, q->at.z, 0.5f));
                         p->at = mid;
                         imps[j] = imps[--nImp];
                     }
@@ -599,7 +594,7 @@ void RigidBody::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
     CollVolume::vf30(t, a, b, na, nb);
     fn_8017D140((u8*)&va, (u8*)&a->vel, 12);
     fn_8017D140((u8*)&vb, (u8*)&b->vel, 12);
-    SetV(&vel, Lerp(va.x, vb.x, t), Lerp(va.y, vb.y, t), Lerp(va.z, vb.z, t));
+    vel.Set(Lerp(va.x, vb.x, t), Lerp(va.y, vb.y, t), Lerp(va.z, vb.z, t));
     accel.x = vb.x - va.x;
     accel.y = vb.y - va.y;
     accel.z = vb.z - va.z;

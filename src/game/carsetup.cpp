@@ -183,11 +183,6 @@ static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
     o->y += v->y * s;
     o->z += v->z * s;
 }
-static inline void SetV(ValVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 /* Helper name unproven */
 static inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
@@ -239,7 +234,7 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->rsway = Lbf(c->GetFloat("rsway", 60.0f)) / 0.0254f;
     f32 rh = c->GetFloat("ride_height", 5.0f);
     f32 ride = In(rh);
-    SetV(&s->modelOffset, 0.0f, -s->collideCmHeight, -(s->balance - 0.5f) * s->wheelbase);
+    s->modelOffset.Set(0.0f, -s->collideCmHeight, -(s->balance - 0.5f) * s->wheelbase);
     if (c->Has("model_offset")) {
         const ValVec3& o = c->GetVec3("model_offset");
         AddScaled(&s->modelOffset, &o, 0.0254f);

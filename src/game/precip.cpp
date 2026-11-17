@@ -515,13 +515,6 @@ static inline void MadV(ValVec3* o, const ValVec3* a, const ValVec3* b, f32 s) {
     o->y = a->y + b->y * s;
     o->z = a->z + b->z * s;
 }
-// Helper name unproven: arguments read right to left, stores go x, y, z.
-static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
-    f32* o = (f32*)o_;
-    o[0] = x;
-    o[1] = y;
-    o[2] = z;
-}
 void fn_802A53B0(DropHit* hits, int n) {
     int k2;
     if ((f32)__fabs(fn_802A4AD4()) <= __float_epsilon[0] || !lbl_8055F894) {
@@ -555,7 +548,7 @@ void fn_802A53B0(DropHit* hits, int n) {
                 continue;
             }
             f32 k = -2.0f * dot;
-            SetV3(&vel, dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
+            vel.Set(dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
             MadV(&vel, &hits->obj->vel, &vel, 3.0f);
             {
                 int m = fn_80287B5C(cnt) + 1;
@@ -1074,7 +1067,7 @@ void Mist::Update(void) {
         back.x = v.x;
         back.y = v.z;
         ValVec3 dv;
-        SetV3(&dv, v.x * dt, v.y * dt, v.z * dt);
+        dv.Set(v.x * dt, v.y * dt, v.z * dt);
         f32 k = -rad * (1.0f / (f32)sqrt(back.x * back.x + back.y * back.y));
         back.x *= k;
         back.y *= k;

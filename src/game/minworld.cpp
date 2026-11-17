@@ -300,11 +300,6 @@ void fn_80252C78(void) {
     lbl_8055F2F8--;
 }
 
-static inline void SetV3(ValVec3* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 void fn_80252C90(void) {
     MWWheels* w;
@@ -328,12 +323,12 @@ void fn_80252C90(void) {
         w = &wheels[i];
         c = contacts[i].w;
         int j;
-        SetV3(&s->mtx.pos, b->pos.x, b->pos.y, b->pos.z);
-        SetV3(&s->mtx.x, b->x.x, b->x.y, b->x.z);
-        SetV3(&s->mtx.y, b->y.x, b->y.y, b->y.z);
-        SetV3(&s->mtx.z, b->z.x, b->z.y, b->z.z);
-        SetV3(&s->vel, b->vel.x, b->vel.y, b->vel.z);
-        SetV3(&s->avel, b->accel.x, b->accel.y, b->accel.z);
+        s->mtx.pos.Set(b->pos.x, b->pos.y, b->pos.z);
+        s->mtx.x.Set(b->x.x, b->x.y, b->x.z);
+        s->mtx.y.Set(b->y.x, b->y.y, b->y.z);
+        s->mtx.z.Set(b->z.x, b->z.y, b->z.z);
+        s->vel.Set(b->vel.x, b->vel.y, b->vel.z);
+        s->avel.Set(b->accel.x, b->accel.y, b->accel.z);
         MWV4 drop(w->drop);
         s->spin = w->spin;
         for (j = 0; j < 4; j++) {

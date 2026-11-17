@@ -329,18 +329,13 @@ void fn_8022FB6C(Background* bg) {
 
 void fn_8022FF10(Mat3* out, const ValVec3* a);
 
-static inline void SetV3(ValVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 static inline void Orthonormalize(Mat3* m) {
     ValVec3 x;
     ValVec3 y;
     ValVec3 z;
-    SetV3(&x, m->m[0][0], m->m[0][1], m->m[0][2]);
-    SetV3(&z, m->m[2][0], m->m[2][1], m->m[2][2]);
+    x.Set(m->m[0][0], m->m[0][1], m->m[0][2]);
+    z.Set(m->m[2][0], m->m[2][1], m->m[2][2]);
     PSVECCrossProduct((const Vec*)&z, (const Vec*)&x, (Vec*)&y);
     PSVECNormalize((const Vec*)&x, (Vec*)&x);
     PSVECNormalize((const Vec*)&y, (Vec*)&y);

@@ -332,12 +332,6 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
 
 }
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 extern "C" {
 
@@ -356,7 +350,7 @@ void fn_80231780(const UIXform* m) {
         u32 color = e->takeColor ? it->color : fn_80230B9C((it->color & 0xFF000000) | 0xFFFFFF);
         if (e->art) {
             VecP p;
-            SetXYZ(&p, it->x, it->y, it->z);
+            p.Set(it->x, it->y, it->z);
             if (m) {
                 XformVec(m, &p, &p);
                 p.x += m->translation.v[0];

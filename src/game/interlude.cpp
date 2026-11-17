@@ -9,12 +9,6 @@
 #include "game/math_types.h"
 #include "game/respawn.h"
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 // A ground-plane (x, z) vector.
 struct V2 {
@@ -480,12 +474,6 @@ f32 fn_801C2F58(int n, f32 x) {
 // Blends two camera frames: orientation through quaternion slerp, position linearly.
 static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
-/* Helper name unproven: sets all three components (arguments evaluate right to left). */
-static inline void SetV(ValVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 void fn_801C2FF4(PlainValMatrix* out, const PlainValMatrix* a, const PlainValMatrix* b, f32 t) {
     IQuat qa;
@@ -496,7 +484,7 @@ void fn_801C2FF4(PlainValMatrix* out, const PlainValMatrix* a, const PlainValMat
     FrameToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToFrame(out, &q);
-    SetV(&pos, FrameLerp(a->origin.x, b->origin.x, t), FrameLerp(a->origin.y, b->origin.y, t), FrameLerp(a->origin.z, b->origin.z, t));
+    pos.Set(FrameLerp(a->origin.x, b->origin.x, t), FrameLerp(a->origin.y, b->origin.y, t), FrameLerp(a->origin.z, b->origin.z, t));
     out->origin = pos;
 }
 
@@ -1300,7 +1288,7 @@ void debug_event(void) {
                         ValMatrix f;
                         f = car->pose.place;
                         ValVec3 euler;
-                        SetXYZ(&euler, 0.0f, tp->yaw, 0.0f);
+                        euler.Set(0.0f, tp->yaw, 0.0f);
                         Mat3 r;
                         Mat3FromEuler(&r, (const Vec3*)&euler);
                         Mat3Mul(&f.Mat(), &r, &f.Mat());
@@ -1324,7 +1312,7 @@ void debug_event(void) {
                     fn_802E317C("interlude: unhandled teleport where %d", tp->where);
                     break;
                 }
-                SetXYZ(&place.vel, place.place.basis[2].x * tp->speed, place.place.basis[2].y * tp->speed, tp->speed * place.place.basis[2].z);
+                place.vel.Set(place.place.basis[2].x * tp->speed, place.place.basis[2].y * tp->speed, tp->speed * place.place.basis[2].z);
                 ((CarObj*)car)->Place(&place);
                 if (CarTypeIsReal(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
                     fn_801B8E28(i);

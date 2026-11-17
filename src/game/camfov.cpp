@@ -583,12 +583,6 @@ void fn_802E30C8(const char* fmt, ...);
 
 // The physics camera (mode 4 on a split screen or the TV output): trails the car like the chase camera
 // but swings the trailing frame round when the car drives backwards; other modes use fn_8026F420.
-// Helper name unproven: the arguments evaluate z first, the stores keep this order.
-static inline void SetZXY(CVec3* v, f32 x, f32 y, f32 z) {
-    v->z = z;
-    v->x = x;
-    v->y = y;
-}
 
 void fn_8026FCFC(int mode, int prev, u8* p) {
     ChaseCam* c = (ChaseCam*)p;
@@ -685,7 +679,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f.v[2] *= inv2;
         if (PSVECDotProduct((const Vec*)f.v, (const Vec*)&c->tf.axes.fwd.x) > -0.95f) {
             f32 w = s + 0.7f * (1.0f - s);
-            SetZXY(&r, LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
+            r.Set(LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
             c->tf.axes.fwd.x = r.x;
             c->tf.axes.fwd.y = r.y;
             c->tf.axes.fwd.z = r.z;
@@ -816,7 +810,7 @@ void fn_802704E4(u8* p) {
         f.v[1] *= inv2;
         f.v[2] *= inv2;
         f32 w = s + 0.7f * (1.0f - s);
-        SetZXY(&r, LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
+        r.Set(LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
         c->tf.axes.fwd.x = r.x;
         c->tf.axes.fwd.y = r.y;
         c->tf.axes.fwd.z = r.z;

@@ -145,11 +145,6 @@ static inline f32 Deq(u16 u) {
     return Lerp(-6.2831855f, 6.2831855f, t);
 }
 
-static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 static inline void AxisAngle(RVec3* m, const RVec3* v) {
     f32 a = PSVECMag((const Vec*)v);
@@ -199,8 +194,8 @@ void CollVolume::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
     RVec3 vb;
     fn_8017A008((u8*)&ma.pos, (u8*)&a->pos, 12);
     fn_8017A008((u8*)&mb.pos, (u8*)&b->pos, 12);
-    SetV(&va, Deq(a->rot[0]), Deq(a->rot[1]), Deq(a->rot[2]));
-    SetV(&vb, Deq(b->rot[0]), Deq(b->rot[1]), Deq(b->rot[2]));
+    va.Set(Deq(a->rot[0]), Deq(a->rot[1]), Deq(a->rot[2]));
+    vb.Set(Deq(b->rot[0]), Deq(b->rot[1]), Deq(b->rot[2]));
     AxisAngle(&ma.rot.x, &va);
     AxisAngle(&mb.rot.x, &vb);
     fn_8017AE94(&mtx, &ma, &mb, t);

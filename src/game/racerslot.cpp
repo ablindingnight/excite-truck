@@ -95,19 +95,6 @@ f32 fn_8026A63C(const f32* a, const f32* b, const f32* axis) {
 // The racer-slot (finish orbit) camera: when the race is over for this car, record its frame, find how far
 // the camera can swing left and right before hitting scenery, then orbit the car and blend into the orbit.
 // Returns 1 while it owns the camera.
-// Helper name unproven: arguments read right to left, stores go x, y, z.
-static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
-    f32* o = (f32*)o_;
-    o[0] = x;
-    o[1] = y;
-    o[2] = z;
-}
-}
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
 }
 extern "C" {
 
@@ -218,10 +205,10 @@ int fn_8026A698(u8* p, int i) {
         s->target = at;
         ValVec3 v;
         ValVec3 d;
-        SetV3(&d, at.x - s->pos.x, at.y - s->pos.y, at.z - s->pos.z);
+        d.Set(at.x - s->pos.x, at.y - s->pos.y, at.z - s->pos.z);
         f32 xv = s->vel.x;
         f32 blend = 0.2f;
-        SetXYZ(&s->vel, xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
+        s->vel.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
         v = s->vel;
         s->pos.x += v.x * 1.0f;
         s->pos.y += v.y * 1.0f;

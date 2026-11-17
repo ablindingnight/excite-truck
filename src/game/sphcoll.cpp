@@ -51,11 +51,6 @@ static inline RVec3 VMax(const RVec3& a, const RVec3& b) {
     return RVec3(MaxF(a.x, b.x), MaxF(a.y, b.y), MaxF(a.z, b.z));
 }
 
-static inline void SetV(RVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 // CFrame: rmtx.h's RMtx.
 
@@ -1935,12 +1930,6 @@ u8 lbl_80435020[0x30];  // scratch tube volume for box edges
 // p against box q's edges: the four edges along each of q's x and z axes are tested as tubes of
 // radius 0.75 inset by that radius.
 }
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 extern "C" {
 
 int fn_8019E500(u8* p, u8* q) {
@@ -1973,7 +1962,7 @@ int fn_8019E500(u8* p, u8* q) {
         e.b.x = ab->dir.v[0];
         e.b.y = ab->dir.v[1];
         e.b.z = ab->dir.v[2];
-        SetXYZ(&e.a, aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
+        e.a.Set(aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
         for (j = 0; j < 4; j++) {
             e.pos = fr.pos;
             f32 k = ea * ((j & 1) ? -1.0f : 1.0f);
@@ -3019,13 +3008,6 @@ void TubeBase::vf4C(void) {
 TubeShape::TubeShape(u32 a, u32 swap) : TubeBase(a, swap) {}
 
 // Axis-aligned bounds of the volume: both axis end points (org +- axis * k), widened by k.
-// Helper name unproven: arguments read right to left, stores go x, y, z.
-static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
-    f32* o = (f32*)o_;
-    o[0] = x;
-    o[1] = y;
-    o[2] = z;
-}
 static inline void SetLowerXY(RVec3* out, const RVec3& a, f32 k, f32 y) {
     out->x = a.x - k;
     out->y = y;
@@ -3046,21 +3028,21 @@ void TubeShape::vf38(RVec3* lo, RVec3* hi) const {
         RVec3 mn;
         RVec3 la;
         RVec3 lb;
-        SetV3(&lb, b.x - k, b.y - k, b.z - k);
+        lb.Set(b.x - k, b.y - k, b.z - k);
         const struct { f32 y; } bias = {a.y - k};
         SetLowerXY(&la, a, k, bias.y);
         const f32 laZ = a.z - k;
         la.z = laZ;
-        SetV(&mn, la.x < lb.x ? la.x : lb.x, MinF(la.y, lb.y), MinF(la.z, lb.z));
+        mn.Set(la.x < lb.x ? la.x : lb.x, MinF(la.y, lb.y), MinF(la.z, lb.z));
         *lo = mn;
     }
     {
         RVec3 mx;
         RVec3 ha;
         RVec3 hb;
-        SetV3(&hb, b.x + k, b.y + k, b.z + k);
-        SetV3(&ha, a.x + k, a.y + k, a.z + k);
-        SetV(&mx, ha.x > hb.x ? ha.x : hb.x, MaxF(ha.y, hb.y), MaxF(ha.z, hb.z));
+        hb.Set(b.x + k, b.y + k, b.z + k);
+        ha.Set(a.x + k, a.y + k, a.z + k);
+        mx.Set(ha.x > hb.x ? ha.x : hb.x, MaxF(ha.y, hb.y), MaxF(ha.z, hb.z));
         *hi = mx;
     }
 }

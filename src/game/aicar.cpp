@@ -2649,11 +2649,6 @@ void fn_801DCF48(RVec3* n, f32 x, f32 z);
 void PSVECCrossProduct(const void* a, const void* b, void* out);
 
 static inline f32 Ramp(f32 x, f32 lo, f32 range) { return (x - lo) / range; }
-static inline void SetV3(RVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 static inline f32 ControlsLateral(const V2& v, u8* d) {
     f32 ay = F32(d, 0x44);
@@ -2845,7 +2840,7 @@ void fn_80198530(u8* d) {
             fn_801DCF48(&n, F32(downhillCar, 0x60), F32(downhillCar, 0x68));
             u8* p = PTR(d, 0x1A0);
             RVec3 dir;
-            SetV3(&dir, F32(p, 0x8), 0.0f, F32(p, 0xC));
+            dir.Set(F32(p, 0x8), 0.0f, F32(p, 0xC));
             RVec3 side;
             PSVECCrossProduct(&n, &dir, &side);
             PSVECCrossProduct(&side, &n, &dir);

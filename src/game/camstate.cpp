@@ -177,12 +177,6 @@ void fn_80274460(u8* p);
 
 // Camera frame (0x58) = the car-relative frame (0xC0), moved by a lift that follows the car's 0x2458 value;
 // flag 0x260C on the car takes fn_80274460 instead.
-/* Helper name unproven */
-static inline void SetV3(CVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 void fn_80274268(u8* p) {
     CamRec* cr = (CamRec*)p;
     u8* car = cr->car;
@@ -194,7 +188,7 @@ void fn_80274268(u8* p) {
     CVec3 w;
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     f32 h = F32(car, 0x2458) - 1.397f;
-    SetV3(&v, 0.0f, 0.8f, -0.1f + h);
+    v.Set(0.0f, 0.8f, -0.1f + h);
     MulVec(&w, &v, (PlainValMatrix*)&cr->pose);
     cr->pose.pos.v[0] = cr->pose.pos.v[0] + w.x;
     cr->pose.pos.v[1] = cr->pose.pos.v[1] + w.y;

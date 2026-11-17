@@ -386,12 +386,6 @@ void fn_802D45C0(Surf* s) {
     }
 }
 
-// Helper name unproven: the arguments are evaluated right to left (z, y, x), as the target converts them.
-static inline void SetV(V3* o, f32 x, f32 y, f32 z) {
-    o->x = x;
-    o->y = y;
-    o->z = z;
-}
 
 void fn_802D479C(Surf* s) {
     MorphVtx* v;
@@ -405,9 +399,9 @@ void fn_802D479C(Surf* s) {
             f32 wb = lbl_804CA308[m->ib];
             f32 wa = lbl_804CA308[m->ia];
             V3 a;
-            SetV(&a, (1.0f / 255) * m->a[0], (1.0f / 255) * m->a[1], (1.0f / 255) * m->a[2]);
+            a.Set((1.0f / 255) * m->a[0], (1.0f / 255) * m->a[1], (1.0f / 255) * m->a[2]);
             V3 b;
-            SetV(&b, (1.0f / 255) * m->b[0], (1.0f / 255) * m->b[1], (1.0f / 255) * m->b[2]);
+            b.Set((1.0f / 255) * m->b[0], (1.0f / 255) * m->b[1], (1.0f / 255) * m->b[2]);
             m++;
             o->x = v->x + a.x * wa;
             o->y = v->y + a.y * wa;
@@ -481,9 +475,9 @@ void fn_802D4C44(Surf* s) {
             f32 wb = lbl_804CA308[v->ib];
             f32 wa = lbl_804CA308[v->ia];
             V3 a;
-            SetV(&a, (1.0f / 255) * v->a[0], (1.0f / 255) * v->a[1], (1.0f / 255) * v->a[2]);
+            a.Set((1.0f / 255) * v->a[0], (1.0f / 255) * v->a[1], (1.0f / 255) * v->a[2]);
             V3 b;
-            SetV(&b, (1.0f / 255) * v->b[0], (1.0f / 255) * v->b[1], (1.0f / 255) * v->b[2]);
+            b.Set((1.0f / 255) * v->b[0], (1.0f / 255) * v->b[1], (1.0f / 255) * v->b[2]);
             o->x = p.x + a.x * wa;
             o->y = p.y + a.y * wa;
             o->z = p.z + a.z * wa;
@@ -1393,7 +1387,7 @@ void fn_802D6C78(void) {
                 f32 ta = a * lbl_804CA308[v->ia];
                 p.x = v->x + d.x * w;
                 p.z = v->z + d.z * w;
-                SetXYZ(o, p.x, p.y + ta + b * lbl_804CA308[v->ib], p.z);
+                o->Set(p.x, p.y + ta + b * lbl_804CA308[v->ib], p.z);
                 v++;
                 o++;
             }

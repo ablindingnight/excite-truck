@@ -1252,12 +1252,6 @@ inline void Challenge::Collect(void) {
     }
 }
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 #pragma push
 #pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
@@ -1316,7 +1310,7 @@ inline void Challenge::Init(void) {
                 t->ends[0].y = 0.0f;
                 t->ends[0].x = a.x;
                 t->ends[0].z = a.z;
-                SetXYZ(&t->ends[1], b.x, 0.0f, b.z);
+                t->ends[1].Set(b.x, 0.0f, b.z);
                 t->mid.x = (a.x + b.x) * 0.5f;
                 t->mid.z = (a.z + b.z) / 2.0f;
                 Delta2 d1;

@@ -472,11 +472,6 @@ static inline void MulVec(ValVec3* out, const ValVec3* in, const ValVec3* m) {
     }
 }
 
-static inline void SetVec(ValVec3* v, f32 x, f32 y, f32 z) {
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 static inline void AddVec(ValVec3* v, const ValVec3* a) {
     v->x += a->x;
@@ -509,12 +504,12 @@ void fn_801F0F78(WheelMod* w, const WheelState* s, const ValMatrix* m, f32 scale
     w->mtx.origin.z += m->origin.z;
     *(Mat3*)w->mtx.basis = *(const Mat3*)m->basis;
     ValVec3 roll;
-    SetVec(&roll, 0.0f, 0.0f, s->roll);
+    roll.Set(0.0f, 0.0f, s->roll);
     Mat3 r;
     Mat3FromEuler(&r, (const Vec3*)&roll);
     Mat3Mul((Mat3*)&w->mtx, &r, (Mat3*)&w->mtx);
     ValVec3 steer;
-    SetVec(&steer, 0.0f, s->steer + (left ? 0.0f : 3.1415927f), 0.0f);
+    steer.Set(0.0f, s->steer + (left ? 0.0f : 3.1415927f), 0.0f);
     Mat3 r2;
     Mat3FromEuler(&r2, (const Vec3*)&steer);
     Mat3Mul((Mat3*)&w->mtx, &r2, (Mat3*)&w->mtx);

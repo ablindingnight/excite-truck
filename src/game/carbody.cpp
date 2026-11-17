@@ -13,12 +13,6 @@
 #include "game/gamedb.h"
 #include <string.h>
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
@@ -2514,7 +2508,7 @@ void fn_80186DE8(void) {
             player = 1;
         }
         RMtx fr;
-        SetXYZ(&fr.rot.x, m->rot[0].x, m->rot[0].y, m->rot[0].z);
+        fr.rot.x.Set(m->rot[0].x, m->rot[0].y, m->rot[0].z);
         fr.rot.y.x = m->rot[1].x;
         fr.rot.y.y = m->rot[1].y;
         fr.rot.y.z = m->rot[1].z;
@@ -3579,7 +3573,7 @@ void fn_8018A9F0(u8* p, u8* m) {
     CbVec4 h = *(CbSolVec*)(x + 0x70);
     for (int i = 0; i < 4; i++) {
         RVec3* o = (RVec3*)(m + 0xE24) + ((s32*)(cb->f26C0 + 0xCC))[i];
-        SetXYZ(o, 0.0f, cb->f5AC + (F32((u8*)&((CarDrawState*)m)->wheels + i * 0x6C, 0x4) + h[i]), 0.0f);
+        o->Set(0.0f, cb->f5AC + (F32((u8*)&((CarDrawState*)m)->wheels + i * 0x6C, 0x4) + h[i]), 0.0f);
     }
     ((CarDrawState*)m)->fFA4 = S32(cb->f26C0, 0xDC);
 }

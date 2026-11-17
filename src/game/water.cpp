@@ -14,12 +14,6 @@ const f32 lbl_80564D78[1] = {2.0f};
 #include "game/math_types.h"
 #include "game/plainvec.h"
 
-template <class T>
-static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 void* operator new(size_t size, const char* tag);
 
@@ -845,7 +839,7 @@ void WaterSystem::Draw(void) {
         PVec lc;
         PVec rel;
         PVec d;
-        SetXYZ(&d, p.x - cam.origin.x, p.y - cam.origin.y, p.z - cam.origin.z);
+        d.Set(p.x - cam.origin.x, p.y - cam.origin.y, p.z - cam.origin.z);
         lc.x = d.x * cam.basis[0].x + d.y * cam.basis[0].y + d.z * cam.basis[0].z;
         lc.y = d.x * cam.basis[1].x + d.y * cam.basis[1].y + d.z * cam.basis[1].z;
         lc.z = d.x * cam.basis[2].x + d.y * cam.basis[2].y + d.z * cam.basis[2].z;
@@ -858,7 +852,7 @@ void WaterSystem::Draw(void) {
             WVert* v = &verts[r * 16 + c];
             f32 u = (2.0f * (f32)c / 15.0f - 1.0f) * depth * sx;
             PVec wp;
-            SetXYZ(&wp, p.x + side.x * u, p.y + side.y * u, p.z + side.z * u);
+            wp.Set(p.x + side.x * u, p.y + side.y * u, p.z + side.z * u);
             v->pos = wp;
             v->color = col;
             PVec s;

@@ -1200,11 +1200,6 @@ static inline void NormV2(V2* d) {
     d->y *= 1.0f / len;
 }
 
-static inline void SetV3(ValVec3* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
 
 static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
     o->x = a->x * k;
@@ -1268,7 +1263,7 @@ inline void CrushMaster::vfA8(int car, int b) {
                 r.place.basis[2].y = 0.0f;
                 r.place.basis[2].z = v.z;
                 PSVECNormalize((const Vec*)&r.place.basis[2], (Vec*)&r.place.basis[2]);
-                SetV3(&r.place.basis[0], r.place.basis[2].z, 0.0f, -r.place.basis[2].x);
+                r.place.basis[0].Set(r.place.basis[2].z, 0.0f, -r.place.basis[2].x);
                 r.vel = v;
             } else {
                 to.x = dst.x;
