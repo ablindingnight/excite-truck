@@ -370,8 +370,9 @@ struct ArenaTimer {
 
 }  // namespace
 
-struct TableRef {
-    ~TableRef(void) { fn_80131818(t); }
+// A value table this unit owns and releases (fn_80131818) when it goes; not tableref.h's TableRef. Name unproven.
+struct OwnedTable {
+    ~OwnedTable(void) { fn_80131818(t); }
     ValueTable* t;
 };
 
@@ -403,7 +404,7 @@ public:
     void Deactivate(int i);
     ArenaTimer timer;              // offset 0x8
     s32 f10;                       // offset 0x10
-    TableRef dynos;                // offset 0x14
+    OwnedTable dynos;                // offset 0x14
     RArray<ObjSet>* sets;          // offset 0x18
     RArray<SetStat>* stats;        // offset 0x1C
     gArtSet* art;                     // offset 0x20
