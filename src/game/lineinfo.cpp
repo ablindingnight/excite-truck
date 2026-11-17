@@ -17,15 +17,7 @@ ValueNode* fn_8013184C(void);  // empty value node
 
 void* operator new(size_t size, const char* tag);
 
-class AIExceptions {
-public:
-    AIExceptions(void);
-    ~AIExceptions(void);
-    void Load(ValueNode* node);
-
-    void* list;
-    f32 tune[7];
-};
+#include "game/aiexc.h"
 
 struct LineParams {
     f32 minT;      // offset 0x0

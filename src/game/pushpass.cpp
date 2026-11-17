@@ -11,33 +11,7 @@ f32 fn_80134B58(const char* key, f32 def);
 
 void* operator new(size_t size, const char* tag);
 
-struct AITune {
-    f32 onT;        // offset 0x0
-    f32 moveout;    // offset 0x4
-    f32 passout;    // offset 0x8
-    f32 pushSens;   // offset 0xC
-    f32 lookahead;  // offset 0x10
-    f32 checks;     // offset 0x14
-    f32 landing;    // offset 0x18
-};
-
-struct AIException {
-    f32 onLon;          // offset 0x0
-    f32 offLon;         // offset 0x4
-    AITune tune;        // offset 0x8
-    AIException* next;  // offset 0x24
-};
-
-class AIExceptions {
-public:
-    AIExceptions(void);
-    ~AIExceptions(void);
-    void Load(ValueNode* node);
-    AITune* Find(f32 lon);
-
-    AIException* list;  // offset 0x0
-    AITune tune;        // offset 0x4
-};
+#include "game/aiexc.h"
 
 static inline const char* Plural(int n) { return n != 1 ? "s" : ""; }
 
