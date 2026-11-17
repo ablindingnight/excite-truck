@@ -1876,22 +1876,12 @@ void fn_80183E7C(u8* p) {
         s32 id = cb->index;
         fn_801796CC(14, &id, 4);
     }
-    f32 t2588 = cb->f2588 - 0.016683351f;
-    t2588 = t2588 > 0.0f ? t2588 : 0.0f;
-    f32 t2590 = cb->f2590 - 0.016683351f;
-    t2590 = t2590 > 0.0f ? t2590 : 0.0f;
-    cb->f2588 = t2588;
-    f32 boost = cb->f258C - 0.016683351f;
-    cb->f2590 = t2590;
-    boost = boost > -3.0f ? boost : -3.0f;
-    cb->f258C = boost;
-    f32 pad = cb->f25BC;
-    if (pad > __float_epsilon[0]) {
-        pad = pad > boost ? pad : boost;
-        f32 left = cb->f25BC - 0.016683351f;
-        cb->f258C = pad;
-        left = left > 0.0f ? left : 0.0f;
-        cb->f25BC = left;
+    cb->f2588 = FMax(0.0f, cb->f2588 - 0.016683351f);
+    cb->f2590 = FMax(0.0f, cb->f2590 - 0.016683351f);
+    cb->f258C = FMax(-3.0f, cb->f258C - 0.016683351f);
+    if (cb->f25BC > __float_epsilon[0]) {
+        cb->f258C = FMax(cb->f258C, cb->f25BC);
+        cb->f25BC = FMax(0.0f, cb->f25BC - 0.016683351f);
         if (!fn_8014E708(cb->index)) {
             s32 id = cb->index;
             fn_801796CC(16, &id, 4);
@@ -1989,7 +1979,7 @@ void fn_80183E7C(u8* p) {
     cb->f259C = 0;
     if (lbl_8055E4F4) {
         if (!NearZero(cb->f2690) && U32(p, 0x10) == 'PCAR') {
-            cb->f25A0 = FMin(heat, heatTune.v[7]);
+            cb->f25A0 = FMin(cb->f25A0, heatTune.v[7]);
         }
         if (cb->f258C < 0.1f && cb->f260D && cb->f2618 < 0.2f &&
             cb->f25A0 < 1.001f && cb->f2588 < 0.001f &&
@@ -2051,10 +2041,7 @@ void fn_80183E7C(u8* p) {
             d2.z = dir.z;
             RVec3 side;
             PSVECCrossProduct((const Vec*)&d2, (const Vec*)(p + 0x54), (Vec*)&side);
-            f32 g = 1.0f;
-            if ((s32)fn_8018B06C(p) < 0) {
-                g = 0.0f;
-            }
+            f32 g = (s32)fn_8018B06C(p) < 0 ? 0.0f : 1.0f;
             f32 st = cb->f25F0 * g;
             f32 lat = PSVECDotProduct((const Vec*)&side, (const Vec*)(p + 0x48));
             f32 t = Clamp01((cb->speed - 22.222223f) / 48.888893f);
@@ -2105,10 +2092,10 @@ void fn_80183E7C(u8* p) {
             }
             f32 l = cb->f2628;
             f32 r = cb->f262C;
-            f32 gap = l - r;
-            r = l < r ? l : r;
+            f32 gap = AbsNarrow(l - r);
+            r = FMin(l, r);
             int side = cb->f2628 > cb->f262C ? 1 : 2;
-            if ((f32)__fabs(gap) < 0.6f && now - r < 1.0f && held &&
+            if (gap < 0.6f && now - r < 1.0f && held &&
                 (cb->f263C == 0 || side == cb->f263C)) {
                 cb->f2638 = side;
                 cb->f263C = side;
@@ -2176,10 +2163,7 @@ void fn_80183E7C(u8* p) {
             grav = grav * s;
             gravUp = gravUp * s;
         }
-        if (cb->vel.y > 0.0f) {
-            gravUp = grav;
-        }
-        airLift = airLift + gravUp;
+        airLift = airLift + (cb->vel.y > 0.0f ? grav : gravUp);
         RVec3 f;
         f.x = 0.0f;
         f.z = 0.0f;
@@ -2200,37 +2184,28 @@ void fn_80183E7C(u8* p) {
         fn_801BF1B8(PTR(p, 0x1EC), stuck);
     }
     if (cb->f26E0) {
-        f32 sy = cb->f26E8 * -30.0f;
-        f32 vy = cb->f26F4 * -3.0f;
-        f32 sz = cb->f26EC * -30.0f;
-        f32 vz = cb->f26F8 * -3.0f;
-        f32 ax = cb->f26E4 * -30.0f + cb->f26F0 * -3.0f;
+        RVec3 a;
+        a.x = cb->f26E4 * -30.0f + cb->f26F0 * -3.0f;
+        a.y = cb->f26E8 * -30.0f + cb->f26F4 * -3.0f;
+        a.z = cb->f26EC * -30.0f + cb->f26F8 * -3.0f;
         if (cb->airborne > 0) {
-            f32 r = 2.0f * cb->f2604;
             cb->f26FC = cb->f2600;
-            ax = ax + r;
+            a.x = a.x + 2.0f * cb->f2604;
         }
+        a.y = a.y + 10.0f * cb->f26FC * (1.0f - cb->f25F0 * cb->f25F0);
         RVec3 acc;
         ObRotateRows(&acc, (const f32*)(p + 0x3C), (const f32*)(p + 0x16C));
-        f32 ay = sy + vy + 10.0f * cb->f26FC * (1.0f - cb->f25F0 * cb->f25F0) +
-                 acc.y * -0.02f;
-        ax = ax + acc.x * -0.02f;
-        f32 az = sz + vz + acc.z * -0.02f;
-        f32 nvx = cb->f26F0 + CbMul(ax, 0.016683351f);
-        f32 nvy = cb->f26F4 + CbMul(ay, 0.016683351f);
-        f32 nvz = cb->f26F8 + CbMul(az, 0.016683351f);
-        f32 dx = CbMul(nvx, 0.016683351f);
-        f32 dy = CbMul(nvy, 0.016683351f);
-        int lean = cb->f26FC > 0.3f;
-        cb->f26F0 = nvx;
-        cb->f26F4 = nvy;
-        f32 dz = CbMul(nvz, 0.016683351f);
-        cb->f26F8 = nvz;
-        cb->f26E4 = cb->f26E4 + dx;
-        cb->f26E8 = cb->f26E8 + dy;
-        cb->f26EC = cb->f26EC + dz;
-        if (lean) {
-            f32 k = nvy * cb->mass * 9.81f * 2.0f;
+        a.x = a.x + acc.x * -0.02f;
+        a.y = a.y + acc.y * -0.02f;
+        a.z = a.z + acc.z * -0.02f;
+        cb->f26F0 = cb->f26F0 + a.x * 0.016683351f;
+        cb->f26F4 = cb->f26F4 + a.y * 0.016683351f;
+        cb->f26F8 = cb->f26F8 + a.z * 0.016683351f;
+        cb->f26E4 = cb->f26E4 + cb->f26F0 * 0.016683351f;
+        cb->f26E8 = cb->f26E8 + cb->f26F4 * 0.016683351f;
+        cb->f26EC = cb->f26EC + cb->f26F8 * 0.016683351f;
+        if (cb->f26FC > 0.3f) {
+            f32 k = 2.0f * (9.81f * (cb->f26F4 * cb->mass));
             RVec3 f;
             f.x = cb->mtx.rot.y.x * k;
             f.y = cb->mtx.rot.y.y * k;
