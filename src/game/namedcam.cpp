@@ -355,6 +355,8 @@ f32 lbl_804A15C0[4];  // smoothed pitch per slot
 
 static inline f32 MinF(f32 a, f32 b) { return b < a ? b : a; }
 static inline f32 MaxF(f32 a, f32 b) { return b > a ? b : a; }
+// Helper name unproven (clampsig 2026-11-16): retail compares the first operand first at the frame-height floor.
+static inline f32 MaxF2(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Atan2F(f32 y, f32 x) { return atan2(y, x); }
 static inline f32 CosF(f32 x) { return cos(x); }
 static inline f32 SinF(f32 x) { return sin(x); }
@@ -643,14 +645,14 @@ void fn_80277A14(CamRec* c, int slot) {
     CamVec3* vel = (CamVec3*)(c->car + 0x118);
     f32 pitch = vel->v[1] / MaxF(PSVECMag((const Vec*)vel), 1.0f);
     if (S32(c->car, 0x2620) == 0 && vel->v[1] < 0.0f) {
-        f32 k = MaxF(MinF(Remap(-(c->carFrame.pos.v[1] - fn_801EA0E8(c->carFrame.pos.v[0], c->carFrame.pos.v[2])) / vel->v[1], pitch, 0.0f), 1.0f), 0.0f);
+        f32 k = MaxF(0.0f, MinF(Remap(-(c->carFrame.pos.v[1] - fn_801EA0E8(c->carFrame.pos.v[0], c->carFrame.pos.v[2])) / vel->v[1], pitch, 0.0f), 1.0f));
         pitch = Lerp(1.25f, 0.25f, k);
     }
     f32 s = lbl_804A15C0[slot];
     s = Lerp(s, pitch, 0.1f);
     lbl_804A15C0[slot] = s;
     frame.pos.v[1] += 0.65f * (8.0f * s);
-    frame.pos.v[1] = MaxF(frame.pos.v[1], fn_801EA0E8(frame.pos.v[0], frame.pos.v[2]) + 4.0f);
+    frame.pos.v[1] = MaxF2(frame.pos.v[1], fn_801EA0E8(frame.pos.v[0], frame.pos.v[2]) + 4.0f);
     up.v[0] = 0.0f;
     up.v[1] = 1.0f;
     up.v[2] = 0.0f;
