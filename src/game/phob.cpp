@@ -1352,37 +1352,26 @@ struct PhobPose {
     s16 hint;            // offset 0x30
 };
 
-// CollVolume::vf28, by its linker name. MATCHING-AID: retail's body reads the fields as through a const pointer
-// formal (a const member matches it exactly), but the slot is not const (PanelVol, MutPhob, Wheel and Ball override
-// it with a non-const this; their code changes under const), and no in-member const view reproduces it (const local,
-// const reference, inline helper with a const formal: all tried 2026-11-16). Port: CollVolume::vf28.
-void vf28__10CollVolumeFPUc(const Phob* v, u8* buf) {  // writes the draw state
+/* Helper name unproven: same as ball.cpp's LerpMtx */
+static inline void LerpMtx(PlainValMatrix* out, const PlainValMatrix* a, const PlainValMatrix* b, f32 t) {
+    f32* d = (f32*)out;
+    const f32* x = (const f32*)a;
+    const f32* y = (const f32*)b;
+    for (int i = 0; i < 12; i++) {
+        *d++ = LerpT(t, *x++, *y++);
+    }
+}
+
+// CollVolume::vf28, by its linker name (the class is named Phob here; port: CollVolume::vf28). The blend is the
+// same 12-float LerpMtx loop as Ball::vf28 (exact sibling); with it the old const-pointer crutch is gone.
+void vf28__10CollVolumeFPUc(Phob* v, u8* buf) {  // writes the draw state
     u8* o = buf + v->a8;
     PlainValMatrix* out = (PlainValMatrix*)o;
     if ((f32)__fabs(lbl_8055E460 - 1.0f) <= __float_epsilon[0]) {
         *out = v->world;
     } else {
         PlainValMatrix t;
-        int i;
-        const f32* b;
-        const f32* a;
-        f32* d = &t.basis[0].x;
-        a = &v->world.basis[0].x;
-        b = &v->prev.basis[0].x;
-        f32 k = lbl_8055E460;
-        for (i = 0; i < 2; i++) {
-            d[0] = LerpRev( a[0], b[0],k);
-            f32 a1 = a[1];
-            f32 b1 = b[1];
-            d[1] = LerpRev( a1, b1,k);
-            d[2] = LerpRev( a[2], b[2],k);
-            d[3] = LerpRev( a[3], b[3],k);
-            d[4] = LerpRev( a[4], b[4],k);
-            d[5] = LerpRev( a[5], b[5],k);
-            d += 6;
-            a += 6;
-            b += 6;
-        }
+        LerpMtx(&t, &v->prev, &v->world, lbl_8055E460);
         *out = t;
     }
     ((PhobPose*)o)->hint = v->hint[0];
