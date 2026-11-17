@@ -118,23 +118,7 @@ struct TreeRec {
     f32 drop;       // offset 0x40
 };
 
-template <class T>
-struct TArray {
-    TArray(T* d, s32 c) {
-        data = d;
-        cap = c;
-        n = 0;
-    }
-    ~TArray(void) {
-        data = 0;
-        n = 0;
-        cap = 0;
-    }
-    T* At(int i) { return &data[i]; }
-    T* data;  // offset 0x0
-    s32 n;    // offset 0x4
-    s32 cap;  // offset 0x8
-};
+#include "game/tarray.h"
 
 template <class T>
 void SafeDelete(T*& p) {
@@ -198,6 +182,8 @@ void __dt__7FanCellFv(void*, int);
 }
 #endif
 
+#ifdef __MWERKS__
+// game/tfixed.h's TFixed as retail's tree saw it: flat, not derived from TArray, no destructor.
 template <class T, int N>
 struct TFixed {
     TFixed(void) {
@@ -205,18 +191,14 @@ struct TFixed {
         cap = N;
         n = 0;
     }
-#ifndef __MWERKS__
-    ~TFixed(void) {
-        data = 0;
-        n = 0;
-        cap = 0;
-    }
-#endif
     T* data;     // offset 0x0
     s32 n;       // offset 0x4
     s32 cap;     // offset 0x8
     T items[N];  // offset 0xC
 };
+#else
+#include "game/tfixed.h"
+#endif
 
 struct TListEntry {
     char name[0x20];             // offset 0x0

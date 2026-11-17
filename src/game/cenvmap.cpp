@@ -32,29 +32,9 @@ struct EnvTex {
     s32 idx;  // offset 0x4
 };
 
-template <class T>
-struct TArray {
-    TArray(T* d, s32 c) {
-        data = d;
-        cap = c;
-        n = 0;
-    }
-    ~TArray(void) {
-        data = 0;
-        n = 0;
-        cap = 0;
-    }
-    void Push(const T& v) { data[n++] = v; }
-    T* data;  // offset 0x0
-    s32 n;    // offset 0x4
-    s32 cap;  // offset 0x8
-};
+#include "game/tarray.h"
 
-template <class T, int N>
-struct TFixed : TArray<T> {
-    TFixed(void) : TArray<T>(items, N) {}
-    T items[N];  // offset 0xC
-};
+#include "game/tfixed.h"
 
 extern "C" {
 double asin(double x);

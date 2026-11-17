@@ -100,31 +100,9 @@ struct SpawnParams {
 };
 
 // ViewState: common.h's PlainValMatrix.
-template <class T>
-struct TArray {
-    TArray(T* d, s32 c) {
-        data = d;
-        cap = c;
-        n = 0;
-    }
-    ~TArray(void) {
-        data = 0;
-        n = 0;
-        cap = 0;
-    }
-    T& operator[](int i) { return data[i]; }  /* Helper name unproven */
-    T* Add(void) { return &data[n++]; }  /* Helper name unproven */
+#include "game/tarray.h"
 
-    T* data;  // offset 0x0
-    s32 n;    // offset 0x4
-    s32 cap;  // offset 0x8
-};
-
-template <class T, int N>
-struct TFixed : TArray<T> {
-    TFixed(void) : TArray<T>(items, N) {}
-    T items[N];  // offset 0xC
-};
+#include "game/tfixed.h"
 
 typedef int (*EventHandler)(const void* e);
 
