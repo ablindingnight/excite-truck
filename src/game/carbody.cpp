@@ -1746,10 +1746,11 @@ void fn_80183E7C(u8* p) {
     if (NearZero(cb->f2690) && cb->f2618 > 0.15f &&
         NearZero(cb->f2650)) {
         f32 stall = MinF(1.0f, 10.0f * cb->f264C);
-        f32 pitch = cb->f2600 + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
+        f32 pitch = cb->f2600;
+        pitch += 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
+        f32 roll = cb->f2604;
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = 0.0f;
-        f32 roll = cb->f2604;
         f32 m = MaxF(1.0f, PSVECMag((const Vec*)&fl));
         f32 inv = 1.0f / m;
         fl.x = fl.x * inv;
@@ -1759,9 +1760,8 @@ void fn_80183E7C(u8* p) {
             CbScaleSelf(&fl, -1.0f);
         }
         f32 nose = PSVECDotProduct((const Vec*)&fl, (const Vec*)(p + 0x48));
-        f32 wantR;
+        f32 wantR = -roll - cb->mtx.rot.x.y * (1.0f - AbsNarrow(cb->mtx.rot.z.y));
         f32 wantP = 0.25f * pitch - nose;
-        wantR = -roll - cb->mtx.rot.x.y * (1.0f - AbsNarrow(cb->mtx.rot.z.y));
         f32 wp = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x3C));
         f32 wr = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x54));
         f32 gainP = cb->f2680 ? 1.0f : 0.25f;
