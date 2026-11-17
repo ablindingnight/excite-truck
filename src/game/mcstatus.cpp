@@ -6,6 +6,7 @@
 #include "game/gart.h"
 #include "game/menu.h"
 #include "game/menustate.h"
+#include "game/joy.h"
 extern "C" {
 size_t strlen(const char* s);
 char* strcpy(char* d, const char* s);
@@ -28,7 +29,7 @@ void fn_80214AF0(int s);
 void fn_80214B44(int i);
 void fn_80214A9C(int s);
 s32 fn_80129AF4(void);
-int fn_801298E8(void* info, s32 ch);
+int fn_801298E8(JoyStatus* info, int ch);
 void fn_80214FD8(const char* title, const char* msg);
 void fn_802C519C(u8* p);
 void fn_802328D4(u8* p);
@@ -127,13 +128,6 @@ static inline MenuDesc MakeStatusMenu(void) {
     MenuDesc d = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
     return d;
 }
-
-// A remote's status block.
-struct WpadInfo {
-    u8 pad0[0x50];  // offset 0x0
-    u32 flags;      // offset 0x50
-    u8 pad54[0x10]; // offset 0x54
-};
 
 ModuleTag lbl_8055F248;
 UnkStatic123s lbl_804988D8;
@@ -662,18 +656,18 @@ inline void MemBar::Draw(void) {
 extern "C" {
 
 inline void fn_8024683C(void) {
-    WpadInfo all;
-    WpadInfo one;
-    s32 ch = fn_80129AF4();
+    JoyStatus all;
+    JoyStatus one;
+    int ch = fn_80129AF4();
     int warn = 0;
     if (ch == -1) {
         for (int i = 0; i < 4; i++) {
-            if (fn_801298E8(&all, i) && (all.flags & 1)) {
+            if (fn_801298E8(&all, i) && (all.info.b & 1)) {
                 warn = 1;
             }
         }
     } else {
-        if (fn_801298E8(&one, ch) && (one.flags & 1)) {
+        if (fn_801298E8(&one, ch) && (one.info.b & 1)) {
             warn = 1;
         }
     }
