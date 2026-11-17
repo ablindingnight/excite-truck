@@ -1432,7 +1432,7 @@ void fn_801DF074(int a, int b);
 f32 fn_801B8950(s32 id);
 void fn_801B8964(s32 id, f32 v);
 void fn_8018E330(u8* p);
-f32 fn_801DCEC0(void);
+f32 fn_801DCEC0(s16 id, f32 x, f32 z);  // heightfld.cpp's stub ignores its arguments (retail passes them)
 double sqrt(double x);
 }
 
@@ -1744,20 +1744,21 @@ void fn_80183E7C(u8* p) {
         wantR = -roll - cb->mtx.rot.x.y * (1.0f - AbsNarrow(cb->mtx.rot.z.y));
         f32 wp = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x3C));
         f32 wr = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x54));
-        f32 gain = 0.25f;
-        if (cb->f2680) {
-            gain = 1.0f;
-        }
+        f32 gainP = cb->f2680 ? 1.0f : 0.25f;
+        f32 gainR = cb->f2680 ? 1.0f : 0.25f;
         f32 lead = 5.0f * LerpT(Clamp01((cb->f2618 - 0.15f) / 0.35f), 0.0f, 0.5f);
         if (!cb->f2680) {
             lead = 0.0f;
         }
-        f32 tp = gain * cb->inertia.x * ((wantP - wp) + lead * (pitch - nose)) / 0.016683351f;
-        f32 tr = gain * cb->inertia.z * (wantR - wr) / 0.016683351f;
+        f32 tp = gainP * (cb->inertia.x * ((wantP - wp) + lead * (pitch - nose))) / 0.016683351f;
         RVec3 t;
-        t.x = cb->mtx.rot.x.x * tp + cb->mtx.rot.z.x * tr;
-        t.y = cb->mtx.rot.x.y * tp + cb->mtx.rot.z.y * tr;
-        t.z = cb->mtx.rot.x.z * tp + cb->mtx.rot.z.z * tr;
+        t.x = cb->mtx.rot.x.x * tp;
+        t.y = cb->mtx.rot.x.y * tp;
+        t.z = cb->mtx.rot.x.z * tp;
+        f32 tr = gainR * (cb->inertia.z * (wantR - wr)) / 0.016683351f;
+        t.x = t.x + cb->mtx.rot.z.x * tr;
+        t.y = t.y + cb->mtx.rot.z.y * tr;
+        t.z = t.z + cb->mtx.rot.z.z * tr;
         ((RigidBody*)p)->AddTorque((const RVec3*)&t);
     }
     if (cb->f2648 == 7) {
@@ -1781,8 +1782,8 @@ void fn_80183E7C(u8* p) {
         }
         if (cb->f2624 && cb->f2618 >= 0.3f && (cb->f2624 = 0, cb->vel.y > 2.2222223f) &&
             (f32)__fabs(cb->f2588) <= __float_epsilon[0] && NearZero(cb->f2690)) {
-            s32 id = cb->index;
             cb->f2625 = 1;
+            s32 id = cb->index;
             fn_801796EC(13, &id, 4);
             (*(CbFx**)(p + 0x2584))->v28();
             fn_8014E61C(cb->index, 6, 0.0f);
@@ -1791,22 +1792,14 @@ void fn_80183E7C(u8* p) {
             ((RigidBody*)p)->AddImpulse(1.0f, (const RVec3*)&kick, (const RVec3*)(p + 0x60));
         }
         f32 top = 0.44444445f * fn_80181A48(p);
-        f32 cap = 0.9f * top;
-        if (cb->f261C < cap) {
-            cap = cb->f261C;
-        }
-        cb->f261C = cap;
+        cb->f261C = FMin(cb->f261C, 0.9f * top);
         f32 flat = sqrt(cb->vel.x * cb->vel.x + cb->vel.z * cb->vel.z);
         int nosedive = 0;
         f32 dive = -cb->f2600;
         if (lbl_8055A3AC && U32(p, 0x10) == 'PCAR' && dive > 0.0f && dive > 0.9f) {
-            f32 st = 1.0f;
-            if (0.016683351f + stalled < 1.0f) {
-                st = 0.016683351f + stalled;
-            }
+            cb->f264C = FMin(0.016683351f + stalled, 1.0f);
             nosedive = 1;
-            cb->f264C = st;
-            dive = LerpT(Ramp(st, 0.5f, 1.0f), 0.9f, -0.5f);
+            dive = LerpT(Ramp(cb->f264C, 0.5f, 1.0f), 0.9f, -0.5f);
         }
         f32 lean = 6.0f * dive;
         lean = lean < 1.0f ? lean : 1.0f;
@@ -1824,10 +1817,7 @@ void fn_80183E7C(u8* p) {
             target = LerpT(t, cb->f261C, 0.9f * cb->f261C);
             airLift = airLift + lbl_8055A3B0 * -lean;
         } else {
-            if (1.1f * cb->f261C < top) {
-                top = 1.1f * cb->f261C;
-            }
-            target = LerpT(Ramp(lean, 0.0f, 0.35f), cb->f261C, top);
+            target = LerpT(Ramp(lean, 0.0f, 0.35f), cb->f261C, FMin(1.1f * cb->f261C, top));
         }
         f32 want = target - 8.888889f * cb->f25E4;
         HVec dir = *(HVec*)(p + 0x118);
@@ -1852,12 +1842,10 @@ void fn_80183E7C(u8* p) {
     if (U32(p, 0x10) == 'PCAR') {
         f32 x = cb->mtx.pos.x;
         f32 z = cb->mtx.pos.z;
-        f32 floor = fn_801DDC8C(p + 0x6C, cb->mtx.pos.x, cb->mtx.pos.z);
-        floor = floor > 0.0f ? floor : 0.0f;
-        f32 t = cb->f2688 - 0.033366702f;
-        t = t > 0.0f ? t : 0.0f;
-        cb->f2688 = t;
-        if (floor > 6.6666665f) {
+        f32 floor = FMax(0.0f, fn_801DDC8C(p + 0x6C, cb->mtx.pos.x, cb->mtx.pos.z));
+        cb->f2688 = FMax(0.0f, cb->f2688 - 0.033366702f);
+        int high = floor > 6.6666665f;
+        if (high) {
             RVec3 f;
             if (cb->mtx.pos.y - 0.915f < fn_801DCF48(&f, x, z) && cb->vel.y < floor) {
                 f32 push = 24.525002f + (floor - cb->vel.y);
@@ -1866,15 +1854,15 @@ void fn_80183E7C(u8* p) {
                 f.y = push * cb->mass / 0.016683351f;
                 ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
                 fn_802E30C8("%d: terrain morph pants-kick: %.2f MPH, terr %.2f MPH", lbl_8055E3C4, push / 0.44444445f, floor / 0.44444445f);
-                if (NearZero(cb->f2688)) {
+                if ((f32)__fabs(cb->f2688) <= __float_epsilon[0]) {
                     fn_8014E61C(cb->index, 8, 0.0f);
                 }
                 cb->f2688 = 1.0f;
             }
-            if (!NearZero(cb->f2688)) {
+            if (!((f32)__fabs(cb->f2688) <= __float_epsilon[0])) {
                 cb->f2688 = 1.0f;
             }
-        } else if (!NearZero(t)) {
+        } else if (!((f32)__fabs(cb->f2688) <= __float_epsilon[0])) {
             if (cb->vel.y > 0.8888889f) {
                 cb->f2688 = 1.0f;
             }
@@ -1944,7 +1932,7 @@ void fn_80183E7C(u8* p) {
         deep = 1;
     }
     if (cb->f25C4 > 0.01f || (cb->airborne > 0 && fn_802B04D4(p + 0x60) && deep)) {
-        if (NearZero(cb->f25C4)) {
+        if ((f32)__fabs(cb->f25C4) <= __float_epsilon[0]) {
             (*(CbFx**)(p + 0x2584))->v30();
             if (NearZero(cb->f2690)) {
                 fn_8018E330(p);
@@ -2199,14 +2187,12 @@ void fn_80183E7C(u8* p) {
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
         cb->f2684 = 9.81f * (1.0f + airLift);
     }
-    f32 depth = fn_801DCEC0();
-    cb->f26D0 = depth;
-    int fast = cb->speed >= 0.5f;
-    cb->f26CC = LerpT(0.1f, cb->f26CC, depth);
-    if (fast || cb->f25F4 >= 0.1f || cb->f25E4 <= 0.9f) {
-        cb->f26A8 = 0.0f;
-    } else {
+    cb->f26D0 = fn_801DCEC0(*(s16*)(p + 0x6C), cb->mtx.pos.x, cb->mtx.pos.z);
+    cb->f26CC = LerpT(0.1f, cb->f26CC, cb->f26D0);
+    if (cb->speed < 0.5f && cb->f25F4 < 0.1f && cb->f25E4 > 0.9f) {
         cb->f26A8 += 0.016683351f;
+    } else {
+        cb->f26A8 = 0.0f;
     }
     u32 stuck = cb->f26A8 > 2.0f;
     if (stuck != cb->f26AC) {
