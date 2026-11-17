@@ -263,7 +263,7 @@ struct Stats {
     s32 bonus;    // offset 0x18
 };
 
-static inline int NearZero(f32 x) {
+inline int NearZero(f32 x) {
     f64 absValue = __fabs(x);
     f32 value = (f32)absValue;
     return value <= __float_epsilon[0];
@@ -2093,10 +2093,10 @@ void ZoneMaster::DrawRing(const Gate* g, int c) const {
     fn_802C70AC(ringModel, &m, -1, c);
 }
 
-void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* hits) {
+void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* __restrict hits) {
     DrawNextGate();
-    int i = hits->count - 1;
     FixedArray<ZoneVec3, 32> pts;
+    int i = hits->count - 1;
     for (; i >= 0; i--) {
         GateHit* data = hits->data;
         Gate* g;
