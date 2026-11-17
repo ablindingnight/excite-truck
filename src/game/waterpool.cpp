@@ -100,8 +100,25 @@ public:
     s32 tex;         // offset 0x40
 };
 
+// The abstract editing interface. Retail's .data has its vtable (nine empty slots: every member is pure) right
+// after WaterIface's, and nothing refers to it: the compiler emits it because this file once constructed a
+// WaterIface (see WaterCreateEditIface below).
+class IWaterIface {
+public:
+    virtual ~IWaterIface(void) = 0;
+    virtual s32 Name(void) = 0;
+    virtual s32 Data(void) = 0;
+    virtual int Unk14(void) = 0;
+    virtual void Unk18(void) = 0;
+    virtual void Unk1C(void) = 0;
+    virtual void Show(void) = 0;
+    virtual void Hide(void) = 0;
+    virtual u8 Shown(void) = 0;
+};
+inline IWaterIface::~IWaterIface(void) {}
+
 // The water editing interface (only its destructor and accessors survive).
-class WaterIface {
+class WaterIface : public IWaterIface {
 public:
     virtual ~WaterIface(void);
     virtual s32 Name(void) { return name; }
@@ -1068,6 +1085,14 @@ void fn_8029EC64(WaterShallow* s, WaterCar* car, int w) {
 }
 
 }  // extern "C"
+
+// Creates the editing interface. Dead-stripped from the game (no symbol, no code in retail), but it is why
+// the abstract base's vtable is in .data and why Unk14's weak copy comes before Close in .text.
+// Helper name unproven.
+int WaterCreateEditIface(void) {
+    WaterIface* w = new WaterIface;
+    return w->Unk14();
+}
 
 void WaterIface::Close(void) {}
 
