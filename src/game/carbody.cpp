@@ -22,7 +22,7 @@
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 // Helpers unproven (names and existence): variable-first operands and one constant load per vector triple.
 static inline f32 CbMul(f32 a, f32 b) { return a * b; }
-template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; b->x = pos->x + vel->x * kb; a->z = pos->z + vel->z * ka; b->z = pos->z + vel->z * kb; a->y = pos->y + vel->y * ka; b->y = pos->y + vel->y * kb; }
+template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; a->y = pos->y + vel->y * ka; a->z = pos->z + vel->z * ka; b->x = pos->x + vel->x * kb; b->y = pos->y + vel->y * kb; b->z = pos->z + vel->z * kb; }
 static inline f32 CbAdd(f32 a, f32 b) { return a + b; }
 static inline void CbScaleTo(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 
@@ -1387,9 +1387,9 @@ static inline void ObRotateRows(RVec3* out, const f32* m, const f32* v) {
         out->y = y;
         out->z = z;
     } else {
-        out->x = v[2] * m[6] + v[0] * m[0] + v[1] * m[3];
-        out->y = v[2] * m[7] + v[0] * m[1] + v[1] * m[4];
-        out->z = v[2] * m[8] + v[0] * m[2] + v[1] * m[5];
+        out->x = v[0] * m[0] + v[1] * m[3] + v[2] * m[6];
+        out->y = v[0] * m[1] + v[1] * m[4] + v[2] * m[7];
+        out->z = v[0] * m[2] + v[1] * m[5] + v[2] * m[8];
     }
 }
 
