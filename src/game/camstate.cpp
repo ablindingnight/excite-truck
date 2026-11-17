@@ -391,8 +391,13 @@ double sin(double x);
 double cos(double x);
 
 // CamVec: rvec.h's RVec3.
-static inline RVec3 operator*(const CVec3& v, f32 k) { return RVec3(k * v.x, k * v.y, k * v.z); }
-static inline RVec3 operator+(CVec3 a, const RVec3& b) { return RVec3(a.x + b.x, a.y + b.y, a.z + b.z); }
+// Helper name unproven: a point plus an offset, written straight into its destination (retail stores the three sums
+// directly into the frame offset's position; the operator form goes through a temporary).
+static inline void AddInto(RVec3& out, CVec3 a, const RVec3& b) {
+    out.x = a.x + b.x;
+    out.y = a.y + b.y;
+    out.z = a.z + b.z;
+}
 
 struct CamPreset {
     CVec3 off;
@@ -519,12 +524,12 @@ void fn_80275410(const u8* p) {
     u8* car = cr->car;
     const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
     CamPreset c = k;
-    RVec3 off = *(CVec3*)(car + 0x2450) + RVec3(0.8f, 0.65f, -1.75f);
+    CamRotOff f;  // rotation and offset are one 48-byte local, as in fn_802751AC (retail: offset right above the rotation)
+    AddInto(f.pos, *(CVec3*)(car + 0x2450), RVec3(0.8f, 0.65f, -1.75f));
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
-    Mat3 rot;
-    RotFromVec(&rot, c.rot * 0.017453292f);
-    fn_801BFD34((u8*)&cr->pose.pos, &off, (u8*)&cr->carFrame);
-    Mat3Mul((Mat3*)&cr->pose, &rot, (Mat3*)&cr->carFrame);
+    RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
+    fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
+    Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
     f32 fovv = c.fov;
     cr->fov = 0.017453292f * fovv;
 }
@@ -535,12 +540,12 @@ void fn_802756A4(const u8* p) {  // Form unproven: const formal, see fn_80275410
     u8* car = cr->car;
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
     CamPreset c = k;
-    RVec3 off = *(CVec3*)(car + 0x2538) + RVec3(0.85f, 0.9f, 2.0f);
+    CamRotOff f;  // rotation and offset are one 48-byte local, as in fn_802751AC (retail: offset right above the rotation)
+    AddInto(f.pos, *(CVec3*)(car + 0x2538), RVec3(0.85f, 0.9f, 2.0f));
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
-    Mat3 rot;
-    RotFromVec(&rot, c.rot * 0.017453292f);
-    fn_801BFD34((u8*)&cr->pose.pos, &off, (u8*)&cr->carFrame);
-    Mat3Mul((Mat3*)&cr->pose, &rot, (Mat3*)&cr->carFrame);
+    RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
+    fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
+    Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
     f32 fovv = c.fov;
     cr->fov = 0.017453292f * fovv;
 }
