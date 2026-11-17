@@ -805,12 +805,12 @@ void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
             Spark* s = &pts[i];
             Vec p;
             Vec d;
-            f32 yv = s->pos.y;
-            p.x = s->pos.x + s->vel.x * (5.0f * -dt) - prev->origin.x;
-            p.y = yv + s->vel.y * (5.0f * -dt) - prev->origin.y;
             f32 a = invLife * (now - s->t);
             color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
-            p.z = s->pos.z + s->vel.z * (5.0f * -dt) - prev->origin.z;
+            AddScaled(&p, &s->pos, &s->vel, 5.0f * -dt);
+            p.x -= prev->origin.x;
+            p.y -= prev->origin.y;
+            p.z -= prev->origin.z;
             MulVec(&p, &p, (const Vec*)&m);
             p.x = p.x + cam->origin.x;
             p.y = p.y + cam->origin.y;
