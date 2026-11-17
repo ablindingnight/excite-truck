@@ -288,9 +288,9 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
                 hasSpecial = 1;
             }
             AchQuery q;
-            q.a0 = 0;
-            q.a4 = 0;
-            q.a8 = 0;
+            q.category = 0;
+            q.profile = 0;
+            q.total = 0;
             AchievementsQuery(&q);
             VehicleList* list = fn_8025007C(2);
             if (!hadSpecial && hasSpecial) {
@@ -303,7 +303,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
                 const char* why = ShowExtremeUnlockReason();
                 list->SetReason(list->Count() - 1, why);
             }
-            fn_80284580(q.a4, q.a8, list, &x);
+            fn_80284580(q.profile, q.total, list, &x);
             delete list;
             fn_8025A204();
             AchievementsCommitSession();

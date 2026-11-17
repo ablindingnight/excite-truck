@@ -30,11 +30,7 @@ public:
 
 #include "game/vehlist.h"
 
-struct AchQuery {
-    s32 a0;
-    s32 a4;
-    s32 a8;
-};
+#include "game/achquery.h"
 
 const char* GetTrackFriendlyName(const char* name);
 const char* GetEventTypeName(u32 type);

@@ -68,11 +68,7 @@ struct AchStats {
     AchModelStat models[NUM_MODELS];  // offset 0x50
 };
 
-struct AchQuery {
-    s32 category;
-    s32 profile;
-    s32 total;
-};
+#include "game/achquery.h"
 
 ModuleTag lbl_8055D608;
 ValueTable* lbl_8055D610;
