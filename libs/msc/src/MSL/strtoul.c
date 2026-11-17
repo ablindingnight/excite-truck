@@ -282,6 +282,8 @@ unsigned long long __strtoull(int base, int max_width, int (*ReadProc)(void*, in
     return value;
 }
 
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (strtoul: in the original source, stripped by the retail linker; the port does not need it either). */
+#if 0
 unsigned long strtoul(const char* str, char** end, int base) {
     unsigned long uvalue;
     long svalue;
@@ -306,8 +308,11 @@ unsigned long strtoul(const char* str, char** end, int base) {
 
     return svalue;
 }
+#endif
 
-long strtol(const char* str, char** end, int base) {
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (strtol: retail inlines it into atoi and strips the
+   standalone copy; inline keeps the atoi expansion without emitting it). The port needs it extern again (dwc calls it). */
+inline long strtol(const char* str, char** end, int base) {
     unsigned long uvalue;
     long svalue;
     int count, negative, overflow;
