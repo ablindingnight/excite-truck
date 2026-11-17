@@ -311,19 +311,7 @@ struct ObjInfo {
     ValMatrix mtx;  // offset 0x14
 };
 
-struct ObjTeleport {
-    ObjTeleport(void) {
-        b30 = 0;
-        valid = 0;
-        radius = 80.0f;
-    }
-    ~ObjTeleport(void) {}
-    ValMatrix mtx;  // offset 0x0
-    u8 b30;         // offset 0x30
-    u8 valid;       // offset 0x31
-    u8 pad32[2];
-    f32 radius;     // offset 0x34
-};
+#include "game/objteleport.h"
 
 struct Race;
 

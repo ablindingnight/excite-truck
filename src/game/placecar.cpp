@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/objteleport.h"
 #include "game/pathset.h"
 #include "game/deity.h"
 #include "game/idealline.h"
@@ -34,16 +35,6 @@ struct GroundInfo {
 };
 
 // Respawn, CarPlace: game/respawn.h.
-struct ObjTeleport {
-    u8 pad0[0x18];
-    f32 dx;  // offset 0x18
-    u8 pad1C[4];
-    f32 dz;  // offset 0x20
-    f32 x;   // offset 0x24
-    u8 pad28[4];
-    f32 z;   // offset 0x2C
-};
-
 extern "C" {
 void* memset(void* p, int c, u32 n);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
@@ -312,10 +303,10 @@ void fn_801B8054(CarPlace* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC
 void fn_801B8060(CarPlace* r, const ObjTeleport* t) {
     V2 pos;
     V2 dir;
-    pos.x = t->x;
-    pos.y = t->z;
-    dir.x = t->dx;
-    dir.y = t->dz;
+    pos.x = t->mtx.origin.x;
+    pos.y = t->mtx.origin.z;
+    dir.x = t->mtx.basis[2].x;
+    dir.y = t->mtx.basis[2].z;
     f32 inv = 1.0f / MaxF(0.01f, (f32)sqrt(dir.x * dir.x + dir.y * dir.y));
     dir.x *= inv;
     dir.y *= inv;
