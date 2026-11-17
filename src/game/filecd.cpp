@@ -21,7 +21,10 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 void fn_80127464(void);  // idle while waiting
 }
 
-class File {
+// The file interface: all pure apart from the empty destructor. MATCHING-AID (novtable, plausible original): no
+// File table exists in retail (no symbol in any unit; FileCD's destructor stores no base vptr), and without novtable
+// this unit emits a dead weak __vt__4File the linker strips (objdiff .data 93.67). Same reading as chalpath PathNode.
+class __declspec(novtable) File {
 public:
     virtual s32 Read(void* dst, s32 len) = 0;
     virtual s32 Write(const void* src, s32 len) = 0;
