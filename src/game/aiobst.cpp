@@ -148,7 +148,7 @@ DynArray<Obst*>* lbl_8055E2A0;  // per segment: the first obstacle at or after i
 extern const BinMeasure kWidth;
 extern const f32 kBin;
 extern const BinMeasure kGap;
-f32 lbl_8055E2A4 = kWidth.value * kBin;               // bin width
+extern const f32 lbl_8055E2A4 = kWidth.value * kBin;  // bin width (const: its reads are loop-invariant, fn_8015F848)
 s32 lbl_8055E2A8 = (s32)(64.0f * (kGap.value / kWidth.value)) + 1;  // bins a car needs
 
 static inline const char* Plural(int n) { return n == 1 ? "" : "s"; }
@@ -414,19 +414,20 @@ int fn_8015F848(ObstBin* bins, f32 range) {
     f32 d;
     int i;
     int last = -1;
-    f32 bw = lbl_8055E2A4;
     for (i = 0; i < 64; i++) {
         d = bins[i].dist;
         if (d < range) {
-            if (last > 0 && range / 2.0f > (f32)__fabs(bins[last].dist - d) &&
-                bw * (f32)(i - last) < kGap.value) {
-                ObstBin* a = &bins[last];
-                ObstBin* b = &bins[i];
-                for (; last <= i; last++) {
-                    const f32 distance = b->dist;
-                    d = a->dist;
-                    d = d < distance ? d : distance;
-                    bins[last].dist = d;
+            if (last > 0) {
+                f32 half = range / 2.0f;
+                if ((f32)__fabs(bins[last].dist - d) < half && lbl_8055E2A4 * (f32)(i - last) < kGap.value) {
+                    ObstBin* a = &bins[last];
+                    ObstBin* b = &bins[i];
+                    for (; last <= i; last++) {
+                        const f32 distance = b->dist;
+                        d = a->dist;
+                        d = d < distance ? d : distance;
+                        bins[last].dist = d;
+                    }
                 }
             }
             last = i;
