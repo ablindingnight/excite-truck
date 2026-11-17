@@ -7,6 +7,7 @@
 // (Window, Widget, MenuState) before the PC port. Tricks are tagged MATCHING-AID.
 
 #include <types.h>
+#include "game/gart.h"
 #include "game/menustate.h"
 #include "game/uilists.h"
 #include "game/menu.h"
@@ -94,13 +95,13 @@ extern "C" void* fn_8021165C(int dir, int set) {
     return fn_80215270(dir, set);
 }
 
-extern "C" s32 lbl_8055EF1C;
-extern "C" s32 lbl_8055EF20;
+extern "C" gArtSet* lbl_8055EF1C;
+extern "C" gArtSet* lbl_8055EF20;
 // The lite-mode blinker art (0 = left, else right).
 // Plain two-return form: the target has no bnelr fold here, which only optimization_level 0 reproduces.
 #pragma push
 #pragma optimization_level 0
-s32 fn_80211660(s32 arg0) {
+gArtSet* fn_80211660(s32 arg0) {
     if (arg0 == 0) {
         return lbl_8055EF1C;
     } else {
@@ -169,7 +170,6 @@ extern "C" void fn_8022D2BC(void*, int);
 extern "C" void fn_8021676C(void);
 extern "C" void fn_8022A7D0(void);
 extern "C" void fn_8020A550(void);
-extern "C" void fn_80235380(s32);
 extern "C" void fn_802C519C(void*);
 extern "C" void fn_80238920(void);
 extern "C" void fn_8012BF24(const char*);
@@ -182,7 +182,6 @@ extern "C" void fn_8012BEF0(const char*);
 extern "C" void fn_8020A47C(void);
 extern "C" void fn_8023889C(void);
 extern "C" void* gxGetImage(const char*);
-extern "C" s32 fn_8023512C(const char*);
 extern "C" void fn_8022A5E4(void);
 extern "C" void fn_80216710(void);
 extern "C" void* fn_8022D228(void*, int, int);
@@ -2317,8 +2316,8 @@ s32 (*lbl_8055EF0C)(s32 *);
 float lbl_8055EF10;
 int lbl_8055EF14;
 int lbl_8055EF18;
-s32 lbl_8055EF1C;
-s32 lbl_8055EF20;
+gArtSet* lbl_8055EF1C;
+gArtSet* lbl_8055EF20;
 void* lbl_8055EF24;
 void* lbl_8055EF28;
 UITable* lbl_8055EF2C;

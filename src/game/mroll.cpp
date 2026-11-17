@@ -3,6 +3,7 @@
 // and the list selection state. Written against raw field offsets; the large routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/gamedb.h"
 
 // Stat level thresholds (defined first: its .rodata precedes the unit's initialiser templates).
@@ -35,9 +36,7 @@ public:
 };
 
 extern "C" {
-void fn_80235380(u8* p);
 void fn_802E317C(const char* fmt, ...);
-u8* fn_8023512C(const char* name);
 int fn_802E4A10(void);
 void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
@@ -248,7 +247,7 @@ public:
     CarUIScreen* screen;   // offset 0x38
     s32 slot;              // offset 0x3C
     u8 pad40[0x4];
-    u8* art;               // offset 0x44
+    gArtSet* art;            // offset 0x44
     s32 time;              // offset 0x48, ms when the slide started
     f32 pos;               // offset 0x4C
     f32 target;            // offset 0x50
@@ -923,13 +922,8 @@ int ColorPick::Key(int key) {
 }
 
 }  // extern "C"
-u8* fn_80211660(long i);
+gArtSet* fn_80211660(long i);  // uiapi.cpp: the lite-mode blinker art
 extern "C" {
-void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
-void fn_80235758(u8* art, int part, f32 x, f32 y, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
-f32 fn_80235F64(u8* art, int part);
-f32 fn_80235EF0(u8* art, int part);
-void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
 void fn_8022BD40(int font, f32 x, f32 y, f32 z, f32 w, f32 h, f32 scale, const char* text, int a, int b);
 extern const f32 lbl_80563780;  // 3.5 swatches across
 extern const f32 lbl_80563784;  // 0.5
@@ -993,14 +987,14 @@ void ColorPick::Draw(void) {
         }
         if (this->vf0C()) {
             if (this->color > 0) {
-                u8* art = fn_80211660(0);
+                gArtSet* art = fn_80211660(0);
                 f32 ah = fn_80235F64(art, 1);
                 f32 ay = y - HalfF(h - ah);
                 f32 gap = lbl_80563794 + this->leftFlash;
                 fn_802353F4(art, 1, x - fn_80235EF0(art, 1) - gap, ay, lbl_80563758);
             }
             if (this->color < this->vehicle->num_colors - 1) {
-                u8* art = fn_80211660(1);
+                gArtSet* art = fn_80211660(1);
                 f32 ay = y - HalfF(h - fn_80235F64(art, 1));
                 fn_802353F4(art, 1, lbl_80563794 + this->rightFlash + (x + w), ay,
                             lbl_80563758);
