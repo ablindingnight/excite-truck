@@ -172,6 +172,12 @@ void SafeDeleteArray(T*& p) {
     }
 }
 
+// The road texture matrix: world x/z (2048 units) to texture u/v around the centre.
+static inline void LoadRoadTexMtx(void) {
+    f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
+    fn_802D3D94(2, m);
+}
+
 namespace {
 
 extern const char kRoadInhibitsSkags[];
@@ -985,8 +991,7 @@ void fn_802BB0FC(void* verts, int nverts) {
                 fn_802DC278();
                 fn_802CADD0(te->tex, 1);
                 fn_802CADD0(fn_802C21B8(), 2);
-                f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
-                fn_802D3D94(2, m);
+                LoadRoadTexMtx();
                 it = DrawEntryStrips(it, te, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
@@ -1056,8 +1061,7 @@ void fn_802BB3B8(void* verts, int nverts) {
                 fn_802DC278();
                 fn_802CADD0(te->tex, 1);
                 fn_802CADD0(fn_802C21B8(), 2);
-                f32 m[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
-                fn_802D3D94(2, m);
+                LoadRoadTexMtx();
                 it = DrawEntryStrips(it, te, verts, nverts);
                 fn_802CADD0(-1, 1);
                 fn_802CADD0(-1, 2);
