@@ -2,11 +2,8 @@
 // constructor, 5 empty functions and its statics. Names are guesses.
 #include "game/common.h"
 
-// Constructor of the car light sets in carlights.cpp.
-class LightSet {
-public:
-    LightSet(void);
-};
+// Constructor of the car light sets (game/carlights.h).
+#include "game/carlights.h"
 
 LightSet::LightSet(void) {}
 

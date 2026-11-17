@@ -9,13 +9,14 @@ struct LightPreset {
     f32 d;     // offset 0x1C
 };
 
-struct LightSet {
+/* Helper name unproven */
+struct LightPresetSet {  // not carlights.h's LightSet
     u8 on;                  // offset 0x0
     u8 pad1[0x1F];
     LightPreset preset[4];  // offset 0x20
 };
 
-LightSet lbl_804A16E8[4];
+LightPresetSet lbl_804A16E8[4];
 ModuleTag lbl_8055F5F8;
 
 extern "C" {
@@ -32,7 +33,7 @@ void fn_80279370(void) {
 void fn_802793AC(void) {}
 
 void fn_802793B0(int i) {
-    LightSet* s = &lbl_804A16E8[i];
+    LightPresetSet* s = &lbl_804A16E8[i];
     int k;
     s->on = 0;
     for (k = 0; k < 4; k++) {

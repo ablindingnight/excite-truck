@@ -3,6 +3,7 @@
 // apart from the node names and value keys.
 #include "game/common.h"
 #include "game/vecmatrix.h"
+#include "game/carlights.h"
 #include "game/weather.h"
 #include "macros.h"
 #include <revolution/MTX.h>
@@ -16,26 +17,6 @@ struct LightCar {
     u32 flags;  // offset 0x68
 };
 
-// Unit-local (port ODR: other units define a different Light).
-namespace {
-struct Light {
-    const VecMatrix* frame;  // offset 0x0
-    Vec off;                  // offset 0x4
-    f32 h;                    // offset 0x10
-    f32 w;                    // offset 0x14
-    u8 r;                     // offset 0x18
-    u8 g;                     // offset 0x19
-    u8 b;                     // offset 0x1A
-    s32 type;                 // offset 0x1C
-};
-}  // namespace
-
-class LightSet {
-public:
-    LightSet(void);
-    Light lights[12];  // offset 0x0
-    s32 count;         // offset 0x180
-};
 
 struct LightVtx {
     Vec pos;    // offset 0x0
@@ -229,7 +210,7 @@ void fn_80294ED4(void) {
     LightCar* car;
     int i;
     int j;
-    Light* l;
+    CarLight* l;
     fn_802C8BD0(lbl_8055C990);
     LightSet* s = lbl_804B42F0;
     for (i = 0; i < fn_80287B14(); i++, s++) {
@@ -291,7 +272,7 @@ void fn_80294ED4(void) {
         if (j >= s->count) {
             continue;
         }
-        Light* l = s->lights;
+        CarLight* l = s->lights;
         for (; j < s->count; l++, j++) {
             Vec p;
             MulVec(&p, &l->frame->origin, car->axes);
@@ -319,7 +300,7 @@ void fn_80294ED4(void) {
 }
 
 void fn_80295C70(LightSet* s, const VecMatrix* frame, const Vec* off, f32 w, f32 h, u32 color, s32 type) {
-    Light* l = &s->lights[s->count];
+    CarLight* l = &s->lights[s->count];
     l->frame = frame;
     l->off = *off;
     l->h = h;
