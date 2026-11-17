@@ -12,6 +12,7 @@
 #include "game/gamedb.h"
 #include "game/highscore.h"
 #include "game/gart.h"
+#include "game/strcopy.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -209,17 +210,6 @@ struct HandlerVec {
     s32 cap;             // offset 0x8
 };
 
-static inline void StrCopyN(char* d, int n, const char* s) {
-    char* p = d;
-    int k = n;
-    const char* q = s;
-    while ((*p++ = *q++) != 0) {
-        if (--k <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 // A fixed-size string; new ones read "zzz" until they are filled in.
 template <int N>
@@ -228,7 +218,7 @@ struct FixedStr {
         memset(s, 'z', 3);
         s[3] = 0;
     }
-    void Set(const char* t) { StrCopyN(s, N, t); }
+    void Set(const char* t) { SafeStrCopy(s, t, N); }
     char s[N];
 };
 
