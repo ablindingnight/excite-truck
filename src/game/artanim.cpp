@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "macros.h"
+#include "game/strcopy.h"
 
 void* operator new(size_t size, const char* name);
 void* operator new[](size_t size, const char* name);
@@ -179,16 +180,6 @@ void fn_802E30C8(const char* fmt, ...);
 extern f32 lbl_8055E3C8;  // race clock
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(const char* src, int n, char* dst) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 ModuleTag lbl_8055F930;
 UnkStatic7F lbl_8055F938;
@@ -322,7 +313,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ArtAnim* a = new ("artanim") ArtAnim;
     memset(a, 0, sizeof(ArtAnim));
     a->refs = 1;
-    CopyName(name, 0x18, a->name);
+    SafeStrCopy(a->name, name, 0x18);
     ValueTable* t = fn_80131808(name);
     ValueNode* named = t->HasChild("named_times") ? t->FindChild("named_times") : 0;
     int nPaths = 0;
