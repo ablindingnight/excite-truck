@@ -2241,9 +2241,12 @@ inline void RingChalMaster::vf0C(void) {
                     StrCopyN(results.bC6, "", 0x14);
                 }
                 {
-                    int tb = (int)arena.timer.t;
+                    // Two casts of the time, the grade's first: every cast owns its own conversion slot, handed out in
+                    // source order, and retail reads the grade's from the lower one (FACTS 2026-11-17 12:50).
+                    int gradeSecs = (int)arena.timer.t;
+                    int secs = (int)arena.timer.t;
                     int total = arena.f30;
-                    fn_801CB5DC(i, total + tb, fn_801609C4(total + (int)arena.timer.t));
+                    fn_801CB5DC(i, total + secs, fn_801609C4(total + gradeSecs));
                 }
                 fn_801CB648(i, 1, arena.timer.t);
                 b9C = 0;
