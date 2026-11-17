@@ -718,8 +718,6 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
             int last = b->n - 1;
             f32 t;
             V2 dir;
-            V2 nrm;
-            V2 base;
             f32 inv;
             int c;
             s32* rt;
@@ -735,28 +733,26 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
             }
             dir.x = seg[1].x - seg[0].x;
             dir.y = seg[1].y - seg[0].y;
-            {
-                V2 perp = dir;
-                f32 x = perp.x;
-                f32 zv = perp.y;
-                perp.x = zv;
-                perp.y = -x;
-                inv = 1.0f / (f32)sqrt(Len2(perp.x, perp.y));
-                perp.x *= inv;
-                base.x = seg[0].x + dir.x * t;
-                f32 z2 = dir.y;
-                perp.y *= inv;
-                base.y = seg[0].y + z2 * t;
-                nrm = perp;
-            }
+            // The unit normal of the segment. Retail has dir, perp and base on the stack and no third vector; perp is
+            // copy-initialised from dir (an 8-byte lfd/stfd move).
+            V2 perp = dir;
+            V2 base;
+            f32 x = perp.x;
+            perp.x = perp.y;
+            perp.y = -x;
+            inv = 1.0f / (f32)sqrt(Len2(perp.x, perp.y));
+            perp.x *= inv;
+            perp.y *= inv;
+            base.x = seg[0].x + dir.x * t;
+            base.y = seg[0].y + dir.y * t;
             rt = rainbowTypes.t;
             for (c = 0; c < count; c++) {
                 f32 half = 0.5f;
                 f32 off = params[2] * (half + ((f32)c - half * (f32)count));
                 V2 p;
                 int ty;
-                p.y = base.y + nrm.y * off;
-                p.x = base.x + nrm.x * off;
+                p.x = base.x + perp.x * off;
+                p.y = base.y + perp.y * off;
                 if (rainbow) {
                     ty = *rt;
                 } else {
