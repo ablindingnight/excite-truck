@@ -1402,9 +1402,9 @@ static inline void ObRotateRows(RVec3* out, const f32* m, const f32* v) {
         out->y = y;
         out->z = z;
     } else {
-        out->x = v[0] * m[0] + v[1] * m[3] + v[2] * m[6];
-        out->y = v[0] * m[1] + v[1] * m[4] + v[2] * m[7];
-        out->z = v[0] * m[2] + v[1] * m[5] + v[2] * m[8];
+        out->x = v[1] * m[3] + v[0] * m[0] + v[2] * m[6];
+        out->y = v[1] * m[4] + v[0] * m[1] + v[2] * m[7];
+        out->z = v[1] * m[5] + v[0] * m[2] + v[2] * m[8];
     }
 }
 
@@ -1953,8 +1953,8 @@ void fn_80183E7C(u8* p) {
         RVec3 front;
         front.x = cb->mtx.pos.x + cb->mtx.rot.z.x * 2.0f;
         front.y = cb->mtx.pos.y + cb->mtx.rot.z.y * 2.0f;
-        f32 df = Ramp(front.y, surf, surf - 0.4f);
         front.z = cb->mtx.pos.z + cb->mtx.rot.z.z * 2.0f;
+        f32 df = Ramp(front.y, surf, surf - 0.4f);
         f32 tf = Clamp01((cb->f25C4 - 0.0f) / 0.3f);
         RVec3 ff;
         ff.x = 0.0f;
@@ -1965,8 +1965,8 @@ void fn_80183E7C(u8* p) {
         RVec3 back;
         back.x = cb->mtx.pos.x + cb->mtx.rot.z.x * -2.0f;
         back.y = cb->mtx.pos.y + cb->mtx.rot.z.y * -2.0f;
-        f32 db = Ramp(back.y, surf, surf - 0.4f);
         back.z = cb->mtx.pos.z + cb->mtx.rot.z.z * -2.0f;
+        f32 db = Ramp(back.y, surf, surf - 0.4f);
         f32 tb = Clamp01((cb->f25C4 - 0.2f) / 0.6f);
         RVec3 fb;
         fb.x = 0.0f;
