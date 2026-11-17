@@ -23,7 +23,7 @@
 template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; a->y = pos->y + vel->y * ka; a->z = pos->z + vel->z * ka; b->x = pos->x + vel->x * kb; b->y = pos->y + vel->y * kb; b->z = pos->z + vel->z * kb; }
 static inline f32 CbAdd(f32 a, f32 b) { return a + b; }
 /* Helper name unproven */
-template <class O, class V> static inline void CbSpring3(O* o, const V* x, f32 ks, const V* v, f32 kd) { o->x = x->x * ks + v->x * kd; o->y = x->y * ks + v->y * kd; o->z = x->z * ks + v->z * kd; }
+template <class O, class V> static inline void CbSpring3(O* o, const V* x, f32 ks, const V* v, f32 kd) { f32 ax = x->x * ks; f32 ay = x->y * ks; f32 az = x->z * ks; o->x = ax + v->x * kd; o->y = ay + v->y * kd; o->z = az + v->z * kd; }
 static inline void CbScaleTo(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
