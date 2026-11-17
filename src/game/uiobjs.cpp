@@ -5,6 +5,7 @@
 #include "game/gart.h"
 #include "game/sound.h"
 #include "game/arrayref.h"
+#include "game/strcopy.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -29,16 +30,6 @@ struct FixedArr : ArrayRef<T> {
 static inline BOOL NameEq(const char* a, const char* b) { return strcasecmp(a, b) == 0; }
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(char* dst, const char* src, int n) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 struct TextStyle {
     TextStyle(const char* file) {
@@ -152,21 +143,21 @@ UIObjectsImpl::~UIObjectsImpl(void) {
 
 void UIObjectsImpl::AddImage(const char* name, const char* file, int frame) {
     UIImage* e = &images.data[images.count++];
-    CopyName(e->name, name, 0x20);
-    CopyName(e->file, file, 0x20);
+    SafeStrCopy(e->name, name, 0x20);
+    SafeStrCopy(e->file, file, 0x20);
     e->img = fn_8023512C(file);
     e->frame = frame;
 }
 
 void UIObjectsImpl::AddFont(const char* name, const char* file) {
     UIFont* e = &fonts.data[fonts.count++];
-    CopyName(e->name, name, 0x20);
+    SafeStrCopy(e->name, name, 0x20);
     e->style = new ("gText") TextStyle(file);
 }
 
 void UIObjectsImpl::AddSound(const char* name, const char* file, u8 loop) {
     UISound* e = &sounds.data[sounds.count++];
-    CopyName(e->name, name, 0x20);
+    SafeStrCopy(e->name, name, 0x20);
     e->snd = fn_80207848(file, 0);
     e->volume = 1.0f;
     e->loop = loop;
