@@ -822,14 +822,16 @@ void fn_8029DDB8(WaterPool* p) {
     f32 c = 4.5f * (1.0f - p->desc.rate) * fn_801E7E24();
     c = c * c;
     f32 a = 2.0f - 4.0f * c;
+    int cellOffset;
     for (int y = 1; y < p->ny - 1; y++) {
         for (int x = 1; x < p->nx - 1; x++) {
             int i = x + y * p->nx;
             s16* h = p->cur;
             s16* o = p->prev;
+            cellOffset = i * (int)sizeof(s16);
             const s16* center = &h[i];
-            const s16 previous = o[i];
-            const s16 height = h[i];
+            const s16 previous = *(s16*)((u8*)o + cellOffset);
+            const s16 height = *center;
             const s16 right = center[1];
             const s16 left = center[-1];
             const s16 belowHeight = h[x + (y + 1) * p->nx];
@@ -837,7 +839,7 @@ void fn_8029DDB8(WaterPool* p) {
             int sum = aboveHeight + left + right + belowHeight;
             f32 f = damp * (a * height + c * sum - previous);
             int v = MAX((int)f, -32768);
-            o[i] = MIN(v, 32767);
+            *(s16*)((u8*)o + cellOffset) = MIN(v, 32767);
         }
     }
     s16* t = p->prev;
