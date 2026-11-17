@@ -480,10 +480,7 @@ f32 fn_802715F0(u8* p) {
 
 }  // extern "C"
 
-// A camera frame copied as 12 words (rotation rows + position).
-struct Words12 {
-    u32 w[12];
-};
+#include "game/words12.h"
 // CamFrame: common.h's PlainValMatrix.
 extern "C" {
 void fn_802704D4(int to, u8* cam);

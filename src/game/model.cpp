@@ -20,11 +20,7 @@ struct MSphere {
     f32 r;    // offset 0xC
 };
 
-struct MMtx33 {
-    f32 xx, xy, xz;
-    f32 yx, yy, yz;
-    f32 zx, zy, zz;
-};
+#include "game/mmtx33.h"
 
 struct MFrame {
     MMtx33 r;  // offset 0x0

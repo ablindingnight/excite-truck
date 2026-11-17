@@ -21,9 +21,7 @@
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-struct PVec3A {
-    f32 v[3];
-};
+#include "game/pvec3a.h"
 
 // o = c + d * k
 // Helpers unproven (names and existence): one constant load for three products, variable-first operands.

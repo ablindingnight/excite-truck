@@ -22,9 +22,7 @@ public:
     virtual ~VD(void);
 };
 
-struct Words12 {
-    u32 w[12];
-};
+#include "game/words12.h"
 
 class CenterLine;
 

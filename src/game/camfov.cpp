@@ -351,10 +351,7 @@ int fn_8026F408(int n) { return n <= 8; }
 extern f32 __float_epsilon[];  // FLT_EPSILON
 int fn_801EA03C(const s16* hint, f32* pos);
 
-// A vector copied as words (the original's struct copies of these move lwz/stw pairs).
-struct PVec3A {
-    f32 v[3];
-};
+#include "game/pvec3a.h"
 
 // A camera frame's rows (right, up, view axis) without its position.
 struct CamAxes {
