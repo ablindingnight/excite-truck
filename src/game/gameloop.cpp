@@ -82,7 +82,7 @@ void fn_80238920(void);
 void fn_801E7DEC(RaceSetup* rs);
 void fn_8017685C(int unk);
 void fn_801AF6FC(void);
-void fn_801AF92C(RaceResult* res);
+void fn_801AF92C(RaceStandings* res);
 CarInfo* fn_801EA9A0(int index);
 int fn_80231504(int unk);
 void fn_801DF110(void);
@@ -471,7 +471,7 @@ void fn_8000B09C(RaceSetup* rs) {
     fn_801E7DEC(rs);
 }
 
-void gameloop_postrace(RaceResult* res) {
+void gameloop_postrace(RaceStandings* res) {
     RaceResultEntry* e;
     int i;
     fn_8017685C(1);
@@ -873,7 +873,7 @@ void fn_8000BF20(RaceSetup* rs, GameListener* listener) {
     int intro = fn_80204024();
     int maxFrames;
     int frames;
-    RaceResult result;
+    RaceStandings result;
 
     gameloop_begin(rs);
     fn_80176780(0x1200, 0);

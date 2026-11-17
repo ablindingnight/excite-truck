@@ -24,11 +24,11 @@ struct GameDoSetup : RaceSetup {
 class ResultListener : public GameListener {
 public:
     virtual void Begin(void) {}
-    virtual void End(RaceResult* r) { result = *r; }
+    virtual void End(RaceStandings* r) { result = *r; }
     virtual void Finish(void) {}
     virtual ~ResultListener(void) {}
 
-    RaceResult result;  // offset 0x4
+    RaceStandings result;  // offset 0x4
 };
 
 // A screen run between head-to-head races.
@@ -156,7 +156,7 @@ void fn_8023B8AC(GameDoSetup* rs) {
     fn_8020A600();
 }
 
-void fn_8023B904(GameDoSetup* rs, RaceResult* out, int skip) {
+void fn_8023B904(GameDoSetup* rs, RaceStandings* out, int skip) {
     if (!skip) {
         ResultListener listener;
         fn_8000BF20(rs, &listener);
@@ -168,7 +168,7 @@ void fn_8023B904(GameDoSetup* rs, RaceResult* out, int skip) {
     }
 }
 
-void fn_8023B9EC(int track, int eve, RaceResult* out, int difficulty, int skip) {
+void fn_8023B9EC(int track, int eve, RaceStandings* out, int difficulty, int skip) {
     int paused = fn_802ECEEC();
     if (paused) {
         fn_802ECEC0();
@@ -245,7 +245,7 @@ void fn_8023BCEC(void) {
             u8 skip = lbl_8055F291;
             SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
             SetPlayer(0, id, vehicle, color);
-            RaceResult result;
+            RaceStandings result;
             fn_8023B9EC(track, eve, &result, difficulty, skip);
             fn_80137C80(0);
         }
@@ -278,9 +278,9 @@ void fn_8023BE38(const char* name, int headToHead) {
 
 void fn_8023BEA8(void) { fn_8023BE38("GameDoHeadToHead", 1); }
 
-void fn_8023BEB8(int track, int eve, RaceResult* out) { fn_8023B9EC(track, eve, out, 0, 0); }
+void fn_8023BEB8(int track, int eve, RaceStandings* out) { fn_8023B9EC(track, eve, out, 0, 0); }
 
-void fn_8023BEC4(int index, RaceResult* out) {
+void fn_8023BEC4(int index, RaceStandings* out) {
     s32 track = GetEvent(index)->track;
     int eve = -1;
     int i = GetTrack(track)->events;
@@ -296,7 +296,7 @@ struct EventStart {
     int track;
     int eve;
     int difficulty;
-    RaceResult* out;
+    RaceStandings* out;
 };
 
 void fn_8023BF4C(EventStart* s) { fn_8023B9EC(s->track, s->eve, s->out, s->difficulty, 0); }
