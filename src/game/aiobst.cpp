@@ -70,12 +70,6 @@ struct Frame {
 };
 
 
-struct TrackSample {
-    IdealPoint* seg;  // offset 0x0
-    f32 t;     // offset 0x4
-    s32 mode;  // offset 0x8
-};
-
 class TrackPosOwner {
 public:
     virtual void vf08(void);
@@ -102,7 +96,7 @@ struct TrackObj {
 
 extern "C" {
 IdealFollower* fn_80178C9C(void);
-TrackSample fn_80136594(IdealFollower* trk, const Vec2* xz);  // idealline: returns the ILPos by value
+ILPos fn_80136594(IdealFollower* trk, const Vec2* xz);  // idealline: returns the ILPos by value
 int fn_80179650(void);
 int fn_80179630(int view);
 RaceCarRec* fn_8017960C(int id);
@@ -160,7 +154,7 @@ static inline const char* Plural(int n) { return n == 1 ? "" : "s"; }
 extern "C" {
 
 void fn_8015EC50(Obst* o, IdealFollower* trk) {
-    const TrackSample& ts = fn_80136594(trk, &o->pos);
+    const ILPos& ts = fn_80136594(trk, &o->pos);
     o->seg = ts.seg - trk->line->points;
 }
 
@@ -403,7 +397,7 @@ extern const f32 kBin = 0.015625f;
 extern const BinMeasure kGap = {3.2889998f};  // the gap a car fits through
 
 
-struct Bin {
+struct ObstBin {
     f32 dist;  // offset 0x0
     s32 type;  // offset 0x4
 };
@@ -414,7 +408,7 @@ static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 
 #pragma push
 #pragma opt_lifetimes off  /* Setting unproven: recovers the fill-loop register reuse. */
-int fn_8015F848(Bin* bins, f32 range) {
+int fn_8015F848(ObstBin* bins, f32 range) {
     f32 d;
     int i;
     int last = -1;
@@ -424,8 +418,8 @@ int fn_8015F848(Bin* bins, f32 range) {
         if (d < range) {
             if (last > 0 && range / 2.0f > (f32)__fabs(bins[last].dist - d) &&
                 bw * (f32)(i - last) < kGap.value) {
-                Bin* a = &bins[last];
-                Bin* b = &bins[i];
+                ObstBin* a = &bins[last];
+                ObstBin* b = &bins[i];
                 for (; last <= i; last++) {
                     const f32 distance = b->dist;
                     d = a->dist;
@@ -440,10 +434,10 @@ int fn_8015F848(Bin* bins, f32 range) {
 }
 #pragma pop
 
-static inline f32 WinMin(Bin* bins, f32 x) {  /* Helper name unproven */
+static inline f32 WinMin(ObstBin* bins, f32 x) {  /* Helper name unproven */
     int n = lbl_8055E2A8 / 2 + 1;
     int i;
-    Bin* b;
+    ObstBin* b;
     for (i = 0, b = bins; i < n; b++, i++) {
         x = MIN(x, b[32].dist);
         x = MIN(x, bins[32 - i].dist);
@@ -451,7 +445,7 @@ static inline f32 WinMin(Bin* bins, f32 x) {  /* Helper name unproven */
     return x;
 }
 
-f32 fn_8015F92C(Bin* bins, f32 x) {
+f32 fn_8015F92C(ObstBin* bins, f32 x) {
     int i;
     x = WinMin(bins, x);
     for (i = 0; i < 64; i++) {
@@ -460,7 +454,7 @@ f32 fn_8015F92C(Bin* bins, f32 x) {
     return x;
 }
 
-int fn_8015FA44(Bin* bins, int i, f32 range) {
+int fn_8015FA44(ObstBin* bins, int i, f32 range) {
     int r = -1;
     if (bins[i].type != 1) {
         int j;
@@ -480,7 +474,7 @@ int fn_8015FA44(Bin* bins, int i, f32 range) {
     return r;
 }
 
-int fn_8015FAB8(Bin* bins, int i, f32 range) {
+int fn_8015FAB8(ObstBin* bins, int i, f32 range) {
     int r = -1;
     if (bins[i].type != 2) {
         int j;
@@ -601,7 +595,7 @@ struct Bins {
             }
         }
     }
-    Bin bins[64];
+    ObstBin bins[64];
 };
 
 // Spot: game/spot.h. Its From is defined here (retail's one copy, called by aiobst, ball and boostman).
@@ -675,7 +669,7 @@ int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
             if (flatten) {
                 int off = 0;
                 for (i = 0; i < 64; i++, off += sizeof(bins.bins[0])) {
-                    Bin* bn = (Bin*)((u8*)bins.bins + off);
+                    ObstBin* bn = (ObstBin*)((u8*)bins.bins + off);
                     bn->dist = bn->dist >= range ? nearest : range;
                 }
             }
