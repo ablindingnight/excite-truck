@@ -13,31 +13,9 @@
 
 extern RaceCarRec* lbl_804348E8[];
 
-// The HUD's stunt pop-up (StuntEvent in betarace) and a results line share these slots.
-class StuntText {
-public:
-    virtual ~StuntText(void);
-    virtual void Text0(const char* fmt, ...);  // 0x0C
-    virtual void Text1(const char* fmt, ...);  // 0x10
-    virtual void Text2(const char* fmt, ...);  // 0x14
-    virtual void SetValue(f32 v);              // 0x18
-    virtual void SetPoints(s32 p);             // 0x1C
-    virtual void SetType(s32 t);               // 0x20
-    virtual void Stop(void);                   // 0x24
-    virtual void SetReady(u8 r);               // 0x28
-};
-
-class StuntHud {
-public:
-    virtual ~StuntHud(void);
-    virtual StuntText* Alloc(void);  // 0x0C
-};
-
-class StuntList {
-public:
-    virtual ~StuntList(void);
-    virtual StuntText* Add(void);  // 0x0C
-};
+// The HUD's stunt pop-up and a results line (StuntDisplay), and what hands them out (StuntFactory: the HUD,
+// the results list).
+#include "game/stuntdisp.h"
 
 // Something told about every awarded stunt (achievements, statistics).
 class StuntWatcher {
@@ -172,7 +150,7 @@ public:
     virtual void Crash(const RaceCarRec* rc) = 0;       // 0x3C
     virtual int Pending(f32* out) const { return 0; }   // 0x40
     virtual int Count(void) const { return 0; }         // 0x44
-    virtual void Fill(StuntList* l) const = 0;          // 0x48
+    virtual void Fill(StuntFactory* l) const = 0;          // 0x48
 };
 
 struct Rank {
@@ -226,7 +204,7 @@ struct CountSound;
 namespace {
 class Tracker : public Meter {
 public:
-    Tracker(StuntHud* h, int c) {
+    Tracker(StuntFactory* h, int c) {
         ranks.a.count = 0;
         car = c;
         hud = h;
@@ -349,16 +327,16 @@ public:
         }
         fn_802E30C8("Total count: %d (%d unscored) (%.0f points)", count, count - scored, total);
     }
-    virtual void Fill(StuntList* l) const {
+    virtual void Fill(StuntFactory* l) const {
         int n = 0;
         struct {
             int i;
         } rank;
-        StuntText* line;
+        StuntDisplay* line;
         for (rank.i = 0; rank.i < ranks.a.count; rank.i++) {
             n += ranks.a.data[rank.i].scored;
         }
-        line = l->Add();
+        line = l->Alloc();
         if (line) {
             f32 total;
             char buf[0x10];
@@ -388,8 +366,8 @@ public:
 
     s32 car;                                 // offset 0x4
     RankTable ranks;                         // offset 0x8
-    StuntHud* hud;                           // offset 0x244
-    StuntText* evt;                          // offset 0x248
+    StuntFactory* hud;                           // offset 0x244
+    StuntDisplay* evt;                          // offset 0x248
 };
 }  // namespace
 
@@ -404,7 +382,7 @@ struct Blip {
 namespace {
 class TimedTracker : public Tracker {
 public:
-    TimedTracker(StuntHud* h, int c, f32 min, s32 fx) : Tracker(h, c) {
+    TimedTracker(StuntFactory* h, int c, f32 min, s32 fx) : Tracker(h, c) {
         effect = fx;
         minT = min;
         mult = 1.0f;
@@ -521,7 +499,7 @@ extern "C" int fn_80157278(int car);
 namespace {
 class AirTracker : public TimedTracker {
 public:
-    AirTracker(StuntHud* h, int c, struct CountSound* cs);
+    AirTracker(StuntFactory* h, int c, struct CountSound* cs);
     virtual f32 Points(int rank) const {
         f32 p = Tracker::Points(rank);
         if (fn_801769CC()->type & 0x200000) {
@@ -664,7 +642,7 @@ inline void LoopSound(GameSound* s) {
 namespace {
 class DriftTracker : public TimedTracker {
 public:
-    DriftTracker(StuntHud* h, int c, struct CountSound* cs);
+    DriftTracker(StuntFactory* h, int c, struct CountSound* cs);
     virtual int Airborne(const RaceCarRec* rc) {
         f32 spd;
         f32 k;
@@ -772,7 +750,7 @@ f32 Max(f32 a, f32 b);  // out-of-line max (0x801429D0)
 namespace {
 class CountTracker : public Tracker {
 public:
-    CountTracker(StuntHud* h, int c, f32 w, s32 fx) : Tracker(h, c) {
+    CountTracker(StuntFactory* h, int c, f32 w, s32 fx) : Tracker(h, c) {
         effect = fx;
         window = w;
         blip = 0;
@@ -871,7 +849,7 @@ public:
 namespace {
 class CloseCallTracker : public CountTracker {
 public:
-    CloseCallTracker(StuntHud* h, int c, struct CountSound* cs);
+    CloseCallTracker(StuntFactory* h, int c, struct CountSound* cs);
     virtual const char* Label(void) const { return fn_80131234(lbl_8032E668[Type()]); }
     virtual s32 Type(void) const { return 4; }
     virtual ~CloseCallTracker(void) {
@@ -1086,7 +1064,7 @@ class ThrowTracker : public CountTracker {
 public:
     void RateTarget(int i, int alive);
 public:
-    ThrowTracker(StuntHud* h, int c);
+    ThrowTracker(StuntFactory* h, int c);
     virtual s32 Type(void) const { return 9; }
     virtual void Init(void) {
         CountTracker::Init();
@@ -1123,7 +1101,7 @@ public:
 namespace {
 class JumpComboTracker : public CountTracker {
 public:
-    JumpComboTracker(StuntHud* h, int c);
+    JumpComboTracker(StuntFactory* h, int c);
     virtual s32 Type(void) const { return 10; }
     virtual ~JumpComboTracker(void) {}
     virtual f32 Rate(const RaceCarRec* rc);
@@ -1170,7 +1148,7 @@ struct CarHit {
 namespace {
 class CarHitTracker : public Tracker {
 public:
-    CarHitTracker(StuntHud* h, int c);
+    CarHitTracker(StuntFactory* h, int c);
     virtual s32 Value(void) const {
         if (wrecked) {
             return 0x7FFFFFFF;
@@ -1274,7 +1252,7 @@ public:
 namespace {
 class ValueTracker : public Tracker {
 public:
-    ValueTracker(StuntHud* h, int c) : Tracker(h, c) { car2 = c; }
+    ValueTracker(StuntFactory* h, int c) : Tracker(h, c) { car2 = c; }
     virtual ~ValueTracker(void) {}
     virtual void Refresh(void) {
         Tracker::Refresh();
@@ -1325,7 +1303,7 @@ public:
 namespace {
 class SpinTracker : public CountTracker {
 public:
-    SpinTracker(StuntHud* h, int c);
+    SpinTracker(StuntFactory* h, int c);
     virtual s32 Type(void) const { return 7; }
     virtual void Score(f32* pts) {
         int deg;
@@ -1389,7 +1367,7 @@ public:
 namespace {
 class CrashTracker : public ValueTracker {
 public:
-    CrashTracker(StuntHud* h, int c);
+    CrashTracker(StuntFactory* h, int c);
     virtual int Kind(void) const { return 4; }
     virtual s32 Type(void) const { return 13; }
     virtual void Refresh(void) {
@@ -1415,7 +1393,7 @@ static const f32 lbl_802F9478[6] = {0.7932f, 0.8904f, 0.9433f, 0.9994f, 1.0f, 0.
 namespace {
 class RingTracker : public CountTracker {
 public:
-    RingTracker(StuntHud* h, int c);
+    RingTracker(StuntFactory* h, int c);
     virtual s32 Type(void) const { return 14; }
     virtual ~RingTracker(void) {
         if (snd) {
@@ -1791,7 +1769,7 @@ void* operator new(size_t size, const char* tag);
 namespace {
 class TrackerArray : public Meter {
 public:
-    TrackerArray(StuntHud* hud, int c, f32* hispeed) {
+    TrackerArray(StuntFactory* hud, int c, f32* hispeed) {
         int i;
         Unused2(&hispeed);
         cnt = new ("cntsound") CountSound("counter.sfx", "fcount.sfx", c);
@@ -1906,7 +1884,7 @@ public:
         }
         return 0;
     }
-    virtual void Fill(StuntList* l) const {
+    virtual void Fill(StuntFactory* l) const {
         int i;
         for (i = 0; i < list.a.count; i++) {
             list.a.data[i]->Fill(l);
@@ -1951,7 +1929,7 @@ int fn_80157278(int car) { return (u32)lbl_804348E8[car]->type == 'ACAR'; }
 void fn_80157560(Tracker* t);
 
 #pragma inline_depth(1)
-Meter* fn_801572A4(StuntHud* hud, int car, f32* hispeed) {
+Meter* fn_801572A4(StuntFactory* hud, int car, f32* hispeed) {
     lbl_8042FD08[car] = 1.0f;
     return new ("arraytracker") TrackerArray(hud, car, hispeed);
 }
@@ -2005,7 +1983,7 @@ void fn_80157560(Tracker* t) {
     fn_80131818(def);
 }
 
-RingTracker::RingTracker(StuntHud* h, int c) : CountTracker(h, c, 2.0f, 0) {
+RingTracker::RingTracker(StuntFactory* h, int c) : CountTracker(h, c, 2.0f, 0) {
     int ok;
     car2 = c;
     ok = !fn_80157278(c);
@@ -2016,9 +1994,9 @@ RingTracker::RingTracker(StuntHud* h, int c) : CountTracker(h, c, 2.0f, 0) {
     }
 }
 
-CrashTracker::CrashTracker(StuntHud* h, int c) : ValueTracker(h, c) {}
+CrashTracker::CrashTracker(StuntFactory* h, int c) : ValueTracker(h, c) {}
 
-CarHitTracker::CarHitTracker(StuntHud* h, int c) : Tracker(h, c) {
+CarHitTracker::CarHitTracker(StuntFactory* h, int c) : Tracker(h, c) {
     int i;
     hits[0].timer = 0.0f;
     car2 = c;
@@ -2030,24 +2008,24 @@ CarHitTracker::CarHitTracker(StuntHud* h, int c) : Tracker(h, c) {
     }
 }
 
-JumpComboTracker::JumpComboTracker(StuntHud* h, int c) : CountTracker(h, c, 0.001f, 0) {}
+JumpComboTracker::JumpComboTracker(StuntFactory* h, int c) : CountTracker(h, c, 0.001f, 0) {}
 
-ThrowTracker::ThrowTracker(StuntHud* h, int c) : CountTracker(h, c, 0.5f, 0) {
+ThrowTracker::ThrowTracker(StuntFactory* h, int c) : CountTracker(h, c, 0.5f, 0) {
     handle = 0;
     active = 0;
 }
 
-SpinTracker::SpinTracker(StuntHud* h, int c) : CountTracker(h, c, 999.0f, 0) {
+SpinTracker::SpinTracker(StuntFactory* h, int c) : CountTracker(h, c, 999.0f, 0) {
     car2 = c;
     f27C = 0.0f;
 }
 
-CloseCallTracker::CloseCallTracker(StuntHud* h, int c, CountSound* cs) : CountTracker(h, c, 2.5f, 0x41206) {
+CloseCallTracker::CloseCallTracker(StuntFactory* h, int c, CountSound* cs) : CountTracker(h, c, 2.5f, 0x41206) {
     snd = fn_802076A0("missflag.sfx", 1, car, 0);
     flags = 0;
 }
 
-DriftTracker::DriftTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h, c, 15.0f, 0x40902) {
+DriftTracker::DriftTracker(StuntFactory* h, int c, CountSound* cs) : TimedTracker(h, c, 15.0f, 0x40902) {
     snd = 0;
     if (snd) {
         snd->SetVolume(f254);
@@ -2055,7 +2033,7 @@ DriftTracker::DriftTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h,
     blip = 0;
 }
 
-AirTracker::AirTracker(StuntHud* h, int c, CountSound* cs) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
+AirTracker::AirTracker(StuntFactory* h, int c, CountSound* cs) : TimedTracker(h, c, 30.5f, 0x40901) { car2 = c; }
 
 CountSound::CountSound(const char* a, const char* b, int car) {
     int ok = !fn_80157278(car);
