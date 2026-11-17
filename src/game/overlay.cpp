@@ -34,17 +34,6 @@ struct RacerState {
     u8 done;    // offset 0x34
 };
 
-// CarInfo: game/carinfo.h.
-struct ResultRacer {
-    u8 pad0[0xC];
-    u32 flags;  // offset 0xC
-    u8 pad10[0x14 - 0x10];
-    s32 place;  // offset 0x14
-    f32 time;   // offset 0x18
-    u8 pad1C[0x48 - 0x1C];
-    char name[1];  // offset 0x48
-};
-
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
 struct Viewport {
     Viewport(int x, int y, int w, int h);
@@ -135,7 +124,7 @@ void UpdateContinueOverlay(void);
 extern "C" {
 f32 fn_80011E34(void);
 f32 fn_80011E54(void);
-ResultRacer* fn_801EA9B0(int index);
+CarInfo* fn_801EA9B0(int index);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);
 const char* fn_800122B4(int place, char* buf);
@@ -987,7 +976,7 @@ void ResultsOverlay::DrawTimes(void) {
     f32 x;
     f32 y;
     int i;
-    ResultRacer* r;
+    CarInfo* r;
     char buf[8];
     f32 t;
 
@@ -997,11 +986,11 @@ void ResultsOverlay::DrawTimes(void) {
         fn_80010E94(art, 0, x0, y - 21.6f, kOverlayStickYScale.value, 27.0f);
         x = x0;
         x += 54.0f;
-        if (r->flags & 1) {
-            fn_8000FF88(0xFFFFFF00, 0x41, "%d", 1.5f, x, y - 21.6f - 27.0f, r->place);
+        if (r->params.flags & 1) {
+            fn_8000FF88(0xFFFFFF00, 0x41, "%d", 1.5f, x, y - 21.6f - 27.0f, r->params.x8);
             x += 85.0f;
-        } else if (r->flags & 2) {
-            t = r->time;
+        } else if (r->params.flags & 2) {
+            t = r->params.xC;
             if (t < 0.0f) {
                 fn_801345D8(buf, sizeof(buf), "--:--");
             } else {
@@ -1014,7 +1003,7 @@ void ResultsOverlay::DrawTimes(void) {
             fn_8000FF88(0xFFFFFF00, 0x41, "%s", 1.5f, x, y - 21.6f - 27.0f, fn_800122B4(i + 1, place));
             x += 85.0f;
         }
-        fn_8000FF88(0xFFFFFF00, 0x21, "%s", kOverlayFullScale.value, x, y - 21.6f - 27.0f, r->name);
+        fn_8000FF88(0xFFFFFF00, 0x21, "%s", kOverlayFullScale.value, x, y - 21.6f - 27.0f, r->setup.name);
     }
 }
 

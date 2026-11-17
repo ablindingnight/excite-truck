@@ -16,11 +16,6 @@
 #include "game/dashhelper.h"
 #include "game/math_types.h"
 
-struct ResultRacer {
-    u8 pad0[0x48];
-    char name[1];  // offset 0x48
-};
-
 // CarInfo: game/carinfo.h.
 struct HitInfo {
     s32 id;  // offset 0x0
@@ -91,7 +86,7 @@ void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 f32 fn_8013672C(void);
 CarInfo* fn_801EA9A0(int index);
 int fn_801EA994(void);
-ResultRacer* fn_801EA9B0(int index);
+CarInfo* fn_801EA9B0(int index);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_80011DEC(int player);
 f32 fn_80011DC0(int player);
@@ -745,7 +740,7 @@ void RacingOverlay::DrawStandings(void) {
     after = after < 0 ? 0 : after;
     y = 85.0f;
     for (i = i < 1 ? 1 : i; i < lbl_8055D350->stats->pos; i++) {
-        fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->name);
+        fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->setup.name);
         y -= 20.0f;
     }
     fn_8000FF88(-0x100, 9, "%d. %s", 1.0f, -280.0f, y, lbl_8055D350->stats->pos,
@@ -753,7 +748,7 @@ void RacingOverlay::DrawStandings(void) {
     y -= 20.0f;
     for (i = lbl_8055D350->stats->pos + 1; i <= lbl_8055D350->stats->pos + after && i <= fn_801EA994();
          i++) {
-        fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->name);
+        fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->setup.name);
         y -= 20.0f;
     }
 }
