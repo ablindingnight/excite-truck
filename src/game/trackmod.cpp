@@ -4,6 +4,7 @@
 // textures, the facing test and its per-frame instances. Objects are created by name; their data is
 // byte-swapped on load. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/tvtx.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
 #include "game/vec3_init.h"
@@ -579,14 +580,6 @@ void PointFacingTMH::Draw(TObj* list) {
 
 MultiFacingTMH::~MultiFacingTMH(void) { gxForgetTexture(tex); }
 
-// A textured quad: position, colour and texture coordinates (0x18).
-struct TVtx {
-    f32 pos[3];  // offset 0x0
-    u32 color;   // offset 0xC
-    f32 u;       // offset 0x10
-    f32 v;       // offset 0x14
-};
-
 
 
 // Which of the 32 facings of the billboard atlas looks at the camera.
@@ -625,7 +618,7 @@ void MultiFacingTMH::Draw(TObj* list) {
         v0 = 0.25f * (seg / 8);
         u1 = 0.125f + u0;
         v1 = 0.25f + v0;
-        fn_801F3158(base.pos, __ct__4VPosFfff(&c0, 0.0f, 0.0f, 0.0f));
+        fn_801F3158(&base.pos.x, __ct__4VPosFfff(&c0, 0.0f, 0.0f, 0.0f));
         base.u = u0;
         base.v = v0;
         base.color = fn_80144C68(0xFF, 0xFF, 0xFF, 0xFF);

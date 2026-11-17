@@ -2,13 +2,7 @@
 // when full, used for plain strips, two-sided skid quads and Hermite-spline skid ribbons (fading
 // with alpha along the curve). Names are guesses apart from the string.
 #include "game/common.h"
-
-// TVec3: valvec3.h's ValVec3.
-struct TVtx {
-    ValVec3 pos;  // offset 0x0
-    u32 color;  // offset 0xC
-    f32 u, v;   // offset 0x10
-};
+#include "game/tvtx.h"
 
 struct SkidQuad {
     ValVec3 dir;  // offset 0x0
