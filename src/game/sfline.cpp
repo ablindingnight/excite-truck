@@ -175,7 +175,6 @@ void fn_802A1290(void) {
         int i;
         int j;
         f32 width;
-        f32 inner;
         s16 h;
         f32 t;
         lbl_8055F844 = fn_802CAC28("sfsquare.tex", 0);
@@ -192,17 +191,16 @@ void fn_802A1290(void) {
         lbl_8055F860.y = -t;
         fn_801E9DC4(&h);
         f32 halfScale = 0.5f;
-        inner = 0.5f * (0.75f * width);
         for (i = 0; i < n; i++) {
             for (j = 0; j < 3; j++) {
                 V2 q;
                 V2 d;
                 f32 a;
-                SFCorner(&q, &lbl_8055F850, &lbl_8055F858, &lbl_8055F860, 1.5f * j, 1.5f * i - (halfScale * width));
+                SFCorner(&q, &lbl_8055F850, &lbl_8055F858, &lbl_8055F860, 1.5f * j, 1.5f * i - (width * halfScale));
                 f32 dy = q.y - lbl_8055F850.y;
                 d.x = q.x - lbl_8055F850.x;
                 d.y = dy;
-                a = ((f32)sqrt(d.x * d.x + d.y * d.y) - inner) / ((halfScale * width) - inner);
+                a = ((f32)sqrt(d.x * d.x + d.y * d.y) - (0.5f * (0.75f * width))) / ((width * halfScale) - (0.5f * (0.75f * width)));
                 if (1.0f < a) {
                     a = 1.0f;
                 }
