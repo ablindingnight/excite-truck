@@ -661,7 +661,7 @@ void fn_80271624(int mode, u8* p) {
             }
             switch (tv->type) {
             case 1:
-                fn_80274730(p, PcMul(tv->fov, 0.017453292f), -1.0f, -1.0f, 0.0f);
+                fn_80274730(p, PcMul(0.017453292f, tv->fov), -1.0f, -1.0f, 0.0f);
                 break;
             case 5: {
                 f32 move[3];
