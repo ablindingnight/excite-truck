@@ -2602,7 +2602,7 @@ int fn_80167634(int i);
 int fn_80167728(int i);
 int fn_80167758(void);
 int fn_80167768(f32 throttle);
-void fn_801DCF48(RVec3* n, f32 x, f32 z);
+f32 fn_801DCF48(RVec3* n, f32 x, f32 z);
 void PSVECCrossProduct(const void* a, const void* b, void* out);
 
 static inline f32 Ramp(f32 x, f32 lo, f32 range) { return (x - lo) / range; }

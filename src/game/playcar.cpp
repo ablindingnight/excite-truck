@@ -1201,7 +1201,7 @@ void fn_8018ADD4(u8* car, int v);
 void fn_8018ADEC(u8* car);
 void fn_8018AE2C(u8* car, f32 v);
 void fn_8018AE34(u8* car, f32 v);
-void fn_8018AE54(u8* car);
+f32 fn_8018AE54(u8* car);
 int fn_801796B4(void);
 Rumble* fn_801D0BF8(s32 car, int a);
 double fmod(double x, double y);
