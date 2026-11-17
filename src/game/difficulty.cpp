@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
+#include "game/haschild.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -30,7 +31,6 @@ const char* fn_80204AA4(int event);
 const DiffLevel* fn_80204B18(int level);
 }
 
-static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != NULL; }
 
 namespace {
 

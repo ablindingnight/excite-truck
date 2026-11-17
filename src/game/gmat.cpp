@@ -135,6 +135,7 @@ typedef IdxBlock<s16> GBlock;
 typedef BlockAlloc<s16, 0x200, 0x54> GAllocator;
 
 #include "game/vecbase.h"
+#include "game/haschild.h"
 
 template <class T, int N>
 struct InlineVec : VecBase<T> {
@@ -266,7 +267,6 @@ extern "C" const f32 kWorldScale;
 static inline const f32& WorldScale() { return kWorldScale; }
 const f32 kWorldScale = 2.0f;
 
-static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
 extern "C" {
 

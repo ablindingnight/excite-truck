@@ -5,6 +5,7 @@
 // from the strings.
 #include "game/pathcareer.h"
 #include "game/mathutil.h"
+#include "game/haschild.h"
 
 
 ModuleTag lbl_8055F660;
@@ -178,7 +179,6 @@ s32 fn_8027DED0(void) { return lbl_8055C790; }
 
 void fn_8027DED8(int, struct Damage*) {}
 
-static inline bool HasChild(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
 int fn_8027DEDC(s32* vehicle, s32* x, int track, int which) {
     SetNumPlayers(1);
