@@ -253,6 +253,22 @@ static inline void GroundAt(f32& h, const s16* hint, f32 x, f32 y, f32 z) {
     }
 }
 
+/* Helper name unproven: the ground height averaged over four corners around a point that arrives BY VALUE. The caller
+   passes the components of its const local: x (offset 0 of an unreferenced local) is pasted by the inliner as a
+   converted read, which is generated before the 10.0 constant in the two sums; y and z get parameter objects.
+   This replaces the (f32)c.x casts and the y/z locals (FACTS 2026-11-17 12:06). */
+static inline f32 GroundAvg(const s16* hint, f32 x, f32 y, f32 z) {
+    f32 h0;
+    f32 h1;
+    f32 h2;
+    f32 h3;
+    GroundAt(h0, hint, x + 10.0f, y, z + 10.0f);
+    GroundAt(h1, hint, x - 10.0f, y, z + 10.0f);
+    GroundAt(h2, hint, x - 10.0f, y, z - 10.0f);
+    GroundAt(h3, hint, x + 10.0f, y, z - 10.0f);
+    return 0.25f * (h0 + (h1 + (h2 + h3)));
+}
+
 /* Helper name unproven */
 static inline void EaseGroundHeight(f32 t, bool onGround, f32 h, CamRect* r) {
     f32 lo;
@@ -280,17 +296,11 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     f32 v;
     f32 h;
     u8* car;
-    f32 y;
-    f32 z;
     bool onGround;
     const s16* hint;
     f32 lift;
-    f32 h2;
-    f32 h0;
-    f32 h1;
     f32 zoom;
     f32 k;
-    f32 h3;
     f32 t;
     f32 m;
     f32 top;
@@ -301,17 +311,8 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     if (!fn_801769F8()) {
         hint = (const s16*)(car + 0x6C);
         onGround = S32(car, 0x2620) > 0;
-        CVec3 c = *(CVec3*)(car + 0x60);
-        y = c.y;
-        z = c.z;
-        /* Cast unproven (spelling): in retail the c.x read is evaluated before the 10.0 constant in the two sums, i.e. it
-           is not a plain field read there (a conversion or a by-value accessor in the original). Exact with the cast on
-           the read, 8 rows without; written on all four corners the same way. */
-        GroundAt(h0, hint, (f32)c.x + 10.0f, y, z + 10.0f);
-        GroundAt(h1, hint, (f32)c.x - 10.0f, y, z + 10.0f);
-        GroundAt(h2, hint, (f32)c.x - 10.0f, y, z - 10.0f);
-        GroundAt(h3, hint, (f32)c.x + 10.0f, y, z - 10.0f);
-        avg = 0.25f * (h0 + (h1 + (h2 + h3)));
+        const CVec3 c = *(CVec3*)(car + 0x60);
+        avg = GroundAvg(hint, c.x, c.y, c.z);
         if (onGround) {
             r->v[0] = avg - c.y;
             r->v[2] = 0.0f;
