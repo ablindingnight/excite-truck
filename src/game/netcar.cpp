@@ -4,6 +4,7 @@
 // blended towards that each frame and snapped when a packet asks for it. Names are guesses apart
 // from the allocation tag.
 #include "game/common.h"
+#include "game/proxer.h"
 #include <revolution/MTX/vec.h>
 #include "game/collvol.h"
 #include "game/rigid.h"
@@ -75,11 +76,6 @@ public:
     virtual void vf1C(void);
     virtual void vf20(void);
     virtual void Ready(void);  // 0x24
-};
-
-class Proxer {
-public:
-    void SortCar(int i);
 };
 
 struct RVec3;

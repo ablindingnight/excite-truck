@@ -2,6 +2,7 @@
 // flag distance, pit speed), creates per-car AI info, formats car numbers, and builds the driver object
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
+#include "game/proxer.h"
 #include "game/gamemode.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -44,15 +45,6 @@ void fn_8018ADB4(void* car, f32 v);
 void fn_8018ADA4(void* car, f32 v);
 }
 
-
-// The AI proximity tracker (proxer.cpp).
-class Proxer {
-public:
-    void Activate(int i);
-    void Update(int i);
-    void UpdateAll(void);
-    void Process(void);
-};
 
 class IDriver;
 class Arena {

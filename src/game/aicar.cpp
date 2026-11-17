@@ -4,6 +4,7 @@
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/proxer.h"
 #include "game/idealline.h"
 #include "game/centerline.h"
 #include "game/v2.h"
@@ -150,42 +151,6 @@ public:
 };
 
 #define VI(p) ((VIface*)(p))
-
-// A pair of cars tracked by the proximity sorter (proxer.cpp).
-struct Pair {
-    u8 close;    // offset 0x0
-    f32 time;    // offset 0x4
-    u8 aFlag;    // offset 0x8
-    s32 a;       // offset 0xC
-    u8 bFlag;    // offset 0x10
-    s32 b;       // offset 0x14
-    f32 dist2;   // offset 0x18
-    V2 dpos;     // offset 0x1C
-    V2 dvel;     // offset 0x24
-};
-
-struct CarRec {
-    V2 pos;          // offset 0x0
-    V2 vel;          // offset 0x8
-    f32 accel;       // offset 0x10
-    u8 flipped;      // offset 0x14
-    u8 active;       // offset 0x15
-    u8 sec;          // offset 0x16
-    Pair* table[1];  // offset 0x18 ([3][count])
-};
-
-class Proxer {
-public:
-    void SortCar(int car);
-    void SetActive(int car, u8 on);
-    CarRec* Rec(int i) { return (CarRec*)(recs + i * stride); }
-
-    s32 count;    // offset 0x0
-    s32 key;      // offset 0x4
-    Pair* pairs;  // offset 0x8
-    s32 stride;   // offset 0xC
-    u8* recs;     // offset 0x10
-};
 
 class AIExceptions {
 public:

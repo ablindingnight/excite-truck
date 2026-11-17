@@ -4,6 +4,7 @@
 // against raw field offsets; the large routines are still stubs. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/proxer.h"
 #include "game/raceopts.h"
 #include "game/rvec.h"
 #include "game/rigid.h"
@@ -1148,12 +1149,6 @@ void fn_80191928(u8* p) {
 int fn_80191A98(u8* p) { return PF(PTR(p, 0x8))->b1 != 0; }
 
 }  // extern "C"
-
-// The race's car proximity sorter.
-class Proxer {
-public:
-    void SortCar(int car);
-};
 
 // A car's damage model (car + 0x270) as the driver sees it.
 class DmgView {
