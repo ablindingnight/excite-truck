@@ -1237,6 +1237,9 @@ void PlayerDriver_vf48(u8* p) {
     u8* car;
     RVec3 f2;
     f32 wob;
+    f32 ax;
+    f32 ay;
+    f32 az;
     RVec3 w;
     f32 lim;
     f32 ib;
@@ -1337,12 +1340,11 @@ void PlayerDriver_vf48(u8* p) {
         f.y *= k;
         f.z *= k;
         b = ((Gearbox*)PTR(p, 0x38))->Speed();
+        q = lean * lean;
         f.x *= b;
         f.y *= b;
         f.z *= b;
-        f32 leanSquared = lean * lean;
-        q = 1.0f;
-        q -= leanSquared;
+        q = 1.0f - q;
         f.x *= q;
         f.y *= q;
         f.z *= q;
@@ -1440,6 +1442,7 @@ void PlayerDriver_vf48(u8* p) {
         mag = mag + (f32)__fabs(h);
     }
     wob = (sum > 0.0f ? 1.0f : kNegOne) * mag;
+    u8* c5;
     int odd;
     f32 gb;
     wob *= F32(p, 0x1C);
@@ -1456,7 +1459,6 @@ void PlayerDriver_vf48(u8* p) {
     if (!fn_801796B4() && fn_801CF050() && !fn_801796C4() &&
         NearZero(F32(PTR(p, 0x34), 0x2690))) {
         f32 a;
-        u8* c5;
         const f32* v;
         f32 buzz;
         f32 str;
@@ -1482,9 +1484,6 @@ void PlayerDriver_vf48(u8* p) {
             f32 inv;
             inv = 1.0f / a;
             f32 sn;
-            f32 az;
-            f32 ay;
-            f32 ax;
             f32 t;
             ax = inv * w.x;
             ay = inv * w.y;
