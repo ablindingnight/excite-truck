@@ -69,7 +69,17 @@ class AnimSoundFileReader
 public:
     AnimSoundFileReader();
 
-    const AnimEvent* GetEvent(const AnimEventRef* eventRef) const;
+    // Inline, body unproven: retail keeps no .text for snd_AnimSound (UpdateTrigger is dead-stripped) and has no
+    // AnimSoundFileReader symbol. Offsets resolve against the data block body, as NW4R's file readers do; written
+    // without GetDataRefAddress0 so no assert strings join the unit's retail .data.
+    const AnimEvent* GetEvent(const AnimEventRef* eventRef) const {
+        u32 value = Util::ReadBigEndian(eventRef->ref.value);
+        if (eventRef->ref.refType == Util::REFTYPE_OFFSET) {
+            return static_cast<const AnimEvent*>(
+                ut::AddOffsetToPtr(reinterpret_cast<const u8*>(dataBlock) + sizeof(ut::BinaryBlockHeader), value));
+        }
+        return reinterpret_cast<const AnimEvent*>(value);
+    }
 
 private:
     /* 0x00 */ const AnimSoundFile::Header* header;
