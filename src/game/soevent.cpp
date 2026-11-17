@@ -4,6 +4,7 @@
 // mutable physics objects ("chunk%d", see mutphob) thrown off the object. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/phobconfig.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 #include "game/mathutil.h"
@@ -147,15 +148,6 @@ public:
 
     u8 pad[0xD4 - 0x4];
     f32 mass;  // offset 0xD4
-};
-
-// A mutable physics object's settings (mutphob.cpp).
-struct PhobConfig {
-    u8 pad0[0x1C];
-    s32 surf;    // offset 0x1C
-    u8 pad20[0x24 - 0x20];
-    s32 effect;  // offset 0x24
-    u8 pad28[0x34 - 0x28];
 };
 
 extern "C" {
