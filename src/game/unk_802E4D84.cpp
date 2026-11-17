@@ -7,6 +7,7 @@
 // This is the game's Spu sound layer. It was C++ (it uses delete[], and bool results are stored unmasked), so it is
 // compiled as C++ with C names until the unit is renamed.
 #include "game/common.h"
+#include "game/byteswap.h"
 
 // Compiled as C++ (2026-11-03): the unit owns a ModuleTag registered by its static initializer (the 8-byte function
 // after the code, formerly the separate split unk_802E6B48) and the globals after it (.sbss 0x8055FF70..0x8055FFB8,
@@ -197,24 +198,6 @@ static inline void StrCopy(char *d, const char *s, int n) {
     }
 }
 
-// Byte swaps for resources saved with the other endianness.
-static inline void Swap32(void *p) {
-    unsigned char *b = (unsigned char *)p;
-    unsigned char t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
-static inline void Swap16(void *p) {
-    unsigned char *b = (unsigned char *)p;
-    unsigned char t = b[0];
-    b[0] = b[1];
-    b[1] = t;
-}
-
 extern void *fn_8012C370(const char *name, unsigned int type, unsigned int *version, unsigned int *size,
                          unsigned char *first, unsigned char *swapped);
 
@@ -243,20 +226,20 @@ SpuSampleRes *fn_802E4DC8(char *name) {
             fn_802E317C("Spu: %s has wrong version (%x != %x)", name, version, 3);
         }
         if (swapped) {
-            Swap32(&res->size);
-            Swap32(&res->data);
-            Swap16(&res->magic);
-            Swap16(&res->unkE);
-            Swap32(&res->rate);
-            Swap32(&res->unk14);
-            Swap16(&res->unk18);
-            Swap16(&res->bits);
-            Swap16(&res->unk1C);
+            SwapWord(&res->size);
+            SwapWord(&res->data);
+            SwapHalf(&res->magic);
+            SwapHalf(&res->unkE);
+            SwapWord(&res->rate);
+            SwapWord(&res->unk14);
+            SwapHalf(&res->unk18);
+            SwapHalf(&res->bits);
+            SwapHalf(&res->unk1C);
             res->data = (unsigned char *)res + (unsigned int)res->data;
             if (res->bits == 16 && res->format != 1) {
                 p = (unsigned short *)res->data;
                 for (i = 0; i < (int)res->size / 2; i++) {
-                    Swap16(p);
+                    SwapHalf(p);
                     p++;
                 }
             }
