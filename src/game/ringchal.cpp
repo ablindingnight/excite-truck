@@ -209,10 +209,7 @@ int IdentGetCurrentSlot(void);
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-struct ConfigRoot {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
+#include "game/configroot.h"
 
 ConfigRoot* fn_8000AC38(void);
 

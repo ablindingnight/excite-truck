@@ -42,14 +42,7 @@ public:
     T storage[N];  // offset 0xC
 };
 
-// Camera: common.h's PlainValMatrix.
-// Pushes an offset onto the layout origin for the lifetime of the object (ovlayout.cpp).
-struct LayoutOffset {
-    LayoutOffset(f32 dx, f32 dy);
-    ~LayoutOffset(void);
-    f32 ox;
-    f32 oy;
-};
+#include "game/layoutoffset.h"
 
 extern "C" {
 extern s32 lbl_8055CFF0;  // screen width

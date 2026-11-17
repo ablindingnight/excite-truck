@@ -402,15 +402,7 @@ int FindEve(int* out_track, int* out_eve, const char* name) {
     return found;
 }
 
-class FlagGuard {
-public:
-    FlagGuard(void) {
-        saved = lbl_8055D430 & 1;
-        lbl_8055D430 |= 1;
-    }
-    ~FlagGuard(void) { lbl_8055D430 = (lbl_8055D430 & ~1) | saved; }
-    u32 saved;
-};
+#include "game/flagguard.h"
 
 int DirectToTrack(const char* name) {
     int found;

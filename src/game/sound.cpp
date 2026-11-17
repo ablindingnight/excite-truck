@@ -18,11 +18,7 @@ void fn_8020A400(void);   // music shutdown
 
 void* operator new(size_t size, const char* tag);
 
-struct Listener {
-    s32 id;          // offset 0x0
-    ValMatrix* mtx;  // offset 0x4
-    ValVec3* vel;    // offset 0x8
-};
+#include "game/listener.h"
 
 class GameSound;
 

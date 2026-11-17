@@ -43,11 +43,7 @@ struct SoundList {
     s32 count;          // offset 0x4
 };
 
-struct Listener {
-    s32 id;      // offset 0x0
-    ValMatrix* mtx;  // offset 0x4
-    ValVec3* vel;  // offset 0x8
-};
+#include "game/listener.h"
 
 // Voices per sound class for one quality setting.
 struct VoiceBudget {

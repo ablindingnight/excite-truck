@@ -102,10 +102,7 @@ extern const Binding lbl_802FAA40;
 const char* GetGradeDisplayName(int grade);
 void* operator new(size_t size, const char* tag);
 
-struct ConfigRoot {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
+#include "game/configroot.h"
 
 ConfigRoot* fn_8000AC38(void);
 

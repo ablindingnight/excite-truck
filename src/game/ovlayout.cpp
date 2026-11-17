@@ -1328,13 +1328,7 @@ void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, int just) {
 
 }  // extern "C"
 
-// Pushes an offset onto the layout origin for the lifetime of the object.
-struct LayoutOffset {
-    LayoutOffset(f32 dx, f32 dy);
-    ~LayoutOffset(void);
-    f32 ox;
-    f32 oy;
-};
+#include "game/layoutoffset.h"
 
 LayoutOffset::LayoutOffset(f32 dx, f32 dy) {
     ox = lbl_8055E200;
