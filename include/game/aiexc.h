@@ -2,7 +2,7 @@
 #define GAME_AIEXC_H
 // AI push/pass tuning (pushpass.cpp): the event's default tuning and per-track exception ranges (on_lon..off_lon)
 // that override it. LineInfo (lineinfo.cpp) holds one at 0x40; aicar looks up the tuning for a lap position.
-// AIExceptions is retail's name (__ct__12AIExceptionsFv); the rest are guesses apart from the value keys.
+// Names unproven apart from the value keys ("exception", on_lon/off_lon).
 #include "game/common.h"
 
 struct ValueNode;

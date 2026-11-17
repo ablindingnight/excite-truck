@@ -391,20 +391,8 @@ struct TableRef {
     ValueTable* t;
 };
 
-#ifdef __MWERKS__
-// The preload list node every arena is (preload.cpp), as retail's ringchal saw it: Arena's own CountDynos and
-// Spawn fill the first two table slots (retail's arena table: CountDynos, Spawn, dtor), so retail's view here
-// had no Size/Load to override. Only its first word (ListNode::next) is used.
-class Preloader {
-public:
-    Preloader(void);
-    ~Preloader(void);
-    s32 f0;  // offset 0x0
-};
-#else
-// PC: the shared Preloader (game/preload.h); Arena forwards Size/Load to CountDynos/Spawn below.
+// Every arena is a preloader (preload.cpp): it counts and spawns its dynos.
 #include "game/preload.h"
-#endif
 
 namespace {
 struct PlayerData;
@@ -414,13 +402,9 @@ public:
 public:
 public:
     Arena(void);
-    virtual int CountDynos(void);  // 0x8
-    virtual void Spawn(void);      // 0xC
+    virtual s32 Size(void);        // 0x8: counts the arena's dynos
+    virtual void Load(void);       // 0xC: spawns them
     virtual ~Arena(void);          // 0x10
-#ifndef __MWERKS__
-    virtual s32 Size(void) { return CountDynos(); }
-    virtual void Load(void) { Spawn(); }
-#endif
     void Init(void);
     int CountFiles(ValueNode* cfg);
     int CountRingSets(void);
@@ -1036,7 +1020,7 @@ Arena::Arena(void) {
 
 PlayerList::PlayerList(void) : ArrayRef<PlayerData*>(storage, 8) {}
 
-/* Helper name unproven: the counting loop with the caller's counter by reference; the boundary is needed (in place: CountDynos 100 -> 96.21) */
+/* Helper name unproven: the counting loop with the caller's counter by reference; the boundary is needed (in place: Size 100 -> 96.21) */
 inline int Arena::CountDynosIn(int n, int& i) {
     const int count = sets->count;
     for (i = 0; i < count; i++) {
@@ -1053,14 +1037,14 @@ inline int Arena::CountDynosIn(int n, int& i) {
     return n;
 }
 
-int Arena::CountDynos(void) {
+s32 Arena::Size(void) {
     int n = 0;
     int i;
     return CountDynosIn(n, i);
 }
 
 
-void Arena::Spawn(void) {
+void Arena::Load(void) {
     struct { ObjInfo* o; int j; } sp_;  /* Struct unproven: fields of a small local (MWCC numbers struct fields as temps; structpair.py) */
     ObjSet* d;
     int i;

@@ -1,7 +1,7 @@
 #ifndef GAME_CARLIGHTS_H
 #define GAME_CARLIGHTS_H
 // The car light sets (carlights.cpp; the constructor sits in stub12.cpp). Names are guesses
-// (LightSet from retail's __ct__8LightSetFv).
+// (no retail symbols).
 #include "game/common.h"
 #include "game/vecmatrix.h"
 

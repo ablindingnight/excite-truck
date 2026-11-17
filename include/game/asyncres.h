@@ -1,7 +1,8 @@
 #ifndef GAME_ASYNCRES_H
 #define GAME_ASYNCRES_H
 // A resource streamed from a resource set (res.cpp; ResourceGetStream opens one): loadpool and texture read
-// through it. AsyncResource is retail's name (Span__13AsyncResourceFv and friends); field names are guesses.
+// through it. AsyncResource is the game's own name ("AsyncResource::pool",
+// "AsyncResource: Bad crc on %s"); field names are guesses.
 #include "game/common.h"
 
 struct ResEntry;

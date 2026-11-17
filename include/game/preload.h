@@ -1,9 +1,8 @@
 #ifndef GAME_PRELOAD_H
 #define GAME_PRELOAD_H
 // Preloaders (preload.cpp): objects that link themselves into a list; a pass totals their sizes, reserves the
-// memory and has each one load. Preloader is retail's name (__ct__9PreloaderFv); its table has three slots
-// (Size, Load pure; the destructor), as TreePreloader's and ringchal's arena tables show. Size/Load are
-// TreePreloader's retail names.
+// memory and has each one load. Its table has three slots (Size, Load pure; the destructor), as the
+// tree and ringchal arena tables show (the 4th word after it is alignment). Names unproven.
 #include "game/common.h"
 
 struct ListNode {

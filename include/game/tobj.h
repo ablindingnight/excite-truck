@@ -1,7 +1,7 @@
 #ifndef GAME_TOBJ_H
 #define GAME_TOBJ_H
-// A placed track object (trackmod.cpp's list; TrackMod handlers get one per Swap/Init/Add). TObj is retail's name
-// (Swap__8TrackModFP4TObj); field names are guesses. The handler's own data starts at 0x2C.
+// A placed track object (trackmod.cpp's list; TrackMod handlers get one per Swap/Init/Add). Names unproven
+// (no retail symbols). The handler's own data starts at 0x2C.
 #include "game/common.h"
 #include "game/math_types.h"
 

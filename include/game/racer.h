@@ -1,8 +1,8 @@
 #ifndef GAME_RACER_H
 #define GAME_RACER_H
 // What a car model is built from (0x11C): world.cpp's fn_801E8F10 builds one per car on the stack and hands it to
-// CarModel/PlayerCarModel (carmodel.cpp), which fill in the tail. Racer is retail's name (__ct__8CarModelFP5Racer...);
-// field names unproven.
+// CarModel/PlayerCarModel (carmodel.cpp), which fill in the tail. Names unproven (no retail
+// symbols; Racer is the name our CarModel constructors use).
 #include "game/common.h"
 #include "game/racesetup.h"
 

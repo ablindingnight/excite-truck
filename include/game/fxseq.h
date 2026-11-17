@@ -1,7 +1,7 @@
 #ifndef GAME_FXSEQ_H
 #define GAME_FXSEQ_H
 // A loaded effect sequence (fxseq.cpp): timed effect nodes played at a position; fire and sparks play them.
-// FXSequence is retail's name (Load__10FXSequenceFPCc and friends); field names are guesses.
+// FXSequence is the game's own name (its allocation tag string); field names are guesses.
 #include "game/common.h"
 
 class FXSeqNode;
