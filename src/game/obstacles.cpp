@@ -599,14 +599,14 @@ void Obstacle::Init(BodyDesc* d) {
             }
         }
         fn_80131818(t);
-        CollShape* s = (CollShape*)new ("polyvol") PolyShape((u32)&mtx, (const PolyPlane*)pl, n, (const RVec3*)&lo, (const RVec3*)&hi, k, skin);
+        CollShape* s = (CollShape*)new ("polyvol") PolyShape(&mtx, (const PolyPlane*)pl, n, (const RVec3*)&lo, (const RVec3*)&hi, k, skin);
         shape = s;
         this->u221 = 1;
         corners = 0;
         break;
     }
     case 20: {
-        CollShape* s = (CollShape*)new ("pmshvol") MeshShape((u32)&mtx, (const char*)&q->a, (u32)this);
+        CollShape* s = (CollShape*)new ("pmshvol") MeshShape(&mtx, (const char*)&q->a, this);
         shape = s;
         this->u221 = 1;
         corners = 0;

@@ -310,8 +310,8 @@ struct PolyPlane;  // a plane: normal + distance (sphcoll)
 // unproven.
 class PolyShape : public CollShape {
 public:
-    PolyShape(u32 frame, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 k, f32 skin);
-    PolyShape(u32 frame, const char* name, f32 k, f32 skin);  // from the named .val table (trackobj)
+    PolyShape(const RMtx* frame, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 k, f32 skin);
+    PolyShape(const RMtx* frame, const char* name, f32 k, f32 skin);  // from the named .val table (trackobj)
     virtual void vf10(u8* other);
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
@@ -329,7 +329,7 @@ public:
 // at 0x24. Class name unproven.
 class MeshShape : public CollShape {
 public:
-    MeshShape(u32 frame, const char* name, u32 owner);  // from the named mesh (0x40 bytes)
+    MeshShape(const RMtx* frame, const char* name, CollVolume* owner);  // from the named mesh (0x40 bytes)
     MeshShape(u32 data, u32 inPlace);  // from file data; the mesh is built in place at 0x40 when `inPlace`
     virtual ~MeshShape(void);
     virtual void vf10(u8* other);

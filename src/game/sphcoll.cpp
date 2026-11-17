@@ -3450,7 +3450,7 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
 void RingVol::vf4C(void) {
     u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, this->inner + this->ring, lbl_8055E598.value); }
 
-PolyShape::PolyShape(u32 a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape((const RMtx*)a, (CollVolume*)0, 'POLY', f1, f2) {
+PolyShape::PolyShape(const RMtx* a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape(a, (CollVolume*)0, 'POLY', f1, f2) {
     u8* p = (u8*)this;
     ((u32&)this->fDC) = 0;
     this->n = n;
@@ -3471,7 +3471,7 @@ void fn_80131818(ValueTable* table);        // release it
 
 // Polyhedron volume ('POLY') from the named table: extents, then its "plane" (n, k) and
 // "curve" (center, axis, radius) entries.
-PolyShape::PolyShape(u32 id, const char* name, f32 s0, f32 s1) : CollShape((const RMtx*)id, 0, 'POLY', s0, s1) {
+PolyShape::PolyShape(const RMtx* id, const char* name, f32 s0, f32 s1) : CollShape(id, 0, 'POLY', s0, s1) {
     u8* p = (u8*)this;
     u8* pl;
     ValueNode* n;
@@ -3633,7 +3633,7 @@ struct MeshRes {
 };
 
 // Mesh volume ('PMSH') from the named mesh: bounding box min (0x28) / max (0x34) over its vertices.
-MeshShape::MeshShape(u32 id, const char* name, u32 owner) : CollShape((const RMtx*)id, (CollVolume*)owner, 'PMSH', 1.0f, 1.0f) {
+MeshShape::MeshShape(const RMtx* id, const char* name, CollVolume* owner) : CollShape(id, owner, 'PMSH', 1.0f, 1.0f) {
     u8* p = (u8*)this;
     MeshRes* m = (MeshRes*)fn_801CFEAC(name);
     this->mesh = (u8*)m;
