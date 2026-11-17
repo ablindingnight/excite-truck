@@ -30,11 +30,11 @@ Exact matches only (objdiff `report.json`), as of 2026-11-17:
 
 | | Exactly matched code | Functions |
 | :--- | :--- | :--- |
-| **Whole game** | 88.5% (2,700,188 / 3,050,236 bytes) | 13,542 / 13,780 (98.3%) |
-| Excite Truck's own code | 82.9% (1,695,184 / 2,045,232 bytes) | 9,907 / 10,145 |
+| **Whole game** | 89.4% (2,726,324 / 3,050,236 bytes) | 13,558 / 13,780 (98.4%) |
+| Excite Truck's own code | 84.2% (1,721,320 / 2,045,232 bytes) | 9,923 / 10,145 |
 | Nintendo SDK libraries | **100%** (1,005,004 / 1,005,004 bytes) | 3,635 / 3,635 |
 
-The SDK is complete: every SDK function is matched and built from source. The RAD Bink video library linked into the game is complete too: all five Bink units match and are built from source. Data matches 98.6%; 659 of 773 units are fully matched.
+The SDK is complete: every SDK function is matched and built from source. The RAD Bink video library linked into the game is complete too: all five Bink units match and are built from source. Data matches 99.1%; 666 of 773 units are fully matched.
 
 ### Goals
 
