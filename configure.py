@@ -1248,7 +1248,7 @@ config.libs.append(
             Object(Matching, "game/skid.cpp"),
             Object(NonMatching, "game/partman.cpp"),
             Object(Matching, "game/sunflare.cpp"),
-            Object(NonMatching, "game/chunks.cpp"),
+            Object(Matching, "game/chunks.cpp"),
             Object(NonMatching, "game/carlights.cpp"),
             Object(Matching, "game/stub12.cpp"),
             Object(NonMatching, "game/flipbook.cpp"),

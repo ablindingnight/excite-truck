@@ -272,11 +272,14 @@ void fn_80292698(void) {
             y = inv * v.y;
             z = inv * v.z;
             sn = (f32)sin(ang);
+            f32 k;
             f32 c = cos(ang);
-            f32 k = 1.0f - c;
+            k = 1.0f - c;
             SetRow(s->rot.x, c + k * Sq(x), y * (k * x) + sn * z, z * (k * x) - sn * y);
             SetRow(s->rot.y, y * (k * x) - sn * z, c + k * Sq(y), z * (k * y) + sn * x);
-            SetRow(s->rot.z, z * (k * x) + sn * y, z * (k * y) - sn * x, c + k * Sq(z));
+            const f32 zz = z * z;
+            const f32 diagonal = c + k * zz;
+            SetRow(s->rot.z, z * (k * x) + sn * y, z * (k * y) - sn * x, diagonal);
         } else {
             s->rot.x.x = 1.0f;
             s->rot.x.y = 0.0f;
