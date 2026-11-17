@@ -300,7 +300,6 @@ f32 fn_802BEFB4(void) {
     return 0.7f + Mul(t, 1.3f);
 }
 
-  /* Helper name unproven */
 // Maps x from [x0, x1] onto [y0, y1], clamped to the segment.
 /* Helper name unproven */
 static inline f32 MapClamped_hm(f32 x0, f32 x1, f32 y0, f32 y1, f32 x) {
