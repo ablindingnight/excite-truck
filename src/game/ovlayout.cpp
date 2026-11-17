@@ -1027,13 +1027,30 @@ static inline int CountChildAt(ValueNode* n, const char* name) {
     return c;
 }
 
+static inline DynArray<BoxCmd>* ReadBoxCmdArray(ValueNode* n, const char* name) {
+    ValueNode* e;
+    int c = CountChildAt(n, name);
+    DynArray<BoxCmd>* items = new ("overlaycmd_dsa") DynArray<BoxCmd>(c);
+    for (int i = 0;; i++) {
+        e = n->GetChildAt(i);
+        if (!e) {
+            break;
+        }
+        if (!strcasecmp(e->GetName(), name)) {
+            BoxCmd* bc = items->Add();
+            bc->elem = e->GetValue("elem");
+            bc->art = e->GetValue("art");
+            bc->color = fn_801454E8(e, "color");
+        }
+    }
+    return items;
+}
+
 static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     int c;
     ValueNode* e;
-    DynArray<TextCmd>* at;
-    DynArray<GartCmd>* ag;
-    DynArray<BoxCmd>* ab;
     const char* name;
+    DynArray<TextCmd>* at;
     name = "text_cmd";
     c = CountChildAt(n, name);
     at = new ("overlaycmd_dsa") DynArray<TextCmd>(c);
@@ -1049,6 +1066,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
         }
     }
     o->texts = at;
+    DynArray<GartCmd>* ag;
     name = "gart_cmd";
     c = CountChildAt(n, name);
     ag = new ("overlaycmd_dsa") DynArray<GartCmd>(c);
@@ -1065,22 +1083,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
         }
     }
     o->garts = ag;
-    name = "box_cmd";
-    c = CountChildAt(n, name);
-    ab = new ("overlaycmd_dsa") DynArray<BoxCmd>(c);
-    for (int i = 0;; i++) {
-        e = n->GetChildAt(i);
-        if (!e) {
-            break;
-        }
-        if (!strcasecmp(e->GetName(), name)) {
-            BoxCmd* bc = ab->Add();
-            bc->elem = e->GetValue("elem");
-            bc->art = e->GetValue("art");
-            bc->color = fn_801454E8(e, "color");
-        }
-    }
-    o->boxes = ab;
+    o->boxes = ReadBoxCmdArray(n, "box_cmd");
 }
 
 inline OverlayCmd::OverlayCmd(ILayout* l, ValueNode* n) {
