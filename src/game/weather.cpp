@@ -2,6 +2,7 @@
 // "weather" table, the lightning flash state machine, and rain/thunder sounds. Names are guesses
 // apart from the value keys and sound names.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/weather.h"
 #include "game/mathutil.h"
 
@@ -12,37 +13,16 @@ int fn_80129D18(int id, int range);        // random int
 f32 fn_80129DC4(int id, f32 lo, f32 hi);   // random float
 }
 
-class RSound {
-public:
-    virtual ~RSound(void);
-    u8 pad4[0x19 - 0x4];
-    u8 busy;  // offset 0x19
-    u8 pad1A[0x49 - 0x1A];
-    u8 playing;  // offset 0x49
-    u8 stop;     // offset 0x4A
-    u8 loop;     // offset 0x4B
-    u8 f4C;      // offset 0x4C
-    void Play(void) {
-        playing = 1;
-        loop = 0;
-        stop = 0;
-    }
-    void Retrigger(void) {
-        if (busy) {
-            f4C = 1;
-            stop = 0;
-        } else {
-            Play();
-        }
-    }
-    void PlayLoop(void) {
-        stop = 0;
-        loop = 1;
-        playing = 1;
-    }
-};
+extern "C" GameSound* fn_80207848(const char* name, int a);
 
-extern "C" RSound* fn_80207848(const char* name, int a);
+// Restarts a playing sound, else plays it.
+static inline void Retrigger(GameSound* s) {
+    if (s->playing) {
+        s->Restart();
+    } else {
+        s->Play();
+    }
+}
 
 // WeatherDef: game/weather.h.
 struct WeatherState {
@@ -51,8 +31,8 @@ struct WeatherState {
     f32 target;      // offset 0x8
     f32 thunderAt;   // offset 0xC
     f32 angle;       // offset 0x10
-    RSound* rain;    // offset 0x14
-    RSound* thunder; // offset 0x18
+    GameSound* rain;    // offset 0x14
+    GameSound* thunder; // offset 0x18
 };
 
 struct WeatherPlayer {
@@ -154,7 +134,7 @@ void fn_801E1B30(void) {
         w->flash = w->flash + 0.5f * (w->target - w->flash);
     }
     if (lbl_804874B8.thunder && w->thunderAt > 0.0f && now > w->thunderAt) {
-        lbl_804874B8.thunder->Retrigger();
+        Retrigger(lbl_804874B8.thunder);
         w->thunderAt = -1.0f;
     }
 }

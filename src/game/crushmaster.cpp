@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/valuebinding.h"
 #include "game/gamemode.h"
 #include "game/gamemodector.h"
@@ -43,7 +44,7 @@ public:
     f32 t;       // offset 0x4
 };
 
-class RSound;
+class GameSound;
 extern f32 lbl_8055E3C8;  // time
 
 extern "C" {
@@ -105,45 +106,21 @@ void* operator new(size_t size, const char* tag);
 ConfigRoot* fn_8000AC38(void);
 
 
-class RSound {
-public:
-    virtual ~RSound(void);
-    u8 pad4[0x4];
-    f32 vol;  // offset 0x8
-    u8 padC[0x19 - 0xC];
-    u8 busy;  // offset 0x19
-    u8 pad1A[0x49 - 0x1A];
-    u8 playing;  // offset 0x49
-    u8 stop;     // offset 0x4A
-    u8 loop;     // offset 0x4B
-    u8 f4C;      // offset 0x4C
-    u8 dirty;    // offset 0x4D
-    void Play(void) {
-        playing = 1;
-        loop = 0;
-        stop = 0;
-    }
-    void Stop(void) {
-        stop = 1;
-        f4C = 0;
-    }
-};
+extern "C" GameSound* fn_80207848(const char* name, int a);
 
-extern "C" RSound* fn_80207848(const char* name, int a);
-
-static inline void Play(RSound* s) {
+static inline void Play(GameSound* s) {
     if (s) {
         s->Play();
     }
 }
 
-static inline void PlayIdle(RSound* s) {
-    if (s && !s->busy) {
+static inline void PlayIdle(GameSound* s) {
+    if (s && !s->playing) {
         s->Play();
     }
 }
 
-static inline void Stop(RSound* s) {
+static inline void Stop(GameSound* s) {
     if (s) {
         s->Stop();
     }
@@ -339,14 +316,14 @@ public:
     ArtPlayer* layout; // offset 0xC: the results' art animation player
     u8 noBonus;        // offset 0x10
     u8 pad11[3];
-    RSound* sBonus;    // offset 0x14
-    RSound* sNoBonus;  // offset 0x18
-    RSound* s1C;       // offset 0x1C
+    GameSound* sBonus;    // offset 0x14
+    GameSound* sNoBonus;  // offset 0x18
+    GameSound* s1C;       // offset 0x1C
     u8 b20;            // offset 0x20
     u8 pad21[3];
-    RSound* s24;       // offset 0x24
-    RSound* s28;       // offset 0x28
-    RSound* s2C;       // offset 0x2C
+    GameSound* s24;       // offset 0x24
+    GameSound* s28;       // offset 0x28
+    GameSound* s2C;       // offset 0x2C
     char killScore[0x14];   // offset 0x30
     char timeLeft[0x14];    // offset 0x44
     char bonusTitle[0x14];  // offset 0x58
@@ -520,7 +497,7 @@ public:
     f32 timeout;               // offset 0x1A4
     LayoutRef layout;          // offset 0x1A8
     CrushResults results;    // offset 0x1AC
-    RSound* sPreRace;          // offset 0x2B4
+    GameSound* sPreRace;          // offset 0x2B4
     u8 b2B8;                   // offset 0x2B8
 };
 

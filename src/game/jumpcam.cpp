@@ -2,6 +2,7 @@
 // player launches off one, the camera switches to a jump view with heart/whoosh sounds. Names are
 // guesses apart from the messages and keys.
 #include "game/common.h"
+#include "game/sound.h"
 #include "game/v2.h"
 
 // Was V2::Set here (x then the second component).
@@ -36,40 +37,7 @@ void fn_8026A1F0(int cam, int player, int unk);
 f32 fn_801E9FDC(const s16* hint, f32 x, f32 z);  // ground height
 }
 
-class RSound {
-public:
-    virtual ~RSound(void);
-    u8 pad4[0x4];
-    f32 vol;  // offset 0x8
-    u8 padC[0x49 - 0xC];
-    u8 playing;  // offset 0x49
-    u8 stop;     // offset 0x4A
-    u8 loop;     // offset 0x4B
-    u8 f4C;      // offset 0x4C
-    u8 dirty;    // offset 0x4D
-    void SetVol(f32 v) {
-        if (v != vol) {
-            dirty = 1;
-            vol = v;
-        }
-    }
-    void Play(void) {
-        playing = 1;
-        loop = 0;
-        stop = 0;
-    }
-    void PlayLoop(void) {
-        stop = 0;
-        loop = 1;
-        playing = 1;
-    }
-    void Stop(void) {
-        stop = 1;
-        f4C = 0;
-    }
-};
-
-extern "C" RSound* fn_80207848(const char* name, int a);
+extern "C" GameSound* fn_80207848(const char* name, int a);
 
 
 struct JumpCar {
@@ -109,8 +77,8 @@ UnkStaticFFFF lbl_8055F4C0;
 static UnkStatic123 lbl_8049A010;
 UnkStatic7F lbl_8055F4C4;
 s32 lbl_8055F4C8;       // jump count
-RSound* lbl_8055F4CC;   // whoosh
-RSound* lbl_8055F4D0;   // heartbeat
+GameSound* lbl_8055F4CC;   // whoosh
+GameSound* lbl_8055F4D0;   // heartbeat
 JumpPt lbl_8049A028[16];
 JumpState lbl_8049A0E8[8];
 
@@ -118,15 +86,15 @@ CameraRacerSlot::CameraRacerSlot(void) {}
 
 extern "C" {
 
-void fn_8026B11C(RSound** out, const char* name) {
-    RSound* s = fn_80207848(name, 0);
+void fn_8026B11C(GameSound** out, const char* name) {
+    GameSound* s = fn_80207848(name, 0);
     *out = s;
     if (s) {
-        s->SetVol(lbl_8055C4F8);
+        s->SetVolume(lbl_8055C4F8);
     }
 }
 
-void fn_8026B178(RSound** p) {
+void fn_8026B178(GameSound** p) {
     if (*p) {
         delete *p;
         *p = 0;
