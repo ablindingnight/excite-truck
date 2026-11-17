@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/locstring.h"
 #include <ctype.h>
+#include "game/byteswap.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -179,15 +180,6 @@ static inline void StrNCat(char* d, const char* s, int n) {
     }
 }
 
-static inline void Swap4(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 static inline void ReadUnit(ValueNode* n, Unit* u) {
     u->name = n->GetString("name", u->name);
     u->sname = n->GetString("sname", u->name);
@@ -257,10 +249,10 @@ void LocaleFormatDate(char* buf, u32 size, int d, int m, int y) {
 
 void fn_801301E0(LangFile* f) {
     int i;
-    Swap4((u8*)&f->count);
+    SwapWord((u8*)&f->count);
     for (i = 0; i < f->count; i++) {
-        Swap4((u8*)&f->entries[i].key);
-        Swap4((u8*)&f->entries[i].text);
+        SwapWord((u8*)&f->entries[i].key);
+        SwapWord((u8*)&f->entries[i].text);
         f->entries[i].key += (u32)f;
         f->entries[i].text += (u32)f;
     }
