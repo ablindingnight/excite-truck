@@ -33,13 +33,7 @@ struct RVec3;
 
 struct RPacket;
 
-class PhobStatic : public CollVolume {
-public:
-    PhobStatic(void);
-    virtual void Init(BodyDesc* d);
-    virtual ~PhobStatic(void);
-    virtual void vf28(u8* buf);
-};
+#include "game/phobstatic.h"
 
 ModuleTag lbl_8055E478;
 

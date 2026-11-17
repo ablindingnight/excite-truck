@@ -290,11 +290,7 @@ public:
     u8 pad0[0x2780];
 };
 
-class PhobStatic {
-public:
-    PhobStatic(void);
-    u8 pad0[0xD0];
-};
+#include "game/phobstatic.h"
 
 struct BodyDesc;
 
