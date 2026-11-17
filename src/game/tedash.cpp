@@ -123,7 +123,7 @@ public:
     virtual void* Get(int i);
 };
 
-struct Cmd {
+struct DashCmd {
     const char* name;
     int (*pred)(const char* name);
     void (*fn)(const char* name);
@@ -394,7 +394,7 @@ int fn_802B6270(void) { return lbl_8055FA40 == 7; }
 
 void fn_802B6284(const char* name) { lbl_8055FA40 = lbl_8055FA40 == 7 ? 6 : 7; }
 
-static Cmd lbl_8034A670[4] = {
+static DashCmd lbl_8034A670[4] = {
     {"layer_dropdown", 0, fn_802B61E0},
     {0, fn_802B5DD0, fn_802B61E0},
     {"brush_dropdown", 0, fn_802B6228},
@@ -402,7 +402,7 @@ static Cmd lbl_8034A670[4] = {
 };
 
 void fn_802B62A4(TextElem* e) {
-    const Cmd* c = lbl_8034A670;
+    const DashCmd* c = lbl_8034A670;
     for (u32 i = 0; i < 4; i++, c++) {
         if ((c->name && strcmp(c->name, e->name) == 0) || (c->pred && c->pred(e->name))) {
             lbl_8034A670[i].fn(e->name);
@@ -411,7 +411,7 @@ void fn_802B62A4(TextElem* e) {
     }
 }
 
-static Cmd lbl_8034A70C[11] = {
+static DashCmd lbl_8034A70C[11] = {
     {"cur_material", 0, fn_802B5CC4},
     {"objects", 0, fn_802B5CAC},
     {"object_clump", 0, fn_802B5CCC},
@@ -426,7 +426,7 @@ static Cmd lbl_8034A70C[11] = {
 };
 
 void fn_802B6358(TextElem* e) {
-    const Cmd* c = lbl_8034A70C;
+    const DashCmd* c = lbl_8034A70C;
     for (u32 i = 0; i < 11; i++, c++) {
         if ((c->name && strcmp(c->name, e->name) == 0) || (c->pred && c->pred(e->name))) {
             lbl_8034A70C[i].fn(e->name);
