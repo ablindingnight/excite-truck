@@ -1962,7 +1962,7 @@ void fn_80183E7C(u8* p) {
         RVec3 ff;
         ff.x = 0.0f;
         ff.z = 0.0f;
-        ff.y = lf * (0.2f + tf * 0.8f) * (0.5f * grow) * cb->mass /
+        ff.y = lf * ((0.2f + tf * 0.8f) * (0.5f * grow)) * cb->mass /
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
         RVec3 back;
@@ -1975,7 +1975,7 @@ void fn_80183E7C(u8* p) {
         RVec3 fb;
         fb.x = 0.0f;
         fb.z = 0.0f;
-        fb.y = lb * LerpT(tb, 0.1f, 1.0f) * (0.3f * grow) * cb->mass /
+        fb.y = lb * (LerpT(tb, 0.1f, 1.0f) * (0.3f * grow)) * cb->mass /
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
     } else {
