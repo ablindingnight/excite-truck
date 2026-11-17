@@ -694,6 +694,14 @@ struct LocalVec {
         T* p = &data[count++];
         *p = v;
     }
+    int Find(const T& v) {
+        for (int i = 0; i < count; i++) {
+            if (data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
     void RemoveAt(int i) {
         if (i >= 0 && i < count) {
             if (i != count - 1) {
@@ -724,18 +732,8 @@ void MatPlacer::Update(void) {
         for (int k = 0; k < 128; k++) {
             added.Push(slots[k]);
         }
-        s32 i;
-        int limit = removed.count;
-        for (i = 0; i < limit;) {
-            int j;
-            for (j = 0; j < added.count; j++) {
-                if (added.data[j] == removed.data[i]) {
-                    break;
-                }
-            }
-            if (j == added.count) {
-                j = -1;
-            }
+        for (int i = 0; i < removed.count;) {
+            int j = added.Find(removed.data[i]);
             if (j != -1) {
                 added.RemoveAt(j);
                 removed.RemoveAt(i);
