@@ -1304,13 +1304,7 @@ void fn_802840F8(void) { fn_8027ED2C(); }
 }  // extern "C"
 
 
-class VehicleList {
-public:
-    virtual ~VehicleList(void);                                    // 0x8
-    virtual void Add(const char* name, int unlocked, int special);  // 0xC
-    virtual void SetReason(int i, const char* reason);             // 0x10
-    virtual int Count(void);                                       // 0x14
-};
+#include "game/vehlist.h"
 
 // Extra vehicles an event offers on top of the unlockables.
 class ExtraVehicles {
