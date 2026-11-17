@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/menustate.h"
 #include <string.h>
+#include "game/strcopy.h"
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -73,17 +74,6 @@ static UnkStatic123 lbl_80498848;
 extern const u32 lbl_8055F210 = MakeILPos(0x7F00, 0);
 extern const u32 lbl_8055F214 = MakeILPos(0xFFFF, 0);
 
-static inline void StrNCopy(char* dst, const char* src, int len) {
-    char* d = dst;
-    int n = len;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void StrNCat(char* d, const char* s, int n) {
     while (*d) {
@@ -91,7 +81,7 @@ static inline void StrNCat(char* d, const char* s, int n) {
         d++;
     }
     if (n > 0) {
-        StrNCopy(d, s, n);
+        SafeStrCopy(d, s, n);
     }
 }
 
@@ -291,7 +281,7 @@ void NameChooser::Draw(void) {
                         text[0] = label[caps];
                         text[1] = 0;
                     } else {
-                        StrNCopy(text, label, 32);
+                        SafeStrCopy(text, label, 32);
                     }
                     u8 flash = 0;
                     f32 t = 0.0f;
@@ -373,7 +363,7 @@ void NameChooser::Accept(void) {
             char text[32] = {0};
             if (k->type == 2) {
                 if (buf[0]) {
-                    StrNCopy(text, " ", 32);
+                    SafeStrCopy(text, " ", 32);
                 } else {
                     text[0] = 0;
                 }
@@ -383,7 +373,7 @@ void NameChooser::Accept(void) {
                     text[1] = 0;
                     text[0] = label[caps];
                 } else {
-                    StrNCopy(text, label, 32);
+                    SafeStrCopy(text, label, 32);
                 }
             }
             StrNCat(buf, text, max);
