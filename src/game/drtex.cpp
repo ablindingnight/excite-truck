@@ -192,9 +192,18 @@ void fn_802D78D4(u16* rgb, u16* alpha, const u32* pal, int n) {
             u32 word;
             u8 b[4];
         } c;
+#ifdef __MWERKS__
         c.word = pal[i];
         rgb[i] = To565(c.b);
         alpha[i] = c.b[3] << 8;
+#else
+        // PORT: the palette words are little-endian on disc (A, B, G, R in memory) and the Wii's loader reversed
+        // them to R, G, B, A; a little-endian host skips that swap, so reverse the word here. GX reads the TLUTs
+        // big-endian, so each u16 entry is stored byte-swapped.
+        c.word = __builtin_bswap32(pal[i]);
+        rgb[i] = __builtin_bswap16((u16)To565(c.b));
+        alpha[i] = __builtin_bswap16((u16)(c.b[3] << 8));
+#endif
     }
 }
 
