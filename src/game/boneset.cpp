@@ -218,8 +218,9 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     }
     s32 nd = set->numDest;
     for (i = 0; i < n; i++) {
-        if (set->bones[i].dest >= 0) {
-            skin[set->bones[i].dest] = world[i];
+        s32 dest = set->bones[i].dest;
+        if (dest >= 0) {
+            skin[dest] = world[i];
         }
     }
     return fn_802C7A38(0, skin, nd);
