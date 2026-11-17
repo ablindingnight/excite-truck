@@ -1499,8 +1499,8 @@ void fn_80183E7C(u8* p) {
         }
         f32 roll;
         if (cb->airborne > 2 && (roll = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48)), (f32)__fabs(roll) < 2.0f)) {
-            f32 m = cb->mass;
             f32 a = LerpT(Ramp(cb->f2650, 0.0f, 1.0f), 0.0f, 1.0f);
+            f32 m = cb->mass;
             f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f);
             f32 k = LerpT(b, 0.0f, 1.0f) * (m * 100.0f * 9.81f * 0.305f * a);
             RVec3 t;
@@ -1942,7 +1942,7 @@ void fn_80183E7C(u8* p) {
                 fn_8018E330(p);
             }
         }
-        f32 k = -2.0f * cb->mass;
+        f32 k = Mul(-2.0f, cb->mass);
         RVec3 f;
         cb->f25C4 = CbAdd(cb->f25C4, 0.016683351f);
         f.x = cb->vel.x * k;
