@@ -1029,6 +1029,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowC19 = &t[c + 19];
     rowC21 = &t[c + 21];
     rowC22 = &t[c + 22];
+    sp2010 = (c + 23) * 16;  // byte offset of row c+23 (retail: addi r25,r6,23; slwi; stw 8208(r1)); was never assigned
     for (;;) {
         // the zero is read from ident.y every pass; MWCC hoists it (store-forwarded: the frsp f31 the target keeps
         // for the whole loop). ident.x is not read in the loop, so the epilogue reloads it, as in the target.
