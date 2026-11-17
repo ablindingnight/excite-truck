@@ -749,6 +749,19 @@ void HermiteDrone::UpdateLoop(f32 dt) {
     v = v0 + u * (v1 - v0);
 }
 
+// Helper name unproven: Ping (mirror at the ends) over a key array and count passed in, as UpdateForward indexes
+// its own keys/count locals. Retail forms each &keys[..] from the array base (base first, per branch), which
+// HermitePathData::Ping's this-relative form does not give.
+static inline HermiteKey* PingK(HermiteKey* keys, int count, int i) {
+    if (i >= count && i < count * 2) {
+        return &keys[count * 2 - i - 1];
+    }
+    if (i >= 0) {
+        return &keys[i % count];
+    }
+    return &keys[-i];
+}
+
 void HermiteDrone::UpdateReverse(f32 dt) {
     HermitePathData* d = entry->data;
     HermiteKey* k = d->Ping(seg);
@@ -789,7 +802,9 @@ void HermiteDrone::UpdateReverse(f32 dt) {
     }
     if (d->count - 1 != seg % d->count) {
         HermitePathData* p = entry->data;
-        Curve(p->Ping(seg - 1), k, p->Ping(seg + 1), p->Ping(seg + 2), u);
+        HermiteKey* keys = p->keys;
+        int count = p->count;
+        Curve(PingK(keys, count, seg - 1), k, PingK(keys, count, seg + 1), PingK(keys, count, seg + 2), u);
     }
     Turn(u);
     v = v0 + u * (v1 - v0);
