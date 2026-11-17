@@ -304,7 +304,9 @@ static inline void SubR(RVec3* o, const RVec3* a, const RVec3* b) {
     o->y = a->y - b->y;
     o->z = a->z - b->z;
 }
-void Trailer::Update(void) {
+// inline: only the vtable refers to it, so it is generated after the table (retail's "regluing" string follows
+// __vt__7Trailer; FACTS 2026-11-16 deferred functions).
+inline void Trailer::Update(void) {
     RVec3 torque;
     RVec3 dav;
     SubR(&dav, &avel, &car->avel);
