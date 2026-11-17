@@ -83,7 +83,7 @@ struct GarageFlags {
         alt = 0;
     }
     s32 unk0;              // offset 0x0, profile slot
-    u8 alt;                // offset 0x4
+    bool alt;              // offset 0x4
     u8 pad5[0x3];
     GaragePair pairs[4];   // offset 0x8
 };
@@ -458,9 +458,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem(lbl_8055B860, 6, (const void*)fn_8024EC3C, -2, 0xD),
                     MenuItem(lbl_80498C30),
                 };
-                MenuDesc desc = {0, 0, (int (*)(int*))fn_8024DAD8, 0, 0};
-                desc.items = items;
-                desc.layout = lbl_8055FC8C ? "carchoose2a_w.lyt" : "carchoose2a.lyt";
+                const char* lyt = lbl_8055FC8C ? "carchoose2a_w.lyt" : "carchoose2a.lyt";
+                MenuDesc desc = {lyt, items, (int (*)(int*))fn_8024DAD8, 0, 0};
                 HeapMark mark("choosevehicle1");
                 r = fn_802146BC(&desc, -999, -999, 1);
             }
