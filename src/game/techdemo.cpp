@@ -65,7 +65,7 @@ struct FixedArr : ArrayRef<T> {
 };
 
 struct ActZone {
-    void Load(ValueNode* n, int& k, int& start);
+    void Load(ValueNode* n, int& k, int& start, f32& dy);
     void Check(int c);
     void Free(void) {
         fn_80128658(bound);
@@ -157,32 +157,35 @@ static char SequenceKey[] = "act_seq";
 static char LapKey[] = "lap";
 static char BoundsTag[] = "bound";
 
-// PROVISIONAL matching helper. Caller-owned counters recover the retail GPR order.
+// PROVISIONAL matching helper. Caller-owned counters and a shared edge component
+// recover the retail allocation order. The float component belongs to a1.
 // The original helper boundary and parameter names remain unconfirmed.
-static inline void LoadActZone(FixedArr<ActZone, 64>& zones, ValueNode* n) {
+static inline void LoadActZone(FixedArr<ActZone, 64>& zones, ValueNode* n, f32& dy) {
     ActZone* zone;
     int start;
     int k;
     zone = &zones.data[zones.count++];
-    zone->Load(n, k, start);
+    zone->Load(n, k, start, dy);
 }
 
 inline void TechDemoMaster::a1(void) {
+    f32 dy;
     ValueNode* vals = GetEvent(fn_801769CC()->event)->node;
     int i;
     ValueNode* n;
     for (i = 0; (n = vals->GetChildAt(i)) != 0; i++) {
         if (strcmp(n->GetName(), ActZoneTag) == 0) {
-            LoadActZone(zones, n);
+            LoadActZone(zones, n, dy);
         }
     }
     fn_802E30C8("TechDemoMaster: Loaded %d actzones", zones.count);
 }
 
-inline void ActZone::Load(ValueNode* n, int& k, int& start) {
+inline void ActZone::Load(ValueNode* n, int& k, int& start, f32& dy) {
     f32* p;
     Bound* b;
     f32 best;
+    f32 dx;
     s16 h[4];
     V2 d;
     seq = fn_801D4888(n->GetValue(SequenceKey));
@@ -192,14 +195,14 @@ inline void ActZone::Load(ValueNode* n, int& k, int& start) {
     start = 2;
     done = 0;
     {
-        V2 e;
-        e.y = b->pts[0].y - b->pts[2].y;
-        e.x = b->pts[0].x - b->pts[2].x;
+        V2C e(b->pts[0].x - b->pts[2].x, b->pts[0].y - b->pts[2].y);
         best = e.x * e.x + e.y * e.y;
     }
     for (int edge = 0; edge < 2; edge++) {
-        d.y = b->pts[edge].y - b->pts[edge + 1].y;
-        d.x = b->pts[edge].x - b->pts[edge + 1].x;
+        dy = b->pts[edge].y - b->pts[edge + 1].y;
+        dx = b->pts[edge].x - b->pts[edge + 1].x;
+        d.x = dx;
+        d.y = dy;
         f32 len = d.x * d.x + d.y * d.y;
         if (len > best) {
             best = len;

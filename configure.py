@@ -1052,7 +1052,7 @@ config.libs.append(
             Object(NonMatching, "game/pickup.cpp"),
             Object(Matching, "game/ring.cpp"),
             Object(NonMatching, "game/ringchal.cpp"),
-            Object(NonMatching, "game/techdemo.cpp"),
+            Object(Matching, "game/techdemo.cpp"),
             Object(NonMatching, "game/crushmaster.cpp"),
             Object(Matching, "game/physics.cpp"),
             Object(NonMatching, "game/phob.cpp"),
