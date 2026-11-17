@@ -14,6 +14,7 @@
 #include "game/gart.h"
 #include "game/strcopy.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -1177,6 +1178,10 @@ static inline Popup* NextPopup(AwardsMgr* m, int car, f32 dt) {
     return 0;
 }
 
+// x mapped from lo..hi to 0..1 and clamped (the shape betarace, carbody and actseq use).
+/* Helper name unproven */
+static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
+
 void fn_801CD970(int car) {
     if (fn_801CE898()) {
         return;
@@ -1200,9 +1205,7 @@ void fn_801CD970(int car) {
     }
     f32 t = p->time < 0.25f ? p->time : 3.0f - p->time;
     f32 out = box->w + (640.0f - (box->pos.x + box->w));
-    f32 k = Unlerp(t, 0.0f, 0.25f);
-    k = 1.0f < k ? 1.0f : k;
-    k = k > 0.0f ? k : 0.0f;
+    f32 k = Ramp(t, 0.0f, 0.25f);
     f32 slide = Lerp(out, 0.0f, k);
     if (box) {
         GartElem b;
