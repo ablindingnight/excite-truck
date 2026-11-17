@@ -3,6 +3,7 @@
 // one car reaches the other along the track, plus per-car sorted pair lists. Names are guesses apart
 // from "Proxer" (its allocation tag).
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/proxer.h"
 #include "game/v2.h"
 #include <revolution/MTX/vec.h>
@@ -246,8 +247,8 @@ bool fn_80137078(const Body* a, const Body* b, f32 ta, f32 tb) {
 int fn_80137140(int i, int j) {
     u8* ca = fn_8017960C(i);
     u8* cb = fn_8017960C(j);
-    u8* ma = (u8*)fn_802C6C34(*(int*)(ca + 0x59C));
-    u8* mb = (u8*)fn_802C6C34(*(int*)(cb + 0x59C));
+    u8* ma = (u8*)fn_802C6C34(((CarBody*)ca)->model);
+    u8* mb = (u8*)fn_802C6C34(((CarBody*)cb)->model);
     int r = 0;
     if (fn_80137078((Body*)(ca + 0x3C), (Body*)(cb + 0x3C), *(f32*)(ma + 0x40), *(f32*)(mb + 0x3C)) &&
         fn_80137078((Body*)(cb + 0x3C), (Body*)(ca + 0x3C), *(f32*)(mb + 0x40), *(f32*)(ma + 0x3C))) {
