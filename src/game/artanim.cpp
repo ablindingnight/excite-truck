@@ -126,22 +126,7 @@ struct ArtList : public ArtListBase {
     ArtAnimEntry* buf;  // offset 0xC
 };
 
-class ArtPlayer {
-public:
-    ArtPlayer(int n);
-    ~ArtPlayer(void);
-    int Add(const char* name, int map);
-    void Start(int i);
-    void Pause(int i);
-    void Resume(int i);
-    void StopAll(void);
-    void Rewind(void);
-    void Update(void);
-    void Draw(ArtXform* xf);  // the art transform (or 0)
-
-    ArtList* list;  // offset 0x0
-    f32 t;          // offset 0x4
-};
+#include "game/artplayer.h"
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" ValueTable* fn_80131808(const char* name);

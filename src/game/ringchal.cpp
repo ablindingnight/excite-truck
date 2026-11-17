@@ -22,22 +22,7 @@
 
 // Art animation player (artanim.cpp).
 struct ArtXform;  // artanim.cpp
-class ArtPlayer {
-public:
-    ArtPlayer(int n);
-    ~ArtPlayer(void);
-    int Add(const char* name, int bindings);
-    void Start(int i);
-    void Pause(int i);
-    void Resume(int i);
-    void StopAll(void);
-    void Rewind(void);
-    void Update(void);
-    void Draw(ArtXform* xf);  // the art transform (or 0)
-
-    void* list;  // offset 0x0
-    f32 t;       // offset 0x4
-};
+#include "game/artplayer.h"
 
 extern f32 lbl_8055E3C8;  // time
 

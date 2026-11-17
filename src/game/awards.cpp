@@ -62,20 +62,7 @@ CarInfo* fn_801EA9A0(int car);
 
 
 struct ArtXform;  // artanim.cpp
-class ArtPlayer {
-public:
-    ArtPlayer(int n);
-    ~ArtPlayer(void);
-    int Add(const char* name, int binds);
-    void Start(int i);
-    void Pause(int i);
-    void StopAll(void);
-    void Update(void);
-    void Draw(ArtXform* xf);  // the art transform (or 0)
-
-    void* list;  // offset 0x0
-    f32 t;       // offset 0x4
-};
+#include "game/artplayer.h"
 
 template <class T> void SafeDelete(T*& p) {
     if (p) {

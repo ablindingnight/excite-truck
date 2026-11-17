@@ -53,19 +53,7 @@ int fn_801609C4(s32 score);  // grade for a score
 
 // The results-screen art animation player.
 struct ArtXform;  // artanim.cpp
-class ArtPlayer {
-public:
-    ArtPlayer(int n);
-    ~ArtPlayer(void);
-    int Add(const char* name, int map);
-    void Start(int i);
-    void Pause(int i);
-    void Resume(int i);
-    void StopAll(void);
-    void Update(void);
-    void Draw(ArtXform* xf);  // the art transform (or 0)
-    u8 pad0[0x8];
-};
+#include "game/artplayer.h"
 
 const char* GetGradeDisplayName(int grade);
 
