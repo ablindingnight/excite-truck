@@ -3135,7 +3135,11 @@ public:
 
 
 extern "C" {
-int fn_801D48F8(void* seq);
+#ifdef __MWERKS__
+int fn_801D48F8(void* seq);  // defined u8 in actseq.cpp (its tail call needs the clrlwi); narrowing this caller drops BetaMaster::vf0C
+#else
+u8 fn_801D48F8(void* seq);  /* PORT: the definition's width (x86 leaves the upper bits undefined) */
+#endif
 int fn_801D4904(void* seq);
 int fn_801D4900(void* seq);
 f32 fn_801B306C(void);
