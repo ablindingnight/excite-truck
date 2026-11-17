@@ -4,6 +4,7 @@
 // bytes; Flush draws one texture-priority band. Names are guesses apart from the strings.
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
+#include "game/byteswap.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -186,31 +187,6 @@ template <class T>
 inline void Relocate(T*& p, u32 base);
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-
-static inline void Swap16(void* p) {
-    u8 t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[1];
-    ((u8*)p)[1] = t;
-}
-
-static inline void Swap32(void* p) {
-    u8 t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[3];
-    ((u8*)p)[3] = t;
-    t = ((u8*)p)[1];
-    ((u8*)p)[1] = ((u8*)p)[2];
-    ((u8*)p)[2] = t;
-}
-
-static inline void SwapL(void* p) {
-    u8* b = (u8*)p;
-    u8 t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
 
 template <class T>
 static inline void SwapItems(T& a, T& b) {
@@ -599,20 +575,20 @@ void fn_802CDB5C(int pri) {
 }
 
 void fn_802CDDC8(MList* m, u32 base) {
-    SwapL(&m->magic);
-    SwapL(&m->version);
-    SwapL(&m->flags);
+    SwapWord(&m->magic);
+    SwapWord(&m->version);
+    SwapWord(&m->flags);
     u32* w = (u32*)&m->a;
     for (int i = 0; i < 10; i++) {
-        SwapL(&w[i]);
+        SwapWord(&w[i]);
     }
     w = (u32*)m->ranges;
     for (int i = 0; i < 20; i++) {
-        SwapL(&w[i]);
+        SwapWord(&w[i]);
     }
-    SwapL(&m->numObjs);
-    SwapL(&m->maxObjs);
-    SwapL(&m->objs);
+    SwapWord(&m->numObjs);
+    SwapWord(&m->maxObjs);
+    SwapWord(&m->objs);
     Relocate(m->a.p, base);
     Relocate(m->b.p, base);
     Relocate(m->c.p, base);
@@ -621,23 +597,23 @@ void fn_802CDDC8(MList* m, u32 base) {
     int count = m->d.n;
     for (i = 0; i < count; i++) {
         MLStrip* s = &m->d.p[i];
-        Swap16(&s->ref);
-        Swap16(&s->flags);
-        Swap16(&s->mtx);
-        Swap16(&s->pad6);
-        Swap32(&s->prim);
+        SwapHalf(&s->ref);
+        SwapHalf(&s->flags);
+        SwapHalf(&s->mtx);
+        SwapHalf(&s->pad6);
+        SwapWordV(&s->prim);
         Relocate(s->prim, base);
     }
     Relocate(m->e.p, base);
     for (i = 0; i < m->e.n; i++) {
         MLBatch* e = &m->e.p[i];
-        Swap32(&e->start);
+        SwapWordV(&e->start);
         e->tex = -2;
-        Swap32(&e->end);
+        SwapWordV(&e->end);
     }
     Relocate(m->objs, base);
     for (i = 0; i < m->numObjs; i++) {
-        Swap32(&m->objs[i]);
+        SwapWordV(&m->objs[i]);
     }
     m->flags |= 1;
 }
