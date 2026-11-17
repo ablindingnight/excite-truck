@@ -709,9 +709,11 @@ static inline void RenderPool(WaterPool* p) {
         for (i = 0; i < p->nx; i++) {
             fn_8029DB78(p, (PoolVtx*)((u8*)rows[0] + i * (int)sizeof(PoolVtx)), i, 0);
         }
+        PoolVtx* a;
+        PoolVtx* b;
         for (int j = 1; j < p->ny; j++) {
-            PoolVtx* a = rows[j & 1];
-            PoolVtx* b = rows[1 - (j & 1)];
+            a = rows[j & 1];
+            b = rows[1 - (j & 1)];
             for (i = 0; i < p->nx; i++) {
                 fn_8029DB78(p, (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx)), i, j);
                 const PoolVtx& vertexBack = *(const PoolVtx*)((const u8*)b + i * (int)sizeof(PoolVtx));
@@ -903,14 +905,11 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
         return;
     }
     p->cur[gx + gy * p->nx] = -32768;
-    dir.x = v.y * inv;
-    base.x = q.x + p->origin.x;
+    f32 dirx = v.y * inv;
+    SetVec(&base, p->origin.x + q.x, p->origin.y + 0.25f, p->origin.z + q.y);
+    dir.x = dirx;
     dir.y = v.x * inv;
-    base.y = 0.25f + p->origin.y;
-    f32 zv = p->origin.z;
-    base.z = zv + q.y;
-    f32 a = 0.125f * speed;
-    a = 2.0f < a ? 2.0f : a;
+    f32 a = 2.0f < 0.125f * speed ? 2.0f : 0.125f * speed;
     int n = (int)(0.25f * speed) < 10 ? (int)(0.25f * speed) : 10;
     for (int k = 0; k < n; k++) {
         SetVec(&pos, base.x + dir.x * fn_80287BC8(-0.5f, 0.5f), base.y, base.z + dir.y * fn_80287BC8(-0.5f, 0.5f));
