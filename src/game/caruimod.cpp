@@ -154,6 +154,7 @@ static inline f32 Ease(f32 x) {
 
 class CarUIModel {
 public:
+    const Vec& WheelPosition(int index) const;
     CarUIModel(void);
     ~CarUIModel(void);
     void Reset(void);
@@ -829,6 +830,19 @@ extern "C" {
     return a + 0.5f * difference;
 }
 
+}  // extern "C"
+
+// Retail retains this diagnostic. The accessor name and invalid-index fallback are unverified.
+inline const Vec& CarUIModel::WheelPosition(int index) const {
+    if ((u32)index >= sizeof(wheelPos) / sizeof(wheelPos[0])) {
+        fn_802E30C8("%d is not a valid wheel index", index);
+        return wheelPos[0];
+    }
+    return wheelPos[index];
+}
+
+extern "C" {
+
 void fn_802545C4(MWSlot* p, s32 model, CarUIModel* m) {
     memset(p, 0, sizeof(MWSlot));
     p->valid = 1;
@@ -868,13 +882,14 @@ void fn_802545C4(MWSlot* p, s32 model, CarUIModel* m) {
         if (m->loaded) {
             f32 rad = fn_801F159C(m->fwheels);
             f32 back;
+            const Vec& wheel = m->WheelPosition(1);
             f32 h = -p->wheelY[1];
-            back = -(0.1524f + m->wheelPos[1].z);
+            back = -(0.1524f + wheel.z);
             p->frame.pos.x = mid.x + p->frame.b.v[2].x * back;
             p->frame.pos.y = mid.y + p->frame.b.v[2].y * back;
             p->frame.pos.z = mid.z + p->frame.b.v[2].z * back;
             f32 zero = 0.0f;
-            f32 lift = zero + (h + (-m->wheelPos[1].y + rad));
+            f32 lift = zero + (h + (-wheel.y + rad));
             p->frame.pos.x = p->frame.pos.x + p->frame.b.v[1].x * lift;
             p->frame.pos.y = p->frame.pos.y + p->frame.b.v[1].y * lift;
             p->frame.pos.z = p->frame.pos.z + p->frame.b.v[1].z * lift;
