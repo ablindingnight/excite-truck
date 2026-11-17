@@ -24,15 +24,7 @@ struct LoadSlot {
     s32 size;            // offset 0x14
 };
 
-class LoadPool {
-public:
-    ~LoadPool(void);
-
-    u8* buf;          // offset 0x0
-    s32 count;        // offset 0x4
-    s32 slotSize;     // offset 0x8
-    LoadSlot* slots;  // offset 0xC
-};
+#include "game/loadpool.h"
 
 ModuleTag lbl_8055E088;
 

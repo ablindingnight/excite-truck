@@ -12,10 +12,7 @@ void fn_802C6FA8(s32 model);
 s32 fn_802C6DC4(const char* name, s32 model, int a, int b);
 }
 
-class LoadPool {
-public:
-    ~LoadPool(void);
-};
+#include "game/loadpool.h"
 
 typedef void (*LoadCallback)(u8* data, s32 size, void* arg);
 
