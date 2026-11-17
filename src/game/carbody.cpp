@@ -1427,6 +1427,29 @@ extern "C" {
 // Before a physics step: copy the solver's wheel ground points/normals in, run the timers (stun, wheelie, air,
 // boost, heat, spin), apply the self-righting, stunt, landing, ramp, water, slope and steering forces/torques,
 // track boost/overheat state and tricks (flips and spins counted while airborne), and drive the sound/FX hooks.
+/* Helper name unproven: eases the stored ground normal towards a new one */
+static inline void EaseNormal(u8* p, f32 t, const RVec3& up) {
+    RVec3 n(LerpT(t, ((CarBody*)p)->f25A4, up.x), LerpT(t, ((CarBody*)p)->f25A8, up.y), LerpT(t, ((CarBody*)p)->f25AC, up.z));
+    *(RVec3*)(p + 0x25A4) = n;
+}
+/* Helper name unproven: world up crossed with a vector */
+static inline void UpCross(RVec3* out, const Vec* v) {
+    RVec3 y(0.0f, 1.0f, 0.0f);
+    PSVECCrossProduct((const Vec*)&y, v, (Vec*)out);
+}
+/* Helper name unproven: an upward impulse at the centre of mass */
+static inline void KickUp(u8* p, f32 k) {
+    RVec3 kick(0.0f, k, 0.0f);
+    ((RigidBody*)p)->AddImpulse(1.0f, (const RVec3*)&kick, (const RVec3*)(p + 0x60));
+}
+/* Helper name unproven: a vertical force at the centre of mass */
+static inline void LiftUp(u8* p, f32 k) {
+    RVec3 f;
+    f.x = 0.0f;
+    f.z = 0.0f;
+    f.y = k;
+    ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+}
 static inline int CarHot(u8* car) { return ((CarBody*)car)->f258C > 0.001f; }
 static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
 void fn_80183E7C(u8* p) {
@@ -1567,9 +1590,7 @@ void fn_80183E7C(u8* p) {
     b.y = cb->wheels[1].plane.ground[1] - cb->wheels[2].plane.ground[1];
     b.z = cb->wheels[1].plane.ground[2] - cb->wheels[2].plane.ground[2];
     PSVECCrossProduct((const Vec*)&a, (const Vec*)&b, (Vec*)&up);
-    RVec3 n(LerpT(0.05f, cb->f25A4, up.x), LerpT(0.05f, cb->f25A8, up.y),
-            LerpT(0.05f, cb->f25AC, up.z));
-    *(RVec3*)(p + 0x25A4) = n;
+    EaseNormal(p, 0.05f, up);
     f32 len = PSVECMag((const Vec*)(p + 0x25A4));
     if (len > 0.01f) {
         f32 inv = 1.0f / len;
@@ -1610,12 +1631,12 @@ void fn_80183E7C(u8* p) {
         dir.y = dir.y * inv;
         dir.z = dir.z * inv;
         f32 into = -PSVECDotProduct((const Vec*)&dir, (const Vec*)(p + 0x25A4));
-        RVec3 behind;
+        RVec3 slope;
         RVec3 ahead;
+        RVec3 behind;
         CbProbe(&ahead, &behind, &cb->mtx.pos, &cb->vel, 0.5f, -2.0f);
         ahead.y = fn_801E9FDC((s16*)(p + 0x6C), ahead.x, ahead.z);
         behind.y = fn_801E9FDC((s16*)(p + 0x6C), behind.x, behind.z);
-        RVec3 slope;
         slope.x = ahead.x - behind.x;
         slope.y = ahead.y - behind.y;
         slope.z = ahead.z - behind.z;
@@ -1742,9 +1763,8 @@ void fn_80183E7C(u8* p) {
         ((RigidBody*)p)->AddTorque((const RVec3*)&t);
     }
     if (cb->f2648 == 7) {
-        RVec3 y(0.0f, 1.0f, 0.0f);
         RVec3 side;
-        PSVECCrossProduct((const Vec*)&y, (const Vec*)(p + 0x54), (Vec*)&side);
+        UpCross(&side, (const Vec*)(p + 0x54));
         side.y = 0.0f;
         f32 k = 0.5f * -PSVECDotProduct((const Vec*)(p + 0x118), (const Vec*)&side) * cb->mass;
         RVec3 f;
@@ -1768,8 +1788,7 @@ void fn_80183E7C(u8* p) {
             (*(CbFx**)(p + 0x2584))->v28();
             fn_8014E61C(cb->index, 6, 0.0f);
             fn_80161A38(1, cb->index, 0);
-            RVec3 kick(0.0f, 10.0f * cb->mass, 0.0f);
-            ((RigidBody*)p)->AddImpulse(1.0f, (const RVec3*)&kick, (const RVec3*)(p + 0x60));
+            KickUp(p, 10.0f * cb->mass);
         }
         f32 top = 0.44444445f * fn_80181A48(p);
         cb->f261C = FMin(cb->f261C, 0.9f * top);
@@ -2006,6 +2025,7 @@ void fn_80183E7C(u8* p) {
         f32 yaw = 0.33333334f * cb->f25D8 * cb->f25F0 * cb->f5B0;
         f32 sp = PSVECMag((const Vec*)(p + 0x118));
         f32 m = FMax(sp, 1.0f);
+        RVec3 t;
         RVec3 dir;
         f32 inv = 1.0f / m;
         dir.x = cb->vel.x * inv;
@@ -2112,7 +2132,6 @@ void fn_80183E7C(u8* p) {
         f32 fa = Clamp01((cb->f2618 - 0.1f) / 0.20000002f);
         f32 k = 30000.0f * cb->f5E4 * cb->f5E4 * (1.0f + CbMul(fa, -0.8f)) *
                 (yaw * (1.0f + fs * -0.9f) - spin);
-        RVec3 t;
         t.x = cb->mtx.rot.y.x * k;
         t.y = cb->mtx.rot.y.y * k;
         t.z = cb->mtx.rot.y.z * k;
@@ -2141,11 +2160,7 @@ void fn_80183E7C(u8* p) {
             gravUp = gravUp * s;
         }
         airLift = airLift + (cb->vel.y > 0.0f ? grav : gravUp);
-        RVec3 f;
-        f.x = 0.0f;
-        f.z = 0.0f;
-        f.y = airLift * (9.81f * -cb->mass);
-        ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
+        LiftUp(p, airLift * (9.81f * -cb->mass));
         cb->f2684 = 9.81f * (1.0f + airLift);
     }
     cb->f26D0 = fn_801DCEC0(*(s16*)(p + 0x6C), cb->mtx.pos.x, cb->mtx.pos.z);
