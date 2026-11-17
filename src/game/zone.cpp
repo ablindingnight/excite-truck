@@ -24,6 +24,7 @@
 #include "game/raceprog.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
+#include "game/strcopy.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -485,16 +486,6 @@ public:
 
 extern "C" const char* fn_80131234(const char* key);
 
-static inline void StrCopyN(const char* src, int n, char* dst) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void InitText(char* s) {
     memset(s, 'z', 3);
@@ -571,14 +562,14 @@ struct ZoneHud {
     }
     int Update(ZoneCar* c);
     void SetComplete(void) {
-        StrCopyN(fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14, textC6);
-        StrCopyN(fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14, textDA);
-        StrCopyN("", 0x14, failText);
+        SafeStrCopy(textC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
+        SafeStrCopy(textDA, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
+        SafeStrCopy(failText, "", 0x14);
     }
     void SetTimedOut(void) {
-        StrCopyN(fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14, failText);
-        StrCopyN("", 0x14, textC6);
-        StrCopyN("", 0x14, textDA);
+        SafeStrCopy(failText, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
+        SafeStrCopy(textC6, "", 0x14);
+        SafeStrCopy(textDA, "", 0x14);
     }
     void ResetState(void) {
         state = 0;
@@ -2194,12 +2185,12 @@ int ZoneHud::Update(ZoneCar* c) {
     }
     fn_801345D8(bonus, 0x14, "%d", shown);
     if (noBonus) {
-        StrCopyN("", 0x14, timeLeft);
-        StrCopyN("", 0x14, bonusTitle);
+        SafeStrCopy(timeLeft, "", 0x14);
+        SafeStrCopy(bonusTitle, "", 0x14);
     } else {
         static LocString caps("ResultsOverlay:TIME_BONUS_CAPS");
         fn_80130980(timeLeft, 0x14, 2, left);
-        StrCopyN(caps.Get(), 0x14, bonusTitle);
+        SafeStrCopy(bonusTitle, caps.Get(), 0x14);
     }
     fn_801345D8(finalText, 0x14, "%d", final);
     fn_801308F4(totalText, 0x14, total);
@@ -2207,9 +2198,9 @@ int ZoneHud::Update(ZoneCar* c) {
     {
         int g = fn_801609C4(total);
         if (g != -1) {
-            StrCopyN(GetGradeDisplayName(g), 10, grade);
+            SafeStrCopy(grade, GetGradeDisplayName(g), 10);
         } else {
-            StrCopyN("-", 10, grade);
+            SafeStrCopy(grade, "-", 10);
         }
     }
     if (i10C) {
@@ -2789,9 +2780,9 @@ inline void ZoneHud::Init(void) {
         Bind(2, "difficulty_level", &level),
         lbl_802FAA40,
     };
-    StrCopyN("100", 0x14, noBonusText);
-    StrCopyN("50", 0x14, bonus);
-    StrCopyN("150", 0x14, totalText);
+    SafeStrCopy(noBonusText, "100", 0x14);
+    SafeStrCopy(bonus, "50", 0x14);
+    SafeStrCopy(totalText, "150", 0x14);
     fn_80130980(timeLeft, 0x14, 2, 15.0f);
     level = fn_80204CF0() + 1;
     animId = ((ArtPlayer*)(anim))->Add("a_zone_finish.val", (int)(b));
