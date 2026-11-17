@@ -2092,4 +2092,4 @@ int fn_80158618(const char* name) {
 // Pragma unproven: this unit-local nested-inline limit preserves retail's helper calls
 // and reverse first-use emission. All 169 bodies and the source-selected retail DOL match
 // for limits 319 through 369; default 512 expands five Stop/Crash paths. Original policy unknown.
-#pragma inline_max_size(320)
+#pragma inline_max_size(350)  // interior of the measured 319..369 window (320 and 350 both full-link verified, handoff/codex_stunts_budget350_independent_2026-11-17.md)
