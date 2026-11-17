@@ -697,6 +697,7 @@ public:
     void DrawGateBonus(int p, ZoneCar* c) const;
     void DrawRing(const Gate* g, int c) const;
     ZoneCar* GetCar(int i) { return &cars[i]; }
+    void UpdateCars(void);  /* Helper name unproven */
     int Paused(f32 now) { return 0; }
     ZoneLevel* CurLevel(void) const { return &levels->levels[level]; }
     Gate* FirstGate(int car) const {
@@ -2214,164 +2215,161 @@ Glow::~Glow(void) {
 void Glow::Draw(ZoneVec3* pts, int n, int c) { fn_802A96E8(pts, n, c, lite, glow); }
 
 
-// Nothing is inlined into the per-frame update in the original build: every helper it uses is a call to
-// a weak copy emitted right after it.
-#pragma dont_inline on
+// The per-car part of the update. Its body is over MWCC's 512-unit nested-inline budget (FACTS 2026-11-17 11:16),
+// so none of its helpers is expanded: each is a call to a weak copy emitted after vf0C in reverse first-use order.
+// The helpers vf0C itself uses (Play, Max) are expanded. Helper name unproven.
+inline void ZoneMaster::UpdateCars(void) {
+    for (int i = 0; i < nCars; i++) {
+        ZoneCar* c = GetCar(i);
+        f32 now = fn_8013CB3C();
+        if (c->human && c->done != 1 && fn_801B306C() <= 0.0f) {
+            if (!Paused(now) && !c->gate && fn_8013D1F0(i) > 0) {
+                c->gate = FirstGate(i);
+                c->SetWidth(fn_8017960C(i));
+            }
+            int finished = 0;
+            if (c->gate) {
+                if (c->bonusT < 0.0f) {
+                    c->bonusT = now;
+                }
+                if (c->gate->ring) {
+                    switch (fn_8013CBC0(c, i)) {
+                    case 0:
+                        break;
+                    case 1:
+                        c->gate = NextGate(c->gate);
+                        break;
+                    case 2: {
+                        EventRing::Entry* e = events.a.Push();
+                        e->bonus = lbl_8042FB3C.ringTimeBonus;
+                        e->time = now;
+                        e->gate = c->gate;
+                        c->finalScore++;
+                        c->score++;
+                        c->gate = NextGate(c->gate);
+                        int k = ClampI(events.a.Count() - 1, 0, 4);
+                        ringhit->SetPitch(lbl_802F93B0[k]);
+                        ringhit->Play();
+                        break;
+                    }
+                    }
+                } else {
+                    switch (fn_8013CBC0(c, i)) {
+                    case 0:
+                        break;
+                    case 1:
+                        c->Miss();
+                        c->clock = Max(Min(c->clock, 1.25f), c->clock - lbl_8042FB3C.gatePenalty);
+                        c->gate = NextGate(c->gate);
+                        c->hits[0]++;
+                        if (!c->tA8.Active()) {
+                            missflag->Play();
+                        }
+                        if (t84.Active()) {
+                            f9C += lbl_8042FB3C.gatePenalty;
+                        } else {
+                            t84.Start();
+                            f9C = lbl_8042FB3C.gatePenalty;
+                        }
+                        break;
+                    case 2: {
+                        f32 add;
+                        if (c->gates == c->streak) {
+                            if (TimeBonusPoints(c) == MaxBonus(level)) {
+                                c->streak++;
+                                goto counted;
+                            }
+                        }
+                        if (c->streak > 0) {
+                            c->tD0.Start();
+                        }
+                        c->streak = 0;
+                    counted:
+                        c->OnGate();
+                        ScoreGate(c);
+                        if (c->gates == lbl_8042FB3C.levelupGates) {
+                            int idx = c->gate - CurLevel()->gates;
+                            finished = !NextLevel();
+                            if (c->streak == lbl_8042FB3C.levelupGates) {
+                                c->perfectLevels++;
+                                t74.Start();
+                            }
+                            c->prev = c->stats;
+                            levelup->Play();
+                            c->ResetGates();
+                            c->gate = &CurLevel()->gates[idx];
+                            c->gate = NextGate(c->gate);
+                        } else {
+                            c->gate = NextGate(c->gate);
+                            fcount->Play();
+                        }
+                        add = lbl_8042FB3C.lifeBoostFactor * CurLevel()->timeScale;
+                        c->clock += add;
+                        if (t7C.Active()) {
+                            f98 += add;
+                        } else {
+                            t7C.Start();
+                            f98 = add;
+                        }
+                        break;
+                    }
+                    }
+                }
+                c->clock = Max(Boosting(fn_8017960C(i)) ? 0.5f : 0.0f, c->clock - 0.016683351f);
+                if (!c->AddTime(-0.016683351f) && !missflag->Playing()) {
+                    missflag->Play();
+                }
+                if (!lbl_8055E1BC && NearZero(c->clock)) {
+                    c->timeLeft = 0.0f;
+                }
+                if (events.a.Get(0)) {
+                    while (events.a.Get(0) && events.a.Get(0)->Expired(now)) {
+                        f94 += events.a.Get(0)->bonus;
+                        events.a.Pop();
+                    }
+                    if (f94 > 0.0f) {
+                        t8C.Start();
+                    }
+                } else if (!t8C.Active()) {
+                    f94 = 0.0f;
+                }
+            }
+            if (t74.Active() && t6C.Active()) {
+                t6C.Start();
+            }
+            if (finished || NearZero(c->timeLeft) || lbl_8042FB3C.highestLevel == level || c->lives < 0) {
+                if (NearZero(c->timeLeft)) {
+                    hud.SetTimedOut();
+                } else {
+                    hud.SetComplete();
+                }
+                c->done = 1;
+                c->doneT = now;
+                c->timeBonus = Floor(c->clock);
+                c->score += c->timeBonus;
+                fn_801CB5DC(i, c->score, fn_801609C4(c->score));
+                fn_801CB648(i, 1, c->clock);
+                if (c->human) {
+                    SetTotal(i);
+                }
+            }
+        }
+        fn_8013EB0C(this, i);
+    }
+}
+
 inline void ZoneMaster::vf0C(void) {
     f32 t = fn_801B306C();
     if (!b258 && t < 6.75f) {
         b258 = 1;
         if (prerace && !fn_80009C84()) {
-            GameSound* p = prerace;
-            p->start = 1;
-            p->loop = 0;
-            p->stop = 0;
+            prerace->Play();
         }
     }
     if (!vf24()) {
-        int finished;
-        ZoneCar* c;
-        int i;
-        for (i = 0; i < nCars; i++) {
-            c = GetCar(i);
-            f32 now = fn_8013CB3C();
-            if (c->human && c->done != 1 && fn_801B306C() <= 0.0f) {
-                if (!Paused(now) && !c->gate && fn_8013D1F0(i) > 0) {
-                    c->gate = FirstGate(i);
-                    c->SetWidth(fn_8017960C(i));
-                }
-                finished = 0;
-                if (c->gate) {
-                    if (c->bonusT < 0.0f) {
-                        c->bonusT = now;
-                    }
-                    if (c->gate->ring) {
-                        switch (fn_8013CBC0(c, i)) {
-                        case 0:
-                            break;
-                        case 1:
-                            c->gate = NextGate(c->gate);
-                            break;
-                        case 2: {
-                            EventRing::Entry* e = events.a.Push();
-                            e->bonus = lbl_8042FB3C.ringTimeBonus;
-                            e->time = now;
-                            e->gate = c->gate;
-                            c->finalScore++;
-                            c->score++;
-                            c->gate = NextGate(c->gate);
-                            int k = ClampI(events.a.Count() - 1, 0, 4);
-                            ringhit->SetPitch(lbl_802F93B0[k]);
-                            ringhit->Play();
-                            break;
-                        }
-                        }
-                    } else {
-                        switch (fn_8013CBC0(c, i)) {
-                        case 0:
-                            break;
-                        case 1:
-                            c->Miss();
-                            c->clock = Max(Min(c->clock, 1.25f), c->clock - lbl_8042FB3C.gatePenalty);
-                            c->gate = NextGate(c->gate);
-                            c->hits[0]++;
-                            if (!c->tA8.Active()) {
-                                missflag->Play();
-                            }
-                            if (t84.Active()) {
-                                f9C += lbl_8042FB3C.gatePenalty;
-                            } else {
-                                t84.Start();
-                                f9C = lbl_8042FB3C.gatePenalty;
-                            }
-                            break;
-                        case 2: {
-                            f32 add;
-                            if (c->gates == c->streak) {
-                                if (TimeBonusPoints(c) == MaxBonus(level)) {
-                                    c->streak++;
-                                    goto counted;
-                                }
-                            }
-                            if (c->streak > 0) {
-                                c->tD0.Start();
-                            }
-                            c->streak = 0;
-                        counted:
-                            c->OnGate();
-                            ScoreGate(c);
-                            if (c->gates == lbl_8042FB3C.levelupGates) {
-                                int idx = c->gate - CurLevel()->gates;
-                                finished = !NextLevel();
-                                if (c->streak == lbl_8042FB3C.levelupGates) {
-                                    c->perfectLevels++;
-                                    t74.Start();
-                                }
-                                c->prev = c->stats;
-                                levelup->Play();
-                                c->ResetGates();
-                                c->gate = &CurLevel()->gates[idx];
-                                c->gate = NextGate(c->gate);
-                            } else {
-                                c->gate = NextGate(c->gate);
-                                fcount->Play();
-                            }
-                            add = lbl_8042FB3C.lifeBoostFactor * CurLevel()->timeScale;
-                            c->clock += add;
-                            if (t7C.Active()) {
-                                f98 += add;
-                            } else {
-                                t7C.Start();
-                                f98 = add;
-                            }
-                            break;
-                        }
-                        }
-                    }
-                    c->clock = Max(Boosting(fn_8017960C(i)) ? 0.5f : 0.0f, c->clock - 0.016683351f);
-                    if (!c->AddTime(-0.016683351f) && !missflag->Playing()) {
-                        missflag->Play();
-                    }
-                    if (!lbl_8055E1BC && NearZero(c->clock)) {
-                        c->timeLeft = 0.0f;
-                    }
-                    if (events.a.Get(0)) {
-                        while (events.a.Get(0) && events.a.Get(0)->Expired(now)) {
-                            f94 += events.a.Get(0)->bonus;
-                            events.a.Pop();
-                        }
-                        if (f94 > 0.0f) {
-                            t8C.Start();
-                        }
-                    } else if (!t8C.Active()) {
-                        f94 = 0.0f;
-                    }
-                }
-                if (t74.Active() && t6C.Active()) {
-                    t6C.Start();
-                }
-                if (finished || NearZero(c->timeLeft) || lbl_8042FB3C.highestLevel == level || c->lives < 0) {
-                    if (NearZero(c->timeLeft)) {
-                        hud.SetTimedOut();
-                    } else {
-                        hud.SetComplete();
-                    }
-                    c->done = 1;
-                    c->doneT = now;
-                    c->timeBonus = Floor(c->clock);
-                    c->score += c->timeBonus;
-                    fn_801CB5DC(i, c->score, fn_801609C4(c->score));
-                    fn_801CB648(i, 1, c->clock);
-                    if (c->human) {
-                        SetTotal(i);
-                    }
-                }
-            }
-            fn_8013EB0C(this, i);
-        }
+        UpdateCars();
     } else {
-        f32 t = f250 - 0.016683351f;
-        f250 = 0.0f > t ? 0.0f : t;
+        f250 = Max(0.0f, f250 - 0.016683351f);
         if ((f32)__fabs(f250) <= __float_epsilon[0]) {
             int car = fn_80179630(0);
             hud.Update(&cars[car]);
@@ -2379,7 +2377,6 @@ inline void ZoneMaster::vf0C(void) {
     }
 }
 
-#pragma dont_inline reset
 
 inline void ZoneMaster::vf10(void) {
     ZoneCar* c;
