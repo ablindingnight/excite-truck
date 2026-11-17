@@ -5,6 +5,7 @@
 // layer weights move a point. Names are guesses apart from the strings.
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
+#include "game/byteswap.h"
 // World units per height-field cell. A named constant with external linkage, defined before any code: retail keeps
 // it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal of the spline helpers (name unproven).
 extern const f32 lbl_80562B60;
@@ -105,21 +106,6 @@ s32 lbl_8055E99C;              // tile origin x
 s32 lbl_8055E9A0;              // tile origin z
 u8 lbl_8055E9A4;               // loaded
 s32 lbl_8055E9A8[2];           // deform count
-
-static inline void Swap16(void* p) {
-    u8 t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[1];
-    ((u8*)p)[1] = t;
-}
-
-static inline void Swap32(void* p) {
-    u8 t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[3];
-    ((u8*)p)[3] = t;
-    t = ((u8*)p)[1];
-    ((u8*)p)[1] = ((u8*)p)[2];
-    ((u8*)p)[2] = t;
-}
 
 static inline GTile* TileAt(GroundHeader* g, int tx, int tz) {
     int ix = tx - lbl_8055E99C;
@@ -318,12 +304,7 @@ extern "C" {
 void fn_801DC32C(GroundHeader* g) {
     u32* w = (u32*)g;
     for (int k = 0; k < 13; k++) {
-        s8 t = ((u8*)&w[k])[0];
-        ((u8*)&w[k])[0] = ((u8*)&w[k])[3];
-        ((u8*)&w[k])[3] = t;
-        t = ((u8*)&w[k])[1];
-        ((u8*)&w[k])[1] = ((u8*)&w[k])[2];
-        ((u8*)&w[k])[2] = t;
+        SwapWord(&w[k]);
     }
     g->tiles = (GTile*)((u8*)g + (u32)g->tiles);
     g->layers = (GLayer*)((u8*)g + (u32)g->layers);
@@ -339,19 +320,19 @@ void fn_801DC32C(GroundHeader* g) {
     int i;
     for (i = 0; i < g->numTiles; i++) {
         GTile* t = &g->tiles[i];
-        Swap32(&t->base);
-        Swap32(&t->scale);
+        SwapWord(&t->base);
+        SwapWord(&t->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(&AtR(t->h, b)[a]);
+                SwapHalfV(&AtR(t->h, b)[a]);
             }
         }
-        Swap32(&t->x);
-        Swap32(&t->z);
+        SwapWord(&t->x);
+        SwapWord(&t->z);
         for (int r = 0; r < 32; r++) {
-            Swap32(&t->rows[r]);
+            SwapWord(&t->rows[r]);
         }
-        Swap32(&t->layer);
+        SwapWord(&t->layer);
         if (i == 0) {
             lbl_8055E99C = minX = maxX = t->x;
             lbl_8055E9A0 = minZ = maxZ = t->z;
@@ -372,20 +353,20 @@ void fn_801DC32C(GroundHeader* g) {
     }
     for (i = 0; i < g->numLayers; i++) {
         GLayer* l = &g->layers[i];
-        Swap32(&l->base);
-        Swap32(&l->scale);
+        SwapWord(&l->base);
+        SwapWord(&l->scale);
         for (int a = 0; a < 32; a++) {
             for (int b = 0; b < 32; b++) {
-                Swap16(&AtR(l->h, b)[a]);
+                SwapHalfV(&AtR(l->h, b)[a]);
             }
         }
-        Swap32(&l->weight);
-        Swap32(&l->next);
+        SwapWord(&l->weight);
+        SwapWord(&l->next);
     }
     for (i = 0; i < g->numItems; i++) {
         GItem* it = &g->items[i];
         for (int k = 0; k < 4; k++) {
-            Swap32(&it->w[k]);
+            SwapWord(&it->w[k]);
         }
     }
 }
