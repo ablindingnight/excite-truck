@@ -43,6 +43,7 @@ int lbl_8055BE10 = -1;  // the column it was moved to
 
 #include "game/namechooser.h"
 #include "game/makeilpos.h"
+#include "game/strcat.h"
 
 ModuleTag lbl_8055F208;
 
@@ -51,15 +52,6 @@ extern const u32 lbl_8055F210 = MakeILPos(0x7F00, 0);
 extern const u32 lbl_8055F214 = MakeILPos(0xFFFF, 0);
 
 
-static inline void StrNCat(char* d, const char* s, int n) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        SafeStrCopy(d, s, n);
-    }
-}
 
 extern "C" {
 

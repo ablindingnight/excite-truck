@@ -80,6 +80,7 @@ struct CarDrawView {
 // The racer description the model is built for.
 #include "game/carres.h"
 #include "game/makeilpos.h"
+#include "game/strcat.h"
 
 struct Joint;
 
@@ -215,15 +216,6 @@ static inline void MulVecT(Vec* out, const Vec* in, const Vec* m) {
 }
 
 
-static inline void StrCat(char* d, const char* s, int n) {
-    while (*d) {
-        n--;
-        d++;
-    }
-    if (n > 0) {
-        SafeStrCopy(d, s, n);
-    }
-}
 
 static inline CarModel* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
@@ -354,7 +346,7 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
     }
     char buf[64];
     SafeStrCopy(buf, d->vehicleName, 64);
-    StrCat(buf, ".car", 64);
+    StrNCat(buf, ".car", 64);
     fn_8012E81C(buf);
     res = (CarRes*)fn_802792E4(d->vehicleName);
     fn_801EA59C(r->index, 0, (CarDef*)d);

@@ -640,6 +640,7 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
 }  // extern "C"
 
 #include "game/gamemode.h"
+#include "game/nearzero.h"
 
 class DmgModel {
 public:
@@ -728,7 +729,6 @@ void fn_801B8610(s32 car, s32 by);
 void fn_8018F76C(u8* p, int i);
 void fn_802E30C8(const char* fmt, ...);
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > __float_epsilon[0]; }
 static inline int HitTooSoon(const u8* car) { return lbl_8055E3C8 < 3.0f + F32(car, 0x26D8); }
 
