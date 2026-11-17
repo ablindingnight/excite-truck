@@ -1452,7 +1452,7 @@ static inline void UpCross(RVec3* out, const Vec* v) {
 }
 /* Helper name unproven: an upward impulse at the centre of mass */
 static inline void KickUp(u8* p, f32 k) {
-    RVec3 kick(0.0f, k, 0.0f);
+    RVec3 kick(0.0f, 10.0f * k, 0.0f);
     ((RigidBody*)p)->AddImpulse(1.0f, (const RVec3*)&kick, (const RVec3*)(p + 0x60));
 }
 /* Helper name unproven: a vertical force at the centre of mass */
@@ -1807,11 +1807,11 @@ void fn_80183E7C(u8* p) {
             ((CbFx*)((CarBody*)p)->f2584)->v28();
             fn_8014E61C(cb->index, 6, 0.0f);
             fn_80161A38(1, cb->index, 0);
-            KickUp(p, 10.0f * cb->mass);
+            KickUp(p, cb->mass);
         }
         f32 top = 0.44444445f * fn_80181A48(p);
         cb->f261C = MinF(cb->f261C, 0.9f * top);
-        f32 flat = sqrt(cb->vel.x * cb->vel.x + cb->vel.z * cb->vel.z);
+        f32 flat = sqrt(Sq(cb->vel.x) + Sq(cb->vel.z));
         int nosedive = 0;
         f32 dive = -cb->f2600;
         if (lbl_8055A3AC && U32(p, 0x10) == 'PCAR' && dive > 0.0f && dive > 0.9f) {
@@ -1909,7 +1909,7 @@ void fn_80183E7C(u8* p) {
         cb->f2618 += 0.016683351f;
     } else {
         cb->f2618 = 0.0f;
-        sqrt(cb->vel.x * cb->vel.x + cb->vel.z * cb->vel.z);
+        sqrt(Sq(cb->vel.x) + Sq(cb->vel.z));
         cb->f261C = cb->speed;
     }
     int sunk = 0;
@@ -2197,8 +2197,9 @@ void fn_80183E7C(u8* p) {
         RVec3 a;
         CbSpring3(&a, (RVec3*)&cb->f26E4, -30.0f, (RVec3*)&cb->f26F0, -3.0f);
         if (cb->airborne > 0) {
+            f32 s = cb->f2604;
             cb->f26FC = cb->f2600;
-            a.x = a.x + 2.0f * cb->f2604;
+            a.x = a.x + 2.0f * s;
         }
         a.y = a.y + 10.0f * cb->f26FC * (1.0f - cb->f25F0 * cb->f25F0);
         RVec3 acc;
