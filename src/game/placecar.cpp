@@ -218,14 +218,17 @@ void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
     m->basis[2].z = f.z;
 }
 
-static inline f32 AddMul_hm(f32 a, f32 b, f32 c) { return a + c * b; }  /* Helper name unproven */
 }
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 extern "C" {
-static inline f32 Corner(f32 p, f32 d, f32 n) { return p + d * 0.5f + n * 0.5f; }  /* Helper name unproven */
 /* Helper unproven: retail creates the 10.0f of fn_801B7F4C BEFORE the literals of fn_801B7C8C, so an unused static
    function with that literal was compiled here (dead static functions keep their constants). */
 static f32 SlotStart(f32 base) { return 10.0f + base; }
+
+/* Helper name unproven */
+static inline void Add2(V2* o, const V2* a, const V2* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; }
+/* Helper name unproven */
+static inline void Flat(V3* o, const V2* v) { o->x = v->x; o->y = 0.0f; o->z = v->y; }
 
 void fn_801B7C8C(CarPlace* r, const V2* pos, const V2* dir) {
     V2 n = *dir;
@@ -233,28 +236,22 @@ void fn_801B7C8C(CarPlace* r, const V2* pos, const V2* dir) {
     V3 up;
     V3 pts[3];
     m.origin.x = pos->x;
-    up.z = 0.0f;
     m.origin.y = 0.0f;
     m.origin.z = pos->y;
     up.x = 0.0f;
     up.y = 1.0f;
+    up.z = 0.0f;
     f32 tmp = n.x;
     n.x = n.y;
     n.y = -tmp;
-    pts[0].x = pos->x + dir->x * -0.5f;
-    pts[0].y = 0.0f;
-    pts[0].z = pos->y + dir->y * -0.5f;
-    f32 ax = Corner(pos->x, dir->x, n.x);
-    f32 ay = AddMul_hm(pos->y, 0.5f, dir->y) + n.y * 0.5f;
-    pts[1].x = ax;
-    pts[1].y = 0.0f;
-    pts[1].z = ay;
     V2 b;
-    b.x = ax + -n.x;
-    b.y = ay + n.y * -1.0f;
-    pts[2].x = b.x;
-    pts[2].y = 0.0f;
-    pts[2].z = b.y;
+    Add2(&b, pos, dir, -0.5f);
+    Flat(&pts[0], &b);
+    Add2(&b, pos, dir, 0.5f);
+    Add2(&b, &b, &n, 0.5f);
+    Flat(&pts[1], &b);
+    Add2(&b, &b, &n, -1.0f);
+    Flat(&pts[2], &b);
     GroundInfo info;
     fn_801E9DC4(&r->hint);
     int fail = 0;
