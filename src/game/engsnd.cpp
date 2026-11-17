@@ -55,7 +55,7 @@ struct Car {
 };
 
 // A fade window: full between lo and hi, fading out over 1/invLo below and 1/invHi above.
-struct Window {
+struct FadeWindow {
 
     f32 lo;     // offset 0x0
     f32 hi;     // offset 0x4
@@ -65,7 +65,7 @@ struct Window {
 };
 
 /* Helper name unproven */
-static inline void LoadWindow(Window* w, ValueNode* n) {
+static inline void LoadWindow(FadeWindow* w, ValueNode* n) {
     f32 g = n->GetFloat("gain", 1.0f);
     f32 t4 = n->GetFloat("t4", 110000.0f);
     f32 t3 = n->GetFloat("t3", 100000.0f);
@@ -81,8 +81,8 @@ static inline void LoadWindow(Window* w, ValueNode* n) {
 struct EngineSample {
     GameSound* snd;  // offset 0x0
     f32 invRpm;      // offset 0x4
-    Window rpm;      // offset 0x8
-    Window throttle; // offset 0x1C
+    FadeWindow rpm;      // offset 0x8
+    FadeWindow throttle; // offset 0x1C
     f32 level;       // offset 0x30
 };
 

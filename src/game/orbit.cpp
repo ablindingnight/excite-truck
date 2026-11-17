@@ -6,6 +6,7 @@
 // and when the player cannot finish in time the "turtle" mode turns it all off. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/racesetup.h"
 #include "game/carbody.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
@@ -455,12 +456,7 @@ void fn_801662FC(void) {
 
 void* lbl_8055E330;  // boost bounds
 
-struct CarSetup {
-    s32 type;  // offset 0x0
-    u8 pad4[0x78 - 0x4];
-};
-
-void fn_801663C8(int n, const CarSetup* cars, const RaceDesc* race) {
+void fn_801663C8(int n, const CarDef* cars, const RaceDesc* race) {
     int i;
     lbl_8055E324 = fn_801659D0(race);
     fn_80165FAC();

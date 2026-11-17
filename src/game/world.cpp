@@ -153,7 +153,7 @@ struct WheelSlot {
 };
 }  // namespace
 
-struct AnimSlot {
+struct WobHeader {
     s32 tag;   // offset 0x0
     s32 size;  // offset 0x4
 };
@@ -1064,7 +1064,7 @@ static void EwobPlacementFailed(f32 x, f32 z) {
 static const char* EwobTorchName(void) { return "tiki_torch"; }
 
 void fn_801E8DD4(void) {
-    AnimSlot a;
+    WobHeader a;
     memset(&a, 0, sizeof(a));
     a.tag = 'Panl';
     a.size = sizeof(a);
