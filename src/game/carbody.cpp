@@ -21,6 +21,7 @@
 
 template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; a->y = pos->y + vel->y * ka; a->z = pos->z + vel->z * ka; b->x = pos->x + vel->x * kb; b->y = pos->y + vel->y * kb; b->z = pos->z + vel->z * kb; }
 static inline f32 CbAdd(f32 a, f32 b) { return a + b; }
+/* Helper name unproven */ template <class O, class V> static inline void CbSpring3(O* o, const V* x, f32 ks, const V* v, f32 kd) { o->x = x->x * ks + v->x * kd; o->y = x->y * ks + v->y * kd; o->z = x->z * ks + v->z * kd; }
 static inline void CbScaleTo(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -1708,7 +1709,8 @@ void fn_80183E7C(u8* p) {
         f32 sink = -PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118));
         if (sink > 13.333333f &&
             (cb->mtx.pos.y - cb->wheels[3].plane.ground[1] - 4.0f * (0.016683351f * sink) < 0.0f || cb->airborne)) {
-            f32 k = MaxF(sink - 13.333333f, 0.0f) * cb->mass / 0.016683351f;
+            f32 ex = MaxF(sink - 13.333333f, 0.0f);
+            f32 k = ex * cb->mass / 0.016683351f;
             RVec3 f;
             f.x = cb->f25A4 * k;
             f.y = cb->f25A8 * k;
@@ -1940,8 +1942,8 @@ void fn_80183E7C(u8* p) {
         }
         f32 k = -2.0f * cb->mass;
         RVec3 f;
+        cb->f25C4 = CbAdd(cb->f25C4, 0.016683351f);
         f.x = cb->vel.x * k;
-        cb->f25C4 = cb->f25C4 + 0.016683351f;
         f.y = cb->vel.y * k;
         f.z = cb->vel.z * k;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
@@ -2191,9 +2193,7 @@ void fn_80183E7C(u8* p) {
     }
     if (cb->f26E0) {
         RVec3 a;
-        a.x = cb->f26E4 * -30.0f + cb->f26F0 * -3.0f;
-        a.y = cb->f26E8 * -30.0f + cb->f26F4 * -3.0f;
-        a.z = cb->f26EC * -30.0f + cb->f26F8 * -3.0f;
+        CbSpring3(&a, (RVec3*)&cb->f26E4, -30.0f, (RVec3*)&cb->f26F0, -3.0f);
         if (cb->airborne > 0) {
             cb->f26FC = cb->f2600;
             a.x = a.x + 2.0f * cb->f2604;
