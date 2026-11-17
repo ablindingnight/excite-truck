@@ -34,7 +34,9 @@ extern char lbl_8055B860[8];
 }
 
 /* Helper name unproven */
-static inline MenuItem Text(const char* n, CaptionContext c, const char* t) { return MenuItem(n, 3, t, c.value, 0); }
+static inline MenuItem Text(const char* name, const char* text, const CaptionContext& context) {
+    return MenuItem(context, name, text);
+}
 ModuleTag lbl_8055F1D0;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
@@ -70,12 +72,12 @@ int fn_8023FAD4(char* name, int maxLen) {
     }
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8023FA9C, 0, 0),
-        Text("player", CaptionContext(4), ""),
+        Text("player", "", CaptionContext(4)),
         MenuItem("namechooser", 5, lbl_8055F1E0, 0, 0),
         MenuItem("circle_list", 10, &list, 0, 0),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
         MenuItem(lbl_8055B860, 6, NULL, -1, 27),
-        *(MenuItem*)&lbl_804987F8,
+        MenuItem(lbl_804987F8),
     };
     MenuDesc desc = {"namenter.lyt", items, fn_8023FA50, 0, 0};
     int ok = fn_802146BC(&desc, -999, -999, 1) != -1;
