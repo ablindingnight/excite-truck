@@ -1284,13 +1284,13 @@ void fn_8019743C(u8* d, u8* out);
 void fn_80197BD0(u8* d, u8* out);
 void fn_8019724C(u8* d, V2* io);
 
-// A 2D point copied as words (array member).
-struct PVec2 {
+// A 2D point copied as words (array member; precip's PVec2 has float fields, so this one has its own name).
+struct WordVec2 {
     f32 v[2];
 };
 
 struct Pos4 {
-    PVec2 p;
+    WordVec2 p;
     f32 c;
     f32 d;
 };
@@ -1319,7 +1319,7 @@ void fn_80195654(u8* d, u8* out) {
         fn_80194FD0(d, out, t);
         if (F32(d, 0x26C) - F32(d, 0x1E4) < F32(d, 0x2BC)) {
             Pos4 tmp;
-            tmp.p = *(PVec2*)out;
+            tmp.p = *(WordVec2*)out;
             tmp.c = F32(out, 0x8);
             tmp.d = F32(out, 0xC);
             fn_801955F0(d, (u8*)&tmp, t);
