@@ -3,6 +3,7 @@
 // get notified when the current slot changes. Names are guesses.
 #include <string.h>
 #include "game/common.h"
+#include "game/strcopy.h"
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
@@ -215,24 +216,13 @@ void IdentSaveEvent(int event) {
     }
 }
 
-/* Helper name unproven: bounded string copy, the same inline as betarace/awards StrCopyN. */
-static inline void StrCopyN(char* d, int n, const char* s) {
-    char* p = d;
-    int k = n;
-    while ((*p++ = *s++) != 0) {
-        if (--k <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 void IdentResetAll(void) {
 
     lbl_8055D46C->current = 0;
     for (int i = 0; i < NUM_SLOTS; i++) {
         lbl_8055D46C->slots[i].state = 0;
-        StrCopyN(lbl_8055D46C->slots[i].name, NAME_LEN, "");
+        SafeStrCopy(lbl_8055D46C->slots[i].name, "", NAME_LEN);
     }
     for (int i = 0; i < NUM_SLOTS; i++) {
         const char* src;
@@ -243,7 +233,7 @@ void IdentResetAll(void) {
         src = fn_80131234(lbl_8055D46C->default_names[i]);
         n = NAME_LEN;
         dst = lbl_8055D46C->default_names[i];
-        StrCopyN(dst, n, src);
+        SafeStrCopy(dst, src, n);
         lbl_8055D46C->unkAC[i] = -1;
     }
 }
