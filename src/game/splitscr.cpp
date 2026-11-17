@@ -10,6 +10,7 @@
 #include "game/carinfo.h"
 #include "game/plainvec.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 // A vertex position (constructed in place).
 // VtxPos: rvec.h's RVec3.
@@ -41,7 +42,6 @@ CarInfo* fn_801EA9A0(int car);
 f32 fn_8013672C(void);      // lap length
 }
 
-static inline f32 Clamp01(f32 x) { return MaxF(MinFRev(x, 1.0f), 0.0f); }
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 
 ModuleTag lbl_8055ED60;

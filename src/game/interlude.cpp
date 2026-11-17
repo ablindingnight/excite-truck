@@ -10,6 +10,7 @@
 #include "game/math_types.h"
 #include "game/respawn.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 
 // A ground-plane (x, z) vector.
@@ -1075,7 +1076,6 @@ f32 fn_80139030(IMotion* m);
 
 static inline f32 Clamp(f32 v, f32 lo, f32 hi) { return MaxF(MinF(hi, v), lo); }
 static inline f32 ClampSigned(f32 v) { return Clamp(v, -1.0f, 1.0f); }
-static inline f32 Clamp01(f32 v) { return Clamp(v, 0.0f, 1.0f); }
 
 struct RaceLen {
     u8 pad0[4];

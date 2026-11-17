@@ -28,6 +28,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/strcopy.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -133,10 +134,6 @@ inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
 inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
 inline f32 Floor(f32 x) { return floor(x); }
 static inline f32 LerpDiffFirst(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
-static inline f32 Clamp01(f32 x) {
-    f32 r = 1.0f < x ? 1.0f : x;
-    return r > 0.0f ? r : 0.0f;
-}
 static inline f32 Sum(f32 a, f32 b) { return a + b; }
 
 // One gate: two posts on the ground plane, an optional ring height.

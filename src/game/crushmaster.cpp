@@ -137,6 +137,7 @@ void fn_8018F76C(RaceCarRec* car, int wheel);
 
 // Interval timer on the race clock (0x8001DAE0..), shared with zone and stdoverlay.
 #include "game/timer.h"
+#include "game/clamp01.h"
 
 // Arrow/marker vertex.
 struct MarkVtx {
@@ -1426,10 +1427,6 @@ inline int CrushMaster::vf8C(int p, int key) {
     return r;
 }
 
-static inline f32 Clamp01(f32 x) {
-    f32 r = 1.0f < x ? 1.0f : x;
-    return r > 0.0f ? r : 0.0f;
-}
 
 static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t) { fn_801479A8(a, b, text, t); }
 

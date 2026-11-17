@@ -6,6 +6,7 @@
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -292,11 +293,6 @@ s32 fn_802A8A34(BoidVec* v) { return v->n; }
 
 Boid* fn_802A8A3C(BoidVec* v, int i) { return &v->data[i]; }
 
-static inline f32 Clamp01(f32 x) {
-    f32 r = 1.0f < x ? 1.0f : x;
-    r = r > 0.0f ? r : 0.0f;
-    return r;
-}
 
 static inline void MulM(const f32* m, const RVec3* v, RVec3* out) {
     if (out == v) {

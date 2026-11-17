@@ -11,6 +11,7 @@
 #include "game/camrec.h"
 #include "game/math_types.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 
 
@@ -580,11 +581,6 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
 // Camera for slot `slot` in the chase modes: behind and above the car, swinging round with the
 // transition and pitched by the car's climb, blended from the slot's camera; the tips camera once the
 // race is over.
-/* Helper name unproven: the clamp keeps its value in one variable (min, then max in place). */
-static inline f32 Clamp01(f32 x) {
-    f32 r = 1.0f < x ? 1.0f : x;
-    return r > 0.0f ? r : 0.0f;
-}
 void fn_80277A14(CamRec* c, int slot) {
     CamPose blend;
     CamPose frame;

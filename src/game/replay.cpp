@@ -43,6 +43,7 @@ public:
 };
 
 #include "game/layoutoffset.h"
+#include "game/clamp01.h"
 
 extern "C" {
 extern s32 lbl_8055CFF0;  // screen width
@@ -235,10 +236,6 @@ void fn_80008618(u32 bit) {
 
 int fn_8000865C(void) { return (fn_801E87A8()->flags >> 1) & 1; }
 
-static inline f32 Clamp01(f32 x) {
-    f32 v = MIN(1.0f, x);
-    return MAX(v, 0.0f);
-}
 
 ActionPrompt lbl_802FB8F0[7] = {
     {0x1, "\\dpad", NULL},

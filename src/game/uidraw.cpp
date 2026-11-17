@@ -12,6 +12,7 @@
 
 #include "game/uivertex.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 void UIContextBegin(void);
 void UIContextEnd(void);
@@ -415,10 +416,6 @@ f32 fn_80230EF4(int real) {
 
 void fn_80230F6C(u32* color) { *color = 0xFFFFCA44; }
 
-static inline f32 Clamp01(f32 t) {
-    t = (1.0f < t) ? 1.0f : t;
-    return (t > 0.0f) ? t : 0.0f;
-}
 
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 

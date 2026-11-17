@@ -110,11 +110,8 @@ static inline void SafeDelete(T*& p) {
 
 
 #include "game/fixedstr.h"
+#include "game/clamp01.h"
 
-static inline f32 Clamp01(f32 x) {
-    f32 r = 1.0f < x ? 1.0f : x;
-    return r > 0.0f ? r : 0.0f;
-}
 
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 

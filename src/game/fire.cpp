@@ -73,6 +73,7 @@ struct FireVec {
 };
 
 #include "game/fxseq.h"
+#include "game/clamp01.h"
 
 extern "C" {
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
@@ -155,10 +156,6 @@ static inline void Scale(Vec* out, const Vec* in, f32 s) {
     out->z = in->z * s;
 }
 
-static inline f32 Clamp01(f32 x) {
-    x = 1.0f < x ? 1.0f : x;
-    return x > 0.0f ? x : 0.0f;
-}
 
 // out = b * a, through a temporary when out aliases an input.
 static inline void MulMat(Mat3* out, const Mat3* a, const Mat3* b) {

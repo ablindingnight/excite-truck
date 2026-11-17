@@ -56,6 +56,7 @@ void gxForgetTexture(void* tex);
 #include "game/trackmod.h"
 
 #include "game/trackinst.h"
+#include "game/clamp01.h"
 
 struct Rot {
     Rot(void);
@@ -410,7 +411,6 @@ extern u16 lbl_802F9B20[6];
 
 
 
-static inline f32 Clamp01(f32 a) { return MaxF(MinFRev(a, 1.0f), 0.0f); }
 
 static inline void NegInto(PVec* o, const f32* v, f32 k) {
     o->x = v[0] * k;

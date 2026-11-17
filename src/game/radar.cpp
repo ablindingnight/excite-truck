@@ -9,6 +9,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 extern "C" {
 double sqrt(double x);
@@ -42,13 +43,6 @@ extern const u32 lbl_8055E128 = MakeILPos(0xFFFF, 0);
 
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
-static inline f32 Clamp01(f32 t) {
-    if (1.0f < t) {
-        t = 1.0f;
-    }
-    t = t > 0.0f ? t : 0.0f;
-    return t;
-}
 
 // Stripped by the linker; its constants come first in the pool.
 f32 RadarClampStub(f32 t) { return Clamp01(t); }

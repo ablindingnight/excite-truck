@@ -87,6 +87,7 @@ struct TrackNode {
 
 #include "game/uivertex.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 
 extern "C" {
@@ -329,10 +330,6 @@ void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int col
 
 
 
-static inline f32 Clamp01(f32 t) {
-    t = (1.0f < t) ? 1.0f : t;
-    return (t > 0.0f) ? t : 0.0f;
-}
 
 static inline void SetCroppedUV(f32& ul, f32& vt, f32& ur, f32& vb,
                                f32 leftU, f32 topV, f32 rightU, f32 bottomV) {

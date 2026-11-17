@@ -3,6 +3,7 @@
 #include "game/common.h"
 #include "game/carbody.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 extern "C" int strcmp(const char* a, const char* b);
 
@@ -53,7 +54,6 @@ RoadSoundVoice* fn_802077A4(const char* name, int flags, void* a, void* b);
 SurfaceInfo* fn_801D04A8(int surface);
 }
 
-static inline f32 Clamp01(f32 t) { return MaxF(MinFRev(t, 1.0f), 0.0f); }
 
 #include "game/roadsound.h"
 

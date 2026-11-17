@@ -630,6 +630,7 @@ static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0];
 
 // A thrown or knocked object on the track.
 #include "game/body.h"
+#include "game/clamp01.h"
 
 extern "C" {
 void fn_801D0800(IPickupListener* l);
@@ -728,7 +729,6 @@ int fn_801D9B28(void* group, int index);  // morph group contains index
 void fn_80178DBC(int index, f32 t);      // set world morph position
 }
 
-static inline f32 Clamp01(f32 x) { return MaxF(MinFRev(x, 1.0f), 0.0f); }
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 
 namespace {

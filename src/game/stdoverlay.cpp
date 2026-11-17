@@ -65,6 +65,7 @@ static inline GameSound* LoadGradeSound(void) {
 
 // Interval timer on the race clock; its inline methods are shared with zone and crushmaster.
 #include "game/timer.h"
+#include "game/clamp01.h"
 
 namespace {
 
@@ -176,10 +177,6 @@ static inline TextElem* FindResItem(const char* name) {
 }
 
 
-static inline f32 Clamp01(f32 x) {
-    f32 v = MIN(1.0f, x);
-    return MAX(v, 0.0f);
-}
 
 
 f32 Pulse(int period) {

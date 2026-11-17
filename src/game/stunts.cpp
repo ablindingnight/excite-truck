@@ -20,6 +20,7 @@ extern RaceCarRec* lbl_804348E8[];
 
 // Something told about every awarded stunt (achievements, statistics).
 #include "game/stuntwatch.h"
+#include "game/clamp01.h"
 
 extern "C" {
 void* memset(void* d, int c, size_t n);
@@ -53,10 +54,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 #define NearZero(x) ((f32)__fabs(x) <= __float_epsilon[0])
 // SpinTracker::Rate tests its angle through the float abs inline FAbs (mathutil.h; the call copy gives fabs its own register);
 // the other trackers use the macro above. Exact original spelling unknown.
-inline f32 Clamp01(f32 x) {
-    f32 r = 1.0f < x ? 1.0f : x;
-    return r > 0.0f ? r : 0.0f;
-}
 
 template <typename T, int N>
 struct FixedList {
