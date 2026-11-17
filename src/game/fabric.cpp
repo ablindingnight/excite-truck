@@ -122,18 +122,12 @@ public:
     s32 count;          // offset 0x120
 };
 
-class TrackInst {
-public:
-    virtual ~TrackInst(void) {}
-    virtual void Draw(void* ctx);
-    virtual int Kind(void);
-    virtual void Draw2(void* ctx);
-};
+#include "game/trackinst.h"
 
 class UniformFabricInst : public TrackInst {
 public:
     virtual ~UniformFabricInst(void);
-    virtual void Draw(void* ctx);
+    virtual void Update(void* ctx);
     virtual int Kind(void);
     virtual void Draw2(void* ctx);
 };
@@ -141,7 +135,7 @@ public:
 class NonUniformFabricInst : public TrackInst {
 public:
     virtual ~NonUniformFabricInst(void);
-    virtual void Draw(void* ctx);
+    virtual void Update(void* ctx);
     virtual int Kind(void);
     virtual void Draw2(void* ctx);
 };
@@ -921,11 +915,11 @@ void ManualFabricMan::Add(ValueNode* vn, RMtx* m) {
     count++;
 }
 
-void UniformFabricInst::Draw(void* ctx) { lbl_8055EC10->Update(ctx); }
+void UniformFabricInst::Update(void* ctx) { lbl_8055EC10->Update(ctx); }
 
 void UniformFabricInst::Draw2(void* ctx) { lbl_8055EC10->Draw(); }
 
-void NonUniformFabricInst::Draw(void* ctx) { lbl_8055EC14->Update(ctx); }
+void NonUniformFabricInst::Update(void* ctx) { lbl_8055EC14->Update(ctx); }
 
 void NonUniformFabricInst::Draw2(void* ctx) { lbl_8055EC14->Draw(); }
 

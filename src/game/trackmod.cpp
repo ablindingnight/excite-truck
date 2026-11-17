@@ -55,14 +55,7 @@ void gxForgetTexture(void* tex);
 // Every handler's base (vtable slots 0x8-0x2C).
 #include "game/trackmod.h"
 
-// A per-scene draw instance created by Add (vtable slots 0x8-0x14).
-class TrackInst {
-public:
-    virtual ~TrackInst(void) {}
-    virtual void Draw(void* ctx);           // 0xC
-    virtual int Kind(void);                 // 0x10
-    virtual void Draw2(void* ctx);          // 0x14
-};
+#include "game/trackinst.h"
 
 struct Rot {
     Rot(void);
@@ -79,7 +72,7 @@ class RotList : public TrackInst {
 public:
     RotList(void);
     virtual ~RotList(void);
-    virtual void Draw(void* ctx);
+    virtual void Update(void* ctx);
     void Check(void);
 
     Rot* rots;  // offset 0x4
@@ -99,7 +92,7 @@ public:
     void DrawFade(XFade** vis, int i);
 public:
     XFadeList(void) { count = 0; }
-    virtual void Draw(void* ctx);
+    virtual void Update(void* ctx);
     virtual void Draw2(void* ctx);
     virtual int Kind(void);
 
@@ -118,7 +111,7 @@ class ScrollList : public TrackInst {
 public:
     ScrollList(void) { count = 0; }
     virtual int Kind(void);
-    virtual void Draw(void* ctx);
+    virtual void Update(void* ctx);
     virtual void Draw2(void* ctx);
 
     Scroll scrolls[16];  // offset 0x4
@@ -131,7 +124,7 @@ public:
         data = d;
         id = i;
     }
-    virtual void Draw(void* ctx);
+    virtual void Update(void* ctx);
 
     u8* data;  // offset 0x4
     s32 id;    // offset 0x8
@@ -1096,7 +1089,7 @@ static inline void Mat3MulD(Mat3* out, const Mat3* l, const Mat3* r) {
     }
 }
 
-inline void RotList::Draw(void* ctx) {
+inline void RotList::Update(void* ctx) {
     int i = 0;
     if (count > 0) {
     for (; i < count; i++) {
@@ -1124,7 +1117,7 @@ inline void RotList::Draw(void* ctx) {
     }
     }
 }
-inline void XFadeList::Draw(void* ctx) {}
+inline void XFadeList::Update(void* ctx) {}
 
 inline void XFadeList::DrawFade(XFade** vis, int i) {
     XFade* f = vis[i];
@@ -1154,7 +1147,7 @@ inline int XFadeList::Kind(void) { return 4; }
 
 inline int ScrollList::Kind(void) { return 3; }
 
-inline void ScrollList::Draw(void* ctx) {}
+inline void ScrollList::Update(void* ctx) {}
 
 inline void ScrollList::Draw2(void* ctx) {
     f32 uv[2];
@@ -1186,7 +1179,7 @@ inline void ScrollList::Draw2(void* ctx) {
     }
 }
 
-inline void FacingTestInst::Draw(void* ctx) {
+inline void FacingTestInst::Update(void* ctx) {
     if (fn_802CDB20(ctx, id) && !fn_801F1CF0(data)) {
         fn_802CDAFC(ctx, id);
     }

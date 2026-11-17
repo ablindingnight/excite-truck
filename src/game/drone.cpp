@@ -41,14 +41,7 @@ struct BMtx33 {
 // Every handler's base (vtable slots 0x8-0x2C).
 #include "game/trackmod.h"
 
-// A per-scene instance (vtable slots 0x8-0x14).
-class TrackInst {
-public:
-    virtual ~TrackInst(void) {}
-    virtual void Update(void* ctx);
-    virtual int Kind(void);
-    virtual void Draw2(void* ctx);
-};
+#include "game/trackinst.h"
 
 // One key of a linear path (0x20).
 struct LinearKey {
