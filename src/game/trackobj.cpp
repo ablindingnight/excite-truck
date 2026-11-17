@@ -404,10 +404,7 @@ struct RaceDesc {
     RaceSlotList list;    // offset 0x20
 };
 
-struct ViewState {
-    u8 pad0[0x24];
-    PVec pos;  // offset 0x24
-};
+#include "game/vecmatrix.h"
 
 #include "game/settings.h"
 
@@ -456,7 +453,7 @@ int fn_801E7650(void* anim);
 void fn_801E75C8(void* anim, TrackAnimObj* a);
 int fn_80129D90(int a, int b, int n);
 f32 fn_801E7E24(void);
-ViewState* fn_801E8718(int view);
+const VecMatrix* fn_801E8718(int view);  // the view camera (world.cpp's ViewState)
 int fn_801E7698(void);
 void fn_801E87D4(AnimObj* o);
 f32 fn_801E88F0(int view);
@@ -1301,7 +1298,7 @@ void fn_801FA2C4(void) {
     TrackAnimObj* a;
     EWSound* s;
     for (a = lbl_8055EC5C; a; a = a->next) {
-        int near = PSVECSquareDistance((const Vec*)(&fn_801E8718(0)->pos), (const Vec*)&a->frame.pos) < a->liveRad2;
+        int near = PSVECSquareDistance(&fn_801E8718(0)->origin, (const Vec*)&a->frame.pos) < a->liveRad2;
         int act;
         int state = a->state;
         if (state != 2) {
