@@ -10,6 +10,7 @@
 #include "game/plainvec.h"
 #include <string.h>
 #include <stdarg.h>
+#include "game/strcopy.h"
 
 // The 2D point class (retail weak __ct__4Vec2Fff): a plain V2 with an (x, y) constructor, arguments read right to left.
 class Vec2 : public V2 {
@@ -201,14 +202,6 @@ extern s32 lbl_8055CFF4;  // screen height
 
 inline f32 Timer::Now(void) { return (f32)fn_802E2C20() / 1000.0f; }
 
-static inline void StrCopy(const char* s, int n, char* d) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 ModuleTag lbl_8055F9F0;
 UnkStaticFFFF lbl_8055F9F8;
@@ -587,7 +580,7 @@ static inline void StrAppend(char* dst, int size, const char* src) {
         p++;
     }
     if (n > 0) {
-        StrCopy(src, n, p);
+        SafeStrCopy(p, src, n);
     }
 }
 
@@ -595,7 +588,7 @@ static inline void StrAppend(char* dst, int size, const char* src) {
 static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h) {
     do {
         Brush* b = &lbl_804BE7D8.data[lbl_804BE7D8.count++];
-        StrCopy(name, 0x20, b->name);
+        SafeStrCopy(b->name, name, 0x20);
         if (strchr(b->name, '.')) {
             *strchr(b->name, '.') = 0;
         }
@@ -1210,7 +1203,7 @@ void fn_802B8AE0(const char* name, u32* value) {
         return;
     }
     Stat s;
-    StrCopy(name, 0x20, s.name);
+    SafeStrCopy(s.name, name, 0x20);
     s.value = value;
     s.peak = 0;
     lbl_804BFA70.data[lbl_804BFA70.count++] = s;
