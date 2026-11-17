@@ -1338,7 +1338,6 @@ void PlayerDriver_vf48(u8* p) {
         f32 k;
         c3 = PTR(p, 0x34);
         lean = F32(c3, 0x25F0);
-        q = 1.0f - lean * lean;
         PcAddScaled(&f, &F32(c3, 0x54), &F32(c3, 0x48), 0.0f);
         f32 b;
         k = -3000.0f * air;
@@ -1346,9 +1345,13 @@ void PlayerDriver_vf48(u8* p) {
         f.y *= k;
         f.z *= k;
         b = ((Gearbox*)PTR(p, 0x38))->Speed();
-        f.x = f.x * b * q;
-        f.y = f.y * b * q;
-        f.z = f.z * b * q;
+        q = 1.0f - lean * lean;
+        f.x *= b;
+        f.y *= b;
+        f.z *= b;
+        f.x *= q;
+        f.y *= q;
+        f.z *= q;
         PcAddScaled(&at2, &F32(c3, 0x60), &F32(c3, 0x54), -2.0f);
         if (fwd > -3.5555556f) {
             ((RigidBody*)PTR(p, 0x34))->AddForceAt(&f, &at2);
