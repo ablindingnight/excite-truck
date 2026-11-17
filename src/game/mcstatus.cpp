@@ -360,38 +360,42 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
     strcpy(text, msg);
     p = text;
     while (strlen(p)) {
-        struct { char* brk; } wrap = { 0 };
+        struct {
+            char* brk;
+            u32 used;
+        } lineState;
+        lineState.brk = 0;
         char line[0x200] = {0};
         char* d = line;
-        u32 i = 0;
-        while (i < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
-            char* c = &p[i];
+        lineState.used = 0;
+        while (lineState.used < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
+            char* c = &p[lineState.used];
             if (*c == ' ') {
-                wrap.brk = c;
+                lineState.brk = c;
             } else if (*c == '^') {
                 *c = ' ';
             }
-            i++;
+            lineState.used++;
             *d++ = *c;
             *d = 0;
         }
         char keep = 0;
-        if (i != strlen(p)) {
-            if (!wrap.brk) {
-                wrap.brk = &p[i];
-                keep = p[i];
+        if (lineState.used != strlen(p)) {
+            if (!lineState.brk) {
+                lineState.brk = &p[lineState.used];
+                keep = p[lineState.used];
             }
-            *wrap.brk = 0;
+            *lineState.brk = 0;
         } else {
-            wrap.brk = &p[(int)i - 1];
+            lineState.brk = &p[(int)lineState.used - 1];
         }
         fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
         fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
         if (!keep) {
-            p = wrap.brk + 1;
+            p = lineState.brk + 1;
         } else {
-            *wrap.brk = keep;
-            p = wrap.brk;
+            *lineState.brk = keep;
+            p = lineState.brk;
         }
         y -= 20.0f;
     }
