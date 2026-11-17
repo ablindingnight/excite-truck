@@ -41,6 +41,23 @@ struct CamPrev {
     CamPose pose;  // offset 0x8
 };
 
+// Two small state blocks inside the record (camera shake at 0x160, the pulsing field of view at 0x178). Each is a
+// class WITH a constructor: retail's copy-construction of a record (cammgr fn_80269BB0) moves their float members
+// with lfs/stfs, while assigning a record (namedcam) moves each block as one run of words. The copy-shape harness
+// (FACTS 2026-11-17) shows only a constructor class member does both; plain u32 arrays copied as words in both.
+// Their users take the address and pass it on. Names unproven.
+struct CamShakeState {
+    CamShakeState(void) {}
+    u32 a, b, c;  // offset 0x0
+    f32 x, y, z;  // offset 0xC
+};
+
+struct CamFovPulse {
+    CamFovPulse(void) {}
+    u32 a, b;  // offset 0x0
+    f32 x, y;  // offset 0x8
+};
+
 // One player's camera record.
 struct CamRec {
     CamRec(void);  // fn_8026A600 (defined in cammgr.cpp)
@@ -77,8 +94,8 @@ struct CamRec {
     f32 f154;           // offset 0x154
     f32 f158;           // offset 0x158
     f32 f15C;           // offset 0x15C
-    u32 w160[6];        // offset 0x160
-    u32 w178[4];        // offset 0x178
+    CamShakeState w160; // offset 0x160
+    CamFovPulse w178;   // offset 0x178
     CamLink link;       // offset 0x188
     f32 f18C;           // offset 0x18C
     f32 f190;           // offset 0x190
