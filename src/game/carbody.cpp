@@ -910,13 +910,13 @@ extern "C" void fn_8018A6F4(u8* p);
 
 CarBody::~CarBody(void) {
     fn_801D1100(PTR(this, 0x1EC));
-    if (*(CbPart**)((u8*)this + 0x257C)) {
-        delete *(CbPart**)((u8*)this + 0x257C);
+    if ((CbPart*)this->f257C) {
+        delete (CbPart*)this->f257C;
     }
-    if (*(CbPart**)((u8*)this + 0x2580)) {
-        delete *(CbPart**)((u8*)this + 0x2580);
+    if ((CbPart*)this->f2580) {
+        delete (CbPart*)this->f2580;
     }
-    delete *(CbPart**)((u8*)this + 0x2584);
+    delete (CbPart*)this->f2584;
     fn_8018A6F4((u8*)this);
     fn_802792EC(((u8*&)this->layout));
     lbl_8055E4D0--;
