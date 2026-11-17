@@ -21,6 +21,7 @@ struct MSphere {
 };
 
 #include "game/mmtx33.h"
+#include "game/strcopy.h"
 
 struct MFrame {
     MMtx33 r;  // offset 0x0
@@ -214,15 +215,6 @@ static inline void SwapVec(ValVec3* v) {
     SwapWord(&v->z);
 }
 
-static inline void StrCopy(char* d, const char* s, int n) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 // Surface types drawn through texture nodes.
 static inline int IsQueued(u32 type) {
@@ -427,11 +419,11 @@ void fn_802C595C(char* dst, int n, const char* name, s32 inst) {
     for (int i = 0; i < lbl_804C13B4.count; i++) {
         Remap* r = &lbl_804C13B4.data[i];
         if (strcasecmp(name, r->from) == 0 && inst == r->inst) {
-            StrCopy(dst, r->to, n);
+            SafeStrCopy(dst, r->to, n);
             return;
         }
     }
-    StrCopy(dst, name, n);
+    SafeStrCopy(dst, name, n);
 }
 
 u16 fn_802C5A50(int a, int b) { return a << 8 | b; }
@@ -493,7 +485,7 @@ void fn_802C5CC4(MSurf* s, s32 inst, int sorted, const char* prefix) {
     if (prefix) {
         fn_801345D8(path, 0x100, "%s/%s", prefix, name);
         if (fn_8012C33C(path)) {
-            StrCopy(name, path, 0x100);
+            SafeStrCopy(name, path, 0x100);
         }
     }
     u32 type = s->type;
