@@ -189,8 +189,11 @@ static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y, const char* lab
 // The choice dialog without a layout: draws the message and the choices (the selected one pulses) until
 // one is accepted or the check callback reports a result.
 static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
+    f32 ax;
+    f32 ay;
     int sel = cfg->select;
     for (;;) {
+        f32 y;
         int r;
         PlainValMatrix cam;
         char text[0x200];
@@ -213,7 +216,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
         }
         const char* title = cfg->title;
         const char* msg = cfg->text;
-        f32 y = 145.0f;
+        y = 145.0f;
         if (strlen(title)) {
             fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
             fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
@@ -272,8 +275,8 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
             fn_80232BA4(cfg->entries[i].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
             y -= 20.0f;
         }
-        f32 ay = -140.0f;
-        f32 ax = 155.0f;
+        ay = -140.0f;
+        ax = 155.0f;
         DrawAccept(bg, ax, ay, "Accept");
         fn_802C9A70(1);
         fn_802C855C();
