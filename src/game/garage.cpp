@@ -170,35 +170,7 @@ static inline void CopyName(const char* s, int n, char* d) {
     }
 }
 
-static inline void CopyNameTo(const char* s, int n, char* d) {
-    char* dd;
-    int nn;
-    const char* ss;
-    dd = d;
-    ss = s;
-    nn = n;
-    while ((*dd++ = *ss++) != 0) {
-        if (--nn <= 0) {
-            dd[-1] = 0;
-            break;
-        }
-    }
-}
 
-static inline void CopyNameA(const char* s, int n, char* d) {
-    char* dd;
-    int nn;
-    const char* ss;
-    nn = n;
-    ss = s;
-    dd = d;
-    while ((*dd++ = *ss++) != 0) {
-        if (--nn <= 0) {
-            dd[-1] = 0;
-            break;
-        }
-    }
-}
 
 extern "C" void fn_802E317C(const char* fmt, ...);
 
@@ -359,6 +331,7 @@ extern u8 lbl_8055FC8C;            // widescreen
 extern const char lbl_8055B860[8];  // ""
 
 #include "game/heapmark.h"
+#include "game/strcopy.h"
 
 namespace {
 
@@ -644,15 +617,6 @@ int fn_8024EC3C(void) {
 }
 
 // The same bounded copy written with a destination cursor.
-static inline void CopyNameD(const char* s, int n, char* d) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 // Shows car `sel` of the list: its name (the extreme version when owned), stats, unlock progress and paint.
 // Index of the car currently shown.
@@ -666,11 +630,11 @@ static inline void ShowCar(u8* g, s32 sel) {
         name = ((GarageList*)PTR(g, 0xD0))->ExtremeName(sel);
     }
     VehicleInfo* v = FindVehicleNamed(name, 0);
-    CopyNameD(v->chassis, 0x20, (char*)(g + 0x60));
+    SafeStrCopy((char*)(g + 0x60), v->chassis, 0x20);
     if (((GarageList*)PTR(g, 0xD0))->IsExtreme(sel)) {
         fn_801345D8((char*)(g + 0x80), 0x40, "\\extreme_star %s", v->display_name + 1);
     } else {
-        CopyNameD(v->display_name, 0x40, (char*)(g + 0x80));
+        SafeStrCopy((char*)(g + 0x80), v->display_name, 0x40);
     }
     S32(g, 0xC4) = ((GarageList*)PTR(g, 0xD0))->IsExtreme(sel) ? 5 : -1;
     *(s32*)PTR(g, 0x34) = v->id;
@@ -844,12 +808,12 @@ public:
                 }
                 CopyIconName(model, 0x20, list->Name(index));
                 VehicleInfo* v = FindVehicleNamed(model, 0);
-                CopyNameD(v->display_name, 0x40, name);
+                SafeStrCopy(name, v->display_name, 0x40);
                 if (!(v->flags & 2)) {
-                    CopyNameD("EventPath:CAR_UNLOCKED", 0x80, message);
+                    SafeStrCopy(message, "EventPath:CAR_UNLOCKED", 0x80);
                     ui->SetAnim(v->colors[v->default_color]);
                 } else {
-                    CopyNameD("EventPath:EXTREME_UNLOCKED", 0x80, message);
+                    SafeStrCopy(message, "EventPath:EXTREME_UNLOCKED", 0x80);
                     if (color) {
                         ui->SetAnim(*color);
                     } else {
@@ -858,7 +822,7 @@ public:
                 }
                 const char* text = fn_80131234((u8*)message);
                 if (text != message) {
-                    CopyNameD(text, 0x80, message);
+                    SafeStrCopy(message, text, 0x80);
                 }
                 CopyIconName(title, 0x80, list->Title(index));
                 ui->SetShine((v->flags >> 2) & 1);
@@ -979,14 +943,14 @@ public:
     virtual void Add(const char* name, u8 a, u8 b) {
         u8* p = (u8*)this;
         u8* e = PTR(p, 4) + S32(p, 8)++ * 0x48;
-        CopyNameA(name, 0x20, (char*)e);
+        SafeStrCopy((char*)e, name, 0x20);
         U8(e, 0x20) = a;
         U8(e, 0x41) = b;
         if (b) {
             const char* sp = GetSpecialChassis(name);
             CopyName(sp, 0x20, (char*)e + 0x21);
         } else {
-            CopyNameTo("", 0x20, (char*)e + 0x21);
+            SafeStrCopy((char*)e + 0x21, "", 0x20);
         }
         if (U32(p, 0x1C) != lbl_8055E044) {
             fn_80131318((LocString*)(p + 0x14));  // a LocString at +0x14
