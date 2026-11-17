@@ -103,13 +103,20 @@ public:
     virtual s32 vf34(RPacket* p);
     virtual int vf44(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);
-    // MATCHING-AID: retail's mutphob .data ends with 12 zero bytes after the 0x54-byte MutPhob table (the next unit
-    // starts at 0x80338460); three pure slots reproduce them. They are not real virtuals: phob news a MutPhob
-    // (fn_801782C8), which MWCC refuses for an abstract class, so no shared abstract base with CarBody's
-    // SetState/vf58/vf5C either (tested 2026-11-16). PORT: drop these three.
+    // Slots 0x54-0x5C: retail's __vt__7MutPhob is 0x60 bytes with these three slots ZERO, which MWCC writes only for
+    // pure virtuals (CarBody/SpringCar/NetCar/Trailer have real virtuals there). So this TU compiled MutPhob abstract;
+    // phob news it through its own non-abstract view (retail has no out-of-line __ct__7MutPhob). No non-abstract
+    // form gives zero slots under MWCC (2026-11-16). PORT: the PC gets empty bodies, so MutPhob is concrete there and
+    // its destructors are real (an abstract MutPhob made clang emit ud2 for them: race-end crash, port patch 2f41092).
+#ifdef __MWERKS__
     virtual void vf54(void) = 0;
     virtual void vf58(void) = 0;
     virtual void vf5C(void) = 0;
+#else
+    virtual void vf54(void) {}
+    virtual void vf58(void) {}
+    virtual void vf5C(void) {}
+#endif
     s32 model;        // offset 0x1EC
     s32 mask;         // offset 0x1F0
     RMtx home;        // offset 0x1F4
