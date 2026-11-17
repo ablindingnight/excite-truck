@@ -314,7 +314,7 @@ void fn_80295C70(LightSet* s, const VecMatrix* frame, const Vec* off, f32 w, f32
 
 void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int unused, Vec off, f32 rad) {
     const VecMatrix* frame;
-    ValVec3 def = color;
+    const ValVec3 def = {color.x, color.y, color.z};
     if (fn_80288070(model, name, &frame)) {
         ValueNode* n;
         f32 r;
