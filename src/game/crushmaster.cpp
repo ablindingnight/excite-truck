@@ -1126,8 +1126,9 @@ static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
 inline void CrushMaster::vfA8(int car, int b) {
     f32 dz;
     f32 dy;
-    f32 dx;
+    f32 k;
     f32 t;
+    f32 dx;
     int jump;
     RaceCarRec* rec;
     ValVec3* pos;
@@ -1164,7 +1165,7 @@ inline void CrushMaster::vfA8(int car, int b) {
                 dy = dst.y - pos->y;
                 dx = dst.x - pos->x;
                 dz = dst.z - pos->z;
-                f32 k = 1.0f / t;
+                k = 1.0f / t;
                 v.y = dy * k;
                 v.z = dz * k;
                 k *= dx;
