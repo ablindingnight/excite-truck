@@ -138,6 +138,7 @@ void fn_8018F76C(RaceCarRec* car, int wheel);
 // Interval timer on the race clock (0x8001DAE0..), shared with zone and stdoverlay.
 #include "game/timer.h"
 #include "game/clamp01.h"
+#include "game/nearzero.h"
 
 // Arrow/marker vertex.
 struct MarkVtx {
@@ -1081,7 +1082,6 @@ inline void CrushMaster::vf10(void) {
     b2B8 = 0;
 }
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 static inline f32 Max0(f32 x) { return 0.0f > x ? 0.0f : x; }
 
 inline int CrushMaster::vf20(int car) const {

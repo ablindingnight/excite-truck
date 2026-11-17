@@ -14,6 +14,7 @@
 #include "game/plainvec.h"
 #include "game/strcopy.h"
 #include "game/mathutil.h"
+#include "game/nearzero.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -626,7 +627,6 @@ int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 extern s32 lbl_8055E3C4;  // frame counter
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 // A thrown or knocked object on the track.
 #include "game/body.h"
