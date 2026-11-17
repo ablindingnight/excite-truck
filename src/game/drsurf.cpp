@@ -1036,7 +1036,7 @@ static void PortHostOrderSurf(Surf* s) {
 }
 #endif
 
-void fn_802D63FC(Surf* s, u32 base) {
+void fn_802D63FC(Surf* s, u32 base) {  // one surface: header swap, file offsets to pointers, format DL
     SwapHeader((u8*)s);
     fn_802D657C((u32*)&s->verts, base);
     fn_802D657C((u32*)&s->attr, base);
