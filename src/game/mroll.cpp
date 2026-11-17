@@ -121,16 +121,6 @@ static inline void SetItem(MenuWidgetBase* w, u8 s, u32 v) {  /* Helper name unp
 
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(const char* src, int n, char* dst) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 
 extern "C" {
@@ -165,6 +155,7 @@ struct VehicleColor {
 };
 
 #include "game/carstat.h"
+#include "game/strcopy.h"
 
 struct CarStats {
     const char* chassis;  // offset 0x0
@@ -265,7 +256,7 @@ public:
             screen->SetAnim(rgb);
             fn_801345D8(label, 0x40, RollStrings::ColorKey(), color + 1);
             const char* text = fn_80131234(label);
-            CopyName(text, 0x40, label);
+            SafeStrCopy(label, text, 0x40);
         }
         *colorOut = color;
     }
@@ -343,9 +334,9 @@ inline void CarSel::SetSlot(s32 s) {
     *slot = s;
     S32(car, 0xD8) = *slot;
     if (*slot < 0) {
-        CopyName("", 0x20, name);
+        SafeStrCopy(name, "", 0x20);
     } else {
-        CopyName(fn_802E85B8(*slot), 0x20, name);
+        SafeStrCopy(name, fn_802E85B8(*slot), 0x20);
     }
     Refresh();
 }
@@ -365,7 +356,7 @@ struct StatPanel {
             stats = *cs;
             for (int i = 0; i < 5; i++) {
                 if (stats.stats[i].name) {
-                    CopyName(stats.stats[i].name, 0x64, text[i]);
+                    SafeStrCopy(text[i], stats.stats[i].name, 0x64);
                 } else {
                     text[i][0] = 0;
                 }
@@ -410,8 +401,8 @@ public:
             VehicleInfo* v = FindVehicleNamed(c, 0);
             *idOut = v->id;
             *unk9COut = v->unk9C;
-            CopyName(c, 0x20, chassis);
-            CopyName(v->display_name, 0x20, name);
+            SafeStrCopy(chassis, c, 0x20);
+            SafeStrCopy(name, v->display_name, 0x20);
             item = list->v1C(index);
             screen->nextTint = item == 0;
             colors->SetVehicle(v);
@@ -716,13 +707,13 @@ CarSel::CarSel(s32* slot, u8* car) {
     this->cur = 0;
     this->slot = slot;
     this->active = 1;
-    CopyName("", 0x20, this->name);
+    SafeStrCopy(this->name, "", 0x20);
     S32(this->car, 0xD8) = *this->slot;
     if (*this->slot < 0) {
-        CopyName("", 0x20, this->name);
+        SafeStrCopy(this->name, "", 0x20);
     } else {
         const char* nm = fn_802E85B8(*this->slot);
-        CopyName(nm, 0x20, this->name);
+        SafeStrCopy(this->name, nm, 0x20);
     }
     this->Refresh();
 }
