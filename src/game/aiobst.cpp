@@ -574,23 +574,23 @@ struct Bins {
                 int k;
                 switch (o->type) {
                 case 0: {
-                    f32 t = (s - o->rad - -kWidth.value * 0.5f) / (kWidth.value * 0.5f - -kWidth.value * 0.5f);
+                    f32 t = (s - o->rad - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     CLAMP01(t);
                     lo = LERP(firstBin, 64.0f, t);
-                    t = (lbl_8055E2A4 + (s + o->rad) - -kWidth.value * 0.5f) / (kWidth.value * 0.5f - -kWidth.value * 0.5f);
+                    t = (lbl_8055E2A4 + (s + o->rad) - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     CLAMP01(t);
                     hi = LERP(firstBin, 64.0f, t);
                     break;
                 }
                 case 2: {
-                    f32 t = (s + lbl_8055E2A4 - -kWidth.value * 0.5f) / (kWidth.value * 0.5f - -kWidth.value * 0.5f);
+                    f32 t = (s + lbl_8055E2A4 - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     lo = 0;
                     CLAMP01(t);
                     hi = LERP(firstBin, 64.0f, t);
                     break;
                 }
                 case 1: {
-                    f32 t = (s - -kWidth.value * 0.5f) / (kWidth.value * 0.5f - -kWidth.value * 0.5f);
+                    f32 t = (s - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     CLAMP01(t);
                     hi = 64;
                     lo = LERP(firstBin, 64.0f, t);
