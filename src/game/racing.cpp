@@ -143,6 +143,7 @@ extern RaceInfo* lbl_8055D350;
 extern const f32 lbl_80562068;
 
 #include "game/gameoverlay.h"
+#include "game/mathutil.h"
 
 class RacingOverlay : public GameOverlay {
 public:
@@ -226,9 +227,6 @@ extern const HudColors lbl_803577A0 = {
 
 RacingOverlay* lbl_803577E0[4];
 
-static inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void DrawLapCounter(ILayout* layout, int lap, int total, int showTotal) {
     char num[20];
@@ -246,13 +244,13 @@ void DrawLapCounter(ILayout* layout, int lap, int total, int showTotal) {
 
 void FadeIn(f32* v) {
     if (fn_801E7E24() > 0.0f) {
-        *v = Min(*v + fn_801E7E24() / 0.35f, 1.0f);
+        *v = MinF(*v + fn_801E7E24() / 0.35f, 1.0f);
     }
 }
 
 void FadeOut(f32* v) {
     if (fn_801E7E24() > 0.0f) {
-        *v = Max(*v - fn_801E7E24() / 0.35f, 0.0f);
+        *v = MaxF(*v - fn_801E7E24() / 0.35f, 0.0f);
     }
 }
 
@@ -474,8 +472,8 @@ void RacingOverlay::UpdateSpeed(void) {
     f32 k;
     unkC = lbl_8055D350->truck->f34;
     k = 0.44444445f * ((f32)fabs(speed - lbl_8055D350->truck->speedXZ) / 10.0f);
-    k = Min(1.0f, k);
-    k = Max(k, 0.05f);
+    k = MinF(1.0f, k);
+    k = MaxF(k, 0.05f);
     speed = Lerp(speed, lbl_8055D350->truck->speedXZ, k);
 }
 
@@ -801,22 +799,19 @@ void RacingOverlay::DrawScore(void) {
     fn_8000FF88(-0x100, 10, "%d", 0.94f, x - 10.0f, y - 22.5f, score1);
 }
 
-static inline f32 NeedleDot(f32 vx, f32 mx, f32 vy, f32 my, f32 vz, f32 mz) {
-    return vx * mx + vy * my + vz * mz;
-}
 
 static inline void MulVec(Vec3* out, const Vec3* in, const Mat3* m) {
     if (out == in) {
-        f32 x = NeedleDot(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        f32 y = NeedleDot(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        f32 z = NeedleDot(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        f32 x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        f32 y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        f32 z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = NeedleDot(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
-        out->y = NeedleDot(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
-        out->z = NeedleDot(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
+        out->x = Dot3(in->x, m->m[0][0], in->y, m->m[1][0], in->z, m->m[2][0]);
+        out->y = Dot3(in->x, m->m[0][1], in->y, m->m[1][1], in->z, m->m[2][1]);
+        out->z = Dot3(in->x, m->m[0][2], in->y, m->m[1][2], in->z, m->m[2][2]);
     }
 }
 
@@ -885,7 +880,6 @@ void Mat3RotZ(Mat3* m, f32 a) {
 
 static inline f32 PairProducts(f32 first, f32 second) { return first + second; }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 void Mat3Mul(Mat3* out, const Mat3* a, const Mat3* b) {
     if (out == a || out == b) {

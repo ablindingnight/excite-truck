@@ -8,6 +8,7 @@
 #include "game/v2.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -38,9 +39,7 @@ static UnkStatic123 lbl_8042F7A8;
 u32 lbl_8055E124 = MakeILPos(0x7F00, 0);
 extern const u32 lbl_8055E128 = MakeILPos(0xFFFF, 0);
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
-static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 static inline f32 Clamp01(f32 t) {
@@ -115,7 +114,6 @@ static inline void MulVec(const PlainValMatrix& m, const V3& src, V3* dst) {
 
 extern "C" {
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     PlainValMatrix m;
@@ -143,7 +141,7 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
     corner.x = origin.x + size.x;
     corner.y = origin.y + size.y;
     cam = fn_801E8718(fn_801392F8(fn_8017960C(self)));
-    if (AbsF(cam->basis[2].x) <= __float_epsilon[0] && AbsF(cam->basis[2].z) <= __float_epsilon[0]) {
+    if (FAbs(cam->basis[2].x) <= __float_epsilon[0] && FAbs(cam->basis[2].z) <= __float_epsilon[0]) {
         return;
     }
     h.x = cam->basis[2].x;
@@ -189,8 +187,8 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
             p.z = ((CarBody*)car)->mtx.pos.z - m.origin.z;
             MulVec(m, p, &p);
             dist = PSVECMag((const Vec*)&p);
-            scale = LerpF(1.0f, 0.6f, Clamp01((dist - 0.7f * range) / (2.0f * range - 0.7f * range)));
-            alpha = LerpF(1.0f, 0.3f, Clamp01((dist - 2.0f * range) / (6.0f * range - 2.0f * range)));
+            scale = Lerp(1.0f, 0.6f, Clamp01((dist - 0.7f * range) / (2.0f * range - 0.7f * range)));
+            alpha = Lerp(1.0f, 0.3f, Clamp01((dist - 2.0f * range) / (6.0f * range - 2.0f * range)));
             if (dist > range) {
                 f32 mag = PSVECMag((const Vec*)&p);
                 if (!((f32)__fabs(mag) <= __float_epsilon[0])) {

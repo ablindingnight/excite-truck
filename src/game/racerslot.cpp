@@ -11,6 +11,7 @@
 #include "macros.h"
 #include <string.h>
 #include <math.h>
+#include "game/mathutil.h"
 // Passed to fn_80176A24 (3.0f; name unproven). A named constant with external linkage defined before any code:
 // retail keeps it as the FIRST .sdata2 entry, separate from the pooled 3.0f literal used further down.
 extern const f32 lbl_80563D08;
@@ -36,7 +37,6 @@ int fn_801784AC(const ValVec3* from, const ValVec3* to, ValVec3* hit, ValVec3* n
 int fn_801EA03C(u8* ground, ValVec3* p);
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 // dst = m * src (column-major rotation), with the aliasing guard of the inline.
 // Helper names unproven: scaled vector adds (the scale stays the right operand).

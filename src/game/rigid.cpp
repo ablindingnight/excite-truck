@@ -11,6 +11,7 @@
 #include "game/collshape.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* dst, int c, u32 n);
@@ -28,7 +29,6 @@ void* operator new[](size_t size, const char* tag);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void Mul(RMat33* out, const RMat33* l, const RMat33* r) {
     if (out == l || out == r) {
@@ -269,7 +269,6 @@ void RigidBody::VelAt2(RVec3* out, const RVec3* p) {
     out->z += accel.z;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
@@ -287,7 +286,6 @@ static inline void MulVec(RVec3* out, const RVec3* in, const RMat33* m) {
     }
 }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 /* Helper name unproven: the body rotation matrix. */
 inline RMat33* RigidBody::Rot(void) {
@@ -363,7 +361,7 @@ void RigidBody::Update(void) {
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->vf14();
     }
-    if (!(AbsF(impW) <= __float_epsilon[0])) {
+    if (!(FAbs(impW) <= __float_epsilon[0])) {
 
         inv = 1.0f / impW;
         impF.x *= inv;
@@ -506,7 +504,7 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
     if ((nAdded > 0 ? sub[0] : 0) && b1E9 && b1E8) {
         (nAdded > 0 ? sub[0] : 0)->vf14();
     }
-    if (!(AbsF(impW) <= __float_epsilon[0])) {
+    if (!(FAbs(impW) <= __float_epsilon[0])) {
         int i;
         f32 inv = 1.0f / impW;
         impF.x *= inv;

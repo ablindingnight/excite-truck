@@ -2,6 +2,7 @@
 // and full-source placement remain incomplete. Native component proofs are separate.
 #include "game/common.h"
 #include "game/menustate.h"
+#include "game/mathutil.h"
 
 // 1.0: a named object, first in .sdata2; a one-field const struct so its uses do not fold to a pooled literal.
 struct ProfOneT { f32 v; };
@@ -619,15 +620,13 @@ int ProfileKeyboardState::Key(int key) {
     return 1;
 }
 
-/* Helper name unproven */
-static inline f32 PkMul(f32 k, f32 v) { return k * v; }
 void ProfileKeyboardState::Draw(void) {
     ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
     f32 x, y;
     fn_80230C30(&x, &y, self->x, self->y);
     f32 cellHeight;
     f32 cellWidth = (f32)self->width / 10.0f;
-    cellHeight = PkMul((f32)self->height, 0.25f);
+    cellHeight = Mul((f32)self->height, 0.25f);
     f32 border;
     f32 left;
     f32 top;

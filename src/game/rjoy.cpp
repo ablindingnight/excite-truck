@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include <revolution/KPAD/KPAD.h>
 #include <revolution/WPAD/WPAD.h>
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -143,7 +144,6 @@ f32 fn_802E7824(f32 x, f32 dead) {
     return r;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Average of two sideways samples, blended toward a squared response curve (blend 0 in this build).
 f32 fn_802E78A4(f32 x) {

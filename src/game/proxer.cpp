@@ -10,6 +10,7 @@
 #include "game/v2.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* p, int c, size_t n);
@@ -135,7 +136,6 @@ void Proxer::Activate(int i) {
     Rec(i)->accel = 0.0f;
 }
 
-static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void Proxer::Update(int i) {
     CarRec* r = Rec(i);
@@ -171,7 +171,7 @@ void Proxer::Update(int i) {
         if (r->flipped) {
             r->vel.y *= -1.0f;
         }
-        r->accel = LerpF(r->accel, (r->vel.y - old) / (1.0f / 59.94f), 0.8f);
+        r->accel = Lerp(r->accel, (r->vel.y - old) / (1.0f / 59.94f), 0.8f);
         sec = f->seg->section;
         r->sec = sec;
         if ((sec & ~1) && (sec & 1) && !(f->seg->next->section & 1)) {
@@ -250,7 +250,6 @@ int fn_80137140(int i, int j) {
 
 }  // extern "C"
 
-static inline double AbsD(double v) { return __fabs(v); }
 
 /* Helper name unproven */
 static inline f32 PxAbs(f32 v) { return (f32)AbsD(v); }
@@ -409,7 +408,6 @@ void Proxer::Sort(Pair** list, PairCmp cmp, int k) {
     } while (!done);
 }
 
-static inline f32 Len2(f32 x, f32 y) { return x * x + y * y; }
 void Pair::UpdateDist(void) { dist2 = Len2(dpos.x, dpos.y); }
 
 extern "C" {
@@ -454,11 +452,10 @@ struct ProxQuery {
     s32 car;  // offset 0x18
 };
 
-static inline f32 Product(f32 a, f32 b) { return a * b; }
 
 f32 fn_80137850(ProxQuery* q) {
     CarRec* r = lbl_8055E0D0->Rec(q->car);
-    return r->pos.x + Product(r->vel.x, q->when->t);
+    return r->pos.x + Mul(r->vel.x, q->when->t);
 }
 
 void fn_80137884(s32 n) { lbl_8055E0D0 = lbl_8055E0D4 = new ("Proxer") Proxer(n); }
