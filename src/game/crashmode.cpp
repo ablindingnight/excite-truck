@@ -213,11 +213,12 @@ static inline void DrawFill(CrashMode* m, ArtElem* fl, ArtElem* fr, f32 fill) {
     fn_801476D8(&e, -1, m->boostTex);
 }
 
-// MATCHING-AID: inline helper with a parameter assigned before it is read: the value only shapes the register allocation.
-static inline void LayoutBoost(TextElem* b, CrashMode* m, TextElem* a, f32 k) {
-    b = m->layout->Find("boost_out");
-    if (a && b) {
-        fn_801479A8(a, b, fn_80131234("Crash:BOOST"), k);
+/* Helper name unproven */
+// The two elements arrive as arguments: MWCC evaluates them right to left (boost_text is looked up first) and binds
+// them as the inline's parameters (aids audit 2, 2026-11-17: replaces a parameter assigned before it was read).
+static inline void LayoutBoost(TextElem* out, TextElem* text, f32 k) {
+    if (text && out) {
+        fn_801479A8(text, out, fn_80131234("Crash:BOOST"), k);
     }
 }
 
@@ -230,7 +231,6 @@ int fn_801DF93C(int view) {
     ArtElem* fl;
     ArtElem* fr;
     TextElem* a;
-    TextElem* b;
     ArtElem* up;
     ArtElem* dn;
     int car;
@@ -302,7 +302,7 @@ int fn_801DF93C(int view) {
     if (!NearZero(left) && s->boosted) {
         f32 d = lbl_8055AE40 / fn_80176A2C();
         f32 k = fn_80144BD8(Remap(d - fade, d - d / 2.0f, 0.0f, 1.0f, left));
-        LayoutBoost(b, m, m->layout->Find("boost_text"), k);
+        LayoutBoost(m->layout->Find("boost_out"), m->layout->Find("boost_text"), k);
     }
     fn_801769CC();
     return 1;
