@@ -283,7 +283,13 @@ public:
     gText(int x, int y, int width, OwnedWidget* value, void* watched);  // fn_8021995C
     virtual ~gText(void);                        // fn_802199D0 (empty)
     virtual int Slot88(void);                    // inline fn_802298DC
+#ifdef __MWERKS__
     virtual void Slot8C(void) = 0;               // 0x8C: pure in retail's table (meaning unknown)
+#else
+    // PORT: retail's gText table has a pure slot 0x8C, but gText objects are built (by-name ctor); a pure slot makes
+    // the class abstract and clang compiles its deleting destructor to a trap. Plain and empty on the host (never called).
+    virtual void Slot8C(void) {}
+#endif
     void* watched;               // 0x254
 };
 
