@@ -423,9 +423,9 @@ void fn_801AEF28(RaceSetup* s) {
         }
         t->e[i].driver = s->e[i].driver;
         t->e[i].type = type;
-        order[i] = i;
         s32 nv = t->n;
-        nv++;
+        order[i] = i;
+        t->n = nv + 1;
         if (fn_801AE600(type)) {
             lbl_8055E620->t[i] = LapResultTable::Create();
         }
