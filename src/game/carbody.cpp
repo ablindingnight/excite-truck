@@ -1465,6 +1465,8 @@ static inline void LiftUp(u8* p, f32 k) {
     f.y = k;
     ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
 }
+/* Helper name unproven: Clamp01((x - lo) / w) with lo and w kept as values */
+static inline f32 RampW(f32 x, f32 lo, f32 w) { return Clamp01((x - lo) / w); }
 static inline int CarHot(u8* car) { return ((CarBody*)car)->f258C > 0.001f; }
 static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
 void fn_80183E7C(u8* p) {
@@ -1955,11 +1957,12 @@ void fn_80183E7C(u8* p) {
         front.y = cb->mtx.pos.y + cb->mtx.rot.z.y * 2.0f;
         front.z = cb->mtx.pos.z + cb->mtx.rot.z.z * 2.0f;
         f32 df = Ramp(front.y, surf, surf - 0.4f);
-        f32 tf = Clamp01((cb->f25C4 - 0.0f) / 0.3f);
+        f32 lf = LerpT(df, 0.0f, 1.0f);
+        f32 tf = RampW(cb->f25C4, 0.0f, 0.3f);
         RVec3 ff;
         ff.x = 0.0f;
         ff.z = 0.0f;
-        ff.y = LerpT(df, 0.0f, 1.0f) * (0.2f + tf * 0.8f) * (0.5f * grow) * cb->mass /
+        ff.y = lf * (0.2f + tf * 0.8f) * (0.5f * grow) * cb->mass /
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
         RVec3 back;
