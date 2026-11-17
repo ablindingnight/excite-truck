@@ -1231,6 +1231,17 @@ static inline void SpinXform(f32* out, const f32* in, const f32* m) {
         out[2] = Dot3(in[0], m[2], in[1], m[5], in[2], m[8]);
     }
 }
+/* PROVISIONAL stand-in, form unproven (FACTS 2026-11-17 02:20, the achview fn_8025A204 mechanism). Between the lean
+   read and the first vector statement of the nose-down push retail tested a constant that went through memory for
+   equality. The back end folds such a test only after its first scheduling pass, so the lean read is scheduled in a
+   block of its own, air is still live there, and air takes f28 instead of sharing lean's f30 (every saved FPR after
+   it follows). The test is always true (0 != 3) and leaves no instruction: 1100/1100, same opcodes as retail. What
+   the original tested is unknown; this stands in for it. Native proof: handoff/dossier/native_lane/playcar_vf48.md. */
+struct PushIndex {
+    int i;
+    PushIndex(int n) : i(n) {}
+};
+static inline bool PushLeft(PushIndex c) { return c.i != 3; }
 /* Helper name unproven: the nose-down push while boosting, as its own inline. Retail colours `lean` second of all
    saved FPRs (f30, before dir): an inline's objects number above the caller's locals, and lean is the first one
    declared here. The -3000 * air factor is written in each product: retail's factor is a code-generation temporary
@@ -1242,23 +1253,25 @@ static inline void NoseDown(u8* p, f32 air, f32 fwd, RVec3& f, RVec3& at2) {
     u8* c3;
     c3 = PTR(p, 0x34);
     lean = F32(c3, 0x25F0);
-    PcAddScaled(&f, &F32(c3, 0x54), &F32(c3, 0x48), 0.0f);
-    f32 b;
-    f.x *= -3000.0f * air;
-    f.y *= -3000.0f * air;
-    f.z *= -3000.0f * air;
-    b = ((Gearbox*)PTR(p, 0x38))->Speed();
-    q = lean * lean;
-    f.x *= b;
-    f.y *= b;
-    f.z *= b;
-    q = 1.0f - q;
-    f.x *= q;
-    f.y *= q;
-    f.z *= q;
-    PcAddScaled(&at2, &F32(c3, 0x60), &F32(c3, 0x54), -2.0f);
-    if (fwd > -3.5555556f) {
-        ((RigidBody*)PTR(p, 0x34))->AddForceAt(&f, &at2);
+    if (PushLeft(PushIndex(0))) {
+        PcAddScaled(&f, &F32(c3, 0x54), &F32(c3, 0x48), 0.0f);
+        f32 b;
+        f.x *= -3000.0f * air;
+        f.y *= -3000.0f * air;
+        f.z *= -3000.0f * air;
+        b = ((Gearbox*)PTR(p, 0x38))->Speed();
+        q = lean * lean;
+        f.x *= b;
+        f.y *= b;
+        f.z *= b;
+        q = 1.0f - q;
+        f.x *= q;
+        f.y *= q;
+        f.z *= q;
+        PcAddScaled(&at2, &F32(c3, 0x60), &F32(c3, 0x54), -2.0f);
+        if (fwd > -3.5555556f) {
+            ((RigidBody*)PTR(p, 0x34))->AddForceAt(&f, &at2);
+        }
     }
 }
 void PlayerDriver_vf48(u8* p) {
