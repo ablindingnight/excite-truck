@@ -412,23 +412,44 @@ struct CamRotOff {
 static inline void RotFromVec(Mat3* r, const RVec3& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > 0.0001f) {
-        f32 y, z, s, x, c, k;  // retail keeps x, s, z, y in f31..f28: the reverse of this order
-        f32 inv = 1.0f / a;
+        // The squares are named, k*x and k*y are written in each entry, and the y and z diagonal entries are
+        // computed ahead of their rows (rigid RigidBody::Update, FACTS 2026-11-17 13:25).
+        // Declaration order unproven: it is what the allocator needs. c..yDiag and inv are numbered below s, and k
+        // between s and y, so that in every caller y and z leave the interference graph in the first simplify scan
+        // (under 32 neighbours) while s and x stay: retail's x, s, [caller value], z, y in f31 down.
+        f32 c;
+        f32 zz;
+        f32 yy;
+        f32 xx;
+        f32 zDiag;
+        f32 yDiag;
+        f32 inv;
+        f32 s;
+        f32 k;
+        f32 y;
+        f32 x;
+        f32 z;
+        inv = 1.0f / a;
         x = inv * w.x;
         y = inv * w.y;
         z = inv * w.z;
         s = (f32)sin(a);
         c = (f32)cos(a);
+        xx = x * x;
+        yy = y * y;
+        zz = z * z;
         k = 1.0f - c;
+        r->m[0][0] = c + k * xx;
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
+        yDiag = c + k * yy;
         r->m[1][0] = y * (k * x) - s * z;
-        r->m[1][1] = c + k * (y * y);
-        r->m[2][0] = z * (k * x) + s * y;
-        r->m[0][0] = c + k * (x * x);
+        r->m[1][1] = yDiag;
         r->m[1][2] = z * (k * y) + s * x;
-        r->m[2][2] = c + k * (z * z);
+        zDiag = c + k * zz;
+        r->m[2][0] = z * (k * x) + s * y;
         r->m[2][1] = z * (k * y) - s * x;
+        r->m[2][2] = zDiag;
     } else {
         r->m[0][0] = 1.0f;
         r->m[0][1] = 0.0f;
