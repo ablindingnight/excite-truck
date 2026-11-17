@@ -559,7 +559,14 @@ void mrModelEnd(void) {
 }
 
 void mrModelFixup(ModelInfo* m, const char* name) {
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
     if ((u32)m->nElems < 16000 && (u32)m->nExtras < 16000) {
+#else
+    // PORT: "already fixed up?" is tested by the counts looking small (little-endian counts read huge on the
+    // big-endian Wii). On a little-endian host the counts always look small: test whether elems is still a file
+    // offset instead (fixed-up data points into MEM1/MEM2).
+    if ((u32)m->elems >= 0x80000000u) {
+#endif
         return;
     }
     u32 base = (u32)m;
