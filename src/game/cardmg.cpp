@@ -1210,10 +1210,6 @@ struct WVec3 {
     f32 x, y, z;
 };
 
-struct PFrame {
-    PVec3 basis[3];
-};
-
 struct WFrame {
     PVec3 basis[3];
 };
