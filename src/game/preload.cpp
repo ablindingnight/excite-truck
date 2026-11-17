@@ -4,18 +4,7 @@
 
 extern "C" void fn_802BAD9C(int size);
 
-struct ListNode {
-    ListNode* next;  // offset 0x0
-};
-
-class Preloader : public ListNode {
-public:
-    Preloader(void);
-    virtual int Size(void) = 0;
-    virtual void Load(void) = 0;
-    virtual ~Preloader(void);
-    virtual void vf14(void) = 0;
-};
+#include "game/preload.h"
 
 ModuleTag lbl_8055FB78;
 ListNode* lbl_8055FB80;

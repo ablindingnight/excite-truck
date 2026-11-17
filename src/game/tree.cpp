@@ -248,17 +248,7 @@ extern "C" void fn_802BAF98(void* p, u8 on);
 
 extern "C" TreeVol* fn_801FA8E0(CollShape* s, const RMtx* m, u8* hit);
 
-struct PListNode {
-    PListNode* next;
-};
-
-class Preloader : public PListNode {
-public:
-    Preloader(void);
-    virtual s32 Size(void) = 0;
-    virtual void Load(void) = 0;
-    virtual ~Preloader(void);
-};
+#include "game/preload.h"
 
 class TreePreloader : public Preloader {
 public:

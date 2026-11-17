@@ -391,13 +391,20 @@ struct TableRef {
     ValueTable* t;
 };
 
-// The preload list node every arena is (preload.cpp); only its first word is used here.
+#ifdef __MWERKS__
+// The preload list node every arena is (preload.cpp), as retail's ringchal saw it: Arena's own CountDynos and
+// Spawn fill the first two table slots (retail's arena table: CountDynos, Spawn, dtor), so retail's view here
+// had no Size/Load to override. Only its first word (ListNode::next) is used.
 class Preloader {
 public:
     Preloader(void);
     ~Preloader(void);
     s32 f0;  // offset 0x0
 };
+#else
+// PC: the shared Preloader (game/preload.h); Arena forwards Size/Load to CountDynos/Spawn below.
+#include "game/preload.h"
+#endif
 
 namespace {
 struct PlayerData;
@@ -410,6 +417,10 @@ public:
     virtual int CountDynos(void);  // 0x8
     virtual void Spawn(void);      // 0xC
     virtual ~Arena(void);          // 0x10
+#ifndef __MWERKS__
+    virtual s32 Size(void) { return CountDynos(); }
+    virtual void Load(void) { Spawn(); }
+#endif
     void Init(void);
     int CountFiles(ValueNode* cfg);
     int CountRingSets(void);
