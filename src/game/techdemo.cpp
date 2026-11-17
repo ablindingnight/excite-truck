@@ -157,12 +157,17 @@ inline void TechDemoMaster::a2(void) {
     }
 }
 
+static char ActZoneTag[] = "actzone";
+static char SequenceKey[] = "act_seq";
+static char LapKey[] = "lap";
+static char BoundsTag[] = "bound";
+
 inline void TechDemoMaster::a1(void) {
     ValueNode* vals = GetEvent(fn_801769CC()->event)->node;
     int i;
     ValueNode* n;
     for (i = 0; (n = vals->GetChildAt(i)) != 0; i++) {
-        if (strcmp(n->GetName(), "actzone") == 0) {
+        if (strcmp(n->GetName(), ActZoneTag) == 0) {
             zones.data[zones.count++].Load(n);
         }
     }
@@ -177,10 +182,10 @@ inline void ActZone::Load(ValueNode* n) {
     f32 best;
     s16 h[4];
     V2 d;
-    seq = fn_801D4888(n->GetValue("act_seq"));
+    seq = fn_801D4888(n->GetValue(SequenceKey));
     draw = n->GetBool("should_draw", 1);
-    lap = n->GetInt("lap", 0);
-    b = bound = fn_801399FC(n->FindChild("bound"));
+    lap = n->GetInt(LapKey, 0);
+    b = bound = fn_801399FC(n->FindChild(BoundsTag));
     start = 2;
     done = 0;
     {
