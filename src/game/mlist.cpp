@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/byteswap.h"
+#include "game/buildquery.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -481,9 +482,15 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     vp = vis + k;
     for (i = 0; i < ca.n; i++) {
         if (cp->flags == (vis[cp->ref] & 0x7F)) {
-            u8 r = Cull(&cp->s);
-            lbl_804C5480[k++] = lbl_8055FCE0;
-            *vp++ = r;
+            /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail scheduled this branch as
+               if a test stood at its head (the piece pointer step `addi r25,r25,4` is not delayed). Found by
+               sweep_latefold.py; 93.23 -> 93.39 and the LATEFOLD row of standinscan is gone. What the original
+               tested here is unknown. */
+            if (BuildMode() == kBuildRetail) {
+                u8 r = Cull(&cp->s);
+                lbl_804C5480[k++] = lbl_8055FCE0;
+                *vp++ = r;
+            }
         } else {
             k++;
             *vp++ = 0;
