@@ -10,7 +10,7 @@
 // reaches the body through byte offsets; the fields from 0x1EC are the census of carbody's own accesses
 // (fXXXX = offset, typed by the accessor; 2026-11-16 offset census) plus the names the other units use. Names unproven.
 
-class StatsSrc;
+class DeityCar;  // deity.h: the car's AI/race controller (CarBody::src)
 struct CarLayout;
 
 // The contact plane under a wheel.
@@ -263,7 +263,7 @@ public:
     CbIdent ident;               // offset 0x1F4
     u8* f268;                    // offset 0x268
     CarLayout* layout;           // offset 0x26C (carlayout.cpp; cardmg walks its deformable points)
-    StatsSrc* src;               // offset 0x270
+    DeityCar* src;               // offset 0x270
     CbDescBlock block;           // offset 0x274
     u8 pad2C4[0x2C8 - 0x2C4];
     f32 f2C8;                    // offset 0x2C8
