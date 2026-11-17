@@ -1490,7 +1490,7 @@ void PlayerDriver_vf48(u8* p) {
     c4 = PTR(p, 0x34);
     grip = F32(c4, 0x2570) + F32(c4, 0x24FC);
     rough = VMag(c4 + 0x26B4);
-    lim = MinF(1.0f, Mul(F32(PTR(p, 0x34), 0x264C), 10.0f));
+    lim = MinF(1.0f, Mul(10.0f, F32(PTR(p, 0x34), 0x264C)));
     ga = 0.033000004f * rough + lim;
     F32(p, 0x40) = 0.8f * F32(p, 0x40) + 0.0039600004f * rough;
     gb = F32(p, 0x40) + 0.2f * MaxF(MinF(1.0f, grip), 0.0f);
