@@ -404,7 +404,8 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
                 Vec a = *(const Vec*)&car->spin;
                 f32 t = i / 8.0f;
                 Vec b = n;
-                f32 k = -PSVECMag((const Vec*)&car->vel) * lbl_8055CC68;
+                f32 m = -PSVECMag((const Vec*)&car->vel);
+                f32 k = m * lbl_8055CC68;
                 Scale(&a, &a, 1.0f * (t * k));
                 Scale(&b, &b, 1.0f * (k * (1.0f - t)));
                 sum.x = b.x + a.x;
