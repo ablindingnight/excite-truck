@@ -9,6 +9,7 @@
 #include "game/racesetup.h"
 #include "game/carbody.h"
 #include "game/pathset.h"
+#include "game/idealline.h"
 #include "game/arrayref.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -61,11 +62,6 @@ struct CarProgress {
     s32 done;  // offset 0x24
 };
 
-struct CarTrackPos {
-    u8 pad0[0x48];
-    f32 lon;  // offset 0x48
-};
-
 struct CarEngine {
     u8 pad0[0x20];
     f32 topSpeed;  // offset 0x20
@@ -83,7 +79,7 @@ public:
     virtual void vf0C(void);
     virtual CarProgress* Progress(void);  // 0x10
     virtual void vf14(void);
-    virtual CarTrackPos* TrackPos(void);  // 0x18
+    virtual IdealFollower* TrackPos(void);  // 0x18 (DeityCar::Ideal)
     virtual CarPhysics* Physics(void);    // 0x1C
 };
 
@@ -396,7 +392,7 @@ f32 fn_801660C0(void) {
     OrbitCar* p = fn_80166098();
     int lap = p->Progress()->laps - 1;
     f32 len = fn_8013672C();
-    f32 v = lap * len + p->TrackPos()->lon;
+    f32 v = lap * len + p->TrackPos()->travel;
     return MAX(0.0f, v);
 }
 
@@ -404,8 +400,8 @@ int fn_8016616C(void) { return lbl_8055E320 > lbl_8042FE38.freezeLon; }
 
 f32 fn_8016618C(OrbitCar* car) {
     OrbitCar* p = fn_80166098();
-    f32 plon = p->TrackPos()->lon;
-    f32 clon = car->TrackPos()->lon;
+    f32 plon = p->TrackPos()->travel;
+    f32 clon = car->TrackPos()->travel;
     f32 d;
     if (p->Progress()->lap < car->Progress()->lap) {
         if (plon < clon) {

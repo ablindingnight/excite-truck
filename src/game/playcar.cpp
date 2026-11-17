@@ -9,6 +9,8 @@
 #include "game/rvec.h"
 #include "game/rigid.h"
 #include "game/carbody.h"
+#include "game/deity.h"
+#include "game/idealline.h"
 #include <string.h>
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
@@ -611,16 +613,6 @@ static inline void SetV30(Recorder* r, u8 v) { CurPkt(r)->v30 = v; }
 static inline void SetV44(Recorder* r, int v) { CurPkt(r)->v44 = v; }
 static inline void SetV48(Recorder* r, int v) { CurPkt(r)->v48 = v; }
 
-// Track position tracker of a car (car + 0x270).
-class CarTrackPos {
-public:
-    virtual void v08(void);
-    virtual void v0C(void);
-    virtual u32* Flags(void);
-    virtual void v14(void);
-    virtual u8* Segment(void);
-};
-
 extern f32 lbl_8055E3C8;  // race time
 extern u8 lbl_8055E529;
 extern f32 __float_epsilon[];  // FLT_EPSILON
@@ -719,10 +711,10 @@ void fn_80190388(u8* p) {
         }
     } else {
         u8* car = PTR(p, 0x20);
-        f32 dist = F32(((CarTrackPos*)PTR(car, 0x270))->Segment(), 0x48);
+        f32 dist = ((RaceCarRec*)car)->src->Ideal()->travel;
         f32 moved = dist - F32(p, 0x30);
         int stopped;
-        int lap = (*((CarTrackPos*)PTR(PTR(p, 0x20), 0x270))->Flags() >> 2) & 1;
+        int lap = (((RaceCarRec*)PTR(p, 0x20))->src->State()->flags >> 2) & 1;
         car = PTR(p, 0x20);
         stopped = NearZero(F32(car, 0x2690));
         if (stopped) {
