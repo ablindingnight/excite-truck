@@ -10,6 +10,8 @@
 #include "game/camrec.h"
 #include "game/camview.h"
 #include "game/idealline.h"
+#include "game/deity.h"
+#include "game/centerline.h"
 #include "game/math_types.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -375,27 +377,10 @@ static inline void ShakeRot(ShakeMat* r, const RVec3& w) {
     }
 }
 
-// The track a car is on, as the camera code sees it.
-struct CamTrack {
-    u8 pad0[0x4];
-    IdealPoint* seg;  // offset 0x4
-    u8 pad8[0x24];
-    u8* path;      // offset 0x2C
-};
-
 struct CamTrackPos {
     IdealPoint* seg;  // offset 0x0
     f32 t;         // offset 0x4
     u8 pad8[0x4];  // offset 0x8
-};
-
-class CamTrackOwner {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual CamTrack* GetTrack(void);  // 0x18
 };
 
 class CamRacerObj {
@@ -414,7 +399,7 @@ struct CamXZ {
     f32 x, z;
 };
 
-void fn_80136594(CamTrackPos* out, CamTrack* trk, const CamXZ* xz);  // PORT: idealline returns the ILPos by value (a by-value form here is not code-identical)
+void fn_80136594(CamTrackPos* out, LineFollower* trk, const CamXZ* xz);  // PORT: idealline returns the ILPos by value (a by-value form here is not code-identical)
 int fn_8026A2C8(void);
 CamRacerObj* fn_801B2EC0(int i);
 extern f32 lbl_8055F49C;  // pass-by range squared
@@ -433,7 +418,7 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
         return;
     }
     const f32* rp;
-    CamTrack* trk = ((CamTrackOwner*)((CarBody*)car)->src)->GetTrack();  // CarBody::src (0x270)
+    IdealFollower* trk = ((DeityCar*)((CarBody*)car)->src)->Ideal();  // CarBody::src (0x270): the car's DeityCar
     CamXZ xz(pose->pos.v[0], pose->pos.v[2]);
     CamTrackPos at;
     fn_80136594(&at, trk, &xz);
@@ -449,8 +434,8 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
         fn_80136594(&rat, trk, &rxz);
         f32 d = (rat.seg->dist + rat.seg->len * rat.t) - camDist;
         if (d < lbl_80563C20) {
-            u32 lap = trk->seg ? trk->seg->type : 3;
-            d += *(f32*)(trk->path + lap * 4 + 8);
+            u32 lap = trk->il.seg ? trk->il.seg->type : 3;
+            d += trk->line->len[lap];
         }
         if (d * d < lbl_8055F49C) {
             f32 sq = PSVECSquareDistance((const Vec*)eye, (const Vec*)rp);
@@ -492,7 +477,7 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
         return;
     }
     const f32* rp;
-    CamTrack* trk = ((CamTrackOwner*)((CarBody*)c->car)->src)->GetTrack();
+    IdealFollower* trk = ((DeityCar*)((CarBody*)c->car)->src)->Ideal();
     CamXZ xz(c->pose.pos.v[0], c->pose.pos.v[2]);
     CamTrackPos at;
     fn_80136594(&at, trk, &xz);
@@ -508,8 +493,8 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
         fn_80136594(&rat, trk, &rxz);
         f32 d = (rat.seg->dist + rat.seg->len * rat.t) - camDist;
         if (d < lbl_80563C20) {
-            u32 lap = trk->seg ? trk->seg->type : 3;
-            d += *(f32*)(trk->path + lap * 4 + 8);
+            u32 lap = trk->il.seg ? trk->il.seg->type : 3;
+            d += trk->line->len[lap];
         }
         if (d * d < lbl_8055F49C) {
             f32 sq = PSVECSquareDistance((const Vec*)eye, (const Vec*)rp);
