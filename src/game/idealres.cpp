@@ -187,8 +187,9 @@ void fn_801381B4(IdealLineRes* res) {
     SwapWord(&res->len[3]);
     SwapWord(&res->total);
     SwapWord(&res->nrelocs);
+    i = 0;
     if (res->nrelocs > 0) {
-        for (i = 0; i < res->nrelocs; i++) {
+        for (; i < res->nrelocs; i++) {
             SwapWord(&res->relocs[i]);
         }
     }
