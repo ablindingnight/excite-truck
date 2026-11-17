@@ -59,7 +59,7 @@ public:
     virtual void v34(void);
     virtual int v38(void);
     virtual void v3C(u32 a, u32 b, int c, u32 d);
-    virtual void v40(void);
+    virtual f32 v40(void);  // PhysDriver::vf40 returns f32 (x87 stack on the PC port)
     virtual void v44(void);
     virtual void v48(void);
     virtual void v4C(void);
@@ -937,7 +937,7 @@ public:
     virtual int v34(void);
     virtual void v38(void);
     virtual int v3C(void);
-    virtual void v40(void);
+    virtual f32 v40(void);  // PhysDriver::vf40 returns f32 (x87 stack on the PC port)
     virtual f32 v44(void);
     virtual f32 v48(void);
     virtual u8 v4C(void);
@@ -1589,7 +1589,7 @@ void DeityCar_vf6C(u8* p) {}
 
 void fn_80192BE8(u8* p) { VP(PTR(p, 0x4))->v4C(); }
 
-void fn_80192BFC(u8* p) { VP(PTR(p, 0x4))->v40(); }
+f32 fn_80192BFC(u8* p) { return VP(PTR(p, 0x4))->v40(); }
 
 void fn_80192C10(u8* p) { VP(PTR(p, 0x4))->v58(); }
 
