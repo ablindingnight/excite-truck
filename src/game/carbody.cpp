@@ -2780,7 +2780,7 @@ void CarBody::vf28(u8* buf) {
         LerpSnapshotMatrix(&tmp, (const SnapPose*)&this->prev, (const SnapPose*)&this->world, lbl_8055E460);
         *pose = tmp;
     }
-    *(s16*)((u8*)pose + 0x30) = *(s16*)&this->hint;
+    ((CarDrawState*)pose)->hint = *(s16*)&this->hint;
     u16 flags = 0;
     if (((CarHost*)((u8*&)this->src))->IsImpaired()) {
         flags |= 0x40;

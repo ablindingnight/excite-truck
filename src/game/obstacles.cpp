@@ -1214,6 +1214,12 @@ static inline void BlendFencePose(ObPose* dest, const ObPose* previous, const Ob
     }
 }
 
+// A fence pole's draw state in the frame buffer (FencePole::vf28 writes it). Name unproven.
+struct FencePose {
+    ObPose pose;  // offset 0x0
+    s16 hint;     // offset 0x30
+};
+
 // Copies or blends the frame pose before writing its associated part ID.
 static inline void WriteFencePose(u8* buf, u8* p) {
     f32 f = lbl_8055E460;
@@ -1225,7 +1231,7 @@ static inline void WriteFencePose(u8* buf, u8* p) {
         BlendFencePose(&t, (const ObPose*)(p + 0xA0), (const ObPose*)(p + 0x70), f);
         *(ObPose*)out = t;
     }
-    *(s16*)(out + 0x30) = *(s16*)(p + 0x6C);
+    ((FencePose*)out)->hint = ((FencePole*)p)->hint[0];
 }
 
 // Writes this obstacle's draw state into the frame buffer: its pose (blended from the previous one when the

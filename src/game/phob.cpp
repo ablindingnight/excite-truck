@@ -1353,6 +1353,12 @@ StatePacket* fn_80179824(void) {
     return p;
 }
 
+// A volume's draw state in the frame buffer (CollVolume::vf28 writes it). Name unproven.
+struct PhobPose {
+    PlainValMatrix mtx;  // offset 0x0
+    s16 hint;            // offset 0x30
+};
+
 // CollVolume::vf28, by its linker name. MATCHING-AID: retail's body reads the fields as through a const pointer
 // formal (a const member matches it exactly), but the slot is not const (PanelVol, MutPhob, Wheel and Ball override
 // it with a non-const this; their code changes under const), and no in-member const view reproduces it (const local,
@@ -1386,7 +1392,7 @@ void vf28__10CollVolumeFPUc(const Phob* v, u8* buf) {  // writes the draw state
         }
         *out = t;
     }
-    *(s16*)(o + 0x30) = v->hint[0];
+    ((PhobPose*)o)->hint = v->hint[0];
 }
 
 u8* fn_80179CB0(void) { return lbl_8055E450->phobs; }

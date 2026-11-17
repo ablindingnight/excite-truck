@@ -633,6 +633,13 @@ static inline void LerpMtx(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     }
 }
 
+// The ball's draw state in the frame buffer (Ball::vf28 writes it). Name unproven.
+struct BallPose {
+    RMtx mtx;   // offset 0x0
+    s16 hint;   // offset 0x30
+    u8 active;  // offset 0x32
+};
+
 void Ball::vf28(u8* buf) {
     u8* o = buf + a8;
     RMtx* out = (RMtx*)o;
@@ -643,8 +650,8 @@ void Ball::vf28(u8* buf) {
         LerpMtx(&t, &prev, &world, lbl_8055E460);
         *out = t;
     }
-    *(s16*)(o + 0x30) = hint[0];
-    buf[a8 + 0x32] = active;
+    ((BallPose*)o)->hint = hint[0];
+    ((BallPose*)(buf + a8))->active = active;
 }
 
 bool Ball::GetPos(f32* xz, f32* vxz) {
