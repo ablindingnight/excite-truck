@@ -68,18 +68,7 @@ struct PlacedObj {
     s32 level;        // offset 0x38
 };
 
-struct ShadowGroup {
-    PVec normal;  // offset 0x0
-    s32 id;       // offset 0xC
-};
-
-struct ShadowDesc {
-    const char* model;      // offset 0x0
-    f32 extend;             // offset 0x4
-    f32 cutoff;             // offset 0x8
-    ShadowGroup groups[8];  // offset 0xC
-    s32 count;              // offset 0x8C
-};
+#include "game/objdesc.h"
 
 class ObjDesc;
 class ObstacleObjDesc;
@@ -280,43 +269,20 @@ public:
     StaticObject* next;   // offset 0x54
 };
 
-// An object class read from a value table (0x10C).
-class ObjDesc {
-public:
-    char name[0x20];    // offset 0x0
-    ObjDesc* next;      // offset 0x20: next class
-    ObjDesc* sibling;   // offset 0x24: next part of a composite
-    f32 drop;           // offset 0x28
-    u8 forbidden;       // offset 0x2C
-    OFrame frame;       // offset 0x30
-    u8 hasFrame;        // offset 0x60
-    char model[0x10];   // offset 0x61
-    void* handle;       // offset 0x74
-    ShadowDesc shadow;  // offset 0x78
-
-    ObjDesc(void);
-    ObjDesc(int) {
-        shadow.model = 0;
-        shadow.extend = 0.0f;
-        shadow.cutoff = 0.0f;
-        shadow.count = 0;
-        sibling = 0;
-        next = 0;
-        drop = -10.0f;
-        hasFrame = 1;
-        memset(name, 'a', sizeof(name));
-        memset(model, 'a', sizeof(model));
-        handle = (void*)-1;
-    }
-    virtual ~ObjDesc(void) {}
-    virtual void Read(PlacedObj* o, ValueNode* vn);
-    virtual void Create(const PlacedObj* o) = 0;
-    virtual void Draw(const OFrame* f) const;
-    virtual void Props(void* p, PlacedObj* o);
-    virtual f32 vf1C(void);
-    virtual void vf20(void);
-    virtual void vf24(void);
-};
+// ObjDesc (game/objdesc.h): its inline constructor.
+inline ObjDesc::ObjDesc(int) {
+    shadow.model = 0;
+    shadow.extend = 0.0f;
+    shadow.cutoff = 0.0f;
+    shadow.count = 0;
+    sibling = 0;
+    next = 0;
+    drop = -10.0f;
+    hasFrame = 1;
+    memset(name, 'a', sizeof(name));
+    memset(model, 'a', sizeof(model));
+    handle = (void*)-1;
+}
 
 // The physical description of an obstacle (0x84).
 struct ObstacleDesc {

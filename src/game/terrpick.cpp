@@ -12,15 +12,8 @@ extern s32 lbl_8055CFF4;  // screen height
 extern f32 lbl_8055FC88;  // projection scale
 }
 
-struct OFrame;
-struct PlacedObj;
-
 // The track object class (trackobj.cpp); its default Props/Draw slots are defined here.
-class ObjDesc {
-public:
-    void Props(void* p, PlacedObj* o);
-    void Draw(const OFrame* f) const;
-};
+#include "game/objdesc.h"
 
 // PickCam: common.h's PlainValMatrix.
 ModuleTag lbl_8055ED20;
