@@ -41,8 +41,9 @@ public:
 class CenterLine;
 
 
-// idealline.h's IdealFollowerData as plain storage (MATCHING-AID: built and destroyed by the linker-name ctor/dtor calls
-// below; a real IdealFollowerData local adds the class's destructor call and vptr stores retail lacks).
+// MATCHING-AID: fn_80268E00 keeps idealline.h's IdealFollower as plain storage built and destroyed by linker name:
+// retail passes the constructor's RETURNED pointer to fn_80134E34, which a named IdealFollower local cannot give
+// (+1 instruction for every form tried, aids audit 2 2026-11-17); the other two users are real IdealFollower locals.
 struct IdealFollowerData {
     u8 pad0[0x4];    // offset 0x0
     IdealPoint* seg; // offset 0x4, current line segment
@@ -1183,12 +1184,11 @@ void fn_80268358(CamRec* c) {
             f32 z;
             f32 x;
             PlainValMatrix* r;
-            IdealFollowerData f;
-            __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
-            p0 = (f32*)f.seg;
-            p1 = (f32*)f.seg->next;
-            x = LerpT(f.t, p0[0], p1[0]);
-            z = LerpT(f.t, p0[1], p1[1]);
+            IdealFollower f(0, 0);
+            p0 = (f32*)f.il.seg;
+            p1 = (f32*)f.il.seg->next;
+            x = LerpT(f.il.t, p0[0], p1[0]);
+            z = LerpT(f.il.t, p0[1], p1[1]);
             ValVec3 v;
             CamXZ xz(x, z);
             v.x = xz.x;
@@ -1198,18 +1198,13 @@ void fn_80268358(CamRec* c) {
             hit = 0;
             fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
             r = &fr[j];
-            SetM3(&r->basis[2].x, f.dir[0], lbl_80563C20.value, f.dir[1]);
+            SetM3(&r->basis[2].x, f.dir.x, lbl_80563C20.value, f.dir.y);
             PSVECNormalize((const Vec*)&r->basis[2].x, (Vec*)&r->basis[2].x);
             PSVECCrossProduct((const Vec*)&n.x, (const Vec*)&r->basis[2].x, (Vec*)&r->basis[0].x);
             PSVECNormalize((const Vec*)&r->basis[0].x, (Vec*)&r->basis[0].x);
             PSVECCrossProduct((const Vec*)&r->basis[2].x, (const Vec*)&r->basis[0].x, (Vec*)&r->basis[1].x);
             PSVECNormalize((const Vec*)&r->basis[1].x, (Vec*)&r->basis[1].x);
             r->origin = v;
-            if (f.buf) {
-                delete[] f.buf;
-            }
-            f.buf = 0;
-            __dt__12LineFollowerFv(&f, 0);
         }
         ValVec3 in = *(ValVec3*)&m[i][0];
         for (int k = 0; k < 2; k++) {
@@ -1327,14 +1322,8 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
 }
 
 void fn_80268D94(void) {
-    IdealFollowerData f;
-    __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
+    IdealFollower f(0, 0);
     fn_80268BD4((u8*)&lbl_80499920, f.line->points, lbl_80563C20.value, lbl_80563C98);
-    if (f.buf) {
-        delete[] f.buf;
-    }
-    f.buf = 0;
-    __dt__12LineFollowerFv(&f, 0);
 }
 
 void fn_80268E00(void) {

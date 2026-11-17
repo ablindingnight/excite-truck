@@ -14,7 +14,11 @@ public:
     LineFollower(void);
     virtual ~LineFollower(void);
     virtual int SetLine(CenterLine* line);
-    virtual void Attach(CenterLine* line, V2* pos, V2* dir);
+    virtual void Attach(CenterLine* line, V2* pos, V2* dir) {
+        if (SetLine(line) == 1) {
+            SetPosition(pos, dir, 0);
+        }
+    }
 
     void Clear(void);
     void Init(void);
@@ -57,9 +61,14 @@ class IdealFollower : public LineFollower {
 
 public:
     IdealFollower(int withTimes, CenterLine* line);
-    virtual ~IdealFollower(void);
+    // No user destructor: retail's is implicit (no vptr store where it is inlined; emitted before the in-class
+    // Attach pair at the end of idealline.cpp). Aids audit 2, 2026-11-17.
     virtual int SetLine(CenterLine* line);
-    virtual void Attach(CenterLine* line, V2* pos, V2* dir);
+    virtual void Attach(CenterLine* line, V2* pos, V2* dir) {
+        if (SetLine(line) == 1) {
+            Start(pos, dir, 1, 0);
+        }
+    }
 
     void Reset(void);
     void Start(V2* pos, V2* dir, int resetTimes, IdealPoint* start);

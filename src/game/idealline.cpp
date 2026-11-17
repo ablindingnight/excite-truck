@@ -627,20 +627,6 @@ void fn_80136768(void) { fn_801569FC(); }
 
 }  // extern "C"
 
-IdealFollower::~IdealFollower(void) {}
-
-void LineFollower::Attach(CenterLine* l, V2* p, V2* d) {
-    if (SetLine(l) == 1) {
-        SetPosition(p, d, 0);
-    }
-}
-
-void IdealFollower::Attach(CenterLine* l, V2* p, V2* d) {
-    if (SetLine(l) == 1) {
-        Start(p, d, 1, 0);
-    }
-}
-
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 
 extern const u32 lbl_8055E0C0 = MakeILPos(0xFFFF, 0);
