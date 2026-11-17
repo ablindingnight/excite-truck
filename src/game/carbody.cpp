@@ -1460,9 +1460,9 @@ void fn_80183E7C(u8* p) {
         }
         f32 roll;
         if (cb->airborne > 2 && (roll = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48)), (f32)__fabs(roll) < 2.0f)) {
-            f32 a = Ramp(cb->f2650, 0.0f, 1.0f);
+            f32 a = LerpT(Ramp(cb->f2650, 0.0f, 1.0f), 0.0f, 1.0f);
             f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f);
-            f32 k = LerpT(b, 0.0f, 1.0f) * (cb->mass * 100.0f * 9.81f * 0.305f * (0.0f + a * 1.0f));
+            f32 k = LerpT(b, 0.0f, 1.0f) * (cb->mass * 100.0f * 9.81f * 0.305f * a);
             RVec3 t;
             t.x = cb->mtx.rot.y.x * (roll > 0.0f ? k : -k);
             t.y = cb->mtx.rot.y.y * (roll > 0.0f ? k : -k);
@@ -1671,7 +1671,7 @@ void fn_80183E7C(u8* p) {
     if (cb->f2618 > 0.35f) {
         f32 sink = -PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118));
         if (sink > 13.333333f &&
-            (cb->mtx.pos.y - cb->wheels[3].plane.ground[1] - 4.0f * 0.016683351f * sink < 0.0f || cb->airborne)) {
+            (cb->mtx.pos.y - cb->wheels[3].plane.ground[1] - 4.0f * (0.016683351f * sink) < 0.0f || cb->airborne)) {
             f32 k = FMax(sink - 13.333333f, 0.0f) * cb->mass / 0.016683351f;
             RVec3 f;
             f.x = cb->f25A4 * k;
@@ -2022,7 +2022,7 @@ void fn_80183E7C(u8* p) {
             f32 st = cb->f25F0 * g;
             f32 lat = PSVECDotProduct((const Vec*)&side, (const Vec*)(p + 0x48));
             f32 t = Clamp01((cb->speed - 22.222223f) / 48.888893f);
-            yaw = LerpT(t, yaw, 3.0f * 20.0f * (0.6f * st - lat));
+            yaw = LerpT(t, yaw, 3.0f * (20.0f * (0.6f * st - lat)));
         }
         f32 now = lbl_8055E3C8;
         if (cb->f2638 == 0 && cb->f2644 > 0 &&
