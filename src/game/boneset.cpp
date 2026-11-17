@@ -173,11 +173,11 @@ void fn_801E5998(const BoneSet* set, Bone* out, s32* n) {
 s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     BFrame world[32];
     BFrame skin[32];
-    int i;
-    BFrame* wa = world;
+    int i = 0;
+    BFrame* wa;
     if (n > 0) {
         const BQuat* q = pose;
-        for (i = 0; i < n; wa++, q++, i++) {
+        for (wa = world; i < n; wa++, q++, i++) {
             const Bone* b = &set->bones[i];
             BFrame local = b->rest;
             BFrame parent;
