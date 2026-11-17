@@ -455,23 +455,23 @@ void fn_80259740(int x, f32* out, f32 v) {
 }  // extern "C"
 
 // Shows the row's current trophy model and level on a view.
-#define TROPHY_VIEW_SHOW(v, row)                                                 \
-    {                                                                            \
-        s32 lvl = S32(row, 0xC8);                                                \
-        s32 cat = S32(row, 0x18);                                                \
-        (v).levelNum = lvl;                                                      \
-        const char* model = AchievementsGetLevelModel(cat, lvl);                 \
-        if (model) {                                                             \
-            CopyName(model, 50, (v).model);                                      \
-        } else {                                                                 \
-            (v).model[0] = 0;                                                    \
-        }                                                                        \
-        if (lvl > 0) {                                                           \
-            fn_801345D8((v).level, 20, "Level %d", lvl);                         \
-        } else {                                                                 \
-            (v).level[0] = 0;                                                    \
-        }                                                                        \
+/* Helper name unproven */
+static inline void TrophyViewShow(AchievementTrophyModel* v, u8* row) {
+    s32 lvl = S32(row, 0xC8);
+    s32 cat = S32(row, 0x18);
+    v->levelNum = lvl;
+    const char* model = AchievementsGetLevelModel(cat, lvl);
+    if (model) {
+        CopyName(model, 50, v->model);
+    } else {
+        v->model[0] = 0;
     }
+    if (lvl > 0) {
+        fn_801345D8(v->level, 20, "Level %d", lvl);
+    } else {
+        v->level[0] = 0;
+    }
+}
 
 struct AchQuery3 {
     s32 category;  // offset 0x0
@@ -491,22 +491,26 @@ int fn_8025978C(u8* p) {
     s32 cat;
     lbl_8055F3A0 = 0;
     AchievementTrophyModel front;
+    front.shown = false;
     AchievementTrophyModel back;
     back.shown = !av->counting;
     TrophyFace frontFace(&front, p);
     TrophyFace backFace(&back, p);
-    TROPHY_VIEW_SHOW(front, p);
-    TROPHY_VIEW_SHOW(back, p);
+    TrophyViewShow(&front, p);
+    TrophyViewShow(&back, p);
     char toNext[0x20];
     fn_801345D8(toNext, 0x20, "%d %s", av->q.best - av->q.value, fn_80131234("Achievements:UP") + 1);
     s32 iconColor[7];
     s32 barColor[7];
     s32 levels[7];
     s32* vals[7];
+    // Form unproven: the level is written through one walker and its address is taken from a second.
+    s32* out;
     s32* lp;
     u32 i;
+    out = levels;
     lp = levels;
-    for (i = 0; i < 7; i++, lp++) {
+    for (i = 0; i < 7; i++, out++, lp++) {
         s32 category = lbl_80344EA0[i].category;
         cat = category;
         if (cat == av->q.category) {
@@ -519,7 +523,7 @@ int fn_8025978C(u8* p) {
             AchQuery q;
             q.category = cat;
             AchievementsQuery(&q);
-            levels[i] = AchievementsGetLevel(cat, av->q.category > cat ? q.best : q.value);
+            *out = AchievementsGetLevel(cat, av->q.category > cat ? q.best : q.value);
             vals[i] = lp;
         }
     }
