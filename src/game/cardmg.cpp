@@ -812,17 +812,18 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         h = di;
         h.v[1] = MinF(h.v[1], 0.0f);
         f32 hm = PSVECMag((const Vec*)h.v);
+        f32 boost = lbl_8055A460;
         if (other >= 0) {
             hm *= 0.3f;
             if (((CarBody*)p)->f1F0 != 0x50 && !Boosting(p)) {
                 if (Boosting(fn_8017960C(other)) || hm > 15000.0f) {
-                    if (((CarBody*)p)->speed < F32(fn_8017960C(other), 0x25D4)) {
+                    if (F32(fn_8017960C(other), 0x25D4) > ((CarBody*)p)->speed) {
                         fn_8018A174(p);
                     }
                 }
             }
         } else if (kind == 0x73) {
-            hm *= lbl_8055A460;
+            hm *= boost;
         }
         if (other < 0 || !Boosting(fn_8017960C(other))) {
             if (hm < 30000.0f) {
@@ -872,8 +873,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
         c0.z = best->pos.z + gb->z;
-        int count = ((CarBody*)p)->f5F8;
-        for (int i = 1; i < count; i++) {
+        for (int i = 1; i < ((CarBody*)p)->f5F8; i++) {
             DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
             DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
             w.x = q->pos.x + g->x;
@@ -1009,10 +1009,13 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                 add = add < cap ? add : cap;
                 f32 v = ((CarBody*)p)->f2690 += add;
                 if (v > 0.6f || (v > 0.5f && add > 0.03f)) {
-                    if (fn_80129D18(4, 2) == 0) {
+                    switch (fn_80129D18(4, 2)) {
+                    case 0:
                         ((CarBody*)p)->a268C = 2;
-                    } else {
+                        break;
+                    default:
                         ((CarBody*)p)->a268C = 3;
+                        break;
                     }
                     if (((CarBody*)p)->f26B0 < 0 && fn_80129D18(4, 6) == 0) {
                         ((CarBody*)p)->f26B0 = HitCorner(&da);
