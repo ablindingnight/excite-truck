@@ -7,6 +7,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
+#include "game/byteswap.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -480,32 +481,15 @@ static inline void SetIdentity(OFrame* f) {
     f->pos.z = 0.0f;
 }
 
-static inline void SwapName(u8* p) {
-    for (int i = 0; i < 8; i++) {
-        u8 t = p[i];
-        p[i] = p[15 - i];
-        p[15 - i] = t;
-    }
-}
-
-static inline void Swap32(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 // Byte-swaps n vectors (two PVecs of 12 bytes each per step).
 static inline void SwapKeys(u8* p, int n) {
     for (int i = 0; i < n; i++) {
-        Swap32(p);
-        Swap32(p + 4);
-        Swap32(p + 8);
-        Swap32(p + 12);
-        Swap32(p + 16);
-        Swap32(p + 20);
+        SwapWord(p);
+        SwapWord(p + 4);
+        SwapWord(p + 8);
+        SwapWord(p + 12);
+        SwapWord(p + 16);
+        SwapWord(p + 20);
         p += 0x18;
     }
 }
@@ -892,11 +876,11 @@ LinearPathTMH::LinearPathTMH(void) {
 
 void LinearPathTMH::Swap(TObj* o) {
     LinearPathData* d = (LinearPathData*)o->data;
-    SwapName((u8*)d->name);
+    SwapBytes16((u8*)d->name);
     SwapKeys((u8*)d->keys, 32);
-    Swap32((u8*)&d->count);
-    Swap32((u8*)&d->intervalMin);
-    Swap32((u8*)&d->intervalMax);
+    SwapWord((u8*)&d->count);
+    SwapWord((u8*)&d->intervalMin);
+    SwapWord((u8*)&d->intervalMax);
 }
 
 void LinearPathTMH::Init(TObj* o) {
@@ -937,9 +921,9 @@ HermitePathTMH::HermitePathTMH(void) { count = 0; }
 
 void HermitePathTMH::Swap(TObj* o) {
     HermitePathData* d = (HermitePathData*)o->data;
-    SwapName((u8*)d->name);
+    SwapBytes16((u8*)d->name);
     SwapKeys((u8*)d->keys, 72);
-    Swap32((u8*)&d->count);
+    SwapWord((u8*)&d->count);
 }
 
 extern "C" void fn_801FE88C(HermitePathTMH* t, HermiteEntry* e);
