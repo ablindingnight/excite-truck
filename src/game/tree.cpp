@@ -10,6 +10,7 @@
 #include "game/collshape.h"
 #include "game/rmtx.h"
 #include "game/shapes.h"
+#include "game/byteswap.h"
 
 // Query cell scale. The name is unproven.
 extern const f32 kTreeCellScale;
@@ -291,23 +292,6 @@ static TreeTypeCleanup sTreeTypeCleanup;
 
 
 static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-
-static inline void Swap32(void* v) {
-    u8* p = (u8*)v;
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
-static inline void Swap16(void* v) {
-    u8* p = (u8*)v;
-    u8 t = p[0];
-    p[0] = p[1];
-    p[1] = t;
-}
 
 static inline f32 Step(f32 x, f32 lo, f32 hi) { return (x - lo) / (hi - lo); }
 static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
@@ -677,8 +661,8 @@ static inline void FixEntry(TListEntry* e, u8* base) {
 
 void fn_802BD4DC(TListFile* f, u8* base) {
     TListEntry* e;
-    Swap32(&f->n);
-    Swap32(&f->entries);
+    SwapWord(&f->n);
+    SwapWord(&f->entries);
     f->entries = fn_802BD5A8(f->entries, base);
     for (u32 i = 0; i < f->n; i++) {
         FixEntry(&f->entries[i], base);
@@ -687,10 +671,10 @@ void fn_802BD4DC(TListFile* f, u8* base) {
 
 /* Helper name unproven: byte-swaps one cell read from the file and clears its fade. */
 inline void TCell::Swap() {
-    Swap16(&x);
-    Swap16(&z);
-    Swap16(&count);
-    Swap16(&first);
+    SwapHalf(&x);
+    SwapHalf(&z);
+    SwapHalf(&count);
+    SwapHalf(&first);
     fade = -1.0f;
 }
 
@@ -701,8 +685,8 @@ TCell* fn_802BD694(TCell* off, u8* base);
 
 void fn_802BD5B0(TFileArray<TCell>* a, u8* base) {
     TCell* c;
-    Swap32(&a->n);
-    Swap32(&a->data);
+    SwapWord(&a->n);
+    SwapWord(&a->data);
     a->data = fn_802BD694(a->data, base);
     for (u32 i = 0; i < a->n; i++) {
         a->data[i].Swap();
@@ -716,13 +700,13 @@ TreeRec* fn_802BD80C(TreeRec* off, u8* base);
 #pragma push
 #pragma opt_unroll_loops off
 void fn_802BD69C(TFileArray<TreeRec>* a, u8* base) {
-    Swap32(&a->n);
-    Swap32(&a->data);
+    SwapWord(&a->n);
+    SwapWord(&a->data);
     a->data = fn_802BD80C(a->data, base);
     for (u32 i = 0; i < a->n; i++) {
         f32* m = (f32*)&a->data[i].mtx;
         for (int k = 0; k < 12; k++) {
-            Swap32(&m[k]);
+            SwapWord(&m[k]);
         }
     }
 }
