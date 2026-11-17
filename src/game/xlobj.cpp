@@ -51,7 +51,20 @@ extern "C" {
 void fn_801286A0(void* p, s32 shrink);         // MemShrink
 void fn_80265DCC(void* base, int num, int size, int (*cmp)(const void*, const void*));  // qsort
 struct XSeg* fn_80138B4C(void* line, struct XSeg* prev);
+#ifdef __MWERKS__
 void fn_80136414(struct XSample* out, void* it, int idx);
+#else
+// PORT: idealline's fn_80136414 returns its 12-byte ILPos by value (the PPC passes the result slot first, as above;
+// the i386 host ABI uses a hidden result pointer). Call the by-value function under its C name and copy.
+struct PortILPos12 {
+    u32 w[3];
+};
+PortILPos12 port_ro_fn_80136414(void* it, int idx) __asm__("_fn_80136414");
+static inline void fn_80136414(struct XSample* out, void* it, int idx) {
+    PortILPos12 r = port_ro_fn_80136414(it, idx);
+    __builtin_memcpy(out, &r, sizeof(r));
+}
+#endif
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 s32 fn_802C28C0(void);
