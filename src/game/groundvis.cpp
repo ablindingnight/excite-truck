@@ -274,7 +274,8 @@ static inline int InCone(f32 a, f32 depth, f32 tanA, const f32& secA, f32 pad, f
     if (0.0f > t) {
         t = 0.0f;
     }
-    return a <= t + (pad + radius * k) * secA;
+    f32 m = pad + radius * k;
+    return a <= t + m * secA;
 }
 
 static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
@@ -697,7 +698,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
             int h = n->size / 2;
             c.z = n->y * lbl_80564AF0.cell;
             c.y = -12.0f + (f32)((cell->bits >> 14) & 0x1FF);
-            k = (f32)(((cell->bits >> 10) & 0xF) + 1) * 1.5f;
+            k = Mul((f32)(((cell->bits >> 10) & 0xF) + 1), 1.5f);
             if (h < 4) {
                 k *= (f32)(4 / h);
             }
