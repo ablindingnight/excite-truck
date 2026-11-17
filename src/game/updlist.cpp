@@ -2,14 +2,7 @@
 // per-frame hooks called in registration order. Names are guesses.
 #include "game/common.h"
 
-class Updatable {
-public:
-    virtual ~Updatable(void);
-    virtual void vf0C(void) = 0;
-    virtual void vf10(void) = 0;
-    virtual void vf14(void) = 0;
-    virtual void vf18(void) = 0;
-};
+#include "game/updatable.h"
 
 static Updatable* lbl_80438818[16];
 ModuleTag lbl_8055E8E0;

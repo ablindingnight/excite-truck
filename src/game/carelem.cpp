@@ -12,14 +12,7 @@ void fn_801D0DDC(class Updatable* u);  // register
 void fn_801D0DFC(void);                // unregister
 }
 
-class Updatable {
-public:
-    virtual ~Updatable(void);
-    virtual void vf0C(void) = 0;
-    virtual void vf10(void) = 0;
-    virtual void vf14(void) = 0;
-    virtual void vf18(void) = 0;
-};
+#include "game/updatable.h"
 
 class Drawable : public Updatable {
 public:

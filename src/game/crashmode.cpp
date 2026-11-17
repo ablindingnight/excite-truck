@@ -65,6 +65,8 @@ V2 LerpV2(const V2& a, const V2& b, f32 t);
 
 void* operator new(size_t size, const char* tag);
 
+#ifdef __MWERKS__
+// game/updatable.h's Updatable as retail's crashmode saw it: the pure destructor gives retail's zero slot in its Updatable table.
 class Updatable {
 public:
     Updatable(void) { fn_801D0DDC(this); }
@@ -74,6 +76,9 @@ public:
     virtual void vf14(void) = 0;
     virtual void vf18(void) = 0;
 };
+#else
+#include "game/updatable.h"
+#endif
 
 inline Updatable::~Updatable(void) { fn_801D0DFC(this); }
 

@@ -45,6 +45,8 @@ void* operator new[](size_t size, const char* tag);
 
 #include "game/pathmover.h"
 
+#ifdef __MWERKS__
+// game/updatable.h's Updatable as retail's pathman saw it: its inline destructor is retail's weak __dt__9UpdatableFv here.
 class Updatable {
 public:
     Updatable(void) { fn_801D0DDC(this); }
@@ -54,6 +56,9 @@ public:
     virtual void vf14(void) = 0;
     virtual void vf18(void) = 0;
 };
+#else
+#include "game/updatable.h"
+#endif
 
 class ConsoleCmd {
 public:
