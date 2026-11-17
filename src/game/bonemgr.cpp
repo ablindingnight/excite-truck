@@ -19,6 +19,11 @@ void operator delete(void* p);
 void operator delete[](void* p);
 
 extern const char lbl_80346798[];
+#ifndef __MWERKS__
+// PORT: no unit's split owns 0x80346798 yet (retail .data, 0x31 bytes), so the PC link has no definition; this is
+// retail's text, read from main.dol.
+extern const char lbl_80346798[] = "StackAlloc(%s:%d)::insufficient memory (max %dK)";
+#endif
 
 class AllocBuf {
 public:
