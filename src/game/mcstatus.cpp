@@ -1,12 +1,10 @@
-// Memory card status screens (0x802451DC-0x80246938): the save status layout ("mc_status.lyt"),
-// the dialog and progress bar ("mc_dialog.lyt", "mem_bar.art", "progress") and the wireless warning.
-// Written against raw field offsets; the large screen routines are still stubs. Names are guesses
-// apart from the strings.
+// Memory card status, dialog and save progress layouts.
+// Class and field names are inferred from the retail callers and resource names.
+// Unit boundary reconstructed (warning + startup). Retail source boundary unverified. User-approved 2026-11-17.
 #include "game/common.h"
 #include "game/gart.h"
 #include "game/menu.h"
 #include "game/menustate.h"
-#include "game/joy.h"
 extern "C" {
 size_t strlen(const char* s);
 char* strcpy(char* d, const char* s);
@@ -28,9 +26,6 @@ void fn_80230E90(int a);
 void fn_80214AF0(int s);
 void fn_80214B44(int i);
 void fn_80214A9C(int s);
-s32 fn_80129AF4(void);
-int fn_801298E8(JoyStatus* info, int ch);
-void fn_80214FD8(const char* title, const char* msg);
 void fn_802C519C(u8* p);
 void fn_802328D4(u8* p);
 u8* gxGetImage(const char* name);
@@ -128,13 +123,6 @@ static inline MenuDesc MakeStatusMenu(void) {
     MenuDesc d = {"mc_status.lyt", 0, (int (*)(int*))fn_802450D4, 0, 0};
     return d;
 }
-
-ModuleTag lbl_8055F248;
-UnkStatic123s lbl_804988D8;
-
-extern "C" {
-
-}  // extern "C"
 
 // A constructor retained by the compiler but stripped by the linker. It emits the pure dialog vtable.
 /* Helper name unproven */
@@ -652,38 +640,5 @@ inline void MemBar::Draw(void) {
         fn_80230924(-1, sx, sy, sx + fw * frac, sy - fh, lbl_80563830);
     }
 }
-
-extern "C" {
-
-inline void fn_8024683C(void) {
-    JoyStatus all;
-    JoyStatus one;
-    int ch = fn_80129AF4();
-    int warn = 0;
-    if (ch == -1) {
-        for (int i = 0; i < 4; i++) {
-            if (fn_801298E8(&all, i) && (all.info.b & 1)) {
-                warn = 1;
-            }
-        }
-    } else {
-        if (fn_801298E8(&one, ch) && (one.info.b & 1)) {
-            warn = 1;
-        }
-    }
-    if (warn) {
-        const char* message = "Any information you enter might be picked up by another wireless receiver";
-        const char* title = "Wireless Warning";
-        fn_80214FD8(title, message);
-    }
-}
-
-typedef void (*RemoteWarningCallback)(void);
-// This reference emits the out-of-line copy of the inline warning for nameent.cpp.
-/* Helper name unproven */
-RemoteWarningCallback GetRemoteWarningCallback(void) { return fn_8024683C; }
-
-
-}  // extern "C"
 
 const f32 lbl_80563830 = 0.0f;  // the dialog fade start (declared in mcdialog.h; menusel reads it too)
