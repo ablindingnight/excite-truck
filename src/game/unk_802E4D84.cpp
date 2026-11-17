@@ -8,6 +8,7 @@
 // compiled as C++ with C names until the unit is renamed.
 #include "game/common.h"
 #include "game/byteswap.h"
+#include "game/strcopy.h"
 
 // Compiled as C++ (2026-11-03): the unit owns a ModuleTag registered by its static initializer (the 8-byte function
 // after the code, formerly the separate split unk_802E6B48) and the globals after it (.sbss 0x8055FF70..0x8055FFB8,
@@ -188,15 +189,6 @@ extern int OSRestoreInterrupts(int);
 extern void *memset(void *, int, unsigned int);
 
 // Copies at most n - 1 characters of src to dst and terminates it.
-static inline void StrCopy(char *d, const char *s, int n) {
-    char *p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 extern void *fn_8012C370(const char *name, unsigned int type, unsigned int *version, unsigned int *size,
                          unsigned char *first, unsigned char *swapped);
@@ -584,7 +576,7 @@ int fn_802E58A0(void *arg0, int arg1) {
 }
 
 void fn_802E58B8(char *name) {
-    StrCopy(lbl_804FC558[lbl_8055FF78++], name, 0x20);
+    SafeStrCopy(lbl_804FC558[lbl_8055FF78++], name, 0x20);
     fn_8012BEF0(name);
     fn_8012C41C((void (*)())fn_802E589C, 0, name);
 }
@@ -600,7 +592,7 @@ void fn_802E5950(int arg0, int arg1) {
 }
 
 void fn_802E59BC(char *name) {
-    StrCopy(lbl_804FC558[lbl_8055FF78++], name, 0x20);
+    SafeStrCopy(lbl_804FC558[lbl_8055FF78++], name, 0x20);
     fn_8012BEF0(name);
     fn_8012C41C((void (*)())fn_802E58A0, 0, name);
 }
@@ -746,7 +738,7 @@ SpuSample *fn_802E5DD8(char *name, unsigned int size, int format, int (*fill)(vo
     s->users = 0;
     s->rate = 1.0f;
     s->length = 1000.0f;
-    StrCopy(s->name, name, 0x20);
+    SafeStrCopy(s->name, name, 0x20);
     return s;
 }
 
