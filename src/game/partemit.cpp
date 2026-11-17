@@ -68,7 +68,7 @@ struct EmitterDef {
     ChunkRef chunk;    // offset 0x6C
 };
 
-struct NameEntry {
+struct EmitterName {
     char name[32];  // offset 0x0
     s32 id;         // offset 0x20
 };
@@ -182,8 +182,8 @@ u32* lbl_8055F820; // per-view fog overlay colour
 s32 lbl_8055F824;
 
 EmitterDef lbl_804B5070[64];
-NameEntry lbl_804B6E70[64];
-NameEntry lbl_804B7770[256];
+EmitterName lbl_804B6E70[64];
+EmitterName lbl_804B7770[256];
 TFixed<EmitterInst, 256> lbl_804B9B7C;
 
 extern "C" {

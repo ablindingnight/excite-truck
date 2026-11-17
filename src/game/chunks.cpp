@@ -161,7 +161,7 @@ struct TypeName {
     s32 type;
 };
 
-struct TypeTable {
+struct ChunkTypeTable {
     TypeName t[3];
 };
 
