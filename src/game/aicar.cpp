@@ -973,6 +973,13 @@ f32 fn_801673A4(int i, f32* wander);
 
 // Target lateral offset: the lane blend (plus the wander), scaled by the throttle response, pushed back when
 // the car is over the lane edge and finally clamped to the track width.
+static inline void LaneLimits(f32* limits, f32 width, f32 position) {
+    limits[1] = width-position;
+    limits[0] = -width-position;
+}
+
+static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
+
 f32 fn_801948B0(u8* d, f32 t, int steer) {
     f32 wander;
     f32 out = 0.0f;
@@ -987,19 +994,18 @@ f32 fn_801948B0(u8* d, f32 t, int steer) {
     f32 push = 0.0f;
     if (steer && U8(d, 0x14)) {
         f32 x = F32(d, 0x8);
-        f64 absWide = __fabs(x);
-        f32 over = gain / 2.0f + (f32)absWide - F32(d, 0x274);
+        f32 over = gain / 2.0f + AbsF(x) - F32(d, 0x274);
         over = over > 0.0f ? over : 0.0f;
         f32 sign = x > 0.0f ? 1.0f : -1.0f;
         push = -sign * over;
     }
+    f32 bias = F32(d, 0x144);
     f32 lim[2] = {0};
     out += push + F32(d, 0x220) * gain;
-    out += F32(d, 0x144) * F32(d, 0x2E8);
+    out += bias * F32(d, 0x2E8);
     if (steer) {
         if ((f32)__fabs(F32(d, 0x278)) < 2.0f + F32(d, 0x284)) {
-            lim[1] = F32(d, 0x274) - F32(d, 0x8);
-            lim[0] = -F32(d, 0x274) - F32(d, 0x8);
+            LaneLimits(lim, F32(d, 0x274), F32(d, 0x8));
             f32 r = lim[1] < out ? lim[1] : out;
             out = r > lim[0] ? r : lim[0];
         } else {
@@ -1436,7 +1442,6 @@ struct LaneWander {
     f32 now;    // offset 0x26C
 };
 
-static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 
 void fn_80195B28(u8* d, f32 v) {
     static f32 lbl_80333308[9] = {5.0f, 15.0f, 4.0f, 1.0f, 1.5f, 0.9f, 0.3f, 0.8f, 0.4f};
