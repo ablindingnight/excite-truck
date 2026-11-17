@@ -3,6 +3,7 @@
 // popup, the "%s/%s" progress counters and the list descriptors behind it. Written against raw field
 // offsets; the large screen routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/sound.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
@@ -40,7 +41,6 @@ void fn_80236914(int, f32*, f32);
 void fn_80214A9C(int s);
 void fn_80230E90(int a);
 void fn_8025C204(u8* p, s32 a);
-void fn_80235380(u8* p);
 void fn_802328D4(u8* p);
 void fn_80214AF0(int s);
 }
@@ -142,7 +142,6 @@ public:
 };
 
 class ChalLevel;
-extern "C" u8* fn_8023512C(const char* art);
 extern "C" u8* fn_80232578(const char* name);
 
 namespace {
@@ -198,7 +197,7 @@ public:
     u8 sel;     // offset 0x1C
     u8 open;    // offset 0x1D
     u8 f1E;     // offset 0x1E
-    u8* art;    // offset 0x20
+    gArtSet* art;    // offset 0x20
     u8* font;   // offset 0x24
 };
 
@@ -247,7 +246,7 @@ public:
     u8 f1E;         // offset 0x1E
     u8 f1F;         // offset 0x1F
     s32 index;      // offset 0x20
-    u8* art;        // offset 0x24
+    gArtSet* art;        // offset 0x24
     u8* font;       // offset 0x28
 };
 
@@ -426,7 +425,6 @@ static inline int MinI(int a, int b) { return a >= b ? b : a; }
 
 extern "C" {
 void* memset(void* d, int c, u32 n);
-u8* fn_8023512C(const char* art);
 u8* fn_80232578(const char* name);
 GameSound* fn_80207848(const char* name, int flags);
 }
@@ -986,7 +984,6 @@ const char* GetGradeDisplayName(int grade);
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
 void fn_80230F78(u8* alpha, f32* grow, u32* color, int a);
-void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
 void fn_801308F4(char* buf, s32 size, s32 value);
 
