@@ -5,6 +5,7 @@
 // strings.
 #include "game/common.h"
 #include "game/axisrow.h"
+#include "game/buildquery.h"
 #include "game/proxer.h"
 #include "game/raceopts.h"
 #include "game/rvec.h"
@@ -1231,17 +1232,11 @@ static inline void SpinXform(f32* out, const f32* in, const f32* m) {
         out[2] = Dot3(in[0], m[2], in[1], m[5], in[2], m[8]);
     }
 }
-/* PROVISIONAL stand-in, form unproven (FACTS 2026-11-17 02:20, the achview fn_8025A204 mechanism). Between the lean
-   read and the first vector statement of the nose-down push retail tested a constant that went through memory for
-   equality. The back end folds such a test only after its first scheduling pass, so the lean read is scheduled in a
-   block of its own, air is still live there, and air takes f28 instead of sharing lean's f30 (every saved FPR after
-   it follows). The test is always true (0 != 3) and leaves no instruction: 1100/1100, same opcodes as retail. What
-   the original tested is unknown; this stands in for it. Native proof: handoff/dossier/native_lane/playcar_vf48.md. */
-struct PushIndex {
-    int i;
-    PushIndex(int n) : i(n) {}
-};
-static inline bool PushLeft(PushIndex c) { return c.i != 3; }
+/* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40). Between the lean read and the first vector
+   statement of the nose-down push retail had a test that only the back end folds, after its first scheduling pass:
+   the lean read is scheduled in a block of its own, air is still live there, and air takes f28 instead of sharing
+   lean's f30 (every saved FPR after it follows). 1100/1100, same opcodes as retail. What the original tested is
+   unknown. Native proof: handoff/dossier/native_lane/playcar_vf48.md. */
 /* Helper name unproven: the nose-down push while boosting, as its own inline. Retail colours `lean` second of all
    saved FPRs (f30, before dir): an inline's objects number above the caller's locals, and lean is the first one
    declared here. The -3000 * air factor is written in each product: retail's factor is a code-generation temporary
@@ -1253,7 +1248,7 @@ static inline void NoseDown(u8* p, f32 air, f32 fwd, RVec3& f, RVec3& at2) {
     u8* c3;
     c3 = PTR(p, 0x34);
     lean = F32(c3, 0x25F0);
-    if (PushLeft(PushIndex(0))) {
+    if (BuildMode() == kBuildRetail) {
         PcAddScaled(&f, &F32(c3, 0x54), &F32(c3, 0x48), 0.0f);
         f32 b;
         f.x *= -3000.0f * air;
