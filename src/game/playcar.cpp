@@ -1488,7 +1488,9 @@ void PlayerDriver_vf48(u8* p) {
     wob *= F32(p, 0x1C);
     wob *= 0.009f;
     c4 = PTR(p, 0x34);
-    grip = F32(c4, 0x2570) + F32(c4, 0x24FC);
+    f32 gr = F32(c4, 0x2570);
+    f32 gl = F32(c4, 0x24FC);
+    grip = gl + gr;
     rough = VMag(c4 + 0x26B4);
     lim = MinF(1.0f, Mul(10.0f, F32(PTR(p, 0x34), 0x264C)));
     ga = 0.033000004f * rough + lim;
@@ -1565,9 +1567,13 @@ void PlayerDriver_vf48(u8* p) {
         v = (const f32*)(PTR(p, 0x34) + 0x3C);
         u8* c6;
         SpinXform(&u.x, v, spin);
-        slip = MaxF(0.0f, 1.0f - 0.5f * (F32(c5, 0x2488) + F32(c5, 0x2414)));
+        f32 sr2 = F32(c5, 0x2488);
+        f32 sl2 = F32(c5, 0x2414);
+        slip = MaxF(0.0f, 1.0f - 0.5f * (sl2 + sr2));
         str *= slip;
-        ref = MaxF(0.1f, F32(PTR(p, 0x34), 0x25D4));
+        ref = 0.1f;
+        f32 spd = F32(PTR(p, 0x34), 0x25D4);
+        ref = ref > spd ? ref : spd;
         turn = VDot(0x118 + PTR(p, 0x34), &u) / ref;
         turn = MaxF(MinF(0.9f, 10.0f * turn), -0.9f);
         c6 = PTR(p, 0x34);
