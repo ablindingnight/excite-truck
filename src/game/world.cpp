@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carmodel.h"
 #include "game/shapes.h"
 #include "game/animobj.h"
 #include "game/raceprog.h"
@@ -134,19 +135,6 @@ public:
     AnimPoint(const char* name);
     virtual void Draw(void);  // animobj.cpp
     u8 pad3C[0x7C - 0x3C];
-};
-
-class CarModel : public AnimObj {
-public:
-    CarModel(Racer* r, const CarDef* d);
-    virtual void Draw(void);  // carmodel.cpp
-    virtual void vf24(void);  // 0x24: draws the car
-    u8 pad3C[0x4E4 - 0x3C];
-};
-
-class PlayerCarModel : public CarModel {
-public:
-    PlayerCarModel(Racer* r, CarDef* d);
 };
 
 // Unit-local (port ODR: other units define a different WheelSlot).

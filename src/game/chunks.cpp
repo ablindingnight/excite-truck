@@ -4,6 +4,7 @@
 // tumble with one of six random spins, fall, bounce once on the ground and sink away. Car chunks are
 // tinted with a dimmed copy of each car's colour. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carmodel.h"
 #include <revolution/MTX/vec.h>
 #include "game/rmtx.h"
 #include "game/plainvec.h"
@@ -170,12 +171,6 @@ struct TypeName {
 
 struct TypeTable {
     TypeName t[3];
-};
-
-// carmodel.cpp's CarModel (lbl_80488648 holds the eight), declared as far as this unit reads it
-struct CarModel {
-    u8 pad0[0x3EC];
-    u32 color;  // offset 0x3EC
 };
 
 struct ModelInfo {
