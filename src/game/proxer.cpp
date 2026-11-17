@@ -24,7 +24,7 @@ void* fn_802C6C34(int id);
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-struct Body {
+struct ProxBody {
     u8 pad0[0x18];
     V3 vel;  // offset 0x18
     V3 pos;  // offset 0x24
@@ -219,7 +219,7 @@ extern "C" {
 
 bool fn_8013705C(f32 a, f32 b) { return a * b >= 0.0f; }
 
-bool fn_80137078(const Body* a, const Body* b, f32 ta, f32 tb) {
+bool fn_80137078(const ProxBody* a, const ProxBody* b, f32 ta, f32 tb) {
     V3 pa;
     V3 pb;
     V3 d;
@@ -241,8 +241,8 @@ int fn_80137140(int i, int j) {
     const ModelInfo* ma = (const ModelInfo*)fn_802C6C34(((CarBody*)ca)->model);
     const ModelInfo* mb = (const ModelInfo*)fn_802C6C34(((CarBody*)cb)->model);
     int r = 0;
-    if (fn_80137078((Body*)(ca + 0x3C), (Body*)(cb + 0x3C), ma->box[5], mb->box[4]) &&
-        fn_80137078((Body*)(cb + 0x3C), (Body*)(ca + 0x3C), mb->box[5], ma->box[4])) {
+    if (fn_80137078((ProxBody*)(ca + 0x3C), (ProxBody*)(cb + 0x3C), ma->box[5], mb->box[4]) &&
+        fn_80137078((ProxBody*)(cb + 0x3C), (ProxBody*)(ca + 0x3C), mb->box[5], ma->box[4])) {
         r = 1;
     }
     return r;
