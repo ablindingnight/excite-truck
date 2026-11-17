@@ -240,6 +240,7 @@ public:
     virtual void Load(const char* name);
     virtual void Update(f32 dt);
     virtual void Draw(void);
+    void DrawVisible(ValVec3& dir, ValVec3& saved);
 
     char model[50];    // offset 0x4
     char level[20];    // offset 0x36
@@ -786,6 +787,13 @@ inline f32 fn_8025ADF4(f32 x);
 
 static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
+// Bind the shared empty vector constructor even in the no-inline update.
+#ifdef __MWERKS__
+#define InitTrophyVec3 __ct__11Vec3StorageFv
+#else
+#define InitTrophyVec3 DefaultConstructVec3
+#endif
+
 // Turns the trophy: the +/- buttons spin it, the stick or pointer tilts it, then the frame at p + 0x84
 // (right, up, forward) is rebuilt around the tilted up vector.
 #pragma push
@@ -807,7 +815,7 @@ inline void AchievementTrophyModel::Update(f32 dt) {
         f32 plus = (pad.hold & 2) ? 1.0f : 0.0f;
         f32 minus = (pad.hold & 8) ? -1.0f : 0.0f;
         lbl_8055F398 += dt * (3.1415927f * (minus + plus));
-        DefaultConstructVec3(v);
+        InitTrophyVec3(v);
         if (pad.flags & 0x20) {
             fn_80144DAC(v, pad.dir);
         } else {
@@ -822,9 +830,9 @@ inline void AchievementTrophyModel::Update(f32 dt) {
     f32 tilt = fn_8017F70C(fn_8025AD88(side, &rot[3]));
     fn_8017F70C(fn_8025AD88(&rot[3], fwd));
     if (tilt > 0.707f) {
-        DefaultConstructVec3(a);
-        DefaultConstructVec3(b);
-        DefaultConstructVec3(c);
+        InitTrophyVec3(a);
+        InitTrophyVec3(b);
+        InitTrophyVec3(c);
         fn_801C0E4C(c, side, &rot[3]);
         fn_801C0E4C(a, &rot[3], c);
         fn_801C0E4C(b, &rot[3], fwd);
@@ -882,10 +890,10 @@ f32 lbl_8055F3A4;
 f32 lbl_80498EAC[3];
 
 extern "C" {
-u8* fn_8025B134(u8* p);
-void fn_8025B0E8(Words9* d, const Words9* s);
-f32 fn_8025B0A8(f32* r);
-f32 fn_8025B0C4(f32 x);
+inline u8* fn_8025B134(u8* p);
+inline void fn_8025B0E8(Words9* d, const Words9* s);
+inline f32 fn_8025B0A8(f32* r);
+inline f32 fn_8025B0C4(f32 x);
 u8* fn_8022EDC4(void);
 void fn_80144D80(Mat3* m, f32 x, f32 y, f32 z);
 void fn_802C77F0(s32 model, f32* bounds);
@@ -906,33 +914,18 @@ void fn_802C744C(s32 model, u8* m);
 
 }  // extern "C"
 
-// Draws the trophy model: scaled to the view, placed in front of the camera so its size class
-// fills the screen, lit from a fixed direction.
-static inline void TrophyCenterOffset(AchievementTrophyModel* p, f32* bounds, u8* cam) {
-    f32 c[3];
-    DefaultConstructVec3(c);
-    fn_801BFEBC(c, fn_8025B0A8(bounds), fn_8025B0A8(bounds + 2), fn_8025B0A8(bounds + 4));
-    fn_801E67B4(c, c, (u8*)p->xform);
-    fn_801C0E60(&p->xform[9], &p->xform[9], c);
-    fn_801BFE7C(&p->xform[9], &p->xform[9], (f32*)(cam + 0x24));
-}
+#undef InitTrophyVec3
 
-// Draw inlines its helper but calls the four small functions above. In the target those four sit right after Draw, the
-// way deferred inlines do; as plain functions here they come before Reset. Their real form is still open.
-inline void AchievementTrophyModel::Draw(void) {
+// Draw the visible trophy and restore the lighting and perspective.
+inline void AchievementTrophyModel::DrawVisible(ValVec3& dir, ValVec3& saved) {
     Mat3 scale;
-    TrophySizes sizes;
     f32 bounds[6];
-    ValVec3 dir;
-    if (handle == -1 || !shown) {
-        return;
-    }
     fn_8025B0E8((Words9*)xform, (Words9*)fn_8025B134((u8*)rot));
     u8* cam = fn_8022EDC4();
     fn_80144D80(&scale, F32(cam, 0x38), F32(cam, 0x38), F32(cam, 0x38));
     Mat3Mul((Mat3*)xform, (Mat3*)xform, &scale);
     fn_802C77F0(handle, bounds);
-    sizes = lbl_802FA628;
+    TrophySizes sizes = lbl_802FA628;
     int level = levelNum;
     if (level <= 0) {
         fn_802E30C8("AchievementTrophyModel: bad level value %d", level);
@@ -942,15 +935,24 @@ inline void AchievementTrophyModel::Draw(void) {
         f32 nearD = 0.1f + r;
         u8* m = (u8*)fn_802C86DC();
         fn_801C2B9C(&xform[9], (f32*)(m + 0x24), (f32*)(m + 0x18), Max(d, nearD));
-        TrophyCenterOffset(this, bounds, cam);
+        Vec3Storage c;
+        fn_801BFEBC(&c.x, fn_8025B0A8(bounds), fn_8025B0A8(bounds + 2), fn_8025B0A8(bounds + 4));
+        fn_801E67B4(&c.x, &c.x, (u8*)xform);
+        fn_801C0E60(&xform[9], &xform[9], &c.x);
+        fn_801BFE7C(&xform[9], &xform[9], (f32*)(cam + 0x24));
     }
     dir.x = 0.2f;
     dir.y = -0.7f;
     dir.z = 0.7f;
-    u32 oldAmb = fn_802C9950(0xFF646464);
-    u32 oldDiff = fn_802C9994(0xFFB4B4B4);
+    u32 oldDiff, oldAmb;
+    oldAmb = fn_802C9950(0xFF646464);
+    oldDiff = fn_802C9994(0xFFB4B4B4);
     f32 oldSpec = fn_802C99E8(1.0f);
-    ValVec3 saved = *fn_802C9A40();
+#ifdef __MWERKS__
+    __memcpy(&saved, fn_802C9A40(), sizeof(saved));
+#else
+    saved = *fn_802C9A40();
+#endif
     fn_802C9A1C(&dir);
     fn_802D7554(1);
     fn_802D9230(fn_802CA294((s32)env));
@@ -963,29 +965,29 @@ inline void AchievementTrophyModel::Draw(void) {
     fn_802C9950(oldAmb);
 }
 
-// 0.5, this unit's own pool entry. Retail creates it in AchievementTrophyModel::Draw, which is compiled BEFORE this
-// helper (Draw calls the four small functions here and they are emitted after it); our compiler would inline them into
-// a deferred Draw, so they are plain functions compiled first, and a literal here would enter the pool six words early.
-// Until that emission order is solved the matching build reads the entry by its label; other compilers get the value.
-#ifdef __MWERKS__
-extern const f32 lbl_80563B1C;
-#else
-static const f32 lbl_80563B1C = 0.5f;
-#endif
+inline void AchievementTrophyModel::Draw(void) {
+    if (handle == -1 || !shown) {
+        return;
+    }
+    ValVec3 dir;
+    ValVec3 saved;
+    DrawVisible(dir, saved);
+}
 
 extern "C" {
-f32 fn_8025B0A8(f32* r) {
+static inline f32 ScaleRange(f32 x, f32 scale) { return x * scale; }
+inline f32 fn_8025B0A8(f32* r) {
     f32 d = r[1] - r[0];
     f32 out = r[0];
-    out += d * lbl_80563B1C;
+    out += ScaleRange(d, 0.5f);
     return out;
 }
 
-f32 fn_8025B0C4(f32 x) { return (f32)sin(x); }
+inline f32 fn_8025B0C4(f32 x) { return (f32)sin(x); }
 
-void fn_8025B0E8(Words9* d, const Words9* s) { *d = *s; }
+inline void fn_8025B0E8(Words9* d, const Words9* s) { *d = *s; }
 
-u8* fn_8025B134(u8* p) { return p; }
+inline u8* fn_8025B134(u8* p) { return p; }
 
 }  // extern "C"
 
@@ -1194,3 +1196,9 @@ inline void TrophyFace::Update(void) {
         view->shown = 1;
     }
 }
+
+// MATCHING-AID: the deferred Draw uses this nested inline budget to keep
+// the four trophy helpers as direct calls. The original setting is unproven.
+#ifdef __MWERKS__
+#pragma inline_max_size(200)
+#endif
