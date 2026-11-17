@@ -473,25 +473,7 @@ f32 GArtStrippedToFloat(int i) { return i; }
 }  // extern "C"
 
 // A set of named textures, one of which is drawn at a time.
-class DynoTex {
-public:
-    struct Entry {
-        char name[0x24];  // offset 0x0
-        s32 tex;          // offset 0x24
-        int id;           // offset 0x28
-    };
-
-    DynoTex(int max, int flip);
-    virtual ~DynoTex(void);
-    void Add(int id, const char* name);
-    void Draw(int id, int x, int y, int w, int h);
-
-    Entry* entries;  // offset 0x4
-    int max;         // offset 0x8
-    int count;       // offset 0xC
-    s32 current;     // offset 0x10
-    u8 flip;         // offset 0x14
-};
+#include "game/dynotex.h"
 
 DynoTex::DynoTex(int max, int flip) {
     this->max = max;

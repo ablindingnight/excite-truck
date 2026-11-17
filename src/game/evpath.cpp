@@ -1058,18 +1058,7 @@ public:
 }  // namespace
 
 // A set of named textures, one of which is drawn at a time (gart.cpp).
-class DynoTex {
-public:
-    DynoTex(int max, int flip);
-    virtual ~DynoTex(void);
-    void Add(int id, const char* name);
-
-    void* entries;  // offset 0x4
-    int max;        // offset 0x8
-    int count;      // offset 0xC
-    s32 current;    // offset 0x10
-    u8 flip;        // offset 0x14
-};
+#include "game/dynotex.h"
 
 extern "C" int fn_802054EC(const char* key, int level, int event);
 
