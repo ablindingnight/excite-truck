@@ -59,7 +59,7 @@ public:
       virtual void vf16();
   virtual void vf17();
   virtual void vf18();
-  virtual void vf19();
+  virtual void* vf19();  // UICustom::Slot60 forwards its result (x86: it must be returned explicitly)
   virtual void vf20();
   virtual int vf21();     // vtable 0x5C
 };
@@ -1913,7 +1913,7 @@ inline void UICustom::Slot48(void) {
 inline void* UICustom::Slot60(void) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
-    obj->vf19();
+    return obj->vf19();
 }
 
 inline void UICustom::Slot74(int, void*) {
