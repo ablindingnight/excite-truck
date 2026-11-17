@@ -3496,8 +3496,9 @@ void fn_8018A9F0(u8* p, u8* m) {
         RVec3* old = 0;
         s32 n = 0;
         fn_801C2BDC(cb->f26C8, &n, &pos, &old);
+        s32 i = 0;
         if (S32(cb->f26C0, 0xC8) > 0) {
-            for (s32 i = 0; i < S32(cb->f26C0, 0xC8); i++) {
+            for (; i < S32(cb->f26C0, 0xC8); i++) {
                 u8* d = cb->f26C0;
                 ToBody(p, (RVec3*)(m + 0xE24) + ((s32*)(d + 0xAC))[i * 2], &pos[i * 2 + 1]);
             }
