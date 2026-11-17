@@ -230,24 +230,31 @@ void fn_8025E034(void) {
     screen.cur = 0;
     screen.all = screen.lists[2];
     fn_8025F46C(&screen);
+    /* Item forms unproven; what they must reproduce is compiler-verified (FACTS 2026-11-17 03:37). The compiler cuts a
+       block every 100 instructions while it selects instructions. A text item with the default context costs 14 of
+       them, the five-argument form 10. Retail's second zero register (`li r18,0`, used from "#cup_name_5"'s arg1
+       through item 16, the first zero again from item 17) is what comes out when such a cut falls inside
+       "#cup_name_5" between its context copy and the load of that copy, and the next cut inside item 17. The forms
+       below put both cuts there: 376/376 instructions and retail's per-item zero map (375 and one zero before).
+       Which items carry the default context is only fixed up to the instruction count before each cut. */
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8025F274, 0, 0),
         MenuItem("#cup_name_1", screen.names[0].name),
         MenuItem("#cup_select_1", 2, &screen.names[0].state, 0, 0),
-        MenuItem("#cup_name_2", screen.names[1].name),
+        MenuItem("#cup_name_2", 3, screen.names[1].name, 0, 0),
         MenuItem("#cup_select_2", 2, &screen.names[1].state, 0, 0),
-        MenuItem("#cup_name_3", screen.names[2].name),
+        MenuItem("#cup_name_3", 3, screen.names[2].name, 0, 0),
         MenuItem("#cup_select_3", 2, &screen.names[2].state, 0, 0),
-        MenuItem("#cup_name_4", screen.names[3].name),
+        MenuItem("#cup_name_4", 3, screen.names[3].name, 0, 0),
         MenuItem("#cup_select_4", 2, &screen.names[3].state, 0, 0),
         MenuItem("#cup_name_5", screen.names[4].name),
         MenuItem("#cup_select_5", 2, &screen.names[4].state, 0, 0),
         MenuItem("#event_location_1", screen.rows[0].name),
         MenuItem("#event_course_1", screen.rows[0].course),
         MenuItem("#event_time_1", screen.rows[0].value),
-        MenuItem("#event_location_2", 3, screen.rows[1].name, 0, 0),
-        MenuItem("#event_course_2", 3, screen.rows[1].course, 0, 0),
-        MenuItem("#event_time_2", 3, screen.rows[1].value, 0, 0),
+        MenuItem("#event_location_2", screen.rows[1].name),
+        MenuItem("#event_course_2", screen.rows[1].course),
+        MenuItem("#event_time_2", screen.rows[1].value),
         MenuItem("#event_location_3", 3, screen.rows[2].name, 0, 0),
         MenuItem("#event_course_3", screen.rows[2].course),
         MenuItem("#event_time_3", screen.rows[2].value),
