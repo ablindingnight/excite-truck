@@ -43,6 +43,17 @@ struct MenuItem {
         arg0 = (int)context.value;
         arg1 = 0;
     }
+    // A text item with the default caption context: the context is read first, through its address, into a local
+    // context (retail loads it at argument time: 12 instructions per item at instruction selection, load first).
+    /* Form unproven: a stand-in (handoff FACTS 2026-11-17). */
+    MenuItem(const char* n, const char* t, const NoCaption& none) {
+        CaptionContext c(*reinterpret_cast<const int*>(&none));
+        type = 3;
+        name = n;
+        data = t;
+        arg0 = c.value;
+        arg1 = 0;
+    }
     MenuItem(const char* n, f32* v, const struct MenuRange& r);  // a slider item (defined out of line)
     MenuItem(const char* n, int t, const void* d, MenuArg a0, int a1) {
         type = t;
