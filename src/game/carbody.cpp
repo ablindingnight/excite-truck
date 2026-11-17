@@ -316,7 +316,7 @@ void fn_8018185C(const u8* p, f32* v) {
     f32 hp = 1.3515152f * (5252.0f * v[0] / MaxF(v[1], 0.00001f));
     F32(p, 0x24) = 0.0f;
     f32 r0 = v[3];
-    f32 peak = Mul(v[2], 1.3515152f);
+    f32 peak = Mul(1.3515152f, v[2]);
     f32 d = F32(p, 0x1C) - r0;
     f32 a = (hp - peak) / MaxF(d * d, 0.00001f);
     F32(p, 0x0) = a;
@@ -1464,6 +1464,8 @@ static inline void LiftUp(u8* p, f32 k) {
 static inline f32 RampW(f32 x, f32 lo, f32 w) { return Clamp01((x - lo) / w); }
 static inline int CarHot(u8* car) { return ((CarBody*)car)->f258C > 0.001f; }
 static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
+/* Helper name unproven */ template <class O, class A, class V> static inline void CbAddScaled(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }
+/* Helper name unproven */ template <class O> static inline void CbScaleSelf(O* o, f32 k) { o->x = o->x * k; o->y = o->y * k; o->z = o->z * k; }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -1749,9 +1751,7 @@ void fn_80183E7C(u8* p) {
         fl.y = fl.y * inv;
         fl.z = fl.z * inv;
         if (PSVECDotProduct((const Vec*)&fl, (const Vec*)(p + 0x54)) < -0.2f) {
-            fl.x = fl.x * -1.0f;
-            fl.y = fl.y * -1.0f;
-            fl.z = fl.z * -1.0f;
+            CbScaleSelf(&fl, -1.0f);
         }
         f32 nose = PSVECDotProduct((const Vec*)&fl, (const Vec*)(p + 0x48));
         f32 wantR;
@@ -1948,9 +1948,7 @@ void fn_80183E7C(u8* p) {
         f32 surf = 0.35f + fn_802BF590();
         f32 grow = 1.0f + Clamp01((cb->f25C4 - 0.7f) / 0.8f) * -0.8f;
         RVec3 front;
-        front.x = cb->mtx.pos.x + cb->mtx.rot.z.x * 2.0f;
-        front.y = cb->mtx.pos.y + cb->mtx.rot.z.y * 2.0f;
-        front.z = cb->mtx.pos.z + cb->mtx.rot.z.z * 2.0f;
+        CbAddScaled(&front, &cb->mtx.pos, &cb->mtx.rot.z, 2.0f);
         f32 df = Ramp(front.y, surf, surf - 0.4f);
         f32 lf = LerpT(df, 0.0f, 1.0f);
         f32 tf = RampW(cb->f25C4, 0.0f, 0.3f);
@@ -1961,9 +1959,7 @@ void fn_80183E7C(u8* p) {
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
         RVec3 back;
-        back.x = cb->mtx.pos.x + cb->mtx.rot.z.x * -2.0f;
-        back.y = cb->mtx.pos.y + cb->mtx.rot.z.y * -2.0f;
-        back.z = cb->mtx.pos.z + cb->mtx.rot.z.z * -2.0f;
+        CbAddScaled(&back, &cb->mtx.pos, &cb->mtx.rot.z, -2.0f);
         f32 db = Ramp(back.y, surf, surf - 0.4f);
         f32 lb = LerpT(db, 0.0f, 1.0f);
         f32 tb = Clamp01((cb->f25C4 - 0.2f) / 0.6f);
@@ -2205,15 +2201,9 @@ void fn_80183E7C(u8* p) {
         a.y = a.y + 10.0f * cb->f26FC * (1.0f - cb->f25F0 * cb->f25F0);
         RVec3 acc;
         ObUnrotateRows(&acc, (const f32*)(p + 0x3C), (const f32*)(p + 0x16C));
-        a.x = a.x + acc.x * -0.02f;
-        a.y = a.y + acc.y * -0.02f;
-        a.z = a.z + acc.z * -0.02f;
-        cb->f26F0 = cb->f26F0 + a.x * 0.016683351f;
-        cb->f26F4 = cb->f26F4 + a.y * 0.016683351f;
-        cb->f26F8 = cb->f26F8 + a.z * 0.016683351f;
-        cb->f26E4 = cb->f26E4 + cb->f26F0 * 0.016683351f;
-        cb->f26E8 = cb->f26E8 + cb->f26F4 * 0.016683351f;
-        cb->f26EC = cb->f26EC + cb->f26F8 * 0.016683351f;
+        CbAddScaled(&a, &a, &acc, -0.02f);
+        CbAddScaled((RVec3*)&cb->f26F0, (RVec3*)&cb->f26F0, &a, 0.016683351f);
+        CbAddScaled((RVec3*)&cb->f26E4, (RVec3*)&cb->f26E4, (RVec3*)&cb->f26F0, 0.016683351f);
         if (cb->f26FC > 0.3f) {
             f32 k = 2.0f * (9.81f * (cb->f26F4 * cb->mass));
             RVec3 f;
