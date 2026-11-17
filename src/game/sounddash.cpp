@@ -3,6 +3,7 @@
 #include "game/common.h"
 
 #include "game/soundsample.h"
+#include "game/strcopy.h"
 
 extern "C" {
 int sprintf(char* s, const char* fmt, ...);
@@ -19,17 +20,6 @@ void fn_80238A74(int x, int y, const char* text, u32 color);
 void fn_80238B44(int x0, int y0, int x1, int y1, u32 color);
 }
 
-static inline void StrCopyN(char* dst, const char* src, int len) {
-    char* d = dst;
-    int n = len;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline int Half(int x) { return x / 2; }
 
@@ -142,7 +132,7 @@ void fn_8020BF58(void) {
             row = k / 2;
             u32 color;
             if (col == 0) {
-                StrCopyN(buf, s->name, sizeof(buf));
+                SafeStrCopy(buf, s->name, sizeof(buf));
             } else {
                 sprintf(buf, "%1.2f", s->volume);
             }
