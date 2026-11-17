@@ -39,8 +39,8 @@ struct SkagPoint {
 
 template <class T>
 struct SkagVec {
-    SkagVec(int n) {
-        data = new ("dsa_buf") T[n];
+    SkagVec(int n, const char* name = "dsa_buf") {
+        data = new (name) T[n];
         cap = n;
         count = 0;
         buf = data;
