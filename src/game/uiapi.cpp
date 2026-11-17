@@ -8,12 +8,18 @@
 
 #include <types.h>
 #include "game/gart.h"
+// The retail UI API section has only the concrete MenuState table.
+#define IMENUSTATE_NO_VTABLE
 #include "game/menustate.h"
+#undef IMENUSTATE_NO_VTABLE
 #include "game/uilists.h"
 #include "game/menu.h"
 #include "game/menuwidget_inl.h"
 #include "game/gxcanvas.h"
+// Provisional emission form: UI API owns the four standalone UIImage bodies.
+#define UIAPI_IMAGE_METHODS_OUT_OF_LINE
 #include "game/uiwidget.h"
+#undef UIAPI_IMAGE_METHODS_OUT_OF_LINE
 #include "game/locstring.h"
 
 extern "C" s32 fn_80218C14(s32, s32, s32);
@@ -476,10 +482,11 @@ public:
 
 extern "C" void *fn_8021203C(char *arg0, s32 arg1, s32 arg2, s32 arg3) {
     char *name = strrchr(arg0, 0x2e);
+    static char canvasSuffix[] = "cvs";
     if (strcasecmp(name + 1, "stp") == 0) {
         return new ("simg") StpImage((s32)arg0);
     }
-    if (strcasecmp(name + 1, "cvs") == 0) {
+    if (strcasecmp(name + 1, canvasSuffix) == 0) {
         return new ("cimg") CvsImage(arg0, arg1);
     }
     if (strcasecmp(name + 1, "img") == 0) {
@@ -1836,6 +1843,10 @@ void UIWidget::Slot74(int, void*) {
 
 
 
+#ifdef __MWERKS__
+int UIImage::Frames(void) { return 1; }
+#endif
+
 UIImageRef::~UIImageRef(void) {}
 
 void UIImageRef::Extra(void) {
@@ -1935,6 +1946,20 @@ int CvsImage::Frames(void) {
 
 
 
+
+#ifdef __MWERKS__
+void UIImage::Draw(int x, int y, int a, unsigned int frame) {}
+
+void UIImage::DrawAt(int x, int y, int a, int b, int c, int frame) { Draw(x, y, a, frame); }
+
+int UIImage::Hit(int x, int y, int testX, int testY) {                      // fn_8021583C: tests Rect
+    int left, top, right, bottom;
+    Rect(x, y, &left, &top, &right, &bottom);
+    int result = 0;
+    if (testX >= left && testX < right && testY >= top && testY < bottom) result = 1;
+    return result;
+}
+#endif
 
 void UICustom::Slot0C(void) {
     UICustom* arg0 = this;
@@ -2190,6 +2215,10 @@ void MenuState::Unk30(void) {
 
 }
 
+void MenuState::Unk34(void) {
+
+}
+
 void MenuState::Unk38(void) {
 
 }
@@ -2224,10 +2253,6 @@ int MenuState::Unk54(void) {
 
 int MenuState::Unk5C(void) {
     return 0;
-}
-
-void MenuState::Unk34(void) {
-
 }
 
 /* .sbss owned by this unit (0x8055EEF8-0x8055EF60), in address order. */

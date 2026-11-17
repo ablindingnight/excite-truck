@@ -5,9 +5,12 @@
 
 struct gxCanvas;
 
-// The menu state interface. Its all-pure vtable (24 zero words) is what follows the vtables of every unit
-// that builds menu states (as in unlkmenu.cpp).
+// Secondary menu owners can emit a blanked copy of this interface table. UI API emits only MenuState.
+#if defined(__MWERKS__) && defined(IMENUSTATE_NO_VTABLE)
+class __declspec(novtable) IMenuState {
+#else
 class IMenuState {
+#endif
 public:
     virtual ~IMenuState(void) = 0;
     virtual void Enter(void) = 0;

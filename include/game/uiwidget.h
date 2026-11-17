@@ -103,17 +103,25 @@ public:
     }
 };
 
-// An image drawer (the "img"/"art"/"cvs"/"stp" resources and the text references): abstract base of
-// uiapi lbl_8033D504/D528/D54C and widgets lbl_8033F998/9BC/9E0. Every virtual is inline, so the class has no key
-// function and each unit that constructs a derived class emits a weak copy of the table: uiapi's (lbl_8033D570) is
-// the one the linker keeps, widgets' copy is the blanked 0x20 block (after a 4-byte pad, the table is 8-aligned)
-// behind ResourcePrefix's table. FACTS 2026-11-17 "zero blocks".
+// Abstract base of the image drawers. Widgets emits the blanked copy of the UIImage table.
+// UI API uses standalone definitions of these four methods in their retail positions.
 class UIImage {  /* Class name unproven */
 public:
     virtual ~UIImage(void) {}                                                  // fn_802121D4 (its copy follows make_image)
+
+#if defined(__MWERKS__) && defined(UIAPI_IMAGE_METHODS_OUT_OF_LINE)
+    virtual void DrawAt(int x, int y, int a, int b, int c, int frame);
+    virtual void Draw(int x, int y, int a, unsigned int frame);
+#else
     virtual void DrawAt(int x, int y, int a, int b, int c, int frame) { Draw(x, y, a, frame); }  // fn_80215828
     virtual void Draw(int x, int y, int a, unsigned int frame) {}              // fn_80215824
+#endif
     virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom) = 0;
+
+#if defined(__MWERKS__) && defined(UIAPI_IMAGE_METHODS_OUT_OF_LINE)
+    virtual int Hit(int x, int y, int testX, int testY);
+    virtual int Frames(void);
+#else
     virtual int Hit(int x, int y, int testX, int testY) {                      // fn_8021583C: tests Rect
         int left, top, right, bottom;
         Rect(x, y, &left, &top, &right, &bottom);
@@ -122,6 +130,7 @@ public:
         return result;
     }
     virtual int Frames(void) { return 1; }                                     // fn_802154B8
+#endif
 };
 
 struct gArtSet;
