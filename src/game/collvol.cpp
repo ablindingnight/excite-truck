@@ -138,27 +138,42 @@ static inline f32 Deq(u16 u) {
 static inline void AxisAngle(RVec3* m, const RVec3* v) {
     f32 a = PSVECMag((const Vec*)v);
     if (a > 0.0001f) {
-        f32 inv = 1.0f / a;
-        f32 z;
-        f32 y;
-        f32 s;
-        f32 x;
+        // The squares are named, t*x and t*y are written in each entry, and the y and z diagonal entries are
+        // computed ahead of their rows (rigid RigidBody::Update, FACTS 2026-11-17 13:25): the block's volatile
+        // registers are retail's. Declaration order unproven: the second expansion's saved registers are still off.
         f32 c;
+        f32 zz;
+        f32 yy;
+        f32 xx;
+        f32 zDiag;
+        f32 yDiag;
+        f32 inv;
+        f32 s;
+        f32 t;
+        f32 y;
+        f32 x;
+        f32 z;
+        inv = 1.0f / a;
         x = inv * v->x;
         y = inv * v->y;
         z = inv * v->z;
         s = sin(a);
         c = cos(a);
-        f32 t = 1.0f - c;
+        xx = x * x;
+        yy = y * y;
+        zz = z * z;
+        t = 1.0f - c;
+        m[0].x = c + t * xx;
         m[0].y = y * (t * x) + s * z;
         m[0].z = z * (t * x) - s * y;
+        yDiag = c + t * yy;
         m[1].x = y * (t * x) - s * z;
-        m[1].y = c + t * (y * y);
-        m[2].x = z * (t * x) + s * y;
-        m[0].x = c + t * (x * x);
+        m[1].y = yDiag;
         m[1].z = z * (t * y) + s * x;
-        m[2].z = c + t * (z * z);
+        zDiag = c + t * zz;
+        m[2].x = z * (t * x) + s * y;
         m[2].y = z * (t * y) - s * x;
+        m[2].z = zDiag;
     } else {
         m[0].x = 1.0f;
         m[0].y = 0.0f;
