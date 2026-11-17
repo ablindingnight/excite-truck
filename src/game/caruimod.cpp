@@ -932,7 +932,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             f32 b;
             f32 r = l + (f32)state.w;
             b = t + (f32)state.h;
-            f32 p = proj < 0.01f ? 0.01f : proj;
+            f32 p = MaxF(0.01f, proj);
             f32 f = hw / p;
             f32 a1 = (f32)AbsD((f32)atan(l / f));
             f32 a2 = (f32)AbsD((f32)atan(r / f));
