@@ -9,6 +9,8 @@
 #include "game/raceopts.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
+// This unit retains the weak root shape table after StaticObject's table.
+#define COLLSHAPE_BASE_DECL
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/shapes.h"
@@ -1569,7 +1571,15 @@ CollShape* fn_801FC048(const ObstacleDesc* d);
 CollShape* fn_801FC12C(const ObstacleDesc* d);
 }
 
-static inline FacingFn PickFacing(u32 fl) { return (fl & 0x20) ? FacingX : (fl & 1) ? FacingZ : FacingNone; }
+static inline FacingFn PickFacing(u32 fl) {
+    if (fl & 0x20) {
+        return FacingX;
+    }
+    if (fl & 1) {
+        return FacingZ;
+    }
+    return FacingNone;
+}
 
 
 static inline void RotVec(const OFrame* m, const PVec* v, PVec* out) {
@@ -1643,12 +1653,24 @@ static inline int IsVolume(s32 kind) {
 }
 
 /* Helper name unproven: creates the static obstacle for a placed object. */
-void ObstacleObjDesc::Create(const PlacedObj* o) {
+static inline StaticOb* CreateWallGob(ObstacleObjDesc* desc, const OFrame* frame, OFrame* solid, s32 id, const char* tag = "wall-gob") {
+    return new (tag) StaticOb(desc, frame, solid, id);
+}
+static inline const char* EventObjectTag(const char* tag = "EWObject") { return tag; }
+
+static inline void ReportObstacleKind(unsigned int kind, const char* format = "eventwob: unhandled static object subtype %x") {
+    fn_802E317C(format, kind);
+}
+
+static inline const char* ObstaclePathKey(const char* key = "path") { return key; }
+static inline const char* SolidIdKey(const char* const& key = "sol_id") { return key; }
+
+inline void ObstacleObjDesc::Create(const PlacedObj* o) {
     s32 sol = -1;
     phys.solId = sol;
     if (flags & 4) {
         int vol;
-        if (o->node && o->node->Has("path")) {
+        if (o->node && o->node->Has(ObstaclePathKey())) {
             vol = 0;
         } else {
             vol = 0;
@@ -1661,39 +1683,65 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
             OFrame* sx;
             s32 id = lbl_8055EC78++;
             sx = 0;
-            CollShape* s;
+            struct {
+                CollShape* shape;
+            } result;
             switch (phys.kind) {
             case 6:
             case 15:
-                s = fn_801FC12C(&phys);
+                {
+                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FC12C;
+                    result.shape = build(&phys);
+                }
                 break;
             case 14:
             case 19:
-                s = fn_801FC048(&phys);
+                {
+                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FC048;
+                    result.shape = build(&phys);
+                }
                 break;
             case 10:
-                s = fn_801FBFE8(&phys);
+                {
+                    CollShape* (*const build)(ObstacleDesc*) = fn_801FBFE8;
+                    result.shape = build(&phys);
+                }
                 break;
             case 9:
-                s = fn_801FBF48(&phys);
+                {
+                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FBF48;
+                    result.shape = build(&phys);
+                }
                 break;
             case 22:
-                s = fn_801FBEA8(&phys);
+                {
+                    CollShape* (*const build)(const ObstacleDesc*) = fn_801FBEA8;
+                    result.shape = build(&phys);
+                }
                 break;
             default:
-                fn_802E317C("eventwob: unhandled static object subtype %x", static_cast<unsigned int>(phys.kind));
-                s = 0;
+                ReportObstacleKind(static_cast<unsigned int>(phys.kind));
+                result.shape = 0;
                 break;
             }
-            if (s) {
-                s->SetSurface(phys.surface);
-                sx = fn_801FBE1C(lbl_8055EC74, id, event, s, &o->frame, o->node);
+            if (result.shape) {
+                result.shape->SetSurface(phys.surface);
+                {
+                    OFrame* (*const fn)(SolBuilder*, s32, s32, CollShape*, const OFrame*, ValueNode*) = fn_801FBE1C;
+                    sx = fn(lbl_8055EC74, id, event, result.shape, &o->frame, o->node);
+                }
             }
-            StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, sx, id);
+            StaticOb* so = CreateWallGob(this, &o->frame, sx, id);
             if (flags & 0x80) {
-                fn_801FBCF4(&lbl_8055EC50, so);
+                {
+                    void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
+                    fn(&lbl_8055EC50, so);
+                }
             } else {
-                fn_801FBCF4(&lbl_8055EC4C, so);
+                {
+                    void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
+                    fn(&lbl_8055EC4C, so);
+                }
             }
             if (flags & 2) {
                 fn_802981EC(o, phys.shape.f[0]);
@@ -1710,16 +1758,22 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
             }
             bool vis = (flags >> 9) & 1;
             StaticObject* so =
-                new ("EWObject") StaticObject((const char*)&phys, model, PickFacing(flags), &shadow, vis);
+                new (EventObjectTag()) StaticObject((const char*)&phys, model, PickFacing(flags), &shadow, vis);
             fn_801E87D4(so);
         }
     } else {
-        sol = o->node ? o->node->GetInt("sol_id", -1) : -1;
-        StaticOb* so = new ("wall-gob") StaticOb(this, &o->frame, 0, sol);
+        sol = o->node ? o->node->GetInt(SolidIdKey(), -1) : -1;
+        StaticOb* so = CreateWallGob(this, &o->frame, 0, sol);
         if (flags & 0x80) {
-            fn_801FBCF4(&lbl_8055EC50, so);
+            {
+                void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
+                fn(&lbl_8055EC50, so);
+            }
         } else {
-            fn_801FBCF4(&lbl_8055EC4C, so);
+            {
+                void (*const fn)(StaticOb**, StaticOb*) = fn_801FBCF4;
+                fn(&lbl_8055EC4C, so);
+            }
         }
         if (flags & 2) {
             fn_802981EC(o, phys.shape.f[0]);
@@ -1732,48 +1786,58 @@ void ObstacleObjDesc::Create(const PlacedObj* o) {
 
 extern "C" {
 
-void fn_801FBCF4(StaticOb** list, StaticOb* o) {
+inline void fn_801FBCF4(StaticOb** list, StaticOb* o) {
     o->next = *list;
     *list = o;
 }
 }
 
-static int FacingNone(const OFrame* f) { return -15; }
+static inline int FacingNone(const OFrame* f) { return -15; }
 
-static int FacingZ(const OFrame* f) { return FacingMode(f, &f->z); }
+static inline int FacingZ(const OFrame* f) { return FacingMode(f, &f->z); }
 
-static int FacingX(const OFrame* f) { return FacingMode(f, &f->x); }
+static inline int FacingX(const OFrame* f) { return FacingMode(f, &f->x); }
 
 extern "C" {
 
-OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node) {
+inline OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node) {
     SolObj* o = NewSolObj(id, event, s, f, node);
     o->next = b->head;
     b->head = o;
     return &o->frame;
 }
 
-CollShape* fn_801FBEA8(const ObstacleDesc* d) {
-    return new ("ewcv:tubevol") TubeShape(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
+static inline const char* AllocTubeVolume(const char* tag = "ewcv:tubevol") { return tag; }
+
+inline CollShape* fn_801FBEA8(const ObstacleDesc* d) {
+    return new (AllocTubeVolume()) TubeShape(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
 }
 
-CollShape* fn_801FBF48(const ObstacleDesc* d) {
-    return new ("ewcv:ringvol") RingVol(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
+static inline const char* AllocRingVolume(const char* tag = "ewcv:ringvol") { return tag; }
+
+inline CollShape* fn_801FBF48(const ObstacleDesc* d) {
+    return new (AllocRingVolume()) RingVol(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
 }
 
-CollShape* fn_801FBFE8(ObstacleDesc* d) {
+static inline const char* AllocPolyVolume(const char* tag = "ewcv:polyvol") { return tag; }
+
+inline CollShape* fn_801FBFE8(ObstacleDesc* d) {
     f32 k = 50000.0f;
-    return new ("ewcv:polyvol") PolyShape(0, d->shape.name, k, d->friction);
+    return new (AllocPolyVolume()) PolyShape(0, d->shape.name, k, d->friction);
 }
 
-CollShape* fn_801FC048(const ObstacleDesc* d) {
+static inline const char* AllocSphereVolume(const char* tag = "ewcv:spherevol") { return tag; }
+
+inline CollShape* fn_801FC048(const ObstacleDesc* d) {
     f32 k = 50000.0f;
-    return new ("ewcv:spherevol") SphereShape(0, 0, k, 0.2f, d->shape.f[0], RVec3(0.0f, 0.0f, 0.0f));
+    return new (AllocSphereVolume()) SphereShape(0, 0, k, 0.2f, d->shape.f[0], RVec3(0.0f, 0.0f, 0.0f));
 }
 
-CollShape* fn_801FC12C(const ObstacleDesc* d) {
+static inline const char* AllocWallVolume(const char* tag = "ewcv:wallvol") { return tag; }
+
+inline CollShape* fn_801FC12C(const ObstacleDesc* d) {
     f32 k = 50000.0f;
-    return new ("ewcv:wallvol") BoxShape(k, 0.2f, d->shape.f);
+    return new (AllocWallVolume()) BoxShape(k, 0.2f, d->shape.f);
 }
 }
 
@@ -1781,7 +1845,7 @@ CollShape* fn_801FC12C(const ObstacleDesc* d) {
 // had a call; a stripped (empty inline) debug call stands in for it (cf. smoke SmokeNop, panelvol DbgLine).
 static inline void AnimDescTeardown(const char* model) {}
 
-AnimDesc::~AnimDesc(void) { AnimDescTeardown(animModel); }
+inline AnimDesc::~AnimDesc(void) { AnimDescTeardown(animModel); }
 
 extern "C" void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a);
 extern "C" void fn_801FC644(EWSound** list, EWSound* s);
@@ -1818,23 +1882,28 @@ static inline void AnimSetup(TrackAnimObj* a, AnimDesc* d, ValueNode* node) {
     a->tag = lbl_8055EC40.cur;
 }
 }  // namespace
-void AnimDesc::Create(const PlacedObj* o) {
+inline void AnimDesc::Create(const PlacedObj* o) {
     place = o->frame;
     TrackAnimObj* a = new ("val-gob") TrackAnimObj;
     if (a) {
         AnimSetup(a, this, o->node);
     }
-    fn_801FC4D8(&lbl_8055EC5C, a);
+    {
+        void (*const fn)(TrackAnimObj**, TrackAnimObj*) = fn_801FC4D8;
+        fn(&lbl_8055EC5C, a);
+    }
 }
 
 extern "C" {
-void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a) {
+inline void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a) {
     a->next = *list;
     *list = a;
 }
 }
 
 static inline const char* ObstacleVolumeKey() { return "volume"; }
+
+static inline f32 ParseSoundRadius(ValueNode* node, f32 range, const char* key = "near_distance") { return node->GetFloat(key, range); }
 
 inline EWSound::EWSound(const PlacedObj* o) : pos(o->frame.pos) {
     f32 vol;
@@ -1845,30 +1914,35 @@ inline EWSound::EWSound(const PlacedObj* o) : pos(o->frame.pos) {
     snd = fn_802077A4(name, 8, &lbl_80488898, &pos);
     if (snd) {
         snd->SetVolume(vol);
-        snd->radius = node->GetFloat("near_distance", snd->radius);
+        snd->radius = ParseSoundRadius(node, snd->radius);
     }
     tag = lbl_8055EC40.cur;
 }
 
-void SoundDesc::Create(const PlacedObj* o) {
-    EWSound* s = new ("EWSound") EWSound(o);
-    fn_801FC644(&lbl_8055EC6C, s);
+static inline const char* EventSoundTag(const char* tag = "EWSound") { return tag; }
+
+inline void SoundDesc::Create(const PlacedObj* o) {
+    EWSound* s = new (EventSoundTag()) EWSound(o);
+    {
+        void (*const fn)(EWSound**, EWSound*) = fn_801FC644;
+        fn(&lbl_8055EC6C, s);
+    }
 }
 
 extern "C" {
-void fn_801FC644(EWSound** list, EWSound* s) {
+inline void fn_801FC644(EWSound** list, EWSound* s) {
     s->next = *list;
     *list = s;
 }
 }
 
-void SoundDesc::Props(void* p, PlacedObj* o) { fn_80204014(p, o->node, lbl_8055EC70); }
+inline void SoundDesc::Props(void* p, PlacedObj* o) { fn_80204014(p, o->node, lbl_8055EC70); }
 
-f32 ObjDesc::vf1C(void) { return 0.0f; }
+inline f32 ObjDesc::vf1C(void) { return 0.0f; }
 
-void ObjDesc::vf20(void) {}
+inline void ObjDesc::vf20(void) {}
 
-void ObjDesc::vf24(void) {}
+inline void ObjDesc::vf24(void) {}
 
 static inline void Unlink(StaticObject** pp, StaticObject* o) {
     StaticObject* s;
@@ -1881,9 +1955,9 @@ static inline void Unlink(StaticObject** pp, StaticObject* o) {
     }
 }
 
-StaticObject::~StaticObject(void) { Unlink(&lbl_8055EC48, this); }
+inline StaticObject::~StaticObject(void) { Unlink(&lbl_8055EC48, this); }
 
-void StaticObject::Draw(void) {
+inline void StaticObject::Draw(void) {
     if (!noDraw && fn_801F7A0C()) {
         fn_802C70AC(model, &frame, -1, -15);
     }
@@ -1898,7 +1972,7 @@ static inline f32 FadeShadowExtent(f32 distance, f32 cutoff, f32 extent) {
     return Lerp(extent, 0.0f, t);
 }
 
-void StaticObject::vf1C(void) {
+inline void StaticObject::vf1C(void) {
     f32 s = fn_801E88F0(-1);
     f32 s2 = s * s;
     f32 dd = fn_802C88E8(&frame.pos);
