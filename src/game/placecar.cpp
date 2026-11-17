@@ -15,7 +15,7 @@
 // Lane offset of the grid columns (5.0f). A named constant defined before any code: retail keeps it as the FIRST
 // .sdata2 entry and negates it at run time, so its value is not folded where it is used. A one-field const struct
 // gives exactly that (type and name unproven; a plain `const f32` defined here folds -x into a second literal).
-struct GridTune { f32 laneOffset; };
+#include "game/gridtune.h"
 extern const GridTune lbl_80562700;
 const GridTune lbl_80562700 = {5.0f};
 
