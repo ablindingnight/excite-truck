@@ -1830,8 +1830,7 @@ void fn_80183E7C(u8* p) {
         }
         f32 target;
         if (lean < 0.0f) {
-            f32 t = Ramp(lean, 0.0f, -0.35f);
-            target = LerpT(t, cb->f261C, 0.9f * cb->f261C);
+            target = LerpT(Ramp(lean, 0.0f, -0.35f), cb->f261C, 0.9f * cb->f261C);
             airLift = airLift + lbl_8055A3B0 * -lean;
         } else {
             target = LerpT(Ramp(lean, 0.0f, 0.35f), cb->f261C, MinF(1.1f * cb->f261C, top));
