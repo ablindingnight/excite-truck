@@ -105,9 +105,11 @@ void fn_8019321C(Vec2* out, const Vec2* local, Frame* f);
 
 void SetV2(V2& d, const V2& s);
 
+static inline const char* ObstacleArrayTag() { return "dsa_buf"; }
+
 template <class T>
 struct DynArray {
-    DynArray(int n) : a(new ("dsa_buf") T[n], n) { alloc = a.data; }
+    DynArray(int n) : a(new (ObstacleArrayTag()) T[n], n) { alloc = a.data; }
     ~DynArray(void) { delete[] alloc; }
     T* Add(void) { return &a.data[a.count++]; }
     void Push(T v) {
