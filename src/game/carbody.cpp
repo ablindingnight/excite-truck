@@ -699,13 +699,12 @@ void fn_801A0444(u8* grp, u8* box);
 void* operator new(unsigned long n, const char* tag);
 extern "C" {
 
-static inline void AddBodyCorner(u8* p, f32 x, f32 y, f32 z, f32 spring) {
-    RVec3 pos;
-    pos.x = x;
-    pos.y = y;
-    pos.z = z;
+static inline void AddBodyCorner(u8* p, RVec3* pos, f32 x, f32 y, f32 z, f32 spring) {
+    pos->x = x;
+    pos->y = y;
+    pos->z = z;
     CbCorner* c = fn_801AE180();
-    c->pos = pos;
+    c->pos = *pos;
     c->spring = spring;
     c->friction = 0.5f;
     c->vel.x = 0.0f;
@@ -717,19 +716,21 @@ static inline void AddBodyCorner(u8* p, f32 x, f32 y, f32 z, f32 spring) {
 }
 
 // One sphere of the body's collision group, at a point in body space (made relative to the centre of mass).
-static inline void AddBodySphere(u8* p, u8* g, f32 x, f32 y, f32 z, const RVec3* mat, f32 r, f32 k, f32 d, f32 m, f32 im) {
-    RVec3 at(x, y, z);
-    HVec rel;
-    rel.x = at.x - F32(p, 0x30);
-    rel.y = at.y - F32(p, 0x34);
-    rel.z = at.z - F32(p, 0x38);
-    fn_801A0258(g, &rel, mat, r, k, d, m, im);
+static inline void AddBodySphere(u8* p, u8* g, HVec* rel, const RVec3& at, const RVec3* mat, f32 r, f32 k, f32 d, f32 m, f32 im) {
+    rel->x = at.x - F32(p, 0x30);
+    rel->y = at.y - F32(p, 0x34);
+    rel->z = at.z - F32(p, 0x38);
+    fn_801A0258(g, rel, mat, r, k, d, m, im);
 }
 
 // Builds the body's collision: two wheel contact corners at the "wheel" joint, then a group of twelve spheres
 // sized from the model's bounding box (front, middle and rear rows) and a box around the whole body.
 void fn_80182DF4(u8* p) {
     CarBody* cb = (CarBody*)p;
+    RVec3 rear;
+    RVec3 mid;
+    RVec3 front;
+    RVec3 center;
     f32 minX = 0.0f;
     f32 maxX = 0.0f;
     f32 minY = 0.0f;
@@ -748,8 +749,14 @@ void fn_80182DF4(u8* p) {
     s32 wheel = fn_801E3004(cb->model, "wheel", -1);
     if (wheel) {
         HVec* o = fn_801E3630(wheel);
-        AddBodyCorner(p, o->x, maxY + cb->offset.y + 0.1016f, o->z, 2.0f * stiff);
-        AddBodyCorner(p, -o->x, maxY + cb->offset.y + 0.1016f, o->z, 2.0f * stiff);
+        {
+            RVec3 pos;
+            AddBodyCorner(p, &pos, o->x, maxY + cb->offset.y + 0.1016f, o->z, 2.0f * stiff);
+        }
+        {
+            RVec3 pos;
+            AddBodyCorner(p, &pos, -o->x, maxY + cb->offset.y + 0.1016f, o->z, 2.0f * stiff);
+        }
         fn_801E323C(wheel);
     }
     minY = FMax(minY, 0.2f);
@@ -766,9 +773,9 @@ void fn_80182DF4(u8* p) {
     cb->f5BC = maxZ;
     u8* g = (u8*)new ("car-volume") SphereGroup((const RMtx*)&cb->mtx, (CollVolume*)p);
     cb->f268 = g;
-    RVec3 rear(0.7f, 0.1f, 1.0f);
-    RVec3 mid(0.7f, 0.1f, 1.0f);
-    RVec3 front(0.7f, 0.1f, 1.0f);
+    rear.Set(0.7f, 0.1f, 1.0f);
+    mid.Set(0.7f, 0.1f, 1.0f);
+    front.Set(0.7f, 0.1f, 1.0f);
     zRear = maxZ - 0.45000002f;
     zFront = 0.44999998f + minZ;
     f32 yMid = 0.45000002f + minY;
@@ -785,19 +792,55 @@ void fn_80182DF4(u8* p) {
     f32 xFront = maxX - 0.44999998f;
     f32 nb = -b;
     f32 yr = 0.254f + yRear;
-    AddBodySphere(p, cb->f268, nb, yr, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, 0.0f, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, b, 0.254f + yRear, zRear, &mid, 0.36f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, -a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, a, 0.254f + yMid, zRearMid, &mid, 0.45000002f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, 0.8f * -xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, 0.8f * xSide, 0.254f + ySide, zMid, &rear, h, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, -xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, xFront, 0.254f + yFront, zFrontMid, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, -xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, 0.0f, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
-    AddBodySphere(p, cb->f268, xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
-    RVec3 center(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.5f * (minZ + maxZ));
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(nb, yr, zRear), &mid, 0.36f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(0.0f, 0.254f + yRear, zRear), &mid, 0.36f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(b, 0.254f + yRear, zRear), &mid, 0.36f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(-a, 0.254f + yMid, zRearMid), &mid, 0.45000002f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(a, 0.254f + yMid, zRearMid), &mid, 0.45000002f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(0.8f * -xSide, 0.254f + ySide, zMid), &rear, h, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(0.8f * xSide, 0.254f + ySide, zMid), &rear, h, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(-xFront, 0.254f + yFront, zFrontMid), &front, 0.44999998f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(xFront, 0.254f + yFront, zFrontMid), &front, 0.44999998f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(-xFront, 0.254f + yFront, zFront), &front, 0.44999998f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(0.0f, 0.254f + yFront, zFront), &front, 0.44999998f, stiff, damp, mass, invMass);
+    }
+    {
+        HVec rel;
+        AddBodySphere(p, cb->f268, &rel, RVec3(xFront, 0.254f + yFront, zFront), &front, 0.44999998f, stiff, damp, mass, invMass);
+    }
+    center.Set(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.5f * (minZ + maxZ));
     u8* box = (u8*)new ("car_box") OrientedBoxShape((const RMtx*)&cb->mtx, &center, (CollVolume*)p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
                           0.5f * (maxZ - minZ));
     fn_801A0444(cb->f268, box);
