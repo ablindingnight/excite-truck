@@ -4,6 +4,7 @@
 // re-timed and reordered, and export to "intrlude.txt"). Every function is written; the player state at
 // lbl_80437D88 is still addressed by offsets in places. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
 #include "game/math_types.h"
@@ -1074,31 +1075,6 @@ static inline f32 Clamp(f32 v, f32 lo, f32 hi) { return MaxF(MinF(hi, v), lo); }
 static inline f32 ClampSigned(f32 v) { return Clamp(v, -1.0f, 1.0f); }
 static inline f32 Clamp01(f32 v) { return Clamp(v, 0.0f, 1.0f); }
 
-// The car object behind fn_8017960C, for its virtual placement.
-class CarObj {
-public:
-    virtual void v08(void);
-    virtual ~CarObj(void);  // 0x0C (CarBody/RigidBody family: Init at 0x08, destructor at 0x0C)
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
-    virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
-    virtual void v4C(void);
-    virtual void v50(void);
-    virtual void Place(const CarPlace* p);  // 0x54
-};
-
 struct RaceLen {
     u8 pad0[4];
     f32 len;  // offset 0x4
@@ -1321,7 +1297,7 @@ void debug_event(void) {
                 }
                 f32 spd = tp->speed;
                 place.vel.Set(place.place.basis[2].x * spd, place.place.basis[2].y * spd, place.place.basis[2].z * spd);
-                ((CarObj*)car)->Place(&place);
+                ((CarBody*)car)->SetState((const BodyState*)&place);
                 if (CarTypeIsReal(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
                     fn_801B8E28(i);
                 }

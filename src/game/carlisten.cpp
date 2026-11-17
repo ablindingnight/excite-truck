@@ -1,16 +1,10 @@
 // Two listener registries (0x801D0590-0x801D0BE4): objects add themselves and get broadcast
 // callbacks; car events are only forwarded for car-type objects. Names are guesses.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/arrayref.h"
 
-struct CarObj {
-    u8 pad0[0x10];
-    u32 type;  // offset 0x10
-    u8 pad14[0x1EC - 0x14];
-    s32 id;  // offset 0x1EC
-};
-
-static inline int IsCar(const CarObj* o) {
+static inline int IsCar(const CarBody* o) {
     u32 t = o->type;
     int r = 0;
     if (t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR') {
@@ -117,9 +111,9 @@ void fn_801D06C4(int a) {
     }
 }
 
-void fn_801D0738(int a, int unused, CarObj* car, int b) {
+void fn_801D0738(int a, int unused, CarBody* car, int b) {
     if (IsCar(car)) {
-        s32 id = car->id;
+        s32 id = car->index;
         int i;
         for (i = 0; i < lbl_804386B4.count; i++) {
             lbl_804386B4.data[i]->OnCar(a, id, b);
