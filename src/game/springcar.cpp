@@ -8,31 +8,14 @@
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/springcar.h"
+#include "game/deity.h"
+#include "game/idealline.h"
+#include "game/centerline.h"
 
 
 struct SaveRec {
     u8 pad0[0x2C0];
     s32 ctl;  // offset 0x2C0
-};
-
-struct Stats {
-    u8 pad0[0x20];
-    f32 rate;  // offset 0x20
-};
-
-struct StatsHolder {
-    u8 pad0[0x4];
-    Stats* stats;  // offset 0x4
-};
-
-class StatsSrc {
-public:
-    virtual void vf08(void);
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual StatsHolder* Get(void);  // 0x1C
 };
 
 // The game mode (fn_801B83A0, GameMode family: destructor at 0x08).
@@ -177,7 +160,7 @@ void SpringCar::vf5C(void) {
     CheckLost();
     ctl->Update();
     if (lifting && lbl_8055A518) {
-        lift.Step(this, src->Get()->stats->rate);
+        lift.Step(this, ((DeityCar*)src)->Line()->il.seg->speed);  // CarBody::src: the car's DeityCar
     }
     {
         RVec3 acc;
