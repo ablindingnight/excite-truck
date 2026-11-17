@@ -535,7 +535,7 @@ u8* fn_801B2EDC(s32 car, u8* body);
 void fn_801795D8(u8* p, s32 car);
 void fn_801BDA74(s32 car, u8* setup);
 void fn_801BEB30(s32 car, u8** out);
-void fn_801836DC(void);
+void fn_801836DC(u8* p, u8* desc);
 void fn_8018C5A0(u8* p, u8* desc);
 void fn_8018A654(u8* p, const u8* cfg);
 u8* fn_80209448(u8* p);
@@ -544,7 +544,7 @@ u8* fn_8020DE74(u8* p);
 void fn_801D108C(s32 car);
 int fn_8020503C(const char* name);
 void fn_802E30C8(const char* fmt, ...);
-void fn_80182DF4(u8* p);
+void fn_80182DF4(u8* p, u8* desc);
 }  // extern "C"
 struct PlayerLook;
 struct BodyDesc;
@@ -653,8 +653,8 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     for (int w = 0; w < 4; w++) {
         ((RVec3*)(p + 0x23DC + w * 0x74))->Set(F32(wheels, w * 0x10), F32(wheels, w * 0x10 + 4), F32(wheels, w * 0x10 + 8));
     }
-    fn_801836DC();
-    fn_80182DF4(p);
+    fn_801836DC(p, desc);
+    fn_80182DF4(p, desc);
     fn_8018C5A0(p, desc);
     fn_8018A654(p, desc);
     bool player = ((CarDesc*)desc)->kind == 'PCAR';
@@ -715,7 +715,7 @@ static inline void AddBodySphere(u8* p, u8* g, HVec* rel, const RVec3& at, const
 
 // Builds the body's collision: two wheel contact corners at the "wheel" joint, then a group of twelve spheres
 // sized from the model's bounding box (front, middle and rear rows) and a box around the whole body.
-void fn_80182DF4(u8* p) {
+void fn_80182DF4(u8* p, u8* desc) {
     CarBody* cb = (CarBody*)p;
     RVec3 rear;
     RVec3 mid;
@@ -844,7 +844,7 @@ void fn_80182DF4(u8* p) {
     }
 }
 
-void fn_801836DC(void) {}
+void fn_801836DC(u8* p, u8* desc) {}
 
 }  // extern "C"
 
