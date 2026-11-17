@@ -471,8 +471,8 @@ void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
     CamFrame tgt;
-    CamVec spin;
     CamVec move;
+    CamVec spin;
     CamVec4 up;
     CamQuat q;
     CamQuat qs;
