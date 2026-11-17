@@ -45,7 +45,7 @@ struct GXTexDesc {
     struct GXTex* user;     // offset 0x30
 };
 
-struct TexEntry {
+struct TexListEntry {
     s32 refs;         // offset 0x0
     char name[32];    // offset 0x4
     s32 key;          // offset 0x24
@@ -274,7 +274,7 @@ ModuleTag lbl_8055FCA0;
 u16 lbl_8055FCA8 = TexShort(0x100);
 extern const u16 lbl_8055FCAA = TexShort(0x405);
 u16 lbl_8055FCAC = TexShort(0x401);
-TexEntry* lbl_8055FCB0;
+TexListEntry* lbl_8055FCB0;
 s32 lbl_8055FCB4;     // null texture
 s32 lbl_8055FCB8;     // bound texture
 TexCache* lbl_8055FCBC;
@@ -291,7 +291,7 @@ void fn_802CB82C(s32 id);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
 void fn_802CAD28(s32 id);
-TexEntry* fn_802CB018(void);
+TexListEntry* fn_802CB018(void);
 TTHeader* fn_802CB2FC(u16 w, u16 h, u8 a, u8 b, u16 c, u8 d);
 void fn_802CB3F4(void* gx);
 void fn_802CB3F8(const char* name, const char* what);
@@ -312,10 +312,10 @@ int TexBitsPerTexel(int fmt) {
 }
 
 void fn_802CA0E4(void) {
-    lbl_8055FCB0 = new ("texlist") TexEntry[512];
+    lbl_8055FCB0 = new ("texlist") TexListEntry[512];
     fn_802CB424();
     for (int i = 0; i < 512; i++) {
-        memset(&lbl_8055FCB0[i], 0, sizeof(TexEntry));
+        memset(&lbl_8055FCB0[i], 0, sizeof(TexListEntry));
     }
     lbl_8055FCB8 = -2;
     lbl_8055FCB4 = fn_802CAC28(lbl_8055D038, 0);
@@ -520,7 +520,7 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
     int slot = -1;
     int i;
     for (i = 0; i < 512; i++) {
-        TexEntry* t = &lbl_8055FCB0[i];
+        TexListEntry* t = &lbl_8055FCB0[i];
         if (t->refs > 0) {
             if (strcasecmp(t->name, fn_802CA824(name)) == 0 && t->key == key && !shared) {
                 if (!fn_802CA7D4(name, kind, lbl_8055FCB0[i].kind)) {
@@ -550,7 +550,7 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
     if (!res) {
         return -1;
     }
-    TexEntry* t = &lbl_8055FCB0[slot];
+    TexListEntry* t = &lbl_8055FCB0[slot];
     t->shared = shared;
     t->refs = 1;
     t->uses = 0;
@@ -590,7 +590,7 @@ void gxForgetTexture(s32 id) {
     if (id >= 0 && id < 512 && lbl_8055FCB0[id].refs <= 0) {
         fn_802E317C("gxForgetTexture: \"%s\" refcount = %d", lbl_8055FCB0[id].name, lbl_8055FCB0[id].refs);
     }
-    TexEntry* t = &lbl_8055FCB0[id];
+    TexListEntry* t = &lbl_8055FCB0[id];
     if (t->shared) {
         fn_802CAD28(id);
         return;
@@ -607,7 +607,7 @@ void fn_802CAD28(s32 id) {
     if (id == -1) {
         return;
     }
-    TexEntry* t = &lbl_8055FCB0[id];
+    TexListEntry* t = &lbl_8055FCB0[id];
     if (--t->refs == 0 && t->res) {
         t->res = 0;
         fn_802D8FB4(t->gx);
@@ -625,7 +625,7 @@ void fn_802CAD74(s32 id) {
         fn_802CAD74(lbl_8055FCB4);
         return;
     }
-    TexEntry* t = &lbl_8055FCB0[id];
+    TexListEntry* t = &lbl_8055FCB0[id];
     t->uses++;
     if (t->mip0) {
         fn_802D9160(t->mip0, 0);
@@ -704,7 +704,7 @@ void TexSummary(void) {
     }
 }
 
-TexEntry* fn_802CB018(void) {
+TexListEntry* fn_802CB018(void) {
     int slot = -1;
     for (int i = 1; i < 512; i++) {
         if (lbl_8055FCB0[i].refs == 0) {
@@ -739,8 +739,8 @@ s32 fn_802CB128(u16 w, u16 h, int unused, u32 flags) {
         wrap &= ~2;
     }
     int fmt = (flags & 1) ? 3 : 2;
-    TexEntry* t = fn_802CB018();
-    memset(t, 0, sizeof(TexEntry));
+    TexListEntry* t = fn_802CB018();
+    memset(t, 0, sizeof(TexListEntry));
     t->refs = 1;
     t->key = 0;
     t->mip0Bytes = 0;
@@ -756,7 +756,7 @@ s32 fn_802CB128(u16 w, u16 h, int unused, u32 flags) {
 s32 lbl_8055D06C = -2;
 
 void fn_802CB228(s32 id) {
-    TexEntry* t = &lbl_8055FCB0[id];
+    TexListEntry* t = &lbl_8055FCB0[id];
     fn_802D8FB4(t->gx);
     delete t->res;
     t->res = 0;
@@ -906,7 +906,7 @@ void fn_802CB82C(s32 id) {
     TexCache* c = lbl_8055FCBC;
     MipSlot* s = &c->slots[id];
     if (s->state == 2) {
-        TexEntry* t = &lbl_8055FCB0[id];
+        TexListEntry* t = &lbl_8055FCB0[id];
         fn_802CB3F4(t->mip0);
         t->mip0 = 0;
         SimpleHeap* heap = TextureHeap(c);
@@ -1009,7 +1009,7 @@ void fn_802CBDD0(TexCache* c) {
         s32 id = c->best->tex;
         int started = 0;
         MipSlot* victim = c->resident;
-        TexEntry* t;
+        TexListEntry* t;
         MipLoad* l = c->freeLoads;
         if (l) {
             if (fn_802D9068()) {
@@ -1082,7 +1082,7 @@ static inline void DiscardMip(TexCache* c, s32 id, s32 frame, MipLoad* l, HeapBl
     ok = 0;
     MipDiscard* d = c->freeDiscards;
     if (d) {
-        TexEntry* t = &lbl_8055FCB0[id];
+        TexListEntry* t = &lbl_8055FCB0[id];
         d->gx = t->mip0;
         d->frame = frame;
         d->load = l;
@@ -1182,7 +1182,7 @@ void fn_802CC410(TexCache* c) {
                 s32 n;
                 TTHeader* h = (TTHeader*)l->res->Poll(&n);
                 if (h) {
-                    TexEntry* t = &lbl_8055FCB0[l->tex];
+                    TexListEntry* t = &lbl_8055FCB0[l->tex];
                     t->mip0Mem = l->mem;
                     t->mip0 = fn_802CB38C(h, (u32)l->gx, lbl_8055FCB0[l->tex].kind);
                     l->gx = 0;
@@ -1210,7 +1210,7 @@ void fn_802CC550(s32 id, f32 dist, f32 scale) {
     if (id == -1) {
         return;
     }
-    TexEntry* t = &lbl_8055FCB0[id];
+    TexListEntry* t = &lbl_8055FCB0[id];
     if (!lbl_8055D07D) {
         return;
     }
@@ -1282,7 +1282,7 @@ static inline void Rank(TexCache* c, MipSlot* s, f32 score) {
 static inline f32 TextureRankScore(f32 a, const f32& b) { return a * b; }
 
 static inline void RankVisibleTexture(int i) {
-    TexEntry* t = &lbl_8055FCB0[i];
+    TexListEntry* t = &lbl_8055FCB0[i];
     int stream = t->mip0Bytes != 0;
     if (t->refs > 0 && stream) {
         if (t->uses > 0) {

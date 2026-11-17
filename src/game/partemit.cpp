@@ -82,10 +82,10 @@ struct EmitterInst {
     s32 emitter;     // offset 0x28
     s16 slot;        // offset 0x2C
     u8 alwaysOn;     // offset 0x2E
-    struct Obj* obj; // offset 0x30
+    struct EmitterObj* obj; // offset 0x30
 };
 
-struct Obj {
+struct EmitterObj {
     u8 pad[0x60];
     RVec3 pos;  // offset 0x60
 };
@@ -235,7 +235,7 @@ static inline void TrackEmitters(void) {
     int i = 0;
     for (int off = 0; i < lbl_804B9B7C.n; off += sizeof(EmitterInst), i++) {
         EmitterInst* in = (EmitterInst*)((u8*)lbl_804B9B7C.data + off);
-        Obj* o = in->obj;
+        EmitterObj* o = in->obj;
         if (o) {
             in->vel.x = o->pos.x - in->pos.x;
             in->vel.y = o->pos.y - in->pos.y;
@@ -291,7 +291,7 @@ s32 fn_8029F3BC(const char* name) {
 }
 
 // Attaches the emitters of an effect ("$name" or "name") to a moving object.
-void fn_8029F458(const char* name, Obj* obj) {
+void fn_8029F458(const char* name, EmitterObj* obj) {
     char buf[32];
     if (*name == '$') {
         name++;

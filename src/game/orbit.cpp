@@ -83,7 +83,7 @@ public:
     virtual CarPhysics* Physics(void);    // 0x1C
 };
 
-struct RaceDesc {
+struct RaceExtra {
     u8 pad0[0x4];
     s32 type;  // offset 0x4
 };
@@ -443,7 +443,7 @@ void fn_801662FC(void) {
 
 void* lbl_8055E330;  // boost bounds
 
-void fn_801663C8(int n, const CarDef* cars, const RaceDesc* race) {
+void fn_801663C8(int n, const CarDef* cars, const RaceExtra* race) {
     int i;
     lbl_8055E324 = fn_801659D0(race);
     fn_80165FAC();
