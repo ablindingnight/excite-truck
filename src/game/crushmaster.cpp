@@ -1232,13 +1232,14 @@ inline void CrushMaster::vfA8(int car, int b) {
                 dx = dst.x - pos->x;
                 dz = dst.z - pos->z;
                 f32 k = 1.0f / t;
-                v.y = dy * k + 9.81f * t;
+                v.y = dy * k;
                 v.z = dz * k;
+                k *= dx;
+                v.x = k;
+                v.y += 9.81f * t;
                 r.place.origin.x = rec->mtx.pos.x;
                 r.place.origin.y = rec->mtx.pos.y;
                 r.place.origin.z = rec->mtx.pos.z;
-                k *= dx;
-                v.x = k;
                 r.place.basis[1].x = 0.0f;
                 r.place.basis[1].y = 1.0f;
                 r.place.basis[1].z = 0.0f;
