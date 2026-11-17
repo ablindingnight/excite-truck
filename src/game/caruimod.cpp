@@ -2,6 +2,7 @@
 // efx bone mesh read from the car's .car folder), its resource loader and the menu state that
 // draws it. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/tadds.h"
 #include "game/wheelsetup.h"
 #include "game/mtx33.h"
 #include "game/menustate.h"
@@ -823,8 +824,6 @@ void fn_80254568(Vec3a* out, s32 model, const char* name) {
 }
 
 }
-template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
-  /* Helper name unproven */
 extern "C" {
 /* Helper name unproven */ static inline f32 MidHalf(f32 a, f32 b) {
     const f32& difference = b - a;

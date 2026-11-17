@@ -3,6 +3,7 @@
 // textured cross quads, and event-driven torch fires. Names are guesses apart from the
 // allocation tags, value keys, file names and messages.
 #include "game/common.h"
+#include "game/tadds.h"
 #include "game/partparams.h"
 #include "game/vecmatrix.h"
 #include "game/math_types.h"
@@ -1438,7 +1439,6 @@ void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
 }
 
 /* Helper name unproven: o = a + v * k; the boundary is needed (in place: DrawEdges 100 -> 96.58, DrawFaces -> 99.57) */
-template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 /* Helper name unproven */
 inline void ExhaustTorchMan::TransformTorchPart(int i, const PlainValMatrix* part) {
     const FireCar* c = fn_80287B24(i);

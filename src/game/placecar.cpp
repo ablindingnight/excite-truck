@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/tadds.h"
 #include "game/objteleport.h"
 #include "game/pathset.h"
 #include "game/deity.h"
@@ -210,7 +211,6 @@ void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
 }
 
 }
-template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 extern "C" {
 /* Name unproven: the 10.0f of fn_801B7F4C is retail's @335, created BEFORE the literals of fn_801B7C8C, so it is a
    named constant defined here (emitted at its definition point); the one-field struct keeps the use from folding
