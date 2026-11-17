@@ -995,7 +995,7 @@ void fn_801308F4(char* buf, s32 size, s32 value);
 
 // Event node: its tile (pulsing while selected), name, grade and "score/target".
 #pragma push
-#pragma opt_propagation off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
+#pragma opt_propagation off  /* Proven 2026-11-17: Draw is exact with it and 4 rows off without (the named 0.5f below must stay a variable) */
 }  // extern "C"
 
 void EventNode::Draw(void) {
@@ -1029,8 +1029,9 @@ void EventNode::Draw(void) {
     fn_802354A0(p->art, part, x, y, 0.0f, (f32)p->w, (f32)p->h, tile);
     if (p->sel && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
-        f32 hw = (f32)p->w / 2.0f;
-        f32 hh = (f32)p->h / 2.0f;
+        f32 half = 0.5f;
+        f32 hw = half * (f32)p->w;
+        f32 hh = half * (f32)p->h;
         u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
         f32 nx = x - grow * hw;
         f32 ny = y + grow * hh;
