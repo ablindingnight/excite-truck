@@ -9,6 +9,7 @@
 // and its listener bases' vtables, with their literals pooled behind those vtables (the original
 // .data layout). Inline callees defined after their caller are called, not inlined, in the original
 // (vfF8 -> Setup, vfF4 -> Pickup ctor, vf44 -> Draw); those callers are compiled without inlining.
+#include "game/strcopy.h"
 #include <math.h>
 #include <stdarg.h>
 #include "game/common.h"
@@ -1080,7 +1081,6 @@ public:
 
 
 #include "game/settings.h"
-#include "game/strcopy.h"
 #include "game/mathutil.h"
 
 extern "C" {

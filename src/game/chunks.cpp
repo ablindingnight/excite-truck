@@ -512,7 +512,7 @@ static inline CarModel* CarAt(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 void CarChunks::InitColors(void) {
     u32 i;
     for (i = 0; CarAt(i) != 0; i++) {
-        const struct { u32 value; } full = {CarAt(i)->color};
+        const struct { u32 value; } full = {(u32)CarAt(i)->color};
         colors[i].dim = DimColor(Dim(full.value >> 16), Dim(full.value >> 8), Dim(full.value));
         colors[i].full = full.value;
     }

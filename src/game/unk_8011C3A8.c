@@ -4805,10 +4805,7 @@ void ReadBPLossyWithMotion(u8 *dst, s32 dstStride, BitReader8011 *bits, u32 limi
 }
 
 extern f64 pow(f64, f64);
-extern void set_rate_volume_and_pan(void *);
 extern void clear(void *, u32, u32);
-extern void set_both_state(void *, s32);
-extern void set_addrs(void *, s32);
 
 /* .sdata owned by this unit (0x80559948-0x80559954), in address order. */
 extern u8 lbl_8041D628[0x80];

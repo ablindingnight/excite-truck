@@ -337,7 +337,9 @@ void fn_8011BC48(s32 arg0);
 s32 RADCB_unregister_2_callbacks(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4);
 void RADCB_suspend_callback(void *arg0, void *arg1);
 void radfree(void *arg0);
+#ifndef __cplusplus  /* PORT: C++ units get the C library's void* memset */
 extern void memset(void *, int, unsigned int);
+#endif
 extern void *memcpy(void *, const void *, unsigned int);
 extern void *memmove(void *, const void *, unsigned int);
 
@@ -488,23 +490,17 @@ extern s32 lbl_8041D608[];   // requested sound track ids
 extern s32 (*lbl_8055DED8)(void *reader, void *name, u32 flags);  // one-shot reader override
 typedef s32 (*BinkSoundOpen8011)(StreamTrack *t, u32 rate, s32 bits, s32 chans, u32 flags, struct StreamPlayer *p);
 
+#ifndef __cplusplus  /* PORT: C++ units get the C library's void* memset */
 extern void memset(void *, int, unsigned int);
+#endif
 
 extern void DCFlushRange(void *, u32);
 
 extern void AXSetVoiceState(void *vpb, s32 state);
 
 extern f64 pow(f64, f64);
-extern void set_rate_volume_and_pan(void *);
-extern void clear(void *, u32, u32);
-extern void set_both_state(void *, s32);
-extern void set_addrs(void *, s32);
 
 extern f64 pow(f64, f64);
-extern void set_rate_volume_and_pan(void *);
-extern void clear(void *, u32, u32);
-extern void set_both_state(void *, s32);
-extern void set_addrs(void *, s32);
 
 extern s32 lbl_8055DEE0[];
 extern s32 lbl_8055DEE8;
@@ -532,13 +528,8 @@ extern void AXSetVoiceSrcType(void *vpb, u32 type);
 extern void AXSetVoiceSrc(void *vpb, AXPBSRC *src);
 extern void AXSetVoiceSrcRatio(void *vpb, f32 ratio);
 extern void AXSetVoiceAdpcm(void *vpb, AXPBADPCM *adpcm);
-s32 Ready(StreamTrack *t);
 s32 fn_80119994(void);
 s32 fn_8011999C(void);
-void Volume(StreamTrack *t, s32 volume);
-void Pan(StreamTrack *t, s32 pan);
-s32 Pause(StreamTrack *t, s32 paused);
-s32 SetOnOff(StreamTrack *t, s32 run);
 
 typedef struct StreamAllocator {
     void *(*alloc)(u32 size);
