@@ -152,8 +152,8 @@ struct StaticOb {
 };
 
 // An animated object (0x6C).
-struct AnimInst {
-    ~AnimInst(void) {
+struct TrackAnimObj {
+    ~TrackAnimObj(void) {
         fn_801E6CD0(anim, 0, 0.0f);
         for (int i = 0; i < count; i++) {
             fn_801E6CC4(streams[i]);
@@ -170,7 +170,7 @@ struct AnimInst {
     f32 liveRad2;       // offset 0x5C
     s32 state;          // offset 0x60
     const char* name;   // offset 0x64
-    AnimInst* next;     // offset 0x68
+    TrackAnimObj* next;     // offset 0x68
 };
 
 // A placed sound (0x18).
@@ -453,7 +453,7 @@ void* fn_801E6BEC(const char* stream);
 void fn_801E6CC8(void* anim, int once);
 void fn_801E6E9C(void* anim, f32 dt);
 int fn_801E7650(void* anim);
-void fn_801E75C8(void* anim, AnimInst* a);
+void fn_801E75C8(void* anim, TrackAnimObj* a);
 int fn_80129D90(int a, int b, int n);
 f32 fn_801E7E24(void);
 ViewState* fn_801E8718(int view);
@@ -504,8 +504,8 @@ StaticOb* lbl_8055EC4C;
 StaticOb* lbl_8055EC50;
 StaticOb** lbl_8055EC54;
 s32 lbl_8055EC58;
-AnimInst* lbl_8055EC5C;
-AnimInst* lbl_8055EC60;
+TrackAnimObj* lbl_8055EC5C;
+TrackAnimObj* lbl_8055EC60;
 s32 lbl_8055EC64;
 ValueNode* lbl_8055EC68;
 EWSound* lbl_8055EC6C;
@@ -532,7 +532,7 @@ static inline int IsSkipType(ValueNode* vn) {
     return 0;
 }
 
-static inline void StartAnim(AnimInst* a) {
+static inline void StartAnim(TrackAnimObj* a) {
     if (a->state != 1) {
         int i = fn_80129D90(0, 0, a->count);
         fn_801E6CD0(a->anim, a->streams[i], 0.0f);
@@ -1209,7 +1209,7 @@ void fn_801F9E04(RaceDesc* r) {
 }
 
 void fn_801F9FA0(StaticOb** list);
-void fn_801FA010(AnimInst** list);
+void fn_801FA010(TrackAnimObj** list);
 void fn_801FA0B0(ClassFile** list);
 void fn_801FA138(EWSound** list);
 
@@ -1241,10 +1241,10 @@ void fn_801F9FA0(StaticOb** list) {
     *list = 0;
 }
 
-void fn_801FA010(AnimInst** list) {
-    AnimInst* c = *list;
+void fn_801FA010(TrackAnimObj** list) {
+    TrackAnimObj* c = *list;
     while (c) {
-        AnimInst* n = c->next;
+        TrackAnimObj* n = c->next;
         delete c;
         c = n;
     }
@@ -1273,7 +1273,7 @@ void fn_801FA138(EWSound** list) {
 
 void fn_801FA1D4(void) {
     StaticOb* o;
-    AnimInst* a;
+    TrackAnimObj* a;
     for (o = lbl_8055EC4C; o; o = o->next) {
         o->visible = 1;
     }
@@ -1293,12 +1293,12 @@ void fn_801FA298(void*) {
     }
 }
 
-static inline int IsLive(AnimInst* a, int near) { return a->live && near; }
+static inline int IsLive(TrackAnimObj* a, int near) { return a->live && near; }
 
 void fn_801FA2C4(void) {
     Sound3D* snd;
     f32 dt = fn_801E7E24();
-    AnimInst* a;
+    TrackAnimObj* a;
     EWSound* s;
     for (a = lbl_8055EC5C; a; a = a->next) {
         int near = PSVECSquareDistance((const Vec*)(&fn_801E8718(0)->pos), (const Vec*)&a->frame.pos) < a->liveRad2;
@@ -1349,7 +1349,7 @@ void fn_801FA2C4(void) {
 
 void fn_801FA550(void) {
     StaticOb* o;
-    AnimInst* a;
+    TrackAnimObj* a;
     for (o = lbl_8055EC50; o; o = o->next) {
         if (!o->hidden && o->visible && fn_801F7A0C()) {
             fn_802C70AC(o->model, o->vol ? o->vol : &o->frame, -1, -15);
@@ -1818,7 +1818,7 @@ static inline void AnimDescTeardown(const char* model) {}
 
 AnimDesc::~AnimDesc(void) { AnimDescTeardown(animModel); }
 
-extern "C" void fn_801FC4D8(AnimInst** list, AnimInst* a);
+extern "C" void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a);
 extern "C" void fn_801FC644(EWSound** list, EWSound* s);
 
 // The frame as retail copies it: a 36-byte rotation block and the position (copy = 4 word pairs + 1, then 1 pair + 1).
@@ -1826,7 +1826,7 @@ extern "C" void fn_801FC644(EWSound** list, EWSound* s);
 struct ORot { PVec x; PVec y; PVec z; };
 struct OFrameRP { ORot rot; PVec pos; };
 namespace {
-static inline void AnimSetup(AnimInst* a, AnimDesc* d, ValueNode* node) {
+static inline void AnimSetup(TrackAnimObj* a, AnimDesc* d, ValueNode* node) {
     a->name = "unknown";
     a->anim = fn_801E6A3C(d->animModel, d->streaming != 0, 0);
     a->count = d->numStreams;
@@ -1855,7 +1855,7 @@ static inline void AnimSetup(AnimInst* a, AnimDesc* d, ValueNode* node) {
 }  // namespace
 void AnimDesc::Create(const PlacedObj* o) {
     place = o->frame;
-    AnimInst* a = new ("val-gob") AnimInst;
+    TrackAnimObj* a = new ("val-gob") TrackAnimObj;
     if (a) {
         AnimSetup(a, this, o->node);
     }
@@ -1863,7 +1863,7 @@ void AnimDesc::Create(const PlacedObj* o) {
 }
 
 extern "C" {
-void fn_801FC4D8(AnimInst** list, AnimInst* a) {
+void fn_801FC4D8(TrackAnimObj** list, TrackAnimObj* a) {
     a->next = *list;
     *list = a;
 }

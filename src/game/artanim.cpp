@@ -95,7 +95,7 @@ struct ArtAnim {
     f32 length;       // offset 0x2C
 };
 
-struct ArtItem {
+struct ArtAnimEntry {
     char name[100];  // offset 0x0
     ArtAnim* anim;   // offset 0x64
     u8 active;       // offset 0x68
@@ -110,20 +110,20 @@ struct ArtListBase {
         count = 0;
         max = 0;
     }
-    ArtItem* items;  // offset 0x0
+    ArtAnimEntry* items;  // offset 0x0
     s32 count;       // offset 0x4
     s32 max;         // offset 0x8
 };
 
 struct ArtList : public ArtListBase {
     ArtList(int n) {
-        items = new ("dsa_buf") ArtItem[n];
+        items = new ("dsa_buf") ArtAnimEntry[n];
         max = n;
         count = 0;
         buf = items;
     }
     ~ArtList(void) { delete[] buf; }
-    ArtItem* buf;  // offset 0xC
+    ArtAnimEntry* buf;  // offset 0xC
 };
 
 class ArtPlayer {
@@ -816,7 +816,7 @@ ArtPlayer::~ArtPlayer(void) {
     int i = list->count;
     int off = i * sizeof(list->items[0]);  // MATCHING-AID: byte offset walker and the comma test, needed for the loop registers
     while (off -= sizeof(list->items[0]), i-- > 0) {
-        fn_802AD30C(((ArtItem*)((u8*)list->items + off))->anim);
+        fn_802AD30C(((ArtAnimEntry*)((u8*)list->items + off))->anim);
     }
     list->count = 0;
     ArtList* l = list;
@@ -831,7 +831,7 @@ int ArtPlayer::Add(const char* name, int map) {
     if (anim) {
         int k;
         char* d;
-        ArtItem* item;
+        ArtAnimEntry* item;
         item = &list->items[list->count++];
         d = item->name;
         k = 100;
@@ -850,7 +850,7 @@ int ArtPlayer::Add(const char* name, int map) {
 }
 
 void ArtPlayer::Start(int i) {
-    ArtItem* item = &list->items[i];
+    ArtAnimEntry* item = &list->items[i];
     if (!item->active) {
         item->active = 1;
         item->paused = 0;
@@ -859,7 +859,7 @@ void ArtPlayer::Start(int i) {
 }
 
 void ArtPlayer::Pause(int i) {
-    ArtItem* item = &list->items[i];
+    ArtAnimEntry* item = &list->items[i];
     if (!item->paused) {
         if (!item->active) {
             fn_802E30C8("ArtAnimManager: PauseAnim(%d) called, but %d is not running!", i, i);
@@ -872,7 +872,7 @@ void ArtPlayer::Pause(int i) {
 }
 
 void ArtPlayer::Resume(int i) {
-    ArtItem* item = &list->items[i];
+    ArtAnimEntry* item = &list->items[i];
     if (item->paused) {
         item->paused = 0;
     }
@@ -895,7 +895,7 @@ void ArtPlayer::Rewind(void) {
 void ArtPlayer::Update(void) {
     t = lbl_8055E3C8;
     for (int i = 0; i < list->count; i++) {
-        ArtItem* item = &list->items[i];
+        ArtAnimEntry* item = &list->items[i];
         if (item->paused) {
             item->t0 += t - item->tp;
             item->tp = t;
@@ -908,7 +908,7 @@ void ArtPlayer::Update(void) {
 
 void ArtPlayer::Draw(ArtXform* xf) {
     for (int i = 0; i < list->count; i++) {
-        ArtItem* item = &list->items[i];
+        ArtAnimEntry* item = &list->items[i];
         if (item->active) {
             fn_802AD4C4(item->anim, t - item->t0, xf);
         }
