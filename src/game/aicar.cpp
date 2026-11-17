@@ -1457,14 +1457,16 @@ void fn_80195B28(u8* d, f32 v) {
         } else {
             tbl = lbl_80333308;
         }
+        f32 lo = tbl[0];
         w->t0 = w->now;
-        w->next = fn_80129DC4(3, tbl[0], tbl[1]);
+        w->next = fn_80129DC4(3, lo, tbl[1]);
         if (!one) {
             w->next *= lbl_8055E56C;
         }
-        w->dur = tbl[2];
-        w->next += w->now;
+        f32 du = tbl[2];
         w->start = w->cur;
+        w->next += w->now;
+        w->dur = du;
         if (one) {
             w->tgt = fn_80129DC4(3, -0.5f, 0.5f);
         } else {
@@ -1475,10 +1477,11 @@ void fn_80195B28(u8* d, f32 v) {
         }
     } else {
         f32 t = w->now;
+        f32 z = 0.0f;
         w->next = t;
-        w->start = 0.0f;
+        w->start = z;
+        w->tgt = z;
         w->t0 = t;
-        w->tgt = 0.0f;
         w->dur = t;
     }
 }
