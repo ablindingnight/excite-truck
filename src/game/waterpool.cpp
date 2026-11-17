@@ -707,7 +707,27 @@ void fn_8029D574(WaterPool* p) {
 }
 
 /* Helper name unproven. */
-static inline void RenderPool(WaterPool* p) {
+static inline void DrawWaterStrip(WaterPool* p, PoolVtx** rows, int j, int& i) {
+    PoolVtx* a;
+    PoolVtx* b;
+    a = rows[j & 1];
+    b = rows[1 - (j & 1)];
+    for (i = 0; i < p->nx; i++) {
+        fn_8029DB78(p, (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx)), i, j);
+        const PoolVtx& vertexBack = *(const PoolVtx*)((const u8*)b + i * (int)sizeof(PoolVtx));
+        const f32 xBack = vertexBack.pos.x;
+        const f32 vBack = vertexBack.t;
+        const f32 uBack = vertexBack.s;
+        fn_802C8E00(xBack, vertexBack.pos.y, vertexBack.pos.z, uBack, vBack, vertexBack.color, i > 0);
+        const PoolVtx& vertexFront = *(const PoolVtx*)((const u8*)a + i * (int)sizeof(PoolVtx));
+        const f32 xFront = vertexFront.pos.x;
+        const f32 vFront = vertexFront.t;
+        const f32 uFront = vertexFront.s;
+        fn_802C8E00(xFront, vertexFront.pos.y, vertexFront.pos.z, uFront, vFront, vertexFront.color, i > 0);
+    }
+}
+
+void fn_8029D644(WaterPool* p) {
     int i = (p->ny - 1) * (p->nx * 2);
     const VecMatrix* cam = fn_802C86DC();
     p->eye.x = cam->origin.x;
@@ -716,36 +736,20 @@ static inline void RenderPool(WaterPool* p) {
     fn_802C8BD0(p->tex);
     if (fn_802C8DBC(i)) {
         PoolVtx* rows[2];
-        rows[0] = p->verts;
-        rows[1] = p->verts + p->nx;
+        PoolVtx* first = p->verts;
+        rows[0] = first;
+        rows[1] = first + p->nx;
         for (i = 0; i < p->nx; i++) {
-            fn_8029DB78(p, (PoolVtx*)((u8*)rows[0] + i * (int)sizeof(PoolVtx)), i, 0);
+            fn_8029DB78(p, (PoolVtx*)((u8*)first + i * (int)sizeof(PoolVtx)), i, 0);
         }
-        PoolVtx* a;
-        PoolVtx* b;
+        PoolVtx** table = &rows[0];
         for (int j = 1; j < p->ny; j++) {
-            a = rows[j & 1];
-            b = rows[1 - (j & 1)];
-            for (i = 0; i < p->nx; i++) {
-                fn_8029DB78(p, (PoolVtx*)((u8*)a + i * (int)sizeof(PoolVtx)), i, j);
-                const PoolVtx& vertexBack = *(const PoolVtx*)((const u8*)b + i * (int)sizeof(PoolVtx));
-                const f32 xBack = vertexBack.pos.x;
-                const f32 vBack = vertexBack.t;
-                const f32 uBack = vertexBack.s;
-                fn_802C8E00(xBack, vertexBack.pos.y, vertexBack.pos.z, uBack, vBack, vertexBack.color, i > 0);
-                const PoolVtx& vertexFront = *(const PoolVtx*)((const u8*)a + i * (int)sizeof(PoolVtx));
-                const f32 xFront = vertexFront.pos.x;
-                const f32 vFront = vertexFront.t;
-                const f32 uFront = vertexFront.s;
-                fn_802C8E00(xFront, vertexFront.pos.y, vertexFront.pos.z, uFront, vFront, vertexFront.color, i > 0);
-            }
+            DrawWaterStrip(p, table, j, i);
         }
         fn_802C8E48();
     }
     fn_802C8D74();
 }
-
-void fn_8029D644(WaterPool* p) { RenderPool(p); }
 
 void fn_8029E49C(WaterPool* p, WaterCar* car, int w);
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r);
