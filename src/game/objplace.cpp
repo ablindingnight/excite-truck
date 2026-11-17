@@ -690,7 +690,10 @@ struct LocalVec {
         count = 0;
         cap = 0;
     }
-    void Push(const T& v) { data[count++] = v; }
+    void Push(const T& v) {
+        T* p = &data[count++];
+        *p = v;
+    }
     void RemoveAt(int i) {
         if (i >= 0 && i < count) {
             if (i != count - 1) {
