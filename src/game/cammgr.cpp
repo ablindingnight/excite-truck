@@ -14,11 +14,21 @@
 #include "game/centerline.h"
 #include "game/math_types.h"
 
+struct CameraConstant { f32 value; };
+
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
+
+extern "C" const f32 lbl_80563C44;
+extern "C" const f32 lbl_80563C48;
+extern "C" const f32 lbl_80563C4C;
+extern "C" const f32 lbl_80563C50;
+extern "C" const f32 lbl_80563C6C;
+extern "C" const f32 lbl_80563C98;
+extern "C" const f32 lbl_80563C9C;
 
 class VD {
 public:
@@ -122,6 +132,22 @@ extern f32 lbl_80499980[];
 extern u8 lbl_8055F488;
 extern f32 lbl_8055F484;
 
+// The first camera literal occupies an initialized slot in the retail constant pool.
+#ifdef __MWERKS__
+#pragma push
+#pragma explicit_zero_data on
+#endif
+extern "C" const CameraConstant lbl_80563C20 = {0.0f};
+#ifdef __MWERKS__
+#pragma pop
+#endif
+
+extern "C" const CameraConstant lbl_80563C24 = {0.017453292f};
+extern "C" const CameraConstant lbl_80563C28 = {-1.0f};
+extern "C" const CameraConstant lbl_80563C2C = {1.0f};
+extern "C" const CameraConstant lbl_80563C30 = {-2.0f};
+extern "C" const CameraConstant lbl_80563C34 = {3.0f};
+
 extern "C" {
 
 u8* fn_80265DD8(u8* p) {
@@ -130,7 +156,7 @@ u8* fn_80265DD8(u8* p) {
 }
 
 void fn_80265E08(u8* p) {
-    f32 z = 0.0f;
+    f32 z = lbl_80563C20.value;
     U32(p, 0x0) = 0;
     F32(p, 0x14) = z;
     F32(p, 0x10) = z;
@@ -142,18 +168,13 @@ void fn_80265E08(u8* p) {
 void fn_80265E2C(void) {
     ShakeEntry* e = lbl_804999A0;
     for (int i = 0; i < 100; i++) {
-        e->x = 0.017453292f * fn_80129DC4(6, -lbl_8055C4E0, lbl_8055C4E0);
-        e->y = 0.017453292f * fn_80129DC4(6, -lbl_8055C4E4, lbl_8055C4E4);
+        e->x = lbl_80563C24.value * fn_80129DC4(6, -lbl_8055C4E0, lbl_8055C4E0);
+        e->y = lbl_80563C24.value * fn_80129DC4(6, -lbl_8055C4E4, lbl_8055C4E4);
         e->n = fn_80129D90(6, lbl_8055C4E8, lbl_8055C4EC);
         e++;
     }
 }
 
-extern const f32 lbl_80563C20;  // 0.0
-extern const f32 lbl_80563C28;  // -1.0
-extern const f32 lbl_80563C2C;  // 1.0
-extern const f32 lbl_80563C30;  // -2.0
-extern const f32 lbl_80563C34;  // 3.0
 
 // Camera shake: walks the random shake table (lbl_804999A0), easing between consecutive entries.
 struct CamShake {
@@ -166,16 +187,20 @@ struct CamShake {
 };
 
 static inline f32 ShakeEase(f32 x) {
-    if (x < lbl_80563C28) {
-        return lbl_80563C28;
+    if (x < lbl_80563C28.value) {
+        return lbl_80563C28.value;
     }
-    if (x > lbl_80563C2C) {
-        return lbl_80563C2C;
+    if (x > lbl_80563C2C.value) {
+        return lbl_80563C2C.value;
     }
-    if (x > lbl_80563C20) {
-        return -2.0f * x * x * x + 3.0f * x * x;
+    if (x > lbl_80563C20.value) {
+        const f32 cubic = lbl_80563C30.value * x;
+        const f32 quadratic = lbl_80563C34.value * x;
+        return cubic * x * x + quadratic * x;
     }
-    return -2.0f * x * x * x - 3.0f * x * x;
+    const f32 cubic = lbl_80563C30.value * x;
+    const f32 quadratic = lbl_80563C34.value * x;
+    return cubic * x * x - quadratic * x;
 }
 
 void fn_80265EC4(CamShake* s, s32 now, int paused) {
@@ -222,7 +247,7 @@ void fn_80266150(u8* p) {
     U32(p, 0x4) = 0;
     U32(p, 0x0) = 0;
     F32(p, 0x8) = lbl_8055C4C0;
-    F32(p, 0xC) = 1.0f;
+    F32(p, 0xC) = lbl_80563C2C.value;
 }
 
 extern f32 lbl_8055C4BC;  // funky fov scale
@@ -230,8 +255,8 @@ extern s32 lbl_8055C4B4;  // funky fov ease start time
 extern s32 lbl_8055C4B8;  // funky fov ease end time
 
 static inline f32 ClampF(f32 x) {
-    x = lbl_80563C2C < x ? lbl_80563C2C : x;
-    return x > lbl_80563C20 ? x : lbl_80563C20;
+    x = lbl_80563C2C.value < x ? lbl_80563C2C.value : x;
+    return x > lbl_80563C20.value ? x : lbl_80563C20.value;
 }
 
 // "funky_fov": on a camera cut, aim the view angle at a scaled (capped) fov, then ease toward it.
@@ -243,7 +268,7 @@ struct FunkyFov {
 };
 
 // Helper name unproven: the clamped value arrives as a parameter, so it stays the left operand of the multiply.
-static inline f32 FovRemap(f32 t) { return lbl_80563C20 + t * lbl_80563C2C; }
+static inline f32 FovRemap(f32 t) { return lbl_80563C20.value + t * lbl_80563C2C.value; }
 void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
     if (fresh) {
         f->last = now;
@@ -260,21 +285,20 @@ void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
     f32 a = f->acc;
     e = lbl_8055C4B8;
     f32 st = lbl_8055C4B4;
-    f32 hi = lbl_80563C2C;
+    f32 hi = lbl_80563C2C.value;
     f32 x = (a - st) / (e - st);
     x = hi < x ? hi : x;
-    x = x > lbl_80563C20 ? x : lbl_80563C20;
+    x = x > lbl_80563C20.value ? x : lbl_80563C20.value;
     f->t = ShakeEase(FovRemap(x));
 }
 
 extern f32 lbl_8055C4C4;
-extern const f32 lbl_80563C20;
 
 // out = from + dir * (distance to `to`, eased by the blend at 0xC).
 void fn_802662D8(u8* p, f32* out, const f32* from, const f32* dir, const f32* to) {
     f32 d = PSVECDistance((const Vec*)from, (const Vec*)to) - lbl_8055C4C4;
     f32 k = F32(p, 0xC);
-    f32 t = lbl_80563C20 + k * (d - lbl_80563C20);
+    f32 t = lbl_80563C20.value + k * (d - lbl_80563C20.value);
     f32 x = from[0] + dir[0] * t;
     f32 y = from[1] + dir[1] * t;
     f32 z = from[2] + dir[2] * t;
@@ -334,7 +358,6 @@ int fn_8026B0C0(int view);
 double sin(double x);
 double cos(double x);
 extern const f32 lbl_80563C40;  // smallest rotation
-extern const f32 lbl_80563C50;
 extern const f32 lbl_80563CA0;  // smallest shake
 extern const f32 lbl_80563CA4;  // 2 pi
 extern const f32 lbl_80563CA8;
@@ -348,13 +371,13 @@ static inline void ShakeRot(ShakeMat* r, const RVec3& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > lbl_80563C40) {
         f32 x, s, y, z, c, k;
-        f32 inv = lbl_80563C2C / a;
+        f32 inv = lbl_80563C2C.value / a;
         x = inv * w.x;
         y = inv * w.y;
         z = inv * w.z;
         s = (f32)sin(a);
         c = (f32)cos(a);
-        k = lbl_80563C2C - c;
+        k = lbl_80563C2C.value - c;
         r->m[0][0] = c + k * (x * x);
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
@@ -365,15 +388,15 @@ static inline void ShakeRot(ShakeMat* r, const RVec3& w) {
         r->m[2][2] = c + k * (z * z);
         r->m[2][1] = z * (k * y) - s * x;
     } else {
-        r->m[0][0] = lbl_80563C2C;
-        r->m[0][1] = lbl_80563C20;
-        r->m[0][2] = lbl_80563C20;
-        r->m[1][0] = lbl_80563C20;
-        r->m[1][1] = lbl_80563C2C;
-        r->m[1][2] = lbl_80563C20;
-        r->m[2][0] = lbl_80563C20;
-        r->m[2][1] = lbl_80563C20;
-        r->m[2][2] = lbl_80563C2C;
+        r->m[0][0] = lbl_80563C2C.value;
+        r->m[0][1] = lbl_80563C20.value;
+        r->m[0][2] = lbl_80563C20.value;
+        r->m[1][0] = lbl_80563C20.value;
+        r->m[1][1] = lbl_80563C2C.value;
+        r->m[1][2] = lbl_80563C20.value;
+        r->m[2][0] = lbl_80563C20.value;
+        r->m[2][1] = lbl_80563C20.value;
+        r->m[2][2] = lbl_80563C2C.value;
     }
 }
 
@@ -433,7 +456,7 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
         CamTrackPos rat;
         fn_80136594(&rat, trk, &rxz);
         f32 d = (rat.seg->dist + rat.seg->len * rat.t) - camDist;
-        if (d < lbl_80563C20) {
+        if (d < lbl_80563C20.value) {
             u32 lap = trk->il.seg ? trk->il.seg->type : 3;
             d += trk->line->len[lap];
         }
@@ -448,7 +471,7 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
     if (near) {
         f32 a = (F32(near, 0x25CC) - lbl_8055C4D0) / (lbl_8055C4D4 - lbl_8055C4D0);
         f32 ka = FovRemap(ClampF(a));
-        f32 b = (best - lbl_8055F49C) / (lbl_80563C20 - lbl_8055F49C);
+        f32 b = (best - lbl_8055F49C) / (lbl_80563C20.value - lbl_8055F49C);
         f32 k = ka * FovRemap(ClampF(b));
         f32 move = lbl_8055C4D8 * k;
         f32 turn = lbl_8055C4DC * k;
@@ -492,7 +515,7 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
         CamTrackPos rat;
         fn_80136594(&rat, trk, &rxz);
         f32 d = (rat.seg->dist + rat.seg->len * rat.t) - camDist;
-        if (d < lbl_80563C20) {
+        if (d < lbl_80563C20.value) {
             u32 lap = trk->il.seg ? trk->il.seg->type : 3;
             d += trk->line->len[lap];
         }
@@ -507,7 +530,7 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
     if (near) {
         f32 a = (F32(near, 0x25CC) - lbl_8055C4D0) / (lbl_8055C4D4 - lbl_8055C4D0);
         f32 ka = FovRemap(ClampF(a));
-        f32 b = (best - lbl_8055F49C) / (lbl_80563C20 - lbl_8055F49C);
+        f32 b = (best - lbl_8055F49C) / (lbl_80563C20.value - lbl_8055F49C);
         f32 k = ka * FovRemap(ClampF(b));
         f32 move = lbl_8055C4D8 * k;
         f32 turn = lbl_8055C4DC * k;
@@ -540,12 +563,12 @@ void fn_802670A0(CamView* p, int idx) {
 }
 
 void fn_80267130(CamView* p) {
-    f32 t = (p->fov - 0.39269909f) / 0.7853981f;
-    f32 c = (1.0f < t) ? 1.0f : t;
-    c = (c > 0.0f) ? c : 0.0f;
-    f32 k = -2.5f;
-    p->nearZ = 3.0f + c * k;
-    p->farZ = lbl_8055F484 * (fn_80178CA4() == 1 ? 1.0f : 0.8f);
+    f32 t = (p->fov - lbl_80563C44) / lbl_80563C48;
+    f32 c = (lbl_80563C2C.value < t) ? lbl_80563C2C.value : t;
+    c = (c > lbl_80563C20.value) ? c : lbl_80563C20.value;
+    f32 k = lbl_80563C4C;
+    p->nearZ = lbl_80563C34.value + c * k;
+    p->farZ = lbl_8055F484 * (fn_80178CA4() == 1 ? lbl_80563C2C.value : lbl_80563C50);
 }
 
 // KFrame: common.h's PlainValMatrix.
@@ -576,7 +599,7 @@ void fn_802671CC(CamView* p) {
     f32 s = nearZ * p->tanHalf;
     f32 hx = s / lbl_8055D020;
     f32 hy = ((f32)p->h * s) / (f32)p->w;
-    f32 lift = lbl_80563C20;
+    f32 lift = lbl_80563C20.value;
     for (int i = 0; i < 4; i++) {
         f32 cx = (i & 1) ? hx : -hx;
         f32 cy = (i & 2) ? hy : -hy;
@@ -617,78 +640,78 @@ void fn_80267420(void) {
     for (int i = 0; i < 4;) {
         memset(c, 0, 0x228);
         c->w0 = i++;
-        c->f8 = lbl_80563C20;
-        c->fC = lbl_80563C20;
+        c->f8 = lbl_80563C20.value;
+        c->fC = lbl_80563C20.value;
         c->nextTarget = 0;
         c->target = 0;
         c->nextMode = 10;
         c->mode = 10;
-        c->v28.v[0] = lbl_80563C20;
-        c->v28.v[1] = lbl_80563C2C;
-        c->v28.v[2] = lbl_80563C20;
-        c->v34.v[0] = lbl_80563C20;
-        c->v34.v[1] = lbl_80563C20;
-        c->v34.v[2] = lbl_80563C20;
+        c->v28.v[0] = lbl_80563C20.value;
+        c->v28.v[1] = lbl_80563C2C.value;
+        c->v28.v[2] = lbl_80563C20.value;
+        c->v34.v[0] = lbl_80563C20.value;
+        c->v34.v[1] = lbl_80563C20.value;
+        c->v34.v[2] = lbl_80563C20.value;
         c->b138 = 1;
-        c->pose.rot.m[0] = lbl_80563C2C;
-        c->pose.rot.m[1] = lbl_80563C20;
-        c->pose.rot.m[2] = lbl_80563C20;
-        c->pose.rot.m[3] = lbl_80563C20;
-        c->pose.rot.m[4] = lbl_80563C2C;
-        c->pose.rot.m[5] = lbl_80563C20;
-        c->pose.rot.m[6] = lbl_80563C20;
-        c->pose.rot.m[7] = lbl_80563C20;
-        c->pose.rot.m[8] = lbl_80563C2C;
-        c->pose.pos.v[0] = lbl_80563C20;
-        c->pose.pos.v[1] = lbl_80563C20;
-        c->pose.pos.v[2] = lbl_80563C20;
+        c->pose.rot.m[0] = lbl_80563C2C.value;
+        c->pose.rot.m[1] = lbl_80563C20.value;
+        c->pose.rot.m[2] = lbl_80563C20.value;
+        c->pose.rot.m[3] = lbl_80563C20.value;
+        c->pose.rot.m[4] = lbl_80563C2C.value;
+        c->pose.rot.m[5] = lbl_80563C20.value;
+        c->pose.rot.m[6] = lbl_80563C20.value;
+        c->pose.rot.m[7] = lbl_80563C20.value;
+        c->pose.rot.m[8] = lbl_80563C2C.value;
+        c->pose.pos.v[0] = lbl_80563C20.value;
+        c->pose.pos.v[1] = lbl_80563C20.value;
+        c->pose.pos.v[2] = lbl_80563C20.value;
         c->lastPose = c->pose;
-        c->vel.v[0] = lbl_80563C20;
-        c->vel.v[1] = lbl_80563C20;
-        c->vel.v[2] = lbl_80563C20;
-        c->carVel.v[0] = lbl_80563C20;
-        c->carVel.v[1] = lbl_80563C20;
-        c->carVel.v[2] = lbl_80563C20;
-        c->poseF0.rot.m[0] = lbl_80563C2C;
-        c->poseF0.rot.m[1] = lbl_80563C20;
-        c->poseF0.rot.m[2] = lbl_80563C20;
-        c->poseF0.rot.m[3] = lbl_80563C20;
-        c->poseF0.rot.m[4] = lbl_80563C2C;
-        c->poseF0.rot.m[5] = lbl_80563C20;
-        c->poseF0.rot.m[6] = lbl_80563C20;
-        c->poseF0.rot.m[7] = lbl_80563C20;
-        c->poseF0.rot.m[8] = lbl_80563C2C;
-        c->poseF0.pos.v[0] = lbl_80563C20;
-        c->poseF0.pos.v[1] = lbl_80563C20;
-        c->poseF0.pos.v[2] = lbl_80563C20;
-        c->carFrame.rot.m[0] = lbl_80563C2C;
-        c->carFrame.rot.m[1] = lbl_80563C20;
-        c->carFrame.rot.m[2] = lbl_80563C20;
-        c->carFrame.rot.m[3] = lbl_80563C20;
-        c->carFrame.rot.m[4] = lbl_80563C2C;
-        c->carFrame.rot.m[5] = lbl_80563C20;
-        c->carFrame.rot.m[6] = lbl_80563C20;
-        c->carFrame.rot.m[7] = lbl_80563C20;
-        c->carFrame.rot.m[8] = lbl_80563C2C;
-        c->carFrame.pos.v[0] = lbl_80563C20;
-        c->carFrame.pos.v[1] = lbl_80563C20;
-        c->carFrame.pos.v[2] = lbl_80563C20;
+        c->vel.v[0] = lbl_80563C20.value;
+        c->vel.v[1] = lbl_80563C20.value;
+        c->vel.v[2] = lbl_80563C20.value;
+        c->carVel.v[0] = lbl_80563C20.value;
+        c->carVel.v[1] = lbl_80563C20.value;
+        c->carVel.v[2] = lbl_80563C20.value;
+        c->poseF0.rot.m[0] = lbl_80563C2C.value;
+        c->poseF0.rot.m[1] = lbl_80563C20.value;
+        c->poseF0.rot.m[2] = lbl_80563C20.value;
+        c->poseF0.rot.m[3] = lbl_80563C20.value;
+        c->poseF0.rot.m[4] = lbl_80563C2C.value;
+        c->poseF0.rot.m[5] = lbl_80563C20.value;
+        c->poseF0.rot.m[6] = lbl_80563C20.value;
+        c->poseF0.rot.m[7] = lbl_80563C20.value;
+        c->poseF0.rot.m[8] = lbl_80563C2C.value;
+        c->poseF0.pos.v[0] = lbl_80563C20.value;
+        c->poseF0.pos.v[1] = lbl_80563C20.value;
+        c->poseF0.pos.v[2] = lbl_80563C20.value;
+        c->carFrame.rot.m[0] = lbl_80563C2C.value;
+        c->carFrame.rot.m[1] = lbl_80563C20.value;
+        c->carFrame.rot.m[2] = lbl_80563C20.value;
+        c->carFrame.rot.m[3] = lbl_80563C20.value;
+        c->carFrame.rot.m[4] = lbl_80563C2C.value;
+        c->carFrame.rot.m[5] = lbl_80563C20.value;
+        c->carFrame.rot.m[6] = lbl_80563C20.value;
+        c->carFrame.rot.m[7] = lbl_80563C20.value;
+        c->carFrame.rot.m[8] = lbl_80563C2C.value;
+        c->carFrame.pos.v[0] = lbl_80563C20.value;
+        c->carFrame.pos.v[1] = lbl_80563C20.value;
+        c->carFrame.pos.v[2] = lbl_80563C20.value;
         c->car = 0;
         c->lastCar = 0;
         c->w4 = 10;
         c->w1C = 10;
-        c->saved.rot.m[0] = lbl_80563C2C;
-        c->saved.rot.m[1] = lbl_80563C20;
-        c->saved.rot.m[2] = lbl_80563C20;
-        c->saved.rot.m[3] = lbl_80563C20;
-        c->saved.rot.m[4] = lbl_80563C2C;
-        c->saved.rot.m[5] = lbl_80563C20;
-        c->saved.rot.m[6] = lbl_80563C20;
-        c->saved.rot.m[7] = lbl_80563C20;
-        c->saved.rot.m[8] = lbl_80563C2C;
-        c->saved.pos.v[0] = lbl_80563C20;
-        c->saved.pos.v[1] = lbl_80563C20;
-        c->saved.pos.v[2] = lbl_80563C20;
+        c->saved.rot.m[0] = lbl_80563C2C.value;
+        c->saved.rot.m[1] = lbl_80563C20.value;
+        c->saved.rot.m[2] = lbl_80563C20.value;
+        c->saved.rot.m[3] = lbl_80563C20.value;
+        c->saved.rot.m[4] = lbl_80563C2C.value;
+        c->saved.rot.m[5] = lbl_80563C20.value;
+        c->saved.rot.m[6] = lbl_80563C20.value;
+        c->saved.rot.m[7] = lbl_80563C20.value;
+        c->saved.rot.m[8] = lbl_80563C2C.value;
+        c->saved.pos.v[0] = lbl_80563C20.value;
+        c->saved.pos.v[1] = lbl_80563C20.value;
+        c->saved.pos.v[2] = lbl_80563C20.value;
         c->f1D4 = lbl_80563C54;
         c++;
     }
@@ -713,7 +736,6 @@ void fn_80268B94(s32 v);
 extern f32 lbl_8055F48C;
 extern const f32 lbl_80563C54;  // default view angle
 extern const f32 lbl_80563C58;
-extern const double lbl_80563C38;  // int -> float conversion
 extern const f32 lbl_80563C5C;
 extern const f32 lbl_80563C60;
 extern const f32 lbl_80563C64;
@@ -728,71 +750,71 @@ void fn_80267680(void) {
     fn_802733C8();
     CamRec* c = lbl_80499080;
     for (int i = 0; i < 4; i++) {
-        c->f8 = lbl_80563C20;
-        c->fC = lbl_80563C20;
+        c->f8 = lbl_80563C20.value;
+        c->fC = lbl_80563C20.value;
         c->lastCar = 0;
         c->lastFrame = -1;
         c->b138 = 1;
         c->b139 = 1;
-        c->f13C = lbl_80563C20;
-        c->eye.v[0] = lbl_80563C20;
-        c->eye.v[1] = lbl_80563C20;
-        c->eye.v[2] = lbl_80563C20;
-        c->v28.v[0] = lbl_80563C20;
-        c->v28.v[1] = lbl_80563C2C;
-        c->v28.v[2] = lbl_80563C20;
+        c->f13C = lbl_80563C20.value;
+        c->eye.v[0] = lbl_80563C20.value;
+        c->eye.v[1] = lbl_80563C20.value;
+        c->eye.v[2] = lbl_80563C20.value;
+        c->v28.v[0] = lbl_80563C20.value;
+        c->v28.v[1] = lbl_80563C2C.value;
+        c->v28.v[2] = lbl_80563C20.value;
         c->w148 = 0;
         c->f194 = lbl_80563C54;
         fn_80265E08((u8*)&c->w160);
         fn_80266150((u8*)&c->w178);
         c->f158 = lbl_80563C58;
         c->f15C = i;
-        c->f198 = lbl_80563C20;
-        c->f19C = lbl_80563C20;
+        c->f198 = lbl_80563C20.value;
+        c->f19C = lbl_80563C20.value;
         c->w14C = -1;
         c->w150 = -1;
         if (!fn_801796B4()) {
             CamPose id;
-            id.rot.m[0] = lbl_80563C2C;
-            id.rot.m[1] = lbl_80563C20;
-            id.rot.m[2] = lbl_80563C20;
-            id.rot.m[3] = lbl_80563C20;
-            id.rot.m[4] = lbl_80563C2C;
-            id.rot.m[5] = lbl_80563C20;
-            id.rot.m[6] = lbl_80563C20;
-            id.rot.m[7] = lbl_80563C20;
-            id.rot.m[8] = lbl_80563C2C;
-            id.pos.v[0] = lbl_80563C20;
-            id.pos.v[1] = lbl_80563C20;
-            id.pos.v[2] = lbl_80563C20;
+            id.rot.m[0] = lbl_80563C2C.value;
+            id.rot.m[1] = lbl_80563C20.value;
+            id.rot.m[2] = lbl_80563C20.value;
+            id.rot.m[3] = lbl_80563C20.value;
+            id.rot.m[4] = lbl_80563C2C.value;
+            id.rot.m[5] = lbl_80563C20.value;
+            id.rot.m[6] = lbl_80563C20.value;
+            id.rot.m[7] = lbl_80563C20.value;
+            id.rot.m[8] = lbl_80563C2C.value;
+            id.pos.v[0] = lbl_80563C20.value;
+            id.pos.v[1] = lbl_80563C20.value;
+            id.pos.v[2] = lbl_80563C20.value;
             fn_80276BE4((u8*)&c->saved, (u8*)&c->f1D4);
         }
         fn_801E9DC4((u8*)&c->h1EC);
-        c->prev.pose.rot.m[0] = lbl_80563C2C;
-        c->prev.pose.rot.m[1] = lbl_80563C20;
-        c->prev.pose.rot.m[2] = lbl_80563C20;
-        c->prev.pose.rot.m[3] = lbl_80563C20;
-        c->prev.pose.rot.m[4] = lbl_80563C2C;
-        c->prev.pose.rot.m[5] = lbl_80563C20;
-        c->prev.pose.rot.m[6] = lbl_80563C20;
-        c->prev.pose.rot.m[7] = lbl_80563C20;
-        c->prev.pose.rot.m[8] = lbl_80563C2C;
-        c->prev.pose.pos.v[0] = lbl_80563C20;
-        c->prev.pose.pos.v[1] = lbl_80563C20;
-        c->prev.pose.pos.v[2] = lbl_80563C20;
+        c->prev.pose.rot.m[0] = lbl_80563C2C.value;
+        c->prev.pose.rot.m[1] = lbl_80563C20.value;
+        c->prev.pose.rot.m[2] = lbl_80563C20.value;
+        c->prev.pose.rot.m[3] = lbl_80563C20.value;
+        c->prev.pose.rot.m[4] = lbl_80563C2C.value;
+        c->prev.pose.rot.m[5] = lbl_80563C20.value;
+        c->prev.pose.rot.m[6] = lbl_80563C20.value;
+        c->prev.pose.rot.m[7] = lbl_80563C20.value;
+        c->prev.pose.rot.m[8] = lbl_80563C2C.value;
+        c->prev.pose.pos.v[0] = lbl_80563C20.value;
+        c->prev.pose.pos.v[1] = lbl_80563C20.value;
+        c->prev.pose.pos.v[2] = lbl_80563C20.value;
         c->prev.fov = lbl_80563C5C;
         c->prev.start = lbl_80563C60;
         c++;
     }
     lbl_8055F488 = 0;
     lbl_8055F48C = lbl_80563C64;
-    fn_80209190(lbl_8055F494, lbl_80563C2C);
+    fn_80209190(lbl_8055F494, lbl_80563C2C.value);
     fn_80265E2C();
     fn_80268B94(0);
     fn_80270484();
     f32* q = lbl_80499980;
     for (int i = 0; i < 8; i++) {
-        *q++ = lbl_80563C20;
+        *q++ = lbl_80563C20.value;
     }
 }
 #pragma pop
@@ -834,7 +856,6 @@ extern s32 lbl_8055E3C4;  // frame counter
 extern f32 lbl_8055E460;  // tick alpha
 extern u8 lbl_8055F480;
 extern const f32 lbl_80563C68;  // default fov
-extern const f32 lbl_80563C6C;  // half
 extern const f32 lbl_80563C70;
 extern const f32 lbl_80563C74;
 extern const f32 lbl_80563C78;
@@ -851,7 +872,7 @@ void fn_802678E8(CamView* view, int idx) {
         return;
     }
     CamRec* c = (CamRec*)fn_80267EE4(idx);
-    c->f1A0 = lbl_80563C28;
+    c->f1A0 = lbl_80563C28.value;
     fn_8026B768(c->target, idx);
     if (lbl_8055E3C4 != c->lastFrame) {
         c->lastPose = c->pose;
@@ -916,14 +937,14 @@ void fn_802678E8(CamView* view, int idx) {
             if (chase) {
                 r = fn_801B8950(c->target);
                 f32 k = ((f32)__fabs(PSVECDotProduct((const Vec*)&c->pose.rot.m[6], (const Vec*)&c->carFrame.rot.m[6])) - lbl_80563C70) / lbl_80563C74;
-                k = (lbl_80563C2C < k) ? lbl_80563C2C : k;
-                k = (k > lbl_80563C20) ? k : lbl_80563C20;
-                rumble = r * (lbl_80563C2C + k * lbl_80563C78);
+                k = (lbl_80563C2C.value < k) ? lbl_80563C2C.value : k;
+                k = (k > lbl_80563C20.value) ? k : lbl_80563C20.value;
+                rumble = r * (lbl_80563C2C.value + k * lbl_80563C78);
                 goto done;
             }
         }
     }
-    rumble = lbl_80563C20;
+    rumble = lbl_80563C20.value;
 done:
     view->rumble = rumble;
     view->f54 = c->f1A0;
@@ -943,7 +964,7 @@ done:
     if (!fn_801769F8()) {
         for (int i = 0; i < 8; i++) {
             f32 v = lbl_80499980[i] - lbl_80563C7C;
-            lbl_80499980[i] = (lbl_80563C20 > v) ? lbl_80563C20 : v;
+            lbl_80499980[i] = (lbl_80563C20.value > v) ? lbl_80563C20.value : v;
         }
     }
     fn_80267130(view);
@@ -955,7 +976,7 @@ void fn_80267E40(u32 id, f32 strength) {
     f32 now = lbl_8055E3C8;
     for (int i = 0; i < 4; i++) {
         CamRec* c = (CamRec*)fn_80267EE4(i);
-        if ((u32)c->car == id && strength > c->f154 * (1.0f - (now - c->f158) / 0.5f)) {
+        if ((u32)c->car == id && strength > c->f154 * (lbl_80563C2C.value - (now - c->f158) / lbl_80563C6C)) {
             c->f158 = now;
             c->f154 = strength;
             return;
@@ -973,9 +994,7 @@ extern "C" {
 u32 fn_802E2C20(void);
 void fn_801769EC(void);
 void fn_8022FF10(CamMat3* out, const f32* euler);
-extern const f32 lbl_80563C24;  // degrees to radians
 extern const f32 lbl_80563C64;  // "no crash" time
-extern const f32 lbl_80563C6C;  // fade time
 extern const f32 lbl_80563C80;  // ms to s
 extern const f32 lbl_80563C84;  // fade back in after
 extern const f32 lbl_80563C88;  // 360
@@ -985,10 +1004,10 @@ extern f32 lbl_8055F48C;        // crash start time
 // other way) and swing the camera once round a pivot ahead of it; then restore the volume and resume.
 void fn_80267EF8(u8* p) {
     f32 t = lbl_80563C80 * (f32)(s32)fn_802E2C20() - lbl_8055F48C;
-    if (t > lbl_80563C34) {
+    if (t > lbl_80563C34.value) {
         lbl_8055F488 = 0;
         lbl_8055F48C = lbl_80563C64;
-        fn_80209190(lbl_8055F494, lbl_80563C2C);
+        fn_80209190(lbl_8055F494, lbl_80563C2C.value);
         if (!fn_8000D75C()) {
             fn_801769EC();
         }
@@ -996,24 +1015,24 @@ void fn_80267EF8(u8* p) {
     }
     f32 vol;
     f32 ang;
-    f32 u = t / lbl_80563C34;
-    vol = lbl_80563C20;
+    f32 u = t / lbl_80563C34.value;
+    vol = lbl_80563C20.value;
     if (t < lbl_80563C6C) {
         f32 fadeIn = t / lbl_80563C6C;
-        vol = lbl_80563C2C + fadeIn * lbl_80563C28;
+        vol = lbl_80563C2C.value + fadeIn * lbl_80563C28.value;
     } else if (t > lbl_80563C84) {
         f32 fadeOut = (t - lbl_80563C84) / lbl_80563C6C;
-        vol += fadeOut * lbl_80563C2C;
+        vol += fadeOut * lbl_80563C2C.value;
     }
     fn_80209190(lbl_8055F494, vol);
     u8* cheer = (u8*)lbl_8055F490;
-    f32 cv = lbl_80563C2C - vol;
+    f32 cv = lbl_80563C2C.value - vol;
     if (cv != F32(cheer, 0x8)) {
         U8(cheer, 0x4D) = 1;
         F32(cheer, 0x8) = cv;
     }
     f32 ease = ShakeEase(u);
-    ang = lbl_80563C24 * (lbl_80563C20 + ease * lbl_80563C88);
+    ang = lbl_80563C24.value * (lbl_80563C20.value + ease * lbl_80563C88);
     CamPose cam;
     CamPose car;
     cam = *(CamPose*)(p + 0x58);
@@ -1025,9 +1044,9 @@ void fn_80267EF8(u8* p) {
     f.pos.v[1] += f.rot.m[7] * dist;
     f.pos.v[2] += f.rot.m[8] * dist;
     f32 euler[3];
-    euler[0] = lbl_80563C20;
+    euler[0] = lbl_80563C20.value;
     euler[1] = ang;
-    euler[2] = lbl_80563C20;
+    euler[2] = lbl_80563C20.value;
     CamMat3 rot;
     fn_8022FF10(&rot, euler);
     Mat3Mul((Mat3*)&f.rot, (Mat3*)&f.rot, (Mat3*)&rot);
@@ -1044,18 +1063,18 @@ void fn_802682B0(u8* p) {
     if (U8(p, 0x138)) {
         // MATCHING-AID: an index the compiler cannot fold (decomp-permuter) gives the target's stfsu; row loops,
         // a row pointer and straight pointer stores were tried 2026-10-28 (all 5 rows off).
-        lbl_80499050.m[row = 0][*rowp] = 1.0f;
-        lbl_80499050.m[0][1] = 0.0f;
-        lbl_80499050.m[0][2] = 0.0f;
-        lbl_80499050.m[0][3] = 0.0f;
-        lbl_80499050.m[1][0] = 1.0f;
-        lbl_80499050.m[1][1] = 0.0f;
-        lbl_80499050.m[1][2] = 0.0f;
-        lbl_80499050.m[1][3] = 0.0f;
-        lbl_80499050.m[2][0] = 1.0f;
-        lbl_80499050.m[2][1] = 0.0f;
-        lbl_80499050.m[2][2] = 0.0f;
-        lbl_80499050.m[2][3] = 0.0f;
+        lbl_80499050.m[row = 0][*rowp] = lbl_80563C2C.value;
+        lbl_80499050.m[0][1] = lbl_80563C20.value;
+        lbl_80499050.m[0][2] = lbl_80563C20.value;
+        lbl_80499050.m[0][3] = lbl_80563C20.value;
+        lbl_80499050.m[1][0] = lbl_80563C2C.value;
+        lbl_80499050.m[1][1] = lbl_80563C20.value;
+        lbl_80499050.m[1][2] = lbl_80563C20.value;
+        lbl_80499050.m[1][3] = lbl_80563C20.value;
+        lbl_80499050.m[2][0] = lbl_80563C2C.value;
+        lbl_80499050.m[2][1] = lbl_80563C20.value;
+        lbl_80499050.m[2][2] = lbl_80563C20.value;
+        lbl_80499050.m[2][3] = lbl_80563C20.value;
     }
     fn_801BFD34(p + 0x7C, &lbl_80499050.m[2][1], p + 0xC0);
     Mat3Mul((Mat3*)(p + 0x58), (Mat3*)&lbl_80499050, (Mat3*)(p + 0xC0));
@@ -1145,7 +1164,7 @@ void fn_80268358(CamRec* c) {
     f32 zero;
     f32 t;
     f32 half = lbl_80563C6C;
-    zero = lbl_80563C20;
+    zero = lbl_80563C20.value;
     int wo = 0;
     for (int i = 0; i < 2; i++, wo += sizeof(out[0])) {
         int j;
@@ -1177,13 +1196,13 @@ void fn_80268358(CamRec* c) {
             ValVec3 v;
             CamXZ xz(x, z);
             v.x = xz.x;
-            v.y = lbl_80563C20;
+            v.y = lbl_80563C20.value;
             v.z = xz.z;
             ValVec3 n;
             hit = 0;
             fn_801E9E78(&lbl_8055F4A8, &v, &n, &hit);
             r = &fr[j];
-            SetM3(&r->basis[2].x, f.dir[0], lbl_80563C20, f.dir[1]);
+            SetM3(&r->basis[2].x, f.dir[0], lbl_80563C20.value, f.dir[1]);
             PSVECNormalize((const Vec*)&r->basis[2].x, (Vec*)&r->basis[2].x);
             PSVECCrossProduct((const Vec*)&n.x, (const Vec*)&r->basis[2].x, (Vec*)&r->basis[0].x);
             PSVECNormalize((const Vec*)&r->basis[0].x, (Vec*)&r->basis[0].x);
@@ -1284,7 +1303,7 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
     pos.y = LerpT(t, seg->pos.y, next->pos.y);
     d.x = LerpT(t, seg->dir.x, next->dir.x);
     d.y = LerpT(t, seg->dir.y, next->dir.y);
-    inv = lbl_80563C2C / (f32)sqrt(Dot4_hm(d.x, d.y, d.x, d.y));
+    inv = lbl_80563C2C.value / (f32)sqrt(Dot4_hm(d.x, d.y, d.x, d.y));
     f32 px;
     f32 c;
     f32 off;
@@ -1292,7 +1311,7 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
     off = lbl_80563C8C * seg->width - lbl_80563C90;
     pt.x = pos.x + d.x * off;
     pt.y = pos.y + d.y * off;
-    F32(rec, 0x28) = lbl_80563C20;
+    F32(rec, 0x28) = lbl_80563C20.value;
     F32(rec, 0x24) = pt.x;
     F32(rec, 0x2C) = pt.y;
     fn_801EA140((f32*)(rec + 0x24));
@@ -1302,11 +1321,11 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
     sn = (f32)sin(angle);
     d.x = d.x * c - d.y * sn;
     d.y = px * sn + d.y * c;
-    F32(rec, 0xC) = lbl_80563C20;
-    F32(rec, 0x10) = lbl_80563C2C;
-    F32(rec, 0x14) = lbl_80563C20;
+    F32(rec, 0xC) = lbl_80563C20.value;
+    F32(rec, 0x10) = lbl_80563C2C.value;
+    F32(rec, 0x14) = lbl_80563C20.value;
     F32(rec, 0x18) = d.x;
-    F32(rec, 0x1C) = lbl_80563C20;
+    F32(rec, 0x1C) = lbl_80563C20.value;
     F32(rec, 0x20) = d.y;
     PSVECCrossProduct((const Vec*)((f32*)(0xC + rec)), (const Vec*)((f32*)(0x18 + rec)), (Vec*)((f32*)rec));
 }
@@ -1314,7 +1333,7 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
 void fn_80268D94(void) {
     IdealFollowerData f;
     __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
-    fn_80268BD4((u8*)&lbl_80499920, f.line->points, 0.0f, 2.088f);
+    fn_80268BD4((u8*)&lbl_80499920, f.line->points, lbl_80563C20.value, lbl_80563C98);
     if (f.buf) {
         delete[] f.buf;
     }
@@ -1324,12 +1343,12 @@ void fn_80268D94(void) {
 
 void fn_80268E00(void) {
     IdealFollowerData f;
-    const PathPos& at = fn_80136468(&f, fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), -1.0f));
+    const PathPos& at = fn_80136468(&f, fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), lbl_80563C28.value));
     PathPos& pos = const_cast<PathPos&>(at);  // the returned temporary itself (not a const object)
     if (!pos.seg) {
         pos.seg = f.line->points;
     }
-    fn_80268BD4((u8*)&lbl_80499950, pos.seg, pos.t, 4.176f);
+    fn_80268BD4((u8*)&lbl_80499950, pos.seg, pos.t, lbl_80563C9C);
     if (f.buf) {
         delete[] f.buf;
     }
@@ -1415,7 +1434,7 @@ extern const f32 lbl_80563CF0;  // smallest bump
 // Camera rumble target for a car speed: rumble per speed, capped at 1.
 static inline f32 RumbleForSpeed(f32 speed) {
     f32 r = lbl_80563CBC * speed;
-    return (lbl_80563C2C < r) ? lbl_80563C2C : r;
+    return (lbl_80563C2C.value < r) ? lbl_80563C2C.value : r;
 }
 
 // Runs camera type c->mode for one frame: follows the car's frame, flags cuts (a mode change other than
@@ -1505,7 +1524,7 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
         case 0x15:
         {
             fn_80275FC0(c);
-            f32 zero = lbl_80563C20;
+            f32 zero = lbl_80563C20.value;
             c->vel.v[0] = zero;
             c->vel.v[1] = zero;
             c->vel.v[2] = zero;
@@ -1553,9 +1572,9 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             break;
         case 0x1E:
         {
-            f32 speed = lbl_80563CCC + lbl_80563C20 * lbl_80563CD0;
-            f32 height = lbl_80563CD4 + lbl_80563C20 * lbl_80563CD8;
-            f32 radius = lbl_80563CDC + lbl_80563C20 * lbl_80563CE0;
+            f32 speed = lbl_80563CCC + lbl_80563C20.value * lbl_80563CD0;
+            f32 height = lbl_80563CD4 + lbl_80563C20.value * lbl_80563CD8;
+            f32 radius = lbl_80563CDC + lbl_80563C20.value * lbl_80563CE0;
             fn_80275B9C(c, radius, height, speed);
             break;
         }
@@ -1584,9 +1603,9 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
         f32 now = lbl_8055E3C8;
         f32 scale = lbl_80563CE8 * lbl_8055C4B0;
         f32 k = (c->prev.start - now) / ((now - lbl_80563CEC) - now);
-        k = (lbl_80563C2C < k) ? lbl_80563C2C : k;
-        k = (k > lbl_80563C20) ? k : lbl_80563C20;
-        w = lbl_80563C20 + k * lbl_80563C2C;
+        k = (lbl_80563C2C.value < k) ? lbl_80563C2C.value : k;
+        k = (k > lbl_80563C20.value) ? k : lbl_80563C20.value;
+        w = lbl_80563C20.value + k * lbl_80563C2C.value;
         f32 s = PSVECMag((const Vec*)((const f32*)(c->car + 0x26B4)));
         s *= scale;
         f32 value = lbl_80563CEC;
@@ -1600,8 +1619,8 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
             c->f154 = bump;
         }
     } else {
-        c->f158 = lbl_80563C20;
-        c->f154 = lbl_80563C20;
+        c->f158 = lbl_80563C20.value;
+        c->f154 = lbl_80563C20.value;
     }
 }
 
@@ -1673,7 +1692,6 @@ u32 fn_8026A368(int i) { return ((CamRec*)fn_80267EE4(i))->mode; }
 int fn_8026A38C(void) { return lbl_8055F488; }
 
 extern const f32 lbl_80563CBC;
-extern const f32 lbl_80563C2C;
 
 // Starts a camera transition for the camera following `car`.
 void fn_8026A394(u8* car) {
@@ -1683,8 +1701,8 @@ void fn_8026A394(u8* car) {
             c->b139 = 1;
             c->b138 = 1;
             c->f13C = RumbleForSpeed(F32(c->car, 0x25D4));
-            c->f154 = lbl_80563C20;
-            c->f158 = lbl_80563C20;
+            c->f154 = lbl_80563C20.value;
+            c->f158 = lbl_80563C20.value;
             c->prev.pose = c->pose;
             c->prev.fov = c->fov;
             c->prev.start = lbl_8055E3C8;
@@ -1708,7 +1726,7 @@ f32 fn_8026A520(int i) {
     if (i >= 0 && (u32)i < 8) {
         return lbl_80499980[i];
     }
-    return 0.0f;
+    return lbl_80563C20.value;
 }
 
 void fn_8026A54C(f32 v) { lbl_8055F484 = v; }
@@ -1716,7 +1734,7 @@ void fn_8026A54C(f32 v) { lbl_8055F484 = v; }
 int fn_8026A554(s32* p) {
     s32 i = *p;
     if (i >= 0 && (u32)i < 8) {
-        lbl_80499980[i] = 0.5f;
+        lbl_80499980[i] = lbl_80563C6C;
     }
     return 4;
 }
@@ -1729,13 +1747,6 @@ int fn_8026A554(s32* p) {
 inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
 
 // .sdata2 constants owned by this unit (0x80563C20-0x80563D08), in address order.
-extern const float lbl_80563C20 = 0.0f;
-extern const float lbl_80563C24 = 0.017453292f;
-extern const float lbl_80563C28 = -1.0f;
-extern const float lbl_80563C2C = 1.0f;
-extern const float lbl_80563C30 = -2.0f;
-extern const float lbl_80563C34 = 3.0f;
-extern const double lbl_80563C38 = 4503601774854144.0;
 extern const float lbl_80563C40 = 0.0001f;
 extern const float lbl_80563C44 = 0.3926991f;
 extern const float lbl_80563C48 = 0.7853981f;
