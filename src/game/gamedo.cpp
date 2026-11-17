@@ -52,22 +52,7 @@ public:
     virtual ~SessionScreen(void) {}
 };
 
-// Heap use at the start of an event, for leak checks.
-class HeapMark {
-public:
-    HeapMark(const char* name) {
-        this->name = name;
-        heap0 = fn_80128314(0);
-        heap1 = fn_80128314(1);
-        other = fn_80265D58();
-    }
-    ~HeapMark(void) {}
-
-    const char* name;
-    int heap0;
-    int heap1;
-    int other;
-};
+#include "game/heapmark.h"
 
 BOOL OptDirectToTrack(void);
 void BuildDAVMap(DAVMap* out, s32 track);

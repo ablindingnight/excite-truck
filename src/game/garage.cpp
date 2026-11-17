@@ -358,22 +358,7 @@ void CarStatsShutdown(void);
 extern u8 lbl_8055FC8C;            // widescreen
 extern const char lbl_8055B860[8];  // ""
 
-// Heap use at the start of a screen, for leak checks.
-class HeapMark {
-public:
-    HeapMark(const char* name) {
-        this->name = name;
-        heap0 = fn_80128314(0);
-        heap1 = fn_80128314(1);
-        other = fn_80265D58();
-    }
-    ~HeapMark(void) {}
-
-    const char* name;
-    int heap0;
-    int heap1;
-    int other;
-};
+#include "game/heapmark.h"
 
 namespace {
 

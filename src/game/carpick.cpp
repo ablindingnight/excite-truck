@@ -187,12 +187,7 @@ extern s32 lbl_8055F2E8;
 
 static inline int Min(int a, int b) { return a < b ? a : b; }
 
-// The car and colour a record was set with.
-struct StatChoice {
-    s32 vehicle;  // offset 0x0
-    s32 color;    // offset 0x4
-    u8 valid;     // offset 0x8
-};
+#include "game/statchoice.h"
 
 class Statistic {
 public:
