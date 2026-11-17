@@ -3,6 +3,7 @@
 // placed markers, the player's truck and the start/finish marker on top. Names are guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/idealline.h"
 #include "game/centerline.h"
 #include "game/carbody.h"
@@ -96,11 +97,6 @@ double atan2(double y, double x);
 double tan(double x);
 double sqrt(double x);
 void* memset(void* p, int c, size_t n);
-int fn_8023512C(const char* name);
-void fn_80235380(int art);
-f32 fn_80235EF0(int art, int part);
-void fn_802354A0(int art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
-void fn_80235AFC(int art, int part, u32 color, f32 x, f32 y, f32 z, f32 w, f32 h, f32 angle);
 void fn_802A1120(Vec2* pos, Vec2* dir);
 int fn_8012C33C(const char* name);
 ValueTable* fn_80131808(const char* name);
@@ -156,7 +152,7 @@ public:
     }
     ~SFMarker(void) { fn_80235380(art); }
 
-    int art;     // offset 0x0
+    gArtSet* art;     // offset 0x0
     s32 lap;     // offset 0x4
     Vec2 pos;    // offset 0x8
     f32 unk10;   // offset 0x10
@@ -174,7 +170,7 @@ public:
     }
     ~TruckDraw(void) { fn_80235380(art); }
 
-    int art;  // offset 0x0
+    gArtSet* art;  // offset 0x0
     struct {
         s32 part;
         f32 angle;
@@ -193,7 +189,7 @@ public:
         art = 0;
         part = -1;
     }
-    int Set(const Vec2* p, int a, int pt) {
+    int Set(const Vec2* p, gArtSet* a, int pt) {
         if (!active) {
             art = a;
             part = pt;
@@ -205,7 +201,7 @@ public:
         return 0;
     }
 
-    int art;     // offset 0x0
+    gArtSet* art;     // offset 0x0
     int part;    // offset 0x4
     Vec2 pos;    // offset 0x8
     u8 active;   // offset 0x10
@@ -680,7 +676,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
 }
 
-int fn_8001B308(const Vec2* pos, int art, int part) {
+int fn_8001B308(const Vec2* pos, gArtSet* art, int part) {
     int i;
     for (i = 0; i < 16; i++) {
         if (lbl_803583C8[i].Set(pos, art, part)) {
