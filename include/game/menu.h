@@ -3,6 +3,15 @@
 
 #include "game/common.h"
 
+// MenuItem::arg0: an int, or for type-16 items (sub-menu / picker) a pointer to the item's state. Pointer-sized on
+// the PC; plain int under MWCC (the Wii layout, code-identical). Port hazard ptr2int, 2026-11-16.
+#ifdef __MWERKS__
+typedef int MenuArg;
+#else
+#include <stdint.h>
+typedef intptr_t MenuArg;
+#endif
+
 // Menu records handed to fn_802146BC: five words per item, ended by an item whose type is
 // 0x7B (each unit's UnkStatic123 object).
 struct CaptionContext {
@@ -28,7 +37,7 @@ struct MenuItem {
         arg1 = 0;
     }
     MenuItem(const char* n, f32* v, const struct MenuRange& r);  // a slider item (defined out of line)
-    MenuItem(const char* n, int t, const void* d, int a0, int a1) {
+    MenuItem(const char* n, int t, const void* d, MenuArg a0, int a1) {
         type = t;
         name = n;
         data = d;
@@ -52,7 +61,7 @@ struct MenuItem {
     const char* name;  // offset 0x0
     int type;          // offset 0x4
     const void* data;  // offset 0x8
-    int arg0;          // offset 0xC
+    MenuArg arg0;      // offset 0xC (a pointer for type-16 items)
     int arg1;          // offset 0x10
 };
 

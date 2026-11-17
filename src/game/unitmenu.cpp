@@ -61,7 +61,7 @@ extern "C" void fn_8024C070(void) {
     const char* labels[2] = {"MPH", "KPH"};
     ValueMulti multi(&units, labels, values, 2);
     MenuItem items[] = {
-        MenuItem("units", 16, NULL, (int)&multi, 0),
+        MenuItem("units", 16, NULL, (MenuArg)&multi, 0),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
         MenuItem(lbl_8055B860, 6, NULL, -2, 27),
         *(MenuItem*)&lbl_804989D0,

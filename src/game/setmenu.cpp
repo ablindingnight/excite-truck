@@ -137,8 +137,8 @@ void fn_8023C55C(const char* layout) {
     StringMulti audio(&lbl_8055F144, fn_80131234("Audio:MONO"), fn_80131234("Audio:STEREO"),
                       fn_80131234("Audio:DOLBY_PRO_LOGIC_II"), NULL);
     MenuItem items[] = {
-        MenuItem("display", 16, NULL, (int)&display, 0),
-        MenuItem("audio", 16, NULL, (int)&audio, 0),
+        MenuItem("display", 16, NULL, (MenuArg)&display, 0),
+        MenuItem("audio", 16, NULL, (MenuArg)&audio, 0),
         MenuItem(lbl_8055B860, 6, (void*)fn_8023C2E4, -1, 27),
         MenuItem("adjust", 0, NULL, 3, 0),
         MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),

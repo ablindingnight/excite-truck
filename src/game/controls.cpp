@@ -453,7 +453,7 @@ extern "C" int fn_8023DD80(void) {
     ControlsChoiceFields choice(&initial);
     MenuItem items[] = {
         MenuItem("#title", 3, ((UITable*)lbl_8055F190)->Get(lbl_8055F194, 0, 0), 0, 0),
-        MenuItem("#input", 16, 0, (int)&choice, 0),
+        MenuItem("#input", 16, 0, (MenuArg)&choice, 0),
         MenuItem(lbl_8055B860, 6, 0, -1, 27),
         MenuItem(lbl_8055B860, 6, 0, -2, 13),
         MenuItem(controlsStatic123)
