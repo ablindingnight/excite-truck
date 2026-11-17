@@ -60,21 +60,7 @@ public:
 
 typedef Vec3Storage BVec;
 
-struct BMtx33 {
-    void Identity(void) {
-        BVec* r = (BVec*)this;
-        r[0].x = 1.0f;
-        r[0].y = 0.0f;
-        r[0].z = 0.0f;
-        r[1].x = 0.0f;
-        r[1].y = 1.0f;
-        r[1].z = 0.0f;
-        r[2].x = 0.0f;
-        r[2].y = 0.0f;
-        r[2].z = 1.0f;
-    }
-    f32 m[3][3];
-};
+#include "game/bmtx33.h"
 
 // Extra words carried by a command (0x8 + 4 * count).
 struct BoneWords {

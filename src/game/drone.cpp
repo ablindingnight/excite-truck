@@ -27,11 +27,7 @@ void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 #include "game/oframe.h"
 #include "game/mathutil.h"
 
-struct BMtx33 {
-    f32 xx, xy, xz;
-    f32 yx, yy, yz;
-    f32 zx, zy, zz;
-};
+#include "game/bmtx33.h"
 
 // A track object instance handed to its handler.
 #include "game/tobj.h"

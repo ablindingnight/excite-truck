@@ -8,11 +8,7 @@
 #include "game/plainvec.h"
 #include "game/mathutil.h"
 
-struct BMtx33 {
-    f32 xx, xy, xz;
-    f32 yx, yy, yz;
-    f32 zx, zy, zz;
-};
+#include "game/bmtx33.h"
 
 struct BFrame {
     BMtx33 r;  // offset 0x0

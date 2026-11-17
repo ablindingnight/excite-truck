@@ -335,12 +335,12 @@ extern char lbl_80339BA0[];
 extern char lbl_80339CB4[];
 extern char lbl_80339CFC[];
 
-struct F4 {
+struct Float4 {
     f32 v[4];
 };
 
 extern CarModel* lbl_80488648[8];
-extern const F4 lbl_802F99F8 = {{1.0f, 1.0f, 2.0f, 2.0f}};  // aspect scale per split count
+extern const Float4 lbl_802F99F8 = {{1.0f, 1.0f, 2.0f, 2.0f}};  // aspect scale per split count
 
 static inline CarModel* GetPlayer(u32 i) { return i < 8 ? lbl_80488648[i] : 0; }
 
@@ -928,7 +928,7 @@ void fn_801E88B4(s32* x, s32* y, s32* w, s32* h, int view) {
 }
 
 f32 fn_801E88F0(int view) {
-    F4 k;
+    Float4 k;
     int n;
     if (view < 0) {
         view = lbl_8055AF0C;
