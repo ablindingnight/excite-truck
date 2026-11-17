@@ -4,6 +4,7 @@
 // mutable physics objects ("chunk%d", see mutphob) thrown off the object. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/phobconfig.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
@@ -81,24 +82,7 @@ public:
     virtual ValueNodeV* GetChild(int index);          // 0xC
 };
 
-// soevent's view of a car: carbody.h's CarBody (CollVolume type 0x10, mtx 0x3C, hint/surface 0x6C; RigidBody mass
-// 0xD4, vel 0x118; CarBody index 0x1EC). Kept as a view (SoVec fields, u32 type) until soevent moves to CarBody.
-struct SoCar {
-    u8 pad0[0x10];
-    u32 type;  // offset 0x10
-    u8 pad14[0x3C - 0x14];
-    SoVec rot[3];     // offset 0x3C
-    SoVec origin;     // offset 0x60
-    s16 surf;       // offset 0x6C
-    u8 pad6E[0xD4 - 0x6E];
-    f32 mass;       // offset 0xD4
-    u8 padD8[0x118 - 0xD8];
-    SoVec vel;        // offset 0x118
-    u8 pad124[0x1EC - 0x124];
-    s32 index;      // offset 0x1EC
-};
-
-static inline int IsCar(const SoCar* o) {
+static inline int IsCar(const CarBody* o) {
     u32 t = o->type;
     int r = 0;
     if (t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR') {
@@ -250,7 +234,7 @@ HeldEffect lbl_80438898[8];
 SoEvent lbl_80438958[32];
 
 // Starts holding effect 'e' until 't' at world point 'p', kept in the car's frame.
-extern SoCar* lbl_804348E8[];
+extern CarBody* lbl_804348E8[];
 
 extern "C" {
 
@@ -258,7 +242,7 @@ void fn_801D2AD4(const char* file);
 void fn_801D2B94(void);
 void fn_801D2C04(void);
 SoEvent* fn_801D2C20(int id);
-void fn_801D2C70(const SoEffects* s, const SoVec* pos, SoCar* car, int id);
+void fn_801D2C70(const SoEffects* s, const SoVec* pos, CarBody* car, int id);
 void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass);
 
 void fn_801D21C0(void) {
@@ -282,13 +266,13 @@ void fn_801D2214(void) {
             if (now > h->time) {
                 h->active = 0;
             } else {
-                SoCar* car = lbl_804348E8[i];
-                MulVec(&m.pos, &h->pos, car->rot);
-                m.pos.x += car->origin.x;
-                m.pos.y += car->origin.y;
-                m.pos.z += car->origin.z;
-                m.vel = car->vel;
-                m.surf = car->surf;
+                CarBody* car = lbl_804348E8[i];
+                MulVec(&m.pos, &h->pos, (const SoVec*)&car->mtx.rot);
+                m.pos.x += car->mtx.pos.x;
+                m.pos.y += car->mtx.pos.y;
+                m.pos.z += car->mtx.pos.z;
+                m.vel = *(const SoVec*)&car->vel;
+                m.surf = car->hint[0];
                 m.effect = h->effect;
                 fn_801796CC(10, &m, 0x20);
             }
@@ -297,7 +281,7 @@ void fn_801D2214(void) {
 }
 
 // A car hit scripted object 'obj' at 'pos'.
-void fn_801D2414(SObj* obj, const SoVec* pos, SoCar* car) {
+void fn_801D2414(SObj* obj, const SoVec* pos, CarBody* car) {
     if (IsCar(car)) {
         SoEvent* e = fn_801D2C20(obj->id);
         if (e) {
@@ -306,7 +290,7 @@ void fn_801D2414(SObj* obj, const SoVec* pos, SoCar* car) {
                 fn_801D2C70(&e->effect, pos, car, obj->id);
             }
             if (e->spawn.enabled && speed > e->spawn.minSpeed) {
-                fn_801D2E38(&e->spawn, obj, pos, &car->vel, car->mass);
+                fn_801D2E38(&e->spawn, obj, pos, (SoVec*)&car->vel, car->mass);
                 fn_801A4868(obj, 0);
             }
         } else if (obj->id > 0) {
@@ -427,11 +411,11 @@ SoEvent* fn_801D2C20(int id) {
 }
 
 // Plays the event's hit effects; the ones with a duration are held on the car.
-void fn_801D2C70(const SoEffects* s, const SoVec* pos, SoCar* car, int id) {
+void fn_801D2C70(const SoEffects* s, const SoVec* pos, CarBody* car, int id) {
     HitMsg m;
     m.pos = *pos;
-    m.vel = car->vel;
-    m.surf = car->surf;
+    m.vel = *(const SoVec*)&car->vel;
+    m.surf = car->hint[0];
     for (int i = 0; i < s->count; i++) {
         int effect = s->effects[i].id;
         if (effect < 0) {
@@ -446,10 +430,10 @@ void fn_801D2C70(const SoEffects* s, const SoVec* pos, SoCar* car, int id) {
             held->active = 1;
             held->effect = m.effect;
             held->time = duration + now;
-            held->pos.x = pos->x - car->origin.x;
-            held->pos.y = pos->y - car->origin.y;
-            held->pos.z = pos->z - car->origin.z;
-            MulVecTSelf(&held->pos, car->rot);
+            held->pos.x = pos->x - car->mtx.pos.x;
+            held->pos.y = pos->y - car->mtx.pos.y;
+            held->pos.z = pos->z - car->mtx.pos.z;
+            MulVecTSelf(&held->pos, (const SoVec*)&car->mtx.rot);
         }
     }
 }
