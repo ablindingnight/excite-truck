@@ -25,7 +25,10 @@ extern const char lbl_80346798[];
 extern const char lbl_80346798[] = "StackAlloc(%s:%d)::insufficient memory (max %dK)";
 #endif
 
-class AllocBuf {
+// MATCHING-AID (novtable, plausible original): retail has no AllocBuf table or destructor in any unit (StackAlloc's
+// destructor inlines buf = 0 and its base vptr store is gone); without novtable this unit emits a dead weak
+// __vt__8AllocBuf the linker strips (objdiff .data 92.31). Same reading as chalpath PathNode.
+class __declspec(novtable) AllocBuf {
 public:
     AllocBuf(const char* n, s32 s, u8* b) {
         name = n;
