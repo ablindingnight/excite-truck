@@ -4,6 +4,7 @@
 // resources. Little-endian headers are byte-swapped on load. Names are guesses.
 #include "game/common.h"
 #include "game/pool.h"
+#include "game/byteswap.h"
 
 // These inline definitions keep the resource messages in their retail data order.
 struct ResStrings {
@@ -169,28 +170,10 @@ int fn_8012C4D8(void* p);
 void fn_8012D908(const char* name);
 }
 
-static inline void Swap4(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 /* Helper name unproven: the header swap uses a byte-swap loop (the target's code), unlike Swap4 . */
-static inline void Swap4Loop(u8* p) {
-    u8* b = (u8*)p;
-    for (int k = 0; k < 2; k++) {
-        u8 t = b[k];
-        b[k] = b[3 - k];
-        b[3 - k] = t;
-    }
-}
-
 static inline void FourCC(char* s, u32 v) {
     *(u32*)s = v;
-    Swap4((u8*)s);
+    SwapWordB((u8*)s);
     s[4] = 0;
 }
 
@@ -230,11 +213,11 @@ inline ResToc* GetToc(const char* name) {
     strlwr(buf);
     toc = (ResToc*)fn_8012C370(buf, 'ETOC', &info, 0, 0, &swap);
     if (toc && swap) {
-        Swap4((u8*)&toc->version);
-        Swap4((u8*)&toc->size);
-        Swap4((u8*)&toc->createTime);
-        Swap4((u8*)&toc->count);
-        Swap4((u8*)&toc->loadSize);
+        SwapWordB((u8*)&toc->version);
+        SwapWordB((u8*)&toc->size);
+        SwapWordB((u8*)&toc->createTime);
+        SwapWordB((u8*)&toc->count);
+        SwapWordB((u8*)&toc->loadSize);
         if (toc->version != 0 || toc->size != 0x14) {
             fn_802E317C(ResStrings::ExternalTocError(), toc->version, 0,
                         toc->size, 0x14);
@@ -397,11 +380,11 @@ Pool* lbl_8055E008;
 extern "C" {
 
 void fn_8012A388(ResEntry* e) {
-    Swap4((u8*)&e->type);
-    Swap4((u8*)&e->info);
-    Swap4((u8*)&e->size);
-    Swap4((u8*)&e->offset);
-    Swap4((u8*)&e->crc);
+    SwapWordB((u8*)&e->type);
+    SwapWordB((u8*)&e->info);
+    SwapWordB((u8*)&e->size);
+    SwapWordB((u8*)&e->offset);
+    SwapWordB((u8*)&e->crc);
     e->refs = 0;
     e->flags = 0;
     e->info &= 0xFFFF;
@@ -490,19 +473,19 @@ void fn_8012A7FC(void) {
 }
 
 void fn_8012A80C(ResSetHeader* h) {
-    Swap4Loop((u8*)&h->magic);
-    Swap4Loop((u8*)&h->headerSize);
-    Swap4Loop((u8*)&h->version);
-    Swap4Loop((u8*)&h->flags);
-    Swap4Loop((u8*)&h->fileSize);
-    Swap4Loop((u8*)&h->createTime);
-    Swap4Loop((u8*)&h->baseOffset);
-    Swap4Loop((u8*)&h->unk1C);
-    Swap4Loop((u8*)&h->resCount);
-    Swap4Loop((u8*)&h->loadSize);
-    Swap4Loop((u8*)&h->unk28);
-    Swap4Loop((u8*)&h->tocCrc);
-    Swap4Loop((u8*)&h->unk30);
+    SwapWord((u8*)&h->magic);
+    SwapWord((u8*)&h->headerSize);
+    SwapWord((u8*)&h->version);
+    SwapWord((u8*)&h->flags);
+    SwapWord((u8*)&h->fileSize);
+    SwapWord((u8*)&h->createTime);
+    SwapWord((u8*)&h->baseOffset);
+    SwapWord((u8*)&h->unk1C);
+    SwapWord((u8*)&h->resCount);
+    SwapWord((u8*)&h->loadSize);
+    SwapWord((u8*)&h->unk28);
+    SwapWord((u8*)&h->tocCrc);
+    SwapWord((u8*)&h->unk30);
 }
 
 int fn_8012AA60(ResourceSet* set, s32 size) {
