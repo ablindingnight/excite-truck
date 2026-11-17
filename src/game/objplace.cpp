@@ -721,9 +721,8 @@ void MatPlacer::Update(void) {
         for (int k = 0; k < 128; k++) {
             removed.Push(old[k]);
         }
-        int off = 0;
-        for (int k = 0; k < 128; off += sizeof(slots[0]), k++) {
-            added.Push(*(ObjectPlacer**)((u8*)slots + off));
+        for (int k = 0; k < 128; k++) {
+            added.Push(slots[k]);
         }
         s32 i;
         int limit = removed.count;
