@@ -2,6 +2,7 @@
 // with parent inheritance, typed getters (int/float/bool/enum/scale/vector/point/matrix/real), '@'
 // child links and checksums. Byte-swapped and pointer-relocated in place on load. Names are guesses.
 #include "game/common.h"
+#include "game/byteswap.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -23,15 +24,6 @@ struct ValuePair {
     const char* key;
     const char* value;
 };
-
-static inline void Swap4(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
 
 class ValueFile;
 
@@ -131,7 +123,7 @@ public:
             int i;
             u32* w = (u32*)&m;
             for (i = 0; i < 12; i++) {
-                Swap4((u8*)&w[i]);
+                SwapWordB((u8*)&w[i]);
             }
         } else {
             m.basis[0] = GetVec3("basis_x");
@@ -145,7 +137,7 @@ public:
         f32 v;
         const char* s = GetValue(key);
         if (fn_8012F9E8(&v, sizeof(v), s)) {
-            Swap4((u8*)&v);
+            SwapWordB((u8*)&v);
         } else {
             fn_802E317C("Bad real64 value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());
         }
@@ -245,8 +237,8 @@ class ValueFile : public ValueTable {
 public:
     ValueFile(void) {
         nodes = (ValueFileNode*)data;
-        Swap4((u8*)&count);
-        Swap4((u8*)&unk8);
+        SwapWordB((u8*)&count);
+        SwapWordB((u8*)&unk8);
         ResolveParents();
     }
     virtual ValueNode* GetChild(int index) {
@@ -365,11 +357,11 @@ ValueNode* fn_8013184C(void) {
 
 ValueFileNode::ValueFileNode(ValueFile* base) {
     int i;
-    Swap4((u8*)&pairs);
+    SwapWordB((u8*)&pairs);
     pairs = (ValuePair*)((u8*)pairs + (u32)base);
-    Swap4((u8*)&count);
-    Swap4((u8*)&name);
-    Swap4((u8*)&parentName);
+    SwapWordB((u8*)&count);
+    SwapWordB((u8*)&name);
+    SwapWordB((u8*)&parentName);
     if (name) {
         name += (u32)base;
     }
@@ -378,8 +370,8 @@ ValueFileNode::ValueFileNode(ValueFile* base) {
     }
     for (i = 0; i < count; i++) {
         ValuePair* p = &pairs[i];
-        Swap4((u8*)&p->key);
-        Swap4((u8*)&p->value);
+        SwapWordB((u8*)&p->key);
+        SwapWordB((u8*)&p->value);
         p->key += (u32)base;
         p->value += (u32)base;
         if (*p->value == '|') {
