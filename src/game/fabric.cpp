@@ -967,7 +967,7 @@ void fn_801F7400(Quad* q, const u8* data, ValueNode* vn) {
     q->c[3].pos.y = sumY - q->c[0].pos.y;
     q->c[3].pos.z = sumZ - q->c[0].pos.z;
     q->c[3].u = u1 + c2.u - c0.u;
-    q->c[3].v = c1.v + c2.v - c0.v;
+    q->c[3].v = c2.v + c1.v - c0.v;
     q->c[3].color = c1.color;
     if (!fn_801F52BC(vn, "col_density", &q->colDensity, 4)) {
         q->colDensity = 0.6f;
