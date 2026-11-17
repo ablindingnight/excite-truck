@@ -58,13 +58,6 @@ struct Perspective {
     f32 fov;   // offset 0x8
 };
 
-// CameraPose: common.h's PlainValMatrix.
-// CarInfo: game/carinfo.h.
-struct Truck {
-    u8 pad0[0x60];
-    Vec3 pos;  // offset 0x60
-};
-
 struct PlayerCtrl {
     u8 pad0[0x260C];
     u8 reversed;  // offset 0x260C
@@ -110,7 +103,7 @@ int fn_801E866C(int player);
 Mtx34* fn_801E8718(int player);
 CarInfo* fn_801EA9A0(int index);
 int fn_801EA994(void);
-Truck* fn_8017960C(int index);
+RaceCarRec* fn_8017960C(int index);
 PlayerObj* fn_802678E4(int player);
 int fn_80178C9C(void);
 Vec3 fn_80136468(int path, f32 dist);  // idealline: returns the ILPos by value
@@ -479,7 +472,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
     }
     {
-        Truck* tr = fn_8017960C(view);
+        RaceCarRec* tr = fn_8017960C(view);
         PlayerObj* obj = fn_802678E4(map->player);
         dir.x = obj->dirX;
         dir.y = obj->dirY;
@@ -487,8 +480,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             dir.x *= -1.0f;
             dir.y *= -1.0f;
         }
-        tpos.x = tr->pos.x;
-        tpos.y = tr->pos.z;
+        tpos.x = tr->mtx.pos.x;
+        tpos.y = tr->mtx.pos.z;
         basis.right.y = 0.0f;
         basis.right.x = 1.0f;
         basis.right.z = 0.0f;
@@ -571,7 +564,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             continue;
         }
         fn_801EA9A0(i);
-        Vec3 rel = fn_8017960C(i)->pos;
+        Vec3 rel = *(const Vec3*)&fn_8017960C(i)->mtx.pos;
         rel.x = rel.x - basis.pos.x;
         f32 yv = basis.pos.y;
         rel.y = rel.z - yv;
@@ -638,13 +631,13 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         fn_80235AFC(d->art, part, -1, x + w / 2.0f, y - h * 0.5f, 0.0f, size, size, d->icons[view].angle);
     }
     {
-        Truck* tr = fn_8017960C(fn_801E866C(map->player));
+        RaceCarRec* tr = fn_8017960C(fn_801E866C(map->player));
         m = lbl_8055D5B4;
         Vec2 tp;
         Vec2 c;
         Vec3 rel;
         c.y = y - h * 0.5f;
-        Vec3 p = tr->pos;
+        Vec3 p = *(const Vec3*)&tr->mtx.pos;  // a plain Vec3 copy (RVec3 has a constructor)
         tp.x = p.x;
         tp.y = p.z;
         c.x = x + w * 0.5f;

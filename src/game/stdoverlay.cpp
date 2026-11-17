@@ -8,18 +8,12 @@
 #include "game/textelem.h"
 #include "game/raceprog.h"
 #include "game/carinfo.h"
+#include "game/carbody.h"
 #include "macros.h"
 #include "game/strcopy.h"
 
 void* operator new(size_t size, const char* tag);
 
-
-struct Truck {
-    u8 pad0[0x2588];
-    f32 heat;  // offset 0x2588
-    u8 pad258C[0x25A0 - 0x258C];
-    f32 heatRate;  // offset 0x25A0
-};
 
 
 extern "C" {
@@ -43,7 +37,7 @@ void fn_801308F4(char* buf, int size, int value);
 void fn_801308F8(char* buf, int size, int value);
 void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
 void fn_80147230(TextElem* item, const char* fmt, ...);
-Truck* fn_8017960C(int player);
+RaceCarRec* fn_8017960C(int player);
 void fn_80147CEC(TextElem* out, TextElem* a, TextElem* b, f32 t);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_80232928(u32 color);
@@ -344,7 +338,7 @@ inline OverheatOverlay::~OverheatOverlay(void) {}
 #pragma push
 #pragma opt_propagation off
 inline void OverheatOverlay::Update(int player, int unused) {
-    Truck* truck = fn_8017960C(player);
+    RaceCarRec* truck = fn_8017960C(player);
     TextElem* a;
     s32 alpha;
     TextElem warn;
@@ -354,7 +348,7 @@ inline void OverheatOverlay::Update(int player, int unused) {
     ILayout* layout;
     TextElem item;
 
-    hot = truck->heat > 0.0f;
+    hot = truck->f2588 > 0.0f;  // heat
     if (hot) {
         if (!((f32)fabs(s->level - 1.0f) <= __float_epsilon[0])) {
             s->start = lbl_8055E3C8;
@@ -363,7 +357,7 @@ inline void OverheatOverlay::Update(int player, int unused) {
     } else {
         s->level = s->level - 0.033366702f;
     }
-    s->rate = truck->heatRate;
+    s->rate = truck->f25A0;  // heat rate
     layout = GetLayout();
     if (layout) {
         if (s->level > 0.01f) {
