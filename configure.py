@@ -1137,7 +1137,7 @@ config.libs.append(
             Object(Matching, "game/wheelmod.cpp"),
             Object(Matching, "game/trackmod.cpp"),
             Object(NonMatching, "game/fabric.cpp"),
-            Object(NonMatching, "game/trackobj.cpp"),
+            Object(Matching, "game/trackobj.cpp"),
             Object(Matching, "game/trackgrf.cpp"),
             Object(NonMatching, "game/drone.cpp"),
             Object(NonMatching, "game/drivmod.cpp"),
