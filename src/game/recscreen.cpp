@@ -77,16 +77,6 @@ void fn_8025C054(void) {
 }  // extern "C"
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(const char* src, int n, char* dst) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 void* operator new(size_t n, const char* tag);
 void* operator new[](size_t n, const char* tag);
@@ -115,6 +105,7 @@ static inline int FindIcon(CarIconTable* icons, const char* name) {
 // the records screen; the deleting dtor (fn_8025CC14) is the weak out-of-line copy its vtable needs.
 namespace {
 #include "game/recordicon.h"
+#include "game/strcopy.h"
 }  // namespace
 
 // One high score row: score, grade and time text.
@@ -181,7 +172,7 @@ void fn_8025C204(int event, int difficulty) {
     icons[4].icons = set;
     icons[4].visible = 0;
     for (int i = 0; i < 5; i++) {
-        CopyName("", 20, rows[i].score);
+        SafeStrCopy(rows[i].score, "", 20);
         rows[i].grade = "";
         f32 time = -__float_max[0];
         HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), event, difficulty, i);
@@ -220,7 +211,7 @@ void fn_8025C204(int event, int difficulty) {
     if (stat.HasValue()) {
         fn_80130980(best, 20, 3, stat.GetValue());
     } else {
-        CopyName(fn_80131234("EventPath:NO_BEST_TIME"), 20, best);
+        SafeStrCopy(best, fn_80131234("EventPath:NO_BEST_TIME"), 20);
     }
     MenuItem items[] = {
         MenuItem("location", location),
