@@ -70,7 +70,11 @@ public:
     virtual void v74(void);
     virtual void v78(int a);
     virtual void v7C(void);
+#ifdef __MWERKS__
     virtual void v80(int del);
+#else
+    virtual ~VPx(void);  // PORT: slot 0x80 is the destructor; on the host a virtual destructor takes two slots
+#endif
 };
 
 #define VP(p) ((VPx*)(p))
@@ -380,7 +384,11 @@ u8* fn_8018FE8C(u8* p, int del) {
             fn_801B6654();
         }
         if (PTR(p, 0x4)) {
+#ifdef __MWERKS__
             VP(PTR(p, 0x4))->v80(1);
+#else
+            delete VP(PTR(p, 0x4));  // PORT: the deleting destructor (MWCC's v80(1))
+#endif
         }
         PTR(p, 0x4) = 0;
         delete (VDtor*)PTR(p, 0x8);
