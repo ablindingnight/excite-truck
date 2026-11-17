@@ -1395,9 +1395,9 @@ static inline void ObUnrotateRows(RVec3* out, const f32* m, const f32* v) {
 }
 static inline void ObRotateRows(RVec3* out, const f32* m, const f32* v) {
     if ((const f32*)out == v) {
-        f32 x = v[2] * m[6] + v[0] * m[0] + v[1] * m[3];
-        f32 y = v[2] * m[7] + v[0] * m[1] + v[1] * m[4];
-        f32 z = v[2] * m[8] + v[0] * m[2] + v[1] * m[5];
+        f32 x = v[2] * m[6] + (v[0] * m[0] + v[1] * m[3]);
+        f32 y = v[2] * m[7] + (v[0] * m[1] + v[1] * m[4]);
+        f32 z = v[2] * m[8] + (v[0] * m[2] + v[1] * m[5]);
         out->x = x;
         out->y = y;
         out->z = z;
@@ -2168,8 +2168,9 @@ void fn_80183E7C(u8* p) {
         if (cb->airborne == 0) {
             f32 pitch = cb->f2600;
             if (pitch < -0.01f) {
-                grav = LerpT(__fabsf(pitch), grav, 0.5f * grav);
-                gravUp = LerpT(AbsNarrow(pitch), gravUp, 0.5f * gravUp);
+                f32 ap = AbsNarrow(pitch);
+                grav = LerpT(ap, grav, 0.5f * grav);
+                gravUp = LerpT(ap, gravUp, 0.5f * gravUp);
             } else if (pitch > 0.01f) {
                 f32 ap = AbsNarrow(pitch);
                 grav = LerpT(ap, grav, 0.5f + grav);
