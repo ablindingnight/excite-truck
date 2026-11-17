@@ -143,7 +143,7 @@ void fn_80273BD0(u8* p) {
     AddSV(&c->pose.rot.m[3], &c->carFrame.rot.m[3], 0.5f);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[3], (const Vec*)&c->pose.rot.m[6], (Vec*)&c->pose.rot.m[0]);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[0], (const Vec*)&c->pose.rot.m[3], (Vec*)&c->pose.rot.m[6]);
-    Orthonormalize(p);
+    Orthonormalize(&((CamRec*)p)->pose);
     if (!c->b138) {
         ScV(c->v34.v, c->v34.v, 0.96f);
         bounce.Set(fn_8018AE3C(c->car), fn_8018AE44(c->car), fn_8018AE4C(c->car));
@@ -288,7 +288,7 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     CsVec up(0.0f, 1.0f, 0.0f);
     PSVECCrossProduct((const Vec*)&up.x, (const Vec*)((f32*)&cr->pose.rot.m[6]), (Vec*)((f32*)&cr->pose));
     PSVECCrossProduct((const Vec*)((f32*)&cr->pose.rot.m[6]), (const Vec*)((f32*)&cr->pose), (Vec*)((f32*)&cr->pose.rot.m[3]));
-    Orthonormalize(p);
+    Orthonormalize(&((CamRec*)p)->pose);
     f32 d = PSVECDistance((const Vec*)((f32*)&cr->pose.pos), (const Vec*)((f32*)&cr->v4C));
     if (dist > 0.0f) {
         f32 k = (1.0f - stiff) * (d - dist);
@@ -367,7 +367,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
     AddSV(&c->pose.rot.m[3], &c->carFrame.rot.m[3], 0.5f);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[3], (const Vec*)&c->pose.rot.m[6], (Vec*)&c->pose.rot.m[0]);
     PSVECCrossProduct((const Vec*)&c->pose.rot.m[0], (const Vec*)&c->pose.rot.m[3], (Vec*)&c->pose.rot.m[6]);
-    Orthonormalize(p);
+    Orthonormalize(&((CamRec*)p)->pose);
 }
 
 void fn_80274E94(u8* p) { fn_80274730(p, -1.0f, -1.0f, -1.0f, 0.0f); }

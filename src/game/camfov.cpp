@@ -52,7 +52,7 @@ void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
     cr->pose.rot.m[8] = d.z;
     PSVECCrossProduct((const Vec*)up, (const Vec*)((f32*)&cr->pose.rot.m[6]), (Vec*)((f32*)&cr->pose));
     PSVECCrossProduct((const Vec*)((f32*)&cr->pose.rot.m[6]), (const Vec*)((f32*)&cr->pose), (Vec*)((f32*)&cr->pose.rot.m[3]));
-    Orthonormalize(cam);
+    Orthonormalize(&((CamRec*)cam)->pose);
 }
 
 // Mode set as a bit mask over modes 4..23 (the original tests a mask, not a switch).
