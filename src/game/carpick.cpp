@@ -230,13 +230,11 @@ void fn_8025E034(void) {
     screen.cur = 0;
     screen.all = screen.lists[2];
     fn_8025F46C(&screen);
-    /* Item forms unproven; what they must reproduce is compiler-verified (FACTS 2026-11-17 03:37). The compiler cuts a
-       block every 100 instructions while it selects instructions. A text item with the default context costs 14 of
-       them, the five-argument form 10. Retail's second zero register (`li r18,0`, used from "#cup_name_5"'s arg1
-       through item 16, the first zero again from item 17) is what comes out when such a cut falls inside
-       "#cup_name_5" between its context copy and the load of that copy, and the next cut inside item 17. The forms
-       below put both cuts there: 376/376 instructions and retail's per-item zero map (375 and one zero before).
-       Which items carry the default context is only fixed up to the instruction count before each cut. */
+    /* What the text items must reproduce is compiler-verified (handoff FACTS 2026-11-17 03:37 and 05:35). The
+       compiler cuts a block every 100 instructions while it selects instructions; a text item costs 12 of them
+       (a temporary for the default context, its load, the stores), a five-argument item 10. Retail's second zero
+       register (`li r18,0`, from "#cup_name_5"'s arg1 through item 16) appears where a cut falls between a
+       context temporary and its load. The NoCaption() overload (menu.h, form unproven) gives that layout. */
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8025F274, 0, 0),
         MenuItem("#cup_name_1", screen.names[0].name, NoCaption()),
