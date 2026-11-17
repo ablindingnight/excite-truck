@@ -179,6 +179,9 @@ public:
 };
 
 static inline void SwapUV(Glyph* g) {
+#if !defined(__MWERKS__) && !defined(GAME_FILE_DATA_NEEDS_SWAP)
+    return;  // PC: the little-endian file data is already native (see byteswap.h)
+#endif
     u8* b = (u8*)&g->u0;
     u8 t;
     t = b[0];

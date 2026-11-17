@@ -45,6 +45,9 @@ extern "C" {
 
 /* Helper name unproven. The count uses separate byte temporaries. */
 static inline void SwapPathCount(RecPath* path) {
+#if !defined(__MWERKS__) && !defined(GAME_FILE_DATA_NEEDS_SWAP)
+    return;  // PC: the little-endian file data is already native (see byteswap.h)
+#endif
     u8* p = (u8*)&path->count;
     u8 first = p[0];
     p[0] = p[3];
