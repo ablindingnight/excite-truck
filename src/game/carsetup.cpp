@@ -3,6 +3,7 @@
 // metric), plus a table of named tweak multipliers applied on top. Names are guesses apart from
 // the keys and messages.
 #include "game/common.h"
+#include "game/strcopy.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -21,16 +22,6 @@ static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
 static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(char* dst, const char* src, int n) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 struct WheelSetup {
     f32 rideHeight;      // offset 0x0
@@ -283,7 +274,7 @@ TweakMul* fn_8027A798(const char* name) {
     t = lbl_804A1968;
     for (int i = 0; i < 32; i++, t++) {
         if (!t->name[0]) {
-            CopyName(t->name, name, 0x20);
+            SafeStrCopy(t->name, name, 0x20);
             fn_8027A888(&t->mul);
             return &t->mul;
         }
