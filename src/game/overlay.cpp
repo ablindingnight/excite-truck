@@ -27,7 +27,6 @@ void* operator new(size_t size, const char* tag);
 extern const f32 lbl_80560108 = 4.0f;
 extern const f32 lbl_8056010C = 4.0f;
 
-
 struct RacerState {
     u8 pad0[0x30];
     s32 state;  // offset 0x30
@@ -210,7 +209,6 @@ int LoadingDraw(void);
 int LoadingHandleKey(int key);
 void LoadingFadeOut(void);
 
-
 extern RaceInfo* lbl_8055D350;
 extern RetryFlags lbl_8055D340;
 extern s32 lbl_8055D348;
@@ -229,17 +227,38 @@ public:
     virtual void DrawContinue(void) = 0;  // 0x3C
 };
 
+namespace {
+struct OverlayConstant { f32 value; };
+
+extern const OverlayConstant kOverlayFullScale;
+extern const OverlayConstant kOverlayKioskLabelScale;
+extern const OverlayConstant kOverlayNoTime;
+extern const OverlayConstant kOverlayStickYScale;
+extern const OverlayConstant kOverlayStartSoundThreshold;
+extern const OverlayConstant kOverlayOffscreen;
+extern const OverlayConstant kOverlaySlideDistance;
+extern const OverlayConstant kOverlayRestartDelay;
+extern const OverlayConstant kOverlayReplayDelay;
+extern const OverlayConstant kOverlayBackdropLeft;
+extern const OverlayConstant kOverlayBackdropTop;
+extern const OverlayConstant kOverlayBackdropWidth;
+extern const OverlayConstant kOverlayBackdropHeight;
+extern const OverlayConstant kOverlayPulseFrequency;
+extern const OverlayConstant kOverlaySecondsPerMillisecond;
+extern const OverlayConstant kOverlaySlideDuration;
+} // namespace
+
 class ClosureOverlay : public EndOverlay {
 public:
     ClosureOverlay(void) { Reset(); }
     virtual void Enter(void);
     virtual void Reset(void) {
         done = 0;
-        times[0] = -1.0f;
-        times[1] = -1.0f;
-        times[2] = -1.0f;
-        times[3] = -1.0f;
-        endTime = -1.0f;
+        times[0] = kOverlayNoTime.value;
+        times[1] = kOverlayNoTime.value;
+        times[2] = kOverlayNoTime.value;
+        times[3] = kOverlayNoTime.value;
+        endTime = kOverlayNoTime.value;
     }
     virtual void Draw(void);
     virtual void Update(void);
@@ -444,11 +463,15 @@ static void fn_800053CC(void) {
         x = 300.0f * v[0];
         f32 xx = v[0] * v[0];
         f32 mag;
-        MeasureStickY(200.0f, v[1], xx, y, mag);
+        MeasureStickY(kOverlayStickYScale.value, v[1], xx, y, mag);
         len = sqrt(mag);
         fn_80010B80(x, y, r, r, 0x800000FF);
     }
 }
+
+namespace {
+const OverlayConstant kOverlayStickYScale = {200.0f};
+} // namespace
 
 static void fn_8000545C(void) {}
 
@@ -664,7 +687,7 @@ inline void ClosureOverlay::DrawContinue(void) {
     if (fn_801B83A0()->vf64() && fn_801B83A0()->vf68() && !IsDone()) {
         x = fn_80011E44() - 132.0f;
         y = 95.0f + fn_80011E60();
-        fn_8000FBE8(x - 35.0f, y, 1.0f);
+        fn_8000FBE8(x - 35.0f, y, kOverlayFullScale.value);
         fn_8000FF88(0xFFFFFFFF, 0x11, "Continue", 0.6f, x, y);
     }
 }
@@ -873,13 +896,21 @@ int ResultsOverlay::HandleMenuKey(int player, u32 type, int key) {
     return handled;
 }
 
-
 static inline f32 Clamp01(f32 x) {
-    f32 v = MIN(1.0f, x);
+    f32 v = MIN(kOverlayFullScale.value, x);
     return MAX(v, 0.0f);
 }
 
-static inline f32 SlideIn(f32 t, f32 delay) { return Lerp(700.0f, 0.0f, Clamp01((t - delay) / 0.25f)); }
+static inline f32 SlideIn(f32 t, f32 delay) {
+    const f32 fraction = Clamp01((t - delay) / kOverlaySlideDuration.value);
+    return kOverlayOffscreen.value + fraction * kOverlaySlideDistance.value;
+}
+
+namespace {
+const OverlayConstant kOverlayFullScale = {1.0f};
+const OverlayConstant kOverlayKioskLabelScale = {1.2f};
+const OverlayConstant kOverlayNoTime = {-1.0f};
+} // namespace
 
 void ResultsOverlay::DrawMenu(void) {
     OverlayMenuRow* item;
@@ -897,14 +928,15 @@ void ResultsOverlay::DrawMenu(void) {
     fn_80011E90();
     int layer = 2;
     f32 z = layer;
-    fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);
+    fn_800109E4(0x7F000000, kOverlayBackdropLeft.value, kOverlayBackdropTop.value,
+                 kOverlayBackdropWidth.value, kOverlayBackdropHeight.value);
     if (layout) {
         fn_8014784C(layout, "back_art", "back_artset", 0);
     }
-    sin(4.0f * (0.001f * fn_802E2C20()));
+    sin(kOverlayPulseFrequency.value * (kOverlaySecondsPerMillisecond.value * fn_802E2C20()));
     if (layout) {
-        elapsed = 0.001f * (GetTime() - start);
-        if (elapsed < 0.2f) {
+        elapsed = kOverlaySecondsPerMillisecond.value * (GetTime() - start);
+        if (elapsed < kOverlayStartSoundThreshold.value) {
             fn_80230E90(1);
         }
         OverlayMenuRow items[3] = {
@@ -913,8 +945,8 @@ void ResultsOverlay::DrawMenu(void) {
             {2, 0.0f, "replay_text", "replay_button"},
         };
         items[0].x = SlideIn(elapsed, 0.0f);
-        items[1].x = SlideIn(elapsed, 0.05f);
-        items[2].x = SlideIn(elapsed, 0.1f);
+        items[1].x = SlideIn(elapsed, kOverlayRestartDelay.value);
+        items[2].x = SlideIn(elapsed, kOverlayReplayDelay.value);
         for (i = 0, item = items; i < 3; i++, item++) {
             if (item->index == 2) {
                 fn_8027AA48();
@@ -934,8 +966,8 @@ void ResultsOverlay::DrawMenu(void) {
             if (selected) {
                 button.pos.x -= 0.5f * button.w * pulse;
                 button.pos.y -= 0.5f * button.h * pulse;
-                button.w *= 1.0f + pulse;
-                button.h *= 1.0f + pulse;
+                button.w *= kOverlayFullScale.value + pulse;
+                button.h *= kOverlayFullScale.value + pulse;
                 button.color = (button.color & 0xFF0000) | (alpha << 24) | (button.color & 0xFFFF);
                 fn_80147940(layout, &button, "menu_artset", 1);
             }
@@ -944,6 +976,25 @@ void ResultsOverlay::DrawMenu(void) {
         UpdateContinueOverlay();
     }
 }
+
+namespace {
+// Keep these constants after DrawMenu so the pulse half is emitted first.
+const OverlayConstant kOverlayBackdropLeft = {-428.0f};
+const OverlayConstant kOverlayBackdropTop = {241.0f};
+const OverlayConstant kOverlayBackdropWidth = {855.0f};
+const OverlayConstant kOverlayBackdropHeight = {482.0f};
+const OverlayConstant kOverlayPulseFrequency = {4.0f};
+const OverlayConstant kOverlaySecondsPerMillisecond = {0.001f};
+const OverlayConstant kOverlaySlideDuration = {0.25f};
+} // namespace
+
+namespace {
+const OverlayConstant kOverlayStartSoundThreshold = {0.2f};
+const OverlayConstant kOverlayOffscreen = {700.0f};
+const OverlayConstant kOverlaySlideDistance = {-700.0f};
+const OverlayConstant kOverlayRestartDelay = {0.05f};
+const OverlayConstant kOverlayReplayDelay = {0.1f};
+} // namespace
 
 void ResultsOverlay::DrawTimes(void) {
     f32 x0 = fn_80011E34();
@@ -959,7 +1010,7 @@ void ResultsOverlay::DrawTimes(void) {
     for (i = 0; i < fn_801EA994(); i++) {
         r = fn_801EA9B0(i);
         y = y0 - 54.0f * i;
-        fn_80010E94(art, 0, x0, y - 21.6f, 200.0f, 27.0f);
+        fn_80010E94(art, 0, x0, y - 21.6f, kOverlayStickYScale.value, 27.0f);
         x = x0;
         x += 54.0f;
         if (r->flags & 1) {
@@ -979,7 +1030,7 @@ void ResultsOverlay::DrawTimes(void) {
             fn_8000FF88(0xFFFFFF00, 0x41, "%s", 1.5f, x, y - 21.6f - 27.0f, fn_800122B4(i + 1, place));
             x += 85.0f;
         }
-        fn_8000FF88(0xFFFFFF00, 0x21, "%s", 1.0f, x, y - 21.6f - 27.0f, r->name);
+        fn_8000FF88(0xFFFFFF00, 0x21, "%s", kOverlayFullScale.value, x, y - 21.6f - 27.0f, r->name);
     }
 }
 
@@ -987,7 +1038,7 @@ void KioskDeadDriverOverlay::Update(void) {
     char buf[0x48];
     if (lbl_8055D350->unk2C->raceFlags & 0x10) {
         sprintf(buf, "Press %s to RESET", lbl_80558928);
-        fn_80010074(0xFFFFFFFF, 0x14, "%s", 1.2f, 0.0f, 125.0f, buf);
+        fn_80010074(0xFFFFFFFF, 0x14, "%s", kOverlayKioskLabelScale.value, 0.0f, 125.0f, buf);
     }
 }
 
@@ -1056,7 +1107,7 @@ void fn_80006E54(void) {
 
 void fn_800070DC(void) {
     int i;
-    fn_80209190(lbl_8055D354, 1.0f);
+    fn_80209190(lbl_8055D354, kOverlayFullScale.value);
     lbl_8034EEB8.intro->Reset();
     lbl_8034EEB8.results->Reset();
     lbl_8034EEB8.closure->Reset();
@@ -1092,7 +1143,7 @@ void fn_80007238(void) {
     fn_802C8638(&cam);
     f32 wide = 1.4396f;
     f32 narrow = 0.82625633f;
-    fn_802C974C(1.0f, 1000.0f, lbl_8034EE84.numViews > 2 ? narrow : wide);
+    fn_802C974C(kOverlayFullScale.value, 1000.0f, lbl_8034EE84.numViews > 2 ? narrow : wide);
     fn_800057D0();
     fn_80161C18();
     if (!LoadingDraw() && !fn_801DF110() && !fn_80161A70()) {
@@ -1116,7 +1167,7 @@ void fn_80007318(int) {
     fn_80005C20();
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    fn_802C974C(kOverlayFullScale.value, 1000.0f, 1.4398966f);
     lbl_8034EE84.player = 0;
     lbl_8034EE84.unk24 = fn_801E866C(0);
     lbl_8034EE84.racer = fn_801EA9A0(lbl_8055D350->unk24);
@@ -1204,16 +1255,9 @@ inline int ClosureOverlay::HandleKey(int player, u32 type, int key) {
     return 0;
 }
 
-
-
-
-
-
 inline ArenaIntroOverlay::~ArenaIntroOverlay(void) {}
 
 inline int ArenaIntroOverlay::IsFullScreen(void) { return 1; }
-
-
 
 inline ResultsOverlay::~ResultsOverlay(void) {
     if (layout) {
@@ -1252,8 +1296,6 @@ inline int ResultsOverlay::HandleKey(int player, u32 type, int key) {
     }
     return HandleMenuKey(player, type, key);
 }
-
-
 
 inline void ReplayOverlay::Update(void) {
     if (lbl_8055D350->event->type & 0x200) {
