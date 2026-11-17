@@ -33,6 +33,9 @@ void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
 #include "game/tobj.h"
 
 // Every handler's base (vtable slots 0x8-0x2C).
+// drone keeps its dead weak TrackMod and TrackInst tables (zero blocks after its own; FACTS 2026-11-17 08:29).
+#define TRACKMOD_DECL
+#define TRACKINST_DECL
 #include "game/trackmod.h"
 
 #include "game/trackinst.h"

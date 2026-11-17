@@ -1052,8 +1052,6 @@ inline void FacingTestTMH::Add(void* scene, const TObj* o, s32 id) {
     fn_802CD320(scene, new ("mlfto") FacingTestInst(data, id));
 }
 
-inline void TrackMod::DrawTree(TNode* tree) {}
-
 inline RotList::~RotList(void) { delete[] rots; }
 
 static inline void Mat3MulD(Mat3* out, const Mat3* l, const Mat3* r) {
@@ -1185,9 +1183,7 @@ inline void FacingTestInst::Update(void* ctx) {
     }
 }
 
-inline int TrackInst::Kind(void) { return -1; }
 
-inline void TrackInst::Draw2(void* ctx) {}
 
 
 static inline Rot* AllocateRotatorTable(const char* tag = "rotator tab") {

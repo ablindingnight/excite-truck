@@ -122,6 +122,10 @@ public:
     s32 count;          // offset 0x120
 };
 
+// fabric keeps its dead weak TrackMod and TrackInst tables (zero blocks after its own; FACTS 2026-11-17 08:29).
+#define TRACKMOD_DECL
+#define TRACKINST_DECL
+#include "game/trackmod.h"
 #include "game/trackinst.h"
 
 class UniformFabricInst : public TrackInst {
@@ -139,8 +143,6 @@ public:
     virtual int Kind(void);
     virtual void Draw2(void* ctx);
 };
-
-#include "game/trackmod.h"
 
 class FabricTMH : public TrackMod {
 public:
