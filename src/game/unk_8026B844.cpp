@@ -462,11 +462,6 @@ static __inline void CamAddRotated(CamVec& pos, const CamVec& v, const CamRot* r
     pos.z = pos.z + w.z;
 }
 
-/* Padding unproven (user-approved 2026-11-17; retail frame is 4 bytes larger under m; replace if a real 40-byte type is found) */
-struct CamRot40 {
-    CamRot r;
-    u32 pad;
-};
 /* Helper name unproven: a 4-float vector (retail keeps 16 bytes for the follow camera's up vector) */
 struct CamVec4 : CamVec {
     f32 w;
