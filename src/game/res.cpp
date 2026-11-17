@@ -1706,7 +1706,7 @@ inline void ClearPending(const char* name) {  /* Helper name unproven */
     }
 }
 
-inline void AsyncSetQueue::Wait(const char* name) {
+void AsyncSetQueue::Wait(const char* name) {
     QueueNode* n;
     for (n = pending.head; n; n = n->next) {
         if (!strcasecmp(name, n->name)) {
@@ -1763,8 +1763,6 @@ extern "C" void fn_8012E81C(const char* name) {
 
 extern "C" int fn_8012E938(const char* name) { return fn_8012BD3C(lbl_8055E000, name) != 0; }
 
-#pragma push
-#pragma dont_inline on
 extern "C" void fn_8012E96C(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
@@ -1780,7 +1778,6 @@ extern "C" void fn_8012E96C(const char* name) {
         }
     }
 }
-#pragma pop
 
 inline ResToc* AsyncSetQueue::NodeToc(QueueNode* n) {
     return GetToc(n->name);
