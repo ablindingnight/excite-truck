@@ -1422,7 +1422,6 @@ void fn_801959AC(u8* d) {
     U8(d, 0x208) = z;
 }
 
-f32 lbl_80333308[9] = {5.0f, 15.0f, 4.0f, 1.0f, 1.5f, 0.9f, 0.3f, 0.8f, 0.4f};
 
 struct LaneWander {
     u8 pad0[0x220];
@@ -1440,6 +1439,7 @@ struct LaneWander {
 static inline f32 AbsF(f32 v) { double a = __fabs(v); return a; }
 
 void fn_80195B28(u8* d, f32 v) {
+    static f32 lbl_80333308[9] = {5.0f, 15.0f, 4.0f, 1.0f, 1.5f, 0.9f, 0.3f, 0.8f, 0.4f};
     LaneWander* w = (LaneWander*)d;
     if (!(w->next < w->now) && v == 0.0f) {
         return;
@@ -1453,16 +1453,18 @@ void fn_80195B28(u8* d, f32 v) {
         } else {
             tbl = lbl_80333308;
         }
-        f32 lo = tbl[0];
         w->t0 = w->now;
-        w->next = fn_80129DC4(3, lo, tbl[1]);
+        w->next = fn_80129DC4(3, tbl[0], tbl[1]);
         if (!one) {
             w->next *= lbl_8055E56C;
         }
-        f32 du = tbl[2];
-        w->start = w->cur;
-        w->next += w->now;
-        w->dur = du;
+        f32 current = w->cur;
+        f32 next = w->next;
+        f32 now = w->now;
+        next += now;
+        w->start = current;
+        w->next = next;
+        w->dur = tbl[2];
         if (one) {
             w->tgt = fn_80129DC4(3, -0.5f, 0.5f);
         } else {
