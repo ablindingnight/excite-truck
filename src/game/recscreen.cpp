@@ -155,10 +155,7 @@ void fn_80214AF0(s32 s);
 // The event records screen ("ep_records.lyt"): the five best scores of one event and difficulty with
 // their grades, times and cars, the event's best time and its location.
 void fn_8025C204(int event, int difficulty) {
-    if (lbl_8055F2E8 == 0) {
-        lbl_8055F2E4 = new ("cimgr") CarIconTable;
-    }
-    lbl_8055F2E8++;
+    CarIconTable::Acquire();
     CarIconTable* set = lbl_8055F2E4;
     ScoreRow rows[5];
     RecordIcon icons[5];
@@ -173,8 +170,8 @@ void fn_8025C204(int event, int difficulty) {
     icons[4].icons = set;
     icons[4].visible = 0;
     for (int i = 0; i < 5; i++) {
-        SafeStrCopy(rows[i].score, "", 20);
-        rows[i].grade = "";
+        SafeStrCopy(rows[i].score, "-", 20);
+        rows[i].grade = "-";
         f32 time = -__float_max[0];
         HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), event, difficulty, i);
         if (hs) {
