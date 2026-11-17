@@ -4,6 +4,7 @@
 // re-timed and reordered, and export to "intrlude.txt"). Every function is written; the player state at
 // lbl_80437D88 is still addressed by offsets in places. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/buildquery.h"
 #include "game/carbody.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/vec.h>
@@ -3057,11 +3058,16 @@ void fn_801CA67C(void) {
         fn_801C94B8(10, 125, "[ and ] Scroll", 0xE6969696);
         yy += 125;
         int first = lbl_8055E82C * 10;
-        for (int i = 0; i < 10 && first + i < lbl_8055E7F0; i++) {
-            int k = first + i;
-            sprintf(buf, "%5.2f   %4d   %s", lbl_8055E7F8[k].time, lbl_8055E7F8[k].order, fn_801C98F4(lbl_80562950, lbl_8055E7F8[k].type));
-            fn_801C94B8(10, yy, buf, k == lbl_8055E828 ? 0xFFFFFF00 : -1);
-            yy += h;
+        /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail scheduled the loop setup apart
+           from the statements before it, as in achview's tally run (its `li r25,0` for i comes after the name table
+           load). 99.28 -> 99.45 with the query. What the original tested here is unknown. */
+        if (BuildMode() == kBuildRetail) {
+            for (int i = 0; i < 10 && first + i < lbl_8055E7F0; i++) {
+                int k = first + i;
+                sprintf(buf, "%5.2f   %4d   %s", lbl_8055E7F8[k].time, lbl_8055E7F8[k].order, fn_801C98F4(lbl_80562950, lbl_8055E7F8[k].type));
+                fn_801C94B8(10, yy, buf, k == lbl_8055E828 ? 0xFFFFFF00 : -1);
+                yy += h;
+            }
         }
         if (first < lbl_8055E7F0 - 10) {
             fn_801C94B8(10, yy, "  v", -1);
