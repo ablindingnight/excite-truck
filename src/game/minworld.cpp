@@ -202,6 +202,8 @@ void fn_802526E0(MWMtx* m) {
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 /* Helper name unproven */ static inline f32 MulF(f32 a, f32 b) { return a * b; }
+/* Helper name unproven */ static inline void Scale3(MWVec4* v, f32 k) { v->x = v->x * k; v->y = v->y * k; v->z = v->z * k; }
+/* Helper name unproven */ static inline void Scale3k(f32 k, MWVec4* v) { v->x = v->x * k; v->y = v->y * k; v->z = v->z * k; }
 void fn_8025280C(MWBody* b, f32 speed) {
     MWVec4 p(b->pos.x, b->pos.y, b->pos.z);
     MWVec2 d;
@@ -265,9 +267,10 @@ void fn_8025280C(MWBody* b, f32 speed) {
             f32 v = -PSVECDotProduct((const Vec*)&n, (const Vec*)&up);
             f32 v3 = MulF(v * v, v);
             f32 u3 = MulF(u * u, u);
-            a.x = (a.x + up.x * u3 + fwd.x * v3) * 0.98f;
-            a.y = (a.y + up.y * u3 + fwd.y * v3) * 0.98f;
-            a.z = (a.z + up.z * u3 + fwd.z * v3) * 0.98f;
+            a.x = a.x + up.x * u3 + fwd.x * v3;
+            a.y = a.y + up.y * u3 + fwd.y * v3;
+            a.z = a.z + up.z * u3 + fwd.z * v3;
+            Scale3(&a, 0.98f);
         }
         b->accel = MWVec4(a.x, a.y, a.z);
     }
