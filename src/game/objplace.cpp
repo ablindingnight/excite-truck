@@ -181,8 +181,8 @@ void Shuffle(T* a, int n) {
 }  // namespace
 
 template <class T, int N>
-struct BlockAlloc {
-    BlockAlloc(void) : blocks(0x60) {
+struct ObjBlockAlloc {
+    ObjBlockAlloc(void) : blocks(0x60) {
         pool = new ("buffer_list[]") T[blocks.cap << 6];
         for (int i = 0; i < blocks.cap; i++) {
             T* p = &pool[i * N];
@@ -193,14 +193,14 @@ struct BlockAlloc {
         }
         blocks.count = 0;
     }
-    ~BlockAlloc(void) { SafeDeleteArray(pool); }
+    ~ObjBlockAlloc(void) { SafeDeleteArray(pool); }
     T* pool;                  // offset 0x0
     DynVec<ObjBlock> blocks;  // offset 0x4
 };
 
 namespace {
 
-typedef BlockAlloc<ObjLoc, 0x40> ObjAllocator;
+typedef ObjBlockAlloc<ObjLoc, 0x40> ObjAllocator;
 
 struct ObjModel {
     ObjModel(void) { tex = -2; }
