@@ -3,6 +3,7 @@
 // metric), plus a table of named tweak multipliers applied on top. Names are guesses apart from
 // the keys and messages.
 #include "game/common.h"
+#include "game/wheelsetup.h"
 #include "game/strcopy.h"
 
 extern "C" {
@@ -21,18 +22,6 @@ void fn_80131818(ValueTable* table);
 
 // Copies at most n - 1 characters and always terminates.
 
-struct WheelSetup {
-    f32 rideHeight;      // offset 0x0
-    f32 spring;          // offset 0x4
-    f32 bump;            // offset 0x8
-    f32 rebound;         // offset 0xC
-    f32 bumpstopHeight;  // offset 0x10
-    f32 bumpstopRate;    // offset 0x14
-    f32 unk18;           // offset 0x18
-    f32 unk1C;           // offset 0x1C
-    f32 unk20;           // offset 0x20
-};
-
 static inline void WheelDefaults(WheelSetup* w, int front) {
     w->rideHeight = 0.127f;
     w->spring = front ? 70078.734f : 43799.215f;
@@ -45,7 +34,7 @@ static inline void WheelDefaults(WheelSetup* w, int front) {
     w->bumpstopRate = 105118.11f;
     w->unk1C = 350393.72f;
     w->unk20 = 8754.098f;
-    w->unk18 = 0.3556f;
+    w->radius = 0.3556f;
 }
 
 #include "game/carsetup.h"
@@ -201,7 +190,7 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
         f32 bump = c->GetFloat("bump_factor", shock);
         f32 rebound = c->GetFloat("rebound_factor", shock);
         rebound = c->GetFloat(front ? "frebound_factor" : "rrebound_factor", rebound);
-        w->unk18 = 2.0f;
+        w->radius = 2.0f;
         w->spring *= spring;
         w->bump *= bump;
         w->rebound *= rebound;

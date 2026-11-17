@@ -4,6 +4,7 @@
 // 2026-11-16 (samesize.py). Names unproven.
 #include "game/common.h"
 #include "game/valvec3.h"
+#include "game/wheelsetup.h"
 
 struct CarSetup {
     f32 mass;             // offset 0x0

@@ -3,6 +3,7 @@
 // 4-float records. Names are guesses apart
 // from the strings.
 #include "game/common.h"
+#include "game/wheelsetup.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/vec3_init.h"
@@ -104,19 +105,6 @@ u8* lbl_8055E7A0;           // per-car flags
 CxEntry* lbl_8055E7A4;      // per car
 u8 lbl_8055E7A8;
 MVec4 lbl_80436D48[0x100];
-
-// A car setup block (carsetup.cpp CarSetup, 0x138 bytes): defaulted by fn_801BDA70, then applied to the car.
-struct WheelSetup {
-    f32 rideHeight;      // offset 0x0
-    f32 spring;          // offset 0x4
-    f32 bump;            // offset 0x8
-    f32 rebound;         // offset 0xC
-    f32 bumpstopHeight;  // offset 0x10
-    f32 bumpstopRate;    // offset 0x14
-    f32 unk18;           // offset 0x18
-    f32 unk1C;           // offset 0x1C
-    f32 unk20;           // offset 0x20
-};
 
 #include "game/carsetup.h"
 #include "game/mathutil.h"
@@ -273,7 +261,7 @@ void fn_801BDA74(int car, CarSetup* s) {
         f32 share = !front ? 1.0f - s->balance : s->balance;
         f32 load = 9.81f * (0.5f * share * s->mass);
         x->row[i] = MVec4(0.5f * (front ? s->ftrack : s->rtrack) * (left ? -1.0f : 1.0f),
-                          w->unk18 - w->rideHeight - s->collideCmHeight - load / w->spring - load / w->unk1C,
+                          w->radius - w->rideHeight - s->collideCmHeight - load / w->spring - load / w->unk1C,
                           (1.0f - share) * s->wheelbase * (front ? 1.0f : -1.0f));
     } while (++i < 4);
     x->row[12] = MVec4(s->wheels[0].spring, s->wheels[1].spring, s->wheels[2].spring, s->wheels[3].spring);
@@ -286,7 +274,7 @@ void fn_801BDA74(int car, CarSetup* s) {
                        s->wheels[3].bumpstopRate);
     x->row[8] = MVec4(s->wheels[0].unk1C, s->wheels[1].unk1C, s->wheels[2].unk1C, s->wheels[3].unk1C);
     x->row[9] = MVec4(s->wheels[0].unk20, s->wheels[1].unk20, s->wheels[2].unk20, s->wheels[3].unk20);
-    x->row[7] = MVec4(s->wheels[0].unk18, s->wheels[1].unk18, s->wheels[2].unk18, s->wheels[3].unk18);
+    x->row[7] = MVec4(s->wheels[0].radius, s->wheels[1].radius, s->wheels[2].radius, s->wheels[3].radius);
     x->row[21] = MVec4(0.5f * (1.0f - s->torqueBalance), 0.5f * (1.0f - s->torqueBalance), 0.5f * s->torqueBalance,
                        0.5f * s->torqueBalance);
     x->row[23] = MVec4(1.29607821f, 0.0f, 0.0f, 0.216013029f);

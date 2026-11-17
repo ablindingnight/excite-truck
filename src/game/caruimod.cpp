@@ -2,6 +2,7 @@
 // efx bone mesh read from the car's .car folder), its resource loader and the menu state that
 // draws it. Names are guesses apart from the file names, value keys and messages.
 #include "game/common.h"
+#include "game/wheelsetup.h"
 #include "game/mtx33.h"
 #include "game/menustate.h"
 #include "game/gamedb.h"
@@ -38,13 +39,6 @@ public:
     virtual ValueNode* FindChild(const char* name);  // 0x8
     virtual ValueNode* GetChild(int index);          // 0xC
     virtual int HasChild(const char* name);          // 0x10
-};
-
-struct WheelSetup {
-    f32 rideHeight;  // offset 0x0
-    u8 pad4[0x18 - 0x4];
-    f32 radius;  // offset 0x18
-    u8 pad1C[0x24 - 0x1C];
 };
 
 #include "game/carsetup.h"
