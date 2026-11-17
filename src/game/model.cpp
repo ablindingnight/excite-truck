@@ -3,6 +3,7 @@
 // with per-instance texture nodes, and the render queue: surfaces are bucketed per texture node, sorted by
 // priority band and drawn texture by texture. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/remap.h"
 #include "game/modelinfo.h"
 #include "game/byteswap.h"
 
@@ -86,14 +87,6 @@ struct ModelNode {
     ModelInfo* info;     // offset 0x4
     s32 inst;            // offset 0x8
     MSphere* spheres;    // offset 0xC
-};
-
-struct Remap {
-    char from[16];   // offset 0x0
-    s32 inst;        // offset 0x10
-    char to[16];     // offset 0x14
-    s32 unk24;       // offset 0x24
-    s32* out;        // offset 0x28
 };
 
 struct Bin {

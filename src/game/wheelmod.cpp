@@ -4,6 +4,7 @@
 // state, LOD/shadow drawing, and an animation object that draws an attached car wheel. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/remap.h"
 #include "game/math_types.h"
 
 void* operator new(size_t size, const char* tag);
@@ -38,14 +39,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 struct MatList {
     s32 count;      // offset 0x0
     char* names;    // offset 0x4: 0x10 bytes each
-};
-
-// A material remap entry (fn_802C7888).
-struct Remap {
-    char from[0x10];  // offset 0x0
-    s32 remap;        // offset 0x10
-    char to[0x10];    // offset 0x14
-    u8 pad24[0x2C - 0x24];
 };
 
 extern "C" {
@@ -236,7 +229,7 @@ void fn_801F004C(const char* model, s32 remap, WNode* t) {
             r.from[0xF] = 0;
             strncpy(r.to, to, 0x10);
             r.to[0xF] = 0;
-            r.remap = remap;
+            r.inst = remap;
             fn_802C7888(&r, 1);
         }
     }
