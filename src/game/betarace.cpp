@@ -98,16 +98,6 @@ static inline void SafeDelete(T*& p) {
     }
 }
 
-static inline void StrCopyN(char* d, int n, const char* s) {
-    char* p = d;
-    int k = n;
-    while ((*p++ = *s++) != 0) {
-        if (--k <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 // A fixed-size string; new ones read "zzz" until they are filled in.
 template <int N>
@@ -116,7 +106,7 @@ struct FixedStr {
         memset(s, 'z', 3);
         s[3] = 0;
     }
-    void Set(const char* t) { StrCopyN(s, N, t); }
+    void Set(const char* t) { SafeStrCopy(s, t, N); }
     char s[N];
 };
 
@@ -1103,6 +1093,7 @@ public:
 
 
 #include "game/settings.h"
+#include "game/strcopy.h"
 
 extern "C" {
 f32 fn_80204CFC(const char* name);  // tuning value
@@ -2950,10 +2941,10 @@ static inline void SatModel(const char* name, const char* tex) {
     TexOverride o;
     int i;
     memset(&o, 0, sizeof(o));
-    StrCopyN(o.tex, 0x10, tex);
+    SafeStrCopy(o.tex, tex, 0x10);
     o.flag = 1;
     for (i = 0; i < m->nMats; i++) {
-        StrCopyN(o.mat, 0x10, fn_802C9C24(m->mats + i * 0x10));
+        SafeStrCopy(o.mat, fn_802C9C24(m->mats + i * 0x10), 0x10);
         fn_802C7888(&o, 1);
     }
     fn_802C6C20(m);
