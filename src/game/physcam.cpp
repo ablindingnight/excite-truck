@@ -1388,12 +1388,12 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
         s = (f32)sin(a);
         c = (f32)cos(a);
         k = 1.0f - c;
-        r->m[0][0] = c + k * (x * x);
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
         r->m[1][0] = y * (k * x) - s * z;
         r->m[1][1] = c + k * (y * y);
         r->m[2][0] = z * (k * x) + s * y;
+        r->m[0][0] = c + k * (x * x);
         r->m[1][2] = z * (k * y) + s * x;
         r->m[2][2] = c + k * (z * z);
         r->m[2][1] = z * (k * y) - s * x;
