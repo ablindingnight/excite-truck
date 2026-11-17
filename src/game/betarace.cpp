@@ -421,27 +421,10 @@ struct CarResult {
 };
 
 // One line of the stunt summary on the results screen.
-class StuntDisplay {
-public:
-    virtual ~StuntDisplay(void) {}
-    virtual void Text0(const char* fmt, ...) = 0;
-    virtual void Text1(const char* fmt, ...) = 0;
-    virtual void Text2(const char* fmt, ...) = 0;
-    virtual void SetValue(f32 v) = 0;
-    virtual void SetPoints(s32 p) = 0;
-    virtual void SetType(s32 t) = 0;
-    virtual void Stop(void) = 0;
-    virtual void SetReady(u8 r) = 0;
-};
+#include "game/stuntdisp.h"
 
 class StuntLine;
 class StuntList;
-
-class StuntFactory {
-public:
-    virtual ~StuntFactory(void) {}
-    virtual StuntDisplay* Alloc(void) = 0;
-};
 
 #include "game/body.h"
 

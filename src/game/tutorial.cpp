@@ -57,10 +57,7 @@ extern "C" ILayout* fn_80145E70(const char* name);
 
 // Something told about every awarded stunt. These interfaces come before Task because the
 // compiler emits vtables in reverse declaration order (target .data: Task, ISubTaskMgr, StuntWatcher).
-class StuntWatcher {
-public:
-    virtual void Notify(s32 type, int car, int rank) = 0;  // 0x08
-};
+#include "game/stuntwatch.h"
 
 // The race's per-mode hooks (0x2C vtable, all pure).
 class ISubTaskMgr {

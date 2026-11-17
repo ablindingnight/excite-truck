@@ -18,10 +18,7 @@ extern RaceCarRec* lbl_804348E8[];
 #include "game/stuntdisp.h"
 
 // Something told about every awarded stunt (achievements, statistics).
-class StuntWatcher {
-public:
-    virtual void Notify(s32 type, int car, int rank);  // 0x08
-};
+#include "game/stuntwatch.h"
 
 extern "C" {
 void* memset(void* d, int c, size_t n);
