@@ -1260,13 +1260,13 @@ struct UIMapping {
     const char* name;   // 0x00 layout name ('$' = built in)
     UIStyle* styles;    // 0x04 style table, terminated by kind 0x7B
     int field8;
-    UILayout* layout;   // 0x0C
-    UILayout* back;     // 0x10
+    mutable UILayout* layout;   // 0x0C cached foreground layout
+    mutable UILayout* back;     // 0x10 cached background layout
 };
 #include "game/window.h"
 
 extern "C" UILayout* fn_8022E0EC(const char*);
-extern "C" UILayout* fn_8022E4C0(UIMapping*);
+extern "C" UILayout* fn_8022E4C0(const UIMapping*);
 extern "C" void fn_80276D3C(const char*, int);
 extern "C" int fn_802C51C0(void*);
 extern "C" int fn_802C5220(void*);
@@ -1278,7 +1278,7 @@ extern "C" int lbl_8055CFF0;
 extern "C" int lbl_8055CFF4;
 
 // Builds a window from a mapping: layout widgets, the optional back layout, hot keys and mapped functions.
-extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flags, int widgetWindow) {
+extern "C" void fn_802141A0(Window** out, const UIMapping* map, int x, int y, int flags, int widgetWindow) {
     UIStyle* styles = map->styles;
     UILayout* layout;
     if (map->name) {
@@ -1287,15 +1287,13 @@ extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flag
         } else {
             layout = fn_8022E0EC(map->name);
         }
-        const char* name = map->name;
-        lbl_8055EF44 = name;
         map->layout = layout;
+        lbl_8055EF44 = map->name;
     } else {
         layout = map->layout;
     }
-    s8 camera = layout->hasCamera;
     map->back = 0;
-    if (camera) {
+    if (layout->hasCamera) {
         if (!lbl_8055EF40) {
             fn_80276D3C(layout->camera, 1);
         } else {
@@ -1420,7 +1418,7 @@ extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
     fn_802D08C4(1);
     int mem = fn_80128314(0);
     Window* win;
-    fn_802141A0(&win, (UIMapping*)desc, x, y, modal, 0);
+    fn_802141A0(&win, (const UIMapping*)desc, x, y, modal, 0);
     fn_80127A24();
     fn_802E47E8();
     s32 (*poll)(s32*) = lbl_8055EF0C;
