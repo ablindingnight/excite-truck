@@ -3,6 +3,7 @@
 // Written against raw field offsets; the large screen routines are still stubs. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/caricontable.h"
 #include "game/gamedb.h"
 #include "game/highscore.h"
@@ -17,7 +18,6 @@
 extern "C" {
 s32 fn_80214D04(void);
 void fn_80214CB4(s32 a);
-void fn_80235380(u8* p);
 }
 
 void operator delete(void* p);
@@ -97,7 +97,6 @@ extern "C" u8* fn_802CAC28(const char* name, int flags);
 extern "C" int strcmp(const char* a, const char* b);
 extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" void gxForgetTexture(u8* tex);
-extern "C" u8* fn_8023512C(const char* name);
 
 extern s32 lbl_8055F2E8;
 
@@ -129,7 +128,7 @@ public:
     s32 icon;         // offset 0x1C
     u8 visible;       // offset 0x20
     u32 color;        // offset 0x24
-    u8* art;          // offset 0x28
+    gArtSet* art;          // offset 0x28
     u8 valid;         // offset 0x2C
 };
 }  // namespace
@@ -297,7 +296,6 @@ static inline u32 DimColor(u32 c) {
 
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
-void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.

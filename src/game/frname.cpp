@@ -2,6 +2,7 @@
 // icons ("caricona.art", "caricons0.tex", ...). Written against raw field offsets; the large screen
 // routines are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/caricontable.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
@@ -13,9 +14,7 @@
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 extern "C" {
-void fn_80235380(u8* p);
 void fn_80214A9C(s32 s);
-u8* fn_8023512C(const char* name);
 }
 
 void operator delete(void* p);
@@ -37,8 +36,6 @@ UnkStatic123s lbl_80498ED0;
 UnkStatic7F lbl_8055F3C0;
 s32 lbl_8055F3C4;
 
-extern "C" u8* fn_8023512C(const char* name);
-extern "C" void fn_80235380(u8* p);
 
 // A record line's car icon: a menu state (vtable lbl_80345718, followed in .data by the zero-filled space of this
 // unit's weak IMenuState copy). Same shape as recscreen's. Declared before FriendlyNames: MWCC emits vtables in
@@ -58,7 +55,7 @@ public:
     s32 icon;         // offset 0x1C
     u8 visible;       // offset 0x20
     u32 color;        // offset 0x24
-    u8* art;          // offset 0x28
+    gArtSet* art;          // offset 0x28
     u8 valid;         // offset 0x2C
 };
 }  // namespace
@@ -346,7 +343,6 @@ static inline u32 DimColor(u32 c) {
 
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
-void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.

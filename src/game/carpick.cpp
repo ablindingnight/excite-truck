@@ -2,6 +2,7 @@
 // with the chassis/uv fields. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/caricontable.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
@@ -13,9 +14,7 @@
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 extern "C" {
-void fn_80235380(u8* p);
 void fn_80214A9C(s32 s);
-u8* fn_8023512C(const char* name);
 }
 
 void operator delete(void* p);
@@ -104,7 +103,7 @@ public:
     u8 visible;      // offset 0x25
     u8 pad26[2];
     u32 tint;        // offset 0x28
-    u8* art;         // offset 0x2C: "caricona.art", the frame
+    gArtSet* art;         // offset 0x2C: "caricona.art", the frame
 };
 
 struct CarPickScreen {
@@ -504,7 +503,6 @@ static inline u32 DimColor(u32 c) {
 
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
-void fn_802354A0(u8* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.

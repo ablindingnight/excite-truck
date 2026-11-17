@@ -1,6 +1,7 @@
 // Car name tags and map gems (0x802A7BE8-0x802A81EC): draws each opponent's place/name above the car,
 // nearest last, and a gem for registered rivals. Names are guesses apart from the asset names.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "macros.h"
@@ -41,14 +42,11 @@ struct TagSlot {
 extern "C" {
 s32 fn_80232578(const char* name);  // load font
 void fn_802328D4(s32 font);
-void* fn_8023512C(const char* name);
-void fn_80235380(void* art);
 int fn_801C5B60(void);
 TagCar* fn_801EA9A0(int car);
 int fn_801EA994(void);
 void fn_802C8E70(const ValVec3* p, ValVec3* out);
 int fn_802C8FF4(ValVec3* p, f32 margin);
-void fn_80235CBC(void* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 int fn_801E85B4(void);
 TagCam* fn_802678C0(int view);
 int fn_801CF064(void);
@@ -66,7 +64,7 @@ void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 ModuleTag lbl_8055F8B0;
 UnkStatic7F lbl_8055F8B8;
 s32 lbl_8055F8BC;    // font
-void* lbl_8055F8C0;  // gem art
+gArtSet* lbl_8055F8C0;  // gem art
 TagSlot lbl_804BD5D8[8];
 
 extern "C" {
