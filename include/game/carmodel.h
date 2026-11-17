@@ -57,10 +57,7 @@ struct BoneSurf {
     u32 mask;   // offset 0x8
 };
 
-struct ShadowLod {
-    s32 model;  // offset 0x0
-    f32 dist;   // offset 0x4
-};
+#include "game/shadowlod.h"
 
 class CarModel : public AnimObj {
 public:

@@ -90,10 +90,7 @@ struct WheelLod {
     u8 spin;      // offset 0x14: the lod's flags contain 'y'
 };
 
-struct ShadowLod {
-    s32 model;  // offset 0x0
-    f32 dist2;  // offset 0x4
-};
+#include "game/shadowlod.h"  // dist holds the squared distance here
 
 struct WheelShadow {
     ShadowLod lods[8];  // offset 0x0
@@ -303,14 +300,14 @@ void fn_801F06DC(WheelShadow* s, WNode* t) {
             }
             s->lods[s->count].model = fn_802C6FC0(path, 0, 0);
             f32 d = t->GetFloat(key);
-            s->lods[s->count].dist2 = d * d;
+            s->lods[s->count].dist = d * d;
         }
         s->baseLen = t->GetFloat("base_len");
         f32 off = t->GetFloat("off_dist", 500.0f);
         s->offDist2 = off * off;
     } else {
         s->lods[0].model = fn_802C6FC0(t->GetValue("model"), 0, 0);
-        s->lods[0].dist2 = 0.0f;
+        s->lods[0].dist = 0.0f;
         s->count = 1;
         s->baseLen = t->GetFloat("dist");
     }
@@ -530,7 +527,7 @@ void fn_801F13F4(WheelMod* w, f32 d2, f32 height) {
         return;
     }
     int i;
-    for (i = s->count - 1; i >= 0 && d2 < s->lods[i].dist2; i--) {
+    for (i = s->count - 1; i >= 0 && d2 < s->lods[i].dist; i--) {
     }
     if (i < 0) {
         return;
@@ -552,7 +549,7 @@ void fn_801F1494(WheelMod* w, const ValMatrix* m, s16 hint) {
     zoom = zoom * zoom;
     f32 d2 = Mul(fn_802C88E8(&w->mtx.origin), zoom);
     int i;
-    for (i = s->count - 1; i >= 0 && d2 < s->lods[i].dist2; i--) {
+    for (i = s->count - 1; i >= 0 && d2 < s->lods[i].dist; i--) {
     }
     if (d2 < s->offDist2 && i >= 0) {
         ValVec3 p = m->origin;

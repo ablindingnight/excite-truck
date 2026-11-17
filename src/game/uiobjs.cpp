@@ -51,7 +51,8 @@ struct TextStyle {
     f32 alpha;   // offset 0x10
 };
 
-struct UIImage {
+// A named image resource (not uiwidget.h's UIImage widget). Name unproven.
+struct UIImageDef {
     char name[0x20];  // offset 0x0
     char file[0x20];  // offset 0x20
     gArtSet* img;     // offset 0x40
@@ -96,7 +97,7 @@ public:
         }
         return -1;
     }
-    UIImage* Image(int i) { return &images.data[i]; }
+    UIImageDef* Image(int i) { return &images.data[i]; }
     UISound* Sound(int i) { return &sounds.data[i]; }
     int FindFont(const char* name) {
         for (int i = 0; i < fonts.count; i++) {
@@ -115,7 +116,7 @@ public:
         return -1;
     }
 
-    FixedArr<UIImage, 32> images;  // offset 0x4
+    FixedArr<UIImageDef, 32> images;  // offset 0x4
     FixedArr<UIFont, 32> fonts;    // offset 0x910
     FixedArr<UISound, 32> sounds;  // offset 0xD9C
 };
@@ -142,7 +143,7 @@ UIObjectsImpl::~UIObjectsImpl(void) {
 }
 
 void UIObjectsImpl::AddImage(const char* name, const char* file, int frame) {
-    UIImage* e = &images.data[images.count++];
+    UIImageDef* e = &images.data[images.count++];
     SafeStrCopy(e->name, name, 0x20);
     SafeStrCopy(e->file, file, 0x20);
     e->img = fn_8023512C(file);
@@ -166,7 +167,7 @@ void UIObjectsImpl::AddSound(const char* name, const char* file, u8 loop) {
 void UIObjectsImpl::DrawImage(const char* name, u32 flags, int a, f32 x, f32 y) {
     int i = FindImage(name);
     if (i >= 0) {
-        UIImage* e = Image(i);
+        UIImageDef* e = Image(i);
         f32 w = fn_80235EF0(e->img, e->frame);
         f32 h = fn_80235F64(e->img, e->frame);
         if (flags & 2) {
@@ -193,7 +194,7 @@ void UIObjectsImpl::DrawImage(const char* name, u32 flags, int a, f32 x, f32 y) 
 void UIObjectsImpl::DrawImageScaled(const char* name, u32 flags, int a, f32 x, f32 y, f32 scale) {
     int i = FindImage(name);
     if (i >= 0) {
-        UIImage* e = Image(i);
+        UIImageDef* e = Image(i);
         f32 w = scale * fn_80235EF0(e->img, e->frame);
         f32 h = scale * fn_80235F64(e->img, e->frame);
         if (flags & 2) {
@@ -220,7 +221,7 @@ void UIObjectsImpl::DrawImageScaled(const char* name, u32 flags, int a, f32 x, f
 f32 UIObjectsImpl::GetWidth(const char* name) {
     int i = FindImage(name);
     if (i >= 0) {
-        UIImage* e = Image(i);
+        UIImageDef* e = Image(i);
         return fn_80235EF0(e->img, e->frame);
     }
     return 0.0f;
@@ -229,7 +230,7 @@ f32 UIObjectsImpl::GetWidth(const char* name) {
 f32 UIObjectsImpl::GetHeight(const char* name) {
     int i = FindImage(name);
     if (i >= 0) {
-        UIImage* e = Image(i);
+        UIImageDef* e = Image(i);
         return fn_80235F64(e->img, e->frame);
     }
     return 0.0f;
