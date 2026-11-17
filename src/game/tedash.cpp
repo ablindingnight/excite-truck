@@ -195,7 +195,7 @@ UnkStaticFFFF lbl_8055F9F8;
 UnkStatic123s lbl_804BE7B8;
 UnkStatic7F lbl_8055F9FC;
 s32 lbl_8055FA00;
-extern const f32 lbl_80564C88;
+extern "C" const f32 lbl_80564C88;
 Cooldown lbl_8055FA08(lbl_80564C88);  // layer list
 Cooldown lbl_8055FA10(lbl_80564C88);  // brush list
 Cooldown lbl_8055FA18(5.0f);  // brush rescan

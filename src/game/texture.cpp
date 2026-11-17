@@ -278,7 +278,7 @@ TexListEntry* lbl_8055FCB0;
 s32 lbl_8055FCB4;     // null texture
 s32 lbl_8055FCB8;     // bound texture
 TexCache* lbl_8055FCBC;
-extern f32 lbl_8055FCC0;
+extern "C" f32 lbl_8055FCC0;
 
 const char* lbl_8055D038 = "null.tex";
 s32 lbl_8055D03C = -1;  // lightmap

@@ -261,7 +261,7 @@ inline int NearZero(f32 x) {
 }
 
 
-extern const f32 lbl_8056149C;  // 5.0: seconds a gate adds
+extern "C" const f32 lbl_8056149C;  // 5.0: seconds a gate adds
 
 // A car's gate-run state in the zone mode (0x12C); class name unproven. Was named CarState here, the name of
 // carstate.cpp's 0x2B4 physics state.

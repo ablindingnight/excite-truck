@@ -143,9 +143,9 @@ static CamCycle lbl_8049A258[5];
 static TvCamera lbl_8049A2C8[200];
 static RegionSphere lbl_8049EDC8[32];
 static CamRegion lbl_8049F9D8[32];
-extern const f32 lbl_8055F560;
-extern u8 lbl_8055F564;
-extern f32 lbl_8055F568;  // car heading
+extern "C" const f32 lbl_8055F560;
+extern "C" u8 lbl_8055F564;
+extern "C" f32 lbl_8055F568;  // car heading
 
 extern "C" int fn_80273494(int x);
 
