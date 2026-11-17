@@ -521,26 +521,30 @@ struct View {
         right.x = fwd.y;
         right.y = -fwd.x;
     }
-    f32 Ahead(const Vec2* p, const Pt* o) const {
-        Delta d;
-        d.x = p->v.x - o->x;
-        d.z = p->v.y - o->y;
-        f32 fx = fwd.x;
-        f32 fy = fwd.y;
-        return fx * d.x + fy * d.z;
-    }
-    f32 Side(const Vec2* p, const Pt* o) const {
-        Delta d;
-        d.x = p->v.x - o->x;
-        d.z = p->v.y - o->y;
-        f32 sx = fwd.y;
-        f32 sz = -fwd.x;
-        return sx * d.x + sz * d.z;
-    }
     Pt fwd;    // offset 0x0
     Pt right;  // offset 0x8
     Pt at;     // offset 0x10
 };
+
+// Distance of p ahead of / beside the view origin o. Non-inline function templates: MWCC never expands those and
+// emits their instances right after the first user in first-use order (FACTS 2026-11-17 11:35), which is
+// the order in retail (Add, Ahead, Side). Helper names unproven.
+template <class V, class P, class O> f32 Ahead(const V* v, const P* p, const O* o) {
+    Delta d;
+    d.x = p->v.x - o->x;
+    d.z = p->v.y - o->y;
+    f32 fx = v->fwd.x;
+    f32 fy = v->fwd.y;
+    return fx * d.x + fy * d.z;
+}
+template <class V, class P, class O> f32 Side(const V* v, const P* p, const O* o) {
+    Delta d;
+    d.x = p->v.x - o->x;
+    d.z = p->v.y - o->y;
+    f32 sx = v->fwd.y;
+    f32 sz = -v->fwd.x;
+    return sx * d.x + sz * d.z;
+}
 
 struct Opts {
     void Init(void) {}
@@ -551,10 +555,10 @@ struct Bins {
     // Marks the bins an obstacle covers with its distance ahead.
     void Add(Obst* o, View* v, u8 side, f32 range) {
         Vec2* p = &o->pos;
-        f32 d = v->Ahead(p, &v->at) - o->rad;
+        f32 d = Ahead(v, p, &v->at) - o->rad;
         f32 firstBin = 0.0f;
         if (d > 0.0f && d < range) {
-            f32 s = v->Side(p, &v->at);
+            f32 s = Side(v, p, &v->at);
             if (s + o->rad > -kWidth.value / 2.0f && s - o->rad < kWidth.value / 2.0f) {
                 int lo;
                 int hi;
@@ -613,123 +617,129 @@ inline IdealFollower* GetTrack(RaceCarRec* rc) { return ((TrackPosOwner*)rc->src
 
 extern "C" {
 
-#pragma dont_inline on
+}  // extern "C"
+
+// The gap search itself. Its body is over the 512-unit nested-inline budget (FACTS 2026-11-17 11:16), so every
+// helper in it stays a call to a weak copy emitted after fn_8015FBCC in reverse first-use order, and its locals
+// take stack slots in declaration order (target below dir). found is a local of the function itself, lent by
+// reference. Helper name unproven.
+static inline void FindGap(RaceCarRec* rc, void* steer, u8 side, int flatten, int seg, int& found) {
+    Frame f;
+    Opts opts;
+    Bins bins;
+    int i;
+    fn_8015FB28(&f, (Frame*)&rc->mtx);
+    f32 curSpeed = rc->speed;
+    const f32 scaledSpeed = 0.6f * curSpeed;
+    f32 range = MAX(20.0f, scaledSpeed);
+    opts.side = side;
+    Obst* o = lbl_8055E2A0->a.data[seg];
+    const Vec3* vel = (Vec3*)&rc->vel;
+    opts.Init();
+    found = 0;
+    for (i = 0; i < 64; i++) {
+        bins.bins[i].dist = range;
+        bins.bins[i].type = 0;
+    }
+    {
+        View v(f);
+        for (i = 0; i < 50; i++) {
+            bins.Add(o, &v, opts.side, range);
+            o++;
+            if (o > lbl_8055E29C->At(lbl_8055E29C->Count() - 1)) {
+                o = lbl_8055E29C->At(0);
+            }
+        }
+        for (i = 0; i < fn_80179650(); i++) {
+            const Vec3& p = (const Vec3&)fn_8017960C(fn_80179630(i))->Mtx()->pos;
+            Vec2 xz;
+            xz.SetXZ(p);
+            {
+                Obst car = {};
+                car.pos = xz;
+                car.rad = 2.0f;
+                bins.Add(&car, &v, opts.side, range);
+            }
+        }
+    }
+    int any = fn_8015F848(bins.bins, range);
+    f32 nearest = fn_8015F92C(bins.bins, range);
+    if (any) {
+        int c;
+        int mid;
+        if (flatten) {
+            int off = 0;
+            for (i = 0; i < 64; i++, off += sizeof(bins.bins[0])) {
+                ObstBin* bn = (ObstBin*)((u8*)bins.bins + off);
+                bn->dist = bn->dist >= range ? nearest : range;
+            }
+        }
+        {
+            Vec2 target(0.0f, 0.0f);
+            Vec2 dir(0.0f, 0.0f);
+            mid = fn_8015F7A0(64, vel, f.Right());
+            c = mid + 32;
+            if (bins.bins[mid + 32].dist < range) {
+                int r = fn_8015FA44(bins.bins, c, range);
+                int l = fn_8015FAB8(bins.bins, c, range);
+                if (r >= 0 && (l < 0 || Abs(r - c) < Abs(l - c))) {
+                    target.Set(1.875f + (lbl_8055E2A4 * (f32)r - kWidth.value * 0.5f), bins.bins[r - 1].dist);
+                    dir.Set(1.875f, 0.0f);
+                    found = 1;
+                } else if (l >= 0 && (r < 0 || Abs(r - c) > Abs(l - c))) {
+                    target.Set(lbl_8055E2A4 * (f32)l - kWidth.value * 0.5f - 1.875f, bins.bins[l + 1].dist);
+                    dir.Set(-1.875f, 0.0f);
+                    found = 1;
+                }
+            } else {
+                int left = 32 - Abs(mid);
+                int n = MinI(left, lbl_8055E2A8 / 2 + Abs(mid) + 1);
+                int k;
+                for (k = 1; k < n; k++) {
+                    if (bins.bins[c + k].dist < range) {
+                        target.Set(lbl_8055E2A4 * (f32)(c + k - 1) - kWidth.value * 0.5f - 1.875f,
+                                   bins.bins[c + k].dist);
+                        dir.Set(-1.875f, 0.0f);
+                        found = 1;
+                        break;
+                    }
+                    if (bins.bins[c - k].dist < range) {
+                        target.Set(1.875f + (lbl_8055E2A4 * (f32)(c - k + 1) - kWidth.value * 0.5f),
+                                   bins.bins[c - k].dist);
+                        dir.Set(1.875f, 0.0f);
+                        found = 1;
+                        break;
+                    }
+                }
+            }
+            if (found) {
+                Vec2 w;
+                Spot spot;
+                fn_8019321C(&w, &target, &f);
+                if (steer) {
+                    SetV2(*(V2*)steer, (const V2&)w);
+                }
+                DefaultConstructVec3(&spot);
+                spot.From(w);
+            }
+        }
+    }
+}
+
+extern "C" {
+
 // Picks a gap for the car to steer into; returns whether it had to.
 int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
     int found = 0;
     if (lbl_8055E2A0) {
-        IdealFollower* trk = ((TrackPosOwner*)rc->src)->GetTrack();
+        IdealFollower* trk = GetTrack(rc);
         int seg = trk->il.seg - trk->line->points;
-        Frame f;
-        f32 range;
-        Opts opts;
-        Obst* o;
-        Bins bins;
-        const Vec3* vel;
-        int i;
-        int any;
-        f32 nearest;
-        fn_8015FB28(&f, (Frame*)&rc->mtx);
-        f32 curSpeed = rc->speed;
-        const f32 scaledSpeed = 0.6f * curSpeed;
-        range = MAX(20.0f, scaledSpeed);
-        opts.side = side;
-        o = lbl_8055E2A0->a.data[seg];
-        vel = (Vec3*)&rc->vel;
-        opts.Init();
-        found = 0;
-        for (i = 0; i < 64; i++) {
-            bins.bins[i].dist = range;
-            bins.bins[i].type = 0;
-        }
-        {
-            View v(f);
-            for (i = 0; i < 50; i++) {
-                bins.Add(o, &v, opts.side, range);
-                o++;
-                if (o > lbl_8055E29C->At(lbl_8055E29C->Count() - 1)) {
-                    o = lbl_8055E29C->At(0);
-                }
-            }
-            for (i = 0; i < fn_80179650(); i++) {
-                const Vec3& p = (const Vec3&)fn_8017960C(fn_80179630(i))->Mtx()->pos;
-                Vec2 xz;
-                xz.SetXZ(p);
-                {
-                    Obst car = {};
-                    car.pos = xz;
-                    car.rad = 2.0f;
-                    bins.Add(&car, &v, opts.side, range);
-                }
-            }
-        }
-        any = fn_8015F848(bins.bins, range);
-        nearest = fn_8015F92C(bins.bins, range);
-        if (any) {
-            int c;
-            int mid;
-            if (flatten) {
-                int off = 0;
-                for (i = 0; i < 64; i++, off += sizeof(bins.bins[0])) {
-                    ObstBin* bn = (ObstBin*)((u8*)bins.bins + off);
-                    bn->dist = bn->dist >= range ? nearest : range;
-                }
-            }
-            {
-                Vec2 dir(0.0f, 0.0f);
-                Vec2 target(0.0f, 0.0f);
-                mid = fn_8015F7A0(64, vel, f.Right());
-                c = mid + 32;
-                if (bins.bins[mid + 32].dist < range) {
-                    int r = fn_8015FA44(bins.bins, c, range);
-                    int l = fn_8015FAB8(bins.bins, c, range);
-                    if (r >= 0 && (l < 0 || Abs(r - c) < Abs(l - c))) {
-                        target.Set(1.875f + (lbl_8055E2A4 * (f32)r - kWidth.value * 0.5f), bins.bins[r - 1].dist);
-                        dir.Set(1.875f, 0.0f);
-                        found = 1;
-                    } else if (l >= 0 && (r < 0 || Abs(r - c) > Abs(l - c))) {
-                        target.Set(lbl_8055E2A4 * (f32)l - kWidth.value * 0.5f - 1.875f, bins.bins[l + 1].dist);
-                        dir.Set(-1.875f, 0.0f);
-                        found = 1;
-                    }
-                } else {
-                    int left = 32 - Abs(mid);
-                    int n = MinI(left, lbl_8055E2A8 / 2 + Abs(mid) + 1);
-                    int k;
-                    for (k = 1; k < n; k++) {
-                        if (bins.bins[c + k].dist < range) {
-                            target.Set(lbl_8055E2A4 * (f32)(c + k - 1) - kWidth.value * 0.5f - 1.875f,
-                                       bins.bins[c + k].dist);
-                            dir.Set(-1.875f, 0.0f);
-                            found = 1;
-                            break;
-                        }
-                        if (bins.bins[c - k].dist < range) {
-                            target.Set(1.875f + (lbl_8055E2A4 * (f32)(c - k + 1) - kWidth.value * 0.5f),
-                                       bins.bins[c - k].dist);
-                            dir.Set(1.875f, 0.0f);
-                            found = 1;
-                            break;
-                        }
-                    }
-                }
-                if (found) {
-                    Vec2 w;
-                    Spot spot;
-                    fn_8019321C(&w, &target, &f);
-                    if (steer) {
-                        SetV2(*(V2*)steer, (const V2&)w);
-                    }
-                    DefaultConstructVec3(&spot);
-                    spot.From(w);
-                }
-            }
-        }
+        FindGap(rc, steer, side, flatten, seg, found);
     }
     return found;
 }
 
 
+
 }  // extern "C"
 
-#pragma dont_inline reset
