@@ -773,9 +773,6 @@ void SparkSys::Step(void) {
     count = out - pts;
 }
 
-/* Helper name unproven: opaque white with the given alpha. The boundary is needed (in place: DrawAll 100 -> 99.58). */
-static inline u32 WhiteWithAlpha(int alpha) { return alpha << 24 | 0xFFFFFF; }
-
 void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
     if (!fn_802C8DBC(count * 4)) {
         return;
@@ -803,7 +800,8 @@ void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
             Vec p;
             Vec d;
             f32 a = invLife * (now - s->t);
-            color = WhiteWithAlpha((int)(255.0f * (1.0f - a * a)));
+            // opaque white with the given alpha; the shared ARGB inline is the boundary (in place: DrawAll 100 -> 99.58)
+            color = ARGB((int)(255.0f * (1.0f - a * a)), 0xFF, 0xFF, 0xFF);
             AddScaled(&p, &s->pos, &s->vel, 5.0f * -dt);
             p.x -= prev->origin.x;
             p.y -= prev->origin.y;
