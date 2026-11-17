@@ -39,11 +39,7 @@ ModuleTag lbl_8055E478;
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-struct RPacket {
-    u16 rot[3];  // offset 0x0
-    u8 pad6[2];
-    RVec3 pos;   // offset 0x8
-};
+#include "game/rpacket.h"
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 

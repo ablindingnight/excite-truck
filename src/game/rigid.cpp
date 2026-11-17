@@ -63,10 +63,7 @@ static inline void Mul(RMat33* out, const RMat33* l, const RMat33* r) {
     }
 }
 
-struct RPacket {
-    u8 pad0[0x14];
-    RVec3 vel;  // offset 0x14
-};
+#include "game/rpacket.h"
 
 // A contact point in body space (corners.cpp); the body keeps its corners in a list.
 class RigidBody;
