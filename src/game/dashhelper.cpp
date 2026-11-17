@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/sound.h"
 #include "game/textelem.h"
 #include "game/ilayout.h"
@@ -94,7 +95,6 @@ double cos(double x);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
-void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 f32 fn_801E7E18(void);
 int fn_801E85A4(void);
 int fn_8023441C(const char* font);  // gtext.cpp: returns the loaded font (GTextFont*)

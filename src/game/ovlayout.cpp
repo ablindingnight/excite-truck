@@ -4,6 +4,7 @@
 // apart from the keys, messages and allocation tags.
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/artelemcopy.h"
@@ -27,7 +28,6 @@ s32 fn_802C9C48(void);  // screen width
 void fn_8000FF88(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_800104B0(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_8001027C(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
-void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 }
 
 extern f32 lbl_8055D020;  // widescreen x stretch

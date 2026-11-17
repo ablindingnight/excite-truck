@@ -4,6 +4,7 @@
 // guesses.
 #include <math.h>
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/gamemode.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
@@ -123,7 +124,6 @@ ResultRacer* fn_801EA9B0(int index);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_80011DEC(int player);
 f32 fn_80011DC0(int player);
-void fn_802354A0(gArtSet* art, int part, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
 void fn_802C8BD0(s32 tex);
 void fn_801E4F20(int n);
 void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);

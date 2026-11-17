@@ -2,6 +2,7 @@
 // text, filled and textured quads, colour fading by the current UI context, the shared pulse/flash
 // timer, TV safe-area margins and number formatting with thousands separators. Names are guesses.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/gtext.h"
 #include "game/uidraw.h"
 #include <math.h>
@@ -24,8 +25,6 @@ void fn_802321D8(void);
 void fn_802324D8(void);
 void fn_8022F248(void);
 void fn_8022F294(void);
-void fn_8023509C(void);
-void fn_802350BC(void);
 void fn_802365D8(void);
 void fn_80236728(void);
 void fn_80236774(void);
