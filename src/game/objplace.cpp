@@ -446,12 +446,11 @@ inline void MatPlacer::Rebuild(void) {
         } while (total > 128);
     }
     memset(slots, 0, sizeof(slots));
-    int spread;
-    int free = 128 - total;
-    spread = free * 2;
+    int left = 128 - total;
+    int free = left;
     int at = 0;
     for (int i = 0; i < placers.count; i++) {
-        int share = spread / placers.count;
+        int share = left * 2 / placers.count;
         ObjectPlacer* p = placers.data[i];
         int lim = free;
         lim = share < free ? share : lim;
