@@ -1198,7 +1198,7 @@ config.libs.append(
             Object(Matching, "game/mcstatus_runtime.cpp"),
             Object(Matching, "game/keyboard.cpp"),
             Object(Matching, "game/loadscrn.cpp"),
-            Object(NonMatching, "game/unlkmenu.cpp"),
+            Object(Matching, "game/unlkmenu.cpp"),
             Object(Matching, "game/popwarn.cpp"),
             Object(NonMatching, "game/multievt.cpp"),
             Object(NonMatching, "game/modeltest.cpp"),

@@ -133,26 +133,33 @@ extern "C" int fn_8024497C(void) {
 }
 
 /* Helper name unproven */
-static inline int ListKind(int type = 5) { return type; }
-
-/* Helper name unproven */
 static inline MenuItem MakeRatingLabel(const UnlockList& list) {
-    int capacity = sizeof(list.title);
-    return MenuItem("#rating", 3, list.title, capacity, 0);
+    const CaptionContext context(sizeof(list.title));
+    return MenuItem(context, "#rating", list.title);
 }
 
 #pragma push
 #pragma opt_propagation off  /* Pragma unproven */
+/* Helper name unproven */
+static inline MenuItem MakeListPanel(MenuState& list, int kind = 5) {
+    return MenuItem("unlockable_list", kind, &list, 0, 0);
+}
+
+/* Helper name unproven */
+static inline MenuItem MakeUnlockOption(void) {
+    int on = 2;
+    return MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, on, 0);
+}
+
 extern "C" void fn_802449A0(void) {
     UnlockList list;
     int arrows = 1;
-    int on = 2;
     MenuItem items[] = {
         MenuItem("downarrow", 2, &arrows, 0, 0),
         MakeRatingLabel(list),
-        MenuItem("unlockable_list", ListKind(), &list, 0, 0),
+        MakeListPanel(list),
         MenuItem(lbl_8055B860, 6, (void*)fn_8024497C, -1, 27),
-        MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, on, 0),
+        MakeUnlockOption(),
         MenuItem(lbl_80498878),
     };
     MenuDesc desc = {"unlock.lyt", items, NULL, 0, 0};
@@ -189,5 +196,3 @@ void UnlockList::Update(void) {
 }
 
 
-// NonMatching: fn_802449A0 and Draw number their saved registers differently (65 and 17 diffs, same
-// instructions); MenuState's and IMenuState's inline dtors are emitted here as weak copies.
