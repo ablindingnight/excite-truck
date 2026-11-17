@@ -1095,7 +1095,7 @@ static inline f32 Clamp01(f32 v) {
     return t > 0.0f ? t : 0.0f;
 }
 
-  /* Helper name unproven */
+/* Helper name unproven */
 static inline int RoundF(f32 v) { return (int)(v < 0.0f ? v - 0.5f : v + 0.5f); }
 
 // Scales `c` by the tint `t`, per channel.

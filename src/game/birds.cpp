@@ -312,7 +312,6 @@ static inline void MulM(const f32* m, const RVec3* v, RVec3* out) {
         out->z = Dot3(v->x, m[2], v->y, m[5], v->z, m[8]);
     }
 }
-  /* Helper name unproven */
 void fn_802A8A4C(Boid* b, const RVec3* target) {
     f32 dir[2];
     dir[0] = b->vel.x;

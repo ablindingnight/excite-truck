@@ -571,7 +571,6 @@ void fn_802C70AC(s32 model, const PlainValMatrix* m, s32 a, int b);
 // the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
 // bent by speed and pitch) drawn at the car.
 
-  /* Helper name unproven */
 void fn_80201018(DriverModel* d, const u8* car, int show) {
     ValVec3 off2;
     DBone bones[32];

@@ -101,7 +101,6 @@ Wheel::Wheel(void) {
 
 Wheel::~Wheel(void) {}
 
-  /* Helper name unproven */
 void Wheel::Init(BodyDesc* bd) {
     WheelDesc* d = (WheelDesc*)bd;
     SphereShape* s;

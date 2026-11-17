@@ -517,7 +517,7 @@ void fn_80168328(void) {
     }
 }
 
-  /* Helper name unproven */
+/* Helper name unproven */
 static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 static inline void RotVec(f32* out, const f32* m, const f32* in) {
