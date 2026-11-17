@@ -401,6 +401,22 @@ static inline void SetIdentity(MCam* m) {
 }
 
 // opt_lifetimes off comes from the unit-wide flag in configure.py (per-file flag rule, FACTS 2026-11-16)
+// A rotation row as its first two floats plus the third, and a 3x3 of such rows (the same bytes as MMtx33).
+// Retail copies the camera rotation one row at a time as an 8-byte block (lfd/stfd) plus the third float. The
+// copy-shape harness (FACTS 2026-11-17 04:41) shows no 12-byte row or matrix copy does that: an 8-byte block
+// move needs a standalone constructor-less pair initialised from a local, here the helper's by-value parameter.
+// Names unproven.
+struct MRowPair {
+    F2Plain xy;
+    f32 z;
+};
+struct MRows {
+    MRowPair x, y, z;
+};
+static inline void SetRow(MRowPair* o, F2Plain xy, f32 z) {
+    o->xy = xy;
+    o->z = z;
+}
 void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_801293C8("mlist: calc");
     MCam ident;
@@ -419,7 +435,10 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     MLArray<MLSphere> sa = m->a;
     MCam cam;
     cam = lbl_804C5610 = *fn_802C86DC();
-    MMtx33 rt = cam.r;
+    MMtx33 rt;
+    SetRow(&((MRows*)&rt)->x, ((const MRows*)&cam.r)->x.xy, cam.r.xz);
+    SetRow(&((MRows*)&rt)->y, ((const MRows*)&cam.r)->y.xy, cam.r.yz);
+    SetRow(&((MRows*)&rt)->z, ((const MRows*)&cam.r)->z.xy, cam.r.zz);
     Transpose(&rt);
     ValVec3 t;
     MulVecT(&t, &cam.t, &cam.r);
