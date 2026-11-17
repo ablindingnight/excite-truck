@@ -82,12 +82,15 @@ public:
     u8 alt;     // offset 0x19
 };
 
+/* Helper name unproven */
+static inline gArtSet* LoadProgressBarArt(void) { return fn_8023512C("mem_bar.art"); }
+
 // The save progress bar ("mem_bar.art").
 class MemBar : public MenuState {
 public:
     MemBar(f32 f) {
         frac = f;
-        art = fn_8023512C("mem_bar.art");
+        art = LoadProgressBarArt();
     }
     virtual ~MemBar(void) {
         if (art) {
@@ -139,19 +142,26 @@ extern "C" {
 
 }  // extern "C"
 
+// A constructor retained by the compiler but stripped by the linker. It emits the pure dialog vtable.
+/* Helper name unproven */
+MemCardDialogMgr* CreateMemoryCardDialog(void) { return new MemCardDialogMgr; }
+
 MemCardDialogMgr::~MemCardDialogMgr(void) { lbl_8055F244 = 0; }
 
-void MemCardDialogBg::Load(void) {
-    if ((image = gxGetImage("*uibig.res/backsplt.img")) == 0) {
+/* Helper name unproven */
+static inline void LoadDialogBackground(MemCardDialogBg* self) {
+    if ((self->image = gxGetImage("*uibig.res/backsplt.img")) == 0) {
         fn_802E30C8("MemCardDialogMgr couldn't get background image backgnd1.img");
     }
-    image2 = 0;
-    font2 = fn_80232578("uifnt.gtx");
-    font = fn_80232578("uifnt.gtx");
-    fade = lbl_80563830;
+    self->image2 = 0;
+    self->font2 = fn_80232578("uifnt.gtx");
+    self->font = fn_80232578("uifnt.gtx");
+    self->fade = lbl_80563830;
 }
 
-void MemCardDialogBg::Unload(void) {
+inline void MemCardDialogBg::Open(void) { LoadDialogBackground(this); }
+
+inline void MemCardDialogBg::Close(void) {
     if (image) {
         fn_802C519C(image);
     }
@@ -302,7 +312,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 #pragma push
 #pragma opt_propagation off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
-int MemCardDialogBg::Setup(McDialogCfg* cfg) { return RunChoices(this, cfg); }
+inline int MemCardDialogBg::Setup(McDialogCfg* cfg) { return RunChoices(this, cfg); }
 #pragma pop
 #pragma pop
 
@@ -392,20 +402,23 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m) {
     fn_802C2B48();
 }
 
-void MemCardDialogBg::Show(const McMsg* m) { DrawDialog(this, m); }
-void MemCardDialogMgr::Open(void) {
-    open = 1;
-    layout = fn_8012C33C("mc_dialog.lyt");
-    if (!layout) {
-        bg.Load();
+inline void MemCardDialogBg::ShowMsg(const McMsg* m) { DrawDialog(this, m); }
+/* Helper name unproven */
+static inline void OpenDialog(MemCardDialogMgr* self) {
+    self->open = 1;
+    self->layout = fn_8012C33C("mc_dialog.lyt");
+    if (!self->layout) {
+        self->bg.Open();
     }
-    bgShown = 1;
+    self->bgShown = 1;
 }
 
-void MemCardDialogMgr::Close(void) {
+inline void MemCardDialogMgr::Open(void) { OpenDialog(this); }
+
+inline void MemCardDialogMgr::Close(void) {
     open = 0;
     if (!layout) {
-        bg.Unload();
+        bg.Close();
     }
     fn_80214D50(4);
 }
@@ -413,10 +426,28 @@ void MemCardDialogMgr::Close(void) {
 extern UnkStatic123s lbl_80498890;
 extern "C" void fn_80216CA8(void);
 extern const char lbl_8055BAC0[8];  // ""
-extern "C" void fn_80246210(void);
+extern "C" inline void fn_80246210(void);
 
 // Runs a memory card choice dialog (up to four options) on the layout, or on the plain background.
-int MemCardDialogMgr::Setup(McDialogCfg* cfg) {
+/* Helper name unproven */
+static inline const char* FirstDialogItem(void) { return "__first"; }
+/* Helper name unproven */
+static inline const char* DialogTitle(void) { return "#title"; }
+/* Helper name unproven */
+static inline const char* DialogMessage(void) { return "#msg"; }
+
+/* Helper name unproven */
+static inline const char* DefaultDialogLayout(void) { return "mc_dialog.lyt"; }
+/* Helper name unproven */
+static inline const char* DialogOption1(void) { return "#option_1"; }
+/* Helper name unproven */
+static inline const char* DialogOption2(void) { return "#option_2"; }
+/* Helper name unproven */
+static inline const char* DialogOption3(void) { return "#option_3"; }
+/* Helper name unproven */
+static inline const char* DialogOption4(void) { return "#option_4"; }
+
+inline int MemCardDialogMgr::Setup(McDialogCfg* cfg) {
     if (!layout) {
         return bg.Setup(cfg);
     }
@@ -435,22 +466,22 @@ int MemCardDialogMgr::Setup(McDialogCfg* cfg) {
         state.alt = 0;
     }
     MenuItem items[] = {
-        MenuItem("__first", 5, &state, 0, 0),
+        MenuItem(FirstDialogItem(), 5, &state, 0, 0),
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_80246210, 0, 0),
-        MenuItem("#title", cfg->title, CaptionContext(strlen(cfg->title))),
-        MenuItem("#msg", cfg->text, CaptionContext(strlen(cfg->text))),
-        MenuItem("#option_1", 0, 0, (int)choices[0].text, 0),
-        MenuItem("#option_1", choices[0].title),
-        MenuItem("#option_2", 0, 0, (int)choices[1].text, 0),
-        MenuItem("#option_2", choices[1].title),
-        MenuItem("#option_3", 0, 0, (int)choices[2].text, 0),
-        MenuItem("#option_3", choices[2].title),
-        MenuItem("#option_4", 0, 0, (int)choices[3].text, 0),
-        MenuItem("#option_4", choices[3].title),
+        MenuItem(DialogTitle(), cfg->title, CaptionContext(strlen(cfg->title))),
+        MenuItem(DialogMessage(), cfg->text, CaptionContext(strlen(cfg->text))),
+        MenuItem(DialogOption1(), 0, 0, (int)choices[0].text, 0),
+        MenuItem(DialogOption1(), choices[0].title),
+        MenuItem(DialogOption2(), 0, 0, (int)choices[1].text, 0),
+        MenuItem(DialogOption2(), choices[1].title),
+        MenuItem(DialogOption3(), 0, 0, (int)choices[2].text, 0),
+        MenuItem(DialogOption3(), choices[2].title),
+        MenuItem(DialogOption4(), 0, 0, (int)choices[3].text, 0),
+        MenuItem(DialogOption4(), choices[3].title),
         MenuItem(lbl_80498890),
     };
     MenuDesc desc = {0, 0, (int (*)(int*))fn_80245080, 0, 0};
-    desc.layout = cfg->layout ? cfg->layout : "mc_dialog.lyt";
+    desc.layout = cfg->layout ? cfg->layout : DefaultDialogLayout();
     desc.items = items;
     fn_80216CA8();
     if (cfg->layout) {
@@ -463,7 +494,7 @@ int MemCardDialogMgr::Setup(McDialogCfg* cfg) {
 
 extern "C" {
 
-void fn_80246210(void) {
+inline void fn_80246210(void) {
     lbl_8055F244->bgShown = 0;
     s32 n = lbl_8055F244->cfg->count;
     for (int i = 0; i < n; i++) {
@@ -487,16 +518,19 @@ int fn_802450D4(void);
 }
 
 // Shows a memory card message with its progress bar (on the plain background without the layout).
-void MemCardDialogMgr::ShowMsg(const McMsg* m) {
+/* Helper name unproven */
+static inline const char* DialogProgressName(void) { return "progress"; }
+
+inline void MemCardDialogMgr::ShowMsg(const McMsg* m) {
     if (!layout) {
-        bg.Show(m);
+        bg.ShowMsg(m);
         return;
     }
     MemBar bar(m->frac);
     MenuItem items[] = {
-        MenuItem("#title", m->title, CaptionContext(strlen(m->title))),
-        MenuItem("#msg", m->text, CaptionContext(strlen(m->text))),
-        MenuItem("progress", 5, &bar, 0, 0),
+        MenuItem(DialogTitle(), m->title, CaptionContext(strlen(m->title))),
+        MenuItem(DialogMessage(), m->text, CaptionContext(strlen(m->text))),
+        MenuItem(DialogProgressName(), 5, &bar, 0, 0),
         MenuItem(lbl_80498890),
     };
     retries = 0;
@@ -506,11 +540,11 @@ void MemCardDialogMgr::ShowMsg(const McMsg* m) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
-void McChoiceState::Enter(void) { fn_80214CB4(accept == 0); }
+inline void McChoiceState::Enter(void) { fn_80214CB4(accept == 0); }
 
-void McChoiceState::Unfocus(void) { alt = 0; }
+inline void McChoiceState::Unfocus(void) { alt = 0; }
 
-int McChoiceState::Key(int key) {
+inline int McChoiceState::Key(int key) {
     switch (key) {
     case 0x125:
         if (!alt) {
@@ -556,7 +590,7 @@ void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
 }
 
 // Left cap, stretched middle and right cap, the filled part drawn over them; a plain bar without art.
-void MemBar::Draw(void) {
+inline void MemBar::Draw(void) {
     f32 sx;
     f32 sy;
     fn_80230C30(&sx, &sy, x, y);
@@ -592,7 +626,7 @@ void MemBar::Draw(void) {
 
 extern "C" {
 
-void fn_8024683C(void) {
+inline void fn_8024683C(void) {
     WpadInfo all;
     WpadInfo one;
     s32 ch = fn_80129AF4();
@@ -609,9 +643,17 @@ void fn_8024683C(void) {
         }
     }
     if (warn) {
-        fn_80214FD8("Wireless Warning", "Any information you enter might be picked up by another wireless receiver");
+        const char* message = "Any information you enter might be picked up by another wireless receiver";
+        const char* title = "Wireless Warning";
+        fn_80214FD8(title, message);
     }
 }
+
+typedef void (*RemoteWarningCallback)(void);
+// This reference emits the out-of-line copy of the inline warning for nameent.cpp.
+/* Helper name unproven */
+RemoteWarningCallback GetRemoteWarningCallback(void) { return fn_8024683C; }
+
 
 }  // extern "C"
 

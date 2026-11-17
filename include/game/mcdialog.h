@@ -37,7 +37,16 @@ struct McDialogCfg {
 extern const f32 lbl_80563830;
 
 // The fallback background ("*uibig.res/backsplt.img") with its two fonts.
-class MemCardDialogBg {
+// Four shared dialog slots. The all-pure base table is zero-filled.
+class IMcDialog {  /* Class name unproven */
+public:
+    virtual void Open(void) = 0;
+    virtual void Close(void) = 0;
+    virtual int Setup(McDialogCfg* cfg) = 0;
+    virtual void ShowMsg(const McMsg* msg) = 0;
+};
+
+class MemCardDialogBg : public IMcDialog {
 public:
     MemCardDialogBg(void) {
         image = 0;
@@ -46,10 +55,10 @@ public:
         font2 = 0;
         fade = lbl_80563830;
     }
-    virtual void Load(void);
-    virtual void Unload(void);
+    virtual void Open(void);
+    virtual void Close(void);
     virtual int Setup(McDialogCfg* cfg);
-    virtual void Show(const McMsg* m);
+    virtual void ShowMsg(const McMsg* m);
     virtual ~MemCardDialogBg(void) {}
 
     u8* image;   // offset 0x4
@@ -62,7 +71,7 @@ public:
 class MemCardDialogMgr;
 extern MemCardDialogMgr* lbl_8055F244;  // the instance
 
-class MemCardDialogMgr {
+class MemCardDialogMgr : public IMcDialog {
 public:
     MemCardDialogMgr(void) {
         lbl_8055F244 = this;
