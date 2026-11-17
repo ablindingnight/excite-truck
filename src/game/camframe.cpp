@@ -17,12 +17,8 @@ struct Quat {
 };
 
 // CamFrame: rmtx.h's RMtx.
-// The camera record cammgr/namedcam call CamRec (0x88 here: its frame at 0x58); was named Camera here,
-// mrender's 0x30 render camera.
-struct CamRec {
-    u8 pad[0x58];
-    RMtx frame;  // offset 0x58
-};
+// The camera record (cammgr/namedcam): game/camrec.h's CamRec (its pose at 0x58).
+#include "game/camrec.h"
 
 extern "C" {
 void fn_8012F57C(Quat* out, Quat* a, Quat* b, f32 t);  // slerp
@@ -147,7 +143,7 @@ void fn_8026E688(RMtx* out, const RVec3* eye, const RVec3* target, const RVec3* 
 }
 
 void fn_8026E850(const RVec3* eye, const RVec3* target, CamRec* cam, const RVec3* up) {
-    fn_8026E688(&cam->frame, eye, target, up);
+    fn_8026E688((RMtx*)&cam->pose, eye, target, up);  // the pose as a 3x4 frame
 }
 
 }  // extern "C"
