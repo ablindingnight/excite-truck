@@ -886,6 +886,12 @@ static inline int NearestCell(f32 v) {
     return (int)(v < 0.0f ? v - 0.5f : 0.5f + v);
 }
 
+/* Helper name unproven: o = a + b * k. */
+static inline void MadPt(ValPoint* o, const ValPoint& a, const ValPoint& b, f32 k) {
+    o->x = a.x + b.x * k;
+    o->y = a.y + b.y * k;
+}
+
 void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     Vec base;
     Vec pos;
@@ -897,8 +903,7 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     if (at->y - r > p->origin.y - 0.1f) {
         return;
     }
-    d.y = at->z - p->origin.z;
-    d.x = at->x - p->origin.x;
+    SetPt(&d, at->x - p->origin.x, at->z - p->origin.z);
     SetPt(&v, vel->x, vel->z);
     f32 s2 = v.x * v.x + v.y * v.y;
     if (AbsF(s2) <= __float_epsilon[0]) {
@@ -909,15 +914,9 @@ void fn_8029E130(WaterPool* p, const Vec* at, const Vec* vel, f32 r) {
     const f32 y = v.y;
     f32 speed = sqrt(v.x * v.x + y * y);
     f32 inv = 1.0f / speed;
-    q.x = d.x + v.x * (depth * inv);
-    f32 yv = d.y;
-    q.y = yv + v.y * (depth * inv);
-    f32 dxzv = p->dxz;
-    f32 fu = q.x * p->dxx + q.y * dxzv;
-    int gx = NearestCell(fu);
-    f32 dyzv = p->dyz;
-    f32 fv = p->dyx * q.x + dyzv * q.y;
-    int gy = NearestCell(fv);
+    MadPt(&q, d, v, depth * inv);
+    int gx = NearestCell(Dot2(q.x, q.y, p->dxx, p->dxz));
+    int gy = NearestCell(Dot2(q.x, q.y, p->dyx, p->dyz));
     if (gx < 1 || gx >= p->nx - 1 || gy < 1 || gy >= p->ny - 1) {
         return;
     }
