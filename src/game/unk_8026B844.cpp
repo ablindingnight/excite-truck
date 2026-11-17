@@ -467,13 +467,18 @@ struct CamRot40 {
     CamRot r;
     u32 pad;
 };
+/* Helper name unproven: a 4-float vector (retail keeps 16 bytes for the follow camera's up vector) */
+struct CamVec4 : CamVec {
+    f32 w;
+};
+
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
     CamFrame tgt;
     CamVec spin;
     CamVec move;
-    CamVec up;
+    CamVec4 up;
     CamQuat q;
     CamQuat qs;
     if (fn_802D3EBC()) {
@@ -500,7 +505,7 @@ void fn_8026C014(int player) {
         return;
     }
     if (lbl_8055F4EC == 0) {
-        CamRot40 m;
+        CamRot m;
         f32 dt;
         int shift;
         int ctrl;
@@ -590,8 +595,8 @@ void fn_8026C014(int player) {
         }
         const CamRot* rot = &lbl_80499050.rot;
         CamAddRotated(lbl_80499050.pos, lbl_8049A1F0, rot);
-        Mat3FromEuler((Mat3*)&m.r, (const Vec3*)&lbl_8049A1FC);
-        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&m.r, (const Mat3*)&lbl_80499050.rot);
+        Mat3FromEuler((Mat3*)&m, (const Vec3*)&lbl_8049A1FC);
+        Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&m, (const Mat3*)&lbl_80499050.rot);
     } else if (pad.w44[3] & 0x10) {
         // Orbit: the left stick turns about the vertical and tilts, the d-pad moves.
         CamRot yawM;
