@@ -76,7 +76,6 @@ V2 lbl_8055F860;  // across the track
 
 extern "C" {
 
-// NonMatching: the p.y = 0 store is scheduled one slot later than in the target.
 void fn_802A0D60(s16* h, V2* o, V2* a, V2* __restrict b, f32 size, f32 alpha, int white) {
     int i;
     int al;
@@ -167,13 +166,17 @@ void fn_802A1120(V2* pos, V2* dir) {
     }
 }
 
-// NonMatching: the hoisted loop constants get different callee-saved float registers.
 void fn_802A1290(void) {
     fn_802A92CC();
     if (fn_802A0FBC()) {
         int n;
         int i;
         int j;
+        f32 negative;
+        f32 zero;
+        f32 range;
+        f32 inner;
+        f32 one;
         f32 width;
         s16 h;
         f32 t;
@@ -191,7 +194,12 @@ void fn_802A1290(void) {
         lbl_8055F860.y = -t;
         fn_801E9DC4(&h);
         f32 halfScale = 0.5f;
+        inner = 0.5f * (0.75f * width);
         for (i = 0; i < n; i++) {
+            range = (width * halfScale) - inner;
+            one = 1.0f;
+            zero = 0.0f;
+            negative = -1.0f;
             for (j = 0; j < 3; j++) {
                 V2 q;
                 V2 d;
@@ -200,12 +208,12 @@ void fn_802A1290(void) {
                 f32 dy = q.y - lbl_8055F850.y;
                 d.x = q.x - lbl_8055F850.x;
                 d.y = dy;
-                a = ((f32)sqrt(d.x * d.x + d.y * d.y) - (0.5f * (0.75f * width))) / ((width * halfScale) - (0.5f * (0.75f * width)));
-                if (1.0f < a) {
-                    a = 1.0f;
+                a = ((f32)sqrt(d.x * d.x + d.y * d.y) - inner) / range;
+                if (one < a) {
+                    a = one;
                 }
-                a = a > 0.0f ? a : 0.0f;
-                fn_802A0D60(&h, &q, &lbl_8055F858, &lbl_8055F860, 1.5f, 1.0f + Mul(a, -1.0f), (i + j) & 1);
+                a = a > zero ? a : zero;
+                fn_802A0D60(&h, &q, &lbl_8055F858, &lbl_8055F860, 1.5f, one + Mul(a, negative), (i + j) & 1);
             }
         }
     } else {
