@@ -7,6 +7,7 @@
 #include <revolution/OS/OSMutex.h>
 #include <revolution/OS/OSThread.h>
 #include <string.h>
+#include "game/mathutil.h"
 
 extern "C" {
 int OSReport(const char* fmt, ...);
@@ -354,7 +355,6 @@ static inline f32 Ramp(f32 x, f32 a, f32 len) {
     return t > 0.0f ? t : 0.0f;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 void fn_802E9EB8(void) {
     static u8 channelDrift;
