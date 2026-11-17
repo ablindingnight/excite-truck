@@ -257,8 +257,8 @@ static inline void AddCorner(u8* body, f32 x, f32 y, f32 z, f32 spring) {
     c->vel.y = 0.0f;
     c->vel.z = 0.0f;
     c->damping = 0.0f;
-    c->next = *(BodyCorner**)(body + 0xD0);
-    *(BodyCorner**)(body + 0xD0) = c;
+    c->next = (BodyCorner*)((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
+    ((RigidBody*)body)->contacts = (Corner*)c;
 }
 
 extern "C" {
@@ -353,8 +353,8 @@ static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
     c->vel.y = 0.0f;
     c->vel.z = 0.0f;
     c->damping = 0.0f;
-    c->next = *(BodyCorner**)(body + 0xD0);
-    *(BodyCorner**)(body + 0xD0) = c;
+    c->next = (BodyCorner*)((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
+    ((RigidBody*)body)->contacts = (Corner*)c;
 }
 
 static inline void AddCornerV(u8* body, const ValVec3& v, f32 spring) {
@@ -366,8 +366,8 @@ static inline void AddCornerV(u8* body, const ValVec3& v, f32 spring) {
     c->vel.y = 0.0f;
     c->vel.z = 0.0f;
     c->damping = 0.0f;
-    c->next = *(BodyCorner**)(body + 0xD0);
-    *(BodyCorner**)(body + 0xD0) = c;
+    c->next = (BodyCorner*)((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
+    ((RigidBody*)body)->contacts = (Corner*)c;
 }
 
 static inline ValVec3 MakeVec(f32 x, f32 y, f32 z) {
