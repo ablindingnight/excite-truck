@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/valuebinding.h"
 #include "game/gart.h"
 #include "game/idealline.h"
 #include "game/centerline.h"
@@ -96,21 +97,15 @@ struct Box {
     ElemColor color;   // offset 0x18
 };
 
-struct Binding {
-    s32 type;          // offset 0x0
-    const char* name;  // offset 0x4
-    void* ptr;         // offset 0x8
-};
-
-static inline Binding Bind(s32 t, const char* n, void* p) {
-    Binding b;
+static inline ValueBinding Bind(s32 t, const char* n, void* p) {
+    ValueBinding b;
     b.type = t;
     b.name = n;
     b.ptr = p;
     return b;
 }
 
-extern const Binding lbl_802FAA40;
+extern const ValueBinding lbl_802FAA40;
 
 extern "C" {
 void fn_8000FBE4(void);
@@ -1697,7 +1692,7 @@ inline int RingChalMaster::vf3C(int view) {
 inline f32 RingChalMaster::vf38(void) { return 7.75f; }
 
 inline void RingResults::Load(void) {
-    Binding b[16] = {
+    ValueBinding b[16] = {
         Bind(3, "time_left", &fF8),
         Bind(3, "time_bonus", &fFC),
         Bind(3, "grade", &f100),

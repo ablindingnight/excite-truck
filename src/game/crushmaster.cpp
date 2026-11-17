@@ -9,6 +9,7 @@
 // their literals pooled behind them (the original .data layout; see betarace.cpp). vfF8 calls Reset/Load
 // instead of inlining them, so it is compiled without inlining.
 #include "game/common.h"
+#include "game/valuebinding.h"
 #include "game/gamemode.h"
 #include "game/gamemodector.h"
 #include "game/ilayout.h"
@@ -83,21 +84,15 @@ s32 fn_802CAC28(const char* name, int a);  // load texture
 void gxForgetTexture(s32 tex);
 }
 
-struct Binding {
-    s32 type;          // offset 0x0
-    const char* name;  // offset 0x4
-    void* ptr;         // offset 0x8
-};
-
-static inline Binding Bind(s32 t, const char* n, void* p) {
-    Binding b;
+static inline ValueBinding Bind(s32 t, const char* n, void* p) {
+    ValueBinding b;
     b.type = t;
     b.name = n;
     b.ptr = p;
     return b;
 }
 
-extern const Binding lbl_802FAA40;
+extern const ValueBinding lbl_802FAA40;
 
 
 const char* GetGradeDisplayName(int grade);
@@ -971,7 +966,7 @@ inline void CrushResults::Reset(void) {
 }
 
 inline void CrushResults::Load(void) {
-    Binding b[16] = {
+    ValueBinding b[16] = {
         Bind(3, "time_left", &fF8),
         Bind(3, "time_bonus", &fFC),
         Bind(3, "grade", &f100),

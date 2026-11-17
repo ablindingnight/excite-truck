@@ -3,6 +3,7 @@
 // writing them as option strings and finding the control the player is pressing. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/binding.h"
 #include "game/locstring.h"
 #include "game/joy.h"
 #include "game/strcopy.h"
@@ -21,18 +22,6 @@ struct Mouse {
     u8 b0;  // offset 0x8
     u8 b1;  // offset 0x9
     u8 b2;  // offset 0xA
-};
-
-// One control: kind (1 key, 2 stick axis, 3 button, 4 direction bit, 5 mouse axis, 6 mouse button), the
-// pad it reads and the control index.
-struct Binding {
-    s32 type;  // offset 0x0
-    s32 pad;   // offset 0x4
-    union {
-        s32 code;
-        u8 key;
-    };           // offset 0x8
-    u8 latched;  // offset 0xC
 };
 
 struct BindEntry {
