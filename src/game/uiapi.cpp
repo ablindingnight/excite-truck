@@ -1284,13 +1284,15 @@ extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flag
         } else {
             layout = fn_8022E0EC(map->name);
         }
-        lbl_8055EF44 = map->name;
+        const char* name = map->name;
+        lbl_8055EF44 = name;
         map->layout = layout;
     } else {
         layout = map->layout;
     }
+    s8 camera = layout->hasCamera;
     map->back = 0;
-    if (layout->hasCamera) {
+    if (camera) {
         if (!lbl_8055EF40) {
             fn_80276D3C(layout->camera, 1);
         } else {
@@ -1357,7 +1359,7 @@ extern "C" void fn_802141A0(Window** out, UIMapping* map, int x, int y, int flag
         switch (s->kind) {
         case 6: {
             lbl_8055EF38 = 0;
-            UIHotKey* key = new ("HotKey") UIHotKey(s->arg1, s->value, (u16)(u32)s->arg2);
+            UIHotKey* key = new ("HotKey") UIHotKey(s->arg1, (u16)(u32)s->arg2, s->value);
             fn_802168EC(win, (WidgetFragment*)key, -1);
             lbl_8055EF38 = (void*)-1;
             break;

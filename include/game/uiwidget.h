@@ -96,9 +96,9 @@ public:
     unsigned short key;            // 0x244
     void* action;       // 0x248
     void* param;        // 0x24C
-    UIHotKey(void* p, void* a, unsigned short k) : UIWidget(0, 0, 0, 0, 0) {
-        action = a;
+    UIHotKey(void* p, unsigned short k, void* a) : UIWidget(0, 0, 0, 0, 0) {
         param = p;
+        action = a;
         key = k;
     }
 };
