@@ -32,10 +32,7 @@ public:
 };
 
 // A screen run between head-to-head races.
-class SessionScreen {
-public:
-    virtual ~SessionScreen(void) {}
-};
+#include "game/sessionscreen.h"
 
 #include "game/heapmark.h"
 

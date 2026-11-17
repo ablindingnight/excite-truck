@@ -10,18 +10,7 @@
 #include "game/menu.h"
 // The car list interface the garage is handed (gamedo.cpp calls it SessionScreen). Only its destructor has a
 // body; the list classes implement the rest.
-class SessionScreen {
-public:
-    virtual ~SessionScreen(void) {}
-    virtual void Add(const char* name, u8 unlocked, u8 extreme) = 0;  // 0x0C
-    virtual void SetValue(int i, s32 v) = 0;          // 0x10
-    virtual int Count(void) = 0;                      // 0x14
-    virtual const char* Name(int i) = 0;              // 0x18
-    virtual int Unlocked(int i) = 0;                  // 0x1C
-    virtual const char* ExtremeName(int i) = 0;       // 0x20
-    virtual int IsExtreme(int i) = 0;                 // 0x24
-    virtual const char* Title(int i) = 0;             // 0x28
-};
+#include "game/sessionscreen.h"
 typedef SessionScreen GarageList;
 
 #include "game/menustate.h"
