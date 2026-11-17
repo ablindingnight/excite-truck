@@ -4,6 +4,7 @@
 // with a small torque, and is parked below the world (y -500) when idle or off the ground. Also packs its
 // pose into the render buffer and its state into replay packets. Names are guesses apart from the string.
 #include "game/common.h"
+#include "game/wheel.h"
 #include "game/carbody.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
@@ -54,24 +55,6 @@ struct WheelPose {
 };
 
 extern "C" CarBody* fn_8017960C(int car);
-
-class Wheel : public RigidBody {
-public:
-    Wheel(void);
-    virtual void Init(BodyDesc* d);
-    virtual ~Wheel(void);
-    virtual void Reset(void);
-    virtual void Update(void);
-    virtual void vf20(void);
-    virtual void vf28(u8* buf);
-    virtual s32 vf2C(RPacket* p);
-    virtual void vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb);
-    virtual s32 vf34(RPacket* p);
-    f32 time;   // offset 0x1EC
-    s32 car;    // offset 0x1F0
-    s32 index;  // offset 0x1F4
-    u8 live;    // offset 0x1F8
-};
 
 ModuleTag lbl_8055E648;
 s32 lbl_8055E650;  // wheels in the pool

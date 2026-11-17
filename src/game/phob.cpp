@@ -4,6 +4,7 @@
 // sent to the renderer, the view->car map and the event message buffers. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/wheel.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/collvol.h"
@@ -348,12 +349,6 @@ class PhobStatic {
 public:
     PhobStatic(void);
     u8 pad0[0xD0];
-};
-
-class Wheel {
-public:
-    Wheel(void);
-    u8 pad0[0x1FC];
 };
 
 struct BodyDesc;
