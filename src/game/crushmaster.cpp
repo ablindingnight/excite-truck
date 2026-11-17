@@ -104,6 +104,7 @@ const char* GetGradeDisplayName(int grade);
 void* operator new(size_t size, const char* tag);
 
 #include "game/configroot.h"
+#include "game/strcopy.h"
 
 ConfigRoot* fn_8000AC38(void);
 
@@ -152,17 +153,6 @@ static inline void Stop(RSound* s) {
     }
 }
 
-static inline void StrCopyN(char* dst, const char* src, int len) {
-    char* d = dst;
-    int n = len;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 #define CLAMP01(x) ((x) = MIN(1.0f, (x)), (x) = MAX((x), 0.0f))
 
@@ -791,21 +781,21 @@ void CrushResults::Update(int score, int kills, int bonus) {
         }
         fn_801345D8(timeLeft, 0x14, "%d", n);
         if (noBonus) {
-            StrCopyN(timeBonus, "", 0x14);
-            StrCopyN(bonusTitle, "", 0x14);
+            SafeStrCopy(timeBonus, "", 0x14);
+            SafeStrCopy(bonusTitle, "", 0x14);
         } else {
             static LocString s("ResultsOverlay:TIME_BONUS_CAPS");
             fn_80130980(timeBonus, 0x14, 2, shown);
-            StrCopyN(bonusTitle, s.Get(), 0x14);
+            SafeStrCopy(bonusTitle, s.Get(), 0x14);
         }
         fn_801308F4(finalScore, 0x14, score);
         fn_801308F4(noBonusScore, 0x14, score - bonus);
         {
             int g = fn_801609C4(score);
             if (g != -1) {
-                StrCopyN(grade, GetGradeDisplayName(g), 0xA);
+                SafeStrCopy(grade, GetGradeDisplayName(g), 0xA);
             } else {
-                StrCopyN(grade, "-", 0xA);
+                SafeStrCopy(grade, "-", 0xA);
             }
         }
         if (fF8) {
@@ -999,9 +989,9 @@ inline void CrushResults::Load(void) {
         Bind(2, "difficulty_level", &fF0),
         lbl_802FAA40,
     };
-    StrCopyN(noBonusScore, "100", 0x14);
-    StrCopyN(timeLeft, "50", 0x14);
-    StrCopyN(finalScore, "150", 0x14);
+    SafeStrCopy(noBonusScore, "100", 0x14);
+    SafeStrCopy(timeLeft, "50", 0x14);
+    SafeStrCopy(finalScore, "150", 0x14);
     fn_80130980(timeBonus, 0x14, 2, 75.0f);
     fF0 = fn_80204CF0() + 1;
     fF4 = layout->Add("a_crush_finish.val", (int)(b));
@@ -1118,18 +1108,18 @@ inline void CrushMaster::vf0C(void) {
                 t174.Start();
             }
             b194 = 1;
-            StrCopyN(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
-            StrCopyN(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
-            StrCopyN(results.complete, "", 0x14);
+            SafeStrCopy(results.bB2, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_1"), 0x14);
+            SafeStrCopy(results.bC6, fn_80131234("ResultsOverlay:CHALLENGE_COMPLETE_2"), 0x14);
+            SafeStrCopy(results.complete, "", 0x14);
         }
         {
             f32 left = endTime - now;
             left = 0.0f > left ? 0.0f : left;
             f32 mag = __fabs(left);
             if (mag <= __float_epsilon[0] && AliveAI() > 0) {
-                StrCopyN(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
-                StrCopyN(results.bB2, "", 0x14);
-                StrCopyN(results.bC6, "", 0x14);
+                SafeStrCopy(results.complete, fn_80131234("ResultsOverlay:TIMED_OUT"), 0x14);
+                SafeStrCopy(results.bB2, "", 0x14);
+                SafeStrCopy(results.bC6, "", 0x14);
                 Finish(now);
             }
         }
