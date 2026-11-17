@@ -210,6 +210,20 @@ extern char lbl_8055BAC0[8];  // "" (shared menu-item name)
 extern "C" {
 
 // The records screen ("times.lyt"): best cup and event times for each car, browsed with left/right.
+/* Helper name unproven */
+static inline void FillLists(CarPickScreen* s) {
+    for (int i = 0; i < 3; i++) {
+        s->lists[i] = fn_8027B834(i);
+    }
+}
+
+/* Helper name unproven */
+static inline void FreeIcons(CarPickScreen* s) {
+    for (int k = 0; k < 6; k++) {
+        delete s->icons[k];
+    }
+}
+
 void fn_8025E034(void) {
     int mode = GetEveMode();
     if (mode != 0x130) {
@@ -218,9 +232,7 @@ void fn_8025E034(void) {
     }
     CarPickScreen screen;
     lbl_8055F3D4 = &screen;
-    for (int i = 0; i < 3; i++) {
-        screen.lists[i] = fn_8027B834(i);
-    }
+    FillLists(&screen);
     screen.set = fn_8025FA18();
     for (int k = 0; k < 6; k++) {
         CarIconWidget* w = new ("car_icon") CarIconWidget;
@@ -279,9 +291,7 @@ void fn_8025E034(void) {
         LoadModeEves(mode);
     }
     lbl_8055F3D4 = 0;
-    for (int k = 0; k < 6; k++) {
-        delete screen.icons[k];
-    }
+    FreeIcons(&screen);
     if (--lbl_8055F2E8 == 0) {
         delete lbl_8055F2E4;
         lbl_8055F2E4 = 0;
