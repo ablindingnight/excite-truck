@@ -813,11 +813,13 @@ void fn_8026C014(int player) {
                 } else {
                     CamIdentity(&tgt.rot);
                 }
-                CamSet(&p, lbl_8049A168.pos.x + 0.5f * (car->frame.pos.x - lbl_8049A168.pos.x),
-                       lbl_8049A168.pos.y + 0.5f * (car->frame.pos.y - lbl_8049A168.pos.y),
-                       lbl_8049A168.pos.z + (car->frame.pos.z - lbl_8049A168.pos.z) / 2.0f);
+                f32 deltaz = car->frame.pos.z - lbl_8049A168.pos.z;
+                f32 deltay = car->frame.pos.y - lbl_8049A168.pos.y;
+                f32 deltax = car->frame.pos.x - lbl_8049A168.pos.x;
+                tgt.pos.z = p.z = lbl_8049A168.pos.z + deltaz / 2.0f;
+                tgt.pos.y = p.y = lbl_8049A168.pos.y + 0.5f * deltay;
+                tgt.pos.x = p.x = lbl_8049A168.pos.x + 0.5f * deltax;
                 QuatCopy(&lbl_8049A168.rot, &qs);
-                CamCopy(&tgt.pos, &p);
                 CamCopy(&lbl_8049A168.pos, &p);
             } else {
                 tgt = car->frame;
