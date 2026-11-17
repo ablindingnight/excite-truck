@@ -284,11 +284,7 @@ public:
     u8 pad4[0x64];
 };
 
-class NetCar {
-public:
-    NetCar(void);
-    u8 pad0[0x2780];
-};
+#include "game/netcar.h"
 
 #include "game/phobstatic.h"
 
