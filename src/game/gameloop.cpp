@@ -30,13 +30,7 @@ struct ViewCam {
 };
 }  // namespace
 
-// The per-car record fn_801EA9A0 returns: carinfo.cpp's CarInfo (0xBC); only the fields used here are
-// declared (was named Racer here, a name world/carmodel use for a different class).
-// CarInfo: game/carinfo.h.
-struct RaceResultEntry {
-    u8 pad0[0x10];
-    s32 value;  // offset 0x10
-};
+#include "game/raceresultentry.h"
 
 struct RaceResult {
     s32 count;     // offset 0x0

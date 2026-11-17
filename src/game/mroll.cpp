@@ -20,10 +20,7 @@ extern const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
 #define U8(p, o) (*(u8*)((u8*)(p) + (o)))
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
-class VDel {
-public:
-    virtual ~VDel(void);
-};
+#include "game/vdel.h"
 
 class VU {
 public:

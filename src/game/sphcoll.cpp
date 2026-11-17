@@ -106,10 +106,7 @@ extern "C" void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b);
 
 class VEx;
 
-class VDel {
-public:
-    virtual ~VDel(void);
-};
+#include "game/vdel.h"
 
 struct SphGroupDel {
     u8 pad0[0x24];    // offset 0x0

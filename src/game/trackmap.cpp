@@ -40,9 +40,7 @@ struct Mtx34 {
     f32 m[3][4];
 };
 
-struct Vertex {
-    f32 data[6];
-};
+#include "game/vertex.h"
 
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
 struct Viewport {

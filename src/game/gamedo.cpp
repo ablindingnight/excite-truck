@@ -11,11 +11,7 @@ int fn_80128314(int heap);
 int fn_80265D58(void);
 }
 
-// The drivers/vehicles of one race.
-struct RaceResultEntry {
-    u8 pad0[0x10];
-    s32 value;  // offset 0x10
-};
+#include "game/raceresultentry.h"
 
 struct RaceResult {
     s32 count;   // offset 0x0

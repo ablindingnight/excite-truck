@@ -114,23 +114,7 @@ static inline int FindIcon(CarIconTable* icons, const char* name) {
 // zero-filled space of this unit's weak IMenuState copy). Constructed and destroyed inline as the stack array in
 // the records screen; the deleting dtor (fn_8025CC14) is the weak out-of-line copy its vtable needs.
 namespace {
-class RecordIcon : public MenuState {
-public:
-    RecordIcon(void) {
-        icons = 0;
-        visible = 0;
-        art = fn_8023512C("caricona.art");
-    }
-    virtual ~RecordIcon(void) { fn_80235380(art); }
-    virtual void Draw(void);
-
-    CarIconTable* icons;  // offset 0x18
-    s32 icon;         // offset 0x1C
-    u8 visible;       // offset 0x20
-    u32 color;        // offset 0x24
-    gArtSet* art;          // offset 0x28
-    u8 valid;         // offset 0x2C
-};
+#include "game/recordicon.h"
 }  // namespace
 
 // One high score row: score, grade and time text.

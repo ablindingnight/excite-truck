@@ -77,9 +77,7 @@ struct ViewLayout {
     f32 centerY;  // offset 0x14
 };
 
-struct Vertex {
-    f32 data[6];
-};
+#include "game/vertex.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);

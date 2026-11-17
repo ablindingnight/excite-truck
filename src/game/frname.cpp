@@ -41,23 +41,7 @@ s32 lbl_8055F3C4;
 // unit's weak IMenuState copy). Same shape as recscreen's. Declared before FriendlyNames: MWCC emits vtables in
 // reverse declaration order.
 namespace {
-class RecordIcon : public MenuState {
-public:
-    RecordIcon(void) {
-        icons = 0;
-        visible = 0;
-        art = fn_8023512C("caricona.art");
-    }
-    virtual ~RecordIcon(void) { fn_80235380(art); }
-    virtual void Draw(void);
-
-    CarIconTable* icons;  // offset 0x18
-    s32 icon;         // offset 0x1C
-    u8 visible;       // offset 0x20
-    u32 color;        // offset 0x24
-    gArtSet* art;          // offset 0x28
-    u8 valid;         // offset 0x2C
-};
+#include "game/recordicon.h"
 }  // namespace
 
 // One stat record line on the friendly-name screen.

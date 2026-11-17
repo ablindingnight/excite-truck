@@ -70,10 +70,7 @@ struct VecHead {
     s32 cap;    // offset 0x8
 };
 
-class VDel {
-public:
-    virtual ~VDel(void);
-};
+#include "game/vdel.h"
 
 // Two (0, 2) value pairs built by the constructor.
 struct GaragePair {
