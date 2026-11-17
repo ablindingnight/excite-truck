@@ -340,7 +340,7 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
     return t;
 }
 
-void fn_802D81C4(GXTexDesc* d) {
+void fn_802D81C4(GXTexDesc* d, const char*) {
     const u8* wa;
     s32 w = d->w;
     u8* tex;
@@ -374,7 +374,7 @@ void fn_802D81C4(GXTexDesc* d) {
     delete[] tmp;
 }
 
-void fn_802D86BC(GXTexDesc* d) {
+void fn_802D86BC(GXTexDesc* d, const char*) {
     const u8* wa;
     TexImage* img = d->data;
     s32 w = d->w;
@@ -463,20 +463,27 @@ static inline void Fix(u8** p, TexImage* img) {
 
 /* Helper name unproven: turns one texture image's offsets into pointers. */
 static inline void FixTexImage(TexImage* img) {
-    Fix((u8**)&img->pal, img);
-    Fix(&img->tex, img);
-    Fix(&img->alpha, img);
-}
-
-void fn_802D8DCC(GXTexDesc* d, const char*) {
-    FixTexImage(d->data);
-    u32 fmt = d->format;
-    if (fmt == 0x40 || fmt == 0) {
-        fn_802D81C4(d);
-    } else if (fmt == 0x41 || fmt == 1) {
-        fn_802D86BC(d);
+    for (int i = 0; i < 3; i++) {
+        Fix((u8**)img + i, img);
     }
 }
+
+// opt_propagation off (scoped): with it the unrolled 3-pointer loop leaves no copy behind (retail's image pointer is
+// r7 above name r4, byte temporary r5 and the loop pointer r6); without it the last iteration keeps an addi. Pragma
+// unproven: no plain-code spelling found (G4 2026-11-17, ATTEMPTS).
+#pragma push
+#pragma opt_propagation off
+void fn_802D8DCC(GXTexDesc* d, const char* name) {
+    TexImage* img = d->data;
+    FixTexImage(img);
+    u32 fmt = d->format;
+    if (fmt == 0x40 || fmt == 0) {
+        fn_802D81C4(d, name);
+    } else if (fmt == 0x41 || fmt == 1) {
+        fn_802D86BC(d, name);
+    }
+}
+#pragma pop
 
 void fn_802D9340(GXTex* t);
 
