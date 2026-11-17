@@ -42,7 +42,7 @@ class IMcDialog {  /* Class name unproven */
 public:
     virtual void Open(void) = 0;
     virtual void Close(void) = 0;
-    virtual int Setup(McDialogCfg* cfg) = 0;
+    virtual int Setup(const McDialogCfg* cfg) = 0;
     virtual void ShowMsg(const McMsg* msg) = 0;
 };
 
@@ -57,7 +57,7 @@ public:
     }
     virtual void Open(void);
     virtual void Close(void);
-    virtual int Setup(McDialogCfg* cfg);
+    virtual int Setup(const McDialogCfg* cfg);
     virtual void ShowMsg(const McMsg* m);
     virtual ~MemCardDialogBg(void) {}
 
@@ -81,7 +81,7 @@ public:
     }
     virtual void Open(void);
     virtual void Close(void);
-    virtual int Setup(McDialogCfg* cfg);
+    virtual int Setup(const McDialogCfg* cfg);
     virtual void ShowMsg(const McMsg* m);
     virtual ~MemCardDialogMgr(void);
 
@@ -89,7 +89,7 @@ public:
     u8 open;             // offset 0x1C
     u8 layout;           // offset 0x1D: "mc_dialog.lyt" loaded
     u8 bgShown;          // offset 0x1E
-    McDialogCfg* cfg;    // offset 0x20
+    const McDialogCfg* cfg;    // offset 0x20
     s32 retries;         // offset 0x24
 };
 

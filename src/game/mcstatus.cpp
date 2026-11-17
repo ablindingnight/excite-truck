@@ -188,7 +188,7 @@ static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y, const char* lab
 
 // The choice dialog without a layout: draws the message and the choices (the selected one pulses) until
 // one is accepted or the check callback reports a result.
-static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
+static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
     f32 ax;
     f32 ay;
     int sel = cfg->select;
@@ -316,7 +316,7 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 #pragma push
 #pragma opt_propagation off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
-inline int MemCardDialogBg::Setup(McDialogCfg* cfg) { return RunChoices(this, cfg); }
+inline int MemCardDialogBg::Setup(const McDialogCfg* cfg) { return RunChoices(this, cfg); }
 #pragma pop
 #pragma pop
 
@@ -451,7 +451,8 @@ static inline const char* DialogOption3(void) { return "#option_3"; }
 /* Helper name unproven */
 static inline const char* DialogOption4(void) { return "#option_4"; }
 
-inline int MemCardDialogMgr::Setup(McDialogCfg* cfg) {
+// cfg is a pointer to const (retail loads through it float above the stores to this->cfg and the choice copies).
+inline int MemCardDialogMgr::Setup(const McDialogCfg* cfg) {
     if (!layout) {
         return bg.Setup(cfg);
     }
