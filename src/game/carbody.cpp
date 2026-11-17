@@ -3399,8 +3399,9 @@ void fn_8018A750(u8* p) {
         SprPin pins[4];
         int n = S32(cb->f26C0, 0xC8);
         int nv = n * 2;
+        int i = 0;
         if (n > 0) {
-            for (int i = 0; i < S32(cb->f26C0, 0xC8); i++) {
+            for (; i < S32(cb->f26C0, 0xC8); i++) {
                 SprVert* v = &verts[i * 2];
                 v->pos.v[0] = cb->world.pos.x;
                 v->pos.v[1] = cb->world.pos.y;
@@ -3408,8 +3409,8 @@ void fn_8018A750(u8* p) {
                 v->w34 = 1.0f;
                 v->w30 = 0.5f;
                 v[1] = v[0];
-                edges[i].b = i * 2 + 1;
                 edges[i].a = i * 2;
+                edges[i].b = i * 2 + 1;
                 edges[i].extra = 0.0f;
                 edges[i].stiff = 1.0f - F32(cb->f26C0 + i * 8, 0xA8);
                 pins[i].idx = i * 2;
