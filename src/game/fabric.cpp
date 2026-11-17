@@ -7,6 +7,7 @@
 #include "game/rmtx.h"
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
+#include "game/byteswap.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -1004,40 +1005,22 @@ void fn_801F75A4(TObj* o, u8* data, void* scene, s32 id) {
 }
 }
 
-static inline void SwapN(u8* p, int n) {
-    int i;
-    for (i = 0; i < n / 2; i++) {
-        u8 t = p[i];
-        p[i] = p[n - 1 - i];
-        p[n - 1 - i] = t;
-    }
-}
-
-static inline void Swap32(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 static inline void SwapKeys(u8* p, int n) {
     for (int i = 0; i < n; i++, p += 0x18) {
-        Swap32(p);
-        Swap32(p + 4);
-        Swap32(p + 8);
-        Swap32(p + 12);
-        Swap32(p + 16);
-        Swap32(p + 20);
+        SwapWord(p);
+        SwapWord(p + 4);
+        SwapWord(p + 8);
+        SwapWord(p + 12);
+        SwapWord(p + 16);
+        SwapWord(p + 20);
     }
 }
 
 void FabricTMH::Swap(TObj* o) {
     u8* d = (u8*)o;
-    SwapN(d + 0x2C, 16);
+    SwapBytesN(d + 0x2C, 16);
     SwapKeys(d + 0x3C, 3);
-    SwapN(d + 0x84, 12);
+    SwapBytesN(d + 0x84, 12);
 }
 
 void FabricTMH::Init(TObj* o) {}
