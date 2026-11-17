@@ -99,7 +99,7 @@ double sin(double x);
 double sqrt(double x);
 void fn_801E9DC4(CxEntry* e);
 void fn_801BDA70(CarSetup* out);
-void fn_801BDA74(int car, CarSetup* out);
+void fn_801BDA74(int car, const CarSetup* out);
 int fn_801E9E78(void* h, ValVec3* p, ValVec3* n, s32* surface);
 void fn_80279D40(CarSetup* out);
 void* memcpy(void* dst, const void* src, size_t n);
@@ -197,7 +197,7 @@ void fn_801BDA70(CarSetup* out) { fn_80279D40(out); }
 // Applies a car setup to car `car`: mass/inertia (and reciprocals) and the integrator's parameter rows - wheel anchors,
 // suspension lanes per wheel, a two-point linear tyre force fit, toe angles, brake split, drive split.
 #define DEG(d) ((d) * 3.141592653589793 / 180.0)
-void fn_801BDA74(int car, CarSetup* s) {
+void fn_801BDA74(int car, const CarSetup* s) {
     MVec4 mass(s->mx, s->my, s->mz, s->mass);
     MVec4 inv(1.0f / s->mx, 1.0f / s->my, 1.0f / s->mz, 1.0f / s->mass);
     CrossSet* x = &lbl_8055E79C[car];
@@ -238,7 +238,7 @@ void fn_801BDA74(int car, CarSetup* s) {
     }
     i = 0;
     do {
-        WheelSetup* w = &s->wheels[i];
+        const WheelSetup* w = &s->wheels[i];
         int front = (i & 2) == 0;
         int left = (i & 1) == 0;
         f32 share = !front ? 1.0f - s->balance : s->balance;
