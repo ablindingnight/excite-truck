@@ -150,15 +150,7 @@ void fn_80214AF0(s32 s);
 }
 extern f32 __float_max[];  // FLT_MAX (MSL)
 
-static inline void CopyName(char* d, int n, const char* s) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
+#include "game/strcopy.h"
 
 extern "C" void gxForgetTexture(u8* tex);
 void operator delete[](void* p);
@@ -171,7 +163,7 @@ static inline void AppendName(const char* s, int n, char* d) {
         d++;
     }
     if (n > 0) {
-        CopyName(d, n, s);
+        SafeStrCopy(d, s, n);
     }
 }
 
@@ -322,7 +314,7 @@ inline void fn_8025F46C(CarPickScreen* s) {
     memset(s->names, 0, sizeof(s->names));
     memset(s->rows, 0, sizeof(s->rows));
     for (int i = 0; i < Min(s->all->Count(), 6); i++) {
-        CopyName(s->names[i].name, 0x20, s->all->Get(i)->Name());
+        SafeStrCopy(s->names[i].name, s->all->Get(i)->Name(), 0x20);
         s->names[i].state = i == s->cur ? 6 : 7;
     }
     int unlocked = 0;
@@ -338,8 +330,8 @@ inline void fn_8025F46C(CarPickScreen* s) {
         CarChoice* car = s->all->Get(s->cur);
         for (int k = 0; k < Min(car->CupCount(), 6); k++) {
             CupChoice* cup = car->Cup(k);
-            CopyName(s->rows[k].name, 0x20, cup->Name());
-            CopyName(s->rows[k].course, 0x20, cup->Course());
+            SafeStrCopy(s->rows[k].name, cup->Name(), 0x20);
+            SafeStrCopy(s->rows[k].course, cup->Course(), 0x20);
             Statistic s0(IdentGetCurrentSlot(), 0x20507, cup->Event(), 0);
             Statistic s1(IdentGetCurrentSlot(), 0x20507, cup->Event(), 1);
             Statistic s2(IdentGetCurrentSlot(), 0x20507, cup->Event(), 2);
