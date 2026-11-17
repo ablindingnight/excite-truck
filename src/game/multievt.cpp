@@ -94,10 +94,10 @@ struct UnlockList {
 
 extern UnlockList* lbl_8055F28C;
 
-static inline int FindUnlock(EventInfo* ev) {
-    UnlockList* l = lbl_8055F28C;
-    for (int i = 0; i < l->count; i++) {
-        if (ev->id == l->entries[i].id) {
+static inline int FindUnlock(EventInfo* ev, const UnlockList* list) {
+    for (int i = 0; i < list->count; i++) {
+        s32 id = list->entries[i].id;
+        if (id == ev->id) {
             return i;
         }
     }
@@ -142,7 +142,7 @@ static inline int FindUnlockByOffset(EventInfo* ev) {
 int fn_8024958C(EventInfo* ev, const char* track) {
     u32 ok = ev->type == 0x180302;
     if (ok) {
-        ok = FindUnlock(ev) != -1;
+        ok = FindUnlock(ev, lbl_8055F28C) != -1;
     }
     if (ok) {
         ok = lbl_8055F28C->entries[FindUnlockByOffset(ev)].unlocked;
