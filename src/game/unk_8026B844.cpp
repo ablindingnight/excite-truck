@@ -467,12 +467,22 @@ struct CamVec4 : CamVec {
     f32 w;
 };
 
+/* Helper name unproven: a row of four rates */
+struct Rate4 {
+    f32 v[4];
+};
+
+static const Rate4 mr0 = {{1.0f, 0.1f, 10.0f, 0.01f}};
+static const Rate4 tr0 = {{0.05f, 0.0125f, 0.15f, 0.0025f}};
+
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
     CamFrame tgt;
     CamVec move;
     CamVec spin;
+    Rate4 moveRate;
+    Rate4 turnRate;
     CamVec4 up;
     CamQuat q;
     CamQuat qs;
@@ -527,11 +537,11 @@ void fn_8026C014(int player) {
         shift = fn_802E4A1C(0xFD);
         ctrl = fn_802E4A1C(0xFE) || fn_802E4A1C(0x3A);
         {
-            f32 moveRate[4] = {1.0f, 0.1f, 10.0f, 0.01f};
-            f32 turnRate[4] = {0.05f, 0.0125f, 0.15f, 0.0025f};
+            moveRate = mr0;
+            turnRate = tr0;
             f32 frames = dt / 0.033333335f;
-            speed = frames * moveRate[(shift << 1) | ctrl];
-            turn = frames * turnRate[(shift << 1) | ctrl];
+            speed = frames * moveRate.v[(shift << 1) | ctrl];
+            turn = frames * turnRate.v[(shift << 1) | ctrl];
         }
         if (fn_802E4A1C(0x1E)) {
             move.z = speed;
