@@ -11,6 +11,16 @@
 #include "game/math_types.h"
 #include "game/mathutil.h"
 
+/* Helper name unproven: three values stored through by-value parameters (one matrix row). */
+static inline void AxisRow(f32& a, f32& b, f32& c, f32 x, f32 y, f32 z) {
+    a = x;
+    b = y;
+    c = z;
+}
+/* Helper name unproven. */
+static inline f32 AxisSq(f32 v) { return v * v; }
+
+
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
@@ -399,15 +409,9 @@ static inline void AxisAngle(CamMat3* m, const CamVec3* axis) {
         f32 s = SinF(angle);
         f32 c = CosF(angle);
         f32 t = 1.0f - c;
-        m->m[1] = y * (t * x) + s * z;
-        m->m[2] = z * (t * x) - s * y;
-        m->m[3] = y * (t * x) - s * z;
-        m->m[4] = c + t * (y * y);
-        m->m[6] = z * (t * x) + s * y;
-        m->m[0] = c + t * (x * x);
-        m->m[5] = z * (t * y) + s * x;
-        m->m[8] = c + t * (z * z);
-        m->m[7] = z * (t * y) - s * x;
+        AxisRow(m->m[0], m->m[1], m->m[2], c + t * AxisSq(x), y * (t * x) + s * z, z * (t * x) - s * y);
+        AxisRow(m->m[3], m->m[4], m->m[5], y * (t * x) - s * z, c + t * AxisSq(y), z * (t * y) + s * x);
+        AxisRow(m->m[6], m->m[7], m->m[8], z * (t * x) + s * y, z * (t * y) - s * x, c + t * AxisSq(z));
     } else {
         m->m[0] = 1.0f;
         m->m[1] = 0.0f;
