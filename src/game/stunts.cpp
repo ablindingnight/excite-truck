@@ -21,7 +21,6 @@ extern RaceCarRec* lbl_804348E8[];
 // Something told about every awarded stunt (achievements, statistics).
 #include "game/stuntwatch.h"
 #include "game/clamp01.h"
-#include "game/round.h"
 
 extern "C" {
 void* memset(void* d, int c, size_t n);
@@ -299,11 +298,12 @@ public:
         }
     }
     void Dump(void) {
-    int scored;
-    int count;
-    f32 total;
-    struct Rank* r;
-    int i;
+        int i;
+        int count;
+        f32 total;
+        int scored;
+        struct Rank* r;
+        int offset;
 
         fn_802E30C8("\r\n%s:", Label());
         fn_802E30C8("   Rank         Count   Unscored   Natural   Score");
@@ -311,8 +311,10 @@ public:
         total = 0.0f;
         count = 0;
         scored = 0;
-        for (i = 0; i < ranks.a.count; i++) {
-            r = &ranks.a.data[i];
+        i = 0;
+        offset = 0;
+        for (; i < ranks.a.count; offset += sizeof(struct Rank), ++i) {
+            r = (struct Rank*)((u8*)ranks.a.data + offset);
             fn_802E30C8("%d: %-12.12s %3d     %4d       %3d       %10.0f", i, r->adj, r->count, r->count - r->scored,
                         r->natural, r->total);
             total += r->total;
@@ -1038,6 +1040,7 @@ extern "C" {
 void fn_80206750(GameSound* s, int car, int pan);
 }
 
+inline s32 Round(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 
 // One-shot stunts reported with a value (crashes).
 struct ThrowTarget {
