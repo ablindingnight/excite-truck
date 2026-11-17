@@ -487,10 +487,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
     }
     CarStatsShutdown();
     fn_8013C8B8();
-    s32* pv = &lbl_80498C48.pairs[slot].c;
-    if (!lbl_80498C48.alt) {
-        pv = &lbl_80498C48.pairs[slot].a;
-    }
+    s32* pv = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a;
     *vehicle = *pv;
     return r != -1;
 }
