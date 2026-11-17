@@ -1839,6 +1839,9 @@ void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
     }
 }
 
+extern const f32 lbl_80561564;
+extern const f32 lbl_80561568;
+
 void ZoneMaster::DrawMissed(int p, ZoneCar* c) const {
     if (c->tA8.Active()) {
         f32 t = c->tA8.Progress();
@@ -1854,10 +1857,14 @@ void ZoneMaster::DrawMissed(int p, ZoneCar* c) const {
         f32 f = 1.0f - c->timeLeft / lbl_8042FB3C.lowTimeWarnT;
         const f32 alpha = f * 255.0f;
         const f32 remaining = 1.0f - f;
-        fn_80147F30(320.0f, 160.0f, 50.0f, 0.0f, ((int)alpha << 24) | 0xFFFFFF, remaining * 100.0f,
-                    1.5707964f, 0.06283186f, tex[2], 0.0f, 0.0f, 1.0f, 1.0f);
+        fn_80147F30(320.0f, 160.0f, 50.0f, 0.0f, ((int)alpha << 24) | 0xFFFFFF, lbl_80561568 * remaining,
+                    1.5707964f, lbl_80561564, tex[2], 0.0f, 0.0f, 1.0f, 1.0f);
     }
 }
+
+// Emit the time-warning arc constants after the function, in retail pool order.
+const f32 lbl_80561564 = 0.06283186f;
+const f32 lbl_80561568 = 100.0f;
 
 void ZoneMaster::DrawGateStar(int p, ZoneCar* c) const {
     if (c->gate && !vf24()) {
