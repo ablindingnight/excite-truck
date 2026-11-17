@@ -128,8 +128,8 @@ static inline int ClampI(int x, int lo, int hi) {
     }
     return hi;
 }
-f32 Max(f32 a, f32 b) { return a > b ? a : b; }
-f32 Min(f32 a, f32 b) { return a < b ? a : b; }
+inline f32 Max(f32 a, f32 b) { return a > b ? a : b; }
+inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
 inline f32 Floor(f32 x) { return floor(x); }
 static inline f32 LerpDiffFirst(f32 a, f32 b, f32 t) { return a + (b - a) * t; }
 static inline f32 Clamp01(f32 x) {
@@ -2348,9 +2348,7 @@ inline void ZoneMaster::vf0C(void) {
                         case 2: {
                             f32 add;
                             if (c->gates == c->streak) {
-                                int mx = MaxBonus(level);
-                                int timeBonusPoints = TimeBonusPoints(c);
-                                if (timeBonusPoints == mx) {
+                                if (TimeBonusPoints(c) == MaxBonus(level)) {
                                     c->streak++;
                                     goto counted;
                                 }
