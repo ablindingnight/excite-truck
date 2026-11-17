@@ -436,6 +436,7 @@ struct DynArray {
     }
     ~DynArray(void) { delete[] mem; }
     T* Add(void) { return &a.data[a.count++]; }
+    T* At(int i) { return &a.data[i]; }
     ArrayRef<T> a;  // offset 0x0
     T* mem;         // offset 0xC
 };
@@ -600,7 +601,7 @@ struct EditContext {
         none.pos.y = 0.0f;
         FixedList<EditRect*, 10> hits;
         for (i = 0; i < rects->a.count; i++) {
-            EditRect* r = &rects->a.data[i];
+            EditRect* r = rects->At(i);
             if (r->handler) {
                 const ElemBase* o = r->target ? (const ElemBase*)r->target : &none;
                 if (p.x >= r->r.x + o->pos.x && p.x < r->r.x + o->pos.x + r->r.w && p.y >= r->r.y + o->pos.y &&
