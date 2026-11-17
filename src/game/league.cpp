@@ -20,11 +20,7 @@ void SetNumPlayers(int n);
 void SetPlayerDriver(s32 player, int driver);
 void ClearPlayer(int player);
 
-struct League {
-    f32 carWid;     // offset 0x0
-    f32 carLen;     // offset 0x4
-    char name[32];  // offset 0x8
-};
+#include "game/league.h"
 
 ModuleTag lbl_8055E0D8;
 u8 lbl_8055E0E0;

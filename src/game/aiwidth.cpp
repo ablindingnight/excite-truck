@@ -2,12 +2,8 @@
 // Names are guesses.
 #include "game/common.h"
 
-struct League {
-    f32 carWid;  // offset 0x0
-    f32 carLen;  // offset 0x4
-};
+#include "game/league.h"
 
-extern "C" League* fn_80137C54(s32 i);
 
 ModuleTag lbl_8055E108;
 

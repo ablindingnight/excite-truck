@@ -25,12 +25,8 @@ void fn_8022D0D8(char* buf, int size);
 void fn_8022D0E8(char* buf, int size, const char* s);
 }
 
-struct League {
-    u8 unk0[0x8];
-    char name[0x20];  // offset 0x8
-};
+#include "game/league.h"
 
-extern "C" League* fn_80137C54(int i);
 
 BOOL OptDirectToTrack(void);
 BOOL OptPaTest(void);
