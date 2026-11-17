@@ -7,6 +7,10 @@
 #include "game/common.h"
 #include "game/phobconfig.h"
 #include <revolution/MTX/vec.h>
+// MutPhob builds its shape through the inline constructors, so this unit emits the root shape table (weak, 0xC).
+// The linker keeps its bytes without the relocation: the 12 zero bytes behind __vt__7MutPhob (they are not three
+// pure slots; MutPhob is a concrete class with 19 slots). FACTS 2026-11-17 "zero blocks".
+#define COLLSHAPE_BASE_DECL
 #include "game/collshape.h"
 #include "game/rvec.h"
 #include "game/rmtx.h"
@@ -80,20 +84,6 @@ public:
     virtual s32 vf34(RPacket* p);
     virtual int vf44(void);
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);
-    // Slots 0x54-0x5C: retail's __vt__7MutPhob is 0x60 bytes with these three slots ZERO, which MWCC writes only for
-    // pure virtuals (CarBody/SpringCar/NetCar/Trailer have real virtuals there). So this TU compiled MutPhob abstract;
-    // phob news it through its own non-abstract view (retail has no out-of-line __ct__7MutPhob). No non-abstract
-    // form gives zero slots under MWCC (2026-11-16). PORT: the PC gets empty bodies, so MutPhob is concrete there and
-    // its destructors are real (an abstract MutPhob made clang emit ud2 for them: race-end crash, port patch 2f41092).
-#ifdef __MWERKS__
-    virtual void vf54(void) = 0;
-    virtual void vf58(void) = 0;
-    virtual void vf5C(void) = 0;
-#else
-    virtual void vf54(void) {}
-    virtual void vf58(void) {}
-    virtual void vf5C(void) {}
-#endif
     s32 model;        // offset 0x1EC
     s32 mask;         // offset 0x1F0
     RMtx home;        // offset 0x1F4
