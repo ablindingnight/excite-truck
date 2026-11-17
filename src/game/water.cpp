@@ -872,7 +872,9 @@ void WaterSystem::Draw(void) {
             WVert* v = &verts[r * 16 + c];
             f32 u = (2.0f * (f32)c / 15.0f - 1.0f) * depth * sx;
             PVec wp;
-            wp.Set(p.x + side.x * u, p.y + side.y * u, p.z + side.z * u);
+            wp.x = p.x + side.x * u;
+            wp.y = p.y + side.y * u;
+            wp.z = p.z + side.z * u;
             v->pos = wp;
             v->color = col;
             PVec s;
