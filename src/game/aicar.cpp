@@ -847,7 +847,10 @@ static inline int ShortStep(f32 dt) {
 }
 
 /* Helper name unproven */
-static inline f32 Cross2(f32 ax, f32 ay, f32 bx, f32 by) { return ay * bx + -ax * by; }
+static inline f32 Cross2(f32 ax, f32 ay, f32 bx, f32 by) {
+    ax = -ax;
+    return ay * bx + ax * by;
+}
 
 void fn_80194324(u8* d) {
     if (IsLoadingActive()) {
@@ -862,8 +865,11 @@ void fn_80194324(u8* d) {
             f32 dt = F32(d, 0x26C) - F32(d, 0x1D0);
             f32 v;
             if (ShortStep(dt)) {
-                f32 b = Cross2(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x180), F32(d, 0x184));
-                v = b + (dt / 1.5f) * (Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8)) - b);
+                f32 fraction = dt / 1.5f;
+                v = Lerp(
+                    Cross2(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x180), F32(d, 0x184)),
+                    Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8)),
+                    fraction);
             } else {
                 v = Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8));
             }
