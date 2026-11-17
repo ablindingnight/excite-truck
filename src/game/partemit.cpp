@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
+#include "game/strcopy.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -161,15 +162,6 @@ void fn_802E30C8(const char* fmt, ...);
 
 extern u8 lbl_8055F73C;
 
-static inline void StrCopy(char* d, int n, const char* s) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void ScaleAdd(RVec3* v, f32 k, const RVec3* a) {
     v->x *= k;
@@ -305,7 +297,7 @@ void fn_8029F458(const char* name, Obj* obj) {
     if (*name == '$') {
         name++;
     }
-    StrCopy(buf, 32, name);
+    SafeStrCopy(buf, name, 32);
     s32 fx = fn_8029F3BC(buf);
     for (int i = 0; i < lbl_804B9B7C.n; i++) {
         EmitterInst& e = lbl_804B9B7C[i];
@@ -373,7 +365,7 @@ void fn_8029F658(ValueNode* node) {
         name++;
     }
     lbl_804B6E70[lbl_8055F81C].id = d->id;
-    StrCopy(lbl_804B6E70[lbl_8055F81C].name, 32, name);
+    SafeStrCopy(lbl_804B6E70[lbl_8055F81C].name, name, 32);
     d->speedScale = node->GetFloat("speed_scale", 0.0f);
     d->spewK = node->GetFloat("spew_k", 0.0f);
     d->spewM = node->GetFloat("spew_m", 0.0f);
@@ -421,7 +413,7 @@ void fn_8029FB00(ValueNode* node) {
     fn_801E9DC4(&in->slot);
     if (fx == lbl_8055F818) {
         lbl_804B7770[lbl_8055F818].id = fx;
-        StrCopy(lbl_804B7770[lbl_8055F818].name, 32, node->GetValue("name"));
+        SafeStrCopy(lbl_804B7770[lbl_8055F818].name, node->GetValue("name"), 32);
         lbl_8055F818++;
     }
 }
