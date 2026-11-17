@@ -1272,7 +1272,7 @@ void fn_802346C8(void) {
 
 void fn_80234AEC(void) { lbl_8055F058.count = 0; }
 
-struct TextStyle {
+struct GTextStyle {
     GTextFont* font;  // offset 0x0
     u32 color;   // offset 0x4
     int align;   // offset 0x8
@@ -1280,7 +1280,7 @@ struct TextStyle {
     f32 xs;      // offset 0x10
 };
 
-void fn_80234AFC(TextStyle* st, const char* fmt, f32 x, f32 y, ...) {
+void fn_80234AFC(GTextStyle* st, const char* fmt, f32 x, f32 y, ...) {
     char buf[128];
     va_list ap;
     va_start(ap, y);
