@@ -15,6 +15,7 @@
 #include "game/math_types.h"
 #include "game/carbody.h"
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 
 struct RPacket;
@@ -570,12 +571,6 @@ int PanelVol::vf44(void) { return owner != 0; }
 
 static inline void DbgLine(RVec3 a, RVec3 b) {}
 
-// Helper name unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
-static inline void AddScaled(RVec3* o, const RVec3* v, f32 s) {
-    o->x += v->x * s;
-    o->y += v->y * s;
-    o->z += v->z * s;
-}
 void PanelVol::Update(void) {
     if (!owner) {
         return;
@@ -601,7 +596,7 @@ void PanelVol::Update(void) {
     nrm.x *= 0.100000024f;
     nrm.y *= 0.100000024f;
     nrm.z *= 0.100000024f;
-    AddScaled(&nrm, &dir, 0.9f);
+    TAddSTo(&nrm, &dir, 0.9f);
     PSVECNormalize((const Vec*)&nrm, (Vec*)&nrm);
     pos = p;
     dir = nrm;

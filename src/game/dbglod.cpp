@@ -18,6 +18,7 @@ void fn_802E4CDC(void);
 }
 
 #include "game/unkstatics16.h"
+#include "game/makeilpos.h"
 
 inline s16 MakeS16(s16 v) { return v; }
 
@@ -40,7 +41,6 @@ const char* lbl_8055AED8 = "";
 bool lbl_8055AEDC = true;
 
 ModuleTag lbl_8055EA70;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055EA78 = MakeILPos(0xFFFF, 0);
 s16 lbl_8055EA7C = MakeS16(0x100);
 extern const s16 lbl_8055EA7E = MakeS16(0x405);

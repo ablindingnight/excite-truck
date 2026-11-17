@@ -11,6 +11,7 @@
 #include "game/respawn.h"
 #include "game/mathutil.h"
 #include "game/clamp01.h"
+#include "game/makeilpos.h"
 
 
 // A ground-plane (x, z) vector.
@@ -3107,7 +3108,6 @@ int fn_801CB114(int key) {
 }  // extern "C"
 
 ModuleTag lbl_8055E7D0;
-static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }
 extern const u32 lbl_8055E7D8 = MakeILPos(0xFFFF, 0);
 UnkStatic7F lbl_8055E7DC;
 bool lbl_8055E7E0;     // hidden

@@ -76,6 +76,7 @@ struct ViewLayout {
 #include "game/vertex.h"
 #include "game/strcopy.h"
 #include "game/mathutil.h"
+#include "game/clamp01.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -311,7 +312,6 @@ gArtSet* lbl_8055D4D0;
 gArtSet* lbl_8055D4D4;
 f32 lbl_8055D4D8;  // centre text wrap width
 
-static inline f32 Clamp01(f32 x) { return MaxF(MinF(1.0f, x), 0.0f); }
 
 static inline DashRow* AddRow(DashRowList* list) { return &list->rows[list->count++]; }
 
