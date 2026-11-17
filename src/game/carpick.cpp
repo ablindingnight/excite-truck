@@ -313,6 +313,12 @@ inline void CarIconWidget::SetChoice(StatChoice c) {
 
 extern "C" {
 
+void fn_80214AF0(s32 s);
+
+// The four functions below are written callee first (refill, poll, previous car, next car) and generated
+// deferred: the compiler then emits them in reverse order, which is where the target has them (next car,
+// previous car, poll, refill, the refill copy after the two handlers that expand it).
+#pragma defer_codegen on
 // Refills the records screen for the current car: the car name header and, per cup, the best time over
 // the three difficulties with the car/colour it was set with.
 #pragma push
@@ -378,52 +384,6 @@ inline void fn_8025F46C(CarPickScreen* s) {
 }
 #pragma pop
 
-// Highlights each cup row's best difficulty.
-static inline void HighlightBest(void) {
-    CarPickScreen* t = lbl_8055F3D4;
-    for (int k = 0; k < 5; k++) {
-        for (int j = 0; j < 3; j++) {
-            if (j == t->rows[k].best) {
-                fn_80214AF0(k + 1 + j * 10);
-            } else {
-                fn_80214A9C(k + 1 + j * 10);
-            }
-        }
-    }
-}
-
-// "Next car" on the records screen: moves to the next car any list has unlocked.
-#pragma push
-#pragma opt_unroll_loops off
-int fn_8025E678(int* key) {
-    if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
-        lbl_8055F3D4->cur++;
-        fn_8025F46C(lbl_8055F3D4);
-        HighlightBest();
-    }
-    return 0;
-}
-#pragma pop
-
-// "Previous car" on the records screen.
-#pragma push
-#pragma opt_unroll_loops off
-int fn_8025ECBC(int* key) {
-    if (lbl_8055F3D4->cur > 0) {
-        lbl_8055F3D4->cur--;
-        fn_8025F46C(lbl_8055F3D4);
-        HighlightBest();
-    }
-    return 0;
-}
-#pragma pop
-
-
-}  // extern "C"
-
-extern "C" {
-void fn_80214AF0(s32 s);
-
 // Greys out the grid buttons of cars nobody can pick and highlights each column's selection.
 static inline void ShowBestRows(CarPickScreen* s) {
     for (int k = 0; k < 5; k++) {
@@ -450,6 +410,46 @@ void fn_8025F274(u8* p) {
     ShowBestRows(s);
 }
 
+// Highlights each cup row's best difficulty.
+static inline void HighlightBest(void) {
+    CarPickScreen* t = lbl_8055F3D4;
+    for (int k = 0; k < 5; k++) {
+        for (int j = 0; j < 3; j++) {
+            if (j == t->rows[k].best) {
+                fn_80214AF0(k + 1 + j * 10);
+            } else {
+                fn_80214A9C(k + 1 + j * 10);
+            }
+        }
+    }
+}
+
+// "Previous car" on the records screen.
+#pragma push
+#pragma opt_unroll_loops off
+int fn_8025ECBC(int* key) {
+    if (lbl_8055F3D4->cur > 0) {
+        lbl_8055F3D4->cur--;
+        fn_8025F46C(lbl_8055F3D4);
+        HighlightBest();
+    }
+    return 0;
+}
+#pragma pop
+
+// "Next car" on the records screen: moves to the next car any list has unlocked.
+#pragma push
+#pragma opt_unroll_loops off
+int fn_8025E678(int* key) {
+    if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
+        lbl_8055F3D4->cur++;
+        fn_8025F46C(lbl_8055F3D4);
+        HighlightBest();
+    }
+    return 0;
+}
+#pragma pop
+#pragma defer_codegen reset
 
 }  // extern "C"
 
