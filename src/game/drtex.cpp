@@ -10,6 +10,7 @@
 #include <revolution/GX/GXTexture.h>
 #include <revolution/OS/OSCache.h>
 #include "game/byteswap.h"
+#include "game/strcopy.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -113,15 +114,6 @@ GXTex* lbl_8055FE20;  // bound lightmap
 GXTex* lbl_8055FE24;  // render target
 GXTex* lbl_8055FE28;  // texture table
 
-static inline void StrCopy(char* d, const char* s, int n) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline u8 MipMapped(s32 n) { return n > 2; }
 
@@ -236,7 +228,7 @@ GXTex* fn_802D7B5C(const GXTexDesc* d, const char* name) {
         ci4 = 0;
     }
     GXTex* t = d->user ? d->user : fn_802D7600(name);
-    StrCopy(t->name, name, 32);
+    SafeStrCopy(t->name, name, 32);
     int n = ci4 ? 16 : 256;
     u32* pal = d->data->pal;
     fn_801282EC(0x20);
@@ -276,7 +268,7 @@ GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
         fn_802E317C("gx: can't create raw texture %s in format 0x%x", name, d->format);
     }
     GXTex* t = d->user ? d->user : fn_802D7600(name);
-    StrCopy(t->name, name, 32);
+    SafeStrCopy(t->name, name, 32);
     s32 w = d->w;
     s32 h = d->h;
     t->lut = 0;
@@ -338,7 +330,7 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
         break;
     }
     GXTex* t = d->user ? d->user : fn_802D7600(name);
-    StrCopy(t->name, name, 32);
+    SafeStrCopy(t->name, name, 32);
     s32 w = d->w;
     s32 h = d->h;
     t->lut = 0;
@@ -424,7 +416,7 @@ void fn_802D86BC(GXTexDesc* d) {
 
 GXTex* fn_802D8A84(const GXTexDesc* d, const char* name) {
     GXTex* t = d->user ? d->user : fn_802D7600(name);
-    StrCopy(t->name, name, 32);
+    SafeStrCopy(t->name, name, 32);
     s32 w = d->w;
     s32 h = d->h;
     t->lut = 0;
