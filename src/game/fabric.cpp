@@ -19,7 +19,7 @@ double fabs(double x);
 }
 
 // One corner of a fabric quad (0x18).
-struct Corner {
+struct FabricCorner {
     PVec pos;   // offset 0x0
     u32 color;  // offset 0xC
     f32 u;      // offset 0x10
@@ -27,7 +27,7 @@ struct Corner {
 };
 
 struct Quad {
-    Corner c[4];     // offset 0x0: ul, ur, ll, lr
+    FabricCorner c[4];     // offset 0x0: ul, ur, ll, lr
     f32 colDensity;  // offset 0x60
     f32 rowDensity;  // offset 0x64
 };
@@ -84,7 +84,7 @@ struct TObj {
 // Track object data for a fabric: corner records indexed by the three corner fields.
 struct FabricData {
     u8 pad0[0x10];
-    Corner corners[3];  // offset 0x10
+    FabricCorner corners[3];  // offset 0x10
     s32 indices[3];  // offset 0x58
 };
 
@@ -315,7 +315,7 @@ static inline ValVec3 White(void) {
     w.z = 1.0f;
     return w;
 }
-void fn_801F4F9C(Corner* out, ValueNode* vn, const RMtx* m) {
+void fn_801F4F9C(FabricCorner* out, ValueNode* vn, const RMtx* m) {
     PVec p = *(const PVec*)&static_cast<const ValVec3&>(NodeVec3(vn, "offset"));  // address of the bound temporary
     ValPoint uv = NodePoint(vn, "uv");
     ValVec3 c = NodeVec3Or(vn, "color", White());
@@ -489,7 +489,7 @@ static inline void LerpPos(PVec* out, const PVec* a, const PVec* b, f32 t) {
     out->z = Lerp( b->z,a->z, t);
 }
 
-static inline void LerpVert(DrawVert* out, Corner a, Corner b, f32 t) {
+static inline void LerpVert(DrawVert* out, FabricCorner a, FabricCorner b, f32 t) {
     out->u = Lerp( b.u,a.u, t);
     out->v = Lerp( b.v,a.v, t);
     out->color = LerpColor( b.color,a.color, t);
@@ -954,12 +954,12 @@ extern "C" {
 
 void fn_801F7400(Quad* q, const u8* data, ValueNode* vn) {
     const FabricData* mesh = (const FabricData*)data;
-    const Corner& c0 = mesh->corners[mesh->indices[0]];
+    const FabricCorner& c0 = mesh->corners[mesh->indices[0]];
     q->c[0] = c0;
-    const Corner& c1 = mesh->corners[mesh->indices[1]];
+    const FabricCorner& c1 = mesh->corners[mesh->indices[1]];
     const f32 u1 = c1.u;
     q->c[1] = c1;
-    const Corner& c2 = mesh->corners[mesh->indices[2]];
+    const FabricCorner& c2 = mesh->corners[mesh->indices[2]];
     q->c[2] = c2;
     const f32 sumX = q->c[2].pos.x + q->c[1].pos.x;
     const f32 sumY = q->c[2].pos.y + q->c[1].pos.y;

@@ -4,6 +4,7 @@
 // Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/corner.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/collvol.h"
@@ -1323,13 +1324,6 @@ struct CbVec4 {
     CbSolVec Sol(void) const { return CbSolVec4(x, y, z, w); }
     f32& operator[](int i) { return (&x)[i]; }
     f32 x, y, z, w;
-};
-
-// CbFrame: rmtx.h's RMtx.
-class Corner {
-public:
-    Corner* next;
-    void Hit(RigidBody* b);
 };
 
 extern "C" {

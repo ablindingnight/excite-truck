@@ -3,6 +3,7 @@
 // guesses apart from the messages.
 #include "game/common.h"
 #include "game/rvec.h"
+#include "game/corner.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "macros.h"
@@ -45,31 +46,6 @@ static inline void AddScaled(RVec3* v, const RVec3* d, f32 s) {
     v->y = v->y + d->y * s;
     v->z = v->z + d->z * s;
 }
-
-// A contact point in body space.
-struct Corner {
-    Corner(void) {
-        pos.x = 0.0f;
-        pos.y = 0.0f;
-        pos.z = 0.0f;
-        spring = 1000.0f;
-        friction = -1000.0f;
-        damping = 0.0f;
-        vel.x = 0.0f;
-        vel.y = 0.0f;
-        vel.z = 0.0f;
-        unk0 = 0;
-    }
-    void Hit(RigidBody* b);
-    void Stop(void);
-
-    s32 unk0;      // offset 0x0
-    RVec3 pos;     // offset 0x4
-    f32 spring;    // offset 0x10
-    f32 friction;  // offset 0x14
-    f32 damping;   // offset 0x18
-    RVec3 vel;     // offset 0x1C
-};
 
 struct CornerBlock {
     CornerBlock(void) {

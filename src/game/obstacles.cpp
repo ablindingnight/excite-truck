@@ -5,6 +5,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rvec.h"
+#include "game/corner.h"
 #include "game/rmtx.h"
 #include "game/collvol.h"
 #include "game/rigid.h"
@@ -233,23 +234,14 @@ ObstacleBody::~ObstacleBody(void) {}
 // A contact corner (corners.cpp), kept in a body's list at 0xD0.
 // Keep the scale operand in MWCC's floating-point pool.
 static inline f32 ScaleOperand(f32 value) { return value; }
-struct BodyCorner {
-    BodyCorner* next;  // offset 0x0
-    RVec3 pos;         // offset 0x4
-    f32 spring;        // offset 0x10
-    f32 friction;      // offset 0x14
-    f32 damping;       // offset 0x18
-    ValVec3 vel;        // offset 0x1C
-};
-
-extern "C" BodyCorner* fn_801AE180(void);  // new corner
+extern "C" Corner* fn_801AE180(void);  // new corner
 
 static inline void AddCorner(u8* body, f32 x, f32 y, f32 z, f32 spring) {
     RVec3 pos;
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    BodyCorner* c = fn_801AE180();
+    Corner* c = fn_801AE180();
     c->pos = pos;
     c->spring = spring;
     c->friction = 0.5f;
@@ -257,8 +249,8 @@ static inline void AddCorner(u8* body, f32 x, f32 y, f32 z, f32 spring) {
     c->vel.y = 0.0f;
     c->vel.z = 0.0f;
     c->damping = 0.0f;
-    c->next = (BodyCorner*)((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
-    ((RigidBody*)body)->contacts = (Corner*)c;
+    c->next = ((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
+    ((RigidBody*)body)->contacts = c;
 }
 
 extern "C" {
@@ -347,7 +339,7 @@ double sqrt(double x);
 }
 
 static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
-    BodyCorner* c = fn_801AE180();
+    Corner* c = fn_801AE180();
     c->pos = v;
     c->spring = spring;
     c->friction = 0.5f;
@@ -355,12 +347,12 @@ static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
     c->vel.y = 0.0f;
     c->vel.z = 0.0f;
     c->damping = 0.0f;
-    c->next = (BodyCorner*)((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
-    ((RigidBody*)body)->contacts = (Corner*)c;
+    c->next = ((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
+    ((RigidBody*)body)->contacts = c;
 }
 
 static inline void AddCornerV(u8* body, const ValVec3& v, f32 spring) {
-    BodyCorner* c = fn_801AE180();
+    Corner* c = fn_801AE180();
     c->pos = (const RVec3&)v;
     c->spring = spring;
     c->friction = 0.5f;
@@ -368,8 +360,8 @@ static inline void AddCornerV(u8* body, const ValVec3& v, f32 spring) {
     c->vel.y = 0.0f;
     c->vel.z = 0.0f;
     c->damping = 0.0f;
-    c->next = (BodyCorner*)((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
-    ((RigidBody*)body)->contacts = (Corner*)c;
+    c->next = ((RigidBody*)body)->contacts;  // RigidBody::contacts (0xD0)
+    ((RigidBody*)body)->contacts = c;
 }
 
 static inline ValVec3 MakeVec(f32 x, f32 y, f32 z) {
@@ -700,7 +692,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddShape(shape);
         this->b1E8 = corners;
     }
-    for (BodyCorner* c = *(BodyCorner**)((u8*)this + 0xD0); c; c = c->next) {
+    for (Corner* c = *(Corner**)((u8*)this + 0xD0); c; c = c->next) {
         c->friction = 2.0f;
     }
     *(Pose12*)((u8*)(u8*)&this->restPose) = *(Pose12*)((u8*)&mtx);

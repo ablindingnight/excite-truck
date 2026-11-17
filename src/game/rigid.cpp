@@ -6,6 +6,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/rvec.h"
+#include "game/corner.h"
 #include "game/rmtx.h"
 #include "game/collshape.h"
 #include "game/collvol.h"
@@ -69,12 +70,6 @@ struct RPacket {
 
 // A contact point in body space (corners.cpp); the body keeps its corners in a list.
 class RigidBody;
-struct Corner {
-    void Hit(RigidBody* b);
-    void Stop(void);
-    Corner* next;  // offset 0x0
-};
-
 struct ImpRec {
     ImpRec(void);
     CollShape* obj;  // offset 0x0: the pushing shape (notified through its slot 0x24)
