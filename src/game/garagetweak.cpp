@@ -4,6 +4,7 @@
 // garage.val layout, fading out a few seconds after the last input. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
@@ -54,23 +55,18 @@ struct CarTune {
     Params saved1;  // offset 0xEC
 };
 
-struct RaceCar {
-    u8 pad0[0x32C];
-    CarTune tune;  // offset 0x32C
-};
-
 extern "C" {
 ILayout* fn_80145E70(const char* name);  // load layout
 void fn_80147230(TextElem* e, const char* fmt, ...);
 int fn_802E2C20(void);  // milliseconds
 int fn_80179630(int view);
-void fn_8018A2C0(RaceCar* car, TweakVisitor* v);  // visit the car's tweaks
-void fn_8018A180(RaceCar* car);                   // apply the car's tweaks
+void fn_8018A2C0(RaceCarRec* car, TweakVisitor* v);  // visit the car's tweaks
+void fn_8018A180(RaceCarRec* car);                   // apply the car's tweaks
 void fn_80230B5C(PlainValMatrix* c);
 void fn_802C8638(PlainValMatrix* c);
 void fn_802C974C(f32 nearZ, f32 farZ, f32 fov);
 void fn_80011A2C(void);
-extern RaceCar* lbl_804348E8[8];
+extern RaceCarRec* lbl_804348E8[8];
 void fn_801DDED0(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step);
 }
 
@@ -80,7 +76,7 @@ UnkStatic7F lbl_8055E9B8;
 s32 lbl_8055E9BC;      // selected row (-1: restore defaults)
 ILayout* lbl_8055E9C0;  // garage.val
 s32 lbl_8055E9C4;      // tweak count
-RaceCar* lbl_8055E9C8;  // car the list was built for
+RaceCarRec* lbl_8055E9C8;  // car the list was built for
 s32 lbl_8055E9CC;      // time of the last input
 Tweak lbl_80486F30[32];
 
@@ -95,9 +91,9 @@ static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
 extern "C" {
 
-RaceCar* fn_801DDE78(void) { return lbl_804348E8[fn_80179630(0)]; }
+RaceCarRec* fn_801DDE78(void) { return lbl_804348E8[fn_80179630(0)]; }
 
-CarTune* fn_801DDEAC(void) { return &fn_801DDE78()->tune; }
+CarTune* fn_801DDEAC(void) { return (CarTune*)&fn_801DDE78()->setupA; }  // the tuned setup (CbSetup)
 
 void fn_801DDED0(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step) {
     Tweak* t = &lbl_80486F30[lbl_8055E9C4++];
@@ -111,7 +107,7 @@ void fn_801DDED0(const char* name, f32* value, const char* unit, f32 min, f32 ma
 }
 
 void fn_801DDF0C(void) {
-    RaceCar* car = fn_801DDE78();
+    RaceCarRec* car = fn_801DDE78();
     if (car != lbl_8055E9C8) {
         lbl_8055E9C8 = car;
         Collector c;
@@ -221,7 +217,7 @@ int fn_801DE5C4(int key) {
     case 0x127:
         handled = 1;
         if (lbl_8055E9BC >= 0 && lbl_8055E9BC < lbl_8055E9C4) {
-            RaceCar* car = fn_801DDE78();
+            RaceCarRec* car = fn_801DDE78();
             Tweak* t = &lbl_80486F30[lbl_8055E9BC];
             if ((u32)key == 0x127) {
                 *t->value = MinF(t->max, *t->value + t->step);
@@ -235,7 +231,7 @@ int fn_801DE5C4(int key) {
     case 0x58:
         if (lbl_8055E9BC == -1) {
             handled = 1;
-            RaceCar* car = fn_801DDE78();
+            RaceCarRec* car = fn_801DDE78();
             for (int i = 0; i < lbl_8055E9C4; i++) {
                 *lbl_80486F30[i].value = lbl_80486F30[i].def;
             }

@@ -1,6 +1,7 @@
 // Car element manager (0x801D1184-0x801D14EC): a Drawable that owns one engine-curve record per car and
 // refreshes it from the car every frame. Names are guesses apart from the "carelmgr"/"carelem" tags.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
@@ -33,21 +34,7 @@ struct CarCurveSrc {
     f32 f64;  // offset 0x64
 };
 
-struct RaceCar {
-    u8 pad0[0x2DC];
-    f32 f2DC;            // offset 0x2DC
-    u8 pad2E0[4];
-    f32 f2E4;            // offset 0x2E4
-    f32 f2E8;            // offset 0x2E8
-    u8 pad2EC[0x32C - 0x2EC];
-    CarCurveSrc curve;   // offset 0x32C
-    u8 pad394[0x25D0 - 0x394];
-    f32 rpm;             // offset 0x25D0
-    u8 pad25D4[0x25F4 - 0x25D4];
-    f32 load;            // offset 0x25F4
-};
-
-extern RaceCar* lbl_804348E8[8];
+extern RaceCarRec* lbl_804348E8[8];
 extern s32 lbl_8055E8F8;  // number of cars
 
 extern "C" void fn_801819A0(f32* out, CarCurveSrc* src, f32 a, f32 b, f32 c);
@@ -99,8 +86,8 @@ extern "C" void fn_801D1184(void) { new ("carelmgr") CarElemMgr; }
 void CarElem::Update(int car) { Fetch(car); }
 
 void CarElem::Fetch(int car) {
-    RaceCar* c = lbl_804348E8[car];
-    CarCurveSrc* src = &c->curve;
+    RaceCarRec* c = lbl_804348E8[car];
+    CarCurveSrc* src = (CarCurveSrc*)&c->setupA;  // the tuned setup (CbSetup)
     fn_801819A0(&f4, src, 1.25f * c->f2DC, c->f2E4, c->f2E8);
     f30 = src->f64;
 }
@@ -124,8 +111,8 @@ inline void CarElem::ApplyCurve(f32 x, f32 k) {
 }
 
 void CarElem::Compute(int car) {
-    RaceCar* c = lbl_804348E8[car];
-    ApplyCurve(c->rpm, c->load);
+    RaceCarRec* c = lbl_804348E8[car];
+    ApplyCurve(c->f25D0, c->f25F4);  // rpm, load
 }
 
 CarElemMgr::~CarElemMgr(void) {}

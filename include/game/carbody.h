@@ -271,7 +271,10 @@ public:
     f32 f2D0;                    // offset 0x2D0
     f32 f2D4;                    // offset 0x2D4
     f32 f2D8;                    // offset 0x2D8
-    u8 pad2DC[0x2EC - 0x2DC];
+    f32 f2DC;                    // offset 0x2DC
+    u8 pad2E0[0x2E4 - 0x2E0];
+    f32 f2E4;                    // offset 0x2E4
+    f32 f2E8;                    // offset 0x2E8
     f32 f2EC;                    // offset 0x2EC
     u8 pad2F0[0x2F4 - 0x2F0];
     f32 f2F4;                    // offset 0x2F4

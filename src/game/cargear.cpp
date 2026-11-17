@@ -3,6 +3,7 @@
 // next gear pulls harder, and shifts automatically with a short delay between shifts. Names are
 // guesses apart from the "carelmgr"/"carelem" tags.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
@@ -38,22 +39,7 @@ struct GearSrc {
     f32 ratio[7];   // offset 0x38
 };
 
-struct RaceCar {
-    u8 pad0[0x32C];
-    GearSrc gears;     // offset 0x32C
-    u8 pad[0x23E8 - 0x32C - sizeof(GearSrc)];
-    f32 f23E8;         // offset 0x23E8
-    u8 pad23EC[0x2544 - 0x23EC];
-    f32 f2544;         // offset 0x2544
-    u8 pad2548[0x25CC - 0x2548];
-    f32 f25CC;         // offset 0x25CC
-    u8 pad25D0[0x25D8 - 0x25D0];
-    f32 f25D8;         // offset 0x25D8
-    u8 pad25DC[0x25F4 - 0x25DC];
-    f32 load;          // offset 0x25F4
-};
-
-extern RaceCar* lbl_804348E8[8];
+extern RaceCarRec* lbl_804348E8[8];
 extern s32 lbl_8055E8F8;  // number of cars
 
 // The engine curve (carelem).
@@ -140,11 +126,11 @@ void CarGear::Update(int car) { Fetch(car); }
 
 
 void CarGear::Fetch(int car) {
-    RaceCar* c = lbl_804348E8[car];
+    RaceCarRec* c = lbl_804348E8[car];
     CarElem* e = &lbl_8055E908[car];
-    f28 = c->gears.wheel;
-    f24 = 0.10471976f * Lerp(c->f23E8, c->f2544, c->gears.f2C) / f28;
-    GearSrc* src = &c->gears;
+    f28 = ((GearSrc*)&c->setupA)->wheel;
+    f24 = 0.10471976f * Lerp(c->wheels[0].v3C, c->wheels[3].v3C, ((GearSrc*)&c->setupA)->f2C) / f28;
+    GearSrc* src = (GearSrc*)&c->setupA;  // the tuned setup (CbSetup)
     f32 max = e->f30;
     memset(gears, 0, sizeof(gears));
     count = src->count;
@@ -197,8 +183,8 @@ void CarGear::Clear(int car) {
 }
 
 void CarGear::Compute(int car) {
-    RaceCar* c = lbl_804348E8[car];
-    f32 load = c->load;
+    RaceCarRec* c = lbl_804348E8[car];
+    f32 load = c->f25F4;
     f4 = 0.0f;
     if (request == -10) {
         if (gear < 1) {
