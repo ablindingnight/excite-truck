@@ -203,7 +203,6 @@ static inline f32 SqrtF(f32 v) { return (f32)sqrt(v); }
 
 /* Helper name unproven */ static inline f32 MulF(f32 a, f32 b) { return a * b; }
 /* Helper name unproven */ static inline void Scale3(MWVec4* v, f32 k) { v->x = v->x * k; v->y = v->y * k; v->z = v->z * k; }
-/* Helper name unproven */ static inline void Scale3k(f32 k, MWVec4* v) { v->x = v->x * k; v->y = v->y * k; v->z = v->z * k; }
 void fn_8025280C(MWBody* b, f32 speed) {
     MWVec4 p(b->pos.x, b->pos.y, b->pos.z);
     MWVec2 d;
