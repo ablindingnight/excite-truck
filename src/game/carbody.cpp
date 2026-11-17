@@ -1723,13 +1723,14 @@ void fn_80183E7C(u8* p) {
         HVec right = *(HVec*)(p + 0x3C);
         f32 slide = -PSVECDotProduct((const Vec*)&right, (const Vec*)(p + 0x118));
         f32 t = Clamp01((cb->f2618 - 0.35f) / 1.15f);
+        f32 lt = LerpT(t, 0.0f, 0.5f);
         f32 d;
         if (slide > 0.0f) {
             d = FMax(slide - 2.2222223f, 0.0f);
         } else {
             d = FMin(2.2222223f + slide, 0.0f);
         }
-        f32 k = (0.0f + t * 0.5f) * d * cb->mass / 0.016683351f;
+        f32 k = lt * d * cb->mass / 0.016683351f;
         RVec3 f;
         f.x = right.x * k;
         f.y = right.y * k;
@@ -1970,11 +1971,12 @@ void fn_80183E7C(u8* p) {
         back.y = cb->mtx.pos.y + cb->mtx.rot.z.y * -2.0f;
         back.z = cb->mtx.pos.z + cb->mtx.rot.z.z * -2.0f;
         f32 db = Ramp(back.y, surf, surf - 0.4f);
+        f32 lb = LerpT(db, 0.0f, 1.0f);
         f32 tb = Clamp01((cb->f25C4 - 0.2f) / 0.6f);
         RVec3 fb;
         fb.x = 0.0f;
         fb.z = 0.0f;
-        fb.y = LerpT(db, 0.0f, 1.0f) * LerpT(tb, 0.1f, 1.0f) * (0.3f * grow) * cb->mass /
+        fb.y = lb * LerpT(tb, 0.1f, 1.0f) * (0.3f * grow) * cb->mass /
                0.016683351f;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
     } else {
