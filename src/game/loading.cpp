@@ -39,6 +39,9 @@ struct DrawContext {
     u8 unk0[0x38];
 };
 
+#ifdef __MWERKS__
+// game/grades.h's Grades as retail's loading saw it: no user destructor (with one, a weak
+// __dt__6GradesFv appears here that retail does not have).
 class Grades {
 public:
     Grades(ValueNode* table);
@@ -47,6 +50,9 @@ public:
     s32 thresholds[5];  // offset 0x0
     s32 passing;        // offset 0x14
 };
+#else
+#include "game/grades.h"
+#endif
 
 class LocString;
 

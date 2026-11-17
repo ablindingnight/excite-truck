@@ -10,17 +10,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
 const char* const lbl_802ED818[NUM_GRADES] = {"S", "A", "B", "C", "D"};
 const char* const lbl_802ED82C[NUM_GRADES] = {"\\GRADE_S", "A", "B", "C", "D"};
 
-class Grades {
-public:
-    Grades(ValueNode* table);
-    void Load(ValueNode* table);
-    int Find(int score);
-    int GetThreshold(int grade);
-    void Reset(void);
-
-    s32 thresholds[NUM_GRADES];  // offset 0x0
-    s32 passing;                 // offset 0x14
-};
+#include "game/grades.h"
 
 ModuleTag lbl_8055D5E0;
 

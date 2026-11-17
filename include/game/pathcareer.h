@@ -19,14 +19,7 @@ void fn_8025A204(void);
 void fn_802E7128(void);
 }
 
-class Grades {
-public:
-    void Reset(void);
-    int Find(int score);
-    int GetThreshold(int grade);
-    s32 thresholds[5];  // offset 0x0
-    s32 passing;        // offset 0x14
-};
+#include "game/grades.h"
 
 #include "game/vehlist.h"
 

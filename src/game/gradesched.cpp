@@ -16,16 +16,7 @@ void* operator new(size_t size, const char* tag);
 
 const char* GetGradeDisplayName(int grade);
 
-class Grades {
-public:
-    Grades(ValueNode* table);
-    ~Grades(void) {}
-    int Find(int score);
-    int GetThreshold(int grade);
-
-    s32 thresholds[5];  // offset 0x0
-    s32 passing;        // offset 0x14
-};
+#include "game/grades.h"
 
 struct Schedule {
     s32 score[5];
