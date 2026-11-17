@@ -8,6 +8,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/rmtx.h"
 #include "game/plainvec.h"
+#include "game/strcopy.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -20,17 +21,6 @@ double sin(double x);
 double cos(double x);
 }
 
-static inline void StrNCopy(char* dst, const char* src, int len) {
-    char* d = dst;
-    int n = len;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 
 // The hit point is copied from p as a raw 12-byte block (word loads/stores), not field by field.
@@ -388,10 +378,10 @@ void fn_80292CD8(const char* model, int id, const char* tex) {
     ModelInfo* m = fn_802C6B44(model);
     TexRemap r;
     memset(&r, 0, sizeof(r));
-    StrNCopy(r.newName, tex, 16);
+    SafeStrCopy(r.newName, tex, 16);
     r.id = id;
     for (int i = 0; i < m->count; i++) {
-        StrNCopy(r.name, fn_802C9C24(m->texs + i * 0x10), 16);
+        SafeStrCopy(r.name, fn_802C9C24(m->texs + i * 0x10), 16);
         fn_802C7888(&r, 1);
     }
     fn_802C6C20(m);
@@ -424,7 +414,7 @@ int Bucket::Find(const char* name, int* idx) {
 }
 
 void Bucket::Add(Chunks* sys, const char* name) {
-    StrNCopy(entries[count].name, name, 16);
+    SafeStrCopy(entries[count].name, name, 16);
     entries[count].sys = sys;
     entries[count].refs = 1;
     count++;
