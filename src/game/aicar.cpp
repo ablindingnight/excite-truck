@@ -1875,7 +1875,7 @@ void fn_80196AA0(u8* d) {
         u8* car = CAR(d);
         RVec3 f;
         AiScale(&f.x, &F32(car, 0x88), -44500.0f);
-        (*(RigidBody**)(d + 0x294))->AddForceAt(&f, (RVec3*)(CAR(d) + 0x94));
+        ((AICarLink*)d)->body->AddForceAt(&f, &((RigidBody*)CAR(d))->world.pos);
     }
     case 1: {
         V2 v;
@@ -1900,7 +1900,7 @@ void fn_80196AA0(u8* d) {
             u8* car = CAR(d);
             RVec3 g;
             AiScale(&g.x, &F32(car, 0x88), -31149.998f);
-            LINK(d)->Body()->AddForceAt(&g, (RVec3*)(CAR(d) + 0x94));
+            LINK(d)->Body()->AddForceAt(&g, &((RigidBody*)CAR(d))->world.pos);
         }
         break;
     }
@@ -2732,7 +2732,7 @@ void fn_80198530(u8* d) {
             f.x = F32(c, 0x54) * k;
             f.y = F32(c, 0x58) * k;
             f.z = F32(c, 0x5C) * k;
-            (*(RigidBody**)(d + 0x294))->AddForceAt(&f, (RVec3*)(c + 0x60));
+            ((AICarLink*)d)->body->AddForceAt(&f, &((RigidBody*)c)->mtx.pos);
         }
     }
     if ((U32(d, 0x2D0) & 0x140) == 0x140) {
@@ -2820,7 +2820,7 @@ void fn_80198530(u8* d) {
             dir.x *= k;
             dir.y *= k;
             dir.z *= k;
-            (*(RigidBody**)(d + 0x294))->AddForceAt(&dir, (RVec3*)(downhillCar + 0x60));
+            ((AICarLink*)d)->body->AddForceAt(&dir, &((RigidBody*)downhillCar)->mtx.pos);
         }
     }
 }

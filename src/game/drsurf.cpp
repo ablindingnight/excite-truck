@@ -70,7 +70,7 @@ struct Surf {
     void* uv;      // offset 0x28
     u32 dlSize;    // offset 0x2C
     void* dl;      // offset 0x30
-    u8 pad34[4];
+    s32 nfacing;   // offset 0x34: facing entries (4 bytes each from 0x38; fn_802D6594 swaps them)
     f32 off0;      // offset 0x38
     f32 off1;      // offset 0x3C
 };
@@ -1025,6 +1025,13 @@ void fn_802D657C(u32* p, u32 base) {
     }
 }
 
+// A surface vertex as far as the facing conversion goes: the word at 0xC holds the colour tag bytes (0x4C/0x4D,
+// 0, weight) until it is rewritten as the signed weight. Name unproven.
+struct SurfVert {
+    f32 pos[3];  // offset 0x0
+    f32 w;       // offset 0xC
+};
+
 void fn_802D6594(u8* s) {
     u8 a = s[0x34];
     u8* p = s + 0x38;
@@ -1035,7 +1042,7 @@ void fn_802D6594(u8* s) {
     s[0x37] = a;
     s[0x35] = s[0x36];
     s[0x36] = b;
-    for (i = 0; i < *(s32*)(s + 0x34); i++) {
+    for (i = 0; i < ((Surf*)s)->nfacing; i++) {
         a = p[0];
         c = p[3];
         p[0] = c;
@@ -1076,9 +1083,9 @@ void fn_802D65F8(Surf* s, u32 base, const char* name) {
         for (int i = 0; i < s->nverts; i++) {
             f32 w = 10.0f * v[0xE] / 255.0f;
             if (v[0xC] == 0x4C) {
-                *(f32*)(v + 0xC) = w;
+                ((SurfVert*)v)->w = w;
             } else {
-                *(f32*)(v + 0xC) = -w;
+                ((SurfVert*)v)->w = -w;
             }
             v += 0x10;
         }
@@ -1099,9 +1106,9 @@ void fn_802D65F8(Surf* s, u32 base, const char* name) {
         for (int i = 0; i < s->nverts; i++) {
             f32 w = 10.0f * v[0xE] / 255.0f;
             if (v[0xC] == 0x4C) {
-                *(f32*)(v + 0xC) = w;
+                ((SurfVert*)v)->w = w;
             } else {
-                *(f32*)(v + 0xC) = -w;
+                ((SurfVert*)v)->w = -w;
             }
             v += 0x18;
         }
