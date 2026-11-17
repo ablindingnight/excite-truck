@@ -78,6 +78,7 @@ struct ViewLayout {
 };
 
 #include "game/vertex.h"
+#include "game/strcopy.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -792,17 +793,6 @@ void fn_8000F4BC(void) {
     }
 }
 
-static inline void CopyString(const char* src, int size, char* dst) {
-    char* d = dst;
-    int n = size;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline u32 WithAlpha(u32 color, s32 alpha) { return (color & 0xFFFFFF) | (alpha << 24); }
 
@@ -827,7 +817,7 @@ void fn_8000F4F0(void) {
         }
         phase = num - t;
         fn_801345D8(key, sizeof(key), "BigText:321_GO_%d", num);
-        CopyString(fn_80131268(key), sizeof(text), text);
+        SafeStrCopy(text, fn_80131268(key), sizeof(text));
     } else if (-t < 1.5f) {
         f32 left;
         num = 0;
@@ -840,7 +830,7 @@ void fn_8000F4F0(void) {
             f32 fade = left / 0.7f;
             alpha *= fade;
         }
-        CopyString(fn_80131268("BigText:321_GO_GO"), sizeof(text), text);
+        SafeStrCopy(text, fn_80131268("BigText:321_GO_GO"), sizeof(text));
     }
     lbl_80558A98 = num;
     if (lbl_8055D4B0) {
