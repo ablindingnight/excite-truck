@@ -8,6 +8,7 @@
 #include "game/math_types.h"
 #include "game/vec3_init.h"
 #include "game/plainvec.h"
+#include "game/byteswap.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -436,15 +437,6 @@ void* fn_802C7A3C(f32 u, f32 v, f32 w);
 extern u16 lbl_802F9B20[6];
 }
 
-static inline void Swap32(u8* p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 static inline f32 FMin(f32 a, f32 b) { return b < a ? b : a; }
 
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
@@ -693,10 +685,10 @@ void SkyTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     int i;
     for (i = 0; i < 32; i++, p += 16) {
-        Swap32(p);
-        Swap32(p + 4);
-        Swap32(p + 8);
-        Swap32(p + 12);
+        SwapWordB(p);
+        SwapWordB(p + 4);
+        SwapWordB(p + 8);
+        SwapWordB(p + 12);
     }
 }
 #pragma pop
@@ -739,10 +731,10 @@ void SkyTMH::Draw(TObj* list) {
 
 void SunTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
-    Swap32(d);
-    Swap32(d + 4);
-    Swap32(d + 8);
-    Swap32(d + 12);
+    SwapWordB(d);
+    SwapWordB(d + 4);
+    SwapWordB(d + 8);
+    SwapWordB(d + 12);
 }
 
 SunTMH::~SunTMH(void) { fn_802C9994(-1); }
@@ -829,10 +821,10 @@ inline void ShadowColorTMH::Init(TObj* o) {
 
 inline void ShadowColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
-    Swap32(d);
-    Swap32(d + 4);
-    Swap32(d + 8);
-    Swap32(d + 12);
+    SwapWordB(d);
+    SwapWordB(d + 4);
+    SwapWordB(d + 8);
+    SwapWordB(d + 12);
 }
 
 inline void ShadowColorTMH::Apply(void) {
@@ -849,10 +841,10 @@ inline SunIntensityTMH::~SunIntensityTMH(void) {}
 
 inline void SunIntensityTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
-    Swap32(d);
-    Swap32(d + 4);
-    Swap32(d + 8);
-    Swap32(d + 12);
+    SwapWordB(d);
+    SwapWordB(d + 4);
+    SwapWordB(d + 8);
+    SwapWordB(d + 12);
 }
 
 inline void SunIntensityTMH::Init(TObj* o) {
@@ -881,10 +873,10 @@ inline void FogColorTMH::Init(TObj* o) {
 
 inline void FogColorTMH::Swap(TObj* o) {
     u8* d = fn_801F1CE8(o);
-    Swap32(d);
-    Swap32(d + 4);
-    Swap32(d + 8);
-    Swap32(d + 12);
+    SwapWordB(d);
+    SwapWordB(d + 4);
+    SwapWordB(d + 8);
+    SwapWordB(d + 12);
 }
 
 inline void FogColorTMH::Apply(void) {
@@ -901,11 +893,11 @@ inline void RotatorTMH::Swap(TObj* o) {
     u8* p = (u8*)o + 0x18;
     int i;
     for (i = 0; i < 3; i++, p += 12) {
-        Swap32(p);
-        Swap32(p + 4);
-        Swap32(p + 8);
+        SwapWordB(p);
+        SwapWordB(p + 4);
+        SwapWordB(p + 8);
     }
-    Swap32((u8*)&o->slot);
+    SwapWordB((u8*)&o->slot);
 }
 
 inline void RotatorTMH::Draw(TObj* list) {
@@ -955,7 +947,7 @@ inline void OptTerrainTMH::Unk30(void) {}
 
 inline void OptTerrainTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
-    Swap32(p);
+    SwapWordB(p);
     o->d2C = 1 << (o->d2C - 1);
 }
 
@@ -975,7 +967,7 @@ inline XFaderTMH::~XFaderTMH(void) { XFaderTeardown(faders); }
 inline void XFaderTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     for (int i = 0; i < 2; i++) {
-        Swap32(p + i * 4);
+        SwapWordB(p + i * 4);
     }
 }
 
@@ -1034,7 +1026,7 @@ inline XFadeList* XFaderTMH::List(void* scene) {
 inline void FlareSourceTMH::Swap(TObj* o) {
     u8* p = (u8*)&o->d2C;
     for (int i = 0; i < 5; i++) {
-        Swap32(p + i * 4);
+        SwapWordB(p + i * 4);
     }
 }
 
@@ -1048,9 +1040,9 @@ inline void WaterTMH::Swap(TObj* o) {
     fn_802E317C("Water objects not currently supported");
     p = (u8*)&o->d2C;
     for (i = 0; i < 3; i++, p += 12) {
-        Swap32(p);
-        Swap32(p + 4);
-        Swap32(p + 8);
+        SwapWordB(p);
+        SwapWordB(p + 4);
+        SwapWordB(p + 8);
     }
 }
 
