@@ -104,6 +104,19 @@ typedef struct SpuSample {
     struct SpuSampleRes *res; // 0xAC
 } SpuSample;
 
+#ifndef __MWERKS__
+// PORT: the two places that take a DSP header in (see PortSwapDspAdpcm).
+static inline void PortCopyDspAdpcm(DSPADPCMHeader* dst, const DSPADPCMHeader* src) {
+    __builtin_memcpy(dst, src, sizeof(*dst));
+    PortSwapDspAdpcm(dst);
+}
+
+static inline void PortFillDspAdpcm(SpuSample* s, DSPADPCMHeader* h) {
+    s->fill(h, sizeof(*h), s->fillArg);
+    PortSwapDspAdpcm(h);
+}
+#endif
+
 // Header of an SFX0 sample resource.
 typedef struct SpuSampleRes {
     unsigned int size;    // bytes of sample data
@@ -697,9 +710,10 @@ SpuSample *fn_802E5AE8(char *name) {
     s->adpcm = res->format == 1;
     s->loop = res->loop;
     if (s->adpcm) {
+#ifdef __MWERKS__
         memcpy(&s->adpcmInfo, &res->adpcmInfo, sizeof(s->adpcmInfo));
-#ifndef __MWERKS__
-        PortSwapDspAdpcm(&s->adpcmInfo);  // PORT: big-endian DSP header (see PortSwapDspAdpcm)
+#else
+        PortCopyDspAdpcm(&s->adpcmInfo, &res->adpcmInfo);  // PORT: copy, then swap the big-endian DSP header
 #endif
     } else {
         memset(&s->adpcmInfo, 0, sizeof(s->adpcmInfo));
@@ -1045,9 +1059,10 @@ void fn_802E6264(void) {
                         addr.currentAddressHi = start >> 16;
                         addr.currentAddressLo = start;
                         memset(&hdr, 0, sizeof(hdr));
+#ifdef __MWERKS__
                         s->fill(&hdr, sizeof(hdr), s->fillArg);
-#ifndef __MWERKS__
-                        PortSwapDspAdpcm(&hdr);  // PORT: the streamed sample's DSP header is big-endian
+#else
+                        PortFillDspAdpcm(s, &hdr);  // PORT: read, then swap the streamed sample's big-endian DSP header
 #endif
                         s->rate = (float)hdr.sampleRate / 22050.0f;
                         s->fill(s->data, s->size, s->fillArg);
