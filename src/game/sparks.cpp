@@ -891,22 +891,31 @@ void ShardSys::Draw(void) {
                 y = inv * a.y;
                 z = inv * a.z;
                 sn = sin(ang);
-                f32 cs = cos(ang);
-                f32 t = 1.0f - cs;
-                f32 yy = y * y;
-                f32 zz = z * z;
-                f32 tx = t * x;
-                f32 xx = x * x;
-                f32 ty = t * y;
+                // The squares are named, t*x and t*y are written in each entry, and the y and z diagonal entries are
+                // computed ahead of their rows (rigid RigidBody::Update, FACTS 2026-11-17 13:25).
+                f32 t;
+                f32 yDiag;
+                f32 zDiag;
+                f32 xx;
+                f32 yy;
+                f32 zz;
+                f32 cs;
+                cs = cos(ang);
+                xx = x * x;
+                yy = y * y;
+                zz = z * z;
+                t = 1.0f - cs;
                 r.m[0][0] = cs + t * xx;
-                r.m[0][1] = sn * z + y * tx;
-                r.m[0][2] = z * tx - sn * y;
-                r.m[1][0] = y * tx - sn * z;
-                r.m[1][1] = cs + t * yy;
-                r.m[2][0] = z * tx + sn * y;
-                r.m[1][2] = z * ty + sn * x;
-                r.m[2][1] = z * ty - sn * x;
-                r.m[2][2] = cs + t * zz;
+                r.m[0][1] = y * (t * x) + sn * z;
+                r.m[0][2] = z * (t * x) - sn * y;
+                yDiag = cs + t * yy;
+                r.m[1][0] = y * (t * x) - sn * z;
+                r.m[1][1] = yDiag;
+                r.m[1][2] = z * (t * y) + sn * x;
+                zDiag = cs + t * zz;
+                r.m[2][0] = z * (t * x) + sn * y;
+                r.m[2][1] = z * (t * y) - sn * x;
+                r.m[2][2] = zDiag;
             } else {
                 r.m[0][0] = 1.0f;
                 r.m[0][1] = 0.0f;
