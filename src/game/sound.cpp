@@ -3,6 +3,7 @@
 // one player) and their state machine against the device sound, plus defaults of the Mixer and Sound
 // interfaces. Names are guesses apart from the class names, pool and messages.
 #include "game/common.h"
+#include "game/soundmgr.h"
 #include "game/mixer.h"
 #include "game/sound.h"
 #include "game/pool.h"
@@ -22,25 +23,6 @@ void* operator new(size_t size, const char* tag);
 #include "game/mathutil.h"
 
 class GameSound;
-
-class SoundManager {
-public:
-    SoundManager(Mixer* mixer);
-    virtual ~SoundManager(void);
-    virtual void Update(void);
-    void Remove(GameSound* s);
-    void Add2(GameSound* s);
-    void Add3(GameSound* s);
-    Sound* Create2(void* desc, int cls);
-    Sound* Create3(void* desc, int cls);
-    void ReleaseSound(Sound* s);
-    void SetListener(const Listener& l, int i);
-    void SetListenerCount(s32 n);
-
-    u8 enabled;      // offset 0x4
-    u8 primaryOnly;  // offset 0x5
-    u8 pad6[0x112];
-};
 
 extern "C" {
 void fn_80208B8C(int create);
