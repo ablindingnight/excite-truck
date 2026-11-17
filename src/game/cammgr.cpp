@@ -1341,7 +1341,8 @@ void fn_80268E00(void) {
 // One axis of the hit shake: a sine wave of the given phase plus jitter, scaled by the amplitude.
 static inline f32 ShakeAxis(f32 amp, f32 phase, f32 twoPi) {
     f32 s = (f32)sin(phase * twoPi);
-    return amp * (fn_80129DC4(0, lbl_80563CB0, lbl_80563CB4) + s * lbl_80563CB8);
+    f32 r = fn_80129DC4(0, lbl_80563CB0, lbl_80563CB4);
+    return amp * (r + s * lbl_80563CB8);
 }
 
 // Hit shake for chase cameras: for half a second after a bump the camera wobbles about all three axes
