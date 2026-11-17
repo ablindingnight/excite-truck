@@ -171,6 +171,8 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
 }
 
 /* Helper name unproven */
+extern const f32 kIdealLaneMargin;
+
 inline f32 LineFollower::Project(IdealPoint* s, f32 t, V2* p) {
     pos.x = s->pos.x + t * (s->next->pos.x - s->pos.x);
     pos.y = s->pos.y + t * (s->next->pos.y - s->pos.y);
@@ -189,9 +191,12 @@ inline f32 LineFollower::Project(IdealPoint* s, f32 t, V2* p) {
     off.y = oy;
     f32 x = (f32)AbsD(oy * dx + -ox * dy);
     f32 half = 0.5f;
-    wide = x > 15.0f * 0.305f + il.seg->width * half;
+    wide = x > kIdealLaneMargin + il.seg->width * half;
     return (dx * ox + dy * oy) / s->len;
 }
+
+extern const f32 kIdealLaneMargin = 15.0f * 0.305f;
+
 
 int LineFollower::Step(V2* p) {
     if (!fn_801355B8(this, p, &il.seg, &il.t)) {
