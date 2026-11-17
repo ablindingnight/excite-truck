@@ -59,7 +59,7 @@ public:
     virtual void v48(void);
     virtual void v4C(void);
     virtual void v50(void);
-    virtual void v54(void);
+    virtual void SetRumbleB(f32 a, f32 b, f32 c);
     virtual void v58(void);
     virtual void v5C(void);
     virtual void v60(void);
@@ -929,7 +929,7 @@ public:
     virtual f32 v48(void);
     virtual u8 v4C(void);
     virtual void v50(f32 a, f32 b, f32 c);
-    virtual void v54(f32 a);
+    virtual void SetRumbleB(f32 a, f32 b, f32 c);
     virtual void v58(f32 a, f32 b);
     virtual void v5C(void);
     virtual void v60(void);
@@ -1290,8 +1290,11 @@ void PlayerDriver_vf48(u8* p) {
         c2 = PTR(p, 0x34);
         boost = MinF(1.0f, (F32(c2, 0x25D4) - 1.7777778f) / 3.5555556f);
         boost = MaxF(boost, 0.0f);
+        f32 high = 1.0f;
+        f32 low = 0.0f;
+        f32 range = high - low;
         roll = MaxF(MinF(1.0f, (steer * -F32(c2, 0x128)) * -20.0f), 0.0f);
-        k = 1.0f - (1.0f - 0.0f) * roll * (steer * steer);
+        k = 1.0f - (range * roll) * (steer * steer);
         rx.x *= k;
         rx.y *= k;
         f32 slow;
@@ -1333,10 +1336,12 @@ void PlayerDriver_vf48(u8* p) {
         f.y *= k;
         f.z *= k;
         b = ((Gearbox*)PTR(p, 0x38))->Speed();
-        q = 1.0f - lean * lean;
         f.x *= b;
         f.y *= b;
         f.z *= b;
+        f32 leanSquared = lean * lean;
+        q = 1.0f;
+        q -= leanSquared;
         f.x *= q;
         f.y *= q;
         f.z *= q;
@@ -1462,11 +1467,11 @@ void PlayerDriver_vf48(u8* p) {
         ((Gearbox*)PTR(p, 0x38))->v50(0.0f, fn_8018AE4C(c5) * 0.25f, wob + buzz);
         f32 turn;
         c5 = PTR(p, 0x34);
-        sr = F32(c5, 0x25D4) / 4.4444447f;
-        if (1.0f < sr) {
-            sr = 1.0f;
-        }
         str = 1.0f;
+        sr = F32(c5, 0x25D4) / 4.4444447f;
+        if (str < sr) {
+            sr = str;
+        }
         str *= MaxF(sr, 0.0f);
         PcScaleTo(&w, &F32(c5, 0x124), -0.05f);
         a = VMag(&w);
@@ -1517,11 +1522,12 @@ void PlayerDriver_vf48(u8* p) {
         turn = MaxF(MinF(0.9f, 10.0f * turn), -0.9f);
         c6 = PTR(p, 0x34);
         sl = MaxF(MinF(1.0f, (f32)__fabs(F32(c6, 0x25F0)) / 0.25f), 0.0f);
+        turn *= sl;
+        f32 coefficient = 0.9f;
         airt = MaxF(F32(c6, 0x23B8), 0.0f) + MaxF(F32(c6, 0x242C), 0.0f);
         str *= MinF(19.68504f * airt, 1.0f);
-        ((Gearbox*)PTR(p, 0x38))->v54(str);
+        ((Gearbox*)PTR(p, 0x38))->SetRumbleB(str, turn, coefficient);
         ((Gearbox*)PTR(p, 0x38))->v58(ga, gb);
-        turn *= sl;
         ((Gearbox*)PTR(p, 0x38))->v78(1);
     } else {
         ((Gearbox*)PTR(p, 0x38))->v78(0);
@@ -1546,7 +1552,9 @@ void fn_80192BFC(u8* p) { VP(PTR(p, 0x4))->v40(); }
 
 void fn_80192C10(u8* p) { VP(PTR(p, 0x4))->v58(); }
 
-void fn_80192C24(u8* p) { VP(PTR(p, 0x4))->v54(); }
+void fn_80192C24(u8* p, f32 strength, f32 turn, f32 coefficient) {
+    VP(PTR(p, 0x4))->SetRumbleB(strength, turn, coefficient);
+}
 
 void fn_80192C38(u8* p) { VP(PTR(p, 0x4))->v50(); }
 
