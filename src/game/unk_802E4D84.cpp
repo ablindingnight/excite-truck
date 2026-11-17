@@ -64,6 +64,27 @@ typedef struct DSPADPCMHeader {
     unsigned short pad[11];
 } DSPADPCMHeader;
 
+#ifndef __MWERKS__
+// PORT: the DSP-ADPCM headers inside the SFX0 sample resources and at the start of a streamed sample are
+// big-endian (the DSPADPCM tool's output) and the Wii reads them as they are, while the SFX0 header around them is
+// little-endian. A little-endian host byte-swaps every field of the DSP header once after copying it.
+static inline void PortSwapDspAdpcm(DSPADPCMHeader* h) {
+    unsigned short* s = &h->coef[0];
+    int i;
+    h->numSamples = __builtin_bswap32(h->numSamples);
+    h->numNibbles = __builtin_bswap32(h->numNibbles);
+    h->sampleRate = __builtin_bswap32(h->sampleRate);
+    h->loopFlag = __builtin_bswap16(h->loopFlag);
+    h->format = __builtin_bswap16(h->format);
+    h->loopStart = __builtin_bswap32(h->loopStart);
+    h->loopEnd = __builtin_bswap32(h->loopEnd);
+    h->currentAddr = __builtin_bswap32(h->currentAddr);
+    for (i = 0; i < 34; i++) {  // coef[16], gain, predScale, yn1, yn2, loopPredScale, loopYn1, loopYn2, pad[11]
+        s[i] = __builtin_bswap16(s[i]);
+    }
+}
+#endif
+
 // A cached sample (the table holds 256). Field names follow their use here and in the voice code.
 typedef struct SpuSample {
     char name[0x20];
@@ -677,6 +698,9 @@ SpuSample *fn_802E5AE8(char *name) {
     s->loop = res->loop;
     if (s->adpcm) {
         memcpy(&s->adpcmInfo, &res->adpcmInfo, sizeof(s->adpcmInfo));
+#ifndef __MWERKS__
+        PortSwapDspAdpcm(&s->adpcmInfo);  // PORT: big-endian DSP header (see PortSwapDspAdpcm)
+#endif
     } else {
         memset(&s->adpcmInfo, 0, sizeof(s->adpcmInfo));
     }
@@ -1022,6 +1046,9 @@ void fn_802E6264(void) {
                         addr.currentAddressLo = start;
                         memset(&hdr, 0, sizeof(hdr));
                         s->fill(&hdr, sizeof(hdr), s->fillArg);
+#ifndef __MWERKS__
+                        PortSwapDspAdpcm(&hdr);  // PORT: the streamed sample's DSP header is big-endian
+#endif
                         s->rate = (float)hdr.sampleRate / 22050.0f;
                         s->fill(s->data, s->size, s->fillArg);
                         DCFlushRange(s->data, s->size);
