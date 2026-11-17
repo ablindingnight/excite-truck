@@ -1378,6 +1378,21 @@ struct CbSpinEvent {
 };
 
 // out = v[0] * row0 + v[1] * row1 + v[2] * row2 (m: rows at 0, 3, 6), safe when out aliases v.
+/* Helper name unproven: rows of m dotted with v (the inverse of ObRotateRows for a rotation) */
+static inline void ObUnrotateRows(RVec3* out, const f32* m, const f32* v) {
+    if ((const f32*)out == v) {
+        f32 x = m[1] * v[1] + m[0] * v[0] + m[2] * v[2];
+        f32 y = m[4] * v[1] + m[3] * v[0] + m[5] * v[2];
+        f32 z = m[7] * v[1] + m[6] * v[0] + m[8] * v[2];
+        out->x = x;
+        out->y = y;
+        out->z = z;
+    } else {
+        out->x = m[1] * v[1] + m[0] * v[0] + m[2] * v[2];
+        out->y = m[4] * v[1] + m[3] * v[0] + m[5] * v[2];
+        out->z = m[7] * v[1] + m[6] * v[0] + m[8] * v[2];
+    }
+}
 static inline void ObRotateRows(RVec3* out, const f32* m, const f32* v) {
     if ((const f32*)out == v) {
         f32 x = v[2] * m[6] + v[0] * m[0] + v[1] * m[3];
@@ -2187,7 +2202,7 @@ void fn_80183E7C(u8* p) {
         }
         a.y = a.y + 10.0f * cb->f26FC * (1.0f - cb->f25F0 * cb->f25F0);
         RVec3 acc;
-        ObRotateRows(&acc, (const f32*)(p + 0x3C), (const f32*)(p + 0x16C));
+        ObUnrotateRows(&acc, (const f32*)(p + 0x3C), (const f32*)(p + 0x16C));
         a.x = a.x + acc.x * -0.02f;
         a.y = a.y + acc.y * -0.02f;
         a.z = a.z + acc.z * -0.02f;
