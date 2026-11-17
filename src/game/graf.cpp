@@ -3,6 +3,7 @@
 // handlers ("Simple Model", "Sky", ...) created from a factory table, the parallax sky model and the
 // lightning flash overlay. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/byteswap.h"
 
 struct GModel {
     s32 kind;    // offset 0x0 (1: typed model)
@@ -158,17 +159,6 @@ void fn_802E317C(const char* fmt, ...);
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline void GSwap32(void* p) {
-    u8 t;
-    u8* b = (u8*)p;
-    t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
 static inline f32 GFloat(f32 x) { return x; }
 
 static inline u32 GColor(u8 a, u8 r, u8 g, u8 b) { return (a << 24) | (r << 16) | (g << 8) | b; }
@@ -287,18 +277,18 @@ void fn_801EB128(void) {
 #pragma push
 #pragma opt_propagation off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_801EB13C exact with it, 74.30 without */
 void fn_801EB13C(GModel* m) {
-    GSwap32(&m->handle);
-    GSwap32(&m->res);
-    GSwap32(&m->unkC);
+    SwapWordV(&m->handle);
+    SwapWordV(&m->res);
+    SwapWordV(&m->unkC);
     m->res = (u8*)m + (u32)m->res;
     mrModelFixup(m->res, "simple_model");
     if (m->kind == 1) {
-        GSwap32(&m->type);
-        GSwap32(&m->unk14);
-        GSwap32(&m->unk18);
-        GSwap32(&m->unk1C);
+        SwapWordV(&m->type);
+        SwapWordV(&m->unk14);
+        SwapWordV(&m->unk18);
+        SwapWordV(&m->unk1C);
         for (int i = 0; i < 3; ++i) {
-            GSwap32((u8*)m + 32 + 4 * i);
+            SwapWordV((u8*)m + 32 + 4 * i);
         }
     }
 }
@@ -307,40 +297,40 @@ void fn_801EB13C(GModel* m) {
 void fixup_display_list(GNode* root, u32 base) {
     GNode* n = root;
     while (n) {
-        GSwap32(&n->type);
+        SwapWordV(&n->type);
         fn_801EB634(&n->next, base);
         switch (n->type) {
         case 0:
-            GSwap32(&n->group.a);
-            GSwap32(&n->group.b);
-            GSwap32(&n->group.c);
-            GSwap32(&n->group.count);
+            SwapWordV(&n->group.a);
+            SwapWordV(&n->group.b);
+            SwapWordV(&n->group.c);
+            SwapWordV(&n->group.count);
             for (int i = 0; i < n->group.count; i++) {
-                GSwap32(&n->group.kids[i].key);
+                SwapWordV(&n->group.kids[i].key);
                 fn_801EB634(&n->group.kids[i].node, base);
                 fixup_display_list(n->group.kids[i].node, base);
             }
             break;
         case 0x101:
-            GSwap32(&n->sub.a);
+            SwapWordV(&n->sub.a);
             fn_801EB634(&n->sub.child, base);
             fixup_display_list(n->sub.child, base);
             break;
         case 0x102:
         case 0x103:
-            GSwap32(&n->sub.a);
-            GSwap32(&n->sub.b);
-            GSwap32(&n->sub.c);
-            GSwap32(&n->sub.d);
+            SwapWordV(&n->sub.a);
+            SwapWordV(&n->sub.b);
+            SwapWordV(&n->sub.c);
+            SwapWordV(&n->sub.d);
             fn_801EB634(&n->sub.child, base);
             fixup_display_list(n->sub.child, base);
             if (n->type == 0x103) {
-                GSwap32(&n->sub.e);
+                SwapWordV(&n->sub.e);
             }
             break;
         case 4: {
             fn_801EB66C(&n->model, base);
-            GSwap32(&n->model->kind);
+            SwapWordV(&n->model->kind);
             fn_801EB13C(n->model);
             if (*(s32*)n->model->res <= 0) {
                 n->model = 0;
@@ -365,14 +355,14 @@ void fixup_display_list(GNode* root, u32 base) {
 }
 
 void fn_801EB634(void* p, u32 base) {
-    GSwap32(p);
+    SwapWordV(p);
     if (*(u32*)p) {
         *(u32*)p += base;
     }
 }
 
 void fn_801EB66C(void* p, u32 base) {
-    GSwap32(p);
+    SwapWordV(p);
     if (*(u32*)p) {
         *(u32*)p += base;
     }
@@ -511,7 +501,7 @@ int fn_801EB9FC(const char* name) {
 }
 
 void fn_801EBB7C(u32* p, u32 base) {
-    GSwap32(p);
+    SwapWordV(p);
     if (*p) {
         *p += base;
     }
