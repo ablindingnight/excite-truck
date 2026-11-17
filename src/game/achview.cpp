@@ -473,18 +473,6 @@ static inline void TrophyViewShow(AchievementTrophyModel* v, u8* row) {
     }
 }
 
-// The default caption context of a text item.
-/* Helper name and form unproven: stands in for the header's default context until menu.h is settled
-   (handoff FACTS 2026-11-17 04:32); then the items go back to MenuItem(name, text). */
-struct NoCaption {
-    union {
-        int value;
-        const void* ptr;
-    };
-    NoCaption(void) { value = 0; }
-    operator int() const { return (int)ptr; }
-};
-
 struct AchQuery3 {
     s32 category;  // offset 0x0
     s32 value;     // offset 0x4
