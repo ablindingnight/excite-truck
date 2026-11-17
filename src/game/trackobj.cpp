@@ -421,10 +421,7 @@ struct ViewState {
     PVec pos;  // offset 0x24
 };
 
-struct Settings {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
+#include "game/settings.h"
 
 struct TableRef {
     TableRef(void) { node = 0; }

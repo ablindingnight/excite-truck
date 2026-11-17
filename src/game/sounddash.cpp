@@ -2,10 +2,7 @@
 // and adjust them and write sounds.txt. Names are guesses apart from the strings.
 #include "game/common.h"
 
-struct SoundSample {
-    char name[0x20];  // offset 0x0
-    f32 volume;       // offset 0x20
-};
+#include "game/soundsample.h"
 
 extern "C" {
 int sprintf(char* s, const char* fmt, ...);

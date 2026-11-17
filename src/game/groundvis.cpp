@@ -78,21 +78,7 @@ struct GroundBuf {
 extern "C" int fn_802E2C20(void);                  // milliseconds
 extern "C" void fn_802E30C8(const char* fmt, ...);  // warning print
 
-// Times a block and reports it when it runs long.
-struct ScopeTimer {
-    ScopeTimer(const char* n) {
-        name = n;
-        start = fn_802E2C20();
-    }
-    ~ScopeTimer(void) {
-        int t = fn_802E2C20() - start;
-        if (t > 500) {
-            fn_802E30C8("%s: took %dms", name, t);
-        }
-    }
-    const char* name;  // offset 0x0
-    int start;         // offset 0x4
-};
+#include "game/scopetimer.h"
 
 extern "C" {
 int fn_8012C33C(const char* name);

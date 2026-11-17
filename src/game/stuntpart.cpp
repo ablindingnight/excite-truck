@@ -25,18 +25,7 @@ struct StuntCar {
     Vec wheel3;  // offset 0x124
 };
 
-// StuntMtx: common.h's PlainValMatrix.
-struct SColor {
-    SColor(void) {}
-    SColor(f32 a, f32 b, f32 c) {
-        r = a;
-        g = b;
-        b_ = c;
-    }
-    f32 r;
-    f32 g;
-    f32 b_;
-};
+#include "game/scolor.h"
 
 extern "C" {
 int fn_80129D90(int seed, int lo, int hi);  // random int

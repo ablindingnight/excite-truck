@@ -54,11 +54,7 @@ int OptNoSound(void);
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
-// One entry of the sample table: a sample name and its volume.
-struct SoundSample {
-    char name[0x20];  // offset 0x0
-    f32 volume;       // offset 0x20
-};
+#include "game/soundsample.h"
 
 extern "C" {
 extern MixerCaps lbl_80489BD0;

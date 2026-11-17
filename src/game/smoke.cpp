@@ -30,17 +30,7 @@ struct SmokeModel {
     s32 nParts;  // offset 0x24
 };
 
-struct SColor {
-    SColor(void) {}
-    SColor(f32 a, f32 b, f32 c) {
-        r = a;
-        g = b;
-        b_ = c;
-    }
-    f32 r;
-    f32 g;
-    f32 b_;
-};
+#include "game/scolor.h"
 
 struct SVec {
     SVec(void) {

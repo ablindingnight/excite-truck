@@ -1101,10 +1101,7 @@ public:
 };
 
 
-struct Settings {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
+#include "game/settings.h"
 
 extern "C" {
 f32 fn_80204CFC(const char* name);  // tuning value
