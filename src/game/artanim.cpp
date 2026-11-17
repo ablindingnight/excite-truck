@@ -3,6 +3,7 @@
 // and a debug viewer. Names are guesses apart from the allocation tags, value keys and messages.
 // The element player (fn_802AD4C4) is still a placeholder; the loader defines the element/key layouts.
 #include "game/common.h"
+#include "game/plainvec.h"
 #include <revolution/MTX/vec.h>
 #include "macros.h"
 #include "game/strcopy.h"
@@ -266,20 +267,13 @@ void fn_802AC458(void) {
 
 void fn_802AC49C(void) { lbl_8055F93C = 0; }
 
-static inline ValVec3 MakeVec3(f32 x, f32 y, f32 z) {
-    ValVec3 v;
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    return v;
-}
-
-static inline ValPoint MakePoint(f32 x, f32 y) {
-    ValPoint v;
-    v.x = x;
-    v.y = y;
-    return v;
-}
+// A point built in place by a constructor (as XP in interlude): the default of a GetPointOr call. Name unproven.
+struct ArtXY : ValPoint {
+    ArtXY(f32 x_, f32 y_) {
+        x = x_;
+        y = y_;
+    }
+};
 
 // Loads an art animation (.val): "elem" entries (models and text) and "path" entries of timed "frame" keys, with
 // optional "named_times" and a "global_transform"; integer/string placeholders are resolved through map.
@@ -289,9 +283,6 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[0] = x;
     o[1] = y;
     o[2] = z;
-}
-static inline ValPoint PointOr(ValueNode* n, const char* key, ValPoint def) { /* Helper name unproven */
-    return n->GetPointOr(key, def);
 }
 
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
@@ -333,11 +324,13 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             }
             e->handle = fn_802C6FC0(model, 0, 0);
             e->model.scale = en->GetFloat("scale", 1.0f);
-            const ValVec3& off = en->GetVec3Or("offset", ValVec3(MakeVec3(0.0f, 0.0f, 0.0f)));
+            const ValVec3& off = en->GetVec3Or("offset", ValV3(0.0f, 0.0f, 0.0f));
             e->model.off[0] = off.x;
             e->model.off[1] = off.y;
             e->model.off[2] = off.z;
-            ValPoint xy = PointOr(en, "xy", MakePoint(0.0f, 0.0f));
+            // The point objects are temporaries in statement order (retail stack: the default built in place, its
+            // by-value copy, the result); each result is then copied into its named local.
+            ValPoint xy = CopyValPoint(en->GetPointOr("xy", ValPoint(ArtXY(0.0f, 0.0f))));
             e->model.off[0] = e->model.off[0] + xy.x;
             e->model.off[1] = e->model.off[1] - xy.y;
             e->model.group = en->GetInt("group", -1);
@@ -391,7 +384,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         int k;
         ArtPath* p = &a->paths[i];
         p->elem = pn->GetIntValue("elem_idx");
-        const ValPoint pxy = CopyValPoint(pn->GetPointOr("xy", MakePoint(0.0f, 0.0f)));
+        const ValPoint pxy = CopyValPoint(pn->GetPointOr("xy", ValPoint(ArtXY(0.0f, 0.0f))));
         f32 t0 = fn_802AC344((ArtNode*)pn, (ArtNode*)named, 0);
         int nFrames = 0;
         ValueNode* c;
@@ -439,8 +432,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                     }
                 }
                 if (f->Has("xy")) {
-                    const ValPoint& raw = f->GetPoint("xy");
-                    ValPoint v = raw;
+                    ValPoint v = CopyValPoint(f->GetPoint("xy"));
                     v.x = v.x + pxy.x;
                     v.y = pxy.y + v.y;
                     key->pos[0] = v.x - 320.0f;
@@ -499,8 +491,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         ValueNode* g = t->FindChild("global_transform");
         f32 off[3];
         if (g->Has("xy")) {
-            const ValPoint& raw = g->GetPoint("xy");
-            ValPoint v = raw;
+            ValPoint v = CopyValPoint(g->GetPoint("xy"));
             off[0] = v.x;
             off[1] = -v.y;
             off[2] = 0.0f;

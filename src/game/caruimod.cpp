@@ -8,6 +8,7 @@
 #include "game/menustate.h"
 #include "game/gamedb.h"
 #include "game/math_types.h"
+#include "game/plainvec.h"
 #include "macros.h"
 #include <revolution/MTX.h>
 #include "game/strcopy.h"
@@ -325,10 +326,7 @@ void CarUIModel::LoadEfx(const char* path) {
             fn_802E317C("carmodelview: %s has no boneset table", file);
         }
         if (t->HasChild("at_rest")) {
-            ValVec3 zero;
-            zero.x = 0.0f;
-            zero.y = 0.0f;
-            zero.z = 0.0f;
+            ValV3 zero(0.0f, 0.0f, 0.0f);
             ValueNode* r = t->FindChild("at_rest");
             // Keep the bone member displacement in each vector store.
             boneCursor = reinterpret_cast<u8*>(this);
@@ -337,7 +335,7 @@ void CarUIModel::LoadEfx(const char* path) {
                 char key[0x20];
                 fn_801345D8(key, 0x20, "%d", boneIndex);
                 ValVec3& bone = *reinterpret_cast<ValVec3*>(boneCursor + bonesOffset);
-                bone = r->GetVec3Or(key, ValVec3(zero));
+                bone = r->GetVec3Or(key, zero);
             }
         } else {
             memset(bones, sizeof(bones), 0);
@@ -1060,15 +1058,6 @@ void CarUIScreen::Init(const char* view) {
     Activate();
 }
 
-/* Helper name unproven */
-static inline ValVec3 ViewDefault(f32 x, f32 y, f32 z) {
-    ValVec3 v;
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    return v;
-}
-
 void CarUIScreen::LoadView(const char* view) {
     const char* file = "carview.val";
     if (fn_8012C33C(file)) {
@@ -1076,8 +1065,7 @@ void CarUIScreen::LoadView(const char* view) {
         if (t->HasChild(view)) {
             ValueNode* n = t->FindChild(view);
             dist = n->GetFloat("camera_dist", 6.0f);
-            const ValVec3 zero = ViewDefault(0.0f, 0.0f, 0.0f);
-            const ValVec3& v = n->GetVec3Or("camera_offset", ValVec3(zero));
+            const ValVec3& v = n->GetVec3Or("camera_offset", ValV3(0.0f, 0.0f, 0.0f));
             camOffset.x = v.x;
             camOffset.y = v.y;
             camOffset.z = v.z;

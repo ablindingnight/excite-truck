@@ -280,21 +280,13 @@ static inline void MulVec(PVec* out, const PVec* in, const RMtx* m) {
         out->z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
     }
 }
-/* Helper names unproven: NodeVec3 / NodePoint / NodeVec3Or / White (by-value wrappers, fn_801F4F9C) */
+/* Helper names unproven: NodeVec3 / NodePoint (by-value wrappers, fn_801F4F9C) */
 static inline ValVec3 NodeVec3(ValueNode* vn, const char* k) { return vn->GetVec3(k); }
 static inline ValPoint NodePoint(ValueNode* vn, const char* k) { return vn->GetPoint(k); }
-static inline ValVec3 NodeVec3Or(ValueNode* vn, const char* k, ValVec3 def) { return vn->GetVec3Or(k, def); }
-static inline ValVec3 White(void) {
-    ValVec3 w;
-    w.x = 1.0f;
-    w.y = 1.0f;
-    w.z = 1.0f;
-    return w;
-}
 void fn_801F4F9C(FabricCorner* out, ValueNode* vn, const RMtx* m) {
     PVec p = *(const PVec*)&static_cast<const ValVec3&>(NodeVec3(vn, "offset"));  // address of the bound temporary
     ValPoint uv = NodePoint(vn, "uv");
-    ValVec3 c = NodeVec3Or(vn, "color", White());
+    ValVec3 c = vn->GetVec3Or("color", ValV3(1.0f, 1.0f, 1.0f));
     MulVec(&out->pos, &p, m);
     out->pos.x += m->pos.x;
     out->pos.y += m->pos.y;

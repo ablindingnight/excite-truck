@@ -3,6 +3,7 @@
 // camera), the "emitter" instances placed by "partemit.val" (optionally attached to moving objects and
 // always on), and the world events that fire them. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/strcopy.h"
@@ -327,11 +328,8 @@ static inline u32 PackEmitterColor(const ValVec3& color) {
 }
 
 void fn_8029F658(ValueNode* node) {
-    ValVec3 zero3;
+    ValV3 zero3(0.0f, 0.0f, 0.0f);
     ValPoint zero2;
-    zero3.x = 0.0f;
-    zero3.y = 0.0f;
-    zero3.z = 0.0f;
     zero2.x = 0.0f;
     zero2.y = 0.0f;
     EmitterDef* d = &lbl_804B5070[lbl_8055F81C];
@@ -346,18 +344,18 @@ void fn_8029F658(ValueNode* node) {
     d->speedScale = node->GetFloat("speed_scale", 0.0f);
     d->spewK = node->GetFloat("spew_k", 0.0f);
     d->spewM = node->GetFloat("spew_m", 0.0f);
-    d->ptK = node->GetPointOr("pt_k", CopyValPoint(zero2));
-    d->ptM = node->GetPointOr("pt_m", CopyValPoint(zero2));
-    d->vK = node->GetPointOr("v_k", CopyValPoint(zero2));
-    d->vM = node->GetPointOr("v_m", CopyValPoint(zero2));
-    *(ValVec3*)&d->offset = node->GetVec3Or("offset", ValVec3(zero3));
-    d->vScale = node->GetPointOr("v_scale", CopyValPoint(zero2));
+    d->ptK = node->GetPointOr("pt_k", zero2);
+    d->ptM = node->GetPointOr("pt_m", zero2);
+    d->vK = node->GetPointOr("v_k", zero2);
+    d->vM = node->GetPointOr("v_m", zero2);
+    *(ValVec3*)&d->offset = node->GetVec3Or("offset", zero3);
+    d->vScale = node->GetPointOr("v_scale", zero2);
     d->radius = node->GetFloat("radius", 0.001f);
     d->fogDensity = node->GetFloat("fog_density", 0.0f);
-    ValVec3 fog = ValVec3(node->GetVec3Or("fog_color", ValVec3(WhiteVec3())));
+    ValVec3 fog = ValVec3(node->GetVec3Or("fog_color", WhiteVec3()));
     d->fogColor = PackEmitterColor(fog);
     d->repeat = node->GetInt("repeat", 1);
-    *(ValVec3*)&d->dpos = node->GetVec3Or("dpos", ValVec3(zero3));
+    *(ValVec3*)&d->dpos = node->GetVec3Or("dpos", zero3);
     fn_8029F534(&d->part, node->FindChild("particle"));
     fn_8029F5C8(&d->chunk, node->FindChild("chunk"));
     lbl_8055F81C++;

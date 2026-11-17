@@ -214,7 +214,7 @@ int fn_802964EC(FlipFrame* f, ValueNode* n, const FlipFrame* def) {
     } else {
         f->size = def->size;
     }
-    (ValVec3&)f->offset = n->GetVec3Or("offset", ValVec3(def->offset));
+    (ValVec3&)f->offset = n->GetVec3Or("offset", def->offset);
     f->blend = fn_802963F0(n, def->blend);
     return 1;
 }

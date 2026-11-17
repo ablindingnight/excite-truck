@@ -48,7 +48,7 @@ struct SoVec {
     f32 z;
 };
 
-// GetVec3Or takes its default by value.
+// GetVec3Or and GetPointOr take their default by value (as ValueNode in game/common.h).
 class ValueNodeV {
 public:
     virtual const char* GetName(void);
@@ -65,7 +65,7 @@ public:
     virtual ValVec3 GetVec3(const char* key);
     virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);
     virtual ValPoint GetPoint(const char* key);
-    virtual ValPoint GetPointOr(const char* key, const ValPoint& def);
+    virtual ValPoint GetPointOr(const char* key, ValPoint def);
     virtual ValMatrix GetMatrix(const char* key);
     virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def);
     virtual f32 GetReal(const char* key);

@@ -64,9 +64,9 @@ public:
     virtual s32 GetIntValue2(const char* key);
     virtual int GetBool(const char* key, int def);
     virtual ValVec3 GetVec3(const char* key);
-    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);
+    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);
     virtual ValPoint GetPoint(const char* key);
-    virtual ValPoint GetPointOr(const char* key, const ValPoint& def);
+    virtual ValPoint GetPointOr(const char* key, ValPoint def);
     virtual ValMatrix GetMatrix(const char* key);
     virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def);
     virtual f32 GetReal(const char* key);

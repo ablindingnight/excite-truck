@@ -2,6 +2,7 @@
 // books so far), each placed at an offset and played over its time window. Names are guesses
 // apart from the keys and messages.
 #include "game/common.h"
+#include "game/plainvec.h"
 
 extern "C" int strcasecmp(const char* a, const char* b);
 
@@ -49,14 +50,6 @@ public:
 
     void* book;  // offset 0x4
 };
-
-static inline ValVec3 Vec3(f32 x, f32 y, f32 z) {
-    ValVec3 v;
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    return v;
-}
 
 typedef FXElem* (*FXElemFactory)(ValueNode* node);
 
@@ -115,8 +108,7 @@ int FXSeqNode::Init(ValueNode* node) {
     FXElem* e = CreateElem(node);
     if (e) {
         start = node->GetFloat("start_t");
-        const ValVec3 zero = Vec3(0.0f, 0.0f, 0.0f);
-        const ValVec3& v = node->GetVec3Or("offset", ValVec3(zero));
+        const ValVec3& v = node->GetVec3Or("offset", ValV3(0.0f, 0.0f, 0.0f));
         offset.x = v.x;
         offset.y = v.y;
         offset.z = v.z;

@@ -1460,9 +1460,11 @@ int Obstacle_ASE::Load(ValueNode* t) {
         }
         speed1 = t->GetFloat("speed1", 0.0f);
         speed2 = t->GetFloat("speed2", speed1);
-        dir1 = (t)->GetVec3Or("dir1", ValVec3(ValV3(0.0f, 0.0f, 0.0f)));
-        dir2 = (t)->GetVec3Or("dir2", ValVec3(*(ValVec3*)&dir1));
-        throwPt = (t)->GetVec3Or("throw_pt", ValVec3(ValV3(0.0f, 0.0f, 0.0f)));
+        dir1 = (t)->GetVec3Or("dir1", ValV3(0.0f, 0.0f, 0.0f));
+        // The by-value default is a copy of dir1 seen as the constructor vector class (a plain ValVec3 lvalue
+        // schedules the copy differently; ActVec is not a ValVec3 subclass yet).
+        dir2 = (t)->GetVec3Or("dir2", *(ValV3*)&dir1);
+        throwPt = (t)->GetVec3Or("throw_pt", ValV3(0.0f, 0.0f, 0.0f));
         resetTimeout = (int)(59.94f * t->GetFloat("reset_timeout", -1.0f));
         fn_801D0800(this);
         state = 1;
@@ -1681,7 +1683,7 @@ int SoundEffect_ASE::Load(ValueNode* t) {
         fn_802E30C8("SoundEffect_ASE: missing required field \"sfx_name\"!");
         return 0;
     }
-    v = (t)->GetVec3Or("v", ValVec3(ValV3(0.0f, 0.0f, 0.0f)));
+    v = (t)->GetVec3Or("v", ValV3(0.0f, 0.0f, 0.0f));
     if (t->GetBool("is_3d", 0)) {
         Sound3D* s = fn_802077A4(name, 5, &v, &loc);
         snd = s;

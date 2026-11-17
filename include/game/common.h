@@ -123,9 +123,11 @@ public:
     virtual s32 GetIntValue2(const char* key);                        // 0x2C (bool: "yes"/"true")
     virtual int GetBool(const char* key, int def);                    // 0x30
     virtual ValVec3 GetVec3(const char* key);                         // 0x34
-    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def);     // 0x38
+    // GetVec3Or / GetPointOr take the default BY VALUE: every retail caller hands over a copy of it, never the
+    // object itself (2026-11-17). A constructor temporary is the natural default (ValV3(0.0f, 0.0f, 0.0f)).
+    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def);            // 0x38
     virtual ValPoint GetPoint(const char* key);                       // 0x3C (returned in r3:r4)
-    virtual ValPoint GetPointOr(const char* key, const ValPoint& def);  // 0x40
+    virtual ValPoint GetPointOr(const char* key, ValPoint def);         // 0x40
     virtual ValMatrix GetMatrix(const char* key);                     // 0x44
     virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def);  // 0x48
     virtual f32 GetReal(const char* key);                             // 0x4C (base64 float)

@@ -883,8 +883,8 @@ void fn_801C3D88(const char* name) {
             // Bound here, not in a helper: retail keeps this result right below o's on the stack.
             const ValVec3& dir = n->GetVec3("dir");
             AxisAngleRows(&c->rot, dir);
-            CopyV(&c->v, n->GetVec3Or("v", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
-            CopyV(&c->av, n->GetVec3Or("av", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
+            CopyV(&c->v, n->GetVec3Or("v", XV3(0.0f, 0.0f, 0.0f)));
+            CopyV(&c->av, n->GetVec3Or("av", XV3(0.0f, 0.0f, 0.0f)));
             c->end = fn_801C3450(c->time + n->GetFloat("duration", 9999.0f));
             c->accel = n->GetBool("accel", 1);
             c->target = fn_801C3A00(fn_801C3954(n->GetString("who", "nobody")));
@@ -917,16 +917,15 @@ void fn_801C3D88(const char* name) {
                 break;
             case 0: {
                 // The point objects are all temporaries, so retail's stack holds them in statement order:
-                // result, the by-value default (CopyValPoint stands in for a by-value `def` parameter, as in
-                // partemit and uianime), then the default built in place.
+                // result, the by-value default (the `def` parameter of GetPointOr), then the default built in place.
                 CopyP(&t->pt, n->GetPoint("pt"));
                 t->yaw = n->GetFloat("yaw");
-                CopyP(&t->offset, n->GetPointOr("offset", CopyValPoint(ValPoint(XP(0.0f, 0.0f)))));
+                CopyP(&t->offset, n->GetPointOr("offset", ValPoint(XP(0.0f, 0.0f))));
                 break;
             }
             case 2: {
                 t->yaw = n->GetFloat("yaw", 0.0f);
-                CopyP(&t->pt, n->GetPointOr("offset", CopyValPoint(ValPoint(XP(0.0f, 0.0f)))));
+                CopyP(&t->pt, n->GetPointOr("offset", ValPoint(XP(0.0f, 0.0f))));
                 break;
             }
             default:

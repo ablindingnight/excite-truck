@@ -165,8 +165,8 @@ public:
         }
         return 0;
     }
-    virtual ValVec3 GetVec3Or(const char* key, const ValVec3& def) { return Has(key) ? GetVec3(key) : def; }
-    virtual ValPoint GetPointOr(const char* key, const ValPoint& def) {
+    virtual ValVec3 GetVec3Or(const char* key, ValVec3 def) { return Has(key) ? GetVec3(key) : def; }
+    virtual ValPoint GetPointOr(const char* key, ValPoint def) {
         return Has(key) ? GetPoint(key) : def;
     }
     virtual ValMatrix GetMatrixOr(const char* key, const ValMatrix& def) {

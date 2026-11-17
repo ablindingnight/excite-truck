@@ -2,6 +2,7 @@
 // model's light nodes, drawn as camera-facing flares and car-aligned glow quads. Names are guesses
 // apart from the node names and value keys.
 #include "game/common.h"
+#include "game/plainvec.h"
 #include "game/vecmatrix.h"
 #include "game/carlights.h"
 #include "game/weather.h"
@@ -296,7 +297,7 @@ void fn_80295C70(LightSet* s, const VecMatrix* frame, const Vec* off, f32 w, f32
 
 void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int unused, Vec off, f32 rad) {
     const VecMatrix* frame;
-    const ValVec3 def = {color.x, color.y, color.z};
+    const ValV3 def(color.x, color.y, color.z);
     if (fn_80288070(model, name, &frame)) {
         ValueNode* n;
         f32 r;
@@ -306,7 +307,7 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
         s32 type;
         if (fn_80287E20(model, name)) {
             n = fn_80287E80(model, name);
-            const ValVec3& v = n->GetVec3Or("color", ValVec3(def));
+            const ValVec3& v = n->GetVec3Or("color", def);
             c = MakeColor(ColorByte(255.0f * v.x), ColorByte(255.0f * v.y), ColorByte(255.0f * v.z));
             r = n->GetFloat("rad", rad);
             w = n->GetFloat("width", -1.0f);
