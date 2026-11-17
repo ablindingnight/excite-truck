@@ -14,10 +14,7 @@ typedef intptr_t MenuArg;
 
 // Menu records handed to fn_802146BC: five words per item, ended by an item whose type is
 // 0x7B (each unit's UnkStatic123 object).
-struct CaptionContext {
-    int value;
-    CaptionContext(int v = 0) : value(v) {}
-};
+#include "game/captionctx.h"
 
 struct MenuItem {
     MenuItem(const char* n, CaptionContext context, const char* t) {

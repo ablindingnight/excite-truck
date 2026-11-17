@@ -1841,7 +1841,7 @@ int Input::Slot64(int key) {
 CDetect::CDetect(int x,int y,int parameter,Binding* value,int height) : UILabel(x,y,0,height,0,0), parameter(parameter) {WidgetFragment* self=(WidgetFragment*)this;BindingFieldPrefix* f=(BindingFieldPrefix*)self;f->value=value;fn_801A7E54(f->buffer,24,value);fn_80219440(self,0,value,16);fn_80219718(self);}
 void CDetect::Slot74(int, void*) {fn_801A7E54(((BindingFieldPrefix*)((WidgetFragment*)this))->buffer,24,((BindingFieldPrefix*)((WidgetFragment*)this))->value);WidgetMarkDirty(((WidgetFragment*)this));}
 int fn_8021F478(int* result){fn_801A7844(1);KeyDetect* file=&lbl_80490934;if(fn_801A7C8C(file->binding)){fn_801A7E54(file->label,24,file->binding);fn_802E47E8();*result=-2;return 1;}return 0;}
-struct CaptionContext {int value;inline CaptionContext(int v=0):value(v){}};
+#include "game/captionctx.h"
 struct WidgetMenuEntry {
  const char* name;int type;const void* data;int arg0,arg1;
  inline WidgetMenuEntry(const char* n,const char* t,int context=0){data=t;arg0=context;name=n;type=3;arg1=0;}
