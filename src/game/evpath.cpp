@@ -180,8 +180,7 @@ public:
         frame = 0;
     }
     virtual ~EvCupBar(void) {
-        EvCupBar* self = this;
-        if ((UPtrInt)lbl_8055F688 == (UPtrInt)self) {
+        if ((UPtrInt)lbl_8055F688 == (UPtrInt)this) {
             lbl_8055F688 = 0;
         }
         lbl_804B3048.Remove(this);
@@ -451,8 +450,6 @@ s32 fn_802168E4(void);
 
 // "Cup completed" box: congratulations and the next cup (or what this one unlocked), with the cup's
 // marker easing in.
-#pragma push
-#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_8027F288(EvBracket* cup, EvBracket* next) {
     char msg[100];
     if (next) {
@@ -499,7 +496,6 @@ void fn_8027F288(EvBracket* cup, EvBracket* next) {
         fn_80214AF0(0x1F);
     }
 }
-#pragma pop
 
 int fn_8024739C(int* item);
 int fn_80280898(void);
@@ -512,8 +508,6 @@ void fn_80281138(void);
 
 // A path's cup screen: a marker per cup (at most five) with its name and progress, coloured and titled for
 // the path's difficulty. Returns 1 with the picked cup in *sel, 0 when backed out.
-#pragma push
-#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 int fn_8027F958(s32* sel, EvPath* path) {
     int diff = path->Get(0)->Difficulty();
     EvCupBar bars[5];
@@ -581,7 +575,6 @@ int fn_8027F958(s32* sel, EvPath* path) {
     lbl_8055F694 = 0;
     return picked;
 }
-#pragma pop
 
 int fn_80280898(void) {
     if (lbl_8055F688 == 0) {
@@ -1030,8 +1023,6 @@ int fn_80283E28(void);
 // The bracket's event screen: a bar per event (at most five) with best/pass and grade, the bracket's cup
 // marker, the selected event's title, best time and map; after a result the improved event's score counts
 // up first. Returns 1 when an event was picked (its index in *event).
-#pragma push
-#pragma opt_dead_assignments off  // Retain address calculations used by the inlined destructors.
 int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     int diff = br->Difficulty();
     ScoreAccumulator acc;
@@ -1169,7 +1160,6 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     lbl_8055C7E0 = -1;
     return picked;
 }
-#pragma pop
 
 int fn_802839D0(void) {
     if (lbl_8055F684 && lbl_8055F698) {
