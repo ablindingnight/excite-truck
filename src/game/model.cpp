@@ -572,10 +572,10 @@ void mrModelFixup(ModelInfo* m, const char* name) {
     u32 base = (u32)m;
     SwapWord(&m->nElems);
     SwapWord(&m->elems);
-    SwapWord(&m->nLists);
-    SwapWord(&m->lists);
     SwapWord(&m->nExtras);
     SwapWord(&m->extras);
+    SwapWord(&m->nLists);
+    SwapWord(&m->lists);
     SwapWord(&m->maxInst);
     f32* f = &m->radius;
     for (int k = 0; k < 10; k++) {
