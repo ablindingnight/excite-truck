@@ -10,6 +10,7 @@
 #include "game/menustate.h"
 #include "game/uitable.h"
 #include <string.h>
+#include "game/strcopy.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -118,14 +119,6 @@ extern u8 lbl_8055F290;
 extern char* lbl_8055F294;
 
 // Copies at most n characters, always terminating.
-static inline void CopyName(const char* s, int n, char* d) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 ModuleTag lbl_8055F280;
 UnkStatic123s lbl_80498998;
@@ -406,7 +399,7 @@ public:
             EventInfo* ev = FindTrackEvent(track, eve);
             id = ev->id;
             const char* name_ = ((VN*)ev->node)->v14("friendly_name");
-            CopyName(name_, 100, name);
+            SafeStrCopy(name, name_, 100);
         } else {
             id = -1;
             name[0] = 0;
@@ -528,7 +521,7 @@ extern "C" {
 int fn_80249668(s32* out) {
     const char* names[3] = {"Select Location", "Select Event", "Select Difficulty"};
     const char* src = names[fn_80214D04()];
-    CopyName(src, 0x100, lbl_8055F294);
+    SafeStrCopy(lbl_8055F294, src, 0x100);
     if (lbl_8055F290 && !fn_802411D4()) {
         *out = -1;
         return 1;
@@ -974,13 +967,13 @@ void CountryScreen::Refresh(void) {
         e = EventAt(this, i);
         if (!strcasecmp(group, e->group)) {
             CourseSlot* c = &slots[e->slot];
-            CopyName(e->name, 50, c->name);
+            SafeStrCopy(c->name, e->name, 50);
             if (e->unlocked) {
-                CopyName(e->name2, 50, c->name2);
+                SafeStrCopy(c->name2, e->name2, 50);
                 c->open = 1;
             } else {
                 const char* locked = fn_80131234("UIMulti:LOCKED_COURSE_NAME");
-                CopyName(locked, 50, c->name2);
+                SafeStrCopy(c->name2, locked, 50);
                 c->open = 0;
             }
         }
@@ -1062,7 +1055,7 @@ void CountryScreen::Update(void) { Refresh(); }
 
 void CourseScreen::Refresh(void) {
     sel = fn_80214D04();
-    CopyName(events.data[sel]->name2, 50, name);
+    SafeStrCopy(name, events.data[sel]->name2, 50);
     id = events.data[sel]->id;
 }
 
