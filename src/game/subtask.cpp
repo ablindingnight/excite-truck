@@ -31,6 +31,11 @@ CSubTaskMgr* fn_8013C9F4(int type) {
     if (type == 0) {
         return new ("csubtasktmgr") CSubTaskMgr;
     }
+#ifndef __MWERKS__
+    // PORT: retail falls off the end with r3 = type (a non-null garbage pointer). Both callers pass 0, so the PC
+    // returns NULL here instead of reproducing it.
+    return 0;
+#endif
 }
 
 void fn_8013CA3C(int, int) {}

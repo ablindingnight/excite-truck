@@ -141,6 +141,10 @@ long fn_8020F608(long arg0, long arg1) {
     for (i = 0; i < 64; i++) {
         *(long *)(ptr + i * 100) = arg0;
     }
+#ifndef __MWERKS__
+    /* PORT: retail falls off the end with r3 = memset's result (ptr); no caller uses it. */
+    return (long)ptr;
+#endif
 }
  
 void fn_8020F6E0(int arg0, int arg1) {

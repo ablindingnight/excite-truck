@@ -50,7 +50,12 @@ public:
     virtual void vfB8(ZoneResults* r) {}
     virtual void vfC0(void) {}
     virtual void vfC4(void) {}
-    virtual int Collide(int a, int b) {}
+    virtual int Collide(int a, int b) {
+#ifndef __MWERKS__
+        // PORT: retail's body is a bare blr, so the (unused) result is r3 = this; give the PC the same value.
+        return (int)(size_t)this;
+#endif
+    }
     virtual f32 vf38(void) { return 4.0f; }
     virtual int vf54(int p) { return (GetNumPlayers() > 1) ? 0x160B : 0x564B; }
     virtual int vf100(void) { return 1; }
