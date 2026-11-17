@@ -1542,8 +1542,16 @@ static inline void MulVec(ValVec3* out, const ValVec3* in, Mat3* m) {
 // The interlude camera for view idx while an interlude plays (and the editor is not flying it): the
 // current camera move at the current time, relative to the world, the start line or a car, blended in
 // from the previous camera over the interpolation time. Returns 0 when not active.
+/* Helper name unproven: acc += m * in. Both users kept the product in their own local; retail has the two
+   products at the bottom of the frame in call order = the local of one helper. */
+static inline void AddRotated(ValVec3* acc, const ValVec3* in, Mat3* m) {
+    ValVec3 d;
+    MulVec(&d, in, m);
+    acc->x += d.x;
+    acc->y += d.y;
+    acc->z += d.z;
+}
 int fn_801C5B68(CamView* v, int idx) {
-    f32 minLen = 0.1f;
     if (idx == 0) {
         lbl_8055E800++;
     }
@@ -1578,7 +1586,7 @@ int fn_801C5B68(CamView* v, int idx) {
         dt = fn_801C3B6C() - lbl_80437D88.play.start;
     }
     f32 len = lbl_80437D88.play.end - lbl_80437D88.play.start;
-    if (len > minLen) {
+    if (len > 0.1f) {
         f32 e = Ease(dt / len);
         if (lbl_80437D88.play.accel) {
             dt = e * len;
@@ -1587,16 +1595,12 @@ int fn_801C5B68(CamView* v, int idx) {
     v->origin.x = lbl_80437D88.play.origin.x;
     v->origin.y = lbl_80437D88.play.origin.y;
     v->origin.z = lbl_80437D88.play.origin.z;
-    v->Mat() = lbl_80437D88.play.rot;
+    *(MatRows*)&v->Mat() = *(const MatRows*)&lbl_80437D88.play.rot;
     ValVec3 move;
     move.x = lbl_80437D88.play.v.x * dt;
     move.y = lbl_80437D88.play.v.y * dt;
     move.z = lbl_80437D88.play.v.z * dt;
-    ValVec3 d;
-    MulVec(&d, &move, &v->Mat());
-    v->origin.x += d.x;
-    v->origin.y += d.y;
-    v->origin.z += d.z;
+    AddRotated(&v->origin, &move, &v->Mat());
     ValVec3 turn;
     turn.x = lbl_80437D88.play.av.x * dt;
     turn.y = lbl_80437D88.play.av.y * dt;
@@ -1606,8 +1610,7 @@ int fn_801C5B68(CamView* v, int idx) {
     MulM(&v->Mat(), &r, &v->Mat());
     if (lbl_80437D88.play.target >= 0) {
         PlainValMatrix rel;
-        rel.Mat() = v->Mat();
-        rel.origin = v->origin;
+        rel = *v;
         ValMatrix f;
         switch (lbl_80437D88.play.camType) {
         case 0:
@@ -1640,11 +1643,7 @@ int fn_801C5B68(CamView* v, int idx) {
         } else {
             v->origin = f.origin;
             MulM(&v->Mat(), &rel.Mat(), &f.Mat());
-            ValVec3 o;
-            MulVec(&o, &rel.origin, &v->Mat());
-            v->origin.x += o.x;
-            v->origin.y += o.y;
-            v->origin.z += o.z;
+            AddRotated(&v->origin, &rel.origin, &v->Mat());
         }
     }
     if (!(FAbs(lbl_80437D88.play.interpTime) <= __float_epsilon[0]) && dt < lbl_80437D88.play.interpTime) {
