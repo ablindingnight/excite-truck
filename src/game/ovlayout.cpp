@@ -1348,7 +1348,7 @@ void fn_80147FF0(const GartElem* e, u32 color) {
 
 void fn_80148070(const GartElem* e, u32 color, gArtSet* art) {
     f32 w = fn_801452A0(e->w, e->elemJust);
-    fn_80011280(color, art, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h);
+    fn_80011280(color, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h, art);
 }
 
 void fn_80148100(const GartElem* e) {

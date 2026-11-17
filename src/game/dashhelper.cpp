@@ -1222,14 +1222,14 @@ void fn_8001123C(int player) {
     fn_8000EF74(player);
 }
 
-void fn_80011278(u32 color, f32 x, f32 y, f32 w, f32 h) { fn_80011280(color, lbl_8055D4D4, x, y, w, h); }
+void fn_80011278(u32 color, f32 x, f32 y, f32 w, f32 h) { fn_80011280(color, x, y, w, h, lbl_8055D4D4); }
 
 struct Vec2 {
     f32 x;
     f32 y;
 };
 
-void fn_80011280(u32 color, gArtSet* art, f32 x, f32 y, f32 w, f32 h) {
+void fn_80011280(u32 color, f32 x, f32 y, f32 w, f32 h, gArtSet* art) {
     Vec2 p;
     f32 pw;
     f32 a;

@@ -491,7 +491,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
         f32 box_h = 140.0f;
         f32 box_y = 0.5f * box_h - 80.0f;
         f32 box_x = panelSlide - 225.0f;
-        fn_80011280(((((alpha * 192) / 255) << 24) | 0xFFFFFF), lbl_8055D658, box_x, box_y, 450.0f, box_h);
+        fn_80011280(((((alpha * 192) / 255) << 24) | 0xFFFFFF), box_x, box_y, 450.0f, box_h, lbl_8055D658);
 
         static LocString s_title("Tips:TITLE");
         fn_8023293C(lbl_8055D64C, s_title.Get(), 1.0f);
@@ -501,10 +501,8 @@ void DrawLoadingScreen(int alpha, f32 t) {
     if (!lbl_8055D646 && show_goals && GetNumPlayers() == 1) {
         f32 eased = SCurve(t);
         f32 panelLeft = 160.0f;
-        f32 panelY = 40.0f;
-        f32 panelWidth = 320.0f;
         f32 panel_x = lbl_8055CFF0 * (eased * 4.0f) - panelLeft;
-        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, lbl_8055D658, panel_x, panelY, panelWidth, panelLeft);
+        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, panelLeft, lbl_8055D658);
 
         int rows[3] = {10, 8, 9};
         int* row = rows;
