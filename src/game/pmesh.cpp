@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/plainvec.h"
+#include "game/byteswap.h"
 
 struct PFrame {
     PVec3 x;    // offset 0x0
@@ -61,23 +62,6 @@ static inline void MulVec(PVec3* out, const PVec3* in, const PFrame* m) {
         out->y = Dot3(in->x, m->x.y, in->y, m->y.y, in->z, m->z.y);
         out->z = Dot3(in->x, m->x.z, in->y, m->y.z, in->z, m->z.z);
     }
-}
-
-static inline void PSwap16(void* p) {
-    u8 t;
-    t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[1];
-    ((u8*)p)[1] = t;
-}
-
-static inline void PSwap32(void* p) {
-    u8 t;
-    t = ((u8*)p)[0];
-    ((u8*)p)[0] = ((u8*)p)[3];
-    ((u8*)p)[3] = t;
-    t = ((u8*)p)[1];
-    ((u8*)p)[1] = ((u8*)p)[2];
-    ((u8*)p)[2] = t;
 }
 
 static inline u32 PColor(u8 a, u8 r, u8 g, u8 b) { return (a << 24) | (r << 16) | (g << 8) | b; }
@@ -286,26 +270,26 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
 
 /* Helper names unproven: per-element byte swaps. */
 static inline void SwapVec(PVec3* v) {
-    PSwap32(&v->x);
-    PSwap32(&v->y);
-    PSwap32(&v->z);
+    SwapWord(&v->x);
+    SwapWord(&v->y);
+    SwapWord(&v->z);
 }
 
 static inline void SwapCell(PCell* c) {
     SwapVec(&c->center);
-    PSwap32(&c->radius);
-    PSwap32(&c->first);
-    PSwap32(&c->end);
+    SwapWord(&c->radius);
+    SwapWord(&c->first);
+    SwapWord(&c->end);
 }
 
 static inline void SwapTri(PTri* t) {
-    PSwap16(&t->flags);
+    SwapHalf(&t->flags);
     for (int k = 0; k < 3; k++) {
-        PSwap16(&t->v[k]);
+        SwapHalf(&t->v[k]);
         SwapVec(&t->edge[k]);
     }
     SwapVec(&t->n);
-    PSwap32(&t->d);
+    SwapWord(&t->d);
 }
 
 /* The target unrolls the 3-edge loop and never hoists a byte load above an
@@ -315,12 +299,12 @@ static inline void SwapTri(PTri* t) {
 #pragma ppc_unroll_instructions_limit 100
 #pragma scheduling off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_801CFA48(PMesh* m) {
-    PSwap32(&m->cells);
-    PSwap32(&m->numCells);
-    PSwap32(&m->verts);
-    PSwap32(&m->numVerts);
-    PSwap32(&m->tris);
-    PSwap32(&m->numTris);
+    SwapWord(&m->cells);
+    SwapWord(&m->numCells);
+    SwapWord(&m->verts);
+    SwapWord(&m->numVerts);
+    SwapWord(&m->tris);
+    SwapWord(&m->numTris);
     u8* p = (u8*)(m + 1);
     m->cells = (PCell*)p;
     p += m->numCells * sizeof(PCell);
