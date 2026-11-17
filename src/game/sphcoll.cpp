@@ -22,12 +22,12 @@
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 
 #include "game/pvec3a.h"
+#include "game/mathutil.h"
 
 // o = c + d * k
 // Helpers unproven (names and existence): one constant load for three products, variable-first operands.
 template <class C> static inline void SphAheadXZY(f32* o, f32 x, const C* c, const f32* v, f32 k) { o[0] = x + v[0] * k; o[2] = c->z + v[2] * k; o[1] = c->y + v[1] * k; }
 static inline f32 SphAdd(f32 a, f32 b) { return a + b; }
-static inline f32 SphMul(f32 a, f32 b) { return a * b; }
 static inline void SphScale(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 static inline void SphAddScaled(f32* o, const f32* a, const f32* d, f32 k) { o[0] = a[0] + d[0] * k; o[1] = a[1] + d[1] * k; o[2] = a[2] + d[2] * k; }
 static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
@@ -38,8 +38,6 @@ static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
 
 // A box corner built component-wise (its constructor arguments are evaluated z, y, x).
 // BoxCorner: rvec.h's RVec3.
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 static inline RVec3 VMin(const RVec3& a, const RVec3& b) {
     return RVec3(MinF(a.x, b.x), MinF(a.y, b.y), MinF(a.z, b.z));
@@ -52,8 +50,6 @@ static inline RVec3 VMax(const RVec3& a, const RVec3& b) {
 
 // CFrame: rmtx.h's RMtx.
 
-static inline f32 Sq(f32 x) { return x * x; }
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(RVec3* out, const RVec3* in, const RMtx* m) {
     if (out == in) {
@@ -863,7 +859,6 @@ void fn_8019AA18(u8* p, u32 a, u32 b, u32 c) { fn_8019A820(p, (f32*)(p + 0x34), 
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 // Sphere (c, r) of p against sphere (d, s) of q: reports the contact (normal flattened in y) to the
 // volume that has an owner.
@@ -878,9 +873,9 @@ int fn_8019AA34(u8* p, const f32* cv, u8* q, const f32* dv, u32 a, u32 b, f32 r,
     dd.v[2] = cv[2] - dv[2];
     f32 rs = r + s;
     int hit = 0;
-    if (SphereMagnitude(dd.v[0]) < rs && AbsF(dd.v[2]) < rs && AbsF(dd.v[1]) < rs) {
+    if (SphereMagnitude(dd.v[0]) < rs && FAbs(dd.v[2]) < rs && FAbs(dd.v[1]) < rs) {
         f32 dist = PSVECMag((const Vec*)dd.v);
-        if (!(AbsF(dist) <= __float_epsilon[0])) {
+        if (!(FAbs(dist) <= __float_epsilon[0])) {
             f32 pen = s + (-dist + r);
             if (pen > 0.0f) {
                 f32 inv = 1.0f / dist;
@@ -1371,7 +1366,7 @@ int fn_8019C854(u8* p, u8* q) {
     f32 tr = F32(q, 0x28);
     if (l.z < rs + tr && l.z > -(rs + tr)) {
         f32 dist = (f32)sqrt(Sq(l.x) + Sq(l.y));
-        f32 pen = (rs + tr) - AbsF(dist - R);
+        f32 pen = (rs + tr) - FAbs(dist - R);
         if (pen > 0.0f) {
             if (dist > R + tr) {
                 f32 k = (dist - rs) / dist;
@@ -2354,7 +2349,6 @@ struct BoxSlip {
     RVec3 slip[8];  // offset 0x64
 };
 
-static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  /* Helper name unproven */
 // Box (half extents at 0x58) on the ground: each of the eight corners below the track height gets a spring
 // impulse, clamped friction (with its own slip accumulator at 0x64) and the bounce event. In water (surface 7)
 // the box floats instead: buoyancy from the submerged depth on a bobbing water line, and drag.
@@ -2434,7 +2428,7 @@ void BoxSphereShape::vf14(void) {
                     f.y = vt.y * c;
                     f.z = vt.z * c;
                     f32 g = -30.0f * F32(rb, 0xD4);
-                    f.x = Lerp_hm(f.x, g, acc[0]);
+                    f.x = AddScaledF(f.x, g, acc[0]);
                     f.y = f.y + acc[1] * g;
                     f.z = f.z + acc[2] * g;
                     f32 fm = PSVECMag((const Vec*)&f.x);
@@ -2488,7 +2482,7 @@ void BoxSphereShape::vf14(void) {
             drag.z = bv.z * dk;
             rb->AddForceAt(&drag, (RVec3*)(p + 0x34));
             f32 lift = 1000.0f + 0.1f * sub;
-            sub = MinF(sub, SphMul(2.0f, this->radius));
+            sub = MinF(sub, Mul(2.0f, this->radius));
             up.y = 9.81f * (lift * (vol * sub));
             up.x = 0.0f;
             up.z = 0.0f;
