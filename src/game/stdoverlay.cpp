@@ -9,6 +9,7 @@
 #include "game/raceprog.h"
 #include "game/carinfo.h"
 #include "macros.h"
+#include "game/strcopy.h"
 
 void* operator new(size_t size, const char* tag);
 
@@ -197,14 +198,6 @@ static inline f32 Clamp01(f32 x) {
     return MAX(v, 0.0f);
 }
 
-static inline void CopyString(int size, char* dst, const char* src) {
-    while ((*dst++ = *src++) != 0) {
-        if (--size <= 0) {
-            dst[-1] = 0;
-            break;
-        }
-    }
-}
 
 f32 Pulse(int period) {
     f32 s = sin(6.2831855f * (f32)(lbl_8055E3C4 % period) / (f32)period);
@@ -527,15 +520,15 @@ inline void LapTitleOverlay::Update(int player, int unused) {
         if (s->lap != 1 && s->lap <= 3) {
             if (s->lap < info->laps) {
                 str = fn_80131234("BigText:LAP_LEFT");
-                CopyString(32, leftText, str);
+                SafeStrCopy(leftText, str, 32);
                 fn_801345D8(key, sizeof(key), "BigText:LAP_RIGHT_%d", s->lap);
                 str = fn_80131234(key);
-                CopyString(32, rightText, str);
+                SafeStrCopy(rightText, str, 32);
             } else if (info->laps == s->lap) {
                 str = fn_80131234("BigText:FINAL_LEFT");
-                CopyString(32, leftText, str);
+                SafeStrCopy(leftText, str, 32);
                 str = fn_80131234("BigText:FINAL_RIGHT");
-                CopyString(32, rightText, str);
+                SafeStrCopy(rightText, str, 32);
             } else if (info->laps + 1 == s->lap) {
                 return;
             } else {
