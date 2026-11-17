@@ -1,5 +1,6 @@
 // Track B1 partial draft. Offsets are observed fields, not asserted class names.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/menustate.h"
 void* operator new(unsigned long size, const char* tag);
 void* operator new[](unsigned long,const char*);
@@ -146,13 +147,13 @@ void fn_802E317C(const char*,...);
 void fn_802640C4(CreditItemFields* self,ValueNode* node);
 
 struct CreditTextDescFields {
-    const void* resource;f32 angleMin,angleMax,speedMin,speedMax;
+    const char* resource;f32 angleMin,angleMax,speedMin,speedMax;
     f32 accelerationX,accelerationY,spinMin,spinMax;int capacity;f32 emissionRate;
     f32 lifetime,fadeTime,size,sizeDelta;
 };
 struct CreditGlyphStorageObservedNew {CreditGlyphStorageObservedNew(int);~CreditGlyphStorageObservedNew(){items=0;count=0;capacity=0;}void* items;int count,capacity;};
 struct CreditGlyphBatchFields:CreditGlyphStorageObservedNew {CreditGlyphBatchFields(int);~CreditGlyphBatchFields(){__dla__FPv(allocation);}void* allocation;f32 inverseX,inverseY,inverseZ,elapsed;};
-struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);~CreditFontGroupFields();void Spawn(const ValPoint&);CreditTextDescFields desc;int resource;CreditGlyphBatchFields glyphs;};
+struct CreditFontGroupFields {CreditFontGroupFields(const CreditTextDescFields&);~CreditFontGroupFields();void Spawn(const ValPoint&);CreditTextDescFields desc;gArtSet* resource;CreditGlyphBatchFields glyphs;};
 // The credits' menu states: menu items of type 5 point at one. MWCC emits their vtables in REVERSE declaration
 // order, so they are declared here in the reverse of their .data order (lbl_803464F8 QuitHotkey, KeyEnabler,
 // ExtraDelay, FireText, background, lbl_803466D8 fade), followed by the zero-filled space of this unit's
@@ -239,7 +240,6 @@ extern const CreditTextDescFields lbl_802FA700;
 extern CreditTextDescFields lbl_80346364;
 extern const char lbl_8055C490[8];
 
-int fn_8023512C(const void*);
 }
 static inline f32 CreditObservedMax(f32 a,f32 b){return a>b?a:b;}
 inline CreditGlyphStorageObservedNew::CreditGlyphStorageObservedNew(int n){void* buffer=__nwa__FUlPCc(n*32,lbl_8055C490);items=buffer;capacity=n;count=0;}
@@ -266,10 +266,6 @@ int fn_802ECF04(void);
 extern int lbl_8055C450;
 void fn_80263F30(int before,u8 allowSkip,int after);
 
-void fn_80235380(int);
-f32 fn_80235F64(int,u32);
-f32 fn_80235EF0(int,u32);
-void fn_80235AFC(int,u32,u32,f32,f32,f32,f32,f32,f32);
 }
 struct CreditVelocityArrayObservedNew {f32 values[2];};typedef char CreditVelocityArraySizeNew[sizeof(CreditVelocityArrayObservedNew)==8?1:-1];
 struct CreditGlyphFields {
@@ -365,7 +361,6 @@ void fn_80264A5C(f32,f32);
 void fn_80230C30(f32*,f32*,int,int);
 f32 fn_80129DC4(int,f32,f32);
 int fn_80129D18(int,int);
-int fn_80235FD8(int);
 f64 cos(f64);f64 sin(f64);
 
 }
