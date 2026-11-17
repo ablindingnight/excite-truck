@@ -87,7 +87,11 @@ extern "C" {
 int fn_801E8838(void);
 int fn_802E4A10(void);
 int fn_802C9A58(void);
-int fn_8020DE1C(void);
+#ifdef __MWERKS__
+int fn_8020DE1C(void);  // defined char in unk_8020CF68.cpp; MWCC callees extend r3, retail callers read it whole
+#else
+char fn_8020DE1C(void);  /* PORT: the definition's width (x86 leaves the upper bits undefined) */
+#endif
 void fn_80230B5C(DrawContext* ctx);
 void fn_80230AD8(DrawContext* ctx);
 void fn_80230B38(void);

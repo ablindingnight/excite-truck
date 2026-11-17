@@ -121,7 +121,11 @@ void fn_80129B60(void);
 int fn_801769A8(void);
 int fn_802E47B8(void);
 u32 fn_802E46F0(void);
-int fn_8020DE1C(void);
+#ifdef __MWERKS__
+int fn_8020DE1C(void);  // defined char in unk_8020CF68.cpp; MWCC callees extend r3, retail callers read it whole
+#else
+char fn_8020DE1C(void);  /* PORT: the definition's width (x86 leaves the upper bits undefined) */
+#endif
 void fn_80176780(int a, int b);
 int fn_802E2C20(void);
 int fn_801298E8(JoyStatus* pad, int index);
@@ -130,7 +134,11 @@ void fn_8026A1F0(int cam, int player, int unk);
 void fn_801E7E48(void);
 void fn_80176BAC(void);
 int fn_801E89EC(void);
-int fn_8012742C(void);
+#ifdef __MWERKS__
+int fn_8012742C(void);  // defined char in unk_80127398.cpp; MWCC callees extend r3, retail callers read it whole
+#else
+char fn_8012742C(void);  /* PORT: the definition's width (x86 leaves the upper bits undefined) */
+#endif
 void fn_8017691C(void);
 void fn_801CB4DC(void);
 void fn_80230B5C(PlainValMatrix* cam);

@@ -89,7 +89,11 @@ void fn_80287A34(int a);
 void fn_8029790C(int a);
 void fn_802B0914(void);
 void fn_802B0954(void);
-u32 fn_802B127C(u32 t, const Vec* p);
+#ifdef __MWERKS__
+u32 fn_802B127C(u32 t, const Vec* p);  // defined u16 in gmat.cpp; MWCC callees extend r3, retail callers read it whole
+#else
+u16 fn_802B127C(u32 t, const Vec* p);  /* PORT: the definition's width (x86 leaves the upper bits undefined) */
+#endif
 void fn_802B14B4(u32 t);
 int fn_802B1C50(u32 t, u32 a, u32 b);
 void fn_802B1E28(void);

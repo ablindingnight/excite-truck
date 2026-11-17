@@ -89,7 +89,11 @@ void fn_80218A34(Window* win, int g);
 void fn_80218ADC(Window* win, int g);
 void fn_80218B88(Window* win, int g, int a, int b);
 void fn_80218C98(Window* w, Widget* widget, int group);
-int fn_8012742C(void);
+#ifdef __MWERKS__
+int fn_8012742C(void);  // defined char in unk_80127398.cpp; MWCC callees extend r3, retail callers read it whole
+#else
+char fn_8012742C(void);  /* PORT: the definition's width (x86 leaves the upper bits undefined) */
+#endif
 void fn_80214D50(int sound);
 void fn_8023660C(void);
 void fn_802D3E9C(int a);

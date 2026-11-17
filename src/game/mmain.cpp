@@ -15,7 +15,11 @@ void fn_80129AEC(int a);
 void fn_802E47E8(void);
 void fn_80127A24(void);
 void fn_8027B690(void);
-int fn_8012742C(void);
+#ifdef __MWERKS__
+int fn_8012742C(void);  // defined char in unk_80127398.cpp; MWCC callees extend r3, retail callers read it whole
+#else
+char fn_8012742C(void);  /* PORT: the definition's width (x86 leaves the upper bits undefined) */
+#endif
 void fn_80127434(void);
 void fn_8027B77C(void);
 void fn_802ECEC0(void);
