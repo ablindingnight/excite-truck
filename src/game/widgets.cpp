@@ -291,7 +291,7 @@ void fn_802C3424(int,int,int,int,int);
 
 struct ChoiceProviderData {u32 words[3];};
 struct ChoiceProviderDispatch :ChoiceProviderData {
- virtual int Modal();virtual int Selected();virtual int AcceptsKeys();virtual void Slot14();virtual void Slot18();virtual const char* Text();
+ virtual int Modal();virtual int Selected();virtual int AcceptsKeys();virtual void Slot14();virtual ~ChoiceProviderDispatch();virtual const char* Text();
  virtual void Previous();virtual void Next();virtual int HasPrevious();virtual int HasNext();
 };
 // Console layout witness: pointer fields are typed; prefix ownership and a 64-bit layout remain open.
