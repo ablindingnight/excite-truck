@@ -307,10 +307,13 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
         CVec3 c = *(CVec3*)(car + 0x60);
         y = c.y;
         z = c.z;
-        GroundAt(h0, hint, c.x + 10.0f, y, z + 10.0f);
-        GroundAt(h1, hint, c.x - 10.0f, y, z + 10.0f);
-        GroundAt(h2, hint, c.x - 10.0f, y, z - 10.0f);
-        GroundAt(h3, hint, c.x + 10.0f, y, z - 10.0f);
+        /* Cast unproven (spelling): in retail the c.x read is evaluated before the 10.0 constant in the two sums, i.e. it
+           is not a plain field read there (a conversion or a by-value accessor in the original). Exact with the cast on
+           the read, 8 rows without; written on all four corners the same way. */
+        GroundAt(h0, hint, (f32)c.x + 10.0f, y, z + 10.0f);
+        GroundAt(h1, hint, (f32)c.x - 10.0f, y, z + 10.0f);
+        GroundAt(h2, hint, (f32)c.x - 10.0f, y, z - 10.0f);
+        GroundAt(h3, hint, (f32)c.x + 10.0f, y, z - 10.0f);
         avg = 0.25f * (h0 + (h1 + (h2 + h3)));
         if (onGround) {
             r->v[0] = avg - c.y;
