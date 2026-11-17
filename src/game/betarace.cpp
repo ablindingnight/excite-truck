@@ -3572,13 +3572,6 @@ inline void BetaMaster::vf44(void) {
 }
 #pragma dont_inline reset
 
-// Helper name unproven: arguments read right to left, stores go x, y, z.
-static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
-    f32* o = (f32*)o_;
-    o[0] = x;
-    o[1] = y;
-    o[2] = z;
-}
 inline void Pickup::Draw(Color col) {
     if (kind == 3) {
         Color tmp = col;
@@ -3593,7 +3586,7 @@ inline void Pickup::Draw(Color col) {
         V3 at;
         Xform m;
     struct { f32 ang; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
-        SetV3(&p, pos[0], 1.25f + pos[1], pos[2]);
+        p.Set(pos[0], 1.25f + pos[1], pos[2]);
         at = p;
         sp_.ang = 6.2831855f * (f32)fmod(0.5f * fn_801E7E18(), 1.0);
         Mat3* mr = (Mat3*)&m;
