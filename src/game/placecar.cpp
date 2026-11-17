@@ -15,8 +15,8 @@
 // .sdata2 entry and negates it at run time, so its value is not folded where it is used. A one-field const struct
 // gives exactly that (type and name unproven; a plain `const f32` defined here folds -x into a second literal).
 struct GridTune { f32 laneOffset; };
-extern const GridTune lbl_80562650;
-const GridTune lbl_80562650 = {5.0f};
+extern const GridTune lbl_80562700;
+const GridTune lbl_80562700 = {5.0f};
 
 extern "C" {
 double sqrt(double x);
@@ -161,9 +161,9 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
     }
     f32 side;
     if (car & 1) {
-        side = lbl_80562650.laneOffset;
+        side = lbl_80562700.laneOffset;
     } else {
-        side = -lbl_80562650.laneOffset;
+        side = -lbl_80562700.laneOffset;
     }
     row = -fn_801B79AC() / 2.0f - (f32)(car / 2) * row;
     f32 back = 100.0f;
