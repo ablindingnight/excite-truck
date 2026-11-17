@@ -21,16 +21,7 @@ void operator delete(void* p);
 
 
 // Copies at most n - 1 characters and always terminates.
-static inline void CopyName(const char* src, int n, char* dst) {
-    char* d = dst;
-    int left = n;
-    while ((*d++ = *src++) != 0) {
-        if (--left <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
+#include "game/strcopy.h"
 ModuleTag lbl_8055F3B8;
 UnkStatic123s lbl_80498ED0;
 UnkStatic7F lbl_8055F3C0;
@@ -205,7 +196,7 @@ extern "C" {
 
 RecordLine::RecordLine(void) {
     label = (char*)"";
-    CopyName((char*)"", 0x14, value);
+    SafeStrCopy(value, (char*)"", 0x14);
     difficulty = 0;
     char* empty;
     name = (empty = (char*)"");
@@ -279,8 +270,8 @@ void fn_8025DAEC(RecordLine* r, u32 type) {
     }
     r->label = StatsGetLabel(type);
     if (bestEv < 0) {
-        CopyName("-", 0x14, r->value);
-        CopyName("---", 1000, r->text);
+        SafeStrCopy(r->value, "-", 0x14);
+        SafeStrCopy(r->text, "---", 1000);
         r->name = "-";
         bestD = 0;
         r->track = "-";
