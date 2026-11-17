@@ -120,33 +120,7 @@ struct WheelSetup {
     f32 unk20;           // offset 0x20
 };
 
-// carsetup.cpp's car setup block (0x138 bytes): defaulted by fn_801BDA70, then applied to the car.
-struct CarSetup {
-    f32 mass;             // offset 0x0
-    f32 mx;               // offset 0x4
-    f32 my;               // offset 0x8
-    f32 mz;               // offset 0xC
-    f32 ftrack;           // offset 0x10
-    f32 rtrack;           // offset 0x14
-    f32 wheelbase;        // offset 0x18
-    f32 balance;          // offset 0x1C
-    f32 collideCmHeight;  // offset 0x20
-    f32 cmHeight;         // offset 0x24
-    f32 airDrag;          // offset 0x28
-    f32 torqueBalance;    // offset 0x2C
-    u8 engine[0x48];      // offset 0x30 (gearing and engine; not read here)
-    f32 fsway;            // offset 0x78
-    f32 rsway;            // offset 0x7C
-    WheelSetup wheels[4];  // offset 0x80
-    f32 grip;             // offset 0x110
-    f32 slip;             // offset 0x114
-    f32 loadFactor;       // offset 0x118
-    f32 unk11C;           // offset 0x11C
-    f32 brake;            // offset 0x120
-    f32 speedSteering;    // offset 0x124
-    f32 wheelLock;        // offset 0x128
-    f32 modelOffset[3];   // offset 0x12C
-};
+#include "game/carsetup.h"
 
 extern "C" {
 void* memset(void* p, int c, size_t n);

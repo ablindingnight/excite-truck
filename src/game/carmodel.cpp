@@ -23,11 +23,7 @@ f32 PSVECMag(const void* v);
 
 void* operator new(size_t size, const char* tag);
 
-// Frame: vecmatrix.h's VecMatrix.
-struct AnimSlot {
-    VecMatrix frame;  // offset 0x0
-    s16 flags;    // offset 0x30
-};
+#include "game/animslot.h"
 
 struct WheelState {
     u8 pad0[0x34];

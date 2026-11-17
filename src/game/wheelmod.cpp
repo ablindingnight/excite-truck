@@ -674,10 +674,7 @@ u32 fn_801F1978(u32 state) {
 
 }  // extern "C"
 
-struct AnimSlot {
-    ValMatrix frame;  // offset 0x0
-    s16 flags;        // offset 0x30
-};
+#include "game/animslot.h"
 
 class WObj {
 public:

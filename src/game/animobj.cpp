@@ -23,12 +23,7 @@ extern u8 lbl_80488228[];
 // Camera: vecmatrix.h's VecMatrix.
 extern "C" VecMatrix* fn_802C86DC(void);
 
-// Frame: vecmatrix.h's VecMatrix.
-// An animation slot.
-struct AnimSlot {
-    VecMatrix frame;  // offset 0x0
-    s16 flags;    // offset 0x30
-};
+#include "game/animslot.h"
 
 struct PointSlot {
     VecMatrix frame;    // offset 0x0

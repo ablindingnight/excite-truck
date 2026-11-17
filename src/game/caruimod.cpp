@@ -47,16 +47,7 @@ struct WheelSetup {
     u8 pad1C[0x24 - 0x1C];
 };
 
-struct CarSetup {
-    u8 pad0[0x10];
-    f32 ftrack;     // offset 0x10
-    f32 rtrack;     // offset 0x14
-    f32 wheelbase;  // offset 0x18
-    u8 pad1C[0x80 - 0x1C];
-    WheelSetup wheels[4];  // offset 0x80
-    u8 pad110[0x12C - 0x110];
-    ValVec3 modelOffset;  // offset 0x12C
-};
+#include "game/carsetup.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
