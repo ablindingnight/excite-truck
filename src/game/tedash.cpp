@@ -696,9 +696,9 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
             if (!(ri == 0 && rj == 0)) {
                 u32 i1 = bi + 1 < b->w - 1 ? bi + 1 : b->w - 1;
                 u32 j1 = bj + 1 < b->h - 1 ? bj + 1 : b->h - 1;
-                f32 d;
+                u8 d;
                 f32 tx = (f32)ri / (f32)k;
-                f32 a = b->data[bj * b->w + bi];
+                u8 a = b->data[bj * b->w + bi];
                 f32 c = b->data[bj * b->w + i1];
                 d = b->data[j1 * b->w + bi];
                 f32 top = a + tx * (c - a);
