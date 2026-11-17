@@ -195,6 +195,17 @@ struct RankTable : FixedList<struct Rank, 10> {
 struct CountSound;
 
 namespace {
+template <class T> class TrackerSettings {
+public:
+    static const char* ScoreScaleKey() { return scoreScaleKey; }
+
+private:
+    static char scoreScaleKey[];
+};
+
+// PROVISIONAL: the template defers the key until the tracker's vtables have been emitted.
+template <class T> char TrackerSettings<T>::scoreScaleKey[] = "score_scale";
+
 class Tracker : public Meter {
 public:
     Tracker(StuntFactory* h, int c) {
@@ -269,7 +280,7 @@ public:
         }
     }
     virtual void Score(f32* pts) {  // 0x8C
-        *pts *= fn_80204CFC("score_scale");
+        *pts *= fn_80204CFC(TrackerSettings<Tracker>::ScoreScaleKey());
         *pts *= lbl_8042FD08[car];
         if (evt && !NearZero(*pts)) {
             char buf[0x10];
@@ -299,9 +310,9 @@ public:
     }
     void Dump(void) {
         int i;
-        int count;
-        f32 total;
         int scored;
+        f32 total;
+        int count;
         struct Rank* r;
         int offset;
 
