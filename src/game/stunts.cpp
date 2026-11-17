@@ -10,6 +10,10 @@
 #include <revolution/MTX/vec.h>
 #include "game/carbody.h"
 
+inline f32 RaceCarRec::Speed(void) const { return speed; }
+
+inline s32 RaceCarRec::Air(void) const { return airborne; }
+
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
 
 extern RaceCarRec* lbl_804348E8[];
@@ -195,17 +199,6 @@ struct RankTable : FixedList<struct Rank, 10> {
 struct CountSound;
 
 namespace {
-template <class T> class TrackerSettings {
-public:
-    static const char* ScoreScaleKey() { return scoreScaleKey; }
-
-private:
-    static char scoreScaleKey[];
-};
-
-// PROVISIONAL: the template defers the key until the tracker's vtables have been emitted.
-template <class T> char TrackerSettings<T>::scoreScaleKey[] = "score_scale";
-
 class Tracker : public Meter {
 public:
     Tracker(StuntFactory* h, int c) {
@@ -217,7 +210,7 @@ public:
     virtual ~Tracker(void) {}
     virtual void Init(void) { ranks.Clear(); }
 
-    int NumRanks(void) const;
+    int NumRanks(void) const { return ranks.a.count; }
     virtual int FirstRank(void) const { return 1; }  // 0x4C
     virtual f32 Points(int rank) const {             // 0x50
         if (rank >= FirstRank()) {
@@ -280,7 +273,7 @@ public:
         }
     }
     virtual void Score(f32* pts) {  // 0x8C
-        *pts *= fn_80204CFC(TrackerSettings<Tracker>::ScoreScaleKey());
+        *pts *= fn_80204CFC("score_scale");
         *pts *= lbl_8042FD08[car];
         if (evt && !NearZero(*pts)) {
             char buf[0x10];
@@ -380,7 +373,7 @@ public:
 
 
 struct Blip {
-    void Clear(void);
+    void Clear(void) { x8 = 0; }
     u8 pad0[0x8];
     s32 x8;  // offset 0x8
 };
@@ -411,8 +404,29 @@ public:
             End();
         }
     }
-    void StopEffect(void);
-    f32 Finish(const RaceCarRec* rc);
+    void StopEffect(void) {
+    if (f260 > minT) {
+        if (effect) {
+            fn_801CB750(effect, car, f260);
+        }
+        f260 = 0.0f;
+    }
+}
+    f32 Finish(const RaceCarRec* rc) {
+    f32 pts = 0.0f;
+    if (dur > minT && Rank() > 0) {
+        pts = Points(Rank()) * mult;
+        Score(&pts);
+        Hide();
+    }
+    if (!NearZero(pts)) {
+        Ended(dur);
+    }
+    dur = 0.0f;
+    f264 = 0.0f;
+    since += 0.016683351f;
+    return pts;
+}
     virtual void Reset(void) {
         Hide();
         dur = 0.0f;
@@ -530,8 +544,10 @@ public:
         b272 = 0;
         TimedTracker::Init();
     }
+    f32 RateBody(const RaceCarRec* rc);
     virtual f32 Rate(const RaceCarRec* rc);
     virtual void Stop(const RaceCarRec* rc);
+    void StopBody(const RaceCarRec* rc);
     virtual void Award(f32 v, RaceCarRec* rc, int kind) {
         if (kind == 1) {
             b270 = 1;
@@ -563,7 +579,7 @@ public:
 };
 }  // namespace
 
-void Unused(const RaceCarRec** p);
+inline void Unused(const RaceCarRec** p) {}
 void Unused2(f32** p);
 
 
@@ -571,7 +587,8 @@ void Unused2(f32** p);
 // class in member declaration order, and that order is also the order their constants enter .sdata2. The members
 // of each class are declared in retail's text order (new virtuals keep their vtable slots); AirTracker, ThrowTracker
 // and CarHitTracker have no destructor of their own (retail emits theirs first, as implicit ones).
-inline f32 AirTracker::Rate(const RaceCarRec* rc) {
+// Helper name unproven: shared inline body inferred from retail call and emission order.
+inline f32 AirTracker::RateBody(const RaceCarRec* rc) {
     f32 r = 0.0f;
     b272 = 0;
     if ((NearZero)(((RaceCarRec*)rc)->F2690()) && Airborne(rc)) {
@@ -607,8 +624,10 @@ inline f32 AirTracker::Rate(const RaceCarRec* rc) {
     b271 = 0;
     return r;
 }
+inline f32 AirTracker::Rate(const RaceCarRec* rc) { return RateBody(rc); }
 
-inline void AirTracker::Stop(const RaceCarRec* rc) {
+// Helper name unproven: shared inline body inferred from retail call and emission order.
+inline void AirTracker::StopBody(const RaceCarRec* rc) {
     s32 n;
     const RaceCarRec* p = rc;
     Unused(&p);
@@ -623,6 +642,7 @@ inline void AirTracker::Stop(const RaceCarRec* rc) {
         AchievementsAdd(3, n);
     }
 }
+inline void AirTracker::Stop(const RaceCarRec* rc) { StopBody(rc); }
 
 // RaceCarVec: valvec3.h's ValVec3.
 
@@ -702,6 +722,7 @@ public:
         StopSound(snd);
     }
     virtual void Stop(const RaceCarRec* rc);
+    void StopBody(const RaceCarRec* rc);
     virtual void Start(const RaceCarRec* rc) {
         if (snd) {
             u8 was = sliding;
@@ -726,7 +747,8 @@ public:
 };
 }  // namespace
 
-inline void DriftTracker::Stop(const RaceCarRec* rc) {
+// Helper name unproven: shared inline body inferred from retail call and emission order.
+inline void DriftTracker::StopBody(const RaceCarRec* rc) {
     s32 n;
     const RaceCarRec* p = rc;
     Unused(&p);
@@ -740,8 +762,9 @@ inline void DriftTracker::Stop(const RaceCarRec* rc) {
     if (n > 0 && fn_80179650() == 1 && rc->f1F0 == 0x50 && !fn_801CF064()) {
         AchievementsAdd(5, n);
     }
-    StopSound(snd);
+
 }
+inline void DriftTracker::Stop(const RaceCarRec* rc) { StopBody(rc); StopSound(snd); }
 
 struct CloseCallSlot {
     void* other;  // offset 0x0
@@ -758,6 +781,7 @@ f32 Max(f32 a, f32 b);  // out-of-line max (0x801429D0)
 namespace {
 class CountTracker : public Tracker {
 public:
+    f32 RateCount(const RaceCarRec* rc);
     CountTracker(StuntFactory* h, int c, f32 w, s32 fx) : Tracker(h, c) {
         effect = fx;
         window = w;
@@ -808,8 +832,22 @@ public:
         }
         return r;
     }
-    void StopEffect(void);
-    f32 Collect(const RaceCarRec* rc);
+    void StopEffect(void) {
+    if (playing > 0) {
+        if (effect) {
+            fn_801CB6E4(effect, car, playing);
+        }
+        playing = 0;
+    }
+}
+    f32 Collect(const RaceCarRec* rc) {
+    f32 pts = Points(Rank()) * mult;
+    Score(&pts);
+    Hide();
+    count = 0;
+    mult = 1.0f;
+    return pts;
+}
     virtual void Stop(const RaceCarRec* rc) {
         if (count > 0) {
             Take();
@@ -852,6 +890,32 @@ public:
     s32 count;    // offset 0x264
     Blip* blip;   // offset 0x268
 };
+// Helper name unproven: shared inline body inferred from retail call and emission order.
+inline f32 CountTracker::RateCount(const RaceCarRec* rc) {
+    f32 r;
+    int full;
+    timer = Max(0.0f, timer - 0.016683351f);
+    if (!rc->Air() && !Grounded()) {
+        timer = Max(timer, 0.033366702f);
+    }
+    r = 0.0f;
+    full = 0;
+    if (Capped() && Rank() == NumRanks() - 1) {
+        full = 1;
+    }
+    if ((NearZero)(timer) || full) {
+        if (count > 0) {
+            r = Collect(rc);
+        }
+        if (!full) {
+            StopEffect();
+        }
+    } else if (count > 0) {
+        Refresh();
+    }
+    return r;
+}
+
 }  // namespace
 
 namespace {
@@ -880,6 +944,7 @@ public:
         turboTime = -100.0f;
     }
     virtual void Stop(const RaceCarRec* rc);
+    void StopBody(const RaceCarRec* rc);
     virtual void Bump(const RaceCarRec* rc, int kind, void* other);
     virtual void Land(const RaceCarRec* rc) {
         if (!turbo && (rc->f25BC > __float_epsilon[0]) != 0) {
@@ -967,25 +1032,7 @@ inline f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     if (count > 0 && Rank() > 0) {
         flags |= 1;
     }
-    timer = Max(0.0f, timer - 0.016683351f);
-    if (!rc->Air() && !Grounded()) {
-        timer = Max(timer, 0.033366702f);
-    }
-    r = 0.0f;
-    full = 0;
-    if (Capped() && Rank() == NumRanks() - 1) {
-        full = 1;
-    }
-    if ((NearZero)(timer) || full) {
-        if (count > 0) {
-            r = Collect(rc);
-        }
-        if (!full) {
-            StopEffect();
-        }
-    } else if (count > 0) {
-        Refresh();
-    }
+    r = CountTracker::RateCount(rc);
     n = ranks.a.count;
     int rankValue = Rank();
     if (rankValue == n - 1) {
@@ -994,7 +1041,8 @@ inline f32 CloseCallTracker::Rate(const RaceCarRec* rc) {
     return r;
 }
 
-inline void CloseCallTracker::Stop(const RaceCarRec* rc) {
+// Helper name unproven: shared inline body inferred from retail call and emission order.
+inline void CloseCallTracker::StopBody(const RaceCarRec* rc) {
     s32 n;
     const RaceCarRec* p = rc;
     Unused(&p);
@@ -1009,6 +1057,7 @@ inline void CloseCallTracker::Stop(const RaceCarRec* rc) {
         AchievementsAdd(4, n);
     }
 }
+inline void CloseCallTracker::Stop(const RaceCarRec* rc) { StopBody(rc); }
 
 inline void CloseCallTracker::Bump(const RaceCarRec* rc, int kind, void* other) {
     if (rc->speed > 0.44444445f * lbl_8055A02C && kind == 1003 && !turbo) {
@@ -1350,6 +1399,7 @@ public:
         }
     }
     virtual void Crash(const RaceCarRec* rc);
+    void CrashBody(const RaceCarRec* rc);
     virtual void Stop(const RaceCarRec* rc) {
         spins = Round(angle);
         Crash(rc);
@@ -1425,6 +1475,7 @@ public:
     }
     virtual f32 Rate(const RaceCarRec* rc);
     virtual void Stop(const RaceCarRec* rc);
+    void StopBody(const RaceCarRec* rc);
     virtual void Award(f32 v, RaceCarRec* rc, int kind) {
         if (kind == 5) {
             pending += Round(v);
@@ -1476,25 +1527,7 @@ inline f32 JumpComboTracker::Rate(const RaceCarRec* rc) {
         }
     }
     jumped = 0;
-    timer = Max(0.0f, timer - 0.016683351f);
-    if (!rc->Air() && !Grounded()) {
-        timer = Max(timer, 0.033366702f);
-    }
-    r = 0.0f;
-    full = 0;
-    if (Capped() && Rank() == NumRanks() - 1) {
-        full = 1;
-    }
-    if ((NearZero)(timer) || full) {
-        if (count > 0) {
-            r = Collect(rc);
-        }
-        if (!full) {
-            StopEffect();
-        }
-    } else if (count > 0) {
-        Refresh();
-    }
+    r = CountTracker::RateCount(rc);
     return r;
 }
 
@@ -1591,25 +1624,7 @@ inline f32 ThrowTracker::Rate(const RaceCarRec* rc) {
             handle = 0;
         }
     }
-    timer = Max(0.0f, timer - 0.016683351f);
-    if (!rc->Air() && !Grounded()) {
-        timer = Max(timer, 0.033366702f);
-    }
-    r = 0.0f;
-    full = 0;
-    if (Capped() && Rank() == NumRanks() - 1) {
-        full = 1;
-    }
-    if ((NearZero)(timer) || full) {
-        if (count > 0) {
-            r = Collect(rc);
-        }
-        if (!full) {
-            StopEffect();
-        }
-    } else if (count > 0) {
-        Refresh();
-    }
+    r = CountTracker::RateCount(rc);
     return r;
 }
 
@@ -1629,25 +1644,7 @@ inline f32 SpinTracker::Rate(const RaceCarRec* rc) {
             }
         }
     }
-    timer = Max(0.0f, timer - 0.016683351f);
-    if (!rc->Air() && !Grounded()) {
-        timer = Max(timer, 0.033366702f);
-    }
-    r = 0.0f;
-    full = 0;
-    if (Capped() && Rank() == NumRanks() - 1) {
-        full = 1;
-    }
-    if ((NearZero)(timer) || full) {
-        if (count > 0) {
-            r = Collect(rc);
-        }
-        if (!full) {
-            StopEffect();
-        }
-    } else if (count > 0) {
-        Refresh();
-    }
+    r = CountTracker::RateCount(rc);
     if (rolls > 0) {
         Crash(rc);
     }
@@ -1667,11 +1664,13 @@ inline f32 SpinTracker::Rate(const RaceCarRec* rc) {
     return r;
 }
 
-inline void SpinTracker::Crash(const RaceCarRec* rc) {
+// Helper name unproven: shared inline body inferred from retail call and emission order.
+inline void SpinTracker::CrashBody(const RaceCarRec* rc) {
     if (spins > 0) {
         Collect(rc);
     }
 }
+inline void SpinTracker::Crash(const RaceCarRec* rc) { CrashBody(rc); }
 
 inline f32 RingTracker::Rate(const RaceCarRec* rc) {
     f32 r;
@@ -1699,29 +1698,12 @@ inline f32 RingTracker::Rate(const RaceCarRec* rc) {
         queued--;
         PlaySound(snd);
     }
-    timer = Max(0.0f, timer - 0.016683351f);
-    if (!rc->Air() && !Grounded()) {
-        timer = Max(timer, 0.033366702f);
-    }
-    r = 0.0f;
-    full = 0;
-    if (Capped() && Rank() == NumRanks() - 1) {
-        full = 1;
-    }
-    if ((NearZero)(timer) || full) {
-        if (count > 0) {
-            r = Collect(rc);
-        }
-        if (!full) {
-            StopEffect();
-        }
-    } else if (count > 0) {
-        Refresh();
-    }
+    r = CountTracker::RateCount(rc);
     return r;
 }
 
-inline void RingTracker::Stop(const RaceCarRec* rc) {
+// Helper name unproven: shared inline body inferred from retail call and emission order.
+inline void RingTracker::StopBody(const RaceCarRec* rc) {
     s32 n;
     const RaceCarRec* p = rc;
     Unused(&p);
@@ -1736,6 +1718,7 @@ inline void RingTracker::Stop(const RaceCarRec* rc) {
         AchievementsAdd(6, n);
     }
 }
+inline void RingTracker::Stop(const RaceCarRec* rc) { StopBody(rc); }
 
 // The two count-up sounds of the score counter.
 struct CountSound {
@@ -2069,9 +2052,6 @@ Meter* fn_801572A4(StuntFactory* hud, int car, f32* hispeed) {
 }  // extern "C"
 
 
-
-
-
 extern "C" {
 
 
@@ -2108,58 +2088,8 @@ int fn_80158618(const char* name) {
 
 }  // extern "C"
 
-int Tracker::NumRanks(void) const { return ranks.a.count; }
 
-
-void TimedTracker::StopEffect(void) {
-    if (f260 > minT) {
-        if (effect) {
-            fn_801CB750(effect, car, f260);
-        }
-        f260 = 0.0f;
-    }
-}
-
-f32 TimedTracker::Finish(const RaceCarRec* rc) {
-    f32 pts = 0.0f;
-    if (dur > minT && Rank() > 0) {
-        pts = Points(Rank()) * mult;
-        Score(&pts);
-        Hide();
-    }
-    if (!NearZero(pts)) {
-        Ended(dur);
-    }
-    dur = 0.0f;
-    f264 = 0.0f;
-    since += 0.016683351f;
-    return pts;
-}
-
-void Blip::Clear(void) { x8 = 0; }
-
-f32 RaceCarRec::Speed(void) const { return speed; }
-
-s32 RaceCarRec::Air(void) const { return airborne; }
-
-void Unused(const RaceCarRec** p) {}
-
-
-void CountTracker::StopEffect(void) {
-    if (playing > 0) {
-        if (effect) {
-            fn_801CB6E4(effect, car, playing);
-        }
-        playing = 0;
-    }
-}
-
-f32 CountTracker::Collect(const RaceCarRec* rc) {
-    f32 pts = Points(Rank()) * mult;
-    Score(&pts);
-    Hide();
-    count = 0;
-    mult = 1.0f;
-    return pts;
-}
-
+// Pragma unproven: this unit-local nested-inline limit preserves retail's helper calls
+// and reverse first-use emission. All 169 bodies and the source-selected retail DOL match
+// for limits 319 through 369; default 512 expands five Stop/Crash paths. Original policy unknown.
+#pragma inline_max_size(320)
