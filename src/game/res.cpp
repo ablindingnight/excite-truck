@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/pool.h"
 #include "game/byteswap.h"
+#include "game/strcopy.h"
 
 // These inline definitions keep the resource messages in their retail data order.
 struct ResStrings {
@@ -177,16 +178,6 @@ static inline void FourCC(char* s, u32 v) {
     s[4] = 0;
 }
 
-static inline void StrNCpy(char* dst, const char* s, int len) {
-    char* d = dst;
-    int n = len;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void StrNCat(char* d, const char* s, int n) {
     while (*d) {
@@ -194,7 +185,7 @@ static inline void StrNCat(char* d, const char* s, int n) {
         d++;
     }
     if (n > 0) {
-        StrNCpy(d, s, n);
+        SafeStrCopy(d, s, n);
     }
 }
 
@@ -204,7 +195,7 @@ inline ResToc* GetToc(const char* name) {
     bool swap;
     u32 info;
     ResToc* toc;
-    StrNCpy(buf, name, 0x80);
+    SafeStrCopy(buf, name, 0x80);
     if (*strrchr(buf, '.')) {
         char* dot = strrchr(buf, '.');
         *dot = 0;
@@ -239,8 +230,8 @@ public:
     ~ResourceSet(void);
 
     void Init(const char* n, const char* p, ResSetHeader* h, int f) {
-        StrNCpy(name, n, sizeof(name));
-        StrNCpy(path, p, sizeof(path));
+        SafeStrCopy(name, n, sizeof(name));
+        SafeStrCopy(path, p, sizeof(path));
         next = 0;
         entries = 0;
         if (h != 0) {
@@ -669,14 +660,14 @@ ResourceSet* fn_8012B32C(const char* name) {
 
 void fn_8012B3D4(char* setName, int setLen, char* resName, int resLen, const char* src) {
     char* p;
-    StrNCpy(setName, src, setLen);
+    SafeStrCopy(setName, src, setLen);
     p = strrchr(setName, '/');
     if (p) {
         *p = 0;
-        StrNCpy(resName, p + 1, resLen);
+        SafeStrCopy(resName, p + 1, resLen);
     } else {
         *setName = 0;
-        StrNCpy(resName, src, resLen);
+        SafeStrCopy(resName, src, resLen);
     }
 }
 
@@ -1607,7 +1598,7 @@ void NodeList::Append(QueueNode* n) {
 }
 
 void QueueNode::Init(const char* n, s32 size) {
-    StrNCpy(name, n, sizeof(name));
+    SafeStrCopy(name, n, sizeof(name));
     async = fn_8012CAA0(size, n);
     refs = 1;
 }
