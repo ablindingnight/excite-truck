@@ -52,7 +52,7 @@ public:
 
 class DMaster {
 public:
-    virtual void m08(void);
+    virtual ~DMaster(void) {}  // slot 0x08 is the game mode's destructor (two slots on the PC Itanium ABI)
     virtual void m0C(void);
     virtual void m10(void);
     virtual void m14(void);
