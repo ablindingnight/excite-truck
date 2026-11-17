@@ -736,14 +736,6 @@ static inline void CopyV(ValVec3* d, const ValVec3& s) {
     d->z = s.z;
 }
 
-static inline void LoadCameraPose(CamEvent* c, ValueNode* n, const ValVec3& o) {
-    c->origin.x = o.x;
-    c->origin.y = o.y;
-    c->origin.z = o.z;
-    const ValVec3& dir = n->GetVec3("dir");
-    AxisAngleToRot(&c->rot, dir);
-}
-
 void fn_801C3D88(const char* name) {
     memset(lbl_8055E7F8, 0, 64 * sizeof(Event));
     for (int i = 0; i < 64; i++) {
@@ -804,7 +796,12 @@ void fn_801C3D88(const char* name) {
             f32 fov = n->GetFloat("fov", 90.0f);
             c->fov = 0.017453292f * fov;
             const ValVec3& o = n->GetVec3("origin");
-            LoadCameraPose(c, n, o);
+            c->origin.x = o.x;
+            c->origin.y = o.y;
+            c->origin.z = o.z;
+            // Bound here, not in a helper: retail keeps this result right below o's on the stack.
+            const ValVec3& dir = n->GetVec3("dir");
+            AxisAngleToRot(&c->rot, dir);
             CopyV(&c->v, n->GetVec3Or("v", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
             CopyV(&c->av, n->GetVec3Or("av", ValVec3(XV3(0.0f, 0.0f, 0.0f))));
             c->end = fn_801C3450(c->time + n->GetFloat("duration", 9999.0f));
@@ -888,10 +885,7 @@ void fn_801C3D88(const char* name) {
             w->mask &= ~fn_801C3954(w->except);
             switch (w->kind) {
             case 0: {
-                const ValVec3& p = n->GetVec3("pt");
-                w->pt.x = p.x;
-                w->pt.y = p.y;
-                w->pt.z = p.z;
+                CopyV(&w->pt, n->GetVec3("pt"));  // a plain temporary (retail: below the bound results)
                 break;
             }
             default:
