@@ -838,7 +838,7 @@ template <class O, class A, class V> static inline void TAddS(O* o, const A* a, 
 extern "C" {
 /* Helper name unproven */ static inline f32 MidHalf(f32 a, f32 b) {
     const f32& difference = b - a;
-    return a + difference / 2.0f;
+    return a + 0.5f * difference;
 }
 
 void fn_802545C4(MWSlot* p, s32 model, CarUIModel* m) {
@@ -1019,9 +1019,11 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         Mat3Mul((Mat3*)&cam, (const Mat3*)&rx, (const Mat3*)&cam);
         f32 z2;
         f32 rideHeightv = model->rideHeight;
-        cam.pos.y = (cam.pos.y - rideHeightv) + camOffset.y;
+        cam.pos.y = cam.pos.y - rideHeightv;
+        cam.pos.y += camOffset.y;
         z2 = cam.pos.z;
-        cam.pos.z = (z2 - dist) + camOffset.z;
+        cam.pos.z = z2 - dist;
+        cam.pos.z += camOffset.z;
         cam.pos.x = cam.pos.x + camOffset.x;
         MulVec(&cam.pos, &cam.pos, cam.b.v);
     }
