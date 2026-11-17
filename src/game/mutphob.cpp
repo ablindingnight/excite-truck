@@ -18,6 +18,7 @@
 #include "game/rigid.h"
 #include "game/shapes.h"
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -404,11 +405,6 @@ void fn_801D4294(MutPhob* p, const PhobConfig* c) {
     p->SetActive(1);
 }
 
-static inline void AddScaled(RVec3* v, const RVec3* a, f32 s) {
-    v->x += a->x * s;
-    v->y += a->y * s;
-    v->z += a->z * s;
-}
 
 // A hinged chunk swings back upright; parked when it is and no car is near.
 void fn_801D4598(MutPhob* p, f32 now) {
@@ -425,7 +421,7 @@ void fn_801D4598(MutPhob* p, f32 now) {
         p->avel.x *= k;
         p->avel.y *= k;
         p->avel.z *= k;
-        AddScaled(&p->avel, &axis, 0.2f);
+        TAddSTo(&p->avel, &axis, 0.2f);
         p->mtx.pos = p->home.pos;
         p->CollVolume::Transform();
     } else {

@@ -74,6 +74,7 @@ struct FireVec {
 
 #include "game/fxseq.h"
 #include "game/clamp01.h"
+#include "game/tscale.h"
 
 extern "C" {
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
@@ -145,11 +146,6 @@ static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
 }
 
 
-static inline void Scale(Vec* out, const Vec* in, f32 s) {
-    out->x = in->x * s;
-    out->y = in->y * s;
-    out->z = in->z * s;
-}
 
 
 // out = b * a, through a temporary when out aliases an input.
@@ -1145,8 +1141,8 @@ void GroundFire::Corners(Vec* p, Vec* e1, Vec* e2) {
     p->x = p->x + m.origin.x;
     p->y = p->y + m.origin.y;
     p->z = p->z + m.origin.z;
-    Scale(e1, &rows[0], 0.4f);
-    Scale(e2, &rows[2], 0.75f);
+    TScale(e1, &rows[0], 0.4f);
+    TScale(e2, &rows[2], 0.75f);
 }
 
 void GroundFire::Start(int idx) {

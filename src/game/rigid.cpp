@@ -64,6 +64,7 @@ static inline void Mul(RMat33* out, const RMat33* l, const RMat33* r) {
 }
 
 #include "game/rpacket.h"
+#include "game/tscale.h"
 
 // A contact point in body space (corners.cpp); the body keeps its corners in a list.
 class RigidBody;
@@ -294,17 +295,6 @@ inline RMat33* RigidBody::InvInertia(void) {
     return &invI;
 }
 
-// Helper names unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
-static inline void AddScaled(RVec3* o, const RVec3* v, f32 s) {
-    o->x += v->x * s;
-    o->y += v->y * s;
-    o->z += v->z * s;
-}
-static inline void Scaled(RVec3* o, const RVec3* v, f32 s) {
-    o->x = v->x * s;
-    o->y = v->y * s;
-    o->z = v->z * s;
-}
 /* Helper name unproven: hands each pending impulse, scaled by the total weight, to its object. */
 inline void RigidBody::NotifyAll(void) {
     int i;
@@ -367,8 +357,8 @@ void RigidBody::Update(void) {
         impT.x *= inv;
         impT.y *= inv;
         impT.z *= inv;
-        AddScaled(&force, &impF, 59.94f);
-        AddScaled(&torque, &impT, 59.94f);
+        TAddSTo(&force, &impF, 59.94f);
+        TAddSTo(&torque, &impT, 59.94f);
         for (i = 0; i < nImp; i++) {
             p = imps[i];
             if (p->by) {
@@ -398,17 +388,17 @@ void RigidBody::Update(void) {
     }
     impW = 0.0f;
     nImp = 0;
-    AddScaled(&vel, &force, 0.0166833512f * invMass);
-    Scaled(&accel, &force, invMass);
+    TAddSTo(&vel, &force, 0.0166833512f * invMass);
+    TScale(&accel, &force, invMass);
     if (PSVECDotProduct((const Vec*)&vel, (const Vec*)&vel) > 90000.0f) {
         PSVECNormalize((const Vec*)&vel, (Vec*)&vel);
         vel.x *= 300.0f;
         vel.y *= 300.0f;
         vel.z *= 300.0f;
     }
-    AddScaled(&mtx.pos, &vel, 0.0166833512f);
+    TAddSTo(&mtx.pos, &vel, 0.0166833512f);
     MulVec(&aaccel, &torque, &worldInvI);
-    AddScaled(&avel, &aaccel, 0.0166833512f);
+    TAddSTo(&avel, &aaccel, 0.0166833512f);
     if (PSVECDotProduct((const Vec*)&avel, (const Vec*)&avel) > 100.0f) {
         PSVECNormalize((const Vec*)&avel, (Vec*)&avel);
         avel.x *= 10.0f;
@@ -418,7 +408,7 @@ void RigidBody::Update(void) {
     {
         RMtx r;
 
-        Scaled(&dr, &avel, 0.0166833512f);
+        TScale(&dr, &avel, 0.0166833512f);
         ang = PSVECMag((const Vec*)&dr);
         if (ang > 0.0001f) {
             inv = 1.0f / ang;
@@ -510,8 +500,8 @@ void RigidBody::Flush(RVec3* f, RVec3* t) {
         impT.x *= inv;
         impT.y *= inv;
         impT.z *= inv;
-        AddScaled(&force, &impF, 59.94f);
-        AddScaled(&torque, &impT, 59.94f);
+        TAddSTo(&force, &impF, 59.94f);
+        TAddSTo(&torque, &impT, 59.94f);
         NotifyAll();
         OnImpulses(&impF, &impT);
         impF.x = 0.0f;

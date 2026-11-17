@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+#include "game/tscale.h"
 
 struct SkidWheel {
     Vec pos;     // offset 0x0
@@ -334,24 +335,18 @@ void fn_8028D7C0(int i) {
     }
 }
 
-/* Helper name unproven */
-static inline void ScaleVec_hm(Vec* out, const Vec* v, f32 k) {
-    out->x = v->x * k;
-    out->y = v->y * k;
-    out->z = v->z * k;
-}
 
 static inline void FillPoint(SkidPt* p, const SkidCar* car, const SkidWheel* w, const SkidType* t) {
     Vec side;
     p->pos.x = w->v0C.x;
     p->pos.y = w->v0C.y;
     p->pos.z = w->v0C.z;
-    ScaleVec_hm(&p->d1, &car->vel, 0.1f);
+    TScale(&p->d1, &car->vel, 0.1f);
     PSVECCrossProduct(&car->dir, &w->v18, &side);
     if (!(w->flags & 8)) {
-        ScaleVec_hm(&p->d2, &side, 0.225f);
+        TScale(&p->d2, &side, 0.225f);
     } else {
-        ScaleVec_hm(&p->d2, &side, 0.025f);
+        TScale(&p->d2, &side, 0.025f);
     }
     f32 th = t->thresh;
     f32 slip = w->slip;

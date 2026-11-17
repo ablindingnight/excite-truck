@@ -11,6 +11,7 @@
 #include "game/plainvec.h"
 #include "game/mathutil.h"
 #include "game/tadds.h"
+#include "game/tscale.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -646,17 +647,6 @@ void SnowSystem::Reset(void) {
     Fill();
 }
 
-// Helper names unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
-static inline void Scaled(ValVec3* o, const ValVec3* v, f32 s) {
-    o->x = v->x * s;
-    o->y = v->y * s;
-    o->z = v->z * s;
-}
-static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
-    o->x += v->x * s;
-    o->y += v->y * s;
-    o->z += v->z * s;
-}
 // Helper names unproven: vector steps as the target evaluates them.
 static inline void SubV3(void* o_, const void* a_, const void* b_) {
     f32* o = (f32*)o_;
@@ -677,13 +667,13 @@ void SnowSystem::Update(void) {
     g.y = -1.0f;
     g.z = 0.0f;
     MulT(&cam, &g, &grav);
-    Scaled(&vel, &grav, 0.05f);
+    TScale(&vel, &grav, 0.05f);
     if (!fn_801E8758(view)) {
         d.x = lastPos.x - cam.origin.x;
         d.y = lastPos.y - cam.origin.y;
         d.z = lastPos.z - cam.origin.z;
         MulTSelf(cam.basis, &d);
-        AddScaled(&vel, &d, 0.2f);
+        TAddSTo(&vel, &d, 0.2f);
         PSVECCrossProduct((const Vec*)&cam.basis[2], (const Vec*)&lastDir, (Vec*)&c);
         Move(PSVECDotProduct((const Vec*)&cam.basis[1], (const Vec*)&c), &cam, (const PVec*)&d);
         Spawn();

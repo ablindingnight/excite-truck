@@ -13,6 +13,7 @@
 #include "game/hitch.h"
 #include <string.h>
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -1165,12 +1166,6 @@ void FencePole::Reset(void) {
 }
 #pragma pop
 
-// Helper name unproven: the scale arrives as a parameter, so it stays the right operand of each multiply.
-static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
-    o->x += v->x * s;
-    o->y += v->y * s;
-    o->z += v->z * s;
-}
 void FencePole::Update(void) {
     u8* p = (u8*)this;
     ((Obstacle*)p)->Obstacle::Update();
@@ -1184,7 +1179,7 @@ void FencePole::Update(void) {
         ValVec3 c;
         PSVECCrossProduct((const Vec*)((f32*)(p + 0x48)), (const Vec*)((f32*)(p + 0x1F8)), (Vec*)&c.x);
         if (F32(p, 0x4C) < 0.92f) {
-            AddScaled((ValVec3*)(p + 0x124), &c, 0.1f);
+            TAddSTo((ValVec3*)(p + 0x124), &c, 0.1f);
         }
         F32(p, 0x60) = F32(p, 0x210);
         F32(p, 0x64) = F32(p, 0x214);

@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 // DVec3: valvec3.h's ValVec3.
 struct DBasis {
@@ -114,11 +115,6 @@ u32 fn_801E36F0(u32 c) { return ((c >> 1) & 0x7F7F7F) | (c & 0xFF000000); }
 
 // Wire box of the unit cube [-1,1]^3 placed by the frame: c0 for the -z face, c1 for the edges along z
 // and the +z face.
-static inline void DbgStep(ValVec3* p, const ValVec3* d, f32 k) {
-    p->x += d->x * k;
-    p->y += d->y * k;
-    p->z += d->z * k;
-}
 
 void fn_801E370C(const DbgFrame* m, u32 c0, u32 c1) {
     fn_802C8BD0(lbl_8055EA6C);
@@ -137,24 +133,24 @@ void fn_801E370C(const DbgFrame* m, u32 c0, u32 c1) {
             pos.y += m->pos.y;
             pos.z += m->pos.z;
             fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c0, 1);
-            DbgStep(&pos, &m->z, 2.0f);
+            TAddSTo(&pos, &m->z, 2.0f);
             fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c1, 1);
         }
-        DbgStep(&pos, &m->x, 2.0f);
+        TAddSTo(&pos, &m->x, 2.0f);
         fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c1, 0);
-        DbgStep(&pos, &m->y, 2.0f);
-        DbgStep(&pos, &m->x, -2.0f);
+        TAddSTo(&pos, &m->y, 2.0f);
+        TAddSTo(&pos, &m->x, -2.0f);
         fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c1, 1);
-        DbgStep(&pos, &m->x, 2.0f);
+        TAddSTo(&pos, &m->x, 2.0f);
         fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c1, 1);
-        DbgStep(&pos, &m->z, -2.0f);
+        TAddSTo(&pos, &m->z, -2.0f);
         fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c0, 0);
-        DbgStep(&pos, &m->x, -2.0f);
+        TAddSTo(&pos, &m->x, -2.0f);
         fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c0, 0);
-        DbgStep(&pos, &m->y, -2.0f);
-        DbgStep(&pos, &m->x, 2.0f);
+        TAddSTo(&pos, &m->y, -2.0f);
+        TAddSTo(&pos, &m->x, 2.0f);
         fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c0, 1);
-        DbgStep(&pos, &m->x, -2.0f);
+        TAddSTo(&pos, &m->x, -2.0f);
         fn_802C8E00(pos.x, pos.y, pos.z, 0.0f, 0.0f, c0, 1);
         fn_802C8E48();
     }

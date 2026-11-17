@@ -9,6 +9,7 @@
 #include "game/rmtx.h"
 #include "game/mathutil.h"
 #include "game/tadds.h"
+#include "game/tscale.h"
 
 // A distance constraint between two particles.
 struct PStick {
@@ -200,11 +201,6 @@ static inline void Sub(RVec3* out, const RVec3* a, const RVec3* b) {
     out->z = a->z - b->z;
 }
 
-static inline void Scale(RVec3* out, const RVec3* v, f32 k) {
-    out->x = v->x * k;
-    out->y = v->y * k;
-    out->z = v->z * k;
-}
 
 static inline void AddPart(PSys* s, const RVec3* p, f32 b, f32 a) {
     int i = s->nPart++;
@@ -374,7 +370,7 @@ void fn_801C1364(PSys* s) {
             MulRot(&axis, *(RVec3*)&l->d, (const RMtx*)l->g);
             Sub(&d, pb, pa);
             f32 dot = PSVECDotProduct((const Vec*)&axis, (const Vec*)&d);
-            Scale(&proj, &axis, dot);
+            TScale(&proj, &axis, dot);
             f32 len = PSVECMag((const Vec*)&proj);
             f32 den = len * (wb + wa);
             den = den > 0.0001f ? den : 0.0001f;
@@ -546,7 +542,7 @@ void fn_801C2694(PSys* s, RVec3* out, s32* n, const RVec3* org, const RVec3* up,
     s->org = *org;
     s->up = *up;
     RVec3 a;
-    Scale(&a, f, 0.0110011f);
+    TScale(&a, f, 0.0110011f);
     ApplyAcceleration(s, &a);
     fn_801C1B60(s);
     s32 k = PSysCount(s);
@@ -561,7 +557,7 @@ void fn_801C27D8(PSys* s, const RVec3* org, const RVec3* up, const RVec3* f, voi
     s->org = *org;
     s->up = *up;
     RVec3 a;
-    Scale(&a, f, 0.0110011f);
+    TScale(&a, f, 0.0110011f);
     for (int i = 0; i < s->nPart; i++) {
         AddTo(&s->acc[i], &a);
     }

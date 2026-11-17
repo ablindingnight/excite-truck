@@ -7,6 +7,7 @@
 #include "game/carinfo.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+#include "game/tscale.h"
 
 class ValueNodeV {
 public:
@@ -297,11 +298,6 @@ void* operator new[](size_t size, const char* name);
 extern void* lbl_80488648[];  // car models
 extern f32 __float_epsilon[];    // FLT_EPSILON
 
-static inline void Scale(Vec* out, const Vec* in, f32 s) {
-    out->x = in->x * s;
-    out->y = in->y * s;
-    out->z = in->z * s;
-}
 
 ModuleTag lbl_8055F6A8;
 static inline s16 EfxS(s16 v) { return v; }  /* Helper name unproven */
@@ -638,7 +634,7 @@ void fn_802882EC(void) {
         c->vel.y = phys->vel.y;
         c->vel.z = phys->vel.z;
         if (!((f32)__fabs(PSVECDotProduct(&phys->vel, &phys->vel)) <= __float_epsilon[0])) {
-            Scale(&c->dir, &phys->vel, 1.0f / (f32)sqrt(PSVECDotProduct(&phys->vel, &phys->vel)));
+            TScale(&c->dir, &phys->vel, 1.0f / (f32)sqrt(PSVECDotProduct(&phys->vel, &phys->vel)));
         } else {
             c->dir.x = 0.0f;
             c->dir.y = 0.0f;

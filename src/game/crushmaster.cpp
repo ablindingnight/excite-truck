@@ -141,6 +141,7 @@ void fn_8018F76C(RaceCarRec* car, int wheel);
 #include "game/nearzero.h"
 #include "game/round.h"
 #include "game/tadds.h"
+#include "game/tscale.h"
 
 // Arrow/marker vertex.
 struct MarkVtx {
@@ -1115,11 +1116,6 @@ static inline void NormV2(V2* d) {
 }
 
 
-static inline void ScaleV(ValVec3* o, const ValVec3* a, f32 k) {
-    o->x = a->x * k;
-    o->y = a->y * k;
-    o->z = a->z * k;
-}
 
 inline void CrushMaster::vfA8(int car, int b) {
     f32 dz;
@@ -1189,7 +1185,7 @@ inline void CrushMaster::vfA8(int car, int b) {
                 NormV2(&d);
                 fn_801B7C8C(&r, &to, &d);
                 r.place.origin.y += 3.0f;
-                ScaleV(&r.vel, &r.place.basis[2], 8.888889f);
+                TScale(&r.vel, &r.place.basis[2], 8.888889f);
             }
         } else if (rec->mtx.rot.y.y < 0.2f) {
             fwd.x = rec->mtx.rot.z.x;

@@ -13,6 +13,7 @@
 #include <math.h>
 #include "game/mathutil.h"
 #include "game/tadds.h"
+#include "game/tscale.h"
 // Passed to fn_80176A24 (3.0f; name unproven). A named constant with external linkage defined before any code:
 // retail keeps it as the FIRST .sdata2 entry, separate from the pooled 3.0f literal used further down.
 extern const f32 lbl_80563D08;
@@ -40,12 +41,6 @@ int fn_801EA03C(u8* ground, ValVec3* p);
 
 
 // dst = m * src (column-major rotation), with the aliasing guard of the inline.
-// Helper names unproven: scaled vector adds (the scale stays the right operand).
-static inline void AddScaledV(ValVec3* o, const ValVec3* v, f32 s) {
-    o->x += v->x * s;
-    o->y += v->y * s;
-    o->z += v->z * s;
-}
 static inline void MulVec(const Mat3& m, const ValVec3& src, ValVec3* dst) {
     if (dst == &src) {
         f32 x = Dot3(src.x, m.m[0][0], src.y, m.m[1][0], src.z, m.m[2][0]);
@@ -153,7 +148,7 @@ int fn_8026A698(u8* p, int i) {
             u32 a;
             u32 b;
             MulVec(*(const Mat3*)&((CamRec*)p)->carFrame, side, &dir);
-            AddScaledV(&from, &dir, -0.5f);
+            TAddSTo(&from, &dir, -0.5f);
             TAddS(&to, &from, &dir, 5.0f);
             if (fn_801784AC(&from, &to, &hit, &nrm, &a, &b, 0)) {
                 *r = fn_8026A63C(&hit.x, &from.x, &dir.x);
@@ -197,7 +192,7 @@ int fn_8026A698(u8* p, int i) {
     s->t += 0.016683351f * (f32)(lbl_8055E3C4 - s->frameNo);
     if (lbl_8055E3C4 != s->frameNo) {
         ValVec3 at = *(const ValVec3*)&((CamRec*)p)->carFrame.pos;
-        AddScaledV(&at, (const ValVec3*)&((CamRec*)p)->carFrame.rot.m[3], 0.7f);
+        TAddSTo(&at, (const ValVec3*)&((CamRec*)p)->carFrame.rot.m[3], 0.7f);
         s->target = at;
         ValVec3 v;
         ValVec3 d;

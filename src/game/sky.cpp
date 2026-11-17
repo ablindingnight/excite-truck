@@ -3,6 +3,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 extern "C" {
 double sqrt(double x);
@@ -39,11 +40,6 @@ SkyCam* fn_802C86DC(void);
 }
 
 
-static inline void Scale(ValVec3* out, const ValVec3* v, f32 s) {
-    out->x = v->x * s;
-    out->y = v->y * s;
-    out->z = v->z * s;
-}
 
 struct SkyMtx {
     SkyMtx(void) {
@@ -98,7 +94,7 @@ void fn_802C0E68(s32 inst) {
             lbl_804C0800.y = 250.0f;
             lbl_804C0800.z = -150.0f;
         }
-        Scale(&dir, &lbl_804C0800, -1.0f);
+        TScale(&dir, &lbl_804C0800, -1.0f);
         PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
         fn_802C0D70(&dir);
         fn_802C9A1C(&dir);

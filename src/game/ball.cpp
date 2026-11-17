@@ -18,6 +18,7 @@
 #include "game/shapes.h"
 #include "game/carbody.h"
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 extern "C" {
 double sqrt(double x);
@@ -496,16 +497,6 @@ inline void Rotate(RVec3* out, const RMtx* m, const RVec3* v) {
 }
 
 // Helper names unproven: vector operations written as inlines, as the target evaluates them.
-static inline void AddSB(RVec3* o, const RVec3* a, f32 s) {
-    o->x += a->x * s;
-    o->y += a->y * s;
-    o->z += a->z * s;
-}
-static inline void ScaleB(RVec3* o, const RVec3* a, f32 s) {
-    o->x = a->x * s;
-    o->y = a->y * s;
-    o->z = a->z * s;
-}
 static inline void AccB(RVec3* o, const RVec3* a) {
     o->x += a->x;
     o->y += a->y;
@@ -532,9 +523,9 @@ void Ball::Launch(const RMtx* in, const RVec3* v, s16 h, f32 k) {
         vel.z = 0.0f;
     } else if (DbgFlag(0x10)) {
         RVec3 d;
-        ScaleB(&d, &m.rot.z, 0.707f);
-        AddSB(&d, &m.rot.y, 0.707f * 0.7f);
-        ScaleB(&vel, &d, (128.0f / 3.6f) * k);
+        TScale(&d, &m.rot.z, 0.707f);
+        TAddSTo(&d, &m.rot.y, 0.707f * 0.7f);
+        TScale(&vel, &d, (128.0f / 3.6f) * k);
         AccB(&vel, v);
     } else {
         f32 s = 40.0f * k;

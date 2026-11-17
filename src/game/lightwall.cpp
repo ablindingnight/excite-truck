@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 extern "C" {
 double fmod(double x, double y);
@@ -41,11 +42,6 @@ struct LSeg {
 };
 
 
-static inline void LAddScaled(ValVec3* v, const ValVec3* d, f32 k) {
-    v->x += d->x * k;
-    v->y += d->y * k;
-    v->z += d->z * k;
-}
 static inline void LAddScaled2(ValVec3* v, const ValVec3* d, f32 k) {
     v->x = v->x + k * d->x;
     v->y = v->y + k * d->y;
@@ -104,7 +100,7 @@ void fn_802A96E8(const ValVec3* pts, int n, u32 color, s32 tex, s32 tex2) {
                 v.z += right->z * w;
                 fn_802C8E00(v.x, v.y, v.z, 1.0f, v0, c, 0);
                 v.y += 105.0f;
-                LAddScaled(&v, right, -w);
+                TAddSTo(&v, right, -w);
                 fn_802C8E00(v.x, v.y, v.z, 0.0f, v1, color & 0xFFFFFF, 1);
                 v.x += right->x * w;
                 v.y += right->y * w;
@@ -141,7 +137,7 @@ void fn_802A96E8(const ValVec3* pts, int n, u32 color, s32 tex, s32 tex2) {
                 v.x = pts->x + right->x * s;
                 v.y = pts->y + right->y * s;
                 v.z = pts->z + right->z * s;
-                LAddScaled(&v, &cam->fwd, 0.1f);
+                TAddSTo(&v, &cam->fwd, 0.1f);
                 fn_802C8E00(v.x, v.y, v.z, 0.0f, v0, c, 0);
                 s = 4.0f * w;
                 v.x += right->x * s;
@@ -149,7 +145,7 @@ void fn_802A96E8(const ValVec3* pts, int n, u32 color, s32 tex, s32 tex2) {
                 v.z += right->z * s;
                 fn_802C8E00(v.x, v.y, v.z, 1.0f, v0, c, 0);
                 v.y += 105.0f;
-                LAddScaled(&v, right, 4.0f * -w);
+                TAddSTo(&v, right, 4.0f * -w);
                 fn_802C8E00(v.x, v.y, v.z, 0.0f, v1, color & 0xFFFFFF, 1);
                 s = 4.0f * w;
                 v.x += right->x * s;
@@ -176,8 +172,8 @@ void fn_802A9BFC(const ValVec3* from, const ValVec3* to, s32 tex, f32 fade, int 
         dir.y = seg.a.y - seg.b.y;
         dir.z = seg.a.z - seg.b.z;
         PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
-        LAddScaled(&seg.a, &dir, len / 2);
-        LAddScaled(&seg.b, &dir, -len / 2);
+        TAddSTo(&seg.a, &dir, len / 2);
+        TAddSTo(&seg.b, &dir, -len / 2);
     }
     f32 m = MaxF(MinFRev(Unlerp(fade, 0.0f, 0.5f), 1.0f), 0.0f);
     int alpha = (int)Lerp(0.0f, 200.0f, m);

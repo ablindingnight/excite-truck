@@ -77,6 +77,7 @@ public:
 
 #include "game/fxseq.h"
 #include "game/tadds.h"
+#include "game/tscale.h"
 
 extern "C" {
 double log2(double x);
@@ -137,11 +138,6 @@ static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     }
 }
 
-static inline void Scale(Vec* out, const Vec* in, f32 s) {
-    out->x = in->x * s;
-    out->y = in->y * s;
-    out->z = in->z * s;
-}
 
 
 static inline void SetVec(Vec* v, f32 x, f32 y, f32 z) {
@@ -478,14 +474,14 @@ void fn_8028ADF4(SparkEntry* e, int n) {
                 Vec p = w->v0C;
                 Vec d;
                 Vec v;
-                Scale(&d, &car->axes[1], fn_80287BC8(0.2f, 1.0f));
+                TScale(&d, &car->axes[1], fn_80287BC8(0.2f, 1.0f));
                 TAddS(&d, &d, &car->axes[2], fn_80287BC8(-0.2f, -1.0f));
                 PSVECNormalize(&d, &d);
-                Scale(&d, &d, w->size);
+                TScale(&d, &d, w->size);
                 p.x = p.x + d.x;
                 p.y = p.y + d.y;
                 p.z = p.z + d.z;
-                Scale(&v, &car->vel, 0.87f);
+                TScale(&v, &car->vel, 0.87f);
                 v.y += 3.0f;
                 TAddS(&v, &v, &car->axes[0], w->pos.x > 0.0f ? 1.0f : -1.0f);
                 f32 s = 0.033333335f * w->speed;
@@ -502,9 +498,9 @@ void fn_8028ADF4(SparkEntry* e, int n) {
                 p.x = p.x + car->pos.x;
                 p.y = p.y + car->pos.y;
                 p.z = p.z + car->pos.z;
-                Scale(&v, &car->axes[2], -1.0f);
+                TScale(&v, &car->axes[2], -1.0f);
                 TAddS(&v, &v, &car->axes[1], fn_80287BC8(0.5f, 1.0f));
-                Scale(&v, &v, w->speed * fn_80287BC8(0.1f, 0.175f));
+                TScale(&v, &v, w->speed * fn_80287BC8(0.1f, 0.175f));
                 TAddS(&v, &v, &car->vel, 0.65f);
                 TAddS(&v, &v, &car->axes[0], w->pos.x > 0.0f ? 1.0f : -1.0f);
                 f32 s = 0.033333335f * w->speed;
@@ -580,7 +576,7 @@ int fn_8028B500(const void* evp) {
         }
         for (int i = 0; i < n; i++) {
             Vec d;
-            Scale(&d, &ev->vel, fn_80287BC8(-0.25f, 1.0f));
+            TScale(&d, &ev->vel, fn_80287BC8(-0.25f, 1.0f));
             d.x = d.x + fn_80287BC8(-spread, spread);
             d.y = d.y + (lift + fn_80287BC8(-2.5f, 2.5f));
             d.z = d.z + fn_80287BC8(-spread, spread);
@@ -610,7 +606,7 @@ int fn_8028B500(const void* evp) {
         f32 zero = 0.0f;
         for (i = 0; i < chunkCount; i++) {
             Vec d;
-            Scale(&d, &ev->vel, fn_80287BC8(-0.25f, 1.0f));
+            TScale(&d, &ev->vel, fn_80287BC8(-0.25f, 1.0f));
             d.x = d.x + fn_80287BC8(-spread, spread);
             d.y = d.y + fn_80287BC8(-2.5f, 2.5f);
             d.z = d.z + fn_80287BC8(-spread, spread);
@@ -629,7 +625,7 @@ int fn_8028B93C(const void* evp) {
     Vec p;
     f32 s;
     int i;
-    Scale(&v, &ev->vel, 0.5f);
+    TScale(&v, &ev->vel, 0.5f);
     s = 0.05f * PSVECMag(&ev->vel);
     for (i = 0; i < 2; i++) {
         SetVec(&p, ev->pos.x + fn_80287BC8(-0.15f, 0.15f), ev->pos.y + fn_80287BC8(-0.15f, 0.15f),
@@ -656,7 +652,7 @@ int fn_8028BA44(const void* evp) {
 int fn_8028BA9C(const void* evp) {
     const SparkEv* ev = (const SparkEv*)evp;
     Vec v;
-    Scale(&v, &ev->pos, 0.05f);
+    TScale(&v, &ev->pos, 0.05f);
     lbl_8055F6F8->Emit(fn_80287B94(0x18, 0x30), &ev->vel, &v, 6.0f);
     return 0x1C;
 }
@@ -905,7 +901,7 @@ void ShardSys::Draw(void) {
             Shard* s = &pts[i];
             Vec a;
             Mat3 r;
-            Scale(&a, &s->axis, now - s->t);
+            TScale(&a, &s->axis, now - s->t);
             f32 ang = PSVECMag(&a);
             if (ang > 0.0001f) {
                 f32 inv = 1.0f / ang;

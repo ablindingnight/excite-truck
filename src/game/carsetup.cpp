@@ -39,6 +39,7 @@ static inline void WheelDefaults(WheelSetup* w, int front) {
 
 #include "game/carsetup.h"
 #include "game/mathutil.h"
+#include "game/tscale.h"
 
 struct TweakMul {
     f32 mass;     // offset 0x0
@@ -120,11 +121,6 @@ void fn_80279D40(CarSetup* s) {
     s->wheelLock = 0.5235988f;
 }
 
-static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
-    o->x += v->x * s;
-    o->y += v->y * s;
-    o->z += v->z * s;
-}
 
 
 void fn_80279F58(CarSetup* s, ValueTable* t) {
@@ -177,7 +173,7 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->modelOffset.Set(0.0f, -s->collideCmHeight, -(s->balance - 0.5f) * s->wheelbase);
     if (c->Has("model_offset")) {
         const ValVec3& o = c->GetVec3("model_offset");
-        AddScaled(&s->modelOffset, &o, 0.0254f);
+        TAddSTo(&s->modelOffset, &o, 0.0254f);
     }
 
     t->FindChild("Front");
