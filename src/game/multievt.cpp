@@ -609,7 +609,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         }
     }
     loc.events->SetEnv(loc.pairs, loc.list.data[loc.cur].env);
-    events.Select(lastTrack, lastEve);
+    loc.events->Select(lastTrack, lastEve);
     MoviePath(loc.movie, loc.list.data[loc.cur].env);
     UnlockList* unlocks = lbl_8055F28C;
     CourseTex tex(unlocks->count);
