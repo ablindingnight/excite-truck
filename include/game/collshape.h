@@ -74,7 +74,7 @@ public:
     virtual ~CollShape(void) {}
     virtual void vf0C(void) {}
     virtual void vf10(u8* other) = 0;
-    virtual inline void vf14(void);
+    virtual void vf14(void) {}
     virtual int vf18(const RVec3* from, const RVec3* dir, f32* t, RVec3* n);
     virtual void vf1C(void);
     virtual void vf20(void* a, const RVec3* b, const RVec3* c, int d, const RVec3* e, void* f, f32 g);
@@ -99,9 +99,5 @@ public:
     s32 surface;        // 0x20
 };
 
-// A defining translation unit may place this identical inline body after its first use.
-#ifndef COLLSHAPE_DEFINE_VF14
-inline void CollShape::vf14(void) {}
-#endif
 
 #endif

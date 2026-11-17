@@ -41,8 +41,8 @@ public:
     virtual int vf40(void) { return 1; }
     virtual RigidBody* vf3C(void) { return this; }
     virtual void OnHit(const RVec3* f, const RVec3* at, int kind, void* c);  // 0x48
-    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by);  // 0x4C
-    virtual void OnImpulses(RVec3* f, RVec3* t);  // 0x50
+    virtual void OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by) {}  // 0x4C
+    virtual void OnImpulses(RVec3* f, RVec3* t) {}  // 0x50
     void ResetState(void);
     void SetMass(f32 m, f32 ix, f32 iy, f32 iz);
     void AddForceAt(const RVec3* f, const RVec3* at);
