@@ -2013,8 +2013,7 @@ void fn_80183E7C(u8* p) {
                 f32 vmax = cb->f5A8;
                 if (cb->speed > vmax) {
                     f32 over = Ramp(cb->speed, vmax, 2.2222223f + vmax);
-                    f32 k = CbMul(heatTune.v[12], 9.81f) * -LerpT(over, 0.0f, 1.0f) * cb->mass /
-                            cb->speed;
+                    f32 k = heatTune.v[12] * (9.81f * (-LerpT(over, 0.0f, 1.0f) * cb->mass)) / cb->speed;
                     RVec3 f;
                     f.x = cb->vel.x * k;
                     f.y = cb->vel.y * k;
@@ -2172,8 +2171,9 @@ void fn_80183E7C(u8* p) {
                 grav = LerpT(__fabsf(pitch), grav, 0.5f * grav);
                 gravUp = LerpT(AbsNarrow(pitch), gravUp, 0.5f * gravUp);
             } else if (pitch > 0.01f) {
-                grav = LerpT(__fabsf(pitch), grav, 0.5f + grav);
-                gravUp = gravUp + AbsNarrow(pitch) * (0.5f + gravUp - gravUp);
+                f32 ap = AbsNarrow(pitch);
+                grav = LerpT(ap, grav, 0.5f + grav);
+                gravUp = LerpT(ap, gravUp, 0.5f + gravUp);
             }
         }
         if (!cb->f2625 && cb->f2618 >= 0.3f) {
