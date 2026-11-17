@@ -128,35 +128,20 @@ class UIVoice {
 public:
     virtual ~UIVoice(void);
 };
+#include "game/uitable.h"
+
 struct UISoundSlot {
     const char* bank;
     float volume;
     UIVoice* voices[4];
 };
-class UITable {
-public:
-    UITable(int rows, int cols, const int* widths);
-    ~UITable(void);
-    // The callers pass the flag unconverted (no extsb), so it is an int at the call site; uitable.cpp
-    // still declares it char (same callee code, symbol name kept for objdiff pairing).
-    void Set(int row, int col, const char* s, int flag);
-
-    char* buf;      // 0x00
-    s32 cols;       // 0x04
-    s32 used;       // 0x08
-    s32 rows;       // 0x0C
-    s32 visible;    // 0x10
-    s32 rowSize;    // 0x14
-    s32* widths;    // 0x18
-    s32* offsets;   // 0x1C
-    s32 page;       // 0x20
-    s32 changes;    // 0x24
-    u32 magic;      // 0x28
-    s32 sel;        // 0x2C
-};
 // uitable.cpp defines Set(int, int, const char*, char) but this caller passes the flag unconverted (no extsb):
-// call retail's symbol directly with an int flag.
+// call retail's symbol directly with an int flag (PC: the member).
+#ifdef __MWERKS__
 extern "C" void Set__7UITableFiiPCcc(UITable*, int, int, const char*, int);
+#else
+static inline void Set__7UITableFiiPCcc(UITable* t, int row, int col, const char* s, int flag) { t->Set(row, col, s, (char)flag); }
+#endif
 extern "C" UISoundSlot lbl_80490558[8];
 extern "C" void* lbl_80490528[3][4];
 extern "C" void* lbl_8055EF24;

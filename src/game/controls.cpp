@@ -7,13 +7,8 @@
 int IdentGetCurrentSlot(void);
 const char* IdentGetSlotName(int);
 
-// The text table the controls table derives from (uitable.cpp), declared as far as the calls below need.
-class UITable {
-public:
-    void Clear(void);
-    char* Get(int row, int col, int* flag);
-    void Set(int row, int col, const char* s, char flag);
-};
+// The text table the controls table derives from (uitable.cpp).
+#include "game/uitable.h"
 
 extern "C" {
 struct ControlActionInfoFields { const char* displayName; const char* key; };

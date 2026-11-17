@@ -32,31 +32,32 @@ const char* StatsGetLabel(u32 type);
 
 extern "C" int fn_80247624(void);  // career mode active
 
-class UITable;
+// A text grid shown by a menu list element.
+#include "game/uitable.h"
+
+// Retail callers pass the style in a full register (Set stores its low byte): they call retail's symbols by
+// name with an int style (PC: the members).
+#ifdef __MWERKS__
 extern "C" {
 const char* Get__7UITableFiiPi(UITable*, int, int, int*);
-// Retail callers pass the style in a full register. Set stores its low byte.
 void Set__7UITableFiiPCcc(UITable*, int, int, const char*, int);
 }
-
-// A text grid shown by a menu list element.
-class UITable {
-public:
-    UITable(int rows, int cols, const int* widths);
-    ~UITable(void);
-    void Clear(void);
-    const char* GetCell(int row, int col, int* flag) {
-        return Get__7UITableFiiPi(this, row, col, flag);
-    }
-    void SetCell(int row, int col, const char* text, int style) {
-        Set__7UITableFiiPCcc(this, row, col, text, style);
-    }
-    int Rows(void) { return rows; }
-
-    u8 pad0[0x8];
-    int rows;  // offset 0x8
-    u8 padC[0x24];
-};
+#endif
+static inline const char* GetCell(UITable* t, int row, int col, int* flag) {
+#ifdef __MWERKS__
+    return Get__7UITableFiiPi(t, row, col, flag);
+#else
+    return t->Get(row, col, flag);
+#endif
+}
+static inline void SetCell(UITable* t, int row, int col, const char* text, int style) {
+#ifdef __MWERKS__
+    Set__7UITableFiiPCcc(t, row, col, text, style);
+#else
+    t->Set(row, col, text, (char)style);
+#endif
+}
+static inline int Rows(UITable* t) { return t->used; }  // an inline getter in retail (read early)
 
 class StatsTable : public UITable {
 public:
@@ -185,28 +186,28 @@ void RecordsState::Enter(void) {
         if (found) {
             env = GetTrackEnviron(track->name);
             listed = 0;
-            for (i = 0; !listed && i < tracks.rows; i++) {
-                if (strcasecmp(env, tracks.GetCell(i, 1, 0)) == 0) {
+            for (i = 0; !listed && i < tracks.used; i++) {
+                if (strcasecmp(env, GetCell(&tracks, i, 1, 0)) == 0) {
                     listed = 1;
                 }
             }
             if (!listed) {
-                row = tracks.rows;
-                tracks.SetCell(row, 1, env, 0);
-                tracks.SetCell(row, 0, GetTrackFriendlyName(track->name), 0);
+                row = tracks.used;
+                SetCell(&tracks, row, 1, env, 0);
+                SetCell(&tracks, row, 0, GetTrackFriendlyName(track->name), 0);
             }
         }
     }
     trackSel = 0;
-    tracks.SetCell(trackSel, 0, tracks.GetCell(trackSel, 0, 0), 1);
+    SetCell(&tracks, trackSel, 0, GetCell(&tracks, trackSel, 0, 0), 1);
     tracksDirty = 1;
 }
 
 static inline void AddEventRow(RecordsState* s, EventInfo* ev, const char* env, int row) {
     if (strcasecmp(GetTrackEnviron(ev->node->GetString("track", GetTrack(ev->track)->name)), env) == 0) {
-        row = s->events.rows;
-        s->events.SetCell(row, 0, GetEventTypeDisplayName(ev->type), 0);
-        s->events.SetCell(row, 1, GetEventTypeName(ev->type), 0);
+        row = s->events.used;
+        SetCell(&s->events, row, 0, GetEventTypeDisplayName(ev->type), 0);
+        SetCell(&s->events, row, 1, GetEventTypeName(ev->type), 0);
         s->eventIds[row] = ev->id;
     }
 }
@@ -217,7 +218,7 @@ void RecordsState::Update(void) {
     const char* env;
     int i;
     if (tracksDirty) {
-        env = tracks.GetCell(trackSel, 1, 0);
+        env = GetCell(&tracks, trackSel, 1, 0);
         events.Clear();
         for (i = 0; i < GetNumEvents(); i++) {
             ev = GetEvent(i);
@@ -230,16 +231,16 @@ void RecordsState::Update(void) {
         tracksDirty = 0;
     }
     if (eventsDirty) {
-        if (events.rows > 0) {
+        if (events.used > 0) {
             stats.Show(eventIds[eventSel]);
         } else {
             stats.Clear();
         }
         eventsDirty = 0;
     }
-    tracks.SetCell(trackSel, 0, tracks.GetCell(trackSel, 0, 0), focus == 0 ? 1 : 2);
-    if (events.rows > 0) {
-        events.SetCell(eventSel, 0, events.GetCell(eventSel, 0, 0), focus == 1 ? 1 : 2);
+    SetCell(&tracks, trackSel, 0, GetCell(&tracks, trackSel, 0, 0), focus == 0 ? 1 : 2);
+    if (events.used > 0) {
+        SetCell(&events, eventSel, 0, GetCell(&events, eventSel, 0, 0), focus == 1 ? 1 : 2);
     }
 }
 
@@ -253,7 +254,7 @@ int RecordsState::HandleKey(u32 key) {
         }
         break;
     case 0x127:
-        if (focus == 0 && events.rows > 0) {
+        if (focus == 0 && events.used > 0) {
             focus = 1;
         }
         break;
@@ -261,13 +262,13 @@ int RecordsState::HandleKey(u32 key) {
     case 0x128:
         switch (focus) {
         case 0:
-            tracks.SetCell(trackSel, 0, tracks.GetCell(trackSel, 0, 0), 0);
-            Wrap(&trackSel, key == 0x128 ? 1 : -1, tracks.Rows());
+            SetCell(&tracks, trackSel, 0, GetCell(&tracks, trackSel, 0, 0), 0);
+            Wrap(&trackSel, key == 0x128 ? 1 : -1, Rows(&tracks));
             tracksDirty = 1;
             break;
         case 1:
-            events.SetCell(eventSel, 0, events.GetCell(eventSel, 0, 0), 0);
-            Wrap(&eventSel, key == 0x128 ? 1 : -1, events.Rows());
+            SetCell(&events, eventSel, 0, GetCell(&events, eventSel, 0, 0), 0);
+            Wrap(&eventSel, key == 0x128 ? 1 : -1, Rows(&events));
             eventsDirty = 1;
             break;
         }
@@ -284,13 +285,13 @@ void StatsTable::Refresh(void) {
     Clear();
     for (int i = 0; i < 7; i++) {
         u32 type = StatsGetTypeFromIndex(i + 1);
-        SetCell(i, 0, StatsGetLabel(type), 0);
+        SetCell(this, i, 0, StatsGetLabel(type), 0);
         Statistic stat(IdentGetCurrentSlot(), type, event, 0);
         if (stat.HasValue()) {
             char buf[20];
-            SetCell(i, 1, stat.Format(buf, 20), 0);
+            SetCell(this, i, 1, stat.Format(buf, 20), 0);
         } else {
-            SetCell(i, 1, "Not set!", 0);
+            SetCell(this, i, 1, "Not set!", 0);
         }
     }
 }
