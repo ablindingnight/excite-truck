@@ -441,18 +441,7 @@ public:
     virtual StuntDisplay* Alloc(void) = 0;
 };
 
-class Body {
-public:
-    virtual ValueNode* Info(void);  // 0x8
-    virtual void vf0C(void);
-    virtual const f32* Pos(void);   // 0x10
-    virtual void vf14(void);
-    virtual void vf18(void);
-    virtual void vf1C(void);
-    virtual void SetActive(int on);  // 0x20
-    virtual void vf24(void);
-    virtual void SetState(const f32* m, const f32* vel, const f32* spin);  // 0x28
-};
+#include "game/body.h"
 
 // A point or invincibility token placed by the pickup system; spins once it is live.
 // A row of the 3x4 body matrix (three rotation rows, then the position).
@@ -4377,7 +4366,7 @@ static inline f32 TakePoints(Token* t, Body* b) {
     if (b == t->body && t->active) {
         t->active = 0;
         t->Hide();
-        return t->body->Info()->GetFloat("points", 10.0f);
+        return t->body->Desc()->GetFloat("points", 10.0f);
     }
     return 0.0f;
 }
@@ -4435,9 +4424,9 @@ inline void BetaMaster::c2(Body* b, int car) {
 }
 
 inline void BetaMaster::c0(Body* b) {
-    if (b->Info()->Has("points")) {
+    if (b->Desc()->Has("points")) {
         bumps.Push(new ("pointtoken") PointToken(b));
-    } else if (b->Info()->Has("invincibility")) {
+    } else if (b->Desc()->Has("invincibility")) {
         bumps2.Push(new ("inv_token") InvToken(b));
     }
 }

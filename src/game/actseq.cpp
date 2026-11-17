@@ -629,19 +629,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
 // A thrown or knocked object on the track.
-class Body {
-public:
-    virtual ValueNode* Desc(void);       // 0x08
-    virtual void vf0C(void);
-    virtual void vf10(void);
-    virtual ActVec* Vel(void);              // 0x14
-    virtual s16 Surface(void);           // 0x18
-    virtual void vf1C(void);
-    virtual void Place(int a);           // 0x20
-    virtual void Throw(const ActVec* vel, const ActVec* at);  // 0x24
-    virtual void vf28(void);
-    virtual void Respawn(void);          // 0x2C
-};
+#include "game/body.h"
 
 extern "C" {
 void fn_801D0800(IPickupListener* l);
@@ -1549,13 +1537,13 @@ int Obstacle_ASE::Begin(int reverse) {
             ActVec vel(0.0f, 0.0f, 0.0f);
             if (FAbs(PSVECDotProduct((const Vec*)&dir, (const Vec*)&dir)) <= __float_epsilon[0] ||
                 FAbs(speed) <= __float_epsilon[0]) {
-                bodies.data[i]->Place(1);
+                bodies.data[i]->SetActive(1);
             } else {
                 PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
                 vel.x = dir.x * speed;
                 vel.y = dir.y * speed;
                 vel.z = dir.z * speed;
-                bodies.data[i]->Throw(&vel, &throwPt);
+                bodies.data[i]->Throw((const f32*)&vel, (const f32*)&throwPt);
             }
         }
         if (resetTimeout > 0) {
@@ -1582,7 +1570,7 @@ void Obstacle_ASE::Hit(Body* b, const ActVec* pos) {
     if (effects.count > 0 && Matches(b)) {
         HitMsg m;
         m.pos = *pos;
-        m.vel = *b->Vel();
+        m.vel = *(ActVec*)b->Vel();
         m.surf = b->Surface();
         f32 v2 = PSVECDotProduct((const Vec*)&m.vel, (const Vec*)&m.vel);
         for (int i = 0; i < effects.count; i++) {
