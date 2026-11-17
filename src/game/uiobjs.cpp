@@ -2,6 +2,7 @@
 // each in a fixed list of 32 entries looked up by case-insensitive name, with drawing at an anchored
 // position, text style setup and sound playback. Names are guesses apart from the tags.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/sound.h"
 #include "game/arrayref.h"
 
@@ -9,11 +10,6 @@ void* operator new(size_t size, const char* tag);
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
-int fn_8023512C(const char* file);  // load image
-void fn_80235380(int img);
-f32 fn_80235EF0(int img, int frame);  // width
-f32 fn_80235F64(int img, int frame);  // height
-void fn_802354A0(int img, f32 x, f32 y, f32 z, f32 w, f32 h, int frame, int a);
 struct GTextFont;
 GTextFont* fn_80232578(const char* name);  // load font
 void fn_802328D4(GTextFont* font);
@@ -67,7 +63,7 @@ struct TextStyle {
 struct UIImage {
     char name[0x20];  // offset 0x0
     char file[0x20];  // offset 0x20
-    int img;          // offset 0x40
+    gArtSet* img;     // offset 0x40
     int frame;        // offset 0x44
 };
 
@@ -192,7 +188,14 @@ void UIObjectsImpl::DrawImage(const char* name, u32 flags, int a, f32 x, f32 y) 
         } else if (flags & 0x10) {
             y += 0.5f * h;
         }
-        fn_802354A0(e->img, x, y, 0.0f, w, h, e->frame, a);
+#ifdef __MWERKS__
+        // Retail: this unit's prototype put idx (frame) after the floats; on PowerPC it reaches
+        // fn_802354A0(s, idx, x, y, z, w, h, color) unchanged (separate int/float registers).
+        ((void (*)(gArtSet*, f32, f32, f32, f32, f32, int, int))fn_802354A0)(e->img, x, y, 0.0f, w, h, e->frame, a);
+#else
+        /* PORT: MWCC path keeps retail's argument order (registers), see the comment above */
+        fn_802354A0(e->img, e->frame, x, y, 0.0f, w, h, a);
+#endif
     }
 }
 
@@ -212,7 +215,14 @@ void UIObjectsImpl::DrawImageScaled(const char* name, u32 flags, int a, f32 x, f
         } else if (flags & 0x10) {
             y += 0.5f * h;
         }
-        fn_802354A0(e->img, x, y, 0.0f, w, h, e->frame, a);
+#ifdef __MWERKS__
+        // Retail: this unit's prototype put idx (frame) after the floats; on PowerPC it reaches
+        // fn_802354A0(s, idx, x, y, z, w, h, color) unchanged (separate int/float registers).
+        ((void (*)(gArtSet*, f32, f32, f32, f32, f32, int, int))fn_802354A0)(e->img, x, y, 0.0f, w, h, e->frame, a);
+#else
+        /* PORT: MWCC path keeps retail's argument order (registers), see the comment above */
+        fn_802354A0(e->img, e->frame, x, y, 0.0f, w, h, a);
+#endif
     }
 }
 
