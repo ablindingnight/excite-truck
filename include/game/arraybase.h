@@ -47,6 +47,17 @@ public:
             count--;
         }
     }
+    // Search by a key passed by const reference and read in place (no local copy): the list's data pointer is
+    // loaded before the key (evpath's `*sel = list.IndexOf(current)`). Find copies its key first. Name unproven.
+    template <typename V>
+    int IndexOf(const V& v) {
+        for (int i = 0; i < Count(); i++) {
+            if ((V)data[i] == v) {
+                return i;
+            }
+        }
+        return -1;
+    }
     T* data;    // offset 0x0
     s32 count;  // offset 0x4
     s32 cap;    // offset 0x8

@@ -565,7 +565,7 @@ int fn_8027F958(s32* sel, EvPath* path) {
     }
     int picked = fn_802146BC(&desc, -999, -999, 1) == -2;
     if (picked) {
-        *sel = lbl_804B3048.Find((u8*)lbl_8055F688);
+        *sel = lbl_804B3048.IndexOf(lbl_8055F688);
     }
     lbl_8055F688 = 0;
     lbl_804B3048.count = 0;
@@ -1151,7 +1151,7 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
         SelectBar(cur);
     }
     int picked = fn_802146BC(&desc, -999, -999, 1) == -2;
-    *event = lbl_804B30D8.Find((u8*)lbl_8055F698);
+    *event = lbl_804B30D8.IndexOf(lbl_8055F698);
     lbl_8055F698 = 0;
     lbl_804B30D8.count = 0;
     sBrowseTitle[0] = 0;
