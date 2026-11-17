@@ -1397,6 +1397,8 @@ void ExhaustTorchMan::Load(void) {
     cell = 1.0f / grid;
 }
 
+static inline void Vertex(u32 c, int idx, const Vec& p, f32 u, f32 v) { fn_802C8E00(p.x, p.y, p.z, u, v, c, idx); }  /* Helper name unproven */
+
 void ExhaustTorchMan::DrawEdge(const Vec* p, int frame, const Vec* a, const Vec* b, f32 len) {
     Vec c[4];
     f32 u0;
@@ -1407,15 +1409,13 @@ void ExhaustTorchMan::DrawEdge(const Vec* p, int frame, const Vec* a, const Vec*
     AddScaled(&c[0], p, a, -len);
     AddScaled(&c[0], &c[0], b, len);
     AddScaled(&c[1], &c[0], a, 2.0f * len);
-    AddScaled(&c[2], &c[0], b, -len * 2.0f);
+    AddScaled(&c[2], &c[0], b, -2.0f * len);
     AddScaled(&c[3], &c[1], b, -2.0f * len);
-    fn_802C8E00(c[0].x, c[0].y, c[0].z, u0, v0, 0xC0FFFFFF, 0);
-    fn_802C8E00(c[1].x, c[1].y, c[1].z, u1, v0, 0xC0FFFFFF, 0);
-    fn_802C8E00(c[2].x, c[2].y, c[2].z, u0, v1, 0xC0FFFFFF, 1);
-    fn_802C8E00(c[3].x, c[3].y, c[3].z, u1, v1, 0xC0FFFFFF, 1);
+    Vertex(0xC0FFFFFF, 0, c[0], u0, v0);
+    Vertex(0xC0FFFFFF, 0, c[1], u1, v0);
+    Vertex(0xC0FFFFFF, 1, c[2], u0, v1);
+    Vertex(0xC0FFFFFF, 1, c[3], u1, v1);
 }
-
-static inline void Vertex(u32 c, int idx, const Vec& p, f32 u, f32 v) { fn_802C8E00(p.x, p.y, p.z, u, v, c, idx); }  /* Helper name unproven */
 
 void ExhaustTorchMan::DrawFace(const TorchEntry* m, int frame, f32 len) {
     Vec c[4];
