@@ -41,11 +41,7 @@ public:
     u8 pitchChanged;   // offset 0x4E
 };
 
-class RoadSound {
-public:
-    virtual ~RoadSound(void);
-    virtual void Update(void);
-};
+#include "game/roadsound.h"
 
 void* operator new(size_t size, const char* tag);
 

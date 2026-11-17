@@ -55,66 +55,47 @@ SurfaceInfo* fn_801D04A8(int surface);
 
 static inline f32 Clamp01(f32 t) { return MaxF(MinFRev(t, 1.0f), 0.0f); }
 
-struct RoadSoundEntry {
-    RoadSoundVoice* voice;  // offset 0x0
-    s32 surface;            // offset 0x4
-    f32 speed1;             // offset 0x8
-    f32 speed2;             // offset 0xC
-    f32 speed3;             // offset 0x10
-    f32 vol2;               // offset 0x14
-    f32 vol3;               // offset 0x18
-    f32 pitch1;             // offset 0x1C
-    f32 pitch3;             // offset 0x20
-};
+#include "game/roadsound.h"
 
 static char RoadSoundTag[] = "roadsnd";
 static char RoadSoundType[] = "sound";
 
-class RoadSound {
-    // The inline definitions emit the constructor strings in retail order.
-    static const char* Path() { return "roadsnd.val"; }  /* Helper name unproven */
-    static const char* SurfaceKey() { return "surftype"; }  /* Helper name unproven */
-    static const char* MissingVoiceFormat() { return "roadsnd: can't find %s"; }  /* Helper name unproven */
+// The constructor and its string helpers (inline; MWCC emits their strings in reverse definition order, so they are defined last-string-first).
+inline const char* RoadSound::MissingVoiceFormat() { return "roadsnd: can't find %s"; }
+inline const char* RoadSound::SurfaceKey() { return "surftype"; }
+inline const char* RoadSound::Path() { return "roadsnd.val"; }
 
-public:
-    RoadSound(char* car) {
-        RoadSoundEntry* e;
-        const char* name;
-        char* c;
-        ValueTable* table;
-        ValueNode* node;
-        int i;
-        this->car = car;
-        count = 0;
-        table = fn_80131808(Path());
-        for (i = 0; (node = table->GetChild(i)) != NULL; i++) {
-            if (strcmp(node->GetName(), RoadSoundType) == 0) {
-                c = this->car;
-                e = &entries[count++];
-                name = node->GetValue("sound");
-                e->voice = fn_802077A4(name, 4, c + 0x118, c + 0x60);
-                if (e->voice == NULL && ((CarBody*)c)->index == 0) {
-                    fn_802E30C8(MissingVoiceFormat(), name);
-                }
-                e->surface = node->GetIntValue(SurfaceKey());
-                e->speed1 = 0.44444445f * node->GetFloat("speed1");
-                e->speed2 = 0.44444445f * node->GetFloat("speed2");
-                e->speed3 = 0.44444445f * node->GetFloat("speed3");
-                e->vol2 = node->GetFloat("vol2");
-                e->vol3 = node->GetFloat("vol3");
-                e->pitch1 = node->GetFloat("pitch1");
-                e->pitch3 = node->GetFloat("pitch3");
+inline RoadSound::RoadSound(char* car) {
+    RoadSoundEntry* e;
+    const char* name;
+    char* c;
+    ValueTable* table;
+    ValueNode* node;
+    int i;
+    this->car = car;
+    count = 0;
+    table = fn_80131808(Path());
+    for (i = 0; (node = table->GetChild(i)) != NULL; i++) {
+        if (strcmp(node->GetName(), RoadSoundType) == 0) {
+            c = this->car;
+            e = &entries[count++];
+            name = node->GetValue("sound");
+            e->voice = fn_802077A4(name, 4, c + 0x118, c + 0x60);
+            if (e->voice == NULL && ((CarBody*)c)->index == 0) {
+                fn_802E30C8(MissingVoiceFormat(), name);
             }
+            e->surface = node->GetIntValue(SurfaceKey());
+            e->speed1 = 0.44444445f * node->GetFloat("speed1");
+            e->speed2 = 0.44444445f * node->GetFloat("speed2");
+            e->speed3 = 0.44444445f * node->GetFloat("speed3");
+            e->vol2 = node->GetFloat("vol2");
+            e->vol3 = node->GetFloat("vol3");
+            e->pitch1 = node->GetFloat("pitch1");
+            e->pitch3 = node->GetFloat("pitch3");
         }
-        fn_80131818(table);
     }
-    virtual ~RoadSound(void);
-    virtual void Update(void);
-
-    char* car;                    // offset 0x4
-    int count;                    // offset 0x8
-    RoadSoundEntry entries[8];    // offset 0xC
-};
+    fn_80131818(table);
+}
 
 ModuleTag lbl_8055EE60;
 
