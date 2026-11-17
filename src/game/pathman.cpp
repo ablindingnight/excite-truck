@@ -7,6 +7,7 @@
 #include "game/recpath.h"
 #include "game/rigid.h"
 #include "game/plainvec.h"
+#include "game/strcopy.h"
 
 // PathMtx: common.h's PlainValMatrix.
 struct PathFile;
@@ -67,15 +68,6 @@ public:
     virtual int Run(const char* args) = 0;
 };
 
-static inline void StrCopy(char* d, const char* s, int n) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 namespace {
 
@@ -95,7 +87,7 @@ class PathGroup : public PathMover {
 public:
     PathGroup(const char* path, int n) {
         cap = n;
-        StrCopy(name, path, 0x10);
+        SafeStrCopy(name, path, 0x10);
         count = 0;
         data = new ("pathclient") PathClient*[cap];
     }
@@ -149,7 +141,7 @@ void fn_801DA758(void* obj, const char* name, const char* file) {
     int i;
     PathMan* m = lbl_8055E984;
     PathClient* c = &m->clients[m->count++];
-    StrCopy(c->name, name, 0x10);
+    SafeStrCopy(c->name, name, 0x10);
     c->obj = obj;
     c->follower = new ("node") PathFollower();
     c->file = fn_801D9CC4(file);
