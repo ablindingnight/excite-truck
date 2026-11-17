@@ -728,6 +728,28 @@ static inline UIStyle* FindStyle(void* styles, const char* name, s32 kind) {
     return (UIStyle*)fn_8021227C(styles, (char*)name, kind);
 }
 
+static inline WidgetFragment* CreateImageRadioButton(UIDesc* d, void* styles) {
+    UIStyle* style = FindStyle(styles, d->style, 2);
+    WidgetFragment* memory = (WidgetFragment*)operator new(0x25c, "RadioButton");
+    if (memory) {
+        if (style) style = (UIStyle*)style->value;
+        else style = (UIStyle*)&lbl_8055EF4C;
+        memory = __ct__11RadioButtonFiiiPvP11OwnedWidget(memory, d->x, d->y, d->field9c, style, new ("rimg") UIImageRef(d->name, d->flags));
+    }
+    return memory;
+}
+
+static inline WidgetFragment* CreateImageTabButton(UIDesc* d, void* styles) {
+    UIStyle* style = FindStyle(styles, d->style, 2);
+    WidgetFragment* memory = (WidgetFragment*)operator new(0x25c, "TabButton");
+    if (memory) {
+        if (style) style = (UIStyle*)style->value;
+        else style = (UIStyle*)&lbl_8055EF54;
+        memory = __ct__9TabButtonFiiiPvP11OwnedWidget(memory, d->x, d->y, d->field9c, style, new ("timg") UIImageRef(d->name, d->flags));
+    }
+    return memory;
+}
+
 extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     UIStyle* value = 0;
     int count = 0;
@@ -795,22 +817,24 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         void* image = button ? button->arg1 : 0;
         const char* label = text ? (const char*)text->value : d->name;
         void* handler = button ? button->value : (void*)fn_80212338;
-        UIImageRef* ref = new ("StyleImage") UIImageRef(label, d->flags);
+        OwnedWidget* ref = (OwnedWidget*)new ("StyleImage") UIImageRef(label, d->flags);
         if (d->field9c == 1 || !fn_80129BC4()) {
-            p = (WidgetFragment*)new ("IButton") IButton(image, d->x, d->y, d->dx, d->dy, (OwnedWidget*)ref, (int (*)(void*))handler, 0, d->field9c != 0);
+            p = (WidgetFragment*)new ("IButton") IButton(image, d->x, d->y, d->dx, d->dy, ref, (int (*)(void*))handler, 0, d->field9c != 0);
             widgets[count++] = p;
             break;
         }
-        p = (WidgetFragment*)new ("MenuBtn") MenuBtn(image, d->x, d->y, d->dx, d->dy, (OwnedWidget*)ref, (int (*)(void*))handler);
+        p = (WidgetFragment*)new ("MenuBtn") MenuBtn(image, d->x, d->y, d->dx, d->dy, ref, (int (*)(void*))handler);
         widgets[count++] = p;
         break;
     }
     case 42: {
         UIStyle* button = FindStyle(styles, d->style, 0);
         value = FindStyle(styles, d->style, 2);
-        void* watched = value ? value->value : 0;
-        void* handler = button ? button->value : (void*)fn_80212338;
         void* image = button ? button->arg1 : 0;
+        void* handler;
+        if (button) handler = button->value;
+        else handler = (void*)fn_80212338;
+        void* watched = value ? value->value : 0;
         p = (WidgetFragment*)new ("FadeButton") FadeButton(image, (WidgetDesc*)d, (int (*)(void*))handler, (int*)watched);
         widgets[count++] = p;
         break;
@@ -850,21 +874,17 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 14: {
-        value = FindStyle(styles, d->style, 2);
-        p = (WidgetFragment*)operator new(0x25c, "RadioButton");
-        if (p) {
-            void* watched = value ? value->value : &lbl_8055EF4C;
-            p = __ct__11RadioButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, new ("rimg") UIImageRef(d->name, d->flags));
-        }
+        p = CreateImageRadioButton(d, styles);
         widgets[count++] = p;
         break;
     }
     case 15: {
-        value = FindStyle(styles, d->style, 2);
+        UIStyle* style = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x25c, "BRadioButton");
         if (p) {
-            void* watched = value ? value->value : &lbl_8055EF4C;
-            p = __ct__11RadioButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 2, -1, -1));
+            if (style) style = (UIStyle*)style->value;
+            else style = (UIStyle*)&lbl_8055EF4C;
+            p = __ct__11RadioButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, style, fn_8021203C(d->name, 2, -1, -1));
         }
         widgets[count++] = p;
         break;
@@ -1014,21 +1034,17 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         break;
     }
     case 16: {
-        value = FindStyle(styles, d->style, 2);
-        p = (WidgetFragment*)operator new(0x25c, "TabButton");
-        if (p) {
-            void* watched = value ? value->value : &lbl_8055EF54;
-            p = __ct__9TabButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, new ("timg") UIImageRef(d->name, d->flags));
-        }
+        p = CreateImageTabButton(d, styles);
         widgets[count++] = p;
         break;
     }
     case 27: {
-        value = FindStyle(styles, d->style, 2);
+        UIStyle* style = FindStyle(styles, d->style, 2);
         p = (WidgetFragment*)operator new(0x25c, "BTabButton");
         if (p) {
-            void* watched = value ? value->value : &lbl_8055EF54;
-            p = __ct__9TabButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, watched, fn_8021203C(d->name, 1, -1, -1));
+            if (style) style = (UIStyle*)style->value;
+            else style = (UIStyle*)&lbl_8055EF54;
+            p = __ct__9TabButtonFiiiPvP11OwnedWidget(p, d->x, d->y, d->field9c, style, fn_8021203C(d->name, 1, -1, -1));
         }
         widgets[count++] = p;
         break;
