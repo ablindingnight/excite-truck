@@ -26,8 +26,8 @@ struct MTVec {
     MTVec(void) {}
     MTVec(f32 ax, f32 ay, f32 az) {
         x = ax;
-        z = az;
         y = ay;
+        z = az;
     }
     f32 x, y, z;
 };
@@ -68,8 +68,9 @@ ModuleTag lbl_8055F2A0;
 extern "C" {
 
 // The model/texture test viewer: draws leather.tex on a unit quad until ESC is pressed.
-// NonMatching: the target builds v[1..3] by copying earlier vertices (lfd/stfd) and keeps four position
-// temporaries on the stack; matrix and calls match.
+// Each vertex starts as a copy of an earlier one (v[1] = v[0], v[2] = v[0], v[3] = v[2]: retail's lfd/stfd pair
+// + word moves of the position), then takes its own position and u/v; the MTVec temporaries stay on the stack.
+// Left: the idx table address is scheduled one slot later than retail.
 void fn_8024BE04(void) {
     fn_802E30C8("ModelTest!");
     MTMtx* vp;
@@ -85,24 +86,20 @@ void fn_8024BE04(void) {
         fn_802C974C(0.2f, 1000.0f, 1.5707964f);
         fn_802C8638(vp);
         MTVtx v[4];
-        __typeof__(v[2].pos) v_2_pos = MTVec(0.0f, 1.0f, 0.0f);
-        const u16 idx[6] = {0, 1, 2, 1, 3, 2};
-        v[0].pos = MTVec(0.0f, 0.0f, 0.0f);
-        v[0].color = 0xFFFFFFFF;
         v[0].u = 0.0f;
         v[0].v = 0.0f;
+        v[0].color = 0xFFFFFFFF;
+        v[0].pos = MTVec(0.0f, 0.0f, 0.0f);
+        v[1] = v[0];
         v[1].pos = MTVec(1.0f, 0.0f, 0.0f);
-        v[1].color = 0xFFFFFFFF;
         v[1].u = 1.0f;
-        v[2].pos = v_2_pos;
-        v[1].v = 0.0f;
-        v[2].color = 0xFFFFFFFF;
-        v[2].u = 0.0f;
+        v[2] = v[0];
+        v[2].pos = MTVec(0.0f, 1.0f, 0.0f);
         v[2].v = 1.0f;
+        v[3] = v[2];
         v[3].pos = MTVec(1.0f, 1.0f, 0.0f);
-        v[3].color = 0xFFFFFFFF;
         v[3].u = 1.0f;
-        v[3].v = 1.0f;
+        const u16 idx[6] = {0, 1, 2, 1, 3, 2};
         fn_802C8BD0(tex);
         fn_802C8DB8(v, 4, idx, 6);
         fn_802C8D74();
