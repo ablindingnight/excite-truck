@@ -69,23 +69,8 @@ extern s32 lbl_8055CFF4;  // screen height
 
 // MrVec: rvec.h's RVec3.
 // Camera: common.h's PlainValMatrix.
-struct Viewport {
-    s32 x;  // offset 0x0
-    s32 y;  // offset 0x4
-    s32 w;  // offset 0x8
-    s32 h;  // offset 0xC
-    Viewport(int x, int y, int w, int h);
-    ~Viewport(void);
-};
+#include "game/viewport.h"
 
-struct Perspective {
-    Perspective(void) {}
-    Perspective(f32 near, f32 far, f32 fov);
-    ~Perspective(void);
-    f32 near;  // offset 0x0
-    f32 far;   // offset 0x4
-    f32 fov;   // offset 0x8
-};
 
 // A pooled flare.
 struct Flare {

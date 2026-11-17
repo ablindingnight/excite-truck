@@ -35,11 +35,7 @@ struct RacerState {
 };
 
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
-struct Viewport {
-    Viewport(int x, int y, int w, int h);
-    ~Viewport(void);
-    u8 data[0x10];
-};
+#include "game/viewport.h"
 
 #include "game/gameoverlay.h"
 #include "game/mathutil.h"

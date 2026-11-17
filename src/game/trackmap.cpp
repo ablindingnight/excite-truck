@@ -44,20 +44,9 @@ struct Mtx34 {
 #include "game/vertex.h"
 
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
-struct Viewport {
-    Viewport(int x, int y, int w, int h);
-    ~Viewport(void);
-    u8 data[0x10];
-};
+#include "game/viewport.h"
 
 // Saves the projection and sets a new one; the destructor restores it (mrender.cpp).
-struct Perspective {
-    Perspective(f32 near, f32 far, f32 fov);
-    ~Perspective(void);
-    f32 near;  // offset 0x0
-    f32 far;   // offset 0x4
-    f32 fov;   // offset 0x8
-};
 
 struct PlayerCtrl {
     u8 pad0[0x260C];

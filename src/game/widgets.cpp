@@ -13,7 +13,7 @@
 typedef Vec3 RotationVec;typedef Mat3 RotationMatrix;
 void* fn_80211660(long i);  // uiapi.cpp
 // Saves the viewport and sets a new one; the destructor restores it (mrender.cpp).
-struct Viewport {Viewport(int x,int y,int w,int h);~Viewport(void);int x,y,w,h;};
+#include "game/viewport.h"
 static inline void SetMat3Row(Mat3* m,int row,float x,float y,float z){m->m[row][0]=x;m->m[row][1]=y;m->m[row][2]=z;}
 static inline void SetUIVec3(UIVec3* v,float x,float y,float z){v->v[0]=x;v->v[1]=y;v->v[2]=z;}
 
