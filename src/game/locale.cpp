@@ -5,6 +5,7 @@
 #include "game/locstring.h"
 #include <ctype.h>
 #include "game/byteswap.h"
+#include "game/strcopy.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -158,17 +159,6 @@ static LocString s_lbsAbbr("Units:PoundsAbbreviation");
 
 static UnitSystem s_custom = lbl_8032B14C;
 
-static inline void StrNCpy(char* dst, const char* src, int len) {
-    char* d = dst;
-    int n = len;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void StrNCat(char* d, const char* s, int n) {
     while (*d) {
@@ -176,7 +166,7 @@ static inline void StrNCat(char* d, const char* s, int n) {
         d++;
     }
     if (n > 0) {
-        StrNCpy(d, s, n);
+        SafeStrCopy(d, s, n);
     }
 }
 
@@ -380,7 +370,7 @@ char* fn_801308F4(char* buf, s32 size, s32 value) { return fn_8013072C(buf, size
 
 void fn_801308F8(char* buf, s32 size, s32 value) {
     if (value >= 1000) {
-        StrNCpy(buf, fn_80131234("Locale:OUT_OF_BOUNDS_SCORE"), size);
+        SafeStrCopy(buf, fn_80131234("Locale:OUT_OF_BOUNDS_SCORE"), size);
     } else {
         fn_8013072C(buf, size, value);
     }
@@ -406,7 +396,7 @@ void fn_80130980(char* buf, s32 size, int fields, f32 secs) {
     int started;
     char* p;
     if (secs == -__float_max[0]) {
-        StrNCpy(buf, fn_80131234("Locale:EMPTY_TIME_STRING"), size);
+        SafeStrCopy(buf, fn_80131234("Locale:EMPTY_TIME_STRING"), size);
         return;
     }
     hundredths = (int)(100.0f * secs) % 10;
@@ -539,7 +529,7 @@ const char* fn_80131268(const char* key) { return fn_80131234(key); }
 
 char* fn_8013126C(char* dst, const char* src) {
     fn_802E317C("LocaleUnXlator - really shouldn't use this in non-DEBUG mode");
-    StrNCpy(dst, src, 300);
+    SafeStrCopy(dst, src, 300);
     return dst;
 }
 
