@@ -16,6 +16,7 @@
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include "revolution/GX/GXTypes.h"
+#include "game/byteswap.h"
 
 template <class T>
 static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven */
@@ -255,15 +256,6 @@ static inline int Queue(DeformQueue* q, int n, void* src, void* dst) {
         return 1;
     }
     return 0;
-}
-
-static inline void Swap32(u8* const& p) {
-    u8 t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
 }
 
 static inline void Skin2(const SkinVtx* v, V3* out, int n) {
@@ -1013,13 +1005,13 @@ void fn_802D62FC(const Surf* s, void** dl, u32* size) {
 void fn_802D657C(u32* p, u32 base);
 
 static inline void SwapHeader(u8* const& b) {
-    Swap32(b + 0x1C);
-    Swap32(b + 0x20);
-    Swap32(b + 0x24);
-    Swap32(b + 0x28);
-    Swap32(b + 0x18);
-    Swap32(b + 0xC);
-    Swap32(b + 0x10);
+    SwapWordRef(b + 0x1C);
+    SwapWordRef(b + 0x20);
+    SwapWordRef(b + 0x24);
+    SwapWordRef(b + 0x28);
+    SwapWordRef(b + 0x18);
+    SwapWordRef(b + 0xC);
+    SwapWordRef(b + 0x10);
 }
 
 void fn_802D63FC(Surf* s, u32 base) {
@@ -1067,8 +1059,8 @@ enum SurfFmt { SURF_FMT_FACING = 0x1A };
 
 void fn_802D65F8(Surf* s, u32 base, const char* name) {
     fn_802D63FC(s, base);
-    Swap32((u8*)s + 0x2C);
-    Swap32((u8*)s + 0x30);
+    SwapWordRef((u8*)s + 0x2C);
+    SwapWordRef((u8*)s + 0x30);
     fn_802D657C((u32*)&s->dl, base);
     if ((SurfFmt)s->fmt == SURF_FMT_FACING) {
         fn_802D6594((u8*)s);
@@ -1195,26 +1187,15 @@ void fn_802D6B78(Surf* s) { fn_802D5FE4(s); }
 
 void fn_802D6B7C(Surf* s) { fn_802D6170(s); }
 
-// By-value byte swap for the 4-character type tag in the error message: Swap32's by-reference pointer
-// changes this function's registers, so the original had a separate value-parameter swap here.
-static inline void SwapBytes(char* p) {
-    char t = p[0];
-    p[0] = p[3];
-    p[3] = t;
-    t = p[1];
-    p[1] = p[2];
-    p[2] = t;
-}
-
 void fn_802D6B80(Surf* s, u32 base, const char* name) {
-    Swap32((u8*)s);
+    SwapWordRef((u8*)s);
     Surf* t = fn_802D62E4(s);
     if (t) {
         fn_802D65F8(t, base, name);
     } else {
         char type[5];
         *(u32*)type = s->magic;
-        SwapBytes(type);
+        SwapWordV(type);
         type[4] = 0;
         fn_802E317C("gx: %s has bad surf type %s", name, type);
     }
