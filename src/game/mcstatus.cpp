@@ -264,7 +264,8 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
             fn_80232BA4(cfg->entries[i].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
             u32 color;
             if (sel == i) {
-                color = ((int)pulse << 24) | 0xFFD03F;
+                const u32 selected = ((u32)(int)pulse << 24) | 0xFFD03F;
+                color = selected;
             } else {
                 color = 0xC8646464;
             }
