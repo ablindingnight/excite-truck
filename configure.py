@@ -1300,7 +1300,7 @@ config.libs.append(
             Object(NonMatching, "game/model.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"']),
             Object(Matching, "game/mrender.cpp"),
             Object(Matching, "game/texture.cpp"),
-            Object(NonMatching, "game/mlist.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"']),  # see model.cpp
+            Object(NonMatching, "game/mlist.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"', '-pragma "opt_lifetimes off"']),  # see model.cpp; opt_lifetimes off unit-wide: fn_802CDDC8 reaches retail's 294 instructions, every other function and data unchanged (2026-11-16 night probe)
             Object(Matching, "game/vidmode.cpp"),
             Object(Matching, "game/modelpool.cpp"),
             Object(Matching, "game/billboard.cpp"),
