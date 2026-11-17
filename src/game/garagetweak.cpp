@@ -8,6 +8,7 @@
 #include "game/textelem.h"
 #include "game/v2.h"
 #include "game/gart.h"
+#include "game/mathutil.h"
 
 // Camera: common.h's PlainValMatrix.
 // A tunable value of the car.
@@ -203,11 +204,6 @@ void fn_801DE154(void) {
 }
 #pragma pop
 
-static inline int MaxI(int a, int b) { return a > b ? a : b; }
-static inline int MinI(int a, int b) { return a < b ? a : b; }
-static inline int MinI2(int a, int b) { return b < a ? b : a; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 
 int fn_801DE5C4(int key) {
     fn_801DDF0C();
@@ -219,7 +215,7 @@ int fn_801DE5C4(int key) {
         break;
     case 0x128:
         handled = 1;
-        lbl_8055E9BC = MinI2(lbl_8055E9C4 - 1, lbl_8055E9BC + 1);
+        lbl_8055E9BC = MinIRev(lbl_8055E9C4 - 1, lbl_8055E9BC + 1);
         break;
     case 0x125:
     case 0x127:

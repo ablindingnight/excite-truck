@@ -86,6 +86,7 @@ struct TrackNode {
 
 
 #include "game/uivertex.h"
+#include "game/mathutil.h"
 
 
 extern "C" {
@@ -326,9 +327,7 @@ void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int col
     }
 }
 
-static inline f32 Lerp(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
-static inline f32 Mul(f32 a, f32 b) { return a * b; }
 
 static inline f32 Clamp01(f32 t) {
     t = (1.0f < t) ? 1.0f : t;
@@ -352,10 +351,10 @@ void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 
         } else {
             f32 sw, sh, vb, ur, vt, ul;
             SetCroppedUV(ul, vt, ur, vb,
-                         Lerp(Clamp01(left), p->u0, p->u1),
-                         Lerp(Clamp01(top), p->v0, p->v1),
-                         Lerp(Clamp01(right), p->u0, p->u1),
-                         Lerp(Clamp01(bottom), p->v0, p->v1));
+                         LerpT(Clamp01(left), p->u0, p->u1),
+                         LerpT(Clamp01(top), p->v0, p->v1),
+                         LerpT(Clamp01(right), p->u0, p->u1),
+                         LerpT(Clamp01(bottom), p->v0, p->v1));
             s32 tex = s->tex;
             sh = h;
             sw = w;

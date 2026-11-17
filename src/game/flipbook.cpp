@@ -5,6 +5,7 @@
 // quad, cross-fading the two textures when "tex" blends. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -370,7 +371,6 @@ static inline f32 Ease(f32 s) {
     return k;
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 static inline const ValVec3* FrameOffset(u32 flags, FlipFrame** fr, f32 k) {
     const ValVec3*o;

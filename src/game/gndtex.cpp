@@ -17,6 +17,7 @@
 #include <revolution/MTX/mtx.h>
 #include <revolution/OS/OSCache.h>
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);  // fatal
@@ -143,8 +144,6 @@ struct Batch {
 
 static inline u16 TexShort(int v) { return v; }
 
-static inline int PMax(int a, int b) { return a > b ? a : b; }
-static inline int PMin(int a, int b) { return a < b ? a : b; }
 
 static inline GXColor Rgba(u8 r, u8 g, u8 b, u8 a) {
     GXColor c;
@@ -532,7 +531,7 @@ void fn_802DC440(void) {
 void fn_802DC464(void* verts, int nverts, const u16* idx, int n) {
     fn_802DBBE4(verts, nverts);
     f32 opacity = lbl_804DB068[1].z;
-    u8 a = PMin(PMax(Round(255.0f * opacity), 0), 0xFF);
+    u8 a = MinI(MaxI(Round(255.0f * opacity), 0), 0xFF);
     if (a != lbl_8055FEA0) {
         GXColor c;
         c.a = a;
@@ -633,7 +632,7 @@ static inline void FlushBatch(void) {
         for (i = 0; i < n; i++) {
             Inst* e = &lbl_804DB480.list.data[i];
             u8 a = 255.0f * e->alpha;
-            colors[i] = 0xFFFFFF00 | (u8)PMin(PMax(a, 0), 0xFF);
+            colors[i] = 0xFFFFFF00 | (u8)MinI(MaxI(a, 0), 0xFF);
             uvs[i].u = 0.5f + e->xf.m[9] / 2048.0f;
             uvs[i].v = 0.5f + e->xf.m[11] / 2048.0f;
             fn_802D2ED8(e, i);
@@ -678,7 +677,7 @@ void fn_802DCAE4(GModel* model, const GXf* xf, f32 alpha) {
         return;
     }
     if (lbl_8055FEB9) {
-        int a = PMin(PMax(Round(255.0f * alpha), 0), 0xFF);
+        int a = MinI(MaxI(Round(255.0f * alpha), 0), 0xFF);
         u32 c = fn_802DC6AC((int)xf->m[9] / 4 + 0x100, (int)xf->m[11] / 4 + 0x100);
         GXColor k;
         k.r = c >> 16;
@@ -697,7 +696,7 @@ void fn_802DCAE4(GModel* model, const GXf* xf, f32 alpha) {
         m[1][2] = 0.0f;
         m[1][3] = 0.5f + xf->m[11] / 2048.0f;
         fn_802D3D94(0, m);
-        u8 a = PMin(PMax(Round(255.0f * alpha), 0), 0xFF);
+        u8 a = MinI(MaxI(Round(255.0f * alpha), 0), 0xFF);
         if (a != lbl_8055FEA0) {
             GXColor k;
             k.a = a;
@@ -742,7 +741,7 @@ void fn_802DCFCC(void* ctx, f32 scale, f32 uvScale, s32 ind, s32 tex, u32) {
         f32 e = ceil(0.1f + (f32)__fabs(d));
         f32 sign = d > 0.0f ? 1.0f : -1.0f;
         int s = sign * e;
-        s = PMin(PMax(s, -46), 17);
+        s = MinI(MaxI(s, -46), 17);
         f32 p = pow(2.0, (f32)s);
         scale = (scale / 128.0f) / p;
         fn_802D3DF8(fn_802CA294(ind), scale, scale, s);

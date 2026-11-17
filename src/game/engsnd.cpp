@@ -4,6 +4,7 @@
 // messages.
 #include "game/common.h"
 #include "game/sound.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -203,7 +204,6 @@ EngineSound::~EngineSound(void) {
     }
 }
 
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 /* Helper name unproven */
 inline void EngineSound::UpdateSample(f32 r, EngineSample* e, f32 t, f32 vol) {

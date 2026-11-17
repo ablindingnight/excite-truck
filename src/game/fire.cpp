@@ -9,6 +9,7 @@
 #include "game/plainvec.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+#include "game/mathutil.h"
 
 // Car state as returned per car index.
 struct FireCar {
@@ -130,7 +131,6 @@ void* operator new[](size_t size, const char* name);
 extern void* lbl_80488648[];  // car models
 extern f32 __float_epsilon[];    // FLT_EPSILON
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {
@@ -1066,15 +1066,13 @@ void BigRingMan::Free(BigRing* r) {
     r->emitter = 0;
 }
 
-// Helper names unproven: a point between two others; the setter loads z first.
-static inline f32 MixF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 static inline void SetVec(Vec* o, f32 x, f32 y, f32 z) {
     o->x = x;
     o->y = y;
     o->z = z;
 }
 static inline void MixVec(Vec* o, const Vec* a, const Vec* b, f32 t) {
-    SetVec(o, MixF(t, a->x, b->x), MixF(t, a->y, b->y), MixF(t, a->z, b->z));
+    SetVec(o, LerpT(t, a->x, b->x), LerpT(t, a->y, b->y), LerpT(t, a->z, b->z));
 }
 
 void BigRingMan::Tick(BigRing* r, f32 now) {
@@ -1251,8 +1249,6 @@ void BoostFireMan::Reset(void) {
     }
 }
 
-/* Helper name unproven: the square with its operand by value (the time step is evaluated once, as a parameter). */
-static inline f32 SqF(f32 x) { return x * x; }
 
 /* Helper name unproven: the i-th boost entry. */
 inline BoostEntry* BoostFireMan::Entry(int i) {
@@ -1287,7 +1283,7 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
             for (int k = 0; k < n; k++) {
                 f32 f = -k * step;
                 Vec off;
-                SetVec(&off, vel->x * f, vel->y * f + -0.5f * SqF(f), vel->z * f);
+                SetVec(&off, vel->x * f, vel->y * f + -0.5f * Sq(f), vel->z * f);
                 for (u32 j = 0; j < 2; j++) {
                     Vec p;
                     AddV(&p, &e->pts[j], &off);

@@ -332,6 +332,7 @@ extern const char lbl_8055B860[8];  // ""
 
 #include "game/heapmark.h"
 #include "game/strcopy.h"
+#include "game/mathutil.h"
 
 namespace {
 
@@ -1105,7 +1106,7 @@ static inline f32 Clamp01(f32 v) {
     return t > 0.0f ? t : 0.0f;
 }
 
-static inline f32 SlotUnit(f32 v, f32 lo, f32 hi) { return (v - lo) / (hi - lo); }  /* Helper name unproven */
+  /* Helper name unproven */
 static inline int RoundF(f32 v) { return (int)(v < 0.0f ? v - 0.5f : v + 0.5f); }
 
 // Scales `c` by the tint `t`, per channel.
@@ -1147,7 +1148,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             if (k == 0) {
                 part = 4;
             }
-            f32 t = SlotUnit(alpha, 0.0f, 1.0f);
+            f32 t = Unlerp(alpha, 0.0f, 1.0f);
             f32 pw = fn_80235EF0(art, part) * (0.5f + Clamp01(t) * 0.5f);
             f32 ph = fn_80235F64(art, part) * (0.5f + Clamp01(t) * 0.5f);
             int a = RoundF(255.0f * fade);
@@ -1265,7 +1266,6 @@ extern s32 lbl_8055CFF4;  // screen height
 extern "C" {
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
-static inline double AbsD(double v) { return __fabs(v); }
 
 // Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
 }  // extern "C"
