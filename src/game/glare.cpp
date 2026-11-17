@@ -264,10 +264,13 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
     GXSetArray((GXAttr)0xD, (const void*)&buf->u, (u8)0x18);
     GXSetArray((GXAttr)0xB, (const void*)&buf->color, (u8)0x18);
     GXBegin((GXPrimitive)0x98, (GXVtxFmt)0, (u16)0x18);
-    for (int i = 0; i < n; i++) {
-        WGPIPE = i;
-        WGPIPE = i;
-        WGPIPE = i;
+    int i = 0;
+    if (n > 0) {
+        for (; i < n; i++) {
+            WGPIPE = i;
+            WGPIPE = i;
+            WGPIPE = i;
+        }
     }
 }
 
