@@ -1384,7 +1384,7 @@ void PlayerDriver_vf48(u8* p) {
         ((Gearbox*)PTR(p, 0x38))->SetGear(fn_8018B06C(PTR(p, 0x34)));
     }
     c = 1.0f - ((Gearbox*)PTR(p, 0x38))->Clutch();
-    fn_8018ADC4(PTR(p, 0x34), cl > c ? cl : c);
+    fn_8018ADC4(PTR(p, 0x34), MaxF(cl, c));
     if (lbl_8055E52B && ((Gearbox*)PTR(p, 0x38))->v3C()) {
         int calm;
         calm = (f32)__fabs(F32(PTR(p, 0x34), 0x2690)) <= __float_epsilon[0];
@@ -1470,7 +1470,9 @@ void PlayerDriver_vf48(u8* p) {
         f32 turn;
         c5 = PTR(p, 0x34);
         sr = F32(c5, 0x25D4) / 4.4444447f;
-        sr = sr < 1.0f ? sr : 1.0f;
+        if (1.0f < sr) {
+            sr = 1.0f;
+        }
         str = 1.0f * MaxF(sr, 0.0f);
         PcScaleTo(&w, &F32(c5, 0x124), -0.05f);
         a = VMag(&w);
