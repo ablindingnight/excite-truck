@@ -406,19 +406,19 @@ void fn_801AED74(void) {
 
 RecordMgr* fn_801AFA20(RecordSetup* s);
 
-void fn_801AEF28(RecordSetup* s) {
+void fn_801AEF28(const RecordSetup* s) {
     int i;
     RaceState* st = (RaceState*)lbl_80435740;
     lbl_8055E635 = 1;
     lbl_8055E620 = new ("CarLapTable") CarLapTable;
     lbl_8055E624 = new ("RaceResultTable") RaceResultTable;
-    lbl_8055E628 = fn_801AFA20(s);
+    lbl_8055E628 = fn_801AFA20((RecordSetup*)s);
     RaceEntries* t = &st->entries;
     t->n = 0;
     s32* order = t->order;
     for (i = 0; i < s->n; i++) {
         s32 type = s->e[i].type;
-        if (!CarTypeIsReal(type, s->car)) {
+        if (!CarTypeIsReal(type, (void*)s->car)) {
             break;
         }
         t->e[i].driver = s->e[i].driver;
