@@ -356,6 +356,10 @@ static inline T& AtR(T* p, int i) {
 }
 extern "C" {
 
+/* Helper name unproven: a 4-vector from a 3-vector. Retail builds these five temporaries (three rotation rows, the
+   velocity, each wheel point) at the bottom of the frame in call order = the local of one inline helper, while
+   the MVec4(...) written in the function sit above them in statement order. */
+template <class D> static inline void SetFromV3(D& d, const ValVec3& v) { d = MVec4(v.x, v.y, v.z); }
 void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     MassSet* s = &lbl_8055E794[car];
     ContactSet* c = &lbl_8055E798[car];
@@ -365,22 +369,24 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->pos = MVec4(mtx->origin.x, mtx->origin.y, mtx->origin.z);
     MtxToQuat(mtx, &q);
     s->quat = MVec4(-q.x, -q.y, -q.z, q.w);
-    AtR(s->rot, 0) = MVec4(mtx->basis[0].x, mtx->basis[0].y, mtx->basis[0].z);
-    s->rot[1] = MVec4(mtx->basis[1].x, mtx->basis[1].y, mtx->basis[1].z);
-    s->rot[2] = MVec4(mtx->basis[2].x, mtx->basis[2].y, mtx->basis[2].z);
+    SetFromV3(AtR(s->rot, 0), mtx->basis[0]);
+    SetFromV3(s->rot[1], mtx->basis[1]);
+    SetFromV3(s->rot[2], mtx->basis[2]);
     s->vA0 = MVec4(0.0f, 0.0f, 0.0f);
     s->v90 = MVec4(0.0f, 0.0f, 0.0f);
     ValVec3 v;
     TScale(&v, &mtx->basis[2], a);
-    __typeof__(s->v60) s_v60 = MVec4(0.0f, 0.0f, 0.0f);
-    __typeof__(c->v20) c_v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    s->vel = MVec4(v.x, v.y, v.z);
-    s->v60 = s_v60;
-    c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v20 = c_v20;
+    SetFromV3(s->vel, v);
+    s->v60 = MVec4(0.0f, 0.0f, 0.0f);
     MLVec4 k(x->row[7]);
+    c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v30 = MVec4(a / k.x, a / k.y, a / k.z, a / k.w);
+    f32 ix = a / k.x;
+    f32 iy = a / k.y;
+    f32 iz = a / k.z;
+    f32 iw = a / k.w;
+    c->v30 = MVec4(ix, iy, iz, iw);
     *(MVec4*)&c->pts[4] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -399,7 +405,7 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
         out.x += mtx->origin.x;
         out.y += mtx->origin.y;
         out.z += mtx->origin.z;
-        q[4] = MVec4(out.x, out.y, out.z);
+        SetFromV3(q[4], out);
     }
     memset(e, 0, sizeof(CxEntry));
     fn_801E9DC4(e);
