@@ -1026,9 +1026,9 @@ void EventNode::Draw(void) {
     fn_802354A0(p->art, part, x, y, 0.0f, (f32)p->w, (f32)p->h, tile);
     if (p->sel && !lbl_8055F3EA) {
         fn_80230F78(&alpha, &grow, &color, 0);
-        u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
         f32 hw = (f32)p->w / 2.0f;
         f32 hh = (f32)p->h / 2.0f;
+        u32 c = (tile & 0xFF0000) | (alpha << 24) | (tile & 0xFFFF);
         f32 nx = x - grow * hw;
         f32 ny = y + grow * hh;
         fn_802354A0(p->art, part, nx, ny, 0.0f, (1.0f + grow) * (f32)p->w,
