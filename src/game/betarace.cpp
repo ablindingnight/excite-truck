@@ -4249,6 +4249,8 @@ Meter* fn_801572A4(CarHud* hud, int car, f32* hispeed);
 
 static inline void InitCarHud(CarHud* h, int car, int acar) {
     int i;
+    const char* bonus = "fcount.sfx";
+    const char* big = "cheerhit.sfx";
     for (i = 0; i < 16; i++) {
         StuntEvent* e = &h->pool[i];
         e->car = car;
@@ -4261,7 +4263,7 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
     if (acar) {
         h->bonusSnd = 0;
     } else {
-        h->bonusSnd = fn_802076A0("fcount.sfx", 1, car, 0);
+        h->bonusSnd = fn_802076A0(bonus, 1, car, 0);
     }
     if (h->bonusSnd) {
         h->bonusSnd->SetVolume(1.0f);
@@ -4269,7 +4271,7 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
     if (acar) {
         h->bigSnd = 0;
     } else {
-        h->bigSnd = fn_802076A0("cheerhit.sfx", 1, car, 2);
+        h->bigSnd = fn_802076A0(big, 1, car, 2);
     }
     if (h->bigSnd) {
         h->bigSnd->SetVolume(1.0f);
