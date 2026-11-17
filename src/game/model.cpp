@@ -655,6 +655,8 @@ void mrModelFixup(ModelInfo* m, const char* name) {
         SwapWord(&m->lists[i]);
         Relocate(m->lists[i], base);
         MSurfList* l = m->lists[i];
+        SwapWord(&l->n);
+        SwapWord(&l->surfs);
         Relocate(l->surfs, base);
         for (int j = 0; j < l->n; j++) {
             SwapWord(&l->surfs[j]);
