@@ -1472,7 +1472,6 @@ static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
-    f32 airLift = 0.0f;
     if (IsLoadingActive()) {
         cb->f25DC = 0.0f;
         cb->f25E0 = 0.0f;
@@ -1532,6 +1531,7 @@ void fn_80183E7C(u8* p) {
         }
     }
     cb->f2608 = LerpT(0.99f, cb->f25E0, cb->f2608);
+    f32 airLift = 0.0f;
     int still;
     if (!(fn_801769CC()->type & 0x4000)) {
         still = NearZero(cb->f2690);
@@ -1816,8 +1816,8 @@ void fn_80183E7C(u8* p) {
         f32 dive = -cb->f2600;
         if (lbl_8055A3AC && U32(p, 0x10) == 'PCAR' && dive > 0.0f && dive > 0.9f) {
             cb->f264C = MinF(0.016683351f + stalled, 1.0f);
-            nosedive = 1;
             dive = LerpT(Ramp(cb->f264C, 0.5f, 1.0f), 0.9f, -0.5f);
+            nosedive = 1;
         }
         f32 lean = MinF(1.0f, 6.0f * dive);
         lean = lean > -1.0f ? lean : -1.0f;
