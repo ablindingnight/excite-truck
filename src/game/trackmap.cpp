@@ -453,6 +453,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         radius = LerpF(Max(Min(1.0f, t), 0.0f), map->minWidth, map->maxWidth);
         const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
     }
+    Vec3* right = &basis.right;
     {
         RaceCarRec* tr = fn_8017960C(view);
         PlayerObj* obj = fn_802678E4(map->player);
@@ -479,7 +480,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     basis.up.x = 0.0f;
     basis.up.y = 0.0f;
     basis.up.z = 1.0f;
-    PSVECCrossProduct((const Vec*)&basis.fwd, (const Vec*)&basis.up, (Vec*)&basis.right);
+    PSVECCrossProduct((const Vec*)&basis.fwd, (const Vec*)&basis.up, (Vec*)right);
     if (fn_801E87A8()->flags & 2) {
         basis.right.x *= -1.0f;
         basis.right.y *= -1.0f;
