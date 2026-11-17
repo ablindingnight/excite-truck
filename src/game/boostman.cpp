@@ -557,7 +557,7 @@ void BoostMan::a2(void) {
 
 static inline int Boosting(u8* rec) {
     int r = 0;
-    bool fast = *(f32*)(rec + 0x258C) > 0.001f;
+    bool fast = ((CarBody*)rec)->f258C > 0.001f;
     if (fast && rec[0x259D]) {
         r = 1;
     }
@@ -575,7 +575,7 @@ void BoostMan::a3(void) {
         if (players[i].car != -1) {
             u8* rec = fn_8017960C(players[i].car);
             int b = Boosting(rec);
-            f32 speed = *(f32*)(rec + 0x258C);
+            f32 speed = ((CarBody*)rec)->f258C;
             if (b && speed > players[i].last) {
                 players[i].timer = 1.0f;
             } else {

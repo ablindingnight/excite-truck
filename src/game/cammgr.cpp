@@ -3,6 +3,7 @@
 // cues ("crash_vol", "cheer3.sfx") and the per-slot shake levels. Written against raw field offsets;
 // the large routines and the initialiser are still stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include <string.h>
@@ -432,7 +433,7 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
         return;
     }
     const f32* rp;
-    CamTrack* trk = (*(CamTrackOwner**)(car + 0x270))->GetTrack();
+    CamTrack* trk = ((CamTrackOwner*)((CarBody*)car)->src)->GetTrack();  // CarBody::src (0x270)
     CamXZ xz(pose->pos.v[0], pose->pos.v[2]);
     CamTrackPos at;
     fn_80136594(&at, trk, &xz);
@@ -491,7 +492,7 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
         return;
     }
     const f32* rp;
-    CamTrack* trk = (*(CamTrackOwner**)(c->car + 0x270))->GetTrack();
+    CamTrack* trk = ((CamTrackOwner*)((CarBody*)c->car)->src)->GetTrack();
     CamXZ xz(c->pose.pos.v[0], c->pose.pos.v[2]);
     CamTrackPos at;
     fn_80136594(&at, trk, &xz);
@@ -953,7 +954,7 @@ done:
     if (own) {
         view->carId = c->h1EC;
     } else {
-        view->carId = *(s16*)(c->car + 0x6C);
+        view->carId = ((CarBody*)c->car)->hint[0];
     }
     if (!fn_801769F8()) {
         for (int i = 0; i < 8; i++) {

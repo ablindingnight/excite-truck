@@ -2,6 +2,7 @@
 // update routines.
 // Written against raw field offsets; the large routines are still stubs. Names are guesses.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/rvec.h"
 #include <revolution/MTX/vec.h>
 #include "game/camframe.h"
@@ -158,7 +159,7 @@ void fn_80273BD0(u8* p) {
         c->pose.pos.v[2] = c->pose.pos.v[2] + c->carFrame.rot.m[5] * g;
     }
     fn_80273B4C(p);
-    euler[0] = *(f32*)(c->car + 0x5C0);
+    euler[0] = ((CarBody*)c->car)->f5C0;
     euler[1] = 0.0f;
     euler[2] = 0.0f;
     Mat3FromEuler(&rot, (const Vec3*)euler);

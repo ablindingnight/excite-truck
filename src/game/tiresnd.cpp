@@ -60,7 +60,7 @@ public:
         this->car = car;
         squeal = fn_802077A4("squeal.sfx", 4, car + 0x118, car + 0x60);
         if (squeal) {
-            squeal->unk10 = *(s32*)(this->car + 0x1EC);
+            squeal->unk10 = ((CarBody*)this->car)->index;
         }
         road = fn_8020CA3C(car);
     }

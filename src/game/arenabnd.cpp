@@ -2,6 +2,7 @@
 // ("x, y" pairs), point-in-polygon tests against one bound or a whole set, and the per-event external
 // table lookup. Names are guesses apart from the message prefixes.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/v2.h"
 #include "game/gamedb.h"
 
@@ -171,7 +172,7 @@ Bound* fn_801399FC(ValueNode* n) {
 
 int fn_80139B70(const Bound* b, f32 x, f32 y);
 
-int fn_80139B5C(u8* car, Bound* b) { return fn_80139B70(b, *(f32*)(car + 0x60), *(f32*)(car + 0x68)); }
+int fn_80139B5C(u8* car, Bound* b) { return fn_80139B70(b, ((CarBody*)car)->mtx.pos.x, ((CarBody*)car)->mtx.pos.z); }
 
 int fn_80139B70(const Bound* b, f32 x, f32 y) {
     const BoundPt* p = b->pts;
