@@ -1208,6 +1208,7 @@ int fn_801B2F40(int place) { return lbl_80435C30[place]; }
 u32 fn_801B2F54(int i) { return *(u32*)((u8*)lbl_8055E684[i].State() + 0x10); }
 
 
+/* Helper name unproven */
 static inline s32 LapDiff(s32 hi, s32 lo) { return hi - lo; }
 #pragma push
 #pragma opt_dead_assignments off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_801B2F90 exact with it, 98.44 without */
