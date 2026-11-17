@@ -3,6 +3,7 @@
 // messages.
 #include "game/common.h"
 #include "game/menu.h"
+#include "game/byteswap.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -56,16 +57,6 @@ struct LytFile {
 // MenuDesc: game/menu.h.
 static inline LytElem* NextElem(LytFile* f, int& n) { return &f->elems[n++]; }
 
-static inline void Swap32(void* p) {
-    u8* b = (u8*)p;
-    u8 t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
 ModuleTag lbl_8055EFE0;
 static UnkStatic123 lbl_80497E10;
 
@@ -82,29 +73,29 @@ LytFile* fn_8022E0EC(const char* name) {
         }
         if (swapped) {
             LytElem* e = f->elems = (LytElem*)(f + 1);
-            Swap32(&f->unk0);
+            SwapWord(&f->unk0);
             for (;;) {
-                Swap32(&e->type);
-                Swap32(&e->unk4);
-                Swap32(&e->x);
-                Swap32(&e->y);
-                Swap32(&e->unk10);
-                Swap32(&e->w);
-                Swap32(&e->h);
-                Swap32(&e->size);
-                Swap32(&e->unk80);
-                Swap32(&e->unk84);
-                Swap32(&e->unk88);
-                Swap32(&e->unk8C);
-                Swap32(&e->unk90);
-                Swap32(&e->unk94);
-                Swap32(&e->unk98);
-                Swap32(&e->color);
-                Swap32(&e->unkA0);
-                Swap32(&e->unkA4);
-                Swap32(&e->unkA8);
-                Swap32(&e->unkAC);
-                Swap32(&e->unkB0);
+                SwapWord(&e->type);
+                SwapWord(&e->unk4);
+                SwapWord(&e->x);
+                SwapWord(&e->y);
+                SwapWord(&e->unk10);
+                SwapWord(&e->w);
+                SwapWord(&e->h);
+                SwapWord(&e->size);
+                SwapWord(&e->unk80);
+                SwapWord(&e->unk84);
+                SwapWord(&e->unk88);
+                SwapWord(&e->unk8C);
+                SwapWord(&e->unk90);
+                SwapWord(&e->unk94);
+                SwapWord(&e->unk98);
+                SwapWord(&e->color);
+                SwapWord(&e->unkA0);
+                SwapWord(&e->unkA4);
+                SwapWord(&e->unkA8);
+                SwapWord(&e->unkAC);
+                SwapWord(&e->unkB0);
                 if (e->type == 0) {
                     break;
                 }
