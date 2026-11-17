@@ -199,7 +199,7 @@ struct SolFile {
     s32 count;          // offset 0x0
     StaticCollObject** ents;    // offset 0x4
     u8 pad8[0x14 - 0x8];
-    void (*done)(void);  // offset 0x14
+    void (*done)(void*);  // offset 0x14
 };
 
 struct AnimSlot;
@@ -1416,7 +1416,7 @@ void fn_801FA9AC(void) {
                 }
             }
         }
-        f->done();
+        f->done(f);
     }
     fn_80204050();
     for (o = lbl_8055EC4C; o; o = o->next) {
