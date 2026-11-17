@@ -333,7 +333,21 @@ static inline void ClearProgressDots(char* dots) { strcpy(dots, ""); }
 static inline void AppendProgressDot(char* dots) { strcat(dots, "."); }
 
 /* Helper name unproven */
-static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
+static inline void DrawMessageProgress(MemCardDialogBg* bg, const McMsg* m, char* dots, int& n, f32& frac) {
+    frac = m->frac;
+    if (!(AbsF(frac) <= __float_epsilon[0])) {
+        ClearProgressDots(dots);
+        for (n = 0; n < (int)(30.0f * frac); n++) {
+            AppendProgressDot(dots);
+        }
+        fn_802335F0(dots, bg->font2, -270.0f, -138.0f);
+    }
+}
+
+/* Helper name unproven */
+static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p, int& n, f32& y, f32& frac) {
+    f32 w;
+    char dots[0x40];
     PlainValMatrix cam;
     char text[0x200];
     fn_802C8530();
@@ -343,7 +357,6 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
     fn_802C8638(&cam);
     fn_802C974C(1.0f, 1000.0f, 1.4398966f);
     f32 h;
-    f32 w;
     f32 x0;
     f32 y0;
     w = lbl_8055FB9C + 1;
@@ -357,9 +370,9 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
         fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
         fn_802C92D8();
     }
-    const char* title = m->title;
     const char* msg = m->text;
-    f32 y = 145.0f;
+    const char* title = m->title;
+    y = 145.0f;
     if (strlen(title)) {
         fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
         fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
@@ -371,10 +384,12 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
         struct {
             char* brk;
             u32 used;
+            char* dest;
+            char keep;
         } lineState;
         lineState.brk = 0;
         char line[0x200] = {0};
-        char* d = line;
+        lineState.dest = line;
         lineState.used = 0;
         while (lineState.used < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
             char* c = &p[lineState.used];
@@ -384,14 +399,14 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
                 *c = ' ';
             }
             lineState.used++;
-            *d++ = *c;
-            *d = 0;
+            *lineState.dest++ = *c;
+            *lineState.dest = 0;
         }
-        char keep = 0;
+        lineState.keep = 0;
         if (lineState.used != strlen(p)) {
             if (!lineState.brk) {
                 lineState.brk = &p[lineState.used];
-                keep = p[lineState.used];
+                lineState.keep = p[lineState.used];
             }
             *lineState.brk = 0;
         } else {
@@ -399,32 +414,27 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p) {
         }
         fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
         fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
-        if (!keep) {
+        if (!lineState.keep) {
             p = lineState.brk + 1;
         } else {
-            *lineState.brk = keep;
+            *lineState.brk = lineState.keep;
             p = lineState.brk;
         }
         y -= 20.0f;
     }
+    DrawMessageProgress(bg, m, dots, n, frac);
+    fn_802C9A70(1);
+    fn_802C855C();
+    fn_802C2B48();
 }
 
 // Draws the plain dialog and its progress dots.
 inline void MemCardDialogBg::ShowMsg(const McMsg* m) {
     char* p;
-    DrawDialog(this, m, p);
-    char dots[0x40];
-    f32 frac = m->frac;
-    if (!(AbsF(frac) <= __float_epsilon[0])) {
-        ClearProgressDots(dots);
-        for (int n = 0; n < (int)(30.0f * frac); n++) {
-            AppendProgressDot(dots);
-        }
-        fn_802335F0(dots, this->font2, -270.0f, -138.0f);
-    }
-    fn_802C9A70(1);
-    fn_802C855C();
-    fn_802C2B48();
+    int n;
+    f32 y;
+    f32 frac;
+    DrawDialog(this, m, p, n, y, frac);
 }
 
 /* Helper name unproven */
