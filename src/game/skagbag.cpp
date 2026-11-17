@@ -174,6 +174,7 @@ SkagVec<SkagBag*>* lbl_8055F9D0;  // root bags
 SkagGrid* lbl_804BE248[128];      // by radius
 
 // Moves a point of a size x size square into the frame of its quadrant.
+static inline f32 Dot2(f32 ax, f32 bx, f32 ay, f32 by) { return ax * bx + ay * by; } /* Helper name unproven */
 inline void SkagPoint::Place(const f32* pt, f32 size, f32 mid) {
     f32 s[2];
     f32 c = size * mid;
@@ -194,8 +195,8 @@ inline void SkagPoint::Place(const f32* pt, f32 size, f32 mid) {
     s[0] = (pt[0] - c) / size;
     const f32* v = kAxes[(quad + 1) & 3];
     const f32* u = kAxes[quad];
-    x = u[0] * s[0] + u[1] * s[1];
-    y = v[0] * s[0] + v[1] * s[1];
+    x = Dot2(u[0], s[0], u[1], s[1]);
+    y = Dot2(v[0], s[0], v[1], s[1]);
 }
 
 // Inverse of Place: back into a size x size square.
@@ -204,8 +205,8 @@ inline void SkagPoint::Unplace(f32* out, f32 size) const {
     f32 sx = x * size;
     const f32* v = kAxes[(quad + 1) & 3];
     const f32* u = kAxes[quad];
-    out[1] = c + u[1] * (sx / 2) + v[1] * ((y * size) / 2);
     out[0] = c + u[0] * (sx / 2) + v[0] * ((y * size) / 2);
+    out[1] = c + u[1] * (sx / 2) + v[1] * ((y * size) / 2);
 }
 
 // A child grid: one bag per rad x rad block, built from the four parent cells around it.
