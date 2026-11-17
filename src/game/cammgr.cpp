@@ -417,7 +417,21 @@ struct CamXZ {
     f32 x, z;
 };
 
+#ifdef __MWERKS__
 void fn_80136594(CamTrackPos* out, LineFollower* trk, const CamXZ* xz);  // PORT: idealline returns the ILPos by value (a by-value form here is not code-identical)
+#else
+// PORT: idealline's fn_80136594 returns its 12-byte ILPos by value; the PPC passes the result slot as the first
+// argument (the form above), the host ABI does not (i386: hidden result pointer the callee pops). Call the by-value
+// function under its C name and copy the result into the caller's slot.
+struct PortILPos12 {
+    u32 w[3];
+};
+PortILPos12 port_ro_fn_80136594(LineFollower* trk, const CamXZ* xz) __asm__("_fn_80136594");
+static inline void fn_80136594(CamTrackPos* out, LineFollower* trk, const CamXZ* xz) {
+    PortILPos12 r = port_ro_fn_80136594(trk, xz);
+    __builtin_memcpy(out, &r, sizeof(*out) < sizeof(r) ? sizeof(*out) : sizeof(r));
+}
+#endif
 int fn_8026A2C8(void);
 CamRacerObj* fn_801B2EC0(int i);
 extern f32 lbl_8055F49C;  // pass-by range squared
