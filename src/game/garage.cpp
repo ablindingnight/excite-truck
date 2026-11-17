@@ -3,6 +3,7 @@
 // and the chassis list entries. Written against raw field offsets; the large screen routines are still
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gart.h"
 #include "game/caricontable.h"
 #include "game/locstring.h"
 #include "game/gamedb.h"
@@ -107,9 +108,7 @@ u32 fn_802E4A10(void);
 int fn_80129800(u32 ch, int feature);
 void fn_80216D28(void);
 void fn_80214D50(int s);
-void fn_80235380(u8* p);
 void gxForgetTexture(u8* p);
-void fn_802354A0(u8* o, int kind, f32 x, f32 y, f32 z, f32 w, f32 h, s32 v);
 f32 fn_80216CB4(void);  // menu fade-in (0..1)
 void fn_80214A9C(int s);
 }
@@ -204,7 +203,6 @@ static inline void CopyNameA(const char* s, int n, char* d) {
     }
 }
 
-extern "C" u8* fn_8023512C(const char* name);
 extern "C" void fn_802E317C(const char* fmt, ...);
 
 // Animated slot: shown value chases the selected one.
@@ -402,7 +400,7 @@ public:
     SlotAnim* slots;  // offset 0x18
     s32 count;        // offset 0x1C
     u8* tex;          // offset 0x20
-    u8* art;          // offset 0x24
+    gArtSet* art;          // offset 0x24
     f32 pos;          // offset 0x28: eased toward sel
     s32 sel;          // offset 0x2C
 };
@@ -1147,8 +1145,6 @@ int CarPick::Key(int key) {
 
 
 extern "C" {
-f32 fn_80235EF0(u8* art, int part);
-f32 fn_80235F64(u8* art, int part);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 }
 
@@ -1200,7 +1196,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     if (!locked && ((GarageList*)PTR(p, 0xD0))->IsExtreme(i)) {
         extreme = 1;
     }
-    fn_802354A0(PTR(p, 0x24), shown && extreme, x, y, 0.0f, w, h, locked ? 0xFF808080 : -1);
+    fn_802354A0(art, shown && extreme, x, y, 0.0f, w, h, locked ? 0xFF808080 : -1);
     f32 fade = fn_80216CB4();
     if (extreme) {
         for (int k = 0; k < 2; k++) {
@@ -1209,11 +1205,11 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
                 part = 4;
             }
             f32 t = SlotUnit(alpha, 0.0f, 1.0f);
-            f32 pw = fn_80235EF0(PTR(p, 0x24), part) * (0.5f + Clamp01(t) * 0.5f);
-            f32 ph = fn_80235F64(PTR(p, 0x24), part) * (0.5f + Clamp01(t) * 0.5f);
+            f32 pw = fn_80235EF0(art, part) * (0.5f + Clamp01(t) * 0.5f);
+            f32 ph = fn_80235F64(art, part) * (0.5f + Clamp01(t) * 0.5f);
             int a = RoundF(255.0f * fade);
             a = a > 0x13F ? 0x13F : a;
-            fn_802354A0(PTR(p, 0x24), part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, pw, ph, (a << 24) | 0xFFFFFF);
+            fn_802354A0(art, part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, pw, ph, (a << 24) | 0xFFFFFF);
         }
     }
     int k = shown > 0 ? shown : 0;
