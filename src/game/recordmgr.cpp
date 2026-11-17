@@ -138,7 +138,9 @@ struct RaceEntry {
     RaceDriver driver; // offset 0x4
 };
 
-struct RaceSetup {
+// A view of racesetup.h's RaceSetup (its CarDefs read as RaceEntry, whose driver block copies as one unit;
+// reading the real RaceSetup changes fn_801AEF28). Own name for the port (ODR).
+struct RecordSetup {
     u8 pad0[0x20];
     RaceEntry e[8];  // offset 0x20
     s32 n;           // offset 0x3E0
@@ -404,9 +406,9 @@ void fn_801AED74(void) {
     lbl_8055E62C = fn_801B2ED4();
 }
 
-RecordMgr* fn_801AFA20(RaceSetup* s);
+RecordMgr* fn_801AFA20(RecordSetup* s);
 
-void fn_801AEF28(RaceSetup* s) {
+void fn_801AEF28(RecordSetup* s) {
     int i;
     RaceState* st = (RaceState*)lbl_80435740;
     lbl_8055E635 = 1;
@@ -567,7 +569,7 @@ f32 fn_801AF9EC(int i, f32* b) {
     return lbl_80435740[i].a;
 }
 
-RecordMgr* fn_801AFA20(RaceSetup* s) { return new ("RecordMgr") RecordMgr(-1); }
+RecordMgr* fn_801AFA20(RecordSetup* s) { return new ("RecordMgr") RecordMgr(-1); }
 
 void fn_801AFA5C(RecordMgr* m) { delete m; }
 
