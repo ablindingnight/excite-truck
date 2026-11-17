@@ -781,6 +781,33 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
 }
 
 template <class O, class A, class D> static inline void AddScaledK(O* o, const A* a, const D* d, f32 s) { o->x = a->x + d->x * s; o->y = a->y + d->y * s; o->z = a->z + d->z * s; }  /* Helper name unproven */
+/* Helper name unproven */
+static inline void CrossUpR(PVec* out, const PVec* a) {
+    PVec up;
+    up.x = 0.0f;
+    up.y = 1.0f;
+    up.z = 0.0f;
+    PSVECCrossProduct((const Vec*)a, (const Vec*)&up, (Vec*)out);
+}
+/* Helper name unproven */
+static inline void CrossUpL(PVec* out, const PVec* a) {
+    PVec up;
+    up.x = 0.0f;
+    up.y = 1.0f;
+    up.z = 0.0f;
+    PSVECCrossProduct((const Vec*)&up, (const Vec*)a, (Vec*)out);
+}
+
+/* Helper name unproven */
+struct WaterPt {
+    WaterPt(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+    f32 x, y, z;
+};
+
 void WaterSystem::Draw(void) {
     PlainValMatrix cam;
     fn_802C8B08(&cam);
@@ -790,9 +817,9 @@ void WaterSystem::Draw(void) {
     f32 nearZ;
     f32 dz;
     fn_802C98DC(&sx, &nearZ, &farZ, &dz);
+    f32 nd = nearZ;
     f32 tilt = h * cam.basis[2].y;
     f32 far = 0.95f * farZ;
-    f32 nd = nearZ;
     sx = sx * (f32)sqrt(1.5625);
     WVert* verts = fn_802DD42C(0x6000);
     f32 k;
@@ -813,12 +840,8 @@ void WaterSystem::Draw(void) {
     fwd.x *= inv;
     fwd.y *= inv;
     fwd.z *= inv;
-    PVec up;
-    up.x = 0.0f;
-    up.y = 1.0f;
-    up.z = 0.0f;
     PVec side;
-    PSVECCrossProduct((const Vec*)&fwd, (const Vec*)&up, (Vec*)&side);
+    CrossUpR(&side, &fwd);
     cx = 0.5f * (640.0f - vh);
     f32 cy = 0.5f * (480.0f - vw);
     for (int r = 0; r < 64; r++) {
@@ -834,12 +857,13 @@ void WaterSystem::Draw(void) {
         p.z += fwd.z * dist;
         PVec lc;
         PVec rel;
-        PVec d;
-        d.Set(p.x - cam.origin.x, p.y - cam.origin.y, p.z - cam.origin.z);
-        lc.x = d.x * cam.basis[0].x + d.y * cam.basis[0].y + d.z * cam.basis[0].z;
-        lc.y = d.x * cam.basis[1].x + d.y * cam.basis[1].y + d.z * cam.basis[1].z;
-        lc.z = d.x * cam.basis[2].x + d.y * cam.basis[2].y + d.z * cam.basis[2].z;
-        rel = d;
+        f32 dx = p.x - cam.origin.x;
+        f32 dy = p.y - cam.origin.y;
+        f32 dz = p.z - cam.origin.z;
+        lc.x = dx * cam.basis[0].x + dy * cam.basis[0].y + dz * cam.basis[0].z;
+        lc.y = dx * cam.basis[1].x + dy * cam.basis[1].y + dz * cam.basis[1].z;
+        lc.z = dx * cam.basis[2].x + dy * cam.basis[2].y + dz * cam.basis[2].z;
+        rel.Set(dx, dy, dz);
         f32 depth = lc.z;
         fn_802BED90(&rel);
         f32 f = MaxF(MinFRev(1.0f - -rel.y, 1.0f), 0.0f);
@@ -859,6 +883,8 @@ void WaterSystem::Draw(void) {
             v->v = 0.5f + 0.75f * ((v->v - 0.5f) * k);
         }
     }
+    // Built and never read: retail keeps the three constructor stores (sp+0xA4..). Name unproven.
+    WaterPt anchor(cam.origin.x, 0.0f, cam.origin.z);
     fn_802DBE4C();
     TexMtx m = {{{0.04f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.04f, 0.0f}}};
     m.m[0][3] = fmod(0.39999998f * fn_801E7E18(), 1.0);
@@ -884,12 +910,8 @@ void WaterSystem::Draw(void) {
     MadV3(&q.x, &c.x, &cam2.basis[1].x, sc);
     PVec ax = cam2.basis[2];
     ax.y = 0.0f;
-    PVec upv;
-    upv.x = 0.0f;
-    upv.y = 1.0f;
-    upv.z = 0.0f;
     PVec fw;
-    PSVECCrossProduct((const Vec*)&upv, (const Vec*)&ax, (Vec*)&fw);
+    CrossUpL(&fw, &ax);
     PVec e0;
     PVec e1;
     AddScaledK(&e0, &q, &fw, -10.0f);
