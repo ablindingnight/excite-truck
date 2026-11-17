@@ -382,7 +382,7 @@ public:
         for (int i = 0; i < unlocks->count; i++) {
             char buf[0x21];
             const char* name = ((VN*)GetEvent(unlocks->entries[i].id)->node)->v14("name");
-            const char* prefix = "career_";
+            const char* const prefix = "career_";
             if (!strncmp(name, prefix, strlen(prefix))) {
                 name += strlen(prefix);
             }
