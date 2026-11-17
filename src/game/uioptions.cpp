@@ -74,14 +74,7 @@ public:
     int unk14;  // offset 0x14
 };
 
-struct MenuRange {
-    MenuRange(void) {}
-    MenuRange(f32 a, f32 b) {
-        lo = a;
-        hi = b;
-    }
-    f32 lo, hi;
-};
+#include "game/slideritem.h"
 
 inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
     type = 9;
@@ -96,20 +89,6 @@ inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
 static inline MenuItem VolumeItem(const char* n, f32* v, f32 lo, f32 hi) {
     return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi);
 }
-
-// A slider: the range is stored in the item's argument words.
-struct SliderItem {
-    SliderItem(const char* n, f32* v, MenuRange r) {
-        name = n;
-        type = 9;
-        data = v;
-        range = r;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    MenuRange range;
-};
 
 int IdentGetCurrentSlot(void);
 const char* IdentGetSlotName(int slot);

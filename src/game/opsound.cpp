@@ -12,14 +12,7 @@ char* strcpy(char* d, const char* s);
 }
 
 
-struct MenuRange {
-    MenuRange(void) {}
-    MenuRange(f32 a, f32 b) {
-        hi = b;
-        lo = a;
-    }
-    f32 lo, hi;
-};
+#include "game/slideritem.h"
 
 // The slider range lives in the item's two int argument words: the float bits are copied as ints (the target
 // builds the range on the stack and reads it back with lwz, 2026-11-08).
@@ -36,20 +29,6 @@ inline MenuItem::MenuItem(const char* n, f32* v, const MenuRange& r) {
 static inline MenuItem VolumeItem(const char* n, f32* v, f32 lo, f32 hi) {
     return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi);
 }
-
-// A slider: the range is stored in the item's argument words.
-struct SliderItem {
-    SliderItem(const char* n, f32* v, MenuRange r) {
-        name = n;
-        type = 9;
-        data = v;
-        range = r;
-    }
-    const char* name;
-    int type;
-    const void* data;
-    MenuRange range;
-};
 
 #include "game/menustrlist.h"
 
