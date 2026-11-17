@@ -1622,16 +1622,19 @@ static inline void AddRotated(ValVec3* acc, const ValVec3* in, Mat3* m) {
     acc->y += d.y;
     acc->z += d.z;
 }
+// The current camera (lbl_80499050) seen as a pose. No local pointer is kept for it in fn_801C5B68: retail forms
+// the address after the source table's, as a temporary.
+static inline PlainValMatrix* CurCamPose(void) { return (PlainValMatrix*)&lbl_80499050; }
+
 int fn_801C5B68(CamView* v, int idx) {
     if (idx == 0) {
         lbl_8055E800++;
     }
     if (fn_801C5B60() && !lbl_8055E80C) {
-        PlainValMatrix* cam = (PlainValMatrix*)&lbl_80499050;
-        cam->origin.x = lbl_80437D88.play.origin.x;
-        cam->origin.y = lbl_80437D88.play.origin.y;
-        cam->origin.z = lbl_80437D88.play.origin.z;
-        cam->Mat() = lbl_80437D88.play.rot;
+        CurCamPose()->origin.x = lbl_80437D88.play.origin.x;
+        CurCamPose()->origin.y = lbl_80437D88.play.origin.y;
+        CurCamPose()->origin.z = lbl_80437D88.play.origin.z;
+        CurCamPose()->Mat() = lbl_80437D88.play.rot;
         lbl_8055F47C = lbl_80437D88.play.fov;
     }
     if (!fn_801C5B60() || lbl_8055E80C) {
@@ -1658,7 +1661,8 @@ int fn_801C5B68(CamView* v, int idx) {
     }
     f32 len = lbl_80437D88.play.end - lbl_80437D88.play.start;
     if (len > 0.1f) {
-        f32 e = Ease(dt / len);
+        f32 q = dt / len;
+        f32 e = Ease(q);
         if (lbl_80437D88.play.accel) {
             dt = e * len;
         }
