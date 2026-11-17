@@ -21,9 +21,7 @@ extern const u32 lbl_8055E1DC = Initial7FWord();
 static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 
 // Mtx33: mtx33.h.
-struct Mtx34 {
-    f32 m[12];
-};
+#include "game/mtx34.h"
 
 // The race and tree-hit listener interfaces: this is the first unit that emits their weak all-pure (zeroed)
 // vtables, so boostman/treehit and the rest link to these copies. The constructors below are stripped by the linker.

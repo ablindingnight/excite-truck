@@ -37,9 +37,7 @@ struct Basis {
     Vec3 pos;    // offset 0x24
 };
 
-struct Mtx34 {
-    f32 m[3][4];
-};
+#include "game/mtx34.h"
 
 #include "game/vertex.h"
 

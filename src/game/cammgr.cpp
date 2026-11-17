@@ -105,9 +105,7 @@ extern f32 lbl_8055C4C0;
 extern f32 lbl_8055F47C;
 
 // A scratch 3x4 matrix.
-struct Mtx34 {
-    f32 m[3][4];
-};
+#include "game/mtx34.h"
 
 extern Mtx34 lbl_80499050;
 extern f32 lbl_8055E3C8;
