@@ -81,7 +81,9 @@ public:
     virtual ValueNodeV* GetChild(int index);          // 0xC
 };
 
-struct Car {
+// soevent's view of a car: carbody.h's CarBody (CollVolume type 0x10, mtx 0x3C, hint/surface 0x6C; RigidBody mass
+// 0xD4, vel 0x118; CarBody index 0x1EC). Kept as a view (SoVec fields, u32 type) until soevent moves to CarBody.
+struct SoCar {
     u8 pad0[0x10];
     u32 type;  // offset 0x10
     u8 pad14[0x3C - 0x14];
@@ -96,7 +98,7 @@ struct Car {
     s32 index;      // offset 0x1EC
 };
 
-static inline int IsCar(const Car* o) {
+static inline int IsCar(const SoCar* o) {
     u32 t = o->type;
     int r = 0;
     if (t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR') {
@@ -248,7 +250,7 @@ HeldEffect lbl_80438898[8];
 SoEvent lbl_80438958[32];
 
 // Starts holding effect 'e' until 't' at world point 'p', kept in the car's frame.
-extern Car* lbl_804348E8[];
+extern SoCar* lbl_804348E8[];
 
 extern "C" {
 
@@ -256,7 +258,7 @@ void fn_801D2AD4(const char* file);
 void fn_801D2B94(void);
 void fn_801D2C04(void);
 SoEvent* fn_801D2C20(int id);
-void fn_801D2C70(const SoEffects* s, const SoVec* pos, Car* car, int id);
+void fn_801D2C70(const SoEffects* s, const SoVec* pos, SoCar* car, int id);
 void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass);
 
 void fn_801D21C0(void) {
@@ -280,7 +282,7 @@ void fn_801D2214(void) {
             if (now > h->time) {
                 h->active = 0;
             } else {
-                Car* car = lbl_804348E8[i];
+                SoCar* car = lbl_804348E8[i];
                 MulVec(&m.pos, &h->pos, car->rot);
                 m.pos.x += car->origin.x;
                 m.pos.y += car->origin.y;
@@ -295,7 +297,7 @@ void fn_801D2214(void) {
 }
 
 // A car hit scripted object 'obj' at 'pos'.
-void fn_801D2414(SObj* obj, const SoVec* pos, Car* car) {
+void fn_801D2414(SObj* obj, const SoVec* pos, SoCar* car) {
     if (IsCar(car)) {
         SoEvent* e = fn_801D2C20(obj->id);
         if (e) {
@@ -425,7 +427,7 @@ SoEvent* fn_801D2C20(int id) {
 }
 
 // Plays the event's hit effects; the ones with a duration are held on the car.
-void fn_801D2C70(const SoEffects* s, const SoVec* pos, Car* car, int id) {
+void fn_801D2C70(const SoEffects* s, const SoVec* pos, SoCar* car, int id) {
     HitMsg m;
     m.pos = *pos;
     m.vel = car->vel;
