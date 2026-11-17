@@ -792,12 +792,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 2: {
         UIStyle* button = FindStyle(styles, d->style, 0);
         UIStyle* text = d->name[0] == '#' ? FindStyle(styles, d->name + 1, 3) : 0;
-        void* image;
-        if (button) {
-            image = button->arg1;
-        } else {
-            image = 0;
-        }
+        void* image = button ? button->arg1 : 0;
         const char* label = text ? (const char*)text->value : d->name;
         void* handler = button ? button->value : (void*)fn_80212338;
         UIImageRef* ref = new ("StyleImage") UIImageRef(label, d->flags);
@@ -813,19 +808,9 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
     case 42: {
         UIStyle* button = FindStyle(styles, d->style, 0);
         value = FindStyle(styles, d->style, 2);
-        void* image;
-        if (button) {
-            image = button->arg1;
-        } else {
-            image = 0;
-        }
-        void* handler;
-        if (button) {
-            handler = button->value;
-        } else {
-            handler = (void*)fn_80212338;
-        }
         void* watched = value ? value->value : 0;
+        void* handler = button ? button->value : (void*)fn_80212338;
+        void* image = button ? button->arg1 : 0;
         p = (WidgetFragment*)new ("FadeButton") FadeButton(image, (WidgetDesc*)d, (int (*)(void*))handler, (int*)watched);
         widgets[count++] = p;
         break;
@@ -936,13 +921,17 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
         }
         p = (WidgetFragment*)operator new(0x268, "ArrowBtn");
         if (p) {
-            void* value = range ? range->value : &lbl_8055EF50;
+            void* value;
+            if (range) value = range->value;
+            else value = &lbl_8055EF50;
             p = __ct__8ArrowBtnFiiPviiPvff(p, d->x, d->y + 1, value, abs((int)d->field9c), -1, fn_80215270(0, 1), low, high);
         }
         widgets[count++] = p;
         p = (WidgetFragment*)operator new(0x268, "ArrowBtn");
         if (p) {
-            void* value = range ? range->value : &lbl_8055EF50;
+            void* value;
+            if (range) value = range->value;
+            else value = &lbl_8055EF50;
             p = __ct__8ArrowBtnFiiPviiPvff(p, d->x + d->dx - 14, d->y + 1, value, abs((int)d->field9c), 1, fn_80215270(1, 1), low, high);
         }
         widgets[count++] = p;
