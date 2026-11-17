@@ -29,14 +29,7 @@ char lbl_8055BF2C[] = "Hard";
 #include "game/dynotex.h"
 
 // The course stats table (mstats.cpp).
-class StatsTable : public UITable {
-public:
-    StatsTable(void);
-    ~StatsTable(void) {}
-    void Show(s32 event);
-
-    s32 event;  // offset 0x30
-};
+#include "game/statstable.h"
 
 struct NamedValue {
     const char* name;

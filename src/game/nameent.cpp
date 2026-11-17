@@ -15,13 +15,7 @@ char* IdentGetDefaultName(int slot);
 void IdentSetDefaultName(const char* name, int slot);
 
 // The keyboard (keyboard.cpp).
-class NameChooser {
-public:
-    NameChooser(char* buf, int max);
-    virtual ~NameChooser(void);
-    int IsDone(void);
-    u8 pad4[0x34];
-};
+#include "game/namechooser.h"
 
 #include "game/menustrlist.h"
 

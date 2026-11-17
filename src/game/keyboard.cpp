@@ -41,31 +41,7 @@ KeyDef lbl_803428B0[5][16] = {
 int lbl_8055BE0C = -1;  // the column remembered when moving between rows
 int lbl_8055BE10 = -1;  // the column it was moved to
 
-class NameChooser : public MenuState {
-public:
-    NameChooser(char* buf, int max);
-    virtual ~NameChooser(void);
-    virtual void Enter(void);
-    virtual void Exit(void);
-    virtual void Changed(int key, void* value);
-    virtual void Draw(void);
-    virtual int Key(int key);
-    virtual void Accept(void);     // 0x60
-    virtual void Backspace(void);  // 0x64
-    virtual void Caps(void);       // 0x68
-    int IsDone(void);
-    int Length(void);
-
-    char* buf;    // offset 0x18
-    int max;      // offset 0x1C
-    s32 font;     // offset 0x20
-    void* box;    // offset 0x24
-    u8 done;      // offset 0x28
-    bool caps;    // offset 0x29
-    int row;      // offset 0x2C
-    int col;      // offset 0x30
-    int unk34;    // offset 0x34
-};
+#include "game/namechooser.h"
 
 ModuleTag lbl_8055F208;
 static inline u32 MakeILPos(u32 seg, u32 frac) { return (seg << 16) | frac; }

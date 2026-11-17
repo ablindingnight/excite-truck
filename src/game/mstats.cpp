@@ -52,15 +52,7 @@ static inline void SetCell(UITable* t, int row, int col, const char* text, int s
 }
 static inline int Rows(UITable* t) { return t->used; }  // an inline getter in retail (read early)
 
-class StatsTable : public UITable {
-public:
-    StatsTable(void);
-    ~StatsTable(void) {}
-    void Refresh(void);
-    void Show(s32 event);
-
-    s32 event;  // offset 0x30
-};
+#include "game/statstable.h"
 
 // A menu state; most slots are empty defaults.
 class MenuState {
