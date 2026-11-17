@@ -479,16 +479,17 @@ static inline void ScaledRow(f32* d, double x, double y, double z, f32 k) {
 }
 
 inline void ObjectPlacer::Spin(void) {
-    f32 one = 1.0f;
+    double zero = 0.0;
+    double one = 1.0;
     ObjRot* r = rots;
     for (u32 k = 0; k < 16; k++, r++) {
         r->scale = fn_80129DC4(0, minScale, maxScale);
         f32 a = fn_80129DC4(0, 0.0f, 6.2831855f);
         f32 c = cos(a);
         f32 s = sin(a);
-        ScaledRow(&r->m[0], c, 0.0f, -s, r->scale);
-        ScaledRow(&r->m[3], 0.0f, one, 0.0f, r->scale);
-        ScaledRow(&r->m[6], s, 0.0f, c, r->scale);
+        ScaledRow(&r->m[0], c, zero, -s, r->scale);
+        ScaledRow(&r->m[3], zero, one, zero, r->scale);
+        ScaledRow(&r->m[6], s, zero, c, r->scale);
     }
 }
 
