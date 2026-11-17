@@ -4,6 +4,7 @@
 // against raw field offsets; the large screen routines are still stubs. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/ptrint.h"
 #include "game/gamedb.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
@@ -143,17 +144,17 @@ u8 lbl_8055F67C;
 UIObjects* lbl_8055F680;
 bool lbl_8055F684;
 u8 lbl_8055F685;
-s32 lbl_8055F688;
-s32 lbl_8055F68C;
-s32 lbl_8055F690;
-s32 lbl_8055F694;
+PtrInt lbl_8055F688;
+PtrInt lbl_8055F68C;
+PtrInt lbl_8055F690;
+PtrInt lbl_8055F694;
 u32 lbl_8055F698;
 s32 lbl_8055F69C;
 u8 lbl_8055F6A0;  // first showing of the cup screen: advance to the next cup
 static EventUnlockFx lbl_804B3018;            // unlock flash widget
 static FixedArray<u32, 5> lbl_804B3048;       // events of the current path
 // Index of a cup bar in the current path's list (the bar is held as an s32 handle).
-static inline int BarIndex(const s32& bar) { return lbl_804B3048.Find((u8*)bar); }
+static inline int BarIndex(const PtrInt& bar) { return lbl_804B3048.Find((u8*)bar); }
 static char lbl_804B3068[100];                // the selected cup's help text
 static FixedArray<u8*, 5> lbl_804B30D8;       // the event browser's events
 static char sBrowseTitle[32];                 // lbl_804B30D8 + 0x20
@@ -222,7 +223,7 @@ public:
     }
     virtual ~EvCupBar(void) {
         EvCupBar* self = this;
-        if ((u32)lbl_8055F688 == (u32)self) {
+        if ((UPtrInt)lbl_8055F688 == (UPtrInt)self) {
             lbl_8055F688 = 0;
         }
         lbl_804B3048.Remove(self);
@@ -294,7 +295,7 @@ static inline void SelectEvent(int i) {
     lbl_804B3068[0] = 0;
     if (i >= 0 && i < lbl_804B3048.count) {
         u8* e = (u8*)lbl_804B3048.data[i];
-        lbl_8055F688 = (s32)e;
+        lbl_8055F688 = (PtrInt)e;
         if (e && ((EvCupBar*)e)->Cup()) {
             CopyName(100, lbl_804B3068, ((EvCupBar*)e)->cup->Text());
         }
@@ -605,7 +606,7 @@ int fn_8027F958(s32* sel, EvPath* path) {
         SelectEvent(*sel);
         if (*sel < path->Count() - 1) {
             (*sel)++;
-            lbl_8055F694 = (s32)&bars[*sel];
+            lbl_8055F694 = (PtrInt)&bars[*sel];
         }
     } else {
         SelectEvent(*sel);
@@ -680,7 +681,7 @@ int fn_80280A38(void) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
                 EvCupBar* e = (EvCupBar*)lbl_804B3048.data[i];
                 if (e->cup && !e->cup->Gated()) {
-                    lbl_8055F68C = (s32)e;
+                    lbl_8055F68C = (PtrInt)e;
                     break;
                 }
             }
@@ -690,7 +691,7 @@ int fn_80280A38(void) {
             lbl_804B3068[0] = 0;
             if (i >= 0 && i < lbl_804B3048.count) {
                 u8* e = (u8*)lbl_804B3048.data[i];
-                lbl_8055F688 = (s32)e;
+                lbl_8055F688 = (PtrInt)e;
                 if (e && ((EvCupBar*)e)->Cup()) {
                     CopyName(100, lbl_804B3068, ((EvCupBar*)e)->cup->Text());
                 }
@@ -717,7 +718,7 @@ int fn_80280C00(void) {
             for (int i = 0; i < lbl_804B3048.count; i++) {
                 EvCupBar* e = (EvCupBar*)lbl_804B3048.data[i];
                 if (e->cup && e->cup->Gated()) {
-                    lbl_8055F690 = (s32)e;
+                    lbl_8055F690 = (PtrInt)e;
                     break;
                 }
             }
