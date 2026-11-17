@@ -123,14 +123,7 @@ static inline void SafeDelete(T*& p) {
 
 // A fixed-size string; new ones read "zzz" until they are filled in.
 template <int N>
-struct FixedStr {
-    FixedStr(void) {
-        memset(s, 'z', 3);
-        s[3] = 0;
-    }
-    void Set(const char* t) { SafeStrCopy(s, t, N); }
-    char s[N];
-};
+#include "game/fixedstr.h"
 
 static inline f32 Clamp01(f32 x) {
     f32 r = 1.0f < x ? 1.0f : x;

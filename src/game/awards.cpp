@@ -214,14 +214,7 @@ struct HandlerVec {
 
 // A fixed-size string; new ones read "zzz" until they are filled in.
 template <int N>
-struct FixedStr {
-    FixedStr(void) {
-        memset(s, 'z', 3);
-        s[3] = 0;
-    }
-    void Set(const char* t) { SafeStrCopy(s, t, N); }
-    char s[N];
-};
+#include "game/fixedstr.h"
 
 struct Vec4 {
     f32 x, y, z, w;
