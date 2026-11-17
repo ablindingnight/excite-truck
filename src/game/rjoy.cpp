@@ -85,7 +85,7 @@ struct Remote {
     u8 home;        // offset 0xC5
     u8 padC6[2];
     KStatus kpad[10];  // offset 0xC8
-    u8 info[0x18];  // offset 0x618
+    WPADInfo info;  // offset 0x618
     u8 sens;        // offset 0x630
     u8 infoBusy;    // offset 0x631
     u8 pad632[2];
@@ -298,7 +298,7 @@ const f32 kMinAxis = -1.0f;
 
 void fn_802E7DDC(Remote* r, const KStatus* k) {
     u32 hold = k->hold;
-    r->isExt = *(s32*)(r->info + 0xC) != 0;
+    r->isExt = r->info.lowBat != 0;
     r->a48 = 0x800F;
     r->a4C = 0xFF;
     r->flags |= 0x10;
@@ -377,11 +377,11 @@ void fn_802E7FD0(void) {
         if (!busy && now - r->lastInfo > 10000) {
             r->lastInfo = now;
             r->infoBusy = 1;
-            s32 res = WPADGetInfoAsync((s32)chan, (WPADInfo*)r->info, (WPADCallback)fn_802E7C14);
+            s32 res = WPADGetInfoAsync((s32)chan, &r->info, (WPADCallback)fn_802E7C14);
             if (res != 0) {
                 r->infoBusy = 0;
                 if (res == -1) {
-                    memset(r->info, 0, sizeof(r->info));
+                    memset(&r->info, 0, sizeof(r->info));
                 }
             }
         }
