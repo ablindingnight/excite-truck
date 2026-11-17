@@ -135,8 +135,8 @@ public:
     virtual ~ResourcePrefix(void);
     virtual void Draw(int x, int y, int unused, unsigned int frame);
     virtual void Rect(int first, int second, int* left, int* top, int* right, int* bottom);
-    virtual int Frames(void) { return 1; }
     virtual void Extra(void) {}  /* Helper name unproven */
+    virtual int Frames(void) { return 1; }
 
     GTextFont* resource;  // 0x4
     const char* text;     // 0x8
@@ -148,8 +148,8 @@ public:
     virtual ~ImagePrefix(void);
     virtual void Draw(int x, int y, int unused, unsigned int frame);
     virtual void Rect(int first, int second, int* left, int* top, int* right, int* bottom);
-    virtual int Frames(void) { return 1; }
     virtual void Extra(void) {}  /* Helper name unproven */
+    virtual int Frames(void) { return 1; }
 
     gArtSet* image;  // 0x4
 };
@@ -177,9 +177,9 @@ public:
     UIImageButton(int x, int y, int kind, int dx, int dy, OwnedWidget* child);  // fn_80222340
     virtual ~UIImageButton(void);                // fn_802223C4: deletes the child
     virtual void Slot1C(int x, int y);           // fn_80222468
-    virtual void Slot20(int dx, int dy);         // inline fn_80229B0C
-    virtual void Slot28(void);                   // inline fn_802299FC
     virtual int Slot70(int x, int y);            // inline fn_80229AE4
+    virtual void Slot28(void);                   // inline fn_802299FC
+    virtual void Slot20(int dx, int dy);         // inline fn_80229B0C
     virtual void Slot84(void);                   // fn_80222450
     virtual int Slot88(void);                    // fn_8021AB88: the draw state
     OwnedWidget* child;          // 0x244
@@ -345,7 +345,7 @@ public:
 class StaticText : public UILabel {  /* Class name unproven (allocation tag "StaticText"); vtable lbl_8033F20C */
 public:
     StaticText(int x, int y, const char* label, int height, int* value, int width);  // fn_8021B2B0
-    virtual ~StaticText(void) {}                            // inline: out-of-line copy fn_8021B404
+    virtual ~StaticText(void);                            // inline: out-of-line copy fn_8021B404
     virtual void Slot7C(void);                              // fn_8021B32C
     virtual int Slot84(void);                               // fn_8021B3A0
     virtual const char* Slot88(void) { return label; }      // inline: fn_80229B70
@@ -524,14 +524,14 @@ struct ObservedListViewport;
 class ListBox : public UIWidget {  /* Class name unproven (allocation tag "ListBox"); vtable lbl_8033EA90 */
 public:
     ListBox(int x, int y, int width, int height, StringList* list, int* selected, ObservedListViewport* view);  // fn_8021E0C0
-    virtual ~ListBox(void) {}                    // inline: out-of-line copy fn_8021E884
+    virtual ~ListBox(void);                    // inline: out-of-line copy fn_8021E884
     virtual void Slot24(void* context);          // fn_8021E3BC
     virtual void Slot28(void);                   // fn_8021E51C
     virtual void Slot3C(int x, int y);           // inline fn_80229DC8
-    virtual void Slot40(int x, int y);           // inline fn_80229EB4
+    virtual void Slot54(void);                   // inline fn_80229E34
     virtual void Slot4C(int x, int y);           // fn_8021E1C8
     virtual void Slot50(void);                   // inline fn_80229E74
-    virtual void Slot54(void);                   // inline fn_80229E34
+    virtual void Slot40(int x, int y);           // inline fn_80229EB4
     virtual int Slot64(int key);                 // fn_8021E620
     virtual int Slot68(void);                    // inline fn_80229EC4
     virtual void Slot7C(void);                   // fn_8021E2A0

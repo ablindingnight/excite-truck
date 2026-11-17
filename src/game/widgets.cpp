@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "game/common.h"
 #include "game/menucustomview.h"
 #include "game/uiwidget.h"
 #include "game/stringlist.h"
@@ -27,7 +28,6 @@ static inline float MapSpanRatioNew(float value,float origin,float extent){retur
 static inline float MapScopeNew(float screen,float value,float span){float fraction=MapSpanRatioNew(value,0.0f,span);fraction=MapMinBranchNew(1.0f,fraction);fraction=MapMaxBranchNew(fraction,0.0f);return PaletteNaturalLerp(0.0f,screen,fraction);}
 static inline int MapIntegerMinNew(int a,int b){if(a<b)return a;return b;}
 // Anonymous widget-class fragment; no recovered TU or data ownership claim.
-typedef unsigned int u32;
 #include "game/binding.h"
 typedef char BindingSize16[sizeof(Binding)==16?1:-1];
 struct WidgetDispatch {virtual ~WidgetDispatch();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual void Slot1c(int,int);virtual void Slot20();virtual void Slot24(void*);virtual void Slot28();virtual void Slot2c();virtual void Slot30();virtual void Slot34();virtual void Slot38();virtual void Slot3c(int,int);virtual void Slot40(int,int);virtual void Slot44();virtual void Slot48();virtual void Slot4c();virtual void Slot50();virtual void Slot54();virtual void Slot58();virtual void Slot5c();virtual void Slot60();virtual int Slot64(int);virtual void Slot68();virtual void Slot6c();virtual int Slot70(int,int);virtual void Slot74(int,void*);virtual int Slot78();virtual void Slot7c();virtual void Slot80();virtual int Slot84();virtual const char* Slot88();};
@@ -495,14 +495,8 @@ extern "C" {
 }
 extern "C" {
 
-// Observed five-word initialized prefix only; complete object size and data ownership remain unresolved.
-typedef struct StartupSharedPrefixNew {unsigned long first,kind,third,fourth,fifth;} StartupSharedPrefixNew;
-typedef char StartupSharedPrefixSizeCheckNew[(sizeof(StartupSharedPrefixNew)==20)?1:-1];
-extern StartupSharedPrefixNew lbl_80490920;extern unsigned long lbl_8055EFB0[2],lbl_8055EFB8;
-void fn_8022A594();
+extern UnkStatic123s lbl_80490920;
 }
-class ModuleTag;
-void RegisterModuleTag(ModuleTag* tag);  // version.cpp
 
 
 struct ProviderDrawMetrics {char unknown[0x70];float margin;};
@@ -1384,6 +1378,12 @@ void StaticText::Slot7C(void) {UIWidget::Slot7C();CaptionBufferPrefix* f=(Captio
 int StaticText::Slot84(void) {int* value=((WidgetFragment*)this)->value;if(value)return *value;return 0;}
 void ColorRect::Slot24(void* context) {fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802C3424(((WidgetFragment*)this)->x,((WidgetFragment*)this)->y,((WidgetFragment*)this)->width,((WidgetFragment*)this)->height,(int)((WidgetFragment*)this)->label);}
 
+// Emit the base destructor here and expand it into the derived destructor.
+#pragma push
+#pragma auto_inline on
+StaticText::~StaticText(void) {}
+#pragma pop
+
 CustomText::CustomText(RotatingChoiceDescriptorNew* desc,const char* label,int* value) : StaticText(desc->x,desc->y,label,8,value,desc->width) {RotatingChoiceFieldsNew* f=(RotatingChoiceFieldsNew*)((WidgetFragment*)this);f->mode=(u32)desc->flags>>31;
 UIStyleInputFields spec={};spec.fontName=desc->name;spec.height=desc->scale;spec.field08=desc->flags;spec.words0C[0]=desc->option90;spec.words0C[1]=desc->option90;spec.words0C[4]=desc->option84;spec.words0C[7]=desc->option94;spec.words0C[8]=desc->option94;spec.field38=desc->option84;
 int resource=fn_8022A86C(&spec);f->resource=resource;((WidgetFragment*)this)->height=resource;fn_80219718(((WidgetFragment*)this));
@@ -1751,6 +1751,12 @@ void fn_8021E7D4(WidgetFragment* self){
  if(*fields->selected<fields->view->start){SetListViewportValue(*fields->selected,fields->view);}
 }
 
+// Emit the base destructor here and expand it into the derived destructor.
+#pragma push
+#pragma auto_inline on
+ListBox::~ListBox(void) {}
+#pragma pop
+
 void DropdownList::Slot24(void* context) {DropdownRowPrefix* f=(DropdownRowPrefix*)((WidgetFragment*)this);if(f->list.active){((WidgetDispatch*)((WidgetFragment*)this))->Slot1c(((WidgetFragment*)this)->left,((WidgetFragment*)this)->bottom+3);int height=((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80219284(((WidgetFragment*)this),f->width,f->height);ListBox::Slot24(context);fn_80219284(((WidgetFragment*)this),width,height);((WidgetDispatch*)((WidgetFragment*)this))->Slot1c(((WidgetFragment*)this)->left,((WidgetFragment*)this)->top*2-3-((WidgetFragment*)this)->bottom);}fn_802C3034(reinterpret_cast<gxCanvas*>(context));UIWidget::Slot24(context);int y,x;x=((WidgetFragment*)this)->left;y=((WidgetFragment*)this)->top;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_802C3424(x,y,x+width,((WidgetFragment*)this)->bottom,lbl_8055FBDC);const char* label=f->list.list->Get(*f->list.selected,0);char buffer[80];sprintf(buffer,"%-*s `",f->list.columns,label?label:"");fn_802C4F58(((WidgetFragment*)this)->left+1,((WidgetFragment*)this)->top+1,buffer,lbl_8055FBC0);}
 Input::Input(int x,int y,int width,int height,char* buffer,int capacity,int stride,int font,bool clear) : UIWidget(x,y,x+width,y+height+3,0) {WidgetFragment* self=(WidgetFragment*)this;
  if(clear)buffer[0]=0;TextEntryPrefix* fields=(TextEntryPrefix*)self;
@@ -1846,7 +1852,7 @@ struct WidgetMenuEntry {
  const char* name;int type;const void* data;int arg0,arg1;
  inline WidgetMenuEntry(const char* n,const char* t,int context=0){data=t;arg0=context;name=n;type=3;arg1=0;}
  inline WidgetMenuEntry(const char* n,int t,const void* d,int a0,int a1){type=t;name=n;data=d;arg0=a0;arg1=a1;}
- inline WidgetMenuEntry(const StartupSharedPrefixNew& end){name=(const char*)end.first;type=end.kind;data=(const void*)end.third;arg0=end.fourth;arg1=end.fifth;}
+ inline WidgetMenuEntry(const UnkStatic123s& end){name=(const char*)end.unk0;type=end.unk4;data=(const void*)end.unk8;arg0=end.unkC;arg1=end.unk10;}
 };
 struct WidgetKeyboardFields {char prefix[0x254];char text[24];const char* value;Binding* binding;};
 struct WidgetMenuDesc {const char* layout;WidgetMenuEntry* items;int(*poll)(int*);int flags,extra;};
@@ -3175,7 +3181,6 @@ inline int CDetect::Slot84(void) {int result=0;if(((WidgetFragment*)this)->flag1
 
 
 
-void fn_8022A594(){RegisterModuleTag((ModuleTag*)lbl_8055EFB0);StartupSharedPrefixNew* settings=&lbl_80490920;settings->kind=123;settings->fifth=settings->fourth=settings->third=settings->first=0;lbl_8055EFB8=0x7f000000;}
 }
 
 // Allocation/offset guards for observed storage views, not recovered class declarations.
@@ -3189,8 +3194,8 @@ typedef char ColumnListOffset[((unsigned long)&((PageTextPrefix*)0)->list)==0x25
 typedef char ResourceTextObservedAllocation[sizeof(ResourceTextPrefix)==0x2a0?1:-1];
 
 // Unit-owned globals (only declared extern above), in address order.
-StartupSharedPrefixNew lbl_80490920;
+ModuleTag lbl_8055EFB0;
+UnkStatic123s lbl_80490920;
+UnkStatic7F lbl_8055EFB8;
 KeyDetect lbl_80490934;
-unsigned long lbl_8055EFB0[2];
-unsigned long lbl_8055EFB8;
 unsigned char lbl_8055EFBC;
