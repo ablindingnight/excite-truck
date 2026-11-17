@@ -1214,7 +1214,7 @@ config.libs.append(
             Object(NonMatching, "game/achview.cpp"),
             Object(NonMatching, "game/recscreen.cpp"),
             Object(Matching, "game/frname.cpp"),
-            Object(NonMatching, "game/carpick.cpp"),
+            Object(Matching, "game/carpick.cpp"),
             Object(NonMatching, "game/chalpath.cpp"),
             Object(Matching, "game/contmenu.cpp"),
             Object(Matching, "game/credits.cpp"),
