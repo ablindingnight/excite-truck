@@ -3229,50 +3229,47 @@ static inline void LaunchBump(Token* b) {
     Rest(b, m);
 }
 
-/* MATCHING-AID (unproven): the loop counter is the caller's local passed by reference - retail numbers both bump
-   counters as function locals declared after the car loop's j, while every other value of the loop stays an inline
-   object (pushsim/numsolve 2026-11-16). */
-static inline void UpdateBumps(FixedList<Token*, 0x20>* l, int& i) {
-    for (i = 0; i < l->a.count; i++) {
-        Token* b = l->a.data[i];
-        if (b->active) {
-            f32 m[12];
-            f32 vel[3];
-            f32 spin[3];
-            f32 a;
-            f32 c;
-            f32 s;
-            IdentityRows(m);
-            m[9] = b->pos[0];
-            m[10] = b->pos[1];
-            m[11] = b->pos[2];
-            a = fmod(kBetaHalfTurn.value * lbl_8055E3C8, kBetaFullTurn.value);
-            c = cos(a);
-            s = sin(a);
-            m[0] = c;
-            m[1] = 0.0f;
-            m[2] = -s;
-            m[3] = 0.0f;
-            m[4] = 1.0f;
-            m[5] = 0.0f;
-            m[6] = s;
-            m[7] = 0.0f;
-            m[8] = c;
-            if (fn_801E87A8()->flags & 2) {
-                m[0] = -m[0];
-                m[1] = -m[1];
-                m[2] = -m[2];
-            }
-            spin[0] = 0.0f;
-            spin[1] = 0.0f;
-            spin[2] = 0.0f;
-            vel[0] = 0.0f;
-            vel[1] = 0.0f;
-            vel[2] = 0.0f;
-            b->body->SetState(m, vel, spin);
-        } else if (b->Ready() && lbl_8055E3C8 > b->start) {
-            LaunchBump(b);
+/* Helper name unproven */
+// One bump token per call; the two loops over the bump lists are in BetaMaster::vf0C with their own counters
+// (aids audit 2, 2026-11-17: replaces a list helper whose counter was the caller's local passed by reference).
+static inline void UpdateBump(Token* b) {
+    if (b->active) {
+        f32 m[12];
+        f32 vel[3];
+        f32 spin[3];
+        f32 a;
+        f32 c;
+        f32 s;
+        IdentityRows(m);
+        m[9] = b->pos[0];
+        m[10] = b->pos[1];
+        m[11] = b->pos[2];
+        a = fmod(kBetaHalfTurn.value * lbl_8055E3C8, kBetaFullTurn.value);
+        c = cos(a);
+        s = sin(a);
+        m[0] = c;
+        m[1] = 0.0f;
+        m[2] = -s;
+        m[3] = 0.0f;
+        m[4] = 1.0f;
+        m[5] = 0.0f;
+        m[6] = s;
+        m[7] = 0.0f;
+        m[8] = c;
+        if (fn_801E87A8()->flags & 2) {
+            m[0] = -m[0];
+            m[1] = -m[1];
+            m[2] = -m[2];
         }
+        spin[0] = 0.0f;
+        spin[1] = 0.0f;
+        spin[2] = 0.0f;
+        vel[0] = 0.0f;
+        vel[1] = 0.0f;
+        vel[2] = 0.0f;
+        b->body->SetState(m, vel, spin);
+    } else if (b->Ready() && lbl_8055E3C8 > b->start) {
+        LaunchBump(b);
     }
 }
 
@@ -3395,10 +3392,12 @@ inline void BetaMaster::vf0C(void) {
             }
         }
     }
-    int k;
-    int k2;
-    UpdateBumps(&bumps, k);
-    UpdateBumps(&bumps2, k2);
+    for (int k = 0; k < bumps.a.count; k++) {
+        UpdateBump(bumps.a.data[k]);
+    }
+    for (int k = 0; k < bumps2.a.count; k++) {
+        UpdateBump(bumps2.a.data[k]);
+    }
     if (skipAt > 0.0f && lbl_8055E3C8 > skipAt) {
         timer.b10 = 1;
         timer.now = timer.limit - kBetaTimeCredit.value;
