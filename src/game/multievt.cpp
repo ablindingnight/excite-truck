@@ -684,17 +684,6 @@ inline const char* EventFriendlyName(u8* ev) {
     return ((EventInfo*)ev)->node->GetString("friendly_name", GetEventDisplayName(((EventInfo*)ev)->id));
 }
 
-// The unlock-table row for event ev, or -1.
-static inline int FindUnlockEv(EventInfo* ev) {
-    UnlockList* l = lbl_8055F28C;
-    for (int i = 0; i < l->count; i++) {
-        if (l->entries[i].id == ev->id) {
-            return i;
-        }
-    }
-    return -1;
-}
-
 // The event's index within its track, or -1.
 static inline int EveIndex(EventInfo* ev) {
     int n = GetTrack(ev->track)->events;
@@ -720,7 +709,7 @@ inline void EvPicker::SetEnv(EvPairs** pairs, const char* env_) {
             ev = (*pairs)->items[i].ev;
             p->ents[p->count].track = ev->track;
             p->ents[p->count].eve = EveIndex(ev);
-            j = FindUnlockEv(ev);
+            j = FindUnlock(ev, lbl_8055F28C);
             if (lbl_8055F290 && j >= 0) {
                 p->ents[p->count].name = lbl_8055F28C->entries[j].name;
             } else {
