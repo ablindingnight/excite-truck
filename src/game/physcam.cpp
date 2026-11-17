@@ -535,6 +535,32 @@ static inline void UpdateFixedTvCamera(u8* p, f32 fov, TvCamera* tv) {
     fn_80274F74(p, w, fov);
 }
 
+// A vector built by its constructor. Retail keeps the blended position and aim each in a stack vector of the helper
+// below (written, never read back) before storing them in the camera. Names unproven.
+struct TvVec3 {
+    TvVec3(f32 a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+    f32 x, y, z;
+};
+
+/* Helper name unproven: out = a + e * (b - a) per component. */
+static inline void TvLerp3(f32* out, const f32* a, const f32* b, f32 e) {
+    TvVec3 v(TvLerp(a[0], b[0], e), TvLerp(a[1], b[1], e), TvLerp(a[2], b[2], e));
+    out[0] = v.x;
+    out[1] = v.y;
+    out[2] = v.z;
+}
+
+/* Helper name unproven: the type 12 camera, like UpdateFixedTvCamera (its w is this helper's local in retail). */
+static inline void UpdateAimedTvCamera(u8* p, f32 fov, TvCamera* tv) {
+    f32 w[3];
+    fn_802715C4(w, (u8*)tv);
+    fn_80266A0C(p, w, (u8*)tv, fov);
+}
+
 void fn_80271624(int mode, u8* p) {
     CamRec* r = (CamRec*)p;
     u8* track = (u8*)((DeityCar*)PTR(r->car, 0x270))->Ideal();
@@ -607,23 +633,8 @@ void fn_80271624(int mode, u8* p) {
                         }
                     }
                     f32 e = CamEase(f);
-                    f32 v[3];
-                    f32 v_2 = TvLerp(tv->from[2], tv->to[2], e);
-                    v[0] = TvLerp(tv->from[0], tv->to[0], e);
-                    v[1] = TvLerp(tv->from[1], tv->to[1], e);
-                    v[2] = v_2;
-                    tv->pos[1] = v[1];
-                    tv->pos[0] = v[0];
-                    tv->pos[2] = v[2];
-                    f32 x[3];
-                    x[0] = TvLerp(tv->exFrom[0], tv->exTo[0], e);
-                    f32 to = tv->exTo[1];
-                    f32 from = tv->exFrom[1];
-                    x[1] = TvLerp(from, to, e);
-                    x[2] = TvLerp(tv->exFrom[2], tv->exTo[2], e);
-                    tv->ex[0] = x[0];
-                    tv->ex[1] = x[1];
-                    tv->ex[2] = x[2];
+                    TvLerp3(tv->pos, tv->from, tv->to, e);
+                    TvLerp3(tv->ex, tv->exFrom, tv->exTo, e);
                     tv->fov = TvLerp(tv->fovFrom, tv->fovTo, e);
                 } else {
                     tv->pos[0] = tv->from[0];
@@ -665,10 +676,10 @@ void fn_80271624(int mode, u8* p) {
                 break;
             case 5: {
                 f32 move[3];
+                lbl_8055F480 = 1;
                 move[0] = 0.4f;
                 move[1] = 1.0f;
                 move[2] = 0.0f;
-                lbl_8055F480 = 1;
                 fn_802749FC(p, move);
                 break;
             }
@@ -683,9 +694,7 @@ void fn_80271624(int mode, u8* p) {
                 break;
             case 12: {
                 f32 fov = fn_802715F0((u8*)tv);
-                f32 w[3];
-                fn_802715C4(w, (u8*)tv);
-                fn_80266A0C(p, w, (u8*)tv, fov);
+                UpdateAimedTvCamera(p, fov, tv);
                 break;
             }
             case 0: {
@@ -735,23 +744,22 @@ void fn_80271624(int mode, u8* p) {
                 r->f1A0 = focus > 5.0f ? focus : 5.0f;
             }
         } else if (idx != -10) {
-            f32 off[3];
-            off[0] = 0.0f;
-            off[1] = 1000.0f;
-            off[2] = 0.0f;
-            Mat3 down;
-            down.m[0][0] = 1.0f;
-            down.m[0][1] = 0.0f;
-            down.m[0][2] = 0.0f;
-            down.m[1][0] = 0.0f;
-            down.m[1][1] = 0.0f;
-            down.m[1][2] = 1.0f;
-            down.m[2][0] = 0.0f;
-            down.m[2][1] = -1.0f;
-            down.m[2][2] = 0.0f;
-            fn_801BFD34((u8*)&r->pose.pos, off, (u8*)&r->carFrame);
-            Mat3Mul((Mat3*)&r->pose, &down, (Mat3*)&r->carFrame);
-            *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
+            CamPose top;  // looking straight down from 1000 above the car (one 0x30 object in retail)
+            top.pos.v[0] = 0.0f;
+            top.pos.v[1] = 1000.0f;
+            top.pos.v[2] = 0.0f;
+            top.rot.m[0] = 1.0f;
+            top.rot.m[1] = 0.0f;
+            top.rot.m[2] = 0.0f;
+            top.rot.m[3] = 0.0f;
+            top.rot.m[4] = 0.0f;
+            top.rot.m[5] = 1.0f;
+            top.rot.m[6] = 0.0f;
+            top.rot.m[7] = -1.0f;
+            top.rot.m[8] = 0.0f;
+            fn_801BFD34((u8*)&r->pose.pos, (f32*)&top.pos, (u8*)&r->carFrame);
+            Mat3Mul((Mat3*)&r->pose, (Mat3*)&top.rot, (Mat3*)&r->carFrame);
+            *(CamPose*)lbl_80499050 = r->pose;
         }
     } else {
         r->pose.pos.v[0] = 100.041f * ((f32)(int)(0.5f + (50.0f + r->carFrame.pos.v[0] / 100.041f)) - 50.0f);
@@ -762,7 +770,7 @@ void fn_80271624(int mode, u8* p) {
         }
         r->pose.pos.v[1] += 1.5f;
         fn_80274E94(p);
-        *(Words12*)lbl_80499050 = *(Words12*)&r->pose;
+        *(CamPose*)lbl_80499050 = r->pose;
     }
 }
 
@@ -1417,7 +1425,7 @@ void camera_car(u8* p, int ci) {
     CamView* v = &lbl_80346BA0[cyc->first + cyc->cur];
     switch (v->type) {
     case 34: {
-        *(Words12*)&r->pose = *(Words12*)&r->carFrame;
+        r->pose = r->carFrame;
         PlainValMatrix f;
         f32 w[3];
         f.origin.x = v->off[0];
