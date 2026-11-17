@@ -3,6 +3,7 @@
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
 // scores rings by size and difficulty. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/pathset.h"
 #include "game/valuebinding.h"
 #include "game/gart.h"
 #include "game/idealline.h"
@@ -161,12 +162,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 #define NearZeroF(x) ((f32)__fabs(x) <= __float_epsilon[0])
 
 struct CenterLine;
-
-class PathSet {
-public:
-    virtual void vf08(void);
-    virtual CenterLine* Get(int index);  // 0xC
-};
 
 extern "C" {
 PathSet* fn_80156A40(void);
@@ -2010,7 +2005,7 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
             Normalize(dir);
             if (sp->GetBool("on_racingline", 1)) {
                 LineFollower lf;
-                lf.SetLine(fn_80156A40()->Get(0));
+                lf.SetLine((CenterLine*)fn_80156A40()->GetRacingLine(0));
                 ILPos pos;
                 pos.seg = 0;
                 pos.mode = 10000;

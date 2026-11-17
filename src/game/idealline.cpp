@@ -3,6 +3,7 @@
 // across segments, look ahead, and keep per-segment pass times to compute gaps between cars. Names are
 // guesses apart from CenterLine::convert_meters_to_ilpos (from its message).
 #include "game/common.h"
+#include "game/pathset.h"
 #include "game/plainvec.h"
 #include "game/idealline.h"
 #include "game/mathutil.h"
@@ -21,11 +22,6 @@ extern f32 lbl_8055E3C8;  // current race time
 
 static inline V2 Sub(const V2& a, const V2& b) { return V2C(a.x - b.x, a.y - b.y); }
 
-
-class PathSet {
-public:
-    virtual CenterLine* GetLine(int index);  // offset 0x8
-};
 
 extern "C" PathSet* fn_80156A40(void);
 
@@ -368,7 +364,7 @@ int LineFollower::SetLine(CenterLine* l) {
 
 IdealFollower::IdealFollower(int withTimes, CenterLine* l) {
     if (!l) {
-        l = fn_80156A40()->GetLine(0);
+        l = ((CenterLine*)fn_80156A40()->GetLine(0));
     }
     if (SetLine(l)) {
         if (withTimes) {
@@ -623,7 +619,7 @@ void IdealFollower::UpdatePerp(void) {
 
 extern "C" {
 
-f32 fn_8013672C(void) { return fn_80156A40()->GetLine(0)->len[0]; }
+f32 fn_8013672C(void) { return ((CenterLine*)fn_80156A40()->GetLine(0))->len[0]; }
 
 void fn_80136764(void) { fn_801564B0(); }
 

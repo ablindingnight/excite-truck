@@ -8,6 +8,7 @@
 // literals pooled behind them (the original .data layout; see betarace.cpp).
 #include <math.h>
 #include "game/common.h"
+#include "game/pathset.h"
 #include "game/glow.h"
 #include "game/idealline.h"
 #include "game/deity.h"
@@ -685,12 +686,6 @@ struct ZoneResults {
 
 // Ideal-path walker from the track map unit (0x801352B8..).
 struct CenterLine;
-class PathSet {
-public:
-    virtual void vf08(void);
-    virtual void* Get(int index);  // 0xC
-};
-
 extern "C" void fn_801B8048(Respawn* r, LineFollower* it, f32 a, f32 b);  // placecar.cpp
 
 static inline int Boosting(Truck* t) { return !NearZero(t->boost); }
@@ -2238,7 +2233,6 @@ void fn_801CB648(int car, int a, f32 t);
 void* fn_80178C9C(void);
 void* fn_802C6C34(int id);
 int fn_80204CF0(void);
-void* fn_80156A40(void);
 void fn_801352B8(void* it);
 int fn_80135D60(void* it, int index);
 void fn_8013530C(void* it, int unk);
@@ -2560,7 +2554,7 @@ inline void* ZoneMaster::vfE8(void) { return fn_8013D288(); }
 inline int ZoneMaster::vfA0(Respawn* r, int idx, int c) {
     LineFollower it;
     CenterLine* path;
-    it.SetLine((CenterLine*)((PathSet*)fn_80156A40())->Get(0));
+    it.SetLine((CenterLine*)fn_80156A40()->GetRacingLine(0));
     path = it.line;
     fn_801B8048(r, &it, 0.0f, path->len[0] - 25.0f - 35.0f);
     ScaleV((ZoneVec3*)&r->vel, (const ZoneVec3*)&r->place.basis[2], 4.4444447f);

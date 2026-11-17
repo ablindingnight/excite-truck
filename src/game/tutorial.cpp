@@ -3,6 +3,7 @@
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
 #include "game/common.h"
+#include "game/pathset.h"
 #include "game/rmtx.h"
 #include "game/sound.h"
 #include "game/ilayout.h"
@@ -1679,12 +1680,6 @@ struct LineHit {
     s32 max;         // offset 0x8
 };
 
-class PathSet {
-public:
-    virtual void vf08(void);
-    virtual int GetLine(int i);  // 0x0C
-};
-
 extern "C" {
 PathSet* fn_80156A40(void);
 }
@@ -1757,7 +1752,7 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
                 LineHit h;
                 LineNode* n;
                 f32 inv;
-                it.SetLine((CenterLine*)fn_80156A40()->GetLine(0));
+                it.SetLine((CenterLine*)fn_80156A40()->GetRacingLine(0));
                 h.node = 0;
                 h.max = 10000;
                 h.t = 0.0f;

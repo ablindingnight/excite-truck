@@ -3,6 +3,7 @@
 // heading - by sampling the ground under three points around the car to get its up vector and building
 // its basis from that. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/pathset.h"
 #include "game/deity.h"
 #include "game/idealline.h"
 #include "game/v2.h"
@@ -24,12 +25,6 @@ double sin(double x);
 }
 
 typedef ValVec3 V3;
-
-class PathSet {
-public:
-    virtual void vf08(void);
-    virtual CenterLine* GetLine(int index);  // offset 0xC
-};
 
 #include "game/league.h"
 
@@ -172,7 +167,7 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
     }
     row = -fn_801B79AC() / 2.0f - (f32)(car / 2) * row;
     f32 back = 100.0f;
-    IdealPoint* first = fn_80156A40()->GetLine(0)->points;
+    IdealPoint* first = ((CenterLine*)fn_80156A40()->GetRacingLine(0))->points;
     IdealPoint* p = first;
     IdealPoint* best = first;
     do {
