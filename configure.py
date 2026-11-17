@@ -1037,7 +1037,7 @@ config.libs.append(
             Object(Matching, "game/carclass.cpp"),
             Object(Matching, "game/subtask.cpp"),
             Object(Matching, "game/zone.cpp"),
-            Object(NonMatching, "game/modeinl.cpp"),
+            Object(Matching, "game/modeinl.cpp"),
             Object(Matching, "game/records.cpp"),
             Object(NonMatching, "game/ovlayout.cpp"),
             Object(NonMatching, "game/betarace.cpp"),

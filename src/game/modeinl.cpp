@@ -18,7 +18,10 @@ static UnkStatic123 lbl_8042FB88;
 static inline u32 Initial7FWord() { return 0x7F000000u; }
 extern const u32 lbl_8055E1DC = Initial7FWord();
 
-static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+// PROVISIONAL export ownership. Retail keeps weak GameMode/Dot/SetEuler
+// copies. These ordinary definitions reproduce their live addresses and bytes.
+// The original inline/header emission context remains unproven.
+f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 
 // Mtx33: mtx33.h.
 #include "game/mtx34.h"
@@ -84,89 +87,8 @@ public:
 
 GameMode::GameMode(void) {}
 
-extern "C" {
+f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
 
-
-VPos::VPos(f32 x, f32 y, f32 z) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-}
-
-void fn_80144B54(Mtx34* d, const Mtx34* s) { *d = *s; }
-
-f32 fn_80144BD8(f32 x) {
-    if (x < -1.0f) {
-        return -1.0f;
-    }
-    if (x > 1.0f) {
-        return 1.0f;
-    }
-    if (x > 0.0f) {
-        return x * (x * -2.0f * x) + x * 3.0f * x;
-    }
-    return x * (x * -2.0f * x) - x * 3.0f * x;
-}
-
-void fn_80144C54(GameSound* s) {
-    s->stop = 1;
-    s->restart = 0;
-}
-
-u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a) { return (r << 24) | (g << 16) | (b << 8) | a; }
-
-f32 fn_80144C80(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-
-int fn_80144C90(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
-
-f32 fn_80144CC8(f32 x) { return x * x; }
-
-/* Helper name and argument grouping unproven. The matrix row is passed y before x. */
-static inline f32 SumProd(f32 x, f32 y, f32 rowY, f32 rowX) { return x * rowX + y * rowY; }
-
-void fn_80144CD0(Vec3* out, const Vec3* p, const f32* m) {
-    const RMtx& frame = *(const RMtx*)m;
-    f32 dx = p->x - frame.pos.x;
-    f32 dy = p->y - frame.pos.y;
-    const f32 xXY = SumProd(dx, dy, frame.rot.x.y, frame.rot.x.x);
-    const f32 yXY = SumProd(dx, dy, frame.rot.y.y, frame.rot.y.x);
-    const f32 zXY = SumProd(dx, dy, frame.rot.z.y, frame.rot.z.x);
-    f32 dz = p->z - frame.pos.z;
-    out->y = dz * frame.rot.y.z + yXY;
-    out->x = dz * frame.rot.x.z + xXY;
-    out->z = dz * frame.rot.z.z + zXY;
-}
-
-#include "game/w3.h"
-void fn_80144D64(W3* d, const W3* s) { *d = *s; }
-
-void fn_80144D80(Mtx33* m, f32 x, f32 y, f32 z) {
-    m->xx = x;
-    m->xy = 0.0f;
-    m->xz = 0.0f;
-    m->yx = 0.0f;
-    m->yy = y;
-    m->yz = 0.0f;
-    m->zx = 0.0f;
-    m->zy = 0.0f;
-    m->zz = z;
-}
-
-void fn_80144DAC(Vec3* d, const Vec3* s) {
-    d->x = s->x;
-    d->y = s->y;
-    d->z = s->z;
-}
-
-CamFrame34::CamFrame34(void) {}
-
-int GameMode::vf3C(int p) { return 0; }
-
-void GameMode::vf50(int p) {}
-
-void* GameMode::vfE8(void) { return 0; }
-
-}  // extern "C"
 
 // d = a * b
 static inline void MtxMul(Mtx33* dp, const Mtx33* ap, const Mtx33* bp) {
@@ -216,4 +138,132 @@ void Mtx33::SetEuler(f32 y, f32 x, f32 z) {
     MtxMul(this, rz, this);
 }
 
-static inline f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
+
+
+extern "C" {
+
+
+VPos::VPos(f32 x, f32 y, f32 z) {
+    this->x = x;
+    this->y = y;
+    this->z = z;
+}
+
+void fn_80144B54(Mtx34* d, const Mtx34* s) { *d = *s; }
+
+f32 fn_80144BD8(f32 x) {
+    if (x < -1.0f) {
+        return -1.0f;
+    }
+    if (x > 1.0f) {
+        return 1.0f;
+    }
+    if (x > 0.0f) {
+        return x * (x * -2.0f * x) + x * 3.0f * x;
+    }
+    return x * (x * -2.0f * x) - x * 3.0f * x;
+}
+
+void fn_80144C54(GameSound* s) {
+    s->stop = 1;
+    s->restart = 0;
+}
+
+u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a) { return (r << 24) | (g << 16) | (b << 8) | a; }
+
+f32 fn_80144C80(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+
+int fn_80144C90(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
+
+f32 fn_80144CC8(f32 x) { return x * x; }
+
+// PROVISIONAL matching aid. These scalar scratch values reuse the disjoint
+// lifetimes seen in retail. Original temporary ownership and optimizer policy
+// are unproven. With lifetime splitting enabled this source is not exact.
+// Pragma unproven: this scoped setting is required by the reconstructed reuse.
+#pragma push
+#pragma opt_lifetimes off
+void fn_80144CD0(Vec3* out, const Vec3* p, const f32* m) {
+    const RMtx& frame = *(const RMtx*)m;
+    f32 yWork;
+    f32 rowWork;
+    f32 term;
+    f32 ySum;
+    f32 yProduct;
+    f32 xSum;
+    f32 frameTerm;
+    f32 zDelta;
+    f32 axisWork;
+    f32 zCoefficient;
+
+
+    ySum = p->x;
+    term = frame.pos.x;
+    rowWork = p->y;
+    axisWork = ySum - term;  // x delta
+    yWork = frame.pos.y;
+    term = frame.rot.x.x;
+    yWork = rowWork - yWork;  // y delta
+    rowWork = frame.rot.x.y;
+    ySum = frame.rot.y.x;
+    xSum = axisWork * term;
+    yProduct = yWork * rowWork;
+    frameTerm = frame.rot.y.y;
+    ySum = axisWork * ySum;
+    rowWork = frame.rot.z.x;
+    term = yWork * frameTerm;
+    zCoefficient = frame.rot.z.y;
+    rowWork = axisWork * rowWork;
+    zDelta = p->z;
+    xSum = xSum + yProduct;
+    yWork = yWork * zCoefficient;
+    frameTerm = frame.pos.z;
+    axisWork = frame.rot.y.z;
+    ySum = ySum + term;
+    zDelta = zDelta - frameTerm;
+    frameTerm = frame.rot.x.z;
+    yWork = rowWork + yWork;  // y delta is now consumed, reuse for the z sum
+    zCoefficient = frame.rot.z.z;
+    yProduct = zDelta * axisWork;
+    frameTerm = zDelta * frameTerm;
+    term = zDelta * zCoefficient;
+    rowWork = yProduct + ySum;
+    xSum = frameTerm + xSum;
+    yWork = term + yWork;
+    out->y = rowWork;
+    out->x = xSum;
+    out->z = yWork;
+}
+#pragma pop
+
+#include "game/w3.h"
+void fn_80144D64(W3* d, const W3* s) { *d = *s; }
+
+void fn_80144D80(Mtx33* m, f32 x, f32 y, f32 z) {
+    m->xx = x;
+    m->xy = 0.0f;
+    m->xz = 0.0f;
+    m->yx = 0.0f;
+    m->yy = y;
+    m->yz = 0.0f;
+    m->zx = 0.0f;
+    m->zy = 0.0f;
+    m->zz = z;
+}
+
+void fn_80144DAC(Vec3* d, const Vec3* s) {
+    d->x = s->x;
+    d->y = s->y;
+    d->z = s->z;
+}
+
+CamFrame34::CamFrame34(void) {}
+
+int GameMode::vf3C(int p) { return 0; }
+
+void GameMode::vf50(int p) {}
+
+void* GameMode::vfE8(void) { return 0; }
+
+}  // extern "C"
+
