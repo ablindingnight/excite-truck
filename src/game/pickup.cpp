@@ -148,6 +148,15 @@ struct PickupObjMan {
     u8 grouping;                        // offset 0x1E158
 };
 
+/* Helper name unproven: squared distance between two points. Its local is the LAST two-float object on the stack
+   of both Make functions in retail (below the vectors those functions create after BeginGroup), which is where a
+   helper nested inside the BeginGroup inline puts it; written out in BeginGroup it sat above them. */
+template <class A, class B> static inline f32 DistSq(const A& a, const B& b) {
+    V2 d;
+    d.y = a.y - b.y;
+    d.x = a.x - b.x;
+    return d.x * d.x + d.y * d.y;
+}
 inline void PickupObjMan::BeginGroup(Bound* b, int id) {
     PickupGroup* g = &groups.data[groups.count++];
     if (b) {
@@ -156,10 +165,8 @@ inline void PickupObjMan::BeginGroup(Bound* b, int id) {
         g->c = fn_80139C5C(b);
         g->radius = 0.0f;
         for (i = 0; i < b->n; i++) {
-            V2 d;
-            d.y = g->c.y - b->pts[i].y;
-            d.x = g->c.x - b->pts[i].x;
-            g->radius = MAX(g->radius, d.x * d.x + d.y * d.y);
+            f32 dd = DistSq(g->c, b->pts[i]);
+            g->radius = MAX(g->radius, dd);
         }
         g->radius = 1.1f * (f32)sqrt(g->radius);
     } else {
@@ -629,8 +636,8 @@ void fn_801688FC(int id) {
 
 static inline V2 Lerp2(const V2& a, const V2& b, f32 t) {
     V2 r;
-    r.x = a.x + t * (b.x - a.x);
     r.y = a.y + t * (b.y - a.y);
+    r.x = a.x + t * (b.x - a.x);
     return r;
 }
 
