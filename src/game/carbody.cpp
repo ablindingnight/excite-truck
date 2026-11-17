@@ -304,6 +304,7 @@ u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 // literal * literal fold away; creation order moves), so they need the original helper forms first.
 
 static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 FMin(f32 a, f32 b) { return a < b ? a : b; }
 
 extern "C" {
 
@@ -1440,6 +1441,8 @@ extern "C" {
 // Before a physics step: copy the solver's wheel ground points/normals in, run the timers (stun, wheelie, air,
 // boost, heat, spin), apply the self-righting, stunt, landing, ramp, water, slope and steering forces/torques,
 // track boost/overheat state and tricks (flips and spins counted while airborne), and drive the sound/FX hooks.
+static inline int CarHot(u8* car) { return ((CarBody*)car)->f258C > 0.001f; }
+static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
 void fn_80183E7C(u8* p) {
     CbSolContact* sol;
     f32 airLift = 0.0f;
@@ -1995,37 +1998,35 @@ void fn_80183E7C(u8* p) {
     } else {
         ((CarBody*)p)->f25C4 = 0.0f;
     }
-    f32 cool = heatTune.v[1];
+    f32 cool;
     if (((CarBody*)p)->f2618 < 0.4f) {
-        cool = heatTune.v[0];
         if (sunk) {
             cool = heatTune.v[2];
+        } else {
+            cool = heatTune.v[0];
         }
+    } else {
+        cool = heatTune.v[1];
     }
-    f32 heat = ((CarBody*)p)->f25A0 - 0.016683351f * cool;
-    heat = heat > 0.0f ? heat : 0.0f;
+    f32 heat = FMax(0.0f, ((CarBody*)p)->f25A0 - 0.016683351f * cool);
     ((CarBody*)p)->f25A0 = heat;
     ((CarBody*)p)->f259C = 0;
     if (lbl_8055E4F4) {
         if (!NearZero(((CarBody*)p)->f2690) && U32(p, 0x10) == 'PCAR') {
-            f32 h = heatTune.v[7];
-            h = h < heat ? h : heat;
-            ((CarBody*)p)->f25A0 = h;
+            ((CarBody*)p)->f25A0 = FMin(heat, heatTune.v[7]);
         }
         if (((CarBody*)p)->f258C < 0.1f && ((CarBody*)p)->f260D && ((CarBody*)p)->f2618 < 0.2f &&
             ((CarBody*)p)->f25A0 < 1.001f && ((CarBody*)p)->f2588 < 0.001f &&
             NearZero(((CarBody*)p)->f2690)) {
-            f32 h = ((CarBody*)p)->f25A0 + 0.016683351f * ((CarBody*)p)->setupA.f6C * heatTune.v[3] * ((CarBody*)p)->f2D4;
-            h = h < 1.0f ? h : 1.0f;
-            ((CarBody*)p)->f25A0 = h;
+            ((CarBody*)p)->f25A0 = FMin(1.0f, ((CarBody*)p)->f25A0 + 0.016683351f * (((CarBody*)p)->setupA.f6C * (heatTune.v[3] * ((CarBody*)p)->f2D4)));
             ((CarBody*)p)->f259C = 1;
         }
-        if (((CarBody*)p)->airborne > 2) {
+        if (((CarBody*)p)->airborne >= 3) {
             int boosting = 1;
-            if (((CarBody*)p)->f258C <= 0.001f && !((CarBody*)p)->f259C) {
+            if (!CarHot(p) && !((CarBody*)p)->f259C) {
                 boosting = 0;
             }
-            if (!boosting || ((CarBody*)p)->f25E0 <= 0.5f) {
+            if (!boosting || !CarOnGas(p)) {
                 f32 vmax = ((CarBody*)p)->f5A8;
                 if (((CarBody*)p)->speed > vmax) {
                     f32 over = Ramp(((CarBody*)p)->speed, vmax, 2.2222223f + vmax);
@@ -2050,19 +2051,11 @@ void fn_80183E7C(u8* p) {
     }
     f32 vol = fn_801B8950(((CarBody*)p)->index);
     int loud = 0;
-    if (((CarBody*)p)->f25E0 > 0.5f && ((CarBody*)p)->f258C > 0.001f) {
+    if (CarOnGas(p) && CarHot(p)) {
         loud = 1;
     }
-    f32 want = 0.0f;
-    if (loud) {
-        want = 1.0f;
-    }
-    f32 dv = want - vol;
-    dv = dv < 0.033366702f ? dv : 0.033366702f;
-    f32 dvc = -0.033366702f;
-    if (dv > -0.033366702f) {
-        dvc = dv;
-    }
+    f32 want = loud ? 1.0f : 0.0f;
+    f32 dvc = FMax(FMin(0.033366702f, want - vol), -0.033366702f);
     fn_801B8964(((CarBody*)p)->index, vol + dvc);
     int trick = 0;
     if (NearZero(((CarBody*)p)->f2690) && NearZero(((CarBody*)p)->f2650)) {
@@ -2145,10 +2138,7 @@ void fn_80183E7C(u8* p) {
                 ((CarBody*)p)->f263C = side;
                 ((CarBody*)p)->f2640 = 0;
                 f32 spin = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48));
-                f32 sgn = 1.0f;
-                if (((CarBody*)p)->f2638 == 1) {
-                    sgn = -1.0f;
-                }
+                f32 sgn = ((CarBody*)p)->f2638 == 1 ? -1.0f : 1.0f;
                 if (sgn * spin < -0.1f && ((CarBody*)p)->f2644 == 0) {
                     ((CarBody*)p)->f2638 = 0;
                 } else {
@@ -2159,22 +2149,17 @@ void fn_80183E7C(u8* p) {
             }
         } else {
             if (((CarBody*)p)->f2638) {
-                f32 sgn = 1.0f;
-                if (((CarBody*)p)->f2638 == 1) {
-                    sgn = -1.0f;
-                }
-                RVec3 fwd;
-                fwd.x = ((CarBody*)p)->mtx.rot.z.x;
+                f32 sgn = ((CarBody*)p)->f2638 == 1 ? -1.0f : 1.0f;
                 yaw = 62.831856f * sgn;
-                fwd.z = ((CarBody*)p)->mtx.rot.z.z;
+                PlainRVec3 fwd = ((CarBody*)p)->mtx.rot.z;
                 fwd.y = 0.0f;
-                RVec3 v;
-                v.x = dir.x;
-                v.z = dir.z;
+                PlainRVec3 v = dir;
                 v.y = 0.0f;
-                if (PSVECDotProduct((const Vec*)&fwd, (const Vec*)&v) < 0.0f) {
+                int behind = PSVECDotProduct((const Vec*)&fwd, (const Vec*)&v) < 0.0f;
+                if (behind) {
                     ((CarBody*)p)->f2640 = 1;
-                } else if (((CarBody*)p)->f2640) {
+                }
+                if (!behind && ((CarBody*)p)->f2640) {
                     ((CarBody*)p)->f2638 = 0;
                     ((CarBody*)p)->f2628 = 0.0f;
                     ((CarBody*)p)->f262C = 0.0f;
@@ -2296,8 +2281,6 @@ extern "C" {
 // air-control forces, read the solved pose and velocities back, rebuild the four wheels' contact state, and work
 // out the throttle/brake/steer limits (water, offroad, airborne, boost) before the drive model update.
 // MATCHING-AID: invented helpers (the target materialises these compares as values, mfcr); unproven.
-static inline int CarHot(u8* car) { return ((CarBody*)car)->f258C > 0.001f; }
-static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
 
 void fn_80186DE8(void) {
     CbSolMass* mass;
