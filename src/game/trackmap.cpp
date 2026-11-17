@@ -421,6 +421,7 @@ static inline f32 Ease(f32 t) {
 /* Helper name unproven */
 static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
+static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
@@ -562,8 +563,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     fn_802C8D74();
     fn_801EA9A0(view);
     for (i = 0; i < fn_801EA994(); i++) {
-        Vec3 p;
-        Vec3 rel;
         f32 fade;
         int part;
         TruckDraw* d;
@@ -572,10 +571,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             continue;
         }
         fn_801EA9A0(i);
-        p = fn_8017960C(i)->pos;
-        rel.x = p.x - basis.pos.x;
+        Vec3 rel = fn_8017960C(i)->pos;
+        rel.x = rel.x - basis.pos.x;
         f32 yv = basis.pos.y;
-        rel.y = p.z - yv;
+        rel.y = rel.z - yv;
         rel.z = 0.0f;
         rel.z -= basis.pos.z;
         MulVecT(&rel, &rel, &basis);
@@ -658,7 +657,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             rel.y *= s;
             rel.z *= s;
         }
-        if (!(PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) >= (w / 2.0f) * (w * 0.5f))) {
+        if (PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) < (w / 2.0f) * (w * 0.5f)) {
             Vec2 delta;
             f32 size;
             f32 fade;
@@ -668,7 +667,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             size = fn_80235EF0(m->art, 0);
             fade = Ease(1.0f - PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) / ((w / 2.0f) * (w * 0.5f)));
             a = 255.0f * fade;
-            fn_80235AFC(m->art, 0, ((int)(a < 0.0f ? a - 0.5f : 0.5f + a) << 24) | 0xFF | 0xFFFF00,
+            fn_80235AFC(m->art, 0, ARGB((int)(a < 0.0f ? a - 0.5f : 0.5f + a), 0xFF, 0xFF, 0xFF),
                         c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->unk10 + m->angle);
         }
     }
