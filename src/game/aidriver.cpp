@@ -51,10 +51,7 @@ class IDriver;
 extern "C" GameMode* fn_801B83A0(void);
 void* operator new(size_t size, const char* tag);
 
-struct AIGrid {
-    CarDef cars[8];  // offset 0x0
-    s32 count;      // offset 0x3C0
-};
+#include "game/aigrid.h"
 
 struct AIRace {
     u8 pad0[0x20];

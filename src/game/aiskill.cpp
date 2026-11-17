@@ -277,16 +277,8 @@ void fn_8013B490_cmd(const char* arg) {
     }
 }
 
-struct AIGridCar {
-    u8 pad0[0x68];
-    s32 driver;  // offset 0x68
-    u8 pad6C[0xC];
-};
 
-struct AIGrid {
-    AIGridCar cars[8];  // offset 0x0
-    s32 count;          // offset 0x3C0
-};
+#include "game/aigrid.h"
 
 void fn_8013B4E0(AIGrid* g, void*) {
     s32 cars[8];
