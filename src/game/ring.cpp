@@ -3,6 +3,7 @@
 // "ring"s (radius + frame64). Sets are switched on and off by name; a car passes a ring by getting within its
 // radius, and rings fade in, flash and fade out. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/event.h"
 #include "game/v2.h"
 #include "game/arrayref.h"
 #include <revolution/MTX/vec.h>
@@ -28,11 +29,6 @@ f32 fn_801E7E18(void);
 }
 
 void* operator new[](size_t size, const char* tag);
-
-struct Event {
-    u8 pad0[0x20];
-    ValueNode* vals;  // offset 0x20
-};
 
 extern "C" {
 }  // extern "C"
@@ -489,7 +485,7 @@ int fn_8016A878(const char* name) {
 
 void fn_8016A8F8(void) {
     int i;
-    radiusScoreMode = fn_8000AC38()->vals->GetBool("radius_score_mode", 0);
+    radiusScoreMode = fn_8000AC38()->node->GetBool("radius_score_mode", 0);
     lbl_804302F0.Reserve(5);
     for (i = 1; lbl_804302F0.count + 1 <= lbl_804302F0.cap && i < 100; i++) {
         RingType* t = lbl_804302F0.Add();
@@ -509,7 +505,7 @@ void fn_8016AC90(void) {
     const char* key;
     lbl_80430318.Reserve(180);
     lbl_80430340.Reserve(36);
-    vals = fn_8000AC38()->vals;
+    vals = fn_8000AC38()->node;
     key = fn_80204EA0("ring_file_key");
     if (vals->Has(key)) {
         ValueTable* t = fn_80131810(vals->GetValue(key));

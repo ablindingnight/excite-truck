@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "game/common.h"
+#include "game/event.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -89,19 +90,6 @@ struct Track {
 struct MyoTrack {
     Track track;   // offset 0x0
     s32 unk84;     // offset 0x84
-};
-
-struct Event {
-    s32 index;        // offset 0x0
-    s32 track;        // offset 0x4
-    u32 type;         // offset 0x8
-    s32 laps;         // offset 0xC
-    s32 drivers;      // offset 0x10
-    u32 terrain;      // offset 0x14
-    s32 rounds;       // offset 0x18
-    s32 purse;        // offset 0x1C
-    ValueNode* node;  // offset 0x20
-    u8 enabled;       // offset 0x24
 };
 
 struct ValFiles {
