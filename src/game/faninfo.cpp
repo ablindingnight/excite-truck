@@ -39,7 +39,6 @@ void fn_802BE780(FanCell** grid);
 int fn_802BE7C4(int x, int z, int size);
 }
 
-FanCell::~FanCell(void) {}
 
 void FanCell::Clear(void) {
     head = 0;

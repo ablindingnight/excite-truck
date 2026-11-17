@@ -22,7 +22,6 @@ struct FanData {
 };
 
 struct FanCell : FanData {
-    ~FanCell(void);
     void Clear(void);
 };
 

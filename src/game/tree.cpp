@@ -175,30 +175,8 @@ struct TreeType {
     f32 sway;          // offset 0x5C
 };
 
-#ifdef __MWERKS__
-extern "C" {
-void* __register_global_object(void*, void*, void*);
-void __dt__7FanCellFv(void*, int);
-}
-#endif
 
-#ifdef __MWERKS__
-// game/tfixed.h's TFixed as retail's tree saw it: flat, not derived from TArray, no destructor.
-template <class T, int N>
-struct TFixed {
-    TFixed(void) {
-        data = items;
-        cap = N;
-        n = 0;
-    }
-    T* data;     // offset 0x0
-    s32 n;       // offset 0x4
-    s32 cap;     // offset 0x8
-    T items[N];  // offset 0xC
-};
-#else
 #include "game/tfixed.h"
-#endif
 
 struct TListEntry {
     char name[0x20];             // offset 0x0
@@ -246,18 +224,10 @@ bool lbl_8055FAB0; // trees collide
 ValueTable* lbl_8055FAB4;
 TListFile* lbl_8055FAB8;
 TreePreloader* lbl_8055FABC;
-#ifdef __MWERKS__
-static void* sTreeDestructorLink[3];
-#endif
 
+// Its implicit destructor (TArray's inlined) is emitted at the end of this unit and registered by __sinit; it is
+// the function at 0x802BE30C that the split used to give faninfo as "~FanCell" (aids audit 2, 2026-11-17).
 TFixed<TreeType, 16> lbl_804C00D4;
-#ifdef __MWERKS__
-// Retail's shutdown callback zeros the three header words and leaves the inline elements alone.
-struct TreeTypeCleanup {
-    TreeTypeCleanup() { __register_global_object(&lbl_804C00D4, (void*)__dt__7FanCellFv, sTreeDestructorLink); }
-};
-static TreeTypeCleanup sTreeTypeCleanup;
-#endif
 
 
 
