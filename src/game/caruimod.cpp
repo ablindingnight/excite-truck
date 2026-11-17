@@ -1196,6 +1196,11 @@ void CarUIScreen::Deactivate(void) {
         fn_8025567C();
     }
 }
+/* Helper name unproven */
+// The box diagonal; retail computes it and drops the result (its user was stripped). The three extents are this
+// helper's operands (aids audit 2, 2026-11-17: replaces a dz, dy, dx declaration list).
+static inline f32 BoxDiagonal(const f32* b) { return sqrt(Sq(b[1] - b[0]) + Sq(b[3] - b[2]) + Sq(b[5] - b[4])); }
+
 
 void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
     lbl_8055F334 = dt;
@@ -1267,20 +1272,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         f32 box[6];
         fn_802C77F0(model->model, (Vec*)box);
         fn_802C7808(model->model);
-        // MATCHING-AID: the declaration order (dz, dy, dx, then the squares) sets the float registers; the diagonal is computed and discarded.
-        f32 dz;
-        f32 dy;
-        f32 dx;
-        f32 xx;
-        f32 yy;
-        f32 zz;
-        dy = box[3] - box[2];
-        dx = box[1] - box[0];
-        dz = box[5] - box[4];
-        xx = dx * dx;
-        yy = dy * dy;
-        zz = dz * dz;
-        sqrt(xx + yy + zz);
+        BoxDiagonal(box);
         sqrt(2.0);
         if (index == 0) {
             fn_802AB9E0(lbl_8055F338);
