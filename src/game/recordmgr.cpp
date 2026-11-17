@@ -47,7 +47,6 @@ struct RaceResult {
 };
 
 struct RaceResultTable {
-    static RaceResultTable* Create(void) { return new ("RaceResultTable") RaceResultTable; }
     RaceResultTable(void) {
         n = 8;
         r = new ("record:RaceResults") RaceResult[n];
@@ -96,7 +95,6 @@ struct LapResultTable {
 };
 
 struct CarLapTable {
-    static CarLapTable* Create(void) { return new ("CarLapTable") CarLapTable; }
     CarLapTable(void) {
         memset(t, 0, sizeof(t));
         n = 8;
@@ -412,8 +410,8 @@ void fn_801AEF28(RecordSetup* s) {
     int i;
     RaceState* st = (RaceState*)lbl_80435740;
     lbl_8055E635 = 1;
-    lbl_8055E620 = CarLapTable::Create();
-    lbl_8055E624 = RaceResultTable::Create();
+    lbl_8055E620 = new ("CarLapTable") CarLapTable;
+    lbl_8055E624 = new ("RaceResultTable") RaceResultTable;
     lbl_8055E628 = fn_801AFA20(s);
     RaceEntries* t = &st->entries;
     t->n = 0;
