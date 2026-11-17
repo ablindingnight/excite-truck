@@ -766,13 +766,13 @@ void SnowSystem::Move(f32 turn, const PlainValMatrix* cam, const PVec* d) {
         PVec* w = &wob[i % 8];
         PVec v;
         v.x = p->x + wind.x;
-        v.z = p->z + wind.z;
         v.y = p->y + wind.y;
+        v.z = p->z + wind.z;
         v.x += w->x * dt;
-        v.z += w->z * dt;
         v.y += w->y * dt;
+        v.z += w->z * dt;
         v.x += turn * v.z;
-        if (v.z > near && v.z < far && v.x * v.x < (v.z * tx) * (v.z * tx) && v.y * v.y < (v.z * ty) * (v.z * ty)) {
+        if (v.z > near && v.z < far && Sq(v.x) < Sq(v.z * tx) && Sq(v.y) < Sq(v.z * ty)) {
             out->x = v.x;
             out->y = v.y;
             out->z = v.z;
