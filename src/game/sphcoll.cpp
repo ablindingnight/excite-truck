@@ -2019,6 +2019,9 @@ int fn_8019EA7C(u8* p, u8* q) {
 }
 
 void fn_8019EB14(u8* tree, int i) {
+#if !defined(__MWERKS__) && !defined(GAME_FILE_DATA_NEEDS_SWAP)
+    return;  // PC: the little-endian quadtree is already native (see byteswap.h)
+#endif
     u8* n = tree + i * 8;
     u8 t;
     t = n[0];
