@@ -199,10 +199,10 @@ static inline f32 Clamp01(f32 v) {
     return t > lbl_80563758 ? t : lbl_80563758;
 }
 
-// Odd smoothstep over [-1, 1]: 3t^2 - 2t^3 mirrored for negative t.
 extern "C" const f32 lbl_80563774;
 extern "C" const f32 lbl_80563778;
 
+// Odd smoothstep over [-1, 1]: 3t^2 - 2t^3 mirrored for negative t.
 static inline f32 Ease(f32 t) {
     if (t < lbl_80563770) {
         return lbl_80563770;
@@ -216,8 +216,8 @@ static inline f32 Ease(f32 t) {
         return cubic * t * t + quadratic * t;
     }
     const f32 cubic = lbl_80563774 * t;
-        const f32 quadratic = lbl_80563778 * t;
-        return cubic * t * t - quadratic * t;
+    const f32 quadratic = lbl_80563778 * t;
+    return cubic * t * t - quadratic * t;
 }
 
 // The body colour chooser of the car picker: a menu value widget (MenuWidgetBase at +0) that is also a menu
@@ -618,39 +618,40 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#model_1", 0x10, NULL, (MenuArg)&pp.p1.picker, 0),
         MenuItem("#color_1", 5, static_cast<MenuState*>(&pp.p1.color), 0, 0),
         MenuItem("#locker_1", 2, &pp.p1.picker.item, 0, 0),
-        MenuItem("#controller_1", pp.p1.sel.name),
+        MenuItem("#controller_1", CaptionContext(), pp.p1.sel.name),
         MenuItem("#car_position_1", 5, pp.p1.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p1", pp.p1.stats.text[0]),
+        MenuItem("#stat_text_1_p1", CaptionContext(), pp.p1.stats.text[0]),
         MenuItem("#stat_art_1_p1", 2, &pp.p1.stats.stats.stats[0].value, 0, 0),
-        MenuItem("#stat_text_2_p1", pp.p1.stats.text[1]),
+        MenuItem("#stat_text_2_p1", CaptionContext(), pp.p1.stats.text[1]),
         MenuItem("#stat_art_2_p1", 2, &pp.p1.stats.stats.stats[1].value, 0, 0),
-        MenuItem("#stat_text_3_p1", pp.p1.stats.text[2]),
+        MenuItem("#stat_text_3_p1", CaptionContext(), pp.p1.stats.text[2]),
         MenuItem("#stat_art_3_p1", 2, &pp.p1.stats.stats.stats[2].value, 0, 0),
-        MenuItem("#stat_text_4_p1", pp.p1.stats.text[3]),
+        MenuItem("#stat_text_4_p1", CaptionContext(), pp.p1.stats.text[3]),
         MenuItem("#stat_custom_4_p1", 5, &pp.p1.stats.bars[3], 0, 0),
-        MenuItem("#stat_text_5_p1", pp.p1.stats.text[4]),
+        MenuItem("#stat_text_5_p1", CaptionContext(), pp.p1.stats.text[4]),
         MenuItem("#stat_art_5_p1", 2, &pp.p1.stats.stats.stats[4].value, 0, 0),
         MenuItem(NULL, 5, &pp.p2.sel, 0, 0),
         MenuItem("#carmodel_2", 0x13, &pp.p2.screen, 0, 0),
-        MenuItem("#carmodel_2", pp.p2.picker.chassis),
+        MenuItem("#carmodel_2", CaptionContext(), pp.p2.picker.chassis),
         MenuItem("#model_2", 0x10, NULL, (MenuArg)&pp.p2.picker, 0),
         MenuItem("#color_2", 5, static_cast<MenuState*>(&pp.p2.color), 0, 0),
         MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
-        MenuItem("#controller_2", pp.p2.sel.name),
+        MenuItem("#controller_2", CaptionContext(), pp.p2.sel.name),
         MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p2", pp.p2.stats.text[0]),
+        MenuItem("#stat_text_1_p2", CaptionContext(), pp.p2.stats.text[0]),
         MenuItem("#stat_art_1_p2", 2, &pp.p2.stats.stats.stats[0].value, 0, 0),
-        MenuItem("#stat_text_2_p2", pp.p2.stats.text[1]),
+        MenuItem("#stat_text_2_p2", CaptionContext(), pp.p2.stats.text[1]),
         MenuItem("#stat_art_2_p2", 2, &pp.p2.stats.stats.stats[1].value, 0, 0),
-        MenuItem("#stat_text_3_p2", pp.p2.stats.text[2]),
+        MenuItem("#stat_text_3_p2", CaptionContext(), pp.p2.stats.text[2]),
         MenuItem("#stat_art_3_p2", 2, &pp.p2.stats.stats.stats[2].value, 0, 0),
-        MenuItem("#stat_text_4_p2", pp.p2.stats.text[3]),
+        MenuItem("#stat_text_4_p2", CaptionContext(), pp.p2.stats.text[3]),
         MenuItem("#stat_custom_4_p2", 5, &pp.p2.stats.bars[3], 0, 0),
-        MenuItem("#stat_text_5_p2", pp.p2.stats.text[4]),
+        MenuItem("#stat_text_5_p2", CaptionContext(), pp.p2.stats.text[4]),
         MenuItem("#stat_art_5_p2", 2, &pp.p2.stats.stats.stats[4].value, 0, 0),
         MenuItem(lbl_80498810),
     };
-    MenuDesc desc = {lbl_8055FC8C ? "rollcall2_w.lyt" : "rollcall2.lyt", items, fn_802411A4, 0, 0};
+    const char* layout = lbl_8055FC8C ? "rollcall2_w.lyt" : "rollcall2.lyt";
+    MenuDesc desc = {layout, items, fn_802411A4, 0, 0};
     fn_80129AEC(-1);
     int result = 1;
     int run = 1;
