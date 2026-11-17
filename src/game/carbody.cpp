@@ -680,17 +680,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     fn_801838C8(p);
 }
 
-// One wheel-contact corner (fn_801AE180 allocates it), linked into the body's list at 0xD0.
-struct CbCorner {
-    CbCorner* next;  // 0x00
-    RVec3 pos;        // 0x04
-    f32 spring;      // 0x10
-    f32 friction;    // 0x14
-    f32 damping;     // 0x18
-    RVec3 vel;        // 0x1C
-};
-
-CbCorner* fn_801AE180(void);
+Corner* fn_801AE180(void);
 s32 fn_801E3004(s32 model, const char* name, s32 a);
 HVec* fn_801E3630(s32 joint);
 void fn_801E323C(s32 joint);
@@ -705,7 +695,7 @@ static inline void AddBodyCorner(u8* p, RVec3* pos, f32 x, f32 y, f32 z, f32 spr
     pos->x = x;
     pos->y = y;
     pos->z = z;
-    CbCorner* c = fn_801AE180();
+    Corner* c = fn_801AE180();
     c->pos = *pos;
     c->spring = spring;
     c->friction = 0.5f;
@@ -713,8 +703,8 @@ static inline void AddBodyCorner(u8* p, RVec3* pos, f32 x, f32 y, f32 z, f32 spr
     c->vel.y = 0.0f;
     c->vel.z = 0.0f;
     c->damping = 0.0f;
-    c->next = *(CbCorner**)(p + 0xD0);
-    *(CbCorner**)(p + 0xD0) = c;
+    c->next = ((RigidBody*)p)->contacts;
+    ((RigidBody*)p)->contacts = c;
 }
 
 // One sphere of the body's collision group, at a point in body space (made relative to the centre of mass).
@@ -1176,7 +1166,7 @@ void fn_801838C8(u8* p) {
     cb->f26D8 = -1000.0f;
     cb->f26DC = -1000.0f;
     cb->f2684 = 9.81f;
-    (*(CbFx**)(p + 0x2584))->Reset();
+    ((CbFx*)((CarBody*)p)->f2584)->Reset();
 }
 
 }  // extern "C"
@@ -1514,7 +1504,7 @@ void fn_80183E7C(u8* p) {
     if (cb->f2608 - cb->f25E0 > 0.2f) {
         cb->f2608 = 0.0f;
         if (fn_80129D18(4, 10) < 3) {
-            (*(CbFx**)(p + 0x2584))->v1C();
+            ((CbFx*)((CarBody*)p)->f2584)->v1C();
             CbEvent ev;
             ev.id = cb->index;
             ev.a = 1.0f;
@@ -1645,6 +1635,7 @@ void fn_80183E7C(u8* p) {
         RVec3 ahead;
         RVec3 behind;
         CbProbe(&ahead, &behind, &cb->mtx.pos, &cb->vel, 0.5f, -2.0f);
+        // MATCHING-AID: CollVolume::hint (0x6C) by raw address: a member address costs this function an instruction (3 forms tried 2026-11-16)
         ahead.y = fn_801E9FDC((s16*)(p + 0x6C), ahead.x, ahead.z);
         behind.y = fn_801E9FDC((s16*)(p + 0x6C), behind.x, behind.z);
         slope.x = ahead.x - behind.x;
@@ -1672,7 +1663,7 @@ void fn_80183E7C(u8* p) {
             if (ramp) {
                 if (tilt < 0.9f && cb->f2618 > 0.5f) {
                     if (!((f32)__fabs(lbl_8055E4F0) <= __float_epsilon[0])) {
-                        (*(CbFx**)(p + 0x2584))->v24();
+                        ((CbFx*)((CarBody*)p)->f2584)->v24();
                     }
                     cb->f2590 = lbl_8055E4F0;
                     fn_8014E61C(cb->index, 2, 0.9f - tilt);
@@ -1686,9 +1677,9 @@ void fn_80183E7C(u8* p) {
                     cb->f258C = cb->setupA.f74 * boost;
                     fn_8014E61C(cb->index, 1, sink);
                     fn_80161A38(2, cb->index, 0);
-                    (*(CbFx**)(p + 0x2584))->v20();
+                    ((CbFx*)((CarBody*)p)->f2584)->v20();
                 } else {
-                    (*(CbFx**)(p + 0x2584))->Land(sink);
+                    ((CbFx*)((CarBody*)p)->f2584)->Land(sink);
                 }
             }
             if (jump && fn_8018A100(p) && fn_801E1048(cb->index)) {
@@ -1795,7 +1786,7 @@ void fn_80183E7C(u8* p) {
             cb->f2625 = 1;
             s32 id = cb->index;
             fn_801796EC(13, &id, 4);
-            (*(CbFx**)(p + 0x2584))->v28();
+            ((CbFx*)((CarBody*)p)->f2584)->v28();
             fn_8014E61C(cb->index, 6, 0.0f);
             fn_80161A38(1, cb->index, 0);
             KickUp(p, 10.0f * cb->mass);
@@ -1930,7 +1921,7 @@ void fn_80183E7C(u8* p) {
     }
     if (cb->f25C4 > 0.01f || (cb->airborne > 0 && fn_802B04D4(p + 0x60) && deep)) {
         if ((f32)__fabs(cb->f25C4) <= __float_epsilon[0]) {
-            (*(CbFx**)(p + 0x2584))->v30();
+            ((CbFx*)((CarBody*)p)->f2584)->v30();
             if (NearZero(cb->f2690)) {
                 fn_8018E330(p);
             }
@@ -2019,7 +2010,7 @@ void fn_80183E7C(u8* p) {
             cb->f25A0 = heatTune.v[6];
             cb->f2588 = heatTune.v[8];
             fn_801DF074(6, 1);
-            (*(CbFx**)(p + 0x2584))->v14();
+            ((CbFx*)((CarBody*)p)->f2584)->v14();
         }
     }
     f32 vol = fn_801B8950(cb->index);
@@ -2173,7 +2164,7 @@ void fn_80183E7C(u8* p) {
         LiftUp(p, airLift * (9.81f * -cb->mass));
         cb->f2684 = 9.81f * (1.0f + airLift);
     }
-    cb->f26D0 = fn_801DCEC0(*(s16*)(p + 0x6C), cb->mtx.pos.x, cb->mtx.pos.z);
+    cb->f26D0 = fn_801DCEC0(*((CollVolume*)p)->hint, cb->mtx.pos.x, cb->mtx.pos.z);
     cb->f26CC = LerpT(0.1f, cb->f26CC, cb->f26D0);
     if (cb->speed < 0.5f && cb->f25F4 < 0.1f && cb->f25E4 > 0.9f) {
         cb->f26A8 += 0.016683351f;
@@ -2256,7 +2247,7 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->b1E9 = 1;
         if (((CarBody*)car)->mtx.rot.y.y < 0.0f) {
             Corner* c;
-            for (c = *(Corner**)(car + 0xD0); c; c = c->next) {
+            for (c = ((RigidBody*)car)->contacts; c; c = c->next) {
                 c->Hit((RigidBody*)car);
             }
         }
@@ -2454,7 +2445,7 @@ void fn_80186DE8(void) {
         fr.pos.z = m->pos.z;
         *(RMtx*)(car + 0x3C) = fr;
         ((CollVolume*)car)->Transform();
-        *(s16*)(car + 0x6C) = e->id;
+        *((CollVolume*)car)->hint = e->id;
         HVec o = *(HVec*)(car + 0x16C);
         RVec3 vel(m->vel.x, m->vel.y, m->vel.z);
         RVec3 avel(m->avel.x, m->avel.y, m->avel.z);
@@ -2733,14 +2724,14 @@ void CarBody::vf20(void) {
     RVec3 a;
     RVec3 f;
     ((CollVolume*)p)->CollVolume::vf20();
-    if (*(CbPart**)(p + 0x257C)) {
-        (*(CbPart**)(p + 0x257C))->Update(((DeityCar*)((CarBody*)p)->src)->Held());
+    if ((CbPart*)((CarBody*)p)->f257C) {
+        ((CbPart*)((CarBody*)p)->f257C)->Update(((DeityCar*)((CarBody*)p)->src)->Held());
     }
-    if (*(CbFx**)(p + 0x2580)) {
-        (*(CbFx**)(p + 0x2580))->Update();
+    if ((CbFx*)((CarBody*)p)->f2580) {
+        ((CbFx*)((CarBody*)p)->f2580)->Update();
     }
-    if (*(CbFx**)(p + 0x2584)) {
-        (*(CbFx**)(p + 0x2584))->Update();
+    if ((CbFx*)((CarBody*)p)->f2584) {
+        ((CbFx*)((CarBody*)p)->f2584)->Update();
     }
     if (F32(p, 0x269C) < 0.5f) {
         F32(p, 0x269C) += 0.016683351f;
@@ -3198,8 +3189,8 @@ void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     ((CarBody*)p)->push.x = 0.0f;
     ((CarBody*)p)->push.y = 0.0f;
     ((CarBody*)p)->push.z = 0.0f;
-    *(s16*)(p + 0x6C) = *(s16*)(s + 0x40);
-    fn_801E9DD0((s16*)(p + 0x6C), frame.pos.x, frame.pos.z);
+    *((CollVolume*)p)->hint = *(s16*)(s + 0x40);
+    fn_801E9DD0(((CollVolume*)p)->hint, frame.pos.x, frame.pos.z);
     ((CarGear*)(lbl_8055E918 + ((CarBody*)p)->index * 0x9C))->Clear(((CarBody*)p)->index);
     f32 speed = ((CarBody*)p)->f25CC;
     fn_801BE400(((CarBody*)p)->index, &frame, speed);
