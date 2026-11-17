@@ -4037,8 +4037,6 @@ void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
     // Pass 2: rows. Each output pixel is written twice across and the row twice down.
     t = tmp;
     for (i = 0; i < 8; i++) {
-        u32 o0, o1, o2, o3, o4;
-        u32 o5, o6, o7;
         u32 w0, w1, w2, w3;
 
         // Even part
@@ -4065,25 +4063,21 @@ void fastidct8x8d(u8 *dst, s32 stride, s16 *block, s32 *quant) {
         tmp5 = tmp11 - tmp6;
         tmp4 = tmp10 + tmp5;
 
-        // Pixel packing: not the original statements yet (85.72). Retail computes the shift for pixels 0 and 2,
-        // computes-and-drops it for 1, 3, 4, 6 and has none for 5 and 7, so o5..o7 are kept unshifted here
-        // (see handoff/FACTS.md 2026-11-15).
-        o0 = (tmp0 + tmp7 + 0x7F) >> 8;
-        o7 = tmp0 - tmp7 + 0x7F;
-        o1 = (tmp1 + tmp6 + 0x7F) >> 8;
-        o6 = tmp1 - tmp6 + 0x7F;
-        o2 = (tmp2 + tmp5 + 0x7F) >> 8;
-        o5 = tmp2 - tmp5 + 0x7F;
-        o4 = (tmp3 + tmp4 + 0x7F) >> 8;
-        o3 = (tmp3 - tmp4 + 0x7F) >> 8;
-        w0 = ((o0 & 0xFF) << 16) | (o1 & 0xFF);
-        w1 = ((o2 & 0xFF) << 16) | (o3 & 0xFF);
-        w2 = ((o5 >> 8) & 0xFF) | ((o4 & 0xFF) << 16);
-        w3 = ((o7 >> 8) & 0xFF) | (((o6 >> 8) & 0xFF) << 16);
-        w0 |= w0 << 8;
-        w1 |= w1 << 8;
-        w2 |= w2 << 8;
+        // Final output stage in libjpeg's order (pixels 0, 7, 1, 6, 2, 5, 4, 3), as in fastidct8x8: each pixel
+        // goes into the word that holds its pair of the row (w0 = pixels 0 1, w1 = 2 3, w2 = 4 5, w3 = 6 7), then
+        // every pixel is doubled across. The doublings must follow all eight pixels, w3 before w2 before w1.
+        w0 = (u8)((tmp0 + tmp7 + 0x7F) >> 8) << 16;
+        w3 = (u8)((tmp0 - tmp7 + 0x7F) >> 8);
+        w0 |= (u8)((tmp1 + tmp6 + 0x7F) >> 8);
+        w3 |= (u8)((tmp1 - tmp6 + 0x7F) >> 8) << 16;
+        w1 = (u8)((tmp2 + tmp5 + 0x7F) >> 8) << 16;
+        w2 = (u8)((tmp2 - tmp5 + 0x7F) >> 8);
+        w2 |= (u8)((tmp3 + tmp4 + 0x7F) >> 8) << 16;
+        w1 |= (u8)((tmp3 - tmp4 + 0x7F) >> 8);
         w3 |= w3 << 8;
+        w2 |= w2 << 8;
+        w1 |= w1 << 8;
+        w0 |= w0 << 8;
         ((u32 *)dst)[0] = w0;
         ((u32 *)dst)[1] = w1;
         ((u32 *)dst)[2] = w2;
