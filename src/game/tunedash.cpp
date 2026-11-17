@@ -8,14 +8,6 @@
 #include "game/joy.h"
 #include "game/gart.h"
 
-struct Box {
-    const char* name;  // offset 0x0
-    V2 pos;            // offset 0x4
-    s32 c;             // offset 0xC
-    f32 w;             // offset 0x10
-    f32 h;             // offset 0x14
-};
-
 // Camera: common.h's PlainValMatrix.
 // joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
 // JoyStatus: game/joy.h.
@@ -94,7 +86,7 @@ int fn_802044E8(void) {
     u32 normal;
     f32 rowH;
     TextElem *n2;
-    Box *list;
+    BoxElem *list;
     u32 selected;
     int first;
     int i;
@@ -109,7 +101,7 @@ int fn_802044E8(void) {
             n1 = lbl_8055ED44->Find("name1");
             n2 = lbl_8055ED44->Find("name2");
             v1 = lbl_8055ED44->Find("value1");
-            list = (Box*)lbl_8055ED44->FindBox("listbox");
+            list = (BoxElem*)lbl_8055ED44->FindBox("listbox");
             if (n1 && n2 && v1 && list) {
                 normal = n1->color;
                 selected = n2->color;
