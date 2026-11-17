@@ -175,7 +175,7 @@ public:
         still = 0;
         style = 0;
         progress[0] = 0;
-        lbl_804B3048.Add((u32)this);
+        lbl_804B3048.AppendSlot() = (u32)this;
         title[0] = 0;
         frame = 0;
     }
