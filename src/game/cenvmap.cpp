@@ -99,7 +99,6 @@ s32 lbl_8055ED1C;  // current object texture
 TFixed<EnvTex, 64> lbl_8048897C;
 EFrame lbl_80488B88;
 
-static inline f32 EnvLerp(f32 lo, f32 span, f32 t) { return lo + t * span; }
 
 // Horizontal part of v, scaled.
 static inline void Flatten(ValVec3* o, const ValVec3* v, f32 k) {
@@ -177,7 +176,7 @@ void fn_80202D50(ValVec3 dir) {
             f32 t = InvLerp(a->idx, b->idx, elev);
             t = 1.0f < t ? 1.0f : t;
             t = t > 0.0f ? t : 0.0f;
-            t = EnvLerp(0.0f, 1.0f, t);
+            t = AddScaledF(0.0f, 1.0f, t);
             void* tb = fn_802CA294(b->tex);
             void* ta = fn_802CA294(a->tex);
             fn_802D94E4(fn_802CA294(lbl_8055ED0C), ta, tb, t);
@@ -273,8 +272,7 @@ void fn_80202F58(const ValVec3* v, const EFrame* f, EFrame* out) {
     fn_802C8D74();
 }
 
-/* Helper name unproven */ static inline f32 EDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
-#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = EDot3(d.x, (m)->x.x, d.y, (m)->x.y, d.z, (m)->x.z);             f32 y = EDot3(d.x, (m)->y.x, d.y, (m)->y.y, d.z, (m)->y.z);             f32 z = EDot3(d.x, (m)->z.x, d.y, (m)->z.y, d.z, (m)->z.z);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag((const Vec*)&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
+#define ENV_PROJECT(m, w, d, sx, sy)                                      d.x = (w).x - (m)->pos.x;                                             d.y = (w).y - (m)->pos.y;                                             d.z = (w).z - (m)->pos.z;                                             {                                                                         f32 x = Dot3(d.x, (m)->x.x, d.y, (m)->x.y, d.z, (m)->x.z);             f32 y = Dot3(d.x, (m)->y.x, d.y, (m)->y.y, d.z, (m)->y.z);             f32 z = Dot3(d.x, (m)->z.x, d.y, (m)->z.y, d.z, (m)->z.z);             d.x = x;                                                              d.y = y;                                                              d.z = z;                                                          }                                                                     {                                                                         f32 len = PSVECMag((const Vec*)&d);                                               if (0.01f > len) {                                                        len = 0.01f;                                                      }                                                                     f32 s = 1.0f / len;                                                   d.x *= s;                                                             d.y *= s;                                                             d.z *= s;                                                         }                                                                     sx = 73.98844f * d.x / (1.0f + d.y);                                  sy = 73.98844f * d.z / (1.0f + d.y);
 
 // Terrain silhouette rings around the camera.
 
@@ -327,9 +325,9 @@ static inline void EnvProject(const EFrame* m, const ValVec3& w, ValVec3& d, f32
     d.y = w.y - f[10];
     d.z = w.z - f[11];
     {
-    f32 x = EDot3(d.x, f[0], d.y, f[1], d.z, f[2]);
-    f32 y = EDot3(d.x, f[3], d.y, f[4], d.z, f[5]);
-    f32 z = EDot3(d.x, f[6], d.y, f[7], d.z, f[8]);
+    f32 x = Dot3(d.x, f[0], d.y, f[1], d.z, f[2]);
+    f32 y = Dot3(d.x, f[3], d.y, f[4], d.z, f[5]);
+    f32 z = Dot3(d.x, f[6], d.y, f[7], d.z, f[8]);
     d.x = x;
     d.y = y;
     d.z = z;

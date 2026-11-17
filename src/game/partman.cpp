@@ -955,7 +955,6 @@ void PartSys::DrawAnimated(Particle* p, int n) {
     batch.Flush();
 }
 
-static inline f32 Lerp_hm(f32 lo, f32 range, f32 t) { return lo + t * range; }  /* Helper name unproven */
 
 void PartSys::DrawRotating(Particle* p, int n) {
     PlainValMatrix* cam = fn_802C86DC();
@@ -991,10 +990,10 @@ void PartSys::DrawRotating(Particle* p, int n) {
         q[0].pos.z = pos.z + a.z * -size + b.z * size;
         f32 posY = pos.y;
         q[0].pos.y = posY + a.y * -size + b.y * size;
-        q[1].pos.Set(Lerp_hm(q[0].pos.x, two, a.x), Lerp_hm(q[0].pos.y, two, a.y), Lerp_hm(q[0].pos.z, two, a.z));
-        q[2].pos.x = Lerp_hm(q[1].pos.x, mtwo, b.x);
-        q[2].pos.y = Lerp_hm(q[1].pos.y, mtwo, b.y);
-        q[2].pos.z = Lerp_hm(q[1].pos.z, mtwo, b.z);
+        q[1].pos.Set(AddScaledF(q[0].pos.x, two, a.x), AddScaledF(q[0].pos.y, two, a.y), AddScaledF(q[0].pos.z, two, a.z));
+        q[2].pos.x = AddScaledF(q[1].pos.x, mtwo, b.x);
+        q[2].pos.y = AddScaledF(q[1].pos.y, mtwo, b.y);
+        q[2].pos.z = AddScaledF(q[1].pos.z, mtwo, b.z);
         q[3].pos.x = q[0].pos.x + b.x * mtwo;
         q[3].pos.y = q[0].pos.y + b.y * mtwo;
         q[3].pos.z = q[0].pos.z + b.z * mtwo;

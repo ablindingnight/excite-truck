@@ -2,6 +2,7 @@
 #include "game/common.h"
 #include "game/gart.h"
 #include "game/menustate.h"
+#include "game/mathutil.h"
 void* operator new(unsigned long size, const char* tag);
 void* operator new[](unsigned long,const char*);
 extern "C" {
@@ -241,14 +242,13 @@ extern CreditTextDescFields lbl_80346364;
 extern const char lbl_8055C490[8];
 
 }
-static inline f32 CreditObservedMax(f32 a,f32 b){return a>b?a:b;}
 inline CreditGlyphStorageObservedNew::CreditGlyphStorageObservedNew(int n){void* buffer=__nwa__FUlPCc(n*32,lbl_8055C490);items=buffer;capacity=n;count=0;}
 inline CreditGlyphBatchFields::CreditGlyphBatchFields(int n):CreditGlyphStorageObservedNew(n),allocation(items){}
 static inline void CreditGroupInit(CreditFontGroupFields* self,int capacity) {
 
-    self->glyphs.inverseX=(1.0f)/CreditObservedMax((0.0010000000474974513f),self->desc.lifetime);
-    self->glyphs.inverseY=(255.0f)/CreditObservedMax((0.0010000000474974513f),self->desc.lifetime);
-    self->glyphs.inverseZ=(1.0f)/CreditObservedMax((0.0010000000474974513f),self->desc.fadeTime);
+    self->glyphs.inverseX=(1.0f)/MaxF((0.0010000000474974513f),self->desc.lifetime);
+    self->glyphs.inverseY=(255.0f)/MaxF((0.0010000000474974513f),self->desc.lifetime);
+    self->glyphs.inverseZ=(1.0f)/MaxF((0.0010000000474974513f),self->desc.fadeTime);
     self->glyphs.count=0;self->glyphs.elapsed=(0.0f);
 }
 

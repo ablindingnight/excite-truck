@@ -5,6 +5,7 @@
 #include "game/uistyle.h"
 #include "game/gtext.h"
 #include "game/fonttext.h"
+#include "game/mathutil.h"
 struct UIStyleRecordFields {
     u8 active; // Three bytes of natural alignment, not semantic fields.
     BitmapFont* resource04; GTextFont* resource08; u32 colors0C[5]; u32 colors20[5]; // +8 is the font resource used by these helpers.
@@ -203,7 +204,6 @@ __declspec(section ".data") static const char lbl_803400E0[12] = "\x63\x6F\x6C\x
 __declspec(section ".data") static const char lbl_803400EC[28] = "\x63\x6F\x6C\x6F\x72\x5F\x63\x79\x63\x6C\x65\x5F\x62\x6C\x61\x63\x6B\x5F\x6F\x75\x74\x6C\x69\x6E\x65";
 }
 static inline int StyleAddPair(int a,int b) { return a+b; }
-static inline f32 StyleMultiply(f32 a,f32 b) { return a*b; }
 
 
 
@@ -552,7 +552,7 @@ int fn_8022B620(int style,const char* text) {
             f32 scale;
             if(s->height<1.0f) scale=1.0f;
             else scale=s->height/(f32)fn_80232B70(s->resource08);
-            if(s->field38&16) bottom=(int)(StyleMultiply(scale*(f32)fn_80232B70(s->resource08),0.5f));
+            if(s->field38&16) bottom=(int)(Mul(scale*(f32)fn_80232B70(s->resource08),0.5f));
             else if(s->field38&32) bottom=(int)(scale*(f32)fn_80232B78(s->resource08));
             else if(s->field38&64) bottom=(int)(scale*(f32)fn_80232B70(s->resource08));
             else bottom=0;
@@ -636,12 +636,12 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
         u32 current=frame%fn_80235FD8(s->field64_2);
-        if(s->field38&16)py+=StyleMultiply(fn_80235F64(s->field64_2,current),0.5f);
+        if(s->field38&16)py+=Mul(fn_80235F64(s->field64_2,current),0.5f);
         else if(s->field38&64)py+=fn_80235F64(s->field64_2,current);
-        if(s->field38&4)px-=StyleMultiply(lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current),0.5f);
+        if(s->field38&4)px-=Mul(lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current),0.5f);
         else if((s->field38&2)&&text&&s->resource08) {
             f32 scale=fn_8022CA40(s);
-            px-=StyleMultiply(fn_8023293C(s->resource08,text,1.0f),scale);
+            px-=Mul(fn_8023293C(s->resource08,text,1.0f),scale);
         }
         f32 imageWidth=lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current);
         f32 imageHeight=fn_80235F64(s->field64_2,current);
@@ -673,9 +673,9 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
     } else if(alternate) {
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
-        if(s->field38&16)py+=StyleMultiply(height,0.5f);
+        if(s->field38&16)py+=Mul(height,0.5f);
         else if(s->field38&64)py+=height;
-        if(s->field38&4)px-=StyleMultiply(lbl_8055E050.active->horizontalBias+width,0.5f);
+        if(s->field38&4)px-=Mul(lbl_8055E050.active->horizontalBias+width,0.5f);
         else if(s->field38&2)px-=lbl_8055E050.active->horizontalBias+width;
         fn_80230924(s->colors20[frame],px,py,px+width,py-height,depth);
     }
