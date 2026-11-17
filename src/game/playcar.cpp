@@ -1522,24 +1522,33 @@ void PlayerDriver_vf48(u8* p) {
         mag = VMag(&w);
         f32 slip;
         if (mag > 0.0001f) {
-            f32 cs;
             f32 inv;
             inv = 1.0f / mag;
             f32 t;
+            f32 yDiag;
+            f32 zDiag;
+            f32 xx;
+            f32 yy;
+            f32 zz;
+            f32 cs;
             ax = inv * w.x;
             ay = inv * w.y;
             az = inv * w.z;
             sn = sin(mag);
             cs = cos(mag);
+            /* The axis-angle rows in rigid's exact form (0fccfbd8b): squares named, t*ax and t*ay written in each
+               entry, the y and z diagonals computed into named locals ahead of their rows. The rows still go
+               through AxisRow: binding spin's elements by reference is what makes spin a referenced object, so
+               SpinXform's matrix reads become parameter objects (loaded before the vector reads, as in retail). */
+            xx = ax * ax;
+            yy = ay * ay;
+            zz = az * az;
             t = 1.0f - cs;
-            f32 yy = ay * ay;
-            f32 zz = az * az;
-            f32 tx = t * ax;
-            f32 xx = ax * ax;
-            f32 ty = t * ay;
-            AxisRow(spin[0], spin[1], spin[2], cs + t * xx, sn * az + ay * tx, az * tx - sn * ay);
-            AxisRow(spin[3], spin[4], spin[5], ay * tx - sn * az, cs + t * yy, az * ty + sn * ax);
-            AxisRow(spin[6], spin[7], spin[8], az * tx + sn * ay, az * ty - sn * ax, cs + t * zz);
+            AxisRow(spin[0], spin[1], spin[2], cs + t * xx, ay * (t * ax) + sn * az, az * (t * ax) - sn * ay);
+            yDiag = cs + t * yy;
+            AxisRow(spin[3], spin[4], spin[5], ay * (t * ax) - sn * az, yDiag, az * (t * ay) + sn * ax);
+            zDiag = cs + t * zz;
+            AxisRow(spin[6], spin[7], spin[8], az * (t * ax) + sn * ay, az * (t * ay) - sn * ax, zDiag);
         } else {
             spin[0] = 1.0f;
             spin[1] = 0.0f;
