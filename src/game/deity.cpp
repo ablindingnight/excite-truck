@@ -15,6 +15,7 @@
 // named constant defined before any code whose value is not folded. A one-field const struct gives exactly that
 // (type unproven; same idiom as placecar's lbl_80562650).
 #include "game/gridtune.h"
+#include "game/mathutil.h"
 extern const GridTune lbl_805625B8;
 const GridTune lbl_805625B8 = {5.0f};
 
@@ -267,7 +268,6 @@ static inline void RecordCrossing(s32 car, f32 tm) {
     }
 }
 
-static inline f32 Scale(f32 v, f32 k) { return v * k; }  /* Helper name unproven */
 static inline void CountCrossing(DeityCar* c, IdealPoint* from, IdealPoint* to) {  /* Helper name unproven */
     u32 n2;
     s32 idx;
@@ -290,7 +290,7 @@ static inline void CountCrossing(DeityCar* c, IdealPoint* from, IdealPoint* to) 
         for (IdealPoint* p = from->next, *e = to->next; p != e; p = p->next) {
             if (p->ilpos == 0) {
                 f32 now = lbl_8055E3C8;
-                f32 tm = now - Scale((1.0f / 59.94f) * (f32)(idx + 1), 0.0625f);
+                f32 tm = now - Mul((1.0f / 59.94f) * (f32)(idx + 1), 0.0625f);
                 RecordCrossing(idx, tm);
                 break;
             }
@@ -710,9 +710,6 @@ void fn_801B1A5C(DeityCar* c) {
 
 }  // extern "C"
 
-static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
 extern "C" {
 u32 fn_801363A0(LineFollower* f, const ILPos* p);
@@ -794,7 +791,7 @@ void DeityCar::Update(void) {
             }
         }
         f32 t = MaxF(MinF(1.0f, (lead - 2.0f) / 8.0f), 0.0f);
-        Car()->boost = LerpF(0.0f, 1.0f, t);
+        Car()->boost = Lerp(0.0f, 1.0f, t);
     }
 }
 #pragma pop
@@ -990,8 +987,7 @@ f32 fn_801B88BC(void);
 f32 fn_8013B650(s32 car);  // AI qualifying time
 int fn_801B25B0(const s32* pa, const s32* pb);
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
-static inline int NearZero(f32 x) { return AbsF(x) <= __float_epsilon[0]; }
+static inline int NearZero(f32 x) { return FAbs(x) <= __float_epsilon[0]; }
 
 // Race start: the intro timer (short in test mode), cleared race counters, every car on its line, and the
 // starting order from the qualifying times.
@@ -1211,9 +1207,7 @@ int fn_801B2F40(int place) { return lbl_80435C30[place]; }
 
 u32 fn_801B2F54(int i) { return *(u32*)((u8*)lbl_8055E684[i].State() + 0x10); }
 
-static inline double AbsD(double v) { return __fabs(v); }
 
-/* Helper name unproven */
 static inline s32 LapDiff(s32 hi, s32 lo) { return hi - lo; }
 #pragma push
 #pragma opt_dead_assignments off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_801B2F90 exact with it, 98.44 without */
