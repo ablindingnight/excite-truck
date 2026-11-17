@@ -12,8 +12,8 @@
 #include "game/math_types.h"
 #include "game/carbody.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 extern "C" {
 double sqrt(double x);

@@ -6,6 +6,7 @@
 #include "game/weather.h"
 #include "macros.h"
 #include <revolution/MTX.h>
+#include "game/mathutil.h"
 
 // LightFrame: vecmatrix.h's VecMatrix.
 struct LightCar {
@@ -67,7 +68,6 @@ s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 tex);
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {
@@ -109,8 +109,6 @@ static inline int ColorByte2(f32 f) {  /* Helper name unproven */
     return v < 255 ? v : 255;
 }
 
-/* Helper name unproven */
-static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 static inline u32 MakeColor(u8 r, u8 g, u8 b) { return ARGB(0xFF, r, g, b); }
 
 static const QuadIdx lbl_802FA9B0 = {{0, 1, 2, 1, 2, 3}};

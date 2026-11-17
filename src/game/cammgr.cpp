@@ -24,6 +24,7 @@ public:
 };
 
 #include "game/words12.h"
+#include "game/mathutil.h"
 
 class CenterLine;
 
@@ -226,7 +227,6 @@ extern f32 lbl_8055C4BC;  // funky fov scale
 extern s32 lbl_8055C4B4;  // funky fov ease start time
 extern s32 lbl_8055C4B8;  // funky fov ease end time
 
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 ClampF(f32 x) {
     x = lbl_80563C2C < x ? lbl_80563C2C : x;
     return x > lbl_80563C20 ? x : lbl_80563C20;
@@ -564,20 +564,19 @@ void fn_80267130(CamView* p) {
 }
 
 // KFrame: common.h's PlainValMatrix.
-static inline f32 KDot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void KMulVec(ValVec3* out, const ValVec3* in, const PlainValMatrix* m) {
     if (out == in) {
-        f32 x = KDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
-        f32 y = KDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
-        f32 z = KDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
+        f32 x = Dot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        f32 y = Dot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        f32 z = Dot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = KDot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
-        out->y = KDot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
-        out->z = KDot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
+        out->x = Dot3(in->x, m->basis[0].x, in->y, m->basis[1].x, in->z, m->basis[2].x);
+        out->y = Dot3(in->x, m->basis[0].y, in->y, m->basis[1].y, in->z, m->basis[2].y);
+        out->z = Dot3(in->x, m->basis[0].z, in->y, m->basis[1].z, in->z, m->basis[2].z);
     }
 }
 
@@ -1135,7 +1134,6 @@ struct MountView {
 
 // Fixed mount camera on the ideal line: for the current and the next mount, place both mount points in
 // the line's frame (an average of two samples), then blend from one mount to the other over time.
-static inline f32 CamLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 // d += v * k. Returns d: chained calls reload through the returned reference, which the optimizer cannot forward
 // (the target's frsp right after each stfs).
@@ -1154,8 +1152,6 @@ static inline void SetM3(f32* o, f32 x, f32 y, f32 z) {
     o[2] = z;
 }
 
-// Helper name unproven: lerp with the fraction first.
-static inline f32 LerpK(f32 k, f32 a, f32 b) { return a + k * (b - a); }
 
 void fn_80268358(CamRec* c) {
     RVec3 mv[4] = {RVec3(lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2]), RVec3(lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]), RVec3(lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2]), RVec3(lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2])};
@@ -1191,8 +1187,8 @@ void fn_80268358(CamRec* c) {
             __ct__13IdealFollowerFiP10CenterLine(&f, 0, 0);
             p0 = (f32*)f.seg;
             p1 = (f32*)f.seg->next;
-            x = LerpK(f.t, p0[0], p1[0]);
-            z = LerpK(f.t, p0[1], p1[1]);
+            x = LerpT(f.t, p0[0], p1[0]);
+            z = LerpT(f.t, p0[1], p1[1]);
             ValVec3 v;
             CamXZ xz(x, z);
             v.x = xz.x;
@@ -1244,11 +1240,11 @@ void fn_80268358(CamRec* c) {
     ka = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F0) : t / lbl_8055C4F0;
     f32 kb;
     kb = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F4) : t / lbl_8055C4F4;
-    RVec3 bl(CamLerp(out[0].b.x, out[1].b.x, ka), CamLerp(out[0].b.y, out[1].b.y, ka), CamLerp(out[0].b.z, out[1].b.z, ka));
-    RVec3 al(CamLerp(out[0].a.x, out[1].a.x, kb), CamLerp(out[0].a.y, out[1].a.y, kb), CamLerp(out[0].a.z, out[1].a.z, kb));
-    RVec3 up(CamLerp(out[0].up.x, out[1].up.x, ka), CamLerp(out[0].up.y, out[1].up.y, ka), CamLerp(out[0].up.z, out[1].up.z, ka));
+    RVec3 bl(Lerp(out[0].b.x, out[1].b.x, ka), Lerp(out[0].b.y, out[1].b.y, ka), Lerp(out[0].b.z, out[1].b.z, ka));
+    RVec3 al(Lerp(out[0].a.x, out[1].a.x, kb), Lerp(out[0].a.y, out[1].a.y, kb), Lerp(out[0].a.z, out[1].a.z, kb));
+    RVec3 up(Lerp(out[0].up.x, out[1].up.x, ka), Lerp(out[0].up.y, out[1].up.y, ka), Lerp(out[0].up.z, out[1].up.z, ka));
     PSVECNormalize((const Vec*)&up.x, (Vec*)&up.x);
-    c->fov = CamLerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
+    c->fov = Lerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
     fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
 }
 
@@ -1299,10 +1295,10 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
     CamPt pos;
     CamPt d;
     CamPt pt;
-    pos.x = LerpK(t, seg->pos.x, next->pos.x);
-    pos.y = LerpK(t, seg->pos.y, next->pos.y);
-    d.x = LerpK(t, seg->dir.x, next->dir.x);
-    d.y = LerpK(t, seg->dir.y, next->dir.y);
+    pos.x = LerpT(t, seg->pos.x, next->pos.x);
+    pos.y = LerpT(t, seg->pos.y, next->pos.y);
+    d.x = LerpT(t, seg->dir.x, next->dir.x);
+    d.y = LerpT(t, seg->dir.y, next->dir.y);
     inv = lbl_80563C2C / (f32)sqrt(Dot4_hm(d.x, d.y, d.x, d.y));
     f32 px;
     f32 c;

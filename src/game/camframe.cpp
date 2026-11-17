@@ -5,6 +5,7 @@
 #include "game/rmtx.h"
 #include "game/camblend.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -93,7 +94,6 @@ ModuleTag lbl_8055F518;
 
 extern "C" {
 
-static inline f32 FrameLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 void fn_8026E22C(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     Quat qa;
@@ -104,7 +104,7 @@ void fn_8026E22C(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     MtxToQuat(b, &qb);
     fn_8012F57C(&q, &qa, &qb, t);
     QuatToMtx(out, &q);
-    pos.Set(FrameLerp(a->pos.x, b->pos.x, t), FrameLerp(a->pos.y, b->pos.y, t), FrameLerp(a->pos.z, b->pos.z, t));
+    pos.Set(Lerp(a->pos.x, b->pos.x, t), Lerp(a->pos.y, b->pos.y, t), Lerp(a->pos.z, b->pos.z, t));
     out->pos = pos;
 }
 

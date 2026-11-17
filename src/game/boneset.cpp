@@ -6,6 +6,7 @@
 #include "game/vec3_init.h"
 #include "game/math_types.h"
 #include "game/plainvec.h"
+#include "game/mathutil.h"
 
 struct BMtx33 {
     f32 xx, xy, xz;
@@ -87,7 +88,6 @@ static inline void MtxMul(BMtx33& d, const BMtx33& a, const BMtx33& b) {
     }
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(BVec* out, const BVec* in, const BMtx33* m) {
     if (out == in) {

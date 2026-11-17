@@ -1,6 +1,7 @@
 // Car element manager (0x801D1184-0x801D14EC): a Drawable that owns one engine-curve record per car and
 // refreshes it from the car every frame. Names are guesses apart from the "carelmgr"/"carelem" tags.
 #include "game/common.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -106,8 +107,6 @@ void CarElem::Fetch(int car) {
 
 void CarElem::Clear(int car) { f0 = 0.0f; }
 
-// Helper name unproven: a square through an inline.
-static inline f32 Sq(f32 v) { return v * v; }
 /* Helper name unproven: evaluates the element curve at x (two quadratic pieces) scaled by k. */
 inline void CarElem::ApplyCurve(f32 x, f32 k) {
     f32 t;

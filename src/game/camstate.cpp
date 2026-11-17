@@ -10,10 +10,9 @@
 #include "game/math_types.h"
 #include "game/plainvec.h"
 #include <string.h>
+#include "game/mathutil.h"
 // Helpers unproven (names and existence): the forms that keep retail's operand order and unfolded identities where a
 // plain literal does not.
-static inline f32 CsMul(f32 a, f32 b) { return a * b; }
-static inline f32 CsMix(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 static inline void CsAddScaled(f32* o, const f32* a, const f32* d, f32 s) { o[0] = a[0] + d[0] * s; o[1] = a[1] + d[1] * s; o[2] = a[2] + d[2] * s; }
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -44,7 +43,7 @@ void fn_80273B4C(u8* p) {
         f32 euler[3];
         f32 side = U8(car, 0x260C) ? -1.0f : 1.0f;
         f32 zero = 0.0f;
-        f32 ang = CsMul(zero, 0.7853982f);
+        f32 ang = Mul(zero, 0.7853982f);
         euler[0] = zero;
         euler[1] = ang * side;
         euler[2] = zero;
@@ -55,7 +54,6 @@ void fn_80273B4C(u8* p) {
 }
 
 // CFrame: common.h's PlainValMatrix.
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(CVec3* out, const CVec3* in, const PlainValMatrix* m) {
     if (out == in) {
@@ -311,7 +309,7 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
         cr->f194 = fov;
     } else {
         f32 prev = cr->f194;
-        f32 f = CsMix(prev, v, 1.0f);
+        f32 f = Lerp(prev, v, 1.0f);
         cr->fov = f;
         cr->f194 = f;
     }
@@ -549,7 +547,6 @@ f32 lbl_8055F588;         // last ground height
 
 
 // Orbits the camera around its target at `radius`, keeping it above the ground.
-static inline f32 CsLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     CamRec* cr = (CamRec*)p;
@@ -566,8 +563,8 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
     pos.z = cr->carFrame.pos.v[2] + off.z;
     if (!fn_801E9E30((u8*)&cr->h1EC, &pos.x)) {
         pos.y = 2.0f + lbl_8055F588;
-        CsVec t(CsLerp(pos.x, cr->carFrame.pos.v[0], 0.5f), CsLerp(pos.y, cr->carFrame.pos.v[1], 0.5f),
-                CsLerp(pos.z, cr->carFrame.pos.v[2], 0.5f));
+        CsVec t(Lerp(pos.x, cr->carFrame.pos.v[0], 0.5f), Lerp(pos.y, cr->carFrame.pos.v[1], 0.5f),
+                Lerp(pos.z, cr->carFrame.pos.v[2], 0.5f));
         pos = t;
     } else {
         lbl_8055F588 = pos.y;

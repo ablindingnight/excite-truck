@@ -3,6 +3,7 @@
 // next gear pulls harder, and shifts automatically with a short delay between shifts. Names are
 // guesses apart from the "carelmgr"/"carelem" tags.
 #include "game/common.h"
+#include "game/mathutil.h"
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
@@ -137,13 +138,12 @@ extern "C" void fn_801D14EC(void) { new ("carelmgr") CarGearMgr; }
 
 void CarGear::Update(int car) { Fetch(car); }
 
-static inline f32 GearLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 void CarGear::Fetch(int car) {
     RaceCar* c = lbl_804348E8[car];
     CarElem* e = &lbl_8055E908[car];
     f28 = c->gears.wheel;
-    f24 = 0.10471976f * GearLerp(c->f23E8, c->f2544, c->gears.f2C) / f28;
+    f24 = 0.10471976f * Lerp(c->f23E8, c->f2544, c->gears.f2C) / f28;
     GearSrc* src = &c->gears;
     f32 max = e->f30;
     memset(gears, 0, sizeof(gears));
@@ -222,7 +222,7 @@ void CarGear::Compute(int car) {
         f32 top = 1.12f * hi;
         f32 lo = c->f25CC;
         f32 speed = (lo + 0.15f * (top - lo)) / f24;
-        f32 down = GearLerp(cur->down1, cur->down0, load);
+        f32 down = Lerp(cur->down1, cur->down0, load);
         if (g > 0) {
             if (speed > cur->up) {
                 if (g < count) {
