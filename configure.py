@@ -976,7 +976,7 @@ config.libs.append(
             Object(Matching, "game/ident.cpp"),
             Object(Matching, "game/achieve.cpp"),
             Object(Matching, "game/driver.cpp"),
-            Object(NonMatching, "game/loading.cpp"),
+            Object(Matching, "game/loading.cpp"),
             Object(Matching, "game/stats.cpp"),
             Object(Matching, "game/davmap.cpp"),
             Object(Matching, "game/eve.cpp"),
