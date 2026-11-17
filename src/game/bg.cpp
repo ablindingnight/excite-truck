@@ -2,12 +2,7 @@
 // plain function or an object with an Update method, run once a frame (or when 16 ticks have passed);
 // removals during a run are deferred. Names are guesses.
 #include "game/common.h"
-
-class BgObject {
-public:
-    virtual ~BgObject(void);
-    virtual void Update(void);  // 0xC
-};
+#include "game/bgobject.h"
 
 typedef void (*BgFunc)(void);
 

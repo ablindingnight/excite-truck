@@ -3,6 +3,7 @@
 // are freed when they stop, and creating device sounds through the mixer. Names are guesses apart
 // from the file name and messages.
 #include "game/common.h"
+#include "game/bgobject.h"
 #include "game/mixer.h"
 #include "game/sound.h"
 #include "game/math_types.h"
@@ -20,12 +21,6 @@ const char* fn_80206570(int cls);        // sound class name
 }
 
 void* operator new[](size_t size, const char* tag);
-
-class BgObject {
-public:
-    virtual ~BgObject(void) {}
-    virtual void Update(void) = 0;
-};
 
 extern "C" {
 void fn_80127CF4(BgObject* obj, const char* name);

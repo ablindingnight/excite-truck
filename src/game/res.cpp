@@ -3,6 +3,7 @@
 // loaded synchronously or through a background queue, plus double-buffered streaming of single
 // resources. Little-endian headers are byte-swapped on load. Names are guesses.
 #include "game/common.h"
+#include "game/bgobject.h"
 #include "game/pool.h"
 #include "game/byteswap.h"
 #include "game/strcopy.h"
@@ -79,12 +80,6 @@ void fn_802E2D74(int ms);    // sleep
 
 void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
-
-class BgObject {
-public:
-    virtual ~BgObject(void) {}
-    virtual void Update(void) = 0;
-};
 
 extern "C" {
 void fn_80127CF4(BgObject* obj, const char* name);
