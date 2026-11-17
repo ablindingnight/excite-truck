@@ -695,7 +695,7 @@ struct LocalVec {
         T* p = &data[count++];
         *p = v;
     }
-    int Find(const T& v) {
+    int Find(const T& v) const {
         for (int i = 0; i < count; i++) {
             if (data[i] == v) {
                 return i;
