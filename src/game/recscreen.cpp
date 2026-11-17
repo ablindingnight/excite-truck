@@ -138,6 +138,14 @@ s32 fn_802168E4(void);
 void fn_80214A9C(s32 s);
 void fn_80214AF0(s32 s);
 
+// Whether a record row shows its car icon. MWCC: an enum-typed local that holds a constant is not propagated
+// by the front end, so it stays a variable and the back end gives it its own `li` (literals share one register:
+// FACTS 2026-11-17 G5 run 3). Retail loads a fresh zero for the five stores below. Names unproven.
+enum IconShow {
+    kIconHidden,  // 0
+    kIconShown
+};
+
 // The event records screen ("ep_records.lyt"): the five best scores of one event and difficulty with
 // their grades, times and cars, the event's best time and its location.
 void fn_8025C204(int event, int difficulty) {
@@ -145,16 +153,17 @@ void fn_8025C204(int event, int difficulty) {
     CarIconTable* set = lbl_8055F2E4;
     ScoreRow rows[5];
     RecordIcon icons[5];
-    icons[0].visible = 0;
-    icons[1].icons = set;
+    IconShow hidden = kIconHidden;
     icons[0].icons = set;
-    icons[1].visible = 0;
+    icons[0].visible = hidden;
+    icons[1].icons = set;
+    icons[1].visible = hidden;
     icons[2].icons = set;
-    icons[2].visible = 0;
+    icons[2].visible = hidden;
     icons[3].icons = set;
-    icons[3].visible = 0;
+    icons[3].visible = hidden;
     icons[4].icons = set;
-    icons[4].visible = 0;
+    icons[4].visible = hidden;
     for (int i = 0; i < 5; i++) {
         SafeStrCopy(rows[i].score, "-", 20);
         rows[i].grade = "-";
