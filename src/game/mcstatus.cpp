@@ -190,9 +190,6 @@ static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y, const char* lab
 // one is accepted or the check callback reports a result.
 static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
     int sel = cfg->select;
-    f32 ax = 155.0f;
-    f32 ay = -140.0f;
-    const char* accept = "Accept";
     for (;;) {
         int r;
         PlainValMatrix cam;
@@ -262,7 +259,8 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
         }
         y = -70.0f;
         for (int i = 0; i < cfg->count; i++) {
-            f32 pulse = 255.0f * (0.75f + 0.25f * (f32)sin(3.0f * (f32)fn_802E2C20() / 1000.0f));
+            f32 angle = 3.0f * (f32)fn_802E2C20() / 1000.0f;
+            f32 pulse = 255.0f * (0.75f + 0.25f * (f32)sin(angle));
             fn_80232BA4(cfg->entries[i].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
             u32 color;
             if (sel == i) {
@@ -273,7 +271,9 @@ static inline int RunChoices(MemCardDialogBg* bg, McDialogCfg* cfg) {
             fn_80232BA4(cfg->entries[i].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
             y -= 20.0f;
         }
-        DrawAccept(bg, ax, ay, accept);
+        f32 ay = -140.0f;
+        f32 ax = 155.0f;
+        DrawAccept(bg, ax, ay, "Accept");
         fn_802C9A70(1);
         fn_802C855C();
         fn_802C2B48();
