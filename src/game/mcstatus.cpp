@@ -191,6 +191,7 @@ static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y, const char* lab
 static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
     f32 ax;
     f32 ay;
+    char* p;
     int sel = cfg->select;
     for (;;) {
         f32 y;
@@ -223,7 +224,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg) {
         }
         y = y - 40.0f;
         strcpy(text, msg);
-        char* p = text;
+        p = text;
         while (strlen(p)) {
             char* brk = 0;
             char line[0x200] = {0};
