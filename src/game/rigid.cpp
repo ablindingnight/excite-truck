@@ -8,7 +8,10 @@
 #include "game/rvec.h"
 #include "game/corner.h"
 #include "game/rmtx.h"
+// PROVISIONAL: defer this shared inline body to its retail code position.
+#define COLLSHAPE_DEFINE_VF14
 #include "game/collshape.h"
+#undef COLLSHAPE_DEFINE_VF14
 #include "game/collvol.h"
 #include "game/rigid.h"
 #include "game/mathutil.h"
@@ -481,8 +484,7 @@ void RigidBody::OnImpulses(RVec3* f, RVec3* t) {}
 
 void RigidBody::OnImpulse(const RVec3* v, const RVec3* at, int kind, void* c, void* by) {}
 
-// CollShape::vf14 (empty; slot 0x14 of the sphcoll shape tables), by its linker name: CollShape is not declared here.
-extern "C" void vf14__9CollShapeFv(void) {}
+inline void CollShape::vf14(void) {}
 
 void RigidBody::Flush(RVec3* f, RVec3* t) {
     RMat33* ii;
