@@ -112,9 +112,9 @@ static inline void QuatToMtx(BMtx33* m, const BQuat* q) {
     f32 yy = q->y * y2;
     f32 zz = q->z * z2;
     f32 wx = q->w * x2;
-    f32 yz = q->y * z2;
     f32 wy = q->w * y2;
     f32 xz = q->x * z2;
+    f32 yz = q->y * z2;
     f32 wz = q->w * z2;
     f32 xy = q->x * y2;
     m->xx = 1.0f - (yy + zz);
@@ -124,7 +124,7 @@ static inline void QuatToMtx(BMtx33* m, const BQuat* q) {
     m->yy = 1.0f - (xx + zz);
     m->zy = yz - wx;
     m->xz = xz - wy;
-    m->yz = wx + yz;
+    m->yz = yz + wx;
     m->zz = 1.0f - (xx + yy);
 }
 
