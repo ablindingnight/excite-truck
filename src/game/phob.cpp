@@ -320,8 +320,19 @@ u8 lbl_8055E45D;
 u8 lbl_8055E45E;
 u8 lbl_8055E45F;
 f32 lbl_8055E460;
-s32 lbl_8055E464;
-char lbl_8055E468[4];
+extern "C" {
+void fn_80177814(s32* out) {
+    static s32 seed;
+    s32 t = fn_802E2C20();
+    out[0] = (seed + t) % 30000;
+    seed += 0x9947;
+    t = fn_802E2C20();
+    out[1] = (seed + t) % 30000;
+    seed += 0x2F1CD;
+}
+}
+
+s32 lbl_8055E468;
 
 s32 lbl_8055A300 = -1;
 
@@ -352,23 +363,15 @@ static inline void Swap(char& a, char& b) {
 
 extern "C" {
 
-void fn_80177814(s32* out) {
-    static s32 seed;
-    s32 t = fn_802E2C20();
-    out[0] = (seed + t) % 30000;
-    seed += 0x9947;
-    t = fn_802E2C20();
-    out[1] = (seed + t) % 30000;
-    seed += 0x2F1CD;
-}
+
 
 void fn_801778C0(void) {
     int i;
-    lbl_8055E464 = 0;
+    lbl_8055E468 = 0;
     for (i = 0; i < lbl_8055E438; i++) {
         Phob* p = lbl_8055E434[i];
         if (p->vf44() && p->vf40()) {
-            lbl_804340C0[lbl_8055E464++] = p;
+            lbl_804340C0[lbl_8055E468++] = p;
         }
     }
 }
@@ -454,14 +457,14 @@ void fn_80177E14(void) {
         fn_801AD5F0();
         fn_80186DE8();
         fn_801D0F38();
-        for (i = 0; i < lbl_8055E464; i++) {
+        for (i = 0; i < lbl_8055E468; i++) {
             lbl_804340C0[i]->Update();
         }
         fn_801B535C(lbl_8055E434, lbl_8055E438);
     } else {
         fn_801B50B4(lbl_8055E434, lbl_8055E438);
     }
-    for (i = 0; i < lbl_8055E464; i++) {
+    for (i = 0; i < lbl_8055E468; i++) {
         lbl_804340C0[i]->vf20();
     }
 }
@@ -547,7 +550,7 @@ void fn_80177F40(void) {
         fn_8017FF4C(0.016683351f);
         fn_801778C0();
         if (!net) {
-            fn_801E22D0(lbl_804340C0, lbl_8055E464);
+            fn_801E22D0(lbl_804340C0, lbl_8055E468);
         }
         fn_80177E14();
         for (int i = 0; i < lbl_8055E438; i++) {
@@ -588,10 +591,11 @@ int fn_801781C0(s32 x) {
 }
 
 char* fn_801781F4(u32 v) {
-    *(u32*)lbl_8055E468 = v;
-    Swap(lbl_8055E468[0], lbl_8055E468[3]);
-    Swap(lbl_8055E468[1], lbl_8055E468[2]);
-    return lbl_8055E468;
+    static char text[4];
+    *(u32*)text = v;
+    Swap(text[0], text[3]);
+    Swap(text[1], text[2]);
+    return text;
 }
 
 Phob* fn_80178224(void) { return (Phob*)new ("NetCar") NetCar; }
@@ -660,7 +664,7 @@ Phob* fn_801783A8(PhobMsg* m, s32 pos) {
 }
 
 int fn_801784AC(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, s32 g) {
-    return fn_801E2640(a, b, hit, n, tri, x, lbl_804340C0, lbl_8055E464, g);
+    return fn_801E2640(a, b, hit, n, tri, x, lbl_804340C0, lbl_8055E468, g);
 }
 
 static inline void Set3(f32* v, f32 x, f32 y, f32 z) {

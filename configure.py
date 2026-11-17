@@ -1055,7 +1055,7 @@ config.libs.append(
             Object(Matching, "game/techdemo.cpp"),
             Object(NonMatching, "game/crushmaster.cpp"),
             Object(Matching, "game/physics.cpp"),
-            Object(NonMatching, "game/phob.cpp"),
+            Object(Matching, "game/phob.cpp"),
             Object(NonMatching, "game/collvol.cpp"),
             Object(Matching, "game/physdriver.cpp"),
             Object(NonMatching, "game/carbody.cpp"),
