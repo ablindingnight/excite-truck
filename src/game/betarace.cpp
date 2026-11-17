@@ -80,6 +80,28 @@ extern const u32 lbl_8055E234 = MakeILPos(0x7F00, 0);
 static inline s32 NoModel(void) { return -1; }
 
 struct TextElem;
+struct BetaFloatConstant { f32 value; };
+struct BetaDoubleConstant { double value; };
+extern "C" {
+extern const BetaFloatConstant kBetaNegativeOne;
+extern const BetaFloatConstant kBetaNegativeTwo;
+extern const BetaFloatConstant kBetaFinishX;
+extern const BetaFloatConstant kBetaFinishY;
+extern const BetaFloatConstant kBetaDefaultLapLimit;
+extern const BetaFloatConstant kBetaLapLimitStep;
+extern const BetaFloatConstant kBetaDefaultSpeed;
+extern const BetaFloatConstant kBetaSpeedScale;
+extern const BetaFloatConstant kBetaSpeedOption;
+extern const BetaFloatConstant kBetaSpinAngle;
+extern const BetaFloatConstant kBetaBoostScale;
+extern const BetaFloatConstant kBetaHalfTurn;
+extern const BetaDoubleConstant kBetaFullTurn;
+extern const BetaFloatConstant kBetaTimeCredit;
+extern const BetaFloatConstant kBetaRingScale;
+extern const BetaFloatConstant kBetaMilliseconds;
+extern const BetaDoubleConstant kBetaQuarterTurn;
+}
+
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);
 
 
@@ -549,7 +571,7 @@ public:
     void Reset(void) {
         if (anim) {
             state = 0;
-            bonusStart = -1.0f;
+            bonusStart = kBetaNegativeOne.value;
             signal[0] = 0;
             signal[1] = 0;
             signal[2] = 0;
@@ -1147,7 +1169,7 @@ struct RaceTimer {
 };
 
 static inline void InitTimer(RaceTimer* t) {
-    t->limit = GetEvent(fn_801769CC()->event)->node->GetFloat("time_limit", 300.0f);
+    t->limit = GetEvent(fn_801769CC()->event)->node->GetFloat("time_limit", kBetaDefaultLapLimit.value);
     t->limit0 = t->limit;
     t->finishTimeout = fn_80204CFC("finish_timeout");
     t->tick = fn_80207848("clocktick.sfx", 1);
@@ -1559,12 +1581,9 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
 }
 }  // namespace
 
-// Only its initialiser survives (the "Clean Race" literal at the start of .data, after the name table's).
+// The retail data keeps this label after the name table.
 namespace {
-inline const char* CleanRaceName(int i) {
-    const char* names[2] = {"Clean Race", 0};
-    return names[i];
-}
+static char kCleanRaceName[] = "Clean Race";
 }  // namespace
 
 char lbl_80559F0C[] = "";
@@ -2268,6 +2287,14 @@ int BetaCar::Results(FinishAnimation* a) {
     return a->Update(&result, stunts, c->enabled ? c->cars[i].count : 0);
 }
 
+extern "C" {
+extern const BetaFloatConstant kBetaNegativeOne = {-1.0f};
+extern const BetaFloatConstant kBetaNegativeTwo = {-2.0f};
+extern const BetaFloatConstant kBetaFinishX = {8.5f};
+extern const BetaFloatConstant kBetaFinishY = {39.0f};
+
+}
+
 void BetaCar::SetResultsView(FinishAnimation* a) {
     fn_801E7E18();
     if (!result.dnf) {
@@ -2275,8 +2302,8 @@ void BetaCar::SetResultsView(FinishAnimation* a) {
             ArtPlayer* h = a->anim;
             f32 r[4];
             r[0] = 1.5f;
-            r[1] = 8.5f;
-            r[2] = 39.0f;
+            r[1] = kBetaFinishX.value;
+            r[2] = kBetaFinishY.value;
             r[3] = 0.0f;
             if (h) {
                 h->Draw((ArtXform*)r);
@@ -2358,6 +2385,22 @@ void BetaCar::DrawBonusStar(ILayout* l, int n) {
             fn_80147940(l, &e, "star_art", 0);
         }
     }
+}
+
+extern "C" {
+extern const BetaFloatConstant kBetaDefaultLapLimit = {300.0f};
+extern const BetaFloatConstant kBetaLapLimitStep = {15.0f};
+extern const BetaFloatConstant kBetaDefaultSpeed = {57.77778f};
+extern const BetaFloatConstant kBetaSpeedScale = {0.44444445f};
+extern const BetaFloatConstant kBetaSpeedOption = {130.0f};
+extern const BetaFloatConstant kBetaSpinAngle = {0.5235988f};
+extern const BetaFloatConstant kBetaBoostScale = {8.0f};
+extern const BetaFloatConstant kBetaHalfTurn = {3.1415927f};
+extern const BetaDoubleConstant kBetaFullTurn = {(double)6.2831855f};
+extern const BetaFloatConstant kBetaTimeCredit = {30.0f};
+extern const BetaFloatConstant kBetaRingScale = {0.75f};
+extern const BetaFloatConstant kBetaMilliseconds = {0.001f};
+extern const BetaDoubleConstant kBetaQuarterTurn = {(double)1.5707964f};
 }
 
 void BetaCar::Retire(void) {
@@ -2523,12 +2566,9 @@ int fn_8012C33C(const char* name);
 ValueTable* fn_80131810(const char* name);
 double ceil(double x);
 
-// Only its initialiser survives (the "scotland" literal before this function's strings).
+// The retail data keeps this track name before the lap-limit strings.
 namespace {
-inline const char* HomeTrack(int i) {
-    const char* names[2] = {"scotland", 0};
-    return names[i];
-}
+static char kHomeTrack[] = "scotland";
 }  // namespace
 
 f32 fn_8014E7DC(int event, int a) {
@@ -2541,7 +2581,7 @@ f32 fn_8014E7DC(int event, int a) {
     t = GetTrack(e->track);
     key = fn_80205268("time_limit_override_key", a, event);
     if (!e->node->Has(key)) {
-        f32 lim = e->node->GetFloat("time_limit", 300.0f);
+        f32 lim = e->node->GetFloat("time_limit", kBetaDefaultLapLimit.value);
         const char* res = e->node->GetString("resource", "xxx");
         ValueTable* vt;
         fn_8012E81C("ghostcar.res");
@@ -2553,7 +2593,7 @@ f32 fn_8014E7DC(int event, int a) {
         if (vt) {
             f32 lap = vt->FindChild("info")->GetFloat("lap_time");
             fn_80131818(vt);
-            lim = 15.0f * (f32)ceil(lbl_80559EB0 * (lap * e->laps) / 15.0f);
+            lim = kBetaLapLimitStep.value * (f32)ceil(lbl_80559EB0 * (lap * e->laps) / kBetaLapLimitStep.value);
         } else {
             fn_802E30C8("betarace: can't open %s", buf);
         }
@@ -2780,12 +2820,12 @@ inline void BetaMaster::LoadLevel(void) {
     int loaded;
     int i;
     ValueTable* t;
-    hispeedThresh = 57.77778f;
+    hispeedThresh = kBetaDefaultSpeed.value;
     {
         TableRef ref("betarace", "info");
         ValueNode* n = ref.node;
         if (n) {
-            hispeedThresh = 0.44444445f * n->GetFloat("hispeed_thresh", 130.0f);
+            hispeedThresh = kBetaSpeedScale.value * n->GetFloat("hispeed_thresh", kBetaSpeedOption.value);
             scoreFactor = n->GetFloat("score_factor", 1.0f);
             fn_802E30C8("betarace: score_factor = %1.2f", scoreFactor);
         }
@@ -3192,7 +3232,7 @@ static inline void UpdateBumps(FixedList<Token*, 0x20>* l, int& i) {
             m[9] = b->pos[0];
             m[10] = b->pos[1];
             m[11] = b->pos[2];
-            a = fmod(3.1415927f * lbl_8055E3C8, 6.2831855f);
+            a = fmod(kBetaHalfTurn.value * lbl_8055E3C8, kBetaFullTurn.value);
             c = cos(a);
             s = sin(a);
             m[0] = c;
@@ -3233,7 +3273,7 @@ static inline void SpinStar(Pickup* t, PlainValMatrix* body) {  /* Helper name u
     f32 s;
     f32 w;
     w = Wave(lbl_8055E3C8);
-    w *= 0.5235988f;
+    w *= kBetaSpinAngle.value;
     ang = w + t->angle;
     body->origin.x = t->pos[0];
     body->origin.y = t->pos[1];
@@ -3284,7 +3324,7 @@ inline void BetaMaster::vf0C(void) {
     }
     found = 0;
     lead = fn_801B306C();
-    if (!b450 && lead < 8.0f) {
+    if (!b450 && lead < kBetaBoostScale.value) {
         b450 = 1;
         if (preraceSnd && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
             preraceSnd->Play();
@@ -3347,8 +3387,8 @@ inline void BetaMaster::vf0C(void) {
     UpdateBumps(&bumps2, k2);
     if (skipAt > 0.0f && lbl_8055E3C8 > skipAt) {
         timer.b10 = 1;
-        timer.now = timer.limit - 30.0f;
-        skipAt = -1.0f;
+        timer.now = timer.limit - kBetaTimeCredit.value;
+        skipAt = kBetaNegativeOne.value;
     }
     if (!found) {
         timer.b10 = 0;
@@ -3465,8 +3505,8 @@ inline int BetaMaster::vf8C(int p, int key) {
 static inline void DrawPuddleMarker(const Puddle* p, u32 col) {
     V3 a = *(V3*)&p->x;
     V3 b = *(V3*)&p->x;
-    a.y = a.y - 0.75f;
-    b.y += 0.75f;
+    a.y = a.y - kBetaRingScale.value;
+    b.y += kBetaRingScale.value;
     fn_801E41D8(&a, &b, col, p->r);
 }
 // Retail compiled vf48 with dead-assignment elimination off: the mode-1 colour assignment survives (so the car and
@@ -3638,6 +3678,20 @@ static inline void DrawPart(int tex, const s32& model, const Xform* m) {
 }
 
 // The morph gadget: two rings turning against each other, each step 0.75 times smaller.
+static inline void SetRingRotation(Mat3* out, double radians) {
+    const f32 c = cos(radians);
+    const f32 s = sin(radians);
+    out->m[0][0] = c;
+    out->m[0][1] = 0.0f;
+    out->m[0][2] = -s;
+    out->m[1][0] = 0.0f;
+    out->m[1][1] = 1.0f;
+    out->m[1][2] = 0.0f;
+    out->m[2][0] = s;
+    out->m[2][1] = 0.0f;
+    out->m[2][2] = c;
+}
+
 void DrawMorph(const VPos& pos, int tex, int realClock) {
     V3 p;
     Mat3 sc;
@@ -3655,11 +3709,11 @@ void DrawMorph(const VPos& pos, int tex, int realClock) {
     p.y = pos.y;
     p.x = pos.x;
     p.z = z;
-    t = realClock ? 0.001f * fn_802E2C20() : fn_801E7E18();
+    t = realClock ? kBetaMilliseconds.value * fn_802E2C20() : fn_801E7E18();
     a1 = 6.2831855f * (f32)fmod(1.5f * t, 1.0);
     a2 = 6.2831855f * (f32)fmod(0.5f * t, 1.0);
     ring = &lbl_8055E254;
-    s = 0.75f;
+    s = kBetaRingScale.value;
     sc.SetScale(s);
     b.t = p;
     a.t = p;
@@ -3672,22 +3726,22 @@ void DrawMorph(const VPos& pos, int tex, int realClock) {
     b.SetRotX(a1);
     pa = &a;
     pa->SetRotX(a2);
-    s *= 0.75f;
+    s *= kBetaRingScale.value;
     sc.SetScale(s);
     MtxMul(&pa->r, &pa->r, &sc);
-    s *= 0.75f;
+    s *= kBetaRingScale.value;
     sc.SetScale(s);
     MtxMul(&b.r, &b.r, &sc);
     DrawPart(tex, *ring, &a);
     DrawPart(tex, *ring, &b);
     pq = &q;
-    pq->SetRotY(1.5707964f);
+    SetRingRotation(pq, kBetaQuarterTurn.value);
     MtxMul(&b.r, &b.r, pq);
     MtxMul(&a.r, &a.r, &q);
-    s *= 0.75f;
+    s *= kBetaRingScale.value;
     sc.SetScale(s);
     MtxMul(&a.r, &a.r, &sc);
-    s *= 0.75f;
+    s *= kBetaRingScale.value;
     sc.SetScale(s);
     MtxMul(&b.r, &b.r, &sc);
     DrawPart(tex, *ring, &a);
@@ -3732,7 +3786,7 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     f32 half = 0.5f;
     V3Init c(box[0] + half * (box[1] - box[0]), box[2] + half * (box[3] - box[2]), box[4] + half * (box[5] - box[4]));
     V3 n;
-    Scale(&n, &c, -1.0f);
+    Scale(&n, &c, kBetaNegativeOne.value);
     MulVec(&n, &n, &b.r);
     f32 lift = 0.0f;
     b.t.x += n.x;
@@ -3889,21 +3943,23 @@ static inline void Blend(const TextElem* a, const TextElem* b, const char* text,
 static inline f32 Width(TextElem* e, const char* text, ILayout* l) { return fn_80147204(e, text); }
 
 static inline f32 Ease(f32 t) {
-    if (t < -1.0f) {
-        return -1.0f;
+    if (t < kBetaNegativeOne.value) {
+        return kBetaNegativeOne.value;
     } else if (t > 1.0f) {
         return 1.0f;
     } else if (t > 0.0f) {
-        return t * (-2.0f * t * t) + 3.0f * t * t;
+        const f32 cubic = kBetaNegativeTwo.value * t;
+        return t * (cubic * t) + 3.0f * t * t;
     } else {
-        return t * (-2.0f * t * t) - 3.0f * t * t;
+        const f32 cubic = kBetaNegativeTwo.value * t;
+        return t * (cubic * t) - 3.0f * t * t;
     }
 }
 
 // The pre-race intro: "stars needed", the time limit and the lap count slide in one after the other.
 inline int BetaMaster::vf3C(int view) {
     f32 t = fn_801E7E3C()->time;
-    f32 end0 = 8.0f;
+    f32 end0 = kBetaBoostScale.value;
     f32 in0 = end0 - 0.8f;
     f32 full0 = in0 - 0.3f;
     f32 end1 = full0 - 0.15f;
@@ -4071,7 +4127,7 @@ HighScore* StatsGetHighScore(int slot, long event, long track, int a);
 extern f32 lbl_80559EBC;  // starting meter of the ACAR
 
 inline void BetaCar::Reset(void) {
-    overtime = -1.0f;
+    overtime = kBetaNegativeOne.value;
     result.score = 0;
     result.place = 0;
     result.table.index = -2;
@@ -4080,7 +4136,7 @@ inline void BetaCar::Reset(void) {
     result.total = 0;
     result.grade = -1;
     result.dnf = 0;
-    result.finishTime = -1.0f;
+    result.finishTime = kBetaNegativeOne.value;
     star = 0;
     shown = 0.0f;
     score = 0.0f;
@@ -4192,7 +4248,7 @@ inline void BetaMaster::a2(void) {
     StopSound(timer.timeout);
     timer.b1C = 0;
     timer.limit = timer.limit0;
-    skipAt = GetEvent(fn_801769CC()->event)->node->GetFloat("early_finish_t", -1.0f);
+    skipAt = GetEvent(fn_801769CC()->event)->node->GetFloat("early_finish_t", kBetaNegativeOne.value);
     for (i = 0; i < ARRAY_COUNT(anims); i++) {
         anims[i].Reset();
     }
