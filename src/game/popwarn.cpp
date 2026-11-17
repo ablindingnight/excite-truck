@@ -189,7 +189,8 @@ int fn_8024762C(void);
 
 /* Helper name unproven */
 static inline MenuItem KioskVersionItem(void) {
-    return MenuItem("version", CaptionContext(0x40), lbl_80498908);
+    const CaptionContext context(sizeof(lbl_80498908));
+    return MenuItem(context, "version", lbl_80498908);
 }
 
 // Kiosk title screen: logo art and version text.

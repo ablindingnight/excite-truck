@@ -1199,7 +1199,7 @@ config.libs.append(
             Object(Matching, "game/keyboard.cpp"),
             Object(Matching, "game/loadscrn.cpp"),
             Object(NonMatching, "game/unlkmenu.cpp"),
-            Object(NonMatching, "game/popwarn.cpp"),
+            Object(Matching, "game/popwarn.cpp"),
             Object(NonMatching, "game/multievt.cpp"),
             Object(NonMatching, "game/modeltest.cpp"),
             Object(Matching, "game/unitmenu.cpp", extra_cflags=["-opt nopropagation"]),

@@ -17,6 +17,16 @@ typedef intptr_t MenuArg;
 #include "game/captionctx.h"
 
 struct MenuItem {
+    // Caption text with the context passed by reference.
+    MenuItem(const CaptionContext& context, const char* n, const char* t) {
+        type = 3;
+        name = n;
+        data = t;
+        // The address of CaptionContext also names its first int member.
+        arg0 = *reinterpret_cast<const int*>(&context);
+        arg1 = 0;
+    }
+
     MenuItem(const char* n, CaptionContext context, const char* t) {
         name = n;
         type = 3;
