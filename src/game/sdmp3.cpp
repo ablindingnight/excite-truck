@@ -734,7 +734,7 @@ void* fn_802EAB28(void* arg) {
                         fn_802E30C8("frameSize = %d", info.frameBytes);
                         fn_802E30C8("pcmSize = %d", info.pcmBytes);
                         fn_802E30C8("sizeof pcmSize = %d", sizeof(info.pcmBytes));
-                        if (!fn_802EAA58(&info, errs == 0)) {
+                        if (!fn_802EAA58(&info, errs > 0)) {
                             MP3_Delete(lbl_80560098);
                             errs++;
                             lbl_80560098 = 0;
