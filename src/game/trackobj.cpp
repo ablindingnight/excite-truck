@@ -4,6 +4,7 @@
 // object lists with their collision volumes, animated and sound objects, and drawing. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/modelinfo.h"
 #include "game/sound.h"
 #include "game/raceopts.h"
 #include "game/gamedb.h"
@@ -618,8 +619,8 @@ extern "C" {
 
 void fn_801F7E20(ValueNode* vn, ObjDesc* d) {
     if (d->model[0]) {
-        u8* m = (u8*)fn_802C6B44(d->model);
-        d->drop = 0.0254f + -*(f32*)(m + 0x34);
+        ModelInfo* m = (ModelInfo*)fn_802C6B44(d->model);
+        d->drop = 0.0254f + -m->box[2];
         fn_802C6C20(m);
     } else {
         d->drop = 0.0f;

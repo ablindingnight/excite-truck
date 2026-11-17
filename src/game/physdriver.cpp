@@ -3,6 +3,7 @@
 // the button event messages. Names are guesses apart from the strings. FIRST DRAFT: the five large update
 // and config functions (fn_8017ED00, fn_8017F718, fn_8017FF4C, fn_801808DC, fn_8018108C) are not written.
 #include "game/common.h"
+#include "game/joy.h"
 
 struct DButton;
 
@@ -314,19 +315,19 @@ inline void PhysDriver::Update(f32 dt) {
     b343 = 0;
     {
         s32 c = b8C.ch;
-        u8 info[0x70];
+        JoyStatus info;
         if (fn_802E85B0(c) == 4) {
             b343 = 1;
             dthr = 0;
             dbrk = 0;
         }
-        if (fn_801298E8(info, c)) {
-            if (*(u32*)(info + 0x50) & 2) {
+        if (fn_801298E8(&info, c)) {
+            if (info.info.b & 2) {
                 b343 = 1;
                 dthr = 0;
                 dbrk = 0;
             }
-            if (*(u32*)(info + 0x50) & 8) {
+            if (info.info.b & 8) {
                 b342 = 1;
                 b343 = 1;
             }
@@ -603,7 +604,7 @@ f32 fn_8017F70C(f32 x) {
 inline void PhysDriver::Init(void) {
     int k;
     u8 pedals;
-    u8 info[0x60];
+    JoyStatus info;
     char buf[0x40];
     ch = fn_80137CFC(car);
     steerDead = 0.05f;
@@ -751,7 +752,7 @@ inline void PhysDriver::Init(void) {
         dpad[2].ch = c;
         dpad[3].ch = c;
         b344 = 0;
-        if (fn_801298E8(info, c) && (*(u32*)(info + 0x50) & 0x10)) {
+        if (fn_801298E8(&info, c) && (info.info.b & 0x10)) {
             b344 = 1;
         }
         b344 = 1;

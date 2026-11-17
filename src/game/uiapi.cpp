@@ -2099,7 +2099,7 @@ void UICustom::Slot34(void) {
     if (self[0x1A]) {
         self[0x234] = 1;
     }
-    (*(MenuState **)(self + 0x244))->Unk4C();
+    ((MenuState*)arg0->handler)->Unk4C();
 }
 
 void UICustom::Slot38(void) {
@@ -2109,7 +2109,7 @@ void UICustom::Slot38(void) {
     if (self[0x1A]) {
         self[0x234] = 1;
     }
-    (*(MenuState **)(self + 0x244))->Unk50();
+    ((MenuState*)arg0->handler)->Unk50();
 }
 int UICustom::Slot64(int arg1) {
     UICustom* arg0 = this;
