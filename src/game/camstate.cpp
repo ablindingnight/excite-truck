@@ -502,9 +502,8 @@ void fn_802751AC(u8* p) {
     CamPreset c = {{0.0f, 1.1f, 0.9f}, {8.0f, 0.0f, 0.0f}, 86.25f};
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     CamRotOff f;
-    f32 z = c.off.z;
-    f.pos.Set(c.off.x, c.off.y, z);
-    RotFromVec(&f.rot, c.rot * 0.017453292f);
+    f.pos.Set(c.off.x, c.off.y, c.off.z);
+    RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
     fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
     Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
     f32 fovv = c.fov;
@@ -551,9 +550,8 @@ void fn_80275938(u8* p) {
     CamPreset c = {{-1.0f, 0.9f, -3.2f}, {5.8f, 63.6f, 1.8f}, 87.75f};
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     CamRotOff f;
-    f32 z = c.off.z;
-    f.pos.Set(c.off.x, c.off.y, z);
-    RotFromVec(&f.rot, c.rot * 0.017453292f);
+    f.pos.Set(c.off.x, c.off.y, c.off.z);
+    RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
     fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
     Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
     f32 fovv = c.fov;
