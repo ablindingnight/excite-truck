@@ -79,8 +79,9 @@ public:
 };
 
 AnimObj::AnimObj(void) {
-    // MATCHING-AID: the target stores axes[0].x/y twice (once before the vtable pointer); the original source
-    // for that is unknown (a member or base initialiser?).
+    // MATCHING-AID: retail writes the identity twice; only the first basis[0].x store survives (scheduled above the
+    // vtable pointer). Two whole identity blocks, or a frame member whose constructor sets the identity followed by
+    // this body, are EXACT as well (aids audit 2, 2026-11-17); which one the original had is unproven.
     frame.basis[0].x = 1.0f;
     frame.basis[0].y = 0.0f;
     frame.basis[0].x = 1.0f;
