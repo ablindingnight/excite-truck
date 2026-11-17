@@ -502,27 +502,29 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
             BRot m;
             if (len > 0.001f) {
                 f32 k = -1.0f / len;
-                d.x *= k;
-                d.y *= k;
-                d.z *= k;
+                // Retail keeps the unit direction in m's first row (the same stack slot) until m is computed.
+                m.rx.x = d.x * k;
+                m.rx.y = d.y * k;
+                m.rx.z = d.z * k;
                 BVec axis;
-                PSVECCrossProduct((const Vec*)&b->rx.x, (const Vec*)&d.x, (Vec*)&axis.x);
+                PSVECCrossProduct((const Vec*)&b->rx.x, (const Vec*)&m.rx.x, (Vec*)&axis.x);
                 f32 a = PSVECMag((const Vec*)&axis.x);
                 BRot r;
                 if (a > 0.0001f) {
                     f32 inv = 1.0f / a;
                     f32 az;
+                    f32 ay;
                     f32 ax;
-                    f32 ay = inv * axis.y;
                     ax = inv * axis.x;
+                    ay = inv * axis.y;
                     az = inv * axis.z;
                     f32 sn = sin(a);
                     f32 cs = cos(a);
                     f32 t = 1.0f - cs;
+                    f32 xx = ax * ax;
                     f32 yy = ay * ay;
                     f32 zz = az * az;
                     f32 tx = t * ax;
-                    f32 xx = ax * ax;
                     f32 ty = t * ay;
                     r.rx.x = cs + t * xx;
                     r.rx.y = sn * az + ay * tx;
