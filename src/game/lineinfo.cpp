@@ -2,6 +2,7 @@
 // times/distances and AI exceptions), shared through a small reference-counted cache keyed by the ideal
 // line resource name. Names are guesses apart from the keys and messages.
 #include "game/common.h"
+#include "game/strcopy.h"
 
 extern "C" {
 char* strchr(const char* s, int c);
@@ -58,14 +59,6 @@ struct LineCache {
 };
 
 static inline bool StrEq(const char* a, const char* b) { return strcmp(a, b) == 0; }
-static inline void StrCopyN(const char* s, int n, char* d) {
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 ModuleTag lbl_8055E178;
 LineCache lbl_8042F8C8;
@@ -74,7 +67,7 @@ extern "C" {
 
 char* fn_8013BC90(char* buf, s32 n, const char* src) {
     char* p = buf;
-    StrCopyN(src, n, buf);
+    SafeStrCopy(buf, src, n);
     if (strchr(p, '/')) {
         p = strchr(p, '/') + 1;
     }
@@ -116,7 +109,7 @@ ValueNode* fn_8013BD5C_exit(ValueNode* t) {
 
 LineInfo* fn_8013BE64(ValueNode* t, const char* name) {
     LineInfo* li = new ("LineInfo") LineInfo;
-    StrCopyN(name, 64, li->name);
+    SafeStrCopy(li->name, name, 64);
     li->exc.Load(t->FindChild("exceptions"));
     fn_8013BD5C(&li->params, t);
     li->extra = 0;
@@ -127,7 +120,7 @@ void fn_8013BF3C(LineParams* p) { fn_8013BD30(p); }
 
 LineInfo* fn_8013BF40(const char* name) {
     LineInfo* li = new ("LineInfo") LineInfo;
-    StrCopyN(name, 64, li->name);
+    SafeStrCopy(li->name, name, 64);
     fn_8013BF3C(&li->params);
     li->extra = 0;
     return li;
@@ -193,7 +186,7 @@ LineInfo* fn_8013BFE8(const char* full) {
     LineEntry* found;
     ValueTable* t;
     LineInfo* li;
-    StrCopyN(full, 64, name.s);
+    SafeStrCopy(name.s, full, 64);
     n = lbl_8042F8C8.count;
     found = 0;
     for (i = 0; i < n; i++) {
