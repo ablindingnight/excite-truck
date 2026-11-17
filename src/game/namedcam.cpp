@@ -480,10 +480,10 @@ void fn_80276DC8(int slot) {
     rel.pos.v[1] *= scale;
     rel.pos.v[2] *= scale;
     AxisAngle(&rel.rot, &axis);
-    f32* frame = lbl_804A1500[slot].m;
-    CamVec3* framePos = (CamVec3*)(frame + 9);
+    RMtx* frame = &lbl_804A1500[slot];
+    CamVec3* framePos = (CamVec3*)&frame->pos;
     fn_801BFD34(framePos, &rel.pos, &car);
-    Mat3Mul((Mat3*)frame, (Mat3*)&rel.rot, (Mat3*)&car.rot);
+    Mat3Mul((Mat3*)&frame->rot, (Mat3*)&rel.rot, (Mat3*)&car.rot);
     inv = look.rot;
     fn_801C7254((Mat3*)&inv);
     Mat3Mul((Mat3*)frame, (Mat3*)frame, (Mat3*)&inv);
