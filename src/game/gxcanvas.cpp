@@ -695,17 +695,19 @@ void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
             u32 p = *s++;
             u32 q = *d;
             u32 a = p >> 24;
+            u32 out;
             if (a == 0) {
+                out = q;
             } else if (a == 0xFF) {
-                q = (q & 0xFF000000) | (p & 0xFFFFFF);
+                out = (p & 0xFFFFFF) | (q & 0xFF000000);
             } else {
                 u32 ia = 0xFF - a;
                 u8 r = gxBlend8(ia, (q >> 16) & 0xFF, a, (p >> 16) & 0xFF);
                 u8 g = gxBlend8(ia, (q >> 8) & 0xFF, a, (p >> 8) & 0xFF);
                 u8 b = gxBlend8(ia, q & 0xFF, a, p & 0xFF);
-                q = (r << 16 | g << 8) | ((q & 0xFF000000) | b);
+                out = (r << 16 | g << 8) | ((q & 0xFF000000) | b);
             }
-            *d++ = q;
+            *d++ = out;
         } while (--n > 0);
         s += sskip;
         d += dskip;
