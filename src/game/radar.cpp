@@ -2,6 +2,7 @@
 // car, positioned by its offset from the camera rotated into the camera's heading, scaled and faded by
 // distance. Names are guesses apart from the art names.
 #include "game/common.h"
+#include "game/carbody.h"
 #include "game/textelem.h"
 #include "game/ilayout.h"
 #include "game/v2.h"
@@ -89,7 +90,7 @@ void fn_801390B0(ILayout* l, V2* pos, V2* dir, int focus, f32 scale, f32 alpha) 
 }
 
 int fn_801392F8(u8* car) {
-    if (*(s32*)(car + 0x1F0) == 0x50) {
+    if (((CarBody*)car)->f1F0 == 0x50) {
         return car[0x260] & 3;
     }
     return 0;
@@ -183,9 +184,9 @@ void fn_80139318(ILayout* l, s32 tex, int self, f32 range) {
             len = 1.0f / len;
             d.x *= len;
             d.y *= len;
-            p.x = *(f32*)(car + 0x60) - m.origin.x;
-            p.y = *(f32*)(car + 0x64) - m.origin.y;
-            p.z = *(f32*)(car + 0x68) - m.origin.z;
+            p.x = ((CarBody*)car)->mtx.pos.x - m.origin.x;
+            p.y = ((CarBody*)car)->mtx.pos.y - m.origin.y;
+            p.z = ((CarBody*)car)->mtx.pos.z - m.origin.z;
             MulVec(m, p, &p);
             dist = PSVECMag((const Vec*)&p);
             scale = LerpF(1.0f, 0.6f, Clamp01((dist - 0.7f * range) / (2.0f * range - 0.7f * range)));
