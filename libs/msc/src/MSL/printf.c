@@ -1278,7 +1278,7 @@ static void* __StringWrite(void* pCtrl, const char* pBuffer, size_t char_num) {
     return (void*)1;
 }
 
-/* Excite Truck: printf is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (printf: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 int printf(const char* format, ...) {
     va_list args;
@@ -1292,7 +1292,7 @@ int printf(const char* format, ...) {
 }
 #endif
 
-/* Excite Truck: fprintf is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (fprintf: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 int fprintf(FILE* file, const char* format, ...) {
     int res;

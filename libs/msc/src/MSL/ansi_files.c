@@ -83,7 +83,7 @@ FILE __files[4] = {
     },
 };
 
-/* Excite Truck: the linker dead-stripped __find_unopened_file and __init_file (absent from the retail DOL); left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (__find_unopened_file and __init_file: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 FILE* __find_unopened_file(void)
 {
@@ -174,7 +174,7 @@ void __close_all(void)
     }
 }
 
-/* Excite Truck: the linker dead-stripped __flush_line_buffered_output_files (absent from the retail DOL); left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (__flush_line_buffered_output_files: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 int __flush_line_buffered_output_files(void)
 {

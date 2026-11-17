@@ -51,7 +51,7 @@ u8 GXTexImage2Ids[8] = { 0x90, 0x91, 0x92, 0x93, 0xB0, 0xB1, 0xB2, 0xB3 };
 u8 GXTexImage3Ids[8] = { 0x94, 0x95, 0x96, 0x97, 0xB4, 0xB5, 0xB6, 0xB7 };
 u8 GXTexTlutIds[8] = { 0x98, 0x99, 0x9A, 0x9B, 0xB8, 0xB9, 0xBA, 0xBB };
 static u8 GX2HWFiltConv[6] = { 0x00, 0x04, 0x01, 0x05, 0x02, 0x06 };
-#if 0 /* Excite Truck: only used by dead-stripped functions */
+#if 0 /* MATCHING-AID: linker-dead-stripped data disabled in our object (only the stripped functions use it) */
 static u8 HW2GXFiltConv[8] = { 0x00, 0x02, 0x04, 0x00, 0x01, 0x03, 0x05, 0x00 };
 #endif
 
@@ -327,7 +327,7 @@ void GXInitTexObjLOD(GXTexObj* obj, GXTexFilter min_filt, GXTexFilter mag_filt, 
     SET_REG_FIELD(819, t->mode1, 8, 8, lmax);
 }
 
-/* Excite Truck: GXInitTexObjData is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexObjData: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexObjData(GXTexObj* obj, void* image_ptr) {
     u32 imageBase;
@@ -371,7 +371,7 @@ void GXInitTexObjFilter(GXTexObj* obj, GXTexFilter min_filt, GXTexFilter mag_fil
     SET_REG_FIELD(912, t->mode0, 3, 5, GX2HWFiltConv[min_filt]);
 }
 
-/* Excite Truck: GXInitTexObjMaxLOD is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexObjMaxLOD: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexObjMaxLOD(GXTexObj* obj, f32 max_lod) {
     u8 lmax;
@@ -390,7 +390,7 @@ void GXInitTexObjMaxLOD(GXTexObj* obj, f32 max_lod) {
 }
 #endif
 
-/* Excite Truck: GXInitTexObjMinLOD is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexObjMinLOD: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexObjMinLOD(GXTexObj* obj, f32 min_lod) {
     u8 lmin;
@@ -409,7 +409,7 @@ void GXInitTexObjMinLOD(GXTexObj* obj, f32 min_lod) {
 }
 #endif
 
-/* Excite Truck: GXInitTexObjLODBias is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexObjLODBias: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexObjLODBias(GXTexObj* obj, f32 lod_bias) {
     u8 lbias;
@@ -428,7 +428,7 @@ void GXInitTexObjLODBias(GXTexObj* obj, f32 lod_bias) {
 }
 #endif
 
-/* Excite Truck: GXInitTexObjBiasClamp is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexObjBiasClamp: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexObjBiasClamp(GXTexObj* obj, u8 bias_clamp) {
     __GXTexObjInt* t = (__GXTexObjInt*)obj;
@@ -440,7 +440,7 @@ void GXInitTexObjBiasClamp(GXTexObj* obj, u8 bias_clamp) {
 }
 #endif
 
-/* Excite Truck: GXInitTexObjEdgeLOD is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexObjEdgeLOD: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexObjEdgeLOD(GXTexObj* obj, u8 do_edge_lod) {
     __GXTexObjInt* t = (__GXTexObjInt*)obj;
@@ -452,7 +452,7 @@ void GXInitTexObjEdgeLOD(GXTexObj* obj, u8 do_edge_lod) {
 }
 #endif
 
-/* Excite Truck: GXInitTexObjMaxAniso is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexObjMaxAniso: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexObjMaxAniso(GXTexObj* obj, GXAnisotropy max_aniso) {
     __GXTexObjInt* t = (__GXTexObjInt*)obj;
@@ -479,7 +479,7 @@ void* GXGetTexObjUserData(const GXTexObj* obj) {
     return t->userData;
 }
 
-/* Excite Truck: GXGetTexObjAll is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjAll: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXGetTexObjAll(const GXTexObj* obj, void** image_ptr, u16* width, u16* height, GXTexFmt* format, GXTexWrapMode* wrap_s, GXTexWrapMode* wrap_t, u8* mipmap) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)obj;
@@ -544,7 +544,7 @@ GXBool GXGetTexObjMipMap(const GXTexObj* to) {
     return (t->flags & 1) == 1;
 }
 
-/* Excite Truck: GXGetTexObjLODAll is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjLODAll: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXGetTexObjLODAll(const GXTexObj* tex_obj, GXTexFilter* min_filt, GXTexFilter* mag_filt, f32* min_lod, f32* max_lod, f32* lod_bias, u8* bias_clamp, u8* do_edge_lod, GXAnisotropy* max_aniso) {
     s16 tmp;
@@ -563,7 +563,7 @@ void GXGetTexObjLODAll(const GXTexObj* tex_obj, GXTexFilter* min_filt, GXTexFilt
 }
 #endif
 
-/* Excite Truck: GXGetTexObjMinFilt is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjMinFilt: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 GXTexFilter GXGetTexObjMinFilt(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -573,7 +573,7 @@ GXTexFilter GXGetTexObjMinFilt(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjMagFilt is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjMagFilt: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 GXTexFilter GXGetTexObjMagFilt(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -583,7 +583,7 @@ GXTexFilter GXGetTexObjMagFilt(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjMinLOD is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjMinLOD: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 f32 GXGetTexObjMinLOD(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -593,7 +593,7 @@ f32 GXGetTexObjMinLOD(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjMaxLOD is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjMaxLOD: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 f32 GXGetTexObjMaxLOD(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -603,7 +603,7 @@ f32 GXGetTexObjMaxLOD(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjLODBias is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjLODBias: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 f32 GXGetTexObjLODBias(const GXTexObj* tex_obj) {
     s16 tmp;
@@ -615,7 +615,7 @@ f32 GXGetTexObjLODBias(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjBiasClamp is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjBiasClamp: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 GXBool GXGetTexObjBiasClamp(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -625,7 +625,7 @@ GXBool GXGetTexObjBiasClamp(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjEdgeLOD is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjEdgeLOD: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 GXBool GXGetTexObjEdgeLOD(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -635,7 +635,7 @@ GXBool GXGetTexObjEdgeLOD(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjMaxAniso is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjMaxAniso: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 GXAnisotropy GXGetTexObjMaxAniso(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -645,7 +645,7 @@ GXAnisotropy GXGetTexObjMaxAniso(const GXTexObj* tex_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTexObjTlut is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexObjTlut: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 u32 GXGetTexObjTlut(const GXTexObj* tex_obj) {
     const __GXTexObjInt* t = (const __GXTexObjInt *)tex_obj;
@@ -732,7 +732,7 @@ void GXInitTlutObj(GXTlutObj* tlut_obj, void* lut, GXTlutFmt fmt, u16 n_entries)
     t->numEntries = n_entries;
 }
 
-/* Excite Truck: GXGetTlutObjAll is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTlutObjAll: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXGetTlutObjAll(const GXTlutObj* tlut_obj, void **data, GXTlutFmt* format, u16* numEntries) {
     const __GXTlutObjInt* t = (const __GXTlutObjInt *)tlut_obj;
@@ -744,7 +744,7 @@ void GXGetTlutObjAll(const GXTlutObj* tlut_obj, void **data, GXTlutFmt* format, 
 }
 #endif
 
-/* Excite Truck: GXGetTlutObjData is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTlutObjData: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void* GXGetTlutObjData(const GXTlutObj* tlut_obj) {
     const __GXTlutObjInt* t = (const __GXTlutObjInt *)tlut_obj;
@@ -754,7 +754,7 @@ void* GXGetTlutObjData(const GXTlutObj* tlut_obj) {
 }
 #endif
 
-/* Excite Truck: GXGetTlutObjFmt is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTlutObjFmt: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 GXTlutFmt GXGetTlutObjFmt(const GXTlutObj* tlut_obj) {
     const __GXTlutObjInt* t = (const __GXTlutObjInt *)tlut_obj;
@@ -848,7 +848,7 @@ void GXInitTexCacheRegion(GXTexRegion* region, u8 is_32b_mipmap, u32 tmem_even, 
     t->isCached = 1;
 }
 
-/* Excite Truck: GXInitTexPreLoadRegion is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInitTexPreLoadRegion: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInitTexPreLoadRegion(GXTexRegion* region, u32 tmem_even, u32 size_even, u32 tmem_odd, u32 size_odd) {
     __GXTexRegionInt* t = (__GXTexRegionInt *)region;
@@ -877,7 +877,7 @@ void GXInitTexPreLoadRegion(GXTexRegion* region, u32 tmem_even, u32 size_even, u
 }
 #endif
 
-/* Excite Truck: GXGetTexRegionAll is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTexRegionAll: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXGetTexRegionAll(const GXTexRegion* region, u8* is_cached, u8* is_32b_mipmap, u32* tmem_even, u32* size_even, u32* tmem_odd, u32* size_odd) {
     const __GXTexRegionInt* t = (const __GXTexRegionInt *)region;
@@ -939,7 +939,7 @@ void GXInitTlutRegion(GXTlutRegion* region, u32 tmem_addr, GXTlutSize tlut_size)
     SET_REG_FIELD(1664, t->loadTlut1, 8, 24, 0x65);
 }
 
-/* Excite Truck: GXGetTlutRegionAll is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXGetTlutRegionAll: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXGetTlutRegionAll(const GXTlutRegion* region, u32* tmem_addr, GXTlutSize* tlut_size) {
     const __GXTlutRegionInt* t = (const __GXTlutRegionInt *)region;
@@ -950,7 +950,7 @@ void GXGetTlutRegionAll(const GXTlutRegion* region, u32* tmem_addr, GXTlutSize* 
 }
 #endif
 
-/* Excite Truck: GXInvalidateTexRegion is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXInvalidateTexRegion: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXInvalidateTexRegion(GXTexRegion* region) {
     s32 wle;
@@ -1040,7 +1040,7 @@ GXTlutRegionCallback GXSetTlutRegionCallback(GXTlutRegionCallback f) {
     return oldcb;
 }
 
-/* Excite Truck: GXPreLoadEntireTexture is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXPreLoadEntireTexture: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXPreLoadEntireTexture(GXTexObj* tex_obj, GXTexRegion* region) {
     GXBool isMipMap;
@@ -1198,7 +1198,7 @@ void GXPreLoadEntireTexture(GXTexObj* tex_obj, GXTexRegion* region) {
 }
 #endif
 
-/* Excite Truck: GXSetTexCoordScaleManually is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXSetTexCoordScaleManually: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXSetTexCoordScaleManually(GXTexCoordID coord, GXBool enable, u16 ss, u16 ts) {
     CHECK_GXBEGIN(1991, "GXSetTexCoordScaleManually");
@@ -1215,7 +1215,7 @@ void GXSetTexCoordScaleManually(GXTexCoordID coord, GXBool enable, u16 ss, u16 t
 }
 #endif
 
-/* Excite Truck: GXSetTexCoordCylWrap is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXSetTexCoordCylWrap: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXSetTexCoordCylWrap(GXTexCoordID coord, u8 s_enable, u8 t_enable) {
     CHECK_GXBEGIN(2023, "GXSetTexCoordCylWrap");
@@ -1231,7 +1231,7 @@ void GXSetTexCoordCylWrap(GXTexCoordID coord, u8 s_enable, u8 t_enable) {
 }
 #endif
 
-/* Excite Truck: GXSetTexCoordBias is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (GXSetTexCoordBias: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void GXSetTexCoordBias(GXTexCoordID coord, u8 s_enable, u8 t_enable) {
     CHECK_GXBEGIN(2054, "GXSetTexCoordBias");
@@ -1318,7 +1318,7 @@ void __GXSetSUTexRegs(void) {
     }
 }
 
-/* Excite Truck: __GXGetSUTexSize is dead-stripped in the retail DOL; left out so the exception tables match. */
+/* MATCHING-AID: linker-dead-stripped function disabled in our object (__GXGetSUTexSize: in the original source, stripped by the retail linker; the port does not need it either). */
 #if 0
 void __GXGetSUTexSize(GXTexCoordID coord, u16* width, u16* height) {
     *width = (u16)__GXData->suTs0[coord] + 1;
