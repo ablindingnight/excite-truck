@@ -435,17 +435,20 @@ inline void MatPlacer::Rebuild(void) {
     if (total > 128) {
         int k = RandomBelow(placers.count);
         do {
+            int w;
             ObjectPlacer* p = placers.data[k];
-            if (p->weight > 0) {
-                p->weight--;
+            w = p->weight;
+            if (w > 0) {
+                p->weight = w - 1;
                 total--;
             }
             k = (k + 1) % placers.count;
         } while (total > 128);
     }
     memset(slots, 0, sizeof(slots));
-    int spread = (128 - total) * 2;
+    int spread;
     int free = 128 - total;
+    spread = free * 2;
     int at = 0;
     for (int i = 0; i < placers.count; i++) {
         int share = spread / placers.count;
@@ -742,8 +745,9 @@ void MatPlacer::Update(void) {
                 i++;
             }
         }
+        ObjectPlacer** s;
         for (int k = 0; added.count > 0; k = (k + 1) % 128) {
-            ObjectPlacer** s = &old[order[k]];
+            s = &old[order[k]];
             if (*s == removed.data[0]) {
                 *s = added.data[0];
                 added.RemoveAt(0);
