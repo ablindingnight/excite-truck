@@ -13,6 +13,14 @@
 #include <revolution/MTX/vec.h>
 #include "game/mathutil.h"
 
+/* Helper name unproven: three values stored through by-value parameters (one matrix row). */
+static inline void AxisRow(f32& a, f32& b, f32& c, f32 x, f32 y, f32 z) {
+    a = x;
+    b = y;
+    c = z;
+}
+
+
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
 #define U32(p, o) (*(u32*)((u8*)(p) + (o)))
@@ -1491,15 +1499,9 @@ void PlayerDriver_vf48(u8* p) {
             f32 tx = t * ax;
             f32 xx = ax * ax;
             f32 ty = t * ay;
-            spin[0] = cs + t * xx;
-            spin[1] = sn * az + ay * tx;
-            spin[2] = az * tx - sn * ay;
-            spin[3] = ay * tx - sn * az;
-            spin[4] = cs + t * yy;
-            spin[6] = az * tx + sn * ay;
-            spin[5] = az * ty + sn * ax;
-            spin[7] = az * ty - sn * ax;
-            spin[8] = cs + t * zz;
+            AxisRow(spin[0], spin[1], spin[2], cs + t * xx, sn * az + ay * tx, az * tx - sn * ay);
+            AxisRow(spin[3], spin[4], spin[5], ay * tx - sn * az, cs + t * yy, az * ty + sn * ax);
+            AxisRow(spin[6], spin[7], spin[8], az * tx + sn * ay, az * ty - sn * ax, cs + t * zz);
         } else {
             spin[0] = 1.0f;
             spin[1] = 0.0f;
