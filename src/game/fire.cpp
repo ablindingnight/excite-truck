@@ -878,10 +878,12 @@ void RingSlots::Add(int id, const Vec* p, const Vec* e1, const Vec* e2, s16 hint
         s->time = fn_801E7E18();
         s->alpha = 0.0f;
         Vec c[4];
-        c[0].x = p->x + e1->x + e2->x;
-        c[0].y = p->y + e1->y + e2->y;
-        f32 zv = e2->z;
-        c[0].z = p->z + e1->z + zv;
+        c[0].x = p->x + e1->x;
+        c[0].y = p->y + e1->y;
+        c[0].z = p->z + e1->z;
+        c[0].x += e2->x;
+        c[0].y += e2->y;
+        c[0].z += e2->z;
         AddScaled(&c[1], &c[0], e1, -2.0f);
         AddScaled(&c[2], &c[0], e2, -2.0f);
         AddScaled(&c[3], &c[2], e1, -2.0f);
