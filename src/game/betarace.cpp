@@ -55,6 +55,7 @@ int fn_801609C4(s32 score);  // grade for a score
 struct ArtXform;  // artanim.cpp
 #include "game/artplayer.h"
 #include "game/makeilpos.h"
+#include "game/stopsound.h"
 
 const char* GetGradeDisplayName(int grade);
 
@@ -93,12 +94,6 @@ extern const BetaDoubleConstant kBetaQuarterTurn;
 extern "C" void fn_801474EC(TextElem* e, const char* fmt, ...);
 
 
-static inline void StopSound(GameSound* s) {
-    if (s) {
-        s->stop = 1;
-        s->restart = 0;
-    }
-}
 
 template <typename T>
 static inline void SafeDelete(T*& p) {

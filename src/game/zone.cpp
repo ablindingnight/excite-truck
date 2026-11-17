@@ -30,6 +30,7 @@
 #include "game/mathutil.h"
 #include "game/clamp01.h"
 #include "game/round.h"
+#include "game/stopsound.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -67,12 +68,6 @@ extern f32 __float_epsilon[];  // FLT_EPSILON (MSL)
 
 extern "C" ILayout* fn_80145E70(const char* name);
 
-static inline void StopSound(GameSound* s) {
-    if (s) {
-        s->stop = 1;
-        s->restart = 0;
-    }
-}
 extern "C" GameSound* fn_80207848(const char* name, int flags);
 
 class TruckPath {
