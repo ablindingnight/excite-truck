@@ -8,18 +8,12 @@
 
 #include <types.h>
 #include "game/gart.h"
-// The retail UI API section has only the concrete MenuState table.
-#define IMENUSTATE_NO_VTABLE
 #include "game/menustate.h"
-#undef IMENUSTATE_NO_VTABLE
 #include "game/uilists.h"
 #include "game/menu.h"
 #include "game/menuwidget_inl.h"
 #include "game/gxcanvas.h"
-// Provisional emission form: UI API owns the four standalone UIImage bodies.
-#define UIAPI_IMAGE_METHODS_OUT_OF_LINE
 #include "game/uiwidget.h"
-#undef UIAPI_IMAGE_METHODS_OUT_OF_LINE
 #include "game/locstring.h"
 
 extern "C" s32 fn_80218C14(s32, s32, s32);
@@ -430,6 +424,8 @@ extern "C" s32 fn_8012C33C(s32);
 extern "C" s32 fn_802C49E8(s32);
 extern "C" s32 fn_802C2DD4(s32);
 // Image/text reference handed to buttons ("StyleImage", "rimg", "timg").
+// The three image classes and UICustom declare their virtuals in retail's emission order (see the note at
+// "Deferred inline code" near the end of the file); a new virtual keeps its slot at the end of the table.
 class UIImageRef : public UIImage {  /* Class name unproven */
 public:
     UIImageRef(const char* n, int f) {
@@ -437,10 +433,10 @@ public:
         name = n;
     }
     virtual ~UIImageRef(void);
-    virtual void DrawAt(int x, int y, int a, int b, int c, int frame);
+    virtual void Extra(void);  /* Helper name unproven */
+    virtual void Draw(int x, int y, int a, int b, int c, int frame);
     virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
     virtual int Frames(void);
-    virtual void Extra(void);  /* Helper name unproven */
 
     const char* name;  // 0x4
     int flags;         // 0x8
@@ -451,9 +447,9 @@ class StpImage : public UIImage {
 public:
     StpImage(s32 name) { value = fn_802C49E8(name); }
     virtual ~StpImage(void);
+    virtual void DrawFrame(int x, int y, int frame);
     virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
     virtual int Frames(void);
-    virtual void DrawFrame(int x, int y, int frame);
     s32 value;  // 0x4
 };
 
@@ -472,9 +468,9 @@ public:
         divisor = div;
     }
     virtual ~CvsImage(void);
+    virtual void DrawFrame(int x, int y, unsigned int frame);
     virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
     virtual int Frames(void);
-    virtual void DrawFrame(int x, int y, unsigned int frame);
     void* value;  // 0x4
     s32 count;    // 0x8
     s32 divisor;  // 0xC
@@ -648,31 +644,31 @@ public:
     }
 };
 
+// No declared destructor: the implicit one leads the implicit-destructor run (0x802152F0, before UIHotKey's).
 class UICustom : public UIWidget {  /* Class name unproven */
 public:
-    virtual ~UICustom(void);
     virtual void Slot0C(void);
     virtual void Slot10(void);
     virtual void Slot14(void);
-    virtual void Slot1C(int x, int y);
-    virtual void Slot24(void* context);
-    virtual void Slot28(void);
-    virtual void Slot30(void);
-    virtual void Slot34(void);
-    virtual void Slot38(void);
+    virtual void Slot7C(void);
+    virtual void Slot80(void);
     virtual void Slot3C(int a, int b);
     virtual void Slot40(int a, int b);
     virtual void Slot44(void);
     virtual void Slot48(void);
+    virtual void* Slot60(void);
+    virtual void Slot74(int key, void* value);
     virtual void Slot4C(int x, int y);
     virtual void Slot58(void);
     virtual void Slot5C(void);
-    virtual void* Slot60(void);
+    virtual void Slot34(void);
+    virtual void Slot38(void);
     virtual int Slot64(int key);
     virtual int Slot68(void);
-    virtual void Slot74(int key, void* value);
-    virtual void Slot7C(void);
-    virtual void Slot80(void);
+    virtual void Slot24(void* context);
+    virtual void Slot28(void);
+    virtual void Slot30(void);
+    virtual void Slot1C(int x, int y);
 
     UICustomHandler* handler;  // 0x244
     UICustom(int x, int y, int dx, int dy, int kind, UICustomHandler* h) : UIWidget(x, y, x + dx, y + dy, kind) {
@@ -1688,9 +1684,6 @@ extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(i
 
 
 
-// 0x802151D4 is MenuState's deleting dtor (the in-class ~MenuState in menustate.h, slot 2 of __vt__9MenuState);
-// our compiler emits that weak copy after the last function instead of here.
-
 extern "C" void fn_80215214(const char* title, const char* message, int (*poll)(int*)) {
     fn_80214FE0(title, message, poll, 1);
 }
@@ -1734,19 +1727,18 @@ extern "C" s32 fn_802152CC(void) {
     fn_802152C8();
     return 0;
 }
-UICustom::~UICustom(void) {}
 
-UIHotKey::~UIHotKey(void) {}
 
-void MenuState::Enter(void) {
-}
-
+// ---- Deferred inline code (0x802152F0 - 0x80215CF4) ----
+// From here to __sinit nothing is an ordinary definition. Retail's order is MWCC's end-of-unit walk over the
+// classes whose tables this unit emits (FACTS 2026-11-17 11:35 and 12:20): first the implicit destructors
+// (UICustom, UIHotKey: neither declares one), then class by class in declaration order, a class's own inline
+// members in class-body order followed by the base-class inlines its table was the first to need. So the
+// header-inline defaults of MenuState (menustate.h), UIWidget and UIImage (uiwidget.h) come out here in two
+// groups each, around the classes below, whose bodies declare their members in retail's emission order.
+// The definitions below follow the class bodies; their own order has no effect.
 extern "C" s32 fn_802168BC(s32);
-int MenuState::Key(int key) {
-    return 0;
-}
-
-int UIHotKey::Slot64(int p_arg1) {
+inline int UIHotKey::Slot64(int p_arg1) {
     UIHotKey* arg0 = this;
     u32 arg1 = (u32)p_arg1;
     s32 (*callback)(s32);
@@ -1760,105 +1752,18 @@ int UIHotKey::Slot64(int p_arg1) {
     return 0;
 }
 
-void UIWidget::Slot0C(void) {
+inline UIImageRef::~UIImageRef(void) {}
+
+inline void UIImageRef::Extra(void) {
 
 }
 
-void UIWidget::Slot10(void) {
-
-}
-
-void UIWidget::Slot14(void) {
-
-}
-
-void UIWidget::Slot28(void) {
-
-}
-
-void UIWidget::Slot30(void) {
-
-}
-
-void UIWidget::Slot34(void) {
-    UIWidget* arg0 = this;
-    arg0->flag19 = 1;
-    if (arg0->flag1a != 0) {
-        arg0->dirty = 1;
-    }
-}
-
-void UIWidget::Slot38(void) {
-    UIWidget* arg0 = this;
-    arg0->flag19 = 0;
-    if (arg0->flag1a != 0) {
-        arg0->dirty = 1;
-    }
-}
-
-void UIWidget::Slot3C(int, int) {
-
-}
-
-void UIWidget::Slot40(int, int) {
-
-}
-
-void UIWidget::Slot44(void) {
-
-}
-
-void UIWidget::Slot48(void) {
-
-}
-
-void UIWidget::Slot4C(int, int) {
-
-}
-
-void UIWidget::Slot58(void) {
-    UIWidget* arg0 = this;
-    arg0->flag18 = 1;
-}
-
-void UIWidget::Slot5C(void) {
-    UIWidget* arg0 = this;
-    arg0->flag18 = 0;
-}
-
-void* UIWidget::Slot60(void) {
-    return 0;
-}
-
-int UIWidget::Slot68(void) {
-    return 0;
-}
-
-void UIWidget::Slot74(int, void*) {
-    UIWidget* arg0 = this;
-    if (arg0->flag1a != 0) {
-        arg0->dirty = 1;
-    }
-}
-
-
-
-#ifdef __MWERKS__
-int UIImage::Frames(void) { return 1; }
-#endif
-
-UIImageRef::~UIImageRef(void) {}
-
-void UIImageRef::Extra(void) {
-
-}
-
-void UIImageRef::DrawAt(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
+inline void UIImageRef::Draw(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
     UIImageRef* arg0 = this;
     fn_8022BAD0(arg0->flags, arg1, arg2, 0, arg4, arg5, arg0->name, arg6, 0, 1.0f);
 }
 
-void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* p_arg5, int* p_arg6) {
+inline void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* p_arg5, int* p_arg6) {
     UIImageRef* arg0 = this;
     s32 arg3 = (s32)p_arg3;
     s32 arg4 = (s32)p_arg4;
@@ -1867,12 +1772,12 @@ void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* p_arg5,
     fn_8022AC1C(arg0->flags, (s32)arg0->name, arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
-int UIImageRef::Frames(void) {
+inline int UIImageRef::Frames(void) {
     return 4;
 }
 
 extern "C" void fn_802C4C80(void*);
-StpImage::~StpImage(void) {
+inline StpImage::~StpImage(void) {
     fn_802C4C80((void*)value);
 }
 
@@ -1881,7 +1786,7 @@ extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
 extern "C" s32 fn_802C4F14(s32);
 extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
-void StpImage::DrawFrame(int arg1, int arg2, int arg3) {
+inline void StpImage::DrawFrame(int arg1, int arg2, int arg3) {
     StpImage* arg0 = this;
     s32 rem = arg3 % fn_802C4F14(arg0->value);
     fn_802C4C90(arg0->value, arg1, arg2, rem, 0);
@@ -1891,7 +1796,7 @@ extern "C" void fn_802C4F2C(int, int *, int *);
 extern "C" int fn_802C4EE4(int);
 extern "C" int fn_802C4EFC(int);
 // Screen rectangle of an image drawn at (x, y), allowing for the image's origin.
-void StpImage::Rect(int x, int y, int* p_left, int* p_top, int* p_right, int* p_bottom) {
+inline void StpImage::Rect(int x, int y, int* p_left, int* p_top, int* p_right, int* p_bottom) {
     StpImage* self = this;
     s32* left = (s32*)p_left;
     s32* top = (s32*)p_top;
@@ -1906,7 +1811,7 @@ void StpImage::Rect(int x, int y, int* p_left, int* p_top, int* p_right, int* p_
     *bottom = *top + fn_802C4EFC(self->value);
 }
 
-int StpImage::Frames(void) {
+inline int StpImage::Frames(void) {
     StpImage* arg0 = this;
     return fn_802C4F14(arg0->value);
 }
@@ -1916,11 +1821,11 @@ extern "C" void fn_802C4F2C(int, int *, int *);
 extern "C" int fn_802C4EE4(int);
 extern "C" int fn_802C4EFC(int);
 extern "C" s32 fn_802C2FC4(s32);
-CvsImage::~CvsImage(void) {
+inline CvsImage::~CvsImage(void) {
     if (value != 0) fn_802C2FC4((s32)value);
 }
 
-void CvsImage::DrawFrame(int arg1, int arg2, unsigned int arg3) {
+inline void CvsImage::DrawFrame(int arg1, int arg2, unsigned int arg3) {
     CvsImage* arg0 = this;
     unsigned int r7 = (unsigned int)arg0->divisor;
     int r8 = (int)arg0->value;
@@ -1928,7 +1833,7 @@ void CvsImage::DrawFrame(int arg1, int arg2, unsigned int arg3) {
     if (r8 != 0) fn_802C40E8(r8, arg1, arg2 - arg0->count * rem);
 }
 
-void CvsImage::Rect(int arg1, int arg2, int* arg3, int* arg4, int* arg5, int* arg6) {
+inline void CvsImage::Rect(int arg1, int arg2, int* arg3, int* arg4, int* arg5, int* arg6) {
     CvsImage* arg0 = this;
     int var_r0;
     *arg3 = arg1;
@@ -1939,7 +1844,7 @@ void CvsImage::Rect(int arg1, int arg2, int* arg3, int* arg4, int* arg5, int* ar
     *arg6 = *arg4 + arg0->count;
 }
 
-int CvsImage::Frames(void) {
+inline int CvsImage::Frames(void) {
     CvsImage* arg0 = this;
     return arg0->divisor;
 }
@@ -1947,21 +1852,9 @@ int CvsImage::Frames(void) {
 
 
 
-#ifdef __MWERKS__
-void UIImage::Draw(int x, int y, int a, unsigned int frame) {}
 
-void UIImage::DrawAt(int x, int y, int a, int b, int c, int frame) { Draw(x, y, a, frame); }
 
-int UIImage::Hit(int x, int y, int testX, int testY) {                      // fn_8021583C: tests Rect
-    int left, top, right, bottom;
-    Rect(x, y, &left, &top, &right, &bottom);
-    int result = 0;
-    if (testX >= left && testX < right && testY >= top && testY < bottom) result = 1;
-    return result;
-}
-#endif
-
-void UICustom::Slot0C(void) {
+inline void UICustom::Slot0C(void) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf1();
@@ -1975,81 +1868,81 @@ public:
     virtual void vf3();
 };
 
-void UICustom::Slot10(void) {
+inline void UICustom::Slot10(void) {
     UICustom* arg0 = this;
     Vf4Obj *obj = (Vf4Obj *)arg0->handler;
     obj->vf2();
 }
 
-void UICustom::Slot14(void) {
+inline void UICustom::Slot14(void) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf3();
 }
 
-void UICustom::Slot7C(void) {
+inline void UICustom::Slot7C(void) {
     UICustom* arg0 = this;
     UIWidget::Slot7C();
     ((VfObj *)(void *)arg0->handler)->vf5();
 }
 
-void UICustom::Slot80(void) {
+inline void UICustom::Slot80(void) {
     UICustom* arg0 = this;
     UIWidget::Slot80();
     ((VfObj *)(void *)arg0->handler)->vf6();
 }
 
-void UICustom::Slot3C(int x, int y) {
+inline void UICustom::Slot3C(int x, int y) {
     UICustom* arg0 = this;
     ((VfObj *)(void *)arg0->handler)->vf10(x, y);
 }
 
-void UICustom::Slot40(int x, int y) {
+inline void UICustom::Slot40(int x, int y) {
     UICustom* arg0 = this;
     ((VfObj *)(void *)arg0->handler)->vf11(x, y);
 }
 
-void UICustom::Slot44(void) {
+inline void UICustom::Slot44(void) {
     UICustom* arg0 = this;
     ((VfObj *)(void *)arg0->handler)->vf13();
 }
 
-void UICustom::Slot48(void) {
+inline void UICustom::Slot48(void) {
     UICustom* arg0 = this;
     ((VfObj *)(void *)arg0->handler)->vf14();
 }
 
-void* UICustom::Slot60(void) {
+inline void* UICustom::Slot60(void) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf19();
 }
 
-void UICustom::Slot74(int, void*) {
+inline void UICustom::Slot74(int, void*) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf4();
 }
 
-void UICustom::Slot4C(int x, int y) {
+inline void UICustom::Slot4C(int x, int y) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf12(x, y);
 }
 
-void UICustom::Slot58(void) {
+inline void UICustom::Slot58(void) {
     UICustom* arg0 = this;
     arg0->flag18 = 1;
     ((VfObj *)(void *)arg0->handler)->vf15();
 }
 
-void UICustom::Slot5C(void) {
+inline void UICustom::Slot5C(void) {
     UICustom* arg0 = this;
     arg0->flag18 = 0;
     ((VfObj *)(void *)arg0->handler)->vf16();
 }
 
-void UICustom::Slot34(void) {
+inline void UICustom::Slot34(void) {
     UICustom* arg0 = this;
     u8 *self = (u8 *)arg0;
     self[0x19] = 1;
@@ -2059,7 +1952,7 @@ void UICustom::Slot34(void) {
     ((MenuState*)arg0->handler)->Unk4C();
 }
 
-void UICustom::Slot38(void) {
+inline void UICustom::Slot38(void) {
     UICustom* arg0 = this;
     u8 *self = (u8 *)arg0;
     self[0x19] = 0;
@@ -2068,7 +1961,7 @@ void UICustom::Slot38(void) {
     }
     ((MenuState*)arg0->handler)->Unk50();
 }
-int UICustom::Slot64(int arg1) {
+inline int UICustom::Slot64(int arg1) {
     UICustom* arg0 = this;
     class Callback {
     public:
@@ -2084,82 +1977,45 @@ int UICustom::Slot64(int arg1) {
     return UIWidget::Slot64(arg1);
 }
 
-int UICustom::Slot68(void) {
+inline int UICustom::Slot68(void) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     return obj->vf21();
 }
 
-void UICustom::Slot24(void*) {
+inline void UICustom::Slot24(void*) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf7();
 }
 
-void UICustom::Slot28(void) {
+inline void UICustom::Slot28(void) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf8();
 }
 
-void UICustom::Slot30(void) {
+inline void UICustom::Slot30(void) {
     UICustom* arg0 = this;
     VfObj *obj = (VfObj *)arg0->handler;
     obj->vf9();
 }
 
-void UICustom::Slot1C(int arg1, int arg2) {
+inline void UICustom::Slot1C(int arg1, int arg2) {
     UICustom* arg0 = this;
     UIWidget::Slot1C(arg1, arg2);
     ((void **)arg0->handler)[1] = (void *)arg1;
     ((void **)arg0->handler)[2] = (void *)arg2;
 }
 
-int UIWidget::Slot18(void) {
-    return -1;
-}
-
-void UIWidget::Slot2C(void) {
-
-}
-
-void UIWidget::Slot50(void) {
-
-}
-
-void UIWidget::Slot54(void) {
-
-}
-
-int UIWidget::Slot6C(int) {
-    return 0;
-}
-
 extern "C" void fn_80214CB4(s32);
 extern "C" void fn_80230E90(s32);
-int UIWidget::Slot70(int arg1, int arg2) {
-    UIWidget* arg0 = this;
-    s32 var_r6;
-
-    var_r6 = 0;
-    if (arg1 >= arg0->left && arg1 < arg0->right &&
-        arg2 >= arg0->top && arg2 < arg0->bottom) {
-        var_r6 = 1;
-    }
-    return var_r6;
-}
-
-int UIWidget::Slot78(void) {
-    UIWidget* arg0 = this;
-    return arg0->right - arg0->left;
-}
-
-void UIYesNoHandler::Enter(void) {
+inline void UIYesNoHandler::Enter(void) {
     UIYesNoHandler* arg0 = this;
     fn_80214CB4(arg0->defaultNo == 0);
 }
 
-int UIYesNoHandler::Key(int arg1) {
+inline int UIYesNoHandler::Key(int arg1) {
     switch (arg1) {
     case 0x125:
         fn_80214CB4(0);
@@ -2177,82 +2033,6 @@ int UIYesNoHandler::Key(int arg1) {
     }
 done:
     return 1;
-}
-
-void MenuState::Exit(void) {
-
-}
-
-void MenuState::Unk14(void) {
-
-}
-
-void MenuState::Changed(int key, void* value) {
-	fn_80221E7C(this);
-}
-
-void MenuState::Update(void) {
-
-}
-
-void MenuState::Unk20(void) {
-
-}
-
-void MenuState::Unk24(gxCanvas*) {
-
-}
-
-void MenuState::Draw(void) {
-
-}
-
-void MenuState::Unk2C(void) {
-
-}
-
-void MenuState::Unk30(void) {
-
-}
-
-void MenuState::Unk34(void) {
-
-}
-
-void MenuState::Unk38(void) {
-
-}
-
-void MenuState::Unk3C(void) {
-
-}
-
-void MenuState::Unk40(void) {
-
-}
-
-void MenuState::Unk44(void) {
-
-}
-
-void MenuState::Unk48(void) {
-
-}
-
-void MenuState::Unk4C(void) {
-
-}
-
-void MenuState::Unk50(void) {
-
-}
-
-int MenuState::Unk54(void) {
-    return 0;
-}
-
-int MenuState::Unk5C(void) {
-    return 0;
 }
 
 /* .sbss owned by this unit (0x8055EEF8-0x8055EF60), in address order. */

@@ -3,9 +3,6 @@
 // "decide" button. The items are menu states. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/menu.h"
-// The intermediate base vptr is unused while constructing these controls.
-class __declspec(novtable) MenuState;
-
 #include "game/menustate.h"
 
 extern "C" {

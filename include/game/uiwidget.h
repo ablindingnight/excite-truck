@@ -7,6 +7,9 @@
 // Class and slot names are unproven; the slot names follow widgets.cpp's WidgetDispatch view. Every widget
 // vtable in the two units (uiapi lbl_8033D480/D590, widgets lbl_8033DD20..lbl_8033F90C) derives from UIWidget,
 // whose own vtable (lbl_8033FB38) is emitted by widgets.cpp (its destructor, the key function, is defined there).
+// The default slots are in-class inlines: every unit emits weak copies of the ones its tables need, and the linker
+// keeps the first in link order, which are uiapi's (0x80215414.. and 0x80215BAC..). Slots 1C/20/24/64/7C/80, the
+// constructors and the destructor are ordinary functions of widgets.cpp.
 
 struct UIWidgetProperty {
     void* value;   // 0x0
@@ -20,34 +23,54 @@ public:
     UIWidget(int left, int top, int right, int bottom, int kind);  // widgets fn_80218F34
     UIWidget(struct WidgetDesc* desc);                              // widgets fn_80218F80
     virtual ~UIWidget(void);                                         // widgets fn_8021915C
-    virtual void Slot0C(void);               // 0x0C
-    virtual void Slot10(void);               // 0x10
-    virtual void Slot14(void);               // 0x14
-    virtual int Slot18(void);                // 0x18
+    virtual void Slot0C(void) {}             // 0x0C
+    virtual void Slot10(void) {}             // 0x10
+    virtual void Slot14(void) {}             // 0x14
+    virtual int Slot18(void) { return -1; }  // 0x18
     virtual void Slot1C(int x, int y);       // 0x1C: move to (x, y)
     virtual void Slot20(int dx, int dy);     // 0x20: move by (dx, dy)
     virtual void Slot24(void* context);      // 0x24
-    virtual void Slot28(void);               // 0x28
-    virtual void Slot2C(void);               // 0x2C
-    virtual void Slot30(void);               // 0x30
-    virtual void Slot34(void);               // 0x34
-    virtual void Slot38(void);               // 0x38
-    virtual void Slot3C(int a, int b);       // 0x3C
-    virtual void Slot40(int a, int b);       // 0x40
-    virtual void Slot44(void);               // 0x44
-    virtual void Slot48(void);               // 0x48
-    virtual void Slot4C(int x, int y);       // 0x4C
-    virtual void Slot50(void);               // 0x50
-    virtual void Slot54(void);               // 0x54
-    virtual void Slot58(void);               // 0x58
-    virtual void Slot5C(void);               // 0x5C
-    virtual void* Slot60(void);              // 0x60
+    virtual void Slot28(void) {}             // 0x28
+    virtual void Slot2C(void) {}             // 0x2C
+    virtual void Slot30(void) {}             // 0x30
+    virtual void Slot34(void) {              // 0x34
+        flag19 = 1;
+        if (flag1a != 0) {
+            dirty = 1;
+        }
+    }
+    virtual void Slot38(void) {              // 0x38
+        flag19 = 0;
+        if (flag1a != 0) {
+            dirty = 1;
+        }
+    }
+    virtual void Slot3C(int a, int b) {}     // 0x3C
+    virtual void Slot40(int a, int b) {}     // 0x40
+    virtual void Slot44(void) {}             // 0x44
+    virtual void Slot48(void) {}             // 0x48
+    virtual void Slot4C(int x, int y) {}     // 0x4C
+    virtual void Slot50(void) {}             // 0x50
+    virtual void Slot54(void) {}             // 0x54
+    virtual void Slot58(void) { flag18 = 1; }  // 0x58
+    virtual void Slot5C(void) { flag18 = 0; }  // 0x5C
+    virtual void* Slot60(void) { return 0; }   // 0x60
     virtual int Slot64(int key);             // 0x64
-    virtual int Slot68(void);                // 0x68
-    virtual int Slot6C(int key);             // 0x6C
-    virtual int Slot70(int x, int y);        // 0x70: hit test
-    virtual void Slot74(int key, void* value);  // 0x74: property changed
-    virtual int Slot78(void);                // 0x78: width
+    virtual int Slot68(void) { return 0; }   // 0x68
+    virtual int Slot6C(int key) { return 0; }  // 0x6C
+    virtual int Slot70(int x, int y) {       // 0x70: hit test
+        int hit = 0;
+        if (x >= left && x < right && y >= top && y < bottom) {
+            hit = 1;
+        }
+        return hit;
+    }
+    virtual void Slot74(int key, void* value) {  // 0x74: property changed
+        if (flag1a != 0) {
+            dirty = 1;
+        }
+    }
+    virtual int Slot78(void) { return right - left; }  // 0x78: width
     virtual void Slot7C(void);               // 0x7C: per-frame update
     virtual void Slot80(void);               // 0x80
 
@@ -89,9 +112,9 @@ public:
 
 // uiapi's key binding widget (lbl_8033D590): calls its mapped action when the key is pressed. Declared before UIImage
 // because its vtable follows UIImage's in uiapi .data (vtables come out in reverse declaration order).
+// No declared destructor (implicit: 0x80215348, in uiapi's implicit-destructor run); Slot64 is an inline of uiapi.cpp.
 class UIHotKey : public UIWidget {  /* Class name unproven */
 public:
-    virtual ~UIHotKey(void);
     virtual int Slot64(int key);
     unsigned short key;            // 0x244
     void* action;       // 0x248
@@ -103,25 +126,19 @@ public:
     }
 };
 
-// Abstract base of the image drawers. Widgets emits the blanked copy of the UIImage table.
-// UI API uses standalone definitions of these four methods in their retail positions.
+// Abstract base of the image drawers, all in-class inlines. uiapi is the first unit in link order to need them, so
+// its weak copies are the ones kept; widgets' copy of the table is the zero-filled duplicate.
+// The two draws are overloads of ONE name with the 6-argument one declared first: MWCC gives overloads their slots
+// in declaration order (6-argument 0x0C, 4-argument 0x10) and emits their deferred copies in REVERSE order
+// (4-argument 0x80215824, then 6-argument 0x80215828), which is what retail has. FACTS 2026-11-17 12:20.
 class UIImage {  /* Class name unproven */
 public:
     virtual ~UIImage(void) {}                                                  // fn_802121D4 (its copy follows make_image)
 
-#if defined(__MWERKS__) && defined(UIAPI_IMAGE_METHODS_OUT_OF_LINE)
-    virtual void DrawAt(int x, int y, int a, int b, int c, int frame);
-    virtual void Draw(int x, int y, int a, unsigned int frame);
-#else
-    virtual void DrawAt(int x, int y, int a, int b, int c, int frame) { Draw(x, y, a, frame); }  // fn_80215828
-    virtual void Draw(int x, int y, int a, unsigned int frame) {}              // fn_80215824
-#endif
+    virtual void Draw(int x, int y, int a, int b, int c, int frame) { Draw(x, y, a, frame); }  // 0x80215828
+    virtual void Draw(int x, int y, int a, unsigned int frame) {}              // 0x80215824
     virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom) = 0;
 
-#if defined(__MWERKS__) && defined(UIAPI_IMAGE_METHODS_OUT_OF_LINE)
-    virtual int Hit(int x, int y, int testX, int testY);
-    virtual int Frames(void);
-#else
     virtual int Hit(int x, int y, int testX, int testY) {                      // fn_8021583C: tests Rect
         int left, top, right, bottom;
         Rect(x, y, &left, &top, &right, &bottom);
@@ -130,7 +147,6 @@ public:
         return result;
     }
     virtual int Frames(void) { return 1; }                                     // fn_802154B8
-#endif
 };
 
 struct gArtSet;
