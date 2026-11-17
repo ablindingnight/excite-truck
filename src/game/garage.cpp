@@ -4,6 +4,9 @@
 // stubs. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/gart.h"
+// Included before caricontable.h: weak strings come out in REVERSE definition order of their inline owners, and
+// retail has IconPool's five before RollStrings' three.
+#include "game/roll_strings.h"
 #include "game/caricontable.h"
 #include "game/locstring.h"
 #include "game/gamedb.h"
@@ -250,7 +253,6 @@ static inline u32 GetSelColor(u8* p) {
     return GetVehicleColor(v, 0)[1];
 }
 
-#include "game/roll_strings.h"
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 extern "C" const char* fn_80131234(const char* key);
 
