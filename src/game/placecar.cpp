@@ -221,9 +221,14 @@ void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
 }
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
 extern "C" {
-/* Helper unproven: retail creates the 10.0f of fn_801B7F4C BEFORE the literals of fn_801B7C8C, so an unused static
-   function with that literal was compiled here (dead static functions keep their constants). */
-static f32 SlotStart(f32 base) { return 10.0f + base; }
+/* Name unproven: the 10.0f of fn_801B7F4C is retail's @335, created BEFORE the literals of fn_801B7C8C, so it is a
+   named constant defined here (emitted at its definition point); the one-field struct keeps the use from folding
+   into a second pooled 10.0f. Replaces a dead static function that blocked linking (extra .text). */
+struct SlotConst {
+    f32 v;
+};
+extern const SlotConst lbl_80562720;
+const SlotConst lbl_80562720 = {10.0f};
 
 /* Helper name unproven */
 static inline void Add2(V2* o, const V2* a, const V2* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; }
@@ -291,7 +296,7 @@ void fn_801B7F4C(Respawn* r, int slot, int mode) {
     if (fn_80178C9C()->line->start) {
         IdealPoint* st = fn_80178C9C()->line->start;
         f32 base = 200.0f + st->dist;
-        fn_801B8054(r, fn_80178C9C(), 0.0f, (10.0f + base) + (f32)slot * spacing);
+        fn_801B8054(r, fn_80178C9C(), 0.0f, (lbl_80562720.v + base) + (f32)slot * spacing);
     } else {
         fn_801B78EC(r, fn_80178C9C(), 0, 0.0f, (f32)slot * spacing, 0.0f);
     }
