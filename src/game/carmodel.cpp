@@ -10,6 +10,7 @@
 #include "game/racesetup.h"
 #include "game/gamedb.h"
 #include <revolution/MTX/mtxtypes.h>  // Vec
+#include "game/strcopy.h"
 
 extern "C" {
 int sscanf(const char* s, const char* fmt, ...);
@@ -239,15 +240,6 @@ static inline void MulVecT(Vec* out, const Vec* in, const Vec* m) {
     }
 }
 
-static inline void StrCopy(char* d, const char* s, int n) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void StrCat(char* d, const char* s, int n) {
     while (*d) {
@@ -255,7 +247,7 @@ static inline void StrCat(char* d, const char* s, int n) {
         d++;
     }
     if (n > 0) {
-        StrCopy(d, s, n);
+        SafeStrCopy(d, s, n);
     }
 }
 
@@ -387,7 +379,7 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
         fn_801EC1D4();
     }
     char buf[64];
-    StrCopy(buf, d->vehicleName, 64);
+    SafeStrCopy(buf, d->vehicleName, 64);
     StrCat(buf, ".car", 64);
     fn_8012E81C(buf);
     res = (CarRes*)fn_802792E4(d->vehicleName);
