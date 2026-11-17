@@ -2061,8 +2061,9 @@ void fn_80183E7C(u8* p) {
             f32 g = (s32)fn_8018B06C(p) < 0 ? 0.0f : 1.0f;
             f32 st = cb->f25F0 * g;
             f32 lat = PSVECDotProduct((const Vec*)&side, (const Vec*)(p + 0x48));
+            f32 want = 3.0f * (20.0f * (0.6f * st - lat));
             f32 t = Clamp01((cb->speed - 22.222223f) / 48.888893f);
-            yaw = LerpT(t, yaw, 3.0f * (20.0f * (0.6f * st - lat)));
+            yaw = LerpT(t, yaw, want);
         }
         f32 now = lbl_8055E3C8;
         if (cb->f2638 == 0 && cb->f2644 > 0 &&
@@ -2149,9 +2150,10 @@ void fn_80183E7C(u8* p) {
         }
         f32 spin = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48));
         f32 fs = Clamp01((cb->speed - 6.6666665f) / 24.444445f);
+        f32 sk = 1.0f + fs * -0.9f;
+        f32 m2 = 30000.0f * (cb->f5E4 * cb->f5E4);
         f32 fa = Clamp01((cb->f2618 - 0.1f) / 0.20000002f);
-        f32 k = 30000.0f * cb->f5E4 * cb->f5E4 * (1.0f + CbMul(fa, -0.8f)) *
-                (yaw * (1.0f + fs * -0.9f) - spin);
+        f32 k = m2 * (1.0f + CbMul(fa, -0.8f)) * (yaw * sk - spin);
         t.x = cb->mtx.rot.y.x * k;
         t.y = cb->mtx.rot.y.y * k;
         t.z = cb->mtx.rot.y.z * k;
