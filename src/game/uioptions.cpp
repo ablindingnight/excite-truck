@@ -558,6 +558,7 @@ void fn_80239AC0(void) {
     int done = 0;
     MenuDesc desc;
     do {
+        desc = lbl_802FA040;
         MenuItem items[] = {
             MenuItem(lbl_8055BAC0, 8, (void*)fn_80239AB8, 0, 0),
             MenuItem(lbl_8055BABC, 8, (void*)fn_80239A94, 1, 0),
@@ -576,7 +577,6 @@ void fn_80239AC0(void) {
             MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
             *(MenuItem*)&lbl_804986F8,
         };
-        desc = lbl_802FA040;
         desc.items = items;
         switch (fn_802146BC(&desc, -999, -999, 1)) {
         case 15:
