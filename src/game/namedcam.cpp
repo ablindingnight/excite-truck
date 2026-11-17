@@ -399,15 +399,15 @@ static inline void AxisAngle(CamMat3* m, const CamVec3* axis) {
         f32 s = SinF(angle);
         f32 c = CosF(angle);
         f32 t = 1.0f - c;
-        m->m[0] = c + t * (x * x);
-        m->m[1] = t * x * y + s * z;
-        m->m[2] = t * x * z - s * y;
-        m->m[3] = t * x * y - s * z;
+        m->m[1] = y * (t * x) + s * z;
+        m->m[2] = z * (t * x) - s * y;
+        m->m[3] = y * (t * x) - s * z;
         m->m[4] = c + t * (y * y);
-        m->m[6] = t * x * z + s * y;
-        m->m[5] = t * y * z + s * x;
+        m->m[6] = z * (t * x) + s * y;
+        m->m[0] = c + t * (x * x);
+        m->m[5] = z * (t * y) + s * x;
         m->m[8] = c + t * (z * z);
-        m->m[7] = t * y * z - s * x;
+        m->m[7] = z * (t * y) - s * x;
     } else {
         m->m[0] = 1.0f;
         m->m[1] = 0.0f;
