@@ -51,9 +51,7 @@ struct SliderItem {
     MenuRange range;
 };
 
-struct MenuStrList {
-    u8 pad0[0x14];
-};
+#include "game/menustrlist.h"
 
 extern "C" {
 MenuStrList* fn_8022D228(MenuStrList* l, int count, int len);

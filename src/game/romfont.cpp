@@ -13,11 +13,7 @@ void* fn_801284E8(const char* tag, s32 size);  // MemAlloc
 void fn_80128658(void* p);                     // MemFree
 }
 
-class UnkStaticS16 {
-public:
-    UnkStaticS16(s16 v) { val = v; }
-    s16 val;
-};
+#include "game/unkstatics16.h"
 
 inline s16 MakeS16(s16 v) { return v; }
 

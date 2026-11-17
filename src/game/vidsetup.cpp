@@ -2,12 +2,7 @@
 // graphics modules, and keeps the clear color. Names are guesses.
 #include "game/common.h"
 
-// A 16-bit value built by an inline constructor.
-class UnkStaticS16 {
-public:
-    UnkStaticS16(s16 v) { val = v; }
-    s16 val;
-};
+#include "game/unkstatics16.h"
 
 inline s16 MakeS16(s16 v) { return v; }
 

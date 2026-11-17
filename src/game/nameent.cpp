@@ -23,9 +23,7 @@ public:
     u8 pad4[0x34];
 };
 
-struct MenuStrList {
-    u8 pad0[0x14];
-};
+#include "game/menustrlist.h"
 
 extern "C" {
 void fn_80214A9C(int sound);

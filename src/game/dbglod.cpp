@@ -17,11 +17,7 @@ void fn_801EC204(void);
 void fn_802E4CDC(void);
 }
 
-class UnkStaticS16 {
-public:
-    UnkStaticS16(s16 v) { val = v; }
-    s16 val;
-};
+#include "game/unkstatics16.h"
 
 inline s16 MakeS16(s16 v) { return v; }
 

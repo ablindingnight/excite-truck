@@ -16,10 +16,7 @@ void* operator new[](size_t size, const char* tag);
 
 #define MAX_CAR_STATS 5
 
-struct CarStat {
-    const char* name;
-    s32 value;
-};
+#include "game/carstat.h"
 
 struct CarStats {
     const char* chassis;               // offset 0x0

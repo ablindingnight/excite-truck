@@ -221,10 +221,7 @@ struct CarEntry {
     u32 value;             // offset 0x10
 };
 
-struct CarStat {
-    const char* name;  // offset 0x0
-    s32 value;         // offset 0x4
-};
+#include "game/carstat.h"
 
 struct CarStats {
     const char* chassis;  // offset 0x0

@@ -5,9 +5,7 @@
 #include "game/menu.h"
 #include <string.h>
 
-struct MenuStrList {
-    u8 pad0[0x14];
-};
+#include "game/menustrlist.h"
 
 // The memory card operation being waited on.
 class CardTask {

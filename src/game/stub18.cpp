@@ -1,11 +1,7 @@
 // A stripped unit (0x802789A8-0x80278A1C): 3 empty functions and its statics. Names are guesses.
 #include "game/common.h"
 
-class UnkStaticS16 {
-public:
-    UnkStaticS16(s16 v) { val = v; }
-    s16 val;
-};
+#include "game/unkstatics16.h"
 
 inline s16 MakeS16(s16 v) { return v; }
 
