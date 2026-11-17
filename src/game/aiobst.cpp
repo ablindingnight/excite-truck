@@ -4,6 +4,7 @@
 // a driver projects the obstacles ahead into 64 lateral bins and picks the nearest free gap. Names are
 // guesses apart from the strings.
 #include "game/common.h"
+#include "game/solgroup.h"
 #include "game/idealline.h"
 #include "game/spot.h"
 #include "game/v2.h"
@@ -97,16 +98,6 @@ struct TrackObj {
     s32 id;    // offset 0x20
     f32 rad;   // offset 0x24
     f32 half;  // offset 0x28
-};
-
-struct GroupItem {
-    u8 pad0[0x3C];
-    TrackObj* obj;  // offset 0x3C
-};
-
-struct Group {
-    s32 count;          // offset 0x0
-    GroupItem** items;  // offset 0x4
 };
 
 extern "C" {
@@ -267,15 +258,15 @@ void fn_8015EF84(ValueNode* list) {
     }
 }
 
-int fn_8015F148(Group** groups, int n) {
+int fn_8015F148(SolGroup** groups, int n) {
     int count = 0;
     int i;
     for (i = 0; i < n; i++) {
-        Group* g = groups[i];
+        SolGroup* g = groups[i];
         if (g) {
             int j;
             for (j = 0; j < g->count; j++) {
-                if (fn_8015ECC0(g->items[j]->obj)) {
+                if (fn_8015ECC0((TrackObj*)g->items[j]->shape)) {
                     count++;
                 }
             }
@@ -310,14 +301,14 @@ void fn_8015F1E4(Obst* o, const TrackObj* t) {
     o->type = 0;
 }
 
-void fn_8015F320(Group** groups, int n, IdealFollower* trk) {
+void fn_8015F320(SolGroup** groups, int n, IdealFollower* trk) {
     int i;
     for (i = 0; i < n; i++) {
-        Group* g = groups[i];
+        SolGroup* g = groups[i];
         if (g) {
             int j;
             for (j = 0; j < g->count; j++) {
-                TrackObj* t = g->items[j]->obj;
+                TrackObj* t = (TrackObj*)g->items[j]->shape;
                 if (fn_8015ECC0(t)) {
                     Obst* o = lbl_8055E29C->Add();
                     fn_8015F1E4(o, t);
@@ -371,7 +362,7 @@ void fn_8015F558(void) {
     Free(lbl_8055E29C);
 }
 
-void fn_8015F670(Group** groups, int n) {
+void fn_8015F670(SolGroup** groups, int n) {
     IdealFollower* trk = fn_80178C9C();
     ValueTable* vt = fn_80131810("aiobst.val");
     ValueNode* objs;

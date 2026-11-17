@@ -4,6 +4,7 @@
 // back to a slow test of every object for near-horizontal rays. Names are guesses apart from the
 // message and the file name.
 #include "game/common.h"
+#include "game/solgroup.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/collvol.h"
@@ -29,28 +30,6 @@ struct PhobIter {  /* Helper name unproven */
     PhobIter(PhobCell** cells) : p(0), nd(0), w(cells) {}
 };
 
-struct QuadNode {
-    u16 first;  // offset 0x0
-    u16 end;    // offset 0x2
-    u16 child;  // offset 0x4
-    u16 pad6;
-};
-
-struct GroupItem {
-    u8 pad0[0x3C];
-    CollShape* shape;  // offset 0x3C
-    u8 active;     // offset 0x40
-};
-
-struct Group {
-    s32 count;              // offset 0x0
-    GroupItem** items;      // offset 0x4
-    u32 unk8;               // offset 0x8
-    u16* index;             // offset 0xC
-    QuadNode* nodes;        // offset 0x10
-    void (*release)(Group* g);  // offset 0x14
-};
-
 typedef int (*RayFilter)(s32 id);
 
 struct RayQuery {
@@ -64,10 +43,10 @@ struct RayQuery {
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801B619C(PhobCell** out, int* n, const RVec3* pos);
-Group* fn_801A4548(const char* name);
-void fn_801A47FC(Group* g);
-void fn_801A47C8(Group* g);
-void fn_8015F670(Group** groups, int n);
+SolGroup* fn_801A4548(const char* name);
+void fn_801A47FC(SolGroup* g);
+void fn_801A47C8(SolGroup* g);
+void fn_8015F670(SolGroup** groups, int n);
 int fn_801A4E88(const RVec3* from, const RVec3* dir, f32* t, RVec3* normal, s32* surf);  // terrain
 extern s32 lbl_8055E3C4;  // frame counter
 }
@@ -76,8 +55,8 @@ ModuleTag lbl_8055EA28;
 UnkStaticFFFF lbl_8055EA30;
 UnkStaticFFFF lbl_8055EA34;
 u8 lbl_8055EA38;      // collision active
-Group* lbl_8055EA3C;  // track.sol
-Group* lbl_8055EA40;  // game-supplied
+SolGroup* lbl_8055EA3C;  // track.sol
+SolGroup* lbl_8055EA40;  // game-supplied
 
 extern "C" {
 
@@ -121,11 +100,11 @@ void fn_801E2100(CollShape* s, RayQuery* q) {
 
 void fn_801E2188(void) { lbl_8055EA3C = fn_801A4548("track.sol"); }
 
-void fn_801E21B4(Group* g) { lbl_8055EA40 = g; }
+void fn_801E21B4(SolGroup* g) { lbl_8055EA40 = g; }
 
 void fn_801E21BC(void) {
     lbl_8055EA38 = 1;
-    Group* g[2];
+    SolGroup* g[2];
     g[0] = lbl_8055EA3C;
     g[1] = lbl_8055EA40;
     for (u32 i = 0; i < 2; i++) {
@@ -156,7 +135,7 @@ void fn_801E2294(void) {
 }
 
 
-static inline void QuadCollide(Group* g, CollVolume* p, f32 scale) {
+static inline void QuadCollide(SolGroup* g, CollVolume* p, f32 scale) {
     int x = (int)(scale * p->mtx.pos.x);
     int z = (int)(scale * p->mtx.pos.z);
     int minX = -40000000;
@@ -168,8 +147,8 @@ static inline void QuadCollide(Group* g, CollVolume* p, f32 scale) {
         QuadNode* nd = &g->nodes[node];
         int end = nd->end;
         for (int k = nd->first; k < end; k++) {
-            GroupItem* it = g->items[g->index[k]];
-            if (it->active) {
+            StaticCollObject* it = g->items[g->index[k]];
+            if (it->b40) {
                 fn_801E2084(it->shape, p);
             }
         }
@@ -234,7 +213,7 @@ void fn_801E22D0(CollVolume** list, int n) {
     }
 }
 
-static inline void QuadRay(Group* g, const RVec3* from, RayQuery* q, f32 scale) {
+static inline void QuadRay(SolGroup* g, const RVec3* from, RayQuery* q, f32 scale) {
     int x = (int)(scale * from->x);
     int z = (int)(scale * from->z);
     int minX = -40000000;
@@ -246,8 +225,8 @@ static inline void QuadRay(Group* g, const RVec3* from, RayQuery* q, f32 scale) 
         QuadNode* nd = &g->nodes[node];
         int end = nd->end;
         for (int k = nd->first; k < end; k++) {
-            GroupItem* it = g->items[g->index[k]];
-            if (it->active) {
+            StaticCollObject* it = g->items[g->index[k]];
+            if (it->b40) {
                 fn_801E2100(it->shape, q);
             }
         }
@@ -317,7 +296,7 @@ int fn_801E2640(const RVec3* from, const RVec3* to, RVec3* outPos, RVec3* outNor
                 }
             }
         }
-        Group* g[2];
+        SolGroup* g[2];
         g[0] = lbl_8055EA3C;
         g[1] = lbl_8055EA40;
         RayQuery q;
@@ -351,14 +330,14 @@ int fn_801E2640(const RVec3* from, const RVec3* to, RVec3* outPos, RVec3* outNor
                 }
             }
         }
-        Group* g[2];
+        SolGroup* g[2];
         g[0] = lbl_8055EA3C;
         g[1] = lbl_8055EA40;
         for (u32 i = 0; i < 2; i++) {
             if (g[i]) {
                 for (int k = 0; k < g[i]->count; k++) {
-                    GroupItem* it = g[i]->items[k];
-                    if (it->active) {
+                    StaticCollObject* it = g[i]->items[k];
+                    if (it->b40) {
                         if (it->shape->vf18(from, &dir, &t, outNormal)) {
                             hit = 1;
                             *outSurf = it->shape->surface;
