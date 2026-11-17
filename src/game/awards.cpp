@@ -212,8 +212,6 @@ struct HandlerVec {
 };
 
 
-// A fixed-size string; new ones read "zzz" until they are filled in.
-template <int N>
 #include "game/fixedstr.h"
 
 struct Vec4 {

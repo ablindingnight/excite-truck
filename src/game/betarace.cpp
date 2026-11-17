@@ -121,8 +121,6 @@ static inline void SafeDelete(T*& p) {
 }
 
 
-// A fixed-size string; new ones read "zzz" until they are filled in.
-template <int N>
 #include "game/fixedstr.h"
 
 static inline f32 Clamp01(f32 x) {

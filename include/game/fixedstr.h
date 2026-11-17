@@ -3,7 +3,10 @@
 // FixedStr: one declaration for the units that each carried an identical copy (awards, betarace). Port ODR work,
 // 2026-11-16 (samesize.py). Names unproven.
 #include "game/common.h"
+#include "game/strcopy.h"
 
+// A fixed-size string; new ones read "zzz" until they are filled in.
+template <int N>
 struct FixedStr {
     FixedStr(void) {
         memset(s, 'z', 3);
