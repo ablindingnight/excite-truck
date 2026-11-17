@@ -333,7 +333,9 @@ void fn_801A0258(CollShape* grp, const RVec3& c, const RVec3& scale, f32 r, f32 
 void fn_801A0444(CollShape* grp, CollShape* box);
 // MATCHING-AID: obstacle-wall:box still calls OrientedBoxShape's constructor by its linker name: its centre
 // argument reads a `const f32& half` temporary created inside the allocation check, which a new-expression cannot hold.
-CollShape* __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
+#ifdef __MWERKS__
+CollShape* __ct__16OrientedBoxShapeFPC4RMtxPC5RVec3P10CollVolumefffff(void* p, u8* frame, const RVec3& c, u8* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
+#endif
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 ObMesh* fn_802C6B44(const char* name);
@@ -476,8 +478,14 @@ void Obstacle::Init(BodyDesc* d) {
         CollShape* s = (CollShape*)operator new(0x74, "obstacle-wall:box");
         if (s) {
             const f32& half = 0.5f;
-            s = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(s, (u8*)&mtx, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
+#ifdef __MWERKS__
+            s = __ct__16OrientedBoxShapeFPC4RMtxPC5RVec3P10CollVolumefffff(s, (u8*)&mtx, RVec3(0.0f, half * q->b, 0.0f), (u8*)this, 50000.0f,
                             0.2f, q->a, half * q->b, q->a);
+#else
+            /* PORT: MWCC path keeps the by-name call (MATCHING-AID above) */
+            s = new (s) OrientedBoxShape(&mtx, VecAddr(RVec3(0.0f, half * q->b, 0.0f)), this, 50000.0f, 0.2f, q->a,
+                                         half * q->b, q->a);
+#endif
         }
         shape = s;
         kind = 110;
@@ -502,7 +510,7 @@ void Obstacle::Init(BodyDesc* d) {
         AddCornerV((u8*)this, c, spring);
         c.z *= (-1.0f);
         AddCornerV((u8*)this, c, spring);
-        shape = (CollShape*)new ("horse-volume") SphereGroup((u32)&mtx, (u32)this);
+        shape = (CollShape*)new ("horse-volume") SphereGroup(&mtx, this);
         const f32 directionComponent = 1.0f;
         f32 r = q->a * ScaleOperand(0.5f);
         const f32 firstCenterXY = 0.0f;
@@ -511,7 +519,7 @@ void Obstacle::Init(BodyDesc* d) {
         const f32 secondCenterXY = 0.0f;
         fn_801A0258(shape, RVec3(secondCenterXY, secondCenterXY, q->c * ScaleOperand(0.5f) - r),
                     RVec3(1.0f, 1.0f, 1.0f), r, k, skin, 1.0f, secondCenterXY);
-        CollShape* box = (CollShape*)new ("horse-box") OrientedBoxShape((u32)&mtx, &origin, (u32)this, k, skin, 0.3f, 0.3f, 0.3f);
+        CollShape* box = (CollShape*)new ("horse-box") OrientedBoxShape(&mtx, &origin, this, k, skin, 0.3f, 0.3f, 0.3f);
         fn_801A0444(shape, box);
         corners = 0;
         break;
@@ -618,8 +626,8 @@ void Obstacle::Init(BodyDesc* d) {
         RVec3 c(origin.x, 0.305f + q->c, q->f - 0.305f);
         CollShape* ball = new ("barrier-sphere") SphereShape(this, ObFrameOf((u8*)this), k, skin, 0.305f, c);
         AddShape(ball);
-        CollShape* s = (CollShape*)new ("barrier-wall") OrientedBoxShape((u32)&mtx, VecAddr(RVec3(hx - q->a, hy - q->c, q->f - 0.305f)),
-                                                                        (u32)this, k, skin, hx, hy, 0.61f);
+        CollShape* s = (CollShape*)new ("barrier-wall") OrientedBoxShape(&mtx, VecAddr(RVec3(hx - q->a, hy - q->c, q->f - 0.305f)),
+                                                                        this, k, skin, hx, hy, 0.61f);
         shape = s;
         AddCornerV((u8*)this, RVec3(q->a, q->c - 0.0254f, q->e), spring);
         AddCornerV((u8*)this, RVec3(q->b, q->c - 0.0254f, q->e), spring);

@@ -10,6 +10,7 @@
 #include "game/rigid.h"
 #include "game/carbody.h"
 #include "game/rmtx.h"
+#include "game/shapes.h"
 #include "game/gamedb.h"
 #include <string.h>
 
@@ -691,11 +692,7 @@ s32 fn_801E3004(s32 model, const char* name, s32 a);
 HVec* fn_801E3630(s32 joint);
 void fn_801E323C(s32 joint);
 void fn_802C7760(s32 model, f32* x0, f32* x1, f32* y0, f32* y1, f32* z0, f32* z1);
-// SphereGroup::SphereGroup(frame, owner) in sphcoll, called by its linker name.
-u8* __ct__11SphereGroupFUlUl(u8* p, u8* frame, u8* owner);
 void fn_801A0258(u8* grp, const HVec* c, const RVec3* mat, f32 r, f32 k, f32 d, f32 m, f32 im);
-// OrientedBoxShape::OrientedBoxShape(frame, centre, owner, k, skin, hx, hy, hz) in sphcoll, called by its linker name.
-u8* __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(u8* p, u8* frame, const RVec3* c, u8* owner, f32 k, f32 d, f32 hx, f32 hy, f32 hz);
 void fn_801A0444(u8* grp, u8* box);
 }  // extern "C"
 void* operator new(unsigned long n, const char* tag);
@@ -766,10 +763,7 @@ void fn_80182DF4(u8* p) {
         maxZ -= 30.0f * 0.0254f;  // 30 in
     }
     cb->f5BC = maxZ;
-    u8* g = (u8*)operator new(0x184, "car-volume");
-    if (g) {
-        g = __ct__11SphereGroupFUlUl(g, (u8*)&cb->mtx, p);
-    }
+    u8* g = (u8*)new ("car-volume") SphereGroup((const RMtx*)&cb->mtx, (CollVolume*)p);
     cb->f268 = g;
     RVec3 rear(0.7f, 0.1f, 1.0f);
     RVec3 mid(0.7f, 0.1f, 1.0f);
@@ -803,11 +797,8 @@ void fn_80182DF4(u8* p) {
     AddBodySphere(p, cb->f268, 0.0f, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
     AddBodySphere(p, cb->f268, xFront, 0.254f + yFront, zFront, &front, 0.44999998f, stiff, damp, mass, invMass);
     RVec3 center(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.5f * (minZ + maxZ));
-    u8* box = (u8*)operator new(0x74, "car_box");
-    if (box) {
-        box = __ct__16OrientedBoxShapeFUlPC5RVec3Ulfffff(box, (u8*)&cb->mtx, &center, p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
+    u8* box = (u8*)new ("car_box") OrientedBoxShape((const RMtx*)&cb->mtx, &center, (CollVolume*)p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
                           0.5f * (maxZ - minZ));
-    }
     fn_801A0444(cb->f268, box);
     ((CollVolume*)p)->AddShape((CollShape*)cb->f268);
     cb->b1E8 = 1;

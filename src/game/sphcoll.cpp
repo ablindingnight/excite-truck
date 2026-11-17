@@ -2509,7 +2509,7 @@ void OffsetSphereShape::vf28(void) {
     this->b78 = 0;
 }
 
-SphereGroup::SphereGroup(u32 a, u32 b) : CollShape((const RMtx*)a, (CollVolume*)b, 'GRUP', 0.0f, 0.0f) {
+SphereGroup::SphereGroup(const RMtx* a, CollVolume* b) : CollShape(a, b, 'GRUP', 0.0f, 0.0f) {
     u8* p = (u8*)this;
     this->f170 = 0.0f;
     this->f178 = 0.0f;
@@ -3202,8 +3202,8 @@ void BoxShape::vf4C(void) {
     fn_801E44F4((u8*)&x, cx, cy, cz, 0x50000000);
 }
 
-OrientedBoxShape::OrientedBoxShape(u32 a, const RVec3* c, u32 b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz)
-    : BoxShape((CollVolume*)b, (const RMtx*)a, s0, s1, hx - 0.2f, hy - 0.2f, hz - 0.2f) {
+OrientedBoxShape::OrientedBoxShape(const RMtx* a, const RVec3* c, CollVolume* b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz)
+    : BoxShape(b, a, s0, s1, hx - 0.2f, hy - 0.2f, hz - 0.2f) {
     F32(this, 0x38) = c->x;
     F32(this, 0x3C) = c->y;
     F32(this, 0x40) = c->z;

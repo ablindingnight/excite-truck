@@ -125,7 +125,7 @@ public:
 // child set at 0x17C. Built by fn_8019FFD8, which carbody and obstacles call. Class name unproven.
 class SphereGroup : public CollShape {
 public:
-    SphereGroup(u32 frame, u32 owner);
+    SphereGroup(const RMtx* frame, CollVolume* owner);
     virtual ~SphereGroup(void);
     virtual void vf0C(void);
     virtual void vf10(u8* other);
@@ -262,7 +262,7 @@ public:
 // by fn_801A2354). Adds slot vf54 (that rotation). Class name unproven.
 class OrientedBoxShape : public BoxShape {
 public:
-    OrientedBoxShape(u32 frame, const RVec3* c, u32 owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
+    OrientedBoxShape(const RMtx* frame, const RVec3* c, CollVolume* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
     virtual void vf0C(void);
     virtual u8* vf54(void);
     virtual ~OrientedBoxShape(void) {}
