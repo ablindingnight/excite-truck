@@ -34,7 +34,9 @@ int fn_80139B5C(RaceCarRec* car, Bound* b);  // inside bound
 RaceCarRec* fn_8017960C(int id);
 }
 
-class IRaceListener {
+// MATCHING-AID (linker-strip stand-in, as COLLSHAPE_BASE_DECL): retail keeps IRaceListener tables only in other units;
+// techdemo's weak copy is a duplicate the linker strips (this .data is not addressed from the section start).
+class __declspec(novtable) IRaceListener {
 public:
     virtual void a0(void) = 0;
     virtual void a1(void) = 0;
@@ -48,7 +50,8 @@ void fn_801777CC(IRaceListener* l);
 void fn_801777D0(IRaceListener* l);
 }
 
-class TriggerMaster {
+// MATCHING-AID (novtable, plausible original): no TriggerMaster table exists in any retail unit (its vptr stores are dead).
+class __declspec(novtable) TriggerMaster {
 public:
     virtual ~TriggerMaster(void) {}
     virtual void Draw(void) = 0;
