@@ -195,7 +195,7 @@ struct RPacket;
 
 class IBallListener {
 public:
-    virtual void Input(RigidBody* src, u8* pressed);  /* not pure: the key function lives elsewhere (no vtable here, as in retail) */
+    virtual void Input(RigidBody* src, u8* pressed);  /* MATCHING-AID: declared non-pure so this object does not emit the weak __vt__13IBallListener that the retail linker dropped (pure in the original) */
     virtual void Status(const char** text, u8* flash) = 0;
     virtual bool GetPos(f32* xz, f32* vxz) = 0;
 };
