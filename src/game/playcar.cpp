@@ -343,6 +343,12 @@ int fn_8018FD38(void) {
     return r;
 }
 
+/* Helper name unproven */
+#pragma push
+#pragma auto_inline on
+static f32 TickCountAsFloat(s32 ticks) { return (f32)ticks; }
+#pragma pop
+
 u8* fn_8018FD88(u8* p, u32 a, u32 b) {
     *(void**)p = lbl_80333018;
     if (lbl_8055E518 == 0) {
@@ -360,7 +366,7 @@ u8* fn_8018FD88(u8* p, u32 a, u32 b) {
     if (!fn_801B6668()) {
         fn_801B664C();
     }
-    f32 t = 0.001f * (f32)fn_801293A4();
+    f32 t = 0.001f * TickCountAsFloat(fn_801293A4());
     f32 v = t - 5.0f;
     lbl_8055A46C = t;
     lbl_8055A468 = 0.5f > v ? 0.5f : v;
