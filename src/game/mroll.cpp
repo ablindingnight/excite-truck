@@ -7,7 +7,7 @@
 #include "game/gamedb.h"
 
 // Stat level thresholds (defined first: its .rodata precedes the unit's initialiser templates).
-extern const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
+extern "C" const s32 lbl_802FA300[3] = {0, 4, 7};  // stat level thresholds
 #include "game/menu.h"
 #include "game/menuwidget.h"
 #include "game/menuwidget_inl.h"
@@ -133,21 +133,8 @@ const char* fn_802E85B8(s32 slot);
 
 #include "game/roll_strings.h"
 
-// One stat bar: a menu state that draws one stat's caption (class name from garage.cpp).
-class StatBar : public MenuState {
-public:
-    StatBar(void);
-    virtual ~StatBar(void);
-    virtual void Exit(void);
-    virtual void Update(void);
-    virtual void Draw(void);
-    virtual void Set(int i, s32* value, u8* flag);
-
-    u8* font;    // offset 0x18
-    s32 index;   // offset 0x1C: stat number + 1 (-1 = none)
-    u8* flag;    // offset 0x20
-    s32* value;  // offset 0x24
-};
+// One stat bar (shared with garage.cpp).
+#include "game/statbar.h"
 
 #include "game/vehcolor.h"
 
@@ -674,13 +661,6 @@ int fn_8023FF1C(u8 flag) {
 
 }  // extern "C"
 
-// Out of line: garage.cpp destroys stat bars through this destructor (retail's copy is a global function here).
-StatBar::~StatBar(void) {
-    value = 0;
-    flag = 0;
-    fn_802328D4(font);
-    font = 0;
-}
 
 extern "C" {
 
@@ -789,11 +769,6 @@ int fn_802411D4(void) {
 
 }  // extern "C"
 
-void StatBar::Set(int i, s32* v, u8* f) {
-    value = v;
-    index = i + 1;
-    flag = f;
-}
 
 StatPanel::StatPanel(void) {
     memset(this, 0, sizeof(CarStats));
@@ -804,16 +779,8 @@ StatPanel::StatPanel(void) {
     text[4][0] = 0;
 }
 
-StatBar::StatBar(void) {
-    index = -1;
-    value = 0;
-    flag = 0;
-    font = fn_80232578(RollStrings::StatFont());
-}
 
-void StatBar::Exit(void) {}
 
-void StatBar::Update(void) {}
 
 extern "C" {
 
@@ -832,29 +799,6 @@ static inline s32 StatOf(const u8* p) { return *(s32*)PTR(p, 0x24); }
 
 }  // extern "C"
 
-void StatBar::Draw(void) {
-    StatBar* p = this;
-    f32 x, y;
-    fn_80230C30(&x, &y, p->x, p->y);
-    if (p->index >= 0) {
-        int lvl = 0;
-        for (int i = 0; i < 3; i++) {
-            s32 v = StatOf((u8*)p);
-            if (v && v >= lbl_802FA300[i]) {
-                lvl = i + 1;
-            }
-        }
-        char buf[0x1E];
-        fn_801345D8(buf, 0x1E, RollStrings::StatKey(), p->index, lvl);
-        int align = 10;
-        f32 size = lbl_8056375C;
-        if (*p->flag) {
-            size = lbl_80563760;
-            align = 9;
-        }
-        fn_80232BA4(fn_80131234(buf), p->font, x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
-    }
-}
 
 extern "C" {
 

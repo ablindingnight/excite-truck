@@ -8,12 +8,12 @@
 #include "game/locstring.h"
 #include "game/gamedb.h"
 #include "game/menu.h"
+#include "game/menustate.h"
 // The car list interface the garage is handed (gamedo.cpp calls it SessionScreen). Only its destructor has a
 // body; the list classes implement the rest.
 #include "game/sessionscreen.h"
 typedef SessionScreen GarageList;
 
-#include "game/menustate.h"
 #include <string.h>
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -185,35 +185,8 @@ CarStats* CarStatsLookup(const char* chassis);
 BOOL GetUnlockReq(const char* name, s32* races_run, s32* aaas);
 s32 AchievementsGetModelStat(int category, const char* model);
 
-// One stat bar (vtable lbl_80342734, from the car select screen).
-class StatBar {
-public:
-    StatBar(void);
-    virtual ~StatBar(void);
-    virtual void v0C(void);
-    virtual void v10(void);
-    virtual void v14(void);
-    virtual void v18(void);
-    virtual void v1C(void);
-    virtual void v20(void);
-    virtual void v24(void);
-    virtual void v28(void);
-    virtual void v2C(void);
-    virtual void v30(void);
-    virtual void v34(void);
-    virtual void v38(void);
-    virtual void v3C(void);
-    virtual void v40(void);
-    virtual void v44(void);
-    virtual void v48(void);
-    virtual void v4C(void);
-    virtual void v50(void);
-    virtual void v54(void);
-    virtual void v58(void);
-    virtual void v5C(void);
-    virtual void Set(int i, s32* value, u8* flag);
-    u8 pad4[0x24];
-};
+// One stat bar (shared with the car select screen, mroll.cpp).
+#include "game/statbar.h"
 
 // The stat panel: the car's stats, one bar and caption per stat.
 struct StatPanel {
@@ -279,7 +252,7 @@ static inline u32 GetSelColor(u8* p) {
 
 #include "game/roll_strings.h"
 extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
-extern "C" const char* fn_80131234(u8* s);
+extern "C" const char* fn_80131234(const char* key);
 
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
@@ -546,7 +519,7 @@ static inline void DisplaySelectedColor(u8* p, VehicleInfo* v) {
     *cp->out = ((u32*)((u8*)v + 0x64))[cp->sel];
     ShowCarColor(p);
     fn_801345D8(cp->colorText, 0x100, RollStrings::ColorKey(), cp->sel + 1);
-    const char* str = fn_80131234((u8*)cp->colorText);
+    const char* str = fn_80131234(cp->colorText);
     CopyName(str, 0x100, cp->colorText);
 }
 
@@ -804,7 +777,7 @@ public:
                         ui->SetAnim(v->colors[v->default_color]);
                     }
                 }
-                const char* text = fn_80131234((u8*)message);
+                const char* text = fn_80131234((const char*)message);
                 if (text != message) {
                     SafeStrCopy(message, text, 0x80);
                 }
