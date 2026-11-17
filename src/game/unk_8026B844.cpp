@@ -437,6 +437,20 @@ static inline f32 KeyAxisRev(FreePad& pad, f32 v, f32 speed, int minus, int plus
     return v;
 }
 
+/* Helper name unproven */
+static __inline void CamOrthonormal(CamRot& d) {
+    CamRot r;
+    CamSet(&r.axes[0], d.axes[0].x, d.axes[0].y, d.axes[0].z);
+    CamSet(&r.axes[2], d.axes[2].x, d.axes[2].y, d.axes[2].z);
+    PSVECCrossProduct((const Vec*)&r.axes[2], (const Vec*)&r.axes[0], (Vec*)&r.axes[1]);
+    PSVECNormalize((const Vec*)&r.axes[0], (Vec*)&r.axes[0]);
+    PSVECNormalize((const Vec*)&r.axes[1], (Vec*)&r.axes[1]);
+    PSVECCrossProduct((const Vec*)&r.axes[0], (const Vec*)&r.axes[1], (Vec*)&r.axes[2]);
+    CamCopy(&d.axes[0], &r.axes[0]);
+    CamCopy(&d.axes[1], &r.axes[1]);
+    CamCopy(&d.axes[2], &r.axes[2]);
+}
+
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
@@ -739,18 +753,9 @@ void fn_8026C014(int player) {
         f->rot.axes[2].z = car->frame.pos.z - f->pos.z;
         CamSet(&up, 0.0f, 1.0f, 0.0f);
         if (f->rot.axes[2].x * f->rot.axes[2].x + f->rot.axes[2].z * f->rot.axes[2].z > 0.01f) {
-            CamRot r;
             PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->rot.axes[2], (Vec*)&f->rot.axes[0]);
             PSVECCrossProduct((const Vec*)&f->rot.axes[2], (const Vec*)&f->rot.axes[0], (Vec*)&f->rot.axes[1]);
-            CamSet(&r.axes[0], f->rot.axes[0].x, f->rot.axes[0].y, f->rot.axes[0].z);
-            CamSet(&r.axes[2], f->rot.axes[2].x, f->rot.axes[2].y, f->rot.axes[2].z);
-            PSVECCrossProduct((const Vec*)&r.axes[2], (const Vec*)&r.axes[0], (Vec*)&r.axes[1]);
-            PSVECNormalize((const Vec*)&r.axes[0], (Vec*)&r.axes[0]);
-            PSVECNormalize((const Vec*)&r.axes[1], (Vec*)&r.axes[1]);
-            PSVECCrossProduct((const Vec*)&r.axes[0], (const Vec*)&r.axes[1], (Vec*)&r.axes[2]);
-            CamCopy(&f->rot.axes[0], &r.axes[0]);
-            CamCopy(&f->rot.axes[1], &r.axes[1]);
-            CamCopy(&f->rot.axes[2], &r.axes[2]);
+            CamOrthonormal(f->rot);
         }
     } else if ((s32)lbl_8055F4E0 == 2 && player) {
         s32 id = fn_8026A344(0);
