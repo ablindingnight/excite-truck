@@ -40,12 +40,7 @@ struct RacerState {
 #include "game/gameoverlay.h"
 #include "game/mathutil.h"
 
-class RacingOverlay : public GameOverlay {
-public:
-    RacingOverlay(int player);
-    virtual void Update(void);
-    u8 pad4[0x54 - 0x4];
-};
+#include "game/racingoverlay.h"
 
 struct FrameTimes {
     f32 values[128];  // offset 0x0
