@@ -149,10 +149,7 @@ public:
     s32* value;  // offset 0x24
 };
 
-struct VehicleColor {
-    s32 body;  // offset 0x0
-    s32 trim;  // offset 0x4
-};
+#include "game/vehcolor.h"
 
 #include "game/carstat.h"
 #include "game/strcopy.h"

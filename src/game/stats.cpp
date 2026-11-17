@@ -25,11 +25,7 @@ void fn_800122B4(s32 value, char* buf);
 
 void* operator new(size_t size, const char* tag);
 
-struct VehicleColor {
-    s32 body;  // offset 0x0
-    s32 trim;  // offset 0x4
-    u8 unk8;   // offset 0x8
-};
+#include "game/vehcolor.h"
 
 struct Units {
     u8 unk0[0x10];

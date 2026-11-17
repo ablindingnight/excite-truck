@@ -36,11 +36,7 @@ void IdentRegisterField(s32 a, s32 b, void** ptr, u32 size, IdentFieldClear clea
 #define VEHICLE_MAGICAL 4
 #define VEHICLE_NO_AI 8
 
-struct VehicleColor {
-    s32 body;  // offset 0x0
-    s32 trim;  // offset 0x4
-    u8 unk8;   // offset 0x8
-};
+#include "game/vehcolor.h"
 
 struct LookVec {
     f32 x;
