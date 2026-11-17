@@ -466,7 +466,7 @@ inline int MemCardDialogMgr::Setup(const McDialogCfg* cfg) {
     }
     this->cfg = cfg;
     McChoice choices[4];
-    int i;
+    s32 i;
     for (i = 0; i < cfg->count; i++) {
         choices[i] = cfg->entries[i];
     }
