@@ -3796,8 +3796,10 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     a = *src;
     b = a;
     fn_802C77F0(lbl_80559ED8, box);
-    f32 half = 0.5f;
-    V3Init c(box[0] + half * (box[1] - box[0]), box[2] + half * (box[3] - box[2]), box[4] + half * (box[5] - box[4]));
+    const f32 deltaz = box[5] - box[4];
+    const f32 deltay = box[3] - box[2];
+    const f32 deltax = box[1] - box[0];
+    V3Init c(box[0] + deltax / 2.0f, box[2] + deltay / 2.0f, box[4] + deltaz / 2.0f);
     V3 n;
     Scale(&n, &c, kBetaNegativeOne.value);
     MulVec(&n, &n, &b.r);
