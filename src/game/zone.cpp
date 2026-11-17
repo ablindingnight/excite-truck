@@ -438,6 +438,7 @@ static inline void InitText(char* s) {
 // Results panel state owned by the master (0x134 in ZoneMaster).
 namespace {
 struct ZoneHud {
+    void Open(void);
     ZoneHud(void) {
         anim = 0;
         timeBonusAnim = 0;
@@ -2644,13 +2645,16 @@ inline f32 ZoneMaster::vf38(void) { return 7.75f; }
 
 inline int ZoneMaster::vf64(void) { return 1; }
 
-#pragma dont_inline on
-inline void ZoneMaster::vfF8(void) {
-    hud.anim = new ("ArtAnimManager") ArtPlayer(1);
-    hud.Init();
-    hud.Reset();
+// Helper name unproven. One inline body: with the ArtPlayer constructor, the loader and Reset inside it, it is over
+// MWCC's nested-inline budget (512 units, FACTS 2026-11-17 11:16), so those three stay calls with no pragma. The
+// same member shape exists in zone (ZoneHud) and ringchal (RingResults).
+inline void ZoneHud::Open(void) {
+    anim = new ("ArtAnimManager") ArtPlayer(1);
+    Init();
+    Reset();
 }
-#pragma dont_inline reset
+
+inline void ZoneMaster::vfF8(void) { hud.Open(); }
 
 inline void ZoneHud::Reset(void) { ResetState(); }
 

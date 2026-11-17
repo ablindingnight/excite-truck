@@ -426,6 +426,7 @@ struct PlayerList : ArrayRef<PlayerData*> {
 
 class RingResults {
 public:
+    void Open(void);
     RingResults(void);
     ~RingResults(void) { Unload(); }
     void Unload(void) {
@@ -1474,14 +1475,19 @@ inline void RingChalMaster::vfB8(ZoneResults* r) {
     }
 }
 
-#pragma dont_inline on
+// Helper name unproven. One inline body: with the ArtPlayer constructor, the loader and Reset inside it, it is over
+// MWCC's nested-inline budget (512 units, FACTS 2026-11-17 11:16), so those three stay calls with no pragma. The
+// same member shape exists in zone (ZoneHud) and ringchal (RingResults).
+inline void RingResults::Open(void) {
+    layout = new ("ArtAnimManager") ArtPlayer(1);
+    Load();
+    Reset();
+}
+
 inline void RingChalMaster::vfF8(void) {
     layout = (ILayout*)fn_80145E70("freestyle.val");
-    results.layout = new ("ArtAnimManager") ArtPlayer(1);
-    results.Load();
-    results.Reset();
+    results.Open();
 }
-#pragma dont_inline reset
 
 inline void RingResults::Reset(void) {
     state = 0;
