@@ -197,6 +197,9 @@ inline f32 LineFollower::Project(IdealPoint* s, f32 t, V2* p) {
 extern const f32 kIdealLaneMargin = 15.0f * 0.305f;
 
 
+#pragma push
+// Pragma unproven: required for this scalar scratch ownership to preserve retail registers.
+#pragma opt_lifetimes off
 int LineFollower::Step(V2* p) {
     if (!fn_801355B8(this, p, &il.seg, &il.t)) {
         int r;
@@ -215,21 +218,25 @@ int LineFollower::Step(V2* p) {
                 if (s->ilpos == 0) {
                     r = 0;
                 }
-                f32 sx = s->pos.x;
-                f32 oy, ox;
-                f32 px = p->x;
-                pos.x = sx;
-                ox = px - sx;
-                f32 py = p->y;
-                f32 sy = s->pos.y;
-                pos.y = sy;
-                oy = py - sy;
+                // PROVISIONAL: coord/value reuse disjoint X/Y scratch lifetimes; original ownership unproven.
+                f32 inputY;
+                f32 coord;
+                f32 value;
+                f32 offsetX;
+                value = s->pos.x;
+                coord = p->x;
+                pos.x = value;
+                offsetX = coord - value;
+                inputY = p->y;
+                coord = s->pos.y;
+                pos.y = coord;
+                value = inputY - coord;
                 dir.x = s->dir.x;
                 f32 headingY = s->dir.y;
                 dir.y = headingY;
-                off.x = ox;
-                off.y = oy;
-                a = (dir.x * ox + headingY * oy) / s->len;
+                off.x = offsetX;
+                off.y = value;
+                a = (dir.x * offsetX + headingY * value) / s->len;
                 if (a < 1.0f) {
                     t = t > a ? t : a;
                     break;
@@ -284,6 +291,8 @@ int LineFollower::Step(V2* p) {
         return 2;
     }
 }
+#pragma pop
+
 
 extern "C" {
 

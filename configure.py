@@ -1021,7 +1021,7 @@ config.libs.append(
             Object(Matching, "game/loadpool.cpp"),
             Object(Matching, "game/strfunc.cpp"),
             Object(NonMatching, "game/aidriver.cpp"),
-            Object(NonMatching, "game/idealline.cpp"),
+            Object(Matching, "game/idealline.cpp"),
             Object(Matching, "game/proxer.cpp"),
             Object(Matching, "game/league.cpp"),
             Object(NonMatching, "game/idealres.cpp"),
