@@ -208,9 +208,9 @@ UnkStaticFFFF lbl_8055F9F8;
 UnkStatic123s lbl_804BE7B8;
 UnkStatic7F lbl_8055F9FC;
 s32 lbl_8055FA00;
-extern const f32 kWorldScale;
-Timer lbl_8055FA08(kWorldScale);  // layer list
-Timer lbl_8055FA10(kWorldScale);  // brush list
+extern const f32 lbl_80564C88;
+Timer lbl_8055FA08(lbl_80564C88);  // layer list
+Timer lbl_8055FA10(lbl_80564C88);  // brush list
 Timer lbl_8055FA18(5.0f);  // brush rescan
 Timer lbl_8055FA20(0.05f);  // paint rate
 s32 lbl_8055FA28;  // current layer
@@ -677,15 +677,15 @@ s16 fn_802B6ED8(s16 base, int i, u32 n) { return base + (i - n / 2) * (s16)fn_80
 
 static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : x + 0.5f); }
 
-extern const f32 kWorldScale;
+extern const f32 lbl_80564C88;
 s32 lbl_8055CEA0 = 1;  // brush scale (.sdata: defined after the brush-list strings)
 
 void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     if (b->w == 0) {
         return;
     }
-    s16 cx = (s16)Round(pos->x / kWorldScale) & ~(fn_802B6E30() - 1);
-    s16 cz = (s16)Round(pos->z / kWorldScale) & ~(fn_802B6E30() - 1);
+    s16 cx = (s16)Round(pos->x / lbl_80564C88) & ~(fn_802B6E30() - 1);
+    s16 cz = (s16)Round(pos->z / lbl_80564C88) & ~(fn_802B6E30() - 1);
     u32 nw = lbl_8055CEA0 * b->w;
     u32 nh = lbl_8055CEA0 * b->h;
     if (lbl_8055FA38 == 5) {
@@ -730,7 +730,7 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     }
 }
 // Centre of cell c in world units.
-static inline f32 CellCentre(int c, f32 scale) { return kWorldScale + (f32)c * scale; }
+static inline f32 CellCentre(int c, f32 scale) { return lbl_80564C88 + (f32)c * scale; }
 
 void fn_802B7300(int x, int z, int v, u32 color, f32 h) {
     V3 p;
@@ -740,7 +740,7 @@ void fn_802B7300(int x, int z, int v, u32 color, f32 h) {
     p.y = 0.5f + fn_801DCF48(0, p.x, p.z);
     V3 q = p;
     p.y += h;
-    f32 w = kWorldScale * (f32)(s16)fn_802B6E30();
+    f32 w = lbl_80564C88 * (f32)(s16)fn_802B6E30();
     if (v == 0) {
         color = 0xFF000000;
         v = 0x20;
@@ -748,7 +748,7 @@ void fn_802B7300(int x, int z, int v, u32 color, f32 h) {
     fn_801E41D8(&p, &q, (color & 0xFFFFFF) | (v << 24), w);
 }
 
-const f32 kWorldScale = 2.0f;
+const f32 lbl_80564C88 = 2.0f;
 
 void fn_802B7420(s16 x, s16 z, int v) { fn_802B7300(x, z, v, 0xFFFFFFFF, 0.2f); }
 
