@@ -5,6 +5,7 @@
 // decals over it, which then draw them with their own texture matrix. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/mathutil.h"
 #include "game/faninfo.h"
 #include "game/idealline.h"
 #include "game/v2.h"
@@ -15,8 +16,6 @@
 extern const f32 lbl_80564CB0;
 const f32 lbl_80564CB0 = 2.0f;
 
-// Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 extern "C" {
 void* memset(void* dst, int c, size_t n);
@@ -393,10 +392,7 @@ static inline TexEntry* FindTex(const char* name, int prio) {
     return *d = new ("xlte") TexEntry(name, prio);
 }
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
-static inline f32 FMin(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 FMax(f32 a, f32 b) { return a > b ? a : b; }
 
 extern "C" {
 
@@ -799,10 +795,10 @@ void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
     s->mtx[1][2] *= -1.0f;
     s->mtx[1][3] *= -1.0f;
     s->mtx[1][3] += 1.0f;
-    s->lo.x = FMin(a->x, FMin(a->x + c->x, FMin(a->x + b->x, b->x + (a->x + c->x))));
-    s->lo.y = FMin(a->y, FMin(a->y + c->y, FMin(a->y + b->y, b->y + (a->y + c->y))));
-    s->hi.x = FMax(a->x, FMax(a->x + c->x, FMax(a->x + b->x, b->x + (a->x + c->x))));
-    s->hi.y = FMax(a->y, FMax(a->y + c->y, FMax(a->y + b->y, b->y + (a->y + c->y))));
+    s->lo.x = MinF(a->x, MinF(a->x + c->x, MinF(a->x + b->x, b->x + (a->x + c->x))));
+    s->lo.y = MinF(a->y, MinF(a->y + c->y, MinF(a->y + b->y, b->y + (a->y + c->y))));
+    s->hi.x = MaxF(a->x, MaxF(a->x + c->x, MaxF(a->x + b->x, b->x + (a->x + c->x))));
+    s->hi.y = MaxF(a->y, MaxF(a->y + c->y, MaxF(a->y + b->y, b->y + (a->y + c->y))));
 }
 
 void fn_802BAA50(V2* v) {

@@ -3,6 +3,7 @@
 // field offsets; the large routines and the initialiser are still stubs. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/mathutil.h"
 #include "game/raceopts.h"
 #include <revolution/MTX/vec.h>
 #include "game/camframe.h"
@@ -137,7 +138,6 @@ extern f32 lbl_8055F534;  // normal fov
 static inline int Boosting(u8* car) { return F32(car, 0x258C) > 0.001f; }
 // MulF: a product whose constant arrives as an inline parameter (a literal written in a multiply is always the
 // first operand; retail has the variable first at these sites).
-static inline f32 MulF(f32 a, f32 b) { return a * b; }
 // AddScaled / Scaled: o = a + d * s and o = a * s; retail loads the scale once for the three components.
 static inline void AddScaled(f32* o, const f32* a, const f32* d, f32 s) {
     o[0] = a[0] + d[0] * s;
@@ -149,7 +149,6 @@ static inline void Scaled(f32* o, const f32* a, f32 s) {
     o[1] = a[1] * s;
     o[2] = a[2] * s;
 }
-static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 static inline int Above(f32 v, f32 k) { return v > k; }
 
 // The view angle for the camera: blended from the last one (0x194) toward the speed-based angle, or
@@ -159,7 +158,7 @@ f32 fn_8026EB4C(const u8* p) {
     f32 fov;
     f32 r = fn_8026EAEC(!Boosting(cr->car) ? lbl_8055F534 : lbl_8055F530);
     f32 lo = lbl_8055F528;
-    fov = fn_8026EAEC(LerpF(cr->f13C, lo, lbl_8055F52C));
+    fov = fn_8026EAEC(LerpT(cr->f13C, lo, lbl_8055F52C));
     u8* car = cr->car;
     int boost = 0;
     int on = Boosting(car) || car[0x259C];
@@ -185,8 +184,8 @@ f32 fn_8026ECE4(u8* p, f32* scale) {
     f32 ref;
     f32 fov = fn_8026EB4C(p);
     if (fov > lbl_8055F52C) {
-        ref = cos(MulF(lbl_8055F52C, 0.25f));
-        *scale *= (f32)cos(MulF(fov, 0.25f)) / ref;
+        ref = cos(Mul(lbl_8055F52C, 0.25f));
+        *scale *= (f32)cos(Mul(fov, 0.25f)) / ref;
     }
     return fov;
 }
@@ -223,7 +222,7 @@ void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
     r += *cam;
     f32 e = Ease(r->v[3]);
     f32 t = Unit01(r->v[1], 0.0f, 20.0f);
-    f32 k = LerpF(t, 0.0f, 1.0f);
+    f32 k = LerpT(t, 0.0f, 1.0f);
     pos[1] = pos[1] + lift * (-4.0f * (k * e));
     CsVec d;
     d.x = target[0] - pos[0];
@@ -241,8 +240,6 @@ int fn_801784DC(f32* pos, f32* h, int a, int b, int (*filter)(int));
 f32 fn_8026A520(int i);
 int fn_8026F408(int n);
 
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 // The ground height at (x, z), raised to any obstacle top found there.
 /* Helper name unproven: the result goes out through a reference (retail keeps it in the caller's variable), the point
    is built with the by-value CsVec::Set. */
@@ -262,7 +259,7 @@ static inline void EaseGroundHeight(f32 t, bool onGround, f32 h, CamRect* r) {
     f32 hi;
     f32 up;
     f32 down;
-    up = 0.016683351f * LerpF(t, 400.0f, 20.0f);
+    up = 0.016683351f * LerpT(t, 400.0f, 20.0f);
     down = onGround ? 6.6733403f : 0.33366704f;
     if (h < r->v[1]) {
         lo = r->v[1] - down;
@@ -343,7 +340,7 @@ void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
     f32 kMax = 1.0f;
     k = kMax < k ? kMax : k;
     k = k > 0.0f ? k : 0.0f;
-    k = LerpF(k, 0.0f, 1.0f);
+    k = LerpT(k, 0.0f, 1.0f);
     pos[1] = pos[1] + lbl_8049A208[0] * k;
     target[1] = target[1] + lbl_8049A208[1] * k;
     fn_8026ED64(cam, MinF(1.0f, 5.0f * k), pos, target);
@@ -361,7 +358,6 @@ struct CamAxes {
     CVec3 right, up, fwd;
 };
 
-static inline f32 AddMul(f32 a, f32 b, f32 c) { return a + c * b; }
 
 // A camera frame: its rows and its position.
 struct CamFovFrame {
@@ -466,7 +462,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     c->fov = fn_8026ECE4(p, &dist);
     f32 a = fn_8026EA44(mode);
     f32 b = fn_8026EA44(c->lastMode);
-    tgt.y = tgt.y + CarScale(c->car) * (lift + LerpF(ease, b, a));
+    tgt.y = tgt.y + CarScale(c->car) * (lift + LerpT(ease, b, a));
     c->view = c->tf;
     CsVec up1(0.0f, 1.0f, 0.0f);
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up1.x);
@@ -503,7 +499,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     f32 sf = c->speedFrac;
     switch (mode) {
     case 8:
-        k = 1.0f - MulF(0.25f, sf);
+        k = 1.0f - Mul(0.25f, sf);
         break;
     default:
         k = 1.0f - 0.35f * sf;
@@ -513,7 +509,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     f32 scale = F32(c->car, 0x5E4);
     f32 pa = fn_8026EA8C(mode, c->pitchT);
     f32 pb = fn_8026EA8C(c->lastMode, c->pitchT);
-    f32 pitch = LerpF(ease, pb, pa);
+    f32 pitch = LerpT(ease, pb, pa);
     f32 back = pitch * (k * scale) - dist;
     c->view.pos.v[0] = tgt.x + c->view.axes.fwd.x * back;
     c->view.pos.v[1] = tgt.y + c->view.axes.fwd.y * back;
@@ -536,7 +532,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
             h = 8.0f;
             break;
         }
-        c->view.pos.v[1] = c->view.pos.v[1] + (h + MulF(2.0f, lift)) * CarScale(c->car);
+        c->view.pos.v[1] = c->view.pos.v[1] + (h + Mul(2.0f, lift)) * CarScale(c->car);
         c->view.pos.v[1] = c->view.pos.v[1] > (1.0f + c->pos.v[1]) ? c->view.pos.v[1] : (1.0f + c->pos.v[1]);
         CsVec up3(0.0f, 1.0f, 0.0f);
         fn_8026E870(c->view.pos.v, &tgt.x, p, &up3.x);
@@ -557,7 +553,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
         if (c->view.pos.v[1] < y) {
             c->view.pos.v[1] = y;
         }
-        c->bump = MulF(c->bump, 0.97f);
+        c->bump = Mul(c->bump, 0.97f);
     }
     f32 bumpv = c->bump;
     f32 v = 9.150001f < bumpv ? 9.150001f : bumpv;
@@ -601,7 +597,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f32 k = c->speedFrac;
         switch (mode) {
         case 8:
-            k = 1.0f - MulF(0.25f, k);
+            k = 1.0f - Mul(0.25f, k);
             break;
         default:
             k = 1.0f - 0.35f * k;
@@ -644,7 +640,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             d.x = target.v[0] - c->tf.pos.v[0];
             d.y = target.v[1] - c->tf.pos.v[1];
             d.z = target.v[2] - c->tf.pos.v[2];
-            f32 m = MulF(2.0f, PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->tf.axes.fwd.x));
+            f32 m = Mul(2.0f, PSVECDotProduct((const Vec*)&d.x, (const Vec*)&c->tf.axes.fwd.x));
             q.x = c->tf.pos.v[0] + c->tf.axes.fwd.x * m;
             q.y = c->tf.pos.v[1] + c->tf.axes.fwd.y * m;
             q.z = c->tf.pos.v[2] + c->tf.axes.fwd.z * m;
@@ -679,7 +675,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f.v[2] *= inv2;
         if (PSVECDotProduct((const Vec*)f.v, (const Vec*)&c->tf.axes.fwd.x) > -0.95f) {
             f32 w = s + 0.7f * (1.0f - s);
-            r.Set(LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
+            r.Set(LerpT(w, f.v[0], c->tf.axes.fwd.x), LerpT(w, f.v[1], c->tf.axes.fwd.y), LerpT(w, f.v[2], c->tf.axes.fwd.z));
             c->tf.axes.fwd.x = r.x;
             c->tf.axes.fwd.y = r.y;
             c->tf.axes.fwd.z = r.z;
@@ -761,7 +757,7 @@ void fn_802704E4(u8* p) {
     PVec3A eye;
     CVec3 r;
     int wide = fn_80178CA4() > 1;
-    f32 dist = AddMul(wide ? 8.0f : 4.0f, 1.0f - MulF(0.35f, c->speedFrac), F32(c->car, 0x5B4));
+    f32 dist = AddScaledF(wide ? 8.0f : 4.0f, 1.0f - Mul(0.35f, c->speedFrac), F32(c->car, 0x5B4));
     lift = CarHeight(c->car) + 2.1f;
     if (c->mode != 9) {
         c->tf.pos = c->pos;
@@ -771,7 +767,7 @@ void fn_802704E4(u8* p) {
     on = U8(c->car, 0x260C) ? 1.0f : 0.0f;
     c->fov = fn_8026ECE4(p, &dist);
     target = c->pos;
-    target.v[1] += MulF(wide ? 2.5f : 2.0f, F32(c->car, 0x5E4));
+    target.v[1] += Mul(wide ? 2.5f : 2.0f, F32(c->car, 0x5E4));
     if ((f32)__fabs(on - c->lastOn) <= __float_epsilon[0]) {
         f32 altitude = F32(c->car, 0x25D8);
         int below = altitude < -0.1f;
@@ -790,7 +786,7 @@ void fn_802704E4(u8* p) {
         t = t > 0.0f ? t : 0.0f;
         f32 k;
         if ((moving && !below) || (below && !moving)) {
-            k = MulF(t, 0.1f);
+            k = Mul(t, 0.1f);
         } else {
             k = fn_8026FCE0(t, -0.5f);
         }
@@ -810,7 +806,7 @@ void fn_802704E4(u8* p) {
         f.v[1] *= inv2;
         f.v[2] *= inv2;
         f32 w = s + 0.7f * (1.0f - s);
-        r.Set(LerpF(w, f.v[0], c->tf.axes.fwd.x), LerpF(w, f.v[1], c->tf.axes.fwd.y), LerpF(w, f.v[2], c->tf.axes.fwd.z));
+        r.Set(LerpT(w, f.v[0], c->tf.axes.fwd.x), LerpT(w, f.v[1], c->tf.axes.fwd.y), LerpT(w, f.v[2], c->tf.axes.fwd.z));
         c->tf.axes.fwd.x = r.x;
         c->tf.axes.fwd.y = r.y;
         c->tf.axes.fwd.z = r.z;
@@ -819,18 +815,18 @@ void fn_802704E4(u8* p) {
         c->tf.axes.fwd.y *= -1.0f;
         c->tf.axes.fwd.z *= -1.0f;
     }
-    f32 back = MulF(-13.0f, F32(c->car, 0x5E4));
+    f32 back = Mul(-13.0f, F32(c->car, 0x5E4));
     c->tf.pos.v[0] = target.v[0] + c->tf.axes.fwd.x * back;
     c->tf.pos.v[1] = target.v[1] + c->tf.axes.fwd.y * back;
     c->tf.pos.v[2] = target.v[2] + c->tf.axes.fwd.z * back;
-    f32 out = MulF(-dist, F32(c->car, 0x5E4));
+    f32 out = Mul(-dist, F32(c->car, 0x5E4));
     c->view.pos.v[0] = c->pos.v[0] + c->tf.axes.fwd.x * out;
     c->view.pos.v[1] = c->pos.v[1] + c->tf.axes.fwd.y * out;
     c->view.pos.v[2] = c->pos.v[2] + c->tf.axes.fwd.z * out;
     c->view.pos.v[1] = c->view.pos.v[1] + lift * F32(c->car, 0x5E4);
     eye = c->view.pos;
     if (fn_801EA03C((const s16*)(c->car + 0x6C), eye.v)) {
-        f32 g = MulF(0.5f + eye.v[1], F32(c->car, 0x5E4));
+        f32 g = Mul(0.5f + eye.v[1], F32(c->car, 0x5E4));
         eye.v[1] = c->view.pos.v[1] > g ? c->view.pos.v[1] : g;
     } else {
         eye.v[0] = c->view.pos.v[0];
@@ -848,10 +844,9 @@ void fn_802704E4(u8* p) {
 
 ModuleTag lbl_8055F520;
 // The four view angles are set by the static initialiser in retail (not constant data): 75, 95, 125 and 110 degrees.
-static inline f32 DegToRad(f32 d) { return d * 0.017453292f; }
-f32 lbl_8055F528 = DegToRad(75.0f);
-f32 lbl_8055F52C = DegToRad(95.0f);  // reference field of view
-f32 lbl_8055F530 = DegToRad(125.0f);
-f32 lbl_8055F534 = DegToRad(110.0f);
+f32 lbl_8055F528 = DegToRadRev(75.0f);
+f32 lbl_8055F52C = DegToRadRev(95.0f);  // reference field of view
+f32 lbl_8055F530 = DegToRadRev(125.0f);
+f32 lbl_8055F534 = DegToRadRev(110.0f);
 f32 lbl_8049A208[4];  // lift terms
 CamRect lbl_8049A218[4];

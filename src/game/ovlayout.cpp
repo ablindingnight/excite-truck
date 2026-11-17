@@ -4,6 +4,7 @@
 // apart from the keys, messages and allocation tags.
 #include <stdarg.h>
 #include "game/common.h"
+#include "game/mathutil.h"
 #include "game/gart.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
@@ -643,7 +644,6 @@ struct MouseEvent {
     s32 d;      // offset 0x10
 };
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 class Layout : public ILayout {
 public:
@@ -719,7 +719,7 @@ public:
                         if (ev.flags & 1) {
                             d.x = p.x - c->lastX;
                             d.y = p.y - c->lastY;
-                            if (!(AbsF(d.x) <= __float_epsilon[0]) || !(AbsF(d.y) <= __float_epsilon[0])) {
+                            if (!(FAbs(d.x) <= __float_epsilon[0]) || !(FAbs(d.y) <= __float_epsilon[0])) {
                                 c->moved = 1;
                             }
                             c->active->handler->Drag(&d, c->active->target);
@@ -1218,7 +1218,6 @@ void fn_80147940(ILayout* l, GartElem* b, const char* set, int part) {
     }
 }
 
-static inline f32 LayLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 
 static inline V2 MakeLayoutPoint(f32 x, f32 y) {
     V2 p = {x, y};
@@ -1226,7 +1225,7 @@ static inline V2 MakeLayoutPoint(f32 x, f32 y) {
 }
 
 static inline V2 LayLerpV2(const V2& a, const V2& b, f32 t) { /* Helper name unproven */
-    return MakeLayoutPoint(LayLerp(a.x, b.x, t), LayLerp(a.y, b.y, t));
+    return MakeLayoutPoint(Lerp(a.x, b.x, t), Lerp(a.y, b.y, t));
 }
 
 void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
@@ -1278,14 +1277,13 @@ u32 fn_80147C50(u32 a, u32 b, f32 t) {
 
 void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
     V2 p = LayLerpV2(a->pos, b->pos, t);
-    f32 s = LayLerp(a->scale, b->scale, t);
+    f32 s = Lerp(a->scale, b->scale, t);
     *out = *a;
     out->pos = p;
     out->scale = s;
     out->color = fn_80147C50(a->color, b->color, t);
 }
 
-static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
     V2 p = LayLerpV2(a->pos, b->pos, t);
     *out = *a;
