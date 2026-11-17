@@ -6,6 +6,7 @@
 // out between 0.525 and 0.625) and the shadow pass, plus the preload job. Names are guesses apart from
 // the strings.
 #include "game/common.h"
+#include "game/faninfo.h"
 #include <revolution/MTX/vec.h>
 #include "game/collshape.h"
 #include "game/rmtx.h"
@@ -88,11 +89,6 @@ struct TCell {
     s16 first;    // offset 0xA
     f32 fade;     // offset 0xC
     void Swap();
-};
-
-struct FanCell {
-    u8 pad0[0x4];
-    TCell* head;  // offset 0x4
 };
 
 extern "C" FanCell* fn_802BE844(s16 x, s16 z, s16 size);

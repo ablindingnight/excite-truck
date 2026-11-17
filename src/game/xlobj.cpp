@@ -5,6 +5,7 @@
 // decals over it, which then draw them with their own texture matrix. Names are guesses apart from the
 // strings.
 #include "game/common.h"
+#include "game/faninfo.h"
 #include "game/idealline.h"
 #include "game/v2.h"
 #include "game/vec3_init.h"
@@ -35,7 +36,7 @@ void gxForgetTexture(s32 tex);
 ValueNode* fn_802B59CC(void);
 void fn_802B8AE0(const char* name, s32* value);
 s32 fn_802B110C(s32 (*load)(const char*), const char* name);
-struct GroundCell* fn_802BE844(s16 x, s16 y, int size);
+FanCell* fn_802BE844(s16 x, s16 y, int size);
 extern "C++" f32 Floor(f32 x);  // weak (C++ linkage; this part of the file sits in an extern "C" block)
 // Vec2's empty constructor, which retail calls out of line here, by its mangled name: declaring it out of line in
 // the class would add calls at every other default-constructed Vec2.
@@ -81,12 +82,6 @@ public:
 
 inline void AddScaled(V2* r, const V2* a, f32 s, const V2* b);
 inline f32 Dot(const V2* a, const V2* b);
-
-struct GroundCell {
-    struct Item** list;  // offset 0x0
-    u8 pad4[4];
-    u32 flags;  // offset 0x8
-};
 
 class XPathSet {
 public:
@@ -447,7 +442,7 @@ s32 fn_802B8E50(const char* name) {
     return -2;
 }
 
-GroundCell* fn_802B8EB8(s16 x, s16 y, int size, int corner) {
+FanCell* fn_802B8EB8(s16 x, s16 y, int size, int corner) {
     int h = size / 2;
     s16 cx = corner & 1 ? x + h : x - h;
     s16 cy = corner & 2 ? y + h : y - h;
@@ -487,7 +482,7 @@ XScale* fn_802B8FE0(int i) {
     return e;
 }
 
-int fn_802B9100(GroundCell* c) { return 0; }
+int fn_802B9100(FanCell* c) { return 0; }
 
 inline f32 Ceil(f32 x);
 inline s16 LowBit(s16 v);
@@ -519,7 +514,7 @@ static inline void FillCoarseGrid(s16 sz, Grid& g) {
         for (y -= 0x200; y < 0x200; y += sz * 2) {
             InlineVec<Item*, 64> near;
             for (int k = 0; k < 4; k++) {
-                for (Item** pp = fn_802B8EB8(x, y, sz, k)->list; *pp; pp++) {
+                for (Item** pp = fn_802B8EB8(x, y, sz, k)->items; *pp; pp++) {
                     u32 t = (*pp)->type;
                     if (t <= 1) {
                         if (near.Find(*pp) == -1 && near.CanAdd()) {
@@ -574,7 +569,7 @@ void fn_802B9108(s16 size) {
     for (int x = size - 0x200; x < 0x200; x += d) {
         int start;
         for (int y = size - 0x200; y < 0x200; y += d) {
-            GroundCell* cell = fn_802BE844(x, y, size);
+            FanCell* cell = fn_802BE844(x, y, size);
             start = GroundItemCount();
             int dd;
             int s = g.size;
@@ -594,15 +589,15 @@ void fn_802B9108(s16 size) {
                         inhibit = 1;
                     }
                     if (inhibit) {
-                        cell->flags |= 0x800000;
+                        cell->bits |= 0x800000;
                     }
                     if (it->type == 2) {
-                        cell->flags |= 0x1000000;
+                        cell->bits |= 0x1000000;
                     }
                 }
             }
             lbl_8055FA80->Next() = 0;
-            cell->list = &lbl_8055FA80->data[start];
+            cell->items = &lbl_8055FA80->data[start];
         }
     }
 }
@@ -927,8 +922,8 @@ void fn_802BAFA0(void) {
     lbl_8055FA74->arr.count = 0;
 }
 
-void fn_802BAFF8(GroundCell* cell, u16** strip) {
-    for (Item** pp = cell->list; *pp; pp++) {
+void fn_802BAFF8(FanCell* cell, u16** strip) {
+    for (Item** pp = cell->items; *pp; pp++) {
         u16** slot = (*pp)->Alloc(lbl_8055FA74);
         if (slot) {
             *slot = *strip;

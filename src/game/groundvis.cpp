@@ -2,6 +2,7 @@
 // keeps the active ground set, and walks the terrain quadtree to build per-frame visibility masks.
 // Names are guesses apart from the value keys and messages.
 #include "game/common.h"
+#include "game/faninfo.h"
 #include "game/raceopts.h"
 #include <revolution/MTX.h>
 #include "game/vec3_init.h"
@@ -30,11 +31,6 @@ struct GroundNode {
 struct GroundStack {
     s32 count;             // offset 0x0
     GroundNode nodes[64];  // offset 0x4
-};
-
-struct GroundCell {
-    u8 pad0[0x8];
-    u32 flags;  // offset 0x8
 };
 
 struct GroundLayer {
@@ -124,7 +120,7 @@ void fn_802BDD54(void);
 void fn_802BDD58(void);
 void fn_802BE7F8(void);
 void fn_802BE840(void);
-GroundCell* fn_802BE844(s16 x, s16 y, int lvl);
+FanCell* fn_802BE844(s16 x, s16 y, int lvl);
 void fn_802BEAB0(void);
 void fn_802BEB70(void);
 void fn_802BF350(void);
@@ -234,8 +230,8 @@ void fn_802B0024(GroundBuf* b, u16 v);
 u16 fn_802B0070(const Vec* p);
 void fn_802B009C(Vec* out, int a, s16 x, s16 y);
 void fn_802B0114(Vec* v);
-u32 fn_802B0118(const GroundCell* c);
-u32 fn_802B0124(const GroundCell* c);
+u32 fn_802B0118(const FanCell* c);
+u32 fn_802B0124(const FanCell* c);
 s16 fn_802B0130(const GroundNode* n);
 
 f32 PSVECDotProduct(const Vec* a, const Vec* b);
@@ -249,10 +245,10 @@ f32 fn_802C973C(void);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 void fn_802B11BC(u32 t);
 void fn_802B2D24(u32 o);
-int fn_802B12E0(u32 t, GroundBuf* out, GroundCell* cell, s16 half);
-void fn_802B13F8(u32 t, GroundCell* cell, GroundBuf* b, s16 half, f32 alpha);
+int fn_802B12E0(u32 t, GroundBuf* out, FanCell* cell, s16 half);
+void fn_802B13F8(u32 t, FanCell* cell, GroundBuf* b, s16 half, f32 alpha);
 void fn_802B1BF0(u32 t, Vec* out, int i);
-void fn_802BDFBC(GroundCell* cell, s16 lod, f32 blend);
+void fn_802BDFBC(FanCell* cell, s16 lod, f32 blend);
 GroundList* fn_802B4F10(s32* used, s16 x, s16 y, s16 size, int lod);
 void fn_80144DAC(Vec* dst, const Vec* src);
 void fn_8025AD3C(Vec* out, const Vec* a, const Vec* b, f32 t);
@@ -302,7 +298,7 @@ static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
 }
 
 // Builds the triangle fan of one visible node and places its scattered objects.
-static inline void DrawNode(GroundNode* n, GroundCell* cell) {
+static inline void DrawNode(GroundNode* n, FanCell* cell) {
     GroundBuf buf;
     if (!fn_802B12E0(lbl_8055F974, &buf, cell, fn_802B0130(n))) {
         return;
@@ -671,7 +667,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
     top->edge[2] = root + 0xC03;
     top->edge[3] = root + 0x802;
 
-    GroundCell* cell = 0;
+    FanCell* cell = 0;
     while (lbl_804BD8E8.count != 0) {
         GroundNode* n = &lbl_804BD8E8.nodes[--lbl_804BD8E8.count];
         if (n->size < 0) {
@@ -696,8 +692,8 @@ void fn_802AEB3C(const GroundFrame* cam) {
             c.x = n->x * lbl_80564AF0.cell;
             int h = n->size / 2;
             c.z = n->y * lbl_80564AF0.cell;
-            c.y = -12.0f + (f32)((cell->flags >> 14) & 0x1FF);
-            k = (f32)(((cell->flags >> 10) & 0xF) + 1) * 1.5f;
+            c.y = -12.0f + (f32)((cell->bits >> 14) & 0x1FF);
+            k = (f32)(((cell->bits >> 10) & 0xF) + 1) * 1.5f;
             if (h < 4) {
                 k *= (f32)(4 / h);
             }
@@ -836,9 +832,9 @@ void fn_802B009C(Vec* out, int a, s16 x, s16 y) {
 
 void fn_802B0114(Vec* v) {}
 
-u32 fn_802B0118(const GroundCell* c) { return (c->flags >> 6) & 7; }
+u32 fn_802B0118(const FanCell* c) { return (c->bits >> 6) & 7; }
 
-u32 fn_802B0124(const GroundCell* c) { return (c->flags >> 23) & 1; }
+u32 fn_802B0124(const FanCell* c) { return (c->bits >> 23) & 1; }
 
 s16 fn_802B0130(const GroundNode* n) { return n->size / 2; }
 
@@ -905,7 +901,7 @@ static inline int InWorld(const Vec* p) {
 
 // World position to grid cell; the name is ours.
 static inline int Grid(f32 v) { return v / lbl_80564AF0.cell; }
-static inline GroundCell* CellAt(const Vec* p) {
+static inline FanCell* CellAt(const Vec* p) {
     int x = Grid(p->x);
     int z = Grid(p->z);
     return fn_802BE844((s16)(x & ~7) + 4, (s16)(z & ~7) + 4, 4);
@@ -914,7 +910,7 @@ static inline GroundCell* CellAt(const Vec* p) {
 int fn_802B02C8(const Vec* p) {
     if (fn_802AE7AC()) {
         if (InWorld(p)) {
-            return !(CellAt(p)->flags & 0x1000000);
+            return !(CellAt(p)->bits & 0x1000000);
         }
         return 1;
     }
@@ -925,7 +921,7 @@ int fn_802B03C0(const Vec* p) {
     int r = 0;
     if (fn_802AE7AC() && lbl_8055F970) {
         if (InWorld(p)) {
-            u32 f = CellAt(p)->flags;
+            u32 f = CellAt(p)->bits;
             r = fn_802B1C50(lbl_8055F970->terrain, (f >> 6) & 7, ((f >> 24) & 1) ^ 1);
         }
     }

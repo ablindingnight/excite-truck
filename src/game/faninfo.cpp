@@ -2,6 +2,7 @@
 // dominant material, the materials present and a height), loaded from faninfo.fnf or computed from the
 // layer weights and terrain heights. Names are guesses apart from the file name and messages.
 #include "game/common.h"
+#include "game/faninfo.h"
 #include "game/ptrint.h"
 
 // World scale 2.0: a named object (first in .sdata2), read by reference so it does not fold.
@@ -22,24 +23,6 @@ f32 fn_801DCF48(int a, f32 x, f32 z);         // terrain height
 
 void* operator new[](size_t size, const char* tag);
 
-// bits: 0-5 materials present, 6-8 dominant material, 10-13 ?, 14-22 height.
-struct FanData {
-    ~FanData(void) {
-        a = 0;
-        b = 0;
-        bits = 0;
-    }
-
-    PtrInt a;  // offset 0x0 (the default cell points it at lbl_8055FAC8)
-    u32 b;     // offset 0x4
-    u32 bits;  // offset 0x8
-};
-
-struct FanCell : FanData {
-    ~FanCell(void);
-    void Clear(void);
-};
-
 ModuleTag lbl_8055FAC0;
 u32 lbl_8055FAC8;
 
@@ -59,8 +42,8 @@ int fn_802BE7C4(int x, int z, int size);
 FanCell::~FanCell(void) {}
 
 void FanCell::Clear(void) {
-    b = 0;
-    a = 0;
+    head = 0;
+    items = 0;
     bits = 0;
 }
 
@@ -144,8 +127,8 @@ void fn_802BE7F4(void) {}
 
 /* Helper name unproven: resets the cell used outside the map. */
 static inline void InitDefault(FanCell* def) {
-    def->a = (PtrInt)&lbl_8055FAC8;
-    def->b = 0;
+    def->items = (Item**)&lbl_8055FAC8;
+    def->head = 0;
     def->bits = 0x200;
     def->bits |= 0x84;
     def->bits |= 0x800000;
