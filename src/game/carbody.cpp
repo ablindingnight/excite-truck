@@ -1376,30 +1376,30 @@ struct CbSpinEvent {
 /* Helper name unproven: rows of m dotted with v (the inverse of ObRotateRows for a rotation) */
 static inline void ObUnrotateRows(RVec3* out, const f32* m, const f32* v) {
     if ((const f32*)out == v) {
-        f32 x = m[1] * v[1] + m[0] * v[0] + m[2] * v[2];
-        f32 y = m[4] * v[1] + m[3] * v[0] + m[5] * v[2];
-        f32 z = m[7] * v[1] + m[6] * v[0] + m[8] * v[2];
+        f32 x = Dot3(v[0], m[0], v[1], m[1], v[2], m[2]);
+        f32 y = Dot3(v[0], m[3], v[1], m[4], v[2], m[5]);
+        f32 z = Dot3(v[0], m[6], v[1], m[7], v[2], m[8]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = m[1] * v[1] + m[0] * v[0] + m[2] * v[2];
-        out->y = m[4] * v[1] + m[3] * v[0] + m[5] * v[2];
-        out->z = m[7] * v[1] + m[6] * v[0] + m[8] * v[2];
+        out->x = Dot3(v[0], m[0], v[1], m[1], v[2], m[2]);
+        out->y = Dot3(v[0], m[3], v[1], m[4], v[2], m[5]);
+        out->z = Dot3(v[0], m[6], v[1], m[7], v[2], m[8]);
     }
 }
 static inline void ObRotateRows(RVec3* out, const f32* m, const f32* v) {
     if ((const f32*)out == v) {
-        f32 x = v[2] * m[6] + (v[0] * m[0] + v[1] * m[3]);
-        f32 y = v[2] * m[7] + (v[0] * m[1] + v[1] * m[4]);
-        f32 z = v[2] * m[8] + (v[0] * m[2] + v[1] * m[5]);
+        f32 x = Dot3(v[0], m[0], v[1], m[3], v[2], m[6]);
+        f32 y = Dot3(v[0], m[1], v[1], m[4], v[2], m[7]);
+        f32 z = Dot3(v[0], m[2], v[1], m[5], v[2], m[8]);
         out->x = x;
         out->y = y;
         out->z = z;
     } else {
-        out->x = v[1] * m[3] + v[0] * m[0] + v[2] * m[6];
-        out->y = v[1] * m[4] + v[0] * m[1] + v[2] * m[7];
-        out->z = v[1] * m[5] + v[0] * m[2] + v[2] * m[8];
+        out->x = Dot3(v[0], m[0], v[1], m[3], v[2], m[6]);
+        out->y = Dot3(v[0], m[1], v[1], m[4], v[2], m[7]);
+        out->z = Dot3(v[0], m[2], v[1], m[5], v[2], m[8]);
     }
 }
 
@@ -1486,7 +1486,7 @@ void fn_80183E7C(u8* p) {
         *(HVec*)w->normal = *(HVec*)&sol->v110[i];
     }
     if (cb->f260D) {
-        cb->f2598 = cb->f2598 + 0.016683351f;
+        cb->f2598 = CbAdd(cb->f2598, 0.016683351f);
     } else {
         cb->f2598 = 0.0f;
     }
@@ -1540,7 +1540,7 @@ void fn_80183E7C(u8* p) {
     if (still && (U32(p, 0x10) != 'PCAR' || ((DeityCar*)cb->src)->v14())) {
         if (cb->airborne <= 2 && cb->mtx.rot.y.y < 0.35f) {
             if (cb->airborne == 0 || !(AbsNarrow(cb->f2614) <= __float_epsilon[0]) || cb->mtx.rot.y.y < 0.0f) {
-                f32 t = cb->f2614 + 0.016683351f;
+                f32 t = CbAdd(cb->f2614, 0.016683351f);
                 cb->f2614 = t;
                 if (cb->speed < 8.0f) {
                     cb->f2614 = CbAdd(t, 0.025025027f);
