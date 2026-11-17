@@ -28,7 +28,7 @@ static inline float MapScopeNew(float screen,float value,float span){float fract
 static inline int MapIntegerMinNew(int a,int b){if(a<b)return a;return b;}
 // Anonymous widget-class fragment; no recovered TU or data ownership claim.
 typedef unsigned int u32;
-struct Binding {int type;int pad;union {int code;unsigned char key;};unsigned char latched;};
+#include "game/binding.h"
 typedef char BindingSize16[sizeof(Binding)==16?1:-1];
 struct WidgetDispatch {virtual ~WidgetDispatch();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual void Slot1c(int,int);virtual void Slot20();virtual void Slot24(void*);virtual void Slot28();virtual void Slot2c();virtual void Slot30();virtual void Slot34();virtual void Slot38();virtual void Slot3c(int,int);virtual void Slot40(int,int);virtual void Slot44();virtual void Slot48();virtual void Slot4c();virtual void Slot50();virtual void Slot54();virtual void Slot58();virtual void Slot5c();virtual void Slot60();virtual int Slot64(int);virtual void Slot68();virtual void Slot6c();virtual int Slot70(int,int);virtual void Slot74(int,void*);virtual int Slot78();virtual void Slot7c();virtual void Slot80();virtual int Slot84();virtual const char* Slot88();};
 struct OwnedWidget {virtual ~OwnedWidget();virtual void Slot0c();virtual void Slot10();virtual void Slot14();virtual void Slot18();virtual int Slot1c();};
