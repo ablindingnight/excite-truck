@@ -66,10 +66,10 @@ public:
     SoundOptions(f32* fx, f32* music, s32* quality, s32* mixer, char* mixerName, f32* announcer, f32* tire,
                  f32* video) {
         this->mixer = mixer;
-        this->mixerName = mixerName;
         this->fx = fx;
-        this->music = music;
         this->quality = quality;
+        this->music = music;
+        this->mixerName = mixerName;
         this->announcer = announcer;
         this->tire = tire;
         this->video = video;
@@ -215,8 +215,8 @@ void fn_8023CC84(const char* layout) {
                 VolumeItem("music_volume", &lbl_8055F164, 0.0f, 1.0f),
                 VolumeItem("tire_volume", &lbl_8055F170, 0.0f, 1.0f),
                 MenuItem("back", 0, 0, -1, 0),
-                MenuItem("quality", 7, &lbl_8055F17C, (int)qualityChoices, 0),
-                MenuItem("race_music", 7, &lbl_8055F178, (int)musicChoices, 0),
+                MenuItem("quality", 7, &lbl_8055F17C, (MenuArg)qualityChoices, 0),
+                MenuItem("race_music", 7, &lbl_8055F178, (MenuArg)musicChoices, 0),
                 MenuItem("mixer", 2, &mixer, 0, 0),
                 MenuItem("mixer_name", 3, mixerName, 0x100, 0),
                 MenuItem("circle_list", 10, &list, 0, 0),
