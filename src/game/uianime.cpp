@@ -3,6 +3,7 @@
 // (offset, alpha, scale over time) and named "special" one-shot animations, and applies them to the UI
 // objects by anim_index as the screen transitions in or out. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/strcopy.h"
 
 // Helper name unproven: arguments evaluate b, a, t, which sets the load order of the expanded form.
 static inline f32 LerpT(f32 t, f32 a, f32 b) { return a + t * (b - a); }
@@ -120,15 +121,6 @@ struct AnimState {
     UiSpecialList* special; // offset 0x30
 };
 
-static inline void StrCopy(char* d, int n, const char* s) {
-    char* p = d;
-    while ((*p++ = *s++) != 0) {
-        if (--n <= 0) {
-            p[-1] = 0;
-            break;
-        }
-    }
-}
 
 static inline void StrCat(char* d, const char* s, int n) {
     while (*d) {
@@ -136,7 +128,7 @@ static inline void StrCat(char* d, const char* s, int n) {
         d++;
     }
     if (n > 0) {
-        StrCopy(d, n, s);
+        SafeStrCopy(d, s, n);
     }
 }
 
@@ -247,7 +239,7 @@ inline UiSpecialList::UiSpecialList(ValueTable* t) {
                         if (!strcasecmp(s->GetName(), "special")) {
                             UiSpecial* sp = &items[n];
                             sp->autoEnd = s->GetBool("auto_end", 0);
-                            StrCopy(sp->name, 30, s->GetValue("name"));
+                            SafeStrCopy(sp->name, s->GetValue("name"), 30);
                             sp->active = 0;
                             sp->track.id = c->GetIntValue("anim_index");
                             sp->track.n = 0;
@@ -449,7 +441,7 @@ int fn_8023695C(const char* name) { return fn_80237EFC(name); }
 
 void fn_80236960(const char* name) {
     if (name) {
-        StrCopy(lbl_80498664, 100, name);
+        SafeStrCopy(lbl_80498664, name, 100);
     }
 }
 
