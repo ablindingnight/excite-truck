@@ -487,21 +487,24 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         basis.right.z *= -1.0f;
     }
     color = fn_80230B9C(-1);
+    f32 half = 0.5f;
+    f32 one = 1.0f;
+    f32 zero = 0.0f;
     for (i = 0; i < 21; i++) {
         Vec3 v;
         Vec3 c = lbl_803582C0[i];
-        v.x = c.x * (0.5f * radius);
-        v.y = c.y * (0.5f * radius);
-        v.z = c.z * (0.5f * radius);
+        v.x = c.x * (half * radius);
+        v.y = c.y * (half * radius);
+        v.z = c.z * (half * radius);
         MulVec(&v, &v, &basis);
         v.x += basis.pos.x;
         f32 y2 = basis.pos.y;
         v.y += y2;
         f32 zv = basis.pos.z;
         v.z += zv;
-        fn_80231380(&verts[i], color, x + w * (1.0f + 0.5f * c.x) * 0.5f, y + h * (0.5f * c.y - 1.0f) * 0.5f,
-                    0.0f, 0.5f + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                    1.0f - (0.5f + 0.5f * scale * v.y) + map->origin.y / map->texSize);
+        fn_80231380(&verts[i], color, x + w * (one + half * c.x) * half, y + h * (half * c.y - one) * half,
+                    zero, half + scale / 2.0f * v.x + map->origin.x / map->texSize,
+                    one - (half + half * scale * v.y) + map->origin.y / map->texSize);
         if (i < 20) {
             v.x = c.x * radius;
             v.y = c.y * radius;
@@ -510,10 +513,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             v.x += basis.pos.x;
             v.y += basis.pos.y;
             v.z += basis.pos.z;
-            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (1.0f + c.x) * 0.5f,
-                        y + h * (c.y - 1.0f) * 0.5f, 0.0f,
-                        0.5f + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                        1.0f - (0.5f + 0.5f * scale * v.y) + map->origin.y / map->texSize);
+            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (one + c.x) * half,
+                        y + h * (c.y - one) * half, zero,
+                        half + scale / 2.0f * v.x + map->origin.x / map->texSize,
+                        one - (half + half * scale * v.y) + map->origin.y / map->texSize);
         }
     }
     {
