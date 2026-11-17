@@ -75,12 +75,7 @@ public:
     virtual SparkNode* Find(const char* name);
 };
 
-class FXSequence {
-public:
-    static FXSequence* Load(const char* name);
-    void Free(void);
-    int Play(f32 t, const ValVec3* pos);
-};
+#include "game/fxseq.h"
 
 extern "C" {
 double log2(double x);

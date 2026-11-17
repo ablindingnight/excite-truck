@@ -77,17 +77,7 @@ public:
     f32 end;         // offset 0x14
 };
 
-class FXSequence {
-public:
-    static FXSequence* Load(const char* name);
-    f32 GetLength(void);
-    void Free(void);
-    int Play(f32 t, const ValVec3* pos);
-
-    FXSeqNode* nodes;  // offset 0x0
-    int count;         // offset 0x4
-    f32 length;        // offset 0x8
-};
+#include "game/fxseq.h"
 
 extern "C" FXElem* fn_802971B0(ValueNode* node);
 

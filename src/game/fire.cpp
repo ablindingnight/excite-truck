@@ -71,12 +71,7 @@ struct FVec {
     f32 z;
 };
 
-class FXSequence {
-public:
-    static FXSequence* Load(const char* name);
-    void Free(void);
-    int Play(f32 t, const ValVec3* pos);
-};
+#include "game/fxseq.h"
 
 extern "C" {
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
