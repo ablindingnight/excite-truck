@@ -2005,9 +2005,8 @@ void fn_80183E7C(u8* p) {
                 boosting = 0;
             }
             if (!boosting || !CarOnGas(p)) {
-                f32 vmax = cb->f5A8;
-                if (cb->speed > vmax) {
-                    f32 over = Ramp(cb->speed, vmax, 2.2222223f + vmax);
+                if (cb->speed > cb->f5A8) {
+                    f32 over = Ramp(cb->speed, cb->f5A8, 2.2222223f + cb->f5A8);
                     f32 k = heatTune.v[12] * (9.81f * (-LerpT(over, 0.0f, 1.0f) * cb->mass)) / cb->speed;
                     RVec3 f;
                     f.x = cb->vel.x * k;
