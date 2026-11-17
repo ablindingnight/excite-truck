@@ -18,6 +18,8 @@ void* operator new[](size_t size, const char* tag);
 void operator delete(void* p);
 void operator delete[](void* p);
 
+extern const char lbl_80346798[];
+
 class AllocBuf {
 public:
     AllocBuf(const char* n, s32 s, u8* b) {
@@ -39,12 +41,12 @@ public:
 
 class StackAlloc : public AllocBuf {
 public:
-    StackAlloc(const char* n, u8* b, s32 s) : AllocBuf(n, s, b) {}
+    StackAlloc(u8* b, const char* n, s32 s) : AllocBuf(n, s, b) {}
     virtual ~StackAlloc(void) { delete[] buf; }
     void* Alloc(const s32& n) {
         s32 a = (n + 3) & ~3;
         if (a + used + 8 > size) {
-            fn_802E317C("StackAlloc(%s:%d)::insufficient memory (max %dK)", name, n, Size() / 1024);
+            fn_802E317C(lbl_80346798, name, n, Size() / 1024);
             return 0;
         }
         s32* h = (s32*)(buf + Used());
@@ -96,7 +98,7 @@ typedef void (*BoneCopy)(int start, const void* src, int n);
 
 class BoneMgr {
 public:
-    BoneMgr(BoneCopy v, BoneCopy m, BoneCopy w) : alloc("BoneHandleAlloc", new ("StackAlloc::buf") u8[0x19000], 0x19000) {
+    BoneMgr(BoneCopy v, BoneCopy m, BoneCopy w) : alloc(new ("StackAlloc::buf") u8[0x19000], "BoneHandleAlloc", 0x19000) {
         copyVec = v;
         copyMtx = m;
         copyWords = w;
