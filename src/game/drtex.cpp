@@ -4,6 +4,7 @@
 // textures to TEXMAP0/1 (base), 2/4 (envmap) and 3 (lightmap), render-target copies, and texel
 // peek/poke. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gxtex.h"
 #include <revolution/GX/GXTypes.h>
 #include <revolution/GX/GXFrameBuf.h>
 #include <revolution/GX/GXPixel.h>
@@ -62,31 +63,6 @@ struct GXTexDesc {
     s32 h;           // offset 0x28
     TexImage* data;  // offset 0x2C
     struct GXTex* user;  // offset 0x30
-};
-
-struct GXTex {
-    char name[32];      // offset 0x0
-    u8 used;            // offset 0x20
-    GXTexObj obj;       // offset 0x24
-    u8 pad44[0x20];
-    GXTlutObj tlut;     // offset 0x64
-    u16* lut;           // offset 0x70
-    u32 lutSize;        // offset 0x74
-    GXTexObj obj2;      // offset 0x78
-    u8 pad98[0x20];
-    GXTlutObj tlut2;    // offset 0xB8
-    u16* lut2;          // offset 0xC4
-    u32 lut2Size;       // offset 0xC8
-    u8 hasAlpha;        // offset 0xCC
-    void* data;         // offset 0xD0
-    u32 dataSize;       // offset 0xD4
-    u32* srcPal;        // offset 0xD8
-    u32 zhint;          // offset 0xDC
-    u32 flags;          // offset 0xE0
-    u8 unkE4;           // offset 0xE4
-    void* heap;         // offset 0xE8
-    u32 lastFrame;      // offset 0xEC
-    u32 uses;           // offset 0xF0
 };
 
 struct TexBind {
@@ -189,7 +165,7 @@ void fn_802D7780(GXTex* t, const GXTexDesc* d) {
         GXInitTexObjWrapMode((GXTexObj*)&t->obj2, (GXTexWrapMode)s, (GXTexWrapMode)tt);
     }
     t->zhint = d->zhint;
-    t->unkE4 = d->unk1C;
+    t->alphaRef = d->unk1C;
     t->flags = 0;
     if (d->wrapT & 1) {
         t->flags |= 4;
@@ -575,7 +551,7 @@ void fn_802D9160(GXTex* t, int) {
     lbl_8055FE18 = t;
     fn_802CFF5C(t->flags | (lbl_8055FD1C & ~0x14E));
     fn_802CFFA4(t->zhint);
-    lbl_8055FD24 = t->unkE4;
+    lbl_8055FD24 = t->alphaRef;
     if (t->lut) {
         GXLoadTlut((GXTlutObj*)&t->tlut, (u32)0);
     }

@@ -4,6 +4,7 @@
 // (a CPU texel fetch from the 512x512 RGBA8 layer or a per-model texture matrix) and the indirect
 // ripple pass. Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/gxtex.h"
 #include "game/surf.h"
 #include <revolution/GX/GXTypes.h>
 #include <revolution/GX/GXAttr.h>
@@ -66,22 +67,6 @@ union WGPipe {
 };
 
 #define WGPIPE (*(volatile WGPipe*)0xCC008000)
-
-struct GXTex {
-    char name[32];  // offset 0x0
-    u8 used;        // offset 0x20
-    GXTexObj obj;   // offset 0x24
-    u8 pad44[0x34];
-    GXTexObj obj2;  // offset 0x78
-    u8 pad98[0x34];
-    u8 hasAlpha;    // offset 0xCC
-    u8 padCD[0x13];
-    u32 flags;      // offset 0xE0
-    u8 alphaRef;    // offset 0xE4
-    void* heap;     // offset 0xE8
-    u32 lastFrame;  // offset 0xEC
-    u32 uses;       // offset 0xF0
-};
 
 struct GXf {
     f32 m[12];
