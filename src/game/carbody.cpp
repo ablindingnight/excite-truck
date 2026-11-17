@@ -1785,7 +1785,7 @@ void fn_80183E7C(u8* p) {
         RVec3 side;
         UpCross(&side, (const Vec*)(p + 0x54));
         side.y = 0.0f;
-        f32 k = 0.5f * -PSVECDotProduct((const Vec*)(p + 0x118), (const Vec*)&side) * cb->mass;
+        f32 k = 0.5f * (-PSVECDotProduct((const Vec*)(p + 0x118), (const Vec*)&side) * cb->mass);
         RVec3 f;
         f.x = side.x * k;
         f.y = side.y * k;
@@ -2041,7 +2041,7 @@ void fn_80183E7C(u8* p) {
     fn_801B8964(cb->index, vol + dvc);
     int trick = 0;
     if (NearZero(cb->f2690) && NearZero(cb->f2650)) {
-        f32 yaw = 0.33333334f * cb->f25D8 * cb->f25F0 * cb->f5B0;
+        f32 yaw = 0.33333334f * (cb->f25D8 * (cb->f25F0 * cb->f5B0));
         f32 sp = PSVECMag((const Vec*)(p + 0x118));
         f32 m = FMax(sp, 1.0f);
         RVec3 t;
