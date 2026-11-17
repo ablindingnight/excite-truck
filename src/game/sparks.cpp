@@ -778,6 +778,9 @@ void SparkSys::Step(void) {
     count = out - pts;
 }
 
+/* Helper name unproven: opaque white with the given alpha. The boundary is needed (in place: DrawAll 100 -> 99.58). */
+static inline u32 WhiteWithAlpha(int alpha) { return alpha << 24 | 0xFFFFFF; }
+
 void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
     if (!fn_802C8DBC(count * 4)) {
         return;
@@ -795,15 +798,17 @@ void SparkSys::DrawAll(const VecMatrix* cam, const VecMatrix* prev) {
     t = m.m[1][2];
     m.m[1][2] = m.m[2][1];
     m.m[2][1] = t;
-    MulMat(&m, &m, (const Mat3*)cam);
+    Mat3* pm = &m;  // one named address: retail forms it once, among the copy's words
+    MulMat(pm, pm, (const Mat3*)cam);
+    int i = 0;
     if (count > 0) {
-        for (int i = 0; i < count; i++) {
+        for (; i < count; i++) {
             u32 color;
             Spark* s = &pts[i];
             Vec p;
             Vec d;
             f32 a = invLife * (now - s->t);
-            color = (int)(255.0f * (1.0f - a * a)) << 24 | 0xFFFFFF;
+            color = WhiteWithAlpha((int)(255.0f * (1.0f - a * a)));
             AddScaled(&p, &s->pos, &s->vel, 5.0f * -dt);
             p.x -= prev->origin.x;
             p.y -= prev->origin.y;
