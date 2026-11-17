@@ -5,6 +5,7 @@
 // the strings.
 #include "game/common.h"
 #include "game/proxer.h"
+#include "game/aiexc.h"
 #include "game/idealline.h"
 #include "game/centerline.h"
 #include "game/v2.h"
@@ -152,11 +153,6 @@ public:
 };
 
 #define VI(p) ((VIface*)(p))
-
-class AIExceptions {
-public:
-    u8* Find(f32 t);
-};
 
 int IsLoadingActive(void);
 
@@ -945,7 +941,7 @@ static inline f32 Blend(u8* d, u8* a, u8* b, int o) {
 }
 
 void fn_80194624(u8* d) {
-    u8* e = ((AIExceptions*)(PTR(d, 0x2C8) + 0x40))->Find(F32(d, 0x280));
+    u8* e = (u8*)((AIExceptions*)(PTR(d, 0x2C8) + 0x40))->Find(F32(d, 0x280));
     if (e != PTR(d, 0x2D8)) {
         PTR(d, 0x2D4) = PTR(d, 0x2D8);
         PTR(d, 0x2D8) = e;
