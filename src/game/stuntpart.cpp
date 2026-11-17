@@ -514,10 +514,11 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
     PlainValMatrix m = *(const PlainValMatrix*)car;
     if (p->sparkAmt > 0.001f) {
         fn_802C8BD0(lbl_8055CC64);
+        const f32 rightX = m.basis[0].x;
         for (int k = 0; k < 2; k++) {
             fn_802C8DBC(10);
             for (int j = 0; j < 5; j++) {
-                f32 bx, by, bz;
+                f32 bz, bx, by;
                 f32 fj = j;
                 f32 ang = 1.5707964f + 1.75f * ((fj - 1.0f) / 5.0f) + (k ? 3.1415927f : 0.0f);
                 if (p->sparkFlip) {
@@ -525,7 +526,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                 }
                 f32 cx = p->sizeZ * (f32)cos(ang) / 2.0f;
                 f32 sz = p->sizeZ * (f32)sin(ang) / 2.0f;
-                bx = m.origin.x + m.basis[0].x * cx;
+                bx = m.origin.x + rightX * cx;
                 by = m.origin.y + m.basis[0].y * cx;
                 bz = m.origin.z + m.basis[0].z * cx;
                 bx = bx + m.basis[2].x * sz;
