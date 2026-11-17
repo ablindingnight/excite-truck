@@ -16,6 +16,7 @@
 #include "game/respawn.h"
 #include <revolution/MTX/vec.h>
 #include "game/springcar.h"
+#include "game/sound.h"
 
 // Art animation player (artanim.cpp).
 struct ArtXform;  // artanim.cpp
@@ -36,7 +37,6 @@ public:
     f32 t;       // offset 0x4
 };
 
-class RSound;
 extern f32 lbl_8055E3C8;  // time
 
 extern "C" {
@@ -66,7 +66,7 @@ void fn_8016A0D4(void);
 void fn_8016A68C(void);
 void fn_8001B450(s32 h);
 s32 fn_802BAF98(void* obj, int on);
-void fn_80144C54(RSound* s);
+void fn_80144C54(GameSound* s);
 s32 fn_80179650(void);
 s32 fn_80145E70(const char* name);
 void fn_802ADDD8(void* p, int a);
@@ -181,10 +181,14 @@ extern "C" {
 s32 fn_8016A30C(void* rings);
 s32 fn_8016A780(const char* name, void* rings);
 s32 fn_8016A878(const char* name);
-// The weak out-of-line copies of Sound::Active and Sound::Play (RSound below is the Sound class), which retail
-// calls here while other paths expand the inline Play, by their mangled names.
-int Active__5SoundFv(RSound* s);
-void Play__5SoundFv(RSound* s);
+// Retail calls the out-of-line forms of GameSound::Playing and GameSound::Play here.
+#ifdef __MWERKS__
+int Playing__9GameSoundFv(GameSound* s);
+void Play__9GameSoundFv(GameSound* s);
+#else
+static inline int Playing__9GameSoundFv(GameSound* s) { return s->Playing(); }
+static inline void Play__9GameSoundFv(GameSound* s) { s->Play(); }
+#endif
 void fn_801CB5DC(int car, s32 score, s32 grade);
 void fn_801CB648(int car, int a, f32 t);
 }
@@ -211,53 +215,23 @@ ConfigRoot* fn_8000AC38(void);
 
 extern f32 lbl_8055E3C8;  // time
 
-class RSound {
-public:
-    virtual ~RSound(void);
-    u8 pad4[0x4];
-    f32 vol;  // offset 0x8
-    u8 padC[0x19 - 0xC];
-    u8 busy;  // offset 0x19
-    u8 pad1A[0x49 - 0x1A];
-    u8 playing;  // offset 0x49
-    u8 stop;     // offset 0x4A
-    u8 loop;     // offset 0x4B
-    u8 f4C;      // offset 0x4C
-    u8 dirty;    // offset 0x4D
-    void SetVol(f32 v) {
-        if (v != vol) {
-            dirty = 1;
-            vol = v;
-        }
-    }
-    void Play(void) {
-        playing = 1;
-        loop = 0;
-        stop = 0;
-    }
-    void Stop(void) {
-        stop = 1;
-        f4C = 0;
-    }
-};
+extern "C" GameSound* fn_802076A0(const char* name, int a, int b, int c);
+extern "C" GameSound* fn_80207848(const char* name, int a);
 
-extern "C" RSound* fn_802076A0(const char* name, int a, int b, int c);
-extern "C" RSound* fn_80207848(const char* name, int a);
-
-static inline void Play(RSound* s) {
+static inline void Play(GameSound* s) {
     if (s) {
         s->Play();
     }
 }
 
-static inline void Stop(RSound* s) {
+static inline void Stop(GameSound* s) {
     if (s) {
         s->Stop();
     }
 }
 
-static inline void PlayIdle(RSound* s) {
-    if (s && !s->busy) {
+static inline void PlayIdle(GameSound* s) {
+    if (s && !s->playing) {
         s->Play();
     }
 }
@@ -290,10 +264,10 @@ static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // has not been found yet (an Arena reset helper comes out just under the limit and expands everything).
 #define STOP_SOUND(s_)                                                                                                 \
     do {                                                                                                               \
-        RSound* snd_ = (s_);                                                                                           \
+        GameSound* snd_ = (s_);                                                                                           \
         if (snd_) {                                                                                                    \
             snd_->stop = 1;                                                                                            \
-            snd_->f4C = 0;                                                                                             \
+            snd_->restart = 0;                                                                                             \
         }                                                                                                              \
     } while (0)
 
@@ -472,13 +446,13 @@ public:
     u8 b49;                        // offset 0x49
     u8 b4A;                        // offset 0x4A
     u8 pad4B;
-    RSound* sRingHit;              // offset 0x4C
-    RSound* sCheerHit;             // offset 0x50
-    RSound* sLongCheer;            // offset 0x54
-    RSound* sTally;                // offset 0x58
-    RSound* sMissFlag;             // offset 0x5C
-    RSound* sLevelUp;              // offset 0x60
-    RSound* sFail;                 // offset 0x64
+    GameSound* sRingHit;              // offset 0x4C
+    GameSound* sCheerHit;             // offset 0x50
+    GameSound* sLongCheer;            // offset 0x54
+    GameSound* sTally;                // offset 0x58
+    GameSound* sMissFlag;             // offset 0x5C
+    GameSound* sLevelUp;              // offset 0x60
+    GameSound* sFail;                 // offset 0x64
 };
 
 struct PlayerData {
@@ -553,14 +527,14 @@ public:
     ArtPlayer* layout; // offset 0xC
     u8 noBonus;        // offset 0x10
     u8 pad11[3];
-    RSound* sBonus;    // offset 0x14
-    RSound* sNoBonus;  // offset 0x18
-    RSound* s1C;       // offset 0x1C
+    GameSound* sBonus;    // offset 0x14
+    GameSound* sNoBonus;  // offset 0x18
+    GameSound* s1C;       // offset 0x1C
     u8 b20;            // offset 0x20
     u8 pad21[3];
-    RSound* s24;       // offset 0x24
-    RSound* s28;       // offset 0x28
-    RSound* s2C;       // offset 0x2C
+    GameSound* s24;       // offset 0x24
+    GameSound* s28;       // offset 0x28
+    GameSound* s2C;       // offset 0x2C
     char ringScore[0x14];   // offset 0x30
     char timeLeft[0x14];    // offset 0x44
     char bonusTitle[0x14];  // offset 0x58
@@ -636,7 +610,7 @@ public:
     u8 b9C;                   // offset 0x9C
     u8 pad9D[3];
     f32 fA0;                  // offset 0xA0
-    RSound* sPreRace;         // offset 0xA4
+    GameSound* sPreRace;         // offset 0xA4
     u8 bA8;                   // offset 0xA8
     u8 padA9[3];
     RingResults results;   // offset 0xAC
@@ -1031,25 +1005,25 @@ Arena::Arena(void) {
     nSets = 0;
     nFiles = 0;
     if (sRingHit) {
-        sRingHit->SetVol(1.0f);
+        sRingHit->SetVolume(1.0f);
     }
     if (sCheerHit) {
-        sCheerHit->SetVol(1.0f);
+        sCheerHit->SetVolume(1.0f);
     }
     if (sTally) {
-        sTally->SetVol(1.0f);
+        sTally->SetVolume(1.0f);
     }
     if (sLongCheer) {
-        sLongCheer->SetVol(1.0f);
+        sLongCheer->SetVolume(1.0f);
     }
     if (sMissFlag) {
-        sMissFlag->SetVol(1.0f);
+        sMissFlag->SetVolume(1.0f);
     }
     if (sLevelUp) {
-        sLevelUp->SetVol(1.0f);
+        sLevelUp->SetVolume(1.0f);
     }
     if (sFail) {
-        sFail->SetVol(1.0f);
+        sFail->SetVolume(1.0f);
     }
     f40 = fn_80204CF0();
 }
@@ -1237,20 +1211,20 @@ inline void Arena::Step(PlayerData* pd) {
                     difficulty = 2;
                 }
                 if (sRingHit) {
-                    if (Active__5SoundFv(sRingHit)) {
+                    if (Playing__9GameSoundFv(sRingHit)) {
                         fn_80144C54(sRingHit);
                     }
-                    Play__5SoundFv(sRingHit);
+                    Play__9GameSoundFv(sRingHit);
                 }
                 if (sCheerHit) {
-                    if (Active__5SoundFv(sCheerHit)) {
+                    if (Playing__9GameSoundFv(sCheerHit)) {
                         fn_80144C54(sCheerHit);
                     }
-                    Play__5SoundFv(sCheerHit);
+                    Play__9GameSoundFv(sCheerHit);
                 }
                 if (stats->At(curSet)->best == 10 || stats->At(curSet)->best == 15) {
                     if (sLongCheer) {
-                        Play__5SoundFv(sLongCheer);
+                        Play__9GameSoundFv(sLongCheer);
                     }
                 }
             } else {
@@ -1300,16 +1274,16 @@ inline void Arena::Tally(void) {
             int n = Lerp(0.0f, 1.0f, Unlerp(lo, 0.25f + lo, Time() - st->time));
             if (n) {
                 f34 += n;
-                RSound* tally = sTally;
-                if (tally && !tally->busy && f34 != f30) {
+                GameSound* tally = sTally;
+                if (tally && !tally->playing && f34 != f30) {
                     tally->stop = 0;
                     tally->loop = 1;
-                    tally->playing = 1;
+                    tally->start = 1;
                 }
                 tally = sTally;
-                if (f34 == f30 && tally && tally->busy) {
+                if (f34 == f30 && tally && tally->playing) {
                     tally->stop = 1;
-                    tally->f4C = 0;
+                    tally->restart = 0;
                 }
             }
         }
@@ -1345,10 +1319,10 @@ inline void Arena::Tally(void) {
             if (!NearZeroF(a)) {
                 f32 t = Unlerp(0.0f, b, lbl_8055E3C8 - stats->data[k].time);
                 f32 v = Lerp(a, 0.0f, t);
-                RSound* cheer = sLongCheer;
-                if (v != cheer->vol) {
-                    cheer->dirty = 1;
-                    cheer->vol = v;
+                GameSound* cheer = sLongCheer;
+                if (v != cheer->volume) {
+                    cheer->volumeDirty = 1;
+                    cheer->volume = v;
                 }
             }
         }
@@ -2170,8 +2144,8 @@ inline void RingChalMaster::DrawRings(void) const {
                 TextElem m = *msg;
                 if (dt < 0.1f) {
                     f32 k;
-                    if (!Active__5SoundFv(arena.sMissFlag)) {
-                        Play__5SoundFv(arena.sMissFlag);
+                    if (!Playing__9GameSoundFv(arena.sMissFlag)) {
+                        Play__9GameSoundFv(arena.sMissFlag);
                     }
                     k = Remap(0.0f, 0.1f, 0.0f, 1.0f, dt);
                     m.scale = fn_80144C80(10.0f, m.scale, k);
@@ -2187,8 +2161,8 @@ inline void RingChalMaster::DrawRings(void) const {
                 f32 d2 = dt - 1.7f;
                 if (d2 < 0.1f) {
                     f32 k;
-                    if (!Active__5SoundFv(arena.sMissFlag)) {
-                        Play__5SoundFv(arena.sMissFlag);
+                    if (!Playing__9GameSoundFv(arena.sMissFlag)) {
+                        Play__9GameSoundFv(arena.sMissFlag);
                     }
                     k = Remap(0.0f, 0.1f, 0.0f, 1.0f, d2);
                     n.scale = fn_80144C80(10.0f, n.scale, k);
@@ -2235,12 +2209,12 @@ inline void RingChalMaster::DrawRings(void) const {
                 if (d <= 0.15f) {
                     f32 k;
                     if (arena.stats->At(arena.curSet - 1)->done) {
-                        if (!Active__5SoundFv(arena.sLevelUp)) {
-                            Play__5SoundFv(arena.sLevelUp);
+                        if (!Playing__9GameSoundFv(arena.sLevelUp)) {
+                            Play__9GameSoundFv(arena.sLevelUp);
                         }
                     } else {
-                        if (!Active__5SoundFv(arena.sFail)) {
-                            Play__5SoundFv(arena.sFail);
+                        if (!Playing__9GameSoundFv(arena.sFail)) {
+                            Play__9GameSoundFv(arena.sFail);
                         }
                     }
                     k = Remap(0.0f, 0.15f, 0.0f, 1.0f, d);
@@ -2309,8 +2283,8 @@ inline void RingChalMaster::vf0C(void) {
     if (!bA8 && rt < 6.75f) {
         bA8 = 1;
         if (sPreRace && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
-            RSound* pre = sPreRace;
-            pre->playing = 1;
+            GameSound* pre = sPreRace;
+            pre->start = 1;
             pre->loop = 0;
             pre->stop = 0;
         }
