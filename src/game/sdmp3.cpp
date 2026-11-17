@@ -546,7 +546,8 @@ int fn_802EAA58(MP3Info* info, int strict) {
     return ok;
 }
 
-static inline int SyncAt(const u8* b) { return b[0] == 0xFF && (b[1] & 0xE0) == 0xE0; }
+// MPEG frame sync test. A macro, not an inline: retail tests the bytes directly with no 0/1 result in a register.
+#define SyncAt(b) ((b)[0] == 0xFF && ((b)[1] & 0xE0) == 0xE0)
 
 void* fn_802EAB28(void* arg) {
     OSReport("kerngc/mp3:thread begins!\n");
