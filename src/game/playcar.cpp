@@ -45,7 +45,7 @@ struct PFlags {
 // through the car's replay Recorder (lbl_80332F40 forwards every slot to its PhysDriver source).
 class VPx {
 public:
-    virtual void v08(void);  // SetGear (not a destructor)
+    virtual void v08(int gear);  // SetGear (not a destructor)
     virtual void v0C(void);
     virtual void v10(u8* car);
     virtual u32 v14(void);
@@ -53,7 +53,7 @@ public:
     virtual void v1C(s32 x, s32 y, s32* dx, s32* dy, f32 t);
     virtual int v20(int x);
     virtual void v24(int a);
-    virtual void v28(void);
+    virtual void v28(f32 t);  // SetThrottle
     virtual void v2C(void);
     virtual void v30(void);
     virtual void v34(void);
@@ -63,9 +63,9 @@ public:
     virtual void v44(void);
     virtual void v48(void);
     virtual void v4C(void);
-    virtual void v50(void);
+    virtual void v50(f32 a, f32 b, f32 c);  // SetRumbleA
     virtual void SetRumbleB(f32 a, f32 b, f32 c);
-    virtual void v58(void);
+    virtual void v58(f32 a, f32 b);  // SetRumbleC
     virtual void v5C(void);
     virtual void v60(void);
     virtual void v64(void);
@@ -1003,7 +1003,7 @@ void PlayerDriver_vf24(u8* p) {
     memset(p + 0x20, 0, 0x10);
 }
 
-void fn_801914F8(u8* p) { VP(PTR(p, 0x4))->v28(); }
+void fn_801914F8(u8* p, f32 t) { VP(PTR(p, 0x4))->v28(t); }
 
 void fn_8019150C(u8* p, int v) {
     VP(PTR(p, 0x4))->v24(v);
@@ -1600,13 +1600,13 @@ void fn_80192BE8(u8* p) { VP(PTR(p, 0x4))->v4C(); }
 
 f32 fn_80192BFC(u8* p) { return VP(PTR(p, 0x4))->v40(); }
 
-void fn_80192C10(u8* p) { VP(PTR(p, 0x4))->v58(); }
+void fn_80192C10(u8* p, f32 a, f32 b) { VP(PTR(p, 0x4))->v58(a, b); }
 
 void fn_80192C24(u8* p, f32 strength, f32 turn, f32 coefficient) {
     VP(PTR(p, 0x4))->SetRumbleB(strength, turn, coefficient);
 }
 
-void fn_80192C38(u8* p) { VP(PTR(p, 0x4))->v50(); }
+void fn_80192C38(u8* p, f32 a, f32 b, f32 c) { VP(PTR(p, 0x4))->v50(a, b, c); }
 
 int fn_80192C4C(u8* p) { return PF(PTR(p, 0x8))->b2 != 0; }
 
@@ -1636,7 +1636,7 @@ f32 fn_80192ED0(u8* p) {
     return PadRange(*(u16*)PTR(p, 0x8), 0.0f, 65535.0f, -3.0f, 3.0f);
 }
 
-void fn_80192F58(u8* p) { VP(PTR(p, 0x4))->v08(); }
+void fn_80192F58(u8* p, int gear) { VP(PTR(p, 0x4))->v08(gear); }
 
 u8 fn_80192F6C(u8* p) { return U8(p, 0x12); }
 
