@@ -2,6 +2,7 @@
 // acceleration (position, speed, acceleration each), solves the quadratic for when the second reaches
 // the first, with fallbacks for equal accelerations, and records which case applied. Names are guesses.
 #include "game/common.h"
+#include "game/mathutil.h"
 
 extern "C" {
 double sqrt(double x);
@@ -27,9 +28,7 @@ struct Motion {
     }
 };
 
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Diff(f32 a, f32 b) { return a - b; }
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 
 ModuleTag lbl_8055E0F8;
 s32 lbl_8055E100;  // solver case
@@ -40,7 +39,6 @@ int fn_80138BE4(f32 a, f32 b) { return a * b < 0.0f; }
 
 int fn_80138BFC(f32 x) { return (f32)__fabs(x) <= 10.0f * __float_epsilon[0]; }
 
-static inline f32 AbsF(f32 v) { return (f32)__fabs(v); }
 
 int fn_80138C28(const Motion* m, f32* t, f32* miss) {
     f32 a;
@@ -74,7 +72,7 @@ int fn_80138C28(const Motion* m, f32* t, f32* miss) {
             }
         } else if (miss) {
             f32 x = -b > 0.0f ? -b : 0.0f;
-            x = (x + b) * (2.0f * AbsF(a));
+            x = (x + b) * (2.0f * FAbs(a));
             *miss = (x * x - disc) / (2.0f * c);
         }
     }

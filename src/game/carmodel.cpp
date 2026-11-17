@@ -24,6 +24,7 @@ f32 PSVECMag(const void* v);
 void* operator new(size_t size, const char* tag);
 
 #include "game/animslot.h"
+#include "game/mathutil.h"
 
 struct WheelState {
     u8 pad0[0x34];
@@ -199,7 +200,6 @@ CarModel* lbl_8055EBC8;  // the player's own car
 
 u8 lbl_8055AFC8 = 1;      // draw the cockpit
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {

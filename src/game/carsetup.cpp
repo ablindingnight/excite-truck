@@ -18,8 +18,6 @@ void fn_80131818(ValueTable* table);
 #define Ft(x) (0.305f * (x))  // feet to metres
 #define In(x) (0.0254f * (x))  // inches to metres
 #define Lbf(x) (4.45f * (x))  // pounds-force to newtons
-static inline f32 Min(f32 a, f32 b) { return (b < a) ? b : a; }
-static inline f32 Max(f32 a, f32 b) { return (a > b) ? a : b; }
 
 // Copies at most n - 1 characters and always terminates.
 
@@ -51,6 +49,7 @@ static inline void WheelDefaults(WheelSetup* w, int front) {
 }
 
 #include "game/carsetup.h"
+#include "game/mathutil.h"
 
 struct TweakMul {
     f32 mass;     // offset 0x0
@@ -138,8 +137,6 @@ static inline void AddScaled(ValVec3* o, const ValVec3* v, f32 s) {
     o->z += v->z * s;
 }
 
-/* Helper name unproven */
-static inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
 
 void fn_80279F58(CarSetup* s, ValueTable* t) {
     fn_80279D40(s);
@@ -180,7 +177,7 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->ebStrength = e->GetFloat("eb_strength_factor", 1.0f);
     s->jbTime = e->GetFloat("jb_time_factor", 1.0f);
 
-    s->grip = 1.5f * Max(Min(c->GetFloat("grip", 1.1f), 1.2f), 0.05f);
+    s->grip = 1.5f * MaxF(MinFRev(c->GetFloat("grip", 1.1f), 1.2f), 0.05f);
     s->slip = 2.0f * c->GetFloat("slip", 1.0f);
     s->loadFactor = c->GetFloat("load_factor", 1.0f);
     s->brake *= c->GetFloat("brake_factor", 1.0f);

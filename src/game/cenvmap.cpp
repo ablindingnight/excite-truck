@@ -4,6 +4,7 @@
 // projected onto the same hemisphere map. Names are guesses apart from the strings.
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
+#include "game/mathutil.h"
 
 // EVec3: valvec3.h's ValVec3.
 struct EVec2 {
@@ -99,13 +100,12 @@ void fn_802D94E4(void* dst, void* a, void* b, f32 t);
 }
 
 static inline u16 EnvShort(int v) { return v; }
-static inline u32 EnvColor(u8 a, u8 r, u8 g, u8 b) { return (a << 24) | (r << 16) | (g << 8) | b; }
 
 ModuleTag lbl_8055ECE8;
 u16 lbl_8055ECF0 = EnvShort(0x100);
 u16 lbl_8055ECF2 = EnvShort(0x405);
 u16 lbl_8055ECF4 = EnvShort(0x401);
-u32 lbl_8055ECF8 = EnvColor(0xFF, 0xFF, 0, 0);
+u32 lbl_8055ECF8 = ARGB(0xFF, 0xFF, 0, 0);
 s32 lbl_8055ECFC;  // render target
 s32 lbl_8055ED00;  // cenvmap.tex / shwenv.tex
 s32 lbl_8055ED04;  // ambmap.tex
@@ -181,8 +181,6 @@ void fn_80202BFC(s32 rt) {
 }
 template <class O> static inline void TMulEq(O* o, f32 k) { o->x *= k; o->y *= k; o->z *= k; }  /* Helper name unproven */
 extern "C" {
-/* Helper name unproven */
-static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
 void fn_80202D50(ValVec3 dir) {
     f32 m = PSVECMag((const Vec*)&dir);
     m = m > 0.001f ? m : 0.001f;

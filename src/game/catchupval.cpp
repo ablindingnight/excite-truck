@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/deity.h"
 #include "game/raceopts.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int strcasecmp(const char* a, const char* b);
@@ -39,9 +40,6 @@ struct CatchupState {
     s32 car;    // offset 0xC
 };
 
-static inline f32 Lerp(f32 t, f32 a, f32 b) { return a + t * (b - a); }
-static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
-static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Round(f32 f) { return f < 0.0f ? f - 0.5f : 0.5f + f; }
 
 ModuleTag lbl_8055E168;
@@ -111,7 +109,7 @@ void fn_8013B950(void) {
     }
     if (fn_8013BC70(&dist)) {
         f32 t = (dist - lbl_8042F8B8.begin) / ((lbl_8042F8B8.begin + lbl_8042F8B8.effect) - lbl_8042F8B8.begin);
-        lbl_8042F8A8.speed = Lerp(MaxF(MinF(1.0f, t), 0.0f), 1.0f, lbl_8042F8B8.speed);
+        lbl_8042F8A8.speed = LerpT(MaxF(MinF(1.0f, t), 0.0f), 1.0f, lbl_8042F8B8.speed);
     } else {
         lbl_8042F8A8.speed = 1.0f;
     }

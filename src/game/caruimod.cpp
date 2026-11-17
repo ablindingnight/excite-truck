@@ -48,6 +48,7 @@ struct WheelSetup {
 };
 
 #include "game/carsetup.h"
+#include "game/mathutil.h"
 
 extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
@@ -82,7 +83,6 @@ void fn_802C9A1C(const Vec* dir);
 void fn_802E317C(const char* fmt, ...);
 }
 
-static inline f32 Dot3(f32 ax, f32 bx, f32 ay, f32 by, f32 az, f32 bz) { return ax * bx + ay * by + az * bz; }
 
 static inline void MulVec(Vec* out, const Vec* in, const Vec* m) {
     if (out == in) {
@@ -150,8 +150,6 @@ static inline int IsLeft(int i) {
 }
 
 static inline f32 Sum(f32 a, f32 b) { return a + b; }
-static inline f32 InvLerp(f32 a, f32 b, f32 x) { return (x - a) / (b - a); }
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 // Odd smoothstep: -2|x|^3 + 3x^2 with the sign of x, for x in [-1, 1].
 static inline f32 Ease(f32 x) {
@@ -840,7 +838,7 @@ void fn_80254568(Vec3a* out, s32 model, const char* name) {
 
 }
 template <class O, class A, class V> static inline void TAddS(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }  /* Helper name unproven */
-static inline f32 LerpH(f32 a, f32 b, f32 t) { return a + t * (b - a); }  /* Helper name unproven */
+  /* Helper name unproven */
 extern "C" {
 /* Helper name unproven */ static inline f32 MidHalf(f32 a, f32 b) {
     const f32& difference = b - a;
@@ -866,8 +864,8 @@ void fn_802545C4(MWSlot* p, s32 model, CarUIModel* m) {
         fn_80254568((Vec3a*)&l, model, "front_l");
         fn_80254568((Vec3a*)&c, model, "rear_c");
         Vec mid;
-        mid.x = LerpH(l.x, r.x, 0.5f);
-        mid.y = LerpH(l.y, r.y, 0.5f);
+        mid.x = Lerp(l.x, r.x, 0.5f);
+        mid.y = Lerp(l.y, r.y, 0.5f);
         mid.z = MidHalf(l.z, r.z);
         p->frame.b.v[2].x = mid.x - c.x;
         p->frame.b.v[2].y = mid.y - c.y;
@@ -906,7 +904,6 @@ void fn_802545C4(MWSlot* p, s32 model, CarUIModel* m) {
 
 }  // extern "C"
 
-static inline double AbsD(double v) { return __fabs(v); }
 
 void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
     if (lbl_8055F330 || mode == 0) {

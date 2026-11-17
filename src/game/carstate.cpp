@@ -4,6 +4,7 @@
 #include "game/common.h"
 #include "game/carstate.h"
 #include "macros.h"
+#include "game/mathutil.h"
 
 extern "C" {
 void* memset(void* p, int c, size_t n);
@@ -17,7 +18,6 @@ struct CarStateBlock {
     CarState state;  // offset 0x4
 };
 
-static inline f32 Lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 
 #define ROUND(x) ((x) < 0.0f ? (x) - 0.5f : (x) + 0.5f)
 

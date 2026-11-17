@@ -177,9 +177,9 @@ extern "C" int strcmp(const char* a, const char* b);
 extern s32 lbl_8055F2E8;
 
 
-static inline int Min(int a, int b) { return a < b ? a : b; }
 
 #include "game/statchoice.h"
+#include "game/mathutil.h"
 
 class Statistic {
 public:
@@ -313,7 +313,7 @@ extern "C" {
 inline void fn_8025F46C(CarPickScreen* s) {
     memset(s->names, 0, sizeof(s->names));
     memset(s->rows, 0, sizeof(s->rows));
-    for (int i = 0; i < Min(s->all->Count(), 6); i++) {
+    for (int i = 0; i < MinI(s->all->Count(), 6); i++) {
         SafeStrCopy(s->names[i].name, s->all->Get(i)->Name(), 0x20);
         s->names[i].state = i == s->cur ? 6 : 7;
     }
@@ -328,7 +328,7 @@ inline void fn_8025F46C(CarPickScreen* s) {
     }
     if (unlocked) {
         CarChoice* car = s->all->Get(s->cur);
-        for (int k = 0; k < Min(car->CupCount(), 6); k++) {
+        for (int k = 0; k < MinI(car->CupCount(), 6); k++) {
             CupChoice* cup = car->Cup(k);
             SafeStrCopy(s->rows[k].name, cup->Name(), 0x20);
             SafeStrCopy(s->rows[k].course, cup->Course(), 0x20);
@@ -478,8 +478,6 @@ struct IconEntry {
 };
 
 // Scales each colour channel by 255*255/65536, alpha forced opaque.
-/* Helper ARGB unproven */
-static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 
 static inline u32 DimColor(u32 c) {
     int b = (u8)c * 255 * 255 / 256 / 256;
