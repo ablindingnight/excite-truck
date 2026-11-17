@@ -10,6 +10,7 @@
 #include "game/v2.h"
 #include "game/gart.h"
 #include "game/mathutil.h"
+#include "game/round.h"
 
 // Camera: common.h's PlainValMatrix.
 // A tunable value of the car.
@@ -87,7 +88,6 @@ public:
     }
 };
 
-static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
 extern "C" {
 

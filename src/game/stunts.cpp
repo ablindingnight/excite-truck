@@ -21,6 +21,7 @@ extern RaceCarRec* lbl_804348E8[];
 // Something told about every awarded stunt (achievements, statistics).
 #include "game/stuntwatch.h"
 #include "game/clamp01.h"
+#include "game/round.h"
 
 extern "C" {
 void* memset(void* d, int c, size_t n);
@@ -1037,7 +1038,6 @@ extern "C" {
 void fn_80206750(GameSound* s, int car, int pan);
 }
 
-inline s32 Round(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 
 // One-shot stunts reported with a value (crashes).
 struct ThrowTarget {

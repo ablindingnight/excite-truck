@@ -111,6 +111,7 @@ static inline void SafeDelete(T*& p) {
 
 #include "game/fixedstr.h"
 #include "game/clamp01.h"
+#include "game/round.h"
 
 
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
@@ -309,7 +310,6 @@ class BetaCar;
 
 extern "C" RaceCarRec* fn_8017960C(int id);
 
-inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 
 extern "C" {
 ValueTable* fn_80131808(const char* name);

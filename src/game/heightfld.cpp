@@ -7,6 +7,7 @@
 #include <revolution/MTX/vec.h>
 #include "game/byteswap.h"
 #include "game/mathutil.h"
+#include "game/round.h"
 // World units per height-field cell. A named constant with external linkage, defined before any code: retail keeps
 // it as the FIRST .sdata2 entry, separate from the pooled 2.0f literal of the spline helpers (name unproven).
 extern const f32 lbl_80562B60;
@@ -514,7 +515,6 @@ f32 fn_801DCF0C(f32 x, f32 z) {
     return h;
 }
 
-static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
 
 /* Helper name unproven: height and optional normal inside one tile; the boundary is needed (in place -19.0) */
 static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, int lx, int lz, f32 h) {

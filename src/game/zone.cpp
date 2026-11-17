@@ -29,6 +29,7 @@
 #include "game/strcopy.h"
 #include "game/mathutil.h"
 #include "game/clamp01.h"
+#include "game/round.h"
 
 extern "C" {
 int strcmp(const char* a, const char* b);
@@ -120,7 +121,6 @@ static inline void Perp(ValPoint* v) {
     v->x = v->y;
     v->y = -t;
 }
-static inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : x + 0.5f; }
 static inline int ClampI(int x, int lo, int hi) {
     if (x > lo) {
         lo = x;

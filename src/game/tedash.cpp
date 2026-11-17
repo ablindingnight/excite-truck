@@ -30,6 +30,7 @@ void SafeDelete(T*& p) {
 }
 
 #include "game/vecbase.h"
+#include "game/round.h"
 
 template <class T, int N>
 struct InlineVec : VecBase<T> {
@@ -662,7 +663,6 @@ s16 fn_802B6E7C(s16 base, int i, u32 n) { return base + (i - n / 2) * (s16)fn_80
 
 s16 fn_802B6ED8(s16 base, int i, u32 n) { return base + (i - n / 2) * (s16)fn_802B6E30(); }
 
-static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : x + 0.5f); }
 
 extern const f32 lbl_80564C88;
 s32 lbl_8055CEA0 = 1;  // brush scale (.sdata: defined after the brush-list strings)

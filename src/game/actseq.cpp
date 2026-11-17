@@ -864,6 +864,7 @@ public:
 #include "game/pathmover.h"
 
 #include "game/gamemode.h"
+#include "game/round.h"
 
 extern "C" {
 PathMover* fn_801DA8C8(const char* object, const char* path);
@@ -1347,7 +1348,6 @@ public:
 
 }  // namespace
 
-static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
 namespace {
 

@@ -139,6 +139,7 @@ void fn_8018F76C(RaceCarRec* car, int wheel);
 #include "game/timer.h"
 #include "game/clamp01.h"
 #include "game/nearzero.h"
+#include "game/round.h"
 
 // Arrow/marker vertex.
 struct MarkVtx {
@@ -1511,7 +1512,6 @@ u8 fn_801B3050(int car);
 void fn_8018F9B4(RaceCarRec* car);
 }
 
-static inline int Round(f32 v) { return v < 0.0f ? v - 0.5f : 0.5f + v; }
 
 
 

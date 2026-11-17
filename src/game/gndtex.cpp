@@ -78,6 +78,7 @@ extern u32 lbl_8055FD30;
 extern "C" GXTex* fn_802D94DC(void);
 
 #include "game/vecbase.h"
+#include "game/round.h"
 
 template <class T, int N>
 struct InlineVec : VecBase<T> {
@@ -114,7 +115,6 @@ static inline GXColor Rgba(u8 r, u8 g, u8 b, u8 a) {
     return c;
 }
 
-static inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : 0.5f + x; }
 
 ModuleTag lbl_8055FE90;
 u16 lbl_8055FE98 = TexShort(0x100);

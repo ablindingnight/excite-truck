@@ -128,6 +128,7 @@ struct ArtList : public ArtListBase {
 
 #include "game/artplayer.h"
 #include "game/ease.h"
+#include "game/round.h"
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" ValueTable* fn_80131808(const char* name);
@@ -612,7 +613,6 @@ static inline void MulVec(f32* out, const f32* in, f32 m[4][3]) {
     }
 }
 
-static inline int Round(f32 v) { return (int)(v < 0.0f ? v - 0.5f : 0.5f + v); }
 
 // Draws every path's element at time t: the two keys around t are blended along the key's curve (position, scale
 // and alpha linearly, rotation by slerp) into a matrix, under the optional parent transform.

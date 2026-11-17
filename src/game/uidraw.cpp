@@ -13,6 +13,7 @@
 #include "game/uivertex.h"
 #include "game/mathutil.h"
 #include "game/clamp01.h"
+#include "game/round.h"
 
 void UIContextBegin(void);
 void UIContextEnd(void);
@@ -430,7 +431,6 @@ void fn_80230F78(u8* alpha, f32* grow, u32* color, int real) {
 
 void fn_8023108C(u8 on) { lbl_8055B998 = on; }
 
-static inline int Round(f32 x) { return (int)(x < 0.0f ? x - 0.5f : 0.5f + x); }
 
 void fn_80231094(int* top, int* bottom, int* left, int* right) {
     f32 k = fn_802C9A68() ? 0.9f : 0.85f;

@@ -112,6 +112,7 @@ extern const f32 lbl_80562068;
 #include "game/mathutil.h"
 
 #include "game/racingoverlay.h"
+#include "game/round.h"
 
 // HUD colours (not referenced by the surviving code).
 static inline u32 InitHudValue(u32 value) { return value; }
@@ -860,7 +861,6 @@ void Mat3RotY(Mat3* m, f32 a) {
     m->m[2][2] = c;
 }
 
-static inline int Round(f32 x) { return x < 0.0f ? x - 0.5f : 0.5f + x; }
 
 void RacingOverlay::DrawHeat(void) {
     f32 heat;
