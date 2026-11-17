@@ -1856,7 +1856,9 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     meterObj->SetActive(!bAA && !boosting);
     if (!boosting && !bAA) {
         f32 k = (u32)rc->type == 'ACAR' ? lbl_80559EB8 : 1.0f;
-        f32 m = meter + 0.0004f * (meterObj->Rate(rc) * k);
+        f32 rate = meterObj->Rate(rc);
+        rate *= k;
+        f32 m = meter + 0.0004f * rate;
         meter = 1.0f < m ? 1.0f : m;
     }
     meterSmooth += 0.1f * (meter - meterSmooth);
@@ -2135,7 +2137,10 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
         UpdateScoreOverlays(id, pts);
     }
     {
-        f32 d = (info->lap - 1) * fn_8013672C() + dist->f48;
+        f32 lapLen = fn_8013672C();
+        f32 base = dist->f48;
+        f32 d = (info->lap - 1) * lapLen;
+        d += base;
         f32 y = d > 0.0f ? d : 0.0f;
         f32 x = fn_801B2ED4();
     }
