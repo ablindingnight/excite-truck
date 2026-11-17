@@ -1181,9 +1181,11 @@ void CarBody::vf14(void) {
 
 
 // The physics solver's per-body records (masslist.cpp names them MassSet/ContactSet/CrossSet/CxEntry).
-struct CbSolVec {
-    CbSolVec(void) {}
+/* Helper name unproven */ struct CbSolPlain {
     f32 x, y, z, w;
+};
+struct CbSolVec : CbSolPlain {
+    CbSolVec(void) {}
 };
 struct CbSolMass {
     CbSolVec pos;     // offset 0x0
@@ -1307,7 +1309,7 @@ struct CbVec4 {
         z = z_;
         w = w_;
     }
-    CbVec4(CbSolVec s) {
+    CbVec4(CbSolPlain s) {
         RVec3 p(s.x, s.y, s.z);
         CbF f(s.w);
         Set(p, f);
