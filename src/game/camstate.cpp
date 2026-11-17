@@ -493,10 +493,9 @@ void fn_802751AC(u8* p) {
 // As fn_802751AC, but the offset follows the car's first point (0x2450) instead of the preset's.
 void fn_80275410(u8* p) {
     CamRec* cr = (CamRec*)p;
-    CamPreset c;
     u8* car = cr->car;
     const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
-    c = k;
+    CamPreset c = k;
     RVec3 off = *(CVec3*)(car + 0x2450) + RVec3(0.8f, 0.65f, -1.75f);
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     Mat3 rot;
@@ -510,10 +509,9 @@ void fn_80275410(u8* p) {
 // As fn_802751AC, but the offset follows the car's second point (0x2538) instead of the preset's.
 void fn_802756A4(u8* p) {
     CamRec* cr = (CamRec*)p;
-    CamPreset c;
     u8* car = cr->car;
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
-    c = k;
+    CamPreset c = k;
     RVec3 off = *(CVec3*)(car + 0x2538) + RVec3(0.85f, 0.9f, 2.0f);
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     Mat3 rot;
