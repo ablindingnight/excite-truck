@@ -470,6 +470,12 @@ static inline void LerpVert(DrawVert* out, FabricCorner a, FabricCorner b, f32 t
     out->color = LerpColor( b.color,a.color, t);
 }
 
+static inline void LerpVert2(DrawVert* out, const DrawVert& b, const DrawVert& a, f32 t) {
+    out->u = LerpRev(b.u, a.u, t);
+    out->v = LerpRev(b.v, a.v, t);
+    out->color = LerpColor(b.color, a.color, t);
+}
+
 extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
     int n = f->rows * f->cols;
     int r;
@@ -494,11 +500,10 @@ extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
             int i = r * f->cols + c;
             PVec p;
             LerpPos(&p, &lp, &rp, s);
-            *(PVec*)&f->cur[i] = p;
-            f->prev[i] = f->cur[i];
-            f->draw[i].u = LerpRev( rd.u,ld.u, s);
-            f->draw[i].v = LerpRev( rd.v,ld.v, s);
-            f->draw[i].color = LerpColor( rd.color,ld.color, s);
+            Vec3Storage* pv = &f->prev[i];
+            *(PVec*)pv = p;
+            f->cur[i] = *pv;
+            LerpVert2(&f->draw[i], rd, ld, s);
         }
     }
 }
