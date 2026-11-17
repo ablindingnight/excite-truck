@@ -149,19 +149,7 @@ public:
     virtual void Draw2(void* ctx);
 };
 
-class TrackMod {
-public:
-    virtual ~TrackMod(void) {}
-    virtual void Swap(TObj* o);
-    virtual void Init(TObj* o);
-    virtual void Unk14(void);
-    virtual void Apply(void);
-    virtual void Unk1C(void);
-    virtual void Draw(TObj* list);
-    virtual void DrawTree(struct TNode* tree);
-    virtual void Add(void* scene, const TObj* o, s32 id);
-    virtual void Link(int a, void* b, int c, void* d, int e);
-};
+#include "game/trackmod.h"
 
 class FabricTMH : public TrackMod {
 public:
