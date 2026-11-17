@@ -5,6 +5,7 @@
 #include "game/common.h"
 #include "game/locstring.h"
 #include "game/joy.h"
+#include "game/strcopy.h"
 
 extern "C" {
 char* strncpy(char* d, const char* s, u32 n);
@@ -366,17 +367,6 @@ static LocString lbl_8043561C("ControlStrings:Unknown\0");
 
 static inline f32 MaxZero(f32 v) { return 0.0f > v ? 0.0f : v; }
 
-static inline void StrNCopy(char* dst, const char* src, int len) {
-    char* d = dst;
-    int n = len;
-    const char* s = src;
-    while ((*d++ = *s++) != 0) {
-        if (--n <= 0) {
-            d[-1] = 0;
-            break;
-        }
-    }
-}
 
 extern "C" {
 
@@ -541,12 +531,12 @@ void fn_801A7E54(char* out, int len, Binding* b) {
     if (e) {
         const NamePair* p = fn_801A75B4(e->name);
         if (p) {
-            StrNCopy(out, p->text, len);
+            SafeStrCopy(out, p->text, len);
         } else {
-            StrNCopy(out, e->label ? e->label : (const char*)&e->key, len);
+            SafeStrCopy(out, e->label ? e->label : (const char*)&e->key, len);
         }
     } else {
-        StrNCopy(out, lbl_8055A850, len);
+        SafeStrCopy(out, lbl_8055A850, len);
     }
     out[len - 1] = 0;
 }
