@@ -2957,6 +2957,8 @@ static inline void SatModel(const char* name, const char* tex) {
 
 inline Pickup::Pickup(ValueNode* n) {
     f32 c[2];
+    f32 dir[2];
+    f32 fwd[2];
     char buf[0x20];
     int k;
     s32 trk;
@@ -3059,10 +3061,6 @@ inline Pickup::Pickup(ValueNode* n) {
         f32 box[6];
         f32 m[12];
         f32 cr[3];
-        f32 b[3];
-        f32 a[3];
-        f32 fwd[2];
-        f32 dir[2];
         f32 xz[2];
         f32 hx;
         f32 hz;
@@ -3088,6 +3086,8 @@ inline Pickup::Pickup(ValueNode* n) {
             fwd[0] = m[6];
             fwd[1] = m[8];
         }
+        f32 b[3];
+        f32 a[3];
         a[0] = dir[0];
         a[1] = 0.0f;
         a[2] = dir[1];
