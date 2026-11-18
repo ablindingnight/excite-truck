@@ -1471,13 +1471,16 @@ template <class O, class A, class V> static inline void CbAddScaled(O* o, const 
 /* Helper name unproven */
 template <class O> static inline void CbScaleSelf(O* o, f32 k) { o->x = o->x * k; o->y = o->y * k; o->z = o->z * k; }
 /* Helper name unproven: the roll torque gain (speed ramp times the mass torque) */
-static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = cb->mass; f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f); return LerpT(b, 0.0f, 1.0f) * (m * 100.0f * 9.81f * 0.305f * a); }
+// PROVISIONAL: named roll-blend factor ownership is unproven.
+static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = cb->mass; f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f); f32 gain = LerpT(b, 0.0f, 1.0f); return gain * (m * 100.0f * 9.81f * 0.305f * a); }
 // PROVISIONAL: helper name/boundary and by-value pitch ownership are unproven.
 static inline f32 StalledPitch(f32 pitch, f32 stall) {
     return pitch + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
 }
 // PROVISIONAL: sound-decision wrapper type and ownership are unproven.
 struct LoudState { int value; };
+// PROVISIONAL: stunt-decision wrapper type and aggregate ownership are unproven.
+struct StuntDecision { int value; };
 // PROVISIONAL: clock query name and temporary-reference ownership are unproven.
 static inline f32 PhysicsTime() { return lbl_8055E3C8; }
 void fn_80183E7C(u8* p) {
@@ -1643,14 +1646,14 @@ void fn_80183E7C(u8* p) {
         f.z = cb->f25AC * k;
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
     }
-    int stunts;
+
     u32 ramp = (fn_801769CC()->type >> 20) & 1;
     u32 jump = (fn_801769CC()->type >> 21) & 1;
-    stunts = 0;
+    StuntDecision stuntState = { 0 };
     if (ramp || jump) {
-        stunts = 1;
+        stuntState.value = 1;
     }
-    if (stunts && cb->airborne && cb->f2618 > 0.35f) {
+    if (stuntState.value && cb->airborne && cb->f2618 > 0.35f) {
         f32 sink = -PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118));
         f32 lim = LerpT(Clamp01((cb->f2618 - 2.9f) / 0.099999905f), landingTune.v[5], landingTune.v[4]);
         if (jump) {
