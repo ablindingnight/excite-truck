@@ -1787,8 +1787,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         }
     }
     score += add + gain;
+    // PROVISIONAL actual-value name and ownership; original spelling unproven.
+    f32 previousShown = shown;
     {
-        int m = !((f32)__fabs(score - shown) <= __float_epsilon[0]);
+        int m = !((f32)__fabs(score - previousShown) <= __float_epsilon[0]);
         moving = m;
     }
     {
@@ -1884,7 +1886,11 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                 f32 dz = rc->mtx.pos.z - p->z;
                 f32 dx = rc->mtx.pos.x - p->x;
                 const f32 radius = p->r;
-                if (dx * dx + dz * dz < radius * radius ? rc->airborne > 0 : 0) {
+                // PROVISIONAL actual squared-value names and ownership.
+                f32 dxSquared = dx * dx;
+                f32 dzSquared = dz * dz;
+                f32 radiusSquared = radius * radius;
+                if (dxSquared + dzSquared < radiusSquared ? rc->airborne > 0 : 0) {
                     f32 v = rc->f25A0 - 0.1f;
                     rc->f25A0 = 0.0f > v ? 0.0f : v;
                 }
