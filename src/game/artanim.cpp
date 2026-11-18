@@ -301,8 +301,8 @@ static inline void AxisQuat(f32* q, const ValVec3& axis) {
     } else {
         q[0] = 0.0f;
         q[1] = 0.0f;
-        q[3] = 1.0f;
         q[2] = 0.0f;
+        q[3] = 1.0f;
     }
 }
 
@@ -404,9 +404,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     // The path loops count with the local nPaths (retail CTR loop); possible once the 12-byte vectors became
     // helper temporaries (77f163d8c) and freed the register the earlier form spilled.
     for (int i = 0; i < nPaths; i++) {
-        ValueNode* pn = paths[i];
         int k;
         ArtPath* p = &a->paths[i];
+        ValueNode* pn = paths[i];
         p->elem = pn->GetIntValue("elem_idx");
         const ValPoint pxy = CopyValPoint(pn->GetPointOr("xy", ValPoint(ArtXY(0.0f, 0.0f))));
         f32 t0 = fn_802AC344((ArtNode*)pn, (ArtNode*)named, 0);
@@ -420,56 +420,56 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         p->nKeys = nFrames;
         p->keys = new ("artframe") ArtKey[nFrames];
         for (k = 0; k < nFrames; k++) {
-            const char* curveKey = "curve";
-                ValueNode* f;
-                ArtKey* key = &p->keys[k];
-                ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
-                f = frames[k];
-                key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
-                if (f->Has("spin")) {
-                    AxisQuat(key->q, ValV3(0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f))));
-                } else {
-                    const char* q = f->GetString("q", "0,0,0,1");
-                    if (sscanf(q, "%f,%f,%f,%f", &key->q[0], &key->q[1], &key->q[2], &key->q[3]) != 4) {
-                        fn_802E317C("artanim: bad quaternion %s in %s", q, name);
-                    }
+        const char* curveKey = "curve";
+            ValueNode* f;
+            ArtKey* key = &p->keys[k];
+            ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
+            f = frames[k];
+            key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
+            if (f->Has("spin")) {
+                AxisQuat(key->q, ValV3(0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f))));
+            } else {
+                const char* q = f->GetString("q", "0,0,0,1");
+                if (sscanf(q, "%f,%f,%f,%f", &key->q[0], &key->q[1], &key->q[2], &key->q[3]) != 4) {
+                    fn_802E317C("artanim: bad quaternion %s in %s", q, name);
                 }
-                if (f->Has("xy")) {
-                    ValPoint v = CopyValPoint(f->GetPoint("xy"));
-                    v.x = v.x + pxy.x;
-                    v.y = pxy.y + v.y;
-                    key->pos[0] = v.x - 320.0f;
-                    key->pos[1] = 240.0f - v.y;
-                    key->pos[2] = 0.0f;
-                } else if (f->Has("offset")) {
-                    CopyF3(key->pos, f->GetVec3("offset"));
-                    key->pos[0] = key->pos[0] + (pxy.x - 320.0f);
-                    key->pos[1] = key->pos[1] + (240.0f - pxy.y);
-                } else {
-                    CopyF3(key->pos, prev ? *(const ValVec3*)prev->pos : ValV3(0.0f, 0.0f, 0.0f));
-                }
-                if (f->Has("scale3")) {
-                    CopyF3(key->scale, f->GetVec3("scale3"));
-                } else if (f->Has("scale")) {
-                    f32 s = f->GetFloat("scale");
-                    key->scale[0] = s;
-                    key->scale[1] = s;
-                    key->scale[2] = s;
-                } else if (prev) {
-                    key->scale[0] = prev->scale[0];
-                    key->scale[1] = prev->scale[1];
-                    key->scale[2] = prev->scale[2];
-                } else {
-                    key->scale[0] = 1.0f;
-                    key->scale[1] = 1.0f;
-                    key->scale[2] = 1.0f;
-                }
-                key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
-                const char* curveNames = "linear\0hermite\0start\0stop\0";
-                s32 curve = prev ? prev->curve : 0;
-                key->curve = f->Has(curveKey) ? f->GetEnum(curveKey, curveNames) : curve;
-                key->signal = f->GetInt("signal", prev ? prev->signal : 0);
             }
+            if (f->Has("xy")) {
+                ValPoint v = CopyValPoint(f->GetPoint("xy"));
+                v.x = v.x + pxy.x;
+                v.y = pxy.y + v.y;
+                key->pos[0] = v.x - 320.0f;
+                key->pos[1] = 240.0f - v.y;
+                key->pos[2] = 0.0f;
+            } else if (f->Has("offset")) {
+                CopyF3(key->pos, f->GetVec3("offset"));
+                key->pos[0] = key->pos[0] + (pxy.x - 320.0f);
+                key->pos[1] = key->pos[1] + (240.0f - pxy.y);
+            } else {
+                CopyF3(key->pos, prev ? *(const ValVec3*)prev->pos : ValV3(0.0f, 0.0f, 0.0f));
+            }
+            if (f->Has("scale3")) {
+                CopyF3(key->scale, f->GetVec3("scale3"));
+            } else if (f->Has("scale")) {
+                f32 s = f->GetFloat("scale");
+                key->scale[0] = s;
+                key->scale[1] = s;
+                key->scale[2] = s;
+            } else if (prev) {
+                key->scale[0] = prev->scale[0];
+                key->scale[1] = prev->scale[1];
+                key->scale[2] = prev->scale[2];
+            } else {
+                key->scale[0] = 1.0f;
+                key->scale[1] = 1.0f;
+                key->scale[2] = 1.0f;
+            }
+            key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
+            const char* curveNames = "linear\0hermite\0start\0stop\0";
+            s32 curve = prev ? prev->curve : 0;
+            key->curve = f->Has(curveKey) ? f->GetEnum(curveKey, curveNames) : curve;
+            key->signal = f->GetInt("signal", prev ? prev->signal : 0);
+        }
     }
     if (t->HasChild("global_transform")) {
         ValueNode* g = t->FindChild("global_transform");
