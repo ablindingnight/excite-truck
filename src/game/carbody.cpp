@@ -1467,6 +1467,8 @@ static inline int CarOnGas(u8* car) { return ((CarBody*)car)->f25E0 > 0.5f; }
 template <class O, class A, class V> static inline void CbAddScaled(O* o, const A* a, const V* v, f32 k) { o->x = a->x + v->x * k; o->y = a->y + v->y * k; o->z = a->z + v->z * k; }
 /* Helper name unproven */
 template <class O> static inline void CbScaleSelf(O* o, f32 k) { o->x = o->x * k; o->y = o->y * k; o->z = o->z * k; }
+/* Helper name unproven: the roll torque gain (speed ramp times the mass torque) */
+static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = cb->mass; f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f); return LerpT(b, 0.0f, 1.0f) * (m * 100.0f * 9.81f * 0.305f * a); }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -1500,9 +1502,7 @@ void fn_80183E7C(u8* p) {
         f32 roll;
         if (cb->airborne > 2 && (roll = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x48)), (f32)__fabs(roll) < 2.0f)) {
             f32 a = LerpT(Ramp(cb->f2650, 0.0f, 1.0f), 0.0f, 1.0f);
-            f32 m = cb->mass;
-            f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f);
-            f32 k = LerpT(b, 0.0f, 1.0f) * (m * 100.0f * 9.81f * 0.305f * a);
+            f32 k = RollGain(cb, a);
             RVec3 t;
             t.x = cb->mtx.rot.y.x * (roll > 0.0f ? k : -k);
             t.y = cb->mtx.rot.y.y * (roll > 0.0f ? k : -k);
