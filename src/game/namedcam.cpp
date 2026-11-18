@@ -238,15 +238,16 @@ void fn_8027656C(CamPose* out, f32* fov, int slot) {
     fn_8012F57C(q, lbl_8049FD58[slot].q0, lbl_8049FD58[slot].q1, e);
     const CamShot* s = &lbl_8049FD58[slot];
     QuatToPose(out, q);
-    CamVec3 v;
-    f32 v_v_1 = s->p0.v[1] + e * (s->p1.v[1] - s->p0.v[1]);
-    v.v[2] = s->p0.v[2] + e * (s->p1.v[2] - s->p0.v[2]);
-    v.v[1] = v_v_1;
-    v.v[0] = s->p0.v[0] + e * (s->p1.v[0] - s->p0.v[0]);
-    out->pos.v[0] = v.v[0];
-    out->pos.v[1] = v.v[1];
+    // PROVISIONAL: the original vector type/copy boundary is unproven. This
+    // uses the shared three-value Set and scalar Lerp helpers for the real pose.
+    ValVec3 v;
+    v.Set(Lerp(s->p0.v[0], s->p1.v[0], e),
+          Lerp(s->p0.v[1], s->p1.v[1], e),
+          Lerp(s->p0.v[2], s->p1.v[2], e));
+    out->pos.v[0] = v.x;
+    out->pos.v[1] = v.y;
+    out->pos.v[2] = v.z;
     *fov = s->fov0 + e * (s->fov1 - s->fov0);
-    out->pos.v[2] = v.v[2];
 }
 
 NamedCam* fn_80276A44(const char* name) {
