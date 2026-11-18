@@ -615,24 +615,26 @@ Recorder::~Recorder(void) {}
 
 extern "C" {
 
+#define p ((u8*)this)  // the parameter itself: a named u8* copy of this recolours it (retail registers)
 void HybridDriver::Init(void* car_, void* q_) {
-    S32(((u8*)this), 0x28) = U8(((u8*)car_), 0x260) & 3;
-    Recorder* r = new ("repl_di") Recorder(S32(((u8*)this), 0x28));
-    PTR(((u8*)this), 0x4) = (u8*)r;
-    PTR(PTR(((u8*)this), 0xC), 0x38) = (u8*)r;
-    B8(((u8*)this), 0x25) = S32(((u8*)q_), 0x5C) == 0;
-    B8(((u8*)this), 0x26) = S32(((u8*)q_), 0x5C) != 0;
-    PTR(((u8*)this), 0x20) = ((u8*)car_);
-    S32(((u8*)this), 0x1C) = S32(((u8*)car_), 0x1EC);
-    DeityView* c = fn_801B2EC0(S32(((u8*)this), 0x1C));
-    PTR(((u8*)this), 0x14) = (u8*)c;
-    S32(((u8*)this), 0x18) = c->v18();
-    ((CarCtl*)PTR(((u8*)this), 0x8))->Attach(((u8*)car_), ((u8*)q_));
-    ((CarCtl*)PTR(((u8*)this), 0xC))->Attach(((u8*)car_), ((u8*)q_));
+    S32(p, 0x28) = U8(((u8*)car_), 0x260) & 3;
+    Recorder* r = new ("repl_di") Recorder(S32(p, 0x28));
+    PTR(p, 0x4) = (u8*)r;
+    PTR(PTR(p, 0xC), 0x38) = (u8*)r;
+    B8(p, 0x25) = S32(((u8*)q_), 0x5C) == 0;
+    B8(p, 0x26) = S32(((u8*)q_), 0x5C) != 0;
+    PTR(p, 0x20) = ((u8*)car_);
+    S32(p, 0x1C) = S32(((u8*)car_), 0x1EC);
+    DeityView* c = fn_801B2EC0(S32(p, 0x1C));
+    PTR(p, 0x14) = (u8*)c;
+    S32(p, 0x18) = c->v18();
+    ((CarCtl*)PTR(p, 0x8))->Attach(((u8*)car_), ((u8*)q_));
+    ((CarCtl*)PTR(p, 0xC))->Attach(((u8*)car_), ((u8*)q_));
     if (OptProfile()) {
         lbl_8055E528 = 1;
     }
 }
+#undef p
 
 void HybridDriver::SetCar(void* car_) {
     u8* p = (u8*)this;
@@ -668,22 +670,24 @@ void Recorder::SetRumble(int a) {
     u8* p = (u8*)this;
     VP(PTR(p, 0x4))->v78(a); }
 
+#define p ((u8*)this)  // the parameter itself: a named u8* copy of this recolours it (retail registers)
 void HybridDriver::Start(void) {
-    fn_80191084(((u8*)this), 0);
-    fn_801B6650(PTR(((u8*)this), 0x20));
-    u32 cur = fn_80191100(((u8*)this));
-    if (cur != U32(((u8*)this), 0x8)) {
-        fn_80191084(((u8*)this), U32(((u8*)this), 0x8));
+    fn_80191084(p, 0);
+    fn_801B6650(PTR(p, 0x20));
+    u32 cur = fn_80191100(p);
+    if (cur != U32(p, 0x8)) {
+        fn_80191084(p, U32(p, 0x8));
     } else {
-        fn_80191084(((u8*)this), U32(((u8*)this), 0xC));
+        fn_80191084(p, U32(p, 0xC));
     }
-    fn_80191084(((u8*)this), cur);
-    if (U8(((u8*)this), 0x38)) {
-        U8(((u8*)this), 0x38) = 0;
-        fn_802793B0(PTR(((u8*)this), 0x28));
+    fn_80191084(p, cur);
+    if (U8(p, 0x38)) {
+        U8(p, 0x38) = 0;
+        fn_802793B0(PTR(p, 0x28));
     }
-    VC(((u8*)this))->v30();
+    VC(p)->v30();
 }
+#undef p
 
 void HybridDriver::Stop(void) {
     u8* p = (u8*)this;
@@ -757,11 +761,12 @@ void fn_801B86A4(s32 car);
 
 static inline int NearZero(f32 x) { return (f32)__fabs(x) <= __float_epsilon[0]; }
 
+#define p ((u8*)this)  // the parameter itself: a named u8* copy of this recolours it (retail registers)
 void HybridDriver::v48(void) {
-    u8* info = ((DeityView*)PTR(((u8*)this), 0x14))->Info();
+    u8* info = ((DeityView*)PTR(p, 0x14))->Info();
     f32 now = lbl_8055E3C8;
-    Recorder* rec = (Recorder*)PTR(((u8*)this), 0x4);
-    f32 speed = ((RaceCarRec*)PTR(((u8*)this), 0x20))->Speed();
+    Recorder* rec = (Recorder*)PTR(p, 0x4);
+    f32 speed = ((RaceCarRec*)PTR(p, 0x20))->Speed();
     s32 frame = lbl_8055E3C4;
     if (frame >= rec->cap) {
         frame = rec->cap - 1;
@@ -789,101 +794,102 @@ void HybridDriver::v48(void) {
         fn_801769E0();
         fn_80176A34(lbl_8055E3C4);
     }
-    VP(PTR(((u8*)this), 0x4))->v74();
-    if (S32(PTR(((u8*)this), 0x20), 0x2620)) {
-        VP(PTR(((u8*)this), 0x4))->v7C();
+    VP(PTR(p, 0x4))->v74();
+    if (S32(PTR(p, 0x20), 0x2620)) {
+        VP(PTR(p, 0x4))->v7C();
     }
     if (!lbl_8055E529) {
-        bool late = lbl_8055E3C8 - F32(PTR(((u8*)this), 0x20), 0x26D8) < 0.4f;
+        bool late = lbl_8055E3C8 - F32(PTR(p, 0x20), 0x26D8) < 0.4f;
         if (S32(info, 0x24) == 3 || lbl_8055E528 || OptPaTest() || late) {
-            fn_80191084(((u8*)this), U32(((u8*)this), 0x8));
-        } else if (U8(((u8*)this), 0x25)) {
-            if (!U8(((u8*)this), 0x26)) {
-                fn_80191084(((u8*)this), U32(((u8*)this), 0xC));
+            fn_80191084(p, U32(p, 0x8));
+        } else if (U8(p, 0x25)) {
+            if (!U8(p, 0x26)) {
+                fn_80191084(p, U32(p, 0xC));
             } else {
-                fn_80191084(((u8*)this), U32(((u8*)this), 0x8));
+                fn_80191084(p, U32(p, 0x8));
             }
         } else if (S32(info, 0x24) == 1) {
-            fn_80191084(((u8*)this), U32(((u8*)this), 0x8));
-        } else if (!fn_801B851C(S32(((u8*)this), 0x1C)) || fn_8026B7B4(S32(((u8*)this), 0x1C))) {
-            fn_80191084(((u8*)this), U32(((u8*)this), 0x8));
+            fn_80191084(p, U32(p, 0x8));
+        } else if (!fn_801B851C(S32(p, 0x1C)) || fn_8026B7B4(S32(p, 0x1C))) {
+            fn_80191084(p, U32(p, 0x8));
         } else {
-            fn_80191084(((u8*)this), U32(((u8*)this), 0xC));
+            fn_80191084(p, U32(p, 0xC));
         }
     } else {
-        fn_80191084(((u8*)this), U32(((u8*)this), 0xC));
+        fn_80191084(p, U32(p, 0xC));
     }
-    if (PTR(((u8*)this), 0x10) == PTR(((u8*)this), 0xC)) {
-        VC(PTR(((u8*)this), 0xC))->v48();
+    if (PTR(p, 0x10) == PTR(p, 0xC)) {
+        VC(PTR(p, 0xC))->v48();
     } else {
-        VP(PTR(((u8*)this), 0x4))->v78(0);
+        VP(PTR(p, 0x4))->v78(0);
     }
     int landed = 0;
-    if (VP(PTR(((u8*)this), 0x4))->v38()) {
-        if (!U8(((u8*)this), 0x24)) {
+    if (VP(PTR(p, 0x4))->v38()) {
+        if (!U8(p, 0x24)) {
             landed = 1;
         }
-        U8(((u8*)this), 0x24) = 1;
+        U8(p, 0x24) = 1;
     } else {
-        U8(((u8*)this), 0x24) = 0;
+        U8(p, 0x24) = 0;
     }
     bool off = false;
-    if (fn_801B83A0()->vE0(S32(((u8*)this), 0x1C), &off)) {
-        if ((VB8(((u8*)this), 0x34) = !off)) {
-            F32(((u8*)this), 0x2C) = CMAX(F32(((u8*)this), 0x2C), now);
+    if (fn_801B83A0()->vE0(S32(p, 0x1C), &off)) {
+        if ((VB8(p, 0x34) = !off)) {
+            F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
         }
     } else {
-        u8* car = PTR(((u8*)this), 0x20);
+        u8* car = PTR(p, 0x20);
         f32 dist = ((RaceCarRec*)car)->src->Ideal()->travel;
-        f32 moved = dist - F32(((u8*)this), 0x30);
+        f32 moved = dist - F32(p, 0x30);
         int stopped;
-        int lap = (((RaceCarRec*)PTR(((u8*)this), 0x20))->src->State()->flags >> 2) & 1;
-        car = PTR(((u8*)this), 0x20);
+        int lap = (((RaceCarRec*)PTR(p, 0x20))->src->State()->flags >> 2) & 1;
+        car = PTR(p, 0x20);
         stopped = NearZero(F32(car, 0x2690));
         if (stopped) {
             stopped = now - F32(car, 0x26D8) >= 5.0f;
         }
         if (lap && stopped) {
-            VU8(((u8*)this), 0x34) = 0;
+            VU8(p, 0x34) = 0;
         } else if (moved > 106.66667f || moved < -500.0f || !stopped || !fn_802B02C8(car + 0x60)) {
-            F32(((u8*)this), 0x30) = dist;
-            F32(((u8*)this), 0x2C) = CMAX(F32(((u8*)this), 0x2C), now);
-            VU8(((u8*)this), 0x34) = 1;
-        } else if (now - F32(((u8*)this), 0x2C) > kSix) {
-            VU8(((u8*)this), 0x34) = 0;
-            F32(((u8*)this), 0x2C) = 1.0f + (now - kSix);
-            F32(((u8*)this), 0x30) = 17.777779f + (dist - 106.66667f);
+            F32(p, 0x30) = dist;
+            F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
+            VU8(p, 0x34) = 1;
+        } else if (now - F32(p, 0x2C) > kSix) {
+            VU8(p, 0x34) = 0;
+            F32(p, 0x2C) = 1.0f + (now - kSix);
+            F32(p, 0x30) = 17.777779f + (dist - 106.66667f);
         }
     }
     if (fn_801796C4() || !lbl_8055E522) {
-        F32(((u8*)this), 0x2C) = now;
-        VU8(((u8*)this), 0x34) = 1;
+        F32(p, 0x2C) = now;
+        VU8(p, 0x34) = 1;
     }
-    if (!VU8(((u8*)this), 0x34) && landed) {
-        VU8(((u8*)this), 0x34) = 1;
-        F32(((u8*)this), 0x2C) = CMAX(F32(((u8*)this), 0x2C), now);
-        fn_801B86A4(S32(((u8*)this), 0x1C));
+    if (!VU8(p, 0x34) && landed) {
+        VU8(p, 0x34) = 1;
+        F32(p, 0x2C) = CMAX(F32(p, 0x2C), now);
+        fn_801B86A4(S32(p, 0x1C));
     }
-    if (!U8(((u8*)this), 0x26)) {
-        u8* other = PTR(PTR(((u8*)this), 0x18), 0x4);
+    if (!U8(p, 0x26)) {
+        u8* other = PTR(PTR(p, 0x18), 0x4);
         if ((other ? VU8(other, 0x34) : 3) == 0) {
-            U8(((u8*)this), 0x26) = 1;
-            S32(PTR(((u8*)this), 0x18), 0xC) = 0;
+            U8(p, 0x26) = 1;
+            S32(PTR(p, 0x18), 0xC) = 0;
         }
     }
-    if (PTR(((u8*)this), 0x10) == PTR(((u8*)this), 0xC) && lbl_8055E523 && !lbl_8055E520) {
+    if (PTR(p, 0x10) == PTR(p, 0xC) && lbl_8055E523 && !lbl_8055E520) {
         int off = 0;
         for (int i = 0; i < 4; i++) {
-            if (!fn_80190368(S32(PTR(((u8*)this), 0x20) + i * 0x74, 0x2410))) {
+            if (!fn_80190368(S32(PTR(p, 0x20) + i * 0x74, 0x2410))) {
                 off = 1;
             }
         }
         if (off) {
             lbl_8055E520 = 1;
-            fn_801797A8(PTR(((u8*)this), 0x28), "\x01" "Don't leave the road!");
+            fn_801797A8(PTR(p, 0x28), "\x01" "Don't leave the road!");
         }
     }
 }
+#undef p
 
 int Recorder::vf34(void) {
     u8* p = (u8*)this;
@@ -938,26 +944,28 @@ void HybridDriver::vf2C(void) {
     fn_801B665C();
 }
 
+#define p ((u8*)this)  // the parameter itself: a named u8* copy of this recolours it (retail registers)
 void HybridDriver::vf30(void) {
     int z = 0;
-    SetMode(((u8*)this), z);
+    SetMode(p, z);
     lbl_8055E520 = z;
-    u8* o = PTR(((u8*)this), 0x4);
+    u8* o = PTR(p, 0x4);
     if (fn_801CF050()) {
         U32(o, 0xC) = z;
         lbl_8055E524 = z;
     }
     S32(o, 0x8) = S32(o, 0x18);
-    VC(PTR(((u8*)this), 0x8))->v30();
-    VC(PTR(((u8*)this), 0xC))->v30();
-    fn_80191084(((u8*)this), 0);
-    fn_80191084(((u8*)this), fn_80191100(((u8*)this)));
+    VC(PTR(p, 0x8))->v30();
+    VC(PTR(p, 0xC))->v30();
+    fn_80191084(p, 0);
+    fn_80191084(p, fn_80191100(p));
     fn_801B6658();
-    VU8(((u8*)this), 0x34) = 0;
-    F32(((u8*)this), 0x30) = 0.0f;
-    VU8(((u8*)this), 0x34) = 1;
-    F32(((u8*)this), 0x2C) = 10.0f;
+    VU8(p, 0x34) = 0;
+    F32(p, 0x30) = 0.0f;
+    VU8(p, 0x34) = 1;
+    F32(p, 0x2C) = 10.0f;
 }
+#undef p
 
 void HybridDriver::vf34(void) {
     u8* p = (u8*)this;
@@ -967,16 +975,18 @@ void HybridDriver::vf38(const RVec3* dir, RVec3* b, int kind, u8* other) {
     u8* p = (u8*)this;
     VC(PTR(p, 0x10))->v38(); }
 
+#define p ((u8*)this)  // the parameter itself: a named u8* copy of this recolours it (retail registers)
 void HybridDriver::vf3C(const RVec3* a_, RVec3* b_, int c, u8* d_) {
-    if (!PTR(((u8*)this), 0x10)) {
+    if (!PTR(p, 0x10)) {
         return;
     }
-    if (PTR(((u8*)this), 0x10) == PTR(((u8*)this), 0xC) && lbl_8055E523 && !lbl_8055E520 && c != 1) {
+    if (PTR(p, 0x10) == PTR(p, 0xC) && lbl_8055E523 && !lbl_8055E520 && c != 1) {
         lbl_8055E520 = 1;
-        fn_801797A8(PTR(((u8*)this), 0x28), "Hit object!");
+        fn_801797A8(PTR(p, 0x28), "Hit object!");
     }
-    VC(PTR(((u8*)this), 0x10))->v3C(((u32)a_), ((u32)b_), c, ((u32)d_));
+    VC(PTR(p, 0x10))->v3C(((u32)a_), ((u32)b_), c, ((u32)d_));
 }
+#undef p
 
 void HybridDriver::vf40(void) {
     u8* p = (u8*)this;
