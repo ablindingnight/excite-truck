@@ -793,7 +793,7 @@ public:
                         if (!r->target) {
                             fn_8000FF88(0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), -1, 9, LayoutTextFormat(), label);
                         } else if (r == c->hover) {
-                            fn_8000FF88(0.6f, fn_801451DC(((ElemBase*)r->target)->pos.x + r->r.x, 4),
+                            fn_8000FF88(0.6f, fn_801451DC(r->r.x + ((ElemBase*)r->target)->pos.x, 4),
                                         fn_801452B4(r->r.y + ((ElemBase*)r->target)->pos.y - 10.0f), -1, 12,
                                         LayoutTextFormat(), label);
                             fn_80010B80(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
