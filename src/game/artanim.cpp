@@ -379,7 +379,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             fn_802E317C("artanim: unknown elem type %s", type);
         }
     }
-    for (int i = 0; i < nPaths; i++) {
+    for (int i = 0; i < a->nPaths; i++) {
         ValueNode* pn = paths[i];
         int k;
         ArtPath* p = &a->paths[i];
@@ -507,7 +507,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         }
         f32 scale = g->GetFloat("scale", 1.0f);
         f32 alpha = g->GetFloat("alpha", 1.0f);
-        for (int i = 0; i < nPaths; i++) {
+        for (int i = 0; i < a->nPaths; i++) {
             ArtPath* p = &a->paths[i];
             for (int k = 0; k < p->nKeys; k++) {
                 ArtKey* key = &p->keys[k];
