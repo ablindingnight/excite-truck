@@ -330,8 +330,8 @@ static inline void ShakeMul(ShakeMat* pd, const ShakeMat* pa, const ShakeMat* pb
         d.m[2][0] = t20;
         d.m[0][1] = t01;
         d.m[1][1] = t11;
-        d.m[0][2] = t02;
         d.m[2][1] = t21;
+        d.m[0][2] = t02;
         d.m[1][2] = t12;
         d.m[2][2] = t22;
     } else {
@@ -494,7 +494,7 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
         }
     }
     if (near) {
-        f32 a = (F32(near, 0x25CC) - lbl_8055C4D0) / (lbl_8055C4D4 - lbl_8055C4D0);
+        f32 a = InvLerp(lbl_8055C4D0, lbl_8055C4D4, F32(near, 0x25CC));
         f32 ka = FovRemap(ClampF(a));
         f32 b = (best - lbl_8055F49C) / (lbl_80563C20.value - lbl_8055F49C);
         f32 k = ka * FovRemap(ClampF(b));
@@ -553,7 +553,7 @@ void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
         }
     }
     if (near) {
-        f32 a = (F32(near, 0x25CC) - lbl_8055C4D0) / (lbl_8055C4D4 - lbl_8055C4D0);
+        f32 a = InvLerp(lbl_8055C4D0, lbl_8055C4D4, F32(near, 0x25CC));
         f32 ka = FovRemap(ClampF(a));
         f32 b = (best - lbl_8055F49C) / (lbl_80563C20.value - lbl_8055F49C);
         f32 k = ka * FovRemap(ClampF(b));
