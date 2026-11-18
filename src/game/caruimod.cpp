@@ -6,7 +6,6 @@
 #include "game/wheelsetup.h"
 #include "game/mtx33.h"
 #include "game/menustate.h"
-#include "game/buildquery.h"
 #include "game/gamedb.h"
 #include "game/math_types.h"
 #include "game/plainvec.h"
@@ -1406,6 +1405,15 @@ struct FloorVtx {
     f32 t;      // offset 0x14
 };
 
+// PROVISIONAL: real vertex input ownership; the original helper API is unproven.
+static inline void SetFloorVertex(FloorVtx* dst, f32 x, f32 y, f32 z, u32 color) {
+    dst->pos.x = x;
+    dst->pos.y = y;
+    dst->pos.z = z;
+    dst->s = 1.333f * x;
+    dst->t = 1.333f * z;
+    dst->color = color;
+}
 void CarUIScreen::DrawFloor(f32 a, u32 color) {
     f32 z0;
     fn_802C942C(-1);
@@ -1456,47 +1464,30 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         f32 c = 1.333f * (f32)cos(fi * step);
         f32 s = 1.333f * (f32)sin(fi * step);
         z0 = 2.5f * s;
-        f32 x1 = 5.0f * c;
-        v[1 + i * 2].pos.x = (2.5f * c);
-        v[1 + i * 2].pos.y = y;
-        v[1 + i * 2].pos.z = z0;
-        v[1 + i * 2].s = 1.333f * (2.5f * c);
-        v[1 + i * 2].t = 1.333f * z0;
-        v[1 + i * 2].color = 0x20FFFFFF;
-        v[2 + i * 2].pos.x = x1;
-        v[2 + i * 2].pos.y = y;
-        v[2 + i * 2].pos.z = (5.0f * s);
-        v[2 + i * 2].s = 1.333f * x1;
-        v[2 + i * 2].t = 1.333f * (5.0f * s);
-        v[2 + i * 2].color = 0x00FFFFFF;
+        SetFloorVertex(&v[1 + i * 2], 2.5f * c, y, z0, 0x20FFFFFF);
+        SetFloorVertex(&v[2 + i * 2], 5.0f * c, y, 5.0f * s, 0x00FFFFFF);
     }
-    /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail scheduled the vertex loop apart from
-       the index loop setup (its `li r3,0` is not delayed over the last vertex store). Found by sweep_latefold.py;
-       97.69 -> 97.70 and the LATEFOLD row of standinscan is gone. What the original tested here is unknown. */
-    if (BuildMode() == kBuildRetail) {
-        int n = 1;
-        for (i = 0; i < 150; i++, n += 2) {
-            u16* q = &idx[i * 9];
-            int b = n + 1;
-            q[0] = 0;
-            q[1] = n;
-            q[2] = b + 1;
-            q[3] = n;
-            q[4] = b;
-            q[5] = b + 1;
-            q[6] = b + 1;
-            q[7] = b;
-            q[8] = b + 2;
-            for (int k = 0; k < 9; k++) {
-                if (q[k] > 300) {
-                    q[k] -= 300;
-                }
+    u16* q;
+    for (i = 0; i < 150; i++) {
+        q = &idx[i * 9];
+        q[0] = 0;
+        q[1] = i * 2 + 1;
+        q[2] = i * 2 + 3;
+        q[3] = i * 2 + 1;
+        q[4] = i * 2 + 2;
+        q[5] = i * 2 + 3;
+        q[6] = i * 2 + 3;
+        q[7] = i * 2 + 2;
+        q[8] = i * 2 + 4;
+        for (int k = 0; k < 9; k++) {
+            if (q[k] > 300) {
+                q[k] -= 300;
             }
         }
-        fn_802C8BD0(tex);
-        fn_802C8DB8(v, 301, idx, 1350);
-        fn_802C8D74();
     }
+    fn_802C8BD0(tex);
+    fn_802C8DB8(v, 301, idx, 1350);
+    fn_802C8D74();
 }
 
 struct ColorState {
