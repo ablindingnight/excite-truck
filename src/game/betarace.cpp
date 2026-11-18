@@ -3052,12 +3052,12 @@ inline Pickup::Pickup(ValueNode* n) {
     if (kind == 3) {
         f32 box[6];
         f32 m[12];
-        f32 xz[2];
-        f32 dir[2];
-        f32 fwd[2];
-        f32 a[3];
-        f32 b[3];
         f32 cr[3];
+        f32 b[3];
+        f32 a[3];
+        f32 fwd[2];
+        f32 dir[2];
+        f32 xz[2];
         f32 hx;
         f32 hz;
         f32 hy;
