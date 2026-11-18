@@ -568,16 +568,25 @@ int fn_80277960(const char* name, CamPose* out, f32* fov) {
 // Camera for slot `slot` in the chase modes: behind and above the car, swinging round with the
 // transition and pitched by the car's climb, blended from the slot's camera; the tips camera once the
 // race is over.
-void fn_80277A14(CamRec* c, int slot) {
-    CamPose blend;
-    CamPose frame;
-    Mat3 swingRot;
-    Mat3 tiltRot;
-    Vec3 swing;
-    Vec3 tilt;
-    CamVec3 back;
-    CamVec3 up;
+// PROVISIONAL: helper name/signature and the caller's workspace ownership are
+// inferred from the matching compiler output; the original source boundary is
+// unproven. Every argument is an existing live value or camera scratch object.
+// The scoped inline budget preserves expansion of this helper's nested inlines.
+#pragma push
+#pragma inline_max_size(1024)
+static inline void BlendNamedCam(
+    CamRec* c,
+    int slot,
+    f32& tf,
+    CamPose& blend,
+    CamPose& frame,
+    Mat3& swingRot,
+    Vec3& swing,
+    Vec3& tilt,
+    CamVec3& back,
+    CamVec3& up) {
     CamVec3 offset;
+    Mat3 tiltRot;
     u8 own;
     lbl_804A0C60[slot].target = lbl_804A0C60[slot].nextTarget;
     lbl_804A0C60[slot].mode = lbl_804A0C60[slot].nextMode;
@@ -637,7 +646,7 @@ void fn_80277A14(CamRec* c, int slot) {
     up.v[1] = 1.0f;
     up.v[2] = 0.0f;
     fn_8026E688(&frame, &frame.pos, &c->carFrame.pos, &up);
-    f32 tf = 1.0471976f;
+    tf = 1.0471976f;
     fn_8026E22C((RMtx*)&blend, (const RMtx*)&lbl_804A0C60[slot].pose, (const RMtx*)&frame, e);
     f32 fov = Lerp(lbl_804A0C60[slot].fov, tf, e);
     if (fn_80178CA4() == 2) {
@@ -645,7 +654,22 @@ void fn_80277A14(CamRec* c, int slot) {
     }
     c->pose = blend;
     c->fov = fov;
+
 }
+
+void fn_80277A14(CamRec* c, int slot) {
+    f32 tf;
+    CamPose blend;
+    CamPose frame;
+    Mat3 swingRot;
+    Vec3 swing;
+    Vec3 tilt;
+    CamVec3 back;
+    CamVec3 up;
+    BlendNamedCam(c, slot, tf, blend, frame, swingRot, swing, tilt, back, up);
+}
+#pragma pop
+
 
 /* Helper name unproven: the camera-table writer is unused, so MWCC drops it but keeps its strings. */
 static void NamedCamWrite(const NamedCam* c) {
