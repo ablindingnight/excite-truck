@@ -1161,6 +1161,13 @@ extern "C" {
 
 // One "cam" table: position, extras, field of view ("new_fov", or old-style "fov" * 0.75), type and
 // flags, plus an optional end pose ("x_a"...) the camera moves to.
+/* Helper name unproven */
+static inline void Copy3(f32* d, const f32* s) {
+    d[0] = s[0];
+    d[1] = s[1];
+    d[2] = s[2];
+}
+
 int TvCamera::Load(ValueNode* t) {
     if (t->Has("x") && t->Has("y") && t->Has("z") && (t->Has("fov") || t->Has("new_fov")) && t->Has("type")) {
         pos[0] = t->GetFloat("x");
@@ -1203,9 +1210,7 @@ int TvCamera::Load(ValueNode* t) {
         }
         if (t->Has("x_a") && t->Has("y_a") && t->Has("z_a")) {
             moves = 1;
-            from[0] = pos[0];
-            from[1] = pos[1];
-            from[2] = pos[2];
+            Copy3(from, pos);
             exFrom[0] = ex[0];
             exFrom[1] = ex[1];
             exFrom[2] = ex[2];
