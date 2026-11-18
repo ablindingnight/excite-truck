@@ -2365,7 +2365,8 @@ void fn_80186DE8(void) {
             f32 drag;
             f32 speed = PSVECMag((const Vec*)(car + 0x118));
             speed = speed > 1.0f ? speed : 1.0f;
-            drag = 9.81f * (-st->drag * ((CarBody*)car)->mass) / speed;
+            f32 h_mass = ((CarBody*)car)->mass;
+            drag = 9.81f * (-st->drag * h_mass) / speed;
             f32 force[3];
             force[0] = ((CarBody*)car)->vel.x * drag;
             force[1] = ((CarBody*)car)->vel.y * drag;
@@ -2379,7 +2380,8 @@ void fn_80186DE8(void) {
             }
             if (((CarBody*)car)->f5EC > 0.01f && (s32)fn_8018B06C(car) > 0 && ((CarBody*)car)->f25E4 < 0.1f &&
                 ((CarBody*)car)->f25E0 > 0.5f) {
-                f32 k = 9.81f * (lbl_8055E4E8[1] * (((CarBody*)car)->f25E0 * ((CarBody*)car)->mass));
+                f32 h_mass2 = ((CarBody*)car)->mass;
+                f32 k = 9.81f * (lbl_8055E4E8[1] * (((CarBody*)car)->f25E0 * h_mass2));
                 AddScaled(force, car + 0x54, k);
             }
             if (((CarBody*)car)->f258C > -2.0f || ((CarBody*)car)->f25E4 > 0.25f || ((CarBody*)car)->f5EC > 0.01f) {
