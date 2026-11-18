@@ -1714,11 +1714,10 @@ char lbl_80559F0C[1] = "";
 #pragma dont_inline on
 void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     // PROVISIONAL actual enabled/result and captured-record workspace; original type/name/ownership unproven.
-    struct UpdateWorkspace { s32 gain; CoinCar* record; };
+    // PROVISIONAL actual wasFull/star-byte-offset ranges and position member; original type/name/ownership unproven.
+    struct UpdateWorkspace { s32 gain; CoinCar* record; f32* position; int slotBytes; };
     UpdateWorkspace work;
-    f32* pos;
     f32 add;
-    int wasFull;
     int boosting;
     int over;
     RaceCarRec* rc;
@@ -1844,7 +1843,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     if (over && overtime < 0.0f) {
         overtime = lbl_8055E3C8;
     }
-    wasFull = (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= __float_epsilon[0]);
+    work.slotBytes = (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= __float_epsilon[0]);
     boosting = 0;
     if (fn_801B2EC0(id)->State()->flags & 4) {
         meterObj->Start(rc);
@@ -1866,7 +1865,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         int j;
         int busy;
         int i;
-        if (!wasFull) {
+        if (!work.slotBytes) {
             if (rc->f1F0 == 0x50) {
                 fn_801DF074(2, 1);
             }
@@ -1897,9 +1896,9 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                 }
             }
         }
-        pos = &rc->mtx.pos.x;
-        for (i = 0; i < stars->count; i++) {
-            Pickup* e = stars->items[i];
+        work.position = &rc->mtx.pos.x;
+        for (i = 0, work.slotBytes = 0; i < stars->count; work.slotBytes += sizeof(Pickup*), i++) {
+            Pickup* e = *(Pickup**)((u8*)stars->items + work.slotBytes);
             int got;
             if (e->kind == 3) {
                 // PROVISIONAL saved hit-index ownership; original spelling unproven.
@@ -1923,7 +1922,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                 } else {
                     got = 0;
                 }
-            } else if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && PSVECSquareDistance((const Vec*)pos, (const Vec*)e->pos) < 25.0f) {
+            } else if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && PSVECSquareDistance((const Vec*)work.position, (const Vec*)e->pos) < 25.0f) {
                 e->respawn = fn_801D48F4(e->objs[e->which]);
                 got = 1;
             } else {
