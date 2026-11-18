@@ -985,7 +985,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         for (int i = 0; i < 13; i++) {
             int idx = l->index;
             u32 bit = 1 << idx;
-            u8 pt = U8(p, 0x1E2C + idx);
+            u8 pt = *(u8*)(p + 0x1E2C + idx);
             if (pt != 0xFF && !(((u32&)((CarBody*)p)->f1E3C) & bit)) {
                 DentVec* g = (DentVec*)(p + 0x5FC) + pt;
                 if (PSVECDotProduct((const Vec*)&g->x, (const Vec*)&g->x) > l->radius * l->radius) {
@@ -994,7 +994,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         ((u32&)((CarBody*)p)->f1E40) |= 1 << l->point;
                     }
                     if (idx >= 2 && idx <= 7) {
-                        DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + U8(p, 0x1E2C + idx);
+                        DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + *(u8*)(p + 0x1E2C + idx);
                         ToWorld(&msg.pos, (EVec*)&q->pos, (DFrame*)&((CarBody*)p)->mtx);
                         ((RigidBody*)p)->VelAt((RVec3*)&msg.vel, (RVec3*)&msg.pos);
                         msg.car = *(s16*)&((CarBody*)p)->hint;
