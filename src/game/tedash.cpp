@@ -1055,15 +1055,16 @@ void fn_802B8510(int op) {
     if (lbl_8055FA2C >= 0 && lbl_8055FA2C < lbl_804BE7D8.count) {
         Brush* b = &lbl_804BE7D8.data[lbl_8055FA2C];
         Brush tmp = *b;
-        u32 w;
+        u32 y;
         u32 x;
         u32 h;
+        u32 w;
         b->w = h = tmp.h;
         b->h = w = tmp.w;
         for (x = 0; x < b->w; x++) {
             int r = w * (x + 1) - 1;
             int l = (h - x - 1) * w;
-            for (u32 y = 0; y < b->h; y++) {
+            for (y = 0; y < b->h; y++) {
                 if (op == 6) {
                     b->data[x + y * b->w] = tmp.data[r - y];
                 } else {
