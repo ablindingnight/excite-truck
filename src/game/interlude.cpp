@@ -893,6 +893,8 @@ void fn_801C3D88(const char* name) {
             c->interpTime = n->GetFloat("interp_time", 0.0f);
             break;
         }
+        case 2:  // no fields to read (retail's jump table sends 2 straight to the loop step, not to the default)
+            break;
         case 3: {
             SoundEvent* s = (SoundEvent*)e;
             s->sample = n->GetInt("sample", -1);
