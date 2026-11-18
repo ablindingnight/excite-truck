@@ -574,20 +574,20 @@ static inline void StrAppend(char* dst, int size, const char* src) {
     }
 }
 
-// PROVISIONAL: column-worker boundary, inputs, and local ownership/order are inferred.
-static inline void CopyBrushColumn(Brush* b, Image* img, u32 x) {
-    for (u32 y = 0; y < b->h; y++) {
-        u32 px = img->pixels[(img->h - 1 - y) * img->w + x];
+// PROVISIONAL: channel-maximum helper boundary and value-input ownership are inferred.
+static inline u32 IncludeBrushChannel(u32 maximum, u32 next) { if (maximum > next) next = maximum; return next; }
+
+// PROVISIONAL: image-pixel getter boundary, inputs, and returned-value ownership are inferred.
+static inline u32 ReadBrushImagePixel(const Image* image, u32 x, u32 y) { return image->pixels[(image->h - 1 - y) * image->w + x]; }
+
+// PROVISIONAL: column-worker inputs/boundary and column-owned borrowed row-counter lifetime are inferred.
+static inline void CopyBrushColumn(Brush* b, Image* img, u32 x, u32& y) {
+    for (y = 0; y < b->h; y++) {
+        u32 px = ReadBrushImagePixel(img, x, y);
         u32 m = (px >> 8) & 0xFF;
-        if ((px & 0xFF) > m) {
-            m = px & 0xFF;
-        }
-        if (((px >> 16) & 0xFF) > m) {
-            m = (px >> 16) & 0xFF;
-        }
-        if ((px >> 24) > m) {
-            m = px >> 24;
-        }
+        m = IncludeBrushChannel(m, px & 0xFF);
+        m = IncludeBrushChannel(m, (px >> 16) & 0xFF);
+        m = IncludeBrushChannel(m, px >> 24);
         b->data[y * b->w + x] = m;
     }
 }
@@ -616,7 +616,8 @@ static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h
                 b->h = b->h > 16 ? 16 : b->h;
             }
             for (u32 x = 0; x < b->w; x++) {
-                CopyBrushColumn(b, img, x);
+                u32 y;
+                CopyBrushColumn(b, img, x, y);
             }
             fn_802B52B4(img);
         }
