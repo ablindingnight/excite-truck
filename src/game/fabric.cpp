@@ -436,7 +436,8 @@ void fn_801F5664(Fabric* f, int style) {
 Anchor::Anchor(void) {}
 
 
-static inline int LerpB(f32 a, f32 b, f32 t) { return b + t * (a - b); }
+// PROVISIONAL: immutable row inputs and retained converted-start reference; scalar signature unproven.
+static inline int LerpB(f32 a, const f32& b, f32 t) { return b + t * (a - b); }
 
 static inline u32 LerpColor( u32 b,u32 a, f32 t) {
     u32 c;
@@ -478,14 +479,14 @@ extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
         DrawVert ld;
         DrawVert rd;
         int c;
-        ValV3 rp(LerpRev(q->c[3].pos.x,q->c[1].pos.x,t), LerpRev(q->c[3].pos.y,q->c[1].pos.y,t), LerpRev(q->c[3].pos.z,q->c[1].pos.z,t));
-        ValV3 lp(LerpRev(q->c[2].pos.x,q->c[0].pos.x,t), LerpRev(q->c[2].pos.y,q->c[0].pos.y,t), LerpRev(q->c[2].pos.z,q->c[0].pos.z,t));
+        const ValV3 lp(Lerp(q->c[0].pos.x,q->c[2].pos.x,t), Lerp(q->c[0].pos.y,q->c[2].pos.y,t), Lerp(q->c[0].pos.z,q->c[2].pos.z,t));
+        const ValV3 rp(Lerp(q->c[1].pos.x,q->c[3].pos.x,t), Lerp(q->c[1].pos.y,q->c[3].pos.y,t), Lerp(q->c[1].pos.z,q->c[3].pos.z,t));
         LerpVert(&ld, q->c[0], q->c[2], t);
         LerpVert(&rd, q->c[1], q->c[3], t);
         for (c = 0; c < f->cols; c++) {
             f32 s = (f32)c / (f32)(f->cols - 1);
             int i = r * f->cols + c;
-            ValV3 p(LerpRev(rp.x,lp.x,s), LerpRev(rp.y,lp.y,s), LerpRev(rp.z,lp.z,s));
+            ValV3 p(Lerp(lp.x,rp.x,s), Lerp(lp.y,rp.y,s), Lerp(lp.z,rp.z,s));
             Vec3Storage* pv = &f->prev[i];
             *(PVec*)pv = p;
             f->cur[i] = *pv;
