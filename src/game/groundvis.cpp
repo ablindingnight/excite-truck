@@ -278,6 +278,9 @@ static inline int InCone(f32 a, f32 depth, f32 tanA, const f32& secA, f32 pad, f
     return a <= t + m * secA;
 }
 
+// PROVISIONAL: helper name and ownership are unproven. Returning the double
+// magnitude keeps fabs separate from its callers' float narrowing, as in retail.
+static inline f64 GroundAbs(f64 value) { return __fabs(value); }
 static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
     // Cone margins as locals, horizontal first: retail creates 40.0f before 18.0f although the vertical test comes first.
     f32 padH = 40.0f;
@@ -291,9 +294,9 @@ static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
     if (depth + r < lbl_804BE0B0.znear || depth - r > lbl_804BE0B0.zfar) {
         return 0;
     }
-    f32 ax = __fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[0]));
+    f32 ax = GroundAbs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[0]));
     if (InCone(ax, depth, lbl_804BE0B0.tanV, lbl_804BE0B0.secV, padV, radius, k)) {
-        f32 ay = __fabs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[1]));
+        f32 ay = GroundAbs(PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[1]));
         if (InCone(ay, depth, lbl_804BE0B0.tanH, lbl_804BE0B0.secH, padH, radius, k)) {
             *dist = fn_802AE6E0(c, &lbl_804BE0B0.cam.pos);
             return 1;
