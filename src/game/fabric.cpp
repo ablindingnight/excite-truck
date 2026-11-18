@@ -330,15 +330,15 @@ static inline void SetStick(Stick* s, const Vec3Storage* v, int a, int b) {
     s->b = b;
     s->rest = PSVECSquareDistance(&v[a], &v[b]);
 }
+// PROVISIONAL: row-base scope and direct endpoint input ownership; exact code does not prove original source.
 void fn_801F5508(Fabric* f) {
-    int row;
     Stick* s;
     int n;
     n = (f->rows - 1) * f->cols + f->rows * (f->cols - 1);
     s = new ("fabric sticks") Stick[n];
     int k = 0;
     for (int r = 0; r < f->rows; r++) {
-        row = r * f->cols;
+        int row = r * f->cols;
         for (int c = 1; c < f->cols; c++) {
             int b = row + c;
             int a = b - 1;
@@ -347,10 +347,7 @@ void fn_801F5508(Fabric* f) {
     }
     for (int c = 0; c < f->cols; c++) {
         for (int r = 1; r < f->rows; r++) {
-            int a;
-            int b = c + r * f->cols;
-            a = c + (r - 1) * f->cols;
-            SetStick(&s[k++], f->cur, a, b);
+            SetStick(&s[k++], f->cur, c + (r - 1) * f->cols, c + r * f->cols);
         }
     }
     f->sticks = s;
