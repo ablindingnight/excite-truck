@@ -263,6 +263,8 @@ void fn_8028E240(int) {
     }
 }
 
+static const char* lbl_80348CF8[3] = {"Simple", "Animated", "Rotating"};
+
 PartSys* fn_8028E2F8(const PartParams* p, const void* owner, const char* tex) {
     PartSys* s = new ("partman") PartSys(p, tex);
     fn_8028ED8C(&lbl_804B35B4, s);
@@ -311,7 +313,6 @@ void fn_8028E58C(PartSys* s, const V3* pos, const V3* dir, f32 size) { fn_8028FA
 
 void fn_8028E590(PartSys* s, const V3* pos, const V3* dir, f32 angVel) { fn_8028FC40(s, pos, dir, angVel); }
 
-static const char* lbl_80348CF8[3] = {"Simple", "Animated", "Rotating"};
 
 int fn_8028E594(const char* name) {
     for (int i = 0; i < 3; i++) {
