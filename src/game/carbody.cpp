@@ -1561,7 +1561,8 @@ void fn_80183E7C(u8* p) {
                 axis.x = cb->mtx.rot.z.x * side;
                 axis.y = cb->mtx.rot.z.y * side;
                 axis.z = cb->mtx.rot.z.z * side;
-                f32 k = cb->mass * 9.81f * 30.0f * 0.305f;
+                f32 m = cb->mass;
+                f32 k = m * 9.81f * 30.0f * 0.305f;
                 RVec3 t;
                 t.x = axis.x * k;
                 t.y = axis.y * k;
@@ -1617,7 +1618,8 @@ void fn_80183E7C(u8* p) {
     f32 dn;
     if (cb->f2590 > 0.001f && (dn = PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x118))) > 0.001f &&
         dn < 4.4444447f && cb->airborne > 0) {
-        f32 k = (4.4444447f - dn) * cb->mass / 0.016683351f;
+        f32 mass0 = cb->mass;
+        f32 k = (4.4444447f - dn) * mass0 / 0.016683351f;
         RVec3 f;
         f.x = cb->f25A4 * k;
         f.y = cb->f25A8 * k;
@@ -1726,7 +1728,8 @@ void fn_80183E7C(u8* p) {
         } else {
             d = MinF(2.2222223f + slide, 0.0f);
         }
-        f32 k = lt * d * cb->mass / 0.016683351f;
+        f32 mass2 = cb->mass;
+        f32 k = lt * d * mass2 / 0.016683351f;
         RVec3 f;
         f.x = right.x * k;
         f.y = right.y * k;
@@ -1936,7 +1939,8 @@ void fn_80183E7C(u8* p) {
                 fn_8018E330(p);
             }
         }
-        f32 k = Mul(-2.0f, cb->mass);
+        f32 mass7 = cb->mass;
+        f32 k = Mul(-2.0f, mass7);
         RVec3 f;
         cb->f25C4 = CbAdd(cb->f25C4, 0.016683351f);
         f.x = cb->vel.x * k;
@@ -1950,14 +1954,16 @@ void fn_80183E7C(u8* p) {
         f32 df = Ramp(front.y, surf, surf - 0.4f);
         f32 lf = LerpT(df, 0.0f, 1.0f);
         f32 tf = RampW(cb->f25C4, 0.0f, 0.3f);
-        RVec3 ff(0.0f, lf * (LerpT(tf, 0.2f, 1.0f) * (0.5f * grow)) * cb->mass / 0.016683351f, 0.0f);
+        f32 mass8 = cb->mass;
+        RVec3 ff(0.0f, lf * (LerpT(tf, 0.2f, 1.0f) * (0.5f * grow)) * mass8 / 0.016683351f, 0.0f);
         ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
         RVec3 back;
         CbAddScaled(&back, &cb->mtx.pos, &cb->mtx.rot.z, -2.0f);
         f32 db = Ramp(back.y, surf, surf - 0.4f);
         f32 lb = LerpT(db, 0.0f, 1.0f);
         f32 tb = Clamp01((cb->f25C4 - 0.2f) / 0.6f);
-        RVec3 fb(0.0f, lb * (LerpT(tb, 0.1f, 1.0f) * (0.3f * grow)) * cb->mass / 0.016683351f, 0.0f);
+        f32 mass9 = cb->mass;
+        RVec3 fb(0.0f, lb * (LerpT(tb, 0.1f, 1.0f) * (0.3f * grow)) * mass9 / 0.016683351f, 0.0f);
         ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
     } else {
         cb->f25C4 = 0.0f;
@@ -1993,7 +1999,8 @@ void fn_80183E7C(u8* p) {
             if (!boosting || !CarOnGas(p)) {
                 if (cb->speed > cb->f5A8) {
                     f32 over = Ramp(cb->speed, cb->f5A8, 2.2222223f + cb->f5A8);
-                    f32 k = heatTune.v[12] * (9.81f * (-LerpT(over, 0.0f, 1.0f) * cb->mass)) / cb->speed;
+                    f32 mass10 = cb->mass;
+                    f32 k = heatTune.v[12] * (9.81f * (-LerpT(over, 0.0f, 1.0f) * mass10)) / cb->speed;
                     RVec3 f;
                     f.x = cb->vel.x * k;
                     f.y = cb->vel.y * k;
