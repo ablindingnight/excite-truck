@@ -654,7 +654,8 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     u8* wheels = 0;
     fn_801BEB30(cb->index, &wheels);
     for (int w = 0; w < 4; w++) {
-        ((RVec3*)(p + 0x23DC + w * 0x74))->Set(F32(wheels, w * 0x10), F32(wheels, w * 0x10 + 4), F32(wheels, w * 0x10 + 8));
+        RVec3* d = (RVec3*)(p + 0x23DC + w * 0x74);
+        d->Set(F32(wheels, w * 0x10), F32(wheels, w * 0x10 + 4), F32(wheels, w * 0x10 + 8));
     }
     fn_801836DC(p, desc);
     fn_80182DF4(p, desc);
