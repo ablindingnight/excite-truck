@@ -575,19 +575,19 @@ static inline void StrAppend(char* dst, int size, const char* src) {
 }
 
 // PROVISIONAL: channel-maximum helper boundary and value-input ownership are inferred.
-static inline u32 IncludeBrushChannel(u32 maximum, u32 next) { if (maximum > next) next = maximum; return next; }
+static inline u32 IncludeBrushChannel(const u32& maximum, u32 next) { if (maximum > next) next = maximum; return next; }
 
-// PROVISIONAL: image-pixel getter boundary, inputs, and returned-value ownership are inferred.
-static inline u32 ReadBrushImagePixel(const Image* image, u32 x, u32 y) { return image->pixels[(image->h - 1 - y) * image->w + x]; }
+// PROVISIONAL: image-pixel getter boundary, inputs, row local, and returned-value ownership are inferred.
+static inline u32 ReadBrushImagePixel(const Image* image, u32 x, u32 y) { u32 row = image->h - 1 - y; return image->pixels[row * image->w + x]; }
 
 // PROVISIONAL: column-worker inputs/boundary and column-owned borrowed row-counter lifetime are inferred.
 static inline void CopyBrushColumn(Brush* b, Image* img, u32 x, u32& y) {
     for (y = 0; y < b->h; y++) {
         u32 px = ReadBrushImagePixel(img, x, y);
         u32 m = (px >> 8) & 0xFF;
-        m = IncludeBrushChannel(m, px & 0xFF);
-        m = IncludeBrushChannel(m, (px >> 16) & 0xFF);
-        m = IncludeBrushChannel(m, px >> 24);
+        m = IncludeBrushChannel(px & 0xFF, m);
+        m = IncludeBrushChannel((px >> 16) & 0xFF, m);
+        m = IncludeBrushChannel(px >> 24, m);
         b->data[y * b->w + x] = m;
     }
 }
