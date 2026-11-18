@@ -23,7 +23,8 @@
 template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; a->y = pos->y + vel->y * ka; a->z = pos->z + vel->z * ka; b->x = pos->x + vel->x * kb; b->y = pos->y + vel->y * kb; b->z = pos->z + vel->z * kb; }
 static inline f32 CbAdd(f32 a, f32 b) { return a + b; }
 /* Helper name unproven */
-template <class O, class V> static inline void CbSpring3(O* o, const V* x, f32 ks, const V* v, f32 kd) { f32 ax = x->x * ks; f32 ay = x->y * ks; f32 az = x->z * ks; o->x = ax + v->x * kd; o->y = ay + v->y * kd; o->z = az + v->z * kd; }
+// PROVISIONAL: spring first-component/stiffness input ownership is unproven.
+template <class O, class V> static inline void CbSpring3(O* o, f32 firstX, const V* x, f32 ks, const V* v, f32 kd) { f32 ax = firstX * ks; f32 ay = x->y * ks; f32 az = x->z * ks; o->x = ax + v->x * kd; o->y = ay + v->y * kd; o->z = az + v->z * kd; }
 static inline void CbScaleTo(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -1475,10 +1476,6 @@ template <class O> static inline void CbScaleSelf(O* o, f32 k) { o->x = o->x * k
 static inline f32 BodyMass(CarBody* cb) { return cb->mass; }
 // PROVISIONAL: named roll-blend factor ownership is unproven.
 static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = BodyMass(cb); f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f); f32 gain = LerpT(b, 0.0f, 1.0f); return gain * (m * 100.0f * 9.81f * 0.305f * a); }
-// PROVISIONAL: helper name/boundary and by-value pitch ownership are unproven.
-static inline f32 StalledPitch(f32 pitch, f32 stall) {
-    return pitch + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
-}
 // PROVISIONAL: sound-decision wrapper type and ownership are unproven.
 struct LoudState { int value; };
 // PROVISIONAL: stunt-decision wrapper type and aggregate ownership are unproven.
@@ -1490,6 +1487,8 @@ static inline f32 PhysicsTime() { return lbl_8055E3C8; }
 static inline f32 BodySpeed(CarBody* cb) { return cb->speed; }
 // PROVISIONAL: body-roll query name and by-value return ownership are unproven.
 static inline f32 BodyRollInput(CarBody* cb) { return cb->f2604; }
+// PROVISIONAL: caller pitch and returned desired-nose ownership are unproven.
+static inline f32 DesiredNose(f32 pitch, f32 nose) { return 0.25f * pitch - nose; }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -1719,7 +1718,9 @@ void fn_80183E7C(u8* p) {
                     f32 b2;
                     f32 boost = landingTune.v[0];
                     b2 = cb->f2618 * fn_80181A94();
-                    b2 = cb->f2CC * fn_80181AC0() + b2;
+                    // PROVISIONAL: named landing-gain value ownership is unproven.
+                    f32 landingGain = cb->f2CC * fn_80181AC0();
+                    b2 = landingGain + b2;
                     boost = MinF(b2, boost);
                     cb->f258C = cb->setupA.f74 * boost;
                     fn_8014E61C(cb->index, 1, sink);
@@ -1761,8 +1762,10 @@ void fn_80183E7C(u8* p) {
         } else {
             d = MinF(2.2222223f + slide, 0.0f);
         }
+        // PROVISIONAL: named lateral-gain value ownership is unproven.
+        f32 lateralGain = lt * d;
         f32 mass2 = cb->mass;
-        f32 k = lt * d * mass2 / 0.016683351f;
+        f32 k = lateralGain * mass2 / 0.016683351f;
         RVec3 f;
         f.x = right.x * k;
         f.y = right.y * k;
@@ -1777,7 +1780,7 @@ void fn_80183E7C(u8* p) {
         NearZero(cb->f2650)) {
         f32 stall = MinF(1.0f, 10.0f * cb->f264C);
         const f32 inputPitch = cb->f2600;
-        f32 pitch = StalledPitch(inputPitch, stall);
+        f32 pitch = inputPitch + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
         f32 roll = BodyRollInput(cb);
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = 0.0f;
@@ -1790,7 +1793,7 @@ void fn_80183E7C(u8* p) {
             CbScaleSelf(&fl, -1.0f);
         }
         f32 nose = PSVECDotProduct((const Vec*)&fl, (const Vec*)(p + 0x48));
-        f32 wantP = 0.25f * pitch - nose;
+        f32 wantP = DesiredNose(pitch, nose);
         f32 wantR = -roll - cb->mtx.rot.x.y * (1.0f - AbsNarrow(cb->mtx.rot.z.y));
         f32 wp = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x3C));
         f32 wr = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x54));
@@ -1815,7 +1818,10 @@ void fn_80183E7C(u8* p) {
         RVec3 side;
         UpCross(&side, (const Vec*)(p + 0x54));
         side.y = 0.0f;
-        f32 k = 0.5f * (-PSVECDotProduct((const Vec*)(p + 0x118), (const Vec*)&side) * cb->mass);
+        // PROVISIONAL: held side-speed and mass input ownership is unproven.
+        f32 sideSpeed = -PSVECDotProduct((const Vec*)(p + 0x118), (const Vec*)&side);
+        f32 sideMass = cb->mass;
+        f32 k = 0.5f * (sideSpeed * sideMass);
         RVec3 f;
         f.x = side.x * k;
         f.y = side.y * k;
@@ -2129,11 +2135,11 @@ void fn_80183E7C(u8* p) {
                 cb->f262C = -1000.0f;
             }
             f32 l = cb->f2628;
-            f32 r = cb->f262C;
-            f32 gap = AbsNarrow(l - r);
-            r = MinF(l, r);
+            // PROVISIONAL: right-time field and earliest-time value ownership are unproven.
+            f32 gap = AbsNarrow(l - cb->f262C);
+            f32 earliestSpin = MinF(l, cb->f262C);
             int side = cb->f2628 > cb->f262C ? 1 : 2;
-            if (gap < 0.6f && now - r < 1.0f && held &&
+            if (gap < 0.6f && now - earliestSpin < 1.0f && held &&
                 (cb->f263C == 0 || side == cb->f263C)) {
                 cb->f2638 = side;
                 cb->f263C = side;
@@ -2221,7 +2227,9 @@ void fn_80183E7C(u8* p) {
     }
     if (cb->f26E0) {
         RVec3 a;
-        CbSpring3(&a, (RVec3*)&cb->f26E4, -30.0f, (RVec3*)&cb->f26F0, -3.0f);
+        f32 firstX = cb->f26E4;
+        f32 stiffness = -30.0f;
+        CbSpring3(&a, firstX, (RVec3*)&cb->f26E4, stiffness, (RVec3*)&cb->f26F0, -3.0f);
         if (cb->airborne > 0) {
             f32 s = cb->f2604;
             cb->f26FC = cb->f2600;
