@@ -862,10 +862,9 @@ void fn_802545C4(CarUISlotView* p, s32 model, CarUIModel* m) {
         fn_80254568((Vec3a*)&r, model, "front_r");
         fn_80254568((Vec3a*)&l, model, "front_l");
         fn_80254568((Vec3a*)&c, model, "rear_c");
-        Vec mid;
-        mid.x = Lerp(l.x, r.x, 0.5f);
-        mid.y = Lerp(l.y, r.y, 0.5f);
-        mid.z = MidHalf(l.z, r.z);
+        // PROVISIONAL: the original midpoint vector type and construction are unproven.
+        ValV3 mid(Lerp(l.x, r.x, 0.5f), Lerp(l.y, r.y, 0.5f),
+                  MidHalf(l.z, r.z));
         p->frame.b.v[2].x = mid.x - c.x;
         p->frame.b.v[2].y = mid.y - c.y;
         p->frame.b.v[2].z = mid.z - c.z;
