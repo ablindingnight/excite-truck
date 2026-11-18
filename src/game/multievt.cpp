@@ -166,10 +166,14 @@ struct EvPairs {
     EvPair* alloc;  // offset 0xC
 };
 
+void* operator new(size_t size, const char* tag);
+
 /* Class name unproven */
 // Owns the event pairs for one menu run.
 struct EvPairsRef {
     EvPairsRef(EvPairs* q) : p(q) {}
+    // The default form allocates the pairs: retail's "ci-list" is a weak string of this inline, emitted last.
+    EvPairsRef(void) : p(new ("ci-list") EvPairs) {}
     ~EvPairsRef(void) {
         EvPairs* q = p;
         if (q) {
@@ -378,18 +382,7 @@ public:
 // Course texture page: a DynoTex of the event pictures plus the chosen course.
 class CourseTex : public DynoTex, public MenuState {
 public:
-    CourseTex(UnlockList* unlocks) : DynoTex(unlocks->count, 0) {
-        for (int i = 0; i < unlocks->count; i++) {
-            char buf[0x21];
-            const char* name = ((VN*)GetEvent(unlocks->entries[i].id)->node)->v14("name");
-            const char* const prefix = "career_";
-            if (!strncmp(name, prefix, strlen(prefix))) {
-                name += strlen(prefix);
-            }
-            fn_801345D8(buf, 0x21, "/%s.tex", name);
-            Add(unlocks->entries[i].id, buf);
-        }
-    }
+    CourseTex(UnlockList* unlocks);
     virtual ~CourseTex(void) {}
     virtual void Enter(void) { Pick(); }
     virtual void Update(void) { Pick(); }
@@ -492,6 +485,20 @@ public:
 
 inline void MoviePath(char* buf, const char* env) { fn_801345D8(buf, 0x20, "%s/race.%s", env, "m2v"); }
 
+// Out of class, after MoviePath: retail's weak strings (reverse parse order) put this ctor's after "m2v".
+inline CourseTex::CourseTex(UnlockList* unlocks) : DynoTex(unlocks->count, 0) {
+    for (int i = 0; i < unlocks->count; i++) {
+        char buf[0x21];
+        const char* name = ((VN*)GetEvent(unlocks->entries[i].id)->node)->v14("name");
+        const char* const prefix = "career_";
+        if (!strncmp(name, prefix, strlen(prefix))) {
+            name += strlen(prefix);
+        }
+        fn_801345D8(buf, 0x21, "/%s.tex", name);
+        Add(unlocks->entries[i].id, buf);
+    }
+}
+
 extern u8 lbl_8055F291;
 extern "C" char lbl_8055B860[8];
 extern char lbl_8055BAC0[8];
@@ -569,7 +576,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     *diff = 0;
     fn_801332D0(0, lbl_8055BF10, eve);
     fn_801332D0(0, lbl_8055BF14, track);
-    EvPairsRef pairs(new ("ci-list") EvPairs);
+    EvPairsRef pairs;
     for (int i = 0; i < GetNumEvents(); i++) {
         EventInfo* ev = GetEvent(i);
         const char* name = GetTrack(ev->track)->name;
