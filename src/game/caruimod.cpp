@@ -903,20 +903,27 @@ void fn_802545C4(CarUISlotView* p, s32 model, CarUIModel* m) {
 }  // extern "C"
 
 
+// PROVISIONAL: original viewport helper API/input ownership is unproven.
+static inline void ViewportGeometry(f32 h, const f32& w, const f32& y, const f32& x,
+                                    f32& hw, f32& hh, f32& cx, f32& cy) {
+    hh = 0.5f * h;
+    hw = 0.5f * w;
+    cy = y + hh;
+    cx = x + hw;
+}
 void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
     if (lbl_8055F330 || mode == 0) {
-        f32 offY = 0.0f;
-        f32 offX = offY;
+        f32 offX = 0.0f;
+        f32 offY = offX;
         f32 d = dist;
         int w2 = (f32)ceil(w / fn_802C9A50());
         f32 hw;
         f32 nd;
-        f32 hh = 0.5f * (f32)h;
-        hw = 0.5f * (f32)w2;
+        f32 hh;
         f32 cx;
-        f32 cy = (f32)y + hh;
+        f32 cy;
         x -= (w2 - w) / 2;
-        cx = (f32)x + hw;
+        ViewportGeometry((f32)h, (f32)w2, (f32)y, (f32)x, hw, hh, cx, cy);
         f32 proj;
         f32 dummy;
         fn_802C98DC(&proj, &dummy, &dummy, &dummy);
@@ -990,15 +997,10 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             cam.b.v[2].z = c2;
             MulM(m, &rx, m);
             MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
-            f32 vx = cam.b.v[0].x;
-            f32 px = cam.pos.x + vx * -offX + cam.b.v[1].x * ny;
-            cam.pos.x = px;
-            f32 yv = cam.pos.y;
-            cam.pos.y = yv + cam.b.v[0].y * -offX + cam.b.v[1].y * ny;
-            f32 zv = cam.pos.z;
-            f32 pz = zv + cam.b.v[0].z * -offX + cam.b.v[1].z * ny;
-            cam.pos.z = pz;
-            if (!lbl_8055F330 || (2.0f * aspect) + fn_801DCF48(0, px, pz) < cam.pos.y) {
+            // PROVISIONAL: original camera-axis translation grouping is unproven.
+            MAdd(&cam.pos, &cam.pos, &cam.b.v[0], -offX);
+            MAdd(&cam.pos, &cam.pos, &cam.b.v[1], ny);
+            if (!lbl_8055F330 || (2.0f * aspect) + fn_801DCF48(0, cam.pos.x, cam.pos.z) < cam.pos.y) {
                 break;
             }
             pitch += 1.5707964f / 800.0f;
