@@ -1458,15 +1458,15 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         v[1 + i * 2].pos.x = (2.5f * c);
         v[1 + i * 2].pos.y = y;
         v[1 + i * 2].pos.z = z0;
-        v[2 + i * 2].pos.x = x1;
         v[1 + i * 2].s = 1.333f * (2.5f * c);
-        v[1 + i * 2].color = 0x20FFFFFF;
         v[1 + i * 2].t = 1.333f * z0;
+        v[1 + i * 2].color = 0x20FFFFFF;
+        v[2 + i * 2].pos.x = x1;
         v[2 + i * 2].pos.y = y;
         v[2 + i * 2].pos.z = (5.0f * s);
-        v[2 + i * 2].color = 0x00FFFFFF;
         v[2 + i * 2].s = 1.333f * x1;
         v[2 + i * 2].t = 1.333f * (5.0f * s);
+        v[2 + i * 2].color = 0x00FFFFFF;
     }
     /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail scheduled the vertex loop apart from
        the index loop setup (its `li r3,0` is not delayed over the last vertex store). Found by sweep_latefold.py;
