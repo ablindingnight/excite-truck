@@ -633,8 +633,9 @@ int fn_8023FF1C(u8 flag) {
     };
     const char* layout = lbl_8055FC8C ? "rollcall2_w.lyt" : "rollcall2.lyt";
     MenuDesc desc = {layout, items, fn_802411A4, 0, 0};
-    fn_80129AEC(-1);
+    // PROVISIONAL: result lifetime starts before dialog setup.
     int result = 1;
+    fn_80129AEC(-1);
     int run = 1;
     while (run) {
         int r = fn_802146BC(&desc, -999, -999, 1);
