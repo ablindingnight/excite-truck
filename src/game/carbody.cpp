@@ -1491,6 +1491,8 @@ static inline f32 BodyRollInput(CarBody* cb) { return cb->f2604; }
 static inline f32 DesiredNose(f32 pitch, f32 nose) { return 0.25f * pitch - nose; }
 // PROVISIONAL: by-value mutable product-input ownership and helper name are unproven.
 static inline f32 ScaledValue(f32 value, f32 factor) { value *= factor; return value; }
+// PROVISIONAL: glide-speed reference update ownership and helper name are unproven.
+static inline void ApplyGlideDrag(f32& speed, f32 drag) { speed -= drag; }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -1873,7 +1875,8 @@ void fn_80183E7C(u8* p) {
         } else {
             target = LerpT(Ramp(lean, 0.0f, 0.35f), cb->f261C, MinF(1.1f * cb->f261C, top));
         }
-        f32 want = target - 8.888889f * cb->f25E4;
+        ApplyGlideDrag(target, 8.888889f * cb->f25E4);
+        f32 want = target;
         HVec dir = *(HVec*)(p + 0x118);
         dir.y = 0.0f;
         f32 m = MaxF(0.01f, PSVECMag((const Vec*)&dir));
@@ -1885,7 +1888,10 @@ void fn_80183E7C(u8* p) {
         if (want < flat) {
             one = one + 4.0f * cb->f25E4;
         }
-        f32 k = one * ((want - flat) * cb->mass);
+        // PROVISIONAL: named glide speed-error and mass input ownership is unproven.
+        f32 speedError = want - flat;
+        f32 glideMass = cb->mass;
+        f32 k = one * (speedError * glideMass);
         RVec3 f;
         f.x = dir.x * k;
         f.y = dir.y * k;
