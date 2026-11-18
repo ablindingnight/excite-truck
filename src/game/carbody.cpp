@@ -2322,17 +2322,10 @@ void fn_80186DE8(void) {
         f32 grip;
         airK = 1.0f + 3.0f * air;
         surf = 0;
-        if (e->surface[0] > surf) {
-            surf = e->surface[0];
-        }
-        if (e->surface[1] > surf) {
-            surf = e->surface[1];
-        }
-        if (e->surface[2] > surf) {
-            surf = e->surface[2];
-        }
-        if (e->surface[3] > surf) {
-            surf = e->surface[3];
+        for (int k = 0; k < 4; k++) {
+            if (e->surface[k] > surf) {
+                surf = e->surface[k];
+            }
         }
         f32 wet;
         f32 hb;
