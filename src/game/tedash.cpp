@@ -685,8 +685,14 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     s16 signedZ;
     int maskZ;
     u32 height;
-    s16 cx = (s16)Round(pos->x / lbl_80564C88) & ~(fn_802B6E30() - 1);
-    int roundedZ = Round(pos->z / lbl_80564C88);
+    // PROVISIONAL: spacing and coordinate temporary ownership is inferred; pooled divisor identity is retail-verified.
+    f32 spacing;
+    f32 coordinateX = pos->x;
+    spacing = 2.0f;
+    s16 cx = (s16)Round(coordinateX / spacing) & ~(fn_802B6E30() - 1);
+    f32 coordinateZ = pos->z;
+    spacing = 2.0f;
+    int roundedZ = Round(coordinateZ / spacing);
     maskZ = fn_802B6E30() - 1;
     signedZ = (s16)roundedZ;
     s16 cz;
