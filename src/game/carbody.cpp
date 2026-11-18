@@ -3486,7 +3486,11 @@ void fn_8018A9F0(u8* p, u8* m) {
     }
     u8* x = 0;
     fn_801BEB30(cb->index, &x);
-    CbVec4 h = *(CbSolVec*)(x + 0x70);
+    CbVec4 h;
+    h.x = ((CbSolVec*)(x + 0x70))->x;
+    h.y = ((CbSolVec*)(x + 0x70))->y;
+    h.z = ((CbSolVec*)(x + 0x70))->z;
+    h.w = ((CbSolVec*)(x + 0x70))->w;
     for (int i = 0; i < 4; i++) {
         RVec3* o = (RVec3*)(m + 0xE24) + ((s32*)(cb->f26C0 + 0xCC))[i];
         o->Set(0.0f, cb->f5AC + (F32((u8*)&((CarDrawState*)m)->wheels + i * 0x6C, 0x4) + h[i]), 0.0f);
