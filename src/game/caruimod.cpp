@@ -114,6 +114,10 @@ static inline void Lift(Vec* v, const f32& y) {
     v->z = 0.0f;
 }
 
+/* Helper name unproven: a - b with b first. Its by-value arguments are evaluated right to left, so the wheel
+   height is loaded before the model offset, as in retail (FACTS 2026-11-17 CONSTFIRST / argument order). */
+static inline f32 SubFrom(f32 b, f32 a) { return a - b; }
+
 static inline void Identity(CarUIFrame* f) {
     f->b.v[0].x = 1.0f;
     f->b.v[0].y = 0.0f;
@@ -454,11 +458,10 @@ void CarUIModel::DrawEfx(void) {
         Scale(b, &p, -1.0f);
         s32* bs = boneset;
         if (bs) {
-            for (int i = 0; i < 4; i++) {
-                const f32 baseHeight = offset.y;
-                const f32 wheelHeight = wheelY[i];
-                Lift((Vec*)&bones[bs[0x33 + i]], wheelHeight - baseHeight);
-            }
+            Lift((Vec*)&bones[bs[0x33]], SubFrom(offset.y, wheelY[0]));
+            Lift((Vec*)&bones[bs[0x34]], SubFrom(offset.y, wheelY[1]));
+            Lift((Vec*)&bones[bs[0x35]], SubFrom(offset.y, wheelY[2]));
+            Lift((Vec*)&bones[bs[0x36]], SubFrom(offset.y, wheelY[3]));
         }
         fn_802C70AC(efx, f, fn_802C7A34(1, (Vec*)&bones[1], numBones), groupMask);
     }
