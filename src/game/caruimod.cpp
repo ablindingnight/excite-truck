@@ -108,10 +108,10 @@ static inline void MAdd(Vec* out, const Vec* a, const Vec* d, f32 s) {
     out->z = a->z + d->z * s;
 }
 
-static inline void Lift(Vec* v, f32 y) {
+static inline void Lift(Vec* v, const f32& y) {
     v->x = 0.0f;
-    v->z = 0.0f;
     v->y = y;
+    v->z = 0.0f;
 }
 
 static inline void Identity(CarUIFrame* f) {
@@ -454,12 +454,11 @@ void CarUIModel::DrawEfx(void) {
         Scale(b, &p, -1.0f);
         s32* bs = boneset;
         if (bs) {
-            const f32 wheelHeight = wheelY[0];
-            const f32 baseHeight = offset.y;
-            Lift((Vec*)&bones[bs[0x33]], wheelHeight - baseHeight);
-            Lift((Vec*)&bones[bs[0x34]], wheelY[1] - offset.y);
-            Lift((Vec*)&bones[bs[0x35]], wheelY[2] - offset.y);
-            Lift((Vec*)&bones[bs[0x36]], wheelY[3] - offset.y);
+            for (int i = 0; i < 4; i++) {
+                const f32 baseHeight = offset.y;
+                const f32 wheelHeight = wheelY[i];
+                Lift((Vec*)&bones[bs[0x33 + i]], wheelHeight - baseHeight);
+            }
         }
         fn_802C70AC(efx, f, fn_802C7A34(1, (Vec*)&bones[1], numBones), groupMask);
     }
