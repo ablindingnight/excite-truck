@@ -1202,7 +1202,7 @@ config.libs.append(
             Object(NonMatching, "game/multievt.cpp"),
             Object(Matching, "game/modeltest.cpp"),
             Object(Matching, "game/unitmenu.cpp", extra_cflags=["-opt nopropagation"]),
-            Object(NonMatching, "game/profile.cpp"),
+            Object(Matching, "game/profile.cpp"),
             Object(NonMatching, "game/garage.cpp"),
             Object(NonMatching, "game/minworld.cpp"),
             Object(NonMatching, "game/caruimod.cpp"),

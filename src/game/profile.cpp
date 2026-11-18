@@ -97,7 +97,8 @@ extern u8 lbl_8055F2D0[8];
 extern u8 lbl_8055F2C8;
 extern u8 lbl_8055F2C9;
 extern s8 lbl_8055F2CA;
-extern u8 lbl_8055F2CC;
+struct ProfileMenuShown { u8 shown; };  // names unproven
+extern ProfileMenuShown lbl_8055F2CC;
 
 
 
@@ -249,8 +250,9 @@ char* lbl_8055F2C4;
 u8 lbl_8055F2C8;
 u8 lbl_8055F2C9;
 s8 lbl_8055F2CA;
-u8 lbl_8055F2CB;  // no surviving user; keeps lbl_8055F2CC at its address
-u8 lbl_8055F2CC;
+// An aggregate: small-data aggregates are 4-aligned, which leaves retail's byte gap at 0x8055F2CB (a plain unused u8
+// there is dead-stripped by the linker and the flag moves down; flipdiff, G9 2026-11-17). Shape PROVISIONAL.
+ProfileMenuShown lbl_8055F2CC;
 u8 lbl_8055F2D0[8];
 
 
@@ -411,18 +413,18 @@ int fn_8024C768(void) {
     desc.items=items;
     fn_8024C464();
     if (!lbl_8055F2CA) {
-        lbl_8055F2CC=1;
+        lbl_8055F2CC.shown=1;
         lbl_8055F2CA=1;
     }
     int done=0;
     int result=-1;
     while (!done) {
-        if (lbl_8055F2CC && lbl_8055F2C9) fn_802149C4(desc.layout);
+        if (lbl_8055F2CC.shown && lbl_8055F2C9) fn_802149C4(desc.layout);
         result=fn_802146BC(&desc,-999,-999,1);
         if (result==-1) {
-            lbl_8055F2CC=1;
+            lbl_8055F2CC.shown=1;
             fn_802149FC(desc.layout);
-        } else lbl_8055F2CC=0;
+        } else lbl_8055F2CC.shown=0;
         switch(result) {
         case -1: done=1; break;
         case 4: fn_8024C524(); break;
