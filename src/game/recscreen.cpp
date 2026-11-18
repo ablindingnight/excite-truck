@@ -9,6 +9,7 @@
 #include "game/highscore.h"
 #include "game/menu.h"
 #include "game/menustate.h"
+#include "game/buildquery.h"
 
 #define PTR(p, o) (*(u8**)((u8*)(p) + (o)))
 #define S32(p, o) (*(s32*)((u8*)(p) + (o)))
@@ -154,16 +155,21 @@ void fn_8025C204(int event, int difficulty) {
     ScoreRow rows[5];
     RecordIcon icons[5];
     IconShow hidden = kIconHidden;
-    icons[0].icons = set;
-    icons[0].visible = hidden;
-    icons[1].icons = set;
-    icons[1].visible = hidden;
-    icons[2].icons = set;
-    icons[2].visible = hidden;
-    icons[3].icons = set;
-    icons[3].visible = hidden;
-    icons[4].icons = set;
-    icons[4].visible = hidden;
+    // Helper name unproven; PROVISIONAL (game/buildquery.h): retail starts a new scheduling block after the last
+    // inlined ctor (the icons address and the hidden flag are formed there) with no instruction left of a test.
+    // Open: this spelling also leaves a join before the loop (one extra li of the loop zero).
+    if (BuildMode() == kBuildRetail) {
+        icons[0].icons = set;
+        icons[0].visible = hidden;
+        icons[1].icons = set;
+        icons[1].visible = hidden;
+        icons[2].icons = set;
+        icons[2].visible = hidden;
+        icons[3].icons = set;
+        icons[3].visible = hidden;
+        icons[4].icons = set;
+        icons[4].visible = hidden;
+    }
     for (int i = 0; i < 5; i++) {
         SafeStrCopy(rows[i].score, "-", 20);
         rows[i].grade = "-";
