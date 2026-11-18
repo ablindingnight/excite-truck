@@ -1222,10 +1222,11 @@ inline void Arena::Tally(void) {
             }
         }
         if (sLongCheer && stats->data[k].done) {
+            SetStat* sc = &stats->data[k];
             f32 a = 0.0f;
             f32 b = 0.0f;
             int lvl;
-            switch (stats->data[k].best) {
+            switch (sc->best) {
             case 5:
                 lvl = 0;
                 break;
