@@ -409,14 +409,14 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
                 MenuItem items[] = {
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
-                    MenuItem("#car_model", cars.Chassis(), (int)NoCaption()),
+                    MenuItem("#car_model", 3, cars.Chassis(), 0, 0),
                     MenuItem("#car_name", cars.Name(), (int)NoCaption()),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
                     MenuItem("#stat_text_1", panel.text[0], (int)NoCaption()),
                     MenuItem("#stat_art_1", 2, &panel.stats.stats[0].value, 0, 0),
                     MenuItem("#stat_text_2", panel.text[1], (int)NoCaption()),
                     MenuItem("#stat_art_2", 2, &panel.stats.stats[1].value, 0, 0),
-                    MenuItem("#stat_text_3", panel.text[2], (int)NoCaption()),
+                    MenuItem("#stat_text_3", panel.text[2], NoCaption()),
                     MenuItem("#stat_art_3", 2, &panel.stats.stats[2].value, 0, 0),
                     MenuItem("#stat_text_4", panel.text[3], (int)NoCaption()),
                     MenuItem("#stat_custom_4", 5, &panel.bars[3], 0, 0),
