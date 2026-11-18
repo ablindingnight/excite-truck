@@ -555,6 +555,14 @@ struct Opts {
 /* Helper name unproven: the bin lerp as an inline function. Its literal arguments are not simplified (0 + t * 64,
    the 64 folded late into a literal at the end of .sdata2), unlike the LERP macro. */
 static inline f32 BinLerpA(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+// PROVISIONAL: original circle-bin helper API/input and output ownership is unproven.
+static inline void FinishCircleBins(f32 lowerFraction, f32 expandedRight, int& lo, int& hi) {
+    lo = BinLerpA(0.0f, 64.0f, lowerFraction);
+    f32 upperFraction = (expandedRight - -kWidth.value / 2.0f) /
+                        (kWidth.value / 2.0f - -kWidth.value / 2.0f);
+    CLAMP01(upperFraction);
+    hi = BinLerpA(0.0f, 64.0f, upperFraction);
+}
 struct Bins {
     // Marks the bins an obstacle covers with its distance ahead.
     void Add(Obst* o, View* v, u8 side, f32 range) {
@@ -570,10 +578,7 @@ struct Bins {
                 case 0: {
                     f32 t = (s - o->rad - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     CLAMP01(t);
-                    lo = BinLerpA(0.0f, 64.0f, t);
-                    t = (lbl_8055E2A4 + (s + o->rad) - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
-                    CLAMP01(t);
-                    hi = BinLerpA(0.0f, 64.0f, t);
+                    FinishCircleBins(t, lbl_8055E2A4 + (s + o->rad), lo, hi);
                     break;
                 }
                 case 2: {
