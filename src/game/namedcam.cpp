@@ -409,6 +409,26 @@ static inline void AxisAngle(CamMat3* m, const CamVec3* axis) {
 
 // Takes over player `slot`'s camera and starts a transition from it to the fixed camera beside the car
 // (lbl_802FA818), keeping the car-relative frame in lbl_804A1500.
+// PROVISIONAL: the scalar-input/workspace boundary and the caller's position
+// view reproduce retail's allocation; the original helper and ownership are unknown.
+static inline void BuildCameraOffset(CamPose& rel, CamVec3& axis, CamRec* src,
+                                    f32 px, f32 py, f32 pz,
+                                    f32 degreesX, f32 degreesY, f32 degreesZ) {
+    f32 rx = 0.017453292f * degreesX;
+    f32 ry = 0.017453292f * degreesY;
+    f32 rz = 0.017453292f * degreesZ;
+    rel.pos.v[0] = px;
+    rel.pos.v[1] = py;
+    rel.pos.v[2] = pz;
+    f32 scale = F32(src->car, 0x5E4);
+    rel.pos.v[0] *= scale;
+    rel.pos.v[1] *= scale;
+    rel.pos.v[2] *= scale;
+    axis.v[0] = rx;
+    axis.v[1] = ry;
+    axis.v[2] = rz;
+}
+
 void fn_80276DC8(int slot) {
     CamPose look;
     CamPose car;
@@ -459,21 +479,11 @@ void fn_80276DC8(int slot) {
     fn_801E9DC4(&rec->h1EC);
     // The offset is copied whole at its declaration (retail moves all seven words, the fov float included; an
     // assignment to an earlier declaration moves the fov with lfs/stfs). The axis is stored after the position.
-    // DegToRad (mathutil.h) takes the angle by value, so retail reads the angle before the constant.
+    // The offset worker takes the angles by value; retail reads each input before the conversion factor.
     CamOffset o = lbl_802FA818;
-    f32 rx = DegToRad(o.rot.v[0]);
-    f32 ry = DegToRad(o.rot.v[1]);
-    f32 rz = DegToRad(o.rot.v[2]);
-    rel.pos.v[0] = o.pos.v[0];
-    rel.pos.v[1] = o.pos.v[1];
-    rel.pos.v[2] = o.pos.v[2];
-    f32 scale = F32(src->car, 0x5E4);
-    rel.pos.v[0] *= scale;
-    rel.pos.v[1] *= scale;
-    rel.pos.v[2] *= scale;
-    axis.v[0] = rx;
-    axis.v[1] = ry;
-    axis.v[2] = rz;
+    const CamVec3& position = o.pos;
+    BuildCameraOffset(rel, axis, src, position.v[0], position.v[1], position.v[2],
+                      o.rot.v[0], o.rot.v[1], o.rot.v[2]);
     AxisAngle(&rel.rot, &axis);
     RMtx* frame = &lbl_804A1500[slot];
     CamVec3* framePos = (CamVec3*)&frame->pos;
