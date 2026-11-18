@@ -2,6 +2,7 @@
 // flag distance, pit speed), creates per-car AI info, formats car numbers, and builds the driver object
 // behind each local car (AI, arena, park or null). Names are guesses.
 #include "game/common.h"
+#include "game/buildquery.h"
 #include "game/racesetup.h"
 #include "game/proxer.h"
 #include "game/gamemode.h"
@@ -215,9 +216,25 @@ void fn_801349C4(void) {
     }
 }
 
-int fn_80134A44(int i) { return lbl_8055E3C4 & 1; }
+// PROVISIONAL: original selector/query context and case names are unproven.
+// Retail retains this switch skeleton behind an unconditional jump to frame parity.
+// A by-value enum temporary selecting case 1 reproduces that late fold. BuildQuery is
+// the existing shared stand-in type; kBuildDebug here supplies its observable value 1,
+// not evidence that this routine implements a debug feature.
+// Case definition order also controls the otherwise-extra final return instruction.
+int fn_80134A44(int i) {
+    switch (BuildQuery(kBuildDebug).kind) {
+    case 2: return 1;
+    case 0: return i >= 0 && ((i + lbl_8055E3C4) & 1);
+    case 1: return lbl_8055E3C4 & 1;
+    default: return 0;
+    }
+}
 
+// PROVISIONAL retention policy: retail keeps this otherwise-unused stub.
+#pragma force_active on
 void fn_80134A88(void) {}
+#pragma force_active reset
 
 void fn_80134A8C(void) {
     AICarInfo* p;
