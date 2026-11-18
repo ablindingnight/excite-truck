@@ -324,8 +324,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* named = t->HasChild("named_times") ? t->FindChild("named_times") : 0;
     int nElems = 0;
     int nPaths = 0;
-    int i;
     ValueNode* n;
+    int i;
     for (i = 0; (n = t->GetChild(i)) != 0; i++) {
         if (!strcmp(n->GetName(), "elem")) {
             elems[nElems++] = n;
