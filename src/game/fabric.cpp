@@ -450,11 +450,7 @@ static inline u32 LerpColor( u32 b,u32 a, f32 t) {
     return c;
 }
 
-static inline void LerpPos(PVec* out, const PVec* a, const PVec* b, f32 t) {
-    out->x = LerpRev( b->x,a->x, t);
-    out->y = LerpRev( b->y,a->y, t);
-    out->z = LerpRev( b->z,a->z, t);
-}
+
 
 static inline void LerpVert(DrawVert* out, FabricCorner a, FabricCorner b, f32 t) {
     out->u = LerpRev( b.u,a.u, t);
@@ -468,6 +464,7 @@ static inline void LerpVert2(DrawVert* out, const DrawVert& b, const DrawVert& a
     out->color = LerpColor(b.color, a.color, t);
 }
 
+// PROVISIONAL: direct position values and row-position construction order; original ownership unproven.
 extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
     int n = f->rows * f->cols;
     int r;
@@ -478,20 +475,17 @@ extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
     f->count = n;
     for (r = 0; r < f->rows; r++) {
         f32 t = (f32)r / (f32)(f->rows - 1);
-        PVec lp;
-        PVec rp;
         DrawVert ld;
         DrawVert rd;
         int c;
-        LerpPos(&lp, &q->c[0].pos, &q->c[2].pos, t);
-        LerpPos(&rp, &q->c[1].pos, &q->c[3].pos, t);
+        ValV3 rp(LerpRev(q->c[3].pos.x,q->c[1].pos.x,t), LerpRev(q->c[3].pos.y,q->c[1].pos.y,t), LerpRev(q->c[3].pos.z,q->c[1].pos.z,t));
+        ValV3 lp(LerpRev(q->c[2].pos.x,q->c[0].pos.x,t), LerpRev(q->c[2].pos.y,q->c[0].pos.y,t), LerpRev(q->c[2].pos.z,q->c[0].pos.z,t));
         LerpVert(&ld, q->c[0], q->c[2], t);
         LerpVert(&rd, q->c[1], q->c[3], t);
         for (c = 0; c < f->cols; c++) {
             f32 s = (f32)c / (f32)(f->cols - 1);
             int i = r * f->cols + c;
-            PVec p;
-            LerpPos(&p, &lp, &rp, s);
+            ValV3 p(LerpRev(rp.x,lp.x,s), LerpRev(rp.y,lp.y,s), LerpRev(rp.z,lp.z,s));
             Vec3Storage* pv = &f->prev[i];
             *(PVec*)pv = p;
             f->cur[i] = *pv;
