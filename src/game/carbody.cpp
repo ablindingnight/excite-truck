@@ -588,11 +588,12 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     const ValVec3& head = chassis->GetVec3("head_pos");
     cb->f5C4 = head.x;
     cb->f5C8 = head.y;
-    cb->f5D0 = head.x;
+    cb->f5CC = head.z;
+    cb->f5D0 = cb->f5C4;
     cb->f5D0 *= 0.2f;
     cb->f5D4 = cb->f5C8;
     cb->f5D4 += 3.0f;
-    cb->f5D8 = cb->f5CC = head.z;
+    cb->f5D8 = cb->f5CC;
     const ValVec3& back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3*)(p + 0x5D0));
     cb->f5D0 = back.x;
     cb->f5D4 = back.y;
