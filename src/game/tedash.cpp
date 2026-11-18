@@ -714,7 +714,8 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
                     }
                     u32 k = lbl_8055CEA0;
                     BrushCellValues cell;
-                    cell.ri = i - (i / k) * k;
+                    u32 quotient = i / k;
+                    cell.ri = i - quotient * k;
                     cell.bj = j / k;
                     cell.rj = j - cell.bj * k;
                     cell.bi = i / k;
