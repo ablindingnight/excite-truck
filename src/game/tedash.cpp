@@ -1048,6 +1048,27 @@ void fn_802B84E4(CursorState* c) {
 
 #pragma push
 #pragma opt_strength_reduction off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
+// PROVISIONAL: worker boundary, five-input shape, and local ownership/order are inferred.
+static inline void RotateBrushSized(Brush* b, const Brush& tmp, int op, u32 h, u32 w) {
+    u32 x;
+    u32 y;
+    int r;
+    int l;
+    const u8* pixels = tmp.data;
+    for (x = 0; x < b->w; x++) {
+        u32 rowLast = h - x - 1;
+        l = rowLast * w;
+        r = w * (x + 1) - 1;
+        for (y = 0; y < b->h; y++) {
+            if (op == 6) {
+                b->data[x + y * b->w] = pixels[(int)(r - y)];
+            } else {
+                b->data[x + y * b->w] = pixels[(int)(y + l)];
+            }
+        }
+    }
+}
+
 void fn_802B8510(int op) {
     if ((u32)(op - 6) > 1) {
         return;
@@ -1055,23 +1076,13 @@ void fn_802B8510(int op) {
     if (lbl_8055FA2C >= 0 && lbl_8055FA2C < lbl_804BE7D8.count) {
         Brush* b = &lbl_804BE7D8.data[lbl_8055FA2C];
         Brush tmp = *b;
-        u32 y;
-        u32 x;
-        u32 h;
         u32 w;
-        b->w = h = tmp.h;
-        b->h = w = tmp.w;
-        for (x = 0; x < b->w; x++) {
-            int r = w * (x + 1) - 1;
-            int l = (h - x - 1) * w;
-            for (y = 0; y < b->h; y++) {
-                if (op == 6) {
-                    b->data[x + y * b->w] = tmp.data[r - y];
-                } else {
-                    b->data[x + y * b->w] = tmp.data[y + l];
-                }
-            }
-        }
+        u32 h;
+        h = tmp.h;
+        b->w = h;
+        w = tmp.w;
+        b->h = w;
+        RotateBrushSized(b, tmp, op, h, w);
     }
 }
 #pragma pop
