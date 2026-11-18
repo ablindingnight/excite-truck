@@ -1857,10 +1857,8 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         meter = 1.0f < m ? 1.0f : m;
     }
     meterSmooth += 0.1f * (meter - meterSmooth);
-    {
-        f32 t = fullFlash - 0.016683351f;
-        fullFlash = 0.0f > t ? 0.0f : t;
-    }
+    // PROVISIONAL clamp expression ownership; original spelling unproven.
+    fullFlash = 0.0f > (fullFlash - 0.016683351f) ? 0.0f : (fullFlash - 0.016683351f);
     if (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= __float_epsilon[0]) {
         int j;
         int busy;
