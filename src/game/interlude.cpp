@@ -2985,6 +2985,9 @@ void fn_801CA5A8(void) {
 // Editor overlay draw: the status box (time, events, camera position/rotation/fov, a time line of the
 // events), the current menu, the input line or the key help, the event list, and markers in the world for
 // the selected event.
+// PROVISIONAL: helper name/signature and the by-value row/step boundary are inferred
+// from matching output; the original source ownership remains unproven.
+static inline void DrawNextMarker(int y,int step) {y += step;fn_801C94B8(10,y-10,"  v",-1);}
 void fn_801CA67C(void) {
     int h = fn_80238A20();
     int bottom = (434 / h) * h;
@@ -3088,10 +3091,12 @@ void fn_801CA67C(void) {
         fn_801C94B8(270, yy, buf, -1);
     }
     if (lbl_8055E839) {
-        int yy = h * 2;
-        fn_801C94BC(10, 125, 260, h * 4 + h * 10 + 125, bg);
+        // PROVISIONAL: original shared doubled-line value/row ownership unproven.
+        int rowStart = h * 2;
+        int yy;
+        fn_801C94BC(10, 125, 260, rowStart * 2 + h * 10 + 125, bg);
         fn_801C94B8(10, 125, "[ and ] Scroll", 0xE6969696);
-        yy += 125;
+        yy = rowStart + 125;
         int first = lbl_8055E82C * 10;
         /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail scheduled the loop setup apart
            from the statements before it, as in achview's tally run (its `li r25,0` for i comes after the name table
@@ -3106,8 +3111,7 @@ void fn_801CA67C(void) {
         }
         if (first < lbl_8055E7F0 - 10) {
             fn_801C94B8(10, yy, "  v", -1);
-            yy += h;
-            fn_801C94B8(10, yy - 10, "  v", -1);
+            DrawNextMarker(yy,h);
         }
         fn_801CA5A8();
     }
