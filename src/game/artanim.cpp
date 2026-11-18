@@ -306,6 +306,11 @@ static inline void AxisQuat(f32* q, const ValVec3& axis) {
     }
 }
 
+// An enum field with a fallback when the key is missing (interlude.cpp has the same helper). Name unproven.
+static inline int GetEnumOr(ValueNode* n, const char* key, const char* names, int def) {
+    return n->Has(key) ? n->GetEnum(key, names) : def;
+}
+
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* elems[64];
     ValueNode* paths[64];
@@ -317,8 +322,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     SafeStrCopy(a->name, name, 0x18);
     ValueTable* t = fn_80131808(name);
     ValueNode* named = t->HasChild("named_times") ? t->FindChild("named_times") : 0;
-    int nPaths = 0;
     int nElems = 0;
+    int nPaths = 0;
     int i;
     ValueNode* n;
     for (i = 0; (n = t->GetChild(i)) != 0; i++) {
@@ -420,7 +425,6 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         p->nKeys = nFrames;
         p->keys = new ("artframe") ArtKey[nFrames];
         for (k = 0; k < nFrames; k++) {
-        const char* curveKey = "curve";
             ValueNode* f;
             ArtKey* key = &p->keys[k];
             ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
@@ -465,9 +469,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 key->scale[2] = 1.0f;
             }
             key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
-            const char* curveNames = "linear\0hermite\0start\0stop\0";
-            s32 curve = prev ? prev->curve : 0;
-            key->curve = f->Has(curveKey) ? f->GetEnum(curveKey, curveNames) : curve;
+            key->curve = GetEnumOr(f, "curve", "linear\0hermite\0start\0stop\0", prev ? prev->curve : 0);
             key->signal = f->GetInt("signal", prev ? prev->signal : 0);
         }
     }
