@@ -757,6 +757,41 @@ static inline int HitCorner(const AVec* at) {
 // raises the car's impairment.
 static inline double AbsDbl(double v) { return __fabs(v); }
 
+// Pushes every dent goal near c0 back along nd by up to `moved` (helper name unproven).
+static inline void PushGoals(u8* p, DentVec& nd, DentVec& c0, f32 moved) {
+    DentVec w;
+    DentVec r;
+    for (int i = 1; i < ((CarBody*)p)->f5F8; i++) {
+        DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
+        DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
+        w.x = q->pos.x + g->x;
+        w.y = q->pos.y + g->y;
+        w.z = q->pos.z + g->z;
+        r.x = w.x - c0.x;
+        r.y = w.y - c0.y;
+        r.z = w.z - c0.z;
+        f32 t = PSVECDotProduct((const Vec*)&nd.x, (const Vec*)&r.x);
+        f32 a = t < moved ? t : moved;
+        if (a > 0.0f) {
+            f32 r2 = PSVECDotProduct((const Vec*)&r.x, (const Vec*)&r.x);
+            if (0.1f > r2) {
+                r2 = 0.1f;
+            }
+            f32 s = 0.2f / r2;
+            if (1.0f < s) {
+                s = 1.0f;
+            }
+            f32 m = -a * s;
+            g->x += nd.x * m;
+            g->y += nd.y * m;
+            g->z += nd.z * m;
+            g->x = DentClamp(g->x, q->lo.x, q->hi.x);
+            g->y = DentClamp(g->y, q->lo.y, q->hi.y);
+            g->z = DentClamp(g->z, q->lo.z, q->hi.z);
+        }
+    }
+}
+
 void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind, u8*, int) {
     AVec di;
     AVec da;
@@ -767,10 +802,11 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     DentVec nd;
     DentVec dg;
     DentVec c0;
-    DentVec w;
-    DentVec r;
     ValVec3 c;
     GlassMsg msg;
+    LightPart* l;
+    CbJoint* sl;
+    DamagePart* t;
     f32 mass = ((CarBody*)p)->mass;
     f32 inv = -0.1f / mass;
     ((CarBody*)p)->f26F0 += imp->v[0] * inv;
@@ -879,38 +915,9 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
         c0.z = best->pos.z + gb->z;
-        for (int i = 1; i < ((CarBody*)p)->f5F8; i++) {
-            DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
-            DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
-            w.x = q->pos.x + g->x;
-            w.y = q->pos.y + g->y;
-            w.z = q->pos.z + g->z;
-            r.x = w.x - c0.x;
-            r.y = w.y - c0.y;
-            r.z = w.z - c0.z;
-            f32 t = PSVECDotProduct((const Vec*)&nd.x, (const Vec*)&r.x);
-            f32 a = t < moved ? t : moved;
-            if (a > 0.0f) {
-                f32 r2 = PSVECDotProduct((const Vec*)&r.x, (const Vec*)&r.x);
-                if (0.1f > r2) {
-                    r2 = 0.1f;
-                }
-                f32 s = 0.2f / r2;
-                if (1.0f < s) {
-                    s = 1.0f;
-                }
-                f32 m = -a * s;
-                g->x += nd.x * m;
-                g->y += nd.y * m;
-                g->z += nd.z * m;
-                g->x = DentClamp(g->x, q->lo.x, q->hi.x);
-                g->y = DentClamp(g->y, q->lo.y, q->hi.y);
-                g->z = DentClamp(g->z, q->lo.z, q->hi.z);
-            }
-        }
-        LightPart* l;
-        CbJoint* sl = (CbJoint*)(p + 0x152C);
-        DamagePart* t = lbl_80332840;
+        PushGoals(p, nd, c0, moved);
+        sl = (CbJoint*)(p + 0x152C);
+        t = lbl_80332840;
         for (int i = 0; i < 17; i++) {
             if ((sl->on && sl->point > 0 && !sl->state) || sl->state == 2) {
                 DentVec* g = (DentVec*)(p + 0x5FC) + sl->point;
