@@ -277,18 +277,40 @@ struct ArtXY : ValPoint {
 
 // Loads an art animation (.val): "elem" entries (models and text) and "path" entries of timed "frame" keys, with
 // optional "named_times" and a "global_transform"; integer/string placeholders are resolved through map.
-// Helper name unproven: arguments read right to left, stores go x, y, z.
-static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
-    f32* o = (f32*)o_;
-    o[0] = x;
-    o[1] = y;
-    o[2] = z;
+// Three floats from a vector. Name unproven.
+static inline void CopyF3(f32* d, const ValVec3& v) {
+    d[0] = v.x;
+    d[1] = v.y;
+    d[2] = v.z;
+}
+
+// Quaternion from a rotation vector (angle = its length). Name unproven.
+static inline void AxisQuat(f32* q, const ValVec3& axis) {
+    f32 d = PSVECDotProduct((const Vec*)&axis.x, (const Vec*)&axis.x);
+    if (!((f32)__fabs(d) <= __float_epsilon[0])) {
+        f32 len = sqrt(d);
+        f32 s;
+        f32 half = 0.5f * len;
+        s = sin(half);
+        f32 w = cos(half);
+        f32 k2 = s / len;
+        q[0] = axis.x * k2;
+        q[1] = axis.y * k2;
+        q[2] = axis.z * k2;
+        q[3] = w;
+    } else {
+        q[0] = 0.0f;
+        q[1] = 0.0f;
+        q[3] = 1.0f;
+        q[2] = 0.0f;
+    }
 }
 
 ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     ValueNode* elems[64];
     ValueNode* paths[64];
     ValueNode* frames[128];
+    f32 off[3];
     ArtAnim* a = new ("artanim") ArtAnim;
     memset(a, 0, sizeof(ArtAnim));
     a->refs = 1;
@@ -407,26 +429,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 f = frames[k];
                 key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
                 if (f->Has("spin")) {
-                    ValVec3 axis;
-                    SetV3(&axis, 0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f)));
-                    f32 d = PSVECDotProduct((const Vec*)&axis.x, (const Vec*)&axis.x);
-                    if (!((f32)__fabs(d) <= __float_epsilon[0])) {
-                        f32 len = sqrt(d);
-                        f32 s;
-                        f32 half = 0.5f * len;
-                        s = sin(half);
-                        f32 w = cos(half);
-                        f32 k2 = s / len;
-                        key->q[0] = axis.x * k2;
-                        key->q[1] = axis.y * k2;
-                        key->q[2] = axis.z * k2;
-                        key->q[3] = w;
-                    } else {
-                        key->q[0] = 0.0f;
-                        key->q[1] = 0.0f;
-                        key->q[3] = 1.0f;
-                        key->q[2] = 0.0f;
-                    }
+                    AxisQuat(key->q, ValV3(0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f))));
                 } else {
                     const char* q = f->GetString("q", "0,0,0,1");
                     if (sscanf(q, "%f,%f,%f,%f", &key->q[0], &key->q[1], &key->q[2], &key->q[3]) != 4) {
@@ -441,32 +444,14 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                     key->pos[1] = 240.0f - v.y;
                     key->pos[2] = 0.0f;
                 } else if (f->Has("offset")) {
-                    const ValVec3& o = f->GetVec3("offset");
-                    key->pos[0] = o.x;
-                    key->pos[1] = o.y;
-                    key->pos[2] = o.z;
+                    CopyF3(key->pos, f->GetVec3("offset"));
                     key->pos[0] = key->pos[0] + (pxy.x - 320.0f);
                     key->pos[1] = key->pos[1] + (240.0f - pxy.y);
                 } else {
-                    const f32* src;
-                    f32 zero[3];
-                    if (prev) {
-                        src = prev->pos;
-                    } else {
-                        zero[0] = 0.0f;
-                        zero[1] = 0.0f;
-                        zero[2] = 0.0f;
-                        src = zero;
-                    }
-                    key->pos[0] = src[0];
-                    key->pos[1] = src[1];
-                    key->pos[2] = src[2];
+                    CopyF3(key->pos, prev ? *(const ValVec3*)prev->pos : ValV3(0.0f, 0.0f, 0.0f));
                 }
                 if (f->Has("scale3")) {
-                    const ValVec3& s = f->GetVec3("scale3");
-                    key->scale[0] = s.x;
-                    key->scale[1] = s.y;
-                    key->scale[2] = s.z;
+                    CopyF3(key->scale, f->GetVec3("scale3"));
                 } else if (f->Has("scale")) {
                     f32 s = f->GetFloat("scale");
                     key->scale[0] = s;
@@ -491,17 +476,13 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     }
     if (t->HasChild("global_transform")) {
         ValueNode* g = t->FindChild("global_transform");
-        f32 off[3];
         if (g->Has("xy")) {
             ValPoint v = CopyValPoint(g->GetPoint("xy"));
             off[0] = v.x;
             off[1] = -v.y;
             off[2] = 0.0f;
         } else if (g->Has("offset")) {
-            const ValVec3& o = g->GetVec3("offset");
-            off[0] = o.x;
-            off[1] = o.y;
-            off[2] = o.z;
+            CopyF3(off, g->GetVec3("offset"));
         } else {
             off[0] = 0.0f;
             off[1] = 0.0f;
