@@ -552,12 +552,14 @@ struct Opts {
     u8 side;
 };
 
+/* Helper name unproven: the bin lerp as an inline function. Its literal arguments are not simplified (0 + t * 64,
+   the 64 folded late into a literal at the end of .sdata2), unlike the LERP macro. */
+static inline f32 BinLerpA(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 struct Bins {
     // Marks the bins an obstacle covers with its distance ahead.
     void Add(Obst* o, View* v, u8 side, f32 range) {
         Vec2* p = &o->pos;
         f32 d = Ahead(v, p, &v->at) - o->rad;
-        f32 firstBin = 0.0f;
         if (d > 0.0f && d < range) {
             f32 s = Side(v, p, &v->at);
             if (s + o->rad > -kWidth.value / 2.0f && s - o->rad < kWidth.value / 2.0f) {
@@ -568,24 +570,24 @@ struct Bins {
                 case 0: {
                     f32 t = (s - o->rad - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     CLAMP01(t);
-                    lo = LERP(firstBin, 64.0f, t);
+                    lo = BinLerpA(0.0f, 64.0f, t);
                     t = (lbl_8055E2A4 + (s + o->rad) - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     CLAMP01(t);
-                    hi = LERP(firstBin, 64.0f, t);
+                    hi = BinLerpA(0.0f, 64.0f, t);
                     break;
                 }
                 case 2: {
                     f32 t = (s + lbl_8055E2A4 - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     lo = 0;
                     CLAMP01(t);
-                    hi = LERP(firstBin, 64.0f, t);
+                    hi = BinLerpA(0.0f, 64.0f, t);
                     break;
                 }
                 case 1: {
                     f32 t = (s - -kWidth.value / 2.0f) / (kWidth.value / 2.0f - -kWidth.value / 2.0f);
                     CLAMP01(t);
                     hi = 64;
-                    lo = LERP(firstBin, 64.0f, t);
+                    lo = BinLerpA(0.0f, 64.0f, t);
                     break;
                 }
                 default:
