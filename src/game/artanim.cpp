@@ -401,9 +401,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             fn_802E317C("artanim: unknown elem type %s", type);
         }
     }
-    /* PROVISIONAL: retail counts this loop and the scale/alpha loop below with the local nPaths (kept in r14, CTR loop
-       there); reading a->nPaths here frees the register ours otherwise spills. One live value too many elsewhere is the open cause. */
-    for (int i = 0; i < a->nPaths; i++) {
+    // The path loops count with the local nPaths (retail CTR loop); possible once the 12-byte vectors became
+    // helper temporaries (77f163d8c) and freed the register the earlier form spilled.
+    for (int i = 0; i < nPaths; i++) {
         ValueNode* pn = paths[i];
         int k;
         ArtPath* p = &a->paths[i];
@@ -490,7 +490,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         }
         f32 scale = g->GetFloat("scale", 1.0f);
         f32 alpha = g->GetFloat("alpha", 1.0f);
-        for (int i = 0; i < a->nPaths; i++) {
+        for (int i = 0; i < nPaths; i++) {
             ArtPath* p = &a->paths[i];
             for (int k = 0; k < p->nKeys; k++) {
                 ArtKey* key = &p->keys[k];
