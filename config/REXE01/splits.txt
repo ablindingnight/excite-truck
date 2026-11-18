@@ -3914,6 +3914,7 @@ game/credits.cpp:
 game/stub16.cpp:
 	.text       start:0x80265D38 end:0x80265DCC
 	.ctors      start:0x802ED47C end:0x802ED480
+	.data       start:0x80346798 end:0x803467C9
 	.sbss       start:0x8055F458 end:0x8055F464
 
 game/sortwrap.cpp:

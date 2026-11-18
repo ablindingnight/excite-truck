@@ -4,6 +4,10 @@
 ModuleTag lbl_8055F458;
 UnkStatic7F lbl_8055F460;
 
+// The StackAlloc overflow message (bonemgr's inline StackAlloc::Alloc prints it). Retail places it in this unit's
+// .data, between credits and cammgr; ownership by this stripped unit is inferred from that position (unproven).
+extern char lbl_80346798[] = "StackAlloc(%s:%d)::insufficient memory (max %dK)";
+
 extern "C" {
 
 void fn_80265D38(void*, s32) {}
