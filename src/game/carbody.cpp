@@ -2290,7 +2290,6 @@ void fn_80186DE8(void) {
         CbSolMass* m;
         f32 steer;
         f32 lim;
-        CbVec4 a;
         CbSolCross* x;
         int wh;
         f32 bk2;
@@ -2659,7 +2658,7 @@ void fn_80186DE8(void) {
         out = throttle;
         ((CarBody*)car)->f25F4 = out;
         ((CarBody*)car)->f25F8 = brake;
-        a = CbVec4(x->pts[6]);
+        CbVec4 a = CbVec4(x->pts[6]);
         a.w = ((CarBody*)car)->setupA.f20 - ((CarBody*)car)->setupA.f24;
         if (!NearZero(((CarBody*)car)->f2650)) {
             f32 off = 0.0f;
