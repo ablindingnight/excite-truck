@@ -156,11 +156,13 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     int n = 0;
     int m;
     for (;;) {
-        if (r[1] + n > lx) {
+        // PROVISIONAL: run-length local ownership and spelling.
+        u8 span = r[1];
+        if (span + n > lx) {
             m = r[0];
             break;
         }
-        n += r[1];
+        n += span;
         r += 2;
     }
     if (m != 0xFF) {
