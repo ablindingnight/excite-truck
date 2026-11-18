@@ -1426,7 +1426,7 @@ void fn_801DF074(int a, int b);
 f32 fn_801B8950(s32 id);
 void fn_801B8964(s32 id, f32 v);
 void fn_8018E330(u8* p);
-f32 fn_801DCEC0(s16 id, f32 x, f32 z);  // heightfld.cpp's stub ignores its arguments (retail passes them)
+f32 fn_801DCEC0(s16 id, f32 x, f32 z);  // heightfld.cpp defines it with the same parameters (unused)
 double sqrt(double x);
 }
 

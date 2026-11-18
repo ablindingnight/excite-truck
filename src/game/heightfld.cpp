@@ -499,7 +499,7 @@ int fn_801DCE14(u16* flags, const ValVec3* in, ValVec3* out, ValVec3* normal, s3
     return 0;
 }
 
-f32 fn_801DCEC0(void) { return 1.0f; }
+f32 fn_801DCEC0(s16, f32, f32) { return 1.0f; }  // carbody passes (hint id, x, z); retail ignores them
 
 void fn_801DCEC8(int i, f32 w) { lbl_804424B0[i] = w; }
 
