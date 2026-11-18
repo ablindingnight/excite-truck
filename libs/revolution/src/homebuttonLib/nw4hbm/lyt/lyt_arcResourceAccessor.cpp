@@ -50,6 +50,12 @@ namespace {
         return entryNum;
     }
 
+#ifndef __MWERKS__
+    // PC: the archive's layout/animation/font files are big-endian; the port swaps each one in place the first time
+    // it is handed out (its sdk/hbmres.cpp).
+    extern "C" void port_hbm_res_fix(void* p, u32 size);
+#endif
+
     void* GetResourceSub(ARCHandle* pArcHandle, const char* resRootDir, u32 resType,
                          const char* name, u32* pSize) {
         s32 entryNum = -1;
@@ -86,6 +92,10 @@ namespace {
             NW4HBM_ASSERT(131, bSuccess);
 
             void* resPtr = ARCGetStartAddrInMem(&arcFileInfo);
+
+#ifndef __MWERKS__
+            port_hbm_res_fix(resPtr, ARCGetLength(&arcFileInfo));
+#endif
 
             if (pSize) {
                 *pSize = ARCGetLength(&arcFileInfo);

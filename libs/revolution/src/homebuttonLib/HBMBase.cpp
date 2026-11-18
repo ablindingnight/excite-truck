@@ -10,6 +10,11 @@
 
 #include <new>
 
+#ifndef __MWERKS__
+// PC: home.csv (UTF-16 big-endian) is swapped to native before it is parsed (the port's sdk/hbmres.cpp).
+extern "C" void port_hbm_text_fix(void* text);
+#endif
+
 #if HBM_REVISION == 1
 #define LN(rev1, rev2) rev1
 #else
@@ -203,7 +208,13 @@ namespace homebutton {
         }
 
         NW4HBM_ASSERT(3814, mpDvdSoundArchive);
+#ifdef __MWERKS__
         NW4R_DB_ASSERTMSG(3819, mpDvdSoundArchive->Open(path), "Cannot open \"%s\"", path);
+#else
+        // PC: asserts compile out (NW4HBM_DEBUG=0), so make the call outside the assertion.
+        bool portOpen = mpDvdSoundArchive->Open(path);
+        NW4R_DB_ASSERTMSG(3819, portOpen, "Cannot open \"%s\"", path);
+#endif
 
         u32 size = mpDvdSoundArchive->GetHeaderSize();
         mpDvdSoundArchive->LoadHeader(MEMAllocFromAllocator(&sSoundAllocator, size), size);
@@ -225,7 +236,12 @@ namespace homebutton {
         }
 
         NW4HBM_ASSERT(3836, mpMemorySoundArchive);
+#ifdef __MWERKS__
         NW4R_DB_ASSERTMSG(3841, mpMemorySoundArchive->Setup(path), "Cannot setup MemorySoundArchive");
+#else
+        bool portSetup = mpMemorySoundArchive->Setup(path);  // PC: see the Open call above
+        NW4R_DB_ASSERTMSG(3841, portSetup, "Cannot setup MemorySoundArchive");
+#endif
         createSound(mpMemorySoundArchive, false);
     }
 
@@ -868,6 +884,9 @@ namespace homebutton {
         bool flag = false;  // more accurately insideStringFlag
 
         wchar_t* message = static_cast<wchar_t*>(mpHBInfo->msgBuf);
+#ifndef __MWERKS__
+        port_hbm_text_fix(message);
+#endif
         for (; message[i]; i++) {
             if (message[i] == L'\"') {
                 message[i] = '\0';
@@ -1036,7 +1055,11 @@ namespace homebutton {
 
         AXFXGetHooks(&mAxFxAlloc, &mAxFxFree);
         AXGetAuxACallback(&mAuxCallback, &mpAuxContext);
+#ifdef __MWERKS__
         AXFXSetHooks(&HBMAllocMem, &HBMFreeMem);
+#else
+        AXFXSetHooks((AXFXAllocHook)&HBMAllocMem, &HBMFreeMem);  // PC: u32 vs unsigned long size types (same 32 bits)
+#endif
 
         mAxFxReverb.preDelay = 0.0f;
         mAxFxReverb.time = 2.5f;
@@ -1490,7 +1513,12 @@ namespace homebutton {
             break;
 
         case 16:
+#ifdef __MWERKS__
             GroupAnmController* anim = mpGroupAnmController[mSelectAnmNum];
+#else
+            GroupAnmController* anim;  // PC: C++ forbids jumping past an initialised declaration (MWCC allows it)
+            anim = mpGroupAnmController[mSelectAnmNum];
+#endif
 
             if (!anim->isPlaying()) {
                 mState = 17;
@@ -1511,7 +1539,12 @@ namespace homebutton {
 
             setVolume(mVolumeNum);
 #ifdef GAME_REXE01
+#ifdef __MWERKS__
             BOOL result = WPADSaveConfig(NULL);
+#else
+            BOOL result;  // PC: as case 16
+            result = WPADSaveConfig(NULL);
+#endif
 #else
             bool result = WPADSaveConfig(NULL);
 #endif

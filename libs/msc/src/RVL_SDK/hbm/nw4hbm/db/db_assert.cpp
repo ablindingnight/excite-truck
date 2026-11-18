@@ -94,9 +94,13 @@ static void ShowStack_(register_t sp) {
 DECL_WEAK void VPanic(const char* file, int line, const char* fmt, va_list vlist) {
     register register_t stackPointer;
 
+#ifdef __MWERKS__
     asm { mr stackPointer, r1 }
 
     stackPointer = *reinterpret_cast<register_t*>(stackPointer);
+#else
+    stackPointer = (register_t)__builtin_frame_address(0);  // PC: the host's own frame pointer, not PowerPC r1
+#endif
 
     OSDisableInterrupts();
 
