@@ -1420,6 +1420,13 @@ static inline void CamRotFromVec(Mat3* r, const f32* w) {
     }
 }
 
+/* Helper name unproven */
+static inline void Set3f(f32* o, f32 x, f32 y, f32 z) {
+    o[0] = x;
+    o[1] = y;
+    o[2] = z;
+}
+
 // Applies the current view of camera cycle `ci` to camera `p`.
 void camera_car(u8* p, int ci) {
     CamRec* r = (CamRec*)p;
@@ -1433,9 +1440,7 @@ void camera_car(u8* p, int ci) {
         f.origin.x = v->off[0];
         f.origin.y = v->off[1];
         f.origin.z = v->off[2];
-        w[0] = 0.017453292f * v->rot[0];
-        w[1] = 0.017453292f * v->rot[1];
-        w[2] = 0.017453292f * v->rot[2];
+        Set3f(w, DegToRad(v->rot[0]), DegToRad(v->rot[1]), DegToRad(v->rot[2]));
         CamRotFromVec(&f.Mat(), w);
         fn_801BFD34((u8*)&r->pose.pos, (f32*)&f.origin, (u8*)&r->carFrame);
         Mat3Mul((Mat3*)&r->pose, &f.Mat(), (Mat3*)&r->carFrame);
