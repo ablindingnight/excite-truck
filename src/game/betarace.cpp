@@ -1713,8 +1713,10 @@ char lbl_80559F0C[1] = "";
 
 #pragma dont_inline on
 void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
+    // PROVISIONAL private result workspace; original type/name/ownership unproven.
+    struct CoinResultWorkspace { s32 gain; };
+    CoinResultWorkspace coins;
     f32* pos;
-    s32 gain;
     f32 add;
     int wasFull;
     int boosting;
@@ -1735,14 +1737,14 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             }
         }
         const s32 count = f.count;
-        gain = count * co->value;
-        cc->count += gain;
+        coins.gain = count * co->value;
+        cc->count += coins.gain;
         for (i = 0; i < count; i++) {
             cc->flash[cc->next] = 0.6f;
             cc->next = (cc->next + 1) % 4;
         }
     } else {
-        gain = 0;
+        coins.gain = 0;
     }
     {
         CarHud* h = hud;
@@ -1786,7 +1788,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             }
         }
     }
-    score += add + gain;
+    score += add + coins.gain;
     // PROVISIONAL actual-value name and ownership; original spelling unproven.
     f32 previousShown = shown;
     {
