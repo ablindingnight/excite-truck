@@ -391,6 +391,11 @@ void fn_802D479C(Surf* s) {
     }
 }
 
+// PROVISIONAL: actual morph-height input/return API is inferred.
+static inline f32 MorphHeight(const f32& y, f32 a, f32 u, f32 b, f32 w) {
+    return y + a * u + b * w;
+}
+
 void fn_802D4988(Surf* s) {
     YMorphVtx* v = (YMorphVtx*)s->verts;
     PSVECDistance((const Vec*)&lbl_804C56C0.origin, (const Vec*)v);
@@ -403,16 +408,21 @@ void fn_802D4988(Surf* s) {
             V3* o = out;
             for (; n > 0; n--) {
                 f32 vx;
-                f32 a = (1.0f / 255) * m->da;
-                f32 b = (1.0f / 255) * m->db;
-                f32 wb = lbl_804CA308[m->ib];
-                f32 wa = lbl_804CA308[m->ia];
+                f32 b;
+                f32 wb;
+                f32 wa;
+                f32 z;
+                f32 a;
+                a = (1.0f / 255) * m->da;
+                b = (1.0f / 255) * m->db;
+                wb = lbl_804CA308[m->ib];
+                wa = lbl_804CA308[m->ia];
                 m++;
-                f32 z = v->z;
-                f32 y = v->y;
+                z = v->z;
                 vx = v->x;
+                f32 height = MorphHeight(v->y, a, wa, b, wb);
                 o->x = vx;
-                o->y = y + a * wa + b * wb;
+                o->y = height;
                 o->z = z;
                 v++;
                 o++;
