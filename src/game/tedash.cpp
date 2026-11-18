@@ -672,7 +672,9 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
         return;
     }
     s16 cx = (s16)Round(pos->x / lbl_80564C88) & ~(fn_802B6E30() - 1);
-    s16 cz = (s16)Round(pos->z / lbl_80564C88) & ~(fn_802B6E30() - 1);
+    s16 roundedZ = (s16)Round(pos->z / lbl_80564C88);
+    int maskZ = fn_802B6E30() - 1;
+    s16 cz = roundedZ & ~maskZ;
     u32 nw = lbl_8055CEA0 * b->w;
     u32 nh = lbl_8055CEA0 * b->h;
     if (lbl_8055FA38 == 5) {
@@ -688,10 +690,14 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
                 continue;
             }
             u32 k = lbl_8055CEA0;
-            u32 bj = j / k;
-            u32 bi = i / k;
-            u32 ri = i - bi * k;
-            u32 rj = j - bj * k;
+            u32 rj;
+            u32 bj;
+            u32 bi;
+            u32 ri;
+            bj = j / k;
+            bi = i / k;
+            ri = i - bi * k;
+            rj = j - bj * k;
             int v;
             if (!(ri == 0 && rj == 0)) {
                 u32 i1 = bi + 1 < b->w - 1 ? bi + 1 : b->w - 1;
@@ -699,11 +705,11 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
                 u8 d;
                 f32 tx = (f32)ri / (f32)k;
                 u8 a = b->data[bj * b->w + bi];
-                f32 c = b->data[bj * b->w + i1];
+                u8 c = b->data[bj * b->w + i1];
                 d = b->data[j1 * b->w + bi];
-                f32 top = a + tx * (c - a);
-                f32 e = b->data[j1 * b->w + i1];
-                f32 bot = d + tx * (e - d);
+                f32 top = (f32)a + tx * ((f32)c - (f32)a);
+                u8 e = b->data[j1 * b->w + i1];
+                f32 bot = (f32)d + tx * ((f32)e - (f32)d);
                 f32 ty = (f32)rj / (f32)k;
                 v = (int)(top + ty * (bot - top));
             } else {
