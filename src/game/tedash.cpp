@@ -819,9 +819,33 @@ void fn_802B7884(const char* label) {
     fn_802B6568(lbl_8055FA48->Find("toggle_objects"), t);
 }
 
+// PROVISIONAL: copy-helper ownership and spelling. Retail copies these two
+// position words as bits. The portable path preserves the same representation.
+static inline void CopyBrushPosition(V2* dst, const V2* src) {
+#if defined(__MWERKS__)
+    struct BrushPositionWords { u32 w[2]; };
+    BrushPositionWords* d = (BrushPositionWords*)dst;
+    const BrushPositionWords* s = (const BrushPositionWords*)src;
+    u32 x = s->w[0];
+    u32 y = s->w[1];
+    d->w[1] = y;
+    d->w[0] = x;
+#else
+    memcpy(dst, src, sizeof(*dst));
+#endif
+}
+
 void fn_802B7918(void) {
     f32 row = (lbl_8055FA48->FindBox("matmap_col"))->h;
-    TextElem t = *lbl_8055FA48->Find("brush_col");
+    const TextElem* src = lbl_8055FA48->Find("brush_col");
+    TextElem t;
+    t.name = src->name;
+    CopyBrushPosition(&t.pos, &src->pos);
+    t.elemJust = src->elemJust;
+    t.scale = src->scale;
+    t.just = src->just;
+    t.color = src->color;
+    t.defText = src->defText;
     char nm[0x20];
     fn_802B6568(lbl_8055FA48->Find("brush_dropdown"), "Brushes");
     if (lbl_8055FA10.Waiting()) {
