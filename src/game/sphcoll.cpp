@@ -1721,12 +1721,18 @@ int fn_8019DAB0(u8* p, u8* q) {
     if (hit) {
         return 1;
     }
+    u8* m;
+    f32 h;
     PVec3A a;
     PVec3A b;
-    PVec3A dir = *(PVec3A*)(((u8*&)((CollShape*)p)->frame) + 0x18);
-    PVec3A mid = *(PVec3A*)(((u8*&)((CollShape*)p)->frame) + 0x24);
-    f32 h = ((TubeShape*)p)->half;
-    f32 r = ((TubeShape*)p)->rad;
+    PVec3A dir;
+    PVec3A mid;
+    f32 r;
+    m = ((u8*&)((CollShape*)p)->frame);
+    h = LoadF(&((TubeShape*)p)->half);
+    dir = *(PVec3A*)(m + 0x18);
+    mid = *(PVec3A*)(m + 0x24);
+    r = LoadF(&((TubeShape*)p)->rad);
     MulAdd(a.v, mid.v, dir.v, h);
     MulAdd(b.v, mid.v, dir.v, -h);
     hit |= fn_8019B08C(p, a.v, q, r);
