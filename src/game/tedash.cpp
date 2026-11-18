@@ -3,6 +3,7 @@
 // and scales, dumping the world model, and the stats columns other units register. Names are guesses
 // apart from the strings.
 #include "game/common.h"
+#include "game/buildquery.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
 #include "game/v2.h"
@@ -668,61 +669,77 @@ s16 fn_802B6ED8(s16 base, int i, u32 n) { return base + (i - n / 2) * (s16)fn_80
 extern const f32 lbl_80564C88;
 s32 lbl_8055CEA0 = 1;  // brush scale (.sdata: defined after the brush-list strings)
 
+// PROVISIONAL: shared-query identity/cut locations and setup-value ownership/order are inferred.
 void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     if (b->w == 0) {
         return;
     }
+    s16 signedZ;
+    int maskZ;
+    u32 height;
     s16 cx = (s16)Round(pos->x / lbl_80564C88) & ~(fn_802B6E30() - 1);
-    s16 roundedZ = (s16)Round(pos->z / lbl_80564C88);
-    int maskZ = fn_802B6E30() - 1;
-    s16 cz = roundedZ & ~maskZ;
-    u32 nw = lbl_8055CEA0 * b->w;
-    u32 nh = lbl_8055CEA0 * b->h;
-    if (lbl_8055FA38 == 5) {
-        Vec2 a(2.0f * (f32)fn_802B6E7C(cx, 0, nw), 2.0f * (f32)fn_802B6ED8(cz, 0, nh));
-        Vec2 c(2.0f * (f32)fn_802B6E7C(cx, nw - 1, nw), 2.0f * (f32)fn_802B6ED8(cz, nh - 1, nh));
-        fn_80204048(&a, &c);
-    }
-    for (u32 i = 0; i < nw; i++) {
-        for (u32 j = 0; j < nh; j++) {
-            s16 gx = fn_802B6E7C(cx, i, nw);
-            s16 gz = fn_802B6E7C(cz, j, nh);
-            if (fn_802B6E00(gx, gz)) {
-                continue;
+    int roundedZ = Round(pos->z / lbl_80564C88);
+    maskZ = fn_802B6E30() - 1;
+    signedZ = (s16)roundedZ;
+    s16 cz;
+    if (BuildMode() == kBuildRetail) {
+        s32 scale = lbl_8055CEA0;
+        u32 width = b->w;
+        height = b->h;
+        u32 nw = scale * width;
+        if (BuildMode() == kBuildRetail) {
+            int mode = lbl_8055FA38;
+            u32 nh = scale * height;
+            int alignedZ = signedZ & ~maskZ;
+            cz = (s16)alignedZ;
+            if (mode == 5) {
+                Vec2 a(2.0f * (f32)fn_802B6E7C(cx, 0, nw), 2.0f * (f32)fn_802B6ED8(cz, 0, nh));
+                Vec2 c(2.0f * (f32)fn_802B6E7C(cx, nw - 1, nw), 2.0f * (f32)fn_802B6ED8(cz, nh - 1, nh));
+                fn_80204048(&a, &c);
             }
-            u32 k = lbl_8055CEA0;
-            u32 rj;
-            u32 bj;
-            u32 bi;
-            u32 ri;
-            bj = j / k;
-            bi = i / k;
-            ri = i - bi * k;
-            rj = j - bj * k;
-            int v;
-            if (!(ri == 0 && rj == 0)) {
-                u32 i1 = bi + 1 < b->w - 1 ? bi + 1 : b->w - 1;
-                u32 j1 = bj + 1 < b->h - 1 ? bj + 1 : b->h - 1;
-                u8 d;
-                f32 tx = (f32)ri / (f32)k;
-                u8 a = b->data[bj * b->w + bi];
-                u8 c = b->data[bj * b->w + i1];
-                d = b->data[j1 * b->w + bi];
-                f32 top = (f32)a + tx * ((f32)c - (f32)a);
-                u8 e = b->data[j1 * b->w + i1];
-                f32 bot = (f32)d + tx * ((f32)e - (f32)d);
-                f32 ty = (f32)rj / (f32)k;
-                v = (int)(top + ty * (bot - top));
-            } else {
-                v = b->data[bj * b->w + bi];
+            for (u32 i = 0; i < nw; i++) {
+                for (u32 j = 0; j < nh; j++) {
+                    s16 gx = fn_802B6E7C(cx, i, nw);
+                    s16 gz = fn_802B6E7C(cz, j, nh);
+                    if (fn_802B6E00(gx, gz)) {
+                        continue;
+                    }
+                    u32 k = lbl_8055CEA0;
+                    u32 rj;
+                    u32 bj;
+                    u32 bi;
+                    u32 ri;
+                    bj = j / k;
+                    bi = i / k;
+                    ri = i - bi * k;
+                    rj = j - bj * k;
+                    int v;
+                    if (!(ri == 0 && rj == 0)) {
+                        u32 i1 = bi + 1 < b->w - 1 ? bi + 1 : b->w - 1;
+                        u32 j1 = bj + 1 < b->h - 1 ? bj + 1 : b->h - 1;
+                        u8 d;
+                        f32 tx = (f32)ri / (f32)k;
+                        u8 a = b->data[bj * b->w + bi];
+                        u8 c = b->data[bj * b->w + i1];
+                        d = b->data[j1 * b->w + bi];
+                        f32 top = (f32)a + tx * ((f32)c - (f32)a);
+                        u8 e = b->data[j1 * b->w + i1];
+                        f32 bot = (f32)d + tx * ((f32)e - (f32)d);
+                        f32 ty = (f32)rj / (f32)k;
+                        v = (int)(top + ty * (bot - top));
+                    } else {
+                        v = b->data[bj * b->w + bi];
+                    }
+                    cb(gx, gz, (u8)v);
+                }
             }
-            cb(gx, gz, (u8)v);
+            if (lbl_8055FA38 == 5) {
+                fn_8020404C();
+            }
         }
     }
-    if (lbl_8055FA38 == 5) {
-        fn_8020404C();
-    }
 }
+
 // Centre of cell c in world units.
 static inline f32 CellCentre(int c, f32 scale) { return lbl_80564C88 + (f32)c * scale; }
 
