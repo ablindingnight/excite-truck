@@ -18,9 +18,8 @@ static UnkStatic123 lbl_8042FB88;
 static inline u32 Initial7FWord() { return 0x7F000000u; }
 extern const u32 lbl_8055E1DC = Initial7FWord();
 
-// PROVISIONAL export ownership. Retail keeps weak GameMode/Dot/SetEuler
-// copies. These ordinary definitions reproduce their live addresses and bytes.
-// The original inline/header emission context remains unproven.
+// These shared helpers keep retail weak binding through DECL_WEAK.
+// Their original inline/header declaration context remains unproven.
 f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 
 // Mtx33: mtx33.h.
@@ -85,9 +84,9 @@ public:
     virtual ~GameMode(void);
 };
 
-GameMode::GameMode(void) {}
+DECL_WEAK GameMode::GameMode(void) {}
 
-f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
+DECL_WEAK f32 Dot(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { return e * f + (a * b + c * d); }
 
 
 // d = a * b
@@ -127,7 +126,7 @@ static inline void MtxMul(Mtx33* dp, const Mtx33* ap, const Mtx33* bp) {
     }
 }
 
-void Mtx33::SetEuler(f32 y, f32 x, f32 z) {
+DECL_WEAK void Mtx33::SetEuler(f32 y, f32 x, f32 z) {
     f32 t[9];
     SetRotY(y);
     Mtx33* rx = (Mtx33*)t;
