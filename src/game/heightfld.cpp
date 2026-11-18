@@ -538,8 +538,8 @@ static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, i
             for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
                 f32 w = lbl_804424B0[l->weight];
                 h += w * (l->base + l->scale * l->h[lx][lz]);
-                hz += w * (l->base + l->scale * l->h[lx][oz]);
                 hx += w * (l->base + l->scale * l->h[ox][lz]);
+                hz += w * (l->base + l->scale * l->h[lx][oz]);
             }
         }
         hz -= h;
