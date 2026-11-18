@@ -1801,9 +1801,10 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         flash[1] = t > 0.0f ? t : 0.0f;
         t = flash[2] - 0.016683351f;
         flash[2] = t > 0.0f ? t : 0.0f;
-        t = flash[3] - 0.016683351f;
-        flash[3] = t > 0.0f ? t : 0.0f;
-        f32 flashTime = flash[4];
+        // PROVISIONAL earlier value range of the actual timer local.
+        f32 flashTime = flash[3] - 0.016683351f;
+        flash[3] = flashTime > 0.0f ? flashTime : 0.0f;
+        flashTime = flash[4];
         t = flashTime - 0.016683351f;
         flash[4] = t > 0.0f ? t : 0.0f;
     }
