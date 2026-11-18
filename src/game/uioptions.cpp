@@ -7,6 +7,7 @@
 #include "game/menu.h"
 #include <stdarg.h>
 #include "game/menuwidget.h"
+#include "game/menuwidget_inl.h"
 
 void* operator new[](size_t size, const char* tag);
 
@@ -48,7 +49,6 @@ void fn_8023FCFC(int slot);
 void fn_8023D1C0(void);
 void fn_8023C958(void);
 void fn_8023C94C(void);
-u32 fn_802E4A10(void);
 void fn_8023D4B8(int);
 void fn_8023C3D4(void);
 void fn_80278A24(void);

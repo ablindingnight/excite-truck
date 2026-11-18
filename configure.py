@@ -1181,7 +1181,7 @@ config.libs.append(
             Object(Matching, "game/uitext.cpp"),
             Object(Matching, "game/swfanim.cpp"),
             Object(Matching, "game/stub19.cpp"),
-            Object(NonMatching, "game/uioptions.cpp"),
+            Object(Matching, "game/uioptions.cpp"),
             Object(Matching, "game/stub10.cpp"),
             Object(Matching, "game/mmain.cpp"),
             Object(Matching, "game/gamedo.cpp"),
