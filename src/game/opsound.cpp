@@ -86,7 +86,8 @@ public:
     virtual void Unk24(gxCanvas*);
     // Restarts the announcer preview at volume v. The menu calls it only when a sample is loaded; right after
     // construction none is, so MWCC turns the caller's test into a branch over the (kept) body, as in the target.
-    void ResetPreview(f32 v) {
+    // v by const reference: retail reads the volume global at the SetVolume compare, after Rewind.
+    void ResetPreview(const f32& v) {
         if (sound) {
             sound->Rewind();
         }
