@@ -111,7 +111,10 @@ int fn_8026A698(u8* p, int i) {
     int n = fn_80178CA4();
     bool multi = n > 1;
     u8* c = ((CamRec*)p)->car;
-    int done = !((f32)__fabs(((CarBody*)c)->f2690) <= __float_epsilon[0]) && fn_801B8570(((CarBody*)c)->index);
+    int done = 0;
+    if (!((f32)__fabs(((CarBody*)c)->f2690) <= __float_epsilon[0]) && fn_801B8570(((CarBody*)c)->index)) {
+        done = 1;
+    }
     if (!done) {
         s->t = 0.0f;
         if (s->active) {
