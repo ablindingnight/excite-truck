@@ -227,6 +227,12 @@ void BuildAIMap(DAVMap* map, int n, DAVMap* players) {
         CollectVehicles(&vehicles, players);
         ColorList colors;
         CollectColors(&colors, players);
+#ifndef __MWERKS__
+        // PORT: x86 traps on `% 0` (PPC divw does not); with an empty list retail would read garbage anyway.
+        if (drivers.count == 0 || vehicles.count == 0 || colors.count == 0) {
+            n = 0;
+        }
+#endif
         for (i = 0; i < n; i++) {
             s32 driver = drivers.data[i % drivers.count];
             s32 vehicle = vehicles.data[i % vehicles.count];
