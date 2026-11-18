@@ -197,7 +197,7 @@ void fn_8023E7A8(int status) {
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", 3, "", 4, 0),
         MenuItem("lbutton", 3, "", 4, 0),
-        MenuItem("rbutton", "", CaptionContext(4)),
+        MenuItem("rbutton", 3, "", 4, 0),
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {"mem3line.lyt", items, fn_8023ECF8, 0, 0};
