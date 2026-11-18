@@ -267,10 +267,10 @@ void NetCar::Update(void) {
 }
 
 static inline double DL(double t, double ti, double tj, double tk) {
-    double den = (ti - tj) * (ti - tk);
-    return ((t + t - tj) - tk) / den;
+    return ((t + t - tj) - tk) / ((ti - tj) * (ti - tk));
 }
 
+// PROVISIONAL: actual Lagrange coefficient evaluation ownership/order is inferred.
 void NetCar::Extrapolate(Blend* b) {
     s32 now = lbl_8055E3C4;
     f32 s = fn_801A63C4(now, ptab[0].frame);
@@ -286,8 +286,8 @@ void NetCar::Extrapolate(Blend* b) {
         f32 t0 = fn_801A63C4(ptab[0].frame, ptab[2].frame);
         f32 tn = fn_801A63C4(now, ptab[2].frame);
         double b0 = DL(tn, t0, 0.0, t1);
-        double b1 = DL(tn, t1, 0.0, t0);
         double b2 = DL(tn, 0.0, t1, t0);
+        double b1 = DL(tn, t1, 0.0, t0);
         f32 x2 = ptab[2].pose.pos.v[0];
         f32 x1 = ptab[1].pose.pos.v[0];
         f32 x0 = ptab[0].pose.pos.v[0];
