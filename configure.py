@@ -505,7 +505,7 @@ config.libs.append(
         "lib": "SDK_mp3",
         "mw_version": "GC/3.0a3",
         "src_dir": "src",
-        "cflags": [*cflags_rvl_tp, "-use_lmw_stmw on", "-inline noauto", "-i src/sdk_mp3"],
+        "cflags": [*cflags_rvl_tp, "-use_lmw_stmw on", "-inline noauto", "-i src/sdk_mp3", f"-i build/{config.version}/include/sdk_mp3"],
         "progress_category": "sdk",
         "objects": [
             Object(Matching, "sdk_mp3/mp3frame.c"),
@@ -1418,6 +1418,34 @@ def dumpdata_steps() -> None:
 
 
 dumpdata_steps()
+
+# 2026-11-17 (TC): the SDK MP3 decoder tables (src/sdk_mp3/*_tables.inc) are generated from the player's main.dol at
+# build time by tools/mp3/gentables.py into build/<ver>/include/sdk_mp3, instead of being stored in the repo.
+def mp3tables_steps() -> None:
+    gen = Path("tools") / "mp3" / "gentables.py"
+    out_dir = Path("build") / config.version / "include" / "sdk_mp3"
+    names = ["mp3frame_tables.inc", "mp3decode_tables.inc", "mp3dequant_tables.inc", "mp3layer3_tables.inc"]
+    dol = Path("orig") / config.version / "sys" / "main.dol"
+    symbols = Path("config") / config.version / "symbols.txt"
+    config.custom_build_rules = [
+        *(config.custom_build_rules or []),
+        {"name": "mp3tables", "command": f"$python {gen} $outdir", "description": "MP3TABLES $outdir", "restat": True},
+    ]
+    steps = config.custom_build_steps or {}
+    steps.setdefault("pre-compile", []).append(
+        {
+            "outputs": out_dir / names[0],
+            "implicit_outputs": [out_dir / n for n in names[1:]],
+            "rule": "mp3tables",
+            "inputs": [dol, symbols],
+            "implicit": [gen],
+            "variables": {"outdir": out_dir},
+        }
+    )
+    config.custom_build_steps = steps
+
+
+mp3tables_steps()
 
 if args.mode == "configure":
     # Write build.ninja and objdiff.json

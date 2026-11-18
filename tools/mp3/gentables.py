@@ -1,7 +1,9 @@
 # Generate C definitions for the SDK MP3 decoder's .rodata/.data/.sdata objects from the original DOL.
 # Objects are static (MWCC then addresses them section-relative, like the original), defined in an order
-# where every pointer target comes first. Output: src/sdk_mp3/mp3{frame,dequant,layer3}_tables.inc
-import re, struct
+# where every pointer target comes first. Output: <outdir>/mp3{frame,decode,dequant,layer3}_tables.inc (build step)
+import os, re, struct, sys
+OUT = sys.argv[1] if len(sys.argv) > 1 else "build/REXE01/include/sdk_mp3"  # 2026-11-17: configure.py runs this at build time (was src/sdk_mp3)
+os.makedirs(OUT, exist_ok=True)
 
 d = open("orig/REXE01/sys/main.dol", "rb").read()
 offs = struct.unpack(">18I", d[0:72]); addrs = struct.unpack(">18I", d[72:144]); sizes = struct.unpack(">18I", d[144:216])
@@ -64,6 +66,8 @@ TYPES = {
 }
 # Objects declared with a specific C shape: address -> (declaration with %s for the name, elem type, size)
 SHAPES = {
+    # count1 region end per [lsf][sr_index], read as s16[][3] by mp3decode.c; s16 keeps it endian-neutral for the PC port
+    0x802F34D8: ("MP3_STATIC const s16 %s[8]", "s16", 2),
     0x802F3418: ("MP3_STATIC const s16 %s[3][16]", "s16", 2),
     0x802F3478: ("MP3_STATIC const s16 %s[3][16]", "s16", 2),
     0x802F3D60: ("MP3_STATIC const s16 %s[2][3][16]", "s16", 2),  # long-block band boundaries
@@ -160,12 +164,12 @@ def emit(a):
 # The decoder is four translation units (MWCC addresses pooled tables from the start of each unit's
 # .rodata, which puts unit boundaries at 0x802F3418, 0x802F34E8 and 0x802F3D60). Each unit gets its own table file.
 UNITS = [
-    ("src/sdk_mp3/mp3frame_tables.inc", {"rodata": (0x802F3238, 0x802F3418), "data": (0x8031BFA8, 0x8031C098),
+    (OUT + "/mp3frame_tables.inc", {"rodata": (0x802F3238, 0x802F3418), "data": (0x8031BFA8, 0x8031C098),
                                          "sdata": (0x80559250, 0x80559270)}),
-    ("src/sdk_mp3/mp3decode_tables.inc", {"rodata": (0x802F3418, 0x802F34E8), "sdata2": (0x80560DA0, 0x80560DB0)}),
-    ("src/sdk_mp3/mp3dequant_tables.inc", {"rodata": (0x802F34E8, 0x802F3D60), "data": (0x8031C098, 0x8031C298),
+    (OUT + "/mp3decode_tables.inc", {"rodata": (0x802F3418, 0x802F34E8), "sdata2": (0x80560DA0, 0x80560DB0)}),
+    (OUT + "/mp3dequant_tables.inc", {"rodata": (0x802F34E8, 0x802F3D60), "data": (0x8031C098, 0x8031C298),
                                            "sdata2": (0x80560DB0, 0x80560DB8)}),
-    ("src/sdk_mp3/mp3layer3_tables.inc", {"rodata": (0x802F3D60, 0x802F44E8), "data": (0x8031C298, 0x8031D840),
+    (OUT + "/mp3layer3_tables.inc", {"rodata": (0x802F3D60, 0x802F44E8), "data": (0x8031C298, 0x8031D840),
                                           "sdata": (0x80559270, 0x80559708)}),
 ]
 def deps(a):
