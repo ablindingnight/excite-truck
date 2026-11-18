@@ -9,6 +9,7 @@
 #include "game/gart.h"
 #include "game/plainvec.h"
 #include <string.h>
+#include <stddef.h>
 #include <stdarg.h>
 #include "game/strcopy.h"
 
@@ -1048,22 +1049,28 @@ void fn_802B84E4(CursorState* c) {
 
 #pragma push
 #pragma opt_strength_reduction off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
-// PROVISIONAL: worker boundary, five-input shape, and local ownership/order are inferred.
+// PROVISIONAL: worker/input shape, next-column value boundary, byte view, and local ownership/order are inferred.
+struct BrushNextColumn { u32 value; };
+static inline BrushNextColumn NextBrushColumn(u32 x) { BrushNextColumn v = { x + 1 }; return v; }
+
 static inline void RotateBrushSized(Brush* b, const Brush& tmp, int op, u32 h, u32 w) {
+    u8* destination;
     u32 x;
     u32 y;
     int r;
     int l;
     const u8* pixels = tmp.data;
     for (x = 0; x < b->w; x++) {
+        BrushNextColumn next = NextBrushColumn(x);
         u32 rowLast = h - x - 1;
         l = rowLast * w;
-        r = w * (x + 1) - 1;
+        destination = (u8*)b + x;
+        r = w * next.value - 1;
         for (y = 0; y < b->h; y++) {
             if (op == 6) {
-                b->data[x + y * b->w] = pixels[(int)(r - y)];
+                destination[offsetof(Brush, data) + y * b->w] = pixels[(int)(r - y)];
             } else {
-                b->data[x + y * b->w] = pixels[(int)(y + l)];
+                destination[offsetof(Brush, data) + y * b->w] = pixels[(int)(y + l)];
             }
         }
     }
