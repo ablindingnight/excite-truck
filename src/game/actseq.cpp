@@ -62,6 +62,8 @@ template <typename T, int N>
 struct FixedArr : ArrayRef<T> {
     FixedArr(void) : ArrayRef<T>(storage, N) {}
     ~FixedArr(void) {}
+    // PROVISIONAL: actual record-address input ownership and insertion overload API are inferred.
+    void Push(const T* const& v) { T* p = &this->data[this->count++]; *p = *v; }
     void Push(T v) {
         T* p = &this->data[this->count++];
         *p = v;
@@ -1255,7 +1257,7 @@ inline void SurfaceChange_ASE::Added(SurfBody* b) {
         e.surf = b->Surface();
         e.mode = b->Mode();
         e.obj = b;
-        entries.Push(e);
+        entries.Push(&e);
         b->SetMode(-1);
     }
 }
