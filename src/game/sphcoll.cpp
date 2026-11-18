@@ -2355,6 +2355,7 @@ struct BoxSlip {
 #pragma push
 #pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void BoxSphereShape::vf14(void) {
+    RigidBody* rb = (RigidBody*)owner;
     int i;
     RVec3 at;
     RVec3 pos;
@@ -2362,7 +2363,6 @@ void BoxSphereShape::vf14(void) {
     RVec3 v;
     int surf;
     u8* p = (u8*)this;
-    RigidBody* rb = (RigidBody*)owner;
     at.x = this->f34;
     at.y = this->f38;
     at.z = this->f3C;
