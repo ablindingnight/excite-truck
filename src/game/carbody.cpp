@@ -556,6 +556,10 @@ extern "C" {
 // sets up the rigid body, wheels, collision shapes and sub-systems, then resets the body.
 /* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
    member body, MWCC keeps this+K in an extra register and the code differs. */
+/* Helper name unproven (interlude has the same one for ValueNode) */
+static inline s32 GetEnumOr(CbValueNode* n, const char* key, const char* names, s32 def) {
+    return n->Has(key) ? n->GetEnum(key, names) : def;
+}
 void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     CarBody* cb = (CarBody*)p;
     char path[0x50];
@@ -606,8 +610,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     cb->f5D8 *= 0.0254f;
     cb->f5C0 = 0.0174f * chassis->GetFloat("head_pitch");
     const char* treeClasses = "light\0medium\0heavy\0\0";
-    const char* key = "treehit_class";
-    cb->f5E8 = chassis->Has(key) ? chassis->GetEnum(key, treeClasses) : 1;
+    cb->f5E8 = GetEnumOr(chassis, "treehit_class", treeClasses, 1);
     GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->ident.vehicle);
     fn_801B86BC(((CarDesc*)desc)->index, p + 0x2C4);
     cb->f25C0 = (FindVehicle(cb->ident.vehicle)->flags >> 2) & 1;
