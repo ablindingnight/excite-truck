@@ -1184,6 +1184,15 @@ inline void Arena::Step(PlayerData* pd) {
     }
 }
 
+// PROVISIONAL: helper name/signature and the pointer/timer value ownership are
+// inferred from matching output; the original inline boundary is unproven.
+static inline int TallyDelta(SetStat* const& entry, int gap) {
+    const f32& now = Time();
+    f32 start = entry->time;
+    f32 lo = 0.3f + (0.2f + 0.05f * entry->best) + 0.05f * (entry->best - gap);
+    return Lerp(0.0f, 1.0f, UnlerpClamped(lo, 0.25f + lo, now - start));
+}
+
 // Helper name unproven: the countdown, score tally and cheer fade.
 inline void Arena::Tally(void) {
     if (!b49) {
@@ -1204,9 +1213,7 @@ inline void Arena::Tally(void) {
             k = curSet;
         }
         if (f34 < f30 && stats->data[k].done) {
-            SetStat* st = &stats->data[k];
-            f32 lo = 0.3f + (0.2f + 0.05f * st->best) + 0.05f * (st->best - (f30 - f34));
-            int n = Lerp(0.0f, 1.0f, UnlerpClamped(lo, 0.25f + lo, Time() - st->time));
+            int n = TallyDelta(&stats->data[k], f30 - f34);
             if (n) {
                 f34 += n;
                 GameSound* tally = sTally;
