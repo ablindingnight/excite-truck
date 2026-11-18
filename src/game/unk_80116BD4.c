@@ -438,7 +438,13 @@ u32 mult64anddiv(u32 a, u32 b, u32 d) {
     u32 rem;
     if ((d & (d - 1)) == 0) {
         s = __cntlzw(d);
+#ifdef __MWERKS__
         return (hi << (s + 1)) | (lo >> (31 - s));
+#else
+        /* PPC slw/srw give 0 for shift counts 32-63; x86 masks the count to 5 bits. d == 1 (s = 31) shifts hi by
+           32 and d == 0 (s = 32) shifts by 33 and by -1: keep the console's results. */
+        return (s + 1 < 32 ? hi << (s + 1) : 0) | (31 - s < 32 ? lo >> (31 - s) : 0);
+#endif
     }
     if (hi == 0) {
         return lo / d;
