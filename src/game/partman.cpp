@@ -127,6 +127,19 @@ struct TypeEntry {
     s32 refs;       // offset 0x14
 };
 
+// PartTweak's base (names unproven). Its vf18/vf1C are the empty out-of-line functions that PartTweak's overrides
+// tail-call (retail fn_802916E8/EC). Defining them here makes this unit emit the base's 0x24 table, which no code
+// references, so the linker keeps it as retail's zero block after the vtables (lbl_8034911C).
+struct TweakBase {
+    virtual ~TweakBase(void) {}
+    virtual s32 vf0C(void) = 0;
+    virtual s32 vf10(void) = 0;
+    virtual int vf14(void) = 0;
+    virtual void vf18(void);
+    virtual void vf1C(void);
+    virtual void vf20(void) = 0;
+};
+
 struct PartTweak2 {
     virtual ~PartTweak2(void);
 };
@@ -609,7 +622,7 @@ void fn_8028F5A4(void) {}
 
 }  // extern "C"
 
-struct PartTweak {
+struct PartTweak : TweakBase {
     virtual ~PartTweak(void);
     virtual s32 vf0C(void);
     virtual s32 vf10(void);
@@ -1039,19 +1052,19 @@ extern "C" {
 
 void fn_802916E4(PartTweak* t) {}
 
-void fn_802916E8(void* t) {}
-
-void fn_802916EC(void* t) {}
-
 }  // extern "C"
+
+void TweakBase::vf18(void) {}
+
+void TweakBase::vf1C(void) {}
 
 s32 PartTweak::vf0C(void) { return f4; }
 
 s32 PartTweak::vf10(void) { return f118; }
 
-void PartTweak::vf18(void) { fn_802916E8(this); }
+void PartTweak::vf18(void) { TweakBase::vf18(); }
 
-void PartTweak::vf1C(void) { fn_802916EC(this); }
+void PartTweak::vf1C(void) { TweakBase::vf1C(); }
 
 void PartTweak::vf20(void) { on = 1; }
 
