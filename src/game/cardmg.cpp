@@ -758,6 +758,12 @@ static inline int HitCorner(const AVec* at) {
 static inline double AbsDbl(double v) { return __fabs(v); }
 
 void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, int kind, u8*, int) {
+    AVec di;
+    AVec da;
+    AVec h;
+    DentVec bp;
+    DentVec cand;
+    AVec g0;
     DentVec nd;
     DentVec dg;
     DentVec c0;
@@ -765,11 +771,6 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     DentVec r;
     ValVec3 c;
     GlassMsg msg;
-    AVec di;
-    AVec da;
-    AVec h;
-    DentVec cand;
-    AVec g0;
     f32 mass = ((CarBody*)p)->mass;
     f32 inv = -0.1f / mass;
     ((CarBody*)p)->f26F0 += imp->v[0] * inv;
@@ -845,7 +846,6 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         fn_8018E330(p);
     }
     /* dead local kept like retail's stores; name/form unproven */
-    DentVec bp;
     bp.x = 0.0f;
     bp.y = 0.0f;
     bp.z = 0.0f;
