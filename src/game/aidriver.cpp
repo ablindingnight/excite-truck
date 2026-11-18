@@ -69,13 +69,19 @@ struct AICarInfo {
 
 #include "game/idriver.h"
 
+// Defined in aicar.cpp (its key function ~AIDriver and the table live there); same overrides declared here.
 class AIDriver : public IDriver {
 public:
     AIDriver(void);
     virtual ~AIDriver(void);
     virtual void Init(void* car, void* q);
+    virtual u32 Flags(void);
     virtual void Start(void);
     virtual void Stop(void);
+    virtual void vf30(void);
+    virtual void vf38(const RVec3* dir, RVec3* b, int kind, u8* other);
+    virtual void vf3C(const RVec3* pt, RVec3* imp, int a, u8* other);
+    virtual void vf44(void);
     u8 pad[0x308];
 };
 

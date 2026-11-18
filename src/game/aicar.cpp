@@ -207,8 +207,6 @@ extern u32 lbl_8055D430;
 extern s32 lbl_8055E3C4;
 extern f32 lbl_8055E3C8;
 extern f32 __float_epsilon[];
-extern "C" void* lbl_80333348[];  // AIDriver vtable
-extern "C" void* lbl_80333390[];  // IDriver vtable
 
 struct AIVecBase {
     ~AIVecBase(void) { data = 0; }
@@ -288,11 +286,61 @@ static inline f32 Clamp01(f32 x) {
     return x > 0.0f ? x : 0.0f;
 }
 
-// AIDriver (aidriver.cpp declares the class), seen here only for its constructor: the slot functions and the
-// table stay hand-written in this unit (user decision, as playcar), so no virtuals here. Port: same member name.
-class AIDriver {
+#include "game/idriver.h"
+
+/* Class name unproven */
+// A driver that keeps itself in lbl_804349E0: its out-of-line destructor (retail fn_80198DD0) unregisters it, which
+// is what makes this unit emit its table (retail lbl_80333390). Init/Start/Stop stay pure (null slots).
+class ListedDriver : public IDriver {
+public:
+    virtual ~ListedDriver(void);
+    virtual void v48(void) = 0;  // called on every listed driver (slot 0x48); name unproven
+};
+
+// The AI driver (aidriver.cpp's new AIDriver). Its overrides keep their raw-offset bodies (d = this).
+class AIDriver : public IDriver {
 public:
     AIDriver(void);
+    virtual ~AIDriver(void);
+    virtual void Init(void* car, void* q);
+    virtual u32 Flags(void);
+    virtual void Start(void);
+    virtual void Stop(void);
+    virtual void vf30(void);
+    virtual void vf38(const RVec3* dir, RVec3* b, int kind, u8* other);
+    virtual void vf3C(const RVec3* pt, RVec3* imp, int a, u8* other);
+    virtual void vf44(void);
+    u8 pad04[0x64];
+    /* Helper name unproven */
+    struct State {
+        State(void) {
+            s68 = 0;
+            s70 = 10000;
+            f6C = 0.0f;
+            s78 = 0;
+            s90 = -1;
+            u8C = 0;
+            sA0 = 0;
+            sB8 = -1;
+            uB4 = 0;
+        }
+        s32 s68;         // 0x68
+        f32 f6C;         // 0x6C
+        s32 s70;         // 0x70
+        u8 pad74[4];
+        s32 s78;         // 0x78
+        u8 pad7C[0x10];
+        u8 u8C;          // 0x8C
+        s32 s90;         // 0x90
+        u8 pad94[0xC];
+        s32 sA0;         // 0xA0
+        u8 padA4[0x10];
+        u8 uB4;          // 0xB4
+        s32 sB8;         // 0xB8
+    } state;             // 0x68
+    u8 padBC[0x168 - 0xBC];
+    struct Followers { LineFollower ahead; LineFollower behind; } follow;  // 0x168
+    u8 pad1D0[0x30C - 0x1D0];
 };
 
 extern "C" {
@@ -411,7 +459,8 @@ void fn_8019330C(V2* out, const V2* in, const u8* m) {
 
 void fn_801933FC(u8* d, V2* v) { fn_8019330C(v, v, CAR(d) + 0x70); }
 
-void AIDriver_vf3C(u8* d, RVec3* pt, RVec3* imp, int a, u8* other) {
+void AIDriver::vf3C(const RVec3* pt, RVec3* imp, int a, u8* other) {
+    u8* d = (u8*)this;
     int isCar = 0;
     if (other && U32(other, 0x10) == 'PCAR') {
         isCar = 1;
@@ -458,14 +507,16 @@ int fn_80193524(u8* a, u8* b) {
     return r;
 }
 
-void AIDriver_vf44(u8* d) {
+void AIDriver::vf44(void) {
+    u8* d = (u8*)this;
     F32(d, 0x224) = 0.0f;
     F32(d, 0x228) = 0.0f;
     F32(d, 0x22C) = lbl_8055E3C8;
 }
 
 
-void AIDriver_vf38(u8* d, const RVec3* dir, RVec3* b, int kind, u8* other) {
+void AIDriver::vf38(const RVec3* dir, RVec3* b, int kind, u8* other) {
+    u8* d = (u8*)this;
     if (other) {
         if (U32(other, 0x10) == 'PCAR') {
             RVec3 rel;
@@ -562,19 +613,7 @@ AICommand lbl_80333158[4] = {
 
 // AIDriver::AIDriver (fn_801938F4; aidriver.cpp's new AIDriver calls it).
 AIDriver::AIDriver(void) {
-    S32(((u8*)this), 0x68) = 0;
-    *(void***)((u8*)this) = lbl_80333348;
-    S32(((u8*)this), 0x70) = 10000;
-    F32(((u8*)this), 0x6C) = 0.0f;
-    S32(((u8*)this), 0x78) = 0;
-    S32(((u8*)this), 0x90) = -1;
-    U8(((u8*)this), 0x8C) = 0;
-    S32(((u8*)this), 0xA0) = 0;
-    S32(((u8*)this), 0xB8) = -1;
-    U8(((u8*)this), 0xB4) = 0;
     u8* m = ((u8*)this) + 0x168;
-    __ct__12LineFollowerFv(m);
-    __ct__12LineFollowerFv(m + 0x34);
     F32(m, 0x68) = -999.0f;
     ((VFollow*)(m + 0x34))->SetLine(0);
     ((VFollow*)m)->SetLine(0);
@@ -585,10 +624,10 @@ AIDriver::AIDriver(void) {
 extern "C" {
 
 void fn_801942F0(u8* d, int on);
-void AIDriver_vf30(u8* d);
 void fn_8019416C(u8* d, const char* why);
 
-void AIDriver_Connect(u8* d) {
+void AIDriver::Start(void) {
+    u8* d = (u8*)this;
     if (U8(d, 0x2A4)) {
         fn_802E30C8("AIDriver::Connect(): Car %d: already connected!", CARID(d));
         return;
@@ -596,35 +635,28 @@ void AIDriver_Connect(u8* d) {
     U8(d, 0x2A4) = 1;
     F32(d, 0x24C) = F32(CAR(d), 0x5B0);
     fn_801942F0(d, 1);
-    AIDriver_vf30(d);
+    AIDriver::vf30();
 }
 
-void AIDriver_vf28(u8* d) {
+void AIDriver::Stop(void) {
+    u8* d = (u8*)this;
     U8(d, 0x2A4) = 0;
     u8* car = CAR(d);
     S32(car, 0x24) = S32(car, 0x28);
 }
 
-u8* AIDriver_vf08(u8* d, int del) {
-    if (d) {
-        s32 id = CARID(d);
-        if (id != -1000) {
-            lbl_804349C0[id] = 0;
-        }
-        lbl_8055E550--;
-        u8* m = d + 0x168;
-        if (m) {
-            ((LineFollower*)(d + 0x19C))->LineFollower::~LineFollower();
-            ((LineFollower*)(d + 0x168))->LineFollower::~LineFollower();
-        }
-        if (del > 0) {
-            operator delete(d);
-        }
+AIDriver::~AIDriver(void) {
+    u8* d = (u8*)this;
+    s32 id = CARID(d);
+    if (id != -1000) {
+        lbl_804349C0[id] = 0;
     }
-    return d;
+    lbl_8055E550--;
 }
 
-void AIDriver_vf0C(u8* d, u8* car) {
+void AIDriver::Init(void* carp, void* q) {
+    u8* d = (u8*)this;
+    u8* car = (u8*)carp;
     CAR(d) = car;
     S32(d, 0x214) = 2;
     U8(d, 0x2A4) = 0;
@@ -656,7 +688,7 @@ void AIDriver_vf0C(u8* d, u8* car) {
         lbl_8055E588 = fn_80134B58((void*)"max_overheat_t", 240.0f);
         lbl_8055E578 = 0;
     }
-    AIDriver_vf30(d);
+    AIDriver::vf30();
 }
 
 void fn_80193CD4(u8* d) { U8(d, 0x2A5) = 1; }
@@ -670,7 +702,8 @@ f32 fn_80193D20(void) { return fn_80129DC4(3, lbl_8055E584, lbl_8055E588); }
 
 void fn_80195D80(u8* d, f32 t);
 
-void AIDriver_vf30(u8* d) {
+void AIDriver::vf30(void) {
+    u8* d = (u8*)this;
     f32 t = lbl_8055E3C8;
     lbl_8055E57C = 0.0f;
     lbl_8055E574 = fn_801769B8() == 2;
@@ -2847,16 +2880,11 @@ static inline void RemoveFromList(u8* d) {
     }
 }
 
-u8* fn_80198DD0(u8* d, int del) {
-    if (d) {
-        *(void***)d = lbl_80333390;
-        RemoveFromList(d);
-        if (del > 0) {
-            operator delete(d);
-        }
-    }
-    return d;
-}
+}  // extern "C"
+
+ListedDriver::~ListedDriver(void) { RemoveFromList((u8*)this); }
+
+extern "C" {
 
 void fn_80198E7C(int car) {
     u8* o = lbl_804349C0[car];
@@ -2867,24 +2895,7 @@ void fn_80198E7C(int car) {
 
 void fn_80198EA0(int car) { fn_80198E7C(car); }
 
-u32 AIDriver_vf14(u8* d) { return 0; }
-
 }  // extern "C"
 
-// Hand-built vtables / pointer tables of this unit, in the target's .data order (vtappend.py).
-extern "C" {
-void SetCar__7IDriverFPv(void);
-void vf18__7IDriverFi(void);
-void vf1C__7IDriverFiiPiPif(void);
-void vf20__7IDriverFi(void);
-void vf2C__7IDriverFv(void);
-void vf34__7IDriverFv(void);
-void vf40__7IDriverFv(void);
-void Flags__7IDriverFv(void);
-void vf30__7IDriverFv(void);
-void vf38__7IDriverFPC5RVec3P5RVec3iPUc(void);
-void vf3C__7IDriverFPC5RVec3P5RVec3iPUc(void);
-void vf44__7IDriverFv(void);
-void* lbl_80333348[18] = {(void*)0, (void*)0, (void*)AIDriver_vf08, (void*)AIDriver_vf0C, (void*)SetCar__7IDriverFPv, (void*)AIDriver_vf14, (void*)vf18__7IDriverFi, (void*)vf1C__7IDriverFiiPiPif, (void*)vf20__7IDriverFi, (void*)AIDriver_Connect, (void*)AIDriver_vf28, (void*)vf2C__7IDriverFv, (void*)AIDriver_vf30, (void*)vf34__7IDriverFv, (void*)AIDriver_vf38, (void*)AIDriver_vf3C, (void*)vf40__7IDriverFv, (void*)AIDriver_vf44};
-void* lbl_80333390[46] = {(void*)0, (void*)0, (void*)fn_80198DD0, (void*)0, (void*)SetCar__7IDriverFPv, (void*)Flags__7IDriverFv, (void*)vf18__7IDriverFi, (void*)vf1C__7IDriverFiiPiPif, (void*)vf20__7IDriverFi, (void*)0, (void*)0, (void*)vf2C__7IDriverFv, (void*)vf30__7IDriverFv, (void*)vf34__7IDriverFv, (void*)vf38__7IDriverFPC5RVec3P5RVec3iPUc, (void*)vf3C__7IDriverFPC5RVec3P5RVec3iPUc, (void*)vf40__7IDriverFv, (void*)vf44__7IDriverFv, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0, (void*)0x69647269, (void*)0x7665723A, (void*)0x20536574, (void*)0x43617220, (void*)0x6E6F7420, (void*)0x6F766572, (void*)0x72696464, (void*)0x656E0000};
-}
+u32 AIDriver::Flags(void) { return 0; }
+
