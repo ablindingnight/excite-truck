@@ -613,8 +613,11 @@ inline int ProfileKeyboardState::Key(int key) {
     case 0x125: self->selectedColumn=(self->selectedColumn+9)%10; break;
     case 0x127: self->selectedColumn=(self->selectedColumn+1)%10; break;
     case 13: {
-        if (self->selectedColumn==9 && self->selectedRow==3) return 0;
-        if (self->selectedColumn==8 && self->selectedRow==3) {
+        // row is declared before column: retail colours the column read after the row read (native colour fit).
+        int row;
+        int column=self->selectedColumn;
+        if (column==9 && self->selectedRow==3) return 0;
+        if (column==8 && self->selectedRow==3) {
             int i=self->cursor;
             if (i==0) break;
             int length=strlen(self->text);
@@ -624,9 +627,9 @@ inline int ProfileKeyboardState::Key(int key) {
             self->text[length-1]=0;
             self->dirty=1;
         } else {
-            int row=self->selectedRow;
+            row=self->selectedRow;
             const char* keys=self->upper ? "!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ. " : "1234567890abcdefghijklmnopqrstuvwxyz. ";
-            char ch=keys[row*10+self->selectedColumn];
+            char ch=keys[row*10+column];
             if (!self->dirty) {
                 memset(self->text,0,17);
                 self->cursor=0;
