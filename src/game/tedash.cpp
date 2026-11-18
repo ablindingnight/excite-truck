@@ -574,7 +574,7 @@ static inline void StrAppend(char* dst, int size, const char* src) {
     }
 }
 
-/* Helper name unproven: the directory loop over the brush images; the boundary is needed (in place -0.51) */
+// PROVISIONAL: directory-loop helper boundary, returned-state reference lifetime, and local ownership/order are inferred.
 static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h) {
     do {
         Brush* b = &lbl_804BE7D8.data[lbl_804BE7D8.count++];
@@ -584,7 +584,7 @@ static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h
         }
         b->h = 0;
         b->w = 0;
-        u8 on = fn_80128690();
+        const u8& on = fn_80128690();
         if (!on) {
             fn_80128684();
         }
@@ -637,10 +637,9 @@ void fn_802B6AC0(void) {
     }
     lbl_8055FA18.Reset();
     lbl_804BE7D8.count = 0;
-    u32 h;
     const char* dir = fn_802B6A70(lbl_8055FA38);
     fn_801345D8(pat, 0x40, "%s*.tga", dir);
-    h = fn_802E3BB4(pat, name, 0x20);
+    u32 h = fn_802E3BB4(pat, name, 0x20);
     if (h == -1) {
         return;
     }
