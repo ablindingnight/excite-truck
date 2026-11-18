@@ -354,9 +354,12 @@ void fn_801F5508(Fabric* f) {
     f->numSticks = n;
 }
 
+// PROVISIONAL: indexed point component ownership; helper name/type/layout remain unproven.
 static inline void SetAnchor(Anchor* a, const Vec3Storage* v, int i) {
     a->index = i;
-    a->pos = *(const PVec*)&v[i];
+    a->pos.x = v[i].x;
+    a->pos.y = v[i].y;
+    a->pos.z = v[i].z;
 }
 
 /* Helper name unproven */
