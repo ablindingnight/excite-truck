@@ -525,8 +525,8 @@ void fn_80275410(const u8* p) {
     const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
     CamPreset c = k;
     CamRotOff f;  // rotation and offset are one 48-byte local, as in fn_802751AC (retail: offset right above the rotation)
-    AddInto(f.pos, *(CVec3*)(car + 0x2450), RVec3(0.8f, 0.65f, -1.75f));
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
+    AddInto(f.pos, *(CVec3*)(car + 0x2450), RVec3(0.8f, 0.65f, -1.75f));
     RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
     fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
     Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
@@ -541,8 +541,8 @@ void fn_802756A4(const u8* p) {  // Form unproven: const formal, see fn_80275410
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
     CamPreset c = k;
     CamRotOff f;  // rotation and offset are one 48-byte local, as in fn_802751AC (retail: offset right above the rotation)
-    AddInto(f.pos, *(CVec3*)(car + 0x2538), RVec3(0.85f, 0.9f, 2.0f));
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
+    AddInto(f.pos, *(CVec3*)(car + 0x2538), RVec3(0.85f, 0.9f, 2.0f));
     RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
     fn_801BFD34((u8*)&cr->pose.pos, &f.pos, (u8*)&cr->carFrame);
     Mat3Mul((Mat3*)&cr->pose, &f.rot, (Mat3*)&cr->carFrame);
