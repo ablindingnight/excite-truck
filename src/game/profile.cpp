@@ -1,6 +1,7 @@
 // Isolated profile research: 26 owning functions; initialized-data ownership
 // and full-source placement remain incomplete. Native component proofs are separate.
 #include "game/common.h"
+#include <string.h>  // strlen as the intrinsic: the cursor read before it is reused after it (Key's delete loop)
 #include "game/menustate.h"
 #include "game/captionctx.h"
 #include "game/mathutil.h"
@@ -69,7 +70,6 @@ int fn_8023FAD4(char*, int);
 int fn_8027B8E4(int, int);
 int fn_8027B984(int, int);
 void fn_80214A9C(int);
-unsigned long strlen(const char*);
 extern char lbl_80498A00[4][18];
 extern int lbl_80498A48[4];
 extern char* lbl_8055F2C4;
@@ -624,8 +624,9 @@ inline int ProfileKeyboardState::Key(int key) {
             self->text[length-1]=0;
             self->dirty=1;
         } else {
+            int row=self->selectedRow;
             const char* keys=self->upper ? "!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ. " : "1234567890abcdefghijklmnopqrstuvwxyz. ";
-            char ch=keys[self->selectedRow*10+self->selectedColumn];
+            char ch=keys[row*10+self->selectedColumn];
             if (!self->dirty) {
                 memset(self->text,0,17);
                 self->cursor=0;
