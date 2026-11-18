@@ -2433,7 +2433,7 @@ void BoxSphereShape::vf14(void) {
                     f.x = vt.x * c;
                     f.y = vt.y * c;
                     f.z = vt.z * c;
-                    f32 g = -30.0f * F32(rb, 0xD4);
+                    f32 g = -30.0f * LoadF((f32*)((u8*)(rb) + 0xD4));
                     f.x = AddScaledF(f.x, g, acc[0]);
                     f.y = f.y + acc[1] * g;
                     f.z = f.z + acc[2] * g;
