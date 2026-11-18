@@ -50,6 +50,21 @@ extern "C" {
 float fn_8002B0A0(double x);  // fabsf wrapper
 float fn_8002B0B0(double x);  // sqrtf wrapper (out of line in the original)
 
+// Lane-wise clamp against a splatted limit (helper names unproven).
+static inline Vec4f VMinK(const Vec4f& a, const Vec4f& k) {
+    Vec4f r;
+    r.x = a.x < k.x ? a.x : k.x;
+    r.y = a.y < k.x ? a.y : k.x;
+    r.z = a.z < k.x ? a.z : k.x;
+    return r;
+}
+static inline Vec4f VMaxK(const Vec4f& a, const Vec4f& k) {
+    Vec4f r;
+    r.x = a.x > k.x ? a.x : k.x;
+    r.y = a.y > k.x ? a.y : k.x;
+    r.z = a.z > k.x ? a.z : k.x;
+    return r;
+}
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
     MVec4* t = t_;
@@ -1081,20 +1096,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1AE0.y = V1AF0.y - V1C30.y;
         V1AF0.y = V1AE0.y;
         c1D88 = temp_f31 + lbl_805627C0;
-        Vec4f V1AD0(c1D88);
-        Vec4f V1AC0;
-        V1AC0.x = V1BF0.x < V1AD0.x ? V1BF0.x : V1AD0.x;
-        V1AC0.y = V1BF0.y < V1AD0.x ? V1BF0.y : V1AD0.x;
-        V1AC0.z = V1BF0.z < V1AD0.x ? V1BF0.z : V1AD0.x;
         c1D84 = temp_f31 + lbl_805627C4;
-        Vec4f V1AB0(c1D84);
-        Vec4f V1AA0;
-        V1AA0.x = V1AC0.x > V1AB0.x ? V1AC0.x : V1AB0.x;
-        V1AA0.y = V1AC0.y > V1AB0.x ? V1AC0.y : V1AB0.x;
-        V1AA0.z = V1AC0.z > V1AB0.x ? V1AC0.z : V1AB0.x;
-        V1BF0.x = V1AA0.x;
-        V1BF0.y = V1AA0.y;
-        V1BF0.z = V1AA0.z;
+        Vec4f V1AA0(VMaxK(VMinK(V1BF0, c1D88), c1D84));
+        VSET(V1BF0, V1AA0);
         c1D80 = temp_f31 + lbl_805627C8;
         Vec4f V1A90(c1D80);
         Vec4f V1A80;
