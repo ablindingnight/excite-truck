@@ -1283,13 +1283,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA0->x = V1860.x;
         rowA0->y = V1860.y;
         rowA0->z = V1860.z;
-        Vec4f V1850(V1BD0);
-        rowA6->x = V1850.x;
-        rowA6->y = V1850.y;
+        rowA6->x = V1BD0.x;
+        rowA6->y = V1BD0.y;
         Vec4f V1840;
         V1840.x = V1BB0.x;
         V1840.y = V1BB0.y;
-        rowA6->z = V1850.z;
+        rowA6->z = V1BD0.z;
         V1840.z = V1BB0.z;
         V1840.w = V1BB0.w;
         rowA4->x = V1840.x;
@@ -2138,8 +2137,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0C00((V0C20.x > V0C10.x ? V0C20.x : V0C10.x));
             VSCALE(V0BF0, V0C80, V0C00.x);
             VSUB(V0BE0, V0D80, V0BF0);
-            Vec4f V0BD0(V0BE0);
-            VSUB(V0BC0, V0BD0, V0D80);
+            VSUB(V0BC0, V0BE0, V0D80);
             Vec4f V0BB0(V0BC0);
             Vec4f V0BA0((temp_f31 + temp_f31));
             DOT_BEGIN(V0C80, V0BB0);
@@ -2356,7 +2354,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSET(V0A10, V0390);
             Vec4f V0380((V1000.x + V03D0.x));
             V1000.x = V0380.x;
-            VSUB(V0370, V0BD0, V0D80);
+            VSUB(V0370, V0BE0, V0D80);
             DOT_BEGIN(V0370, V0DF0);
             Vec4f V0360(((V19E0.x + V19E0.y) + V19E0.z));
             Vec4f V0350;
