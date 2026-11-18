@@ -574,6 +574,24 @@ static inline void StrAppend(char* dst, int size, const char* src) {
     }
 }
 
+// PROVISIONAL: column-worker boundary, inputs, and local ownership/order are inferred.
+static inline void CopyBrushColumn(Brush* b, Image* img, u32 x) {
+    for (u32 y = 0; y < b->h; y++) {
+        u32 px = img->pixels[(img->h - 1 - y) * img->w + x];
+        u32 m = (px >> 8) & 0xFF;
+        if ((px & 0xFF) > m) {
+            m = px & 0xFF;
+        }
+        if (((px >> 16) & 0xFF) > m) {
+            m = (px >> 16) & 0xFF;
+        }
+        if ((px >> 24) > m) {
+            m = px >> 24;
+        }
+        b->data[y * b->w + x] = m;
+    }
+}
+
 // PROVISIONAL: directory-loop helper boundary, returned-state reference lifetime, and local ownership/order are inferred.
 static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h) {
     do {
@@ -598,20 +616,7 @@ static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h
                 b->h = b->h > 16 ? 16 : b->h;
             }
             for (u32 x = 0; x < b->w; x++) {
-                for (u32 y = 0; y < b->h; y++) {
-                    u32 px = img->pixels[(img->h - 1 - y) * img->w + x];
-                    u32 m = (px >> 8) & 0xFF;
-                    if ((px & 0xFF) > m) {
-                        m = px & 0xFF;
-                    }
-                    if (((px >> 16) & 0xFF) > m) {
-                        m = (px >> 16) & 0xFF;
-                    }
-                    if ((px >> 24) > m) {
-                        m = px >> 24;
-                    }
-                    b->data[y * b->w + x] = m;
-                }
+                CopyBrushColumn(b, img, x);
             }
             fn_802B52B4(img);
         }
