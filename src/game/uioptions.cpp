@@ -491,12 +491,9 @@ void fn_80239A94(void) { lbl_8055BAC8 = fn_80214D04(); }
 
 void fn_80239AB8(void) { fn_80214CB4(lbl_8055BAC8); }
 
-static const MenuDesc lbl_802FA040 = {"options.lyt", 0, 0, 0, 0};
 void fn_80239AC0(void) {
     int done = 0;
-    MenuDesc desc;
     do {
-        desc = lbl_802FA040;
         MenuItem items[] = {
             MenuItem(lbl_8055BAC0, 8, (void*)fn_80239AB8, 0, 0),
             MenuItem(lbl_8055BABC, 8, (void*)fn_80239A94, 1, 0),
@@ -513,8 +510,9 @@ void fn_80239AC0(void) {
             MenuItem("units", 0, 0, 12, 0),
             MenuItem("stats", 0, 0, 13, 0),
             MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
-            *(MenuItem*)&lbl_804986F8,
+            MenuItem(lbl_804986F8),
         };
+        MenuDesc desc = {"options.lyt", 0, 0, 0, 0};
         desc.items = items;
         switch (fn_802146BC(&desc, -999, -999, 1)) {
         case 15:
