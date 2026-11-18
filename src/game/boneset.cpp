@@ -3,6 +3,7 @@
 // one quaternion per bone) and from given world frames, then handing the skin matrices to the model.
 // Names are guesses.
 #include "game/common.h"
+#include <string.h>
 #include "game/vec3_init.h"
 #include "game/math_types.h"
 #include "game/plainvec.h"
@@ -124,6 +125,17 @@ static inline void QuatToMtx(BMtx33* m, const BQuat* q) {
     m->zz = 1.0f - (xx + yy);
 }
 
+// PROVISIONAL: word-copy helper name and spelling. Retail copies these nine words
+// before the transpose; ordinary float assignment permits a different copy/transpose fold.
+static inline void CopyMatrixWords(BMtx33* d, const BMtx33* s) {
+#if defined(__MWERKS__)
+    struct MatrixWords { u32 w[9]; };
+    *(MatrixWords*)d = *(const MatrixWords*)s;
+#else
+    memcpy(d, s, sizeof(*d));
+#endif
+}
+
 static inline void Transpose(BMtx33* m) {
     f32 t;
     t = m->xy;
@@ -166,19 +178,32 @@ void fn_801E5998(const BoneSet* set, Bone* out, s32* n) {
     *n = nb;
 }
 
+// PROVISIONAL: scratch storage/address ownership and names. The loop and all
+// emitted bytes match retail; original author declarations remain unknown.
 s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     BFrame world[32];
     BFrame skin[32];
-    int i = 0;
+    BMtx33* rotation;
+    BMtx33* inverse;
+    BMtx33* product;
+    const Bone* bone;
+    const BQuat* q;
     BFrame* wa;
+    BFrame local;
+    BFrame parent;
+    BMtx33 rot;
+    BFrame t;
+    BMtx33 m;
+    BFrame a;
+    int i = 0;
     if (n > 0) {
-        const BQuat* q = pose;
-        for (wa = world; i < n; wa++, q++, i++) {
-            const Bone* b = &set->bones[i];
-            BFrame local = b->rest;
-            BFrame parent;
-            BMtx33 rot;
-            BFrame t;
+        q = pose;
+        rotation = &rot;
+        inverse = &m;
+        product = &t.r;
+        for (bone = set->bones, wa = world; i < n; bone++, q++, wa++, i++) {
+            const Bone* b = bone;
+            local = b->rest;
             if (b->parent < 1) {
                 parent.r.xx = 1.0f;
                 parent.r.xy = 0.0f;
@@ -195,12 +220,11 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
             } else {
                 parent = world[b->parent];
             }
-            QuatToMtx(&rot, q + 1);
-            BMtx33 m = local.r;
-            BFrame a;
-            Transpose(&m);
-            MtxMul(t.r, m, rot);
-            MulVec(&t.t, &local.t, &t.r);
+            QuatToMtx(rotation, q + 1);
+            CopyMatrixWords(inverse, &local.r);
+            Transpose(inverse);
+            MtxMul(*product, *inverse, *rotation);
+            MulVec(&t.t, &local.t, product);
             t.t.x *= -1.0f;
             t.t.y *= -1.0f;
             t.t.z *= -1.0f;
