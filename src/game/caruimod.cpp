@@ -1475,15 +1475,16 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
         int n = 1;
         for (i = 0; i < 150; i++, n += 2) {
             u16* q = &idx[i * 9];
+            int b = n + 1;
             q[0] = 0;
-            q[2] = n + 2;
             q[1] = n;
+            q[2] = b + 1;
             q[3] = n;
-            q[4] = n + 1;
-            q[5] = n + 2;
-            q[6] = n + 2;
-            q[7] = n + 1;
-            q[8] = n + 3;
+            q[4] = b;
+            q[5] = b + 1;
+            q[6] = b + 1;
+            q[7] = b;
+            q[8] = b + 2;
             for (int k = 0; k < 9; k++) {
                 if (q[k] > 300) {
                     q[k] -= 300;
