@@ -216,7 +216,7 @@ public:
     virtual void v34(u8* q);
     virtual void v38(void);
     virtual f32 v3C(void);  // bounding radius
-    virtual void v40(void);
+    virtual void v40(int surface);  // SetSurface
     virtual void v44(void);
     virtual void v48(void);
     virtual void v4C(void);
@@ -3975,11 +3975,11 @@ u8 StaticCollObject::vf14(void) {
 void StaticCollObject::vf18(u32 v) {
     u8* p = (u8*)this; fn_801A4868(p, v); }
 
-void StaticCollObject::vf1C(void) {
+void StaticCollObject::vf1C(int surface) {
     u8* p = (u8*)this;
     u8* o = ((u8*&)this->shape);
     if (o) {
-        VE(o)->v40();
+        VE(o)->v40(surface);
     }
 }
 

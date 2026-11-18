@@ -353,7 +353,7 @@ public:
     virtual u8* vf10(void);
     virtual u8 vf14(void);
     virtual void vf18(u32 v);
-    virtual void vf1C(void);
+    virtual void vf1C(int surface);  // sets the shape's surface (CollShape::SetSurface); actseq's SurfBody 0x1C
     virtual s32 vf20(void);
     virtual u32 vf24(void);
     virtual void vf28(u32 v);

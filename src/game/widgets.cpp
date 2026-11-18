@@ -131,7 +131,7 @@ extern const char lbl_8055B8A4[3];
 
 class AnimationBoundsDispatch {
 public:
- virtual void Slot00();virtual void Slot04();virtual void Slot08();
+ virtual ~AnimationBoundsDispatch();virtual void Slot04();virtual void Slot08();  // 0x08 = AnimationPrefix's destructor
  virtual void Bounds(int,int,int*,int*,int*,int*);
 };
 extern "C" {
