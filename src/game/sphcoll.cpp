@@ -1743,8 +1743,8 @@ int fn_8019DAB0(u8* p, u8* q) {
 // Capsule p against capsule q: bounding spheres, then the axis segments, then p's end spheres.
 int fn_8019DC04(u8* p, u8* q) {
     PVec3A d;
-    PVec3A b;
     PVec3A a;
+    PVec3A b;
     PVec3A axis;
     PVec3A org;
     u8* fq = ((u8*&)((CollShape*)q)->frame);
@@ -1763,12 +1763,12 @@ int fn_8019DC04(u8* p, u8* q) {
             return 1;
         }
         u8* m = ((u8*&)((CollShape*)p)->frame);
-        f32 h = ((TubeShape*)p)->half;
+        f32 h = LoadF(&((TubeShape*)p)->half);
         axis = *(PVec3A*)(m + 0x18);
         org = *(PVec3A*)(m + 0x24);
-        f32 rad = ((TubeShape*)p)->rad;
-        MulAdd(b.v, org.v, axis.v, -h);
+        f32 rad = LoadF(&((TubeShape*)p)->rad);
         MulAdd(a.v, org.v, axis.v, h);
+        MulAdd(b.v, org.v, axis.v, -h);
         hit |= fn_8019CCCC(p, (u8*)a.v, q, rad);
         if (hit) {
             return 1;
