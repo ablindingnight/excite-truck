@@ -2205,13 +2205,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             c1D60 = (temp_f31 + (lbl_805627AC)) * (temp_f31 + lbl_80562804);
             Vec4f V0960(fn_8002B0A0(V0970.x));
             Vec4f V0950(V0B50.x);
-            Vec4f V0940((temp_f31 + lbl_80562804));
-            Vec4f V0930(c1D60);
-            Vec4f V0920((V0960.x > V0930.x ? V0960.x : V0930.x));
+            Vec4f V0920((V0960.x > c1D60 ? V0960.x : c1D60));
             VSCALE(V0910, V0980, V0920.x);
             VSUB(V0900, V09D0, V0910);
             Vec4f V08F0((temp_f31 + lbl_80562808));
-            Vec4f V08E0(V0940.x);
+            Vec4f V08E0(((temp_f31 + lbl_80562804)));
             Vec4f V08D0(((temp_f31 + lbl_80562808) * (temp_f31 + lbl_80562804)));
             VSCALE(V08C0, V0900, V08D0.x);
             Vec4f V08B0(V08C0);
@@ -2274,8 +2272,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V06B0((temp_f31 + lbl_80562818));
             Vec4f V06A0((V0720.x * V06B0.x));
             Vec4f V0690((V06C0.x * V06A0.x));
-            Vec4f V0680((temp_f31 + lbl_8056281C));
-            Vec4f V0670((V06C0.x * V0680.x));
+            Vec4f V0670((V06C0.x * ((temp_f31 + lbl_8056281C))));
             Vec4f V0660((temp_f31 + lbl_80562820));
             Vec4f V0650((V0720.x * V0660.x));
             Vec4f V0640((V0670.x + V0650.x));
