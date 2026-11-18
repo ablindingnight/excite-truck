@@ -675,6 +675,9 @@ extern const f32 lbl_80564C88;
 s32 lbl_8055CEA0 = 1;  // brush scale (.sdata: defined after the brush-list strings)
 
 // PROVISIONAL: shared-query identity/cut locations and setup-value ownership/order are inferred.
+// PROVISIONAL: coordinate/corner record, scalarization and quotient/remainder ownership/order are inferred; source origin is unproven.
+struct BrushCellValues { u32 bi; u32 bj; u32 ri; u32 rj; u8 a; };
+
 void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     if (b->w == 0) {
         return;
@@ -710,30 +713,27 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
                         continue;
                     }
                     u32 k = lbl_8055CEA0;
-                    u32 rj;
-                    u32 bj;
-                    u32 bi;
-                    u32 ri;
-                    bj = j / k;
-                    bi = i / k;
-                    ri = i - bi * k;
-                    rj = j - bj * k;
+                    BrushCellValues cell;
+                    cell.ri = i - (i / k) * k;
+                    cell.bj = j / k;
+                    cell.rj = j - cell.bj * k;
+                    cell.bi = i / k;
                     int v;
-                    if (!(ri == 0 && rj == 0)) {
-                        u32 i1 = bi + 1 < b->w - 1 ? bi + 1 : b->w - 1;
-                        u32 j1 = bj + 1 < b->h - 1 ? bj + 1 : b->h - 1;
+                    if (!(cell.ri == 0 && cell.rj == 0)) {
+                        u32 i1 = cell.bi + 1 < b->w - 1 ? cell.bi + 1 : b->w - 1;
+                        u32 j1 = cell.bj + 1 < b->h - 1 ? cell.bj + 1 : b->h - 1;
                         u8 d;
-                        f32 tx = (f32)ri / (f32)k;
-                        u8 a = b->data[bj * b->w + bi];
-                        u8 c = b->data[bj * b->w + i1];
-                        d = b->data[j1 * b->w + bi];
-                        f32 top = (f32)a + tx * ((f32)c - (f32)a);
+                        f32 tx = (f32)cell.ri / (f32)k;
+                        cell.a = b->data[cell.bj * b->w + cell.bi];
+                        u8 c = b->data[cell.bj * b->w + i1];
+                        d = b->data[j1 * b->w + cell.bi];
+                        f32 top = (f32)cell.a + tx * ((f32)c - (f32)cell.a);
                         u8 e = b->data[j1 * b->w + i1];
                         f32 bot = (f32)d + tx * ((f32)e - (f32)d);
-                        f32 ty = (f32)rj / (f32)k;
+                        f32 ty = (f32)cell.rj / (f32)k;
                         v = (int)(top + ty * (bot - top));
                     } else {
-                        v = b->data[bj * b->w + bi];
+                        v = b->data[cell.bj * b->w + cell.bi];
                     }
                     cb(gx, gz, (u8)v);
                 }
