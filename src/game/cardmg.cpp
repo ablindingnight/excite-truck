@@ -731,7 +731,11 @@ void fn_8018F76C(u8* p, int i);
 void fn_802E30C8(const char* fmt, ...);
 
 static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > __float_epsilon[0]; }
-static inline int HitTooSoon(const u8* car) { return lbl_8055E3C8 < 3.0f + F32(car, 0x26D8); }
+// The delay is a variable: its constant is created on its own (FACTS 17:10), before the time read.
+static inline int HitTooSoon(const u8* car) { f32 k = 3.0f; return lbl_8055E3C8 < k + F32(car, 0x26D8); }
+
+/* Helper name unproven: a car's speed field read through one accessor for both cars. */
+static inline f32 CarSpeed(const u8* c) { return ((CarBody*)c)->speed; }
 
 // Which corner of the car a body-space point is nearest: 0/1 front left/right, 3/2 rear left/right.
 // Retail bug: the rear branch tests `front` again (false there) instead of `left`, so a rear hit is always
@@ -875,7 +879,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
             hm *= 0.3f;
             if (((CarBody*)p)->f1F0 != 0x50 && !Boosting(p)) {
                 if (Boosting(fn_8017960C(other)) || hm > 15000.0f) {
-                    if (F32(fn_8017960C(other), 0x25D4) > ((CarBody*)p)->speed) {
+                    if (CarSpeed(fn_8017960C(other)) > CarSpeed(p)) {
                         fn_8018A174(p);
                     }
                 }
