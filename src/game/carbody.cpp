@@ -1759,8 +1759,8 @@ void fn_80183E7C(u8* p) {
             CbScaleSelf(&fl, -1.0f);
         }
         f32 nose = PSVECDotProduct((const Vec*)&fl, (const Vec*)(p + 0x48));
-        f32 wantR = -roll - cb->mtx.rot.x.y * (1.0f - AbsNarrow(cb->mtx.rot.z.y));
         f32 wantP = 0.25f * pitch - nose;
+        f32 wantR = -roll - cb->mtx.rot.x.y * (1.0f - AbsNarrow(cb->mtx.rot.z.y));
         f32 wp = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x3C));
         f32 wr = PSVECDotProduct((const Vec*)(p + 0x124), (const Vec*)(p + 0x54));
         f32 gainP = cb->f2680 ? 1.0f : 0.25f;
