@@ -365,23 +365,39 @@ extern const f32 lbl_80563CB8;  // wave weight
 static inline void ShakeRot(ShakeMat* r, const RVec3& w) {
     f32 a = PSVECMag((const Vec*)&w.x);
     if (a > lbl_80563C40) {
-        f32 y, z, s, x, c, k;
-        f32 inv = lbl_80563C2C.value / a;
+        f32 c;
+        f32 zz;
+        f32 yy;
+        f32 xx;
+        f32 zDiag;
+        f32 yDiag;
+        f32 inv;
+        f32 s;
+        f32 k;
+        f32 y;
+        f32 x;
+        f32 z;
+        inv = lbl_80563C2C.value / a;
         x = inv * w.x;
         y = inv * w.y;
         z = inv * w.z;
         s = (f32)sin(a);
         c = (f32)cos(a);
+        xx = x * x;
+        yy = y * y;
+        zz = z * z;
         k = lbl_80563C2C.value - c;
+        r->m[0][0] = c + k * xx;
         r->m[0][1] = y * (k * x) + s * z;
         r->m[0][2] = z * (k * x) - s * y;
+        yDiag = c + k * yy;
         r->m[1][0] = y * (k * x) - s * z;
-        r->m[1][1] = c + k * (y * y);
-        r->m[2][0] = z * (k * x) + s * y;
-        r->m[0][0] = c + k * (x * x);
+        r->m[1][1] = yDiag;
         r->m[1][2] = z * (k * y) + s * x;
-        r->m[2][2] = c + k * (z * z);
+        zDiag = c + k * zz;
+        r->m[2][0] = z * (k * x) + s * y;
         r->m[2][1] = z * (k * y) - s * x;
+        r->m[2][2] = zDiag;
     } else {
         r->m[0][0] = lbl_80563C2C.value;
         r->m[0][1] = lbl_80563C20.value;
