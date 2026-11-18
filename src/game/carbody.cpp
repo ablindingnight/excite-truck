@@ -1489,6 +1489,8 @@ static inline f32 BodySpeed(CarBody* cb) { return cb->speed; }
 static inline f32 BodyRollInput(CarBody* cb) { return cb->f2604; }
 // PROVISIONAL: caller pitch and returned desired-nose ownership are unproven.
 static inline f32 DesiredNose(f32 pitch, f32 nose) { return 0.25f * pitch - nose; }
+// PROVISIONAL: by-value mutable product-input ownership and helper name are unproven.
+static inline f32 ScaledValue(f32 value, f32 factor) { value *= factor; return value; }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -1994,7 +1996,7 @@ void fn_80183E7C(u8* p) {
         f32 lf = LerpT(df, 0.0f, 1.0f);
         f32 tf = RampW(cb->f25C4, 0.0f, 0.3f);
         f32 mass8 = cb->mass;
-        RVec3 ff(0.0f, lf * (LerpT(tf, 0.2f, 1.0f) * (0.5f * grow)) * mass8 / 0.016683351f, 0.0f);
+        RVec3 ff(0.0f, ScaledValue(lf * (ScaledValue(LerpT(tf, 0.2f, 1.0f), 0.5f * grow)), mass8) / 0.016683351f, 0.0f);
         ((RigidBody*)p)->AddForceAt((const RVec3*)&ff, (const RVec3*)&front);
         RVec3 back;
         CbAddScaled(&back, &cb->mtx.pos, &cb->mtx.rot.z, -2.0f);
@@ -2002,7 +2004,7 @@ void fn_80183E7C(u8* p) {
         f32 lb = LerpT(db, 0.0f, 1.0f);
         f32 tb = Clamp01((cb->f25C4 - 0.2f) / 0.6f);
         f32 mass9 = cb->mass;
-        RVec3 fb(0.0f, lb * (LerpT(tb, 0.1f, 1.0f) * (0.3f * grow)) * mass9 / 0.016683351f, 0.0f);
+        RVec3 fb(0.0f, ScaledValue(lb * (ScaledValue(LerpT(tb, 0.1f, 1.0f), 0.3f * grow)), mass9) / 0.016683351f, 0.0f);
         ((RigidBody*)p)->AddForceAt((const RVec3*)&fb, (const RVec3*)&back);
     } else {
         cb->f25C4 = 0.0f;
@@ -2038,8 +2040,10 @@ void fn_80183E7C(u8* p) {
             if (!boosting || !CarOnGas(p)) {
                 if (cb->speed > cb->f5A8) {
                     f32 over = Ramp(cb->speed, cb->f5A8, 2.2222223f + cb->f5A8);
+                    // PROVISIONAL: named speed-cap blend ownership is unproven.
+                    f32 dragBlend = -LerpT(over, 0.0f, 1.0f);
                     f32 mass10 = cb->mass;
-                    f32 k = heatTune.v[12] * (9.81f * (-LerpT(over, 0.0f, 1.0f) * mass10)) / cb->speed;
+                    f32 k = heatTune.v[12] * (9.81f * (dragBlend * mass10)) / cb->speed;
                     RVec3 f;
                     f.x = cb->vel.x * k;
                     f.y = cb->vel.y * k;
