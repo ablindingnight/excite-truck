@@ -823,13 +823,12 @@ void fn_802B7884(const char* label) {
 // position words as bits. The portable path preserves the same representation.
 static inline void CopyBrushPosition(V2* dst, const V2* src) {
 #if defined(__MWERKS__)
-    struct BrushPositionWords { u32 w[2]; };
-    BrushPositionWords* d = (BrushPositionWords*)dst;
-    const BrushPositionWords* s = (const BrushPositionWords*)src;
-    u32 x = s->w[0];
-    u32 y = s->w[1];
-    d->w[1] = y;
-    d->w[0] = x;
+    u32* d = (u32*)dst;
+    const u32* s = (const u32*)src;
+    u32 x = *s++;
+    u32 y = *s;
+    *d++ = x;
+    *d = y;
 #else
     memcpy(dst, src, sizeof(*dst));
 #endif
