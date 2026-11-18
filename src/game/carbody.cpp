@@ -1647,8 +1647,14 @@ void fn_80183E7C(u8* p) {
         ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
     }
 
-    u32 ramp = (fn_801769CC()->type >> 20) & 1;
-    u32 jump = (fn_801769CC()->type >> 21) & 1;
+    // PROVISIONAL: shared decision scope and declaration ownership are unproven.
+    int bad;
+    int hard;
+    int sunk;
+    u32 jump;
+    u32 ramp;
+    ramp = (fn_801769CC()->type >> 20) & 1;
+    jump = (fn_801769CC()->type >> 21) & 1;
     StuntDecision stuntState = { 0 };
     if (ramp || jump) {
         stuntState.value = 1;
@@ -1685,8 +1691,8 @@ void fn_80183E7C(u8* p) {
             smooth = 1;
         }
         f32 tilt = PSVECDotProduct((const Vec*)(p + 0x25A4), (const Vec*)(p + 0x48));
-        int bad = 0;
-        int hard = 0;
+        bad = 0;
+        hard = 0;
         if (!smooth && tilt > lim && cb->f2618 > landingTune.v[1]) {
             hard = 1;
         }
@@ -1929,7 +1935,7 @@ void fn_80183E7C(u8* p) {
         sqrt(Sq(cb->vel.x) + Sq(cb->vel.z));
         cb->f261C = cb->speed;
     }
-    int sunk = 0;
+    sunk = 0;
     if (fn_802BF4F0()) {
         sunk = 1;
         for (int i = 0; i < 4; i++) {
