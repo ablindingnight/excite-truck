@@ -1472,6 +1472,10 @@ template <class O, class A, class V> static inline void CbAddScaled(O* o, const 
 template <class O> static inline void CbScaleSelf(O* o, f32 k) { o->x = o->x * k; o->y = o->y * k; o->z = o->z * k; }
 /* Helper name unproven: the roll torque gain (speed ramp times the mass torque) */
 static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = cb->mass; f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f); return LerpT(b, 0.0f, 1.0f) * (m * 100.0f * 9.81f * 0.305f * a); }
+// PROVISIONAL: helper name/boundary and by-value pitch ownership are unproven.
+static inline f32 StalledPitch(f32 pitch, f32 stall) {
+    return pitch + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
+}
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -1752,8 +1756,8 @@ void fn_80183E7C(u8* p) {
     if (NearZero(cb->f2690) && cb->f2618 > 0.15f &&
         NearZero(cb->f2650)) {
         f32 stall = MinF(1.0f, 10.0f * cb->f264C);
-        f32 pitch = cb->f2600;
-        pitch += 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
+        const f32 inputPitch = cb->f2600;
+        f32 pitch = StalledPitch(inputPitch, stall);
         f32 roll = cb->f2604;
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = 0.0f;
