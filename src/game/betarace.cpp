@@ -1713,9 +1713,9 @@ char lbl_80559F0C[1] = "";
 
 #pragma dont_inline on
 void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
-    // PROVISIONAL private result workspace; original type/name/ownership unproven.
-    struct CoinResultWorkspace { s32 gain; };
-    CoinResultWorkspace coins;
+    // PROVISIONAL actual enabled/result and captured-record workspace; original type/name/ownership unproven.
+    struct UpdateWorkspace { s32 gain; CoinCar* record; };
+    UpdateWorkspace work;
     f32* pos;
     f32 add;
     int wasFull;
@@ -1726,25 +1726,25 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     f32 cur = shown > 0.0f ? shown : 0.0f;
     Coins* co = &master->coins;
     int me = id;
-    if (co->enabled && co->cars[me].active) {
-        CoinCar* cc = &co->cars[me];
+    work.gain = co->enabled;
+    if (work.gain && (work.record = &co->cars[me], work.record->active)) {
         const CoinFrame& r = fn_801683F4(me);
         CoinFrame f = r;
         int i;
         for (i = 0; i < 4; i++) {
-            if (cc->flash[i] > 0.0f) {
-                cc->flash[i] -= 0.016683351f;
+            if (work.record->flash[i] > 0.0f) {
+                work.record->flash[i] -= 0.016683351f;
             }
         }
         const s32 count = f.count;
-        coins.gain = count * co->value;
-        cc->count += coins.gain;
+        work.gain = count * co->value;
+        work.record->count += work.gain;
         for (i = 0; i < count; i++) {
-            cc->flash[cc->next] = 0.6f;
-            cc->next = (cc->next + 1) % 4;
+            work.record->flash[work.record->next] = 0.6f;
+            work.record->next = (work.record->next + 1) % 4;
         }
     } else {
-        coins.gain = 0;
+        work.gain = 0;
     }
     {
         CarHud* h = hud;
@@ -1788,7 +1788,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             }
         }
     }
-    score += add + coins.gain;
+    score += add + work.gain;
     // PROVISIONAL actual-value name and ownership; original spelling unproven.
     f32 previousShown = shown;
     {
