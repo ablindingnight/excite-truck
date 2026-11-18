@@ -1900,8 +1900,9 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             Pickup* e = stars->items[i];
             int got;
             if (e->kind == 3) {
-                u8* mine;
-                if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && (mine = &e->hit[rc->index])[0]) {
+                // PROVISIONAL saved hit-index ownership; original spelling unproven.
+                int mineIndex;
+                if ((f32)__fabs(e->respawn) <= __float_epsilon[0] && (mineIndex = rc->index, e->hit[mineIndex])) {
                     if (e->big) {
                         PickupEvent ev;
                         ev.pos[0] = e->pos[0];
@@ -1916,7 +1917,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
                     }
                     e->respawn = fn_801D48F4(e->objs[e->which]);
                     got = 1;
-                    mine[0] = 0;
+                    e->hit[mineIndex] = 0;
                 } else {
                     got = 0;
                 }
