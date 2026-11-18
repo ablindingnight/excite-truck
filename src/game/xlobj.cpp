@@ -330,6 +330,77 @@ extern "C" s32 fn_802B8E50(const char* name);
 
 static inline s32 LoadTex(const char* name) { return *name ? fn_802B110C(fn_802B8E50, name) : -2; }
 
+// FillA/FillB are (non-static) inlines defined before Grid: retail's weak strings come out in reverse creation
+// order, FillA ("size", "rot"), FillB ("size"), then Grid's ctor ("tmp"), each function its own "size" (G9).
+extern "C" {
+void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a);
+void fn_802BAA50(V2* v);
+static inline const V2& PtV2(const ValPoint& p) { return *(const V2*)&p; }
+
+void fn_802BAD0C(V2* v, f32 a);
+f32 fn_802BAD90(f32 deg);
+inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
+    Vec2 org;
+    __ct__4Vec2Fv(&org);
+    Vec2 along;
+    __ct__4Vec2Fv(&along);
+    Vec2 side;
+    __ct__4Vec2Fv(&side);
+    along.SetXZ(*(const Vec3*)&m->basis[2]);
+    fn_80160B18(&along);
+    side.SetXZ(*(const Vec3*)&m->basis[0]);
+    fn_80160B18(&side);
+    org.SetXZ(*(const Vec3*)&m->origin);
+    Vec2 size = PtV2(node->GetPoint("size"));
+    fn_80160BA0(&along, &along, size.y);
+    fn_80160BA0(&side, &side, size.y);
+    f32 k = -1.0f;
+    f32 rot = fn_802BAD90(k * node->GetFloat("rot", 0.0f));
+    fn_802BAD0C(&along, rot);
+    fn_802BAD0C(&side, rot);
+    AddScaled(&org, &org, -0.5f, &side);
+    AddScaled(&org, &org, -0.5f, &along);
+    fn_802BA848(s, &side, &along, &org);
+    s->type = 0;
+}
+
+inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
+    Vec2 org;
+    __ct__4Vec2Fv(&org);
+    Vec2 along;
+    __ct__4Vec2Fv(&along);
+    Vec2 side;
+    __ct__4Vec2Fv(&side);
+    Vec2 size;
+    __ct__4Vec2Fv(&size);
+    fn_80160BA0(&size, &PtV2(node->GetPoint("size")), scale);
+    Vec3 sun;
+    fn_80144D64(&sun, fn_802C9A40());
+    Vec2 dir;
+    __ct__4Vec2Fv(&dir);
+    dir.SetXZ(sun);
+    fn_80160B18(&dir);
+    fn_80160BA0(&along, &dir, size.y);
+    fn_80160BA0(&side, &dir, size.x);
+    fn_802BAA50(&side);
+    AddScaled(&org, pos, -0.5f, &side);
+    Vec2 at;
+    __ct__4Vec2Fv(&at);
+    AddScaled(&at, pos, 0.5f, &along);
+    Vec3 nrm;
+    DefaultConstructVec3(&nrm);
+    if (fn_801DCF48(&nrm, at.x, at.y)) {
+        Vec2 n2;
+        __ct__4Vec2Fv(&n2);
+        n2.SetXZ(nrm);
+        f32 k = Remap(-0.6f, -0.1f, 0.4f, 1.0f, Dot(&n2, &dir));
+        fn_80160BA0(&along, &along, k);
+    }
+    fn_802BA848(s, &side, &along, &org);
+    s->type = 1;
+}
+}  // extern "C"
+
 struct Grid {
     Grid(s16 s) {
         int d = s * 2;
@@ -748,43 +819,6 @@ void fn_802BA348(void) {
 void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a);
 void fn_802BAA50(V2* v);
 
-static inline const V2& PtV2(const ValPoint& p) { return *(const V2*)&p; }
-
-static inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
-    Vec2 org;
-    __ct__4Vec2Fv(&org);
-    Vec2 along;
-    __ct__4Vec2Fv(&along);
-    Vec2 side;
-    __ct__4Vec2Fv(&side);
-    Vec2 size;
-    __ct__4Vec2Fv(&size);
-    fn_80160BA0(&size, &PtV2(node->GetPoint("size")), scale);
-    Vec3 sun;
-    fn_80144D64(&sun, fn_802C9A40());
-    Vec2 dir;
-    __ct__4Vec2Fv(&dir);
-    dir.SetXZ(sun);
-    fn_80160B18(&dir);
-    fn_80160BA0(&along, &dir, size.y);
-    fn_80160BA0(&side, &dir, size.x);
-    fn_802BAA50(&side);
-    AddScaled(&org, pos, -0.5f, &side);
-    Vec2 at;
-    __ct__4Vec2Fv(&at);
-    AddScaled(&at, pos, 0.5f, &along);
-    Vec3 nrm;
-    DefaultConstructVec3(&nrm);
-    if (fn_801DCF48(&nrm, at.x, at.y)) {
-        Vec2 n2;
-        __ct__4Vec2Fv(&n2);
-        n2.SetXZ(nrm);
-        f32 k = Remap(-0.6f, -0.1f, 0.4f, 1.0f, Dot(&n2, &dir));
-        fn_80160BA0(&along, &along, k);
-    }
-    fn_802BA848(s, &side, &along, &org);
-    s->type = 1;
-}
 
 Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
     Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
@@ -833,30 +867,6 @@ void fn_802BAA50(V2* v) {
 void fn_802BAD0C(V2* v, f32 a);
 f32 fn_802BAD90(f32 deg);
 
-static inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
-    Vec2 org;
-    __ct__4Vec2Fv(&org);
-    Vec2 along;
-    __ct__4Vec2Fv(&along);
-    Vec2 side;
-    __ct__4Vec2Fv(&side);
-    along.SetXZ(*(const Vec3*)&m->basis[2]);
-    fn_80160B18(&along);
-    side.SetXZ(*(const Vec3*)&m->basis[0]);
-    fn_80160B18(&side);
-    org.SetXZ(*(const Vec3*)&m->origin);
-    Vec2 size = PtV2(node->GetPoint("size"));
-    fn_80160BA0(&along, &along, size.y);
-    fn_80160BA0(&side, &side, size.y);
-    f32 k = -1.0f;
-    f32 rot = fn_802BAD90(k * node->GetFloat("rot", 0.0f));
-    fn_802BAD0C(&along, rot);
-    fn_802BAD0C(&side, rot);
-    AddScaled(&org, &org, -0.5f, &side);
-    AddScaled(&org, &org, -0.5f, &along);
-    fn_802BA848(s, &side, &along, &org);
-    s->type = 0;
-}
 
 Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
     Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
