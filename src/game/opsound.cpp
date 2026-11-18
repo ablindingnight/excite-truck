@@ -218,7 +218,7 @@ void fn_8023CC84(const char* layout) {
                 MenuItem("quality", 7, &lbl_8055F17C, (MenuArg)qualityChoices, 0),
                 MenuItem("race_music", 7, &lbl_8055F178, (MenuArg)musicChoices, 0),
                 MenuItem("mixer", 2, &mixer, 0, 0),
-                MenuItem("mixer_name", 3, mixerName, 0x100, 0),
+                MenuItem("mixer_name", mixerName, CaptionContext(0x100)),
                 MenuItem("circle_list", 10, &list, 0, 0),
                 MenuItem(lbl_8055B860, 6, (void*)fn_8023CB80, -1, 0x1B),
                 MenuItem(lbl_8055BABC, 8, (void*)fn_8023CA50, 1, 0),
