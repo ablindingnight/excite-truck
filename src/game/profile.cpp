@@ -19,6 +19,10 @@ public:
     ~ProfileFontState(void) { fn_802328D4(font); font=0; }
     int font; u32 color; int alignment; f32 scale,widthScale;inline void DrawCoordinatesNew(const void* text,f32 x,f32 y)const;
 };
+// Both states are file-local (unnamed namespace): retail's Key reaches its keyboard rows from the .data section base
+// (ordinary pooled literals, not weak @STRING@ objects), and those rows sit after the vtables, i.e. Key is compiled in
+// the deferred phase (an inline method reached only through the vtable). Names unproven.
+namespace {
 class ProfileTextState : public MenuState {
 public:
     virtual ~ProfileTextState(void) {}
@@ -34,13 +38,14 @@ class ProfileKeyboardState : public MenuState {
 public:
     virtual ~ProfileKeyboardState(void);
     virtual void Enter(void);
+    virtual int Key(int key);   // declared before Draw: the deferred batch emits members in declaration order
     virtual void Draw(void);
-    virtual int Key(int key);
     ProfileTextState textItem;
     int column,row;
     bool upper; char shiftLabel[10];
     ProfileFontState font;
 };
+}
 typedef char CheckProfileFontSize[sizeof(ProfileFontState)==0x14?1:-1];
 typedef char CheckProfileTextSize[sizeof(ProfileTextState)==0x4C?1:-1];
 typedef char CheckProfileKeyboardSize[sizeof(ProfileKeyboardState)==0x8C?1:-1];
@@ -299,6 +304,19 @@ void fn_8024C370(void) {}
 
 ProfileKeyboardState::~ProfileKeyboardState(void) {}
 
+// Unused (stripped by the linker); defined here, after the destructor, because retail's weak ~ProfileTextState follows
+// ~ProfileKeyboardState and its strings open .data. It constructs a keyboard state: retail's .data keeps a zero-filled
+// MenuState table copy (FACTS 2026-11-17 08:29/13:25), which the unit emits only when it builds a MenuState.
+// PROVISIONAL: body and name unproven (AIDS_VERDICTS row).
+static void SetupNameEntry(int upper, const char* name, int len) {
+    void* lyt = LoadNameLayout("profile_name.lyt");
+    int font = LoadNameFont("uifnt.gtx");
+    const char* shift = upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
+    SetNameText(FindNameWidget(lyt, "name_field"), name, len);
+    SetNameText(FindNameWidget(lyt, "name_widget"), shift, font);
+    new ProfileKeyboardState;
+}
+
 extern "C" {
 // Slot label and selection-icon refresh, 8024C464-8024C524.
 void fn_8024C464(void) {
@@ -358,13 +376,6 @@ void fn_8024C628(void) {
     }
 }
 
-static void SetupNameEntry(int upper, const char* name, int len) {
-    void* lyt = LoadNameLayout("profile_name.lyt");
-    int font = LoadNameFont("uifnt.gtx");
-    const char* shift = upper ? "UIKeyboard:SHIFT_UPPER" : "UIKeyboard:SHIFT_LOWER";
-    SetNameText(FindNameWidget(lyt, "name_field"), name, len);
-    SetNameText(FindNameWidget(lyt, "name_widget"), shift, font);
-}
 
 int fn_8024C6F4(int slot) {
     int allowed = 0;
@@ -584,7 +595,7 @@ const char* src;int n;char* dst;src=fn_80131234(key);dst=self->shiftLabel;n=10;
     }
 }
 
-int ProfileKeyboardState::Key(int key) {
+inline int ProfileKeyboardState::Key(int key) {
     ProfileKeyboardInputFields* self=(ProfileKeyboardInputFields*)this;
     switch (key) {
     case 0x113: {
@@ -633,7 +644,7 @@ int ProfileKeyboardState::Key(int key) {
     return 1;
 }
 
-void ProfileKeyboardState::Draw(void) {
+inline void ProfileKeyboardState::Draw(void) {
     ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
     f32 x, y;
     fn_80230C30(&x, &y, self->x, self->y);
