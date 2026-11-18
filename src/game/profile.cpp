@@ -2,6 +2,7 @@
 // and full-source placement remain incomplete. Native component proofs are separate.
 #include "game/common.h"
 #include "game/menustate.h"
+#include "game/captionctx.h"
 #include "game/mathutil.h"
 
 // 1.0: a named object, first in .sdata2; a one-field const struct so its uses do not fold to a pooled literal.
@@ -254,6 +255,12 @@ struct ProfileMenuItem {
     ProfileMenuItem(const char* n, int t, const void* d, int a0, int a1) {
         type=t; name=n; data=d; arg0=a0; arg1=a1;
     }
+    // A text item with the default caption context (menu.h's MenuItem(name, text, NoCaption()) form).
+    /* Form unproven: a stand-in (handoff FACTS 2026-11-17). */
+    ProfileMenuItem(const char* n, const char* t, const NoCaption& none) {
+        CaptionContext c(*reinterpret_cast<const int*>(&none));
+        type=3; name=n; data=t; arg0=c.value; arg1=0;
+    }
     ProfileMenuItem(const UnkStatic123& end) {
         name=(const char*)end.unk0; type=end.unk4; data=(const void*)end.unk8;
         arg0=end.unkC; arg1=end.unk10;
@@ -372,16 +379,16 @@ finished:
 int fn_8024C768(void) {
     ProfileMenuItem items[] = {
         ProfileMenuItem(lbl_8055BAC0,8,(const void*)fn_8024C628,0,0),
-        ProfileMenuItem("slot_1",3,lbl_80498A00[0],0,0),
+        ProfileMenuItem("slot_1",lbl_80498A00[0],NoCaption()),
         ProfileMenuItem("slot_1",0,(const void*)fn_8024C6F4,0,0),
         ProfileMenuItem("icon_1",2,&lbl_80498A48[0],0,0),
-        ProfileMenuItem("slot_2",3,lbl_80498A00[1],0,0),
+        ProfileMenuItem("slot_2",lbl_80498A00[1],NoCaption()),
         ProfileMenuItem("slot_2",0,(const void*)fn_8024C6F4,1,0),
         ProfileMenuItem("icon_2",2,&lbl_80498A48[1],0,0),
-        ProfileMenuItem("slot_3",3,lbl_80498A00[2],0,0),
+        ProfileMenuItem("slot_3",lbl_80498A00[2],NoCaption()),
         ProfileMenuItem("slot_3",0,(const void*)fn_8024C6F4,2,0),
         ProfileMenuItem("icon_3",2,&lbl_80498A48[2],0,0),
-        ProfileMenuItem("slot_4",3,lbl_80498A00[3],0,0),
+        ProfileMenuItem("slot_4",lbl_80498A00[3],NoCaption()),
         ProfileMenuItem("slot_4",0,(const void*)fn_8024C6F4,3,0),
         ProfileMenuItem("icon_4",2,&lbl_80498A48[3],0,0),
         ProfileMenuItem("load",0,0,4,0),
