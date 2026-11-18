@@ -379,6 +379,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
             fn_802E317C("artanim: unknown elem type %s", type);
         }
     }
+    /* PROVISIONAL: retail counts this loop and the scale/alpha loop below with the local nPaths (kept in r14, CTR loop
+       there); reading a->nPaths here frees the register ours otherwise spills. One live value too many elsewhere is the open cause. */
     for (int i = 0; i < a->nPaths; i++) {
         ValueNode* pn = paths[i];
         int k;
