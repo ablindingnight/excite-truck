@@ -325,6 +325,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     int nElems = 0;
     int nPaths = 0;
     ValueNode* n;
+    ValueNode* en;
     int i;
     for (i = 0; (n = t->GetChild(i)) != 0; i++) {
         if (!strcmp(n->GetName(), "elem")) {
@@ -338,7 +339,7 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     a->nPaths = nPaths;
     a->paths = new ("animpath") ArtPath[nPaths];
     for (int i = 0; i < nElems; i++) {
-        ValueNode* en = elems[i];
+        en = elems[i];
         AnimElem* e = &a->elems[i];
         const char* type = en->GetValue("type");
         memset(e, 0, sizeof(AnimElem));
