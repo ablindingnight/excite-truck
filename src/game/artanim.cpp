@@ -307,7 +307,7 @@ static inline void AxisQuat(f32* q, const ValVec3& axis) {
 }
 
 // An enum field with a fallback when the key is missing (interlude.cpp has the same helper). Name unproven.
-static inline int GetEnumOr(ValueNode* n, const char* key, const char* names, int def) {
+static inline s32 GetEnumOr(ValueNode* n, const char* key, const char* names, s32 def) {
     return n->Has(key) ? n->GetEnum(key, names) : def;
 }
 
