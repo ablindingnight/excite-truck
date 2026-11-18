@@ -6,6 +6,7 @@
 
 #include "game/common.h"
 #include "game/mathutil.h"
+#include "game/ilayout.h"
 
 // gameloop.cpp (C++ linkage in retail: fn_8000C69C__Fv etc., found by linkcheck).
 const char* fn_8000C69C(void);
@@ -36,10 +37,6 @@ extern void *fn_802090D4(const char *);
 extern void *fn_80145E70(const char *);
 extern void fn_80209110(void *);
 extern int fn_802104D0(void);
-class Dummy_8020D1C8 {
-public:
-    virtual ~Dummy_8020D1C8();
-};
 
 int fn_8020CF68(void) {
     return fn_802104D0();
@@ -114,7 +111,7 @@ void fn_8020D178(void) {
 }
 
 void fn_8020D1C8(void) {
-    Dummy_8020D1C8 *obj = (Dummy_8020D1C8 *)lbl_8055EEA0;
+    ILayout *obj = (ILayout *)lbl_8055EEA0;
     if (obj != 0) {
         delete obj;
         lbl_8055EEA0 = 0;

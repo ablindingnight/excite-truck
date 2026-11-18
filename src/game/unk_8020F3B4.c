@@ -572,21 +572,17 @@ void fn_802103B8(void* a0) {
 }  // extern "C"
 #endif
 #pragma cplusplus on
-/* Helper name unproven: the layouts held in lbl_8055EED4/lbl_8055EED0 are deleted through their virtual destructor (slot 8). */
-class LayoutObj {
-public:
-    virtual ~LayoutObj(void);
-};
+#include "game/ilayout.h"
 
 extern "C" void fn_802103BC(void) {
     fn_802EC1C0(0.0f);
     fn_802EC12C();
     fn_802EC1E4();
-    delete (LayoutObj *)lbl_8055EED4;
+    delete (ILayout *)lbl_8055EED4;
     lbl_8055EED4 = 0;
     lbl_8055B658 = -1;
     fn_8020F5DC();
-    delete (LayoutObj *)lbl_8055EED0;
+    delete (ILayout *)lbl_8055EED0;
     lbl_8055EED0 = 0;
 }
 #pragma pop
@@ -670,9 +666,6 @@ extern long fn_80209110(void *);
 }  // extern "C"
 #endif
 #pragma cplusplus on
-struct Dummy_80210904 {
-      virtual void f1(long);
-  };
 #pragma cplusplus off
 #ifdef __cplusplus
 extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined here)
@@ -784,10 +777,9 @@ void fn_802108C8(void) {
 #pragma cplusplus on
 extern "C" void fn_80210904(void) {
     fn_80209110(&lbl_8055EEF0);
-    struct Dummy_80210904 *obj = (struct Dummy_80210904 *)lbl_8055EED4;
-    if (obj != 0) {
-        obj->f1(1);
-    }
+    // Retail calls the layout's deleting destructor. Spelled as a delete through the real type: an explicit call of
+    // the first slot on a view class only destroyed it on the PC (Itanium splits complete/deleting dtors).
+    delete (ILayout *)lbl_8055EED4;
     lbl_8055EED4 = 0;
 }
 #pragma cplusplus off
@@ -1168,17 +1160,10 @@ extern int fn_8002B1D8(const char *, const char *, int);
 }  // extern "C"
 #endif
 #pragma cplusplus on
-class ModuleTag;
-void RegisterModuleTag(ModuleTag* tag);
-class ModuleTag {
+// ModuleTag comes from game/common.h (via game/ilayout.h).
+class UnkStatic123x {  // 0x18 bytes; common.h's UnkStatic123s is 0x14
 public:
-    ModuleTag(void) { RegisterModuleTag(this); }
-    unsigned char flag;
-    ModuleTag* next;
-};
-class UnkStatic123s {
-public:
-    UnkStatic123s(void) {
+    UnkStatic123x(void) {
         unk4 = 123;
         unk0 = 0;
         unk8 = 0;
@@ -1187,13 +1172,8 @@ public:
     }
     unsigned long unk0, unk4, unk8, unkC, unk10, unk14;
 };
-class UnkStatic7F {
-public:
-    UnkStatic7F(void) { value = 0x7F000000; }
-    unsigned long value;
-};
 ModuleTag lbl_8055EEB0;
-UnkStatic123s lbl_80489C88;
+UnkStatic123x lbl_80489C88;
 UnkStatic7F lbl_8055EEB8;
 char lbl_80489CA0[0x6400];
 Unk_804900AC lbl_804900AC;
