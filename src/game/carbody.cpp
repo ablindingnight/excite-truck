@@ -620,7 +620,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
         CbValueNode* axle = table->FindChild((i == 0 || i == 1) ? "Front" : "Rear");
         F32(p + i * 0x74, 0x23E8) = F32(desc + i * 4, 0x10C);
         F32(p + i * 0x74, 0x23EC) = 0.0254f * axle->GetFloat("max_compression", 8.0f) - F32(p + i * 0x74, 0x23E8);
-        *(f32*)((u8*)&setup.wheels[i] + 0x18) = F32(p + i * 0x74, 0x23E8);
+        F32((u8*)&setup + i * 0x24, 0x98) = F32(p + i * 0x74, 0x23E8);
     }
     ((CarDesc*)desc)->mass = setup.mass / 0.4545f;
     ((CarDesc*)desc)->ix = setup.f04 / 0.042279866f;
