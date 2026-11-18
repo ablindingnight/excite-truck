@@ -693,7 +693,7 @@ static inline f32 Log2(f32 x) { return log2(x); }
 
 #pragma push
 #pragma opt_lifetimes off
-void fn_802DCFCC(void* ctx, f32 scale, f32 uvScale, s32 ind, s32 tex, u32) {
+void fn_802DCFCC(void* ctx, s32 ind, f32 scale, f32 uvScale, s32 tex, u32) {
     lbl_8055D148 = uvScale;
     fn_802DBD88();
     if (tex != -2) {
