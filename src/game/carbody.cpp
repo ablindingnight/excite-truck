@@ -1868,6 +1868,8 @@ void fn_80183E7C(u8* p) {
             ev.dive = nosedive;
             fn_801796CC(15, &ev, sizeof(ev));
         }
+        // PROVISIONAL: actual glide-force scale declaration scope is unproven.
+        f32 one;
         f32 target;
         if (lean < 0.0f) {
             target = LerpT(Ramp(lean, 0.0f, -0.35f), cb->f261C, 0.9f * cb->f261C);
@@ -1880,7 +1882,7 @@ void fn_80183E7C(u8* p) {
         HVec dir = *(HVec*)(p + 0x118);
         dir.y = 0.0f;
         f32 m = MaxF(0.01f, PSVECMag((const Vec*)&dir));
-        f32 one = 1.0f;
+        one = 1.0f;
         f32 inv = one / m;
         dir.x = dir.x * inv;
         dir.y = dir.y * inv;
