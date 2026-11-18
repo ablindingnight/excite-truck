@@ -419,10 +419,8 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         }
         p->nKeys = nFrames;
         p->keys = new ("artframe") ArtKey[nFrames];
-        k = 0;
-        if (nFrames > 0) {
+        for (k = 0; k < nFrames; k++) {
             const char* curveKey = "curve";
-            for (; k < nFrames; k++) {
                 ValueNode* f;
                 ArtKey* key = &p->keys[k];
                 ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
@@ -472,7 +470,6 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 key->curve = f->Has(curveKey) ? f->GetEnum(curveKey, curveNames) : curve;
                 key->signal = f->GetInt("signal", prev ? prev->signal : 0);
             }
-        }
     }
     if (t->HasChild("global_transform")) {
         ValueNode* g = t->FindChild("global_transform");
