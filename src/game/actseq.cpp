@@ -62,8 +62,6 @@ template <typename T, int N>
 struct FixedArr : ArrayRef<T> {
     FixedArr(void) : ArrayRef<T>(storage, N) {}
     ~FixedArr(void) {}
-    // PROVISIONAL: actual record-address input ownership and insertion overload API are inferred.
-    void Push(const T* const& v) { T* p = &this->data[this->count++]; *p = *v; }
     void Push(T v) {
         T* p = &this->data[this->count++];
         *p = v;
@@ -1170,6 +1168,14 @@ struct SurfEntry {
     s32 mode;       // offset 0x8
 };
 
+// PROVISIONAL: actual insertion context and saved-state address input ownership/API are inferred.
+static inline void AppendSurfaceEntry(FixedArr<SurfEntry, 32>& entries, SurfBody* body, const SurfEntry* const& state) {
+    SurfEntry* p = &entries.data[entries.count++];
+    p->obj = body;
+    p->surf = state->surf;
+    p->mode = state->mode;
+}
+
 namespace {
 
 // Changes the surface of every body in a group after "delay" seconds, and back after "length".
@@ -1250,14 +1256,17 @@ inline void SurfaceChange_ASE::Removed(SurfBody* b) {
         }
     }
 }
+// PROVISIONAL: descriptor-result and saved-state input ownership are inferred.
 inline void SurfaceChange_ASE::Added(SurfBody* b) {
     ValueNode* d = b->Desc();
-    if (d && groupId == d->GetInt("group_id", -1)) {
+    if (!d) { return; }
+    s32 group = d->GetInt("group_id", -1);
+    if (group == groupId) {
+        // Only surf/mode are saved-state inputs; insertion supplies the body.
         SurfEntry e;
         e.surf = b->Surface();
         e.mode = b->Mode();
-        e.obj = b;
-        entries.Push(&e);
+        AppendSurfaceEntry(entries, b, &e);
         b->SetMode(-1);
     }
 }
