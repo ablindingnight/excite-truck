@@ -697,7 +697,9 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
         u32 nw = scale * width;
         if (BuildMode() == kBuildRetail) {
             int mode = lbl_8055FA38;
-            u32 nh = scale * height;
+            // PROVISIONAL: scaled-height accumulator ownership is inferred.
+            u32 nh = height;
+            nh *= scale;
             int alignedZ = signedZ & ~maskZ;
             cz = (s16)alignedZ;
             if (mode == 5) {
