@@ -1471,8 +1471,10 @@ template <class O, class A, class V> static inline void CbAddScaled(O* o, const 
 /* Helper name unproven */
 template <class O> static inline void CbScaleSelf(O* o, f32 k) { o->x = o->x * k; o->y = o->y * k; o->z = o->z * k; }
 /* Helper name unproven: the roll torque gain (speed ramp times the mass torque) */
+// PROVISIONAL: body-mass query name and by-value return ownership are unproven.
+static inline f32 BodyMass(CarBody* cb) { return cb->mass; }
 // PROVISIONAL: named roll-blend factor ownership is unproven.
-static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = cb->mass; f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f); f32 gain = LerpT(b, 0.0f, 1.0f); return gain * (m * 100.0f * 9.81f * 0.305f * a); }
+static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = BodyMass(cb); f32 b = Clamp01((cb->speed - 4.4444447f) / 8.888888f); f32 gain = LerpT(b, 0.0f, 1.0f); return gain * (m * 100.0f * 9.81f * 0.305f * a); }
 // PROVISIONAL: helper name/boundary and by-value pitch ownership are unproven.
 static inline f32 StalledPitch(f32 pitch, f32 stall) {
     return pitch + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
@@ -1483,6 +1485,11 @@ struct LoudState { int value; };
 struct StuntDecision { int value; };
 // PROVISIONAL: clock query name and temporary-reference ownership are unproven.
 static inline f32 PhysicsTime() { return lbl_8055E3C8; }
+
+// PROVISIONAL: body-speed query name and by-value return ownership are unproven.
+static inline f32 BodySpeed(CarBody* cb) { return cb->speed; }
+// PROVISIONAL: body-roll query name and by-value return ownership are unproven.
+static inline f32 BodyRollInput(CarBody* cb) { return cb->f2604; }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -1560,7 +1567,7 @@ void fn_80183E7C(u8* p) {
             if (cb->airborne == 0 || !(AbsNarrow(cb->f2614) <= __float_epsilon[0]) || cb->mtx.rot.y.y < 0.0f) {
                 f32 t = CbAdd(cb->f2614, 0.016683351f);
                 cb->f2614 = t;
-                if (cb->speed < 8.0f) {
+                if (BodySpeed(cb) < 8.0f) {
                     cb->f2614 = CbAdd(t, 0.025025027f);
                 }
             } else {
@@ -1771,7 +1778,7 @@ void fn_80183E7C(u8* p) {
         f32 stall = MinF(1.0f, 10.0f * cb->f264C);
         const f32 inputPitch = cb->f2600;
         f32 pitch = StalledPitch(inputPitch, stall);
-        f32 roll = cb->f2604;
+        f32 roll = BodyRollInput(cb);
         HVec fl = *(HVec*)(p + 0x118);
         fl.y = 0.0f;
         f32 m = MaxF(1.0f, PSVECMag((const Vec*)&fl));
@@ -2202,7 +2209,7 @@ void fn_80183E7C(u8* p) {
     }
     cb->f26D0 = fn_801DCEC0(*((CollVolume*)p)->hint, cb->mtx.pos.x, cb->mtx.pos.z);
     cb->f26CC = LerpT(0.1f, cb->f26CC, cb->f26D0);
-    if (cb->speed < 0.5f && cb->f25F4 < 0.1f && cb->f25E4 > 0.9f) {
+    if (BodySpeed(cb) < 0.5f && cb->f25F4 < 0.1f && cb->f25E4 > 0.9f) {
         cb->f26A8 += 0.016683351f;
     } else {
         cb->f26A8 = 0.0f;
@@ -2220,7 +2227,9 @@ void fn_80183E7C(u8* p) {
             cb->f26FC = cb->f2600;
             a.x = a.x + 2.0f * s;
         }
-        a.y = a.y + 10.0f * cb->f26FC * (1.0f - cb->f25F0 * cb->f25F0);
+        // PROVISIONAL: named steering-square value ownership is unproven.
+        f32 steeringSquare = cb->f25F0 * cb->f25F0;
+        a.y = a.y + 10.0f * cb->f26FC * (1.0f - steeringSquare);
         RVec3 acc;
         ObUnrotateRows(&acc, (const f32*)(p + 0x3C), (const f32*)(p + 0x16C));
         CbAddScaled(&a, &a, &acc, -0.02f);
