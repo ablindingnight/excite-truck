@@ -1447,7 +1447,8 @@ static inline void UpCross(RVec3* out, const Vec* v) {
 }
 /* Helper name unproven: an upward impulse at the centre of mass */
 static inline void KickUp(u8* p, f32 k) {
-    RVec3 kick(0.0f, 10.0f * k, 0.0f);
+    f32 up = 10.0f * k;
+    RVec3 kick(0.0f, up, 0.0f);
     ((RigidBody*)p)->AddImpulse(1.0f, (const RVec3*)&kick, (const RVec3*)(p + 0x60));
 }
 /* Helper name unproven: a vertical force at the centre of mass */
