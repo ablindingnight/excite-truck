@@ -1476,6 +1476,10 @@ static inline f32 RollGain(CarBody* cb, f32 a) { f32 m = cb->mass; f32 b = Clamp
 static inline f32 StalledPitch(f32 pitch, f32 stall) {
     return pitch + 0.75f * stall * fn_80129DC4(4, -1.0f, 1.0f);
 }
+// PROVISIONAL: sound-decision wrapper type and ownership are unproven.
+struct LoudState { int value; };
+// PROVISIONAL: clock query name and temporary-reference ownership are unproven.
+static inline f32 PhysicsTime() { return lbl_8055E3C8; }
 void fn_80183E7C(u8* p) {
     CarBody* cb = (CarBody*)p;
     CbSolContact* sol;
@@ -2032,10 +2036,11 @@ void fn_80183E7C(u8* p) {
         }
     }
     f32 vol = fn_801B8950(cb->index);
-    int loud = 0;
+    LoudState soundState = { 0 };
     if (CarOnGas(p) && CarHot(p)) {
-        loud = 1;
+        soundState.value = 1;
     }
+    int loud = soundState.value;
     f32 want = loud ? 1.0f : 0.0f;
     f32 dvc = MaxF(MinF(0.033366702f, want - vol), -0.033366702f);
     fn_801B8964(cb->index, vol + dvc);
@@ -2064,7 +2069,7 @@ void fn_80183E7C(u8* p) {
             f32 t = RampW(cb->speed, 22.222223f, 48.888893f);
             yaw = LerpT(t, yaw, want);
         }
-        f32 now = lbl_8055E3C8;
+        const f32& now = PhysicsTime();
         if (cb->f2638 == 0 && cb->f2644 > 0 &&
             (now - cb->f2634 > 0.6f || cb->f2618 < 0.1f)) {
             fn_8014E61C(cb->index, 7, (f32)cb->f2644);
