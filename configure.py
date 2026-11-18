@@ -1100,7 +1100,7 @@ config.libs.append(
             Object(Matching, "game/drawlist.cpp"),
             Object(Matching, "game/carelem.cpp"),
             Object(Matching, "game/cargear.cpp"),
-            Object(NonMatching, "game/meshswap.cpp"),
+            Object(Matching, "game/meshswap.cpp"),
             Object(Matching, "game/carmesh.cpp"),
             Object(Matching, "game/soevent.cpp"),
             Object(Matching, "game/mutphob.cpp"),

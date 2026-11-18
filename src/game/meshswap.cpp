@@ -35,15 +35,6 @@ struct MeshStrip {
 };
 
 struct MeshBone {
-    void Swap(void) {
-        SwapWord(&w[0]);
-        SwapWord(&w[1]);
-        SwapWord(&w[2]);
-        SwapWord(&w[3]);
-        SwapWord(&w[4]);
-        SwapWord(&w[5]);
-        SwapWord(&w[6]);
-    }
     u32 w[7];
 };
 
@@ -69,6 +60,10 @@ static inline void Fix(void** p, u32 base) {
 
 extern "C" {
 
+// PROVISIONAL: shared byte-swap scratch ownership and function lifetime policy.
+// The ordinary compiled source matches retail; original author spelling is unproven.
+#pragma push
+#pragma opt_lifetimes off
 void fn_801D1C68(MeshHeader* m, u32 base) {
     Fix((void**)&m->verts, base);
     Fix((void**)&m->faces, base);
@@ -80,9 +75,12 @@ void fn_801D1C68(MeshHeader* m, u32 base) {
     int jf;
     MeshStrip* s;
     int ks;
-    int lb;
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
+    unsigned byteScratch;
+#endif
     unsigned offset;
     MeshBone* b;
+    int lb;
     for (iv = 0; iv < m->numVerts; iv++) {
         v = &m->verts[iv];
         v->Swap();
@@ -98,8 +96,53 @@ void fn_801D1C68(MeshHeader* m, u32 base) {
     }
     for (lb = 0, offset = 0; lb < m->numBones; lb++, offset += sizeof(*m->bones)) {
         b = (MeshBone*)((u8*)m->bones + offset);
-        b->Swap();
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
+        byteScratch = ((u8*)b)[0];
+        ((u8*)b)[0] = ((u8*)b)[3];
+        ((u8*)b)[3] = byteScratch;
+        byteScratch = ((u8*)b)[1];
+        ((u8*)b)[1] = ((u8*)b)[2];
+        ((u8*)b)[2] = byteScratch;
+        byteScratch = ((u8*)b)[4];
+        ((u8*)b)[4] = ((u8*)b)[7];
+        ((u8*)b)[7] = byteScratch;
+        byteScratch = ((u8*)b)[5];
+        ((u8*)b)[5] = ((u8*)b)[6];
+        ((u8*)b)[6] = byteScratch;
+        byteScratch = ((u8*)b)[8];
+        ((u8*)b)[8] = ((u8*)b)[11];
+        ((u8*)b)[11] = byteScratch;
+        byteScratch = ((u8*)b)[9];
+        ((u8*)b)[9] = ((u8*)b)[10];
+        ((u8*)b)[10] = byteScratch;
+        byteScratch = ((u8*)b)[12];
+        ((u8*)b)[12] = ((u8*)b)[15];
+        ((u8*)b)[15] = byteScratch;
+        byteScratch = ((u8*)b)[13];
+        ((u8*)b)[13] = ((u8*)b)[14];
+        ((u8*)b)[14] = byteScratch;
+        byteScratch = ((u8*)b)[16];
+        ((u8*)b)[16] = ((u8*)b)[19];
+        ((u8*)b)[19] = byteScratch;
+        byteScratch = ((u8*)b)[17];
+        ((u8*)b)[17] = ((u8*)b)[18];
+        ((u8*)b)[18] = byteScratch;
+        byteScratch = ((u8*)b)[20];
+        ((u8*)b)[20] = ((u8*)b)[23];
+        ((u8*)b)[23] = byteScratch;
+        byteScratch = ((u8*)b)[21];
+        ((u8*)b)[21] = ((u8*)b)[22];
+        ((u8*)b)[22] = byteScratch;
+        byteScratch = ((u8*)b)[24];
+        ((u8*)b)[24] = ((u8*)b)[27];
+        ((u8*)b)[27] = byteScratch;
+        byteScratch = ((u8*)b)[25];
+        ((u8*)b)[25] = ((u8*)b)[26];
+        ((u8*)b)[26] = byteScratch;
+#endif
     }
 }
+#pragma pop
+
 
 }  // extern "C"
