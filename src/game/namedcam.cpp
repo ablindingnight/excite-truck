@@ -421,14 +421,20 @@ void fn_80276DC8(int slot) {
     lbl_804A15C0[slot] = 0.0f;
     look = rec->pose;
     if (!fn_80276068(rec->nextMode) || !S32(src->car, 0x24)) {
-        lbl_804A0C60[slot].nextMode = 4;
+        // PROVISIONAL: the array and field-reference ownership is inferred
+        // from retail's held base and multiply operands; original spelling unknown.
+        CamRec (&records)[4] = lbl_804A0C60;
+        records[slot].nextMode = 4;
         f32 d = fn_802704E0(4, 0.0f);
-        look.pos.v[0] = lbl_804A0C60[slot].carFrame.pos.v[0] + lbl_804A0C60[slot].carFrame.rot.m[6] * d;
-        look.pos.v[1] = lbl_804A0C60[slot].carFrame.pos.v[1] + lbl_804A0C60[slot].carFrame.rot.m[7] * d;
-        look.pos.v[2] = lbl_804A0C60[slot].carFrame.pos.v[2] + lbl_804A0C60[slot].carFrame.rot.m[8] * d;
-        look.rot.m[6] = lbl_804A0C60[slot].carFrame.rot.m[6];
-        look.rot.m[7] = lbl_804A0C60[slot].carFrame.rot.m[7];
-        look.rot.m[8] = lbl_804A0C60[slot].carFrame.rot.m[8];
+        const f32& forwardX = records[slot].carFrame.rot.m[6];
+        const f32& forwardY = records[slot].carFrame.rot.m[7];
+        const f32& forwardZ = records[slot].carFrame.rot.m[8];
+        look.pos.v[0] = records[slot].carFrame.pos.v[0] + forwardX * d;
+        look.pos.v[1] = records[slot].carFrame.pos.v[1] + forwardY * d;
+        look.pos.v[2] = records[slot].carFrame.pos.v[2] + forwardZ * d;
+        look.rot.m[6] = forwardX;
+        look.rot.m[7] = forwardY;
+        look.rot.m[8] = forwardZ;
         look.rot.m[3] = 0.0f;
         look.rot.m[4] = 1.0f;
         look.rot.m[5] = 0.0f;
