@@ -322,15 +322,18 @@ void fn_8018185C(const u8* p, f32* v) {
     f32 r0 = v[3];
     f32 peak = Mul(1.3515152f, v[2]);
     f32 d = F32(p, 0x1C) - r0;
+    // PROVISIONAL: upper-curve input declaration scope is unproven.
+    f32 top;
+    f32 red;
     f32 a = (hp - peak) / MaxF(d * d, 0.00001f);
     F32(p, 0x0) = a;
     F32(p, 0x8) = peak + a * (r0 * r0);
     f32 low = 1.3515152f * (0.3f * v[2]);
     F32(p, 0x4) = F32(p, 0x18) + -2.0f * a * r0;
     f32 peak2 = 1.3515152f * v[2];
-    f32 top = F32(p, 0x28);
+    top = F32(p, 0x28);
     F32(p, 0x20) = hp / 8000.0f;
-    f32 red = v[4];
+    red = v[4];
     d = red - top;
     f32 b = (low - peak2) / MaxF(d * d, 0.0001f);
     F32(p, 0xC) = b;
