@@ -394,6 +394,7 @@ static inline int AnchorCount(Fabric* f, int style) {
     return n;
 }
 
+// PROVISIONAL: running output counter owns the first two anchors; source ownership remains unproven.
 void fn_801F5664(Fabric* f, int style) {
     int n = AnchorCount(f, style);
     Anchor* a;
@@ -403,9 +404,8 @@ void fn_801F5664(Fabric* f, int style) {
     k = 0;
     switch (style) {
     case 2:
-        SetAnchor(&a[0], f->cur, (f->rows - 1) * f->cols);
-        SetAnchor(&a[1], f->cur, f->cols * f->rows - 1);
-        k = 2;
+        SetAnchor(&a[k++], f->cur, (f->rows - 1) * f->cols);
+        SetAnchor(&a[k++], f->cur, f->cols * f->rows - 1);
     case 1:
         SetAnchor(&a[k++], f->cur, 0);
         SetAnchor(&a[k++], f->cur, f->cols - 1);
