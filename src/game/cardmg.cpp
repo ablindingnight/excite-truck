@@ -757,12 +757,28 @@ static inline int HitCorner(const AVec* at) {
 // raises the car's impairment.
 static inline double AbsDbl(double v) { return __fabs(v); }
 
+// Breaks part t off at the centre of its bone box (helper name unproven).
+static inline void BreakAtBox(u8* p, DamagePart* t) {
+    ValVec3* lo = &((CarBody*)p)->layout->bounds[t->bit].min;
+    ValVec3* hi = lo + 1;
+    ValVec3 c;
+    c.x = lo->x + (lo + 1)->x;
+    c.y = lo->y + hi->y;
+    c.z = lo->z + (lo + 1)->z;
+    c.x *= -0.5f;
+    c.y *= -0.5f;
+    c.z *= -0.5f;
+    fn_801BF2A4(p, 1 << t->bit, &c, lo, lo + 1, t->x34, (u8*)t + 0x38);
+}
+
 // Pushes every dent goal near c0 back along nd by up to `moved` (helper name unproven).
 static inline void PushGoals(u8* p, DentVec& nd, DentVec& c0, f32 moved) {
-    DentVec w;
     DentVec r;
-    for (int i = 1; i < ((CarBody*)p)->f5F8; i++) {
-        DentPoint* q = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
+    DentVec w;
+    int i;
+    int off;
+    for (i = 1, off = sizeof(DentPoint); i < ((CarBody*)p)->f5F8; off += sizeof(DentPoint), i++) {
+        DentPoint* q = (DentPoint*)((u8*)((CarBody*)p)->layout + off);
         DentVec* g = (DentVec*)(p + 0x5FC) + q->goal;
         w.x = q->pos.x + g->x;
         w.y = q->pos.y + g->y;
@@ -802,7 +818,6 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     DentVec nd;
     DentVec dg;
     DentVec c0;
-    ValVec3 c;
     GlassMsg msg;
     LightPart* l;
     CbJoint* sl;
@@ -955,15 +970,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         sl->valid = 0;
                     }
                     if (sl->state == 3) {
-                        ValVec3* lo = &((CarBody*)p)->layout->bounds[t->bit].min;
-                        ValVec3* hi = lo + 1;
-                        c.x = lo->x + (lo + 1)->x;
-                        c.y = lo->y + hi->y;
-                        c.z = lo->z + (lo + 1)->z;
-                        c.x *= -0.5f;
-                        c.y *= -0.5f;
-                        c.z *= -0.5f;
-                        fn_801BF2A4(p, 1 << t->bit, &c, lo, lo + 1, t->x34, (u8*)t + 0x38);
+                        BreakAtBox(p, t);
                     }
                 }
             }
