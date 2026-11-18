@@ -1215,8 +1215,7 @@ inline void Arena::Tally(void) {
                     tally->loop = 1;
                     tally->start = 1;
                 }
-                tally = sTally;
-                if (f34 == f30 && tally && tally->playing) {
+                if (f34 == f30 && (tally = sTally) && tally->playing) {
                     tally->stop = 1;
                     tally->restart = 0;
                 }
