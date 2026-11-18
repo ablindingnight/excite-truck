@@ -1381,7 +1381,7 @@ static inline f32 ShakeAxis(f32 amp, f32 phase, f32 twoPi) {
 // Hit shake for chase cameras: for half a second after a bump the camera wobbles about all three axes
 // (a sine wave per axis plus jitter), easing out with the time since the hit.
 void fn_80268E94(CamRec* c, int idx) {
-    f32 amp, twoPi, t;
+    f32 t, amp, twoPi;
     if (!fn_8026B0C0(idx) && !fn_801769F8()) {
         bool chase = false;
         int m = c->mode;
