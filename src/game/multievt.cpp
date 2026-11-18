@@ -623,7 +623,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
         MenuItem("#ai_strength", 0x10, &level, 0, 0),
         MenuItem(lbl_8055B860, 6, 0, -1, 27),
         MenuItem(lbl_8055B860, 6, 0, -2, 13),
-        MenuItem("#title", stats.text, CaptionContext(0x100)),
+        MenuItem("#title", 3, stats.text, 0x100, 0),
         MenuItem("#course_name", tex.name, NoCaption()),
         MenuItem("#trackmap", 0x12, &tex, 0, 0),
         MenuItem("#trackmap", 2, &tex.id, 0, 0),
