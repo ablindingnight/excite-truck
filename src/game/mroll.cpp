@@ -589,6 +589,8 @@ int fn_8023FF1C(u8 flag) {
     JoinLeaveWidget w;
     AddFocus(&w, &pp.p1.sel, 3, 1, 5, 7, 9);
     AddFocus(&w, &pp.p2.sel, 4, 2, 6, 8, 10);
+    // PROVISIONAL: text-row base ownership and first-use spelling.
+    char (*text2)[0x64];
     MenuItem items[] = {
         MenuItem(NULL, 5, &w, 0, 0),
         MenuItem(NULL, 5, &pp.p1.sel, 0, 0),
@@ -617,15 +619,15 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
         MenuItem("#controller_2", pp.p2.sel.name, NoCaption()),
         MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p2", pp.p2.stats.text[0], NoCaption()),
+        MenuItem("#stat_text_1_p2", (text2 = pp.p2.stats.text)[0], NoCaption()),
         MenuItem("#stat_art_1_p2", 2, &pp.p2.stats.stats.stats[0].value, 0, 0),
-        MenuItem("#stat_text_2_p2", pp.p2.stats.text[1], NoCaption()),
+        MenuItem("#stat_text_2_p2", text2[1], NoCaption()),
         MenuItem("#stat_art_2_p2", 2, &pp.p2.stats.stats.stats[1].value, 0, 0),
-        MenuItem("#stat_text_3_p2", pp.p2.stats.text[2], NoCaption()),
+        MenuItem("#stat_text_3_p2", text2[2], NoCaption()),
         MenuItem("#stat_art_3_p2", 2, &pp.p2.stats.stats.stats[2].value, 0, 0),
-        MenuItem("#stat_text_4_p2", pp.p2.stats.text[3], NoCaption()),
+        MenuItem("#stat_text_4_p2", text2[3], NoCaption()),
         MenuItem("#stat_custom_4_p2", 5, &pp.p2.stats.bars[3], 0, 0),
-        MenuItem("#stat_text_5_p2", pp.p2.stats.text[4], NoCaption()),
+        MenuItem("#stat_text_5_p2", text2[4], NoCaption()),
         MenuItem("#stat_art_5_p2", 2, &pp.p2.stats.stats.stats[4].value, 0, 0),
         MenuItem(lbl_80498810),
     };
