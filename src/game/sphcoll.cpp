@@ -30,6 +30,8 @@ template <class C> static inline void SphAheadXZY(f32* o, f32 x, const C* c, con
 static inline f32 SphAdd(f32 a, f32 b) { return a + b; }
 static inline void SphScale(f32* o, const f32* v, f32 k) { o[0] = v[0] * k; o[1] = v[1] * k; o[2] = v[2] * k; }
 static inline void SphAddScaled(f32* o, const f32* a, const f32* d, f32 k) { o[0] = a[0] + d[0] * k; o[1] = a[1] + d[1] * k; o[2] = a[2] + d[2] * k; }
+// A float field read through a pointer (a getter in the original; found by the permuter).
+static inline f32 LoadF(const f32* f) { return *f; }
 static inline void MulAdd(f32* o, const f32* c, const f32* d, f32 k) {
     o[0] = c[0] + d[0] * k;
     o[1] = c[1] + d[1] * k;
@@ -1306,7 +1308,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     if (len < 0.05f) {
         return 0;
     }
-    f32 comp = 0.2f + (-len + F32(p, 0x24));
+    f32 comp = 0.2f + (-len + LoadF((f32*)((u8*)(p) + 0x24)));
     f32 fq = 0.0f;
     if (fq < comp) {
         f32 fp = fq;
@@ -1402,8 +1404,6 @@ int fn_8019C854(u8* p, u8* q) {
 
 // Capsule (q: frame at 0xC with axis at 0x18 and centre at 0x24, half length 0x28, radius 0x24):
 // the cylinder test, then a sphere test at each end.
-// A float field read through a pointer (a getter in the original; found by the permuter).
-static inline f32 LoadF(const f32* f) { return *f; }
 
 int fn_8019CCCC(u8* p, u8* c, u8* q, f32 r) {
     u8* m;
