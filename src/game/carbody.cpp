@@ -2506,8 +2506,13 @@ void fn_80186DE8(void) {
             w->local[1] = x->pts[j].y - w6[j];
             u32 fl;
             f32 up = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x54));
-            w->plane.nRight = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x3C));
-            w->plane.nFwd = up;
+            // The pair is built in a stack object, then copied: retail forwards both stored values (frsp) into the
+            // plane fields (fwdsig FWDCOPY, G9).
+            f32 pl[2];
+            pl[0] = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x3C));
+            pl[1] = up;
+            w->plane.nRight = pl[0];
+            w->plane.nFwd = pl[1];
             w->grounded = nrm[1] > 0.01f;
             f32 comp = c->pts[5 + j].w;
             if (comp > 20000.0f) {
