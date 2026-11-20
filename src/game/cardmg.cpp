@@ -136,17 +136,17 @@ static inline void ToWorld(EVec* out, const EVec* in, const DFrame* f) {
 extern "C" {
 
 // Rotates frame a by b's rotation about b's position: out = a * b, keeping b's pivot where a puts it.
-void fn_8018BFA0(DFrame* out, const DFrame* a, const DFrame* b) {
-    f32 v[3];
-    MulM(&out->rot, &a->rot, &b->rot);
-    MulVec((EVec*)v, &b->pos, &a->rot);
-    out->pos.x = a->pos.x + v[0];
-    out->pos.y = a->pos.y + v[1];
-    out->pos.z = a->pos.z + v[2];
-    MulVec((EVec*)v, &b->pos, &out->rot);
-    out->pos.x = out->pos.x - v[0];
-    out->pos.y = out->pos.y - v[1];
-    out->pos.z = out->pos.z - v[2];
+void fn_8018BFA0(DFrame* resultFrame, const DFrame* parentFrame, const DFrame* childFrame) {
+    f32 tempVector[3];
+    MulM(&resultFrame->rot, &parentFrame->rot, &childFrame->rot);
+    MulVec((EVec*)tempVector, &childFrame->pos, &parentFrame->rot);
+    resultFrame->pos.x = parentFrame->pos.x + tempVector[0];
+    resultFrame->pos.y = parentFrame->pos.y + tempVector[1];
+    resultFrame->pos.z = parentFrame->pos.z + tempVector[2];
+    MulVec((EVec*)tempVector, &childFrame->pos, &resultFrame->rot);
+    resultFrame->pos.x = resultFrame->pos.x - tempVector[0];
+    resultFrame->pos.y = resultFrame->pos.y - tempVector[1];
+    resultFrame->pos.z = resultFrame->pos.z - tempVector[2];
 }
 
 void fn_8018C50C(void) {}
