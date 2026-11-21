@@ -2943,18 +2943,39 @@ s32 fn_801FA8E0(BoxShape* v, const f32* m, s32 h);
 }
 
 static inline void SatModel(const char* name, const char* tex) {
-    Model* m = fn_802C6B44(name);
+    // PROVISIONAL actual material/copy workspace; original ownership unproven.
+    struct CopyWork { char* dst; const char* src; int left; };
+    struct MaterialWork { Model* model; int index; CopyWork copy; };
+    MaterialWork work;
     TexOverride o;
-    int i;
-    memset(&o, 0, sizeof(o));
-    SafeStrCopy(o.tex, tex, 0x10);
+    work.index = 0;
+    work.model = fn_802C6B44(name);
+    memset(&o, work.index, sizeof(o));
+    work.copy.src = tex;
+    work.copy.left = 0x10;
+    work.copy.dst = o.tex;
+    while ((*work.copy.dst++ = *work.copy.src++) != 0) {
+        if (--work.copy.left <= 0) {
+            work.copy.dst[-1] = 0;
+            break;
+        }
+    }
     o.flag = 1;
-    for (i = 0; i < m->nMats; i++) {
-        SafeStrCopy(o.mat, fn_802C9C24(m->mats + i * 0x10), 0x10);
+    for (work.index = 0; work.index < work.model->nMats; work.index++) {
+        work.copy.src = fn_802C9C24(work.model->mats + work.index * 0x10);
+        work.copy.left = 0x10;
+        work.copy.dst = o.mat;
+        while ((*work.copy.dst++ = *work.copy.src++) != 0) {
+            if (--work.copy.left <= 0) {
+                work.copy.dst[-1] = 0;
+                break;
+            }
+        }
         fn_802C7888(&o, 1);
     }
-    fn_802C6C20(m);
+    fn_802C6C20(work.model);
 }
+
 
 inline Pickup::Pickup(ValueNode* n) {
     f32 c[2];
