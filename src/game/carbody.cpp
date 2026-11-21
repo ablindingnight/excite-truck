@@ -3442,6 +3442,7 @@ void fn_8018A750(u8* p) {
         SprEdge edges[4];
         SprPin pins[4];
         int n = S32(cb->f26C0, 0xC8);
+        int ne = S32(cb->f26C0, 0xC8);  // edge count read on its own (retail keeps it in r8 across the loop)
         int nv = n * 2;
         int i = 0;
         if (n > 0) {
@@ -3462,7 +3463,7 @@ void fn_8018A750(u8* p) {
                 pins[i].at = 0;
             }
         }
-        fn_801C1CBC(cb->f26C8, nv, verts, n, edges, n, pins);
+        fn_801C1CBC(cb->f26C8, nv, verts, n, edges, ne, pins);
     }
 }
 
