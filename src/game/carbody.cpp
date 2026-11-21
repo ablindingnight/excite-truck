@@ -311,6 +311,9 @@ u8 lbl_8055E4F7;  // the zone-mode limiter message was shown
 
 extern "C" {
 
+// Name unproven.
+static inline f32 EngineSquare(const f32& value) { return value * value; }
+
 // Builds the engine torque curve from v = {hp, hp rpm, peak torque, torque rpm, redline rpm, idle torque}: a
 // parabola through the torque peak and the hp point below it, another from the peak down to 30% at redline.
 void fn_8018185C(const u8* p, f32* v) {
@@ -325,9 +328,9 @@ void fn_8018185C(const u8* p, f32* v) {
     // PROVISIONAL: upper-curve input declaration scope is unproven.
     f32 top;
     f32 red;
-    f32 a = (hp - peak) / MaxF(d * d, 0.00001f);
+    f32 a = (hp - peak) / MaxF(EngineSquare(d), 0.00001f);
     F32(p, 0x0) = a;
-    F32(p, 0x8) = peak + a * (r0 * r0);
+    F32(p, 0x8) = peak + a * EngineSquare(r0);
     f32 low = 1.3515152f * (0.3f * v[2]);
     F32(p, 0x4) = F32(p, 0x18) + -2.0f * a * r0;
     f32 peak2 = 1.3515152f * v[2];
@@ -335,9 +338,9 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x20) = hp / 8000.0f;
     red = v[4];
     d = red - top;
-    f32 b = (low - peak2) / MaxF(d * d, 0.0001f);
+    f32 b = (low - peak2) / MaxF(EngineSquare(d), 0.0001f);
     F32(p, 0xC) = b;
-    F32(p, 0x14) = peak2 + b * (top * top);
+    F32(p, 0x14) = peak2 + b * EngineSquare(top);
     F32(p, 0x10) = F32(p, 0x18) + -2.0f * b * top;
 }
 static f32 RpmFromRad(f32 w) { return w / 0.10472f; } /* Helper name unproven */
