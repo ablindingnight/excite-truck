@@ -678,34 +678,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     f32 ang = PSVECMag((const Vec*)&v.x);
     if (ang > 0.0001f) {
         f32 inv = 1.0f / ang;
-        f32 ax = inv * v.x;
-        f32 sn;
-        f32 ay = inv * v.y;
-        f32 az = inv * v.z;
-        f32 t;
-        f32 yDiag;
-        f32 zDiag;
-        f32 xx;
-        f32 yy;
-        f32 zz;
-        f32 cs;
-        sn = sin(ang);
-        cs = cos(ang);
-        xx = ax * ax;
-        yy = ay * ay;
-        zz = az * az;
-        t = 1.0f - cs;
-        rot.rx.x = cs + t * xx;
-        rot.rx.y = ay * (t * ax) + sn * az;
-        rot.rx.z = az * (t * ax) - sn * ay;
-        yDiag = cs + t * yy;
-        rot.ry.x = ay * (t * ax) - sn * az;
-        rot.ry.y = yDiag;
-        rot.ry.z = az * (t * ay) + sn * ax;
-        zDiag = cs + t * zz;
-        rot.rz.x = az * (t * ax) + sn * ay;
-        rot.rz.y = az * (t * ay) - sn * ax;
-        rot.rz.z = zDiag;
+        AxisAngleRows(rot, inv * v.z, inv * v.y, inv * v.x, ang);
     } else {
         SetIdentity(&rot.rx.x);
     }
