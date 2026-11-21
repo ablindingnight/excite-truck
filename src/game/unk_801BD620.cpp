@@ -545,7 +545,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V18B0.y = (V18F0.y * V18F0.y) + (V18F0.y * V18F0.y);
         V18B0.z = (V18F0.z * V18F0.z) + (V18F0.z * V18F0.z);
         temp_f16_6 = V18F0.w * c1D50;
-        Vec4f V18A0(lbl_805627AC);
+        Vec4f V18A0((temp_f31 + lbl_805627AC));
         V18A0.y = V18A0.x;
         V18A0.z = V18A0.y;
         Vec4f V1890;
@@ -953,10 +953,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V14F0.x = V18F0.x;
         V14E0.x = V14F0.x - V1520.x;
         V18F0.x = V1500.x + V1500.z;
-        V14D0.x = V18A0.z;
+        V14D0.x = (temp_f31 + lbl_805627AC);  // retail splats f29 = zero + 1 into each of these, not a copy chain
         var_f18 = V14E0.x * V14D0.x;
         V14C0.x = var_f18;
-        V14B0.x = V14D0.x;
+        V14B0.x = (temp_f31 + lbl_805627AC);
         var_f18 = V14C0.x < V14B0.x ? V14C0.x : V14B0.x;
         V14A0.x = var_f18;
         c1D74 = temp_f31 + lbl_805627D8;
@@ -969,7 +969,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1450.w = V17A0.w * ((temp_f31 + lbl_805627E0));
         temp_f1_14 = fn_8002B0A0(V1450.w);
         V1440.w = temp_f1_14;
-        V1430.x = V14B0.x;
+        V1430.x = (temp_f31 + lbl_805627AC);
         c1D78 = (lbl_805627AC) * (temp_f31 + (lbl_805627AC));
         V1420.w = c1D78;
         var_f6 = temp_f1_14;
@@ -1052,7 +1052,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1230.w = V16D0.w * ((temp_f31 + lbl_805627EC));
         V1250.y = V1770.x + V18F0.x;
         rowB8->y = V1250.y;
-        V1220.x = V1430.x;
+        V1220.x = (temp_f31 + lbl_805627AC);
         var_f0_2 = V1230.x < V1220.x ? V1230.x : V1220.x;
         var_f2_6 = V1230.y;
         V1210.x = var_f0_2;
@@ -1135,7 +1135,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         var_f2_9 = V10D0.z;
         V10D0.w = V10E0.w;
         var_f1_9 = V10D0.w;
-        V10C0.x = V1220.x;
+        V10C0.x = (temp_f31 + lbl_805627AC);
         var_f10 = V10D0.x < V10C0.x ? V10D0.x : V10C0.x;
         V10B0.x = var_f10;
         var_f1_8 = var_f1_8 < V10C0.x ? var_f1_8 : V10C0.x;
@@ -1427,7 +1427,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0B70((V0BA0.x > V0B80.x ? V0BA0.x : V0B80.x));
             Vec4f V0B60;
             V0B60.y = (temp_f31 + V0B70.x);
-            Vec4f V0B50(lbl_805627AC);
+            Vec4f V0B50((temp_f31 + lbl_805627AC));
             Vec4f V0B40((temp_f31 + lbl_805627FC));
             Vec4f V0B30;
             V0B30.y = (V0B60.y * V0B40.x);
@@ -1485,7 +1485,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0970((V16D0.x * V0BB0.y));
             c1D60 = (temp_f31 + (lbl_805627AC)) * (temp_f31 + lbl_80562804);
             Vec4f V0960(fn_8002B0A0(V0970.x));
-            Vec4f V0950(V0B50.x);
+            Vec4f V0950((temp_f31 + lbl_805627AC));
             Vec4f V0940((temp_f31 + lbl_80562804));  // retail stack objects 0x0940/0x0930 (restored, see below)
             Vec4f V0930(c1D60);
             Vec4f V0920((V0960.x > V0930.x ? V0960.x : V0930.x));
@@ -1547,7 +1547,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0710;
             V0710.w = (ident.w * V0720.x);
             Vec4f V06D0((V0720.x * V0720.x));
-            Vec4f V0700(V0950.x);
+            Vec4f V0700((temp_f31 + lbl_805627AC));
             Vec4f V06F0((temp_f31 + (V0700.x / V0720.x)));
             Vec4f V06E0;
             V06E0.y = (temp_f31 + V06F0.x);
@@ -1579,7 +1579,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0560((V0720.x - V0570.x));
             Vec4f V0580((temp_f31 + lbl_80562830));
             Vec4f V0550((V0580.x * V0560.x));
-            Vec4f V0540(V0700.x);
+            Vec4f V0540((temp_f31 + lbl_805627AC));
             Vec4f V0530((V0550.x < V0540.x ? V0550.x : V0540.x));
             Vec4f V0520((temp_f31 + temp_f31));
             Vec4f V0510((V0530.x > V0520.x ? V0530.x : V0520.x));
@@ -1587,7 +1587,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0500.w = (ident.w * V0510.x);
             Vec4f V04F0;
             V04F0.w = (V0500.w * V0620.y);
-            Vec4f V04E0(V0540.x);
+            Vec4f V04E0((temp_f31 + lbl_805627AC));
             Vec4f V04D0((V04E0.x - V0500.w));
             Vec4f V04C0((V04D0.x * V0590.z));
             Vec4f V04A0;
