@@ -1704,6 +1704,44 @@ static inline void ReadBound(ValueNode* n, int k, TVec2* w) {
     w->z = p.y;
 }
 
+// Helper names unproven.
+static inline f32 QueryMidX(f32 a, f32 b) { return a + (b - a) / 2.0f; }
+static inline f32 QueryMidZ(f32 a, f32 b) { return a + 0.5f * (b - a); }
+static inline TVec2 QueryMid2(const TVec2& a, const TVec2& b) {
+    TVec2 r;
+    r.z = QueryMidZ(a.z, b.z);
+    r.x = QueryMidX(a.x, b.x);
+    return r;
+}
+
+// name unproven
+static inline int QueryLongestSide(const TVec2& a, const TVec2& b, const TVec2& c) {
+    int best;
+    f32 max;
+    Delta2 d;
+    Delta2 e;
+    f32 len;
+    d.z = c.z - a.z;
+    f32 xv = a.x;
+    d.x = c.x - xv;
+    e.x = a.x - b.x;
+    best = 2;
+    max = d.x * d.x + d.z * d.z;
+    e.z = a.z - b.z;
+    len = e.x * e.x + e.z * e.z;
+    if (len > max) {
+        max = len;
+        best = 0;
+    }
+    d.x = b.x - c.x;
+    d.z = b.z - c.z;
+    if (d.x * d.x + d.z * d.z > max) {
+        best = 1;
+    }
+
+    return best;
+}
+
 inline int ChallengeBase::Query(void* carp, int idx, int c) {
     speed[idx] = 0.0f;
     if (node) {
@@ -1717,7 +1755,6 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             TVec2 dir;
             int k;
             int best;
-            f32 max;
             f32 spd;
             pos.x = 0.0f;
             pos.z = 0.0f;
@@ -1727,31 +1764,10 @@ inline int ChallengeBase::Query(void* carp, int idx, int c) {
             for (k = 0; k < 3; w++, k++) {
                 ReadBound(place, k, w);
             }
-            {
-                Delta2 d;
-                Delta2 e;
-                f32 len;
-                d.z = pts[2].z - pts[0].z;
-                f32 xv = pts[0].x;
-                d.x = pts[2].x - xv;
-                e.x = pts[0].x - pts[1].x;
-                best = 2;
-                max = d.x * d.x + d.z * d.z;
-                e.z = pts[0].z - pts[1].z;
-                len = e.x * e.x + e.z * e.z;
-                if (len > max) {
-                    max = len;
-                    best = 0;
-                }
-                d.x = pts[1].x - pts[2].x;
-                d.z = pts[1].z - pts[2].z;
-                if (d.x * d.x + d.z * d.z > max) {
-                    best = 1;
-                }
-            }
+            best = QueryLongestSide(pts[0], pts[1], pts[2]);
             {
                 f32 inv;
-                pos = Mid2(pts[best], pts[(best + 1) % 3]);
+                pos = QueryMid2(pts[best], pts[(best + 1) % 3]);
                 dir.x = pts[(best + 2) % 3].x - pos.x;
                 dir.z = pts[(best + 2) % 3].z - pos.z;
                 inv = 1.0f / (f32)sqrt(dir.x * dir.x + dir.z * dir.z);
