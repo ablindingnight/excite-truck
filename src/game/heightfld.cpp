@@ -178,7 +178,9 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
 // HeightSquare: name unproven.
 static inline f32 HeightSquare(const f32& value) { return value * value; }
 
-static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3, f32* deriv) {
+static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32* deriv) {
+    f32 t2 = t * t;
+    f32 t3 = Mul(t2, t);
     f32 m1 = 0.5f * (p2 - p0);
     f32 d = p2 - p1;
     f32 m2 = 0.5f * (p3 - p1);
@@ -244,16 +246,13 @@ static inline f32 SplinePD(const f32* p, int s, f32 t, f32* deriv) {
 }
 
 f32 fn_801DB514(const f32 g[4][4], ValVec3* normal, f32 fx, f32 fz) {
-    f32 t3;
-    f32 t2 = fx * fx;
-    t3 = t2 * fx;
     f32 col[4];
     f32 dcol[4];
     for (int i = 0; i < 4; i++) {
         f32 p1 = g[1][i];
         f32 p2 = g[2][i];
         f32 p3 = g[3][i];
-        col[i] = SplineD(g[0][i], p1, p2, p3, fx, t2, t3, &dcol[i]);
+        col[i] = SplineD(g[0][i], p1, p2, p3, fx, &dcol[i]);
     }
     f32 dz;
     f32 h = SplinePD(col, 1, fz, &dz);
