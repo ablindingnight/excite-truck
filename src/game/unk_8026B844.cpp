@@ -612,6 +612,7 @@ void fn_8026C014(int player) {
         u32 now = fn_802E2C20();
         u32 last = lbl_8055F508;
         f32 dt;
+        f32 maxStep = 0.1f;
         f32 speed;
         f32 yawRate;
         f32 fovRate;
@@ -623,10 +624,9 @@ void fn_8026C014(int player) {
         f32 x;
         f32 z;
         lbl_8055F508 = now;
-        dt = CAM_MAX(0.001f * (f32)(now - last), 0.1f);
-        f32 yawUnit = 0.5235988f;
-        yawRate = Mul(dt, yawUnit);
-        speed = 4.0f * (0.25f * (10.0f * dt));
+        dt = CAM_MAX(0.001f * (f32)(now - last), maxStep);
+        yawRate = Mul(dt, 0.5235988f);
+        speed = Mul(4.0f, Mul(0.25f, Mul(10.0f, dt)));
         fovRate = Mul(dt, 0.034906585f);
         lo = 0.2617994f;
         hi = 2.443461f;
