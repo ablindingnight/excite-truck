@@ -258,7 +258,8 @@ void fn_80294ED4(void) {
         CarLight* l = s->lights;
         for (; j < s->count; l++, j++) {
             Vec p;
-            MulVec(&p, &l->frame->origin, car->axes);
+            const Vec* sourcePos = &l->frame->origin;
+            MulVec(&p, sourcePos, car->axes);
             p.x = p.x + car->pos.x;
             p.y = p.y + car->pos.y;
             p.z = p.z + car->pos.z;
