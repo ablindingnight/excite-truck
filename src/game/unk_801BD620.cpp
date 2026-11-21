@@ -54,6 +54,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
     MVec4* t = t_;
     int a = a1, b = a2, c = a3;
+    int i9 = a + 9, i10 = a + 10;  // row indices of the two scaled rows (names unproven; retail keeps the raw a+9/a+10)
     MVec4* rowA0;
     MVec4* rowA1;
     MVec4* rowA2;
@@ -290,8 +291,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     tmp.y = lbl_805627A8;
     tmp.z = lbl_805627A8;
     tmp.w = lbl_805627A8;
-    SCALE_ROW(t[a + 9], ident.x + lbl_805627B0);
-    SCALE_ROW(t[a + 10], ident.x + lbl_805627B0);
+    SCALE_ROW(t[i9], ident.x + lbl_805627B0);
+    SCALE_ROW(t[i10], ident.x + lbl_805627B0);
     {
     rowA0 = &t[a];
     rowA1 = &t[a + 1];
@@ -983,7 +984,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V13A0.w = V13B0.w;
         V1390.w = V13A0.w * ((temp_f31 + lbl_805627E4));
         V1380.w = (V1390.w + V13D0.x);
-        V1360.x = V1490.x;
+        V1360.x = c1D74;
         V1350.w = V17A0.w * V1360.x;
         V1340.x = (V13D0.x * V1350.w);
         V1370.x = V1770.x + V1380.w;
@@ -1010,6 +1011,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V12A0.x = V16D0.x * V16F0.x;
         V12C0.x = V1520.x + V12D0.x;
         V1520.x = V12C0.x;
+        rowB8->x = V1520.x;  // retail writes row b+8 here, before the clamp blocks
         V12B0.x = V1520.x;
         V12A0.y = V16D0.y * V16F0.y;
         V12A0.z = V16D0.z * V16F0.z;
@@ -1049,6 +1051,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1230.z = V16D0.z * ((temp_f31 + lbl_805627EC));
         V1230.w = V16D0.w * ((temp_f31 + lbl_805627EC));
         V1250.y = V1770.x + V18F0.x;
+        rowB8->y = V1250.y;
         V1220.x = V1430.x;
         var_f0_2 = V1230.x < V1220.x ? V1230.x : V1220.x;
         var_f2_6 = V1230.y;
@@ -1061,7 +1064,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1210.z = var_f1_5;
         var_f2_7 = var_f2_7 < V1220.x ? var_f2_7 : V1220.x;
         V1210.w = var_f2_7;
-        V1200.x = V1360.x;
+        V1200.x = c1D74;
         var_f1_6 = V1210.x;
         var_f1_6 = var_f1_6 > V1200.x ? var_f1_6 : V1200.x;
         var_f2_8 = V1210.y;
@@ -1074,8 +1077,6 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V11F0.z = var_f1_7;
         var_f5 = var_f5 > V1200.x ? var_f5 : V1200.x;
         V11F0.w = var_f5;
-        rowB8->x = V1520.x;
-        rowB8->y = V1250.y;
         V11E0.x = rowC22->x;
         V11E0.y = rowC22->y;
         V11E0.z = rowC22->z;
@@ -1143,7 +1144,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V10B0.z = var_f2_9;
         var_f1_9 = var_f1_9 < V10C0.x ? var_f1_9 : V10C0.x;
         V10B0.w = var_f1_9;
-        V10A0.x = V1200.x;
+        V10A0.x = c1D74;
         var_f2_10 = V10B0.x;
         var_f2_10 = var_f2_10 > V10A0.x ? var_f2_10 : V10A0.x;
         var_f1_10 = V10B0.y;
@@ -1160,7 +1161,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1080.y = fn_8002B0A0(V1090.y);
         V1080.z = fn_8002B0A0(V1090.z);
         temp_f1_19 = fn_8002B0A0(V1090.w);
-        V1070.x = V10A0.x;
+        V1070.x = c1D74;
         V1080.w = temp_f1_19;
         var_f0_3 = V1080.x * V1070.x;
         V1060.x = var_f0_3;
@@ -1828,8 +1829,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA10->z = V00B0.z;
         }
     }
-        SCALE_ROW(t[a + 9], ident.x + lbl_805627B8);
-        SCALE_ROW(t[a + 10], ident.x + lbl_805627B8);
+        SCALE_ROW(t[i9], ident.x + lbl_805627B8);
+        SCALE_ROW(t[i10], ident.x + lbl_805627B8);
     }
 }
 
