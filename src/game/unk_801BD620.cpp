@@ -27,7 +27,7 @@ struct Vec4f {
     Vec4f r_; r_.x = a_.x * k_.x; r_.y = a_.y * k_.x; r_.z = a_.z * k_.x; Vec4f o_(r_); m.x = o_.x; m.y = o_.y; m.z = o_.z; }
 #define F(p, o) (*(f32*)((u8*)(p) + (o)))
 #define CROSS_BEGIN(a, b) tmp.x = a.y * b.z; tmp.y = a.z * b.x; tmp.z = a.x * b.y
-static inline f32 SubMul(f32 t, f32 a, f32 b) { return t - a * b; }
+static inline f32 SubMul(f32 t, f32 a, f32 b) { return t - a * b; }  // by-value inline helper, name unproven
 #define CROSS_END(o, a, b) Vec4f o; o.x = SubMul(tmp.x, b.y, a.z); o.y = SubMul(tmp.y, b.z, a.x); o.z = SubMul(tmp.z, b.x, a.y)
 #define DOT_BEGIN(a, b) V19E0.x = a.x * b.x; V19E0.y = a.y * b.y; V19E0.z = a.z * b.z
 #define MXV_END(o, c, v) Vec4f o; o.x = tmp.x + c.x * v.z; o.y = tmp.y + c.y * v.z; o.z = tmp.z + c.z * v.z
@@ -1800,8 +1800,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA10->z = V00B0.z;
         }
     }
-        SCALE_ROW(t[i9], ident.x + lbl_805627B8);
-        SCALE_ROW(t[i10], ident.x + lbl_805627B8);
+        // retail recomputes each row address from the raw index here (slwi + add), byte-offset form
+        SCALE_ROW((*(MVec4*)(arg0 + i9 * 16)), ident.x + lbl_805627B8);
+        SCALE_ROW((*(MVec4*)(arg0 + i10 * 16)), ident.x + lbl_805627B8);
     }
 }
 
