@@ -289,11 +289,10 @@ static inline void AxisQuat(f32* q, const ValVec3& axis) {
     f32 d = PSVECDotProduct((const Vec*)&axis.x, (const Vec*)&axis.x);
     if (!((f32)__fabs(d) <= __float_epsilon[0])) {
         f32 len = sqrt(d);
-        f32 s;
         f32 half = 0.5f * len;
-        s = sin(half);
+        d = sin(half);
         f32 w = cos(half);
-        f32 k2 = s / len;
+        f32 k2 = d / len;
         q[0] = axis.x * k2;
         q[1] = axis.y * k2;
         q[2] = axis.z * k2;
@@ -322,10 +321,11 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     SafeStrCopy(a->name, name, 0x18);
     ValueTable* t = fn_80131808(name);
     ValueNode* named = t->HasChild("named_times") ? t->FindChild("named_times") : 0;
-    int nElems = 0;
-    int nPaths = 0;
-    ValueNode* n;
     ValueNode* en;
+    int nPaths;
+    ValueNode* n;
+    int nElems = 0;
+    nPaths = 0;
     int i;
     for (i = 0; (n = t->GetChild(i)) != 0; i++) {
         if (!strcmp(n->GetName(), "elem")) {
@@ -410,13 +410,14 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
     // The path loops count with the local nPaths (retail CTR loop); possible once the 12-byte vectors became
     // helper temporaries (77f163d8c) and freed the register the earlier form spilled.
     for (int i = 0; i < nPaths; i++) {
-        int k;
         ArtPath* p = &a->paths[i];
+        int nFrames;
         ValueNode* pn = paths[i];
+        int k;
         p->elem = pn->GetIntValue("elem_idx");
         const ValPoint pxy = CopyValPoint(pn->GetPointOr("xy", ValPoint(ArtXY(0.0f, 0.0f))));
         f32 t0 = fn_802AC344((ArtNode*)pn, (ArtNode*)named, 0);
-        int nFrames = 0;
+        nFrames = 0;
         ValueNode* c;
         for (int j = 0; (c = pn->GetChildAt(j)) != 0; j++) {
             if (!strcmp(c->GetName(), "frame")) {
@@ -426,37 +427,37 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
         p->nKeys = nFrames;
         p->keys = new ("artframe") ArtKey[nFrames];
         for (k = 0; k < nFrames; k++) {
-            ValueNode* f;
+            
             ArtKey* key = &p->keys[k];
             ArtKey* prev = k > 0 ? &p->keys[k - 1] : 0;
-            f = frames[k];
-            key->t = t0 + fn_802AC454((ArtNode*)f, (ArtNode*)named, &prev->t);
-            if (f->Has("spin")) {
-                AxisQuat(key->q, ValV3(0.0f, 0.0f, -(0.017453292f * f->GetFloat("spin", 0.0f))));
+            n = frames[k];
+            key->t = t0 + fn_802AC454((ArtNode*)n, (ArtNode*)named, &prev->t);
+            if (n->Has("spin")) {
+                AxisQuat(key->q, ValV3(0.0f, 0.0f, -(0.017453292f * n->GetFloat("spin", 0.0f))));
             } else {
-                const char* q = f->GetString("q", "0,0,0,1");
+                const char* q = n->GetString("q", "0,0,0,1");
                 if (sscanf(q, "%f,%f,%f,%f", &key->q[0], &key->q[1], &key->q[2], &key->q[3]) != 4) {
                     fn_802E317C("artanim: bad quaternion %s in %s", q, name);
                 }
             }
-            if (f->Has("xy")) {
-                ValPoint v = CopyValPoint(f->GetPoint("xy"));
+            if (n->Has("xy")) {
+                ValPoint v = CopyValPoint(n->GetPoint("xy"));
                 v.x = v.x + pxy.x;
-                v.y = pxy.y + v.y;
+                v.y = v.y + pxy.y;
                 key->pos[0] = v.x - 320.0f;
                 key->pos[1] = 240.0f - v.y;
                 key->pos[2] = 0.0f;
-            } else if (f->Has("offset")) {
-                CopyF3(key->pos, f->GetVec3("offset"));
+            } else if (n->Has("offset")) {
+                CopyF3(key->pos, n->GetVec3("offset"));
                 key->pos[0] = key->pos[0] + (pxy.x - 320.0f);
                 key->pos[1] = key->pos[1] + (240.0f - pxy.y);
             } else {
                 CopyF3(key->pos, prev ? *(const ValVec3*)prev->pos : ValV3(0.0f, 0.0f, 0.0f));
             }
-            if (f->Has("scale3")) {
-                CopyF3(key->scale, f->GetVec3("scale3"));
-            } else if (f->Has("scale")) {
-                f32 s = f->GetFloat("scale");
+            if (n->Has("scale3")) {
+                CopyF3(key->scale, n->GetVec3("scale3"));
+            } else if (n->Has("scale")) {
+                f32 s = n->GetFloat("scale");
                 key->scale[0] = s;
                 key->scale[1] = s;
                 key->scale[2] = s;
@@ -469,9 +470,9 @@ ArtAnim* fn_802AC4A8(const char* name, ArtMap* map) {
                 key->scale[1] = 1.0f;
                 key->scale[2] = 1.0f;
             }
-            key->alpha = f->GetFloat("alpha", prev ? prev->alpha : 1.0f);
-            key->curve = GetEnumOr(f, "curve", "linear\0hermite\0start\0stop\0", prev ? prev->curve : 0);
-            key->signal = f->GetInt("signal", prev ? prev->signal : 0);
+            key->alpha = n->GetFloat("alpha", prev ? prev->alpha : 1.0f);
+            key->curve = GetEnumOr(n, "curve", "linear\0hermite\0start\0stop\0", prev ? prev->curve : 0);
+            key->signal = n->GetInt("signal", prev ? prev->signal : 0);
         }
     }
     if (t->HasChild("global_transform")) {
