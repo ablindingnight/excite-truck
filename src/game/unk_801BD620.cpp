@@ -1717,10 +1717,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V12A0.y = V16D0.y * V16F0.y;
         V12A0.z = V16D0.z * V16F0.z;
         V12A0.w = V16D0.w * V16F0.w;
-        V1290.x = V1320.x;
-        V1290.y = V1320.y;
-        V1290.z = V1320.z;
-        V1290.w = V1320.w;
+        V1290.x = rowC21->x;  // retail re-reads row c+21 (lfs 0..12(r29)), not a copy of V1320
+        V1290.y = rowC21->y;
+        V1290.z = rowC21->z;
+        V1290.w = rowC21->w;
         V1280.x = V1290.x;
         V1280.y = V1290.y;
         V1280.z = V1290.z;
