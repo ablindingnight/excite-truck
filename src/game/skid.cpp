@@ -101,7 +101,7 @@ f32 fn_801E7E18(void);
 f32 fn_801E7E24(void);
 f32 fn_801E88F0(int view);
 s32 fn_80287B14(void);
-void fn_80287B38(void (*cb)(SkidEntry* e, int n));
+void fn_80287B38(void (*cb)(const SkidEntry* e, int n));
 SkidNode* fn_802AE414(const char* name);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
@@ -138,7 +138,7 @@ void fn_8028D4A0(void);
 void fn_8028D4FC(void);
 void fn_8028D728(void);
 void fn_8028D7C0(int i);
-void fn_8028DDF0(SkidEntry* e, int n);
+void fn_8028DDF0(const SkidEntry* e, int n);
 
 void fn_8028CED8(void) {
     if (fn_8028D17C()) {
@@ -401,7 +401,7 @@ static inline void Start_hm(SkidType* t, int idx, SkidCar* car, SkidWheel* w) {
     t->total += 2;
 }
 
-void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
+void fn_8028D89C(const SkidEntry* e, int wi, f32 now) {
     SkidWheel* w;
     int type;
     SkidSlot* slot;
@@ -438,7 +438,7 @@ void fn_8028D89C(SkidEntry* e, int wi, f32 now) {
 
 #pragma push
 #pragma opt_propagation off
-void fn_8028DDF0(SkidEntry* e, int n) {
+void fn_8028DDF0(const SkidEntry* e, int n) {
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }

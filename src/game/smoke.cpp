@@ -83,7 +83,7 @@ extern "C" {
 f32 fn_801E7E24(void);
 s32 fn_80287B14(void);
 const SmokeCar* fn_80287B24(s32 i);
-void fn_80287B38(void (*cb)(SmokeEntry* e, int n));
+void fn_80287B38(void (*cb)(const SmokeEntry* e, int n));
 int fn_80287B5C(int n);
 int fn_80287E20(SmokeModel* model, const char* name);
 ValueNodeV* fn_80287E80(SmokeModel* model, const char* name);
@@ -196,7 +196,7 @@ static const int lbl_802FA978[8] = {0, 7, 3, 2, 5, 4, 6, 1};
 
 extern "C" {
 
-void fn_80288A74(SmokeEntry* e, int n);
+void fn_80288A74(const SmokeEntry* e, int n);
 
 void fn_802888D8(void) {
     lbl_8055F6D8 = new ("engine smoke man") EngineSmokeMan;
@@ -236,11 +236,11 @@ void fn_80288A58(const Vec* p, const Vec* v) { fn_8028E584(lbl_8055F6E0->small, 
 
 void fn_80288A70(const void*, const Vec*, f32) {}
 
-void fn_80288A74(SmokeEntry* e, int n) {
+void fn_80288A74(const SmokeEntry* e, int n) {
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }
-    SmokeEntry* p = e;
+    const SmokeEntry* p = e;
     for (int i = 0; i < n; e++, p++, i++) {
         if (p->active && p->dist < 10000.0f) {
             int state = p->car->state;

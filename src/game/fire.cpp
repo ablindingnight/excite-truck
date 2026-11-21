@@ -94,7 +94,7 @@ void fn_801EEFDC(int (*h)(const void* ev), u8 type);
 void EventUnInstallHandler(int (*h)(const void* ev));
 s32 fn_80287B14(void);
 const FireCar* fn_80287B24(s32 i);
-void fn_80287B38(void (*cb)(FireCarEntry* e, int n));
+void fn_80287B38(void (*cb)(const FireCarEntry* e, int n));
 int fn_80287B5C(int n);
 f32 fn_80287BC8(f32 lo, f32 hi);
 int fn_80287E20(FireModel* model, const char* name);
@@ -417,7 +417,7 @@ extern "C" {
 int fn_8029BFF8(const void* ev);
 int fn_8029C024(const void* ev);
 int fn_8029C054(const void* ev);
-void fn_8029C084(FireCarEntry* e, int n);
+void fn_8029C084(const FireCarEntry* e, int n);
 int fn_8029C190(const void* ev);
 
 int fn_80297D5C(s32* out, int n) {
@@ -1632,7 +1632,7 @@ int fn_8029C054(const void* ev) {
     return 4;
 }
 
-void fn_8029C084(FireCarEntry* e, int n) {
+void fn_8029C084(const FireCarEntry* e, int n) {
     f32 dt = fn_801E7E24();
     if ((f32)__fabs(dt) <= __float_epsilon[0]) {
         return;

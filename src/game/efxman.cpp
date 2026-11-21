@@ -81,7 +81,7 @@ struct EfxEntry {
     u8 active;    // offset 0xC
 };
 
-typedef void (*EfxCallback)(EfxEntry* e, int n);
+typedef void (*EfxCallback)(const EfxEntry* e, int n);
 
 struct EfxGlobals {
     EfxCar* cars;  // offset 0x0

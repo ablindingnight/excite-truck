@@ -94,7 +94,7 @@ f32 fn_801E7E24(void);
 void fn_801EEFDC(int (*h)(const void* ev), u8 type);
 void EventUnInstallHandler(int (*h)(const void* ev));
 const SparkCar* fn_80287B24(s32 i);
-void fn_80287B38(void (*cb)(SparkEntry* e, int n));
+void fn_80287B38(void (*cb)(const SparkEntry* e, int n));
 int fn_80287B5C(int n);
 int fn_80287B94(int lo, int hi);
 f32 fn_80287BC8(f32 lo, f32 hi);
@@ -392,7 +392,7 @@ void fn_8028AB14(void) {
     }
 }
 
-void fn_8028ADF4(SparkEntry* e, int n);
+void fn_8028ADF4(const SparkEntry* e, int n);
 
 void fn_8028ABE8(void) {
     TerChunk* tc = lbl_804B3238;
@@ -431,7 +431,7 @@ void fn_8028AD78(void) {
     }
 }
 
-void fn_8028ADF4(SparkEntry* e, int n) {
+void fn_8028ADF4(const SparkEntry* e, int n) {
     const SparkWheel* w;
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;

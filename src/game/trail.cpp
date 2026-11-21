@@ -129,7 +129,7 @@ struct Paint {
 };
 
 typedef int (*EventHandler)(const TrailEvent* e);
-typedef void (*RacerHook)(TRacer* r, int n);
+typedef void (*RacerHook)(const TRacer* r, int n);
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -426,7 +426,7 @@ static inline void Xform(RVec3* p, const TBody* b) {
 extern "C" {
 
 TrailSys* fn_802A194C(ValueNode* cfg);
-void fn_802A1B20(TRacer* r, int n);
+void fn_802A1B20(const TRacer* r, int n);
 int fn_802A1C30(const TrailEvent* e);
 void fn_802A1CC4(void);
 void fn_802A1DC0(void);
@@ -542,7 +542,7 @@ TrailSys* fn_802A194C(ValueNode* cfg) {
     }
 }
 
-void fn_802A1B20(TRacer* r, int n) {
+void fn_802A1B20(const TRacer* r, int n) {
     int i;
     if (NearZero(fn_801E7E24())) {
         return;

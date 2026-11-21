@@ -143,7 +143,7 @@ void fn_8014E740(const Vec* c, f32 r);
 f32 fn_801E7E24(void);
 f32 fn_801E88F0(s32 a);
 s32 fn_801EE0C8(void* model);
-void fn_80287B38(void (*cb)(WaterCarEntry* e, int n));
+void fn_80287B38(void (*cb)(const WaterCarEntry* e, int n));
 int fn_80287B94(int lo, int hi);
 f32 fn_80287BC8(f32 lo, f32 hi);
 void* fn_8028E2F8(void* desc, const char* name, const char* tex);
@@ -249,7 +249,7 @@ extern "C" void fn_8029CB3C(void);
 extern "C" void fn_8029CBA0(void);
 extern "C" void fn_8029CD14(void);
 extern "C" void fn_8029CD48(WaterCar* car);
-extern "C" void fn_8029C450(WaterCarEntry* e, int n);
+extern "C" void fn_8029C450(const WaterCarEntry* e, int n);
 extern "C" void fn_8029C3EC(void);
 
 extern "C" {
@@ -336,7 +336,7 @@ static f32 RippleDamp(f32 a, f32 b) {
     return d + 0.1f;
 }
 
-extern "C" void fn_8029C450(WaterCarEntry* e, int n) {
+extern "C" void fn_8029C450(const WaterCarEntry* e, int n) {
     f32 far = 2500.0f;
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;

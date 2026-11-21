@@ -146,7 +146,7 @@ extern "C" {
 s32 fn_802E2C20(void);
 f32 fn_801E7E24(void);
 WeatherCfg* fn_801E1F44(void);
-void fn_80287B38(void (*cb)(DropHit* hits, int n));
+void fn_80287B38(void (*cb)(const DropHit* hits, int n));
 s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
 ValueNode* fn_802AE414(const char* name);
@@ -294,7 +294,7 @@ f32 fn_802A4A50(void) {
 f32 fn_802A4AD4(void) { return lbl_8055F8A0; }
 
 void fn_802A5384(WeatherCfg* c);
-void fn_802A53B0(DropHit* hits, int n);
+void fn_802A53B0(const DropHit* hits, int n);
 void fn_802A5878(void);
 
 void fn_802A4ADC(void) {
@@ -507,7 +507,7 @@ void fn_802A5384(WeatherCfg* c) {
     }
 }
 
-void fn_802A53B0(DropHit* hits, int n) {
+void fn_802A53B0(const DropHit* hits, int n) {
     int m;
     int k2;
     Droplet* d;
@@ -540,7 +540,11 @@ void fn_802A53B0(DropHit* hits, int n) {
                 continue;
             }
             f32 k = -2.0f * dot;
-            vel.Set(dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
+            f32 reflectedX = dir.x + nrm.x * k;
+            dot = dir.y + nrm.y * k;  /* reuses dot (already consumed) for the y lane, as retail reuses its register; spelling unproven */
+            vel.x = reflectedX;
+            vel.y = dot;
+            vel.z = dir.z + nrm.z * k;
             TAddS(&vel, &hits->obj->vel, &vel, 3.0f);
             {
                 m = fn_80287B5C(cnt) + 1;
