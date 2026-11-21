@@ -50,6 +50,9 @@ extern "C" {
 float fn_8002B0A0(double x);  // fabsf wrapper
 float fn_8002B0B0(double x);  // sqrtf wrapper (out of line in the original)
 
+// Absolute value through a by-value f32 parameter (helper name unproven): retail loads each lane into f0 and
+// copies it into f1 (fmr) only after storing the previous result, the parameter-object shape.
+static inline f32 AbsF(f32 v) { return fn_8002B0A0(v); }
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
     MVec4* t = t_;
@@ -1157,10 +1160,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         var_f3_2 = var_f3_2 > V10A0.x ? var_f3_2 : V10A0.x;
         V1090.z = var_f2_11;
         V1090.w = var_f3_2;
-        V1080.x = fn_8002B0A0(V1090.x);
-        V1080.y = fn_8002B0A0(V1090.y);
-        V1080.z = fn_8002B0A0(V1090.z);
-        temp_f1_19 = fn_8002B0A0(V1090.w);
+        V1080.x = AbsF(V1090.x);
+        V1080.y = AbsF(V1090.y);
+        V1080.z = AbsF(V1090.z);
+        temp_f1_19 = AbsF(V1090.w);
         V1070.x = c1D74;
         V1080.w = temp_f1_19;
         var_f0_3 = V1080.x * V1070.x;
