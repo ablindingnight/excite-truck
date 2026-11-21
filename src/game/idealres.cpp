@@ -172,17 +172,6 @@ void fn_80138144(ResExt* e) {
 
 void fn_80138434(void* p);
 
-// Helper function implementing byte-by-byte swap through u8* pointers as requested
-static inline void SwapWordBytes(void* p) {
-    unsigned char* b = (unsigned char*)p;
-    unsigned char t = b[0];
-    b[0] = b[3];
-    b[3] = t;
-    t = b[1];
-    b[1] = b[2];
-    b[2] = t;
-}
-
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 void fn_801381B4(IdealLineRes* res) {
@@ -190,20 +179,20 @@ void fn_801381B4(IdealLineRes* res) {
     int t;
     IdealPoint* p;
     ResExt* e;
-    SwapWordBytes(&res->hdr.resSize);
-    SwapWordBytes(&res->hdr.segSize);
-    SwapWordBytes(&res->len[0]);
-    SwapWordBytes(&res->len[1]);
-    SwapWordBytes(&res->len[2]);
-    SwapWordBytes(&res->len[3]);
-    SwapWordBytes(&res->total);
-    SwapWordBytes(&res->nrelocs);
+    SwapWord(&res->hdr.resSize);
+    SwapWord(&res->hdr.segSize);
+    SwapWord(&res->len[0]);
+    SwapWord(&res->len[1]);
+    SwapWord(&res->len[2]);
+    SwapWord(&res->len[3]);
+    SwapWord(&res->total);
+    SwapWord(&res->nrelocs);
     for (i = 0; i < res->nrelocs; i++) {
-        SwapWordBytes(&res->relocs[i]);
+        SwapWord(&res->relocs[i]);
     }
     for (i = 0; i < res->nrelocs; i++) {
         u32* r = (u32*)((u8*)res + res->relocs[i]);
-        SwapWordBytes(r);
+        SwapWord(r);
         *r += (u32)res;
     }
     fn_80138434(&res->points);
