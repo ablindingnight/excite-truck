@@ -239,7 +239,9 @@ void fn_801BDA74(int car, const CarSetup* s) {
         f32 b1 = 161887.922f * g * sl;
         f32 b0 = 104856.312f * g * sl;
         f32 kb = (b1 - b0) / (x1 - x0);
-        x->row[11] = x->row[10] = MVec4((1.46f * g) - ka * x0, ka, b0 - kb * x0, kb);
+        MVec4 tyre((1.46f * g) - ka * x0, ka, b0 - kb * x0, kb);
+        x->row[10] = tyre;
+        x->row[11] = tyre;
     }
     for (i = 0; i < 4; i++) {
         const WheelSetup* w = &s->wheels[i];
