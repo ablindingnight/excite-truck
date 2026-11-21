@@ -3071,8 +3071,10 @@ inline Pickup::Pickup(ValueNode* n) {
         m[9] = pos[0];
         m[10] = pos[1];
         m[11] = pos[2];
+        // PROVISIONAL actual Z input-value owner; original spelling/ownership unproven.
+        const f32 positionZ = pos[2];
         xz[0] = pos[0];
-        xz[1] = pos[2];
+        xz[1] = positionZ;
         const TrackSample& ts = fn_80136594(trk, xz);
         {
             Seg* s0 = ts.seg;
