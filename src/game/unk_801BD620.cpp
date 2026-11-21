@@ -1534,7 +1534,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             t[var_r19].y = V0D80.y;
             V02B0.z = (V1760.z + V02C0.z);
             VSET(V1760, V02B0);
-            Vec4f V02A0(V0D80);
+            Vec4f V02A0;
+            VSET(V02A0, V0D80);
             t[var_r19].z = V02A0.z;
             ROTATE(V0290, V1730);
             ROTATE(V0280, V1710);
