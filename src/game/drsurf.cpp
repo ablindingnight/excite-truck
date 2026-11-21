@@ -375,12 +375,12 @@ void fn_802D479C(Surf* s) {
             V3 b;
             b.Set((1.0f / 255) * m->b[0], (1.0f / 255) * m->b[1], (1.0f / 255) * m->b[2]);
             m++;
-            o->x = v->x + a.x * wa;
-            o->y = v->y + a.y * wa;
-            o->z = v->z + a.z * wa;
-            o->x = o->x + b.x * wb;
-            o->y = o->y + b.y * wb;
-            o->z = o->z + b.z * wb;
+            f32 z = v->z + a.z * wa;
+            f32 x = v->x + a.x * wa;
+            f32 y = v->y + a.y * wa;
+            o->x = x + b.x * wb;
+            o->y = y + b.y * wb;
+            o->z = z + b.z * wb;
             v++;
             o++;
         }
