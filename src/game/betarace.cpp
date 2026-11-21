@@ -2967,7 +2967,7 @@ inline Pickup::Pickup(ValueNode* n) {
     name = n->GetName();
     objs[0] = fn_801D4888(n->GetName());
     const char* types = "bank\0jump\0misc\0spin\0multi";
-    const char* key = "type";
+    const char* const& key = "type";
     kind = n->Has(key) ? n->GetEnum(key, types) : 2;
     big = n->GetBool("visible", 1);
     kind = 3;
@@ -3084,9 +3084,7 @@ inline Pickup::Pickup(ValueNode* n) {
             Seg* s0 = ts.seg;
             f32 len;
             dir[0] = s0->x + ts.t * (s0->next->x - s0->x);
-            f32 z0 = s0->z;
-            f32 z1 = s0->next->z;
-            dir[1] = z0 + ts.t * (z1 - s0->z);
+            dir[1] = Lerp(s0->z, s0->next->z, ts.t);
             len = sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
             dir[0] *= 1.0f / len;
             dir[1] *= 1.0f / len;
@@ -3104,14 +3102,31 @@ inline Pickup::Pickup(ValueNode* n) {
         PSVECCrossProduct((const Vec*)b, (const Vec*)a, (Vec*)cr);
         bool ccw = cr[1] > 0.0f;
         if (ccw) {
-            angle = acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
+            f32 leftZ;
+            f32 leftX;
+            f32 rightX;
+            f32 rightZ;
+            rightZ = fwd[1];
+            leftZ = dir[1];
+            rightX = fwd[0];
+            leftX = dir[0];
+            angle = acos(leftX * rightX + leftZ * rightZ);
         } else {
-            angle = -(f32)acos(dir[0] * fwd[0] + dir[1] * fwd[1]);
+            f32 leftZ;
+            f32 leftX;
+            f32 rightX;
+            f32 rightZ;
+            rightZ = fwd[1];
+            leftZ = dir[1];
+            rightX = fwd[0];
+            leftX = dir[0];
+            angle = -(f32)acos(leftX * rightX + leftZ * rightZ);
         }
         hx = 1.0f + 1.5f * (box[1] - box[0]) / 2.0f;
         hz = 1.0f + 1.5f * (box[5] - box[4]) / 2.0f;
         hy = 1.0f + (box[3] - box[2]);
-        vol = new ("spinvol") BoxShape(hx, hy, hx);
+        // PROVISIONAL existing owner/frame overload with actual null/zero base fields; original overload unproven.
+        vol = new ("spinvol") BoxShape(0, 0, 0.0f, 0.0f, hx, hy, hx);
         vol->SetSurface(1000);
         hC0 = fn_801FB1F4(1);
         hB8 = fn_801FA8E0(vol, m, hC0);
