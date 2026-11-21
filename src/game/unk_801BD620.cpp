@@ -50,21 +50,6 @@ extern "C" {
 float fn_8002B0A0(double x);  // fabsf wrapper
 float fn_8002B0B0(double x);  // sqrtf wrapper (out of line in the original)
 
-// Lane-wise clamp against a splatted limit (helper names unproven).
-static inline Vec4f VMinK(const Vec4f& a, const Vec4f& k) {
-    Vec4f r;
-    r.x = a.x < k.x ? a.x : k.x;
-    r.y = a.y < k.x ? a.y : k.x;
-    r.z = a.z < k.x ? a.z : k.x;
-    return r;
-}
-static inline Vec4f VMaxK(const Vec4f& a, const Vec4f& k) {
-    Vec4f r;
-    r.x = a.x > k.x ? a.x : k.x;
-    r.y = a.y > k.x ? a.y : k.x;
-    r.z = a.z > k.x ? a.z : k.x;
-    return r;
-}
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
     MVec4* t = t_;
@@ -1055,7 +1040,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         sp1F80 = sp1F80 - 1;
         Vec4f V1C60((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
         Vec4f V1C50;
-        V1C50.w = (temp_f31 + lbl_805627AC) * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
+        V1C50.w = lbl_805627AC * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
         Vec4f V1C40(temp_f31 + lbl_805627BC);
         Vec4f V1C30;
         V1C30.y = temp_f31 + (temp_f31 + lbl_805627BC);
@@ -1097,7 +1082,16 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1AF0.y = V1AE0.y;
         c1D88 = temp_f31 + lbl_805627C0;
         c1D84 = temp_f31 + lbl_805627C4;
-        Vec4f V1AA0(VMaxK(VMinK(V1BF0, c1D88), c1D84));
+        Vec4f V1AD0(c1D88);
+        Vec4f V1AC0;
+        V1AC0.x = V1BF0.x < V1AD0.x ? V1BF0.x : V1AD0.x;
+        V1AC0.y = V1BF0.y < V1AD0.x ? V1BF0.y : V1AD0.x;
+        V1AC0.z = V1BF0.z < V1AD0.x ? V1BF0.z : V1AD0.x;
+        Vec4f V1AB0(c1D84);
+        Vec4f V1AA0;
+        V1AA0.x = V1AC0.x > V1AB0.x ? V1AC0.x : V1AB0.x;
+        V1AA0.y = V1AC0.y > V1AB0.x ? V1AC0.y : V1AB0.x;
+        V1AA0.z = V1AC0.z > V1AB0.x ? V1AC0.z : V1AB0.x;
         VSET(V1BF0, V1AA0);
         c1D80 = temp_f31 + lbl_805627C8;
         Vec4f V1A90(c1D80);
@@ -1189,7 +1183,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1930.z = V1BD0.z * V1940.x;
         Vec4f V1920(V1930);
         Vec4f V1910(temp_f31 + temp_f31);
-        V1920.w = (temp_f31 + lbl_805627AC) * V1910.x;
+        V1920.w = lbl_805627AC * V1910.x;
         Vec4f V1900;
         V1900.x = V1BB0.x * V1920.x;
         V1900.y = V1BB0.y * V1920.y;
@@ -1251,7 +1245,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V18B0.y = (V18F0.y * V18F0.y) + (V18F0.y * V18F0.y);
         V18B0.z = (V18F0.z * V18F0.z) + (V18F0.z * V18F0.z);
         temp_f16_6 = V18F0.w * c1D50;
-        Vec4f V18A0(temp_f31 + lbl_805627AC);
+        Vec4f V18A0(lbl_805627AC);
         V18A0.y = V18A0.x;
         V18A0.z = V18A0.y;
         Vec4f V1890;
@@ -1261,7 +1255,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec4f V1880;
         V1880.x = (V1900.y * V1900.z) + (V1900.x * temp_f16_6);
         V1880.z = (V1900.x * V1900.y) + (V1900.z * temp_f16_6);
-        tmp.x = V18A0.z - ((temp_f31 + lbl_805627AC) * V18B0.y);
+        tmp.x = V18A0.z - (lbl_805627AC * V18B0.y);
         tmp.y = V18A0.z - (V18A0.z * V18B0.x);
         V1B90.x = tmp.x - (V18A0.z * V18B0.z);
         V1B90.y = V1890.z;
@@ -1275,7 +1269,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B50.x = V1890.y;
         V1B50.y = V1B50.w + V1880.x;
         Vec4f V1870(V1BF0);
-        V1B50.z = tmp.z - ((temp_f31 + lbl_805627AC) * V18B0.y);
+        V1B50.z = tmp.z - (lbl_805627AC * V18B0.y);
         rowA5->x = V1870.x;
         rowA5->y = V1870.y;
         rowA5->z = V1870.z;
@@ -1478,7 +1472,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec4f V0E20;
         Vec4f V0E10;
         Vec4f V0E00;
-        V1C50.w = (temp_f31 + lbl_805627AC) * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
+        V1C50.w = lbl_805627AC * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
         V17E0.x = ((temp_f31 + lbl_805627B4));
         V17D0.x = ((temp_f31 + lbl_805627B8));
         V17C0.x = (((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8)));
@@ -2146,7 +2140,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0B70((V0BA0.x > V0B80.x ? V0BA0.x : V0B80.x));
             Vec4f V0B60;
             V0B60.y = (temp_f31 + V0B70.x);
-            Vec4f V0B50((temp_f31 + lbl_805627AC));
+            Vec4f V0B50(lbl_805627AC);
             Vec4f V0B40((temp_f31 + lbl_805627FC));
             Vec4f V0B30;
             V0B30.y = (V0B60.y * V0B40.x);
