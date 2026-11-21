@@ -14,6 +14,7 @@
 #include "game/math_types.h"
 #include "game/carbody.h"
 #include "game/plainvec.h"
+#include "game/tadds.h"
 #include "macros.h"
 
 #define F32(p, o) (*(f32*)((u8*)(p) + (o)))
@@ -1244,7 +1245,7 @@ struct WVec3 {
 };
 
 struct WFrame {
-    PVec3 basis[3];
+    PVec3 row0, row1, row2;
 };
 
 // The wheel's launch frame: the car's rotation rows with the hub as the position.
@@ -1273,10 +1274,7 @@ void fn_8018F76C(u8* p, int i) {
     *(CDSolVec*)(x + 0x70) = c.Sol();
     m.rot = *(WFrame*)&((CarBody*)p)->mtx;
     m.pos = *(WVec3*)(w + 0x23D0);
-    m.pos.x += m.rot.basis[1].x * 0.3f;
-    m.pos.y += m.rot.basis[1].y * 0.3f;
-    f32 zv = m.rot.basis[1].z;
-    m.pos.z += zv * 0.3f;
+    TAddS(&m.pos, &m.pos, &m.rot.row1, 0.3f);
     WVec3 vel;
     ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&m.pos);
     f32 s = F32(w, 0x23AC);
@@ -1285,9 +1283,9 @@ void fn_8018F76C(u8* p, int i) {
     }
     f32 spin = F32(w, 0x23AC);
     WVec3 imp;
-    imp.x = m.rot.basis[0].x * spin;
-    imp.y = m.rot.basis[0].y * spin;
-    imp.z = m.rot.basis[0].z * spin;
+    imp.x = m.rot.row0.x * spin;
+    imp.y = m.rot.row0.y * spin;
+    imp.z = m.rot.row0.z * spin;
     imp.x += ((CarBody*)p)->avel.x;
     imp.y += ((CarBody*)p)->avel.y;
     imp.z += ((CarBody*)p)->avel.z;
