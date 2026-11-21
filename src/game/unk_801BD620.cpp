@@ -2176,7 +2176,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0A70.y = (V0AA0.y < V0A80.y ? V0AA0.y : V0A80.y);
             Vec4f V0A60(V0BA0.x);
             Vec4f V0A50;
-            c1D64 = temp_f31 + (lbl_80562804 * temp_f31);
+            c1D64 = temp_f31 + (temp_f31 + temp_f31);  // retail preheader: fadds f28,f31,f31; fadds f0,f31,f28 (x + x)
             V0A50.y = c1D64;
             Vec4f V0A40;
             V0A40.y = (V0A70.y > V0A50.y ? V0A70.y : V0A50.y);
