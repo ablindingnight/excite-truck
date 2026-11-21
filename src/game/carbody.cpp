@@ -2285,6 +2285,11 @@ extern "C" {
 // out the throttle/brake/steer limits (water, offroad, airborne, boost) before the drive model update.
 // MATCHING-AID: invented helpers (the target materialises these compares as values, mfcr); unproven.
 
+// Name unproven.
+static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
+    return 0.55181247f * (-forward * mass) * amount;
+}
+
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2439,7 +2444,7 @@ void fn_80186DE8(void) {
             if (((CarBody*)car)->f258C > -2.0f || ((CarBody*)car)->f25E4 > 0.25f || ((CarBody*)car)->f5EC > 0.01f) {
                 f32 fwd = PSVECDotProduct((const Vec*)(car + 0x3C), (const Vec*)(car + 0x118));
                 f32 b = MaxF(2.0f + ((CarBody*)car)->f258C, ((CarBody*)car)->f25E4);
-                f32 k = 0.55181247f * (-fwd * ((CarBody*)car)->mass) * Clamp01(b);
+                f32 k = ForwardBrakingForce(fwd, ((CarBody*)car)->mass, Clamp01(b));
                 AddScaled(force, car + 0x3C, k);
             }
             speed = PSVECMag((const Vec*)(car + 0x118));
