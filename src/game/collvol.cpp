@@ -259,7 +259,7 @@ s32 CollVolume::vf34(RPacket* p) {
     f32 th;
     f32 sn;
     p->pos = mtx.pos;
-    tr = mtx.rot.x.x + mtx.rot.y.y + mtx.rot.z.z;
+    tr = mtx.rot.x.x + mtx.rot.y.y + m[2][2];  /* view choice unproven: only the Z diagonal reads through m */
     if (tr > 0.0f) {
         f32 r = sqrt(1.0f + tr);
         f32 inv = 0.5f / r;
@@ -269,26 +269,28 @@ s32 CollVolume::vf34(RPacket* p) {
         q[2] = inv * (m[0][1] - m[1][0]);
     } else {
         qp = q;
-        int i;
-        int k;
-        int j;
+        /* Helper type unproven (Codex, review 2026-11-21): a local i/j/k record; each initial index is consumed by the diagonal selection */
+        struct AxisSelection { int i; int j; int k; };
+        AxisSelection axes;
         f32 r;
         f32 inv;
-        i = 0;
-        if (m[1][1] > m[0][0]) {
-            i = 1;
+        axes.k = 2;
+        axes.j = 1;
+        axes.i = 0;
+        if (m[axes.j][axes.j] > m[axes.i][axes.i]) {
+            axes.i = axes.j;
         }
-        if (m[2][2] > m[i][i]) {
-            i = 2;
+        if (m[axes.k][axes.k] > m[axes.i][axes.i]) {
+            axes.i = axes.k;
         }
-        j = (i + 1) % 3;
-        k = (j + 1) % 3;
-        r = sqrt(1.0f + (m[i][i] - (m[j][j] + m[k][k])));
+        axes.j = (axes.i + 1) % 3;
+        axes.k = (axes.j + 1) % 3;
+        r = sqrt(1.0f + (m[axes.i][axes.i] - (m[axes.j][axes.j] + m[axes.k][axes.k])));
         inv = 0.5f / r;
-        qp[i] = 0.5f * r;
-        qp[3] = inv * (m[j][k] - m[k][j]);
-        qp[j] = inv * (m[i][j] + m[j][i]);
-        qp[k] = inv * (m[i][k] + m[k][i]);
+        qp[axes.i] = 0.5f * r;
+        qp[3] = inv * (m[axes.j][axes.k] - m[axes.k][axes.j]);
+        qp[axes.j] = inv * (m[axes.i][axes.j] + m[axes.j][axes.i]);
+        qp[axes.k] = inv * (m[axes.i][axes.k] + m[axes.k][axes.i]);
     }
     th = acos(q[3]);
     sn = sin(th);
