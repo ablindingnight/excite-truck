@@ -422,7 +422,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         Mtx34 m = *fn_801E8718(map->player);
         f32 y = m.m[1][2];
         f32 x = m.m[2][0];
-        sf->unk10 = atan2(y, x);
+        sf->unk10 = Atan2F(y, x);
     }
     sf->lap = fn_801EA9A0(view)->params.lap;
     draw = map->trucks;
@@ -438,7 +438,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     {
         Mtx34 m = *fn_801E8718(me);
-        f32 rot = -(f32)atan2(m.m[1][2], m.m[2][0]);
+        f32 rot = -Atan2F(m.m[1][2], m.m[2][0]);
         for (i = 0; i < draw->count; i++) {
             draw->icons[i].angle -= rot;
         }
@@ -453,7 +453,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         radius = LerpF(Max(Min(1.0f, t), 0.0f), map->minWidth, map->maxWidth);
         const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
     }
-    Vec3* right = &basis.right;
     {
         RaceCarRec* tr = fn_8017960C(view);
         PlayerObj* obj = fn_802678E4(map->player);
@@ -480,6 +479,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     basis.up.x = 0.0f;
     basis.up.y = 0.0f;
     basis.up.z = 1.0f;
+    Vec3* right = &basis.right;
     PSVECCrossProduct((const Vec*)&basis.fwd, (const Vec*)&basis.up, (Vec*)right);
     if (fn_801E87A8()->flags & 2) {
         basis.right.x *= -1.0f;
