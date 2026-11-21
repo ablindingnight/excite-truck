@@ -251,10 +251,10 @@ static inline void LerpPos(PlainValMatrix* m, const PathKey* a, const PathKey* b
     f32 y2 = b->pos.y;
     f32 xv;
     f32 y_ = a->pos.y;
-    pos.y = y_ + f * (y2 - y_);
+    pos.y = Lerp(y_, y2, f);
     f32 x_ = a->pos.x;
     xv = b->pos.x;
-    pos.x = x_ + f * (xv - x_);
+    pos.x = Lerp(x_, xv, f);
     m->origin.z = pos.z;
     m->origin.y = pos.y;
     m->origin.x = pos.x;
