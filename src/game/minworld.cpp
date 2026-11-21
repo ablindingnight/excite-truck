@@ -230,11 +230,9 @@ void fn_8025280C(MWBody* b, f32 speed) {
     }
     MWVec2 t = e;
     {
-        f32 tmp = t.y;
-        t.y = t.x;
-        t.x = -tmp;
+        Perp(&t);
     }
-    len = sqrt(t.x * t.x + t.y * t.y);
+    len = SqrtF(Len2(t.x, t.y));
     if (!NearZero(len)) {
         f32 k = speed / len;
         t.x = t.x * k;
@@ -263,8 +261,8 @@ void fn_8025280C(MWBody* b, f32 speed) {
         if (depth > 1.5f) {
             f32 u = PSVECDotProduct((const Vec*)&n, (const Vec*)&fwd);
             f32 v = -PSVECDotProduct((const Vec*)&n, (const Vec*)&up);
-            f32 v3 = Mul(v * v, v);
             f32 u3 = Mul(u * u, u);
+            f32 v3 = Mul(v * v, v);
             a.x = a.x + up.x * u3 + fwd.x * v3;
             a.y = a.y + up.y * u3 + fwd.y * v3;
             a.z = a.z + up.z * u3 + fwd.z * v3;
