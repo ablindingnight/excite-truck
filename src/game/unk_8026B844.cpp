@@ -604,6 +604,7 @@ void fn_8026C014(int player) {
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&m, (const Mat3*)&lbl_80499050.rot);
     } else if (pad.w44[3] & 0x10) {
         // Orbit: the left stick turns about the vertical and tilts, the d-pad moves.
+        const f32 yawUnit = 0.5235988f;
         CamRot yawM;
         CamRot pitchM;
         CamVec yawE;
@@ -625,7 +626,7 @@ void fn_8026C014(int player) {
         f32 z;
         lbl_8055F508 = now;
         dt = CAM_MAX(0.001f * (f32)(now - last), maxStep);
-        yawRate = Mul(dt, 0.5235988f);
+        yawRate = dt * yawUnit;
         speed = Mul(4.0f, Mul(0.25f, Mul(10.0f, dt)));
         fovRate = Mul(dt, 0.034906585f);
         lo = 0.2617994f;
