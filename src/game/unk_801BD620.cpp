@@ -1195,7 +1195,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1000.y = V1010.y;
         V1000.z = V1010.z;
         V1000.w = V1010.w;
-        V0FF0.x = V1910.x;
+        V0FF0.x = (temp_f31 + temp_f31);  // retail splats zero+zero from f28 each time, not a copy
         var_f0_3 = V10D0.x > V0FF0.x ? V10D0.x : V0FF0.x;
         var_f2_12 = V10D0.y;
         V0FE0.x = var_f0_3;
@@ -1219,7 +1219,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0FB0.y = V0FC0.y * V0FE0.y;
         V0FB0.z = V0FC0.z * V0FE0.z;
         V0FB0.w = V0FC0.w * V0FE0.w;
-        V0FA0.x = V0FF0.x;
+        V0FA0.x = (temp_f31 + temp_f31);
         var_f9 = V10D0.x;
         var_f9 = var_f9 < V0FA0.x ? var_f9 : V0FA0.x;
         var_f1_12 = V10D0.y;
@@ -1281,7 +1281,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0EF0.y = V1690.y - V0F00.y;
         V0EF0.z = V1690.z - V0F00.z;
         V0EF0.w = (V1690.w) - V0F00.w;
-        V0EE0.x = V0FA0.x;
+        V0EE0.x = (temp_f31 + temp_f31);
         var_f27 = V0EF0.x > V0EE0.x ? V0EF0.x : V0EE0.x;
         var_f1_13 = V0EF0.y;
         V0ED0.x = var_f27;
@@ -1455,7 +1455,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0A80.y = c1D68;
             Vec4f V0A70;
             V0A70.y = (V0AA0.y < V0A80.y ? V0AA0.y : V0A80.y);
-            Vec4f V0A60(V0BA0.x);
+            Vec4f V0A60((temp_f31 + temp_f31));
             Vec4f V0A50;
             c1D64 = temp_f31 + (temp_f31 + temp_f31);  // retail preheader: fadds f28,f31,f31; fadds f0,f31,f28 (x + x)
             V0A50.y = c1D64;
@@ -1581,7 +1581,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0550((V0580.x * V0560.x));
             Vec4f V0540(V0700.x);
             Vec4f V0530((V0550.x < V0540.x ? V0550.x : V0540.x));
-            Vec4f V0520(V0A60.x);
+            Vec4f V0520((temp_f31 + temp_f31));
             Vec4f V0510((V0530.x > V0520.x ? V0530.x : V0520.x));
             Vec4f V0500;
             V0500.w = (ident.w * V0510.x);
