@@ -4297,8 +4297,8 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
     const char* big = "cheerhit.sfx";
     for (i = 0; i < 16; i++) {
         StuntEvent* e = &h->pool[i];
-        e->car = car;
         e->hud = h;
+        e->car = car;
         h->free.PushFront(e);
     }
     h->current = 0;
@@ -4339,11 +4339,12 @@ inline CarHud::CarHud(int car, int acar) {
     InitCarHud(this, car, acar);
 }
 
+// PROVISIONAL: actual track-name input and/or consumed icon text workspace; original ownership/name unproven.
 inline void BetaMaster::a1(void) {
-    const char* star = "betatex2.tex";
     int i = 0;
     nCars = lbl_8055E4D0;
     if (nCars > 0) {
+        const char* star = "betatex2.tex";
         for (; i < nCars; i++) {
         bool acar = (u32)lbl_804348E8[i]->type == 'ACAR';
         cars[i].hud = new ("stuntdash") CarHud(i, acar);
@@ -4354,23 +4355,25 @@ inline void BetaMaster::a1(void) {
         cars[i].tex[0] = fn_802CAC28("zonetex.tex", 0);
         cars[i].tex[1] = fn_802CAC28("zonetex4.tex", 0);
         {
-            TrackInfo* trk = GetTrack(GetEvent(fn_801769CC()->event)->track);
+            const char* trackName = GetTrack(GetEvent(fn_801769CC()->event)->track)->name;
             const char* set = 0;
-            char key[0x40];
-            fn_801345D8(key, sizeof(key), "icon_set");
-            fn_801332D0((u8*)IdentGetCurrentSlot() + 0xC, key, &set);
+            struct IconLookupBuffers {
+                char key[0x40];
+                char file[0x40];
+            } text;
+            fn_801345D8(text.key, sizeof(text.key), "icon_set");
+            fn_801332D0((u8*)IdentGetCurrentSlot() + 0xC, text.key, &set);
             if (!set) {
                 cars[i].tex[2] = fn_802CAC28(star, 0);
             } else {
                 char prefix[8];
-                char file[0x40];
                 memset(prefix, 0, sizeof(prefix));
-                strncpy(prefix, trk->name, 3);
-                fn_801345D8(file, sizeof(file), "%sstar1.tex", prefix, set);
-                if (fn_8012C33C(file)) {
-                    cars[i].tex[2] = fn_802CAC28(file, 0);
+                strncpy(prefix, trackName, 3);
+                fn_801345D8(text.file, sizeof(text.file), "%sstar1.tex", prefix, set);
+                if (fn_8012C33C(text.file)) {
+                    cars[i].tex[2] = fn_802CAC28(text.file, 0);
                 } else {
-                    fn_802E30C8("Couldn't find star icon texture %s!", file);
+                    fn_802E30C8("Couldn't find star icon texture %s!", text.file);
                     cars[i].tex[2] = fn_802CAC28(star, 0);
                 }
             }
