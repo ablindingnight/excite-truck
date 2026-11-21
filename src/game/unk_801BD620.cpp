@@ -1322,9 +1322,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0CE0.x = V0CF0.x;
             V0CE0.z = V0CF0.z;
             V1900.z = Sq(V0CB0.z);
-            V18F0.w = (ident.w - ident.w);
             V1900.x = ((Sq(V0CB0.x) + V1900.y) + V1900.z);
             f32 inv = ident.w / SqrtF(V1900.x);
+            V18F0.w = (ident.w - ident.w);
             V18F0.x = (V0CB0.x * inv);
             V18F0.y = (V0CB0.y * inv);
             V18F0.z = (V0CB0.z * inv);
