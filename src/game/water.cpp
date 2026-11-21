@@ -713,6 +713,18 @@ static double WaterScrollOffset(f32 ticks) { return fmod(0.39999998f * ticks, 1.
 static f32 WaterCoordinate(int index) { return (f32)index; }
 #pragma pop
 
+// Name unproven.
+static inline void EmitWaterQuad(u16* p, int a, int b) {
+    p[0] = a;
+    ++a;
+    p[1] = a;
+    p[2] = b;
+    p[3] = b;
+    p[4] = a;
+    ++b;
+    p[5] = b;
+}
+
 WaterSystem::WaterSystem(void) {
     const char* mskName = "watermsk.tex";
     const char* deepName = "gen_waterd.tex";
@@ -736,14 +748,7 @@ WaterSystem::WaterSystem(void) {
         int row = r * 16;
         int next = (r + 1) * 16;
         for (int c = 0; c < 15; c++) {
-            int a = row + c;
-            int b = next + c;
-            p[0] = a;
-            p[1] = a + 1;
-            p[2] = b;
-            p[3] = b;
-            p[4] = a + 1;
-            p[5] = b + 1;
+            EmitWaterQuad(p, row + c, next + c);
             p += 6;
         }
     }
