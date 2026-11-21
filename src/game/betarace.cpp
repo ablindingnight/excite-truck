@@ -2982,9 +2982,13 @@ inline Pickup::Pickup(ValueNode* n) {
         switchTime = n->GetFloat("switch_time", 2.0f);
     }
     if (lbl_8055E258++ == 0) {
-        const char* bar = "morphbar.mod";
-        const char* ring = "morphring1.mod";
-        const char* qst = "morphqst.mod";
+        // PROVISIONAL real model-name declaration order; original order unproven.
+        const char* qst;
+        const char* ring;
+        const char* bar;
+        bar = "morphbar.mod";
+        ring = "morphring1.mod";
+        qst = "morphqst.mod";
         SatModel(bar, "sat.tex");
         SatModel(ring, "sat.tex");
         SatModel(qst, "sat.tex");
