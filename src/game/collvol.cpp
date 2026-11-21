@@ -134,6 +134,13 @@ static inline f32 Deq(u16 u) {
     return Lerp(-6.2831855f, 6.2831855f, t);
 }
 
+// PROVISIONAL: a borrowed packet angle input; original API/name unproven.
+static inline f32 DeqBorrowed(const u16& u) {
+    f32 t = MIN(1.0f, Unlerp(u, 0.0f, 65535.0f));
+    t = MAX(t, 0.0f);
+    return Lerp(-6.2831855f, 6.2831855f, t);
+}
+
 
 static inline void AxisAngle(RVec3* m, const RVec3* v) {
     f32 a = PSVECMag((const Vec*)v);
@@ -197,7 +204,7 @@ void CollVolume::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
     fn_8017A008((u8*)&ma.pos, (u8*)&a->pos, 12);
     fn_8017A008((u8*)&mb.pos, (u8*)&b->pos, 12);
     va.Set(Deq(a->rot[0]), Deq(a->rot[1]), Deq(a->rot[2]));
-    vb.Set(Deq(b->rot[0]), Deq(b->rot[1]), Deq(b->rot[2]));
+    vb.Set(DeqBorrowed(b->rot[0]), DeqBorrowed(b->rot[1]), DeqBorrowed(b->rot[2]));
     AxisAngle(&ma.rot.x, &va);
     AxisAngle(&mb.rot.x, &vb);
     fn_8017AE94(&mtx, &ma, &mb, t);
