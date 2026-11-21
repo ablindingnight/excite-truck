@@ -282,7 +282,7 @@ int fn_801DA294(PathFollower* p, PlainValMatrix* m, V3* vel, V3* angvel) {
         LerpPos(m, a, b, f);
         Quat q;
         LerpQ(&q, &a->rot, &b->rot, f);
-        f32 inv = 1.0f / (f32)sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+        f32 inv = 1.0f / (f32)sqrt(q.x * q.x + (q.y * q.y + (q.w * q.w + q.z * q.z)));
         q.y *= inv;
         q.z *= inv;
         q.x *= inv;
