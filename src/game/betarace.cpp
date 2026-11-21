@@ -3782,8 +3782,10 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     b.t.y += lift;
     b.t.z += c.z;
     a.t.y += lift;
-    ScaleRot(&b.r, 1.0f);
-    ScaleRot(&a.r, 1.0f);
+    // PROVISIONAL actual shared rotation-scale value owner; original name/ownership unproven.
+    f32 rotationScale = 1.0f;
+    ScaleRot(&b.r, rotationScale);
+    ScaleRot(&a.r, rotationScale);
     if (fn_801E87A8()->flags & 2) {
         a.r.m[0][0] = -a.r.m[0][0];
         a.r.m[0][1] = -a.r.m[0][1];
