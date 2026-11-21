@@ -600,8 +600,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec4f V1590;
         Vec4f V1580;
         Vec4f V1570;
-        Vec4f V1550;
         Vec4f V1560;
+        Vec4f V1550;
         Vec4f V1540;
         Vec4f V1530;
         Vec4f V1520;
