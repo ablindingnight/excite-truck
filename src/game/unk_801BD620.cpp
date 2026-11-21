@@ -1660,7 +1660,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V14A0.x = var_f18;
         c1D74 = temp_f31 + lbl_805627D8;
         V1490.x = c1D74;
-        var_f2_5 = var_f18;
+        var_f2_5 = V14A0.x;  // read back from the stored lane (retail frsp f2,f18 = store-forward)
         var_f2_5 = var_f2_5 > V1490.x ? var_f2_5 : V1490.x;
         V1480.x = var_f2_5;
         V1470.x = ((temp_f31 + lbl_805627DC));
