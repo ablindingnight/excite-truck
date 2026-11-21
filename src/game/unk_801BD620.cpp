@@ -286,7 +286,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         sp1F80 = sp1F80 - 1;
         Vec4f V1C60((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
         Vec4f V1C50;
-        V1C50.w = lbl_805627AC * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
+        V1C50.w = ident.w * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
         Vec4f V1C40(temp_f31 + lbl_805627BC);
         Vec4f V1C30;
         V1C30.y = temp_f31 + (temp_f31 + lbl_805627BC);
@@ -501,7 +501,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec4f V1880;
         V1880.x = (V1900.y * V1900.z) + (V1900.x * temp_f16_6);
         V1880.z = (V1900.x * V1900.y) + (V1900.z * temp_f16_6);
-        tmp.x = V18A0.z - (lbl_805627AC * V18B0.y);
+        tmp.x = V18A0.z - (ident.w * V18B0.y);
         tmp.y = V18A0.z - (V18A0.z * V18B0.x);
         V1B90.x = tmp.x - (V18A0.z * V18B0.z);
         V1B90.y = V1890.z;
@@ -515,7 +515,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B50.x = V1890.y;
         V1B50.y = V1B50.w + V1880.x;
         Vec4f V1870(V1BF0);
-        V1B50.z = tmp.z - (lbl_805627AC * V18B0.y);
+        V1B50.z = tmp.z - (ident.w * V18B0.y);
         rowA5->x = V1870.x;
         rowA5->y = V1870.y;
         rowA5->z = V1870.z;
@@ -719,7 +719,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec4f V0E20;
         Vec4f V0E10;
         Vec4f V0E00;
-        V1C50.w = lbl_805627AC * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
+        V1C50.w = ident.w * ((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8));
         V17E0.x = ((temp_f31 + lbl_805627B4));
         V17D0.x = ((temp_f31 + lbl_805627B8));
         V17C0.x = (((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8)));
