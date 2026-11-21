@@ -617,9 +617,9 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                     u = 1.0f - (1.0f - u) * (1.0f - u);
                 }
                 fn_8012F57C(q, k0->q, k1->q, u);
-                pos[2] = k0->pos[2] + u * (k1->pos[2] - k0->pos[2]);
-                pos[1] = k0->pos[1] + u * (k1->pos[1] - k0->pos[1]);
-                pos[0] = k0->pos[0] + u * (k1->pos[0] - k0->pos[0]);
+                pos[2] = Lerp(k0->pos[2], k1->pos[2], u);
+                pos[1] = Lerp(k0->pos[1], k1->pos[1], u);
+                pos[0] = Lerp(k0->pos[0], k1->pos[0], u);
                 f32 ps = parent ? parent->scale : 1.0f;
                 if (parent) {
                     pos[0] = pos[0] + parent->pos[0];
