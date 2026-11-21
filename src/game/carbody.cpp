@@ -3446,13 +3446,13 @@ void fn_8018A750(u8* p) {
         int i = 0;
         if (n > 0) {
             for (; i < S32(cb->f26C0, 0xC8); i++) {
-                SprVert* v = &verts[i * 2];
-                v->pos.v[0] = cb->world.pos.x;
-                v->pos.v[1] = cb->world.pos.y;
-                v->pos.v[2] = cb->world.pos.z;
-                v->w34 = 1.0f;
-                v->w30 = 0.5f;
-                v[1] = v[0];
+                // indexed (not through a SprVert* local): the copy then re-rounds w34/w30 (retail frsp f3,f5 / f2,f4)
+                verts[i * 2].pos.v[0] = cb->world.pos.x;
+                verts[i * 2].pos.v[1] = cb->world.pos.y;
+                verts[i * 2].pos.v[2] = cb->world.pos.z;
+                verts[i * 2].w34 = 1.0f;
+                verts[i * 2].w30 = 0.5f;
+                verts[i * 2 + 1] = verts[i * 2];
                 edges[i].a = i * 2;
                 edges[i].b = i * 2 + 1;
                 edges[i].extra = 0.0f;
