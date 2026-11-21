@@ -181,11 +181,14 @@ struct TrailerTarget {
 
 struct TrailerTargets {
     void Drop(s32 id) {
-        TrailerTarget* p = t;
-        for (int k = 0; k < 3; k++, p++) {
-            if (p->id == id) {
-                p->id = -1;
-            }
+        if (t[0].id == id) {
+            t[0].id = -1;
+        }
+        if (t[1].id == id) {
+            t[1].id = -1;
+        }
+        if (t[2].id == id) {
+            t[2].id = -1;
         }
     }
     TrailerTarget t[3];
