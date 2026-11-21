@@ -1372,17 +1372,11 @@ void fn_80268E00(void) {
 
 
 // One axis of the hit shake: a sine wave of the given phase plus jitter, scaled by the amplitude.
-// PROVISIONAL: the original sample type, helper boundary and ownership are unproven.
-// This sample holds the actual rounded sine result through the jitter query.
-struct ShakeSample {
-    f32 sine;
-};
-
-static inline f32 ShakeAxisOwned(f32 amp, f32 phase, f32 twoPi) {
-    ShakeSample sample;
-    sample.sine = (f32)sin(phase * twoPi);
+// PROVISIONAL: shared per-axis sine/jitter workspace ownership and lifetime are inferred.
+static inline f32 ShakeAxisOwned(f32& sample, f32 amp, f32 phase, f32 twoPi) {
+    sample = (f32)sin(phase * twoPi);
     f32 r = fn_80129DC4(0, lbl_80563CB0, lbl_80563CB4);
-    return amp * (r + sample.sine * lbl_80563CB8);
+    return amp * (r + sample * lbl_80563CB8);
 }
 
 static inline f32 ShakeAxis(f32 amp, f32 phase, f32 twoPi) {
@@ -1406,9 +1400,10 @@ void fn_80268E94(CamRec* c, int idx) {
             if (t < lbl_80563C6C) {
                 amp = c->f154 * ShakeEase((lbl_80563C6C - t) / lbl_80563C6C);
                 if (amp > lbl_80563CA0) {
+                    f32 sample;
                     twoPi = lbl_80563CA4;
-                    RVec3 w(ShakeAxisOwned(amp, lbl_80563CAC * t, twoPi), ShakeAxis(amp, lbl_80563C50 * (lbl_80563CAC * t), twoPi),
-                               ShakeAxis(amp, lbl_80563CA8 * (lbl_80563CAC * t), twoPi));
+                    RVec3 w(ShakeAxisOwned(sample, amp, lbl_80563CAC * t, twoPi), ShakeAxis(amp, lbl_80563C50 * (lbl_80563CAC * t), twoPi),
+                               ShakeAxisOwned(sample, amp, lbl_80563CA8 * (lbl_80563CAC * t), twoPi));
                     ShakeMat rot;
                     ShakeRot(&rot, w);
                     ShakeMul((ShakeMat*)&c->pose.rot, (ShakeMat*)&c->pose.rot, &rot);
