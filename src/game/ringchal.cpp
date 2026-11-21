@@ -1897,6 +1897,33 @@ static inline void ReadBound(ValueNode* n, int k, V2* w) {
     w->y = p.y;
 }
 
+// Name unproven.
+static inline int RespawnLongestSide(const V2& a, const V2& b, const V2& c) {
+    int k;
+    f32 best;
+    f32 l;
+    k = 2;
+    {
+        V2 d;
+        Sub(d, c, a);
+        best = LenSq(d);
+    }
+    {
+        V2 e;
+        Sub(e, a, b);
+        l = LenSq(e);
+        if (l > best) {
+            best = l;
+            k = 0;
+        }
+        Sub(e, b, c);
+        if (LenSq(e) > best) {
+            k = 1;
+        }
+    }
+    return k;
+}
+
 inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
     int i;
     int k;
@@ -1911,8 +1938,6 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
             V2 pts[3];
             V2 mid;
             V2 dir;
-            f32 best;
-            f32 l;
             mid.x = 0.0f;
             mid.y = 0.0f;
             dir.x = 0.0f;
@@ -1921,25 +1946,7 @@ inline int RingChalMaster::vfA0(Respawn* out, int idx, int c) {
             for (i = 0; i < 3; i++, w++) {
                 ReadBound(sp, i, w);
             }
-            k = 2;
-            {
-                V2 d;
-                Sub(d, pts[2], pts[0]);
-                best = LenSq(d);
-            }
-            {
-                V2 e;
-                Sub(e, pts[0], pts[1]);
-                l = LenSq(e);
-                if (l > best) {
-                    best = l;
-                    k = 0;
-                }
-                Sub(e, pts[1], pts[2]);
-                if (LenSq(e) > best) {
-                    k = 1;
-                }
-            }
+            k = RespawnLongestSide(pts[0], pts[1], pts[2]);
             mid = MidPoint(pts[k], pts[(k + 1) % 3]);
             Sub(dir, pts[(k + 2) % 3], mid);
             Normalize(dir);
