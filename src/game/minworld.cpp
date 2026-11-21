@@ -240,8 +240,8 @@ void fn_8025280C(MWBody* b, f32 speed) {
     }
     {
         MWVec4 up;
-        MWVec4 a;
         MWVec4 n;
+        MWVec4 a;
         MWVec4 fwd;
         f32 radial;
         MWVec2 zz;
