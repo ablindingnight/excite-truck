@@ -200,13 +200,18 @@ inline void SkagPoint::Place(const f32* pt, f32 size, f32 mid) {
 }
 
 // Inverse of Place: back into a size x size square.
+// Name unproven.
+static inline f32 SkagUnplacedCoordinate(f32 center, f32 u, f32 scaledX, f32 v, const f32& y, f32 size) {
+    return center + u * (scaledX / 2) + v * ((y * size) / 2);
+}
+
 inline void SkagPoint::Unplace(f32* out, f32 size) const {
     f32 c = size / 2.0f;
     f32 sx = x * size;
     const f32* v = kAxes[(quad + 1) & 3];
     const f32* u = kAxes[quad];
-    out[0] = c + u[0] * (sx / 2) + v[0] * ((y * size) / 2);
-    out[1] = c + u[1] * (sx / 2) + v[1] * ((y * size) / 2);
+    out[0] = SkagUnplacedCoordinate(c, u[0], sx, v[0], y, size);
+    out[1] = SkagUnplacedCoordinate(c, u[1], sx, v[1], y, size);
 }
 
 // A child grid: one bag per rad x rad block, built from the four parent cells around it.
