@@ -2268,7 +2268,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V06B0((temp_f31 + lbl_80562818));
             Vec4f V06A0((V0720.x * V06B0.x));
             Vec4f V0690((V06C0.x * V06A0.x));
-            Vec4f V0670((V06C0.x * ((temp_f31 + lbl_8056281C))));
+            Vec4f V0680((temp_f31 + lbl_8056281C));  // retail stack object 0x0680 (restored; b72611f6a had dropped it)
+            Vec4f V0670((V06C0.x * V0680.x));
             Vec4f V0660((temp_f31 + lbl_80562820));
             Vec4f V0650((V0720.x * V0660.x));
             Vec4f V0640((V0670.x + V0650.x));
