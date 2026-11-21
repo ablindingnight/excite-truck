@@ -879,12 +879,13 @@ static inline int ShortStep(f32 dt) {
     return dt < 1.5f;
 }
 
-/* Helper name unproven */
-static inline f32 Cross2(f32 ax, f32 ay, f32 bx, f32 by) {
-    ax = -ax;
-    return ay * bx + ax * by;
-}
+// PROVISIONAL: named negative coordinate owns the real unary result; original scope unproven.
+static inline f32 Cross2(f32 ax, f32 ay, f32 bx, f32 by) { f32 negativeX=-ax; return ay*bx + negativeX*by; }
 
+// PROVISIONAL: real previous/current geometry inputs and borrowed previous Y; original API unproven.
+static inline f32 RecoveryCrossBlend(f32 px, f32 py, f32 cx, f32 cy, f32 qx, const f32& qy, f32 dx, f32 dy, f32 t) {
+    return Lerp(Cross2(px,py,qx,qy), Cross2(cx,cy,dx,dy), t);
+}
 void fn_80194324(u8* d) {
     if (IsLoadingActive()) {
         S32(d, 0x2D0) |= 0x10;
@@ -899,10 +900,7 @@ void fn_80194324(u8* d) {
             f32 v;
             if (ShortStep(dt)) {
                 f32 fraction = dt / 1.5f;
-                v = Lerp(
-                    Cross2(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x180), F32(d, 0x184)),
-                    Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8)),
-                    fraction);
+                v = RecoveryCrossBlend(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x180), F32(d, 0x184), F32(d, 0x1B4), F32(d, 0x1B8), fraction);
             } else {
                 v = Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8));
             }
@@ -1266,19 +1264,72 @@ extern "C" {
 
 // The AI's driving target: how far ahead to look (from the line's curvature speed), the line point and
 // speed there, ramp-ups after a start or restart, the steering offset, and (debug) chasing the car ahead.
-void fn_80194FD0(u8* d, u8* out, f32 t) {
+// PROVISIONAL real initial line-curvature query; shared ABI unchanged.
+// PROVISIONAL-AICAR-LINE-QUERY-OWNERS: real driver/parameter inputs and line-position query.
+// The position is constructed before its distance expression is evaluated.
+// Original helper APIs, boundaries, constness, and local ownership are unproven.
+// GENUINE_DEBT: all inherited raw-layout, type, scope, and helper debt is retained.
+static inline f32 InitialLineCurvature(u8* d, u8* prm) {
+    ILPos point;
+    fn_80135B9C((LineFollower*)PTR(d, 0x164), F32(prm, 0x70) + F32(prm, 0x6C) * F32(d, 0x270), 0, 0, 0, &point);
+    return Lerp(point.seg->unk24, point.seg->next->unk24, point.t);
+}
+// PROVISIONAL: target-speed output and clamped first lookahead distance.
+static inline f32 InitialTargetDistance(u8* d, u8* out) {
     u8* prm = PTR(d, 0x2C8);
-    ILPos il;
-    fn_80135B9C((LineFollower*)PTR(d, 0x164), F32(prm, 0x70) + F32(prm, 0x6C) * F32(d, 0x270), 0, 0, 0, &il);
-    F32(out, 0xC) = F32(d, 0x2F0) * fn_801931AC(Lerp(il.seg->unk24, il.seg->next->unk24, il.t), F32(prm, 0x60),
+    f32 curvature = InitialLineCurvature(d, prm);
+    F32(out, 0xC) = F32(d, 0x2F0) * fn_801931AC(curvature, F32(prm, 0x60),
                                                  F32(prm, 0x64), F32(PTR(PTR(d, 0x164), 0x2C), 0x14));
     f32 ahead = F32(out, 0xC) * F32(d, 0x270);
     ahead = F32(PTR(d, 0x2C8), 0x68) > ahead ? F32(PTR(d, 0x2C8), 0x68) : ahead;
-    LineAhead(d, ahead, (V2*)out, (f32*)(out + 0x8), (f32*)(d + 0x8));
+    return ahead;
+}
+// PROVISIONAL actual non-blending position/speed/height query.
+static inline void QueryLineHeight(LineFollower* follower, f32 ahead, V2* pos, f32* speed, f32* height) {
+    ILPos point;
+    fn_80135B9C(follower, ahead, pos, 0, speed, &point);
+    *height = LerpRev(point.seg->next->height, point.seg->height, point.t);
+}
+
+// PROVISIONAL local call-site boundary; other callers retain existing helper.
+static inline void TargetLineAhead(u8* d, f32 ahead, V2* pos, f32* speed, f32* height) {
+    f32 at = F32(d, 0x26C);
+    int blend = at - F32(d, 0x1D0) < 1.5f;
+    if (blend) {
+        ILPos a;
+        ILPos b;
+        V2 pa;
+        V2 pb;
+        V2 da;
+        V2 db;
+        f32 sa;
+        f32 sb;
+        fn_80135B9C((LineFollower*)(d + 0x168), ahead, &pa, &da, &sa, &a);
+        fn_80135B9C((LineFollower*)(d + 0x19C), ahead, &pb, &db, &sb, &b);
+        if (speed) {
+            *speed = sa + ((at - F32(d, 0x1D0)) / 1.5f) * (sb - sa);
+        }
+        if (pos) {
+            *pos = LerpV2(pa, pb, (at - F32(d, 0x1D0)) / 1.5f);
+        }
+        if (height) {
+            f32 ha = LerpRev(a.seg->next->height, a.seg->height, a.t);
+            f32 hb = LerpRev(b.seg->next->height, b.seg->height, b.t);
+            *height = ha + ((at - F32(d, 0x1D0)) / 1.5f) * (hb - ha);
+        }
+    } else if (height) {
+        QueryLineHeight((LineFollower*)(d + 0x19C), ahead, pos, speed, height);
+    } else {
+        fn_80135B9C((LineFollower*)(d + 0x19C), ahead, pos, 0, speed, 0);
+    }
+}
+void fn_80194FD0(u8* d, u8* out, f32 t) {
+    f32 ahead = InitialTargetDistance(d, out);
+    TargetLineAhead(d, ahead, (V2*)out, (f32*)(out + 0x8), (f32*)(d + 0x8));
     F32(d, 0xC) = F32(out, 0x0);
     F32(d, 0x10) = F32(out, 0x4);
     U8(d, 0x14) = 1;
-    LineAhead(d, 0.65f * ahead, 0, (f32*)(out + 0x8), 0);
+    TargetLineAhead(d, 0.65f * ahead, 0, (f32*)(out + 0x8), 0);
     F32(out, 0x8) = F32(out, 0x8) * fn_80194FC8(d);
     if (U8(d, 0x2A6)) {
         f32 st = F32(d, 0x1EC);
@@ -2208,6 +2259,29 @@ void fn_80198488(u8* d);
 // [0xC4, 0xC8]; when the band closes the two cars negotiate who yields, then the car is pulled toward the band.
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+// PROVISIONAL-AICAR-NEIGHBOR-BAND-OWNERS: real interpolation input snapshot.
+// Existing V2/V2C layouts retained; original helper/input/scope ownership unproven.
+// Inherited opt_lifetimes-off and dead blend-test debt retained, not validated here.
+static inline V2 BlendAvoidanceSnapshot(f32 k, f32 xv, f32 yv, const V2& b) {
+    V2C endpoint;
+    endpoint.y = b.y;
+    endpoint.x = b.x;
+    V2 r;
+    r.y = LerpT(k, yv, endpoint.y);
+    r.x = LerpT(k, xv, endpoint.x);
+    return r;
+}
+// PROVISIONAL-AICAR-NEIGHBOR-BAND-OWNERS: actual push-band update inputs.
+// Original private helper/API ownership unproven; no compiler option is added.
+static inline void NarrowPushBand(u8* d, f32 push) {
+        if (push > 0.0f) {
+            f32 lo = F32(d, 0x278) + push;
+            F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
+        } else if (push < 0.0f) {
+            f32 hi = F32(d, 0x278) + push;
+            F32(d, 0xC8) = F32(d, 0xC8) < hi ? F32(d, 0xC8) : hi;
+        }
+}
 void fn_8019743C(u8* d, u8* out) {
     f32 diff = 0.0f;
     int decay = 1;
@@ -2218,21 +2292,20 @@ void fn_8019743C(u8* d, u8* out) {
     if (any) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
-            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + (F32(d, 0x7C) + Mul(0.5f, F32(d, 0x84))));
-            F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
+            // PROVISIONAL: names for real neighbor-center and previous-bound values.
+            f32 relativeCenter = (F32(d, 0x7C) + Mul(0.5f, F32(d, 0x84)));
+            f32 priorLimit = F32(d, 0xC4);
+            f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + relativeCenter);
+            F32(d, 0xC4) = priorLimit > lo ? priorLimit : lo;
         }
         if (U8(d, 0x9C)) {
-            f32 hi = (F32(d, 0x278) + (F32(d, 0xA4) + Mul(0.5f, F32(d, 0xAC)))) - (0.61f + lbl_8055A488);
-            F32(d, 0xC8) = F32(d, 0xC8) < hi ? F32(d, 0xC8) : hi;
+            // PROVISIONAL: names for real neighbor-center and previous-bound values.
+            f32 relativeCenter = (F32(d, 0xA4) + Mul(0.5f, F32(d, 0xAC)));
+            f32 priorLimit = F32(d, 0xC8);
+            f32 hi = (F32(d, 0x278) + relativeCenter) - (0.61f + lbl_8055A488);
+            F32(d, 0xC8) = priorLimit < hi ? priorLimit : hi;
         }
-        f32 push = F32(d, 0xE8);
-        if (push > 0.0f) {
-            f32 lo = F32(d, 0x278) + push;
-            F32(d, 0xC4) = F32(d, 0xC4) > lo ? F32(d, 0xC4) : lo;
-        } else if (push < 0.0f) {
-            f32 hi = F32(d, 0x278) + push;
-            F32(d, 0xC8) = F32(d, 0xC8) < hi ? F32(d, 0xC8) : hi;
-        }
+        NarrowPushBand(d, F32(d, 0xE8));
         u8* side = 0;
         u32 blocked = 0;
         f32 k = 2.0f;
@@ -2327,10 +2400,12 @@ void fn_8019743C(u8* d, u8* out) {
             at = F32(d, 0xE4);
         }
         U8(d, 0x250) = 1;
-        V2C tgt(F32(d, 0x48) + F32(d, 0x58) * at, F32(d, 0x4C) + F32(d, 0x5C) * at);
+        V2C tgt;
+        tgt.x = F32(d, 0x48) + F32(d, 0x58) * at;
+        tgt.y = F32(d, 0x4C) + F32(d, 0x5C) * at;
         f32 xv = ((V2*)out)->x;
         f32 yv = ((V2*)out)->y;
-        V2 c = LerpV2(F32(d, 0xE0), xv, yv, tgt);
+        V2 c = BlendAvoidanceSnapshot(F32(d, 0xE0), xv, yv, tgt);
         ((V2*)out)->x = c.x;
         ((V2*)out)->y = c.y;
     }
@@ -2592,7 +2667,10 @@ static inline void EaseAndNudge(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
             F32(d, 0x150) = -1.0f;
             f32 side = S32(d, 0x18) == 1 ? -1.0f : 1.0f;
             f32 sgn = F32(d, 0x12C) - 0.305f * (2.0f * side) > 0.0f ? 1.0f : -1.0f;
-            f32 p = F32(d, 0x144) + 0.08f * r * -sgn;
+            // PROVISIONAL-AICAR-NUDGE-NEGATIVE-LOCAL: actual negative sign value.
+            // Original unary-result scope unproven; inherited helper/type/layout debt retained.
+            f32 negativeSign = -sgn;
+            f32 p = F32(d, 0x144) + 0.08f * r * negativeSign;
             p = lim < p ? lim : p;
             p = p > -lim ? p : -lim;
             F32(d, 0x144) = p;
