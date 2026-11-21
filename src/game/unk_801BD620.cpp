@@ -1366,7 +1366,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSCALE(V0910, V0980, V0920.x);
             VSUB(V0900, V09D0, V0910);
             Vec4f V08F0((temp_f31 + lbl_80562808));
-            Vec4f V08E0(V0940.x);
+            Vec4f V08E0((temp_f31 + lbl_80562804));
             Vec4f V08D0(((temp_f31 + lbl_80562808) * (temp_f31 + lbl_80562804)));
             VSCALE(V08C0, V0900, V08D0.x);
             Vec4f V08B0(V08C0);
