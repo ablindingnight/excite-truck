@@ -3778,9 +3778,10 @@ void DrawSpin(const VPos& pos, const Xform* src) {
     b.t.y += n.y;
     b.t.z += n.z;
     b.t.x += c.x;
+    // PROVISIONAL actual translation component order; original sequence unproven.
+    b.t.z += c.z;
     b.t.y += c.y;
     b.t.y += lift;
-    b.t.z += c.z;
     a.t.y += lift;
     // PROVISIONAL actual shared rotation-scale value owner; original name/ownership unproven.
     f32 rotationScale = 1.0f;
