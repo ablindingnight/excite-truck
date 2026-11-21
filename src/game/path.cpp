@@ -247,13 +247,13 @@ static inline void SubV3(void* o_, const void* a_, const void* b_) {
 }
 static inline void LerpPos(PlainValMatrix* m, const PathKey* a, const PathKey* b, f32 f) {
     V3 pos;
-    pos.z = a->pos.z + f * (b->pos.z - a->pos.z);
+    pos.z = Lerp(a->pos.z, b->pos.z, f);
     f32 y2 = b->pos.y;
-    f32 xv;
     f32 y_ = a->pos.y;
+    f32 xv;
     pos.y = Lerp(y_, y2, f);
-    f32 x_ = a->pos.x;
     xv = b->pos.x;
+    f32 x_ = a->pos.x;
     pos.x = Lerp(x_, xv, f);
     m->origin.z = pos.z;
     m->origin.y = pos.y;
