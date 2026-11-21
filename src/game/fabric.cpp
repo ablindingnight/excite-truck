@@ -436,36 +436,39 @@ void fn_801F5664(Fabric* f, int style) {
 Anchor::Anchor(void) {}
 
 
-// PROVISIONAL: immutable row inputs and retained converted-start reference; scalar signature unproven.
-static inline int LerpB(f32 a, const f32& b, f32 t) { return b + t * (a - b); }
+// PROVISIONAL: color input ownership and scalar helper boundaries are unproven.
+// Earlier converted-start reference is superseded by the existing float Lerp helper.
 
-static inline u32 LerpColor( u32 b,u32 a, f32 t) {
+
+// PROVISIONAL: real word inputs use start/end order; original API and scopes unproven.
+static inline u32 LerpColor(u32 a,u32 b,f32 t) {
     u32 c;
     u8* pa = (u8*)&a;
     u8* pb = (u8*)&b;
     u8* pc = (u8*)&c;
-    pc[0] = LerpB(pb[0], pa[0], t);
-    pc[1] = LerpB(pb[1], pa[1], t);
-    pc[2] = LerpB(pb[2], pa[2], t);
-    pc[3] = LerpB(pb[3], pa[3], t);
+    pc[0] = Lerp(pa[0], pb[0], t);
+    pc[1] = Lerp(pa[1], pb[1], t);
+    pc[2] = Lerp(pa[2], pb[2], t);
+    pc[3] = Lerp(pa[3], pb[3], t);
     return c;
 }
 
 
 
 static inline void LerpVert(DrawVert* out, FabricCorner a, FabricCorner b, f32 t) {
-    out->u = LerpRev( b.u,a.u, t);
-    out->v = LerpRev( b.v,a.v, t);
-    out->color = LerpColor( b.color,a.color, t);
+    out->u = Lerp(a.u, b.u, t);
+    out->v = Lerp(a.v, b.v, t);
+    out->color = LerpColor(a.color,b.color,t);
 }
 
 static inline void LerpVert2(DrawVert* out, const DrawVert& b, const DrawVert& a, f32 t) {
-    out->u = LerpRev(b.u, a.u, t);
-    out->v = LerpRev(b.v, a.v, t);
-    out->color = LerpColor(b.color, a.color, t);
+    out->u = Lerp(a.u, b.u, t);
+    out->v = Lerp(a.v, b.v, t);
+    out->color = LerpColor(a.color,b.color,t);
 }
 
 // PROVISIONAL: direct position values and row-position construction order; original ownership unproven.
+// PROVISIONAL: row vector declarations own storage before draw locals; source scopes unproven.
 extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
     int n = f->rows * f->cols;
     int r;
@@ -476,11 +479,11 @@ extern "C" void fn_801F5970(Fabric* f, const Quad* q) {
     f->count = n;
     for (r = 0; r < f->rows; r++) {
         f32 t = (f32)r / (f32)(f->rows - 1);
-        DrawVert ld;
-        DrawVert rd;
         int c;
         const ValV3 lp(Lerp(q->c[0].pos.x,q->c[2].pos.x,t), Lerp(q->c[0].pos.y,q->c[2].pos.y,t), Lerp(q->c[0].pos.z,q->c[2].pos.z,t));
         const ValV3 rp(Lerp(q->c[1].pos.x,q->c[3].pos.x,t), Lerp(q->c[1].pos.y,q->c[3].pos.y,t), Lerp(q->c[1].pos.z,q->c[3].pos.z,t));
+        DrawVert ld;
+        DrawVert rd;
         LerpVert(&ld, q->c[0], q->c[2], t);
         LerpVert(&rd, q->c[1], q->c[3], t);
         for (c = 0; c < f->cols; c++) {
