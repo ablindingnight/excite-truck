@@ -541,7 +541,8 @@ static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, i
         f32 hx = t->base + t->scale * t->h[ox][lz];
         if (t->layer >= 0) {
             GroundHeader* gg = lbl_8055E990;
-            for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
+            GLayer* layers = gg->layers;
+            for (GLayer* l = &layers[t->layer]; l; l = l->next >= 0 ? &layers[l->next] : 0) {
                 f32 w = lbl_804424B0[l->weight];
                 h += w * (l->base + l->scale * l->h[lx][lz]);
                 hx += w * (l->base + l->scale * l->h[ox][lz]);
@@ -559,7 +560,8 @@ static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, i
     h = t->base + t->scale * t->h[lx][lz];
     if (t->layer >= 0) {
         GroundHeader* gg = lbl_8055E990;
-        for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
+        GLayer* layers = gg->layers;
+        for (GLayer* l = &layers[t->layer]; l; l = l->next >= 0 ? &layers[l->next] : 0) {
             h += lbl_804424B0[l->weight] * (l->base + l->scale * l->h[lx][lz]);
         }
     }
