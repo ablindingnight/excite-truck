@@ -1168,6 +1168,9 @@ void fn_801B8048(CarPlace* p, LineFollower* line, f32 lat, f32 along);
 void fn_801B8E28(int car);
 }
 
+// Name unproven.
+static inline f32 InterludeYaw(f32 x, f32 z) { return (f32)atan2(x, z); }
+
 // The interlude player, once per frame: runs every event whose time has come, in order. A wait (cars to
 // cross a point) or a fade still running holds the queue and pauses the clock.
 void debug_event(void) {
@@ -1355,7 +1358,7 @@ void debug_event(void) {
                         f.origin.z += f.basis[2].z * off.y;
                         // Retail reads the two entries again for atan2: a const view is not merged with the reads above.
                         const ValMatrix& cf = f;
-                        f32 yaw = atan2(cf.basis[2].x, cf.basis[2].z);
+                        f32 yaw = InterludeYaw(cf.basis[2].x, cf.basis[2].z);
                         V2 pt;
                         pt.y = f.origin.z;
                         pt.x = f.origin.x;
