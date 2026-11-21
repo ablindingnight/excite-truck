@@ -175,6 +175,9 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     return 0;
 }
 
+// HeightSquare: name unproven.
+static inline f32 HeightSquare(const f32& value) { return value * value; }
+
 static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32 t2, f32 t3, f32* deriv) {
     f32 m1 = 0.5f * (p2 - p0);
     f32 d = p2 - p1;
@@ -228,8 +231,8 @@ static inline f32 SplinePD(const f32* p, int s, f32 t, f32* deriv) {
     k = 0.5f;
     p2 = p[s * 2]; p0 = p[0]; p1 = p[s]; p3 = p[s * 3];
     d = p2 - p1;
-    t2 = t * t;
-    t3 = t2 * t;
+    t2 = HeightSquare(t);
+    t3 = Mul(t2, t);
     m1 = k * (p2 - p0);
     m2 = k * (p3 - p1);
     c3 = m1 + m2 - 2.0f * d;
