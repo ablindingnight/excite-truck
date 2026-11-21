@@ -56,6 +56,7 @@ static inline f32 AbsF(f32 v) { return fn_8002B0A0(v); }  // by-value inline wra
 static inline f32 SqrtF(f32 v) { return fn_8002B0B0(v); }  // same shape (name unproven)
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }  // helper names unproven
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 Sum3(f32 a, f32 b, f32 c) { return (a + b) + c; }  // by-value inline helper, name unproven
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
     MVec4* t = t_;
@@ -787,7 +788,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V17B0.y = rowB25->y;
         V17B0.z = rowB25->z;
         V17B0.w = rowB25->w;
-        temp_f1_10 = V19E0.x + V19E0.y + V19E0.z;
+        temp_f1_10 = Sum3(V19E0.x, V19E0.y, V19E0.z);
         V17A0.x = V17B0.x;
         V17A0.y = V17B0.y;
         V1790.x = rowA9->x;  // retail reloads row a+9 (lfs 0/4/8(r28)) right after zeroing it through the pointer
@@ -867,7 +868,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V19E0.y = V1670.y * V1670.y;
         V1670.z = V1680.z;
         V19E0.z = V1670.z * V1670.z;
-        V1660.x = V19E0.x + V19E0.y + V19E0.z;
+        V1660.x = Sum3(V19E0.x, V19E0.y, V19E0.z);
         V1650.x = V1770.x + SqrtF(V1660.x);
         temp_f19_7 = V1650.x * rowC6->x;
         temp_f18_7 = V1670.x * temp_f19_7;
@@ -1377,7 +1378,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0C60(V0C70);
             VSUB(V0C50, V0D80, V0C60);
             DOT_BEGIN(V0C80, V0C50);
-            Vec4f V0C40(((V19E0.x + V19E0.y) + V19E0.z));
+            Vec4f V0C40(Sum3(V19E0.x, V19E0.y, V19E0.z));
             c1D70 = temp_f31 + lbl_805627F4;
             Vec4f V0C30(c1D70);
             Vec4f V0C20((MinF(V0C40.x, V0C30.x)));
@@ -1391,7 +1392,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0BB0(V0BC0);
             Vec4f V0BA0((temp_f31 + temp_f31));
             DOT_BEGIN(V0C80, V0BB0);
-            Vec4f V0B90(((V19E0.x + V19E0.y) + V19E0.z));
+            Vec4f V0B90(Sum3(V19E0.x, V19E0.y, V19E0.z));
             Vec4f V0B80((V16F0.x + V0B90.x));
             Vec4f V0B70((MaxF(V0BA0.x, V0B80.x)));
             Vec4f V0B60;
@@ -1416,7 +1417,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0AA0;
             Vec4f V0A90((temp_f31 + lbl_80562800));
             V19E0.z = (V0C80.z * V0CE0.z);
-            V0AD0.x = ((V19E0.x + V19E0.y) + V19E0.z);
+            V0AD0.x = Sum3(V19E0.x, V19E0.y, V19E0.z);
             V0AB0.x = (V0AD0.x * V0AC0.x);
             V0AA0.y = (V0AE0.y - V0AB0.x);
             Vec4f V0A80;
@@ -1440,7 +1441,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VADD(V09E0, V0CE0, V09F0);
             DOT_BEGIN(V0C80, V09E0);
             Vec4f V09D0;
-            Vec4f V09C0(((V19E0.x + V19E0.y) + V19E0.z));
+            Vec4f V09C0(Sum3(V19E0.x, V19E0.y, V19E0.z));
             VSCALE(V09B0, V0C80, V09C0.x);
             Vec4f V09A0;
             V09A0.x = (V09E0.x - V09B0.x);
@@ -1507,7 +1508,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSCALE(V0770, V0870, V0780.z);
             VSET(V0980, V0770);
             DOT_BEGIN(V0980, V0980);
-            Vec4f V0760(((V19E0.x + V19E0.y) + V19E0.z));
+            Vec4f V0760(Sum3(V19E0.x, V19E0.y, V19E0.z));
             Vec4f V0750((temp_f31 + SqrtF(V0760.x)));
             c1D54 = temp_f31 + lbl_80562814;
             Vec4f V0740(c1D54);
@@ -1589,13 +1590,13 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V19E0.y = (V0420.y * V0CB0.y);
             V0420.z = (tmp.z - (V0440.x * V0BB0.y));
             V19E0.z = (V0420.z * V0CB0.z);
-            Vec4f V0410(((V19E0.x + V19E0.y) + V19E0.z));
+            Vec4f V0410(Sum3(V19E0.x, V19E0.y, V19E0.z));
             Vec4f V0400((V1300.x + V0410.x));
             V1300.x = V0400.x;
             Vec4f V03F0(V0A10);
             t[var_r17].z = V03F0.z;
             DOT_BEGIN(V03F0, V0DF0);
-            Vec4f V03E0(((V19E0.x + V19E0.y) + V19E0.z));
+            Vec4f V03E0(Sum3(V19E0.x, V19E0.y, V19E0.z));
             Vec4f V03D0(V03E0.x);
             VSCALE(V03C0, V0DF0, V03D0.x);
             VSUB(V03B0, V03F0, V03C0);
@@ -1606,7 +1607,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V1000.x = V0380.x;
             VSUB(V0370, V0BD0, V0D80);
             DOT_BEGIN(V0370, V0DF0);
-            Vec4f V0360(((V19E0.x + V19E0.y) + V19E0.z));
+            Vec4f V0360(Sum3(V19E0.x, V19E0.y, V19E0.z));
             Vec4f V0350;
             V0350.w = rowC6->w;
             Vec4f V0340;
