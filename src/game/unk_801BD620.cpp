@@ -258,13 +258,13 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     f32 var_f8;
     f32 temp_f1_14;
     f32 temp_f1_19;
-    s16 var_r16;
-    s16 var_r17;
-    s16 var_r18;
-    s16 var_r19;
-    s16 var_r20;
-    s16 var_r21;
     s16 var_r22;
+    s16 var_r21;
+    s16 var_r20;
+    s16 var_r19;
+    s16 var_r18;
+    s16 var_r17;
+    s16 var_r16;
 
 
 
