@@ -508,27 +508,26 @@ void fn_802A5384(WeatherCfg* c) {
 }
 
 void fn_802A53B0(DropHit* hits, int n) {
+    int m;
     int k2;
+    Droplet* d;
     if ((f32)__fabs(fn_802A4AD4()) <= __float_epsilon[0] || !lbl_8055F894) {
         return;
     }
-    RainSystem* r = lbl_8055F88C;
+    const RainSystem* r = lbl_8055F88C;
     f32 inv = -(1.0f / (f32)sqrt(PSVECDotProduct((const Vec*)&r->vel, (const Vec*)&r->vel)));
     ValVec3 dir;
     dir.x = r->vel.x * inv;
     dir.y = r->vel.y * inv;
     dir.z = r->vel.z * inv;
     for (int i = 0; i < n; hits++, i++) {
-        Droplet* d;
-        int j;
         DropSource* s = &lbl_804BCFB8[hits->source];
         if (hits->dist > 56.25f || !hits->enabled || s->count < 1) {
             continue;
         }
-        d = s->drops;
         DropObj* o = hits->obj;
-        j = 0;
-        if (s->count > 0) for (; j < s->count; d++, j++) {
+        int j = 0;
+        if (s->count > 0) for (d = s->drops; j < s->count; d++, j++) {
             ValVec3 nrm;
             Mul(&o->frame, &d->n, &nrm);
             f32 dot = PSVECDotProduct((const Vec*)&dir, (const Vec*)&nrm);
@@ -543,16 +542,14 @@ void fn_802A53B0(DropHit* hits, int n) {
             vel.Set(dir.x + nrm.x * k, dir.y + nrm.y * k, dir.z + nrm.z * k);
             TAddS(&vel, &hits->obj->vel, &vel, 3.0f);
             {
-                int m = fn_80287B5C(cnt) + 1;
+                m = fn_80287B5C(cnt) + 1;
                 k2 = 0;
                 if (m > 0) for (; k2 < m; k2++) {
                     f32 a = fn_80287BC8(0.0f, 1.0f);
                     f32 b = fn_80287BC8(0.0f, 1.0f);
                     ValVec3 p;
-                    p.y = d->origin.y + d->sv.y * a + d->tv.y * b;
-                    p.x = d->origin.x + d->sv.x * a + d->tv.x * b;
-                    f32 originZ = d->origin.z;
-                    p.z = originZ + d->sv.z * a + d->tv.z * b;
+                    TAddS(&p, &d->origin, &d->sv, a);
+                    TAddSTo(&p, &d->tv, b);
                     Mul(&o->frame, &p, &p);
                     p.x = p.x + o->frame.origin.x;
                     p.y = p.y + o->frame.origin.y;
