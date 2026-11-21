@@ -52,7 +52,7 @@ float fn_8002B0B0(double x);  // sqrtf wrapper (out of line in the original)
 
 // Absolute value through a by-value f32 parameter (helper name unproven): retail loads each lane into f0 and
 // copies it into f1 (fmr) only after storing the previous result, the parameter-object shape.
-static inline f32 AbsF(f32 v) { return fn_8002B0A0(v); }
+static inline f32 AbsF(f32 v) { return fn_8002B0A0(v); }  // by-value inline wrapper: shape retail-required (fmr f1,f0), name unproven
 static inline f32 SqrtF(f32 v) { return fn_8002B0B0(v); }  // same shape (name unproven)
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }  // helper names unproven
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
@@ -614,7 +614,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA9->x = V1800.y;
         rowA9->y = V1800.z;
         rowA9->z = V1800.z;
-        Vec4f V17F0(V1800.z);
+        Vec4f V17F0(temp_f31);  // retail stores the zero register f31 straight into V17F0, not a copy of V1800
         V17F0.y = V17F0.x;
         V17F0.z = V17F0.y;
         rowA10->x = V17F0.y;
