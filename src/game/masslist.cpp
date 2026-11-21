@@ -197,6 +197,11 @@ void fn_801BDA70(CarSetup* out) { fn_80279D40(out); }
 // Applies a car setup to car `car`: mass/inertia (and reciprocals) and the integrator's parameter rows - wheel anchors,
 // suspension lanes per wheel, a two-point linear tyre force fit, toe angles, brake split, drive split.
 #define DEG(d) ((d) * 3.141592653589793 / 180.0)
+// Name unproven.
+static inline f32 WheelRestHeight(const WheelSetup& wheel, f32 cmHeight, f32 load) {
+    return wheel.radius - wheel.rideHeight - cmHeight - load / wheel.spring - load / wheel.unk1C;
+}
+
 void fn_801BDA74(int car, const CarSetup* s) {
     MVec4 mass(s->mx, s->my, s->mz, s->mass);
     MVec4 inv(1.0f / s->mx, 1.0f / s->my, 1.0f / s->mz, 1.0f / s->mass);
@@ -243,7 +248,7 @@ void fn_801BDA74(int car, const CarSetup* s) {
         f32 share = front ? s->balance : 1.0f - s->balance;
         f32 load = 9.81f * (0.5f * share * s->mass);
         x->row[i] = MVec4(0.5f * (front ? s->ftrack : s->rtrack) * (left ? -1.0f : 1.0f),
-                          w->radius - w->rideHeight - s->collideCmHeight - load / w->spring - load / w->unk1C,
+                          WheelRestHeight(*w, s->collideCmHeight, load),
                           (1.0f - share) * s->wheelbase * (front ? 1.0f : -1.0f));
     }
     x->row[12] = MVec4(s->wheels[0].spring, s->wheels[1].spring, s->wheels[2].spring, s->wheels[3].spring);
