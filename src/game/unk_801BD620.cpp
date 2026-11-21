@@ -1485,11 +1485,13 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             c1D60 = (temp_f31 + (lbl_805627AC)) * (temp_f31 + lbl_80562804);
             Vec4f V0960(fn_8002B0A0(V0970.x));
             Vec4f V0950(V0B50.x);
-            Vec4f V0920((V0960.x > c1D60 ? V0960.x : c1D60));
+            Vec4f V0940((temp_f31 + lbl_80562804));  // retail stack objects 0x0940/0x0930 (restored, see below)
+            Vec4f V0930(c1D60);
+            Vec4f V0920((V0960.x > V0930.x ? V0960.x : V0930.x));
             VSCALE(V0910, V0980, V0920.x);
             VSUB(V0900, V09D0, V0910);
             Vec4f V08F0((temp_f31 + lbl_80562808));
-            Vec4f V08E0(((temp_f31 + lbl_80562804)));
+            Vec4f V08E0(V0940.x);
             Vec4f V08D0(((temp_f31 + lbl_80562808) * (temp_f31 + lbl_80562804)));
             VSCALE(V08C0, V0900, V08D0.x);
             Vec4f V08B0(V08C0);
@@ -1561,7 +1563,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0620;
             V0620.y = (temp_f31 + V0630.x);
             Vec4f V0610((temp_f31 + lbl_80562824));
-            Vec4f V05F0((V0610.x * ((V06E0.y * V06E0.y))));
+            Vec4f V0600;  // retail stack object 0x0600 (restored)
+            V0600.y = (V06E0.y * V06E0.y);
+            Vec4f V05F0((V0610.x * V0600.y));
             Vec4f V05E0((temp_f31 + lbl_80562828));
             Vec4f V05D0((V05E0.x * V06E0.y));
             Vec4f V05C0((temp_f31 + lbl_8056282C));
@@ -1586,7 +1590,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V04D0((V04E0.x - V0500.w));
             Vec4f V04C0((V04D0.x * V0590.z));
             Vec4f V04A0;
-            V04A0.y = (temp_f31 + ((V04F0.w + V04C0.x)));
+            Vec4f V04B0;  // retail stack object 0x04B0 (restored)
+            V04B0.w = (V04F0.w + V04C0.x);
+            V04A0.y = (temp_f31 + V04B0.w);
             Vec4f V0490;
             V0490.y = (V04A0.y * V06E0.y);
             VSCALE(V0480, V0980, V0490.y);
