@@ -167,7 +167,7 @@ int fn_8026A698(u8* p, int i) {
         // p + 0xC0 = CamRec::carFrame (typed, together with the MulVec read above, it grows the frame by 16)
         turn = PSVECDotProduct((const Vec*)&((CarBody*)((CamRec*)p)->car)->vel, (const Vec*)((f32*)(p + 0xC0))) > 0.0f ? turn : -turn;
         s->spin = turn;
-        if (MIN(room[0], room[1]) < 10.0f) {
+        if (MinF(room[0], room[1]) < 10.0f) {
             if (room[0] > room[1]) {
                 s->spin = -(f32)__fabs(s->spin);
             } else {
@@ -244,7 +244,7 @@ int fn_8026A698(u8* p, int i) {
     ValVec3 g = f.origin;
     if (fn_801EA03C((u8*)((CarBody*)((CamRec*)p)->car)->hint, &g)) {
         g.y += 1.0f;
-        f32 up = MAX(0.0f, g.y - f.origin.y);
+        f32 up = MaxF(0.0f, g.y - f.origin.y);
         f.origin.y += up;
         f32 euler[3];
         euler[0] = (f32)atan(up / 6.0f);
@@ -257,7 +257,7 @@ int fn_8026A698(u8* p, int i) {
     const f32& duration = lbl_80563D08;
     fn_80176A24(duration);
     fn_80176A00(2);
-    f32 k = MIN(1.0f, 3000.0f * (3.0f * s->t));
+    f32 k = MinF(1.0f, 3000.0f * (3.0f * s->t));
     f32 e;
     if (k < -1.0f) {
         e = -1.0f;
