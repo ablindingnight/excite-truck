@@ -605,8 +605,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec4f V1540;
         Vec4f V1530;
         Vec4f V1520;
-        Vec4f V1500;
         Vec4f V1510;
+        Vec4f V1500;
         Vec4f V14F0;
         Vec4f V14E0;
         Vec4f V14D0;
@@ -1446,8 +1446,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V04E0((temp_f31 + lbl_805627AC));
             Vec4f V04D0((V04E0.x - V0500.w));
             Vec4f V04C0((V04D0.x * V0590.z));
-            Vec4f V04A0;
             Vec4f V04B0;  // retail stack object 0x04B0 (restored)
+            Vec4f V04A0;
             V04B0.w = (V04F0.w + V04C0.x);
             V04A0.y = (temp_f31 + V04B0.w);
             Vec4f V0490;
