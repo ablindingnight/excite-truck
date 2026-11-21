@@ -53,6 +53,7 @@ float fn_8002B0B0(double x);  // sqrtf wrapper (out of line in the original)
 // Absolute value through a by-value f32 parameter (helper name unproven): retail loads each lane into f0 and
 // copies it into f1 (fmr) only after storing the previous result, the parameter-object shape.
 static inline f32 AbsF(f32 v) { return fn_8002B0A0(v); }
+static inline f32 SqrtF(f32 v) { return fn_8002B0B0(v); }  // same shape (name unproven)
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
     MVec4* t = t_;
@@ -527,7 +528,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1900.z = V1BB0.z * V1BB0.z;
         V1900.w = V1BB0.w * V1BB0.w;
         V1900.x = (((V1BB0.x * V1BB0.x) + V1900.y) + V1900.z) + V1900.w;
-        temp_f4_7 = ident.w / fn_8002B0B0(V1900.x);
+        temp_f4_7 = ident.w / SqrtF(V1900.x);
         V18F0.x = V1BB0.x * temp_f4_7;
         V18F0.y = V1BB0.y * temp_f4_7;
         V18F0.z = V1BB0.z * temp_f4_7;
@@ -865,7 +866,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1670.z = V1680.z;
         V19E0.z = V1670.z * V1670.z;
         V1660.x = V19E0.x + V19E0.y + V19E0.z;
-        V1650.x = V1770.x + fn_8002B0B0(V1660.x);
+        V1650.x = V1770.x + SqrtF(V1660.x);
         temp_f19_7 = V1650.x * rowC6->x;
         temp_f18_7 = V1670.x * temp_f19_7;
         temp_f15_11 = V1780.x - temp_f18_7;
@@ -970,7 +971,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1470.x = ((temp_f31 + lbl_805627DC));
         V1460.x = ((temp_f31 + lbl_805627E0));
         V1450.w = V17A0.w * ((temp_f31 + lbl_805627E0));
-        temp_f1_14 = fn_8002B0A0(V1450.w);
+        temp_f1_14 = AbsF(V1450.w);
         V1440.w = temp_f1_14;
         V1430.x = (temp_f31 + lbl_805627AC);
         c1D78 = (lbl_805627AC) * (temp_f31 + (lbl_805627AC));
@@ -1397,7 +1398,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V1900.z = (V0CB0.z * V0CB0.z);
             V18F0.w = (ident.w - ident.w);
             V1900.x = (((V0CB0.x * V0CB0.x) + V1900.y) + V1900.z);
-            f32 inv = ident.w / fn_8002B0B0(V1900.x);
+            f32 inv = ident.w / SqrtF(V1900.x);
             V18F0.x = (V0CB0.x * inv);
             V18F0.y = (V0CB0.y * inv);
             V18F0.z = (V0CB0.z * inv);
@@ -1487,7 +1488,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0980(V0990);
             Vec4f V0970((V16D0.x * V0BB0.y));
             c1D60 = (temp_f31 + (lbl_805627AC)) * (temp_f31 + lbl_80562804);
-            Vec4f V0960(fn_8002B0A0(V0970.x));
+            Vec4f V0960(AbsF(V0970.x));
             Vec4f V0950((temp_f31 + lbl_805627AC));
             Vec4f V0940((temp_f31 + lbl_80562804));  // retail stack objects 0x0940/0x0930 (restored, see below)
             Vec4f V0930(c1D60);
@@ -1542,7 +1543,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSET(V0980, V0770);
             DOT_BEGIN(V0980, V0980);
             Vec4f V0760(((V19E0.x + V19E0.y) + V19E0.z));
-            Vec4f V0750((temp_f31 + fn_8002B0B0(V0760.x)));
+            Vec4f V0750((temp_f31 + SqrtF(V0760.x)));
             c1D54 = temp_f31 + lbl_80562814;
             Vec4f V0740(c1D54);
             Vec4f V0730((V0750.x > V0740.x ? V0750.x : V0740.x));
