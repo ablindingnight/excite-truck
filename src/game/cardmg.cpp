@@ -1219,9 +1219,10 @@ struct CDF {
 };
 
 struct CDVec4 {
-    CDVec4(CDSolVec s) {
+    CDVec4(CDSolVec s, f32& scratchZ) {
         CDF f(s.w);
-        Set(RVec3(s.x, s.y, s.z), f);
+        scratchZ = s.z;
+        Set(RVec3(s.x, s.y, scratchZ), f);
     }
     void Set(const RVec3& p, CDF w_) {
         x = p.x;
@@ -1269,7 +1270,8 @@ void fn_8018F76C(u8* p, int i) {
     u8* x;
     WLaunch m;
     fn_801BEB30(((CarBody*)p)->index, &x);
-    CDVec4 c(*(CDSolVec*)(x + 0x70));
+    f32 s;
+    CDVec4 c(*(CDSolVec*)(x + 0x70), s);
     c[i] *= 0.15f;
     *(CDSolVec*)(x + 0x70) = c.Sol();
     m.rot = *(WFrame*)&((CarBody*)p)->mtx;
@@ -1277,7 +1279,7 @@ void fn_8018F76C(u8* p, int i) {
     TAddS(&m.pos, &m.pos, &m.rot.row1, 0.3f);
     WVec3 vel;
     ((RigidBody*)p)->VelAt((RVec3*)&vel, (RVec3*)&m.pos);
-    f32 s = F32(w, 0x23AC);
+    s = F32(w, 0x23AC);
     if ((f32)__fabs(s) < 5.0f) {
         s = s < 0.0f ? -5.0f : 5.0f;
     }
