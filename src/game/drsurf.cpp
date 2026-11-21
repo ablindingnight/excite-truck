@@ -413,10 +413,10 @@ void fn_802D4988(Surf* s) {
                 f32 wa;
                 f32 z;
                 f32 a;
+                wa = lbl_804CA308[m->ia];
+                wb = lbl_804CA308[m->ib];
                 a = (1.0f / 255) * m->da;
                 b = (1.0f / 255) * m->db;
-                wb = lbl_804CA308[m->ib];
-                wa = lbl_804CA308[m->ia];
                 m++;
                 z = v->z;
                 vx = v->x;
