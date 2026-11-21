@@ -181,9 +181,10 @@ static inline f32 HeightSquare(const f32& value) { return value * value; }
 static inline f32 SplineD(f32 p0, f32 p1, f32 p2, f32 p3, f32 t, f32* deriv) {
     f32 t2 = t * t;
     f32 t3 = Mul(t2, t);
-    f32 m1 = 0.5f * (p2 - p0);
+    f32 half = 0.5f;
+    f32 m1 = half * (p2 - p0);
     f32 d = p2 - p1;
-    f32 m2 = 0.5f * (p3 - p1);
+    f32 m2 = half * (p3 - p1);
     f32 c3 = m2 + m1 - 2.0f * d;
     f32 c2 = 3.0f * d - 2.0f * m1 - m2;
     if (deriv) {
