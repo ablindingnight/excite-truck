@@ -57,6 +57,7 @@ static inline f32 AbsF(f32 v) { return fn_8002B0A0(v); }  // by-value inline wra
 static inline f32 SqrtF(f32 v) { return fn_8002B0B0(v); }  // same shape (name unproven)
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }  // helper names unproven
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
+static inline f32 Sq(const f32& a) { return a * a; }  // helper name unproven
 static inline f32 Sum3(f32 a, f32 b, f32 c) { return (a + b) + c; }  // by-value inline helper, name unproven
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
@@ -1308,7 +1309,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0CB0(V0CC0);
             V0CF0.y = ((V0D20.y + ((V0D60.z * V0D50.x) - (V0D50.z * V0D60.x))) + V0D00.y);
             V0CE0.y = V0CF0.y;
-            V1900.y = (V0CB0.y * V0CB0.y);
+            V1900.y = Sq(V0CB0.y);
             CROSS_BEGIN(V0D60, V0D50);
             V0D40.x = (tmp.x - (V0D50.y * V0D60.z));
             V0D40.y = (tmp.y - (V0D50.z * V0D60.x));
@@ -1320,9 +1321,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0CF0.z = (V0D10.z + V0D00.z);
             V0CE0.x = V0CF0.x;
             V0CE0.z = V0CF0.z;
-            V1900.z = (V0CB0.z * V0CB0.z);
+            V1900.z = Sq(V0CB0.z);
             V18F0.w = (ident.w - ident.w);
-            V1900.x = (((V0CB0.x * V0CB0.x) + V1900.y) + V1900.z);
+            V1900.x = ((Sq(V0CB0.x) + V1900.y) + V1900.z);
             f32 inv = ident.w / SqrtF(V1900.x);
             V18F0.x = (V0CB0.x * inv);
             V18F0.y = (V0CB0.y * inv);
