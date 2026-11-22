@@ -265,7 +265,7 @@ void fn_80202718(void) {
     f32 planarY = dx * cam->basis[1].x + dy * cam->basis[1].y;
     f32 planarZ = dx * cam->basis[2].x + dy * cam->basis[2].y;
     v.x = planarX + dz * cam->basis[0].z;
-    v.y = planarY + dz * cam->basis[1].z;
+    v.y = planarY + cam->basis[1].z * dz;
     v.z = planarZ + dz * cam->basis[2].z;
     int dir = 1;
     if (v.z < 0.0f) {
