@@ -1078,7 +1078,8 @@ void Mist::Update(void) {
     } else {
         a = density * (1.0f - (f32)sqrt(d2) / rad);
     }
-    if ((__float_epsilon[0] >= (f32)__fabs(a)) != (__float_epsilon[0] >= (f32)__fabs(alpha))) {
+    bool off = FAbs(a) <= __float_epsilon[0];
+    if (off != (FAbs(alpha) <= __float_epsilon[0])) {
         fn_802C990C(color);
     }
     fn_802C2B78(0.5f, 50.0f, a);
