@@ -305,8 +305,8 @@ static inline void SwapTri(PTri* t, u8& sc) {
 /* Helper names unproven: per-table swap loops */
 static inline void SwapTris(PMesh* m) {
     int i;
-    int off;
     u8* p;
+    int off;
     u8 sc;
     for (i = 0, off = 0; i < m->numTris; off += sizeof(m->tris[0]), i++) {
         p = (u8*)m->tris + off;
