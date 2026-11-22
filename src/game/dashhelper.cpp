@@ -118,14 +118,14 @@ void fn_80231380(Vertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 void fn_802C8DB8(Vertex* v, int nv, const u16* idx, int ni);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
-int fn_8022EDC4(void);
+int GetTopUIContext(void);
 void fn_802C8B98(s32 tex, int unk);
 void fn_801E4F20(int n);
 void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
 void RenderTextWithOutline(void);
 void fn_80234AEC(void);
-void fn_80231094(int* top, int* bottom, int* left, int* right);
+void CalculateScreenMargins(int* top, int* bottom, int* left, int* right);
 void fn_801331C4(int type, const char* name, f32* out);
 void FormatNumberWithUnit(char* buf, int size, s32 value);
 const char* GetOrdinalSuffix(s32 value);
@@ -1317,7 +1317,7 @@ void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 s
     if (segs <= 0) {
         return;
     }
-    fn_802C8B98(tex, fn_8022EDC4());
+    fn_802C8B98(tex, GetTopUIContext());
     fn_801E4F20(segs * 4);
     f32 sn = sin(start);
     d.x = cos(start);
@@ -1373,7 +1373,7 @@ void SetScreenViewports(int n) {
     int cols;
 
     lbl_8055D4A0 = n;
-    fn_80231094(&top, &bottom, &left, &right);
+    CalculateScreenMargins(&top, &bottom, &left, &right);
     l = left;
     r = right;
     t = top;

@@ -420,16 +420,16 @@ static inline void NegInto(PVec* o, const f32* v, f32 k) {
 
 extern "C" {
 u8* fn_801F1CE8(TObj* o);
-int fn_801F1CF0(u8* d);
+int IsFaceFacingCamera(u8* d);
 void fn_801F2570(TNode* n);
 void fn_801F3124(void* dst, const void* src);
-void fn_801F3158(f32* dst, const f32* src);
+void CopyVector3Components(f32* dst, const f32* src);
 f32 fn_801F3174(f32 y, f32 x);
 void fn_801F3198(TVec* v);
 void fn_801F3E60(void);
 
 // Billboard frame facing the camera, upright.
-void fn_801F1C24(TFrame* f) {
+void CalculateBillboardFrame(TFrame* f) {
     TCam* cam = fn_802C86DC();
     f->y.x = 0.0f;
     f->y.y = 1.0f;
@@ -449,7 +449,7 @@ void fn_801F1C24(TFrame* f) {
 u8* fn_801F1CE8(TObj* o) { return (u8*)&o->d2C; }
 
 // Whether the data's normal faces away from the camera.
-int fn_801F1CF0(u8* d) {
+int IsFaceFacingCamera(u8* d) {
     PVec v;
     TCam* cam = fn_802C86DC();
     f32 x = ((f32*)d)[9];
@@ -461,41 +461,41 @@ int fn_801F1CF0(u8* d) {
     return PSVECDotProduct((const Vec*)&v, (const Vec*)(d + 0x18)) < 0.0f;
 }
 
-TrackMod* fn_801F1D68(void) { return new ("Generic") GenericTMH; }
+TrackMod* CreateGenericTrackModifier(void) { return new ("Generic") GenericTMH; }
 
-TrackMod* fn_801F1DA4(void) { return new ("PointFacing") PointFacingTMH; }
+TrackMod* CreatePointFacingHandler(void) { return new ("PointFacing") PointFacingTMH; }
 
-TrackMod* fn_801F1DE4(void) { return new ("AxisFacing") AxisFacingTMH; }
+TrackMod* CreateAxisFacingTrackModifier(void) { return new ("AxisFacing") AxisFacingTMH; }
 
-TrackMod* fn_801F1E24(void) { return new ("Sky") SkyTMH; }
+TrackMod* CreateSkyTrackModifier(void) { return new ("Sky") SkyTMH; }
 
 TrackMod* fn_801F1EA8(void) { return new ("Sun") SunTMH; }
 
-TrackMod* fn_801F1EEC(void) { return new ("AmbientColor") AmbientColorTMH; }
+TrackMod* CreateAmbientColorModifier(void) { return new ("AmbientColor") AmbientColorTMH; }
 
-TrackMod* fn_801F1F38(void) { return new ("ShadowColor") ShadowColorTMH; }
+TrackMod* CreateShadowColorTrackModifier(void) { return new ("ShadowColor") ShadowColorTMH; }
 
-TrackMod* fn_801F1F84(void) { return new ("SunIntensity") SunIntensityTMH; }
+TrackMod* CreateSunIntensityHandler(void) { return new ("SunIntensity") SunIntensityTMH; }
 
-TrackMod* fn_801F1FD4(void) { return new ("FogColor") FogColorTMH; }
+TrackMod* CreateFogColorHandler(void) { return new ("FogColor") FogColorTMH; }
 
-TrackMod* fn_801F2020(void) { return new ("Rotator") RotatorTMH; }
+TrackMod* CreateRotatorTrackModifier(void) { return new ("Rotator") RotatorTMH; }
 
-TrackMod* fn_801F2064(void) { return new ("MultiFacing") MultiFacingTMH; }
+TrackMod* CreateMultiFacingTrackModifier(void) { return new ("MultiFacing") MultiFacingTMH; }
 
-TrackMod* fn_801F20C8(void) { return new ("OptTerrain") OptTerrainTMH; }
+TrackMod* CreateOptTerrain(void) { return new ("OptTerrain") OptTerrainTMH; }
 
-TrackMod* fn_801F2108(void) { return new ("XFader") XFaderTMH; }
+TrackMod* CreateXfaderTrackModifier(void) { return new ("XFader") XFaderTMH; }
 
-TrackMod* fn_801F2150(void) { return new ("FlareSource") FlareSourceTMH; }
+TrackMod* CreateFlareSource(void) { return new ("FlareSource") FlareSourceTMH; }
 
-TrackMod* fn_801F2190(void) { return new ("Water") WaterTMH; }
+TrackMod* CreateWaterTrackModifier(void) { return new ("Water") WaterTMH; }
 
-TrackMod* fn_801F21CC(void) { return new ("PinkTriangle") PinkTriangleTMH; }
+TrackMod* CreatePinkTriangleManager(void) { return new ("PinkTriangle") PinkTriangleTMH; }
 
-TrackMod* fn_801F220C(void) { return new ("FacingTest") FacingTestTMH; }
+TrackMod* CreateFacingTestTrackModifier(void) { return new ("FacingTest") FacingTestTMH; }
 
-TrackMod* fn_801F224C(void) { return new ("Scrolling") ScrollingTMH; }
+TrackMod* CreateScrollingTrackModifier(void) { return new ("Scrolling") ScrollingTMH; }
 }
 
 FacingTestTMH::~FacingTestTMH(void) {}
@@ -524,7 +524,7 @@ void GenericTMH::Draw(TObj* list) {
 
 void AxisFacingTMH::DrawTree(TNode* tree) {
     TFrame f;
-    fn_801F1C24(&f);
+    CalculateBillboardFrame(&f);
     fn_802C7730(&f);
     if (tree) {
         fn_801F2570(tree->left);
@@ -543,7 +543,7 @@ extern "C" inline void fn_801F2570(TNode* n) {
 
 void AxisFacingTMH::Draw(TObj* list) {
     TFrame f;
-    fn_801F1C24(&f);
+    CalculateBillboardFrame(&f);
     fn_802C7730(&f);
     for (; list; list = list->next) {
         fn_802C7040(list->model);
@@ -552,7 +552,7 @@ void AxisFacingTMH::Draw(TObj* list) {
 
 void PointFacingTMH::Draw(TObj* list) {
     TFrame f;
-    fn_801F1C24(&f);
+    CalculateBillboardFrame(&f);
     fn_802C7730(&f);
     for (; list; list = list->next) {
         fn_802C7040(list->model);
@@ -599,7 +599,7 @@ void MultiFacingTMH::Draw(TObj* list) {
         v0 = 0.25f * (seg / 8);
         u1 = 0.125f + u0;
         v1 = 0.25f + v0;
-        fn_801F3158(&base.pos.x, __ct__4VPosFfff(&c0, 0.0f, 0.0f, 0.0f));
+        CopyVector3Components(&base.pos.x, __ct__4VPosFfff(&c0, 0.0f, 0.0f, 0.0f));
         base.u = u0;
         base.v = v0;
         base.color = fn_80144C68(0xFF, 0xFF, 0xFF, 0xFF);
@@ -627,7 +627,7 @@ void MultiFacingTMH::Draw(TObj* list) {
 extern "C" {
 void fn_801F3124(void* dst, const void* src) { *(TVtx*)dst = *(const TVtx*)src; }
 
-void fn_801F3158(f32* dst, const f32* src) {
+void CopyVector3Components(f32* dst, const f32* src) {
     dst[0] = src[0];
     dst[1] = src[1];
     dst[2] = src[2];
@@ -1041,7 +1041,7 @@ inline void PinkTriangleTMH::Draw(TObj* list) {}
 inline void FacingTestTMH::Draw(TObj* list) {
     for (; list; list = list->next) {
         void* model = list->model;
-        if (fn_801F1CF0((u8*)&list->d2C)) {
+        if (IsFaceFacingCamera((u8*)&list->d2C)) {
             fn_802C7040(model);
         }
     }
@@ -1178,7 +1178,7 @@ inline void ScrollList::Draw2(void* ctx) {
 }
 
 inline void FacingTestInst::Update(void* ctx) {
-    if (IsVisibleAtIndex(ctx, id) && !fn_801F1CF0(data)) {
+    if (IsVisibleAtIndex(ctx, id) && !IsFaceFacingCamera(data)) {
         fn_802CDAFC(ctx, id);
     }
 }

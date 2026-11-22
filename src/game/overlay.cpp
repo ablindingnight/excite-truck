@@ -143,7 +143,7 @@ void ResetOverlays(void);
 extern "C" {
 void fn_80011A50(void);
 f32 fn_801E7E18(void);
-void fn_80230B5C(PlainValMatrix* cam);
+void ResetTransformMatrix(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_80161C18(void);
@@ -1103,7 +1103,7 @@ void fn_80007238(void) {
     lbl_8034EE84.info = fn_801E7E3C();
     lbl_8034EE84.time = fn_801E7E18();
     lbl_8034EE84.numViews = fn_801E85A4();
-    fn_80230B5C(&cam);
+    ResetTransformMatrix(&cam);
     fn_802C8638(&cam);
     f32 wide = 1.4396f;
     f32 narrow = 0.82625633f;
@@ -1129,7 +1129,7 @@ void fn_80007238(void) {
 void fn_80007318(int) {
     PlainValMatrix cam;
     fn_80005C20();
-    fn_80230B5C(&cam);
+    ResetTransformMatrix(&cam);
     fn_802C8638(&cam);
     SetupCameraProjection(kOverlayFullScale.value, 1000.0f, 1.4398966f);
     lbl_8034EE84.player = 0;

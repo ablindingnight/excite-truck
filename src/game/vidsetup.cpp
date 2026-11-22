@@ -26,7 +26,7 @@ extern "C" {
 
 VidModeInfo* fn_802CE344(int mode);
 void fn_802CF5F8(u32 x);
-void fn_802CA0E4(void);
+void InitializeTextureList(void);
 void CreateJointPool(void);
 void InitializeRenderMatrix(void);
 void SetFogColor(u32 color);
@@ -34,7 +34,7 @@ void fn_801E6978(void);
 void fn_801E69EC(void);
 void fn_802C84EC(void);
 void fn_801E2F68(void);
-void fn_802CA1E0(void);
+void ReleaseTextureCache(void);
 void fn_802CF5FC(void);
 void ResetGraphicsState(void);
 void fn_80127468(void);
@@ -85,7 +85,7 @@ void fn_802C2A48(s32 mode) {
 void fn_802C2AA8(int) {
     fn_802C2A48(2);
     fn_802CF5F8(fn_802CE344(2)->x10);
-    fn_802CA0E4();
+    InitializeTextureList();
     lbl_8055FBA8 = 0;
     CreateJointPool();
     InitializeRenderMatrix();
@@ -99,7 +99,7 @@ void fn_802C2B18(void) {
     fn_801E69EC();
     fn_802C84EC();
     fn_801E2F68();
-    fn_802CA1E0();
+    ReleaseTextureCache();
     fn_802CF5FC();
 }
 

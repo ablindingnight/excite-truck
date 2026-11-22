@@ -986,7 +986,7 @@ void EventNode::Update(void) {
 const char* GetGradeDisplayName(int grade);
 
 extern "C" {
-void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
+void CalculateScreenPosition(f32* x, f32* y, s32 lx, s32 ly);
 void fn_80230F78(u8* alpha, f32* grow, u32* color, int a);
 void DrawColoredText(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
 void FormatIntegerBuffer(char* buf, s32 size, s32 value);
@@ -1011,7 +1011,7 @@ void EventNode::Draw(void) {
     f32 grow;
     u8 alpha;
     u32 gradeColor;
-    fn_80230C30(&x, &y, p->x, p->y);
+    CalculateScreenPosition(&x, &y, p->x, p->y);
     color = 0xFFFFFFFF;
     part = 0;
     gradeColor = 0xFFFFFFFF;
@@ -1096,7 +1096,7 @@ void LevelNode::Draw(void) {
     u32 color;
     int part;
     u32 tile;
-    fn_80230C30(&x, &y, p->x, p->y);
+    CalculateScreenPosition(&x, &y, p->x, p->y);
     tile = 0xFFFFFFFF;
     part = lbl_80345B40[p->index] + 1;
     color = 0xFFFFFFFF;

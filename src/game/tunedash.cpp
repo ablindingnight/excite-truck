@@ -18,7 +18,7 @@ ILayout* fn_80145E70(const char* name);
 void fn_801476C4(TextElem* e);
 void fn_80147230(TextElem* e, const char* fmt, ...);
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
-void fn_80230B5C(PlainValMatrix* cam);
+void ResetTransformMatrix(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 void SetupCameraProjection(f32 a, f32 b, f32 c);
 int ReadJoyStatus(JoyStatus* pad, int chan);
@@ -75,7 +75,7 @@ void fn_8020449C(void) {
     lbl_8055ED44 = NULL;
 }
 
-int fn_802044E8(void) {
+int UpdateTuneDashboard(void) {
     TextElem *v1;
     TextElem *n1;
     TuneItem *it;
@@ -90,7 +90,7 @@ int fn_802044E8(void) {
     int first;
     int i;
     PlainValMatrix cam;
-    fn_80230B5C(&cam);
+    ResetTransformMatrix(&cam);
     fn_802C8638(&cam);
     SetupCameraProjection(1.0f, 1000.0f, 1.4396f);
     lbl_8055ED44->Edit();
@@ -154,7 +154,7 @@ int fn_802044E8(void) {
     return active;
 }
 
-int fn_80204870(u32 key) {
+int HandleTuneInput(u32 key) {
     if (fn_8020437C()) {
         switch (key) {
         case 0x126:

@@ -267,8 +267,8 @@ static inline u32 DimColor(u32 c) {
 }
 
 extern "C" {
-void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
-void fn_80231220(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
+void CalculateScreenPosition(f32* x, f32* y, s32 lx, s32 ly);
+void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.
 void RecordIcon::Draw(void) {
@@ -287,7 +287,7 @@ void RecordIcon::Draw(void) {
     f32 u0;
     f32 fw;
     f32 fh;
-    fn_80230C30(&sx, &sy, this->x, this->y);
+    CalculateScreenPosition(&sx, &sy, this->x, this->y);
     c = valid;
     fw = (f32)w;
     fh = (f32)h;
@@ -301,8 +301,8 @@ void RecordIcon::Draw(void) {
     u1 = e->u2;
     v1 = e->v2;
     c = color;
-    fn_80231220(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
-    fn_80231220(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
+    DrawTexturedQuad(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
+    DrawTexturedQuad(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
 }
 
 

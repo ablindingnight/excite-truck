@@ -892,7 +892,7 @@ inline u8* fn_8025B134(u8* p);
 inline void fn_8025B0E8(Words9* d, const Words9* s);
 inline f32 fn_8025B0A8(f32* r);
 inline f32 fn_8025B0C4(f32 x);
-u8* fn_8022EDC4(void);
+u8* GetTopUIContext(void);
 void fn_80144D80(Mat3* m, f32 x, f32 y, f32 z);
 void fn_802C77F0(s32 model, f32* bounds);
 void fn_801C2B9C(f32* out, const f32* pos, const f32* dir, f32 d);
@@ -921,7 +921,7 @@ inline void AchievementTrophyModel::Place(void) {
     Mat3 scale;
     f32 bounds[6];
     fn_8025B0E8((Words9*)xform, (Words9*)fn_8025B134((u8*)rot));
-    u8* cam = fn_8022EDC4();
+    u8* cam = GetTopUIContext();
     fn_80144D80(&scale, F32(cam, 0x38), F32(cam, 0x38), F32(cam, 0x38));
     Mat3Mul((Mat3*)xform, (Mat3*)xform, &scale);
     fn_802C77F0(handle, bounds);

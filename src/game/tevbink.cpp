@@ -68,7 +68,7 @@ void operator delete[](void* p);
 
 extern "C" {
 
-void fn_802DEAC4(void) {
+void SetupTextureGeneration(void) {
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)0, (u32)33, (GXBool)0, (u32)125);
     GXSetTexCoordGen2((GXTexCoordID)1, (GXTexGenType)1, (GXTexGenSrc)0, (u32)36, (GXBool)0, (u32)125);
     GXSetTexCoordGen2((GXTexCoordID)2, (GXTexGenType)1, (GXTexGenSrc)0, (u32)39, (GXBool)0, (u32)125);
@@ -115,7 +115,7 @@ void fn_802DEE1C(void) {
     GXSetTevSwapMode((GXTevStageID)4, (GXTevSwapSel)0, (GXTevSwapSel)0);
 }
 
-void fn_802DEE88(void) {
+void SetupTextureStage0(void) {
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)4, (u32)60, (GXBool)0, (u32)125);
     GXSetNumTexGens((u8)1);
     GXSetTevOrder((GXTevStageID)0, (GXTexCoordID)0, (GXTexMapID)0, (GXChannelID)4);
@@ -133,7 +133,7 @@ void fn_802DEF70(void) {
     fn_802D3144();
 }
 
-void fn_802DEFA0(void) {
+void SetupTextureAndTevStages(void) {
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)0, (GXTexGenSrc)1, (u32)42, (GXBool)1, (u32)76);
     GXSetTexCoordGen2((GXTexCoordID)1, (GXTexGenType)1, (GXTexGenSrc)1, (u32)33, (GXBool)0, (u32)125);
     GXSetNumTexGens((u8)2);
@@ -169,7 +169,7 @@ void fn_802DF1B4(void) {
     GXSetTevDirect((GXTevStageID)1);
 }
 
-void fn_802DF21C(void) {
+void ConfigureTextureStage0(void) {
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)1, (u32)42, (GXBool)0, (u32)125);
     GXSetNumTexGens((u8)1);
     GXSetTevOrder((GXTevStageID)0, (GXTexCoordID)0, (GXTexMapID)0, (GXChannelID)4);
@@ -209,7 +209,7 @@ void fn_802DF46C(void) {
     GXSetTevSwapMode((GXTevStageID)1, (GXTevSwapSel)0, (GXTevSwapSel)0);
 }
 
-void fn_802DF4A8(void) {
+void ConfigureTextureAndTevStages(void) {
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)4, (u32)60, (GXBool)0, (u32)125);
     GXSetTexCoordGen2((GXTexCoordID)1, (GXTexGenType)0, (GXTexGenSrc)1, (u32)42, (GXBool)1, (u32)76);
     GXSetNumTexGens((u8)2);
@@ -240,7 +240,7 @@ void fn_802DF684(void) {
     GXSetTevDirect((GXTevStageID)1);
 }
 
-void fn_802DF6D0(void) {
+void ConfigureRenderPipeline(void) {
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)4, (u32)60, (GXBool)0, (u32)125);
     GXSetTexCoordGen2((GXTexCoordID)1, (GXTexGenType)0, (GXTexGenSrc)1, (u32)42, (GXBool)1, (u32)76);
     GXSetNumTexGens((u8)2);
@@ -296,7 +296,7 @@ void fn_802DF994(void) {
     GXSetNumTevStages((u8)2);
 }
 
-void fn_802DFAF4(void) {
+void SetupTevSwapModes(void) {
     GXSetTevSwapMode((GXTevStageID)0, (GXTevSwapSel)0, (GXTevSwapSel)0);
     GXSetTevSwapMode((GXTevStageID)1, (GXTevSwapSel)0, (GXTevSwapSel)0);
 }
@@ -417,7 +417,7 @@ void fn_802E0218(void) {
     GXSetNumTevStages((u8)3);
 }
 
-void fn_802E0420(void) {
+void SetupTextureStage(void) {
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)4, (u32)60, (GXBool)0, (u32)125);
     GXSetNumTexGens((u8)1);
     GXSetTevOrder((GXTevStageID)0, (GXTexCoordID)0, (GXTexMapID)1, (GXChannelID)255);
@@ -627,9 +627,9 @@ BinkMovie* fn_802E0BA8(void) {
 
 void fn_802E0BE0(BinkMovie* m) { operator delete(fn_802E0BA4(m)); }
 
-void* fn_802E0C04(u32 size) { return lbl_8055FEE8->Alloc(size); }
+void* AllocateMemory(u32 size) { return lbl_8055FEE8->Alloc(size); }
 
-void fn_802E0D44(void* p) {
+void FreeHeapBlock(void* p) {
     SimpleHeap* h = lbl_8055FEE8;
     HeapBlock* b = (HeapBlock*)((u8*)p - (h->align + 1));
     HeapBlock** l;
@@ -676,7 +676,7 @@ void fn_802E0D44(void* p) {
     } while (merged);
 }
 
-void fn_802E0E60(BinkMovie* m) {
+void CloseBinkMovie(BinkMovie* m) {
     if (m->bink) {
         fn_802E1728(m->tex);
         BinkClose(m->bink);
@@ -684,8 +684,8 @@ void fn_802E0E60(BinkMovie* m) {
     }
 }
 
-void fn_802E0EAC(BinkMovie* m) {
-    fn_802E0E60(m);
+void LoadBinkMovie(BinkMovie* m) {
+    CloseBinkMovie(m);
     int fd = LoadFileWithName(m->name);
     if (fd != -1) {
         u8 hdr[0x20];
@@ -707,10 +707,10 @@ void fn_802E0EAC(BinkMovie* m) {
     }
 }
 
-void* lbl_8055D150[2] = {(void*)fn_802E0C04, (void*)fn_802E0D44};
+void* lbl_8055D150[2] = {(void*)AllocateMemory, (void*)FreeHeapBlock};
 
-void fn_802E0F98(void) {
-    fn_80119214(fn_802E0C04, fn_802E0D44);
+void InitializeBinkAudioMemory(void) {
+    fn_80119214(AllocateMemory, FreeHeapBlock);
     BinkSetSoundSystem((void*)BinkOpenAX, lbl_8055D150);
     fn_801282EC(0x80);
     fn_801282F4();
@@ -752,24 +752,24 @@ BinkMovie* fn_802E11A4(const char* name, u8 loop) {
         *dot = 0;
     }
     StrNCat(m->name, ".bik", 0x40);
-    fn_802E0EAC(m);
+    LoadBinkMovie(m);
     return r;
 }
 
-void fn_802E1290(BinkMovie* m) {
+void UnloadBinkMovie(BinkMovie* m) {
     fn_802E30C8("drMovieUnload");
-    fn_802E0E60(fn_802E0BA4(m));
+    CloseBinkMovie(fn_802E0BA4(m));
     fn_802E0BE0(m);
 }
 
-void fn_802E12DC(BinkMovie* r) {
+void UpdateBinkMovie(BinkMovie* r) {
     BinkMovie* m = fn_802E0BA4(r);
     if (m->bink && m->bink[7]) {
         fn_802E30C8("bmovie: movie has error");
-        fn_802E0E60(m);
+        CloseBinkMovie(m);
     }
     if (!m->bink) {
-        fn_802E0EAC(m);
+        LoadBinkMovie(m);
     }
     if (m->bink) {
         fn_802E27B8(m->tex);
@@ -797,7 +797,7 @@ struct MVtx {
 
 const GXColorS10 lbl_80565238 = {0, 0, 0, 0};
 
-void fn_802E13D8(BinkMovie* r, f32 x, f32 y, f32 w, f32 h) {
+void RenderBinkMovie(BinkMovie* r, f32 x, f32 y, f32 w, f32 h) {
     BinkMovie* m = fn_802E0BA4(r);
     fn_802D3360();
     if (!m->bink) {

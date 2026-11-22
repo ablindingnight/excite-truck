@@ -17,7 +17,7 @@ int fn_802CAF8C(s32 tex);  // texture has alpha
 ValueNode* fn_802B59CC(void);
 int fn_802B05E4(void);
 int fn_802B05EC(void);
-void fn_802B8AE0(const char* name, s32* value);
+void RecordStatValue(const char* name, s32* value);
 void* fn_802CFFA0(u32 size);  // frame allocation
 void fn_802BAFA0(void);
 void fn_802BAFF8(void* ctx, void* batch);
@@ -303,8 +303,8 @@ void fn_802B0874(void) { SafeDelete(lbl_8055F9A0); }
 void ResetBlockCount(void) { lbl_8055F9A0->blocks.count = 0; }
 
 void fn_802B0914(void) {
-    fn_802B8AE0("last-gmat-tris", &lbl_8055F998);
-    fn_802B8AE0("last-wmap-tris", &lbl_8055F99C);
+    RecordStatValue("last-gmat-tris", &lbl_8055F998);
+    RecordStatValue("last-wmap-tris", &lbl_8055F99C);
     fn_802B0710();
 }
 

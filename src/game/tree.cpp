@@ -37,14 +37,14 @@ s32 fn_802CAC28(const char* name, int a);  // texture handle
 void gxForgetTexture(s32 tex);
 int GetSurfaceTypeId(const char* name);  // surface type by name
 void fn_80127464(void);             // keep alive
-void fn_802B8AE0(const char* name, s32* value);
+void RecordStatValue(const char* name, s32* value);
 int fn_802B05E4(void);
-void fn_802C126C(void);
-void fn_802C13A4(void);
-void fn_802C1550(void);
-int fn_802C143C(ValueNode* cfg);
+void InitializeTreeHitSystem(void);
+void CleanUpTreeData(void);
+void InitializeTreeObstacles(void);
+int InitializeTreeClass(ValueNode* cfg);
 u8* fn_802C1500(void* tree, int cls);
-void fn_802C173C(f32 time);
+void UpdateTreeShakeAnimations(f32 time);
 f32 fn_801E7E18(void);
 int fn_8020403C(void);
 void* fn_802C28C0(void);
@@ -83,7 +83,7 @@ void fn_802C6C20(TModel* m);
 s32 fn_802B1DA0(s32 id);
 ValueTable* fn_802B561C(ValueTable* (*load)(const char*), const char* name);
 void fn_802DCAE4(s32 model, const RMtx* m, f32 alpha);
-void fn_801F1C24(RMtx* m);
+void CalculateBillboardFrame(RMtx* m);
 }
 
 // A fan-grid draw cell (0x10): which placed trees it covers.
@@ -239,7 +239,7 @@ TFixed<TreeType, 16> lbl_804C00D4;
 
 extern "C" {
 
-s32 fn_802BC334(const char* name) {
+s32 CheckResourceExists(const char* name) {
     int ok = 0;
     if (name && fn_8012C33C(name)) {
         ok = 1;
@@ -277,14 +277,14 @@ void fn_802BC44C(TArray<TCell>* a) {
     }
 }
 
-s32 fn_802BC4D4(TModel* m) { return m->data->id; }
+s32 GetModelId(TModel* m) { return m->data->id; }
 
 s32 fn_802BC4E0(const TModel* m) {
     const char* name = fn_802C9C24(m->data);
     if (!fn_8012C33C(name)) {
         fn_802E317C("tree: Missing texture %s", name);
     }
-    return fn_802B110C(fn_802BC334, name);
+    return fn_802B110C(CheckResourceExists, name);
 }
 
 f32 fn_802BC540(const RVec3* v, f32 k) {
@@ -320,7 +320,7 @@ extern "C" {
 
 void fn_801EA18C(const RVec3* pos, RVec3* normal, int a);
 
-void fn_802BC588(RMtx* src, RMtx* dst, RVec3* normal, const TRot* r, const TreeType* t) {
+void TransformTreeMatrix(RMtx* src, RMtx* dst, RVec3* normal, const TRot* r, const TreeType* t) {
     src->pos.x = r->x;
     src->pos.y = 0.0f;
     src->pos.z = r->z;
@@ -378,7 +378,7 @@ CollShape* fn_802BC9B0(const TCyl* c, int id, f32 scale) {
 
 void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t) {
     RMtx m;
-    fn_802BC588(&tr->mtx, &m, (RVec3*)tr, r, t);
+    TransformTreeMatrix(&tr->mtx, &m, (RVec3*)tr, r, t);
     u8* hit = fn_802C1500(&tr->mtx, t->cls);
     if (lbl_8055FAB0) {
         f32 s = r->scale;
@@ -418,7 +418,7 @@ static inline void ReadCyl(TreeType* t, ValueNode* n, RVec3& c) {
     PSVECNormalize((const Vec*)&t->cyl.axis, (Vec*)&t->cyl.axis);
 }
 
-void fn_802BCBDC(void) {
+void LoadTreeClassData(void) {
     TreeType* t;
     lbl_8055FAB4 = fn_802B561C(fn_80131810, "treeclass.val");
     if (lbl_8055FAB4) {
@@ -429,17 +429,17 @@ void fn_802BCBDC(void) {
                 t->name = n->GetValue("name");
                 t->shadow = n->FindChild("tree_shadow");
                 t->far = fn_802B2C34((void* (*)(const char*))fn_802C6B44, n->GetValue("far_model"));
-                t->farId = fn_802BC4D4(t->far);
+                t->farId = GetModelId(t->far);
                 t->farTex = fn_802BC4E0(t->far);
                 t->farTris = fn_802B1DA0(t->farId);
                 t->near = fn_802B2C34((void* (*)(const char*))fn_802C6B44, n->GetValue("near_model"));
-                t->nearId = fn_802BC4D4(t->near);
+                t->nearId = GetModelId(t->near);
                 t->nearTex = fn_802BC4E0(t->near);
                 t->nearTris = fn_802B1DA0(t->nearId);
                 t->sway = n->GetFloat("sway_radius", 0.0f);
                 t->run = n->GetBool("tree_run", 1);
                 t->surf = GetSurfaceTypeId(n->GetString("surf_type", "tree"));
-                t->cls = fn_802C143C(n);
+                t->cls = InitializeTreeClass(n);
                 RVec3 c;
                 ReadCyl(t, n, c);
                 t->cyl.rad = n->GetFloat("rad");
@@ -461,7 +461,7 @@ static inline void FreeTreeType(TreeType* t) {
     t->near = 0;
 }
 
-void fn_802BCF04(void) {
+void FreeTreeTypeList(void) {
     for (int i = 0; i < lbl_804C00D4.n; i++) {
         FreeTreeType(&lbl_804C00D4.data[i]);
     }
@@ -503,7 +503,7 @@ void fn_802BD0F4(TreeType* t) {
     }
 }
 
-TListEntry* fn_802BD194(TListFile* f, const char* name) {
+TListEntry* FindListEntryByName(TListFile* f, const char* name) {
     u32 n;
     TListEntry* es;
     u32 i;
@@ -519,7 +519,7 @@ TListEntry* fn_802BD194(TListFile* f, const char* name) {
 
 TArray<TreeRec>* fn_802BD414(const char* tag, TFileArray<TreeRec>* f);
 TArray<TCell>* fn_802BD478(const char* tag, TFileArray<TCell>* f);
-void fn_802BD4DC(TListFile* f, u8* base);
+void LoadListFile(TListFile* f, u8* base);
 void fn_802BCA8C(TreeRec* tr, const TRot* r, const TreeType* t);
 
 /* Helper name unproven: builds the tree set of one list entry. */
@@ -557,18 +557,18 @@ static inline void LoadTreeSet(TListEntry* e, TreeType* t) {
     }
 }
 
-void fn_802BD210(void) {
+void LoadTreeListFile(void) {
     u32 version = 0;
     u8 swapped;
     lbl_8055FAB8 = (TListFile*)fn_8012C370("treelist.trl", 'TLST', &version, 0, 0, &swapped);
     if (lbl_8055FAB8) {
         if (version == 2) {
             if (swapped) {
-                fn_802BD4DC(lbl_8055FAB8, (u8*)lbl_8055FAB8 + 8);
+                LoadListFile(lbl_8055FAB8, (u8*)lbl_8055FAB8 + 8);
             }
             for (int i = 0; i < lbl_804C00D4.n; i++) {
                 TreeType* t = &lbl_804C00D4.data[i];
-                TListEntry* e = fn_802BD194(lbl_8055FAB8, t->name);
+                TListEntry* e = FindListEntryByName(lbl_8055FAB8, t->name);
                 LoadTreeSet(e, t);
             }
         } else {
@@ -590,16 +590,16 @@ TArray<TCell>* fn_802BD478(const char* tag, TFileArray<TCell>* f) {
 }
 
 TListEntry* fn_802BD5A8(TListEntry* off, u8* base);
-void fn_802BD5B0(TFileArray<TCell>* a, u8* base);
-void fn_802BD69C(TFileArray<TreeRec>* a, u8* base);
+void FixFileArrayHeader(TFileArray<TCell>* a, u8* base);
+void FixTreeArray(TFileArray<TreeRec>* a, u8* base);
 
 static inline void FixEntry(TListEntry* e, u8* base) {
-    fn_802BD69C(&e->list, base);
-    fn_802BD5B0(&e->frames, base);
-    fn_802BD5B0(&e->near, base);
+    FixTreeArray(&e->list, base);
+    FixFileArrayHeader(&e->frames, base);
+    FixFileArrayHeader(&e->near, base);
 }
 
-void fn_802BD4DC(TListFile* f, u8* base) {
+void LoadListFile(TListFile* f, u8* base) {
     TListEntry* e;
     SwapWord(&f->n);
     SwapWord(&f->entries);
@@ -623,7 +623,7 @@ TListEntry* fn_802BD5A8(TListEntry* off, u8* base) { return (TListEntry*)((u8*)o
 
 TCell* fn_802BD694(TCell* off, u8* base);
 
-void fn_802BD5B0(TFileArray<TCell>* a, u8* base) {
+void FixFileArrayHeader(TFileArray<TCell>* a, u8* base) {
     TCell* c;
     SwapWord(&a->n);
     SwapWord(&a->data);
@@ -639,7 +639,7 @@ TreeRec* fn_802BD80C(TreeRec* off, u8* base);
 
 #pragma push
 #pragma opt_unroll_loops off
-void fn_802BD69C(TFileArray<TreeRec>* a, u8* base) {
+void FixTreeArray(TFileArray<TreeRec>* a, u8* base) {
     SwapWord(&a->n);
     SwapWord(&a->data);
     a->data = fn_802BD80C(a->data, base);
@@ -716,7 +716,7 @@ static inline void DrawTreeType(int i) {
             fn_802DC71C(t->farId, t->farTex);
             RMtx cam;
             RMtx m;
-            fn_801F1C24(&cam);
+            CalculateBillboardFrame(&cam);
             for (j2 = 0; j2 < near->n; j2++) {
                 c2 = &near->data[j2];
                 if (Live(c2)) {
@@ -756,7 +756,7 @@ static inline void DrawTreeType(int i) {
     }
 }
 
-void fn_802BD814(void) {
+void DrawAllTrees(void) {
     lbl_8055FAAC = 0;
     lbl_8055FAA8 = 0;
     for (int i = 0; i < lbl_804C00D4.n; i++) {
@@ -765,36 +765,36 @@ void fn_802BD814(void) {
 }
 
 void fn_802BDBA8(void) {
-    fn_802C126C();
-    fn_802BCBDC();
-    fn_802B8AE0("tree-count", &lbl_8055FAA8);
-    fn_802B8AE0("tree-tri-count", &lbl_8055FAAC);
+    InitializeTreeHitSystem();
+    LoadTreeClassData();
+    RecordStatValue("tree-count", &lbl_8055FAA8);
+    RecordStatValue("tree-tri-count", &lbl_8055FAAC);
     int x = fn_802B05E4();
     lbl_8055FAB0 = x == 0;
     if (x) {
-        fn_802BD210();
+        LoadTreeListFile();
     }
     lbl_8055FABC = new ("tree-ixfg") TreePreloader;
 }
 
 void fn_802BDC3C(void) {
-    fn_802BD210();
-    fn_802C1550();
+    LoadTreeListFile();
+    InitializeTreeObstacles();
 }
 
-void fn_802BDCA4(TreePreloader** p);
+void FreeTreePreloader(TreePreloader** p);
 
 void fn_802BDC60(void) {
-    fn_802BCF04();
+    FreeTreeTypeList();
     if (lbl_8055FAB8) {
         fn_8012C4D8(lbl_8055FAB8);
         lbl_8055FAB8 = 0;
     }
-    fn_802C13A4();
-    fn_802BDCA4(&lbl_8055FABC);
+    CleanUpTreeData();
+    FreeTreePreloader(&lbl_8055FABC);
 }
 
-void fn_802BDCA4(TreePreloader** p) {
+void FreeTreePreloader(TreePreloader** p) {
     if (*p) {
         delete *p;
         *p = 0;
@@ -807,12 +807,12 @@ TreePreloader::~TreePreloader(void) {}
 
 extern "C" {
 
-void fn_802BDD54(void) { fn_802BD814(); }
+void fn_802BDD54(void) { DrawAllTrees(); }
 
 void fn_802BDD58(void) {
-    fn_802C173C(fn_801E7E18());
+    UpdateTreeShakeAnimations(fn_801E7E18());
     if (fn_8020403C()) {
-        fn_802BD814();
+        DrawAllTrees();
     }
 }
 
@@ -841,7 +841,7 @@ static inline void DrawFarTrees(int i, f32 range) {
             f32 in = range - fade;
             span = r2 - in * in;
             RMtx cam;
-            fn_801F1C24(&cam);
+            CalculateBillboardFrame(&cam);
             eye = (const RVec3*)(fn_801E8718(-1) + 0x24);
             for (j = 0; j < frames->n; j++) {
                 c = &frames->data[j];
@@ -876,7 +876,7 @@ static inline void DrawFarTrees(int i, f32 range) {
     }
 }
 
-void fn_802BDD8C(f32 range) {
+void RenderFarTreeBatch(f32 range) {
     fn_802DBE4C();
     if (fn_8020403C()) {
         lbl_8055FAAC = 0;
@@ -909,7 +909,7 @@ void fn_802BDFF4(RMtx* m, u8 on) {
     }
 }
 
-TreeType* fn_802BE008(TCell* c) {
+TreeType* FindTreeForCell(TCell* c) {
     int in;
     TreeType* t = lbl_804C00D4.data;
     for (int i = 0; i < lbl_804C00D4.n; i++, t++) {
@@ -939,7 +939,7 @@ void fn_802BE07C(const RVec3* pos, TreeQuery cb) {
         for (int j = -0x80; j <= 0x80; j += 0x80) {
             FanCell* f = fn_802BE844(bx + i, bz + j, 0x40);
             for (TCell* c = f->head; c; c = c->next) {
-                TreeType* t = fn_802BE008(c);
+                TreeType* t = FindTreeForCell(c);
                 if (t->set && t->farTris <= 10) {
                     TreeRec* tr = &t->set->list->data[c->first];
                     TModel* m = t->far;

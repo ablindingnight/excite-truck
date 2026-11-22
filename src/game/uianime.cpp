@@ -28,8 +28,8 @@ void fn_80131818(ValueTable* t);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 void fn_80214C54(s32 id, void* obj);
 const char* fn_80215264(void);
-void* fn_8022EDE4(const UiPose* p, f32 alpha);
-void fn_8022EE98(void* obj);
+void* CreateUIContext(const UiPose* p, f32 alpha);
+void DeleteUIContext(void* obj);
 void* fn_8022EE9C(void);
 f32 CalculateTimeDelta(void);
 void fn_802E30C8(const char* fmt, ...);
@@ -301,7 +301,7 @@ static inline void* MakeObj(ValPoint p, f32 s, f32 a) {
     pose.x = p.x;
     pose.z = 0.0f;
     IdentityRot(pose.m);
-    void* o = fn_8022EDE4(&pose, a);
+    void* o = CreateUIContext(&pose, a);
     *(f32*)((u8*)o + 0x38) = s;
     return o;
 }
@@ -337,16 +337,16 @@ static inline void* EvalTrack(UiAnimTrack* tr, f32 time) {
 inline void UiAnimTrack::Apply(f32 time) {
     void* obj = EvalTrack(this, time);
     fn_80214C54(id, obj);
-    fn_8022EE98(obj);
+    DeleteUIContext(obj);
 }
 
 extern "C" {
 
 AnimState* fn_80237C40(void);
-void fn_80237D00(AnimState* s);
+void FreeAnimationState(AnimState* s);
 void fn_80236960(const char* name);
 void fn_80237AA0(int which, f32* out, f32 t);
-void fn_80236A5C(const char* name, const char* parent);
+void ValidateAnimationParent(const char* name, const char* parent);
 void fn_80237A9C(void);
 void fn_80237DA0(const char* name);
 void fn_80237E7C(const char* name);
@@ -388,7 +388,7 @@ void fn_80236848(void) {
     AnimState* cur = lbl_8055F0C0;
     AnimState* p;
     if (lbl_8055F0BC == cur) {
-        fn_80237D00(cur);
+        FreeAnimationState(cur);
         lbl_8055F0BC = 0;
         lbl_8055F0C0 = 0;
     } else {
@@ -396,7 +396,7 @@ void fn_80236848(void) {
         while (p->next != cur) {
             p = p->next;
         }
-        fn_80237D00(cur);
+        FreeAnimationState(cur);
         lbl_8055F0C0 = p;
         p->next = 0;
     }
@@ -420,7 +420,7 @@ void fn_80236910(const char* name) { fn_80236960(name); }
 
 void fn_80236914(int which, f32* out, f32 t) { fn_80237AA0(which, out, t); }
 
-void fn_80236918(const char* name) { fn_80236A5C(name, fn_80215264()); }
+void fn_80236918(const char* name) { ValidateAnimationParent(name, fn_80215264()); }
 
 void fn_80236950(void) { fn_80237A9C(); }
 
@@ -436,7 +436,7 @@ void fn_80236960(const char* name) {
     }
 }
 
-void fn_802369A8(char* dst, int n, const char* name) {
+void FormatAnimationName(char* dst, int n, const char* name) {
     fn_801345D8(dst, n, "a_%s", name);
     char* dot = strrchr(dst, '.');
     if (dot) {
@@ -445,9 +445,9 @@ void fn_802369A8(char* dst, int n, const char* name) {
     StrNCat(dst, ".val", n);
 }
 
-void fn_80236A5C(const char* name, const char* parent) {
+void ValidateAnimationParent(const char* name, const char* parent) {
     if (!lbl_80498664[0]) {
-        fn_802369A8(lbl_80498664, 100, name);
+        FormatAnimationName(lbl_80498664, 100, name);
     }
     ValueTable* t = fn_80131810(lbl_80498664);
     if (t) {
@@ -531,7 +531,7 @@ AnimState* fn_80237C40(void) {
     return s;
 }
 
-void fn_80237D00(AnimState* s) {
+void FreeAnimationState(AnimState* s) {
     if (s->present) {
         delete s->present;
     }
@@ -646,7 +646,7 @@ void UiSpecialList::Apply(f32 t) {
             f32 time = now - s->start;
             void* obj = EvalTrack(&s->track, time);
             fn_80214C54(s->track.id, obj);
-            fn_8022EE98(obj);
+            DeleteUIContext(obj);
             s = &items[i];
             if (s->autoEnd && time > LastTime(&s->track)) {
                 s->active = 0;

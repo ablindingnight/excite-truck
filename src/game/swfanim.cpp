@@ -13,7 +13,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal
 s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
-s32 fn_8022EDC4(void);
+s32 GetTopUIContext(void);
 }
 
 struct SwfVtx {
@@ -110,7 +110,7 @@ void SwfAnim::DrawItem(const Sw2Item* it) {
     int g = SwfChannel(cg << 1, cx->mul[1], cx->add[1]);
     int b = SwfChannel(cb << 1, cx->mul[2], cx->add[2]);
     u32 color = SwfColor(r, g, b, a);
-    s32 ctx = fn_8022EDC4();
+    s32 ctx = GetTopUIContext();
     fn_80231380(&v[0], color, pts[0].x, pts[0].y, 0.0f, 0.0f, 0.0f);
     fn_80231380(&v[1], color, pts[1].x, pts[1].y, 0.0f, 1.0f, 0.0f);
     fn_80231380(&v[2], color, pts[2].x, pts[2].y, 0.0f, 0.0f, 1.0f);

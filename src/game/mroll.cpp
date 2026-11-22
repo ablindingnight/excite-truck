@@ -787,7 +787,7 @@ StatPanel::StatPanel(void) {
 
 extern "C" {
 
-void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
+void CalculateScreenPosition(f32* x, f32* y, s32 a, s32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
 void DrawColoredText(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
@@ -873,7 +873,7 @@ void ColorPick::Draw(void) {
     if (this->vehicle && this->vf0C()) {
         f32 x;
         f32 y;
-        fn_80230C30(&x, &y, this->x, this->y);
+        CalculateScreenPosition(&x, &y, this->x, this->y);
         f32 w = this->w;
         f32 h;
         h = this->h;

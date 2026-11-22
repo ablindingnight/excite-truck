@@ -23,7 +23,7 @@ void LoadCarClassFile(void);
 void fn_8013C8B8(void);
 s32 FindCarClassByChassis(const char* chassis);
 const char* fn_8013C9C8(s32 id);
-void fn_80230C30(f32* x, f32* y, int a, int b);  // element position
+void CalculateScreenPosition(f32* x, f32* y, int a, int b);  // element position
 int fn_80232578(const char* name);              // load font
 void fn_802328D4(int font);
 int fn_80232B70(int font);  // font height
@@ -71,7 +71,7 @@ public:
         f32 textY;
         f32 px;
         f32 py;
-        fn_80230C30(&px, &py, x, y);
+        CalculateScreenPosition(&px, &py, x, y);
         f32 w = this->w;
         f32 lockX = px + w - fn_802C51C0(image);
         f32 left = px;

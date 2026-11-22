@@ -31,13 +31,13 @@ void fn_802D0160(int r, int g, int b);
 void SetAmbientColor(int r, int g, int b);
 void fn_802C7758(void);
 void fn_802C7734(int a);
-void fn_802CC60C(void);
+void ResetTextureCacheStats(void);
 void fn_802CFCA0(void);
 void HandleFrameSync(void);
 void fn_802CC770(void);
 void fn_802D03F4(void* mtx);
 void fn_802D01E0(int x, int y, int w, int h);
-void fn_802CC518(int w, f32 f);
+void CalculateFieldOfViewScale(int w, f32 f);
 void fn_802D02F8(u32 color, int a);
 void fn_802CAD74(s32);
 void fn_802CAD68(void);
@@ -238,7 +238,7 @@ void fn_802C84EC(void) {
 
 void fn_802C8530(void) {
     lbl_8055FC70 = 1;
-    fn_802CC60C();
+    ResetTextureCacheStats();
     fn_802CFCA0();
 }
 
@@ -299,7 +299,7 @@ void fn_802C87B4(int x, int y, int w, int h) {
     lbl_8055FC68 = h;
     lbl_8055FC6C = (f32)w / (f32)h;
     fn_802D01E0(x, y, w, h);
-    fn_802CC518(w, lbl_8055FC44);
+    CalculateFieldOfViewScale(w, lbl_8055FC44);
 }
 
 void fn_802C88BC(int a) { fn_802D02F8(lbl_8055D018, a & 1); }
@@ -617,7 +617,7 @@ void SetupCameraProjection(f32 near, f32 far, f32 fov) {
     lbl_8055FC58 = 1.0f / (f32)sin(1.5707964f - 2.0f * v / 2.0f);
     f32 aspect = is2D ? 1.0f : lbl_8055D020 / lbl_8055D024;
     fn_802D0368(lbl_8055FC38, lbl_8055FC3C, fov, aspect);
-    fn_802CC518(lbl_8055FC64, lbl_8055FC44);
+    CalculateFieldOfViewScale(lbl_8055FC64, lbl_8055FC44);
 }
 
 void fn_802C98DC(f32* tanHalf, f32* near, f32* far, f32* sinHalf) {

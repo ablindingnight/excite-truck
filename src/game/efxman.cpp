@@ -262,8 +262,8 @@ void fn_802A1290(void);
 void fn_802A14F8(void);
 void fn_802A1548(void);
 void fn_802A1584(void);
-void fn_802A1590(void);
-void fn_802A1660(void);
+void InitializeTerrainTrails(void);
+void UninstallEventHandlers(void);
 void fn_802A172C(void);
 void fn_802A1794(void);
 void fn_802A17FC(int mode);
@@ -347,7 +347,7 @@ void fn_80287800(void* a) {
     fn_802880F4();
     LoadBirdFlocks();
     InitializeSmokeSystems();
-    fn_802A1590();
+    InitializeTerrainTrails();
     InitializeSparkEffects();
     fn_8028CED8();
     fn_80294970();
@@ -386,7 +386,7 @@ void ExecuteEffectFunctions(void) {
     fn_80294C68();
     fn_8028CF18();
     UninstallEventHandlersAndFreeMemory();
-    fn_802A1660();
+    UninstallEventHandlers();
     CleanUpSmokeEffects();
     fn_802A85C8();
     fn_802881D4();

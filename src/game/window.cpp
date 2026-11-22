@@ -79,7 +79,7 @@ int fn_8012C33C(const char* name);
 void* gxGetImage(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 const Style* fn_8022EE9C(void);
-void fn_8022EE98(const Style*);  // UIContext* (uictx.cpp); deletes what fn_8022EE9C made
+void DeleteUIContext(const Style*);  // UIContext* (uictx.cpp); deletes what fn_8022EE9C made
 void fn_802C4C80(void* p);
 void fn_802C2FC4(void* p);
 void fn_802C519C(void* p);
@@ -91,14 +91,14 @@ int fn_802182F0(Window* w, Widget* wd);
 void fn_80217C4C(Window* w);
 void fn_80217D84(Window* w);
 void fn_80217EC0(Window* w, int horizontal, int negative);
-void fn_80230C30(f32* x, f32* y, int a, int b);
+void CalculateScreenPosition(f32* x, f32* y, int a, int b);
 void DrawImageFrame(void* p, int a, f32 x, f32 y, f32 z);
 int fn_80215228(void);
 void fn_802C86E8(u32 color);
 void fn_802C88BC(int a);
-void fn_8022EDB8(void);
-void fn_8022ED00(const Style* s);
-const Style* fn_8022EDC4(void);
+void UpdateTopSlot(void);
+void AppendNodeToUIList(const Style* s);
+const Style* GetTopUIContext(void);
 void fn_802193C8(Widget* w, f32 t);
 void fn_80219358(Widget* w, f32 t);
 void fn_80214D50(int sound);
@@ -190,7 +190,7 @@ Window::Window(const char* bg, s32 x, s32 y, s32 w, s32 h, s32 f) {
     for (i = 0; i < 31; i++) {
         styles[i] = *s;
     }
-    fn_8022EE98(s);
+    DeleteUIContext(s);
 }
 
 Window::~Window(void) {
@@ -674,7 +674,7 @@ void fn_80218574(Window* win) {
     if (win->image) {
         f32 x;
         f32 y;
-        fn_80230C30(&x, &y, 0, 0);
+        CalculateScreenPosition(&x, &y, 0, 0);
         DrawImageFrame(win->image, 0, x, y, 0.0f);
     } else if (fn_80215228() && !win->noSound) {
         fn_802C86E8(0xFF000000);
@@ -691,10 +691,10 @@ void fn_80218574(Window* win) {
         s = StyleOf(wd);
         if (s != style) {
             if (style != -1) {
-                fn_8022EDB8();
+                UpdateTopSlot();
             }
             style = s;
-            fn_8022ED00(&win->styles[s]);
+            AppendNodeToUIList(&win->styles[s]);
         }
         f32 al = Alpha(wd);
         pushed = 0;
@@ -702,7 +702,7 @@ void fn_80218574(Window* win) {
             Style tmp;
             f32 a;
             pushed = 1;
-            tmp = *fn_8022EDC4();
+            tmp = *GetTopUIContext();
             a = Alpha(wd);
             {
                 s32 x;
@@ -713,15 +713,15 @@ void fn_80218574(Window* win) {
                 mask = wd->mask;
                 win->fadeStyle(&tmp, mask, x, y, wd->Height(), wd->bottom - y, 0, a);
             }
-            fn_8022ED00(&tmp);
+            AppendNodeToUIList(&tmp);
         }
         wd->Draw();
         if (pushed) {
-            fn_8022EDB8();
+            UpdateTopSlot();
         }
     }
     if (style != -1) {
-        fn_8022EDB8();
+        UpdateTopSlot();
     }
 }
 

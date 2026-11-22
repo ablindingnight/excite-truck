@@ -425,13 +425,13 @@ static inline void Xform(RVec3* p, const TBody* b) {
 
 extern "C" {
 
-TrailSys* fn_802A194C(ValueNode* cfg);
+TrailSys* CreateTrailSystem(ValueNode* cfg);
 void fn_802A1B20(const TRacer* r, int n);
-int fn_802A1C30(const TrailEvent* e);
-void fn_802A1CC4(void);
+int HandleTrailSurfaceInteraction(const TrailEvent* e);
+void CreatePaintTrailEffects(void);
 void fn_802A1DC0(void);
 
-void fn_802A1590(void) {
+void InitializeTerrainTrails(void) {
     int i;
     memset(lbl_804BCF88, 0, sizeof(lbl_804BCF88));
     for (i = 0; i < 8; i++) {
@@ -443,17 +443,17 @@ void fn_802A1590(void) {
             t = t->FindChild("trail");
         }
         if (t) {
-            lbl_804BCF88[i] = fn_802A194C(t);
+            lbl_804BCF88[i] = CreateTrailSystem(t);
         }
     }
     fn_80287B38(fn_802A1B20);
-    fn_802A1CC4();
-    RegisterEventHandler(fn_802A1C30, 5);
+    CreatePaintTrailEffects();
+    RegisterEventHandler(HandleTrailSurfaceInteraction, 5);
 }
 
-void fn_802A1660(void) {
+void UninstallEventHandlers(void) {
     int i;
-    EventUnInstallHandler(fn_802A1C30);
+    EventUnInstallHandler(HandleTrailSurfaceInteraction);
     fn_802A1DC0();
     for (i = 0; i < 8; i++) {
         if (lbl_804BCF88[i]) {
@@ -501,7 +501,7 @@ void TrailSys::Draw(void) {}
 
 extern "C" {
 
-u32 fn_802A1864(const char* name) {
+u32 ParseTrailTypeString(const char* name) {
     TrailType types[6] = {
         {"dust", 1}, {"asphalt", 2}, {"grass", 3}, {"sand", 4}, {"water", 5}, {"mud", 6},
     };
@@ -515,8 +515,8 @@ u32 fn_802A1864(const char* name) {
     return 0;
 }
 
-TrailSys* fn_802A194C(ValueNode* cfg) {
-    u32 type = fn_802A1864(cfg->GetValue("type"));
+TrailSys* CreateTrailSystem(ValueNode* cfg) {
+    u32 type = ParseTrailTypeString(cfg->GetValue("type"));
     int i;
     for (i = 0; i < 8; i++) {
         if (lbl_804BCF88[i] && type == lbl_804BCF88[i]->GetType()) {
@@ -562,7 +562,7 @@ void fn_802A1B20(const TRacer* r, int n) {
     }
 }
 
-int fn_802A1C30(const TrailEvent* e) {
+int HandleTrailSurfaceInteraction(const TrailEvent* e) {
     if (e->surface >= 0 && e->surface < 8 && lbl_804BCF88[e->surface]) {
         TrailSys* s = lbl_804BCF88[e->surface];
         if (e->force > 200.0f) {
@@ -581,7 +581,7 @@ void TrailSys::Impact(const TrailEvent* e) {}
 
 extern "C" {
 
-void fn_802A1CC4(void) {
+void CreatePaintTrailEffects(void) {
     const char* tex = "splash.tex";
     if (DbgFlag(8)) {
         PartParams d;

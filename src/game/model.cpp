@@ -141,9 +141,9 @@ s32 fn_802C9C58(s32 v);
 s32 fn_802CAC28(const char* name, s32 key);
 s32 fn_802CAC44(const char* name, s32 kind);
 void gxForgetTexture(s32 id);
-const char* fn_802CAE34(s32 id);
+const char* GetTextureName(s32 id);
 int fn_802CAF8C(s32 id);
-s32 fn_802CAFC8(s32 id);
+s32 GetTexturePriority(s32 id);
 s32 fn_802CAFF0(s32 id);
 void fn_802CC550(s32 id, f32 dist, f32 scale);
 void* fn_802D0514(const MFrame* m);
@@ -274,7 +274,7 @@ int CompareTextureNodes(const void* pa, const void* pb) {
     if (a->prio != b->prio) {
         return a->prio - b->prio;
     }
-    return strcasecmp(fn_802CAE34(a->tex), fn_802CAE34(b->tex));
+    return strcasecmp(GetTextureName(a->tex), GetTextureName(b->tex));
 }
 
 Bin* fn_802C54B4(int pri) { return &lbl_804C1348[pri - 1]; }
@@ -472,7 +472,7 @@ void LoadTextureWithPrefix(MSurf* s, s32 inst, int sorted, const char* prefix) {
     if (sorted) {
         prio = fn_802C5BEC(type, fn_802CAF8C(tex));
     } else {
-        prio = fn_802C5A50(fn_802CAFC8(tex), fn_802CAFF0(tex));
+        prio = fn_802C5A50(GetTexturePriority(tex), fn_802CAFF0(tex));
     }
     s->tex[inst] = FindOrCreateTexNode(tex, type, prio);
 }

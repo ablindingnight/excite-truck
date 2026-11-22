@@ -132,7 +132,7 @@ void fn_802C7730(PlainValMatrix* f);
 void fn_802C9648(f32 a);
 void fn_802C967C(void);
 void fn_80202718(void);
-void fn_801F1C24(PlainValMatrix* f);
+void CalculateBillboardFrame(PlainValMatrix* f);
 int fn_801EA470(void);
 void fn_801FA6B8(void);
 void fn_8029790C(int a);
@@ -164,41 +164,41 @@ static inline f32 GFloat(f32 x) { return x; }
 
 
 extern "C" {
-GModelHandler* fn_801F1D68(void);
-GModelHandler* fn_801F1DA4(void);
-GModelHandler* fn_801F1DE4(void);
-GModelHandler* fn_801F1E24(void);
-GModelHandler* fn_801F2064(void);
-GModelHandler* fn_801F2020(void);
+GModelHandler* CreateGenericTrackModifier(void);
+GModelHandler* CreatePointFacingHandler(void);
+GModelHandler* CreateAxisFacingTrackModifier(void);
+GModelHandler* CreateSkyTrackModifier(void);
+GModelHandler* CreateMultiFacingTrackModifier(void);
+GModelHandler* CreateRotatorTrackModifier(void);
 GModelHandler* fn_801F1EA8(void);
-GModelHandler* fn_801F21CC(void);
-GModelHandler* fn_801F1EEC(void);
-GModelHandler* fn_801F1F38(void);
-GModelHandler* fn_801F1F84(void);
-GModelHandler* fn_801F1FD4(void);
-GModelHandler* fn_801F20C8(void);
+GModelHandler* CreatePinkTriangleManager(void);
+GModelHandler* CreateAmbientColorModifier(void);
+GModelHandler* CreateShadowColorTrackModifier(void);
+GModelHandler* CreateSunIntensityHandler(void);
+GModelHandler* CreateFogColorHandler(void);
+GModelHandler* CreateOptTerrain(void);
 GModelHandler* fn_801FC914(void);
 GModelHandler* fn_801FC94C(void);
-GModelHandler* fn_801F2108(void);
-GModelHandler* fn_801F2150(void);
-GModelHandler* fn_801F2190(void);
+GModelHandler* CreateXfaderTrackModifier(void);
+GModelHandler* CreateFlareSource(void);
+GModelHandler* CreateWaterTrackModifier(void);
 GModelHandler* fn_801FC994(void);
 GModelHandler* fn_801FC9CC(void);
 GModelHandler* fn_801F78F0(void);
-GModelHandler* fn_801F220C(void);
-GModelHandler* fn_801F224C(void);
+GModelHandler* CreateFacingTestTrackModifier(void);
+GModelHandler* CreateScrollingTrackModifier(void);
 GModelHandler* fn_801EB0E8(void);
 }
 
 const GrafFactory lbl_802F9A08[25] = {
-    {"Simple Model", fn_801F1D68},     {"Point-Facing", fn_801F1DA4}, {"Axis-Facing", fn_801F1DE4},
-    {"Sky", fn_801F1E24},              {"Multi-Facing", fn_801F2064}, {"Rotator", fn_801F2020},
-    {"Sun", fn_801F1EA8},              {"Animation", fn_801F21CC},    {"Unknown", fn_801F21CC},
-    {"Ambient", fn_801F1EEC},          {"Shadow", fn_801F1F38},       {"SunBright", fn_801F1F84},
-    {"FogColor", fn_801F1FD4},         {"Optional Terrain", fn_801F20C8}, {"Linear Path", fn_801FC914},
-    {"Linear Drone", fn_801FC94C},     {"Cross Fader", fn_801F2108},  {"Flare Source", fn_801F2150},
-    {"Water", fn_801F2190},            {"Hermite path", fn_801FC994}, {"Hermite drone", fn_801FC9CC},
-    {"Fabric", fn_801F78F0},           {"Facing Test", fn_801F220C},  {"Scrolling", fn_801F224C},
+    {"Simple Model", CreateGenericTrackModifier},     {"Point-Facing", CreatePointFacingHandler}, {"Axis-Facing", CreateAxisFacingTrackModifier},
+    {"Sky", CreateSkyTrackModifier},              {"Multi-Facing", CreateMultiFacingTrackModifier}, {"Rotator", CreateRotatorTrackModifier},
+    {"Sun", fn_801F1EA8},              {"Animation", CreatePinkTriangleManager},    {"Unknown", CreatePinkTriangleManager},
+    {"Ambient", CreateAmbientColorModifier},          {"Shadow", CreateShadowColorTrackModifier},       {"SunBright", CreateSunIntensityHandler},
+    {"FogColor", CreateFogColorHandler},         {"Optional Terrain", CreateOptTerrain}, {"Linear Path", fn_801FC914},
+    {"Linear Drone", fn_801FC94C},     {"Cross Fader", CreateXfaderTrackModifier},  {"Flare Source", CreateFlareSource},
+    {"Water", CreateWaterTrackModifier},            {"Hermite path", fn_801FC994}, {"Hermite drone", fn_801FC9CC},
+    {"Fabric", fn_801F78F0},           {"Facing Test", CreateFacingTestTrackModifier},  {"Scrolling", CreateScrollingTrackModifier},
     {"Sanity", fn_801EB0E8},
 };
 
@@ -574,7 +574,7 @@ void fn_801EBDCC(void) {
         PlainValMatrix f;
         fn_802C7A44();
         fn_80202718();
-        fn_801F1C24(&f);
+        CalculateBillboardFrame(&f);
         fn_802C7730(&f);
         int alt = fn_801EA470();
         void* list;

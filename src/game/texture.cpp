@@ -286,22 +286,22 @@ s32 lbl_8055D03C = -1;  // lightmap
 extern "C" {
 
 void fn_802CB424(void);
-void fn_802CB6B4(void);
-void fn_802CB82C(s32 id);
+void DestroyTextureCache(void);
+void UnloadTextureMip(s32 id);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
 void fn_802CAD28(s32 id);
 TexListEntry* fn_802CB018(void);
-TTHeader* fn_802CB2FC(u16 w, u16 h, u8 a, u8 b, u16 c, u8 d);
+TTHeader* CreateTextureHeader(u16 w, u16 h, u8 a, u8 b, u16 c, u8 d);
 void fn_802CB3F4(void* gx);
 void fn_802CB3F8(const char* name, const char* what);
 void fn_802CBB9C(MipLoad** to, MipLoad** from, MipLoad* l);
-void fn_802CBBE8(MipLoad** list, MipLoad* l);
+void UnlinkMipLoadNode(MipLoad** list, MipLoad* l);
 void fn_802CBD30(MipDiscard** to, MipDiscard** from, MipDiscard* d);
-void fn_802CBD7C(MipDiscard** list, MipDiscard* d);
+void UnlinkMipDiscardNode(MipDiscard** list, MipDiscard* d);
 void fn_802CBFA0(TexCache* c, MipLoad* l);
-void fn_802CBFCC(TexCache* c, MipLoad* l);
-void fn_802CC03C(TexCache* c, MipLoad* l, s32 id);
+void LoadTextureMipmap(TexCache* c, MipLoad* l);
+void LoadTextureResource(TexCache* c, MipLoad* l, s32 id);
 static int fn_802CC10C(TexCache* c, s32 id, s32 frame, MipLoad* l);
 SimpleHeap* fn_802CC404(TexCache* c);
 
@@ -311,7 +311,7 @@ int TexBitsPerTexel(int fmt) {
     return 0;
 }
 
-void fn_802CA0E4(void) {
+void InitializeTextureList(void) {
     lbl_8055FCB0 = new ("texlist") TexListEntry[512];
     fn_802CB424();
     for (int i = 0; i < 512; i++) {
@@ -331,7 +331,7 @@ void fn_802CA0E4(void) {
     }
 }
 
-void fn_802CA1E0(void) {
+void ReleaseTextureCache(void) {
     if (lbl_8055D03C != -1) {
         gxForgetTexture(lbl_8055D03C);
         lbl_8055D03C = -1;
@@ -343,7 +343,7 @@ void fn_802CA1E0(void) {
             fn_802E317C("gxTexture: texture %d (%s) still in use", i, lbl_8055FCB0[i].name);
         }
     }
-    fn_802CB6B4();
+    DestroyTextureCache();
     delete[] lbl_8055FCB0;
     lbl_8055FCB0 = 0;
 }
@@ -351,7 +351,7 @@ void fn_802CA1E0(void) {
 void* fn_802CA294(s32 id) { return lbl_8055FCB0[id].gx; }
 
 // name.ext -> name.tm0
-char* fn_802CA2A8(char* dst, int n, const char* name) {
+char* StripExtensionAndAddTm0(char* dst, int n, const char* name) {
     SafeStrCopy(dst, name, n);
     char* dot = strrchr(dst, '.');
     *dot = 0;
@@ -370,11 +370,11 @@ char* fn_802CA2A8(char* dst, int n, const char* name) {
 char lbl_8055D050[] = "mip-0";
 const char* lbl_8055D058 = lbl_8055D050;
 
-s32 fn_802CA380(const char* name) {
+s32 LoadTextureSpan(const char* name) {
     char buf[32];
     u32 ver;
     s32 span = 0;
-    fn_802CA2A8(buf, 32, name);
+    StripExtensionAndAddTm0(buf, 32, name);
     AsyncResource* r = ResourceGetStream(buf, 'TEX ', &ver);
     if (r) {
         span = r->Span();
@@ -383,7 +383,7 @@ s32 fn_802CA380(const char* name) {
     return span;
 }
 
-void fn_802CA3F4(GXTexDesc* d, const TTHeader* h, s32 mode, u32 data, s32 user) {
+void InitializeTextureDescriptor(GXTexDesc* d, const TTHeader* h, s32 mode, u32 data, s32 user) {
     memset(d, 0, sizeof(GXTexDesc));
     d->flags = h->mips & 1;
     d->format = h->flags & 0x7F;
@@ -407,12 +407,12 @@ void fn_802CA3F4(GXTexDesc* d, const TTHeader* h, s32 mode, u32 data, s32 user) 
     }
 }
 
-void* fn_802CA4E0(const TTHeader* h, const char* name, int rt, u32 data, s32 kind) {
+void* CreateSceneTexture(const TTHeader* h, const char* name, int rt, u32 data, s32 kind) {
     GXTexDesc d;
     if (!fn_802C90E0() && name != lbl_8055D058) {
         fn_802E30C8("texture: create %s in scene", name);
     }
-    fn_802CA3F4(&d, h, rt == 1 ? 3 : 1, data, kind);
+    InitializeTextureDescriptor(&d, h, rt == 1 ? 3 : 1, data, kind);
     return drCreateTexture(&d, name);
 }
 
@@ -424,13 +424,13 @@ void fn_802CA57C(TTHeader* h, const char* name, u32 data, s32 kind) {
         SwapHalf(&h->h);
         SwapHalf(&h->zhint);
         h->data = (u32)((u8*)h + h->data);  // offset -> pointer
-        fn_802CA3F4(&d, h, 0, data, kind);
+        InitializeTextureDescriptor(&d, h, 0, data, kind);
         fn_802D8DCC(&d, name);
         h->flags |= 0x80;
     }
 }
 
-TTHeader* fn_802CA658(const char* name, s32 kind) {
+TTHeader* LoadTextureHeader(const char* name, s32 kind) {
     u32 ver;
     u32 size;
     u8 first = 0;
@@ -450,7 +450,7 @@ TTHeader* fn_802CA658(const char* name, s32 kind) {
     return h;
 }
 
-const char* fn_802CA72C(u32 type) {
+const char* GetMaterialTypeName(u32 type) {
     switch (type) {
     case 0:
         return "MMT_BASELAYER";
@@ -503,7 +503,7 @@ const char* fn_802CA824(const char* name) {
     return name;
 }
 
-s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
+s32 LoadTextureFile(const char* name, s32 key, TTHeader* res, s32 kind) {
     if (strlen(name) >= 16 && !fn_802CA7DC(name) && !fn_802CA7F4(name)) {
         fn_802E317C("texture: \"%s\" is too long (%d >= %d)", name, strlen(name), 16);
     }
@@ -539,10 +539,10 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
         fn_802E317C("Out of textures (%s)", name);
     }
     if (!shared) {
-        res = fn_802CA658(name, kind);
+        res = LoadTextureHeader(name, kind);
         if (!res) {
             fn_802E30C8("texture: missing texture %s", name);
-            res = fn_802CA658("badtex.tex", 14);
+            res = LoadTextureHeader("badtex.tex", 14);
         }
     } else {
         fn_802CA57C(res, name, 0, kind);
@@ -557,7 +557,7 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
     t->key = key;
     if (!fn_802CA7DC(name)) {
         SafeStrCopy(t->name, name, 32);
-        s32 span = shared ? 0 : fn_802CA380(name);
+        s32 span = shared ? 0 : LoadTextureSpan(name);
         t->mip0Bytes = span;
         if (span < 16000) {
             t->mip0Bytes = 0;
@@ -572,16 +572,16 @@ s32 fn_802CA898(const char* name, s32 key, TTHeader* res, s32 kind) {
     t->mip0Mem = 0;
     t->res = res;
     t->kind = kind;
-    t->gx = fn_802CA4E0(res, name, 0, 0, kind);
+    t->gx = CreateSceneTexture(res, name, 0, 0, kind);
     lbl_8055FCB8 = -2;
     return slot;
 }
 
-s32 fn_802CAC28(const char* name, s32 key) { return fn_802CA898(name, key, 0, 14); }
+s32 fn_802CAC28(const char* name, s32 key) { return LoadTextureFile(name, key, 0, 14); }
 
-s32 fn_802CAC34(const char* name, TTHeader* res) { return fn_802CA898(name, 0, res, 14); }
+s32 LoadTextureResourceHeader(const char* name, TTHeader* res) { return LoadTextureFile(name, 0, res, 14); }
 
-s32 fn_802CAC44(const char* name, s32 kind) { return fn_802CA898(name, 0, 0, kind); }
+s32 fn_802CAC44(const char* name, s32 kind) { return LoadTextureFile(name, 0, 0, kind); }
 
 void gxForgetTexture(s32 id) {
     if (id == -1) {
@@ -596,7 +596,7 @@ void gxForgetTexture(s32 id) {
         return;
     }
     if (--t->refs == 0 && t->res) {
-        fn_802CB82C(id);
+        UnloadTextureMip(id);
         fn_8012C4D8(t->res);
         t->res = 0;
         ReleaseTextureResources(t->gx);
@@ -650,7 +650,7 @@ int fn_802CAE00(s32 id) {
     return ok;
 }
 
-const char* fn_802CAE34(s32 id) {
+const char* GetTextureName(s32 id) {
     if (id == -1) {
         return "TEXTURE_NULL";
     }
@@ -660,7 +660,7 @@ const char* fn_802CAE34(s32 id) {
     return "(INVALID)";
 }
 
-void fn_802CAE98(s32 id, const char* name) {
+void SetTextureName(s32 id, const char* name) {
     if (fn_802CAE00(id)) {
         SafeStrCopy(lbl_8055FCB0[id].name, name, 32);
     }
@@ -681,7 +681,7 @@ int fn_802CAF8C(s32 id) {
     return *z != lbl_8055FCA8;
 }
 
-int fn_802CAFC8(s32 id) {
+int GetTexturePriority(s32 id) {
     if (id == -1) {
         return 5;
     }
@@ -748,8 +748,8 @@ s32 fn_802CB128(u16 w, u16 h, int unused, u32 flags) {
     t->mip0Mem = 0;
     t->kind = 14;
     strcpy(t->name, name);
-    t->res = fn_802CB2FC(w, h, 1, fmt, z, wrap);
-    t->gx = fn_802CA4E0(t->res, "<rt>", 1, 0, t->kind);
+    t->res = CreateTextureHeader(w, h, 1, fmt, z, wrap);
+    t->gx = CreateSceneTexture(t->res, "<rt>", 1, 0, t->kind);
     return t - lbl_8055FCB0;
 }
 
@@ -777,7 +777,7 @@ void fn_802CB29C(s32 id) {
     }
 }
 
-TTHeader* fn_802CB2FC(u16 w, u16 h, u8 fmt, u8 flags, u16 zhint, u8 wrapT) {
+TTHeader* CreateTextureHeader(u16 w, u16 h, u8 fmt, u8 flags, u16 zhint, u8 wrapT) {
     TTHeader* t = new ("tt tex") TTHeader;
     t->w = w;
     t->h = h;
@@ -794,10 +794,10 @@ TTHeader* fn_802CB2FC(u16 w, u16 h, u8 fmt, u8 flags, u16 zhint, u8 wrapT) {
     return t;
 }
 
-void* fn_802CB38C(void* res, u32 data, s32 kind) {
+void* LoadTextureMip0(void* res, u32 data, s32 kind) {
     TTHeader* h = (TTHeader*)res;
     fn_802CA57C(h, "mip0", 0, kind);
-    return fn_802CA4E0(h, lbl_8055D058, 0, data, kind);
+    return CreateSceneTexture(h, lbl_8055D058, 0, data, kind);
 }
 
 void fn_802CB3F4(void* gx) { ReleaseTextureResources(gx); }
@@ -806,7 +806,7 @@ void fn_802CB3F8(const char* name, const char* what) {}
 
 u8 lbl_8055D07D = 1;    // mip0 streaming on
 
-s32 fn_802CB3FC(s32 id) {
+s32 GetTextureMaxDimension(s32 id) {
     TTHeader* h = lbl_8055FCB0[id].res;
     s32 w = h->w;
     s32 hh = h->h;
@@ -864,7 +864,7 @@ void fn_802CB424(void) {
 
 
 
-void fn_802CB6B4(void) {
+void DestroyTextureCache(void) {
     TexCache* c = lbl_8055FCBC;
     if (c) {
         c->~TexCache();
@@ -901,7 +901,7 @@ static inline void CancelMipLoads(TexCache* c, s32 id, HeapBlock**& cursor) {
 
 static inline SimpleHeap* TextureHeap(TexCache* c) { return c->heapRef->heap; }
 
-void fn_802CB82C(s32 id) {
+void UnloadTextureMip(s32 id) {
     HeapBlock** cursor;
     TexCache* c = lbl_8055FCBC;
     MipSlot* s = &c->slots[id];
@@ -921,12 +921,12 @@ void fn_802CB82C(s32 id) {
 }
 
 void fn_802CBB9C(MipLoad** to, MipLoad** from, MipLoad* l) {
-    fn_802CBBE8(from, l);
+    UnlinkMipLoadNode(from, l);
     l->next = *to;
     *to = l;
 }
 
-void fn_802CBBE8(MipLoad** list, MipLoad* l) {
+void UnlinkMipLoadNode(MipLoad** list, MipLoad* l) {
     int found = 0;
     MipLoad* p;
     while ((p = *list) != 0) {
@@ -943,7 +943,7 @@ void fn_802CBBE8(MipLoad** list, MipLoad* l) {
     }
 }
 
-void fn_802CBC3C(TexCache* c, s32 frame) {
+void ProcessTextureDiscards(TexCache* c, s32 frame) {
     MipLoad* l;
     MipDiscard* d = c->discards;
     while (d) {
@@ -969,12 +969,12 @@ void fn_802CBC3C(TexCache* c, s32 frame) {
 }
 
 void fn_802CBD30(MipDiscard** to, MipDiscard** from, MipDiscard* d) {
-    fn_802CBD7C(from, d);
+    UnlinkMipDiscardNode(from, d);
     d->next = *to;
     *to = d;
 }
 
-void fn_802CBD7C(MipDiscard** list, MipDiscard* d) {
+void UnlinkMipDiscardNode(MipDiscard** list, MipDiscard* d) {
     int found = 0;
     MipDiscard* p;
     while ((p = *list) != 0) {
@@ -1028,9 +1028,9 @@ void fn_802CBDD0(TexCache* c) {
                     l->wait++;
                 }
                 if (l->mem) {
-                    fn_802CC03C(c, l, id);
+                    LoadTextureResource(c, l, id);
                     if (l->wait == 0) {
-                        fn_802CBFCC(c, l);
+                        LoadTextureMipmap(c, l);
                     }
                     started = 1;
                 } else {
@@ -1057,16 +1057,16 @@ void fn_802CBFA0(TexCache* c, MipLoad* l) {
     }
 }
 
-void fn_802CBFCC(TexCache* c, MipLoad* l) {
+void LoadTextureMipmap(TexCache* c, MipLoad* l) {
     l->wait = -1;
     l->res->Load((u8*)l->mem, lbl_8055FCB0[l->tex].mip0Bytes, 0);
     fn_802CB3F8(lbl_8055FCB0[l->tex].name, "LOADING");
 }
 
-void fn_802CC03C(TexCache* c, MipLoad* l, s32 id) {
+void LoadTextureResource(TexCache* c, MipLoad* l, s32 id) {
     char buf[32];
     u32 ver;
-    l->res = ResourceGetStream(fn_802CA2A8(buf, 32, lbl_8055FCB0[id].name), 'TEX ', &ver);
+    l->res = ResourceGetStream(StripExtensionAndAddTm0(buf, 32, lbl_8055FCB0[id].name), 'TEX ', &ver);
     l->tex = id;
     l->gx = LoadTextureHandle();
     if (!l->res) {
@@ -1173,7 +1173,7 @@ extern "C" {
 
 SimpleHeap* fn_802CC404(TexCache* c) { return c->heapRef->heap; }
 
-void fn_802CC410(TexCache* c) {
+void ProcessTextureLoadCompletion(TexCache* c) {
     for (;;) {
         MipLoad* l;
         s32 done = -2;
@@ -1184,7 +1184,7 @@ void fn_802CC410(TexCache* c) {
                 if (h) {
                     TexListEntry* t = &lbl_8055FCB0[l->tex];
                     t->mip0Mem = l->mem;
-                    t->mip0 = fn_802CB38C(h, (u32)l->gx, lbl_8055FCB0[l->tex].kind);
+                    t->mip0 = LoadTextureMip0(h, (u32)l->gx, lbl_8055FCB0[l->tex].kind);
                     l->gx = 0;
                     fn_8012C958(l->res);
                     l->res = 0;
@@ -1204,7 +1204,7 @@ void fn_802CC410(TexCache* c) {
     }
 }
 
-void fn_802CC518(int w, f32 fov) { lbl_8055FCC0 = 2.0f * fov / w; }
+void CalculateFieldOfViewScale(int w, f32 fov) { lbl_8055FCC0 = 2.0f * fov / w; }
 
 void fn_802CC550(s32 id, f32 dist, f32 scale) {
     if (id == -1) {
@@ -1229,7 +1229,7 @@ void fn_802CC5B8(s32 id) {
     }
 }
 
-void fn_802CC60C(void) {
+void ResetTextureCacheStats(void) {
     static s32 frame;
     for (int i = 0; i < 512; i++) {
         lbl_8055FCB0[i].size = 1e12f;
@@ -1286,7 +1286,7 @@ static inline void RankVisibleTexture(int i) {
     int stream = t->mip0Bytes != 0;
     if (t->refs > 0 && stream) {
         if (t->uses > 0) {
-            s32 dim = fn_802CB3FC(i);
+            s32 dim = GetTextureMaxDimension(i);
             TexCache* c = lbl_8055FCBC;
             MipSlot* s = &c->slots[i];
             f32 score = TextureRankScore((f32)(dim * 2), t->size) - 1.0f;
@@ -1329,9 +1329,9 @@ void fn_802CC770(void) {
         DiscardOneResident(c, cursor, ok);
     }
     TexCache* c = lbl_8055FCBC;
-    fn_802CC410(c);
+    ProcessTextureLoadCompletion(c);
     fn_802CBDD0(c);
-    fn_802CBC3C(c, c->frame);
+    ProcessTextureDiscards(c, c->frame);
     c->frame++;
     lbl_8055FCB8 = -2;
 }

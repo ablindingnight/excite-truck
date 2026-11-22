@@ -16,7 +16,7 @@ Tire* lbl_8055E640;
 
 extern "C" {
 
-void fn_801AFAC8(void) {
+void InitializeTireList(void) {
     int i;
     lbl_8055E640 = new ("tire_list") Tire[32];
     for (i = 0; i < 32; i++) {

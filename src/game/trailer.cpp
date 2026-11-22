@@ -152,7 +152,7 @@ inline void Trailer::Reglue(void) {
 
 extern "C" {
 
-void fn_801B8CC0(RVec3* out, int model, const char* name, RVec3 def) {
+void GetTrailerJointPosition(RVec3* out, int model, const char* name, RVec3 def) {
     *(WV3*)out = *(WV3*)&def;
     if (fn_801E320C(model, name)) {
         Joint* j = fn_801E3004(model, name, -1);
@@ -165,7 +165,7 @@ void fn_801B8CC0(RVec3* out, int model, const char* name, RVec3 def) {
     }
 }
 
-Trailer* fn_801B8D80(void) { return new ("trlr_car") Trailer; }
+Trailer* CreateTrailer(void) { return new ("trlr_car") Trailer; }
 
 void fn_801B8E28(int slot) {
     Trailer* t = lbl_80436D28[slot];
@@ -262,7 +262,7 @@ Trailer::~Trailer(void) {
 /* Helper name unproven: a named model point returned by value, with a default. */
 static inline RVec3 FindPoint(int model, const char* name, RVec3 def) {
     RVec3 r;
-    fn_801B8CC0(&r, model, name, def);
+    GetTrailerJointPosition(&r, model, name, def);
     return r;
 }
 
@@ -270,7 +270,7 @@ void Trailer::Init(BodyDesc* desc) {
     low = (fn_801769CC()->type >> 12) & 1;
     CarBody::Init(desc);
     RVec3 p;
-    fn_801B8CC0(&p, model, "hitch", RVec3(0.0f, 0.0f, 3.0f));
+    GetTrailerJointPosition(&p, model, "hitch", RVec3(0.0f, 0.0f, 3.0f));
     hitchLocal = p;
     f32 b[6];
     fn_802C77F0(model, b);

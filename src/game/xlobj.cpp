@@ -33,7 +33,7 @@ int fn_8012C33C(const char* name);       // file exists
 s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 tex);
 ValueNode* fn_802B59CC(void);
-void fn_802B8AE0(const char* name, s32* value);
+void RecordStatValue(const char* name, s32* value);
 s32 fn_802B110C(s32 (*load)(const char*), const char* name);
 FanCell* fn_802BE844(s16 x, s16 y, int size);
 extern "C++" f32 Floor(f32 x);  // weak (C++ linkage; this part of the file sits in an extern "C" block)
@@ -707,8 +707,8 @@ inline int Item::Type(void) { return type; }
 int fn_802B9B50(const void* a, const void* b) { return (*(TexEntry**)a)->prio - (*(TexEntry**)b)->prio; }
 
 void fn_802B9B68(void) {
-    fn_802B8AE0("xlobj-tris", &lbl_8055FA6C);
-    fn_802B8AE0("xlobj-fans", &lbl_8055FA70);
+    RecordStatValue("xlobj-tris", &lbl_8055FA6C);
+    RecordStatValue("xlobj-fans", &lbl_8055FA70);
     memset(lbl_804C0088, 0, sizeof(lbl_804C0088));
     lbl_8055FA74 = new ("XLOFanAlloc") BufPool<u16*>(0x500);
     lbl_8055FA7C = 0;

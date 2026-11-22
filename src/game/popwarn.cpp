@@ -531,7 +531,7 @@ void fn_802E6FBC(void);
 void fn_80137C78(int n);
 void fn_80137C84(int pad, int slot);
 void RunPlayerRace(void);
-void fn_8025812C(void);
+void HandleTutorialMenu(void);
 void HandleRecordsMenu(void);
 void fn_80161DE4(void);
 void fn_8027DE6C(void);
@@ -604,7 +604,7 @@ void MenuDoDemo(void) {
                     break;
                 }
                 case 12:
-                    fn_8025812C();
+                    HandleTutorialMenu();
                     break;
                 case 16:
                     HandleRecordsMenu();
@@ -1113,14 +1113,14 @@ void MenuArt::Update(void) {
     scroll = scroll + (f32)rate * dt;
 }
 
-extern "C" void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
+extern "C" void CalculateScreenPosition(f32* x, f32* y, s32 a, s32 b);
 extern "C" f32 GetArtHeight(u8* text, int flag, f32 v);
 extern "C" void DrawArtPictureAtPosition(u8* text, int flag, f32 x, f32 y, f32 z);
 
 // Draws the scrolling warning text, wrapping the scroll offset at the box width.
 void MenuArt::Draw(void) {
     f32 sx, sy;
-    fn_80230C30(&sx, &sy, x, y);
+    CalculateScreenPosition(&sx, &sy, x, y);
     f32 fw = w;
     f32 fh = h;
     if (scroll > fw) {

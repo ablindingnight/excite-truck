@@ -156,7 +156,7 @@ int TestPointVisibility(const ValVec3* c, u8* clip, f32* dist, f32 r);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
-s32 fn_802CAFC8(s32 id);
+s32 GetTexturePriority(s32 id);
 s32 fn_802CAFF0(s32 id);
 void fn_802CC550(s32 id, f32 dist, f32 scale);
 void* fn_802D0514(const void* m);
@@ -251,8 +251,8 @@ u8 CheckBoxFrustumCull(const MLBox* e, MVec4 eye, f32 a, f32 b) {
 int fn_802CCD0C(const void* pa, const void* pb) {
     const MLBatch* a = (const MLBatch*)pa;
     const MLBatch* b = (const MLBatch*)pb;
-    s32 x = fn_802CAFC8(a->tex);
-    s32 y = fn_802CAFC8(b->tex);
+    s32 x = GetTexturePriority(a->tex);
+    s32 y = GetTexturePriority(b->tex);
     if (x != y) {
         return x - y;
     }
@@ -313,7 +313,7 @@ void SortAndInitializeRenderBatches(MList* m) {
         }
     }
     for (int i = 0; i < m->e.n; i++) {
-        s32 pr = fn_802CAFC8(m->e.p[i].tex);
+        s32 pr = GetTexturePriority(m->e.p[i].tex);
         int cls = 0;
         if (pr == 1) {
             cls = 0;

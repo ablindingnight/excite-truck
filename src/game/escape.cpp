@@ -11,7 +11,7 @@
 extern "C" {
 void fn_80230E90(int unk);
 void PlayNextSound(void);
-void fn_80230B5C(PlainValMatrix* cam);
+void ResetTransformMatrix(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
@@ -137,7 +137,7 @@ static void fn_8000C964(void) {
     u8 alpha;
     GartElem button;
 
-    fn_80230B5C(&cam);
+    ResetTransformMatrix(&cam);
     fn_802C8638(&cam);
     SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);
@@ -322,7 +322,7 @@ void fn_8000D1DC(void) {
     if (lbl_8055D40C) {
         lbl_8055D40C();
     }
-    fn_80230B5C(&cam);
+    ResetTransformMatrix(&cam);
     fn_802C8638(&cam);
     SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);

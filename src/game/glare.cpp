@@ -26,7 +26,7 @@ static inline f32 LerpT(f32 t, const f32& a, f32 b) { return a + t * (b - a); }
 extern "C" {
 GXRenderModeObj* fn_802D2D14(void);
 void* fn_802CFF64(u32 size);  // frame allocation
-void fn_802DEE88(void);
+void SetupTextureStage0(void);
 void fn_802DEF70(void);
 void fn_802D3360(void);
 }
@@ -314,7 +314,7 @@ void ConfigureGraphicsPipeline(void) {
     GXSetNumChans((u8)1);
     GXSetChanCtrl((GXChannelID)4, (GXBool)0, (GXColorSrc)1, (GXColorSrc)1, (GXLightID)0, (GXDiffuseFn)0, (GXAttnFn)2);
     GXSetChanCtrl((GXChannelID)5, (GXBool)0, (GXColorSrc)1, (GXColorSrc)1, (GXLightID)0, (GXDiffuseFn)0, (GXAttnFn)2);
-    fn_802DEE88();
+    SetupTextureStage0();
     GXSetColorUpdate((GXBool)1);
     GXSetZMode((GXBool)0, (GXCompare)7, (GXBool)0);
     GXSetAlphaCompare((GXCompare)4, (u8)0, (GXAlphaOp)0, (GXCompare)7, (u8)0xFF);

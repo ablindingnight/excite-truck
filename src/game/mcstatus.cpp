@@ -103,7 +103,7 @@ public:
 
 // Camera: common.h's PlainValMatrix.
 extern "C" {
-void fn_80230B5C(PlainValMatrix* cam);
+void ResetTransformMatrix(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 }
 
@@ -185,7 +185,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
         fn_802C8530();
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_802C88BC(2);
-        fn_80230B5C(&cam);
+        ResetTransformMatrix(&cam);
         fn_802C8638(&cam);
         SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
         f32 w = lbl_8055FB9C + 1;
@@ -335,7 +335,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p, int
     fn_802C8530();
     fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
     fn_802C88BC(2);
-    fn_80230B5C(&cam);
+    ResetTransformMatrix(&cam);
     fn_802C8638(&cam);
     SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     f32 h;
@@ -602,15 +602,15 @@ inline int McChoiceState::Key(int key) {
 }
 
 extern "C" {
-void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
-void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
+void CalculateScreenPosition(f32* x, f32* y, s32 lx, s32 ly);
+void DrawColoredQuad(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
 }
 
 // Left cap, stretched middle and right cap, the filled part drawn over them; a plain bar without art.
 inline void MemBar::Draw(void) {
     f32 sx;
     f32 sy;
-    fn_80230C30(&sx, &sy, x, y);
+    CalculateScreenPosition(&sx, &sy, x, y);
     f32 fw = (f32)w;
     f32 fh = (f32)h;
     if (art) {
@@ -637,7 +637,7 @@ inline void MemBar::Draw(void) {
         fn_802354A0(art, 1, sx + lw, sy, lbl_80563830, mid, ah, -1);
         DrawArtPictureAtPosition(art, 2, mid + (sx + lw), sy, lbl_80563830);
     } else {
-        fn_80230924(-1, sx, sy, sx + fw * frac, sy - fh, lbl_80563830);
+        DrawColoredQuad(-1, sx, sy, sx + fw * frac, sy - fh, lbl_80563830);
     }
 }
 

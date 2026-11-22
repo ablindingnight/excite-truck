@@ -37,7 +37,7 @@ void fn_80131818(ValueTable* t);
 const char* fn_80131234(const char* key);  // localize
 GameSound* CreateSoundDash(const char* name, int flags, int car, int pan);
 f32 fn_80204CFC(const char* name);  // tuning value
-char* fn_8023139C(char* buf, int size, u32 value);  // format a score
+char* FormatNumberWithCommas(char* buf, int size, u32 value);  // format a score
 void fn_801CB6E4(u32 type, int car, long v);  // stop a rumble effect (awards.cpp)
 void fn_801CB750(u32 type, int car, f32 v);  // awards.cpp
 // The weak out-of-line copy of NearZero, which retail calls in some trackers while others expand it (the macro
@@ -277,7 +277,7 @@ public:
         *pts *= lbl_8042FD08[car];
         if (evt && !NearZero(*pts)) {
             char buf[0x10];
-            evt->Text2("%s", fn_8023139C(buf, sizeof(buf), *pts));
+            evt->Text2("%s", FormatNumberWithCommas(buf, sizeof(buf), *pts));
             evt->SetType(Type());
             evt->SetPoints(*pts);
             evt->Text1("%s", Label());
@@ -352,7 +352,7 @@ public:
                 total += ranks.a.data[points.i].total;
             }
             pts = total;
-            line->Text2("%s", fn_8023139C(buf, sizeof(buf), pts));
+            line->Text2("%s", FormatNumberWithCommas(buf, sizeof(buf), pts));
             line->SetPoints(pts);
             line->SetValue(Progress());
             if (Rank() >= FirstRank()) {

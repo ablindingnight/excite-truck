@@ -43,7 +43,7 @@ f32 fn_8022CA40(UIStyleRecordFields*);
 extern UIStyleRecordFields lbl_80497D68;
 extern const char lbl_8055B918[5],lbl_8055B920[5],lbl_8033FC40[];
 void* memset(void*,int,unsigned long);
-void fn_8022C520(void);
+void LoadInputFieldStyles(void);
 
 
 
@@ -79,9 +79,9 @@ void fn_8022B390(int,const char*,int,int*,int*);
 
 
 
-void fn_8022ACFC(int,const char*,f32,f32,f32*,f32*,f32*,f32*);
+void CalculateTextBounds(int,const char*,f32,f32,f32*,f32*,f32*,f32*);
 void fn_8022BD40(int,f32,f32,f32,f32,f32,f32,const char*,u32,u8);
-void fn_80230C30(f32*,f32*,int,int);
+void CalculateScreenPosition(f32*,f32*,int,int);
 
 
 extern ModuleTag lbl_8055EFC0;
@@ -239,7 +239,7 @@ f32 CalculateTimeDelta(void);
 double fmod(double,double);
 double sin(double);
 void DrawImageFrame(u32,u32,f32,f32,f32);
-void fn_80230924(u32,f32,f32,f32,f32,f32);
+void DrawColoredQuad(u32,f32,f32,f32,f32,f32);
 
 
 void fn_80232930(void);
@@ -255,35 +255,35 @@ int fn_8022A86C(const UIStyleInputFields* input);
 int fn_8022AA84(int i);
 f32 fn_8022AAA8(int i,const char* text);
 int fn_8022AB18(int i,int axis,int mode);
-int fn_8022AB94(const signed char* text,signed char value);
-f32 fn_8022ABC8(GTextFont* font,const char* text,int n);
+int CountCharacterOccurrences(const signed char* text,signed char value);
+f32 CalculateMultilineTextWidth(GTextFont* font,const char* text,int n);
 void fn_8022C9D0(void);
 UIStyleRecordFields* fn_8022CA2C(int i);
 f32 fn_8022CA40(UIStyleRecordFields* s);
-int fn_8022CC8C(const char* name);
+int LookupStyleValue(const char* name);
 void fn_8022A5E4(void);
 void fn_8022A8E4(int i);
 void fn_8022CAA8(UIStyleRecordFields* s,const UIStyleInputFields* input);
 u32 fn_8022CD0C(const char* text);
 int fn_8022B2D4(int style,const char* text,int targetX,int targetY);
-void fn_8022AC1C(int style,const char* text,int x,int y,int* a,int* b,int* c,int* d);
+void ConvertTextRect(int style,const char* text,int x,int y,int* a,int* b,int* c,int* d);
 void fn_8022B390(int style,const char* text,int n,int* outX,int* outY);
-void fn_8022BAD0(int style,int x,int y,int w,int h,int z,const char* p,u32 q,u8 flag,f32 scale);
+void DrawStyledText(int style,int x,int y,int w,int h,int z,const char* p,u32 q,u8 flag,f32 scale);
 void fn_8022BB60(f32* px,f32* py,f32 x,f32 y);
-u32 fn_8022BC30(u32 a,u32 b,f32 t);
+u32 BlendStyleARGB(u32 a,u32 b,f32 t);
 void fn_8022D088(void);
-int fn_8022B498(int style,const char* text);
-void fn_8022B91C(int style,int x,int y,const char* text,u32 frame);
+int CalculateStyleTextWidth(int style,const char* text);
+void DrawStyledTextWithEffects(int style,int x,int y,const char* text,u32 frame);
 int fn_8022B620(int style,const char* text);
 void fn_8022CDE4(u32* out,ValueNode* node);
-void fn_8022C520(void);
-void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop,f32* outRight,f32* outBottom);
+void LoadInputFieldStyles(void);
+void CalculateTextBounds(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop,f32* outRight,f32* outBottom);
 void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused,const char* text,u32 frame,u8 initialShadow);
 void fn_8022A5E4(void) {
     memset(&lbl_80497D68,0,sizeof(lbl_80497D68));
     lbl_80497D68.field38=9;
     for(int i=0;i<256;i++) lbl_80490968[i]=lbl_80497D68;
-    fn_8022C520();
+    LoadInputFieldStyles();
 }
 
 void fn_8022A7D0(void) {fn_8022C9D0();}
@@ -350,7 +350,7 @@ int fn_8022AB18(int i,int axis,int mode) {
     return 0;
 }
 
-int fn_8022AB94(const signed char* text,signed char value) {
+int CountCharacterOccurrences(const signed char* text,signed char value) {
     int n=0;
     while(*text) {
         if(*text==value) n++;
@@ -359,16 +359,16 @@ int fn_8022AB94(const signed char* text,signed char value) {
     return n;
 }
 
-f32 fn_8022ABC8(GTextFont* font,const char* text,int n) {
+f32 CalculateMultilineTextWidth(GTextFont* font,const char* text,int n) {
     char buffer[2048];
     strncpy(buffer,text,n);
     buffer[n]=0;
     return CalculateTextWidth(font,buffer,1.0f);
 }
 
-void fn_8022AC1C(int style,const char* text,int x,int y,int* a,int* b,int* c,int* d) {
+void ConvertTextRect(int style,const char* text,int x,int y,int* a,int* b,int* c,int* d) {
     f32 fa,fb,fc,fd;
-    fn_8022ACFC(style,text,(f32)x,(f32)y,&fa,&fb,&fc,&fd);
+    CalculateTextBounds(style,text,(f32)x,(f32)y,&fa,&fb,&fc,&fd);
     *a=(int)fa; *b=(int)fb; *c=(int)fc; *d=(int)fd;
 }
 
@@ -379,9 +379,9 @@ static inline void StyleMultilineWidth(UIStyleRecordFields* s,const char* text,i
         int n=end?(int)(end-text):(int)strlen(text);
         if(s->resource04) width=StyleMaximum(width,(f32)CalculateFontStringWidth(s->resource04,text,n));
         if(s->resource08) {
-            if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8(s->resource08,text,n));
+            if(s->height<1.0f) width=StyleMaximum(width,CalculateMultilineTextWidth(s->resource08,text,n));
             else {
-                width=StyleMaximum(width,(s->height*fn_8022ABC8(s->resource08,text,n))/(f32)fn_80232B70(s->resource08));
+                width=StyleMaximum(width,(s->height*CalculateMultilineTextWidth(s->resource08,text,n))/(f32)fn_80232B70(s->resource08));
             }
         }
         end=strchr(text,10);text=end;if(text)text++;
@@ -400,7 +400,7 @@ static inline void StyleMultilineFontHeight(UIStyleRecordFields* s,int lines,f32
     }
 }
 
-void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop,f32* outRight,f32* outBottom) {
+void CalculateTextBounds(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop,f32* outRight,f32* outBottom) {
     f32 width;
     UIStyleRecordFields* s=fn_8022CA2C(style);
     f32 left=x,top=y,right=x,bottom=y;
@@ -420,7 +420,7 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
     }
     if(text) {
         height=0.0f;
-        int lines=fn_8022AB94((const signed char*)text,10)+1;
+        int lines=CountCharacterOccurrences((const signed char*)text,10)+1;
         if(s->resource04) height=(f32)lines*(f32)fn_801E4BA8(s->resource04);
         StyleMultilineFontHeight(s,lines,height);
         StyleMultilineWidth(s,text,lines,width);
@@ -485,7 +485,7 @@ void fn_8022B390(int style,const char* text,int n,int* outX,int* outY) {
     *outX=x; *outY=y;
 }
 
-int fn_8022B498(int style,const char* text) {
+int CalculateStyleTextWidth(int style,const char* text) {
     int flags;
     int left;
     int width;
@@ -565,7 +565,7 @@ int fn_8022B620(int style,const char* text) {
     return imageHeight;
 }
 
-void fn_8022B91C(int style,int x,int y,const char* text,u32 frame) {
+void DrawStyledTextWithEffects(int style,int x,int y,const char* text,u32 frame) {
     UIStyleRecordFields* s=fn_8022CA2C(style);
     u32 alternate=frame&1;
     if(s->field64_0) {
@@ -575,7 +575,7 @@ void fn_8022B91C(int style,int x,int y,const char* text,u32 frame) {
     if(text && !s->resource08) {
         fn_802E317C(lbl_8033FC08);
         int height=fn_801E4BA8(s->resource04);
-        int lines=fn_8022AB94((const signed char*)text,10)+1;
+        int lines=CountCharacterOccurrences((const signed char*)text,10)+1;
         if(s->field38&16) y-=((lines-1)*height)/2;
         else if(s->field38&64) y-=(lines-1)*height;
         int i=0;
@@ -593,12 +593,12 @@ void fn_8022B91C(int style,int x,int y,const char* text,u32 frame) {
     }
 }
 
-void fn_8022BAD0(int style,int x,int y,int w,int h,int z,const char* p,u32 q,u8 flag,f32 scale) {
+void DrawStyledText(int style,int x,int y,int w,int h,int z,const char* p,u32 q,u8 flag,f32 scale) {
     fn_8022BD40(style,(f32)x,(f32)y,(f32)w,(f32)h,(f32)z,scale,p,q,flag);
 }
 
 void fn_8022BB60(f32* px,f32* py,f32 x,f32 y) {
-    fn_80230C30(px,py,(int)x,(int)y);
+    CalculateScreenPosition(px,py,(int)x,(int)y);
     *px+=x-(f32)(int)x;
     *py-=y-(f32)(int)y;
 }
@@ -608,7 +608,7 @@ static inline u32 PackStyleARGB(u32 alpha,u32 red,u32 green,u32 blue) {
     return ((blue & 255) | ((green & 255) << 8)) |
            ((alpha << 24) | ((red & 255) << 16));
 }
-u32 fn_8022BC30(u32 a,u32 b,f32 t) {
+u32 BlendStyleARGB(u32 a,u32 b,f32 t) {
 return PackStyleARGB((int)BlendStyleByte(a>>24,b>>24,t),(int)BlendStyleByte((a>>16)&255,(b>>16)&255,t),(int)BlendStyleByte((a>>8)&255,(b>>8)&255,t),(int)BlendStyleByte((a>>0)&255,(b>>0)&255,t));
 }
 
@@ -625,8 +625,8 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         f32 phase=(f32)fmod((double)(6.2831854820251465f*CalculateTimeDelta()),9.42477798461914);
         f32 t=1.0f;
         if(phase<3.1415927410125732f) t=1.0f-(f32)sin((double)phase);
-        if(alternate)cycleColor=fn_8022BC30(s->colors0C[3],s->colors0C[1],t);
-        else cycleColor=fn_8022BC30(s->colors0C[2],s->colors0C[0],t);
+        if(alternate)cycleColor=BlendStyleARGB(s->colors0C[3],s->colors0C[1],t);
+        else cycleColor=BlendStyleARGB(s->colors0C[2],s->colors0C[0],t);
     }
     if(s->field64_1) {
         f32 px,py;
@@ -677,11 +677,11 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         else if(s->field38&64)py+=height;
         if(s->field38&4)px-=Mul(lbl_8055E050.active->horizontalBias+width,0.5f);
         else if(s->field38&2)px-=lbl_8055E050.active->horizontalBias+width;
-        fn_80230924(s->colors20[frame],px,py,px+width,py-height,depth);
+        DrawColoredQuad(s->colors20[frame],px,py,px+width,py-height,depth);
     }
     if(text&&s->resource08) {
         int lineHeight=fn_80232B70(s->resource08);
-        int lines=fn_8022AB94((const signed char*)text,10)+1;
+        int lines=CountCharacterOccurrences((const signed char*)text,10)+1;
         if(s->field38&16)y-=(f32)(((lines-1)*lineHeight)/2);
         else if(s->field38&64)y-=(f32)((lines-1)*lineHeight);
         char line[1024];
@@ -731,7 +731,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
     }
 }
 
-void fn_8022C520(void) {
+void LoadInputFieldStyles(void) {
     UIStyleInputFields defaults=lbl_802F9F58;
     defaults.words0C[0]=0xFFD6003C; defaults.words0C[1]=0xFFD6003C;
     defaults.words0C[2]=0xFF2DC82D; defaults.words0C[3]=0xFF2DC82D;
@@ -746,7 +746,7 @@ void fn_8022C520(void) {
             if(node->Has(lbl_8033FC58)) id=node->GetIntValue(lbl_8033FC58);
             else {
                 if(!node->Has(lbl_8033FC64)) {fn_802E30C8(lbl_8033FC70);continue;}
-                id=fn_8022CC8C(node->GetValue(lbl_8033FC64));
+                id=LookupStyleValue(node->GetValue(lbl_8033FC64));
             }
             if(id<0||id>=256) {fn_802E30C8(lbl_8033FC9C,node->GetString(lbl_8033FC64,lbl_8033FCCC));continue;}
             UIStyleInputFields input=defaults;
@@ -836,7 +836,7 @@ void fn_8022CAA8(UIStyleRecordFields* s,const UIStyleInputFields* input) {
     s->field3C_7=(u32)-1;
 }
 
-int fn_8022CC8C(const char* name) {
+int LookupStyleValue(const char* name) {
     const UIStyleNameFields* p=lbl_8033FF98;
     for(u32 i=0;i<27;i++,p++) {
         if(strcasecmp(name,p->name)==0) return lbl_8033FF98[i].value;

@@ -8,7 +8,7 @@
 extern "C" {
 void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
-void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
+void CalculateScreenPosition(f32* x, f32* y, s32 a, s32 b);
 void DrawColoredText(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
@@ -42,7 +42,7 @@ public:
     virtual void Update(void) {}
     virtual void Draw(void) {
         f32 x, y;
-        fn_80230C30(&x, &y, this->x, this->y);
+        CalculateScreenPosition(&x, &y, this->x, this->y);
         if (index >= 0) {
             int lvl = 0;
             for (int i = 0; i < 3; i++) {

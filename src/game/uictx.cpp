@@ -86,14 +86,14 @@ void UIContextBegin(void) {
 }
 
 extern "C" {
-cnode* fn_8022EC7C(void);
+cnode* GetStackBottomNode(void);
 void fn_8022ED50(cnode* n);
 }
 
 void UIContextEnd(void) {
     if (lbl_8055F004->top) {
         fn_802E30C8("UIcontext: Some contexts not popped.  Freeing memory now.");
-        for (cnode* n = fn_8022EC7C(); n; n = fn_8022EC7C()) {
+        for (cnode* n = GetStackBottomNode(); n; n = GetStackBottomNode()) {
             fn_8022ED50(lbl_8055F004->top);
         }
         delete lbl_8055F004->top;
@@ -107,7 +107,7 @@ void UIContextEnd(void) {
 extern "C" {
 
 // Returns the node below the top of the stack.
-cnode* fn_8022EC7C(void) {
+cnode* GetStackBottomNode(void) {
     cnode* n = lbl_8055F004->head;
     if (!n) {
         return NULL;
@@ -128,7 +128,7 @@ cnode* fn_8022ECC0(UIContext* ctx) {
     return n;
 }
 
-void fn_8022ED00(UIContext* ctx) {
+void AppendNodeToUIList(UIContext* ctx) {
     cnode* n = fn_8022ECC0(ctx);
     if (lbl_8055F004->top == NULL) {
         lbl_8055F004->head = n;
@@ -140,7 +140,7 @@ void fn_8022ED00(UIContext* ctx) {
 }
 
 void fn_8022ED50(cnode* n) {
-    cnode* prev = fn_8022EC7C();
+    cnode* prev = GetStackBottomNode();
     if (!prev) {
         lbl_8055F004->top = NULL;
         lbl_8055F004->head = lbl_8055F004->top;
@@ -151,16 +151,16 @@ void fn_8022ED50(cnode* n) {
     delete n;
 }
 
-void fn_8022EDB8(void) { fn_8022ED50(lbl_8055F004->top); }
+void UpdateTopSlot(void) { fn_8022ED50(lbl_8055F004->top); }
 
-UIContext* fn_8022EDC4(void) {
+UIContext* GetTopUIContext(void) {
     if (lbl_8055F004->top) {
         return lbl_8055F004->top->ctx;
     }
     return NULL;
 }
 
-UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha) {
+UIContext* CreateUIContext(const UIXform* xf, f32 alpha) {
     UIContext* c = new ("UIContext") UIContext;
     c->xf = *xf;
     c->alpha = alpha;
@@ -169,7 +169,7 @@ UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha) {
     return c;
 }
 
-void fn_8022EE98(UIContext* c) { delete c; }
+void DeleteUIContext(UIContext* c) { delete c; }
 
 UIContext* fn_8022EE9C(void) {
     UIXform xf;
@@ -185,10 +185,10 @@ UIContext* fn_8022EE9C(void) {
     xf.translation.v[0] = 0.0f;
     xf.translation.v[1] = 0.0f;
     xf.translation.v[2] = 0.0f;
-    return fn_8022EDE4(&xf, 1.0f);
+    return CreateUIContext(&xf, 1.0f);
 }
 
-void fn_8022EEF8(UIContext* out, const UIContext* l, const UIContext* r) {
+void InterpolateTransforms(UIContext* out, const UIContext* l, const UIContext* r) {
     out->alpha = l->alpha * r->alpha;
     out->unk34 = l->unk34 * r->unk34;
     out->scale = l->scale * r->scale;

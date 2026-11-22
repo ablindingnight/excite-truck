@@ -521,7 +521,7 @@ extern "C" {
 int fn_801F7A0C(void) { return 1; }
 
 // Make the basis right-handed.
-void fn_801F7A14(OFrame* f) {
+void FixRightHandedBasis(OFrame* f) {
     PVec c;
     PSVECCrossProduct((const Vec*)&f->x, (const Vec*)&f->y, (Vec*)&c);
     if (PSVECDotProduct((const Vec*)&c, (const Vec*)&f->z) < 0.0f) {
@@ -531,7 +531,7 @@ void fn_801F7A14(OFrame* f) {
     }
 }
 
-int fn_801F7A88(ValueNode* vn, const char* key, void* out, int size) {
+int ReadValueForKey(ValueNode* vn, const char* key, void* out, int size) {
     int r = 0;
     if (vn->Has(key)) {
         r = DecodeBase64String(out, size, vn->GetValue(key));
@@ -539,8 +539,8 @@ int fn_801F7A88(ValueNode* vn, const char* key, void* out, int size) {
     return r;
 }
 
-void fn_801F7B10(OFrame* f, ValueNode* vn, const char* key) {
-    if (fn_801F7A88(vn, key, f, sizeof(OFrame))) {
+void ReadOFrameTransform(OFrame* f, ValueNode* vn, const char* key) {
+    if (ReadValueForKey(vn, key, f, sizeof(OFrame))) {
         int i;
         u32* w = (u32*)f;
         for (i = 0; i < 12; i++) {
@@ -552,13 +552,13 @@ void fn_801F7B10(OFrame* f, ValueNode* vn, const char* key) {
         f->z.Set(vn->GetVec3("basis_z"));
         f->pos.Set(vn->GetVec3("origin"));
     }
-    fn_801F7A14(f);
+    FixRightHandedBasis(f);
 }
 }
 
 void ObjDesc::Read(PlacedObj* o, ValueNode* vn) {
     if (vn->Has("unfloat_frame64")) {
-        fn_801F7B10(&o->frame, vn, "unfloat_frame64");
+        ReadOFrameTransform(&o->frame, vn, "unfloat_frame64");
         Lift(&o->frame, drop);
     }
     if (vn->Has("difficulty_level")) {
@@ -571,7 +571,7 @@ void ObjDesc::Read(PlacedObj* o, ValueNode* vn) {
 
 extern "C" {
 
-void fn_801F7E20(ValueNode* vn, ObjDesc* d) {
+void CalculateDropHeight(ValueNode* vn, ObjDesc* d) {
     if (d->model[0]) {
         ModelInfo* m = (ModelInfo*)fn_802C6B44(d->model);
         d->drop = 0.0254f + -m->box[2];
@@ -582,10 +582,10 @@ void fn_801F7E20(ValueNode* vn, ObjDesc* d) {
     d->drop = vn->GetFloat("drop_height", d->drop);
 }
 
-int fn_801F7EB0(OFrame* f, ValueNode* vn, const OFrame* parent) {
+int InitializeFrameFromLocal(OFrame* f, ValueNode* vn, const OFrame* parent) {
     ValueNode* lf = vn->FindChild("local_frame");
     if (lf) {
-        fn_801F7B10(f, lf, "frame64");
+        ReadOFrameTransform(f, lf, "frame64");
     } else {
         f->x.x = 1.0f;
         f->x.y = 0.0f;
@@ -607,7 +607,7 @@ int fn_801F7EB0(OFrame* f, ValueNode* vn, const OFrame* parent) {
     return lf || parent;
 }
 
-void fn_801F7FA0(ShadowDesc* s, ValueNode* vn) {
+void ParseShadowDescriptor(ShadowDesc* s, ValueNode* vn) {
     s->model = vn->GetValue("model");
     s->extend = vn->GetFloat("extend_dist");
     s->cutoff = vn->GetFloat("cutoff_dist");
@@ -623,27 +623,27 @@ void fn_801F7FA0(ShadowDesc* s, ValueNode* vn) {
     s->count = n;
 }
 
-int fn_801F80FC(const char* type) { return strcasecmp(type, "composite") == 0; }
+int IsCompositeType(const char* type) { return strcasecmp(type, "composite") == 0; }
 
-int fn_801F812C(const char* type) { return strcasecmp(type, "animation") == 0; }
+int IsAnimationType(const char* type) { return strcasecmp(type, "animation") == 0; }
 
 static inline const char* ObstacleSoundKey() { return "sound"; }
 
 int fn_801F815C(const char* type) { return strcasecmp(type, ObstacleSoundKey()) == 0; }
 
-ObjDesc* fn_801F9338(ValueNode* vn);
+ObjDesc* ParseObjectChildren(ValueNode* vn);
 ObjDesc* fn_801F83E4(ValueNode* vn);
-ObjDesc* fn_801F861C(ValueNode* vn);
-ObjDesc* fn_801F86C8(ValueNode* vn);
+ObjDesc* CreateSoundDescriptor(ValueNode* vn);
+ObjDesc* CreateObstacleDescriptor(ValueNode* vn);
 
 static const ReaderList sReaders = {{
-    {fn_801F80FC, fn_801F9338},
-    {fn_801F812C, fn_801F83E4},
-    {fn_801F815C, fn_801F861C},
-    {0, fn_801F86C8},
+    {IsCompositeType, ParseObjectChildren},
+    {IsAnimationType, fn_801F83E4},
+    {fn_801F815C, CreateSoundDescriptor},
+    {0, CreateObstacleDescriptor},
 }};
 
-ObjDesc* fn_801F8188(ValueNode* vn, const OFrame* parent, int named) {
+ObjDesc* ParseObjectDescription(ValueNode* vn, const OFrame* parent, int named) {
     const char* type = vn->GetValue("type");
     ReaderList readers = sReaders;
     ObjDesc* d = 0;
@@ -654,13 +654,13 @@ ObjDesc* fn_801F8188(ValueNode* vn, const OFrame* parent, int named) {
             break;
         }
     }
-    if (!fn_801F80FC(type)) {
+    if (!IsCompositeType(type)) {
         StrNCopy(d->model, vn->GetValue("model"), sizeof(d->model));
-        d->hasFrame = fn_801F7EB0(&d->frame, vn, parent);
-        fn_801F7E20(vn, d);
+        d->hasFrame = InitializeFrameFromLocal(&d->frame, vn, parent);
+        CalculateDropHeight(vn, d);
         d->forbidden = vn->GetBool("forbidden_in_objects_file", 0);
         if (vn->FindChild("shadow")) {
-            fn_801F7FA0(&d->shadow, vn->FindChild("shadow"));
+            ParseShadowDescriptor(&d->shadow, vn->FindChild("shadow"));
         }
     } else {
         d->drop = vn->GetFloat("drop_height", d->drop);
@@ -689,16 +689,16 @@ inline AnimDesc::AnimDesc(ValueNode* vn) : ObjDesc(0) {
 
 ObjDesc* fn_801F83E4(ValueNode* vn) { return new ("AnimDI") AnimDesc(vn); }
 
-ObjDesc* fn_801F861C(ValueNode* vn) { return new ("SoundDI") SoundDesc; }
+ObjDesc* CreateSoundDescriptor(ValueNode* vn) { return new ("SoundDI") SoundDesc; }
 
-int fn_801F88F4(ValueNode* vn);
-int fn_801F8988(ObstacleDesc* d, ValueNode* vn);
+int IsTypeInSkipList(ValueNode* vn);
+int ParseObstacleData(ObstacleDesc* d, ValueNode* vn);
 
 static inline void ReadObstacle(ObstacleObjDesc* d, ValueNode* vn) {
     d->flags = 0;
     d->phys.tag = 0;
-    fn_801F8988(&d->phys, vn);
-    if (!fn_801F88F4(vn)) {
+    ParseObstacleData(&d->phys, vn);
+    if (!IsTypeInSkipList(vn)) {
         d->flags |= 4;
     }
     if (vn->GetBool("facing_test", 0)) {
@@ -728,11 +728,11 @@ static inline void ReadObstacle(ObstacleObjDesc* d, ValueNode* vn) {
 
 inline ObstacleObjDesc::ObstacleObjDesc(ValueNode* vn) { ReadObstacle(this, vn); }
 
-ObjDesc* fn_801F86C8(ValueNode* vn) {
+ObjDesc* CreateObstacleDescriptor(ValueNode* vn) {
     return new ("ObstacleDI") ObstacleObjDesc(vn);
 }
 
-int fn_801F88F4(ValueNode* vn) {
+int IsTypeInSkipList(ValueNode* vn) {
     SkipList skip = MakeSkipList();
     const char* type = vn->GetValue("type");
     const char** p;
@@ -856,7 +856,7 @@ static inline void ReadShape(ObstacleDesc* d, ValueNode* vn) {
 
 extern "C" {
 
-int fn_801F8988(ObstacleDesc* d, ValueNode* vn) {
+int ParseObstacleData(ObstacleDesc* d, ValueNode* vn) {
     if (!IsSkipType(vn)) {
         d->tag = 'OBST';
         d->size = sizeof(ObstacleDesc);
@@ -901,20 +901,20 @@ ObjDesc::ObjDesc(void) {
 
 extern "C" {
 
-ObjDesc* fn_801F9338(ValueNode* vn) {
+ObjDesc* ParseObjectChildren(ValueNode* vn) {
     OFrame f;
     const OFrame* parent = 0;
     ObjDesc* list;
     ValueNode* c;
     int i;
-    if (fn_801F7EB0(&f, vn, 0)) {
+    if (InitializeFrameFromLocal(&f, vn, 0)) {
         parent = &f;
     }
     list = 0;
     i = 0;
     while ((c = vn->GetChildAt(i)) != 0) {
         if (strcmp(c->GetName(), "object") == 0) {
-            ObjDesc* d = fn_801F8188(c, parent, 0);
+            ObjDesc* d = ParseObjectDescription(c, parent, 0);
             d->sibling = list;
             list = d;
         }
@@ -926,7 +926,7 @@ ObjDesc* fn_801F9338(ValueNode* vn) {
 void fn_801F9440(ObjDesc** list, ObjDesc* d);
 
 ObjDesc* fn_801F93FC(ValueNode* vn) {
-    ObjDesc* d = fn_801F8188(vn, 0, 1);
+    ObjDesc* d = ParseObjectDescription(vn, 0, 1);
     fn_801F9440(&lbl_8055EC38, d);
     return d;
 }
@@ -940,7 +940,7 @@ int fn_801F9450(ValueNode* vn) { return strcasecmp(vn->GetName(), "dyno") == 0; 
 
 int fn_801F948C(ValueNode* vn) { return strcasecmp(vn->GetName(), "object_properties") == 0; }
 
-void fn_801F94CC(const char* fmt, ...) {
+void LoadClassFile(const char* fmt, ...) {
     char buf[0x100];
     va_list ap;
     va_start(ap, fmt);
@@ -954,7 +954,7 @@ void fn_801F94CC(const char* fmt, ...) {
     }
 }
 
-ValueNode* fn_801F95C4(int (*pred)(ValueNode*), const char* name) {
+ValueNode* FindNamedValueNode(int (*pred)(ValueNode*), const char* name) {
     ValueNode* n = 0;
     ClassFile* e = lbl_8055EC44;
     while (!n && e) {
@@ -973,9 +973,9 @@ ValueNode* fn_801F95C4(int (*pred)(ValueNode*), const char* name) {
     return n;
 }
 
-ValueNode* fn_801F96A8(const char* name) { return fn_801F95C4(fn_801F9450, name); }
+ValueNode* fn_801F96A8(const char* name) { return FindNamedValueNode(fn_801F9450, name); }
 
-ValueNode* fn_801F96B8(const char* name) { return fn_801F95C4(fn_801F948C, name); }
+ValueNode* fn_801F96B8(const char* name) { return FindNamedValueNode(fn_801F948C, name); }
 
 ObjDesc* fn_801F96C8(const char* name) {
     ObjDesc* d;
@@ -1015,7 +1015,7 @@ void fn_801F973C(ObjDesc* d, const PlacedObj* parent, u32 flags) {
     }
 }
 
-void fn_801F981C(ValueNode* vn, u32 flags) {
+void ValidateDynamicObjectPlacement(ValueNode* vn, u32 flags) {
     const char* name = vn->GetValue("dyno");
     ObjDesc* d = fn_801F96C8(name);
     PlacedObj p;
@@ -1032,18 +1032,18 @@ void fn_801F981C(ValueNode* vn, u32 flags) {
     }
 }
 
-void fn_801F9928(ValueNode* vn, u32 flags) {
+void ProcessObjectChildren(ValueNode* vn, u32 flags) {
     ValueNode* c;
     int i = 0;
     while ((c = vn->GetChildAt(i)) != 0) {
         if (strcasecmp(c->GetName(), "object") == 0) {
-            fn_801F981C(c, flags);
+            ValidateDynamicObjectPlacement(c, flags);
         }
         i++;
     }
 }
 
-void fn_801F99CC(ObjDesc* d) {
+void DeleteSiblingObjects(ObjDesc* d) {
     ObjDesc* c = d->sibling;
     while (c) {
         ObjDesc* n = c->sibling;
@@ -1055,7 +1055,7 @@ void fn_801F99CC(ObjDesc* d) {
 void fn_801F9A24(ObjDesc** list) {
     ObjDesc* c = *list;
     while (c) {
-        fn_801F99CC(c);
+        DeleteSiblingObjects(c);
         ObjDesc* n = c->next;
         delete c;
         c = n;
@@ -1063,31 +1063,31 @@ void fn_801F9A24(ObjDesc** list) {
     *list = 0;
 }
 
-void fn_801F9AA4(const char* file, u32 flags) {
+void LoadObjectDefinitions(const char* file, u32 flags) {
     ValueTable* t = fn_80131810(file);
     if (t) {
         if (t->HasChild("objects")) {
-            fn_801F9928(t->FindChild("objects"), flags);
+            ProcessObjectChildren(t->FindChild("objects"), flags);
         }
         fn_80131818(t);
     }
 }
 
-void fn_801F9B28(void) {
+void LoadTrackObjects(void) {
     TableRef r("eventwob", "objects");
     if (r.node) {
-        fn_801F9928(r.node, 3);
+        ProcessObjectChildren(r.node, 3);
     }
-    fn_801F9AA4("def_objects.val", 3);
+    LoadObjectDefinitions("def_objects.val", 3);
     if (fn_8000AC38()->vals->GetBool("load_bonus_items", 0)) {
-        fn_801F9AA4("bonusitems.val", 3);
+        LoadObjectDefinitions("bonusitems.val", 3);
     }
-    fn_801F9AA4("trackwob.val", 2);
+    LoadObjectDefinitions("trackwob.val", 2);
 }
 
 int fn_801F9BD0(const void* a, const void* b) { return (*(StaticOb**)a)->id - (*(StaticOb**)b)->id; }
 
-void fn_801F9BE8(void) {
+void CountAndSortStaticObjects(void) {
     int n;
     lbl_8055EC58 = 0;
     for (StaticOb* o = lbl_8055EC4C; o; o = o->next) {
@@ -1117,7 +1117,7 @@ void fn_801F9BE8(void) {
     }
 }
 
-int fn_801F9CF8(ObjMsg* m) {
+int UpdateStaticObjectVisibility(ObjMsg* m) {
     if (lbl_8055EC54) {
         int lo = 0;
         int hi = lbl_8055EC58 - 1;
@@ -1155,10 +1155,10 @@ int fn_801F9D70(RaceDesc* r) {
 
 void fn_801F9E04(RaceDesc* r) {
     lbl_8055EC38 = 0;
-    fn_801F94CC("race.res/obstacle.val");
-    fn_801F94CC("%s.trk/obstacle.val", r);
-    fn_801F94CC("trackwob.val");
-    fn_801F94CC("treeclass.val");
+    LoadClassFile("race.res/obstacle.val");
+    LoadClassFile("%s.trk/obstacle.val", r);
+    LoadClassFile("trackwob.val");
+    LoadClassFile("treeclass.val");
     lbl_8055EC4C = 0;
     lbl_8055EC3C = 1;
     lbl_8055EC50 = 0;
@@ -1172,16 +1172,16 @@ void fn_801F9E04(RaceDesc* r) {
     lbl_8055EC68 = fn_801F96B8("anim");
     lbl_8055EC70 = fn_801F96B8(ObstacleSoundKey());
     fn_8020401C(r);
-    RegisterEventHandler(fn_801F9CF8, 0xC);
+    RegisterEventHandler(UpdateStaticObjectVisibility, 0xC);
 }
 
 void fn_801F9FA0(StaticOb** list);
-void fn_801FA010(TrackAnimObj** list);
-void fn_801FA0B0(ClassFile** list);
-void fn_801FA138(EWSound** list);
+void ClearAnimationObjectList(TrackAnimObj** list);
+void DeleteClassFileList(ClassFile** list);
+void ClearSoundList(EWSound** list);
 
 void fn_801F9F08(void) {
-    EventUnInstallHandler(fn_801F9CF8);
+    EventUnInstallHandler(UpdateStaticObjectVisibility);
     fn_80204020();
     lbl_8055EC70 = 0;
     delete lbl_8055EC74;
@@ -1191,11 +1191,11 @@ void fn_801F9F08(void) {
     }
     fn_801F9FA0(&lbl_8055EC4C);
     fn_801F9FA0(&lbl_8055EC50);
-    fn_801FA010(&lbl_8055EC5C);
-    fn_801FA010(&lbl_8055EC60);
+    ClearAnimationObjectList(&lbl_8055EC5C);
+    ClearAnimationObjectList(&lbl_8055EC60);
     fn_801F9A24(&lbl_8055EC38);
-    fn_801FA0B0(&lbl_8055EC44);
-    fn_801FA138(&lbl_8055EC6C);
+    DeleteClassFileList(&lbl_8055EC44);
+    ClearSoundList(&lbl_8055EC6C);
 }
 
 void fn_801F9FA0(StaticOb** list) {
@@ -1208,7 +1208,7 @@ void fn_801F9FA0(StaticOb** list) {
     *list = 0;
 }
 
-void fn_801FA010(TrackAnimObj** list) {
+void ClearAnimationObjectList(TrackAnimObj** list) {
     TrackAnimObj* c = *list;
     while (c) {
         TrackAnimObj* n = c->next;
@@ -1218,7 +1218,7 @@ void fn_801FA010(TrackAnimObj** list) {
     *list = 0;
 }
 
-void fn_801FA0B0(ClassFile** list) {
+void DeleteClassFileList(ClassFile** list) {
     ClassFile* c = *list;
     while (c) {
         ClassFile* n = c->next;
@@ -1228,7 +1228,7 @@ void fn_801FA0B0(ClassFile** list) {
     *list = 0;
 }
 
-void fn_801FA138(EWSound** list) {
+void ClearSoundList(EWSound** list) {
     EWSound* c = *list;
     while (c) {
         EWSound* n = c->next;
@@ -1256,7 +1256,7 @@ void fn_801FA1D4(void) {
 
 void fn_801FA298(void*) {
     if (!fn_8020402C()) {
-        fn_801F9B28();
+        LoadTrackObjects();
     }
 }
 
@@ -1376,7 +1376,7 @@ void fn_801FA738(void) {
     fn_802C9C58(old);
 }
 
-void fn_801FA7F4(const char* name, const OFrame* f, ValueNode* node) {
+void PlaceObjectWithLift(const char* name, const OFrame* f, ValueNode* node) {
     PlacedObj p;
     p.frame = *f;
     p.node = node;
@@ -1397,7 +1397,7 @@ OFrame* fn_801FA8E0(CollShape* s, const OFrame* f, s32 event) {
 }
 
 void fn_801FA978(void) {
-    fn_801F9BE8();
+    CountAndSortStaticObjects();
     fn_801792F4(BuildStaticCollisionTable(lbl_8055EC74));
     lbl_8055EC3C = 0;
 }
@@ -1432,8 +1432,8 @@ void fn_801FA9AC(void) {
 }
 
 // Same body as ReadShape, not a call to it: an inline's temporaries ascend on the stack, these descend, so this copy was
-// the plain function the compiler also inlined into fn_801F8988 (-inline auto). Source order forces the second copy here.
-void fn_801FAAC4(ObstacleDesc* d, ValueNode* vn) {
+// the plain function the compiler also inlined into ParseObstacleData (-inline auto). Source order forces the second copy here.
+void ParseObstacleShapeData(ObstacleDesc* d, ValueNode* vn) {
     u32 i = FindShape(vn);
     d->kind = i;
     switch (i) {
@@ -1562,12 +1562,12 @@ static int FacingNone(const OFrame* f);
 static int FacingZ(const OFrame* f);
 static int FacingX(const OFrame* f);
 extern "C" {
-OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node);
-CollShape* fn_801FBEA8(const ObstacleDesc* d);
+OFrame* CreateCollisionFrame(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node);
+CollShape* CreateTubeCollisionShape(const ObstacleDesc* d);
 CollShape* fn_801FBF48(const ObstacleDesc* d);
-CollShape* fn_801FBFE8(ObstacleDesc* d);
-CollShape* fn_801FC048(const ObstacleDesc* d);
-CollShape* fn_801FC12C(const ObstacleDesc* d);
+CollShape* CreatePolyShapeCollision(ObstacleDesc* d);
+CollShape* CreateObstacleCollisionShape(const ObstacleDesc* d);
+CollShape* CreateWallCollisionShape(const ObstacleDesc* d);
 }
 
 static inline FacingFn PickFacing(u32 fl) {
@@ -1674,20 +1674,20 @@ static inline OFrame* MakeVolume(ObstacleObjDesc* d, const PlacedObj* o, s32 id)
     switch (d->phys.kind) {
     case 6:
     case 15:
-        shape = fn_801FC12C(&d->phys);
+        shape = CreateWallCollisionShape(&d->phys);
         break;
     case 14:
     case 19:
-        shape = fn_801FC048(&d->phys);
+        shape = CreateObstacleCollisionShape(&d->phys);
         break;
     case 10:
-        shape = fn_801FBFE8(&d->phys);
+        shape = CreatePolyShapeCollision(&d->phys);
         break;
     case 9:
         shape = fn_801FBF48(&d->phys);
         break;
     case 22:
-        shape = fn_801FBEA8(&d->phys);
+        shape = CreateTubeCollisionShape(&d->phys);
         break;
     default:
         fn_802E317C("eventwob: unhandled static object subtype %x", static_cast<unsigned int>(d->phys.kind));
@@ -1696,7 +1696,7 @@ static inline OFrame* MakeVolume(ObstacleObjDesc* d, const PlacedObj* o, s32 id)
     }
     if (shape) {
         shape->SetSurface(d->phys.surface);
-        vol = fn_801FBE1C(lbl_8055EC74, id, d->event, shape, &o->frame, o->node);
+        vol = CreateCollisionFrame(lbl_8055EC74, id, d->event, shape, &o->frame, o->node);
     }
     return vol;
 }
@@ -1773,7 +1773,7 @@ static inline int FacingX(const OFrame* f) { return FacingMode(f, &f->x); }
 
 extern "C" {
 
-inline OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node) {
+inline OFrame* CreateCollisionFrame(SolBuilder* b, s32 id, s32 event, CollShape* s, const OFrame* f, ValueNode* node) {
     SolObj* o = NewSolObj(id, event, s, f, node);
     o->next = b->head;
     b->head = o;
@@ -1782,7 +1782,7 @@ inline OFrame* fn_801FBE1C(SolBuilder* b, s32 id, s32 event, CollShape* s, const
 
 static inline const char* AllocTubeVolume(const char* tag = "ewcv:tubevol") { return tag; }
 
-inline CollShape* fn_801FBEA8(const ObstacleDesc* d) {
+inline CollShape* CreateTubeCollisionShape(const ObstacleDesc* d) {
     return new (AllocTubeVolume()) TubeShape(50000.0f, 1.0f, d->shape.f[0], d->shape.f[1]);
 }
 
@@ -1794,21 +1794,21 @@ inline CollShape* fn_801FBF48(const ObstacleDesc* d) {
 
 static inline const char* AllocPolyVolume(const char* tag = "ewcv:polyvol") { return tag; }
 
-inline CollShape* fn_801FBFE8(ObstacleDesc* d) {
+inline CollShape* CreatePolyShapeCollision(ObstacleDesc* d) {
     f32 k = 50000.0f;
     return new (AllocPolyVolume()) PolyShape(0, d->shape.name, k, d->friction);
 }
 
 static inline const char* AllocSphereVolume(const char* tag = "ewcv:spherevol") { return tag; }
 
-inline CollShape* fn_801FC048(const ObstacleDesc* d) {
+inline CollShape* CreateObstacleCollisionShape(const ObstacleDesc* d) {
     f32 k = 50000.0f;
     return new (AllocSphereVolume()) SphereShape(0, 0, k, 0.2f, d->shape.f[0], RVec3(0.0f, 0.0f, 0.0f));
 }
 
 static inline const char* AllocWallVolume(const char* tag = "ewcv:wallvol") { return tag; }
 
-inline CollShape* fn_801FC12C(const ObstacleDesc* d) {
+inline CollShape* CreateWallCollisionShape(const ObstacleDesc* d) {
     f32 k = 50000.0f;
     return new (AllocWallVolume()) BoxShape(k, 0.2f, d->shape.f);
 }

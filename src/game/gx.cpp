@@ -87,19 +87,19 @@ void Setup2DRenderState(void);
 void LoadEnvironmentMapTexture(void* tex);
 void ValidateLightmapTexture(void* tex);
 void fn_802D92B0(void);
-void fn_802DFAF4(void);
-void fn_802DF21C(void);
+void SetupTevSwapModes(void);
+void ConfigureTextureStage0(void);
 void fn_802DF2F0(void);
 void fn_802E09EC(void);
 void fn_802E0B68(void);
 void fn_802DF300(void);
 void fn_802DF46C(void);
-void fn_802DEFA0(void);
+void SetupTextureAndTevStages(void);
 void fn_802DF1B4(void);
 void fn_802DF994(void);
-void fn_802DF6D0(void);
+void ConfigureRenderPipeline(void);
 void fn_802DF938(void);
-void fn_802DF4A8(void);
+void ConfigureTextureAndTevStages(void);
 void fn_802DF684(void);
 int CreateFileFromName(const char* name);
 void fn_802E3734(s32* fd);
@@ -1909,7 +1909,7 @@ void SetupTextureEffectStages(void) {
 void SetupChannelOne(void) {
     GXSetNumChans((u8)1);
     GXSetChanCtrl((GXChannelID)1, (GXBool)0, (GXColorSrc)0, (GXColorSrc)0, (GXLightID)0, (GXDiffuseFn)0, (GXAttnFn)2);
-    fn_802DFAF4();
+    SetupTevSwapModes();
 }
 
 static inline bool TexChanged(void) { return memcmp(&lbl_804C9930, &lbl_804C5700, sizeof(TexState)) != 0; }
@@ -1923,7 +1923,7 @@ void fn_802D2B0C(void) {
         switch (lbl_804C5700.mode) {
         case 1:
             lbl_8055FD70 = 1;
-            fn_802DF21C();
+            ConfigureTextureStage0();
             lbl_8055FD80 = fn_802DF2F0;
             break;
         case 5:
@@ -1937,7 +1937,7 @@ void fn_802D2B0C(void) {
                 fn_802DF300();
                 lbl_8055FD80 = fn_802DF46C;
             } else {
-                fn_802DEFA0();
+                SetupTextureAndTevStages();
                 lbl_8055FD80 = fn_802DF1B4;
             }
             break;
@@ -1952,10 +1952,10 @@ void fn_802D2B0C(void) {
                 SetupTextureEffectStages();
             } else {
                 if (lbl_804C5700.base2) {
-                    fn_802DF6D0();
+                    ConfigureRenderPipeline();
                     lbl_8055FD80 = fn_802DF938;
                 } else {
-                    fn_802DF4A8();
+                    ConfigureTextureAndTevStages();
                     lbl_8055FD80 = fn_802DF684;
                 }
                 lbl_8055FD70 = 1;

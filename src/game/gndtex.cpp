@@ -31,7 +31,7 @@ void* fn_802CFF64(u32 size);  // frame allocation
 void fn_802D0610(int a);
 void fn_802D68C4(int a, int b, int c, int d);
 void fn_802D3360(void);
-void fn_802DEAC4(void);
+void SetupTextureGeneration(void);
 void fn_802E0684(void);
 void fn_802DEE1C(void);
 void fn_802DFB30(void);
@@ -40,7 +40,7 @@ void InvertCameraMatrix(void);
 void fn_802E0218(void);
 void fn_802E009C(void);
 void fn_802E050C(void);
-void fn_802E0420(void);
+void SetupTextureStage(void);
 void fn_802DFE88(void);
 void fn_802DFD00(void);
 void fn_802D2ED8(const void* xf, int i);
@@ -319,7 +319,7 @@ void SetupTextureMatrices(int prepass) {
         GXLoadTexObj((const GXTexObj*)&lbl_804DB468[2]->obj, (GXTexMapID)2);
         GXLoadTexObj((const GXTexObj*)&lbl_804DB468[2]->obj2, (GXTexMapID)3);
         GXLoadTexObj((const GXTexObj*)&lbl_804DB468[3]->obj, (GXTexMapID)4);
-        fn_802DEAC4();
+        SetupTextureGeneration();
     } else {
         GXLoadTexObj((const GXTexObj*)&lbl_804DB468[0]->obj, (GXTexMapID)0);
         GXLoadTexObj((const GXTexObj*)&lbl_804DB468[1]->obj, (GXTexMapID)1);
@@ -564,7 +564,7 @@ void fn_802DC71C(Surf* model, s32 tex) {
             if (hasAlpha) {
                 fn_802E050C();
             } else {
-                fn_802E0420();
+                SetupTextureStage();
             }
             fn_802DC62C();
         } else if (hasAlpha) {

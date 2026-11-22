@@ -151,7 +151,7 @@ typedef struct SoundMenuLabels {
 } SoundMenuLabels;
 
 const SoundMenuLabels lbl_802F9E58 = {{"Volume:MUSIC", "Volume:EFFECTS", "Volume:SD_CARD"}};
-extern void fn_80230B5C(void *);
+extern void ResetTransformMatrix(void *);
 extern void fn_802C8638(void *);
 extern void SetupCameraProjection(float, float, float);
 extern void fn_800109E4(unsigned long, float, float, float, float);
@@ -222,7 +222,7 @@ void fn_8020D2D4(void) {
     if (lbl_8055EE80 != 0) {
         ((void (*)(void))lbl_8055EE80)();
     }
-    fn_80230B5C(camera);
+    ResetTransformMatrix(camera);
     fn_802C8638(camera);
     SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     now = 0.001f * (float)fn_802E2C20();

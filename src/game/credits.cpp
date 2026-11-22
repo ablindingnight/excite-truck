@@ -353,12 +353,12 @@ static inline void CreditDrawFireGroupObservedNew(CreditFontGroupFields* self) {
 extern "C" {
 
 extern const f32 lbl_80563C18,lbl_80563C1C;
-void fn_8022ACFC(void*,const char*,f32,f32,f32*,f32*,f32*,f32*);
+void CalculateTextBounds(void*,const char*,f32,f32,f32*,f32*,f32*,f32*);
 u32 fn_8022AA84(void*);
 void fn_8022BD40(void*,f32,f32,f32,f32,f32,f32,const char*,int,int);
 void fn_80264A5C(f32,f32);
 
-void fn_80230C30(f32*,f32*,int,int);
+void CalculateScreenPosition(f32*,f32*,int,int);
 f32 fn_80129DC4(int,f32,f32);
 int fn_80129D18(int,int);
 f64 cos(f64);f64 sin(f64);
@@ -571,7 +571,7 @@ extern "C" void* fn_80264A54(void) { return lbl_8055F448; }
 extern "C" void fn_80264A5C(f32 x,f32 y) {
     if((f32)__fabs((f64)fn_80214D48())<=__float_epsilon[0])return;
     f32 screenX,screenY;
-    fn_80230C30(&screenX,&screenY,(int)x,(int)y);
+    CalculateScreenPosition(&screenX,&screenY,(int)x,(int)y);
     screenX+=x-(f32)(int)x;screenY-=y-(f32)(int)y;
     CreditBackgroundFields* self=(CreditBackgroundFields*)lbl_8055F448;
     ValPoint firePosition={screenX,screenY};self->fire.Spawn(firePosition);
@@ -607,14 +607,14 @@ void CreditsFireText::Draw(void) {
     if(elapsed<offset)return; {
         f32 progress=lbl_80563C18*(elapsed-offset);
         CreditTextBoundsNew full;
-        fn_8022ACFC(font,text,(f32)x,(f32)y,&full.left,&full.top,&full.right,&full.bottom);
+        CalculateTextBounds(font,text,(f32)x,(f32)y,&full.left,&full.top,&full.right,&full.bottom);
         int cutoff=(int)progress;
         bool complete=cutoff>length;
         if(complete)cutoff=length;
         else fn_802645EC();
         char savedByte=text[cutoff];text[cutoff]=0;int saved=savedByte;
         CreditTextBoundsNew partial;
-        fn_8022ACFC(font,text,(f32)x,(f32)y,&partial.left,&partial.top,&partial.right,&partial.bottom);
+        CalculateTextBounds(font,text,(f32)x,(f32)y,&partial.left,&partial.top,&partial.right,&partial.bottom);
         f32 delta=(full.right-full.left)-(partial.right-partial.left);
         f32 drawX=(f32)x;
         u32 flags=fn_8022AA84(font);

@@ -1549,7 +1549,7 @@ extern "C" double cos(double x);
 extern "C" double sin(double x);
 
 extern "C" {
-void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
+void CalculateScreenPosition(f32* x, f32* y, s32 lx, s32 ly);
 
 // The fill level of each of an event icon's stars.
 // Draws the event's stars on an arc under its icon: full, empty, or empty with the fill fading in.
@@ -1561,7 +1561,7 @@ inline void EvCupBar::Draw(void) {
     }
     f32 x;
     f32 y;
-    fn_80230C30(&x, &y, this->x, this->y);
+    CalculateScreenPosition(&x, &y, this->x, this->y);
     f32 cx = x + 0.5f * w;
     f32 cy = y - 0.5f * h;
     f32 radius = 0.3f * w;

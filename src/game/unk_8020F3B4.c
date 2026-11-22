@@ -807,7 +807,7 @@ typedef struct CourseVec2 {
 }  // extern "C"
 #endif
 #pragma cplusplus on
-extern "C" void fn_80230B5C(void *);
+extern "C" void ResetTransformMatrix(void *);
 extern "C" void fn_802C8638(void *);
 extern "C" void SetupCameraProjection(float, float, float);
 extern "C" void fn_800109E4(unsigned long, float, float, float, float);
@@ -831,7 +831,7 @@ extern "C" void fn_8021095C(void) {
     if (lbl_8055EEDC != 0) {
         ((void (*)(void))lbl_8055EEDC)();
     }
-    fn_80230B5C(camera);
+    ResetTransformMatrix(camera);
     fn_802C8638(camera);
     SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     fn_800109E4(0x7F000000, (-428.0f), 241.0f, 855.0f, 482.0f);

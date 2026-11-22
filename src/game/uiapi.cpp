@@ -84,8 +84,8 @@ const char* lbl_8055B6BC = "__null";
 extern "C" void fn_80214E10(const char* title, const char* message, int (*poll)(int*));
 extern "C" int fn_80214FE0(const char* title, const char* message, int (*poll)(int*), int defaultNo);
 extern "C" s32 fn_80206430(void);
-extern "C" void fn_8022BAD0(s32 style, s32 x, s32 y, s32 z, s32 w, s32 h, const char* text, s32 color, s32 extra, f32 scale);
-extern "C" s32 fn_8022AC1C(s32, s32, s32, s32, s32, s32, s32, s32);
+extern "C" void DrawStyledText(s32 style, s32 x, s32 y, s32 z, s32 w, s32 h, const char* text, s32 color, s32 extra, f32 scale);
+extern "C" s32 ConvertTextRect(s32, s32, s32, s32, s32, s32, s32, s32);
 extern "C" float fn_80209028(void);
 extern "C" int lbl_8055EF5C;
 
@@ -162,7 +162,7 @@ extern "C" int fn_80128314(int);
 extern "C" void fn_802E1058(void);
 extern "C" void* memset(void*, int, unsigned long);
 extern "C" void fn_802E30C8(const char *, ...);
-extern "C" void fn_802E0F98(void);
+extern "C" void InitializeBinkAudioMemory(void);
 extern "C" void fn_8012BEF0(const char*);
 extern "C" void InitializeMusicPlayer(void);
 extern "C" void fn_8023889C(void);
@@ -203,7 +203,7 @@ static inline void CopyName(const char* src, int n, char* dst) {
 extern "C" void fn_80211690(int mode) {
     bool lite;
     int i;
-    fn_802E0F98();
+    InitializeBinkAudioMemory();
     lbl_8055EF40 = mode;
     lite = mode == 0;
     bool timer = !lite;
@@ -1758,7 +1758,7 @@ inline void UIImageRef::Extra(void) {
 
 inline void UIImageRef::Draw(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
     UIImageRef* arg0 = this;
-    fn_8022BAD0(arg0->flags, arg1, arg2, 0, arg4, arg5, arg0->name, arg6, 0, 1.0f);
+    DrawStyledText(arg0->flags, arg1, arg2, 0, arg4, arg5, arg0->name, arg6, 0, 1.0f);
 }
 
 inline void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* p_arg5, int* p_arg6) {
@@ -1767,7 +1767,7 @@ inline void UIImageRef::Rect(int arg1, int arg2, int* p_arg3, int* p_arg4, int* 
     s32 arg4 = (s32)p_arg4;
     s32 arg5 = (s32)p_arg5;
     s32 arg6 = (s32)p_arg6;
-    fn_8022AC1C(arg0->flags, (s32)arg0->name, arg1, arg2, arg3, arg4, arg5, arg6);
+    ConvertTextRect(arg0->flags, (s32)arg0->name, arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 inline int UIImageRef::Frames(void) {

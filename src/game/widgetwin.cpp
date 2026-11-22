@@ -36,7 +36,7 @@ extern "C" {
 
 Window* fn_8021832C(Window* w);
 void SetupCameraProjection(f32 nearPlane, f32 farPlane, f32 fov);
-void fn_80230B5C(UIXform* m);
+void ResetTransformMatrix(UIXform* m);
 void fn_802C8638(UIXform* m);
 void DrawImageFrame(Window* w, int a, f32 x, f32 y, f32 z);
 void fn_802166B8(void);
@@ -176,7 +176,7 @@ void fn_802160AC(void) {
         f32 x;
         f32 y;
         SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
-        fn_80230B5C(&m);
+        ResetTransformMatrix(&m);
         fn_802C8638(&m);
         x = (f32)lbl_8055EF80 - 320.0f;
         y = 240.0f - (f32)lbl_8055EF84;
@@ -223,7 +223,7 @@ void fn_80216244(void) {
             VecP v;
             VecP t;
             fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
-            fn_80230B5C(&m);
+            ResetTransformMatrix(&m);
             SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
             v.Set(-(f32)w->x, (f32)w->y, 0.0f);
             XformVec(&m, &v, &t);

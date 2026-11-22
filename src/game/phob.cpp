@@ -100,7 +100,7 @@ void fn_801B5274(void);
 void fn_801B5FA0(void);
 void fn_801B3448(void);
 void fn_801A4E28(void);
-void fn_801AFAC8(void);
+void InitializeTireList(void);
 void fn_801B06C8(void);
 void InitializeAlarmEvents(void);
 void InitializeDamageInfo(void);
@@ -608,7 +608,7 @@ Phob* fn_801782C8(void) { return (Phob*)new ("MutablePhob") MutPhob; }
 
 Phob* BuildLocalPlayerCar(void);
 Phob* fn_80134F48(void);
-Phob* fn_801B8D80(void);
+Phob* CreateTrailer(void);
 Phob* fn_8017D688(void);
 Phob* CreateTrackObstacle(void);
 Phob* CreatePanelVolume(void);
@@ -618,7 +618,7 @@ PhobType lbl_80331950[] = {
     {'PCAR', 0xFA8, BuildLocalPlayerCar},
     {'ACAR', 0xFA8, fn_80134F48},
     {'NCAR', 0xFA8, CreateNetCarInstance},
-    {'TRLR', 0xFA8, fn_801B8D80},
+    {'TRLR', 0xFA8, CreateTrailer},
     {'STAT', 0, fn_80178258},
     {'BALL', 0x34, fn_8017D688},
     {'WHLP', 0x44, CreateWheelPhob},
@@ -956,7 +956,7 @@ void InitializeRacePhysics(s32 stream) {
     fn_801B5FA0();
     fn_801B3448();
     fn_801A4E28();
-    fn_801AFAC8();
+    InitializeTireList();
     fn_801B06C8();
     InitializeAlarmEvents();
     InitializeDamageInfo();

@@ -95,7 +95,7 @@ extern "C" {
 void fn_802C8B98(s32 tex, const void* m);
 void fn_802C8C04(s32 tex);
 u32 fn_80230B9C(int color);
-UIVertex fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 v);
+UIVertex CreateUIVertex(u32 color, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_80231380(UIVertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 void fn_802C8DB8(UIVertex* v, int nv, const u16* idx, int ni);
 void fn_802C8D74(void);
@@ -104,10 +104,10 @@ f32 fn_802C9A4C(f32 a);
 
 static inline void DrawRect(u32 c, f32 x, f32 y, f32 z, f32 w, f32 h, f32 u0, f32 v0, f32 u1, f32 v1) {
     UIVertex v[4] __attribute__((aligned(16)));
-    v[0] = fn_80230A68(c, x, y, z, u0, v0);
-    v[1] = fn_80230A68(c, x + w, y, z, u1, v0);
-    v[2] = fn_80230A68(c, x, y - h, z, u0, v1);
-    v[3] = fn_80230A68(c, x + w, y - h, z, u1, v1);
+    v[0] = CreateUIVertex(c, x, y, z, u0, v0);
+    v[1] = CreateUIVertex(c, x + w, y, z, u1, v0);
+    v[2] = CreateUIVertex(c, x, y - h, z, u0, v1);
+    v[3] = CreateUIVertex(c, x + w, y - h, z, u1, v1);
     u16 idx[6] = {0, 1, 3, 0, 3, 2};
     fn_802C8DB8(v, 4, idx, 6);
     fn_802C8D74();
@@ -314,7 +314,7 @@ void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int col
             v0 = p->v0;
             u0 = p->u0;
             s32 tex = s->tex;
-            const UIContext* cam = fn_8022EDC4();
+            const UIContext* cam = GetTopUIContext();
             fn_802C8B98(tex, cam);
             u32 c = fn_80230B9C(color);
             if (!NearZero(cam->scale - 1.0f)) {
@@ -355,7 +355,7 @@ void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 
             s32 tex = s->tex;
             sh = h;
             sw = w;
-            const UIContext* cam = fn_8022EDC4();
+            const UIContext* cam = GetTopUIContext();
             fn_802C8B98(tex, cam);
             u32 c = fn_80230B9C(color);
             if (!NearZero(cam->scale - 1.0f)) {
@@ -415,10 +415,10 @@ void fn_80235CBC(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int col
             fn_802C8C04(s->tex);
             u32 c = fn_80230B9C(color);
             UIVertex v[4] __attribute__((aligned(16)));
-            v[0] = fn_80230A68(c, x, y, z, u0, v0);
-            v[1] = fn_80230A68(c, x + w, y, z, u1, v0);
-            v[2] = fn_80230A68(c, x, y - h, z, u0, v1);
-            v[3] = fn_80230A68(c, x + w, y - h, z, u1, v1);
+            v[0] = CreateUIVertex(c, x, y, z, u0, v0);
+            v[1] = CreateUIVertex(c, x + w, y, z, u1, v0);
+            v[2] = CreateUIVertex(c, x, y - h, z, u0, v1);
+            v[3] = CreateUIVertex(c, x + w, y - h, z, u1, v1);
             u16 idx6[6] = {0, 1, 3, 0, 3, 2};
             fn_802C8DB8(v, 4, idx6, 6);
             fn_802C8D74();
@@ -521,7 +521,7 @@ void DynoTex::Draw(int id, int x, int y, int w, int h) {
         fw = w;
         fy = y;
         fx = x;
-        const UIContext* cam = fn_8022EDC4();
+        const UIContext* cam = GetTopUIContext();
         fn_802C8B98(tex, cam);
         u32 c = fn_80230B9C(-1);
         if (!NearZero(cam->scale - 1.0f)) {

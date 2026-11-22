@@ -21,7 +21,7 @@ int fn_802CAC28(const char* name, int a);  // load a texture
 void gxForgetTexture(int tex);
 int fn_80129D90(int seed, int lo, int hi);  // random int
 f32 fn_80214D48(void);                      // frame time
-const Mat3* fn_8022EDC4(void);              // camera
+const Mat3* GetTopUIContext(void);              // camera
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const Mat3* m);
 void fn_802C8B98(int tex, const PlainValMatrix* m);
 void fn_802C8DB8(const void* verts, int nv, const u16* idx, int ni);
@@ -243,7 +243,7 @@ void FreeBackground(Background* bg) {
 
 // m in camera space.
 void TransformCameraSpaceMatrix(PlainValMatrix* out, const PlainValMatrix* m) {
-    const Mat3* cam = fn_8022EDC4();
+    const Mat3* cam = GetTopUIContext();
     fn_801BFD34(&out->origin, &m->origin, cam);
     Mat3Mul(&out->Mat(), &m->Mat(), cam);
 }
@@ -261,7 +261,7 @@ struct BackVert {
     f32 v;
 } __attribute__((aligned(8)));
 
-extern "C" BackVert fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 v);
+extern "C" BackVert CreateUIVertex(u32 color, f32 x, f32 y, f32 z, f32 u, f32 v);
 
 
 void DrawBackgroundLayer(Background* bg) {
@@ -271,10 +271,10 @@ void DrawBackgroundLayer(Background* bg) {
     f32 w = bg->width;
     f32 h = bg->height;
     BackVert verts[4] __attribute__((aligned(16)));
-    verts[0] = fn_80230A68(color, -w, h, dist, 0.0f, 0.0f);
-    verts[1] = fn_80230A68(color, w, h, dist, scale, 0.0f);
-    verts[2] = fn_80230A68(color, -w, -h, dist, 0.0f, scale);
-    verts[3] = fn_80230A68(color, w, -h, dist, scale, scale);
+    verts[0] = CreateUIVertex(color, -w, h, dist, 0.0f, 0.0f);
+    verts[1] = CreateUIVertex(color, w, h, dist, scale, 0.0f);
+    verts[2] = CreateUIVertex(color, -w, -h, dist, 0.0f, scale);
+    verts[3] = CreateUIVertex(color, w, -h, dist, scale, scale);
     u16 idx[6] = {0, 1, 3, 0, 3, 2};
     PlainValMatrix cm;
     PlainValMatrix m = bg->mtx;

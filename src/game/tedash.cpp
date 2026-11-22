@@ -178,7 +178,7 @@ void DrawLineSegment(V3* a, V3* b, u32 color, f32 w);
 s32 fn_8026E214(void* fn);
 void mrModelUnload(s32 h);
 void fn_802C7040(s32 h);
-void fn_80230B5C(void* m);
+void ResetTransformMatrix(void* m);
 void fn_802C8638(void* m);
 void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_8001123C(int a);
@@ -224,7 +224,7 @@ Cursor lbl_804BFF80;
 
 extern "C" {
 
-const char* fn_802B5B18(int i) {
+const char* GetResourceTypeName(int i) {
     const char* names[4] = {"Objects", "Advanced", "Material-Map", "Road-Opacity"};
     if (i >= 0 && (u32)i < 4) {
         return names[i];
@@ -256,7 +256,7 @@ void fn_802B5CB4(int d) { lbl_8055FA3C += d; }
 
 void fn_802B5CC4(const char* name) { fn_802B5CB4(1); }
 
-void fn_802B5CCC(const char* name) {
+void ToggleClumpFlag(const char* name) {
     bool* clump;
     ExtractTweakersFromLayer(0, (u8**)&clump, fn_802B5B6C()->objs, lbl_8055FA40);
     *clump = !*clump;
@@ -264,7 +264,7 @@ void fn_802B5CCC(const char* name) {
     fn_802B4E44(fn_802B5B6C()->objs);
 }
 
-int fn_802B5D2C(const char* prefix, const char* s) {
+int ParsePrefixedInteger(const char* prefix, const char* s) {
     char fmt[0x40];
     int v;
     fn_801345D8(fmt, 0x40, "%s:%%d", prefix);
@@ -274,12 +274,12 @@ int fn_802B5D2C(const char* prefix, const char* s) {
     return v;
 }
 
-int fn_802B5D94(const char* s) { return fn_802B5D2C("object", s); }
+int fn_802B5D94(const char* s) { return ParsePrefixedInteger("object", s); }
 
 int fn_802B5DA0(const char* s) { return fn_802B5D94(s) != -1; }
 
-int fn_802B5DD0(const char* s) {
-    int i = fn_802B5D2C("layer", s);
+int CheckLayerChange(const char* s) {
+    int i = ParsePrefixedInteger("layer", s);
     int cur = fn_802B05DC();
     int r = 0;
     if (i != -1 && i != cur) {
@@ -292,17 +292,17 @@ int fn_802B5DD0(const char* s) {
    function with a 2.0f literal was compiled here (dead static functions keep their constants). */
 static f32 CellToWorld(f32 c) { return c * 2.0f; }
 
-void fn_802B5E24(const char* s) {
-    lbl_8055FA28 = fn_802B5D2C("layer", s);
+void LoadLayerData(const char* s) {
+    lbl_8055FA28 = ParsePrefixedInteger("layer", s);
     lbl_8055FA08.last = -100.0f;
 }
 
-void fn_802B5E58(const char* s) {
-    lbl_8055FA2C = fn_802B5D2C("brush", s);
+void LoadBrushTexture(const char* s) {
+    lbl_8055FA2C = ParsePrefixedInteger("brush", s);
     lbl_8055FA10.last = -100.0f;
 }
 
-int fn_802B5E8C(const char* s) { return fn_802B5D2C("brush", s) != -1; }
+int fn_802B5E8C(const char* s) { return ParsePrefixedInteger("brush", s) != -1; }
 
 void fn_802B5EC4(const char* s) { lbl_8055FA44 = fn_802B5D94(s); }
 
@@ -326,7 +326,7 @@ void fn_802B5F24(int fd) {
 
 static inline f32 GridToWorld(int v, f32 cell) { return (f32)v * cell; }
 
-void fn_802B5F98(const char* name) {
+void SaveWorldModelFile(const char* name) {
     int fd = CreateFileFromName("worldmodel.mml");
     if (fd == -1) {
         return;
@@ -386,7 +386,7 @@ void fn_802B6284(const char* name) { lbl_8055FA40 = lbl_8055FA40 == 7 ? 6 : 7; }
 
 static DashCmd lbl_8034A670[4] = {
     {"layer_dropdown", 0, fn_802B61E0},
-    {0, fn_802B5DD0, fn_802B61E0},
+    {0, CheckLayerChange, fn_802B61E0},
     {"brush_dropdown", 0, fn_802B6228},
     {0, fn_802B5E8C, fn_802B6228},
 };
@@ -404,18 +404,18 @@ void fn_802B62A4(TextElem* e) {
 static DashCmd lbl_8034A70C[11] = {
     {"cur_material", 0, fn_802B5CC4},
     {"objects", 0, fn_802B5CAC},
-    {"object_clump", 0, fn_802B5CCC},
+    {"object_clump", 0, ToggleClumpFlag},
     {"mode_button", 0, fn_802B5EE8},
     {"generate_wmap", 0, fn_802B618C},
     {"save_matmap", 0, fn_802B61B8},
     {"toggle_objects", 0, fn_802B6284},
-    {"dump_world_model", 0, fn_802B5F98},
+    {"dump_world_model", 0, SaveWorldModelFile},
     {0, fn_802B5DA0, fn_802B5EC4},
-    {0, fn_802B5DD0, fn_802B5E24},
-    {0, fn_802B5E8C, fn_802B5E58},
+    {0, CheckLayerChange, LoadLayerData},
+    {0, fn_802B5E8C, LoadBrushTexture},
 };
 
-void fn_802B6358(TextElem* e) {
+void ProcessCommandElement(TextElem* e) {
     const DashCmd* c = lbl_8034A70C;
     for (u32 i = 0; i < 11; i++, c++) {
         if ((c->name && strcmp(c->name, e->name) == 0) || (c->pred && c->pred(e->name))) {
@@ -425,7 +425,7 @@ void fn_802B6358(TextElem* e) {
     }
 }
 
-int fn_802B640C(const TextElem* e, const char* text) {
+int CheckTextElementHover(const TextElem* e, const char* text) {
     f32 w = fn_800108C8(text, e->scale);
     f32 h = fn_8001090C(e->scale);
     u32 just = e->just;
@@ -458,7 +458,7 @@ int fn_802B640C(const TextElem* e, const char* text) {
     return r;
 }
 
-void fn_802B6568(TextElem* e, const char* fmt, ...) {
+void UpdateTextElementColor(TextElem* e, const char* fmt, ...) {
     char buf[0x100];
     va_list args;
     va_start(args, fmt);
@@ -473,7 +473,7 @@ void fn_802B6568(TextElem* e, const char* fmt, ...) {
         if (strcasecmp(c->hover, e->name) == 0) {
             e->color = 0xFFFFFFFF;
         }
-    } else if (fn_802B640C(e, buf)) {
+    } else if (CheckTextElementHover(e, buf)) {
         {
             const char* src = e->name;
             int left = 0x20;
@@ -488,7 +488,7 @@ void fn_802B6568(TextElem* e, const char* fmt, ...) {
         e->color = 0xFFFFFFFF;
         fn_802B62A4(e);
         if (lbl_804BFF80.s.op == 0) {
-            fn_802B6358(e);
+            ProcessCommandElement(e);
             {
                 const char* src = e->name;
                 int left = 0x20;
@@ -508,7 +508,7 @@ void fn_802B6568(TextElem* e, const char* fmt, ...) {
 
 void fn_802B676C(void) {
     World* w = fn_802B5B6C();
-    fn_802B6568(lbl_8055FA48->Find("cur_material"), "Material: %s", w->name);
+    UpdateTextElementColor(lbl_8055FA48->Find("cur_material"), "Material: %s", w->name);
 }
 
 void fn_802B67C8(const char* name) {
@@ -518,13 +518,13 @@ void fn_802B67C8(const char* name) {
 
 }
 template <class T>
-/* Helper name unproven: the address of element i; the accessor boundary is needed (in place: fn_802B6804 100 -> 99.56) */
+/* Helper name unproven: the address of element i; the accessor boundary is needed (in place: UpdateStatsDisplay 100 -> 99.56) */
 static inline T* ElemAt(T* p, int i) {
     return &p[i];
 }
 extern "C" {
 
-void fn_802B6804(void) {
+void UpdateStatsDisplay(void) {
     Stat* s;
     fn_802B67C8("stats_box");
     TextElem* num = lbl_8055FA48->Find("stats_colnumber");
@@ -544,12 +544,12 @@ void fn_802B6804(void) {
     }
 }
 
-void fn_802B69FC(void) {
-    fn_802B6568(lbl_8055FA48->Find("generate_wmap"), "Generate World Map");
-    fn_802B6568(lbl_8055FA48->Find("dump_world_model"), "Generate World Model");
+void GenerateWorldMap(void) {
+    UpdateTextElementColor(lbl_8055FA48->Find("generate_wmap"), "Generate World Map");
+    UpdateTextElementColor(lbl_8055FA48->Find("dump_world_model"), "Generate World Model");
 }
 
-const char* fn_802B6A70(int mode) {
+const char* GetBrushPath(int mode) {
     switch (mode) {
     case 2:
         return "brush\\";
@@ -643,7 +643,7 @@ void fn_802B6AC0(void) {
     }
     lbl_8055FA18.Reset();
     lbl_804BE7D8.count = 0;
-    const char* dir = fn_802B6A70(lbl_8055FA38);
+    const char* dir = GetBrushPath(lbl_8055FA38);
     fn_801345D8(pat, 0x40, "%s*.tga", dir);
     u32 h = FindFirstFile(pat, name, 0x20);
     if (h == -1) {
@@ -851,10 +851,10 @@ void fn_802B773C(void) {
     }
 }
 
-void fn_802B7884(const char* label) {
-    fn_802B6568(lbl_8055FA48->Find("save_matmap"), label);
+void UpdateObjectVisibility(const char* label) {
+    UpdateTextElementColor(lbl_8055FA48->Find("save_matmap"), label);
     const char* t = fn_802B6270() ? "Objects On" : "Objects Off";
-    fn_802B6568(lbl_8055FA48->Find("toggle_objects"), t);
+    UpdateTextElementColor(lbl_8055FA48->Find("toggle_objects"), t);
 }
 
 // PROVISIONAL: copy-helper ownership and spelling. Retail copies these two
@@ -872,7 +872,7 @@ static inline void CopyBrushPosition(V2* dst, const V2* src) {
 #endif
 }
 
-void fn_802B7918(void) {
+void UpdateBrushSelector(void) {
     f32 row = (lbl_8055FA48->FindBox("matmap_col"))->h;
     const TextElem* src = lbl_8055FA48->Find("brush_col");
     TextElem t;
@@ -884,14 +884,14 @@ void fn_802B7918(void) {
     t.color = src->color;
     t.defText = src->defText;
     char nm[0x20];
-    fn_802B6568(lbl_8055FA48->Find("brush_dropdown"), "Brushes");
+    UpdateTextElementColor(lbl_8055FA48->Find("brush_dropdown"), "Brushes");
     if (lbl_8055FA10.Waiting()) {
         fn_802B6AC0();
         if (lbl_804BE7D8.count > 0) {
             for (int i = 0; i < lbl_804BE7D8.count; i++) {
                 fn_801345D8(nm, 0x20, "brush:%d", i);
                 t.name = nm;
-                fn_802B6568(&t, "%s", &lbl_804BE7D8.data[i]);
+                UpdateTextElementColor(&t, "%s", &lbl_804BE7D8.data[i]);
                 t.pos.y += row;
             }
         } else {
@@ -906,9 +906,9 @@ void fn_802B7918(void) {
     }
 }
 
-void fn_802B7B08(void) {
+void PopulateLayerDropdown(void) {
     f32 row = (lbl_8055FA48->FindBox("matmap_col"))->h;
-    fn_802B6568(lbl_8055FA48->Find("layer_dropdown"), "Layers");
+    UpdateTextElementColor(lbl_8055FA48->Find("layer_dropdown"), "Layers");
     TextElem t = *lbl_8055FA48->Find("layer_col");
     char nm[0x20];
     if (lbl_8055FA08.Waiting()) {
@@ -917,7 +917,7 @@ void fn_802B7B08(void) {
             for (int i = 0; i < GetLayerCount(layers); i++) {
                 fn_801345D8(nm, 0x20, "layer:%d", i);
                 t.name = nm;
-                fn_802B6568(&t, "%s", fn_802B1C1C(layers, i));
+                UpdateTextElementColor(&t, "%s", fn_802B1C1C(layers, i));
                 t.pos.y += row;
             }
         } else {
@@ -929,21 +929,21 @@ void fn_802B7B08(void) {
 }
 
 void fn_802B7CF0(void) {
-    fn_802B7884("Save Road-Opacity Map");
-    fn_802B7918();
+    UpdateObjectVisibility("Save Road-Opacity Map");
+    UpdateBrushSelector();
 }
 
-void fn_802B7D1C(void) {
-    fn_802B7884("Save Material Maps");
-    fn_802B7918();
-    fn_802B7B08();
+void SaveMaterialMaps(void) {
+    UpdateObjectVisibility("Save Material Maps");
+    UpdateBrushSelector();
+    PopulateLayerDropdown();
 }
 
 #pragma push
 #pragma opt_loop_invariants off
-void fn_802B7D4C(void) {
+void UpdateObjectStatistics(void) {
     if (lbl_8055FA40 == 6) {
-        fn_802B6568(lbl_8055FA48->Find("objects"), "All Objects");
+        UpdateTextElementColor(lbl_8055FA48->Find("objects"), "All Objects");
         return;
     }
     World* w = fn_802B5B6C();
@@ -954,7 +954,7 @@ void fn_802B7D4C(void) {
     if (*clump) {
         cl = "Clumpy";
     }
-    fn_802B6568(lbl_8055FA48->Find("object_clump"), "%s", cl);
+    UpdateTextElementColor(lbl_8055FA48->Find("object_clump"), "%s", cl);
     TextElem num = *lbl_8055FA48->Find("objcolnumber");
     TextElem name = *lbl_8055FA48->Find("objcolname");
     f32 row = (lbl_8055FA48->FindBox("stats_col"))->h;
@@ -965,25 +965,25 @@ void fn_802B7D4C(void) {
         TextElem t = num;
         t.name = nm;
         t.pos.y += row * (f32)i;
-        fn_802B6568(&t, "%d", *it->density);
+        UpdateTextElementColor(&t, "%d", *it->density);
         TextElem t2 = name;
         t2.name = nm;
         t2.pos.y += row * (f32)i;
-        fn_802B6568(&t2, "%s", it->name);
+        UpdateTextElementColor(&t2, "%s", it->name);
     }
     ObjItem it;
     if (fn_802B5B74(&it)) {
         fn_802B67C8("object_box");
         fn_801476C4(lbl_8055FA48->Find("scale_title"));
         fn_801473F8(lbl_8055FA48, "obj_name", "%s", it.name);
-        fn_802B6568(lbl_8055FA48->Find("obj_scale_min"), "%.2f", it.scale->min);
-        fn_802B6568(lbl_8055FA48->Find("obj_scale_max"), "%.2f", it.scale->max);
+        UpdateTextElementColor(lbl_8055FA48->Find("obj_scale_min"), "%.2f", it.scale->min);
+        UpdateTextElementColor(lbl_8055FA48->Find("obj_scale_max"), "%.2f", it.scale->max);
     }
-    fn_802B6568(lbl_8055FA48->Find("objects"), "Object layer: %d", lbl_8055FA40 + 1);
+    UpdateTextElementColor(lbl_8055FA48->Find("objects"), "Object layer: %d", lbl_8055FA40 + 1);
 }
 #pragma pop
 
-int fn_802B8110(int d, const char* s) {
+int AdjustItemDensity(int d, const char* s) {
     int changed = 0;
     int idx = fn_802B5D94(s);
     World* w = fn_802B5B6C();
@@ -1049,7 +1049,7 @@ int fn_802B8310(int d, const char* s) {
 }
 
 static Cmd2 lbl_8034A95C[3] = {
-    {0, fn_802B5DA0, fn_802B8110},
+    {0, fn_802B5DA0, AdjustItemDensity},
     {"obj_scale_min", 0, fn_802B825C},
     {"obj_scale_max", 0, fn_802B8310},
 };
@@ -1136,7 +1136,7 @@ void fn_802B8624(CursorState* in) {
     }
 }
 
-void fn_802B869C(void) {
+void HandleCursorInput(void) {
     if (lbl_8055FA48->IsEditing() == 0) {
         CursorState c;
         if (fn_80127A50(&c)) {
@@ -1156,7 +1156,7 @@ void fn_802B86F8(void) {
 
 int fn_802B8728(void) { return lbl_804BFF80.hover[0] == 0; }
 
-void fn_802B8744(void) {
+void LoadTedashValues(void) {
     lbl_8055FA48 = fn_80145E70("tedash.val");
     lbl_8055FA40 = 6;
     lbl_804BE7D8.count = 0;
@@ -1164,7 +1164,7 @@ void fn_802B8744(void) {
     lbl_8055FA34 = -1;
 }
 
-void fn_802B87A0(void) {
+void UnloadRaceAssets(void) {
     fn_8026E214((void*)lbl_8055FA00);
     SafeDelete(lbl_8055FA48);
     if (lbl_8055FA34 != -1) {
@@ -1176,7 +1176,7 @@ void fn_802B87A0(void) {
 
 void fn_802B87F4(void) {
     if (lbl_8055FA48) {
-        fn_802B869C();
+        HandleCursorInput();
         fn_802B0288(fn_802B59A4(lbl_8055FA3C));
         if (lbl_8055FA38 != 1 && lbl_8055FA40 != 6) {
             fn_802B4E3C(lbl_8055FA40);
@@ -1185,7 +1185,7 @@ void fn_802B87F4(void) {
 }
 
 
-void fn_802B8848(void) {
+void UpdateGameModeDisplay(void) {
     u8 m[0x30];
     if (!lbl_8055FA48) {
         return;
@@ -1196,37 +1196,37 @@ void fn_802B8848(void) {
     if (lbl_8055FA32 && lbl_8055FA34 != -1) {
         fn_802C7040(lbl_8055FA34);
     }
-    fn_80230B5C(m);
+    ResetTransformMatrix(m);
     fn_802C8638(m);
     SetupCameraProjection(1.0f, 1000.0f, 1.4396f);
     fn_802B86F8();
     fn_802B676C();
     if (lbl_8055FA38 != 2 && lbl_8055FA38 != 3) {
-        fn_802B6804();
+        UpdateStatsDisplay();
     }
     switch (lbl_8055FA38) {
     case 0:
-        fn_802B7D4C();
+        UpdateObjectStatistics();
         break;
     case 1:
-        fn_802B69FC();
+        GenerateWorldMap();
         break;
     case 2:
-        fn_802B7D1C();
+        SaveMaterialMaps();
         break;
     case 3:
         fn_802B7CF0();
         break;
     }
-    const char* mode = fn_802B5B18(lbl_8055FA38 % 4);
-    fn_802B6568(lbl_8055FA48->Find("mode_button"), mode);
+    const char* mode = GetResourceTypeName(lbl_8055FA38 % 4);
+    UpdateTextElementColor(lbl_8055FA48->Find("mode_button"), mode);
     lbl_8055FA48->Edit();
     fn_8001123C(0);
     fn_80011A2C();
 }
 
 // Debug-dash key handler (keys arrive as unsigned codes).
-int fn_802B8998(u32 key) {
+int HandleDebugDashInput(u32 key) {
     ILayout* l = lbl_8055FA48;
     if (l) {
         switch (key) {
@@ -1265,7 +1265,7 @@ int fn_802B8998(u32 key) {
     return 0;
 }
 
-void fn_802B8AE0(const char* name, u32* value) {
+void RecordStatValue(const char* name, u32* value) {
     if (fn_802B05E4()) {
         return;
     }

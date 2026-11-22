@@ -49,7 +49,7 @@ public:
     virtual void Throw(const RMtx* m, const RVec3* vel, const RVec3* spin);  // 0x28
 };
 
-extern "C" void fn_801FA7F4(const char* model, const RMtx* m, ValueNode* cfg);
+extern "C" void PlaceObjectWithLift(const char* model, const RMtx* m, ValueNode* cfg);
 
 // A tree class (0x60).
 struct TreeClass {
@@ -121,12 +121,12 @@ void fn_801D0590(IHitListener* l);
 void RemoveCarListener(IHitListener* l);
 void AddRaceListener(IPickupListener* l);
 void fn_801D0824(IPickupListener* l);
-TreeClass* fn_802C110C(int id);
+TreeClass* FindTreeClassById(int id);
 void fn_802C1180(Shake* s);
 Shake* fn_802C120C(void);
 }
 
-// Unnamed namespace: TreeHit's inline Added pools its "name" string with fn_802C1550's (retail has one copy).
+// Unnamed namespace: TreeHit's inline Added pools its "name" string with InitializeTreeObstacles's (retail has one copy).
 namespace {
 
 class TreeHit : public IHitListener, public IPickupListener {
@@ -136,7 +136,7 @@ public:
     virtual void Hit(TreeObj* o, int car) {
         int id = o->Handle() - (u8*)lbl_8055CFA0;
         if (id >= 0 && id < lbl_8055FB2C) {
-            TreeClass* c = fn_802C110C(id);
+            TreeClass* c = FindTreeClassById(id);
             RMtx** tbl = lbl_8055FB30;
             RMtx* t = tbl[id];
             if (t) {
@@ -219,7 +219,7 @@ TreeHit lbl_8055FB40;
 
 extern "C" {
 
-TreeClass* fn_802C110C(int id) {
+TreeClass* FindTreeClassById(int id) {
     TreeClass* c = lbl_804C0810;
     for (int i = 0; i < lbl_8055FB28; i++, c++) {
         if (id >= c->first && id <= c->last) {
@@ -248,7 +248,7 @@ Shake* fn_802C120C(void) {
 void fn_802C1928(void);
 void fn_802C1A08(void);
 
-void fn_802C126C(void) {
+void InitializeTreeHitSystem(void) {
     lbl_8055FB2C = 0;
     lbl_8055FB28 = 0;
     lbl_8055CFA0 = fn_801FB1F4(8000);
@@ -268,7 +268,7 @@ void fn_802C126C(void) {
     fn_802C1A08();
 }
 
-void fn_802C13A4(void) {
+void CleanUpTreeData(void) {
     RemoveCarListener(&lbl_8055FB40);
     fn_801D0824(&lbl_8055FB40);
     TreeClass* c = lbl_804C0810;
@@ -283,7 +283,7 @@ void fn_802C13A4(void) {
     lbl_8055FB28 = 0;
 }
 
-int fn_802C143C(ValueNode* cfg) {
+int InitializeTreeClass(ValueNode* cfg) {
     int n = lbl_8055FB28;
     TreeClass* c = &lbl_804C0810[n];
     c->first = -1;
@@ -322,7 +322,7 @@ static inline void SetV3(void* o_, f32 x, f32 y, f32 z) {
     o[2] = z;
     o[1] = y;
 }
-void fn_802C1550(void) {
+void InitializeTreeObstacles(void) {
     TreeClass* c;
     int i;
     int n;
@@ -366,13 +366,13 @@ void fn_802C1550(void) {
                 m.rot.z.y = 0.0f;
                 m.rot.z.z = 1.0f;
                 SetV3(&m.pos, 0.0f, -1000.0f, 0.0f);
-                fn_801FA7F4(model, &m, c->cfg);
+                PlaceObjectWithLift(model, &m, c->cfg);
             }
         }
     }
 }
 
-void fn_802C173C(f32 time) {
+void UpdateTreeShakeAnimations(f32 time) {
     lbl_8055FB38 = time;
     Shake* s = lbl_804C0E10;
     for (int i = 0; i < 8; i++, s++) {
@@ -428,7 +428,7 @@ void fn_802C1A0C(TreeObj* o, int car) {
     }
     int id = ObjId(o);
     if (id >= 0 && id < lbl_8055FB2C) {
-        TreeClass* c = fn_802C110C(id);
+        TreeClass* c = FindTreeClassById(id);
         RMtx** tbl = lbl_8055FB30;
         if (tbl[id]->pos.y > -2000.0f) {
             CarBody* r = fn_8017960C(car);

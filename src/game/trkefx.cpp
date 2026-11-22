@@ -20,17 +20,17 @@ TableList lbl_804BD8CC;
 
 extern "C" {
 
-void fn_802AE2E0(const char* name) {
+void RegisterValueTable(const char* name) {
     ValueTable* t = fn_80131810(name);
     if (t) {
         *lbl_804BD8CC.Next() = t;
     }
 }
 
-void fn_802AE328(void) {
-    fn_802AE2E0("trkefx.val");
-    fn_802AE2E0("sh_trkefx.val");
-    fn_802AE2E0("race.res/efx.val");
+void LoadEffectFiles(void) {
+    RegisterValueTable("trkefx.val");
+    RegisterValueTable("sh_trkefx.val");
+    RegisterValueTable("race.res/efx.val");
     lbl_8055F958 = 1;
 }
 
@@ -53,7 +53,7 @@ void fn_802AE394(void) {
 ValueNode* fn_802AE414(const char* name) {
     int i;
     if (!lbl_8055F958) {
-        fn_802AE328();
+        LoadEffectFiles();
     }
     for (i = 0; i < lbl_804BD8CC.count; i++) {
         if (lbl_804BD8CC.data[i]->HasChild(name)) {
@@ -65,7 +65,7 @@ ValueNode* fn_802AE414(const char* name) {
 
 ValueTable* fn_802AE4C8(int index) {
     if (!lbl_8055F958) {
-        fn_802AE328();
+        LoadEffectFiles();
     }
     if (index >= 0 && index < lbl_804BD8CC.count) {
         return lbl_804BD8CC.data[index];

@@ -64,7 +64,7 @@ ValVec3* fn_802C9A40(void);
 void* fn_802CA294(s32 tex);
 s32 fn_802CAC28(const char* name, int a);
 void gxForgetTexture(s32 tex);
-void fn_802CAE98(s32 tex, const char* name);
+void SetTextureName(s32 tex, const char* name);
 void fn_802CAF1C(s32 tex, int a, int b);
 s32 fn_802CB128(int w, int h, int a, int b);
 void fn_802CB228(s32 rt);
@@ -478,8 +478,8 @@ void LoadEnvironmentMaps(int mode) {
         }
     }
     lbl_8055ECFC = fn_802CB128(0x100, 0x100, 0, 1);
-    fn_802CAE98(lbl_8055ECFC, name);
-    fn_802CAE98(lbl_8055ED00, "bad*name.tex");
+    SetTextureName(lbl_8055ECFC, name);
+    SetTextureName(lbl_8055ED00, "bad*name.tex");
     fn_802CAF1C(lbl_8055ECFC, 6, 0x50);
     fn_80202BE4();
     lbl_8055ED08 = 1;

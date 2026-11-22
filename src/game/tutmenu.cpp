@@ -83,7 +83,7 @@ int fn_80258104(int* result) {
     return 0;
 }
 
-void fn_8025812C(void) {
+void HandleTutorialMenu(void) {
     lbl_8055F368 = fn_80257FB8();
     int slot = IdentGetCurrentSlot();
     if (lbl_8055F370.slot != slot) {

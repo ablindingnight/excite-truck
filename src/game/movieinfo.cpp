@@ -8,10 +8,10 @@ char* strrchr(const char* s, int c);
 char* strncpy(char* dst, const char* src, u32 n);
 int strcasecmp(const char* a, const char* b);
 s32 fn_802E11A4(const char* name, int flag);  // open movie
-void fn_802E1290(s32 h);                      // close movie
-void fn_802E12DC(s32 h);
+void UnloadBinkMovie(s32 h);                      // close movie
+void UpdateBinkMovie(s32 h);
 struct BinkMovie;
-void fn_802E13D8(BinkMovie* r, f32 x, f32 y, f32 w, f32 h);
+void RenderBinkMovie(BinkMovie* r, f32 x, f32 y, f32 w, f32 h);
 void fn_802E1718(s32 h);
 }
 
@@ -59,7 +59,7 @@ int fn_802ECD68(MovieInfo* m, const char* name, int flag) {
 int fn_802ECDF4(void) {
     if (lbl_805600F8) {
         MovieStackEntry* next;
-        fn_802E1290(lbl_805600F8->handle);
+        UnloadBinkMovie(lbl_805600F8->handle);
         next = lbl_805600F8->next;
         delete lbl_805600F8;
         lbl_805600F8 = next;
@@ -114,16 +114,16 @@ int fn_802ECF90(const char* want, const char* name) {
     return strcasecmp(buf, want) == 0;
 }
 
-void fn_802ECFEC(MovieInfo* m) { fn_802E12DC(m->handle); }
+void fn_802ECFEC(MovieInfo* m) { UpdateBinkMovie(m->handle); }
 
 void fn_802ECFF4(MovieInfo* m) {
     if (!lbl_805600F8) {
-        fn_802E1290(m->handle);
+        UnloadBinkMovie(m->handle);
         delete m;
     }
 }
 
-void fn_802ED038(MovieInfo* m, f32 x, f32 y, f32 w, f32 h) { fn_802E13D8((BinkMovie*)m->handle, x, y, w, h); }
+void fn_802ED038(MovieInfo* m, f32 x, f32 y, f32 w, f32 h) { RenderBinkMovie((BinkMovie*)m->handle, x, y, w, h); }
 
 void fn_802ED040(MovieInfo* m) { fn_802E1718(m->handle); }
 

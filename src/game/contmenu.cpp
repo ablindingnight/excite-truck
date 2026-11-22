@@ -7,7 +7,7 @@
 
 extern "C" {
 const char* fn_80131234(const char* key);  // localize
-void fn_8022BAD0(int style, int x, int y, int z, int w, int h, const char* text, int color, int a, f32 scale);
+void DrawStyledText(int style, int x, int y, int z, int w, int h, const char* text, int color, int a, f32 scale);
 }
 
 static inline void DrawText(const MenuState& menu, int style, int dx, int dy, const char* key, int color) {
@@ -16,7 +16,7 @@ static inline void DrawText(const MenuState& menu, int style, int dx, int dy, co
     w = menu.w;
     y = menu.y;
     x = menu.x;
-    fn_8022BAD0(style, x + dx, y + dy, 0, w, h, fn_80131234(key), color, 0, 1.0f);
+    DrawStyledText(style, x + dx, y + dy, 0, w, h, fn_80131234(key), color, 0, 1.0f);
 }
 
 class Sound {

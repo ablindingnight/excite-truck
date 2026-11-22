@@ -43,8 +43,8 @@ struct Vec3 {
 extern "C" {
 extern f32 lbl_8055D0B4;  // last DMA draw time
 void fn_802E30C8(const char* fmt, ...);  // debug print
-int fn_802044E8(void);
-int fn_80204870(u32);
+int UpdateTuneDashboard(void);
+int HandleTuneInput(u32);
 int fn_802E4A10(void);
 void fn_80129374(int i, int x);
 int fn_80204024(void);
@@ -58,7 +58,7 @@ void fn_801617BC(void);
 void LoadCarTexture(void);
 void fn_8020D178(void);
 void fn_802108C8(void);
-void fn_802B8744(void);
+void LoadTedashValues(void);
 void fn_801769EC(void);
 void fn_801769E0(void);
 void fn_801332D0(int slot, const char* name, s32* value);
@@ -72,7 +72,7 @@ void fn_80127930(void);
 void fn_80127954(void);
 void fn_802D3E9C(int unk);
 void fn_80265D78(void);
-void fn_802B87A0(void);
+void UnloadRaceAssets(void);
 void fn_80210904(void);
 void fn_8020D1C8(void);
 void fn_80206228(void);
@@ -141,7 +141,7 @@ char fn_8012742C(void);  /* PORT: the definition's width (x86 leaves the upper b
 #endif
 void fn_8017691C(void);
 void fn_801CB4DC(void);
-void fn_80230B5C(PlainValMatrix* cam);
+void ResetTransformMatrix(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 void SetupCameraProjection(f32 a, f32 b, f32 c);
 void DrawColoredTextWithShadow(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
@@ -210,8 +210,8 @@ void UpdateTweakDisplay(void);
 int HandleGarageInput(int key);
 void fn_801DE12C(void);
 void fn_801DE150(void);
-void fn_802B8848(void);
-int fn_802B8998(int key);
+void UpdateGameModeDisplay(void);
+int HandleDebugDashInput(int key);
 void fn_802B87F4(void);
 void fn_802B8C88(void);
 void fn_802B8C98(void);
@@ -277,7 +277,7 @@ GameModeEntry lbl_802FBC90[25] = {
     {fn_8020D2D4, fn_8020DB0C, fn_8020DABC, fn_8020D224, fn_8020D29C},
     {fn_8000ACB0, fn_8000ACDC, NULL, fn_80204A50, NULL},
     {UpdateTweakDisplay, HandleGarageInput, NULL, fn_801DE12C, fn_801DE150},
-    {fn_802B8848, fn_802B8998, fn_802B87F4, fn_802B8C88, fn_802B8C98},
+    {UpdateGameModeDisplay, HandleDebugDashInput, fn_802B87F4, fn_802B8C88, fn_802B8C98},
     {fn_80148218, fn_8014821C, fn_80148224, fn_80148228, fn_8014822C},
     {fn_8000AC98, fn_8000AC9C, fn_8000ACA4, fn_8000ACA8, fn_8000ACAC},
     {fn_8021095C, fn_802111E4, fn_802112AC, fn_802113D8, fn_802114C4},
@@ -324,13 +324,13 @@ void fn_8000ACA8(void) {}
 void fn_8000ACAC(void) {}
 
 void fn_8000ACB0(void) {
-    if (!fn_802044E8()) {
+    if (!UpdateTuneDashboard()) {
         fn_80007238();
     }
 }
 
 int fn_8000ACDC(int key) {
-    if (fn_80204870(key)) {
+    if (HandleTuneInput(key)) {
         return 1;
     }
     return fn_800074EC(key);
@@ -421,7 +421,7 @@ void gameloop_begin(RaceSetup* rs) {
     fn_8000CE60();
     fn_8020D178();
     fn_802108C8();
-    fn_802B8744();
+    LoadTedashValues();
     fn_801769EC();
     fn_8000AF04(rs->opts.type);
     for (i = 0, c = lbl_8034F5B8; i < 4; c++, i++) {
@@ -458,7 +458,7 @@ void fn_8000B09C(RaceSetup* rs) {
     for (i = 0, c = lbl_8034F5B8; i < 4; i++, c++) {
         fn_80133348(i + 12, "last_race_cam", c->cam);
     }
-    fn_802B87A0();
+    UnloadRaceAssets();
     fn_80210904();
     fn_8020D1C8();
     fn_8000CEF0();
@@ -946,7 +946,7 @@ void fn_8000C0E8(RaceSetup* rs) {
 
 void fn_8000C5CC(void) {
     PlainValMatrix cam;
-    fn_80230B5C(&cam);
+    ResetTransformMatrix(&cam);
     fn_802C8638(&cam);
     SetupCameraProjection(DemoNear[0], DemoFar[0], DemoFov[0]);
     DrawColoredTextWithShadow(0xFFFFFF00, 9, "DEMO", DemoNear[0], -270.0f, -180.0f);

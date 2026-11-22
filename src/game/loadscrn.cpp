@@ -24,8 +24,8 @@ void fn_8012E81C(const char* name);
 s32 fn_802E2C20(void);
 int fn_802ECC10(void);
 void fn_802C942C(u32 color);
-void fn_80230B5C(LoadView* v);
-void fn_80230AD8(LoadView* v);
+void ResetTransformMatrix(LoadView* v);
+void DrawLoadingScreenElements(LoadView* v);
 void fn_80230B38(void);
 }
 
@@ -75,8 +75,8 @@ extern "C" void fn_802445FC(int track, int eve, int difficulty) {
 extern "C" void fn_80244738(void) {
     LoadingFinish();
     LoadView view;
-    fn_80230B5C(&view);
-    fn_80230AD8(&view);
+    ResetTransformMatrix(&view);
+    DrawLoadingScreenElements(&view);
     fn_802C942C(0xFF000000);
     DrawLoadingTextOnly();
     fn_80230B38();

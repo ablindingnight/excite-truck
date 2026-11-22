@@ -80,10 +80,10 @@ void MenuDoControlUnified(void);
 void fn_80263F30(int a, int b, int c);
 void fn_80230E90(int a);
 void fn_802168BC(int a);
-void fn_8022BAD0(int id, int x, int y, int z, int w, int h, const char* s, int sel, int extra, f32 scale);
+void DrawStyledText(int id, int x, int y, int z, int w, int h, const char* s, int sel, int extra, f32 scale);
 void* fn_80232578(const char* font);
 void fn_802328D4(void* font);
-int fn_802399DC(int unused);
+int ConfirmEraseBody(int unused);
 int fn_802399AC(void);
 extern char lbl_8055BABC[4];
 extern char lbl_8055BAB8[4];
@@ -244,7 +244,7 @@ public:
     virtual int Key(int key) {
         switch (key) {
         case 0xD:
-            if (armed && fn_802399DC(0)) {
+            if (armed && ConfirmEraseBody(0)) {
                 fn_802168BC(6);
                 break;
             }
@@ -259,7 +259,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xCB, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ERASEDATA"), sel, 0, 1.0f);
+        DrawStyledText(0xCB, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ERASEDATA"), sel, 0, 1.0f);
     }
     virtual int Armed(void);
 
@@ -313,7 +313,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:SFXVOLUME"), sel, 0, 1.0f);
+        DrawStyledText(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:SFXVOLUME"), sel, 0, 1.0f);
     }
 };
 
@@ -336,7 +336,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:MUSICVOLUME"), sel, 0, 1.0f);
+        DrawStyledText(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:MUSICVOLUME"), sel, 0, 1.0f);
     }
 };
 
@@ -369,7 +369,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ICONS"), sel, 0, 1.0f);
+        DrawStyledText(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:ICONS"), sel, 0, 1.0f);
     }
 
     u8 special;  // offset 0x1C
@@ -426,7 +426,7 @@ public:
         s32 w0 = w;
         s32 y0 = y;
         s32 x0 = x;
-        fn_8022BAD0(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:RACE_MUSIC"), sel, 0, 1.0f);
+        DrawStyledText(0xC9, x0, y0, 0, w0, h0, fn_80131234("UIOptions:RACE_MUSIC"), sel, 0, 1.0f);
     }
 
     s32 sel;              // offset 0x18
@@ -467,7 +467,7 @@ extern "C" {
 
 int fn_802399AC(void) { return fn_8027B9EC(1) != 0; }
 
-int fn_802399DC(int unused) {
+int ConfirmEraseBody(int unused) {
     int a = fn_80214A38(0x1E);
     int b = fn_80214A38(0x1D);
     int r;
@@ -491,7 +491,7 @@ void fn_80239A94(void) { lbl_8055BAC8 = fn_80214D04(); }
 
 void fn_80239AB8(void) { fn_80214CB4(lbl_8055BAC8); }
 
-void fn_80239AC0(void) {
+void DrawOptionsScreen(void) {
     int done = 0;
     do {
         MenuItem items[] = {
@@ -506,7 +506,7 @@ void fn_80239AC0(void) {
             MenuItem("credits", 0, 0, 16, 0),
             MenuItem("aspectratio", 0, 0, 4, 0),
             MenuItem("audioquality", 0, 0, 5, 0),
-            MenuItem("erasedata", 0, (void*)fn_802399DC, 6, 0),
+            MenuItem("erasedata", 0, (void*)ConfirmEraseBody, 6, 0),
             MenuItem("units", 0, 0, 12, 0),
             MenuItem("stats", 0, 0, 13, 0),
             MenuItem(lbl_8055BAB8, 8, (void*)fn_80236914, 2, 0),
@@ -569,14 +569,14 @@ void fn_80239AC0(void) {
     } while (!done);
 }
 
-int fn_80239DE4(void) {
+int ConfirmTrackMusicChange(void) {
     if (sCur.track != sCur.trackOld && fn_802104D0()) {
         return fn_8021521C(fn_80131234("TrackMusic:CONFIRM_CHANGE_HEAD"), fn_80131234("TrackMusic:CONFIRM_CHANGE_BODY"), 0);
     }
     return 1;
 }
 
-void fn_80239E5C(const OptValues* v, int force) {
+void UpdateAudioSettings(const OptValues* v, int force) {
     SetEffectsVolume(v->sfx);
     fn_8020A5F8(v->music);
     if (force || v->aspect != v->aspectOld) {
@@ -589,7 +589,7 @@ void fn_80239E5C(const OptValues* v, int force) {
 }
 
 int fn_80239EF0(int* result) {
-    fn_80239E5C(&sCur, 0);
+    UpdateAudioSettings(&sCur, 0);
     sCur.aspectOld = sCur.aspect;
     sCur.audioOld = sCur.audio;
     if (lbl_8055F10C->Armed()) {
@@ -648,7 +648,7 @@ extern "C" void fn_80239F74(void) {
                             MenuItem("iconcustom", 5, &iconCap, 0, 0),
                             MenuItem("cerase", 5, &erase, 0, 0),
                             MenuItem("decide", 0, 0, -2, 0),
-                            MenuItem(lbl_8055B860, 6, (void*)fn_80239DE4, -1, 0x1B),
+                            MenuItem(lbl_8055B860, 6, (void*)ConfirmTrackMusicChange, -1, 0x1B),
                             MenuItem(lbl_8055B860, 6, (void*)SoundCaption::Dolby, 0x10, 0x121),
                             *(MenuItem*)&lbl_804986F8,
                         };

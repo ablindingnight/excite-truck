@@ -82,8 +82,8 @@ int fn_80215214(const char* title, const char* message, int flags);
 void fn_80214B44(int item);
 void fn_80214CB4(int item);
 int fn_80232B70(int font);
-void fn_80230C30(f32*, f32*, int, int);
-void fn_80230924(u32, f32, f32, f32, f32, f32);
+void CalculateScreenPosition(f32*, f32*, int, int);
+void DrawColoredQuad(u32, f32, f32, f32, f32, f32);
 void DrawColoredText(const void*, int, f32, f32, u32, int, f32, f32, f32);
 int sprintf(char*, const char*, ...);
 f32 CalculateTextWidth(int font, const char* text, f32 widthScale);
@@ -561,13 +561,13 @@ int ProfileTextState::Key(int key) {
 void ProfileTextState::Draw(void) {
     ProfileTextDrawFields* self=(ProfileTextDrawFields*)this;
     f32 x, y;
-    fn_80230C30(&x, &y, self->x, self->y);
+    CalculateScreenPosition(&x, &y, self->x, self->y);
     if (self->active) self->color = 0xFFFFFFFF;
     else {
         self->color = 0xFF000000;
         int height = self->height;
         f32 width = CalculateTextWidth(self->font, self->text, self->widthScale);
-        width=self->scale*width;fn_80230924(0xFFFFFFFF, x, y, x+width, y - (f32)height, 0.0f);
+        width=self->scale*width;DrawColoredQuad(0xFFFFFFFF, x, y, x+width, y - (f32)height, 0.0f);
     }
     // Use the observed font payload through a typed inline call.
     // The original method name and inline boundary remain unknown.
@@ -578,7 +578,7 @@ void ProfileTextState::Draw(void) {
     sprintf(prefix, "%*.*s", self->cursor, self->cursor, self->text);
     f32 width = CalculateTextWidth(self->font, prefix, self->widthScale) * self->scale;
     f32 cursorX = x + width;
-    fn_80230924(0xFFFFD03F, cursorX - lbl_80563930.v, y, lbl_80563930.v + cursorX,
+    DrawColoredQuad(0xFFFFD03F, cursorX - lbl_80563930.v, y, lbl_80563930.v + cursorX,
                y - (f32)self->height, 0.0f);
 }
 
@@ -653,7 +653,7 @@ inline int ProfileKeyboardState::Key(int key) {
 inline void ProfileKeyboardState::Draw(void) {
     ProfileKeyboardDrawFields* self=(ProfileKeyboardDrawFields*)this;
     f32 x, y;
-    fn_80230C30(&x, &y, self->x, self->y);
+    CalculateScreenPosition(&x, &y, self->x, self->y);
     f32 cellHeight;
     f32 cellWidth = (f32)self->width / 10.0f;
     cellHeight = Mul((f32)self->height, 0.25f);
@@ -666,10 +666,10 @@ inline void ProfileKeyboardState::Draw(void) {
     f32 right = x + cellWidth * (f32)(self->selectedColumn + 1);
     f32 bottom = y - cellHeight * (f32)(self->selectedRow + 1);
     border = 4.0f;
-    fn_80230924(0xFFAF7F00, left, top, left + cellWidth, top - border, 0.0f);
-    fn_80230924(0xFFAF7F00, left, top - cellHeight, left + cellWidth, border + (top - cellHeight), 0.0f);
-    fn_80230924(0xFFAF7F00, left, top, left + border, top - cellHeight, 0.0f);
-    fn_80230924(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - border, top - cellHeight, 0.0f);
+    DrawColoredQuad(0xFFAF7F00, left, top, left + cellWidth, top - border, 0.0f);
+    DrawColoredQuad(0xFFAF7F00, left, top - cellHeight, left + cellWidth, border + (top - cellHeight), 0.0f);
+    DrawColoredQuad(0xFFAF7F00, left, top, left + border, top - cellHeight, 0.0f);
+    DrawColoredQuad(0xFFAF7F00, left + cellWidth, top, (left + cellWidth) - border, top - cellHeight, 0.0f);
     f32 half = 0.5f;
     y = y - cellHeight * half;
     f32 startX = x + cellWidth * half;

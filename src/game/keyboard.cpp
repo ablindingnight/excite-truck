@@ -14,8 +14,8 @@ void fn_802328D4(s32 font);
 void* gxGetImage(const char* name);  // load image
 void fn_802C519C(void* img);
 f32 CalculateTextWidth(s32 font, const char* text, f32 scale);
-void fn_80230C30(f32* x, f32* y, int lx, int ly);
-void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
+void CalculateScreenPosition(f32* x, f32* y, int lx, int ly);
+void DrawColoredQuad(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
 void fn_80230F78(u8* flash, f32* t, u32* color, int a);
 void DrawColoredText(const char* text, s32 font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
 void fn_80230E90(int a);
@@ -226,7 +226,7 @@ void NameChooser::Draw(void) {
     int c;
     f32 px;
     f32 py;
-    fn_80230C30(&px, &py, x, y);
+    CalculateScreenPosition(&px, &py, x, y);
     for (pass = 0; pass < 2; pass++) {
         rowp = lbl_803428B0[0];
         for (r = 0; r < 5; r++, rowp += 16) {
@@ -275,7 +275,7 @@ void NameChooser::Draw(void) {
                             gy = 38.0f * t;
                             box = (flash << 24) | (((box >> 16) & 0xFF) << 16) | (((box >> 8) & 0xFF) << 8) | (box & 0xFF);
                         }
-                        fn_80230924(box, (1.0f + kx) - gx, gy + (ky - 1.0f), gx + ((kx + 32.0f * k->width) - 2.0f),
+                        DrawColoredQuad(box, (1.0f + kx) - gx, gy + (ky - 1.0f), gx + ((kx + 32.0f * k->width) - 2.0f),
                                     (2.0f + (ky - 38.0f)) - gy, 0.0f);
                     }
                     if (sel == (pass == 1)) {
@@ -307,7 +307,7 @@ void NameChooser::Draw(void) {
         *(u16*)ch = 0;
         ch[0] = buf[i];
         if (cursor) {
-            fn_80230924(0x80FFFF00, 2.0f + (nx + 23.0f * i), (17.0f + ny) - 2.0f, 4.0f + ((nx + 23.0f * (i + 1)) - 3.0f),
+            DrawColoredQuad(0x80FFFF00, 2.0f + (nx + 23.0f * i), (17.0f + ny) - 2.0f, 4.0f + ((nx + 23.0f * (i + 1)) - 3.0f),
                         ny - 17.0f, 0.0f);
         }
         DrawColoredText(i < Length() ? ch : "_", font, nx + 23.0f * (0.5f + i), ny, color, 0x14, 0.57f, 0.0f, 1.0f);

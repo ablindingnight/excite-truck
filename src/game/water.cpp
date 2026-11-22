@@ -91,7 +91,7 @@ void fn_802C8B08(PlainValMatrix* cam);
 void fn_802C8638(const PlainValMatrix* cam);
 void fn_802C88BC(int mode);
 void fn_802C10C8(void);
-void fn_802BDD8C(f32 dist);
+void RenderFarTreeBatch(f32 dist);
 void __ct__10CamFrame34Fv(PlainValMatrix* f);
 void fn_80144DAC(PVec* out, const PVec* in);
 void fn_802C8B98(s32 tex, const PlainValMatrix* m);
@@ -638,7 +638,7 @@ inline void WaterEnvMap::RenderBody(void* cam, f32 fov) {
     }
     fn_802C7040(world);
     if (fn_801E85A4() == 1) {
-        fn_802BDD8C(300.0f);
+        RenderFarTreeBatch(300.0f);
     }
     if (envModel != -1) {
         fn_802C7040(envModel);

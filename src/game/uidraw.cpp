@@ -20,7 +20,7 @@ void UIContextEnd(void);
 
 extern "C" {
 void fn_80129C64(int a);
-UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha = 1.0f);
+UIContext* CreateUIContext(const UIXform* xf, f32 alpha = 1.0f);
 
 
 
@@ -72,7 +72,7 @@ void fn_80230C9C(f32* a, f32* b, f32 lo, f32 hi, f32 range);
 void fn_80231380(UIVertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 u32 fn_80230B9C(u32 color);
 
-void fn_80230090(void) {
+void InitializeUIDrawingContext(void) {
     fn_80129C64(2);
     UIContextBegin();
     UIXform xf;
@@ -88,8 +88,8 @@ void fn_80230090(void) {
     xf.translation.v[0] = 0.0f;
     xf.translation.v[1] = 0.0f;
     xf.translation.v[2] = 0.0f;
-    lbl_8055F028 = fn_8022EDE4(&xf);
-    fn_8022ED00(lbl_8055F028);
+    lbl_8055F028 = CreateUIContext(&xf);
+    AppendNodeToUIList(lbl_8055F028);
     InitializeFontSystem();
     InitializeBackgroundSystem();
     fn_8023509C();
@@ -97,8 +97,8 @@ void fn_80230090(void) {
     fn_80236728();
 }
 
-void fn_80230114(void) {
-    fn_8022EDB8();
+void CleanupUIResources(void) {
+    UpdateTopSlot();
     delete lbl_8055F028;
     fn_80236774();
     HandleArtCleanup();
@@ -107,7 +107,7 @@ void fn_80230114(void) {
     UIContextEnd();
 }
 
-void fn_80230150(f32 x, u32 color, int flags, f32 y, f32 z, f32 w, f32 h, f32 speed, f32 t, f32 margin) {
+void DrawAnimatedWidget(f32 x, u32 color, int flags, f32 y, f32 z, f32 w, f32 h, f32 speed, f32 t, f32 margin) {
     f32 x0 = x;
     f32 y0 = y;
     f32 x1 = x0 + w;
@@ -127,7 +127,7 @@ void fn_80230150(f32 x, u32 color, int flags, f32 y, f32 z, f32 w, f32 h, f32 sp
     f32 r = 320.0f;
     f32 b = -240.0f;
     f32 tp = 240.0f;
-    fn_802C8B98(-1, fn_8022EDC4());
+    fn_802C8B98(-1, GetTopUIContext());
     color = fn_80230B9C(color);
     if (flags & 8) {
         l -= margin;
@@ -265,8 +265,8 @@ void fn_802307AC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 sca
     DrawColoredText(text, font, x, y0, color, align, scale, a, 1.0f);
 }
 
-void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
-    fn_802C8B98(-1, fn_8022EDC4());
+void DrawColoredQuad(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
+    fn_802C8B98(-1, GetTopUIContext());
     u32 c = fn_80230B9C(color);
     UIVertex v[4] __attribute__((aligned(16)));
     fn_80231380(&v[0], c, x0, y0, z, 0.0f, 0.0f);
@@ -278,7 +278,7 @@ void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
     fn_802C8D74();
 }
 
-UIVertex fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
+UIVertex CreateUIVertex(u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
     UIVertex r;
     r.position.x = x;
     r.position.y = y;
@@ -289,14 +289,14 @@ UIVertex fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
     return r;
 }
 
-void fn_80230AB8(u32 c, u8* a, u8* r, u8* g, u8* b) {
+void ExtractColorComponents(u32 c, u8* a, u8* r, u8* g, u8* b) {
     *a = c >> 24;
     *r = c >> 16;
     *g = c >> 8;
     *b = c;
 }
 
-void fn_80230AD8(const void* m) {
+void DrawLoadingScreenElements(const void* m) {
     fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
     fn_802C88BC(3);
     fn_802C8530();
@@ -312,7 +312,7 @@ void fn_80230B38(void) {
 // Stripped from ET; only its constant remains.
 f32 UIDrawStrippedPeriod(void) { return 2.0f; }
 
-void fn_80230B5C(UIXform* m) {
+void ResetTransformMatrix(UIXform* m) {
     m->basis.m[0][0] = 1.0f;
     m->basis.m[1][0] = 0.0f;
     m->basis.m[0][2] = 0.0f;
@@ -334,12 +334,12 @@ u32 fn_80230B9C(u32 color) {
     u8 r = 0;
     u8 g = 0;
     u8 b = 0;
-    fn_80230AB8(color, &a, &r, &g, &b);
-    f32 k = fn_8022EDC4()->alpha;
+    ExtractColorComponents(color, &a, &r, &g, &b);
+    f32 k = GetTopUIContext()->alpha;
     return RGBA((int)(a * k), r, g, b);
 }
 
-void fn_80230C30(f32* x, f32* y, int lx, int ly) {
+void CalculateScreenPosition(f32* x, f32* y, int lx, int ly) {
     *x = lx - lbl_8055FB9C / 2;
     *y = lbl_8055FBA0 / 2 - ly;
 }
@@ -432,7 +432,7 @@ void fn_80230F78(u8* alpha, f32* grow, u32* color, int real) {
 void fn_8023108C(u8 on) { lbl_8055B998 = on; }
 
 
-void fn_80231094(int* top, int* bottom, int* left, int* right) {
+void CalculateScreenMargins(int* top, int* bottom, int* left, int* right) {
     f32 k = fn_802C9A68() ? 0.9f : 0.85f;
     f32 inv = 1.0f - k;
     int mx = (int)(0.5f + 0.5f * (640.0f * inv));
@@ -451,8 +451,8 @@ void fn_80231094(int* top, int* bottom, int* left, int* right) {
     }
 }
 
-void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1) {
-    fn_802C8B98(tex, fn_8022EDC4());
+void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1) {
+    fn_802C8B98(tex, GetTopUIContext());
     u32 c = fn_80230B9C(color);
     f32 z = 0.0f;
     UIVertex v[4] __attribute__((aligned(16)));
@@ -474,7 +474,7 @@ void fn_80231380(UIVertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w) {
     v->v = w;
 }
 
-char* fn_8023139C(char* buf, int size, u32 value) {
+char* FormatNumberWithCommas(char* buf, int size, u32 value) {
     int n = size - 1;
     int digits = n - (n - 1) / 3;
     u32 max = 1;

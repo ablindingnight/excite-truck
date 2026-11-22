@@ -22,11 +22,11 @@ void* fn_802C6B44(const char* name);  // load a model
 void fn_802C6C20(void* model);
 const char* fn_802C9C24(void* info);  // texture name
 s32 fn_802B110C(s32 (*load)(const char*), const char* name);
-void fn_802B8AE0(const char* name, s32* value);
+void RecordStatValue(const char* name, s32* value);
 int fn_80129D90(int seed, int lo, int hi);    // random int
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 f32 fn_801E7E18(void);                      // time
-void fn_801F1C24(void* m);                  // camera facing matrix
+void CalculateBillboardFrame(void* m);                  // camera facing matrix
 s32 fn_802C28C0(void);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
@@ -335,8 +335,8 @@ s32 fn_802B1DA0(s32* m) {
 bool fn_802B1DE8(ValueNode* n) { return strcasecmp("object", n->GetName()) == 0; }
 
 void fn_802B1E28(void) {
-    fn_802B8AE0("gobjects", &lbl_8055F9B4);
-    fn_802B8AE0("gobject-tris", &lbl_8055F9B0);
+    RecordStatValue("gobjects", &lbl_8055F9B4);
+    RecordStatValue("gobject-tris", &lbl_8055F9B0);
     lbl_8055F9BC = new ("objloc-allocator") ObjAllocator;
 }
 
@@ -605,7 +605,7 @@ void MatPlacer::Draw(void) {
         }
         if (p->facing) {
             f32 face[9];
-            fn_801F1C24(face);
+            CalculateBillboardFrame(face);
             ObjRot* r = p->rots;
             for (int k = 0; k < 16; k++, r++) {
                 f32* d = r->m;

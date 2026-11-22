@@ -507,7 +507,7 @@ f32 fn_801DCF48(void*, f32, f32);  // (GVec* normal, x, z) in heightfld.cpp: gro
 void fn_801E2CCC(s32 model, const char* name, const CarUIFrame** f);
 void fn_801EFF4C(void);
 void fn_801EFF70(void);
-void fn_801F1C24(void* p);
+void CalculateBillboardFrame(void* p);
 void LoadEnvironmentMaps(int a);
 void fn_80203DC8(void);
 void fn_80203E88(const CarUIFrame* f, const Vec* target, int a);
@@ -1522,7 +1522,7 @@ void CarUIScreen::Draw(void) {
     }
     fn_802C9994(0xFFF5D9);
     u8 env[0x30];
-    fn_801F1C24(env);
+    CalculateBillboardFrame(env);
     fn_802C7730(env);
     f32 refl;
     u32 reflColor;

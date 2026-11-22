@@ -110,7 +110,7 @@ void fn_8012C4D8(void* p);
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
 s32 fn_802CAC28(const char* name, s32 key);
-s32 fn_802CAC34(const char* name, const char* data);
+s32 LoadTextureResourceHeader(const char* name, const char* data);
 void gxForgetTexture(s32 tex);
 void fn_802CB228(s32 tex);
 
@@ -348,7 +348,7 @@ void DrawUiArtItems(const UIXform* m) {
                 p.y += m->translation.v[1];
                 p.z += m->translation.v[2];
             }
-            f32 s = fn_8022EDC4()->scale;
+            f32 s = GetTopUIContext()->scale;
             s = (s > 0.001f) ? s : 0.001f;
             f32 k = 1.0f / s;
 #ifdef __MWERKS__
@@ -365,7 +365,7 @@ void DrawUiArtItems(const UIXform* m) {
             if (m) {
                 fn_802C8B98(lbl_80497F14.data[it->esc].tex, m);
             } else {
-                fn_802C8B98(lbl_80497F14.data[it->esc].tex, fn_8022EDC4());
+                fn_802C8B98(lbl_80497F14.data[it->esc].tex, GetTopUIContext());
             }
             fn_802C8DBC(4);
             f32 x0 = it->x;
@@ -560,7 +560,7 @@ void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXfor
     if (f->outline) {
         passes = 2;
     }
-    f32 lh = f->height * scale * fn_8022EDC4()->scale;
+    f32 lh = f->height * scale * GetTopUIContext()->scale;
     CalculateTextAlignmentOffset(str, f, &px, &py, align, scale, xs);
     while (passes > 0) {
         const bool outline = passes == 2;
@@ -575,7 +575,7 @@ void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXfor
         } else {
             fn_80233DD8(ff, cc);
         }
-        lbl_8055B9A8(str, ff, px, py, z, lh, scale * fn_8022EDC4()->scale, xs, spacing);
+        lbl_8055B9A8(str, ff, px, py, z, lh, scale * GetTopUIContext()->scale, xs, spacing);
         fn_80233EBC();
         if (outline) {
             fn_80231ADC();
@@ -694,7 +694,7 @@ GTextFont* fn_80232578(const char* name) {
     if (strlen(tex) > 16) {
         fn_802E317C("gText: Texture name %s is longer than %d, it's %d", tex, 16, strlen(tex));
     }
-    s32 t = fn_802CAC34(tex, f->texName);
+    s32 t = LoadTextureResourceHeader(tex, f->texName);
     if (t == -1) {
         fn_802E30C8("gText: Failed to extract texture with font- returning NULL font.");
         return NULL;
@@ -771,7 +771,7 @@ f32 CalculateTextWidth(GTextFont* f, const char* s, f32 xs) {
         gaps = (g->pre + g->post) + gaps;
     }
     gaps *= xs;
-    return (w + gaps) * fn_8022EDC4()->scale;
+    return (w + gaps) * GetTopUIContext()->scale;
 }
 
 int fn_80232B70(GTextFont* f) { return f->height; }
@@ -831,7 +831,7 @@ void DrawTextWithOutline(const char* text, GTextFont* f, u32 color, int align, f
     if (*text) {
         f32 lh;
         int passes;
-        lh = f->height * scale * fn_8022EDC4()->unk34;
+        lh = f->height * scale * GetTopUIContext()->unk34;
         CalculateTextAlignmentOffset(text, f, &px, &py, align, scale, xs);
         f32 x0 = px;
         strlen(text);
@@ -1038,7 +1038,7 @@ void CalculateTextAlignmentOffset(const char* s, GTextFont* f, f32* x, f32* y, i
     } else if (align & 4) {
         *x -= Mul(scale * CalculateTextWidth(f, s, xs), 0.5f);
     }
-    f32 cs = fn_8022EDC4()->scale;
+    f32 cs = GetTopUIContext()->scale;
     if (align & 8) {
         *y -= cs * (f->height * scale);
     } else if (align & 0x20) {
@@ -1049,7 +1049,7 @@ void CalculateTextAlignmentOffset(const char* s, GTextFont* f, f32* x, f32* y, i
 }
 
 void fn_80233DD8(GTextFont* f, u32 color) {
-    UIContext* ctx = fn_8022EDC4();
+    UIContext* ctx = GetTopUIContext();
     lbl_8055F050 = fn_80230B9C(color);
     fn_802C8B98(f->tex, ctx);
 }
