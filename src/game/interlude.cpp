@@ -1398,9 +1398,9 @@ void debug_event(void) {
         }
         case 7: {
             TextEvent* tx = (TextEvent*)e;
-            msg->time = lbl_8055E3C8;
             msg->title = tx->text;
             msg->text = tx->title;
+            msg->time = lbl_8055E3C8;
             break;
         }
         default:
