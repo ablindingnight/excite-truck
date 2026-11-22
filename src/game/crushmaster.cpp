@@ -1161,7 +1161,7 @@ inline void CrushMaster::vfA8(int car, int b) {
                 dz = dst.z - pos->z;
                 k = 1.0f / t;
                 v.y = dy * k;
-                v.z = dz * k;
+                v.z = Mul(dz, k);
                 k *= dx;
                 v.x = k;
                 v.y += 9.81f * t;
