@@ -3,12 +3,26 @@
   "game": "Excite Truck",
   "system": "Wii",
   "type": "decomp",
-  "original": { "region": "USA", "serial": "REXE01", "sha1": "e51685814152f377e5c76a50067d8132e25f672b" },
+  "original": {
+    "region": "USA",
+    "serial": "REXE01",
+    "sha1": "e51685814152f377e5c76a50067d8132e25f672b"
+  },
   "project": "Excite Truck decompilation (runtime-decomp fork)",
   "status": "in-progress",
   "toolchain": "Decomp-toolkit",
   "approach": "Matching decompilation (MWCC GC/3.0a5); every commit rebuilds a byte-identical DOL",
-  "maintainers": [{ "name": "ablindingnight", "link": "https://github.com/ablindingnight" }],
-  "links": [{ "label": "Original project", "url": "https://github.com/orangedude27/excite-truck" }],
-  "notes": "Independent fork of orangedude27/excite-truck. 60.5% of code matched exactly (objdiff, Oct 2026): SDK 95.8%, game code 45.5%. Goal: 100% matching with natural source and no matching tricks. Contact: Discord ablindingnight."
+  "maintainers": [
+    {
+      "name": "ablindingnight",
+      "link": "https://github.com/ablindingnight"
+    }
+  ],
+  "links": [
+    {
+      "label": "Original project",
+      "url": "https://github.com/orangedude27/excite-truck"
+    }
+  ],
+  "notes": "Independent fork of orangedude27/excite-truck. 93.2% of code matched exactly (objdiff, Nov 2026): 13,636 of 13,780 functions, data 99.8%; every commit still rebuilds a byte-identical main.dol. Goal: 100% matching with natural source and no matching tricks. Contact: Discord ablindingnight."
 }
