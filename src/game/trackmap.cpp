@@ -397,6 +397,11 @@ static inline f32 Ease(f32 t) {
 static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
+// Name unproven: consumed map texture projection.
+static inline f32 MapTextureV(f32 one, f32 half, f32 scale, f32 value, f32 origin, f32 texSize) {
+    return one - (half + half * scale * value) + origin / texSize;
+}
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
@@ -504,7 +509,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         v.z += zv;
         fn_80231380(&verts[i], color, x + w * (one + half * c.x) * half, y + h * (half * c.y - one) * half,
                     zero, half + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                    one - (half + half * scale * v.y) + map->origin.y / map->texSize);
+                    MapTextureV(one, half, scale, v.y, map->origin.y, map->texSize));
         if (i < 20) {
             v.x = c.x * radius;
             v.y = c.y * radius;
@@ -516,7 +521,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (one + c.x) * half,
                         y + h * (c.y - one) * half, zero,
                         half + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                        one - (half + half * scale * v.y) + map->origin.y / map->texSize);
+                        MapTextureV(one, half, scale, v.y, map->origin.y, map->texSize));
         }
     }
     {
