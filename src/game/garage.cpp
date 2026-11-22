@@ -1082,6 +1082,9 @@ extern "C" {
 // with its colour.
 }  // extern "C"
 
+// Name unproven.
+static inline f32 GarageFadeAlpha(const f32& fade) { return 255.0f * fade; }
+
 void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
     u8* p = (u8*)this;
     CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[i];
@@ -1109,7 +1112,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             f32 pw = fn_80235EF0(art, part) * s;
             f32 s2 = 0.5f + Clamp01(t) * 0.5f;
             f32 ph = fn_80235F64(art, part) * s2;
-            int a = RoundF(255.0f * fade);
+            int a = RoundF(GarageFadeAlpha(fade));
             a = a > 0x13F ? 0x13F : a;
             fn_802354A0(art, part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, pw, ph, (a << 24) | 0xFFFFFF);
         }
