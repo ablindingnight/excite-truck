@@ -723,7 +723,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
             int lvl = MaskLevel(n->size);
             draw = e >= lbl_804BE090[lvl - 1];
             if (!draw) {
-                f32 f = (e - lbl_804BE090[lvl - 1]) / (lbl_804BE090[lvl - 2] - lbl_804BE090[lvl - 1]);
+                f32 f = Unlerp(e, lbl_804BE090[lvl - 1], lbl_804BE090[lvl - 2]);
                 if (1.0f < f) {
                     f = 1.0f;
                 }
