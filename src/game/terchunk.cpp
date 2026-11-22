@@ -2,6 +2,7 @@
 // terchunk.val, streamed in a window around the nearest chunk to the camera, plus the far
 // models. Names are guesses apart from the file names, keys and messages.
 #include "game/common.h"
+#include "game/mathutil.h"
 #include "game/carbody.h"
 #include "game/carinfo.h"
 #include "game/raceopts.h"
@@ -261,7 +262,7 @@ void fn_80202718(void) {
     f32 dy = next->pos.y - cam->origin.y;
     f32 dz = next->pos.z - cam->origin.z;
     ValVec3 v;
-    f32 planarX = dx * cam->basis[0].x + dy * cam->basis[0].y;
+    f32 planarX = Mul(dx, cam->basis[0].x) + dy * cam->basis[0].y;
     f32 planarY = dx * cam->basis[1].x + dy * cam->basis[1].y;
     f32 planarZ = dx * cam->basis[2].x + dy * cam->basis[2].y;
     v.x = planarX + dz * cam->basis[0].z;
