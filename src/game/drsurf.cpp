@@ -448,11 +448,11 @@ void fn_802D4C44(Surf* s) {
             f32 w0 = (1.0f / 255) * v->w0;
             f32 w1 = (1.0f / 255) * v->w1;
             V3 p;
-            p.y = v->y + ba->y * w0;
             p.x = v->x + ba->x * w0;
+            p.y = v->y + ba->y * w0;
             p.z = v->z + ba->z * w0;
-            p.y = p.y + bb->y * w1;
             p.x = p.x + bb->x * w1;
+            p.y = p.y + bb->y * w1;
             p.z = p.z + bb->z * w1;
             f32 wb = lbl_804CA308[v->ib];
             f32 wa = lbl_804CA308[v->ia];
