@@ -298,7 +298,7 @@ static inline void SwapTri(PTri* t) {
 #pragma ppc_unroll_instructions_limit 100
 void fn_801CFA48(PMesh* m) {
     int i;
-    int off = 0;
+    int off;
     for (i = 0; i < 6; i++) {
         SwapWordB((u8*)m + i * 4);
     }
@@ -308,14 +308,13 @@ void fn_801CFA48(PMesh* m) {
     m->verts = (PVec3*)p;
     p += m->numVerts * sizeof(PVec3);
     m->tris = (PTri*)p;
-    for (i = 0; i < m->numCells; off += sizeof(m->cells[0]), i++) {
+    for (i = 0, off = 0; i < m->numCells; off += sizeof(m->cells[0]), i++) {
         SwapCell((PCell*)((u8*)m->cells + off));
     }
     for (i = 0; i < m->numVerts; i++) {
         SwapVec(&m->verts[i]);
     }
-    off = 0;
-    for (i = 0; i < m->numTris; i++, off += sizeof(m->tris[0])) {
+    for (i = 0, off = 0; i < m->numTris; off += sizeof(m->tris[0]), i++) {
         SwapTri((PTri*)((u8*)m->tris + off));
     }
 }
