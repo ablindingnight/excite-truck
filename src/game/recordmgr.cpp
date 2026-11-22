@@ -464,6 +464,13 @@ void fn_801AF65C(void) {
     }
 }
 
+// Final place assignment from the sorted entry list; helper name unproven.
+static inline void AssignRacePlaces(RaceEntries* entries) {
+    for (int i = 0; i < entries->n; i++) {
+        lbl_8055E624->r[entries->order[i]].place = i + 1;
+    }
+}
+
 void fn_801AF6FC(void) {
     RaceState* st = (RaceState*)lbl_80435740;
     int i;
@@ -490,9 +497,7 @@ void fn_801AF6FC(void) {
         }
     }
     qsort(st->entries.order, st->entries.n, 4, (mode == 1) ? fn_801AEB58 : fn_801AEAA4);
-    for (int i = 0; i < st->entries.n; i++) {
-        lbl_8055E624->r[st->entries.order[i]].place = i + 1;
-    }
+    AssignRacePlaces(&st->entries);
     fn_801AEBD0();
     fn_801AE628(fn_80137C4C());
     if (!notRace) {
