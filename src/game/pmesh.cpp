@@ -290,26 +290,23 @@ static inline void SwapTri(PTri* t) {
     SwapWord(&t->d);
 }
 
-/* The target unrolls the 3-edge loop and never hoists a byte load above an
-   earlier byte store; scheduling off reproduces that (281/281 instrs) but the
-   target is otherwise scheduled, so the real cause is still unknown. */
+/* The header is swapped as a loop over its six words (SwapWordB(p + i * 4), the trackmod FlareSourceTMH::Swap
+   spelling): before unrolling, the byte addresses have no known offset, so their alias is the whole object and the
+   scheduler keeps every byte load/store in order while still moving the field loads and loop counters (retail).
+   Written as six SwapWord(&m->field) calls the bytes get exact offsets and interleave. (TC 2026-11-22, schedray) */
 #pragma push
 #pragma ppc_unroll_instructions_limit 100
-#pragma scheduling off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void fn_801CFA48(PMesh* m) {
-    SwapWord(&m->cells);
-    SwapWord(&m->numCells);
-    SwapWord(&m->verts);
-    SwapWord(&m->numVerts);
-    SwapWord(&m->tris);
-    SwapWord(&m->numTris);
+    int i;
+    for (i = 0; i < 6; i++) {
+        SwapWordB((u8*)m + i * 4);
+    }
     u8* p = (u8*)(m + 1);
     m->cells = (PCell*)p;
     p += m->numCells * sizeof(PCell);
     m->verts = (PVec3*)p;
     p += m->numVerts * sizeof(PVec3);
     m->tris = (PTri*)p;
-    int i;
     int off = 0;
     for (i = 0; i < m->numCells; off += sizeof(m->cells[0]), i++) {
         SwapCell((PCell*)((u8*)m->cells + off));
