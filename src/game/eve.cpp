@@ -22,8 +22,8 @@ void LoadCarClassFile(void);
 void fn_8013C8B8(void);
 s32 FindCarClassByChassis(const char* chassis);
 s32 fn_8013C9A4(const char* car_class);
-void fn_8022D0D8(char* buf, int size);
-void fn_8022D0E8(char* buf, int size, const char* s);
+void ClearStringFlags(char* buf, int size);
+void AppendStringToList(char* buf, int size, const char* s);
 }
 
 #include "game/league.h"
@@ -330,10 +330,10 @@ void ParseTrack(Track* t, int index, ValueNode* node, const char* file) {
 
     memset(t, 0, sizeof(Track));
     t->index = index;
-    fn_8022D0D8(leagues, sizeof(leagues));
+    ClearStringFlags(leagues, sizeof(leagues));
     for (i = 0; i < 4; i++) {
         const char* name = fn_80137C54(i)->name;
-        fn_8022D0E8(leagues, sizeof(leagues), name);
+        AppendStringToList(leagues, sizeof(leagues), name);
     }
     {
         const char* key = "league";

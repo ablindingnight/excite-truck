@@ -27,7 +27,7 @@ extern const u32 lbl_8055E1A0 = MakeILPos(0xFFFF, 0);
 
 extern "C" {
 
-CSubTaskMgr* fn_8013C9F4(int type) {
+CSubTaskMgr* CreateSubTaskManager(int type) {
     if (type == 0) {
         return new ("csubtasktmgr") CSubTaskMgr;
     }

@@ -28,7 +28,7 @@ u8 lbl_8055E8C0;  // loaded
 
 extern "C" {
 
-void fn_801D02B0(void) {
+void LoadSurfaceTypes(void) {
     SurfType* s;
     ValueTable* def;
     ValueTable* trk;
@@ -71,7 +71,7 @@ SurfType* fn_801D04A8(int i) {
     return &lbl_80338098[i];
 }
 
-s32 fn_801D04D0(const char* name) {
+s32 GetSurfaceTypeId(const char* name) {
     SurfName names[13] = {
         {"default", 100}, {"concrete", 101}, {"metal", 105},  {"plastic", 106},        {"rubber", 107},
         {"wood", 108},    {"wall", 110},     {"hay", 111},    {"powerup", 1000},       {"magic_concrete", 114},

@@ -86,7 +86,7 @@ extern "C" {
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, u8* first, u8* swapped);
 void fn_8012C4D8(void* res);
 void fn_8012E96C(const char* name);
-void fn_801D02B0(void);
+void LoadSurfaceTypes(void);
 void fn_801D049C(void);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
@@ -460,7 +460,7 @@ void load_ground(int fake) {
         lbl_8055E994 = fn_801DCD24;
     }
     lbl_8055E9A4 = 1;
-    fn_801D02B0();
+    LoadSurfaceTypes();
 }
 
 void fn_801DCDA0(void) {}

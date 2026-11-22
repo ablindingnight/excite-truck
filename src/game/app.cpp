@@ -113,7 +113,7 @@ void fn_80129BD4(void);
 void fn_801E78A0(void);
 void RunModelTextureViewer(void);
 void fn_8023B6B0(void);
-void fn_80129BF8(void);
+void CleanUpResources(void);
 void fn_80265D4C(void);
 
 void fn_80127434(void);
@@ -322,7 +322,7 @@ void AppMain(void) {
         fn_8023B6B0();
     }
     AppShutdown();
-    fn_80129BF8();
+    CleanUpResources();
     fn_80265D4C();
 }
 

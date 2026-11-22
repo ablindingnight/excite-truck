@@ -63,11 +63,11 @@ int FindFirstFile(const char* pattern, char* name, s32 n);  // find first
 int FileFindNext(int h, char* name, s32 n);                // find next
 void FileFindClose(int h);                                  // find close
 void fn_802E4CA8(char* dst, const char* src, s32 n);
-int fn_802E7354(const char* path);
-void fn_802E746C(int h, s32* sector, s32* size);
-int fn_802E748C(s32 sector, void* buf, s32 size);  // start read
+int LoadStreamFile(const char* path);
+void GetStreamFileOffsetAndSize(int h, s32* sector, s32* size);
+int ReadStreamSector(s32 sector, void* buf, s32 size);  // start read
 int fn_802E7544(int h);                            // read done
-void fn_802E7548(int h);                           // finish read
+void HandleAsyncResourceCancel(int h);                           // finish read
 char* strlwr(char* s);
 void fn_801282F4(void);
 void fn_801282EC(s32 align);
@@ -486,9 +486,9 @@ int FindResourceSector(const char* name, s32* sizeOut) {
     s32 size;
     int h;
     fn_802E4CA8(path, name, sizeof(path));
-    h = fn_802E7354(path);
+    h = LoadStreamFile(path);
     if (h != -1) {
-        fn_802E746C(h, &sector, &size);
+        GetStreamFileOffsetAndSize(h, &sector, &size);
         if (sizeOut) {
             *sizeOut = size;
         }
@@ -1002,7 +1002,7 @@ s32 AsyncResource::Span(void) {
 void AsyncResource::Load(u8* dst, s32 n, s32 offs) {
     if (!(entry->flags & 8)) {
         s32 pos = offs + Start();
-        handle = fn_802E748C(set->fd + pos / 0x800, dst, n);
+        handle = ReadStreamSector(set->fd + pos / 0x800, dst, n);
         buf = dst + (pos & 0x7FF);
         size = n;
     } else {
@@ -1018,7 +1018,7 @@ u8* AsyncResource::Poll(s32* sizeOut) {
     ResEntry* e;
     u8* data = 0;
     if (handle != -1 && fn_802E7544(handle)) {
-        fn_802E7548(handle);
+        HandleAsyncResourceCancel(handle);
         handle = -1;
     }
     if (handle == -1 && buf) {
@@ -1038,7 +1038,7 @@ u8* AsyncResource::Poll(s32* sizeOut) {
 
 void AsyncResource::Cancel(void) {
     if (handle != -1) {
-        fn_802E7548(handle);
+        HandleAsyncResourceCancel(handle);
         handle = -1;
         buf = 0;
     }
@@ -1077,7 +1077,7 @@ public:
         switch (state) {
         case 2:
             if (handle != -1) {
-                fn_802E7548(handle);
+                HandleAsyncResourceCancel(handle);
                 handle = -1;
             }
             set.Unload();
@@ -1105,7 +1105,7 @@ public:
             if (sector != -1) {
                 fileSize = bufSize;
                 if (fileSize <= bufSize) {
-                    handle = fn_802E748C(sector, buf, fileSize);
+                    handle = ReadStreamSector(sector, buf, fileSize);
                     if (handle != -1) {
                         state = 2;
                         set.Init(name, path, 0, sector);
@@ -1179,7 +1179,7 @@ extern "C" int fn_8012CC20(AsyncResourceSet* s, const char* name) { return s->Re
 int AsyncResourceSet::Restart(const char* name) {
     if (state == 2 && fn_802E7544(handle) && Ready()) {
         int ok;
-        fn_802E7548(handle);
+        HandleAsyncResourceCancel(handle);
         handle = -1;
         CopyHeader(&set.hdr, (ResSetHeader*)buf);
         fn_8012A80C(&set.hdr);
@@ -1209,7 +1209,7 @@ int AsyncResourceSet::Restart(const char* name) {
     switch (state) {
     case 2:
         if (handle != -1) {
-            fn_802E7548(handle);
+            HandleAsyncResourceCancel(handle);
             handle = -1;
         }
         set.Unload();
@@ -1230,7 +1230,7 @@ inline void AsyncResourceSet::Open(const char* name, char* path, int sector, int
     if (sector != -1) {
         fileSize = bufSize;
         if (fileSize <= bufSize) {
-            handle = fn_802E748C(sector, buf, fileSize);
+            handle = ReadStreamSector(sector, buf, fileSize);
             if (handle != -1) {
                 state = 2;
                 set.Init(name, path, 0, sector);
@@ -1279,7 +1279,7 @@ inline void AsyncResourceSet::Retry(void) {
 void AsyncResourceSet::Update(void) {
     if (state == 2 && fn_802E7544(handle)) {
         int ok;
-        fn_802E7548(handle);
+        HandleAsyncResourceCancel(handle);
         handle = -1;
         set.hdr = *(ResSetHeader*)buf;
         fn_8012A80C(&set.hdr);

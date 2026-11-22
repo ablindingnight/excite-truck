@@ -46,9 +46,9 @@ StrmBank* lbl_8055FFF0;
 
 extern "C" {
 
-StrmBank* fn_802E769C(void);
+StrmBank* CreateNullStreamBank(void);
 
-void fn_802E7578(void) { lbl_8055FFF0 = fn_802E769C(); }
+void fn_802E7578(void) { lbl_8055FFF0 = CreateNullStreamBank(); }
 
 void fn_802E759C(void) {
     if (lbl_8055FFF0) {
@@ -59,7 +59,7 @@ void fn_802E759C(void) {
 
 int fn_802E75E4(s32 a) { return lbl_8055FFF0->LoadBank(a); }
 
-void fn_802E75FC(s32 a) {
+void UnloadAudioBank(s32 a) {
     fn_802E30C8("+StrmUnloadBank");
     lbl_8055FFF0->UnloadBank(a);
     fn_802E30C8("-StrmUnloadBank");
@@ -69,7 +69,7 @@ void fn_802E765C(s32 a, s32 b, s32 c) { lbl_8055FFF0->vf14(a, b, c); }
 
 void fn_802E7684(s32 a) { lbl_8055FFF0->vf20(a); }
 
-StrmBank* fn_802E769C(void) {
+StrmBank* CreateNullStreamBank(void) {
     OSGetConsoleType();
     fn_802E30C8("StrmBank: creating 'null' manager");
     return new ("NullStrmBank") NullStrmBank;

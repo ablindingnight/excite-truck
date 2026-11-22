@@ -36,7 +36,7 @@ extern f32 lbl_8055E3C8;    // time
 extern s32 lbl_8055E3C4;    // frame
 extern f32 __float_epsilon[];  // FLT_EPSILON
 
-// The AI sub-task manager (fn_8013C9F4, CSubTaskMgr family: destructor at 0x08).
+// The AI sub-task manager (CreateSubTaskManager, CSubTaskMgr family: destructor at 0x08).
 class DAI {
 public:
     virtual ~DAI(void);
@@ -171,7 +171,7 @@ int fn_801769F8(void);
 int fn_80179630(int view);  // car of a local player
 int fn_800081F0(EventDesc* r);
 DMaster* fn_801B83A0(void);
-DAI* fn_8013C9F4(int a);
+DAI* CreateSubTaskManager(int a);
 void fn_80204A1C(const char* key, u8* out);
 
 int fn_801B8928(int car, TeleportInfo* t, int a);
@@ -829,7 +829,7 @@ void InitializeRaceSettings(EventDesc* r) {
     lbl_8055E680 = fn_800081F0(fn_801769CC());
     lbl_8055E68C = fn_801B83A0()->GetAI();
     if (!lbl_8055E68C) {
-        lbl_8055E68C = fn_8013C9F4(0);
+        lbl_8055E68C = CreateSubTaskManager(0);
     }
     lbl_8055E674 = 0;
 }

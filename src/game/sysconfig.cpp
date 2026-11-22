@@ -21,9 +21,9 @@ extern "C" {
 
 int fn_802E98C8(void) { return 0; }
 
-void fn_802E99AC(void);
+void UpdateWpadSettings(void);
 
-void fn_802E98D0(void) {
+void InitializeSystemConfig(void) {
     u32 status;
     SCInit();
     do {
@@ -54,12 +54,12 @@ void fn_802E98D0(void) {
     }
     lbl_8056004C = SCGetProgressiveMode() == 1;
     lbl_80560040 = 1;
-    fn_802E99AC();
+    UpdateWpadSettings();
 }
 
 void fn_802E99A8(void) {}
 
-void fn_802E99AC(void) {
+void UpdateWpadSettings(void) {
     lbl_8056004D = SCGetWpadMotorMode() == 1;
     lbl_80560050 = SCGetWpadSpeakerVolume() / 127.0f;
 }

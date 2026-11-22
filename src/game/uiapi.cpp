@@ -608,7 +608,7 @@ extern "C" WidgetFragment* __ct__5gTextFiiiP11OwnedWidgetPv(WidgetFragment*, int
 extern "C" WidgetFragment* __ct__8ArrowBtnFiiPviiPvff(WidgetFragment*, int, int, void*, int, int, void*, float, float);
 extern "C" void fn_802E30C8(const char *, ...);
 extern "C" int fn_80129BC4(void);
-extern "C" unsigned int fn_8022D1B4(const char*);
+extern "C" unsigned int CountNullTerminatedStrings(const char*);
 extern "C" void fn_802168EC(void*, WidgetFragment*, int);
 extern "C" void fn_80215298(s32 *, s32 *, s32 *, s32 *, s32, s32, s32);
 // Float parameter positions follow the call site's evaluation order (scale is read after the value pointer).
@@ -906,7 +906,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             if (list) {
                 value = list->value;
                 low = 0;
-                high = (void*)fn_8022D1B4((const char*)list->arg1);
+                high = (void*)CountNullTerminatedStrings((const char*)list->arg1);
             } else {
                 value = &lbl_8055EF4C;
                 low = 0;
@@ -1022,7 +1022,7 @@ extern "C" void fn_802123B8(void* window, UIDesc* d, void* styles) {
             list = (const char*)multi->arg1;
         }
         if (d->dx > 0) {
-            fn_8022D1B4(list);
+            CountNullTerminatedStrings(list);
             if (d->dx - 37 <= 10) {
                 break;
             }

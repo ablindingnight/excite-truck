@@ -1156,7 +1156,7 @@ public:
 };
 
 extern "C" {
-int fn_801D04D0(const char* name);  // surface type by name
+int GetSurfaceTypeId(const char* name);  // surface type by name
 void fn_801D0590(ISurfaceListener* l);
 void RemoveCarListener(ISurfaceListener* l);
 void fn_801E1F78(void);  // lightning flash
@@ -1185,7 +1185,7 @@ public:
         delay = t->GetFloat("delay", 0.0f);
         length = t->GetFloat("length");
         groupId = t->GetIntValue("group_id");
-        surftype = fn_801D04D0(t->GetValue("surftype"));
+        surftype = GetSurfaceTypeId(t->GetValue("surftype"));
         fn_801D0590(this);
         state = 1;
         start = 0.0f;

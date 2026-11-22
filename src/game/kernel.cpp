@@ -542,7 +542,7 @@ void fn_802E3498(void);
 void fn_801293B4(void);
 void LogBuildInfo(void);
 void InitializeMemorySystem(u32 size);
-void fn_802E98D0(void);
+void InitializeSystemConfig(void);
 void fn_802E7318(void);
 void fn_802E46B0(void);
 void fn_80127C8C(void);
@@ -583,7 +583,7 @@ int fn_802E2A5C(void) {
     LogBuildInfo();
     fn_802E2A54();
     InitializeMemorySystem(0x2000000);
-    fn_802E98D0();
+    InitializeSystemConfig();
     fn_802E7318();
     fn_802E46B0();
     fn_80127C8C();

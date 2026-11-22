@@ -17,7 +17,7 @@ void fn_80129BD4(void) {
     InitializeTocLib();
 }
 
-void fn_80129BF8(void) {
+void CleanUpResources(void) {
     ResourceEnd();
     fn_80129C60();
 }

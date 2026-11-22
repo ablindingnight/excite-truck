@@ -19,7 +19,7 @@ void* __nwa__FUlPCc(u32 size, const char* tag);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal
 int fn_8012C33C(const char* name);       // file exists
-StringTable* fn_8012F150(const char* name);
+StringTable* LoadStringTable(const char* name);
 int fn_8012F2E4(StringTable* t);
 int fn_8012F2E8(StringTable* t);
 const char* fn_8012F2F0(StringTable* t, int row, int col);
@@ -174,7 +174,7 @@ gArtSet* fn_80234E88(const char* name) {
 
 void LoadArtSetFromTable(gArtSet* s, const char* file) {
     if (fn_8012C33C(file)) {
-        StringTable* t = fn_8012F150(file);
+        StringTable* t = LoadStringTable(file);
         int rows = fn_8012F2E8(t);
         Picture* prev = NULL;
         for (int i = 0; i < rows; i++) {

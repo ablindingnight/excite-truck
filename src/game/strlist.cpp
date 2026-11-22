@@ -10,12 +10,12 @@ static UnkStatic123 lbl_80497DE0;
 
 extern "C" {
 
-void fn_8022D0D8(char* list, int) {
+void ClearStringFlags(char* list, int) {
     list[1] = 0;
     list[0] = 0;
 }
 
-void fn_8022D0E8(char* list0, int size0, const char* s) {
+void AppendStringToList(char* list0, int size0, const char* s) {
     char* list;
     int size;
     int len;
@@ -40,7 +40,7 @@ void fn_8022D0E8(char* list0, int size0, const char* s) {
     }
 }
 
-int fn_8022D1B4(const char* list) {
+int CountNullTerminatedStrings(const char* list) {
     int n = 0;
     do {
         n++;

@@ -22,7 +22,7 @@ void fn_801DCDA4(void);
 void fn_802E3D00(void);
 void fn_80206484(const char* name);
 void* fn_801292CC(const char* name);
-void fn_80129324(void* p);
+void UnloadAudioBankQueue(void* p);
 void fn_80206518(void);
 void fn_8020CA38(void);
 void LoadTrackMusic(RaceSetup* rs);
@@ -194,7 +194,7 @@ void fn_8000A8C4(RaceSetup* rs) {
 }
 
 void fn_8000AA38(RaceSetup* rs) {
-    fn_80129324(lbl_8055D3B0);
+    UnloadAudioBankQueue(lbl_8055D3B0);
     lbl_8055D3B0 = 0;
     fn_80206518();
     fn_8020CA38();

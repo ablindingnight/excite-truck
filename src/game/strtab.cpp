@@ -21,7 +21,7 @@ ModuleTag lbl_8055E018;
 
 extern "C" {
 
-StringTable* fn_8012F150(const char* name) {
+StringTable* LoadStringTable(const char* name) {
     bool swap;
     u32 version;
     StringTable* t = (StringTable*)fn_8012C370(name, 'STAB', &version, 0, 0, &swap);

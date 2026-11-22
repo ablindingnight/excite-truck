@@ -27,7 +27,7 @@ ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);
 void fn_801796CC(u8 type, const void* data, u32 n);
 void fn_801A4868(void* obj, int a);
-int fn_801D04D0(const char* name);  // surface type by name
+int GetSurfaceTypeId(const char* name);  // surface type by name
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 }
 
@@ -132,7 +132,7 @@ void LoadPhobConfig(PhobConfig* c, ValueNode* t) {
     c->spring = t->GetFloat("spring", 1.5f * (9.81f * c->mass / 0.03f));
     c->friction = t->GetFloat("friction", 1.0f);
     if (t->Has("surf_type")) {
-        c->surf = fn_801D04D0(t->GetValue("surf_type"));
+        c->surf = GetSurfaceTypeId(t->GetValue("surf_type"));
     } else {
         c->surf = 100;
     }

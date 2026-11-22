@@ -85,7 +85,7 @@ f32 fn_80291784(void) {
     return zfar - 1.0f;
 }
 
-void fn_802917C0(FlareSet* fs, ValueNode* node) {
+void InitializeSunFlareSet(FlareSet* fs, ValueNode* node) {
     f32 maxR = 0.0f;
     fs->count = 0;
     while (fs->count < 8) {
@@ -123,7 +123,7 @@ void fn_802919AC(FlareSet* fs) {
     }
 }
 
-void fn_80291A1C(void) {
+void InitializeSunSprite(void) {
     f32 radius = 300.0f;
     ValueNode* n = fn_802AE414("sun");
     if (n != NULL) {
@@ -158,7 +158,7 @@ void fn_80291B14(const SunVecP* p, f32 depth) {
     lbl_804B4010.visible = vis;
 }
 
-void fn_80291B9C(FlareSet* fs, const SunVecP* p, f32 depth) {
+void UpdateSunFlareVisibility(FlareSet* fs, const SunVecP* p, f32 depth) {
     fs->sunPos = *p;
     TransformWorldToScreen(p, &fs->screen);
     fs->screen.z = depth;
@@ -300,13 +300,13 @@ void fn_80292114(void) {
         ValueTable* t = fn_80131810("flare.val");
         if (t != NULL) {
             if (t->HasChild("sun")) {
-                fn_802917C0(&lbl_804B3EC0, t->FindChild("sun"));
+                InitializeSunFlareSet(&lbl_804B3EC0, t->FindChild("sun"));
             }
             fn_80131818(t);
         } else {
             lbl_804B3EC0.count = 0;
         }
-        fn_80291A1C();
+        InitializeSunSprite();
     }
 }
 
@@ -317,7 +317,7 @@ void fn_802921F4(void) {
     }
 }
 
-void fn_8029222C(void) {
+void HideSunFlares(void) {
     if (lbl_8055F75C) {
         SunFlare* f = lbl_804B3EC0.flares;
         for (int i = 0; i < lbl_804B3EC0.count; f++, i++) {
@@ -356,7 +356,7 @@ void fn_8029231C(const SunVecP* dir) {
         p.z = c->origin.z + dir->z * dist;
         f32 depth = fn_80291784();
         fn_80291B14(&p, depth);
-        fn_80291B9C(&lbl_804B3EC0, &p, depth);
+        UpdateSunFlareVisibility(&lbl_804B3EC0, &p, depth);
     }
 }
 

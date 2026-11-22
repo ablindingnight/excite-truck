@@ -33,7 +33,7 @@ extern "C" {
 
 int fn_802E72B8(int bytes) { return (bytes + 0x7FF) / 0x800; }
 
-int fn_802E72C8(s32 sector) {
+int FindSectorIndex(s32 sector) {
     int i;
     for (i = 0; i < lbl_8055FFD8; i++) {
         if (sector >= lbl_804FC978[i].start && sector < lbl_804FC978[i].end) {
@@ -54,7 +54,7 @@ void StrmEnd(void) {
     fn_802E30C8("StrmEnd: used %d of %d entries, %d sectors", lbl_8055FFD8, 0x100, lbl_8055FFDC);
 }
 
-int fn_802E7354(const char* name) {
+int LoadStreamFile(const char* name) {
     int i;
     s32 f;
     int k;
@@ -83,14 +83,14 @@ int fn_802E7354(const char* name) {
     return -1;
 }
 
-void fn_802E746C(int idx, s32* start, s32* size) {
+void GetStreamFileOffsetAndSize(int idx, s32* start, s32* size) {
     StrmFile* e = &lbl_804FC978[idx];
     *start = e->start;
     *size = e->size;
 }
 
-s32 fn_802E748C(s32 sector, void* buf, s32 len) {
-    int idx = fn_802E72C8(sector);
+s32 ReadStreamSector(s32 sector, void* buf, s32 len) {
+    int idx = FindSectorIndex(sector);
     StrmFile* e;
     s32 f;
     s32 off;
@@ -115,6 +115,6 @@ s32 fn_802E748C(s32 sector, void* buf, s32 len) {
 
 int fn_802E7544(int id) { return fn_802E3990(id); }
 
-void fn_802E7548(s32 f) { fn_802E3734(&f); }
+void HandleAsyncResourceCancel(s32 f) { fn_802E3734(&f); }
 
 }  // extern "C"

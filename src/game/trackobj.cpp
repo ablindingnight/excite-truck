@@ -399,7 +399,7 @@ void fn_802C6C20(void* model);
 void fn_802C70AC(void* model, const OFrame* f, int a, int mode);
 void fn_802C7AE0(void* model, const OFrame* f, int a, f32 alpha);
 void fn_801BFD34(void* out, const void* p, const OFrame* m);
-s32 fn_801D04D0(const char* surface);
+s32 GetSurfaceTypeId(const char* surface);
 void fn_802E317C(const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);
 ValueNode* fn_8013184C(void);
@@ -873,7 +873,7 @@ int fn_801F8988(ObstacleDesc* d, ValueNode* vn) {
         d->inertia[0] = vn->GetFloat("mx", 10000.0f);
         d->inertia[1] = vn->GetFloat("my", 10000.0f);
         d->inertia[2] = vn->GetFloat("mz", 10000.0f);
-        d->surface = vn->Has("surf_type") ? fn_801D04D0(vn->GetValue("surf_type")) : 100;
+        d->surface = vn->Has("surf_type") ? GetSurfaceTypeId(vn->GetValue("surf_type")) : 100;
         d->friction = vn->GetFloat("friction", 1.0f);
         ReadShape(d, vn);
         return 1;

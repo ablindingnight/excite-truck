@@ -5,7 +5,7 @@ extern "C" {
 int sprintf(char* buf, const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 s32 fn_802E75E4(const char* name);
-void fn_802E75FC(s32 bank);
+void UnloadAudioBank(s32 bank);
 void fn_802E765C(s32 bank, s32 a, s32 b);
 #ifdef __MWERKS__
 void fn_802E7684(f32 volume);
@@ -27,9 +27,9 @@ void fn_801292CC(const char* name) {
     lbl_8055DFA8 = fn_802E75E4(buf);
 }
 
-void fn_80129324(void*) {
+void UnloadAudioBankQueue(void*) {
     fn_802E30C8("SpuQueueUnloadBank!");
-    fn_802E75FC(lbl_8055DFA8);
+    UnloadAudioBank(lbl_8055DFA8);
     lbl_8055DFA8 = 0;
 }
 

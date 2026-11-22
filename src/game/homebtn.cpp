@@ -25,7 +25,7 @@ u8 SCGetLanguage(void);
 int fn_802D9BF0(void);
 s32 fn_802E2C20(void);
 void* fn_802E8668(int i);  // KPAD status
-void fn_802E99AC(void);
+void UpdateWpadSettings(void);
 void fn_802E7C40(void);
 void fn_802E5438(void);
 void fn_802E2E38(int mode);
@@ -247,7 +247,7 @@ void HandleHomeButtonActivation(void) {
             c->kpad = fn_802E8668(i);
         }
         if (HBMCalc(lbl_80558898) >= 0) {
-            fn_802E99AC();
+            UpdateWpadSettings();
             fn_802E7C40();
             fn_802E5438();
             fn_802E30C8("homebtn: leaving home menu");

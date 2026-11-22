@@ -162,7 +162,7 @@ struct Rank {
 };
 
 extern "C" {
-void fn_801584D4(s32 type, int car, int rank);
+void NotifyAllRacers(s32 type, int car, int rank);
 }
 
 struct RankTable : FixedList<struct Rank, 10> {
@@ -298,7 +298,7 @@ public:
                 }
             }
             ranks.a.data[r].total += p;
-            fn_801584D4(Type(), car, Rank());
+            NotifyAllRacers(Type(), car, Rank());
         }
     }
     void Dump(void) {
@@ -1836,7 +1836,7 @@ inline CountSound::CountSound(const char* a, const char* b, int car) {
 }
 
 extern "C" {
-static inline void fn_80157560(Tracker* t) {
+static inline void LoadStuntRankData(Tracker* t) {
     ValueTable* vt = fn_80131810("stunts.val");
     ValueTable* def = fn_80131808("stuntdef.val");
     ValueNode* node;
@@ -1899,7 +1899,7 @@ public:
         list.Push(new ("crashtracker") CrashTracker(hud, c));
         list.Push(new ("ringtracker") RingTracker(hud, c));
         for (i = 0; i < list.Count(); i++) {
-            fn_80157560(*list.At(i));
+            LoadStuntRankData(*list.At(i));
         }
         active = 1;
         car = c;
@@ -2055,7 +2055,7 @@ Meter* fn_801572A4(StuntFactory* hud, int car, f32* hispeed) {
 extern "C" {
 
 
-void fn_801584D4(s32 type, int car, int rank) {
+void NotifyAllRacers(s32 type, int car, int rank) {
     int i;
     for (i = 0; i < lbl_8042FD34.a.count; i++) {
         lbl_8042FD34.a.data[i]->Notify(type, car, rank);

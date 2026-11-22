@@ -25,7 +25,7 @@ int fn_801CB6B4(int a, int b, int c);
 void fn_801B0C78(int car);
 void fn_801B0F70(int a, int b);
 void InitializeDeitySnapshot(void* r);
-int fn_8013C9F4(int a);
+int CreateSubTaskManager(int a);
 }
 
 int GetNumPlayers(void);
@@ -290,7 +290,7 @@ void GameMode::vfA8(int a, int b) { fn_801B0F70(a, b); }
 
 void GameMode::FillResults(void* r) { InitializeDeitySnapshot(r); }
 
-int GameMode::Reset(void) { return fn_8013C9F4(0); }
+int GameMode::Reset(void) { return CreateSubTaskManager(0); }
 
 // NonMatching: the code matches, but the null master's vtable needs the GameMode default virtuals
 // (weak copies in zone, modeinl, aiutil, racing, overlay, betarace and aidriver) named first.

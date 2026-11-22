@@ -249,7 +249,7 @@ int fn_802A9FB0(const void* ev) {
     return 8;
 }
 
-void fn_802A9FE0(StuntPart* p) {
+void ResetStuntPartData(StuntPart* p) {
     for (int i = 0; i < 16; i++) {
         p->pts[i].x = 0.0f;
         p->pts[i].y = 0.0f;
@@ -277,7 +277,7 @@ void fn_802AA0EC(StuntPart* p) {
 }
 
 // Projects v onto the plane of a and b.
-void fn_802AA100(Vec* out, const Vec* v, const Vec* a, const Vec* b) {
+void ProjectVectorOntoPlane(Vec* out, const Vec* v, const Vec* a, const Vec* b) {
     f32 da = PSVECDotProduct(v, a);
     f32 db = PSVECDotProduct(v, b);
     Vec ta;
@@ -316,7 +316,7 @@ static inline void SetXYZ(T* v, f32 x, f32 y, f32 z) { /* Helper name unproven *
 extern "C" {
 
 /* Helper unproven: a function retail compiled here and the linker stripped (nothing calls it). It is known only by
-   its constants: -1, 1, 3, 2 enter the pool between fn_802AA0C8 and fn_802AA25C, and 3 is not read by fn_802AA25C.
+   its constants: -1, 1, 3, 2 enter the pool between fn_802AA0C8 and UpdateStuntTrail, and 3 is not read by UpdateStuntTrail.
    The body (clamp to -1..1, then the 3 - 2t smoothing) is a guess that creates them in that order. */
 static f32 Smooth(f32 t) {
     t = MIN(MAX(t, -1.0f), 1.0f);
@@ -330,7 +330,7 @@ static inline f32 TrailAlpha(f32 growth, f32 power) {
     return Lerp(0.0f, growth, fraction);
 }
 
-void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
+void UpdateStuntTrail(StuntPart* p, const StuntCar* car, f32 dt) {
     p->phase = fmod(p->phase + 8.0f * dt, 1.0);
     if (p->power >= 0.35f && !p->hold && p->trig) {
         p->trig = 0;
@@ -357,7 +357,7 @@ void fn_802AA25C(StuntPart* p, const StuntCar* car, f32 dt) {
         SetXYZ(&w[1], car->wheel3.x, 0.0f, car->wheel3.z);
         MulVec(&w[0], &w[0], car->axes);
         MulVec(&w[1], &w[1], car->axes);
-        fn_802AA100(&n, (const Vec*)&car->spin, &car->axes[0], &car->axes[2]);
+        ProjectVectorOntoPlane(&n, (const Vec*)&car->spin, &car->axes[0], &car->axes[2]);
         if (PSVECDotProduct(&n, &n) > 0.010000001f) {
             PSVECNormalize(&n, &n);
             f32 facing = PSVECDotProduct(&n, &car->axes[2]);
@@ -444,7 +444,7 @@ void fn_802AA9D4(StuntPart* p, const StuntCar* car, f32 dt) {
     }
 }
 
-void fn_802AAC80(StuntPart* p, const StuntCar* car, f32 dt) {
+void UpdateSparkAmount(StuntPart* p, const StuntCar* car, f32 dt) {
     fn_801E86F8(0);
     if (p->spark) {
         p->spark = 0;
@@ -459,7 +459,7 @@ void fn_802AAC80(StuntPart* p, const StuntCar* car, f32 dt) {
     }
 }
 
-void fn_802AAD5C(void* cam, StuntPart* p, const StuntCar* car) {
+void DrawStuntTrail(void* cam, StuntPart* p, const StuntCar* car) {
     fn_802C8BD0(lbl_8055CC60);
     fn_801E866C(-1);
     if (p->alpha > 0.01f) {
@@ -530,7 +530,7 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
 
 void fn_802AB5B8(void);
 
-void fn_802AB21C(void) {
+void InitializeStuntEffects(void) {
     lbl_8055F928 = new ("efxstuntcar") StuntPart[8];
     lbl_8055F924 = new ("stuntpart") StuntEmitters;
     fn_802AB5B8();
@@ -567,7 +567,7 @@ void fn_802AB5B8(void) {
     for (int i = 0; i < 8; i++) {
         StuntPart* p = &lbl_8055F928[i];
         p->index = i;
-        fn_802A9FE0(p);
+        ResetStuntPartData(p);
         fn_802AA0C8(p);
         fn_802AA0EC(p);
     }
@@ -579,9 +579,9 @@ void fn_802AB628(f32 dt) {
         const StuntCar* car = fn_80287B24(i);
         StuntPart* p = &lbl_8055F928[i];
         fn_802AA1D0(i);
-        fn_802AA25C(p, car, dt);
+        UpdateStuntTrail(p, car, dt);
         fn_802AA9D4(p, car, dt);
-        fn_802AAC80(p, car, dt);
+        UpdateSparkAmount(p, car, dt);
     }
 }
 
@@ -593,7 +593,7 @@ void fn_802AB6D4(void) {
     for (int i = 0; i < n; i++) {
         const StuntCar* car = fn_80287B24(i);
         StuntPart* p = &lbl_8055F928[i];
-        fn_802AAD5C(cam, p, car);
+        DrawStuntTrail(cam, p, car);
         fn_802AAF00(cam, p, car);
         fn_802AAF04(cam, p, car);
     }

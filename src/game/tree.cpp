@@ -35,7 +35,7 @@ ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* table);
 s32 fn_802CAC28(const char* name, int a);  // texture handle
 void gxForgetTexture(s32 tex);
-int fn_801D04D0(const char* name);  // surface type by name
+int GetSurfaceTypeId(const char* name);  // surface type by name
 void fn_80127464(void);             // keep alive
 void fn_802B8AE0(const char* name, s32* value);
 int fn_802B05E4(void);
@@ -438,7 +438,7 @@ void fn_802BCBDC(void) {
                 t->nearTris = fn_802B1DA0(t->nearId);
                 t->sway = n->GetFloat("sway_radius", 0.0f);
                 t->run = n->GetBool("tree_run", 1);
-                t->surf = fn_801D04D0(n->GetString("surf_type", "tree"));
+                t->surf = GetSurfaceTypeId(n->GetString("surf_type", "tree"));
                 t->cls = fn_802C143C(n);
                 RVec3 c;
                 ReadCyl(t, n, c);

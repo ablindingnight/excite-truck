@@ -270,7 +270,7 @@ void fn_80217D84(void*);void fn_80217C4C(void*);
 
 extern "C" {
 
-unsigned int fn_8022D1B4(const char*);
+unsigned int CountNullTerminatedStrings(const char*);
 unsigned int strlen(const char*);int fn_80228F40(int,int);void fn_8021D61C(WidgetFragment*);
 }
 
@@ -1461,7 +1461,7 @@ void IntNumeric::Slot74(int, void*) {fn_8021CF9C(((WidgetFragment*)this));}
 Multi::Multi(int x,int y,int* value,const char* list,int height,int first,int second,int style) : UILabel(x,y,0,height,0,0) {WidgetFragment* self=(WidgetFragment*)this;
  ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)self;
  fields->first=first;fields->second=second;fields->style=style;fields->value=value;fields->count=0;
- fields->choices=(const char**)__nwa__FUlPCc(fn_8022D1B4(list)*4,"multi_vlist");
+ fields->choices=(const char**)__nwa__FUlPCc(CountNullTerminatedStrings(list)*4,"multi_vlist");
  while(*list){fields->choices[fields->count++]=list;list+=strlen(list)+1;}
  fn_80219440(self,0,value,4);fn_8021D61C(self);fields->focus=0;fields->token=fn_80228F40(x,y);}
 void Multi::Slot14(void) {
