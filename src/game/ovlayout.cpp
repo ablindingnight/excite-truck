@@ -1058,6 +1058,26 @@ static inline DynArray<BoxCmd>* ReadBoxCmdArray(ValueNode* n, const char* name) 
     return items;
 }
 
+// Art command collection reader; helper name unproven.
+static inline DynArray<GartCmd>* ReadGartCmdArray(ValueNode* n, const char* name) {
+    ValueNode* e;
+    int c = CountChildAt(n, name);
+    DynArray<GartCmd>* ag = new ("overlaycmd_dsa") DynArray<GartCmd>(c);
+    for (int i = 0;; i++) {
+        e = n->GetChildAt(i);
+        if (!e) {
+            break;
+        }
+        if (!strcasecmp(e->GetName(), name)) {
+            GartCmd* gc = ag->Add();
+            gc->elem = e->GetValue("elem");
+            gc->art = e->GetValue("art");
+            gc->idx = e->GetIntValue("idx");
+        }
+    }
+    return ag;
+}
+
 static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     int c;
     ValueNode* e;
@@ -1078,23 +1098,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
         }
     }
     o->texts = at;
-    DynArray<GartCmd>* ag;
-    name = "gart_cmd";
-    c = CountChildAt(n, name);
-    ag = new ("overlaycmd_dsa") DynArray<GartCmd>(c);
-    for (int i = 0;; i++) {
-        e = n->GetChildAt(i);
-        if (!e) {
-            break;
-        }
-        if (!strcasecmp(e->GetName(), name)) {
-            GartCmd* gc = ag->Add();
-            gc->elem = e->GetValue("elem");
-            gc->art = e->GetValue("art");
-            gc->idx = e->GetIntValue("idx");
-        }
-    }
-    o->garts = ag;
+    o->garts = ReadGartCmdArray(n, "gart_cmd");
     o->boxes = ReadBoxCmdArray(n, "box_cmd");
 }
 
