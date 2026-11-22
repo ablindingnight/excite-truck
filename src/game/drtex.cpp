@@ -340,8 +340,22 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
     return t;
 }
 
-void fn_802D81C4(GXTexDesc* d, const char*) {
+/* Helper name unproven: copy linear CI4 bytes into GX tile order. */
+static inline void TileCI4(u8* tex, const u8* tmp, int w, int h, int row) {
     const u8* wa;
+    int tw = w / 2 / 4;
+    const u8* src = tmp;
+    int y;
+    for (y = 0; y < h; y++) {
+        wa = src;
+        for (int x = 0; x < w / 2; wa++, x++) {
+            tex[((y / 8) * tw + x / 4) * 32 + (y % 8) * 4 + x % 4] = *wa;
+        }
+        src += row;
+    }
+}
+
+void fn_802D81C4(GXTexDesc* d, const char*) {
     s32 w = d->w;
     u8* tex;
     s32 h = d->h;
@@ -361,16 +375,7 @@ void fn_802D81C4(GXTexDesc* d, const char*) {
     fn_801282EC(0x20);
     u8* tmp = new ("tmp_tx8") u8[row * h];
     memcpy(tmp, tex, row * h);
-    int tw = w / 2 / 4;
-    const u8* src = tmp;
-    int y;
-    for (y = 0; y < h; y++) {
-        wa = src;
-        for (int x = 0; x < w / 2; wa++, x++) {
-            tex[((y / 8) * tw + x / 4) * 32 + (y % 8) * 4 + x % 4] = *wa;
-        }
-        src += row;
-    }
+    TileCI4(tex, tmp, w, h, row);
     delete[] tmp;
 }
 
