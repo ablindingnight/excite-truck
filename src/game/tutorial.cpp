@@ -2,6 +2,7 @@
 // stunt challenges with a list of required stunts, freestyle challenges with a score threshold), their HUD
 // pop-ups and results screen, and the save-slot progress through the tutorial events. Names are guesses
 // apart from the strings. FIRST DRAFT: the challenge classes' methods are not written yet.
+#include "game/mathutil.h"
 #include "game/common.h"
 #include "game/pathset.h"
 #include "game/rmtx.h"
@@ -1734,7 +1735,7 @@ static inline int QueryLongestSide(const TVec2& a, const TVec2& b, const TVec2& 
     best = 2;
     max = d.x * d.x + d.z * d.z;
     e.z = a.z - b.z;
-    len = e.x * e.x + e.z * e.z;
+    len = Sq(e.x) + e.z * e.z;
     if (len > max) {
         max = len;
         best = 0;
