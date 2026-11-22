@@ -1371,7 +1371,9 @@ void debug_event(void) {
                     break;
                 }
                 f32 spd = tp->speed;
-                place.vel.Set(place.place.basis[2].x * spd, place.place.basis[2].y * spd, place.place.basis[2].z * spd);
+                place.vel.x = place.place.basis[2].x * spd;
+                place.vel.y = place.place.basis[2].y * spd;
+                place.vel.z = place.place.basis[2].z * spd;
                 ((CarBody*)car)->SetState((const BodyState*)&place);
                 if (CarTypeIsReal(car->player, 0) && (fn_801769CC()->type & 0x1400)) {
                     fn_801B8E28(i);
