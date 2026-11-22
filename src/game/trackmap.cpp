@@ -402,6 +402,14 @@ static inline f32 MapTextureV(f32 one, f32 half, f32 scale, f32 value, f32 origi
     return one - (half + half * scale * value) + origin / texSize;
 }
 
+// Name unproven: initialize the real right row via its first float member.
+static inline void SetMapRightRow(f32* first, f32 x, f32 y, f32 z) {
+    Vec3* row = (Vec3*)first;
+    row->x = x;
+    row->y = y;
+    row->z = z;
+}
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
@@ -470,9 +478,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         }
         tpos.x = tr->mtx.pos.x;
         tpos.y = tr->mtx.pos.z;
-        basis.right.y = 0.0f;
-        basis.right.x = 1.0f;
-        basis.right.z = 0.0f;
+        SetMapRightRow(&basis.right.x, 1.0f, 0.0f, 0.0f);
         basis.up.x = 0.0f;
         basis.up.y = 0.0f;
         basis.up.z = 1.0f;
