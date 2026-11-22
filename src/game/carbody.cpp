@@ -2335,7 +2335,7 @@ void fn_80186DE8(void) {
         F.x += f.x;
         F.y += f.y;
         F.z += f.z;
-        RVec3 T(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
+        RVec3 T(CbAdd(m->torque.x, t.x), m->torque.y + t.y, m->torque.z + t.z);
         m->force = CbSolVec4(F.x, F.y, F.z);
         m->torque = CbSolVec4(T.x, T.y, T.z);
         if (PSVECDotProduct((const Vec*)(car + 0x124), (const Vec*)(car + 0x124)) > 100.0f) {
@@ -2412,7 +2412,7 @@ void fn_80186DE8(void) {
             wet = 1.0f;
         }
         f32 slip;
-        grip = st->grip * wet;
+        grip = Mul(st->grip, wet);
         slip = st->slip * wet;
         f32 gas;
         f32 steerK;
@@ -2518,7 +2518,7 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->accel.y = vel.y * 59.94f + ((CarBody*)car)->vel.y * -59.94f;
         ((CarBody*)car)->accel.z = vel.z * 59.94f + ((CarBody*)car)->vel.z * -59.94f;
         ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + ((CarBody*)car)->avel.x * -59.94f;
-        ((CarBody*)car)->aaccel.y = avel.y * 59.94f + ((CarBody*)car)->avel.y * -59.94f;
+        ((CarBody*)car)->aaccel.y = Mul(avel.y, 59.94f) + ((CarBody*)car)->avel.y * -59.94f;
         ((CarBody*)car)->aaccel.z = avel.z * 59.94f + ((CarBody*)car)->avel.z * -59.94f;
         ((CarBody*)car)->vel.x = vel.x;
         ((CarBody*)car)->vel.y = vel.y;
