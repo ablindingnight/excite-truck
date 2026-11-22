@@ -625,16 +625,16 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     fn_802C8DB8(verts, 41, idx, 180);
     fn_802C8D74();
     fn_801EA9A0(view);
-    for (i = 0; i < fn_801EA994(); i++) {
+    for (int truck = 0; truck < fn_801EA994(); truck++) {
         f32 fade;
         int part;
         TruckDraw* d;
-        bool self = i == fn_801E866C(map->player);
+        bool self = truck == fn_801E866C(map->player);
         if (self) {
             continue;
         }
-        fn_801EA9A0(i);
-        Vec3 rel = *(const Vec3*)&fn_8017960C(i)->mtx.pos;
+        fn_801EA9A0(truck);
+        Vec3 rel = *(const Vec3*)&fn_8017960C(truck)->mtx.pos;
         rel.x = rel.x - basis.pos.x;
         f32 yv = basis.pos.y;
         rel.y = rel.z - yv;
@@ -655,9 +655,9 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         {
             f32 py = rel.y + (y - h / 2.0f);
             f32 px = rel.x + (x + w / 2.0f);
-            part = i == d->self ? 1 : 3;
+            part = truck == d->self ? 1 : 3;
             f32 size = fade * fn_80235EF0(d->art, part);
-            fn_80235AFC(d->art, part, -1, px, py, 0.0f, size, size, d->icons[i].angle);
+            fn_80235AFC(d->art, part, -1, px, py, 0.0f, size, size, d->icons[truck].angle);
         }
     }
     Vec2 tp;  // Actual final truck-position workspace; writes remain at their original points.
