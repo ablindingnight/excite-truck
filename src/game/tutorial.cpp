@@ -1711,7 +1711,7 @@ static inline void ReadBound(ValueNode* n, int k, TVec2* w) {
 }
 
 // Helper names unproven.
-static inline f32 QueryMidX(f32 a, f32 b) { return a + (b - a) / 2.0f; }
+static inline f32 QueryMidX(f32 a, f32 b) { return a + 0.5f * (b - a); }
 static inline f32 QueryMidZ(f32 a, f32 b) { return a + 0.5f * (b - a); }
 static inline TVec2 QueryMid2(const TVec2& a, const TVec2& b) {
     TVec2 r;
