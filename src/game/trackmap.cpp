@@ -410,6 +410,28 @@ static inline void SetMapRightRow(f32* first, f32 x, f32 y, f32 z) {
     row->z = z;
 }
 
+// Name unproven: prepare the actual truck-icon output, including relative heading.
+static inline void PrepareTruckIcons(TruckDraw* draw, int me, int view) {
+    int i;
+    memset(draw->icons, 0, sizeof(draw->icons));
+    draw->count = fn_801EA994();
+    for (i = 0; i < draw->count; i++) {
+        CarInfo* r = fn_801EA9A0(i);
+        draw->icons[i].part = FindDriver(r->setup.driver)->color;  // the driver's colour picks its map icon
+        if (r->draw) {
+            draw->icons[i].angle = -Atan2F(r->draw->pose.rot.m[6], r->draw->pose.rot.m[8]);
+        }
+    }
+    {
+        Mtx34 m = *fn_801E8718(me);
+        f32 rot = -Atan2F(m.m[1][2], m.m[2][0]);
+        for (i = 0; i < draw->count; i++) {
+            draw->icons[i].angle -= rot;
+        }
+    }
+    draw->self = view;
+}
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
@@ -441,23 +463,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     sf->lap = fn_801EA9A0(view)->params.lap;
     draw = map->trucks;
     me = map->player;
-    memset(draw->icons, 0, sizeof(draw->icons));
-    draw->count = fn_801EA994();
-    for (i = 0; i < draw->count; i++) {
-        CarInfo* r = fn_801EA9A0(i);
-        draw->icons[i].part = FindDriver(r->setup.driver)->color;  // the driver's colour picks its map icon
-        if (r->draw) {
-            draw->icons[i].angle = -Atan2F(r->draw->pose.rot.m[6], r->draw->pose.rot.m[8]);
-        }
-    }
-    {
-        Mtx34 m = *fn_801E8718(me);
-        f32 rot = -Atan2F(m.m[1][2], m.m[2][0]);
-        for (i = 0; i < draw->count; i++) {
-            draw->icons[i].angle -= rot;
-        }
-    }
-    draw->self = view;
+    PrepareTruckIcons(draw, me, view);
     {
         f32 dist = fn_801EA9A0(view)->draw->lapDist;
         f32 t;
