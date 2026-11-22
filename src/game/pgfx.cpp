@@ -37,7 +37,7 @@ void fn_802C8E70(const ValVec3* p, ValVec3* out);
 int fn_802C8FF4(ValVec3* p, f32 margin);
 void DrawTextWithBackground(int x, int y, const char* text);
 void fn_802E317C(const char* fmt, ...);
-void fn_801EEFDC(int (*handler)(const PGfxEvent*), int kind);
+void RegisterEventHandler(int (*handler)(const PGfxEvent*), int kind);
 void EventUnInstallHandler(int (*handler)(const PGfxEvent*));
 
 int pgfx_handler(const PGfxEvent* ev) {
@@ -71,7 +71,7 @@ int pgfx_handler(const PGfxEvent* ev) {
     }
 }
 
-void fn_801B6604(void) { fn_801EEFDC(pgfx_handler, 3); }
+void fn_801B6604(void) { RegisterEventHandler(pgfx_handler, 3); }
 
 void fn_801B6614(void) { EventUnInstallHandler(pgfx_handler); }
 

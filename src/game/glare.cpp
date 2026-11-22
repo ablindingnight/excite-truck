@@ -92,14 +92,14 @@ Streaks lbl_804DB6A0;
 
 extern "C" {
 
-void fn_802DD4FC(void) {
+void InitializeBlurTexture(void) {
     GXRenderModeObj* rm = fn_802D2D14();
     lbl_8055FED0 = rm->fbWidth;
     lbl_8055FED4 = rm->efbHeight;
     lbl_8055FED8 = new ("blur_tex") BlurTex(lbl_8055FED0, lbl_8055FED4, 1);
 }
 
-void fn_802DD5F4(void) {
+void ClearBlurTexture(void) {
     BlurTex* t = lbl_8055FED8;
     if (t) {
         delete[] t->data;
@@ -157,9 +157,9 @@ void fn_802DD738(int i, f32 power) { lbl_804DB6A0.s[i].power = power; }
 
 void fn_802DD750(void) {}
 
-void fn_802DE788(void);
+void ConfigureGraphicsPipeline(void);
 void fn_802DEA6C(void);
-void fn_802DD898(Streak* s, int pass, f32 scale, f32 k);
+void DrawLightStreakEffect(Streak* s, int pass, f32 scale, f32 k);
 
 static inline int AnyGlare(void) {
     for (int i = 0; i < lbl_804DB6A0.count; i++) {
@@ -176,7 +176,7 @@ void fn_802DD754(void) {
     Streak* s;
     int pass;
     if (AnyGlare()) {
-        fn_802DE788();
+        ConfigureGraphicsPipeline();
         for (pass = 0; pass < 5; pass++) {
             t = lbl_8055FED8;
             GXSetTexCopySrc((u16)0, (u16)0, (u16)lbl_8055FED0, (u16)lbl_8055FED4);
@@ -186,7 +186,7 @@ void fn_802DD754(void) {
             GXLoadTexObj((const GXTexObj*)&lbl_8055FED8->obj, (GXTexMapID)0);
             s = lbl_804DB6A0.s;
             for (j = 0; j < lbl_804DB6A0.count; j++) {
-                fn_802DD898(s, pass, (f32)(1 << pass), 0.5f);
+                DrawLightStreakEffect(s, pass, (f32)(1 << pass), 0.5f);
                 s++;
             }
         }
@@ -254,7 +254,7 @@ static inline void GlareVtx(GVtx* buf, int* n, Streak* s, f32 fx, f32 fy, u32 co
 }
 
 // Draws one light streak as a framed quad: an outer ring (lit at the edge, faded inside) as a strip.
-void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
+void DrawLightStreakEffect(Streak* s, int pass, f32 scale, f32 k) {
     f32 powerv = s->power;
     int a = (int)(k * (255.0f * powerv));
     a = a > 0 ? a : 0;
@@ -298,7 +298,7 @@ void fn_802DD898(Streak* s, int pass, f32 scale, f32 k) {
 
 void fn_802DE774(void) { lbl_804DB6A0.count = 0; }
 
-void fn_802DE788(void) {
+void ConfigureGraphicsPipeline(void) {
     GXVtxDescList desc[4] = {{(GXAttr)9, (GXAttrType)2}, {(GXAttr)0xD, (GXAttrType)2}, {(GXAttr)0xB, (GXAttrType)2}, {(GXAttr)0xFF, (GXAttrType)0}};
     GXClearVtxDesc();
     GXSetVtxDescv(desc);

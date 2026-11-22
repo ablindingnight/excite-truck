@@ -78,21 +78,21 @@ FileTable lbl_804DB810;
 
 extern "C" {
 
-int fn_802E321C(const char* path) {
+int IsNandPath(const char* path) {
     const char* prefix = "nand:";
     return strncmp(path, prefix, strlen(prefix)) == 0;
 }
 
-int fn_802E3270(const char* path) {
+int IsPathOnSdCard(const char* path) {
     const char* prefix = "sd:";
     return strncmp(path, prefix, strlen(prefix)) == 0;
 }
 
 FileSystem* fn_802E32C4(const char* path) {
-    if (path && fn_802E321C(path) && lbl_8055FF20) {
+    if (path && IsNandPath(path) && lbl_8055FF20) {
         return lbl_8055FF20;
     }
-    if (path && fn_802E3270(path) && lbl_8055FF24) {
+    if (path && IsPathOnSdCard(path) && lbl_8055FF24) {
         return lbl_8055FF24;
     }
     return NULL;
@@ -122,7 +122,7 @@ FileFinder* FileSystem::Finder(void) { return NULL; }
 
 extern "C" {
 
-FileEntry* fn_802E33D8(int id, const char* file, int line) {
+FileEntry* ValidateFileEntry(int id, const char* file, int line) {
     if (id < 0 || id == -1 || id > 0x10) {
         fn_802E317C("file: bad file_id %d (%s, %d)", id, file, line);
     }
@@ -180,7 +180,7 @@ int fn_802E367C(const char* name) {
     return -1;
 }
 
-int fn_802E36D8(const char* name) {
+int LoadFileWithName(const char* name) {
     File* f = fn_802E333C(name)->Open(name);
     if (f) {
         return fn_802E35C0(name, f);
@@ -189,7 +189,7 @@ int fn_802E36D8(const char* name) {
 }
 
 void fn_802E3734(int* id) {
-    FileEntry* e = fn_802E33D8(*id, "file.cpp", 228);
+    FileEntry* e = ValidateFileEntry(*id, "file.cpp", 228);
     File* f = e->f;
     f->Disk()->Close(f);
     e->f = NULL;
@@ -197,12 +197,12 @@ void fn_802E3734(int* id) {
     *id = -1;
 }
 
-s32 fn_802E37C4(int id) { return fn_802E33D8(id, "file.cpp", 293)->f->Size(); }
+s32 GetFileSize(int id) { return ValidateFileEntry(id, "file.cpp", 293)->f->Size(); }
 
 void fn_802E3898(int id, void* buf, s32* len);
 
-void fn_802E3804(int id, void* buf, s32 len) {
-    FileEntry* e = fn_802E33D8(id, "file.cpp", 304);
+void ReadFileBuffer(int id, void* buf, s32 len) {
+    FileEntry* e = ValidateFileEntry(id, "file.cpp", 304);
     s32 n = len;
     fn_802E3898(id, buf, &n);
     if (n != len) {
@@ -211,7 +211,7 @@ void fn_802E3804(int id, void* buf, s32 len) {
 }
 
 void fn_802E3898(int id, void* buf, s32* len) {
-    FileEntry* e = fn_802E33D8(id, "file.cpp", 322);
+    FileEntry* e = ValidateFileEntry(id, "file.cpp", 322);
     s32 want = *len;
     s32 got = 0;
     while (want > 0) {
@@ -229,9 +229,9 @@ void fn_802E3898(int id, void* buf, s32* len) {
     *len = got;
 }
 
-int fn_802E3930(int id, void* buf, s32 len) { return fn_802E33D8(id, "file.cpp", 350)->f->ReadAsync(buf, len); }
+int ReadFileAsync(int id, void* buf, s32 len) { return ValidateFileEntry(id, "file.cpp", 350)->f->ReadAsync(buf, len); }
 
-int fn_802E3990(int id) { return fn_802E33D8(id, "file.cpp", 364)->f->IsDone(); }
+int fn_802E3990(int id) { return ValidateFileEntry(id, "file.cpp", 364)->f->IsDone(); }
 
 int fn_802E39D0(int id, void* buf, s32 len) {
     s32 n = len;
@@ -239,10 +239,10 @@ int fn_802E39D0(int id, void* buf, s32 len) {
     return n == len;
 }
 
-int fn_802E3A14(int id, s32 pos) { return fn_802E33D8(id, "file.cpp", 427)->f->Seek(pos); }
+int FileSeekToPosition(int id, s32 pos) { return ValidateFileEntry(id, "file.cpp", 427)->f->Seek(pos); }
 
-int fn_802E3A64(int id, const void* buf, s32 len) {
-    return fn_802E33D8(id, "file.cpp", 451)->f->Write(buf, len) == len;
+int WriteFileData(int id, const void* buf, s32 len) {
+    return ValidateFileEntry(id, "file.cpp", 451)->f->Write(buf, len) == len;
 }
 
 void fn_802E3AD0(int id, const char* fmt, ...) {
@@ -251,13 +251,13 @@ void fn_802E3AD0(int id, const char* fmt, ...) {
     va_start(args, fmt);
     vsprintf(buf, fmt, args);
     if (id != -666) {
-        fn_802E3A64(id, buf, strlen(buf));
+        WriteFileData(id, buf, strlen(buf));
     } else if (fn_802E333C(NULL)) {
         fn_802E333C(NULL)->Print(buf);
     }
 }
 
-s32 fn_802E3BB4(void* a, void* b, void* c) {
+s32 FindFirstFile(void* a, void* b, void* c) {
     FileFinder* f = fn_802E339C();
     if (f) {
         return f->FindFirst(a, b, c);
@@ -285,7 +285,7 @@ void FileFindClose(void* a) {
 
 void fn_802E3D00(void) {}
 
-int fn_802E3D04(const char* name) {
+int LoadFileFromSystem(const char* name) {
     FileSystem* fs = fn_802E336C(name);
     if (fs) {
         File* f = fs->Open(name);
@@ -296,7 +296,7 @@ int fn_802E3D04(const char* name) {
     return -1;
 }
 
-int fn_802E3D68(const char* name) {
+int CreateFileFromName(const char* name) {
     FileSystem* fs = fn_802E336C(name);
     if (fs) {
         File* f = fs->Create(name);

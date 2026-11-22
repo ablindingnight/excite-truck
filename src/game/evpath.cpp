@@ -60,7 +60,7 @@ void fn_8025C204(u8* p, s32 a);
 f32 fn_8023659C(void);
 void fn_80214A9C(int s);
 void fn_80214AF0(int s);
-void fn_8027E908(void);
+void LoadScreenAssets(void);
 UIObjects* fn_80258354(void);
 void fn_80286A34(u8* p);
 void fn_80287238(u8* p);
@@ -264,7 +264,7 @@ static inline void SelectEvent(int i) {
 extern "C" {
 
 // Loads the screen's images, fonts and sounds.
-void fn_8027E908(void) {
+void LoadScreenAssets(void) {
     lbl_8055F680 = fn_80258354();
     lbl_8055F680->AddImage("meter_unlockable", "ep_ticker.art", 4);
     lbl_8055F680->AddImage("meter_minor", "ep_ticker.art", 3);
@@ -313,7 +313,7 @@ extern char lbl_8055B860[8];
 extern "C" {
 
 // Shows the "event unlocked" message box.
-void fn_8027ED78(const char* title, const char* message) {
+void ShowEventUnlockedMessage(const char* title, const char* message) {
     MenuItem items[] = {
         MenuItem("#title", title),
         MenuItem("#message", message),
@@ -330,7 +330,7 @@ void fn_8027EE74(int x, f32* out, f32 t) {
     fn_80236914(x, out, t);
 }
 
-int fn_8027EE88(void) {
+int CheckCareerUnlockSound(void) {
     if (!lbl_8055F685 && lbl_8055F684) {
         lbl_8055F685 = 1;
         fn_8027ED70()->PlaySound("unlocked_career");
@@ -385,7 +385,7 @@ void fn_8027EEE4(int level) {
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
         MenuItem(lbl_804B2FF8),
     };
-    MenuDesc desc = {NewModeLayout(level - 1), 0, (int (*)(int*))fn_8027EE88, 0, 0};
+    MenuDesc desc = {NewModeLayout(level - 1), 0, (int (*)(int*))CheckCareerUnlockSound, 0, 0};
     lbl_8055F684 = 0;
     desc.items = items;
     lbl_8055F685 = 0;
@@ -402,7 +402,7 @@ struct EvResult;
 extern "C" {
 
 // "Career difficulty N unlocked" message box.
-void fn_8027F09C(int difficulty) {
+void ShowCareerDifficultyUnlockMessage(int difficulty) {
     char buf[100];
     fn_801345D8(buf, 100, "EventPath:CAREER_DIFFICULTY_%d_UNLOCK_INSTRUCTIONS", difficulty);
     MenuItem items[] = {
@@ -450,7 +450,7 @@ s32 fn_802168E4(void);
 
 // "Cup completed" box: congratulations and the next cup (or what this one unlocked), with the cup's
 // marker easing in.
-void fn_8027F288(EvBracket* cup, EvBracket* next) {
+void ShowCupCompletionScreen(EvBracket* cup, EvBracket* next) {
     char msg[100];
     if (next) {
         fn_801345D8(msg, 100, "EventPath:%s_COMPLETED", cup->Id());
@@ -499,12 +499,12 @@ void fn_8027F288(EvBracket* cup, EvBracket* next) {
 
 int fn_8024739C(int* item);
 int fn_80280898(void);
-int fn_802808D0(void);
-int fn_80280A38(void);
-int fn_80280C00(void);
+int ValidateEventSlotSelection(void);
+int AdvanceToNextUnlockedEvent(void);
+int FindNextUnlockedEvent(void);
 int fn_80280DC8(void);
 int fn_80280F7C(void);
-void fn_80281138(void);
+void PlaySlotUnlockAnimation(void);
 
 // A path's cup screen: a marker per cup (at most five) with its name and progress, coloured and titled for
 // the path's difficulty. Returns 1 with the picked cup in *sel, 0 when backed out.
@@ -517,7 +517,7 @@ int fn_8027F958(s32* sel, EvPath* path) {
         bars[i].SetCup(path->Get(i), 0);
     }
     MenuItem items[] = {
-        MenuItem(lbl_8055BAC0, 8, (const void*)fn_80281138, 0, 0),
+        MenuItem(lbl_8055BAC0, 8, (const void*)PlaySlotUnlockAnimation, 0, 0),
         MenuItem("cup_help", lbl_804B3068),
         MenuItem("path_1", 5, &bars[0], 0, 0),
         MenuItem("cup_bar_1", 2, &bars[0].style, 0, 0),
@@ -544,9 +544,9 @@ int fn_8027F958(s32* sel, EvPath* path) {
         MenuItem("#screen_title", fn_80131234(CupTitle(diff))),
         MenuItem(lbl_8055B860, 6, (const void*)fn_80280F7C, 0, 0x125),
         MenuItem(lbl_8055B860, 6, (const void*)fn_80280DC8, 0, 0x127),
-        MenuItem(lbl_8055B860, 6, (const void*)fn_80280C00, 0, 0x128),
-        MenuItem(lbl_8055B860, 6, (const void*)fn_80280A38, 0, 0x126),
-        MenuItem(lbl_8055B860, 6, (const void*)fn_802808D0, -2, 13),
+        MenuItem(lbl_8055B860, 6, (const void*)FindNextUnlockedEvent, 0, 0x128),
+        MenuItem(lbl_8055B860, 6, (const void*)AdvanceToNextUnlockedEvent, 0, 0x126),
+        MenuItem(lbl_8055B860, 6, (const void*)ValidateEventSlotSelection, -2, 13),
         MenuItem(lbl_8055B860, 6, (const void*)fn_80280898, -1, 0x1B),
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
         MenuItem(lbl_804B2FF8),
@@ -593,7 +593,7 @@ void fn_80236954(const char* name);
 void fn_80214D50(int s);
 
 // Moves the cursor to the current event's slot; returns whether it is selectable.
-int fn_802808D0(void) {
+int ValidateEventSlotSelection(void) {
     int i = lbl_804B3048.Find((u8*)lbl_8055F688);
     if (i >= 0) {
         int ok;
@@ -624,7 +624,7 @@ int fn_802808D0(void) {
 extern "C" {
 
 // When the current event is done, picks the first not-yet-done event as the next unlock.
-int fn_80280A38(void) {
+int AdvanceToNextUnlockedEvent(void) {
     u8* cur = (u8*)lbl_8055F688;
     if (cur && ((EvCupBar*)cur)->Cup() && ((EvCupBar*)cur)->cup->Gated()) {
         lbl_8055F690 = lbl_8055F688;
@@ -661,7 +661,7 @@ extern "C" {
 void fn_80216D28(void);
 
 // While the current event is not done, picks the first done event as the one to show.
-int fn_80280C00(void) {
+int FindNextUnlockedEvent(void) {
     u8* cur = (u8*)lbl_8055F688;
     if (cur && ((EvCupBar*)cur)->Cup() && !((EvCupBar*)cur)->cup->Gated()) {
         lbl_8055F68C = lbl_8055F688;
@@ -735,7 +735,7 @@ int fn_802368EC(void);
 
 
 // Plays the "back to slot" animation, then the unlock animation for the newly opened event.
-void fn_80281138(void) {
+void PlaySlotUnlockAnimation(void) {
     if (lbl_804B3048.Find((u8*)lbl_8055F688) >= 0 && fn_802368EC()) {
         char buf[0x1E];
         fn_801345D8(buf, 0x1E, "back_select_%d", EventSlot((u8*)lbl_8055F688) + 1);
@@ -1009,9 +1009,9 @@ void* operator new(unsigned long n, const char* tag);
 extern "C" {
 int fn_802839D0(void);
 int fn_80283A50(void);
-int fn_80283AC8(void);
+int CheckContestEvent(void);
 int fn_80283B58(void);
-int fn_80283E28(void);
+int SelectPreviousUnlockedEvent(void);
 
 // The bracket's event screen: a bar per event (at most five) with best/pass and grade, the bracket's cup
 // marker, the selected event's title, best time and map; after a result the improved event's score counts
@@ -1025,7 +1025,7 @@ static inline void StartTally(ScoreAccumulator& acc, EvContest* c, int delta) {
         t->acc = 0.0f;
     }
 }
-int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
+int ProcessEventPath(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
     int diff = br->Difficulty();
     ScoreAccumulator acc;
     if (res->newly[2]) {
@@ -1136,9 +1136,9 @@ int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path) {
         MenuItem("#bar4_top_color", BarTop(diff)),
         MenuItem("#bar4_bot_color", BarBottom(diff)),
         MenuItem("#screen_title", fn_80131234(EventTitle(diff))),
-        MenuItem(lbl_8055B860, 6, (const void*)fn_80283E28, 0, 0x126),
+        MenuItem(lbl_8055B860, 6, (const void*)SelectPreviousUnlockedEvent, 0, 0x126),
         MenuItem(lbl_8055B860, 6, (const void*)fn_80283B58, 0, 0x128),
-        MenuItem(lbl_8055B860, 6, (const void*)fn_80283AC8, -2, 13),
+        MenuItem(lbl_8055B860, 6, (const void*)CheckContestEvent, -2, 13),
         MenuItem(lbl_8055B860, 6, (const void*)fn_80283A50, -1, 0x1B),
         MenuItem(lbl_8055B860, 6, (const void*)fn_802839D0, 0, 0x121),
         MenuItem(lbl_8055BAB8, 8, (const void*)fn_8027EE74, 2, 0),
@@ -1180,7 +1180,7 @@ int fn_80283A50(void) {
     return 0;
 }
 
-int fn_80283AC8(void) {
+int CheckContestEvent(void) {
     int i = lbl_804B30D8.Find((u8*)lbl_8055F698);
     if (i >= 0 && ((EvEventBar*)lbl_804B30D8.data[i])->contest) {
         return 1;
@@ -1197,7 +1197,7 @@ extern "C" {
 // Selects the next event that has an unlock condition and shows its title, description and best time.
 }
 template <class T>
-/* Helper name unproven: element i by reference; the accessor boundary is needed (written in place: fn_80283B58 / fn_80283E28 100 -> 98.47) */
+/* Helper name unproven: element i by reference; the accessor boundary is needed (written in place: fn_80283B58 / SelectPreviousUnlockedEvent 100 -> 98.47) */
 static inline T& ElemRef(T* p, int i) {
     return p[i];
 }
@@ -1220,7 +1220,7 @@ int fn_80283B58(void) {
 }
 
 // Selects the previous event that has an unlock condition and shows its title, description and best time.
-int fn_80283E28(void) {
+int SelectPreviousUnlockedEvent(void) {
     int cur = lbl_804B30D8.Find((u8*)lbl_8055F698);
     if (cur >= 0) {
         s32 i = cur;
@@ -1236,7 +1236,7 @@ int fn_80283E28(void) {
     return 0;
 }
 
-void fn_802840F4(u8* p) { fn_8027E908(); }
+void fn_802840F4(u8* p) { LoadScreenAssets(); }
 
 void fn_802840F8(void) { fn_8027ED2C(); }
 
@@ -1268,13 +1268,13 @@ extern "C" {
 VehicleList* fn_8025007C(int n);
 void fn_80263F30(int lastTier, int finalTier, int a);
 int fn_8027F958(s32* bracket, EvPath* path);
-int fn_802812B4(s32* event, EvBracket* br, const EvResult* res, EvPath* path);
-void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg);
+int ProcessEventPath(s32* event, EvBracket* br, const EvResult* res, EvPath* path);
+void ShowUnlockedCarsBetweenPoints(int lo, int hi, ExtraVehicles* extra, u32 arg);
 
 // The career event browser: starts on the selected event (or the first one not yet unlocked), then lets the
 // player pick brackets and events; plays the tier/path/career rewards the last result earned. Returns 1 with the
 // chosen event in *sel, 0 when backed out.
-int fn_802840FC(s32* sel, EvPath* path, const EvResult* res) {
+int BrowseCareerEvent(s32* sel, EvPath* path, const EvResult* res) {
     lbl_8055F67C = 0;
     EvResult r = *res;
     int fresh = *sel == -1;
@@ -1319,7 +1319,7 @@ int fn_802840FC(s32* sel, EvPath* path, const EvResult* res) {
             e = 0;
         }
         prev = b;
-        int go = fn_802812B4(&e, br, &r, path);
+        int go = ProcessEventPath(&e, br, &r, path);
         if (r.newly[5]) {
             fn_8027EEE4(br->Difficulty() + 1);
         }
@@ -1327,7 +1327,7 @@ int fn_802840FC(s32* sel, EvPath* path, const EvResult* res) {
             VehicleList* list = fn_8025007C(1);
             list->Add(GetCareerCompletedChassis(), 1, 0);
             list->SetReason(0, ShowCareerCompletedReason());
-            fn_80284580(0, 0, (ExtraVehicles*)list, 0);
+            ShowUnlockedCarsBetweenPoints(0, 0, (ExtraVehicles*)list, 0);
             delete list;
         }
         if ((r.newly[4] && br->Difficulty() == 1) || (r.newly[5] && br->Difficulty() == 2)) {
@@ -1338,7 +1338,7 @@ int fn_802840FC(s32* sel, EvPath* path, const EvResult* res) {
             return 0;
         }
         if (r.newly[4] && br->Difficulty() < 2) {
-            fn_8027F09C(br->Difficulty() + 1);
+            ShowCareerDifficultyUnlockMessage(br->Difficulty() + 1);
         }
         memset(&r, 0, sizeof(r));
         if (go) {
@@ -1355,10 +1355,10 @@ int fn_802840FC(s32* sel, EvPath* path, const EvResult* res) {
 extern "C" {
 int strcasecmp(const char* a, const char* b);
 VehicleList* fn_8025007C(int n);
-void fn_8024FBD8(VehicleList* list, u32 arg);
+void DisplayCarUnlockScreen(VehicleList* list, u32 arg);
 
 // Shows the cars unlocked between two point totals (plus the event's extra vehicles).
-void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg) {
+void ShowUnlockedCarsBetweenPoints(int lo, int hi, ExtraVehicles* extra, u32 arg) {
     VehicleList* list = fn_8025007C(GetUnlockableCount() + (extra ? extra->Count() : 0));
     if (extra) {
         for (int i = 0; i < extra->Count(); i++) {
@@ -1373,7 +1373,7 @@ void fn_80284580(int lo, int hi, ExtraVehicles* extra, u32 arg) {
         }
     }
     if (list->Count() > 0) {
-        fn_8024FBD8(list, arg);
+        DisplayCarUnlockScreen(list, arg);
     }
     delete list;
 }
@@ -1749,7 +1749,7 @@ static inline int AnimsBusy(ScoreAccumulator* a) {
 }
 
 void fn_802168BC(int a);
-void fn_8027ED78(const char* title, const char* msg);
+void ShowEventUnlockedMessage(const char* title, const char* msg);
 
 // Score tally frame: counts up (stopping the tally sound at the target), waits for the queued animations,
 // then selects the event and shows what the result opened (cup done, difficulty unlocked, career done);
@@ -1776,10 +1776,10 @@ inline void ScoreAccumulator::Update(void) {
         }
         shown = 1;
         if (showCup) {
-            fn_8027F288(cup, nextCup);
+            ShowCupCompletionScreen(cup, nextCup);
         }
         if (showUnlock) {
-            fn_8027F09C(unlockLevel);
+            ShowCareerDifficultyUnlockMessage(unlockLevel);
         }
         if (quit) {
             fn_802168BC(-1);
@@ -1805,7 +1805,7 @@ inline void ScoreAccumulator::Update(void) {
                             CopyName(20, title, fn_80131234("EventPath:RANK_UP_TITLE"));
                             CopyName(200, msg, u->name);
                         }
-                        fn_8027ED78(title, msg);
+                        ShowEventUnlockedMessage(title, msg);
                     }
                 }
             }

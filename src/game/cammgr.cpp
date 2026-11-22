@@ -653,7 +653,7 @@ void fn_80273354(void);
 void fn_8027045C(void);
 u32 fn_802090D4(const char* name);  // mixer volume handle
 VD* fn_80207848(const char* file, int flags);  // load a sound
-void fn_801EEFDC(void* handler, int type);
+void RegisterEventHandler(void* handler, int type);
 int fn_8026A554(s32* p);
 extern const f32 lbl_80563C54;  // default view angle
 
@@ -749,7 +749,7 @@ void InitializeCameraManager(int /* nViews */) {
     fn_8027045C();
     lbl_8055F494 = fn_802090D4("crash_vol");
     lbl_8055F490 = fn_80207848("cheer3.sfx", 0);
-    fn_801EEFDC((void*)fn_8026A554, 13);
+    RegisterEventHandler((void*)fn_8026A554, 13);
     InitializeCameraStructures();
 }
 
@@ -1019,7 +1019,7 @@ int fn_8000D75C(void);
 extern "C" {
 u32 fn_802E2C20(void);
 void fn_801769EC(void);
-void fn_8022FF10(CamMat3* out, const f32* euler);
+void ApplyEulerAngles(CamMat3* out, const f32* euler);
 extern const f32 lbl_80563C64;  // "no crash" time
 extern const f32 lbl_80563C80;  // ms to s
 extern const f32 lbl_80563C84;  // fade back in after
@@ -1074,7 +1074,7 @@ void HandleCrashCameraEffect(u8* p) {
     euler[1] = ang;
     euler[2] = lbl_80563C20.value;
     CamMat3 rot;
-    fn_8022FF10(&rot, euler);
+    ApplyEulerAngles(&rot, euler);
     Mat3Mul((Mat3*)&f.rot, (Mat3*)&f.rot, (Mat3*)&rot);
     f32 back = -dist;
     f.pos.v[0] += f.rot.m[6] * back;

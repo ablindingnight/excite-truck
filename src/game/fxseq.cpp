@@ -14,9 +14,9 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 int fn_8012C33C(const char* name);       // resource exists
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
-void* fn_80296B10(const char* resource, ValueNode* config);
+void* LoadFlipBookResource(const char* resource, ValueNode* config);
 void fn_80296D28(void* book);
-void fn_80296D2C(void* book, f32 t, const ValVec3* pos);
+void InterpolateFlipbookFrame(void* book, f32 t, const ValVec3* pos);
 f32 fn_802970C8(void* book);
 }
 
@@ -32,7 +32,7 @@ public:
 /* Helper name unproven */
 static inline void* LoadBook(ValueNode* node) {
     const char* resource = node->GetValue("resource");
-    return fn_80296B10(resource, node->FindChild("config"));
+    return LoadFlipBookResource(resource, node->FindChild("config"));
 }
 
 class FlipBookElem : public FXElem {
@@ -45,7 +45,7 @@ public:
         book = NULL;
     }
     virtual int IsValid(void) { return book != NULL; }
-    virtual void Play(f32 t, const ValVec3* pos) { fn_80296D2C(book, t, pos); }
+    virtual void Play(f32 t, const ValVec3* pos) { InterpolateFlipbookFrame(book, t, pos); }
     virtual f32 GetLength(void) { return fn_802970C8(book); }
 
     void* book;  // offset 0x4

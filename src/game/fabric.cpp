@@ -238,7 +238,7 @@ void fn_801F4DD4(const char* table, RMtx* m) {
     lbl_8055EC18->Add(vn, m);
 }
 
-int fn_801F4E44(const char* name) {
+int ValidateAnchorStyle(const char* name) {
     u32 i;
     for (i = 0; i < 5; i++) {
         if (strcasecmp(name, lbl_8033AC9C[i]) == 0) {
@@ -249,7 +249,7 @@ int fn_801F4E44(const char* name) {
     return 0;
 }
 
-u32 fn_801F4ECC(ValueNode* vn) {
+u32 ParseFabricFlags(ValueNode* vn) {
     u32 flags = 0;
     if (vn->GetBool("flag", 0)) {
         flags |= 1;
@@ -280,10 +280,10 @@ static inline void MulVec(PVec* out, const PVec* in, const RMtx* m) {
         out->z = Dot3(in->x, m->rot.x.z, in->y, m->rot.y.z, in->z, m->rot.z.z);
     }
 }
-/* Helper names unproven: NodeVec3 / NodePoint (by-value wrappers, fn_801F4F9C) */
+/* Helper names unproven: NodeVec3 / NodePoint (by-value wrappers, CalculateFabricCorner) */
 static inline ValVec3 NodeVec3(ValueNode* vn, const char* k) { return vn->GetVec3(k); }
 static inline ValPoint NodePoint(ValueNode* vn, const char* k) { return vn->GetPoint(k); }
-void fn_801F4F9C(FabricCorner* out, ValueNode* vn, const RMtx* m) {
+void CalculateFabricCorner(FabricCorner* out, ValueNode* vn, const RMtx* m) {
     PVec p = *(const PVec*)&static_cast<const ValVec3&>(NodeVec3(vn, "offset"));  // address of the bound temporary
     ValPoint uv = NodePoint(vn, "uv");
     ValVec3 c = vn->GetVec3Or("color", ValV3(1.0f, 1.0f, 1.0f));
@@ -308,14 +308,14 @@ int fn_801F52BC(ValueNode* vn, const char* key, f32* out, int size) {
     return r;
 }
 
-void fn_801F5344(Quad* q, ValueNode* vn, const RMtx* m) {
+void ValidateAndSetupQuadCorners(Quad* q, ValueNode* vn, const RMtx* m) {
     if (!vn->FindChild("ul") || !vn->FindChild("ur") || !vn->FindChild("ll") || !vn->FindChild("lr")) {
         fn_802E317C("mesh: table %s is missing corner geometry");
     }
-    fn_801F4F9C(&q->c[0], vn->FindChild("ul"), m);
-    fn_801F4F9C(&q->c[1], vn->FindChild("ur"), m);
-    fn_801F4F9C(&q->c[2], vn->FindChild("ll"), m);
-    fn_801F4F9C(&q->c[3], vn->FindChild("lr"), m);
+    CalculateFabricCorner(&q->c[0], vn->FindChild("ul"), m);
+    CalculateFabricCorner(&q->c[1], vn->FindChild("ur"), m);
+    CalculateFabricCorner(&q->c[2], vn->FindChild("ll"), m);
+    CalculateFabricCorner(&q->c[3], vn->FindChild("lr"), m);
     if (!fn_801F52BC(vn, "col_density", &q->colDensity, 4)) {
         q->colDensity = 0.6f;
     }
@@ -395,7 +395,7 @@ static inline int AnchorCount(Fabric* f, int style) {
 }
 
 // PROVISIONAL: running output counter owns the first two anchors; source ownership remains unproven.
-void fn_801F5664(Fabric* f, int style) {
+void InitializeFabricAnchors(Fabric* f, int style) {
     int n = AnchorCount(f, style);
     Anchor* a;
     int k;
@@ -539,7 +539,7 @@ void fn_801F602C(Fabric* f, const Quad* q, const char* tex, int style, u32 flags
     f->lod = log2(span / MaxF(w, h));
     fn_801F5970(f, q);
     fn_801F5508(f);
-    fn_801F5664(f, style);
+    InitializeFabricAnchors(f, style);
 }
 
 void fn_801F6358(Fabric* f) {
@@ -547,7 +547,7 @@ void fn_801F6358(Fabric* f) {
     delete[] f->verts;
 }
 
-void fn_801F639C(Fabric* f) {
+void DeleteFabricResources(Fabric* f) {
     delete[] f->anchors;
     delete[] f->sticks;
     fn_801F6358(f);
@@ -652,7 +652,7 @@ void fn_801F65D0(Fabric* f) {
     }
 }
 
-void fn_801F6728(Fabric* f) {
+void UpdateFabricAnchors(Fabric* f) {
     int i;
     for (i = 0; i < f->numAnchors; i++) {
         Anchor* a = &f->anchors[i];
@@ -692,7 +692,7 @@ static inline void SubmitVertex(const DrawVert& vertex, const Vec3Storage& posit
     fn_802C8E00(position.x, position.y, position.z, u, v, vertex.color, c > 0);
 }
 
-void fn_801F6880(const Fabric* f) {
+void DrawFabricMesh(const Fabric* f) {
     f32 old = fn_802C9A4C(f->lod);
     fn_802C8BD0(f->tex);
     if (fn_802C8DBC((f->rows - 1) * (f->cols * 2))) {
@@ -726,7 +726,7 @@ UniformFabricMan::UniformFabricMan(void) {
 UniformFabricMan::~UniformFabricMan(void) {
     int i;
     for (i = 0; i < count; i++) {
-        fn_801F639C(&fabrics[i]);
+        DeleteFabricResources(&fabrics[i]);
     }
     count = 0;
 }
@@ -751,7 +751,7 @@ void UniformFabricMan::Update(void* ctx) {
             force.y -= gravity;
             fn_801F63F0(f, &force, f->drag);
             fn_801F65D0(f);
-            fn_801F6728(f);
+            UpdateFabricAnchors(f);
         }
         f->visible = fn_802CDB20(ctx, f->id);
     }
@@ -762,7 +762,7 @@ void UniformFabricMan::Draw(void) {
     int i;
     for (i = 0; i < count; f++, i++) {
         if (f->visible) {
-            fn_801F6880(f);
+            DrawFabricMesh(f);
         }
     }
 }
@@ -774,8 +774,8 @@ void UniformFabricMan::Add(Quad* q, void* tex, ValueNode* vn, s32 id) {
         fn_802E317C("mesh: exceeded uniform fabric limit");
     }
     f = &fabrics[count];
-    style = fn_801F4E44(vn->GetValue("anchor"));
-    fn_801F602C(f, q, (const char*)tex, style, fn_801F4ECC(vn));
+    style = ValidateAnchorStyle(vn->GetValue("anchor"));
+    fn_801F602C(f, q, (const char*)tex, style, ParseFabricFlags(vn));
     f->id = id;
     f->visible = 1;
     f->gravity = 9.81f * vn->GetFloat("gravity");
@@ -792,7 +792,7 @@ NonUniformFabricMan::NonUniformFabricMan(void) {
 NonUniformFabricMan::~NonUniformFabricMan(void) {
     int i;
     for (i = 0; i < count; i++) {
-        fn_801F639C(&fabrics[i].f);
+        DeleteFabricResources(&fabrics[i].f);
     }
     count = 0;
 }
@@ -807,7 +807,7 @@ void NonUniformFabricMan::Update(void* ctx) {
             fn_801F6778(forces, f->f.count, f->f.gravity, f->f.wind, &f->random);
             fn_801F64E4(&f->f, forces, f->f.drag);
             fn_801F65D0(&f->f);
-            fn_801F6728(&f->f);
+            UpdateFabricAnchors(&f->f);
         }
         f->f.visible = fn_802CDB20(ctx, f->f.id);
     }
@@ -817,7 +817,7 @@ void NonUniformFabricMan::Draw(void) {
     int i;
     for (i = 0; i < count; i++) {
         if (fabrics[i].f.visible) {
-            fn_801F6880(&fabrics[i].f);
+            DrawFabricMesh(&fabrics[i].f);
         }
     }
 }
@@ -829,8 +829,8 @@ void NonUniformFabricMan::Add(Quad* q, void* tex, ValueNode* vn, s32 id) {
         fn_802E317C("mesh: exceeded non-uniform fabric limit");
     }
     f = &fabrics[count];
-    style = fn_801F4E44(vn->GetValue("anchor"));
-    fn_801F602C(&f->f, q, (const char*)tex, style, fn_801F4ECC(vn));
+    style = ValidateAnchorStyle(vn->GetValue("anchor"));
+    fn_801F602C(&f->f, q, (const char*)tex, style, ParseFabricFlags(vn));
     f->f.id = id;
     f->f.visible = 1;
     f->f.gravity = 9.81f * vn->GetFloat("gravity");
@@ -853,7 +853,7 @@ ManualFabricMan::ManualFabricMan(void) {
 ManualFabricMan::~ManualFabricMan(void) {
     int i;
     for (i = 0; i < count; i++) {
-        fn_801F639C(&fabrics[i]);
+        DeleteFabricResources(&fabrics[i]);
     }
     count = 0;
 }
@@ -874,7 +874,7 @@ void ManualFabricMan::Update(void) {
         force.y -= gravity;
         fn_801F63F0(f, &force, f->drag);
         fn_801F65D0(f);
-        fn_801F6728(f);
+        UpdateFabricAnchors(f);
     }
 }
 
@@ -882,7 +882,7 @@ void ManualFabricMan::Draw(void) {
     Fabric* f = fabrics;
     int i;
     for (i = 0; i < count; f++, i++) {
-        fn_801F6880(f);
+        DrawFabricMesh(f);
     }
 }
 
@@ -895,14 +895,14 @@ void ManualFabricMan::Add(ValueNode* vn, RMtx* m) {
     if (count >= 4) {
         fn_802E317C("mesh: exceeded manual fabric limit");
     }
-    flags = fn_801F4ECC(vn);
+    flags = ParseFabricFlags(vn);
     if (flags & 1) {
         fn_802E317C("mesh: only uniform meshes can be added manually");
     }
     f = &fabrics[count];
     tex = vn->GetValue("texture");
-    style = fn_801F4E44(vn->GetValue("anchor"));
-    fn_801F5344(&q, vn, m);
+    style = ValidateAnchorStyle(vn->GetValue("anchor"));
+    ValidateAndSetupQuadCorners(&q, vn, m);
     fn_801F602C(f, &q, tex, style, flags);
     f->id = -1;
     f->visible = 1;
@@ -956,7 +956,7 @@ void fn_801F75A4(TObj* o, u8* data, void* scene, s32 id) {
     }
     tex = fn_802C9C24(o->models[1]);
     fn_801F7400(&q, data, vn);
-    if (!(fn_801F4ECC(vn) & 1)) {
+    if (!(ParseFabricFlags(vn) & 1)) {
         lbl_8055EC10->Add(&q, tex, vn, id);
         if (scene && !lbl_8055EC1C) {
             UniformFabricInst* inst = new ("uniformfabricMLO") UniformFabricInst;

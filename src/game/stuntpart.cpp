@@ -40,7 +40,7 @@ int fn_801E866C(int view);
 f32 fn_801E7E24(void);
 int fn_801E86F8(int view);
 s32 fn_801EE0C8(void* model);
-void fn_801EEFDC(int (*h)(const void* ev), u8 type);
+void RegisterEventHandler(int (*h)(const void* ev), u8 type);
 void EventUnInstallHandler(int (*h)(const void* ev));
 s32 fn_80287B14(void);
 const StuntCar* fn_80287B24(s32 i);
@@ -536,9 +536,9 @@ void fn_802AB21C(void) {
     fn_802AB5B8();
     lbl_8055CC60 = fn_802CAC28("airstrm.tex", 0);
     lbl_8055CC64 = fn_802CAC28("entrypuff.tex", 0);
-    fn_801EEFDC(fn_802A9F30, 15);
-    fn_801EEFDC(fn_802A9F90, 16);
-    fn_801EEFDC(fn_802A9FB0, 17);
+    RegisterEventHandler(fn_802A9F30, 15);
+    RegisterEventHandler(fn_802A9F90, 16);
+    RegisterEventHandler(fn_802A9FB0, 17);
     lbl_8055F92C = fn_801E87A8()->type == 0x180304;
 }
 

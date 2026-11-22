@@ -144,7 +144,7 @@ f32 Dot(float, float, float, float, float, float);
 extern "C" {
 f32 fn_801E7E18(void);                                        // time
 f32 fn_801E7E24(void);                                        // frame time
-void fn_801EEFDC(EventHandler h, u8 type);
+void RegisterEventHandler(EventHandler h, u8 type);
 void EventUnInstallHandler(EventHandler h);
 int fn_80287B14(void);
 TBody* fn_80287B24(int i);
@@ -448,7 +448,7 @@ void fn_802A1590(void) {
     }
     fn_80287B38(fn_802A1B20);
     fn_802A1CC4();
-    fn_801EEFDC(fn_802A1C30, 5);
+    RegisterEventHandler(fn_802A1C30, 5);
 }
 
 void fn_802A1660(void) {

@@ -39,7 +39,7 @@ void fn_802C519C(void* img) {
 
 int fn_802C51AC(void* img) {
     if (img) {
-        return fn_80235FD8(static_cast<gArtSet*>(img));
+        return CountArtSetPictures(static_cast<gArtSet*>(img));
     }
     return 1;
 }
@@ -54,7 +54,7 @@ int fn_802C51C0(void* img) {
 
 int fn_802C5220(void* img) {
     if (img) {
-        f32 f = fn_80235F64(static_cast<gArtSet*>(img), 0);
+        f32 f = GetArtHeight(static_cast<gArtSet*>(img), 0);
         return f < 0.0f ? f - 0.5f : 0.5f + f;
     }
     return 1;
@@ -75,7 +75,7 @@ int fn_802C5280(void* img, int x, int y, int) {
 
 void fn_802C5310(void* img, int frame, f32 x, f32 y, f32 z) {
     if (img) {
-        fn_802353F4(static_cast<gArtSet*>(img), frame, x, y, z);
+        DrawArtPictureAtPosition(static_cast<gArtSet*>(img), frame, x, y, z);
     }
 }
 

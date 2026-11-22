@@ -316,7 +316,7 @@ static inline void CreditDrawGroup(CreditFontGroupFields* self,int index=0) {f32
     f32 scale = CreditDrawScaleObservedNew(self, glyph);
     u32 code = glyph->glyph;
 
-    f32 yScale = scale * fn_80235F64(self->resource, glyph->glyph);
+    f32 yScale = scale * GetArtHeight(self->resource, glyph->glyph);
     f32 xScale = scale * fn_80235EF0(self->resource, glyph->glyph);
     fn_80235AFC(self->resource, code, (((u32) opacity) << 24) | 0xFFFFFF, glyph->position.x, glyph->position.y, 0.0f, xScale, yScale, glyph->angle);
     ++index;
@@ -343,7 +343,7 @@ static inline void CreditDrawFireGroupObservedNew(CreditFontGroupFields* self) {
     f32 scale = CreditDrawScaleObservedNew(self, glyph);
     u32 code = glyph->glyph;
 
-    yScale = scale * fn_80235F64(self->resource, glyph->glyph);
+    yScale = scale * GetArtHeight(self->resource, glyph->glyph);
     f32 xScale = scale * fn_80235EF0(self->resource, glyph->glyph);
     fn_80235AFC(self->resource, code, (((u32) opacity) << 24) | 0xFFFFFF, glyph->position.x, glyph->position.y, 0.0f, xScale, yScale, glyph->angle);
     ++index;
@@ -377,7 +377,7 @@ inline void CreditFontGroupFields::Spawn(const ValPoint& position) {CreditFontGr
         glyph->angle=fn_80129DC4(6,(0.0f),(6.2831854820251465f));
         glyph->angularVelocity=fn_80129DC4(6,self->desc.spinMin,self->desc.spinMax);
         glyph->remaining=self->desc.lifetime;
-        glyph->glyph=fn_80129D18(6,fn_80235FD8(self->resource));
+        glyph->glyph=fn_80129D18(6,CountArtSetPictures(self->resource));
     }
 }
 extern "C" {

@@ -90,7 +90,7 @@ void fn_801E9DD4(const char* a, const char* b);
 void fn_801E9DD8(void);
 int fn_801E9E30(s16* h, Vec* pos);
 s32 fn_801EE0C8(void* model);
-void fn_801EEFDC(int (*h)(const void* ev), u8 type);
+void RegisterEventHandler(int (*h)(const void* ev), u8 type);
 void EventUnInstallHandler(int (*h)(const void* ev));
 s32 fn_80287B14(void);
 const FireCar* fn_80287B24(s32 i);
@@ -414,11 +414,11 @@ const char* lbl_8055CA8C = "fireboost.tex";
 static const int lbl_802FA9F0[8] = {0, 7, 3, 2, 5, 4, 6, 1};
 
 extern "C" {
-int fn_8029BFF8(const void* ev);
-int fn_8029C024(const void* ev);
+int HandleBackfireEvent(const void* ev);
+int HandleEventSetT(const void* ev);
 int fn_8029C054(const void* ev);
 void fn_8029C084(const FireCarEntry* e, int n);
-int fn_8029C190(const void* ev);
+int HandleFireEvent(const void* ev);
 
 int fn_80297D5C(s32* out, int n) {
     for (int i = 1; i < 16; i++) {
@@ -440,7 +440,7 @@ int fn_80297D90(s32* out, int n) {
     return 0;
 }
 
-void fn_80297DC8(PartParams* e) {
+void InitializeFireParticles(PartParams* e) {
     e->maxParticles = 0xC0;
     e->maxLife = 1.0f;
     e->spewRate = 0.25f;
@@ -466,28 +466,28 @@ void fn_80297DC8(PartParams* e) {
     e->unk89 = 1;
 }
 
-void fn_80297E90(void) {
+void InitializeTorchFire(void) {
     PartParams e;
-    fn_80297DC8(&e);
+    InitializeFireParticles(&e);
     lbl_8055F7E0 = fn_8028E2F8(&e, "torch fire", lbl_8055CA80);
 }
 
 void fn_80297ED4(void) {}
 
-void fn_80297ED8(void) {
+void InitializeFireSystems(void) {
     lbl_8055F7C8 = new ("EngineFireMan") EngineFireMan;
     lbl_8055F7D8 = new ("BackfireMan") BackfireMan;
     lbl_8055F7DC = new ("TorchFireMan") TorchFireMan;
     lbl_8055F7D4 = new ("BoostFireMan") BoostFireMan;
     if (fn_801E87A8()->mode == 0x180201) {
-        fn_80297E90();
+        InitializeTorchFire();
     } else {
         lbl_8055F7E0 = 0;
     }
     fn_80287B38(fn_8029C084);
 }
 
-void fn_80297FA4(void) {
+void ReleaseFireResources(void) {
     if (lbl_8055F7E0) {
         fn_8028E398(lbl_8055F7E0);
         lbl_8055F7E0 = 0;
@@ -520,7 +520,7 @@ void fn_80297FA4(void) {
     lbl_8055F7C8 = 0;
 }
 
-void fn_802980A0(void) {
+void ResetAllEffects(void) {
     lbl_8055F7C8->Reset();
     lbl_8055F7D8->Reset();
     lbl_8055F7DC->Reset();
@@ -541,7 +541,7 @@ void fn_802980A0(void) {
     }
 }
 
-void fn_80298124(int) {
+void DrawFireEffects(int) {
     lbl_8055F7C8->Draw();
     lbl_8055F7D8->Draw();
     if (lbl_8055F7C4) {
@@ -1196,12 +1196,12 @@ BoostFireMan::BoostFireMan(void) {
     e.randomFrame = 1;
     e.unk89 = 1;
     emitter = fn_8028E2F8(&e, "boost fire", lbl_8055CA8C);
-    fn_801EEFDC(fn_8029C054, 14);
-    fn_801EEFDC(fn_8029C024, 13);
+    RegisterEventHandler(fn_8029C054, 14);
+    RegisterEventHandler(HandleEventSetT, 13);
 }
 
 BoostFireMan::~BoostFireMan(void) {
-    EventUnInstallHandler(fn_8029C024);
+    EventUnInstallHandler(HandleEventSetT);
     EventUnInstallHandler(fn_8029C054);
     fn_8028E398(emitter);
 }
@@ -1459,12 +1459,12 @@ void ExhaustTorchMan::DrawFaces(void) {
 
 BackfireMan::BackfireMan(void) {
     torch = new ("ExhaustTorchMan") ExhaustTorchMan;
-    fn_801EEFDC(fn_8029BFF8, 4);
+    RegisterEventHandler(HandleBackfireEvent, 4);
     Reset();
 }
 
 BackfireMan::~BackfireMan(void) {
-    EventUnInstallHandler(fn_8029BFF8);
+    EventUnInstallHandler(HandleBackfireEvent);
     delete torch;
 }
 
@@ -1552,11 +1552,11 @@ void BackfireMan::Tick(int i, int on) {
 
 TorchFireMan::TorchFireMan(void) {
     InitEmitter();
-    fn_801EEFDC(fn_8029C190, 9);
+    RegisterEventHandler(HandleFireEvent, 9);
 }
 
 TorchFireMan::~TorchFireMan(void) {
-    EventUnInstallHandler(fn_8029C190);
+    EventUnInstallHandler(HandleFireEvent);
     fn_8028E398(emitter);
 }
 
@@ -1617,12 +1617,12 @@ void TorchFireMan::InitEmitter(void) {
 
 extern "C" {
 
-int fn_8029BFF8(const void* ev) {
+int HandleBackfireEvent(const void* ev) {
     lbl_8055F7D8->Event((const BackfireEvt*)ev);
     return 0x10;
 }
 
-int fn_8029C024(const void* ev) {
+int HandleEventSetT(const void* ev) {
     lbl_8055F7D4->SetT(*(const int*)ev);
     return 4;
 }
@@ -1655,7 +1655,7 @@ void fn_8029C084(const FireCarEntry* e, int n) {
     }
 }
 
-int fn_8029C190(const void* ev) {
+int HandleFireEvent(const void* ev) {
     lbl_8055F7DC->Add((const TorchFire*)ev);
     return 0x14;
 }

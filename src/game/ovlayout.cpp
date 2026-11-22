@@ -408,7 +408,7 @@ char* strcpy(char* d, const char* s);
 size_t strlen(const char* s);
 int vsprintf(char* buf, const char* fmt, va_list args);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-s32 fn_802E3D68(const char* name);        // open file for writing
+s32 CreateFileFromName(const char* name);        // open file for writing
 void fn_802E3734(s32* f);                // close file
 int fn_80127A50(void* ev);               // next mouse event
 void fn_802C8BD0(s32 tex);
@@ -707,7 +707,7 @@ public:
         if (strchr(base, '/')) {
             base = strchr(base, '/') + 1;
         }
-        f = fn_802E3D68(base);
+        f = CreateFileFromName(base);
         if (f != -1) {
             fn_802E3AD0((void*)f, "table info\r\n\tversion\t%d\r\nend\r\n", 1);
             fn_801457D0((ElemList<ArtElem>*)arts, (void*)f);

@@ -920,15 +920,15 @@ void ColorPick::Draw(void) {
         if (this->vf0C()) {
             if (this->color > 0) {
                 gArtSet* art = fn_80211660(0);
-                f32 ah = fn_80235F64(art, 1);
+                f32 ah = GetArtHeight(art, 1);
                 f32 ay = y - HalfF(h - ah);
                 f32 gap = lbl_80563794 + this->leftFlash;
-                fn_802353F4(art, 1, x - fn_80235EF0(art, 1) - gap, ay, lbl_80563758);
+                DrawArtPictureAtPosition(art, 1, x - fn_80235EF0(art, 1) - gap, ay, lbl_80563758);
             }
             if (this->color < this->vehicle->num_colors - 1) {
                 gArtSet* art = fn_80211660(1);
-                f32 ay = y - HalfF(h - fn_80235F64(art, 1));
-                fn_802353F4(art, 1, lbl_80563794 + this->rightFlash + (x + w), ay,
+                f32 ay = y - HalfF(h - GetArtHeight(art, 1));
+                DrawArtPictureAtPosition(art, 1, lbl_80563794 + this->rightFlash + (x + w), ay,
                             lbl_80563758);
             }
             f32 l = this->leftFlash - lbl_80563764;

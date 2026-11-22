@@ -68,7 +68,7 @@ void fn_802C8638(PlainValMatrix* c);
 void fn_802C974C(f32 nearZ, f32 farZ, f32 fov);
 void fn_80011A2C(void);
 extern RaceCarRec* lbl_804348E8[8];
-void fn_801DDED0(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step);
+void RegisterTweakVariable(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step);
 }
 
 ModuleTag lbl_8055E9B0;
@@ -84,7 +84,7 @@ Tweak lbl_80486F30[32];
 class Collector : public TweakVisitor {
 public:
     virtual void Add(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step) {
-        fn_801DDED0(name, value, unit, min, max, step);
+        RegisterTweakVariable(name, value, unit, min, max, step);
     }
 };
 
@@ -95,7 +95,7 @@ RaceCarRec* fn_801DDE78(void) { return lbl_804348E8[fn_80179630(0)]; }
 
 CarTune* fn_801DDEAC(void) { return (CarTune*)&fn_801DDE78()->setupA; }  // the tuned setup (CbSetup)
 
-void fn_801DDED0(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step) {
+void RegisterTweakVariable(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step) {
     Tweak* t = &lbl_80486F30[lbl_8055E9C4++];
     t->name = name;
     t->unit = unit;
@@ -126,7 +126,7 @@ void fn_801DDFE8(CarTune* t) {
     t->saved1 = t->cur1;
 }
 
-void fn_801DE0A4(void) {
+void LoadGarageValues(void) {
     lbl_8055E9BC = 0;
     lbl_8055E9C8 = 0;
     lbl_8055E9C4 = 0;
@@ -145,7 +145,7 @@ void fn_801DE150(void) {}
 
 #pragma push
 #pragma opt_loop_invariants off
-void fn_801DE154(void) {
+void UpdateTweakDisplay(void) {
     fn_801DDF0C();
     PlainValMatrix cam;
     fn_80230B5C(&cam);
@@ -201,7 +201,7 @@ void fn_801DE154(void) {
 #pragma pop
 
 
-int fn_801DE5C4(int key) {
+int HandleGarageInput(int key) {
     fn_801DDF0C();
     int handled = 0;
     switch (key) {

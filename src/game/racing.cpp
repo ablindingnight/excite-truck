@@ -638,7 +638,7 @@ int RacingOverlay::DrawWarnings(void) {
 void RacingOverlay::DrawMarker(f32 t, int index, f32 x, f32 y, f32 w, f32 h) {
     int valid = index >= 0;
     f32 aw = fn_80235EF0(arrowsArt, 0);
-    f32 ah = fn_80235F64(arrowsArt, 0);
+    f32 ah = GetArtHeight(arrowsArt, 0);
     f32 bottom = y - h;
     f32 px = Lerp(x - aw / 2, x + w - aw / 2, t);
     f32 top = y + ah;

@@ -15,9 +15,9 @@ int fn_801345D8(char* dst, int n, const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);  // fatal
 int fn_802E9A0C(void);                   // aspect
-int fn_802E36D8(const char* path);       // open
-u32 fn_802E37C4(int fd);                 // size
-void fn_802E3804(int fd, void* buf, u32 n);
+int LoadFileWithName(const char* path);       // open
+u32 GetFileSize(int fd);                 // size
+void ReadFileBuffer(int fd, void* buf, u32 n);
 void fn_802E3734(int* fd);
 void fn_801282EC(int align);
 void fn_801282F4(void);
@@ -108,14 +108,14 @@ bool fn_802EC4BC(void) { return fn_802E9A0C() == 1; }
 void* fn_802EC4E8(const char* name) {
     char path[0x40];
     fn_801345D8(path, sizeof(path), "homeButton2/%s", name);
-    int fd = fn_802E36D8(path);
+    int fd = LoadFileWithName(path);
     if (fd == -1) {
         fn_802E317C("homebtn: can't open %s", path);
     }
-    u32 size = fn_802E37C4(fd);
+    u32 size = GetFileSize(fd);
     fn_801282EC(0x20);
     u8* buf = new ("homeFile") u8[size];
-    fn_802E3804(fd, buf, size);
+    ReadFileBuffer(fd, buf, size);
     fn_802E3734(&fd);
     return buf;
 }

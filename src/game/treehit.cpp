@@ -30,7 +30,7 @@ struct TMtxRaw {
 };
 
 extern "C" {
-void fn_8022FF10(RMat33* out, const RVec3* axis);  // rotation from axis * angle
+void ApplyEulerAngles(RMat33* out, const RVec3* axis);  // rotation from axis * angle
 void fn_802BDFF4(RMtx* tree, int a);
 }
 
@@ -387,7 +387,7 @@ void fn_802C173C(f32 time) {
                 a.x = s->axis.x * k;
                 a.y = s->axis.y * k;
                 a.z = s->axis.z * k;
-                fn_8022FF10(&r, &a);
+                ApplyEulerAngles(&r, &a);
                 Mat3Mul((Mat3*)&m, (const Mat3*)&m, (const Mat3*)&r);
                 *s->tree = m;
             } else {

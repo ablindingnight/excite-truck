@@ -76,7 +76,7 @@ void fn_802DC134(void);
 void fn_802DC278(void);
 void fn_802DC27C(void);
 void fn_802DC138(void* verts, int nverts, const u16* idx, int n);
-void fn_802DC280(void* verts, int nverts, const u16* idx, int n);
+void DrawVertexStrip(void* verts, int nverts, const u16* idx, int n);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -960,7 +960,7 @@ static inline Item* DrawEntryStrips(Item* it, TexEntry* te, void* verts, int nve
             for (j = 0; j < c->count; j++) {
                 u16** d = c->data;
                 st = d[j];
-                fn_802DC280(verts, nverts, st, st[0] + 1);
+                DrawVertexStrip(verts, nverts, st, st[0] + 1);
                 AddStripTriangles(d[j][0] - 1);
             }
             c = c->next;

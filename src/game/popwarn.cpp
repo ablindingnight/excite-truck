@@ -524,13 +524,13 @@ void fn_8024CF60(void);
 void fn_8024CFB4(void);
 void fn_8027DDCC(int a);
 void MenuDoChallengeMode(int a);
-void fn_8023BEA8(void);
+void StartHeadToHeadMode(void);
 void fn_80214FD8(const char* title, const char* text);
 void fn_80239F74(void);
 void fn_802E6FBC(void);
 void fn_80137C78(int n);
 void fn_80137C84(int pad, int slot);
-void fn_8023BCEC(void);
+void RunPlayerRace(void);
 void fn_8025812C(void);
 void fn_8025C054(void);
 void fn_80161DE4(void);
@@ -573,7 +573,7 @@ void MenuDoDemo(void) {
                     break;
                 case 8: {
                     FlagGuard guard;
-                    fn_8023BEA8();
+                    StartHeadToHeadMode();
                     if (!fn_802411D4()) {
                         static LocString sTitle("UIMain:VERSUS_MISSING_CONTROLLER_TITLE");
                         static LocString sText("UIMain:VERSUS_MISSING_CONTROLLER_TEXT");
@@ -600,7 +600,7 @@ void MenuDoDemo(void) {
                     int slot = IdentGetCurrentSlot();
                     fn_80137C84(fn_802E4A10(), slot);
                     fn_80129AEC(fn_802E4A10());
-                    fn_8023BCEC();
+                    RunPlayerRace();
                     break;
                 }
                 case 12:
@@ -1114,8 +1114,8 @@ void MenuArt::Update(void) {
 }
 
 extern "C" void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
-extern "C" f32 fn_80235F64(u8* text, int flag, f32 v);
-extern "C" void fn_802353F4(u8* text, int flag, f32 x, f32 y, f32 z);
+extern "C" f32 GetArtHeight(u8* text, int flag, f32 v);
+extern "C" void DrawArtPictureAtPosition(u8* text, int flag, f32 x, f32 y, f32 z);
 
 // Draws the scrolling warning text, wrapping the scroll offset at the box width.
 void MenuArt::Draw(void) {
@@ -1127,7 +1127,7 @@ void MenuArt::Draw(void) {
         scroll -= fw;
     }
     int wide = scroll > 370.0f;
-    fn_802353F4(image, wide, sx + scroll, (sy - fh) + fn_80235F64(image, wide, scroll), 0.0f);
+    DrawArtPictureAtPosition(image, wide, sx + scroll, (sy - fh) + GetArtHeight(image, wide, scroll), 0.0f);
 }
 extern "C" {
 
@@ -1282,7 +1282,7 @@ inline int StrapScreen::Key(int key) {
 extern "C" {
 
 f32 fn_80235EF0(u8* art, int part);
-void fn_802353F4(u8* art, int part, f32 x, f32 y, f32 z);
+void DrawArtPictureAtPosition(u8* art, int part, f32 x, f32 y, f32 z);
 void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 #ifdef __MWERKS__
 void fn_80234AFC(CupText* st, f32 x, f32 y, const char* fmt, ...);
@@ -1300,7 +1300,7 @@ inline void CupSelect::Draw(void) {
         f32 off = 300.0f * ((f32)i - pos) - 100.0f;
         bool cur = i == sel;
         u8* art = cur ? tileSel : tile;
-        fn_802353F4(art, 0, 200.0f + off - fn_80235EF0(art, 0), 100.0f, 0.0f);
+        DrawArtPictureAtPosition(art, 0, 200.0f + off - fn_80235EF0(art, 0), 100.0f, 0.0f);
         fn_802354A0(tracks, i, 30.0f + off, 70.0f, 0.0f, 140.0f, 140.0f, cur ? 0xFFFFFF00 : 0xC0202020);
         CupText* tx = text;
         tx->color = cur ? 0xFFFFFF00 : 0xC0202020;

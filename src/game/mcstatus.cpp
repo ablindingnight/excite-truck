@@ -618,24 +618,24 @@ inline void MemBar::Draw(void) {
         f32 rw = fn_80235EF0(art, 2);
         f32 mid = fw - lw - rw;
         f32 total = rw + (lw + mid);
-        f32 ah = fn_80235F64(art, 0);
+        f32 ah = GetArtHeight(art, 0);
         sx = (sx + 0.5f * fw) - 0.5f * total;
         sy = (sy + 0.5f * fh) - 0.5f * ah;
         f32 fill = total * frac;
         if (fill < lw) {
             fn_80235758(art, 3, sx, sy, fill, ah, lbl_80563830, lbl_80563830, fill / lw, 1.0f, -1);
         } else if (fill < lw + mid) {
-            fn_802353F4(art, 3, sx, sy, lbl_80563830);
+            DrawArtPictureAtPosition(art, 3, sx, sy, lbl_80563830);
             fn_80235758(art, 4, sx + lw, sy, fill - lw, ah, lbl_80563830, lbl_80563830, (fill - lw) / mid, 1.0f, -1);
         } else {
-            fn_802353F4(art, 3, sx, sy, lbl_80563830);
+            DrawArtPictureAtPosition(art, 3, sx, sy, lbl_80563830);
             fn_802354A0(art, 4, sx + lw, sy, lbl_80563830, mid, ah, -1);
             fn_80235758(art, 5, mid + (sx + lw), sy, (fill - lw) - mid, ah, lbl_80563830, lbl_80563830, ((fill - lw) - mid) / rw, 1.0f,
                         -1);
         }
-        fn_802353F4(art, 0, sx, sy, lbl_80563830);
+        DrawArtPictureAtPosition(art, 0, sx, sy, lbl_80563830);
         fn_802354A0(art, 1, sx + lw, sy, lbl_80563830, mid, ah, -1);
-        fn_802353F4(art, 2, mid + (sx + lw), sy, lbl_80563830);
+        DrawArtPictureAtPosition(art, 2, mid + (sx + lw), sy, lbl_80563830);
     } else {
         fn_80230924(-1, sx, sy, sx + fw * frac, sy - fh, lbl_80563830);
     }

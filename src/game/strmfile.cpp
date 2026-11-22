@@ -6,11 +6,11 @@
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int strcasecmp(const char* a, const char* b);
-s32 fn_802E36D8(const char* name);  // open
+s32 LoadFileWithName(const char* name);  // open
 void fn_802E3734(s32* f);           // close
-s32 fn_802E37C4(s32 f);             // file size
-void fn_802E3A14(s32 f, s32 pos);   // seek
-void fn_802E3930(s32 f, void* buf, s32 len);  // read
+s32 GetFileSize(s32 f);             // file size
+void FileSeekToPosition(s32 f, s32 pos);   // seek
+void ReadFileAsync(s32 f, void* buf, s32 len);  // read
 int fn_802E3990(int id);
 }
 
@@ -66,12 +66,12 @@ int fn_802E7354(const char* name) {
             return i;
         }
     }
-    f = fn_802E36D8(name);
+    f = LoadFileWithName(name);
     if (f != -1) {
         k = lbl_8055FFD8++;
         e = &lbl_804FC978[k];
         SafeStrCopy(e->name, name, 0x80);
-        size = fn_802E37C4(f);
+        size = GetFileSize(f);
         n = fn_802E72B8(size);
         e->start = lbl_8055FFDC;
         e->end = lbl_8055FFDC + n;
@@ -99,17 +99,17 @@ s32 fn_802E748C(s32 sector, void* buf, s32 len) {
         return -1;
     }
     e = &lbl_804FC978[idx];
-    f = fn_802E36D8(e->name);
+    f = LoadFileWithName(e->name);
     if (f == -1) {
         return -1;
     }
     off = (sector - e->start) << 11;
-    fn_802E3A14(f, off);
+    FileSeekToPosition(f, off);
     n = (e->size - off + 0x1F) & ~0x1F;
     if (n > len) {
         n = len;
     }
-    fn_802E3930(f, buf, n);
+    ReadFileAsync(f, buf, n);
     return f;
 }
 

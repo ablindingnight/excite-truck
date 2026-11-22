@@ -5,13 +5,13 @@
 struct Font;
 typedef Font BitmapFont;
 extern "C" {
-void fn_801E4A2C(BitmapFont*);
+void DeleteFont(BitmapFont*);
 int fn_801E4A6C(BitmapFont*,const char*);
-int fn_801E4AB0(BitmapFont*,const char*,int);
+int CalculateFontStringWidth(BitmapFont*,const char*,int);
 int fn_801E4B00(BitmapFont*);
 int fn_801E4B48(BitmapFont*);
 int fn_801E4BA8(BitmapFont*);
-void fn_801E4BEC(BitmapFont*,unsigned long,unsigned long,int,int,const char*,...);
-void fn_801E4DBC(BitmapFont*,unsigned long,unsigned long,int,int,const char*,int);
+void DrawTextWithFormatting(BitmapFont*,unsigned long,unsigned long,int,int,const char*,...);
+void FormatAndDrawText(BitmapFont*,unsigned long,unsigned long,int,int,const char*,int);
 }
 #endif

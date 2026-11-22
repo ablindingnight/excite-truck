@@ -36,7 +36,7 @@ void fn_8025C028(void) { lbl_8055C390 = fn_80214D04(); }
 void fn_8025C04C(void) { fn_80214CB4(lbl_8055C390); }
 
 void MenuDoAchievementsViewer(void);
-void fn_8025CE78(void);
+void InitializeStuntRecordsScreen(void);
 void InitializeCarSelectionScreen(void);
 extern char lbl_8055B860[8];
 extern char lbl_8055BAC0[4];  // ""
@@ -62,7 +62,7 @@ void fn_8025C054(void) {
             MenuDoAchievementsViewer();
             break;
         case 1:
-            fn_8025CE78();
+            InitializeStuntRecordsScreen();
             break;
         case 2:
             InitializeCarSelectionScreen();

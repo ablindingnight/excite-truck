@@ -77,24 +77,24 @@ Background lbl_80497E3C;    // the state of the last freed background
 
 extern "C" {
 
-void fn_8022F824(Background* bg);
-int fn_80230020(void);
-void fn_8022FF90(Background* bg);
+void FreeBackground(Background* bg);
+int CountBackNodes(void);
+void InitializeBackgroundMatrix(Background* bg);
 
-void fn_8022F248(void) {
+void InitializeBackgroundSystem(void) {
     if (lbl_8055F014) {
         fn_802E317C("gBack system started twice.  Next time just call gBackBegin once.");
     }
     strcpy(lbl_80497E3C.name, "");
 }
 
-void fn_8022F294(void) {
-    if (fn_80230020()) {
+void DeallocateBackgrounds(void) {
+    if (CountBackNodes()) {
         fn_802E30C8("gBack: Some backgrounds still set, deallocating now:");
         BackNode* t = lbl_8055F014;
         BackNode* n = t;
         while (t) {
-            fn_8022F824(n->bg);
+            FreeBackground(n->bg);
             n = n->next;
             t = 0;
             lbl_8055F014 = n;
@@ -102,7 +102,7 @@ void fn_8022F294(void) {
     }
 }
 
-BackNode* fn_8022F2FC(const char* name) {
+BackNode* FindBackgroundNodeByName(const char* name) {
     for (BackNode* n = lbl_8055F014; n; n = n->next) {
         if (!strcasecmp(n->bg->name, name)) {
             return n;
@@ -111,7 +111,7 @@ BackNode* fn_8022F2FC(const char* name) {
     return 0;
 }
 
-void fn_8022F364(Background* bg) {
+void InitializeBackgroundTracker(Background* bg) {
     if (bg) {
         BackNode* n = lbl_8055F014;
         if (!n) {
@@ -133,7 +133,7 @@ void fn_8022F364(Background* bg) {
 }
 
 // Remembers bg's state.
-void fn_8022F418(Background* bg) {
+void SaveBackgroundState(Background* bg) {
     lbl_80497E3C.mtx = bg->mtx;
     lbl_80497E3C.tex = -1;
     lbl_80497E3C.color = bg->color;
@@ -157,7 +157,7 @@ void fn_8022F418(Background* bg) {
 }
 
 // Restores the remembered state into bg.
-void fn_8022F548(Background* bg) {
+void RestoreBackgroundState(Background* bg) {
     const Background* c = &lbl_80497E3C;
     bg->mtx = c->mtx;
     bg->color = c->color;
@@ -179,11 +179,11 @@ void fn_8022F548(Background* bg) {
     bg->driftMax = c->driftMax;
 }
 
-Background* fn_8022F638(const char* tex, u8 spins, u8 drifts, s32 texScale, f32 dist) {
+Background* CreateBackgroundWithTexture(const char* tex, u8 spins, u8 drifts, s32 texScale, f32 dist) {
     if (!tex) {
         return 0;
     }
-    fn_8022F2FC(tex);
+    FindBackgroundNodeByName(tex);
     Background* bg = (Background*)operator new(sizeof(Background), "gBack");
     if (fn_8012C33C(tex)) {
         bg->tex = fn_802CAC28(tex, 0);
@@ -195,7 +195,7 @@ Background* fn_8022F638(const char* tex, u8 spins, u8 drifts, s32 texScale, f32 
     }
     strcpy(bg->name, tex);
     if (strcmp(tex, lbl_80497E3C.name)) {
-        fn_8022FF90(bg);
+        InitializeBackgroundMatrix(bg);
         bg->drifts = drifts;
         bg->spins = spins;
         bg->driftLimit = 30.0f;
@@ -207,13 +207,13 @@ Background* fn_8022F638(const char* tex, u8 spins, u8 drifts, s32 texScale, f32 
         bg->width = 720;
         bg->height = 480;
     } else {
-        fn_8022F548(bg);
+        RestoreBackgroundState(bg);
     }
-    fn_8022F364(bg);
+    InitializeBackgroundTracker(bg);
     return bg;
 }
 
-void fn_8022F77C(Background* bg) {
+void RemoveBackgroundNode(Background* bg) {
     BackNode* prev = 0;
     BackNode* n = lbl_8055F014;
     while (n->bg != bg) {
@@ -234,15 +234,15 @@ void fn_8022F77C(Background* bg) {
     operator delete(n);
 }
 
-void fn_8022F824(Background* bg) {
-    fn_8022F418(bg);
+void FreeBackground(Background* bg) {
+    SaveBackgroundState(bg);
     gxForgetTexture(bg->tex);
-    fn_8022F77C(bg);
+    RemoveBackgroundNode(bg);
     operator delete(bg);
 }
 
 // m in camera space.
-void fn_8022F868(PlainValMatrix* out, const PlainValMatrix* m) {
+void TransformCameraSpaceMatrix(PlainValMatrix* out, const PlainValMatrix* m) {
     const Mat3* cam = fn_8022EDC4();
     fn_801BFD34(&out->origin, &m->origin, cam);
     Mat3Mul(&out->Mat(), &m->Mat(), cam);
@@ -264,7 +264,7 @@ struct BackVert {
 extern "C" BackVert fn_80230A68(u32 color, f32 x, f32 y, f32 z, f32 u, f32 v);
 
 
-void fn_8022F8CC(Background* bg) {
+void DrawBackgroundLayer(Background* bg) {
     f32 scale = bg->texScale;
     f32 dist = bg->dist;
     u32 color = fn_80230B9C(bg->tint);
@@ -280,7 +280,7 @@ void fn_8022F8CC(Background* bg) {
     PlainValMatrix m = bg->mtx;
     const PlainValMatrix* in = &m;
     PlainValMatrix* out = &cm;
-    fn_8022F868(out, in);
+    TransformCameraSpaceMatrix(out, in);
     fn_802C8B98(bg->tex, &cm);
     fn_802C8DB8(verts, 4, idx, 6);
     fn_802C8D74();
@@ -292,7 +292,7 @@ static inline f32 Jitter(f32 amount) {
     return fn_80129D90(2, -n, n + 1) / scale;
 }
 
-void fn_8022FB6C(Background* bg) {
+void UpdateBackgroundMotion(Background* bg) {
     if (bg->spins) {
         bg->spin += Jitter(bg->spinJitter);
         if (bg->spin > bg->spinMax) {
@@ -327,7 +327,7 @@ void fn_8022FB6C(Background* bg) {
     }
 }
 
-void fn_8022FF10(Mat3* out, const ValVec3* a);
+void ApplyEulerAngles(Mat3* out, const ValVec3* a);
 
 
 static inline void Orthonormalize(Mat3* m) {
@@ -345,14 +345,14 @@ static inline void Orthonormalize(Mat3* m) {
     *(ValVec3*)m->m[2] = z;
 }
 
-void fn_8022FD9C(Background* bg, f32 dt) {
+void UpdateBackgroundMatrix(Background* bg, f32 dt) {
     ValVec3 turn;
     turn.x = 0.0f;
     turn.y = 0.0f;
     turn.z = bg->spin * dt;
     if (bg->spins) {
         Mat3 r;
-        fn_8022FF10(&r, &turn);
+        ApplyEulerAngles(&r, &turn);
         Mat3Mul(&bg->mtx.Mat(), &bg->mtx.Mat(), &r);
     }
     ValVec3 v;
@@ -367,7 +367,7 @@ void fn_8022FD9C(Background* bg, f32 dt) {
     Orthonormalize(&bg->mtx.Mat());
 }
 
-void fn_8022FF10(Mat3* out, const ValVec3* a) {
+void ApplyEulerAngles(Mat3* out, const ValVec3* a) {
     f32 ry = a->y;
     f32 rx = a->x;
     f32 rz = a->z;
@@ -379,7 +379,7 @@ void fn_8022FF10(Mat3* out, const ValVec3* a) {
     Mat3Mul(out, out, &t);
 }
 
-void fn_8022FF90(Background* bg) {
+void InitializeBackgroundMatrix(Background* bg) {
     bg->mtx.basis[0].x = 1.0f;
     bg->mtx.basis[0].y = 0.0f;
     bg->mtx.basis[0].z = 0.0f;
@@ -399,12 +399,12 @@ void fn_8022FF90(Background* bg) {
     bg->vy = 0.0f;
 }
 
-void fn_8022FFE8(Background* bg) {
-    fn_8022FB6C(bg);
-    fn_8022FD9C(bg, fn_80214D48());
+void UpdateBackgroundWidgets(Background* bg) {
+    UpdateBackgroundMotion(bg);
+    UpdateBackgroundMatrix(bg, fn_80214D48());
 }
 
-int fn_80230020(void) {
+int CountBackNodes(void) {
     int n = 0;
     for (BackNode* p = lbl_8055F014; p; p = p->next) {
         n++;

@@ -40,8 +40,8 @@ int fn_801345D8(char* dst, int n, const char* fmt, ...);
 char* strrchr(const char* s, int c);
 void fn_801282EC(int align);
 void fn_801282F4(void);
-int fn_802E36D8(const char* path);  // open
-void fn_802E3804(int fd, void* buf, u32 n);
+int LoadFileWithName(const char* path);  // open
+void ReadFileBuffer(int fd, void* buf, u32 n);
 void fn_802E3734(int* fd);
 void* BinkOpen(const char* name, u32 flags);  // BinkOpen
 void BinkGetFrameBuffersInfo(void* bink, void* info);
@@ -686,10 +686,10 @@ void fn_802E0E60(BinkMovie* m) {
 
 void fn_802E0EAC(BinkMovie* m) {
     fn_802E0E60(m);
-    int fd = fn_802E36D8(m->name);
+    int fd = LoadFileWithName(m->name);
     if (fd != -1) {
         u8 hdr[0x20];
-        fn_802E3804(fd, hdr, 0x20);
+        ReadFileBuffer(fd, hdr, 0x20);
         fn_802E3734(&fd);
     }
     m->bink = (u32*)BinkOpen(m->name, 0x100400);

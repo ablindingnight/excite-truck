@@ -20,7 +20,7 @@ void SetDefaultColors(const char* arg);
 
 extern "C" {
 void fn_80203F0C(const char* arg);
-void fn_8023BF68(const char* arg);
+void ValidatePlayerCount(const char* arg);
 void fn_802BC328(const char* arg);
 void fn_80131368(const char* arg);
 }
@@ -42,7 +42,7 @@ Option lbl_802FD528[] = {
     {"-force_chassis", 0, SetForceChassis},
     {"-widescreen", 0x200, NULL},
     {"-e3_demo", 0x400, NULL},
-    {"-players", 0, fn_8023BF68},
+    {"-players", 0, ValidatePlayerCount},
     {"-cars", 0, SetForcedRacers},
     {"-wmapgen", 0x800, fn_802BC328},
     {"-default_colors", 0, SetDefaultColors},

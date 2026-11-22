@@ -105,7 +105,7 @@ void fn_801B06C8(void);
 void InitializeAlarmEvents(void);
 void InitializeDamageInfo(void);
 void fn_80181F30(void);
-void fn_801DE0A4(void);
+void LoadGarageValues(void);
 void InitializeRaceSettings(EventDesc* d);  // deity.cpp
 void fn_801C4AD0(void);
 void fn_8020C41C(void);
@@ -961,7 +961,7 @@ void fn_80178DD4(s32 stream) {
     InitializeAlarmEvents();
     InitializeDamageInfo();
     fn_80181F30();
-    fn_801DE0A4();
+    LoadGarageValues();
     InitializeRaceSettings(fn_801769CC());
     fn_80127464();
     fn_801C4AD0();

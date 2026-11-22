@@ -123,7 +123,7 @@ int fn_801E85AC(void);  // max player views
 PlainValMatrix* fn_801E8718(int i);
 void fn_801E88B4(s32* x, s32* y, s32* w, s32* h, int i);
 void fn_801E9DC4(s16* h);
-void fn_801EEFDC(EventHandler h, u8 type);
+void RegisterEventHandler(EventHandler h, u8 type);
 void EventUnInstallHandler(EventHandler h);
 void fn_802029FC(void);
 f32 fn_80287BC8(f32 lo, f32 hi);  // random range
@@ -186,8 +186,8 @@ void fn_8029F03C(void) {
     fn_8029FEF8();
     fn_8029FE00();
     fn_8029FD04();
-    fn_801EEFDC(fn_802A0620, 10);
-    fn_801EEFDC(fn_802A0720, 11);
+    RegisterEventHandler(fn_802A0620, 10);
+    RegisterEventHandler(fn_802A0720, 11);
     lbl_8055F820 = new ("fsrecttab") u32[fn_801E85AC()];
 }
 

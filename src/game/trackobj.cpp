@@ -411,7 +411,7 @@ void fn_80204020(void);
 int fn_8020402C(void);
 void fn_80204050(void);
 void fn_80203FF8(void);
-void fn_801EEFDC(int (*cb)(ObjMsg*), int type);
+void RegisterEventHandler(int (*cb)(ObjMsg*), int type);
 void EventUnInstallHandler(int (*cb)(ObjMsg*));
 void* CreateAnimationInstance(const char* model, int streaming, int c);
 void* LoadAnimationResource(const char* stream);
@@ -1172,7 +1172,7 @@ void fn_801F9E04(RaceDesc* r) {
     lbl_8055EC68 = fn_801F96B8("anim");
     lbl_8055EC70 = fn_801F96B8(ObstacleSoundKey());
     fn_8020401C(r);
-    fn_801EEFDC(fn_801F9CF8, 0xC);
+    RegisterEventHandler(fn_801F9CF8, 0xC);
 }
 
 void fn_801F9FA0(StaticOb** list);

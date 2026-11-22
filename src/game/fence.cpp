@@ -32,7 +32,7 @@ struct Fence {
 typedef int (*EventHandler)(const Fence* e);
 
 extern "C" {
-void fn_801EEFDC(EventHandler h, u8 type);
+void RegisterEventHandler(EventHandler h, u8 type);
 void EventUnInstallHandler(EventHandler h);
 }
 
@@ -55,17 +55,17 @@ int fn_802A0944(const Fence* e) {
     return sizeof(Fence);
 }
 
-void fn_802A09B0(void) {
+void InitializeFenceArray(void) {
     int i;
     lbl_8055F834 = new ("chainlink") Fence[64];
     for (i = 0; i < 64; i++) {
         lbl_8055F834[i].count = 0;
     }
     lbl_8055CB68 = fn_802CAC28("fencepol.tex", 0);
-    fn_801EEFDC(fn_802A0944, 6);
+    RegisterEventHandler(fn_802A0944, 6);
 }
 
-void fn_802A0AFC(void) {
+void CleanupFenceResources(void) {
     EventUnInstallHandler(fn_802A0944);
     gxForgetTexture(lbl_8055CB68);
     lbl_8055CB68 = -2;

@@ -314,7 +314,7 @@ int fn_8022A86C(const UIStyleInputFields* input) {
 
 void fn_8022A8E4(int i) {
     UIStyleRecordFields* s=&lbl_80490968[i];
-    if(s->resource04) fn_801E4A2C(s->resource04);
+    if(s->resource04) DeleteFont(s->resource04);
     if(s->resource08) fn_802328D4(s->resource08);
     if(s->field64_0) fn_802C4C80(s->field64_0);
     if(s->field64_1) fn_802C519C(s->field64_1);
@@ -377,7 +377,7 @@ static inline void StyleMultilineWidth(UIStyleRecordFields* s,const char* text,i
     for(int i=0;i<lines;i++) {
         const char* end=strchr(text,10);
         int n=end?(int)(end-text):(int)strlen(text);
-        if(s->resource04) width=StyleMaximum(width,(f32)fn_801E4AB0(s->resource04,text,n));
+        if(s->resource04) width=StyleMaximum(width,(f32)CalculateFontStringWidth(s->resource04,text,n));
         if(s->resource08) {
             if(s->height<1.0f) width=StyleMaximum(width,fn_8022ABC8(s->resource08,text,n));
             else {
@@ -584,7 +584,7 @@ void fn_8022B91C(int style,int x,int y,const char* text,u32 frame) {
             int n=end?(int)(end-text):(int)strlen(text);
             int dy=alternate?(int)s->field3C_5:(int)s->field3C_3;
             int dx=alternate?(int)s->field3C_4:(int)s->field3C_2;
-            fn_801E4DBC(s->resource04,0,s->field38,x+dx,y+dy,text,n);
+            FormatAndDrawText(s->resource04,0,s->field38,x+dx,y+dy,text,n);
             y+=height;
             end=strchr(text,10);
             text=end;
@@ -635,16 +635,16 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
     } else if(s->field64_2) {
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
-        u32 current=frame%fn_80235FD8(s->field64_2);
-        if(s->field38&16)py+=Mul(fn_80235F64(s->field64_2,current),0.5f);
-        else if(s->field38&64)py+=fn_80235F64(s->field64_2,current);
+        u32 current=frame%CountArtSetPictures(s->field64_2);
+        if(s->field38&16)py+=Mul(GetArtHeight(s->field64_2,current),0.5f);
+        else if(s->field38&64)py+=GetArtHeight(s->field64_2,current);
         if(s->field38&4)px-=Mul(lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current),0.5f);
         else if((s->field38&2)&&text&&s->resource08) {
             f32 scale=fn_8022CA40(s);
             px-=Mul(fn_8023293C(s->resource08,text,1.0f),scale);
         }
         f32 imageWidth=lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current);
-        f32 imageHeight=fn_80235F64(s->field64_2,current);
+        f32 imageHeight=GetArtHeight(s->field64_2,current);
         fn_802354A0(s->field64_2,current,px,py,0.0f,imageWidth,imageHeight,0xFFFFFFFF);
         switch(effect) {
         case 1: {
@@ -658,7 +658,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
             int suffix=(int)s->field3C_6;
             if(suffix>=0) {
                 f32 w;
-                f32 h=fn_80235F64(s->field64_2,current);
+                f32 h=GetArtHeight(s->field64_2,current);
                 w=fn_80235EF0(s->field64_2,(int)s->field3C_6);
                 f32 dx=fn_80235EF0(s->field64_2,current);
                 fn_802354A0(s->field64_2,suffix,px+dx,py,0.0f,w,h,0xFFFFFFFF);
@@ -666,7 +666,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         }
         if(s->field64_3&&frame==1) {
             int overlay=(int)s->field3C_7;
-            f32 h=fn_80235F64(s->field64_3,overlay);
+            f32 h=GetArtHeight(s->field64_3,overlay);
             f32 w=fn_80235EF0(s->field64_3,(int)s->field3C_7);
             fn_802354A0(s->field64_3,overlay,px+s->field5C,py+s->field60,0.0f,w,h,0xFFFFFFFF);
         }

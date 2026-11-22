@@ -14,7 +14,7 @@ void fn_80247210(void);
 void fn_80129AEC(int a);
 void fn_802E47E8(void);
 void fn_80127A24(void);
-void fn_8027B690(void);
+void InitializeCareerEvents(void);
 #ifdef __MWERKS__
 int fn_8012742C(void);  // defined char in unk_80127398.cpp; MWCC callees extend r3, retail callers read it whole
 #else
@@ -67,7 +67,7 @@ void fn_8023B6B0(void) {
     fn_802E47E8();
     fn_80127A24();
     fn_8023B618();
-    fn_8027B690();
+    InitializeCareerEvents();
     if (fn_8012742C()) {
         fn_80127434();
     }

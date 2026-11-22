@@ -14,7 +14,7 @@ void fn_802840F4(void);
 void fn_802840F8(void);
 int fn_802E4A10(void);
 void fn_80137C84(int a, int b);
-void fn_80284580(s32 a, s32 b, void* list, s32* x);
+void ShowUnlockedCarsBetweenPoints(s32 a, s32 b, void* list, s32* x);
 void TallyRunAchievements(void);
 void fn_802E7128(void);
 }
@@ -241,7 +241,7 @@ extern "C" {
 void fn_8027AF94(Contest* c);
 void fn_8027B288(Bracket* b);
 void fn_8027B60C(Path* p);
-void fn_8027B690(void);
+void InitializeCareerEvents(void);
 void fn_8027B77C(void);
 Path* fn_8027B834(int i);
 int fn_8027B94C(int i);
@@ -252,7 +252,7 @@ void fn_8027BF38(void);
 VehicleList* fn_8025007C(int n);
 int fn_8024DAE0(s32* vehicle, s32* x, int a, VehicleList* list, int b);
 void fn_8023BF4C(CareerRun* r);
-int fn_802840FC(s32* sel, IPath* path, CareerResult* res);
+int BrowseCareerEvent(s32* sel, IPath* path, CareerResult* res);
 }
 
 #endif

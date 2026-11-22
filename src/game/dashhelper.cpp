@@ -179,18 +179,18 @@ public:
         art = fn_8023512C(name);
         if (!art) {
             fn_802E30C8("init_box_info: art resource %s was not found!", name);
-        } else if (fn_80235FD8(art) < 4) {
+        } else if (CountArtSetPictures(art) < 4) {
             fn_802E30C8("init_box_info: art resource %s doesn't have enough parts!", name);
             fn_80235380(art);
         } else {
             int n;
             int i;
             color = 0x66000000;
-            n = fn_80235FD8(art);
+            n = CountArtSetPictures(art);
             i = n < 8 ? n : 8;
             while (i-- > 0) {
                 parts[i].w = fn_80235EF0(art, i);
-                parts[i].h = fn_80235F64(art, i);
+                parts[i].h = GetArtHeight(art, i);
             }
             margin[0] = m;
             margin[1] = m;
@@ -384,7 +384,7 @@ void DrawDashRows(int player) {
     } else {
         top = fn_80011DC0(player);
     }
-    y = MinF(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80350F88.art, fn_8000DFA8(0)));
+    y = MinF(0.0f, fn_80011EC8(player) - GetArtHeight(lbl_80350F88.art, fn_8000DFA8(0)));
     y = y + top - 50.0f;
     if (player < 0) {
         right = fn_80011E34();
@@ -401,7 +401,7 @@ void DrawDashRows(int player) {
         part = fn_8000DFA8(row->type);
         part2 = fn_8000DFC0(row->type);
         f32 w = pad + fn_80235EF0(lbl_80350F88.art, part);
-        f32 h = fn_80235F64(lbl_80350F88.art, part);
+        f32 h = GetArtHeight(lbl_80350F88.art, part);
         f32 x = Lerp(-5.0f, right + w, row->slide) - w;
         f32 x5;
         f32 xr;
@@ -496,7 +496,7 @@ void DrawDashBarRows(int player) {
     } else {
         top = fn_80011DC0(player);
     }
-    y = MinF(0.0f, fn_80011EC8(player) - fn_80235F64(lbl_80351214.art, fn_8000DFA8(0)));
+    y = MinF(0.0f, fn_80011EC8(player) - GetArtHeight(lbl_80351214.art, fn_8000DFA8(0)));
     y = y + top;
     pad = lbl_80351214.wide ? 56.0f : 0.0f;
     maxSlide = 0.0f;
@@ -509,7 +509,7 @@ void DrawDashBarRows(int player) {
         part2 = fn_8000DFC0(row->type);
         f32 w = fn_80235EF0(lbl_80351214.art, part);
         w += pad;
-        f32 h = fn_80235F64(lbl_80351214.art, part);
+        f32 h = GetArtHeight(lbl_80351214.art, part);
         f32 x = Lerp(5.0f + lbl_8055CFF0, right, row->slide);
         f32 ty;
         f32 x5;
@@ -592,7 +592,7 @@ void DrawDashBarRows(int player) {
         part2 = fn_8000DFC0(0);
         fn_80235EF0(lbl_80351214.art, part);
         fn_80235EF0(lbl_80351214.art, part2);
-        fn_80235F64(lbl_80351214.art, part);
+        GetArtHeight(lbl_80351214.art, part);
         f32 sw = lbl_8055CFF0;
     }
 }
@@ -906,7 +906,7 @@ void fn_8000FBE8(f32 x, f32 y, f32 scale) {
     f32 size;
     f32 bx;
     y += 1.0f;
-    f32 h0 = fn_80235F64(lbl_8055D4CC, 4);
+    f32 h0 = GetArtHeight(lbl_8055D4CC, 4);
     f32 h = h0 * scale;
     f32 half = Mul(h, 0.5f);
     size = 10.0f + h;
@@ -923,7 +923,7 @@ void fn_8000FC8C(const char* text) {
     if (lbl_8055D4C0) {
         f32 w0 = fn_80235EF0(lbl_8055D4C0, 0);
         f32 bx = x - 0.5f * (w0 + fn_80235EF0(lbl_8055D4C0, 1));
-        f32 by = y - 17.5f + 0.5f * fn_80235F64(lbl_8055D4C0, 0);
+        f32 by = y - 17.5f + 0.5f * GetArtHeight(lbl_8055D4C0, 0);
         DrawSpriteWithSize(lbl_8055D4C0, 0, bx, by, 0.0f, 0.0f);
         DrawSpriteWithSize(lbl_8055D4C0, 1, bx + w0, by, 0.0f, 0.0f);
     }
@@ -939,7 +939,7 @@ void DrawCenteredText(const char* text) {
     f32 bx = x - 0.5f * w;
     fn_800109E4(0x66000000, bx - 7.0f, 13.0f + y, 14.0f + w, 26.0f);
     if (lbl_8055D4C0) {
-        f32 by = y + 0.5f * fn_80235F64(lbl_8055D4C0, 2);
+        f32 by = y + 0.5f * GetArtHeight(lbl_8055D4C0, 2);
         DrawSpriteWithSize(lbl_8055D4C0, 2, bx - fn_80235EF0(lbl_8055D4C0, 2) - 7.0f, by, 0.0f, 0.0f);
         DrawSpriteWithSize(lbl_8055D4C0, 2, 7.0f + (bx + w), by, 0.0f, 0.0f);
     }
@@ -1118,7 +1118,7 @@ void fn_80010D88(f32 x, f32 y, f32 h) {
 
 void DrawSpriteWithSize(gArtSet* art, int part, f32 x, f32 y, f32 w, f32 h) {
     if (0.0f == w && 0.0f == h) {
-        fn_802353F4(art, part, x, y, 1.0f);
+        DrawArtPictureAtPosition(art, part, x, y, 1.0f);
     } else {
         fn_802354A0(art, part, x, y, 1.0f, w, h, -1);
     }
@@ -1236,7 +1236,7 @@ void DrawLoadingScreenBackground(u32 color, f32 x, f32 y, f32 w, f32 h, gArtSet*
     f32 b;
 
     pw = fn_80235EF0(art, 0);
-    b = fn_80235F64(art, 0);
+    b = GetArtHeight(art, 0);
     p.x = x;
     p.y = y;
     fn_802354A0(art, 0, p.x, p.y, 0.0f, pw, b, color);
@@ -1244,52 +1244,52 @@ void DrawLoadingScreenBackground(u32 color, f32 x, f32 y, f32 w, f32 h, gArtSet*
     pw = fn_80235EF0(art, 1);
     p.y = y;
     p.x = x + w - pw;
-    fn_802354A0(art, 1, p.x, p.y, 0.0f, pw, fn_80235F64(art, 1), color);
+    fn_802354A0(art, 1, p.x, p.y, 0.0f, pw, GetArtHeight(art, 1), color);
 
     pw = fn_80235EF0(art, 2);
-    b = fn_80235F64(art, 2);
+    b = GetArtHeight(art, 2);
     p.x = x;
     p.y = b + (y - h);
-    fn_802354A0(art, 2, p.x, p.y, 0.0f, pw, fn_80235F64(art, 2), color);
+    fn_802354A0(art, 2, p.x, p.y, 0.0f, pw, GetArtHeight(art, 2), color);
 
     pw = fn_80235EF0(art, 3);
     p.x = x + w - pw;
-    b = fn_80235F64(art, 3);
+    b = GetArtHeight(art, 3);
     p.y = b + (y - h);
-    fn_802354A0(art, 3, p.x, p.y, 0.0f, pw, fn_80235F64(art, 3), color);
+    fn_802354A0(art, 3, p.x, p.y, 0.0f, pw, GetArtHeight(art, 3), color);
 
     a = fn_80235EF0(art, 0);
     p.y = y;
     p.x = x + a;
     pw = w - (a + fn_80235EF0(art, 1));
-    fn_802354A0(art, 4, p.x, p.y, 0.0f, pw, fn_80235F64(art, 0), color);
+    fn_802354A0(art, 4, p.x, p.y, 0.0f, pw, GetArtHeight(art, 0), color);
 
     a = fn_80235EF0(art, 2);
     p.x = x + a;
     pw = w - (a + fn_80235EF0(art, 3));
-    b = fn_80235F64(art, 2);
+    b = GetArtHeight(art, 2);
     p.y = b + (y - h);
     f32 height = b;
     fn_802354A0(art, 5, p.x, p.y, 0.0f, pw, height, color);
 
     pw = fn_80235EF0(art, 0);
-    a = fn_80235F64(art, 0);
+    a = GetArtHeight(art, 0);
     p.x = x;
     p.y = y - a;
-    fn_802354A0(art, 6, p.x, p.y, 0.0f, pw, h - (a + fn_80235F64(art, 2)), color);
+    fn_802354A0(art, 6, p.x, p.y, 0.0f, pw, h - (a + GetArtHeight(art, 2)), color);
 
     pw = fn_80235EF0(art, 1);
     p.x = x + w - pw;
-    a = fn_80235F64(art, 1);
+    a = GetArtHeight(art, 1);
     p.y = y - a;
-    fn_802354A0(art, 7, p.x, p.y, 0.0f, pw, h - (a + fn_80235F64(art, 3)), color);
+    fn_802354A0(art, 7, p.x, p.y, 0.0f, pw, h - (a + GetArtHeight(art, 3)), color);
 
     a = fn_80235EF0(art, 0);
     p.x = x + a;
     pw = w - a - fn_80235EF0(art, 1);
-    b = fn_80235F64(art, 0);
+    b = GetArtHeight(art, 0);
     p.y = y - b;
-    fn_802354A0(art, 8, p.x, p.y, 0.0f, pw, h - b - fn_80235F64(art, 2), color);
+    fn_802354A0(art, 8, p.x, p.y, 0.0f, pw, h - b - GetArtHeight(art, 2), color);
 }
 
 static inline void ApplyRotation(Vec2* v, f32 x, f32 c, f32 s) {

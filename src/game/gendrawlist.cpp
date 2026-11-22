@@ -65,11 +65,11 @@ void GenericDrawList::Draw(void) { fn_802D68C4(verts, count, idx, nidx); }
 
 extern "C" {
 
-GenericDrawList* fn_801E7840(s32 max) { return new ("GenericDrawList") GenericDrawList(max); }
+GenericDrawList* CreateGenericDrawList(s32 max) { return new ("GenericDrawList") GenericDrawList(max); }
 
-void fn_801E7888(GenericDrawList* list) { delete list; }
+void DeleteGenericDrawList(GenericDrawList* list) { delete list; }
 
-void fn_801E7890(GenericDrawList* list, f32 x, f32 y, f32 z, u32 color, f32 u, f32 v, int strip) {
+void AddTriangleStrip(GenericDrawList* list, f32 x, f32 y, f32 z, u32 color, f32 u, f32 v, int strip) {
     list->Add(x, y, z, color, u, v, strip);
 }
 

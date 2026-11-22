@@ -53,7 +53,7 @@ int fn_802BE378(short size) {
     return n * n;
 }
 
-void fn_802BE38C(void) {
+void LoadFanInfoFile(void) {
     const char* name = "faninfo.fnf";
     fn_8012E96C(name);
     lbl_8055FACC = 0;
@@ -105,7 +105,7 @@ void fn_802BE694(void) {
             lbl_804C06E0[s][i].Clear();
         }
     }
-    fn_802BE38C();
+    LoadFanInfoFile();
 }
 
 void fn_802BE72C(void) {

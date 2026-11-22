@@ -87,7 +87,7 @@ public:
 int GetEveMode(void);
 void UnloadEves(void);
 void LoadModeEves(int mode);
-extern "C" void fn_8025DAEC(RecordLine* r, u32 type);
+extern "C" void FindBestRecordLine(RecordLine* r, u32 type);
 extern "C" u8 lbl_8055B860;
 
 // Hides the HUD groups of the two difficulties a stunt record was not set on.
@@ -105,7 +105,7 @@ extern "C" {
 
 // The stunt records screen ("tricks.lyt"): the best of five stunt stats, each with where it was set and
 // the car it was set with; the difficulty columns that did not set a record are hidden.
-void fn_8025CE78(void) {
+void InitializeStuntRecordsScreen(void) {
     int mode = GetEveMode();
     if (mode != 0x130) {
         UnloadEves();
@@ -121,15 +121,15 @@ void fn_8025CE78(void) {
     lines[5].widget.icons = lbl_8055F2E4;
     lines[6].widget.icons = lbl_8055F2E4;
     FriendlyNames hider;
-    fn_8025DAEC(&lines[0], 0x40901);
+    FindBestRecordLine(&lines[0], 0x40901);
     HideOtherDifficulties(0, &lines[0]);
-    fn_8025DAEC(&lines[1], 0x40902);
+    FindBestRecordLine(&lines[1], 0x40902);
     HideOtherDifficulties(1, &lines[1]);
-    fn_8025DAEC(&lines[2], 0x41206);
+    FindBestRecordLine(&lines[2], 0x41206);
     HideOtherDifficulties(2, &lines[2]);
-    fn_8025DAEC(&lines[3], 0x48203);
+    FindBestRecordLine(&lines[3], 0x48203);
     HideOtherDifficulties(3, &lines[3]);
-    fn_8025DAEC(&lines[4], 0x50204);
+    FindBestRecordLine(&lines[4], 0x50204);
     HideOtherDifficulties(4, &lines[4]);
     MenuItem items[] = {
         MenuItem(NULL, 5, &hider, 0, 0),
@@ -226,7 +226,7 @@ static inline int FindIcon(CarIconTable* icons, const char* name) {
 
 // Fills one record line for stat `type`: the best value over every event and difficulty, where it was
 // set ("%s - %s": track, friendly name) and the car icon and colour it was set with.
-void fn_8025DAEC(RecordLine* r, u32 type) {
+void FindBestRecordLine(RecordLine* r, u32 type) {
     int bestEv;
     int bestD;
     int diff;

@@ -273,13 +273,13 @@ void fn_8013C8B8(void);
 void fn_80257C10(const char* chassis);
 int fn_80128314(int heap);
 int fn_80265D58(void);
-void fn_8024EA1C(u8* p);
+void ShowSelectionColor(u8* p);
 s32 fn_8024EB94(u8* p);
 u8* fn_8024EB9C(u8* p, int i);
-void fn_8024EBAC(u8* p, s32 v, int set);
+void SetCarSlotSelection(u8* p, s32 v, int set);
 u32 fn_8024EBE4(u8* p);
 int fn_8024EC3C(void);
-int fn_8024ECD4(void);
+int PickRandomGarageCar(void);
 u8* fn_8025007C(int n);
 int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar);
 }
@@ -428,7 +428,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
                     MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
                     MenuItem(0, 5, (u8*)&cars, 0, 0),
-                    MenuItem(lbl_8055B860, 6, (const void*)fn_8024ECD4, 0, 0x72),
+                    MenuItem(lbl_8055B860, 6, (const void*)PickRandomGarageCar, 0, 0x72),
                     MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
                     MenuItem(lbl_8055B860, 6, (const void*)fn_8024EC3C, -2, 0xD),
                     MenuItem(lbl_80498C30),
@@ -447,13 +447,13 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 }
                 ColorPick paint(colors, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b,
                                 lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
-                fn_8024EBAC((u8*)&paint, fn_8024EBE4((u8*)&paint), 1);
+                SetCarSlotSelection((u8*)&paint, fn_8024EBE4((u8*)&paint), 1);
                 u8* e = fn_8024EB9C((u8*)&paint, 0);
                 for (int i = 0; i < fn_8024EB94((u8*)&paint); i++) {
                     e = fn_8024EB9C((u8*)&paint, i);
                     S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
                 }
-                fn_8024EA1C((u8*)&paint);
+                ShowSelectionColor((u8*)&paint);
                 const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
                 MenuItem items[] = {
                     MenuItem(0, 5, (u8*)&paint, 0, 0),
@@ -537,7 +537,7 @@ static inline void ShowSelColor(u8* p) {
 
 extern "C" {
 
-void fn_8024EA1C(u8* p) { ShowSelColor(p); }
+void ShowSelectionColor(u8* p) { ShowSelColor(p); }
 
 s32 fn_8024EB94(u8* p) {
     CarSlotList* cp = (CarSlotList*)p;
@@ -549,7 +549,7 @@ u8* fn_8024EB9C(u8* p, int i) {
     return ((u8*)cp->entries) + i * 0x14;
 }
 
-void fn_8024EBAC(u8* p, s32 v, int set) {
+void SetCarSlotSelection(u8* p, s32 v, int set) {
     CarSlotList* cp = (CarSlotList*)p;
     cp->sel = v;
     if (set) {
@@ -614,7 +614,7 @@ static inline void ShowCar(u8* g, s32 sel) {
 }
 
 // Picks a random car for the garage and shows it.
-int fn_8024ECD4(void) {
+int PickRandomGarageCar(void) {
     s32 sel = fn_80129D18(1, S32(lbl_8055F2EC, 0x1C) - 1);
     u8* g = lbl_8055F2EC;
     S32(g, 0x2C) = sel;
@@ -824,7 +824,7 @@ public:
 extern "C" {
 
 // The car unlock screen: shows every car of `list` in turn ("carunlock.lyt").
-void fn_8024FBD8(GarageList* list, u32* color) {
+void DisplayCarUnlockScreen(GarageList* list, u32* color) {
     LoadCarClassFile();
     CarStatsInit();
     CarUIScreen ui(1);
@@ -1111,7 +1111,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             f32 s = 0.5f + Clamp01(t) / 2.0f;
             f32 pw = fn_80235EF0(art, part) * s;
             f32 s2 = 0.5f + Clamp01(t) / 2.0f;
-            f32 ph = fn_80235F64(art, part) * s2;
+            f32 ph = GetArtHeight(art, part) * s2;
             int a = RoundF(GarageFadeAlpha(fade));
             a = a > 0x13F ? 0x13F : a;
             fn_802354A0(art, part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, pw, ph, (a << 24) | 0xFFFFFF);

@@ -55,9 +55,9 @@ int fn_802D31D8(int a);
 void fn_802D362C(int a);
 void fn_802D3304(void);
 void fn_802D08CC(int a);
-void* fn_801E7840(int a);
-void fn_801E7888(void* p);
-void fn_801E7890(void* p, f32 x, f32 y, f32 z, int a, f32 s, f32 t, int b);
+void* CreateGenericDrawList(int a);
+void DeleteGenericDrawList(void* p);
+void AddTriangleStrip(void* p, f32 x, f32 y, f32 z, int a, f32 s, f32 t, int b);
 void fn_801E7894(void* p);
 }
 
@@ -771,7 +771,7 @@ void Flare::operator delete(void* p) {
 }
 
 Flare::Flare(int id) {
-    fx = fn_801E7840(id);
+    fx = CreateGenericDrawList(id);
     pos.x = 0.0f;
     pos.y = 0.0f;
     pos.z = 0.0f;
@@ -779,7 +779,7 @@ Flare::Flare(int id) {
     count = 0;
 }
 
-Flare::~Flare(void) { fn_801E7888(fx); }
+Flare::~Flare(void) { DeleteGenericDrawList(fx); }
 
 void Flare::Draw(int a, int b, f32 x, f32 y, f32 z, f32 s, f32 t) {
     if (count == 0) {
@@ -806,7 +806,7 @@ void Flare::Draw(int a, int b, f32 x, f32 y, f32 z, f32 s, f32 t) {
             radius = 0.5f * (radius + dist);
         }
     }
-    fn_801E7890(fx, x, y, z, a, s, t, b);
+    AddTriangleStrip(fx, x, y, z, a, s, t, b);
     count++;
 }
 

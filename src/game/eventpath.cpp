@@ -273,7 +273,7 @@ void fn_8027D158(const char* name, char* out, int n);
 int fn_8027BA24(Path* p);
 int fn_8027BAB8(Path* p);
 
-int fn_8027AD4C(Contest* c, ValueNode* n) {
+int LoadContestEvent(Contest* c, ValueNode* n) {
     c->node = n;
     c->valid = 1;
     if (!strcasecmp(n->GetName(), "event_goal")) {
@@ -326,7 +326,7 @@ int Contest::Unlocked(void) { return unlocked; }
 
 void fn_8027AF94(Contest* c) { c->valid = 0; }
 
-int fn_8027AFA0(Bracket* b, ValueNode* n) {
+int ValidateAndInitializeBracket(Bracket* b, ValueNode* n) {
     b->node = n;
     b->valid = 1;
     if (n) {
@@ -343,7 +343,7 @@ int fn_8027AFA0(Bracket* b, ValueNode* n) {
             b->difficulty = fn_8027D1F4();
             ValueNode* c;
             for (int i = 0; (c = n->GetChildAt(i)) != 0; i++) {
-                if (!fn_8027AD4C(&b->contests.data[b->contests.n++], c)) {
+                if (!LoadContestEvent(&b->contests.data[b->contests.n++], c)) {
                     b->contests.RemoveAt(b->contests.n - 1);
                 }
             }
@@ -379,14 +379,14 @@ void fn_8027B288(Bracket* b) {
     b->name = 0;
 }
 
-void fn_8027B2F8(Path* p, const char* file, u8 career) {
+void LoadPathBrackets(Path* p, const char* file, u8 career) {
     p->career = career;
     p->table = fn_80131810(file);
     if (p->table) {
         ValueNode* c;
         for (int i = 0; (c = p->table->GetChild(i)) != 0; i++) {
             if (!strcmp(c->GetName(), "bracket")) {
-                if (!fn_8027AFA0(&p->brackets.data[p->brackets.n++], c)) {
+                if (!ValidateAndInitializeBracket(&p->brackets.data[p->brackets.n++], c)) {
                     p->brackets.RemoveAt(p->brackets.n - 1);
                 }
             }
@@ -409,18 +409,18 @@ void fn_8027B60C(Path* p) {
     }
 }
 
-void fn_8027CCB4(Path* p, int slot, int difficulty);
-void fn_8027CD80(Path* p, int slot, int difficulty);
+void LoadCareerEventPath(Path* p, int slot, int difficulty);
+void SetupCareerChallenge(Path* p, int slot, int difficulty);
 
-void fn_8027B690(void) {
+void InitializeCareerEvents(void) {
     int mode = EnterCareerEves();
     for (int s = 0; s < 4; s++) {
         SlotPaths* sp = &lbl_804A4380[s];
         for (u32 i = 0; i < 3; i++) {
-            fn_8027CCB4(&sp->career[i], s, i);
+            LoadCareerEventPath(&sp->career[i], s, i);
         }
         for (u32 i = 0; i < 2; i++) {
-            fn_8027CD80(&sp->chal[i], s, i);
+            SetupCareerChallenge(&sp->chal[i], s, i);
         }
     }
     lbl_8055F650 = 1;
@@ -487,7 +487,7 @@ int fn_8027BAB8(Path* p) {
     return 1;
 }
 
-void fn_8027BB4C(int difficulty, s32* total, s32* max, int clamp) {
+void CalculateDifficultyScores(int difficulty, s32* total, s32* max, int clamp) {
     s32 sum = 0;
     s32 most = 0;
     Path* p = fn_8027B834(difficulty);
@@ -519,9 +519,9 @@ void fn_8027BB4C(int difficulty, s32* total, s32* max, int clamp) {
     }
 }
 
-void fn_8027BCC0(int difficulty, s32* total, s32* max) { fn_8027BB4C(difficulty, total, max, 0); }
+void fn_8027BCC0(int difficulty, s32* total, s32* max) { CalculateDifficultyScores(difficulty, total, max, 0); }
 
-void fn_8027BCC8(int difficulty, s32* total, s32* max) { fn_8027BB4C(difficulty, total, max, 1); }
+void fn_8027BCC8(int difficulty, s32* total, s32* max) { CalculateDifficultyScores(difficulty, total, max, 1); }
 
 void fn_8027BCD0(PathEventList* list) {
     for (int k = 0; k < 3; k++) {
@@ -569,7 +569,7 @@ void fn_8027BF38(void) {
     LeaveEves(mode);
 }
 
-void fn_8027C014(ContestRef* r, s32 type, const char* bracket, ValueNode* n) {
+void MatchContestNameToEventId(ContestRef* r, s32 type, const char* bracket, ValueNode* n) {
     r->type = type;
     r->bracket = bracket;
     r->node = n;
@@ -588,7 +588,7 @@ void fn_8027C0D0(BracketRef* r, s32 type, ValueNode* n) {
     r->name = n->GetValue("bracket_name");
 }
 
-ContestRef* fn_8027C120(Oracle* o, const char* name) {
+ContestRef* GetContestByString(Oracle* o, const char* name) {
     int idx = FindContestIdx(o, name);
     if (idx < 0) {
         return 0;
@@ -618,7 +618,7 @@ BracketRef* fn_8027C26C(Oracle* o, const char* name) {
     return &o->brackets.data[i];
 }
 
-void fn_8027C2B8(Oracle* o, s32 type, const char* file) {
+void LoadBracketEventGoals(Oracle* o, s32 type, const char* file) {
     BracketRef* br;
     ValueNode* b;
     ValueTable* t = fn_80131808(file);
@@ -632,7 +632,7 @@ void fn_8027C2B8(Oracle* o, s32 type, const char* file) {
                 ValueNode* c;
                 for (int j = 0; (c = b->GetChildAt(j)) != 0; j++) {
                     if (!strcasecmp(c->GetName(), "event_goal")) {
-                        fn_8027C014(&o->contests.data[o->contests.n++], type, br->name, c);
+                        MatchContestNameToEventId(&o->contests.data[o->contests.n++], type, br->name, c);
                     }
                 }
             }
@@ -640,7 +640,7 @@ void fn_8027C2B8(Oracle* o, s32 type, const char* file) {
     }
 }
 
-Oracle* fn_8027C41C(Oracle* o, s32 difficulty) {
+Oracle* InitializeOracleData(Oracle* o, s32 difficulty) {
     o->difficulty = difficulty;
     o->contests.data = o->contestBuf;
     o->contests.cap = 0x8C0;
@@ -651,8 +651,8 @@ Oracle* fn_8027C41C(Oracle* o, s32 difficulty) {
     o->tables.data = o->tableBuf;
     o->tables.cap = 2;
     o->tables.n = 0;
-    fn_8027C2B8(o, 0, "ep_career.val");
-    fn_8027C2B8(o, 1, "ep_chal.val");
+    LoadBracketEventGoals(o, 0, "ep_career.val");
+    LoadBracketEventGoals(o, 1, "ep_chal.val");
     return o;
 }
 
@@ -678,7 +678,7 @@ void fn_8027C59C(s32 difficulty) {
     if (!lbl_8055F654) {
         Oracle* o = (Oracle*)operator new(sizeof(Oracle), "EventPathOracle");
         if (o) {
-            o = fn_8027C41C(o, difficulty);
+            o = InitializeOracleData(o, difficulty);
         }
         lbl_8055F654 = o;
         lbl_8055F658 = 1;
@@ -694,7 +694,7 @@ void fn_8027C610(void) {
     }
 }
 
-int fn_8027C650(ContestRef* r) {
+int CheckGradeRequirement(ContestRef* r) {
     HighScore* h = StatsGetHighScore(IdentGetCurrentSlot(), r->event, fn_8027D1F4(), 0);
     if (h) {
         const char* table = GetDifficultyString("grade_table", lbl_8055F654->difficulty, -1);
@@ -704,7 +704,7 @@ int fn_8027C650(ContestRef* r) {
     return 0;
 }
 
-int fn_8027C71C(ContestRef* r) {
+int CheckIfEventDone(ContestRef* r) {
     HighScore* h = StatsGetHighScore(IdentGetCurrentSlot(), r->event, fn_8027D1F4(), 0);
     int done = 0;
     if (h && h->grade == 0) {
@@ -713,11 +713,11 @@ int fn_8027C71C(ContestRef* r) {
     return done;
 }
 
-int fn_8027C788(BracketRef* b) {
+int ValidateEventGoal(BracketRef* b) {
     ValueNode* c;
     for (int i = 0; (c = b->node->GetChildAt(i)) != 0; i++) {
         if (!strcasecmp(c->GetName(), "event_goal")) {
-            if (!fn_8027C650(fn_8027C120(lbl_8055F654, c->GetValue("contest_name")))) {
+            if (!CheckGradeRequirement(GetContestByString(lbl_8055F654, c->GetValue("contest_name")))) {
                 return 0;
             }
         }
@@ -731,13 +731,13 @@ int fn_8027C850(const BracketRef* b) {
     if (i == 0) {
         return 1;
     }
-    return fn_8027C788(fn_8027C26C(lbl_8055F654, fn_8027C258(lbl_8055F654, i - 1)->name));
+    return ValidateEventGoal(fn_8027C26C(lbl_8055F654, fn_8027C258(lbl_8055F654, i - 1)->name));
 }
 
 int fn_8027C8B0(ContestRef* r) { return 1; }
 
-void fn_8027C8B8(BracketRef* b, char* out, int n) {
-    if (fn_8027C788(b)) {
+void GetCareerPathString(BracketRef* b, char* out, int n) {
+    if (ValidateEventGoal(b)) {
         StrCopyN(out, fn_80131234("EventPath:COMPLETED"), n);
         out[0] = '\0';
     } else if (fn_8027C850(b)) {
@@ -750,7 +750,7 @@ void fn_8027C8B8(BracketRef* b, char* out, int n) {
     }
 }
 
-int fn_8027CA1C(ContestRef* r) {
+int CheckContestPassStatus(ContestRef* r) {
     HighScore* h = StatsGetHighScore(IdentGetCurrentSlot(), r->event, fn_8027D1F4(), 0);
     int passed = 0;
     if (h) {
@@ -761,7 +761,7 @@ int fn_8027CA1C(ContestRef* r) {
     return passed;
 }
 
-int fn_8027CAB4(ContestRef* r) {
+int CheckEventCompleted(ContestRef* r) {
     HighScore* h = StatsGetHighScore(IdentGetCurrentSlot(), r->event, fn_8027D1F4(), 0);
     int done = 0;
     if (h && h->grade == 0) {
@@ -772,10 +772,10 @@ int fn_8027CAB4(ContestRef* r) {
 
 int fn_8027CB20(ContestRef* r) { return 1; }
 
-// MATCHING-AID: linker-stripped contest describer (the contest twin of fn_8027CBF8), reconstructed only so its
+// MATCHING-AID: linker-stripped contest describer (the contest twin of GetEventPathCompletionString), reconstructed only so its
 // literals keep their .data pool slots; the body is a guess.
 void ContestDescribe(ContestRef* r, char* out, int n) {
-    if (fn_8027CA1C(r)) {
+    if (CheckContestPassStatus(r)) {
         char buf[100];
         fn_801345D8(buf, 100, "EventPath:GOAL_GRADE_%s", r->node->GetValue("passing_grade"));
         StrCopyN(out, fn_80131234(buf), n);
@@ -788,7 +788,7 @@ int fn_8027CB28(BracketRef* b) {
     ValueNode* c;
     for (int i = 0; (c = b->node->GetChildAt(i)) != 0; i++) {
         if (!strcasecmp(c->GetName(), "event_goal")) {
-            if (!fn_8027CA1C(fn_8027C120(lbl_8055F654, c->GetValue("contest_name")))) {
+            if (!CheckContestPassStatus(GetContestByString(lbl_8055F654, c->GetValue("contest_name")))) {
                 return 0;
             }
         }
@@ -798,7 +798,7 @@ int fn_8027CB28(BracketRef* b) {
 
 int fn_8027CBF0(BracketRef* b) { return 1; }
 
-void fn_8027CBF8(BracketRef* b, char* out, int n) {
+void GetEventPathCompletionString(BracketRef* b, char* out, int n) {
     if (fn_8027CB28(b)) {
         StrCopyN(out, fn_80131234("EventPath:COMPLETED"), n);
     } else {
@@ -806,14 +806,14 @@ void fn_8027CBF8(BracketRef* b, char* out, int n) {
     }
 }
 
-void fn_8027CCB4(Path* p, int slot, int difficulty) {
+void LoadCareerEventPath(Path* p, int slot, int difficulty) {
     int mode = EnterCareerEves();
     int cur = IdentGetCurrentSlot();
     if (cur != slot) {
         IdentSelectSlot(slot);
     }
     fn_8027C59C(difficulty);
-    fn_8027B2F8(p, "ep_career.val", 1);
+    LoadPathBrackets(p, "ep_career.val", 1);
     if (cur != slot) {
         IdentSelectSlot(cur);
     }
@@ -821,14 +821,14 @@ void fn_8027CCB4(Path* p, int slot, int difficulty) {
     LeaveEves(mode);
 }
 
-void fn_8027CD80(Path* p, int slot, int difficulty) {
+void SetupCareerChallenge(Path* p, int slot, int difficulty) {
     int mode = EnterCareerEves();
     int cur = IdentGetCurrentSlot();
     if (cur != slot) {
         IdentSelectSlot(slot);
     }
     fn_8027C59C(difficulty);
-    fn_8027B2F8(p, "ep_chal.val", 1);
+    LoadPathBrackets(p, "ep_chal.val", 1);
     if (cur != slot) {
         IdentSelectSlot(cur);
     }
@@ -837,7 +837,7 @@ void fn_8027CD80(Path* p, int slot, int difficulty) {
 }
 
 int fn_8027CE4C(const char* name) {
-    ContestRef* r = fn_8027C120(lbl_8055F654, name);
+    ContestRef* r = GetContestByString(lbl_8055F654, name);
     switch (r->type) {
     case 0:
         return fn_8027C8B0(r);
@@ -850,12 +850,12 @@ int fn_8027CE4C(const char* name) {
 }
 
 int fn_8027CEC4(const char* name) {
-    ContestRef* r = fn_8027C120(lbl_8055F654, name);
+    ContestRef* r = GetContestByString(lbl_8055F654, name);
     switch (r->type) {
     case 0:
-        return fn_8027C650(r);
+        return CheckGradeRequirement(r);
     case 1:
-        return fn_8027CA1C(r);
+        return CheckContestPassStatus(r);
     default:
         fn_802E317C("eventpath: contest %s has unknown event-path type %d", name, r->type);
         return 1;
@@ -863,12 +863,12 @@ int fn_8027CEC4(const char* name) {
 }
 
 int fn_8027CF3C(const char* name) {
-    ContestRef* r = fn_8027C120(lbl_8055F654, name);
+    ContestRef* r = GetContestByString(lbl_8055F654, name);
     switch (r->type) {
     case 0:
-        return fn_8027C71C(r);
+        return CheckIfEventDone(r);
     case 1:
-        return fn_8027CAB4(r);
+        return CheckEventCompleted(r);
     default:
         fn_802E317C("eventpath: contest %s has unknown event-path type %d", name, r->type);
         return 1;
@@ -876,7 +876,7 @@ int fn_8027CF3C(const char* name) {
 }
 
 s32 fn_8027CFB4(const char* name) {
-    ContestRef* r = fn_8027C120(lbl_8055F654, name);
+    ContestRef* r = GetContestByString(lbl_8055F654, name);
     const char* table = GetDifficultyString("grade_table", lbl_8055F654->difficulty, -1);
     Grades g(GetEvent(r->event)->node->FindChild(table));
     for (int i = 0; i < 5; i++) {
@@ -905,7 +905,7 @@ int fn_8027D0E0(const char* name) {
     BracketRef* b = fn_8027C26C(lbl_8055F654, name);
     switch (b->type) {
     case 0:
-        return fn_8027C788(b);
+        return ValidateEventGoal(b);
     case 1:
         return fn_8027CB28(b);
     default:
@@ -918,10 +918,10 @@ void fn_8027D158(const char* name, char* out, int n) {
     BracketRef* b = fn_8027C26C(lbl_8055F654, name);
     switch (b->type) {
     case 0:
-        fn_8027C8B8(b, out, n);
+        GetCareerPathString(b, out, n);
         break;
     case 1:
-        fn_8027CBF8(b, out, n);
+        GetEventPathCompletionString(b, out, n);
         break;
     default:
         fn_802E317C("eventpath: contest %s has unknown event-path type %d", name, b->type);

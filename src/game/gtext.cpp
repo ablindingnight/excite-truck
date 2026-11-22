@@ -399,7 +399,7 @@ static inline int EscDraw(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color, 
                 f32 post = 0.0f;
                 it->esc = i;
                 if (e->art) {
-                    f32 k = h / fn_80235F64(e->art, e->artIdx);
+                    f32 k = h / GetArtHeight(e->art, e->artIdx);
                     it->h = h * e->scale;
                     it->w = (k * e->scale) * fn_80235EF0(e->art, e->artIdx);
                     post = e->scale * (e->postspace * k);
@@ -433,7 +433,7 @@ static inline int EscDrawT(const char* s, f32 x, f32 y, f32 z, f32 h, u32 color,
                 f32 post = 0.0f;
                 it->esc = i;
                 if (e->art) {
-                    f32 k = h / fn_80235F64(e->art, e->artIdx);
+                    f32 k = h / GetArtHeight(e->art, e->artIdx);
                     it->h = h * e->scale;
                     it->w = (k * e->scale) * fn_80235EF0(e->art, e->artIdx);
                     post = e->scale * (e->postspace * k);
@@ -467,7 +467,7 @@ static inline int EscAdv(const char* const& s, f32 h, double& adv, EscSeq*& e) {
             if (strncasecmp(s + 1, name, strlen(name)) == 0) {
                 e = GetEscapeEntry(i);
                 if (e->art) {
-                    f32 k = h / fn_80235F64(e->art, e->artIdx);
+                    f32 k = h / GetArtHeight(e->art, e->artIdx);
                     const f32 width = fn_80235EF0(e->art, e->artIdx);
                     const f32 assetScale = e->scale;
                     const f32 postspace = e->postspace;
@@ -723,7 +723,7 @@ static inline int EscWidth(const char* s, const int& i, f32& h, double& adv) {
             if (strncasecmp(s + i + 1, lbl_80497F14.data[j].name, strlen(lbl_80497F14.data[j].name)) == 0) {
                 e = &lbl_80497F14.data[j];
                 if (e->art) {
-                    h /= (fn_80235F64(e->art, e->artIdx));
+                    h /= (GetArtHeight(e->art, e->artIdx));
                     f32 wd = fn_80235EF0(e->art, e->artIdx);
                     adv = e->scale * (h * wd) + e->scale * (e->postspace * h);
                 } else {

@@ -66,7 +66,7 @@ void fn_800126B4(RaceSetup* rs, DAVMap* dav, int a, int b);
 void fn_800126C0(RaceSetup* rs, DAVMap* dav);
 void fn_80244738(void);
 void fn_80211F44(void);
-void fn_8027B690(void);
+void InitializeCareerEvents(void);
 void fn_8020A600(void);
 int fn_802ECEEC(void);
 void fn_802ECEC0(void);
@@ -112,7 +112,7 @@ int lbl_8055BB30 = 1;  // players for direct-to-track starts
 
 extern "C" {
 
-int fn_8023B764(int track, int eve) { return fn_802054EC("mirror_mode", track, eve); }
+int GetMirrorModeSetting(int track, int eve) { return fn_802054EC("mirror_mode", track, eve); }
 
 void fn_8023B77C(void) {
     int left = 297;
@@ -124,16 +124,16 @@ void fn_8023B77C(void) {
     fn_802CED50(left * 640 / 512, 392, (right - left) * 640 / 512, 31);
 }
 
-void fn_8023C0EC(RaceSetup* rs, int track, int eve);
+void SetRaceTrackFromEvent(RaceSetup* rs, int track, int eve);
 
-void fn_8023B7EC(GameDoSetup* rs, int track, int eve, int difficulty) {
+void SetupGameDo(GameDoSetup* rs, int track, int eve, int difficulty) {
     fn_802ECC18(0);
     fn_802445FC(track, eve, difficulty);
     fn_8023B77C();
     fn_8020A634();
     fn_8027B77C();
     fn_80211F4C();
-    fn_8023C0EC(rs, track, eve);
+    SetRaceTrackFromEvent(rs, track, eve);
     BuildDAVMap(&rs->dav, track);
     fn_800126B4(rs, &rs->dav, 0, 1);
     DAVMap rev;
@@ -148,7 +148,7 @@ void fn_8023B8AC(GameDoSetup* rs) {
     fn_8023B77C();
     fn_80211F44();
     if (!OptDirectToTrack()) {
-        fn_8027B690();
+        InitializeCareerEvents();
     }
     fn_8020A600();
 }
@@ -165,7 +165,7 @@ void fn_8023B904(GameDoSetup* rs, RaceStandings* out, int skip) {
     }
 }
 
-void fn_8023B9EC(int track, int eve, RaceStandings* out, int difficulty, int skip) {
+void RunSinglePlayerEvent(int track, int eve, RaceStandings* out, int difficulty, int skip) {
     int paused = fn_802ECEEC();
     if (paused) {
         fn_802ECEC0();
@@ -176,10 +176,10 @@ void fn_8023B9EC(int track, int eve, RaceStandings* out, int difficulty, int ski
             fn_8012BF28();
         }
         GameDoSetup rs;
-        fn_8023B7EC(&rs, track, eve, difficulty);
+        SetupGameDo(&rs, track, eve, difficulty);
         rs.opts.level = 0;
         rs.opts.difficulty = difficulty;
-        if (fn_8023B764(difficulty, rs.opts.event)) {
+        if (GetMirrorModeSetting(difficulty, rs.opts.event)) {
             fn_802E30C8("Enabling Mirror Mode!!");
             rs.opts.flags |= 2;
         }
@@ -192,7 +192,7 @@ void fn_8023B9EC(int track, int eve, RaceStandings* out, int difficulty, int ski
     }
 }
 
-void fn_8023BB0C(void) {
+void InitializePlayers(void) {
     int n = fn_802411CC();
     SetNumPlayers(n);
     for (int i = 0; i < n; i++) {
@@ -214,8 +214,8 @@ void fn_8023BBA8(void) {
     while (fn_8024A4CC(&track, &eve, &difficulty)) {
         fn_802411C8();
         if (fn_8023FF1C(1) != 1) {
-            fn_8023BB0C();
-            fn_8023B9EC(track, eve, NULL, difficulty, 0);
+            InitializePlayers();
+            RunSinglePlayerEvent(track, eve, NULL, difficulty, 0);
             AchievementsClearSession();
         }
     }
@@ -228,7 +228,7 @@ int fn_8023BC24(s32* id, s32* vehicle, u32* color, int unused) {
     return r;
 }
 
-void fn_8023BCEC(void) {
+void RunPlayerRace(void) {
     fn_80137C78(1);
     fn_80137C84(fn_802E4A10(), 0);
     s32 id = GetDriver(0)->id;
@@ -243,7 +243,7 @@ void fn_8023BCEC(void) {
             SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
             SetPlayer(0, id, vehicle, color);
             RaceStandings result;
-            fn_8023B9EC(track, eve, &result, difficulty, skip);
+            RunSinglePlayerEvent(track, eve, &result, difficulty, skip);
             fn_80137C80(0);
         }
     }
@@ -256,7 +256,7 @@ void fn_8023BDEC(void) {
     fn_80137C78(1);
 }
 
-void fn_8023BE38(const char* name, int headToHead) {
+void LoadRaceModeEves(const char* name, int headToHead) {
     UnloadEves();
     LoadModeEves(0x130);
     fn_802411C8();
@@ -264,7 +264,7 @@ void fn_8023BE38(const char* name, int headToHead) {
         fn_8023BBA8();
     } else {
         while (fn_8023FF1C(headToHead) != 1) {
-            fn_8023BB0C();
+            InitializePlayers();
             fn_8023B5E0();
         }
     }
@@ -273,9 +273,9 @@ void fn_8023BE38(const char* name, int headToHead) {
     LoadArcadeEves();
 }
 
-void fn_8023BEA8(void) { fn_8023BE38("GameDoHeadToHead", 1); }
+void StartHeadToHeadMode(void) { LoadRaceModeEves("GameDoHeadToHead", 1); }
 
-void fn_8023BEB8(int track, int eve, RaceStandings* out) { fn_8023B9EC(track, eve, out, 0, 0); }
+void fn_8023BEB8(int track, int eve, RaceStandings* out) { RunSinglePlayerEvent(track, eve, out, 0, 0); }
 
 void fn_8023BEC4(int index, RaceStandings* out) {
     s32 track = GetEvent(index)->track;
@@ -296,9 +296,9 @@ struct EventStart {
     RaceStandings* out;
 };
 
-void fn_8023BF4C(EventStart* s) { fn_8023B9EC(s->track, s->eve, s->out, s->difficulty, 0); }
+void fn_8023BF4C(EventStart* s) { RunSinglePlayerEvent(s->track, s->eve, s->out, s->difficulty, 0); }
 
-void fn_8023BF68(const char* arg) {
+void ValidatePlayerCount(const char* arg) {
     int n = atoi(arg);
     lbl_8055BB30 = n;
     if (n == 0 || __abs(n) > 4) {
@@ -328,7 +328,7 @@ void GameDoEve(int track, int eve) {
     }
 }
 
-void fn_8023C0EC(RaceSetup* rs, int track, int eve) {
+void SetRaceTrackFromEvent(RaceSetup* rs, int track, int eve) {
     TrackInfo* t = GetTrack(track);
     EventInfo* e = FindTrackEvent(track, eve);
     if (e->node->Has("track")) {

@@ -8,7 +8,7 @@
 extern "C" {
 int sprintf(char* s, const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-s32 fn_802E3D68(const char* name);       // create
+s32 CreateFileFromName(const char* name);       // create
 void fn_802E3AD0(s32 fd, const char* fmt, ...);  // file printf
 void fn_802E3734(s32* fd);                       // close
 int fn_8020A76C(void);
@@ -31,7 +31,7 @@ s32 lbl_8055EE28;  // selection
 extern "C" {
 
 void fn_8020BCE4(void) {
-    s32 fd = fn_802E3D68("sounds.txt");
+    s32 fd = CreateFileFromName("sounds.txt");
     if (fd != -1) {
         int i;
         fn_802E3AD0(fd, "tabular samples\r\n");

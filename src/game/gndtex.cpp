@@ -146,7 +146,7 @@ Batch lbl_804DB480;
 
 extern "C" {
 
-void fn_802DB2D4(void) {
+void SetupTextureAlphaTest(void) {
     lbl_8055FEB0 = 0;
     GXTex* t = lbl_804DB468[0];
     lbl_8055FD24 = t->alphaRef;
@@ -187,7 +187,7 @@ void fn_802DB394(void) {
     GXSetTevAlphaIn((GXTevStageID)1, (GXTevAlphaArg)0, (GXTevAlphaArg)7, (GXTevAlphaArg)7, (GXTevAlphaArg)7);
 }
 
-void fn_802DB3FC(void) {
+void SetupTextureEnvironment(void) {
     GXSetTevOp((GXTevStageID)0, (GXTevMode)3);
     GXSetTevOp((GXTevStageID)1, (GXTevMode)4);
     GXSetTevAlphaOp((GXTevStageID)1, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
@@ -248,10 +248,10 @@ int fn_802DB69C(GXTex** layers, int mode) {
     return stage;
 }
 
-void fn_802DB778(int mode) {
+void SetupGroundTextureRendering(int mode) {
     if (lbl_8055FE9E) {
         lbl_8055FE9E = 0;
-        fn_802DB2D4();
+        SetupTextureAlphaTest();
         GXTex* layers[3];
         fn_802DB304(layers, mode);
         int stages = fn_802DB69C(layers, mode);
@@ -260,7 +260,7 @@ void fn_802DB778(int mode) {
             fn_802DB394();
             break;
         case 1:
-            fn_802DB3FC();
+            SetupTextureEnvironment();
             break;
         case 2:
             GXSetTevColorOp((GXTevStageID)0, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
@@ -306,7 +306,7 @@ void fn_802DB9DC(int first) {
     }
 }
 
-void fn_802DBA1C(int prepass) {
+void SetupTextureMatrices(int prepass) {
     f32 a[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5009765625f}, {0.0f, 0.0f, -1.0f / 2048, 0.4990234375f}};
     GXLoadTexMtxImm((const f32 (*)[4])(a), (u32)0x24, (GXMtxType)1);
     f32 b[2][4] = {{1.0f / 2048, 0.0f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f / 2048, 0.5f}};
@@ -331,7 +331,7 @@ void fn_802DBA1C(int prepass) {
     }
 }
 
-void fn_802DBBE4(void* verts, int n) {
+void SetupVertexAttributes(void* verts, int n) {
     if (lbl_8055FEA8 != verts) {
         lbl_8055FEA8 = verts;
         lbl_8055FEAC = n;
@@ -429,9 +429,9 @@ void fn_802DBF54(const u16* idx, int n) {
 }
 
 void fn_802DC078(void* verts, int nverts, const u16* idx, int n, int first, int layer) {
-    fn_802DBA1C(lbl_8055FEBA);
+    SetupTextureMatrices(lbl_8055FEBA);
     fn_802DB9DC(first);
-    fn_802DBBE4(verts, nverts);
+    SetupVertexAttributes(verts, nverts);
     fn_802DBF54(idx, n);
     if (lbl_8055FEBA) {
         GXSetZMode((GXBool)1, (GXCompare)3, (GXBool)1);
@@ -447,7 +447,7 @@ void fn_802DC130(void) { fn_802DBD88(); }
 void fn_802DC134(void) { fn_802DBDD8(); }
 
 void fn_802DC138(void* verts, int nverts, const u16* idx, int n) {
-    fn_802DB778(0);
+    SetupGroundTextureRendering(0);
     fn_802DBCFC(verts, nverts);
     const u16* p = idx;
     int left = n;
@@ -465,8 +465,8 @@ void fn_802DC278(void) { fn_802DBD88(); }
 
 void fn_802DC27C(void) { fn_802DBDD8(); }
 
-void fn_802DC280(void* verts, int nverts, const u16* idx, int n) {
-    fn_802DB778(1);
+void DrawVertexStrip(void* verts, int nverts, const u16* idx, int n) {
+    SetupGroundTextureRendering(1);
     fn_802DBC70(verts, nverts);
     const u16* p = idx;
     int left = n;
@@ -496,7 +496,7 @@ void fn_802DC440(void) {
 }
 
 void fn_802DC464(void* verts, int nverts, const u16* idx, int n) {
-    fn_802DBBE4(verts, nverts);
+    SetupVertexAttributes(verts, nverts);
     f32 opacity = lbl_804DB068[1].z;
     u8 a = MinI(MaxI(Round(255.0f * opacity), 0), 0xFF);
     if (a != lbl_8055FEA0) {
@@ -699,7 +699,7 @@ void fn_802DCFCC(void* ctx, s32 ind, f32 scale, f32 uvScale, s32 tex, u32) {
     if (tex != -2) {
         fn_802CADD0(tex, 1);
     }
-    fn_802DB778(2);
+    SetupGroundTextureRendering(2);
     if (ind != -2) {
         lbl_8055FEC0 = 1;
         scale = 5.0f * scale;
@@ -745,7 +745,7 @@ void fn_802DD228(void) {
     GXSetTevDirect((GXTevStageID)0);
 }
 
-void fn_802DD27C(u8* verts, int n, const u16* idx, int count) {
+void DrawWaterGeometry(u8* verts, int n, const u16* idx, int count) {
     GXSetArray((GXAttr)9, (const void*)verts, (u8)0x18);
     GXSetArray((GXAttr)0xB, (const void*)(verts + 0xC), (u8)0x18);
     GXSetArray((GXAttr)0xD, (const void*)(verts + 0x10), (u8)0x18);

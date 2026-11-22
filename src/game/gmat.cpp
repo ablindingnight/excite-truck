@@ -300,7 +300,7 @@ void fn_802B0710(void) { lbl_8055F9A0 = new ("gmat-tba") GAllocator; }
 
 void fn_802B0874(void) { SafeDelete(lbl_8055F9A0); }
 
-void fn_802B0904(void) { lbl_8055F9A0->blocks.count = 0; }
+void ResetBlockCount(void) { lbl_8055F9A0->blocks.count = 0; }
 
 void fn_802B0914(void) {
     fn_802B8AE0("last-gmat-tris", &lbl_8055F998);
@@ -409,7 +409,7 @@ inline GMat::GMat(ValueNode* node, ValueNode* tune) {
     LoadMaps(node);
 }
 
-void fn_802B0B20(ValueNode* node, ValueNode* tune) {
+void CreateGMaterial(ValueNode* node, ValueNode* tune) {
     if (!lbl_804BE104.Fits(1)) {
         return;
     }
@@ -451,7 +451,7 @@ void fn_802B11BC(GMat* g) {
     g->verts.cap = 0x3000;
     g->verts.count = 0;
     fn_802BAFA0();
-    fn_802B0904();
+    ResetBlockCount();
     for (int i = 0; i < 65; i++) {
         (GListData&)g->lists[i] = GListData();
     }
@@ -740,7 +740,7 @@ void fn_802B1BEC(void) {}
 
 void fn_802B1BF0(GMat* g, ValVec3* out, int i) { *out = g->verts.data[i]; }
 
-int fn_802B1C14(GMat* g) { return g->layers.count; }
+int GetLayerCount(GMat* g) { return g->layers.count; }
 
 const char* fn_802B1C1C(GMat* g, int i) { return g->LayerName(i); }
 

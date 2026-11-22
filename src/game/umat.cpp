@@ -15,7 +15,7 @@ ValueTable* fn_80131810(const char* name);  // load value file, quiet
 void fn_80131818(ValueTable* t);
 void fn_8012E96C(const char* name);
 ValueNode* fn_8013184C(void);  // empty value node
-void fn_802B0B20(ValueNode* n, ValueNode* ground);
+void CreateGMaterial(ValueNode* n, ValueNode* ground);
 void fn_802B224C(ValueNode* n);
 s32 fn_802B1138(const char* name);
 s32 fn_802B2C98(const char* name);
@@ -125,7 +125,7 @@ void fn_802B562C(UMat* m, ValueNode* n) {
     void* model;
     int k;
     m->name = n->GetValue("name");
-    fn_802B0B20(n, n->FindChild("ground_tex_params"));
+    CreateGMaterial(n, n->FindChild("ground_tex_params"));
     fn_802B224C(n);
     m->x4 = fn_802B1138(m->name);
     m->x8 = fn_802B2C98(m->name);

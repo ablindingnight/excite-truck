@@ -206,8 +206,8 @@ void fn_8020DABC(void);
 void fn_8020D224(void);
 void fn_8020D29C(void);
 void fn_80204A50(void);
-void fn_801DE154(void);
-int fn_801DE5C4(int key);
+void UpdateTweakDisplay(void);
+int HandleGarageInput(int key);
 void fn_801DE12C(void);
 void fn_801DE150(void);
 void fn_802B8848(void);
@@ -276,7 +276,7 @@ GameModeEntry lbl_802FBC90[25] = {
     {fn_80265D94, NULL, NULL, NULL, NULL},
     {fn_8020D2D4, fn_8020DB0C, fn_8020DABC, fn_8020D224, fn_8020D29C},
     {fn_8000ACB0, fn_8000ACDC, NULL, fn_80204A50, NULL},
-    {fn_801DE154, fn_801DE5C4, NULL, fn_801DE12C, fn_801DE150},
+    {UpdateTweakDisplay, HandleGarageInput, NULL, fn_801DE12C, fn_801DE150},
     {fn_802B8848, fn_802B8998, fn_802B87F4, fn_802B8C88, fn_802B8C98},
     {fn_80148218, fn_8014821C, fn_80148224, fn_80148228, fn_8014822C},
     {fn_8000AC98, fn_8000AC9C, fn_8000ACA4, fn_8000ACA8, fn_8000ACAC},

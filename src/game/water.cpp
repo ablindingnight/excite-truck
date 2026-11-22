@@ -109,7 +109,7 @@ void fn_802DBE4C(void);
 void fn_802DBECC(void);
 void fn_802C8BD0(s32 tex);
 void fn_802DCFCC(s32 target, s32 dtex, f32 a, f32 b, s32 mask, u32 color);
-void fn_802DD27C(WVert* v, int nv, const u16* idx, int ni);
+void DrawWaterGeometry(WVert* v, int nv, const u16* idx, int ni);
 void fn_802DD228(void);
 }
 
@@ -908,7 +908,7 @@ void WaterSystem::Draw(void) {
     u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
     fn_802C8BD0(env->Target());
     fn_802DCFCC(env->Target(), deep, lbl_8055CF74, 1.0f / (1024.0f * lbl_80564D78[0]), mask, deepCol);
-    fn_802DD27C(verts, 0x400, &idx[0][0][0], 0x1626);
+    DrawWaterGeometry(verts, 0x400, &idx[0][0][0], 0x1626);
     fn_802DD228();
     fn_802C8D74();
     fn_802DBECC();

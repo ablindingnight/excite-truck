@@ -172,7 +172,7 @@ gArtSet* fn_80234E88(const char* name) {
     return n->set;
 }
 
-void fn_80234EF4(gArtSet* s, const char* file) {
+void LoadArtSetFromTable(gArtSet* s, const char* file) {
     if (fn_8012C33C(file)) {
         StringTable* t = fn_8012F150(file);
         int rows = fn_8012F2E8(t);
@@ -199,7 +199,7 @@ void fn_80234EF4(gArtSet* s, const char* file) {
     }
 }
 
-Picture* fn_8023505C(gArtSet* s, int idx) {
+Picture* GetPictureAtIndex(gArtSet* s, int idx) {
     if (idx == 0) {
         return s->pictures;
     }
@@ -221,7 +221,7 @@ void fn_8023509C(void) {
     }
 }
 
-void fn_802350BC(void) {
+void HandleArtCleanup(void) {
     if (lbl_8055F084) {
         fn_802E30C8("gArt: Doing some cleanup that you should've done yourself:");
     }
@@ -270,7 +270,7 @@ gArtSet* fn_8023512C(const char* name) {
         fn_802E317C("gArt: Couldn't find the extension part of %s", info);
     }
     StrNCat(info, ".tab", 128);
-    fn_80234EF4(s, info);
+    LoadArtSetFromTable(s, info);
     fn_80234D44(s);
     return s;
 }
@@ -289,9 +289,9 @@ void fn_80235380(gArtSet* s) {
     }
 }
 
-void fn_802353F4(gArtSet* s, int idx, f32 x, f32 y, f32 z) {
+void DrawArtPictureAtPosition(gArtSet* s, int idx, f32 x, f32 y, f32 z) {
     if (idx >= 0) {
-        Picture* p = fn_8023505C(s, idx);
+        Picture* p = GetPictureAtIndex(s, idx);
         if (p == NULL) {
             fn_802E30C8("gArt: Picture #%d not found in gArtSet %s", idx, s->name);
         } else {
@@ -302,7 +302,7 @@ void fn_802353F4(gArtSet* s, int idx, f32 x, f32 y, f32 z) {
 
 void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int color) {
     if (idx >= 0) {
-        Picture* p = fn_8023505C(s, idx);
+        Picture* p = GetPictureAtIndex(s, idx);
         if (p == NULL) {
             fn_802E30C8("gArt: Picture #%d not found in gArtSet %s", idx, s->name);
         } else {
@@ -342,7 +342,7 @@ static inline void SetCroppedUV(f32& ul, f32& vt, f32& ur, f32& vb,
 void fn_80235758(gArtSet* s, int idx, f32 x, f32 y, f32 w, f32 h, f32 left, f32 top, f32 right, f32 bottom,
                  int color) {
     if (idx >= 0) {
-        Picture* p = fn_8023505C(s, idx);
+        Picture* p = GetPictureAtIndex(s, idx);
         if (p == NULL) {
             fn_802E30C8("gArt: Picture #%d not found in gArtSet %s", idx, s->name);
         } else {
@@ -387,7 +387,7 @@ void fn_80235AFC(gArtSet* s, int idx, u32 color, f32 x, f32 y, f32 z, f32 w, f32
     mp->basis.m[2][0] = zero;
     mp->basis.m[2][1] = zero;
     mp->basis.m[2][2] = 1.0f;
-    Picture* p = fn_8023505C(s, idx);
+    Picture* p = GetPictureAtIndex(s, idx);
     f32 hw = Mul(w, 0.5f);
     f32 hh = Mul(h, 0.5f);
     UIVertex v[4] __attribute__((aligned(16)));
@@ -404,7 +404,7 @@ void fn_80235AFC(gArtSet* s, int idx, u32 color, f32 x, f32 y, f32 z, f32 w, f32
 
 void fn_80235CBC(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int color) {
     if (idx >= 0) {
-        Picture* p = fn_8023505C(s, idx);
+        Picture* p = GetPictureAtIndex(s, idx);
         if (p == NULL) {
             fn_802E30C8("gArt: Picture #%d not found in gArtSet %s", idx, s->name);
         } else {
@@ -430,7 +430,7 @@ f32 fn_80235EF0(gArtSet* s, int idx) {
     if (s == NULL) {
         return 0.0f;
     }
-    Picture* p = fn_8023505C(s, idx);
+    Picture* p = GetPictureAtIndex(s, idx);
     if (p == NULL) {
         fn_802E30C8("gArt: width requested on art that's not part of this set(%s, %d)", s->name, idx);
         return 0.0f;
@@ -438,11 +438,11 @@ f32 fn_80235EF0(gArtSet* s, int idx) {
     return p->width;
 }
 
-f32 fn_80235F64(gArtSet* s, int idx) {
+f32 GetArtHeight(gArtSet* s, int idx) {
     if (s == NULL) {
         return 0.0f;
     }
-    Picture* p = fn_8023505C(s, idx);
+    Picture* p = GetPictureAtIndex(s, idx);
     if (p == NULL) {
         fn_802E30C8("gArt: height requested on art that's not part of this set(%s, %d)", s->name, idx);
         return 0.0f;
@@ -450,7 +450,7 @@ f32 fn_80235F64(gArtSet* s, int idx) {
     return p->height;
 }
 
-int fn_80235FD8(gArtSet* s) {
+int CountArtSetPictures(gArtSet* s) {
     if (s == NULL) {
         return 0;
     }

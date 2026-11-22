@@ -169,7 +169,7 @@ void UIObjectsImpl::DrawImage(const char* name, u32 flags, int a, f32 x, f32 y) 
     if (i >= 0) {
         UIImageDef* e = Image(i);
         f32 w = fn_80235EF0(e->img, e->frame);
-        f32 h = fn_80235F64(e->img, e->frame);
+        f32 h = GetArtHeight(e->img, e->frame);
         if (flags & 2) {
             x -= w;
         } else if (flags & 4) {
@@ -196,7 +196,7 @@ void UIObjectsImpl::DrawImageScaled(const char* name, u32 flags, int a, f32 x, f
     if (i >= 0) {
         UIImageDef* e = Image(i);
         f32 w = scale * fn_80235EF0(e->img, e->frame);
-        f32 h = scale * fn_80235F64(e->img, e->frame);
+        f32 h = scale * GetArtHeight(e->img, e->frame);
         if (flags & 2) {
             x -= w;
         } else if (flags & 4) {
@@ -231,7 +231,7 @@ f32 UIObjectsImpl::GetHeight(const char* name) {
     int i = FindImage(name);
     if (i >= 0) {
         UIImageDef* e = Image(i);
-        return fn_80235F64(e->img, e->frame);
+        return GetArtHeight(e->img, e->frame);
     }
     return 0.0f;
 }

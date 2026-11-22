@@ -81,8 +81,8 @@ void fn_802DA4C4(void);
 void fn_802DA52C(void);
 void fn_802DAE18(void);
 void fn_802DB168(void);
-void fn_802DD4FC(void);
-void fn_802DD5F4(void);
+void InitializeBlurTexture(void);
+void ClearBlurTexture(void);
 void fn_802ECA48(void);
 void LoadEnvironmentMapTexture(void* tex);
 void ValidateLightmapTexture(void* tex);
@@ -101,9 +101,9 @@ void fn_802DF6D0(void);
 void fn_802DF938(void);
 void fn_802DF4A8(void);
 void fn_802DF684(void);
-int fn_802E3D68(const char* name);
+int CreateFileFromName(const char* name);
 void fn_802E3734(s32* fd);
-void fn_802E3A64(s32 fd, const void* buf, u32 n);
+void WriteFileData(s32 fd, const void* buf, u32 n);
 void fn_801BFD34(V3* out, const V3* in, const PlainValMatrix* m);
 void fn_802C8588(void* out, const V3* a, const V3* b);
 
@@ -717,7 +717,7 @@ void fn_802CF600(void) {
     GXSetDrawSyncCallback((GXDrawSyncCallback)fn_802CECF4);
     GXSetDrawDoneCallback((GXDrawDoneCallback)fn_802CEC44);
     fn_802D37E4();
-    fn_802DD4FC();
+    InitializeBlurTexture();
     lbl_8055FD40 = -1;
     fn_80127468();
     RegisterBackgroundTask(HandleResetSequence, "drIdle");
@@ -844,7 +844,7 @@ void fn_802CFBA8(void) {
     fn_802D9C4C();
     VISetPreRetraceCallback((VIRetraceCallback)0);
     fn_802E30C8("gx: max dynamic data used = %d", lbl_8055FD98);
-    fn_802DD5F4();
+    ClearBlurTexture();
     fn_802D3894();
     fn_802D6860();
     delete[] (u8*)lbl_804C9940.buf;
@@ -1241,7 +1241,7 @@ void fn_802D0914(s32 fd, int w, int h) {
     t = hdr[14];
     hdr[14] = hdr[15];
     hdr[15] = t;
-    fn_802E3A64(fd, hdr, 0x12);
+    WriteFileData(fd, hdr, 0x12);
 }
 
 void fn_802D09E4(void) {}
@@ -1262,7 +1262,7 @@ void fn_802D09E8(void) {
     }
     lbl_8055FDC0 = 0;
     if (lbl_8055D0B8 == 0) {
-        lbl_8055D10C = fn_802E3D68(lbl_804C9830);
+        lbl_8055D10C = CreateFileFromName(lbl_804C9830);
         if (lbl_8055D10C == -1) {
             fn_802E30C8("gx: can't create %s", lbl_804C9830);
             lbl_8055FD90 = 0;

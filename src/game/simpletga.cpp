@@ -6,10 +6,10 @@ void* memset(void* p, int c, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void* fn_801284E8(const char* tag, s32 size);  // MemAlloc
 void fn_80128658(void* p);                     // MemFree
-s32 fn_802E3D04(const char* name);             // open for reading
-s32 fn_802E3D68(const char* name);             // create
+s32 LoadFileFromSystem(const char* name);             // open for reading
+s32 CreateFileFromName(const char* name);             // create
 int fn_802E39D0(s32 fd, void* buf, s32 n);     // read, checked
-int fn_802E3A64(s32 fd, const void* buf, s32 n);  // write
+int WriteFileData(s32 fd, const void* buf, s32 n);  // write
 void fn_802E3734(s32* fd);                     // close
 }
 
@@ -46,7 +46,7 @@ int fn_802B4FB0(u32 bpp) {
 
 int fn_802B4FD0(const char* name, s32* width, s32* height) {
     int ok = 0;
-    s32 fd = fn_802E3D04(name);
+    s32 fd = LoadFileFromSystem(name);
     if (fd != -1) {
         TGAHeader hdr;
         if (fn_802E39D0(fd, &hdr, sizeof(hdr)) && hdr.imageType == 2 && fn_802B4FB0(hdr.bpp)) {
@@ -69,7 +69,7 @@ int fn_802B5070(const TGAHeader* hdr, s32 count) {
 
 int fn_802B50E8(const char* name, u32* pixels, s32 count) {
     int ok = 0;
-    s32 fd = fn_802E3D04(name);
+    s32 fd = LoadFileFromSystem(name);
     if (fd != -1) {
         TGAHeader hdr;
         if (fn_802E39D0(fd, &hdr, sizeof(hdr)) && fn_802B5070(&hdr, count)) {
@@ -126,10 +126,10 @@ int save_simple_tga(const char* name, const SimpleTGA* img) {
     hdr.width = img->width;
     hdr.height = img->height;
     hdr.bpp = 32;
-    fd = fn_802E3D68(name);
+    fd = CreateFileFromName(name);
     if (fd != -1) {
-        fn_802E3A64(fd, &hdr, sizeof(hdr));
-        fn_802E3A64(fd, img->pixels, img->width * 4 * img->height);
+        WriteFileData(fd, &hdr, sizeof(hdr));
+        WriteFileData(fd, img->pixels, img->width * 4 * img->height);
         fn_802E3734(&fd);
         ok = 1;
     } else {

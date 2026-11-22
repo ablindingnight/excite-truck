@@ -140,17 +140,17 @@ void fn_802B4E3C(s32 layer);
 s32 fn_802B05DC(void);
 int fn_802B05E4(void);
 void fn_802B0288(void*);  // GroundSet*
-s32 fn_802B1C14(void* layers);
+s32 GetLayerCount(void* layers);
 const char* fn_802B1C1C(void* layers, s32 i);
 void fn_80128684(void);
 void fn_80128678(void);
 u8 fn_80128690(void);
 ObjSrc* fn_80156A40(void);
 void fn_802A7BDC(int fd, void* obj);
-int fn_802E3D68(const char* name);
+int CreateFileFromName(const char* name);
 void fn_802E3AD0(int fd, const char* fmt, ...);
 void fn_802E3734(int* fd);
-int fn_802E3BB4(const char* pattern, char* name, int n);
+int FindFirstFile(const char* pattern, char* name, int n);
 int FileFindNext(int h, char* name, int n);
 void FileFindClose(int h);
 f32 fn_801DCF48(V3* nrm, f32 x, f32 z);
@@ -327,7 +327,7 @@ void fn_802B5F24(int fd) {
 static inline f32 GridToWorld(int v, f32 cell) { return (f32)v * cell; }
 
 void fn_802B5F98(const char* name) {
-    int fd = fn_802E3D68("worldmodel.mml");
+    int fd = CreateFileFromName("worldmodel.mml");
     if (fd == -1) {
         return;
     }
@@ -645,7 +645,7 @@ void fn_802B6AC0(void) {
     lbl_804BE7D8.count = 0;
     const char* dir = fn_802B6A70(lbl_8055FA38);
     fn_801345D8(pat, 0x40, "%s*.tga", dir);
-    u32 h = fn_802E3BB4(pat, name, 0x20);
+    u32 h = FindFirstFile(pat, name, 0x20);
     if (h == -1) {
         return;
     }
@@ -913,8 +913,8 @@ void fn_802B7B08(void) {
     char nm[0x20];
     if (lbl_8055FA08.Waiting()) {
         void* layers = fn_802B5B6C()->layers;
-        if (fn_802B1C14(layers) > 0) {
-            for (int i = 0; i < fn_802B1C14(layers); i++) {
+        if (GetLayerCount(layers) > 0) {
+            for (int i = 0; i < GetLayerCount(layers); i++) {
                 fn_801345D8(nm, 0x20, "layer:%d", i);
                 t.name = nm;
                 fn_802B6568(&t, "%s", fn_802B1C1C(layers, i));

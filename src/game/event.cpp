@@ -23,7 +23,7 @@ extern "C" {
 
 void fn_801EEFC8(void) { memset(lbl_80488678, 0, sizeof(lbl_80488678)); }
 
-void fn_801EEFDC(EventHandler h, u8 type) {
+void RegisterEventHandler(EventHandler h, u8 type) {
     int i;
     for (i = 0; i < 4; i++) {
         if (lbl_80488678[type][i] == 0) {

@@ -167,7 +167,7 @@ int fn_8027DE68(int i) { return fn_8027B94C(i); }
 void fn_8027DE6C(void) {
     fn_8027B77C();
     fn_8027BF38();
-    fn_8027B690();
+    InitializeCareerEvents();
     fn_8027DA08();
 }
 
@@ -222,7 +222,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
     fn_802840F4();
     CareerResult res;
     memset(&res, 0, sizeof(res));
-    while (fn_802840FC(&sel, path, &res)) {
+    while (BrowseCareerEvent(&sel, path, &res)) {
         memset(&res, 0, sizeof(res));
         if (!fn_8027DEDC(&vehicle, &x, GetEvent(sel)->track, which)) {
             continue;
@@ -303,7 +303,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
                 const char* why = ShowExtremeUnlockReason();
                 list->SetReason(list->Count() - 1, why);
             }
-            fn_80284580(q.profile, q.total, list, &x);
+            ShowUnlockedCarsBetweenPoints(q.profile, q.total, list, &x);
             delete list;
             TallyRunAchievements();
             AchievementsCommitSession();

@@ -31,7 +31,7 @@ ModuleTag lbl_8055EA98;
 
 extern "C" {
 
-void fn_801E4A2C(Font* f) { delete f; }
+void DeleteFont(Font* f) { delete f; }
 
 int fn_801E4A6C(Font* f, const char* s) {
     if (f) {
@@ -45,7 +45,7 @@ int fn_801E4A6C(Font* f, const char* s) {
     return fn_802C4FF8(s);
 }
 
-int fn_801E4AB0(Font* f, const char* s, int n) {
+int CalculateFontStringWidth(Font* f, const char* s, int n) {
     if (f) {
         const u8* p = (const u8*)s;
         int w = 0;
@@ -79,7 +79,7 @@ int fn_801E4B48(Font* f) {
 
 int fn_801E4BA8(Font* f) { return fn_801E4B00(f) + fn_801E4B48(f); }
 
-void fn_801E4BEC(Font* f, u32 color, u32 flags, int x, int y, const char* fmt, ...) {
+void DrawTextWithFormatting(Font* f, u32 color, u32 flags, int x, int y, const char* fmt, ...) {
     char buf[0x1000];
     va_list args;
     int w;
@@ -113,11 +113,11 @@ void fn_801E4BEC(Font* f, u32 color, u32 flags, int x, int y, const char* fmt, .
     }
 }
 
-void fn_801E4DBC(Font* f, u32 color, u32 flags, int x, int y, const char* s, int n) {
+void FormatAndDrawText(Font* f, u32 color, u32 flags, int x, int y, const char* s, int n) {
     char buf[0x100];
     strncpy(buf, s, n);
     buf[n] = 0;
-    fn_801E4BEC(f, color, flags, x, y, "%s", buf);
+    DrawTextWithFormatting(f, color, flags, x, y, "%s", buf);
 }
 
 }  // extern "C"

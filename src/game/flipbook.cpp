@@ -155,7 +155,7 @@ int fn_802962CC(ValueNode* n) { return strcasecmp(n->GetName(), "frame") == 0; }
 
 int fn_80296308(ValueNode* n) { return strcasecmp(n->GetName(), "default") == 0; }
 
-u32 fn_80296344(ValueNode* n, const char* key, u32 def) {
+u32 ParseHexValueFromNode(ValueNode* n, const char* key, u32 def) {
     u32 v;
     const char* s = n->GetString(key, "");
     if (s[0] == '0' && ToLower(s[1]) == 'x') {
@@ -166,7 +166,7 @@ u32 fn_80296344(ValueNode* n, const char* key, u32 def) {
     return v;
 }
 
-u32 fn_802963F0(ValueNode* n, u32 def) {
+u32 ParseBlendFlags(ValueNode* n, u32 def) {
     u32 r = def;
     if (n->Has("blend")) {
         BlendFlag flags[4] = {{1, "uv"}, {2, "color"}, {4, "tex"}, {8, "pos"}};
@@ -181,13 +181,13 @@ u32 fn_802963F0(ValueNode* n, u32 def) {
     return r;
 }
 
-int fn_802964EC(FlipFrame* f, ValueNode* n, const FlipFrame* def) {
+int ParseFlipFrameData(FlipFrame* f, ValueNode* n, const FlipFrame* def) {
     f->t = n->GetFloat("t", def->t);
     f->u1 = n->GetFloat("u1", def->u1);
     f->u2 = n->GetFloat("u2", def->u2);
     f->v1 = n->GetFloat("v1", def->v1);
     f->v2 = n->GetFloat("v2", def->v2);
-    f->color = fn_80296344(n, "color", def->color);
+    f->color = ParseHexValueFromNode(n, "color", def->color);
     if (n->Has("alpha")) {
         f->color &= 0x00FFFFFF;
         f->color |= n->GetIntValue("alpha") << 24;
@@ -215,11 +215,11 @@ int fn_802964EC(FlipFrame* f, ValueNode* n, const FlipFrame* def) {
         f->size = def->size;
     }
     (ValVec3&)f->offset = n->GetVec3Or("offset", def->offset);
-    f->blend = fn_802963F0(n, def->blend);
+    f->blend = ParseBlendFlags(n, def->blend);
     return 1;
 }
 
-void fn_80296838(FlipBook* b) {
+void FreeFlipBookFrames(FlipBook* b) {
     if (b) {
         if (b->frames) {
             for (int i = 0; i < b->count; i++) {
@@ -251,11 +251,11 @@ void fn_8029690C(FlipBook* b) {
                 break;
             }
         }
-        fn_80296838(b);
+        FreeFlipBookFrames(b);
     }
 }
 
-FlipBook* fn_80296950(const char* name) {
+FlipBook* FindFlipBookByName(const char* name) {
     for (FlipBook* b = lbl_8055F788; b; b = b->next) {
         if (strcasecmp(name, b->name) == 0) {
             return b;
@@ -276,7 +276,7 @@ u32 fn_80296A10(u32 c0, u32 c1, f32 t) {
     return lo | hi;
 }
 
-void fn_80296AAC(FlipFrame* f) {
+void InitializeFlipFrame(FlipFrame* f) {
     memset(f, 0, sizeof(FlipFrame));
     f->v2 = 1.0f;
     f->u2 = 1.0f;
@@ -287,17 +287,17 @@ void fn_80296AAC(FlipFrame* f) {
     f->color = 0xFFFFFFFF;
 }
 
-FlipBook* fn_80296B10(const char* res, ValueNode* cfg) {
+FlipBook* LoadFlipBookResource(const char* res, ValueNode* cfg) {
     int frames;
     int other;
-    FlipBook* b = fn_80296950(res);
+    FlipBook* b = FindFlipBookByName(res);
     if (!b) {
         int ok = 0;
         if (fn_8012C33C(res)) {
             ValueTable* t = fn_80131808(res);
             FlipFrame def;
             frames = 0;
-            fn_80296AAC(&def);
+            InitializeFlipFrame(&def);
             other = 0;
             for (;;) {
                 ValueNode* n = t->GetChild(frames + other);
@@ -309,12 +309,12 @@ FlipBook* fn_80296B10(const char* res, ValueNode* cfg) {
                     continue;
                 }
                 if (fn_80296308(n)) {
-                    fn_802964EC(&def, n, &def);
+                    ParseFlipFrameData(&def, n, &def);
                 }
                 other++;
             }
             if (cfg) {
-                fn_802964EC(&def, cfg, &def);
+                ParseFlipFrameData(&def, cfg, &def);
             }
             if (frames) {
                 ok = 1;
@@ -334,7 +334,7 @@ FlipBook* fn_80296B10(const char* res, ValueNode* cfg) {
                         break;
                     }
                     if (fn_802962CC(n)) {
-                        if (!fn_802964EC(&b->frames[i] - other, n, &def)) {
+                        if (!ParseFlipFrameData(&b->frames[i] - other, n, &def)) {
                             ok = 0;
                         }
                     } else {
@@ -345,7 +345,7 @@ FlipBook* fn_80296B10(const char* res, ValueNode* cfg) {
             fn_80131818(t);
         }
         if (!ok) {
-            fn_80296838(b);
+            FreeFlipBookFrames(b);
             b = 0;
         }
     }
@@ -384,7 +384,7 @@ static inline const ValVec3* FrameOffset(u32 flags, FlipFrame** fr, f32 k) {
     return o;
 }
 
-int fn_80296D2C(FlipBook* b, f32 t, const ValVec3* pos) {
+int InterpolateFlipbookFrame(FlipBook* b, f32 t, const ValVec3* pos) {
     FlipFrame* fr[2] = {0, 0};
     f32 start = 0.0f;
     for (int i = 0; i < b->count; i++) {

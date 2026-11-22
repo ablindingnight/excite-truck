@@ -53,13 +53,13 @@ void* memcpy(void* d, const void* s, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 u32 fn_80132E7C(const void* p, s32 n);   // crc
-int fn_802E36D8(const char* path);       // open
-s32 fn_802E37C4(int fd);                 // file size
+int LoadFileWithName(const char* path);       // open
+s32 GetFileSize(int fd);                 // file size
 void fn_802E3734(int* fd);               // close
 int fn_802E39D0(int fd, void* buf, s32 n);  // read, checked
-void fn_802E3A14(int fd, s32 pos);       // seek
-void fn_802E3804(int fd, void* buf, s32 n);  // read
-int fn_802E3BB4(const char* pattern, char* name, s32 n);  // find first
+void FileSeekToPosition(int fd, s32 pos);       // seek
+void ReadFileBuffer(int fd, void* buf, s32 n);  // read
+int FindFirstFile(const char* pattern, char* name, s32 n);  // find first
 int FileFindNext(int h, char* name, s32 n);                // find next
 void FileFindClose(int h);                                  // find close
 void fn_802E4CA8(char* dst, const char* src, s32 n);
@@ -281,17 +281,17 @@ inline void TocLib::Reload(void) {
     u32 k;
     for (k = 0; k < sizeof(patterns) / sizeof(patterns[0]); k++) {
         char name[0x80];
-        u32 h = fn_802E3BB4(patterns[k], name, sizeof(name));
+        u32 h = FindFirstFile(patterns[k], name, sizeof(name));
         if (h != -1) {
             do {
                 int fd;
                 ResTocHeader th;
                 *strrchr(name, '.') = 0;
                 StrNCat(name, ".toc", sizeof(name));
-                fd = fn_802E36D8(name);
+                fd = LoadFileWithName(name);
                 if (fd != -1) {
-                    fn_802E3A14(fd, 0x14);
-                    fn_802E3804(fd, &th, 0x14);
+                    FileSeekToPosition(fd, 0x14);
+                    ReadFileBuffer(fd, &th, 0x14);
                     if (th.version == 0) {
                         ResToc* toc = GetToc(name);
                         if (toc) {
@@ -300,7 +300,7 @@ inline void TocLib::Reload(void) {
                                     fn_802E30C8(ResStrings::ReloadTocMessage(), name);
                                     toc->createTime = th.createTime;
                                     toc->loadSize = th.loadSize;
-                                    fn_802E3804(fd, toc->entries, th.count * sizeof(ResEntry));
+                                    ReadFileBuffer(fd, toc->entries, th.count * sizeof(ResEntry));
                                 } else {
                                     fn_802E30C8(ResStrings::ReloadCountError(),
                                                 name, th.count, toc->count);
@@ -472,8 +472,8 @@ int fn_8012AB34(int fd, ResSetHeader* h, const char* name, u32 fileSize) {
 }
 
 int fn_8012ABB0(const char* path, ResSetHeader* h) {
-    int fd = fn_802E36D8(path);
-    if (fd != -1 && !fn_8012AB34(fd, h, path, fn_802E37C4(fd))) {
+    int fd = LoadFileWithName(path);
+    if (fd != -1 && !fn_8012AB34(fd, h, path, GetFileSize(fd))) {
         fn_802E3734(&fd);
         fd = -1;
     }
@@ -546,8 +546,8 @@ ResourceSet* fn_8012AFE0(const char* path, const char* name) {
         fn_801282F4();
         fn_801282EC(0x80);
         mem = fn_801284F0(name, size);
-        fn_802E3A14(fd, set->hdr.baseOffset);
-        fn_802E3804(fd, mem, size);
+        FileSeekToPosition(fd, set->hdr.baseOffset);
+        ReadFileBuffer(fd, mem, size);
         set->mem = mem;
         if (hdr.flags & 1) {
             set->entries = 0;
@@ -701,13 +701,13 @@ int fn_8012B6FC(ResourceSet* set, int idx) {
         mem = (u8*)fn_801284F0(e->name, size);
         if (mem) {
             u32 start = fn_802E2C20();
-            int fd = fn_802E36D8(set->path);
+            int fd = LoadFileWithName(set->path);
             if (fd != -1) {
                 ResData* d = (ResData*)(mem + 0x78);
                 d->entry = e;
                 d->magic = 'MGI!';
-                fn_802E3A14(fd, e->offset + set->hdr.baseOffset);
-                fn_802E3804(fd, d->body, e->size);
+                FileSeekToPosition(fd, e->offset + set->hdr.baseOffset);
+                ReadFileBuffer(fd, d->body, e->size);
                 if (e->crc == fn_80132E7C(d->body, e->size)) {
                     e->flags |= 0xC;
                     e->data = d;

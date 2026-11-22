@@ -91,7 +91,7 @@ const VecMatrix* fn_801E8718(int view);
 int fn_801E8758(int view);
 f32 fn_801E7E18(void);
 f32 fn_801E7E24(void);
-void fn_801EEFDC(int (*h)(const void* ev), u8 type);
+void RegisterEventHandler(int (*h)(const void* ev), u8 type);
 void EventUnInstallHandler(int (*h)(const void* ev));
 const SparkCar* fn_80287B24(s32 i);
 void fn_80287B38(void (*cb)(const SparkEntry* e, int n));
@@ -286,11 +286,11 @@ void fn_8028A664(void) {
     lbl_804B32B8.count = 0;
     fn_8028ABE8();
     fn_8028B3CC();
-    fn_801EEFDC(fn_8028B93C, 0);
-    fn_801EEFDC(fn_8028B500, 1);
-    fn_801EEFDC(fn_8028BA44, 2);
-    fn_801EEFDC(fn_8028BA9C, 7);
-    fn_801EEFDC(fn_8028BB14, 8);
+    RegisterEventHandler(fn_8028B93C, 0);
+    RegisterEventHandler(fn_8028B500, 1);
+    RegisterEventHandler(fn_8028BA44, 2);
+    RegisterEventHandler(fn_8028BA9C, 7);
+    RegisterEventHandler(fn_8028BB14, 8);
 }
 
 void fn_8028A784(void) {

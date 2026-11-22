@@ -26,8 +26,8 @@ UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha = 1.0f);
 
 void fn_802321D8(void);
 void fn_802324D8(void);
-void fn_8022F248(void);
-void fn_8022F294(void);
+void InitializeBackgroundSystem(void);
+void DeallocateBackgrounds(void);
 void fn_802365D8(void);
 void fn_80236728(void);
 void fn_80236774(void);
@@ -91,7 +91,7 @@ void fn_80230090(void) {
     lbl_8055F028 = fn_8022EDE4(&xf);
     fn_8022ED00(lbl_8055F028);
     fn_802321D8();
-    fn_8022F248();
+    InitializeBackgroundSystem();
     fn_8023509C();
     fn_802365D8();
     fn_80236728();
@@ -101,8 +101,8 @@ void fn_80230114(void) {
     fn_8022EDB8();
     delete lbl_8055F028;
     fn_80236774();
-    fn_802350BC();
-    fn_8022F294();
+    HandleArtCleanup();
+    DeallocateBackgrounds();
     fn_802324D8();
     UIContextEnd();
 }

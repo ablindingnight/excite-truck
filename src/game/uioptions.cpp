@@ -75,7 +75,7 @@ u8 fn_8027B8C0(int a);
 int fn_802E8D84(void);
 void fn_802E6FBC(void);
 void fn_8027B77C(void);
-void fn_8027B690(void);
+void InitializeCareerEvents(void);
 void MenuDoControlUnified(void);
 void fn_80263F30(int a, int b, int c);
 void fn_80230E90(int a);
@@ -675,7 +675,7 @@ extern "C" void fn_80239F74(void) {
                             case 6:
                                 fn_8027B77C();
                                 IdentClearSlot();
-                                fn_8027B690();
+                                InitializeCareerEvents();
                                 run = 0;
                                 break;
                             case 4:
