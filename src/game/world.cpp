@@ -1225,7 +1225,7 @@ void fn_801E96D8(RaceSetup* s) {
                         c.x = cur.x + 0.5f * (prev.x - cur.x);
                         c.z = cur.z + 0.5f * (prev.z - cur.z);
                         mtx.z.x = cur.x - prev.x;
-                        c.y = cur.y + 0.5f * (prev.y - cur.y);
+                        c.y = AddScaledF(cur.y, (prev.y - cur.y), 0.5f);
                         mtx.z.y = 0.0f;
                         mtx.z.z = cur.z - prev.z;
                         mtx.pos = c;
