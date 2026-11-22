@@ -267,27 +267,30 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
 
 
 /* Helper names unproven: per-element byte swaps. */
-static inline void SwapVec(PVec3* v) {
-    SwapWord(&v->x);
-    SwapWord(&v->y);
-    SwapWord(&v->z);
+/* Helper names unproven: one byte-swap scratch owned by the caller (meshswap FixMeshHeaders shape) */
+static inline void SwapWordS(void* p, u8& t) { u8* b = (u8*)p; t = b[0]; b[0] = b[3]; b[3] = t; t = b[1]; b[1] = b[2]; b[2] = t; }
+static inline void SwapHalfS(void* p, u8& t) { u8* b = (u8*)p; t = b[0]; b[0] = b[1]; b[1] = t; }
+static inline void SwapVec(PVec3* v, u8& sc) {
+    SwapWordS(&v->x, sc);
+    SwapWordS(&v->y, sc);
+    SwapWordS(&v->z, sc);
 }
 
-static inline void SwapCell(PCell* c) {
-    SwapVec(&c->center);
-    SwapWord(&c->radius);
-    SwapWord(&c->first);
-    SwapWord(&c->end);
+static inline void SwapCell(PCell* c, u8& sc) {
+    SwapVec(&c->center, sc);
+    SwapWordS(&c->radius, sc);
+    SwapWordS(&c->first, sc);
+    SwapWordS(&c->end, sc);
 }
 
-static inline void SwapTri(PTri* t) {
-    SwapHalf(&t->flags);
+static inline void SwapTri(PTri* t, u8& sc) {
+    SwapHalfS(&t->flags, sc);
     for (int k = 0; k < 3; k++) {
-        SwapHalf(&t->v[k]);
-        SwapVec(&t->edge[k]);
+        SwapHalfS(&t->v[k], sc);
+        SwapVec(&t->edge[k], sc);
     }
-    SwapVec(&t->n);
-    SwapWord(&t->d);
+    SwapVec(&t->n, sc);
+    SwapWordS(&t->d, sc);
 }
 
 /* The header is swapped as a loop over its six words (SwapWordB(p + i * 4), the trackmod FlareSourceTMH::Swap
@@ -297,6 +300,7 @@ static inline void SwapTri(PTri* t) {
 #pragma push
 #pragma ppc_unroll_instructions_limit 100
 void fn_801CFA48(PMesh* m) {
+    u8 sc;
     int i;
     int off;
     for (i = 0; i < 6; i++) {
@@ -308,15 +312,15 @@ void fn_801CFA48(PMesh* m) {
     u8* p;
     for (i = 0, off = 0; i < m->numCells; off += sizeof(m->cells[0]), i++) {
         p = (u8*)m->cells + off;
-        SwapCell((PCell*)p);
+        SwapCell((PCell*)p, sc);
     }
     for (i = 0; i < m->numVerts; i++) {
         p = (u8*)&m->verts[i];
-        SwapVec((PVec3*)p);
+        SwapVec((PVec3*)p, sc);
     }
     for (i = 0, off = 0; i < m->numTris; off += sizeof(m->tris[0]), i++) {
         p = (u8*)m->tris + off;
-        SwapTri((PTri*)p);
+        SwapTri((PTri*)p, sc);
     }
 }
 #pragma pop
