@@ -144,6 +144,12 @@ void RigidBody::ResetState(void) {
 static inline f32 LbToKg(f32 x) { return 0.4545f * x; }
 static inline f32 FtToM(f32 x) { return 0.305f * x; }
 
+/* Helper name unproven */
+static inline f32 RigidReciprocal(f32 value) {
+    value = 1.0f / value;
+    return value;
+}
+
 void RigidBody::SetMass(f32 m, f32 ix, f32 iy, f32 iz) {
     mass = LbToKg(m);
     // Convert pounds to kilograms, then both feet factors of inertia to metres.
@@ -154,10 +160,10 @@ void RigidBody::SetMass(f32 m, f32 ix, f32 iy, f32 iz) {
     inertia.y = FtToM(inertia.y);
     inertia.z = FtToM(inertia.z);
     inertia.x = FtToM(inertia.x);
-    invInertia.x = 1.0f / inertia.x;
-    invMass = 1.0f / mass;
-    invInertia.y = 1.0f / inertia.y;
-    invInertia.z = 1.0f / inertia.z;
+    invInertia.x = RigidReciprocal(inertia.x);
+    invMass = RigidReciprocal(mass);
+    invInertia.y = RigidReciprocal(inertia.y);
+    invInertia.z = RigidReciprocal(inertia.z);
     invI.x.x = invInertia.x;
     invI.x.y = 0.0f;
     invI.x.z = 0.0f;
