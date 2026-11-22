@@ -422,9 +422,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         return;
     }
     view = fn_801E866C(map->player);
+    int cameraPlayer = map->player;
     sf = lbl_8055D5B4;
     {
-        Mtx34 m = *fn_801E8718(map->player);
+        Mtx34 m = *fn_801E8718(cameraPlayer);
         f32 y = m.m[1][2];
         f32 x = m.m[2][0];
         sf->unk10 = Atan2F(y, x);
