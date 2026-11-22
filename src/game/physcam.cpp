@@ -1023,7 +1023,7 @@ void CamRegion::Prepare(u8* line) {
         rel.x = s.x - center.x;
         rel.y = s.y - yv;
         f32 b = 2.0f * (dir.x * rel.x + dir.y * rel.y);
-        f32 disc = b * b - 4.0f * a * (rel.x * rel.x + rel.y * rel.y - r2);
+        f32 disc = b * b - 4.0f * a * (rel.x * rel.x + PcSq(rel.y) - r2);
         if (!(AbsF(a) <= __float_epsilon[0]) && disc > 0.0f) {
             f32 q = (f32)sqrt(disc);
             n = 2;
