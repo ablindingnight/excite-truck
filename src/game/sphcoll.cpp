@@ -1709,7 +1709,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     f32 k = -1.0f / dist;
     nrm.x = diff.x * k;
     nrm.y = diff.y * k;
-    at.x = (pa.x + pb.x) / 2.0f;
+    at.x = (SphAdd(pa.x, pb.x)) / 2.0f;
     at.y = (pa.y + pb.y) / 2.0f;
     nrm.z = diff.z * k;
     at.z = (pa.z + pb.z) / 2.0f;
@@ -2483,7 +2483,7 @@ void BoxSphereShape::vf14(void) {
         RVec3 up;
         f32 sub = this->f50 - this->f38 + this->radius;
         rb->VelAt(&bv, (RVec3*)(p + 0x34));
-        f32 ph = fmod(this->f34 + 6.2831855f * lbl_8055E3C8 / 2.0f, 6.2831854820251465);
+        f32 ph = fmod(this->f34 + Mul(6.2831855f, lbl_8055E3C8) / 2.0f, 6.2831854820251465);
         f32 s = sin(ph);
         sub += 0.0254f * (1.0f + s);
         if (sub > 0.0f) {
