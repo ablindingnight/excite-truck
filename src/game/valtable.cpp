@@ -319,7 +319,7 @@ ModuleTag lbl_8055E058;
 
 extern "C" {
 
-ValueTable* fn_80131588(const char* name, int quiet) {
+ValueTable* LoadValueTableFile(const char* name, int quiet) {
     u32 version;
     bool swap;
     ValueFile* f = (ValueFile*)fn_8012C370(name, 'VALT', &version, 0, 0, &swap);
@@ -337,9 +337,9 @@ ValueTable* fn_80131588(const char* name, int quiet) {
     return f;
 }
 
-ValueTable* fn_80131808(const char* name) { return fn_80131588(name, 0); }
+ValueTable* fn_80131808(const char* name) { return LoadValueTableFile(name, 0); }
 
-ValueTable* fn_80131810(const char* name) { return fn_80131588(name, 1); }
+ValueTable* fn_80131810(const char* name) { return LoadValueTableFile(name, 1); }
 
 void fn_80131818(ValueTable* t) { fn_8012C4D8(t); }
 

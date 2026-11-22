@@ -53,12 +53,12 @@ s32 fn_80147C50(s32 a, s32 b, f32 t);
 void fn_8018BF44(u32* flags);
 void* LoadCarMesh(const char* name);
 void fn_801D21B4(void* p);
-void fn_801F0000(void* w);
-u32 fn_801F0008(void);
+void UnloadWheelMod(void* w);
+u32 GetWheelModSize(void);
 void* fn_801F0010(const char* cls, void* buf);
 void fn_801F1394(void* w, const CarUIFrame* f);
-void fn_801F1474(void* w, const CarUIFrame* f, f32 a);
-f32 fn_801F159C(void* w);
+void DrawWheelShadow(void* w, const CarUIFrame* f, f32 a);
+f32 GetTireRadius(void* w);
 f32 CalculateTimeDelta(void);
 void LoadCarPhysicsValues(CarSetup* s, const char* name);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
@@ -239,8 +239,8 @@ CarUIModel::CarUIModel(void) {
     start = CalculateTimeDelta();
     animSet = 0;
     anim = 0;
-    fwheelBuf = fn_801284E8("fwheelbuf", fn_801F0008());
-    rwheelBuf = fn_801284E8("rwheelbuf", fn_801F0008());
+    fwheelBuf = fn_801284E8("fwheelbuf", GetWheelModSize());
+    rwheelBuf = fn_801284E8("rwheelbuf", GetWheelModSize());
 }
 
 CarUIModel::~CarUIModel(void) {
@@ -264,7 +264,7 @@ void CarUIModel::Load(const char* carName) {
     LoadCarPhysicsValues(&setup, carName);
     int i;
     for (i = 0; i < 4; i++) {
-        setup.wheels[i].radius = IsFront(i) ? fn_801F159C(fwheels) : fn_801F159C(rwheels);
+        setup.wheels[i].radius = IsFront(i) ? GetTireRadius(fwheels) : GetTireRadius(rwheels);
     }
     offset = *(Vec*)&setup.modelOffset;
     f32 wheelbase = setup.wheelbase;
@@ -290,8 +290,8 @@ void CarUIModel::Unload(void) {
         loaded = 0;
         mrModelUnload(model);
         mrModelUnload(shadow);
-        fn_801F0000(fwheels);
-        fn_801F0000(rwheels);
+        UnloadWheelMod(fwheels);
+        UnloadWheelMod(rwheels);
         UnloadEfx();
         Reset();
     }
@@ -439,9 +439,9 @@ void CarUIModel::DrawShadow(void) {
     fn_802C7AE0(shadow, &frame, -1, 40.0f);
     for (int i = 0; i < 4; i++) {
         if (IsFront(i)) {
-            fn_801F1474(fwheels, &wheels[i], 40.0f);
+            DrawWheelShadow(fwheels, &wheels[i], 40.0f);
         } else {
-            fn_801F1474(rwheels, &wheels[i], 40.0f);
+            DrawWheelShadow(rwheels, &wheels[i], 40.0f);
         }
     }
 }
@@ -530,7 +530,7 @@ void fn_802AE9D0(void);
 void fn_802AEB3C(const CarUIFrame* f);
 void fn_802B016C(void);
 u8 fn_802C2C00(u8 a);
-void fn_802C2B78(f32 a, f32 b, f32 c);
+void SetBackgroundColor(f32 a, f32 b, f32 c);
 void fn_802C2BB8(f32* a, f32* b, f32* c);
 void fn_802C744C(s32 model, const CarUIFrame* f);
 void fn_802C7730(void* p);
@@ -879,7 +879,7 @@ void InitializeCarSlotView(CarUISlotView* p, s32 model, CarUIModel* m) {
         TAddS(&lbl_80498E18, &mid, &p->frame.b.v[2], -1.5566f);
         TAddS(&lbl_80498E18, &lbl_80498E18, &p->frame.b.v[1], 1.2283f);
         if (m->loaded) {
-            f32 rad = fn_801F159C(m->fwheels);
+            f32 rad = GetTireRadius(m->fwheels);
             f32 back;
             const Vec& wheel = m->WheelPosition(1);
             f32 h = -p->wheelY[1];
@@ -1425,7 +1425,7 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
     CarUIModel* m = model;
     if (m->loaded) {
         f32 ride = m->rideHeight;
-        f32 rad = fn_801F159C(m->fwheels);
+        f32 rad = GetTireRadius(m->fwheels);
         f.pos.y = f.pos.y + (m->wheels[0].pos.y + (m->frame.pos.y - ride) - rad - 0.03f);
     }
     f.b.v[0].y *= -1.0f;
@@ -1447,7 +1447,7 @@ void CarUIScreen::DrawFloor(f32 a, u32 color) {
     m = model;
     f32 y;
     if (m->loaded) {
-        y = m->wheels[0].pos.y - fn_801F159C(m->fwheels);
+        y = m->wheels[0].pos.y - GetTireRadius(m->fwheels);
     } else {
         y = 0.0f;
     }
@@ -1564,7 +1564,7 @@ void CarUIScreen::Draw(void) {
         st.alpha = fn_802C2C00(1);
         st.color = SetFogColor(0xFF000000);
         fn_802C2BB8(&st.a, &st.b, &st.c);
-        fn_802C2B78(1.0f, 1.01f, 1.0f);
+        SetBackgroundColor(1.0f, 1.01f, 1.0f);
     } else {
         memset(&st, 0, 0x14);
     }
@@ -1579,7 +1579,7 @@ void CarUIScreen::Draw(void) {
     }
     if (tint) {
         SetFogColor(st.color);
-        fn_802C2B78(st.a, st.b, st.c);
+        SetBackgroundColor(st.a, st.b, st.c);
         fn_802C2C00(st.alpha);
     }
     if (bg != -1) {

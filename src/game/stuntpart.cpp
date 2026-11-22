@@ -59,7 +59,7 @@ void EmitParticleTrail(void* e, const ValVec3* p, const ValVec3* v, f32 spin);
 static inline void EmitCopy(void* e, ValVec3 p, ValVec3 v) { fn_8028E584(e, &p, &v); }
 static inline void EmitCopySpin(void* e, ValVec3 p, ValVec3 v, f32 spin) { EmitParticleTrail(e, &p, &v, spin); }
 u8 fn_802C2C00(u8 a);
-void fn_802C2B78(f32 a, f32 b, f32 c);
+void SetBackgroundColor(f32 a, f32 b, f32 c);
 void fn_802C2BB8(f32* a, f32* b, f32* c);
 void fn_802C77F0(s32 model, f32* box);
 void* fn_802C86DC(void);
@@ -660,12 +660,12 @@ void fn_802AB770(int idx) {
     lbl_8055F92D = fn_802C2C00(1);
     lbl_804BD7B0.color = SetFogColor(color);
     fn_802C2BB8(&lbl_804BD7B0.a, &lbl_804BD7B0.b, &lbl_804BD7B0.c);
-    fn_802C2B78(z, 1000.0f + z, 1.0f);
+    SetBackgroundColor(z, 1000.0f + z, 1.0f);
 }
 
 void fn_802AB994(void) {
     SetFogColor(lbl_804BD7B0.color);
-    fn_802C2B78(lbl_804BD7B0.a, lbl_804BD7B0.b, lbl_804BD7B0.c);
+    SetBackgroundColor(lbl_804BD7B0.a, lbl_804BD7B0.b, lbl_804BD7B0.c);
     fn_802C2C00(lbl_8055F92D);
 }
 
@@ -739,12 +739,12 @@ void fn_802ABFF8(f32 z, u32 color) {
     lbl_8055F92D = fn_802C2C00(1);
     lbl_804BD7B0.color = SetFogColor(color);
     fn_802C2BB8(&lbl_804BD7B0.a, &lbl_804BD7B0.b, &lbl_804BD7B0.c);
-    fn_802C2B78(z, 1000.0f + z, 1.0f);
+    SetBackgroundColor(z, 1000.0f + z, 1.0f);
 }
 
 void fn_802AC070(void) {
     SetFogColor(lbl_804BD7B0.color);
-    fn_802C2B78(lbl_804BD7B0.a, lbl_804BD7B0.b, lbl_804BD7B0.c);
+    SetBackgroundColor(lbl_804BD7B0.a, lbl_804BD7B0.b, lbl_804BD7B0.c);
     fn_802C2C00(lbl_8055F92D);
 }
 

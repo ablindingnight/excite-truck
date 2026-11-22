@@ -69,15 +69,15 @@ WeatherDef lbl_804874D4;
 
 extern "C" {
 
-void fn_801E1874(void) {
+void ResetWeatherConditions(void) {
     lbl_804874D4.precip = 0;
     lbl_804874D4.hasFog = 0;
     lbl_804874D4.night = 0;
     lbl_8055EA22 = 0;
 }
 
-void fn_801E1894(void) {
-    fn_801E1874();
+void InitializeWeatherSettings(void) {
+    ResetWeatherConditions();
     if (fn_802AE414("weather")) {
         ValueNode* w = fn_802AE414("weather");
         ValueNode* fog = w->FindChild("fog");
@@ -105,7 +105,7 @@ void fn_801E1894(void) {
 }
 
 
-void fn_801E1B30(void) {
+void UpdateWeatherLightning(void) {
     WeatherState* w = &lbl_804874B8;
     f32 now = lbl_8055E3C8;
     if (!fn_80129D18(4, 300) || lbl_8055EA21) {
@@ -145,14 +145,14 @@ void fn_801E1D2C(void) { lbl_8055EA20 = 0; }
 
 WeatherDef* fn_801E1F44(void);
 
-void fn_801E1D38(void) {
+void InitializeWeatherSounds(void) {
     if (fn_801E1F44()->precip == 1) {
         lbl_804874B8.rain = fn_80207848("rain.sfx", 2);
         lbl_804874B8.thunder = fn_80207848("thunder.sfx", 2);
     }
 }
 
-void fn_801E1D9C(void) {
+void ClearWeatherEffects(void) {
     if (lbl_804874B8.thunder) {
         delete lbl_804874B8.thunder;
         lbl_804874B8.thunder = 0;
@@ -175,7 +175,7 @@ void fn_801E1E64(void) {
         lbl_804874B8.rain->PlayLoop();
     }
     if (lbl_804874B8.lightning) {
-        fn_801E1B30();
+        UpdateWeatherLightning();
     }
 }
 
@@ -205,7 +205,7 @@ void fn_801E1EA4(WeatherRace* r) {
 
 WeatherDef* fn_801E1F44(void) {
     if (!lbl_8055EA20) {
-        fn_801E1894();
+        InitializeWeatherSettings();
     }
     return &lbl_804874D4;
 }

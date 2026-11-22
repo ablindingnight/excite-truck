@@ -52,7 +52,7 @@ void fn_801E7C1C(RaceSetup* rs);
 void fn_801E8818(void (*fn)(void), const char* name);
 void fn_801E8820(void (*fn)(void));
 void fn_8012E81C(const char* name);
-void fn_8023889C(void);
+void LoadUiFont(void);
 void fn_801CB808(void);
 void fn_801617BC(void);
 void LoadCarTexture(void);
@@ -413,7 +413,7 @@ void gameloop_begin(RaceSetup* rs) {
     fn_801E8818(fn_8000AEC4, "gameloop");
     fn_8012E81C("overlays.res");
     ((void (*)(void))fn_8000AB44)();  // retail passes no argument (r3 is left over)
-    fn_8023889C();
+    LoadUiFont();
     fn_801CB808();
     fn_801617BC();
     LoadCarTexture();

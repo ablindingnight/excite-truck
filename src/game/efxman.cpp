@@ -280,7 +280,7 @@ void fn_802A85C8(void);
 void fn_802A86A4(void);
 void fn_802A8978(void);
 void fn_802A8DE8(void);
-void fn_802A9574(void);
+void ResetLapStates(void);
 void InitializeStuntEffects(void);
 void fn_802AB504(void);
 void fn_802AB5B8(void);
@@ -408,7 +408,7 @@ void fn_80287914(void) {
     ResetRainEffects();
     fn_802A7C64();
     fn_802AB5B8();
-    fn_802A9574();
+    ResetLapStates();
     SetRandomSeed(0);
 }
 

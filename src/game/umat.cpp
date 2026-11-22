@@ -91,24 +91,24 @@ void fn_802B5404(s32* tex) {
     }
 }
 
-int fn_802B5448(ValueNode* n) { return !strcasecmp("include", n->GetName()); }
+int IsIncludeDirective(ValueNode* n) { return !strcasecmp("include", n->GetName()); }
 
-int fn_802B5488(ValueNode* n) { return !strcasecmp("global_parameters", n->GetName()); }
+int IsGlobalParametersNode(ValueNode* n) { return !strcasecmp("global_parameters", n->GetName()); }
 
-int fn_802B54CC(ValueNode* n) { return !strcasecmp("unified_material_set", n->GetName()); }
+int IsUnifiedMaterialSet(ValueNode* n) { return !strcasecmp("unified_material_set", n->GetName()); }
 
 ValueTable* fn_802B561C(TableLoader f, const char* name);
 
-void fn_802B5510(const char* name) {
+void LoadMaterialTable(const char* name) {
     ValueTable* t = fn_802B561C(fn_80131810, name);
     if (t) {
         ValueNode* n;
         int i;
         *lbl_804BE454.Next() = t;
         for (i = 0; (n = t->GetChild(i)) != 0; i++) {
-            if (fn_802B5448(n)) {
-                fn_802B5510(n->GetValue("name"));
-            } else if (fn_802B5488(n) && !lbl_8055F9E8) {
+            if (IsIncludeDirective(n)) {
+                LoadMaterialTable(n->GetValue("name"));
+            } else if (IsGlobalParametersNode(n) && !lbl_8055F9E8) {
                 lbl_8055F9E8 = n;
             }
         }
@@ -150,7 +150,7 @@ void fn_802B562C(UMat* m, ValueNode* n) {
 void fn_802B57B8(void) {
     const char* name = "umat.val";
     fn_8012E96C(name);
-    fn_802B5510(name);
+    LoadMaterialTable(name);
     if (!lbl_8055F9E8) {
         lbl_8055F9E8 = fn_8013184C();
     }
@@ -192,7 +192,7 @@ void fn_802B58E0(void) {
         ValueNode* n;
         int j;
         for (j = 0; (n = t->GetChild(j)) != 0; j++) {
-            if (fn_802B54CC(n)) {
+            if (IsUnifiedMaterialSet(n)) {
                 fn_802B562C(lbl_804BE4AC.Next(), n);
             }
         }

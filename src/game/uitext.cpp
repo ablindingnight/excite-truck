@@ -44,7 +44,7 @@ void fn_8023875C(int x, int y, const char* text, u32 color, int flags) {
     }
 }
 
-void fn_8023889C(void) {
+void LoadUiFont(void) {
     u32 i;
     lbl_8055F0D9 = 1;
     const char* names[2] = {"uifnt.gtx", "uifnt_o.gtx"};

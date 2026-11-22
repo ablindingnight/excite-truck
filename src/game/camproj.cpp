@@ -15,7 +15,7 @@ void fn_801EBC70(void);
 void fn_801EBCAC(void);
 void fn_802C86E8(u32 color);
 void SetFogColor(u32 color);
-void fn_802C2B78(f32 r, f32 g, f32 b);
+void SetBackgroundColor(f32 r, f32 g, f32 b);
 void fn_801FC904(void);
 void fn_801FC908(int a);
 void fn_801EBF00(void);
@@ -88,7 +88,7 @@ void fn_801EA394(void) {
 void fn_801EA3B8(void) {
     SetFogColor(0x00C9C9EB);
     fn_802C86E8(0xFF000000);
-    fn_802C2B78(0.0f, 100.0f, 0.0f);
+    SetBackgroundColor(0.0f, 100.0f, 0.0f);
     lbl_8055EB59 = 0;
 }
 

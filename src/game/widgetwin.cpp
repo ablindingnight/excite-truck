@@ -39,32 +39,32 @@ void SetupCameraProjection(f32 nearPlane, f32 farPlane, f32 fov);
 void ResetTransformMatrix(UIXform* m);
 void fn_802C8638(UIXform* m);
 void DrawImageFrame(Window* w, int a, f32 x, f32 y, f32 z);
-void fn_802166B8(void);
+void ProcessWidgetWindowUpdate(void);
 void fn_80218464(Window* w);
-void fn_802184D0(Window* w);
+void DrawVisibleWidgets(Window* w);
 void fn_802C86E8(u32 color);
 void fn_802C87B4(s32 x, s32 y, s32 w, s32 h);
 void fn_802C88BC(int a);
 void fn_8023108C(int active);
-void fn_80218574(Window* w);
+void DrawWindowContent(Window* w);
 int fn_80127A50(PadPos* p);
-void fn_80217590(Window* w, s32 x, s32 y);
-void fn_802176D4(Window* w, s32 x, s32 y);
-void fn_8021749C(Window* w, s32 x, s32 y);
+void HandleWindowPressRelease(Window* w, s32 x, s32 y);
+void HandleWindowRelease(Window* w, s32 x, s32 y);
+void HandleWindowPress(Window* w, s32 x, s32 y);
 void fn_802175F0(Window* w, s32 x, s32 y);
 void fn_80217734(Window* w, s32 x, s32 y);
 void fn_80217834(Window* w, s32 x, s32 y);
 void fn_80217854(Window* w, s32 x, s32 y);
 int fn_802E47B8(void);
 u32 HandleScreenshotInput(void);
-void fn_80217874(Window* w, u16 key);
+void ProcessWindowInput(Window* w, u16 key);
 void fn_80211F64(void);
 void fn_80129AFC(void);
 void fn_80218370(Window* w);
 void HandleMemcardAsyncError(void);
 void fn_802C8530(void);
-void fn_80216244(void);
-void fn_802160AC(void);
+void RenderWidgetWindows(void);
+void UpdateWindowPosition(void);
 int fn_80211F54(void);
 void fn_80230DA0(void);
 void fn_802C855C(void);
@@ -76,7 +76,7 @@ int fn_8021885C(Window* win, int g);
 void fn_80218A34(Window* win, int g);
 void fn_80218ADC(Window* win, int g);
 void fn_80218B88(Window* win, int g, int a, int b);
-void fn_80218C98(Window* w, Widget* widget, int group);
+void AddWidgetToWindow(Window* w, Widget* widget, int group);
 #ifdef __MWERKS__
 int fn_8012742C(void);  // defined char in unk_80127398.cpp; MWCC callees extend r3, retail callers read it whole
 #else
@@ -97,7 +97,7 @@ f32 fn_80214D48(void);
 void fn_80236900(void);
 void fn_802368D0(void);
 void fn_80216194(void);
-void fn_802173F8(Window* w);
+void CloseWindowWidgets(Window* w);
 void fn_80217478(Window* w);
 void fn_80236848(void);
 void fn_80236600(void);
@@ -162,14 +162,14 @@ static inline void XformVec(const UIXform* m, const VecP* in, VecP* out) {
 extern "C" char lbl_8055B860[8] = "";
 #pragma explicit_zero_data off
 
-/* Helper unproven: retail creates 0.0f and the int-to-float bias BEFORE the other constants of fn_802160AC, so an
+/* Helper unproven: retail creates 0.0f and the int-to-float bias BEFORE the other constants of UpdateWindowPosition, so an
    unused static function with those two was compiled here (dead static functions keep their constants). */
 static f32 CursorCoord(int n) { if (n < 0) return 0.0f; return (f32)n; }
 
 
 extern "C" {
 
-void fn_802160AC(void) {
+void UpdateWindowPosition(void) {
     Window* w = lbl_8055EF88 ? fn_8021832C(lbl_8055EF88) : 0;
     if (w || lbl_8055EF7C) {
         UIXform m;
@@ -191,7 +191,7 @@ void fn_802160AC(void) {
 void fn_80216194(void) {
     int i = 1;
     do {
-        fn_802166B8();
+        ProcessWidgetWindowUpdate();
     } while (i++ < 3);
 }
 
@@ -204,10 +204,10 @@ void fn_802161CC(int all) {
     }
 }
 
-void fn_80216244(void) {
+void RenderWidgetWindows(void) {
     for (int i = 0; i < 16; i++) {
         if (lbl_804908C8[i]) {
-            fn_802184D0(lbl_804908C8[i]);
+            DrawVisibleWidgets(lbl_804908C8[i]);
         }
     }
     if (lbl_8055EF8C) {
@@ -232,13 +232,13 @@ void fn_80216244(void) {
             m.translation.v[2] += t.z;
             fn_802C8638(&m);
             fn_8023108C(w == lbl_8055EF88);
-            fn_80218574(w);
+            DrawWindowContent(w);
         }
     }
     fn_8023108C(1);
 }
 
-void fn_802164D8(void) {
+void ProcessTouchInput(void) {
     PadPos p;
     if (fn_80127A50(&p)) {
         lbl_8055EF80 = (s32)(640.0f * (f32)p.x / (f32)lbl_8055CFF0);
@@ -246,13 +246,13 @@ void fn_802164D8(void) {
         if (lbl_8055EF88) {
             switch (p.button) {
             case 1:
-                fn_80217590(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
+                HandleWindowPressRelease(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
                 break;
             case 3:
-                fn_802176D4(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
+                HandleWindowRelease(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
                 break;
             case 0:
-                fn_8021749C(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
+                HandleWindowPress(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
                 break;
             case 2:
                 fn_802175F0(lbl_8055EF88, lbl_8055EF80, lbl_8055EF84);
@@ -272,7 +272,7 @@ void fn_802164D8(void) {
     if (fn_802E47B8()) {
         u32 key = HandleScreenshotInput();
         if (lbl_8055EF88) {
-            fn_80217874(lbl_8055EF88, key);
+            ProcessWindowInput(lbl_8055EF88, key);
         }
     }
 }
@@ -283,7 +283,7 @@ void fn_8021662C(void) {
     if (lbl_8055EF90) {
         lbl_8055EF90();
     }
-    fn_802164D8();
+    ProcessTouchInput();
     if (lbl_8055EF88) {
         fn_80129AFC();
     }
@@ -293,16 +293,16 @@ void fn_8021662C(void) {
     }
     if (depth == lbl_8055EF78) {
         if (!lbl_8055EF70) {
-            fn_802166B8();
+            ProcessWidgetWindowUpdate();
         }
         HandleMemcardAsyncError();
     }
 }
 
-void fn_802166B8(void) {
+void ProcessWidgetWindowUpdate(void) {
     fn_802C8530();
-    fn_80216244();
-    fn_802160AC();
+    RenderWidgetWindows();
+    UpdateWindowPosition();
     if (!fn_80211F54()) {
         OptE3Demo();
     }
@@ -328,7 +328,7 @@ void fn_80216710(void) {
 
 void fn_8021676C(void) {}
 
-Window* fn_80216770(const char* a, s32 b, s32 c, s32 d, s32 e, s32 f) {
+Window* CreateWidgetWindow(const char* a, s32 b, s32 c, s32 d, s32 e, s32 f) {
     Window* w = new ("WidgetWindow") Window(a, b, c, d, e, f);
     int i;
     for (i = 0; i < 16; i++) {
@@ -341,7 +341,7 @@ Window* fn_80216770(const char* a, s32 b, s32 c, s32 d, s32 e, s32 f) {
     return 0;
 }
 
-void fn_8021683C(Window* w) {
+void DeleteUnmanagedWindow(Window* w) {
     int i;
     for (i = 0; i < 16; i++) {
         if (lbl_804908C8[i] == w) {
@@ -372,9 +372,9 @@ void fn_802168E0(Window* w, int g, int a, int b) { fn_80218B88(w, g, a, b); }
 
 Window* fn_802168E4(void) { return lbl_8055EF88; }
 
-void fn_802168EC(Window* w, Widget* widget, int group) { fn_80218C98(w, widget, group); }
+void fn_802168EC(Window* w, Widget* widget, int group) { AddWidgetToWindow(w, widget, group); }
 
-s32 fn_802168F0(Window* w) {
+s32 InitializeWindowFade(Window* w) {
     Window* prev;
     BOOL started;
     f32 tOut;
@@ -477,7 +477,7 @@ s32 fn_802168F0(Window* w) {
             }
         }
         fn_802161CC(1);
-        fn_802166B8();
+        ProcessWidgetWindowUpdate();
         if (zero == tOut) {
             break;
         }
@@ -486,7 +486,7 @@ s32 fn_802168F0(Window* w) {
     }
     fn_80216194();
     lbl_8055EF70 = 0;
-    fn_802173F8(w);
+    CloseWindowWidgets(w);
     lbl_8055EF88 = prev;
     if (prev) {
         fn_80217734(prev, lbl_8055EF80, lbl_8055EF84);

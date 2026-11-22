@@ -85,7 +85,7 @@ static inline void Perp(ZV2* v) {
 
 extern "C" {
 
-void fn_802A9574(void);
+void ResetLapStates(void);
 
 void fn_802A8FEC(ValVec3* out, const ZV2* p) {
     f32 z = p->y;
@@ -175,11 +175,11 @@ void fn_802A92CC(void) {
         fn_802A9090(&lbl_8055F8F8, &lbl_8055F908);
         lbl_8055F8F1 = 0;
         lbl_8055CC58 = fn_802CAC28("zonelite.tex", 0);
-        fn_802A9574();
+        ResetLapStates();
     }
 }
 
-void fn_802A93A4(void) {
+void UnloadLapModels(void) {
     if (lbl_8055F8F0) {
         LapModel* m = lbl_804BD740;
         for (u32 i = 0; i < 4; i++, m++) {
@@ -203,7 +203,7 @@ static inline s32 LapShown(int view) {
     return lbl_804BD790[view].shown;
 }
 
-void fn_802A9428(void) {
+void UpdateLapDisplay(void) {
     if (!lbl_8055F8F0) {
         return;
     }
@@ -240,7 +240,7 @@ void fn_802A9428(void) {
     }
 }
 
-void fn_802A9574(void) {
+void ResetLapStates(void) {
     // A counted-down loop over both views (the compiler unrolls it; the stores stay in source order).
     LapState* s = lbl_804BD790;
     int n = 2;

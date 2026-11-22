@@ -35,7 +35,7 @@ extern "C" void fn_802168D8(Window* window, s32 group);
 extern "C" void fn_802168DC(Window* window, s32 group);
 extern "C" void fn_802168E0(Window* window, s32 group, s32 x, s32 y);
 
-extern "C" s32 fn_802180E0(s32, s32);
+extern "C" s32 ValidateMenuIndex(s32, s32);
 
 
 class VfObj {
@@ -165,7 +165,7 @@ extern "C" void fn_802E30C8(const char *, ...);
 extern "C" void InitializeBinkAudioMemory(void);
 extern "C" void fn_8012BEF0(const char*);
 extern "C" void InitializeMusicPlayer(void);
-extern "C" void fn_8023889C(void);
+extern "C" void LoadUiFont(void);
 extern "C" void* gxGetImage(const char*);
 extern "C" void fn_8022A5E4(void);
 extern "C" void fn_80216710(void);
@@ -217,7 +217,7 @@ extern "C" void fn_80211690(int mode) {
     }
     InitializeMusicPlayer();
     if (!lite) {
-        fn_8023889C();
+        LoadUiFont();
     }
     const char* art[3][4] = {
         {"a_lslide.img", "a_rslide.img", "a_uscroll.img", "a_dscroll.img"},
@@ -1270,7 +1270,7 @@ extern "C" UILayout* BuildMenuLayout(const UIMapping*);
 extern "C" void fn_80276D3C(const char*, int);
 extern "C" int fn_802C51C0(void*);
 extern "C" int fn_802C5220(void*);
-extern "C" Window* fn_80216770(const char*, int, int, int, int, int);
+extern "C" Window* CreateWidgetWindow(const char*, int, int, int, int, int);
 extern "C" void fn_80236914(int which, f32* out, f32 t);
 extern "C" int strcmp(const char*, const char*);
 extern "C" const char* lbl_8055EF44;
@@ -1321,7 +1321,7 @@ extern "C" void fn_802141A0(Window** out, const UIMapping* map, int x, int y, in
     if (widgetWindow) {
         win = new ("WidgetTWindow") Window("", x, y, w, h, flags);
     } else {
-        win = fn_80216770(map->layout->name, x, y, w, h, flags);
+        win = CreateWidgetWindow(map->layout->name, x, y, w, h, flags);
     }
     *out = win;
     UIDesc* d;
@@ -1407,10 +1407,10 @@ extern "C" void fn_80127A24(void);
 extern "C" void ClearInputBuffer(void);
 extern "C" void fn_80218D54(Window*, int);
 extern "C" void fn_80236918(const char*);
-extern "C" int fn_802168F0(Window*);
+extern "C" int InitializeWindowFade(Window*);
 extern "C" void fn_802E3D00(void);
 extern "C" void fn_80236950(void);
-extern "C" void fn_8021683C(Window*);
+extern "C" void DeleteUnmanagedWindow(Window*);
 
 // UIDoMappedDialog: builds the mapped window, runs it until it returns a result, then tears it down.
 extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
@@ -1427,12 +1427,12 @@ extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
     const char* layout = desc->layout;
     win->update = (void (*)(Window*))fn_80211FF0;
     fn_80236918(layout);
-    result = fn_802168F0(win);
+    result = InitializeWindowFade(win);
     if (lbl_8055EF40) {
         fn_802E3D00();
     }
     fn_80236950();
-    fn_8021683C(win);
+    DeleteUnmanagedWindow(win);
     lbl_8055EF0C = poll;
     fn_80212340(desc);
     int now = fn_80128314(0);
@@ -1563,7 +1563,7 @@ extern "C" void fn_80214C54(s32 arg0, s32 arg1) {
 extern "C" void fn_80214CB4(s32 arg0) {
     s32 temp = fn_802168E4();
     if (temp != 0) {
-        ((s32 (*)(s32, s32))fn_802180E0)(temp, arg0);
+        ((s32 (*)(s32, s32))ValidateMenuIndex)(temp, arg0);
     } else {
         ((s32 (*)(const char *, ...))fn_802E317C)("UISetMenuIndex: No active window");
     }

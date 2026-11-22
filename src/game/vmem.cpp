@@ -32,11 +32,11 @@ void fn_802E4C14(int) {}
 
 void fn_802E4C18(int) {}
 
-VirtualMemory* fn_802E4C1C(int n) { return new ("vmem") VirtualMemory(n); }
+VirtualMemory* AllocateVirtualMemory(int n) { return new ("vmem") VirtualMemory(n); }
 
-VirtualMemory* fn_802E4CA4(int n) { return fn_802E4C1C(n); }
+VirtualMemory* fn_802E4CA4(int n) { return AllocateVirtualMemory(n); }
 
-void fn_802E4CA8(char* dst, const char* src, int n) {
+void CopyStringWithLimit(char* dst, const char* src, int n) {
     while ((*dst++ = *src++) != 0) {
         if (--n <= 0) {
             dst[-1] = 0;

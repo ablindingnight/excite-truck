@@ -148,53 +148,53 @@ WheelMod* lbl_80488798[64];   // by car * 4 + wheel
 
 extern "C" {
 
-void fn_801F0AA0(void);
-void fn_801F0CC4(void);
+void InitializeWheelClassTabs(void);
+void UnloadWheelLodModels(void);
 void fn_801F17C8(void);
 void fn_801F17DC(void);
-WheelMod* fn_801F0DC0(WheelMod* w, const char* cls, s32 car, s32 index);
-WheelMod* fn_801F0E88(WheelMod* w, const char* cls);
-WheelMod* fn_801F0F18(WheelMod* w, int del);
-WheelClass* fn_801F09FC(const char* name);
-void fn_801F1878(WheelMod* w);
-void fn_801F18F0(WheelMod* w);
-int fn_801F15A8(WheelMod* w, const ValVec3* pos);
-void fn_801F163C(WheelMod* w, int lod, f32 spin);
+WheelMod* InitializeWheelModule(WheelMod* w, const char* cls, s32 car, s32 index);
+WheelMod* InitializeWheelModuleState(WheelMod* w, const char* cls);
+WheelMod* DestroyWheelMod(WheelMod* w, int del);
+WheelClass* FindOrCreateWheel(const char* name);
+void CheckWheelEntryDuplicate(WheelMod* w);
+void ValidateWheelEntry(WheelMod* w);
+int GetWheelLODFromDistance(WheelMod* w, const ValVec3* pos);
+void RotateWheelForSpin(WheelMod* w, int lod, f32 spin);
 s32 fn_801F196C(s32 car, s32 index);
-u32 fn_801F1978(u32 state);
-f32 fn_801F159C(WheelMod* w);
+u32 CreateModelMaskFromState(u32 state);
+f32 GetTireRadius(WheelMod* w);
 void fn_801F1394(WheelMod* w, const ValMatrix* m);
 void fn_801F1494(WheelMod* w, const ValMatrix* m, s16 hint);
 WheelMod* fn_801F1848(s32 car, s32 index);
 
 void fn_801EFF4C(void) {
-    fn_801F0AA0();
+    InitializeWheelClassTabs();
     fn_801F17C8();
 }
 
 void fn_801EFF70(void) {
     fn_801F17DC();
-    fn_801F0CC4();
+    UnloadWheelLodModels();
 }
 
-WheelMod* fn_801EFF94(const char* cls, s32 car, s32 index) {
+WheelMod* CreateWheelMod(const char* cls, s32 car, s32 index) {
     WheelMod* w = (WheelMod*)operator new(sizeof(WheelMod), "wheel");
     if (w) {
-        w = fn_801F0DC0(w, cls, car, index);
+        w = InitializeWheelModule(w, cls, car, index);
     }
     return w;
 }
 
-void fn_801EFFF8(WheelMod* w) { fn_801F0F18(w, 1); }
+void fn_801EFFF8(WheelMod* w) { DestroyWheelMod(w, 1); }
 
-void fn_801F0000(WheelMod* w) { fn_801F0F18(w, -1); }
+void UnloadWheelMod(WheelMod* w) { DestroyWheelMod(w, -1); }
 
-s32 fn_801F0008(void) { return sizeof(WheelMod); }
+s32 GetWheelModSize(void) { return sizeof(WheelMod); }
 
 // A detached wheel built in 'mem'.
 WheelMod* fn_801F0010(const char* cls, WheelMod* mem) {
     if (mem) {
-        mem = fn_801F0E88(mem, cls);
+        mem = InitializeWheelModuleState(mem, cls);
     }
     return mem;
 }
@@ -203,7 +203,7 @@ WheelMod* fn_801F0010(const char* cls, WheelMod* mem) {
 WheelMod* WheelModStripped0(const char* cls) { return fn_801F0010(cls, (WheelMod*)operator new(sizeof(WheelMod), "detached wheel")); }
 
 // Adds the material remaps for 'model' listed in 't' to remap set 'remap'.
-void fn_801F004C(const char* model, s32 remap, WNode* t) {
+void AddMaterialRemapsForModel(const char* model, s32 remap, WNode* t) {
     MatList* l = fn_802C6B44(model);
     for (int i = 0; i < l->count; i++) {
         const char* name = fn_802C9C24(l->names + i * 0x10);
@@ -222,14 +222,14 @@ void fn_801F004C(const char* model, s32 remap, WNode* t) {
     fn_802C6C20(l);
 }
 
-void fn_801F0148(WheelClass* c, WNode* t) {
+void InitializeWheelDimensions(WheelClass* c, WNode* t) {
     c->tireRadius = 0.0254f * t->GetFloat("tire_diameter") / 2;
     c->rimRadius = 0.0254f * t->GetFloat("rim_diameter") / 2;
     c->width = 0.0254f * t->GetFloat("width");
     c->scale = 1.0f;
 }
 
-void fn_801F0208(WheelClass* c, WNode* t, const char* file) {
+void ParseWheelLodEntries(WheelClass* c, WNode* t, const char* file) {
     WheelLod* lod = c->lods;
     int i;
     for (i = 0; i < 8; i++) {
@@ -250,7 +250,7 @@ void fn_801F0208(WheelClass* c, WNode* t, const char* file) {
     c->numLods = i;
 }
 
-void fn_801F0488(WheelClass* c, WNode* t) {
+void LoadWheelModelFiles(WheelClass* c, WNode* t) {
     const char* base = t->GetValue("base");
     int first = 0;
     for (int i = 0; i < c->numLods; i++) {
@@ -270,10 +270,10 @@ void fn_801F0488(WheelClass* c, WNode* t) {
             }
             if (i != 1 || !first) {
                 if (t->FindChild("slow_remap")) {
-                    fn_801F004C(path, c->slowRemap, t->FindChild("slow_remap"));
+                    AddMaterialRemapsForModel(path, c->slowRemap, t->FindChild("slow_remap"));
                 }
                 if (t->FindChild("fast_remap")) {
-                    fn_801F004C(path, c->fastRemap, t->FindChild("fast_remap"));
+                    AddMaterialRemapsForModel(path, c->fastRemap, t->FindChild("fast_remap"));
                 }
             }
             c->lods[i].slow[j] = fn_802C6FC0(path, c->slowRemap, 0);
@@ -287,7 +287,7 @@ void fn_801F0488(WheelClass* c, WNode* t) {
     }
 }
 
-void fn_801F06DC(WheelShadow* s, WNode* t) {
+void LoadWheelShadowModels(WheelShadow* s, WNode* t) {
     if (t->Has("model_base")) {
         const char* base = t->GetValue("model_base");
         for (s->count = 0; s->count < 8; s->count++) {
@@ -313,7 +313,7 @@ void fn_801F06DC(WheelShadow* s, WNode* t) {
     }
 }
 
-void fn_801F08AC(WheelClass* c, const char* name) {
+void LoadWheelClassData(WheelClass* c, const char* name) {
     strncpy(c->name, name, 0x10);
     c->name[0xF] = 0;
     char file[0x20];
@@ -322,18 +322,18 @@ void fn_801F08AC(WheelClass* c, const char* name) {
         fn_802E317C("wheelmod: invalid wheel class '%s'", name);
     }
     WTable* t = (WTable*)fn_80131808(file);
-    fn_801F0148(c, t->FindChild("dimensions"));
-    fn_801F0208(c, t->FindChild("lod"), file);
-    fn_801F0488(c, t->FindChild("model"));
+    InitializeWheelDimensions(c, t->FindChild("dimensions"));
+    ParseWheelLodEntries(c, t->FindChild("lod"), file);
+    LoadWheelModelFiles(c, t->FindChild("model"));
     if (t->HasChild("shadow")) {
-        fn_801F06DC(&c->shadow, t->FindChild("shadow"));
+        LoadWheelShadowModels(&c->shadow, t->FindChild("shadow"));
     } else {
         c->shadow.count = 0;
     }
     fn_80131818((ValueTable*)t);
 }
 
-WheelClass* fn_801F09FC(const char* name) {
+WheelClass* FindOrCreateWheel(const char* name) {
     for (int i = 0; i < lbl_8055EBF0; i++) {
         if (!strcasecmp(lbl_8055EBEC[i].name, name)) {
             return &lbl_8055EBEC[i];
@@ -341,11 +341,11 @@ WheelClass* fn_801F09FC(const char* name) {
     }
     WheelClass* c = &lbl_8055EBEC[lbl_8055EBF0];
     lbl_8055EBF0++;
-    fn_801F08AC(c, name);
+    LoadWheelClassData(c, name);
     return c;
 }
 
-void fn_801F0AA0(void) {
+void InitializeWheelClassTabs(void) {
     lbl_8055EBEC = new ("wheelmod class tab") WheelClass[8];
     lbl_8055EBF0 = 0;
     for (int i = 0; i < 8; i++) {
@@ -369,7 +369,7 @@ void fn_801F0AA0(void) {
 // From a function the linker stripped.
 void WheelModStripped(void) { fn_802E317C("wheelmod: can't change classes of an attached wheel"); }
 
-void fn_801F0CC4(void) {
+void UnloadWheelLodModels(void) {
     int i;
     int l;
     int j;
@@ -395,8 +395,8 @@ void fn_801F0CC4(void) {
     lbl_8055EBF0 = 0;
 }
 
-WheelMod* fn_801F0DC0(WheelMod* w, const char* cls, s32 car, s32 index) {
-    w->cls = fn_801F09FC(cls);
+WheelMod* InitializeWheelModule(WheelMod* w, const char* cls, s32 car, s32 index) {
+    w->cls = FindOrCreateWheel(cls);
     int left = 0;
     w->state = left;
     w->car = car;
@@ -407,12 +407,12 @@ WheelMod* fn_801F0DC0(WheelMod* w, const char* cls, s32 car, s32 index) {
     w->side = !left;
     w->detached = 0;
     Identity(&w->mtx);
-    fn_801F1878(w);
+    CheckWheelEntryDuplicate(w);
     return w;
 }
 
-WheelMod* fn_801F0E88(WheelMod* w, const char* cls) {
-    w->cls = fn_801F09FC(cls);
+WheelMod* InitializeWheelModuleState(WheelMod* w, const char* cls) {
+    w->cls = FindOrCreateWheel(cls);
     w->state = 0;
     w->car = -1;
     w->index = -1;
@@ -422,10 +422,10 @@ WheelMod* fn_801F0E88(WheelMod* w, const char* cls) {
     return w;
 }
 
-WheelMod* fn_801F0F18(WheelMod* w, int del) {
+WheelMod* DestroyWheelMod(WheelMod* w, int del) {
     if (w) {
         if (!w->detached) {
-            fn_801F18F0(w);
+            ValidateWheelEntry(w);
         }
         if (del > 0) {
             operator delete(w);
@@ -459,7 +459,7 @@ static inline void AddVec(ValVec3* v, const ValVec3* a) {
 }
 
 // Poses wheel 'w' from its state 's' in the car frame 'm', scaled by 'scale'.
-void fn_801F0F78(WheelMod* w, const CarDrawWheel* s, const ValMatrix* m, f32 scale) {
+void PoseWheelFromState(WheelMod* w, const CarDrawWheel* s, const ValMatrix* m, f32 scale) {
     if (s->flags & 8) {
         w->state = 3;
         return;
@@ -474,7 +474,7 @@ void fn_801F0F78(WheelMod* w, const CarDrawWheel* s, const ValMatrix* m, f32 sca
         w->state |= 0x10;
     }
     ValVec3 pos = *(const ValVec3*)s->pos;
-    pos.y += fn_801F159C(w);
+    pos.y += GetTireRadius(w);
     w->spin = s->spin;
     int left = w->index == 0 || w->index == 2;
     MulVec(&w->mtx.origin, &pos, m->basis);
@@ -507,18 +507,18 @@ void fn_801F0F78(WheelMod* w, const CarDrawWheel* s, const ValMatrix* m, f32 sca
 
 void fn_801F131C(WheelMod* w, f32 unused, int lod0) {
     if (w->state != 3) {
-        fn_801F163C(w, lod0 ? 0 : fn_801F15A8(w, &w->mtx.origin), w->spin);
+        RotateWheelForSpin(w, lod0 ? 0 : GetWheelLODFromDistance(w, &w->mtx.origin), w->spin);
     }
 }
 
 void fn_801F1378(WheelMod* w, f32 unused) {
     if (w->state != 3) {
-        fn_801F163C(w, 0, w->spin);
+        RotateWheelForSpin(w, 0, w->spin);
     }
 }
 
 void fn_801F1394(WheelMod* w, const ValMatrix* m) {
-    fn_802C70AC(w->cls->lods[0].slow[w->side], m, 0, fn_801F1978(0));
+    fn_802C70AC(w->cls->lods[0].slow[w->side], m, 0, CreateModelMaskFromState(0));
 }
 
 void fn_801F13F4(WheelMod* w, f32 d2, f32 height) {
@@ -535,7 +535,7 @@ void fn_801F13F4(WheelMod* w, f32 d2, f32 height) {
     fn_802C7AE0(s->lods[i].model, &w->mtx, -1, s->baseLen + height);
 }
 
-void fn_801F1474(WheelMod* w, const ValMatrix* m, f32 height) {
+void DrawWheelShadow(WheelMod* w, const ValMatrix* m, f32 height) {
     if (w->cls->shadow.count > 0) {
         fn_802C7AE0(w->cls->shadow.lods[0].model, m, -1, height);
     }
@@ -559,9 +559,9 @@ void fn_801F1494(WheelMod* w, const ValMatrix* m, s16 hint) {
     }
 }
 
-f32 fn_801F159C(WheelMod* w) { return w->cls->tireRadius; }
+f32 GetTireRadius(WheelMod* w) { return w->cls->tireRadius; }
 
-int fn_801F15A8(WheelMod* w, const ValVec3* pos) {
+int GetWheelLODFromDistance(WheelMod* w, const ValVec3* pos) {
     f32 zoom = fn_801E88F0(-1);
     zoom = zoom * zoom;
     f32 d2 = Mul(fn_802C88E8(pos), zoom);
@@ -573,7 +573,7 @@ int fn_801F15A8(WheelMod* w, const ValVec3* pos) {
     return w->cls->numLods - 1;
 }
 
-void fn_801F163C(WheelMod* w, int lod, f32 spin) {
+void RotateWheelForSpin(WheelMod* w, int lod, f32 spin) {
     int left = w->index == 0 || w->index == 2;
     u32 fast = (w->state >> 4) & 1;
     WheelLod* l = &w->cls->lods[lod];
@@ -597,7 +597,7 @@ void fn_801F163C(WheelMod* w, int lod, f32 spin) {
     } else {
         model = l->slow[w->side];
     }
-    fn_802C70AC(model, &m, 0, fn_801F1978(w->state));
+    fn_802C70AC(model, &m, 0, CreateModelMaskFromState(w->state));
 }
 
 void fn_801F17C8(void) { memset(lbl_80488798, 0, sizeof(lbl_80488798)); }
@@ -612,7 +612,7 @@ void fn_801F17DC(void) {
 
 WheelMod* fn_801F1848(s32 car, s32 index) { return lbl_80488798[fn_801F196C(car, index)]; }
 
-void fn_801F1878(WheelMod* w) {
+void CheckWheelEntryDuplicate(WheelMod* w) {
     s32 i = fn_801F196C(w->car, w->index);
     if (lbl_80488798[i]) {
         fn_802E317C("wheelmod: duplicate wheel entry: car %d, wheel %d", w->car, w->index);
@@ -620,7 +620,7 @@ void fn_801F1878(WheelMod* w) {
     lbl_80488798[i] = w;
 }
 
-void fn_801F18F0(WheelMod* w) {
+void ValidateWheelEntry(WheelMod* w) {
     s32 i = fn_801F196C(w->car, w->index);
     if (!lbl_80488798[i]) {
         fn_802E317C("wheelmod: could not find wheel entry: car %d, wheel %d", w->car, w->index);
@@ -630,7 +630,7 @@ void fn_801F18F0(WheelMod* w) {
 
 s32 fn_801F196C(s32 car, s32 index) { return index + car * 4; }
 
-u32 fn_801F1978(u32 state) {
+u32 CreateModelMaskFromState(u32 state) {
     u32 mask = -1;
     switch (state & ~0x10) {
     case 0:

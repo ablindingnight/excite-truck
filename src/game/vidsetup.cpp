@@ -67,7 +67,7 @@ ClearColor lbl_804C1328;
 
 extern "C" {
 
-void fn_802C2B78(f32 r, f32 g, f32 b);
+void SetBackgroundColor(f32 r, f32 g, f32 b);
 int fn_802C2C00(u8 on);
 
 void fn_802C2A48(s32 mode) {
@@ -90,7 +90,7 @@ void fn_802C2AA8(int) {
     CreateJointPool();
     InitializeRenderMatrix();
     SetFogColor(0xFF00FF00);
-    fn_802C2B78(0.0f, 1.0f, 0.0f);
+    SetBackgroundColor(0.0f, 1.0f, 0.0f);
     fn_802C2C00(1);
     fn_801E6978();
 }
@@ -114,7 +114,7 @@ inline void ApplyClear(double b) {
     fn_802D0014(lbl_804C1328.r, lbl_804C1328.g, lbl_804C1328.on ? (f32)b : 0.0f);
 }
 
-void fn_802C2B78(f32 r, f32 g, f32 b) {
+void SetBackgroundColor(f32 r, f32 g, f32 b) {
     lbl_804C1328.r = r;
     lbl_804C1328.g = g;
     lbl_804C1328.b = b;

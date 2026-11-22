@@ -27,7 +27,7 @@ void fn_801E34E4(const Joint* j, const ValMatrix* root);
 int fn_801E3534(const Joint* j);
 void fn_801E353C(Joint* j, f32 angle);
 void fn_801E35D4(Joint* j, const Mat3* r);
-f32 fn_801F159C(void* w);
+f32 GetTireRadius(void* w);
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
@@ -119,13 +119,13 @@ f32 fn_801EF190(int model) {
     return y1 - y0;
 }
 
-void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel);
+void UpdateWheelSuspension(XraySide* s, const ValMatrix* root, const ValMatrix* wheel);
 
 }  // extern "C"
 
 extern "C" {
 
-XraySusp* fn_801EF1F0(XraySusp* x, const char* model) {
+XraySusp* InitializeXraySuspension(XraySusp* x, const char* model) {
     XrayContext*& ctx = x->ctx;
     ctx = new ("xray_context") XrayContext;
     ctx->model = fn_802C6FC0(model, 0, 0);
@@ -191,7 +191,7 @@ extern "C" {
 // Poses side 's': its hub at the wheel and the suspension joints aimed at it.
 static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
 
-void fn_801EF53C(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
+void UpdateWheelSuspension(XraySide* s, const ValMatrix* root, const ValMatrix* wheel) {
     ValMatrix w;
     ValMatrix hub;
     Mat3 rot;
@@ -287,7 +287,7 @@ extern "C" void fn_801EFC90(XraySusp* x, const ValMatrix* carMtx, void** __restr
     const XrayCar* car = (const XrayCar*)carMtx;
     f32 back = car->wheelbase - 1.397f;
     ValMatrix m = car->mtx;
-    f32 up = fn_801F159C(wheels[1]) - 0.3556f;
+    f32 up = GetTireRadius(wheels[1]) - 0.3556f;
     f32 half;
     half = car->track - 0.76835f;
     TAddS(&m.origin, &m.origin, &m.basis[2], back);
@@ -304,6 +304,6 @@ extern "C" void fn_801EFC90(XraySusp* x, const ValMatrix* carMtx, void** __restr
     ends[1].y = 0.0f;
     ends[1].z = 0.0f;
     fn_802C70AC(ctx->model, &m, fn_802C7A34(1, ends, 2), -1);
-    fn_801EF53C(&ctx->sides[0], &left, &((XrayWheel*)wheels[0])->mtx);
-    fn_801EF53C(&ctx->sides[1], &right, &((XrayWheel*)wheels[1])->mtx);
+    UpdateWheelSuspension(&ctx->sides[0], &left, &((XrayWheel*)wheels[0])->mtx);
+    UpdateWheelSuspension(&ctx->sides[1], &right, &((XrayWheel*)wheels[1])->mtx);
 }

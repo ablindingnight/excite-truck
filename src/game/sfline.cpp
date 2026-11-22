@@ -49,8 +49,8 @@ void gxForgetTexture(s32 tex);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 void fn_802A92CC(void);
-void fn_802A93A4(void);
-void fn_802A9428(void);
+void UnloadLapModels(void);
+void UpdateLapDisplay(void);
 }
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
@@ -231,7 +231,7 @@ void fn_802A14F8(void) {
         DeleteFlare(lbl_8055F840);
         lbl_8055F840 = 0;
     }
-    fn_802A93A4();
+    UnloadLapModels();
 }
 
 void fn_802A1548(void) {
@@ -242,5 +242,5 @@ void fn_802A1548(void) {
     }
 }
 
-void fn_802A1584(void) { fn_802A9428(); }
+void fn_802A1584(void) { UpdateLapDisplay(); }
 }

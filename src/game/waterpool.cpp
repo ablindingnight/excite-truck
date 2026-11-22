@@ -690,7 +690,7 @@ void fn_8029D550(WaterPool* p, Vec* c, f32* r) {
 }
 
 void fn_8029DF64(WaterPool* p, int x, int y, f32 amount);
-void fn_8029DDB8(WaterPool* p);
+void UpdateWaterSimulation(WaterPool* p);
 void fn_8029DB78(WaterPool* p, PoolVtx* v, int x, int y);
 
 void fn_8029D574(WaterPool* p) {
@@ -703,7 +703,7 @@ void fn_8029D574(WaterPool* p) {
     } else {
         p->timer = p->timer + p->desc.amount;
     }
-    fn_8029DDB8(p);
+    UpdateWaterSimulation(p);
 }
 
 /* Helper name unproven. */
@@ -778,7 +778,7 @@ void fn_8029D7D0(WaterPool* p, const WaterCarEntry* e) {
     fn_8029E130(p, &c, &e->car->vel, 0.8f * m->radius);
 }
 
-void fn_8029DA24(WaterPool* p, Vec* n, int x, int y) {
+void CalculateWaterNormal(WaterPool* p, Vec* n, int x, int y) {
     if (x == 0 || x == p->nx - 1 || y == 0 || y == p->ny - 1) {
         n->x = 0.0f;
         n->y = 1.0f;
@@ -800,7 +800,7 @@ void fn_8029DB78(WaterPool* p, PoolVtx* v, int x, int y) {
     SetVec(&v->pos, p->origin.x + x * p->dxx + y * p->dyx, p->origin.y + (1.0f / 65535.0f) * (p->desc.scale * h),
            p->origin.z + x * p->dxz + y * p->dyz);
     Vec n;
-    fn_8029DA24(p, &n, x, y);
+    CalculateWaterNormal(p, &n, x, y);
     Vec d;
     d.x = v->pos.x - p->eye.x;
     d.y = v->pos.y - p->eye.y;
@@ -817,7 +817,7 @@ void fn_8029DB78(WaterPool* p, PoolVtx* v, int x, int y) {
     v->color = p->desc.color | (p->desc.minAlpha + (int)((p->desc.maxAlpha - p->desc.minAlpha) * (1.0f - Sq(r.y)))) << 24;
 }
 
-void fn_8029DDB8(WaterPool* p) {
+void UpdateWaterSimulation(WaterPool* p) {
     f32 damp = 0.9f + 0.1f * p->desc.damping;
     f32 c = 4.5f * (1.0f - p->desc.rate) * fn_801E7E24();
     c = c * c;
@@ -862,7 +862,7 @@ static inline void SetPt(ValPoint* o, f32 x, f32 y) {
     o->y = y;
 }
 
-int fn_8029DFE0(WaterPool* p, const Vec* at) {
+int IsPointInWaterPool(WaterPool* p, const Vec* at) {
     int in = 0;
     ValPoint d;
     SetPt(&d, at->x - p->origin.x, at->z - p->origin.z);
@@ -943,7 +943,7 @@ void fn_8029E49C(WaterPool* p, WaterCar* car, int w) {
     at.x = at.x + car->pos.x;
     at.y = at.y + car->pos.y;
     at.z = at.z + car->pos.z;
-    if (fn_8029DFE0(p, &at)) {
+    if (IsPointInWaterPool(p, &at)) {
         at.y += 0.5f;
         f32 kick = 0.2f + 0.1f * (car->speed * (wp->x > 0.0f ? 1.0f : -1.0f));
         Vec v;
@@ -1045,7 +1045,7 @@ int fn_8029EAE8(WaterShallow* s) {
     return vis;
 }
 
-int fn_8029EB54(WaterShallow* s, const Vec* at) {
+int IsPointInShallowWater(WaterShallow* s, const Vec* at) {
     int in = 0;
     int inside = 0;
     if (InRange(at->x, MinF(s->corners[0].x, s->corners[3].x), MaxF(s->corners[0].x, s->corners[3].x)) &&
@@ -1067,7 +1067,7 @@ void fn_8029EC64(WaterShallow* s, WaterCar* car, int w) {
     at.x = at.x + car->pos.x;
     at.y = at.y + car->pos.y;
     at.z = at.z + car->pos.z;
-    if (fn_8029EB54(s, &at)) {
+    if (IsPointInShallowWater(s, &at)) {
         at.y += 0.5f;
         f32 kick = 0.2f + 0.1f * (car->speed * (wp->x > 0.0f ? 1.0f : -1.0f));
         Vec v;

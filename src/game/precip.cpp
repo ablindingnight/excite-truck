@@ -155,7 +155,7 @@ void mrModelUnload(s32 model);
 void fn_8028E398(s32 sys);
 int fn_802C2C00(int mode);
 void SetFogColor(u32 color);
-void fn_802C2B78(f32 a, f32 b, f32 c);
+void SetBackgroundColor(f32 a, f32 b, f32 c);
 void fn_802D3D50(void);
 ScreenFx* fn_801E7E34(void);
 void fn_802C90F0(s32 tex);
@@ -366,7 +366,7 @@ void fn_802A4CA8(void) {
     if (c->fogOn) {
         fn_802C2C00(1);
         SetFogColor(c->color);
-        fn_802C2B78(c->fog[0], c->fog[1], c->fog[2]);
+        SetBackgroundColor(c->fog[0], c->fog[1], c->fog[2]);
     }
 }
 
@@ -1082,7 +1082,7 @@ void Mist::Update(void) {
     if (off != (FAbs(alpha) <= __float_epsilon[0])) {
         SetFogColor(color);
     }
-    fn_802C2B78(0.5f, 50.0f, a);
+    SetBackgroundColor(0.5f, 50.0f, a);
     alpha = a;
 }
 

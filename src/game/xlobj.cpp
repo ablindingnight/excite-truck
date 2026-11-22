@@ -337,8 +337,8 @@ void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a);
 void fn_802BAA50(V2* v);
 static inline const V2& PtV2(const ValPoint& p) { return *(const V2*)&p; }
 
-void fn_802BAD0C(V2* v, f32 a);
-f32 fn_802BAD90(f32 deg);
+void RotateVector2D(V2* v, f32 a);
+f32 ConvertDegreesToRadians(f32 deg);
 inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
     Vec2 org;
     __ct__4Vec2Fv(&org);
@@ -355,9 +355,9 @@ inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
     ScaleVector2f(&along, &along, size.y);
     ScaleVector2f(&side, &side, size.y);
     f32 k = -1.0f;
-    f32 rot = fn_802BAD90(k * node->GetFloat("rot", 0.0f));
-    fn_802BAD0C(&along, rot);
-    fn_802BAD0C(&side, rot);
+    f32 rot = ConvertDegreesToRadians(k * node->GetFloat("rot", 0.0f));
+    RotateVector2D(&along, rot);
+    RotateVector2D(&side, rot);
     AddScaled(&org, &org, -0.5f, &side);
     AddScaled(&org, &org, -0.5f, &along);
     fn_802BA848(s, &side, &along, &org);
@@ -742,7 +742,7 @@ void fn_802B9D08(void) {
 void fn_802BA004(void) { lbl_8055FA84 = 0; }
 
 
-void fn_802BA010(void* line, int idx) {
+void AddRacingLine(void* line, int idx) {
     Obj* o;
     XPoint* pt;
     XSample smp;
@@ -812,7 +812,7 @@ void fn_802BA348(void) {
     }
     lbl_8055FA78 = new ("roadobject[]") Arr<Obj>(total, "roadobject[]");
     for (int j = 0; j < lines.count; j++) {
-        fn_802BA010(lines.data[j], j);
+        AddRacingLine(lines.data[j], j);
     }
 }
 
@@ -869,11 +869,11 @@ void fn_802BAA50(V2* v) {
     v->y = -x;
 }
 
-void fn_802BAD0C(V2* v, f32 a);
-f32 fn_802BAD90(f32 deg);
+void RotateVector2D(V2* v, f32 a);
+f32 ConvertDegreesToRadians(f32 deg);
 
 
-Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
+Shadow* CreateShadowEntry(ValueNode* node, const ValMatrix* m) {
     Shadow* s = &lbl_8055FA7C->data[lbl_8055FA7C->count++];
     FillA(s, node, m);
     const char* tex = node->GetValue("texture");
@@ -886,7 +886,7 @@ Shadow* fn_802BAA68(ValueNode* node, const ValMatrix* m) {
 
 static inline f32 CosF(f32 v) { return (f32)cos(v); }
 
-void fn_802BAD0C(V2* v, f32 a) {
+void RotateVector2D(V2* v, f32 a) {
     f32 x = v->x;
     f32 c = CosF(a);
     f32 s = sin(a);
@@ -894,7 +894,7 @@ void fn_802BAD0C(V2* v, f32 a) {
     v->y = x * s + v->y * c;
 }
 
-f32 fn_802BAD90(f32 deg) { return 0.017453292f * deg; }
+f32 ConvertDegreesToRadians(f32 deg) { return 0.017453292f * deg; }
 
 void fn_802BAD9C(int n) { lbl_8055FA7C = new ("treeshdwlst") Arr<Shadow>(n, "treeshdwlst"); }
 
@@ -1040,7 +1040,7 @@ void fn_802BB0FC(void* verts, int nverts) {
     }
 }
 
-void fn_802BB3B8(void* verts, int nverts) {
+void DrawTransparentObjects(void* verts, int nverts) {
     Item* head;
     Chunk<u16*> *c;
     u16* st;

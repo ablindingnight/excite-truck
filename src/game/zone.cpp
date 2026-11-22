@@ -843,7 +843,7 @@ void fn_8013CB90(ArtElem* a) {
 /* The 2D helpers below are invented (names unproven); their SHAPES are what retail's code fixes:
    scalar parameters passed by value (arguments evaluated right to left, each expression argument is its own
    object) for the sum of two products and for the squared length, and a V2C built from two differences inside
-   the distance helper. See handoff/FACTS.md, toughcases 2026-11-16 (fn_8013CBC0). */
+   the distance helper. See handoff/FACTS.md, toughcases 2026-11-16 (CheckGateCrossing). */
 static inline f32 SumProd(f32 a, f32 b, f32 c, f32 d) { return a * b + c * d; }
 static inline f32 Dot(const V2& a, const V2& b) { return SumProd(a.x, b.x, a.y, b.y); }
 /* Dot of a turned a quarter (a.y, -a.x) with b. */
@@ -879,13 +879,13 @@ static inline void CenterOf(ZoneVec3& out, const Gate* g) {
 }
 
 // Seconds a gate adds (declared extern above). Defined here, between the first function that pools 0.5f and
-// fn_8013CBC0: retail holds it as the second .sdata2 entry, separate from the pooled 5.0f literal of the tuning
+// CheckGateCrossing: retail holds it as the second .sdata2 entry, separate from the pooled 5.0f literal of the tuning
 // loader. Defining it above its users would let the compiler fold it into them.
 const f32 lbl_8056149C = 5.0f;
 
 // Did the truck's step (p = predicted position, q = a little behind it) cross the car's gate line?
 // 0 = no, 1 = crossed the line outside the posts (or missed the ring), 2 = through the gate.
-int fn_8013CBC0(ZoneCar* zm, int car) {
+int CheckGateCrossing(ZoneCar* zm, int car) {
     Gate* g = zm->gate;
     int r = 0;
     Truck* t = fn_8017960C(car);
@@ -966,7 +966,7 @@ struct Watcher {
     ZoneVec3 pos;  // offset 0x24
 };
 
-int fn_8013CFF0(const Gate* g, const Watcher* w, f32* out) {
+int CheckGateProximity(const Gate* g, const Watcher* w, f32* out) {
     ZoneVec3 mid = g->Center();
     ZoneVec3 d;
     d.x = mid.x - w->pos.x;
@@ -1018,7 +1018,7 @@ static inline f32 SignF(f32 x) { return x > 0.0f ? 1.0f : -1.0f; }
 
 
 // Compare two floats: 0 when (nearly) equal, else the sign of a - b.
-int fn_8013D224(f32 a, f32 b) {
+int CompareFloats(f32 a, f32 b) {
     f32 d = a - b;
     f32 m = (f32)__fabs(d);
     if (m <= __float_epsilon[0]) {
@@ -1027,7 +1027,7 @@ int fn_8013D224(f32 a, f32 b) {
     return d > 0.0f ? 1.0f : -1.0f;
 }
 
-int fn_8013D27C(Gate* a, Gate* b) { return fn_8013D224(a->t, b->t); }
+int fn_8013D27C(Gate* a, Gate* b) { return CompareFloats(a->t, b->t); }
 
 }  // extern "C"
 
@@ -1043,7 +1043,7 @@ public:
 extern "C" CSubTaskMgr* fn_8013D288(void) { return new ("zstm") ZoneSubTask; }
 
 extern Tune lbl_8042FB3C;
-extern "C" void fn_8013E3A8(Tune* t, ValueNode* n);
+extern "C" void LoadZoneTuneParams(Tune* t, ValueNode* n);
 
 ZoneMaster::ZoneMaster(RaceSetup* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1.0f), t8C(2.0f) {
     ValueTable* conf;
@@ -1091,7 +1091,7 @@ ZoneMaster::ZoneMaster(RaceSetup* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1
         if (conf && conf->HasChild("config")) {
             node = conf->FindChild("config");
         }
-        fn_8013E3A8(&lbl_8042FB3C, node);
+        LoadZoneTuneParams(&lbl_8042FB3C, node);
         levels = new ("zonelevels") ZoneLevels(t);
         if (conf) {
             fn_80131818(conf);
@@ -1132,7 +1132,7 @@ ZoneMaster::ZoneMaster(RaceSetup* race) : t6C(0.8f), t74(0.8f), t7C(1.0f), t84(1
 
 extern "C" {
 
-int fn_8013DDD4(ValueTable* t, const char* name);
+int CountMatchingChildren(ValueTable* t, const char* name);
 int fn_8013DE7C(ValueNode* t, const char* name);
 void fn_8013DF24(Gate* g, Gate* prev, Gate* next);
 f32 fn_8013E300(const V2* v);
@@ -1227,7 +1227,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
     int i;
     int lvl;
     ValueNode* child;
-    n = fn_8013DDD4(t, "ZoneLevel");
+    n = CountMatchingChildren(t, "ZoneLevel");
     levels = new ("ZoneLevel[]") ZoneLevel[n];
     i = 0;
     lvl = 0;
@@ -1249,7 +1249,7 @@ ZoneLevels::ZoneLevels(ValueTable* t) {
 
 extern "C" {
 
-int fn_8013DDD4(ValueTable* t, const char* name) {
+int CountMatchingChildren(ValueTable* t, const char* name) {
     int n = 0;
     int i;
     for (i = 0; t->GetChild(i) != 0; i++) {
@@ -1385,7 +1385,7 @@ ZoneLevel::~ZoneLevel(void) {
 
 extern "C" {
 
-void fn_8013E3A8(Tune* t, ValueNode* n) {
+void LoadZoneTuneParams(Tune* t, ValueNode* n) {
     t->awesomeComboX = n ? n->GetInt("awesome_combo_x", 25) : 25;
     t->levelupGates = n ? n->GetInt("levelup_gates", 10) : 10;
     t->wideOpenSpeedF = n ? n->GetFloat("wide_open_speed_f", 0.95f) : 0.95f;
@@ -1569,7 +1569,7 @@ void ZoneMaster::vf44(void) {
             } else {
                 sp_.ok = 0;
             }
-            if (sp_.ok && fn_8013CFF0(g, w, &d2)) {
+            if (sp_.ok && CheckGateProximity(g, w, &d2)) {
                 if (hits.count + 1 > hits.max) {
                     break;
                 }
@@ -2233,7 +2233,7 @@ inline void ZoneMaster::UpdateCars(void) {
                     c->bonusT = now;
                 }
                 if (c->gate->ring) {
-                    switch (fn_8013CBC0(c, i)) {
+                    switch (CheckGateCrossing(c, i)) {
                     case 0:
                         break;
                     case 1:
@@ -2254,7 +2254,7 @@ inline void ZoneMaster::UpdateCars(void) {
                     }
                     }
                 } else {
-                    switch (fn_8013CBC0(c, i)) {
+                    switch (CheckGateCrossing(c, i)) {
                     case 0:
                         break;
                     case 1:

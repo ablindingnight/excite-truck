@@ -270,7 +270,7 @@ void fn_802BED90(PVec* v) {
     v->z *= s;
 }
 
-void fn_802BEDFC(void) {
+void LoadWaterGraphicsSettings(void) {
     farWaterColor = 0xE0005030;
     waterHeight = 0.7f;
     nearWaterColor = 0xE0FFFFFF;
@@ -320,7 +320,7 @@ f32 fn_802BF02C(f32 x) {
 }
 
 
-void fn_802BF160(void) {
+void UpdateWaterRings(void) {
     if (lbl_8055CF6C == -1) {
         return;
     }
@@ -357,7 +357,7 @@ void fn_802BF160(void) {
 WaterBase* fn_802C00A4(void);
 
 void fn_802BF350(void) {
-    fn_802BEDFC();
+    LoadWaterGraphicsSettings();
     lbl_8055FADC = fn_801E85AC();
     for (int i = 0; i < lbl_8055FADC; i++) {
         lbl_804C07F0[i] = fn_802C00A4();
@@ -396,7 +396,7 @@ void fn_802BF508(void) {
         lbl_804C07F0[v]->Draw();
         fn_802C2C00(old);
     }
-    fn_802BF160();
+    UpdateWaterRings();
 }
 
 f32 fn_802BF590(void) { return lbl_8055FAF4; }

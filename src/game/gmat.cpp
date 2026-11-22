@@ -31,7 +31,7 @@ void fn_802CADD0(s32 tex, int stage);
 s32 fn_802BC30C(int layer);
 void fn_802DC078(void* verts, int nverts, u16* idx, int n, int first, int layer);
 void fn_802BB0FC(void* verts, int n);
-void fn_802BB3B8(void* verts, int n);
+void DrawTransparentObjects(void* verts, int n);
 struct BoneCmd;
 BoneCmd* fn_802DA704(int start, const BVec* v, int n);
 void fn_802DAA18(BoneCmd* c);
@@ -600,7 +600,7 @@ void fn_802B14B4(GMat* g) {
         fn_802C2C00(old);
         fn_802BB0FC(g->verts.At(0), g->verts.Count());
         fn_802B1758(g);
-        fn_802BB3B8(g->verts.At(0), g->verts.Count());
+        DrawTransparentObjects(g->verts.At(0), g->verts.Count());
     }
 }
 

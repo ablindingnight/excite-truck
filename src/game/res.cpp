@@ -62,7 +62,7 @@ void ReadFileBuffer(int fd, void* buf, s32 n);  // read
 int FindFirstFile(const char* pattern, char* name, s32 n);  // find first
 int FileFindNext(int h, char* name, s32 n);                // find next
 void FileFindClose(int h);                                  // find close
-void fn_802E4CA8(char* dst, const char* src, s32 n);
+void CopyStringWithLimit(char* dst, const char* src, s32 n);
 int LoadStreamFile(const char* path);
 void GetStreamFileOffsetAndSize(int h, s32* sector, s32* size);
 int ReadStreamSector(s32 sector, void* buf, s32 size);  // start read
@@ -485,7 +485,7 @@ int FindResourceSector(const char* name, s32* sizeOut) {
     s32 sector = -1;
     s32 size;
     int h;
-    fn_802E4CA8(path, name, sizeof(path));
+    CopyStringWithLimit(path, name, sizeof(path));
     h = LoadStreamFile(path);
     if (h != -1) {
         GetStreamFileOffsetAndSize(h, &sector, &size);

@@ -114,16 +114,16 @@ int fn_801E89C8(s32 a);
 int fn_801E9E78(void* a, Vec* p, Vec* n, s32* c);
 void InitializeCarInfo(s32 index, int a, CarDef* d);
 void fn_801EAB10(int idx, CarDrawState* draw);  // carinfo.cpp
-void* fn_801EF1F0(void* p, const char* name);
+void* InitializeXraySuspension(void* p, const char* name);
 void fn_801EF428(void* p, int del);
 void fn_801EFC90(void* p, CarDrawView* c, void** wheels);
-void* fn_801EFF94(const char* cls, s32 index, int i);
+void* CreateWheelMod(const char* cls, s32 index, int i);
 void fn_801EFFF8(void* w);
-void fn_801F0F78(void* w, CarDrawWheel* s, const VecMatrix* f, f32 scale);
+void PoseWheelFromState(void* w, CarDrawWheel* s, const VecMatrix* f, f32 scale);
 void fn_801F131C(void* w, f32 spin, int mine);
 void fn_801F1378(void* w, f32 spin);
 void fn_801F13F4(void* w, f32 a, f32 b);
-f32 fn_801F159C(void* w);
+f32 GetTireRadius(void* w);
 void* fn_802002D4(const char* name, s32 model, s32 inst);
 void fn_8020095C(void* p);
 void fn_80201018(void* p, CarDrawView* c, int a);
@@ -781,7 +781,7 @@ void CarModel::Set(const AnimSlot* s) {
         scaled.basis[2].z = frame.basis[2].z * k;
     }
     for (i = 0; i < 4; i++) {
-        fn_801F0F78(wheels[i], &car->wheels[i], &frame, scale);
+        PoseWheelFromState(wheels[i], &car->wheels[i], &frame, scale);
     }
 }
 
@@ -830,7 +830,7 @@ extern "C" {
 
 s32 fn_801EE0C8(CarModel* m) { return m->lodModels[1]; }
 
-f32 fn_801EE0D0(CarModel* m, int i) { return fn_801F159C(m->wheels[i]); }
+f32 fn_801EE0D0(CarModel* m, int i) { return GetTireRadius(m->wheels[i]); }
 
 void LoadCarModelDetails(CarModel* m, const char* name, s32 x, s32 inst, const char* dir) {
     char path[256];
@@ -929,7 +929,7 @@ void LoadCarModelDetails(CarModel* m, const char* name, s32 x, s32 inst, const c
     const char* xm = use->GetString("xray_model", "xray.mod");
     void* o = new ("xray_model") u32;
     if (o) {
-        o = fn_801EF1F0(o, xm);
+        o = InitializeXraySuspension(o, xm);
     }
     m->tire = o;
     char bp[256];
@@ -975,8 +975,8 @@ void fn_801EE974(CarModel* m, Racer* r) {
         } else {
             cls = m->res->values->FindChild("Rear")->GetValue("wheel_class");
         }
-        m->wheels[i] = fn_801EFF94(cls, m->index, i);
-        r->wheelSize[i] = fn_801F159C(m->wheels[i]);
+        m->wheels[i] = CreateWheelMod(cls, m->index, i);
+        r->wheelSize[i] = GetTireRadius(m->wheels[i]);
     }
 }
 

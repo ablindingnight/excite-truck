@@ -46,7 +46,7 @@ s32 fn_80204CF0(void);
 s32 fn_80204EA0(const char* key);
 void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, int a, int b);
-void* fn_802BAA68(void* xlo, const ValMatrix* m);
+void* CreateShadowEntry(void* xlo, const ValMatrix* m);
 void fn_8016A0B0(void);
 void ActivateRingSetByName(const char* name);  // activate ring set
 void FindAndDisableRingSet(const char* name);  // deactivate ring set
@@ -998,7 +998,7 @@ void Arena::Load(void) {
         for (sp_.j = 0; sp_.j < d[i].infos->count; sp_.j++) {
             sp_.o = &d[i].infos->data[sp_.j];
             if (sp_.o->type == 0) {
-                sp_.o->obj = fn_802BAA68(sp_.o->xlo, &sp_.o->mtx);
+                sp_.o->obj = CreateShadowEntry(sp_.o->xlo, &sp_.o->mtx);
             }
         }
     }

@@ -84,12 +84,12 @@ void fn_802C4C80(void* p);
 void fn_802C2FC4(void* p);
 void fn_802C519C(void* p);
 void fn_802368B4(s32 style);
-int fn_80218214(Window* w, s32 x, s32 y);
-void fn_80218198(Window* w, Widget* wd);
+int FindWidgetAtPosition(Window* w, s32 x, s32 y);
+void UpdateWindowFocus(Window* w, Widget* wd);
 void fn_80218E08(Window* w, int key);
 int fn_802182F0(Window* w, Widget* wd);
-void fn_80217C4C(Window* w);
-void fn_80217D84(Window* w);
+void UpdateMenuSelection(Window* w);
+void UpdateWindowMenuSelection(Window* w);
 void fn_80217EC0(Window* w, int horizontal, int negative);
 void CalculateScreenPosition(f32* x, f32* y, int a, int b);
 void DrawImageFrame(void* p, int a, f32 x, f32 y, f32 z);
@@ -99,7 +99,7 @@ void fn_802C88BC(int a);
 void UpdateTopSlot(void);
 void AppendNodeToUIList(const Style* s);
 const Style* GetTopUIContext(void);
-void fn_802193C8(Widget* w, f32 t);
+void AnimateWidgetFadeOut(Widget* w, f32 t);
 void fn_80219358(Widget* w, f32 t);
 void fn_80214D50(int sound);
 }
@@ -225,7 +225,7 @@ void fn_8021734C(Window* win) {
     }
 }
 
-void fn_802173F8(Window* win) {
+void CloseWindowWidgets(Window* win) {
     int i;
     if (win->close) {
         win->close();
@@ -244,11 +244,11 @@ void fn_8021747C(Window* win, int phase, void* fade, f32 t) {
     }
 }
 
-void fn_8021749C(Window* win, s32 x, s32 y) {
+void HandleWindowPress(Window* win, s32 x, s32 y) {
     if (!win->pressed) {
         s32 lx = x - win->x;
         s32 ly = y - win->y;
-        int i = fn_80218214(win, lx, ly);
+        int i = FindWidgetAtPosition(win, lx, ly);
         Widget* wd = 0;
         if (i >= 0) {
             wd = win->widgets[i];
@@ -256,10 +256,10 @@ void fn_8021749C(Window* win, s32 x, s32 y) {
         win->pressed = wd;
         if (wd && wd->Focusable()) {
             if (win->focus != wd) {
-                fn_80218198(win, wd);
+                UpdateWindowFocus(win, wd);
             }
         } else {
-            fn_80218198(win, 0);
+            UpdateWindowFocus(win, 0);
         }
         if (wd) {
             wd->PressA(lx, ly);
@@ -267,7 +267,7 @@ void fn_8021749C(Window* win, s32 x, s32 y) {
     }
 }
 
-void fn_80217590(Window* win, s32 x, s32 y) {
+void HandleWindowPressRelease(Window* win, s32 x, s32 y) {
     Widget* wd = win->pressed;
     x -= win->x;
     y -= win->y;
@@ -281,14 +281,14 @@ void fn_802175F0(Window* win, s32 x, s32 y) {
     if (!win->pressed) {
         s32 lx = x - win->x;
         s32 ly = y - win->y;
-        int i = fn_80218214(win, lx, ly);
+        int i = FindWidgetAtPosition(win, lx, ly);
         Widget* wd = 0;
         if (i >= 0) {
             wd = win->widgets[i];
         }
         win->pressed = wd;
         if (wd && win->focus != wd && wd->Focusable()) {
-            fn_80218198(win, wd);
+            UpdateWindowFocus(win, wd);
         }
         if (wd) {
             wd->PressB(lx, ly);
@@ -296,7 +296,7 @@ void fn_802175F0(Window* win, s32 x, s32 y) {
     }
 }
 
-void fn_802176D4(Window* win, s32 x, s32 y) {
+void HandleWindowRelease(Window* win, s32 x, s32 y) {
     Widget* wd = win->pressed;
     x -= win->x;
     y -= win->y;
@@ -309,7 +309,7 @@ void fn_802176D4(Window* win, s32 x, s32 y) {
 void fn_80217734(Window* win, s32 x, s32 y) {
     s32 lx = x - win->x;
     s32 ly = y - win->y;
-    int i = fn_80218214(win, lx, ly);
+    int i = FindWidgetAtPosition(win, lx, ly);
     Widget* wd = 0;
     if (i >= 0) {
         wd = win->widgets[i];
@@ -346,7 +346,7 @@ void fn_80217854(Window* win, s32 x, s32 y) {
     }
 }
 
-void fn_80217874(Window* win, u32 key) {
+void ProcessWindowInput(Window* win, u32 key) {
     int i;
     fn_80216D34();
     if (!win->pressed) {
@@ -364,7 +364,7 @@ void fn_80217874(Window* win, u32 key) {
     }
 }
 
-void fn_802179A0(Window* win) {
+void FocusNextWidget(Window* win) {
     int i = win->focus ? fn_802182F0(win, win->focus) : 0;
     int n;
     if (i >= 0) {
@@ -373,7 +373,7 @@ void fn_802179A0(Window* win) {
             i++;
             wd = win->widgets[i % win->count];
             if (Visible(wd) && wd->Focusable() && wd->enabled) {
-                fn_80218198(win, wd);
+                UpdateWindowFocus(win, wd);
                 return;
             }
         }
@@ -390,7 +390,7 @@ void fn_80217AC0(Window* win) {
         i--;
         wd = win->widgets[(i + win->count) % win->count];
         if (Visible(wd) && wd->Focusable() && wd->enabled) {
-            fn_80218198(win, wd);
+            UpdateWindowFocus(win, wd);
             return;
         }
     }
@@ -398,7 +398,7 @@ void fn_80217AC0(Window* win) {
 
 int fn_80217BC8(const void* a, const void* b) { return *(const s32*)a - *(const s32*)b; }
 
-s32* fn_80217BD8(Window* win, s32 id, Widget* wd) {
+s32* UpdateMenuEntries(Window* win, s32 id, Widget* wd) {
     win->menu[win->menuCount].id = id;
     win->menu[win->menuCount].w = wd;
     win->menuCount++;
@@ -407,7 +407,7 @@ s32* fn_80217BD8(Window* win, s32 id, Widget* wd) {
     return &win->menuCur;
 }
 
-void fn_80217C4C(Window* win) {
+void UpdateMenuSelection(Window* win) {
     int n = win->menuCount;
     int next;
     int i;
@@ -446,7 +446,7 @@ void fn_80217C4C(Window* win) {
     win->menuCur = win->menu[next].id;
 }
 
-void fn_80217D84(Window* win) {
+void UpdateWindowMenuSelection(Window* win) {
     Widget* wd;
     int n = win->menuCount;
     int cur;
@@ -566,7 +566,7 @@ void fn_802180C8(Window* win) { fn_80217EC0(win, 0, 0); }
 
 void fn_802180D4(Window* win) { fn_80217EC0(win, 0, 1); }
 
-void fn_802180E0(Window* win, int i) {
+void ValidateMenuIndex(Window* win, int i) {
     if (i < 0 || i >= win->menuCount) {
         fn_802E30C8("SetMenuIndex(%d) out of range (%d)", i, win->menuCount);
         return;
@@ -585,9 +585,9 @@ int fn_80218120(Window* win) {
     return 0;
 }
 
-void fn_8021818C(Window* win) { win->menuCur = -1; }
+void ResetMenuCursor(Window* win) { win->menuCur = -1; }
 
-void fn_80218198(Window* win, Widget* wd) {
+void UpdateWindowFocus(Window* win, Widget* wd) {
     if (wd != win->focus) {
         if (win->focus) {
             win->focus->Blur();
@@ -599,7 +599,7 @@ void fn_80218198(Window* win, Widget* wd) {
     }
 }
 
-int fn_80218214(Window* win, s32 x, s32 y) {
+int FindWidgetAtPosition(Window* win, s32 x, s32 y) {
     int i;
     for (i = win->count - 1; i >= 0; i--) {
         Widget* wd = win->widgets[i];
@@ -648,7 +648,7 @@ void fn_80218370(Window* win) {
         }
     }
     if (!found) {
-        fn_80217D84(win);
+        UpdateWindowMenuSelection(win);
     }
 }
 
@@ -659,7 +659,7 @@ void fn_80218464(Window* win) {
     }
 }
 
-void fn_802184D0(Window* win) {
+void DrawVisibleWidgets(Window* win) {
     int i;
     for (i = 0; i < win->count; i++) {
         if (Visible(win->widgets[i])) {
@@ -668,7 +668,7 @@ void fn_802184D0(Window* win) {
     }
 }
 
-void fn_80218574(Window* win) {
+void DrawWindowContent(Window* win) {
     int style;
     int i;
     if (win->image) {
@@ -735,7 +735,7 @@ void fn_8021889C(Window* win, int g, f32 t) {
         n = 0;
         for (i = 0; i < win->count; i++) {
             if (win->hiddenGroups & win->widgets[i]->mask) {
-                fn_802193C8(win->widgets[i], t);
+                AnimateWidgetFadeOut(win->widgets[i], t);
                 n++;
             }
         }
@@ -808,10 +808,10 @@ void fn_80218B88(Window* win, int g, int a, int b) {
 
 void fn_80218C14(Window* win, int i, const Style* s) { win->styles[i] = *s; }
 
-void fn_80218C98(Window* win, Widget* wd, int g) {
+void AddWidgetToWindow(Window* win, Widget* wd, int g) {
     win->widgets[win->count++] = wd;
     if (wd->Focusable() && !win->focus && win->noSound) {
-        fn_80218198(win, wd);
+        UpdateWindowFocus(win, wd);
     }
     wd->mask = fn_80216D14(g);
     wd->window = win;
@@ -822,7 +822,7 @@ void fn_80218D54(Window* win, int id) {
     int i;
     for (i = 0; i < win->count; i++) {
         if (win->widgets[i]->Focusable() && id == win->widgets[i]->Id()) {
-            fn_80218198(win, win->widgets[i]);
+            UpdateWindowFocus(win, win->widgets[i]);
             return;
         }
     }
