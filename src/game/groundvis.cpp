@@ -648,7 +648,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
     fn_802AE690(&lbl_804BE0B0.cam);
 
     f32 above = -10.0f + lbl_804BE0B0.cam.pos.y - fn_801EA0E8(lbl_804BE0B0.cam.pos.x, lbl_804BE0B0.cam.pos.z);
-    lbl_8055F98C = fn_80203FF0() + (0.0f > above ? 0.0f : above);
+    lbl_8055F98C = fn_80203FF0() + (MaxF(0.0f, above));
 
     f32 aspect = fn_802C8FEC();
     f32 fov = fn_802C973C();
