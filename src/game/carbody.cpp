@@ -332,7 +332,7 @@ void fn_8018185C(const u8* p, f32* v) {
     F32(p, 0x0) = a;
     F32(p, 0x8) = peak + a * EngineSquare(r0);
     f32 low = 1.3515152f * (0.3f * v[2]);
-    F32(p, 0x4) = F32(p, 0x18) + -2.0f * a * r0;
+    F32(p, 0x4) = F32(p, 0x18) + Mul(-2.0f, a) * r0;
     f32 peak2 = 1.3515152f * v[2];
     top = F32(p, 0x28);
     F32(p, 0x20) = hp / 8000.0f;
@@ -2386,7 +2386,7 @@ void fn_80186DE8(void) {
         }
         f32 ds;
         f32 grip;
-        airK = 1.0f + 3.0f * air;
+        airK = AddScaledF(1.0f, air, 3.0f);
         surf = 0;
         for (int k = 0; k < 4; k++) {
             if (e->surface[k] > surf) {
@@ -2462,7 +2462,7 @@ void fn_80186DE8(void) {
                 f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
                 f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
                 f32 lo = 2.4f * boost;
-                f32 boostScale = LerpT(Clamp01(t), lo, 0.6f * boost);
+                f32 boostScale = LerpT(Clamp01(t), lo, Mul(0.6f, boost));
                 f32 mass = ((CarBody*)car)->mass;
                 k = boostScale * (((CarBody*)car)->f25E0 * mass);
                 AddScaled(force, car + 0x54, k);
@@ -2517,7 +2517,7 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->accel.x = 59.94f * vel.x + ((CarBody*)car)->vel.x * -59.94f;
         ((CarBody*)car)->accel.y = vel.y * 59.94f + ((CarBody*)car)->vel.y * -59.94f;
         ((CarBody*)car)->accel.z = vel.z * 59.94f + ((CarBody*)car)->vel.z * -59.94f;
-        ((CarBody*)car)->aaccel.x = avel.x * 59.94f + ((CarBody*)car)->avel.x * -59.94f;
+        ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + ((CarBody*)car)->avel.x * -59.94f;
         ((CarBody*)car)->aaccel.y = avel.y * 59.94f + ((CarBody*)car)->avel.y * -59.94f;
         ((CarBody*)car)->aaccel.z = avel.z * 59.94f + ((CarBody*)car)->avel.z * -59.94f;
         ((CarBody*)car)->vel.x = vel.x;
@@ -2641,7 +2641,7 @@ void fn_80186DE8(void) {
             }
             if (sp > 0.0f) {
                 t = Clamp01((sp / 20.0f) * 0.44444445f);
-                steerK = steerK * (1.0f - 0.5f * t) * (1.0f - 0.6f * t);
+                steerK = steerK * (1.0f - 0.5f * t) * (1.0f - Mul(0.6f, t));
             }
         }
         slide = (f32)__fabs(((CarBody*)car)->f25CC) - 1.3f * AbsNarrow(((CarBody*)car)->f25D8) - 3.0f;
