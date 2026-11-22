@@ -500,8 +500,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     color = fn_80230B9C(-1);
     f32 half = 0.5f;
-    f32 one = 1.0f;
     f32 zero = 0.0f;
+    f32 one = 1.0f;
     for (i = 0; i < 21; i++) {
         Vec3 c = lbl_803582C0[i];
         Vec3 v;
