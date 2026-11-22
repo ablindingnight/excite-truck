@@ -337,7 +337,7 @@ static inline void MulVec(ValVec3* out, const ValVec3* in, const ValMatrix* m) {
 // Resets a car's body to rest at a matrix: position and orientation from it, velocity a along its z axis,
 // contact points moved into place.
 }
-template <class O, class V> static inline void TScale(O* o, const V* v, f32 k) { o->x = v->x * k; o->y = v->y * k; o->z = v->z * k; }  /* Helper name unproven */
+template <class O, class V> static inline void TScale(O* o, const V* v, f32 k) { o->x = Mul(v->x, k); o->y = Mul(v->y, k); o->z = Mul(v->z, k); }  /* Helper name unproven */
 /* Helper name unproven */
 template <class T>
 static inline T& AtR(T* p, int i) {
