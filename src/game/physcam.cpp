@@ -1182,7 +1182,7 @@ int TvCamera::Load(ValueNode* t) {
         ex[0] = t->GetFloat("ex_1", 0.0f);
         ex[1] = t->GetFloat("ex_2", 0.0f);
         ex[2] = t->GetFloat("ex_3", 1.0f);
-        int funky = t->GetBool("funky_fov", 0);
+        u8 funky = t->GetBool("funky_fov", 0);
         int shakey = t->GetBool("shakey", 0);
         int rumble = t->GetBool("rumble", 0);
         int blur = t->GetBool("focus_blur", 0);
