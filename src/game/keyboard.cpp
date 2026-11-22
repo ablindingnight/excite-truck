@@ -55,7 +55,7 @@ extern const u32 lbl_8055F214 = MakeILPos(0xFFFF, 0);
 
 extern "C" {
 
-int fn_80243478(int row) {
+int CountKeyboardEntries(int row) {
     KeyDef* k = lbl_803428B0[row];
     int n = 0;
     for (int i = 0; i < 16; i++) {
@@ -67,7 +67,7 @@ int fn_80243478(int row) {
     return n;
 }
 
-int fn_80243528(int col, int row) {
+int CalculateKeyXPosition(int col, int row) {
     KeyDef* k = lbl_803428B0[row];
     int x = 0;
     for (int i = 0; i < col; i++) {
@@ -76,7 +76,7 @@ int fn_80243528(int col, int row) {
     return x;
 }
 
-int fn_8024360C(int x, int row) {
+int FindKeyIndexFromXPosition(int x, int row) {
     KeyDef* k = lbl_803428B0[row];
     int start = 0;
     int last = 0;
@@ -95,13 +95,13 @@ int fn_8024360C(int x, int row) {
 
 int fn_80243710(int col, int row) {
     int ok = 0;
-    if (col >= 0 && col <= fn_80243478(row)) {
+    if (col >= 0 && col <= CountKeyboardEntries(row)) {
         ok = 1;
     }
     return ok;
 }
 
-int fn_80243764(int* col, int* row, int dx, int dy) {
+int UpdateKeyboardSelection(int* col, int* row, int dx, int dy) {
     int oldCol = *col;
     int oldRow = *row;
     *row = oldRow + dy;
@@ -111,9 +111,9 @@ int fn_80243764(int* col, int* row, int dx, int dy) {
         *row = 0;
     }
     if (*row != oldRow) {
-        int pos = fn_80243528(*col, oldRow);
-        pos = fn_8024360C(pos, *row);
-        if (fn_80243478(oldRow) != fn_80243478(*row)) {
+        int pos = CalculateKeyXPosition(*col, oldRow);
+        pos = FindKeyIndexFromXPosition(pos, *row);
+        if (CountKeyboardEntries(oldRow) != CountKeyboardEntries(*row)) {
             if (fn_80243710(lbl_8055BE0C, *row) && *col == lbl_8055BE10) {
                 pos = lbl_8055BE0C;
                 lbl_8055BE0C = lbl_8055BE10;
@@ -131,8 +131,8 @@ int fn_80243764(int* col, int* row, int dx, int dy) {
     }
     *col += dx;
     if (*col < 0) {
-        *col = fn_80243478(*row) - 1;
-    } else if (*col > fn_80243478(*row) - 1) {
+        *col = CountKeyboardEntries(*row) - 1;
+    } else if (*col > CountKeyboardEntries(*row) - 1) {
         *col = 0;
     }
     if (*col != lbl_8055BE10) {
@@ -146,14 +146,14 @@ int fn_80243764(int* col, int* row, int dx, int dy) {
     return 0;
 }
 
-void fn_802438EC(char* s) {
+void RemoveTrailingUnderscore(char* s) {
     int n = strlen(s);
     if (n > 0 && s[n - 1] == '_') {
         s[n - 1] = 0;
     }
 }
 
-void fn_80243938(char* s, int max) {
+void AppendUnderscoreIfNeeded(char* s, int max) {
     int n = strlen(s);
     if ((n == 0 || s[n - 1] != '_') && n + 1 < max) {
         StrNCat(s, "_", max);
@@ -179,9 +179,9 @@ void NameChooser::Enter(void) {
     if (box == NULL) {
         fn_802E30C8("mname: Error getting selector box");
     }
-    fn_80243938(buf, max);
+    AppendUnderscoreIfNeeded(buf, max);
     for (int r = 0; r < 5; r++) {
-        for (int i = 0; i < fn_80243478(r); i++) {
+        for (int i = 0; i < CountKeyboardEntries(r); i++) {
             KeyDef* k = &lbl_803428B0[r][i];
             switch (k->type) {
             case 3:
@@ -205,7 +205,7 @@ void NameChooser::Enter(void) {
 }
 
 void NameChooser::Exit(void) {
-    fn_802438EC(buf);
+    RemoveTrailingUnderscore(buf);
     fn_802C519C(box);
     box = NULL;
     fn_802328D4(font);
@@ -327,7 +327,7 @@ void NameChooser::Accept(void) {
             Backspace();
         }
         if (Length() + 1 < max) {
-            fn_802438EC(buf);
+            RemoveTrailingUnderscore(buf);
             char text[32] = {0};
             if (k->type == 2) {
                 if (buf[0]) {
@@ -345,7 +345,7 @@ void NameChooser::Accept(void) {
                 }
             }
             StrNCat(buf, text, max);
-            fn_80243938(buf, max);
+            AppendUnderscoreIfNeeded(buf, max);
             if (max == Length() + 1) {
                 for (int r = 0; r < 5; r++) {
                     for (int c = 0; c < 16; c++) {
@@ -365,20 +365,20 @@ void NameChooser::Accept(void) {
     case 5:
         if (strlen(buf) > 1) {
             done = 1;
-            fn_802438EC(buf);
+            RemoveTrailingUnderscore(buf);
         }
         break;
     }
 }
 
 void NameChooser::Backspace(void) {
-    fn_802438EC(buf);
+    RemoveTrailingUnderscore(buf);
     char* s = buf;
     if (strlen(s) != 0) {
         int n = strlen(s);
         s[n - 1] = 0;
     }
-    fn_80243938(buf, max);
+    AppendUnderscoreIfNeeded(buf, max);
 }
 
 void NameChooser::Caps(void) { caps = !caps; }
@@ -386,16 +386,16 @@ void NameChooser::Caps(void) { caps = !caps; }
 int NameChooser::Key(int key) {
     switch (key) {
     case 0x125:
-        fn_80243764(&col, &row, -1, 0);
+        UpdateKeyboardSelection(&col, &row, -1, 0);
         break;
     case 0x127:
-        fn_80243764(&col, &row, 1, 0);
+        UpdateKeyboardSelection(&col, &row, 1, 0);
         break;
     case 0x126:
-        fn_80243764(&col, &row, 0, -1);
+        UpdateKeyboardSelection(&col, &row, 0, -1);
         break;
     case 0x128:
-        fn_80243764(&col, &row, 0, 1);
+        UpdateKeyboardSelection(&col, &row, 0, 1);
         break;
     case 0xD:
         Accept();
