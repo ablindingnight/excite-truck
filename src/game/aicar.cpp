@@ -1333,7 +1333,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     F32(out, 0x8) = F32(out, 0x8) * fn_80194FC8(d);
     if (U8(d, 0x2A6)) {
         f32 st = F32(d, 0x1EC);
-        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + 10.0f) - st));
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((AiAdd(st, 10.0f)) - st));
         F32(out, 0x8) = F32(out, 0x8) * Lerp(1.0f, 0.8f, Lerp(0.0f, 1.0f, k));
     }
     f32 side = fn_801948B0(d, t, 0);
@@ -1341,7 +1341,7 @@ void fn_80194FD0(u8* d, u8* out, f32 t) {
     F32(out, 0x4) = F32(out, 0x4) + F32(d, 0x5C) * side;
     if (S32(d, 0x268) == 3) {
         f32 st = F32(d, 0x1DC);
-        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((st + 12.0f) - st));
+        f32 k = Clamp01F((F32(d, 0x26C) - st) / ((AiAdd(st, 12.0f)) - st));
         F32(out, 0x8) = F32(out, 0x8) * Lerp(1.0f, 0.7f, k);
     }
     int chase = (lbl_8055D430 & 1) && (lbl_8055D430 & 0x20);
