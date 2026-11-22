@@ -435,6 +435,36 @@ void fn_802D4988(Surf* s) {
     }
 }
 
+// Actual per-vertex skinned morph operation.
+/* Helper name unproven */
+static inline void SkinMorphVertex(V3* o, const SkinMorphVtx* v) {
+
+    const BVec* ba = &lbl_804DB068[v->b0];
+    const BVec* bb = &lbl_804DB068[v->b1];
+    f32 w0 = (1.0f / 255) * v->w0;
+    f32 w1 = (1.0f / 255) * v->w1;
+    V3 p;
+    p.x = v->x + ba->x * w0;
+    p.y = v->y + ba->y * w0;
+    p.z = v->z + ba->z * w0;
+    p.x = p.x + bb->x * w1;
+    p.y = p.y + bb->y * w1;
+    p.z = p.z + bb->z * w1;
+    f32 wb = lbl_804CA308[v->ib];
+    f32 wa = lbl_804CA308[v->ia];
+    V3 a;
+    a.Set((1.0f / 255) * v->a[0], Mul((1.0f / 255), v->a[1]), (1.0f / 255) * v->a[2]);
+    V3 b;
+    b.Set(Mul((1.0f / 255), v->b[0]), Mul((1.0f / 255), v->b[1]), (1.0f / 255) * v->b[2]);
+    o->x = p.x + a.x * wa;
+    o->y = p.y + Mul(a.y, wa);
+    o->z = p.z + a.z * wa;
+    o->x = o->x + b.x * wb;
+    o->y = o->y + b.y * wb;
+    o->z = o->z + b.z * wb;
+
+}
+
 void fn_802D4C44(Surf* s) {
     SkinMorphVtx* v;
     int n = s->nverts;
@@ -443,29 +473,7 @@ void fn_802D4C44(Surf* s) {
     if (out) {
         V3* o = out;
         for (int i = n; i > 0; i--) {
-            const BVec* ba = &lbl_804DB068[v->b0];
-            const BVec* bb = &lbl_804DB068[v->b1];
-            f32 w0 = (1.0f / 255) * v->w0;
-            f32 w1 = (1.0f / 255) * v->w1;
-            V3 p;
-            p.x = v->x + ba->x * w0;
-            p.y = v->y + ba->y * w0;
-            p.z = v->z + ba->z * w0;
-            p.x = p.x + bb->x * w1;
-            p.y = p.y + bb->y * w1;
-            p.z = p.z + bb->z * w1;
-            f32 wb = lbl_804CA308[v->ib];
-            f32 wa = lbl_804CA308[v->ia];
-            V3 a;
-            a.Set((1.0f / 255) * v->a[0], Mul((1.0f / 255), v->a[1]), (1.0f / 255) * v->a[2]);
-            V3 b;
-            b.Set(Mul((1.0f / 255), v->b[0]), Mul((1.0f / 255), v->b[1]), (1.0f / 255) * v->b[2]);
-            o->x = p.x + a.x * wa;
-            o->y = p.y + Mul(a.y, wa);
-            o->z = p.z + a.z * wa;
-            o->x = o->x + b.x * wb;
-            o->y = o->y + b.y * wb;
-            o->z = o->z + b.z * wb;
+            SkinMorphVertex(o, v);
             v++;
             o++;
         }
