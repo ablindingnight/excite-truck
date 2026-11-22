@@ -649,7 +649,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             fade = Ease(1.0f - PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) / ((w / 2.0f) * (w / 2.0f)));
             a = 255.0f * fade;
             fn_80235AFC(m->art, 0, ARGB((int)(a < 0.0f ? a - 0.5f : 0.5f + a), 0xFF, 0xFF, 0xFF),
-                        c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->unk10 + m->angle);
+                        c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->angle + m->unk10);
         }
     }
 }
