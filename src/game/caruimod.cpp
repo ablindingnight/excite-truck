@@ -1000,7 +1000,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             // PROVISIONAL: original camera-axis translation grouping is unproven.
             MAdd(&cam.pos, &cam.pos, &cam.b.v[0], -offX);
             MAdd(&cam.pos, &cam.pos, &cam.b.v[1], ny);
-            if (!lbl_8055F330 || (2.0f * aspect) + fn_801DCF48(0, cam.pos.x, cam.pos.z) < cam.pos.y) {
+            if (!lbl_8055F330 || Sum(fn_801DCF48(0, cam.pos.x, cam.pos.z), 2.0f * aspect) < cam.pos.y) {
                 break;
             }
             pitch += 1.5707964f / 800.0f;
