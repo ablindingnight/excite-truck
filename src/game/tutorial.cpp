@@ -1221,6 +1221,10 @@ inline void Challenge::Collect(int& i) {
 
 #pragma push
 #pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+// Helper names unproven.
+static inline f32 InitMidX(f32 a, f32 b) { return (a + b) * 0.5f; }
+static inline f32 InitMidZ(f32 a, f32 b) { return (a + b) / 2.0f; }
+
 inline void Challenge::Init(void) {
     ValueNode* n;
     const char* name = "growcoin.mod";
@@ -1284,8 +1288,8 @@ inline void Challenge::Init(void) {
                 TVec2 b;
                 b.z = t->ends[1].z;
                 b.x = t->ends[1].x;
-                t->mid.x = (a.x + b.x) * 0.5f;
-                t->mid.z = (a.z + b.z) / 2.0f;
+                t->mid.x = InitMidX(a.x, b.x);
+                t->mid.z = InitMidZ(a.z, b.z);
                 Delta2 d2;
                 d2.x = a.x - b.x;
                 d2.z = a.z - b.z;
