@@ -1,6 +1,7 @@
 // Triangle strip batcher (0x801E4E44-0x801E592C): a 60-vertex / 174-index buffer flushed to the GPU
 // when full, used for plain strips, two-sided skid quads and Hermite-spline skid ribbons (fading
 // with alpha along the curve). Names are guesses apart from the string.
+#include "game/mathutil.h"
 #include "game/common.h"
 #include "game/tvtx.h"
 
@@ -212,7 +213,7 @@ void fn_801E53A8(const ValVec3* p, const ValVec3* tan, const ValVec3* side, int 
             f32 h2 = t3 - 2.0f * t2 + t;
             h4 = t3 - t2;
             ValVec3 tp;
-            tp.x = s->tan.x * h2 + tan->x * h4;
+            tp.x = Mul(s->tan.x, h2) + tan->x * h4;
             tp.y = s->tan.y * h2 + tan->y * h4;
             f32 z2 = tan->z;
             tp.z = s->tan.z * h2 + z2 * h4;
