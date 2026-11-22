@@ -158,7 +158,7 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     for (;;) {
         // PROVISIONAL: run-length local ownership and spelling.
         u8 span = r[1];
-        if (span + n > lx) {
+        if (n + span > lx) {
             m = r[0];
             break;
         }
