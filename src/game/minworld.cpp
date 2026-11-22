@@ -214,7 +214,7 @@ void fn_8025280C(MWBody* b, f32 speed) {
         d.y = 0.0f;
     }
     len = sqrt(Len2(d.x, d.y));
-    if (!NearZero(len)) {
+    if (!(FAbs(len) <= __float_epsilon[0])) {
         f32 k = 325.0f / len;
         d.x = d.x * k;
         d.y = d.y * k;
@@ -233,7 +233,7 @@ void fn_8025280C(MWBody* b, f32 speed) {
         Perp(&t);
     }
     len = SqrtF(Len2(t.x, t.y));
-    if (!NearZero(len)) {
+    if (!(FAbs(len) <= __float_epsilon[0])) {
         f32 k = speed / len;
         t.x = t.x * k;
         t.y = t.y * k;
