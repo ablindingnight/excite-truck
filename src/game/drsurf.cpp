@@ -451,7 +451,7 @@ static inline void ApplySkinMorph(V3* o, const V3& p, const SkinMorphVtx* v) {
     V3 b;
     b.Set(DecodeMorphDelta(v->b[0]), DecodeMorphDelta(v->b[1]), DecodeMorphDelta(v->b[2]));
     o->x = p.x + a.x * wa;
-    o->y = p.y + Mul(a.y, wa);
+    o->y = p.y + a.y * wa;
     o->z = p.z + a.z * wa;
     o->x = o->x + b.x * wb;
     o->y = o->y + b.y * wb;
