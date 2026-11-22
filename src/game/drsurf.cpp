@@ -459,7 +459,7 @@ void fn_802D4C44(Surf* s) {
             V3 a;
             a.Set((1.0f / 255) * v->a[0], Mul((1.0f / 255), v->a[1]), (1.0f / 255) * v->a[2]);
             V3 b;
-            b.Set((1.0f / 255) * v->b[0], Mul((1.0f / 255), v->b[1]), (1.0f / 255) * v->b[2]);
+            b.Set(Mul((1.0f / 255), v->b[0]), Mul((1.0f / 255), v->b[1]), (1.0f / 255) * v->b[2]);
             o->x = p.x + a.x * wa;
             o->y = p.y + Mul(a.y, wa);
             o->z = p.z + a.z * wa;
