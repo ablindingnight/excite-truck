@@ -215,9 +215,7 @@ static inline f32 Unit01(f32 v, f32 lo, f32 hi) {
     t = t > 0.0f ? t : 0.0f;
     return t;
 }
-#pragma push
-#pragma peephole off  /* Setting unproven: recovers the viewport adjustment body. */
-void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
+void fn_8026ED64(s32* cam, f32 lift, f32* pos, f32* target) {
     CamRect* r = lbl_8049A218;  // the base stays in r3 and the scaled index is added to it (retail); &lbl[*cam] swaps the two
     r += *cam;
     f32 e = Ease(r->v[3]);
@@ -233,7 +231,6 @@ void fn_8026ED64(const s32* cam, f32 lift, f32* pos, f32* target) {
     pos[1] = target[1] + d.y * s;
     pos[2] = target[2] + d.z * s;
 }
-#pragma pop
 
 f32 fn_801E9FDC(const s16* hint, f32 x, f32 z);
 int fn_801784DC(f32* pos, f32* h, int a, int b, int (*filter)(int));
@@ -290,7 +287,7 @@ static inline void EaseGroundHeight(f32 t, bool onGround, f32 h, CamRect* r) {
 
 // Per-frame camera height tracking: averages the ground around the car into the player's rect
 // (lbl_8049A218), eases the rect's lift/zoom terms, then lifts pos/target and applies fn_8026ED64.
-void fn_8026EF48(const s32* cam, f32* pos, f32* target) {
+void fn_8026EF48(s32* cam, f32* pos, f32* target) {
     const CamRec* cr = (const CamRec*)cam;
     f32 avg;
     f32 v;
@@ -561,7 +558,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     v = v > 0.0f ? v : 0.0f;
     c->bump = v;
     c->view.pos.v[1] = c->view.pos.v[1] + c->bump;
-    fn_8026EF48((const s32*)p, c->view.pos.v, &tgt.x);
+    fn_8026EF48((s32*)p, c->view.pos.v, &tgt.x);
     CsVec up4(0.0f, 1.0f, 0.0f);
     fn_8026E870(c->view.pos.v, &tgt.x, p, &up4.x);
     if (!fn_801769F8()) {
@@ -834,7 +831,7 @@ void fn_802704E4(u8* p) {
         eye.v[1] = c->view.pos.v[1];
         eye.v[2] = c->view.pos.v[2];
     }
-    fn_8026EF48((const s32*)p, eye.v, target.v);
+    fn_8026EF48((s32*)p, eye.v, target.v);
     CsVec up(0.0f, 1.0f, 0.0f);
     fn_8026E870(eye.v, target.v, p, &up.x);
     c->lastOn = on;
