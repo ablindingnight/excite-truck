@@ -2435,7 +2435,7 @@ void fn_80186DE8(void) {
             f32 top = 0.44444445f * fn_80181A48(car);
             if (CarHot(car) && ((CarBody*)car)->speed < top && ((CarBody*)car)->f25E4 < 0.1f &&
                 (s32)fn_8018B06C(car) > 0) {
-                f32 k = 9.81f * fn_80181A14(car) * ((CarBody*)car)->f25E0 * ((CarBody*)car)->mass;
+                f32 k = (9.81f * fn_80181A14(car)) * (((CarBody*)car)->f25E0 * ((CarBody*)car)->mass);
                 AddScaled(force, 0x54 + car, k);
             }
             if (((CarBody*)car)->f5EC > 0.01f && (s32)fn_8018B06C(car) > 0 && ((CarBody*)car)->f25E4 < 0.1f &&
@@ -2460,7 +2460,7 @@ void fn_80186DE8(void) {
                 f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
                 f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
                 f32 lo = 2.4f * boost;
-                k = (LerpT(Clamp01(t), lo, 0.6f * boost)) * ((CarBody*)car)->f25E0 * ((CarBody*)car)->mass;
+                k = (LerpT(Clamp01(t), lo, 0.6f * boost)) * (((CarBody*)car)->f25E0 * ((CarBody*)car)->mass);
                 AddScaled(force, car + 0x54, k);
             }
             ((RigidBody*)car)->AddForceAt((const RVec3*)force, (const RVec3*)(car + 0x60));
@@ -2485,7 +2485,7 @@ void fn_80186DE8(void) {
             a = F32(car, wh * 0x74 + 0x23B4);
             f32 s1[4] = {0};
             f32 s0[4] = {0};
-            s1[wh] = (a - 6.2831855f) * (a - 3.1415927f) * (0.09829f * a) * 0.08726646f;
+            s1[wh] = (a - 6.2831855f) * ((a - 3.1415927f) * (0.09829f * a)) * 0.08726646f;
             b = fmod(1.5707964f + a, 6.2831854820251465);
             x->v130 = CbVec4(s1[0], s1[1], s1[2], s1[3]).Sol();
             s0[wh] = -((b - 6.2831855f) * (b - 3.1415927f) * (0.09829f * b)) * 0.08726646f;
