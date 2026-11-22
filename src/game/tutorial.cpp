@@ -1087,15 +1087,17 @@ void fn_80161F10(int n) {
     ev = (int)fn_80161E40(n);
     e = GetEvent(ev);
     fn_80137C78(1);
+    const char* playerCarKey = "player_car";
+    const char* playerColorKey = "player_color";
     fn_80137C84(fn_802E4A10(), 0);
     driver = GetDriver(0)->id;
     vehicle = GetDriverVehicle(driver)->id;
-    if (e->node->Has("player_car")) {
-        vehicle = FindVehicleNamed(e->node->GetValue("player_car"), 0)->id;
+    if (e->node->Has(playerCarKey)) {
+        vehicle = FindVehicleNamed(e->node->GetValue(playerCarKey), 0)->id;
     }
     color = GetDriver(driver)->color;
-    if (e->node->Has("player_color")) {
-        s32 c = e->node->GetIntValue("player_color");
+    if (e->node->Has(playerColorKey)) {
+        s32 c = e->node->GetIntValue(playerColorKey);
         color = FindVehicle(vehicle)->colors[c];
     }
     SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
