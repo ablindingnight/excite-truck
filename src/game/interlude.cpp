@@ -1353,7 +1353,7 @@ void debug_event(void) {
                         f.origin.x += f.basis[0].x * off.x;
                         f.origin.y += f.basis[0].y * off.x;
                         f.origin.z += f.basis[0].z * off.x;
-                        f.origin.x += f.basis[2].x * off.y;
+                        f.origin.x += Mul(f.basis[2].x, off.y);
                         f.origin.y += f.basis[2].y * off.y;
                         f.origin.z += f.basis[2].z * off.y;
                         // Retail reads the two entries again for atan2: a const view is not merged with the reads above.
