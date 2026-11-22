@@ -437,6 +437,24 @@ void fn_802D4988(Surf* s) {
 
 // Actual per-vertex skinned morph operation.
 /* Helper name unproven */
+// Actual two-target morph of the skinned base point.
+/* Helper name unproven */
+static inline void ApplySkinMorph(V3* o, const V3& p, const SkinMorphVtx* v) {
+    f32 wb = lbl_804CA308[v->ib];
+    f32 wa = lbl_804CA308[v->ia];
+    V3 a;
+    a.Set((1.0f / 255) * v->a[0], Mul((1.0f / 255), v->a[1]), (1.0f / 255) * v->a[2]);
+    V3 b;
+    b.Set(Mul((1.0f / 255), v->b[0]), Mul((1.0f / 255), v->b[1]), (1.0f / 255) * v->b[2]);
+    o->x = p.x + a.x * wa;
+    o->y = p.y + Mul(a.y, wa);
+    o->z = p.z + a.z * wa;
+    o->x = o->x + b.x * wb;
+    o->y = o->y + b.y * wb;
+    o->z = o->z + b.z * wb;
+
+}
+
 static inline void SkinMorphVertex(V3* o, const SkinMorphVtx* v) {
 
     const BVec* ba = &lbl_804DB068[v->b0];
@@ -451,18 +469,7 @@ static inline void SkinMorphVertex(V3* o, const SkinMorphVtx* v) {
     p.x = p.x + bb->x * w1;
     p.y = p.y + bb->y * w1;
     p.z = p.z + bb->z * w1;
-    f32 wb = lbl_804CA308[v->ib];
-    f32 wa = lbl_804CA308[v->ia];
-    V3 a;
-    a.Set((1.0f / 255) * v->a[0], Mul((1.0f / 255), v->a[1]), (1.0f / 255) * v->a[2]);
-    V3 b;
-    b.Set(Mul((1.0f / 255), v->b[0]), Mul((1.0f / 255), v->b[1]), (1.0f / 255) * v->b[2]);
-    o->x = p.x + a.x * wa;
-    o->y = p.y + Mul(a.y, wa);
-    o->z = p.z + a.z * wa;
-    o->x = o->x + b.x * wb;
-    o->y = o->y + b.y * wb;
-    o->z = o->z + b.z * wb;
+    ApplySkinMorph(o, p, v);
 
 }
 
