@@ -602,9 +602,9 @@ void FlushRenderQueue(int pri) {
 }
 
 void fn_802CDDC8(MList* m, u32 base) {
-    SwapWord(&m->magic);
-    SwapWord(&m->version);
-    SwapWord(&m->flags);
+    for (int word = 0; word < 3; word++) {
+        SwapWordB((u8*)m + word * 4);
+    }
     u32* w = (u32*)&m->a;
     for (int i = 0; i < 10; i++) {
         SwapWord(&w[i]);
@@ -613,9 +613,9 @@ void fn_802CDDC8(MList* m, u32 base) {
     for (int i = 0; i < 20; i++) {
         SwapWordV(&w[i]);
     }
-    SwapWord(&m->numObjs);
-    SwapWord(&m->maxObjs);
-    SwapWord(&m->objs);
+    for (int word = 0; word < 3; word++) {
+        SwapWordB((u8*)&m->numObjs + word * 4);
+    }
     Relocate(m->a.p, base);
     Relocate(m->b.p, base);
     Relocate(m->c.p, base);
