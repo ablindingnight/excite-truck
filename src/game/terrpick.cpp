@@ -1,6 +1,7 @@
 // Terrain picking (0x80203FE0-0x80204330): a set of stub hooks, plus the screen-to-terrain pick that
 // walks a ray from the camera until it lands on the ground. Names are guesses apart from the message.
 #include "game/common.h"
+#include "game/mathutil.h"
 #include <revolution/MTX/vec.h>
 
 extern "C" {
@@ -73,7 +74,7 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PlainValMatri
     f32 bx;
     f32 by;
     f32 bz;
-    bx = cam->basis[0].x * dx;
+    bx = Mul(cam->basis[0].x, dx);
     by = cam->basis[0].y * dx;
     bz = cam->basis[0].z * dx;
     f32 dy = sy - lbl_8055CFF4 / 2;
