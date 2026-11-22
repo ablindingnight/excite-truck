@@ -709,6 +709,9 @@ WaterBase* fn_802C00A4(void) {
 /* Helper names and scoped auto-inline setting unproven. */
 #pragma push
 #pragma auto_inline on
+// Helper name unproven.
+static inline f32 WaterDepthScale(f32 height) { return MaxF(0.25f * height, 1.0f); }
+
 static double WaterScrollOffset(f32 ticks) { return fmod(0.39999998f * ticks, 1.0); }
 static f32 WaterCoordinate(int index) { return (f32)index; }
 #pragma pop
@@ -901,7 +904,7 @@ void WaterSystem::Draw(void) {
     TexMtx m = {{{0.04f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.04f, 0.0f}}};
     m.m[0][3] = WaterScrollOffset(fn_801E7E18());
     fn_802D3D94(2, &m);
-    f32 sh = MaxF(cam.origin.y / 4.0f, 1.0f);
+    f32 sh = WaterDepthScale(cam.origin.y);
     u32 deepCol = fn_80147C50(0, deepWaterSubColor, 1.0f / sh);
     fn_802C8BD0(env->Target());
     fn_802DCFCC(env->Target(), deep, lbl_8055CF74, 1.0f / (1024.0f * lbl_80564D78[0]), mask, deepCol);
