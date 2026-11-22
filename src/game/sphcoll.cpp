@@ -2257,13 +2257,18 @@ void FlatSphereShape::vf10(u8* o) {
 
 void FlatSphereShape::vf14(void) {}
 
+// Name unproven.
+static inline f32 AttachedSphereLift(f32 radius, f32 attachmentHeight) {
+    return 0.06f + radius + attachmentHeight;
+}
+
 // Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
 void AttachedSphereShape::vf0C(void) {
     u8* p = (u8*)this;
     u8* o = ((u8*&)this->owner);
     u8* m = this->attach;
     PVec3A t = *(PVec3A*)(m + 0x30);
-    f32 lift = 0.06f + this->radius + F32(m, 0xC);
+    f32 lift = AttachedSphereLift(this->radius, F32(m, 0xC));
     t.v[0] = t.v[0] - F32(o, 0x30) + this->f58;
     t.v[1] = t.v[1] - F32(o, 0x34) + lift;
     t.v[2] = t.v[2] - F32(o, 0x38);
