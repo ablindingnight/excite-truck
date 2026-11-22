@@ -723,9 +723,9 @@ extern "C" Sound3D* fn_80207848(const char* name, int flags);  // 2D sound
 
 extern "C" {
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-void* fn_801D9A54(const char* name);     // find morph group
+void* FindMorphGroupByName(const char* name);     // find morph group
 void fn_801D9AB8(void* group, f32 t);    // set morph group position
-int fn_801D9B28(void* group, int index);  // morph group contains index
+int CheckRegionExists(void* group, int index);  // morph group contains index
 void fn_80178DBC(int index, f32 t);      // set world morph position
 }
 
@@ -741,7 +741,7 @@ public:
     virtual int Handles(const int* ids, int n) {
         for (int i = 0; i < n; i++) {
             if (group) {
-                if (fn_801D9B28(group, ids[i])) {
+                if (CheckRegionExists(group, ids[i])) {
                     return 1;
                 }
             } else if (index == ids[i]) {
@@ -755,7 +755,7 @@ public:
         index = -1;
         if (t->Has("mgroup_name")) {
             const char* n = t->GetValue("mgroup_name");
-            group = fn_801D9A54(n);
+            group = FindMorphGroupByName(n);
             if (!group) {
                 fn_802E30C8("WorldMorphActionSequenceEvent: MorphGroup \"%s\" does not exist!", n);
                 return 0;

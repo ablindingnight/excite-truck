@@ -43,9 +43,9 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 void fn_801476C4(TextElem* item);
 void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
 void fn_80147230(TextElem* item, const char* fmt, ...);
-void fn_80130FCC(char* buf, int size, s32 value);
+void FormatIntWithPrefix(char* buf, int size, s32 value);
 void fn_80130978(char* buf, int size, f32 value);
-const char* fn_80130FE0(s32 place);
+const char* GetOrdinalSuffix(s32 place);
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 f32 fn_801E7E24(void);
 int fn_802C9A58(void);
@@ -153,10 +153,10 @@ void DrawLapCounter(ILayout* layout, int lap, int total, int showTotal) {
 
     fn_801476C4(layout->Find("lap_title"));
     fn_801476C4(layout->Find("lap_fwd_slash"));
-    fn_80130FCC(num, sizeof(num), lap);
+    FormatIntWithPrefix(num, sizeof(num), lap);
     fn_801473F8(layout, "lap_numerator", num);
     if (showTotal) {
-        fn_80130FCC(den, sizeof(den), total);
+        FormatIntWithPrefix(den, sizeof(den), total);
         fn_801473F8(layout, "lap_denominator", den);
     }
 }
@@ -215,7 +215,7 @@ void DrawPlayerLapCounter(int player, int lap, int total) {
 
 static inline void PrintInt(TextElem* item, s32 value) {
     char buf[20];
-    fn_80130FCC(buf, sizeof(buf), value);
+    FormatIntWithPrefix(buf, sizeof(buf), value);
     fn_80147230(item, buf);
 }
 
@@ -553,7 +553,7 @@ void RacingOverlay::Update(void) {
     }
     if (lbl_8055D350->flags & 2) {
         fn_801473F8(layout, "place_numerator", "%d", lbl_8055D350->stats->pos);
-        fn_801473F8(layout, "place_suffix", "%s", fn_80130FE0(lbl_8055D350->stats->pos));
+        fn_801473F8(layout, "place_suffix", "%s", GetOrdinalSuffix(lbl_8055D350->stats->pos));
     }
     if (lbl_8055D350->flags & 1) {
         int total = lbl_8055D350->info->laps;

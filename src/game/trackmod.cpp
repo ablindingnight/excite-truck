@@ -365,7 +365,7 @@ f32 Dot(f32 a0, f32 b0, f32 a1, f32 b1, f32 a2, f32 b2);
 
 extern "C" {
 void fn_801C0E60(TVec* out, const f32* a, const f32* b);
-void fn_80144B54(TMtx* m, TCam* c);
+void CopyMatrix34(TMtx* m, TCam* c);
 f32* __ct__4VPosFfff(PVec* v, f32 x, f32 y, f32 z);
 u32 fn_80144C68(int r, int g, int b, int a);
 void fn_80144DAC(f32* dst, const f32* src);
@@ -392,7 +392,7 @@ void fn_8029231C(f32* dir);
 void fn_802C9950(u32 color);
 void fn_80297990(u32 color);
 void fn_802923EC(f32 v);
-void fn_802C990C(u32 color);
+void SetFogColor(u32 color);
 f32 fn_801E7E18(void);
 void fn_802C744C(void* model, TMtx* m);
 void fn_802CD320(void* scene, TrackInst* inst);
@@ -402,8 +402,8 @@ void fn_802C9900(f32 a);
 void fn_802C9904(void);
 void fn_802C77F0(void* model, f32* bounds);
 ValueNode* fn_802AE414(void* data);
-void fn_802CDAB4(void* ctx, s32 id, TMtx* m);
-int fn_802CDB20(void* ctx, s32 id);
+void UpdateMatrixSlot(void* ctx, s32 id, TMtx* m);
+int IsVisibleAtIndex(void* ctx, s32 id);
 void fn_802CDAFC(void* ctx, s32 id);
 void* fn_802C7A3C(f32 u, f32 v, f32 w);
 extern u16 lbl_802F9B20[6];
@@ -612,7 +612,7 @@ void MultiFacingTMH::Draw(TObj* list) {
         v[1].u = u1;
         v[3].v = v1;
         v[2].v = v1;
-        fn_80144B54(&m, cam);
+        CopyMatrix34(&m, cam);
         fn_80144DAC(m.t, pos);
         fn_801BFD34(&v[0], __ct__4VPosFfff(&c1, -0.5f, 1.0f, 0.0f), &m);
         fn_801BFD34(&v[1], __ct__4VPosFfff(&c2, 0.5f, 1.0f, 0.0f), &m);
@@ -841,9 +841,9 @@ inline void FogColorTMH::Swap(TObj* o) {
 
 inline void FogColorTMH::Apply(void) {
     if (set) {
-        fn_802C990C(color);
+        SetFogColor(color);
     } else {
-        fn_802C990C(0xC9C9EB);
+        SetFogColor(0xC9C9EB);
     }
 }
 
@@ -1111,7 +1111,7 @@ inline void RotList::Update(void* ctx) {
         m.t[0] = r->pos.values[0];
         m.t[1] = r->pos.values[1];
         m.t[2] = r->pos.values[2];
-        fn_802CDAB4(ctx, r->id, &m);
+        UpdateMatrixSlot(ctx, r->id, &m);
     }
     }
 }
@@ -1132,7 +1132,7 @@ inline void XFadeList::Draw2(void* ctx) {
     int n = 0;
     int i;
     for (i = 0; i < count; i++) {
-        if (fn_802CDB20(ctx, fades[i].id)) {
+        if (IsVisibleAtIndex(ctx, fades[i].id)) {
             vis[n++] = &fades[i];
         }
     }
@@ -1166,7 +1166,7 @@ inline void ScrollList::Draw2(void* ctx) {
     m[3][1] = zero;
     m[3][2] = zero;
     for (int i = 0; i < count; i++) {
-        if (fn_802CDB20(ctx, scrolls[i].id)) {
+        if (IsVisibleAtIndex(ctx, scrolls[i].id)) {
             f32 v = scrolls[i].v;
             f32 u = scrolls[i].u;
             uv[1] = v * t;
@@ -1178,7 +1178,7 @@ inline void ScrollList::Draw2(void* ctx) {
 }
 
 inline void FacingTestInst::Update(void* ctx) {
-    if (fn_802CDB20(ctx, id) && !fn_801F1CF0(data)) {
+    if (IsVisibleAtIndex(ctx, id) && !fn_801F1CF0(data)) {
         fn_802CDAFC(ctx, id);
     }
 }

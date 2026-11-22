@@ -82,7 +82,7 @@ s32 fn_80129D90(int stream, s32 lo, s32 hi);
 int fn_80178CA4(void);
 void fn_80278288(void);
 void fn_802733F0(void);
-void fn_80209110(void* p);
+void ClearAudioHandle(void* p);
 void fn_801E9DC4(void* p);
 void fn_802735F4(int i, u8 b);
 int fn_802734F0(int mode);
@@ -651,7 +651,7 @@ void InitializeScriptNodeVariables(void);
 void InitializeCameraStructures(void);
 void fn_80273354(void);
 void fn_8027045C(void);
-u32 fn_802090D4(const char* name);  // mixer volume handle
+u32 AllocateVolumeHandle(const char* name);  // mixer volume handle
 VD* fn_80207848(const char* file, int flags);  // load a sound
 void RegisterEventHandler(void* handler, int type);
 int fn_8026A554(s32* p);
@@ -747,7 +747,7 @@ void InitializeCameraManager(int /* nViews */) {
     InitializeScriptNodeVariables();
     fn_80273354();
     fn_8027045C();
-    lbl_8055F494 = fn_802090D4("crash_vol");
+    lbl_8055F494 = AllocateVolumeHandle("crash_vol");
     lbl_8055F490 = fn_80207848("cheer3.sfx", 0);
     RegisterEventHandler((void*)fn_8026A554, 13);
     InitializeCameraStructures();
@@ -756,7 +756,7 @@ void InitializeCameraManager(int /* nViews */) {
 void fn_802733C8(void);
 int fn_801796B4(void);
 void fn_80276BE4(u8* pose, u8* fov);
-void fn_80209190(u32 handle, f32 vol);
+void SetVolumeClamped(u32 handle, f32 vol);
 void fn_80270484(void);
 void fn_80268B94(s32 v);
 extern f32 lbl_8055F48C;
@@ -834,7 +834,7 @@ void InitializeCameraStructures(void) {
     }
     lbl_8055F488 = 0;
     lbl_8055F48C = lbl_80563C64;
-    fn_80209190(lbl_8055F494, lbl_80563C2C.value);
+    SetVolumeClamped(lbl_8055F494, lbl_80563C2C.value);
     fn_80265E2C();
     fn_80268B94(0);
     fn_80270484();
@@ -853,7 +853,7 @@ void CleanupCameraManager(void) {
         delete lbl_8055F490;
         lbl_8055F490 = 0;
     }
-    fn_80209110(&lbl_8055F494);
+    ClearAudioHandle(&lbl_8055F494);
 }
 
 u8* fn_802678C0(int i) { return fn_80267EE4(i) + 0x58; }
@@ -1033,7 +1033,7 @@ void HandleCrashCameraEffect(u8* p) {
     if (t > lbl_80563C34.value) {
         lbl_8055F488 = 0;
         lbl_8055F48C = lbl_80563C64;
-        fn_80209190(lbl_8055F494, lbl_80563C2C.value);
+        SetVolumeClamped(lbl_8055F494, lbl_80563C2C.value);
         if (!fn_8000D75C()) {
             fn_801769EC();
         }
@@ -1050,7 +1050,7 @@ void HandleCrashCameraEffect(u8* p) {
         f32 fadeOut = (t - lbl_80563C84) / lbl_80563C6C;
         vol += fadeOut * lbl_80563C2C.value;
     }
-    fn_80209190(lbl_8055F494, vol);
+    SetVolumeClamped(lbl_8055F494, vol);
     u8* cheer = (u8*)lbl_8055F490;
     f32 cv = lbl_80563C2C.value - vol;
     if (cv != F32(cheer, 0x8)) {

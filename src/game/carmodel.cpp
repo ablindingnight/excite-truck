@@ -155,7 +155,7 @@ f32 fn_802C88E8(const Vec* p);
 void fn_802C8B98(s32 tex, const VecMatrix* f);
 void fn_802C8D74(void);
 void fn_802C8DB8(void* v, int nv, u16* idx, int ni);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 u32 fn_802C9950(u32 c);
 u32 fn_802C9994(u32 c);
 f32 fn_802C99E8(f32 a);
@@ -688,7 +688,7 @@ static inline void OffsetDashboardFrame(VecMatrix& f) {
 }
 
 void DrawDashboardOverlay(CarModel* m) {
-    fn_802C974C(0.1f, 20.0f, fn_801E8738(-1));
+    SetupCameraProjection(0.1f, 20.0f, fn_801E8738(-1));
     fn_802C88BC(2);
     s32 tex = fn_801E7E2C();
     if (tex != -1) {

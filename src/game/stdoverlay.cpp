@@ -34,8 +34,8 @@ void fn_801476D8(ArtElem* art, u32 color, s32 tex);
 int FindGradeForScore(int score);
 void fn_801476C4(TextElem* item);
 int fn_80160A90(void);
-void fn_801308F4(char* buf, int size, int value);
-void fn_801308F8(char* buf, int size, int value);
+void FormatIntegerBuffer(char* buf, int size, int value);
+void FormatOutOfBoundsScore(char* buf, int size, int value);
 void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
 void fn_80147230(TextElem* item, const char* fmt, ...);
 RaceCarRec* fn_8017960C(int player);
@@ -310,10 +310,10 @@ inline void ScoreOverlay::Update(int player, int score) {
             int multi = GetNumPlayers() > 1;
             if (!multi) {
                 fn_801476C4(layout->Find("score_slash"));
-                fn_801308F4(total, sizeof(total), fn_80160A90());
+                FormatIntegerBuffer(total, sizeof(total), fn_80160A90());
                 fn_801473F8(layout, "score_denominator", "%s", total);
             }
-            fn_801308F8(text, sizeof(text), score);
+            FormatOutOfBoundsScore(text, sizeof(text), score);
             fn_80147230(&item, "%s", text);
         }
     }

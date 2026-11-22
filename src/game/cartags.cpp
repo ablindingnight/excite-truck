@@ -45,7 +45,7 @@ void fn_802328D4(s32 font);
 int fn_801C5B60(void);
 TagCar* GetCarInfo(int car);
 int GetHumanPlayerCount(void);
-void fn_802C8E70(const ValVec3* p, ValVec3* out);
+void TransformWorldToScreen(const ValVec3* p, ValVec3* out);
 int fn_802C8FF4(ValVec3* p, f32 margin);
 int fn_801E85B4(void);
 TagCam* fn_802678C0(int view);
@@ -109,7 +109,7 @@ void fn_802A7CA8(int car, int gem, f32 t) {
     u32 color;
     f32 size;
     p.y += 2.5f;
-    fn_802C8E70(&p, &scr);
+    TransformWorldToScreen(&p, &scr);
     color = (int)(255.0f * Ramp(t, 1.0f, 0.0f, 1.0f, 0.0f)) << 24 | 0xFFFFFF;
     size = Ramp(t, 1.0f, 0.0f, 24.0f, 14.0f);
     if (fn_802C8FF4(&scr, 0.0f)) {
@@ -171,7 +171,7 @@ void fn_802A7EEC(void) {
             ValVec3 p = o->pos;
             ValVec3 scr;
             p.y += lift;
-            fn_802C8E70(&p, &scr);
+            TransformWorldToScreen(&p, &scr);
             d = PSVECSquareDistance((const Vec*)&p, (const Vec*)(&fn_802678C0(fn_801E85B4())->pos));
             if (fn_802C8FF4(&scr, 0.0f)) {
                 char buf[8];

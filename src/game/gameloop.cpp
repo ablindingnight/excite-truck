@@ -143,7 +143,7 @@ void fn_8017691C(void);
 void fn_801CB4DC(void);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void DrawColoredTextWithShadow(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 void fn_80011A2C(void);
 void fn_802C9904(void);
@@ -948,7 +948,7 @@ void fn_8000C5CC(void) {
     PlainValMatrix cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(DemoNear[0], DemoFar[0], DemoFov[0]);
+    SetupCameraProjection(DemoNear[0], DemoFar[0], DemoFov[0]);
     DrawColoredTextWithShadow(0xFFFFFF00, 9, "DEMO", DemoNear[0], -270.0f, -180.0f);
     fn_80011A2C();
     fn_802C9904();

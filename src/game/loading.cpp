@@ -102,7 +102,7 @@ char fn_8020DE1C(void);  /* PORT: the definition's width (x86 leaves the upper b
 void fn_80230B5C(DrawContext* ctx);
 void fn_80230AD8(DrawContext* ctx);
 void fn_80230B38(void);
-void fn_80130FCC(char* buf, int size, s32 value);
+void FormatIntWithPrefix(char* buf, int size, s32 value);
 void fn_80130980(char* buf, int size, int digits, f32 time);
 const char* GetDifficultyString(const char* fmt, s32 difficulty, s32 event);
 int fn_8027DED0(void);
@@ -539,12 +539,12 @@ void DrawLoadingScreen(int alpha, f32 t) {
                 break;
             case 9:
                 label = fn_80131234("Loading:LAPS");
-                fn_80130FCC(value, sizeof(value), lbl_8035BAD8.laps);
+                FormatIntWithPrefix(value, sizeof(value), lbl_8035BAD8.laps);
                 break;
             case 10:
                 if (GetNumPlayers() == 1) {
                     label = fn_80131234("Loading:STARS");
-                    fn_80130FCC(value, sizeof(value), lbl_8035BAD8.stars);
+                    FormatIntWithPrefix(value, sizeof(value), lbl_8035BAD8.stars);
                 } else {
                     value[0] = '\0';
                     label = "";
@@ -572,7 +572,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
             case 7: {
                 RecordEntry* rec = StatsGetHighScore(IdentGetCurrentSlot(), lbl_8055D668, lbl_8055D66C, 0);
                 if (rec != NULL && rec->score >= 0) {
-                    fn_80130FCC(value, sizeof(value), rec->score);
+                    FormatIntWithPrefix(value, sizeof(value), rec->score);
                 } else {
                     COPY_STRING(value, lbl_80558D8C, sizeof(value));
                 }

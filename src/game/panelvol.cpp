@@ -122,7 +122,7 @@ extern "C" {
 }  // extern "C"
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
-void fn_80144B54(RMtx* dst, const RMtx* src);
+void CopyMatrix34(RMtx* dst, const RMtx* src);
 f32 fn_80144CC8(f32 x);
 void fn_80144DAC(RVec3* dst, const RVec3* src);
 void fn_8017E388(RMtx* m);
@@ -274,7 +274,7 @@ static inline void SetupPanel(PanelVol* p, RigidBody* car, s32 part, const RVec3
         fn_801C00B8(s, &neg);
     }
     RMtx m;
-    fn_80144B54(&m, car->World());
+    CopyMatrix34(&m, car->World());
     fn_801BFF64(&m, &neg);
     fn_801BFECC(p, &m);
     fn_801BFEBC(&p->vel, 0.0f, 0.0f, 0.0f);

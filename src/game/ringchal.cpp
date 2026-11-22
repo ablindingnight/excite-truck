@@ -36,7 +36,7 @@ u32 strlen(const char* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_801345D8(char* buf, int size, const char* fmt, ...);
-void fn_801308F4(char* buf, int size, int value);         // number with separators
+void FormatIntegerBuffer(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
 int FindGradeForScore(int score);                                // grade for a score
 ValueTable* fn_80131808(const char* name);  // open .val table
@@ -54,7 +54,7 @@ void fn_8016A0D4(void);
 void fn_8016A68C(void);
 void fn_8001B450(s32 h);
 s32 fn_802BAF98(void* obj, int on);
-void fn_80144C54(GameSound* s);
+void StopGameSound(GameSound* s);
 s32 fn_80179650(void);
 s32 fn_80145E70(const char* name);
 void fn_802ADDD8(void* p, int a);
@@ -563,7 +563,7 @@ void RingResults::Update(int score, int rings, int bonus) {
     if (layout) {
         int shown;
         int n;
-        fn_801308F4(ringScore, 0x14, rings);
+        FormatIntegerBuffer(ringScore, 0x14, rings);
         shown = bonus;
         n = 0;
         if (bonus && start > 0.0f) {
@@ -583,8 +583,8 @@ void RingResults::Update(int score, int rings, int bonus) {
                 StrCopyN(bonusTitle, s.Get(), 0x14);
             }
         }
-        fn_801308F4(finalScore, 0x14, score);
-        fn_801308F4(noBonusScore, 0x14, score - bonus);
+        FormatIntegerBuffer(finalScore, 0x14, score);
+        FormatIntegerBuffer(noBonusScore, 0x14, score - bonus);
         {
             int g = FindGradeForScore(score);
             if (g != -1) {
@@ -1147,13 +1147,13 @@ inline void Arena::Step(PlayerData* pd) {
                 }
                 if (sRingHit) {
                     if (Playing__9GameSoundFv(sRingHit)) {
-                        fn_80144C54(sRingHit);
+                        StopGameSound(sRingHit);
                     }
                     Play__9GameSoundFv(sRingHit);
                 }
                 if (sCheerHit) {
                     if (Playing__9GameSoundFv(sCheerHit)) {
-                        fn_80144C54(sCheerHit);
+                        StopGameSound(sCheerHit);
                     }
                     Play__9GameSoundFv(sCheerHit);
                 }
@@ -1320,25 +1320,25 @@ inline void RingChalMaster::ResetGame(void) {
     }
     arena.stats->At(arena.curSet)->best = arena.PointValue();
     if (arena.sRingHit) {
-        fn_80144C54(arena.sRingHit);
+        StopGameSound(arena.sRingHit);
     }
     if (arena.sLongCheer) {
-        fn_80144C54(arena.sLongCheer);
+        StopGameSound(arena.sLongCheer);
     }
     if (arena.sTally) {
-        fn_80144C54(arena.sTally);
+        StopGameSound(arena.sTally);
     }
     if (arena.sCheerHit) {
-        fn_80144C54(arena.sCheerHit);
+        StopGameSound(arena.sCheerHit);
     }
     if (arena.sMissFlag) {
-        fn_80144C54(arena.sMissFlag);
+        StopGameSound(arena.sMissFlag);
     }
     if (arena.sLevelUp) {
-        fn_80144C54(arena.sLevelUp);
+        StopGameSound(arena.sLevelUp);
     }
     if (arena.sFail) {
-        fn_80144C54(arena.sFail);
+        StopGameSound(arena.sFail);
     }
 }
 
@@ -1566,7 +1566,7 @@ inline int RingChalMaster::vf3C(int view) {
             if (h0 && h1 && body && denom) {
                 char buf[0x14];
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
-                fn_801308F4(buf, sizeof(buf), GetGradeScoreThreshold(fn_80160A74()));
+                FormatIntegerBuffer(buf, sizeof(buf), GetGradeScoreThreshold(fn_80160A74()));
                 {
                     TextElem e;
                     e = *body;

@@ -29,7 +29,7 @@ void* fn_80207848(const char* name, int a);
 int GetHumanPlayerCount(void);
 void fn_802E317C(const char* fmt, ...);  // fatal
 const char* fn_80131234(const char* key);  // localize
-void fn_801308F4(char* buf, s32 size, s32 value);  // format a score
+void FormatIntegerBuffer(char* buf, s32 size, s32 value);  // format a score
 void fn_80130978(char* buf, int size, f32 v);      // format a time
 extern f32 __float_max[];  // FLT_MAX (MSL)
 extern f32 __float_epsilon[];  // FLT_EPSILON
@@ -651,7 +651,7 @@ void UpdateRecordAnimation(Results* r, AwardsMgr* m) {
             fn_80130978(r->recordTime.s, 20, -__float_max[0]);
         }
     }
-    fn_801308F4(r->score.s, 20, lbl_8055E884->score);
+    FormatIntegerBuffer(r->score.s, 20, lbl_8055E884->score);
     r->grade.Set(lbl_8055E884->grade != -1 ? GetGradeDisplayName(lbl_8055E884->grade) : "");
     if (lbl_8055E884->hasTime) {
         fn_80130978(r->time.s, 20, lbl_8055E884->time);
@@ -663,7 +663,7 @@ void UpdateRecordAnimation(Results* r, AwardsMgr* m) {
         HighScore* h = StatsGetHighScore(IdentGetCurrentSlot(), m->event, m->difficulty, i);
         RecordRow* row = &r->rows[i];
         if (h) {
-            fn_801308F4(row->score.s, 20, h->score);
+            FormatIntegerBuffer(row->score.s, 20, h->score);
             row->grade.Set(h->grade != -1 ? GetGradeDisplayName(h->grade) : "");
             fn_80130978(row->time.s, 20, h->time);
         } else {

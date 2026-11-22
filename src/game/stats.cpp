@@ -19,7 +19,7 @@ void fn_80131818(ValueTable* table);
 const char* fn_80131234(const char* key);  // localize
 void fn_802E6BD8(u32 code, int unk, void* buf, u32 size, void (*cb)(int));
 void fn_80130978(char* buf, int size, f32 value);
-void fn_801308E4(char* buf, int size, int unk, f32 value);
+void FormatDistanceValue(char* buf, int size, int unk, f32 value);
 void FormatIntegerWithSuffix(s32 value, char* buf);
 }
 
@@ -559,7 +559,7 @@ char* FormatStatValue(u32 type, s32 value, char* buf, int size) {
             fn_80130978(buf, size, v);
             break;
         case 0x800:
-            fn_801308E4(buf, size, 1, v);
+            FormatDistanceValue(buf, size, 1, v);
             break;
         default:
             fn_802E317C("stats: unit type (%x) is not value with data type STF_DATA_TYPE_REAL", type & STF_UNIT_MASK);

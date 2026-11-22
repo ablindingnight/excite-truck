@@ -137,7 +137,7 @@ static inline u32 AlignUp(u32 x, u32 a);
 
 extern "C" {
 
-const char* fn_801281A0(int type) {
+const char* GetAllocationTypeName(int type) {
     const char* table[4] = {"new[]", "MemAlloc", "MemAllocPhys", "new"};
     if (type >= 0 && type < sizeof(table) / sizeof(table[0])) {
         return table[type];
@@ -149,7 +149,7 @@ u32 fn_801281F4(u32 x, u32 a) { return (x + a - 1) & ~(a - 1); }
 
 void fn_80128208(const char* name) {}
 
-int fn_8012820C(u32) {
+int InitializeMemorySystem(u32) {
     void* base0;
     void* base1;
     u32 size0;
@@ -169,7 +169,7 @@ int fn_8012820C(u32) {
 
 void fn_80128710(void* p);
 
-void fn_801282A0(void) {
+void ShutdownMemorySystems(void) {
     lbl_8041E140.Shutdown();
     lbl_8041E160.Shutdown();
     fn_80128710(lbl_8055DF94);
@@ -405,7 +405,7 @@ void StackHeap::Free(void* p, int type) {
         fn_802E317C("MemFree: %s not in use", b->name);
     }
     if (b->type != type) {
-        fn_802E317C("MemFree: %s was allocated %s, freed %s", b->name, fn_801281A0(b->type), fn_801281A0(type));
+        fn_802E317C("MemFree: %s was allocated %s, freed %s", b->name, GetAllocationTypeName(b->type), GetAllocationTypeName(type));
     }
     b->inUse = 0;
     while (top) {

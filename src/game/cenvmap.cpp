@@ -59,7 +59,7 @@ int fn_802C8DBC(int n);
 void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int a);
 void fn_802C8E48(void);
 void fn_802C9294(s32 rt, int a);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 ValVec3* fn_802C9A40(void);
 void* fn_802CA294(s32 tex);
 s32 fn_802CAC28(const char* name, int a);
@@ -443,7 +443,7 @@ void fn_80203B20(const EFrame* cam, const ValVec3* v, int objects) {
         view.z.z = 0.0f;
         fn_802C8638(&view);
         fn_802C87B4(0, 0, 0x100, 0x100);
-        fn_802C974C(1.0f, 512.0f, 1.5707964f);
+        SetupCameraProjection(1.0f, 512.0f, 1.5707964f);
         fn_802C86E8(0xFF00FF00);
         fn_802C88BC(-1);
         EFrame out;

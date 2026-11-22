@@ -30,7 +30,7 @@ ModuleTag lbl_8055E088;
 
 extern "C" {
 
-LoadPool* fn_8013420C(LoadPool* pool, s32 count, s32 slotSize) {
+LoadPool* InitializeLoadPool(LoadPool* pool, s32 count, s32 slotSize) {
     int i;
     pool->count = count;
     pool->slotSize = slotSize;

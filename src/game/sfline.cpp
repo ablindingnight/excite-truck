@@ -41,7 +41,7 @@ void fn_801E9DC4(s16* h);
 double log2(double x);
 double sqrt(double x);
 DrawList* fn_802CA04C(int n);
-void fn_802CA094(DrawList* d);
+void DeleteFlare(DrawList* d);
 void fn_802CA09C(DrawList* d, u32 color, int flag, f32 x, f32 y, f32 z, f32 u, f32 v);
 void fn_802CA0A0(DrawList* d);
 s32 fn_802CAC28(const char* name, int flags);
@@ -228,7 +228,7 @@ void fn_802A14F8(void) {
         lbl_8055F844 = -2;
     }
     if (lbl_8055F840) {
-        fn_802CA094(lbl_8055F840);
+        DeleteFlare(lbl_8055F840);
         lbl_8055F840 = 0;
     }
     fn_802A93A4();

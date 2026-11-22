@@ -35,7 +35,7 @@ class Widget;
 extern "C" {
 
 Window* fn_8021832C(Window* w);
-void fn_802C974C(f32 nearPlane, f32 farPlane, f32 fov);
+void SetupCameraProjection(f32 nearPlane, f32 farPlane, f32 fov);
 void fn_80230B5C(UIXform* m);
 void fn_802C8638(UIXform* m);
 void DrawImageFrame(Window* w, int a, f32 x, f32 y, f32 z);
@@ -175,7 +175,7 @@ void fn_802160AC(void) {
         UIXform m;
         f32 x;
         f32 y;
-        fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+        SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
         fn_80230B5C(&m);
         fn_802C8638(&m);
         x = (f32)lbl_8055EF80 - 320.0f;
@@ -224,7 +224,7 @@ void fn_80216244(void) {
             VecP t;
             fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
             fn_80230B5C(&m);
-            fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+            SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
             v.Set(-(f32)w->x, (f32)w->y, 0.0f);
             XformVec(&m, &v, &t);
             m.translation.v[0] += t.x;

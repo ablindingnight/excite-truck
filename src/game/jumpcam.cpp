@@ -27,7 +27,7 @@ ValueTable* fn_80131808(const char* name);  // load value file
 void fn_80131818(ValueTable* t);
 void fn_801331C4(int section, const char* name, f32* v);  // register a tunable
 s32 fn_80178CA4(void);
-void fn_8020C900(int on);
+void SetPauseState(int on);
 void fn_80206444(void);
 void fn_80206454(void);
 void fn_802C2C68(int a, int b);
@@ -157,7 +157,7 @@ void HandleJumpCameraActivation(int player) {
                     lbl_8055F4D0->Stop();
                 }
             } else {
-                fn_8020C900(1);
+                SetPauseState(1);
                 fn_80206444();
                 if (lbl_8055F4D0) {
                     lbl_8055F4D0->PlayLoop();
@@ -194,7 +194,7 @@ void HandleJumpCameraActivation(int player) {
                 fn_802C2C68(-1, 0);
                 fn_80206454();
                 fn_80176A00(1);
-                fn_8020C900(0);
+                SetPauseState(0);
                 lbl_8049A0E8[player].blend = 0.0f;
             }
         }

@@ -56,7 +56,7 @@ int fn_802C2C00(int on);
 PlainValMatrix* fn_802C86DC(void);
 void fn_802C8C04(int a);
 void fn_802C8D74(void);
-void fn_802C8E70(const SunVecP* p, SunVecP* out);
+void TransformWorldToScreen(const SunVecP* p, SunVecP* out);
 int fn_802C8FF4(const SunVecP* p, f32 r);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 void* fn_802CA294(s32 tex);
@@ -149,7 +149,7 @@ void fn_80291AC8(void) {
 }
 
 void fn_80291B14(const SunVecP* p, f32 depth) {
-    fn_802C8E70(p, &lbl_804B4010.pos);
+    TransformWorldToScreen(p, &lbl_804B4010.pos);
     lbl_804B4010.pos.z = depth;
     u8 vis = 0;
     if (fn_802C8FF4(&lbl_804B4010.pos, lbl_804B4010.radius) && fn_802D3A5C(lbl_804B4010.obj, &lbl_804B4010.pos)) {
@@ -160,7 +160,7 @@ void fn_80291B14(const SunVecP* p, f32 depth) {
 
 void fn_80291B9C(FlareSet* fs, const SunVecP* p, f32 depth) {
     fs->sunPos = *p;
-    fn_802C8E70(p, &fs->screen);
+    TransformWorldToScreen(p, &fs->screen);
     fs->screen.z = depth;
     if (fn_802C8FF4(&fs->screen, fs->maxRadius)) {
         fs->visible = fs->count > 0;
@@ -272,7 +272,7 @@ void fn_80291E64(FlareSet* fs) {
         f32 projectedY = startY + t * deltaY;
         f32 projectedX = startX + t * deltaX;
         p.Set(projectedX, projectedY, projectedZ);
-        fn_802C8E70(&p, &f->pos);
+        TransformWorldToScreen(&p, &f->pos);
         if (f->visible && fn_802C8FF4(&f->pos, 0.0f)) {
             fn_802C8C04(f->tex);
             fn_80291C7C(f, 0);

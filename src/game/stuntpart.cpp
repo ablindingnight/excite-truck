@@ -68,7 +68,7 @@ void fn_802C8D74(void);
 int fn_802C8DBC(int n);
 void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
-u32 fn_802C990C(u32 color);
+u32 SetFogColor(u32 color);
 s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 tex);
 double cos(double x);
@@ -658,13 +658,13 @@ void fn_802AB770(int idx) {
     }
     color = p->fogColor;
     lbl_8055F92D = fn_802C2C00(1);
-    lbl_804BD7B0.color = fn_802C990C(color);
+    lbl_804BD7B0.color = SetFogColor(color);
     fn_802C2BB8(&lbl_804BD7B0.a, &lbl_804BD7B0.b, &lbl_804BD7B0.c);
     fn_802C2B78(z, 1000.0f + z, 1.0f);
 }
 
 void fn_802AB994(void) {
-    fn_802C990C(lbl_804BD7B0.color);
+    SetFogColor(lbl_804BD7B0.color);
     fn_802C2B78(lbl_804BD7B0.a, lbl_804BD7B0.b, lbl_804BD7B0.c);
     fn_802C2C00(lbl_8055F92D);
 }
@@ -737,13 +737,13 @@ void fn_802ABE58(f32* t, f32* out, u32* color, f32 dt) {
 
 void fn_802ABFF8(f32 z, u32 color) {
     lbl_8055F92D = fn_802C2C00(1);
-    lbl_804BD7B0.color = fn_802C990C(color);
+    lbl_804BD7B0.color = SetFogColor(color);
     fn_802C2BB8(&lbl_804BD7B0.a, &lbl_804BD7B0.b, &lbl_804BD7B0.c);
     fn_802C2B78(z, 1000.0f + z, 1.0f);
 }
 
 void fn_802AC070(void) {
-    fn_802C990C(lbl_804BD7B0.color);
+    SetFogColor(lbl_804BD7B0.color);
     fn_802C2B78(lbl_804BD7B0.a, lbl_804BD7B0.b, lbl_804BD7B0.c);
     fn_802C2C00(lbl_8055F92D);
 }

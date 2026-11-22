@@ -53,8 +53,8 @@ int fn_80214D04(void);
 const char* fn_80131234(const char* key);  // localize
 void fn_802E30C8(const char* fmt, ...);    // debug print
 int fn_802C83C4(void);                     // widescreen mode
-void fn_802C82C4(int mode);
-int fn_802090CC(void);                     // sound mode
+void SetDisplayType(int mode);
+int GetMasterVolume(void);                     // sound mode
 void fn_802090BC(int mode);
 extern char lbl_8055BAC0[8];
 extern char lbl_8055BAB8[4];
@@ -104,7 +104,7 @@ int fn_8023C308(int* result) {
     if (lbl_8055F148 != lbl_8055F150) {
         lbl_8055F150 = lbl_8055F148;
         fn_802E30C8("WSM: %d", lbl_8055F148);
-        fn_802C82C4(lbl_8055F148);
+        SetDisplayType(lbl_8055F148);
     }
     if (lbl_8055F144 != lbl_8055F14C) {
         lbl_8055F14C = lbl_8055F144;
@@ -133,7 +133,7 @@ void fn_8023C3D4(void) {
 void fn_8023C55C(const char* layout) {
     lbl_8055F150 = lbl_8055F148 = fn_802C83C4();
     StringMulti display(&lbl_8055F148, fn_80131234("Display:STANDARD"), fn_80131234("Display:WIDESCREEN"), NULL);
-    lbl_8055F14C = lbl_8055F144 = fn_802090CC();
+    lbl_8055F14C = lbl_8055F144 = GetMasterVolume();
     StringMulti audio(&lbl_8055F144, fn_80131234("Audio:MONO"), fn_80131234("Audio:STEREO"),
                       fn_80131234("Audio:DOLBY_PRO_LOGIC_II"), NULL);
     MenuItem items[] = {

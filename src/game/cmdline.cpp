@@ -22,7 +22,7 @@ extern "C" {
 void fn_80203F0C(const char* arg);
 void ValidatePlayerCount(const char* arg);
 void fn_802BC328(const char* arg);
-void fn_80131368(const char* arg);
+void ParseStringToIndex(const char* arg);
 }
 
 ModuleTag lbl_8055D598;
@@ -46,7 +46,7 @@ Option lbl_802FD528[] = {
     {"-cars", 0, SetForcedRacers},
     {"-wmapgen", 0x800, fn_802BC328},
     {"-default_colors", 0, SetDefaultColors},
-    {"-locale", 0, fn_80131368},
+    {"-locale", 0, ParseStringToIndex},
     {"", 0, NULL},
     {NULL, 0, NULL},
 };

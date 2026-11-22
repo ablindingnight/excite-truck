@@ -54,7 +54,7 @@ s32 fn_802BB87C(const char* name) {
     return -2;
 }
 
-void fn_802BB8E4(s32* handle) {
+void ReleaseTextureHandle(s32* handle) {
     if (*handle != -2) {
         gxForgetTexture(*handle);
         *handle = -2;
@@ -76,7 +76,7 @@ void fn_802BB958(short x, short z, const u8* weights, const u8* old) {
     }
 }
 
-void fn_802BBA08(const char* name, int base) {
+void LoadWeightImage(const char* name, int base) {
     WeightImage* img = fn_802B51E4(512, 512);
     if (img) {
         for (int x = 0; x < 512; x++) {
@@ -150,7 +150,7 @@ void fn_802BBBC8(void) {
 
 void fn_802BBCC4(void) {
     for (int i = 0; i < 6; i++) {
-        fn_802BB8E4(&lbl_804C0098[i]);
+        ReleaseTextureHandle(&lbl_804C0098[i]);
         lbl_804C00B0[i] = NULL;
     }
 }
@@ -192,20 +192,20 @@ void fn_802BBE34(void) {
     }
 }
 
-void fn_802BBEE4(void) {
+void LoadMaterialMaps(void) {
     fn_802BBE34();
     u8 was = fn_80128690();
     if (!was) {
         fn_80128684();
     }
-    fn_802BBA08("matmap", 0);
-    fn_802BBA08("matmap2", 3);
+    LoadWeightImage("matmap", 0);
+    LoadWeightImage("matmap2", 3);
     if (!was) {
         fn_80128678();
     }
 }
 
-void fn_802BBF44(const u8* w, int adj) {
+void ValidateWeightChecksum(const u8* w, int adj) {
     u32 sum = 0;
     for (int i = 0; i < 6; i++) {
         sum += w[i];
@@ -216,11 +216,11 @@ void fn_802BBF44(const u8* w, int adj) {
     }
 }
 
-u8 fn_802BBF94(u8 v) { return (v & 0xF0) | (v >> 4); }
+u8 SwapNibbles(u8 v) { return (v & 0xF0) | (v >> 4); }
 
 void fn_802BBFA4(u8* w, int layer, int keep) {
     for (int i = 0; i < 6; i++) {
-        w[i] = fn_802BBF94(w[i]);
+        w[i] = SwapNibbles(w[i]);
     }
     int sum = 0;
     for (int i = 0; i < 6; i++) {
@@ -259,7 +259,7 @@ static inline void ReadLayers(u8* cur, short x, short z) {
 // constants/strings of linker-stripped functions; romfont, crashmode PumpWindow).
 static f32 Clamp0(f32 f) { return (f < 0.0f) ? 0.0f : f; }
 
-int fn_802BC09C(short x, short z, int layer, u8 value, f32 strength) {
+int UpdateLayerValueWithLerp(short x, short z, int layer, u8 value, f32 strength) {
     int locked;
     int i;
     int done;
@@ -296,7 +296,7 @@ int fn_802BC09C(short x, short z, int layer, u8 value, f32 strength) {
                     }
                 }
                 fn_802BBFA4(next, layer, locked);
-                fn_802BBF44(next, layer);
+                ValidateWeightChecksum(next, layer);
                 fn_802BB958(x, z, next, cur);
                 done = 1;
             }

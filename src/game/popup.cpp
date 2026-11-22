@@ -66,9 +66,9 @@ void fn_801331C4(int section, const char* name, f32* v);
 void fn_801332D0(void* prefs, const char* name, u32* v);
 void fn_80133348(void* prefs, const char* name, u32 v);
 Sound2D* fn_80207848(const char* name, int flags);
-s32 fn_802090D4(const char* name);
-void fn_80209110(s32* h);
-void fn_80209190(s32 h, f32 v);
+s32 AllocateVolumeHandle(const char* name);
+void ClearAudioHandle(s32* h);
+void SetVolumeClamped(s32 h, f32 v);
 int fn_801E85A4(void);
 void fn_801769E0(void);
 void fn_801769EC(void);
@@ -205,7 +205,7 @@ void fn_801DEC18(void) {
     } else {
         fn_802E30C8("Popup: Couldn't find file %s", file);
     }
-    lbl_8055E9EC = fn_802090D4("Popup");
+    lbl_8055E9EC = AllocateVolumeHandle("Popup");
     lbl_8055E9F0 = fn_80207848("levelup.sfx", 0);
     f32 vol = 1.0f;
     fn_801331C4(4, "effects_volume", &vol);
@@ -239,7 +239,7 @@ void fn_801DEE3C(void) {
         }
         fn_801DE88C(i);
     }
-    fn_80209110(&lbl_8055E9EC);
+    ClearAudioHandle(&lbl_8055E9EC);
     if (lbl_8055E9F0) {
         delete lbl_8055E9F0;
         lbl_8055E9F0 = 0;
@@ -268,10 +268,10 @@ void fn_801DEF98(void) {
 void fn_801DEFE0(void) {
     if (lbl_8055E9E8) {
         fn_801769E0();
-        fn_80209190(lbl_8055E9EC, 0.0f);
+        SetVolumeClamped(lbl_8055E9EC, 0.0f);
     } else if (lbl_8055ADF0 >= 0) {
         fn_801769EC();
-        fn_80209190(lbl_8055E9EC, 1.0f);
+        SetVolumeClamped(lbl_8055E9EC, 1.0f);
         lbl_8055ADF0 = -1;
     }
 }

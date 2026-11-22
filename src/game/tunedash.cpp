@@ -20,7 +20,7 @@ void fn_80147230(TextElem* e, const char* fmt, ...);
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 int ReadJoyStatus(JoyStatus* pad, int chan);
 void fn_80011A2C(void);
 }
@@ -92,7 +92,7 @@ int fn_802044E8(void) {
     PlainValMatrix cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, 1.4396f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4396f);
     lbl_8055ED44->Edit();
     active = fn_8020437C();
     if (active) {

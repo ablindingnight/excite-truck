@@ -61,12 +61,12 @@ void fn_802E30C8(const char* fmt, ...);
 int fn_802104D0(void);
 s32 fn_80210570(void);
 void fn_80210514(s32 mode);
-void fn_80209030(f32 v);
+void SetEffectsVolume(f32 v);
 void fn_8020A5F8(f32 v);
-void fn_802C82C4(s32 mode);
+void SetDisplayType(s32 mode);
 void fn_802090BC(s32 mode);
 s32 fn_802C83C4(void);
-s32 fn_802090CC(void);
+s32 GetMasterVolume(void);
 void fn_801331C4(int section, const char* key, f32* v);
 void fn_8013323C(int section, const char* key, f32 v);
 void fn_801332D0(int section, const char* key, s32* v);
@@ -577,11 +577,11 @@ int fn_80239DE4(void) {
 }
 
 void fn_80239E5C(const OptValues* v, int force) {
-    fn_80209030(v->sfx);
+    SetEffectsVolume(v->sfx);
     fn_8020A5F8(v->music);
     if (force || v->aspect != v->aspectOld) {
         fn_802E30C8("WSM: %d", v->aspect);
-        fn_802C82C4(v->aspect);
+        SetDisplayType(v->aspect);
     }
     if (force || v->audio != v->audioOld) {
         fn_802090BC(v->audio);
@@ -610,7 +610,7 @@ extern "C" void fn_80239F74(void) {
     sCur.aspectOld = sCur.aspect = fn_802C83C4();
     {
         VideoList aspect(&sCur.aspect, fn_80131234("Display:STANDARD"), fn_80131234("Display:WIDESCREEN"), 0);
-        sCur.audioOld = sCur.audio = fn_802090CC();
+        sCur.audioOld = sCur.audio = GetMasterVolume();
         {
             ChoiceList audio(&sCur.audio, fn_80131234("Audio:MONO"), fn_80131234("Audio:STEREO"),
                              fn_80131234("Audio:DOLBY_PRO_LOGIC_II"), 0);

@@ -34,7 +34,7 @@ u8* fn_80232578(const char* name);
 void fn_802C8530(void);
 void fn_802C87B4(int a, int b, s32 w, s32 h);
 void fn_802C88BC(int a);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void DrawImageWithParams(u8* img, int a, f32 x, f32 y, f32 z, f32 w, f32 h);
 void fn_802C92D0(void);
 void fn_802C92DC(int x0, int y0, int x1, int y1, u32 color);
@@ -187,7 +187,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
         fn_802C88BC(2);
         fn_80230B5C(&cam);
         fn_802C8638(&cam);
-        fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+        SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
         f32 w = lbl_8055FB9C + 1;
         f32 h = lbl_8055FBA0 + 1;
         f32 x0 = -1.0f * lbl_8055FB9C / 2.0f - 1.0f;
@@ -337,7 +337,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p, int
     fn_802C88BC(2);
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     f32 h;
     f32 x0;
     f32 y0;

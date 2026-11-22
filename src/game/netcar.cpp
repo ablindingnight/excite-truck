@@ -92,7 +92,7 @@ void fn_8018ADC4(CarBody* b, f32 v);
 void fn_8018ADCC(CarBody* b, f32 v);
 void fn_8018ADD4(CarBody* b, s32 v);
 Link* GetDeityCarByIndex(int car);
-void fn_801BE168(int car, RMtx* m, RVec3* vel, RVec3* avel);
+void UpdateCarPhysics(int car, RMtx* m, RVec3* vel, RVec3* avel);
 int fn_801E89EC(void);
 void fn_801E9DC4(s16* h);
 void fn_80265D40(CarBody* b, s32 i);
@@ -246,7 +246,7 @@ void NetCar::Update(void) {
         fn_8018ADB4(this, 0.0f);
         fn_8018ADC4(this, 0.0f);
         linkObj->Ready();
-        fn_801BE168(index, &mtx, &vel, &avel);
+        UpdateCarPhysics(index, &mtx, &vel, &avel);
     }
     if (!waiting && state == 3) {
         fn_8018ADA4(this, ptab[0].throttle);
@@ -443,7 +443,7 @@ void NetCar::Predict(void) {
         vel.y = 1.0f;
         vel.z = 0.0f;
     }
-    fn_801BE168(index, &mtx, &vel, &avel);
+    UpdateCarPhysics(index, &mtx, &vel, &avel);
     if (ptab[0].snap) {
         Snap();
         ptab[0].snap = 0;

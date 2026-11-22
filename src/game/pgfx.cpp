@@ -33,7 +33,7 @@ void DrawDebugBox(const ValVec3* p, const ValVec3* q, f32 size, s32 color, s32 e
 void DrawDebugSphere(const ValVec3* p, f32 size, s32 color);
 void DrawCameraFacingTriangle(const ValVec3* p, f32 size, s32 color);
 void DrawAxisIndicator(const ValVec3* p, f32 a, f32 b);
-void fn_802C8E70(const ValVec3* p, ValVec3* out);
+void TransformWorldToScreen(const ValVec3* p, ValVec3* out);
 int fn_802C8FF4(ValVec3* p, f32 margin);
 void DrawTextWithBackground(int x, int y, const char* text);
 void fn_802E317C(const char* fmt, ...);
@@ -53,7 +53,7 @@ int pgfx_handler(const PGfxEvent* ev) {
         return 0x18;
     case 3: {
         ValVec3 p;
-        fn_802C8E70(&ev->pos, &p);
+        TransformWorldToScreen(&ev->pos, &p);
         if (fn_802C8FF4(&p, 0.0f)) {
             DrawTextWithBackground(p.x, p.y, ev->text);
         }

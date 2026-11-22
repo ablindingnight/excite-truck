@@ -235,7 +235,7 @@ extern char lbl_8055C0C0[];  // "%d/%d"
 
 extern "C" {
 int fn_80129D18(int seed, int n);
-void fn_80130FCC(char* buf, s32 size, s32 value);
+void FormatIntWithPrefix(char* buf, s32 size, s32 value);
 }
 
 // Garage car-select screen (partial).
@@ -607,8 +607,8 @@ static inline void ShowCar(u8* g, s32 sel) {
         fn_801345D8((char*)(g + 0x3C), 0x10, "%d/%d", AchievementsGetModelStat(0, (char*)(g + 0x60)), races);
         fn_801345D8((char*)(g + 0x50), 0x10, "%d/%d", AchievementsGetModelStat(1, (char*)(g + 0x60)), aaas);
     } else {
-        fn_80130FCC((char*)(g + 0x3C), 0x10, AchievementsGetModelStat(0, (char*)(g + 0x60)));
-        fn_80130FCC((char*)(g + 0x50), 0x10, AchievementsGetModelStat(1, (char*)(g + 0x60)));
+        FormatIntWithPrefix((char*)(g + 0x3C), 0x10, AchievementsGetModelStat(0, (char*)(g + 0x60)));
+        FormatIntWithPrefix((char*)(g + 0x50), 0x10, AchievementsGetModelStat(1, (char*)(g + 0x60)));
     }
     ShowCarColor(g);
 }

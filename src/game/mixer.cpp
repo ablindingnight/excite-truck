@@ -139,10 +139,10 @@ LocString lbl_8048929C("Sound:NoSound");
 
 extern "C" {
 
-void fn_80209030(f32 v);
-void fn_80209090(s32 q);
+void SetEffectsVolume(f32 v);
+void SetSoundOption(s32 q);
 
-f32 fn_80208A18(f32 v) {
+f32 ApplyVolumeModifiers(f32 v) {
     VolumeHandle* h = lbl_80489258.h;
     for (int i = 0; i < lbl_80489258.count; i++, h++) {
         if (h->owner) {
@@ -152,22 +152,22 @@ f32 fn_80208A18(f32 v) {
     return v;
 }
 
-void fn_80208A50(void) { lbl_8055B4D4 = fn_80208A18(lbl_8055B4D0); }
+void fn_80208A50(void) { lbl_8055B4D4 = ApplyVolumeModifiers(lbl_8055B4D0); }
 
-void fn_80208A78(void) {
+void LoadAudioSettingsFromConfig(void) {
     fn_801331C4(4, "effects_volume", &lbl_8055B4D0);
-    fn_80209030(lbl_8055B4D0);
+    SetEffectsVolume(lbl_8055B4D0);
     fn_801332D0(4, "quality", &lbl_8055EDA8);
-    fn_80209090(lbl_8055EDA8);
+    SetSoundOption(lbl_8055EDA8);
 }
 
-void fn_80208AC8(int ident, int event) {
+void UpdateSoundVolumes(int ident, int event) {
     f32 v = 1.0f;
     switch (event) {
     case 3:
         fn_801331C4(ident + 0xC, "player_sfx_vol", &v);
         fn_8013323C(4, "effects_volume", v);
-        fn_80209030(v);
+        SetEffectsVolume(v);
         break;
     case 1:
     case 2:
@@ -176,12 +176,12 @@ void fn_80208AC8(int ident, int event) {
         break;
     case 0:
         fn_8013323C(4, "effects_volume", v);
-        fn_80209030(v);
+        SetEffectsVolume(v);
         break;
     }
 }
 
-void fn_80208B8C(int create) {
+void InitializeAudioMixer(int create) {
     switch (fn_802E9A14()) {
     default:
     case 1:
@@ -207,16 +207,16 @@ void fn_80208B8C(int create) {
         lbl_80489238.current = 0;
     }
     fn_8013323C(4, "effects_volume", 1.0f);
-    fn_80208A78();
-    lbl_8055B4DC = fn_8013365C("Mixer", fn_80208A78);
-    IdentRegisterCallback(fn_80208AC8);
+    LoadAudioSettingsFromConfig();
+    lbl_8055B4DC = fn_8013365C("Mixer", LoadAudioSettingsFromConfig);
+    IdentRegisterCallback(UpdateSoundVolumes);
 }
 
 s32 fn_80208D3C(void) { return lbl_80489238.count; }
 
-Mixer* fn_80208D4C(int i) { return lbl_80489238.list[i]; }
+Mixer* GetMixerByIndex(int i) { return lbl_80489238.list[i]; }
 
-void fn_80208D60(s32 i) { lbl_80489238.current = i; }
+void SetCurrentSoundOption(s32 i) { lbl_80489238.current = i; }
 
 s32 fn_80208D70(void) { return lbl_80489238.current; }
 
@@ -240,10 +240,10 @@ void fn_80208D80(int destroy) {
     fn_80133348(4, "mixer", lbl_80489238.current);
     fn_8013323C(4, "effects_volume", lbl_8055B4D0);
     fn_80133348(4, "quality", lbl_8055EDA8);
-    fn_801336E0(lbl_8055B4DC, fn_80208A78);
+    fn_801336E0(lbl_8055B4DC, LoadAudioSettingsFromConfig);
 }
 
-void fn_80208E90(Mixer* m, int dontCare) {
+void ProcessSoundMixer(Mixer* m, int dontCare) {
     if (strncmp(m->Name(), "Dream 9407,", 11) == 0) {
         fn_802E30C8("tossing bogus mixer: %s", m->Name());
         delete m;
@@ -289,14 +289,14 @@ const char* MixerQualityName(int q) {
 
 f32 fn_80209028(void) { return lbl_8055B4D4; }
 
-void fn_80209030(f32 v) {
+void SetEffectsVolume(f32 v) {
     f32 t = MIN(1.0f, v);
     lbl_8055B4D0 = MAX(t, 0.0f);
     fn_8013323C(4, "effects_volume", lbl_8055B4D0);
     fn_80208A50();
 }
 
-void fn_80209090(s32 q) {
+void SetSoundOption(s32 q) {
     if (q >= 0 && q <= 2) {
         lbl_8055EDA8 = q;
     } else {
@@ -304,16 +304,16 @@ void fn_80209090(s32 q) {
     }
 }
 
-s32 fn_802090B4(void) { return lbl_8055EDA8; }
+s32 GetSoundChannelCount(void) { return lbl_8055EDA8; }
 
 void fn_802090BC(int) { fn_802E30C8("mixer: MixerSetSoundMode is a NOOP"); }
 
 // Dead-stripped in the game (sound mode name).
 const char* MixerSoundModeName(void) { return "Surround"; }
 
-s32 fn_802090CC(void) { return lbl_8055B4D8; }
+s32 GetMasterVolume(void) { return lbl_8055B4D8; }
 
-VolumeHandle* fn_802090D4(void* owner) {
+VolumeHandle* AllocateVolumeHandle(void* owner) {
     VolumeHandle* h = NULL;
     if ((u32)lbl_80489258.count < 8) {
         h = &lbl_80489258.h[lbl_80489258.count++];
@@ -323,7 +323,7 @@ VolumeHandle* fn_802090D4(void* owner) {
     return h;
 }
 
-void fn_80209110(VolumeHandle** ph) {
+void ClearAudioHandle(VolumeHandle** ph) {
     if (*ph) {
         (*ph)->owner = NULL;
         while (lbl_80489258.count > 0) {
@@ -337,7 +337,7 @@ void fn_80209110(VolumeHandle** ph) {
     }
 }
 
-void fn_80209190(VolumeHandle* h, f32 v) {
+void SetVolumeClamped(VolumeHandle* h, f32 v) {
     if (h) {
         f32 t = MIN(1.0f, v);
         h->volume = MAX(t, 0.0f);
@@ -345,7 +345,7 @@ void fn_80209190(VolumeHandle* h, f32 v) {
     }
 }
 
-f32 fn_802091CC(void) { return fn_80208A18(1.0f); }
+f32 fn_802091CC(void) { return ApplyVolumeModifiers(1.0f); }
 
 }  // extern "C"
 

@@ -41,21 +41,21 @@ ModuleTag lbl_8055E020;
 
 extern "C" {
 
-MemBuffer* fn_8012F31C(s32 size) { return new ("MemStream") MemBuffer(size); }
+MemBuffer* CreateMemBuffer(s32 size) { return new ("MemStream") MemBuffer(size); }
 
-void fn_8012F384(MemBuffer* b) { delete b; }
+void DeleteMemoryBuffer(MemBuffer* b) { delete b; }
 
 MemStream* fn_8012F3CC(MemBuffer* b) { return new ("MemStreamPtr") MemStream(b); }
 
-void fn_8012F418(MemStream* s) { delete s; }
+void DeleteMemStream(MemStream* s) { delete s; }
 
-void fn_8012F43C(MemStream* s) { s->pos = 0; }
+void ResetMemStreamPosition(MemStream* s) { s->pos = 0; }
 
-void fn_8012F448(MemStream* s, s32 pos) { s->pos = pos; }
+void SetMemoryStreamPosition(MemStream* s, s32 pos) { s->pos = pos; }
 
-s32 fn_8012F450(MemStream* s) { return s->pos; }
+s32 GetStreamPosition(MemStream* s) { return s->pos; }
 
-void fn_8012F458(MemStream* s, u32 v) {
+void WriteValueToStream(MemStream* s, u32 v) {
     memcpy(s->buf->data + s->pos, &v, sizeof(v));
     s->pos += sizeof(v);
 }

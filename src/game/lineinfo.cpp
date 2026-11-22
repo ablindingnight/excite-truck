@@ -57,7 +57,7 @@ LineCache lbl_8042F8C8;
 
 extern "C" {
 
-char* fn_8013BC90(char* buf, s32 n, const char* src) {
+char* ExtractFilenameFromPath(char* buf, s32 n, const char* src) {
     char* p = buf;
     SafeStrCopy(buf, src, n);
     if (strchr(p, '/')) {
@@ -72,7 +72,7 @@ char* fn_8013BC90(char* buf, s32 n, const char* src) {
     return p;
 }
 
-void fn_8013BD30(LineParams* p) {
+void InitializeLineParams(LineParams* p) {
     p->minT = 0.5f;
     p->maxT = 1.5f;
     p->minDist = 13.0f;
@@ -80,9 +80,9 @@ void fn_8013BD30(LineParams* p) {
     p->curvT = 0.0f;
 }
 
-void fn_8013BD5C(LineParams* p, ValueNode* t) {
+void ParseLookaheadParams(LineParams* p, ValueNode* t) {
     ValueNode* n;
-    fn_8013BD30(p);
+    InitializeLineParams(p);
     n = t->FindChild("lookahead");
     if (n) {
         p->minT = n->GetFloat("min_t", p->minT);
@@ -99,18 +99,18 @@ ValueNode* fn_8013BD5C_exit(ValueNode* t) {
     return n ? n->FindChild("exit_path") : 0;
 }
 
-LineInfo* fn_8013BE64(ValueNode* t, const char* name) {
+LineInfo* CreateLineInfo(ValueNode* t, const char* name) {
     LineInfo* li = new ("LineInfo") LineInfo;
     SafeStrCopy(li->name, name, 64);
     li->exc.Load(t->FindChild("exceptions"));
-    fn_8013BD5C(&li->params, t);
+    ParseLookaheadParams(&li->params, t);
     li->extra = 0;
     return li;
 }
 
-void fn_8013BF3C(LineParams* p) { fn_8013BD30(p); }
+void fn_8013BF3C(LineParams* p) { InitializeLineParams(p); }
 
-LineInfo* fn_8013BF40(const char* name) {
+LineInfo* CreateLineInfoStruct(const char* name) {
     LineInfo* li = new ("LineInfo") LineInfo;
     SafeStrCopy(li->name, name, 64);
     fn_8013BF3C(&li->params);
@@ -143,18 +143,18 @@ static inline LineInfo* LoadCached(LineCacheEntry* found, Name64& name) {
         t = fn_80131810("lineinfo.val");
         if (t) {
             char buf[0x80];
-            char* key = fn_8013BC90(buf, 0x80, name.s);
+            char* key = ExtractFilenameFromPath(buf, 0x80, name.s);
             ValueNode* n = t->HasChild(key) ? t->FindChild(key) : 0;
             if (n) {
                 fn_802E30C8("lineinfo: using table %s", key);
             } else {
                 n = fn_8013184C();
             }
-            li = fn_8013BE64(n, name.s);
+            li = CreateLineInfo(n, name.s);
             fn_80131818(t);
         }
         if (!li) {
-            li = fn_8013BF40(name.s);
+            li = CreateLineInfoStruct(name.s);
         }
         if (li) {
             fn_8013BFE0(li);

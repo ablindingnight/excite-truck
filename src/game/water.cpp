@@ -104,7 +104,7 @@ int fn_802C9C40(void);
 int fn_802C9C38(void);
 int fn_802C9C48(void);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
-void fn_802C8E70(const PVec* p, PVec* out);
+void TransformWorldToScreen(const PVec* p, PVec* out);
 void fn_802DBE4C(void);
 void fn_802DBECC(void);
 void fn_802C8BD0(s32 tex);
@@ -891,7 +891,7 @@ void WaterSystem::Draw(void) {
             v->pos = wp;
             v->color = col;
             PVec s;
-            fn_802C8E70(&v->pos, &s);
+            TransformWorldToScreen(&v->pos, &s);
             v->u = (s.x - vx + cx) / 640.0f;
             v->v = (s.y - vy + 0.5f * (480.0f - vw)) / 480.0f;
             v->u = 0.5f + (v->u - 0.5f) * k;

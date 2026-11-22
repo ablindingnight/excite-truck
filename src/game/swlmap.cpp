@@ -11,7 +11,7 @@ void fn_802CB274(int rt);
 void fn_802C9294(int rt, int unk);
 void fn_802C8638(ValMatrix* cam);
 void fn_802C87B4(int x, int y, int w, int h);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_802C86E8(u32 color);
 void fn_802C88BC(int unk);
 int fn_802C2C00(int on);
@@ -67,7 +67,7 @@ void fn_802C276C(void) {
         cam.basis[2].z = 0.0f;
         fn_802C8638(&cam);
         fn_802C87B4(0, 0, 0x200, 0x200);
-        fn_802C974C(1.0f, 100.0f + cam.origin.y, 1.5707964f);
+        SetupCameraProjection(1.0f, 100.0f + cam.origin.y, 1.5707964f);
         fn_802C86E8(0xFF00FF00);
         fn_802C88BC(-1);
         int old = fn_802C2C00(0);

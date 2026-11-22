@@ -16,7 +16,7 @@ char* strchr(const char* s, int c);
 void* memset(void* dst, int c, size_t n);
 f32 fn_80209028(void);
 f32 fn_802091CC(void);
-int fn_802090CC(void);
+int GetMasterVolume(void);
 s32 fn_802E2C20(void);
 void fn_802E625C(int mode);
 void fn_802E6264(void);
@@ -318,10 +318,10 @@ SoundSample* fn_8020A6AC(const char* name) {
     return &lbl_8033C338;
 }
 
-void fn_80208E90(Mixer* m, int dontCare);
+void ProcessSoundMixer(Mixer* m, int dontCare);
 
 void fn_8020A72C(void) {
-    fn_80208E90(new ("Voicemixer") VoiceSoundMixer, 0);
+    ProcessSoundMixer(new ("Voicemixer") VoiceSoundMixer, 0);
 }
 
 s32 fn_8020A76C(void) {
@@ -458,7 +458,7 @@ void VoiceSoundMixer::SetListeners(void* listeners) {
         p = voices[i];
         if (p) {
             int mode = 1;
-            switch (fn_802090CC()) {
+            switch (GetMasterVolume()) {
             case 0:
                 mode = 0;
                 break;

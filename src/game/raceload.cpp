@@ -25,7 +25,7 @@ void* fn_801292CC(const char* name);
 void fn_80129324(void* p);
 void fn_80206518(void);
 void fn_8020CA38(void);
-void fn_8020C920(RaceSetup* rs);
+void LoadTrackMusic(RaceSetup* rs);
 void fn_802103B8(RaceSetup* rs);
 }
 VehicleInfo* FindVehicleByFlags(u32 flags, int n);
@@ -240,7 +240,7 @@ void fn_8000AB48(RaceSetup* rs, DAVMap* map) {
         fn_8000AA9C(rs->cars.defs[i].vehicleName);
     }
     fn_8012DDA8("overlays.res");
-    fn_8020C920(rs);
+    LoadTrackMusic(rs);
     fn_802103B8(rs);
 }
 

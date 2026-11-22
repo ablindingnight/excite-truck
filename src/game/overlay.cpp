@@ -125,7 +125,7 @@ void fn_8000F0E4(const char* name);
 void LoadDashboardAssets(void);
 void fn_80011F64(void);
 int fn_80137C74(void);
-void* fn_802090D4(const char* name);
+void* AllocateVolumeHandle(const char* name);
 void fn_801331C4(int unk, const char* name, f32* value);
 }  // extern "C"
 void InitOverlays(void);
@@ -133,11 +133,11 @@ extern "C" {
 }  // extern "C"
 void ShutdownOverlays(void);
 extern "C" {
-void fn_80209110(void** p);
+void ClearAudioHandle(void** p);
 void fn_8000FB44(void);
 void fn_800120BC(void);
 void fn_8000F158(void);
-void fn_80209190(void* p, f32 value);
+void SetVolumeClamped(void* p, f32 value);
 }  // extern "C"
 void ResetOverlays(void);
 extern "C" {
@@ -145,7 +145,7 @@ void fn_80011A50(void);
 f32 fn_801E7E18(void);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_80161C18(void);
 int fn_801DF110(void);
 int fn_80161A70(void);
@@ -1017,7 +1017,7 @@ void fn_80006D9C(void) {
     fn_80011F64();
     lbl_8034EE84.event = fn_801E87A8();
     lbl_8034EE84.numPlayers = fn_80137C74();
-    lbl_8055D354 = fn_802090D4("dashboard");
+    lbl_8055D354 = AllocateVolumeHandle("dashboard");
     fn_801331C4(4, "effects_volume", &lbl_8055892C);
     fn_80005464();
     fn_80005C88();
@@ -1061,7 +1061,7 @@ void fn_80006E54(void) {
         delete lbl_8034EEB8.unk60;
     }
     memset(&lbl_8034EEB8, 0, sizeof(lbl_8034EEB8));
-    fn_80209110(&lbl_8055D354);
+    ClearAudioHandle(&lbl_8055D354);
     fn_8000FB44();
     fn_800120BC();
     fn_8000F158();
@@ -1071,7 +1071,7 @@ void fn_80006E54(void) {
 
 void fn_800070DC(void) {
     int i;
-    fn_80209190(lbl_8055D354, kOverlayFullScale.value);
+    SetVolumeClamped(lbl_8055D354, kOverlayFullScale.value);
     lbl_8034EEB8.intro->Reset();
     lbl_8034EEB8.results->Reset();
     lbl_8034EEB8.closure->Reset();
@@ -1107,7 +1107,7 @@ void fn_80007238(void) {
     fn_802C8638(&cam);
     f32 wide = 1.4396f;
     f32 narrow = 0.82625633f;
-    fn_802C974C(kOverlayFullScale.value, 1000.0f, lbl_8034EE84.numViews > 2 ? narrow : wide);
+    SetupCameraProjection(kOverlayFullScale.value, 1000.0f, lbl_8034EE84.numViews > 2 ? narrow : wide);
     fn_800057D0();
     fn_80161C18();
     if (!LoadingDraw() && !fn_801DF110() && !fn_80161A70()) {
@@ -1131,7 +1131,7 @@ void fn_80007318(int) {
     fn_80005C20();
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(kOverlayFullScale.value, 1000.0f, 1.4398966f);
+    SetupCameraProjection(kOverlayFullScale.value, 1000.0f, 1.4398966f);
     lbl_8034EE84.player = 0;
     lbl_8034EE84.view = fn_801E866C(0);
     lbl_8034EE84.racer = GetCarInfo(lbl_8055D350->view);

@@ -57,7 +57,7 @@ void fn_802C2AA8(int);
 void fn_80127464(void);
 void fn_802062E8(void);
 void fn_80230090(void);
-void fn_801303A8(void);
+void InitializeLanguageSettings(void);
 void fn_80245118(void);
 void fn_802E712C(void);
 void LoadEscapeSequenceData(void);
@@ -80,7 +80,7 @@ void fn_802E9884(void (*)(void));
 void fn_802E9888(void (*)(void));
 void fn_8023E7A8(int status);
 struct CardTask;
-void fn_8023E5B4(CardTask* task);
+void InitializeSaveMenu(CardTask* task);
 void fn_8023F0E8(void);
 void fn_8023F4B8(void);
 void fn_8023F694(void);
@@ -99,7 +99,7 @@ void fn_80141458(void);
 void CleanupGraphicsResources(void);
 void fn_80137BE4(void);
 void fn_8023243C(void);
-void fn_80130518(void);
+void ResetLanguageData(void);
 void fn_80245124(void);
 void fn_80230114(void);
 void fn_802063D8(void);
@@ -111,7 +111,7 @@ void fn_8000D878(void);
 void fn_80265D48(void);
 void fn_80129BD4(void);
 void fn_801E78A0(void);
-void fn_8024BE04(void);
+void RunModelTextureViewer(void);
 void fn_8023B6B0(void);
 void fn_80129BF8(void);
 void fn_80265D4C(void);
@@ -202,7 +202,7 @@ void AppInit(void) {
     fn_80127464();
     fn_802062E8();
     fn_80230090();
-    fn_801303A8();
+    InitializeLanguageSettings();
     fn_80245118();
     fn_802E712C();
     LoadTimerInit();
@@ -234,7 +234,7 @@ void AppInit(void) {
     LoadingInitHook();
     fn_80211F44();
     fn_802E986C(fn_8023E7A8);
-    fn_802E9870(fn_8023E5B4);
+    fn_802E9870(InitializeSaveMenu);
     fn_802E9874(fn_8023F0E8);
     fn_802E9878(fn_8023F4B8);
     fn_802E987C(fn_8023F694);
@@ -272,7 +272,7 @@ void AppShutdown(void) {
     fn_80137BE4();
     fn_8023243C();
     LoadTimerShutdown();
-    fn_80130518();
+    ResetLanguageData();
     fn_80245124();
     fn_80230114();
     fn_802063D8();
@@ -311,7 +311,7 @@ void AppMain(void) {
     if (OptGxTest()) {
         fn_801E78A0();
     } else if (OptModelTest()) {
-        fn_8024BE04();
+        RunModelTextureViewer();
     } else if (OptPaTest()) {
         void PlayEves(void);
         PlayEves();

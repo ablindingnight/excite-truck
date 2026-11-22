@@ -103,9 +103,9 @@ struct Unk40 {
 };
 
 extern "C" {
-const char* fn_801302E0(const char* key);
+const char* LookupLocalizedString(const char* key);
 const char* fn_80131234(const char* key);
-void fn_8013111C(int lang);
+void LoadLanguageFile(int lang);
 }
 
 ModuleTag lbl_8055E038;
@@ -171,7 +171,7 @@ static inline void ReadUnit(ValueNode* n, Unit* u) {
 
 extern "C" {
 
-void fn_8012FAB8(const char* valName) {
+void LoadUnitAbbreviations(const char* valName) {
     lbl_8032B0C8.s_dist.name = s_metersAbbr.Get();
     lbl_8032B0C8.l_dist.name = s_kmAbbr.Get();
     lbl_8032B0C8.speed.name = s_kmhAbbr.Get();
@@ -229,7 +229,7 @@ void LocaleFormatDate(char* buf, u32 size, int d, int m, int y) {
     fn_801345D8(buf, size, "%d", y);
 }
 
-void fn_801301E0(LangFile* f) {
+void FixLanguageFileEntries(LangFile* f) {
     int i;
     SwapWord((u8*)&f->count);
     for (i = 0; i < f->count; i++) {
@@ -247,7 +247,7 @@ void fn_8013028C(void) {
     s_lang.cur = -1;
 }
 
-const char* fn_801302E0(const char* key) {
+const char* LookupLocalizedString(const char* key) {
     if (s_lang.file) {
         int i;
         for (i = 0; i < s_lang.file->count; i++) {
@@ -261,22 +261,22 @@ const char* fn_801302E0(const char* key) {
 
 const char* fn_80130390(void) { return lbl_802F8E60[lbl_8055E04C].res; }
 
-void fn_801303A8(void) {
+void InitializeLanguageSettings(void) {
     lbl_8055E048 = 1;
     s_lang.cur = -1;
-    fn_8013111C(lbl_8055E04C);
+    LoadLanguageFile(lbl_8055E04C);
     s_cur.sys = s_custom;
     s_cur.sep = s_cur.sys.metric ? ',' : '.';
 }
 
-void fn_80130518(void) {
+void ResetLanguageData(void) {
     fn_8013028C();
     s_lang.file = 0;
     memset(s_lang.buf, 0, sizeof(s_lang.buf));
     lbl_8055E048 = 0;
 }
 
-void fn_80130568(char* s) {
+void ReplacePeriodsWithSeparator(char* s) {
     if (lbl_8055E050.sep != '.') {
         char* p;
         while ((p = strchr(s, '.')) != 0) {
@@ -285,7 +285,7 @@ void fn_80130568(char* s) {
     }
 }
 
-void fn_801305C4(char* buf, s32 size, const Unit* u, int mode, f32 value) {
+void FormatUnitValueWithSuffix(char* buf, s32 size, const Unit* u, int mode, f32 value) {
     if (u->precis == 0) {
         fn_801345D8(buf, size, "%c%d", 1, (int)(value * u->conv));
     } else {
@@ -303,7 +303,7 @@ void fn_801305C4(char* buf, s32 size, const Unit* u, int mode, f32 value) {
     }
 }
 
-char* fn_8013072C(char* buf, s32 size, s32 value) {
+char* FormatIntegerWithCommas(char* buf, s32 size, s32 value) {
     int offset;
     int neg = value < 0;
     s32 groups;
@@ -356,15 +356,15 @@ char* fn_8013072C(char* buf, s32 size, s32 value) {
     return p;
 }
 
-void fn_801308E4(char* buf, s32 size, int mode, f32 value) { fn_801305C4(buf, size, &lbl_8055E050.sys.s_dist, mode, value); }
+void FormatDistanceValue(char* buf, s32 size, int mode, f32 value) { FormatUnitValueWithSuffix(buf, size, &lbl_8055E050.sys.s_dist, mode, value); }
 
-char* fn_801308F4(char* buf, s32 size, s32 value) { return fn_8013072C(buf, size, value); }
+char* FormatIntegerBuffer(char* buf, s32 size, s32 value) { return FormatIntegerWithCommas(buf, size, value); }
 
-void fn_801308F8(char* buf, s32 size, s32 value) {
+void FormatOutOfBoundsScore(char* buf, s32 size, s32 value) {
     if (value >= 1000) {
         SafeStrCopy(buf, fn_80131234("Locale:OUT_OF_BOUNDS_SCORE"), size);
     } else {
-        fn_8013072C(buf, size, value);
+        FormatIntegerWithCommas(buf, size, value);
     }
 }
 
@@ -464,9 +464,9 @@ void fn_80130980(char* buf, s32 size, int fields, f32 secs) {
     }
 }
 
-int fn_80130FCC(char* buf, s32 size, s32 value) { return fn_801345D8(buf, size, "%c%d", 1, value); }
+int FormatIntWithPrefix(char* buf, s32 size, s32 value) { return fn_801345D8(buf, size, "%c%d", 1, value); }
 
-const char* fn_80130FE0(int n) {
+const char* GetOrdinalSuffix(int n) {
     const char* ords[] = {
         "Ordinal:ZEROTH", "Ordinal:FIRST",   "Ordinal:SECOND", "Ordinal:THIRD",  "Ordinal:FOURTH",
         "Ordinal:FIFTH",  "Ordinal:SIXTH",   "Ordinal:SEVENTH", "Ordinal:EIGHTH", "Ordinal:NINTH",
@@ -477,11 +477,11 @@ const char* fn_80130FE0(int n) {
     return fn_80131234(ords[n % 10]);
 }
 
-int fn_801310B4(char* buf, s32 size, int n) { return fn_801345D8(buf, size, "%d%s", n, fn_80130FE0(n) + 1); }
+int FormatNumberWithUnit(char* buf, s32 size, int n) { return fn_801345D8(buf, size, "%d%s", n, GetOrdinalSuffix(n) + 1); }
 
 void fn_80131308(void);
 
-void fn_8013111C(int lang) {
+void LoadLanguageFile(int lang) {
     if (lang >= 0 && lang < sizeof(lbl_802F8E60) / sizeof(lbl_802F8E60[0])) {
         fn_8013028C();
         fn_80131308();
@@ -496,7 +496,7 @@ void fn_8013111C(int lang) {
                 memcpy(s_lang.buf, data, size);
                 fn_8012C4D8(data);
                 if (version == 1) {
-                    fn_801301E0((LangFile*)s_lang.buf);
+                    FixLanguageFileEntries((LangFile*)s_lang.buf);
                 } else {
                     fn_802E30C8("Bad version on %s", name);
                 }
@@ -505,17 +505,17 @@ void fn_8013111C(int lang) {
                 fn_802E30C8("Can't load %s", name);
             }
         }
-        fn_8012FAB8("units.val");
+        LoadUnitAbbreviations("units.val");
         s_lang.cur = lang;
     }
 }
 
 const char* fn_80131234(const char* key) {
-    const char* s = fn_801302E0(key);
+    const char* s = LookupLocalizedString(key);
     return s ? s : "???";
 }
 
-const char* fn_80131264(const char* key) { return fn_801302E0(key); }
+const char* fn_80131264(const char* key) { return LookupLocalizedString(key); }
 
 const char* fn_80131268(const char* key) { return fn_80131234(key); }
 
@@ -538,7 +538,7 @@ extern "C" {
 void fn_80131308(void) { lbl_8055E044++; }
 
 void fn_80131318(LocString* s) {
-    s->text = fn_801302E0(s->key);
+    s->text = LookupLocalizedString(s->key);
     if (!s->text) {
         s->text = s->key;
     } else {
@@ -546,7 +546,7 @@ void fn_80131318(LocString* s) {
     }
 }
 
-void fn_80131368(const char* s) {
+void ParseStringToIndex(const char* s) {
     if (isdigit(*s)) {
         lbl_8055E04C = atoi(s);
     } else {

@@ -2065,7 +2065,7 @@ void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* __restrict hits) {
 
 extern "C" {
 size_t strlen(const char* s);
-char* fn_801308F4(char* buf, s32 size, s32 value);
+char* FormatIntegerBuffer(char* buf, s32 size, s32 value);
 int FindGradeForScore(int score);
 }
 const char* GetGradeDisplayName(int grade);
@@ -2108,8 +2108,8 @@ int ZoneHud::Update(ZoneCar* c) {
         SafeStrCopy(bonusTitle, caps.Get(), 0x14);
     }
     fn_801345D8(finalText, 0x14, "%d", final);
-    fn_801308F4(totalText, 0x14, total);
-    fn_801308F4(noBonusText, 0x14, total - tb);
+    FormatIntegerBuffer(totalText, 0x14, total);
+    FormatIntegerBuffer(noBonusText, 0x14, total - tb);
     {
         int g = FindGradeForScore(total);
         if (g != -1) {
@@ -2609,7 +2609,7 @@ inline int ZoneMaster::vf3C(int p) {
                 char buf[0x14];
                 TextElem it;
                 fn_801479A8(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(a));
-                fn_801308F4(buf, 0x14, GetGradeScoreThreshold(fn_80160A74()));
+                FormatIntegerBuffer(buf, 0x14, GetGradeScoreThreshold(fn_80160A74()));
                 it = *b0;
                 it.pos.x -= fn_80147204(&it, buf) * 0.5f;
                 fn_801479A8(&it, b1, buf, Ease(a));

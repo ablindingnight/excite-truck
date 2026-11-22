@@ -47,7 +47,7 @@ void ProcessGreenFlagActivation(void);
 void fn_8026B6E4(void);
 void fn_801CEDDC(void);
 void fn_801D2214(void);
-void fn_8020C59C(void);
+void UpdateMusicState(void);
 void fn_801DEFE0(void);
 void fn_801EA1F0(void);
 void fn_80178DBC(int i, f32 v);
@@ -71,12 +71,12 @@ void fn_80179D8C(void* p, s32 pos);
 int fn_801E2640(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, void* list, int count, s32 g);
 void fn_801B5318(void* p);
 s32 fn_8012F500(s32 s, s32* pos);
-s32 fn_8012F450(s32 s);
+s32 GetStreamPosition(s32 s);
 void fn_8012F550(s32 s, void* dst, s32 n);
-void fn_8012F448(s32 s, s32 pos);
+void SetMemoryStreamPosition(s32 s, s32 pos);
 s32 fn_8012F3CC(s32 a);
-void fn_8012F43C(s32 s);
-void fn_8012F418(s32 s);
+void ResetMemStreamPosition(s32 s);
+void DeleteMemStream(s32 s);
 int fn_80278820(void);
 int fn_802787FC(void);
 s32 fn_80176A1C(void);
@@ -108,12 +108,12 @@ void fn_80181F30(void);
 void LoadGarageValues(void);
 void InitializeRaceSettings(EventDesc* d);  // deity.cpp
 void fn_801C4AD0(void);
-void fn_8020C41C(void);
+void LoadGoalLineSound(void);
 void InitializeSoundEffects(void);
 void fn_801C1B9C(void);
 void fn_801D21C0(void);
 void fn_801D32D0(void);
-void fn_801D9284(void);
+void LoadMorphAndRegionData(void);
 void InitializeRumbleSound(void);
 void fn_801CB2D8(void);
 void fn_801DEC18(void);
@@ -157,7 +157,7 @@ void fn_801B228C(void);
 void fn_801AFBE8(void);
 void fn_801B06CC(void);
 void fn_801C4B74(void);
-void fn_8020C45C(void);
+void StopMusicAndCleanup(void);
 void fn_801DE0E8(void);
 void fn_80181FC4(void);
 void fn_801CECB4(void);
@@ -513,7 +513,7 @@ void fn_80177F40(void) {
     fn_8026B6E4();
     fn_801CEDDC();
     fn_801D2214();
-    fn_8020C59C();
+    UpdateMusicState();
     fn_801DEFE0();
     if (paused) {
         fn_801EA1F0();
@@ -726,9 +726,9 @@ int fn_80178678(s32 s, Phob** out, int pass) {
     if (pos < 0) {
         return 0;
     }
-    at = fn_8012F450(s);
+    at = GetStreamPosition(s);
     fn_8012F550(s, &m, 8);
-    fn_8012F448(s, at);
+    SetMemoryStreamPosition(s, at);
     fn_8012F550(s, &m, m->size);
     if (pass == fn_80178604(m)) {
         r = fn_801783A8(m, pos);
@@ -965,12 +965,12 @@ void fn_80178DD4(s32 stream) {
     InitializeRaceSettings(fn_801769CC());
     fn_80127464();
     fn_801C4AD0();
-    fn_8020C41C();
+    LoadGoalLineSound();
     InitializeSoundEffects();
     fn_801C1B9C();
     fn_801D21C0();
     fn_801D32D0();
-    fn_801D9284();
+    LoadMorphAndRegionData();
     InitializeRumbleSound();
     fn_801CB2D8();
     fn_801DEC18();
@@ -996,7 +996,7 @@ void fn_80178DD4(s32 stream) {
     fn_80127464();
     for (pass = 0; pass < 3; pass++) {
         Phob* p;
-        fn_8012F43C(s);
+        ResetMemStreamPosition(s);
         while (fn_80178678(s, &p, pass)) {
             if (p) {
                 fn_801785A4(p);
@@ -1004,7 +1004,7 @@ void fn_80178DD4(s32 stream) {
         }
     }
     fn_80127464();
-    fn_8012F418(s);
+    DeleteMemStream(s);
     fn_801B52CC();
     fn_801E21BC();
     fn_80127464();
@@ -1071,7 +1071,7 @@ void fn_801791A8(void) {
     fn_801AFBE8();
     fn_801B06CC();
     fn_801C4B74();
-    fn_8020C45C();
+    StopMusicAndCleanup();
     fn_801DE0E8();
     fn_80181FC4();
     fn_801CECB4();

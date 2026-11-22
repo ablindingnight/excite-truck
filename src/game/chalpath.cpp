@@ -989,7 +989,7 @@ extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
 void fn_80230F78(u8* alpha, f32* grow, u32* color, int a);
 void DrawColoredText(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
-void fn_801308F4(char* buf, s32 size, s32 value);
+void FormatIntegerBuffer(char* buf, s32 size, s32 value);
 
 #define EV ((ChalEvent*)p->ev)
 
@@ -1041,11 +1041,11 @@ void EventNode::Draw(void) {
     DrawColoredText(EV->Name(), p->font, 15.0f + x, y + sTextY, color, 0x11, 0.65f, 0.0f, 1.0f);
     const char* grade = EV->Grade() != -1 ? GetGradeDisplayName(EV->Grade()) : "-";
     DrawColoredText(grade, p->font, 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, 0.0f, 1.0f);
-    fn_801308F4(target, 30, EV->Target());
+    FormatIntegerBuffer(target, 30, EV->Target());
     if (EV->Score() <= 0) {
         fn_801345D8(line, 30, "0/%s", target + 1);
     } else {
-        fn_801308F4(line, 30, EV->Score());
+        FormatIntegerBuffer(line, 30, EV->Score());
         fn_801345D8(line, 30, "%s/%s", line, target + 1);
     }
     DrawColoredText(line, p->font, 350.0f + x, y + sTextY, color, 0x12, 0.65f, 0.0f, 1.0f);

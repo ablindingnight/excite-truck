@@ -154,7 +154,7 @@ int FindFirstFile(const char* pattern, char* name, int n);
 int FileFindNext(int h, char* name, int n);
 void FileFindClose(int h);
 f32 fn_801DCF48(V3* nrm, f32 x, f32 z);
-void fn_802BBEE4(void);
+void LoadMaterialMaps(void);
 void fn_802C21C0(void);
 void fn_802C21DC(s32 x, s32 z, s32 v);
 f32 fn_800108C8(const char* text, f32 scale);
@@ -173,14 +173,14 @@ void fn_80204044(s32 v, f32 x, f32 z);
 int fn_80204054(V3* out, int a, int b, void* cam, s32 x, s32 y);
 void* fn_802C86DC(void);
 void fn_802BE8B4(s16 x, s16 z, s16 size);
-int fn_802BC09C(s32 x, s32 z, s32 layer, s32 a, f32 t);
+int UpdateLayerValueWithLerp(s32 x, s32 z, s32 layer, s32 a, f32 t);
 void DrawLineSegment(V3* a, V3* b, u32 color, f32 w);
 s32 fn_8026E214(void* fn);
 void mrModelUnload(s32 h);
 void fn_802C7040(s32 h);
 void fn_80230B5C(void* m);
 void fn_802C8638(void* m);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_8001123C(int a);
 void fn_80011A2C(void);
 int fn_80127A50(CursorState* c);
@@ -368,7 +368,7 @@ void fn_802B618C(const char* name) {
 void fn_802B61B8(const char* name) {
     switch (lbl_8055FA38) {
     case 2:
-        fn_802BBEE4();
+        LoadMaterialMaps();
         break;
     case 3:
         fn_802C21C0();
@@ -797,7 +797,7 @@ void fn_802B7518(s16 x, s16 z, int v) {
     switch (lbl_8055FA38) {
     case 2:
         if (v) {
-            if (fn_802BC09C(x, z, lbl_8055FA28, 0xFF, (f32)(u32)v / 255.0f)) {
+            if (UpdateLayerValueWithLerp(x, z, lbl_8055FA28, 0xFF, (f32)(u32)v / 255.0f)) {
                 lbl_8055FA50[0] = lbl_8055FA50[0] < x ? lbl_8055FA50[0] : x;
                 lbl_8055FA50[1] = lbl_8055FA50[1] > x ? lbl_8055FA50[1] : x;
                 lbl_8055FA50[2] = lbl_8055FA50[2] < z ? lbl_8055FA50[2] : z;
@@ -1198,7 +1198,7 @@ void fn_802B8848(void) {
     }
     fn_80230B5C(m);
     fn_802C8638(m);
-    fn_802C974C(1.0f, 1000.0f, 1.4396f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4396f);
     fn_802B86F8();
     fn_802B676C();
     if (lbl_8055FA38 != 2 && lbl_8055FA38 != 3) {

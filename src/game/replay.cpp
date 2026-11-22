@@ -74,7 +74,7 @@ void fn_802C87B4(int x, int y, int w, int h);
 void fn_801E81B8(int a, int b);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_80278924(f32* a, f32* b);
 f32 fn_801E7E18(void);
 int fn_802787F4(void);
@@ -503,7 +503,7 @@ void fn_80008F98(void) {
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_80230B5C(&cam);
         fn_802C8638(&cam);
-        fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+        SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
         a = 0.0f;
         b = 0.0f;
         fn_80278924(&a, &b);
@@ -902,7 +902,7 @@ void fn_80009534(void) {
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_80230B5C(&cam);
         fn_802C8638(&cam);
-        fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+        SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
         if (exiting) {
             DrawFade2(frames / 59.0f);
             fn_80206444();

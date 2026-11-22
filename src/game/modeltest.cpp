@@ -10,7 +10,7 @@ void fn_802C8530(void);
 void fn_802C87B4(int x, int y, int w, int h);
 void fn_802C86E8(u32 color);
 void fn_802C88BC(int mode);
-void fn_802C974C(f32 near, f32 far, f32 fov);
+void SetupCameraProjection(f32 near, f32 far, f32 fov);
 void fn_802C8BD0(s32 tex);
 void fn_802C8D74(void);
 void fn_802C855C(void);
@@ -82,7 +82,7 @@ extern "C" {
 // The model/texture test viewer: draws leather.tex on a unit quad until ESC is pressed.
 // Each vertex starts as a copy of an earlier one (v[1] = v[0], v[2] = v[0], v[3] = v[2]: retail's lfd/stfd pair
 // + word moves of the position), then takes its own position and u/v; the MTVec temporaries stay on the stack.
-void fn_8024BE04(void) {
+void RunModelTextureViewer(void) {
     fn_802E30C8("ModelTest!");
     s32 tex = fn_802CAC28("leather.tex", 0);
     for (u32 frame = 0;; frame++) {
@@ -92,7 +92,7 @@ void fn_8024BE04(void) {
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_802C86E8(0xFF7F7F7F);
         fn_802C88BC(3);
-        fn_802C974C(0.2f, 1000.0f, 1.5707964f);
+        SetupCameraProjection(0.2f, 1000.0f, 1.5707964f);
         fn_802C8638(vp);
         MTVtx v[4];
         v[0].u = 0.0f;

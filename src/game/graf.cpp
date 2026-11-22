@@ -115,14 +115,14 @@ int fn_801E2CCC(s32 model, const char* name, f32** out);
 void fn_802C744C(s32 model, const PlainValMatrix* m);
 void fn_802C8B08(PlainValMatrix* cam);
 PlainValMatrix* fn_802C86DC(void);
-void fn_802C9474(u32 color);
+void HandleFullscreenUnsupported(u32 color);
 void fn_802C9900(f32 a);
 void fn_802C9904(void);
 void fn_802CDDC8(void* l, void* base);
-void fn_802CCE24(void* l);
+void SortAndInitializeRenderBatches(void* l);
 void fn_802CD254(void* l);
 void fn_802CD37C(void* l, int a, int b, int c, f32 x, f32 y);
-void fn_802CDB5C(int pass);
+void FlushRenderQueue(int pass);
 void fn_802CDAA8(void);
 void fn_802C7A44(void);
 void fn_802C7A50(void);
@@ -526,8 +526,8 @@ void fn_801EBBB4(void) {
 
 void fn_801EBC2C(void) {
     if (lbl_8055EBA0) {
-        fn_802CCE24(lbl_8055EBA0->list0);
-        fn_802CCE24(lbl_8055EBA0->list1);
+        SortAndInitializeRenderBatches(lbl_8055EBA0->list0);
+        SortAndInitializeRenderBatches(lbl_8055EBA0->list1);
     } else {
         fn_802AEA44();
     }
@@ -584,27 +584,27 @@ void fn_801EBDCC(void) {
             list = lbl_8055EBA0->list0;
         }
         fn_802CD37C(list, 0, 0, 0, lbl_8055EB98[0], lbl_8055EB98[1]);
-        fn_802CDB5C(0);
+        FlushRenderQueue(0);
         fn_802C7A94(1);
         if (!alt) {
             fn_802C9648(1.1f);
-            fn_802CDB5C(1);
+            FlushRenderQueue(1);
             fn_802C7A94(2);
             fn_802C7A94(3);
             fn_80287A34(0);
             fn_802C967C();
-            fn_802CDB5C(2);
+            FlushRenderQueue(2);
             fn_802879E4(0);
             fn_802C7A94(4);
         }
         fn_801FA6B8();
         fn_802C7730(&f);
-        fn_802CDB5C(3);
+        FlushRenderQueue(3);
         fn_802C7A50();
         if (!alt) {
             fn_8029790C(0);
             fn_801F4DCC();
-            fn_802CDB5C(4);
+            FlushRenderQueue(4);
         }
         fn_802C7AD4();
         fn_802CDAA8();
@@ -646,7 +646,7 @@ void fn_801EBF00(void) {
             if (a < 0xFF) {
                 c = a;
             }
-            fn_802C9474(ARGB(0xFF, c, c, c));
+            HandleFullscreenUnsupported(ARGB(0xFF, c, c, c));
             PlainValMatrix* cf = fn_802C86DC();
             PlainValMatrix m;
             m.origin.x = cf->origin.x;

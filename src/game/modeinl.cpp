@@ -148,7 +148,7 @@ VPos::VPos(f32 x, f32 y, f32 z) {
     this->z = z;
 }
 
-void fn_80144B54(Mtx34* d, const Mtx34* s) { *d = *s; }
+void CopyMatrix34(Mtx34* d, const Mtx34* s) { *d = *s; }
 
 f32 fn_80144BD8(f32 x) {
     if (x < -1.0f) {
@@ -163,7 +163,7 @@ f32 fn_80144BD8(f32 x) {
     return x * (x * -2.0f * x) - x * 3.0f * x;
 }
 
-void fn_80144C54(GameSound* s) {
+void StopGameSound(GameSound* s) {
     s->stop = 1;
     s->restart = 0;
 }

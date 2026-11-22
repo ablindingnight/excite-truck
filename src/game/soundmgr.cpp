@@ -16,7 +16,7 @@ void* memmove(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 s32 fn_802E2C20(void);                   // milliseconds
-s32 fn_802090B4(void);                   // sound quality
+s32 GetSoundChannelCount(void);                   // sound quality
 int fn_8026A344(int a);                  // local player
 const char* fn_80206570(int cls);        // sound class name
 }
@@ -200,7 +200,7 @@ void SoundManager::ReapOneShots(void) {
 }
 
 void SoundManager::Allocate(void) {
-    int q = fn_802090B4();
+    int q = GetSoundChannelCount();
     int avail = lbl_802F9DC8[q].total;
     int want[9];
     int got[9];
@@ -259,7 +259,7 @@ void SoundManager::Allocate(void) {
 }
 
 void SoundManager::CheckPlaying(void) {
-    int max = lbl_802F9DC8[fn_802090B4()].total;
+    int max = lbl_802F9DC8[GetSoundChannelCount()].total;
     int playing = 0;
     for (int i = 0; i < all.count; i++) {
         if (all.first[i]->dev->State() == 1) {

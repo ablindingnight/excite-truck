@@ -17,7 +17,7 @@ s32 fn_802C6DC4(const char* name, s32 model, int a, int b);
 typedef void (*LoadCallback)(u8* data, s32 size, void* arg);
 
 extern "C" {
-LoadPool* fn_8013420C(LoadPool* pool, s32 count, s32 slotSize);
+LoadPool* InitializeLoadPool(LoadPool* pool, s32 count, s32 slotSize);
 void fn_8013436C(LoadPool* pool);
 int fn_80134424(LoadPool* pool, const char* name, u32 type, u32* info, LoadCallback cb, void* arg, s32 offset,
                 s32 size);
@@ -70,7 +70,7 @@ struct ModelPool {
         count = n;
         max = m;
         LoadPool* lp = (LoadPool*)operator new(0x10, kLoadPoolTag);
-        loads = lp ? fn_8013420C(lp, max, slotSize) : lp;
+        loads = lp ? InitializeLoadPool(lp, max, slotSize) : lp;
         slots = new (kModelPoolTag) ModelSlot[count];
         time = 0;
     }

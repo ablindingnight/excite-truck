@@ -65,7 +65,7 @@ void fn_8018A2C0(RaceCarRec* car, TweakVisitor* v);  // visit the car's tweaks
 void fn_8018A180(RaceCarRec* car);                   // apply the car's tweaks
 void fn_80230B5C(PlainValMatrix* c);
 void fn_802C8638(PlainValMatrix* c);
-void fn_802C974C(f32 nearZ, f32 farZ, f32 fov);
+void SetupCameraProjection(f32 nearZ, f32 farZ, f32 fov);
 void fn_80011A2C(void);
 extern RaceCarRec* lbl_804348E8[8];
 void RegisterTweakVariable(const char* name, f32* value, const char* unit, f32 min, f32 max, f32 step);
@@ -150,7 +150,7 @@ void UpdateTweakDisplay(void) {
     PlainValMatrix cam;
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, 1.4396f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4396f);
     lbl_8055E9C0->Edit();
     TextElem name = *lbl_8055E9C0->Find("name");
     TextElem name2 = *lbl_8055E9C0->Find("name2");

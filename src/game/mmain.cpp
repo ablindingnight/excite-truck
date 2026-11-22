@@ -36,24 +36,24 @@ UnkStatic7F lbl_8055F128;
 
 extern "C" {
 
-void fn_8023B5EC(void) {
+void LoadMemoryCardSystem(void) {
     fn_802E712C();
     fn_802E6CA4(1);
     MemCardSystemLoad();
 }
 
 void fn_8023B618(void) {
-    fn_8023B5EC();
+    LoadMemoryCardSystem();
     fn_8023D7CC();
     fn_8023D70C();
 }
 
-void fn_8023B640(void) {
+void HandleDemoMode(void) {
     fn_802E30C8("mmain: demo mode!");
     MenuDoDemo();
 }
 
-void fn_8023B670(void) {
+void InitDemoMode(void) {
     fn_802E30C8("mmain: e3 demo mode!");
     UnloadEves();
     LoadDemoEves();
@@ -72,9 +72,9 @@ void fn_8023B6B0(void) {
         fn_80127434();
     }
     if (OptE3Demo()) {
-        fn_8023B670();
+        InitDemoMode();
     } else {
-        fn_8023B640();
+        HandleDemoMode();
     }
     fn_8027B77C();
     fn_802ECEC0();

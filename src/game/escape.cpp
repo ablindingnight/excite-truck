@@ -13,7 +13,7 @@ void fn_80230E90(int unk);
 void PlayNextSound(void);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
 const char* fn_80131234(const char* key);
 void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
@@ -33,11 +33,11 @@ int fn_80137C74(void);
 void fn_80148070(GartElem* item, u32 color, gArtSet* set);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, u32 unk);
 void DrawFormattedText(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
-void* fn_802090D4(const char* name);
-void fn_80209190(void* p, f32 value);
+void* AllocateVolumeHandle(const char* name);
+void SetVolumeClamped(void* p, f32 value);
 ILayout* fn_80145E70(const char* name);
 Sound2D* fn_80207848(const char* name, int flags);
-void fn_80209110(void** p);
+void ClearAudioHandle(void** p);
 f32 fn_80209028(void);
 int fn_80265D64(void);
 void fn_801769E0(void);
@@ -139,7 +139,7 @@ static void fn_8000C964(void) {
 
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);
     if (lbl_8055D414) {
         const char* choices[2] = {"Generic:YES", "Generic:NO"};
@@ -222,8 +222,8 @@ void fn_8000CE60(void) {
     lbl_8055D400 = 0;
     lbl_8055D408 = 0;
     lbl_8055D40C = 0;
-    lbl_8055D410 = fn_802090D4("escape-menu");
-    fn_80209190(lbl_8055D410, 1.0f);
+    lbl_8055D410 = AllocateVolumeHandle("escape-menu");
+    SetVolumeClamped(lbl_8055D410, 1.0f);
     lbl_8055D414 = fn_80145E70("esclyt.val");
     lbl_8055D418 = fn_80207848("pauseon.sfx", 0);
     lbl_8055D41C = fn_80207848("pauseoff.sfx", 0);
@@ -243,7 +243,7 @@ void fn_8000CEF0(void) {
         delete lbl_8055D414;
         lbl_8055D414 = 0;
     }
-    fn_80209110(&lbl_8055D410);
+    ClearAudioHandle(&lbl_8055D410);
     lbl_8055D404 = 0;
     lbl_8055D405 = 0;
     lbl_8055D407 = 0;
@@ -275,7 +275,7 @@ void fn_8000D070(void) {
     }
     fn_80206444();
     lbl_8055D400 = 0;
-    fn_80209190(lbl_8055D410, 0.0f);
+    SetVolumeClamped(lbl_8055D410, 0.0f);
     fn_80230E90(1);
 }
 
@@ -284,7 +284,7 @@ void fn_8000D100(void) {
         lbl_8055D41C->SetVolume(fn_80209028());
         lbl_8055D41C->Play();
     }
-    fn_80209190(lbl_8055D410, 1.0f);
+    SetVolumeClamped(lbl_8055D410, 1.0f);
     fn_80206454();
     if (lbl_8055D404) {
         fn_802E30C8("escape: leave with still active!");
@@ -324,7 +324,7 @@ void fn_8000D1DC(void) {
     }
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     fn_800109E4(0x7F000000, -428.0f, 241.0f, 855.0f, 482.0f);
     if (lbl_8055D407) {
         fn_8000CD24();

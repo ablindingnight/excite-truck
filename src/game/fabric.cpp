@@ -173,7 +173,7 @@ int fn_802C8DBC(int n);
 void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int cont);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
-int fn_802CDB20(void* ctx, s32 id);
+int IsVisibleAtIndex(void* ctx, s32 id);
 void fn_802CD320(void* scene, TrackInst* inst);
 void* fn_802C9C24(void* model);
 extern f32 __float_epsilon[];
@@ -753,7 +753,7 @@ void UniformFabricMan::Update(void* ctx) {
             fn_801F65D0(f);
             UpdateFabricAnchors(f);
         }
-        f->visible = fn_802CDB20(ctx, f->id);
+        f->visible = IsVisibleAtIndex(ctx, f->id);
     }
 }
 
@@ -809,7 +809,7 @@ void NonUniformFabricMan::Update(void* ctx) {
             fn_801F65D0(&f->f);
             UpdateFabricAnchors(&f->f);
         }
-        f->f.visible = fn_802CDB20(ctx, f->f.id);
+        f->f.visible = IsVisibleAtIndex(ctx, f->f.id);
     }
 }
 

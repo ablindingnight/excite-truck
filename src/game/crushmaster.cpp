@@ -42,7 +42,7 @@ double fmod(double x, double y);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_801345D8(char* buf, int size, const char* fmt, ...);
-void fn_801308F4(char* buf, int size, int value);         // number with separators
+void FormatIntegerBuffer(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
 int FindGradeForScore(int score);                                // grade for a score
 void fn_802ADDD8(void* p, int a);
@@ -698,7 +698,7 @@ void CrushResults::Update(int score, int kills, int bonus) {
     if (layout) {
         int shown;
         int n;
-        fn_801308F4(killScore, 0x14, kills);
+        FormatIntegerBuffer(killScore, 0x14, kills);
         shown = bonus;
         n = 0;
         if (bonus && start > 0.0f) {
@@ -716,8 +716,8 @@ void CrushResults::Update(int score, int kills, int bonus) {
             fn_80130980(timeBonus, 0x14, 2, shown);
             SafeStrCopy(bonusTitle, s.Get(), 0x14);
         }
-        fn_801308F4(finalScore, 0x14, score);
-        fn_801308F4(noBonusScore, 0x14, score - bonus);
+        FormatIntegerBuffer(finalScore, 0x14, score);
+        FormatIntegerBuffer(noBonusScore, 0x14, score - bonus);
         {
             int g = FindGradeForScore(score);
             if (g != -1) {
@@ -1447,7 +1447,7 @@ inline int CrushMaster::vf3C(int view) {
             if (h0 && h1 && body && denom) {
                 char buf[0x14];
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
-                fn_801308F4(buf, sizeof(buf), GetGradeScoreThreshold(fn_80160A74()));
+                FormatIntegerBuffer(buf, sizeof(buf), GetGradeScoreThreshold(fn_80160A74()));
                 {
                     TextElem e = *body;
                     e.pos.x -= 0.5f * Width(&e, buf);

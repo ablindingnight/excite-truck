@@ -25,8 +25,8 @@ void* operator new(size_t size, const char* tag);
 class GameSound;
 
 extern "C" {
-void fn_80208B8C(int create);
-Mixer* fn_80208D4C(int i);
+void InitializeAudioMixer(int create);
+Mixer* GetMixerByIndex(int i);
 s32 fn_80208D70(void);
 void fn_80208D80(int destroy);
 }
@@ -56,9 +56,9 @@ s32 lbl_8055ED94;            // failed grabs
 extern "C" {
 
 int fn_802062E8(void) {
-    fn_80208B8C(lbl_8055ED84 == 0);
-    fn_802E30C8("using sound mixer %s", fn_80208D4C(fn_80208D70())->Name());
-    lbl_8055ED80 = new ("SoundManager") SoundManager(fn_80208D4C(fn_80208D70()));
+    InitializeAudioMixer(lbl_8055ED84 == 0);
+    fn_802E30C8("using sound mixer %s", GetMixerByIndex(fn_80208D70())->Name());
+    lbl_8055ED80 = new ("SoundManager") SoundManager(GetMixerByIndex(fn_80208D70()));
     if (lbl_8055ED80) {
         if (lbl_8055ED80->enabled) {
             fn_8020A368();
@@ -92,17 +92,17 @@ void fn_8020646C(int i, s32 id) { lbl_804891E8[i] = id; }
 
 void Mixer::vf3C(void) {}
 
-extern "C" void fn_80206484(int a) { fn_80208D4C(fn_80208D70())->vf2C(a); }
+extern "C" void fn_80206484(int a) { GetMixerByIndex(fn_80208D70())->vf2C(a); }
 
 void Mixer::vf2C(int a) {}
 
 void Mixer::vf30(int a, int b) {}
 
-extern "C" void fn_802064D0(int a) { fn_80208D4C(fn_80208D70())->vf34((void*)a); }
+extern "C" void fn_802064D0(int a) { GetMixerByIndex(fn_80208D70())->vf34((void*)a); }
 
 void Mixer::vf34(void* a) {}
 
-extern "C" void fn_80206518(void) { fn_80208D4C(fn_80208D70())->vf38(); }
+extern "C" void fn_80206518(void) { GetMixerByIndex(fn_80208D70())->vf38(); }
 
 void Mixer::vf38(void) {}
 

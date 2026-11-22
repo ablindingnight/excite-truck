@@ -24,7 +24,7 @@ extern int fn_802E2C20(void);
 extern void PlayNextSound(void);
 extern void fn_8020CF6C(int);
 extern double fabs(double);
-extern void fn_80209190(int, float);
+extern void SetVolumeClamped(int, float);
 extern void fn_80206454(void);
 extern void fn_801769EC(void);
 extern void fn_80206444(void);
@@ -33,9 +33,9 @@ extern float fn_8020A5F0(void);
 extern int fn_80265D64(void);
 extern void fn_801769E0(void);
 extern void fn_80230E90(int);
-extern void *fn_802090D4(const char *);
+extern void *AllocateVolumeHandle(const char *);
 extern void *fn_80145E70(const char *);
-extern void fn_80209110(void *);
+extern void ClearAudioHandle(void *);
 extern int fn_802104D0(void);
 
 int fn_8020CF68(void) {
@@ -44,7 +44,7 @@ int fn_8020CF68(void) {
 
 extern void fn_8020A5F8(float);
 extern void fn_8020C908(float);
-extern void fn_80209030(float);
+extern void SetEffectsVolume(float);
 extern void fn_8013323C(int, char *, float);
 extern void fn_800121F0(void);
 extern void fn_8020D0CC(int);
@@ -85,7 +85,7 @@ void fn_8020CFEC(int arg0) {
 void fn_8020D06C(void) {
     fn_8020A5F8(lbl_8055EE8C);
     fn_8020C908(lbl_8055EE8C);
-    fn_80209030(lbl_8055EE90);
+    SetEffectsVolume(lbl_8055EE90);
     fn_8013323C(4, "music_volume", lbl_8055EE8C);
     fn_8013323C(4, "effects_volume", lbl_8055EE90);
     fn_800121F0();
@@ -103,8 +103,8 @@ void fn_8020D0CC(int arg0) {
 }
 
 void fn_8020D178(void) {
-    lbl_8055EE74 = (int)fn_802090D4("volume-dash");
-    fn_80209190(lbl_8055EE74, 1.0f);
+    lbl_8055EE74 = (int)AllocateVolumeHandle("volume-dash");
+    SetVolumeClamped(lbl_8055EE74, 1.0f);
     lbl_8055EE7C = 0;
     lbl_8055EE80 = 0;
     lbl_8055EEA0 = (int)fn_80145E70("vollyt.val");
@@ -116,7 +116,7 @@ void fn_8020D1C8(void) {
         delete obj;
         lbl_8055EEA0 = 0;
     }
-    fn_80209110(&lbl_8055EE74);
+    ClearAudioHandle(&lbl_8055EE74);
     lbl_8055EE7C = 0;
     lbl_8055EE80 = 0;
 }
@@ -132,7 +132,7 @@ void fn_8020D224(void) {
     if (fn_80265D64() == 0)
         fn_801769E0();
     fn_80206444();
-    fn_80209190(lbl_8055EE74, 0.0f);
+    SetVolumeClamped(lbl_8055EE74, 0.0f);
     lbl_8055EE78 = 0;
     lbl_8055EE9C = 0.0f;
     lbl_8055EE98 = 0.0f;
@@ -141,7 +141,7 @@ void fn_8020D224(void) {
 
 void fn_8020D29C(void) {
     lbl_8055EE94 = 0;
-    fn_80209190(lbl_8055EE74, 1.0f);
+    SetVolumeClamped(lbl_8055EE74, 1.0f);
     fn_80206454();
     fn_801769EC();
 }
@@ -153,7 +153,7 @@ typedef struct SoundMenuLabels {
 const SoundMenuLabels lbl_802F9E58 = {{"Volume:MUSIC", "Volume:EFFECTS", "Volume:SD_CARD"}};
 extern void fn_80230B5C(void *);
 extern void fn_802C8638(void *);
-extern void fn_802C974C(float, float, float);
+extern void SetupCameraProjection(float, float, float);
 extern void fn_800109E4(unsigned long, float, float, float, float);
 extern const char *fn_80131234(const char *);
 extern void fn_801473F8(int, const char *, const char *, ...);
@@ -224,7 +224,7 @@ void fn_8020D2D4(void) {
     }
     fn_80230B5C(camera);
     fn_802C8638(camera);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     now = 0.001f * (float)fn_802E2C20();
     fn_800109E4(0x7F000000, (-428.0f), 241.0f, 855.0f, 482.0f);
     if (lbl_8055EEA0 != 0) {
@@ -363,7 +363,7 @@ void fn_8020D2D4(void) {
 
 void fn_8020DABC(void) {
     fn_8020C908(lbl_8055EE8C);
-    fn_80209030(lbl_8055EE90);
+    SetEffectsVolume(lbl_8055EE90);
     fn_800121F0();
     if (lbl_8055EE78 == 2 && fn_8020CF68() == 0)
         fn_8020D0CC(-1);

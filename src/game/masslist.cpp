@@ -107,10 +107,10 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, s16 c);
 void __ct__4VPosFfff(ValVec3* v, f32 x, f32 y, f32 z);
 s32 lbl_8055A920 = -1;
-MVec4* fn_801BF12C(MVec4* out, const MVec4* in);
-MVec4* fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w);
+MVec4* CopyVector4(MVec4* out, const MVec4* in);
+MVec4* SetVector4Components(MVec4* out, f32 x, f32 y, f32 z, f32 w);
 MVec4* fn_801BF164(MVec4* out, const MVec4* in);
-MVec4* fn_801BF188(MVec4* out, f32 x, f32 y, f32 z);
+MVec4* SetVector3Components(MVec4* out, f32 x, f32 y, f32 z);
 void fn_801BF198(ValVec3* out, const ValVec3* in);
 void fn_801BF0C4(ValVec3* p, ValVec3* n, void* h, s32* surface);
 }
@@ -306,7 +306,7 @@ static inline void MtxToQuat(const ValMatrix* r, MVec4* q) {
     }
 }
 
-void fn_801BE168(int car, const ValMatrix* mtx, const ValVec3* vel, const ValVec3* avel) {
+void UpdateCarPhysics(int car, const ValMatrix* mtx, const ValVec3* vel, const ValVec3* avel) {
     MassSet* s = &lbl_8055E794[car];
     MVec4 q;
     s->pos = MVec4(mtx->origin.x, mtx->origin.y, mtx->origin.z);
@@ -488,11 +488,11 @@ static inline void PostUpdateCar(int car) {
     fn_801BF198(&p, (ValVec3*)&m->pos);
     if (!fn_801BD628(&p)) {
         fn_802E30C8("CarPostUpdate: illegal mass position (%f %f %f)", p.x, p.y, p.z);
-        fn_801BF164(&m->pos, fn_801BF188(&t0, 0.0f, 100.0f, 0.0f));
-        fn_801BF12C(&m->quat, fn_801BF150(&t1, 0.0f, 0.0f, 0.0f, 1.0f));
-        fn_801BF164(&m->vel, fn_801BF164(&m->v60, fn_801BF188(&t2, 0.0f, 0.0f, 0.0f)));
-        fn_801BF12C(&cs->v0, fn_801BF12C(&cs->v10, fn_801BF12C(&cs->v20, fn_801BF12C(&cs->v30,
-            fn_801BF150(&t3, 0.0f, 0.0f, 0.0f, 0.0f)))));
+        fn_801BF164(&m->pos, SetVector3Components(&t0, 0.0f, 100.0f, 0.0f));
+        CopyVector4(&m->quat, SetVector4Components(&t1, 0.0f, 0.0f, 0.0f, 1.0f));
+        fn_801BF164(&m->vel, fn_801BF164(&m->v60, SetVector3Components(&t2, 0.0f, 0.0f, 0.0f)));
+        CopyVector4(&cs->v0, CopyVector4(&cs->v10, CopyVector4(&cs->v20, CopyVector4(&cs->v30,
+            SetVector4Components(&t3, 0.0f, 0.0f, 0.0f, 0.0f)))));
         fn_801BF198(&p, (ValVec3*)&m->pos);
     }
     DefaultConstructVec3(&up);
@@ -504,8 +504,8 @@ static inline void PostUpdateCar(int car) {
         __ct__4VPosFfff(&n, 0.0f, 1.0f, 0.0f);
         fn_801BF0C4(&pt, &n, cx, &surface);
         cx->surface[i] = surface;
-        fn_801BF12C((MVec4*)&cs->nrm[i], fn_801BF150(&t4, n.x, n.y, n.z, pt.y));
-        fn_801BF164((MVec4*)&cs->ref[i], fn_801BF188(&t5, pt.x, pt.y, pt.z));
+        CopyVector4((MVec4*)&cs->nrm[i], SetVector4Components(&t4, n.x, n.y, n.z, pt.y));
+        fn_801BF164((MVec4*)&cs->ref[i], SetVector3Components(&t5, pt.x, pt.y, pt.z));
     }
 }
 
@@ -524,7 +524,7 @@ void fn_801BF0C4(ValVec3* p, ValVec3* n, void* h, s32* surface) {
     }
 }
 
-MVec4* fn_801BF12C(MVec4* out, const MVec4* in) {
+MVec4* CopyVector4(MVec4* out, const MVec4* in) {
     out->x = in->x;
     out->y = in->y;
     out->z = in->z;
@@ -532,7 +532,7 @@ MVec4* fn_801BF12C(MVec4* out, const MVec4* in) {
     return out;
 }
 
-MVec4* fn_801BF150(MVec4* out, f32 x, f32 y, f32 z, f32 w) {
+MVec4* SetVector4Components(MVec4* out, f32 x, f32 y, f32 z, f32 w) {
     out->x = x;
     out->y = y;
     out->z = z;
@@ -548,7 +548,7 @@ MVec4* fn_801BF164(MVec4* out, const MVec4* in) {
     return out;
 }
 
-MVec4* fn_801BF188(MVec4* out, f32 x, f32 y, f32 z) {
+MVec4* SetVector3Components(MVec4* out, f32 x, f32 y, f32 z) {
     out->x = x;
     out->y = y;
     out->z = z;

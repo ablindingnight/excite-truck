@@ -24,7 +24,7 @@ void fn_80133348(int owner, const char* key, s32 value);
 void fn_801332D0(int owner, const char* key, s32* value);
 int fn_8013365C(const char* name, void (*cb)(void));
 void fn_801336E0(int handle, void (*cb)(void));
-void fn_802C5F48(void);
+void InitializeModelBuffers(void);
 void mrModelEnd(void);
 void fn_802CFFAC(int r, int g, int b);
 void fn_802D0160(int r, int g, int b);
@@ -146,7 +146,7 @@ FovState lbl_804C144C;
 
 extern "C" {
 void fn_802C87B4(int x, int y, int w, int h);
-void fn_802C974C(f32 near, f32 far, f32 fov);
+void SetupCameraProjection(f32 near, f32 far, f32 fov);
 s32 fn_802C9C58(s32 mode);
 void fn_802C8BD0(int a);
 void fn_802C8C04(int a);
@@ -162,7 +162,7 @@ extern "C" {
 
 void fn_802C82C0(void) {}
 
-void fn_802C82C4(int type) {
+void SetDisplayType(int type) {
     if (OptWidescreen() || fn_802E9A0C() == 1) {
         type = 1;
     }
@@ -194,7 +194,7 @@ void fn_802C82C4(int type) {
 
 s32 fn_802C83C4(void) { return lbl_8055FC90; }
 
-void fn_802C83CC(void) {
+void InitializeRenderMatrix(void) {
     int n = 10;
     VecP* b = (VecP*)&lbl_804C1410;
     b[0].x = 1.0f;
@@ -214,13 +214,13 @@ void fn_802C83CC(void) {
     lbl_8055FC64 = n;
     lbl_8055FC68 = n;
     lbl_8055FC6C = (f32)n / (f32)n;
-    fn_802C5F48();
+    InitializeModelBuffers();
     lbl_8055FC34 = 0;
-    fn_802C974C(1.0f, 100.0f, 1.3089969f);
+    SetupCameraProjection(1.0f, 100.0f, 1.3089969f);
     lbl_8055FC70 = 0;
     fn_802CFFAC(0xC9, 0xC9, 0xEB);
     fn_802C7758();
-    fn_802C82C4(0);
+    SetDisplayType(0);
     fn_802C9C58(0);
     if (fn_80133010()) {
         fn_801332D0(1, "display_type", &lbl_8055FC90);
@@ -248,7 +248,7 @@ void fn_802C855C(void) {
     lbl_8055FC70 = 0;
 }
 
-void fn_802C8588(PlainValMatrix* cam, const VecP* eye, const VecP* target) {
+void SetupCameraOrientation(PlainValMatrix* cam, const VecP* eye, const VecP* target) {
     VecP up;
     up.x = 0.0f;
     up.y = 1.0f;
@@ -420,7 +420,7 @@ void fn_802C8E48(void) {
 
 // World point to screen: camera space first (the camera read as twelve floats: three axes, then the position),
 // then the viewport mapping.
-void fn_802C8E70(const VecP* p, VecP* out) {
+void TransformWorldToScreen(const VecP* p, VecP* out) {
     const f32* m = (const f32*)&lbl_804C1410;
     f32 z;
     f32 y;
@@ -515,7 +515,7 @@ void fn_802C942C(u32 color) {
     fn_802C92D8();
 }
 
-void fn_802C9474(u32) {
+void HandleFullscreenUnsupported(u32) {
     if (lbl_8055FC94) {
         return;
     }
@@ -523,7 +523,7 @@ void fn_802C9474(u32) {
     fn_802E30C8("%s", "mrFullscreenAdd NOT SUPPORTED!  ANDREW_H IS LAME!");
 }
 
-int fn_802C94A0(const VecP* p, u8* visible, f32* depth, f32 r) {
+int TestPointVisibility(const VecP* p, u8* visible, f32* depth, f32 r) {
     if (visible) {
         *visible = 1;
     }
@@ -557,7 +557,7 @@ int fn_802C94A0(const VecP* p, u8* visible, f32* depth, f32 r) {
     return 1;
 }
 
-int fn_802C9638(const VecP* p, u8* visible, f32 r) { return fn_802C94A0(p, visible, NULL, r); }
+int fn_802C9638(const VecP* p, u8* visible, f32 r) { return TestPointVisibility(p, visible, NULL, r); }
 
 int fn_802C9640(const VecP* p, f32 r) { return fn_802C9638(p, NULL, r); }
 
@@ -568,10 +568,10 @@ void fn_802C9648(f32 scale) {
     lbl_804C144C.far = far;
     lbl_8055FC38 = near * scale;
     lbl_8055FC3C = far * scale;
-    fn_802C974C(near * scale, far * scale, lbl_804C144C.fov);
+    SetupCameraProjection(near * scale, far * scale, lbl_804C144C.fov);
 }
 
-void fn_802C967C(void) { fn_802C974C(lbl_804C144C.near, lbl_804C144C.far, lbl_804C144C.fov); }
+void fn_802C967C(void) { SetupCameraProjection(lbl_804C144C.near, lbl_804C144C.far, lbl_804C144C.fov); }
 
 }  // extern "C"
 
@@ -579,10 +579,10 @@ Perspective::Perspective(f32 near, f32 far, f32 fov) {
     this->near = lbl_8055FC38;
     this->far = lbl_8055FC3C;
     this->fov = lbl_8055FC40;
-    fn_802C974C(near, far, fov);
+    SetupCameraProjection(near, far, fov);
 }
 
-Perspective::~Perspective(void) { fn_802C974C(near, far, fov); }
+Perspective::~Perspective(void) { SetupCameraProjection(near, far, fov); }
 
 extern "C" {
 
@@ -590,7 +590,7 @@ f32 fn_802C973C(void) { return lbl_8055FC4C; }
 
 f32 fn_802C9744(void) { return lbl_8055FC40; }
 
-void fn_802C974C(f32 near, f32 far, f32 fov) {
+void SetupCameraProjection(f32 near, f32 far, f32 fov) {
     u8 is2D = lbl_8055FC74;
     lbl_8055FC38 = near;
     lbl_8055FC3C = far;
@@ -631,7 +631,7 @@ void fn_802C9900(f32 a) { fn_802D007C(a); }
 
 void fn_802C9904(void) { fn_802D007C(1.0f); }
 
-u32 fn_802C990C(u32 color) {
+u32 SetFogColor(u32 color) {
     u32 old = lbl_8055FC78;
     lbl_8055FC78 = color;
     fn_802CFFAC((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
@@ -683,7 +683,7 @@ void fn_802C9A70(int bars) {
     if (lbl_8055FC8D) {
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_802C88BC(2);
-        fn_802C974C(lbl_8055FC38, lbl_8055FC3C, 1.5707964f);
+        SetupCameraProjection(lbl_8055FC38, lbl_8055FC3C, 1.5707964f);
     }
     if ((lbl_8055FC8C || lbl_8055FC8D) && bars) {
         int side = (lbl_8055CFF0 - (int)(0.5f + lbl_8055CFF0 * lbl_8055D020)) / 2;
@@ -820,7 +820,7 @@ extern "C" {
 
 Flare* fn_802CA04C(int id) { return new ("mrDrawList") Flare(id); }
 
-void fn_802CA094(Flare* f) { delete f; }
+void DeleteFlare(Flare* f) { delete f; }
 
 void fn_802CA09C(Flare* f, int a, int b, f32 x, f32 y, f32 z, f32 s, f32 t) { f->Draw(a, b, x, y, z, s, t); }
 

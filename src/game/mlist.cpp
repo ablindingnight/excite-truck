@@ -152,7 +152,7 @@ void fn_801293E8(void* buf);
 const MCam* fn_802C86DC(void);
 void fn_802C8B70(s32 tex);
 void fn_802C8D74(void);
-int fn_802C94A0(const ValVec3* c, u8* clip, f32* dist, f32 r);
+int TestPointVisibility(const ValVec3* c, u8* clip, f32* dist, f32 r);
 void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
@@ -204,7 +204,7 @@ static inline u8 Cull(const MLSphere* sp) {
     c.y = s.y;
     c.z = s.z;
     f32 r = s.r;
-    if (fn_802C94A0(&c, &clip, &lbl_8055FCE0, r)) {
+    if (TestPointVisibility(&c, &clip, &lbl_8055FCE0, r)) {
         lbl_8055FCDC = clip ? 0x81 : 1;
     } else {
         lbl_8055FCDC = 0;
@@ -216,7 +216,7 @@ extern "C" {
 
 void fn_802CCBC0(const MMtx33* r, const F4& a, const F4& b, const F4& c) {}
 
-u8 fn_802CCBC4(const MLBox* e, MVec4 eye, f32 a, f32 b) {
+u8 CheckBoxFrustumCull(const MLBox* e, MVec4 eye, f32 a, f32 b) {
     MVec4 w;
     ValVec3 d;
     MVec4 v = *(MVec4*)&e->ext;
@@ -270,13 +270,13 @@ int fn_802CCD0C(const void* pa, const void* pb) {
     return strcasecmp(a->name, b->name);
 }
 
-int fn_802CCDC4(const void* pa, const void* pb) {
+int SortByPriority(const void* pa, const void* pb) {
     MLObj* a = *(MLObj**)pa;
     MLObj* b = *(MLObj**)pb;
     return a->Priority() - b->Priority();
 }
 
-void fn_802CCE24(MList* m) {
+void SortAndInitializeRenderBatches(MList* m) {
     for (int i = 0; i < m->e.n; i++) {
         MLBatch* e = &m->e.p[i];
         e->tex = fn_802CAC28(e->name, 0);
@@ -290,7 +290,7 @@ void fn_802CCE24(MList* m) {
             SwapItems(d[j], d[n - j - 1]);
         }
     }
-    qsort(m->objs, m->numObjs, sizeof(MLObj*), fn_802CCDC4);
+    qsort(m->objs, m->numObjs, sizeof(MLObj*), SortByPriority);
     memset(m->ranges, 0, sizeof(m->ranges));
     for (int p = 0; p < 5; p++) {
         m->ranges[p].lo = m->e.n;
@@ -477,7 +477,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     const MLBox* bp = ba.p;
     vp = vis + k;
     for (i = 0; i < ba.n; i++, k++, vp++) {
-        *vp = vis[bp->sphere] ? fn_802CCBC4(bp, eye, a, b) : 0;
+        *vp = vis[bp->sphere] ? CheckBoxFrustumCull(bp, eye, a, b) : 0;
         bp++;
     }
     ca = MLArray<MLPiece>(m->c);
@@ -509,7 +509,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
 
 void fn_802CDAA8(void) { lbl_8055FCD8 = 0; }
 
-void fn_802CDAB4(MList* m, int i, const MMtx* mtx) {
+void UpdateMatrixSlot(MList* m, int i, const MMtx* mtx) {
     RenderCtx* ctx = lbl_8055DFC4;
     ctx->mtx[i] = fn_802D0514(mtx);
 }
@@ -519,7 +519,7 @@ void fn_802CDAFC(MList* m, int i) {
     lbl_8055DFC4->vis[k] = 0;
 }
 
-int fn_802CDB20(MList* m, int i) {
+int IsVisibleAtIndex(MList* m, int i) {
     if (i < 0) {
         return 0;
     }
@@ -527,7 +527,7 @@ int fn_802CDB20(MList* m, int i) {
     return lbl_8055DFC4->vis[k] != 0;
 }
 
-void fn_802CDB5C(int pri) {
+void FlushRenderQueue(int pri) {
     MLPrim* pr;
     MList* m;
     RenderCtx* ctx;

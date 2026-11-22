@@ -8,13 +8,13 @@ extern "C" {
 f32 fn_801E8738(int cam);
 f32 fn_801E8874(int cam);
 f32 fn_801E8894(int cam);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_8026A54C(f32 farPlane);
 void fn_801EBC2C(void);
 void fn_801EBC70(void);
 void fn_801EBCAC(void);
 void fn_802C86E8(u32 color);
-void fn_802C990C(u32 color);
+void SetFogColor(u32 color);
 void fn_802C2B78(f32 r, f32 g, f32 b);
 void fn_801FC904(void);
 void fn_801FC908(int a);
@@ -46,20 +46,20 @@ void fn_801EA1FC(void) {
 void fn_801EA210(int cam, f32 fov) {
     if (!lbl_8055EB58) {
         f32 nearPlane = fn_801E8874(cam);
-        fn_802C974C(nearPlane, fn_801E8894(cam), fov);
+        SetupCameraProjection(nearPlane, fn_801E8894(cam), fov);
     } else {
-        fn_802C974C(1.0f, 150.0f, lbl_8055AF68);
+        SetupCameraProjection(1.0f, 150.0f, lbl_8055AF68);
     }
 }
 
 void fn_801EA28C(int cam, f32 fov) {
     f32 nearPlane = fn_801E8874(cam);
-    fn_802C974C(nearPlane, fn_801E8894(cam), fov);
+    SetupCameraProjection(nearPlane, fn_801E8894(cam), fov);
 }
 
 void fn_801EA2E8(void) {
     fn_801EA1FC();
-    fn_802C974C(1.0f, 1000.0f, 1.1780972f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.1780972f);
 }
 
 void fn_801EA318(void) {}
@@ -68,7 +68,7 @@ void fn_801EA31C(int* event) {
     lbl_8055EB60.farPlane = 2250.0f;
     fn_8026A54C(lbl_8055EB60.farPlane);
     lbl_8055EB60.large = GetEventSizeClass(*event) == 2;
-    fn_802C974C(1.0f, lbl_8055EB60.farPlane, 0.65449846f);
+    SetupCameraProjection(1.0f, lbl_8055EB60.farPlane, 0.65449846f);
     lbl_8055EB58 = 0;
     lbl_8055EB59 = 1;
 }
@@ -86,7 +86,7 @@ void fn_801EA394(void) {
 }
 
 void fn_801EA3B8(void) {
-    fn_802C990C(0x00C9C9EB);
+    SetFogColor(0x00C9C9EB);
     fn_802C86E8(0xFF000000);
     fn_802C2B78(0.0f, 100.0f, 0.0f);
     lbl_8055EB59 = 0;

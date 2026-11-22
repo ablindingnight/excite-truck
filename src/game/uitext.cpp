@@ -18,7 +18,7 @@ void fn_802328D4(s32 font);
 int fn_80232B70(int font);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_802C8BD0(s32 tex);
 void fn_802C92DC(int x0, int y0, int x1, int y1, u32 color);
 void fn_802C8D74(void);
@@ -66,7 +66,7 @@ void fn_80238920(void) {
 
 void fn_8023895C(void) {
     PlainValMatrix cam;
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     fn_80230B5C(&cam);
     cam.origin.z = -(lbl_8055CFF0 / 2) / lbl_8055FC88;
     fn_802C8638(&cam);

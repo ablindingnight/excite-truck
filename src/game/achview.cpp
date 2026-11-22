@@ -178,7 +178,7 @@ struct AchQuery {
 void AchievementsQuery(AchQuery* q);
 int AchievementsGetLevel(int category, s32 value);
 int AchievementsGetLevelCount(int category);
-extern "C" void fn_80130FCC(char* buf, s32 size, s32 value);
+extern "C" void FormatIntWithPrefix(char* buf, s32 size, s32 value);
 extern f32 __float_epsilon[];  // FLT_EPSILON
 extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" void fn_80236954(const char* name);
@@ -328,7 +328,7 @@ public:
         s32 v;
         int show;
         v = (s32)(shown + __float_epsilon[0]);
-        fn_80130FCC(valueText, 0x14, v);
+        FormatIntWithPrefix(valueText, 0x14, v);
         show = 1;
         if (counting && (started || !levelUp)) {
             show = 0;
@@ -336,7 +336,7 @@ public:
         level = AchievementsGetLevel(q.category, v);
         s32 next = AchievementsGetLevelThreshold(q.category, level + 1);
         if (next >= 0) {
-            fn_80130FCC(nextText, 0x14, next);
+            FormatIntWithPrefix(nextText, 0x14, next);
         } else {
             nextText.CopyFrom("");
         }

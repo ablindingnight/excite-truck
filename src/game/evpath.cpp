@@ -803,7 +803,7 @@ static inline void SelectBar(int i, bool select = true) {
     }
 }
 
-extern "C" void fn_801308F4(char* buf, int n, int value);  // format a score
+extern "C" void FormatIntegerBuffer(char* buf, int n, int value);  // format a score
 const char* GetGradeDisplayName(int grade);
 
 
@@ -917,10 +917,10 @@ public:
 // The bar's caption without animations: "best/pass", whether it is passed, its best grade.
 inline void EvEventBar::Reset(void) {
     if (contest) {
-        fn_801308F4(text, 30, contest->Best());
+        FormatIntegerBuffer(text, 30, contest->Best());
         AppendName("/", 30, text);
         char pass[20];
-        fn_801308F4(pass, 20, contest->PassScore());
+        FormatIntegerBuffer(pass, 20, contest->PassScore());
         AppendName(pass + 1, 30, text);
         if (contest->Unlocked()) {
             unlocked = 1;
@@ -1598,10 +1598,10 @@ static inline void PlayBarAnim(EvEventBar* b, const char* anim) {
 // Refreshes the bar: "best/pass", the passed / perfected / grade-up animations, the grade.
 static inline void RefreshEvent(EvEventBar* b) {
     if (b->contest) {
-        fn_801308F4(b->text, 30, b->contest->Best());
+        FormatIntegerBuffer(b->text, 30, b->contest->Best());
         AppendName("/", 30, b->text);
         char pass[20];
-        fn_801308F4(pass, 20, b->contest->PassScore());
+        FormatIntegerBuffer(pass, 20, b->contest->PassScore());
         AppendName(pass + 1, 30, b->text);
         if (!b->passed && b->contest->Unlocked()) {
             fn_8027ED70()->PlaySound("scoreup_passevent");

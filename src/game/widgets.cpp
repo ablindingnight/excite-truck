@@ -248,7 +248,7 @@ struct NumericCaptionPrefix {char base[0x254];float scale,bias;int* value;const 
 typedef char NumericCaptionPrefixSize[(sizeof(NumericCaptionPrefix)==0x268)?1:-1];
 extern "C" {
 
-int sprintf(char*,const char*,...);void fn_80130568(char*);
+int sprintf(char*,const char*,...);void ReplacePeriodsWithSeparator(char*);
 void fn_8021CF9C(WidgetFragment*);
 void fn_8021CF9C(WidgetFragment* self);
 }
@@ -1399,7 +1399,7 @@ Column::~Column(void) {WidgetFragment* self=(WidgetFragment*)this;PageTextPrefix
 void Column::Slot28(void) {PageTextPrefix* f=(PageTextPrefix*)((WidgetFragment*)this);int end;int x=((WidgetFragment*)this)->left;int start=f->list->page*f->list->visible;int y=((WidgetFragment*)this)->top;end=start+f->list->visible;if(f->list->used<end)end=f->list->used;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=f->list->Get(i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);DrawImageWithParams(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
 void RichCaption::Slot24(void* context) {SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));RichCaptionPrefix* f=(RichCaptionPrefix*)((WidgetFragment*)this);DrawTextWithFormatting(f->renderer,0,9,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top,f->label);}
 Numeric::Numeric(int x,int y,float* value,float scale,const char* format,float bias,int height) : UILabel(x,y,0,height,0,0), value(value) {WidgetFragment* self=(WidgetFragment*)this;FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);}
-void fn_8021BE48(WidgetFragment* self){FloatFormatPrefix* f=(FloatFormatPrefix*)self;sprintf(f->text,f->format,*f->value*f->scale+f->bias);fn_80130568(f->text);fn_80219718(self);WidgetMarkDirty(self);}
+void fn_8021BE48(WidgetFragment* self){FloatFormatPrefix* f=(FloatFormatPrefix*)self;sprintf(f->text,f->format,*f->value*f->scale+f->bias);ReplacePeriodsWithSeparator(f->text);fn_80219718(self);WidgetMarkDirty(self);}
 void Numeric::Slot74(int, void*) {fn_8021BE48(((WidgetFragment*)this));}
 SpinCtl::SpinCtl(int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY) : UILabel(x,y,0,height,0,0), target(target) {WidgetFragment* self=(WidgetFragment*)this;ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;f->left=left;f->right=right;f->lineY=lineY;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C12C(self);f->focus=0;f->token=fn_80228F40(x,y);}
 void SpinCtl::Slot14(void) {if(fn_80129BC4(((WidgetFragment*)this))){Bound2a8* f=(Bound2a8*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}}
@@ -1455,7 +1455,7 @@ void fn_8021CF9C(WidgetFragment* self){
  NumericCaptionPrefix* fields=(NumericCaptionPrefix*)self;
  float number=fields->bias+(float)*fields->value*fields->scale;
  sprintf(fields->text,fields->format,(int)((0.5f)+number));
- fn_80130568(fields->text);fn_80219718(self);WidgetMarkDirty(self);
+ ReplacePeriodsWithSeparator(fields->text);fn_80219718(self);WidgetMarkDirty(self);
 }
 void IntNumeric::Slot74(int, void*) {fn_8021CF9C(((WidgetFragment*)this));}
 Multi::Multi(int x,int y,int* value,const char* list,int height,int first,int second,int style) : UILabel(x,y,0,height,0,0) {WidgetFragment* self=(WidgetFragment*)this;

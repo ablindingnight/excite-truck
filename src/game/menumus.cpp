@@ -72,7 +72,7 @@ extern "C" {
 
 #pragma push
 #pragma ppc_unroll_instructions_limit 40
-void fn_8020C140(void) {
+void UpdateMusicVolume(void) {
     f32 v = lbl_8055EE48 * lbl_8055EE4C;
     if (lbl_8055EE58) {
         if (lbl_8055EE40) {
@@ -115,7 +115,7 @@ struct HeapGuard {
     }
 };
 
-void fn_8020C2AC(void) {
+void LoadMusicTracks(void) {
     lbl_8055EE40 = 0;
     lbl_8055EE48 = fn_8020A5F0();
     lbl_8055EE4C = 1.0f;
@@ -155,17 +155,17 @@ void fn_8020C2AC(void) {
             *loaded = 1;
         }
     }
-    fn_8020C140();
+    UpdateMusicVolume();
 }
 
-void fn_8020C41C(void) {
+void LoadGoalLineSound(void) {
     fn_8021037C();
     lbl_8055EE38 = fn_80207848("goalline.sfx", 1);
     lbl_8055EE45 = 0;
     lbl_8055EE46 = 0;
 }
 
-void fn_8020C45C(void) {
+void StopMusicAndCleanup(void) {
     if (lbl_8055EE38) {
         delete lbl_8055EE38;
     }
@@ -200,9 +200,9 @@ void fn_8020C54C(void) {
     lbl_8055EE46 = 0;
 }
 
-void fn_8020C59C(void) {
+void UpdateMusicState(void) {
     if (!lbl_8055EE41 || !lbl_8055EE43 || !lbl_8055EE42) {
-        fn_8020C2AC();
+        LoadMusicTracks();
     }
     lbl_8055EE58 = fn_802104B8();
     lbl_8055EE40 = fn_8000D75C();
@@ -259,7 +259,7 @@ void fn_8020C59C(void) {
     }
     f32 d = MaxF(MinFRev(lbl_8055EE50 - lbl_8055EE4C, 0.2f), -0.2f);
     lbl_8055EE4C = MaxF(MinFRev(lbl_8055EE4C + d, 1.0f), 0.0f);
-    fn_8020C140();
+    UpdateMusicVolume();
     t = lbl_80489BE0;
     for (int i = 0; i < 3; i++, t++) {
         if (i == track) {
@@ -287,11 +287,11 @@ void fn_8020C8F8(void) {}
 
 void fn_8020C8FC(void) {}
 
-void fn_8020C900(u8 paused) { lbl_8055EE40 = paused; }
+void SetPauseState(u8 paused) { lbl_8055EE40 = paused; }
 
 void fn_8020C908(f32 volume) {
     lbl_8055EE48 = volume;
-    fn_8020C140();
+    UpdateMusicVolume();
 }
 
 void fn_8020C910(f32 target) { lbl_8055EE50 = target; }
@@ -300,7 +300,7 @@ void fn_8020C918(int) {}
 
 void fn_8020C91C(int) {}
 
-void fn_8020C920(const char* track) {
+void LoadTrackMusic(const char* track) {
     MusicTrack* t;
     const char* name = track;
     int i;
@@ -329,6 +329,6 @@ void fn_8020C920(const char* track) {
 
 }  // extern "C"
 
-// NonMatching: fn_8020C2AC still issues the hoisted constant 1 one store later than the target; case 2
+// NonMatching: LoadMusicTracks still issues the hoisted constant 1 one store later than the target; case 2
 // there loads song before the loaded flag (swapping it here fixes that row but lowers objdiff's score until
-// the constant also moves). fn_8020C140 is now exact.
+// the constant also moves). UpdateMusicVolume is now exact.

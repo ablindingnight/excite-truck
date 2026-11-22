@@ -83,7 +83,7 @@ struct ModelRefs : ArrayRef<s32> {
 };
 
 extern "C" void fn_801D94DC(MorphRegion** head, ValueNode* node, const char* key, ValueTable* regions);
-extern "C" void fn_801D98F0(MorphRegion** head);
+extern "C" void ClearMorphRegions(MorphRegion** head);
 
 struct MorphGroup {
     MorphGroup(ValueNode* node, ValueTable* regionTable) {
@@ -101,7 +101,7 @@ struct MorphGroup {
         next = NULL;
         t = 0.0f;
     }
-    ~MorphGroup(void) { fn_801D98F0(&regions); }
+    ~MorphGroup(void) { ClearMorphRegions(&regions); }
 
     char name[0x20];       // offset 0x0
     f32 t;                 // offset 0x20
@@ -183,7 +183,7 @@ void fn_801D9120(f32* out, const f32* w, int n, f32 scale) {
     }
 }
 
-void fn_801D91D8(void) {
+void LinkGroupsToLists(void) {
     for (MorphGroup* g = lbl_8055E96C; g; g = g->next) {
         for (OmlList* l = lbl_8055E964; l; l = l->next) {
             if (l->groups.Find(g) != -1) {
@@ -200,20 +200,20 @@ MorphGroup* fn_801D9260(int i) {
     return g;
 }
 
-void fn_801D9394(MorphGroup** head, ValueNode* node, const char* key, ValueTable* regions);
+void CreateMorphGroupFromKey(MorphGroup** head, ValueNode* node, const char* key, ValueTable* regions);
 void fn_801D9654(OmlList** head, ValueNode* node, const char* key, int unused);
 
-void fn_801D9284(void) {
+void LoadMorphAndRegionData(void) {
     lbl_8055E96C = NULL;
     ValueTable* regions = fn_80131810("mregion.val");
     if (regions) {
         ValueTable* morph = fn_80131810("mmorph.val");
         if (morph) {
-            fn_801D9394(&lbl_8055E96C, morph->FindChild("morph_groups"), "morph_group", regions);
+            CreateMorphGroupFromKey(&lbl_8055E96C, morph->FindChild("morph_groups"), "morph_group", regions);
             ValueTable* wl = fn_80131810("wlmodels.val");
             if (wl) {
                 fn_801D9654(&lbl_8055E964, wl->FindChild("oml_lists"), kOverlay, 0);
-                fn_801D91D8();
+                LinkGroupsToLists();
                 fn_80131818(wl);
             }
             fn_80131818(morph);
@@ -224,7 +224,7 @@ void fn_801D9284(void) {
     lbl_8055E968 = 0;
 }
 
-void fn_801D9394(MorphGroup** head, ValueNode* node, const char* key, ValueTable* regions) {
+void CreateMorphGroupFromKey(MorphGroup** head, ValueNode* node, const char* key, ValueTable* regions) {
     ValueNode* child;
     for (int i = 0; (child = node->GetChildAt(i)) != NULL; i++) {
         if (strcmp(child->GetName(), key) == 0) {
@@ -268,16 +268,16 @@ char kMorphRegion[] = "morph_region";
 
 extern "C" {
 
-void fn_801D985C(MorphGroup** head);
-void fn_801D9948(OmlList** head);
+void DeleteMorphGroups(MorphGroup** head);
+void ClearOmlList(OmlList** head);
 
 void fn_801D9828(void) {
     mrModelUnload(lbl_8055E960);
-    fn_801D985C(&lbl_8055E96C);
-    fn_801D9948(&lbl_8055E964);
+    DeleteMorphGroups(&lbl_8055E96C);
+    ClearOmlList(&lbl_8055E964);
 }
 
-void fn_801D985C(MorphGroup** head) {
+void DeleteMorphGroups(MorphGroup** head) {
     MorphGroup* g = *head;
     while (g) {
         MorphGroup* next = g->next;
@@ -287,7 +287,7 @@ void fn_801D985C(MorphGroup** head) {
     *head = NULL;
 }
 
-void fn_801D98F0(MorphRegion** head) {
+void ClearMorphRegions(MorphRegion** head) {
     MorphRegion* r = *head;
     while (r) {
         MorphRegion* next = r->next;
@@ -297,7 +297,7 @@ void fn_801D98F0(MorphRegion** head) {
     *head = NULL;
 }
 
-void fn_801D9948(OmlList** head) {
+void ClearOmlList(OmlList** head) {
     OmlList* l = *head;
     while (l) {
         OmlList* next = l->next;
@@ -316,7 +316,7 @@ void fn_801D9A08(void) {
     lbl_8055E968 = 0;
 }
 
-MorphGroup* fn_801D9A54(const char* name) {
+MorphGroup* FindMorphGroupByName(const char* name) {
     for (MorphGroup* g = lbl_8055E96C; g; g = g->next) {
         if (strcmp(name, g->name) == 0) {
             return g;
@@ -334,7 +334,7 @@ void fn_801D9AB8(MorphGroup* g, f32 t) {
     }
 }
 
-int fn_801D9B28(MorphGroup* g, int region) {
+int CheckRegionExists(MorphGroup* g, int region) {
     for (MorphRegion* r = g->regions; r; r = r->next) {
         if (r->index == region) {
             return 1;

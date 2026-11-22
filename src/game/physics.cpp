@@ -16,13 +16,13 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 void fn_801E1D20(void);
 void fn_801E1D2C(void);
 void fn_80178DD0(void);
-s32 fn_8012F31C(s32 size);
+s32 CreateMemBuffer(s32 size);
 s32 fn_8012F3CC(s32);
-void fn_8012F43C(s32);
-void fn_8012F384(s32 s);
-void fn_8012F418(s32 s);
-void fn_8012F458(s32 s, s32 pos);
-s32 fn_8012F450(s32 s);
+void ResetMemStreamPosition(s32);
+void DeleteMemoryBuffer(s32 s);
+void DeleteMemStream(s32 s);
+void WriteValueToStream(s32 s, s32 pos);
+s32 GetStreamPosition(s32 s);
 void fn_8012F4AC(s32 s, void* data, s32 size);
 void fn_8017EBE0(void);
 void fn_8017EC30(void);
@@ -32,9 +32,9 @@ void fn_801B6604(void);
 void fn_801B6614(void);
 void fn_801D0BE4(void);
 void fn_801D0BF4(void);
-s32 fn_802090D4(const char* name);
-void fn_80209110(s32* h);
-void fn_80209190(s32 h, f32 v);
+s32 AllocateVolumeHandle(const char* name);
+void ClearAudioHandle(s32* h);
+void SetVolumeClamped(s32 h, f32 v);
 s32 fn_80179658(s32 a);
 void fn_8013A208(void);
 s32 fn_802E2C20(void);
@@ -188,9 +188,9 @@ void fn_80176460(const RaceOpts* s, const char* name, const s32* seed) {
     lbl_8055E3E4 = 1;
     lbl_8055A3A0 = 1.0f;
     lbl_8055E3CC = 0;
-    lbl_8055E3DC = fn_8012F31C(0x10000);
+    lbl_8055E3DC = CreateMemBuffer(0x10000);
     lbl_8055E3E0 = fn_8012F3CC(lbl_8055E3DC);
-    fn_8012F43C(lbl_8055E3E0);
+    ResetMemStreamPosition(lbl_8055E3E0);
     fn_8017EBE0();
     fn_801AE5A8();
     fn_801B6604();
@@ -205,8 +205,8 @@ void fn_801765B8(void) {
     fn_801B6614();
     fn_801AE5AC();
     fn_8017EC30();
-    fn_8012F418(lbl_8055E3E0);
-    fn_8012F384(lbl_8055E3DC);
+    DeleteMemStream(lbl_8055E3E0);
+    DeleteMemoryBuffer(lbl_8055E3DC);
     fn_801E1D2C();
     lbl_8055E3BC = 0;
 }
@@ -216,8 +216,8 @@ void fn_80176610(void) { fn_80176CC8(); }
 void fn_80176614(void) {
     int tries;
     lbl_8055E3F4 = 1;
-    fn_8012F458(lbl_8055E3E0, -1);
-    fn_802E30C8("physics: using %d of %d for init stream", fn_8012F450(lbl_8055E3E0), 0x10000);
+    WriteValueToStream(lbl_8055E3E0, -1);
+    fn_802E30C8("physics: using %d of %d for init stream", GetStreamPosition(lbl_8055E3E0), 0x10000);
     tries = 0;
     while (lbl_8055E3F4 == 1) {
         fn_80176CC8();
@@ -227,7 +227,7 @@ void fn_80176614(void) {
     }
     lbl_8055E3F4 = 3;
     fn_80176DE0();
-    lbl_8055E3F0 = fn_802090D4("physics");
+    lbl_8055E3F0 = AllocateVolumeHandle("physics");
     fn_8017779C();
 }
 
@@ -240,7 +240,7 @@ void fn_801766C4(void) {
             fn_802E317C("can't get physics to end");
         }
     }
-    fn_80209110(&lbl_8055E3F0);
+    ClearAudioHandle(&lbl_8055E3F0);
 }
 
 void fn_80176734(void) {
@@ -316,7 +316,7 @@ void fn_8017691C(void) {
 void fn_80176948(s32* data, s32* pos) {
     s32 p = lbl_8055E3CC;
     *pos = p;
-    fn_8012F458(lbl_8055E3E0, p);
+    WriteValueToStream(lbl_8055E3E0, p);
     fn_8012F4AC(lbl_8055E3E0, data, data[1]);
     lbl_8055E3CC += fn_80179658(data[0]);
 }
@@ -606,7 +606,7 @@ int fn_801773E4(void) {
     } else {
         a = lbl_80430558.alpha;
     }
-    fn_80209190(lbl_8055E3F0, (f32)(255 - a) / 255.0f);
+    SetVolumeClamped(lbl_8055E3F0, (f32)(255 - a) / 255.0f);
     return a;
 }
 

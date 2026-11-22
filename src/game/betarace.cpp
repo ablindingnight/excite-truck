@@ -43,10 +43,10 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 void fn_802E30C8(const char* fmt, ...);                      // debug print
 void fn_802E317C(const char* fmt, ...);                      // fatal: print, then exit() -> PPCHalt (never returns)
 const char* fn_80131234(const char* key);                    // localize
-const char* fn_80130FE0(s32 value);                          // ordinal suffix
+const char* GetOrdinalSuffix(s32 value);                          // ordinal suffix
 void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
-void fn_801308F4(char* buf, s32 size, s32 value);             // format a score
-void fn_801308F8(char* buf, s32 size, s32 value);
+void FormatIntegerBuffer(char* buf, s32 size, s32 value);             // format a score
+void FormatOutOfBoundsScore(char* buf, s32 size, s32 value);
 int fn_80179650(void);
 int FindGradeForScore(s32 score);  // grade for a score
 }
@@ -1564,7 +1564,7 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
     {
         s32 p = r->place;
         fn_801345D8(place.s, 0x14, "%d", p);
-        suffix.Set(fn_80130FE0(p));
+        suffix.Set(GetOrdinalSuffix(p));
     }
     if (fn_80179650() == 1) {
         char buf[0x32];
@@ -1580,12 +1580,12 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         f32 t = Ramp(clockNow - bonusStart, 0.0f, 1.0f);
         shown = Lerp(0.0f, 0.5f + b, t);
     }
-    fn_801308F4(bonus.s, 0x14, shown);
+    FormatIntegerBuffer(bonus.s, 0x14, shown);
     {
         s32 tot = r->total;
         s32 basePts = tot - b;
-        fn_801308F4(base.s, 0x14, basePts);
-        fn_801308F8(total.s, 0x14, tot);
+        FormatIntegerBuffer(base.s, 0x14, basePts);
+        FormatOutOfBoundsScore(total.s, 0x14, tot);
         fn_801345D8(count.s, 0x14, r->timeLeft ? "%d" : kBetaDash, r->timeLeft);
         int g = FindGradeForScore(basePts);
         if (g != -1) {
@@ -2061,7 +2061,7 @@ inline void DrawBonanza(Coins* co, CoinCar* car) {
     GartElem* s2;
     int k;
     DrawText(co->obj, "bonanza_title");
-    fn_801308F4(buf, sizeof(buf), car->count);
+    FormatIntegerBuffer(buf, sizeof(buf), car->count);
     fn_801473F8(co->obj, "bonanza_score", buf);
     s0 = co->obj->FindBox("star_0");
     s1 = co->obj->FindBox("star_1");
@@ -3960,7 +3960,7 @@ extern "C" {
 }  // extern "C"
 void DrawPlayerLapCounter(int, int, int);
 extern "C" {
-void fn_80130FCC(char* buf, s32 size, s32 value);
+void FormatIntWithPrefix(char* buf, s32 size, s32 value);
 f32 fn_80147204(TextElem* e, const char* text);  // text width
 }
 
@@ -4012,7 +4012,7 @@ inline int BetaMaster::vf3C(int view) {
         if (h0 && h1 && body && denom) {
             char buf[0x14];
             Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k), Overlay());
-            fn_801308F4(buf, sizeof(buf), fn_80160A90());
+            FormatIntegerBuffer(buf, sizeof(buf), fn_80160A90());
             {
                 TextElem e = *body;
                 e.pos.x -= 0.5f * Width(&e, buf, Overlay());
@@ -4047,7 +4047,7 @@ inline int BetaMaster::vf3C(int view) {
             char buf[0x14];
             Blend(h0, h1, fn_80131234("PreRaceOverlay:NUMBER_OF_LAPS"), Ease(k), Overlay());
             laps = fn_801E7E3C()->laps;
-            fn_80130FCC(buf, sizeof(buf), laps);
+            FormatIntWithPrefix(buf, sizeof(buf), laps);
             {
                 TextElem e = *body;
                 e.pos.x -= 0.5f * Width(&e, buf, Overlay());

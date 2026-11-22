@@ -546,9 +546,9 @@ void fn_802C8D74(void);
 void fn_802C8DB8(void* v, int nv, u16* idx, int ni);
 void fn_802C942C(u32 a);
 f32 fn_802C9744(void);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_802C98DC(f32* a, f32* b, f32* c, f32* d);
-u32 fn_802C990C(u32 c);
+u32 SetFogColor(u32 c);
 void fn_802C9950(u32 c);
 void fn_802C9994(u32 c);
 f32 fn_802C99E8(f32 a);
@@ -1511,7 +1511,7 @@ void CarUIScreen::Draw(void) {
     } else {
         InitializeCarSlotView(&p, bg, model);
     }
-    fn_802C974C(1.0f, 2250.0f, fn_802C9744());
+    SetupCameraProjection(1.0f, 2250.0f, fn_802C9744());
     fn_802C8638(&cam);
     fn_80253258();
     fn_802C99E8(1.0f);
@@ -1562,7 +1562,7 @@ void CarUIScreen::Draw(void) {
     ColorState st;
     if (tint) {
         st.alpha = fn_802C2C00(1);
-        st.color = fn_802C990C(0xFF000000);
+        st.color = SetFogColor(0xFF000000);
         fn_802C2BB8(&st.a, &st.b, &st.c);
         fn_802C2B78(1.0f, 1.01f, 1.0f);
     } else {
@@ -1578,7 +1578,7 @@ void CarUIScreen::Draw(void) {
         fn_802AC070();
     }
     if (tint) {
-        fn_802C990C(st.color);
+        SetFogColor(st.color);
         fn_802C2B78(st.a, st.b, st.c);
         fn_802C2C00(st.alpha);
     }

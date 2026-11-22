@@ -105,7 +105,7 @@ int CreateFileFromName(const char* name);
 void fn_802E3734(s32* fd);
 void WriteFileData(s32 fd, const void* buf, u32 n);
 void fn_801BFD34(V3* out, const V3* in, const PlainValMatrix* m);
-void fn_802C8588(void* out, const V3* a, const V3* b);
+void SetupCameraOrientation(void* out, const V3* a, const V3* b);
 
 extern GXRenderModeObj GXNtsc480IntDf;
 extern GXRenderModeObj GXNtsc480Prog;
@@ -1713,7 +1713,7 @@ void UpdateModelViewMatrix(void) {
         f32 t[3][4];
         f32 s[3][4];
         f32 st[3][4];
-        fn_802C8588(&look, &lbl_804C56C0.origin, &lbl_804C5690.origin);
+        SetupCameraOrientation(&look, &lbl_804C56C0.origin, &lbl_804C5690.origin);
         Invert(&li, &look);
         fn_801BFD34(&lw.origin, &lbl_804C5690.origin, &li);
         Mat3Mul(&lw.Mat(), &lbl_804C5690.Mat(), &li.Mat());

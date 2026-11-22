@@ -209,7 +209,7 @@ extern "C" {
 extern char lbl_80498A58[4][18];
 extern char lbl_80498AA0[4][100];
 void* memset(void*, int, unsigned long);
-void fn_801308F4(char*, int, u32);
+void FormatIntegerBuffer(char*, int, u32);
 // Achievement result is retained as an opaque register-sized word: both this
 // build's producer and consumer are four-byte stubs, so no pointee type is inferred.
 static inline void ProfileCopyLabelNew(const char* src,int n,char* dst){while((*dst++=*src++)!=0){if(--n<=0){dst[-1]=0;break;}}}
@@ -450,7 +450,7 @@ void fn_8024CAAC(int emptyAvailable) {
             fn_801345D8(key, 100, "PlayerName:%d", slot + 1);
             const char* src = fn_80131234(key);
             ProfileCopyLabelNew(src,18,name);
-            fn_801308F4(description, 100, AchievementsGetForSlot(0, slot));
+            FormatIntegerBuffer(description, 100, AchievementsGetForSlot(0, slot));
             *available = 1;
         }
     }

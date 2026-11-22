@@ -132,7 +132,7 @@ extern "C" const char* fn_80131234(const char* key);
 extern f32 __float_max[];  // FLT_MAX (MSL)
 
 extern "C" {
-void fn_801308F4(char* buf, s32 size, s32 value);
+void FormatIntegerBuffer(char* buf, s32 size, s32 value);
 void fn_80130980(char* buf, s32 size, int fields, f32 secs);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 s32 fn_802168E4(void);
@@ -176,7 +176,7 @@ void fn_8025C204(int event, int difficulty) {
         f32 time = -__float_max[0];
         HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), event, difficulty, i);
         if (hs) {
-            fn_801308F4(rows[i].score, 20, hs->score);
+            FormatIntegerBuffer(rows[i].score, 20, hs->score);
             if (hs->grade != -1) {
                 rows[i].grade = GetGradeDisplayName(hs->grade);
             }

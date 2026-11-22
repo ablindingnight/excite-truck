@@ -134,7 +134,7 @@ void fn_802C8B70(s32 tex);
 void fn_802C8B98(s32 tex, const MFrame* m);
 void fn_802C8D74(void);
 int fn_802C90E0(void);
-int fn_802C94A0(const ValVec3* c, u8* clip, f32* dist, f32 r);
+int TestPointVisibility(const ValVec3* c, u8* clip, f32* dist, f32 r);
 int fn_802C9638(const ValVec3* c, u8* clip, f32 r);
 const ValVec3* fn_802C9A40(void);
 s32 fn_802C9C58(s32 v);
@@ -248,9 +248,9 @@ extern "C" {
 
 ModelNode* fn_802C5390(s32 i) { return &lbl_804C139C.data[i]; }
 
-ModelInfo* fn_802C53A8(s32 i) { return lbl_804C139C.data[i].info; }
+ModelInfo* GetModelInfoByIndex(s32 i) { return lbl_804C139C.data[i].info; }
 
-void fn_802C53C4(MElem* e, TexNode* t, void* mtx, u32 mat, u8 clip) {
+void SetupRenderNode(MElem* e, TexNode* t, void* mtx, u32 mat, u8 clip) {
     RNode* n = lbl_804C1338.Alloc();
     if (n) {
         n->prim = e->prim;
@@ -268,7 +268,7 @@ void fn_802C53C4(MElem* e, TexNode* t, void* mtx, u32 mat, u8 clip) {
 
 void fn_802C543C(void) { lbl_804C1338.count = 0; }
 
-int fn_802C544C(const void* pa, const void* pb) {
+int CompareTextureNodes(const void* pa, const void* pb) {
     TexNode* b = *(TexNode**)pb;
     TexNode* a = *(TexNode**)pa;
     if (a->prio != b->prio) {
@@ -294,7 +294,7 @@ void fn_802C54D4(void) {
                 }
             }
         }
-        qsort(lbl_804C1390.data, lbl_804C1390.count, sizeof(TexNode*), fn_802C544C);
+        qsort(lbl_804C1390.data, lbl_804C1390.count, sizeof(TexNode*), CompareTextureNodes);
         int pri = 1;
         Bin* b = fn_802C54B4(1);
         b->first = lbl_804C1390.data;
@@ -357,7 +357,7 @@ static inline void DrawElemSurfs(MElem* el, int inst, void* mtx, u32 mat, u8 cl,
     for (int j = 0; j < sl->n; j++) {
         if (IsQueued(sl->surfs[j]->type)) {
             TexNode* t = sl->surfs[j]->tex[inst];
-            fn_802C53C4(el, t, mtx, mat, cl);
+            SetupRenderNode(el, t, mtx, mat, cl);
             fn_802CC550(t->tex, dist, fn_802C57B0(el->prim)->size);
         }
     }
@@ -406,7 +406,7 @@ void fn_802C595C(char* dst, int n, const char* name, s32 inst) {
 
 u16 fn_802C5A50(int a, int b) { return a << 8 | b; }
 
-TexNode* fn_802C5A60(s32 tex, s32 key, u16 prio) {
+TexNode* FindOrCreateTexNode(s32 tex, s32 key, u16 prio) {
     TexNode* empty = 0;
     TexNode* t = lbl_804C13A8.data;
     TexNode* found = 0;
@@ -453,10 +453,10 @@ u16 fn_802C5BEC(u32 a, u32 b) { return fn_802C5A50(5, 100) + (u16)Twice(a) + (u1
 void fn_802C5C40(MSurf* s, s32 inst, MSurf* base) {
     u32 type = s->type;
     s32 tex = fn_802CAC28("zonly.tex", 0);
-    s->tex[inst] = fn_802C5A60(tex, type, base->tex[inst]->prio - 1);
+    s->tex[inst] = FindOrCreateTexNode(tex, type, base->tex[inst]->prio - 1);
 }
 
-void fn_802C5CC4(MSurf* s, s32 inst, int sorted, const char* prefix) {
+void LoadTextureWithPrefix(MSurf* s, s32 inst, int sorted, const char* prefix) {
     char name[0x100];
     char path[0x100];
     fn_802C595C(name, 0x100, s->name, inst);
@@ -474,7 +474,7 @@ void fn_802C5CC4(MSurf* s, s32 inst, int sorted, const char* prefix) {
     } else {
         prio = fn_802C5A50(fn_802CAFC8(tex), fn_802CAFF0(tex));
     }
-    s->tex[inst] = fn_802C5A60(tex, type, prio);
+    s->tex[inst] = FindOrCreateTexNode(tex, type, prio);
 }
 
 void fn_802C5DF0(ModelInfo* info, void (*fn)(MPrim*)) {
@@ -485,17 +485,17 @@ void fn_802C5DF0(ModelInfo* info, void (*fn)(MPrim*)) {
 
 void fn_802C5E6C(void* res, void* info) { fn_802C5DF0((ModelInfo*)info, fn_802D6C44); }
 
-MExtra* fn_802C5EB8(ModelInfo* info, u32 tag);
+MExtra* FindExtraByTag(ModelInfo* info, u32 tag);
 
 MSphere* fn_802C5E7C(ModelInfo* info) {
-    MExtra* x = fn_802C5EB8(info, 'SPHL');
+    MExtra* x = FindExtraByTag(info, 'SPHL');
     if (x) {
         return (MSphere*)&x->n;
     }
     return 0;
 }
 
-MExtra* fn_802C5EB8(ModelInfo* info, u32 tag) {
+MExtra* FindExtraByTag(ModelInfo* info, u32 tag) {
     MExtra* found = 0;
     for (int i = 0; i < info->nExtras; i++) {
         MExtra* x = info->extras[i];
@@ -517,7 +517,7 @@ TexNode* fn_802C5EFC(s32 tex) {
     return 0;
 }
 
-void fn_802C5F48(void) {
+void InitializeModelBuffers(void) {
     lbl_804C139C.Init(640, "model:modelnode[]");
     lbl_804C1338.Init(2048, "model:surfnode[]");
     lbl_804C13A8.Init(1024, "model:texnode[]");
@@ -700,7 +700,7 @@ void fn_802C6C20(ModelInfo* m) { fn_8012C4E4(m, fn_802C5E6C, m); }
 
 void fn_802C6C30(void) {}
 
-ModelInfo* fn_802C6C34(s32 i) { return fn_802C53A8(i); }
+ModelInfo* fn_802C6C34(s32 i) { return GetModelInfoByIndex(i); }
 
 void fn_802C6C38(s32 i) {
     ModelNode* slot = fn_802C5390(i);
@@ -724,7 +724,7 @@ void mrModelUnload(s32 i) {
         fn_802E30C8("mrModelUnload: unloading MODEL_INVALID!!");
         return;
     }
-    ModelInfo* m = fn_802C53A8(i);
+    ModelInfo* m = GetModelInfoByIndex(i);
     fn_802C6C38(i);
     fn_802C6C20(m);
 }
@@ -777,7 +777,7 @@ s32 fn_802C6DC4(const char* name, ModelInfo* m, s32 inst, const char* prefix) {
                 if (sf->type == 7) {
                     fn_802C5C40(sf, empty->inst, l->surfs[0]);
                 } else {
-                    fn_802C5CC4(sf, empty->inst, sorted, prefix);
+                    LoadTextureWithPrefix(sf, empty->inst, sorted, prefix);
                 }
             }
         }
@@ -815,7 +815,7 @@ void fn_802C7040(s32 i) {
         ModelInfo* m = fn_802C5390(i)->info;
         u8 clip;
         f32 dist;
-        if (fn_802C94A0(&m->center, &clip, &dist, m->radius)) {
+        if (TestPointVisibility(&m->center, &clip, &dist, m->radius)) {
             fn_802C57B4(i, 0, 0xFFFFFFFF, clip, dist);
         }
     }
@@ -831,7 +831,7 @@ void fn_802C70AC(s32 i, const MFrame* f, u32 mat, u32 mask) {
         u8 clip;
         f32 dist;
         f32 r = slot->info->radius;
-        if (fn_802C94A0(&c, &clip, &dist, r)) {
+        if (TestPointVisibility(&c, &clip, &dist, r)) {
             fn_802C57B4(i, fn_802D0514(f), mat, clip, dist);
         }
         lbl_8055D008 = old;
@@ -852,7 +852,7 @@ void fn_802C729C(s32 i, f32 range) {
     int e;
     f32 radius;
     if (lbl_804C13C0.mtx != 0xFFFFFFFF && i != -1) {
-        m = fn_802C53A8(i);
+        m = GetModelInfoByIndex(i);
         if (m->nElems > 0) {
             radius = 1000.0f;
             sp = fn_802C5E7C(m);
@@ -869,7 +869,7 @@ void fn_802C729C(s32 i, f32 range) {
                         MSurf* s = it.sl->surfs[it.j];
                         if (IsQueued(s->type)) {
                             TexNode* t = s->tex[0];
-                            fn_802C53C4(it.el, t, it.mtx, 0xFFFFFFFF, 0);
+                            SetupRenderNode(it.el, t, it.mtx, 0xFFFFFFFF, 0);
                             fn_802CC550(t->tex, radius, fn_802C57B0(it.el->prim)->size);
                         }
                     }
@@ -888,7 +888,7 @@ void fn_802C7458(s32 i, u32 mask) {
         ModelInfo* m = fn_802C5390(i)->info;
         u8 clip;
         f32 dist;
-        if (fn_802C94A0(&m->center, &clip, &dist, m->radius)) {
+        if (TestPointVisibility(&m->center, &clip, &dist, m->radius)) {
             fn_802C57B4(i, 0, 0xFFFFFFFF, clip, dist);
         }
         lbl_8055D008 = old;
@@ -903,12 +903,12 @@ void fn_802C74D8(s32 i, const MFrame* f, s32 tex) {
     u8 clip;
     f32 dist;
     f32 r = slot->info->radius;
-    if (fn_802C94A0(&c, &clip, &dist, r)) {
+    if (TestPointVisibility(&c, &clip, &dist, r)) {
         if (lbl_8055FC20) {
             TexNode* t = fn_802C5EFC(tex);
             void* mtx = fn_802D0514(f);
             for (int e = 0; e < m->nElems; e++) {
-                fn_802C53C4(&m->elems[e], t, mtx, 0xFFFFFFFF, clip);
+                SetupRenderNode(&m->elems[e], t, mtx, 0xFFFFFFFF, clip);
             }
         } else {
             fn_802C8B98(tex, f);
@@ -967,7 +967,7 @@ void fn_802C7888(const Remap* src, int n) {
 
 void fn_802C7A00(void) { lbl_804C13B4.count = 0; }
 
-const char* fn_802C7A10(s32 i) { return fn_8012C58C(fn_802C53A8(i)); }
+const char* fn_802C7A10(s32 i) { return fn_8012C58C(GetModelInfoByIndex(i)); }
 
 BoneCmd* fn_802C7A34(int start, const BVec* v, int n) { return fn_802DA704(start, v, n); }
 
@@ -1036,7 +1036,7 @@ void fn_802C7D54(s32 i, const MFrame* f, s32 v, f32 a, f32 b, f32 range) {
     u8 clip;
     f32 dist;
     f32 r = slot->info->radius;
-    if (fn_802C94A0(&c, &clip, &dist, r)) {
+    if (TestPointVisibility(&c, &clip, &dist, r)) {
         void* mtx = fn_802D0514(f);
         ModelInfo* m = slot->info;
         if (!lbl_8055FC20) {

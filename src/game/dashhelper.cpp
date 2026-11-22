@@ -127,8 +127,8 @@ void RenderTextWithOutline(void);
 void fn_80234AEC(void);
 void fn_80231094(int* top, int* bottom, int* left, int* right);
 void fn_801331C4(int type, const char* name, f32* out);
-void fn_801310B4(char* buf, int size, s32 value);
-const char* fn_80130FE0(s32 value);
+void FormatNumberWithUnit(char* buf, int size, s32 value);
+const char* GetOrdinalSuffix(s32 value);
 
 f32 fn_80011E54(void);
 f32 fn_80011DC0(int player);
@@ -1521,8 +1521,8 @@ char* FormatIntegerWithSuffix(s32 value, char* out) {
         char text[20];
         const char* suffix;
     } num;
-    fn_801310B4(num.text, sizeof(num.text), value);
-    num.suffix = fn_80130FE0(value);
+    FormatNumberWithUnit(num.text, sizeof(num.text), value);
+    num.suffix = GetOrdinalSuffix(value);
     strcpy(out, num.text);
     return out;
 }

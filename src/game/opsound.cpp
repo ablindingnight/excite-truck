@@ -47,11 +47,11 @@ void fn_80133348(int section, const char* key, s32 v);
 void fn_801333E8(int section, const char* key, bool* v);
 void fn_80133460(int section, const char* key, bool v);
 s32 fn_80208D3C(void);  // mixer count
-Mixer* fn_80208D4C(int i);
-void fn_80208D60(s32 i);
+Mixer* GetMixerByIndex(int i);
+void SetCurrentSoundOption(s32 i);
 s32 fn_80208D70(void);
-void fn_80209030(f32 v);
-void fn_80209090(s32 q);
+void SetEffectsVolume(f32 v);
+void SetSoundOption(s32 q);
 void fn_8020A5F8(f32 v);
 void fn_80221EA0(MenuState* m, int item, void* value, int kind);
 extern char lbl_8055BAC0[8];
@@ -96,7 +96,7 @@ public:
     void UpdateMixerName(void) {
         s32 i = *mixer;
         if (i >= 0 && i < fn_80208D3C()) {
-            strcpy(mixerName, fn_80208D4C(i)->Name());
+            strcpy(mixerName, GetMixerByIndex(i)->Name());
         } else {
             strcpy(mixerName, "N/A");
         }
@@ -146,10 +146,10 @@ void fn_8023CA54(void) {
     fn_801331C4(4, "spotter_volume", &lbl_8055F168);
     lbl_8055F16C = 1.0f;
     fn_801331C4(4, "effects_volume", &lbl_8055F16C);
-    fn_80209030(lbl_8055F16C);
+    SetEffectsVolume(lbl_8055F16C);
     lbl_8055F17C = 0;
     fn_801332D0(4, "quality", &lbl_8055F17C);
-    fn_80209090(lbl_8055F17C);
+    SetSoundOption(lbl_8055F17C);
     lbl_8055F170 = 1.0f;
     fn_801331C4(4, "tire_volume", &lbl_8055F170);
     lbl_8055F174 = 1.0f;
@@ -268,17 +268,17 @@ void SoundOptions::Changed(int item, void* value) {
         if (*mixer >= fn_80208D3C()) {
             *mixer = fn_80208D3C() - 1;
         }
-        fn_80208D60(*mixer);
+        SetCurrentSoundOption(*mixer);
         UpdateMixerName();
         break;
     case 3:
         fn_8020A5F8(*music);
         break;
     case 0:
-        fn_80209030(*fx);
+        SetEffectsVolume(*fx);
         break;
     case 1:
-        fn_80209090(*quality);
+        SetSoundOption(*quality);
         break;
     case 4:
         if (sound) {

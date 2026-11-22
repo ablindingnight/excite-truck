@@ -660,8 +660,8 @@ long fn_80210570(void) {
 }
  
 extern long fn_80145E70(const char *);
-extern long fn_802090D4(const char *);
-extern long fn_80209110(void *);
+extern long AllocateVolumeHandle(const char *);
+extern long ClearAudioHandle(void *);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
@@ -768,7 +768,7 @@ extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined he
 
 void fn_802108C8(void) {
     lbl_8055EED4 = fn_80145E70("tmuslyt.val");
-    lbl_8055EEF0 = fn_802090D4("TrkMusDash");
+    lbl_8055EEF0 = AllocateVolumeHandle("TrkMusDash");
 }
  
 #ifdef __cplusplus
@@ -776,7 +776,7 @@ void fn_802108C8(void) {
 #endif
 #pragma cplusplus on
 extern "C" void fn_80210904(void) {
-    fn_80209110(&lbl_8055EEF0);
+    ClearAudioHandle(&lbl_8055EEF0);
     // Retail calls the layout's deleting destructor. Spelled as a delete through the real type: an explicit call of
     // the first slot on a view class only destroyed it on the PC (Itanium splits complete/deleting dtors).
     delete (ILayout *)lbl_8055EED4;
@@ -809,7 +809,7 @@ typedef struct CourseVec2 {
 #pragma cplusplus on
 extern "C" void fn_80230B5C(void *);
 extern "C" void fn_802C8638(void *);
-extern "C" void fn_802C974C(float, float, float);
+extern "C" void SetupCameraProjection(float, float, float);
 extern "C" void fn_800109E4(unsigned long, float, float, float, float);
 extern "C" void fn_80011A2C(void);
 extern "C" void fn_802C9904(void);
@@ -833,7 +833,7 @@ extern "C" void fn_8021095C(void) {
     }
     fn_80230B5C(camera);
     fn_802C8638(camera);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
     fn_800109E4(0x7F000000, (-428.0f), 241.0f, 855.0f, 482.0f);
     fn_80011A2C();
     if (lbl_8055EED4 != 0) {
@@ -1036,7 +1036,7 @@ long fn_802111E4(long arg0) {
 extern long fn_80265D64(void);
 extern void fn_801769E0(void);
 extern void fn_80206444(void);
-extern void fn_80209190(long, float);
+extern void SetVolumeClamped(long, float);
 extern long fn_801769CC(void);
 extern void *GetEvent__Fi(long);
 extern unsigned char lbl_8055EEEC;
@@ -1107,7 +1107,7 @@ extern "C" void fn_802113D8(void) {
         fn_801769E0();
     }
     fn_80206444();
-    fn_80209190(lbl_8055EEF0, 0.0f);
+    SetVolumeClamped(lbl_8055EEF0, 0.0f);
     lbl_8055EEE0 = minusTwo;
     lbl_8055EEE4 = zero;
     lbl_8055B65C = lbl_8055B658;
@@ -1136,7 +1136,7 @@ extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined he
 extern void fn_80206454(void);
 extern void fn_801769EC(void);
 void fn_802114C4(void) {
-    fn_80209190(lbl_8055EEF0, 1.0f);
+    SetVolumeClamped(lbl_8055EEF0, 1.0f);
     fn_80206454();
     fn_801769EC();
 }

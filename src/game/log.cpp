@@ -20,7 +20,7 @@ void fn_802E3028(const char* fmt, va_list args, const char* prefix) {}
 
 void fn_802E30C8(const char* fmt, ...);
 
-int fn_802E302C(void) {
+int LogBuildInfo(void) {
     lbl_8055D178 = fn_802E367C("log.log");
     fn_802E30C8("========================================================");
     fn_802E30C8("%s", GetBuildString());

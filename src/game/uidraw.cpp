@@ -42,7 +42,7 @@ void fn_802C87B4(int x, int y, int w, int h);
 void fn_802C88BC(int a);
 void fn_802C8530(void);
 void fn_802C8638(const void* m);
-void fn_802C974C(f32 a, f32 b, f32 c);
+void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_802C855C(void);
 void fn_802C2B48(void);
 int fn_802C9A68(void);
@@ -301,7 +301,7 @@ void fn_80230AD8(const void* m) {
     fn_802C88BC(3);
     fn_802C8530();
     fn_802C8638(m);
-    fn_802C974C(1.0f, 1000.0f, 1.4398966f);
+    SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
 }
 
 void fn_80230B38(void) {

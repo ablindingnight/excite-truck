@@ -48,7 +48,7 @@ s32 lbl_8055F1C8;         // when the status box closes
 
 extern "C" {
 
-const char* fn_8023E5A8(void) { return "mem3line.lyt"; }
+const char* GetMemoryLayoutFile(void) { return "mem3line.lyt"; }
 
 void fn_8023F870(void);
 void fn_8023F874(void);
@@ -64,7 +64,7 @@ static inline MenuItem MakeSavingTitle(CardTask* task) {
     return MenuItem("title", task->Title(), CaptionContext(label.length));
 }
 
-void fn_8023E5B4(CardTask* task) {
+void InitializeSaveMenu(CardTask* task) {
     s32 now = fn_802E2C20();
     lbl_8055F1B0 = task;
     lbl_8055F1B4 = now + 1500;
@@ -243,7 +243,7 @@ void fn_8023ED30(void) {
     };
     lbl_8055F1C4 = 0;
     MenuDesc desc = {NULL, NULL, fn_8023F964, 0, 0};
-    desc.layout = fn_8023E5A8();
+    desc.layout = GetMemoryLayoutFile();
     desc.items = items;
     fn_802146BC(&desc, -999, -999, 1);
 }
@@ -264,7 +264,7 @@ int fn_8023EEF8(void) {
     };
     lbl_8055F1C4 = 0;
     MenuDesc desc = {NULL, NULL, fn_8023F964, 0, 0};
-    desc.layout = fn_8023E5A8();
+    desc.layout = GetMemoryLayoutFile();
     desc.items = items;
     return fn_802146BC(&desc, -999, -999, 1) == -2;
 }
@@ -284,7 +284,7 @@ int fn_8023F0E8(void) {
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
-    desc.layout = fn_8023E5A8();
+    desc.layout = GetMemoryLayoutFile();
     desc.items = items;
     return fn_802146BC(&desc, -999, -999, 1) == -2;
 }
@@ -304,7 +304,7 @@ int fn_8023F2C4(void) {
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, fn_8023F91C, 0, 0};
-    desc.layout = fn_8023E5A8();
+    desc.layout = GetMemoryLayoutFile();
     desc.items = items;
     return fn_802146BC(&desc, -999, -999, 1) == -2;
 }
@@ -324,7 +324,7 @@ int fn_8023F4B8(void) {
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
-    desc.layout = fn_8023E5A8();
+    desc.layout = GetMemoryLayoutFile();
     desc.items = items;
     return fn_802146BC(&desc, -999, -999, 1) == -2;
 }
@@ -344,7 +344,7 @@ int fn_8023F694(void) {
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {NULL, NULL, NULL, 0, 0};
-    desc.layout = fn_8023E5A8();
+    desc.layout = GetMemoryLayoutFile();
     desc.items = items;
     return fn_802146BC(&desc, -999, -999, 1) == -2;
 }

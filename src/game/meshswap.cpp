@@ -64,7 +64,7 @@ extern "C" {
 // The ordinary compiled source matches retail; original author spelling is unproven.
 #pragma push
 #pragma opt_lifetimes off
-void fn_801D1C68(MeshHeader* m, u32 base) {
+void FixMeshHeaders(MeshHeader* m, u32 base) {
     Fix((void**)&m->verts, base);
     Fix((void**)&m->faces, base);
     Fix((void**)&m->strips, base);
