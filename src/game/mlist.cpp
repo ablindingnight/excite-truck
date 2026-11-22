@@ -602,9 +602,9 @@ void FlushRenderQueue(int pri) {
 }
 
 void fn_802CDDC8(MList* m, u32 base) {
-    for (int word = 0; word < 3; word++) {
-        SwapWordB((u8*)m + word * 4);
-    }
+    SwapWord(&m->magic);
+    SwapWord(&m->version);
+    SwapWord(&m->flags);
     u32* w = (u32*)&m->a;
     for (int i = 0; i < 10; i++) {
         SwapWord(&w[i]);
