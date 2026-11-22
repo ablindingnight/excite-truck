@@ -305,14 +305,18 @@ void fn_801CFA48(PMesh* m) {
     m->cells = (PCell*)(m + 1);
     m->verts = (PVec3*)(m->cells + m->numCells);
     m->tris = (PTri*)(m->verts + m->numVerts);
+    u8* p;
     for (i = 0, off = 0; i < m->numCells; off += sizeof(m->cells[0]), i++) {
-        SwapCell((PCell*)((u8*)m->cells + off));
+        p = (u8*)m->cells + off;
+        SwapCell((PCell*)p);
     }
     for (i = 0; i < m->numVerts; i++) {
-        SwapVec(&m->verts[i]);
+        p = (u8*)&m->verts[i];
+        SwapVec((PVec3*)p);
     }
     for (i = 0, off = 0; i < m->numTris; off += sizeof(m->tris[0]), i++) {
-        SwapTri((PTri*)((u8*)m->tris + off));
+        p = (u8*)m->tris + off;
+        SwapTri((PTri*)p);
     }
 }
 #pragma pop
