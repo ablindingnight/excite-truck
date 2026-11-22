@@ -89,7 +89,7 @@ ModuleTag lbl_8055F518;
 extern "C" {
 
 
-void fn_8026E22C(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
+void InterpolateCameraMatrix(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     Quat qa;
     Quat qb;
     Quat q;
@@ -102,7 +102,7 @@ void fn_8026E22C(RMtx* out, const RMtx* a, const RMtx* b, f32 t) {
     out->pos = pos;
 }
 
-void fn_8026E688(RMtx* out, const RVec3* eye, const RVec3* target, const RVec3* up) {
+void CalculateCameraMatrix(RMtx* out, const RVec3* eye, const RVec3* target, const RVec3* up) {
     RVec3 d;
     RVec3 fwd;
     RVec3 upv;
@@ -141,7 +141,7 @@ void fn_8026E688(RMtx* out, const RVec3* eye, const RVec3* target, const RVec3* 
 }
 
 void fn_8026E850(const RVec3* eye, const RVec3* target, CamRec* cam, const RVec3* up) {
-    fn_8026E688((RMtx*)&cam->pose, eye, target, up);  // the pose as a 3x4 frame
+    CalculateCameraMatrix((RMtx*)&cam->pose, eye, target, up);  // the pose as a 3x4 frame
 }
 
 }  // extern "C"

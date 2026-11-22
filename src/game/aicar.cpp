@@ -2393,7 +2393,7 @@ void fn_8019743C(u8* d, u8* out) {
     }
     if (F32(d, 0xE0) > 0.05f) {
         // The target still tests the line-switch blend (now - switch time < length) here and drops the result,
-        // like the dead spin clamp in cardmg fn_8018F76C; the original's use of it is unknown.
+        // like the dead spin clamp in cardmg DetachWheelFromCar; the original's use of it is unknown.
         int blend = F32(d, 0x26C) - F32(d, 0x1D0) < 1.5f;
         f32 at = F32(d, 0xE4);
         if (blend) {

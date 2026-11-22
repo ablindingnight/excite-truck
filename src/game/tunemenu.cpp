@@ -27,7 +27,7 @@ struct TuneScales {
 static inline MenuItem Slider(const char* n, f32* v, f32 lo, f32 hi) { return MenuItem(n, 9, v, *(int*)&lo, *(int*)&hi); }
 
 extern "C" {
-TuneScales* fn_8027A798(const char*);  // the current car's scales
+TuneScales* FindOrAddTweakMultiplier(const char*);  // the current car's scales
 extern char lbl_8055B860[8];
 }
 
@@ -35,7 +35,7 @@ ModuleTag lbl_8055F358;
 static UnkStatic123 lbl_80498E50;
 
 extern "C" void fn_80257C10(const char* chassis) {
-    TuneScales* t = fn_8027A798(chassis);
+    TuneScales* t = FindOrAddTweakMultiplier(chassis);
     int steps = 30;
     f32 lo = 0.25f;
     f32 hi = 1.75f;

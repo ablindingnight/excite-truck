@@ -76,7 +76,7 @@ void fn_80279CE4(void) {
 
 void fn_80279D3C(void) {}
 
-void fn_80279D40(CarSetup* s) {
+void InitializeVehiclePhysicsParams(CarSetup* s) {
     memset(s, 0, sizeof(CarSetup));
     s->mass = 1477.125f;
     s->mx = 2705.9114f;
@@ -123,8 +123,8 @@ void fn_80279D40(CarSetup* s) {
 
 
 
-void fn_80279F58(CarSetup* s, ValueTable* t) {
-    fn_80279D40(s);
+void LoadCarChassisParams(CarSetup* s, ValueTable* t) {
+    InitializeVehiclePhysicsParams(s);
     ValueNode* c = t->FindChild("Chassis");
     s->mass = Lb(c->GetFloat("mass"));
     s->mx = Ft(Ft(Lb(c->GetFloat("mx"))));
@@ -198,18 +198,18 @@ void fn_80279F58(CarSetup* s, ValueTable* t) {
     s->wheelLock = DegToRad(c->GetFloat("wheel_lock", 27.5f));
 }
 
-void fn_8027A714(CarSetup* s, const char* name) {
+void LoadCarPhysicsValues(CarSetup* s, const char* name) {
     char path[0x100];
     sprintf(path, "%s.car/physics.val", name);
     ValueTable* t = fn_80131808(path);
     if (!t) {
         fn_802E317C("carsetup: can't get %s", path);
     }
-    fn_80279F58(s, t);
+    LoadCarChassisParams(s, t);
     fn_80131818(t);
 }
 
-TweakMul* fn_8027A798(const char* name) {
+TweakMul* FindOrAddTweakMultiplier(const char* name) {
     Tweak* t = lbl_804A1968;
     for (int i = 0; i < 32; i++, t++) {
         if (strcmp(t->name, name) == 0) {
@@ -240,7 +240,7 @@ void fn_8027A888(TweakMul* m) {
     m->slip = 1.0f;
 }
 
-void fn_8027A8B4(CarSetup* s, const TweakMul* m) {
+void ApplyTweakMultipliers(CarSetup* s, const TweakMul* m) {
     s->mass *= m->mass;
     s->mx *= m->inertia;
     s->my *= m->inertia;

@@ -268,7 +268,7 @@ void fn_8024DADC(u8* p) { fn_8024739C(p); }
 
 
 extern "C" {
-void fn_8013C804(void);
+void LoadCarClassFile(void);
 void fn_8013C8B8(void);
 void fn_80257C10(const char* chassis);
 int fn_80128314(int heap);
@@ -394,7 +394,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
         }
     }
     lbl_80498C48.alt = screen->Count() == 1;
-    fn_8013C804();
+    LoadCarClassFile();
     CarStatsInit();
     int r = -1;
     {
@@ -825,7 +825,7 @@ extern "C" {
 
 // The car unlock screen: shows every car of `list` in turn ("carunlock.lyt").
 void fn_8024FBD8(GarageList* list, u32* color) {
-    fn_8013C804();
+    LoadCarClassFile();
     CarStatsInit();
     CarUIScreen ui(1);
     ui.channel = fn_802E4A10();

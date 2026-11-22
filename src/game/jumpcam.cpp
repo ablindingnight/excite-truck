@@ -33,7 +33,7 @@ void fn_80206454(void);
 void fn_802C2C68(int a, int b);
 void fn_80176A00(int mode);
 int fn_801B2F24(void);
-void fn_8026A1F0(int cam, int player, int unk);
+void SetCameraNextMode(int cam, int player, int unk);
 f32 fn_801E9FDC(const s16* hint, f32 x, f32 z);  // ground height
 }
 
@@ -249,7 +249,7 @@ int fn_8026B734(int player, f32* out) {
 
 int fn_8026B768(int player, int cam) {
     if (lbl_8049A0E8[player].active) {
-        fn_8026A1F0(11, cam, 0);
+        SetCameraNextMode(11, cam, 0);
         return 1;
     }
     return 0;

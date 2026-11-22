@@ -101,7 +101,7 @@ void fn_801E9DC4(CxEntry* e);
 void fn_801BDA70(CarSetup* out);
 void fn_801BDA74(int car, const CarSetup* out);
 int fn_801E9E78(void* h, ValVec3* p, ValVec3* n, s32* surface);
-void fn_80279D40(CarSetup* out);
+void InitializeVehiclePhysicsParams(CarSetup* out);
 void* memcpy(void* dst, const void* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_801BA088(MVec4* t, int a, int b, s16 c);
@@ -192,7 +192,7 @@ void fn_801BD808(void) {
     fn_801BDA74(car, &out);
 }
 
-void fn_801BDA70(CarSetup* out) { fn_80279D40(out); }
+void fn_801BDA70(CarSetup* out) { InitializeVehiclePhysicsParams(out); }
 
 // Applies a car setup to car `car`: mass/inertia (and reciprocals) and the integrator's parameter rows - wheel anchors,
 // suspension lanes per wheel, a two-point linear tyre force fit, toe angles, brake split, drive split.

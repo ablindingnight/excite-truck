@@ -13,8 +13,8 @@ int fn_801B2F24(void);           // racer count
 s32 fn_801B3050(int i);          // racer id
 int fn_801B2ED4(void);           // total laps
 void fn_801B3208(int, int, f32);
-int fn_801EA994(void);           // human count
-u8* fn_801EA9A0(int i);          // car info (first byte: still racing)
+int GetHumanPlayerCount(void);           // human count
+u8* GetCarInfo(int i);          // car info (first byte: still racing)
 int fn_801769B8(void);           // game mode
 void* fn_80137C4C(void);
 int CarTypeIsReal(s32 type, void* car);
@@ -284,7 +284,7 @@ void fn_801AE894(RaceResult* r) {
 }
 
 void fn_801AE928(void) {
-    int n = fn_801EA994();
+    int n = GetHumanPlayerCount();
     for (int i = 0; i < n; i++) {
         if (i < lbl_8055E624->n) {
             RaceResult* r = &lbl_8055E624->r[i];
@@ -458,7 +458,7 @@ void fn_801AF598(void) {
 void fn_801AF65C(void) {
     for (int i = 0; i < lbl_80435780.n; i++) {
         RaceResult* r = &lbl_8055E624->r[i];
-        if (fn_801AE620(r) && *fn_801EA9A0(i)) {
+        if (fn_801AE620(r) && *GetCarInfo(i)) {
             r->flags |= 2;
         }
     }

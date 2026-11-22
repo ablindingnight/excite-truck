@@ -2,7 +2,7 @@
 #include "game/common.h"
 
 extern "C" {
-void fn_802797A8(const s32* ids, int n);
+void InitializeCarStateBlocks(const s32* ids, int n);
 void fn_80279848(void);
 }
 
@@ -10,7 +10,7 @@ ModuleTag lbl_8055EB68;
 
 extern "C" {
 
-void fn_801EA4B4(const s32* ids, int n) { fn_802797A8(ids, n); }
+void fn_801EA4B4(const s32* ids, int n) { InitializeCarStateBlocks(ids, n); }
 
 void fn_801EA4B8(void) { fn_80279848(); }
 

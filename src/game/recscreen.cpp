@@ -37,7 +37,7 @@ void fn_8025C04C(void) { fn_80214CB4(lbl_8055C390); }
 
 void MenuDoAchievementsViewer(void);
 void fn_8025CE78(void);
-void fn_8025E034(void);
+void InitializeCarSelectionScreen(void);
 extern char lbl_8055B860[8];
 extern char lbl_8055BAC0[4];  // ""
 extern char lbl_8055BABC[4];  // ""
@@ -65,7 +65,7 @@ void fn_8025C054(void) {
             fn_8025CE78();
             break;
         case 2:
-            fn_8025E034();
+            InitializeCarSelectionScreen();
             break;
         case -1:
         default:

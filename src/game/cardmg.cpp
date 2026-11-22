@@ -137,7 +137,7 @@ static inline void ToWorld(EVec* out, const EVec* in, const DFrame* f) {
 extern "C" {
 
 // Rotates frame a by b's rotation about b's position: out = a * b, keeping b's pivot where a puts it.
-void fn_8018BFA0(DFrame* resultFrame, const DFrame* parentFrame, const DFrame* childFrame) {
+void ComposeFrameTransform(DFrame* resultFrame, const DFrame* parentFrame, const DFrame* childFrame) {
     f32 tempVector[3];
     MulM(&resultFrame->rot, &parentFrame->rot, &childFrame->rot);
     MulVec((EVec*)tempVector, &childFrame->pos, &parentFrame->rot);
@@ -156,7 +156,7 @@ void fn_8018C510(void) {}
 
 
 // Index of the damage point nearest to pos (entry 0 is skipped).
-int fn_8018C514(u8* p, const f32* pos) {
+int FindNearestDamagePoint(u8* p, const f32* pos) {
     f32 best = 10000000.0f;
     int idx = 0;
     for (int i = 1; i < *(s32*)((u8*&)((CarBody*)p)->layout); i++) {
@@ -177,7 +177,7 @@ extern "C" {
 void* memset(void* p, int c, unsigned long n);
 int fn_801E2CCC(s32 model, const char* name, DFrame** bone);
 void fn_802E317C(const char* fmt, ...);
-void fn_80279B28(u8* block, CarState* out);
+void CopyCarStateBlock(u8* block, CarState* out);
 void fn_80279CD8(CarState* s);
 }
 
@@ -186,7 +186,7 @@ extern "C" {
 // Sets the car's damage up: finds each part's bone and the body points it rides on (its anchor and its
 // origin), the dent stiffness from the car's mass and bounce (scaled by the event's player_damage_tweak),
 // the paint state, and the body point each light, window and helper sits nearest to.
-void fn_8018C5A0(u8* p, u8* desc) {
+void InitializeCarDamage(u8* p, u8* desc) {
     memset(p + 0x152C, 0, 0x900);
     DamagePart* d = lbl_80332840;
     CbJoint* s = (CbJoint*)(p + 0x152C);
@@ -194,13 +194,13 @@ void fn_8018C5A0(u8* p, u8* desc) {
         if (fn_801E2CCC(((CarBody*)p)->model, d->name, &s->on)) {
             EVec v;
             ToWorld(&v, &d->anchor, s->on);
-            s->point = fn_8018C514(p, &v.x);
+            s->point = FindNearestDamagePoint(p, &v.x);
             EVec o;
             o.x = 0.0f;
             o.y = 0.0f;
             o.z = 0.0f;
             ToWorld(&v, &o, s->on);
-            s->hub = fn_8018C514(p, &v.x);
+            s->hub = FindNearestDamagePoint(p, &v.x);
             s->limit = 1.5707964f;
         }
     }
@@ -217,7 +217,7 @@ void fn_8018C5A0(u8* p, u8* desc) {
     }
     ((CarBody*)p)->f5F4 *= 0.5f;
     if (((CarBody*)p)->f328) {
-        fn_80279B28(((CarBody*)p)->f328, (CarState*)(p + 0x1E44));
+        CopyCarStateBlock(((CarBody*)p)->f328, (CarState*)(p + 0x1E44));
     } else {
         fn_80279CD8((CarState*)(p + 0x1E44));
     }
@@ -231,13 +231,13 @@ void fn_8018C5A0(u8* p, u8* desc) {
         DFrame* bone = 0;
         if (l->name[0] == '$') {
             if (l->name[1] == 'W') {
-                *point = fn_8018C514(p, (f32*)(p + (l->name[2] - '0') * 0x74 + 0x23DC));
+                *point = FindNearestDamagePoint(p, (f32*)(p + (l->name[2] - '0') * 0x74 + 0x23DC));
             } else {
                 fn_802E317C("cardmg: unknown special helper %s", l->name);
             }
         }
         if (fn_801E2CCC(((CarBody*)p)->model, l->name, &bone)) {
-            *point = fn_8018C514(p, &bone->pos.x);
+            *point = FindNearestDamagePoint(p, &bone->pos.x);
         }
     }
 }
@@ -280,7 +280,7 @@ static inline void TurnEuler(DMat3* m, const EVec* e) {
 // Swings the hinged parts (hood, decklid, ...). A hanging part (2) is driven by the torque of the
 // wind and car motion about its hinge, damped and limited, and may snap shut and reattach; a bouncing
 // part (4) swings freely between its stops. Both rebuild the part frame on the car each tick.
-void fn_8018CB3C(u8* p) {
+void UpdateHingedParts(u8* p) {
     CbJoint* s = (CbJoint*)(p + 0x152C);
     const DamagePart* d = lbl_80332840;
     for (int i = 0; i < 17; i++, s++, d++) {
@@ -354,7 +354,7 @@ void fn_8018CB3C(u8* p) {
             MulVec(&er, &e, &s->on->rot);
             m.SetEuler(er.y, er.x, er.z);
             s->prev = s->cur;
-            fn_8018BFA0(&s->cur, (DFrame*)(p + 0x70), (DFrame*)&m);
+            ComposeFrameTransform(&s->cur, (DFrame*)(p + 0x70), (DFrame*)&m);
             if (!s->valid) {
                 s->valid = 1;
                 s->prev = s->cur;
@@ -381,10 +381,10 @@ void fn_8018CB3C(u8* p) {
             if (fn_801769CC()->flags & 2) {
                 DFrame cf = *(DFrame*)(p + 0x70);
                 DmgScale3(&cf.rot.m[0], -1.0f);
-                fn_8018BFA0(&s->cur, &cf, (DFrame*)&m);
+                ComposeFrameTransform(&s->cur, &cf, (DFrame*)&m);
                 DmgScale3(&s->cur.rot.m[0], -1.0f);
             } else {
-                fn_8018BFA0(&s->cur, (DFrame*)(p + 0x70), (DFrame*)&m);
+                ComposeFrameTransform(&s->cur, (DFrame*)(p + 0x70), (DFrame*)&m);
             }
             if (!s->valid) {
                 s->valid = 1;
@@ -549,7 +549,7 @@ static inline f32 DentClamp(f32 v, f32 lo, f32 hi) {
 // Dents point i of the body by `push`: moves its spring goal (pushing out only along the point's outward
 // direction is cancelled), clamps it to the point's box, then passes the push on to linked points (not back to
 // `from`), up to three links deep.
-void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
+void DentBodyPoint(u8* p, int i, const DentVec* push, int from, int depth) {
     DentPoint* pt = (DentPoint*)((u8*&)((CarBody*)p)->layout) + i;
     f32 k = 10.0f * (0.0000068539325f * pt->soft);
     f32 mag = PSVECMag((const Vec*)&push->x);
@@ -589,7 +589,7 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                 DentVec* go = (DentVec*)(p + 0x5FC) + other;
                 DentVec op;
                 // MATCHING-AID (kept, audited 2026-11-16): y read ahead of x (single-use reads); the target adds y first but stores x
-                // first. Natural forms measured in fn_8018DE94 (EXACT with this): plain sums 14 diff rows, y operands swapped 14,
+                // first. Natural forms measured in DentBodyPoint (EXACT with this): plain sums 14 diff rows, y operands swapped 14,
                 // y first 18, reversed operands 18, copy then add 24, only go->y in a local 6.
                 f32 yv = go->y;
                 f32 y2 = o->pos.y;
@@ -633,7 +633,7 @@ void fn_8018DE94(u8* p, int i, const DentVec* push, int from, int depth) {
                     f.y = push->y * a;
                     f.z = push->z * a;
                 }
-                fn_8018DE94(p, other, &f, i, depth + 1);
+                DentBodyPoint(p, other, &f, i, depth + 1);
             }
         }
     }
@@ -667,7 +667,7 @@ void fn_80161A38(int a, u8* car, int b);
 void fn_801DFF1C(u8* car);
 extern f32 lbl_8055E3C8;
 
-void fn_8018E330(u8* p) {
+void ResetRaceCarState(u8* p) {
     static_cast<GameUI*>(fn_801B83A0())->vfA4((RaceCarRec*)p);  // reset the car, through the mode interface (retail emits no GameMode inline here)
     fn_80161A38(0, ((u8*&)((CarBody*)p)->index), 0);
     fn_801DFF1C(((u8*&)((CarBody*)p)->index));
@@ -728,7 +728,7 @@ u8* fn_8017960C(s32 car);
 void fn_8018A174(u8* p);
 void fn_801796CC(int kind, void* msg, int size);
 void fn_801B8610(s32 car, s32 by);
-void fn_8018F76C(u8* p, int i);
+void DetachWheelFromCar(u8* p, int i);
 void fn_802E30C8(const char* fmt, ...);
 
 static inline int Boosting(const u8* car) { return F32(car, 0x25BC) > __float_epsilon[0]; }
@@ -837,7 +837,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     }
     if (NearZero(((CarBody*)p)->f2690)) {
         if ((((CarBody*)p)->mtx.rot.y.y < 0.0f && kind != 0x6D) || kind == 0x3E7) {
-            fn_8018E330(p);
+            ResetRaceCarState(p);
         }
     }
     if (kind == 0x73) {
@@ -899,7 +899,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         if (fn_801769CC()->type == 0x180304 && ((CarBody*)p)->f1F0 == 0x50 && other >= 0) {
             return;
         }
-        fn_8018E330(p);
+        ResetRaceCarState(p);
     }
     /* dead local kept like retail's stores; name/form unproven */
     bp.x = 0.0f;
@@ -923,7 +923,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
     }
     if (best) {
         g0 = *(AVec*)((DentVec*)(p + 0x5FC) + best->goal);
-        fn_8018DE94(p, best->goal, (DentVec*)&di, -1, 0);
+        DentBodyPoint(p, best->goal, (DentVec*)&di, -1, 0);
         DmgScaleTo(&nd, di.v, -1.0f);
         PSVECNormalize((const Vec*)&nd.x, (Vec*)&nd.x);
         DentVec* gb = (DentVec*)(p + 0x5FC) + best->goal;
@@ -1002,7 +1002,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                         fn_801796CC(7, &msg, sizeof(GlassMsg));
                     }
                     if (idx >= 8 && idx <= 11 && fn_80129D18(4, 10) < 5) {
-                        fn_8018F76C(p, idx - 8);
+                        DetachWheelFromCar(p, idx - 8);
                     }
                     if (idx == 12) {
                         if (fn_80129D18(4, 10) < 5) {
@@ -1072,7 +1072,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
                     if (fn_80129D18(4, 4) == 0) {
                         int corner = HitCorner(&da);
                         if (!(U32(p + corner * 0x74, 0x241C) & 8)) {
-                            fn_8018F76C(p, corner);
+                            DetachWheelFromCar(p, corner);
                         }
                     }
                     fn_802E30C8("car %d: impaired", ((CarBody*)p)->index);
@@ -1116,8 +1116,8 @@ static inline f32 UnpackDent(u32 b, f32 span, f32 lo, f32 hi) {
 
 extern "C" {
 
-// Restores the damage state saved by fn_8018F538.
-void fn_8018F2C0(u8* p, const u8* q) {
+// Restores the damage state saved by SaveDamageState.
+void RestoreDamageState(u8* p, const u8* q) {
     f32 h = ((CarState*)q)->time;
     ((CarBody*)p)->f2690 = h;
     ((CarBody*)p)->f2694 = h;
@@ -1148,7 +1148,7 @@ void fn_8018F2C0(u8* p, const u8* q) {
 extern "C" {
 
 // Saves the damage state (dents packed to bytes, part states) into a snapshot.
-void fn_8018F538(u8* p, u8* q) {
+void SaveDamageState(u8* p, u8* q) {
     ((CarState*)q)->time = ((CarBody*)p)->f2690;
     ((CarState*)q)->duration = ((CarBody*)p)->f2698;
     ((CarState*)q)->x298 = ((CarBody*)p)->a268C;
@@ -1262,7 +1262,7 @@ void fn_801AFC44(s32 car, int wheel, WLaunch* m, WVec3* vel, WVec3* imp);
 
 // Knocks wheel i off the car: dims its channel in the car's cross-link colour, then launches it from
 // the hub with the car's velocity plus its own spin.
-void fn_8018F76C(u8* p, int i) {
+void DetachWheelFromCar(u8* p, int i) {
     u8* w = p + i * 0x74;
     if (U32(w, 0x241C) & 8) {
         fn_802E30C8("cardmg: wheel %d is already missing from car %d", i, ((CarBody*)p)->index);
@@ -1307,7 +1307,7 @@ struct PartState {
 
 
 // Breaks off every part that is detached (or flagged to break) at its bone box centre.
-void fn_8018F9B4(u8* p) {
+void BreakOffDetachedParts(u8* p) {
     PartState* w = (PartState*)(p + 0x152C);
     DamagePart* t = lbl_80332840;
     for (int i = 0; i < 17; i++) {

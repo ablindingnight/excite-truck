@@ -43,8 +43,8 @@ extern "C" {
 s32 fn_80232578(const char* name);  // load font
 void fn_802328D4(s32 font);
 int fn_801C5B60(void);
-TagCar* fn_801EA9A0(int car);
-int fn_801EA994(void);
+TagCar* GetCarInfo(int car);
+int GetHumanPlayerCount(void);
 void fn_802C8E70(const ValVec3* p, ValVec3* out);
 int fn_802C8FF4(ValVec3* p, f32 margin);
 int fn_801E85B4(void);
@@ -69,7 +69,7 @@ TagSlot lbl_804BD5D8[8];
 
 extern "C" {
 
-void fn_802A7BE8(void) {
+void LoadUiFontAndMapGems(void) {
     lbl_8055F8BC = fn_80232578("uifnt_o.gtx");
     lbl_8055F8C0 = fn_8023512C("mapgems.art");
 }
@@ -103,7 +103,7 @@ static inline f32 Ramp(f32 v, f32 x0, f32 x1, f32 y0, f32 y1) {
 }
 
 void fn_802A7CA8(int car, int gem, f32 t) {
-    TagObj* o = fn_801EA9A0(car)->obj;
+    TagObj* o = GetCarInfo(car)->obj;
     ValVec3 p = o->pos;
     ValVec3 scr;
     u32 color;
@@ -117,13 +117,13 @@ void fn_802A7CA8(int car, int gem, f32 t) {
     }
 }
 
-int fn_802A7E08(const void* pa, const void* pb) {
+int CompareCameraDistances(const void* pa, const void* pb) {
     TagCam* cam = fn_802678C0(fn_801E85B4());
-    ValVec3 p = fn_801EA9A0(*(const int*)pa)->obj->pos;
+    ValVec3 p = GetCarInfo(*(const int*)pa)->obj->pos;
     f32 da;
     p.y += 2.0f;
     da = PSVECSquareDistance((const Vec*)&p, (const Vec*)&cam->pos);
-    p = fn_801EA9A0(*(const int*)pb)->obj->pos;
+    p = GetCarInfo(*(const int*)pb)->obj->pos;
     p.y += 2.0f;
     if (da > PSVECSquareDistance((const Vec*)&p, (const Vec*)&cam->pos)) {
         return -1;
@@ -142,16 +142,16 @@ void fn_802A7EEC(void) {
     if (fn_801CF064()) {
         return;
     }
-    for (i = 0, q = order; i < fn_801EA994(); q++, i++) {
+    for (i = 0, q = order; i < GetHumanPlayerCount(); q++, i++) {
         *q = i;
     }
-    qsort(order, fn_801EA994(), sizeof(int), fn_802A7E08);
+    qsort(order, GetHumanPlayerCount(), sizeof(int), CompareCameraDistances);
     f32 lift = 2.0f;
     f32 nearDist = 100.0f;
     f32 farDist = 7056.0f;
     int car;
     int j;
-    for (j = 0, q = order; j < fn_801EA994(); q++, j++) {
+    for (j = 0, q = order; j < GetHumanPlayerCount(); q++, j++) {
         car = *q;
         TagCar* c;
         TagObj* o;
@@ -159,7 +159,7 @@ void fn_802A7EEC(void) {
         if (car == fn_801E866C(-1)) {
             continue;
         }
-        c = fn_801EA9A0(car);
+        c = GetCarInfo(car);
         o = c->obj;
         if (o->flags & 0x40) {
             continue;
@@ -185,7 +185,7 @@ void fn_802A7EEC(void) {
             s32 id;
             s32 me;
             id = c->regId;
-            me = fn_801EA9A0(fn_801E866C(-1))->regId;
+            me = GetCarInfo(fn_801E866C(-1))->regId;
             if (fn_8027AC50(fn_8027ABF8(me))) {
                 if (id == fn_8027AC64(fn_8027ABF8(me))) {
                     fn_802A7CA8(car, 3, b);

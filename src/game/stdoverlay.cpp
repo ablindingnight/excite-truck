@@ -43,7 +43,7 @@ void fn_80147CEC(TextElem* out, TextElem* a, TextElem* b, f32 t);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_80232928(u32 color);
 void fn_80232930(void);
-CarInfo* fn_801EA9A0(int player);
+CarInfo* GetCarInfo(int player);
 f32 fn_801E7E18(void);
 void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 }
@@ -474,7 +474,7 @@ inline void LapTitleOverlay::Update(int player, int unused) {
     CarInfo* racer;
     f32 elapsed;
     int i;
-    racer = fn_801EA9A0(player);
+    racer = GetCarInfo(player);
     now = fn_801E7E18();
     s = &state[player];
 

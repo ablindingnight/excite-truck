@@ -18,9 +18,9 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 int fn_8012C33C(const char* name);  // resource exists
-void fn_8013C804(void);
+void LoadCarClassFile(void);
 void fn_8013C8B8(void);
-s32 fn_8013C8E8(const char* chassis);
+s32 FindCarClassByChassis(const char* chassis);
 s32 fn_8013C9A4(const char* car_class);
 void fn_8022D0D8(char* buf, int size);
 void fn_8022D0E8(char* buf, int size, const char* s);
@@ -260,7 +260,7 @@ int GetEventSizeClass(int i) {
 void LoadEves(int mode) {
     ModeInfo* info;
 
-    fn_8013C804();
+    LoadCarClassFile();
     info = GetModeInfo(mode);
     lbl_8055D514 = NULL;
     lbl_80558AD8 = info->mode;
@@ -359,7 +359,7 @@ void ParseTrack(Track* t, int index, ValueNode* node, const char* file) {
     t->chassis = node->FindChild("chassis_allowed");
     if (t->chassis != NULL) {
         for (i = 0; t->chassis->GetPair(i, &chassis, &value); i++) {
-            if (fn_8013C8E8(chassis) == 6) {
+            if (FindCarClassByChassis(chassis) == 6) {
                 fn_802E317C("Eve: %s chassis allowed has invalid chassis %s", t->name, chassis);
             }
         }

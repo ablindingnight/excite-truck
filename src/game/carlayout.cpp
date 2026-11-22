@@ -38,7 +38,7 @@ int fn_80278A1C(const char*) { return 0; }
 void fn_80278A24(void) {}
 
 // Fallback for a bone missing from the table.
-void fn_80278A28(LayoutBone* b) {
+void SetBoneDefaultBounds(LayoutBone* b) {
     f32 r = 10.0f;
     b->max.x = r;
     b->min.x = -r;
@@ -52,7 +52,7 @@ void fn_80278A28(LayoutBone* b) {
     b->weakness = 1.0f;
 }
 
-void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, const char* car) {
+void ParseCarBoneLayout(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, const char* car) {
     if (boneTable) {
         int w;
         int n;
@@ -85,7 +85,7 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
                 b->dmgDist = node->GetFloat("dmg_dist", 0.2032f);
             } else {
                 fn_802E30C8("layout: WARNING: Car \"%s\" using bad bone info for bone %d", car, i);
-                fn_80278A28(b);
+                SetBoneDefaultBounds(b);
             }
         }
         ValueNode* child;
@@ -143,7 +143,7 @@ void fn_80278A64(CarLayout* l, ValueTable* boneTable, ValueTable* modTable, cons
     }
 }
 
-CarLayout* fn_80279004(const char* car, int unused) {
+CarLayout* LoadCarLayoutBounds(const char* car, int unused) {
     CarLayout* l;
     ValueTable* mods;
     ValueTable* bones;
@@ -166,7 +166,7 @@ CarLayout* fn_80279004(const char* car, int unused) {
     } else {
         mods = NULL;
     }
-    fn_80278A64(l, bones, mods, car);
+    ParseCarBoneLayout(l, bones, mods, car);
     memset(l->bounds, 0, sizeof(l->bounds));
     if (bones->HasChild("bounds")) {
         node = (ValueNode*)bones->FindChild("bounds");
@@ -198,7 +198,7 @@ CarLayout* fn_80279004(const char* car, int unused) {
     return l;
 }
 
-CarLayout* fn_80279254(const char* car, int unused) {
+CarLayout* FindOrLoadCarLayout(const char* car, int unused) {
     CarLayout* l;
     for (l = lbl_8055F5F0; l; l = l->next) {
         if (strcasecmp(l->name, car) == 0) {
@@ -207,14 +207,14 @@ CarLayout* fn_80279254(const char* car, int unused) {
         }
     }
     if (!l) {
-        l = fn_80279004(car, unused);
+        l = LoadCarLayoutBounds(car, unused);
     }
     return l;
 }
 
-CarLayout* fn_802792E4(const char* car) { return fn_80279254(car, 0); }
+CarLayout* fn_802792E4(const char* car) { return FindOrLoadCarLayout(car, 0); }
 
-void fn_802792EC(CarLayout* l) {
+void DecrementLayoutReference(CarLayout* l) {
     if (--l->refs == 0) {
         CarLayout** pp = &lbl_8055F5F0;
         while (*pp) {

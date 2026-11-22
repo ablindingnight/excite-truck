@@ -106,7 +106,7 @@ public:
     virtual void Hit(TreeObj* o, int car) = 0;
 };
 
-// Same class as betarace's/actseq's IPickupListener (fn_801D0800 registers it): retail's vptr store points at
+// Same class as betarace's/actseq's IPickupListener (AddRaceListener registers it): retail's vptr store points at
 // betarace's weak copy of the table, so the name must match for the linker to fold ours into it.
 class IPickupListener {
 public:
@@ -118,8 +118,8 @@ public:
 
 extern "C" {
 void fn_801D0590(IHitListener* l);
-void fn_801D05B4(IHitListener* l);
-void fn_801D0800(IPickupListener* l);
+void RemoveCarListener(IHitListener* l);
+void AddRaceListener(IPickupListener* l);
 void fn_801D0824(IPickupListener* l);
 TreeClass* fn_802C110C(int id);
 void fn_802C1180(Shake* s);
@@ -255,7 +255,7 @@ void fn_802C126C(void) {
     lbl_8055FB38 = 0.0f;
     lbl_8055FB30 = new ("treehittree") RMtx*[8000];
     fn_801D0590(&lbl_8055FB40);
-    fn_801D0800(&lbl_8055FB40);
+    AddRaceListener(&lbl_8055FB40);
     for (int i = 0; i < 16; i++) {
         memset(&lbl_804C0810[i], 0, sizeof(TreeClass));
         SafeStrCopy(lbl_804C0810[i].name, "???INVALID???", 0x20);
@@ -269,7 +269,7 @@ void fn_802C126C(void) {
 }
 
 void fn_802C13A4(void) {
-    fn_801D05B4(&lbl_8055FB40);
+    RemoveCarListener(&lbl_8055FB40);
     fn_801D0824(&lbl_8055FB40);
     TreeClass* c = lbl_804C0810;
     for (int i = 0; i < lbl_8055FB28; c++, i++) {

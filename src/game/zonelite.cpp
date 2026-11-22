@@ -53,7 +53,7 @@ struct CarLap {
 };
 
 extern "C" {
-CarLap* fn_801EA9A0(int car);
+CarLap* GetCarInfo(int car);
 }
 
 ModuleTag lbl_8055F8E0;
@@ -212,7 +212,7 @@ void fn_802A9428(void) {
     int which = -1;
     int view = fn_801E85B4();
     int car = fn_801E866C(-1);
-    s32 lap = fn_801EA9A0(car)->lap;
+    s32 lap = GetCarInfo(car)->lap;
     s = LapAt(view);
     if (car != s->car || lap < s->lap) {
         lbl_804BD790[view].hold = 0.0f;

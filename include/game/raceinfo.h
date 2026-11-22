@@ -10,7 +10,7 @@ struct CarDrawState;  // game/carbody.h
 struct CarParams;     // game/carinfo.h
 
 // The current race's overlay info (overlay.cpp's lbl_8034EE84, reached through lbl_8055D350): the event, its
-// progress and the viewed player's car record (racer = fn_801EA9A0's CarInfo, truck = its draw state, stats = its
+// progress and the viewed player's car record (racer = GetCarInfo's CarInfo, truck = its draw state, stats = its
 // params). One declaration for overlay and racing. Names are guesses.
 struct RaceInfo {
     u8 split;             // offset 0x0

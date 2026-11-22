@@ -164,7 +164,7 @@ public:
 
 extern "C" {
 s32 fn_801C1BA4(int nPart, int nStick, int nAnchor);  // ppsys.cpp: new PSysObj
-void fn_801D08C0(u8* p);
+void NotifyAllListeners(u8* p);
 void fn_801D0A24(u8* p, int a);
 void fn_801C1C7C(u8* p);
 void fn_802E30C8(const char* fmt, ...);
@@ -890,7 +890,7 @@ public:
     virtual void Init(BodyDesc* d) {
         Obstacle::Init(d);
         owner = (u32)((ObDesc*)d)->extra;
-        fn_801D08C0((u8*)(DynamicLink*)this);
+        NotifyAllListeners((u8*)(DynamicLink*)this);
     }
     virtual void OnImpulse(const RVec3* v, const RVec3* at, int force, void* extra, void* by) {
         if (force < 8) {

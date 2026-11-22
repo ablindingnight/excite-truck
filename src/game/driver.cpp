@@ -15,9 +15,9 @@ int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 const char* fn_80131234(const char* key);  // localize
-void fn_8013C804(void);
+void LoadCarClassFile(void);
 void fn_8013C8B8(void);
-s32 fn_8013C8E8(const char* chassis);
+s32 FindCarClassByChassis(const char* chassis);
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -362,7 +362,7 @@ void GetDriverTexName(char* buf, u32 size, const char* name, int n) {
 void LoadDriverLists(void) {
     int i;
 
-    fn_8013C804();
+    LoadCarClassFile();
     lbl_8055D54C = 0;
     lbl_8055D550 = 0;
     if (lbl_8055D538 != NULL) {
@@ -515,7 +515,7 @@ void LoadVehicle(ValueNode* node) {
         }
     }
     v->default_color = node->GetInt("default_body_color_idx", 0) - 1;
-    v->unk9C = fn_8013C8E8(v->chassis);
+    v->unk9C = FindCarClassByChassis(v->chassis);
     v->flags = 0;
     if (node->GetBool("is_trailer", 0)) {
         v->flags |= VEHICLE_TRAILER;

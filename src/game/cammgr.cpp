@@ -41,7 +41,7 @@ public:
 class CenterLine;
 
 
-// MATCHING-AID: fn_80268E00 keeps idealline.h's IdealFollower as plain storage built and destroyed by linker name:
+// MATCHING-AID: UpdateIdealFollower keeps idealline.h's IdealFollower as plain storage built and destroyed by linker name:
 // retail passes the constructor's RETURNED pointer to fn_80134E34, which a named IdealFollower local cannot give
 // (+1 instruction for every form tried, aids audit 2 2026-11-17); the other two users are real IdealFollower locals.
 struct IdealFollowerData {
@@ -63,7 +63,7 @@ struct IdealFollowerData {
 extern "C" {
 f32 fn_80134E34(IdealFollowerData* f, f32 dist);  // aidriver: returns the follower's distance
 ILPos fn_80136468(IdealFollowerData* f, f32 m);  // idealline: returns the ILPos by value
-void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 k);
+void BuildFixedCameraFrame(u8* rec, const IdealPoint* seg, f32 t, f32 k);
 }
 
 extern CamPose lbl_80499950;  // trackside camera frames
@@ -87,7 +87,7 @@ void fn_801E9DC4(void* p);
 void fn_802735F4(int i, u8 b);
 int fn_802734F0(int mode);
 int fn_80267EE0(int mode);
-int fn_801EA994(void);  // racer count
+int GetHumanPlayerCount(void);  // racer count
 void fn_80265E08(u8* p);
 void fn_80266150(u8* p);
 u8* fn_80267EE4(int i);
@@ -290,7 +290,7 @@ void fn_80266170(FunkyFov* f, s32 now, int paused, int fresh, f32 fov) {
 extern f32 lbl_8055C4C4;
 
 // out = from + dir * (distance to `to`, eased by the blend at 0xC).
-void fn_802662D8(u8* p, f32* out, const f32* from, const f32* dir, const f32* to) {
+void CalculateEasedPosition(u8* p, f32* out, const f32* from, const f32* dir, const f32* to) {
     f32 d = PSVECDistance((const Vec*)from, (const Vec*)to) - lbl_8055C4C4;
     f32 k = F32(p, 0xC);
     f32 t = lbl_80563C20.value + k * (d - lbl_80563C20.value);
@@ -461,7 +461,7 @@ extern f32 lbl_8055C4DC;  // rotation shake
 
 // Trackside camera rumble: find the car about to pass the camera (just ahead of it along the track and
 // nearest in space) and shake the camera's position and orientation by its speed and closeness.
-void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
+void UpdateCameraRumble(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
     if (paused) {
         return;
     }
@@ -515,12 +515,12 @@ void fn_80266388(u8* self, int paused, CamPose* pose, const f32* eye, u8* car) {
     }
 }
 
-void fn_80274F74(u8* p, const f32* w, f32 fov);
+void UpdateCameraPose(u8* p, const f32* w, f32 fov);
 int fn_801769F8(void);
 
-// Trackside camera aimed by a rotation vector, with the same pass-by rumble as fn_80266388.
-void fn_80266A0C(CamRec* c, const f32* w, const f32* eye, f32 fov) {
-    fn_80274F74((u8*)c, w, fov);
+// Trackside camera aimed by a rotation vector, with the same pass-by rumble as UpdateCameraRumble.
+void UpdateTracksideCamera(CamRec* c, const f32* w, const f32* eye, f32 fov) {
+    UpdateCameraPose((u8*)c, w, fov);
     if (fn_801769F8()) {
         return;
     }
@@ -617,7 +617,7 @@ f32 fn_801EA0E8(f32 x, f32 z);  // ground height
 extern f32 lbl_8055D020;        // aspect
 
 // Keeps the camera's near plane above the ground: lifts it by the deepest corner (not in modes 17/21).
-void fn_802671CC(CamView* p) {
+void AdjustCameraNearPlane(CamView* p) {
     ValVec3 v;
     ValVec3 w;
     f32 nearZ = p->nearZ;
@@ -646,9 +646,9 @@ void fn_802671CC(CamView* p) {
 void fn_801769CC(void);
 void fn_80276B8C(void);
 void fn_80268D94(void);
-void fn_80268E00(void);
+void UpdateIdealFollower(void);
 void fn_80278214(void);
-void fn_80267680(void);
+void InitializeCameraStructures(void);
 void fn_80273354(void);
 void fn_8027045C(void);
 u32 fn_802090D4(const char* name);  // mixer volume handle
@@ -660,7 +660,7 @@ extern const f32 lbl_80563C54;  // default view angle
 // Camera manager start-up: initialises the four camera records, the named/fixed cameras, the crash
 /// volume handle and the cheer sound, then resets. phob's start-up passes the view count (the clamp result is built
 // in r3 there); nothing here reads it.
-void fn_80267420(int /* nViews */) {
+void InitializeCameraManager(int /* nViews */) {
     fn_801769CC();
     CamRec* c = lbl_80499080;
     for (int i = 0; i < 4;) {
@@ -743,14 +743,14 @@ void fn_80267420(int /* nViews */) {
     }
     fn_80276B8C();
     fn_80268D94();
-    fn_80268E00();
+    UpdateIdealFollower();
     fn_80278214();
     fn_80273354();
     fn_8027045C();
     lbl_8055F494 = fn_802090D4("crash_vol");
     lbl_8055F490 = fn_80207848("cheer3.sfx", 0);
     fn_801EEFDC((void*)fn_8026A554, 13);
-    fn_80267680();
+    InitializeCameraStructures();
 }
 
 void fn_802733C8(void);
@@ -772,7 +772,7 @@ static inline void ResetSavedPose(u8* c, const CamPose& pose) { fn_80276BE4(c + 
 // Resets the four players' camera records, the shake table, the split-screen rects and the shake levels.
 #pragma push
 #pragma opt_lifetimes off
-void fn_80267680(void) {
+void InitializeCameraStructures(void) {
     fn_802733C8();
     CamRec* c = lbl_80499080;
     for (int i = 0; i < 4; i++) {
@@ -845,7 +845,7 @@ void fn_80267680(void) {
 }
 #pragma pop
 
-void fn_8026785C(void) {
+void CleanupCameraManager(void) {
     EventUnInstallHandler((void*)fn_8026A554);
     fn_80278288();
     fn_802733F0();
@@ -876,8 +876,8 @@ int fn_801769F8(void);
 f32 fn_801B8950(int car);
 double tan(double x);
 double fabs(double x);
-void fn_802693F4(CamRec* c, u8* own, int idx);
-void fn_80268E94(CamRec* c, int idx);
+void UpdateCameraMode(CamRec* c, u8* own, int idx);
+void UpdateChaseCameraShake(CamRec* c, int idx);
 extern s32 lbl_8055E3C4;  // frame counter
 extern f32 lbl_8055E460;  // tick alpha
 extern u8 lbl_8055F480;
@@ -891,7 +891,7 @@ extern const f32 lbl_80563C7C;  // shake decay per frame
 // tick alpha, and fill the view (pose, fov, rumble, flags). The shake levels decay unless paused.
 #pragma push
 #pragma optimization_level 3
-void fn_802678E8(CamView* view, int idx) {
+void UpdateCameraTracking(CamView* view, int idx) {
     fn_802670A0(view, idx);
     if (fn_801C5B68(view, idx)) {
         fn_80267130(view);
@@ -920,7 +920,7 @@ void fn_802678E8(CamView* view, int idx) {
     u8 own = 0;
     int flags;
     if (c->car) {
-        fn_802693F4(c, &own, idx);
+        UpdateCameraMode(c, &own, idx);
         flags = fn_80267EE0(c->mode);
         if (U8(c->car, 0x260C)) {
             flags |= 0x20;
@@ -928,7 +928,7 @@ void fn_802678E8(CamView* view, int idx) {
     } else {
         flags = fn_80267EE0(c->mode);
     }
-    fn_80268E94(c, idx);
+    UpdateChaseCameraShake(c, idx);
     ListenerRef l = {c->target, &c->pose, &c->vel};
     fn_8020655C(l, idx);
     if (c->mode != 0x11) {
@@ -994,7 +994,7 @@ done:
         }
     }
     fn_80267130(view);
-    fn_802671CC(view);
+    AdjustCameraNearPlane(view);
 }
 #pragma pop
 
@@ -1028,7 +1028,7 @@ extern f32 lbl_8055F48C;        // crash start time
 
 // Crash camera: for three seconds after a crash, fade the crash volume out and back in (the cheer the
 // other way) and swing the camera once round a pivot ahead of it; then restore the volume and resume.
-void fn_80267EF8(u8* p) {
+void HandleCrashCameraEffect(u8* p) {
     f32 t = lbl_80563C80 * (f32)(s32)fn_802E2C20() - lbl_8055F48C;
     if (t > lbl_80563C34.value) {
         lbl_8055F488 = 0;
@@ -1311,7 +1311,7 @@ static inline void ScalePerpendicular(CamPt* d, f32 inv) {
 
 // Builds a fixed camera frame (rows right/up/forward + position) beside the track at path position
 // (seg, t): offset sideways by the segment width, set on the ground, looking `angle` off the track.
-void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
+void BuildFixedCameraFrame(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
     f32 inv;
     const IdealPoint* next;
     next = seg->next;
@@ -1352,17 +1352,17 @@ void fn_80268BD4(u8* rec, const IdealPoint* seg, f32 t, f32 angle) {
 
 void fn_80268D94(void) {
     IdealFollower f(0, 0);
-    fn_80268BD4((u8*)&lbl_80499920, f.line->points, lbl_80563C20.value, lbl_80563C98);
+    BuildFixedCameraFrame((u8*)&lbl_80499920, f.line->points, lbl_80563C20.value, lbl_80563C98);
 }
 
-void fn_80268E00(void) {
+void UpdateIdealFollower(void) {
     IdealFollowerData f;
     const ILPos& at = fn_80136468(&f, fn_80134E34(__ct__13IdealFollowerFiP10CenterLine(&f, 0, 0), lbl_80563C28.value));
     ILPos& pos = const_cast<ILPos&>(at);  // the returned temporary itself (not a const object)
     if (!pos.seg) {
         pos.seg = f.line->points;
     }
-    fn_80268BD4((u8*)&lbl_80499950, pos.seg, pos.t, lbl_80563C9C);
+    BuildFixedCameraFrame((u8*)&lbl_80499950, pos.seg, pos.t, lbl_80563C9C);
     if (f.buf) {
         delete[] f.buf;
     }
@@ -1387,7 +1387,7 @@ static inline f32 ShakeAxis(f32 amp, f32 phase, f32 twoPi) {
 
 // Hit shake for chase cameras: for half a second after a bump the camera wobbles about all three axes
 // (a sine wave per axis plus jitter), easing out with the time since the hit.
-void fn_80268E94(CamRec* c, int idx) {
+void UpdateChaseCameraShake(CamRec* c, int idx) {
     f32 t, amp, twoPi;
     if (!fn_8026B0C0(idx) && !fn_801769F8()) {
         bool chase = false;
@@ -1414,14 +1414,14 @@ void fn_80268E94(CamRec* c, int idx) {
 }
 
 void fn_802733F4(CamRec* c);
-void fn_80273BD0(CamRec* c);
+void CalculateCameraPoseFromCar(CamRec* c);
 void fn_8027445C(CamRec* c);
-void fn_80274268(CamRec* c);
+void UpdateCameraFrame(CamRec* c);
 void fn_802704D4(int type, CamRec* c);
 int fn_8026A698(CamRec* c, int idx);
-void fn_80274460(CamRec* c);
+void UpdateCameraFrameFromCar(CamRec* c);
 void fn_8027847C(CamRec* c);
-void fn_802704E4(CamRec* c);
+void UpdateChaseCameraView(CamRec* c);
 void fn_80274660(int type, CamRec* c);
 void fn_8026DAA8(CamRec* c);
 void fn_80275FC0(CamRec* c);
@@ -1462,7 +1462,7 @@ static inline f32 RumbleForSpeed(f32 speed) {
 // Runs camera type c->mode for one frame: follows the car's frame, flags cuts (a mode change other than
 // between 4 and 25, or a new car), smooths the rumble, dispatches on the type and finally arms the hit
 // shake from the car's impact speed. Sets *own for types that fill the sound pose themselves.
-void fn_802693F4(CamRec* c, u8* own, int idx) {
+void UpdateCameraMode(CamRec* c, u8* own, int idx) {
     u8* car = c->car;
     const ValVec3* off = (const ValVec3*)(car + 0x30);
     c->carFrame = *(CamPose*)(car + 0x3C);
@@ -1503,16 +1503,16 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
     if (!fn_8026A698(c, idx)) {
         switch (c->mode) {
         case 0:
-            fn_80273BD0(c);
+            CalculateCameraPoseFromCar(c);
             break;
         case 1:
             fn_8027445C(c);
             break;
         case 2:
-            fn_80274268(c);
+            UpdateCameraFrame(c);
             break;
         case 3:
-            fn_80274460(c);
+            UpdateCameraFrameFromCar(c);
             break;
         case 0x19:
             fn_8027847C(c);
@@ -1525,11 +1525,11 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
         case 0x17:
             fn_802704D4(c->mode, c);
             if (lbl_8055F488) {
-                fn_80267EF8((u8*)c);
+                HandleCrashCameraEffect((u8*)c);
             }
             break;
         case 9:
-            fn_802704E4(c);
+            UpdateChaseCameraView(c);
             break;
         case 0xA:
         case 0x10:
@@ -1646,15 +1646,15 @@ void fn_802693F4(CamRec* c, u8* own, int idx) {
     }
 }
 
-void fn_80273BD0(CamRec* c);
+void CalculateCameraPoseFromCar(CamRec* c);
 void fn_8027445C(CamRec* c);
-void fn_80274268(CamRec* c);
+void UpdateCameraFrame(CamRec* c);
 void fn_802704D4(int type, CamRec* c);
 void fn_802E30C8(const char* fmt, ...);
 
 // Where camera type `type` would put player idx's camera right now: runs it on a copy of the record and
 // returns the pose and fov, leaving the live camera alone.
-void fn_80269BB0(int idx, int type, CamPose* pose, f32* fov) {
+void CalculateCameraPose(int idx, int type, CamPose* pose, f32* fov) {
     CamRec c = lbl_80499080[idx];
     c.w4 = 0x15;
     c.mode = type;
@@ -1664,14 +1664,14 @@ void fn_80269BB0(int idx, int type, CamPose* pose, f32* fov) {
         fn_8027445C(&c);
         break;
     case 0:
-        fn_80273BD0(&c);
+        CalculateCameraPoseFromCar(&c);
         break;
     case 4:
     case 5:
         fn_802704D4(type, &c);
         break;
     case 2:
-        fn_80274268(&c);
+        UpdateCameraFrame(&c);
         break;
     case 0xB:
     case 0x11:
@@ -1682,7 +1682,7 @@ void fn_80269BB0(int idx, int type, CamPose* pose, f32* fov) {
     *fov = c.fov;
 }
 
-void fn_8026A1F0(s32 a, int i, u8 b) {
+void SetCameraNextMode(s32 a, int i, u8 b) {
     ((CamRec*)fn_80267EE4(i))->nextMode = a;
     fn_802735F4(i, b);
 }
@@ -1699,7 +1699,7 @@ void fn_8026A298(int i) { lbl_80499E50[i] = -1; }
 
 void fn_8026A2B0(int i) { lbl_80499E50[i] = 1; }
 
-int fn_8026A2C8(void) { return fn_801EA994(); }
+int fn_8026A2C8(void) { return GetHumanPlayerCount(); }
 
 void fn_8026A2CC(const Words12* s, int i, f32 v) {
     CamRec* e = &lbl_80499080[i];
@@ -1716,7 +1716,7 @@ int fn_8026A38C(void) { return lbl_8055F488; }
 extern const f32 lbl_80563CBC;
 
 // Starts a camera transition for the camera following `car`.
-void fn_8026A394(u8* car) {
+void StartCameraTransition(u8* car) {
     for (int i = 0; i < 4; i++) {
         CamRec* c = (CamRec*)fn_80267EE4(i);
         if (c->car == car) {
@@ -1733,7 +1733,7 @@ void fn_8026A394(u8* car) {
     }
 }
 
-void fn_8026A49C(int idx, int type, CamPose* pose, f32* fov) { fn_80269BB0(idx, type, pose, fov); }
+void fn_8026A49C(int idx, int type, CamPose* pose, f32* fov) { CalculateCameraPose(idx, type, pose, fov); }
 
 void fn_8026A4A0(int i, CamPose* out, f32* fov) {
     CamRec* e = &lbl_80499080[i];
@@ -1742,7 +1742,7 @@ void fn_8026A4A0(int i, CamPose* out, f32* fov) {
     *fov = e->fov;
 }
 
-void fn_8026A51C(CamRec* c, u8* own, int idx) { fn_802693F4(c, own, idx); }
+void fn_8026A51C(CamRec* c, u8* own, int idx) { UpdateCameraMode(c, own, idx); }
 
 f32 fn_8026A520(int i) {
     if (i >= 0 && (u32)i < 8) {

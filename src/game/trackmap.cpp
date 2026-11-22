@@ -83,8 +83,8 @@ void fn_802C8530(void);
 void fn_802C855C(void);
 int fn_801E866C(int player);
 Mtx34* fn_801E8718(int player);
-CarInfo* fn_801EA9A0(int index);
-int fn_801EA994(void);
+CarInfo* GetCarInfo(int index);
+int GetHumanPlayerCount(void);
 RaceCarRec* fn_8017960C(int index);
 PlayerObj* fn_802678E4(int player);
 int fn_80178C9C(void);
@@ -414,9 +414,9 @@ static inline void SetMapRightRow(f32* first, f32 x, f32 y, f32 z) {
 static inline void PrepareTruckIcons(TruckDraw* draw, int me, int view) {
     int i;
     memset(draw->icons, 0, sizeof(draw->icons));
-    draw->count = fn_801EA994();
+    draw->count = GetHumanPlayerCount();
     for (i = 0; i < draw->count; i++) {
-        CarInfo* r = fn_801EA9A0(i);
+        CarInfo* r = GetCarInfo(i);
         draw->icons[i].part = FindDriver(r->setup.driver)->color;  // the driver's colour picks its map icon
         if (r->draw) {
             draw->icons[i].angle = -Atan2F(r->draw->pose.rot.m[6], r->draw->pose.rot.m[8]);
@@ -526,15 +526,15 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         f32 x = m.m[2][0];
         sf->unk10 = Atan2F(y, x);
     }
-    sf->lap = fn_801EA9A0(view)->params.lap;
+    sf->lap = GetCarInfo(view)->params.lap;
     draw = map->trucks;
     me = map->player;
     PrepareTruckIcons(draw, me, view);
     {
-        f32 dist = fn_801EA9A0(view)->draw->lapDist;
+        f32 dist = GetCarInfo(view)->draw->lapDist;
         f32 t;
         scale = 1.0f / (map->width / 2.0f);
-        t = (fn_801EA9A0(view)->draw->speedXZ / 0.44444445f - map->minSpeed) /
+        t = (GetCarInfo(view)->draw->speedXZ / 0.44444445f - map->minSpeed) /
             (map->maxSpeed - map->minSpeed);
         radius = LerpF(Max(Min(1.0f, t), 0.0f), map->minWidth, map->maxWidth);
         const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
@@ -624,8 +624,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     fn_802C8DB8(verts, 41, idx, 180);
     fn_802C8D74();
-    fn_801EA9A0(view);
-    for (int truck = 0; truck < fn_801EA994(); truck++) {
+    GetCarInfo(view);
+    for (int truck = 0; truck < GetHumanPlayerCount(); truck++) {
         f32 fade;
         int part;
         TruckDraw* d;
@@ -633,7 +633,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         if (self) {
             continue;
         }
-        fn_801EA9A0(truck);
+        GetCarInfo(truck);
         Vec3 rel = *(const Vec3*)&fn_8017960C(truck)->mtx.pos;
         rel.x = rel.x - basis.pos.x;
         f32 yv = basis.pos.y;

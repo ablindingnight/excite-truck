@@ -537,7 +537,7 @@ extern u8 lbl_8055FC8C;  // wide-screen layout
 void CarStatsInit(void);
 void CarStatsShutdown(void);
 extern "C" {
-void fn_8013C804(void);
+void LoadCarClassFile(void);
 void fn_8013C8B8(void);
 void fn_80129AEC(int a);
 int fn_802E4A10(void);
@@ -584,7 +584,7 @@ extern "C" {
 // MenuDoRollCall: both players pick a car and colour ("rollcall2.lyt"); returns 1 to go on, 0 to go back.
 int fn_8023FF1C(u8 flag) {
     CarStatsInit();
-    fn_8013C804();
+    LoadCarClassFile();
     RollPanels pp(flag);
     JoinLeaveWidget w;
     AddFocus(&w, &pp.p1.sel, 3, 1, 5, 7, 9);

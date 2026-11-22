@@ -13,9 +13,9 @@ RegTable lbl_804A433C;
 
 extern "C" {
 
-RegEntry* fn_8027ACBC(RegTable* table, s32 id);
+RegEntry* FindRegEntryById(RegTable* table, s32 id);
 
-RegEntry* fn_8027ABF8(s32 id) { return fn_8027ACBC(&lbl_804A433C, id); }
+RegEntry* fn_8027ABF8(s32 id) { return FindRegEntryById(&lbl_804A433C, id); }
 
 s32 fn_8027AC08(RegUser* u, s32 key) { return u->map.Find(key); }
 
@@ -29,9 +29,9 @@ s32 fn_8027AC64(RegUser* u) {
     }
 }
 
-int fn_8027AC80(const RegUser* u) { return fn_8027ACBC(&lbl_804A433C, u->regId) != 0; }
+int fn_8027AC80(const RegUser* u) { return FindRegEntryById(&lbl_804A433C, u->regId) != 0; }
 
-RegEntry* fn_8027ACBC(RegTable* table, s32 id) {
+RegEntry* FindRegEntryById(RegTable* table, s32 id) {
     int i;
     for (i = 0; i < table->count; i++) {
         if (id == table->items[i]->id) {

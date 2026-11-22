@@ -40,7 +40,7 @@ int fn_80138BE4(f32 a, f32 b) { return a * b < 0.0f; }
 int fn_80138BFC(f32 x) { return (f32)__fabs(x) <= 10.0f * __float_epsilon[0]; }
 
 
-int fn_80138C28(const Motion* m, f32* t, f32* miss) {
+int SolveQuadraticMotion(const Motion* m, f32* t, f32* miss) {
     f32 a;
     f32 hi;
     f32 b;
@@ -87,7 +87,7 @@ f32 fn_80138DF4(const Motion* m) {
         if (!fn_80138BFC(m->Da())) {
             f32 t;
             f32 miss;
-            if (fn_80138C28(m, &t, &miss)) {
+            if (SolveQuadraticMotion(m, &t, &miss)) {
                 f32 a2 = m->a2;
                 f32 n = m->v2 + t * a2 - m->v1;
                 r = n / MaxF(t, 0.01f);
@@ -115,7 +115,7 @@ f32 fn_80138DF4(const Motion* m) {
 f32 fn_80138F38(const Motion* m) {
     f32 t;
     f32 component;
-    if ((component = m->v2) > 0.0f && (component = m->a2) < 0.0f && fn_80138C28(m, &t, 0)) {
+    if ((component = m->v2) > 0.0f && (component = m->a2) < 0.0f && SolveQuadraticMotion(m, &t, 0)) {
         f32 a2v = m->a2;
         f32 stop = -m->v2 / a2v;
         if (stop <= t) {

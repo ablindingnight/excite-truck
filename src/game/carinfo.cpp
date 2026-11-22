@@ -41,7 +41,7 @@ s32 lbl_8055EB7C;
 
 extern "C" {
 
-void fn_801EA4C4(void) {
+void InitializeCarManager(void) {
     int i;
     lbl_8055EB7C = 1;
     lbl_8055EB78 = (CarMgr*)operator new(sizeof(CarMgr), "CarMgr::info");
@@ -57,7 +57,7 @@ void fn_801EA56C(void) {
     lbl_8055EB7C = 0;
 }
 
-void fn_801EA59C(int idx, CarDrawState* draw, const CarSetup* setup) {
+void InitializeCarInfo(int idx, CarDrawState* draw, const CarSetup* setup) {
     CarInfo* c = &lbl_8055EB78->cars[idx];
     s32 type = setup->type;
     c->setup = *setup;
@@ -74,13 +74,13 @@ void fn_801EA59C(int idx, CarDrawState* draw, const CarSetup* setup) {
     }
 }
 
-s32 fn_801EA994(void) { return lbl_8055EB78->humans; }
+s32 GetHumanPlayerCount(void) { return lbl_8055EB78->humans; }
 
-CarInfo* fn_801EA9A0(int i) { return &lbl_8055EB78->cars[i]; }
+CarInfo* GetCarInfo(int i) { return &lbl_8055EB78->cars[i]; }
 
 CarInfo* fn_801EA9B0(int i) { return &lbl_8055EB78->cars[lbl_8055EB78->order[i]]; }
 
-CarInfo* fn_801EA9CC(int i) { return &lbl_8055EB78->cars[i]; }
+CarInfo* GetCarInfoByIndex(int i) { return &lbl_8055EB78->cars[i]; }
 
 void fn_801EA9DC(int idx, const CarParams* p) {
     int pos;

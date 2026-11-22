@@ -137,7 +137,7 @@ void fn_8027847C(ScriptCam* cam) {
         f32 t = (f32)(lbl_8055E3C4 - a->tick) / span;
         t = MIN(1.0f, t);
         t = MAX(t, 0.0f);
-        fn_8026E22C((RMtx*)&cam->frame, (const RMtx*)&a->frame, (const RMtx*)&b->frame, t);
+        InterpolateCameraMatrix((RMtx*)&cam->frame, (const RMtx*)&a->frame, (const RMtx*)&b->frame, t);
         cam->fov = a->fov + t * (b->fov - a->fov);
         if (lbl_8055F5B9 && !lbl_8055F5BA && lbl_8055E3C4 >= lbl_8055F5C0 && lbl_8055E3C4 < lbl_8055F5C0 + 10) {
             lbl_8055F5B9 = 0;

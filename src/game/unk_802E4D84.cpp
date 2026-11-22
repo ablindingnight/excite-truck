@@ -164,7 +164,7 @@ extern int lbl_8055FF8C;  // output mode: 0/1 stereo, 2 surround
 extern void fn_802E5264(int, int);
 extern float lbl_804FC680[];
 extern void fn_802E7770(void);
-extern int fn_802E7774(void (*arg0)(void));
+extern int CallFunctionPointer(void (*arg0)(void));
 extern void fn_802E2E0C(int (*arg0)(int), const char *name);
 int lbl_8055D1D0 = -1;  // output mode last applied
 extern void AXQuit(void);
@@ -1176,7 +1176,7 @@ void fn_802E6AC4(void) {
 
 int fn_802E6AD0(int arg0) {
     if (arg0 == 1) {
-        fn_802E7774(fn_802E6AC4);
+        CallFunctionPointer(fn_802E6AC4);
     }
     return 0;
 }

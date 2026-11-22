@@ -199,11 +199,11 @@ int GetEveMode(void);
 void UnloadEves(void);
 void LoadModeEves(int mode);
 extern "C" CarChoiceList* fn_8027B834(int i);
-extern "C" CarIconTable* fn_8025FA18(void);
-extern "C" int fn_8025E678(int* key);
+extern "C" CarIconTable* LoadCarIconTable(void);
+extern "C" int AdvanceToNextUnlockedVehicle(int* key);
 extern "C" int fn_8025ECBC(int* key);
 extern "C" void fn_8025F274(u8* p);
-extern "C" void fn_8025F46C(CarPickScreen* s);
+extern "C" void PopulateCarSelectionRows(CarPickScreen* s);
 extern "C" u8 lbl_8055B860;
 extern char lbl_8055BAC0[8];  // "" (shared menu-item name)
 
@@ -224,7 +224,7 @@ static inline void FreeIcons(CarPickScreen* s) {
     }
 }
 
-void fn_8025E034(void) {
+void InitializeCarSelectionScreen(void) {
     int mode = GetEveMode();
     if (mode != 0x130) {
         UnloadEves();
@@ -233,7 +233,7 @@ void fn_8025E034(void) {
     CarPickScreen screen;
     lbl_8055F3D4 = &screen;
     FillLists(&screen);
-    screen.set = fn_8025FA18();
+    screen.set = LoadCarIconTable();
     for (int k = 0; k < 6; k++) {
         CarIconWidget* w = new ("car_icon") CarIconWidget;
         screen.icons[k] = w;
@@ -241,7 +241,7 @@ void fn_8025E034(void) {
     }
     screen.cur = 0;
     screen.all = screen.lists[2];
-    fn_8025F46C(&screen);
+    PopulateCarSelectionRows(&screen);
     /* What the text items must reproduce is compiler-verified (handoff FACTS 2026-11-17 03:37 and 05:35). The
        compiler cuts a block every 100 instructions while it selects instructions; a text item costs 12 of them
        (a temporary for the default context, its load, the stores), a five-argument item 10. Retail's second zero
@@ -280,7 +280,7 @@ void fn_8025E034(void) {
         MenuItem("car_icon_4", 5, screen.icons[3], 0, 0),
         MenuItem("car_icon_5", 5, screen.icons[4], 0, 0),
         MenuItem((const char*)&lbl_8055B860, 6, (void*)fn_8025ECBC, 0, 0x125),
-        MenuItem((const char*)&lbl_8055B860, 6, (void*)fn_8025E678, 0, 0x127),
+        MenuItem((const char*)&lbl_8055B860, 6, (void*)AdvanceToNextUnlockedVehicle, 0, 0x127),
         MenuItem((const char*)&lbl_8055B860, 6, NULL, -1, 0x1B),
         MenuItem(lbl_80498EE8),
     };
@@ -323,7 +323,7 @@ void fn_80214AF0(s32 s);
 // the three difficulties with the car/colour it was set with.
 #pragma push
 #pragma opt_unroll_loops off
-inline void fn_8025F46C(CarPickScreen* s) {
+inline void PopulateCarSelectionRows(CarPickScreen* s) {
     memset(s->names, 0, sizeof(s->names));
     memset(s->rows, 0, sizeof(s->rows));
     for (int i = 0; i < MinI(s->all->Count(), 6); i++) {
@@ -430,7 +430,7 @@ static inline void HighlightBest(void) {
 int fn_8025ECBC(int* key) {
     if (lbl_8055F3D4->cur > 0) {
         lbl_8055F3D4->cur--;
-        fn_8025F46C(lbl_8055F3D4);
+        PopulateCarSelectionRows(lbl_8055F3D4);
         HighlightBest();
     }
     return 0;
@@ -440,10 +440,10 @@ int fn_8025ECBC(int* key) {
 // "Next car" on the records screen: moves to the next car any list has unlocked.
 #pragma push
 #pragma opt_unroll_loops off
-int fn_8025E678(int* key) {
+int AdvanceToNextUnlockedVehicle(int* key) {
     if (AnyUnlocked(lbl_8055F3D4->cur + 1)) {
         lbl_8055F3D4->cur++;
-        fn_8025F46C(lbl_8055F3D4);
+        PopulateCarSelectionRows(lbl_8055F3D4);
         HighlightBest();
     }
     return 0;
@@ -469,7 +469,7 @@ extern "C" {
 extern "C" {
 
 // Loads the car icon table on first use; reference counted.
-CarIconTable* fn_8025FA18(void) { return CarIconTable::Acquire(); }
+CarIconTable* LoadCarIconTable(void) { return CarIconTable::Acquire(); }
 
 }  // extern "C"
 

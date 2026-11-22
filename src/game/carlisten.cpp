@@ -95,7 +95,7 @@ extern "C" {
 
 void fn_801D0590(CarListener* l) { *lbl_804386B4.Next() = l; }
 
-void fn_801D05B4(CarListener* l) { lbl_804386B4.Remove(l); }
+void RemoveCarListener(CarListener* l) { lbl_804386B4.Remove(l); }
 
 void fn_801D0650(int a) {
     int i;
@@ -111,7 +111,7 @@ void fn_801D06C4(int a) {
     }
 }
 
-void fn_801D0738(int a, int unused, CarBody* car, int b) {
+void ProcessCarEvent(int a, int unused, CarBody* car, int b) {
     if (IsCar(car)) {
         s32 id = car->index;
         int i;
@@ -121,11 +121,11 @@ void fn_801D0738(int a, int unused, CarBody* car, int b) {
     }
 }
 
-void fn_801D0800(RaceListener* l) { *lbl_8043870C.Next() = l; }
+void AddRaceListener(RaceListener* l) { *lbl_8043870C.Next() = l; }
 
 void fn_801D0824(RaceListener* l) { lbl_8043870C.Remove(l); }
 
-void fn_801D08C0(int a) {
+void NotifyAllListeners(int a) {
     int i;
     for (i = 0; i < lbl_8043870C.count; i++) {
         lbl_8043870C.data[i]->OnA(a);

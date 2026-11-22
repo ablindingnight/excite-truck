@@ -158,7 +158,7 @@ struct SphGroupAll {
 
 extern "C" {
 void fn_801D2414(u8*, const RVec3*, void*);  // (SObj*, const Vec*, Car*) in soevent.cpp
-void fn_801D0738(u8* p, const RVec3* c, void* f, const RVec3* b);
+void ProcessCarEvent(u8* p, const RVec3* c, void* f, const RVec3* b);
 }
 
 // The per-volume cached values cleared on reset.
@@ -3881,7 +3881,7 @@ void fn_801A4A10(u8* p, const RVec3* c, void* f, const RVec3* b) {
     if (U8(p, 0x40)) {
         fn_801D2414(p, c, f);
         if (PTR(p, 0x48)) {
-            fn_801D0738(p, c, f, b);
+            ProcessCarEvent(p, c, f, b);
         }
     }
 }

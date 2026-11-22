@@ -6,7 +6,7 @@
 // A car's damage snapshot (carstate keeps a pool of them; CarBody holds the live one and a saved copy).
 // Field names unproven.
 struct CarColors {
-    u8 c[164][4];  // packed dents: one byte per axis (fn_8018F538)
+    u8 c[164][4];  // packed dents: one byte per axis (SaveDamageState)
 };
 
 struct CarFlags {

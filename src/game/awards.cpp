@@ -26,7 +26,7 @@ int fn_801345D8(char* dst, int n, const char* fmt, ...);
 int fn_80160AB4(void);
 int fn_80161C38(void);
 void* fn_80207848(const char* name, int a);
-int fn_801EA994(void);
+int GetHumanPlayerCount(void);
 void fn_802E317C(const char* fmt, ...);  // fatal
 const char* fn_80131234(const char* key);  // localize
 void fn_801308F4(char* buf, s32 size, s32 value);  // format a score
@@ -55,7 +55,7 @@ HighScore* StatsGetHighScore(int slot, long event, long difficulty, int a);
 
 // CarInfo: game/carinfo.h.
 extern "C" {
-CarInfo* fn_801EA9A0(int car);
+CarInfo* GetCarInfo(int car);
 }
 
 #include "game/statistic.h"
@@ -296,7 +296,7 @@ AwardsMgr* lbl_8055E884;
 #define Disabled() (OptE3Demo() || fn_80161C38())
 
 static inline int CarSlot(int car) {
-    CarInfo* c = fn_801EA9A0(car);
+    CarInfo* c = GetCarInfo(car);
     return c->active ? (c->setup.slot & 3) : -1;
 }
 
@@ -367,7 +367,7 @@ void fn_801CB3F8(void) {
     if (Disabled()) {
         return;
     }
-    int n = fn_801EA994();
+    int n = GetHumanPlayerCount();
     for (int i = 0; i < n; i++) {
         fn_801CCAEC(i);
     }
@@ -878,8 +878,8 @@ static inline void CommitHandlers(AwardsMgr* m) {
 static inline void CommitAndRecordScore(AwardsMgr* m) {
     CommitHandlers(m);
     if (!fn_801CE898() && m->score != 0) {
-        for (int i = 0; i < fn_801EA994(); i++) {
-            CarInfo* c = fn_801EA9A0(i);
+        for (int i = 0; i < GetHumanPlayerCount(); i++) {
+            CarInfo* c = GetCarInfo(i);
             if (c->setup.type == 0x50) {
                 StatsAddHighScore(IdentGetCurrentSlot(), m->event, m->difficulty, c->setup.name, m->score, m->grade,
                                   m->time);
@@ -1055,7 +1055,7 @@ void fn_801CD4CC(int car, long place) {
     if (CarOff(m, car)) {
         return;
     }
-    if (!fn_801EA9A0(car)->active) {
+    if (!GetCarInfo(car)->active) {
         return;
     }
     if (m->place == 0) {
@@ -1079,7 +1079,7 @@ void ProcessAwardSubmission(int car, long score, long grade) {
     if (CarOff(m, car)) {
         return;
     }
-    if (!fn_801EA9A0(car)->active) {
+    if (!GetCarInfo(car)->active) {
         return;
     }
     if (m->score == 0) {
@@ -1089,7 +1089,7 @@ void ProcessAwardSubmission(int car, long score, long grade) {
         if (m->grade == 0) {
             AchievementsAdd(2, 1);
         }
-        const char* model = fn_801EA9A0(car)->setup.paint;
+        const char* model = GetCarInfo(car)->setup.paint;
         AchievementsAddModelStat(0, model, 1);
         if (grade == 0) {
             AchievementsAddModelStat(1, model, 1);
@@ -1137,7 +1137,7 @@ void fn_801CD7BC(int car, int valid, f32 t) {
     if (CarOff(m, car)) {
         return;
     }
-    if (!fn_801EA9A0(car)->active) {
+    if (!GetCarInfo(car)->active) {
         return;
     }
     if (!valid) {
@@ -1403,7 +1403,7 @@ void ClearAwardDisplayObjects(void) {
     }
 }
 
-int fn_801CE874(int car) { return fn_801EA9A0(car)->active; }
+int fn_801CE874(int car) { return GetCarInfo(car)->active; }
 
 int fn_801CE898(void) { return GetNumPlayers() > 1; }
 

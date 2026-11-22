@@ -112,7 +112,7 @@ int fn_801E897C(s32 a);
 int fn_801E89A4(s32 a);
 int fn_801E89C8(s32 a);
 int fn_801E9E78(void* a, Vec* p, Vec* n, s32* c);
-void fn_801EA59C(s32 index, int a, CarDef* d);
+void InitializeCarInfo(s32 index, int a, CarDef* d);
 void fn_801EAB10(int idx, CarDrawState* draw);  // carinfo.cpp
 void* fn_801EF1F0(void* p, const char* name);
 void fn_801EF428(void* p, int del);
@@ -128,7 +128,7 @@ void* fn_802002D4(const char* name, s32 model, s32 inst);
 void fn_8020095C(void* p);
 void fn_80201018(void* p, CarDrawView* c, int a);
 void* fn_802792E4(const char* name);
-void fn_802792EC(void* p);
+void DecrementLayoutReference(void* p);
 void fn_80297988(CarModel* m);
 void fn_802AB770(s32 index);
 void fn_802AB994(void);
@@ -219,7 +219,7 @@ u32* fn_801EC204(void) { return &lbl_80488668.c1; }
 
 static inline f32 Atan2F(f32 y, f32 x) { return (f32)atan2(y, x); }
 
-void fn_801EC214(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale, f32 offset, const f32* src) {
+void ParseGaugeDefinition(Gauge* g, ValueNode* n, s32 model, const char* name, f32 scale, f32 offset, const f32* src) {
     g->src = src;
     if (!n->Has(name)) {
         g->bone = 0;
@@ -286,7 +286,7 @@ void fn_801EC4A8(Gauge* g, const VecMatrix* f) {
     }
 }
 
-void fn_801EC59C(NeedleSlider* s, ValueNode* n, const char* name, const f32* src, f32 scale, f32 offset) {
+void SetupNeedleSliderFromNodes(NeedleSlider* s, ValueNode* n, const char* name, const f32* src, f32 scale, f32 offset) {
     s->src = src;
     ValueNode* c = n->FindChild(name);
     if (c) {
@@ -310,7 +310,7 @@ void fn_801EC59C(NeedleSlider* s, ValueNode* n, const char* name, const f32* src
     }
 }
 
-void fn_801EC714(NeedleSlider* s, f32* y, f32* z) {
+void CalculateSliderPosition(NeedleSlider* s, f32* y, f32* z) {
     *y = s->by + *s->src * s->ky;
     *z = s->bz + *s->src * s->kz;
 }
@@ -318,10 +318,10 @@ void fn_801EC714(NeedleSlider* s, f32* y, f32* z) {
 }  // extern "C"
 
 extern "C" {
-void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir);
+void LoadCarModelDetails(CarModel* m, const char* name, s32 x, s32 inst, const char* dir);
 void fn_801EE974(CarModel* m, Racer* r);
-void fn_801EEA64(CarModel* m, Racer* r, const char* name, const char* dir);
-void fn_801EEC68(CarModel* m);
+void LoadXrayModelData(CarModel* m, Racer* r, const char* name, const char* dir);
+void UnloadXrayModel(CarModel* m);
 void fn_801ECCE0(CarModel* m, u32 pass);
 }
 
@@ -336,7 +336,7 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
     StrNCat(buf, ".car", 64);
     fn_8012E81C(buf);
     res = (CarRes*)fn_802792E4(d->vehicleName);
-    fn_801EA59C(r->index, 0, (CarDef*)d);
+    InitializeCarInfo(r->index, 0, (CarDef*)d);
     models = drawModels;
     lods = lodTable;
     lodCount = &numLods;
@@ -344,9 +344,9 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
     s32 inst = driver >= 0 ? r->index : 0;
     char dir[64];
     fn_801345D8(dir, 64, "%s.car", d->vehicleName);
-    fn_801EE0E0(this, d->vehicleName, d->vehicle, inst, dir);
+    LoadCarModelDetails(this, d->vehicleName, d->vehicle, inst, dir);
     fn_801EE974(this, r);
-    fn_801EEA64(this, r, d->vehicleName, dir);
+    LoadXrayModelData(this, r, d->vehicleName, dir);
     s32 drv = d->driver;
     lbl_80488648[index] = this;
     r->lodModel = lodModels[1];
@@ -364,7 +364,7 @@ CarModel::CarModel(Racer* r, const CarDef* d) {
 }
 
 CarModel::~CarModel(void) {
-    fn_801EEC68(this);
+    UnloadXrayModel(this);
     int i;
     for (i = 0; i < numLods; i++) {
         drawModels[i] = -1;
@@ -383,7 +383,7 @@ CarModel::~CarModel(void) {
     }
     lbl_80488648[index] = 0;
     fn_801EF428(tire, 1);
-    fn_802792EC(res);
+    DecrementLayoutReference(res);
     res = 0;
     if (lbl_8055EBC8 == this) {
         lbl_8055EBC8 = 0;
@@ -394,7 +394,7 @@ extern "C" {
 
 int fn_801ECB60(CarModel* m) { return m->car->x2D4 > __float_epsilon[0]; }
 
-void fn_801ECB80(CarModel* m) {
+void UpdateCarLodBasedOnDistance(CarModel* m) {
     f32 d = fn_802C88D4(&m->frame.origin);
     d *= fn_801E88F0(-1);
     m->curLod = *m->lodCount - 1;
@@ -438,7 +438,7 @@ void fn_801ECCE0(CarModel* m, u32 pass) {
     CarModel** p = lbl_80488648;
     for (int i = 0; *p && i < 8; p++, i++) {
         if (pass != fn_801ECC8C(*p)) {
-            fn_801ECB80(*p);
+            UpdateCarLodBasedOnDistance(*p);
         }
     }
     CarModel* mine = CarAt(fn_801E866C(-1));
@@ -632,12 +632,12 @@ void CarModel::vf24(void) {
     fn_801ECCE0(this, 0);
 }
 
-extern "C" void fn_801ED718(CarModel* m);
+extern "C" void DrawDashboardOverlay(CarModel* m);
 
 void CarModel::PostDraw(void) {
     if (index == fn_801E866C(-1) && fn_801E89C8(-1)) {
         lbl_80488668.alpha = fn_802C99E8(car->alpha);
-        fn_801ED718(this);
+        DrawDashboardOverlay(this);
         fn_802C99E8(lbl_80488668.alpha);
     }
 }
@@ -687,7 +687,7 @@ static inline void OffsetDashboardFrame(VecMatrix& f) {
     f.origin.z = f.origin.z + w.z;
 }
 
-void fn_801ED718(CarModel* m) {
+void DrawDashboardOverlay(CarModel* m) {
     fn_802C974C(0.1f, 20.0f, fn_801E8738(-1));
     fn_802C88BC(2);
     s32 tex = fn_801E7E2C();
@@ -734,7 +734,7 @@ void fn_801ED718(CarModel* m) {
         b[20] = b[1];
         b[21] = b[21];  // the target loads and rewrites both
         b[22] = b[22];
-        fn_801EC714(&m->speedoSlider, &b[4].x, &b[5].x);
+        CalculateSliderPosition(&m->speedoSlider, &b[4].x, &b[5].x);
         fn_802C70AC(m->chassis, &m->frame, fn_802C7A34(1, &b[1], 22), 0xFFFFFFFF);
         fn_802C70AC(m->models[1], &m->frame, 0, m->car->groupMask & 0xFFFDFF9F);
     }
@@ -832,7 +832,7 @@ s32 fn_801EE0C8(CarModel* m) { return m->lodModels[1]; }
 
 f32 fn_801EE0D0(CarModel* m, int i) { return fn_801F159C(m->wheels[i]); }
 
-void fn_801EE0E0(CarModel* m, const char* name, s32 x, s32 inst, const char* dir) {
+void LoadCarModelDetails(CarModel* m, const char* name, s32 x, s32 inst, const char* dir) {
     char path[256];
     fn_801345D8(path, 256, "%s.car/lod.val", name);
     ValueTable* t = fn_80131808(path);
@@ -980,7 +980,7 @@ void fn_801EE974(CarModel* m, Racer* r) {
     }
 }
 
-void fn_801EEA64(CarModel* m, Racer* r, const char* name, const char* dir) {
+void LoadXrayModelData(CarModel* m, Racer* r, const char* name, const char* dir) {
     char p[256];
     fn_801345D8(p, 256, "%s.car/efxmesh.val", name);
     ValueTable* t = fn_80131810(p);
@@ -1007,7 +1007,7 @@ void fn_801EEA64(CarModel* m, Racer* r, const char* name, const char* dir) {
     }
 }
 
-void fn_801EEC68(CarModel* m) {
+void UnloadXrayModel(CarModel* m) {
     if (m->xray != -1) {
         mrModelUnload(m->xray);
         m->xray = -1;
@@ -1016,18 +1016,18 @@ void fn_801EEC68(CarModel* m) {
 
 f32 lbl_8055B088 = 12.3f;  // battery volts
 
-void fn_801EECAC(CarModel* m, u8* data) {
+void InitializeDashboardGauges(CarModel* m, u8* data) {
     m->car = (CarDrawView*)(data + m->offset);
     fn_801EAB10(m->index, (CarDrawState*)m->car);  // CarDrawView = carbody.h CarDrawState
     ValueNode* ch = m->res->values->FindChild("Chassis");
-    fn_801EC214(&m->volts, ch, m->chassis, "volt_gauge", 1.0f, 0.0f, &lbl_8055B088);
-    fn_801EC214(&m->speedometer, ch, m->chassis, "speedometer", 0.44444445f, 0.0f, &m->car->speed);
-    fn_801EC59C(&m->speedoSlider, ch, "speedo_slider", &m->car->speed, 0.44444445f, 0.0f);
-    fn_801EC214(&m->tachometer, ch, m->chassis, "tachometer", 1.0f, 0.0f, &m->car->rpm);
-    fn_801EC214(&m->oilPressure, ch, m->chassis, "oil_pressure_gauge", 1.0f, 0.0f, &m->car->oilPressure);
-    fn_801EC214(&m->oilTemp, ch, m->chassis, "oil_temp_gauge", 254.77777f, 254.22223f, &m->car->oilTemp);
-    fn_801EC214(&m->waterTemp, ch, m->chassis, "water_temp_gauge", 254.77777f, 254.22223f, &m->car->waterTemp);
-    fn_801EC214(&m->fuel, ch, m->chassis, "fuel_gauge", 1.0f, 0.0f, &m->car->fuel);
+    ParseGaugeDefinition(&m->volts, ch, m->chassis, "volt_gauge", 1.0f, 0.0f, &lbl_8055B088);
+    ParseGaugeDefinition(&m->speedometer, ch, m->chassis, "speedometer", 0.44444445f, 0.0f, &m->car->speed);
+    SetupNeedleSliderFromNodes(&m->speedoSlider, ch, "speedo_slider", &m->car->speed, 0.44444445f, 0.0f);
+    ParseGaugeDefinition(&m->tachometer, ch, m->chassis, "tachometer", 1.0f, 0.0f, &m->car->rpm);
+    ParseGaugeDefinition(&m->oilPressure, ch, m->chassis, "oil_pressure_gauge", 1.0f, 0.0f, &m->car->oilPressure);
+    ParseGaugeDefinition(&m->oilTemp, ch, m->chassis, "oil_temp_gauge", 254.77777f, 254.22223f, &m->car->oilTemp);
+    ParseGaugeDefinition(&m->waterTemp, ch, m->chassis, "water_temp_gauge", 254.77777f, 254.22223f, &m->car->waterTemp);
+    ParseGaugeDefinition(&m->fuel, ch, m->chassis, "fuel_gauge", 1.0f, 0.0f, &m->car->fuel);
 }
 
 /* Helper name unproven: unused, so MWCC drops it but keeps its strings in .data */
@@ -1040,7 +1040,7 @@ void fn_801EEE38(void) {
     u8* data = (u8*)fn_80179CB0();
     CarModel* m;
     for (u32 i = 0; (m = CarAt(i)) != 0; i++) {
-        fn_801EECAC(m, data);
+        InitializeDashboardGauges(m, data);
     }
 }
 

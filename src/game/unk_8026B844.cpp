@@ -70,7 +70,7 @@ extern f32 lbl_8055F47C;       // its field of view
 extern s32 lbl_8055F4F0;       // the car the replay camera follows (-1: none)
 s32 fn_8026A344(s32 i);
 CamCar* fn_8017960C(s32 car);
-void fn_8026E688(CamFrame* out, const CamVec* eye, const CamVec* target, const CamVec* up);
+void CalculateCameraMatrix(CamFrame* out, const CamVec* eye, const CamVec* target, const CamVec* up);
 void fn_801BFD34(CamVec* out, const CamVec* v, const CamFrame* m);
 
 // The pad as fn_801298E8 fills it (achview's ViewPad, keybd's KeyState): sticks, the analog trigger at 0x1C,
@@ -886,7 +886,7 @@ void fn_8026DAA8(CamView* c) {
             up.x = 0.0f;
             up.y = 1.0f;
             up.z = 0.0f;
-            fn_8026E688(&c->frame, &f.pos, &b->frame.pos, &up);
+            CalculateCameraMatrix(&c->frame, &f.pos, &b->frame.pos, &up);
         } else {
             c->frame.rot.axes[0].x = 1.0f;
             c->frame.rot.axes[0].y = 0.0f;

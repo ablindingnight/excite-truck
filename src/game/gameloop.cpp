@@ -83,7 +83,7 @@ void fn_801E7DEC(RaceSetup* rs);
 void fn_8017685C(int unk);
 void fn_801AF6FC(void);
 void fn_801AF92C(RaceStandings* res);
-CarInfo* fn_801EA9A0(int index);
+CarInfo* GetCarInfo(int index);
 int fn_80231504(int unk);
 void fn_801DF110(void);
 void fn_802C8530(void);
@@ -130,7 +130,7 @@ void fn_80176780(int a, int b);
 int fn_802E2C20(void);
 int fn_801298E8(JoyStatus* pad, int index);
 int fn_801E85AC(void);
-void fn_8026A1F0(int cam, int player, int unk);
+void SetCameraNextMode(int cam, int player, int unk);
 void fn_801E7E48(void);
 void fn_80176BAC(void);
 int fn_801E89EC(void);
@@ -485,7 +485,7 @@ void gameloop_postrace(RaceStandings* res) {
         res->races = lbl_8055D3E8;
         fn_802E30C8("gameloop_postrace: Player ran %i consecutive races.", lbl_8055D3E8);
         for (i = 0, e = (RaceResultEntry*)res; i < res->count; i++, e++) {
-            e->value = fn_801EA9A0(i)->setup.driver;
+            e->value = GetCarInfo(i)->setup.driver;
         }
     }
 }
@@ -679,7 +679,7 @@ void fn_8000B838(void) {
         if (fn_801E868C(i, &type, &arg)) {
             switch (type) {
             case 3:
-                if (fn_801EA9A0(fn_801E86F8(i))->params.state != 3) {
+                if (GetCarInfo(fn_801E86F8(i))->params.state != 3) {
                     if (fn_801E7DF0(i)) {
                         fn_801E7E04(i, 0);
                     } else {
@@ -688,7 +688,7 @@ void fn_8000B838(void) {
                 }
                 break;
             case 0:
-                if (fn_801EA9A0(fn_801E86F8(i))->params.state != 3) {
+                if (GetCarInfo(fn_801E86F8(i))->params.state != 3) {
                     fn_8000BD9C(i, 0, &c->cam);
                 }
                 break;
@@ -780,9 +780,9 @@ void game_loop(void) {
     int i;
     for (i = 0, c = lbl_8034F5B8; i < fn_801E85AC(); c++, i++) {
         if (c->next == 0x22) {
-            fn_8026A1F0(c->cam, i, 0);
+            SetCameraNextMode(c->cam, i, 0);
         } else {
-            fn_8026A1F0(c->next, i, 0);
+            SetCameraNextMode(c->next, i, 0);
             c->next = 0x22;
         }
     }

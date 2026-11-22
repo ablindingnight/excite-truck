@@ -90,7 +90,7 @@ void fn_802788E0(f32 t);
 void fn_802787E4(void);
 void fn_80278318(void);
 void fn_80278778(const char* name);
-void fn_8026A1F0(int cam, int a, int b);
+void SetCameraNextMode(int cam, int a, int b);
 void fn_8027888C(int unk);
 void fn_801E85CC(int unk);
 void fn_801E85BC(int unk);
@@ -567,7 +567,7 @@ void fn_80008F98(void) {
                 } else {
                     fn_802E30C8("replay: previewing movie");
                 }
-                fn_8026A1F0(0x19, 0, 1);
+                SetCameraNextMode(0x19, 0, 1);
                 break;
             case 'r':
                 fn_801769E0();
@@ -607,26 +607,26 @@ void fn_80008F98(void) {
                 fn_801E85BC(0);
                 break;
             case 0x170:
-                fn_8026A1F0(4, 0, 0);
+                SetCameraNextMode(4, 0, 0);
                 break;
             case 0x171:
-                fn_8026A1F0(0x11, 0, 0);
+                SetCameraNextMode(0x11, 0, 0);
                 fn_8026DDD8(0);
                 break;
             case 0x172:
-                fn_8026A1F0(0x11, 0, 0);
+                SetCameraNextMode(0x11, 0, 0);
                 fn_8026DDD8(1);
                 break;
             case 0x173:
-                fn_8026A1F0(0x11, 0, 0);
+                SetCameraNextMode(0x11, 0, 0);
                 fn_8026DDD8(2);
                 break;
             case 0x174:
-                fn_8026A1F0(0x11, 0, 0);
+                SetCameraNextMode(0x11, 0, 0);
                 fn_8026DDD8(3);
                 break;
             case 0x175:
-                fn_8026A1F0(0x11, 0, 0);
+                SetCameraNextMode(0x11, 0, 0);
                 fn_8026DDD8(4);
                 break;
             }
@@ -895,7 +895,7 @@ void fn_80009534(void) {
         fn_802C8530();
         fn_802C87B4(0, 0, lbl_8055CFF0, lbl_8055CFF4);
         fn_801E7E48();
-        fn_8026A1F0(camera, 0, newCam);
+        SetCameraNextMode(camera, 0, newCam);
         newCam = 0;
         fn_801E81B8(1, 0);
         fn_802E2C20();

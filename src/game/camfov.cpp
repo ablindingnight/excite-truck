@@ -33,7 +33,7 @@ extern "C" {
 
 // Places the camera at `pos` looking at `target` with `up` as the up hint; nothing changes the frame
 // when the target is too close or straight above/below.
-void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
+void SetupCameraLookAt(const f32* pos, const f32* target, u8* cam, const f32* up) {
     CamRec* cr = (CamRec*)cam;
     cr->pose.pos.v[0] = pos[0];
     cr->pose.pos.v[1] = pos[1];
@@ -59,7 +59,7 @@ void fn_8026E870(const f32* pos, const f32* target, u8* cam, const f32* up) {
 // Mode set as a bit mask over modes 4..23 (the original tests a mask, not a switch).
 #define CAM_MODE_BIT(m) (1 << ((m) - 4))
 
-int fn_8026EA14(int mode) {
+int IsCameraModeValid(int mode) {
     int r = 0;
     u32 i = mode - 4;
     if (i <= 19 && ((1 << i) & (CAM_MODE_BIT(4) | CAM_MODE_BIT(5) | CAM_MODE_BIT(6) | CAM_MODE_BIT(8) | CAM_MODE_BIT(23)))) {
@@ -82,7 +82,7 @@ f32 fn_8026EA44(int mode) {
 }
 
 // Camera pitch offset by mode. Draft: the original compiles to a jump table over 4..23.
-f32 fn_8026EA8C(int mode, f32 t) {
+f32 CalculateCameraPitchOffset(int mode, f32 t) {
     // The target's jump table covers modes 4-23, so mode 4 and at least one more mode in 8-22 had their own
     // labels on the default value (MWCC builds a table from six labels on); which one besides 4 is unknown.
     switch (mode) {
@@ -153,7 +153,7 @@ static inline int Above(f32 v, f32 k) { return v > k; }
 
 // The view angle for the camera: blended from the last one (0x194) toward the speed-based angle, or
 // toward the boost angle while boosting (not while an AI driver is in mode 1).
-f32 fn_8026EB4C(const u8* p) {
+f32 CalculateCameraFieldOfView(const u8* p) {
     const CamRec* cr = (const CamRec*)p;
     f32 fov;
     f32 r = fn_8026EAEC(!Boosting(cr->car) ? lbl_8055F534 : lbl_8055F530);
@@ -180,9 +180,9 @@ f32 fn_8026EB4C(const u8* p) {
 double cos(double x);
 
 // Returns the view angle; scales *scale so that wider views keep the reference framing.
-f32 fn_8026ECE4(u8* p, f32* scale) {
+f32 CalculateViewAngleScale(u8* p, f32* scale) {
     f32 ref;
-    f32 fov = fn_8026EB4C(p);
+    f32 fov = CalculateCameraFieldOfView(p);
     if (fov > lbl_8055F52C) {
         ref = cos(Mul(lbl_8055F52C, 0.25f));
         *scale *= (f32)cos(Mul(fov, 0.25f)) / ref;
@@ -287,7 +287,7 @@ static inline void EaseGroundHeight(f32 t, bool onGround, f32 h, CamRect* r) {
 
 // Per-frame camera height tracking: averages the ground around the car into the player's rect
 // (lbl_8049A218), eases the rect's lift/zoom terms, then lifts pos/target and applies fn_8026ED64.
-void fn_8026EF48(s32* cam, f32* pos, f32* target) {
+void UpdateCameraHeightTracking(s32* cam, f32* pos, f32* target) {
     const CamRec* cr = (const CamRec*)cam;
     f32 avg;
     f32 v;
@@ -363,7 +363,7 @@ struct CamFovFrame {
     PVec3A pos;     // offset 0x24
 };
 
-// The chase/follow camera (fields used by fn_8026F420 and fn_802704E4; the rest is camstate's).
+// The chase/follow camera (fields used by UpdateChaseCameraMode and UpdateChaseCameraView; the rest is camstate's).
 struct ChaseCam {
     u8 pad0[0x4];
     s32 mode;           // offset 0x4
@@ -410,7 +410,7 @@ static inline f32 BackOffset(int mode, int wide) {
 // moves sideways, keeps it above the ground and aims it.
 static inline f32 CarHeight(u8* car) { return F32(car, 0x5B8); }  /* Helper name unproven */
 static inline f32 CarScale(u8* car) { return F32(car, 0x5E4); }  /* Helper name unproven */
-void fn_8026F420(int mode, int prev, u8* p) {
+void UpdateChaseCameraMode(int mode, int prev, u8* p) {
     ChaseCam* c = (ChaseCam*)p;
     int wide = fn_80178CA4() > 1;
     f32 off = BackOffset(mode, wide);
@@ -421,7 +421,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
     int air = F32(c->car, 0x2688) > 0.0f;
     if (c->reset || air) {
         c->blend = 0.0f;
-        if (!fn_8026EA14(prev) && mode != 23) {
+        if (!IsCameraModeValid(prev) && mode != 23) {
             c->lastMode = 4;
             c->pitchT = 0.0f;
         } else {
@@ -430,7 +430,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
         if ((c->lastMode != 23 && mode != 23) || c->hold) {
             c->pitchT = 0.0f;
         }
-        if (!fn_8026EA14(prev) || c->hold || air) {
+        if (!IsCameraModeValid(prev) || c->hold || air) {
             c->tf.pos = c->pos;
             c->tf.axes = c->axes;
             AddScaled(c->tf.pos.v, c->tf.pos.v, &c->axes.fwd.x, -20.0f);
@@ -457,13 +457,13 @@ void fn_8026F420(int mode, int prev, u8* p) {
     tgt.x = c->pos.v[0];
     tgt.y = c->pos.v[1];
     tgt.z = c->pos.v[2];
-    c->fov = fn_8026ECE4(p, &dist);
+    c->fov = CalculateViewAngleScale(p, &dist);
     f32 a = fn_8026EA44(mode);
     f32 b = fn_8026EA44(c->lastMode);
     tgt.y = tgt.y + CarScale(c->car) * (lift + LerpT(ease, b, a));
     c->view = c->tf;
     CsVec up1(0.0f, 1.0f, 0.0f);
-    fn_8026E870(c->view.pos.v, &tgt.x, p, &up1.x);
+    SetupCameraLookAt(c->view.pos.v, &tgt.x, p, &up1.x);
     d.Set(0.0f, 0.0f, 0.0f);
     int still = 0;
     if (PSVECDotProduct((const Vec*)c->move, (const Vec*)c->move) < 1.0f) {
@@ -492,7 +492,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
         }
     }
     CsVec up2(0.0f, 1.0f, 0.0f);
-    fn_8026E870(c->view.pos.v, &tgt.x, p, &up2.x);
+    SetupCameraLookAt(c->view.pos.v, &tgt.x, p, &up2.x);
     f32 k;
     f32 sf = c->speedFrac;
     switch (mode) {
@@ -505,8 +505,8 @@ void fn_8026F420(int mode, int prev, u8* p) {
     }
     f32 y;
     f32 scale = F32(c->car, 0x5E4);
-    f32 pa = fn_8026EA8C(mode, c->pitchT);
-    f32 pb = fn_8026EA8C(c->lastMode, c->pitchT);
+    f32 pa = CalculateCameraPitchOffset(mode, c->pitchT);
+    f32 pb = CalculateCameraPitchOffset(c->lastMode, c->pitchT);
     f32 pitch = LerpT(ease, pb, pa);
     f32 back = pitch * (k * scale) - dist;
     c->view.pos.v[0] = tgt.x + c->view.axes.fwd.x * back;
@@ -533,7 +533,7 @@ void fn_8026F420(int mode, int prev, u8* p) {
         c->view.pos.v[1] = c->view.pos.v[1] + (h + Mul(2.0f, lift)) * CarScale(c->car);
         c->view.pos.v[1] = c->view.pos.v[1] > (1.0f + c->pos.v[1]) ? c->view.pos.v[1] : (1.0f + c->pos.v[1]);
         CsVec up3(0.0f, 1.0f, 0.0f);
-        fn_8026E870(c->view.pos.v, &tgt.x, p, &up3.x);
+        SetupCameraLookAt(c->view.pos.v, &tgt.x, p, &up3.x);
     }
     f32 gap;
     if (seven) {
@@ -558,9 +558,9 @@ void fn_8026F420(int mode, int prev, u8* p) {
     v = v > 0.0f ? v : 0.0f;
     c->bump = v;
     c->view.pos.v[1] = c->view.pos.v[1] + c->bump;
-    fn_8026EF48((s32*)p, c->view.pos.v, &tgt.x);
+    UpdateCameraHeightTracking((s32*)p, c->view.pos.v, &tgt.x);
     CsVec up4(0.0f, 1.0f, 0.0f);
-    fn_8026E870(c->view.pos.v, &tgt.x, p, &up4.x);
+    SetupCameraLookAt(c->view.pos.v, &tgt.x, p, &up4.x);
     if (!fn_801769F8()) {
         f32 b2 = 0.016683351f + c->blend;
         c->blend = b2 < 100.0f ? b2 : 100.0f;
@@ -576,9 +576,9 @@ s32 fn_8018B06C(u8* car);
 void fn_802E30C8(const char* fmt, ...);
 
 // The physics camera (mode 4 on a split screen or the TV output): trails the car like the chase camera
-// but swings the trailing frame round when the car drives backwards; other modes use fn_8026F420.
+// but swings the trailing frame round when the car drives backwards; other modes use UpdateChaseCameraMode.
 
-void fn_8026FCFC(int mode, int prev, u8* p) {
+void UpdateChaseCameraFOV(int mode, int prev, u8* p) {
     ChaseCam* c = (ChaseCam*)p;
     PVec3A target;
     CVec3 d;
@@ -590,7 +590,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
     CVec3 r;
     int tv = (fn_801769CC()->type >> 17) & 1;
     if ((fn_80178CA4() <= 4 && !tv) || mode != 4) {
-        fn_8026F420(mode, prev, p);
+        UpdateChaseCameraMode(mode, prev, p);
     } else {
         f32 k = c->speedFrac;
         switch (mode) {
@@ -604,7 +604,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
         f32 radius = F32(c->car, 0x5B4);
         f32 dist = 7.0f + radius * k;
         f32 lift = CarHeight(c->car) + 2.7f;
-        c->fov = fn_8026ECE4(p, &dist);
+        c->fov = CalculateViewAngleScale(p, &dist);
         target = c->pos;
         target.v[1] += 1.5f;
         if (prev != mode && prev <= 11) {
@@ -713,7 +713,7 @@ void fn_8026FCFC(int mode, int prev, u8* p) {
             eye.v[2] = c->view.pos.v[2];
         }
         CsVec up(0.0f, 1.0f, 0.0f);
-        fn_8026E870(eye.v, target.v, p, &up.x);
+        SetupCameraLookAt(eye.v, target.v, p, &up.x);
     }
 }
 
@@ -736,15 +736,15 @@ void fn_80270484(void) {
     }
 }
 
-void fn_802704D0(int to, int from, u8* cam) { fn_8026FCFC(to, from, cam); }
+void CopyCameraData(int to, int from, u8* cam) { UpdateChaseCameraFOV(to, from, cam); }
 
-void fn_802704D4(int to, u8* cam) { fn_802704D0(to, ((CamRec*)cam)->w4, cam); }
+void fn_802704D4(int to, u8* cam) { CopyCameraData(to, ((CamRec*)cam)->w4, cam); }
 
-f32 fn_802704E0(int mode, f32 t) { return fn_8026EA8C(mode, t); }
+f32 fn_802704E0(int mode, f32 t) { return CalculateCameraPitchOffset(mode, t); }
 
 // Chase camera: keeps a trailing frame behind the car's frame, eases the view direction toward the
 // car's heading, places the eye behind the target above the ground and aims it.
-void fn_802704E4(u8* p) {
+void UpdateChaseCameraView(u8* p) {
     ChaseCam* c = (ChaseCam*)p;
     f32 on;
     f32 s;
@@ -763,7 +763,7 @@ void fn_802704E4(u8* p) {
         AddScaled(c->tf.pos.v, c->tf.pos.v, &c->axes.fwd.x, -10.0f);
     }
     on = U8(c->car, 0x260C) ? 1.0f : 0.0f;
-    c->fov = fn_8026ECE4(p, &dist);
+    c->fov = CalculateViewAngleScale(p, &dist);
     target = c->pos;
     target.v[1] += Mul(wide ? 2.5f : 2.0f, F32(c->car, 0x5E4));
     if ((f32)__fabs(on - c->lastOn) <= __float_epsilon[0]) {
@@ -831,9 +831,9 @@ void fn_802704E4(u8* p) {
         eye.v[1] = c->view.pos.v[1];
         eye.v[2] = c->view.pos.v[2];
     }
-    fn_8026EF48((s32*)p, eye.v, target.v);
+    UpdateCameraHeightTracking((s32*)p, eye.v, target.v);
     CsVec up(0.0f, 1.0f, 0.0f);
-    fn_8026E870(eye.v, target.v, p, &up.x);
+    SetupCameraLookAt(eye.v, target.v, p, &up.x);
     c->lastOn = on;
 }
 

@@ -117,7 +117,7 @@ void fn_801D9284(void);
 void InitializeRumbleSound(void);
 void fn_801CB2D8(void);
 void fn_801DEC18(void);
-void fn_801E0710(void);
+void CreateBoostManager(void);
 void fn_801B8318(void);
 void fn_801FA978(void);
 void fn_801E2188(void);
@@ -125,7 +125,7 @@ void fn_801AE4C4(void);
 void fn_801B52CC(void);
 void fn_801E21BC(void);
 void fn_8017D2CC(int n);
-void fn_80267420(int nViews);  // camera manager start-up; retail passes the view count, the callee ignores it
+void InitializeCameraManager(int nViews);  // camera manager start-up; retail passes the view count, the callee ignores it
 void* fn_801284E8(const char* tag, s32 size);
 void fn_801AD5EC(void);
 void fn_801B2320(void);
@@ -139,12 +139,12 @@ void fn_801B5354(void);
 void fn_80177A18(void);
 void PhysReplayUninstallEventHandler(s32 (*fn)(void*));
 void fn_801E1D9C(void);
-void fn_8026785C(void);
+void CleanupCameraManager(void);
 void fn_8017D334(void);
 void fn_80128658(void* p);
 void fn_801AE50C(void);
 void fn_801E222C(void);
-void fn_801E1520(void);
+void ClearBoostManager(void);
 void fn_801DEE3C(void);
 void fn_801CB518(void);
 void ResetSoundSystem(void);
@@ -184,7 +184,7 @@ void fn_801B265C(void);
 void fn_801AED74(void);
 void fn_801E2294(void);
 void fn_801B2910(void);
-void fn_80267680(void);
+void InitializeCameraStructures(void);
 void fn_80265D60(void);
 void fn_801CECE0(void);
 void fn_801349C4(void);
@@ -202,7 +202,7 @@ void fn_801CF01C(void);
 void fn_801CB4A0(void);
 void fn_801AED68(void);
 s32 fn_8026A368(int a);
-void fn_802678E8(void* car, int i);
+void UpdateCameraTracking(void* car, int i);
 void fn_801B2D28(void* p);
 void fn_801CEEC8(void* p);
 void fn_801B848C(void* p);
@@ -975,7 +975,7 @@ void fn_80178DD4(s32 stream) {
     fn_801CB2D8();
     fn_801DEC18();
     fn_80127464();
-    fn_801E0710();
+    CreateBoostManager();
     fn_801B8318();
     fn_801FA978();
     lbl_8055E434 = new ("phob_list") Phob*[0x200];
@@ -1012,7 +1012,7 @@ void fn_80178DD4(s32 stream) {
     int n = lbl_8055E430;
     lbl_8055E448 = 0;
     lbl_8055E444 = lbl_8055E440 = n > 1 ? n : 1;
-    fn_80267420(lbl_8055E444);
+    InitializeCameraManager(lbl_8055E444);
     lbl_8055E450 = (StatePacket*)fn_801284E8("PhysMessage", lbl_8055E3CC + 0x2EE8);
     fn_801AD5EC();
     fn_80127464();
@@ -1047,7 +1047,7 @@ void fn_801791A8(void) {
     fn_80177A18();
     PhysReplayUninstallEventHandler((s32 (*)(void*))fn_80178C4C);
     fn_801E1D9C();
-    fn_8026785C();
+    CleanupCameraManager();
     fn_8017D334();
     fn_80128658(lbl_8055E450);
     lbl_8055E450 = 0;
@@ -1058,7 +1058,7 @@ void fn_801791A8(void) {
     lbl_8055E434 = 0;
     fn_801AE50C();
     fn_801E222C();
-    fn_801E1520();
+    ClearBoostManager();
     fn_801DEE3C();
     fn_801CB518();
     ResetSoundSystem();
@@ -1128,7 +1128,7 @@ void fn_80179320(void) {
         lbl_8055E434[i]->Reset();
     }
     fn_801B2910();
-    fn_80267680();
+    InitializeCameraStructures();
     if (!fn_801CF064()) {
         for (i = 0; i < lbl_8055E430; i++) {
             fn_8026A248(lbl_80430590[i], i);
@@ -1252,7 +1252,7 @@ StatePacket* fn_80179824(void) {
     lbl_8055E444 = p->nViews;
     for (i = 0; i < lbl_8055E440; i++) {
         CarStateOut* c = &p->cars[i];
-        fn_802678E8(c, i);
+        UpdateCameraTracking(c, i);
         c->id = lbl_804305A0[i].id;
         c->count = lbl_804305A0[i].count;
     }

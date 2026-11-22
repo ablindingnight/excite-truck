@@ -59,13 +59,13 @@ extern "C" {
 int fn_801298E8(f32* out, int unk);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 int fn_801769B8(void);
-int fn_801EA994(void);
+int GetHumanPlayerCount(void);
 int fn_802E2C20(void);
 int fn_801E86F8(int player);
-RacerState* fn_801EA9CC(int index);
+RacerState* GetCarInfoByIndex(int index);
 int fn_801B8570(int index);
 int fn_801E866C(int player);
-CarInfo* fn_801EA9A0(int index);
+CarInfo* GetCarInfo(int index);
 u32 fn_801B84D8(int player);
 extern u8 lbl_8055F024;
 void fn_80230DA0(void);
@@ -444,7 +444,7 @@ static void fn_80005460(void) {}
 void fn_80005464(void) {
     lbl_8034EE84.mode = fn_801769B8();
     lbl_8034EE84.split = 0;
-    if (lbl_8034EE84.mode == 2 && fn_801EA994() > 1) {
+    if (lbl_8034EE84.mode == 2 && GetHumanPlayerCount() > 1) {
         lbl_8034EE84.split = 1;
     }
     lbl_8034EE84.active = 1;
@@ -468,7 +468,7 @@ int fn_80005564(void) { return lbl_8034EEB8.arena != 0; }
 int fn_80005580(int player) {
     u32 flags = fn_801E87A8()->type;
     int index = fn_801E86F8(player);
-    RacerState* r = fn_801EA9CC(index);
+    RacerState* r = GetCarInfoByIndex(index);
     if (!fn_801B8570(index)) {
         return 1;
     }
@@ -490,7 +490,7 @@ int fn_8000561C(void) {
 
 int fn_80005678(void) { return lbl_8034EEB8.closure->IsDone(); }
 
-int fn_80005694(void) { return fn_801EA9CC(0)->state == 1; }
+int fn_80005694(void) { return GetCarInfoByIndex(0)->state == 1; }
 
 void fn_800056C8(int player, GameOverlay* overlay) { lbl_8034EEB8.players[player].next = overlay; }
 
@@ -506,7 +506,7 @@ void fn_80005740(int player) {
     CarInfo* racer;
     lbl_8034EE84.player = player;
     lbl_8034EE84.view = fn_801E866C(player);
-    racer = fn_801EA9A0(lbl_8034EE84.view);
+    racer = GetCarInfo(lbl_8034EE84.view);
     lbl_8034EE84.racer = racer;
     lbl_8034EE84.truck = racer->draw;
     lbl_8034EE84.stats = &racer->params;
@@ -971,7 +971,7 @@ void ResultsOverlay::DrawTimes(void) {
     char buf[8];
     f32 t;
 
-    for (i = 0; i < fn_801EA994(); i++) {
+    for (i = 0; i < GetHumanPlayerCount(); i++) {
         r = fn_801EA9B0(i);
         y = y0 - 54.0f * i;
         fn_80010E94(art, 0, x0, y - 21.6f, kOverlayStickYScale.value, 27.0f);
@@ -1134,7 +1134,7 @@ void fn_80007318(int) {
     fn_802C974C(kOverlayFullScale.value, 1000.0f, 1.4398966f);
     lbl_8034EE84.player = 0;
     lbl_8034EE84.view = fn_801E866C(0);
-    lbl_8034EE84.racer = fn_801EA9A0(lbl_8055D350->view);
+    lbl_8034EE84.racer = GetCarInfo(lbl_8055D350->view);
     lbl_8034EE84.truck = lbl_8055D350->racer->draw;
     lbl_8034EE84.stats = &lbl_8055D350->racer->params;
     lbl_8034EE84.time = fn_801E7E18();

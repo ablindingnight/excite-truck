@@ -7,7 +7,7 @@ extern "C" {
 
 void fn_802E7770(void) {}
 
-int fn_802E7774(void (*fn)(void)) {
+int CallFunctionPointer(void (*fn)(void)) {
     if (fn) {
         fn();
     }

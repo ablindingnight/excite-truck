@@ -49,7 +49,7 @@ void fn_802ADDD8(void* p, int a);
 s32 fn_80145E70(const char* name);
 s32 fn_80204CF0(void);
 s32 fn_80204EA0(const char* key);
-int fn_801EA994(void);  // number of cars
+int GetHumanPlayerCount(void);  // number of cars
 f32 fn_80129DC4(int n, f32 lo, f32 hi);  // random float
 }
 
@@ -132,7 +132,7 @@ extern "C" RaceCarRec* fn_8017960C(int id);
 // Camera: common.h's PlainValMatrix.
 extern "C" {
 PlainValMatrix* fn_802C86DC(void);
-void fn_8018F76C(RaceCarRec* car, int wheel);
+void DetachWheelFromCar(RaceCarRec* car, int wheel);
 }
 
 // Interval timer on the race clock (0x8001DAE0..), shared with zone and stdoverlay.
@@ -460,7 +460,7 @@ public:
 class CrushSubTaskMgr : public CSubTaskMgr {
 public:
     CrushSubTaskMgr(CrushMaster* m) {
-        nCars = fn_801EA994();
+        nCars = GetHumanPlayerCount();
         master = m;
     }
     virtual ~CrushSubTaskMgr(void) {}
@@ -512,7 +512,7 @@ void fn_80171D94(int id) {
     RaceCarRec* car = fn_8017960C(id);
     int i;
     for (i = 0; i < 4; i++) {
-        fn_8018F76C(car, i);
+        DetachWheelFromCar(car, i);
     }
 }
 
@@ -840,7 +840,7 @@ inline void CrushResults::Init(void) {
 inline void CrushMaster::vfF8(void) {
     int i;
     layout.p = (ILayout*)fn_80145E70("crushlyt.val");
-    nCars = fn_801EA994();
+    nCars = GetHumanPlayerCount();
     for (i = 0; i < nCars; i++) {
         cars[i].human = fn_80171EC0(i);
         cars[i].active = 1;
@@ -1213,7 +1213,7 @@ inline void CrushMaster::vfB8(ZoneResults* r) {
 
 inline void CrushMaster::vf44(void) {
     if (fn_801B306C() < 0.0f && !IsLoadingActive()) {
-        int n = fn_801EA994();
+        int n = GetHumanPlayerCount();
         int i;
         for (i = 0; i < n; i++) {
             if (i != fn_801E866C(-1) && vf20(i)) {
@@ -1501,7 +1501,7 @@ struct RVec3;
 extern "C" {
 CarBrain* fn_801B2EC0(int car);
 u8 fn_801B3050(int car);
-void fn_8018F9B4(RaceCarRec* car);
+void BreakOffDetachedParts(RaceCarRec* car);
 }
 
 
@@ -1684,7 +1684,7 @@ static inline void Punt(int a, int victim) {
     ValVec3 at = *(ValVec3*)&v->mtx.pos;
     at.y += 0.5f;
     ((RigidBody*)v)->AddForceAt((const RVec3*)&imp, (const RVec3*)&at);
-    fn_8018F9B4(v);
+    BreakOffDetachedParts(v);
 }
 
 inline void CrushSubTaskMgr::vf18(int a, int b) {

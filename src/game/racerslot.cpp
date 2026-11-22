@@ -268,7 +268,7 @@ int fn_8026A698(u8* p, int i) {
     } else {
         e = k * (-2.0f * k * k) - 3.0f * k * k;
     }
-    fn_8026E22C((RMtx*)&((CamRec*)p)->pose, (const RMtx*)&s->frame, (const RMtx*)&f, e);
+    InterpolateCameraMatrix((RMtx*)&((CamRec*)p)->pose, (const RMtx*)&s->frame, (const RMtx*)&f, e);
     ((CamRec*)p)->fov = s->fov + e * (1.3089969f - s->fov);
     ((CamRec*)p)->mode = 5;
     s->frameNo = lbl_8055E3C4;

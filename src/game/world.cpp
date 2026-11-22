@@ -194,7 +194,7 @@ void fn_801EBD18(int view);
 void fn_8026A298(int view);
 void fn_8026A2B0(int view);
 int fn_8026A2C8(void);
-u8* fn_801EA9A0(int i);
+u8* GetCarInfo(int i);
 void fn_8026A248(int player, int view);
 void mrModelUnload(s32 h);
 s32 fn_802C6FC0(const char* file, int a, int b);
@@ -204,7 +204,7 @@ void fn_801EEFC8(void);
 void fn_80204BB8(void);
 void fn_80203C50(int a);
 void fn_801EFF4C(void);
-void fn_801EA4C4(void);
+void InitializeCarManager(void);
 void fn_801AEF28(RaceSetup* s);
 void fn_80176460(s32* ev, RaceSetup* s, StartOpts* o);
 void fn_8000D7F0(RaceSetup* s);
@@ -272,7 +272,7 @@ void fn_8013A074(void);
 void fn_8020449C(void);
 void fn_802E3D00(void);
 WorldState* PhysicsGetStatePacked(void);
-int fn_801EA994(void);
+int GetHumanPlayerCount(void);
 void fn_801EA9DC(int i, u8* racer);
 void fn_80176BA8(void);
 void fn_80287974(void);
@@ -460,7 +460,7 @@ void WorldBeginCommon(RaceSetup* s) {
     fn_80204BB8();
     fn_80203C50(2);
     fn_801EFF4C();
-    fn_801EA4C4();
+    InitializeCarManager();
     fn_801AEF28(s);
     fn_80127464();
     fn_80176460(&s->opts.event, s, &o);
@@ -640,7 +640,7 @@ void fn_801E7E48(void) {
     for (i = 0; i < lbl_8055EB38; i++) {
         lbl_8055EB40[i]->Update(w->anim);
     }
-    for (i = 0; i < fn_801EA994(); i++) {
+    for (i = 0; i < GetHumanPlayerCount(); i++) {
         fn_801EA9DC(i, lbl_8055EB04->racers[i]);
     }
     fn_80176BA8();
@@ -806,7 +806,7 @@ void fn_801E85DC(int view) {
     do {
         i++;
         i %= fn_8026A2C8();
-    } while (!*fn_801EA9A0(i) && i != start);
+    } while (!*GetCarInfo(i) && i != start);
     fn_8026A248(i, view);
 }
 

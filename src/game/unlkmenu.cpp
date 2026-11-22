@@ -19,9 +19,9 @@ void fn_80236900(void);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 s32 fn_802E2C20(void);                   // milliseconds
 int fn_80019888(void);                   // reputation rating
-void fn_8013C804(void);
+void LoadCarClassFile(void);
 void fn_8013C8B8(void);
-s32 fn_8013C8E8(const char* chassis);
+s32 FindCarClassByChassis(const char* chassis);
 const char* fn_8013C9C8(s32 id);
 void fn_80230C30(f32* x, f32* y, int a, int b);  // element position
 int fn_80232578(const char* name);              // load font
@@ -92,7 +92,7 @@ public:
             textY = rowY - 4.0f;
             char buf[0x40] = {0};
             if (strcasecmp(u->type, "car") == 0) {
-                sprintf(buf, "%s Car", fn_8013C9C8(fn_8013C8E8(u->name)));
+                sprintf(buf, "%s Car", fn_8013C9C8(FindCarClassByChassis(u->name)));
             } else if (strcasecmp(u->type, "track") == 0) {
                 strcpy(buf, "Track");
             } else {
@@ -167,7 +167,7 @@ extern "C" void fn_802449A0(void) {
 }
 #pragma pop
 
-void UnlockList::Enter(void) { fn_8013C804(); }
+void UnlockList::Enter(void) { LoadCarClassFile(); }
 
 void UnlockList::Exit(void) { fn_8013C8B8(); }
 

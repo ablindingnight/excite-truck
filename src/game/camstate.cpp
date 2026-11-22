@@ -79,7 +79,7 @@ f32 fn_8018AE44(u8* car);
 f32 fn_8018AE4C(u8* car);
 
 // Chase camera: follows the car's camera mount (the second one when the car is flipped), levels the
-// up vector like fn_802749FC, and adds the car's bounce unless snapping.
+// up vector like AdjustCameraForGround, and adds the car's bounce unless snapping.
 // Helper names unproven: the frame row is a scale then an added scale, as in the target.
 static inline void ScV(f32* o, const f32* a, f32 s) {
     o[0] = a[0] * s;
@@ -91,7 +91,7 @@ static inline void AddSV(f32* o, const f32* a, f32 s) {
     o[1] += a[1] * s;
     o[2] += a[2] * s;
 }
-void fn_80273BD0(u8* p) {
+void CalculateCameraPoseFromCar(u8* p) {
     CamRec* c = (CamRec*)p;
     Mat3 rot;
     Mat3 flip;
@@ -172,15 +172,15 @@ void fn_80273BD0(u8* p) {
 }
 
 
-void fn_80274460(u8* p);
+void UpdateCameraFrameFromCar(u8* p);
 
 // Camera frame (0x58) = the car-relative frame (0xC0), moved by a lift that follows the car's 0x2458 value;
-// flag 0x260C on the car takes fn_80274460 instead.
-void fn_80274268(u8* p) {
+// flag 0x260C on the car takes UpdateCameraFrameFromCar instead.
+void UpdateCameraFrame(u8* p) {
     CamRec* cr = (CamRec*)p;
     u8* car = cr->car;
     if (U8(car, 0x260C)) {
-        fn_80274460(p);
+        UpdateCameraFrameFromCar(p);
         return;
     }
     CVec3 v;
@@ -195,11 +195,11 @@ void fn_80274268(u8* p) {
     fn_80273B4C(p);
 }
 
-void fn_8027445C(u8* p) { fn_80274268(p); }
+void fn_8027445C(u8* p) { UpdateCameraFrame(p); }
 
 
 // Camera frame (0x58) = the car-relative frame (0xC0) turned about y by pi and lifted.
-void fn_80274460(u8* p) {
+void UpdateCameraFrameFromCar(u8* p) {
     CamRec* cr = (CamRec*)p;
     Mat3 rot;
     f32 euler[3];
@@ -266,7 +266,7 @@ extern f32 __float_epsilon[];  // epsilon
 // given.
 static inline f32 CsTanHalf(f32 a) { return (f32)tan(a / 2.0f); }
 static inline f32 CsAtanTwice(f32 t) { return 2.0f * (f32)atan(t); }
-void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
+void UpdateCameraOrientation(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
     CamRec* cr = (CamRec*)p;
     f32 dx = cr->v4C.v[0] - cr->pose.pos.v[0];
     f32 dy = cr->v4C.v[1] - cr->pose.pos.v[1];
@@ -321,7 +321,7 @@ void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff) {
 
 // Moves the camera by `move` in the car frame, then levels its up vector (0x28) toward the ground
 // normal below the target (or the car's up axis), and rebuilds the frame around it.
-void fn_802749FC(u8* p, const CVec3* move) {
+void AdjustCameraForGround(u8* p, const CVec3* move) {
     CamRec* c = (CamRec*)p;
     if (c->b138) {
         c->v28.v[0] = 0.0f;
@@ -369,7 +369,7 @@ void fn_802749FC(u8* p, const CVec3* move) {
     Orthonormalize(&((CamRec*)p)->pose);
 }
 
-void fn_80274E94(u8* p) { fn_80274730(p, -1.0f, -1.0f, -1.0f, 0.0f); }
+void fn_80274E94(u8* p) { UpdateCameraOrientation(p, -1.0f, -1.0f, -1.0f, 0.0f); }
 
 void fn_80274EA8(u8* p) {
     CamRec* cr = (CamRec*)p;
@@ -384,7 +384,7 @@ void fn_80274EA8(u8* p) {
         cr->pose.pos.v[1] = cr->pose.pos.v[1] + d[1] * s;
         cr->pose.pos.v[2] = cr->pose.pos.v[2] + d[2] * s;
     }
-    fn_80274730(p, -1.0f, 25.0f, 6.0f, 0.15f);
+    UpdateCameraOrientation(p, -1.0f, 25.0f, 6.0f, 0.15f);
 }
 
 double sin(double x);
@@ -470,7 +470,7 @@ static inline void RotFromVec(Mat3* r, const RVec3& w) {
 
 // Rotation (0x58, 3x3) from the rotation vector w (axis * angle), Rodrigues' formula; identity for a
 // tiny angle. t goes to 0xBC.
-void fn_80274F74(u8* p, const f32* w, f32 t) {
+void UpdateCameraPose(u8* p, const f32* w, f32 t) {
     CamRec* cr = (CamRec*)p;
     RotFromVec((Mat3*)&cr->pose, *(const RVec3*)w);
     cr->fov = t;
@@ -479,7 +479,7 @@ void fn_80274F74(u8* p, const f32* w, f32 t) {
 void fn_8026E850(f32* pos, const f32* target, u8* cam, const f32* up);
 
 // Re-aims the camera, then slides it along its view axis toward `dist` from the target.
-void fn_802750C4(u8* p, f32 k, f32 dist) {
+void AdjustCameraPosition(u8* p, f32 k, f32 dist) {
     CamRec* cr = (CamRec*)p;
     f32 d[3];
     f32 up[3];
@@ -502,7 +502,7 @@ void fn_802750C4(u8* p, f32 k, f32 dist) {
 
 // A fixed camera placement: offset from the car frame, rotation vector in degrees, field of view.
 // Camera frame = the car frame (0xC0) turned by the preset rotation and moved to its offset.
-void fn_802751AC(u8* p) {
+void SetupFixedCameraPose(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{0.0f, 1.1f, 0.9f}, {8.0f, 0.0f, 0.0f}, 86.25f};
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
@@ -515,7 +515,7 @@ void fn_802751AC(u8* p) {
     cr->fov = 0.017453292f * fovv;
 }
 
-// As fn_802751AC, but the offset follows the car's first point (0x2450) instead of the preset's.
+// As SetupFixedCameraPose, but the offset follows the car's first point (0x2450) instead of the preset's.
 // Form unproven: the record comes in through a CONST formal (cast back for the writes). Retail hoists the preset
 // copy's loads above the pose stores, which only the const formal's alias class gives (FACTS 2026-11-17 10:45);
 // the real parameter type is unknown (u8* is a stand-in). Same for the twin fn_802756A4.
@@ -524,7 +524,7 @@ void fn_80275410(const u8* p) {
     u8* car = cr->car;
     const CamPreset k = {{1.7f, 0.4f, -0.3f}, {8.0f, -21.0f, 0.0f}, 65.25f};
     CamPreset c = k;
-    CamRotOff f;  // rotation and offset are one 48-byte local, as in fn_802751AC (retail: offset right above the rotation)
+    CamRotOff f;  // rotation and offset are one 48-byte local, as in SetupFixedCameraPose (retail: offset right above the rotation)
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     AddInto(f.pos, *(CVec3*)(car + 0x2450), RVec3(0.8f, 0.65f, -1.75f));
     RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
@@ -534,13 +534,13 @@ void fn_80275410(const u8* p) {
     cr->fov = 0.017453292f * fovv;
 }
 
-// As fn_802751AC, but the offset follows the car's second point (0x2538) instead of the preset's.
+// As SetupFixedCameraPose, but the offset follows the car's second point (0x2538) instead of the preset's.
 void fn_802756A4(const u8* p) {  // Form unproven: const formal, see fn_80275410
     CamRec* cr = (CamRec*)p;
     u8* car = cr->car;
     const CamPreset k = {{1.9f, 0.7f, 0.1f}, {0.7f, 193.0f, -21.9f}, 64.3f};
     CamPreset c = k;
-    CamRotOff f;  // rotation and offset are one 48-byte local, as in fn_802751AC (retail: offset right above the rotation)
+    CamRotOff f;  // rotation and offset are one 48-byte local, as in SetupFixedCameraPose (retail: offset right above the rotation)
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;
     AddInto(f.pos, *(CVec3*)(car + 0x2538), RVec3(0.85f, 0.9f, 2.0f));
     RotFromVec(&f.rot, RVec3(DegToRad(c.rot.x), DegToRad(c.rot.y), DegToRad(c.rot.z)));
@@ -604,9 +604,9 @@ void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed) {
 }
 
 
-// As fn_802751AC, but relative to a level frame at the target: forward = the car's forward axis,
+// As SetupFixedCameraPose, but relative to a level frame at the target: forward = the car's forward axis,
 // up = world y made perpendicular.
-void fn_80275D0C(u8* p) {
+void CalculateCameraPoseFromCarFrame(u8* p) {
     CamRec* cr = (CamRec*)p;
     CamPreset c = {{-28.5f, 9.1f, -9.1f}, {16.3f, 70.4f, -13.4f}, 18.75f};
     *(PlainValMatrix*)&cr->pose = *(PlainValMatrix*)&cr->carFrame;

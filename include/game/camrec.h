@@ -42,7 +42,7 @@ struct CamPrev {
 };
 
 // Two small state blocks inside the record (camera shake at 0x160, the pulsing field of view at 0x178). Each is a
-// class WITH a constructor: retail's copy-construction of a record (cammgr fn_80269BB0) moves their float members
+// class WITH a constructor: retail's copy-construction of a record (cammgr CalculateCameraPose) moves their float members
 // with lfs/stfs, while assigning a record (namedcam) moves each block as one run of words. The copy-shape harness
 // (FACTS 2026-11-17) shows only a constructor class member does both; plain u32 arrays copied as words in both.
 // Their users take the address and pass it on. Names unproven.

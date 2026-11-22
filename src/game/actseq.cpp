@@ -633,7 +633,7 @@ extern f32 __float_epsilon[];  // FLT_EPSILON
 #include "game/clamp01.h"
 
 extern "C" {
-void fn_801D0800(IPickupListener* l);
+void AddRaceListener(IPickupListener* l);
 void fn_801D0824(IPickupListener* l);
 }
 
@@ -1158,7 +1158,7 @@ public:
 extern "C" {
 int fn_801D04D0(const char* name);  // surface type by name
 void fn_801D0590(ISurfaceListener* l);
-void fn_801D05B4(ISurfaceListener* l);
+void RemoveCarListener(ISurfaceListener* l);
 void fn_801E1F78(void);  // lightning flash
 }
 
@@ -1191,7 +1191,7 @@ public:
         start = 0.0f;
         return 1;
     }
-    virtual void Unload(void) { fn_801D05B4(this); }
+    virtual void Unload(void) { RemoveCarListener(this); }
     virtual const char* Name(void) { return "SurfaceChange_ASE"; }
     virtual int State(void) { return state; }
     virtual int IsTrigger(void) { return 0; }
@@ -1477,7 +1477,7 @@ int Obstacle_ASE::Load(ValueNode* t) {
         dir2 = (t)->GetVec3Or("dir2", *(ValV3*)&dir1);
         throwPt = (t)->GetVec3Or("throw_pt", ValV3(0.0f, 0.0f, 0.0f));
         resetTimeout = (int)(59.94f * t->GetFloat("reset_timeout", -1.0f));
-        fn_801D0800(this);
+        AddRaceListener(this);
         state = 1;
         ok = 1;
     } else {

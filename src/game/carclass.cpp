@@ -31,7 +31,7 @@ void fn_8013C748(void) {
     }
 }
 
-CarClass* fn_8013C770(const char* name) {
+CarClass* FindCarClassByName(const char* name) {
     CarClass* c;
     for (c = lbl_8032C478; c->name; c++) {
         if (!strcasecmp(name, c->name)) {
@@ -41,7 +41,7 @@ CarClass* fn_8013C770(const char* name) {
     return c;
 }
 
-CarClass* fn_8013C7D0(s32 id) {
+CarClass* FindCarClassById(s32 id) {
     CarClass* c;
     for (c = lbl_8032C478; c->name; c++) {
         if (id == c->id) {
@@ -51,16 +51,16 @@ CarClass* fn_8013C7D0(s32 id) {
     return c;
 }
 
-CarClass* fn_8013C800(s32 id) { return fn_8013C7D0(id); }
+CarClass* fn_8013C800(s32 id) { return FindCarClassById(id); }
 
-void fn_8013C804(void) {
+void LoadCarClassFile(void) {
     fn_8013C748();
     lbl_8055E188 = fn_80131808("carclass.val");
     if (lbl_8055E188) {
         ValueNode* n;
         int i;
         for (i = 0; (n = lbl_8055E188->GetChild(i)) != 0; i++) {
-            CarClass* c = fn_8013C770(n->GetName());
+            CarClass* c = FindCarClassByName(n->GetName());
             if (c->id != 6) {
                 c->node = n;
             }
@@ -76,7 +76,7 @@ void fn_8013C8B8(void) {
     lbl_8055E188 = 0;
 }
 
-s32 fn_8013C8E8(const char* chassis) {
+s32 FindCarClassByChassis(const char* chassis) {
     int i;
     for (i = 0; i < 5; i++) {
         CarClass* c = fn_8013C800(i);
@@ -93,7 +93,7 @@ s32 fn_8013C8E8(const char* chassis) {
     return 6;
 }
 
-s32 fn_8013C9A4(const char* name) { return fn_8013C770(name)->id; }
+s32 fn_8013C9A4(const char* name) { return FindCarClassByName(name)->id; }
 
 const char* fn_8013C9C8(s32 id) { return fn_8013C800(id)->name; }
 

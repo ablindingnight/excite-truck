@@ -12,8 +12,8 @@ extern "C" {
 int strcasecmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
-s32 fn_8013C8E8(const char* chassis);
-void fn_8013C804(void);
+s32 FindCarClassByChassis(const char* chassis);
+void LoadCarClassFile(void);
 void fn_8013C8B8(void);
 int fn_80129D18(int stream, int n);  // random
 int atoi(const char* s);
@@ -94,7 +94,7 @@ char lbl_80357DC0[0x40];    // forced chassis
 void CheckVehicleClass(s32 vehicle) {
     const char* chassis = FindVehicle(vehicle)->chassis;
 
-    if (fn_8013C8E8(chassis) == 6) {
+    if (FindCarClassByChassis(chassis) == 6) {
         fn_802E30C8("DAVMap: WARNING! Player is driving the %s, an unclassified car!", chassis);
     }
 }
@@ -355,7 +355,7 @@ void BuildDAVMap(DAVMap* out, s32 track) {
     DAVMap ai;
     int n;
 
-    fn_8013C804();
+    LoadCarClassFile();
     AddPlayers(&players);
     n = GetNumRacers(track) - players.num_drivers;
     BuildAIMap(&ai, n < 0 ? 0 : n, &players);

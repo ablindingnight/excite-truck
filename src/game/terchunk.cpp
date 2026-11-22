@@ -54,7 +54,7 @@ void* operator new[](size_t size, const char* tag);
 // CarInfo: game/carinfo.h.
 extern "C" {
 PlainValMatrix* fn_802C86DC(void);
-CarInfo* fn_801EA9A0(int i);
+CarInfo* GetCarInfo(int i);
 }
 
 struct ChunkPos : ValVec3 {
@@ -244,7 +244,7 @@ void fn_8020268C(void) {
 void fn_80202718(void) {
     lbl_804888E0.count = 0;
     if (lbl_8055ECD8) {
-        int lap = fn_801EA9A0(fn_801E86F8(-1))->draw->hint;
+        int lap = GetCarInfo(fn_801E86F8(-1))->draw->hint;
         if (lap >= 0) {
             fn_801DCEF0(lap);
         }

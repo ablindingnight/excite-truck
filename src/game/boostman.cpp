@@ -152,8 +152,8 @@ u8* fn_8017960C(int car);
 int fn_801E85A4(void);       // player views
 int fn_801E85B4(void);       // current view
 int fn_801E866C(int view);  // car of a view
-void fn_801E0890(BoostMan* m);
-void fn_801E1384(BoostArea* a, u32 color);
+void LoadBoosterAreas(BoostMan* m);
+void RenderBoostArea(BoostArea* a, u32 color);
 }
 
 V2 LerpV2(const V2& a, const V2& b, f32 t);
@@ -166,7 +166,7 @@ public:
         int i;
         lines = fn_802CAC28("bstrlines.tex", 0);
         arrows = fn_802CAC28("bstrarrows.tex", 0);
-        fn_801E0890(this);
+        LoadBoosterAreas(this);
         // MATCHING-AID: through a pointer local the loop seeds pointers from the base; through this it indexes. The real form is unknown.
         BoostMan* m = this;
         for (i = 0; i < 4; i++) {
@@ -244,7 +244,7 @@ static inline void SetVtx(BoostVtx* v, const V2* p) {
 
 extern "C" {
 
-void fn_801E0710(void) {
+void CreateBoostManager(void) {
     if (fn_801769CC()->type & 0x200000) {
         lbl_8055EA10 = new ("BoostMan") BoostMan();
     }
@@ -331,7 +331,7 @@ static inline int AddArea(BoostMan* m, ValueNode* n) {  /* Helper name unproven 
 
 extern "C" {
 
-void fn_801E0890(BoostMan* m) {
+void LoadBoosterAreas(BoostMan* m) {
     ValueTable* t;
     int i;
     ValueNode* n;
@@ -433,7 +433,7 @@ int fn_801E1048(int car) {
     return r;
 }
 
-void fn_801E1250(int car, u8 on) {
+void SetPlayerBoostFlag(int car, u8 on) {
     BoostMan* m = lbl_8055EA10;
     if (m) {
         int i;
@@ -447,13 +447,13 @@ void fn_801E1250(int car, u8 on) {
 
 static inline void DrawLines(BoostMan* m, PlayerBoost* p) {
     for (int i = 0; i < m->areas.Count(); i++) {
-        fn_801E1384(m->areas.At(i), p->color1);
+        RenderBoostArea(m->areas.At(i), p->color1);
     }
 }
 
 static inline void DrawArrows(BoostMan* m, PlayerBoost* p) {
     for (int i = 0; i < m->areas.Count(); i++) {
-        fn_801E1384(m->areas.At(i), p->color0);
+        RenderBoostArea(m->areas.At(i), p->color0);
     }
 }
 
@@ -484,7 +484,7 @@ inline int FixedArr<BoostArea, 100>::Count(void) {
 
 extern "C" {
 
-void fn_801E1384(BoostArea* a, u32 color) {
+void RenderBoostArea(BoostArea* a, u32 color) {
     if (a->bound) {
         int x;
         int i;
@@ -517,7 +517,7 @@ inline BoostArea* FixedArr<BoostArea, 100>::At(int i) {
 
 extern "C" {
 
-void fn_801E1520(void) {
+void ClearBoostManager(void) {
     if (lbl_8055EA10) {
         delete lbl_8055EA10;
         lbl_8055EA10 = 0;

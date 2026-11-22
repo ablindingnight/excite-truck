@@ -27,7 +27,7 @@ s32 lbl_8055F61C;
 
 extern "C" {
 
-void fn_802795E8(CarState* s) {
+void ResetCarStateStruct(CarState* s) {
     int i;
     memset(s, 0, 0x2B4);
     s->x298 = 0;
@@ -43,11 +43,11 @@ void fn_802795E8(CarState* s) {
 void fn_8027974C(void) {
     int i;
     for (i = 0; i < lbl_8055F61C; i++) {
-        fn_802795E8(&lbl_8055F618[i].state);
+        ResetCarStateStruct(&lbl_8055F618[i].state);
     }
 }
 
-void fn_802797A8(const s32* ids, int n) {
+void InitializeCarStateBlocks(const s32* ids, int n) {
     int i;
     lbl_8055F61C = n;
     lbl_8055F618 = new ("cs_block") CarStateBlock[n];
@@ -64,7 +64,7 @@ void fn_80279848(void) {
     lbl_8055F618 = 0;
 }
 
-CarStateBlock* fn_80279874(s32 id) {
+CarStateBlock* FindVehicleBlockById(s32 id) {
     int i;
     for (i = 0; i < lbl_8055F61C; i++) {
         if (id == lbl_8055F618[i].id) {
@@ -109,7 +109,7 @@ void fn_802799EC(CarStateBlock* b, f32 dt) {
     }
 }
 
-void fn_80279B28(const CarStateBlock* b, CarState* out) {
+void CopyCarStateBlock(const CarStateBlock* b, CarState* out) {
     out->col = b->state.col;
     out->time = b->state.time;
     out->duration = b->state.duration;
@@ -127,6 +127,6 @@ void fn_80279C00(CarStateBlock* b, const CarState* in) {
     b->state.flags = in->flags;
 }
 
-void fn_80279CD8(CarState* s) { fn_802795E8(s); }
+void fn_80279CD8(CarState* s) { ResetCarStateStruct(s); }
 
 }  // extern "C"

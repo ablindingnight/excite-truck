@@ -485,21 +485,21 @@ f32 fn_801E9DDC(u8* h, f32 x, f32 z);
 void fn_80265EC4(u8* shake, u32 t, int a);
 void fn_80266070(u8* shake, f32* a, f32* b, f32* c);
 void fn_80266170(u8* funky, u32 t, int a, int fresh, f32 fov);
-void fn_802662D8(u8* funky, f32* a, f32* b, f32* c, f32* d);
-void fn_80266388(u8* rumble, int a, f32* frame, u8* tv, u8* car);
-void fn_80266A0C(u8* p, f32* w, u8* tv, f32 fov);
-void fn_80274730(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff);
-void fn_802749FC(u8* p, f32* move);
+void CalculateEasedPosition(u8* funky, f32* a, f32* b, f32* c, f32* d);
+void UpdateCameraRumble(u8* rumble, int a, f32* frame, u8* tv, u8* car);
+void UpdateTracksideCamera(u8* p, f32* w, u8* tv, f32 fov);
+void UpdateCameraOrientation(u8* p, f32 fov, f32 dist, f32 zoom, f32 stiff);
+void AdjustCameraForGround(u8* p, f32* move);
 void fn_80274E94(u8* p);
 void fn_80274EA8(u8* p);
-void fn_80274F74(u8* p, const f32* w, f32 t);
-void fn_802750C4(u8* p, f32 k, f32 dist);
-void fn_802751AC(u8* p);
+void UpdateCameraPose(u8* p, const f32* w, f32 t);
+void AdjustCameraPosition(u8* p, f32 k, f32 dist);
+void SetupFixedCameraPose(u8* p);
 void fn_80275410(const u8* p);
 void fn_802756A4(const u8* p);
 void fn_80275938(u8* p);
 void fn_80275B9C(u8* p, f32 radius, f32 height, f32 speed);
-void fn_80275D0C(u8* p);
+void CalculateCameraPoseFromCarFrame(u8* p);
 
 // The track's pit/route mode (3 = none).
 static inline int PitMode(u8* track) {
@@ -515,7 +515,7 @@ static inline f32 TvLerp(f32 a, f32 b, f32 k) { return a + k * (b - a); }
 static inline void UpdateFixedTvCamera(u8* p, f32 fov, TvCamera* tv) {
     f32 w[3];
     fn_802715C4(w, (u8*)tv);
-    fn_80274F74(p, w, fov);
+    UpdateCameraPose(p, w, fov);
 }
 
 // A vector built by its constructor. Retail keeps the blended position and aim each in a stack vector of the helper
@@ -541,7 +541,7 @@ static inline void TvLerp3(f32* out, const f32* a, const f32* b, f32 e) {
 static inline void UpdateAimedTvCamera(u8* p, f32 fov, TvCamera* tv) {
     f32 w[3];
     fn_802715C4(w, (u8*)tv);
-    fn_80266A0C(p, w, (u8*)tv, fov);
+    UpdateTracksideCamera(p, w, (u8*)tv, fov);
 }
 
 void fn_80271624(int mode, u8* p) {
@@ -655,7 +655,7 @@ void fn_80271624(int mode, u8* p) {
             }
             switch (tv->type) {
             case 1:
-                fn_80274730(p, PcMul(0.017453292f, tv->fov), -1.0f, -1.0f, 0.0f);
+                UpdateCameraOrientation(p, PcMul(0.017453292f, tv->fov), -1.0f, -1.0f, 0.0f);
                 break;
             case 5: {
                 f32 move[3];
@@ -663,7 +663,7 @@ void fn_80271624(int mode, u8* p) {
                 move[0] = 0.4f;
                 move[1] = 1.0f;
                 move[2] = 0.0f;
-                fn_802749FC(p, move);
+                AdjustCameraForGround(p, move);
                 break;
             }
             case 4:
@@ -686,10 +686,10 @@ void fn_80271624(int mode, u8* p) {
                 break;
             }
             case 17:
-                fn_802750C4(p, tv->ex[0], tv->ex[1]);
+                AdjustCameraPosition(p, tv->ex[0], tv->ex[1]);
                 break;
             case 16:
-                fn_802751AC(p);
+                SetupFixedCameraPose(p);
                 break;
             case 7:
                 fn_80275410(p);
@@ -704,7 +704,7 @@ void fn_80271624(int mode, u8* p) {
                 fn_80275B9C(p, 6.0f, 1.9f, 1.0f);
                 break;
             case 10:
-                fn_80275D0C(p);
+                CalculateCameraPoseFromCarFrame(p);
                 break;
             default:
                 fn_802E317C("Unknown camera %d", tv->type);
@@ -712,10 +712,10 @@ void fn_80271624(int mode, u8* p) {
             }
             lbl_8055F54C = tv->type;
             if (tv->flags & 1) {
-                fn_802662D8((u8*)&r->w178, (f32*)&r->pose.pos, (f32*)&r->pose.pos, (f32*)&r->pose.rot.m[6], (f32*)&r->v4C);
+                CalculateEasedPosition((u8*)&r->w178, (f32*)&r->pose.pos, (f32*)&r->pose.pos, (f32*)&r->pose.rot.m[6], (f32*)&r->v4C);
             }
             if (tv->flags & 4) {
-                fn_80266388((u8*)&r->link, fn_801769F8(), (f32*)&r->pose, (u8*)tv, r->car);
+                UpdateCameraRumble((u8*)&r->link, fn_801769F8(), (f32*)&r->pose, (u8*)tv, r->car);
             }
             if (tv->flags & 8) {
                 f32 d[3];
@@ -1370,9 +1370,9 @@ void fn_802735F4(int a, u8 b) {
 double sin(double x);
 double cos(double x);
 void fn_801BFD34(u8* out, const f32* v, const u8* frame);
-void fn_80273BD0(u8* p);
-void fn_80274268(u8* p);
-void fn_802704D0(int to, int from, u8* cam);
+void CalculateCameraPoseFromCar(u8* p);
+void UpdateCameraFrame(u8* p);
+void CopyCameraData(int to, int from, u8* cam);
 void fn_802704D4(int to, u8* cam);
 
 // Rotation from the rotation vector w (axis * angle), Rodrigues' formula (as camstate's).
@@ -1454,10 +1454,10 @@ void camera_car(u8* p, int ci) {
         break;
     }
     case 0:
-        fn_80273BD0(p);
+        CalculateCameraPoseFromCar(p);
         break;
     case 2:
-        fn_80274268(p);
+        UpdateCameraFrame(p);
         break;
     case 4:
     case 5:
@@ -1465,9 +1465,9 @@ void camera_car(u8* p, int ci) {
         int t = fn_80273494(r->w4);
         if (!(t == 6 || t == 0 || t == ci)) {
             CamCycle* o = &lbl_8049A258[t];
-            fn_802704D0(v->type, lbl_80346BA0[o->first + o->cur].type, p);
+            CopyCameraData(v->type, lbl_80346BA0[o->first + o->cur].type, p);
         } else {
-            fn_802704D0(v->type, lbl_80346BA0[cyc->first + (cyc->count + cyc->cur - 1) % cyc->count].type, p);
+            CopyCameraData(v->type, lbl_80346BA0[cyc->first + (cyc->count + cyc->cur - 1) % cyc->count].type, p);
         }
         break;
     }

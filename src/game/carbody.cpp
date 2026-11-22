@@ -159,7 +159,7 @@ extern "C" {
 void fn_801838C8(u8* p);
 void fn_801A1474(u8* p, f32 s);
 void fn_8018A180(u8* p);
-u8* fn_801D2008(u8* name);
+u8* LoadCarMesh(u8* name);
 s32 fn_801C1C1C(const void*);  // const PSysDesc*
 s32 fn_801C1BA4(s32 a, s32 b, s32 c);
 }
@@ -248,9 +248,9 @@ void fn_801AFC28(void);
 void fn_80181AFC(void);
 void fn_80204A1C(const char* name, u8* flag);
 void fn_8018C50C(void);
-void fn_8018F538(u8* p, u8* q);
+void SaveDamageState(u8* p, u8* q);
 void fn_80279C00(u8* p, u8* q);
-void fn_80279B28(u8* p, u8* q);
+void CopyCarStateBlock(u8* p, u8* q);
 VBig* fn_801B83A0(void);
 void fn_801D14EC(void);
 void fn_801BD808(void);
@@ -532,18 +532,18 @@ CbValueTable* fn_80131808(const char* name);
 void fn_80131818(CbValueTable* table);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 CarLayout* fn_802792E4(const char* car);  // carlayout.cpp
-s32 fn_80279874(s32);
+s32 FindVehicleBlockById(s32);
 int fn_8027AA48(void);
-void fn_80279F58(CbSetup* setup, CbValueTable* table);
-void* fn_8027A798(const char* model);
-void fn_8027A8B4(CbSetup* setup, void* tune);
+void LoadCarChassisParams(CbSetup* setup, CbValueTable* table);
+void* FindOrAddTweakMultiplier(const char* model);
+void ApplyTweakMultipliers(CbSetup* setup, void* tune);
 void ApplyDamageFactor(s32 car, void* look);
 u8* fn_801B2EDC(s32 car, u8* body);
 void fn_801795D8(u8* p, s32 car);
 void fn_801BDA74(s32 car, u8* setup);
 void fn_801BEB30(s32 car, u8** out);
 void fn_801836DC(u8* p, u8* desc);
-void fn_8018C5A0(u8* p, u8* desc);
+void InitializeCarDamage(u8* p, u8* desc);
 void fn_8018A654(u8* p, const u8* cfg);
 u8* fn_80209448(u8* p);
 u8* fn_80209D4C(u8* p);
@@ -587,7 +587,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     cb->layout = fn_802792E4((char*)(p + 0x234));
     s32 id = cb->ident.vehicle;
     *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)&((CarDesc*)desc)->block;
-    S32(p, 0x328) = fn_80279874(id);
+    S32(p, 0x328) = FindVehicleBlockById(id);
     if (!fn_8027AA48()) {
         S32(p, 0x328) = 0;
     }
@@ -621,8 +621,8 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->ident.vehicle);
     ApplyDamageFactor(((CarDesc*)desc)->index, p + 0x2C4);
     cb->f25C0 = (FindVehicle(cb->ident.vehicle)->flags >> 2) & 1;
-    fn_80279F58(&setup, table);
-    fn_8027A8B4(&setup, fn_8027A798((char*)(p + 0x234)));
+    LoadCarChassisParams(&setup, table);
+    ApplyTweakMultipliers(&setup, FindOrAddTweakMultiplier((char*)(p + 0x234)));
     setup.mass = setup.mass * cb->f2EC;
     setup.f110 = setup.f110 * (0.5f * (cb->f2F4 + cb->f2F8));
     setup.f114 = setup.f114 * cb->f2FC;
@@ -669,7 +669,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     }
     fn_801836DC(p, desc);
     fn_80182DF4(p, desc);
-    fn_8018C5A0(p, desc);
+    InitializeCarDamage(p, desc);
     fn_8018A654(p, desc);
     bool player = ((CarDesc*)desc)->kind == 'PCAR';
     cb->f257C = fn_80209448(p);
@@ -913,7 +913,7 @@ public:
 };
 
 extern "C" void fn_801D1100(u8* p);
-extern "C" void fn_802792EC(u8* p);
+extern "C" void DecrementLayoutReference(u8* p);
 extern "C" void fn_8018A6F4(u8* p);
 
 CarBody::~CarBody(void) {
@@ -926,7 +926,7 @@ CarBody::~CarBody(void) {
     }
     delete (CbPart*)this->f2584;
     fn_8018A6F4((u8*)this);
-    fn_802792EC(((u8*&)this->layout));
+    DecrementLayoutReference(((u8*&)this->layout));
     lbl_8055E4D0--;
 }
 
@@ -1003,7 +1003,7 @@ DeityCar* fn_801B2ED0(int id);
 void fn_801B8100(u8* pose, s32 car, s32 player);
 void fn_80189C64(u8* p);
 void fn_801BDA74(s32 id, u8* mass);
-void fn_8018F2C0(u8* p, u8* q);
+void RestoreDamageState(u8* p, u8* q);
 int fn_801CF064(void);
 s32* fn_801E1F44(void);
 void fn_8018F6F8(u8* p);
@@ -1163,7 +1163,7 @@ void fn_801838C8(u8* p) {
     fn_801B8100(p + 0x274, cb->index, cb->f1F0);
     ((CbBodyV*)p)->SetPose(p + 0x274);
     f->ClearFlag();
-    fn_8018F2C0(p, !fn_801CF064() ? (u8*)&cb->state : (u8*)&cb->saved);
+    RestoreDamageState(p, !fn_801CF064() ? (u8*)&cb->state : (u8*)&cb->saved);
     ((CbModel*)cb->f268)->Reset();
     if (*fn_801E1F44() == 1) {
         fn_8018F6F8(p);
@@ -1182,11 +1182,11 @@ void fn_801838C8(u8* p) {
 void CarBody::vf14(void) {
     u8* p = (u8*)this;
     if (PTR(p, 0x328)) {
-        fn_8018F538(p, p + 0x1E44);
+        SaveDamageState(p, p + 0x1E44);
         fn_80279C00(PTR(p, 0x328), p + 0x1E44);
         if (fn_801769C4() == 2 && U32(p, 0x10) != 'PCAR' && !(U8(p, 0x260) & 4)) {
             fn_80181EAC(PTR(p, 0x328));
-            fn_80279B28(PTR(p, 0x328), p + 0x1E44);
+            CopyCarStateBlock(PTR(p, 0x328), p + 0x1E44);
         }
     }
 }
@@ -1343,7 +1343,7 @@ int fn_802B03C0(const f32* p);
 int fn_802B02C8(const u8* p);
 int fn_802BF4F0(void);
 f32 fn_802BF590(void);
-void fn_8018CB3C(u8* p);
+void UpdateHingedParts(u8* p);
 u32 fn_8018B06C(u8* p);
 double asin(double x);
 double fmod(double x, double y);
@@ -1435,7 +1435,7 @@ int fn_8014E708(s32 id);
 void fn_801DF074(int a, int b);
 f32 fn_801B8950(s32 id);
 void fn_801B8964(s32 id, f32 v);
-void fn_8018E330(u8* p);
+void ResetRaceCarState(u8* p);
 f32 fn_801DCEC0(s16 id, f32 x, f32 z);  // heightfld.cpp defines it with the same parameters (unused)
 double sqrt(double x);
 }
@@ -1991,7 +1991,7 @@ void fn_80183E7C(u8* p) {
         if ((f32)__fabs(cb->f25C4) <= __float_epsilon[0]) {
             ((CbFx*)((CarBody*)p)->f2584)->v30();
             if (NearZero(cb->f2690)) {
-                fn_8018E330(p);
+                ResetRaceCarState(p);
             }
         }
         f32 mass7 = cb->mass;
@@ -2742,7 +2742,7 @@ void fn_80186DE8(void) {
         }
         c->v1A0 = CbSolVec4(MaxF(0.0f, bk2), MaxF(0.0f, bk2), MaxF(0.0f, hb),
                              MaxF(0.0f, hb));
-        fn_8018CB3C(car);
+        UpdateHingedParts(car);
         ((CbStepV*)((u8*&)((CarBody*)car)->src))->Step();
         ((CbTickV*)car)->Tick();
     }
@@ -3197,7 +3197,7 @@ static inline void PlaceRotate(RVec3* out, const RVec3* v, const RMtx* m) {
 f32 fn_801E9DD0(s16* surface, f32 x, f32 z);
 void fn_801BE400(s32 car, RMtx* frame, f32 a);
 void fn_801B30C0(s32 car, s32 reset, void* start);
-void fn_8026A394(u8* car);
+void StartCameraTransition(u8* car);
 void fn_8018A750(u8* p);
 
 // Puts the car down at `s` (a frame for the body origin, the velocity at 0x30, the start point at
@@ -3266,7 +3266,7 @@ void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     ((CarBody*)p)->f262C = 0.0f;
     ((CarBody*)p)->f2640 = 0;
     ((CarBody*)p)->f26D4++;
-    fn_8026A394(p);
+    StartCameraTransition(p);
 }
 
 // CollShape::vf48 (empty; slot 0x48 of the sphcoll shape tables), by its linker name: carbody only forward-declares CollShape.
@@ -3301,7 +3301,7 @@ void fn_8018A174(u8* p) { F32(p, 0x2650) = 4.0f; }
 extern CarElem* lbl_8055E908;  // carelem.cpp: one per car
 
 extern "C" {
-void fn_8018F2C0(u8* p, u8* q);
+void RestoreDamageState(u8* p, u8* q);
 void fn_8018AF04(u8* p);
 void fn_802E30C8(const char* fmt, ...);
 void fn_801BDA74(s32 id, u8* mass);
@@ -3315,8 +3315,8 @@ static void KickReport(int id, f32 mph, f32 terr) {
 void fn_8018A180(u8* p) {
     CarBody* cb = (CarBody*)p;
     if (cb->f328) {
-        fn_80279B28(cb->f328, (u8*)&cb->state);
-        fn_8018F2C0(p, (u8*)&cb->state);
+        CopyCarStateBlock(cb->f328, (u8*)&cb->state);
+        RestoreDamageState(p, (u8*)&cb->state);
         if (cb->state.x298 < 9 && ((DeityCar*)cb->src)->Held()) {
             fn_802E30C8("car: unimpairing car %d", cb->index);
             ((DeityCar*)cb->src)->Release();
@@ -3376,7 +3376,7 @@ void fn_8018A2C0(u8* p, TuneSink* t) {
 void fn_8018A654(u8* p, const u8* cfg) {
     CarBody* cb = (CarBody*)p;
     if (*(s8*)(cfg + 0xEC)) {  // CarDesc::part (typed access reuses the address: lbzu)
-        u8* m = fn_801D2008((u8*)cfg + 0xEC);
+        u8* m = LoadCarMesh((u8*)cfg + 0xEC);
         cb->f26C0 = m;
         if (S32(m, 0x10) > 0) {
             S32(p, 0x26C4) = fn_801C1C1C(m);
@@ -3651,7 +3651,7 @@ static inline f32 CbReattach(u8* w) {
 }
 void fn_8018AF04(u8* p) {
     CarBody* cb = (CarBody*)p;
-    fn_8018F2C0(p, !fn_801CF064() ? (u8*)&cb->state : (u8*)&cb->saved);
+    RestoreDamageState(p, !fn_801CF064() ? (u8*)&cb->state : (u8*)&cb->saved);
     CVec4 load;
     u8* w = p + 0x241C;
     for (int i = 0; i < 4; i++, w += 0x74) {

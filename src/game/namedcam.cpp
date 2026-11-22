@@ -337,7 +337,7 @@ void fn_801E9DC4(s16* h);
 void fn_801C7254(Mat3* m);  // transpose
 void fn_801BFD34(CamVec3* out, const CamVec3* v, const CamPose* m);
 void fn_80144CD0(CamVec3* out, const CamVec3* p, const CamPose* m);
-void fn_8026E688(CamPose* out, const CamVec3* eye, const CamVec3* target, const CamVec3* up);
+void CalculateCameraMatrix(CamPose* out, const CamVec3* eye, const CamVec3* target, const CamVec3* up);
 double atan2(double y, double x);
 double atan(double x);
 double tan(double x);
@@ -662,9 +662,9 @@ static inline void BlendNamedCam(
     up.v[0] = 0.0f;
     up.v[1] = 1.0f;
     up.v[2] = 0.0f;
-    fn_8026E688(&frame, &frame.pos, &c->carFrame.pos, &up);
+    CalculateCameraMatrix(&frame, &frame.pos, &c->carFrame.pos, &up);
     tf = 1.0471976f;
-    fn_8026E22C((RMtx*)&blend, (const RMtx*)&lbl_804A0C60[slot].pose, (const RMtx*)&frame, e);
+    InterpolateCameraMatrix((RMtx*)&blend, (const RMtx*)&lbl_804A0C60[slot].pose, (const RMtx*)&frame, e);
     f32 fov = Lerp(lbl_804A0C60[slot].fov, tf, e);
     if (fn_80178CA4() == 2) {
         fov = 2.0f * (f32)atan(Lerp(1.0f, 0.65f, e) * (f32)tan(fov / 2.0f));

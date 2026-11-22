@@ -51,7 +51,7 @@ void fn_80131818(ValueTable* t);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);  // snprintf
 s32 fn_80147C50(s32 a, s32 b, f32 t);
 void fn_8018BF44(u32* flags);
-void* fn_801D2008(const char* name);
+void* LoadCarMesh(const char* name);
 void fn_801D21B4(void* p);
 void fn_801F0000(void* w);
 u32 fn_801F0008(void);
@@ -60,7 +60,7 @@ void fn_801F1394(void* w, const CarUIFrame* f);
 void fn_801F1474(void* w, const CarUIFrame* f, f32 a);
 f32 fn_801F159C(void* w);
 f32 fn_8023659C(void);
-void fn_8027A714(CarSetup* s, const char* name);
+void LoadCarPhysicsValues(CarSetup* s, const char* name);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
 void mrModelUnload(s32 model);
 void fn_802C70AC(s32 model, const CarUIFrame* f, s32 mat, u32 mask);
@@ -261,7 +261,7 @@ void CarUIModel::Load(const char* carName) {
     ValueTable* t = fn_80131808(file);
     fwheels = fn_801F0010(t->FindChild("front")->GetValue("wheel_class"), fwheelBuf);
     rwheels = fn_801F0010(t->FindChild("rear")->GetValue("wheel_class"), rwheelBuf);
-    fn_8027A714(&setup, carName);
+    LoadCarPhysicsValues(&setup, carName);
     int i;
     for (i = 0; i < 4; i++) {
         setup.wheels[i].radius = IsFront(i) ? fn_801F159C(fwheels) : fn_801F159C(rwheels);
@@ -354,7 +354,7 @@ void CarUIModel::LoadEfx(const char* path) {
         }
         fn_80131818(t);
         if (bonesetName[0]) {
-            boneset = (s32*)fn_801D2008(bonesetName);
+            boneset = (s32*)LoadCarMesh(bonesetName);
         } else {
             boneset = 0;
         }
@@ -817,7 +817,7 @@ static inline void MulM(Mtx33* out, const Mtx33* a, const Mtx33* b) {
 
 extern "C" {
 
-void fn_80254568(Vec3a* out, s32 model, const char* name) {
+void GetFramePosition(Vec3a* out, s32 model, const char* name) {
     const CarUIFrame* f = 0;
     fn_801E2CCC(model, name, &f);
     *out = *(const Vec3a*)&f->pos;
@@ -843,7 +843,7 @@ inline const Vec& CarUIModel::WheelPosition(int index) const {
 
 extern "C" {
 
-void fn_802545C4(CarUISlotView* p, s32 model, CarUIModel* m) {
+void InitializeCarSlotView(CarUISlotView* p, s32 model, CarUIModel* m) {
     memset(p, 0, sizeof(CarUISlotView));
     p->valid = 1;
     if (m->loaded) {
@@ -858,9 +858,9 @@ void fn_802545C4(CarUISlotView* p, s32 model, CarUIModel* m) {
         Vec r;
         Vec l;
         Vec c;
-        fn_80254568((Vec3a*)&r, model, "front_r");
-        fn_80254568((Vec3a*)&l, model, "front_l");
-        fn_80254568((Vec3a*)&c, model, "rear_c");
+        GetFramePosition((Vec3a*)&r, model, "front_r");
+        GetFramePosition((Vec3a*)&l, model, "front_l");
+        GetFramePosition((Vec3a*)&c, model, "rear_c");
         // PROVISIONAL: the original midpoint vector type and construction are unproven.
         ValV3 mid(Lerp(l.x, r.x, 0.5f), Lerp(l.y, r.y, 0.5f),
                   MidHalf(l.z, r.z));
@@ -966,7 +966,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         if (lbl_8055F330) {
             fn_80253004(index, &pose);
         } else {
-            fn_802545C4(&pose, bg, model);
+            InitializeCarSlotView(&pose, bg, model);
         }
         nd = -d;
         f32 ny = -offY;
@@ -1094,7 +1094,7 @@ void CarUIScreen::LoadView(const char* view) {
 
 extern "C" {
 
-void fn_80255604(int a) {
+void LoadResourceFiles(int a) {
     fn_8012E81C("hobbyset.res");
     fn_8012E81C("part.res");
     fn_8012E81C("race.res");
@@ -1159,7 +1159,7 @@ void CarUIScreen::Unk24(void) {}
 
 void CarUIScreen::Activate(void) {
     if (lbl_8055F340 == 0) {
-        fn_80255604(mode);
+        LoadResourceFiles(mode);
     }
     if (lbl_8055F330) {
         fn_80252BF0();
@@ -1293,7 +1293,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
                         if (lbl_8055F330) {
                             fn_80253004(i, &p);
                         } else {
-                            fn_802545C4(&p, bg, model);
+                            InitializeCarSlotView(&p, bg, model);
                             Scale(&p.shadow, &p.frame.b.v[2], -13.333333f);
                         }
                         off = p.shadow;
@@ -1326,7 +1326,7 @@ void CarUIScreen::SetupCamera(void) {
         if (lbl_8055F330) {
             fn_80253004(index, &p);
         } else {
-            fn_802545C4(&p, bg, model);
+            InitializeCarSlotView(&p, bg, model);
         }
         t = p.frame.pos;
     }
@@ -1509,7 +1509,7 @@ void CarUIScreen::Draw(void) {
             p.wheelY[i] = p.wheelY[i] < -0.3048f ? p.wheelY[i] : -0.3048f;
         }
     } else {
-        fn_802545C4(&p, bg, model);
+        InitializeCarSlotView(&p, bg, model);
     }
     fn_802C974C(1.0f, 2250.0f, fn_802C9744());
     fn_802C8638(&cam);

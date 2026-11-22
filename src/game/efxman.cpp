@@ -137,7 +137,7 @@ struct EfxModel {
     s32 i3EC;    // offset 0x3EC
 };
 
-// CarInfo: game/carinfo.h (fn_801EA9A0; was a local CarDef view).
+// CarInfo: game/carinfo.h (GetCarInfo; was a local CarDef view).
 
 struct EfxShort {
     EfxShort(s16 v) { x = v; }
@@ -183,9 +183,9 @@ const VecMatrix* fn_801E8718(int view);
 int fn_801E866C(int view);
 f32 fn_801E88F0(int view);
 int fn_801E8954(int view);
-int fn_801EA994(void);
-CarInfo* fn_801EA9A0(int i);
-EfxDriver* fn_801EA9CC(int i);
+int GetHumanPlayerCount(void);
+CarInfo* GetCarInfo(int i);
+EfxDriver* GetCarInfoByIndex(int i);
 s32 fn_801EE0C8(void* model);
 f32 fn_801EE0D0(void* model, int wheel);
 void fn_802E317C(const char* fmt, ...);
@@ -271,7 +271,7 @@ void fn_802A4ADC(void);
 void fn_802A4B90(void);
 void fn_802A4C20(void);
 void fn_802A4C60(void);
-void fn_802A7BE8(void);
+void LoadUiFontAndMapGems(void);
 void fn_802A7C24(void);
 void fn_802A7C64(void);
 void fn_802A7C68(void);
@@ -359,7 +359,7 @@ void fn_80287800(void* a) {
     fn_802A1290();
     fn_802A4ADC();
     fn_80292114();
-    fn_802A7BE8();
+    LoadUiFontAndMapGems();
     fn_8029F03C();
     fn_802AB21C();
     fn_8028DFB0();
@@ -585,10 +585,10 @@ int fn_80288070(EfxInfo* e, const char* name, void** out) {
 }
 
 void fn_802880F4(void) {
-    int n = fn_801EA994();
+    int n = GetHumanPlayerCount();
     lbl_8055F6C4 = new ("efx car tab") EfxInfo[n];
-    for (int i = 0; i < fn_801EA994(); i++) {
-        CarInfo* d = fn_801EA9A0(i);
+    for (int i = 0; i < GetHumanPlayerCount(); i++) {
+        CarInfo* d = GetCarInfo(i);
         s32 model = fn_801EE0C8((u32)i < 8 ? lbl_80488648[i] : 0);
         fn_80287CE8(&lbl_8055F6C4[i], d->setup.paint, model, d->setup.flags);
     }
@@ -602,8 +602,8 @@ void fn_802881D4(void) {
 EfxInfo* fn_80288208(s32 i) { return &lbl_8055F6C4[i]; }
 
 void fn_80288218(void* a) {
-    lbl_804B3150.cars = new ("EfxCarInfo tab") EfxCar[fn_801EA994()];
-    lbl_804B3150.count = fn_801EA994();
+    lbl_804B3150.cars = new ("EfxCarInfo tab") EfxCar[GetHumanPlayerCount()];
+    lbl_804B3150.count = GetHumanPlayerCount();
     lbl_804B3150.flag = 0;
     memset(lbl_804B3150.cars, 0, lbl_804B3150.count * sizeof(EfxCar));
 }
@@ -625,7 +625,7 @@ void fn_802882EC(void) {
     EfxCar* c = lbl_804B3150.cars;
     lbl_804B3150.flag = 0;
     for (int i = 0; i < lbl_804B3150.count; c++, i++) {
-        EfxDriver* d = fn_801EA9CC(i);
+        EfxDriver* d = GetCarInfoByIndex(i);
         PhysCar* phys = d->phys;
         EfxModel* model = (EfxModel*)((u32)i < 8 ? lbl_80488648[i] : 0);
         c->m = model->m;

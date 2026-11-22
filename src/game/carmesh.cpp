@@ -27,7 +27,7 @@ ModuleTag lbl_8055E920;
 
 extern "C" {
 
-void* fn_801D2008(const char* name) {
+void* LoadCarMesh(const char* name) {
     u32 version = 0;
     bool swap = true;
     u32* mesh = (u32*)fn_8012C370(name, 'CMsh', &version, 0, 0, &swap);

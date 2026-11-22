@@ -38,7 +38,7 @@ int fn_802C2C00(int on);
 int fn_801E85A4(void);       // player views
 int fn_801E866C(int view);  // car of a view
 int fn_801B8570(int car);   // car is racing
-CarInfo* fn_801EA9A0(int car);
+CarInfo* GetCarInfo(int car);
 f32 fn_8013672C(void);      // lap length
 }
 
@@ -89,7 +89,7 @@ void fn_802059C0(void) {
     for (int i = 0; i < n; i++) {
         int car = fn_801E866C(i);
         if (fn_801B8570(car)) {
-            CarInfo* cp = fn_801EA9A0(car);
+            CarInfo* cp = GetCarInfo(car);
             int lap = cp->params.lap;
             f32 dist = cp->draw->lapDist;
             if (lap == 0) {

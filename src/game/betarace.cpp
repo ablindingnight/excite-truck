@@ -970,7 +970,7 @@ f32 fn_801D48F4(void* obj);
 void fn_80161A38(int a, int id, int b);
 void fn_801D488C(void* obj, int a, int b, V3* pos);
 void AwardBetaCar(int id, int kind, f32 v);
-void fn_801E1250(int id, int n);
+void SetPlayerBoostFlag(int id, int n);
 void fn_8018A098(RaceCarRec* rc, f32 v);
 }
 
@@ -1962,7 +1962,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         fn_801DF074(4, 1);
     }
     f58 = 0.0f;
-    fn_801E1250(id, meterObj->Count());
+    SetPlayerBoostFlag(id, meterObj->Count());
     {
         f32 v = 0.0f;
         if (meterObj->Pending(&v)) {
@@ -2437,7 +2437,7 @@ extern "C" {
 int fn_802C9A58(void);  // widescreen
 void fn_801777CC(IRaceListener* l);
 void fn_801D0590(IStuntListener* l);
-void fn_801D0800(IPickupListener* l);
+void AddRaceListener(IPickupListener* l);
 s32 fn_80232578(const char* name);  // load font
 void fn_80167834(void);
 void fn_8016A0B0(void);
@@ -2462,7 +2462,7 @@ static inline void InitBeta(BetaMaster* m) {
     m->nCars = 0;
     fn_801777CC(m);
     fn_801D0590(m);
-    fn_801D0800(m);
+    AddRaceListener(m);
     m->coinSnd = fn_80207848("pickup_coin.sfx", 1);
     m->starSnd = fn_80207848("pickup_star.sfx", 1);
     m->preraceSnd = fn_80207848("prerace.sfx", 1);
@@ -2585,7 +2585,7 @@ f32 CalculateTimeLimit(int event, int a) {
 extern "C" {
 void fn_802328D4(s32 font);
 void fn_801D0824(IPickupListener* l);
-void fn_801D05B4(IStuntListener* l);
+void RemoveCarListener(IStuntListener* l);
 void fn_801777D0(IRaceListener* l);
 void fn_80167838(void);
 void fn_8016A68C(void);
@@ -2641,7 +2641,7 @@ inline BetaMaster::~BetaMaster(void) {
         delete starSnd;
     }
     fn_801D0824(this);
-    fn_801D05B4(this);
+    RemoveCarListener(this);
     fn_801777D0(this);
     lbl_8055E268 = 0;
     fn_80167838();

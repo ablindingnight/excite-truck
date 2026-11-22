@@ -392,7 +392,7 @@ void GetTipsCamera(RMtx* out, f32* out_fov) {
         if (tc->hermite) {
             s = SCurve(s);
         }
-        fn_8026E22C(&cam, &tc->start, &tc->end, s);
+        InterpolateCameraMatrix(&cam, &tc->start, &tc->end, s);
         OrthonormalizeFrame(&cam);
         fov = tc->start_fov + s * (tc->end_fov - tc->start_fov);
     }

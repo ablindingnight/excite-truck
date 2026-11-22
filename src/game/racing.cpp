@@ -84,8 +84,8 @@ void fn_801D490C(void);
 f32 fn_80011E60(void);
 void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
 f32 fn_8013672C(void);
-CarInfo* fn_801EA9A0(int index);
-int fn_801EA994(void);
+CarInfo* GetCarInfo(int index);
+int GetHumanPlayerCount(void);
 CarInfo* fn_801EA9B0(int index);
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_80011DEC(int player);
@@ -662,19 +662,19 @@ void RacingOverlay::DrawProgress(void) {
     fn_80010B80(-165.0f, y, 330.0f, 5.0f, 0xC80000C8);
     lapLen = fn_8013672C();
     total = lapLen * fn_801E7E3C()->laps;
-    for (i = 0; i < fn_801EA994(); i++) {
-        CarDrawState* truck = fn_801EA9A0(i)->draw;
+    for (i = 0; i < GetHumanPlayerCount(); i++) {
+        CarDrawState* truck = GetCarInfo(i)->draw;
         f32 t = 0.0f;
-        int lap = fn_801EA9A0(i)->params.lap;
+        int lap = GetCarInfo(i)->params.lap;
         if (lap > 0) {
             t = (truck->lapDist + (lap - 1) * lapLen) / total;
         }
-        DrawMarker(t, fn_801EA9A0(i)->active ? n++ : -1, -165.0f, y, 330.0f, 5.0f);
+        DrawMarker(t, GetCarInfo(i)->active ? n++ : -1, -165.0f, y, 330.0f, 5.0f);
     }
 }
 
 void RacingOverlay::DrawStandings(void) {
-    int n = fn_801EA994();
+    int n = GetHumanPlayerCount();
     int place = lbl_8055D350->stats->pos;
     int before = 2;
     int after = 2;
@@ -699,7 +699,7 @@ void RacingOverlay::DrawStandings(void) {
     fn_8000FF88(-0x100, 9, "%d. %s", 1.0f, -280.0f, y, lbl_8055D350->stats->pos,
                 lbl_8055D350->racer->setup.name);
     y -= 20.0f;
-    for (i = lbl_8055D350->stats->pos + 1; i <= lbl_8055D350->stats->pos + after && i <= fn_801EA994();
+    for (i = lbl_8055D350->stats->pos + 1; i <= lbl_8055D350->stats->pos + after && i <= GetHumanPlayerCount();
          i++) {
         fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->setup.name);
         y -= 20.0f;
