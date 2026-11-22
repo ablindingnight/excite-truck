@@ -213,7 +213,7 @@ int fn_802E88D8(void) {
 
 void fn_802E8918(void) { fn_802E2E38(1); }
 
-void fn_802E8920(s32 size) {
+void ValidateMemoryCardSpace(s32 size) {
     u32 answer = 0;
     s32 r = NANDCheck((u32)((size + 0x3FFF) / 0x4000 + 4), (u32)2, (u32*)&answer);
     if (r == 0) {
@@ -272,7 +272,7 @@ int test_banner_ok(void) {
     return ok;
 }
 
-int fn_802E8AE8(const char* name) {
+int ValidateNANDFile(const char* name) {
     u8 file[0x8C];
     int ok = 0;
     if (NANDOpen((const char*)name, (NANDFileInfo*)file, (u8)1) == 0) {
@@ -282,7 +282,7 @@ int fn_802E8AE8(const char* name) {
     return ok;
 }
 
-void fn_802E8B34(const char* name) {
+void DeleteSaveFile(const char* name) {
     fn_802E30C8("rmemcard: deleting %s", name);
     s32 r = NANDDelete((const char*)name);
     if (r != 0) {
@@ -292,8 +292,8 @@ void fn_802E8B34(const char* name) {
 
 void fn_802E8B98(void) {
     if (lbl_80560030) {
-        fn_802E8B34(lbl_80560030);
-        fn_802E8B34("banner.bin");
+        DeleteSaveFile(lbl_80560030);
+        DeleteSaveFile("banner.bin");
     } else {
         fn_802E30C8("rmemcard: g_filename not set for delete file!");
     }
@@ -323,14 +323,14 @@ void fn_802E8C2C(void) {
     }
 }
 
-int fn_802E8C6C(int phase, int mode) {
+int RegisterResetHandler(int phase, int mode) {
     if (phase == 1) {
         fn_802E95E0("reset hander", fn_802E9010);
     }
     return 0;
 }
 
-void fn_802E8CA8(void) {
+void InitializeMemoryCard(void) {
     s32 r = NANDInit();
     if (r != 0) {
         fn_802E317C("rmemcard: NANDInit returns %d", r);
@@ -340,10 +340,10 @@ void fn_802E8CA8(void) {
     lbl_80560020 = new ("mc_async") u8[0x55730];
     fn_802E6B50();
     RegisterBackgroundTask(fn_802E9010, "memcard");
-    fn_802E2E0C(fn_802E8C6C, "NAND");
+    fn_802E2E0C(RegisterResetHandler, "NAND");
 }
 
-void fn_802E8D2C(void) {
+void EndMemoryCardOperation(void) {
     fn_802E95E0("MemCardEnd", fn_802E8838);
     RemoveBackgroundFunction(fn_802E9010);
     fn_802E6B94();
@@ -361,7 +361,7 @@ bool lbl_8055D255 = true;  // first read
 
 extern "C" {
 
-int fn_802E8D8C(const char* name, void* dst, s32 size) {
+int ReadMemoryCardFile(const char* name, void* dst, s32 size) {
     u8 file[0x8C];
     FileNameGuard guard(name);
     if (!fn_802E95E0("MemCardReadFile", fn_802E8838)) {
@@ -370,18 +370,18 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
     const bool first = lbl_8055D255;
     lbl_8055D255 = false;
     int banner = test_banner_ok();
-    int have = fn_802E8AE8(name);
+    int have = ValidateNANDFile(name);
     if (!banner && !have) {
         fn_802E30C8("rmemcard: new user, missing both banner and memcard");
         if (first) {
-            fn_802E8920(size);
+            ValidateMemoryCardSpace(size);
         }
         return 0;
     }
     if (!banner || !have) {
         fn_802E30C8("rmemcard: new user, missing either banner or memcard");
         if (fn_802E8BE4()) {
-            fn_802E8920(size);
+            ValidateMemoryCardSpace(size);
         }
         return 0;
     }
@@ -389,7 +389,7 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
     if (r != 0) {
         fn_802E30C8("rmemcard: NANDOpen (R) returns %d", r);
         if (first) {
-            fn_802E8920(size);
+            ValidateMemoryCardSpace(size);
         }
         return 0;
     }
@@ -411,7 +411,7 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
         if (got == -4) {
             fn_802E8C2C();
         } else if (fn_802E8BE4()) {
-            fn_802E8920(size);
+            ValidateMemoryCardSpace(size);
         }
         return 0;
     }
@@ -423,7 +423,7 @@ int fn_802E8D8C(const char* name, void* dst, s32 size) {
     return 1;
 }
 
-void fn_802E9254(Writer* w);
+void HandleNANDWriteOperation(Writer* w);
 void fn_802E91D8(Writer* w, const char* name, const void* buf, u32 len);
 int fn_802E91BC(Writer* w);
 int fn_802E91AC(Writer* w);
@@ -431,7 +431,7 @@ void fn_802E9118(SaveTask* t);
 void fn_802E9160(SaveTask* t);
 
 inline void fn_802E9010(void) {
-    fn_802E9254(&lbl_80507288.w);
+    HandleNANDWriteOperation(&lbl_80507288.w);
     SaveTask* t = &lbl_80507288;
     switch (lbl_80507288.state) {
     case 2:
@@ -494,16 +494,16 @@ inline void fn_802E91D8(Writer* w, const char* name, const void* buf, u32 len) {
     fn_802E30C8(kStartWrite, len, name);
 }
 
-inline void fn_802E95CC(s32 result, void* block);
+inline void SetWriteResult(s32 result, void* block);
 
 // Starts one NAND call; a refused call ends the write.
 #define NAND_START(call, name, next, closeOnFail)      {                                                         w->done = 0;                                          w->result = 0;                                        s32 r = call;                                         if (r != 0) {                                             fn_802E30C8(kNandFailure, name, r);             w->state = 0;                                         w->err = r;                                           if (closeOnFail) {                                        NANDClose((NANDFileInfo*)w->file);                               }                                                 } else {                                                  w->state = next;                                  }                                                 }
 
-inline void fn_802E9254(Writer* w) {
+inline void HandleNANDWriteOperation(Writer* w) {
     s32 res;
     switch (w->state) {
     case 2:
-        NAND_START(NANDCreateAsync(w->name, 0x30, 0, fn_802E95CC, &w->user), kCreateStart, 3, 0);
+        NAND_START(NANDCreateAsync(w->name, 0x30, 0, SetWriteResult, &w->user), kCreateStart, 3, 0);
         break;
     case 3:
         if (!w->done) {
@@ -511,7 +511,7 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == 0 || res == -6) {
-            NAND_START(NANDOpenAsync((const char*)w->name, (NANDFileInfo*)w->file, (u8)2, (NANDAsyncCallback)fn_802E95CC, (NANDCommandBlock*)&w->user), kOpenStart, 4, 0);
+            NAND_START(NANDOpenAsync((const char*)w->name, (NANDFileInfo*)w->file, (u8)2, (NANDAsyncCallback)SetWriteResult, (NANDCommandBlock*)&w->user), kOpenStart, 4, 0);
         } else {
             if (res == -11) {
                 lbl_80560034 = 1;
@@ -529,7 +529,7 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == 0) {
-            NAND_START(NANDWriteAsync((NANDFileInfo*)w->file, (const void*)w->buf, (u32)w->len, (NANDAsyncCallback)fn_802E95CC, (NANDCommandBlock*)&w->user), kWriteStart, 5, 1);
+            NAND_START(NANDWriteAsync((NANDFileInfo*)w->file, (const void*)w->buf, (u32)w->len, (NANDAsyncCallback)SetWriteResult, (NANDCommandBlock*)&w->user), kWriteStart, 5, 1);
         } else {
             fn_802E30C8(kNandFailure, kOpenComplete, res);
             w->err = res;
@@ -542,7 +542,7 @@ inline void fn_802E9254(Writer* w) {
         }
         res = w->result;
         if (res == (s32)w->len) {
-            NAND_START(NANDCloseAsync((NANDFileInfo*)w->file, (NANDAsyncCallback)fn_802E95CC, (NANDCommandBlock*)&w->user), kCloseStart, 6, 1);
+            NAND_START(NANDCloseAsync((NANDFileInfo*)w->file, (NANDAsyncCallback)SetWriteResult, (NANDCommandBlock*)&w->user), kCloseStart, 6, 1);
         } else {
             fn_802E30C8(kNandFailure, kWriteComplete, res);
             w->err = res;
@@ -568,7 +568,7 @@ inline void fn_802E9254(Writer* w) {
     }
 }
 
-inline void fn_802E95CC(s32 result, void* block) {
+inline void SetWriteResult(s32 result, void* block) {
     Writer* w = *(Writer**)block;
     w->result = result;
     w->done = 1;
@@ -593,7 +593,7 @@ inline void* LoadBanner(s32* size) {
     return fn_8012C370(kPackBanner, 'RVBN', tmp, size, 0, 0);
 }
 
-int fn_802E967C(const char* name, const void* data, s32 size) {
+int SaveGameFile(const char* name, const void* data, s32 size) {
     if (!fn_802E95E0("MemCardWriteFile", fn_802E8838)) {
         fn_802E30C8("rmemcard: block_for_ready fails on writefile!");
         return 0;
@@ -613,7 +613,7 @@ int fn_802E967C(const char* name, const void* data, s32 size) {
     return 1;
 }
 
-void fn_802E97B4(void) {
+void HandleMemcardAsyncError(void) {
     if (lbl_80560035 || fn_802ECC10()) {
         return;
     }

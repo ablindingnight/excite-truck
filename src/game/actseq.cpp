@@ -56,7 +56,7 @@ struct ActVec {
     f32 z;
 };
 
-extern "C" Sound3D* fn_802077A4(const char* name, int cls, ActVec* vel, ActVec* pos);
+extern "C" Sound3D* Create3DSound(const char* name, int cls, ActVec* vel, ActVec* pos);
 
 template <typename T, int N>
 struct FixedArr : ArrayRef<T> {
@@ -209,7 +209,7 @@ void UpdateCameraTargetPosition(ActionSequence* s, const ActVec* pos);
 
 void InitializeRumbleSound(void) {
     lbl_8055E954 = 1;
-    lbl_804422F0.snd = fn_802077A4("rumble.sfx", 5, &lbl_804422F0.vel, &lbl_804422F0.pos);
+    lbl_804422F0.snd = Create3DSound("rumble.sfx", 5, &lbl_804422F0.vel, &lbl_804422F0.pos);
     if (lbl_804422F0.snd) {
         lbl_804422F0.snd->radius = 100.0f;
     }
@@ -1696,7 +1696,7 @@ int SoundEffect_ASE::Load(ValueNode* t) {
     }
     v = (t)->GetVec3Or("v", ValV3(0.0f, 0.0f, 0.0f));
     if (t->GetBool("is_3d", 0)) {
-        Sound3D* s = fn_802077A4(name, 5, &v, &loc);
+        Sound3D* s = Create3DSound(name, 5, &v, &loc);
         snd = s;
         if (s) {
             s->radius = t->GetFloat("near_distance", 50.0f);

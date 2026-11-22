@@ -147,8 +147,8 @@ struct RenderCtx {
 extern "C" {
 void fn_801293C8(const char* name);
 void fn_801293D0(void);
-void fn_801293DC(void* buf);
-void fn_801293E8(void* buf);
+void CopyCourseData(void* buf);
+void CopyTextureData(void* buf);
 const MCam* fn_802C86DC(void);
 void fn_802C8B70(s32 tex);
 void fn_802C8D74(void);
@@ -503,7 +503,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     for (i = 0; i < m->numObjs; i++) {
         m->objs[i]->Calc(m);
     }
-    fn_801293DC(lbl_804C1480);
+    CopyCourseData(lbl_804C1480);
     fn_801293D0();
 }
 
@@ -542,7 +542,7 @@ void FlushRenderQueue(int pri) {
     s32 cnt;
     void* id;
     fn_801293C8("mlist: flush");
-    fn_801293E8(lbl_804C1480);
+    CopyTextureData(lbl_804C1480);
     m = lbl_8055FCD8;
     MLArray<MLStrip> da = m->d;
     MLRange r = m->ranges[pri];

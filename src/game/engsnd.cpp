@@ -24,7 +24,7 @@ int IsLoadingActive(void);
 void* operator new(size_t size, const char* tag);
 
 extern "C" {
-GameSound* fn_802077A4(const char* name, int cls, void* vel, void* pos);
+GameSound* Create3DSound(const char* name, int cls, void* vel, void* pos);
 Sound2D* fn_80207848(const char* name, int cls);
 }
 
@@ -110,7 +110,7 @@ public:
                 memset(e, 0, sizeof(EngineSample));
                 const char* name = child->GetValue("sound");
                 if (this->car->kind != 0x50) {
-                    e->snd = fn_802077A4(name, 3, this->car->vel, car->pos);
+                    e->snd = Create3DSound(name, 3, this->car->vel, car->pos);
                 } else {
                     Sound2D* s = fn_80207848(name, 2);
                     if (s) {

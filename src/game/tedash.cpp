@@ -165,7 +165,7 @@ void fn_801476C4(TextElem* e);
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
 ILayout* fn_80145E70(const char* name);
 void fn_80148F4C(void);
-Image* fn_802B5240(const char* path);
+Image* LoadTextureImage(const char* path);
 void fn_802B52B4(Image* img);
 void fn_80204048(V2* a, V2* b);
 void fn_8020404C(void);
@@ -607,7 +607,7 @@ static inline void LoadBrushFiles(char* name, char* path, const char* dir, int h
             fn_80128684();
         }
         fn_801345D8(path, 0x40, "%s%s", dir, name);
-        Image* img = fn_802B5240(path);
+        Image* img = LoadTextureImage(path);
         if (img) {
             b->w = img->w;
             b->h = img->h;

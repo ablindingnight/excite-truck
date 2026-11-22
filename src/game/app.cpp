@@ -55,7 +55,7 @@ void fn_802E2C20(void);
 void LoadOptionsFile(void);
 void fn_802C2AA8(int);
 void fn_80127464(void);
-void fn_802062E8(void);
+void InitializeSoundManager(void);
 void fn_80230090(void);
 void InitializeLanguageSettings(void);
 void fn_80245118(void);
@@ -200,7 +200,7 @@ void AppInit(void) {
     fn_802C2AA8(lbl_80558900);
     fn_80127464();
     fn_80127464();
-    fn_802062E8();
+    InitializeSoundManager();
     fn_80230090();
     InitializeLanguageSettings();
     fn_80245118();

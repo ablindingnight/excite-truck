@@ -109,7 +109,7 @@ static inline void Replace(char* s, char from, char to) {
 
 extern "C" {
 
-void fn_802DACD4(void) {
+void InitializeRomFont(void) {
     fn_801282EC(32);
     lbl_8055FE78 = fn_801284E8("OSFontData", OSGetFontEncode() == 0 ? 0x20120 : 0x120F00);
     int ok = OSInitFont((OSFontHeader*)lbl_8055FE78);
@@ -152,7 +152,7 @@ void fn_802DAE18(void) {
 }
 
 // Draws str with the ROM font, wrapping words past x = 570; a negative x starts at -x.
-void fn_802DAE64(int x, int y, const char* str) {
+void DrawWrappedString(int x, int y, const char* str) {
     int py;
     const char* s;
     u8* image;
@@ -211,12 +211,12 @@ void fn_802DAE64(int x, int y, const char* str) {
     }
 }
 
-void fn_802DB03C(const char* msg) {
+void DisplayMessageCentered(const char* msg) {
     char text[1024];
     ClearScreen();
     strcpy(text, msg);
     Replace(text, '\n', ' ');
-    fn_802DAE64(320, 120, text);
+    DrawWrappedString(320, 120, text);
     UpdateFrameBuffer();
 }
 
@@ -239,9 +239,9 @@ static void BootScreenUnused(const char* name, int a, int b, int t[6], int dtv, 
     fn_802E30C8("Screen has been set to interlaced mode");
 }
 
-void fn_802DB168(void) {
+void RenderLoadingScreen(void) {
     ClearScreen();
-    fn_802DAE64(-450, 380, "LOADING");
+    DrawWrappedString(-450, 380, "LOADING");
     UpdateFrameBuffer();
     fn_802CED50(450, 380, 120, 30);
 }

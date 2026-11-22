@@ -69,7 +69,7 @@ void fn_8012E81C(const char* name);
 void fn_8012DDA8(const char* name);
 void fn_8012E498(const char* name);
 MusicVoice* fn_802078CC(const char* name, int flags, u8* buf, int size);
-void fn_80207924(MusicVoice* v);
+void DestroyGameSound(MusicVoice* v);
 }
 
 
@@ -218,7 +218,7 @@ void fn_8020A550(void) {
     lbl_8055EDD0 = 0;
     for (int i = 0; i < 2; i++) {
         if (lbl_804892C0[i].voice) {
-            fn_80207924(lbl_804892C0[i].voice);
+            DestroyGameSound(lbl_804892C0[i].voice);
             lbl_804892C0[i].voice = NULL;
         }
         char buf[0x40];

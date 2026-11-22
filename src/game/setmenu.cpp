@@ -115,7 +115,7 @@ int fn_8023C308(int* result) {
 
 int fn_8023C3CC(void) { return 0; }
 
-void fn_8023C3D4(void) {
+void CreateAdjustMenu(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, (void*)fn_8023C2E4, -1, 27),
         MenuItem(lbl_8055B860, 6, (void*)fn_8023C3CC, -10, 0x126),
@@ -130,7 +130,7 @@ void fn_8023C3D4(void) {
     fn_802146BC(&desc, -999, -999, 1);
 }
 
-void fn_8023C55C(const char* layout) {
+void SetupDisplayAudioMenu(const char* layout) {
     lbl_8055F150 = lbl_8055F148 = fn_802C83C4();
     StringMulti display(&lbl_8055F148, fn_80131234("Display:STANDARD"), fn_80131234("Display:WIDESCREEN"), NULL);
     lbl_8055F14C = lbl_8055F144 = GetMasterVolume();
@@ -151,14 +151,14 @@ void fn_8023C55C(const char* layout) {
         if (fn_802146BC(&desc, -999, -999, 1) != 3) {
             break;
         }
-        fn_8023C3D4();
+        CreateAdjustMenu();
     }
     fn_8023C308(NULL);
 }
 
-void fn_8023C94C(void) { fn_8023C55C("audio.lyt"); }
+void LoadAudioLayout(void) { SetupDisplayAudioMenu("audio.lyt"); }
 
-void fn_8023C958(void) { fn_8023C55C("display.lyt"); }
+void LoadDisplayLayout(void) { SetupDisplayAudioMenu("display.lyt"); }
 
 }  // extern "C"
 

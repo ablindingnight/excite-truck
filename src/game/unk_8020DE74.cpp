@@ -30,10 +30,10 @@ extern const float lbl_8056336C;
 extern "C++" void *operator new(unsigned long size, const char *tag);
 extern "C" void *memset(void *, int, unsigned long);
 extern "C" void fn_801345D8(char *, int, const char *, ...);
-extern "C" void *fn_802077A4(const char *name, long kind, void *a, void *b);
-extern "C" void *fn_802076A0(const char *name, long kind, void *owner, long mode);
+extern "C" void *Create3DSound(const char *name, long kind, void *a, void *b);
+extern "C" void *CreateSoundDash(const char *name, long kind, void *owner, long mode);
 
-// A part created by fn_802077A4: owner at 0x10, a level at 0x04 with a dirty flag at 0x4E.
+// A part created by Create3DSound: owner at 0x10, a level at 0x04 with a dirty flag at 0x4E.
 struct HudPart {
     virtual ~HudPart();     /* 0x00: vptr (the parts are deleted through slot 0) */
     float level;            /* 0x04 */
@@ -125,7 +125,7 @@ public:
 }  // namespace
 
 static inline HudPart *CreateFlash(HudPart *&slot, const char *name, void *res, void *res2) {
-    slot = (HudPart *)fn_802077A4(name, 5, res, res2);
+    slot = (HudPart *)Create3DSound(name, 5, res, res2);
     return slot;
 }
 
@@ -145,13 +145,13 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     const long type = ((CarBody *)vehicle)->type;
     isCar = type == 0x50434152;
     if (isCar) {
-        this->p28 = (HudPart *)fn_802077A4("waterbounce.sfx", 5, res, res2);
-        this->air = (HudPart *)fn_802077A4("airtime.sfx", 8, res, res2);
+        this->p28 = (HudPart *)Create3DSound("waterbounce.sfx", 5, res, res2);
+        this->air = (HudPart *)Create3DSound("airtime.sfx", 8, res, res2);
     } else {
         this->p28 = 0;
         this->air = 0;
     }
-    this->p08 = (HudPart *)fn_802077A4("backfire.sfx", 5, res, res2);
+    this->p08 = (HudPart *)Create3DSound("backfire.sfx", 5, res, res2);
     this->flashCount = 0;
     memset(this->flashes, 0, 8);
     this->flash = 0;
@@ -165,7 +165,7 @@ inline CarSound::CarSound(unsigned char *vehicle) {
         this->flashCount++;
     }
     if (isCar) {
-        this->speedLines = (HudPart *)fn_802077A4("boost_manual.sfx", 5, res, res2);
+        this->speedLines = (HudPart *)Create3DSound("boost_manual.sfx", 5, res, res2);
     } else {
         this->speedLines = 0;
     }
@@ -176,15 +176,15 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     if (this->p28 != 0) this->p28->owner = owner;
     if (this->air != 0) this->air->owner = owner;
     if (isCar) {
-        this->p1C = (HudPart *)fn_802077A4("car_gnd1.sfx", 5, res, res2);
+        this->p1C = (HudPart *)Create3DSound("car_gnd1.sfx", 5, res, res2);
     } else {
         this->p1C = 0;
     }
-    this->p20 = (HudPart *)fn_802077A4("badland.sfx", 5, res, res2);
-    this->splash = (HudPart *)fn_802077A4("waterdrive.sfx", 5, res, res2);
+    this->p20 = (HudPart *)Create3DSound("badland.sfx", 5, res, res2);
+    this->splash = (HudPart *)Create3DSound("waterdrive.sfx", 5, res, res2);
     if (isCar) {
-        this->dive = (HudPart *)fn_802077A4("water_in.sfx", 5, res, res2);
-        this->surface = (HudPart *)fn_802077A4("water_out.sfx", 5, res, res2);
+        this->dive = (HudPart *)Create3DSound("water_in.sfx", 5, res, res2);
+        this->surface = (HudPart *)Create3DSound("water_out.sfx", 5, res, res2);
     } else {
         this->dive = 0;
         this->surface = 0;
@@ -192,16 +192,16 @@ inline CarSound::CarSound(unsigned char *vehicle) {
     if (this->splash != 0) this->splash->owner = owner;
     if (this->dive != 0) this->dive->owner = owner;
     if (this->surface != 0) this->surface->owner = owner;
-    this->drift = (HudPart *)fn_802077A4("dirtskid.sfx", 5, res, res2);
+    this->drift = (HudPart *)Create3DSound("dirtskid.sfx", 5, res, res2);
     if (this->drift != 0) this->drift->owner = owner;
     if (isCar) {
-        this->p24 = (HudPart *)fn_802077A4("niceland.sfx", 5, res, res2);
-        this->p2C = (HudPart *)fn_802077A4("boost_turbotap.sfx", 5, res, res2);
-        this->boost = (HudPart *)fn_802076A0("heatbeep.sfx", 1, owner, 2);
-        this->tilt = (HudPart *)fn_802076A0("overheat.sfx", 1, owner, 2);
-        this->p50 = (HudPart *)fn_802076A0("overheat_start.sfx", 1, owner, 2);
-        this->p44 = (HudPart *)fn_802076A0("watersink.sfx", 1, owner, 0);
-        this->start = (HudPart *)fn_802076A0("invulnerable.sfx", 1, owner, 0);
+        this->p24 = (HudPart *)Create3DSound("niceland.sfx", 5, res, res2);
+        this->p2C = (HudPart *)Create3DSound("boost_turbotap.sfx", 5, res, res2);
+        this->boost = (HudPart *)CreateSoundDash("heatbeep.sfx", 1, owner, 2);
+        this->tilt = (HudPart *)CreateSoundDash("overheat.sfx", 1, owner, 2);
+        this->p50 = (HudPart *)CreateSoundDash("overheat_start.sfx", 1, owner, 2);
+        this->p44 = (HudPart *)CreateSoundDash("watersink.sfx", 1, owner, 0);
+        this->start = (HudPart *)CreateSoundDash("invulnerable.sfx", 1, owner, 0);
     } else {
         this->p24 = 0;
         this->p2C = 0;

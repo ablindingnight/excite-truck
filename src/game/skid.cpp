@@ -131,18 +131,18 @@ u32 lbl_804B3490[8];      // last surface of each car
 
 extern "C" {
 
-int fn_8028D17C(void);
+int LoadTerrainSkidData(void);
 void fn_8028D25C(void);
-void fn_8028D2B4(void);
+void InitializeSkidBuffers(void);
 void fn_8028D4A0(void);
-void fn_8028D4FC(void);
+void ResetSkidSlots(void);
 void fn_8028D728(void);
 void fn_8028D7C0(int i);
 void fn_8028DDF0(const SkidEntry* e, int n);
 
 void fn_8028CED8(void) {
-    if (fn_8028D17C()) {
-        fn_8028D2B4();
+    if (LoadTerrainSkidData()) {
+        InitializeSkidBuffers();
         fn_80287B38(fn_8028DDF0);
         lbl_8055F714 = 1;
     }
@@ -158,7 +158,7 @@ void fn_8028CF18(void) {
 
 void fn_8028CF50(void) {
     if (lbl_8055F714) {
-        fn_8028D4FC();
+        ResetSkidSlots();
     }
 }
 
@@ -190,7 +190,7 @@ void fn_8028CFB0(void) {
     }
 }
 
-void fn_8028D084(SkidType* t, SkidNode* n) {
+void ParseSkidParameters(SkidType* t, SkidNode* n) {
     t->tex = fn_802CAC28(n->GetValue("texture"), 0);
     t->bias = n->GetFloat("alpha_bias");
     t->slope = n->GetFloat("alpha_slope");
@@ -201,7 +201,7 @@ void fn_8028D084(SkidType* t, SkidNode* n) {
     }
 }
 
-int fn_8028D17C(void) {
+int LoadTerrainSkidData(void) {
     lbl_8055F728 = 0;
     for (int i = 0; i < 8; i++) {
         char buf[32];
@@ -211,7 +211,7 @@ int fn_8028D17C(void) {
             n = n->Find("skid");
         }
         if (n) {
-            fn_8028D084(&lbl_804B3400[lbl_8055F728], n);
+            ParseSkidParameters(&lbl_804B3400[lbl_8055F728], n);
             lbl_804B3470[i] = lbl_8055F728++;
         } else {
             lbl_804B3470[i] = -1;
@@ -226,7 +226,7 @@ void fn_8028D25C(void) {
     }
 }
 
-void fn_8028D2B4(void) {
+void InitializeSkidBuffers(void) {
     int total = 0;
     int i;
     for (i = 0; i < lbl_8055F728; i++) {
@@ -266,7 +266,7 @@ void fn_8028D4A0(void) {
     lbl_8055F718 = 0;
 }
 
-void fn_8028D4FC(void) {
+void ResetSkidSlots(void) {
     int i;
     for (i = 0; i < lbl_8055F728; i++) {
         for (int k = 0; k < lbl_8055F724; k++) {

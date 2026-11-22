@@ -111,14 +111,14 @@ void fn_802C0F4C(void) {
     fn_802C0E68(lbl_8055FB18);
 }
 
-void fn_802C0FD4(s32* inst) {
+void UnloadModelInstance(s32* inst) {
     if (*inst != -1) {
         mrModelUnload(*inst);
         *inst = -1;
     }
 }
 
-void fn_802C1018(void) { fn_802C0FD4(&lbl_8055FB18); }
+void fn_802C1018(void) { UnloadModelInstance(&lbl_8055FB18); }
 
 // Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
 void fn_802C1020(void) {

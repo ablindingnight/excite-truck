@@ -144,7 +144,7 @@ void fn_801B54B0(StaticCollObject* list) {
     }
 }
 
-void fn_801B561C(StaticCollObject* phob, s32 index, QuadTree* t, int depth, f32 x0, f32 z0, f32 x1, f32 z1) {
+void InsertObjectIntoQuadTree(StaticCollObject* phob, s32 index, QuadTree* t, int depth, f32 x0, f32 z0, f32 x1, f32 z1) {
     f32 cx = 0.5f * (x0 + x1);
     f32 cz = 0.5f * (z0 + z1);
     SolRect rects[4] = {{x0, z0, cx, cz}, {cx, z0, x1, cz}, {x0, cz, cx, z1}, {cx, cz, x1, z1}};
@@ -165,7 +165,7 @@ void fn_801B561C(StaticCollObject* phob, s32 index, QuadTree* t, int depth, f32 
         if (!t->children) {
             t->children = new ("QuadTree::children") QuadTree[4];
         }
-        fn_801B561C(phob, index, &t->children[last], depth + 1, rects[last].x0, rects[last].z0, rects[last].x1,
+        InsertObjectIntoQuadTree(phob, index, &t->children[last], depth + 1, rects[last].x0, rects[last].z0, rects[last].x1,
                     rects[last].z1);
     } else {
         f32 dx = x1 - x0;
@@ -184,7 +184,7 @@ void fn_801B561C(StaticCollObject* phob, s32 index, QuadTree* t, int depth, f32 
             }
             for (int i = 0; i < 4; i++) {
                 if (hit[i]) {
-                    fn_801B561C(phob, index, &t->children[i], depth + 1, rects[i].x0, rects[i].z0, rects[i].x1,
+                    InsertObjectIntoQuadTree(phob, index, &t->children[i], depth + 1, rects[i].x0, rects[i].z0, rects[i].x1,
                                 rects[i].z1);
                 }
             }
@@ -233,7 +233,7 @@ void fn_801B5B04(QuadTree* t, StaticCollObject** list, int n) {
         lbl_80435EB8.z0 = min.z - 4.0f;
         lbl_80435EB8.x1 = max.x + 4.0f;
         lbl_80435EB8.z1 = max.z + 4.0f;
-        fn_801B561C(list[i], i, t, 0, -4000000.0f, -4000000.0f, 4000000.0f, 4000000.0f);
+        InsertObjectIntoQuadTree(list[i], i, t, 0, -4000000.0f, -4000000.0f, 4000000.0f, 4000000.0f);
     }
 }
 
@@ -262,7 +262,7 @@ int fn_801B5D10(StaticCollObject* p) {
     return n;
 }
 
-SolTable* fn_801B5D30(StaticCollObject** head) {
+SolTable* BuildStaticCollisionTable(StaticCollObject** head) {
     fn_801B5AE4();
     fn_801B54B0(*head);
     int n = fn_801B5D10(*head);

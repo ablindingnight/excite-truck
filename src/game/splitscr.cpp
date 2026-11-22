@@ -51,7 +51,7 @@ s32 lbl_8055ED6C;  // car icon texture
 extern "C" {
 
 // One vertex at (x, y) in bar space: x in [-1, 1] across the divider, y in [0, 1] down the screen.
-void fn_802057A8(u32 color, int idx, f32 x, f32 y, f32 u, f32 v) {
+void DrawBarVertex(u32 color, int idx, f32 x, f32 y, f32 u, f32 v) {
     f32 px = (f32)lbl_8055CFF0 * Lerp(0.49f, 0.51f, (x - -1.0f) / 2.0f);
     f32 py = (f32)lbl_8055CFF4 * Lerp(0.93f, 0.07f, y);
     RVec3 p(px, py, 0.0f);
@@ -61,14 +61,14 @@ void fn_802057A8(u32 color, int idx, f32 x, f32 y, f32 u, f32 v) {
 void fn_80205850(void) {
     fn_802C8CBC(-1);
     fn_802C8DBC(0x20);
-    fn_802057A8(-1, 0, -1.0f, 0.0f, 0.0f, 0.0f);
-    fn_802057A8(-1, 0, 1.0f, 0.0f, 0.0f, 0.0f);
-    fn_802057A8(-1, 1, -1.0f, 0.005f, 0.0f, 0.0f);
-    fn_802057A8(-1, 1, 1.0f, 0.005f, 0.0f, 0.0f);
-    fn_802057A8(-1, 0, -1.0f, 0.995f, 0.0f, 0.0f);
-    fn_802057A8(-1, 0, 1.0f, 0.995f, 0.0f, 0.0f);
-    fn_802057A8(-1, 1, -1.0f, 1.0f, 0.0f, 0.0f);
-    fn_802057A8(-1, 1, 1.0f, 1.0f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 0, -1.0f, 0.0f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 0, 1.0f, 0.0f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 1, -1.0f, 0.005f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 1, 1.0f, 0.005f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 0, -1.0f, 0.995f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 0, 1.0f, 0.995f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 1, -1.0f, 1.0f, 0.0f, 0.0f);
+    DrawBarVertex(-1, 1, 1.0f, 1.0f, 0.0f, 0.0f);
     fn_802C8E48();
     fn_802C8D74();
 }
@@ -82,7 +82,7 @@ int fn_80205964(void) {
     return 0;
 }
 
-void fn_802059C0(void) {
+void DrawCarPositionIndicators(void) {
     f32 lapLen = fn_8013672C();
     f32 total = lapLen * (f32)fn_801E7E3C()->laps;
     int n = fn_801E85A4();
@@ -109,25 +109,25 @@ void fn_802059C0(void) {
             if ((u8)a) {
                 fn_802C8CBC(-1);
                 fn_802C8DBC(6);
-                fn_802057A8(color & 0xFFFFFF, 0, side, y, 0.0f, 0.0f);
-                fn_802057A8(dark & 0xFFFFFF, 0, 0.0f, y, 0.0f, 0.0f);
+                DrawBarVertex(color & 0xFFFFFF, 0, side, y, 0.0f, 0.0f);
+                DrawBarVertex(dark & 0xFFFFFF, 0, 0.0f, y, 0.0f, 0.0f);
                 f32 y2 = MaxF(0.0f, y - 0.05f);
-                fn_802057A8(color, 1, side, y2, 0.0f, 0.0f);
-                fn_802057A8(dark, 1, 0.0f, y2, 0.0f, 0.0f);
+                DrawBarVertex(color, 1, side, y2, 0.0f, 0.0f);
+                DrawBarVertex(dark, 1, 0.0f, y2, 0.0f, 0.0f);
                 y2 = MaxF(0.0f, y2 - Lerp(0.07f, 0.25f, Ramp(y2, 0.1f, 0.5f)));
-                fn_802057A8(color & 0xFFFFFF, 1, side, y2, 0.0f, 0.0f);
-                fn_802057A8(dark & 0xFFFFFF, 1, 0.0f, y2, 0.0f, 0.0f);
+                DrawBarVertex(color & 0xFFFFFF, 1, side, y2, 0.0f, 0.0f);
+                DrawBarVertex(dark & 0xFFFFFF, 1, 0.0f, y2, 0.0f, 0.0f);
                 fn_802C8E48();
                 fn_802C8D74();
             }
             if (lbl_8055ED6C != -2) {
                 fn_802C8CBC(lbl_8055ED6C);
                 fn_802C8DBC(4);
-                fn_802057A8(-1, 0, iconX, y, 1.0f, 0.0f);
-                fn_802057A8(-1, 0, 0.0f, y, 1.0f, 1.0f);
+                DrawBarVertex(-1, 0, iconX, y, 1.0f, 0.0f);
+                DrawBarVertex(-1, 0, 0.0f, y, 1.0f, 1.0f);
                 y -= margin;
-                fn_802057A8(-1, 1, iconX, y, 0.0f, 0.0f);
-                fn_802057A8(-1, 1, 0.0f, y, 0.0f, 1.0f);
+                DrawBarVertex(-1, 1, iconX, y, 0.0f, 0.0f);
+                DrawBarVertex(-1, 1, 0.0f, y, 0.0f, 1.0f);
                 fn_802C8E48();
                 fn_802C8D74();
             }
@@ -160,7 +160,7 @@ void fn_80205D5C(void) {
     fn_802C8D74();
 }
 
-void fn_80205FCC(void) {
+void DrawSplitScreenMessages(void) {
     PlainValMatrix saved;
     saved = *fn_802C86DC();
     PlainValMatrix m;
@@ -180,7 +180,7 @@ void fn_80205FCC(void) {
     fn_802C8638(&saved);
 }
 
-void fn_802061F8(void) { lbl_8055ED6C = fn_802CAC28("mpov_car.tex", 0); }
+void LoadCarTexture(void) { lbl_8055ED6C = fn_802CAC28("mpov_car.tex", 0); }
 
 void fn_80206228(void) {
     if (lbl_8055ED6C != -2) {
@@ -195,9 +195,9 @@ void fn_8020625C(void) {
         fn_80205D5C();
         if (fn_80205964()) {
             fn_80205850();
-            fn_80205FCC();
+            DrawSplitScreenMessages();
         }
-        fn_802059C0();
+        DrawCarPositionIndicators();
         fn_802C2C00((u8)old);
     }
 }

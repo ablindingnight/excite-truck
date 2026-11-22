@@ -46,7 +46,7 @@ public:
 void* operator new(size_t size, const char* tag);
 
 extern "C" {
-TireVoice* fn_802077A4(const char* name, int flags, void* a, void* b);
+TireVoice* Create3DSound(const char* name, int flags, void* a, void* b);
 RoadSound* fn_8020CA3C(char* car);
 }
 
@@ -54,7 +54,7 @@ class TireSound {
 public:
     TireSound(char* car) {
         this->car = car;
-        squeal = fn_802077A4("squeal.sfx", 4, car + 0x118, car + 0x60);
+        squeal = Create3DSound("squeal.sfx", 4, car + 0x118, car + 0x60);
         if (squeal) {
             squeal->unk10 = ((CarBody*)this->car)->index;
         }

@@ -23,13 +23,13 @@ struct KeyMap {
 
 extern "C" {
 void* memset(void* p, int c, size_t n);
-void fn_802E7FD0(void);
+void UpdateRemoteControllerStatus(void);
 void fn_802E8364(JoyStatus* status, int chan);
-int fn_802E8504(int chan);
+int GetControllerConnectionStatus(int chan);
 void fn_802E4800(int key);
 u32 fn_802E2C20(void);
-void fn_802E7C64(void);
-void fn_802E7D0C(void);
+void InitializeWiiControllers(void);
+void ShutdownWpadControllers(void);
 void fn_802E830C(s32* map);
 void RegisterBackgroundTask(void (*fn)(void), const char* name);
 void RemoveBackgroundFunction(void (*fn)(void));
@@ -47,7 +47,7 @@ extern "C" {
 
 void fn_80129400(void) {
     int i;
-    fn_802E7FD0();
+    UpdateRemoteControllerStatus();
     for (i = 0; i < 4; i++) {
         fn_802E8364(&lbl_80422180[i].status, i);
     }
@@ -162,7 +162,7 @@ void fn_80129690(JoyPad* p, int chan, KeyMap* m) {
 }
 
 void fn_80129790(void) {
-    fn_802E7C64();
+    InitializeWiiControllers();
     RegisterBackgroundTask(fn_80129400, "JoyUpdate");
     InitializeInputConfig();
     lbl_8055DFD0 = 1;
@@ -184,14 +184,14 @@ int GetButtonState(int chan, int button) {
 
 void fn_80129864(void) {
     RemoveBackgroundFunction(fn_80129400);
-    fn_802E7D0C();
+    ShutdownWpadControllers();
 }
 
 int CountActiveControllers(void) {
     int n = 0;
     int i;
     for (i = 0; i < 4; i++) {
-        if (fn_802E8504(i)) {
+        if (GetControllerConnectionStatus(i)) {
             n++;
         }
     }
@@ -199,7 +199,7 @@ int CountActiveControllers(void) {
 }
 
 int ReadJoyStatus(JoyStatus* out, int chan) {
-    int ok = fn_802E8504(chan);
+    int ok = GetControllerConnectionStatus(chan);
     if (ok) {
         *out = lbl_80422180[chan].status;
     } else {

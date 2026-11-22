@@ -89,26 +89,26 @@ long fn_8020F400(long arg0, long arg1, long arg2) {
 extern char lbl_804904D0[0x40];
 extern int fn_8012E938(const char *name);
 extern void fn_8012E81C(const char *name);
-extern void fn_802EC294(int slot, const char *name);
+extern void LoadMp3Resource(int slot, const char *name);
 extern void fn_802E30C8(const char *, ...);
 
 void fn_8020F444(void) {
     char buf[0x40];
     if (!lbl_8055EEF4 && fn_8012E938((const char *)fn_8020F400((long)lbl_804904D0, (long)buf, sizeof(buf)))) {
         fn_8012E81C((const char *)fn_8020F400((long)lbl_804904D0, (long)buf, sizeof(buf)));
-        fn_802EC294(0, (const char *)fn_8020F3BC((long)lbl_804904D0, (long)buf, sizeof(buf)));
+        LoadMp3Resource(0, (const char *)fn_8020F3BC((long)lbl_804904D0, (long)buf, sizeof(buf)));
         fn_802E30C8("Tried to load %s!", buf);
         lbl_8055EEF4 = 1;
     }
     if (!lbl_8055EEF5 && fn_8012E938((const char *)fn_8020F400((long)lbl_8055B650, (long)buf, sizeof(buf)))) {
         fn_8012E81C((const char *)fn_8020F400((long)lbl_8055B650, (long)buf, sizeof(buf)));
-        fn_802EC294(1, (const char *)fn_8020F3BC((long)lbl_8055B650, (long)buf, sizeof(buf)));
+        LoadMp3Resource(1, (const char *)fn_8020F3BC((long)lbl_8055B650, (long)buf, sizeof(buf)));
         fn_802E30C8("Tried to load %s!", buf);
         lbl_8055EEF5 = 1;
     }
     if (!lbl_8055EEF6 && fn_8012E938((const char *)fn_8020F400((long)lbl_8055B654, (long)buf, sizeof(buf)))) {
         fn_8012E81C((const char *)fn_8020F400((long)lbl_8055B654, (long)buf, sizeof(buf)));
-        fn_802EC294(2, (const char *)fn_8020F3BC((long)lbl_8055B654, (long)buf, sizeof(buf)));
+        LoadMp3Resource(2, (const char *)fn_8020F3BC((long)lbl_8055B654, (long)buf, sizeof(buf)));
         fn_802E30C8("Tried to load %s!", buf);
         lbl_8055EEF6 = 1;
     }
@@ -1035,7 +1035,7 @@ long fn_802111E4(long arg0) {
 
 extern long fn_80265D64(void);
 extern void fn_801769E0(void);
-extern void fn_80206444(void);
+extern void SetPrimaryOnlyFlag(void);
 extern void SetVolumeClamped(long, float);
 extern long fn_801769CC(void);
 extern void *GetEvent__Fi(long);
@@ -1106,7 +1106,7 @@ extern "C" void fn_802113D8(void) {
     if (fn_80265D64() == 0) {
         fn_801769E0();
     }
-    fn_80206444();
+    SetPrimaryOnlyFlag();
     SetVolumeClamped(lbl_8055EEF0, 0.0f);
     lbl_8055EEE0 = minusTwo;
     lbl_8055EEE4 = zero;

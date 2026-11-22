@@ -4285,7 +4285,7 @@ inline void BetaMaster::a2(void) {
 }
 
 extern "C" {
-GameSound* fn_802076A0(const char* name, int flags, int car, int pan);  // 3D sound
+GameSound* CreateSoundDash(const char* name, int flags, int car, int pan);  // 3D sound
 void fn_801332D0(void* prefs, const char* key, const char** out);
 char* strncpy(char* d, const char* s, size_t n);
 Meter* fn_801572A4(CarHud* hud, int car, f32* hispeed);
@@ -4307,7 +4307,7 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
     if (acar) {
         h->bonusSnd = 0;
     } else {
-        h->bonusSnd = fn_802076A0(bonus, 1, car, 0);
+        h->bonusSnd = CreateSoundDash(bonus, 1, car, 0);
     }
     if (h->bonusSnd) {
         h->bonusSnd->SetVolume(1.0f);
@@ -4315,7 +4315,7 @@ static inline void InitCarHud(CarHud* h, int car, int acar) {
     if (acar) {
         h->bigSnd = 0;
     } else {
-        h->bigSnd = fn_802076A0(big, 1, car, 2);
+        h->bigSnd = CreateSoundDash(big, 1, car, 2);
     }
     if (h->bigSnd) {
         h->bigSnd->SetVolume(1.0f);
@@ -4382,11 +4382,11 @@ inline void BetaMaster::a1(void) {
         cars[i].fullSnd = 0;
         cars[i].starSnd = 0;
         if (!acar) {
-            cars[i].starSnd = fn_802076A0("boing.sfx", 1, cars[i].id, 2);
+            cars[i].starSnd = CreateSoundDash("boing.sfx", 1, cars[i].id, 2);
             if (cars[i].starSnd) {
                 cars[i].starSnd->SetVolume(1.0f);
             }
-            cars[i].fullSnd = fn_802076A0("counter.sfx", 7, cars[i].id, 0);
+            cars[i].fullSnd = CreateSoundDash("counter.sfx", 7, cars[i].id, 0);
         }
     }
     }

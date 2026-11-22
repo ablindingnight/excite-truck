@@ -27,7 +27,7 @@ extern double fabs(double);
 extern void SetVolumeClamped(int, float);
 extern void fn_80206454(void);
 extern void fn_801769EC(void);
-extern void fn_80206444(void);
+extern void SetPrimaryOnlyFlag(void);
 extern float fn_80209028(void);
 extern float fn_8020A5F0(void);
 extern int fn_80265D64(void);
@@ -131,7 +131,7 @@ void fn_8020D224(void) {
     lbl_8055EE84 = value;
     if (fn_80265D64() == 0)
         fn_801769E0();
-    fn_80206444();
+    SetPrimaryOnlyFlag();
     SetVolumeClamped(lbl_8055EE74, 0.0f);
     lbl_8055EE78 = 0;
     lbl_8055EE9C = 0.0f;

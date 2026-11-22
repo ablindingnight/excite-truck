@@ -18,12 +18,12 @@ void fn_802D3DAC(void);
 void fn_802E2E38(int reason);
 void fn_80129AFC(void);
 void fn_802E6264(void);
-void fn_802E7FD0(void);
+void UpdateRemoteControllerStatus(void);
 int fn_802CF834(void);
 void fn_802C2AA8(int mode);
 void fn_802C2B18(void);
 void fn_802D3E9C(int a);
-void fn_802DB03C(const char* msg);  // shows a message on the ROM-font screen
+void DisplayMessageCentered(const char* msg);  // shows a message on the ROM-font screen
 extern u8 lbl_8055FFB4;
 }
 
@@ -132,7 +132,7 @@ void HandleResetSequence(void) {
         }
         fn_80129AFC();
         fn_802E6264();
-        fn_802E7FD0();
+        UpdateRemoteControllerStatus();
         OSDisableInterrupts();
         int idle = fn_802CF834() == 0;
         OSEnableInterrupts();
@@ -142,7 +142,7 @@ void HandleResetSequence(void) {
             fn_802C2AA8(2);
         }
         fn_802D3E9C(0);
-        fn_802DB03C(lbl_8034C80C[state]);
+        DisplayMessageCentered(lbl_8034C80C[state]);
         OSEnableInterrupts();
     }
     OSDisableInterrupts();

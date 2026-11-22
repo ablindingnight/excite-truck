@@ -69,29 +69,29 @@ ShadowCaster* lbl_804B4F10[64];
 extern "C" {
 
 void fn_80297998(void);
-void fn_80297A30(void);
-void fn_80297A84(void);
-void fn_80297AFC(void);
-void fn_802979A4(void);
+void InitializeStaticShadows(void);
+void UnloadModelInstances(void);
+void UpdateShadowAlpha(void);
+void DrawShadowVolumes(void);
 void fn_80297A08(ShadowCaster* c);
 void fn_80297C3C(void* model, const ValMatrix* mtx, u32 color, f32 alpha, f32 radius);
 
 void fn_802978B8(void*) {
     fn_80297998();
-    fn_80297A30();
+    InitializeStaticShadows();
     lbl_8055F7B0 = 0x50000000;
 }
 
 void fn_802978E4(void) {
-    fn_80297A84();
+    UnloadModelInstances();
     lbl_8055F7A4 = 0;
 }
 
 void fn_8029790C(int) {
     if (fn_802C9C8C(lbl_8055F7B0)) {
         fn_802C7ADC((fn_801E87A8()->flags >> 1) & 1);
-        fn_80297AFC();
-        fn_802979A4();
+        UpdateShadowAlpha();
+        DrawShadowVolumes();
         fn_802C9CE0();
     } else if (!lbl_8055F7B4) {
         lbl_8055F7B4 = 1;
@@ -109,11 +109,11 @@ void fn_8029798C(void* model, const ValMatrix* mtx, u32 color, f32 alpha, f32 ra
     fn_80297C3C(model, mtx, color, alpha, radius);
 }
 
-void fn_80297990(u32 color) { lbl_8055F7B0 = color; }
+void SetShadowColor(u32 color) { lbl_8055F7B0 = color; }
 
 void fn_80297998(void) { lbl_8055F7A4 = 0; }
 
-void fn_802979A4(void) {
+void DrawShadowVolumes(void) {
     for (int i = 0; i < lbl_8055F7A4; i++) {
         lbl_804B4F10[i]->Draw();
     }
@@ -126,12 +126,12 @@ void fn_80297A08(ShadowCaster* c) {
     }
 }
 
-void fn_80297A30(void) {
+void InitializeStaticShadows(void) {
     lbl_8055F7A8 = new ("static shadows") StaticShadow[128];
     lbl_8055F7AC = 0;
 }
 
-void fn_80297A84(void) {
+void UnloadModelInstances(void) {
     for (int i = 0; i < lbl_8055F7AC; i++) {
         mrModelUnload(lbl_8055F7A8[i].inst);
     }
@@ -140,7 +140,7 @@ void fn_80297A84(void) {
     lbl_8055F7AC = 0;
 }
 
-void fn_80297AFC(void) {
+void UpdateShadowAlpha(void) {
     f32 range;
     f32 zero;
     f32 one;

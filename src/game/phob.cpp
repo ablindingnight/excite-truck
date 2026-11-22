@@ -46,7 +46,7 @@ void fn_80265D84(void);
 void ProcessGreenFlagActivation(void);
 void fn_8026B6E4(void);
 void fn_801CEDDC(void);
-void fn_801D2214(void);
+void ReplayHeldEffects(void);
 void UpdateMusicState(void);
 void fn_801DEFE0(void);
 void fn_801EA1F0(void);
@@ -111,7 +111,7 @@ void fn_801C4AD0(void);
 void LoadGoalLineSound(void);
 void InitializeSoundEffects(void);
 void fn_801C1B9C(void);
-void fn_801D21C0(void);
+void LoadTrackObjectResources(void);
 void fn_801D32D0(void);
 void LoadMorphAndRegionData(void);
 void InitializeRumbleSound(void);
@@ -512,7 +512,7 @@ void fn_80177F40(void) {
     ProcessGreenFlagActivation();
     fn_8026B6E4();
     fn_801CEDDC();
-    fn_801D2214();
+    ReplayHeldEffects();
     UpdateMusicState();
     fn_801DEFE0();
     if (paused) {
@@ -968,7 +968,7 @@ void InitializeRacePhysics(s32 stream) {
     LoadGoalLineSound();
     InitializeSoundEffects();
     fn_801C1B9C();
-    fn_801D21C0();
+    LoadTrackObjectResources();
     fn_801D32D0();
     LoadMorphAndRegionData();
     InitializeRumbleSound();

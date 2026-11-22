@@ -66,7 +66,7 @@ void fn_801769EC(void);
 void fn_80176734(void);
 void StartRecordingOnTick(void);
 void fn_80206454(void);
-void fn_80206444(void);
+void SetPrimaryOnlyFlag(void);
 void fn_801E7E48(void);
 void fn_802C8530(void);
 void fn_802C855C(void);
@@ -493,7 +493,7 @@ void fn_80008F98(void) {
             if (!p) {
                 fn_80206454();
             } else {
-                fn_80206444();
+                SetPrimaryOnlyFlag();
             }
         }
         fn_801E7E48();
@@ -724,7 +724,7 @@ void fn_80009534(void) {
             if (!key) {
                 fn_80206454();
             } else {
-                fn_80206444();
+                SetPrimaryOnlyFlag();
             }
         }
         q = fn_802ECC10();
@@ -905,7 +905,7 @@ void fn_80009534(void) {
         SetupCameraProjection(1.0f, 1000.0f, 1.4398966f);
         if (exiting) {
             DrawFade2(frames / 59.0f);
-            fn_80206444();
+            SetPrimaryOnlyFlag();
         }
         fn_802C9A70(0);
         now = fn_802E2C20();
@@ -938,7 +938,7 @@ void fn_80009534(void) {
         fn_80129AFC();
         fn_802C2B48();
     }
-    fn_80206444();
+    SetPrimaryOnlyFlag();
     fn_801795B0();
     fn_801E86E8(player, 0);
     fn_8026DDD8(savedCam);

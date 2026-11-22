@@ -67,7 +67,7 @@ int fn_802B5070(const TGAHeader* hdr, s32 count) {
     return ok;
 }
 
-int fn_802B50E8(const char* name, u32* pixels, s32 count) {
+int LoadTgaImageData(const char* name, u32* pixels, s32 count) {
     int ok = 0;
     s32 fd = LoadFileFromSystem(name);
     if (fd != -1) {
@@ -93,7 +93,7 @@ int fn_802B50E8(const char* name, u32* pixels, s32 count) {
     return ok;
 }
 
-SimpleTGA* fn_802B51E4(s32 width, s32 height) {
+SimpleTGA* CreateSimpleTGAImage(s32 width, s32 height) {
     SimpleTGA* img = (SimpleTGA*)fn_801284E8("SimpleTGA", width * height * 4 + sizeof(SimpleTGA));
     img->width = width;
     img->height = height;
@@ -101,13 +101,13 @@ SimpleTGA* fn_802B51E4(s32 width, s32 height) {
     return img;
 }
 
-SimpleTGA* fn_802B5240(const char* name) {
+SimpleTGA* LoadTextureImage(const char* name) {
     SimpleTGA* img = 0;
     s32 width;
     s32 height;
     if (fn_802B4FD0(name, &width, &height)) {
-        img = fn_802B51E4(width, height);
-        fn_802B50E8(name, img->pixels, img->width * img->height);
+        img = CreateSimpleTGAImage(width, height);
+        LoadTgaImageData(name, img->pixels, img->width * img->height);
     }
     return img;
 }

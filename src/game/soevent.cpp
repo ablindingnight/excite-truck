@@ -238,25 +238,25 @@ extern CarBody* lbl_804348E8[];
 
 extern "C" {
 
-void fn_801D2AD4(const char* file);
-void fn_801D2B94(void);
-void fn_801D2C04(void);
-SoEvent* fn_801D2C20(int id);
-void fn_801D2C70(const SoEffects* s, const SoVec* pos, CarBody* car, int id);
-void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass);
+void ProcessSoEventEntries(const char* file);
+void UnloadSpawnedModels(void);
+void SortEventList(void);
+SoEvent* CreateEventInstance(int id);
+void PlayHitEffects(const SoEffects* s, const SoVec* pos, CarBody* car, int id);
+void SpawnEventChunks(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass);
 
-void fn_801D21C0(void) {
+void LoadTrackObjectResources(void) {
     lbl_8055E930 = 0;
-    fn_801D2AD4("race.res/sobj.val");
-    fn_801D2AD4("trk_sobj.val");
-    fn_801D2AD4("trackwob.val");
-    fn_801D2C04();
+    ProcessSoEventEntries("race.res/sobj.val");
+    ProcessSoEventEntries("trk_sobj.val");
+    ProcessSoEventEntries("trackwob.val");
+    SortEventList();
 }
 
-void fn_801D2210(void) { fn_801D2B94(); }
+void fn_801D2210(void) { UnloadSpawnedModels(); }
 
 // Replays the held effects at their points on each car.
-void fn_801D2214(void) {
+void ReplayHeldEffects(void) {
     int n = fn_801B2F24();
     f32 now = lbl_8055E3C8;
     HitMsg m;
@@ -283,14 +283,14 @@ void fn_801D2214(void) {
 // A car hit scripted object 'obj' at 'pos'.
 void fn_801D2414(SObj* obj, const SoVec* pos, CarBody* car) {
     if (IsCar(car)) {
-        SoEvent* e = fn_801D2C20(obj->id);
+        SoEvent* e = CreateEventInstance(obj->id);
         if (e) {
             f32 speed = PSVECMag((const Vec*)&car->vel);
             if (e->effect.enabled && speed > e->effect.minSpeed) {
-                fn_801D2C70(&e->effect, pos, car, obj->id);
+                PlayHitEffects(&e->effect, pos, car, obj->id);
             }
             if (e->spawn.enabled && speed > e->spawn.minSpeed) {
-                fn_801D2E38(&e->spawn, obj, pos, (SoVec*)&car->vel, car->mass);
+                SpawnEventChunks(&e->spawn, obj, pos, (SoVec*)&car->vel, car->mass);
                 fn_801A4868(obj, 0);
             }
         } else if (obj->id > 0) {
@@ -299,7 +299,7 @@ void fn_801D2414(SObj* obj, const SoVec* pos, CarBody* car) {
     }
 }
 
-int fn_801D2550(SoTrigger* s, ValueNodeV* t) {
+int SetTriggerMinSpeed(SoTrigger* s, ValueNodeV* t) {
     if (t) {
         s->enabled = 1;
         s->minSpeed = t->GetFloat("min_speed", 0.0f);
@@ -309,8 +309,8 @@ int fn_801D2550(SoTrigger* s, ValueNodeV* t) {
     return s->enabled;
 }
 
-void fn_801D25BC(SoEffects* s, ValueNodeV* t) {
-    if (fn_801D2550(s, t)) {
+void ParseEffectParameters(SoEffects* s, ValueNodeV* t) {
+    if (SetTriggerMinSpeed(s, t)) {
         s->effects[s->count = 0].id = -1;
         for (s->count++; s->count < 4; s->count++) {
             char key[0x20];
@@ -325,8 +325,8 @@ void fn_801D25BC(SoEffects* s, ValueNodeV* t) {
     }
 }
 
-void fn_801D26C8(SoSpawn* s, ValueNodeV* t) {
-    if (fn_801D2550(s, t)) {
+void ParseSpawnConfig(SoSpawn* s, ValueNodeV* t) {
+    if (SetTriggerMinSpeed(s, t)) {
         if (t->Has("phob_config")) {
             fn_801D3610(&s->config, t->GetValue("phob_config"));
         } else {
@@ -370,28 +370,28 @@ void fn_801D26C8(SoSpawn* s, ValueNodeV* t) {
     }
 }
 
-void fn_801D2A24(ValueNodeV* t) {
+void ProcessEventElement(ValueNodeV* t) {
     SoEvent* e = &lbl_80438958[lbl_8055E930];
     e->id = t->GetIntValue("id");
-    fn_801D25BC(&e->effect, t->FindChild("effect"));
-    fn_801D26C8(&e->spawn, t->FindChild("spawn"));
+    ParseEffectParameters(&e->effect, t->FindChild("effect"));
+    ParseSpawnConfig(&e->spawn, t->FindChild("spawn"));
     lbl_8055E930++;
 }
 
-void fn_801D2AD4(const char* file) {
+void ProcessSoEventEntries(const char* file) {
     SoValueTable* table = (SoValueTable*)fn_80131810(file);
     if (table) {
         for (int i = 0; table->GetChild(i); i++) {
             ValueNodeV* t = table->GetChild(i);
             if (strncmp(t->GetName(), "soevent", 7) == 0) {
-                fn_801D2A24(t);
+                ProcessEventElement(t);
             }
         }
         fn_80131818((ValueTable*)table);
     }
 }
 
-void fn_801D2B94(void) {
+void UnloadSpawnedModels(void) {
     for (int i = 0; i < lbl_8055E930; i++) {
         if (lbl_80438958[i].spawn.model != -1) {
             mrModelUnload(lbl_80438958[i].spawn.model);
@@ -399,19 +399,19 @@ void fn_801D2B94(void) {
     }
 }
 
-int fn_801D2BF4(const void* a, const void* b) { return ((const SoEvent*)a)->id - ((const SoEvent*)b)->id; }
+int CompareSoEventIds(const void* a, const void* b) { return ((const SoEvent*)a)->id - ((const SoEvent*)b)->id; }
 
-void fn_801D2C04(void) { qsort(lbl_80438958, lbl_8055E930, sizeof(SoEvent), fn_801D2BF4); }
+void SortEventList(void) { qsort(lbl_80438958, lbl_8055E930, sizeof(SoEvent), CompareSoEventIds); }
 
-SoEvent* fn_801D2C20(int id) {
+SoEvent* CreateEventInstance(int id) {
     if (id <= 0) {
         return 0;
     }
-    return (SoEvent*)fn_800241DC(&id, lbl_80438958, lbl_8055E930, sizeof(SoEvent), fn_801D2BF4);
+    return (SoEvent*)fn_800241DC(&id, lbl_80438958, lbl_8055E930, sizeof(SoEvent), CompareSoEventIds);
 }
 
 // Plays the event's hit effects; the ones with a duration are held on the car.
-void fn_801D2C70(const SoEffects* s, const SoVec* pos, CarBody* car, int id) {
+void PlayHitEffects(const SoEffects* s, const SoVec* pos, CarBody* car, int id) {
     HitMsg m;
     m.pos = *pos;
     m.vel = *(const SoVec*)&car->vel;
@@ -439,7 +439,7 @@ void fn_801D2C70(const SoEffects* s, const SoVec* pos, CarBody* car, int id) {
 }
 
 // Spawns the event's chunks at the object and throws them.
-void fn_801D2E38(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass) {
+void SpawnEventChunks(SoSpawn* s, SObj* obj, const SoVec* pos, const SoVec* vel, f32 mass) {
     int i = 0;
     SoXform xf(obj->xf.rot);
     SoVec v = *vel;

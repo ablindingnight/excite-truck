@@ -61,7 +61,7 @@ void fn_80217874(Window* w, u16 key);
 void fn_80211F64(void);
 void fn_80129AFC(void);
 void fn_80218370(Window* w);
-void fn_802E97B4(void);
+void HandleMemcardAsyncError(void);
 void fn_802C8530(void);
 void fn_80216244(void);
 void fn_802160AC(void);
@@ -295,7 +295,7 @@ void fn_8021662C(void) {
         if (!lbl_8055EF70) {
             fn_802166B8();
         }
-        fn_802E97B4();
+        HandleMemcardAsyncError();
     }
 }
 

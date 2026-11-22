@@ -236,9 +236,9 @@ struct FileReader : Mp3Reader {
 
 extern "C" {
 
-Mp3Reader* fn_802E9A3C(u8* data, int size) { return new MemReader(data, size); }
+Mp3Reader* CreateMemoryReader(u8* data, int size) { return new MemReader(data, size); }
 
-Mp3Reader* fn_802E9A6C(const char* path) {
+Mp3Reader* LoadMp3File(const char* path) {
     FileReader* r = new FileReader(path);
     if (r->fp) {
         return r;
@@ -258,7 +258,7 @@ FileReader::~FileReader(void) {
 
 extern "C" {
 
-void fn_802E9BCC(Mp3Reader* r) { delete r; }
+void DeleteMp3Reader(Mp3Reader* r) { delete r; }
 
 volatile s32 lbl_8055D25C = -1;  // decoded sample rate
 volatile s32 lbl_8055D260 = -1;  // rate the voices play at
@@ -269,7 +269,7 @@ f32 lbl_8055D270 = 1.0f;
 
 const char* lbl_8055D274 = "EXCITE TRUCK";
 
-const char* fn_802E9BEC(int err) {
+const char* GetErrorString(int err) {
     switch (err) {
     case 0:
         return "NO_ERR";
@@ -293,7 +293,7 @@ const char* fn_802E9BEC(int err) {
     return "???";
 }
 
-void fn_802E9C68(int drive) {
+void ReportSdCardInsertion(int drive) {
     OSReport(" mp3: SD card inserted (%c)\n", drive);
     lbl_80560061 = 1;
     lbl_80560068.Raise();
@@ -305,7 +305,7 @@ void fn_802E9CAC(int drive) {
     lbl_80560068.Raise();
 }
 
-void fn_802E9CF0(void) {
+void InitializeDriveCache(void) {
     DriveCache* c = &lbl_805076C4;
     c->buf = lbl_805076D8;
     c->buf2 = lbl_80507818;
@@ -316,7 +316,7 @@ void fn_802E9CF0(void) {
     if (VFInit(0x20000)) {
         fn_802E317C("FAInit fails");
     }
-    if (VFSetMediaCallback(0, fn_802E9C68, fn_802E9CAC)) {
+    if (VFSetMediaCallback(0, ReportSdCardInsertion, fn_802E9CAC)) {
         fn_802E317C("FARegistCB fails");
     }
     if (VFAttachDrive(0, 0, 0, &lbl_805076B8)) {
@@ -325,7 +325,7 @@ void fn_802E9CF0(void) {
     lbl_80560061 = (lbl_805076B8.flags >> 4) & 1;
 }
 
-void fn_802E9DDC(void) {
+void HandleDriveRemovalErrors(void) {
     if (VFUnmountDrive(lbl_805076B8.letter, 1)) {
         fn_802E30C8("FAUnmount fails");
     }
@@ -358,7 +358,7 @@ static inline f32 Ramp(f32 x, f32 a, f32 len) {
 }
 
 
-void fn_802E9EB8(void) {
+void HandleAudioSync(void) {
     static u8 channelDrift;
     if (channelDrift) {
         fn_802E30C8("mp3: trying to restart after channel drift");
@@ -409,7 +409,7 @@ void fn_802E9EB8(void) {
     }
 }
 
-int fn_802EA5D4(const char* dir, int depth) {
+int LoadMp3TrackList(const char* dir, int depth) {
     char pat[0x100];
     char sub[0x200];
     FindData fd;
@@ -432,7 +432,7 @@ int fn_802EA5D4(const char* dir, int depth) {
                     if (*name && strcmp(name, ".") && strcmp(name, "..")) {
                         if (strlen(shortName) + strlen(dir) + 1 < 0x200) {
                             fn_801345D8(sub, 0x200, "%s/%s", dir, shortName);
-                            fn_802EA5D4(sub, depth - 1);
+                            LoadMp3TrackList(sub, depth - 1);
                         } else {
                             fn_802E30C8("mp3: sub path would be too long");
                         }
@@ -461,20 +461,20 @@ int fn_802EA5D4(const char* dir, int depth) {
 void fn_802EA7E0(void) {
     lbl_8056007C = 0;
     if (lbl_80560061) {
-        fn_802EA5D4(lbl_8055D274, 0);
+        LoadMp3TrackList(lbl_8055D274, 0);
         if (lbl_8056007C == 0) {
-            fn_802EA5D4("", 8);
+            LoadMp3TrackList("", 8);
         }
     }
 }
 
-Mp3Reader* fn_802EA834(int idx, s32* size) {
+Mp3Reader* LoadMp3Track(int idx, s32* size) {
     int k;
     Mp3Reader* r = 0;
     if (idx <= -2) {
         k = -2 - idx;
         if (k >= 0 && k < 3 && lbl_805076A0[k].data) {
-            r = fn_802E9A3C((u8*)lbl_805076A0[k].data, lbl_805076A0[k].size);
+            r = CreateMemoryReader((u8*)lbl_805076A0[k].data, lbl_805076A0[k].size);
         }
         if (r) {
             strncpy(lbl_80507640.title, "", 0x1F);
@@ -485,7 +485,7 @@ Mp3Reader* fn_802EA834(int idx, s32* size) {
         char* file = lbl_80508818[idx].file;
         fn_801345D8(path, 0x40A, "%s/%s", lbl_80508818[idx].dir, file);
         fn_802E30C8("+OpenSd(%s)...", path);
-        r = fn_802E9A6C(path);
+        r = LoadMp3File(path);
         fn_802E30C8("-OpenSD(%s): %p", path, r);
         if (r) {
             fn_802E30C8("mp3: file %s is %d bytes", path, r->Size());
@@ -517,7 +517,7 @@ void fn_802EAA08(void) {
 static inline bool ChannelsOk(const MP3Info* info) { return info->channels == 1 || info->channels == 2; }
 static inline bool PcmOk(const MP3Info* info) { return info->pcmBytes != 0 && (u32)info->pcmBytes <= 0x1200; }
 
-int fn_802EAA58(MP3Info* info, int strict) {
+int ValidateMp3Format(MP3Info* info, int strict) {
     if (strict) {
         switch (info->sampleRate) {
         case 11025:
@@ -575,7 +575,7 @@ void* fn_802EAB28(void* arg) {
                 lbl_80560098 = 0;
             }
             if (r) {
-                fn_802E9BCC(r);
+                DeleteMp3Reader(r);
                 r = 0;
             }
             fn_802EA7E0();
@@ -585,7 +585,7 @@ void* fn_802EAB28(void* arg) {
         if (!r && lbl_80560078 != -1 && lbl_80560078 < lbl_8056007C) {
             pos = 0;
             size = 0;
-            r = fn_802EA834(lbl_80560078, &size);
+            r = LoadMp3Track(lbl_80560078, &size);
             errs = 0;
             if (r && r->Seek(r->Size() - 0x80) && r->Read(lbl_805587E0, 0x80) &&
                 strncmp((char*)lbl_805587E0, "TAG", 3) == 0) {
@@ -737,7 +737,7 @@ void* fn_802EAB28(void* arg) {
                         fn_802E30C8("frameSize = %d", info.frameBytes);
                         fn_802E30C8("pcmSize = %d", info.pcmBytes);
                         fn_802E30C8("sizeof pcmSize = %d", sizeof(info.pcmBytes));
-                        if (!fn_802EAA58(&info, errs > 0)) {
+                        if (!ValidateMp3Format(&info, errs > 0)) {
                             MP3_Delete(lbl_80560098);
                             errs++;
                             lbl_80560098 = 0;
@@ -810,7 +810,7 @@ void* fn_802EAB28(void* arg) {
                             off += used;
                         } else {
                             errs++;
-                            fn_802E30C8("mp3: TMCCMP3Decode returns %d (%s) c=%d", rc, fn_802E9BEC(rc), used);
+                            fn_802E30C8("mp3: TMCCMP3Decode returns %d (%s) c=%d", rc, GetErrorString(rc), used);
                             if (!used || errs > 30) {
                                 done = 1;
                                 break;
@@ -847,7 +847,7 @@ void* fn_802EAB28(void* arg) {
                     lbl_80560098 = 0;
                 }
                 if (r) {
-                    fn_802E9BCC(r);
+                    DeleteMp3Reader(r);
                     fn_802E30C8("mp3: did Close");
                     r = 0;
                 }
@@ -861,7 +861,7 @@ void* fn_802EAB28(void* arg) {
         OSUnlockMutex((OSMutex*)lbl_805584A0);
     }
     if (r) {
-        fn_802E9BCC(r);
+        DeleteMp3Reader(r);
     }
     lbl_80560063 = 1;
     return 0;
@@ -938,7 +938,7 @@ int fn_802EB7D4(void* dst, int n, int ch) {
     return n;
 }
 
-void fn_802EBD40(void) {
+void WaitForMp3Thread(void) {
     lbl_80560062 = 0;
     fn_802E30C8("mp3: waiting for thread to end");
     int t = 0;
@@ -955,12 +955,12 @@ void fn_802EBD40(void) {
 
 int fn_802EBE00(int ev) {
     if (ev == 1) {
-        fn_802EBD40();
+        WaitForMp3Thread();
     }
     return 0;
 }
 
-void fn_802EBE2C(void) {
+void InitializeMp3Audio(void) {
     lbl_8055D260 = -1;
     lbl_8055D264 = 44100;
     lbl_80560078 = -1;
@@ -984,7 +984,7 @@ void fn_802EBE2C(void) {
     }
     lbl_805600D0 = 0;
     OSInitMutex((OSMutex*)lbl_805584A0);
-    fn_802E9CF0();
+    InitializeDriveCache();
     fn_802E3DCC();
     lbl_80560062 = 1;
     lbl_80560063 = 0;
@@ -993,7 +993,7 @@ void fn_802EBE2C(void) {
     }
     fn_802E2E0C(fn_802EBE00, "mp3");
     OSResumeThread((OSThread*)lbl_805584B8);
-    RegisterBackgroundTask(fn_802E9EB8, "mp3");
+    RegisterBackgroundTask(HandleAudioSync, "mp3");
 }
 
 void fn_802EC038(void) {
@@ -1006,9 +1006,9 @@ void fn_802EC038(void) {
         fn_802E5FE4(lbl_80560088[i]);
         lbl_80560088[i] = 0;
     }
-    RemoveBackgroundFunction(fn_802E9EB8);
-    fn_802EBD40();
-    fn_802E9DDC();
+    RemoveBackgroundFunction(HandleAudioSync);
+    WaitForMp3Thread();
+    HandleDriveRemovalErrors();
     delete[] lbl_8056009C;
     lbl_8056009C = 0;
     delete[] lbl_805600A0;
@@ -1065,7 +1065,7 @@ void fn_802EC1E4(void) {
     }
 }
 
-void fn_802EC294(int slot, const char* name) {
+void LoadMp3Resource(int slot, const char* name) {
     Res* res = &lbl_805076A0[slot];
     u32 ver = 0;
     u32 size = 0;

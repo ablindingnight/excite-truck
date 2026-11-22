@@ -37,7 +37,7 @@ void fn_802E317C(const char* fmt, ...);
 int fn_802E4A10(void);
 void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
-int fn_802E8504(int ch);
+int GetControllerConnectionStatus(int ch);
 void __construct_array(void* p, void* ctor, void* dtor, u32 size, u32 n);
 }
 
@@ -127,7 +127,7 @@ extern "C" {
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
 VU* FilterAvailableCars(int kind);
-const char* fn_802E85B8(s32 slot);
+const char* GetControllerSocketName(s32 slot);
 }
 
 
@@ -322,7 +322,7 @@ inline void CarSel::SetSlot(s32 s) {
     if (*slot < 0) {
         SafeStrCopy(name, "", 0x20);
     } else {
-        SafeStrCopy(name, fn_802E85B8(*slot), 0x20);
+        SafeStrCopy(name, GetControllerSocketName(*slot), 0x20);
     }
     Refresh();
 }
@@ -672,7 +672,7 @@ void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
 }  // extern "C"
 
 extern "C" {
-const char* fn_802E85B8(s32 slot);
+const char* GetControllerSocketName(s32 slot);
 
 void AddCarSelectionItem(CarSel* p, CarSelItem* item) {
     int n = p->count;
@@ -695,7 +695,7 @@ CarSel::CarSel(s32* slot, u8* car) {
     if (*this->slot < 0) {
         SafeStrCopy(this->name, "", 0x20);
     } else {
-        const char* nm = fn_802E85B8(*this->slot);
+        const char* nm = GetControllerSocketName(*this->slot);
         SafeStrCopy(this->name, nm, 0x20);
     }
     this->Refresh();
@@ -764,7 +764,7 @@ void fn_802411D0(int id, u32* car, u32* color, s32* slot) { GetPlayerInfoByIndex
 
 int fn_802411D4(void) {
     int r = 0;
-    if (fn_802E8504(0) && fn_802E8504(1)) {
+    if (GetControllerConnectionStatus(0) && GetControllerConnectionStatus(1)) {
         r = 1;
     }
     return r;
@@ -1031,7 +1031,7 @@ extern "C" {
 void JoinLeaveWidget::Update(void) {
     if (++lbl_8055F1F8 % 10 == 0) {
         for (u32 i = 0; i < 2; i++) {
-            if (this->groups[i].state > 1 && !fn_802E8504(*this->groups[i].sel->slot)) {
+            if (this->groups[i].state > 1 && !GetControllerConnectionStatus(*this->groups[i].sel->slot)) {
                 FocusGroup* g = &this->groups[i];
                 g->sel->SetSlot(-1);
                 g->state = 1;

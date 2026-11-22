@@ -47,10 +47,10 @@ int fn_8021521C(const char* head, const char* body, int a);
 void fn_80236914(int which, f32* out, f32 t);
 void ValidatePlayerName(int slot);
 void fn_8023D1C0(void);
-void fn_8023C958(void);
-void fn_8023C94C(void);
+void LoadDisplayLayout(void);
+void LoadAudioLayout(void);
 void fn_8023D4B8(int);
-void fn_8023C3D4(void);
+void CreateAdjustMenu(void);
 void fn_80278A24(void);
 void fn_802449A0(void);
 void fn_8024C070(void);
@@ -522,20 +522,20 @@ void fn_80239AC0(void) {
             fn_8023D1C0();
             break;
         case 4:
-            fn_8023C958();
+            LoadDisplayLayout();
             break;
         case 6:
             IdentClearSlot();
             done = 1;
             break;
         case 5:
-            fn_8023C94C();
+            LoadAudioLayout();
             break;
         case 3:
             fn_8023D4B8(fn_802E4A10());
             break;
         case 8:
-            fn_8023C3D4();
+            CreateAdjustMenu();
             break;
         case 16:
             fn_80278A24();

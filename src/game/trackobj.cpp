@@ -432,7 +432,7 @@ void fn_802C7AD4(void);
 PVec* fn_802C9A40(void);
 OFrame* fn_802C86DC(void);
 f32 fn_802C88E8(const PVec* p);
-void* fn_801B5D30(SolBuilder* b);
+void* BuildStaticCollisionTable(SolBuilder* b);
 void fn_801792F4(void*);
 SolFile* fn_801A4548(const char* name);
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
@@ -441,7 +441,7 @@ void fn_8029798C(const char* model, const OFrame* f, u32 mask, f32 extend, f32 c
 void fn_80297988(StaticObject* o);
 void fn_802981EC(const PlacedObj* o, f32 a);
 void fn_801F4DD4(const char* table, const PlacedObj* o);
-Sound3D* fn_802077A4(const char* name, int cls, const RVec3* vel, const PVec* pos);
+Sound3D* Create3DSound(const char* name, int cls, const RVec3* vel, const PVec* pos);
 }
 
 // A new solid object, tagged for the allocator.
@@ -1398,7 +1398,7 @@ OFrame* fn_801FA8E0(CollShape* s, const OFrame* f, s32 event) {
 
 void fn_801FA978(void) {
     fn_801F9BE8();
-    fn_801792F4(fn_801B5D30(lbl_8055EC74));
+    fn_801792F4(BuildStaticCollisionTable(lbl_8055EC74));
     lbl_8055EC3C = 0;
 }
 
@@ -1878,7 +1878,7 @@ inline EWSound::EWSound(const PlacedObj* o) : pos(o->frame.pos) {
     ValueNode* node = o->node;
     name = node->GetString(ObstacleSoundKey(), lbl_8055EC70->GetValue(ObstacleSoundKey()));
     vol = node->GetFloat(ObstacleVolumeKey(), lbl_8055EC70->GetFloat(ObstacleVolumeKey()));
-    snd = fn_802077A4(name, 8, &lbl_80488898, &pos);
+    snd = Create3DSound(name, 8, &lbl_80488898, &pos);
     if (snd) {
         snd->SetVolume(vol);
         snd->radius = ParseSoundRadius(node, snd->radius);

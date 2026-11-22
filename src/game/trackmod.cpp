@@ -390,7 +390,7 @@ void fn_802923C4(u32 color);
 void fn_802C9A1C(TVec* dir);
 void fn_8029231C(f32* dir);
 void fn_802C9950(u32 color);
-void fn_80297990(u32 color);
+void SetShadowColor(u32 color);
 void fn_802923EC(f32 v);
 void SetFogColor(u32 color);
 f32 fn_801E7E18(void);
@@ -789,9 +789,9 @@ inline void ShadowColorTMH::Swap(TObj* o) {
 
 inline void ShadowColorTMH::Apply(void) {
     if (set) {
-        fn_80297990(color);
+        SetShadowColor(color);
     } else {
-        fn_80297990(0x80000000);
+        SetShadowColor(0x80000000);
     }
 }
 

@@ -18,7 +18,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 s32 fn_802E2C20(void);                   // milliseconds
 s32 GetSoundChannelCount(void);                   // sound quality
 int fn_8026A344(int a);                  // local player
-const char* fn_80206570(int cls);        // sound class name
+const char* GetSoundClassName(int cls);        // sound class name
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -315,7 +315,7 @@ void SoundManager::SortClasses(void) {
             SortClass(&classes[c]);
             break;
         default:
-            fn_802E317C("%s/%d: Invalid soundclass! (%s)", "soundmgr.cpp", 613, fn_80206570(c));
+            fn_802E317C("%s/%d: Invalid soundclass! (%s)", "soundmgr.cpp", 613, GetSoundClassName(c));
             break;
         }
     }

@@ -266,38 +266,38 @@ ExplosionSet lbl_804B32B8;
 
 extern "C" {
 
-void fn_8028ABE8(void);
+void LoadTerrainChunkData(void);
 void fn_8028AD78(void);
-void fn_8028B3CC(void);
+void CreatePaintSplashEffect(void);
 void fn_8028B4CC(void);
-void fn_8028AB14(void);
+void UpdateExplosions(void);
 int fn_8028B93C(const void* ev);
-int fn_8028B500(const void* ev);
+int ProcessImpactEffects(const void* ev);
 int fn_8028BA44(const void* ev);
 int fn_8028BA9C(const void* ev);
 int fn_8028BB14(const void* ev);
 
-void fn_8028A664(void) {
+void InitializeSparkEffects(void) {
     lbl_8055F6F0 = new ("short sparks") SparkSys(0x80, 0.5f);
     lbl_8055F6F4 = new ("long sparks") SparkSys(0x60, 1.0f);
     lbl_8055F6F8 = new ("glass shards") ShardSys(0x60);
     lbl_8055F6FC = fn_802929D8(1, "debris", 0, 0);
     lbl_8055F700 = FXSequence::Load("expseq.val");
     lbl_804B32B8.count = 0;
-    fn_8028ABE8();
-    fn_8028B3CC();
+    LoadTerrainChunkData();
+    CreatePaintSplashEffect();
     RegisterEventHandler(fn_8028B93C, 0);
-    RegisterEventHandler(fn_8028B500, 1);
+    RegisterEventHandler(ProcessImpactEffects, 1);
     RegisterEventHandler(fn_8028BA44, 2);
     RegisterEventHandler(fn_8028BA9C, 7);
     RegisterEventHandler(fn_8028BB14, 8);
 }
 
-void fn_8028A784(void) {
+void UninstallEventHandlersAndFreeMemory(void) {
     EventUnInstallHandler(fn_8028BB14);
     EventUnInstallHandler(fn_8028BA9C);
     EventUnInstallHandler(fn_8028BA44);
-    EventUnInstallHandler(fn_8028B500);
+    EventUnInstallHandler(ProcessImpactEffects);
     EventUnInstallHandler(fn_8028B93C);
     fn_8028B4CC();
     fn_8028AD78();
@@ -327,7 +327,7 @@ extern "C" Chunks* __dt__6ChunksFv(Chunks* c, short del) {
 
 extern "C" {
 
-void fn_8028A89C(void) {
+void ResetAllSystems(void) {
     lbl_8055F6F0->Reset();
     lbl_8055F6F4->Reset();
     lbl_8055F6F8->Reset();
@@ -351,14 +351,14 @@ void fn_8028A92C(void) {
     }
 }
 
-void fn_8028A9BC(int) {
+void DrawSparkEffects(int) {
     lbl_8055F6F0->Draw();
     lbl_8055F6F4->Draw();
     lbl_8055F6F8->Draw();
-    fn_8028AB14();
+    UpdateExplosions();
 }
 
-void fn_8028A9F4(void) {
+void DrawAllSystems(void) {
     lbl_8055F6FC->Draw();
     for (int i = 0; i < 8; i++) {
         if (lbl_804B3238[i].sys) {
@@ -376,7 +376,7 @@ void fn_8028AA6C(const Vec* pos, FXSequence* seq, f32 scale) {
     }
 }
 
-void fn_8028AB14(void) {
+void UpdateExplosions(void) {
     f32 now = fn_801E7E18();
     Explosion* e = lbl_804B32B8.ex;
     for (int i = 0; i < lbl_804B32B8.count;) {
@@ -392,9 +392,9 @@ void fn_8028AB14(void) {
     }
 }
 
-void fn_8028ADF4(const SparkEntry* e, int n);
+void GenerateSkidEffects(const SparkEntry* e, int n);
 
-void fn_8028ABE8(void) {
+void LoadTerrainChunkData(void) {
     TerChunk* tc = lbl_804B3238;
     int n = 0;
     for (int i = 0; i < 8; i++, tc++) {
@@ -418,7 +418,7 @@ void fn_8028ABE8(void) {
             tc->sys = 0;
         }
     }
-    fn_80287B38(fn_8028ADF4);
+    fn_80287B38(GenerateSkidEffects);
 }
 
 void fn_8028AD78(void) {
@@ -431,7 +431,7 @@ void fn_8028AD78(void) {
     }
 }
 
-void fn_8028ADF4(const SparkEntry* e, int n) {
+void GenerateSkidEffects(const SparkEntry* e, int n) {
     const SparkWheel* w;
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
@@ -502,7 +502,7 @@ static inline int PaintOn(void) {
     return on;
 }
 
-void fn_8028B3CC(void) {
+void CreatePaintSplashEffect(void) {
     const char* tex = "splash.tex";
     if (PaintOn()) {
         PartParams e;
@@ -542,7 +542,7 @@ void fn_8028B4CC(void) {
 }
 
 
-int fn_8028B500(const void* evp) {
+int ProcessImpactEffects(const void* evp) {
     const ImpactEv* ev = (const ImpactEv*)evp;
     f32 mag = PSVECMag(&ev->v18);
     int n = MinI(MaxI((int)(0.002f * mag), 0), 0x60);

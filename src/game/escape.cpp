@@ -28,7 +28,7 @@ void fn_802C9904(void);
 int fn_800075A0(int);
 extern "C" {
 int fn_80137CFC(int player);
-int fn_802E8504(int pad);
+int GetControllerConnectionStatus(int pad);
 int fn_80137C74(void);
 void fn_80148070(GartElem* item, u32 color, gArtSet* set);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, u32 unk);
@@ -41,7 +41,7 @@ void ClearAudioHandle(void** p);
 f32 fn_80209028(void);
 int fn_80265D64(void);
 void fn_801769E0(void);
-void fn_80206444(void);
+void SetPrimaryOnlyFlag(void);
 void fn_80206454(void);
 void fn_802E30C8(const char* fmt, ...);
 void fn_801769EC(void);
@@ -186,7 +186,7 @@ static void fn_8000C964(void) {
 static int fn_8000CCB8(void) {
     int i;
     for (i = 0; i < fn_80137C74(); i++) {
-        if (fn_800075A0(i) && !fn_802E8504(fn_80137CFC(i))) {
+        if (fn_800075A0(i) && !GetControllerConnectionStatus(fn_80137CFC(i))) {
             return i;
         }
     }
@@ -273,7 +273,7 @@ void fn_8000D070(void) {
     if (!fn_80265D64()) {
         fn_801769E0();
     }
-    fn_80206444();
+    SetPrimaryOnlyFlag();
     lbl_8055D400 = 0;
     SetVolumeClamped(lbl_8055D410, 0.0f);
     fn_80230E90(1);

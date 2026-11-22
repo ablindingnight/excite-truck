@@ -192,7 +192,7 @@ ConfigRoot* fn_8000AC38(void);
 
 extern f32 lbl_8055E3C8;  // time
 
-extern "C" GameSound* fn_802076A0(const char* name, int a, int b, int c);
+extern "C" GameSound* CreateSoundDash(const char* name, int a, int b, int c);
 extern "C" GameSound* fn_80207848(const char* name, int a);
 
 static inline void Play(GameSound* s) {
@@ -925,13 +925,13 @@ RingResults::RingResults(void) {
 Arena::Arena(void) {
     dynos.t = fn_80131808("race.res/obstacle.val");
     art = fn_8023512C("mapgems.art");
-    sRingHit = fn_802076A0("ringhit.sfx", 1, 0, 0);
-    sCheerHit = fn_802076A0("cheerhit.sfx", 1, 0, 0);
-    sTally = fn_802076A0("rctally.sfx", 1, 0, 0);
-    sLongCheer = fn_802076A0("longcheer.sfx", 1, 0, 0);
-    sMissFlag = fn_802076A0("missflag.sfx", 1, 0, 0);
-    sLevelUp = fn_802076A0("levelup.sfx", 1, 0, 0);
-    sFail = fn_802076A0("rcfail.sfx", 1, 0, 0);
+    sRingHit = CreateSoundDash("ringhit.sfx", 1, 0, 0);
+    sCheerHit = CreateSoundDash("cheerhit.sfx", 1, 0, 0);
+    sTally = CreateSoundDash("rctally.sfx", 1, 0, 0);
+    sLongCheer = CreateSoundDash("longcheer.sfx", 1, 0, 0);
+    sMissFlag = CreateSoundDash("missflag.sfx", 1, 0, 0);
+    sLevelUp = CreateSoundDash("levelup.sfx", 1, 0, 0);
+    sFail = CreateSoundDash("rcfail.sfx", 1, 0, 0);
     f24 = -1;
     b48 = 0;
     b49 = 0;

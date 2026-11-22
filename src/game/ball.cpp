@@ -177,7 +177,7 @@ public:
     }
 };
 
-extern "C" BSound* fn_802077A4(const char* name, int prio, const RVec3* vel, const RVec3* pos);
+extern "C" BSound* Create3DSound(const char* name, int prio, const RVec3* vel, const RVec3* pos);
 
 struct RPacket;
 
@@ -358,9 +358,9 @@ void Ball::Init(BodyDesc* desc) {
     StoreBallData((IBallListener*)this, car, 0);
     startPos = mtx.pos;
     explPos = mtx.pos;
-    sndStart = fn_802077A4(BallStrings::StartSound(), 5, &vel, &startPos);
-    sndRoll = fn_802077A4(BallStrings::RollSound(), 8, &vel, &mtx.pos);
-    sndExpl = fn_802077A4(BallStrings::ExplodeSound(), 5, &vel, &explPos);
+    sndStart = Create3DSound(BallStrings::StartSound(), 5, &vel, &startPos);
+    sndRoll = Create3DSound(BallStrings::RollSound(), 8, &vel, &mtx.pos);
+    sndExpl = Create3DSound(BallStrings::ExplodeSound(), 5, &vel, &explPos);
 }
 
 Ball::~Ball(void) {

@@ -103,7 +103,7 @@ void fn_802A0D60(s16* h, V2* o, V2* a, V2* __restrict b, f32 size, f32 alpha, in
 }
 
 // Projects (a - b) onto dir.
-f32 fn_802A0F7C(const V2* dir, const V2* a, const V2* b) {
+f32 ProjectVectorOntoDirection(const V2* dir, const V2* a, const V2* b) {
     V2 d;
     d.x = a->x - b->x;
     d.y = a->y - b->y;
@@ -122,8 +122,8 @@ int fn_802A0FBC(void) {
 IdealPoint* fn_802A1040(IdealPoint* first, IdealPoint* n, SFPath* path) {
     int i = 0;
     do {
-        f32 d0 = fn_802A0F7C(&first->dir, &n->pos, &first->pos);
-        f32 d1 = fn_802A0F7C(&first->dir, &n->next->pos, &first->pos);
+        f32 d0 = ProjectVectorOntoDirection(&first->dir, &n->pos, &first->pos);
+        f32 d1 = ProjectVectorOntoDirection(&first->dir, &n->next->pos, &first->pos);
         if (d0 < 0.0f && d1 > 0.0f) {
             break;
         }
@@ -160,7 +160,7 @@ void fn_802A1120(V2* pos, V2* dir) {
     for (t = 0.0f; t < 1.0f; t += 0.025f) {
         pos->x = n->pos.x + t * (n->next->pos.x - n->pos.x);
         pos->y = n->pos.y + t * (n->next->pos.y - n->pos.y);
-        if (fn_802A0F7C(&path->nodes->dir, pos, &path->nodes->pos) >= 0.0f) {
+        if (ProjectVectorOntoDirection(&path->nodes->dir, pos, &path->nodes->pos) >= 0.0f) {
             break;
         }
     }

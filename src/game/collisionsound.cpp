@@ -85,7 +85,7 @@ void* __nwa__FUlPCc(unsigned long,const char*);
 void __dla__FPv(void*);
 void __dl__FPv(void*);
 void __destroy_arr(void*,void*,int,int);
-void* fn_802077A4(const char*,int,void*,void*);
+void* Create3DSound(const char*,int,void*,void*);
 void qsort(void*,unsigned long,unsigned long,int(*)(const void*,const void*));
 extern char lbl_80335D3C[],lbl_80335D80[];extern int lbl_80435C50[8];
 extern Manager* lbl_8055E6C0;
@@ -313,7 +313,7 @@ inline u32 NodeKeyFromInfoNew(const KeyInfo* row){int second=row->second;int fir
 
 void fn_801B4204(Manager* self){for(int i=0;i<43;i++){self->nodes[i].key=NodeKeyFromInfoNew(lbl_802F96CC+i);self->nodes[i].pool=self->pools+lbl_802F96CC[i].pool;self->nodes[i].left=0;self->nodes[i].right=0;}qsort(self->nodes,43,16,(int(*)(const void*,const void*))CompareNodeKeys);self->root=fn_801B447C(self,self->nodes,43);}
 
-void InitializeCollisionSounds(Manager* self){const char* name=lbl_802F9630[0].name;for(int i=0;i<16;i++){Entry* entry=self->entries+i;entry->sound=fn_802077A4(name,5,&entry->d,&entry->a);entry->key1=0;entry->key2=0;entry->time=lbl_80562650;}self->next=0;}
+void InitializeCollisionSounds(Manager* self){const char* name=lbl_802F9630[0].name;for(int i=0;i<16;i++){Entry* entry=self->entries+i;entry->sound=Create3DSound(name,5,&entry->d,&entry->a);entry->key1=0;entry->key2=0;entry->time=lbl_80562650;}self->next=0;}
 
 void ClearCollisionEntries(Manager* self){for(int i=0;i<16;i++){self->entries[i].key1=0;self->entries[i].key2=0;self->entries[i].time=lbl_80562650;}}
 

@@ -28,7 +28,7 @@ void fn_80131818(ValueTable* t);
 void fn_801331C4(int section, const char* name, f32* v);  // register a tunable
 s32 fn_80178CA4(void);
 void SetPauseState(int on);
-void fn_80206444(void);
+void SetPrimaryOnlyFlag(void);
 void fn_80206454(void);
 void fn_802C2C68(int a, int b);
 void fn_80176A00(int mode);
@@ -158,7 +158,7 @@ void HandleJumpCameraActivation(int player) {
                 }
             } else {
                 SetPauseState(1);
-                fn_80206444();
+                SetPrimaryOnlyFlag();
                 if (lbl_8055F4D0) {
                     lbl_8055F4D0->PlayLoop();
                 }

@@ -194,12 +194,12 @@ void* memset(void* dst, int c, size_t n);
 void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void*));
 double sqrt(double x);
 
-void fn_8028A664(void);
-void fn_8028A784(void);
-void fn_8028A89C(void);
+void InitializeSparkEffects(void);
+void UninstallEventHandlersAndFreeMemory(void);
+void ResetAllSystems(void);
 void fn_8028A92C(void);
-void fn_8028A9BC(int mode);
-void fn_8028A9F4(void);
+void DrawSparkEffects(int mode);
+void DrawAllSystems(void);
 void fn_8028CED8(void);
 void fn_8028CF18(void);
 void fn_8028CF50(void);
@@ -212,8 +212,8 @@ void ResetAllItems(void);
 void fn_8028E1A4(void);
 void fn_8028E1D0(void);
 void fn_8028E240(int mode);
-void fn_802888D8(void);
-void fn_80288988(void);
+void InitializeSmokeSystems(void);
+void CleanUpSmokeEffects(void);
 void fn_80288A1C(int mode);
 void fn_80288A20(void);
 void fn_80292114(void);
@@ -346,9 +346,9 @@ void fn_80287800(void* a) {
     InitializeEfxCars(a);
     fn_802880F4();
     LoadBirdFlocks();
-    fn_802888D8();
+    InitializeSmokeSystems();
     fn_802A1590();
-    fn_8028A664();
+    InitializeSparkEffects();
     fn_8028CED8();
     fn_80294970();
     InitializeFireSystems();
@@ -385,9 +385,9 @@ void ExecuteEffectFunctions(void) {
     ReleaseFireResources();
     fn_80294C68();
     fn_8028CF18();
-    fn_8028A784();
+    UninstallEventHandlersAndFreeMemory();
     fn_802A1660();
-    fn_80288988();
+    CleanUpSmokeEffects();
     fn_802A85C8();
     fn_802881D4();
     fn_802882A0();
@@ -397,7 +397,7 @@ void fn_80287914(void) {
     fn_802A86A4();
     ResetAllItems();
     ResetAllEffects();
-    fn_8028A89C();
+    ResetAllSystems();
     fn_8028CF50();
     fn_8029222C();
     fn_80294CC0();
@@ -469,7 +469,7 @@ void fn_80287A6C(int mode) {
         fn_801B8834();
         fn_802A1584();
         fn_8029C2D4();
-        fn_8028A9BC(mode);
+        DrawSparkEffects(mode);
         fn_8028E240(mode);
         fn_80288A1C(mode);
         fn_802A17FC(mode);
@@ -482,7 +482,7 @@ void fn_80287A6C(int mode) {
 
 void fn_80287AF0(int) {
     fn_80292864();
-    fn_8028A9F4();
+    DrawAllSystems();
 }
 
 s32 fn_80287B14(void) { return lbl_804B3150.count; }

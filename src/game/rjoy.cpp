@@ -109,7 +109,7 @@ extern "C" {
 
 int fn_802E77B8(s32 chan) { return 0; }
 
-const char* fn_802E77C0(s32 err) {
+const char* GetControllerErrorString(s32 err) {
     switch (err) {
     case 0:
         return "NONE";
@@ -151,7 +151,7 @@ f32 fn_802E78A4(f32 x) {
     return Lerp(v, (f32)__fabs(v) * v, 0.0f);
 }
 
-void fn_802E7920(s32 chanArg, s32 a) {
+void UpdateRumbleMotor(s32 chanArg, s32 a) {
     const s32 chan = chanArg;
     Remote* r = &lbl_80505978[chan];
     s32 now = fn_802E2C20();
@@ -183,7 +183,7 @@ void fn_802E7920(s32 chanArg, s32 a) {
     WPADControlMotor((s32)chan, (u32)cmd);
 }
 
-void* fn_802E7A14(u32 size) {
+void* AllocateWpadMemory(u32 size) {
     fn_801282EC(0x80);
     fn_801282F4();
     void* p = fn_801284E8("wpad", size);
@@ -203,7 +203,7 @@ int fn_802E7A70(void* p) {
     return 1;
 }
 
-int fn_802E7AF4(int phase, int mode) {
+int HandleWPADShutdown(int phase, int mode) {
     if (phase == 1) {
         fn_80128684();
         if (mode != 2) {
@@ -243,8 +243,8 @@ void fn_802E7C14(s32 chan, s32 result) {
 
 void fn_802E7C40(void) { lbl_80560008 = fn_802E9A24(); }
 
-void fn_802E7C64(void) {
-    WPADRegisterAllocator((WPADAllocFunc)fn_802E7A14, (WPADFreeFunc)fn_802E7A70);
+void InitializeWiiControllers(void) {
+    WPADRegisterAllocator((WPADAllocFunc)AllocateWpadMemory, (WPADFreeFunc)fn_802E7A70);
     PADInit();
     KPADInit();
     while (WPADGetStatus() != 3) {
@@ -252,12 +252,12 @@ void fn_802E7C64(void) {
     for (int i = 0; i < 4; i++) {
         lbl_80507268[i] = WPADSetConnectCallback((s32)i, (WPADConnectCallback)fn_802E7B6C);
     }
-    fn_802E2E0C(fn_802E7AF4, "Joy");
+    fn_802E2E0C(HandleWPADShutdown, "Joy");
     fn_802E7C40();
     lbl_80560009 = 1;
 }
 
-void fn_802E7D0C(void) {
+void ShutdownWpadControllers(void) {
     int i;
     for (i = 0; i < 4; i++) {
         WPADSetConnectCallback((s32)i, (WPADConnectCallback)(lbl_80507268[i]));
@@ -296,7 +296,7 @@ const f32 kMinAxis = -1.0f;
 
 }  // namespace
 
-void fn_802E7DDC(Remote* r, const KStatus* k) {
+void UpdateJoystickInput(Remote* r, const KStatus* k) {
     u32 hold = k->hold;
     r->isExt = r->info.lowBat != 0;
     r->a48 = 0x800F;
@@ -341,7 +341,7 @@ void fn_802E7DDC(Remote* r, const KStatus* k) {
 }
 
 s8 lbl_8055D230[8] = {6, 6, 6, 6};
-void fn_802E7FD0(void) {
+void UpdateRemoteControllerStatus(void) {
     s32 now = fn_802E2C20();
     if (lbl_80560010 < now && now - lbl_80560010 < 15) {
         return;
@@ -389,7 +389,7 @@ void fn_802E7FD0(void) {
         if (KPADRead((s32)chan, (KPADStatus*)r->kpad, (s32)1) >= 1 && probe == 0 && r->present) {
             int err = r->kpad[0].err;
             if (err != *last) {
-                fn_802E30C8("rjoy: #%d: %s -> %s", chan, fn_802E77C0(*last), fn_802E77C0(err));
+                fn_802E30C8("rjoy: #%d: %s -> %s", chan, GetControllerErrorString(*last), GetControllerErrorString(err));
                 *last = err;
             }
             if (err == 0) {
@@ -401,9 +401,9 @@ void fn_802E7FD0(void) {
                 }
                 r->sens = WPADGetRadioSensitivity(chan);
                 if (!fn_802ECC10()) {
-                    fn_802E7920(chan, 0x3091);
+                    UpdateRumbleMotor(chan, 0x3091);
                 }
-                fn_802E7DDC(r, r->kpad);
+                UpdateJoystickInput(r, r->kpad);
             }
         } else if (!r->present && r->connected) {
             r->connected = 0;
@@ -458,7 +458,7 @@ u8 fn_802E8364(RemoteOut* out, s32 chan) {
     return r->connected;
 }
 
-int fn_802E8504(s32 chan) { return lbl_80505978[chan].connected; }
+int GetControllerConnectionStatus(s32 chan) { return lbl_80505978[chan].connected; }
 
 void fn_802E8528(s32 chan, f32 strength, f32 b);
 
@@ -479,7 +479,7 @@ void fn_802E85AC(int, f32, f32) {}
 
 int fn_802E85B0(s32) { return 3; }
 
-const char* fn_802E85B8(s32 chan) {
+const char* GetControllerSocketName(s32 chan) {
     const char* names[4] = {"Controller Socket 1", "Controller Socket 2", "Controller Socket 3", "Controller Socket 4"};
     return names[chan];
 }

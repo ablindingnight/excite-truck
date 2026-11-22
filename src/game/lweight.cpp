@@ -30,7 +30,7 @@ struct WeightImage {
 };
 
 extern "C" {
-WeightImage* fn_802B51E4(int w, int h);
+WeightImage* CreateSimpleTGAImage(int w, int h);
 void fn_802B52B4(WeightImage* img);
 void save_simple_tga(const char* name, WeightImage* img);
 }
@@ -77,7 +77,7 @@ void fn_802BB958(short x, short z, const u8* weights, const u8* old) {
 }
 
 void LoadWeightImage(const char* name, int base) {
-    WeightImage* img = fn_802B51E4(512, 512);
+    WeightImage* img = CreateSimpleTGAImage(512, 512);
     if (img) {
         for (int x = 0; x < 512; x++) {
             for (int z = 0; z < 512; z++) {

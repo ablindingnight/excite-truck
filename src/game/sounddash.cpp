@@ -30,7 +30,7 @@ s32 lbl_8055EE28;  // selection
 
 extern "C" {
 
-void fn_8020BCE4(void) {
+void SaveSoundSampleData(void) {
     s32 fd = CreateFileFromName("sounds.txt");
     if (fd != -1) {
         int i;
@@ -48,7 +48,7 @@ void fn_8020BCE4(void) {
     }
 }
 
-int fn_8020BDB8(int key) {
+int HandleSoundControlInput(int key) {
     switch (key) {
     case 'm':
         lbl_8055EE24 = !lbl_8055EE24;
@@ -92,7 +92,7 @@ int fn_8020BDB8(int key) {
     case 'S':
         if (!lbl_8055EE24) {
             fn_802E30C8("writing sounds.txt...");
-            fn_8020BCE4();
+            SaveSoundSampleData();
             return 1;
         }
         break;
@@ -103,7 +103,7 @@ int fn_8020BDB8(int key) {
 // The target computes `i / 2` again for the row after the sample call.
 #pragma push
 #pragma opt_common_subs off
-void fn_8020BF58(void) {
+void DrawSoundDashMenu(void) {
     fn_8023895C();
     fn_80238A74(12, 12, "SOUND DASH", 0xFF2D2DC8);
     int i;

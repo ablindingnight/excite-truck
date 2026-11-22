@@ -35,7 +35,7 @@ ValueTable* fn_80131810(const char* name);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 const char* fn_80131234(const char* key);  // localize
-GameSound* fn_802076A0(const char* name, int flags, int car, int pan);
+GameSound* CreateSoundDash(const char* name, int flags, int car, int pan);
 f32 fn_80204CFC(const char* name);  // tuning value
 char* fn_8023139C(char* buf, int size, u32 value);  // format a score
 void fn_801CB6E4(u32 type, int car, long v);  // stop a rumble effect (awards.cpp)
@@ -1769,7 +1769,7 @@ inline RingTracker::RingTracker(StuntFactory* h, int c) : CountTracker(h, c, 2.0
     car2 = c;
     ok = !fn_80157278(c);
     if (ok) {
-        snd = fn_802076A0("ringhit.sfx", 1, c, 2);
+        snd = CreateSoundDash("ringhit.sfx", 1, c, 2);
     } else {
         snd = 0;
     }
@@ -1802,7 +1802,7 @@ inline SpinTracker::SpinTracker(StuntFactory* h, int c) : CountTracker(h, c, 999
 }
 
 inline CloseCallTracker::CloseCallTracker(StuntFactory* h, int c, CountSound* cs) : CountTracker(h, c, 2.5f, 0x41206) {
-    snd = fn_802076A0("missflag.sfx", 1, car, 0);
+    snd = CreateSoundDash("missflag.sfx", 1, car, 0);
     flags = 0;
 }
 
@@ -1821,12 +1821,12 @@ inline CountSound::CountSound(const char* a, const char* b, int car) {
     s1 = 0;
     s0 = 0;
     if (ok) {
-        s0 = fn_802076A0(a, 1, car, 0);
+        s0 = CreateSoundDash(a, 1, car, 0);
         if (s0) {
             s0->SetPitch(1.2f);
             s0->SetVolume(1.0f);
         }
-        s1 = fn_802076A0(b, 1, car, 0);
+        s1 = CreateSoundDash(b, 1, car, 0);
         if (s1) {
             s1->SetPitch(1.2f);
             s1->SetVolume(1.0f);

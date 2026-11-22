@@ -55,7 +55,7 @@ s32 lbl_8055ED94;            // failed grabs
 
 extern "C" {
 
-int fn_802062E8(void) {
+int InitializeSoundManager(void) {
     InitializeAudioMixer(lbl_8055ED84 == 0);
     fn_802E30C8("using sound mixer %s", GetMixerByIndex(fn_80208D70())->Name());
     lbl_8055ED80 = new ("SoundManager") SoundManager(GetMixerByIndex(fn_80208D70()));
@@ -80,7 +80,7 @@ void fn_802063D8(void) {
 
 int fn_80206430(void) { return lbl_8055ED80 != NULL; }
 
-void fn_80206444(void) { lbl_8055ED80->primaryOnly = 1; }
+void SetPrimaryOnlyFlag(void) { lbl_8055ED80->primaryOnly = 1; }
 
 void fn_80206454(void) { lbl_8055ED80->primaryOnly = 0; }
 
@@ -112,7 +112,7 @@ void fn_80206550(s32 n) { lbl_8055ED80->SetListenerCount(n); }
 
 void fn_8020655C(const Listener& l, int i) { lbl_8055ED80->SetListener(l, i); }
 
-const char* fn_80206570(int cls) {
+const char* GetSoundClassName(int cls) {
     const char* names[10] = {
         "SNDCLASS_UI",           "SNDCLASS_COUNTDOWN",  "SNDCLASS_ENGINE_2D", "SNDCLASS_ENGINE",
         "SNDCLASS_TIRESQUEAL",   "SNDCLASS_CRASH",      "SNDCLASS_ENGINE_START",
@@ -465,7 +465,7 @@ void SoundDash::Update(Listener* l, int n) { Sound2D::Update(l, n); }
 
 extern "C" {
 
-SoundDash* fn_802076A0(const char* name, int cls, s32 player, int on) {
+SoundDash* CreateSoundDash(const char* name, int cls, s32 player, int on) {
     SoundDash* s = new ("SoundDash") SoundDash(name, cls, player, on);
     if (s && !s->dev) {
         delete s;
@@ -474,7 +474,7 @@ SoundDash* fn_802076A0(const char* name, int cls, s32 player, int on) {
     return s;
 }
 
-Sound3D* fn_802077A4(const char* name, int cls, ValVec3* vel, ValVec3* pos) {
+Sound3D* Create3DSound(const char* name, int cls, ValVec3* vel, ValVec3* pos) {
     Sound3D* s = new ("Sound3D") Sound3D(name, cls, vel, pos);
     if (s && !s->dev) {
         delete s;
@@ -505,9 +505,9 @@ Sound2D* fn_802078CC(const char* name, int cls, void* mem, int) {
     return NULL;
 }
 
-void fn_80207924(GameSound* s) { s->~GameSound(); }
+void DestroyGameSound(GameSound* s) { s->~GameSound(); }
 
-void fn_80207938(const char* name) { fn_802E30C8("sound: %08d: grab failed (%s)", ++lbl_8055ED94, name); }
+void LogSoundGrabFailure(const char* name) { fn_802E30C8("sound: %08d: grab failed (%s)", ++lbl_8055ED94, name); }
 
 }  // extern "C"
 

@@ -196,17 +196,17 @@ static const int lbl_802FA978[8] = {0, 7, 3, 2, 5, 4, 6, 1};
 
 extern "C" {
 
-void fn_80288A74(const SmokeEntry* e, int n);
+void UpdateSmokeEffects(const SmokeEntry* e, int n);
 
-void fn_802888D8(void) {
+void InitializeSmokeSystems(void) {
     lbl_8055F6D8 = new ("engine smoke man") EngineSmokeMan;
     lbl_8055F6E0 = new ("misc smoke man") FireSmokeMan;
     lbl_8055F6DC = new ("exhaust smoke man") ExhaustSmokeMan;
     lbl_8055F6E4 = new ("radiator smoke man") RadiatorSmokeMan;
-    fn_80287B38(fn_80288A74);
+    fn_80287B38(UpdateSmokeEffects);
 }
 
-void fn_80288988(void) {
+void CleanUpSmokeEffects(void) {
     delete lbl_8055F6E4;
     lbl_8055F6E4 = 0;
     delete lbl_8055F6E0;
@@ -236,7 +236,7 @@ void fn_80288A58(const Vec* p, const Vec* v) { fn_8028E584(lbl_8055F6E0->small, 
 
 void fn_80288A70(const void*, const Vec*, f32) {}
 
-void fn_80288A74(const SmokeEntry* e, int n) {
+void UpdateSmokeEffects(const SmokeEntry* e, int n) {
     if ((f32)__fabs(fn_801E7E24()) <= __float_epsilon[0]) {
         return;
     }

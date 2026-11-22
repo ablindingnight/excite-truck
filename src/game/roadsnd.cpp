@@ -50,7 +50,7 @@ extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
-RoadSoundVoice* fn_802077A4(const char* name, int flags, void* a, void* b);
+RoadSoundVoice* Create3DSound(const char* name, int flags, void* a, void* b);
 SurfaceInfo* fn_801D04A8(int surface);
 }
 
@@ -80,7 +80,7 @@ inline RoadSound::RoadSound(char* car) {
             c = this->car;
             e = &entries[count++];
             name = node->GetValue("sound");
-            e->voice = fn_802077A4(name, 4, c + 0x118, c + 0x60);
+            e->voice = Create3DSound(name, 4, c + 0x118, c + 0x60);
             if (e->voice == NULL && ((CarBody*)c)->index == 0) {
                 fn_802E30C8(MissingVoiceFormat(), name);
             }

@@ -55,7 +55,7 @@ void fn_8012E81C(const char* name);
 void fn_8023889C(void);
 void fn_801CB808(void);
 void fn_801617BC(void);
-void fn_802061F8(void);
+void LoadCarTexture(void);
 void fn_8020D178(void);
 void fn_802108C8(void);
 void fn_802B8744(void);
@@ -67,7 +67,7 @@ void fn_80265D74(void);
 void fn_80128678(void);
 void fn_80128684(void);
 void fn_80206454(void);
-void fn_80206444(void);
+void SetPrimaryOnlyFlag(void);
 void fn_80127930(void);
 void fn_80127954(void);
 void fn_802D3E9C(int unk);
@@ -181,8 +181,8 @@ void fn_80127958(void);
 int fn_8012795C(int key);
 void fn_8018BF5C(void);
 int fn_8018BF54(int key);
-void fn_8020BF58(void);
-int fn_8020BDB8(int key);
+void DrawSoundDashMenu(void);
+int HandleSoundControlInput(int key);
 void fn_80296070(void);
 int fn_80296068(int key);
 void fn_80204008(void);
@@ -266,7 +266,7 @@ GameModeEntry lbl_802FBC90[25] = {
     {fn_801B3284, fn_801B327C, NULL, NULL, NULL},
     {fn_80127958, fn_8012795C, NULL, NULL, NULL},
     {fn_8018BF5C, fn_8018BF54, NULL, NULL, NULL},
-    {fn_8020BF58, fn_8020BDB8, NULL, NULL, NULL},
+    {DrawSoundDashMenu, HandleSoundControlInput, NULL, NULL, NULL},
     {fn_80296070, fn_80296068, NULL, NULL, NULL},
     {fn_8000C5CC, NULL, NULL, NULL, NULL},
     {fn_80204008, fn_8020400C, fn_80204004, fn_80203FFC, fn_80204000},
@@ -416,7 +416,7 @@ void gameloop_begin(RaceSetup* rs) {
     fn_8023889C();
     fn_801CB808();
     fn_801617BC();
-    fn_802061F8();
+    LoadCarTexture();
     fn_80006D9C();
     fn_8000CE60();
     fn_8020D178();
@@ -648,7 +648,7 @@ void fn_8000B64C(int key, int pad) {
                 fn_80206454();
             } else {
                 fn_801769E0();
-                fn_80206444();
+                SetPrimaryOnlyFlag();
             }
         }
         break;
@@ -712,7 +712,7 @@ void fn_8000B950(void) {
                 fn_80206454();
             } else {
                 fn_801769E0();
-                fn_80206444();
+                SetPrimaryOnlyFlag();
             }
         }
     }

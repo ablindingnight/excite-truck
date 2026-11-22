@@ -251,7 +251,7 @@ extern char lbl_8055B860[8];
 int fn_802146BC(MenuDesc*, int, int, int);
 void ResetPhysicsFlagsAndState(void);
 void fn_8017EC30(void);
-const char* fn_802E85B8(int);
+const char* GetControllerSocketName(int);
 void __dt__7UITableFv(ControlsTableFields*, int);
 void fn_801A7A08(ControlInputFields*, const char*, ControlValueTableHandle);
 void fn_801808DC(void);
@@ -290,7 +290,7 @@ extern "C" void fn_8023D4B8(int controller) {
         MenuItem(lbl_8055B860, 6, (const void*)fn_8023DD80, 0, 13),
         MenuItem(lbl_8055B860, 6, 0, -1, 27),
         MenuItem(lbl_8055B860, 6, (const void*)fn_8023DFB0, 0, 0x6F),
-        MenuItem("#controller_name", fn_802E85B8(controller)),
+        MenuItem("#controller_name", GetControllerSocketName(controller)),
         MenuItem("#profile_name", IdentGetSlotName(IdentGetCurrentSlot())),
         MenuItem(controlsStatic123)
     };

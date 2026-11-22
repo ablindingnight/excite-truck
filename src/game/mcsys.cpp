@@ -11,8 +11,8 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 u8* fn_801284E8(const char* tag, u32 size);
 void fn_80128658(void* p);
 u32 fn_80132E7C(const void* data, s32 len);  // checksum
-int fn_802E8D8C(const char* name, void* buf, u32 size);  // read save file
-int fn_802E967C(const char* name, void* buf, u32 size);  // write save file
+int ReadMemoryCardFile(const char* name, void* buf, u32 size);  // read save file
+int SaveGameFile(const char* name, void* buf, u32 size);  // write save file
 }
 
 // A registered chunk; cb is told 0/1 around loading, 2 when it was not loaded, 3/4 around saving.
@@ -108,7 +108,7 @@ int MemCardSystemLoad(void) {
     }
     ok = 0;
     failed = 0;
-    if (!fn_802E8D8C(lbl_8055D200[0], h, total)) {
+    if (!ReadMemoryCardFile(lbl_8055D200[0], h, total)) {
         fn_802E30C8("MemCardSystemLoad fails");
         failed = 1;
     } else if (h->dataSize != dataSize) {
@@ -212,7 +212,7 @@ int fn_802E6FBC(void) {
     }
     h->checksum = fn_80132E7C(h->data, h->dataSize);
     fn_802E30C8("memcard: writing file (%d blocks, %d bytes)", (s32)(total + 0x1FFF) / 0x2000, total);
-    int r = fn_802E967C(lbl_8055D200[0], h, total);
+    int r = SaveGameFile(lbl_8055D200[0], h, total);
     fn_80128658(h);
     return r;
 }
