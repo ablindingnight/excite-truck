@@ -832,7 +832,8 @@ Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
 }
 
 static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
-void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
+// Complete inverse-basis shadow matrix output; helper name unproven.
+static inline void SetShadowMatrix(Shadow* s, const V2* c, const V2* b, const V2* a) {
     f32 i11;
     f32 det = c->x * b->y - b->x * c->y;
     f32 i00 = b->y / det;
@@ -852,6 +853,10 @@ void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
     s->mtx[1][2] *= -1.0f;
     s->mtx[1][3] *= -1.0f;
     s->mtx[1][3] += 1.0f;
+}
+
+void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
+    SetShadowMatrix(s, c, b, a);
     s->lo.x = MinF(a->x, MinF(a->x + c->x, MinF(a->x + b->x, b->x + (a->x + c->x))));
     s->lo.y = MinF(a->y, MinF(a->y + c->y, MinF(a->y + b->y, b->y + (a->y + c->y))));
     s->hi.x = MaxF(a->x, MaxF(a->x + c->x, MaxF(a->x + b->x, b->x + (a->x + c->x))));
