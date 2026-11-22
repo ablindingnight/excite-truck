@@ -906,8 +906,8 @@ void fn_802545C4(CarUISlotView* p, s32 model, CarUIModel* m) {
 // PROVISIONAL: original viewport helper API/input ownership is unproven.
 static inline void ViewportGeometry(f32 h, const f32& w, const f32& y, const f32& x,
                                     f32& hw, f32& hh, f32& cx, f32& cy) {
-    hh = 0.5f * h;
-    hw = 0.5f * w;
+    hh = h / 2.0f;
+    hw = w / 2.0f;
     cy = y + hh;
     cx = x + hw;
 }
