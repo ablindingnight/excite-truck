@@ -1607,6 +1607,9 @@ int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32*
 
 // Tube p against tube q: closest points of the two axes (parameters clamped to the half lengths when
 // `clamp`, else out-of-range is a miss); overlapping radii report one contact at the midpoint.
+// Helper name unproven.
+static inline f32 TubeMidpointZ(f32 a, f32 b) { return (a + b) / 2.0f; }
+
 int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     f32 m[3][3];
     RVec3 ca;
@@ -1642,7 +1645,7 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
         mid.x = (xv + cb.x) / 2.0f;
         yv = ca.y;
         zv = cb.z;
-        mid.z = (ca.z + zv) * 0.5f;
+        mid.z = TubeMidpointZ(ca.z, zv);
         mid.y = (yv + cb.y) / 2.0f;
         w.x = mid.x - ca.x;
         w.y = mid.y - ca.y;
