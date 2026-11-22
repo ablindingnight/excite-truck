@@ -313,6 +313,16 @@ static inline void SwapTris(PMesh* m) {
         SwapTri((PTri*)p, sc);
     }
 }
+/* Helper name unproven */
+static inline void SwapVerts(PMesh* m) {
+    u8* p;
+    int i;
+    u8 sc;
+    for (i = 0; i < m->numVerts; i++) {
+        p = (u8*)&m->verts[i];
+        SwapVec((PVec3*)p, sc);
+    }
+}
 #pragma push
 #pragma ppc_unroll_instructions_limit 100
 void fn_801CFA48(PMesh* m) {
@@ -330,10 +340,7 @@ void fn_801CFA48(PMesh* m) {
         p = (u8*)m->cells + off;
         SwapCell((PCell*)p, sc);
     }
-    for (i = 0; i < m->numVerts; i++) {
-        p = (u8*)&m->verts[i];
-        SwapVec((PVec3*)p, sc);
-    }
+    SwapVerts(m);
     SwapTris(m);
 }
 #pragma pop
