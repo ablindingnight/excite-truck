@@ -656,7 +656,7 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 f32 alpha = k0->alpha + u * (k1->alpha - k0->alpha);
                 AnimElem* e = &a->elems[p->elem];
                 m[3][2] = pos[2] * ps;
-                scale[2] = k0->scale[2] + u * (k1->scale[2] - k0->scale[2]);
+                scale[2] = k0->scale[2] + Mul(u, (k1->scale[2] - k0->scale[2]));
                 scale[1] = k0->scale[1] + u * (k1->scale[1] - k0->scale[1]);
                 scale[0] = k0->scale[0] + u * (k1->scale[0] - k0->scale[0]);
                 f32 es = 1.0f;
