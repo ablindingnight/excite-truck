@@ -109,14 +109,14 @@ ModuleTag lbl_8055E5B8;
 
 extern "C" {
 
-f32 fn_801A6370(f32 p, f32 v, f32 a, f32 t) { return p + v * t + t * (0.5f * a * t); }
+f32 CalculatePositionWithAcceleration(f32 p, f32 v, f32 a, f32 t) { return p + v * t + t * (0.5f * a * t); }
 
 f32 fn_801A6390(s32 a, s32 b) { return 0.016683351f * (f32)(a - b); }
 
 f32 fn_801A63C4(s32 a, s32 b) { return 0.0192f * fn_801A6390(a, b) / 0.016683351f; }
 
 static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); } /* Helper name unproven */
-void fn_801A63F4(RVec3* out, const RVec3* a, const RVec3* b, const RVec3* t) {
+void InterpolatePosition(RVec3* out, const RVec3* a, const RVec3* b, const RVec3* t) {
     f32 startX;
     f32 endX;
     f32 xWeight;
@@ -278,9 +278,9 @@ void NetCar::Extrapolate(Blend* b) {
     RVec3 d;
     RVec3 r;
     RVec3 r2;
-    p.x = fn_801A6370(ptab[0].pose.pos.v[0], v[0].x, acc.x, s);
-    p.y = fn_801A6370(ptab[0].pose.pos.v[1], v[0].y, acc.y, s);
-    p.z = fn_801A6370(ptab[0].pose.pos.v[2], v[0].z, acc.z, s);
+    p.x = CalculatePositionWithAcceleration(ptab[0].pose.pos.v[0], v[0].x, acc.x, s);
+    p.y = CalculatePositionWithAcceleration(ptab[0].pose.pos.v[1], v[0].y, acc.y, s);
+    p.z = CalculatePositionWithAcceleration(ptab[0].pose.pos.v[2], v[0].z, acc.z, s);
     {
         f32 t1 = fn_801A63C4(ptab[1].frame, ptab[2].frame);
         f32 t0 = fn_801A63C4(ptab[0].frame, ptab[2].frame);
@@ -301,10 +301,10 @@ void NetCar::Extrapolate(Blend* b) {
         f32 z0 = ptab[0].pose.pos.v[2];
         d.z = z0 * b0 + (z2 * b2 + z1 * b1);
     }
-    fn_801A63F4(&r, &mtx.pos, &p, &b->at);
+    InterpolatePosition(&r, &mtx.pos, &p, &b->at);
     mtx.pos = r;
     Transform__10CollVolumeFv(this);
-    fn_801A63F4(&r2, &vel, &d, &b->at);
+    InterpolatePosition(&r2, &vel, &d, &b->at);
     vel = r2;
 }
 

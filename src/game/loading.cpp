@@ -81,7 +81,7 @@ void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f3
                  f32 scale, f32 a, f32 b);
 void fn_80231220(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
 void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
-int fn_80277960(const char* name, RMtx* frame, f32* fov);
+int GetNamedCameraPose(const char* name, RMtx* frame, f32* fov);
 void fn_802A1120(f32* center, f32* dir);
 f32 fn_801EA0E8(f32 x, f32 z);
 void fn_8026A2CC(RMtx* cam, int unk, f32 fov);
@@ -105,7 +105,7 @@ void fn_80230B38(void);
 void FormatIntWithPrefix(char* buf, int size, s32 value);
 void fn_80130980(char* buf, int size, int digits, f32 time);
 const char* GetDifficultyString(const char* fmt, s32 difficulty, s32 event);
-int fn_8027DED0(void);
+int GetCourseId(void);
 f32 CalculateTimeLimit(s32 event, s32 difficulty);
 int fn_80129D18(int lo, int hi);
 }
@@ -295,10 +295,10 @@ void LoadTipsSequence(void) {
                     const char* cam2 = node->GetValue("end_camera");
                     TipCam* tc = &lbl_8035B758[lbl_8055D630++];
 
-                    if (!fn_80277960(cam1, &tc->start, &tc->start_fov)) {
+                    if (!GetNamedCameraPose(cam1, &tc->start, &tc->start_fov)) {
                         fn_802E317C("tips: can't find camera1 %s", cam1);
                     }
-                    if (!fn_80277960(cam2, &tc->end, &tc->end_fov)) {
+                    if (!GetNamedCameraPose(cam2, &tc->end, &tc->end_fov)) {
                         fn_802E317C("tips: can't find camera2 %s", cam1);
                     }
                     tc->duration = node->GetFloat("duration");
@@ -665,7 +665,7 @@ void LoadingBegin(EventInfo* __restrict info, s32 difficulty) {
         ValueNode* table = ev->node->FindChild(GetDifficultyString("grade_table", lbl_8055D66C, lbl_8055D668));
         if (table != NULL) {
             Grades grades(table);
-            int grade = fn_8027DED0();
+            int grade = GetCourseId();
             if (grade == -1) {
                 grade = grades.passing;
             }

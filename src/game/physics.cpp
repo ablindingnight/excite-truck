@@ -29,29 +29,29 @@ void fn_8017EC30(void);
 void fn_801AE5A8(void);
 void fn_801AE5AC(void);
 void fn_801B6604(void);
-void fn_801B6614(void);
+void UninstallEventHandler(void);
 void fn_801D0BE4(void);
 void fn_801D0BF4(void);
 s32 AllocateVolumeHandle(const char* name);
 void ClearAudioHandle(s32* h);
 void SetVolumeClamped(s32 h, f32 v);
-s32 fn_80179658(s32 a);
+s32 GetMessageSizeOfType(s32 a);
 void fn_8013A208(void);
 s32 fn_802E2C20(void);
 s64 fn_802E2C9C(void);
 s32 fn_802D3EBC(void);
 void fn_802E2D74(int a);
 f32 fn_8017970C(void);
-struct StatePacket* fn_80179824(void);
+struct StatePacket* PackPhysicsState(void);
 void fn_801C6AD0(s32* p);
 void fn_8017ED00(f32 dt);
 void fn_80179320(void);
 void fn_802E4C14(int a);
 void fn_80178CAC(s32 a, s32 b);
-void fn_80178DD4(s32 s);
+void InitializeRacePhysics(s32 s);
 void fn_8017952C(void);
 void fn_80179110(void);
-void fn_801791A8(void);
+void CleanupRaceSession(void);
 void fn_801B235C(void);
 void fn_80179140(void);
 void fn_80179308(void);
@@ -202,7 +202,7 @@ void fn_801765B8(void) {
     fn_801777C0();
     lbl_8055E3F4 = 0;
     fn_801D0BF4();
-    fn_801B6614();
+    UninstallEventHandler();
     fn_801AE5AC();
     fn_8017EC30();
     DeleteMemStream(lbl_8055E3E0);
@@ -318,7 +318,7 @@ void fn_80176948(s32* data, s32* pos) {
     *pos = p;
     WriteValueToStream(lbl_8055E3E0, p);
     fn_8012F4AC(lbl_8055E3E0, data, data[1]);
-    lbl_8055E3CC += fn_80179658(data[0]);
+    lbl_8055E3CC += GetMessageSizeOfType(data[0]);
 }
 
 s32 fn_801769A8(void) { return lbl_804303C8.flags; }
@@ -386,7 +386,7 @@ StatePacket* PhysicsGetStatePacked(void) {
         f32 dt = 0.001f * __cvt_sll_flt(now - start);
         lbl_8055E3D0 = dt + 0.95f * (lbl_8055E3D0 - dt);
     }
-    pkt = fn_80179824();
+    pkt = PackPhysicsState();
     pkt->fade = fn_801773E4();
     fn_801C6AD0(&pkt->fade);
     return pkt;
@@ -428,7 +428,7 @@ void fn_80176CC8(void) {
     }
     switch (lbl_8055E3F4) {
     case 1:
-        fn_80178DD4(lbl_8055E3DC);
+        InitializeRacePhysics(lbl_8055E3DC);
         lbl_8055E3F4 = 2;
         break;
     case 2:
@@ -448,7 +448,7 @@ void fn_80176CC8(void) {
         fn_8017952C();
         break;
     case 7:
-        fn_801791A8();
+        CleanupRaceSession();
         lbl_8055E3F4 = 8;
         break;
     case 8:

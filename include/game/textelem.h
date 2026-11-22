@@ -29,7 +29,7 @@ struct TextElem : ElemBase {
 
 struct ArtElem;
 struct GartElem;
-extern "C" void fn_80145438(ArtElem* e, ValueNode* n);   // ovlayout: reads an art element
+extern "C" void LoadArtElementDimensions(ArtElem* e, ValueNode* n);   // ovlayout: reads an art element
 extern "C" void fn_80145538(GartElem* e, ValueNode* n);  // ovlayout: reads a gart element
 
 // Elements with a size (art and boxes).
@@ -47,7 +47,7 @@ struct ArtElem : BoxElem {
     ArtElem(void) {}
     ArtElem(const ArtElem& o);              // defined in game/artelemcopy.h
     ArtElem& operator=(const ArtElem& o);  // defined in game/artelemcopy.h
-    void Read(ValueNode* n) { fn_80145438(this, n); }
+    void Read(ValueNode* n) { LoadArtElementDimensions(this, n); }
     f32 u0;  // offset 0x18
     f32 v0;  // offset 0x1C
     f32 u1;  // offset 0x20

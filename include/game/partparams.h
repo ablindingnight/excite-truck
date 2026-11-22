@@ -1,6 +1,6 @@
 #ifndef GAME_PARTPARAMS_H
 #define GAME_PARTPARAMS_H
-// A particle system's parameters (partman.cpp: PartParams() zeroes them, fn_8028E654 reads them from a .val node,
+// A particle system's parameters (partman.cpp: PartParams() zeroes them, LoadParticleParams reads them from a .val node,
 // whose keys give the field names: "Max_particles", "Spew_rate", "Upwards_kick", "Size_ramp", ...). The effect units
 // (fire, smoke, sparks, precip, stuntpart, trail, waterpool) fill one in code. One declaration for every unit (port
 // ODR work, 2026-11-16).

@@ -61,7 +61,7 @@ s32 fn_80232578(const char* name);  // load font
 void fn_802328D4(s32 font);
 Sound* fn_80207848(const char* name, int flags);
 void fn_801333E8(int section, const char* name, bool* v);
-void fn_80133460(int section, const char* name, bool v);
+void SetOptionBooleanValue(int section, const char* name, bool v);
 s32 fn_802E2C20(void);  // milliseconds
 void fn_802E8528(int ch, f32 a, f32 b);
 int fn_802E8D84(void);
@@ -183,7 +183,7 @@ public:
         index = pad * 2;
         fn_801333E8(pad + 8, "force_feedback", &value);
     }
-    virtual void Save(void) { fn_80133460(pad + 8, "force_feedback", value); }
+    virtual void Save(void) { SetOptionBooleanValue(pad + 8, "force_feedback", value); }
     virtual int Key(int key) {
         if (focused) {
             switch (key) {
@@ -241,7 +241,7 @@ public:
         fn_801333E8(pad + 8, "controller_speaker", &value);
         mask |= 1 << this->pad;
     }
-    virtual void Save(void) { fn_80133460(pad + 8, "controller_speaker", value); }
+    virtual void Save(void) { SetOptionBooleanValue(pad + 8, "controller_speaker", value); }
     virtual int Key(int key) {
         if (focused) {
             switch (key) {

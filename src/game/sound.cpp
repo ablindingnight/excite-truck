@@ -13,7 +13,7 @@ extern "C" {
 char* strncpy(char* dst, const char* src, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 extern u32 lbl_8055D430;  // debug flags
-void fn_8020A368(void);   // music init
+void InitializeMusicBuffer(void);   // music init
 void fn_8020A400(void);   // music shutdown
 }
 
@@ -61,7 +61,7 @@ int fn_802062E8(void) {
     lbl_8055ED80 = new ("SoundManager") SoundManager(GetMixerByIndex(fn_80208D70()));
     if (lbl_8055ED80) {
         if (lbl_8055ED80->enabled) {
-            fn_8020A368();
+            InitializeMusicBuffer();
             return 1;
         }
         delete lbl_8055ED80;

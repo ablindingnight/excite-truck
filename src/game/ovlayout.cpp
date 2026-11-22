@@ -144,7 +144,7 @@ u32 fn_80144F40(const char* s, const FlagName* tbl) {
     return r;
 }
 
-char* fn_80144FB0(char* buf, int n, u32 flags, const FlagName* tbl) {
+char* FormatFlagNames(char* buf, int n, u32 flags, const FlagName* tbl) {
     buf[0] = 0;
     for (; tbl->name; tbl++) {
         if ((tbl->flag & flags) == tbl->flag) {
@@ -157,14 +157,14 @@ char* fn_80144FB0(char* buf, int n, u32 flags, const FlagName* tbl) {
     return buf;
 }
 
-u8 fn_801450A0(u32 a, u32 b, f32 t) {
+u8 InterpolateAndClampValue(u32 a, u32 b, f32 t) {
     f32 f = (f32)a + t * ((f32)b - (f32)a);
     int v = Round(f);
     v = v > 0 ? v : 0;
     return v < 0xFF ? v : 0xFF;
 }
 
-int fn_80145140(ValueTable* t, const char* name) {
+int CountNamedChildren(ValueTable* t, const char* name) {
     int n = 0;
     int i = 0;
     ValueNode* c;
@@ -239,7 +239,7 @@ f32 fn_801452E0(ValueNode* n, const char* key) {
     return atof(s);
 }
 
-void fn_80145368(ElemBase* e, ValueNode* n) {
+void ParseElementPosition(ElemBase* e, ValueNode* n) {
     e->name = n->GetValue("name");
     e->pos.x = n->GetFloat("x");
     e->pos.y = n->GetFloat("y");
@@ -250,8 +250,8 @@ void fn_80145368(ElemBase* e, ValueNode* n) {
     e->elemJust = n->GetInt("elem_just", 0);
 }
 
-void fn_80145438(ArtElem* e, ValueNode* n) {
-    fn_80145368((ElemBase*)e, n);
+void LoadArtElementDimensions(ArtElem* e, ValueNode* n) {
+    ParseElementPosition((ElemBase*)e, n);
     e->w = n->GetFloat("wid");
     e->h = n->GetFloat("hit");
     e->u0 = fn_801452E0(n, "u0");
@@ -260,7 +260,7 @@ void fn_80145438(ArtElem* e, ValueNode* n) {
     e->v1 = fn_801452E0(n, "v1");
 }
 
-u32 fn_801454E8(ValueNode* n, const char* key) {
+u32 ParseColorHexValue(ValueNode* n, const char* key) {
     u32 c;
     if (sscanf(n->GetValue(key), "#%x", &c) != 1) {
         c = 0xFFFFFFFF;
@@ -269,17 +269,17 @@ u32 fn_801454E8(ValueNode* n, const char* key) {
 }
 
 void fn_80145538(GartElem* e, ValueNode* n) {
-    fn_80145368((ElemBase*)e, n);
+    ParseElementPosition((ElemBase*)e, n);
     e->w = n->GetFloat("wid");
     e->h = n->GetFloat("hit");
-    e->color = fn_801454E8(n, "color");
+    e->color = ParseColorHexValue(n, "color");
 }
 
 void fn_801455B8(TextElem* e, ValueNode* n) {
-    fn_80145368((ElemBase*)e, n);
+    ParseElementPosition((ElemBase*)e, n);
     e->just = fn_80144F40(n->GetValue("just"), lbl_8032CED8);
     e->scale = n->GetFloat("scale");
-    e->color = fn_801454E8(n, "color");
+    e->color = ParseColorHexValue(n, "color");
     e->defText = n->GetString("default_text", "XXX BADTEXT XXX");
 }
 
@@ -293,14 +293,14 @@ void fn_80145670(GartSet* s, ValueNode* n) {
 static inline void WriteElemLine(const char* dt, char* q, TextElem* e, char* just, void* f) {
     const char*js;
     dt = fn_8013126C(q, e->defText);
-    js = fn_80144FB0(just, 0x40, e->just, lbl_8032CED8);
+    js = FormatFlagNames(just, 0x40, e->just, lbl_8032CED8);
     fn_802E3AD0(f, "\t%5.1f %5.1f %d #%8.8X %4.2f %16.16s %s \"%s\"\r\n", e->pos.x, e->pos.y, e->elemJust, e->color,
                 e->scale, js, e->name, dt);
 }
 
 static inline const char* LayoutFileEnd() { return "end\r\n"; }
 
-void fn_801456E8(ElemList<TextElem>* l, void* f) {
+void WriteTabularTextLayout(ElemList<TextElem>* l, void* f) {
     char q[0x130];
     TextElem* e;
     char just[0x40];
@@ -314,7 +314,7 @@ void fn_801456E8(ElemList<TextElem>* l, void* f) {
     fn_802E3AD0(f, LayoutFileEnd());
 }
 
-void fn_801457D0(ElemList<ArtElem>* l, void* f) {
+void WriteArtElementTable(ElemList<ArtElem>* l, void* f) {
     int i;
     fn_802E3AD0(f, "tabular art\r\n");
     fn_802E3AD0(f, "\tx y wid hit u0 v0 u1 v1 elem_just name\r\n");
@@ -326,7 +326,7 @@ void fn_801457D0(ElemList<ArtElem>* l, void* f) {
     fn_802E3AD0(f, LayoutFileEnd());
 }
 
-void fn_8014589C(ElemList<GartElem>* l, void* f) {
+void WriteGartTable(ElemList<GartElem>* l, void* f) {
     int i;
     fn_802E3AD0(f, "tabular gart\r\n");
     fn_802E3AD0(f, "\tx y wid hit color elem_just name\r\n");
@@ -338,7 +338,7 @@ void fn_8014589C(ElemList<GartElem>* l, void* f) {
     fn_802E3AD0(f, LayoutFileEnd());
 }
 
-void fn_8014595C(ElemList<GartSet>* l, void* f) {
+void WriteGartSetTable(ElemList<GartSet>* l, void* f) {
     int i;
     fn_802E3AD0(f, "tabular gart_set\r\n");
     fn_802E3AD0(f, "\tresource_name name\r\n");
@@ -364,7 +364,7 @@ ValPoint fn_80145A24(const IPoint* p) {
     return r;
 }
 
-void fn_80145B50(Rect* r, int n) {
+void SetRectPosition(Rect* r, int n) {
     f32 s = 10.0f;
     r->x = s * n;
     r->y = 0.0f;
@@ -372,7 +372,7 @@ void fn_80145B50(Rect* r, int n) {
     r->w = s;
 }
 
-void fn_80145B94(const TextElem* e, const char* text) {
+void DrawTextElement(const TextElem* e, const char* text) {
     f32 y = fn_801452B4(e->pos.y);
     DrawFormattedString(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, text);
 }
@@ -549,7 +549,7 @@ struct EditRect {
     Rect r;                // offset 0x0
     void* target;          // offset 0x10
     EditHandler* handler;  // offset 0x14
-    void Set(int n) { fn_80145B50(&r, n); }
+    void Set(int n) { SetRectPosition(&r, n); }
 };
 
 template <typename T, int N>
@@ -628,12 +628,12 @@ extern "C" void fn_80146BD4(char* d, const char* s, int n, int pad);
 extern FixedList<Layout*, 40> lbl_8042FBC0;
 
 extern "C" void fn_80145D8C(Layout* l);
-extern "C" void fn_80145DD8(Layout* l);
+extern "C" void RemoveLayoutFromContainer(Layout* l);
 extern "C" Layout* fn_80146490(Layout* l);
 
 template <typename T>
 DynArray<T>* LoadElems(ValueTable* t, const char* name) {
-    int n = fn_80145140(t, name);
+    int n = CountNamedChildren(t, name);
     DynArray<T>* a = new ("overlay_dsa") DynArray<T>(n);
     int i;
     ValueNode* c;
@@ -710,10 +710,10 @@ public:
         f = CreateFileFromName(base);
         if (f != -1) {
             fn_802E3AD0((void*)f, "table info\r\n\tversion\t%d\r\nend\r\n", 1);
-            fn_801457D0((ElemList<ArtElem>*)arts, (void*)f);
-            fn_801456E8((ElemList<TextElem>*)texts, (void*)f);
-            fn_8014589C((ElemList<GartElem>*)garts, (void*)f);
-            fn_8014595C((ElemList<GartSet>*)sets, (void*)f);
+            WriteArtElementTable((ElemList<ArtElem>*)arts, (void*)f);
+            WriteTabularTextLayout((ElemList<TextElem>*)texts, (void*)f);
+            WriteGartTable((ElemList<GartElem>*)garts, (void*)f);
+            WriteGartSetTable((ElemList<GartSet>*)sets, (void*)f);
             fn_802E3AD0((void*)f, LayoutFileEnd());
             fn_802E3734(&f);
         }
@@ -868,7 +868,7 @@ void fn_80145D8C(Layout* l) {
     }
 }
 
-void fn_80145DD8(Layout* l) {
+void RemoveLayoutFromContainer(Layout* l) {
     int i = lbl_8042FBC0.IndexOf(l);
     if (i >= 0) {
         lbl_8042FBC0.RemoveAt(i);
@@ -893,7 +893,7 @@ Layout* fn_80146490(Layout* l) {
 }  // extern "C"
 
 Layout::~Layout(void) {
-    fn_80145DD8(this);
+    RemoveLayoutFromContainer(this);
     if (table) {
         fn_80131818(table);
         table = 0;
@@ -1052,7 +1052,7 @@ static inline DynArray<BoxCmd>* ReadBoxCmdArray(ValueNode* n, const char* name) 
             BoxCmd* bc = items->Add();
             bc->elem = e->GetValue("elem");
             bc->art = e->GetValue("art");
-            bc->color = fn_801454E8(e, "color");
+            bc->color = ParseColorHexValue(e, "color");
         }
     }
     return items;
@@ -1150,11 +1150,11 @@ void fn_80147230(TextElem* e, const char* fmt, ...) {
         if (strlen(buf) >= 0x200) {
             fn_802E317C("ovedit: oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
         }
-        fn_80145B94(e, buf);
+        DrawTextElement(e, buf);
     }
 }
 
-void fn_80147314(TextElem* e, const char* fmt, ...) {
+void FormatTextElementWithValidation(TextElem* e, const char* fmt, ...) {
     if (e) {
         va_list args;
         char buf[0x200];
@@ -1179,7 +1179,7 @@ void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...) {
         if (strlen(buf) >= 0x200) {
             fn_802E317C("ovedit: oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
         }
-        fn_80145B94(e, buf);
+        DrawTextElement(e, buf);
     }
 }
 
@@ -1214,7 +1214,7 @@ void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...) {
 
 void fn_801476C4(TextElem* e) {
     if (e) {
-        fn_80145B94(e, e->defText);
+        DrawTextElement(e, e->defText);
     }
 }
 
@@ -1264,11 +1264,11 @@ static inline V2 LayLerpV2(const V2& a, const V2& b, f32 t) { /* Helper name unp
     return MakeLayoutPoint(Lerp(a.x, b.x, t), Lerp(a.y, b.y, t));
 }
 
-void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
-void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t);
+void InterpolateTextElement(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
+void InterpolateArtElement(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 
-void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...) {
+void FormatAndLayoutTextElement(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...) {
     va_list args;
     char buf[0x200];
     TextElem e;
@@ -1278,11 +1278,11 @@ void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, .
     if (strlen(buf) >= 0x200) {
         fn_802E317C("ovedit: oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
     }
-    fn_80147CEC(&e, a, b, t);
+    InterpolateTextElement(&e, a, b, t);
     fn_80147230(&e, LayoutTextFormat(), buf);
 }
 
-void fn_80147ABC(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...) {
+void ValidateAndFormatTextElement(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...) {
     va_list args;
     char buf[0x200];
     TextElem e;
@@ -1292,26 +1292,26 @@ void fn_80147ABC(const TextElem* a, const TextElem* b, const char* fmt, f32 t, .
     if (strlen(buf) >= 0x200) {
         fn_802E317C("ovedit: oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
     }
-    fn_80147CEC(&e, a, b, t);
-    fn_80147314(&e, LayoutTextFormat(), buf);
+    InterpolateTextElement(&e, a, b, t);
+    FormatTextElementWithValidation(&e, LayoutTextFormat(), buf);
 }
 
 void fn_80147BD0(const ArtElem* a, const ArtElem* b, u32 c0, u32 c1, s32 tex, f32 t) {
     ArtElem e;
-    fn_80147DC0(&e, a, b, t);
+    InterpolateArtElement(&e, a, b, t);
     fn_801476D8(&e, fn_80147C50(c0, c1, t), tex);
 }
 
 u32 fn_80147C50(u32 a, u32 b, f32 t) {
-    u8 c0 = fn_801450A0(a & 0xFF, b & 0xFF, t);
-    u8 c1 = fn_801450A0((a >> 8) & 0xFF, (b >> 8) & 0xFF, t);
-    u8 c2 = fn_801450A0((a >> 16) & 0xFF, (b >> 16) & 0xFF, t);
-    u8 c3 = fn_801450A0(a >> 24, b >> 24, t);
+    u8 c0 = InterpolateAndClampValue(a & 0xFF, b & 0xFF, t);
+    u8 c1 = InterpolateAndClampValue((a >> 8) & 0xFF, (b >> 8) & 0xFF, t);
+    u8 c2 = InterpolateAndClampValue((a >> 16) & 0xFF, (b >> 16) & 0xFF, t);
+    u8 c3 = InterpolateAndClampValue(a >> 24, b >> 24, t);
     return (c3 << 24) | (c2 << 16) | (c1 << 8) | c0;
 }
 
 
-void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
+void InterpolateTextElement(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
     V2 p = LayLerpV2(a->pos, b->pos, t);
     f32 s = Lerp(a->scale, b->scale, t);
     *out = *a;
@@ -1320,7 +1320,7 @@ void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t) {
     out->color = fn_80147C50(a->color, b->color, t);
 }
 
-void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
+void InterpolateArtElement(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
     V2 p = LayLerpV2(a->pos, b->pos, t);
     *out = *a;
     out->pos = p;
@@ -1332,7 +1332,7 @@ void fn_80147DC0(ArtElem* out, const ArtElem* a, const ArtElem* b, f32 t) {
     out->h = LerpT(t, a->h, b->h);
 }
 
-void fn_80147EE0(ArtElem* e, f32 s) {
+void ScaleArtElemAroundCenter(ArtElem* e, f32 s) {
     f32 cx = e->pos.x + e->w / 2.0f;
     f32 cy = e->pos.y + e->h / 2.0f;
     e->w *= s;

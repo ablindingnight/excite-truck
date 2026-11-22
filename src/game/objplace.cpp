@@ -295,7 +295,7 @@ struct ObjTweak {
 }  // namespace
 
 extern "C" {
-bool fn_802B2C44(ValueNode* n, const char* name);
+bool HasChildNode(ValueNode* n, const char* name);
 void* fn_802B2C34(void* (*f)(const char*), const char* a);
 }
 
@@ -385,7 +385,7 @@ inline NodeSetPlacer::NodeSetPlacer(ValueNode* node) {
     for (int i = 1;; i++) {
         char name[16];
         fn_801345D8(name, 16, "mat%d", i);
-        if (!fn_802B2C44(node, name)) {
+        if (!HasChildNode(node, name)) {
             break;
         }
         MatPlacer* m = new ("ObjectSetPlacer") MatPlacer(node->FindChild(name), i - 1);
@@ -541,7 +541,7 @@ extern "C" {
 
 void* fn_802B2C34(void* (*f)(const char*), const char* a) { return f(a); }
 
-bool fn_802B2C44(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
+bool HasChildNode(ValueNode* n, const char* name) { return n->FindChild(name) != 0; }
 
 }  // extern "C"
 
@@ -549,7 +549,7 @@ SetPlacer::SetPlacer(void) {}
 
 extern "C" {
 
-SetPlacer* fn_802B2C98(const char* name) {
+SetPlacer* FindSetPlacerByName(const char* name) {
     SetPlacer* set = 0;
     for (int i = 0; i < lbl_804BE1FC.count; i++) {
         if (strcasecmp(name, lbl_804BE1FC.data[i]->name) == 0) {
@@ -646,7 +646,7 @@ void MatPlacer::Draw(void) {
 
 extern "C" {
 
-void fn_802B321C(InlineVec<ObjTweak, 1>* out, u8** clumpy, InlineVec<MatPlacer*, 6>* set, int layer) {
+void ExtractTweakersFromLayer(InlineVec<ObjTweak, 1>* out, u8** clumpy, InlineVec<MatPlacer*, 6>* set, int layer) {
     ObjectPlacer* p;
     int k;
     ObjTweak* t;

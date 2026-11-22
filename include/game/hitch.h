@@ -8,7 +8,7 @@ class CollVolume;
 
 // A spring joint between a point on its owner volume and a point on another volume (or a fixed world point): the
 // trailer's hitch to its car, obstacles' dynamic links. obstacles.cpp's fn_801AD0E0/AD148/AD28C set it up and
-// fn_801AD394 applies it. One declaration for every unit (port ODR work, 2026-11-16). Field names unproven.
+// ApplyJointSpringDamping applies it. One declaration for every unit (port ODR work, 2026-11-16). Field names unproven.
 struct Hitch {
     Hitch(void) {
         owner = 0;

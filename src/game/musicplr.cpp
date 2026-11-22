@@ -59,7 +59,7 @@ int sprintf(char* buf, const char* fmt, ...);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 s32 fn_802E2C20(void);                   // milliseconds
 void fn_801331C4(int owner, const char* key, f32* value);
-void fn_8013323C(int owner, const char* key, f32 value);
+void SetOptionFloatValue(int owner, const char* key, f32 value);
 int fn_8013365C(const char* name, void (*cb)(void));
 void fn_801336E0(int handle, void (*cb)(void));
 void RegisterBackgroundTask(void (*fn)(void), const char* name);
@@ -101,34 +101,34 @@ f32 fn_8020A5F0(void);
 void fn_8020A5F8(f32 v);
 void fn_8020A634(void);
 
-void fn_80209FFC(void) {
+void SetMusicVolume(void) {
     f32 v = fn_8020A5F0();
     fn_801331C4(4, "music_volume", &v);
     fn_8020A5F8(v);
 }
 
-void fn_8020A03C(int ident, int event) {
+void UpdateMusicVolumeSettings(int ident, int event) {
     f32 v = 0.7f;
     switch (event) {
     case 3:
         fn_801331C4(ident + 0xC, "player_music_vol", &v);
-        fn_8013323C(4, "music_volume", v);
+        SetOptionFloatValue(4, "music_volume", v);
         fn_8020A5F8(v);
         break;
     case 1:
     case 2:
         fn_801331C4(4, "music_volume", &v);
-        fn_8013323C(ident + 0xC, "player_music_vol", v);
+        SetOptionFloatValue(ident + 0xC, "player_music_vol", v);
         break;
     case 0:
-        fn_8013323C(4, "music_volume", v);
+        SetOptionFloatValue(4, "music_volume", v);
         fn_8020A5F8(v);
         break;
     }
 }
 
 const char* lbl_8055B560[2] = {"mus_ui", "mus_credits"};
-void fn_8020A100(void) {
+void UpdateMusicFadeAndLoad(void) {
     if (lbl_8055EDD0) {
         f32 fade = 1.0f;
         s32 dt = fn_802E2C20() - lbl_8055EDE8;
@@ -173,20 +173,20 @@ void fn_8020A100(void) {
     }
 }
 
-void fn_8020A368(void) {
+void InitializeMusicBuffer(void) {
     for (int i = 0; i < 2; i++) {
         lbl_804892C0[i].buf = new ("mus_buf") u8[0x70];
     }
     lbl_8055EDDC = 0;
     lbl_8055EDD8 = 0.7f;
-    fn_8013323C(4, "music_volume", 0.7f);
-    lbl_8055B550 = fn_8013365C("Music", fn_80209FFC);
-    IdentRegisterCallback(fn_8020A03C);
+    SetOptionFloatValue(4, "music_volume", 0.7f);
+    lbl_8055B550 = fn_8013365C("Music", SetMusicVolume);
+    IdentRegisterCallback(UpdateMusicVolumeSettings);
 }
 
 void fn_8020A400(void) {
     fn_8020A634();
-    fn_801336E0(lbl_8055B550, fn_80209FFC);
+    fn_801336E0(lbl_8055B550, SetMusicVolume);
     lbl_8055B550 = -1;
     for (int i = 0; i < 2; i++) {
         delete[] lbl_804892C0[i].buf;
@@ -194,7 +194,7 @@ void fn_8020A400(void) {
     }
 }
 
-void fn_8020A47C(void) {
+void InitializeMusicPlayer(void) {
     fn_802E30C8("music: begin UI!");
     lbl_8055EDE0 = 0;
     lbl_8055EDD0 = 1;
@@ -207,14 +207,14 @@ void fn_8020A47C(void) {
         fn_802E30C8("music: loading %s...", buf);
         fn_8012DDA8(buf);
     }
-    RegisterBackgroundTask(fn_8020A100, "music");
+    RegisterBackgroundTask(UpdateMusicFadeAndLoad, "music");
     char buf[0x40];
     sprintf(buf, "%s.sng", lbl_8055B560[0]);
     fn_8012E81C(buf);
 }
 
 void fn_8020A550(void) {
-    RemoveBackgroundFunction(fn_8020A100);
+    RemoveBackgroundFunction(UpdateMusicFadeAndLoad);
     lbl_8055EDD0 = 0;
     for (int i = 0; i < 2; i++) {
         if (lbl_804892C0[i].voice) {
@@ -232,7 +232,7 @@ f32 fn_8020A5F0(void) { return lbl_8055EDD8; }
 
 void fn_8020A5F8(f32 v) { lbl_8055EDD8 = v; }
 
-void fn_8020A600(void) {
+void PlayMusicTrack(void) {
     fn_802E30C8("music: play!");
     lbl_8055EDDC = 1;
 }
@@ -241,7 +241,7 @@ void fn_8020A634(void) { lbl_8055EDDC = 0; }
 
 int fn_8020A640(void) { return lbl_8055EDDC; }
 
-void fn_8020A648(int song) {
+void UpdateMusicTrackIndex(int song) {
     if (song != lbl_8055EDE4) {
         fn_802E30C8("music: setting song idx to %d", song);
         lbl_8055EDE4 = song;
@@ -253,5 +253,5 @@ int fn_8020A69C(void) { return lbl_8055EDE0; }
 
 }  // extern "C"
 
-// NonMatching: fn_8020A100 gives the clamp's second int-to-float conversion its own stack temp and
+// NonMatching: UpdateMusicFadeAndLoad gives the clamp's second int-to-float conversion its own stack temp and
 // hoists the loop's 1/0 constants before the string addresses (7 diffs).

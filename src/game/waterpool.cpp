@@ -146,10 +146,10 @@ s32 fn_801EE0C8(void* model);
 void fn_80287B38(void (*cb)(const WaterCarEntry* e, int n));
 int fn_80287B94(int lo, int hi);
 f32 fn_80287BC8(f32 lo, f32 hi);
-void* fn_8028E2F8(void* desc, const char* name, const char* tex);
+void* CreateParticleSystem(void* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
-void fn_8028E590(void* e, const Vec* p, const Vec* v, f32 spin);
+void EmitParticleTrail(void* e, const Vec* p, const Vec* v, f32 spin);
 ValueNode* fn_802AE414(const char* name);
 int fn_802BF4F0(void);
 f32 fn_802BF590(void);
@@ -510,7 +510,7 @@ extern "C" void fn_8029CBA0(void) {
         e.greenConst = 1.0f;
         e.redConst = 1.0f;
         e.angConst = 1.0f;
-        lbl_8055F7F8 = fn_8028E2F8(&e, "splash", tex);
+        lbl_8055F7F8 = CreateParticleSystem(&e, "splash", tex);
     } else {
         lbl_8055F7F8 = 0;
     }
@@ -585,7 +585,7 @@ extern "C" void fn_8029CD48(WaterCar* car) {
             w.y = 2.0f * fn_80287BC8(0.0f, a);
             w.z = w.z + fn_80287BC8(-a, a);
             f32 dir = wp->x > 0.0f ? 1.0f : -1.0f;
-            fn_8028E590(lbl_8055F7F8, &q, &w, -dir * fn_80287BC8(0.0f, 3.1415927f));
+            EmitParticleTrail(lbl_8055F7F8, &q, &w, -dir * fn_80287BC8(0.0f, 3.1415927f));
         }
     }
 }
@@ -956,7 +956,7 @@ void fn_8029E49C(WaterPool* p, WaterCar* car, int w) {
         v.y = v.y + car->axes[1].y * up;
         v.z = v.z + car->axes[1].z * up;
         f32 dir = wp->x > 0.0f ? 1.0f : -1.0f;
-        fn_8028E590(lbl_8055F7F8, &at, &v, -dir * fn_80287BC8(0.0f, 3.1415927f));
+        EmitParticleTrail(lbl_8055F7F8, &at, &v, -dir * fn_80287BC8(0.0f, 3.1415927f));
     }
 }
 
@@ -1080,7 +1080,7 @@ void fn_8029EC64(WaterShallow* s, WaterCar* car, int w) {
         v.y = v.y + car->axes[1].y * up;
         v.z = v.z + car->axes[1].z * up;
         f32 dir = wp->x > 0.0f ? 1.0f : -1.0f;
-        fn_8028E590(lbl_8055F7F8, &at, &v, -dir * fn_80287BC8(0.0f, 3.1415927f));
+        EmitParticleTrail(lbl_8055F7F8, &at, &v, -dir * fn_80287BC8(0.0f, 3.1415927f));
     }
 }
 

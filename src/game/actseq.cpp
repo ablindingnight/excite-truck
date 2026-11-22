@@ -1025,7 +1025,7 @@ public:
 
 }  // namespace
 
-extern "C" int fn_8029F3BC(const char* name);  // embedded effect id
+extern "C" int FindParticleIdByName(const char* name);  // embedded effect id
 
 namespace {
 
@@ -1039,7 +1039,7 @@ public:
         f32 dly = t->GetFloat("delay", 0.0f);
         length = (int)(59.94f * len);
         delay = (int)(59.94f * dly);
-        effect = fn_8029F3BC(t->GetValue("effect"));
+        effect = FindParticleIdByName(t->GetValue("effect"));
         if (effect < 0) {
             return 0;
         }

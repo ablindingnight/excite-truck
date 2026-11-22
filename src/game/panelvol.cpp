@@ -144,24 +144,24 @@ void fn_801BFEB0(PanelVert* v);
 s16* fn_801BFEB4(CollVolume* v);
 void fn_801BFEBC(RVec3* v, f32 x, f32 y, f32 z);
 void fn_801BFECC(CollVolume* v, const RMtx* m);
-void fn_801BFF64(RMtx* m, const RVec3* v);
-void fn_801C00B8(CollShape* s, const RVec3* c);
-u32 fn_801C00F0(CollShape* s);
+void TransformPositionByMatrix(RMtx* m, const RVec3* v);
+void UpdateSphereCenter(CollShape* s, const RVec3* c);
+u32 GetCollisionShapeType(CollShape* s);
 CollShape* fn_801C00F8(CollVolume* v, int i);
-void fn_801C0124(RVec3* out, const RVec3* v, f32 s);
+void ScaleVector(RVec3* out, const RVec3* v, f32 s);
 void fn_801C014C(CollVolume* v, const RVec3* off);
 s32 fn_801C0168(RigidBody* car);
 s32 fn_801C0170(RigidBody* car);
 f32 fn_801C0178(void);
-void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b);
-void fn_801BFB2C(PanelVol* p, RMtx* out, const RVec3* pts);
+void CalculateRelativeTransform(RMtx* out, const RMtx* a, const RMtx* b);
+void CalculatePanelMatrix(PanelVol* p, RMtx* out, const RVec3* pts);
 void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
 const RVec3* fn_801BF754(RigidBody* car);
 void fn_801C092C(RMtx* out, const RMtx* a, const RMtx* b);
 void fn_801C0D3C(Mat3* m);
-void fn_801C0D6C(Mat3* m);
+void OrthonormalizeMatrix(Mat3* m);
 f32 fn_801C0E44(const RVec3* v);
-void fn_801C0E4C(RVec3* out, const RVec3* a, const RVec3* b);
+void CalculateVectorCrossProduct(RVec3* out, const RVec3* a, const RVec3* b);
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
 }
 
@@ -249,7 +249,7 @@ inline PanelVol::PanelVol(void) {
 
 extern "C" {
 
-PanelVol* fn_801BF214(void) { return new ("panel") PanelVol; }
+PanelVol* CreatePanelVolume(void) { return new ("panel") PanelVol; }
 
 struct WVec : RVec3 {
     WVec(void) { DefaultConstructVec3(this); }
@@ -268,14 +268,14 @@ static inline void SetupPanel(PanelVol* p, RigidBody* car, s32 part, const RVec3
     p->car = fn_801C0168(p->owner);
     fn_801C014C(p, off);
     WVec neg;
-    fn_801C0124(&neg, off, kNegate);
+    ScaleVector(&neg, off, kNegate);
     CollShape* s = fn_801C00F8(p, 0);
-    if (s && fn_801C00F0(s) == 'SPHR') {
-        fn_801C00B8(s, &neg);
+    if (s && GetCollisionShapeType(s) == 'SPHR') {
+        UpdateSphereCenter(s, &neg);
     }
     RMtx m;
     CopyMatrix34(&m, car->World());
-    fn_801BFF64(&m, &neg);
+    TransformPositionByMatrix(&m, &neg);
     fn_801BFECC(p, &m);
     fn_801BFEBC(&p->vel, 0.0f, 0.0f, 0.0f);
     fn_801BFEBC(&p->avel, 0.0f, 0.0f, 0.0f);
@@ -314,8 +314,8 @@ static inline void SetupPanel(PanelVol* p, RigidBody* car, s32 part, const RVec3
         fn_80144DAC(&pts[k], &verts[k].p);
     }
     CamFrame34 frame;
-    fn_801BFB2C(p, frame.Mtx(), pts);
-    fn_801BF75C(&p->rest, &m, frame.Mtx());
+    CalculatePanelMatrix(p, frame.Mtx(), pts);
+    CalculateRelativeTransform(&p->rest, &m, frame.Mtx());
     PanelLink links[2];
     for (i = 0; i < n; ids++, i++) {
         links[i].id = *ids;
@@ -361,7 +361,7 @@ int fn_801BF2A4(RigidBody* car, s32 part, const RVec3* off, const RVec3* lo, con
 const RVec3* fn_801BF754(RigidBody* car) { return (const RVec3*)((u8*)car + 0x124); }
 
 // out = a relative to b: a's basis times b's transposed basis, and a's position in b's frame.
-void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b) {
+void CalculateRelativeTransform(RMtx* out, const RMtx* a, const RMtx* b) {
     Mat3 t = *(const Mat3*)&b->rot;
     f32 s;
     s = t.m[0][1];
@@ -388,7 +388,7 @@ void fn_801BF75C(RMtx* out, const RMtx* a, const RMtx* b) {
     op->z = z;
 }
 
-void fn_801BFB2C(PanelVol* p, RMtx* out, const RVec3* pts) {
+void CalculatePanelMatrix(PanelVol* p, RMtx* out, const RVec3* pts) {
     RMtx m;
     m.pos = pts[p->org];
     Sub(&m.rot.x, &pts[p->e0b], &pts[p->e0a]);
@@ -431,7 +431,7 @@ void fn_801BFECC(CollVolume* v, const RMtx* m) {
     v->Transform();
 }
 
-void fn_801BFF64(RMtx* m, const RVec3* v) {
+void TransformPositionByMatrix(RMtx* m, const RVec3* v) {
     RVec3 t;
     MulVec(&t, v, &m->rot.x);
     m->pos.x = m->pos.x + t.x;
@@ -439,7 +439,7 @@ void fn_801BFF64(RMtx* m, const RVec3* v) {
     m->pos.z = m->pos.z + t.z;
 }
 
-void fn_801C00B8(CollShape* s, const RVec3* c) {
+void UpdateSphereCenter(CollShape* s, const RVec3* c) {
     SphereView* sp = (SphereView*)s;
     sp->center.x = c->x;
     sp->center.y = c->y;
@@ -449,7 +449,7 @@ void fn_801C00B8(CollShape* s, const RVec3* c) {
     }
 }
 
-u32 fn_801C00F0(CollShape* s) { return *(u32*)((u8*)s + 0x18); }
+u32 GetCollisionShapeType(CollShape* s) { return *(u32*)((u8*)s + 0x18); }
 
 CollShape* fn_801C00F8(CollVolume* v, int i) {
     if (i >= 0 && i < v->nAdded) {
@@ -458,7 +458,7 @@ CollShape* fn_801C00F8(CollVolume* v, int i) {
     return 0;
 }
 
-void fn_801C0124(RVec3* out, const RVec3* v, f32 s) {
+void ScaleVector(RVec3* out, const RVec3* v, f32 s) {
     out->x = v->x * s;
     out->y = v->y * s;
     out->z = v->z * s;
@@ -614,10 +614,10 @@ void PanelVol::Update(void) {
     fn_80144DAC(&m.Mtx()->pos, &pts[org]);
     fn_801C0E60(&m.Mtx()->rot.x, &pts[e0b], &pts[e0a]);
     fn_801C0E60(&m.Mtx()->rot.y, &pts[e1b], &pts[e1a]);
-    fn_801C0E4C(&m.Mtx()->rot.z, &m.Mtx()->rot.x, &m.Mtx()->rot.y);
+    CalculateVectorCrossProduct(&m.Mtx()->rot.z, &m.Mtx()->rot.x, &m.Mtx()->rot.y);
     f32 eps = fn_80144CC8(0.01f);
     if (fn_801C0E44(&m.Mtx()->rot.z) > eps) {
-        fn_801C0D6C((Mat3*)&m.Mtx()->rot);
+        OrthonormalizeMatrix((Mat3*)&m.Mtx()->rot);
     } else {
         fn_801C0D3C((Mat3*)&m.Mtx()->rot);
     }
@@ -638,11 +638,11 @@ void fn_801C092C(RMtx* out, const RMtx* a, const RMtx* b) {
 
 void fn_801C0D3C(Mat3* m) { m->SetScale(1.0f); }
 
-void fn_801C0D6C(Mat3* m) { Orthonormalize(m); }
+void OrthonormalizeMatrix(Mat3* m) { Orthonormalize(m); }
 
 f32 fn_801C0E44(const RVec3* v) { return PSVECDotProduct((const Vec*)v, (const Vec*)v); }
 
-void fn_801C0E4C(RVec3* out, const RVec3* a, const RVec3* b) { PSVECCrossProduct((const Vec*)a, (const Vec*)b, (Vec*)out); }
+void CalculateVectorCrossProduct(RVec3* out, const RVec3* a, const RVec3* b) { PSVECCrossProduct((const Vec*)a, (const Vec*)b, (Vec*)out); }
 
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b) { Sub(out, a, b); }
 

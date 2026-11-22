@@ -66,14 +66,14 @@ u32 lbl_8055F200;
 extern "C" {
 
 // Clears both join slots.
-void fn_8023FE20(void) {
+void ClearJoinSlots(void) {
     JoinSlot* j = lbl_80498828;
     j++->id = -1;
     j->id = -1;
 }
 
 // Number of joined players.
-int fn_8023FE34(void) {
+int CountActivePlayers(void) {
     int n = 0;
     for (int i = 0; i < 2; i++) {
         if (lbl_80498828[i].id >= 0) {
@@ -84,7 +84,7 @@ int fn_8023FE34(void) {
 }
 
 // Car, colour and slot of the id-th joined player (slots with id < 0 are empty).
-void fn_8023FE60(int id, u32* car, u32* color, s32* slot) {
+void GetPlayerInfoByIndex(int id, u32* car, u32* color, s32* slot) {
     JoinSlot* s = lbl_80498828;
     int n = 0;
     int i;
@@ -126,7 +126,7 @@ static inline void SetItem(MenuWidgetBase* w, u8 s, u32 v) {  /* Helper name unp
 extern "C" {
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
-VU* fn_8027DB40(int kind);
+VU* FilterAvailableCars(int kind);
 const char* fn_802E85B8(s32 slot);
 }
 
@@ -543,7 +543,7 @@ void SetInputChannel(int a);
 int fn_802E4A10(void);
 void fn_8023D4B8(s32 ch);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
-void fn_802409AC(CarSel* p, CarSelItem* item);
+void AddCarSelectionItem(CarSel* p, CarSelItem* item);
 }  // extern "C"
 
 
@@ -564,8 +564,8 @@ struct RollPanel {
 
     RollPanel(JoinSlot* s, u8 flag) : screen(0), color(&s->color, &colorIndex, &screen), stats(),
         picker((s32*)&s->unk4, (s32*)&s->car, &color, &stats, &screen), sel(&s->id, (u8*)&screen) {
-        fn_802409AC(&sel, &picker);
-        fn_802409AC(&sel, &color);
+        AddCarSelectionItem(&sel, &picker);
+        AddCarSelectionItem(&sel, &color);
         fn_802409A4((u8*)&stats, flag);
     }
     ~RollPanel(void) {
@@ -674,7 +674,7 @@ void fn_802409A4(u8* p, u8 v) { U8(p, 0x2E8) = v; }
 extern "C" {
 const char* fn_802E85B8(s32 slot);
 
-void fn_802409AC(CarSel* p, CarSelItem* item) {
+void AddCarSelectionItem(CarSel* p, CarSelItem* item) {
     int n = p->count;
     p->items[n] = item;
     p->count = n + 1;
@@ -710,7 +710,7 @@ CarPicker::CarPicker(s32* unk9COut, s32* idOut, ColorPick* colors, StatPanel* st
     this->colors = colors;
     this->stats = stats;
     this->screen = screen;
-    this->list = fn_8027DB40(6);
+    this->list = FilterAvailableCars(6);
     flag8 = 1;
     this->index = 0;
     int n = this->list->v14();
@@ -756,11 +756,11 @@ int fn_802411A4(int* out) {
     return 0;
 }
 
-void fn_802411C8(void) { fn_8023FE20(); }
+void fn_802411C8(void) { ClearJoinSlots(); }
 
-int fn_802411CC(void) { return fn_8023FE34(); }
+int fn_802411CC(void) { return CountActivePlayers(); }
 
-void fn_802411D0(int id, u32* car, u32* color, s32* slot) { fn_8023FE60(id, car, color, slot); }
+void fn_802411D0(int id, u32* car, u32* color, s32* slot) { GetPlayerInfoByIndex(id, car, color, slot); }
 
 int fn_802411D4(void) {
     int r = 0;

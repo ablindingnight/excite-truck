@@ -13,7 +13,7 @@ ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
 void fn_80131234(const char* event_path);
 void fn_80265DCC(void* base, int num, int size, int (*cmp)(const void*, const void*));
-s32 fn_8027DEAC(void);
+s32 GetCurrentSlotPoints(void);
 }  // extern "C"
 s32 AchievementsGet(int);
 extern "C" {
@@ -61,7 +61,7 @@ FixedArray<Unlockable, 32> lbl_80357E0C;
 ChassisTable lbl_803580A4;
 
 s32 GetExcitePoints(void) {
-    return fn_8027DEAC();
+    return GetCurrentSlotPoints();
 }
 
 s32 GetCarPoints(void) {

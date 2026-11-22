@@ -233,7 +233,7 @@ void fn_8026ED64(s32* cam, f32 lift, f32* pos, f32* target) {
 }
 
 f32 fn_801E9FDC(const s16* hint, f32 x, f32 z);
-int fn_801784DC(f32* pos, f32* h, int a, int b, int (*filter)(int));
+int GetGroundHeightAndNormal(f32* pos, f32* h, int a, int b, int (*filter)(int));
 f32 fn_8026A520(int i);
 int fn_8026F408(int n);
 
@@ -245,7 +245,7 @@ static inline void GroundAt(f32& h, const s16* hint, f32 x, f32 y, f32 z) {
     CsVec q;
     q.Set(x, y, z);
     f32 top;
-    if (fn_801784DC(&q.x, &top, 0, 0, fn_8026F408)) {
+    if (GetGroundHeightAndNormal(&q.x, &top, 0, 0, fn_8026F408)) {
         h = h > top ? h : top;
     }
 }

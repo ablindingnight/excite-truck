@@ -21,7 +21,7 @@ f32 fn_8013672C(void);
 void fn_80137884(s32 count);
 void fn_80139044(int* p);
 void CalculateCatchupValues(s32 count);
-void fn_801663C8(s32 count, void* cars, void* extra);
+void InitializeOrbitParameters(s32 count, void* cars, void* extra);
 void fn_8013A1E8(int n);
 void fn_8015F554(void);
 void LoadGradeSchedule(void);
@@ -38,7 +38,7 @@ void fn_8013A1F0(void);
 void fn_8013A200(s32 idx);
 void fn_8013A204(s32 idx);
 void fn_8013BC54(void);
-void fn_80166A24(void);
+void UpdateOrbitPositions(void);
 u8* fn_8017960C(int i);
 u32 fn_801769A8(void);
 u8* fn_801792F8(void);
@@ -172,7 +172,7 @@ void InitializeRaceGrid(AIRace* race) {
     fn_80137884(lbl_8055E0B0);
     fn_80139044((int*)fn_801E87A8());
     CalculateCatchupValues(lbl_8055E0B0);
-    fn_801663C8(lbl_8055E0B0, grid, race->extra);
+    InitializeOrbitParameters(lbl_8055E0B0, grid, race->extra);
     for (i = 0; i < grid->count; i++) {
         if (grid->cars[i].type != 'S') {
             lbl_8042F758[i] = new ("AI::AICarInfo") AICarInfo(i);
@@ -261,7 +261,7 @@ void UpdateAICarStates(void) {
         lbl_8055E0D4->Process();
     }
     fn_8013BC54();
-    fn_80166A24();
+    UpdateOrbitPositions();
 }
 
 void fn_80134B50(void) { lbl_8055E0D4->UpdateAll(); }

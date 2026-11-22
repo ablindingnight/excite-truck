@@ -132,7 +132,7 @@ static inline int FindUnlockByOffset(EventInfo* ev) {
     return -1;
 }
 
-int fn_8024958C(EventInfo* ev, const char* track) {
+int CheckTrackUnlock(EventInfo* ev, const char* track) {
     u32 ok = ev->type == 0x180302;
     if (ok) {
         ok = FindUnlock(ev, lbl_8055F28C) != -1;
@@ -516,7 +516,7 @@ void fn_80265DCC(void* base, int n, int size, int (*cmp)(u8*, u8*));
 int fn_802146BC(MenuDesc* desc, int x, int y, int modal);
 void fn_802E317C(const char* fmt, ...);
 void fn_80236914(int which, f32* out, f32 t);
-int fn_8024A4B8(const char** a, const char** b);
+int CompareStrings(const char** a, const char** b);
 }
 
 // Stripped from the shipped game; only its message survives in the unit's .data.
@@ -580,7 +580,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     for (int i = 0; i < GetNumEvents(); i++) {
         EventInfo* ev = GetEvent(i);
         const char* name = GetTrack(ev->track)->name;
-        if ((testing ? fn_8024958C : fn_80249660)(ev, name)) {
+        if ((testing ? CheckTrackUnlock : fn_80249660)(ev, name)) {
             EvPair* d = pairs.p->items;
             int k = pairs.p->count;
             pairs.p->count = k + 1;
@@ -594,7 +594,7 @@ int fn_8024974C(s32* track, s32* eve, s32* diff, int testing) {
     s32 lastTrack = *track;
     LocPicker loc(&pairs.p, &events);
     loc.Build();
-    fn_80265DCC(loc.list.data, loc.list.count, sizeof(LocEntry), (int (*)(u8*, u8*))fn_8024A4B8);
+    fn_80265DCC(loc.list.data, loc.list.count, sizeof(LocEntry), (int (*)(u8*, u8*))CompareStrings);
     if (lastTrack >= 0 && lastTrack < GetNumTracks()) {
         const char* env = GetTrackEnviron(GetTrack(lastTrack)->name);
         for (int j = 0; j < loc.list.count; j++) {
@@ -721,7 +721,7 @@ inline void EvPicker::SetEnv(EvPairs** pairs, const char* env_) {
 
 extern "C" {
 
-int fn_8024A4B8(const char** a, const char** b) { return strcasecmp(*a, *b); }
+int CompareStrings(const char** a, const char** b) { return strcasecmp(*a, *b); }
 
 int fn_8024A4C4(s32* track, s32* eve, s32* diff) { return fn_8024974C(track, eve, diff, 0); }
 
@@ -739,7 +739,7 @@ int fn_8024B070(s32* key, const u8* list);
 
 // Multiplayer event choice: starts from the remembered track/event, runs the pickers and remembers the
 // result. Returns 0 when backed out.
-int fn_8024A4CC(s32* track, s32* eve, s32* extra) {
+int ProcessMultiplayerEventChoice(s32* track, s32* eve, s32* extra) {
     *track = -1;
     *eve = 0;
     *extra = 0;
@@ -785,7 +785,7 @@ int fn_8024A6A4(s32* p) {
 extern char lbl_8055B860[8];
 
 // Location menu: on a choice stores the location name in *sel and returns 1.
-int fn_8024A6EC(const char** sel, u8* list) {
+int SelectLocationMenu(const char** sel, u8* list) {
     if (!fn_802411D4()) {
         return 0;
     }
@@ -838,7 +838,7 @@ int fn_8024A6EC(const char** sel, u8* list) {
 extern char lbl_8055B860[8];
 
 // Course menu of location sel; on a choice stores the event in *key and returns 1.
-int fn_8024ACB4(s32* key, const char* sel, u8* list) {
+int DisplayCourseSelectionMenu(s32* key, const char* sel, u8* list) {
     if (!fn_802411D4()) {
         return 0;
     }
@@ -890,9 +890,9 @@ int fn_8024B070(s32* key, const u8* list) {
     if (fn_80215228()) {
         lbl_8055F298 = 0;
     }
-    while (lbl_8055F298 || fn_8024A6EC(&sel, (u8*)list)) {
+    while (lbl_8055F298 || SelectLocationMenu(&sel, (u8*)list)) {
         lbl_8055F298 = 0;
-        if (fn_8024ACB4(key, sel, (u8*)list)) {
+        if (DisplayCourseSelectionMenu(key, sel, (u8*)list)) {
             lbl_8055F298 = 1;
             break;
         }
@@ -900,7 +900,7 @@ int fn_8024B070(s32* key, const u8* list) {
     return lbl_8055F298;
 }
 
-const char* fn_8024B178(int ev) {
+const char* LoadCareerEventTexture(int ev) {
     const char* name = ((VN*)GetEvent(ev)->node)->v14("name");
     const char* prefix = "career_";
     if (!strncmp(name, prefix, strlen(prefix))) {
@@ -910,7 +910,7 @@ const char* fn_8024B178(int ev) {
     return lbl_804989AC;
 }
 
-int fn_8024B214(u8* a, u8* b) {
+int CompareEventStrings(u8* a, u8* b) {
     u8 fa = U8(a, 0x4);
     if (fa && !U8(b, 0x4)) {
         return 1;
@@ -962,7 +962,7 @@ static inline T* ElemAt(T* p, int i) {
     return &p[i];
 }
 
-extern "C" int fn_8024B214(u8* a, u8* b);
+extern "C" int CompareEventStrings(u8* a, u8* b);
 
 CountryScreen::CountryScreen(EvList* l) {
     list = l;
@@ -985,7 +985,7 @@ CountryScreen::CountryScreen(EvList* l) {
             anyNew = 1;
         }
     }
-    fn_80265DCC(groups.data, groups.count, 8, fn_8024B214);
+    fn_80265DCC(groups.data, groups.count, 8, CompareEventStrings);
     memset(slots, 0, 0x208);
     sel = -1;
 }
@@ -1038,7 +1038,7 @@ void CourseScreen::Refresh(void) {
 static inline void AddIfInGroup(const char* group, EvEntry* e, CourseScreen* s) {
     if (!strcasecmp(group, e->group)) {
         s->events.Push(e);
-        s->tex.Add(e->id, fn_8024B178(e->id));
+        s->tex.Add(e->id, LoadCareerEventTexture(e->id));
     }
 }
 

@@ -89,7 +89,7 @@ extern "C" {
 // Mode set as a bit mask over modes 4..23 (the original tests a mask, not a switch).
 #define CAM_MODE_BIT(m) (1 << ((m) - 4))
 
-int fn_80276068(int mode) {
+int IsCameraModeAllowed(int mode) {
     int r = 0;
     u32 i = mode - 4;
     if (i <= 19 && ((1 << i) & (CAM_MODE_BIT(4) | CAM_MODE_BIT(5) | CAM_MODE_BIT(6) | CAM_MODE_BIT(9) | CAM_MODE_BIT(23)))) {
@@ -208,7 +208,7 @@ static inline void QuatToPose(CamPose* p, const f32* q) {
 // Name of the default named-camera set (also the format for generated default camera names).
 const char* lbl_8055C638 = "rddefault";
 
-void fn_8027656C(CamPose* out, f32* fov, int slot) {
+void InterpolateCameraPose(CamPose* out, f32* fov, int slot) {
     f32 t = fn_80277704(slot);
     int kind = lbl_8049FD58[slot].kind;
     if (kind != 0x22) {
@@ -250,7 +250,7 @@ void fn_8027656C(CamPose* out, f32* fov, int slot) {
     *fov = s->fov0 + e * (s->fov1 - s->fov0);
 }
 
-NamedCam* fn_80276A44(const char* name) {
+NamedCam* FindNamedCamera(const char* name) {
     NamedCam* c = lbl_8049FEE0;
     for (int i = 0; i < lbl_8055F5A0; i++) {
         if (!strcasecmp(c->name, name)) {
@@ -261,14 +261,14 @@ NamedCam* fn_80276A44(const char* name) {
     return 0;
 }
 
-void fn_80277F84(NamedCam* c, CamReader* r, int n);
+void LoadCameraPose(NamedCam* c, CamReader* r, int n);
 extern const char* lbl_8055C638;
 
 // Reads one named camera and remembers the special "house" and default ones.
-void fn_80276ACC(CamReader* r, const char* def) {
+void ReadNamedCamera(CamReader* r, const char* def) {
     const char* name = r->GetString("name", def);
     NamedCam* c = &lbl_8049FEE0[lbl_8055F5A0++];
-    fn_80277F84(c, r, lbl_8055F5A0);
+    LoadCameraPose(c, r, lbl_8055F5A0);
     strncpy(c->name, name, 0x10);
     if (!strcasecmp(name, "house")) {
         lbl_8055F59C = c;
@@ -287,7 +287,7 @@ void fn_80276B8C(void) {
 
 void fn_80276BE4(CamPose* out, f32* fov) {
     if (lbl_8049FD58[0].active) {
-        fn_8027656C(&lbl_8049FE98.pose, &lbl_8049FE98.fov, 0);
+        InterpolateCameraPose(&lbl_8049FE98.pose, &lbl_8049FE98.fov, 0);
     }
     out->rot = lbl_8049FE98.pose.rot;
     out->pos = lbl_8049FE98.pose.pos;
@@ -295,7 +295,7 @@ void fn_80276BE4(CamPose* out, f32* fov) {
 }
 
 void fn_80276CB0(const char* name, int blend) {
-    NamedCam* c = fn_80276A44(name);
+    NamedCam* c = FindNamedCamera(name);
     if (!c) {
         c = lbl_8055F598;
     }
@@ -308,7 +308,7 @@ void fn_80276CB0(const char* name, int blend) {
 }
 
 void fn_80276D3C(const char* name, int mode) {
-    NamedCam* c = fn_80276A44(name);
+    NamedCam* c = FindNamedCamera(name);
     if (mode == 1) {
         f32 pose[12];
         f32 fov;
@@ -440,7 +440,7 @@ void fn_80276DC8(int slot) {
     CamRec* rec = &lbl_804A0C60[slot];
     lbl_804A15C0[slot] = 0.0f;
     look = rec->pose;
-    if (!fn_80276068(rec->nextMode) || !S32(src->car, 0x24)) {
+    if (!IsCameraModeAllowed(rec->nextMode) || !S32(src->car, 0x24)) {
         // PROVISIONAL: the array and field-reference ownership is inferred
         // from retail's held base and multiply operands; original spelling unknown.
         CamRec (&records)[4] = lbl_804A0C60;
@@ -513,11 +513,11 @@ void fn_80277740(void) {
 // Handles one camera-file block; returns whether the tag was recognised.
 int fn_80277754(CamReader* r) {
     if (!strcasecmp(r->Tag(), "raceday")) {
-        fn_80276ACC(r, lbl_8055C638);
+        ReadNamedCamera(r, lbl_8055C638);
     } else if (!strcasecmp(r->Tag(), "house")) {
-        fn_80276ACC(r, "house");
+        ReadNamedCamera(r, "house");
     } else if (!strcasecmp(r->Tag(), "namedcam")) {
-        fn_80276ACC(r, "def_name");
+        ReadNamedCamera(r, "def_name");
     } else {
         return 0;
     }
@@ -571,8 +571,8 @@ void fn_80277828(void) {
     strcpy(lbl_8055F59C->name, "house");
 }
 
-int fn_80277960(const char* name, CamPose* out, f32* fov) {
-    NamedCam* c = fn_80276A44(name);
+int GetNamedCameraPose(const char* name, CamPose* out, f32* fov) {
+    NamedCam* c = FindNamedCamera(name);
     if (c) {
         out->rot = c->pose.rot;
         out->pos = c->pose.pos;
@@ -674,7 +674,7 @@ static inline void BlendNamedCam(
 
 }
 
-void fn_80277A14(CamRec* c, int slot) {
+void CalculateNamedCameraBlend(CamRec* c, int slot) {
     f32 tf;
     CamPose blend;
     CamPose frame;
@@ -707,7 +707,7 @@ static void NamedCamWrite(const NamedCam* c) {
     fn_802E30C8("\tfov\t%1.3f\r\n", c->fov);
 }
 
-void fn_80277F84(NamedCam* c, CamReader* r, int n) {
+void LoadCameraPose(NamedCam* c, CamReader* r, int n) {
     c->pose.pos.v[0] = r->GetFloat("location_x");
     c->pose.pos.v[1] = r->GetFloat("location_y");
     c->pose.pos.v[2] = r->GetFloat("location_z");

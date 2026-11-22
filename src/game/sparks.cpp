@@ -99,7 +99,7 @@ int fn_80287B5C(int n);
 int fn_80287B94(int lo, int hi);
 f32 fn_80287BC8(f32 lo, f32 hi);
 void fn_80288A70(const void* ev, const Vec* v, f32 x);
-void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
+void* CreateParticleSystem(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const void* p, const void* v);
 Chunks* fn_802929D8(int type, const char* base, int inst, const char* remap);
@@ -528,7 +528,7 @@ void fn_8028B3CC(void) {
         e.greenConst = 1.0f;
         e.redConst = 1.0f;
         e.blueConst = 0.0f;
-        lbl_8055F704 = fn_8028E2F8(&e, "paint splat", tex);
+        lbl_8055F704 = CreateParticleSystem(&e, "paint splat", tex);
     } else {
         lbl_8055F704 = 0;
     }

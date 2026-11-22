@@ -258,7 +258,7 @@ CreditBackgroundFields* fn_802646D0(CreditBackgroundFields* self);
 
 // Imported calls only; no reconstruction in the held AX/SPU range.
 int fn_8020A69C(void);
-void fn_8020A648(int);
+void UpdateMusicTrackIndex(int);
 ValueTable* fn_80131810(const char*);
 void fn_80131818(ValueTable*);
 int fn_802ECF00(int);
@@ -449,7 +449,7 @@ __declspec(section ".sdata") const char lbl_8055C4A8[8]="fade_in";
 // Definitions ordered by validated original identity, not pair position.
 extern "C" void fn_80263F30(int before,u8 allowSkip,int after) {
     lbl_8055F450=allowSkip;
-    int previous=fn_8020A69C();fn_8020A648(1);
+    int previous=fn_8020A69C();UpdateMusicTrackIndex(1);
     if(before)fn_80265A74();
     ValueTable* table=fn_80131810(lbl_803463A0);
     if(table) {
@@ -462,12 +462,12 @@ extern "C" void fn_80263F30(int before,u8 allowSkip,int after) {
             if(!strcasecmp(node->GetName(),lbl_803463E4))keepGoing=fn_802656C8(node);
             index++;
         }
-        fn_8020A648(-1);fn_80265A74();
+        UpdateMusicTrackIndex(-1);fn_80265A74();
         if(!fn_802ECF04())fn_802E317C(lbl_803463F8);
         fn_80131818(table);
     }
     if(after)fn_80265940();
-    fn_8020A648(previous);
+    UpdateMusicTrackIndex(previous);
 }
 
 extern "C" void fn_80264098(CreditItemFields* self, int kind) { self->kind = kind; }

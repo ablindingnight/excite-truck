@@ -103,7 +103,7 @@ void UpdateScoreOverlays(int, int);
 extern "C" {
 int fn_801E866C(int view);
 const char* fn_80131234(const char* key);
-void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
+void FormatAndLayoutTextElement(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 f32 fn_80147204(TextElem* e, const char* text);
 s32 GetGradeScoreThreshold(s32 a);
 s32 fn_80160A74(void);
@@ -1540,7 +1540,7 @@ static inline f32 Ease(f32 t) {
     }
 }
 
-static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t) { fn_801479A8(a, b, text, t); }
+static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t) { FormatAndLayoutTextElement(a, b, text, t); }
 
 static inline f32 Width(TextElem* e, const char* text) { return fn_80147204(e, text); }
 

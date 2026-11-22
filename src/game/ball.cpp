@@ -284,8 +284,8 @@ extern "C" void fn_8017D404(f32 r, f32 force, const RVec3* c, RigidBody* self, i
     struct { Node* nd; } sp_;  /* MATCHING-AID: one-field local struct; the field is numbered as a temp (structpair.py) */
     int n = 5;
     int i;
-    void fn_801B619C(List** out, int* n, const RVec3* c);
-    fn_801B619C(lists, &n, c);
+    void FindCellNeighbors(List** out, int* n, const RVec3* c);
+    FindCellNeighbors(lists, &n, c);
     for (i = 0; i < n; i++) {
         for (sp_.nd = lists[i]->head; sp_.nd; sp_.nd = sp_.nd->next) {
             RigidBody* b = sp_.nd->obj->vf40() ? (RigidBody*)sp_.nd->obj : 0;

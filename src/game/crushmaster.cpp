@@ -949,7 +949,7 @@ int IsLoadingActive(void);
 
 extern "C" {
 void UpdateDashHelper(void);
-void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
+void FormatAndLayoutTextElement(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 f32 fn_80147204(TextElem* e, const char* text);
 s32 GetGradeScoreThreshold(s32 a);
 s32 fn_80160A74(void);
@@ -960,7 +960,7 @@ void fn_80139318(ILayout* l, s32 tex, int car, f32 size);  // radar
 void fn_80147940(ILayout* l, Box* b, const char* art, int part);
 void fn_80147230(TextElem* e, const char* fmt, ...);
 void fn_801476C4(TextElem* e);
-void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
+void InterpolateTextElement(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
 void fn_801475D0(ILayout* l, const char* name, const char* fmt, ...);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
 void fn_80130978(char* buf, int size, f32 v);
@@ -1349,7 +1349,7 @@ static inline void UpdateTextElementFormat(ILayout* l, const char* from, const c
     TextElem* b = l->Find(to);
     TextElem e;
     if (a) {
-        fn_80147CEC(&e, a, b, t);
+        InterpolateTextElement(&e, a, b, t);
     } else {
         e = *b;
     }
@@ -1421,7 +1421,7 @@ inline int CrushMaster::vf8C(int p, int key) {
 }
 
 
-static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t) { fn_801479A8(a, b, text, t); }
+static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t) { FormatAndLayoutTextElement(a, b, text, t); }
 
 static inline f32 Width(TextElem* e, const char* text) { return fn_80147204(e, text); }
 

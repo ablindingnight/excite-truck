@@ -14,7 +14,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 s32 fn_802E2C20(void);                   // milliseconds
 int fn_802E9A14(void);                   // sound mode
 void fn_801331C4(int owner, const char* key, f32* value);
-void fn_8013323C(int owner, const char* key, f32 value);
+void SetOptionFloatValue(int owner, const char* key, f32 value);
 void fn_801332D0(int owner, const char* key, s32* value);
 void fn_80133348(int owner, const char* key, s32 value);
 int fn_8013365C(const char* name, void (*cb)(void));
@@ -166,16 +166,16 @@ void UpdateSoundVolumes(int ident, int event) {
     switch (event) {
     case 3:
         fn_801331C4(ident + 0xC, "player_sfx_vol", &v);
-        fn_8013323C(4, "effects_volume", v);
+        SetOptionFloatValue(4, "effects_volume", v);
         SetEffectsVolume(v);
         break;
     case 1:
     case 2:
         fn_801331C4(4, "effects_volume", &v);
-        fn_8013323C(ident + 0xC, "player_sfx_vol", v);
+        SetOptionFloatValue(ident + 0xC, "player_sfx_vol", v);
         break;
     case 0:
-        fn_8013323C(4, "effects_volume", v);
+        SetOptionFloatValue(4, "effects_volume", v);
         SetEffectsVolume(v);
         break;
     }
@@ -206,7 +206,7 @@ void InitializeAudioMixer(int create) {
     if (lbl_80489238.current < 0 || lbl_80489238.current >= lbl_80489238.count) {
         lbl_80489238.current = 0;
     }
-    fn_8013323C(4, "effects_volume", 1.0f);
+    SetOptionFloatValue(4, "effects_volume", 1.0f);
     LoadAudioSettingsFromConfig();
     lbl_8055B4DC = fn_8013365C("Mixer", LoadAudioSettingsFromConfig);
     IdentRegisterCallback(UpdateSoundVolumes);
@@ -238,7 +238,7 @@ void fn_80208D80(int destroy) {
         }
     }
     fn_80133348(4, "mixer", lbl_80489238.current);
-    fn_8013323C(4, "effects_volume", lbl_8055B4D0);
+    SetOptionFloatValue(4, "effects_volume", lbl_8055B4D0);
     fn_80133348(4, "quality", lbl_8055EDA8);
     fn_801336E0(lbl_8055B4DC, LoadAudioSettingsFromConfig);
 }
@@ -292,7 +292,7 @@ f32 fn_80209028(void) { return lbl_8055B4D4; }
 void SetEffectsVolume(f32 v) {
     f32 t = MIN(1.0f, v);
     lbl_8055B4D0 = MAX(t, 0.0f);
-    fn_8013323C(4, "effects_volume", lbl_8055B4D0);
+    SetOptionFloatValue(4, "effects_volume", lbl_8055B4D0);
     fn_80208A50();
 }
 

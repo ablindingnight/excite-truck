@@ -107,9 +107,9 @@ MutPhob* lbl_804421D8[64];
 extern "C" {
 
 MutPhob* fn_801D36E8(void);
-void fn_801D3FA4(MutPhob* p, int model, int mask, const RMtx* xf, const RVec3* offset, const PhobConfig* c, void* src);
-void fn_801D411C(MutPhob* p);
-void fn_801D4294(MutPhob* p, const PhobConfig* c);
+void PlaceChunkWithSettings(MutPhob* p, int model, int mask, const RMtx* xf, const RVec3* offset, const PhobConfig* c, void* src);
+void ResetPhysicsState(MutPhob* p);
+void InitializePhobShape(MutPhob* p, const PhobConfig* c);
 void fn_801D4598(MutPhob* p, f32 now);
 int fn_801D37C4(const char* name);
 
@@ -119,11 +119,11 @@ void fn_801D32DC(void) {}
 
 MutPhob* fn_801D32E0(int model, int mask, const RMtx* xf, const RVec3* offset, const PhobConfig* c, void* src) {
     MutPhob* p = fn_801D36E8();
-    fn_801D3FA4(p, model, mask, xf, offset, c, src);
+    PlaceChunkWithSettings(p, model, mask, xf, offset, c, src);
     return p;
 }
 
-void fn_801D334C(PhobConfig* c, ValueNode* t) {
+void LoadPhobConfig(PhobConfig* c, ValueNode* t) {
     c->maxLife = t->GetFloat("max_life");
     c->mass = t->GetFloat("mass");
     c->mx = t->GetFloat("mx");
@@ -167,7 +167,7 @@ void fn_801D3610(PhobConfig* c, const char* name) {
         ValueTable* t = (ValueTable*)fn_80131810(files[i]);
         if (t) {
             if (t->HasChild(name)) {
-                fn_801D334C(c, t->FindChild(name));
+                LoadPhobConfig(c, t->FindChild(name));
                 fn_80131818((ValueTable*)t);
                 return;
             }
@@ -190,7 +190,7 @@ MutPhob* fn_801D36E8(void) {
             t = oldest->time;
         }
     }
-    fn_801D411C(oldest);
+    ResetPhysicsState(oldest);
     return oldest;
 }
 
@@ -272,7 +272,7 @@ void MutPhob::Update(void) {
         avel.y *= 0.99983317f;
         avel.z *= 0.99983317f;
     } else {
-        fn_801D411C(this);
+        ResetPhysicsState(this);
         nImp = 0;
     }
 }
@@ -322,7 +322,7 @@ void MutPhob::OnHit(const RVec3* f, const RVec3* at, int k, void* c) {
 extern "C" {
 
 // Places chunk 'p' at 'xf' with the settings in 'c'.
-void fn_801D3FA4(MutPhob* p, int model, int mask, const RMtx* xf, const RVec3* offset, const PhobConfig* c, void* src) {
+void PlaceChunkWithSettings(MutPhob* p, int model, int mask, const RMtx* xf, const RVec3* offset, const PhobConfig* c, void* src) {
     p->model = model;
     p->mask = mask;
     p->home = *xf;
@@ -333,7 +333,7 @@ void fn_801D3FA4(MutPhob* p, int model, int mask, const RMtx* xf, const RVec3* o
     p->maxLife = c->maxLife;
     p->effect = c->effect;
     p->SetMass(c->mass, c->mx, c->my, c->mz);
-    fn_801D4294(p, c);
+    InitializePhobShape(p, c);
     p->offset = *offset;
     p->CollVolume::vf20();
     p->mtx = *xf;
@@ -341,7 +341,7 @@ void fn_801D3FA4(MutPhob* p, int model, int mask, const RMtx* xf, const RVec3* o
 }
 
 // Parks chunk 'p' below the world.
-void fn_801D411C(MutPhob* p) {
+void ResetPhysicsState(MutPhob* p) {
     if (p->kind == MP_HINGED && p->src) {
         fn_801A4868(p->src, 1);
     }
@@ -371,7 +371,7 @@ static inline f32 SumSquares(f32 a, f32 b) {
     return aa + bb;
 }
 
-void fn_801D4294(MutPhob* p, const PhobConfig* c) {
+void InitializePhobShape(MutPhob* p, const PhobConfig* c) {
     RVec3 center(0.0f, 0.0f, 0.0f);
     switch (c->kind) {
     case MP_SPHERE:
@@ -425,7 +425,7 @@ void fn_801D4598(MutPhob* p, f32 now) {
         p->mtx.pos = p->home.pos;
         p->CollVolume::Transform();
     } else {
-        fn_801D411C(p);
+        ResetPhysicsState(p);
     }
 }
 

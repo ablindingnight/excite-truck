@@ -164,7 +164,7 @@ extern "C" void* memset(void*, int, unsigned long);
 extern "C" void fn_802E30C8(const char *, ...);
 extern "C" void fn_802E0F98(void);
 extern "C" void fn_8012BEF0(const char*);
-extern "C" void fn_8020A47C(void);
+extern "C" void InitializeMusicPlayer(void);
 extern "C" void fn_8023889C(void);
 extern "C" void* gxGetImage(const char*);
 extern "C" void fn_8022A5E4(void);
@@ -215,7 +215,7 @@ extern "C" void fn_80211690(int mode) {
             LoadTimerProgress();
         }
     }
-    fn_8020A47C();
+    InitializeMusicPlayer();
     if (!lite) {
         fn_8023889C();
     }

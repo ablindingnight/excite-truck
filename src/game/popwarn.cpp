@@ -516,7 +516,7 @@ void SetPlayerName(const char* name, int slot);
 
 extern "C" {
 void SetInputChannel(int a);
-void fn_8020A600(void);
+void PlayMusicTrack(void);
 int fn_80247C18(void);
 int fn_802478A4(void);
 int fn_80247AD0(void);
@@ -541,7 +541,7 @@ int fn_8024CF54(void);
 // Demo main menu loop: dispatches the demo menu's choices until the title screen is left.
 void MenuDoDemo(void) {
     lbl_8055F260 = 1;
-    fn_8020A600();
+    PlayMusicTrack();
     fn_802ECEC4();
     while (fn_80246AE8()) {
         while (fn_8024CF54()) {
@@ -1077,11 +1077,11 @@ int fn_802485FC(void) {
 
 extern "C" {
 int fn_8020A640(void);
-void fn_8020A600(void);
+void PlayMusicTrack(void);
 
 int fn_80248668(void) {
     if (!fn_8020A640()) {
-        fn_8020A600();
+        PlayMusicTrack();
     }
     MenuTimer t(30000, 1);
     MenuItem items[] = {

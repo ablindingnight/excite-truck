@@ -151,7 +151,7 @@ void fn_80147230(TextElem* e, const char* fmt, ...);
 void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
 void fn_80147940(ILayout* l, GartElem* b, const char* set, int part);
-void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
+void FormatAndLayoutTextElement(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 ILayout* fn_80145E70(const char* name);
 }
 
@@ -1321,7 +1321,7 @@ void fn_80232930(void);
 u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a);
 f32 fn_80144C80(f32 a, f32 b, f32 t);
 int fn_80144C90(f32 x);
-void fn_80147EE0(ArtElem* e, f32 s);
+void ScaleArtElemAroundCenter(ArtElem* e, f32 s);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 }  // extern "C"
 void UpdateScoreOverlays(int id, int score);
@@ -1397,7 +1397,7 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
                             for (j = 0.0f; j <= it->Value(); j += 1.0f) {
                                 f32 f = Clamp(it->Value() - j, 0.0f, 1.0f);
                                 ArtElem s = e;
-                                fn_80147EE0(&s, Remap(0.0f, 1.0f, 3.0f, 1.0f, f));
+                                ScaleArtElemAroundCenter(&s, Remap(0.0f, 1.0f, 3.0f, 1.0f, f));
                                 s.elemJust = 2;
                                 fn_80147C50(0x00FFFFFF, 0x7FFFFFFF, f);
                                 if (NearEq(f, 1.0f)) {
@@ -1456,7 +1456,7 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
                         TextElem e2 = *t2;
                         e1.color = fn_80144C68(ColR(e1.color), ColG(c0), ColB(c0), ColA(c0));
                         e2.color = fn_80144C68(ColR(e2.color), ColG(c0), ColB(c0), ColA(c0));
-                        fn_801479A8(&e1, &e2, "%s", p, names[2]);
+                        FormatAndLayoutTextElement(&e1, &e2, "%s", p, names[2]);
                     }
                 }
                 fn_80232930();
@@ -1464,7 +1464,7 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
                 TextElem* t1 = l->Find(names[0]);
                 TextElem* t2 = l->Find(names[1]);
                 if (t1 && t2) {
-                    fn_801479A8(t1, t2, "%s", a, names[2]);
+                    FormatAndLayoutTextElement(t1, t2, "%s", a, names[2]);
                 }
             }
             stars = l->FindArt("hi_score_stars");
@@ -1521,7 +1521,7 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
                             ArtElem b2 = base;
                             f32 red;
                             u32 c2;
-                            fn_80147EE0(&b2, 1.0f + 6.0f * r);
+                            ScaleArtElemAroundCenter(&b2, 1.0f + 6.0f * r);
                             red = (1.0f - r) * ColR(col);
                             c2 = fn_80144C68(red, ColG(col), ColB(col), ColA(col));
                             b2.pos.x = b2.pos.x + 0.5f * ((i - 2) * (b2.w - base.w));
@@ -2020,7 +2020,7 @@ extern "C" {
 int fn_801E85A4(void);
 int fn_80161C38(void);
 double fmod(double x, double y);
-void fn_80147CEC(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
+void InterpolateTextElement(TextElem* out, const TextElem* a, const TextElem* b, f32 t);
 f32 fn_8013672C(void);
 s32 fn_80204CF0(void);  // difficulty
 }
@@ -2233,7 +2233,7 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
         ft = l->Find("finish_timer");
         if (tc && ft && !master->timer.Finishing()) {
             TextElem e;
-            fn_80147CEC(&e, tc, ft, k);
+            InterpolateTextElement(&e, tc, ft, k);
             FormatTimeDisplay(&e, elapsed);
         }
     }
@@ -3203,7 +3203,7 @@ void fn_801688B4(int a);
 void fn_80167840(RaceCarRec* rc);
 s32 fn_8016A30C(int id);
 int fn_80179630(int view);
-void fn_80167684(f32 left);
+void CheckTurtleEnabled(f32 left);
 double floor(double x);
 double cos(double x);
 }
@@ -3436,7 +3436,7 @@ inline void BetaMaster::vf0C(void) {
     }
     if (found) {
         f32 left = timer.limit - timer.now;
-        fn_80167684(0.0f > left ? 0.0f : left);
+        CheckTurtleEnabled(0.0f > left ? 0.0f : left);
     }
 }
 
@@ -3968,7 +3968,7 @@ f32 fn_80147204(TextElem* e, const char* text);  // text width
 static inline ILayout* Overlay(void) { return fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238; }
 
 static inline void Blend(const TextElem* a, const TextElem* b, const char* text, f32 t, ILayout* l) {
-    fn_801479A8(a, b, text, t);
+    FormatAndLayoutTextElement(a, b, text, t);
 }
 static inline f32 Width(TextElem* e, const char* text, ILayout* l) { return fn_80147204(e, text); }
 
@@ -4033,7 +4033,7 @@ inline int BetaMaster::vf3C(int view) {
         if (h0 && h1 && body && limit) {
             f32 left = 0.0f > timer.limit - timer.now ? 0.0f : timer.limit - timer.now;
             TextElem e;
-            fn_80147CEC(&e, body, limit, Ease(k));
+            InterpolateTextElement(&e, body, limit, Ease(k));
             Blend(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(k), Overlay());
             FormatTimeDisplay(&e, left);
         }

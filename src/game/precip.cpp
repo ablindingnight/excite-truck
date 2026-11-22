@@ -168,7 +168,7 @@ void fn_802C744C(s32 model, const PlainValMatrix* f);
 void fn_802C9904(void);
 void fn_802E317C(const char* fmt, ...);
 void fn_8028E61C(PartParams* d);
-s32 fn_8028E2F8(PartParams* d, const char* name, const char* tex);
+s32 CreateParticleSystem(PartParams* d, const char* name, const char* tex);
 ValueNode* GetEffectInfo(int i);
 int fn_80287B14(void);
 int CheckEffectKeyExists(ValueNode* vn, const char* key);
@@ -466,7 +466,7 @@ void fn_802A50F8(void) {
     pd.blueConst = 1.0f;
     pd.greenConst = 1.0f;
     pd.redConst = 1.0f;
-    lbl_8055F894 = fn_8028E2F8(&pd, "droplets", "rain.tex");
+    lbl_8055F894 = CreateParticleSystem(&pd, "droplets", "rain.tex");
     DropSource* s = lbl_804BCFB8;
     for (int i = 0; i < fn_80287B14(); s++, i++) {
         ValueNode* t = GetEffectInfo(i);

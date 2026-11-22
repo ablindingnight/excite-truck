@@ -305,7 +305,7 @@ void fn_80165A30(ValueNode* table) {
     ReadRoles(table);
 }
 
-void fn_80165B78(ValueNode* table) {
+void LoadOrbitConfigParams(ValueNode* table) {
     const char* s;
     f32 v;
     ValueNode* sf;
@@ -352,14 +352,14 @@ void fn_80165B78(ValueNode* table) {
     lbl_8042FE38.turtleSpeed *= 0.44444445f;
 }
 
-void fn_80165FAC(void) {
+void LoadOrbitTable(void) {
     ValueTable* t = fn_80131808("orbit.val");
     const char* name = fn_80204EA0("orbit_table");
     ValueNode* n;
     fn_802E30C8("orbit: loading from subtable \"%s\"", name);
     n = t->FindChild(name);
     fn_80165A30(n);
-    fn_80165B78(n);
+    LoadOrbitConfigParams(n);
     fn_80131818(t);
 }
 
@@ -378,7 +378,7 @@ Role* fn_80166040(s32 id) {
 
 OrbitCar* fn_80166098(void) { return GetDeityCarByIndex(fn_80179630(-1)); }
 
-f32 fn_801660C0(void) {
+f32 CalculateLapDistance(void) {
     OrbitCar* p = fn_80166098();
     int lap = p->Progress()->laps - 1;
     f32 len = fn_8013672C();
@@ -418,7 +418,7 @@ f32 fn_80166274(void) {
     return MAX(0.7f, r);
 }
 
-void fn_801662FC(void) {
+void LogSpeedFactorDebugInfo(void) {
     static s32 frame;
     if ((lbl_8055E329 = (u8)frame++ == 0xFF) && lbl_8055E328) {
         if (!NearEq(lbl_8055E31C, 1.0f)) {
@@ -433,10 +433,10 @@ void fn_801662FC(void) {
 
 void* lbl_8055E330;  // boost bounds
 
-void fn_801663C8(int n, const CarDef* cars, const RaceExtra* race) {
+void InitializeOrbitParameters(int n, const CarDef* cars, const RaceExtra* race) {
     int i;
     lbl_8055E324 = fn_801659D0(race);
-    fn_80165FAC();
+    LoadOrbitTable();
     lbl_8042FE38.maxSf = GetEvent(fn_801769CC()->event)->node->GetFloat("orbit_max_sf", lbl_8042FE38.maxSf);
     fn_802E30C8("orbit: %.2f->%.2f on %.2f->%.2f", lbl_8042FE38.minSf, lbl_8042FE38.maxSf, lbl_8042FE38.maxLon,
                 lbl_8042FE38.minLon);
@@ -495,7 +495,7 @@ void fn_80166898(void) {
 
 f32 fn_80166DD4(Ramp* r);
 void fn_80166E54(Role* r);
-void fn_80166E68(Ramp* r, f32 v);
+void UpdateRampTarget(Ramp* r, f32 v);
 void fn_80166F3C(f32* t, f32 lo, f32 hi);
 int fn_80166F78(f32* t);
 f32 fn_80166F90(const Role* r);
@@ -522,7 +522,7 @@ static inline void UpdateCar(OrbitCarState* s, OrbitCar* car) {
             if (s->close = d > lbl_8042FE38.minCloseLon && d < lbl_8042FE38.maxCloseLon) {
                 f = Clamp(f, lbl_8042FE38.minCloseSf, lbl_8042FE38.maxCloseSf);
             }
-            fn_80166E68(&s->sf, lbl_8042FE38.speedAdjust + f * lbl_8055E31C);
+            UpdateRampTarget(&s->sf, lbl_8042FE38.speedAdjust + f * lbl_8055E31C);
         }
         hold = 0;
         if (lbl_8042FE38.holdCycle && (diff < lbl_8042FE38.minLon || diff > lbl_8042FE38.maxLon)) {
@@ -541,9 +541,9 @@ static inline void UpdateCar(OrbitCarState* s, OrbitCar* car) {
             fn_80166F3C(&s->laneTime, 7.0f, 15.0f);
         }
         if (crazy) {
-            fn_80166E68(&s->lane, 1.0f);
+            UpdateRampTarget(&s->lane, 1.0f);
         } else {
-            fn_80166E68(&s->lane, 0.0f);
+            UpdateRampTarget(&s->lane, 0.0f);
         }
         s->factor = fn_80166DD4(&s->sf);
         s->park = diff > lbl_8042FE38.parkLon;
@@ -562,7 +562,7 @@ static inline void UpdateCar(OrbitCarState* s, OrbitCar* car) {
     }
 }
 
-void fn_80166A24(void) {
+void UpdateOrbitPositions(void) {
     int i;
     if (fn_801667F0()) {
         int frozen = fn_8016616C();
@@ -571,7 +571,7 @@ void fn_80166A24(void) {
         if (lbl_8042FE38.trackSpeed) {
             lbl_8055E31C *= fn_80166274();
         }
-        lbl_8055E320 = fn_801660C0();
+        lbl_8055E320 = CalculateLapDistance();
         if (fn_8016616C() && !frozen) {
             if (lbl_8055E328) {
                 fn_802E30C8("orbit: positions are frozen.");
@@ -583,7 +583,7 @@ void fn_80166A24(void) {
                 s->frozenDist = d;
             }
         }
-        fn_801662FC();
+        LogSpeedFactorDebugInfo();
         for (i = 0; i < lbl_8055E32C->Count(); i++) {
             OrbitCarState* s = lbl_8055E32C->At(i);
             UpdateCar(s, GetDeityCarByIndex(s->id));
@@ -595,7 +595,7 @@ f32 fn_80166DD4(Ramp* r) { return RampValue(r); }
 
 void fn_80166E54(Role* r) { r->start += 0.016683351f; }
 
-void fn_80166E68(Ramp* r, f32 v) {
+void UpdateRampTarget(Ramp* r, f32 v) {
     f32 target = r->to;
     if (!NearEq(v, target)) {
         f32 cur = RampValue(r);
@@ -705,9 +705,9 @@ int fn_80167634(int i) {
     return 0;
 }
 
-void fn_80167684(f32 left) {
+void CheckTurtleEnabled(f32 left) {
     if (!lbl_8055E32B && left < lbl_8042FE38.turtleTime) {
-        f32 need = (lbl_8055E324 - fn_801660C0()) / lbl_8042FE38.turtleSpeed;
+        f32 need = (lbl_8055E324 - CalculateLapDistance()) / lbl_8042FE38.turtleSpeed;
         if (need > left) {
             fn_802E30C8("orbit: TURTLE ENABLED: Player cannot possibly finish");
             fn_802E30C8("orbit: %.2f remains, Player won't finish before %.2f", left, need);

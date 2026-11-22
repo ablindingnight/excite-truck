@@ -127,10 +127,10 @@ void RegisterEventHandler(EventHandler h, u8 type);
 void EventUnInstallHandler(EventHandler h);
 void fn_802029FC(void);
 f32 fn_80287BC8(f32 lo, f32 hi);  // random range
-s32 fn_8028E3F4(const char* name);
-void fn_8028E528(s32 sys);
+s32 LoadParticleSystem(const char* name);
+void ProcessPartSystemRelease(s32 sys);
 void fn_8028E584(s32 sys, const RVec3* pos, const RVec3* vel);
-void fn_8028E590(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
+void EmitParticleTrail(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
 Chunks* fn_802929F8(const char* name);
 void fn_80292B48(Chunks* c);
 ValueTable* fn_802AE4C8(int i);
@@ -167,31 +167,31 @@ TFixed<EmitterInst, 256> lbl_804B9B7C;
 
 extern "C" {
 
-void fn_8029FEF8(void);
-void fn_8029FE00(void);
-void fn_8029FD04(void);
+void ProcessTrackEffects(void);
+void SortEmitterDefinitions(void);
+void LoadParticleEmitters(void);
 void fn_8029FDDC(void);
 void fn_8029FFBC(void);
-void fn_802A002C(void);
+void UpdateEmitterSystems(void);
 int fn_802A0620(const void* e);
 int fn_802A0720(const void* e);
 void fn_802A0794(EmitterInst* in);
-s32 fn_8029FE6C(const char* name);
+s32 FindParticleIdFromName(const char* name);
 
-void fn_8029F03C(void) {
+void InitializeParticleEffects(void) {
     lbl_8055F81C = 0;
     lbl_8055F818 = 0;
     memset(lbl_804B7770, 0, sizeof(lbl_804B7770));
     memset(lbl_804B6E70, 0, sizeof(lbl_804B6E70));
-    fn_8029FEF8();
-    fn_8029FE00();
-    fn_8029FD04();
+    ProcessTrackEffects();
+    SortEmitterDefinitions();
+    LoadParticleEmitters();
     RegisterEventHandler(fn_802A0620, 10);
     RegisterEventHandler(fn_802A0720, 11);
     lbl_8055F820 = new ("fsrecttab") u32[fn_801E85AC()];
 }
 
-void fn_8029F0D0(void) {
+void CleanupParticleEffects(void) {
     if (lbl_8055F820) {
         delete[] lbl_8055F820;
     }
@@ -203,7 +203,7 @@ void fn_8029F0D0(void) {
 }
 
 void fn_8029F124(void) {
-    fn_802A002C();
+    UpdateEmitterSystems();
     for (int i = 0; i < fn_801E85A4(); i++) {
         lbl_8055F820[i] = 0;
     }
@@ -260,7 +260,7 @@ void fn_8029F300(void) {
     }
 }
 
-s32 fn_8029F3BC(const char* name) {
+s32 FindParticleIdByName(const char* name) {
     for (int i = 0; i < lbl_804B9B7C.n; i++) {
         if (strcasecmp(lbl_804B7770[i].name, name) == 0) {
             return lbl_804B7770[i].id;
@@ -270,13 +270,13 @@ s32 fn_8029F3BC(const char* name) {
 }
 
 // Attaches the emitters of an effect ("$name" or "name") to a moving object.
-void fn_8029F458(const char* name, EmitterObj* obj) {
+void AttachEffectEmitter(const char* name, EmitterObj* obj) {
     char buf[32];
     if (*name == '$') {
         name++;
     }
     SafeStrCopy(buf, name, 32);
-    s32 fx = fn_8029F3BC(buf);
+    s32 fx = FindParticleIdByName(buf);
     for (int i = 0; i < lbl_804B9B7C.n; i++) {
         EmitterInst& e = lbl_804B9B7C[i];
         if (e.fx == fx) {
@@ -296,14 +296,14 @@ int fn_8029F510(u8* flag, void* node) {
 
 void fn_8029F534(ParticleRef* p, ValueNode* node) {
     if (fn_8029F510(&p->enabled, node)) {
-        p->sys = fn_8028E3F4(node->GetValue("sys_name"));
+        p->sys = LoadParticleSystem(node->GetValue("sys_name"));
         p->rotating = node->GetBool("rotating", 0);
     } else {
         p->sys = 0;
     }
 }
 
-void fn_8029F5C8(ChunkRef* c, ValueNode* node) {
+void ParseParticleSystemParams(ChunkRef* c, ValueNode* node) {
     if (fn_8029F510(&c->enabled, node)) {
         c->sys = fn_802929F8(node->GetValue("sys_name"));
         c->upwards = node->GetFloat("upwards", 0.0f);
@@ -327,7 +327,7 @@ static inline u32 PackEmitterColor(const ValVec3& color) {
     return ARGB(0xFF, 255.0f * color.x, 255.0f * color.y, 255.0f * color.z);
 }
 
-void fn_8029F658(ValueNode* node) {
+void ParseTrackEffectDefinition(ValueNode* node) {
     ValV3 zero3(0.0f, 0.0f, 0.0f);
     ValPoint zero2;
     zero2.x = 0.0f;
@@ -357,12 +357,12 @@ void fn_8029F658(ValueNode* node) {
     d->repeat = node->GetInt("repeat", 1);
     *(ValVec3*)&d->dpos = node->GetVec3Or("dpos", zero3);
     fn_8029F534(&d->part, node->FindChild("particle"));
-    fn_8029F5C8(&d->chunk, node->FindChild("chunk"));
+    ParseParticleSystemParams(&d->chunk, node->FindChild("chunk"));
     lbl_8055F81C++;
 }
 
 // Reads one placed "emitter".
-void fn_8029FB00(ValueNode* node) {
+void ReadEmitterInstance(ValueNode* node) {
     s32 fx = lbl_8055F818;
     EmitterInst* in = lbl_804B9B7C.Add();
     for (int i = 0; i < lbl_8055F818; i++) {
@@ -372,7 +372,7 @@ void fn_8029FB00(ValueNode* node) {
     }
     in->fx = fx;
     in->alwaysOn = node->GetBool("always_on", 0);
-    in->emitter = fn_8029FE6C(node->GetValue("sys_name"));
+    in->emitter = FindParticleIdFromName(node->GetValue("sys_name"));
     const ValVec3& pt = node->GetVec3("pt");
     in->pos.x = pt.x;
     in->pos.y = pt.y;
@@ -393,7 +393,7 @@ void fn_8029FB00(ValueNode* node) {
     }
 }
 
-void fn_8029FD04(void) {
+void LoadParticleEmitters(void) {
     lbl_804B9B7C.n = 0;
     ValueTable* t = fn_80131810("partemit.val");
     if (t) {
@@ -401,7 +401,7 @@ void fn_8029FD04(void) {
         ValueNode* n = t->GetChild(i++);
         while (n) {
             if (strcasecmp(n->GetName(), "emitter") == 0) {
-                fn_8029FB00(n);
+                ReadEmitterInstance(n);
             }
             n = t->GetChild(i++);
         }
@@ -411,18 +411,18 @@ void fn_8029FD04(void) {
 
 void fn_8029FDDC(void) { lbl_804B9B7C.n = 0; }
 
-int fn_8029FDF0(const void* a, const void* b) { return *(const s32*)a - *(const s32*)b; }
+int CompareIntegers(const void* a, const void* b) { return *(const s32*)a - *(const s32*)b; }
 
-void fn_8029FE00(void) { qsort(lbl_804B5070, lbl_8055F81C, sizeof(EmitterDef), fn_8029FDF0); }
+void SortEmitterDefinitions(void) { qsort(lbl_804B5070, lbl_8055F81C, sizeof(EmitterDef), CompareIntegers); }
 
-EmitterDef* fn_8029FE1C(s32 id) {
+EmitterDef* GetEmitterDefinition(s32 id) {
     if (id <= 0) {
         return 0;
     }
-    return (EmitterDef*)fn_800241DC(&id, lbl_804B5070, lbl_8055F81C, sizeof(EmitterDef), fn_8029FDF0);
+    return (EmitterDef*)fn_800241DC(&id, lbl_804B5070, lbl_8055F81C, sizeof(EmitterDef), CompareIntegers);
 }
 
-s32 fn_8029FE6C(const char* name) {
+s32 FindParticleIdFromName(const char* name) {
     for (int i = 0; i < lbl_8055F81C; i++) {
         if (strcasecmp(lbl_804B6E70[i].name, name) == 0) {
             return lbl_804B6E70[i].id;
@@ -431,13 +431,13 @@ s32 fn_8029FE6C(const char* name) {
     return -1;
 }
 
-void fn_8029FEF8(void) {
+void ProcessTrackEffects(void) {
     ValueTable* t;
     for (int i = 0; (t = fn_802AE4C8(i)) != 0; i++) {
         for (int j = 0; t->GetChild(j); j++) {
             ValueNode* n = t->GetChild(j);
             if (strncmp(n->GetName(), "trkeffect", 9) == 0) {
-                fn_8029F658(n);
+                ParseTrackEffectDefinition(n);
             }
         }
     }
@@ -447,7 +447,7 @@ void fn_8029FFBC(void) {
     EmitterDef* d = lbl_804B5070;
     for (int i = 0; i < lbl_8055F81C; d++, i++) {
         if (d->part.sys) {
-            fn_8028E528(d->part.sys);
+            ProcessPartSystemRelease(d->part.sys);
         }
         if (d->chunk.sys) {
             fn_80292B48(d->chunk.sys);
@@ -455,7 +455,7 @@ void fn_8029FFBC(void) {
     }
 }
 
-void fn_802A002C(void) {
+void UpdateEmitterSystems(void) {
     EmitterDef* d = lbl_804B5070;
     for (int i = 0; i < lbl_8055F81C; d++, i++) {
         if (d->chunk.sys) {
@@ -465,7 +465,7 @@ void fn_802A002C(void) {
 }
 
 
-void fn_802A0098(SpawnParams* p, const EmitterDef* d, const Spawn* s) {
+void CalculateSpawnParameters(SpawnParams* p, const EmitterDef* d, const Spawn* s) {
     f32 k = d->speedScale * PSVECMag((const Vec*)&s->vel);
     k = 1.0f < k ? 1.0f : k;
     p->count = d->spewK + d->spewM * k;
@@ -481,9 +481,9 @@ void fn_802A0098(SpawnParams* p, const EmitterDef* d, const Spawn* s) {
 
 static inline f32 Rand(f32 r) { return fn_80287BC8(-r, r); }
 
-void fn_802A01C8(const EmitterDef* d, const Spawn* s) {
+void SpawnParticleEffects(const EmitterDef* d, const Spawn* s) {
     SpawnParams p;
-    fn_802A0098(&p, d, s);
+    CalculateSpawnParameters(&p, d, s);
     for (int i = 0; i < p.count; i++) {
         RVec3 pos;
         RVec3 vel;
@@ -498,16 +498,16 @@ void fn_802A01C8(const EmitterDef* d, const Spawn* s) {
         vel.y = y;
         vel.z = z;
         if (d->part.rotating) {
-            fn_8028E590(d->part.sys, &pos, &vel, 5.0f);
+            EmitParticleTrail(d->part.sys, &pos, &vel, 5.0f);
         } else {
             fn_8028E584(d->part.sys, &pos, &vel);
         }
     }
 }
 
-void fn_802A02F4(const EmitterDef* d, const Spawn* s) {
+void SpawnParticleChunks(const EmitterDef* d, const Spawn* s) {
     SpawnParams p;
-    fn_802A0098(&p, d, s);
+    CalculateSpawnParameters(&p, d, s);
     p.vel.y += d->chunk.upwards;
     for (int i = 0; i < p.count; i++) {
         RVec3 pos;
@@ -562,15 +562,15 @@ void fn_802A042C(const EmitterDef* d, const Spawn* s) {
 
 int fn_802A0620(const void* ev) {
     const SpawnEvent* e = (const SpawnEvent*)ev;
-    EmitterDef* d = fn_8029FE1C(e->id);
+    EmitterDef* d = GetEmitterDefinition(e->id);
     SpawnEvent se = *e;
     if (d) {
         for (int i = 0; i < d->repeat; i++) {
             if (d->part.enabled) {
-                fn_802A01C8(d, (Spawn*)&se);
+                SpawnParticleEffects(d, (Spawn*)&se);
             }
             if (d->chunk.enabled) {
-                fn_802A02F4(d, (Spawn*)&se);
+                SpawnParticleChunks(d, (Spawn*)&se);
             }
             ((Spawn*)&se)->pos.x = ((Spawn*)&se)->pos.x + d->dpos.x;
             ((Spawn*)&se)->pos.y = ((Spawn*)&se)->pos.y + d->dpos.y;
@@ -601,14 +601,14 @@ void fn_802A0794(EmitterInst* in) {
     s.vel.y = in->vel.y;
     s.vel.z = in->vel.z;
     s.id = in->emitter;
-    EmitterDef* d = fn_8029FE1C(s.id);
+    EmitterDef* d = GetEmitterDefinition(s.id);
     if (d) {
         fn_802A042C(d, &s);
         if (d->part.enabled) {
-            fn_802A01C8(d, &s);
+            SpawnParticleEffects(d, &s);
         }
         if (d->chunk.enabled) {
-            fn_802A02F4(d, &s);
+            SpawnParticleChunks(d, &s);
         }
     } else {
         fn_802E30C8("Hey DUDE!  I can't find an effect with id %d.", s.id);

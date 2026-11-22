@@ -66,7 +66,7 @@ struct ObDesc;
 
 struct RPacket;
 
-extern "C" void fn_801AC240(u8* p);
+extern "C" void InitializeObstacleData(u8* p);
 
 namespace {
 
@@ -157,7 +157,7 @@ class HitVisitBase : public VVisit {};
 // Wakes each obstacle of a chain.
 class WakeVisit : public VVisit {
 public:
-    virtual void Visit(ObstacleSink* o) { fn_801AC240((u8*)o); }
+    virtual void Visit(ObstacleSink* o) { InitializeObstacleData((u8*)o); }
 };
 
 }  // namespace
@@ -168,9 +168,9 @@ void NotifyAllListeners(u8* p);
 void fn_801D0A24(u8* p, int a);
 void fn_801C1C7C(u8* p);
 void fn_802E30C8(const char* fmt, ...);
-void fn_801AC240(u8* p);
+void InitializeObstacleData(u8* p);
 void fn_801ABFF8(u8* p, VVisit* f);
-void fn_801ACF94(void);
+void SampleFenceRopePoints(void);
 void fn_801D09A8(u8* p, s32 id);
 }
 
@@ -197,10 +197,10 @@ extern "C" {
 
 u8* fn_801792F8(void);
 void fn_802E317C(const char* fmt, ...);
-u8* fn_801AC26C(void);
+u8* CreateDynamicObstacle(void);
 
 // Creates the obstacle object for the current track's obstacle type.
-u8* fn_801A9660(void) {
+u8* CreateTrackObstacle(void) {
     u8* o;
     switch (S32(fn_801792F8(), 0x50)) {
     case 12:
@@ -208,7 +208,7 @@ u8* fn_801A9660(void) {
     case 17:
     case 18:
     case 21:
-        return fn_801AC26C();
+        return CreateDynamicObstacle();
     case 6:
     case 9:
     case 14:
@@ -258,7 +258,7 @@ static inline void AddCorner(u8* body, f32 x, f32 y, f32 z, f32 spring) {
 extern "C" {
 
 // Puts a contact corner at each of the eight corners of a box with half extents (x, y, z).
-void fn_801A9798(u8* p, f32 x, f32 y, f32 z, f32 spring) {
+void CreateBoxCollisionCorners(u8* p, f32 x, f32 y, f32 z, f32 spring) {
     AddCorner(p, -x, y, -z, spring);
     AddCorner(p, x, y, -z, spring);
     AddCorner(p, -x, y, z, spring);
@@ -334,7 +334,7 @@ ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 ObMesh* fn_802C6B44(const char* name);
 void fn_802C6C20(ObMesh* m);
-void fn_801DA758(u8* p, const char* id, const char* path);
+void RegisterPathClient(u8* p, const char* id, const char* path);
 double cos(double x);
 double sin(double x);
 double sqrt(double x);
@@ -424,7 +424,7 @@ void Obstacle::Init(BodyDesc* d) {
     this->u235 = 0;
     this->u234 = 0;
     this->u238 = 0.0f;
-    fn_801AC240((u8*)this);
+    InitializeObstacleData((u8*)this);
     *(ObRot*)((u8*)&mtx) = q->rot;
     *(ObPos*)((u8*)(u8*)&this->mtx.pos) = q->pos;
     CollVolume::Transform();
@@ -450,7 +450,7 @@ void Obstacle::Init(BodyDesc* d) {
         f32 x = q->a;
         f32 y = q->b;
         f32 z = q->c;
-        fn_801A9798((u8*)this, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f), spring);
+        CreateBoxCollisionCorners((u8*)this, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f), spring);
         if (q->type == 1) {
             shape = new ("box1:box-volume") BoxShape(this, ObFrameOf((u8*)this), k, skin, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f));
             corners = 0;
@@ -553,7 +553,7 @@ void Obstacle::Init(BodyDesc* d) {
         break;
     }
     case 5:
-        fn_801A9798((u8*)this, q->a, q->b * ScaleOperand(0.5f), q->a, spring);
+        CreateBoxCollisionCorners((u8*)this, q->a, q->b * ScaleOperand(0.5f), q->a, spring);
         shape = new ("barrel:flat-volume") FlatSphereShape(this, ObFrameOf((u8*)this), k, skin, q->a, q->b * ScaleOperand(0.5f), origin);
         corners = 0;
         break;
@@ -641,7 +641,7 @@ void Obstacle::Init(BodyDesc* d) {
         f32 x = q->a;
         f32 y = q->b;
         f32 z = q->c;
-        fn_801A9798((u8*)this, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f), spring);
+        CreateBoxCollisionCorners((u8*)this, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f), spring);
         shape = new ("box1:box-volume") BoxShape(this, ObFrameOf((u8*)this), k, skin, x * ScaleOperand(0.5f), y * ScaleOperand(0.5f), z * ScaleOperand(0.5f));
         this->hitOffset[0] = q->d;
         this->hitOffset[1] = q->e;
@@ -718,7 +718,7 @@ void Obstacle::Init(BodyDesc* d) {
         int i;
         path = q->extra->GetValue("path");
         id = q->extra->GetString("path_id", q->extra->GetString("dyno", ""));
-        fn_801DA758((u8*)this, id, path);
+        RegisterPathClient((u8*)this, id, path);
         this->u222 = 1;
         for (i = 0; i < nAdded; i++) {
             Shape(i)->SetSurface(0x72);
@@ -776,7 +776,7 @@ void Obstacle::Update(void) {
     if (PSVECDotProduct((const Vec*)((f32*)&p->vel), (const Vec*)((f32*)&p->vel)) > 0.1f * 0.1f ||
         PSVECDotProduct((const Vec*)((f32*)&p->avel), (const Vec*)((f32*)&p->avel)) > 0.1f * 0.1f) {
         if (p->mtx.pos.y > -500.0f) {
-            fn_801AC240((u8*)p);
+            InitializeObstacleData((u8*)p);
         }
     }
     if (p->asleep) {
@@ -847,7 +847,7 @@ void fn_801ABFF8(u8* p, VVisit* f) {
         }
         ob->chainArmed = 0;
     }
-    fn_801AC240(p);
+    InitializeObstacleData(p);
 }
 
 }  // extern "C"
@@ -941,7 +941,7 @@ public:
         F32(this, 0x124) = hi->x;
         F32(this, 0x128) = hi->y;
         F32(this, 0x12C) = hi->z;
-        fn_801AC240((u8*)this);
+        InitializeObstacleData((u8*)this);
     }
     virtual void Rest(void) {
         Reset();
@@ -967,7 +967,7 @@ void Obstacle::OnHit(const RVec3* v_, const RVec3* at_, int force, void* extra_)
 
 void Obstacle::Reset(void) {
     Obstacle* p = this;
-    fn_801AC240((u8*)p);
+    InitializeObstacleData((u8*)p);
     *(Pose12*)&p->mtx.rot.x = *(Pose12*)&p->restPose;
     ((CollVolume*)p)->CollVolume::Transform();
     ((RigidBody*)p)->RigidBody::Reset();
@@ -977,7 +977,7 @@ void Obstacle::Reset(void) {
 
 extern "C" {
 
-void fn_801AC240(u8* p) {
+void InitializeObstacleData(u8* p) {
     U8(p, 0x220) = 1;
     F32(p, 0x21C) = lbl_8055E3C8;
 }
@@ -988,7 +988,7 @@ void fn_801AC254(u8* p) {
     }
 }
 
-u8* fn_801AC26C(void) { return (u8*)new ("DynamicObstacle") DynamicObstacle; }
+u8* CreateDynamicObstacle(void) { return (u8*)new ("DynamicObstacle") DynamicObstacle; }
 
 }  // extern "C"
 
@@ -1262,7 +1262,7 @@ void fn_801C2694(s32 rope, f32 (*out)[3], s32* n, f32* d, f32* c, f32* b, f32* a
 void fn_801796CC(int kind, void* msg, int size);
 
 // Samples the fence rope and sends each linked post pair its span of points.
-void fn_801ACF94(void) {
+void SampleFenceRopePoints(void) {
     if (lbl_8055E5F0) {
         f32 out[0x13C][3];
         FenceMsg m;
@@ -1372,7 +1372,7 @@ double sqrt(double x);
 static const struct { f32 value; u32 reserved; } MinJointLength = { 0.001f, 0 };
 
 // Applies the joint's spring (beyond the rest length) and damping between the two attachment points.
-void fn_801AD394(u8* p) {
+void ApplyJointSpringDamping(u8* p) {
     RVec3 wa;
     RVec3 wb;
     RVec3 d;
@@ -1440,7 +1440,7 @@ void fn_801AD394(u8* p) {
 
 void fn_801AD5EC(void) { fn_801AC508(); }
 
-void fn_801AD5F0(void) { fn_801ACF94(); }
+void fn_801AD5F0(void) { SampleFenceRopePoints(); }
 
 }  // extern "C"
 

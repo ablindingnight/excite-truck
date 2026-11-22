@@ -66,7 +66,7 @@ u32 AchievementsGetForSlot(int, int);
 extern "C" {
 void fn_802E712C(void);
 int fn_801345D8(char*, unsigned long, const char*, ...);
-int fn_8023FAD4(char*, int);
+int InitializeNameEntryMenu(char*, int);
 int fn_8027B8E4(int, int);
 int fn_8027B984(int, int);
 void fn_80214A9C(int);
@@ -349,7 +349,7 @@ int fn_8024C550(void) {
 int fn_8024C578(int slot) {
     if (IdentIsSlotEmpty(slot)) {
         char name[18] = {0};
-        if (fn_8023FAD4(name, 18)) {
+        if (InitializeNameEntryMenu(name, 18)) {
             IdentSelectSlot(slot);
             IdentClearSlot();
             IdentSetSlotName(name);

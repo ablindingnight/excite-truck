@@ -45,8 +45,8 @@ u8 fn_802E47F8(int key);
 int fn_802E4A1C(int key);
 void fn_80127A84(s32* x, s32* y, s32* buttons);
 int fn_80129AE8(JoyStatus* out, int chan);
-void fn_801334F4(int section, const char* key, char* out, int len);
-void fn_8013358C(int section, const char* key, const char* s);
+void LoadOptionString(int section, const char* key, char* out, int len);
+void SetOptionString(int section, const char* key, const char* s);
 void fn_802E317C(const char* fmt, ...);
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
@@ -454,14 +454,14 @@ void InitializeJoyStatus(int reset) {
 void SaveInputBinding(Binding* b, const char* key, int section) {
     char buf[32] = {0};
     fn_801A90A4(buf, sizeof(buf), b);
-    fn_801334F4(section, key, buf, sizeof(buf));
+    LoadOptionString(section, key, buf, sizeof(buf));
     BindInputToDevice(b, buf);
 }
 
 void fn_801A7A08(Binding* b, const char* key, int section) {
     char buf[32];
     fn_801A90A4(buf, sizeof(buf), b);
-    fn_8013358C(section, key, buf);
+    SetOptionString(section, key, buf);
 }
 
 void fn_801A7A5C(void) {

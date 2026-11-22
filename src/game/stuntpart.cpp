@@ -48,16 +48,16 @@ f32 fn_80287BC8(f32 lo, f32 hi);
 void fn_8028DFFC(void);
 void fn_8028E024(void);
 void fn_8028E070(f32 t);
-void fn_8028E080(void);
+void UpdateAllItems(void);
 void fn_8028E240(int a);
-void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
+void* CreateParticleSystem(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const ValVec3* p, const ValVec3* v);
-void fn_8028E590(void* e, const ValVec3* p, const ValVec3* v, f32 spin);
+void EmitParticleTrail(void* e, const ValVec3* p, const ValVec3* v, f32 spin);
 // The stunt effects hand the emitters copies of the position and velocity (the Wii passes them as
 // by-value aggregates); partman takes const pointers.
 static inline void EmitCopy(void* e, ValVec3 p, ValVec3 v) { fn_8028E584(e, &p, &v); }
-static inline void EmitCopySpin(void* e, ValVec3 p, ValVec3 v, f32 spin) { fn_8028E590(e, &p, &v, spin); }
+static inline void EmitCopySpin(void* e, ValVec3 p, ValVec3 v, f32 spin) { EmitParticleTrail(e, &p, &v, spin); }
 u8 fn_802C2C00(u8 a);
 void fn_802C2B78(f32 a, f32 b, f32 c);
 void fn_802C2BB8(f32* a, f32* b, f32* c);
@@ -144,7 +144,7 @@ struct StuntEmitters {
         r.sizeConst = 1.8f;
         r.angRamp = 0.8f;
         r.angConst = 1.0f;
-        e1 = fn_8028E2F8(&r, "reentry", "entrypuff.tex");
+        e1 = CreateParticleSystem(&r, "reentry", "entrypuff.tex");
     }
     void MakeSpark(void) {
         PartParams e;
@@ -179,7 +179,7 @@ struct StuntEmitters {
         e.sizeConst = 0.001f;
         e.angRamp = 0.0f;
         e.angConst = 2.0f;
-        e0 = fn_8028E2F8(&e, "invcblespark", "spark.tex");
+        e0 = CreateParticleSystem(&e, "invcblespark", "spark.tex");
     }
     StuntEmitters(void) {
         MakeSpark();
@@ -671,7 +671,7 @@ void fn_802AB994(void) {
 
 void fn_802AB9E0(f32 t) { fn_8028E070(t); }
 
-void fn_802AB9E4(void) { fn_8028E080(); }
+void fn_802AB9E4(void) { UpdateAllItems(); }
 
 void fn_802AB9E8(void) {
     fn_8028DFFC();

@@ -162,7 +162,7 @@ int fn_80139EC4(void* regions, f32 x, f32 z);
 void* LoadBoundSet(const char* name);
 void DeleteBoundSet(void* regions);
 void fn_801B8040(TeleportInfo* t, ILPos* at, f32 a);
-int fn_801784DC(f32* pos, f32* h, int a, int b, int c);
+int GetGroundHeightAndNormal(f32* pos, f32* h, int a, int b, int c);
 void fn_8018A08C(DCar* car);
 void fn_8018AF04(DCar* car);
 void fn_8018B0D0(DCar* car, int mode);
@@ -235,7 +235,7 @@ void fn_801B07B4(TeleportInfo* t, const ILPos* at) {
     if (lbl_8055E670 && fn_80139EC4(lbl_8055E670, v.v[0], v.v[2])) {
         v.v[1] += 200.0f;
         f32 h;
-        if (fn_801784DC(v.v, &h, 0, 0, 0)) {
+        if (GetGroundHeightAndNormal(v.v, &h, 0, 0, 0)) {
             t->pos[1] = 0.6286f + h;
         }
     }

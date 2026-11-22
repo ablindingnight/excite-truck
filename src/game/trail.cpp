@@ -150,11 +150,11 @@ int fn_80287B14(void);
 TBody* fn_80287B24(int i);
 void fn_80287B38(RacerHook h);
 f32 fn_80287BC8(f32 lo, f32 hi);  // random range
-s32 fn_8028E2F8(PartParams* d, const char* name, const char* tex);
+s32 CreateParticleSystem(PartParams* d, const char* name, const char* tex);
 void fn_8028E398(s32 sys);
 void fn_8028E584(s32 sys, const RVec3* pos, const RVec3* vel);
-void fn_8028E58C(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
-void fn_8028E590(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
+void EmitDustTrail(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
+void EmitParticleTrail(s32 sys, const RVec3* pos, const RVec3* vel, f32 a);
 ValueNode* fn_802AE414(const char* name);  // track effect table lookup
 int fn_802BF4F0(void);                     // has water
 f32 fn_802BF590(void);                     // water level
@@ -607,7 +607,7 @@ void fn_802A1CC4(void) {
         d.greenConst = 1.0f;
         d.redConst = 1.0f;
         d.blueConst = 0.0f;
-        lbl_8055F870 = fn_8028E2F8(&d, "paint trail", tex);
+        lbl_8055F870 = CreateParticleSystem(&d, "paint trail", tex);
     } else {
         lbl_8055F870 = 0;
     }
@@ -706,9 +706,9 @@ void DustTrail::Emit(const TRacer* r, int wheel) {
         t = t > 0.0f ? t : 0.0f;
         a = Lerp(0.25f, 1.0f, t);
         if (r->camDist < 2500.0f) {
-            fn_8028E58C(small, &p, &r->body->vel, a);
+            EmitDustTrail(small, &p, &r->body->vel, a);
             if (rear) {
-                fn_8028E58C(medium, &p, &r->body->vel, a);
+                EmitDustTrail(medium, &p, &r->body->vel, a);
             }
         }
         if (rear && wh->speed * wh->speed > 900.0f) {
@@ -821,7 +821,7 @@ void DustTrail::InitSmall(const char* tex) {
     d.sizeConst = 0.5f;
     d.angRamp = -0.2f;
     d.angConst = 0.2f;
-    small = fn_8028E2F8(&d, "small trail dust", tex);
+    small = CreateParticleSystem(&d, "small trail dust", tex);
 }
 
 void DustTrail::InitMedium(const char* tex) {
@@ -847,7 +847,7 @@ void DustTrail::InitMedium(const char* tex) {
     d.sizeConst = 0.5f;
     d.angRamp = -0.2f;
     d.angConst = 0.2f;
-    medium = fn_8028E2F8(&d, "medium trail dust", tex);
+    medium = CreateParticleSystem(&d, "medium trail dust", tex);
 }
 
 void DustTrail::InitEvent(const char* tex) {
@@ -872,7 +872,7 @@ void DustTrail::InitEvent(const char* tex) {
     d.sizeConst = 0.75f;
     d.angRamp = -0.2f;
     d.angConst = 0.2f;
-    event = fn_8028E2F8(&d, "event dust", tex);
+    event = CreateParticleSystem(&d, "event dust", tex);
 }
 
 void DustTrail::InitPaint(const char* tex) {
@@ -925,9 +925,9 @@ void AsphaltTrail::Emit(const TRacer* r, int wheel) {
         p.y += 0.25f;
         s = 0.02f * wh->speed * (left ? 1 : -1);
         if (wh->slip > 37.5f) {
-            fn_8028E590(large, (RVec3*)&p, vel, s);
+            EmitParticleTrail(large, (RVec3*)&p, vel, s);
         } else {
-            fn_8028E590(small, (RVec3*)&p, vel, s);
+            EmitParticleTrail(small, (RVec3*)&p, vel, s);
         }
     }
 }
@@ -958,7 +958,7 @@ void AsphaltTrail::InitSmall(const char* tex) {
     d.sizeConst = 0.5f;
     d.angRamp = -0.5f;
     d.angConst = 1.0f;
-    small = fn_8028E2F8(&d, "small trail smoke", tex);
+    small = CreateParticleSystem(&d, "small trail smoke", tex);
 }
 
 void AsphaltTrail::InitLarge(const char* tex) {
@@ -987,7 +987,7 @@ void AsphaltTrail::InitLarge(const char* tex) {
     d.sizeConst = 0.65f;
     d.angRamp = -1.0f;
     d.angConst = 1.0f;
-    large = fn_8028E2F8(&d, "large trail smoke", tex);
+    large = CreateParticleSystem(&d, "large trail smoke", tex);
 }
 
 GrassTrail::GrassTrail(ValueNode* cfg) { Init(cfg->GetValue("texture")); }
@@ -1011,7 +1011,7 @@ void GrassTrail::Emit(const TRacer* r, int wheel) {
         k = 0.1f * b->speed;
         v.x = v.x + fn_80129DC4(0, -k, k);
         v.z = v.z + fn_80129DC4(0, -k, k);
-        fn_8028E590(sys, (RVec3*)&p, &v, 5.0f);
+        EmitParticleTrail(sys, (RVec3*)&p, &v, 5.0f);
     }
 }
 
@@ -1038,7 +1038,7 @@ void GrassTrail::Init(const char* tex) {
     d.sizeConst = 0.4f;
     d.angRamp = 0.0f;
     d.angConst = 1.0f;
-    sys = fn_8028E2F8(&d, "trail grass", tex);
+    sys = CreateParticleSystem(&d, "trail grass", tex);
 }
 
 SandTrail::SandTrail(ValueNode* cfg) { Init(cfg->GetValue("texture")); }
@@ -1059,7 +1059,7 @@ void SandTrail::Emit(const TRacer* r, int wheel) {
         v.x = v.x + r->body->m.xx * k;
         v.y = v.y + r->body->m.xy * k;
         v.z = v.z + r->body->m.xz * k;
-        fn_8028E590(sys, (RVec3*)&wh->world, &v, 5.0f);
+        EmitParticleTrail(sys, (RVec3*)&wh->world, &v, 5.0f);
     }
 }
 
@@ -1086,7 +1086,7 @@ void SandTrail::Init(const char* tex) {
     d.sizeConst = 1.0f;
     d.angRamp = -0.75f;
     d.angConst = 1.0f;
-    sys = fn_8028E2F8(&d, "trail sand", tex);
+    sys = CreateParticleSystem(&d, "trail sand", tex);
 }
 
 WaterTrail::WaterTrail(ValueNode* cfg) { Init(cfg->GetValue("texture")); }
@@ -1117,7 +1117,7 @@ void WaterTrail::Emit(const TRacer* r, int wheel) {
         v.x = v.x + b->m.yx * up;
         v.y = v.y + b->m.yy * up;
         v.z = v.z + b->m.yz * up;
-        fn_8028E590(sys, &p, &v, -side * fn_80287BC8(0.0f, 3.1415927f));
+        EmitParticleTrail(sys, &p, &v, -side * fn_80287BC8(0.0f, 3.1415927f));
     }
 }
 
@@ -1141,7 +1141,7 @@ void WaterTrail::Init(const char* tex) {
     d.greenConst = 1.0f;
     d.redConst = 1.0f;
     d.angConst = 1.0f;
-    sys = fn_8028E2F8(&d, "trail water", tex);
+    sys = CreateParticleSystem(&d, "trail water", tex);
 }
 
 MudTrail::MudTrail(ValueNode* cfg) { Init(cfg->GetValue("texture")); }
@@ -1179,13 +1179,13 @@ void MudTrail::Emit(const TRacer* r, int wheel) {
         v.x = v.x + b->m.yx * up;
         v.y = v.y + b->m.yy * up;
         v.z = v.z + b->m.yz * up;
-        fn_8028E590(sys, &p, &v, -side * fn_80287BC8(0.0f, 3.1415927f));
+        EmitParticleTrail(sys, &p, &v, -side * fn_80287BC8(0.0f, 3.1415927f));
     }
 }
 
 void MudTrail::Touch(const TrailEvent* e) {
     if (Full(touch[e->who])) {
-        fn_8028E590(sys, (RVec3*)&e->pos, &e->vel, fn_80287BC8(-3.1415927f, 3.1415927f));
+        EmitParticleTrail(sys, (RVec3*)&e->pos, &e->vel, fn_80287BC8(-3.1415927f, 3.1415927f));
     }
     Wrap(touch[e->who], 0.1f);
 }
@@ -1210,7 +1210,7 @@ void MudTrail::Init(const char* tex) {
     d.greenConst = 1.0f;
     d.redConst = 1.0f;
     d.angConst = 1.0f;
-    sys = fn_8028E2F8(&d, "trail mud", tex);
+    sys = CreateParticleSystem(&d, "trail mud", tex);
 }
 
 Paint::Paint(const PaintDesc* d, const char* name) {

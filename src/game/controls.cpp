@@ -102,7 +102,7 @@ int fn_80137C74(void);
 void fn_80137C78(int);
 int fn_80137CFC(int);
 void fn_80137C84(int, int);
-void fn_80133460(ControlValueTableHandle, const char*, int);
+void SetOptionBooleanValue(ControlValueTableHandle, const char*, int);
 void fn_801333E8(ControlValueTableHandle, const char*, u8*);
 void fn_8023DA64(int, int, int);
 void fn_8023E1FC(ControlsTableFields*);
@@ -213,7 +213,7 @@ extern const ControlActionInfoFields lbl_802FA0A8[29];
 extern const ControlKeyDefaultFields lbl_802FA218[8];
 int strcasecmp(const char*, const char*);
 void fn_802E317C(const char*, ...);
-void fn_8013358C(ControlValueTableHandle, const char*, const char*);
+void SetOptionString(ControlValueTableHandle, const char*, const char*);
 ControlActionDescriptorFields* fn_8023DCCC(const char*);
 
 // Reading a missing boolean creates it from the supplied byte default. The five
@@ -327,41 +327,41 @@ extern "C" void fn_8023D7CC(void) {
         switch (fn_8023D6FC()) {
         case 0:
             fn_802E8664(1);
-            fn_8013358C(controller + 8, "horn", "POV Any");
-            fn_8013358C(controller + 8, "horn2", "");
-            fn_8013358C(controller + 8, "roll_left", "");
-            fn_8013358C(controller + 8, "roll_right", "");
+            SetOptionString(controller + 8, "horn", "POV Any");
+            SetOptionString(controller + 8, "horn2", "");
+            SetOptionString(controller + 8, "roll_left", "");
+            SetOptionString(controller + 8, "roll_right", "");
             break;
         case 2:
             fn_802E30C8("MCM_NES_GRIP_DPAD_STEER is an obsolete controller configuration");
             fn_802E8664(1);
-            fn_8013358C(controller + 8, "steer_left", "POV Left");
-            fn_8013358C(controller + 8, "steer_right", "POV Right");
-            fn_8013358C(controller + 8, "roll_left", "Joy Left");
-            fn_8013358C(controller + 8, "roll_right", "Joy Right");
-            fn_8013358C(controller + 8, "horn", "Button 2");
-            fn_8013358C(controller + 8, "braking", "Button 3");
+            SetOptionString(controller + 8, "steer_left", "POV Left");
+            SetOptionString(controller + 8, "steer_right", "POV Right");
+            SetOptionString(controller + 8, "roll_left", "Joy Left");
+            SetOptionString(controller + 8, "roll_right", "Joy Right");
+            SetOptionString(controller + 8, "horn", "Button 2");
+            SetOptionString(controller + 8, "braking", "Button 3");
             break;
         case 3:
             fn_802E30C8("MCM_REMOTE_GRIP_DPD_STEER is an obsolete controller configuration");
             fn_802E8664(0);
-            fn_8013358C(controller + 8, "braking", "POV Back");
-            fn_8013358C(controller + 8, "horn", "Button 2");
-            fn_8013358C(controller + 8, "view", "Button 5");
-            fn_8013358C(controller + 8, "pitch_up", "JB Up");
-            fn_8013358C(controller + 8, "pitch_down", "JB Down");
+            SetOptionString(controller + 8, "braking", "POV Back");
+            SetOptionString(controller + 8, "horn", "Button 2");
+            SetOptionString(controller + 8, "view", "Button 5");
+            SetOptionString(controller + 8, "pitch_up", "JB Up");
+            SetOptionString(controller + 8, "pitch_down", "JB Down");
             break;
         case 1:
             fn_802E8664(0);
-            fn_8013358C(controller + 8, "steer_left", "JB Left");
-            fn_8013358C(controller + 8, "steer_right", "JB Right");
-            fn_8013358C(controller + 8, "pitch_up", "JB Up");
-            fn_8013358C(controller + 8, "pitch_down", "JB Down");
-            fn_8013358C(controller + 8, "roll_left", "");
-            fn_8013358C(controller + 8, "roll_right", "");
-            fn_8013358C(controller + 8, "braking", "POV Back");
-            fn_8013358C(controller + 8, "horn", "Button 2");
-            fn_8013358C(controller + 8, "view", "Button 5");
+            SetOptionString(controller + 8, "steer_left", "JB Left");
+            SetOptionString(controller + 8, "steer_right", "JB Right");
+            SetOptionString(controller + 8, "pitch_up", "JB Up");
+            SetOptionString(controller + 8, "pitch_down", "JB Down");
+            SetOptionString(controller + 8, "roll_left", "");
+            SetOptionString(controller + 8, "roll_right", "");
+            SetOptionString(controller + 8, "braking", "POV Back");
+            SetOptionString(controller + 8, "horn", "Button 2");
+            SetOptionString(controller + 8, "view", "Button 5");
             break;
         default:
             fn_802E317C("mcontroller: unhandled controller mode %d", fn_8023D6FC());
@@ -377,7 +377,7 @@ extern "C" __declspec(section ".data") const char ControlsObservedDiagnostic[] =
 
 extern "C" void fn_8023DA2C(ControlValueTableHandle object, const char* key, int value, int write) {
     u8 byteDefault = value;
-    if (write) fn_80133460(object, key, value);
+    if (write) SetOptionBooleanValue(object, key, value);
     else fn_801333E8(object, key, &byteDefault);
 }
 
@@ -395,11 +395,11 @@ info=lbl_802FA0A8;
         if (defaults) {
             input.id = 0;
             if (!reset) SaveInputBinding(&input, info->key, table);
-            if (input.id == 0) fn_8013358C(table, info->key, defaults->defaultValue);
-        } else fn_8013358C(table, info->key, "");
+            if (input.id == 0) SetOptionString(table, info->key, defaults->defaultValue);
+        } else SetOptionString(table, info->key, "");
     }
     value = lbl_802FA218;
-    for (int i = 0; i < 8; i++, value++) fn_8013358C(table, value->key, value->value);
+    for (int i = 0; i < 8; i++, value++) SetOptionString(table, value->key, value->value);
     fn_8023DA2C(table, "force_feedback", 1, write);
 }
 

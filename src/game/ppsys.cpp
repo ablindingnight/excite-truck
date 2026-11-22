@@ -130,7 +130,7 @@ void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
 f32 fn_801C0E44(const RVec3* v);
 void DrawLineSegment(const RVec3* a, const RVec3* b, u32 color, f32 width);
-void fn_801C0124(RVec3* out, const RVec3* v, f32 s);
+void ScaleVector(RVec3* out, const RVec3* v, f32 s);
 }
 f32 Max(f32 a, f32 b);
 
@@ -638,7 +638,7 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
         }
     }
     if (center) {
-        fn_801C0124(center, &sum, 1.0f / Max(total, 0.000001f));
+        ScaleVector(center, &sum, 1.0f / Max(total, 0.000001f));
     }
     if (push) {
         fn_80144DAC(push, &force);

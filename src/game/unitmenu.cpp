@@ -44,7 +44,7 @@ extern "C" {
 int fn_802146BC(MenuDesc* desc, int x, int y, int a);
 void fn_80236914(int which, f32* out, f32 t);
 void fn_801333E8(int section, const char* name, bool* v);
-void fn_80133460(int section, const char* name, bool v);
+void SetOptionBooleanValue(int section, const char* name, bool v);
 extern char lbl_8055BAB8[4];
 extern char lbl_8055B860[8];
 }
@@ -69,5 +69,5 @@ extern "C" void fn_8024C070(void) {
     MenuDesc desc = {"units.lyt", items, NULL, 0, 0};
     fn_802146BC(&desc, -999, -999, 1);
     kph = units == 1;
-    fn_80133460(5, "units", kph);
+    SetOptionBooleanValue(5, "units", kph);
 }

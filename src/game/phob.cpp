@@ -85,12 +85,12 @@ int fn_80265D64(void);
 s64 __div2i(s64 a, s64 b);
 void fn_8026A248(int car, int view);
 void fn_801EAA94(int car, s32 kind);
-void fn_80177990(void);
+void ResetTrackSurfaceData(void);
 void fn_801D0CF0(void);
 s32* fn_801769D8(void);
 void fn_80181FEC(void);
 void InitializeCrashMode(void);
-void fn_801DA6EC(void);
+void InitializePathManager(void);
 void fn_801D0E0C(void);
 void fn_80127464(void);
 void fn_801CEFAC(void);
@@ -120,7 +120,7 @@ void fn_801DEC18(void);
 void CreateBoostManager(void);
 void fn_801B8318(void);
 void fn_801FA978(void);
-void fn_801E2188(void);
+void LoadTrackSolution(void);
 void InitializeCornerPool(void);
 void fn_801B52CC(void);
 void fn_801E21BC(void);
@@ -380,7 +380,7 @@ int CollVolume::vf40(void) { return 0; }
 
 int CollVolume::vf44(void) { return 1; }
 
-void fn_80177990(void) {
+void ResetTrackSurfaceData(void) {
     int i;
     for (i = 0; i < 75; i++) {
         lbl_80430700[i] = 0.0f;
@@ -451,7 +451,7 @@ void fn_80177CEC(void) {
     lbl_8055E43C++;
 }
 
-void fn_80177E14(void) {
+void UpdateRaceLogic(void) {
     int i;
     if (!fn_801B526C()) {
         fn_801AD5F0();
@@ -552,7 +552,7 @@ void fn_80177F40(void) {
         if (!net) {
             fn_801E22D0(lbl_804340C0, lbl_8055E468);
         }
-        fn_80177E14();
+        UpdateRaceLogic();
         for (int i = 0; i < lbl_8055E438; i++) {
             PhobCar* c = lbl_8055E434[i]->vf3C();
             if (c) {
@@ -598,11 +598,11 @@ char* fn_801781F4(u32 v) {
     return text;
 }
 
-Phob* fn_80178224(void) { return (Phob*)new ("NetCar") NetCar; }
+Phob* CreateNetCarInstance(void) { return (Phob*)new ("NetCar") NetCar; }
 
 Phob* fn_80178258(void) { return (Phob*)new ("PhobStatic") PhobStatic; }
 
-Phob* fn_80178290(void) { return (Phob*)new ("WheelPhob") Wheel; }
+Phob* CreateWheelPhob(void) { return (Phob*)new ("WheelPhob") Wheel; }
 
 Phob* fn_801782C8(void) { return (Phob*)new ("MutablePhob") MutPhob; }
 
@@ -610,26 +610,26 @@ Phob* fn_8018FB18(void);
 Phob* fn_80134F48(void);
 Phob* fn_801B8D80(void);
 Phob* fn_8017D688(void);
-Phob* fn_801A9660(void);
-Phob* fn_801BF214(void);
+Phob* CreateTrackObstacle(void);
+Phob* CreatePanelVolume(void);
 
 PhobType lbl_80331950[] = {
     {'CAR ', 0xFA8, 0},
     {'PCAR', 0xFA8, fn_8018FB18},
     {'ACAR', 0xFA8, fn_80134F48},
-    {'NCAR', 0xFA8, fn_80178224},
+    {'NCAR', 0xFA8, CreateNetCarInstance},
     {'TRLR', 0xFA8, fn_801B8D80},
     {'STAT', 0, fn_80178258},
     {'BALL', 0x34, fn_8017D688},
-    {'WHLP', 0x44, fn_80178290},
-    {'OBST', 0x34, fn_801A9660},
-    {'Panl', 0x40, fn_801BF214},
+    {'WHLP', 0x44, CreateWheelPhob},
+    {'OBST', 0x34, CreateTrackObstacle},
+    {'Panl', 0x40, CreatePanelVolume},
     {'FGPL', 0x34, 0},
     {'MUTP', 0x40, fn_801782C8},
     {0, 0, 0},
 };
 
-PhobType* fn_80178374(u32 type) {
+PhobType* FindPhobType(u32 type) {
     PhobType* t;
     for (t = lbl_80331950; t->type; t++) {
         if (t->type == type) {
@@ -639,11 +639,11 @@ PhobType* fn_80178374(u32 type) {
     return 0;
 }
 
-Phob* fn_801783A8(PhobMsg* m, s32 pos) {
+Phob* CreatePhobOfType(PhobMsg* m, s32 pos) {
     Phob* p = 0;
     PhobType* t;
     lbl_8055E454 = m;
-    t = fn_80178374(m->type);
+    t = FindPhobType(m->type);
     if (t) {
         if (t->create) {
             p = t->create();
@@ -673,7 +673,7 @@ static inline void Set3(f32* v, f32 x, f32 y, f32 z) {
     v[2] = z;
 }
 
-int fn_801784DC(const f32* pos, f32* outY, f32* outN, s32* outTri, s32 x) {
+int GetGroundHeightAndNormal(const f32* pos, f32* outY, f32* outN, s32* outTri, s32 x) {
     f32 below[3];
     f32 hit[3];
     f32 n[3];
@@ -702,7 +702,7 @@ void fn_801785A4(Phob* p) {
     }
 }
 
-int fn_80178604(PhobMsg* m) {
+int HandlePhobMessageType(PhobMsg* m) {
     int car = 0;
     u32 t = m->type;
     if (t == 'CAR ' || t == 'PCAR' || t == 'ACAR' || t == 'NCAR') {
@@ -730,8 +730,8 @@ int fn_80178678(s32 s, Phob** out, int pass) {
     fn_8012F550(s, &m, 8);
     SetMemoryStreamPosition(s, at);
     fn_8012F550(s, &m, m->size);
-    if (pass == fn_80178604(m)) {
-        r = fn_801783A8(m, pos);
+    if (pass == HandlePhobMessageType(m)) {
+        r = CreatePhobOfType(m, pos);
     } else {
         r = 0;
     }
@@ -739,7 +739,7 @@ int fn_80178678(s32 s, Phob** out, int pass) {
     return 1;
 }
 
-void fn_8017873C(MsgBuf* b, u8 type, const void* data, u32 n) {
+void AppendMessageData(MsgBuf* b, u8 type, const void* data, u32 n) {
     if (n + b->len + 1 < 0x1000) {
         b->data[b->len] = type;
         memcpy(b->data + b->len + 1, data, n);
@@ -749,7 +749,7 @@ void fn_8017873C(MsgBuf* b, u8 type, const void* data, u32 n) {
 
 s64 fn_80178BBC(PhysClock* c);
 
-int fn_801787B4(PhysClock* c) {
+int HandlePhysicsTiming(PhysClock* c) {
     int n;
     int fixed;
     s32 mode;
@@ -919,7 +919,7 @@ void fn_80178DBC(int i, f32 v) {
     fn_801DCEC8(i, v);
 }
 
-void fn_80178DD0(void) { fn_80177990(); }
+void fn_80178DD0(void) { ResetTrackSurfaceData(); }
 
 static inline void Seeds(void) {
     fn_80129C80(4, lbl_8055E418[0], lbl_8055E418[1]);
@@ -927,7 +927,7 @@ static inline void Seeds(void) {
     fn_80129C80(5, lbl_8055E428[0], lbl_8055E428[1]);
 }
 
-void fn_80178DD4(s32 stream) {
+void InitializeRacePhysics(s32 stream) {
     int i;
     s32 s;
     int pass;
@@ -935,7 +935,7 @@ void fn_80178DD4(s32 stream) {
     lbl_8055E8F8 = *fn_801769D8();
     fn_80181FEC();
     InitializeCrashMode();
-    fn_801DA6EC();
+    InitializePathManager();
     fn_801D0E0C();
     fn_80127464();
     fn_801CEFAC();
@@ -979,7 +979,7 @@ void fn_80178DD4(s32 stream) {
     fn_801B8318();
     fn_801FA978();
     lbl_8055E434 = new ("phob_list") Phob*[0x200];
-    fn_801E2188();
+    LoadTrackSolution();
     for (i = 0; i < 8; i++) {
         lbl_80430830[i] = 0;
     }
@@ -1042,7 +1042,7 @@ void fn_80179140(void) {
 
 void CollVolume::vf14(void) {}  // empty; in every collision vtable
 
-void fn_801791A8(void) {
+void CleanupRaceSession(void) {
     int i;
     fn_80177A18();
     PhysReplayUninstallEventHandler((s32 (*)(void*))fn_80178C4C);
@@ -1105,7 +1105,7 @@ void fn_80179320(void) {
     lbl_8055E460 = 1.0f;
     lbl_8055E44C = 0;
     lbl_8055E458 = 0;
-    fn_80177990();
+    ResetTrackSurfaceData();
     if (IsReplayActive()) {
         fn_80177814(lbl_8055E418);
         fn_80177814(lbl_8055E420);
@@ -1160,7 +1160,7 @@ void fn_8017952C(void) {
     int n;
     int i;
     fn_802E4C18(1);
-    n = fn_801787B4(&lbl_80430850);
+    n = HandlePhysicsTiming(&lbl_80430850);
     for (i = 0; i < n; i++) {
         fn_80177F40();
     }
@@ -1201,8 +1201,8 @@ s32 fn_80179630(int i) {
 
 s32 fn_80179650(void) { return lbl_8055E430; }
 
-s32 fn_80179658(u32 type) {
-    PhobType* t = fn_80178374(type);
+s32 GetMessageSizeOfType(u32 type) {
+    PhobType* t = FindPhobType(type);
     if (t) {
         return t->size;
     }
@@ -1216,9 +1216,9 @@ void fn_801796BC(u8 v) { lbl_8055E45E = v; }
 
 int fn_801796C4(void) { return lbl_8055E45F; }
 
-void fn_801796CC(u8 type, const void* data, u32 n) { fn_8017873C(&lbl_80430870, type, data, n); }
+void fn_801796CC(u8 type, const void* data, u32 n) { AppendMessageData(&lbl_80430870, type, data, n); }
 
-void fn_801796EC(u8 type, const void* data, u32 n) { fn_8017873C(&lbl_80431874, type, data, n); }
+void fn_801796EC(u8 type, const void* data, u32 n) { AppendMessageData(&lbl_80431874, type, data, n); }
 
 f32 fn_8017970C(void) {
     const char* asserts[] = {"ConvertPTimeToPhysicsTime: bad approximation", "ConvertPhysicsTickToPTime: bad approximation",
@@ -1235,7 +1235,7 @@ void fn_801797F8(int i, u32 hi, u32 lo) {
     lbl_804305A0[i].count++;
 }
 
-StatePacket* fn_80179824(void) {
+StatePacket* PackPhysicsState(void) {
     StatePacket* p = lbl_8055E450;
     u8* buf;
     int i;

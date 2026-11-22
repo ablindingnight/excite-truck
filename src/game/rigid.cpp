@@ -19,7 +19,7 @@ void* memset(void* dst, int c, u32 n);
 f32 Dot(float, float, float, float, float, float);
 extern "C" {
 void* fn_801B60F4(const void* pos, f32 r);                            // grid cell at
-void fn_801B6428(void* cell, void* body);                             // cell remove
+void RemovePhobFromCell(void* cell, void* body);                             // cell remove
 void fn_801B63E0(void* cell, void* body);                             // cell add
 double sin(double x);
 double cos(double x);
@@ -133,7 +133,7 @@ void RigidBody::ResetState(void) {
     memset(imps, 0, sizeof(imps));
     worldInvI = invI;
     if (cell) {
-        fn_801B6428(cell, this);
+        RemovePhobFromCell(cell, this);
     }
     cell = 0;
     for (c = contacts; c; c = c->next) {
@@ -556,7 +556,7 @@ void RigidBody::UpdateCell(void) {
     void* c = fn_801B60F4(&mtx.pos, radius);
     if (c != cell) {
         if (cell) {
-            fn_801B6428(cell, this);
+            RemovePhobFromCell(cell, this);
         }
         cell = c;
         if (c) {

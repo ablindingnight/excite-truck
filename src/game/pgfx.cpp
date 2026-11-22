@@ -73,6 +73,6 @@ int pgfx_handler(const PGfxEvent* ev) {
 
 void fn_801B6604(void) { RegisterEventHandler(pgfx_handler, 3); }
 
-void fn_801B6614(void) { EventUnInstallHandler(pgfx_handler); }
+void UninstallEventHandler(void) { EventUnInstallHandler(pgfx_handler); }
 
 }  // extern "C"

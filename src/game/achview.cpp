@@ -768,7 +768,7 @@ void fn_801BFEBC(f32* v, f32 x, f32 y, f32 z);
 void fn_801F3198(f32* v);
 void __ct__4VPosFfff(f32* v, f32 x, f32 y, f32 z);
 f32 fn_8017F70C(f32 x);
-void fn_801C0E4C(f32* out, const f32* a, const f32* b);
+void CalculateVectorCrossProduct(f32* out, const f32* a, const f32* b);
 Mat3* fn_802C86DC(void);
 inline void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t);
 inline f32 fn_8025AD88(const f32* a, const f32* b);
@@ -832,17 +832,17 @@ inline void AchievementTrophyModel::Turn(f32 dt) {
         InitTrophyVec3(a);
         InitTrophyVec3(b);
         InitTrophyVec3(c);
-        fn_801C0E4C(c, side, &rot[3]);
-        fn_801C0E4C(a, &rot[3], c);
-        fn_801C0E4C(b, &rot[3], fwd);
+        CalculateVectorCrossProduct(c, side, &rot[3]);
+        CalculateVectorCrossProduct(a, &rot[3], c);
+        CalculateVectorCrossProduct(b, &rot[3], fwd);
         fn_8025AD3C(r, a, b, Remap(0.707f, 0.996f, 0.0f, 1.0f, tilt));
-        fn_801C0E4C(&rot[6], r, &rot[3]);
+        CalculateVectorCrossProduct(&rot[6], r, &rot[3]);
         fn_801F3198(&rot[6]);
-        fn_801C0E4C(rot, &rot[3], &rot[6]);
+        CalculateVectorCrossProduct(rot, &rot[3], &rot[6]);
     } else {
-        fn_801C0E4C(&rot[6], side, &rot[3]);
+        CalculateVectorCrossProduct(&rot[6], side, &rot[3]);
         fn_801F3198(&rot[6]);
-        fn_801C0E4C(rot, &rot[3], &rot[6]);
+        CalculateVectorCrossProduct(rot, &rot[3], &rot[6]);
     }
     Mat3RotY(&spin, lbl_8055F398);
     Mat3Mul((Mat3*)rot, &spin, (Mat3*)rot);

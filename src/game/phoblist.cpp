@@ -81,7 +81,7 @@ PhobCell* fn_801B60F4(const ValVec3* pos, f32 radius) {
     return &lbl_8055E70C[z * 100 + x];
 }
 
-void fn_801B619C(PhobCell** out, int* n, const ValVec3* pos) {
+void FindCellNeighbors(PhobCell** out, int* n, const ValVec3* pos) {
     int x0 = CellIndex(pos->x - 9.5999994f);
     int x1 = CellIndex(9.5999994f + pos->x);
     int z0 = CellIndex(pos->z - 9.5999994f);
@@ -116,7 +116,7 @@ void fn_801B63E0(PhobCell* c, CollVolume* p) {
     c->head = n;
 }
 
-void fn_801B6428(PhobCell* c, CollVolume* p) {
+void RemovePhobFromCell(PhobCell* c, CollVolume* p) {
     PhobNode* prev = c->head;
     PhobNode* n;
     if (prev->phob == p) {

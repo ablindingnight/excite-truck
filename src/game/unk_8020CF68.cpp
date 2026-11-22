@@ -45,7 +45,7 @@ int fn_8020CF68(void) {
 extern void fn_8020A5F8(float);
 extern void fn_8020C908(float);
 extern void SetEffectsVolume(float);
-extern void fn_8013323C(int, char *, float);
+extern void SetOptionFloatValue(int, char *, float);
 extern void fn_800121F0(void);
 extern void fn_8020D0CC(int);
 extern int lbl_8055EE78;
@@ -86,8 +86,8 @@ void fn_8020D06C(void) {
     fn_8020A5F8(lbl_8055EE8C);
     fn_8020C908(lbl_8055EE8C);
     SetEffectsVolume(lbl_8055EE90);
-    fn_8013323C(4, "music_volume", lbl_8055EE8C);
-    fn_8013323C(4, "effects_volume", lbl_8055EE90);
+    SetOptionFloatValue(4, "music_volume", lbl_8055EE8C);
+    SetOptionFloatValue(4, "effects_volume", lbl_8055EE90);
     fn_800121F0();
 }
 

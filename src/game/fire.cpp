@@ -105,7 +105,7 @@ const PlainValMatrix* fn_80288060(FireModel* model, int i);
 FireModel* GetEffectInfo(s32 i);
 void fn_80288A40(const Vec* p, const Vec* v);
 void fn_80288A58(const Vec* p, const Vec* v);
-void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
+void* CreateParticleSystem(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
 void fn_802C77F0(s32 model, f32* box);
@@ -469,7 +469,7 @@ void InitializeFireParticles(PartParams* e) {
 void InitializeTorchFire(void) {
     PartParams e;
     InitializeFireParticles(&e);
-    lbl_8055F7E0 = fn_8028E2F8(&e, "torch fire", lbl_8055CA80);
+    lbl_8055F7E0 = CreateParticleSystem(&e, "torch fire", lbl_8055CA80);
 }
 
 void fn_80297ED4(void) {}
@@ -583,7 +583,7 @@ void fn_802981F8(const Vec* p) {
 // Ground fire manager setup; dead-stripped from the game but its name remains.
 void fn_ground_dead(RingFireMan* m) {
     PartParams e;
-    m->emitter = fn_8028E2F8(&e, "ground fire", lbl_8055CA80);
+    m->emitter = CreateParticleSystem(&e, "ground fire", lbl_8055CA80);
 }
 
 }  // extern "C"
@@ -829,7 +829,7 @@ extern "C" void fn_802991BC(EngineFireMan* m) {
     e.frames = 0x40;
     e.randomFrame = 1;
     e.unk89 = 1;
-    m->emitter = fn_8028E2F8(&e, "engine fire", lbl_8055CA80);
+    m->emitter = CreateParticleSystem(&e, "engine fire", lbl_8055CA80);
 }
 
 RingSlots::~RingSlots(void) {
@@ -1002,7 +1002,7 @@ void BigRingMan::Make(BigRing* r, const FireCar* m, f32 radius) {
     e.randomFrame = 1;
     e.priority = 2;
     e.unk89 = 1;
-    r->emitter = fn_8028E2F8(&e, "ring fire", lbl_8055CA80);
+    r->emitter = CreateParticleSystem(&e, "ring fire", lbl_8055CA80);
     int n = MIN((int)(4.0f * radius), 12);
     n = MAX(n, 1);
     Mat3* rp = &rot;
@@ -1195,7 +1195,7 @@ BoostFireMan::BoostFireMan(void) {
     e.frames = 0x40;
     e.randomFrame = 1;
     e.unk89 = 1;
-    emitter = fn_8028E2F8(&e, "boost fire", lbl_8055CA8C);
+    emitter = CreateParticleSystem(&e, "boost fire", lbl_8055CA8C);
     RegisterEventHandler(fn_8029C054, 14);
     RegisterEventHandler(HandleEventSetT, 13);
 }
@@ -1612,7 +1612,7 @@ void TorchFireMan::InitEmitter(void) {
     e.randomFrame = 1;
     e.priority = 2;
     e.unk89 = 1;
-    emitter = fn_8028E2F8(&e, "torch fire", lbl_8055CA80);
+    emitter = CreateParticleSystem(&e, "torch fire", lbl_8055CA80);
 }
 
 extern "C" {

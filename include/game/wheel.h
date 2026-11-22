@@ -8,7 +8,7 @@ struct BodyDesc;
 struct RPacket;
 
 // A loose wheel phob (wheel.cpp; vtable emitted there by Init, its first non-inline virtual): a rigid body knocked
-// off a car (phob.cpp's fn_80178290 creates one under the tag "WheelPhob"). Names are guesses.
+// off a car (phob.cpp's CreateWheelPhob creates one under the tag "WheelPhob"). Names are guesses.
 class Wheel : public RigidBody {
 public:
     Wheel(void);

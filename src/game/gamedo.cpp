@@ -67,7 +67,7 @@ void fn_800126C0(RaceSetup* rs, DAVMap* dav);
 void fn_80244738(void);
 void fn_80211F44(void);
 void InitializeCareerEvents(void);
-void fn_8020A600(void);
+void PlayMusicTrack(void);
 int fn_802ECEEC(void);
 void fn_802ECEC0(void);
 void fn_802ECEC4(void);
@@ -81,9 +81,9 @@ void fn_802411C8(void);
 void fn_802411D0(int i, s32* vehicle, u32* color, int* pad);
 void fn_80137C84(int pad, int slot);
 int fn_8023FF1C(int a);
-int fn_8024A4CC(int* track, int* eve, int* difficulty);
+int ProcessMultiplayerEventChoice(int* track, int* eve, int* difficulty);
 int fn_8024A4C4(int* track, int* eve, int* difficulty);
-SessionScreen* fn_8027DB40(int a);
+SessionScreen* FilterAvailableCars(int a);
 int fn_8024DAE0(s32* vehicle, u32* color, int a, SessionScreen* screen, int b);
 void fn_80137C78(int n);
 int fn_802E4A10(void);
@@ -150,7 +150,7 @@ void fn_8023B8AC(GameDoSetup* rs) {
     if (!OptDirectToTrack()) {
         InitializeCareerEvents();
     }
-    fn_8020A600();
+    PlayMusicTrack();
 }
 
 void fn_8023B904(GameDoSetup* rs, RaceStandings* out, int skip) {
@@ -211,7 +211,7 @@ void fn_8023BBA8(void) {
     int track = 0;
     int eve = 0;
     int difficulty = 0;
-    while (fn_8024A4CC(&track, &eve, &difficulty)) {
+    while (ProcessMultiplayerEventChoice(&track, &eve, &difficulty)) {
         fn_802411C8();
         if (fn_8023FF1C(1) != 1) {
             InitializePlayers();
@@ -222,7 +222,7 @@ void fn_8023BBA8(void) {
 }
 
 int fn_8023BC24(s32* id, s32* vehicle, u32* color, int unused) {
-    SessionScreen* screen = fn_8027DB40(1);
+    SessionScreen* screen = FilterAvailableCars(1);
     int r = fn_8024DAE0(vehicle, color, 0, screen, 0);
     delete screen;
     return r;

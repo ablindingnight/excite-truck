@@ -19,7 +19,7 @@ struct PhysStats {
     f32 e;  // offset 0x10
 };
 
-// The physics state packet (phob.cpp allocates it as "PhysMessage"; fn_80179824 / PhysicsGetStatePacked hand it
+// The physics state packet (phob.cpp allocates it as "PhysMessage"; PackPhysicsState / PhysicsGetStatePacked hand it
 // out): per-car state, the views, stats, forces and the message/event/phob streams. physics.cpp reads fade.
 // Names are guesses.
 struct StatePacket {

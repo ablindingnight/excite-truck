@@ -52,7 +52,7 @@ void fn_8012E498(const char* res);
 void fn_8012E81C(const char* res);
 
 void fn_802E2C20(void);
-void fn_80133024(void);
+void LoadOptionsFile(void);
 void fn_802C2AA8(int);
 void fn_80127464(void);
 void fn_802062E8(void);
@@ -64,7 +64,7 @@ void LoadEscapeSequenceData(void);
 void InitializeLeagueData(void);
 void LoadDebugGeometry(void);
 void fn_80141454(void);
-void fn_8027DAF4(void);
+void RegisterCareerCallbacks(void);
 void fn_8021031C(void);
 void fn_801AED54(void);
 void fn_802789A8(void);
@@ -104,7 +104,7 @@ void fn_80245124(void);
 void fn_80230114(void);
 void fn_802063D8(void);
 void fn_802C2B18(void);
-void fn_80133144(void);
+void CheckForLeakedCallbacks(void);
 void fn_8000D878(void);
 
 
@@ -119,7 +119,7 @@ void fn_80265D4C(void);
 void fn_80127434(void);
 void fn_8023D7CC(void);
 void fn_8023D70C(void);
-void fn_8020A600(void);
+void PlayMusicTrack(void);
 void GameDoEve(int eve, int track);
 }
 
@@ -196,7 +196,7 @@ void AppInit(void) {
     fn_802E2C20();
     LoadResidentRes();
     fn_8012E81C("genesis.res");
-    fn_80133024();
+    LoadOptionsFile();
     fn_802C2AA8(lbl_80558900);
     fn_80127464();
     fn_80127464();
@@ -223,7 +223,7 @@ void AppInit(void) {
     AchievementsInit();
     FlagsInit();
     fn_80141454();
-    fn_8027DAF4();
+    RegisterCareerCallbacks();
     fn_8021031C();
     fn_801AED54();
     RepInit();
@@ -277,7 +277,7 @@ void AppShutdown(void) {
     fn_80230114();
     fn_802063D8();
     fn_802C2B18();
-    fn_80133144();
+    CheckForLeakedCallbacks();
     FreeResidentRes();
     fn_8000D878();
 }
@@ -433,7 +433,7 @@ int DirectToTrack(const char* name) {
         }
 
         if (found) {
-            fn_8020A600();
+            PlayMusicTrack();
             GameDoEve(track, eve);
         } else if (lbl_8034EC58[0] != '\0') {
             fn_802E30C8("no eves for \"%s\"", lbl_8034EC58);

@@ -132,7 +132,7 @@ int vsprintf(char* dst, const char* fmt, va_list args);
 int strcasecmp(const char* a, const char* b);
 int fn_802E2C20(void);  // milliseconds
 World* fn_802B59A4(s32 i);
-void fn_802B321C(InlineVec<ObjItem, 16>* list, u8** clump, void* objs, s32 layer);
+void ExtractTweakersFromLayer(InlineVec<ObjItem, 16>* list, u8** clump, void* objs, s32 layer);
 s32 fn_802B3F0C(void* objs);
 void fn_802B32E0(void* objs);
 void fn_802B4E44(void* objs);
@@ -236,7 +236,7 @@ World* fn_802B5B6C(void) { return fn_802B59A4(lbl_8055FA3C); }
 
 int fn_802B5B74(ObjItem* out) {
     InlineVec<ObjItem, 16> list;
-    fn_802B321C(&list, 0, fn_802B5B6C()->objs, lbl_8055FA40);
+    ExtractTweakersFromLayer(&list, 0, fn_802B5B6C()->objs, lbl_8055FA40);
     int ok = lbl_8055FA44 >= 0 && lbl_8055FA44 < list.count;
     if (ok) {
         *out = list.data[lbl_8055FA44];
@@ -258,7 +258,7 @@ void fn_802B5CC4(const char* name) { fn_802B5CB4(1); }
 
 void fn_802B5CCC(const char* name) {
     bool* clump;
-    fn_802B321C(0, (u8**)&clump, fn_802B5B6C()->objs, lbl_8055FA40);
+    ExtractTweakersFromLayer(0, (u8**)&clump, fn_802B5B6C()->objs, lbl_8055FA40);
     *clump = !*clump;
     fn_802B32E0(fn_802B5B6C()->objs);
     fn_802B4E44(fn_802B5B6C()->objs);
@@ -949,7 +949,7 @@ void fn_802B7D4C(void) {
     World* w = fn_802B5B6C();
     InlineVec<ObjItem, 16> list;
     u8* clump = 0;
-    fn_802B321C(&list, &clump, w->objs, lbl_8055FA40);
+    ExtractTweakersFromLayer(&list, &clump, w->objs, lbl_8055FA40);
     const char* cl = "Dispersed";
     if (*clump) {
         cl = "Clumpy";
@@ -988,7 +988,7 @@ int fn_802B8110(int d, const char* s) {
     int idx = fn_802B5D94(s);
     World* w = fn_802B5B6C();
     InlineVec<ObjItem, 16> list;
-    fn_802B321C(&list, 0, w->objs, lbl_8055FA40);
+    ExtractTweakersFromLayer(&list, 0, w->objs, lbl_8055FA40);
     int v;
     s32* dp = list.data[idx].density;
     v = *dp + d / 2;

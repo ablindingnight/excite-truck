@@ -57,15 +57,15 @@ struct OptCallback {
 
 extern "C" {
 void fn_80133F3C(int section);
-void fn_80133FCC(int event);
-void fn_801341B4(int slot, int cleared);
-int fn_80133BA0(const char* name, int quiet, int section);
-const char* fn_80133AD8(int section);
-int fn_80133E10(OptItem** out, int section, const char* name);
-void fn_8013323C(int section, const char* name, f32 v);
+void HandleOptionEvent(int event);
+void HandleIdentityClear(int slot, int cleared);
+int ParseOptionsFile(const char* name, int quiet, int section);
+const char* GetSectionName(int section);
+int FindOrCreateOptionItem(OptItem** out, int section, const char* name);
+void SetOptionFloatValue(int section, const char* name, f32 v);
 void fn_80133348(int section, const char* name, s32 v);
-void fn_80133460(int section, const char* name, bool v);
-void fn_8013358C(int section, const char* name, const char* s);
+void SetOptionBooleanValue(int section, const char* name, bool v);
+void SetOptionString(int section, const char* name, const char* s);
 bool fn_80133844(const char* s);
 s32 fn_801338D8(const char* s);
 f32 fn_80133960(const char* s);
@@ -87,7 +87,7 @@ extern "C" {
 
 int fn_80133010(void) { return lbl_8055E07C != 0; }
 
-void fn_80133024(void) {
+void LoadOptionsFile(void) {
     int i;
     lbl_8055E078 = 1;
     lbl_8055E07C = new ("OptionsFile") OptionsFile;
@@ -96,23 +96,23 @@ void fn_80133024(void) {
     for (i = 0; i < OPT_MAX_CALLBACKS; i++) {
         lbl_8042F718[i].fn = 0;
     }
-    if (!fn_80133BA0(lbl_80559B58, 0, OPT_SECTION_NONE)) {
+    if (!ParseOptionsFile(lbl_80559B58, 0, OPT_SECTION_NONE)) {
         fn_802E317C("Can't load %s", lbl_80559B58);
     }
-    fn_802E6BD8('OPTs', 6, lbl_8055E07C, sizeof(OptionsFile), fn_80133FCC);
-    IdentRegisterCallback(fn_801341B4);
+    fn_802E6BD8('OPTs', 6, lbl_8055E07C, sizeof(OptionsFile), HandleOptionEvent);
+    IdentRegisterCallback(HandleIdentityClear);
 }
 
 // Stripped from ET; only its string remains.
 void OptionsLoadFile(const char* name) { fn_802E317C("Couldn't load %s", name); }
 
 void OptionsDefault(int section) {
-    if (!fn_80133BA0(lbl_80559B58, 0, section)) {
-        fn_802E317C("OptionsDefault: can't load %s", fn_80133AD8(section));
+    if (!ParseOptionsFile(lbl_80559B58, 0, section)) {
+        fn_802E317C("OptionsDefault: can't load %s", GetSectionName(section));
     }
 }
 
-void fn_80133144(void) {
+void CheckForLeakedCallbacks(void) {
     int i;
     for (i = 0; i < OPT_MAX_CALLBACKS; i++) {
         if (lbl_8042F718[i].fn) {
@@ -125,16 +125,16 @@ void fn_80133144(void) {
 
 void fn_801331C4(int section, const char* name, f32* v) {
     OptItem* it;
-    if (fn_80133E10(&it, section, name)) {
+    if (FindOrCreateOptionItem(&it, section, name)) {
         *v = it->value.f;
     } else {
-        fn_8013323C(section, name, *v);
+        SetOptionFloatValue(section, name, *v);
     }
 }
 
-void fn_8013323C(int section, const char* name, f32 v) {
+void SetOptionFloatValue(int section, const char* name, f32 v) {
     OptItem* it;
-    fn_80133E10(&it, section, name);
+    FindOrCreateOptionItem(&it, section, name);
     it->value.f = v;
     it->value.i = (int)v;
     it->value.b = 0.0f != v;
@@ -144,7 +144,7 @@ void fn_8013323C(int section, const char* name, f32 v) {
 
 void fn_801332D0(int section, const char* name, s32* v) {
     OptItem* it;
-    if (fn_80133E10(&it, section, name)) {
+    if (FindOrCreateOptionItem(&it, section, name)) {
         *v = it->value.i;
     } else {
         fn_80133348(section, name, *v);
@@ -153,7 +153,7 @@ void fn_801332D0(int section, const char* name, s32* v) {
 
 void fn_80133348(int section, const char* name, s32 v) {
     OptItem* it;
-    fn_80133E10(&it, section, name);
+    FindOrCreateOptionItem(&it, section, name);
     it->value.i = v;
     it->value.f = v;
     it->value.b = v != 0;
@@ -163,16 +163,16 @@ void fn_80133348(int section, const char* name, s32 v) {
 
 void fn_801333E8(int section, const char* name, bool* v) {
     OptItem* it;
-    if (fn_80133E10(&it, section, name)) {
+    if (FindOrCreateOptionItem(&it, section, name)) {
         *v = it->value.b;
     } else {
-        fn_80133460(section, name, *v);
+        SetOptionBooleanValue(section, name, *v);
     }
 }
 
-void fn_80133460(int section, const char* name, bool v) {
+void SetOptionBooleanValue(int section, const char* name, bool v) {
     OptItem* it;
-    fn_80133E10(&it, section, name);
+    FindOrCreateOptionItem(&it, section, name);
     it->value.b = v;
     it->value.i = v;
     it->value.f = v;
@@ -180,19 +180,19 @@ void fn_80133460(int section, const char* name, bool v) {
     it->type = 1;
 }
 
-void fn_801334F4(int section, const char* name, char* buf, int size) {
+void LoadOptionString(int section, const char* name, char* buf, int size) {
     OptItem* it;
-    if (fn_80133E10(&it, section, name)) {
+    if (FindOrCreateOptionItem(&it, section, name)) {
         strncpy(buf, it->value.s, size);
         buf[size - 1] = 0;
     } else {
-        fn_8013358C(section, name, buf);
+        SetOptionString(section, name, buf);
     }
 }
 
-void fn_8013358C(int section, const char* name, const char* s) {
+void SetOptionString(int section, const char* name, const char* s) {
     OptItem* it;
-    fn_80133E10(&it, section, name);
+    FindOrCreateOptionItem(&it, section, name);
     strncpy(it->value.s, s, sizeof(it->value.s));
     it->value.s[15] = 0;
     it->value.i = fn_801338D8(it->value.s);
@@ -233,7 +233,7 @@ void OptionsAddPatchup(const char* section, const char* name) {
     fn_802E317C("OptionsAddPatchup: can't find %s : %s", section, name);
 }
 
-int fn_80133780(const void* a, const void* b) {
+int CompareOptionItems(const void* a, const void* b) {
     const OptItem* x = (const OptItem*)a;
     const OptItem* y = (const OptItem*)b;
     int d = x->section - y->section;
@@ -245,9 +245,9 @@ int fn_80133780(const void* a, const void* b) {
     return d;
 }
 
-void fn_801337C8(void) { qsort(lbl_8055E07C->items, lbl_8055E07C->count, sizeof(OptItem), fn_80133780); }
+void fn_801337C8(void) { qsort(lbl_8055E07C->items, lbl_8055E07C->count, sizeof(OptItem), CompareOptionItems); }
 
-const char* fn_801337E4(const char* s) {
+const char* SkipWhitespace(const char* s) {
     while (*s && isspace(*s)) {
         s++;
     }
@@ -255,7 +255,7 @@ const char* fn_801337E4(const char* s) {
 }
 
 bool fn_80133844(const char* s) {
-    s = fn_801337E4(s);
+    s = SkipWhitespace(s);
     if (isdigit(*s)) {
         return atoi(s) != 0;
     }
@@ -263,7 +263,7 @@ bool fn_80133844(const char* s) {
 }
 
 s32 fn_801338D8(const char* s) {
-    s = fn_801337E4(s);
+    s = SkipWhitespace(s);
     if (isdigit(*s) || *s == '-') {
         return atoi(s);
     }
@@ -271,7 +271,7 @@ s32 fn_801338D8(const char* s) {
 }
 
 f32 fn_80133960(const char* s) {
-    s = fn_801337E4(s);
+    s = SkipWhitespace(s);
     if (isdigit(*s) || *s == '-' || *s == '.') {
         return atof(s);
     }
@@ -294,7 +294,7 @@ int fn_80133A08(const char** pp, s32 avail, char* buf, s32 size) {
     return buf != start;
 }
 
-const char* fn_80133AD8(int section) {
+const char* GetSectionName(int section) {
     const char* names[] = {
         "GLOBAL",   "GX",       "AI",       "MULTI",   "SOUND",   "GAME",    "PHYSICS", "TRKEDIT", "CONTROL",
         "CONTROL1", "CONTROL2", "CONTROL3", "PLAYER0", "PLAYER1", "PLAYER2", "PLAYER3", "PLAYER_CAREER",
@@ -302,10 +302,10 @@ const char* fn_80133AD8(int section) {
     return names[section];
 }
 
-int fn_80133B24(const char* name) {
+int FindOptionSectionIndex(const char* name) {
     int i;
     for (i = 0; i < 17; i++) {
-        if (!strcasecmp(name, fn_80133AD8(i))) {
+        if (!strcasecmp(name, GetSectionName(i))) {
             return i;
         }
     }
@@ -313,7 +313,7 @@ int fn_80133B24(const char* name) {
     return OPT_SECTION_NONE;
 }
 
-int fn_80133BA0(const char* name, int quiet, int section) {
+int ParseOptionsFile(const char* name, int quiet, int section) {
     s32 size = 0;
     u32 info;
     s32 version;
@@ -336,7 +336,7 @@ int fn_80133BA0(const char* name, int quiet, int section) {
                 int sec = OPT_SECTION_NONE;
                 if (close) {
                     *close = 0;
-                    sec = fn_80133B24(line + 1);
+                    sec = FindOptionSectionIndex(line + 1);
                 }
                 if (sec != OPT_SECTION_NONE) {
                     curSection = sec;
@@ -350,7 +350,7 @@ int fn_80133BA0(const char* name, int quiet, int section) {
                     if (sp && *sp) {
                         *sp = 0;
                         if (section == OPT_SECTION_NONE || section == curSection) {
-                            fn_80133E10(&it, curSection, line);
+                            FindOrCreateOptionItem(&it, curSection, line);
                             strcpy(it->value.s, sp + 1);
                             it->value.i = fn_801338D8(it->value.s);
                             it->value.f = fn_80133960(it->value.s);
@@ -358,7 +358,7 @@ int fn_80133BA0(const char* name, int quiet, int section) {
                             it->type = 0;
                         }
                     } else {
-                        fn_802E30C8("Item %s:%s has no value", fn_80133AD8(curSection), line);
+                        fn_802E30C8("Item %s:%s has no value", GetSectionName(curSection), line);
                     }
                 }
             } else if ((sscanf(line, "version %d", &version) == 1 && version == 2) || quiet) {
@@ -375,7 +375,7 @@ int fn_80133BA0(const char* name, int quiet, int section) {
     return ok;
 }
 
-int fn_80133E10(OptItem** out, int section, const char* name) {
+int FindOrCreateOptionItem(OptItem** out, int section, const char* name) {
     int i;
     for (i = 0; i < lbl_8055E07C->count; i++) {
         OptItem* it = &lbl_8055E07C->items[i];
@@ -416,7 +416,7 @@ void fn_80133F3C(int section) {
     }
 }
 
-void fn_80133FCC(int event) {
+void HandleOptionEvent(int event) {
     if (event == 1) {
         int k;
         for (k = 0; k < lbl_8055E080; k++) {
@@ -442,7 +442,7 @@ void fn_80133FCC(int event) {
     }
 }
 
-void fn_801341B4(int slot, int cleared) {
+void HandleIdentityClear(int slot, int cleared) {
     switch (cleared) {
     case 0:
         fn_802E30C8("Opt: Identity called to say that %d was cleared", slot);

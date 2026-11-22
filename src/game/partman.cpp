@@ -172,22 +172,22 @@ extern "C" {
 void fn_8028ED74(SysList* l);
 void fn_8028ED80(SysList* l);
 void fn_8028ED8C(SysList* l, PartSys* s);
-int fn_8028EDA8(SysList* l, PartSys* s);
-void fn_8028EE1C(TypeTable* t);
+int RemoveParticleSystem(SysList* l, PartSys* s);
+void ResetTypeTableCount(TypeTable* t);
 void fn_8028EE28(TypeTable* t);
 int fn_8028EE34(TypeTable* t, const char* name, s32* idx);
 void fn_8028F2EC(SysList* l);
 void fn_8028F5A0(const void* owner, PartSys* s);
 void fn_8028F5A4(void);
 void fn_8028FAE4(PartSys* s, const V3* pos, const V3* dir, f32 size);
-void fn_8028FB98(PartSys* s, const V3* pos, const V3* dir, f32 scale);
+void EmitParticleEffect(PartSys* s, const V3* pos, const V3* dir, f32 scale);
 void fn_8028FC40(PartSys* s, const V3* pos, const V3* dir, f32 angVel);
-void fn_8028E654(PartParams* p, ValueNode* vn);
+void LoadParticleParams(PartParams* p, ValueNode* vn);
 
 void fn_8028DF58(void) {
     fn_8028ED74(&lbl_804B34B0);
     fn_8028ED74(&lbl_804B35B4);
-    fn_8028EE1C(&lbl_804B36B8);
+    ResetTypeTableCount(&lbl_804B36B8);
     lbl_8055F740 = 0;
     lbl_8055F744 = 1;
     lbl_8055F748 = 0;
@@ -219,7 +219,7 @@ void fn_8028E070(f32 t) {
     lbl_8055F73C = 1;
 }
 
-void fn_8028E080(void) {
+void UpdateAllItems(void) {
     lbl_8055F73C = 0;
     for (int i = 0; i < lbl_804B34B0.count; i++) {
         lbl_804B34B0.items[i]->Update(lbl_8055F738);
@@ -233,7 +233,7 @@ void fn_8028E0F0(void) {
     fn_8028ED80(&lbl_804B34B0);
 }
 
-void fn_8028E138(void) {
+void ResetAllItems(void) {
     lbl_8055F738 = 0.0f;
     for (int i = 0; i < lbl_804B34B0.count; i++) {
         lbl_804B34B0.items[i]->Reset();
@@ -278,7 +278,7 @@ void fn_8028E240(int) {
 
 static const char* lbl_80348CF8[3] = {"Simple", "Animated", "Rotating"};
 
-PartSys* fn_8028E2F8(const PartParams* p, const void* owner, const char* tex) {
+PartSys* CreateParticleSystem(const PartParams* p, const void* owner, const char* tex) {
     PartSys* s = new ("partman") PartSys(p, tex);
     fn_8028ED8C(&lbl_804B35B4, s);
     fn_8028ED8C(&lbl_804B34B0, s);
@@ -287,13 +287,13 @@ PartSys* fn_8028E2F8(const PartParams* p, const void* owner, const char* tex) {
 }
 
 void fn_8028E398(PartSys* s) {
-    if (fn_8028EDA8(&lbl_804B35B4, s)) {
-        fn_8028EDA8(&lbl_804B34B0, s);
+    if (RemoveParticleSystem(&lbl_804B35B4, s)) {
+        RemoveParticleSystem(&lbl_804B34B0, s);
         delete s;
     }
 }
 
-PartSys* fn_8028E3F4(const char* name) {
+PartSys* LoadParticleSystem(const char* name) {
     s32 idx = -1;
     if (fn_8028EE34(&lbl_804B36B8, name, &idx)) {
         TypeEntry* e = &lbl_804B36B8.e[idx];
@@ -305,7 +305,7 @@ PartSys* fn_8028E3F4(const char* name) {
     if (!vn) {
         fn_802E317C("particle: could not find table %s", name);
     }
-    fn_8028E654(&p, vn);
+    LoadParticleParams(&p, vn);
     PartSys* s = new ("partman") PartSys(&p, vn->GetValue("texture"));
     lbl_804B36B8.Add(s, name);
     fn_8028ED8C(&lbl_804B34B0, s);
@@ -313,21 +313,21 @@ PartSys* fn_8028E3F4(const char* name) {
     return s;
 }
 
-void fn_8028E528(PartSys* s) {
+void ProcessPartSystemRelease(PartSys* s) {
     if (lbl_804B36B8.Release(s)) {
-        fn_8028EDA8(&lbl_804B34B0, s);
+        RemoveParticleSystem(&lbl_804B34B0, s);
         delete s;
     }
 }
 
-void fn_8028E584(PartSys* s, const V3* pos, const V3* dir) { fn_8028FB98(s, pos, dir, 1.0f); }
+void fn_8028E584(PartSys* s, const V3* pos, const V3* dir) { EmitParticleEffect(s, pos, dir, 1.0f); }
 
-void fn_8028E58C(PartSys* s, const V3* pos, const V3* dir, f32 size) { fn_8028FAE4(s, pos, dir, size); }
+void EmitDustTrail(PartSys* s, const V3* pos, const V3* dir, f32 size) { fn_8028FAE4(s, pos, dir, size); }
 
-void fn_8028E590(PartSys* s, const V3* pos, const V3* dir, f32 angVel) { fn_8028FC40(s, pos, dir, angVel); }
+void EmitParticleTrail(PartSys* s, const V3* pos, const V3* dir, f32 angVel) { fn_8028FC40(s, pos, dir, angVel); }
 
 
-int fn_8028E594(const char* name) {
+int FindParticleTypeIndex(const char* name) {
     for (int i = 0; i < 3; i++) {
         if (strcasecmp(name, lbl_80348CF8[i]) == 0) {
             return i;
@@ -351,9 +351,9 @@ struct V3c : V3 {
     }
 };
 
-void fn_8028E654(PartParams* p, ValueNode* vn) {
+void LoadParticleParams(PartParams* p, ValueNode* vn) {
     memset(p, 0, sizeof(PartParams));
-    p->type = fn_8028E594(vn->GetValue("Type"));
+    p->type = FindParticleTypeIndex(vn->GetValue("Type"));
     p->maxParticles = vn->GetIntValue("Max_particles");
     p->maxLife = vn->GetFloat("Max_life");
     p->spewRate = vn->GetFloat("Spew_rate");
@@ -422,7 +422,7 @@ void fn_8028ED8C(SysList* l, PartSys* s) {
     l->count++;
 }
 
-int fn_8028EDA8(SysList* l, PartSys* s) {
+int RemoveParticleSystem(SysList* l, PartSys* s) {
     for (int i = 0; i < l->count; i++) {
         if (l->items[i] == s) {
             l->items[i] = 0;
@@ -433,7 +433,7 @@ int fn_8028EDA8(SysList* l, PartSys* s) {
     return 0;
 }
 
-void fn_8028EE1C(TypeTable* t) { t->count = 0; }
+void ResetTypeTableCount(TypeTable* t) { t->count = 0; }
 
 void fn_8028EE28(TypeTable* t) { t->count = 0; }
 
@@ -752,7 +752,7 @@ void fn_8028FAE4(PartSys* s, const V3* pos, const V3* dir, f32 size) {
     }
 }
 
-void fn_8028FB98(PartSys* s, const V3* pos, const V3* dir, f32 scale) {
+void EmitParticleEffect(PartSys* s, const V3* pos, const V3* dir, f32 scale) {
     if (s->CanEmit()) {
         V3 v;
         fn_8028F444(&v, dir, &s->spread, &s->velScale, s->upKick, scale);

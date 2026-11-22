@@ -208,7 +208,7 @@ void fn_8028CFB0(void);
 void fn_8028DF58(void);
 void fn_8028DFB0(void);
 void fn_8028E0F0(void);
-void fn_8028E138(void);
+void ResetAllItems(void);
 void fn_8028E1A4(void);
 void fn_8028E1D0(void);
 void fn_8028E240(int mode);
@@ -249,8 +249,8 @@ void fn_8029C25C(void);
 void fn_8029C2D4(void);
 void LoadLineTexture(void);
 void fn_8029EFBC(void);
-void fn_8029F03C(void);
-void fn_8029F0D0(void);
+void InitializeParticleEffects(void);
+void CleanupParticleEffects(void);
 void fn_8029F124(void);
 void fn_8029F188(void);
 void fn_8029F300(void);
@@ -360,7 +360,7 @@ void fn_80287800(void* a) {
     fn_802A4ADC();
     fn_80292114();
     LoadUiFontAndMapGems();
-    fn_8029F03C();
+    InitializeParticleEffects();
     fn_802AB21C();
     fn_8028DFB0();
     lbl_8055F6BC = fn_801E7DF0(0) > 1;
@@ -372,7 +372,7 @@ void fn_802882A0(void);
 
 void ExecuteEffectFunctions(void) {
     fn_802AB504();
-    fn_8029F0D0();
+    CleanupParticleEffects();
     fn_802A7C24();
     fn_802921F4();
     fn_802A4B90();
@@ -395,7 +395,7 @@ void ExecuteEffectFunctions(void) {
 
 void fn_80287914(void) {
     fn_802A86A4();
-    fn_8028E138();
+    ResetAllItems();
     ResetAllEffects();
     fn_8028A89C();
     fn_8028CF50();

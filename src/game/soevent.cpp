@@ -138,7 +138,7 @@ public:
 };
 
 extern "C" {
-void fn_801D334C(PhobConfig* c, ValueNodeV* t);
+void LoadPhobConfig(PhobConfig* c, ValueNodeV* t);
 void fn_801D3610(PhobConfig* c, const char* name);
 SpawnPhob* fn_801D32E0(int model, int chunk, const SoXform* xf, const SoVec* offset, const PhobConfig* c, SObj* obj);
 }
@@ -330,7 +330,7 @@ void fn_801D26C8(SoSpawn* s, ValueNodeV* t) {
         if (t->Has("phob_config")) {
             fn_801D3610(&s->config, t->GetValue("phob_config"));
         } else {
-            fn_801D334C(&s->config, t);
+            LoadPhobConfig(&s->config, t);
         }
         s->config.effect = t->GetInt("effect_id", -1);
         s->model = fn_802C6FC0(t->GetValue("model"), 0, 0);
@@ -351,7 +351,7 @@ void fn_801D26C8(SoSpawn* s, ValueNodeV* t) {
             }
             bool own = c->FindChild("phob_config") != 0;
             if (own) {
-                fn_801D334C(&k->config, c->FindChild("phob_config"));
+                LoadPhobConfig(&k->config, c->FindChild("phob_config"));
                 k->ownConfig = 1;
             } else {
                 k->ownConfig = 0;

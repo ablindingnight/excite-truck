@@ -35,7 +35,7 @@ struct RayQuery {
 
 extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_801B619C(PhobCell** out, int* n, const RVec3* pos);
+void FindCellNeighbors(PhobCell** out, int* n, const RVec3* pos);
 SolGroup* fn_801A4548(const char* name);
 void fn_801A47FC(SolGroup* g);
 void fn_801A47C8(SolGroup* g);
@@ -82,7 +82,7 @@ void fn_801E2084(CollShape* s, CollVolume* p) {
     CollideShapes(p, s);
 }
 
-void fn_801E2100(CollShape* s, RayQuery* q) {
+void ProcessRayCollision(CollShape* s, RayQuery* q) {
     if (!q->filter || q->filter(s->surface)) {
         RVec3 n;
         if (s->vf18(&q->from, &q->dir, q->t, &n)) {
@@ -91,7 +91,7 @@ void fn_801E2100(CollShape* s, RayQuery* q) {
     }
 }
 
-void fn_801E2188(void) { lbl_8055EA3C = fn_801A4548("track.sol"); }
+void LoadTrackSolution(void) { lbl_8055EA3C = fn_801A4548("track.sol"); }
 
 void fn_801E21B4(SolGroup* g) { lbl_8055EA40 = g; }
 
@@ -185,7 +185,7 @@ void fn_801E22D0(CollVolume** list, int n) {
         if (p->nAdded > 0) {
             int nc = 5;
             PhobCell* cells[5];
-            fn_801B619C(cells, &nc, &p->mtx.pos);
+            FindCellNeighbors(cells, &nc, &p->mtx.pos);
             PhobIter it(cells);
             int k;
             for (k = 0; k < nc; it.w++, k++) {
@@ -220,7 +220,7 @@ static inline void QuadRay(SolGroup* g, const RVec3* from, RayQuery* q, f32 scal
         for (int k = nd->first; k < end; k++) {
             StaticCollObject* it = g->items[g->index[k]];
             if (it->b40) {
-                fn_801E2100(it->shape, q);
+                ProcessRayCollision(it->shape, q);
             }
         }
         node = nd->child;
@@ -268,7 +268,7 @@ int fn_801E2640(const RVec3* from, const RVec3* to, RVec3* outPos, RVec3* outNor
     if ((f32)__fabs(dir.y) > 0.9f) {
         int nc = 5;
         PhobCell* cells[5];
-        fn_801B619C(cells, &nc, from);
+        FindCellNeighbors(cells, &nc, from);
         PhobIter it(cells);
         int k;
         for (k = 0; k < nc; it.w++, k++) {

@@ -112,7 +112,7 @@ ILayout* fn_80145E70(const char* name);
 const char* fn_80131268(const char* key);
 void SetInputMask(u32 color);
 void fn_80232930(void);
-void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
+void ValidateAndFormatTextElement(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 int fn_80137C74(void);
 void fn_80231380(Vertex* v, u32 color, f32 x, f32 y, f32 z, f32 u, f32 w);
 void fn_802C8DB8(Vertex* v, int nv, const u16* idx, int ni);
@@ -835,7 +835,7 @@ void DrawGoText(void) {
             a.color = (alpha << 24) | (a.color & 0xFFFFFF);
             b.color = a.color;
             SetInputMask(-1);
-            fn_80147ABC(&a, &b, "%s", phase, text);
+            ValidateAndFormatTextElement(&a, &b, "%s", phase, text);
             fn_80232930();
         }
     }

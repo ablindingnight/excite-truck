@@ -35,7 +35,7 @@ int fn_801DA688(PathFollower* p);
 f32 fn_801DA6B8(PathFollower* p);
 f32 fn_801DD88C(f32 x, f32 z);  // ground height
 f32 fn_801EA0E8(f32 x, f32 z);  // ground height
-void fn_8029F458(const char* name, void* obj);
+void AttachEffectEmitter(const char* name, void* obj);
 void fn_801D0DDC(class Updatable* u);  // register
 void fn_801D0DFC(class Updatable* u);  // unregister
 }
@@ -132,9 +132,9 @@ PathMan* lbl_8055E984;
 
 extern "C" {
 
-void fn_801DA6EC(void) { new ("pathman") PathMan(); }
+void InitializePathManager(void) { new ("pathman") PathMan(); }
 
-void fn_801DA758(void* obj, const char* name, const char* file) {
+void RegisterPathClient(void* obj, const char* name, const char* file) {
     int i;
     PathMan* m = lbl_8055E984;
     PathClient* c = &m->clients[m->count++];
@@ -166,7 +166,7 @@ void fn_801DA758(void* obj, const char* name, const char* file) {
     } else {
         c->groundOffset = 0.0f;
     }
-    fn_8029F458(name, obj);
+    AttachEffectEmitter(name, obj);
 }
 
 /* Helper name unproven: adds each found client to a new group. */

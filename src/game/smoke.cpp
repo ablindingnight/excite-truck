@@ -90,7 +90,7 @@ ValueNodeV* FindEffectNode(SmokeModel* model, const char* name);
 ValVec3 GetEffectNodeVector(SmokeModel* model, const char* node, const char* key);
 const VecMatrix* fn_80288060(SmokeModel* model, int i);
 SmokeModel* GetEffectInfo(s32 i);
-void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
+void* CreateParticleSystem(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
 void* memset(void* dst, int c, size_t n);
@@ -332,7 +332,7 @@ void EngineSmokeMan::InitLight(void) {
     e.sizeConst = 0.8f;
     e.angRamp = -0.5f;
     e.angConst = 1.0f;
-    light = fn_8028E2F8(&e, "light engine smoke", lbl_8055C880);
+    light = CreateParticleSystem(&e, "light engine smoke", lbl_8055C880);
 }
 
 void EngineSmokeMan::InitHeavy(void) {
@@ -361,7 +361,7 @@ void EngineSmokeMan::InitHeavy(void) {
     e.sizeConst = 1.7f;
     e.angRamp = -0.75f;
     e.angConst = 1.0f;
-    heavy = fn_8028E2F8(&e, "heavy engine smoke", lbl_8055C880);
+    heavy = CreateParticleSystem(&e, "heavy engine smoke", lbl_8055C880);
 }
 
 void EngineSmokeMan::InitFire(void) {
@@ -390,7 +390,7 @@ void EngineSmokeMan::InitFire(void) {
     e.sizeConst = 2.3f;
     e.angRamp = -0.75f;
     e.angConst = 1.0f;
-    fire = fn_8028E2F8(&e, "engine fire smoke", lbl_8055C880);
+    fire = CreateParticleSystem(&e, "engine fire smoke", lbl_8055C880);
 }
 
 ExhaustSmokeMan::ExhaustSmokeMan(void) {
@@ -460,7 +460,7 @@ void ExhaustSmokeMan::InitLight(void) {
     e.alphaConst = 0.25f;
     e.sizeRamp = 0.4f;
     e.sizeConst = 0.1f;
-    light = fn_8028E2F8(&e, "light exhaust", lbl_8055C880);
+    light = CreateParticleSystem(&e, "light exhaust", lbl_8055C880);
 }
 
 void ExhaustSmokeMan::InitDark(void) {
@@ -485,7 +485,7 @@ void ExhaustSmokeMan::InitDark(void) {
     e.alphaConst = 0.25f;
     e.sizeRamp = 1.5f;
     e.sizeConst = 0.15f;
-    dark = fn_8028E2F8(&e, "dark exhaust", lbl_8055C880);
+    dark = CreateParticleSystem(&e, "dark exhaust", lbl_8055C880);
 }
 
 void ExhaustSmokeMan::Emit(void* e, int car, int part) {
@@ -538,7 +538,7 @@ void FireSmokeMan::InitSmall(void) {
     e.sizeConst = 0.75f;
     e.angRamp = -0.75f;
     e.angConst = 1.0f;
-    small = fn_8028E2F8(&e, "small fire smoke", lbl_8055C880);
+    small = CreateParticleSystem(&e, "small fire smoke", lbl_8055C880);
 }
 
 void FireSmokeMan::InitLarge(void) {
@@ -567,7 +567,7 @@ void FireSmokeMan::InitLarge(void) {
     e.sizeConst = 3.0f;
     e.angRamp = -0.75f;
     e.angConst = 1.0f;
-    large = fn_8028E2F8(&e, "large fire smoke", lbl_8055C880);
+    large = CreateParticleSystem(&e, "large fire smoke", lbl_8055C880);
 }
 
 RadiatorSmokeMan::RadiatorSmokeMan(void) {
@@ -626,7 +626,7 @@ void RadiatorSmokeMan::InitEmitter(void) {
     e.sizeConst = 0.25f;
     e.angRamp = -0.5f;
     e.angConst = 1.0f;
-    emitter = fn_8028E2F8(&e, "radiator smoke", lbl_8055C880);
+    emitter = CreateParticleSystem(&e, "radiator smoke", lbl_8055C880);
 }
 
 void RadiatorSmokeMan::InitCars(void) {

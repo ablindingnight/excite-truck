@@ -39,13 +39,13 @@ void FormatOutOfBoundsScore(char* buf, int size, int value);
 void fn_801473F8(ILayout* layout, const char* name, const char* fmt, ...);
 void fn_80147230(TextElem* item, const char* fmt, ...);
 RaceCarRec* fn_8017960C(int player);
-void fn_80147CEC(TextElem* out, TextElem* a, TextElem* b, f32 t);
+void InterpolateTextElement(TextElem* out, TextElem* a, TextElem* b, f32 t);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void SetInputMask(u32 color);
 void fn_80232930(void);
 CarInfo* GetCarInfo(int player);
 f32 fn_801E7E18(void);
-void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
+void ValidateAndFormatTextElement(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 }
 
 int GetNumPlayers(void);
@@ -351,7 +351,7 @@ inline void OverheatOverlay::Update(int player, int unused) {
             a = layout->Find("overheat_text");
             b = layout->Find("overheat_text_end");
             if (a && b) {
-                fn_80147CEC(&item, a, b, Lerp(0.0f, 1.0f, Clamp01((lbl_8055E3C8 - s->start - 1.0f) / 0.39999998f)));
+                InterpolateTextElement(&item, a, b, Lerp(0.0f, 1.0f, Clamp01((lbl_8055E3C8 - s->start - 1.0f) / 0.39999998f)));
                 item.color = fn_80147C50(a->color, b->color, PulseFast());
                 item.color &= 0xFFFFFFu;
                 item.color |= static_cast<u32>(alpha) << 24;
@@ -524,8 +524,8 @@ inline void LapTitleOverlay::Update(int player, int unused) {
             }
             t = Lerp(0.0f, 1.0f, Clamp01(Unlerp(elapsed, keys[seg], keys[seg + 1])));
             SetInputMask(0xFFFFFFFF);
-            fn_80147ABC(left[seg], left[seg + 1], "%s", t, leftText);
-            fn_80147ABC(right[seg], right[seg + 1], "%s", t, rightText);
+            ValidateAndFormatTextElement(left[seg], left[seg + 1], "%s", t, leftText);
+            ValidateAndFormatTextElement(right[seg], right[seg + 1], "%s", t, rightText);
             fn_80232930();
         }
     }

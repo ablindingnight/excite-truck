@@ -47,7 +47,7 @@ NameChooser* lbl_8055F1E0;
 
 extern "C" {
 
-int fn_8023FA50(int* result) {
+int CheckIfDone(int* result) {
     if (lbl_8055F1E0->IsDone()) {
         *result = -2;
         return 1;
@@ -62,7 +62,7 @@ void fn_8023FA9C(void) {
     fn_80214AF0(12);
 }
 
-int fn_8023FAD4(char* name, int maxLen) {
+int InitializeNameEntryMenu(char* name, int maxLen) {
     strcat(name, "_");
     lbl_8055F1E0 = new ("name_chooser") NameChooser(name, maxLen);
     MenuStrList list;
@@ -79,7 +79,7 @@ int fn_8023FAD4(char* name, int maxLen) {
         MenuItem(lbl_8055B860, 6, NULL, -1, 27),
         MenuItem(lbl_804987F8),
     };
-    MenuDesc desc = {"namenter.lyt", items, fn_8023FA50, 0, 0};
+    MenuDesc desc = {"namenter.lyt", items, CheckIfDone, 0, 0};
     int ok = fn_802146BC(&desc, -999, -999, 1) != -1;
     delete lbl_8055F1E0;
     lbl_8055F1E0 = NULL;
@@ -87,13 +87,13 @@ int fn_8023FAD4(char* name, int maxLen) {
     return ok;
 }
 
-void fn_8023FCFC(int slot) {
+void ValidatePlayerName(int slot) {
     char name[32];
     strcpy(name, IdentGetDefaultName(slot));
     if (strstr(name, "Player-") || strstr(name, "Guest") || strstr(name, "Driver-")) {
         strcpy(name, "");
     }
-    if (fn_8023FAD4(name, 19) && strcmp(IdentGetDefaultName(slot), name) && strcmp(name, "")) {
+    if (InitializeNameEntryMenu(name, 19) && strcmp(IdentGetDefaultName(slot), name) && strcmp(name, "")) {
         IdentSetDefaultName(name, slot);
     }
 }

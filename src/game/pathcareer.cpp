@@ -17,7 +17,7 @@ s32 lbl_8055C790 = -1;
 
 extern "C" {
 
-void fn_8027D96C(int slot) {
+void ClearSlotData(int slot) {
     switch (slot) {
     case 1:
         break;
@@ -28,7 +28,7 @@ void fn_8027D96C(int slot) {
     }
 }
 
-void fn_8027D9A4(int slot, int ok) {
+void ClearCareerSlot(int slot, int ok) {
     switch (ok) {
     case 0:
         fn_802E30C8("PathCareer: Identity called to say that %d was cleared", slot);
@@ -37,7 +37,7 @@ void fn_8027D9A4(int slot, int ok) {
     }
 }
 
-void fn_8027DA08(void) {
+void CalculateCareerPoints(void) {
     CareerSave* s = &lbl_804B2FD8[IdentGetCurrentSlot()];
     s->points = 0;
     for (int i = 0; i < 3; i++) {
@@ -56,14 +56,14 @@ void fn_8027DA08(void) {
     s->percent = MinI(MaxI(got * 100 / all, 0), 100);
 }
 
-void fn_8027DAF4(void) {
-    fn_802E6BD8('PCRR', 1, lbl_804B2FD8, sizeof(lbl_804B2FD8), fn_8027D96C);
-    IdentRegisterCallback(fn_8027D9A4);
+void RegisterCareerCallbacks(void) {
+    fn_802E6BD8('PCRR', 1, lbl_804B2FD8, sizeof(lbl_804B2FD8), ClearSlotData);
+    IdentRegisterCallback(ClearCareerSlot);
 }
 
 int fn_8027DE68(int i);
 
-VehicleList* fn_8027DB40(u32 flags) {
+VehicleList* FilterAvailableCars(u32 flags) {
     int limit;
     VehicleInfo* v;
     int unlocked;
@@ -138,7 +138,7 @@ VehicleList* fn_8027DB40(u32 flags) {
     return list;
 }
 
-void fn_8027E0C8(Path* (*getPath)(int), int which);
+void ProcessCareerRaceResults(Path* (*getPath)(int), int which);
 
 void fn_8027DDCC(int which) {
     lbl_8055F66C = 1;
@@ -149,7 +149,7 @@ void fn_8027DDCC(int which) {
         }
         LoadModeEves(0x130);
     }
-    fn_8027E0C8(fn_8027B834, which);
+    ProcessCareerRaceResults(fn_8027B834, which);
     lbl_8055F66C = 0;
     int cur = GetEveMode();
     if (mode != cur) {
@@ -168,19 +168,19 @@ void fn_8027DE6C(void) {
     fn_8027B77C();
     fn_8027BF38();
     InitializeCareerEvents();
-    fn_8027DA08();
+    CalculateCareerPoints();
 }
 
 s32 fn_8027DE98(int slot) { return lbl_804B2FD8[slot].points; }
 
-s32 fn_8027DEAC(void) { return fn_8027DE98(IdentGetCurrentSlot()); }
+s32 GetCurrentSlotPoints(void) { return fn_8027DE98(IdentGetCurrentSlot()); }
 
-s32 fn_8027DED0(void) { return lbl_8055C790; }
+s32 GetCourseId(void) { return lbl_8055C790; }
 
 void fn_8027DED8(int, struct Damage*) {}
 
 
-int fn_8027DEDC(s32* vehicle, s32* x, int track, int which) {
+int LoadTrackVehicleMap(s32* vehicle, s32* x, int track, int which) {
     SetNumPlayers(1);
     TrackInfo* t = GetTrack(track);
     const char* def = 0;
@@ -189,7 +189,7 @@ int fn_8027DEDC(s32* vehicle, s32* x, int track, int which) {
     }
     VehicleList* list;
     if (!def) {
-        list = fn_8027DB40(0);
+        list = FilterAvailableCars(0);
     } else {
         list = fn_8025007C(1);
         list->Add(def, 1, 0);
@@ -213,7 +213,7 @@ void fn_8027E024(void* out, int event, int which) {
     fn_8023BF4C(&run);
 }
 
-void fn_8027E0C8(Path* (*getPath)(int), int which) {
+void ProcessCareerRaceResults(Path* (*getPath)(int), int which) {
     s32 sel = -1;
     s32 driver = GetDriver(0)->id;
     s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->id;
@@ -224,7 +224,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
     memset(&res, 0, sizeof(res));
     while (BrowseCareerEvent(&sel, path, &res)) {
         memset(&res, 0, sizeof(res));
-        if (!fn_8027DEDC(&vehicle, &x, GetEvent(sel)->track, which)) {
+        if (!LoadTrackVehicleMap(&vehicle, &x, GetEvent(sel)->track, which)) {
             continue;
         }
         int bi = -1;
@@ -281,7 +281,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
         path = getPath(which);
         fn_802840F4();
         if (*(s32*)(out + 8) > 0) {
-            fn_8027DA08();
+            CalculateCareerPoints();
             int newBest = path->Get(bi)->Get(ci)->Best();
             int hasSpecial = 0;
             if (special && IsSpecialChassisUnlocked(v->chassis)) {

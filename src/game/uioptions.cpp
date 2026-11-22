@@ -45,7 +45,7 @@ void fn_80214CB4(int a);
 const char* fn_80131234(const char* key);  // localized string
 int fn_8021521C(const char* head, const char* body, int a);
 void fn_80236914(int which, f32* out, f32 t);
-void fn_8023FCFC(int slot);
+void ValidatePlayerName(int slot);
 void fn_8023D1C0(void);
 void fn_8023C958(void);
 void fn_8023C94C(void);
@@ -68,7 +68,7 @@ void fn_802090BC(s32 mode);
 s32 fn_802C83C4(void);
 s32 GetMasterVolume(void);
 void fn_801331C4(int section, const char* key, f32* v);
-void fn_8013323C(int section, const char* key, f32 v);
+void SetOptionFloatValue(int section, const char* key, f32 v);
 void fn_801332D0(int section, const char* key, s32* v);
 void fn_80133348(int section, const char* key, s32 v);
 u8 fn_8027B8C0(int a);
@@ -516,7 +516,7 @@ void fn_80239AC0(void) {
         desc.items = items;
         switch (fn_802146BC(&desc, -999, -999, 1)) {
         case 15:
-            fn_8023FCFC(IdentGetCurrentSlot());
+            ValidatePlayerName(IdentGetCurrentSlot());
             break;
         case 0:
             fn_8023D1C0();
@@ -660,8 +660,8 @@ extern "C" void fn_80239F74(void) {
                             switch (fn_802146BC(&desc, -999, -999, 1)) {
                             case -2:
                             case -1:
-                                fn_8013323C(4, "music_volume", sCur.music);
-                                fn_8013323C(4, "effects_volume", sCur.sfx);
+                                SetOptionFloatValue(4, "music_volume", sCur.music);
+                                SetOptionFloatValue(4, "effects_volume", sCur.sfx);
                                 fn_80133348(IdentGetCurrentSlot() + 0xC, "icon_set", sCur.icon);
                                 if (fn_802104D0()) {
                                     fn_80210514(sCur.track);

@@ -9,7 +9,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 const char* fn_80204EA0(const char* name);  // tuning string
-int fn_8027DED0(void);
+int GetCourseId(void);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -127,7 +127,7 @@ int fn_80160AB4(void);
 int fn_80160A90(void) { return GetGradeScoreThreshold(fn_80160AB4()); }
 
 int fn_80160AB4(void) {
-    int g = fn_8027DED0();
+    int g = GetCourseId();
     return g != -1 ? g : fn_80160A74();
 }
 

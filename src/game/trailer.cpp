@@ -33,7 +33,7 @@ class CarBody;
 extern "C" {
 void fn_801AD148(Hitch* h, const RVec3* at, CarBody* car, f32 k, f32 len);
 void fn_801AD28C(Hitch* h, const RVec3* at, CarBody* car, const RVec3* carAt, f32 k, f32 len);
-void fn_801AD394(Hitch* h);
+void ApplyJointSpringDamping(Hitch* h);
 }
 
 struct RVec3;
@@ -340,7 +340,7 @@ inline void Trailer::Update(void) {
         fn_8018ADA4(this, s);
     }
     if (!detached) {
-        fn_801AD394(&hitch);
+        ApplyJointSpringDamping(&hitch);
         int over = hitch.load > hitch.limit;
         if (over) {
             slack += 0.016683351f;

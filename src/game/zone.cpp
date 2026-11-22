@@ -1460,11 +1460,11 @@ void UpdateContinueOverlay(void);
 extern "C" {
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
                  f32 v0, f32 u1, f32 v1);
-void fn_80147EE0(ArtElem* a, f32 s);
+void ScaleArtElemAroundCenter(ArtElem* a, f32 s);
 void fn_801476D8(ArtElem* a, u32 color, s32 tex);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_801476C4(TextElem* item);
-void fn_801479A8(TextElem* orig, TextElem* item, const char* fmt, f32 alpha, ...);
+void FormatAndLayoutTextElement(TextElem* orig, TextElem* item, const char* fmt, f32 alpha, ...);
 void fn_80147BD0(ArtElem* a, ArtElem* b, int c, int d, s32 tex, f32 alpha);
 void DrawFormattedString(u32 color, int size, const char* text, f32 scale, f32 x, f32 y, ...);
 }
@@ -1672,7 +1672,7 @@ void ZoneMaster::DrawBonus(int p, ZoneCar* c) const {
             star.pos.x = pie->pos.x;
             star.pos.y = pie->pos.y;
             fn_8013CB90(&star);
-            fn_80147EE0(&star, k);
+            ScaleArtElemAroundCenter(&star, k);
             fn_801476D8(&star, fn_80147C50(0xFFFFFF, 0xFFFFFFFF, LerpDiffFirst(1.0f, 0.0f, Clamp01(InvLerp(0.2f, 0.0f, a)))),
                         tex[3]);
         }
@@ -1720,7 +1720,7 @@ void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
                 m = *it;
                 m.scale *= 0.3f;
                 m.color = 0xFFFFFF;
-                fn_801479A8(it, &m, "PERFECT LEVEL", a);
+                FormatAndLayoutTextElement(it, &m, "PERFECT LEVEL", a);
             }
             {
                 ArtElem* star = mainLyt->FindArt("perfect_star_art");
@@ -1744,7 +1744,7 @@ void ZoneMaster::DrawLevel(int p, ZoneCar* c) const {
                 m = *it;
                 m.scale *= 0.3f;
                 m.color = 0xFFFFFF;
-                fn_801479A8(it, &m, "LEVEL %d", a, level + 1);
+                FormatAndLayoutTextElement(it, &m, "LEVEL %d", a, level + 1);
             }
         }
     }
@@ -1785,7 +1785,7 @@ void ZoneMaster::DrawGateStar(int p, ZoneCar* c) const {
             ArtElem l;
             l = *a;
             fn_8013CB90(&l);
-            fn_80147EE0(&l, k);
+            ScaleArtElemAroundCenter(&l, k);
             fn_801476D8(&l, -1, tex[3]);
         }
         fn_801476C4(mainLyt->Find("next_gate"));
@@ -1824,12 +1824,12 @@ void fn_802C8E48(void);
 void fn_802C8D74(void);
 void fn_80130980(char* buf, int size, int digits, f32 t);
 void fn_8014784C(ILayout* l, const char* name, const char* set, int index);
-void fn_80147CEC(TextElem* out, TextElem* a, TextElem* b, f32 t);
+void InterpolateTextElement(TextElem* out, TextElem* a, TextElem* b, f32 t);
 void fn_801474EC(TextElem* item, const char* fmt, ...);
 }  // extern "C"
 void UpdateScoreOverlays(int, int);
 extern "C" {
-void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
+void ValidateAndFormatTextElement(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 void fn_802C70AC(int model, void* mtx, int a, int b);
 void fn_802A96E8(ZoneVec3* pts, int n, int c, s32 lite, s32 glow);
 }
@@ -1895,14 +1895,14 @@ void ZoneMaster::DrawTimer(int p, ZoneCar* c) const {
             f32 t = Ease(t7C.Progress());
             TextElem* a = mainLyt->Find("timer_increase_0");
             TextElem item;
-            fn_80147CEC(&item, a, mainLyt->Find("timer_increase_1"), t);
+            InterpolateTextElement(&item, a, mainLyt->Find("timer_increase_1"), t);
             fn_801474EC(&item, "+%.0f", f98);
         }
         if (t84.Active()) {
             f32 t = Ease(t84.Progress());
             TextElem* a = mainLyt->Find("timer_decrease_0");
             TextElem item;
-            fn_80147CEC(&item, a, mainLyt->Find("timer_decrease_1"), t);
+            InterpolateTextElement(&item, a, mainLyt->Find("timer_decrease_1"), t);
             fn_801474EC(&item, "-%.0f", f9C);
         }
         now = fn_8013CB3C();
@@ -1943,7 +1943,7 @@ void ZoneMaster::DrawMissedFlag(int p, ZoneCar* c) const {
         TextElem* a = mainLyt->Find("missed_start");
         TextElem* b = mainLyt->Find("missed_end");
         f32 t = c->tA0.Progress();
-        fn_80147ABC(a, b, a->defText, t * t);
+        ValidateAndFormatTextElement(a, b, a->defText, t * t);
     }
 }
 
@@ -2608,11 +2608,11 @@ inline int ZoneMaster::vf3C(int p) {
             if (h0 && h1 && b0 && b1) {
                 char buf[0x14];
                 TextElem it;
-                fn_801479A8(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(a));
+                FormatAndLayoutTextElement(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(a));
                 FormatIntegerBuffer(buf, 0x14, GetGradeScoreThreshold(fn_80160A74()));
                 it = *b0;
                 it.pos.x -= fn_80147204(&it, buf) * 0.5f;
-                fn_801479A8(&it, b1, buf, Ease(a));
+                FormatAndLayoutTextElement(&it, b1, buf, Ease(a));
             }
         }
         if (t < t3) {
@@ -2626,12 +2626,12 @@ inline int ZoneMaster::vf3C(int p) {
             if (h0 && h1 && tb && bt) {
                 char buf[0x14];
                 TextElem it;
-                fn_801479A8(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(a));
+                FormatAndLayoutTextElement(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(a));
                 f32 t = GetCar(fn_801E866C(0))->clock;
                 fn_80130978(buf, 0x14, t);
                 it = *tb;
                 it.pos.x += fn_80147204(&it, buf) * 0.5f;
-                fn_801479A8(&it, bt, buf, Ease(a));
+                FormatAndLayoutTextElement(&it, bt, buf, Ease(a));
             }
         }
     }

@@ -41,11 +41,11 @@ void fn_80236900(void);
 void fn_80236914(int which, f32* out, f32 t);
 void OptionsDefault(int section);
 void fn_801331C4(int section, const char* key, f32* v);
-void fn_8013323C(int section, const char* key, f32 v);
+void SetOptionFloatValue(int section, const char* key, f32 v);
 void fn_801332D0(int section, const char* key, s32* v);
 void fn_80133348(int section, const char* key, s32 v);
 void fn_801333E8(int section, const char* key, bool* v);
-void fn_80133460(int section, const char* key, bool v);
+void SetOptionBooleanValue(int section, const char* key, bool v);
 s32 fn_80208D3C(void);  // mixer count
 Mixer* GetMixerByIndex(int i);
 void SetCurrentSoundOption(s32 i);
@@ -137,7 +137,7 @@ void fn_8023CA18(void) {
 
 void fn_8023CA50(void) {}
 
-void fn_8023CA54(void) {
+void LoadAudioSettings(void) {
     lbl_8055F160 = 0;
     fn_801333E8(4, "music_enabled", &lbl_8055F160);
     lbl_8055F164 = 1.0f;
@@ -158,9 +158,9 @@ void fn_8023CA54(void) {
     fn_801332D0(4, "race_music_enabled", &lbl_8055F178);
 }
 
-int fn_8023CB54(void) {
+int InitializeSoundOptions(void) {
     OptionsDefault(4);
-    fn_8023CA54();
+    LoadAudioSettings();
     return 0;
 }
 
@@ -171,7 +171,7 @@ int fn_8023CB80(void) {
 
 static const MenuDesc lbl_802FA090 = {"imgtest.lyt", 0, 0, 0, 0};
 
-void fn_8023CBA4(void) {
+void InitializeSoundMenu(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
         MenuItem(lbl_8055B860, 6, 0, -2, 0xD),
@@ -185,7 +185,7 @@ void fn_8023CBA4(void) {
 void fn_8023CC84(const char* layout) {
     static char qualities[] = "Low\0Medium\0High\0";
     static char raceMusic[] = "In-Game Music Off\0In-Game Music On\0\0";
-    fn_8023CA54();
+    LoadAudioSettings();
     if (!lbl_8055F160) {
         lbl_8055F164 = 0.0f;
     }
@@ -209,7 +209,7 @@ void fn_8023CC84(const char* layout) {
             MenuItem items[] = {
                 MenuItem(lbl_8055BAC0, 8, (void*)fn_8023CA18, 0, 0),
                 MenuItem(0, 5, &opts, 0, 0),
-                MenuItem("default", 0, (void*)fn_8023CB54, 0, 0),
+                MenuItem("default", 0, (void*)InitializeSoundOptions, 0, 0),
                 VolumeItem("video_volume", &lbl_8055F174, 0.0f, 1.0f),
                 VolumeItem("sfx_volume", &lbl_8055F16C, 0.0f, 1.0f),
                 VolumeItem("announcer_volume", &lbl_8055F168, 0.0f, 1.0f),
@@ -228,15 +228,15 @@ void fn_8023CC84(const char* layout) {
             };
             MenuDesc desc = {layout, items, 0, 0, 0};
             if (fn_802146BC(&desc, -999, -999, 1) == -2) {
-                fn_8023CBA4();
+                InitializeSoundMenu();
             }
         }
         lbl_8055F160 = lbl_8055F164 > 0.01f;
-        fn_8013323C(4, "music_volume", lbl_8055F164);
-        fn_80133460(4, "music_enabled", lbl_8055F160);
-        fn_8013323C(4, "spotter_volume", lbl_8055F168);
-        fn_8013323C(4, "tire_volume", lbl_8055F170);
-        fn_8013323C(4, "video_volume", lbl_8055F174);
+        SetOptionFloatValue(4, "music_volume", lbl_8055F164);
+        SetOptionBooleanValue(4, "music_enabled", lbl_8055F160);
+        SetOptionFloatValue(4, "spotter_volume", lbl_8055F168);
+        SetOptionFloatValue(4, "tire_volume", lbl_8055F170);
+        SetOptionFloatValue(4, "video_volume", lbl_8055F174);
         fn_80133348(4, "race_music_enabled", lbl_8055F178);
         fn_8022D2BC(&list, -1);
     }

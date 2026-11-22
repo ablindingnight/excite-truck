@@ -1431,7 +1431,7 @@ u32 fn_801769A8(void);
 void fn_80273490(int type, CamRec* c);
 void camera_car(CamRec* c, int which);
 void fn_80275B9C(CamRec* rec, f32 a, f32 b, f32 c);
-void fn_80277A14(CamRec* c, int idx);
+void CalculateNamedCameraBlend(CamRec* c, int idx);
 void fn_80278360(CamRec* c);
 void fn_802E317C(const char* fmt, ...);
 int fn_80268BA4(int mode);
@@ -1610,7 +1610,7 @@ void UpdateCameraMode(CamRec* c, u8* own, int idx) {
             fn_802704D4(7, c);
             break;
         case 0x20:
-            fn_80277A14(c, idx);
+            CalculateNamedCameraBlend(c, idx);
             break;
         default:
             fn_802E317C("Unrecognized camera type (%d) (id=%d)", c->mode, idx);
