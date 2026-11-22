@@ -156,7 +156,7 @@ public:
 extern "C" {
 ValueNode* fn_802AE414(const char* name);
 void fn_802E317C(const char* fmt, ...);
-int fn_8012F9E8(f32* out, int size, const char* text);
+int DecodeBase64String(f32* out, int size, const char* text);
 f32 PSVECSquareDistance(const void* a, const void* b);
 f32 PSVECDistance(const void* a, const void* b);
 f32 PSVECDotProduct(const void* a, const void* b);
@@ -303,7 +303,7 @@ void fn_801F4F9C(FabricCorner* out, ValueNode* vn, const RMtx* m) {
 int fn_801F52BC(ValueNode* vn, const char* key, f32* out, int size) {
     int r = 0;
     if (vn->Has(key)) {
-        r = fn_8012F9E8(out, size, vn->GetValue(key));
+        r = DecodeBase64String(out, size, vn->GetValue(key));
     }
     return r;
 }

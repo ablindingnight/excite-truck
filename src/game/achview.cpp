@@ -99,7 +99,7 @@ extern f32 lbl_8055F3A4;
 
 extern "C" {
 
-void fn_80259148(void) {
+void LoadAchievementSounds(void) {
     lbl_8055F394 = fn_80258354();
     lbl_8055F394->AddSound("achieve_enter", "a_achieve.sfx", 0);
     lbl_8055F394->AddSound("achieve_trophy", "a_trophy1.sfx", 0);
@@ -398,7 +398,7 @@ void fn_80216CA8(void);
 void fn_80259740(int x, f32* out, f32 v);
 
 // The trophy viewer for one achievement row: its model, level and the five level thresholds.
-int fn_80259224(u8* p) {
+int DrawAchievementTrophyView(u8* p) {
     AchView* av = (AchView*)p;
     AchievementTrophyModel view;
     TrophyController* ctl;
@@ -490,7 +490,7 @@ const char* fn_80131234(const char* key);
 
 // The achievement viewer for one row (with the level-up "new" effect while tallying): the trophy front and
 // back, the progress towards the next level and every category's level bar.
-int fn_8025978C(u8* p) {
+int RenderAchievementViewer(u8* p) {
     AchView* av = (AchView*)p;
     s32 cat;
     lbl_8055F3A0 = 0;
@@ -612,15 +612,15 @@ int fn_8025978C(u8* p) {
 }  // extern "C"
 
 extern "C" {
-void fn_80259148(void);
+void LoadAchievementSounds(void);
 void fn_802591D8(void);
-int fn_8025978C(u8* p);
-int fn_80259224(u8* p);
+int RenderAchievementViewer(u8* p);
+int DrawAchievementTrophyView(u8* p);
 void fn_802E317C(const char* fmt, ...);
 
 // Tally run: every category that changed since the last visit counts up in turn.
-void fn_8025A204(void) {
-    fn_80259148();
+void TallyRunAchievements(void) {
+    LoadAchievementSounds();
     lbl_80498EAC[0] = 0.0f;
     lbl_80498EAC[1] = -1.0f;
     lbl_80498EAC[2] = 0.0f;
@@ -635,7 +635,7 @@ void fn_8025A204(void) {
             v.counting = 1;
             if (v.q.best != v.q.value) {
                 lbl_8055F394->PlaySound("achieve_enter");
-                fn_8025978C((u8*)&v);
+                RenderAchievementViewer((u8*)&v);
             }
         }
     }
@@ -644,7 +644,7 @@ void fn_8025A204(void) {
 
 // Browse run: left/right page through the categories until the player backs out.
 void MenuDoAchievementsViewer(void) {
-    fn_80259148();
+    LoadAchievementSounds();
     lbl_80498EAC[0] = 0.0f;
     lbl_80498EAC[1] = -1.0f;
     lbl_80498EAC[2] = 0.0f;
@@ -654,7 +654,7 @@ void MenuDoAchievementsViewer(void) {
     while (run) {
         AchView v(i, lbl_80344EA0[i].category, 0.0f);
         v.counting = 0;
-        int r = fn_8025978C((u8*)&v);
+        int r = RenderAchievementViewer((u8*)&v);
         switch (r) {
         case 1:
             i = (i + 6) % 7;
@@ -663,7 +663,7 @@ void MenuDoAchievementsViewer(void) {
             i = (i + 1) % 7;
             break;
         case 3:
-            while (fn_80259224((u8*)&v) != -1) {
+            while (DrawAchievementTrophyView((u8*)&v) != -1) {
             }
             break;
         case -1:

@@ -76,7 +76,7 @@ s32 lbl_8055DF70;  // last run time
 
 extern "C" {
 
-void fn_80127B5C(u32 time) {
+void UpdateBackgroundTasks(u32 time) {
     BgTask* t;
     int i;
     lbl_8041E098.running = 1;
@@ -100,7 +100,7 @@ void fn_80127B5C(u32 time) {
 
 void fn_80127C8C(void) {}
 
-void fn_80127C90(BgFunc fn, const char* name) {
+void RegisterBackgroundTask(BgFunc fn, const char* name) {
     bool ok = lbl_8041E098.count < 10;
     if (ok) {
         BgTask* t = &lbl_8041E098.tasks[lbl_8041E098.count++];
@@ -114,7 +114,7 @@ void fn_80127C90(BgFunc fn, const char* name) {
     }
 }
 
-void fn_80127CF4(BgObject* obj, const char* name) {
+void RegisterBgTaskObject(BgObject* obj, const char* name) {
     bool ok = lbl_8041E098.count < 10;
     if (ok) {
         BgTask* t = &lbl_8041E098.tasks[lbl_8041E098.count++];
@@ -128,23 +128,23 @@ void fn_80127CF4(BgObject* obj, const char* name) {
     }
 }
 
-void fn_80127D58(BgFunc fn) { lbl_8041E098.RemoveFunc(fn); }
+void RemoveBackgroundFunction(BgFunc fn) { lbl_8041E098.RemoveFunc(fn); }
 
-void fn_80127E28(BgObject* obj) { lbl_8041E098.RemoveObj(obj); }
+void RemoveBgObject(BgObject* obj) { lbl_8041E098.RemoveObj(obj); }
 
-void fn_80127EF8(void) {
+void CheckForUnfreedHooks(void) {
     int i;
     for (i = 0; i < lbl_8041E098.count; i++) {
         fn_802E30C8("bg: Unfreed hook! \"%s\"", lbl_8041E098.tasks[i].name);
     }
 }
 
-void fn_80127F70(void) { fn_80127B5C(fn_802E2C20()); }
+void fn_80127F70(void) { UpdateBackgroundTasks(fn_802E2C20()); }
 
 void fn_80127F94(void) {
     s32 now = fn_802E2C20();
     if (now - lbl_8055DF70 > 16) {
-        fn_80127B5C(now);
+        UpdateBackgroundTasks(now);
     }
 }
 

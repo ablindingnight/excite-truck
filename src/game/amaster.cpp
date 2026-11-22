@@ -82,7 +82,7 @@ f32 lbl_80436D08[8];
 
 extern "C" {
 
-GameMode* fn_801B81E0(const RaceSetup* s) {
+GameMode* CreateArenaMaster(const RaceSetup* s) {
     switch (s->opts.type) {
     case 0x180201:
         return fn_8014145C(s);
@@ -98,11 +98,11 @@ GameMode* fn_801B81E0(const RaceSetup* s) {
     }
 }
 
-void fn_801B826C(const RaceSetup* s) {
+void InitializeArenaMaster(const RaceSetup* s) {
     u32 type = s->opts.type;
     lbl_8055E74C = type;
     if (type & 0x200) {
-        lbl_8055E744 = fn_801B81E0(s);
+        lbl_8055E744 = CreateArenaMaster(s);
     } else {
         lbl_8055E744 = new ("null_amaster") NullArenaMaster;
     }
@@ -114,7 +114,7 @@ void fn_801B826C(const RaceSetup* s) {
 
 void fn_801B8318(void) { lbl_8055E744->vfF4(); }
 
-void fn_801B832C(void) {
+void ResetRaceState(void) {
     fn_801616FC();
     delete lbl_8055E744;
     lbl_8055E744 = NULL;
@@ -166,7 +166,7 @@ void fn_801B84F8(void) {
     lbl_8055E744->vf18();
 }
 
-int fn_801B8514(void) { return lbl_8055E748; }
+int GetFrameCounter(void) { return lbl_8055E748; }
 
 int fn_801B851C(int car) {
     if (fn_80161BB8(car)) {
@@ -192,7 +192,7 @@ int fn_801B8630(int a, int b, int c) {
 
 void fn_801B86A4(int car) { lbl_8055E744->vfAC(car); }
 
-void fn_801B86BC(int car, Damage* d) {
+void ApplyDamageFactor(int car, Damage* d) {
     lbl_8055E744->vfB4(car, d);
     d->amount *= damageFactor;
     fn_8027DED8(car, d);

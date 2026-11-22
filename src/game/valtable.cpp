@@ -16,7 +16,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got);
 int fn_8012C4D8(void* p);
 const char* fn_80131234(const char* key);  // Localize
-int fn_8012F9E8(void* out, s32 size, const char* in);  // base64 decode
+int DecodeBase64String(void* out, s32 size, const char* in);  // base64 decode
 void __register_global_object(void* obj, void* dtor, void* chain);
 }
 
@@ -119,7 +119,7 @@ public:
     }
     virtual ValMatrix GetMatrix(const char* key) {
         ValMatrix m;
-        if (fn_8012F9E8(&m, sizeof(m), GetValue(key))) {
+        if (DecodeBase64String(&m, sizeof(m), GetValue(key))) {
             int i;
             u32* w = (u32*)&m;
             for (i = 0; i < 12; i++) {
@@ -136,7 +136,7 @@ public:
     virtual f32 GetReal(const char* key) {
         f32 v;
         const char* s = GetValue(key);
-        if (fn_8012F9E8(&v, sizeof(v), s)) {
+        if (DecodeBase64String(&v, sizeof(v), s)) {
             SwapWordB((u8*)&v);
         } else {
             fn_802E317C("Bad real64 value \"%s\" for \"%s\" in \"%s\"", s, key, GetName());

@@ -258,7 +258,7 @@ f32 lbl_80559EB8 = 0.3f;
 f32 lbl_80559EBC = 0.3f;  // starting meter of the ACAR
 s32 lbl_80559EC0 = 3;
 
-void fn_80149588(TextElem* e, f32 secs) {
+void FormatTimeDisplay(TextElem* e, f32 secs) {
     char buf[0x20];
     fn_80130980(buf, sizeof(buf), 3, secs);
     fn_801474EC(e, "%s", buf);
@@ -961,7 +961,7 @@ class Body;
 
 extern "C" {
 CoinFrame fn_801683F4(int player);
-int fn_801B8514(void);
+int GetFrameCounter(void);
 DeityCar* fn_801B2EC0(int id);
 DeityCar* fn_801B2ED0(int id);
 void fn_801DF074(int a, int b);
@@ -969,7 +969,7 @@ void fn_801796EC(int type, void* data, int size);
 f32 fn_801D48F4(void* obj);
 void fn_80161A38(int a, int id, int b);
 void fn_801D488C(void* obj, int a, int b, V3* pos);
-void fn_8014E61C(int id, int kind, f32 v);
+void AwardBetaCar(int id, int kind, f32 v);
 void fn_801E1250(int id, int n);
 void fn_8018A098(RaceCarRec* rc, f32 v);
 }
@@ -1834,7 +1834,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         }
     }
     rc = fn_8017960C(id);
-    if (fn_801B8514() && !master->vf20(id)) {
+    if (GetFrameCounter() && !master->vf20(id)) {
         shown = score;
         result.Compute(this);
         return;
@@ -1953,7 +1953,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
             fn_801DF074(3, 1);
         }
         fn_801D488C(star, 1, 1, &lastPos);
-        fn_8014E61C(id, 3, *(f32*)&star);
+        AwardBetaCar(id, 3, *(f32*)&star);
         star = 0;
         boosts++;
         maxBoosts = boosts > maxBoosts ? boosts : maxBoosts;
@@ -2226,7 +2226,7 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
         fn_8014784C(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, "time_limit_art", "excite_artset", art);
         tl = l->Find("time_limit");
         if (tl) {
-            fn_80149588(tl, limit);
+            FormatTimeDisplay(tl, limit);
         }
         fn_8014784C(fn_801E85A4() == 2 ? lbl_8055E23C : lbl_8055E238, "stop_watch_art", "stop_watch_artset", 0);
         tc = l->Find("time_counter");
@@ -2234,7 +2234,7 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
         if (tc && ft && !master->timer.Finishing()) {
             TextElem e;
             fn_80147CEC(&e, tc, ft, k);
-            fn_80149588(&e, elapsed);
+            FormatTimeDisplay(&e, elapsed);
         }
     }
     UpdateLapTitleOverlay(id);
@@ -2505,7 +2505,7 @@ static inline void AwardCar(BetaCar* c, int id, int kind, f32 v) {
 
 extern "C" {
 
-void fn_8014E61C(int id, int kind, f32 v) {
+void AwardBetaCar(int id, int kind, f32 v) {
     BetaMaster* m = lbl_8055E268;
     if (m) {
         BetaCar* c = &m->cars[id];
@@ -2549,7 +2549,7 @@ namespace {
 static char kHomeTrack[] = "scotland";
 }  // namespace
 
-f32 fn_8014E7DC(int event, int a) {
+f32 CalculateTimeLimit(int event, int a) {
     char buf[0x104];
     EventInfo* e;
     TrackInfo* t;
@@ -2924,7 +2924,7 @@ struct TrackSample {
 
 extern "C" {
 s32 fn_802CAC28(const char* name, int flags);  // load texture
-void* fn_801D4888(const char* name);
+void* LoadActionSequence(const char* name);
 Model* fn_802C6B44(const char* name);
 const char* fn_802C9C24(void* mat);
 void fn_802C7888(TexOverride* o, int on);
@@ -2986,7 +2986,7 @@ inline Pickup::Pickup(ValueNode* n) {
     s32 trk;
     tex.h = fn_802CAC28("trigglow.tex", 0);
     name = n->GetName();
-    objs[0] = fn_801D4888(n->GetName());
+    objs[0] = LoadActionSequence(n->GetName());
     const char* types = "bank\0jump\0misc\0spin\0multi";
     const char* const& key = "type";
     kind = n->Has(key) ? n->GetEnum(key, types) : 2;
@@ -2994,7 +2994,7 @@ inline Pickup::Pickup(ValueNode* n) {
     kind = 3;
     if (kind == 4) {
         if (n->Has("second_actseq")) {
-            objs[1] = fn_801D4888(n->GetValue("second_actseq"));
+            objs[1] = LoadActionSequence(n->GetValue("second_actseq"));
         } else {
             fn_802E30C8("!! Warning: Morph trigger %s is marked as a 'multi' trigger, but has no \"second_actseq\" value!",
                         n->GetName());
@@ -3381,7 +3381,7 @@ inline void BetaMaster::vf0C(void) {
                 }
                 n = fn_8016A30C(i);
                 if (n > 0) {
-                    fn_8014E61C(i, 5, n);
+                    AwardBetaCar(i, 5, n);
                 }
             }
         } else if (fn_8017960C(i)->f1F0 == 0x50) {
@@ -4035,7 +4035,7 @@ inline int BetaMaster::vf3C(int view) {
             TextElem e;
             fn_80147CEC(&e, body, limit, Ease(k));
             Blend(h0, h1, fn_80131234("PreRaceOverlay:TIME_LIMIT"), Ease(k), Overlay());
-            fn_80149588(&e, left);
+            FormatTimeDisplay(&e, left);
         }
     }
     if (t < end2) {
@@ -4097,7 +4097,7 @@ inline int BetaMaster::vf24(void) const {
         it++;
     }
     r = 0;
-    if (!any && fn_801B8514()) {
+    if (!any && GetFrameCounter()) {
         r = 1;
     }
     return r;
@@ -4400,7 +4400,7 @@ inline void BetaMaster::a1(void) {
     }
     {
         EventDesc* d = fn_801769CC();
-        f32 lim = fn_8014E7DC(fn_801769CC()->event, d->difficulty);
+        f32 lim = CalculateTimeLimit(fn_801769CC()->event, d->difficulty);
         if (fn_801769CC()->flags & 1) {
             lim = 3600.0f;
         }

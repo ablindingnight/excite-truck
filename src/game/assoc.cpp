@@ -32,14 +32,14 @@ void* fn_801D0BF8(s32 a, s32 b) {
     return 0;
 }
 
-void fn_801D0C58(void* value, s32 a, s32 b) {
+void StoreBallData(void* value, s32 a, s32 b) {
     lbl_80438758[lbl_8055E8D8].b = b;
     lbl_80438758[lbl_8055E8D8].a = a;
     lbl_80438758[lbl_8055E8D8].value = value;
     lbl_8055E8D8++;
 }
 
-void fn_801D0C84(void* value) {
+void RemoveAssocValue(void* value) {
     int i = 0;
     while (i < lbl_8055E8D8) {
         if (lbl_80438758[i].value == value) {

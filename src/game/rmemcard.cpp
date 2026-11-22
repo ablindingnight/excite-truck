@@ -34,8 +34,8 @@ void fn_802E2E38(int a);
 void fn_802E2E0C(int (*cb)(int, int), const char* name);
 const char* fn_80131234(const char* key);  // localized text
 void fn_80127464(void);
-void fn_80127C90(void (*cb)(void), const char* name);
-void fn_80127D58(void (*cb)(void));
+void RegisterBackgroundTask(void (*cb)(void), const char* name);
+void RemoveBackgroundFunction(void (*cb)(void));
 void fn_801282EC(int a);
 void fn_801282F4(void);
 void fn_802E6B50(void);
@@ -339,13 +339,13 @@ void fn_802E8CA8(void) {
     fn_801282EC(0x80);
     lbl_80560020 = new ("mc_async") u8[0x55730];
     fn_802E6B50();
-    fn_80127C90(fn_802E9010, "memcard");
+    RegisterBackgroundTask(fn_802E9010, "memcard");
     fn_802E2E0C(fn_802E8C6C, "NAND");
 }
 
 void fn_802E8D2C(void) {
     fn_802E95E0("MemCardEnd", fn_802E8838);
-    fn_80127D58(fn_802E9010);
+    RemoveBackgroundFunction(fn_802E9010);
     fn_802E6B94();
     delete[] lbl_80560020;
     lbl_80560020 = 0;

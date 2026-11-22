@@ -12,7 +12,7 @@ extern "C" {
 int strcmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_80128658(void* p);              // MemFree
-s32 fn_801D4888(const char* name);      // sequence by name
+s32 LoadActionSequence(const char* name);      // sequence by name
 void fn_801D488C(s32 seq, int a, int b, const f32* pos);
 int fn_801B2F24(void);                  // car count
 int fn_801B2F54(int car);               // lap
@@ -27,7 +27,7 @@ void* operator new(size_t size, const char* tag);
 struct RaceCarRec;
 
 extern "C" {
-Bound* fn_801399FC(ValueNode* n);
+Bound* ParseBoundPoints(ValueNode* n);
 int fn_80139B5C(RaceCarRec* car, Bound* b);  // inside bound
 RaceCarRec* fn_8017960C(int id);
 }
@@ -206,8 +206,8 @@ inline void TechDemoMaster::a1(void) {
 }
 
 inline void ActZone::Load(ValueNode* n) {
-    seq = fn_801D4888(n->GetValue(SequenceKey));
+    seq = LoadActionSequence(n->GetValue(SequenceKey));
     draw = n->GetBool("should_draw", 1);
     lap = n->GetInt(LapKey, 0);
-    bound = fn_801399FC(n->FindChild(BoundsTag));
+    bound = ParseBoundPoints(n->FindChild(BoundsTag));
 }

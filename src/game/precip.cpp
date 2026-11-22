@@ -196,7 +196,7 @@ double log2(double x);
 int fn_801EA140(ValVec3* p);
 void fn_802C8BD0(s32 tex);
 int fn_802CE860(int n);
-void fn_802CE86C(u32 color, int i, f32 size, f32 x, f32 y, f32 z);
+void DrawBillboardQuad(u32 color, int i, f32 size, f32 x, f32 y, f32 z);
 void fn_802CE868(void);
 }
 
@@ -1101,7 +1101,7 @@ void Mist::Draw(void) {
                 f32 x = p->x;
                 f32 y = p->y;
                 f32 z = p->z;
-                fn_802CE86C((b < a ? b : a) << 24 | 0xFFFFFF, i, s, x, y, z);
+                DrawBillboardQuad((b < a ? b : a) << 24 | 0xFFFFFF, i, s, x, y, z);
             }
             fn_802CE868();
         }

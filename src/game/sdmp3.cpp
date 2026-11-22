@@ -45,8 +45,8 @@ void fn_802E61EC(void* voice, f32 pan);
 void fn_802E620C(void* voice, f32 x);
 void fn_802E622C(void* voice, f32 pitch);
 void fn_802E2E0C(int (*fn)(int), const char* name);
-void fn_80127C90(void (*fn)(void), const char* name);
-void fn_80127D58(void (*fn)(void));
+void RegisterBackgroundTask(void (*fn)(void), const char* name);
+void RemoveBackgroundFunction(void (*fn)(void));
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, int flags, u8* swapped);
 }
 
@@ -993,7 +993,7 @@ void fn_802EBE2C(void) {
     }
     fn_802E2E0C(fn_802EBE00, "mp3");
     OSResumeThread((OSThread*)lbl_805584B8);
-    fn_80127C90(fn_802E9EB8, "mp3");
+    RegisterBackgroundTask(fn_802E9EB8, "mp3");
 }
 
 void fn_802EC038(void) {
@@ -1006,7 +1006,7 @@ void fn_802EC038(void) {
         fn_802E5FE4(lbl_80560088[i]);
         lbl_80560088[i] = 0;
     }
-    fn_80127D58(fn_802E9EB8);
+    RemoveBackgroundFunction(fn_802E9EB8);
     fn_802EBD40();
     fn_802E9DDC();
     delete[] lbl_8056009C;

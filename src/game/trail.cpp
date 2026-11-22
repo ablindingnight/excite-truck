@@ -165,7 +165,7 @@ s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 tex);
 int fn_802CE860(int n);
 void fn_802CE868(void);
-void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z);
+void DrawBillboardQuad(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z);
 void fn_802E317C(const char* fmt, ...);  // fatal
 }
 
@@ -1306,7 +1306,7 @@ void Paint::Draw(void) {
                 a = a > 0 ? a : 0;
                 a = a < 255 ? a : 255;
                 color = (a << 24) | 0xFFFFFF;
-                fn_802CE86C(color, 0, sizeCurve.At(age), m->pos.x, m->pos.y, m->pos.z);
+                DrawBillboardQuad(color, 0, sizeCurve.At(age), m->pos.x, m->pos.y, m->pos.z);
             }
             fn_802CE868();
         }

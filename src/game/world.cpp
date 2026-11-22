@@ -217,14 +217,14 @@ void fn_801FFB6C(void);
 }  // extern "C"
 void fn_8000A868(void);
 extern "C" {
-void fn_801B826C(RaceSetup* s);
+void InitializeArenaMaster(RaceSetup* s);
 void fn_80136764(void);
-void fn_8013477C(RaceSetup* s);
+void InitializeRaceGrid(RaceSetup* s);
 void fn_801F9E04(RaceSetup* s);
 void fn_80265D8C(RaceSetup* s);
 void fn_801DCE0C(int a);
 void fn_801FC8DC(RaceSetup* s);
-void fn_80139F5C(EventInfo* ev);
+void LoadEventTable(EventInfo* ev);
 void fn_801FA298(RaceSetup* s);
 void fn_801EC11C(void);
 void fn_80287800(RaceSetup* s);
@@ -250,7 +250,7 @@ void fn_8013490C(void);
 void fn_80265D90(void);
 void fn_801F4D64(void);
 void fn_801F9F08(void);
-void fn_801B832C(void);
+void ResetRaceState(void);
 void fn_801DCE10(void);
 void fn_801AF598(void);
 void fn_801EA56C(void);
@@ -307,7 +307,7 @@ void fn_802C7A50(void);
 void fn_802C7AD4(void);
 void fn_801FA618(void);
 void fn_802BF508(void);
-void fn_802C2488(void);
+void UpdateBoatTransforms(void);
 void fn_802B0254(void);
 void fn_802B0218(void);
 void fn_80203EF4(void);
@@ -474,15 +474,15 @@ void WorldBeginCommon(RaceSetup* s) {
     fn_801EA394();
     fn_801FFB6C();
     fn_8000A868();
-    fn_801B826C(s);
+    InitializeArenaMaster(s);
     fn_80136764();
-    fn_8013477C(s);
+    InitializeRaceGrid(s);
     fn_801F9E04(s);
     fn_80265D8C(s);
     LoadTimerMark("load track", 500.0f);
     fn_801DCE0C(0);
     fn_801FC8DC(s);
-    fn_80139F5C(GetEvent(s->opts.event));
+    LoadEventTable(GetEvent(s->opts.event));
     fn_80127464();
     fn_801FA298(s);
     fn_801E96D8(s);
@@ -538,7 +538,7 @@ void fn_801E7C28(RaceSetup* s) {
     fn_801F4D64();
     fn_801E9BE4();
     fn_801F9F08();
-    fn_801B832C();
+    ResetRaceState();
     for (i = 0; i < lbl_8055EB34; i++) {
         delete lbl_8055EB3C[i];
     }
@@ -762,7 +762,7 @@ void fn_801E8410(void) {
             }
         }
         fn_802BF508();
-        fn_802C2488();
+        UpdateBoatTransforms();
         fn_802B0254();
         fn_802B0218();
         fn_80203EF4();

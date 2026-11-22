@@ -62,7 +62,7 @@ static UnkStatic123 lbl_80497E10;
 
 extern "C" {
 
-LytFile* fn_8022E0EC(const char* name) {
+LytFile* LoadLayoutFile(const char* name) {
     u32 version;
     u32 size;
     u8 swapped;
@@ -126,7 +126,7 @@ static const char* CantWriteMsg(void) { return "Can't write %s"; }        /* Hel
 static const char* CorruptLayoutMsg(void) { return "Corrupt layout %s"; }  /* Helper name unproven */
 
 // Builds a plain column of labels and widgets for a menu that has no layout file.
-LytFile* fn_8022E4C0(const MenuDesc* desc) {
+LytFile* BuildMenuLayout(const MenuDesc* desc) {
     LytFile* f = new ("autolyt") LytFile;
     memset(f, 0, sizeof(LytFile));
     f->elems = new ("autoitem") LytElem[0x100];
@@ -269,7 +269,7 @@ LytFile* fn_8022E4C0(const MenuDesc* desc) {
     return f;
 }
 
-void fn_8022E960(LytFile* f) {
+void FreeLytFile(LytFile* f) {
     delete[] f->elems;
     delete f;
 }

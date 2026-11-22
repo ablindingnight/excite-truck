@@ -26,8 +26,8 @@ f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 void fn_801796EC(int type, const void* data, int size);  // post event
 void fn_801E9DC4(s16* h);
 int fn_801E9E30(s16* h, const f32* pos);
-void fn_801D0C58(void* l, int car, int a);  // register listener
-void fn_801D0C84(void* l);                  // unregister listener
+void StoreBallData(void* l, int car, int a);  // register listener
+void RemoveAssocValue(void* l);                  // unregister listener
 // Vec2's empty constructor, which retail calls out of line in Drop, by its mangled name (xz stays a plain array:
 // PickDrop takes an f32*).
 void __ct__4Vec2Fv(f32* v);
@@ -355,7 +355,7 @@ void Ball::Init(BodyDesc* desc) {
     b1E9 = 0;
     resetPending = 1;
     active = 0;
-    fn_801D0C58((IBallListener*)this, car, 0);
+    StoreBallData((IBallListener*)this, car, 0);
     startPos = mtx.pos;
     explPos = mtx.pos;
     sndStart = fn_802077A4(BallStrings::StartSound(), 5, &vel, &startPos);
@@ -364,7 +364,7 @@ void Ball::Init(BodyDesc* desc) {
 }
 
 Ball::~Ball(void) {
-    fn_801D0C84((IBallListener*)this);
+    RemoveAssocValue((IBallListener*)this);
     if (sndExpl) {
         delete (Sound3D*)sndExpl;
     }

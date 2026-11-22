@@ -31,7 +31,7 @@ f32 fn_80144BD8(f32 x);  // ease in/out
 u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);  // t is named in ovlayout's definition
 void fn_80148100(GartElem* e);
-void fn_8014E61C(int id, int kind, f32 v);
+void AwardBetaCar(int id, int kind, f32 v);
 f32 fn_80176A2C(void);
 f32 fn_801E7E18(void);
 f32 fn_802C9A50(void);
@@ -474,7 +474,7 @@ void CrashMode::vf14(void) {
                     }
                 }
                 if (s->score >= 0) {
-                    fn_8014E61C(i, 4, scores[s->score].score);
+                    AwardBetaCar(i, 4, scores[s->score].score);
                 }
                 s->scored = 1;
             }

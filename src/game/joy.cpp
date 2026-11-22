@@ -31,8 +31,8 @@ u32 fn_802E2C20(void);
 void fn_802E7C64(void);
 void fn_802E7D0C(void);
 void fn_802E830C(s32* map);
-void fn_80127C90(void (*fn)(void), const char* name);
-void fn_80127D58(void (*fn)(void));
+void RegisterBackgroundTask(void (*fn)(void), const char* name);
+void RemoveBackgroundFunction(void (*fn)(void));
 }
 
 ModuleTag lbl_8055DFC8;
@@ -163,7 +163,7 @@ void fn_80129690(JoyPad* p, int chan, KeyMap* m) {
 
 void fn_80129790(void) {
     fn_802E7C64();
-    fn_80127C90(fn_80129400, "JoyUpdate");
+    RegisterBackgroundTask(fn_80129400, "JoyUpdate");
     fn_80129458();
     lbl_8055DFD0 = 1;
     memset(lbl_804223C0, -1, sizeof(lbl_804223C0));
@@ -183,7 +183,7 @@ int fn_80129800(int chan, int button) {
 }
 
 void fn_80129864(void) {
-    fn_80127D58(fn_80129400);
+    RemoveBackgroundFunction(fn_80129400);
     fn_802E7D0C();
 }
 

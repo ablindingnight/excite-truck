@@ -138,14 +138,14 @@ void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 void fn_80160B14(void* p);
-void fn_80160B18(V2* v);
-void fn_80160B7C(V2* r, const V2* a, const V2* b);
-void fn_80160BA0(V2* r, const V2* a, f32 s);
-void fn_80160BBC(V2* r, const V2* a, const V2* b);
-f32 fn_80160BE0(const V2* a, const V2* b);
-Bound* fn_801399FC(ValueNode* n);
-int fn_80139B70(Bound* b, f32 x, f32 y);
-V2 fn_80139C5C(Bound* b);
+void NormalizeVector(V2* v);
+void CalculateVectorDifference(V2* r, const V2* a, const V2* b);
+void ScaleVector2f(V2* r, const V2* a, f32 s);
+void AddVector2D(V2* r, const V2* a, const V2* b);
+f32 CalculateDistanceSquared(const V2* a, const V2* b);
+Bound* ParseBoundPoints(ValueNode* n);
+int IsPointInBound(Bound* b, f32 x, f32 y);
+V2 CalculateBoundCenter(Bound* b);
 f32 fn_801DD88C(f32 x, f32 z);  // ground height
 void fn_801EA1E0(f32 x, f32 z, f32* y, int a);
 u8* fn_8017960C(int car);
@@ -263,31 +263,31 @@ static inline int AddArea(BoostMan* m, ValueNode* n) {  /* Helper name unproven 
     Bound* b;
     int ok;
     a = &m->areas.data[m->areas.count++];
-    b = fn_801399FC(n);
+    b = ParseBoundPoints(n);
     ok = 0;
     if (b->n == 3) {
         int best = -1;
         int k;
         for (k = 0; k < b->n; k++) {
-            if (best < 0 || fn_80160BE0(&b->pts[best], &b->pts[best % b->n]) > fn_80160BE0(&b->pts[k], &b->pts[k % b->n])) {
+            if (best < 0 || CalculateDistanceSquared(&b->pts[best], &b->pts[best % b->n]) > CalculateDistanceSquared(&b->pts[k], &b->pts[k % b->n])) {
                 best = k;
             }
         }
         Vec2 tip(b->pts[(best + 2) % b->n]);
         Vec2 mid;
-        fn_80160BBC(&mid, &b->pts[best], &b->pts[(best + 1) % b->n]);
-        fn_80160BA0(&mid, &mid, 0.5f);
+        AddVector2D(&mid, &b->pts[best], &b->pts[(best + 1) % b->n]);
+        ScaleVector2f(&mid, &mid, 0.5f);
         Vec2 dir;
-        fn_80160B7C(&dir, &tip, &mid);
-        fn_80160B18(&dir);
+        CalculateVectorDifference(&dir, &tip, &mid);
+        NormalizeVector(&dir);
         Vec2 side;
-        fn_80160B7C(&side, &b->pts[best], &mid);
+        CalculateVectorDifference(&side, &b->pts[best], &mid);
         AddScaled(&side, &side, -Dot(&dir, &side), &dir);
         a->bound = NewBound(4);
-        fn_80160BBC(&a->bound->pts[0], &mid, &side);
+        AddVector2D(&a->bound->pts[0], &mid, &side);
         AddScaled(&a->bound->pts[1], &mid, -1.0f, &side);
         AddScaled(&a->bound->pts[2], &tip, -1.0f, &side);
-        fn_80160BBC(&a->bound->pts[3], &tip, &side);
+        AddVector2D(&a->bound->pts[3], &tip, &side);
         a->bound->n = 4;
         a->ny = Max(2, (int)((2.5f + Dist(&a->bound->pts[0], &a->bound->pts[1])) / 5.0f));
         a->nx = Max(2, (int)((2.5f + Dist(&a->bound->pts[1], &a->bound->pts[2])) / 5.0f));
@@ -309,7 +309,7 @@ static inline int AddArea(BoostMan* m, ValueNode* n) {  /* Helper name unproven 
                 vt->v = 1.0f - s;
             }
         }
-        fn_80160B18(&side);
+        NormalizeVector(&side);
         AddScaled(&a->bound->pts[0], &a->bound->pts[0], 1.0f, &side);
         AddScaled(&a->bound->pts[0], &a->bound->pts[0], -2.0f, &dir);
         AddScaled(&a->bound->pts[1], &a->bound->pts[1], -1.0f, &side);
@@ -318,7 +318,7 @@ static inline int AddArea(BoostMan* m, ValueNode* n) {  /* Helper name unproven 
         AddScaled(&a->bound->pts[2], &a->bound->pts[2], 2.0f, &dir);
         AddScaled(&a->bound->pts[3], &a->bound->pts[3], 1.0f, &side);
         AddScaled(&a->bound->pts[3], &a->bound->pts[3], 2.0f, &dir);
-        Vec2 c(fn_80139C5C(a->bound));
+        Vec2 c(CalculateBoundCenter(a->bound));
         a->center.From(c);
         a->center.y = fn_801DD88C(a->center.x, a->center.z);
         ok = 1;
@@ -411,7 +411,7 @@ static inline int InArea(BoostMan* m, CarBody* rec) {
             p.y += rec->mtx.pos.y;
             p.z += rec->mtx.pos.z;
             hit = 0;
-            if (AreaAt(m->areas.data, i).bound && fn_80139B70(m->areas.data[i].bound, p.x, p.z)) {
+            if (AreaAt(m->areas.data, i).bound && IsPointInBound(m->areas.data[i].bound, p.x, p.z)) {
                 hit = 1;
             }
             if (hit) {

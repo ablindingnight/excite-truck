@@ -4,7 +4,7 @@
 #include "game/common.h"
 #include "game/v2.h"
 
-// A ground-plane boundary polygon (arenabnd.cpp allocates them, tag "arenabnd", from .val nodes via fn_801399FC):
+// A ground-plane boundary polygon (arenabnd.cpp allocates them, tag "arenabnd", from .val nodes via ParseBoundPoints):
 // point count, capacity and the (x, z) points, as v2.h V2s. Names are guesses.
 typedef V2 BoundPt;
 

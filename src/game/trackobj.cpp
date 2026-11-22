@@ -108,9 +108,9 @@ ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);
 void mrModelUnload(void* model);
 void* fn_802C6FC0(const char* model, int a, int b);
-void fn_801E6CD0(void* anim, void* stream, f32 t);
+void InitializeAnimationInstance(void* anim, void* stream, f32 t);
 void fn_801E6CC4(void* stream);
-void fn_801E6B98(void* anim);
+void FreeAnimationInstance(void* anim);
 }
 
 // A loaded class file (8).
@@ -145,11 +145,11 @@ struct StaticOb {
 // An animated object (0x6C).
 struct TrackAnimObj {
     ~TrackAnimObj(void) {
-        fn_801E6CD0(anim, 0, 0.0f);
+        InitializeAnimationInstance(anim, 0, 0.0f);
         for (int i = 0; i < count; i++) {
             fn_801E6CC4(streams[i]);
         }
-        fn_801E6B98(anim);
+        FreeAnimationInstance(anim);
     }
     OFrame frame;       // offset 0x0
     void* anim;         // offset 0x30
@@ -391,7 +391,7 @@ struct EWState {
 
 
 extern "C" {
-int fn_8012F9E8(void* out, int size, const char* text);
+int DecodeBase64String(void* out, int size, const char* text);
 s32 fn_80204BB4(const char* level);
 s32 fn_80204CF0(void);
 void* fn_802C6B44(const char* model);
@@ -413,10 +413,10 @@ void fn_80204050(void);
 void fn_80203FF8(void);
 void fn_801EEFDC(int (*cb)(ObjMsg*), int type);
 void EventUnInstallHandler(int (*cb)(ObjMsg*));
-void* fn_801E6A3C(const char* model, int streaming, int c);
-void* fn_801E6BEC(const char* stream);
-void fn_801E6CC8(void* anim, int once);
-void fn_801E6E9C(void* anim, f32 dt);
+void* CreateAnimationInstance(const char* model, int streaming, int c);
+void* LoadAnimationResource(const char* stream);
+void SetAnimationLoopMode(void* anim, int once);
+void LoadAnimationFrameData(void* anim, f32 dt);
 int fn_801E7650(void* anim);
 void fn_801E75C8(void* anim, TrackAnimObj* a);
 int fn_80129D90(int a, int b, int n);
@@ -500,9 +500,9 @@ static inline int IsSkipType(ValueNode* vn) {
 static inline void StartAnim(TrackAnimObj* a) {
     if (a->state != 1) {
         int i = fn_80129D90(0, 0, a->count);
-        fn_801E6CD0(a->anim, a->streams[i], 0.0f);
+        InitializeAnimationInstance(a->anim, a->streams[i], 0.0f);
     } else {
-        fn_801E6CD0(a->anim, 0, 0.0f);
+        InitializeAnimationInstance(a->anim, 0, 0.0f);
     }
 }
 
@@ -534,7 +534,7 @@ void fn_801F7A14(OFrame* f) {
 int fn_801F7A88(ValueNode* vn, const char* key, void* out, int size) {
     int r = 0;
     if (vn->Has(key)) {
-        r = fn_8012F9E8(out, size, vn->GetValue(key));
+        r = DecodeBase64String(out, size, vn->GetValue(key));
     }
     return r;
 }
@@ -1293,7 +1293,7 @@ void fn_801FA2C4(void) {
                 break;
             }
         }
-        fn_801E6E9C(a->anim, dt);
+        LoadAnimationFrameData(a->anim, dt);
         if (a->count > 1 && fn_801E7650(a->anim)) {
             StartAnim(a);
         }
@@ -1830,12 +1830,12 @@ struct OFrameRP { ORot rot; PVec pos; };
 namespace {
 static inline void AnimSetup(TrackAnimObj* a, AnimDesc* d, ValueNode* node) {
     a->name = "unknown";
-    a->anim = fn_801E6A3C(d->animModel, d->streaming != 0, 0);
+    a->anim = CreateAnimationInstance(d->animModel, d->streaming != 0, 0);
     a->count = d->numStreams;
     for (int i = 0; i < a->count; i++) {
-        a->streams[i] = fn_801E6BEC(d->streams[i]);
+        a->streams[i] = LoadAnimationResource(d->streams[i]);
     }
-    fn_801E6CC8(a->anim, a->count <= 1);
+    SetAnimationLoopMode(a->anim, a->count <= 1);
     if (d->streaming) {
         a->state = 1;
         a->live = 1;

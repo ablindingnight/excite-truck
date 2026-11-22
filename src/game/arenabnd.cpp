@@ -49,7 +49,7 @@ public:
 #include "game/bound.h"
 
 
-extern "C" Bound* fn_801399FC(ValueNode* n);
+extern "C" Bound* ParseBoundPoints(ValueNode* n);
 
 template <typename T, int N>
 struct ArrayWrap {
@@ -62,7 +62,7 @@ struct BoundSet {
         ValueNode* n;
         table = t;
         for (i = 0; (n = t->GetChild(i)) != 0; i++) {
-            bounds.a.data[bounds.a.count++] = fn_801399FC(n);
+            bounds.a.data[bounds.a.count++] = ParseBoundPoints(n);
         }
     }
     ~BoundSet(void) {
@@ -107,7 +107,7 @@ static inline void Perp(V2* v) {
 
 extern "C" {
 
-int fn_8013990C(ValueNode* n) {
+int ValidateArenaBoundPoints(ValueNode* n) {
     char buf[0x10];
     int i = 0;
     const char* v;
@@ -124,9 +124,9 @@ int fn_8013990C(ValueNode* n) {
     return i;
 }
 
-Bound* fn_801399FC(ValueNode* n) {
+Bound* ParseBoundPoints(ValueNode* n) {
     char buf[0x10];
-    s32 cnt = fn_8013990C(n);
+    s32 cnt = ValidateArenaBoundPoints(n);
     Bound* b = NewBound(cnt);
     BoundPt* p;
     int i;
@@ -156,11 +156,11 @@ Bound* fn_801399FC(ValueNode* n) {
     return b;
 }
 
-int fn_80139B70(const Bound* b, f32 x, f32 y);
+int IsPointInBound(const Bound* b, f32 x, f32 y);
 
-int fn_80139B5C(u8* car, Bound* b) { return fn_80139B70(b, ((CarBody*)car)->mtx.pos.x, ((CarBody*)car)->mtx.pos.z); }
+int fn_80139B5C(u8* car, Bound* b) { return IsPointInBound(b, ((CarBody*)car)->mtx.pos.x, ((CarBody*)car)->mtx.pos.z); }
 
-int fn_80139B70(const Bound* b, f32 x, f32 y) {
+int IsPointInBound(const Bound* b, f32 x, f32 y) {
     const BoundPt* p = b->pts;
     int n = b->n;
     int c = 0;
@@ -195,7 +195,7 @@ int fn_80139B70(const Bound* b, f32 x, f32 y) {
 /* Helper name unproven */
 static inline f32 MidF(f32 a, f32 b) { return a + 0.5f * (b - a); }
 
-V2 fn_80139C5C(const Bound* b) {
+V2 CalculateBoundCenter(const Bound* b) {
     V2C lo;
     V2C hi;
     const BoundPt* p = &b->pts[1];
@@ -214,7 +214,7 @@ V2 fn_80139C5C(const Bound* b) {
     return V2C(MidF(lo.x, hi.x), MidF(lo.y, hi.y));
 }
 
-BoundSet* fn_80139D4C(const char* name) {
+BoundSet* LoadBoundSet(const char* name) {
     BoundSet* s = 0;
     ValueTable* t = fn_80131810(name);
     if (t) {
@@ -223,12 +223,12 @@ BoundSet* fn_80139D4C(const char* name) {
     return s;
 }
 
-void fn_80139E18(BoundSet* s) { delete s; }
+void DeleteBoundSet(BoundSet* s) { delete s; }
 
 static inline int AnyBoundHit(BoundSet* s, f32 x, f32 y) {
     int i;
     for (i = 0; i < s->bounds.a.count; i++) {
-        if (fn_80139B70(s->bounds.a.data[i], x, y)) {
+        if (IsPointInBound(s->bounds.a.data[i], x, y)) {
             return 1;
         }
     }
@@ -240,7 +240,7 @@ int fn_80139EC4(BoundSet* s, f32 x, f32 y) {
     return AnyBoundHit(s, x, y);
 }
 
-void fn_80139F5C(EventInfo* ev) {
+void LoadEventTable(EventInfo* ev) {
     char buf[0x40];
     char path[0x80];
     const char* name;

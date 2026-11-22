@@ -30,8 +30,8 @@ const char* fn_801E879C(void);  // track name
 IdealLineRes* fn_80138968(const char* name);
 void fn_80138AD8(IdealLineRes** pr);
 void fn_80138BA0(IdealLineRes* a, IdealLineRes* b);
-Region* fn_801399FC(ValueNode* n);
-int fn_80139B70(Region* r, f32 x, f32 z);
+Region* ParseBoundPoints(ValueNode* n);
+int IsPointInBound(Region* r, f32 x, f32 z);
 void fn_80128658(Region* r);
 int fn_80129D90(int seed, int lo, int hi);  // random int
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
@@ -302,7 +302,7 @@ public:
         for (i = 0; i < regions.a.count; i++) {
             f32 x = rc->mtx.pos.x;
             f32 z = rc->mtx.pos.z;
-            if (fn_80139B70(regions.a.data[i], x, z)) {
+            if (IsPointInBound(regions.a.data[i], x, z)) {
                 return 1;
             }
         }
@@ -424,7 +424,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
         if (regs) {
             ValueNode* r;
             for (i = 0; (r = regs->GetChildAt(i)) != 0 && !RefFull(&s->regions.a); i++) {
-                s->regions.a.data[s->regions.a.count++] = fn_801399FC(r);
+                s->regions.a.data[s->regions.a.count++] = ParseBoundPoints(r);
             }
         }
     }

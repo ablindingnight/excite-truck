@@ -537,7 +537,7 @@ int fn_8027AA48(void);
 void fn_80279F58(CbSetup* setup, CbValueTable* table);
 void* fn_8027A798(const char* model);
 void fn_8027A8B4(CbSetup* setup, void* tune);
-void fn_801B86BC(s32 car, void* look);
+void ApplyDamageFactor(s32 car, void* look);
 u8* fn_801B2EDC(s32 car, u8* body);
 void fn_801795D8(u8* p, s32 car);
 void fn_801BDA74(s32 car, u8* setup);
@@ -619,7 +619,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     const char* treeClasses = "light\0medium\0heavy\0\0";
     cb->f5E8 = GetEnumOr(chassis, "treehit_class", treeClasses, 1);
     GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->ident.vehicle);
-    fn_801B86BC(((CarDesc*)desc)->index, p + 0x2C4);
+    ApplyDamageFactor(((CarDesc*)desc)->index, p + 0x2C4);
     cb->f25C0 = (FindVehicle(cb->ident.vehicle)->flags >> 2) & 1;
     fn_80279F58(&setup, table);
     fn_8027A8B4(&setup, fn_8027A798((char*)(p + 0x234)));
@@ -1423,7 +1423,7 @@ f32 fn_801E9FDC(s16* cell, f32 x, f32 z);
 int fn_802B04D4(const u8* p);
 f32 fn_80181A94(void);
 f32 fn_80181AC0(void);
-void fn_8014E61C(s32 id, int kind, f32 v);
+void AwardBetaCar(s32 id, int kind, f32 v);
 void fn_80161A38(int a, s32 id, int c);
 int fn_8018A100(u8* p);
 int fn_801E1048(s32 id);
@@ -1722,7 +1722,7 @@ void fn_80183E7C(u8* p) {
                         ((CbFx*)((CarBody*)p)->f2584)->v24();
                     }
                     cb->f2590 = lbl_8055E4F0;
-                    fn_8014E61C(cb->index, 2, 0.9f - tilt);
+                    AwardBetaCar(cb->index, 2, 0.9f - tilt);
                 } else if (bad && !(!NearZero(cb->f2690))) {
                     cb->f259D = 0;
                     f32 b2;
@@ -1733,7 +1733,7 @@ void fn_80183E7C(u8* p) {
                     b2 = landingGain + b2;
                     boost = MinF(b2, boost);
                     cb->f258C = cb->setupA.f74 * boost;
-                    fn_8014E61C(cb->index, 1, sink);
+                    AwardBetaCar(cb->index, 1, sink);
                     fn_80161A38(2, cb->index, 0);
                     ((CbFx*)((CarBody*)p)->f2584)->v20();
                 } else {
@@ -1741,9 +1741,9 @@ void fn_80183E7C(u8* p) {
                 }
             }
             if (jump && fn_8018A100(p) && fn_801E1048(cb->index)) {
-                fn_8014E61C(cb->index, 0, 0.0f);
+                AwardBetaCar(cb->index, 0, 0.0f);
                 if (bad) {
-                    fn_8014E61C(cb->index, 1, sink);
+                    AwardBetaCar(cb->index, 1, sink);
                 }
             }
         }
@@ -1851,7 +1851,7 @@ void fn_80183E7C(u8* p) {
             s32 id = cb->index;
             fn_801796EC(13, &id, 4);
             ((CbFx*)((CarBody*)p)->f2584)->v28();
-            fn_8014E61C(cb->index, 6, 0.0f);
+            AwardBetaCar(cb->index, 6, 0.0f);
             fn_80161A38(1, cb->index, 0);
             KickUp(p, cb->mass);
         }
@@ -1922,7 +1922,7 @@ void fn_80183E7C(u8* p) {
                 ((RigidBody*)p)->AddForceAt((const RVec3*)&f, (const RVec3*)(p + 0x60));
                 fn_802E30C8("%d: terrain morph pants-kick: %.2f MPH, terr %.2f MPH", lbl_8055E3C4, push / 0.44444445f, floor / 0.44444445f);
                 if ((f32)__fabs(cb->f2688) <= __float_epsilon[0]) {
-                    fn_8014E61C(cb->index, 8, 0.0f);
+                    AwardBetaCar(cb->index, 8, 0.0f);
                 }
                 cb->f2688 = 1.0f;
             }
@@ -2112,7 +2112,7 @@ void fn_80183E7C(u8* p) {
         const f32& now = PhysicsTime();
         if (cb->f2638 == 0 && cb->f2644 > 0 &&
             (now - cb->f2634 > 0.6f || cb->f2618 < 0.1f)) {
-            fn_8014E61C(cb->index, 7, (f32)cb->f2644);
+            AwardBetaCar(cb->index, 7, (f32)cb->f2644);
             cb->f2644 = 0;
             trick = 1;
         }
@@ -2121,7 +2121,7 @@ void fn_80183E7C(u8* p) {
             if (cb->f2638) {
                 cb->f2638 = 0;
                 if (cb->f2644 > 1) {
-                    fn_8014E61C(cb->index, 7, (f32)(cb->f2644 - 1));
+                    AwardBetaCar(cb->index, 7, (f32)(cb->f2644 - 1));
                     trick = 1;
                 }
             }
@@ -2205,7 +2205,7 @@ void fn_80183E7C(u8* p) {
     }
     int spins = cb->f2644 - (cb->f2638 != 0);
     if (spins > 0 && !trick) {
-        fn_8014E61C(cb->index, 9, (f32)spins);
+        AwardBetaCar(cb->index, 9, (f32)spins);
     }
     if (cb->airborne < 3) {
         f32 grav = cb->f5DC;

@@ -42,8 +42,8 @@ void* operator new(size_t size, const char* tag);
 
 // Camera: common.h's PlainValMatrix.
 extern "C" {
-Bound* fn_801399FC(ValueNode* n);
-V2 fn_80139C5C(Bound* b);
+Bound* ParseBoundPoints(ValueNode* n);
+V2 CalculateBoundCenter(Bound* b);
 RaceCarRec* fn_8017960C(int id);
 PlainValMatrix* fn_802C86DC(void);
 int fn_802C9994(u32 c);
@@ -163,7 +163,7 @@ inline void PickupObjMan::BeginGroup(Bound* b, int id) {
     if (b) {
         int i;
         g->hasBound = 1;
-        g->c = fn_80139C5C(b);
+        g->c = CalculateBoundCenter(b);
         g->radius = 0.0f;
         for (i = 0; i < b->n; i++) {
             f32 dd = DistSq(g->c, b->pts[i]);
@@ -666,7 +666,7 @@ inline int CoinStripPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* 
         fn_802E30C8("CoinStripPickupMaker: table name \"%s\" is not a match", n->GetName());
         return 0;
     }
-    Bound* b = fn_801399FC(n);
+    Bound* b = ParseBoundPoints(n);
     if (b->n < 2) {
         fn_802E30C8("CoinStripPickupMaker: bound for table \"%s\" has less than two points", n->GetName());
         fn_80128658(b);
@@ -844,7 +844,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         fn_802E30C8("CoinBoxPickupMaker: table name \"%s\" is not a match", n->GetName());
         return 0;
     }
-    b = fn_801399FC(n);
+    b = ParseBoundPoints(n);
     np = b->n;
     if (np < 4 || np > 4) {
         fn_802E30C8("CoinBoxPickupMaker: bound %s has %d points, should have 4", n->GetName(), np);
@@ -935,7 +935,7 @@ inline int SinglesPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
     } else if (type == 4) {
         sscanf(n->GetName(), "star%d", &id);
     }
-    b = fn_801399FC(n);
+    b = ParseBoundPoints(n);
     m->BeginGroup(0, id);
     for (i = 0; i < b->n; i++) {
         m->Add(type, b->pts[i], 0.0f);

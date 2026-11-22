@@ -11,7 +11,7 @@ int strcasecmp(const char* a, const char* b);
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
-void fn_8013B6C0(s32* lvl, f32* frac, s32 strength);
+void ParseAIStrength(s32* lvl, f32* frac, s32 strength);
 int fn_80179630(int i);
 int fn_801B2F24(void);
 int fn_801B2F40(int i);
@@ -117,7 +117,7 @@ void fn_8013BAE4(s32 n) {
     int cnt;
     lbl_8042F8A8.active = 0;
     fn_8013B7B4(tbl, n);
-    fn_8013B6C0(&lvl, &frac, fn_801E87A8()->level);
+    ParseAIStrength(&lvl, &frac, fn_801E87A8()->level);
     // The four settings are blended as an array of floats: a counted-down loop the compiler unrolls.
     const f32* lo = (const f32*)&tbl[lvl];
     f32 t = frac;

@@ -131,7 +131,7 @@ void fn_802C744C(s32 model, const ValMatrix* m);
 void fn_802C9900(f32 alpha);
 void fn_802C9904(void);
 void fn_8016A438(void);
-int fn_801B8514(void);
+int GetFrameCounter(void);
 }  // extern "C"
 void UpdateContinueOverlay(void);
 extern "C" {
@@ -1690,7 +1690,7 @@ inline int RingChalMaster::vf54(int p) { return 0x1408; }
 
 inline int RingChalMaster::vf24(void) const {
     int r = 0;
-    if (fn_801B8514() && arena.b49 && !b9C) {
+    if (GetFrameCounter() && arena.b49 && !b9C) {
         r = 1;
     }
     return r;

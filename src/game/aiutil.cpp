@@ -25,34 +25,34 @@ extern "C" {
 
 void fn_80160B14(void* p) { fn_80128658(p); }
 
-void fn_80160B18(V2* v) {
+void NormalizeVector(V2* v) {
     f32 inv = 1.0f / Len(v->x, v->y);
     v->x *= inv;
     v->y *= inv;
 }
 
-void fn_80160B7C(V2* r, const V2* a, const V2* b) {
+void CalculateVectorDifference(V2* r, const V2* a, const V2* b) {
     f32 x = a->x - b->x;
     f32 y = a->y - b->y;
     r->x = x;
     r->y = y;
 }
 
-void fn_80160BA0(V2* r, const V2* a, f32 s) {
+void ScaleVector2f(V2* r, const V2* a, f32 s) {
     f32 x = a->x * s;
     f32 y = a->y * s;
     r->x = x;
     r->y = y;
 }
 
-void fn_80160BBC(V2* r, const V2* a, const V2* b) {
+void AddVector2D(V2* r, const V2* a, const V2* b) {
     f32 x = a->x + b->x;
     f32 y = a->y + b->y;
     r->x = x;
     r->y = y;
 }
 
-f32 fn_80160BE0(const V2* a, const V2* b) {
+f32 CalculateDistanceSquared(const V2* a, const V2* b) {
     V2 d;
     d.y = a->y - b->y;
     d.x = a->x - b->x;

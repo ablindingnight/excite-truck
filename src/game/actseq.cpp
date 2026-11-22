@@ -196,35 +196,35 @@ FixedArr<ActionSequence*, 64> lbl_804423A4;
 u8 lbl_8055E954;  // started
 
 extern "C" {
-void fn_801D5520(const char* file);
-void fn_801D5650(void);
-void fn_801D5488(void);
-void fn_801D56C0(void);
-void fn_801D5730(void);
-void fn_801D57F0(void);
-ActionSequence* fn_801D5860(const char* name);
+void LoadActionSequences(const char* file);
+void UpdateAllObjects(void);
+void UpdateEngineSound(void);
+void StopAllActiveObjects(void);
+void ClearActionSequences(void);
+void ResetAllObjects(void);
+ActionSequence* FindActionSequenceByName(const char* name);
 void fn_801D597C(ActionSequence* s, int forward);
 int fn_801D5A68(ActionSequence* s);
-void fn_801D5454(ActionSequence* s, const ActVec* pos);
+void UpdateCameraTargetPosition(ActionSequence* s, const ActVec* pos);
 
-void fn_801D4734(void) {
+void InitializeRumbleSound(void) {
     lbl_8055E954 = 1;
     lbl_804422F0.snd = fn_802077A4("rumble.sfx", 5, &lbl_804422F0.vel, &lbl_804422F0.pos);
     if (lbl_804422F0.snd) {
         lbl_804422F0.snd->radius = 100.0f;
     }
-    fn_801D5520("actseq.val");
+    LoadActionSequences("actseq.val");
     ValueNode* t = ((EventInfo*)GetEvent(fn_801769CC()->event))->node;
     if (t->Has("action_sequence_file")) {
-        fn_801D5520(t->GetValue("action_sequence_file"));
+        LoadActionSequences(t->GetValue("action_sequence_file"));
     }
 }
 
-void fn_801D47F4(void) { fn_801D57F0(); }
+void fn_801D47F4(void) { ResetAllObjects(); }
 
 void fn_801D47F8(void) {
-    fn_801D5650();
-    fn_801D5488();
+    UpdateAllObjects();
+    UpdateEngineSound();
 }
 
 void fn_801D481C(void) {
@@ -232,21 +232,21 @@ void fn_801D481C(void) {
     lbl_804422F0.pos.y = 0.0f;
     lbl_804422F0.pos.z = 0.0f;
     lbl_804422F0.time = 0.0f;
-    fn_801D56C0();
+    StopAllActiveObjects();
 }
 
-void fn_801D483C(void) {
+void ResetSoundSystem(void) {
     lbl_8055E954 = 0;
     delete lbl_804422F0.snd;
-    fn_801D5730();
+    ClearActionSequences();
 }
 
-ActionSequence* fn_801D4888(const char* name) { return fn_801D5860(name); }
+ActionSequence* LoadActionSequence(const char* name) { return FindActionSequenceByName(name); }
 
 void fn_801D488C(ActionSequence* s, int a, int rumble, const ActVec* pos) {
     fn_801D597C(s, a);
     if (rumble && fn_801D5A68(s)) {
-        fn_801D5454(s, pos);
+        UpdateCameraTargetPosition(s, pos);
     }
 }
 
@@ -254,14 +254,14 @@ void fn_801D488C(ActionSequence* s, int a, int rumble, const ActVec* pos) {
 
 extern "C" {
 void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
-f32 fn_801D58DC(ActionSequence* s);
+f32 GetActionSequenceResetTime(ActionSequence* s);
 u8 fn_801D592C(ActionSequence* s);
 int fn_801D5A14(ActionSequence* s);
 int fn_801D5A1C(ActionSequence* s);
 int fn_801D5A24(ActionSequence* s);
-int fn_801D5A2C(ActionSequence* s, const int* ids, int n);
+int FindActionSequenceHandle(ActionSequence* s, const int* ids, int n);
 
-f32 fn_801D48F4(ActionSequence* s) { return fn_801D58DC(s); }
+f32 fn_801D48F4(ActionSequence* s) { return GetActionSequenceResetTime(s); }
 
 u8 fn_801D48F8(ActionSequence* s) { return fn_801D592C(s); }
 
@@ -271,7 +271,7 @@ int fn_801D4900(ActionSequence* s) { return fn_801D5A1C(s); }
 
 int fn_801D4904(ActionSequence* s) { return fn_801D5A24(s); }
 
-int fn_801D4908(ActionSequence* s, const int* ids, int n) { return fn_801D5A2C(s, ids, n); }
+int fn_801D4908(ActionSequence* s, const int* ids, int n) { return FindActionSequenceHandle(s, ids, n); }
 
 }  // extern "C"
 
@@ -463,12 +463,12 @@ void ActionSequence::Start(int fwd) {
 
 extern "C" {
 
-void fn_801D5454(ActionSequence* s, const ActVec* pos) {
+void UpdateCameraTargetPosition(ActionSequence* s, const ActVec* pos) {
     lbl_804422F0.pos = *pos;
     lbl_804422F0.time += 3.0f;
 }
 
-void fn_801D5488(void) {
+void UpdateEngineSound(void) {
     Sound3D* s = lbl_804422F0.snd;
     if (!s) {
         return;
@@ -482,7 +482,7 @@ void fn_801D5488(void) {
     }
 }
 
-void fn_801D5520(const char* file) {
+void LoadActionSequences(const char* file) {
     ValueTable* t = fn_80131810(file);
     if (!t) {
         fn_802E30C8("ActionSequence: can't load value file %s", file);
@@ -502,19 +502,19 @@ void fn_801D5520(const char* file) {
     fn_80131818(t);
 }
 
-void fn_801D5650(void) {
+void UpdateAllObjects(void) {
     for (int i = 0; i < lbl_804423A4.count; i++) {
         lbl_804423A4.data[i]->Update();
     }
 }
 
-void fn_801D56C0(void) {
+void StopAllActiveObjects(void) {
     for (int i = 0; i < lbl_804423A4.count; i++) {
         lbl_804423A4.data[i]->Stop();
     }
 }
 
-void fn_801D5730(void) {
+void ClearActionSequences(void) {
     int i = lbl_804423A4.count;
     while (i-- > 0) {
         ActionSequence* s = lbl_804423A4.data[i];
@@ -524,13 +524,13 @@ void fn_801D5730(void) {
     }
 }
 
-void fn_801D57F0(void) {
+void ResetAllObjects(void) {
     for (int i = 0; i < lbl_804423A4.count; i++) {
         lbl_804423A4.data[i]->Reset();
     }
 }
 
-ActionSequence* fn_801D5860(const char* name) {
+ActionSequence* FindActionSequenceByName(const char* name) {
     ActionSequence** p = lbl_804423A4.data;
     int n = lbl_804423A4.count;
     for (int i = 0; i < n; p++, i++) {
@@ -543,7 +543,7 @@ ActionSequence* fn_801D5860(const char* name) {
 }
 
 
-f32 fn_801D58DC(ActionSequence* s) {
+f32 GetActionSequenceResetTime(ActionSequence* s) {
     if (!s) {
         return 10.0f;
     }
@@ -583,7 +583,7 @@ void fn_801D597C(ActionSequence* s, int forward) {
     }
 }
 
-int fn_801D59C8(ActionSequence* s, int state) {
+int CheckActionSequenceState(ActionSequence* s, int state) {
     for (int i = 0; i < lbl_804423A4.count; i++) {
         if (lbl_804423A4.data[i] == s) {
             return state == s->state;
@@ -592,13 +592,13 @@ int fn_801D59C8(ActionSequence* s, int state) {
     return 0;
 }
 
-int fn_801D5A14(ActionSequence* s) { return fn_801D59C8(s, 2); }
+int fn_801D5A14(ActionSequence* s) { return CheckActionSequenceState(s, 2); }
 
-int fn_801D5A1C(ActionSequence* s) { return fn_801D59C8(s, 1); }
+int fn_801D5A1C(ActionSequence* s) { return CheckActionSequenceState(s, 1); }
 
-int fn_801D5A24(ActionSequence* s) { return fn_801D59C8(s, 4); }
+int fn_801D5A24(ActionSequence* s) { return CheckActionSequenceState(s, 4); }
 
-int fn_801D5A2C(ActionSequence* s, const int* ids, int n) {
+int FindActionSequenceHandle(ActionSequence* s, const int* ids, int n) {
     for (int i = 0; i < lbl_804423A4.count; i++) {
         if (lbl_804423A4.data[i] == s) {
             return s->Handles(ids, n);
@@ -708,7 +708,7 @@ inline void Obstacle_ASE::Added(Body* b) {
 
 extern "C" {
 void fn_80128658(void* p);  // MemFree
-void* fn_801399FC(ValueNode* t);  // load a bound volume
+void* ParseBoundPoints(ValueNode* t);  // load a bound volume
 int fn_80139B5C(u8* car, void* bound);  // car inside bound
 void fn_80267E40(u8* car, f32 amount);  // shake the camera
 void fn_801E9DC4(s16* h);
@@ -896,7 +896,7 @@ public:
         SafeStrCopy(path, t->GetValue("path"), 0x14);
         SafeStrCopy(object, t->GetString("object", "*"), 0x14);
         ValueNode* kb = t->FindChild("kill_bound");
-        killBound = !kb ? 0 : fn_801399FC(kb);
+        killBound = !kb ? 0 : ParseBoundPoints(kb);
         delay = (int)(59.94f * t->GetFloat("delay", 0.0f));
         dir = 0;
         mover = 0;
@@ -1417,7 +1417,7 @@ public:
     }
     virtual void Update(void) {
         if (state == 2 && lbl_8055E3C8 - start >= delay) {
-            ActionSequence* s = fn_801D4888(seq);
+            ActionSequence* s = LoadActionSequence(seq);
             if (!s) {
                 fn_802E30C8("TriggerActionSequenceEvent: no action sequence found with name %s", seq);
             } else {
@@ -1580,7 +1580,7 @@ int CameraShake_ASE::Load(ValueNode* t) {
     bound = 0;
     ValueNode* b = t->FindChild("bound");
     if (b) {
-        bound = fn_801399FC(b);
+        bound = ParseBoundPoints(b);
     }
     runSolo = t->GetBool("run_solo", 0);
     state = 1;
@@ -1914,10 +1914,10 @@ extern "C" ActionSequenceEvent* fn_801D7334(ValueNode* t) {
 extern "C" void ActionSequenceCommand(const char* name) {
     if (!name) {
         fn_802E30C8("actseqs resetting");
-        fn_801D57F0();
+        ResetAllObjects();
         return;
     }
-    ActionSequence* s = fn_801D5860(name);
+    ActionSequence* s = FindActionSequenceByName(name);
     if (!s) {
         fn_802E30C8("actseq is unknown; known sequences listed below");
         for (int i = 0; i < lbl_804423A4.count; i++) {

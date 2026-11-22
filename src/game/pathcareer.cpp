@@ -305,7 +305,7 @@ void fn_8027E0C8(Path* (*getPath)(int), int which) {
             }
             fn_80284580(q.profile, q.total, list, &x);
             delete list;
-            fn_8025A204();
+            TallyRunAchievements();
             AchievementsCommitSession();
             if (path->IsCareer()) {
                 int nowUnlocked = path->Get(bi)->Get(ci)->Unlocked();

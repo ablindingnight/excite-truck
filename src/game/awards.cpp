@@ -3,7 +3,7 @@
 // a value that beats them queues a "live update" pop-up (awards_lyt.val). It also takes the place, score,
 // grade and race time once per race, feeds achievements and the high-score table, and runs the records
 // animation (awards_pr.val / awardsart.art). Single-player only (Off() = more than one player). The records
-// animation setup (fn_801CDE00) and the pop-up draw are decompiled. Names are guesses apart from the strings.
+// animation setup (SetupRecordAnimation) and the pop-up draw are decompiled. Names are guesses apart from the strings.
 #include "game/common.h"
 #include "game/ilayout.h"
 #include "game/textelem.h"
@@ -308,29 +308,29 @@ static inline u8 CarOff(AwardsMgr* m, int car) {
 extern "C" {
 
 void fn_801CC470(void);
-void fn_801CC918(void);
+void ResetAwardManager(void);
 void fn_801CCAEC(int car);
 void fn_801CCB48(int car);
-void fn_801CCBA4(void);
+void PauseGame(void);
 void fn_801CCBB4(void);
-void fn_801CCBC4(void);
+void SubmitAwardScore(void);
 void fn_801CCCAC(void);
 void fn_801CCDAC(u32 type, int car, long v);
 void fn_801CD130(u32 type, int car, f32 v);
 void fn_801CD4CC(int car, long place);
-void fn_801CD5B4(int car, long score, long grade);
+void ProcessAwardSubmission(int car, long score, long grade);
 void fn_801CD7BC(int car, int valid, f32 t);
-void fn_801CD970(int car);
+void UpdateLivePopupAnimation(int car);
 void fn_801CDDCC(void);
-void fn_801CE6F8(void);
+void DrawAwardResults(void);
 int fn_801CE75C(void);
-void fn_801CE7A0(void);
+void ClearAwardDisplayObjects(void);
 int fn_801CE874(int car);
 int fn_801CE898(void);
 int fn_801CE8CC(void);
 void fn_801CB3F8(void);
-void fn_801CBD48(Results* r, AwardsMgr* m);
-void fn_801CDE00(Results* r);
+void UpdateRecordAnimation(Results* r, AwardsMgr* m);
+void SetupRecordAnimation(Results* r);
 
 void fn_801CB2D8(void) {
     if (Disabled()) {
@@ -345,7 +345,7 @@ void fn_801CB320(void) {
     if (Disabled()) {
         return;
     }
-    fn_801CC918();
+    ResetAwardManager();
     fn_801CB3F8();
 }
 
@@ -377,7 +377,7 @@ void fn_801CB464(void) {
     if (Disabled()) {
         return;
     }
-    fn_801CCBA4();
+    PauseGame();
 }
 
 void fn_801CB4A0(void) {
@@ -391,7 +391,7 @@ void fn_801CB4DC(void) {
     if (Disabled()) {
         return;
     }
-    fn_801CCBC4();
+    SubmitAwardScore();
 }
 
 void fn_801CB518(void) {
@@ -416,7 +416,7 @@ void fn_801CB5DC(int car, long score, long grade) {
     if (Disabled()) {
         return;
     }
-    fn_801CD5B4(car, score, grade);
+    ProcessAwardSubmission(car, score, grade);
 }
 
 void fn_801CB648(int car, int valid, f32 t) {
@@ -450,7 +450,7 @@ void fn_801CB7BC(int car) {
     if (Disabled()) {
         return;
     }
-    fn_801CD970(car);
+    UpdateLivePopupAnimation(car);
 }
 
 void fn_801CB808(void) {
@@ -464,7 +464,7 @@ void fn_801CB844(void) {
     if (Disabled()) {
         return;
     }
-    fn_801CE6F8();
+    DrawAwardResults();
 }
 
 int fn_801CB880(void) {
@@ -478,7 +478,7 @@ void fn_801CB8C0(void) {
     if (Disabled()) {
         return;
     }
-    fn_801CE7A0();
+    ClearAwardDisplayObjects();
 }
 
 int fn_801CB8FC(void) { return fn_801CE8CC(); }
@@ -615,7 +615,7 @@ Cmd fn_801CE670(const char* name, Vec4* v);
 const char* fn_801CE698(FixedStr<18>* s);
 const char* fn_801CE69C(FixedStr<64>* s);
 const char* fn_801CE6A0(FixedStr<100>* s);
-Cmd fn_801CE6A4(const char* name, const char* text);
+Cmd CreateCommandWithText(const char* name, const char* text);
 const char* fn_801CE6CC(FixedStr<20>* s);
 Cmd fn_801CE6D0(const char* name, s32* v);
 extern const Cmd lbl_802FAA40;  // list terminator
@@ -623,7 +623,7 @@ extern const Cmd lbl_802FAA40;  // list terminator
 
 // Records animation update: fills the texts once, then plays the bar in, pauses it at the new place and
 // grows the record rows.
-void fn_801CBD48(Results* r, AwardsMgr* m) {
+void UpdateRecordAnimation(Results* r, AwardsMgr* m) {
     if (!r->anim || !lbl_8055E884) {
         return;
     }
@@ -842,7 +842,7 @@ HandlerVec::HandlerVec(void) {
     n = 0;
 }
 
-void fn_801CC918(void) {
+void ResetAwardManager(void) {
     AwardsMgr* m = lbl_8055E884;
     ResetAwards(m);
 }
@@ -863,7 +863,7 @@ void fn_801CCB48(int car) {
     }
 }
 
-void fn_801CCBA4(void) { lbl_8055E884->paused = 1; }
+void PauseGame(void) { lbl_8055E884->paused = 1; }
 
 void fn_801CCBB4(void) { lbl_8055E884->paused = 0; }
 
@@ -889,7 +889,7 @@ static inline void CommitAndRecordScore(AwardsMgr* m) {
     }
 }
 
-void fn_801CCBC4(void) {
+void SubmitAwardScore(void) {
     AwardsMgr* m = lbl_8055E884;
     if (!m->paused) {
         CommitAndRecordScore(m);
@@ -1068,7 +1068,7 @@ void fn_801CD4CC(int car, long place) {
     }
 }
 
-void fn_801CD5B4(int car, long score, long grade) {
+void ProcessAwardSubmission(int car, long score, long grade) {
     if (fn_801CE898()) {
         return;
     }
@@ -1212,7 +1212,7 @@ static inline Popup* NextPopup(AwardsMgr* m, int car, f32 dt) {
 /* Helper name unproven */
 static inline f32 Ramp(f32 x, f32 lo, f32 hi) { return Clamp01((x - lo) / (hi - lo)); }
 
-void fn_801CD970(int car) {
+void UpdateLivePopupAnimation(int car) {
     if (fn_801CE898()) {
         return;
     }
@@ -1270,38 +1270,38 @@ void fn_801CDDCC(void) {
     if (fn_801CE898()) {
         return;
     }
-    fn_801CDE00(&lbl_8055E884->results);
+    SetupRecordAnimation(&lbl_8055E884->results);
 }
 
 // Binds the record texts and scales to a_records.val; returns the animation id.
 static inline int BindRecords(Results* r, int diff) {
     Cmd b[36] = {
         fn_801CE6D0("player_score", &r->n),
-        fn_801CE6A4("record_score_1", fn_801CE6CC(&r->rows[0].score)),
-        fn_801CE6A4("record_grade_1", fn_801CE6CC(&r->rows[0].grade)),
-        fn_801CE6A4("record_time_1", fn_801CE6CC(&r->rows[0].time)),
-        fn_801CE6A4("record_score_2", fn_801CE6CC(&r->rows[1].score)),
-        fn_801CE6A4("record_grade_2", fn_801CE6CC(&r->rows[1].grade)),
-        fn_801CE6A4("record_time_2", fn_801CE6CC(&r->rows[1].time)),
-        fn_801CE6A4("record_score_3", fn_801CE6CC(&r->rows[2].score)),
-        fn_801CE6A4("record_grade_3", fn_801CE6CC(&r->rows[2].grade)),
-        fn_801CE6A4("record_time_3", fn_801CE6CC(&r->rows[2].time)),
-        fn_801CE6A4("record_score_4", fn_801CE6CC(&r->rows[3].score)),
-        fn_801CE6A4("record_grade_4", fn_801CE6CC(&r->rows[3].grade)),
-        fn_801CE6A4("record_time_4", fn_801CE6CC(&r->rows[3].time)),
-        fn_801CE6A4("record_score_5", fn_801CE6CC(&r->rows[4].score)),
-        fn_801CE6A4("record_grade_5", fn_801CE6CC(&r->rows[4].grade)),
-        fn_801CE6A4("record_time_5", fn_801CE6CC(&r->rows[4].time)),
-        fn_801CE6A4("player_score", fn_801CE6CC(&r->score)),
-        fn_801CE6A4("player_grade", fn_801CE6CC(&r->grade)),
-        fn_801CE6A4("player_time", fn_801CE6CC(&r->time)),
-        fn_801CE6A4("time_record_excite", diff == 0 ? fn_801CE6CC(&r->recordTime) : ""),
-        fn_801CE6A4("time_record_super", diff == 1 ? fn_801CE6CC(&r->recordTime) : ""),
-        fn_801CE6A4("time_record_mirror", diff == 2 ? fn_801CE6CC(&r->recordTime) : ""),
-        fn_801CE6A4("time_record_title", fn_801CE6A0(&r->recordTitle)),
-        fn_801CE6A4("new_time_record_title", fn_801CE6A0(&r->newRecordTitle)),
-        fn_801CE6A4("time_heading", fn_801CE69C(&r->timeHeading)),
-        fn_801CE6A4("player_name", fn_801CE698(&r->name)),
+        CreateCommandWithText("record_score_1", fn_801CE6CC(&r->rows[0].score)),
+        CreateCommandWithText("record_grade_1", fn_801CE6CC(&r->rows[0].grade)),
+        CreateCommandWithText("record_time_1", fn_801CE6CC(&r->rows[0].time)),
+        CreateCommandWithText("record_score_2", fn_801CE6CC(&r->rows[1].score)),
+        CreateCommandWithText("record_grade_2", fn_801CE6CC(&r->rows[1].grade)),
+        CreateCommandWithText("record_time_2", fn_801CE6CC(&r->rows[1].time)),
+        CreateCommandWithText("record_score_3", fn_801CE6CC(&r->rows[2].score)),
+        CreateCommandWithText("record_grade_3", fn_801CE6CC(&r->rows[2].grade)),
+        CreateCommandWithText("record_time_3", fn_801CE6CC(&r->rows[2].time)),
+        CreateCommandWithText("record_score_4", fn_801CE6CC(&r->rows[3].score)),
+        CreateCommandWithText("record_grade_4", fn_801CE6CC(&r->rows[3].grade)),
+        CreateCommandWithText("record_time_4", fn_801CE6CC(&r->rows[3].time)),
+        CreateCommandWithText("record_score_5", fn_801CE6CC(&r->rows[4].score)),
+        CreateCommandWithText("record_grade_5", fn_801CE6CC(&r->rows[4].grade)),
+        CreateCommandWithText("record_time_5", fn_801CE6CC(&r->rows[4].time)),
+        CreateCommandWithText("player_score", fn_801CE6CC(&r->score)),
+        CreateCommandWithText("player_grade", fn_801CE6CC(&r->grade)),
+        CreateCommandWithText("player_time", fn_801CE6CC(&r->time)),
+        CreateCommandWithText("time_record_excite", diff == 0 ? fn_801CE6CC(&r->recordTime) : ""),
+        CreateCommandWithText("time_record_super", diff == 1 ? fn_801CE6CC(&r->recordTime) : ""),
+        CreateCommandWithText("time_record_mirror", diff == 2 ? fn_801CE6CC(&r->recordTime) : ""),
+        CreateCommandWithText("time_record_title", fn_801CE6A0(&r->recordTitle)),
+        CreateCommandWithText("new_time_record_title", fn_801CE6A0(&r->newRecordTitle)),
+        CreateCommandWithText("time_heading", fn_801CE69C(&r->timeHeading)),
+        CreateCommandWithText("player_name", fn_801CE698(&r->name)),
         fn_801CE670("player_bar", &r->scales[0]),
         fn_801CE670("player_score", &r->scales[1]),
         fn_801CE670("player_grade", &r->scales[2]),
@@ -1317,7 +1317,7 @@ static inline int BindRecords(Results* r, int diff) {
 }
 
 // Records animation setup: binds the layout, loads the sounds and resets.
-void fn_801CDE00(Results* r) {
+void SetupRecordAnimation(Results* r) {
     r->anim = new ("records_anim") ArtPlayer(16);
     int diff = fn_80204CF0();
     r->animId = BindRecords(r, diff);
@@ -1341,7 +1341,7 @@ const char* fn_801CE69C(FixedStr<64>* s) { return s->s; }
 
 const char* fn_801CE6A0(FixedStr<100>* s) { return s->s; }
 
-Cmd fn_801CE6A4(const char* name, const char* text) {
+Cmd CreateCommandWithText(const char* name, const char* text) {
     Cmd c;
     c.op = 1;
     c.name = name;
@@ -1359,12 +1359,12 @@ Cmd fn_801CE6D0(const char* name, s32* v) {
     return c;
 }
 
-void fn_801CE6F8(void) {
+void DrawAwardResults(void) {
     if (fn_801CE898()) {
         return;
     }
     AwardsMgr* m = lbl_8055E884;
-    fn_801CBD48(&m->results, m);
+    UpdateRecordAnimation(&m->results, m);
     if (m->results.anim) {
         m->results.anim->Draw((ArtXform*)&m->results.nameScale);
     }
@@ -1380,7 +1380,7 @@ int fn_801CE75C(void) {
     return lbl_8055E884->results.state == 3;
 }
 
-void fn_801CE7A0(void) {
+void ClearAwardDisplayObjects(void) {
     if (fn_801CE898()) {
         return;
     }

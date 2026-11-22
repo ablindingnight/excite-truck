@@ -155,7 +155,7 @@ void fn_802DA1F4(int start, const u32* src, int n) {
     lbl_8055FE58 = 1;
 }
 
-void fn_802DA2F4(void) {
+void InitializeBoneManager(void) {
     lbl_8055FE5C = new ("bonemgr") BoneMgr((BoneCopy)fn_802D9C5C, (BoneCopy)fn_802D9DE4, (BoneCopy)fn_802DA1F4);
     for (int i = 0; i < 22; i++) {
         lbl_804DAC48[i].Identity();
@@ -197,7 +197,7 @@ BoneCmd* fn_802DA704(int start, const BVec* v, int n) {
     return m->NewCmd(start, v, n, sizeof(BVec), 0, 0);
 }
 
-BoneCmd* fn_802DA80C(int start, const CamFrame34* v, int n) {
+BoneCmd* CreateCameraBoneCommand(int start, const CamFrame34* v, int n) {
     BoneMgr* m = lbl_8055FE5C;
     return m->NewCmd(start, v, n, sizeof(CamFrame34), 1, 0);
 }

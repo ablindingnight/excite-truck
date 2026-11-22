@@ -53,8 +53,8 @@ void* memset(void* p, int c, size_t n);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 u32 fn_802E2C20(void);
 u64 fn_802E2C9C(void);
-void fn_80127C90(void (*fn)(void), const char* name);
-void fn_80127D58(void (*fn)(void));
+void RegisterBackgroundTask(void (*fn)(void), const char* name);
+void RemoveBackgroundFunction(void (*fn)(void));
 }
 
 ModuleTag lbl_8055DF10;
@@ -108,7 +108,7 @@ int fn_80127538(void) {
     memset(lbl_8041D790, 0, sizeof(lbl_8041D790));
     memset(lbl_8041DC10, 0, sizeof(lbl_8041DC10));
     fn_80127968();
-    fn_80127C90(fn_80127968, "ProfUpdate");
+    RegisterBackgroundTask(fn_80127968, "ProfUpdate");
     lbl_8055DF18 = 0;
     lbl_8055DF30 = 0;
     lbl_8055DF34 = 0;
@@ -117,7 +117,7 @@ int fn_80127538(void) {
 
 void fn_801275AC(void) {
     int i;
-    fn_80127D58(fn_80127968);
+    RemoveBackgroundFunction(fn_80127968);
     if (lbl_8055DF44) {
         fn_802E30C8("=======================================================");
         fn_802E30C8("prof: trace list %d", lbl_8055DF44);

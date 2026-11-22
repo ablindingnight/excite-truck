@@ -222,7 +222,7 @@ s32 fn_802C6FC0(const char* name, int a, int b);
 void fn_802C77F0(s32 model, f32* box);
 GameSound* fn_80207848(const char* name, int flags);
 int sscanf(const char* s, const char* fmt, ...);
-TPath* fn_801399FC(ValueNode* n);
+TPath* ParseBoundPoints(ValueNode* n);
 double sqrt(double x);
 void fn_80128658(void* p);  // MemFree
 void mrModelUnload(s32 model);
@@ -1259,7 +1259,7 @@ inline void Challenge::Init(void) {
             TutorialToken* t = &tokens.data[tokens.count++];
             TPath* p;
             int i;
-            t->path = p = fn_801399FC(n->FindChild("end"));
+            t->path = p = ParseBoundPoints(n->FindChild("end"));
             int best = -1;
             f32 max = -999.0f;
             for (i = 1; i <= p->count; i++) {

@@ -41,7 +41,7 @@ f32 Clamp(float, float, float);
 extern "C" {
 int fn_80179630(int view);
 int fn_801B8570(int id);
-void fn_80139E18(void* b);
+void DeleteBoundSet(void* b);
 int fn_80139EC4(void* b, f32 x, f32 z);
 }
 
@@ -466,7 +466,7 @@ int fn_801667F0(void) { return lbl_8055E32A && !lbl_8055E32B; }
 
 void fn_80166814(void) {
     if (lbl_8055E330) {
-        fn_80139E18(lbl_8055E330);
+        DeleteBoundSet(lbl_8055E330);
         lbl_8055E330 = 0;
     }
     delete lbl_8055E32C;

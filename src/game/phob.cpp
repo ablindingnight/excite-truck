@@ -51,12 +51,12 @@ void fn_8020C59C(void);
 void fn_801DEFE0(void);
 void fn_801EA1F0(void);
 void fn_80178DBC(int i, f32 v);
-void fn_801B8BF4(void);
+void ProcessAlarmEvents(void);
 int fn_801C5B60(void);
 void fn_801B841C(void);
 void debug_event(void);
 void fn_801D47F8(void);
-void fn_80134A8C(void);
+void UpdateAICarStates(void);
 void fn_80134B50(void);
 void fn_8017FF4C(f32 dt);
 void fn_801E22D0(void* list, int n);
@@ -102,7 +102,7 @@ void fn_801B3448(void);
 void fn_801A4E28(void);
 void fn_801AFAC8(void);
 void fn_801B06C8(void);
-void fn_801B8B84(void);
+void InitializeAlarmEvents(void);
 void fn_801CEC80(void);
 void fn_80181F30(void);
 void fn_801DE0A4(void);
@@ -114,7 +114,7 @@ void fn_801C1B9C(void);
 void fn_801D21C0(void);
 void fn_801D32D0(void);
 void fn_801D9284(void);
-void fn_801D4734(void);
+void InitializeRumbleSound(void);
 void fn_801CB2D8(void);
 void fn_801DEC18(void);
 void fn_801E0710(void);
@@ -147,7 +147,7 @@ void fn_801E222C(void);
 void fn_801E1520(void);
 void fn_801DEE3C(void);
 void fn_801CB518(void);
-void fn_801D483C(void);
+void ResetSoundSystem(void);
 void fn_801D9828(void);
 void fn_801D32DC(void);
 void fn_801D2210(void);
@@ -530,7 +530,7 @@ void fn_80177F40(void) {
             f32 sn = sin(6.2831855f * (0.25f * now));
             fn_80178DBC(k, 0.5f + 0.5f * sn);
         }
-        fn_801B8BF4();
+        ProcessAlarmEvents();
         if (!fn_801C5B60()) {
             fn_801B841C();
         }
@@ -539,7 +539,7 @@ void fn_80177F40(void) {
         fn_801EA1F0();
         if (!net) {
             if (!fn_801C5B60()) {
-                fn_80134A8C();
+                UpdateAICarStates();
             }
         } else {
             fn_80134B50();
@@ -958,7 +958,7 @@ void fn_80178DD4(s32 stream) {
     fn_801A4E28();
     fn_801AFAC8();
     fn_801B06C8();
-    fn_801B8B84();
+    InitializeAlarmEvents();
     fn_801CEC80();
     fn_80181F30();
     fn_801DE0A4();
@@ -971,7 +971,7 @@ void fn_80178DD4(s32 stream) {
     fn_801D21C0();
     fn_801D32D0();
     fn_801D9284();
-    fn_801D4734();
+    InitializeRumbleSound();
     fn_801CB2D8();
     fn_801DEC18();
     fn_80127464();
@@ -1061,7 +1061,7 @@ void fn_801791A8(void) {
     fn_801E1520();
     fn_801DEE3C();
     fn_801CB518();
-    fn_801D483C();
+    ResetSoundSystem();
     fn_801D9828();
     fn_801D32DC();
     fn_801D2210();

@@ -62,8 +62,8 @@ s32* fn_801297F4(void);  // button mapping
 struct BoundSet;
 
 extern "C" {
-BoundSet* fn_80139D4C(const char* name);
-void fn_80139E18(BoundSet* s);
+BoundSet* LoadBoundSet(const char* name);
+void DeleteBoundSet(BoundSet* s);
 int fn_80139EC4(BoundSet* s, f32 x, f32 y);
 int fn_802B04D4(const ValVec3* p);
 s32 fn_802CAC28(const char* name, int a);  // load texture
@@ -780,7 +780,7 @@ void CrushResults::Update(int score, int kills, int bonus) {
 // Loads the crush assets: forbidden zones, zone and radar textures, the pre-race sound.
 static inline void CrushSetup(CrushMaster* m) {
     const char* nogo = "crush_nogo.val";
-    lbl_8055E3A4 = fn_80139D4C(nogo);
+    lbl_8055E3A4 = LoadBoundSet(nogo);
     lbl_8055E3A8 = fn_802CAC28("white_zr.tex", 0);
     m->radarTex = fn_802CAC28("ovradar.tex", 0);
     if (lbl_8055E3A4) {
@@ -799,7 +799,7 @@ inline CrushMaster::~CrushMaster(void) {
         delete sPreRace;
     }
     if (lbl_8055E3A4) {
-        fn_80139E18(lbl_8055E3A4);
+        DeleteBoundSet(lbl_8055E3A4);
         lbl_8055E3A4 = 0;
     }
     gxForgetTexture(lbl_8055E3A8);

@@ -380,9 +380,9 @@ public:
 
 extern "C" {
 PcGameMode* fn_801B83A0(void);
-u32 fn_80134E90(void);
-u32 fn_80134EC8(u32);
-u32 fn_80135078(void);
+u32 CreateAIDriver(void);
+u32 GetArenaDriverByType(u32);
+u32 CreateParkDriver(void);
 
 // Builds the local player's car: driver, hybrid controller and the car itself.
 SpringCar* fn_8018FB18(void) {
@@ -396,11 +396,11 @@ SpringCar* fn_8018FB18(void) {
     }
     if (!ctl) {
         if (U32(prof, 0x4) & 0x100) {
-            ctl = fn_80134E90();
+            ctl = CreateAIDriver();
         } else if (U32(prof, 0x4) == 0x180201) {
-            ctl = fn_80134EC8(U32(prof, 0x4));
+            ctl = GetArenaDriverByType(U32(prof, 0x4));
         } else {
-            ctl = fn_80135078();
+            ctl = CreateParkDriver();
         }
     }
     drv = (u8*)new ("PlayerDriver") PlayerDriver;

@@ -16,7 +16,7 @@ char* strcpy(char* d, const char* s);
 double atof(const char* s);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
-void fn_8013B4E0(void* cars, void* race);
+void SetDroneSpeedSettings(void* cars, void* race);
 f32 fn_8013672C(void);
 void fn_80137884(s32 count);
 void fn_80139044(int* p);
@@ -130,12 +130,12 @@ AICarInfo::AICarInfo(s32 i) {
 }
 
 extern "C" {
-const char* fn_80134B9C(const char* key, const char* def);
+const char* GetConfigValue(const char* key, const char* def);
 f32 fn_80134B58(const char* key, f32 def);
-int fn_80134A44(int i);
+int EvaluateBuildQueryCase(int i);
 s32 fn_80134C24(int i);
-IDriver* fn_80134E90(void);
-IDriver* fn_80134FF8(void);
+IDriver* CreateAIDriver(void);
+IDriver* CreateNullDriver(void);
 IDriver* fn_801350C0(void);
 
 void fn_8013472C(void) {
@@ -154,13 +154,13 @@ static inline f32 DefaultGreenFlag(void) {
     return fn_8013672C() - offset;
 }
 
-void fn_8013477C(AIRace* race) {
+void InitializeRaceGrid(AIRace* race) {
     AIGrid* grid = &race->grid;
     int i;
     fn_8013472C();
     for (lbl_8055E0B0 = grid->count; lbl_8055E0B0 > 0 && grid->cars[lbl_8055E0B0 - 1].type == 'S'; lbl_8055E0B0--) {
     }
-    fn_8013B4E0(grid, race);
+    SetDroneSpeedSettings(grid, race);
     f32 g = fn_80134B58("greenflag_lon", -1.0f);
     lbl_8055E0A0 = g;
     if (g < 0.0f) {
@@ -228,7 +228,7 @@ void fn_801349C4(void) {
 // the existing shared stand-in type; kBuildDebug here supplies its observable value 1,
 // not evidence that this routine implements a debug feature.
 // Case definition order also controls the otherwise-extra final return instruction.
-int fn_80134A44(int i) {
+int EvaluateBuildQueryCase(int i) {
     switch (BuildQuery(kBuildDebug).kind) {
     case 2: return 1;
     case 0: return i >= 0 && ((i + lbl_8055E3C4) & 1);
@@ -242,7 +242,7 @@ int fn_80134A44(int i) {
 void fn_80134A88(void) {}
 #pragma force_active reset
 
-void fn_80134A8C(void) {
+void UpdateAICarStates(void) {
     AICarInfo* p;
     int i;
     for (i = 0; i < lbl_8055E0B0; i++) {
@@ -257,7 +257,7 @@ void fn_80134A8C(void) {
             fn_8013A204(p->idx);
         }
     }
-    if (fn_80134A44(-1)) {
+    if (EvaluateBuildQueryCase(-1)) {
         lbl_8055E0D4->Process();
     }
     fn_8013BC54();
@@ -267,14 +267,14 @@ void fn_80134A8C(void) {
 void fn_80134B50(void) { lbl_8055E0D4->UpdateAll(); }
 
 f32 fn_80134B58(const char* key, f32 def) {
-    const char* s = fn_80134B9C(key, 0);
+    const char* s = GetConfigValue(key, 0);
     if (s) {
         def = atof(s);
     }
     return def;
 }
 
-const char* fn_80134B9C(const char* key, const char* def) {
+const char* GetConfigValue(const char* key, const char* def) {
     if (lbl_8055E0AC && lbl_8055E0AC->Has(key)) {
         return lbl_8055E0AC->GetValue(key);
     }
@@ -348,18 +348,18 @@ f32 fn_80134E34(void*, f32 d) {
     return fn_80134D20() - t * speed;
 }
 
-IDriver* fn_80134E90(void) { return new ("AIDriver") AIDriver; }
+IDriver* CreateAIDriver(void) { return new ("AIDriver") AIDriver; }
 
-IDriver* fn_80134EC8(u32 type) {
+IDriver* GetArenaDriverByType(u32 type) {
     IDriver* d = fn_801B83A0()->vfEC();
     if (!d) {
         switch (type) {
         case 0x180201:
-            d = fn_80134E90();
+            d = CreateAIDriver();
             break;
         default:
             fn_802E30C8("WARNING: No arena driver for type 0x%x", type);
-            d = fn_80134FF8();
+            d = CreateNullDriver();
             break;
         }
     }
@@ -378,23 +378,23 @@ void* fn_80134F48(void) {
     if (park) {
         d = fn_801350C0();
     } else if (desc->type & 0x100) {
-        d = fn_80134E90();
+        d = CreateAIDriver();
     } else if (desc->type & 0x200) {
-        d = fn_80134EC8(desc->type);
+        d = GetArenaDriverByType(desc->type);
     } else {
-        d = fn_80134FF8();
+        d = CreateNullDriver();
     }
     return new ("LocalCar (ai)") SpringCar((Controller*)d);
 }
 
-IDriver* fn_80134FF8(void) { return new ("NullDriver") NullDriver; }
+IDriver* CreateNullDriver(void) { return new ("NullDriver") NullDriver; }
 
-IDriver* fn_80135078(void) { return new ("ParkDriver") ParkDriver(false); }
+IDriver* CreateParkDriver(void) { return new ("ParkDriver") ParkDriver(false); }
 
 IDriver* fn_801350C0(void) { return new ("ParkDriver") ParkDriver(true); }
 
 // Stripped by the linker.
-const char* fn_801350C0_rtt_pack_lon(void) { return fn_80134B9C("rtt_pack_lon", 0); }
+const char* fn_801350C0_rtt_pack_lon(void) { return GetConfigValue("rtt_pack_lon", 0); }
 
 s32 fn_80135108(void) { return lbl_8055E0B0; }
 

@@ -168,9 +168,9 @@ BoneSet* fn_801E592C(s32 model) {
 
 void fn_801E598C(BoneSet* set) {}
 
-s32 fn_801E5990(BoneSet* set) { return set->numBones; }
+s32 GetBoneCount(BoneSet* set) { return set->numBones; }
 
-void fn_801E5998(const BoneSet* set, Bone* out, s32* n) {
+void CopyBoneSet(const BoneSet* set, Bone* out, s32* n) {
     int nb = set->numBones;
     for (int i = 0; i < nb; i++) {
         out[i] = set->bones[i];
@@ -180,7 +180,7 @@ void fn_801E5998(const BoneSet* set, Bone* out, s32* n) {
 
 // PROVISIONAL: scratch storage/address ownership and names. The loop and all
 // emitted bytes match retail; original author declarations remain unknown.
-s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
+s32 ComputeBoneTransforms(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     BFrame world[32];
     BFrame skin[32];
     BMtx33* rotation;
@@ -250,7 +250,7 @@ s32 fn_801E5E24(const BoneSet* set, const BQuat* pose, int n, BFrame* root) {
     return fn_802C7A38(0, skin, nd);
 }
 
-s32 fn_801E65BC(const BoneSet* set, const BFrame* world, int n, BFrame* root) {
+s32 UpdateBoneTransforms(const BoneSet* set, const BFrame* world, int n, BFrame* root) {
     BFrame skin[32];
     if (root) {
         *root = world[0];

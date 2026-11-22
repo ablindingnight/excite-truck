@@ -44,7 +44,7 @@ u32 fn_8012F968(const char* s) {
     return v;
 }
 
-int fn_8012F9E8(u8* out, s32 size, const char* in) {
+int DecodeBase64String(u8* out, s32 size, const char* in) {
     s32 len = strlen(in);
     int ok = 1;
     s32 i;

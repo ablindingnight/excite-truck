@@ -75,8 +75,8 @@ void fn_8012EE80(void* b);
 int fn_8012EFB0(void* b, void* dst, u32 n);
 void* fn_801E592C(s32 model);
 void fn_801E598C(void* skel);
-s32 fn_801E5990(void* skel);
-s32 fn_801E5E24(void* skel, const AQuat* pose, s32 n, ValMatrix* out);
+s32 GetBoneCount(void* skel);
+s32 ComputeBoneTransforms(void* skel, const AQuat* pose, s32 n, ValMatrix* out);
 void fn_801BFD34(ValVec3* out, const ValVec3* v, const ValMatrix* m);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void mrModelUnload(s32 model);
@@ -127,7 +127,7 @@ void fn_801E69EC(void) {
     }
 }
 
-AnimInst* fn_801E6A3C(const char* name, int streaming, int flags) {
+AnimInst* CreateAnimationInstance(const char* name, int streaming, int flags) {
     AnimInst* a;
     s32 model = fn_802C6FC0(name, flags, 0);
     void* skel = fn_801E592C(model);
@@ -136,7 +136,7 @@ AnimInst* fn_801E6A3C(const char* name, int streaming, int flags) {
     }
     a = new ("mranm") AnimInst;
     memset(a, 0, sizeof(AnimInst));
-    a->numBones = fn_801E5990(skel);
+    a->numBones = GetBoneCount(skel);
     a->skel = skel;
     a->model = model;
     a->time = 0.0f;
@@ -170,7 +170,7 @@ AnimInst* fn_801E6A3C(const char* name, int streaming, int flags) {
     return a;
 }
 
-void fn_801E6B98(AnimInst* a) {
+void FreeAnimationInstance(AnimInst* a) {
     if (a->buf) {
         release_buffer(a->buf);
     }
@@ -179,7 +179,7 @@ void fn_801E6B98(AnimInst* a) {
     delete a;
 }
 
-AnimRes* fn_801E6BEC(const char* name) {
+AnimRes* LoadAnimationResource(const char* name) {
     u32 size = 0;
     u8 first = 0;
     u8 swapped = 0;
@@ -202,9 +202,9 @@ AnimRes* fn_801E6BEC(const char* name) {
 
 void fn_801E6CC4(AnimRes* r) { fn_8012C4D8(r); }
 
-void fn_801E6CC8(AnimInst* a, u8 loop) { a->loop = loop; }
+void SetAnimationLoopMode(AnimInst* a, u8 loop) { a->loop = loop; }
 
-void fn_801E6CD0(AnimInst* a, AnimRes* r, f32 t) {
+void InitializeAnimationInstance(AnimInst* a, AnimRes* r, f32 t) {
     a->res = r;
     a->frame = 0;
     a->lastFrame = -1;
@@ -245,7 +245,7 @@ void fn_801E6CD0(AnimInst* a, AnimRes* r, f32 t) {
 
 static inline f32 Dequant(u32 v, f32 lo, f32 range) { return ((f32)v - lo) / range; }
 
-void fn_801E6E9C(AnimInst* a, f32 dt) {
+void LoadAnimationFrameData(AnimInst* a, f32 dt) {
     AnimRes* r = a->res;
     f32 time = a->time;
     if (r) {
@@ -323,7 +323,7 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
         }
         a->time = time + dt;
         if (a->loop && a->frame >= r->numFrames && a->time >= r->duration) {
-            fn_801E6CD0(a, r, 0.0f);
+            InitializeAnimationInstance(a, r, 0.0f);
         }
     }
     for (int i = 0; i < a->numBones + 1; i++) {
@@ -361,7 +361,7 @@ void fn_801E6E9C(AnimInst* a, f32 dt) {
 void fn_801E75C8(AnimInst* a, const ValMatrix* m) {
     ValMatrix mat;
     ValMatrix out;
-    s32 r = fn_801E5E24(a->skel, a->pose, a->numBones, &mat);
+    s32 r = ComputeBoneTransforms(a->skel, a->pose, a->numBones, &mat);
     fn_801BFD34(&out.origin, &mat.origin, m);
     Mat3Mul((Mat3*)&out, (const Mat3*)&mat, (const Mat3*)m);
     fn_802C70AC(a->model, &out, r, -1);

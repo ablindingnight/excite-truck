@@ -68,7 +68,7 @@ public:
 extern "C" void fn_80221E7C(void*);
 extern "C" void* fn_80215270(int, int);
 extern "C" void fn_8022E4BC(s32);
-extern "C" void fn_8022E960(s32);
+extern "C" void FreeLytFile(s32);
 s32 fn_80211678(u8* arg0);
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int strcasecmp(const char *, const char *);
@@ -511,7 +511,7 @@ extern "C" float fn_80212248(s32 arg0) {
 }
 
 extern "C" void fn_8022E4BC(s32);
-extern "C" void fn_8022E960(s32);
+extern "C" void FreeLytFile(s32);
 extern "C" int sprintf(char *, const char *, ...);
 extern "C" int strcasecmp(const char *, const char *);
 extern "C" void *fn_8021227C(void *entry, const char *name, s32 arg2) {
@@ -543,7 +543,7 @@ extern "C" void fn_80212340(const void *arg0) {
         if (fn_80211678(name) == 0) {
             fn_8022E4BC(p[3]);
         } else {
-            fn_8022E960(p[3]);
+            FreeLytFile(p[3]);
         }
         p[3] = 0;
     }
@@ -1265,8 +1265,8 @@ struct UIMapping {
 };
 #include "game/window.h"
 
-extern "C" UILayout* fn_8022E0EC(const char*);
-extern "C" UILayout* fn_8022E4C0(const UIMapping*);
+extern "C" UILayout* LoadLayoutFile(const char*);
+extern "C" UILayout* BuildMenuLayout(const UIMapping*);
 extern "C" void fn_80276D3C(const char*, int);
 extern "C" int fn_802C51C0(void*);
 extern "C" int fn_802C5220(void*);
@@ -1283,9 +1283,9 @@ extern "C" void fn_802141A0(Window** out, const UIMapping* map, int x, int y, in
     UILayout* layout;
     if (map->name) {
         if (fn_80211678((u8*)map->name)) {
-            layout = fn_8022E4C0(map);
+            layout = BuildMenuLayout(map);
         } else {
-            layout = fn_8022E0EC(map->name);
+            layout = LoadLayoutFile(map->name);
         }
         map->layout = layout;
         lbl_8055EF44 = map->name;
@@ -1328,7 +1328,7 @@ extern "C" void fn_802141A0(Window** out, const UIMapping* map, int x, int y, in
     for (d = layout->descs; d->type; d++) {
     }
     if (layout->hasBack) {
-        map->back = fn_8022E0EC("back.lyt");
+        map->back = LoadLayoutFile("back.lyt");
         for (d = map->back->descs; d->type; d++) {
         }
     }

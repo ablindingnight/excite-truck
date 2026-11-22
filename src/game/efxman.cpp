@@ -275,7 +275,7 @@ void fn_802A7BE8(void);
 void fn_802A7C24(void);
 void fn_802A7C64(void);
 void fn_802A7C68(void);
-void fn_802A81F0(void);
+void LoadBirdFlocks(void);
 void fn_802A85C8(void);
 void fn_802A86A4(void);
 void fn_802A8978(void);
@@ -345,7 +345,7 @@ void fn_80287800(void* a) {
     fn_8028777C(a);
     fn_80288218(a);
     fn_802880F4();
-    fn_802A81F0();
+    LoadBirdFlocks();
     fn_802888D8();
     fn_802A1590();
     fn_8028A664();

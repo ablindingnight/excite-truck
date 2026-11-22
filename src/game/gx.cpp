@@ -61,8 +61,8 @@ int fn_802E2C20(void);                   // milliseconds
 void fn_80127468(void);
 void fn_801282EC(int align);
 void fn_801282F4(void);
-void fn_80127C90(void (*cb)(void), const char* name);
-void fn_80127D58(void (*cb)(void));
+void RegisterBackgroundTask(void (*cb)(void), const char* name);
+void RemoveBackgroundFunction(void (*cb)(void));
 void fn_802E2E0C(int (*cb)(int), const char* name);
 int fn_802E9A1C(void);
 void fn_802D9C4C(void);
@@ -76,7 +76,7 @@ void fn_802D6C68(void);
 void fn_802D6C78(void);
 void fn_802D68C4(void* verts, int unused, const u16* idx, int n);
 void fn_802DACD4(void);
-void fn_802DA2F4(void);
+void InitializeBoneManager(void);
 void fn_802DA4C4(void);
 void fn_802DA52C(void);
 void fn_802DAE18(void);
@@ -706,7 +706,7 @@ void fn_802CF600(void) {
     fn_802D9C18();
     VISetPreRetraceCallback((VIRetraceCallback)fn_802CF10C);
     fn_80127468();
-    fn_802DA2F4();
+    InitializeBoneManager();
     fn_802CFF5C(0x17);
     fn_802CFFA4(lbl_8055FD0A);
     lbl_8055FD20 = -1;
@@ -720,7 +720,7 @@ void fn_802CF600(void) {
     fn_802DD4FC();
     lbl_8055FD40 = -1;
     fn_80127468();
-    fn_80127C90(fn_802D9A50, "drIdle");
+    RegisterBackgroundTask(fn_802D9A50, "drIdle");
     fn_802DB168();
     lbl_8055FD48 = 0;
     VISetBlack((BOOL)0);
@@ -840,7 +840,7 @@ void fn_802CF850(void) {
 }
 
 void fn_802CFBA8(void) {
-    fn_80127D58(fn_802D9A50);
+    RemoveBackgroundFunction(fn_802D9A50);
     fn_802D9C4C();
     VISetPreRetraceCallback((VIRetraceCallback)0);
     fn_802E30C8("gx: max dynamic data used = %d", lbl_8055FD98);

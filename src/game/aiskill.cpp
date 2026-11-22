@@ -70,7 +70,7 @@ SkillTable lbl_8042F858;
 
 extern "C" {
 
-void fn_8013A660(ValueNode* t, const char* key, const char* table) {
+void CheckTableElementExists(ValueNode* t, const char* key, const char* table) {
     if (!t->Has(key)) {
         fn_802E317C("AI: Warning: table \"%s\" has no element \"%s\"", table, key);
     }
@@ -84,20 +84,20 @@ f32 fn_8013A660_ghost(void* ghost) {
     return 60.0f;
 }
 
-int fn_8013A6C4(const void* a, const void* b) { return ((SkillSlot*)a)->score - ((SkillSlot*)b)->score; }
+int CompareSkillSlots(const void* a, const void* b) { return ((SkillSlot*)a)->score - ((SkillSlot*)b)->score; }
 
-const char* fn_8013A6D4(int i) {
+const char* GetDifficultyName(int i) {
     const char* names[3] = {"easy_", "medium_", "hard_"};
     return names[i];
 }
 
 char* fn_8013A708(char* buf, int lvl, const char* key) {
-    strcpy(buf, fn_8013A6D4(lvl));
+    strcpy(buf, GetDifficultyName(lvl));
     strcat(buf, key);
     return buf;
 }
 
-int fn_8013A760(ValueNode* t, const char* key) {
+int CheckHasKey(ValueNode* t, const char* key) {
     char buf[32];
     int i;
     for (i = 0; i < 3; i++) {
@@ -112,11 +112,11 @@ void fn_8013A7E8(ValueNode* t, const char* key, const char* table) {
     char buf[32];
     int i;
     for (i = 0; i < 3; i++) {
-        fn_8013A660(t, fn_8013A708(buf, i, key), table);
+        CheckTableElementExists(t, fn_8013A708(buf, i, key), table);
     }
 }
 
-int fn_8013A860(V2* out, ValueNode* t, const char* table) {
+int ReadSpeedFactorRange(V2* out, ValueNode* t, const char* table) {
     int r = t->Has("speed_factor");
     if (r) {
         out->x = t->GetFloat("skill_range");
@@ -125,45 +125,45 @@ int fn_8013A860(V2* out, ValueNode* t, const char* table) {
     return r;
 }
 
-f32 fn_8013A90C(ValueNode* t, const char* key, int lvl, f32 frac) {
+f32 InterpolateFloatValue(ValueNode* t, const char* key, int lvl, f32 frac) {
     char lo[32];
     char hi[32];
     return Lerp(t->GetFloat(fn_8013A708(lo, lvl, key)), t->GetFloat(fn_8013A708(hi, lvl + 1, key)), frac);
 }
 
-void fn_8013B6C0(s32* lvl, f32* frac, s32 strength);
+void ParseAIStrength(s32* lvl, f32* frac, s32 strength);
 
-int fn_8013A9C0(V2* out, ValueNode* t, RaceOpts* s, const char* table) {
+int GetSkillRangeValues(V2* out, ValueNode* t, RaceOpts* s, const char* table) {
     int r = t->Has("easy_skill_range");
     if (r) {
         s32 lvl;
         f32 frac;
-        fn_8013B6C0(&lvl, &frac, s->level);
-        out->x = fn_8013A90C(t, "skill_range", lvl, frac);
-        out->y = fn_8013A90C(t, "speed_factor", lvl, frac);
+        ParseAIStrength(&lvl, &frac, s->level);
+        out->x = InterpolateFloatValue(t, "skill_range", lvl, frac);
+        out->y = InterpolateFloatValue(t, "speed_factor", lvl, frac);
     }
     return r;
 }
 
 f32 fn_8013AA68(ValueNode* t, const char* key, const char* table, RaceOpts* s) {
     f32 v = 0.0f;
-    if (fn_8013A760(t, key)) {
+    if (CheckHasKey(t, key)) {
         s32 lvl;
         f32 frac;
-        fn_8013B6C0(&lvl, &frac, s->level);
+        ParseAIStrength(&lvl, &frac, s->level);
         fn_8013A7E8(t, key, table);
-        v = fn_8013A90C(t, key, lvl, frac);
+        v = InterpolateFloatValue(t, key, lvl, frac);
     }
     return v;
 }
 
-void fn_8013AB08(V2* out, RaceOpts* s) {
+void CalculateSkillTableValues(V2* out, RaceOpts* s) {
     EventInfo* ev = GetEvent(s->event);
     TrackInfo* trk = GetTrack(ev->track);
-    if (!fn_8013A860(out, ev->node, "Contest Table") &&
-        !fn_8013A860(out, trk->node, "Eve Table") &&
-        !fn_8013A9C0(out, ev->node, s, "Contest Table") &&
-        !fn_8013A9C0(out, trk->node, s, "Eve Table")) {
+    if (!ReadSpeedFactorRange(out, ev->node, "Contest Table") &&
+        !ReadSpeedFactorRange(out, trk->node, "Eve Table") &&
+        !GetSkillRangeValues(out, ev->node, s, "Contest Table") &&
+        !GetSkillRangeValues(out, trk->node, s, "Eve Table")) {
         out->x = 0.05f;
         out->y = 1.5f;
         fn_802E30C8("skill: !! !! no skill for this contest !! !!");
@@ -174,13 +174,13 @@ void fn_8013AB08(V2* out, RaceOpts* s) {
     }
 }
 
-f32 fn_8013AC2C(const RaceOpts* s) {
+f32 GetRaceTrackSpeedFactor(const RaceOpts* s) {
     EventInfo* ev = GetEvent(s->event);
     TrackInfo* trk = GetTrack(ev->track);
     return trk->node->GetFloat("rtt_speed_factor", 1.0f);
 }
 
-void fn_8013AC78(V2* ovr, const s32* cars) {
+void InitializeSkillOverrides(V2* ovr, const s32* cars) {
     DriverBonus bonus[50];
     SkillSlot slots[8];
     V2 sk;
@@ -192,13 +192,13 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
     f32 span;
     fn_801E879C();
     if (!ovr) {
-        fn_8013AB08(&sk, s);
+        CalculateSkillTableValues(&sk, s);
     } else {
         fn_802E30C8("skill: override %.2f/%.2f", ovr->y, ovr->x);
         sk.x = ovr->x;
         sk.y = ovr->y;
     }
-    lbl_8042F858.rtt = fn_8013AC2C(s);
+    lbl_8042F858.rtt = GetRaceTrackSpeedFactor(s);
     lbl_8042F858.base = sk.y;
     num = GetNumDrivers();
     for (nd = 0; nd < num; nd++) {
@@ -218,7 +218,7 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
             }
         }
     }
-    qsort(slots, n, sizeof(SkillSlot), fn_8013A6C4);
+    qsort(slots, n, sizeof(SkillSlot), CompareSkillSlots);
     span = 1.0f;
     if ((f32)(n - 1) > span) {
         span = (f32)(n - 1);
@@ -230,7 +230,7 @@ void fn_8013AC78(V2* ovr, const s32* cars) {
     for (i = 0; i < n; i++) {
         slots[i].score += fn_80129D90(3, -2, 2);
     }
-    qsort(slots, n, sizeof(SkillSlot), fn_8013A6C4);
+    qsort(slots, n, sizeof(SkillSlot), CompareSkillSlots);
     for (i = 0; i < n; i++) {
         f32 t = (f32)i / span;
         lbl_8042F858.entries[slots[i].idx].race = lbl_8042F858.base - t * sk.x;
@@ -280,13 +280,13 @@ void fn_8013B490_cmd(const char* arg) {
 
 #include "game/aigrid.h"
 
-void fn_8013B4E0(AIGrid* g, void*) {
+void SetDroneSpeedSettings(AIGrid* g, void*) {
     s32 cars[8];
     int i;
     for (i = 0; i < g->count; i++) {
         cars[i] = g->cars[i].driver;
     }
-    fn_8013AC78(0, cars);
+    InitializeSkillOverrides(0, cars);
     lbl_80559C98 = 1.0f;
     fn_802049DC("Drone Speed", &lbl_80559C98, 0.2f, 1.4f, 0.05f);
     lbl_8055E160 = 1;
@@ -295,7 +295,7 @@ void fn_8013B4E0(AIGrid* g, void*) {
 
 void fn_8013B56C(void) { lbl_8055E160 = 0; }
 
-SkillEntry* fn_8013B578(int i) { return &lbl_8042F858.entries[i]; }
+SkillEntry* GetSkillEntry(int i) { return &lbl_8042F858.entries[i]; }
 
 f32 fn_8013B590(int car) {
     ResExt* e = fn_80138B1C(*(void**)((u8*)fn_801B2ED0(car)->Line() + 0x2C));
@@ -306,7 +306,7 @@ f32 fn_8013B590(int car) {
 }
 
 f32 fn_8013B5DC(int car, int seed) {
-    SkillEntry* e = fn_8013B578(car);
+    SkillEntry* e = GetSkillEntry(car);
     f32 v = fn_8013B590(car) / e->race;
     return v + v * fn_80129DC4(seed, -0.005f, 0.005f);
 }
@@ -319,7 +319,7 @@ f32 fn_8013B650(int car) {
 
 void fn_8013B6A4(int car, f32 v) { lbl_8042F858.entries[car].start = lbl_8042F858.entries[car].race = v; }
 
-void fn_8013B6C0(s32* lvl, f32* frac, s32 strength) {
+void ParseAIStrength(s32* lvl, f32* frac, s32 strength) {
     static const StrengthDef defs[5] = {{0, 0.0f}, {0, 0.5f}, {0, 1.0f}, {1, 0.5f}, {1, 1.0f}};
     if (strength <= 4) {
         *lvl = defs[strength].level;
@@ -336,7 +336,7 @@ f32 fn_8013B744(int car) {
         return 1.0f - 0.01f * car;
     }
     {
-        f32 r = fn_8013B578(car)->race;
+        f32 r = GetSkillEntry(car)->race;
         return r * lbl_80559C98;
     }
 }

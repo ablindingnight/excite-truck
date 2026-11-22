@@ -13,7 +13,7 @@ struct RaceCarRec;
 class IDriver;
 struct Damage;
 struct ZoneResults;
-extern "C" int fn_801B8514(void);
+extern "C" int GetFrameCounter(void);
 
 class GameUI {
 public:
@@ -132,7 +132,7 @@ public:
     virtual int vfD0(void) { return 0; }
     virtual int vfD4(int car) {
         int r = 0;
-        if (fn_801B8514() && !vf20(car)) {
+        if (GetFrameCounter() && !vf20(car)) {
             r = 1;
         }
         return r;

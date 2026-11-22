@@ -36,7 +36,7 @@ BoatList lbl_804C109C;
 
 extern "C" {
 
-void fn_802C2298(void) {
+void LoadBoatData(void) {
     ValueTable* t;
     lbl_804C109C.count = 0;
     t = fn_80131810("_boat.val");
@@ -68,7 +68,7 @@ void fn_802C2410(void) {
 }
 
 // Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
-void fn_802C2488(void) {
+void UpdateBoatTransforms(void) {
     int i;
     i = 0;
     if (i < lbl_804C109C.count) {

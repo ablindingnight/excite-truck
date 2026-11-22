@@ -106,7 +106,7 @@ void fn_80130FCC(char* buf, int size, s32 value);
 void fn_80130980(char* buf, int size, int digits, f32 time);
 const char* fn_80205268(const char* fmt, s32 difficulty, s32 event);
 int fn_8027DED0(void);
-f32 fn_8014E7DC(s32 event, s32 difficulty);
+f32 CalculateTimeLimit(s32 event, s32 difficulty);
 int fn_80129D18(int lo, int hi);
 }
 const char* GetEventDisplayName(int event);
@@ -672,7 +672,7 @@ void LoadingBegin(EventInfo* __restrict info, s32 difficulty) {
             lbl_8035BAD8.stars = grades.GetThreshold(grade);
         }
     }
-    lbl_8035BAD8.time_limit = fn_8014E7DC(lbl_8055D668, difficulty);
+    lbl_8035BAD8.time_limit = CalculateTimeLimit(lbl_8055D668, difficulty);
     for (count = 0;; count++) {
         GetTipKey(count, type, s_key, sizeof(s_key));
         if (!fn_80131264(s_key)) {

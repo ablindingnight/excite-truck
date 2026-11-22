@@ -60,7 +60,7 @@ void fn_801FFB70(void) {}
 }  // extern "C"
 
 // DMtx: common.h's PlainValMatrix (DVec3: valvec3.h's ValVec3).
-// One posed skeleton bone (fn_801E5998 output, 0x38 bytes).
+// One posed skeleton bone (CopyBoneSet output, 0x38 bytes).
 struct DBone {
     PlainValMatrix m;        // offset 0x0
     u8 pad30[0x8];
@@ -117,7 +117,7 @@ u8* fn_801E3004(u8* skel, const char* name, int a);
 u8* fn_801E31D8(u8* node, const char* name, int a);
 s32 fn_802C6FC0(const char* name, int a, int b);
 u8* fn_801E592C(s32 model);
-void fn_801E5998(u8* skel, DBone* out, int* n);
+void CopyBoneSet(u8* skel, DBone* out, int* n);
 void fn_801E3488(ValVec3* out, u8* helper);
 void fn_801E33E4(PlainValMatrix* out, u8* helper);
 void fn_802E317C(const char* fmt, ...);
@@ -189,7 +189,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     rfoot.z = rh.z;
     DBone bones[32];
     int n = 32;
-    fn_801E5998(d->skel, bones, &n);
+    CopyBoneSet(d->skel, bones, &n);
     u8* butt;
     if (!fn_801E2CCC(skel, "butt", &butt)) {
         fn_802E317C("drivmod: can't get butt helper from %s", name);
@@ -318,7 +318,7 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     chest.z = zv / 2.0f + rs.z / 2.0f;
     DBone bones[32];
     int n = 32;
-    fn_801E5998(d->skel, bones, &n);
+    CopyBoneSet(d->skel, bones, &n);
     d->butt.x = rs.x - bones[4].m.origin.x;
     d->butt.y = rs.y - bones[4].m.origin.y;
     d->butt.z = rs.z - bones[4].m.origin.z;
@@ -577,7 +577,7 @@ void fn_801E353C(u8* helper, f32 angle);
 void fn_801E34E4(u8* helper, PlainValMatrix* m);
 void fn_801E3284(PlainValMatrix* out, u8* helper, const PlainValMatrix* frame);
 void fn_801C2694(u8* sys, BVec* pts, int* n, const BVec* g, const BVec* up, const BVec* a, const BVec* b);
-s32 fn_801E65BC(u8* skel, BonePose* bones, int n, int x);
+s32 UpdateBoneTransforms(u8* skel, BonePose* bones, int n, int x);
 void fn_802C70AC(s32 model, const PlainValMatrix* m, s32 a, int b);
 
 // Name unproven.
@@ -703,7 +703,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     g.z = 0.0f;
     fn_801C2694(d->sys, pts, &cnt, &g, &up, &b, &a);
     n = 32;
-    fn_801E5998(d->skel, bones, &n);
+    CopyBoneSet(d->skel, bones, &n);
     PlainValMatrix rm;
     *(BRot*)&rm = rot;
     rm.origin.x = 0.0f;
@@ -746,7 +746,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         pose[i].pos.y -= root.y;
         pose[i].pos.z -= root.z;
     }
-    s32 r = fn_801E65BC(d->skel, pose, n, 0);
+    s32 r = UpdateBoneTransforms(d->skel, pose, n, 0);
     m2 = m;
     MulVec(&off2, &root, &m2);
     m2.origin.x = m2.origin.x + off2.x;

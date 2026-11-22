@@ -35,7 +35,7 @@ static inline void MadV3(void* o_, const void* a_, const void* b_, f32 s) {
     o[1] = a[1] + b[1] * s;
     o[2] = a[2] + b[2] * s;
 }
-void fn_802CE86C(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
+void DrawBillboardQuad(u32 color, u32 flags, f32 size, f32 x, f32 y, f32 z) {
     ValVec3 pos;
     PlainValMatrix* right;
     PlainValMatrix* up;

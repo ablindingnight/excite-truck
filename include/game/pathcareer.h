@@ -15,7 +15,7 @@ void fn_802840F8(void);
 int fn_802E4A10(void);
 void fn_80137C84(int a, int b);
 void fn_80284580(s32 a, s32 b, void* list, s32* x);
-void fn_8025A204(void);
+void TallyRunAchievements(void);
 void fn_802E7128(void);
 }
 

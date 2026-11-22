@@ -40,8 +40,8 @@ extern "C++" f32 Floor(f32 x);  // weak (C++ linkage; this part of the file sits
 // Vec2's empty constructor, which retail calls out of line here, by its mangled name: declaring it out of line in
 // the class would add calls at every other default-constructed Vec2.
 void __ct__4Vec2Fv(class Vec2* v);
-void fn_80160BA0(struct V2* r, const struct V2* a, f32 s);
-void fn_80160B18(struct V2* v);
+void ScaleVector2f(struct V2* r, const struct V2* a, f32 s);
+void NormalizeVector(struct V2* v);
 void fn_80144D64(Vec3* d, const Vec3* s);
 const Vec3* fn_802C9A40(void);
 f32 fn_801DCF48(Vec3* n, f32 x, f32 z);  // ground height
@@ -347,13 +347,13 @@ inline void FillA(Shadow* s, ValueNode* node, const ValMatrix* m) {
     Vec2 side;
     __ct__4Vec2Fv(&side);
     along.SetXZ(*(const Vec3*)&m->basis[2]);
-    fn_80160B18(&along);
+    NormalizeVector(&along);
     side.SetXZ(*(const Vec3*)&m->basis[0]);
-    fn_80160B18(&side);
+    NormalizeVector(&side);
     org.SetXZ(*(const Vec3*)&m->origin);
     Vec2 size = PtV2(node->GetPoint("size"));
-    fn_80160BA0(&along, &along, size.y);
-    fn_80160BA0(&side, &side, size.y);
+    ScaleVector2f(&along, &along, size.y);
+    ScaleVector2f(&side, &side, size.y);
     f32 k = -1.0f;
     f32 rot = fn_802BAD90(k * node->GetFloat("rot", 0.0f));
     fn_802BAD0C(&along, rot);
@@ -373,15 +373,15 @@ inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
     __ct__4Vec2Fv(&side);
     Vec2 size;
     __ct__4Vec2Fv(&size);
-    fn_80160BA0(&size, &PtV2(node->GetPoint("size")), scale);
+    ScaleVector2f(&size, &PtV2(node->GetPoint("size")), scale);
     Vec3 sun;
     fn_80144D64(&sun, fn_802C9A40());
     Vec2 dir;
     __ct__4Vec2Fv(&dir);
     dir.SetXZ(sun);
-    fn_80160B18(&dir);
-    fn_80160BA0(&along, &dir, size.y);
-    fn_80160BA0(&side, &dir, size.x);
+    NormalizeVector(&dir);
+    ScaleVector2f(&along, &dir, size.y);
+    ScaleVector2f(&side, &dir, size.x);
     fn_802BAA50(&side);
     AddScaled(&org, pos, -0.5f, &side);
     Vec2 at;
@@ -394,7 +394,7 @@ inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
         __ct__4Vec2Fv(&n2);
         n2.SetXZ(nrm);
         f32 k = Remap(-0.6f, -0.1f, 0.4f, 1.0f, Dot(&n2, &dir));
-        fn_80160BA0(&along, &along, k);
+        ScaleVector2f(&along, &along, k);
     }
     fn_802BA848(s, &side, &along, &org);
     s->type = 1;

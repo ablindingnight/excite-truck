@@ -177,7 +177,7 @@ int fn_801769B8(void);
 u32 fn_801769A8(void);
 f32 fn_80134B58(void* tune, f32 def);
 void fn_8013B6A4(s32 car, f32 v);
-s32 fn_8013B578(s32 car);
+s32 GetSkillEntry(s32 car);
 int fn_801667F0(void);
 void fn_801B30D0(s32 car);
 int fn_801B8570(s32 car);
@@ -761,7 +761,7 @@ void AIDriver::vf30(void) {
     if (x) {
         fn_8013B6A4(CARID(d), VI(x)->v28("speed_factor"));
     }
-    S32(d, 0x29C) = fn_8013B578(CARID(d));
+    S32(d, 0x29C) = GetSkillEntry(CARID(d));
     if (fn_801667F0()) {
         fn_8013B6A4(CARID(d), 1.0f);
     }
@@ -1886,7 +1886,7 @@ struct CarList {
 
 extern "C" {
 int fn_801796B4(void);
-int fn_80134A44(int car);
+int EvaluateBuildQueryCase(int car);
 
 // Updates every active AI driver: paused/scripted ones only get the base update and path step, the rest
 // run the full pipeline; then each listed driver's v48.
@@ -1902,7 +1902,7 @@ void fn_8019684C(void) {
     paused = fn_801796B4();
     for (i = 0; i < 8; i++) {
         d = lbl_804349C0[i];
-        if (d && fn_80134A44(i) && U8(d, 0x2A4)) {
+        if (d && EvaluateBuildQueryCase(i) && U8(d, 0x2A4)) {
             if (paused || U8(d, 0x2A5)) {
                 hold.Add(d);
             } else {

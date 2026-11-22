@@ -195,7 +195,7 @@ inline Flock::Flock(ValueNode* n) {
     birdTurn = n->GetFloat("bird_turn", 180.0f);
 }
 
-void fn_802A81F0(void) {
+void LoadBirdFlocks(void) {
     int i;
     lbl_804BD6C4.n = 0;
     ValueTable* t = fn_80131810("birds.val");

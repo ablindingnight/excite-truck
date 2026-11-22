@@ -20,7 +20,7 @@ s32 lbl_8055E764;
 
 extern "C" {
 
-void fn_801B8B84(void) {
+void InitializeAlarmEvents(void) {
     lbl_8055E760 = new ("alarm_event") AlarmEvent[64];
     lbl_8055E764 = 0;
 }
@@ -32,7 +32,7 @@ void fn_801B8BBC(void) {
 
 void fn_801B8BE8(void) { lbl_8055E764 = 0; }
 
-void fn_801B8BF4(void) {
+void ProcessAlarmEvents(void) {
     s32 now = lbl_8055E3C4;
     while (lbl_8055E764 > 0) {
         AlarmEvent* e = lbl_8055E760;

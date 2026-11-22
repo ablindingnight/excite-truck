@@ -629,7 +629,7 @@ struct Wrap {
 };
 
 
-extern "C" int fn_801B8514(void);  // amaster.cpp: nonzero while the race is running
+extern "C" int GetFrameCounter(void);  // amaster.cpp: nonzero while the race is running
 
 extern "C" Gate* fn_8013D148(ZoneLevel* l, f32 x);
 extern "C" u32 fn_8013D18C(u32 i);

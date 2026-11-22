@@ -190,7 +190,7 @@ int fn_8015ED90(ValueNode* list) {
     return count;
 }
 
-void fn_8015EE14(ValueNode* list, IdealFollower* trk) {
+void SpawnObstaclesFromList(ValueNode* list, IdealFollower* trk) {
     if (list) {
         ValueNode* n;
         for (int i = 0; (n = list->GetChildAt(i)) != 0; i++) {
@@ -370,7 +370,7 @@ void fn_8015F670(SolGroup** groups, int n) {
         lbl_8055E29C = new ("ai-obstable") DynArray<Obst>(total);
         fn_8015F320(groups, n, trk);
         fn_8015EF84(objs);
-        fn_8015EE14(objs, trk);
+        SpawnObstaclesFromList(objs, trk);
         fn_8015F3FC(trk);
     }
     if (vt) {

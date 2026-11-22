@@ -24,8 +24,8 @@ const char* fn_80206570(int cls);        // sound class name
 void* operator new[](size_t size, const char* tag);
 
 extern "C" {
-void fn_80127CF4(BgObject* obj, const char* name);
-void fn_80127E28(BgObject* obj);
+void RegisterBgTaskObject(BgObject* obj, const char* name);
+void RemoveBgObject(BgObject* obj);
 }
 
 extern "C" {
@@ -118,7 +118,7 @@ SoundManager::SoundManager(Mixer* mixer) {
         classes[c].first = all.first;
     }
     lastUpdate = 0;
-    fn_80127CF4(this, "SoundManager::Update");
+    RegisterBgTaskObject(this, "SoundManager::Update");
     enabled = mixer->Usable();
 }
 
@@ -135,7 +135,7 @@ SoundManager::~SoundManager(void) {
     if (mixer) {
         mixer->Shutdown();
     }
-    fn_80127E28(this);
+    RemoveBgObject(this);
     enabled = 0;
 }
 

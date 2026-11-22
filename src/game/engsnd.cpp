@@ -12,8 +12,8 @@ int strcmp(const char* a, const char* b);
 void fn_802E30C8(const char* fmt, ...);  // debug print
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* table);
-void fn_80127C90(void (*fn)(void), const char* name);
-void fn_80127D58(void (*fn)(void));
+void RegisterBackgroundTask(void (*fn)(void), const char* name);
+void RemoveBackgroundFunction(void (*fn)(void));
 int fn_801B89F8(void);   // race over
 int fn_80178CA4(void);   // local players
 int fn_8026A344(int i);  // local player's car
@@ -159,7 +159,7 @@ public:
 inline void EngineSound::Register(void) {
     if (lbl_8055EDBC == 0) {
         lbl_8055EDB8 = 0.0f;
-        fn_80127C90(fn_80209904, "engsnd");
+        RegisterBackgroundTask(fn_80209904, "engsnd");
     }
     lbl_8055EDBC++;
 }
@@ -194,7 +194,7 @@ EngineSound::~EngineSound(void) {
         delete samples[i].snd;
     }
     if (--lbl_8055EDBC == 0) {
-        fn_80127D58(fn_80209904);
+        RemoveBackgroundFunction(fn_80209904);
     }
 }
 

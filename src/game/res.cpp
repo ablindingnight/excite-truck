@@ -83,8 +83,8 @@ void* operator new(size_t size, const char* tag);
 void* operator new[](size_t size, const char* tag);
 
 extern "C" {
-void fn_80127CF4(BgObject* obj, const char* name);
-void fn_80127E28(BgObject* obj);
+void RegisterBgTaskObject(BgObject* obj, const char* name);
+void RemoveBgObject(BgObject* obj);
 }
 
 struct ResEntry;
@@ -1373,10 +1373,10 @@ public:
         pool.free = pool.nodes;
         pending.head = 0;
         pending.tail = &pending.head;
-        fn_80127CF4(this, ResStrings::AsyncSetQueueName());
+        RegisterBgTaskObject(this, ResStrings::AsyncSetQueueName());
         busy = 0;
     }
-    virtual ~AsyncSetQueue(void) { fn_80127E28(this); }
+    virtual ~AsyncSetQueue(void) { RemoveBgObject(this); }
     virtual void Update(void);
 
     void Pump(void) {

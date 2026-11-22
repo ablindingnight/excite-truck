@@ -62,8 +62,8 @@ void fn_801331C4(int owner, const char* key, f32* value);
 void fn_8013323C(int owner, const char* key, f32 value);
 int fn_8013365C(const char* name, void (*cb)(void));
 void fn_801336E0(int handle, void (*cb)(void));
-void fn_80127C90(void (*fn)(void), const char* name);
-void fn_80127D58(void (*fn)(void));
+void RegisterBackgroundTask(void (*fn)(void), const char* name);
+void RemoveBackgroundFunction(void (*fn)(void));
 int fn_8012E938(const char* name);
 void fn_8012E81C(const char* name);
 void fn_8012DDA8(const char* name);
@@ -207,14 +207,14 @@ void fn_8020A47C(void) {
         fn_802E30C8("music: loading %s...", buf);
         fn_8012DDA8(buf);
     }
-    fn_80127C90(fn_8020A100, "music");
+    RegisterBackgroundTask(fn_8020A100, "music");
     char buf[0x40];
     sprintf(buf, "%s.sng", lbl_8055B560[0]);
     fn_8012E81C(buf);
 }
 
 void fn_8020A550(void) {
-    fn_80127D58(fn_8020A100);
+    RemoveBackgroundFunction(fn_8020A100);
     lbl_8055EDD0 = 0;
     for (int i = 0; i < 2; i++) {
         if (lbl_804892C0[i].voice) {

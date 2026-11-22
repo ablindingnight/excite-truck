@@ -159,7 +159,7 @@ struct BVec;
 struct CamFrame34;
 BoneCmd* fn_802DA550(int start, const BVec* v, int n, int wstart, const u32* w, int wn);
 BoneCmd* fn_802DA704(int start, const BVec* v, int n);
-BoneCmd* fn_802DA80C(int start, const CamFrame34* v, int n);
+BoneCmd* CreateCameraBoneCommand(int start, const CamFrame34* v, int n);
 BoneCmd* fn_802DA918(f32 a, f32 b, f32 c);
 void fn_802DAA18(u32 mat);
 void fn_802DABA4(const f32* p);
@@ -971,7 +971,7 @@ const char* fn_802C7A10(s32 i) { return fn_8012C58C(fn_802C53A8(i)); }
 
 BoneCmd* fn_802C7A34(int start, const BVec* v, int n) { return fn_802DA704(start, v, n); }
 
-BoneCmd* fn_802C7A38(int start, const CamFrame34* v, int n) { return fn_802DA80C(start, v, n); }
+BoneCmd* fn_802C7A38(int start, const CamFrame34* v, int n) { return CreateCameraBoneCommand(start, v, n); }
 
 BoneCmd* fn_802C7A3C(f32 a, f32 b, f32 c) { return fn_802DA918(a, b, c); }
 

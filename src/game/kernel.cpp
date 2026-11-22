@@ -28,8 +28,8 @@ void fn_802E317C(const char* fmt, ...);  // fatal
 int DVDCancelAll(void);
 void __WPADShutdown(void);
 s32 WPADGetStatus(void);
-void fn_80127C90(void (*cb)(void), const char* name);
-void fn_80127D58(void (*cb)(void));
+void RegisterBackgroundTask(void (*cb)(void), const char* name);
+void RemoveBackgroundFunction(void (*cb)(void));
 int fn_802D9BF0(void);
 int fn_802D9C04(void);
 
@@ -563,7 +563,7 @@ void fn_802E56F0(void);
 void fn_80129864(void);
 void fn_801275AC(void);
 void fn_802E8D2C(void);
-void fn_80127EF8(void);
+void CheckForUnfreedHooks(void);
 void fn_802E46E4(void);
 void StrmEnd(void);
 void fn_802E99A8(void);
@@ -600,12 +600,12 @@ int fn_802E2A5C(void) {
     fn_802E30C8("date: %d/%d/%d (%d)", d.month, d.day, d.year, d.wday);
     fn_802E30C8("time: %d:%02d:%02d", d.hour, d.min, d.sec);
     stack_check();
-    fn_80127C90(fn_802E2A1C, "check_stack");
+    RegisterBackgroundTask(fn_802E2A1C, "check_stack");
     return 1;
 }
 
 void fn_802E2B34(void) {
-    fn_80127D58(fn_802E2A1C);
+    RemoveBackgroundFunction(fn_802E2A1C);
     fn_802E29AC();
     fn_802EC7AC();
     fn_802CFBA8();
@@ -615,7 +615,7 @@ void fn_802E2B34(void) {
     fn_80129864();
     fn_801275AC();
     fn_802E8D2C();
-    fn_80127EF8();
+    CheckForUnfreedHooks();
     fn_802E46E4();
     StrmEnd();
     fn_802E99A8();

@@ -159,8 +159,8 @@ s32 lbl_80435C30[8];  // cars by place
 extern "C" {
 int fn_802B04D4(void* pos);
 int fn_80139EC4(void* regions, f32 x, f32 z);
-void* fn_80139D4C(const char* name);
-void fn_80139E18(void* regions);
+void* LoadBoundSet(const char* name);
+void DeleteBoundSet(void* regions);
 void fn_801B8040(TeleportInfo* t, ILPos* at, f32 a);
 int fn_801784DC(f32* pos, f32* h, int a, int b, int c);
 void fn_8018A08C(DCar* car);
@@ -816,8 +816,8 @@ void fn_801B21B8(DeityCar* c);
 void fn_801B2118(DeityCar* c, short del);
 
 void fn_801B2024(EventDesc* r) {
-    lbl_8055E66C = fn_80139D4C("bad_teleport.val");
-    lbl_8055E670 = fn_80139D4C("bridge_teleport.val");
+    lbl_8055E66C = LoadBoundSet("bad_teleport.val");
+    lbl_8055E670 = LoadBoundSet("bridge_teleport.val");
     fn_80204A1C("Unlimited Laps", &lbl_8055E692);
     u32 f = r->type;
     lbl_8055E690 = (f >> 8) & 1;
@@ -872,11 +872,11 @@ void fn_801B228C(void) {
         lbl_8055E68C = 0;
     }
     if (lbl_8055E66C) {
-        fn_80139E18(lbl_8055E66C);
+        DeleteBoundSet(lbl_8055E66C);
         lbl_8055E66C = 0;
     }
     if (lbl_8055E670) {
-        fn_80139E18(lbl_8055E670);
+        DeleteBoundSet(lbl_8055E670);
         lbl_8055E670 = 0;
     }
 }

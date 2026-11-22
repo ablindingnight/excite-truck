@@ -136,7 +136,7 @@ void fn_802C10C8(void);
 void fn_802C10CC(u32 a);
 void fn_802C2138(void);
 void fn_802C217C(void);
-void fn_802C2298(void);
+void LoadBoatData(void);
 void fn_802C2410(void);
 void fn_802C26F0(void);
 void fn_802C2874(void);
@@ -559,7 +559,7 @@ void fn_802AE7F4(void) {
     fn_802C2138();
     fn_802B9B68();
     fn_802BDBA8();
-    fn_802C2298();
+    LoadBoatData();
     if (!lbl_8055F980) {
         fn_802BF350();
     }
