@@ -2435,7 +2435,9 @@ void fn_80186DE8(void) {
             f32 top = 0.44444445f * fn_80181A48(car);
             if (CarHot(car) && ((CarBody*)car)->speed < top && ((CarBody*)car)->f25E4 < 0.1f &&
                 (s32)fn_8018B06C(car) > 0) {
-                f32 k = (9.81f * fn_80181A14(car)) * (((CarBody*)car)->f25E0 * ((CarBody*)car)->mass);
+                f32 weightScale = 9.81f * fn_80181A14(car);
+                f32 mass = ((CarBody*)car)->mass;
+                f32 k = weightScale * (((CarBody*)car)->f25E0 * mass);
                 AddScaled(force, 0x54 + car, k);
             }
             if (((CarBody*)car)->f5EC > 0.01f && (s32)fn_8018B06C(car) > 0 && ((CarBody*)car)->f25E4 < 0.1f &&
@@ -2460,7 +2462,9 @@ void fn_80186DE8(void) {
                 f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
                 f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
                 f32 lo = 2.4f * boost;
-                k = (LerpT(Clamp01(t), lo, 0.6f * boost)) * (((CarBody*)car)->f25E0 * ((CarBody*)car)->mass);
+                f32 boostScale = LerpT(Clamp01(t), lo, 0.6f * boost);
+                f32 mass = ((CarBody*)car)->mass;
+                k = boostScale * (((CarBody*)car)->f25E0 * mass);
                 AddScaled(force, car + 0x54, k);
             }
             ((RigidBody*)car)->AddForceAt((const RVec3*)force, (const RVec3*)(car + 0x60));
