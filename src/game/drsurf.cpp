@@ -444,8 +444,8 @@ void fn_802D4988(Surf* s) {
 static inline f32 DecodeMorphDelta(s16 raw) { return (1.0f / 255) * raw; }
 
 static inline void ApplySkinMorph(V3* o, const V3& p, const SkinMorphVtx* v) {
-    f32 wb = lbl_804CA308[v->ib];
     f32 wa = lbl_804CA308[v->ia];
+    f32 wb = lbl_804CA308[v->ib];
     V3 a;
     a.Set(DecodeMorphDelta(v->a[0]), DecodeMorphDelta(v->a[1]), DecodeMorphDelta(v->a[2]));
     V3 b;
@@ -463,9 +463,8 @@ static inline void SkinMorphVertex(V3* o, const SkinMorphVtx* v) {
 
     const BVec* ba = &lbl_804DB068[v->b0];
     const BVec* bb = &lbl_804DB068[v->b1];
-    f32 w1;
     f32 w0 = (1.0f / 255) * v->w0;
-    w1 = (1.0f / 255) * v->w1;
+    f32 w1 = (1.0f / 255) * v->w1;
     V3 p;
     p.x = v->x + ba->x * w0;
     p.y = v->y + ba->y * w0;
