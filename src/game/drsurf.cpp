@@ -441,8 +441,9 @@ static inline void SkinMorphVertex(V3* o, const SkinMorphVtx* v) {
 
     const BVec* ba = &lbl_804DB068[v->b0];
     const BVec* bb = &lbl_804DB068[v->b1];
+    f32 w1;
     f32 w0 = (1.0f / 255) * v->w0;
-    f32 w1 = (1.0f / 255) * v->w1;
+    w1 = (1.0f / 255) * v->w1;
     V3 p;
     p.x = v->x + ba->x * w0;
     p.y = v->y + ba->y * w0;
