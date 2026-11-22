@@ -461,7 +461,7 @@ void fn_802D4C44(Surf* s) {
             V3 b;
             b.Set((1.0f / 255) * v->b[0], (1.0f / 255) * v->b[1], (1.0f / 255) * v->b[2]);
             o->x = p.x + a.x * wa;
-            o->y = p.y + a.y * wa;
+            o->y = p.y + Mul(a.y, wa);
             o->z = p.z + a.z * wa;
             o->x = o->x + b.x * wb;
             o->y = o->y + b.y * wb;
@@ -501,7 +501,7 @@ void fn_802D4ECC(Surf* s) {
             wa = lbl_804CA308[v->ia];
             wb = lbl_804CA308[v->ib];
             o->x = p.x;
-            o->y = p.y + a * wa + b * wb;
+            o->y = AddScaledF(p.y, wa, a) + b * wb;
             o->z = p.z;
             v++;
             o++;
