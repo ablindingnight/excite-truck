@@ -1224,7 +1224,7 @@ config.libs.append(
             Object(Matching, "game/jumpcam.cpp"),
             Object(NonMatching, "game/unk_8026B844.cpp"),
             Object(Matching, "game/camframe.cpp"),
-            Object(NonMatching, "game/camfov.cpp"),
+            Object(Matching, "game/camfov.cpp"),
             Object(NonMatching, "game/physcam.cpp"),
             Object(NonMatching, "game/camstate.cpp"),
             Object(Matching, "game/namedcam.cpp"),
