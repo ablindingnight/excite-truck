@@ -302,6 +302,17 @@ static inline void SwapTri(PTri* t, u8& sc) {
    spelling): before unrolling, the byte addresses have no known offset, so their alias is the whole object and the
    scheduler keeps every byte load/store in order while still moving the field loads and loop counters (retail).
    Written as six SwapWord(&m->field) calls the bytes get exact offsets and interleave. (TC 2026-11-22, schedray) */
+/* Helper names unproven: per-table swap loops */
+static inline void SwapTris(PMesh* m) {
+    int i;
+    int off;
+    u8* p;
+    u8 sc;
+    for (i = 0, off = 0; i < m->numTris; off += sizeof(m->tris[0]), i++) {
+        p = (u8*)m->tris + off;
+        SwapTri((PTri*)p, sc);
+    }
+}
 #pragma push
 #pragma ppc_unroll_instructions_limit 100
 void fn_801CFA48(PMesh* m) {
@@ -323,10 +334,7 @@ void fn_801CFA48(PMesh* m) {
         p = (u8*)&m->verts[i];
         SwapVec((PVec3*)p, sc);
     }
-    for (i = 0, off = 0; i < m->numTris; off += sizeof(m->tris[0]), i++) {
-        p = (u8*)m->tris + off;
-        SwapTri((PTri*)p, sc);
-    }
+    SwapTris(m);
 }
 #pragma pop
 
