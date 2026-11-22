@@ -582,6 +582,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             fn_80235AFC(d->art, part, -1, px, py, 0.0f, size, size, d->icons[i].angle);
         }
     }
+    Vec2 tp;  // Actual final truck-position workspace; writes remain at their original points.
     {
         f32 cy;
         f32 cx = x + w / 2.0f;
@@ -627,7 +628,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     {
         RaceCarRec* tr = fn_8017960C(fn_801E866C(map->player));
         m = lbl_8055D5B4;
-        Vec2 tp;
         Vec2 c;
         Vec3 rel;
         c.y = y - h / 2.0f;
