@@ -629,9 +629,9 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         RaceCarRec* tr = fn_8017960C(fn_801E866C(map->player));
         m = lbl_8055D5B4;
         Vec2 c;
-        Vec3 rel;
         c.y = y - h / 2.0f;
         Vec3 p = *(const Vec3*)&tr->mtx.pos;  // a plain Vec3 copy (RVec3 has a constructor)
+        Vec3 rel;
         tp.x = p.x;
         tp.y = p.z;
         c.x = x + w / 2.0f;
