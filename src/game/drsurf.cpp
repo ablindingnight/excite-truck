@@ -704,7 +704,7 @@ static inline void SurfFog(int n, u32* col, f32* uv, const Surf* s) {
         f32 rx = m[0];
         f32 x = d.z * m[2] + (dx * rx + d.y * m[1]);
         f32 ux = m[3];
-        f32 y = d.z * m[5] + (dx * ux + d.y * m[4]);
+        f32 y = Mul(d.z, m[5]) + (dx * ux + d.y * m[4]);
         f32 vx = m[6];
         f32 z = d.z * m[8] + (dx * vx + d.y * m[7]);
         d.x = x;
