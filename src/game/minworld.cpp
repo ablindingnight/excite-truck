@@ -202,6 +202,41 @@ void fn_802526E0(MWMtx* m) {
 
 
 /* Helper name unproven */ static inline void Scale3(MWVec4* v, f32 k) { v->x = v->x * k; v->y = v->y * k; v->z = v->z * k; }
+// Apply tangent velocity and terrain response.
+/* Helper name unproven */
+static inline void ApplyTerrainResponse(MWBody* b, const MWVec4& p, const MWVec2& e, const MWVec2& t) {
+        MWVec4 up;
+        MWVec4 n;
+        MWVec4 a;
+        MWVec4 fwd;
+        f32 radial;
+        MWVec2 zz;
+        zz.x = b->z.x;
+        zz.y = b->z.z;
+        b->vel = MWVec4(t.x, b->vel.y, t.y);
+        radial = -2.5f * (zz.x * e.x + zz.y * e.y);
+        f32 h;
+        f32 depth;
+        fwd = MWVec4(b->z.x, b->z.y, b->z.z);
+        a = b->accel;
+        a.y = radial;
+        up = MWVec4(b->x.x, b->x.y, b->x.z);
+        h = fn_801DCF48((ValVec3*)&n, p.x, p.z);
+        depth = p.y - h;
+        depth = 0.0f > depth ? 0.0f : depth;
+        if (depth > 1.5f) {
+            f32 u = PSVECDotProduct((const Vec*)&n, (const Vec*)&fwd);
+            f32 v = -PSVECDotProduct((const Vec*)&n, (const Vec*)&up);
+            f32 u3 = Mul(u * u, u);
+            f32 v3 = Mul(v * v, v);
+            a.x = a.x + up.x * u3 + fwd.x * v3;
+            a.y = a.y + up.y * u3 + fwd.y * v3;
+            a.z = a.z + up.z * u3 + fwd.z * v3;
+            Scale3(&a, 0.98f);
+        }
+        b->accel = MWVec4(a.x, a.y, a.z);
+    }
+
 void fn_8025280C(MWBody* b, f32 speed) {
     MWVec4 p(b->pos.x, b->pos.y, b->pos.z);
     MWVec2 d;
@@ -238,38 +273,7 @@ void fn_8025280C(MWBody* b, f32 speed) {
         t.x = t.x * k;
         t.y = t.y * k;
     }
-    {
-        MWVec4 up;
-        MWVec4 n;
-        MWVec4 a;
-        MWVec4 fwd;
-        f32 radial;
-        MWVec2 zz;
-        zz.x = b->z.x;
-        zz.y = b->z.z;
-        b->vel = MWVec4(t.x, b->vel.y, t.y);
-        radial = -2.5f * (zz.x * e.x + zz.y * e.y);
-        f32 h;
-        f32 depth;
-        fwd = MWVec4(b->z.x, b->z.y, b->z.z);
-        a = b->accel;
-        a.y = radial;
-        up = MWVec4(b->x.x, b->x.y, b->x.z);
-        h = fn_801DCF48((ValVec3*)&n, p.x, p.z);
-        depth = p.y - h;
-        depth = 0.0f > depth ? 0.0f : depth;
-        if (depth > 1.5f) {
-            f32 u = PSVECDotProduct((const Vec*)&n, (const Vec*)&fwd);
-            f32 v = -PSVECDotProduct((const Vec*)&n, (const Vec*)&up);
-            f32 u3 = Mul(u * u, u);
-            f32 v3 = Mul(v * v, v);
-            a.x = a.x + up.x * u3 + fwd.x * v3;
-            a.y = a.y + up.y * u3 + fwd.y * v3;
-            a.z = a.z + up.z * u3 + fwd.z * v3;
-            Scale3(&a, 0.98f);
-        }
-        b->accel = MWVec4(a.x, a.y, a.z);
-    }
+    ApplyTerrainResponse(b, p, e, t);
 }
 
 void fn_80252B88(int i) {
