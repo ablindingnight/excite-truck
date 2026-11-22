@@ -219,12 +219,12 @@ void fn_80288A20(void);
 void fn_80292114(void);
 void fn_802921F4(void);
 void fn_8029222C(void);
-void fn_802924E8(void);
+void ClearFrameBuffer(void);
 void fn_802924F4(void);
 void fn_80292618(void);
 void fn_8029261C(void);
 void fn_80292628(void);
-void fn_80292698(void);
+void UpdateSpinRotations(void);
 void fn_80292864(void);
 void fn_80294970(void);
 void fn_80294C68(void);
@@ -247,7 +247,7 @@ void fn_8029C1C4(void);
 void fn_8029C22C(void);
 void fn_8029C25C(void);
 void fn_8029C2D4(void);
-void fn_8029EF70(void);
+void LoadLineTexture(void);
 void fn_8029EFBC(void);
 void fn_8029F03C(void);
 void fn_8029F0D0(void);
@@ -322,7 +322,7 @@ void fn_80287780(void* a) {
     lbl_8055F6C0 = 0;
     fn_802AE374();
     fn_8028DF58();
-    fn_802924E8();
+    ClearFrameBuffer();
     fn_802978B8(a);
     fn_80297ED4();
     fn_8029605C();
@@ -337,13 +337,13 @@ void fn_802877D0(void) {
     fn_802AE394();
 }
 
-void fn_80288218(void* a);
+void InitializeEfxCars(void* a);
 void fn_802880F4(void);
-void fn_80288868(u32 seed);
+void SetRandomSeed(u32 seed);
 
 void fn_80287800(void* a) {
     fn_8028777C(a);
-    fn_80288218(a);
+    InitializeEfxCars(a);
     fn_802880F4();
     LoadBirdFlocks();
     fn_802888D8();
@@ -353,7 +353,7 @@ void fn_80287800(void* a) {
     fn_80294970();
     fn_80297ED8();
     fn_8029C1C4();
-    fn_8029EF70();
+    LoadLineTexture();
     fn_802924F4();
     fn_802A09B0();
     fn_802A1290();
@@ -364,13 +364,13 @@ void fn_80287800(void* a) {
     fn_802AB21C();
     fn_8028DFB0();
     lbl_8055F6BC = fn_801E7DF0(0) > 1;
-    fn_80288868(0);
+    SetRandomSeed(0);
 }
 
 void fn_802881D4(void);
 void fn_802882A0(void);
 
-void fn_802878A8(void) {
+void ExecuteEffectFunctions(void) {
     fn_802AB504();
     fn_8029F0D0();
     fn_802A7C24();
@@ -409,20 +409,20 @@ void fn_80287914(void) {
     fn_802A7C64();
     fn_802AB5B8();
     fn_802A9574();
-    fn_80288868(0);
+    SetRandomSeed(0);
 }
 
 void fn_80287974(void) { fn_8028E1A4(); }
 
 void fn_80287978(void) { fn_8028E1D0(); }
 
-void fn_802882EC(void);
+void UpdateEfxCarData(void);
 void fn_802885F0(void);
 void fn_802887EC(void);
 void fn_802885C0(void);
 
 void fn_8028797C(void) {
-    fn_802882EC();
+    UpdateEfxCarData();
     fn_802A8978();
     fn_80298160();
     fn_80288A20();
@@ -433,7 +433,7 @@ void fn_8028797C(void) {
     fn_80294CC4();
     fn_8029C25C();
     fn_8029F188();
-    fn_80292698();
+    UpdateSpinRotations();
     fn_802A0B50();
     fn_802A4C60();
     fn_802AB628(fn_801E7E24());
@@ -526,18 +526,18 @@ EfxInfo::~EfxInfo(void) {
 
 extern "C" {
 
-void fn_80287D70(EfxInfo* e, s32 model, u32 flags);
+void SetupExhaustEffects(EfxInfo* e, s32 model, u32 flags);
 
-void fn_80287CE8(EfxInfo* e, const char* car, s32 model, u32 flags) {
+void LoadEffectFile(EfxInfo* e, const char* car, s32 model, u32 flags) {
     char buf[64];
     sprintf(buf, "%s.car/efx.val", car);
     if (fn_8012C33C(buf)) {
         e->node = fn_80131808(buf);
     }
-    fn_80287D70(e, model, flags);
+    SetupExhaustEffects(e, model, flags);
 }
 
-void fn_80287D70(EfxInfo* e, s32 model, u32 flags) {
+void SetupExhaustEffects(EfxInfo* e, s32 model, u32 flags) {
     const char* fmt = (flags & 0x100000) ? "exhaust%d_20" : "exhaust%d";
     char buf[32];
     for (e->n = 0; e->n < 8; e->n++) {
@@ -548,7 +548,7 @@ void fn_80287D70(EfxInfo* e, s32 model, u32 flags) {
     }
 }
 
-int fn_80287E20(EfxInfo* e, const char* key) {
+int CheckEffectKeyExists(EfxInfo* e, const char* key) {
     char buf[64];
     fn_801346B4(buf, 64, key);
     if (e->node) {
@@ -557,20 +557,20 @@ int fn_80287E20(EfxInfo* e, const char* key) {
     return 0;
 }
 
-ValueNodeV* fn_80287E80(EfxInfo* e, const char* key) {
+ValueNodeV* FindEffectNode(EfxInfo* e, const char* key) {
     char buf[64];
     fn_801346B4(buf, 64, key);
     return e->node->Find(buf);
 }
 
-ValVec3 fn_80287ED0(const EfxInfo* e, const char* node, const char* key) {
+ValVec3 GetEffectNodeVector(const EfxInfo* e, const char* node, const char* key) {
     if (!e->node || !e->node->Find(node)) {
         fn_802E317C("efx: this model doesn't support '%s'", node);
     }
     return e->node->Find(node)->GetVec3(key);
 }
 
-ValVec3 fn_80287F90(const EfxInfo* e, const char* node, const char* key, ValVec3 def) {
+ValVec3 GetNodeVector3(const EfxInfo* e, const char* node, const char* key, ValVec3 def) {
     if (!e->node || !e->node->Find(node)) {
         fn_802E317C("efx: this model doesn't support '%s'", node);
     }
@@ -590,7 +590,7 @@ void fn_802880F4(void) {
     for (int i = 0; i < GetHumanPlayerCount(); i++) {
         CarInfo* d = GetCarInfo(i);
         s32 model = fn_801EE0C8((u32)i < 8 ? lbl_80488648[i] : 0);
-        fn_80287CE8(&lbl_8055F6C4[i], d->setup.paint, model, d->setup.flags);
+        LoadEffectFile(&lbl_8055F6C4[i], d->setup.paint, model, d->setup.flags);
     }
 }
 
@@ -599,9 +599,9 @@ void fn_802881D4(void) {
     lbl_8055F6C4 = 0;
 }
 
-EfxInfo* fn_80288208(s32 i) { return &lbl_8055F6C4[i]; }
+EfxInfo* GetEffectInfo(s32 i) { return &lbl_8055F6C4[i]; }
 
-void fn_80288218(void* a) {
+void InitializeEfxCars(void* a) {
     lbl_804B3150.cars = new ("EfxCarInfo tab") EfxCar[GetHumanPlayerCount()];
     lbl_804B3150.count = GetHumanPlayerCount();
     lbl_804B3150.flag = 0;
@@ -621,7 +621,7 @@ void fn_802882A0(void) {
     lbl_804B3150.flag = 0;
 }
 
-void fn_802882EC(void) {
+void UpdateEfxCarData(void) {
     EfxCar* c = lbl_804B3150.cars;
     lbl_804B3150.flag = 0;
     for (int i = 0; i < lbl_804B3150.count; c++, i++) {
@@ -734,7 +734,7 @@ void fn_802887EC(void) {
     }
 }
 
-void fn_80288868(u32 seed) { lbl_8055F6C8 = seed; }
+void SetRandomSeed(u32 seed) { lbl_8055F6C8 = seed; }
 
 u32 fn_80288870(void) {
     lbl_8055F6C8 = (lbl_8055F6C8 * 0x12B9B0A1 + 0x1CCE8AC1) & 0x7FFFFFFF;

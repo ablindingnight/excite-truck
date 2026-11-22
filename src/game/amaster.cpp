@@ -24,7 +24,7 @@ void fn_8027DED8(int car, struct Damage* d);
 int fn_801CB6B4(int a, int b, int c);
 void fn_801B0C78(int car);
 void fn_801B0F70(int a, int b);
-void fn_801B2C70(void* r);
+void InitializeDeitySnapshot(void* r);
 int fn_8013C9F4(int a);
 }
 
@@ -288,7 +288,7 @@ void GameMode::vfAC(int car) { fn_801B0C78(car); }
 
 void GameMode::vfA8(int a, int b) { fn_801B0F70(a, b); }
 
-void GameMode::FillResults(void* r) { fn_801B2C70(r); }
+void GameMode::FillResults(void* r) { InitializeDeitySnapshot(r); }
 
 int GameMode::Reset(void) { return fn_8013C9F4(0); }
 

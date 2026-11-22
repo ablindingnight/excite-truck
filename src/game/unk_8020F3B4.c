@@ -1002,7 +1002,7 @@ extern "C" {  // this region compiles as C (MWCC leaves __cplusplus undefined he
 
 extern void fn_8020FEF0(long);
 extern void fn_802100AC(void);
-extern long fn_80012158(void);
+extern long PlayNextSound(void);
 long fn_802111E4(long arg0) {
     switch (arg0) {
     case 0x126:
@@ -1029,7 +1029,7 @@ long fn_802111E4(long arg0) {
     default:
         return 0;
     }
-    fn_80012158();
+    PlayNextSound();
     return 1;
 }
 

@@ -57,7 +57,7 @@ void fn_80179140(void);
 void fn_80179308(void);
 void fn_801AED68(void);
 void fn_801AED5C(void);
-int fn_801CF050(void);
+int IsReplayActive(void);
 int fn_802ECC10(void);
 f32 __cvt_sll_flt(s64 v);
 }
@@ -493,7 +493,7 @@ void fn_80176EC0(void) {
             fn_801AED5C();
         }
     }
-    if (!fn_801CF050()) {
+    if (!IsReplayActive()) {
         fn_80176A34(0);
     }
     fn_80176C4C();

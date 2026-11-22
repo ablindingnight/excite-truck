@@ -43,7 +43,7 @@ void fn_80176A6C(void);
 void fn_8026C014(int a);
 int fn_802D3EBC(void);
 void fn_80265D84(void);
-void fn_801B2364(void);
+void ProcessGreenFlagActivation(void);
 void fn_8026B6E4(void);
 void fn_801CEDDC(void);
 void fn_801D2214(void);
@@ -89,7 +89,7 @@ void fn_80177990(void);
 void fn_801D0CF0(void);
 s32* fn_801769D8(void);
 void fn_80181FEC(void);
-void fn_801DF6FC(void);
+void InitializeCrashMode(void);
 void fn_801DA6EC(void);
 void fn_801D0E0C(void);
 void fn_80127464(void);
@@ -103,10 +103,10 @@ void fn_801A4E28(void);
 void fn_801AFAC8(void);
 void fn_801B06C8(void);
 void InitializeAlarmEvents(void);
-void fn_801CEC80(void);
+void InitializeDamageInfo(void);
 void fn_80181F30(void);
 void fn_801DE0A4(void);
-void fn_801B2024(EventDesc* d);  // deity.cpp
+void InitializeRaceSettings(EventDesc* d);  // deity.cpp
 void fn_801C4AD0(void);
 void fn_8020C41C(void);
 void fn_8026B644(void);
@@ -121,7 +121,7 @@ void CreateBoostManager(void);
 void fn_801B8318(void);
 void fn_801FA978(void);
 void fn_801E2188(void);
-void fn_801AE4C4(void);
+void InitializeCornerPool(void);
 void fn_801B52CC(void);
 void fn_801E21BC(void);
 void fn_8017D2CC(int n);
@@ -163,7 +163,7 @@ void fn_80181FC4(void);
 void fn_801CECB4(void);
 void fn_801B8BBC(void);
 void fn_801A4E54(void);
-void fn_801B3B28(void);
+void UninstallCollisionSoundHandlers(void);
 void fn_801B60A8(void);
 void fn_801B531C(void);
 void fn_801CEFC4(void);
@@ -171,7 +171,7 @@ void fn_80206550(int a);
 void fn_801D0E70(void);
 void fn_801D0CFC(void);
 void fn_801E21B4(void*);  // Group* (physcol.cpp)
-int fn_801CF050(void);
+int IsReplayActive(void);
 void fn_801D9A08(void);
 void fn_801B8BE8(void);
 void fn_801DEF98(void);
@@ -180,13 +180,13 @@ void fn_801B34A4(void);
 void fn_8026B6D0(void);
 void fn_802C1928(void);
 void fn_80134998(void);
-void fn_801B265C(void);
+void InitializeDeityTestMode(void);
 void fn_801AED74(void);
 void fn_801E2294(void);
 void fn_801B2910(void);
 void InitializeCameraStructures(void);
 void fn_80265D60(void);
-void fn_801CECE0(void);
+void InitializeDamageSlots(void);
 void fn_801349C4(void);
 void fn_801CB320(void);
 void fn_801D481C(void);
@@ -195,15 +195,15 @@ void fn_8020C54C(void);
 void fn_801E1E30(void);
 void fn_801D0ED4(void);
 void fn_802E4C18(int a);
-void fn_801CEFE8(void);
+void StartReplayPlayback(void);
 void fn_801AED5C(void);
 void fn_801CB464(void);
-void fn_801CF01C(void);
+void EndReplayPlayback(void);
 void fn_801CB4A0(void);
 void fn_801AED68(void);
 s32 fn_8026A368(int a);
 void UpdateCameraTracking(void* car, int i);
-void fn_801B2D28(void* p);
+void InitializeRaceState(void* p);
 void fn_801CEEC8(void* p);
 void fn_801B848C(void* p);
 void fn_801E1EA4(void* p);
@@ -509,7 +509,7 @@ void fn_80177F40(void) {
     paused = FlagValue(lbl_8055E3BD);
     lbl_80430870.len = 0;
     fn_80265D84();
-    fn_801B2364();
+    ProcessGreenFlagActivation();
     fn_8026B6E4();
     fn_801CEDDC();
     fn_801D2214();
@@ -934,7 +934,7 @@ void fn_80178DD4(s32 stream) {
     fn_801D0CF0();
     lbl_8055E8F8 = *fn_801769D8();
     fn_80181FEC();
-    fn_801DF6FC();
+    InitializeCrashMode();
     fn_801DA6EC();
     fn_801D0E0C();
     fn_80127464();
@@ -959,10 +959,10 @@ void fn_80178DD4(s32 stream) {
     fn_801AFAC8();
     fn_801B06C8();
     InitializeAlarmEvents();
-    fn_801CEC80();
+    InitializeDamageInfo();
     fn_80181F30();
     fn_801DE0A4();
-    fn_801B2024(fn_801769CC());
+    InitializeRaceSettings(fn_801769CC());
     fn_80127464();
     fn_801C4AD0();
     fn_8020C41C();
@@ -992,7 +992,7 @@ void fn_80178DD4(s32 stream) {
     lbl_80430870.len = 0;
     lbl_80431874.len = 0;
     s = fn_8012F3CC(stream);
-    fn_801AE4C4();
+    InitializeCornerPool();
     fn_80127464();
     for (pass = 0; pass < 3; pass++) {
         Phob* p;
@@ -1077,7 +1077,7 @@ void fn_801791A8(void) {
     fn_801CECB4();
     fn_801B8BBC();
     fn_801A4E54();
-    fn_801B3B28();
+    UninstallCollisionSoundHandlers();
     fn_801B60A8();
     fn_801B531C();
     delete lbl_8055E414;
@@ -1106,7 +1106,7 @@ void fn_80179320(void) {
     lbl_8055E44C = 0;
     lbl_8055E458 = 0;
     fn_80177990();
-    if (fn_801CF050()) {
+    if (IsReplayActive()) {
         fn_80177814(lbl_8055E418);
         fn_80177814(lbl_8055E420);
         fn_80177814(lbl_8055E428);
@@ -1121,7 +1121,7 @@ void fn_80179320(void) {
     fn_8026B6D0();
     fn_802C1928();
     fn_80134998();
-    fn_801B265C();
+    InitializeDeityTestMode();
     fn_801AED74();
     fn_801E2294();
     for (i = 0; i < lbl_8055E438; i++) {
@@ -1141,7 +1141,7 @@ void fn_80179320(void) {
         lbl_80433880[i].name[0] = 0;
     }
     fn_80265D60();
-    fn_801CECE0();
+    InitializeDamageSlots();
     if (!fn_80265D64()) {
         lbl_80430850.Reset();
     }
@@ -1167,13 +1167,13 @@ void fn_8017952C(void) {
 }
 
 void fn_80179588(void) {
-    fn_801CEFE8();
+    StartReplayPlayback();
     fn_801AED5C();
     fn_801CB464();
 }
 
 void fn_801795B0(void) {
-    fn_801CF01C();
+    EndReplayPlayback();
     fn_801CB4A0();
     fn_801AED68();
 }
@@ -1246,7 +1246,7 @@ StatePacket* fn_80179824(void) {
     p->views[1] = lbl_80430590[1];
     p->views[2] = lbl_80430590[2];
     p->views[3] = lbl_80430590[3];
-    if (!fn_801CF050() || fn_801781C0(fn_8026A368(0)) || fn_801B526C()) {
+    if (!IsReplayActive() || fn_801781C0(fn_8026A368(0)) || fn_801B526C()) {
         p->nViews = 1;
     }
     lbl_8055E444 = p->nViews;
@@ -1262,7 +1262,7 @@ StatePacket* fn_80179824(void) {
     for (i = 0; i < lbl_8055E438; i++) {
         lbl_8055E434[i]->vf28(buf);
     }
-    fn_801B2D28(p);
+    InitializeRaceState(p);
     fn_801CEEC8(p);
     fn_801B848C(p);
     p->stats = lbl_804305C0;

@@ -20,7 +20,7 @@ const char* fn_80131234(const char* key);  // localize
 void fn_802E6BD8(u32 code, int unk, void* buf, u32 size, void (*cb)(int));
 void fn_80130978(char* buf, int size, f32 value);
 void fn_801308E4(char* buf, int size, int unk, f32 value);
-void fn_800122B4(s32 value, char* buf);
+void FormatIntegerWithSuffix(s32 value, char* buf);
 }
 
 void* operator new(size_t size, const char* tag);
@@ -575,7 +575,7 @@ char* FormatStatValue(u32 type, s32 value, char* buf, int size) {
             fn_801345D8(buf, size, "%d %s", value, value == 1 ? "Time" : "Times");
             break;
         case 0x2000:
-            fn_800122B4(value, buf);
+            FormatIntegerWithSuffix(value, buf);
             break;
         case 0x8000:
             fn_801345D8(buf, size, "%d%s", value * 360, fn_80131234("Records:AIR_SPIN_UNITS") + 1);

@@ -231,8 +231,8 @@ public:
 
 extern "C" {
 double sqrt(double x);
-void fn_801E3FC8(u8* c, f32 r, u32 color);
-void fn_801E44F4(u8* m, f32 a, f32 b, f32 c, u32 color);
+void DrawDebugSphere(u8* c, f32 r, u32 color);
+void ScaleAndDrawDebugFrame(u8* m, f32 a, f32 b, f32 c, u32 color);
 void fn_801CFA48(u8* p);
 void fn_801CFF14(u8* p);
 void fn_801CFF18(u8* p, u32 a);
@@ -493,7 +493,7 @@ static inline f32 ClampExt(f32 v, f32 e) {
 }
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
-void fn_801B34DC(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
+void ProcessCollisionResponse(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
 
 // The race rules object (fn_801B83A0) seen through its car-hit hook.
 class HitRules {
@@ -787,9 +787,9 @@ void fn_80199894(u8* p, u8* q, const RVec3* pt, const RVec3* n, u32 a, u32 b, f3
         J.z *= -1.0f;
         VE(q)->v20((u32)p, &J, &pq, U32(p, 0x20), (u32)pt, (u32)pb, w);
         if (a) {
-            fn_801B34DC((u8*)a, (u8*)b, pt, &J, &n->x, U32(q, 0x20));
+            ProcessCollisionResponse((u8*)a, (u8*)b, pt, &J, &n->x, U32(q, 0x20));
         } else {
-            fn_801B34DC(p, q, pt, &J, &n->x, U32(q, 0x20));
+            ProcessCollisionResponse(p, q, pt, &J, &n->x, U32(q, 0x20));
         }
     }
     VE(p)->v1C(&imp, &pa, U32(q, 0x20), (u32)qb);
@@ -815,7 +815,7 @@ void fn_8019A788(u8* p, u8* q, const RVec3* x, const RVec3* n, u32 a, u32 b, f32
 }
 
 f32 fn_8019DF88(const u8* com, const RVec3* v, const u8* iinv, const RVec3* at, const f32* n, f32 mass, f32 e);
-void fn_801B34DC(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
+void ProcessCollisionResponse(u8* p, u8* q, const RVec3* at, const RVec3* f, const f32* n, u32 a);  // collision sound
 
 // Sphere (c, r) of p against the point at: a spring push along the normal, then friction from the body.
 int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
@@ -850,7 +850,7 @@ int fn_8019A820(u8* p, const f32* c, const RVec3* at, u32 a, u32 b, f32 r) {
             f32 lo = 0.001f;
             f32 w = lo > pen ? lo : pen;
             VE(p)->v20(b, &fr, at, a, 0, 0, w);
-            fn_801B34DC(p, 0, at, &fr, n.v, a);
+            ProcessCollisionResponse(p, 0, at, &fr, n.v, a);
         }
         return 1;
     }
@@ -993,7 +993,7 @@ void fn_8019AC44(u8* p, const f32* c, f32* d, f32 r) {
             f32 lo = 0.001f;
             f32 ww = lo > depth ? lo : depth;
             VE(p)->v20(0, &fr, &pt, surf, 0, 0, ww);
-            fn_801B34DC(p, 0, &pt, &fr, &nrm.x, surf);
+            ProcessCollisionResponse(p, 0, &pt, &fr, &nrm.x, surf);
         }
     } else {
         d[0] = 0.0f;
@@ -2219,7 +2219,7 @@ void SphereShape::vf4C(void) {
     u8* p = (u8*)this;
     f32 r = this->radius;
     r = r > 0.2f ? r : 0.2f;
-    fn_801E3FC8(p + 0x34, r, lbl_8055E598.value);
+    DrawDebugSphere(p + 0x34, r, lbl_8055E598.value);
 }
 
 void fn_802E30C8(const char* fmt, ...);
@@ -3003,7 +3003,7 @@ struct TubeSeg {
     f32 mid[3];  // offset 0xC
 };
 
-void fn_801E41D8(f32* a, f32* b, u32 color, f32 r);
+void DrawLineSegment(f32* a, f32* b, u32 color, f32 r);
 
 
 // Debug-draws the tube as a capsule.
@@ -3014,7 +3014,7 @@ void TubeBase::vf4C(void) {
     f32 b[3];
     MulAdd(a, s.mid, s.dir, this->half);
     MulAdd(b, s.mid, s.dir, -this->half);
-    fn_801E41D8(a, b, 0x40FFFF00, 2.0f * this->rad);
+    DrawLineSegment(a, b, 0x40FFFF00, 2.0f * this->rad);
 }
 
 TubeShape::TubeShape(u32 a, u32 swap) : TubeBase(a, swap) {}
@@ -3114,11 +3114,11 @@ void TubeShape::vf4C(void) {
     if (this->surface < 1000) {
         f32 x = this->rad;
         f32 z = this->half;
-        fn_801E44F4(((u8*&)this->frame), x, x, z, 0x40FFFF00);
+        ScaleAndDrawDebugFrame(((u8*&)this->frame), x, x, z, 0x40FFFF00);
     } else {
         f32 x = this->rad;
         f32 z = this->half;
-        fn_801E44F4(((u8*&)this->frame), x, x, z, 0x4000FF80);
+        ScaleAndDrawDebugFrame(((u8*&)this->frame), x, x, z, 0x4000FF80);
     }
 }
 
@@ -3218,7 +3218,7 @@ void BoxShape::vf4C(void) {
     f32 cz = c->z;
     f32 cy = c->y;
     f32 cx = c->x;
-    fn_801E44F4((u8*)&x, cx, cy, cz, 0x50000000);
+    ScaleAndDrawDebugFrame((u8*)&x, cx, cy, cz, 0x50000000);
 }
 
 OrientedBoxShape::OrientedBoxShape(const RMtx* a, const RVec3* c, CollVolume* b, f32 s0, f32 s1, f32 hx, f32 hy, f32 hz)
@@ -3341,7 +3341,7 @@ void RagdollShape::vf10(u8* o) {
             RVec3 push;
             fn_801C28A8(this->f30, &x, &(const RVec3C&)HalfExtents::Read(box), &vel, &spin, this->f28, this->f2C, &at, &push);
             if (PSVECDotProduct((const Vec*)&push, (const Vec*)&push) > 10.0f) {
-                fn_801B34DC(o, 0, &at, &push, &((const RVec3C&)RVec3C(0.0f, 1.0f, 0.0f)).x, U32(p, 0x20));
+                ProcessCollisionResponse(o, 0, &at, &push, &((const RVec3C&)RVec3C(0.0f, 1.0f, 0.0f)).x, U32(p, 0x20));
             }
         }
     } else if (((CollShape*)o)->type == 'BOX ') {
@@ -3386,7 +3386,7 @@ f32 SphereGroup::Radius(void) {
     u8* p = (u8*)this; return this->f178; }
 
 void RagdollShape::vf4C(void) {
-    u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, this->radius, lbl_8055E598.value); }
+    u8* p = (u8*)this; DrawDebugSphere(((u8*&)this->frame) + 0x24, this->radius, lbl_8055E598.value); }
 
 RingVol::RingVol(u32 a, u32 swap) : CollShape(a, swap) {
     u8* p = (u8*)this;
@@ -3460,7 +3460,7 @@ void RingVol::vf38(RVec3* lo, RVec3* hi) const {
 }
 
 void RingVol::vf4C(void) {
-    u8* p = (u8*)this; fn_801E3FC8(((u8*&)this->frame) + 0x24, this->inner + this->ring, lbl_8055E598.value); }
+    u8* p = (u8*)this; DrawDebugSphere(((u8*&)this->frame) + 0x24, this->inner + this->ring, lbl_8055E598.value); }
 
 PolyShape::PolyShape(const RMtx* a, const PolyPlane* planes, s32 n, const RVec3* lo, const RVec3* hi, f32 f1, f32 f2) : CollShape(a, (CollVolume*)0, 'POLY', f1, f2) {
     u8* p = (u8*)this;
@@ -3633,7 +3633,7 @@ void PolyShape::vf4C(void) {
         w.x = w.x + f->pos.x;
         w.y = w.y + f->pos.y;
         w.z = w.z + f->pos.z;
-        fn_801E41D8(o.v, &w.x, color, 0.3f);
+        DrawLineSegment(o.v, &w.x, color, 0.3f);
     }
 }
 

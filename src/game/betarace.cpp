@@ -962,7 +962,7 @@ class Body;
 extern "C" {
 CoinFrame fn_801683F4(int player);
 int GetFrameCounter(void);
-DeityCar* fn_801B2EC0(int id);
+DeityCar* GetDeityCarByIndex(int id);
 DeityCar* fn_801B2ED0(int id);
 void fn_801DF074(int a, int b);
 void fn_801796EC(int type, void* data, int size);
@@ -1845,7 +1845,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
     }
     work.slotBytes = (mode == 0 ? 0 : mode == 1 ? 1 : (f32)__fabs(meter - 1.0f) <= __float_epsilon[0]);
     boosting = 0;
-    if (fn_801B2EC0(id)->State()->flags & 4) {
+    if (GetDeityCarByIndex(id)->State()->flags & 4) {
         meterObj->Start(rc);
         meterObj->Reset();
         boosting = 1;
@@ -1958,7 +1958,7 @@ void BetaCar::Update(PickupList* stars, PuddleList* puddles) {
         boosts++;
         maxBoosts = boosts > maxBoosts ? boosts : maxBoosts;
     }
-    if (fn_801B2EC0(id)->State()->mode == 0 && rc->f1F0 == 0x50 && rc->speed > 44.444447f) {
+    if (GetDeityCarByIndex(id)->State()->mode == 0 && rc->f1F0 == 0x50 && rc->speed > 44.444447f) {
         fn_801DF074(4, 1);
     }
     f58 = 0.0f;
@@ -2013,7 +2013,7 @@ extern "C" {
 f32 fn_80144BD8(f32 x);  // ease in/out
 int fn_80160A74(void);   // places that get a high score entry
 int fn_801B2ED4(void);
-void fn_801DF93C(int view);
+void DrawBoostGauge(int view);
 }  // extern "C"
 void UpdateLapTitleOverlay(int);
 extern "C" {
@@ -2148,7 +2148,7 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
     }
     pal = fn_8026B0C0(view);
     if (pal) {
-        fn_801DF93C(view);
+        DrawBoostGauge(view);
     }
     if (!pal || fn_80179650() > 1) {
         if (master->timer.b10 && master->timer.Finishing()) {
@@ -2539,7 +2539,7 @@ extern f32 lbl_80559EB0;
 
 extern "C" {
 void fn_8012E81C(const char* res);
-const char* fn_80205268(const char* key, int a, int event);
+const char* GetDifficultyString(const char* key, int a, int event);
 int fn_8012C33C(const char* name);
 ValueTable* fn_80131810(const char* name);
 double ceil(double x);
@@ -2557,7 +2557,7 @@ f32 CalculateTimeLimit(int event, int a) {
     fn_8012E81C("ghostcar.res");
     e = GetEvent(event);
     t = GetTrack(e->track);
-    key = fn_80205268("time_limit_override_key", a, event);
+    key = GetDifficultyString("time_limit_override_key", a, event);
     if (!e->node->Has(key)) {
         f32 lim = e->node->GetFloat("time_limit", kBetaDefaultLapLimit.value);
         const char* res = e->node->GetString("resource", "xxx");
@@ -3192,7 +3192,7 @@ u8 fn_801D48F8(void* seq);  /* PORT: the definition's width (x86 leaves the uppe
 #endif
 int fn_801D4904(void* seq);
 int fn_801D4900(void* seq);
-f32 fn_801B306C(void);
+f32 CalculateFrameTime(void);
 int fn_80161C38(void);
 }  // extern "C"
 int fn_80009C84(void);
@@ -3346,7 +3346,7 @@ inline void BetaMaster::vf0C(void) {
         stars.a.data[i]->Update();
     }
     found = 0;
-    lead = fn_801B306C();
+    lead = CalculateFrameTime();
     if (!b450 && lead < kBetaBoostScale.value) {
         b450 = 1;
         if (preraceSnd && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
@@ -3445,7 +3445,7 @@ int fn_801E85A4(void);
 int fn_801E86F8(int view);
 int fn_801E85B4(void);
 int fn_801E866C(int view);
-void fn_801E41D8(const V3* a, const V3* b, u32 color, f32 r);
+void DrawLineSegment(const V3* a, const V3* b, u32 color, f32 r);
 void fn_80167844(void);
 void fn_8016A438(void);
 }
@@ -3532,7 +3532,7 @@ static inline void DrawPuddleMarker(const Puddle* p, u32 col) {
     V3 b = *(V3*)&p->x;
     a.y = a.y - kBetaRingScale.value;
     b.y += kBetaRingScale.value;
-    fn_801E41D8(&a, &b, col, p->r);
+    DrawLineSegment(&a, &b, col, p->r);
 }
 // Retail compiled vf48 with dead-assignment elimination off: the mode-1 colour assignment survives (so the car and
 // mode tests stay) and the back end deletes its load (same family as gtext fn_80233354 and pickup fn_80168104).
@@ -3949,7 +3949,7 @@ inline void BetaMaster::vf60(int view) {
 inline int BetaMaster::vf88(void) const { return 1; }
 
 extern "C" {
-void fn_8000FBE4(void);
+void UpdateDashHelper(void);
 s32 fn_80160A90(void);  // stars needed
 }  // extern "C"
 TextElem* GetLapBody(int);
@@ -4001,7 +4001,7 @@ inline int BetaMaster::vf3C(int view) {
     TextElem* h0 = Overlay()->Find("intro_head_0");
     TextElem* h1 = Overlay()->Find("intro_head_1");
     if (t < full2) {
-        fn_8000FBE4();
+        UpdateDashHelper();
     }
     if (!fn_80161C38()) {
     if (t < end0) {

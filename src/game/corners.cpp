@@ -191,7 +191,7 @@ void Corner::Stop(void) {
 
 extern "C" {
 
-Corner* fn_801AE180(void) {
+Corner* AllocateCornerFromPool(void) {
     CornerPool* pool = lbl_8055E604;
     if (!pool->head || pool->head->count == 64) {
         CornerBlock* b = new (pool->name) CornerBlock;
@@ -202,7 +202,7 @@ Corner* fn_801AE180(void) {
     return &b->corners[b->count++];
 }
 
-void fn_801AE4C4(void) { lbl_8055E604 = new ("corner-alloc") CornerPool("corners"); }
+void InitializeCornerPool(void) { lbl_8055E604 = new ("corner-alloc") CornerPool("corners"); }
 
 void fn_801AE50C(void) {
     CornerPool* pool = lbl_8055E604;

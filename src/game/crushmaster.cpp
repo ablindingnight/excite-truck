@@ -331,7 +331,7 @@ struct LayoutRef {
     ILayout* p;  // offset 0x0
 };
 
-extern "C" int fn_80171EC0(int id);
+extern "C" int IsPlayerCar(int id);
 
 
 // The race's per-mode hooks (0x2C vtable, all pure).
@@ -499,7 +499,7 @@ static inline void Rotate(V2* v, f32 a) {
     v->y = tx * sn + v->y * cs;
 }
 
-int fn_80171D38(int chan) {
+int IsTurboButtonPressed(int chan) {
     JoyStatus s;
     int r = 0;
     if (fn_801298E8(&s, chan) && s.buttons[fn_801297F4()[12]]) {
@@ -543,7 +543,7 @@ int fn_80171E3C(const V2& p) {
 }
 
 // Whether the car is a player's ('PCAR') rather than the AI's.
-int fn_80171EC0(int id) { return (u32)fn_8017960C(id)->type == 'PCAR'; }
+int IsPlayerCar(int id) { return (u32)fn_8017960C(id)->type == 'PCAR'; }
 
 static inline V2 LerpV(const V2* a, const V2* b, f32 t) {
     V2 r;
@@ -593,7 +593,7 @@ V2 fn_80171FF0(const V2* c, int tries, f32 r0, f32 dr) {
 
 u32 fn_801720E0(u32 c) { return ((c >> 1) & 0x7F7F7F) | (c & 0xFF000000); }
 
-void fn_801720FC(const ValVec3* at, u32 color, f32 size) {
+void DrawArrowMarker(const ValVec3* at, u32 color, f32 size) {
     ValVec3 up;
     ValVec3 fwd;
     ValVec3 side;
@@ -666,14 +666,14 @@ void fn_8017248C(int id) {
         f32 now = lbl_8055E3C8;
         p.y += lo + h * Parab(fmod(3.742f * (2.0f * id) + now, 2.0), 1.0f);
     }
-    fn_801720FC(&p, 0xFFFFFF00, size);
+    DrawArrowMarker(&p, 0xFFFFFF00, size);
 }
 
-f32 fn_801725C8(f32 t) {
+f32 CalculateSpeedInterpolation(f32 t) {
     return Remap(t, lbl_8043038C.speedATime, lbl_8043038C.speedBTime, lbl_8043038C.speedA, lbl_8043038C.speedB);
 }
 
-int fn_80172624(int killer, int victim) {
+int CalculateKillRating(int killer, int victim) {
     RaceCarRec* a = fn_8017960C(killer);
     RaceCarRec* b = fn_8017960C(victim);
     f32 d = PSVECDistance((const Vec*)((ValVec3*)&a->vel), (const Vec*)((ValVec3*)&b->vel));
@@ -842,7 +842,7 @@ inline void CrushMaster::vfF8(void) {
     layout.p = (ILayout*)fn_80145E70("crushlyt.val");
     nCars = GetHumanPlayerCount();
     for (i = 0; i < nCars; i++) {
-        cars[i].human = fn_80171EC0(i);
+        cars[i].human = IsPlayerCar(i);
         cars[i].active = 1;
         cars[i].f18 = -1.0f;
         cars[i].fC = 0;
@@ -948,7 +948,7 @@ inline int CrushMaster::Started1C(int car) { return AliveAI() != 0; }
 int IsLoadingActive(void);
 
 extern "C" {
-void fn_8000FBE4(void);
+void UpdateDashHelper(void);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 f32 fn_80147204(TextElem* e, const char* text);
 s32 fn_80160998(s32 a);
@@ -977,7 +977,7 @@ void fn_8018AF04(RaceCarRec* car);
 void fn_801E9DC4(s16* h);
 f32 fn_801DCF48(int a, f32 x, f32 z);  // ground height
 void fn_801B7C8C(CarPlace* r, V2* pos, V2* dir);
-f32 fn_801B306C(void);  // race time
+f32 CalculateFrameTime(void);  // race time
 int fn_80161C38(void);
 int fn_80179650(void);
 }  // extern "C"
@@ -1011,13 +1011,13 @@ inline void CrushMaster::Finish(f32 now) {
 inline void CrushMaster::vf0C(void) {
     f32 now = lbl_8055E3C8;
     int i;
-    if (!b2B8 && fn_801B306C() < 6.75f) {
+    if (!b2B8 && CalculateFrameTime() < 6.75f) {
         b2B8 = 1;
         if (sPreRace && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {
             sPreRace->Play();
         }
     }
-    if (fn_801B306C() >= 0.0f) {
+    if (CalculateFrameTime() >= 0.0f) {
         endTime = now + timeout;
     }
     for (i = 0; i < nCars; i++) {
@@ -1205,14 +1205,14 @@ inline void CrushMaster::vfB8(ZoneResults* r) {
     r->done = vf24();
     r->bC = 0;
     for (i = 0, e = r->entries; i < r->nCars; e++, i++) {
-        e->b10 = fn_80171EC0(i) == 0;
+        e->b10 = IsPlayerCar(i) == 0;
         e->place = i;
         e->score = cars[i].Score();
     }
 }
 
 inline void CrushMaster::vf44(void) {
-    if (fn_801B306C() < 0.0f && !IsLoadingActive()) {
+    if (CalculateFrameTime() < 0.0f && !IsLoadingActive()) {
         int n = GetHumanPlayerCount();
         int i;
         for (i = 0; i < n; i++) {
@@ -1253,7 +1253,7 @@ static inline f32 Ease(f32 t) {
 }
 
 extern "C" {
-static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...);
+static inline void UpdateTextElementFormat(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...);
 }
 
 // Helper name unproven: the kill icon column (its locals colour as an inlined body).
@@ -1303,7 +1303,7 @@ inline void CrushMaster::DrawKills(int car) const {
 inline void CrushMaster::vf4C(int view) const {
     int car = fn_801E866C(view);
     int radar = 1;
-    if (!lbl_8043038C.alwaysRadar && !fn_80171D38(view)) {
+    if (!lbl_8043038C.alwaysRadar && !IsTurboButtonPressed(view)) {
         radar = 0;
     }
     if (layout.p) {
@@ -1329,22 +1329,22 @@ inline void CrushMaster::vf4C(int view) const {
             }
         }
         if (t184.Running()) {
-            fn_80175080(layout.p, "lame_kill_msg_0", "lame_kill_msg", Ease(t184.Progress()), 0);
+            UpdateTextElementFormat(layout.p, "lame_kill_msg_0", "lame_kill_msg", Ease(t184.Progress()), 0);
         }
         if (t17C.Running()) {
-            fn_80175080(layout.p, "kill_msg_0", "kill_msg", Ease(t17C.Progress()), 0);
+            UpdateTextElementFormat(layout.p, "kill_msg_0", "kill_msg", Ease(t17C.Progress()), 0);
         }
         if (t18C.Running()) {
-            fn_80175080(layout.p, "awesome_kill_msg_0", "awesome_kill_msg", Ease(t18C.Progress()), 0);
+            UpdateTextElementFormat(layout.p, "awesome_kill_msg_0", "awesome_kill_msg", Ease(t18C.Progress()), 0);
         }
         if (t174.Running()) {
-            fn_80175080(layout.p, "player_wins_msg_0", "player_wins_msg", Ease(t174.Progress()), 0);
+            UpdateTextElementFormat(layout.p, "player_wins_msg_0", "player_wins_msg", Ease(t174.Progress()), 0);
         }
     }
     UpdateScoreOverlays(fn_801E866C(view), lbl_8043038C.pointsPerKill * (cars[car].fC + cars[car].f8));
 }
 
-static inline void fn_80175080(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
+static inline void UpdateTextElementFormat(ILayout* l, const char* from, const char* to, f32 t, const char* fmt, ...) {
     TextElem* a = l->Find(from);
     TextElem* b = l->Find(to);
     TextElem e;
@@ -1436,7 +1436,7 @@ inline int CrushMaster::vf3C(int view) {
     TextElem* h0 = layout.p->Find("intro_head_0");
     TextElem* h1 = layout.p->Find("intro_head_1");
     if (t < full1) {
-        fn_8000FBE4();
+        UpdateDashHelper();
     }
     if (!fn_80161C38()) {
         if (t < end0) {
@@ -1499,7 +1499,7 @@ public:
 
 struct RVec3;
 extern "C" {
-CarBrain* fn_801B2EC0(int car);
+CarBrain* GetDeityCarByIndex(int car);
 u8 fn_801B3050(int car);
 void BreakOffDetachedParts(RaceCarRec* car);
 }
@@ -1584,7 +1584,7 @@ static inline void PickSide(CrushTarget* t, int i) {
         a0 = 0.0f;
         a1 = 20.0f;
     }
-    PickTarget(t, i, fn_801725C8(lbl_8055E3C8), a1, a0);
+    PickTarget(t, i, CalculateSpeedInterpolation(lbl_8055E3C8), a1, a0);
 }
 
 inline void CrushSubTaskMgr::vf24(void) {
@@ -1615,7 +1615,7 @@ static inline void Retarget(CrushTarget* t, int i) {
     here.y = rec->mtx.pos.z;
     if (fn_80171E3C(here)) {
         f32 now = lbl_8055E3C8;
-        PickTarget(t, i, fn_801725C8(now), 20.0f, -20.0f);
+        PickTarget(t, i, CalculateSpeedInterpolation(now), 20.0f, -20.0f);
     } else {
         V2 p = fn_80171FF0(&here, 10, 5.0f, 5.0f);
         t->x = p.x;
@@ -1691,9 +1691,9 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
     if (master->vf20(a) && master->vf20(b)) {
         CrushMaster* m;
         int victim = -1;
-        if (fn_80171EC0(a)) {
+        if (IsPlayerCar(a)) {
             victim = b;
-        } else if (fn_80171EC0(b)) {
+        } else if (IsPlayerCar(b)) {
             victim = a;
         }
         if (victim != -1) {
@@ -1701,14 +1701,14 @@ inline void CrushSubTaskMgr::vf18(int a, int b) {
             if (a == victim) {
                 a = b;
             }
-            grade = fn_80172624(a, victim);
+            grade = CalculateKillRating(a, victim);
             m = master;
             m->t17C.Clear();
             m->t18C.Clear();
             if (grade >= 1) {
                 f32 now;
                 m->t184.Clear();
-                fn_801B2EC0(victim)->Crushed(a);
+                GetDeityCarByIndex(victim)->Crushed(a);
                 fn_80171D94(victim);
                 now = lbl_8055E3C8;
                 m->cars[victim].active = 0;

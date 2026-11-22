@@ -27,18 +27,18 @@ int fn_802C9A60(void);
 s32 fn_802C9C38(void);  // screen height
 s32 fn_802C9C48(void);  // screen width
 #ifdef __MWERKS__
-void fn_8000FF88(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
+void DrawFormattedString(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 void fn_800104B0(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
-void fn_8001027C(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
+void DrawFormattedTextElement(f32 scale, f32 x, f32 y, u32 color, int flags, const char* fmt, ...);
 #else
 // PORT: dashhelper's definitions take (color, flags, fmt, scale, x, y, ...); on the PPC the floats travel in FPRs
 // whatever their position, on x86 every argument is a stack slot. Same calls, reordered for the definition.
-void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void DrawFormattedString(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 void fn_800104B0(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
-void fn_8001027C(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
-#define fn_8000FF88(s, x, y, c, f, fmt, ...) (fn_8000FF88)(c, f, fmt, s, x, y, ##__VA_ARGS__)
+void DrawFormattedTextElement(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+#define DrawFormattedString(s, x, y, c, f, fmt, ...) (DrawFormattedString)(c, f, fmt, s, x, y, ##__VA_ARGS__)
 #define fn_800104B0(s, x, y, c, f, fmt, ...) (fn_800104B0)(c, f, fmt, s, x, y, ##__VA_ARGS__)
-#define fn_8001027C(s, x, y, c, f, fmt, ...) (fn_8001027C)(c, f, fmt, s, x, y, ##__VA_ARGS__)
+#define DrawFormattedTextElement(s, x, y, c, f, fmt, ...) (DrawFormattedTextElement)(c, f, fmt, s, x, y, ##__VA_ARGS__)
 #endif
 }
 
@@ -374,7 +374,7 @@ void fn_80145B50(Rect* r, int n) {
 
 void fn_80145B94(const TextElem* e, const char* text) {
     f32 y = fn_801452B4(e->pos.y);
-    fn_8000FF88(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, text);
+    DrawFormattedString(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, text);
 }
 
 void fn_80145C08(const TextElem* e, const char* text) {
@@ -387,7 +387,7 @@ static inline const char* LayoutTextFormat() { return "%s"; }
 
 void fn_80145C7C(const TextElem* e, const char* text) {
     f32 y = fn_801452B4(e->pos.y);
-    fn_8001027C(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, LayoutTextFormat(), text);
+    DrawFormattedTextElement(e->scale, fn_801451DC(e->pos.x, e->elemJust), y, e->color, e->just, LayoutTextFormat(), text);
 }
 
 void fn_80145CF4(const GartElem* e, gArtSet* art, int part) {
@@ -417,7 +417,7 @@ void fn_802C8E00(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int idx);
 void fn_802C8E48(void);
 void fn_802C8D74(void);
 f32 fn_800108C8(const char* text, f32 scale);
-void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
+void QueueColoredRectangle(f32 x, f32 y, f32 w, f32 h, u32 color);
 void fn_80011278(u32 color, f32 x, f32 y, f32 w, f32 h);
 void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 start, f32 step, f32 u0, f32 v0,
                  f32 u1, f32 v1);
@@ -719,8 +719,8 @@ public:
         }
     }
     static void DrawInfo(const BoxElem* e) {
-        fn_80010B80(fn_801451DC(e->pos.x, 4), fn_801452B4(e->pos.y - 15.0f), 100.0f, 15.0f, 0x40000000);
-        fn_8000FF88(0.6f, fn_801451DC(e->pos.x, 4), fn_801452B4(e->pos.y - 15.0f), -1, 9, "%.0f, %.0f (%.0f, %.0f)",
+        QueueColoredRectangle(fn_801451DC(e->pos.x, 4), fn_801452B4(e->pos.y - 15.0f), 100.0f, 15.0f, 0x40000000);
+        DrawFormattedString(0.6f, fn_801451DC(e->pos.x, 4), fn_801452B4(e->pos.y - 15.0f), -1, 9, "%.0f, %.0f (%.0f, %.0f)",
                     e->pos.x, e->pos.y, e->w, e->h);
     }
     virtual void ToggleEdit(void) { editing = !editing; }
@@ -783,21 +783,21 @@ public:
                         col = r->handler->Color();
                     }
                     if (r->target) {
-                        fn_80010B80(fn_801451DC(((ElemBase*)r->target)->pos.x + r->r.x, 4),
+                        QueueColoredRectangle(fn_801451DC(((ElemBase*)r->target)->pos.x + r->r.x, 4),
                                     fn_801452B4(((ElemBase*)r->target)->pos.y + r->r.y), r->r.w, r->r.h, col);
                     } else {
-                        fn_80010B80(fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), r->r.w, r->r.h, col);
+                        QueueColoredRectangle(fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), r->r.w, r->r.h, col);
                     }
                     label = r->handler->Label();
                     if (label) {
                         if (!r->target) {
-                            fn_8000FF88(0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), -1, 9, LayoutTextFormat(), label);
+                            DrawFormattedString(0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), -1, 9, LayoutTextFormat(), label);
                         } else if (r == c->hover) {
-                            fn_8000FF88(0.6f, fn_801451DC(r->r.x + ((ElemBase*)r->target)->pos.x, 4),
+                            DrawFormattedString(0.6f, fn_801451DC(r->r.x + ((ElemBase*)r->target)->pos.x, 4),
                                         fn_801452B4(r->r.y + ((ElemBase*)r->target)->pos.y - 10.0f), -1, 12,
                                         LayoutTextFormat(), label);
-                            fn_80010B80(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
-                            fn_8000FF88(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, LayoutTextFormat(),
+                            QueueColoredRectangle(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
+                            DrawFormattedString(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, LayoutTextFormat(),
                                         ((ElemBase*)r->target)->name);
                         }
                     }
@@ -809,7 +809,7 @@ public:
                 c = ctx;
                 other = !c->hover || a != c->hover->target;
                 col = other ? 0x70FFFFFF : 0xC0FFFFFF;
-                fn_80010B80(fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y), a->w, a->h, col);
+                QueueColoredRectangle(fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y), a->w, a->h, col);
                 if (c->active && a == c->active->target) {
                     DrawInfo(a);
                 }
@@ -823,7 +823,7 @@ public:
                 } else {
                     col = 0xC0FFFFFF;
                 }
-                fn_80010B80(fn_801451DC(g->pos.x, 4), fn_801452B4(g->pos.y), g->w, g->h, col);
+                QueueColoredRectangle(fn_801451DC(g->pos.x, 4), fn_801452B4(g->pos.y), g->w, g->h, col);
                 if (c->active && g == c->active->target) {
                     DrawInfo(g);
                 }
@@ -1353,7 +1353,7 @@ void fn_80147FF0(const GartElem* e, u32 color) {
 
 void fn_80148070(const GartElem* e, u32 color, gArtSet* art) {
     f32 w = fn_801452A0(e->w, e->elemJust);
-    fn_80011280(color, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h, art);
+    DrawLoadingScreenBackground(color, fn_801451DC(e->pos.x, e->elemJust), fn_801452B4(e->pos.y), w, e->h, art);
 }
 
 void fn_80148100(const GartElem* e) {

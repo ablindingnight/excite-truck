@@ -251,14 +251,14 @@ void fn_802C8638(void* cam);
 void fn_801EA478(int cam);
 void fn_801E9DC4(s16* hint);
 f32 fn_801E9DDC(s16* hint, f32 x, f32 z);
-void fn_801E3FC8(const ValVec3* p, f32 size, u32 color);
+void DrawDebugSphere(const ValVec3* p, f32 size, u32 color);
 double cos(double x);
 int fn_8012C33C(const char* name);
 ValueTable* fn_80131808(const char* name);
 void fn_80131818(ValueTable* t);
 void fn_80144CD0(ValVec3* out, const ValVec3* p, const f32* m);
 void fn_8000FC8C(const char* s);
-void fn_8000FDF0(const char* s);
+void DrawCenteredText(const char* s);
 void fn_80128678(void);
 void fn_80128684(void);
 void fn_8012BEF0(const char* name);
@@ -750,7 +750,7 @@ static inline void AxisAngleToRot(Mat3* m, const ValVec3& v) {
     }
 }
 
-// Helper name unproven: one matrix row through by-value arguments (chunks fn_80292698 has the same rows).
+// Helper name unproven: one matrix row through by-value arguments (chunks UpdateSpinRotations has the same rows).
 static inline void SetRow3(f32* row, f32 x, f32 y, f32 z) {
     row[0] = x;
     row[1] = y;
@@ -1785,7 +1785,7 @@ void fn_801C6B70(void) {
             }
             s = lbl_80437E24.title;
             if (strlen(s)) {
-                fn_8000FDF0(s);
+                DrawCenteredText(s);
             }
         }
     }
@@ -3128,7 +3128,7 @@ void fn_801CA67C(void) {
         InterludeEvent ev = lbl_8055E7F8[lbl_8055E828];
         switch (ev.type) {
         case 6:
-            fn_801E3FC8(&((WaitEvent*)&ev)->pt, 2.0f, 0xFFFFFF00);
+            DrawDebugSphere(&((WaitEvent*)&ev)->pt, 2.0f, 0xFFFFFF00);
             break;
         case 4: {
             TeleportEvent* tp = (TeleportEvent*)&ev;
@@ -3142,7 +3142,7 @@ void fn_801CA67C(void) {
                 p.y = 0.0f;
                 p.z = z;
                 p.y = fn_801E9DDC(&hint, x, z);
-                fn_801E3FC8(&p, 2.0f, 0xFF0000FF);
+                DrawDebugSphere(&p, 2.0f, 0xFF0000FF);
             }
             break;
         }
@@ -3158,7 +3158,7 @@ void fn_801CA67C(void) {
                 p.y = 0.0f;
                 p.z = z;
                 p.y = fn_801E9DDC(&hint, x, z);
-                fn_801E3FC8(&p, 2.0f, 0xFF00FF00);
+                DrawDebugSphere(&p, 2.0f, 0xFF00FF00);
             }
             break;
         }

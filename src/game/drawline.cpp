@@ -14,22 +14,22 @@ UnkStaticFFFF lbl_8055F808;
 
 extern "C" {
 
-int fn_8029EFF0(s32 tex);
+int IsValidTextureIndex(s32 tex);
 
-void fn_8029EF70(void) {
+void LoadLineTexture(void) {
     lbl_8055CAE0 = fn_802CAC28("efx_line.tex", 0);
-    if (!fn_8029EFF0(lbl_8055CAE0)) {
+    if (!IsValidTextureIndex(lbl_8055CAE0)) {
         fn_802E30C8("drawline: Couldn't get the line texture");
     }
 }
 
 void fn_8029EFBC(void) {
-    if (fn_8029EFF0(lbl_8055CAE0)) {
+    if (IsValidTextureIndex(lbl_8055CAE0)) {
         gxForgetTexture(lbl_8055CAE0);
     }
 }
 
-int fn_8029EFF0(s32 tex) {
+int IsValidTextureIndex(s32 tex) {
     if (!(tex != -1 && tex != -2)) {
         return 0;
     }

@@ -29,7 +29,7 @@ int fn_80158618(const char* name);  // stunt type by name
 void fn_80158558(void* w);          // add stunt watcher
 void fn_801332D0(void* slot, const char* key, s32* value);
 void fn_80133348(void* slot, const char* key, s32 value);
-void fn_800121A4(void);
+void PlayDashSounds(void);
 void fn_80137C78(int a);
 void* fn_802E4A10(void);
 void fn_80137C84(void* a, int b);
@@ -38,7 +38,7 @@ void fn_8023BEC4(int event, void* out);
 void fn_802E7128(void);
 void fn_80148070(GartElem* elem, u32 color, gArtSet* art);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, s32 mode);
-void fn_800103B8(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
+void DrawFormattedText(f32 scale, u32 color, u32 flags, f32 x, f32 y, f32 w, const char* fmt, ...);
 void fn_801473F8(void* layout, const char* elem, const char* fmt, ...);
 void fn_801476C4(TextElem* elem);
 }
@@ -828,7 +828,7 @@ void fn_80161438(const char* title, const char* msg) {
         }
         t = lbl_8055E2E0->Find("popup_msg");
         fn_80148134(&x, &y, t->pos.x, t->pos.y, t->elemJust);
-        fn_800103B8(t->scale, t->color, t->just, x, y, box->w - 34.0f, "%s", msg);
+        DrawFormattedText(t->scale, t->color, t->just, x, y, box->w - 34.0f, "%s", msg);
         fn_801473F8(lbl_8055E2E0, "popup_title_elem", "%s", title);
         fn_801476C4(lbl_8055E2E0->Find("continue"));
     }
@@ -955,7 +955,7 @@ void fn_80161AEC(void) {
 int fn_80161B0C(int unused, int key) {
     if (lbl_8055E300 && lbl_8055E300->Key(key)) {
         if (!lbl_8055E2DD) {
-            fn_800121A4();
+            PlayDashSounds();
         }
         lbl_8055E2DD = 0;
         return 1;
@@ -1412,7 +1412,7 @@ inline int StuntChallenge::DrawResults(int a) {
         f32 px;
         f32 py;
         fn_80148134(&px, &py, t->pos.x, t->pos.y, t->elemJust);
-        fn_800103B8(t->scale, t->color, t->just, px, py, art->w - 100.0f, "%s", body);
+        DrawFormattedText(t->scale, t->color, t->just, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {
         fn_801476C4(lbl_8055E2E0->Find("continue"));
@@ -1446,7 +1446,7 @@ inline int FreestyleChallenge::DrawResults(int a) {
         f32 px;
         f32 py;
         fn_80148134(&px, &py, t->pos.x, t->pos.y, t->elemJust);
-        fn_800103B8(t->scale, t->color, t->just, px, py, art->w - 100.0f, "%s", body);
+        DrawFormattedText(t->scale, t->color, t->just, px, py, art->w - 100.0f, "%s", body);
     }
     if (endTime > 0.5f) {
         fn_801476C4(lbl_8055E2E0->Find("continue"));

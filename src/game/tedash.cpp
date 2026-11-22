@@ -174,7 +174,7 @@ int fn_80204054(V3* out, int a, int b, void* cam, s32 x, s32 y);
 void* fn_802C86DC(void);
 void fn_802BE8B4(s16 x, s16 z, s16 size);
 int fn_802BC09C(s32 x, s32 z, s32 layer, s32 a, f32 t);
-void fn_801E41D8(V3* a, V3* b, u32 color, f32 w);
+void DrawLineSegment(V3* a, V3* b, u32 color, f32 w);
 s32 fn_8026E214(void* fn);
 void mrModelUnload(s32 h);
 void fn_802C7040(s32 h);
@@ -770,7 +770,7 @@ void fn_802B7300(int x, int z, int v, u32 color, f32 h) {
         color = 0xFF000000;
         v = 0x20;
     }
-    fn_801E41D8(&p, &q, (color & 0xFFFFFF) | (v << 24), w);
+    DrawLineSegment(&p, &q, (color & 0xFFFFFF) | (v << 24), w);
 }
 
 const f32 lbl_80564C88 = 2.0f;

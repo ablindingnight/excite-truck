@@ -15,7 +15,7 @@ void ParseAIStrength(s32* lvl, f32* frac, s32 strength);
 int fn_80179630(int i);
 int fn_801B2F24(void);
 int fn_801B2F40(int i);
-f32 fn_801B2F90(int a, int b);
+f32 CalculateRankDifference(int a, int b);
 }
 
 
@@ -45,7 +45,7 @@ Catchup lbl_8042F8B8;
 
 extern "C" {
 
-void fn_8013B7B4(Catchup* tbl, s32 n) {
+void LoadCatchupValues(Catchup* tbl, s32 n) {
     Catchup* out;
     ValueTable* t;
     ValueNode* c;
@@ -75,7 +75,7 @@ void fn_8013B7B4(Catchup* tbl, s32 n) {
 
 int fn_8013BC70(f32* dist);
 
-void fn_8013B950(void) {
+void UpdateCatchupValue(void) {
     int leader;
     f32 dist;
     lbl_8042F8A8.active = 0;
@@ -96,7 +96,7 @@ void fn_8013B950(void) {
             }
         }
         if (found && fn_801B2ED0(leader)->State()->place > found->place) {
-            f32 d = fn_801B2F90(leader, id);
+            f32 d = CalculateRankDifference(leader, id);
             lbl_8042F8A8.dist = d;
             lbl_8042F8A8.car = id;
             lbl_8042F8A8.active = lbl_8042F8A8.dist < 1000.0f;
@@ -110,13 +110,13 @@ void fn_8013B950(void) {
     }
 }
 
-void fn_8013BAE4(s32 n) {
+void CalculateCatchupValues(s32 n) {
     Catchup tbl[3];
     s32 lvl;
     f32 frac;
     int cnt;
     lbl_8042F8A8.active = 0;
-    fn_8013B7B4(tbl, n);
+    LoadCatchupValues(tbl, n);
     ParseAIStrength(&lvl, &frac, fn_801E87A8()->level);
     // The four settings are blended as an array of floats: a counted-down loop the compiler unrolls.
     const f32* lo = (const f32*)&tbl[lvl];
@@ -142,7 +142,7 @@ void fn_8013BC34(void) {
 
 void fn_8013BC54(void) {
     if ((++lbl_8055E174 & 7) == 0) {
-        fn_8013B950();
+        UpdateCatchupValue();
     }
 }
 

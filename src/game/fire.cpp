@@ -97,12 +97,12 @@ const FireCar* fn_80287B24(s32 i);
 void fn_80287B38(void (*cb)(const FireCarEntry* e, int n));
 int fn_80287B5C(int n);
 f32 fn_80287BC8(f32 lo, f32 hi);
-int fn_80287E20(FireModel* model, const char* name);
-ValueNode* fn_80287E80(FireModel* model, const char* name);
-ValVec3 fn_80287ED0(FireModel* model, const char* node, const char* key);
-ValVec3 fn_80287F90(FireModel* model, const char* node, const char* key, ValVec3 def);
+int CheckEffectKeyExists(FireModel* model, const char* name);
+ValueNode* FindEffectNode(FireModel* model, const char* name);
+ValVec3 GetEffectNodeVector(FireModel* model, const char* node, const char* key);
+ValVec3 GetNodeVector3(FireModel* model, const char* node, const char* key, ValVec3 def);
 const PlainValMatrix* fn_80288060(FireModel* model, int i);
-FireModel* fn_80288208(s32 i);
+FireModel* GetEffectInfo(s32 i);
 void fn_80288A40(const Vec* p, const Vec* v);
 void fn_80288A58(const Vec* p, const Vec* v);
 void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
@@ -709,10 +709,10 @@ EngineFireMan::EngineFireMan(void) {
     int n = fn_80287B14();
     cars = new ("EngineFireMan tab") EngineEntry[n];
     for (int i = 0; i < n; i++) {
-        FireModel* model = fn_80288208(i);
-        if (fn_80287E20(model, "engine")) {
-            cars[i].pos = fn_80287ED0(model, "engine", "arm");
-            cars[i].spread = fn_80287F90(model, "engine", "spread", ValV3(0.0f, 0.0f, 0.0f));
+        FireModel* model = GetEffectInfo(i);
+        if (CheckEffectKeyExists(model, "engine")) {
+            cars[i].pos = GetEffectNodeVector(model, "engine", "arm");
+            cars[i].spread = GetNodeVector3(model, "engine", "spread", ValV3(0.0f, 0.0f, 0.0f));
             cars[i].has = 1;
         } else {
             cars[i].has = 0;
@@ -1266,7 +1266,7 @@ void BoostFireMan::Update(int i, const FireCar* car, f32 dt, f32 dist) {
 
 void BoostFireMan::Calc(int i, const FireCar* car) {
     BoostEntry* e = &entries[i];
-    fn_80288208(i);
+    GetEffectInfo(i);
     MulVec(&e->pts[0], &car->wheels[2].pos, car->axes);
     e->pts[0].x = e->pts[0].x + car->pos.x;
     e->pts[0].y = e->pts[0].y + car->pos.y;
@@ -1283,10 +1283,10 @@ ExhaustTorchMan::ExhaustTorchMan(void) {
     Load();
     int n = fn_80287B14();
     for (int i = 0; i < n; i++) {
-        FireModel* model = fn_80288208(i);
+        FireModel* model = GetEffectInfo(i);
         sizes[i] = 1.0f;
-        if (fn_80287E20(model, "engine")) {
-            sizes[i] = fn_80287E80(model, "engine")->GetFloat("exhaust_torch_size", sizes[i]);
+        if (CheckEffectKeyExists(model, "engine")) {
+            sizes[i] = FindEffectNode(model, "engine")->GetFloat("exhaust_torch_size", sizes[i]);
         }
     }
     Reset();
@@ -1307,7 +1307,7 @@ void ExhaustTorchMan::Draw(void) {
         int total = 0;
         for (int i = 0; i < fn_80287B14(); i++) {
             if (entries[i].on) {
-                total += fn_80288208(i)->nParts;
+                total += GetEffectInfo(i)->nParts;
             }
         }
         f32 old = fn_802C9A4C(-grid / 0.325f);
@@ -1425,7 +1425,7 @@ void ExhaustTorchMan::DrawEdges(void) {
     int i;
     for (i = 0; i < fn_80287B14(); ++i) {
         if (TorchAt(entries, i).on) {
-            FireModel* model = fn_80288208(i);
+            FireModel* model = GetEffectInfo(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
                 const PlainValMatrix* part = fn_80288060(model, k);
@@ -1443,7 +1443,7 @@ void ExhaustTorchMan::DrawFaces(void) {
     TorchEntry* entry;
     for (i = 0, entry = entries; i < fn_80287B14(); ++entry, ++i) {
         if (entry->on) {
-            FireModel* model = fn_80288208(i);
+            FireModel* model = GetEffectInfo(i);
             int n = model->nParts;
             for (int k = 0; k < n; k++) {
                 const PlainValMatrix* part = fn_80288060(model, k);
@@ -1470,7 +1470,7 @@ BackfireMan::~BackfireMan(void) {
 
 void BackfireMan::Reset(void) {
     for (int i = 0; i < fn_80287B14(); i++) {
-        if (fn_80288208(i)->nParts > 0) {
+        if (GetEffectInfo(i)->nParts > 0) {
             entries[i].state = 1;
         } else {
             entries[i].state = 0;
@@ -1502,7 +1502,7 @@ inline void BackfireMan::Fire(const BackfireEvt* ev) {
     } else {
         return;
     }
-    FireModel* model = fn_80288208(car);
+    FireModel* model = GetEffectInfo(car);
     int n;
     n = model->nParts;
     BackfireEntry* e = &entries[ev->Car()];
@@ -1541,7 +1541,7 @@ void BackfireMan::Tick(int i, int on) {
             e->b = 0.0f;
             e->d = 0;
         } else if (!(e->state & 0x10) && fn_80287B5C(40) == 0) {
-            FireModel* model = fn_80288208(i);
+            FireModel* model = GetEffectInfo(i);
             int n = model->nParts;
             e->c = (e->c + 1) % 8;
             e->d = fn_80288060(model, lbl_802FA9F0[e->c] % n);

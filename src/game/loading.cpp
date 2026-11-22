@@ -104,7 +104,7 @@ void fn_80230AD8(DrawContext* ctx);
 void fn_80230B38(void);
 void fn_80130FCC(char* buf, int size, s32 value);
 void fn_80130980(char* buf, int size, int digits, f32 time);
-const char* fn_80205268(const char* fmt, s32 difficulty, s32 event);
+const char* GetDifficultyString(const char* fmt, s32 difficulty, s32 event);
 int fn_8027DED0(void);
 f32 CalculateTimeLimit(s32 event, s32 difficulty);
 int fn_80129D18(int lo, int hi);
@@ -491,7 +491,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
         f32 box_h = 140.0f;
         f32 box_y = 0.5f * box_h - 80.0f;
         f32 box_x = panelSlide - 225.0f;
-        fn_80011280(((((alpha * 192) / 255) << 24) | 0xFFFFFF), box_x, box_y, 450.0f, box_h, lbl_8055D658);
+        DrawLoadingScreenBackground(((((alpha * 192) / 255) << 24) | 0xFFFFFF), box_x, box_y, 450.0f, box_h, lbl_8055D658);
 
         static LocString s_title("Tips:TITLE");
         fn_8023293C(lbl_8055D64C, s_title.Get(), 1.0f);
@@ -502,7 +502,7 @@ void DrawLoadingScreen(int alpha, f32 t) {
         f32 eased = SCurve(t);
         f32 panelLeft = 160.0f;
         f32 panel_x = lbl_8055CFF0 * (eased * 4.0f) - panelLeft;
-        fn_80011280((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, panelLeft, lbl_8055D658);
+        DrawLoadingScreenBackground((((alpha * 192) / 255) << 24) | 0xFFFFFF, panel_x, 40.0f, 320.0f, panelLeft, lbl_8055D658);
 
         int rows[3] = {10, 8, 9};
         int* row = rows;
@@ -662,7 +662,7 @@ void LoadingBegin(EventInfo* __restrict info, s32 difficulty) {
     GetTrack(ev->track);
     lbl_8035BAD8.laps = ev->laps;
     {
-        ValueNode* table = ev->node->FindChild(fn_80205268("grade_table", lbl_8055D66C, lbl_8055D668));
+        ValueNode* table = ev->node->FindChild(GetDifficultyString("grade_table", lbl_8055D66C, lbl_8055D668));
         if (table != NULL) {
             Grades grades(table);
             int grade = fn_8027DED0();

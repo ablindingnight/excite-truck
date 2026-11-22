@@ -401,7 +401,7 @@ f32 fn_80181AEC(void) { return driveTune.v[3]; }
 extern "C++" int OptE3Demo(void);  // cmdline.cpp (C++ linkage; this part of the file sits in an extern "C" block)
 extern "C" {
 void fn_802049DC(const char* name, f32* var, f32 lo, f32 hi, f32 step);  // debug tunable
-int fn_8020503C(const char* name);                                       // debug switch
+int ParseBooleanString(const char* name);                                       // debug switch
 }
 
 // Resets the car body tunables (when asked) and registers them with the debug tuner.
@@ -441,7 +441,7 @@ void fn_80181AFC(void) {
         fn_802049DC("Overheat target speed", &heatTune.v[11], 0.0f, 180.0f, 5.0f);
         fn_802049DC("Nonboost slowdown", &heatTune.v[12], 0.0f, 10.0f, 0.25f);
     }
-    if (fn_8020503C("unlimited_turbo")) {
+    if (ParseBooleanString("unlimited_turbo")) {
         heatTune.v[3] = 0.0f;
     } else {
         heatTune.v[3] = burn;
@@ -549,7 +549,7 @@ u8* fn_80209448(u8* p);
 u8* fn_80209D4C(u8* p);
 u8* fn_8020DE74(u8* p);
 void fn_801D108C(s32 car);
-int fn_8020503C(const char* name);
+int ParseBooleanString(const char* name);
 void fn_802E30C8(const char* fmt, ...);
 void fn_80182DF4(u8* p, u8* desc);
 }  // extern "C"
@@ -682,7 +682,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     fn_801D108C(cb->index);
     fn_80131818(table);
     u8 trees = 0;
-    if (player && fn_8020503C("player_destroys_trees")) {
+    if (player && ParseBooleanString("player_destroys_trees")) {
         trees = 1;
     }
     cb->f25C8 = trees;
@@ -692,7 +692,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     fn_801838C8(p);
 }
 
-Corner* fn_801AE180(void);
+Corner* AllocateCornerFromPool(void);
 s32 fn_801E3004(s32 model, const char* name, s32 a);
 HVec* fn_801E3630(s32 joint);
 void fn_801E323C(s32 joint);
@@ -707,7 +707,7 @@ static inline void AddBodyCorner(u8* p, RVec3* pos, f32 x, f32 y, f32 z, f32 spr
     pos->x = x;
     pos->y = y;
     pos->z = z;
-    Corner* c = fn_801AE180();
+    Corner* c = AllocateCornerFromPool();
     c->pos = *pos;
     c->spring = spring;
     c->friction = 0.5f;

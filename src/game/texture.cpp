@@ -76,14 +76,14 @@ void fn_801282F4(void);
 int fn_802C90E0(void);
 void* fn_802D8DCC(const GXTexDesc* d, const char* name);
 void* drCreateTexture(const GXTexDesc* d, const char* name);
-void fn_802D8FB4(void* gx);
+void ReleaseTextureResources(void* gx);
 int fn_802D9068(void);
-void* fn_802D9154(void);
+void* LoadTextureHandle(void);
 void fn_802D915C(void* gx);
-void fn_802D9160(void* gx, int map);
-void fn_802D92B8(void* gx);
+void LoadTextureObject(void* gx, int map);
+void ValidateLightmapTexture(void* gx);
 void fn_802D93E8(void* gx);
-void fn_802D9418(void);
+void CopyTextureToBuffer(void);
 void fn_802DB2C0(void* gx);
 void fn_802DB2C4(void* gx);
 void fn_802DBDE8(void* a, void* gx);
@@ -325,7 +325,7 @@ void fn_802CA0E4(void) {
     lbl_8055D03C = fn_802CAC28("gclmap.tex", 0);
     if (lbl_8055D03C != -1) {
         fn_802E30C8("texture: loaded lightmap");
-        fn_802D92B8(lbl_8055FCB0[lbl_8055D03C].gx);
+        ValidateLightmapTexture(lbl_8055FCB0[lbl_8055D03C].gx);
     } else {
         fn_802E30C8("texture: can't load lightmap (pre-genesis)");
     }
@@ -599,7 +599,7 @@ void gxForgetTexture(s32 id) {
         fn_802CB82C(id);
         fn_8012C4D8(t->res);
         t->res = 0;
-        fn_802D8FB4(t->gx);
+        ReleaseTextureResources(t->gx);
     }
 }
 
@@ -610,7 +610,7 @@ void fn_802CAD28(s32 id) {
     TexListEntry* t = &lbl_8055FCB0[id];
     if (--t->refs == 0 && t->res) {
         t->res = 0;
-        fn_802D8FB4(t->gx);
+        ReleaseTextureResources(t->gx);
     }
 }
 
@@ -628,9 +628,9 @@ void fn_802CAD74(s32 id) {
     TexListEntry* t = &lbl_8055FCB0[id];
     t->uses++;
     if (t->mip0) {
-        fn_802D9160(t->mip0, 0);
+        LoadTextureObject(t->mip0, 0);
     } else {
-        fn_802D9160(t->gx, 0);
+        LoadTextureObject(t->gx, 0);
     }
 }
 
@@ -757,7 +757,7 @@ s32 lbl_8055D06C = -2;
 
 void fn_802CB228(s32 id) {
     TexListEntry* t = &lbl_8055FCB0[id];
-    fn_802D8FB4(t->gx);
+    ReleaseTextureResources(t->gx);
     delete t->res;
     t->res = 0;
     t->refs = 0;
@@ -772,7 +772,7 @@ void fn_802CB29C(s32 id) {
         fn_802D93E8(lbl_8055FCB0[id].gx);
         lbl_8055D06C = id;
     } else {
-        fn_802D9418();
+        CopyTextureToBuffer();
         lbl_8055D06C = -2;
     }
 }
@@ -800,7 +800,7 @@ void* fn_802CB38C(void* res, u32 data, s32 kind) {
     return fn_802CA4E0(h, lbl_8055D058, 0, data, kind);
 }
 
-void fn_802CB3F4(void* gx) { fn_802D8FB4(gx); }
+void fn_802CB3F4(void* gx) { ReleaseTextureResources(gx); }
 
 void fn_802CB3F8(const char* name, const char* what) {}
 
@@ -1068,7 +1068,7 @@ void fn_802CC03C(TexCache* c, MipLoad* l, s32 id) {
     u32 ver;
     l->res = ResourceGetStream(fn_802CA2A8(buf, 32, lbl_8055FCB0[id].name), 'TEX ', &ver);
     l->tex = id;
-    l->gx = fn_802D9154();
+    l->gx = LoadTextureHandle();
     if (!l->res) {
         fn_802E317C("tex: Can't load %s...how did tm0_bytes get set to nonzero?", buf);
     }

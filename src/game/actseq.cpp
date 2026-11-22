@@ -30,7 +30,7 @@ int fn_801B2F24(void);  // racer count
 }
 
 
-extern "C" DeityCar* fn_801B2EC0(int car);
+extern "C" DeityCar* GetDeityCarByIndex(int car);
 
 // Unit-local vector with constructors (port ODR: the SDK and other units define a different Vec).
 struct ActVec {
@@ -253,7 +253,7 @@ void fn_801D488C(ActionSequence* s, int a, int rumble, const ActVec* pos) {
 }  // extern "C"
 
 extern "C" {
-void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void DrawFormattedString(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 GetActionSequenceResetTime(ActionSequence* s);
 u8 fn_801D592C(ActionSequence* s);
 int fn_801D5A14(ActionSequence* s);
@@ -277,9 +277,9 @@ int fn_801D4908(ActionSequence* s, const int* ids, int n) { return FindActionSeq
 
 
 /* Helper name unproven */
-inline void DrawTitle(u32 color, const char* s) { fn_8000FF88(color, 12, "%s", 1.2f, 0.0f, 130.0f, s); }
+inline void DrawTitle(u32 color, const char* s) { DrawFormattedString(color, 12, "%s", 1.2f, 0.0f, 130.0f, s); }
 /* Helper name unproven */
-inline void DrawLine(u32 color, f32 y, const char* s) { fn_8000FF88(color, 12, "%s", 1.0f, 0.0f, y, s); }
+inline void DrawLine(u32 color, f32 y, const char* s) { DrawFormattedString(color, 12, "%s", 1.0f, 0.0f, y, s); }
 
 extern "C" void fn_801D490C(void) {
     f32 dur = lbl_80442310.duration;
@@ -409,7 +409,7 @@ void ActionSequence::Update(void) {
         int lap = -1;
         for (int i = 0; i < fn_801B2F24(); i++) {
             if (*(s32*)(fn_8017960C(i) + 0x1F0) == 0x50) {
-                int l = fn_801B2EC0(i)->State()->lap;
+                int l = GetDeityCarByIndex(i)->State()->lap;
                 if (l > lap) {
                     lap = l;
                 }
@@ -920,7 +920,7 @@ public:
                     car = fn_80179630(i);
                     inside = fn_80139B5C(fn_8017960C(car), killBound);
                     if (inside) {
-                        cp = fn_801B2EC0(car)->State()->place;
+                        cp = GetDeityCarByIndex(car)->State()->place;
                         fn_801B83A0()->vfA8(car, cp);  // respawn the car at checkpoint cp
                     }
                     fn_802E30C8("Car %d was %s the kill bound.", car, inside ? "inside" : "outside");

@@ -31,7 +31,7 @@ void fn_802C8D74(void);
 PlainValMatrix* fn_802C86DC(void);
 void fn_802C88FC(PlainValMatrix* m);
 void fn_802C8638(PlainValMatrix* cam);
-void fn_80010188(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...);
+void FormatAndPrintText(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...);
 s32 fn_802CAC28(const char* name, int flags);  // load texture
 void gxForgetTexture(s32 tex);
 int fn_802C2C00(int on);
@@ -171,12 +171,12 @@ void fn_80205FCC(void) {
     fn_802C8638(&m);
     static LocString finish("SplitScreen:FINISH");
     static LocString start("SplitScreen:START");
-    fn_80010188(0.75f, -1, 0xC, 0.5f * (f32)lbl_8055CFF0, 3.0f + 0.07f * (f32)lbl_8055CFF4, start.Get());
+    FormatAndPrintText(0.75f, -1, 0xC, 0.5f * (f32)lbl_8055CFF0, 3.0f + 0.07f * (f32)lbl_8055CFF4, start.Get());
     f32 height = (f32)lbl_8055CFF4;
     f32 margin = 4.0f;
     height = 0.93f * height;
     f32 y = height + margin;
-    fn_80010188(0.75f, -1, 0x24, 0.5f * (f32)lbl_8055CFF0, y, finish.Get());
+    FormatAndPrintText(0.75f, -1, 0x24, 0.5f * (f32)lbl_8055CFF0, y, finish.Get());
     fn_802C8638(&saved);
 }
 

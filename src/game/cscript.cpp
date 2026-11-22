@@ -67,7 +67,7 @@ static inline ScriptNode* NodeAt(int i);
 
 extern "C" {
 
-void fn_80278214(void) {
+void InitializeScriptNodeVariables(void) {
     lbl_8055F5B4 = 0;
     lbl_8055F5C8 = 0;
     lbl_8055F5BB = 0;
@@ -85,7 +85,7 @@ void fn_80278288(void) {
     lbl_8055F5B4 = 0;
 }
 
-void fn_802782C4(void) {
+void StartRecordingOnTick(void) {
     lbl_8055F5B8 = 1;
     lbl_8055F5B4 = 0;
     lbl_8055F5BA = 0;
@@ -95,7 +95,7 @@ void fn_802782C4(void) {
     lbl_8055F5C0 = -1;
 }
 
-void fn_80278318(void) {
+void EndRecordingOnTick(void) {
     fn_802E30C8("script: end recording on tick %d", lbl_8055E3C4);
     lbl_8055F5B8 = 0;
     lbl_8055F5BA = 0;
@@ -123,7 +123,7 @@ void fn_80278360(const ScriptCam* cam) {
     }
 }
 
-void fn_8027847C(ScriptCam* cam) {
+void InterpolateCameraAnimation(ScriptCam* cam) {
     int i;
     for (i = 0; i + 2 < lbl_8055F5B4; i++) {
         if (lbl_8055F5B0[i + 1].tick > lbl_8055E3C4) {
@@ -214,7 +214,7 @@ void fn_8027888C(u8 v) { lbl_8055F5C8 = v; }
 
 void fn_80278894(u8 v) { lbl_8055F5BB = v; }
 
-void fn_8027889C(f32 sec) {
+void ConvertSecondsToFrames(f32 sec) {
     f32 t = sec / 0.016683351f;
     lbl_8055F5C0 = ROUND(t);
 }

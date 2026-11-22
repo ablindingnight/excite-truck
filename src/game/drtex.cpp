@@ -95,7 +95,7 @@ static inline u8 MipMapped(s32 n) { return n > 2; }
 
 extern "C" {
 
-void fn_802D7564(void) {
+void DumpTextureInfo(void) {
     fn_802E30C8(" === DUMPING TEXTURES ===");
     for (int i = 0; i < 450; i++) {
         GXTex* t = &lbl_8055FE28[i];
@@ -105,7 +105,7 @@ void fn_802D7564(void) {
     }
 }
 
-GXTex* fn_802D7600(const char* name) {
+GXTex* AllocateTextureSlot(const char* name) {
     GXTex* t = lbl_8055FE28;
     for (int i = 0; i < 450; i++, t++) {
         if (!t->used) {
@@ -114,12 +114,12 @@ GXTex* fn_802D7600(const char* name) {
             return t;
         }
     }
-    fn_802D7564();
+    DumpTextureInfo();
     fn_802E317C("dr: out of textures for %s", name);
     return 0;
 }
 
-void fn_802D768C(GXTex* t) {
+void ReleaseTexture(GXTex* t) {
     t->used = 0;
     if (t->heap) {
         fn_80128658(t->heap);
@@ -151,7 +151,7 @@ int fn_802D76DC(u32 fmt) {
     return 1;
 }
 
-void fn_802D7780(GXTex* t, const GXTexDesc* d) {
+void InitializeTextureObject(GXTex* t, const GXTexDesc* d) {
     int s = d->wrap & 1;
     int tt = (d->wrap & 2) >> 1 != 0;
     if (!(d->mips & 2)) {
@@ -207,12 +207,12 @@ void fn_802D78D4(u16* rgb, u16* alpha, const u32* pal, int n) {
     }
 }
 
-GXTex* fn_802D7B5C(const GXTexDesc* d, const char* name) {
+GXTex* CreateTextureWithPalette(const GXTexDesc* d, const char* name) {
     int ci4 = 1;
     if (d->format != 0 && d->format != 0x40) {
         ci4 = 0;
     }
-    GXTex* t = d->user ? d->user : fn_802D7600(name);
+    GXTex* t = d->user ? d->user : AllocateTextureSlot(name);
     SafeStrCopy(t->name, name, 32);
     int n = ci4 ? 16 : 256;
     u32* pal = d->data->pal;
@@ -239,11 +239,11 @@ GXTex* fn_802D7B5C(const GXTexDesc* d, const char* name) {
     GXInitTexObjCI((GXTexObj*)&t->obj, (void*)img->tex, (u16)w, (u16)h, (GXTexFmt)(ci4 ? GX_TF_C4 : GX_TF_C8), (GXTexWrapMode)1, (GXTexWrapMode)1, (GXBool)0, (u32)0);
     GXInitTexObjCI((GXTexObj*)&t->obj2, (void*)img->tex, (u16)w, (u16)h, (GXTexFmt)(ci4 ? GX_TF_C4 : GX_TF_C8), (GXTexWrapMode)1, (GXTexWrapMode)1, (GXBool)0, (u32)1);
     GXInvalidateTexAll();
-    fn_802D7780(t, d);
+    InitializeTextureObject(t, d);
     return t;
 }
 
-GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
+GXTex* CreateTextureFromDescriptor(const GXTexDesc* d, const char* name) {
     int fmt = -1;
     if (d->format == 0x47 || d->format == 3) {
         fmt = 6;
@@ -252,7 +252,7 @@ GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
     } else {
         fn_802E317C("gx: can't create raw texture %s in format 0x%x", name, d->format);
     }
-    GXTex* t = d->user ? d->user : fn_802D7600(name);
+    GXTex* t = d->user ? d->user : AllocateTextureSlot(name);
     SafeStrCopy(t->name, name, 32);
     s32 w = d->w;
     s32 h = d->h;
@@ -278,7 +278,7 @@ GXTex* fn_802D7D98(const GXTexDesc* d, const char* name) {
         GXInitTexObjLOD((GXTexObj*)&t->obj, (GXTexFilter)5, (GXTexFilter)1, 0.0f, (f32)(d->lods - 1), -0.7f, (GXBool)1, (GXBool)1, (GXAnisotropy)0);
     }
     GXInvalidateTexAll();
-    fn_802D7780(t, d);
+    InitializeTextureObject(t, d);
     return t;
 }
 
@@ -314,7 +314,7 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
         fn_802E317C("create_generic_texture: unhandled type %x", d->format);
         break;
     }
-    GXTex* t = d->user ? d->user : fn_802D7600(name);
+    GXTex* t = d->user ? d->user : AllocateTextureSlot(name);
     SafeStrCopy(t->name, name, 32);
     s32 w = d->w;
     s32 h = d->h;
@@ -336,7 +336,7 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
         GXInitTexObjLOD((GXTexObj*)&t->obj, (GXTexFilter)5, (GXTexFilter)1, 0.0f, (f32)(lods - 1), -0.7f, (GXBool)1, (GXBool)1, (GXAnisotropy)0);
     }
     GXInvalidateTexAll();
-    fn_802D7780(t, d);
+    InitializeTextureObject(t, d);
     return t;
 }
 
@@ -404,8 +404,8 @@ void fn_802D86BC(GXTexDesc* d, const char*) {
     delete[] tmp;
 }
 
-GXTex* fn_802D8A84(const GXTexDesc* d, const char* name) {
-    GXTex* t = d->user ? d->user : fn_802D7600(name);
+GXTex* InitializeTextureFromDescriptor(const GXTexDesc* d, const char* name) {
+    GXTex* t = d->user ? d->user : AllocateTextureSlot(name);
     SafeStrCopy(t->name, name, 32);
     s32 w = d->w;
     s32 h = d->h;
@@ -422,12 +422,12 @@ GXTex* fn_802D8A84(const GXTexDesc* d, const char* name) {
         GXInitTexObjLOD((GXTexObj*)&t->obj, (GXTexFilter)5, (GXTexFilter)1, 0.0f, (f32)(d->lods - 1), -0.7f, (GXBool)1, (GXBool)1, (GXAnisotropy)0);
     }
     GXInvalidateTexAll();
-    fn_802D7780(t, d);
+    InitializeTextureObject(t, d);
     return t;
 }
 
-GXTex* fn_802D8C00(const GXTexDesc* d, const char* name) {
-    GXTex* t = fn_802D8A84(d, name);
+GXTex* InitializeTextureWithAlpha(const GXTexDesc* d, const char* name) {
+    GXTex* t = InitializeTextureFromDescriptor(d, name);
     s32 w = d->w;
     s32 h = d->h;
     t->hasAlpha = 1;
@@ -439,11 +439,11 @@ GXTex* fn_802D8C00(const GXTexDesc* d, const char* name) {
     if (mip) {
         GXInitTexObjLOD((GXTexObj*)&t->obj2, (GXTexFilter)5, (GXTexFilter)1, 0.0f, (f32)(d->lods - 1), -0.7f, (GXBool)0, (GXBool)1, (GXAnisotropy)0);
     }
-    fn_802D7780(t, d);
+    InitializeTextureObject(t, d);
     return t;
 }
 
-void fn_802D8D1C(void) {
+void InitializeTextureArray(void) {
     lbl_8055FE24 = 0;
     lbl_8055FE20 = 0;
     lbl_8055FE1C = 0;
@@ -454,7 +454,7 @@ void fn_802D8D1C(void) {
     }
 }
 
-void fn_802D8DA0(void) {
+void FreeTextureMemory(void) {
     delete[] (u8*)lbl_8055FE28;
     lbl_8055FE28 = 0;
 }
@@ -490,7 +490,7 @@ void fn_802D8DCC(GXTexDesc* d, const char* name) {
 }
 #pragma pop
 
-void fn_802D9340(GXTex* t);
+void FlushTextureData(GXTex* t);
 
 GXTex* drCreateTexture(const GXTexDesc* d, const char* name) {
     GXTex* t = 0;
@@ -507,32 +507,32 @@ GXTex* drCreateTexture(const GXTexDesc* d, const char* name) {
     case 1:
     case 0x40:
     case 0x41:
-        t = fn_802D7B5C(d, name);
+        t = CreateTextureWithPalette(d, name);
         break;
     case 0x10:
     case 0x17:
     case 0x42:
     case 0x43:
-        t = fn_802D8A84(d, name);
+        t = InitializeTextureFromDescriptor(d, name);
         break;
     case 0x11:
     case 0x44:
-        t = fn_802D8C00(d, name);
+        t = InitializeTextureWithAlpha(d, name);
         break;
     case 2:
     case 3:
     case 0x47:
-        t = fn_802D7D98(d, name);
+        t = CreateTextureFromDescriptor(d, name);
         break;
     default:
         fn_802E317C("drCreateTexture: unknown type 0x%x (%s)", d->format, name);
         break;
     }
-    fn_802D9340(t);
+    FlushTextureData(t);
     return t;
 }
 
-void fn_802D8FB4(GXTex* t) {
+void ReleaseTextureResources(GXTex* t) {
     if (t->uses && lbl_8055FD2C - t->lastFrame >= (u32)-0x100) {
         fn_802CFEEC();
     }
@@ -542,7 +542,7 @@ void fn_802D8FB4(GXTex* t) {
     if (t->lut2) {
         delete[] t->lut2;
     }
-    fn_802D768C(t);
+    ReleaseTexture(t);
     if (lbl_8055FE18 == t) {
         lbl_8055FE18 = 0;
     }
@@ -563,11 +563,11 @@ int fn_802D9068(void) {
     return 0;
 }
 
-GXTex* fn_802D9154(void) { return fn_802D7600("handle"); }
+GXTex* LoadTextureHandle(void) { return AllocateTextureSlot("handle"); }
 
-void fn_802D915C(GXTex* t) { fn_802D768C(t); }
+void fn_802D915C(GXTex* t) { ReleaseTexture(t); }
 
-void fn_802D9160(GXTex* t, int) {
+void LoadTextureObject(GXTex* t, int) {
     fn_802D6C68();
     lbl_8055FE18 = t;
     fn_802CFF5C(t->flags | (lbl_8055FD1C & ~0x14E));
@@ -588,7 +588,7 @@ void fn_802D9160(GXTex* t, int) {
     lbl_804C5700.base2 = t->hasAlpha;
 }
 
-void fn_802D9230(GXTex* t) {
+void LoadEnvironmentMapTexture(GXTex* t) {
     lbl_8055FE1C = t;
     if (t->lut) {
         fn_802E317C("dr: envmap with lut data disallowed (%s)", t);
@@ -600,9 +600,9 @@ void fn_802D9230(GXTex* t) {
     lbl_804C5700.env2 = t->hasAlpha;
 }
 
-void fn_802D92B0(void) { fn_802D9230(lbl_8055FE1C); }
+void fn_802D92B0(void) { LoadEnvironmentMapTexture(lbl_8055FE1C); }
 
-void fn_802D92B8(GXTex* t) {
+void ValidateLightmapTexture(GXTex* t) {
     lbl_8055FE20 = t;
     if (t->hasAlpha) {
         fn_802E317C("dr: lightmap with alpha channel disallowed (%s)", t);
@@ -614,7 +614,7 @@ void fn_802D92B8(GXTex* t) {
     GXLoadTexObj((const GXTexObj*)&t->obj, (GXTexMapID)3);
 }
 
-void fn_802D9340(GXTex* t) {
+void FlushTextureData(GXTex* t) {
     if (t->data && t->dataSize) {
         DCFlushRange((const void*)t->data, (u32)t->dataSize);
     }
@@ -635,7 +635,7 @@ void fn_802D93E8(GXTex* t) {
     lbl_8055FE24 = t;
 }
 
-void fn_802D9418(void) {
+void CopyTextureToBuffer(void) {
     fn_802D2614();
     GXTexObj* o = &lbl_8055FE24->obj;
     int w = GXGetTexObjWidth((const GXTexObj*)o);
@@ -699,7 +699,7 @@ void fn_802D9628(GXTex* t, int x, int y, u32 color) {
     }
 }
 
-u32 fn_802D972C(GXTex* t, int x, int y) {
+u32 ReadTexturePixel(GXTex* t, int x, int y) {
     int fmt = GXGetTexObjFmt((const GXTexObj*)&t->obj);
     int w = GXGetTexObjWidth((const GXTexObj*)&t->obj);
     GXGetTexObjHeight((const GXTexObj*)&t->obj);

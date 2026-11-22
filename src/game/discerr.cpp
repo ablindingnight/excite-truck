@@ -51,12 +51,12 @@ int lbl_8055FE4C;  // reset requests
 
 extern "C" {
 
-void fn_802D98F8(void) {
+void ReportPowerButtonPress(void) {
     OSReport((const char*)("POWER BUTTON!\n"));
     lbl_8055FE41 = 1;
 }
 
-void fn_802D992C(u32 count) {
+void HandleDVDStatus(u32 count) {
     int wasReset = lbl_8055FE3C == 1;
     switch (DVDGetDriveStatus()) {
     case 0:
@@ -96,7 +96,7 @@ void fn_802D992C(u32 count) {
     }
 }
 
-void fn_802D9A50(void) {
+void HandleResetSequence(void) {
     if (lbl_8055FFB4) {
         return;
     }
@@ -158,9 +158,9 @@ int fn_802D9BF0(void) { return lbl_8055FE3C != 0; }
 
 int fn_802D9C04(void) { return lbl_8055FE3C == 1; }
 
-void fn_802D9C18(void) {
-    VISetPostRetraceCallback((VIRetraceCallback)fn_802D992C);
-    OSSetPowerCallback((OSStateCallback)fn_802D98F8);
+void SetupSystemCallbacks(void) {
+    VISetPostRetraceCallback((VIRetraceCallback)HandleDVDStatus);
+    OSSetPowerCallback((OSStateCallback)ReportPowerButtonPress);
 }
 
 // The disc-error reset request: never called in this build (the compiler drops it but keeps its string).

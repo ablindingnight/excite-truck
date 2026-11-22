@@ -14,7 +14,7 @@ int fn_8012C33C(const char* name);       // resource exists
 s32 fn_802CAC28(const char* name, int flags);
 void gxForgetTexture(s32 handle);
 void* fn_802CA294(s32 handle);
-u32 fn_802D972C(void* tex, int x, int y);
+u32 ReadTexturePixel(void* tex, int x, int y);
 void fn_802D9628(void* tex, int x, int y, u32 color);
 u8 fn_80128690(void);
 void fn_80128684(void);
@@ -84,7 +84,7 @@ void fn_802BBA08(const char* name, int base) {
                 u32 pixel = 0;
                 for (int k = 0; k < 3; k++) {
                     if (lbl_804C00B0[base + k]) {
-                        pixel |= ((fn_802D972C(lbl_804C00B0[base + k], x, z) >> 8) & 0xFF) << (k * 8);
+                        pixel |= ((ReadTexturePixel(lbl_804C00B0[base + k], x, z) >> 8) & 0xFF) << (k * 8);
                     }
                 }
                 int y = img->h - 1 - z;
@@ -168,7 +168,7 @@ int fn_802BBD38(short x, short z, int layer) {
             out = 1;
         }
         if (!out) {
-            w = (fn_802D972C(lbl_804C00B0[layer], fn_802BB928(x), fn_802BB93C(z)) >> 8) & 0xFF;
+            w = (ReadTexturePixel(lbl_804C00B0[layer], fn_802BB928(x), fn_802BB93C(z)) >> 8) & 0xFF;
         } else {
             w = layer == 2 ? 0xFF : 0;
         }
@@ -182,7 +182,7 @@ void fn_802BBE34(void) {
             u32 sum = 0;
             for (int i = 0; i < 6; i++) {
                 if (lbl_804C00B0[i]) {
-                    sum += (fn_802D972C(lbl_804C00B0[i], x, z) >> 8) & 0xFF;
+                    sum += (ReadTexturePixel(lbl_804C00B0[i], x, z) >> 8) & 0xFF;
                 }
             }
             if (sum != 0xFF) {

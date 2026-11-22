@@ -91,7 +91,7 @@ void fn_8018ADBC(CarBody* b, f32 v);
 void fn_8018ADC4(CarBody* b, f32 v);
 void fn_8018ADCC(CarBody* b, f32 v);
 void fn_8018ADD4(CarBody* b, s32 v);
-Link* fn_801B2EC0(int car);
+Link* GetDeityCarByIndex(int car);
 void fn_801BE168(int car, RMtx* m, RVec3* vel, RVec3* avel);
 int fn_801E89EC(void);
 void fn_801E9DC4(s16* h);
@@ -176,7 +176,7 @@ void NetCar::Clear(void) {
 
 void NetCar::Init(BodyDesc* desc) {
     CarBody::Init(desc);
-    linkObj = fn_801B2EC0(index);
+    linkObj = GetDeityCarByIndex(index);
     waiting = 0;
     first = 1;
     Clear();

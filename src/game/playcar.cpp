@@ -178,7 +178,7 @@ void fn_802793B0(u8* p);
 void fn_801797A8(u8* p, const char* fmt, ...);
 u32 fn_80191100(u8* p);
 void fn_801B6660(void);
-int fn_801CF050(void);
+int IsReplayActive(void);
 void fn_801B6658(void);
 int fn_801B6668(void);
 void fn_801B6654(void);
@@ -509,7 +509,7 @@ public:
     virtual void Attach(u8* car, u8* q);
 };
 
-// The car's DeityCar (+0x14, fn_801B2EC0): Reset at 0x08 (not a destructor), State at 0x10, Ideal at 0x18.
+// The car's DeityCar (+0x14, GetDeityCarByIndex): Reset at 0x08 (not a destructor), State at 0x10, Ideal at 0x18.
 class DeityView {
 public:
     virtual void Reset(void);
@@ -521,7 +521,7 @@ public:
 
 extern "C" {
 ReplaySrc* fn_8018108C(s32 id);
-DeityView* fn_801B2EC0(s32 id);
+DeityView* GetDeityCarByIndex(s32 id);
 }
 
 // The car's replay recorder (0x24): writes packets into the car's replay buffer.
@@ -576,7 +576,7 @@ struct Recorder : public RecorderIface {
         src = fn_8018108C(n);
         pos = 0;
         lbl_8055E524 = 0;
-        if (fn_801CF050()) {
+        if (IsReplayActive()) {
             cfg[0] = src->v5C();
             cfg[1] = src->v64();
             cfg[2] = src->v60();
@@ -625,7 +625,7 @@ void HybridDriver::Init(void* car_, void* q_) {
     B8(p, 0x26) = S32(((u8*)q_), 0x5C) != 0;
     PTR(p, 0x20) = ((u8*)car_);
     S32(p, 0x1C) = S32(((u8*)car_), 0x1EC);
-    DeityView* c = fn_801B2EC0(S32(p, 0x1C));
+    DeityView* c = GetDeityCarByIndex(S32(p, 0x1C));
     PTR(p, 0x14) = (u8*)c;
     S32(p, 0x18) = c->v18();
     ((CarCtl*)PTR(p, 0x8))->Attach(((u8*)car_), ((u8*)q_));
@@ -772,7 +772,7 @@ void HybridDriver::v48(void) {
         frame = rec->cap - 1;
     }
     rec->buf = rec->start + frame * 8;
-    if (fn_801CF050()) {
+    if (IsReplayActive()) {
         if (frame >= rec->pos) {
             lbl_8055E524 = rec->pos = frame + 1;
         }
@@ -950,7 +950,7 @@ void HybridDriver::vf30(void) {
     SetMode(p, z);
     lbl_8055E520 = z;
     u8* o = PTR(p, 0x4);
-    if (fn_801CF050()) {
+    if (IsReplayActive()) {
         U32(o, 0xC) = z;
         lbl_8055E524 = z;
     }
@@ -1656,7 +1656,7 @@ void PlayerDriver::vf48(void) {
     gb = F32(p, 0x40) + 0.2f * MaxF(MinF(1.0f, grip), 0.0f);
     fn_8018AE54(PTR(p, 0x34));
     odd = (lbl_8055E3C4 >> 1) & 1;
-    if (!fn_801796B4() && fn_801CF050() && !fn_801796C4() &&
+    if (!fn_801796B4() && IsReplayActive() && !fn_801796C4() &&
         NearZero(F32(PTR(p, 0x34), 0x2690))) {
         const f32* v;
         f32 buzz;

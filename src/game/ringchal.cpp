@@ -96,7 +96,7 @@ static inline ValueBinding Bind(s32 t, const char* n, void* p) {
 extern const ValueBinding lbl_802FAA40;
 
 extern "C" {
-void fn_8000FBE4(void);
+void UpdateDashHelper(void);
 int fn_80161C38(void);
 }  // extern "C"
 void UpdateScoreOverlays(int, int);
@@ -151,7 +151,7 @@ void fn_801B7C8C(CarPlace* r, V2* pos, V2* dir);
 }
 
 extern "C" {
-f32 fn_801B306C(void);
+f32 CalculateFrameTime(void);
 }  // extern "C"
 int fn_80009C84(void);
 extern "C" {
@@ -1203,7 +1203,7 @@ inline void Arena::Tally(void) {
         int expired = timer.t <= 0.0f;
         if (expired) {
             b49 = 1;
-        } else if (fn_801B306C() <= 0.0f) {
+        } else if (CalculateFrameTime() <= 0.0f) {
             timer.t -= 0.0166833512f;
         }
     }
@@ -1555,7 +1555,7 @@ inline int RingChalMaster::vf3C(int view) {
     TextElem* h0 = layout->Find("intro_head_0");
     TextElem* h1 = layout->Find("intro_head_1");
     if (t < full1) {
-        fn_8000FBE4();
+        UpdateDashHelper();
     }
     if (!fn_80161C38()) {
         if (t < end0) {
@@ -2221,7 +2221,7 @@ inline void ArenaTimer::Draw(ILayout* l) const {
 }
 
 inline void RingChalMaster::vf0C(void) {
-    f32 rt = fn_801B306C();
+    f32 rt = CalculateFrameTime();
     if (!bA8 && rt < 6.75f) {
         bA8 = 1;
         if (sPreRace && !fn_80161C38() && fn_80179650() == 1 && !fn_80009C84()) {

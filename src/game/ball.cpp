@@ -141,7 +141,7 @@ struct BPath {
 extern "C" {
 BTrack* fn_80178C9C(void);
 RaceCarRec* fn_8017960C(int id);
-BRacer* fn_801B2EC0(int id);
+BRacer* GetDeityCarByIndex(int id);
 }
 
 class BSound {
@@ -433,7 +433,7 @@ inline void Ball::Drop(void) {
 
 inline void Ball::TryDrop(void) {
     if (!active && DbgFlag(0x80)) {
-        if (fn_801B2EC0(car)->vf10()->f24 == 0) {
+        if (GetDeityCarByIndex(car)->vf10()->f24 == 0) {
             Drop();
         }
     }
@@ -586,7 +586,7 @@ void Ball::PickDrop(f32* xz, s16* h) {
         xz[1] = p.z;
         fn_801E9DC4(h);
     } else {
-        BPath* path = fn_801B2EC0(car)->vf18();
+        BPath* path = GetDeityCarByIndex(car)->vf18();
         f32 d = fn_80129DC4(4, 50.0f, 80.0f);
         BPathPos pp = path->pos;
         f32 w;

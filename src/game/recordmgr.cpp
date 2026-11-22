@@ -12,14 +12,14 @@ void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 int fn_801B2F24(void);           // racer count
 s32 fn_801B3050(int i);          // racer id
 int fn_801B2ED4(void);           // total laps
-void fn_801B3208(int, int, f32);
+void UpdateQualifyInfo(int, int, f32);
 int GetHumanPlayerCount(void);           // human count
 u8* GetCarInfo(int i);          // car info (first byte: still racing)
 int fn_801769B8(void);           // game mode
 void* fn_80137C4C(void);
 int CarTypeIsReal(s32 type, void* car);
 int fn_801B8728(void* s);
-int fn_801B2C70(void* s);
+int InitializeDeitySnapshot(void* s);
 void fn_801B8778(void);
 void fn_801B878C(void);
 }
@@ -507,7 +507,7 @@ void fn_801AF6FC(void) {
     if (mode == 1) {
         for (int i = 0; i < st->entries.n; i++) {
             int idx = st->entries.order[i];
-            fn_801B3208(idx, i, fn_801AF9EC(idx, 0));
+            UpdateQualifyInfo(idx, i, fn_801AF9EC(idx, 0));
         }
     }
 }
@@ -542,7 +542,7 @@ struct Standings {
 };
 
 void fn_801AF92C(Standings* s) {
-    if (fn_801B8728(s) == 0 && fn_801B2C70(s) == 0) {
+    if (fn_801B8728(s) == 0 && InitializeDeitySnapshot(s) == 0) {
     StandingRow* row;
     int n = lbl_80435780.n;
     s->n = n;

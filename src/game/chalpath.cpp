@@ -65,7 +65,7 @@ int lbl_80345B40[3] = {10, 6, 8};
 struct BarArt {
     const char* art[3];
 };
-// MATCHING-AID: never used, keeps these strings ahead of the others in the pool; the tables in .rodata come from the initialisers in fn_80261948 and fn_802619A0.
+// MATCHING-AID: never used, keeps these strings ahead of the others in the pool; the tables in .rodata come from the initialisers in GetBottomBarTexture and GetBarTopArtPath.
 static const BarArt sBarBot = {{"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"}};
 static const BarArt sBarTop = {{"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"}};
 extern const MenuDesc lbl_802FA6C0 = {"challengemode.lyt", 0, 0, 0, 0};
@@ -73,7 +73,7 @@ extern const MenuDesc lbl_802FA6D4 = {"newmode1.lyt", 0, 0, 0, 0};
 
 extern "C" {
 
-int fn_8025FE8C(void) {
+int ResetPathFlags(void) {
     if (lbl_8055F3E9 && !lbl_8055F3EC) {
         u8* o = PTR(lbl_8055F420, 0x14);
         U8(o, 0x49) = 1;
@@ -303,7 +303,7 @@ public:
 };
 
 struct PathScreenBuf;
-extern "C" void fn_80261C68(PathScreenBuf* s);
+extern "C" void InitializeChallengeMode(PathScreenBuf* s);
 
 // Node lists with inline storage for 6 events / 3 difficulties.
 struct NodeVec6 {
@@ -508,7 +508,7 @@ GarageChassisList* fn_8025007C(int n);
 int fn_8024DAE0(u8* a, u8* b, int c, GarageChassisList* list, u32 d);
 
 // Challenge mode: picks the vehicle through the garage, limited to the track's default vehicle.
-int fn_8025FECC(u8* a, u8* b, int track, u32 d) {
+int ChooseChallengeVehicle(u8* a, u8* b, int track, u32 d) {
     if (lbl_8055C400 >= 0) {
         return 1;
     }
@@ -553,7 +553,7 @@ void fn_8026003C(void) {
     event = ((ChalEvent*)SCREEN_BUF->evObjs[SCREEN_BUF->event])->Id();
     track = GetEvent(event)->track;
     arg = SCREEN_BUF->arg;
-    if (fn_8025FECC((u8*)&vehicle, (u8*)&color, track, arg)) {
+    if (ChooseChallengeVehicle((u8*)&vehicle, (u8*)&color, track, arg)) {
         VehicleInfo* v = FindVehicle(vehicle);
         int special = !(v->flags & 2);
         int hadSpecial = special && IsSpecialChassisUnlocked(v->chassis);
@@ -592,26 +592,26 @@ void fn_8026003C(void) {
 
 extern "C" {
 void fn_8026003C(void);
-void fn_80261AF0(u8* p, int difficulty);
+void ShowChallengeUnlockMessage(u8* p, int difficulty);
 void fn_80261AE8(u8* p, u32 v);
 void fn_80261A7C(MenuItem* p, s32 a);
 void fn_80261A18(MenuItem* p, s32 a);
 u8* fn_80261A08(u8* p, int i);
 u8* fn_802619D8(u8* p, int i);
 void fn_802619E8(MenuItem* p, s32 a, s32 b);
-void fn_80261980(MenuItem* p, s32 a, s32 b, s32 c);
-const char* fn_80261948(s32* p);
-const char* fn_802619A0(s32* p);
+void SetupMenuItem(MenuItem* p, s32 a, s32 b, s32 c);
+const char* GetBottomBarTexture(s32* p);
+const char* GetBarTopArtPath(s32* p);
 void fn_80261688(MenuItem* p, s32 a, s32 b, s32 c);
 void fn_80261AA0(void);
 void fn_80261A40(int, f32*, f32);
 int fn_802610C8(void);
-int fn_80260E30(void);
-int fn_80261178(void);
-int fn_802613E0(void);
-int fn_802616A8(void);
+int HandleDifficultyReturn(void);
+int SetDifficultyFirstEvent(void);
+int AdvanceToNextDifficulty(void);
+int DecrementDifficultyEvent(void);
 u8* fn_80260DC4(u8* p, int del);
-void fn_80260E04(Words5* d, const Words5* s);
+void CopyWords5Data(Words5* d, const Words5* s);
 
 // The challenge map screen: unlock popups, then the map menu until backed out.
 void MenuDoChallengeMode(int arg) {
@@ -627,14 +627,14 @@ void MenuDoChallengeMode(int arg) {
     {
     PathScreenBuf scr(arg);
     s32 diff;
-    fn_80261C68(&scr);
+    InitializeChallengeMode(&scr);
     int r;
     goto start;
     do {
         fn_8026003C();
     start:
         if (lbl_8055F3E8) {
-            fn_80261AF0((u8*)&scr, scr.arg + 1);
+            ShowChallengeUnlockMessage((u8*)&scr, scr.arg + 1);
             lbl_8055F3E8 = 0;
             if (scr.arg == 0) {
                 lbl_8055F3EB = 0;
@@ -654,14 +654,14 @@ void MenuDoChallengeMode(int arg) {
         fn_802619E8((MenuItem*)&items[8], (s32)"button_custom_3", *(s32*)fn_802619D8((u8*)&scr.events, 3));
         fn_802619E8((MenuItem*)&items[9], (s32)"button_custom_4", *(s32*)fn_802619D8((u8*)&scr.events, 4));
         fn_802619E8((MenuItem*)&items[10], (s32)"button_custom_5", *(s32*)fn_802619D8((u8*)&scr.events, 5));
-        fn_80261980((MenuItem*)&items[11], (s32)"#bar4_top_color", (s32)fn_802619A0(&diff), 0);
-        fn_80261980((MenuItem*)&items[12], (s32)"#bar4_bot_color", (s32)fn_80261948(&diff), 0);
-        fn_80261688((MenuItem*)&items[13], 0x126, 0, (s32)fn_802616A8);
-        fn_80261688((MenuItem*)&items[14], 0x128, 0, (s32)fn_802613E0);
-        fn_80261688((MenuItem*)&items[15], 0xD, -2, (s32)fn_80261178);
+        SetupMenuItem((MenuItem*)&items[11], (s32)"#bar4_top_color", (s32)GetBarTopArtPath(&diff), 0);
+        SetupMenuItem((MenuItem*)&items[12], (s32)"#bar4_bot_color", (s32)GetBottomBarTexture(&diff), 0);
+        fn_80261688((MenuItem*)&items[13], 0x126, 0, (s32)DecrementDifficultyEvent);
+        fn_80261688((MenuItem*)&items[14], 0x128, 0, (s32)AdvanceToNextDifficulty);
+        fn_80261688((MenuItem*)&items[15], 0xD, -2, (s32)SetDifficultyFirstEvent);
         fn_80261688((MenuItem*)&items[16], 0x121, 0, (s32)fn_802610C8);
-        fn_80261688((MenuItem*)&items[17], 0x1B, -1, (s32)fn_80260E30);
-        fn_80260E04((Words5*)&items[18], (const Words5*)&lbl_80498F00);
+        fn_80261688((MenuItem*)&items[17], 0x1B, -1, (s32)HandleDifficultyReturn);
+        CopyWords5Data((Words5*)&items[18], (const Words5*)&lbl_80498F00);
         MenuDesc desc = *(const MenuDesc*)&lbl_802FA6C0;
         desc.items = (MenuItem*)items;
         for (;;) {
@@ -698,7 +698,7 @@ u8* fn_80260DC4(u8* p, int del) {
     return p;
 }
 
-void fn_80260E04(Words5* d, const Words5* s) { *d = *s; }
+void CopyWords5Data(Words5* d, const Words5* s) { *d = *s; }
 
 }  // extern "C"
 
@@ -708,7 +708,7 @@ void fn_80260E04(Words5* d, const Words5* s) { *d = *s; }
 extern "C" {
 
 // Back from event picking to difficulty picking (lbl_8055F3EB set); returns 1 when nothing changed.
-int fn_80260E30(void) {
+int HandleDifficultyReturn(void) {
     if (lbl_8055F3EB) {
         lbl_8055F3EB = 0;
         for (int i = 0; i < SCREEN->numLevels; i++) {
@@ -735,7 +735,7 @@ int fn_802610C8(void) {
 }
 
 // Difficulty chosen: moves to its first event node.
-int fn_80261178(void) {
+int SetDifficultyFirstEvent(void) {
     if (lbl_8055F3EB) {
         return 1;
     }
@@ -746,7 +746,7 @@ int fn_80261178(void) {
 }
 
 // Next difficulty, or next event of the chosen difficulty.
-int fn_802613E0(void) {
+int AdvanceToNextDifficulty(void) {
     if (!lbl_8055F3EB) {
         SCREEN->level++;
         if (SCREEN->level >= SCREEN->numLevels) {
@@ -771,7 +771,7 @@ void fn_80261688(MenuItem* p, s32 a, s32 b, s32 c) {
 }
 
 // Previous difficulty, or previous event of the chosen difficulty.
-int fn_802616A8(void) {
+int DecrementDifficultyEvent(void) {
     if (!lbl_8055F3EB) {
         SCREEN->level--;
         if (SCREEN->level < 0) {
@@ -787,12 +787,12 @@ int fn_802616A8(void) {
     return 0;
 }
 
-const char* fn_80261948(s32* p) {
+const char* GetBottomBarTexture(s32* p) {
     const char* t[3] = {"bar4_bot_e.art", "bar4_bot_s.art", "bar4_bot_m.art"};
     return t[*p];
 }
 
-void fn_80261980(MenuItem* p, s32 a, s32 b, s32 c) {
+void SetupMenuItem(MenuItem* p, s32 a, s32 b, s32 c) {
     p->name = (const char*)a;
     p->type = 3;
     p->data = (const void*)b;
@@ -800,7 +800,7 @@ void fn_80261980(MenuItem* p, s32 a, s32 b, s32 c) {
     p->arg1 = 0;
 }
 
-const char* fn_802619A0(s32* p) {
+const char* GetBarTopArtPath(s32* p) {
     const char* t[3] = {"bar4_top_e.art", "bar4_top_s.art", "bar4_top_m.art"};
     return t[*p];
 }
@@ -895,7 +895,7 @@ extern "C" int fn_801345D8(char* buf, int n, const char* fmt, ...);
 extern "C" {
 
 // "Challenge difficulty N unlocked" message box.
-void fn_80261AF0(u8* p, int difficulty) {
+void ShowChallengeUnlockMessage(u8* p, int difficulty) {
     char buf[100];
     fn_801345D8(buf, 100, "EventPath:CHALLENGE_DIFFICULTY_%d_UNLOCKED", difficulty);
     MenuItem items[] = {
@@ -918,7 +918,7 @@ void* operator new(size_t size, const char* tag);
 
 extern "C" {
 
-void fn_80261C68(PathScreenBuf* s) {
+void InitializeChallengeMode(PathScreenBuf* s) {
     int i;
     int j;
     s->numEvents = 0;

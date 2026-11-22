@@ -36,7 +36,7 @@ void fn_80128658(Region* r);
 int fn_80129D90(int seed, int lo, int hi);  // random int
 f32 fn_80129DC4(int seed, f32 lo, f32 hi);  // random float
 RaceCarRec* fn_8017960C(int id);
-f32 fn_801B306C(void);
+f32 CalculateFrameTime(void);
 int fn_801B2F24(void);
 DeityCar* fn_801B2ED0(int i);
 V2* fn_80135420(V2* p, int a, IdealLineRes* line);  // closest point on a line
@@ -223,7 +223,7 @@ public:
                 c->next += 1.0f;
             }
         }
-        return fn_801B306C() > 0.0f ? cars[0].line : cars[car].line;
+        return CalculateFrameTime() > 0.0f ? cars[0].line : cars[car].line;
     }
     virtual void Reset(void);
     inline void StoreSnappedLine(int car, IdealLineRes* line) {

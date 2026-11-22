@@ -90,10 +90,10 @@ s32 lbl_8055EA6C;
 
 extern "C" {
 
-void fn_801E41D8(const ValVec3* a, const ValVec3* b, u32 color, f32 width);
+void DrawLineSegment(const ValVec3* a, const ValVec3* b, u32 color, f32 width);
 
 
-void fn_801E3640(const ValVec3* dir, DBasis* out) {
+void BuildBasisFromDirection(const ValVec3* dir, DBasis* out) {
     ValVec3 up;
     out->z.x = dir->x;
     out->z.y = dir->y;
@@ -116,7 +116,7 @@ u32 fn_801E36F0(u32 c) { return ((c >> 1) & 0x7F7F7F) | (c & 0xFF000000); }
 // Wire box of the unit cube [-1,1]^3 placed by the frame: c0 for the -z face, c1 for the edges along z
 // and the +z face.
 
-void fn_801E370C(const DbgFrame* m, u32 c0, u32 c1) {
+void DrawDebugFrameAxes(const DbgFrame* m, u32 c0, u32 c1) {
     fn_802C8BD0(lbl_8055EA6C);
     if (fn_802C8DBC(0x11)) {
         ValVec3 pos;
@@ -157,7 +157,7 @@ void fn_801E370C(const DbgFrame* m, u32 c0, u32 c1) {
     fn_802C8D74();
 }
 
-void fn_801E3C04(void) {
+void LoadDebugGeometry(void) {
     f32 x0, y0, x1, y1, z0, z1;
     lbl_8055EA6C = fn_802CAC28("white_zr.tex", 0);
     lbl_8055EA64 = fn_802C6FC0("sphere.mod", 0, 0);
@@ -165,7 +165,7 @@ void fn_801E3C04(void) {
     lbl_8055EA68 = (f32)__fabs(y1 - y0) / 2;
 }
 
-void fn_801E3C88(void) {
+void CleanupGraphicsResources(void) {
     gxForgetTexture(lbl_8055EA6C);
     mrModelUnload(lbl_8055EA64);
 }
@@ -177,10 +177,10 @@ static inline void AddV(DVtx* o, const DVtx* a, const ValVec3* b) {
     o->pos.z = a->pos.z + b->z;
 }
 
-void fn_801E3CB4(const ValVec3* pos, const ValVec3* dir, f32 size, u32 color) {
+void DrawDebugArrow(const ValVec3* pos, const ValVec3* dir, f32 size, u32 color) {
     DBasis b;
     DVtx v[5];
-    fn_801E3640(dir, &b);
+    BuildBasisFromDirection(dir, &b);
     f32 w = 0.66f * size;
     SetLength(&b.z, -size);
     SetLength(&b.x, w / 2);
@@ -222,7 +222,7 @@ static inline void ScaleFrame(DbgFrame* m, f32 s) {
     m->pos.z = 0.0f;
 }
 
-void fn_801E3FC8(const ValVec3* pos, f32 radius, u32) {
+void DrawDebugSphere(const ValVec3* pos, f32 radius, u32) {
     DbgFrame m;
     ScaleFrame(&m, radius / lbl_8055EA68);
     m.pos.x = pos->x;
@@ -232,13 +232,13 @@ void fn_801E3FC8(const ValVec3* pos, f32 radius, u32) {
 }
 
 // Box of the given width from a to b.
-void fn_801E4040(const ValVec3* a, const ValVec3* b, f32 width, u32 c0, u32 c1) {
+void DrawDebugBox(const ValVec3* a, const ValVec3* b, f32 width, u32 c0, u32 c1) {
     ValVec3 d;
     DbgFrame f;
     d.x = b->x - a->x;
     d.y = b->y - a->y;
     d.z = b->z - a->z;
-    fn_801E3640(&d, &f);
+    BuildBasisFromDirection(&d, &f);
     f.z.x = d.x / 2;
     f.z.y = d.y / 2;
     f.z.z = d.z / 2;
@@ -247,13 +247,13 @@ void fn_801E4040(const ValVec3* a, const ValVec3* b, f32 width, u32 c0, u32 c1) 
     f.pos.x = a->x + f.z.x;
     f.pos.y = a->y + f.z.y;
     f.pos.z = a->z + f.z.z;
-    fn_801E370C(&f, c0, c1);
+    DrawDebugFrameAxes(&f, c0, c1);
 }
 
-void fn_801E41D8(const ValVec3* a, const ValVec3* b, u32 color, f32 width) { fn_801E4040(a, b, width, color, color); }
+void DrawLineSegment(const ValVec3* a, const ValVec3* b, u32 color, f32 width) { DrawDebugBox(a, b, width, color, color); }
 
 // Camera-facing triangle around pos.
-void fn_801E41E0(const ValVec3* pos, f32 size, u32 color) {
+void DrawCameraFacingTriangle(const ValVec3* pos, f32 size, u32 color) {
     DVtx t;
     DVtx v[3];
     t.v = 0.0f;
@@ -286,23 +286,23 @@ void fn_801E41E0(const ValVec3* pos, f32 size, u32 color) {
 }
 
 // Red/green/blue axis bars of the frame.
-void fn_801E43BC(const DbgFrame* m, f32 len, f32 width) {
+void DrawAxisIndicator(const DbgFrame* m, f32 len, f32 width) {
     ValVec3 p;
     p.x = m->pos.x + m->x.x * len;
     p.y = m->pos.y + m->x.y * len;
     p.z = m->pos.z + m->x.z * len;
-    fn_801E41D8(&m->pos, &p, 0xFFFF0000, width);
+    DrawLineSegment(&m->pos, &p, 0xFFFF0000, width);
     p.x = m->pos.x + m->y.x * len;
     p.y = m->pos.y + m->y.y * len;
     p.z = m->pos.z + m->y.z * len;
-    fn_801E41D8(&m->pos, &p, 0xFF00FF00, width);
+    DrawLineSegment(&m->pos, &p, 0xFF00FF00, width);
     p.x = m->pos.x + m->z.x * len;
     p.y = m->pos.y + m->z.y * len;
     p.z = m->pos.z + m->z.z * len;
-    fn_801E41D8(&m->pos, &p, 0xFF0000FF, width);
+    DrawLineSegment(&m->pos, &p, 0xFF0000FF, width);
 }
 
-void fn_801E44F4(const DbgFrame* m, f32 sx, f32 sy, f32 sz, u32 color) {
+void ScaleAndDrawDebugFrame(const DbgFrame* m, f32 sx, f32 sy, f32 sz, u32 color) {
     DbgFrame f;
     f.pos = m->pos;
     f.x.x = m->x.x * sx;
@@ -314,7 +314,7 @@ void fn_801E44F4(const DbgFrame* m, f32 sx, f32 sy, f32 sz, u32 color) {
     f.z.x = m->z.x * sz;
     f.z.y = m->z.y * sz;
     f.z.z = m->z.z * sz;
-    fn_801E370C(&f, color, color);
+    DrawDebugFrameAxes(&f, color, color);
 }
 
 }  // extern "C"

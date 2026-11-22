@@ -75,7 +75,7 @@ void fn_802D3050(int a);
 void fn_802D306C(int a);
 void fn_802D30DC(void* tex);
 void fn_802D3ECC(u16 a);
-void fn_802D9230(void* tex);
+void LoadEnvironmentMapTexture(void* tex);
 void fn_802D94E4(void* dst, void* a, void* b, f32 t);
 }
 
@@ -276,7 +276,7 @@ void fn_80202F58(const ValVec3* v, const EFrame* f, EFrame* out) {
 
 // Terrain silhouette rings around the camera.
 
-void fn_80203380(EFrame* m) {
+void DrawEnvironmentRings(EFrame* m) {
     u32 r;
     int i;
     f32 a;
@@ -419,7 +419,7 @@ void fn_80203A88(const ValVec3* v, const EFrame* cam, EFrame* m) {
         m->pos = *v;
         m->pos.y += 0.5f;
         fn_802039CC(cam, m);
-        fn_80203380(m);
+        DrawEnvironmentRings(m);
         fn_802D306C(0);
     }
 }
@@ -456,7 +456,7 @@ void fn_80203B20(const EFrame* cam, const ValVec3* v, int objects) {
     lbl_8055ED08 = lbl_8055ED08 == 0;
 }
 
-void fn_80203C50(int mode) {
+void LoadEnvironmentMaps(int mode) {
     char buf[32];
     lbl_8055ED14 = mode;
     lbl_8055ED18 = 1;
@@ -511,7 +511,7 @@ void fn_80203DC8(void) {
 
 void fn_80203E88(const EFrame* cam, const ValVec3* v, int objects) {
     fn_80203B20(cam, v, objects);
-    fn_802D9230(fn_802CA294(lbl_8055ECFC));
+    LoadEnvironmentMapTexture(fn_802CA294(lbl_8055ECFC));
     fn_802D050C(fn_802CA294(lbl_8055ED04));
 }
 

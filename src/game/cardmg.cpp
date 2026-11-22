@@ -664,13 +664,13 @@ public:
 extern "C" {
 GameMode* fn_801B83A0(void);
 void fn_80161A38(int a, u8* car, int b);
-void fn_801DFF1C(u8* car);
+void CalculateCrashDamage(u8* car);
 extern f32 lbl_8055E3C8;
 
 void ResetRaceCarState(u8* p) {
     static_cast<GameUI*>(fn_801B83A0())->vfA4((RaceCarRec*)p);  // reset the car, through the mode interface (retail emits no GameMode inline here)
     fn_80161A38(0, ((u8*&)((CarBody*)p)->index), 0);
-    fn_801DFF1C(((u8*&)((CarBody*)p)->index));
+    CalculateCrashDamage(((u8*&)((CarBody*)p)->index));
     f32 zero = 0.0f;
     f32 k = 0.5f;
     ((CarBody*)p)->f258C = zero;

@@ -169,10 +169,10 @@ void fn_802C9904(void);
 void fn_802E317C(const char* fmt, ...);
 void fn_8028E61C(PartParams* d);
 s32 fn_8028E2F8(PartParams* d, const char* name, const char* tex);
-ValueNode* fn_80288208(int i);
+ValueNode* GetEffectInfo(int i);
 int fn_80287B14(void);
-int fn_80287E20(ValueNode* vn, const char* key);
-ValueNode* fn_80287E80(ValueNode* vn, const char* key);
+int CheckEffectKeyExists(ValueNode* vn, const char* key);
+ValueNode* FindEffectNode(ValueNode* vn, const char* key);
 int fn_80287B5C(int n);
 f32 fn_80287BC8(f32 lo, f32 hi);
 void fn_8028E584(s32 sys, const PVec* pos, const ValVec3* vel);
@@ -469,10 +469,10 @@ void fn_802A50F8(void) {
     lbl_8055F894 = fn_8028E2F8(&pd, "droplets", "rain.tex");
     DropSource* s = lbl_804BCFB8;
     for (int i = 0; i < fn_80287B14(); s++, i++) {
-        ValueNode* t = fn_80288208(i);
+        ValueNode* t = GetEffectInfo(i);
         s->count = 0;
-        if (fn_80287E20(t, "droplet")) {
-            ValueNode* d = fn_80287E80(t, "droplet");
+        if (CheckEffectKeyExists(t, "droplet")) {
+            ValueNode* d = FindEffectNode(t, "droplet");
             for (s->count = 0; s->count < 4; s->count++) {
                 sprintf(key, "source%d", s->count + 1);
                 if (!fn_802A4FA8(&s->drops[s->count], d->FindChild(key))) {

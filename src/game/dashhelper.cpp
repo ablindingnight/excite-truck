@@ -138,27 +138,27 @@ f32 fn_80011DD4(int player);
 f32 fn_80011DEC(int player);
 f32 fn_80011E04(int player);
 f32 fn_80011E1C(int player);
-f32 fn_80011E70(void);
+f32 GetCenterX(void);
 f32 fn_80011E90(void);
 f32 fn_80011E60(void);
 f32 fn_80011EDC(void);
-void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
-void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void DrawColoredTextWithShadow(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void DrawFormattedString(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_800108C8(const char* text, f32 scale);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
-void fn_80010A50(f32 x, f32 y, f32 w, f32 h, u32 color0, u32 color1);
+void DrawGradientRectangle(f32 x, f32 y, f32 w, f32 h, u32 color0, u32 color1);
 void fn_80010B74(void);
 void fn_80010B7C(void);
-void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
+void QueueColoredRectangle(f32 x, f32 y, f32 w, f32 h, u32 color);
 void fn_80010C74(f32 x, f32 y, f32 w);
 void fn_80010D88(f32 x, f32 y, f32 h);
-void fn_80010FDC(const char* text, int type);
+void WrapAndAddTextRows(const char* text, int type);
 int fn_8001084C(int size, const char* text);
 int fn_80010964(int size);
 f32 fn_800109A0(int size);
-char* fn_800122B4(s32 value, char* out);
-void fn_8000F4F0(void);
-void fn_80010BEC(void);
+char* FormatIntegerWithSuffix(s32 value, char* out);
+void DrawGoText(void);
+void DrawQueuedRectangles(void);
 
 extern s32 lbl_8055CFF0;
 extern s32 lbl_8055CFF4;
@@ -319,22 +319,22 @@ int fn_8000DFA8(int type) { return lbl_802FC2A8[type].part; }
 
 int fn_8000DFC0(int type) { return lbl_802FC2A8[type].part2; }
 
-void fn_8000DFD8(const DashRow* row, u32 color, f32 x, f32 y) {
+void DrawDashRow(const DashRow* row, u32 color, f32 x, f32 y) {
     if (row->c > 0 && row->type == 9) {
         fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + GetBarHeight() / 2.0f, GetBarWidth(), GetBarHeight());
     }
     fn_800109E4(-1, x, y + GetBarHeight() / 2.0f, row->b * GetBarWidth() / 100.0f, GetBarHeight());
     fn_800109E4(color, x, y + GetBarHeight() / 2.0f, row->a * GetBarWidth() / 100.0f, GetBarHeight());
-    fn_80010074(-1, 0x14, "%s", 1.0f, x + GetBarWidth() / 2.0f, y, row);
+    DrawColoredTextWithShadow(-1, 0x14, "%s", 1.0f, x + GetBarWidth() / 2.0f, y, row);
 }
 
-void fn_8000E15C(const DashRow* row, u32 color, f32 x, f32 y) {
+void DrawSpeedGaugeBar(const DashRow* row, u32 color, f32 x, f32 y) {
     if (row->c > 0 && row->type == 9) {
         fn_800109E4(((int)(2.55f * row->c) << 24) | 0xFDB300, x, y + GetBarHeight() / 2.0f, GetBarWidth(), GetBarHeight());
     }
     fn_800109E4(-1, x, y + GetBarHeight() / 2.0f, row->b * GetBarWidth() / 100.0f, GetBarHeight());
     fn_800109E4(color, x, y + GetBarHeight() / 2.0f, row->a * GetBarWidth() / 100.0f, GetBarHeight());
-    fn_80010074(-1, 0x11, "%s", 1.0f, 4.0f + x, y, row);
+    DrawColoredTextWithShadow(-1, 0x11, "%s", 1.0f, 4.0f + x, y, row);
 }
 
 u32 fn_8000E2D8(int kind) {
@@ -365,7 +365,7 @@ u32 fn_8000E338(int value) {
     return value <= 70 ? 0xFFE5A703 : 0xFF278F27;
 }
 
-void fn_8000E3B4(int player) {
+void DrawDashRows(int player) {
     DashRowList* list = &lbl_80350F88;
     f32 top;
     f32 y;
@@ -414,43 +414,43 @@ void fn_8000E3B4(int player) {
         ty = 1.0f + (y - Mul(h, 0.5f));
         switch (row->type) {
         case 1:
-            fn_80010074(fn_8000E2D8(row->a), 0x11, "%s", 1.0f, x10, ty, row);
+            DrawColoredTextWithShadow(fn_8000E2D8(row->a), 0x11, "%s", 1.0f, x10, ty, row);
             break;
         case 2:
         {
             f32 x = x10 + fn_800108C8("000", 1.0f);
-            fn_80010074(-1, 0x12, "%d", 1.0f, x, ty, row->a);
-            fn_80010074(-1, 0x11, "%s", 1.0f, x10 + fn_800108C8("000 ", 1.0f), ty, row);
+            DrawColoredTextWithShadow(-1, 0x12, "%d", 1.0f, x, ty, row->a);
+            DrawColoredTextWithShadow(-1, 0x11, "%s", 1.0f, x10 + fn_800108C8("000 ", 1.0f), ty, row);
             break;
         }
         case 3:
             sprintf(buf, "%d", row->a);
             switch (row->b) {
             case 5:
-                fn_800122B4(row->a, buf);
+                FormatIntegerWithSuffix(row->a, buf);
                 break;
             case 6:
                 sprintf(buf, "$%d", row->a);
                 break;
             }
-            fn_80010074(fn_8000E2D8(row->b), 0x11, "%s", 1.0f, x10, ty, row);
-            fn_80010074(fn_8000E2D8(row->b), 0x12, "%s", 1.0f, xr - 4.0f, ty, buf);
+            DrawColoredTextWithShadow(fn_8000E2D8(row->b), 0x11, "%s", 1.0f, x10, ty, row);
+            DrawColoredTextWithShadow(fn_8000E2D8(row->b), 0x12, "%s", 1.0f, xr - 4.0f, ty, buf);
             break;
         case 4:
-            fn_80010074(-1, 0x11, "%s", 1.0f, x10, ty, row);
-            fn_80010074(-1, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
+            DrawColoredTextWithShadow(-1, 0x11, "%s", 1.0f, x10, ty, row);
+            DrawColoredTextWithShadow(-1, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
             break;
         case 5:
-            fn_80010074(0xFFFFD03F, 0x11, "%s", 1.0f, x10, ty, row);
+            DrawColoredTextWithShadow(0xFFFFD03F, 0x11, "%s", 1.0f, x10, ty, row);
             if ((f32)fmod(fn_801E7E18(), 0.5) > 0.1f) {
-                fn_80010074(0xFFFFD03F, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
+                DrawColoredTextWithShadow(0xFFFFD03F, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
             }
             break;
         case 6:
-            fn_8000DFD8(row, fn_8000E338(row->a), x5 + pad, ty);
+            DrawDashRow(row, fn_8000E338(row->a), x5 + pad, ty);
             break;
         case 7:
-            fn_8000DFD8(row, fn_8000E338(row->a), x5 + pad, ty);
+            DrawDashRow(row, fn_8000E338(row->a), x5 + pad, ty);
             {
                 f32 bx = x5 + pad;
                 f32 fill = bx + Mul(row->c, GetBarWidth()) / 100.0f;
@@ -462,10 +462,10 @@ void fn_8000E3B4(int player) {
             }
             break;
         case 8:
-            fn_8000DFD8(row, fn_8000E338(row->a), x5 + pad, ty);
+            DrawDashRow(row, fn_8000E338(row->a), x5 + pad, ty);
             break;
         case 9:
-            fn_8000DFD8(row, 0xFF2D2DC8, x5 + pad, ty);
+            DrawDashRow(row, 0xFF2D2DC8, x5 + pad, ty);
             break;
         }
         maxSlide = MaxF(maxSlide, row->slide);
@@ -473,7 +473,7 @@ void fn_8000E3B4(int player) {
     }
 }
 
-void fn_8000E874(int player) {
+void DrawDashBarRows(int player) {
     f32 right;
     f32 top;
     f32 y;
@@ -527,39 +527,39 @@ void fn_8000E874(int player) {
         f32 bh;
         f32 cy;
         case 1:
-            fn_8000FF88(fn_8000E2D8(row->a), 0x12, "%s", 1.1f, x9, ty, row);
+            DrawFormattedString(fn_8000E2D8(row->a), 0x12, "%s", 1.1f, x9, ty, row);
             break;
         case 2:
-            fn_8000FF88(-1, 0x12, "%d %s", 1.4f, x9, ty, row->a, row);
+            DrawFormattedString(-1, 0x12, "%d %s", 1.4f, x9, ty, row->a, row);
             break;
         case 3:
             sprintf(buf, "%d", row->a);
             switch (row->b) {
             case 5:
-                fn_800122B4(row->a, buf);
+                FormatIntegerWithSuffix(row->a, buf);
                 break;
             case 6:
                 sprintf(buf, "$%d", row->a);
                 break;
             }
-            fn_8000FF88(fn_8000E2D8(row->b), 0x11, "%s", 1.0f, x9, ty, row);
-            fn_8000FF88(fn_8000E2D8(row->b), 0x12, "%s", 1.0f, xr - 4.0f, ty, buf);
+            DrawFormattedString(fn_8000E2D8(row->b), 0x11, "%s", 1.0f, x9, ty, row);
+            DrawFormattedString(fn_8000E2D8(row->b), 0x12, "%s", 1.0f, xr - 4.0f, ty, buf);
             break;
         case 4:
-            fn_8000FF88(-1, 0x11, "%s", 1.0f, x9, ty, row);
-            fn_8000FF88(-1, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
+            DrawFormattedString(-1, 0x11, "%s", 1.0f, x9, ty, row);
+            DrawFormattedString(-1, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
             break;
         case 5:
-            fn_8000FF88(0xFFFFD03F, 0x11, "%s", 1.0f, x9, ty, row);
+            DrawFormattedString(0xFFFFD03F, 0x11, "%s", 1.0f, x9, ty, row);
             if ((f32)fmod(fn_801E7E18(), 0.5) > 0.1f) {
-                fn_8000FF88(0xFFFFD03F, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
+                DrawFormattedString(0xFFFFD03F, 0x12, "%d/%d", 1.0f, xr - 4.0f, ty, row->a, row->b);
             }
             break;
         case 6:
-            fn_8000DFD8(row, fn_8000E338(row->a), x5, ty);
+            DrawDashRow(row, fn_8000E338(row->a), x5, ty);
             break;
         case 7:
-            fn_8000DFD8(row, fn_8000E338(row->a), x5, ty);
+            DrawDashRow(row, fn_8000E338(row->a), x5, ty);
             {
                 bw = 2.0f;
                 bh = GetBarHeight();
@@ -568,17 +568,17 @@ void fn_8000E874(int player) {
             }
             break;
         case 8:
-            fn_8000DFD8(row, fn_8000E338(row->a), x5 + pad, ty);
+            DrawDashRow(row, fn_8000E338(row->a), x5 + pad, ty);
             break;
         case 9:
-            fn_8000E15C(row, 0xFF2D2DC8, x5, ty);
+            DrawSpeedGaugeBar(row, 0xFF2D2DC8, x5, ty);
             break;
         case 10:
             size = 20.0f;
             cy = ty + 0.5f * size;
-            fn_8000FF88(fn_8000E2D8(row->a), 0x12, "%s", 1.0f, x9, ty, row);
+            DrawFormattedString(fn_8000E2D8(row->a), 0x12, "%s", 1.0f, x9, ty, row);
             if (row->b >= 0) {
-                fn_80010E94(lbl_8055D4CC, row->b, x9, cy, size, size);
+                DrawSpriteWithSize(lbl_8055D4CC, row->b, x9, cy, size, size);
             }
             break;
         }
@@ -597,7 +597,7 @@ void fn_8000E874(int player) {
     }
 }
 
-f32 fn_8000EDC0(int type) {
+f32 GetCenterItemScale(int type) {
     if (fn_801E85A4() > 2) {
         return 1.0f;
     }
@@ -617,7 +617,7 @@ f32 fn_8000EDC0(int type) {
     return 1.0f;
 }
 
-u32 fn_8000EE54(int type) {
+u32 GetCenterItemColor(int type) {
     switch (type) {
     case 11:
         break;
@@ -664,21 +664,21 @@ void fn_8000EF74(int player) {
         return;
     }
     if (player < 0) {
-        x = fn_80011E70();
+        x = GetCenterX();
     } else {
         x = fn_80011E04(player);
     }
     total = 0.0f;
     for (i = 0; i < lbl_803514A0.count; i++) {
-        total += fn_8000EDC0(lbl_803514A0.rows[i].type);
+        total += GetCenterItemScale(lbl_803514A0.rows[i].type);
     }
     total *= lbl_80558A90;
     y = fn_8000EEC8(player, total);
     for (j = 0, row = lbl_803514A0.rows; j < lbl_803514A0.count; row++, j++) {
-        f32 scale = fn_8000EDC0(row->type);
+        f32 scale = GetCenterItemScale(row->type);
         f32 lineH = scale * lbl_80558A90;
         f32 ty = y - 0.5f * lineH;
-        fn_80010074(fn_8000EE54(row->type), 0x14, row->text, scale, x, ty);
+        DrawColoredTextWithShadow(GetCenterItemColor(row->type), 0x14, row->text, scale, x, ty);
         y -= lineH;
     }
 }
@@ -703,13 +703,13 @@ void fn_8000F1B4(void) {
     lbl_80558A94 = -1;
 }
 
-void fn_8000F1E0(const char* name) {
+void LoadStartSounds(const char* name) {
     lbl_8055D4BC = fn_8023512C(name);
     lbl_8055D4B4 = fn_80207848("321low.sfx", 1);
     lbl_8055D4B8 = fn_80207848("321high.sfx", 1);
 }
 
-void fn_8000F22C(void) {
+void ClearDashboardResources(void) {
     if (lbl_8055D4BC) {
         fn_80235380(lbl_8055D4BC);
     }
@@ -736,7 +736,7 @@ void fn_8000F2EC(void) {
     }
 }
 
-void fn_8000F330(const char* art, const char* font, const char* font2) {
+void LoadArtFontTextures(const char* art, const char* font, const char* font2) {
     lbl_8055D4C0 = fn_8023512C(art);
     lbl_8055D4C4 = fn_80232578(font);
     lbl_8055D4C8 = fn_80232578(font2);
@@ -757,7 +757,7 @@ void fn_8000F384(void) {
     }
 }
 
-void fn_8000F3E8(const char* name) { lbl_8055D4D0 = fn_8023512C(name); }
+void SetLabelName(const char* name) { lbl_8055D4D0 = fn_8023512C(name); }
 
 void fn_8000F40C(void) {
     if (lbl_8055D4D0) {
@@ -787,7 +787,7 @@ void fn_8000F4BC(void) {
 
 static inline u32 WithAlpha(u32 color, s32 alpha) { return (color & 0xFFFFFF) | (alpha << 24); }
 
-void fn_8000F4F0(void) {
+void DrawGoText(void) {
     Viewport vp(0, 0, lbl_8055CFF0, lbl_8055CFF4);
     f32 t;
     int num;
@@ -852,14 +852,14 @@ void GetArcUV(f32 c, f32 s, f32* u, f32* v) {
     *v = ArcV(s);
 }
 
-void fn_8000F884(void) {
+void LoadDashboardAssets(void) {
     int n;
     fn_8000F188("hlparrow.mod");
     fn_8000F2A8("left_rows.art", "right_rows.art");
-    fn_8000F1E0("321go.art");
-    fn_8000F330("interlude.art", "uifnt.gtx", "uifnt.gtx");
+    LoadStartSounds("321go.art");
+    LoadArtFontTextures("interlude.art", "uifnt.gtx", "uifnt.gtx");
     fn_8000F440("replayxb.art");
-    fn_8000F3E8("uielems.art");
+    SetLabelName("uielems.art");
     fn_8000F498("nicebox.art");
     lbl_8055D494 = fn_80232578("digiface.gtx");
     lbl_8055D4B0 = fn_80145E70("laptitle.val");
@@ -896,11 +896,11 @@ void fn_8000FB44(void) {
     fn_8000F384();
     fn_8000F1B4();
     fn_8000F2EC();
-    fn_8000F22C();
+    ClearDashboardResources();
     fn_8000F4BC();
 }
 
-void fn_8000FBE4(void) { fn_8000F4F0(); }
+void UpdateDashHelper(void) { DrawGoText(); }
 
 void fn_8000FBE8(f32 x, f32 y, f32 scale) {
     f32 size;
@@ -912,36 +912,36 @@ void fn_8000FBE8(f32 x, f32 y, f32 scale) {
     size = 10.0f + h;
     f32 by = 5.0f + (y + half);
     bx = x - 5.0f;
-    fn_80010E94(lbl_8055D4D0, 4, bx, by, size, size);
-    fn_80010E94(lbl_8055D4D0, 5, bx + size, by, 640.0f, size);
+    DrawSpriteWithSize(lbl_8055D4D0, 4, bx, by, size, size);
+    DrawSpriteWithSize(lbl_8055D4D0, 5, bx + size, by, 640.0f, size);
 }
 
 void fn_8000FC8C(const char* text) {
     f32 scale = 35.0f / fn_80232B70(lbl_8055D4C4);
-    f32 x = fn_80011E70();
+    f32 x = GetCenterX();
     f32 y = fn_80011E54();
     if (lbl_8055D4C0) {
         f32 w0 = fn_80235EF0(lbl_8055D4C0, 0);
         f32 bx = x - 0.5f * (w0 + fn_80235EF0(lbl_8055D4C0, 1));
         f32 by = y - 17.5f + 0.5f * fn_80235F64(lbl_8055D4C0, 0);
-        fn_80010E94(lbl_8055D4C0, 0, bx, by, 0.0f, 0.0f);
-        fn_80010E94(lbl_8055D4C0, 1, bx + w0, by, 0.0f, 0.0f);
+        DrawSpriteWithSize(lbl_8055D4C0, 0, bx, by, 0.0f, 0.0f);
+        DrawSpriteWithSize(lbl_8055D4C0, 1, bx + w0, by, 0.0f, 0.0f);
     }
     fn_802337A0(lbl_8055D4C4, 0xFF000000, 12, "%s", 2.0f + x, y - 2.0f, 0.0f, scale, 1.0f, text);
     fn_802337A0(lbl_8055D4C4, -1, 12, "%s", x, y, 0.0f, scale, 1.0f, text);
 }
 
-void fn_8000FDF0(const char* text) {
+void DrawCenteredText(const char* text) {
     f32 scale = 27.0f / fn_80232B70(lbl_8055D4C8);
-    f32 x = fn_80011E70();
+    f32 x = GetCenterX();
     f32 y = 13.0f + fn_80011E60();
     f32 w = scale * fn_8023293C(lbl_8055D4C8, text, 1.0f);
     f32 bx = x - 0.5f * w;
     fn_800109E4(0x66000000, bx - 7.0f, 13.0f + y, 14.0f + w, 26.0f);
     if (lbl_8055D4C0) {
         f32 by = y + 0.5f * fn_80235F64(lbl_8055D4C0, 2);
-        fn_80010E94(lbl_8055D4C0, 2, bx - fn_80235EF0(lbl_8055D4C0, 2) - 7.0f, by, 0.0f, 0.0f);
-        fn_80010E94(lbl_8055D4C0, 2, 7.0f + (bx + w), by, 0.0f, 0.0f);
+        DrawSpriteWithSize(lbl_8055D4C0, 2, bx - fn_80235EF0(lbl_8055D4C0, 2) - 7.0f, by, 0.0f, 0.0f);
+        DrawSpriteWithSize(lbl_8055D4C0, 2, 7.0f + (bx + w), by, 0.0f, 0.0f);
     }
     {
         f32 ty = 2.0f + y;
@@ -950,7 +950,7 @@ void fn_8000FDF0(const char* text) {
     }
 }
 
-void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
+void DrawFormattedString(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
     va_list args;
     char buf[0x200];
     va_start(args, y);
@@ -959,7 +959,7 @@ void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     fn_802344CC(buf, color, flags, 0, x, y, 0.73333335f * scale);
 }
 
-void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
+void DrawColoredTextWithShadow(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
     va_list args;
     char buf[0x200];
     va_start(args, y);
@@ -969,7 +969,7 @@ void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     fn_802344CC(buf, color, flags, 0, x, y, 0.73333335f * scale);
 }
 
-void fn_80010188(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...) {
+void FormatAndPrintText(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt, ...) {
     va_list args;
     char buf[0x200];
     va_start(args, fmt);
@@ -978,7 +978,7 @@ void fn_80010188(f32 scale, u32 color, int flags, f32 x, f32 y, const char* fmt,
     fn_80232BA4(buf, lbl_8055D490, x, y, color, flags, 0.73333335f * scale, 0.0f, 1.0f);
 }
 
-void fn_8001027C(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
+void DrawFormattedTextElement(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
     va_list args;
     char buf[0x200];
     if (lbl_8055D494) {
@@ -992,7 +992,7 @@ void fn_8001027C(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     }
 }
 
-void fn_800103B8(f32 scale, u32 color, int flags, f32 x, f32 y, f32 w, const char* fmt, ...) {
+void DrawFormattedText(f32 scale, u32 color, int flags, f32 x, f32 y, f32 w, const char* fmt, ...) {
     va_list args;
     char buf[0x200];
     va_start(args, fmt);
@@ -1010,7 +1010,7 @@ void fn_800104B0(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     fn_80232BA4(buf, lbl_8055D498, x, y, color, flags, scale, 0.0f, 1.0f);
 }
 
-void fn_800105A0(const char* text, int player) {
+void DrawPlayerNameBox(const char* text, int player) {
     int many = fn_80137C74() > 2;
     f32 scale = many ? 1.0f : 1.2f;
     f32 w = 10.0f + fn_800108C8(text, scale);
@@ -1018,23 +1018,23 @@ void fn_800105A0(const char* text, int player) {
     f32 x = -w / 2 + fn_80011E04(player);
     f32 cx = fn_80011E04(player);
     f32 y = (many ? 0 : -40) + fn_80011E1C(player);
-    fn_80010B80(x, y, w, h, 0x90000000);
+    QueueColoredRectangle(x, y, w, h, 0x90000000);
     fn_80010C74(x, 1.0f + y, 1.0f + w);
     fn_80010D88(x + w, y, h);
     fn_80010C74(x, y - h, 1.0f + w);
     fn_80010D88(x, y, h);
-    fn_8000FF88(-1, 0xC, text, scale, cx, y);
+    DrawFormattedString(-1, 0xC, text, scale, cx, y);
 }
 
-void fn_8001071C(const char* text, int) { fn_80010FDC(text, 13); }
+void ShowMessageText(const char* text, int) { WrapAndAddTextRows(text, 13); }
 
-void fn_80010724(int x, int y, const char* text) {
+void DrawTextWithBackground(int x, int y, const char* text) {
     f32 w = 14.0f + fn_8001084C(16, text);
     f32 h = 6.0f + fn_80010964(16);
     f32 bx = (x - 320.0f) - w / 2;
     f32 by = (240.0f - y) + h / 2;
-    fn_80010B80(bx, by, w, h, 0x80000000);
-    fn_8000FF88(-1, 0x14, "%s", fn_800109A0(lbl_80558A90), bx, by, text);
+    QueueColoredRectangle(bx, by, w, h, 0x80000000);
+    DrawFormattedString(-1, 0x14, "%s", fn_800109A0(lbl_80558A90), bx, by, text);
 }
 
 int fn_8001084C(int size, const char* text) {
@@ -1053,11 +1053,11 @@ f32 fn_800109A0(int size) { return (f32)size / (f32)lbl_80558A90; }
 
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h) {
     fn_80010B74();
-    fn_80010A50(x, y, w, h, color, color);
+    DrawGradientRectangle(x, y, w, h, color, color);
     fn_80010B7C();
 }
 
-void fn_80010A50(f32 x, f32 y, f32 w, f32 h, u32 color0, u32 color1) {
+void DrawGradientRectangle(f32 x, f32 y, f32 w, f32 h, u32 color0, u32 color1) {
     Vertex v[4] __attribute__((aligned(16)));
     fn_80231380(&v[0], color0, x, y, 1.0f, 0.0f, 0.0f);
     fn_80231380(&v[1], color1, x + w, y, 1.0f, 0.0f, 0.0f);
@@ -1071,7 +1071,7 @@ void fn_80010B74(void) { fn_802C8BD0(-1); }
 
 void fn_80010B7C(void) { fn_802C8D74(); }
 
-void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color) {
+void QueueColoredRectangle(f32 x, f32 y, f32 w, f32 h, u32 color) {
     QueuedRect r;
     r.x = x;
     r.y = y;
@@ -1084,14 +1084,14 @@ void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color) {
     }
 }
 
-void fn_80010BEC(void) {
+void DrawQueuedRectangles(void) {
     int i;
     QueuedRect* r;
     if (lbl_8055D4A8 > 0) {
         fn_80010B74();
         for (i = 0; i < lbl_8055D4A8; i++) {
             r = &lbl_8034F6B0[i];
-            fn_80010A50(r->x, r->y, r->w, r->h, r->color0, r->color1);
+            DrawGradientRectangle(r->x, r->y, r->w, r->h, r->color0, r->color1);
         }
         fn_80010B7C();
         lbl_8055D4A8 = 0;
@@ -1116,7 +1116,7 @@ void fn_80010D88(f32 x, f32 y, f32 h) {
     }
 }
 
-void fn_80010E94(gArtSet* art, int part, f32 x, f32 y, f32 w, f32 h) {
+void DrawSpriteWithSize(gArtSet* art, int part, f32 x, f32 y, f32 w, f32 h) {
     if (0.0f == w && 0.0f == h) {
         fn_802353F4(art, part, x, y, 1.0f);
     } else {
@@ -1126,12 +1126,12 @@ void fn_80010E94(gArtSet* art, int part, f32 x, f32 y, f32 w, f32 h) {
 
 void fn_80010EF0(void);
 void fn_80010F08(void);
-void fn_80010F20(void);
+void ResetCounters(void);
 
 void fn_80010EC8(void) {
     fn_80010EF0();
     fn_80010F08();
-    fn_80010F20();
+    ResetCounters();
 }
 
 void fn_80010EF0(void) {
@@ -1144,12 +1144,12 @@ void fn_80010F08(void) {
     lbl_80351214.wide = 0;
 }
 
-void fn_80010F20(void) {
+void ResetCounters(void) {
     lbl_803514A0.count = 0;
     lbl_803514A0.wide = 0;
 }
 
-void fn_80010F38(const char* text, s32 a, s32 b, s32 type, f32 slide) {
+void AddDashboardRow(const char* text, s32 a, s32 b, s32 type, f32 slide) {
     DashRow* row = AddRow(&lbl_80350F88);
     strncpy(row->text, text, 40);
     row->text[40] = 0;
@@ -1160,13 +1160,13 @@ void fn_80010F38(const char* text, s32 a, s32 b, s32 type, f32 slide) {
     row->slide = slide;
 }
 
-void fn_80010FDC(const char* text, int type) {
+void WrapAndAddTextRows(const char* text, int type) {
     char buf[0x200];
     int n;
     int space;
     DashRow* row;
     f32 wrap = lbl_8055D4D8;
-    f32 scale = fn_8000EDC0(type);
+    f32 scale = GetCenterItemScale(type);
     if (fn_800108C8(text, scale) > wrap) {
         while (*text) {
             memset(buf, 0, sizeof(buf));
@@ -1205,7 +1205,7 @@ void fn_80010FDC(const char* text, int type) {
     }
 }
 
-void fn_800111A4(const char* text, s32 a, s32 b, s32 c, s32 type, f32 slide) {
+void AddDashboardTextRow(const char* text, s32 a, s32 b, s32 c, s32 type, f32 slide) {
     DashRow* row = AddRow(&lbl_80350F88);
     strncpy(row->text, text, 40);
     row->text[40] = 0;
@@ -1217,19 +1217,19 @@ void fn_800111A4(const char* text, s32 a, s32 b, s32 c, s32 type, f32 slide) {
 }
 
 void fn_8001123C(int player) {
-    fn_8000E3B4(player);
-    fn_8000E874(player);
+    DrawDashRows(player);
+    DrawDashBarRows(player);
     fn_8000EF74(player);
 }
 
-void fn_80011278(u32 color, f32 x, f32 y, f32 w, f32 h) { fn_80011280(color, x, y, w, h, lbl_8055D4D4); }
+void fn_80011278(u32 color, f32 x, f32 y, f32 w, f32 h) { DrawLoadingScreenBackground(color, x, y, w, h, lbl_8055D4D4); }
 
 struct Vec2 {
     f32 x;
     f32 y;
 };
 
-void fn_80011280(u32 color, f32 x, f32 y, f32 w, f32 h, gArtSet* art) {
+void DrawLoadingScreenBackground(u32 color, f32 x, f32 y, f32 w, f32 h, gArtSet* art) {
     Vec2 p;
     f32 pw;
     f32 a;
@@ -1349,7 +1349,7 @@ void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 s
 }
 
 void fn_80011A2C(void) {
-    fn_80010BEC();
+    DrawQueuedRectangles();
     fn_802346C8();
 }
 
@@ -1358,7 +1358,7 @@ void fn_80011A50(void) {
     fn_80234AEC();
 }
 
-void fn_80011A5C(int n) {
+void SetScreenViewports(int n) {
     int left;
     int right;
     int top;
@@ -1462,7 +1462,7 @@ f32 fn_80011E54(void) { return lbl_80350EC4.top; }
 
 f32 fn_80011E60(void) { return lbl_80350EC4.bottom; }
 
-f32 fn_80011E70(void) { return (lbl_80350EC4.left + lbl_80350EC4.right) / 2; }
+f32 GetCenterX(void) { return (lbl_80350EC4.left + lbl_80350EC4.right) / 2; }
 
 f32 fn_80011E90(void) { return (lbl_80350EC4.top + lbl_80350EC4.bottom) / 2; }
 
@@ -1492,7 +1492,7 @@ void fn_800120BC(void) {
     lbl_8055D4AC = 0;
 }
 
-void fn_80012158(void) {
+void PlayNextSound(void) {
     DashSoundPlayer* p = lbl_8055D4AC;
     GameSound* s = p->sounds[0][p->index];
     if (s) {
@@ -1503,7 +1503,7 @@ void fn_80012158(void) {
     }
 }
 
-void fn_800121A4(void) {
+void PlayDashSounds(void) {
     DashSoundPlayer* p = lbl_8055D4AC;
     GameSound* s = p->sounds[1][p->index];
     if (s) {
@@ -1516,7 +1516,7 @@ void fn_800121A4(void) {
 
 void fn_800121F0(void) { lbl_8055D4AC->UpdateVolume(); }
 
-char* fn_800122B4(s32 value, char* out) {
+char* FormatIntegerWithSuffix(s32 value, char* out) {
     struct {
         char text[20];
         const char* suffix;

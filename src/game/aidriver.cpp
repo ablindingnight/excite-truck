@@ -20,7 +20,7 @@ void SetDroneSpeedSettings(void* cars, void* race);
 f32 fn_8013672C(void);
 void fn_80137884(s32 count);
 void fn_80139044(int* p);
-void fn_8013BAE4(s32 count);
+void CalculateCatchupValues(s32 count);
 void fn_801663C8(s32 count, void* cars, void* extra);
 void fn_8013A1E8(int n);
 void fn_8015F554(void);
@@ -171,7 +171,7 @@ void InitializeRaceGrid(AIRace* race) {
     lbl_8055E0A4 = fn_80134B58("rtt_greenflag_lon", fn_8013672C() / 2);
     fn_80137884(lbl_8055E0B0);
     fn_80139044((int*)fn_801E87A8());
-    fn_8013BAE4(lbl_8055E0B0);
+    CalculateCatchupValues(lbl_8055E0B0);
     fn_801663C8(lbl_8055E0B0, grid, race->extra);
     for (i = 0; i < grid->count; i++) {
         if (grid->cars[i].type != 'S') {

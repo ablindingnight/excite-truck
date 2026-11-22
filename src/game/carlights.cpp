@@ -38,10 +38,10 @@ WeatherDef* fn_801E1F44(void);
 f32 fn_801E88F0(s32 a);
 s32 fn_80287B14(void);
 LightCar* fn_80287B24(s32 i);
-int fn_80287E20(s32 model, const char* name);
-ValueNode* fn_80287E80(s32 model, const char* name);
+int CheckEffectKeyExists(s32 model, const char* name);
+ValueNode* FindEffectNode(s32 model, const char* name);
 int fn_80288070(s32 model, const char* name, const VecMatrix** frame);
-s32 fn_80288208(s32 i);
+s32 GetEffectInfo(s32 i);
 const VecMatrix* fn_802C86DC(void);
 f32 fn_802C88E8(const Vec* p);
 void fn_802C8BD0(s32 tex);
@@ -109,7 +109,7 @@ void fn_80294970(void) {
             SetVec(&back, 0.0f, 0.0f, -1.0f);
             Vec up;
             SetVec(&up, 0.0f, 0.0f, 1.0f);
-            s32 model = fn_80288208(i);
+            s32 model = GetEffectInfo(i);
             fn_80295CC4(s, model, "left headlight", white, 0, front, 0.35f);
             fn_80295CC4(s, model, "right headlight", white, 0, front, 0.35f);
             fn_80295CC4(s, model, "left taillight", red, 0, back, 0.15f);
@@ -308,8 +308,8 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
         f32 w;
         f32 h;
         s32 type;
-        if (fn_80287E20(model, name)) {
-            n = fn_80287E80(model, name);
+        if (CheckEffectKeyExists(model, name)) {
+            n = FindEffectNode(model, name);
             const ValVec3& v = n->GetVec3Or("color", def);
             c = MakeColor(ColorByte(255.0f * v.x), ColorByte(255.0f * v.y), ColorByte(255.0f * v.z));
             r = n->GetFloat("rad", rad);

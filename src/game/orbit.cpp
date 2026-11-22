@@ -90,7 +90,7 @@ struct RaceExtra {
 };
 
 extern "C" {
-OrbitCar* fn_801B2EC0(int id);
+OrbitCar* GetDeityCarByIndex(int id);
 
 CarBody* fn_8017960C(int id);
 }
@@ -376,7 +376,7 @@ Role* fn_80166040(s32 id) {
     return r;
 }
 
-OrbitCar* fn_80166098(void) { return fn_801B2EC0(fn_80179630(-1)); }
+OrbitCar* fn_80166098(void) { return GetDeityCarByIndex(fn_80179630(-1)); }
 
 f32 fn_801660C0(void) {
     OrbitCar* p = fn_80166098();
@@ -408,7 +408,7 @@ f32 fn_8016618C(OrbitCar* car) {
 }
 
 f32 fn_80166274(void) {
-    CarPhysics* ph = fn_801B2EC0(fn_80179630(-1))->Physics();
+    CarPhysics* ph = GetDeityCarByIndex(fn_80179630(-1))->Physics();
     CarBody* rec = fn_8017960C(fn_80179630(-1));
     f32 top = ph->engine->topSpeed;
     f32 speed = rec->f25CC;
@@ -578,7 +578,7 @@ void fn_80166A24(void) {
             }
             for (i = 0; i < lbl_8055E32C->Count(); i++) {
                 OrbitCarState* s = lbl_8055E32C->At(i);
-                f32 d = fn_8016618C(fn_801B2EC0(s->id));
+                f32 d = fn_8016618C(GetDeityCarByIndex(s->id));
                 s->frozen = 1;
                 s->frozenDist = d;
             }
@@ -586,7 +586,7 @@ void fn_80166A24(void) {
         fn_801662FC();
         for (i = 0; i < lbl_8055E32C->Count(); i++) {
             OrbitCarState* s = lbl_8055E32C->At(i);
-            UpdateCar(s, fn_801B2EC0(s->id));
+            UpdateCar(s, GetDeityCarByIndex(s->id));
         }
     }
 }
@@ -654,7 +654,7 @@ f32 fn_801671FC(int i) {
                     boost = 0.5f;
                 }
             } else {
-                f32 t = InvLerpClamped(0.0f, 0.002f, fn_801B2EC0(i)->Physics()->engine->throttle);
+                f32 t = InvLerpClamped(0.0f, 0.002f, GetDeityCarByIndex(i)->Physics()->engine->throttle);
                 boost = Lerp(0.6f, 0.0f, t);
             }
             lbl_8055E32C->a.data[i].boost = boost;

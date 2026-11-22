@@ -89,7 +89,7 @@ void fn_801DF110(void);
 void fn_802C8530(void);
 int fn_801DF060(void);
 void fn_801E81B8(int a, void (*draw)(void));
-void fn_801DFFB4(void);
+void HandleWhiteoutEffect(void);
 void fn_802C9A70(int unk);
 int fn_801E8838(void);
 void fn_802C942C(u32 color);
@@ -144,7 +144,7 @@ void fn_801CB4DC(void);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
-void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void DrawColoredTextWithShadow(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 void fn_80011A2C(void);
 void fn_802C9904(void);
 
@@ -173,8 +173,8 @@ void fn_8013A1F4(void);
 int fn_8013A1F8(int key);
 void fn_801AE5A4(void);
 int fn_801AE59C(int key);
-void fn_801E45CC(void);
-int fn_801E47BC(int key);
+void DrawLodDebugInfo(void);
+int HandleDebugInput(int key);
 void fn_801B3284(void);
 int fn_801B327C(int key);
 void fn_80127958(void);
@@ -260,7 +260,7 @@ GameModeEntry lbl_802FBC90[25] = {
     {fn_8000D1DC, fn_8000D540, fn_8000D19C, fn_8000D070, fn_8000D100},
     {fn_8013A1F4, fn_8013A1F8, NULL, NULL, NULL},
     {fn_801AE5A4, fn_801AE59C, NULL, NULL, NULL},
-    {fn_801E45CC, fn_801E47BC, NULL, NULL, NULL},
+    {DrawLodDebugInfo, HandleDebugInput, NULL, NULL, NULL},
     {fn_80007498, NULL, NULL, NULL, NULL},
     {fn_8000AD20, fn_8000AD24, NULL, NULL, NULL},
     {fn_801B3284, fn_801B327C, NULL, NULL, NULL},
@@ -514,7 +514,7 @@ void fn_8000B288(void) {
 void fn_8000B2AC(void) {
     fn_802C8530();
     fn_801E81B8(1, fn_801DF060() ? fn_8000B288 : fn_8000B210);
-    fn_801DFFB4();
+    HandleWhiteoutEffect();
     fn_802C9A70(0);
     if (fn_801E8838() && IsLoadingDone()) {
         fn_802C942C(fn_801E8838() << 24);
@@ -949,7 +949,7 @@ void fn_8000C5CC(void) {
     fn_80230B5C(&cam);
     fn_802C8638(&cam);
     fn_802C974C(DemoNear[0], DemoFar[0], DemoFov[0]);
-    fn_80010074(0xFFFFFF00, 9, "DEMO", DemoNear[0], -270.0f, -180.0f);
+    DrawColoredTextWithShadow(0xFFFFFF00, 9, "DEMO", DemoNear[0], -270.0f, -180.0f);
     fn_80011A2C();
     fn_802C9904();
 }

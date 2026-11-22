@@ -35,17 +35,17 @@ void fn_801CEFD4(u8 on) {
     }
 }
 
-void fn_801CEFE8(void) {
+void StartReplayPlayback(void) {
     fn_802E30C8("CSReplayStartReplayPlayback");
     lbl_8055E8A0 = 1;
 }
 
-void fn_801CF01C(void) {
+void EndReplayPlayback(void) {
     fn_802E30C8("CSReplayEndReplayPlayback");
     lbl_8055E8A0 = 0;
 }
 
-int fn_801CF050(void) { return lbl_8055AB50 != 0; }
+int IsReplayActive(void) { return lbl_8055AB50 != 0; }
 
 int fn_801CF064(void) { return lbl_8055E8A0 != 0; }
 

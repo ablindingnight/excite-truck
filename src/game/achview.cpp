@@ -907,7 +907,7 @@ ValVec3* fn_802C9A40(void);
 void fn_802C9A1C(const ValVec3* d);
 void fn_802D7554(int on);
 void* fn_802CA294(s32 tex);
-void fn_802D9230(void*);
+void LoadEnvironmentMapTexture(void*);
 void fn_802C744C(s32 model, u8* m);
 
 }  // extern "C"
@@ -959,7 +959,7 @@ inline void AchievementTrophyModel::Draw(void) {
     ValVec3 saved = *fn_802C9A40();
     fn_802C9A1C(&dir);
     fn_802D7554(1);
-    fn_802D9230(fn_802CA294((s32)env));
+    LoadEnvironmentMapTexture(fn_802CA294((s32)env));
     Perspective persp(0.1f, 100.0f, lbl_8055F39C);
     fn_802C744C(handle, (u8*)xform);
     fn_802D7554(0);

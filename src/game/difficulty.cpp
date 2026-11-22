@@ -27,7 +27,7 @@ struct DiffLevel {
 };
 
 extern "C" {
-const char* fn_80204AA4(int event);
+const char* GetEventString(int event);
 const DiffLevel* fn_80204B18(int level);
 }
 
@@ -50,7 +50,7 @@ public:
             if (HasChild(ev, d->node)) {
                 eventNode = ev->FindChild(d->node);
             }
-            prefix = fn_80204AA4(event);
+            prefix = GetEventString(event);
         }
     }
     ~Difficulty(void) {
@@ -101,7 +101,7 @@ Difficulty* lbl_8055ED5C;      // current difficulty
 
 extern "C" {
 
-const char* fn_80204AA4(int event) {
+const char* GetEventString(int event) {
     switch (GetEvent(event)->type) {
     case 0x180302:
         return "excite";
@@ -125,7 +125,7 @@ extern "C" {
 
 const DiffLevel* fn_80204B18(int level) { return &lbl_802F9D68[level]; }
 
-int fn_80204B2C(const char* name) {
+int FindDifficultyLevelIndex(const char* name) {
     for (u32 i = 0; i < 3; i++) {
         if (strcasecmp(name, lbl_802F9D68[i].name) == 0) {
             return i;
@@ -135,9 +135,9 @@ int fn_80204B2C(const char* name) {
     return 0;
 }
 
-int fn_80204BB4(const char* name) { return fn_80204B2C(name); }
+int fn_80204BB4(const char* name) { return FindDifficultyLevelIndex(name); }
 
-void fn_80204BB8(void) {
+void InitializeDifficulty(void) {
     lbl_8055ED58 = 1;
     lbl_8055ED5C = NULL;
     RaceOpts* f = fn_801E87A8();
@@ -150,7 +150,7 @@ f32 fn_80204CFC(const char* key) { return atof(lbl_8055ED5C->Get(key)); }
 
 const char* fn_80204EA0(const char* key) { return lbl_8055ED5C->Get(key); }
 
-int fn_8020503C(const char* key) {
+int ParseBooleanString(const char* key) {
     const char* v = lbl_8055ED5C->Get(key);
     int b = strcasecmp(v, "yes") == 0 || strcasecmp(v, "true") == 0;
     return b;
@@ -161,7 +161,7 @@ void fn_80205208(void) {
     delete lbl_8055ED5C;
 }
 
-const char* fn_80205268(const char* key, int level, int event) {
+const char* GetDifficultyString(const char* key, int level, int event) {
     Difficulty d(level, event);
     return d.Get(key);
 }

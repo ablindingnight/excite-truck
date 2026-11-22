@@ -508,7 +508,7 @@ void fn_801E2CCC(s32 model, const char* name, const CarUIFrame** f);
 void fn_801EFF4C(void);
 void fn_801EFF70(void);
 void fn_801F1C24(void* p);
-void fn_80203C50(int a);
+void LoadEnvironmentMaps(int a);
 void fn_80203DC8(void);
 void fn_80203E88(const CarUIFrame* f, const Vec* target, int a);
 void fn_80252BC8(void);
@@ -1099,7 +1099,7 @@ void LoadResourceFiles(int a) {
     fn_8012E81C("part.res");
     fn_8012E81C("race.res");
     fn_8012E96C("swlmap.tex");
-    fn_80203C50(a != 0);
+    LoadEnvironmentMaps(a != 0);
     fn_801EFF4C();
     lbl_8055F330 = 0;
     fn_802AB9E8();

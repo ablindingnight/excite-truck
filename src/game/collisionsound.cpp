@@ -97,19 +97,19 @@ void PhysReplayUninstallEventHandler(void*);
 void fn_802E317C(const char*,...);
 void __construct_array(void*,void*,void*,int,int);
 extern ModuleTag lbl_8055E6B8;
-Manager* fn_801B3B70(Manager*);
+Manager* InitializeCollisionSoundManager(Manager*);
 void* fn_801B3BD4(Entry*,int);
 #ifdef __MWERKS__
 // MATCHING-AID (by name): the Manager ctor below hands the Entry ctor to __construct_array by its linker name.
 extern "C" Entry* __ct__5EntryFv(Entry*);
 #endif
-Manager* fn_801B3D24(Manager*,int);
+Manager* DestroySoundManager(Manager*,int);
 void fn_801B3DBC(Manager*);
-void fn_801B3FD8(Manager*);
+void InitializeSoundPools(Manager*);
 void fn_801B4204(Manager*);
-void fn_801B42D0(Manager*);
-void fn_801B435C(Manager*);
-Node* fn_801B4528(Manager*,Node*,u32);
+void InitializeCollisionSounds(Manager*);
+void ClearCollisionEntries(Manager*);
+Node* FindNodeByKey(Manager*,Node*,u32);
 
 
 struct V3 {float x,y,z;};
@@ -136,8 +136,8 @@ void fn_801B5360(int,const void*,int);
 void fn_801B85E0(Body*,Body*,const V3*,const V3*);
 void fn_801B3084(Body*,Body*,const V3*,const V3*);
 int fn_801B3DC0(Manager*,u32,u32);
-void fn_801B3E24(Manager*,const Vec3*,Contact*,Contact*,int,float);
-int fn_801B4428(const Node*,const Node*);
+void PlayCollisionSound(Manager*,const Vec3*,Contact*,Contact*,int,float);
+int CompareNodeKeys(const Node*,const Node*);
 Node* fn_801B447C(Manager*,Node*,int);
 void* fn_801B4570(Manager*,u32);
 inline void ScaleVInto(const V3& p,const float& f,V3& result){result.x=p.x*f;result.y=p.y*f;result.z=p.z*f;}
@@ -147,7 +147,7 @@ inline bool CollisionAbove(float value,float threshold){return value>threshold;}
 inline float CollisionMin(float limit,float value){if(limit<value)return limit;return value;}
 int fn_801B32C8(const Contact* self,int kind){int result=0;int kinds[2];kinds[0]=self->kind;int selected=-1;kinds[1]=kind;if(kinds[0]==109)selected=0;else if(kinds[1]==109)selected=1; if(selected!=-1)switch(kinds[!selected]){case 1:case 110:result=1;break;}return result;}
 
-Body* fn_801B3338(Contact* self) {
+Body* GetCarBodyFromContact(Contact* self) {
  Body* p=self->body;
  if(p){bool car=false;u32 tag=p->tag;
  if(tag==0x43415220||tag==0x50434152||tag==0x41434152||tag==0x4e434152)car=true;
@@ -159,14 +159,14 @@ int fn_801B3390(){return 0x14;}
 
 int fn_801B3398(const Message* input){Message message=*input;fn_801796CC(1,&message,0x38);return 0x38;}
 
-void fn_801B3448(){Manager* p=(Manager*)__nw__FUlPCc(0x5c0,lbl_80335D3C);if(p)p=fn_801B3B70(p);lbl_8055E6C0=p;fn_801B5364(1,(void*)fn_801B3390);fn_801B5364(15,(void*)fn_801B3398);}
+void fn_801B3448(){Manager* p=(Manager*)__nw__FUlPCc(0x5c0,lbl_80335D3C);if(p)p=InitializeCollisionSoundManager(p);lbl_8055E6C0=p;fn_801B5364(1,(void*)fn_801B3390);fn_801B5364(15,(void*)fn_801B3398);}
 
 void fn_801B34A4(){fn_801B3DBC(lbl_8055E6C0);memset(lbl_80435C50,0,0x20);}
 
 // Preserve the by-value position copy in the sound packet construction.
 #pragma push
 #pragma opt_propagation off
-void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inputA,const V3* inputB,int kind){
+void ProcessCollisionResponse(Contact* first,Contact* second,const V3* position,const V3* inputA,const V3* inputB,int kind){
  V3 vectorA=*inputA;V3 vectorB=*inputB;
  if(!first->body){Contact* temp=first;first=second;second=temp;ScaleVInto(vectorA,lbl_80562620,vectorA);ScaleVInto(vectorB,lbl_80562620,vectorB);if(second)kind=second->kind;}
  V3 firstVelocity,relative,secondVelocity;
@@ -176,9 +176,9 @@ void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inp
  relative.x=firstVelocity.x-secondVelocity.x;relative.y=firstVelocity.y-secondVelocity.y;relative.z=firstVelocity.z-secondVelocity.z;
  float impact=PSVECDotProduct(&vectorB,&vectorA);
  bool allowed=true;int special=0;u32 offset=(u32)kind-107u;if(offset<=3u){if((1u<<offset)&13u)special=1;}if(!special&&kind>=8)allowed=false;
- Body* firstCar=fn_801B3338(first);
+ Body* firstCar=GetCarBodyFromContact(first);
  if(firstCar&&allowed&&impact*impact>lbl_80562628&&PSVECDotProduct(&relative,&relative)>lbl_8056262C){
-  Body* secondCar=second?fn_801B3338(second):0;
+  Body* secondCar=second?GetCarBodyFromContact(second):0;
   CollisionMessage message;
   float ay;
   float ax;
@@ -214,23 +214,23 @@ void fn_801B34DC(Contact* first,Contact* second,const V3* position,const V3* inp
  if(firstCar&&kind<8&&lbl_80435C50[firstCar->id]<lbl_8055E3C4){
   EffectMessage effect;effect.position=*position;effect.velocity=firstVelocity;effect.vector=vectorB;effect.impact=impact;effect.car=firstCar->id;effect.kind=kind;fn_801796CC(5,(const Message*)&effect,0x30);lbl_80435C50[firstCar->id]=lbl_8055E3C4;
  }
- if(firstCar&&kind==109){Body* other=fn_801B3338(second);fn_801B85E0(firstCar,other,position,&vectorA);fn_801B3084(firstCar,other,position,&vectorA);}
+ if(firstCar&&kind==109){Body* other=GetCarBodyFromContact(second);fn_801B85E0(firstCar,other,position,&vectorA);fn_801B3084(firstCar,other,position,&vectorA);}
  V3 magnitudeVector;if(kind==110)ScaleVInto(vectorA,lbl_80562638,magnitudeVector);else magnitudeVector=vectorA;
  if(!fn_801B3DC0(lbl_8055E6C0,(u32)first,(u32)second)&&CollisionAbove(PSVECDotProduct(&magnitudeVector,&magnitudeVector),lbl_8056263C)){
   float magnitude=PSVECMag(&magnitudeVector);float capped=CollisionMin(lbl_80562640,magnitude);
   float amplitude=lbl_80562644+lbl_80562648*(capped/lbl_80562640);
   SoundMessage message(1234,*position,amplitude);fn_801B5360(1,&message,0x14);
-  fn_801B3E24(lbl_8055E6C0,(const Vec3*)position,first,second,kind,amplitude);
+  PlayCollisionSound(lbl_8055E6C0,(const Vec3*)position,first,second,kind,amplitude);
  }
 }
 #pragma pop
 
 void fn_801B3B24(u8*, void*, void*){}
 
-void fn_801B3B28(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);fn_801B3D24(lbl_8055E6C0,1);lbl_8055E6C0=0;}
+void UninstallCollisionSoundHandlers(){PhysReplayUninstallEventHandler((void*)fn_801B3390);PhysReplayUninstallEventHandler((void*)fn_801B3398);DestroySoundManager(lbl_8055E6C0,1);lbl_8055E6C0=0;}
 
 #ifdef __MWERKS__
-Manager* fn_801B3B70(Manager* self){__construct_array(self->entries,(void*)__ct__5EntryFv,(void*)fn_801B3BD4,0x2c,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
+Manager* InitializeCollisionSoundManager(Manager* self){__construct_array(self->entries,(void*)__ct__5EntryFv,(void*)fn_801B3BD4,0x2c,16);InitializeSoundPools(self);fn_801B4204(self);InitializeCollisionSounds(self);return self;}
 
 
 // MATCHING-AID: retail repeats Entry's destructor body here (the element dtor handed to __construct_array); an explicit
@@ -242,7 +242,7 @@ void* fn_801B3BD4(Entry* self,int destroy){if(self){EntryCleanup(self);if(destro
 /* PORT: MWCC path keeps retail's linker-name form, see FACTS 13e */
 // The same behaviour in plain C++: the entries are constructed with Entry's constructor, and the element dtor runs
 // Entry's destructor (Entry's vtable comes from its out-of-line virtual destructor).
-Manager* fn_801B3B70(Manager* self){ConstructEntries(self->entries,16);fn_801B3FD8(self);fn_801B4204(self);fn_801B42D0(self);return self;}
+Manager* InitializeCollisionSoundManager(Manager* self){ConstructEntries(self->entries,16);InitializeSoundPools(self);fn_801B4204(self);InitializeCollisionSounds(self);return self;}
 void* fn_801B3BD4(Entry* self,int destroy){if(self){self->Entry::~Entry();if(destroy>0)__dl__FPv(self);}return self;}
 #endif
 
@@ -250,9 +250,9 @@ Entry::Entry(void){a=lbl_80562624;b=lbl_80562624;c=lbl_80562624;d=lbl_80562624;e
 
 Entry::~Entry(void){if(sound){delete (OwnedSound*)sound;sound=0;}}
 
-Manager* fn_801B3D24(Manager* self,int destroy){if(self){for(int i=0;i<6;i++)__dla__FPv(self->pools[i].items);__destroy_arr(self->entries,(void*)fn_801B3BD4,0x2c,16);if(destroy>0)__dl__FPv(self);}return self;}
+Manager* DestroySoundManager(Manager* self,int destroy){if(self){for(int i=0;i<6;i++)__dla__FPv(self->pools[i].items);__destroy_arr(self->entries,(void*)fn_801B3BD4,0x2c,16);if(destroy>0)__dl__FPv(self);}return self;}
 
-void fn_801B3DBC(Manager* self){fn_801B435C(self);}
+void fn_801B3DBC(Manager* self){ClearCollisionEntries(self);}
 
 int fn_801B3DC0(Manager* self,u32 first,u32 second){
  Entry* entry=self->entries;
@@ -271,7 +271,7 @@ inline u32 PairKey(int first,int second){if(first<0||second<0)return (u32)-1;u32
 
 #pragma push
 #pragma opt_lifetimes off
-void fn_801B3E24(Manager* self,const Vec3* position,Contact* first,Contact* second,int secondKind,float amplitude){
+void PlayCollisionSound(Manager* self,const Vec3* position,Contact* first,Contact* second,int secondKind,float amplitude){
  u32 key=PairKey(first->kind,secondKind);
  SoundTuple* choice=(SoundTuple*)fn_801B4570(self,key);
  Entry* entry=self->entries+self->next;
@@ -307,23 +307,23 @@ int Sound::vf14(void) { return 0; }
 
 extern "C" {
 
-void fn_801B3FD8(Manager* self){int pool=0;unsigned int at=0;for(;pool<6;pool++){int first=at;while(at<13&&lbl_802F9630[at].pool==pool)at++;int count=at-first;if(count<1)fn_802E317C(lbl_80335D50,pool);self->pools[pool].items=__nwa__FUlPCc(count*8,lbl_80335D74);self->pools[pool].count=count;self->pools[pool].index=0;for(int i=0;i<count;i++){SoundTuple* item=(SoundTuple*)self->pools[pool].items+i;item->name=lbl_802F9630[first+i].name;item->gain=lbl_802F9630[first+i].gain;}}}
+void InitializeSoundPools(Manager* self){int pool=0;unsigned int at=0;for(;pool<6;pool++){int first=at;while(at<13&&lbl_802F9630[at].pool==pool)at++;int count=at-first;if(count<1)fn_802E317C(lbl_80335D50,pool);self->pools[pool].items=__nwa__FUlPCc(count*8,lbl_80335D74);self->pools[pool].count=count;self->pools[pool].index=0;for(int i=0;i<count;i++){SoundTuple* item=(SoundTuple*)self->pools[pool].items+i;item->name=lbl_802F9630[first+i].name;item->gain=lbl_802F9630[first+i].gain;}}}
 
 inline u32 NodeKeyFromInfoNew(const KeyInfo* row){int second=row->second;int first=row->first;if(first<0||second<0)return (u32)-1;u32 key=(second<<16)|(first&0xffff);if(first<second)key=(first<<16)|(second&0xffff);return key;}
 
-void fn_801B4204(Manager* self){for(int i=0;i<43;i++){self->nodes[i].key=NodeKeyFromInfoNew(lbl_802F96CC+i);self->nodes[i].pool=self->pools+lbl_802F96CC[i].pool;self->nodes[i].left=0;self->nodes[i].right=0;}qsort(self->nodes,43,16,(int(*)(const void*,const void*))fn_801B4428);self->root=fn_801B447C(self,self->nodes,43);}
+void fn_801B4204(Manager* self){for(int i=0;i<43;i++){self->nodes[i].key=NodeKeyFromInfoNew(lbl_802F96CC+i);self->nodes[i].pool=self->pools+lbl_802F96CC[i].pool;self->nodes[i].left=0;self->nodes[i].right=0;}qsort(self->nodes,43,16,(int(*)(const void*,const void*))CompareNodeKeys);self->root=fn_801B447C(self,self->nodes,43);}
 
-void fn_801B42D0(Manager* self){const char* name=lbl_802F9630[0].name;for(int i=0;i<16;i++){Entry* entry=self->entries+i;entry->sound=fn_802077A4(name,5,&entry->d,&entry->a);entry->key1=0;entry->key2=0;entry->time=lbl_80562650;}self->next=0;}
+void InitializeCollisionSounds(Manager* self){const char* name=lbl_802F9630[0].name;for(int i=0;i<16;i++){Entry* entry=self->entries+i;entry->sound=fn_802077A4(name,5,&entry->d,&entry->a);entry->key1=0;entry->key2=0;entry->time=lbl_80562650;}self->next=0;}
 
-void fn_801B435C(Manager* self){for(int i=0;i<16;i++){self->entries[i].key1=0;self->entries[i].key2=0;self->entries[i].time=lbl_80562650;}}
+void ClearCollisionEntries(Manager* self){for(int i=0;i<16;i++){self->entries[i].key1=0;self->entries[i].key2=0;self->entries[i].time=lbl_80562650;}}
 
-int fn_801B4428(const Node* a,const Node* b){if(a->key<b->key)return -1;if(a->key>b->key)return 1;fn_802E317C(lbl_80335D80);return 0;}
+int CompareNodeKeys(const Node* a,const Node* b){if(a->key<b->key)return -1;if(a->key>b->key)return 1;fn_802E317C(lbl_80335D80);return 0;}
 
 Node* fn_801B447C(Manager* self,Node* nodes,int count){if(count==1)return nodes;int middle=count/2;if(middle>0)nodes[middle].left=fn_801B447C(self,nodes,middle);int remaining=count-middle-1;if(remaining>0)nodes[middle].right=fn_801B447C(self,nodes+middle+1,remaining);return nodes+middle;}
 
-Node* fn_801B4528(Manager* self,Node* node,u32 key){if(key<node->key){if(node->left)return fn_801B4528(self,node->left,key);return 0;}if(key>node->key){if(node->right)return fn_801B4528(self,node->right,key);return 0;}return node;}
+Node* FindNodeByKey(Manager* self,Node* node,u32 key){if(key<node->key){if(node->left)return FindNodeByKey(self,node->left,key);return 0;}if(key>node->key){if(node->right)return FindNodeByKey(self,node->right,key);return 0;}return node;}
 
-void* fn_801B4570(Manager* self,u32 key){SndPool* pool=(SndPool*)self;Node* node=fn_801B4528(self,self->root,key);if(node)pool=node->pool;SoundTuple* result=(SoundTuple*)pool->items+pool->index;pool->index=(pool->index+1)%pool->count;return result;}
+void* fn_801B4570(Manager* self,u32 key){SndPool* pool=(SndPool*)self;Node* node=FindNodeByKey(self,self->root,key);if(node)pool=node->pool;SoundTuple* result=(SoundTuple*)pool->items+pool->index;pool->index=(pool->index+1)%pool->count;return result;}
 
 }  // extern "C"
 

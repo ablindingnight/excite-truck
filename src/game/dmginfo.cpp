@@ -83,11 +83,11 @@ DmgCar* lbl_8055E890;
 
 extern "C" {
 
-void fn_801CECE0(void);
+void InitializeDamageSlots(void);
 
-void fn_801CEC80(void) {
+void InitializeDamageInfo(void) {
     lbl_8055E890 = new ("dmg_car_info") DmgCar[8];
-    fn_801CECE0();
+    InitializeDamageSlots();
 }
 
 void fn_801CECB4(void) {
@@ -95,7 +95,7 @@ void fn_801CECB4(void) {
     lbl_8055E890 = 0;
 }
 
-void fn_801CECE0(void) {
+void InitializeDamageSlots(void) {
     int i;
     int j;
     for (i = 0; i < 8; i++) {

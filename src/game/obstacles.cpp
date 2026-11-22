@@ -236,14 +236,14 @@ ObstacleBody::~ObstacleBody(void) {}
 // A contact corner (corners.cpp), kept in a body's list at 0xD0.
 // Keep the scale operand in MWCC's floating-point pool.
 static inline f32 ScaleOperand(f32 value) { return value; }
-extern "C" Corner* fn_801AE180(void);  // new corner
+extern "C" Corner* AllocateCornerFromPool(void);  // new corner
 
 static inline void AddCorner(u8* body, f32 x, f32 y, f32 z, f32 spring) {
     RVec3 pos;
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    Corner* c = fn_801AE180();
+    Corner* c = AllocateCornerFromPool();
     c->pos = pos;
     c->spring = spring;
     c->friction = 0.5f;
@@ -341,7 +341,7 @@ double sqrt(double x);
 }
 
 static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
-    Corner* c = fn_801AE180();
+    Corner* c = AllocateCornerFromPool();
     c->pos = v;
     c->spring = spring;
     c->friction = 0.5f;
@@ -354,7 +354,7 @@ static inline void AddCornerV(u8* body, const RVec3& v, f32 spring) {
 }
 
 static inline void AddCornerV(u8* body, const ValVec3& v, f32 spring) {
-    Corner* c = fn_801AE180();
+    Corner* c = AllocateCornerFromPool();
     c->pos = (const RVec3&)v;
     c->spring = spring;
     c->friction = 0.5f;

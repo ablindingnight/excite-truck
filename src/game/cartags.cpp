@@ -51,7 +51,7 @@ int fn_801E85B4(void);
 TagCam* fn_802678C0(int view);
 int fn_801CF064(void);
 int fn_801E866C(int view);
-const char* fn_800122B4(int place, char* buf);
+const char* FormatIntegerWithSuffix(int place, char* buf);
 void fn_802339A8(s32 font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 alpha, ...);
 int fn_8027AA48(void);
 TagReg* fn_8027ABF8(s32 id);
@@ -177,7 +177,7 @@ void fn_802A7EEC(void) {
                 char buf[8];
                 u32 color = WhiteAlpha(Ramp(d, nearDist, farDist, 1.0f, 0.0f));
                 fn_802339A8(lbl_8055F8BC, color, 0x44, "%s", scr.x, scr.y, 0.0f, 0.42000002f, 1.0f,
-                            fn_800122B4(c->place, buf));
+                            FormatIntegerWithSuffix(c->place, buf));
             }
         }
         if (fn_8027AA48()) {

@@ -19,7 +19,7 @@ void fn_80131818(ValueTable* t);
 const char* fn_80131234(const char* key);  // localized text
 int fn_801345D8(char* dst, int n, const char* fmt, ...);
 int fn_80204BB4(const char* difficulty);
-const char* fn_80205268(const char* key, int difficulty, int event);
+const char* GetDifficultyString(const char* key, int difficulty, int event);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);  // fatal
 }
@@ -289,7 +289,7 @@ int fn_8027AD4C(Contest* c, ValueNode* n) {
                     found = 1;
                     s32 id = e->id;
                     c->event = id;
-                    const char* table = fn_80205268("grade_table", c->difficulty, id);
+                    const char* table = GetDifficultyString("grade_table", c->difficulty, id);
                     if (HasChild(e->node, table)) {
                         c->grades.Load(e->node->FindChild(table));
                     } else {
@@ -697,7 +697,7 @@ void fn_8027C610(void) {
 int fn_8027C650(ContestRef* r) {
     HighScore* h = StatsGetHighScore(IdentGetCurrentSlot(), r->event, fn_8027D1F4(), 0);
     if (h) {
-        const char* table = fn_80205268("grade_table", lbl_8055F654->difficulty, -1);
+        const char* table = GetDifficultyString("grade_table", lbl_8055F654->difficulty, -1);
         Grades g(GetEvent(r->event)->node->FindChild(table));
         return h->grade <= g.passing;
     }
@@ -877,7 +877,7 @@ int fn_8027CF3C(const char* name) {
 
 s32 fn_8027CFB4(const char* name) {
     ContestRef* r = fn_8027C120(lbl_8055F654, name);
-    const char* table = fn_80205268("grade_table", lbl_8055F654->difficulty, -1);
+    const char* table = GetDifficultyString("grade_table", lbl_8055F654->difficulty, -1);
     Grades g(GetEvent(r->event)->node->FindChild(table));
     for (int i = 0; i < 5; i++) {
         int t = g.GetThreshold(i);

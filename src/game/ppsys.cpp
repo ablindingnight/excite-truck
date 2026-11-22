@@ -129,7 +129,7 @@ f32 fn_8017F70C(f32 x);
 void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
 f32 fn_801C0E44(const RVec3* v);
-void fn_801E41D8(const RVec3* a, const RVec3* b, u32 color, f32 width);
+void DrawLineSegment(const RVec3* a, const RVec3* b, u32 color, f32 width);
 void fn_801C0124(RVec3* out, const RVec3* v, f32 s);
 }
 f32 Max(f32 a, f32 b);
@@ -676,7 +676,7 @@ void fn_801C2BF8(PSys* s, const RMtx* m) {
             AddTo(&wa, &m->pos);
             MulRot(&wb, b, m);
             AddTo(&wb, &m->pos);
-            fn_801E41D8(&wa, &wb, col, 0.04f);
+            DrawLineSegment(&wa, &wb, col, 0.04f);
         }
     }
 }

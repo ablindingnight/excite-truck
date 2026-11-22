@@ -181,7 +181,7 @@ s32 GetSkillEntry(s32 car);
 int fn_801667F0(void);
 void fn_801B30D0(s32 car);
 int fn_801B8570(s32 car);
-f32 fn_801B306C(void);
+f32 CalculateFrameTime(void);
 void fn_801B30E0(s32 car);
 void fn_8018ADB4(void* car, f32 v);
 void fn_8018ADAC(void* car, f32 v);
@@ -808,7 +808,7 @@ void AIDriver::vf30(void) {
         int take = 0;
         if (!fn_801B8570(CARID(d))) {
             f32 l = lbl_8055E3C8;
-            if (fn_801B306C() < l) {
+            if (CalculateFrameTime() < l) {
                 take = 1;
             }
         }
@@ -1088,7 +1088,7 @@ f32 fn_80194B60(f32 a, f32 b, f32 p, f32 x) {
     return a + s * (b - a);
 }
 
-// Another racer, as seen through its controller (fn_801B2EC0).
+// Another racer, as seen through its controller (GetDeityCarByIndex).
 class AIRacer {
 public:
     virtual void v08(void);
@@ -1116,7 +1116,7 @@ public:
 };
 
 extern "C" {
-AIRacer* fn_801B2EC0(int car);
+AIRacer* GetDeityCarByIndex(int car);
 f32 fn_80134C1C(void);
 f32 fn_801B3064(void);
 f32 fn_80139048(void);
@@ -1156,7 +1156,7 @@ void fn_80194C4C(u8* d, u8* out, f32 t) {
         o->speed = speed;
         for (int i = 0; i < fn_801B2F24(); i++) {
             u8* me;
-            AIRacer* r = fn_801B2EC0(i);
+            AIRacer* r = GetDeityCarByIndex(i);
             if (i == CARID(d)) {
                 continue;
             }

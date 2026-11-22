@@ -43,7 +43,7 @@ extern "C" {
 void* fn_8012C370(const char* name, u32 type, u32* version, u32* size, u8* first, u8* swapped);
 void fn_8012C4D8(void* res);
 void fn_802C8B08(PFrame* cam);
-void fn_801E41D8(const PVec3* a, const PVec3* b, u32 color, f32 width);
+void DrawLineSegment(const PVec3* a, const PVec3* b, u32 color, f32 width);
 }
 
 extern f32 __float_epsilon[];  // FLT_EPSILON
@@ -383,9 +383,9 @@ void fn_801CFF18(PMesh* m, const PFrame* xf) {
         if (PSVECDotProduct((const Vec*)&nrm, (const Vec*)&d) > 0.0f) {
             continue;
         }
-        fn_801E41D8(&v[0], &v[1], 0x80FFFF00, 0.2f);
-        fn_801E41D8(&v[1], &v[2], 0x80FFFF00, 0.2f);
-        fn_801E41D8(&v[2], &v[0], 0x80FFFF00, 0.2f);
+        DrawLineSegment(&v[0], &v[1], 0x80FFFF00, 0.2f);
+        DrawLineSegment(&v[1], &v[2], 0x80FFFF00, 0.2f);
+        DrawLineSegment(&v[2], &v[0], 0x80FFFF00, 0.2f);
     }
 }
 

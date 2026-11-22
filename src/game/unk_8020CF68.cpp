@@ -21,7 +21,7 @@ extern char lbl_8055EE94;
 extern float lbl_8055EE84, lbl_8055EE88, lbl_8055EE8C, lbl_8055EE90, lbl_8055EE98, lbl_8055EE9C;
 __declspec(section ".data") extern float __float_epsilon;
 extern int fn_802E2C20(void);
-extern void fn_80012158(void);
+extern void PlayNextSound(void);
 extern void fn_8020CF6C(int);
 extern double fabs(double);
 extern void fn_80209190(int, float);
@@ -451,7 +451,7 @@ int fn_8020DB0C(int arg0) {
         return 0;
     }
     if (var_r31 != 0) {
-        fn_80012158();
+        PlayNextSound();
     }
     return 1;
 }

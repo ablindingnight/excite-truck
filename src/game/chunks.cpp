@@ -212,7 +212,7 @@ static inline f32 Rand(f32 lo, f32 hi) { return fn_80129DC4(0, lo, hi); }
 
 extern "C" {
 
-void fn_802924E8(void) { lbl_804B4168.Clear(); }
+void ClearFrameBuffer(void) { lbl_804B4168.Clear(); }
 
 static inline f64 Rest(f32 x, f32 used) { return sqrt(1.0f - x * x - used); }
 
@@ -251,7 +251,7 @@ static inline void SetRow(RVec3& v, f32 x, f32 y, f32 z) {
     v.z = z;
 }
 
-void fn_80292698(void) {
+void UpdateSpinRotations(void) {
     f32 t = fn_801E7E18();
     Spin* s = lbl_804B4030;
     for (int i = 0; i < 6; i++, s++) {
@@ -303,7 +303,7 @@ void fn_80292864(void) {
     }
 }
 
-Chunks* fn_802928D4(ValueNode* vn, int type, const char* base, int inst, const char* remap) {
+Chunks* CreateChunkSystem(ValueNode* vn, int type, const char* base, int inst, const char* remap) {
     switch (type) {
     case 1:
         return new ("car chunk sys") CarChunks(vn, base);
@@ -318,10 +318,10 @@ Chunks* fn_802928D4(ValueNode* vn, int type, const char* base, int inst, const c
 }
 
 Chunks* fn_802929D8(int type, const char* base, int inst, const char* remap) {
-    return fn_802928D4(0, type, base, inst, remap);
+    return CreateChunkSystem(0, type, base, inst, remap);
 }
 
-int fn_80292DE8(const char* name);
+int ParseChunkTypeName(const char* name);
 
 Chunks* fn_802929F8(const char* name) {
     int idx = -1;
@@ -333,10 +333,10 @@ Chunks* fn_802929F8(const char* name) {
     if (!vn) {
         fn_802E317C("chunk: could not find table %s", name);
     }
-    int type = fn_80292DE8(vn->GetValue("type"));
+    int type = ParseChunkTypeName(vn->GetValue("type"));
     const char* base = vn->GetValue("model_base");
     int inst = vn->GetInt("instance", 0);
-    Chunks* sys = fn_802928D4(vn, type, base, inst, vn->GetString("remap_texture", 0));
+    Chunks* sys = CreateChunkSystem(vn, type, base, inst, vn->GetString("remap_texture", 0));
     lbl_804B4168.Add(sys, name);
     return sys;
 }
@@ -373,7 +373,7 @@ int fn_80292BA8(PVec* pos, PVec* vel, const PVec* hit, const PVec* n) {
     return 0;
 }
 
-void fn_80292CD8(const char* model, int id, const char* tex) {
+void RemapModelTexture(const char* model, int id, const char* tex) {
     ModelInfo* m = fn_802C6B44(model);
     TexRemap r;
     memset(&r, 0, sizeof(r));
@@ -386,7 +386,7 @@ void fn_80292CD8(const char* model, int id, const char* tex) {
     fn_802C6C20(m);
 }
 
-int fn_80292DE8(const char* name) {
+int ParseChunkTypeName(const char* name) {
     TypeName t[3] = {{"car", 1}, {"terrain", 2}, {"wood", 3}};
     for (u32 i = 0; i < 3; i++) {
         if (strcmp(name, t[i].name) == 0) {
@@ -598,7 +598,7 @@ void CarChunks::Step(void) {
     fn_801E9DD8();
 }
 
-extern "C" void fn_80292CD8(const char* model, int id, const char* tex);
+extern "C" void RemapModelTexture(const char* model, int id, const char* tex);
 
 TerrainChunks::TerrainChunks(ValueNode* vn, const char* base, int inst, const char* remap) {
     LoadModels(base, inst, remap);
@@ -652,7 +652,7 @@ void TerrainChunks::LoadModels(const char* base, int inst, const char* remap) {
             break;
         }
         if (remap && remap[0]) {
-            fn_80292CD8(name, inst, remap);
+            RemapModelTexture(name, inst, remap);
         }
         models[numModels] = fn_802C6FC0(name, inst, 0);
     }
@@ -794,7 +794,7 @@ void WoodChunks::LoadModels(const char* base, int inst, const char* remap) {
             break;
         }
         if (remap && remap[0]) {
-            fn_80292CD8(name, inst, remap);
+            RemapModelTexture(name, inst, remap);
         }
         models[numModels] = fn_802C6FC0(name, inst, 0);
     }

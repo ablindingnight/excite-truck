@@ -85,11 +85,11 @@ s32 fn_80287B14(void);
 const SmokeCar* fn_80287B24(s32 i);
 void fn_80287B38(void (*cb)(const SmokeEntry* e, int n));
 int fn_80287B5C(int n);
-int fn_80287E20(SmokeModel* model, const char* name);
-ValueNodeV* fn_80287E80(SmokeModel* model, const char* name);
-ValVec3 fn_80287ED0(SmokeModel* model, const char* node, const char* key);
+int CheckEffectKeyExists(SmokeModel* model, const char* name);
+ValueNodeV* FindEffectNode(SmokeModel* model, const char* name);
+ValVec3 GetEffectNodeVector(SmokeModel* model, const char* node, const char* key);
 const VecMatrix* fn_80288060(SmokeModel* model, int i);
-SmokeModel* fn_80288208(s32 i);
+SmokeModel* GetEffectInfo(s32 i);
 void* fn_8028E2F8(PartParams* desc, const char* name, const char* tex);
 void fn_8028E398(void* e);
 void fn_8028E584(void* e, const Vec* p, const Vec* v);
@@ -297,9 +297,9 @@ void EngineSmokeMan::Update(int i, int state) {
 void EngineSmokeMan::InitPos(void) {
     Vec* p = pos;
     for (int i = 0; i < fn_80287B14(); p++, i++) {
-        SmokeModel* model = fn_80288208(i);
-        if (fn_80287E20(model, "engine")) {
-            *(ValVec3*)p = fn_80287ED0(model, "engine", "arm");
+        SmokeModel* model = GetEffectInfo(i);
+        if (CheckEffectKeyExists(model, "engine")) {
+            *(ValVec3*)p = GetEffectNodeVector(model, "engine", "arm");
         } else {
             *(SVec*)p = SVec(0.0f, 2.0f, 0.0f);
         }
@@ -433,7 +433,7 @@ void ExhaustSmokeMan::Clear(void) {
     memset(cars, 0, sizeof(cars));
     ExhaustState* s = cars;
     for (int i = 0; i < fn_80287B14(); i++, s++) {
-        s->count = fn_80288208(i)->nParts;
+        s->count = GetEffectInfo(i)->nParts;
     }
 }
 
@@ -490,7 +490,7 @@ void ExhaustSmokeMan::InitDark(void) {
 
 void ExhaustSmokeMan::Emit(void* e, int car, int part) {
     const SmokeCar* c = fn_80287B24(car);
-    const VecMatrix* pt = fn_80288060(fn_80288208(car), part);
+    const VecMatrix* pt = fn_80288060(GetEffectInfo(car), part);
     Vec p;
     Vec d;
     MulVec(&p, &pt->origin, c->axes);
@@ -633,11 +633,11 @@ void RadiatorSmokeMan::InitCars(void) {
     SmokeModel* model;
     cars = new ("smoke car tab") RadiatorCar[fn_80287B14()];
     for (int i = 0; i < fn_80287B14(); i++) {
-        model = fn_80288208(i);
+        model = GetEffectInfo(i);
         RadiatorCar* c = &cars[i];
-        if (fn_80287E20(model, "radiator")) {
+        if (CheckEffectKeyExists(model, "radiator")) {
             RadiatorPoint* p;
-            ValueNodeV* node = fn_80287E80(model, "radiator");
+            ValueNodeV* node = FindEffectNode(model, "radiator");
             c->count = node->GetIntValue("count");
             p = c->pts;
             for (int k = 0; k < c->count; k++, p++) {

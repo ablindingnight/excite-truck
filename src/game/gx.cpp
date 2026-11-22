@@ -66,10 +66,10 @@ void RemoveBackgroundFunction(void (*cb)(void));
 void fn_802E2E0C(int (*cb)(int), const char* name);
 int fn_802E9A1C(void);
 void fn_802D9C4C(void);
-void fn_802D9C18(void);
-void fn_802D9A50(void);
-void fn_802D8D1C(void);
-void fn_802D8DA0(void);
+void SetupSystemCallbacks(void);
+void HandleResetSequence(void);
+void InitializeTextureArray(void);
+void FreeTextureMemory(void);
 void fn_802D6810(void);
 void fn_802D6860(void);
 void fn_802D6C68(void);
@@ -84,8 +84,8 @@ void fn_802DB168(void);
 void fn_802DD4FC(void);
 void fn_802DD5F4(void);
 void fn_802ECA48(void);
-void fn_802D9230(void* tex);
-void fn_802D92B8(void* tex);
+void LoadEnvironmentMapTexture(void* tex);
+void ValidateLightmapTexture(void* tex);
 void fn_802D92B0(void);
 void fn_802DFAF4(void);
 void fn_802DF21C(void);
@@ -687,7 +687,7 @@ void fn_802CF600(void) {
     lbl_8055FD94 = 0;
     lbl_8055FDB0 = NewLightSets();
     lbl_8055FDAC = 0;
-    fn_802D8D1C();
+    InitializeTextureArray();
     fn_80127468();
     lbl_8055FD68 = new ("fifo_buf") u8[0x300000];
     lbl_8055FD6C = GXInit((void*)lbl_8055FD68, (u32)0x300000);
@@ -703,7 +703,7 @@ void fn_802CF600(void) {
     fn_80127468();
     fn_802CF5A8();
     fn_802DACD4();
-    fn_802D9C18();
+    SetupSystemCallbacks();
     VISetPreRetraceCallback((VIRetraceCallback)fn_802CF10C);
     fn_80127468();
     InitializeBoneManager();
@@ -720,7 +720,7 @@ void fn_802CF600(void) {
     fn_802DD4FC();
     lbl_8055FD40 = -1;
     fn_80127468();
-    RegisterBackgroundTask(fn_802D9A50, "drIdle");
+    RegisterBackgroundTask(HandleResetSequence, "drIdle");
     fn_802DB168();
     lbl_8055FD48 = 0;
     VISetBlack((BOOL)0);
@@ -831,16 +831,16 @@ void fn_802CF850(void) {
     fn_802CFF50();
     fn_802CFFA4(lbl_8055FD0A);
     if (lbl_8055FE1C) {
-        fn_802D9230(lbl_8055FE1C);
+        LoadEnvironmentMapTexture(lbl_8055FE1C);
     }
     if (lbl_8055FE20) {
-        fn_802D92B8(lbl_8055FE20);
+        ValidateLightmapTexture(lbl_8055FE20);
     }
     lbl_8055FDB4 = 0;
 }
 
 void fn_802CFBA8(void) {
-    RemoveBackgroundFunction(fn_802D9A50);
+    RemoveBackgroundFunction(HandleResetSequence);
     fn_802D9C4C();
     VISetPreRetraceCallback((VIRetraceCallback)0);
     fn_802E30C8("gx: max dynamic data used = %d", lbl_8055FD98);
@@ -863,7 +863,7 @@ void fn_802CFBA8(void) {
     lbl_8055FD68 = 0;
     delete[] (u8*)lbl_804C9760.buf;
     lbl_804C9760.buf = 0;
-    fn_802D8DA0();
+    FreeTextureMemory();
     delete[] lbl_8055FDB0;
     lbl_8055FDB0 = 0;
     lbl_804C9760.cur = 0;

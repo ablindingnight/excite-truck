@@ -449,7 +449,7 @@ static inline void fn_80136594(CamTrackPos* out, LineFollower* trk, const CamXZ*
 }
 #endif
 int fn_8026A2C8(void);
-CamRacerObj* fn_801B2EC0(int i);
+CamRacerObj* GetDeityCarByIndex(int i);
 extern f32 lbl_8055F49C;  // pass-by range squared
 extern u8 lbl_8055F498;   // shake position
 extern u8 lbl_8055C4C8;   // shake rotation
@@ -475,7 +475,7 @@ void UpdateCameraRumble(u8* self, int paused, CamPose* pose, const f32* eye, u8*
     f32 best = lbl_8055F49C;
     u8* near = 0;
     for (int i = 0; i < n; i++) {
-        u8* r = fn_801B2EC0(i)->GetCar();
+        u8* r = GetDeityCarByIndex(i)->GetCar();
         rp = (const f32*)(r + 0x60);
         CamXZ rxz(rp[0], rp[2]);
         CamTrackPos rat;
@@ -534,7 +534,7 @@ void UpdateTracksideCamera(CamRec* c, const f32* w, const f32* eye, f32 fov) {
     f32 best = lbl_8055F49C;
     u8* near = 0;
     for (int i = 0; i < n; i++) {
-        u8* r = fn_801B2EC0(i)->GetCar();
+        u8* r = GetDeityCarByIndex(i)->GetCar();
         rp = (const f32*)(r + 0x60);
         CamXZ rxz(rp[0], rp[2]);
         CamTrackPos rat;
@@ -647,7 +647,7 @@ void fn_801769CC(void);
 void fn_80276B8C(void);
 void fn_80268D94(void);
 void UpdateIdealFollower(void);
-void fn_80278214(void);
+void InitializeScriptNodeVariables(void);
 void InitializeCameraStructures(void);
 void fn_80273354(void);
 void fn_8027045C(void);
@@ -744,7 +744,7 @@ void InitializeCameraManager(int /* nViews */) {
     fn_80276B8C();
     fn_80268D94();
     UpdateIdealFollower();
-    fn_80278214();
+    InitializeScriptNodeVariables();
     fn_80273354();
     fn_8027045C();
     lbl_8055F494 = fn_802090D4("crash_vol");
@@ -1420,7 +1420,7 @@ void UpdateCameraFrame(CamRec* c);
 void fn_802704D4(int type, CamRec* c);
 int fn_8026A698(CamRec* c, int idx);
 void UpdateCameraFrameFromCar(CamRec* c);
-void fn_8027847C(CamRec* c);
+void InterpolateCameraAnimation(CamRec* c);
 void UpdateChaseCameraView(CamRec* c);
 void fn_80274660(int type, CamRec* c);
 void fn_8026DAA8(CamRec* c);
@@ -1515,7 +1515,7 @@ void UpdateCameraMode(CamRec* c, u8* own, int idx) {
             UpdateCameraFrameFromCar(c);
             break;
         case 0x19:
-            fn_8027847C(c);
+            InterpolateCameraAnimation(c);
             break;
         case 4:
         case 5:

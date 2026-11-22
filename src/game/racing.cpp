@@ -62,8 +62,8 @@ void fn_8000C630(long, int);
 extern "C" {
 int fn_8026B0C0(int player);
 GameUI* fn_801B83A0(void);
-void fn_801DF93C(int player);
-void fn_8000FBE4(void);
+void DrawBoostGauge(int player);
+void UpdateDashHelper(void);
 int fn_801E866C(int player);
 int fn_801E89C8(int player);
 }  // extern "C"
@@ -73,8 +73,8 @@ extern "C" {
 void UpdateOverheatOverlay(int);
 extern "C" {
 int fn_8027AA48(void);
-void fn_800111A4(const char* text, int a, int b, int c, int flags, f32 scale);
-void fn_80010F38(const char* text, int a, int b, int flags, f32 scale);
+void AddDashboardTextRow(const char* text, int a, int b, int c, int flags, f32 scale);
+void AddDashboardRow(const char* text, int a, int b, int flags, f32 scale);
 PlayerHits* fn_801E7E34(void);
 int fn_801E89EC(void);
 int fn_80144F2C(void);
@@ -82,12 +82,12 @@ int fn_80144F34(int view, int team, u8* out);
 void fn_80148134(f32* ox, f32* oy, f32 x, f32 y, s32 unk);
 void fn_801D490C(void);
 f32 fn_80011E60(void);
-void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
+void QueueColoredRectangle(f32 x, f32 y, f32 w, f32 h, u32 color);
 f32 fn_8013672C(void);
 CarInfo* GetCarInfo(int index);
 int GetHumanPlayerCount(void);
 CarInfo* fn_801EA9B0(int index);
-void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void DrawFormattedString(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 f32 fn_80011DEC(int player);
 f32 fn_80011DC0(int player);
 void fn_802C8BD0(s32 tex);
@@ -99,7 +99,7 @@ void fn_801478E0(ILayout* layout, const char* name, gArtSet* art, int frame);
 void fn_80147F30(f32 x, f32 y, f32 w, f32 h, u32 color, int segs, f32 start, f32 step, s32 tex, f32 u0,
                  f32 v0, f32 u1, f32 v1);
 f32 fn_80011E04(int unk);
-void fn_80010FDC(const char* text, int flags);
+void WrapAndAddTextRows(const char* text, int flags);
 extern u8 lbl_8055E520;
 }
 
@@ -527,12 +527,12 @@ void RacingOverlay::Update(void) {
     view = lbl_8055D350->view;
     if (fn_8026B0C0(lbl_8055D350->player)) {
         if (fn_801B83A0()->vf58()) {
-            fn_801DF93C(lbl_8055D350->player);
+            DrawBoostGauge(lbl_8055D350->player);
         }
         return;
     }
     if (lbl_8055D350->player == 0) {
-        fn_8000FBE4();
+        UpdateDashHelper();
     }
     {
         RaceInfo* ri = lbl_8055D350;
@@ -567,9 +567,9 @@ void RacingOverlay::Update(void) {
         int g = 100.0f * (1.0f - t->damage[1]);
         int b = 100.0f * (1.0f - t->damage[2]);
         if (fn_8027AA48()) {
-            fn_800111A4(text, r, g, b, 7, 1.0f);
+            AddDashboardTextRow(text, r, g, b, 7, 1.0f);
         } else {
-            fn_80010F38(text, r, g, 6, 1.0f);
+            AddDashboardRow(text, r, g, 6, 1.0f);
         }
     }
     if (lbl_8055D350->flags & 0x20) {
@@ -579,9 +579,9 @@ void RacingOverlay::Update(void) {
         for (j = 0; j < 4; j++, hit++) {
             if (hit->id >= 0) {
                 if (hit->type > 9 && hit->type < 13) {
-                    fn_80010F38("KILLED", 100.0f * (1.0f - hit->a), 100.0f * (1.0f - hit->b), 8, 1.0f);
+                    AddDashboardRow("KILLED", 100.0f * (1.0f - hit->a), 100.0f * (1.0f - hit->b), 8, 1.0f);
                 } else {
-                    fn_80010F38("DAMAGE", 100.0f * (1.0f - hit->a), 100.0f * (1.0f - hit->b), 8, 1.0f);
+                    AddDashboardRow("DAMAGE", 100.0f * (1.0f - hit->a), 100.0f * (1.0f - hit->b), 8, 1.0f);
                 }
             }
         }
@@ -643,7 +643,7 @@ void RacingOverlay::DrawMarker(f32 t, int index, f32 x, f32 y, f32 w, f32 h) {
     f32 px = Lerp(x - aw / 2, x + w - aw / 2, t);
     f32 top = y + ah;
     int flip = !valid;
-    fn_80010E94(arrowsArt, flip, px, valid ? top : bottom, 0.0f, 0.0f);
+    DrawSpriteWithSize(arrowsArt, flip, px, valid ? top : bottom, 0.0f, 0.0f);
 }
 
 void RacingOverlay::DrawProgress(void) {
@@ -659,7 +659,7 @@ void RacingOverlay::DrawProgress(void) {
         y = fn_80011E60();
     }
     n = 0;
-    fn_80010B80(-165.0f, y, 330.0f, 5.0f, 0xC80000C8);
+    QueueColoredRectangle(-165.0f, y, 330.0f, 5.0f, 0xC80000C8);
     lapLen = fn_8013672C();
     total = lapLen * fn_801E7E3C()->laps;
     for (i = 0; i < GetHumanPlayerCount(); i++) {
@@ -693,15 +693,15 @@ void RacingOverlay::DrawStandings(void) {
     after = after < 0 ? 0 : after;
     y = 85.0f;
     for (i = i < 1 ? 1 : i; i < lbl_8055D350->stats->pos; i++) {
-        fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->setup.name);
+        DrawFormattedString(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->setup.name);
         y -= 20.0f;
     }
-    fn_8000FF88(-0x100, 9, "%d. %s", 1.0f, -280.0f, y, lbl_8055D350->stats->pos,
+    DrawFormattedString(-0x100, 9, "%d. %s", 1.0f, -280.0f, y, lbl_8055D350->stats->pos,
                 lbl_8055D350->racer->setup.name);
     y -= 20.0f;
     for (i = lbl_8055D350->stats->pos + 1; i <= lbl_8055D350->stats->pos + after && i <= GetHumanPlayerCount();
          i++) {
-        fn_8000FF88(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->setup.name);
+        DrawFormattedString(-1, 9, "%d. %s", 1.0f, -280.0f, y, i, fn_801EA9B0(i - 1)->setup.name);
         y -= 20.0f;
     }
 }
@@ -714,8 +714,8 @@ void RacingOverlay::DrawScore(void) {
     f32 x = fn_80011DEC(lbl_8055D350->player) - 60.0f;
     f32 y = fn_80011DC0(lbl_8055D350->player) - 314.0f;
     fn_802354A0(uiArt, 3, x, y, 0.0f, 60.0f, 45.0f, -1);
-    fn_8000FF88(-0x100, 10, "%d", 0.94f, x - 10.0f, y, score0);
-    fn_8000FF88(-0x100, 10, "%d", 0.94f, x - 10.0f, y - 22.5f, score1);
+    DrawFormattedString(-0x100, 10, "%d", 0.94f, x - 10.0f, y, score0);
+    DrawFormattedString(-0x100, 10, "%d", 0.94f, x - 10.0f, y - 22.5f, score1);
 }
 
 
@@ -910,7 +910,7 @@ int RacingOverlay::DrawTryAgain(void) {
     int on = (f32)fmod(lbl_8055D350->time, 1.0) > 0.5f;
     if (on && lbl_8055E520) {
         fn_80011E04(0);
-        fn_80010FDC("Please try again", 12);
+        WrapAndAddTextRows("Please try again", 12);
         return 1;
     }
     return 0;

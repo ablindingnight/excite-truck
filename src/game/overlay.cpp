@@ -57,7 +57,7 @@ struct RetryFlags {
 
 extern "C" {
 int fn_801298E8(f32* out, int unk);
-void fn_80010B80(f32 x, f32 y, f32 w, f32 h, u32 color);
+void QueueColoredRectangle(f32 x, f32 y, f32 w, f32 h, u32 color);
 int fn_801769B8(void);
 int GetHumanPlayerCount(void);
 int fn_802E2C20(void);
@@ -81,7 +81,7 @@ void fn_8000D75C(void);
 extern "C" {
 void fn_8001123C(int player);
 void fn_80011A2C(void);
-void fn_800105A0(const char* text, int unk);
+void DrawPlayerNameBox(const char* text, int unk);
 int fn_801B8914(void);
 void fn_80176780(int a, int b);
 int fn_801B8900(void);
@@ -89,21 +89,21 @@ ILayout* fn_80145E70(const char* name);
 void fn_801769E0(void);
 void fn_8017691C(void);
 GameUI* fn_801B83A0(void);
-void fn_8001071C(const char* text, int player);
+void ShowMessageText(const char* text, int player);
 int fn_801B885C(int player);
-void fn_8000FBE4(void);
+void UpdateDashHelper(void);
 void fn_801C6B70(void);
-void fn_80011A5C(int numPlayers);
+void SetScreenViewports(int numPlayers);
 void fn_801B84A4(int player);
 int fn_801B87A0(int player, u16 key);
 void fn_801CB844(void);
 int fn_801B8874(void);
-void fn_800121A4(void);
+void PlayDashSounds(void);
 void fn_8027AA48(void);
 void fn_80230E90(int unk);
-void fn_80012158(void);
+void PlayNextSound(void);
 int fn_801CB880(void);
-f32 fn_80011E70(void);
+f32 GetCenterX(void);
 f32 fn_80011E90(void);
 void fn_800109E4(u32 color, f32 x, f32 y, f32 w, f32 h);
 void fn_8014784C(ILayout* layout, const char* name, const char* set, int index);
@@ -116,13 +116,13 @@ extern "C" {
 f32 fn_80011E34(void);
 f32 fn_80011E54(void);
 CarInfo* fn_801EA9B0(int index);
-void fn_8000FF88(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+void DrawFormattedString(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 int fn_801345D8(char* buf, int size, const char* fmt, ...);
-const char* fn_800122B4(int place, char* buf);
-void fn_80010074(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
+const char* FormatIntegerWithSuffix(int place, char* buf);
+void DrawColoredTextWithShadow(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...);
 void fn_801A7F8C(void);
 void fn_8000F0E4(const char* name);
-void fn_8000F884(void);
+void LoadDashboardAssets(void);
 void fn_80011F64(void);
 int fn_80137C74(void);
 void* fn_802090D4(const char* name);
@@ -429,7 +429,7 @@ static void fn_800053CC(void) {
         f32 mag;
         MeasureStickY(kOverlayStickYScale.value, v[1], xx, y, mag);
         len = sqrt(mag);
-        fn_80010B80(x, y, r, r, 0x800000FF);
+        QueueColoredRectangle(x, y, r, r, 0x800000FF);
     }
 }
 
@@ -618,17 +618,17 @@ void fn_80005B74(void) {
         now = lbl_8055D350->time;
         if (now > t) {
             if (now - t < 2.0f) {
-                fn_800105A0("Please trigger PA", 0);
+                DrawPlayerNameBox("Please trigger PA", 0);
             }
         } else {
             sprintf(buf, "%.1f seconds til grab", t - now);
-            fn_800105A0(buf, 0);
+            DrawPlayerNameBox(buf, 0);
         }
     }
 }
 
 // Not referenced in the final game; kept for their strings.
-static void DrawWaitingForOthers(void) { fn_800105A0("Other players are still racing", 0); }
+static void DrawWaitingForOthers(void) { DrawPlayerNameBox("Other players are still racing", 0); }
 
 static void DrawPressPrompt(char* buf, const char* button, const char* action) {
     sprintf(buf, "Press  %s  to  %s", button, action);
@@ -652,7 +652,7 @@ inline void ClosureOverlay::DrawContinue(void) {
         x = fn_80011E44() - 132.0f;
         y = 95.0f + fn_80011E60();
         fn_8000FBE8(x - 35.0f, y, kOverlayFullScale.value);
-        fn_8000FF88(0xFFFFFFFF, 0x11, "Continue", 0.6f, x, y);
+        DrawFormattedString(0xFFFFFFFF, 0x11, "Continue", 0.6f, x, y);
     }
 }
 
@@ -664,7 +664,7 @@ inline void ClosureOverlay::ShowMessage(int player) {
         msg = "Your car is impaired";
     }
     if (msg) {
-        fn_8001071C(msg, player);
+        ShowMessageText(msg, player);
     }
 }
 
@@ -754,7 +754,7 @@ void ClosureOverlay::DrawPlayer(int player) {
 
 void ArenaIntroOverlay::Update(void) {
     if (!fn_801B885C(lbl_8055D350->player) && lbl_8055D350->numViews == lbl_8055D350->numPlayers) {
-        fn_8000FBE4();
+        UpdateDashHelper();
     }
 }
 
@@ -772,7 +772,7 @@ void InterludeOverlay::Update(void) { fn_801C6B70(); }
 
 void ArenaOverlay::Update(void) {
     int player = lbl_8055D350->player;
-    fn_80011A5C(lbl_8055D350->numPlayers);
+    SetScreenViewports(lbl_8055D350->numPlayers);
     lbl_8034EEB8.players[player].racing->Update();
     fn_801B84A4(player);
 }
@@ -830,7 +830,7 @@ int ResultsOverlay::HandleMenuKey(int player, u32 type, int key) {
         case 3:
             if (k == 'X') {
                 fn_800060E0(selection == 2, selection == 1);
-                fn_800121A4();
+                PlayDashSounds();
                 handled = 1;
             } else if (k == 0x126 || k == 0x128) {
                 MoveSelection(k == 0x126 ? -1 : 1);
@@ -840,7 +840,7 @@ int ResultsOverlay::HandleMenuKey(int player, u32 type, int key) {
                     }
                 }
                 fn_80230E90(1);
-                fn_80012158();
+                PlayNextSound();
             }
             break;
         case 2:
@@ -888,7 +888,7 @@ void ResultsOverlay::DrawMenu(void) {
     f32 pulse;
 
     fn_8027AA48();
-    fn_80011E70();
+    GetCenterX();
     fn_80011E90();
     int layer = 2;
     f32 z = layer;
@@ -974,11 +974,11 @@ void ResultsOverlay::DrawTimes(void) {
     for (i = 0; i < GetHumanPlayerCount(); i++) {
         r = fn_801EA9B0(i);
         y = y0 - 54.0f * i;
-        fn_80010E94(art, 0, x0, y - 21.6f, kOverlayStickYScale.value, 27.0f);
+        DrawSpriteWithSize(art, 0, x0, y - 21.6f, kOverlayStickYScale.value, 27.0f);
         x = x0;
         x += 54.0f;
         if (r->params.flags & 1) {
-            fn_8000FF88(0xFFFFFF00, 0x41, "%d", 1.5f, x, y - 21.6f - 27.0f, r->params.x8);
+            DrawFormattedString(0xFFFFFF00, 0x41, "%d", 1.5f, x, y - 21.6f - 27.0f, r->params.x8);
             x += 85.0f;
         } else if (r->params.flags & 2) {
             t = r->params.xC;
@@ -988,13 +988,13 @@ void ResultsOverlay::DrawTimes(void) {
                 int sec = t;
                 fn_801345D8(buf, sizeof(buf), "%d:%02d", sec, (int)(100.0f * t) - sec * 100);
             }
-            fn_8000FF88(0xFFFFFF00, 0x41, "%s", 1.5f, x, y - 21.6f - 27.0f, buf);
+            DrawFormattedString(0xFFFFFF00, 0x41, "%s", 1.5f, x, y - 21.6f - 27.0f, buf);
             x += 135.0f;
         } else {
-            fn_8000FF88(0xFFFFFF00, 0x41, "%s", 1.5f, x, y - 21.6f - 27.0f, fn_800122B4(i + 1, place));
+            DrawFormattedString(0xFFFFFF00, 0x41, "%s", 1.5f, x, y - 21.6f - 27.0f, FormatIntegerWithSuffix(i + 1, place));
             x += 85.0f;
         }
-        fn_8000FF88(0xFFFFFF00, 0x21, "%s", kOverlayFullScale.value, x, y - 21.6f - 27.0f, r->setup.name);
+        DrawFormattedString(0xFFFFFF00, 0x21, "%s", kOverlayFullScale.value, x, y - 21.6f - 27.0f, r->setup.name);
     }
 }
 
@@ -1002,7 +1002,7 @@ void KioskDeadDriverOverlay::Update(void) {
     char buf[0x48];
     if (lbl_8055D350->truck->raceFlags & 0x10) {
         sprintf(buf, "Press %s to RESET", lbl_80558928);
-        fn_80010074(0xFFFFFFFF, 0x14, "%s", kOverlayKioskLabelScale.value, 0.0f, 125.0f, buf);
+        DrawColoredTextWithShadow(0xFFFFFFFF, 0x14, "%s", kOverlayKioskLabelScale.value, 0.0f, 125.0f, buf);
     }
 }
 
@@ -1013,7 +1013,7 @@ void fn_80006D9C(void) {
     fn_801A7F8C();
     fn_800054E0();
     fn_8000F0E4("uifnt_o.gtx");
-    fn_8000F884();
+    LoadDashboardAssets();
     fn_80011F64();
     lbl_8034EE84.event = fn_801E87A8();
     lbl_8034EE84.numPlayers = fn_80137C74();
@@ -1021,7 +1021,7 @@ void fn_80006D9C(void) {
     fn_801331C4(4, "effects_volume", &lbl_8055892C);
     fn_80005464();
     fn_80005C88();
-    fn_80011A5C(lbl_8055D350->numPlayers);
+    SetScreenViewports(lbl_8055D350->numPlayers);
     InitOverlays();
     fn_801B83A0()->vfF8();
     fn_800070DC();

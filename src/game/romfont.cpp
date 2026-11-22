@@ -52,7 +52,7 @@ struct ScreenDesc {
 
 extern "C" {
 void* drCreateTexture(TexDesc* desc, const char* name);
-void fn_802D8FB4(void* tex);
+void ReleaseTextureResources(void* tex);
 u8* fn_802D2F78(int* width, int* height);
 void fn_802D2FD8(void);
 
@@ -144,7 +144,7 @@ void fn_802DACD4(void) {
 
 void fn_802DAE18(void) {
     if (lbl_8055FE78) {
-        fn_802D8FB4(lbl_8055FE80);
+        ReleaseTextureResources(lbl_8055FE80);
         lbl_8055FE80 = NULL;
         fn_80128658(lbl_8055FE78);
         lbl_8055FE78 = NULL;

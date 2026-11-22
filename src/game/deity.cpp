@@ -495,7 +495,7 @@ int fn_801B1130(int i) {
     return ok;
 }
 
-int fn_801B11DC(const void* pa, const void* pb) {
+int SortByLapTimeAndRank(const void* pa, const void* pb) {
     DeityCar* a = &lbl_8055E684[*(const s32*)pa];
     DeityCar* b = &lbl_8055E684[*(const s32*)pb];
     bool aFin = lbl_8055E680 + 1 == a->finishLap;
@@ -533,7 +533,7 @@ DState* DeityCar::State2(void) { return (DState*)((u8*)this + 0x4); }
 extern "C" {
 
 void fn_801B1318(void) {
-    qsort(lbl_80435C30, lbl_8055E678, 4, fn_801B11DC);
+    qsort(lbl_80435C30, lbl_8055E678, 4, SortByLapTimeAndRank);
     for (int i = 0; i < lbl_8055E678; i++) {
         DS((u8*)&lbl_8055E684[lbl_80435C30[i]] + 0x4)->place = i + 1;
     }
@@ -561,7 +561,7 @@ void fn_801B146C(void) {
     }
 }
 
-void fn_801B14BC(u32* flags, u32 bit, int on) {
+void SetFlagBit(u32* flags, u32 bit, int on) {
     if (on) {
         *flags |= bit;
     } else {
@@ -569,14 +569,14 @@ void fn_801B14BC(u32* flags, u32 bit, int on) {
     }
 }
 
-void fn_801B14E4(DeityCar* c) {
+void UpdateStuckTimer(DeityCar* c) {
     if (fn_801366C0(c->follower, (u8*)c->car + 0x118, 16.0f / 3.6f)) {
         c->stuck++;
     } else {
         c->stuck = 0;
     }
     bool over = (f32)c->stuck > 29.97f;
-    fn_801B14BC((u32*)((u8*)c + 0x4), 4, over);
+    SetFlagBit((u32*)((u8*)c + 0x4), 4, over);
 }
 
 }  // extern "C"
@@ -591,7 +591,7 @@ void DeityCar::Hold(int who) {
 
 extern "C" {
 
-void fn_801B15A8(DeityCar* c, f32 t) {
+void UpdateCarFinishTime(DeityCar* c, f32 t) {
     if (!c->locked && !c->finished) {
         s32 lap = *(s32*)((u8*)c + 0x14);
         if (lap == c->finishLap) {
@@ -641,7 +641,7 @@ void fn_801B15A8(DeityCar* c, f32 t) {
     }
 }
 
-void fn_801B179C(DeityCar* c, int index, DCar* car) {
+void InitializeDeityCar(DeityCar* c, int index, DCar* car) {
     c->index = index;
     c->car = car;
     c->start = index;
@@ -693,7 +693,7 @@ void fn_801B196C(DeityCar* c) {
     c->racing.mode = l->il.mode;
 }
 
-void fn_801B1A5C(DeityCar* c) {
+void UpdateCarPathData(DeityCar* c) {
     PathSet* ps = fn_80156A40();
     c->follower->SetLine((CenterLine*)ps->CenterFor(c->index));
     c->line->SetLine((CenterLine*)ps->LineFor(c->index));
@@ -713,7 +713,7 @@ void fn_801B1A5C(DeityCar* c) {
 
 extern "C" {
 u32 fn_801363A0(LineFollower* f, const ILPos* p);
-f32 fn_801B2F90(int a, int b);
+f32 CalculateRankDifference(int a, int b);
 }
 
 // Per-car update: tracks the car along the centre and racing lines from a point just ahead of it, keeps the last
@@ -776,7 +776,7 @@ void DeityCar::Update(void) {
         *(s32*)((u8*)this + 0x14) = l > 0 ? l : 0;
     }
     if (fn_801B83A0()->mDC()) {
-        fn_801B14E4(this);
+        UpdateStuckTimer(this);
     }
     if (lbl_8055E67C > 1 && Car()->type == 'PCAR') {
         f32 lead = 0.0f;
@@ -785,7 +785,7 @@ void DeityCar::Update(void) {
             DCar* oc = o->Car();
             if (i != index && oc->type == 'PCAR') {
                 if (State()->place > (o->State()->place)) {
-                    f32 d = fn_801B2F90(i, index);
+                    f32 d = CalculateRankDifference(i, index);
                     lead = lead > d ? lead : d;
                 }
             }
@@ -815,7 +815,7 @@ extern "C" {
 void fn_801B21B8(DeityCar* c);
 void fn_801B2118(DeityCar* c, short del);
 
-void fn_801B2024(EventDesc* r) {
+void InitializeRaceSettings(EventDesc* r) {
     lbl_8055E66C = LoadBoundSet("bad_teleport.val");
     lbl_8055E670 = LoadBoundSet("bridge_teleport.val");
     fn_80204A1C("Unlimited Laps", &lbl_8055E692);
@@ -904,7 +904,7 @@ static inline void ReleaseCar(DeityCar* c) {
 }
 
 
-void fn_801B2364(void) {
+void ProcessGreenFlagActivation(void) {
     fn_801B146C();
     if (fn_801769F8()) {
         return;
@@ -953,7 +953,7 @@ void fn_801B24B8(void) {
     fn_801B1318();
     for (int i = 0; i < lbl_80435BE8.n; i++) {
         Crossing* p = &q->e[i];
-        fn_801B15A8(&lbl_8055E684[p->car], p->time);
+        UpdateCarFinishTime(&lbl_8055E684[p->car], p->time);
     }
     lbl_80435BE8.n = 0;
     if (lbl_8055E68C) {
@@ -961,7 +961,7 @@ void fn_801B24B8(void) {
     }
 }
 
-int fn_801B25B0(const s32* pa, const s32* pb) {
+int CompareCarQualities(const s32* pa, const s32* pb) {
     DeityCar* ca = &lbl_8055E684[*pa];
     DeityCar* cb = &lbl_8055E684[*pb];
     f32 a = ca->State()->qual;
@@ -985,7 +985,7 @@ int OptDirectToTrack(void);
 extern "C" {
 f32 fn_801B88BC(void);
 f32 fn_8013B650(s32 car);  // AI qualifying time
-int fn_801B25B0(const s32* pa, const s32* pb);
+int CompareCarQualities(const s32* pa, const s32* pb);
 
 static inline int NearZero(f32 x) { return FAbs(x) <= __float_epsilon[0]; }
 
@@ -1002,7 +1002,7 @@ static inline void SetQual(DeityCar* c) { /* Helper name unproven */
     }
     DS((u8*)c + 0x4)->qual = v;
 }
-void fn_801B265C(void) {
+void InitializeDeityTestMode(void) {
     DeityCar* c;
     static u8 warned;
     s32 order[8];
@@ -1026,7 +1026,7 @@ void fn_801B265C(void) {
     memset(lbl_80435C30, -1, sizeof(lbl_80435C30));
     fn_80156A40()->Reset();
     for (int i = 0; i < lbl_8055E678; i++) {
-        fn_801B1A5C(&lbl_8055E684[i]);
+        UpdateCarPathData(&lbl_8055E684[i]);
     }
     for (int i = 0; i < lbl_8055E678; i++) {
         SetQual(&lbl_8055E684[i]);
@@ -1034,7 +1034,7 @@ void fn_801B265C(void) {
     for (int i = 0; i < lbl_8055E678; i++) {
         order[i] = i;
     }
-    qsort(order, lbl_8055E678, 4, (int (*)(const void*, const void*))fn_801B25B0);
+    qsort(order, lbl_8055E678, 4, (int (*)(const void*, const void*))CompareCarQualities);
     for (int i = 0; i < lbl_8055E678; i++) {
         lbl_8055E684[order[i]].start = i;
     }
@@ -1127,7 +1127,7 @@ struct DeitySnap {
     DeitySnapCar car[8];  // offset 0x10
 };
 
-int fn_801B2C70(DeitySnap* s) {
+int InitializeDeitySnapshot(DeitySnap* s) {
     memset(s, 0, sizeof(DeitySnap));
     s->cars = lbl_8055E678;
     s->players = lbl_8055E67C;
@@ -1144,7 +1144,7 @@ int fn_801B2C70(DeitySnap* s) {
 }
 
 s32 fn_801B307C(void);
-f32 fn_801B306C(void);
+f32 CalculateFrameTime(void);
 
 struct DeityStatus {
     u8 pad0[0x39C];
@@ -1159,7 +1159,7 @@ struct DeityStatus {
     s32 a578;       // offset 0x578
 };
 
-void fn_801B2D28(DeityStatus* s) {
+void InitializeRaceState(DeityStatus* s) {
     memset(&s->leaderLap, 0, 0x1C);
     s->leaderLap = fn_801B307C();
     s->first = fn_801B2F40(0);
@@ -1170,7 +1170,7 @@ void fn_801B2D28(DeityStatus* s) {
     s->a574 = m;
     s->a578 = m;
     s->green = lbl_8055E6A4;
-    s->left = fn_801B306C();
+    s->left = CalculateFrameTime();
     s->laps = lbl_8055E680;
     for (int i = 0; i < lbl_8055E678; i++) {
         s->cars[i] = *lbl_8055E684[i].State();
@@ -1187,15 +1187,15 @@ void fn_801B2D28(DeityStatus* s) {
     }
 }
 
-DeityCar* fn_801B2EC0(int i) { return &lbl_8055E684[i]; }
+DeityCar* GetDeityCarByIndex(int i) { return &lbl_8055E684[i]; }
 
-DeityCar* fn_801B2ED0(int i) { return fn_801B2EC0(i); }
+DeityCar* fn_801B2ED0(int i) { return GetDeityCarByIndex(i); }
 
 s32 fn_801B2ED4(void) { return lbl_8055E680; }
 
 DeityCar* fn_801B2EDC(int i, DCar* car) {
     DeityCar* c = &lbl_8055E684[i];
-    fn_801B179C(c, i, car);
+    InitializeDeityCar(c, i, car);
     return c;
 }
 
@@ -1211,8 +1211,8 @@ u32 fn_801B2F54(int i) { return *(u32*)((u8*)lbl_8055E684[i].State() + 0x10); }
 /* Helper name unproven */
 static inline s32 LapDiff(s32 hi, s32 lo) { return hi - lo; }
 #pragma push
-#pragma opt_dead_assignments off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_801B2F90 exact with it, 98.44 without */
-f32 fn_801B2F90(int a, int b) {
+#pragma opt_dead_assignments off  /* Proven by the pragma gate (aids audit 2026-11-16): CalculateRankDifference exact with it, 98.44 without */
+f32 CalculateRankDifference(int a, int b) {
     DeityCar* ca = &lbl_8055E684[a];
     DeityCar* cb = &lbl_8055E684[b];
     DeityCar* hi;
@@ -1238,7 +1238,7 @@ s32 fn_801B3050(int i) { return lbl_8055E684[i].start; }
 
 f32 fn_801B3064(void) { return lbl_8055E6A4; }
 
-f32 fn_801B306C(void) {
+f32 CalculateFrameTime(void) {
     f32 t = lbl_8055E3C8;
     return lbl_8055E6AC - t;
 }
@@ -1291,7 +1291,7 @@ void fn_801B30E0(int i) {
     l->SetPosition(&pos, 0, best);
 }
 
-void fn_801B3208(int i, s32 start, f32 qual) {
+void UpdateQualifyInfo(int i, s32 start, f32 qual) {
     fn_802E317C("+DeityStuffQualifyInfo(%d, %d, %f)", i, start, qual);
     lbl_8055E684[i].start = start;
     *(f32*)((u8*)&lbl_8055E684[i] + 0x24) = qual;

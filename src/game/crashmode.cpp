@@ -202,7 +202,7 @@ inline void DrawArt(ILayout* l, const char* name, u32 color, s32 tex);
 
 extern "C" {
 
-void fn_801DF6FC(void) { new ("crashmode") CrashMode(); }
+void InitializeCrashMode(void) { new ("crashmode") CrashMode(); }
 
 static inline void DrawFill(CrashMode* m, ArtElem* fl, ArtElem* fr, f32 fill) {
     f32 split = fl->w / (fl->w + fr->w);
@@ -229,10 +229,10 @@ static inline void LayoutBoost(TextElem* out, TextElem* text, f32 k) {
 
 // Stripped helper (name unproven): retail pools 3.0f FIRST in .sdata2, before this unit's first float user below.
 // A never-called static function is dropped by the compiler but keeps its constant in creation order (FACTS:
-// strings/constants of linker-stripped functions, romfont); fn_801DFFB4 and vf14 compute the same window inline.
+// strings/constants of linker-stripped functions, romfont); HandleWhiteoutEffect and vf14 compute the same window inline.
 static f32 PumpWindow(void) { return lbl_8055AE40 / 3.0f; }
 
-int fn_801DF93C(int view) {
+int DrawBoostGauge(int view) {
     ArtElem* fl;
     ArtElem* fr;
     TextElem* a;
@@ -334,7 +334,7 @@ inline RaceCarRec* Car(int i) { return lbl_804348E8[i]; }
 
 extern "C" {
 
-void fn_801DFF1C(int car) {
+void CalculateCrashDamage(int car) {
     CrashState* s = &lbl_8055EA04->cars[car];
     RaceCarRec* rc = lbl_804348E8[car];
     s->pump = 0.15f;
@@ -346,7 +346,7 @@ void fn_801DFF1C(int car) {
     s->score = -1;
 }
 
-void fn_801DFFB4(void) {
+void HandleWhiteoutEffect(void) {
     int car;
     f32 dur;
     GartElem* e;

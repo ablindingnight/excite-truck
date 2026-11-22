@@ -1007,12 +1007,12 @@ u32 fn_8013D18C(u32 i) {
 }
 
 
-extern "C" DeityCar* fn_801B2EC0(int i);
+extern "C" DeityCar* GetDeityCarByIndex(int i);
 
 // Ring-hit pitch per ring in the current chain.
 const f32 lbl_802F93B0[5] = {0.7932f, 0.8904f, 0.9433f, 0.9994f, 1.0f};
 
-int fn_8013D1F0(int i) { return fn_801B2EC0(i)->State()->lap; }
+int fn_8013D1F0(int i) { return GetDeityCarByIndex(i)->State()->lap; }
 
 static inline f32 SignF(f32 x) { return x > 0.0f ? 1.0f : -1.0f; }
 
@@ -1466,7 +1466,7 @@ u32 fn_80147C50(u32 a, u32 b, f32 t);
 void fn_801476C4(TextElem* item);
 void fn_801479A8(TextElem* orig, TextElem* item, const char* fmt, f32 alpha, ...);
 void fn_80147BD0(ArtElem* a, ArtElem* b, int c, int d, s32 tex, f32 alpha);
-void fn_8000FF88(u32 color, int size, const char* text, f32 scale, f32 x, f32 y, ...);
+void DrawFormattedString(u32 color, int size, const char* text, f32 scale, f32 x, f32 y, ...);
 }
 
 /* Helper name unproven: the watcher's position. */
@@ -1762,7 +1762,7 @@ void ZoneMaster::DrawMissed(int p, ZoneCar* c) const {
         f32 s;
         fn_8013F498(t, &a, &b);
         s = LerpDiffFirst(1.8f, 1.0f, Clamp01(InvLerp(0.4f, 0.9f, t)));
-        fn_8000FF88(col, 12, "TIME MISSED", s, 0.0f, fn_8013EFBC(a.y));
+        DrawFormattedString(col, 12, "TIME MISSED", s, 0.0f, fn_8013EFBC(a.y));
     }
     if (c->timeLeft < lbl_8042FB3C.lowTimeWarnT) {
         f32 f = 1.0f - c->timeLeft / lbl_8042FB3C.lowTimeWarnT;
@@ -2170,7 +2170,7 @@ int ZoneHud::Update(ZoneCar* c) {
 }
 
 extern "C" {
-f32 fn_801B306C(void);
+f32 CalculateFrameTime(void);
 }  // extern "C"
 int fn_80009C84(void);
 extern "C" {
@@ -2184,7 +2184,7 @@ void fn_801352B8(void* it);
 int fn_80135D60(void* it, int index);
 void fn_8013530C(void* it, int unk);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_8000FBE4(void);
+void UpdateDashHelper(void);
 int fn_80161C38(void);
 int fn_80160A74(void);
 int fn_80160998(int x);
@@ -2222,7 +2222,7 @@ inline void ZoneMaster::UpdateCars(void) {
     for (int i = 0; i < nCars; i++) {
         ZoneCar* c = GetCar(i);
         f32 now = fn_8013CB3C();
-        if (c->human && c->done != 1 && fn_801B306C() <= 0.0f) {
+        if (c->human && c->done != 1 && CalculateFrameTime() <= 0.0f) {
             if (!Paused(now) && !c->gate && fn_8013D1F0(i) > 0) {
                 c->gate = FirstGate(i);
                 c->SetWidth(fn_8017960C(i));
@@ -2359,7 +2359,7 @@ inline void ZoneMaster::UpdateCars(void) {
 }
 
 inline void ZoneMaster::vf0C(void) {
-    f32 t = fn_801B306C();
+    f32 t = CalculateFrameTime();
     if (!b258 && t < 6.75f) {
         b258 = 1;
         if (prerace && !fn_80009C84()) {
@@ -2481,7 +2481,7 @@ inline void ZoneMaster::vfB8(ZoneResults* r) {
     for (i = 0; i < nCars; i++) {
         ZoneResults::Entry* e = &r->entries[i];
         e->b10 = 0;
-        e->place = fn_801B2EC0(i)->State()->place;
+        e->place = GetDeityCarByIndex(i)->State()->place;
         e->score = cars[i].score;
     }
 }
@@ -2597,7 +2597,7 @@ inline int ZoneMaster::vf3C(int p) {
     TextElem* h0 = mainLyt->Find("intro_head_0");
     TextElem* h1 = mainLyt->Find("intro_head_1");
     if (t < t5) {
-        fn_8000FBE4();
+        UpdateDashHelper();
     }
     if (!fn_80161C38()) {
         if (t < t0) {
