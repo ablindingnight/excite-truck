@@ -36,7 +36,7 @@ void fn_802E0684(void);
 void fn_802DEE1C(void);
 void fn_802DFB30(void);
 void fn_802DFCC0(void);
-void fn_802D2D1C(void);
+void InvertCameraMatrix(void);
 void fn_802E0218(void);
 void fn_802E009C(void);
 void fn_802E050C(void);
@@ -542,7 +542,7 @@ void fn_802DC71C(Surf* model, s32 tex) {
     fn_802DBD88();
     lbl_8055FEB4 = 0;
     fn_802CADD0(tex, 1);
-    fn_802D2D1C();
+    InvertCameraMatrix();
     const GXTex* t = lbl_804DB468[1];
     u8 hasAlpha = t->hasAlpha;
     lbl_8055FEBB = fn_802DC628(model)->fmt == 0x1D ? 1 : 0;

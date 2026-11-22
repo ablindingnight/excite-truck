@@ -22,14 +22,14 @@ extern "C" {
 void fn_802365D8(void);
 void fn_80236674(void);
 
-void fn_80236550(void) {
+void CheckTimePrecisionReset(void) {
     if (lbl_8055F09C - lbl_8055F094 > 10000000) {
         fn_802E30C8("gTime: auto-reset, running out of float precision");
         fn_802365D8();
     }
 }
 
-f32 fn_8023659C(void) { return (f32)(lbl_8055F09C - lbl_8055F094) / 1000.0f; }
+f32 CalculateTimeDelta(void) { return (f32)(lbl_8055F09C - lbl_8055F094) / 1000.0f; }
 
 void fn_802365D8(void) {
     lbl_8055F094 = fn_802E2C20();
@@ -52,7 +52,7 @@ void fn_8023660C(void) {
 void fn_80236674(void) {
     if (!lbl_8055F0A0) {
         s32 now;
-        fn_80236550();
+        CheckTimePrecisionReset();
         now = fn_802E2C20();
         if (fn_802ECC10()) {
             lbl_8055F094 += now - lbl_8055F09C;

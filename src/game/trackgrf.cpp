@@ -4,7 +4,7 @@
 
 extern "C" {
 void fn_801EBEF4(f32 scale);
-void fn_801EB9FC(const char* name);
+void LoadGrafResource(const char* name);
 void fn_801EBBB4(void);
 void fn_801EBD70(void);
 void fn_801EBDCC(void);
@@ -16,7 +16,7 @@ extern "C" {
 
 void fn_801FC8A8(void) {
     fn_801EBEF4(2.0f);
-    fn_801EB9FC("track.grf");
+    LoadGrafResource("track.grf");
 }
 
 void fn_801FC8D8(void) { fn_801EBBB4(); }

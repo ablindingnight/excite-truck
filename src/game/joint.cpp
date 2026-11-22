@@ -96,7 +96,7 @@ static inline void RotZ(Mat3* m, f32 angle) {
 
 extern "C" {
 
-int fn_801E2C1C(int model, int index, JointEntry** entry, ValMatrix** mtx) {
+int FindJointEntry(int model, int index, JointEntry** entry, ValMatrix** mtx) {
     ModelData* md = fn_802C6C34(model);
     for (int i = 0; i < md->numChunks; i++) {
         JointChunk* c = md->chunks[i];
@@ -116,7 +116,7 @@ int fn_801E2CCC(int model, const char* name, ValMatrix** out) {
     mtx = NULL;
     entry = NULL;
     full = strchr(name, ' ') != NULL;
-    for (int i = 0; fn_801E2C1C(model, i, &entry, &mtx); i++) {
+    for (int i = 0; FindJointEntry(model, i, &entry, &mtx); i++) {
         char jointName[0x40] = {0};
         if (!full) {
             sscanf(entry->name, "%s", jointName);
@@ -132,7 +132,7 @@ int fn_801E2CCC(int model, const char* name, ValMatrix** out) {
     return 0;
 }
 
-JointEntry* fn_801E2DEC(int model, const char* name, char* modelName) {
+JointEntry* FindJointByName(int model, const char* name, char* modelName) {
     JointEntry* e;
     ModelData* md = fn_802C6C34(model);
     for (int i = 0; i < md->numChunks; i++) {
@@ -154,7 +154,7 @@ JointEntry* fn_801E2DEC(int model, const char* name, char* modelName) {
     return NULL;
 }
 
-void fn_801E2F00(void) { lbl_8055EA50 = new ("Joint Pool") JointPool("Joint Pool", 0x128, sizeof(Joint)); }
+void CreateJointPool(void) { lbl_8055EA50 = new ("Joint Pool") JointPool("Joint Pool", 0x128, sizeof(Joint)); }
 
 void fn_801E2F68(void) {
     delete lbl_8055EA50;
@@ -171,7 +171,7 @@ Joint* fn_801E3004(int model, const char* name, int flags) {
         return j;
     }
     char modelName[0x28];
-    JointEntry* e = fn_801E2DEC(model, name, modelName);
+    JointEntry* e = FindJointByName(model, name, modelName);
     if (e) {
         j->base = e->mtx;
         if (modelName[0] && strchr(modelName, '.')) {
@@ -195,7 +195,7 @@ Joint* fn_801E31D8(Joint* parent, const char* name, int flags) {
     return j;
 }
 
-int fn_801E320C(int model, const char* name) { return fn_801E2DEC(model, name, NULL) != NULL; }
+int fn_801E320C(int model, const char* name) { return FindJointByName(model, name, NULL) != NULL; }
 
 void fn_801E323C(Joint* j) {
     if (j->inst != -1) {
@@ -226,7 +226,7 @@ void fn_801E33E4(ValMatrix* out, const Joint* j) {
     fn_801E3284(out, j, &root);
 }
 
-void fn_801E3440(ValVec3* out, const Joint* j, const ValMatrix* root) {
+void GetJointWorldPosition(ValVec3* out, const Joint* j, const ValMatrix* root) {
     ValMatrix w;
     fn_801E3284(&w, j, root);
     out->x = w.origin.x;
@@ -237,7 +237,7 @@ void fn_801E3440(ValVec3* out, const Joint* j, const ValMatrix* root) {
 void fn_801E3488(ValVec3* out, const Joint* j) {
     ValMatrix root;
     Identity(&root);
-    fn_801E3440(out, j, &root);
+    GetJointWorldPosition(out, j, &root);
 }
 
 void fn_801E34E4(const Joint* j, const ValMatrix* root) {

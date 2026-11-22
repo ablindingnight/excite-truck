@@ -18,7 +18,7 @@ void fn_802E2E0C(int (*cb)(int, int), const char* name);
 int fn_802ECC10(void);
 void fn_802ECBF8(void);
 void fn_802E2E38(int a);
-void fn_802EC884(void);
+void HandleHomeButtonActivation(void);
 void fn_802E6B44(s32 chan, s32 result);
 void fn_801282EC(int a);
 void fn_801282F4(void);
@@ -425,7 +425,7 @@ void fn_802E7FD0(void) {
             fn_802E2E38(0);
         }
     }
-    fn_802EC884();
+    HandleHomeButtonActivation();
 }
 
 void fn_802E830C(s32* m) {

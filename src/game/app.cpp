@@ -60,8 +60,8 @@ void fn_80230090(void);
 void fn_801303A8(void);
 void fn_80245118(void);
 void fn_802E712C(void);
-void fn_80232230(void);
-void fn_80137B20(void);
+void LoadEscapeSequenceData(void);
+void InitializeLeagueData(void);
 void LoadDebugGeometry(void);
 void fn_80141454(void);
 void fn_8027DAF4(void);
@@ -88,7 +88,7 @@ void fn_8023EEF8(void);
 void fn_8023F2C4(void);
 void fn_8023ED30(void);
 void fn_802789AC(void);
-void fn_802E47E8(void);
+void ClearInputBuffer(void);
 
 void fn_8020A634(void);
 void fn_80211F4C(void);
@@ -209,8 +209,8 @@ void AppInit(void) {
     LoadTimerBegin("app_begin", 1, 1, 12538.0f);
     fn_80127464();
     fn_8012E81C("common.res");
-    fn_80232230();
-    fn_80137B20();
+    LoadEscapeSequenceData();
+    InitializeLeagueData();
     DriverInit();
     LoadTimerProgress();
     fn_80127464();
@@ -243,7 +243,7 @@ void AppInit(void) {
     fn_802E9888(fn_8023ED30);
     fn_802789AC();
     fn_80127464();
-    fn_802E47E8();
+    ClearInputBuffer();
     PlayAttractMovie();
 }
 

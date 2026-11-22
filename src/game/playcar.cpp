@@ -174,7 +174,7 @@ void fn_80191758(u8* p);
 int fn_801B526C(u8* p);
 int fn_801769F8(void);
 void fn_801B6650(u8* p);
-void fn_802793B0(u8* p);
+void ResetLightPreset(u8* p);
 void fn_801797A8(u8* p, const char* fmt, ...);
 u32 fn_80191100(u8* p);
 void fn_801B6660(void);
@@ -683,7 +683,7 @@ void HybridDriver::Start(void) {
     fn_80191084(p, cur);
     if (U8(p, 0x38)) {
         U8(p, 0x38) = 0;
-        fn_802793B0(PTR(p, 0x28));
+        ResetLightPreset(PTR(p, 0x28));
     }
     VC(p)->v30();
 }
@@ -754,7 +754,7 @@ int fn_801CF064(void);
 void fn_801769E0(void);
 void fn_80176A34(s32 frame);
 int fn_801B851C(s32 car);
-int fn_8026B7B4(s32 car);
+int IsPlayerActive(s32 car);
 int fn_802B02C8(u8* p);
 int fn_801796C4(void);
 void fn_801B86A4(s32 car);
@@ -810,7 +810,7 @@ void HybridDriver::v48(void) {
             }
         } else if (S32(info, 0x24) == 1) {
             fn_80191084(p, U32(p, 0x8));
-        } else if (!fn_801B851C(S32(p, 0x1C)) || fn_8026B7B4(S32(p, 0x1C))) {
+        } else if (!fn_801B851C(S32(p, 0x1C)) || IsPlayerActive(S32(p, 0x1C))) {
             fn_80191084(p, U32(p, 0x8));
         } else {
             fn_80191084(p, U32(p, 0xC));

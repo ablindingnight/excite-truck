@@ -10,7 +10,7 @@ extern "C" {
 void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);  // snprintf
 void fn_802D08B4(int a, int b, int c);
-void fn_802D07E4(const char* name, int a);
+void TakeScreenshot(const char* name, int a);
 }
 
 void* operator new[](size_t size, const char* tag);
@@ -158,7 +158,7 @@ void InterpolateCameraAnimation(ScriptCam* cam) {
                 fn_802E30C8("script: screenshot on tick %d / %d\0\0\0\0", frame, lbl_8055F5BC - lbl_8055F5C0);
                 fn_801345D8(name, sizeof(name), "sd:\\%s_%04d.baz", lbl_804A15D0, frame / 2);
                 fn_802D08B4(2, 2, 1);
-                fn_802D07E4(name, 1);
+                TakeScreenshot(name, 1);
             }
         }
     } else {

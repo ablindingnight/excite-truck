@@ -50,7 +50,7 @@ f32 Remap(float, float, float, float, float);
 extern "C" {
 void fn_801286A0(void* p, s32 shrink);         // MemShrink
 void fn_80265DCC(void* base, int num, int size, int (*cmp)(const void*, const void*));  // qsort
-struct XSeg* fn_80138B4C(void* line, struct XSeg* prev);
+struct XSeg* FindExtensionByType(void* line, struct XSeg* prev);
 #ifdef __MWERKS__
 void fn_80136414(struct XSample* out, void* it, int idx);
 #else
@@ -753,7 +753,7 @@ void fn_802BA010(void* line, int idx) {
     LineFollower it;
     it.SetLine((CenterLine*)line);
     XScale* sc = fn_802B8FE0(idx);
-    XSeg* s = fn_80138B4C(line, 0);
+    XSeg* s = FindExtensionByType(line, 0);
     if (s) {
         f32 w = s->width;
         sc->u = 1.0f / w;
@@ -777,7 +777,7 @@ void fn_802BA010(void* line, int idx) {
                     lbl_8055FA84++;
                 }
             }
-            s = fn_80138B4C(line, s);
+            s = FindExtensionByType(line, s);
         } while (s);
     }
 }
@@ -802,11 +802,11 @@ void fn_802BA348(void) {
     int total = 0;
     for (int j = 0; j < lines.count; j++) {
         void* ln = lines.data[j];
-        XSeg* s = fn_80138B4C(ln, 0);
+        XSeg* s = FindExtensionByType(ln, 0);
         if (s) {
             do {
                 total += s->count;
-                s = fn_80138B4C(ln, s);
+                s = FindExtensionByType(ln, s);
             } while (s);
         }
     }

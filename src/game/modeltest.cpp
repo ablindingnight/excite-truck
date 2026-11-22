@@ -17,7 +17,7 @@ void fn_802C855C(void);
 void fn_802C2B48(void);
 void fn_80129AFC(void);
 int fn_802E47B8(void);
-int fn_802E46F0(void);
+int HandleScreenshotInput(void);
 extern s32 lbl_8055CFF0;
 extern s32 lbl_8055CFF4;
 }
@@ -118,7 +118,7 @@ void fn_8024BE04(void) {
             fn_802E30C8("frame %08x", frame);
         }
         fn_80129AFC();
-        if (fn_802E47B8() && (u16)fn_802E46F0() == 0x1B) {
+        if (fn_802E47B8() && (u16)HandleScreenshotInput() == 0x1B) {
             break;
         }
     }

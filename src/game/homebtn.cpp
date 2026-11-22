@@ -35,8 +35,8 @@ void fn_802D3360(void);
 void fn_802CFCA0(void);
 void fn_802D02F8(u32 color, int a);
 void fn_802D68C4(int a, int b, int c, int d);
-void fn_802CFDE0(void);
-void fn_802CFF10(void);
+void HandleFrameSync(void);
+void ResetGraphicsState(void);
 void fn_80127464(void);
 
 void HBMCreate(void* info);
@@ -105,7 +105,7 @@ extern "C" {
 
 bool fn_802EC4BC(void) { return fn_802E9A0C() == 1; }
 
-void* fn_802EC4E8(const char* name) {
+void* LoadHomeButtonFile(const char* name) {
     char path[0x40];
     fn_801345D8(path, sizeof(path), "homeButton2/%s", name);
     int fd = LoadFileWithName(path);
@@ -120,7 +120,7 @@ void* fn_802EC4E8(const char* name) {
     return buf;
 }
 
-const char* fn_802EC598(void) {
+const char* GetHomeButtonArchiveName(void) {
     switch (lbl_80558860.region) {
     default:
         lbl_80558860.region = 0;
@@ -165,7 +165,7 @@ static inline void InitFastCast(void) {
 #endif
 }
 
-void fn_802EC614(void) {
+void InitializeHomeButtonMenu(void) {
     lbl_805600E9 = 0;
     lbl_805600EA = 0;
     InitFastCast();
@@ -179,10 +179,10 @@ void fn_802EC614(void) {
     memset(lbl_80558860.mem, 0, 0x80000);
     lbl_80558860.memSize = 0x80000;
     lbl_80558860.region = SCGetLanguage();
-    lbl_80558860.layoutBuf = fn_802EC4E8(fn_802EC598());
-    lbl_80558860.spkSeBuf = fn_802EC4E8("SpeakerSe.arc");
-    lbl_80558860.msgBuf = fn_802EC4E8("home.csv");
-    lbl_80558860.configBuf = fn_802EC4E8("config.tx_");
+    lbl_80558860.layoutBuf = LoadHomeButtonFile(GetHomeButtonArchiveName());
+    lbl_80558860.spkSeBuf = LoadHomeButtonFile("SpeakerSe.arc");
+    lbl_80558860.msgBuf = LoadHomeButtonFile("home.csv");
+    lbl_80558860.configBuf = LoadHomeButtonFile("config.tx_");
     lbl_80558860.soundCallback = 0;
     lbl_80558860.backFlag = 0;
     lbl_80558860.cursor = 0;
@@ -193,12 +193,12 @@ void fn_802EC614(void) {
     fn_801282F4();
     lbl_805600E0 = new ("home_snd") u8[0x19000];
     memset(lbl_805600E0, 0, 0x19000);
-    lbl_805600E4 = fn_802EC4E8("HomeButtonSe.brsar");
+    lbl_805600E4 = LoadHomeButtonFile("HomeButtonSe.brsar");
     HBMCreate(&lbl_80558860);
     lbl_805600EC = 1;
 }
 
-void fn_802EC7AC(void) {
+void CleanupHomeButtonResources(void) {
     lbl_805600EC = 0;
     HBMDelete();
     for (int i = 0; i < 8; i++) {
@@ -221,7 +221,7 @@ void fn_802EC7AC(void) {
     }
 }
 
-void fn_802EC884(void) {
+void HandleHomeButtonActivation(void) {
     if (!lbl_805600EC) {
         return;
     }
@@ -272,7 +272,7 @@ void fn_802EC884(void) {
     }
 }
 
-void fn_802ECA48(void) {
+void Setup2DRenderState(void) {
     if (!lbl_805600E8) {
         return;
     }
@@ -321,8 +321,8 @@ void fn_802ECC20(void) {
         fn_802CFCA0();
         fn_802D02F8(0xFF000000, 1);
         fn_802D68C4(0, 0, 0, 0);
-        fn_802CFDE0();
-        fn_802CFF10();
+        HandleFrameSync();
+        ResetGraphicsState();
     }
 }
 

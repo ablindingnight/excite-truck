@@ -8,11 +8,11 @@ extern "C" {
 int vsprintf(char* buf, const char* fmt, va_list args);
 char* strncpy(char* dst, const char* src, size_t n);
 void fn_802C4C80(s32 tex);
-void fn_802C4C90(s32 tex, int x, int y, int glyph, u32 color);
+void DrawStampFrame(s32 tex, int x, int y, int glyph, u32 color);
 int fn_802C4FF8(const char* s);  // debug text width
 int fn_802C501C(void);           // debug text height
-void fn_802C4F2C(s32 tex, int* a, int* b);
-int fn_802C4EFC(s32 tex);
+void GetStampOffset(s32 tex, int* a, int* b);
+int GetStampHeight(s32 tex);
 void fn_802C4F58(int x, int y, const char* s, u32 color);  // debug text
 }
 
@@ -61,7 +61,7 @@ int fn_801E4B00(Font* f) {
     if (f) {
         int a;
         int b = 0;
-        fn_802C4F2C(f->tex, &a, &b);
+        GetStampOffset(f->tex, &a, &b);
         return b;
     }
     return fn_802C501C();
@@ -71,8 +71,8 @@ int fn_801E4B48(Font* f) {
     if (f) {
         int a;
         int b = 0;
-        fn_802C4F2C(f->tex, &a, &b);
-        return fn_802C4EFC(f->tex) - b;
+        GetStampOffset(f->tex, &a, &b);
+        return GetStampHeight(f->tex) - b;
     }
     return 0;
 }
@@ -103,7 +103,7 @@ void DrawTextWithFormatting(Font* f, u32 color, u32 flags, int x, int y, const c
         for (p = (const u8*)buf; *p;) {
             int g = f->glyph[*p];
             if (g >= 0) {
-                fn_802C4C90(f->tex, x + f->xOffset[*p], y, g, color);
+                DrawStampFrame(f->tex, x + f->xOffset[*p], y, g, color);
             }
             x += f->advance[*p++];
         }

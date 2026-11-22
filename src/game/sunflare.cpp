@@ -62,7 +62,7 @@ void fn_802C98DC(f32* fov, f32* znear, f32* zfar, f32* aspect);
 void* fn_802CA294(s32 tex);
 s32 fn_802CAC28(const char* name, s32 key);
 void gxForgetTexture(s32 id);
-void* fn_802D39A4(void* tex, f32 scale);
+void* AllocateVisibilityTest(void* tex, f32 scale);
 void fn_802D3A50(void* obj);
 int fn_802D3A5C(void* obj, const SunVecP* p);
 void fn_802D3BB0(void* obj);
@@ -134,7 +134,7 @@ void fn_80291A1C(void) {
     s->pos.y = 0.0f;
     s->pos.z = 0.0f;
     s->tex = fn_802CAC28("burst.tex", 0);
-    s->obj = fn_802D39A4(fn_802CA294(s->tex), 0.1f);
+    s->obj = AllocateVisibilityTest(fn_802CA294(s->tex), 0.1f);
     s->visible = 0;
     s->color = 0xFFFFFFFF;
     s->radius = radius;

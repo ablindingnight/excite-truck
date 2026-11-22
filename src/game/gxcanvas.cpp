@@ -81,24 +81,24 @@ s8 lbl_8055CFF8 = 3;
 
 extern "C" {
 
-void fn_802C2CE8(gxCanvas* c, int w, int h, s8 fmt);
-void fn_802C3014(gxCanvas* c);
+void InitializeCanvasBuffer(gxCanvas* c, int w, int h, s8 fmt);
+void SetCanvasCoordinates(gxCanvas* c);
 void fn_802C5024(int x, int y, int ch, u32 color);
 
-u32 fn_802C2CAC(u16 c) { return 0xFF000000 | ((c & 0x7C00) << 9) | ((c & 0x3E0) << 6) | ((c & 0x1F) << 3); }
+u32 ConvertRgb5ToRgba8(u16 c) { return 0xFF000000 | ((c & 0x7C00) << 9) | ((c & 0x3E0) << 6) | ((c & 0x1F) << 3); }
 
 u32 fn_802C2CC4(u16 c) { return 0xFF000000 | ((c & 0xF800) << 8) | ((c & 0x7E0) << 5) | ((c & 0x1F) << 3); }
 
-void fn_802C2CDC(gxCanvas* c, int w, int h) { fn_802C2CE8(c, w, h, lbl_8055CFF8); }
+void SetCanvasSize(gxCanvas* c, int w, int h) { InitializeCanvasBuffer(c, w, h, lbl_8055CFF8); }
 
-void fn_802C2CE8(gxCanvas* c, int w, int h, s8 fmt) {
+void InitializeCanvasBuffer(gxCanvas* c, int w, int h, s8 fmt) {
     c->fmt = fmt;
     c->flags = 0x82;
     c->data = fn_801284E8("canvas", w * h * gxBpp(fmt));
     c->w = w;
     c->h = h;
     c->stride = w * gxBpp(fmt);
-    fn_802C3014(c);
+    SetCanvasCoordinates(c);
 }
 
 void fn_802C2D94(gxCanvas* c) {
@@ -106,7 +106,7 @@ void fn_802C2D94(gxCanvas* c) {
     memset(c, 0, sizeof(gxCanvas));
 }
 
-gxCanvas* fn_802C2DD4(const char* name) {
+gxCanvas* LoadAndSwapCanvas(const char* name) {
     u32 ver;
     u32 size;
     u8 swapped;
@@ -142,31 +142,31 @@ gxCanvas* fn_802C2DD4(const char* name) {
 
 void fn_802C2FC4(gxCanvas* c) { fn_8012C4D8(c); }
 
-void fn_802C2FC8(gxCanvas* c, int x0, int y0, int x1, int y1) {
+void ClampCanvasCoordinates(gxCanvas* c, int x0, int y0, int x1, int y1) {
     c->cx0 = x0 >= 0 ? x0 : 0;
     c->cy0 = y0 >= 0 ? y0 : 0;
     c->cx1 = x1 < c->w ? x1 : c->w;
     c->cy1 = y1 < c->h ? y1 : c->h;
 }
 
-void fn_802C3014(gxCanvas* c) {
+void SetCanvasCoordinates(gxCanvas* c) {
     c->cx0 = 0;
     c->cy0 = 0;
     c->cx1 = c->w;
     c->cy1 = c->h;
 }
 
-gxCanvas* fn_802C3034(gxCanvas* c) {
+gxCanvas* SetCurrentCanvas(gxCanvas* c) {
     gxCanvas* old = lbl_8055FC00;
     lbl_8055FC00 = c;
     return old;
 }
 
-u16* fn_802C3044(gxCanvas* c, int x, int y) { return (u16*)((u8*)c->data + x * 2 + c->stride * y); }
+u16* GetPixelAddress(gxCanvas* c, int x, int y) { return (u16*)((u8*)c->data + x * 2 + c->stride * y); }
 
 u32* fn_802C3060(gxCanvas* c, int x, int y) { return (u32*)((u8*)c->data + x * 4 + c->stride * y); }
 
-int fn_802C307C(gxCanvas* c, int* x0, int* y0, int* x1, int* y1) {
+int ClipRectCoordinates(gxCanvas* c, int* x0, int* y0, int* x1, int* y1) {
     if (*x0 >= c->cx1) {
         return 0;
     }
@@ -191,7 +191,7 @@ int fn_802C307C(gxCanvas* c, int* x0, int* y0, int* x1, int* y1) {
     return *y0 < *y1;
 }
 
-int fn_802C3130(gxCanvas* c, int x, int y) {
+int IsPointInCanvas(gxCanvas* c, int x, int y) {
     if (x >= c->cx0 && y >= c->cy0 && x < c->cx1 && y < c->cy1) {
         return 1;
     }
@@ -199,7 +199,7 @@ int fn_802C3130(gxCanvas* c, int x, int y) {
 }
 
 // Clips a w*h blit to (dx, dy) against the canvas clip rect, adjusting the source position to match.
-int fn_802C3170(gxCanvas* c, int* dx, int* dy, int* sx, int* sy, int* w, int* h) {
+int ClipBlitToCanvas(gxCanvas* c, int* dx, int* dy, int* sx, int* sy, int* w, int* h) {
     if (*dx + *w < c->cx0) {
         return 0;
     }
@@ -237,7 +237,7 @@ int fn_802C3170(gxCanvas* c, int* dx, int* dy, int* sx, int* sy, int* w, int* h)
 }
 
 void fn_802C3320(int x, int y, u32 color);
-void fn_802C33A8(int x, int y, u32 color);
+void SetPixelColor(int x, int y, u32 color);
 
 void fn_802C32B8(int x, int y, u32 color) {
     gxCanvas* c = lbl_8055FC00;
@@ -248,53 +248,53 @@ void fn_802C32B8(int x, int y, u32 color) {
     if (gxIs16(fmt)) {
         fn_802C3320(x, y, color);
     } else if (fmt == 5) {
-        fn_802C33A8(x, y, color);
+        SetPixelColor(x, y, color);
     } else {
         fn_802E317C("gxPoint: bad format %d", gxFmt(c));
     }
 }
 
 void fn_802C3320(int x, int y, u32 color) {
-    if (fn_802C3130(lbl_8055FC00, x, y)) {
+    if (IsPointInCanvas(lbl_8055FC00, x, y)) {
         u16 v = color >> 16;
         if (lbl_8055FC00->fmt == 3) {
             v = color;
         }
-        *fn_802C3044(lbl_8055FC00, x, y) = v;
+        *GetPixelAddress(lbl_8055FC00, x, y) = v;
     }
 }
 
 static inline u32 gx565To8888(u32 c) { return 0xFF000000 | ((c & 0xF800) << 8) | ((c & 0x7E0) << 5) | ((c & 0x1F) << 3); }
 
-void fn_802C33A8(int x, int y, u32 color) {
-    if (fn_802C3130(lbl_8055FC00, x, y)) {
+void SetPixelColor(int x, int y, u32 color) {
+    if (IsPointInCanvas(lbl_8055FC00, x, y)) {
         u32* p = fn_802C3060(lbl_8055FC00, x, y);
         *p = gx565To8888(color >> 16);
     }
 }
 
-void fn_802C3478(int x0, int y0, int x1, int y1, u32 color);
-void fn_802C356C(int x0, int y0, int x1, int y1, u32 color);
-void fn_802C365C(int x0, int y0, int x1, int y1, u32 color);
+void DrawFilledRectangle(int x0, int y0, int x1, int y1, u32 color);
+void DrawRectangleFilled(int x0, int y0, int x1, int y1, u32 color);
+void DrawColoredRectangle(int x0, int y0, int x1, int y1, u32 color);
 
 void fn_802C3424(int x0, int y0, int x1, int y1, u32 color) {
     gxCanvas* c = lbl_8055FC00;
     if (gxIs16(c->fmt)) {
         if (c->fmt != 1) {
-            fn_802C3478(x0, y0, x1, y1, color);
+            DrawFilledRectangle(x0, y0, x1, y1, color);
         } else {
-            fn_802C365C(x0, y0, x1, y1, color);
+            DrawColoredRectangle(x0, y0, x1, y1, color);
         }
     } else if (c->fmt == 5) {
-        fn_802C356C(x0, y0, x1, y1, color);
+        DrawRectangleFilled(x0, y0, x1, y1, color);
     }
 }
 
-void fn_802C3478(int x0, int y0, int x1, int y1, u32 color) {
+void DrawFilledRectangle(int x0, int y0, int x1, int y1, u32 color) {
     if (x1 == x0 || y1 == y0) {
         return;
     }
-    if (!fn_802C307C(lbl_8055FC00, &x0, &y0, &x1, &y1)) {
+    if (!ClipRectCoordinates(lbl_8055FC00, &x0, &y0, &x1, &y1)) {
         return;
     }
     u16 v = color >> 16;
@@ -303,7 +303,7 @@ void fn_802C3478(int x0, int y0, int x1, int y1, u32 color) {
     if (lbl_8055FC00->fmt == 3) {
         v = color;
     }
-    u16* p = fn_802C3044(lbl_8055FC00, x0, y0);
+    u16* p = GetPixelAddress(lbl_8055FC00, x0, y0);
     int skip = (lbl_8055FC00->stride - w * 2) / 2;
     do {
         int n = w;
@@ -314,11 +314,11 @@ void fn_802C3478(int x0, int y0, int x1, int y1, u32 color) {
     } while (--h > 0);
 }
 
-void fn_802C356C(int x0, int y0, int x1, int y1, u32 color) {
+void DrawRectangleFilled(int x0, int y0, int x1, int y1, u32 color) {
     if (x1 == x0 || y1 == y0) {
         return;
     }
-    if (!fn_802C307C(lbl_8055FC00, &x0, &y0, &x1, &y1)) {
+    if (!ClipRectCoordinates(lbl_8055FC00, &x0, &y0, &x1, &y1)) {
         return;
     }
     u32 v;
@@ -337,11 +337,11 @@ void fn_802C356C(int x0, int y0, int x1, int y1, u32 color) {
 }
 
 // ARGB4444: replaces the colour and keeps the destination alpha.
-void fn_802C365C(int x0, int y0, int x1, int y1, u32 color) {
+void DrawColoredRectangle(int x0, int y0, int x1, int y1, u32 color) {
     if (x1 == x0 || y1 == y0) {
         return;
     }
-    if (!fn_802C307C(lbl_8055FC00, &x0, &y0, &x1, &y1)) {
+    if (!ClipRectCoordinates(lbl_8055FC00, &x0, &y0, &x1, &y1)) {
         return;
     }
     u16 v;
@@ -349,7 +349,7 @@ void fn_802C365C(int x0, int y0, int x1, int y1, u32 color) {
     int h = y1 - y0;
     int b = (color & 0x1F) << 3;
     v = (b >> 4) | (((color >> 2) & 0xF0) | ((color >> 3) & 0xF00));
-    u16* p = fn_802C3044(lbl_8055FC00, x0, y0);
+    u16* p = GetPixelAddress(lbl_8055FC00, x0, y0);
     int skip = (lbl_8055FC00->stride - w * 2) / 2;
     do {
         int n = w;
@@ -362,20 +362,20 @@ void fn_802C365C(int x0, int y0, int x1, int y1, u32 color) {
 }
 
 void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
-void fn_802C3C68(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
-void fn_802C3D74(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
+void BlitCanvasRegion(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
+void CopyCanvasRegionWithFormatConversion(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
 void fn_802C3F00(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
-void fn_802C4108(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
+void BlitAlphaSourceOver(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
 void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
 void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy);
 
-void fn_802C3754(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
+void CopyCanvasRegion(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     if (gxIs16(src->fmt) && gxIs16(dst->fmt)) {
         copy_16_to_16(src, x0, y0, x1, y1, dst, dx, dy);
     } else if (src->fmt == 5 && dst->fmt == 5) {
-        fn_802C3C68(src, x0, y0, x1, y1, dst, dx, dy);
+        BlitCanvasRegion(src, x0, y0, x1, y1, dst, dx, dy);
     } else if (gxIs16(src->fmt) && dst->fmt == 5) {
-        fn_802C3D74(src, x0, y0, x1, y1, dst, dx, dy);
+        CopyCanvasRegionWithFormatConversion(src, x0, y0, x1, y1, dst, dx, dy);
     } else if (src->fmt == 5 && gxIs16(dst->fmt)) {
         fn_802C3F00(src, x0, y0, x1, y1, dst, dx, dy);
     } else {
@@ -385,7 +385,7 @@ void fn_802C3754(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
 
 void fn_802C3850(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     if (gxIs16(src->fmt) && gxIs16(dst->fmt)) {
-        fn_802C4108(src, x0, y0, x1, y1, dst, dx, dy);
+        BlitAlphaSourceOver(src, x0, y0, x1, y1, dst, dx, dy);
     } else if (src->fmt == 5 && dst->fmt == 5) {
         fn_802C4610(src, x0, y0, x1, y1, dst, dx, dy);
     } else if (src->fmt == 5 && gxIs16(dst->fmt)) {
@@ -398,11 +398,11 @@ void fn_802C3850(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
 void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
-    if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {
+    if (!ClipBlitToCanvas(dst, &dx, &dy, &x0, &y0, &w, &h)) {
         return;
     }
-    u16* s = fn_802C3044(src, x0, y0);
-    u16* d = fn_802C3044(dst, dx, dy);
+    u16* s = GetPixelAddress(src, x0, y0);
+    u16* d = GetPixelAddress(dst, dx, dy);
     int cw = w;
     int ch = h;
     int sskip = (src->stride - cw * 2) / 2;
@@ -419,8 +419,8 @@ void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst,
         return;
     }
     if (src->fmt == 4 && dst->fmt == 3) {
-        s = fn_802C3044(src, x0, y0);
-        d = fn_802C3044(dst, dx, dy);
+        s = GetPixelAddress(src, x0, y0);
+        d = GetPixelAddress(dst, dx, dy);
         w = cw;
         h = ch;
         sskip = (src->stride - cw * 2) / 2;
@@ -435,8 +435,8 @@ void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst,
             d += dskip;
         } while (--h > 0);
     } else if (src->fmt == 3 && dst->fmt == 4) {
-        s = fn_802C3044(src, x0, y0);
-        d = fn_802C3044(dst, dx, dy);
+        s = GetPixelAddress(src, x0, y0);
+        d = GetPixelAddress(dst, dx, dy);
         w = cw;
         h = ch;
         sskip = (src->stride - cw * 2) / 2;
@@ -451,8 +451,8 @@ void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst,
             d += dskip;
         } while (--h > 0);
     } else if (src->fmt == 1 && dst->fmt == 4) {
-        s = fn_802C3044(src, x0, y0);
-        d = fn_802C3044(dst, dx, dy);
+        s = GetPixelAddress(src, x0, y0);
+        d = GetPixelAddress(dst, dx, dy);
         w = cw;
         h = ch;
         sskip = (src->stride - cw * 2) / 2;
@@ -471,10 +471,10 @@ void copy_16_to_16(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst,
     }
 }
 
-void fn_802C3C68(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
+void BlitCanvasRegion(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
-    if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {
+    if (!ClipBlitToCanvas(dst, &dx, &dy, &x0, &y0, &w, &h)) {
         return;
     }
     u32* s = fn_802C3060(src, x0, y0);
@@ -491,13 +491,13 @@ void fn_802C3C68(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     } while (--h > 0);
 }
 
-void fn_802C3D74(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
+void CopyCanvasRegionWithFormatConversion(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
-    if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {
+    if (!ClipBlitToCanvas(dst, &dx, &dy, &x0, &y0, &w, &h)) {
         return;
     }
-    u16* s = fn_802C3044(src, x0, y0);
+    u16* s = GetPixelAddress(src, x0, y0);
     u32* d = fn_802C3060(dst, dx, dy);
     int sskip = (src->stride - w * 2) / 2;
     int dskip = (dst->stride - w * 4) / 4;
@@ -514,7 +514,7 @@ void fn_802C3D74(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
         do {
             int n = w;
             do {
-                *d++ = fn_802C2CAC(*s++);
+                *d++ = ConvertRgb5ToRgba8(*s++);
             } while (--n > 0);
             s += sskip;
             d += dskip;
@@ -529,11 +529,11 @@ static inline u32 gxReadPixel32(const u32* pixel) { return *pixel; }
 void fn_802C3F00(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
-    if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {
+    if (!ClipBlitToCanvas(dst, &dx, &dy, &x0, &y0, &w, &h)) {
         return;
     }
     u32* s = fn_802C3060(src, x0, y0);
-    u16* d = fn_802C3044(dst, dx, dy);
+    u16* d = GetPixelAddress(dst, dx, dy);
     int sskip = (src->stride - w * 4) / 4;
     int dskip = (dst->stride - w * 2) / 2;
     if (dst->fmt == 3) {
@@ -569,20 +569,20 @@ void fn_802C40B8(gxCanvas* src, int x, int y) {
         fn_802DB2C8(src, x, y);
         return;
     }
-    fn_802C3754(src, 0, 0, src->w, src->h, lbl_8055FC00, x, y);
+    CopyCanvasRegion(src, 0, 0, src->w, src->h, lbl_8055FC00, x, y);
 }
 
-void fn_802C40E8(gxCanvas* src, int x, int y) { fn_802C3850(src, 0, 0, src->w, src->h, lbl_8055FC00, x, y); }
+void DrawCanvasRegion(gxCanvas* src, int x, int y) { fn_802C3850(src, 0, 0, src->w, src->h, lbl_8055FC00, x, y); }
 
 // ARGB4444 source over a 555/565 destination.
-void fn_802C4108(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
+void BlitAlphaSourceOver(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
-    if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {
+    if (!ClipBlitToCanvas(dst, &dx, &dy, &x0, &y0, &w, &h)) {
         return;
     }
-    u16* s = fn_802C3044(src, x0, y0);
-    u16* d = fn_802C3044(dst, dx, dy);
+    u16* s = GetPixelAddress(src, x0, y0);
+    u16* d = GetPixelAddress(dst, dx, dy);
     int sskip = (src->stride - w * 2) / 2;
     int dskip = (dst->stride - w * 2) / 2;
     if (dst->fmt == 3) {
@@ -625,11 +625,11 @@ void fn_802C4108(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
 void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
-    if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {
+    if (!ClipBlitToCanvas(dst, &dx, &dy, &x0, &y0, &w, &h)) {
         return;
     }
     u32* s = fn_802C3060(src, x0, y0);
-    u16* d = fn_802C3044(dst, dx, dy);
+    u16* d = GetPixelAddress(dst, dx, dy);
     int sskip = (src->stride - w * 4) / 4;
     int dskip = (dst->stride - w * 2) / 2;
     if (dst->fmt == 3) {
@@ -682,7 +682,7 @@ static inline u8 gxBlend8(u32 ia, u32 dc, u32 a, u32 sc) {
 void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
-    if (!fn_802C3170(dst, &dx, &dy, &x0, &y0, &w, &h)) {
+    if (!ClipBlitToCanvas(dst, &dx, &dy, &x0, &y0, &w, &h)) {
         return;
     }
     u32* s = fn_802C3060(src, x0, y0);
@@ -749,7 +749,7 @@ void fn_802C47B8(int x0, int y0, int x1, int y1, u32 color) {
     }
 }
 
-gxStamp* fn_802C49E8(const char* name) {
+gxStamp* LoadStampWithVersionCheck(const char* name) {
     u8 swapped = 0;
     u32 size = 0;
     u32 ver;
@@ -788,7 +788,7 @@ void fn_802C4C80(gxStamp* st) {
     }
 }
 
-void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
+void DrawStampFrame(gxStamp* st, int x, int y, int frame, u16* pal) {
     int ox;
     int oy;
     int skip;
@@ -831,7 +831,7 @@ void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
     }
     for (; row < rowEnd; row++) {
         run = st->rows[st->h * frame + row];
-        u16* d = fn_802C3044(lbl_8055FC00, ox, row + oy);
+        u16* d = GetPixelAddress(lbl_8055FC00, ox, row + oy);
     col = 0;
     while (col < colEnd) {
         n = *run++;
@@ -867,28 +867,28 @@ void fn_802C4C90(gxStamp* st, int x, int y, int frame, u16* pal) {
     }
 }
 
-s32 fn_802C4EE4(gxStamp* st) {
+s32 GetStampWidth(gxStamp* st) {
     if (st) {
         return st->w;
     }
     return 0;
 }
 
-s32 fn_802C4EFC(gxStamp* st) {
+s32 GetStampHeight(gxStamp* st) {
     if (st) {
         return st->h;
     }
     return 0;
 }
 
-s32 fn_802C4F14(gxStamp* st) {
+s32 GetStampFrameCount(gxStamp* st) {
     if (st) {
         return st->frames;
     }
     return 0;
 }
 
-void fn_802C4F2C(gxStamp* st, s32* ox, s32* oy) {
+void GetStampOffset(gxStamp* st, s32* ox, s32* oy) {
     if (!st) {
         *oy = 0;
         *ox = 0;

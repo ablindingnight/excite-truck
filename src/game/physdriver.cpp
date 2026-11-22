@@ -33,15 +33,15 @@ int fn_801331C4(void* t, const char* name, f32* out);
 s32 fn_80137CFC(s32 car);
 f32 fn_8014C8F8(f32 x, f32 lo, f32 hi);
 f32 fn_801429D0(f32 a, f32 b);
-void fn_801A7DFC(const char* a, const char* b, void* t);
-void fn_801A7974(DButton* b, const char* name, void* t);
-void fn_801A9110(DButton* b, const char* name);
+void BindInputKey(const char* a, const char* b, void* t);
+void SaveInputBinding(DButton* b, const char* name, void* t);
+void BindInputToDevice(DButton* b, const char* name);
 int sprintf(char* buf, const char* fmt, ...);
-int fn_801298E8(void* out, s32 ch);
-void fn_801A7844(int a);
+int ReadJoyStatus(void* out, s32 ch);
+void InitializeJoyStatus(int a);
 int fn_801A8E38(void* b);  // button down
 int ControlExists(void* b);  // button bound
-f32 fn_801A7F98(void* b);  // button analog value
+f32 GetJoystickAxisValue(void* b);  // button analog value
 f32 fn_80144C80(f32 a, f32 b, f32 t);
 int fn_802E85B0(s32 ch);
 int fn_80179300(void);
@@ -322,7 +322,7 @@ inline void PhysDriver::Update(f32 dt) {
             dthr = 0;
             dbrk = 0;
         }
-        if (fn_801298E8(&info, c)) {
+        if (ReadJoyStatus(&info, c)) {
             if (info.info.b & 2) {
                 b343 = 1;
                 dthr = 0;
@@ -360,8 +360,8 @@ inline void PhysDriver::Update(f32 dt) {
         }
     } else {
         f32 prev = steer;
-        f32 r = fn_801A7F98(&b7C);
-        f32 l = fn_801A7F98(&b6C);
+        f32 r = GetJoystickAxisValue(&b7C);
+        f32 l = GetJoystickAxisValue(&b6C);
         f32 v = -l + r;
         if (b344) {
             steer = fn_8017EB80(v, steerDead, steerOver);
@@ -419,7 +419,7 @@ inline void PhysDriver::Update(f32 dt) {
             }
         }
     } else {
-        throttle = fn_8017EB80(fn_801A7F98(b), thrDead, thrOver);
+        throttle = fn_8017EB80(GetJoystickAxisValue(b), thrDead, thrOver);
     }
     if (forced || fn_801A8EE4(&bDC)) {
         {
@@ -432,7 +432,7 @@ inline void PhysDriver::Update(f32 dt) {
             }
         }
     } else {
-        throttleAdd = fn_8017EB80(fn_801A7F98(&bDC), thrDead, thrOver);
+        throttleAdd = fn_8017EB80(GetJoystickAxisValue(&bDC), thrDead, thrOver);
     }
     {
     DButton* bb = &b9C;
@@ -456,7 +456,7 @@ inline void PhysDriver::Update(f32 dt) {
             }
         }
     } else {
-        brake = fn_8017EB80(fn_801A7F98(bb), brkDead, brkOver);
+        brake = fn_8017EB80(GetJoystickAxisValue(bb), brkDead, brkOver);
     }
     }
     if (forced || fn_801A8EE4(&bEC)) {
@@ -474,9 +474,9 @@ inline void PhysDriver::Update(f32 dt) {
             }
         }
     } else {
-        brakeAdd = fn_8017EB80(fn_801A7F98(&bEC), brkDead, brkOver);
+        brakeAdd = fn_8017EB80(GetJoystickAxisValue(&bEC), brkDead, brkOver);
     }
-    f28 = fn_801A7F98(&bAC);
+    f28 = GetJoystickAxisValue(&bAC);
     if (!freeShift) {
         u8 rev = 0;
         if (fn_801A8E38(&bFC) || fn_801A8E38(&b10C)) {
@@ -494,7 +494,7 @@ inline void PhysDriver::Update(f32 dt) {
             grip = 1.0f;
         }
     } else {
-        grip = fn_801A7F98(&b15C);
+        grip = GetJoystickAxisValue(&b15C);
     }
     b5B = fn_801A8E38(&b16C);
     {
@@ -510,8 +510,8 @@ inline void PhysDriver::Update(f32 dt) {
     }
     b68 = fn_801A8E38(&b17C);
     {
-        f32 l = fn_801A7F98(&b1AC);
-        f32 v = fn_8017EB80(-l + fn_801A7F98(&b1BC), 0.4f, 0.07f);
+        f32 l = GetJoystickAxisValue(&b1AC);
+        f32 v = fn_8017EB80(-l + GetJoystickAxisValue(&b1BC), 0.4f, 0.07f);
         f32 k = 4.0f * dt;
         f32C += Clamp(v - f32C, -k, k);
     }
@@ -520,12 +520,12 @@ inline void PhysDriver::Update(f32 dt) {
         b338 = 1;
     }
     {
-        f32 a = fn_801A7F98(&b28C);
-        f330 = fn_801A7F98(&b29C) - a;
+        f32 a = GetJoystickAxisValue(&b28C);
+        f330 = GetJoystickAxisValue(&b29C) - a;
     }
     {
-        f32 a = fn_801A7F98(&b2AC);
-        f334 = fn_801A7F98(&b2BC) - a;
+        f32 a = GetJoystickAxisValue(&b2AC);
+        f334 = GetJoystickAxisValue(&b2BC) - a;
     }
     if (!freeShift) {
         if (fn_801A8E38(&b13C)) {
@@ -566,7 +566,7 @@ extern "C" void fn_8017ED00(f32 dt) {
         PhysDriver* d;
         int i;
         fn_802E317C("I don't expect PhysDriverUpdate (fg) to be used");
-        fn_801A7844(1);
+        InitializeJoyStatus(1);
         for (i = 0; i < 4; i++) {
             d = lbl_804348D8[i];
             if (d) {
@@ -645,41 +645,41 @@ inline void PhysDriver::Init(void) {
         Names4 sel = *(Names4*)&lbl_802F9530;
         Names4 pov = *(Names4*)&lbl_802F9540;
         for (k = 0; k < 4; k++) {
-            fn_801A7DFC(sel.n[k], pov.n[k], (void*)f34C);
-            fn_801A7974(&dpad[k], sel.n[k], (void*)f34C);
+            BindInputKey(sel.n[k], pov.n[k], (void*)f34C);
+            SaveInputBinding(&dpad[k], sel.n[k], (void*)f34C);
         }
     }
-    fn_801A7974((&b6C), "steer_left", (void*)f34C);
-    fn_801A7974((&b7C), "steer_right", (void*)f34C);
-    fn_801A7974((&b18C), "steer2_left", (void*)f34C);
-    fn_801A7974((&b19C), "steer2_right", (void*)f34C);
-    fn_801A7974((&b8C), "throttle", (void*)f34C);
-    fn_801A7974((&b9C), "braking", (void*)f34C);
-    fn_801A7974((&bBC), "dig_throttle", (void*)f34C);
-    fn_801A7974((&bCC), "dig_braking", (void*)f34C);
-    fn_801A7974((&bDC), "throttle2", (void*)f34C);
-    fn_801A7974((&bEC), "braking2", (void*)f34C);
-    fn_801A7974((&b24C), "view", (void*)f34C);
-    fn_801A7974((&b25C), "race_info", (void*)f34C);
-    fn_801A7974((&b26C), "car_info", (void*)f34C);
-    fn_801A7974((&b27C), "mirror_control", (void*)f34C);
-    fn_801A7974((&bAC), "e_brake", (void*)f34C);
-    fn_801A7974((&bFC), "reverse", (void*)f34C);
-    fn_801A7974((&b10C), "alt_reverse", (void*)f34C);
-    fn_801A7974((&b15C), "clutch", (void*)f34C);
-    fn_801A7974((&b13C), "upshift", (void*)f34C);
-    fn_801A7974((&b14C), "downshift", (void*)f34C);
-    fn_801A7974((&b16C), "help", (void*)f34C);
-    fn_801A7974((&b17C), "airlift", (void*)f34C);
-    fn_801A7974((&b11C), "horn", (void*)f34C);
-    fn_801A7974((&b12C), "horn2", (void*)f34C);
-    fn_801A7974((&b1AC), "look_left", (void*)f34C);
-    fn_801A7974((&b1BC), "look_right", (void*)f34C);
-    fn_801A7974((&b1CC), "look_back", (void*)f34C);
-    fn_801A7974((&b28C), "pitch_up", (void*)f34C);
-    fn_801A7974((&b29C), "pitch_down", (void*)f34C);
-    fn_801A7974((&b2AC), "roll_left", (void*)f34C);
-    fn_801A7974((&b2BC), "roll_right", (void*)f34C);
+    SaveInputBinding((&b6C), "steer_left", (void*)f34C);
+    SaveInputBinding((&b7C), "steer_right", (void*)f34C);
+    SaveInputBinding((&b18C), "steer2_left", (void*)f34C);
+    SaveInputBinding((&b19C), "steer2_right", (void*)f34C);
+    SaveInputBinding((&b8C), "throttle", (void*)f34C);
+    SaveInputBinding((&b9C), "braking", (void*)f34C);
+    SaveInputBinding((&bBC), "dig_throttle", (void*)f34C);
+    SaveInputBinding((&bCC), "dig_braking", (void*)f34C);
+    SaveInputBinding((&bDC), "throttle2", (void*)f34C);
+    SaveInputBinding((&bEC), "braking2", (void*)f34C);
+    SaveInputBinding((&b24C), "view", (void*)f34C);
+    SaveInputBinding((&b25C), "race_info", (void*)f34C);
+    SaveInputBinding((&b26C), "car_info", (void*)f34C);
+    SaveInputBinding((&b27C), "mirror_control", (void*)f34C);
+    SaveInputBinding((&bAC), "e_brake", (void*)f34C);
+    SaveInputBinding((&bFC), "reverse", (void*)f34C);
+    SaveInputBinding((&b10C), "alt_reverse", (void*)f34C);
+    SaveInputBinding((&b15C), "clutch", (void*)f34C);
+    SaveInputBinding((&b13C), "upshift", (void*)f34C);
+    SaveInputBinding((&b14C), "downshift", (void*)f34C);
+    SaveInputBinding((&b16C), "help", (void*)f34C);
+    SaveInputBinding((&b17C), "airlift", (void*)f34C);
+    SaveInputBinding((&b11C), "horn", (void*)f34C);
+    SaveInputBinding((&b12C), "horn2", (void*)f34C);
+    SaveInputBinding((&b1AC), "look_left", (void*)f34C);
+    SaveInputBinding((&b1BC), "look_right", (void*)f34C);
+    SaveInputBinding((&b1CC), "look_back", (void*)f34C);
+    SaveInputBinding((&b28C), "pitch_up", (void*)f34C);
+    SaveInputBinding((&b29C), "pitch_down", (void*)f34C);
+    SaveInputBinding((&b2AC), "roll_left", (void*)f34C);
+    SaveInputBinding((&b2BC), "roll_right", (void*)f34C);
     fn_801331C4((void*)f34C, "ff_deadband_width", &lbl_8055A330);
     fn_801331C4((void*)f34C, "ff_torque_gain", &lbl_8055A334);
     fn_801331C4((void*)f34C, "ff_inband_damping", &lbl_8055A338);
@@ -699,21 +699,21 @@ inline void PhysDriver::Init(void) {
         digBraking = 0;
         digThrottle = 0;
     }
-    fn_801A9110((&freeG[0]), "Button 6");
-    fn_801A9110((&freeG[1]), "Button 7");
-    fn_801A9110((&freeG[2]), "Button 1");
-    fn_801A9110((&freeG[3]), "Button 2");
-    fn_801A9110((&freeG[4]), "POV Front");
-    fn_801A9110((&freeG[5]), "POV Left");
-    fn_801A9110((&freeRev), "POV Right");
+    BindInputToDevice((&freeG[0]), "Button 6");
+    BindInputToDevice((&freeG[1]), "Button 7");
+    BindInputToDevice((&freeG[2]), "Button 1");
+    BindInputToDevice((&freeG[3]), "Button 2");
+    BindInputToDevice((&freeG[4]), "POV Front");
+    BindInputToDevice((&freeG[5]), "POV Left");
+    BindInputToDevice((&freeRev), "POV Right");
     {
         int j;
         for (j = 0; j < 6; j++) {
             sprintf(buf, "free_g%d", j + 1);
-            fn_801A7974((&freeG[j]), buf, (void*)f34C);
+            SaveInputBinding((&freeG[j]), buf, (void*)f34C);
         }
     }
-    fn_801A7974((&freeRev), "free_reverse", (void*)f34C);
+    SaveInputBinding((&freeRev), "free_reverse", (void*)f34C);
     {
         s32 c = ch;
         b6C.ch = c;
@@ -752,7 +752,7 @@ inline void PhysDriver::Init(void) {
         dpad[2].ch = c;
         dpad[3].ch = c;
         b344 = 0;
-        if (fn_801298E8(&info, c) && (info.info.b & 0x10)) {
+        if (ReadJoyStatus(&info, c) && (info.info.b & 0x10)) {
             b344 = 1;
         }
         b344 = 1;
@@ -772,7 +772,7 @@ extern "C" void fn_8017FF4C(f32 dt) {
         if (!fn_801769F8() && !fn_801B526C()) {
             PhysDriver* d;
             int i;
-            fn_801A7844(1);
+            InitializeJoyStatus(1);
             for (i = 0; i < 4; i++) {
                 d = lbl_804348D8[i];
                 if (d) {

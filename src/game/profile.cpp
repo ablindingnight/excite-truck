@@ -84,9 +84,9 @@ void fn_80214CB4(int item);
 int fn_80232B70(int font);
 void fn_80230C30(f32*, f32*, int, int);
 void fn_80230924(u32, f32, f32, f32, f32, f32);
-void fn_80232BA4(const void*, int, f32, f32, u32, int, f32, f32, f32);
+void DrawColoredText(const void*, int, f32, f32, u32, int, f32, f32, f32);
 int sprintf(char*, const char*, ...);
-f32 fn_8023293C(int font, const char* text, f32 widthScale);
+f32 CalculateTextWidth(int font, const char* text, f32 widthScale);
 
 // Forward declarations for bodies defined below.
 void fn_8024C464(void);
@@ -180,7 +180,7 @@ struct ProfileTextDrawFields {
 };
 }
 
-inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{fn_80232BA4(text, font, x, y, color, alignment, scale, lbl_80563930.v, widthScale);}
+inline void ProfileFontState::DrawCoordinatesNew(const void* text,f32 x,f32 y)const{DrawColoredText(text, font, x, y, color, alignment, scale, lbl_80563930.v, widthScale);}
 
 extern "C" {
 
@@ -227,11 +227,11 @@ extern const char lbl_80344148[40];
 // The callee's va_list starts after two GPR and two FP fixed arguments.
 // Its first two FP values are drawing coordinates, not format substitutions.
 #ifdef __MWERKS__
-void fn_80234AFC(const void*, f32, f32, const char*, ...);
+void DrawTextFormatted(const void*, f32, f32, const char*, ...);
 #else
 // PORT: gtext's definition takes (st, fmt, x, y, ...): reorder for the x86 stack (PPC floats ride in FPRs).
-void fn_80234AFC(const void*, const char*, f32, f32, ...);
-#define fn_80234AFC(st, x, y, fmt, ...) (fn_80234AFC)(st, fmt, x, y, ##__VA_ARGS__)
+void DrawTextFormatted(const void*, const char*, f32, f32, ...);
+#define DrawTextFormatted(st, x, y, fmt, ...) (DrawTextFormatted)(st, fmt, x, y, ##__VA_ARGS__)
 #endif
 }
 
@@ -566,7 +566,7 @@ void ProfileTextState::Draw(void) {
     else {
         self->color = 0xFF000000;
         int height = self->height;
-        f32 width = fn_8023293C(self->font, self->text, self->widthScale);
+        f32 width = CalculateTextWidth(self->font, self->text, self->widthScale);
         width=self->scale*width;fn_80230924(0xFFFFFFFF, x, y, x+width, y - (f32)height, 0.0f);
     }
     // Use the observed font payload through a typed inline call.
@@ -576,7 +576,7 @@ void ProfileTextState::Draw(void) {
     // not independently recoverable from the non-bounds-checked sprintf call.
     char prefix[18];
     sprintf(prefix, "%*.*s", self->cursor, self->cursor, self->text);
-    f32 width = fn_8023293C(self->font, prefix, self->widthScale) * self->scale;
+    f32 width = CalculateTextWidth(self->font, prefix, self->widthScale) * self->scale;
     f32 cursorX = x + width;
     fn_80230924(0xFFFFD03F, cursorX - lbl_80563930.v, y, lbl_80563930.v + cursorX,
                y - (f32)self->height, 0.0f);
@@ -585,7 +585,7 @@ void ProfileTextState::Draw(void) {
 void ProfileKeyboardState::Enter(void) {
     ProfileKeyboardFitFields* self=(ProfileKeyboardFitFields*)this;
     f32 cellWidth;f32 width=(f32)self->width;f32 cellHeight=(f32)self->height/4.0f;cellWidth=width/10.0f;
-    f32 textWidth = fn_8023293C(self->font, "BS", self->widthScale);
+    f32 textWidth = CalculateTextWidth(self->font, "BS", self->widthScale);
     textWidth=self->scale*textWidth;f32 fitWidth=(cellWidth-5.5f)/textWidth;
     int fontHeight=fn_80232B70(self->font);f32 heightGap=cellHeight-5.5f;f32 fitHeight=heightGap/(f32)fontHeight;
     self->scale = fitHeight < fitWidth ? fitHeight : fitWidth;
@@ -676,11 +676,11 @@ inline void ProfileKeyboardState::Draw(void) {
     for (int row = 0; row < 4; row++) {
         x = startX;
         for (int column = 0; column < 10; column++) {
-            if (row == 3 && column == 9) fn_80234AFC(&self->font, x, y, "%cOK", 1);
-            else if (row == 3 && column == 8) fn_80234AFC(&self->font, x, y, "%cBS", 1);
+            if (row == 3 && column == 9) DrawTextFormatted(&self->font, x, y, "%cOK", 1);
+            else if (row == 3 && column == 8) DrawTextFormatted(&self->font, x, y, "%cBS", 1);
             else {
                 const char* keys = self->upper ? "!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ. " : "1234567890abcdefghijklmnopqrstuvwxyz. ";
-                fn_80234AFC(&self->font, x, y, "%c%c", 1, keys[row * 10 + column]);
+                DrawTextFormatted(&self->font, x, y, "%c%c", 1, keys[row * 10 + column]);
             }
             x = x + cellWidth;
         }

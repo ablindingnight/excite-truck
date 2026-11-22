@@ -168,7 +168,7 @@ extern "C" const f32 lbl_8056376C;  // 250.0
 extern "C" const f32 lbl_80563770;  // -1.0
 extern "C" const f32 lbl_8056377C;  // 5.0
 extern "C" {
-f32 fn_8023659C(void);
+f32 CalculateTimeDelta(void);
 void fn_80216D28(void);
 void fn_80214D50(int s);
 }
@@ -249,7 +249,7 @@ public:
 
     // Starts sliding the swatch strip towards the new colour.
     void Slide(void) {
-        s32 now = fn_8023659C() * lbl_80563768;
+        s32 now = CalculateTimeDelta() * lbl_80563768;
         f32 t = Clamp01((f32)(now - time) / lbl_8056376C);
         f32 e = Ease(t);
         time = now;
@@ -539,7 +539,7 @@ void CarStatsShutdown(void);
 extern "C" {
 void LoadCarClassFile(void);
 void fn_8013C8B8(void);
-void fn_80129AEC(int a);
+void SetInputChannel(int a);
 int fn_802E4A10(void);
 void fn_8023D4B8(s32 ch);
 void __destroy_arr(void* p, void* dtor, u32 size, u32 n);
@@ -635,7 +635,7 @@ int fn_8023FF1C(u8 flag) {
     MenuDesc desc = {layout, items, fn_802411A4, 0, 0};
     // PROVISIONAL: result lifetime starts before dialog setup.
     int result = 1;
-    fn_80129AEC(-1);
+    SetInputChannel(-1);
     int run = 1;
     while (run) {
         int r = fn_802146BC(&desc, -999, -999, 1);
@@ -656,7 +656,7 @@ int fn_8023FF1C(u8 flag) {
             break;
         }
     }
-    fn_80129AEC(0);
+    SetInputChannel(0);
     fn_8013C8B8();
     CarStatsShutdown();
     return result;
@@ -790,7 +790,7 @@ extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
-void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
+void DrawColoredText(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
 extern const f32 lbl_80563758;     // 0.0
 extern const f32 lbl_8056375C;     // 0.43
 extern const f32 lbl_80563760;     // 0.37
@@ -878,7 +878,7 @@ void ColorPick::Draw(void) {
         f32 h;
         h = this->h;
         f32 cell = w / lbl_80563780;
-        s32 now = fn_8023659C() * lbl_80563768;
+        s32 now = CalculateTimeDelta() * lbl_80563768;
         f32 t = Clamp01((f32)(now - this->time) / lbl_8056376C);
         f32 e = Ease(t);
         f32 cur = this->pos + e * (this->target - this->pos);

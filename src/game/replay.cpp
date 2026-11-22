@@ -58,7 +58,7 @@ void fn_8026E204(u32 flags);
 int fn_801769F8(void);
 void fn_80011A2C(void);
 int fn_802ECC10(void);
-int fn_801298E8(JoyStatus* pad, int unk);
+int ReadJoyStatus(JoyStatus* pad, int unk);
 void fn_80176A00(int unk);
 void fn_80278894(int unk);
 void fn_801769E0(void);
@@ -84,7 +84,7 @@ void fn_80211F64(void);
 void fn_80129AFC(void);
 void fn_802C2B48(void);
 int fn_802E47B8(void);
-u32 fn_802E46F0(void);
+u32 HandleScreenshotInput(void);
 void ConvertSecondsToFrames(f32 t);
 void fn_802788E0(f32 t);
 void fn_802787E4(void);
@@ -99,7 +99,7 @@ int fn_8026DDD0(void);
 void fn_801CEFD4(int unk);
 int fn_80137C74(void);
 int fn_80137CFC(int player);
-void fn_80129AEC(int pad);
+void SetInputChannel(int pad);
 int fn_801E86F8(int player);
 void fn_801E86E8(int index, int unk);
 ILayout* fn_80145E70(const char* name);
@@ -110,7 +110,7 @@ int fn_801CB8FC(void);
 void fn_801E7E04(int a, int b);
 int fn_8018FD38(void);
 int fn_802E4A10(void);
-int fn_80137C98(int unk);
+int FindDriverIndex(int unk);
 int fn_801E8838(void);
 void fn_80230E90(int unk);
 void fn_8017691C(void);
@@ -365,7 +365,7 @@ int fn_80008C5C(void) {
     u32 dir;
     int any;
 
-    if (!lbl_8055D37A && !fn_802ECC10() && fn_801298E8(&pad, 0)) {
+    if (!lbl_8055D37A && !fn_802ECC10() && ReadJoyStatus(&pad, 0)) {
         dir = pad.dir;
         if (dir == 8) {
             camMode = fn_8000865C() ? CAM_RIGHT : CAM_LEFT;
@@ -538,7 +538,7 @@ void fn_80008F98(void) {
             fn_801769E0();
         }
         if (fn_802E47B8()) {
-            key = fn_802E46F0();
+            key = HandleScreenshotInput();
             switch ((u16)key) {
             case 0x1B:
                 done = 1;
@@ -680,7 +680,7 @@ void fn_80009534(void) {
     lbl_8055D378[1] = 0;
     fn_801CEFD4(0);
     fn_80137C74();
-    fn_80129AEC(fn_80137CFC(0));
+    SetInputChannel(fn_80137CFC(0));
     player = fn_801E86F8(0);
     lbl_8055D374 = fn_80145E70("replaylyt.val");
     lbl_8055D36D = 1;
@@ -742,8 +742,8 @@ void fn_80009534(void) {
             }
         }
         if (fn_802E47B8()) {
-            key = fn_802E46F0();
-            if (fn_802ECC10() || fn_80137C98(fn_802E4A10()) < 0) {
+            key = HandleScreenshotInput();
+            if (fn_802ECC10() || FindDriverIndex(fn_802E4A10()) < 0) {
                 fn_802E30C8("IGNORE KEY");
                 key = 0;
             }

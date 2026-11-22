@@ -76,7 +76,7 @@ enum { FALSE_, TRUE_ };
 
 extern "C" {
 
-void fn_80137D58(IdealPoint* p, IdealLineRes* res) {
+void SwapIdealPointData(IdealPoint* p, IdealLineRes* res) {
     for (int i = 0; i < 2; i++) {
         SwapV2(&(&p->pos)[i]);
     }
@@ -112,7 +112,7 @@ static inline void IrItem(IrRec* r) {
     SwapHalf(&r->b);
     SwapWord(&r->c);
 }
-void fn_80137FF0(ResExt* e) {
+void ProcessResourceData(ResExt* e) {
     int i;
     SwapWord(&e->data[0]);
     SwapWord(&e->data[1]);
@@ -122,7 +122,7 @@ void fn_80137FF0(ResExt* e) {
     }
 }
 
-void fn_801380DC(ResExt* e) {
+void SwapExtensionData(ResExt* e) {
 #if !defined(__MWERKS__) && !defined(GAME_FILE_DATA_NEEDS_SWAP)
     return;  // PORT: this extension's hand-written swap; the data is already native on a little-endian host
 #endif
@@ -149,7 +149,7 @@ void fn_801380DC(ResExt* e) {
     }
 }
 
-void fn_80138144(ResExt* e) {
+void ProcessResourceExtension(ResExt* e) {
     SwapWord(&e->type);
     switch (e->type) {
     case 0:
@@ -159,10 +159,10 @@ void fn_80138144(ResExt* e) {
         fn_80137F74(e->data);
         break;
     case 2:
-        fn_80137FF0(e);
+        ProcessResourceData(e);
         break;
     case 3:
-        fn_801380DC(e);
+        SwapExtensionData(e);
         break;
     default:
         fn_802E317C("idealres: unhandled ext type %x", e->type);
@@ -197,13 +197,13 @@ void fn_801381B4(IdealLineRes* res) {
     }
     fn_80138434(&res->points);
     fn_80138434(&res->start);
-    fn_80137D58(res->points, res);
+    SwapIdealPointData(res->points, res);
     for (t = 0; t < 3; t++) {
         bool found = false;
         for (p = res->points->next; p != res->points; p = p->next) {
             if (p->type == t) {
                 found = true;
-                fn_80137D58(p, res);
+                SwapIdealPointData(p, res);
             } else if (found) {
                 break;
             }
@@ -212,19 +212,19 @@ void fn_801381B4(IdealLineRes* res) {
     p = res->start;
     if (p) {
         while (p->type == 3) {
-            fn_80137D58(p, res);
+            SwapIdealPointData(p, res);
             p = p->next;
         }
     }
     for (e = res->ext; e; e = e->next) {
-        fn_80138144(e);
+        ProcessResourceExtension(e);
     }
 }
 #pragma pop
 
 void fn_80138434(void* p) { fn_80137F2C(p); }
 
-IdealPoint* fn_80138438(IdealPoint* start) {
+IdealPoint* FindHighestIdealPoint(IdealPoint* start) {
     IdealPoint* p = start->next;
     IdealPoint* best = start;
     for (; p != start; p = p->next) {
@@ -248,7 +248,7 @@ IdealPoint* fn_8013846C(IdealPoint* start) {
 
 static inline s32 MaxI(s32 a, s32 b) { return b > a ? b : a; }
 
-void fn_801384A0(IdealLineRes* line, IdealLineRes* ref) {
+void UpdateIdealLineFollower(IdealLineRes* line, IdealLineRes* ref) {
     IdealFollower f(1, (CenterLine*)ref);
     IdealPoint* p;
     IdealPoint* lo;
@@ -261,7 +261,7 @@ void fn_801384A0(IdealLineRes* line, IdealLineRes* ref) {
         p->ilpos = f.il.seg->ilpos;
         p = p->next;
     } while (p != line->points);
-    lo = fn_8013846C(fn_80138438(p));
+    lo = fn_8013846C(FindHighestIdealPoint(p));
     lo->ilpos = 0;
     p = lo;
     mx = 0;
@@ -286,7 +286,7 @@ void fn_80138594(IdealLineRes* res) {
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 
-f32 fn_801385F0(f32 a, f32 lap, f32 b, f32 radius) {
+f32 NormalizeAngleDifference(f32 a, f32 lap, f32 b, f32 radius) {
     f32 d = a - b;
     f32 x;
     if ((f32)__fabs(d) > lap / 2) {
@@ -337,7 +337,7 @@ int fn_801386D0(IdealLineRes* line, f32 at, f32 amount, f32 radius) {
         IdealPoint* end;
         f32 acc;
         do {
-            f32 w = fn_801385F0(p->dist, lap, amount, radius);
+            f32 w = NormalizeAngleDifference(p->dist, lap, amount, radius);
             if (w > 0.0f) {
                 f32 qx;
                 f32 py = p->dir.y;
@@ -394,7 +394,7 @@ int fn_801388F4(IdealPoint* p) {
 
 void fn_80138958(IdealLineRes* res, f32* v) { fn_801386D0(res, v[0], v[1], v[2]); }
 
-IdealLineRes* fn_80138968(const char* name) {
+IdealLineRes* LoadIdealLineResource(const char* name) {
     u32 version;
     s32 size;
     u32 seg;
@@ -435,7 +435,7 @@ IdealLineRes* fn_80138968(const char* name) {
     return r;
 }
 
-void fn_80138AD8(IdealLineRes** pr) {
+void FreeIdealLineResources(IdealLineRes** pr) {
     fn_8013C428((*pr)->blips);
     fn_8012C4D8(*pr);
     *pr = 0;
@@ -453,7 +453,7 @@ ResExt* fn_80138B1C(IdealLineRes* res) {
     return r;
 }
 
-ResExt* fn_80138B4C(IdealLineRes* res, ResExt* prev) {
+ResExt* FindExtensionByType(IdealLineRes* res, ResExt* prev) {
     ResExt* r;
     ResExt* e = prev ? prev->next : 0;
     r = 0;
@@ -474,7 +474,7 @@ void fn_80138BA0(IdealLineRes* a, IdealLineRes* b) {
     if (a == b) {
         return;
     }
-    fn_801384A0(a, b);
+    UpdateIdealLineFollower(a, b);
 }
 
 }  // extern "C"

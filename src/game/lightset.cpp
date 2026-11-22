@@ -21,18 +21,18 @@ ModuleTag lbl_8055F5F8;
 
 extern "C" {
 
-void fn_802793B0(int i);
+void ResetLightPreset(int i);
 
 void fn_80279370(void) {
     int i;
     for (i = 0; i < 4; i++) {
-        fn_802793B0(i);
+        ResetLightPreset(i);
     }
 }
 
 void fn_802793AC(void) {}
 
-void fn_802793B0(int i) {
+void ResetLightPreset(int i) {
     LightPresetSet* s = &lbl_804A16E8[i];
     int k;
     s->on = 0;

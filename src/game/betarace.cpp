@@ -48,7 +48,7 @@ void fn_80130980(char* buf, s32 size, int fields, f32 secs);  // format a time
 void fn_801308F4(char* buf, s32 size, s32 value);             // format a score
 void fn_801308F8(char* buf, s32 size, s32 value);
 int fn_80179650(void);
-int fn_801609C4(s32 score);  // grade for a score
+int FindGradeForScore(s32 score);  // grade for a score
 }
 
 // The results-screen art animation player.
@@ -1316,7 +1316,7 @@ inline void SetV2(V2& d, const V2& s) {
 extern "C" {
 f32 fn_801E7E18(void);
 int fn_8026B0C0(int view);
-void fn_80232928(u32 color);
+void SetInputMask(u32 color);
 void fn_80232930(void);
 u32 fn_80144C68(u8 r, u8 g, u8 b, u8 a);
 f32 fn_80144C80(f32 a, f32 b, f32 t);
@@ -1432,7 +1432,7 @@ inline void DrawStunts(const BetaCar* c, ILayout* l, int view) {
             if (n >= 5) {
                 f32 p = Remap(0.0f, 1.1f, 0.0f, 1.0f, age);
                 u32 c0 = fn_80144C68(0xFF, 0xC1, 0, 0);
-                fn_80232928(fn_80144C68(0xFF, 0xFF, 0xFF, 0xFF));
+                SetInputMask(fn_80144C68(0xFF, 0xFF, 0xFF, 0xFF));
                 if (p < 0.3f) {
                     TextElem* t;
                     p = Remap(0.0f, 0.3f, 0.0f, 1.0f, p);
@@ -1587,7 +1587,7 @@ int FinishAnimation::Update(const CarResult* r, const StuntList* s, s32 coins) {
         fn_801308F4(base.s, 0x14, basePts);
         fn_801308F8(total.s, 0x14, tot);
         fn_801345D8(count.s, 0x14, r->timeLeft ? "%d" : kBetaDash, r->timeLeft);
-        int g = fn_801609C4(basePts);
+        int g = FindGradeForScore(basePts);
         if (g != -1) {
             grade.Set(GetGradeDisplayName(g));
         } else {
@@ -1682,7 +1682,7 @@ void CarResult::Compute(const BetaCar* c) {
     left = 0.0f > left ? 0.0f : left;
     total = score + bonus;
     timeLeft = left;
-    grade = fn_801609C4(total);
+    grade = FindGradeForScore(total);
 }
 
 f32 CarResult::SinceFinish(const BetaCar* c) {
@@ -2121,7 +2121,7 @@ void BetaCar::DrawHud(ILayout* l, int view) const {
     PlaceDist* dist = ((PlaceSource*)rc->src)->Dist();
     int out = (info->flags >> 2) & 1;
     s32 pts = Round(shown);
-    int grade = fn_801609C4(pts);
+    int grade = FindGradeForScore(pts);
     int pal;
     if (!fn_80161C38() && lbl_8055E4D0 > 1 && pts > shownInt && grade <= fn_80160A74() && grade >= 0) {
         TextElem* t = l->Find("high_score_title");
@@ -3372,7 +3372,7 @@ inline void BetaMaster::vf0C(void) {
             } else if (fn_8017960C(i)->f1F0 == 0x50) {
                 s32 n;
                 found = 1;
-                if (fn_801609C4((s32)c->score) == 0 && coins.enabled) {
+                if (FindGradeForScore((s32)c->score) == 0 && coins.enabled) {
                     fn_801688B4(1);
                     coins.cars[i].active = 1;
                 }
@@ -3535,7 +3535,7 @@ static inline void DrawPuddleMarker(const Puddle* p, u32 col) {
     DrawLineSegment(&a, &b, col, p->r);
 }
 // Retail compiled vf48 with dead-assignment elimination off: the mode-1 colour assignment survives (so the car and
-// mode tests stay) and the back end deletes its load (same family as gtext fn_80233354 and pickup fn_80168104).
+// mode tests stay) and the back end deletes its load (same family as gtext DrawTextWithOutlineAndAlignment and pickup fn_80168104).
 #pragma push
 #pragma opt_dead_assignments off
 inline void BetaMaster::vf48(void) {

@@ -38,7 +38,7 @@ Window* fn_8021832C(Window* w);
 void fn_802C974C(f32 nearPlane, f32 farPlane, f32 fov);
 void fn_80230B5C(UIXform* m);
 void fn_802C8638(UIXform* m);
-void fn_802C5310(Window* w, int a, f32 x, f32 y, f32 z);
+void DrawImageFrame(Window* w, int a, f32 x, f32 y, f32 z);
 void fn_802166B8(void);
 void fn_80218464(Window* w);
 void fn_802184D0(Window* w);
@@ -56,7 +56,7 @@ void fn_80217734(Window* w, s32 x, s32 y);
 void fn_80217834(Window* w, s32 x, s32 y);
 void fn_80217854(Window* w, s32 x, s32 y);
 int fn_802E47B8(void);
-u32 fn_802E46F0(void);
+u32 HandleScreenshotInput(void);
 void fn_80217874(Window* w, u16 key);
 void fn_80211F64(void);
 void fn_80129AFC(void);
@@ -181,9 +181,9 @@ void fn_802160AC(void) {
         x = (f32)lbl_8055EF80 - 320.0f;
         y = 240.0f - (f32)lbl_8055EF84;
         if (w) {
-            fn_802C5310(w, 0, x, y, 0.0f);
+            DrawImageFrame(w, 0, x, y, 0.0f);
         } else {
-            fn_802C5310(lbl_8055EF7C, 0, x, y, 0.0f);
+            DrawImageFrame(lbl_8055EF7C, 0, x, y, 0.0f);
         }
     }
 }
@@ -270,7 +270,7 @@ void fn_802164D8(void) {
         }
     }
     if (fn_802E47B8()) {
-        u32 key = fn_802E46F0();
+        u32 key = HandleScreenshotInput();
         if (lbl_8055EF88) {
             fn_80217874(lbl_8055EF88, key);
         }
@@ -433,7 +433,7 @@ s32 fn_802168F0(Window* w) {
         }
         if (t < 0.65f) {
             while (fn_802E47B8()) {
-                fn_802E46F0();
+                HandleScreenshotInput();
             }
         }
         fn_8021662C();

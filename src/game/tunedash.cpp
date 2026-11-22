@@ -10,7 +10,7 @@
 #include "game/mathutil.h"
 
 // Camera: common.h's PlainValMatrix.
-// joy.cpp's JoyStatus (fn_801298E8), declared as far as this unit reads it
+// joy.cpp's JoyStatus (ReadJoyStatus), declared as far as this unit reads it
 // JoyStatus: game/joy.h.
 extern "C" {
 s32 fn_802E2C20(void);  // milliseconds
@@ -21,7 +21,7 @@ void fn_801473F8(ILayout* l, const char* name, const char* fmt, ...);
 void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 void fn_802C974C(f32 a, f32 b, f32 c);
-int fn_801298E8(JoyStatus* pad, int chan);
+int ReadJoyStatus(JoyStatus* pad, int chan);
 void fn_80011A2C(void);
 }
 
@@ -146,7 +146,7 @@ int fn_802044E8(void) {
     } else {
         fn_801476C4(lbl_8055ED44->Find("inactivity_message"));
         JoyStatus pad;
-        if (fn_801298E8(&pad, 0) && pad.buttons[5]) {
+        if (ReadJoyStatus(&pad, 0) && pad.buttons[5]) {
             fn_80204330();
         }
     }

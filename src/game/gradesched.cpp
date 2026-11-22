@@ -33,7 +33,7 @@ static inline int HasNode(ValueNode* n, const char* name) { return n->FindChild(
 
 extern "C" {
 
-void fn_8016071C(ValueNode* t) {
+void LoadGradeScheduleScores(ValueNode* t) {
     int i;
     lbl_8055E2BC = new ("gradeschedule") Grades(t);
     for (i = 0; i < 5; i++) {
@@ -48,7 +48,7 @@ void fn_801607BC(void) {
     }
 }
 
-void fn_801607F8(void) {
+void ResetScoreTable(void) {
     if (lbl_8055E2BC) {
         delete lbl_8055E2BC;
         lbl_8055E2BC = 0;
@@ -60,26 +60,26 @@ void fn_801607F8(void) {
     lbl_8042FD60.score[4] = -1;
 }
 
-void fn_80160850(void) {
+void LoadGradeSchedule(void) {
     int ok;
     const char* file;
     const char* key;
     ValueNode* ev;
     const char* name;
-    fn_801607F8();
+    ResetScoreTable();
     file = "grades.val";
     ok = 0;
     key = "grades";
     ev = GetEvent(fn_801769CC()->event)->node;
     name = fn_80204EA0("grade_table");
     if (HasNode(ev, name)) {
-        fn_8016071C(ev->FindChild(name));
+        LoadGradeScheduleScores(ev->FindChild(name));
         ok = 1;
     } else {
         ValueTable* vt = fn_80131808(file);
         if (vt) {
             if (vt->HasChild(key)) {
-                fn_8016071C(vt->FindChild(key));
+                LoadGradeScheduleScores(vt->FindChild(key));
                 ok = 1;
             } else {
                 fn_802E30C8("GradeSchedule: couldn't find the grade table (\"%s\") in %s", key, file);
@@ -95,14 +95,14 @@ void fn_80160850(void) {
     }
 }
 
-int fn_80160998(int grade) {
+int GetGradeScoreThreshold(int grade) {
     if (lbl_8055E2BC) {
         return lbl_8055E2BC->GetThreshold(grade);
     }
     return lbl_8042FD60.score[grade];
 }
 
-int fn_801609C4(int score) {
+int FindGradeForScore(int score) {
     int i;
     if (lbl_8055E2BC) {
         return lbl_8055E2BC->Find(score);
@@ -124,13 +124,13 @@ int fn_80160A74(void) {
 
 int fn_80160AB4(void);
 
-int fn_80160A90(void) { return fn_80160998(fn_80160AB4()); }
+int fn_80160A90(void) { return GetGradeScoreThreshold(fn_80160AB4()); }
 
 int fn_80160AB4(void) {
     int g = fn_8027DED0();
     return g != -1 ? g : fn_80160A74();
 }
 
-void fn_80160AE4(void) { fn_801607F8(); }
+void fn_80160AE4(void) { ResetScoreTable(); }
 
 }  // extern "C"

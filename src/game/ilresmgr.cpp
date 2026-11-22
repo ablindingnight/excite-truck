@@ -27,8 +27,8 @@ void fn_802E30C8(const char* fmt, ...);                      // debug print
 void fn_802E317C(const char* fmt, ...);                      // fatal: print, then exit() -> PPCHalt (never returns)
 void fn_8012E81C(const char* res);
 const char* fn_801E879C(void);  // track name
-IdealLineRes* fn_80138968(const char* name);
-void fn_80138AD8(IdealLineRes** pr);
+IdealLineRes* LoadIdealLineResource(const char* name);
+void FreeIdealLineResources(IdealLineRes** pr);
 void fn_80138BA0(IdealLineRes* a, IdealLineRes* b);
 Region* ParseBoundPoints(ValueNode* n);
 int IsPointInBound(Region* r, f32 x, f32 z);
@@ -39,7 +39,7 @@ RaceCarRec* fn_8017960C(int id);
 f32 CalculateFrameTime(void);
 int fn_801B2F24(void);
 DeityCar* fn_801B2ED0(int i);
-V2* fn_80135420(V2* p, int a, IdealLineRes* line);  // closest point on a line
+V2* FindClosestIdealPoint(V2* p, int a, IdealLineRes* line);  // closest point on a line
 }
 
 void* operator new(size_t size, const char* tag);
@@ -81,7 +81,7 @@ struct FixedList {
 
 extern "C" {
 
-void fn_801561E8(char* s) {
+void RemoveFileExtension(char* s) {
     char* p = strrchr(s, '.');
     if (p) {
         *p = 0;
@@ -90,16 +90,16 @@ void fn_801561E8(char* s) {
 
 ValueNode* fn_8015621C(void) { return GetEvent(fn_801E87A8()->event)->node; }
 
-char* fn_80156248(char* buf, int size) {
+char* BuildTrackFilename(char* buf, int size) {
     const char* base = fn_8015621C()->GetString("line_basename", "");
     fn_801345D8(buf, size, "%strack.ild", base);
     return buf;
 }
 
-char* fn_801562BC(char* buf, int size, const char* name, int ghost) {
+char* BuildGhostCarResourcePath(char* buf, int size, const char* name, int ghost) {
     char track[0x20];
     SafeStrCopy(track, fn_801E879C(), sizeof(track));
-    fn_801561E8(track);
+    RemoveFileExtension(track);
     if (ghost) {
         fn_801345D8(buf, size, "*ghostcar.res/%s%s%s.il0", name, *name ? "_" : "", track);
     } else {
@@ -129,7 +129,7 @@ public:
     virtual void Assign(void) {}                           // 0x20
 };
 
-extern "C" IdealLineRes* fn_801563BC(const char* name, LineSource* center);
+extern "C" IdealLineRes* LoadRacingLine(const char* name, LineSource* center);
 
 class CenterSource;
 static inline void InitCenter(CenterSource* c);
@@ -137,7 +137,7 @@ static inline void InitCenter(CenterSource* c);
 class CenterSource : public LineSource {
 public:
     CenterSource(void) { InitCenter(this); }
-    virtual ~CenterSource(void) { fn_80138AD8(&line); }
+    virtual ~CenterSource(void) { FreeIdealLineResources(&line); }
     virtual IdealLineRes* Get(int car) { return line; }
     virtual IdealLineRes* GetLine(int i) { return line; }
     virtual void Reset(void) {}
@@ -151,7 +151,7 @@ static inline void InitSingle(SingleLine* s, LineSource* center);
 class SingleLine : public LineSource {
 public:
     SingleLine(LineSource* center) { InitSingle(this, center); }
-    virtual ~SingleLine(void) { fn_80138AD8(&line); }
+    virtual ~SingleLine(void) { FreeIdealLineResources(&line); }
     virtual IdealLineRes* Get(int car) { return line; }
     virtual IdealLineRes* GetLine(int i) {
         if (i == 0) {
@@ -184,7 +184,7 @@ public:
     // The loop being in an inline is what orders its registers (allocator rule, Codex round 12). Name reconstructed.
     void FreeLines(void) {
         for (int i = 0; i < lines.a.count; i++) {
-            fn_80138AD8(&lines.a.data[i].line);
+            FreeIdealLineResources(&lines.a.data[i].line);
         }
         lines.a.count = 0;
     }
@@ -253,7 +253,7 @@ public:
         best = 2.5e7f;
         bi = -1;
         for (i = 0; i < lines.a.count; i++) {
-            V2* q = fn_80135420(&p, 0, lines.a.data[i].line);
+            V2* q = FindClosestIdealPoint(&p, 0, lines.a.data[i].line);
             V2 d;
             f32 dd;
             d.y = p.y - q->y;
@@ -347,19 +347,19 @@ static PathSet* lbl_8055E27C;
 
 extern "C" {
 
-IdealLineRes* fn_801563BC(const char* name, LineSource* center) {
+IdealLineRes* LoadRacingLine(const char* name, LineSource* center) {
     char buf[0x40];
     IdealLineRes* r;
-    fn_801562BC(buf, sizeof(buf), name, 0);
-    r = fn_80138968(buf);
+    BuildGhostCarResourcePath(buf, sizeof(buf), name, 0);
+    r = LoadIdealLineResource(buf);
     if (!r) {
         fn_802E30C8("ilresmgr: Can't load racingline \"%s\", using ghostcar.res", buf);
-        fn_801562BC(buf, sizeof(buf), name, 1);
-        r = fn_80138968(buf);
+        BuildGhostCarResourcePath(buf, sizeof(buf), name, 1);
+        r = LoadIdealLineResource(buf);
     }
     if (!r) {
         fn_802E30C8("ilresmgr: Can't load racingline \"%s\", using centerline", buf);
-        r = fn_80138968(fn_80156248(buf, sizeof(buf)));
+        r = LoadIdealLineResource(BuildTrackFilename(buf, sizeof(buf)));
     } else {
         fn_80138BA0(r, center->GetLine(0));
     }
@@ -370,7 +370,7 @@ IdealLineRes* fn_801563BC(const char* name, LineSource* center) {
 
 static inline void InitCenter(CenterSource* c) {
     char buf[0x40];
-    c->line = fn_80138968(fn_80156248(buf, sizeof(buf)));
+    c->line = LoadIdealLineResource(BuildTrackFilename(buf, sizeof(buf)));
     if (!c->line) {
         fn_802E317C("ilresmgr: Can't load \"%s\"", buf);
     }
@@ -378,7 +378,7 @@ static inline void InitCenter(CenterSource* c) {
 
 static inline void InitSingle(SingleLine* s, LineSource* center) {
     ValueNode* v = fn_8015621C();
-    s->line = fn_801563BC(v->GetString("ghostline_basename", v->GetString("line_basename", "")), center);
+    s->line = LoadRacingLine(v->GetString("ghostline_basename", v->GetString("line_basename", "")), center);
 }
 
 static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
@@ -396,7 +396,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
             break;
         }
         e = RefAdd(&s->lines.a);
-        e->line = fn_801563BC(name, center);
+        e->line = LoadRacingLine(name, center);
         SafeStrCopy(sideKey, key, sizeof(sideKey));
         StrCatN(sideKey, sizeof(sideKey), "_side");
         side = set->GetString(sideKey, "");
@@ -437,7 +437,7 @@ static inline void InitSet(LineSet* s, ValueNode* set, LineSource* center) {
 
 extern "C" {
 
-void fn_801564B0(void) {
+void LoadRacingLines(void) {
     LineSource* center;
     LineSource* racing;
     ValueNode* set;

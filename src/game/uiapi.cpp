@@ -22,8 +22,8 @@ extern "C" void fn_80214934(const void *, s32, void *, s32);
 extern "C" char* strrchr(const char *, int);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
-extern "C" s32 fn_802C4F14(s32);
-extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
+extern "C" s32 GetStampFrameCount(s32);
+extern "C" s32 DrawStampFrame(s32, s32, s32, s32, s32);
 extern "C" void fn_8021481C(const char*);
 
 extern "C" s32 fn_802168E4(void);
@@ -421,8 +421,8 @@ extern "C" void fn_80211FF0(void) {
 }
 
 extern "C" s32 fn_8012C33C(s32);
-extern "C" s32 fn_802C49E8(s32);
-extern "C" s32 fn_802C2DD4(s32);
+extern "C" s32 LoadStampWithVersionCheck(s32);
+extern "C" s32 LoadAndSwapCanvas(s32);
 // Image/text reference handed to buttons ("StyleImage", "rimg", "timg").
 // The three image classes and UICustom declare their virtuals in retail's emission order (see the note at
 // "Deferred inline code" near the end of the file); a new virtual keeps its slot at the end of the table.
@@ -445,7 +445,7 @@ public:
 // make_image's drawers (class names unproven): "stp" sprite tables and "cvs" canvases.
 class StpImage : public UIImage {
 public:
-    StpImage(s32 name) { value = fn_802C49E8(name); }
+    StpImage(s32 name) { value = LoadStampWithVersionCheck(name); }
     virtual ~StpImage(void);
     virtual void DrawFrame(int x, int y, int frame);
     virtual void Rect(int x, int y, int* left, int* top, int* right, int* bottom);
@@ -458,7 +458,7 @@ public:
     CvsImage(char* name, s32 div) {
         void* c;
         if (fn_8012C33C((s32)name)) {
-            c = (void*)fn_802C2DD4((s32)name);
+            c = (void*)LoadAndSwapCanvas((s32)name);
             value = c;
             count = *(s32*)((char*)c + 12) / div;
         } else {
@@ -639,7 +639,7 @@ public:
     UICustomHandler(void) {}
     virtual ~UICustomHandler(void) {}
     virtual void Unk24(gxCanvas* canvas) {
-        fn_802C3034(canvas);
+        SetCurrentCanvas(canvas);
         fn_802C3424(x, y, x + w, y + h, lbl_8055FBDC);
     }
 };
@@ -1404,7 +1404,7 @@ extern "C" void fn_802141A0(Window** out, const UIMapping* map, int x, int y, in
 
 extern "C" void fn_802D08C4(int);
 extern "C" void fn_80127A24(void);
-extern "C" void fn_802E47E8(void);
+extern "C" void ClearInputBuffer(void);
 extern "C" void fn_80218D54(Window*, int);
 extern "C" void fn_80236918(const char*);
 extern "C" int fn_802168F0(Window*);
@@ -1420,7 +1420,7 @@ extern "C" int fn_802146BC(MenuDesc* desc, int x, int y, int modal) {
     Window* win;
     fn_802141A0(&win, (const UIMapping*)desc, x, y, modal, 0);
     fn_80127A24();
-    fn_802E47E8();
+    ClearInputBuffer();
     s32 (*poll)(s32*) = lbl_8055EF0C;
     fn_80218D54(win, 0);
     lbl_8055EF0C = (s32 (*)(s32*))desc->poll;
@@ -1782,17 +1782,17 @@ inline StpImage::~StpImage(void) {
 extern "C" char* strrchr(const char *, int);
 extern "C" s32 fn_801345D8(void *, s32, const char *, ...);
 extern "C" unsigned long strlen(const char *);
-extern "C" s32 fn_802C4F14(s32);
-extern "C" s32 fn_802C4C90(s32, s32, s32, s32, s32);
+extern "C" s32 GetStampFrameCount(s32);
+extern "C" s32 DrawStampFrame(s32, s32, s32, s32, s32);
 inline void StpImage::DrawFrame(int arg1, int arg2, int arg3) {
     StpImage* arg0 = this;
-    s32 rem = arg3 % fn_802C4F14(arg0->value);
-    fn_802C4C90(arg0->value, arg1, arg2, rem, 0);
+    s32 rem = arg3 % GetStampFrameCount(arg0->value);
+    DrawStampFrame(arg0->value, arg1, arg2, rem, 0);
 }
 
-extern "C" void fn_802C4F2C(int, int *, int *);
-extern "C" int fn_802C4EE4(int);
-extern "C" int fn_802C4EFC(int);
+extern "C" void GetStampOffset(int, int *, int *);
+extern "C" int GetStampWidth(int);
+extern "C" int GetStampHeight(int);
 // Screen rectangle of an image drawn at (x, y), allowing for the image's origin.
 inline void StpImage::Rect(int x, int y, int* p_left, int* p_top, int* p_right, int* p_bottom) {
     StpImage* self = this;
@@ -1802,22 +1802,22 @@ inline void StpImage::Rect(int x, int y, int* p_left, int* p_top, int* p_right, 
     s32* bottom = (s32*)p_bottom;
     int ox = 0;
     int oy = 0;
-    fn_802C4F2C(self->value, &ox, &oy);
+    GetStampOffset(self->value, &ox, &oy);
     *left = x - ox;
     *top = y - oy;
-    *right = *left + fn_802C4EE4(self->value);
-    *bottom = *top + fn_802C4EFC(self->value);
+    *right = *left + GetStampWidth(self->value);
+    *bottom = *top + GetStampHeight(self->value);
 }
 
 inline int StpImage::Frames(void) {
     StpImage* arg0 = this;
-    return fn_802C4F14(arg0->value);
+    return GetStampFrameCount(arg0->value);
 }
 
-extern "C" void fn_802C40E8(int, int, int);
-extern "C" void fn_802C4F2C(int, int *, int *);
-extern "C" int fn_802C4EE4(int);
-extern "C" int fn_802C4EFC(int);
+extern "C" void DrawCanvasRegion(int, int, int);
+extern "C" void GetStampOffset(int, int *, int *);
+extern "C" int GetStampWidth(int);
+extern "C" int GetStampHeight(int);
 extern "C" s32 fn_802C2FC4(s32);
 inline CvsImage::~CvsImage(void) {
     if (value != 0) fn_802C2FC4((s32)value);
@@ -1828,7 +1828,7 @@ inline void CvsImage::DrawFrame(int arg1, int arg2, unsigned int arg3) {
     unsigned int r7 = (unsigned int)arg0->divisor;
     int r8 = (int)arg0->value;
     unsigned int rem = arg3 % r7;
-    if (r8 != 0) fn_802C40E8(r8, arg1, arg2 - arg0->count * rem);
+    if (r8 != 0) DrawCanvasRegion(r8, arg1, arg2 - arg0->count * rem);
 }
 
 inline void CvsImage::Rect(int arg1, int arg2, int* arg3, int* arg4, int* arg5, int* arg6) {

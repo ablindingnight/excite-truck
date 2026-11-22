@@ -27,13 +27,13 @@ void fn_80230C30(f32* x, f32* y, int a, int b);  // element position
 int fn_80232578(const char* name);              // load font
 void fn_802328D4(int font);
 int fn_80232B70(int font);  // font height
-void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
-void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
+void DrawColoredText(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
+void PrintFormattedText(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
                  f32 alpha, ...);
 int gxGetImage(const char* name);  // load image
 void fn_802C519C(int image);
 int fn_802C51C0(int image);  // image width
-void fn_802C5310(int image, int frame, f32 x, f32 y, f32 z);
+void DrawImageFrame(int image, int frame, f32 x, f32 y, f32 z);
 extern char lbl_8055BAB8[4];
 extern char lbl_8055B860[8];
 }
@@ -98,14 +98,14 @@ public:
             } else {
                 fn_802E30C8("Unknown unlockable type %s for %s", u->type, u->name);
             }
-            fn_80232BA4(u->name, font, left, nameY, 0xFFDFDF20, 9, nameScale, 0.0f, 1.0f);
+            DrawColoredText(u->name, font, left, nameY, 0xFFDFDF20, 9, nameScale, 0.0f, 1.0f);
             int frame = 2;
             if (u->points <= rating || u->unlocked) {
                 frame = 3;
             }
-            fn_802C5310(image, frame, lockX, lockY, 0.0f);
-            fn_802337A0(font, -1, 10, "%d Pts", ptsX, ptsY, 0.0f, ptsScale, 1.0f, u->points);
-            fn_80232BA4(buf, font, textX, textY, -1, 9, ptsScale, 0.0f, 1.0f);
+            DrawImageFrame(image, frame, lockX, lockY, 0.0f);
+            PrintFormattedText(font, -1, 10, "%d Pts", ptsX, ptsY, 0.0f, ptsScale, 1.0f, u->points);
+            DrawColoredText(buf, font, textX, textY, -1, 9, ptsScale, 0.0f, 1.0f);
             rowY -= 33.0f;
         }
     }

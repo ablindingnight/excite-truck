@@ -109,7 +109,7 @@ void LoadGarageValues(void);
 void InitializeRaceSettings(EventDesc* d);  // deity.cpp
 void fn_801C4AD0(void);
 void fn_8020C41C(void);
-void fn_8026B644(void);
+void InitializeSoundEffects(void);
 void fn_801C1B9C(void);
 void fn_801D21C0(void);
 void fn_801D32D0(void);
@@ -177,7 +177,7 @@ void fn_801B8BE8(void);
 void fn_801DEF98(void);
 void fn_801B83A8(void);
 void fn_801B34A4(void);
-void fn_8026B6D0(void);
+void ClearCameraBuffer(void);
 void fn_802C1928(void);
 void fn_80134998(void);
 void InitializeDeityTestMode(void);
@@ -966,7 +966,7 @@ void fn_80178DD4(s32 stream) {
     fn_80127464();
     fn_801C4AD0();
     fn_8020C41C();
-    fn_8026B644();
+    InitializeSoundEffects();
     fn_801C1B9C();
     fn_801D21C0();
     fn_801D32D0();
@@ -1118,7 +1118,7 @@ void fn_80179320(void) {
     fn_801DEF98();
     fn_801B83A8();
     fn_801B34A4();
-    fn_8026B6D0();
+    ClearCameraBuffer();
     fn_802C1928();
     fn_80134998();
     InitializeDeityTestMode();

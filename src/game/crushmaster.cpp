@@ -44,7 +44,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 void fn_801345D8(char* buf, int size, const char* fmt, ...);
 void fn_801308F4(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
-int fn_801609C4(int score);                                // grade for a score
+int FindGradeForScore(int score);                                // grade for a score
 void fn_802ADDD8(void* p, int a);
 s32 fn_80145E70(const char* name);
 s32 fn_80204CF0(void);
@@ -55,7 +55,7 @@ f32 fn_80129DC4(int n, f32 lo, f32 hi);  // random float
 
 // JoyStatus: game/joy.h.
 extern "C" {
-int fn_801298E8(JoyStatus* out, int chan);
+int ReadJoyStatus(JoyStatus* out, int chan);
 s32* fn_801297F4(void);  // button mapping
 }
 
@@ -502,7 +502,7 @@ static inline void Rotate(V2* v, f32 a) {
 int IsTurboButtonPressed(int chan) {
     JoyStatus s;
     int r = 0;
-    if (fn_801298E8(&s, chan) && s.buttons[fn_801297F4()[12]]) {
+    if (ReadJoyStatus(&s, chan) && s.buttons[fn_801297F4()[12]]) {
         r = 1;
     }
     return r;
@@ -719,7 +719,7 @@ void CrushResults::Update(int score, int kills, int bonus) {
         fn_801308F4(finalScore, 0x14, score);
         fn_801308F4(noBonusScore, 0x14, score - bonus);
         {
-            int g = fn_801609C4(score);
+            int g = FindGradeForScore(score);
             if (g != -1) {
                 SafeStrCopy(grade, GetGradeDisplayName(g), 0xA);
             } else {
@@ -951,7 +951,7 @@ extern "C" {
 void UpdateDashHelper(void);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 f32 fn_80147204(TextElem* e, const char* text);
-s32 fn_80160998(s32 a);
+s32 GetGradeScoreThreshold(s32 a);
 s32 fn_80160A74(void);
 }  // extern "C"
 void UpdateContinueOverlay(void);
@@ -1000,7 +1000,7 @@ inline void CrushMaster::Finish(f32 now) {
             c->f18 = now;
         }
         if (c->human) {
-            s32 g = fn_801609C4(c->Score());
+            s32 g = FindGradeForScore(c->Score());
             fn_801CB5DC(i, c->Score(), g);
             fn_801CB648(i, 1, c->bonus);
         }
@@ -1447,7 +1447,7 @@ inline int CrushMaster::vf3C(int view) {
             if (h0 && h1 && body && denom) {
                 char buf[0x14];
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
-                fn_801308F4(buf, sizeof(buf), fn_80160998(fn_80160A74()));
+                fn_801308F4(buf, sizeof(buf), GetGradeScoreThreshold(fn_80160A74()));
                 {
                     TextElem e = *body;
                     e.pos.x -= 0.5f * Width(&e, buf);

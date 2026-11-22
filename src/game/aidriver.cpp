@@ -24,7 +24,7 @@ void CalculateCatchupValues(s32 count);
 void fn_801663C8(s32 count, void* cars, void* extra);
 void fn_8013A1E8(int n);
 void fn_8015F554(void);
-void fn_80160850(void);
+void LoadGradeSchedule(void);
 void fn_80160AE4(void);
 void fn_8015F558(void);
 void fn_8013A1EC(void);
@@ -180,7 +180,7 @@ void InitializeRaceGrid(AIRace* race) {
     }
     fn_8013A1E8(grid->count);
     fn_8015F554();
-    fn_80160850();
+    LoadGradeSchedule();
 }
 
 void fn_8013490C(void) {

@@ -106,7 +106,7 @@ void fn_80265D54(int unk);
 void fn_80265D50(void);
 void fn_801CB3F8(void);
 void fn_80210950(int (*fn)(int), int unk);
-int fn_80137C98(int pad);
+int FindDriverIndex(int pad);
 int fn_801DF238(int key);
 int fn_801769F8(void);
 int fn_801E86F8(int player);
@@ -116,11 +116,11 @@ int fn_801E7DF0(int player);
 void fn_801E7E04(int player, int unk);
 int fn_802ECC10(void);
 int fn_80161C70(void);
-void fn_80129AEC(int unk);
-void fn_80129B60(void);
+void SetInputChannel(int unk);
+void ProcessPlayerInput(void);
 int fn_801769A8(void);
 int fn_802E47B8(void);
-u32 fn_802E46F0(void);
+u32 HandleScreenshotInput(void);
 #ifdef __MWERKS__
 int fn_8020DE1C(void);  // defined char in unk_8020CF68.cpp; MWCC callees extend r3, retail callers read it whole
 #else
@@ -128,7 +128,7 @@ char fn_8020DE1C(void);  /* PORT: the definition's width (x86 leaves the upper b
 #endif
 void fn_80176780(int a, int b);
 int fn_802E2C20(void);
-int fn_801298E8(JoyStatus* pad, int index);
+int ReadJoyStatus(JoyStatus* pad, int index);
 int fn_801E85AC(void);
 void SetCameraNextMode(int cam, int player, int unk);
 void fn_801E7E48(void);
@@ -614,7 +614,7 @@ int fn_8000BD9C(int player, int key, s32* cam);
 int fn_8000BF10(int key, s32* cam);
 
 void fn_8000B64C(int key, int pad) {
-    int player = fn_80137C98(pad);
+    int player = FindDriverIndex(pad);
     if (player < 0) {
         return;
     }
@@ -725,13 +725,13 @@ void fn_8000B950(void) {
             lbl_8055D3E4 = m;
         }
     }
-    fn_80129AEC(-1);
-    fn_80129B60();
+    SetInputChannel(-1);
+    ProcessPlayerInput();
     if (!(fn_801769A8() & 0x4000)) {
         fn_8000B838();
     }
     if (fn_802E47B8()) {
-        key = fn_802E46F0();
+        key = HandleScreenshotInput();
         key = fn_802ECC10() ? 0 : key;
         if ((u16)key) {
             if ((fn_801769A8() & 0x4000) && ((u16)key == 'X' || (u16)key == '\r') && !fn_8000D75C() &&
@@ -754,7 +754,7 @@ int fn_8000BB08(void) {
         now = fn_802E2C20();
         active = 0;
         for (i = 0; i < 4; i++) {
-            if (fn_801298E8(&pad, i)) {
+            if (ReadJoyStatus(&pad, i)) {
                 for (j = 0; j < 8; j++) {
                     if (pad.buttons[j]) {
                         active = 1;

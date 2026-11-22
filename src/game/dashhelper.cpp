@@ -94,23 +94,23 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 int fn_801345D8(char* buf, u32 size, const char* fmt, ...);
 f32 fn_801E7E18(void);
 int fn_801E85A4(void);
-int fn_8023441C(const char* font);  // gtext.cpp: returns the loaded font (GTextFont*)
+int LoadTextFont(const char* font);  // gtext.cpp: returns the loaded font (GTextFont*)
 void fn_80234470(void);
 int fn_80232B70(int font);
 int fn_80232578(const char* name);
 void fn_802328D4(int font);
-f32 fn_8023293C(int font, const char* text, f32 scale);
+f32 CalculateTextWidth(int font, const char* text, f32 scale);
 void fn_802344CC(const char* text, u32 color, int flags, int unk, f32 x, f32 y, f32 scale);
-void fn_80232BA4(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
+void DrawColoredText(const char* text, int font, f32 x, f32 y, u32 color, int flags, f32 scale, f32 z, f32 alpha);
 void fn_80233010(const char* text, int font, u32 color, int flags, int wrap, f32 x, f32 y, f32 w, f32 scale, f32 z, f32 alpha);
-void fn_802337A0(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
+void PrintFormattedText(int font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale,
                  f32 alpha, ...);
 int fn_802C6FC0(const char* name, int a, int b);
 void mrModelUnload(int model);
 GameSound* fn_80207848(const char* name, int flags);
 ILayout* fn_80145E70(const char* name);
 const char* fn_80131268(const char* key);
-void fn_80232928(u32 color);
+void SetInputMask(u32 color);
 void fn_80232930(void);
 void fn_80147ABC(TextElem* a, TextElem* b, const char* fmt, f32 t, ...);
 int fn_80137C74(void);
@@ -123,7 +123,7 @@ void fn_802C8B98(s32 tex, int unk);
 void fn_801E4F20(int n);
 void fn_801E4F3C(f32 x, f32 y, f32 z, f32 u, f32 v, u32 color, int back);
 void fn_801E4FF4(void);
-void fn_802346C8(void);
+void RenderTextWithOutline(void);
 void fn_80234AEC(void);
 void fn_80231094(int* top, int* bottom, int* left, int* right);
 void fn_801331C4(int type, const char* name, f32* out);
@@ -684,7 +684,7 @@ void fn_8000EF74(int player) {
 }
 
 void fn_8000F0E4(const char* font) {
-    lbl_8055D490 = fn_8023441C(font);
+    lbl_8055D490 = LoadTextFont(font);
     lbl_80558A90 = 0.73333335f * fn_80232B70(lbl_8055D490);
     lbl_8055D49C = fn_80011EDC();
     lbl_8055D498 = fn_80232578("bigtext.gtx");
@@ -834,7 +834,7 @@ void DrawGoText(void) {
             b = *out;
             a.color = (alpha << 24) | (a.color & 0xFFFFFF);
             b.color = a.color;
-            fn_80232928(-1);
+            SetInputMask(-1);
             fn_80147ABC(&a, &b, "%s", phase, text);
             fn_80232930();
         }
@@ -927,15 +927,15 @@ void fn_8000FC8C(const char* text) {
         DrawSpriteWithSize(lbl_8055D4C0, 0, bx, by, 0.0f, 0.0f);
         DrawSpriteWithSize(lbl_8055D4C0, 1, bx + w0, by, 0.0f, 0.0f);
     }
-    fn_802337A0(lbl_8055D4C4, 0xFF000000, 12, "%s", 2.0f + x, y - 2.0f, 0.0f, scale, 1.0f, text);
-    fn_802337A0(lbl_8055D4C4, -1, 12, "%s", x, y, 0.0f, scale, 1.0f, text);
+    PrintFormattedText(lbl_8055D4C4, 0xFF000000, 12, "%s", 2.0f + x, y - 2.0f, 0.0f, scale, 1.0f, text);
+    PrintFormattedText(lbl_8055D4C4, -1, 12, "%s", x, y, 0.0f, scale, 1.0f, text);
 }
 
 void DrawCenteredText(const char* text) {
     f32 scale = 27.0f / fn_80232B70(lbl_8055D4C8);
     f32 x = GetCenterX();
     f32 y = 13.0f + fn_80011E60();
-    f32 w = scale * fn_8023293C(lbl_8055D4C8, text, 1.0f);
+    f32 w = scale * CalculateTextWidth(lbl_8055D4C8, text, 1.0f);
     f32 bx = x - 0.5f * w;
     fn_800109E4(0x66000000, bx - 7.0f, 13.0f + y, 14.0f + w, 26.0f);
     if (lbl_8055D4C0) {
@@ -945,8 +945,8 @@ void DrawCenteredText(const char* text) {
     }
     {
         f32 ty = 2.0f + y;
-        fn_802337A0(lbl_8055D4C8, 0xFF000000, 0x14, "%s", 1.0f + x, ty - 1.0f, 0.0f, scale, 1.0f, text);
-        fn_802337A0(lbl_8055D4C8, -1, 0x14, "%s", x, ty, 0.0f, scale, 1.0f, text);
+        PrintFormattedText(lbl_8055D4C8, 0xFF000000, 0x14, "%s", 1.0f + x, ty - 1.0f, 0.0f, scale, 1.0f, text);
+        PrintFormattedText(lbl_8055D4C8, -1, 0x14, "%s", x, ty, 0.0f, scale, 1.0f, text);
     }
 }
 
@@ -975,7 +975,7 @@ void FormatAndPrintText(f32 scale, u32 color, int flags, f32 x, f32 y, const cha
     va_start(args, fmt);
     vsprintf(buf, fmt, args);
     va_end(args);
-    fn_80232BA4(buf, lbl_8055D490, x, y, color, flags, 0.73333335f * scale, 0.0f, 1.0f);
+    DrawColoredText(buf, lbl_8055D490, x, y, color, flags, 0.73333335f * scale, 0.0f, 1.0f);
 }
 
 void DrawFormattedTextElement(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y, ...) {
@@ -988,7 +988,7 @@ void DrawFormattedTextElement(u32 color, int flags, const char* fmt, f32 scale, 
         if (strlen(buf) >= 0x200) {
             fn_802E317C("dashhelper: oversized text elem (len %d, fmt \"%s\")", strlen(buf), fmt);
         }
-        fn_802337A0(lbl_8055D494, color, flags, "%s", x, y, 0.0f, scale, 1.0f, buf);
+        PrintFormattedText(lbl_8055D494, color, flags, "%s", x, y, 0.0f, scale, 1.0f, buf);
     }
 }
 
@@ -1007,7 +1007,7 @@ void fn_800104B0(u32 color, int flags, const char* fmt, f32 scale, f32 x, f32 y,
     va_start(args, y);
     vsprintf(buf, fmt, args);
     va_end(args);
-    fn_80232BA4(buf, lbl_8055D498, x, y, color, flags, scale, 0.0f, 1.0f);
+    DrawColoredText(buf, lbl_8055D498, x, y, color, flags, scale, 0.0f, 1.0f);
 }
 
 void DrawPlayerNameBox(const char* text, int player) {
@@ -1038,11 +1038,11 @@ void DrawTextWithBackground(int x, int y, const char* text) {
 }
 
 int fn_8001084C(int size, const char* text) {
-    return size * fn_8023293C(lbl_8055D490, text, 1.0f) / lbl_80558A90;
+    return size * CalculateTextWidth(lbl_8055D490, text, 1.0f) / lbl_80558A90;
 }
 
 f32 fn_800108C8(const char* text, f32 scale) {
-    return 0.73333335f * (scale * fn_8023293C(lbl_8055D490, text, 1.0f));
+    return 0.73333335f * (scale * CalculateTextWidth(lbl_8055D490, text, 1.0f));
 }
 
 f32 fn_8001090C(f32 scale) { return 0.73333335f * (scale * fn_80232B70(lbl_8055D490)); }
@@ -1350,7 +1350,7 @@ void fn_80011630(u32 color, int segs, s32 tex, f32 x, f32 y, f32 w, f32 h, f32 s
 
 void fn_80011A2C(void) {
     DrawQueuedRectangles();
-    fn_802346C8();
+    RenderTextWithOutline();
 }
 
 void fn_80011A50(void) {
@@ -1477,7 +1477,7 @@ f32 fn_80011EDC(void) {
         char buf[8];
         f32 w;
         sprintf(buf, "%c", (char)('0' + i));
-        w = 0.73333335f * fn_8023293C(lbl_8055D490, buf, 1.0f);
+        w = 0.73333335f * CalculateTextWidth(lbl_8055D490, buf, 1.0f);
         if (w > max) {
             max = w;
         }

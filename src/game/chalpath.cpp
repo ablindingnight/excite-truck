@@ -849,7 +849,7 @@ void fn_80261AE8(u8* p, u32 v) { U32(p, 0x0) = v; }
 }  // extern "C"
 
 
-extern "C" f32 fn_8023659C(void);  // seconds
+extern "C" f32 CalculateTimeDelta(void);  // seconds
 
 /* Class name unproven */
 // The unlock animation shown in the challenge unlock box: it flashes briefly, then lets the box continue. Its
@@ -859,12 +859,12 @@ public:
     UnlockAnim(void) { start = 0.0f; }
     virtual ~UnlockAnim(void) {}
     virtual void Enter(void) {
-        start = fn_8023659C();
+        start = CalculateTimeDelta();
         done = 0;
         fn_80214A9C(0x1D);
     }
     virtual void Update(void) {
-        f32 now = fn_8023659C();
+        f32 now = CalculateTimeDelta();
         f32 t0 = start;
         if (now < t0 || now - t0 > 1.5f) {
             done = 1;
@@ -988,7 +988,7 @@ const char* GetGradeDisplayName(int grade);
 extern "C" {
 void fn_80230C30(f32* x, f32* y, s32 lx, s32 ly);
 void fn_80230F78(u8* alpha, f32* grow, u32* color, int a);
-void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
+void DrawColoredText(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
 void fn_801308F4(char* buf, s32 size, s32 value);
 
 #define EV ((ChalEvent*)p->ev)
@@ -1038,9 +1038,9 @@ void EventNode::Draw(void) {
         fn_802354A0(p->art, part, nx, ny, 0.0f, (1.0f + grow) * (f32)p->w,
                     (1.0f + grow) * (f32)p->h, c);
     }
-    fn_80232BA4(EV->Name(), p->font, 15.0f + x, y + sTextY, color, 0x11, 0.65f, 0.0f, 1.0f);
+    DrawColoredText(EV->Name(), p->font, 15.0f + x, y + sTextY, color, 0x11, 0.65f, 0.0f, 1.0f);
     const char* grade = EV->Grade() != -1 ? GetGradeDisplayName(EV->Grade()) : "-";
-    fn_80232BA4(grade, p->font, 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, 0.0f, 1.0f);
+    DrawColoredText(grade, p->font, 205.0f + x, y + sTextY, gradeColor, 0x14, 0.65f, 0.0f, 1.0f);
     fn_801308F4(target, 30, EV->Target());
     if (EV->Score() <= 0) {
         fn_801345D8(line, 30, "0/%s", target + 1);
@@ -1048,7 +1048,7 @@ void EventNode::Draw(void) {
         fn_801308F4(line, 30, EV->Score());
         fn_801345D8(line, 30, "%s/%s", line, target + 1);
     }
-    fn_80232BA4(line, p->font, 350.0f + x, y + sTextY, color, 0x12, 0.65f, 0.0f, 1.0f);
+    DrawColoredText(line, p->font, 350.0f + x, y + sTextY, color, 0x12, 0.65f, 0.0f, 1.0f);
 }
 
 extern "C" {
@@ -1083,7 +1083,7 @@ public:
 };
 
 extern "C" {
-f32 fn_8023659C(void);
+f32 CalculateTimeDelta(void);
 void fn_80230F6C(u32* color);
 
 // Difficulty node: its tile and label; while selected a highlight frame grows and shrinks around it.
@@ -1123,7 +1123,7 @@ void LevelNode::Draw(void) {
         f32 fw = sBigW + (f32)p->w;
         f32 fh = sBigH + (f32)p->h;
         if (!p->f1E) {
-            f32 now = fn_8023659C();
+            f32 now = CalculateTimeDelta();
             if (now - sStart > sPeriod) {
                 sStart = now;
             }
@@ -1154,7 +1154,7 @@ void LevelNode::Draw(void) {
         fn_802354A0(p->art, 0x12, fx, fy, 0.0f, fw, fh, tile);
     }
     fn_802354A0(p->art, part, x, y, 0.0f, (f32)p->w, (f32)p->h, tile);
-    fn_80232BA4(((NodeText*)p->lv)->GetText(), p->font, 22.0f + x, -16.0f + y, color, 0x11, 0.6f, 0.0f,
+    DrawColoredText(((NodeText*)p->lv)->GetText(), p->font, 22.0f + x, -16.0f + y, color, 0x11, 0.6f, 0.0f,
                 1.0f);
 }
 

@@ -92,9 +92,9 @@ struct ControlInputFields { int id, controller; u32 modifiers; u8 flag; };
 extern const int lbl_80563748[2];
 extern const char* lbl_8055BBA0;
 void __ct__7UITableFiiPCi(ControlsTableFields*, int, int, const int*);
-int fn_80137C98(int);
+int FindDriverIndex(int);
 void* fn_8018108C(int);
-void fn_801A7E54(char*, int, const ControlInputFields*);
+void GetBindingText(char*, int, const ControlInputFields*);
 extern ControlsTableFields* lbl_8055F190;
 extern const char* lbl_80341C40[];
 
@@ -160,7 +160,7 @@ void fn_8023E33C(void* pointer);
 
 extern const ControlActionDescriptorFields lbl_802FA190[17];
 ControlActionInfoFields* fn_8023DC38(const char*);
-void fn_801A7974(ControlInputFields*, const char*, ControlValueTableHandle);
+void SaveInputBinding(ControlInputFields*, const char*, ControlValueTableHandle);
 typedef ControlValueTableHandle (*ControlConfigMapGetter)(void*);
 
 class ControlsConfigCallView {public:
@@ -278,7 +278,7 @@ extern "C" void fn_8023D4B8(int controller) {
     fn_80137C78(1);
     fn_80137C84(controller, 0);
     fn_8017EBE0();
-    lbl_8055F198 = fn_8018108C(fn_80137C98(controller));
+    lbl_8055F198 = fn_8018108C(FindDriverIndex(controller));
     ControlsTableFields table;
     fn_8023E078(&table, controller);
     lbl_8055F190 = &table;
@@ -394,7 +394,7 @@ info=lbl_802FA0A8;
         const ControlActionDescriptorFields* defaults = fn_8023DCCC(info->key);
         if (defaults) {
             input.id = 0;
-            if (!reset) fn_801A7974(&input, info->key, table);
+            if (!reset) SaveInputBinding(&input, info->key, table);
             if (input.id == 0) fn_8013358C(table, info->key, defaults->defaultValue);
         } else fn_8013358C(table, info->key, "");
     }
@@ -444,7 +444,7 @@ extern "C" int fn_8023DD80(void) {
     initial.controller = lbl_8055F19C;
     initial.flag = 0;
     ControlValueTableHandle table = ((ControlsConfigCallView*)lbl_8055F198)->GetMap();
-    fn_801A7974(&initial, lbl_802FA190[lbl_8055F194].key, table);
+    SaveInputBinding(&initial, lbl_802FA190[lbl_8055F194].key, table);
     ControlsChoiceFields choice(&initial);
     MenuItem items[] = {
         MenuItem("#title", 3, ((UITable*)lbl_8055F190)->Get(lbl_8055F194, 0, 0), 0, 0),
@@ -488,7 +488,7 @@ extern "C" int fn_8023E028(void) {
 extern "C" ControlsTableFields* fn_8023E078(ControlsTableFields* self, int controller) {
     __ct__7UITableFiiPCi(self, 18, 2, lbl_80563748);
     self->controller = controller;
-    self->inputConfig = fn_8018108C(fn_80137C98(controller));
+    self->inputConfig = fn_8018108C(FindDriverIndex(controller));
     fn_8023E1FC(self);
     return self;
 }
@@ -525,7 +525,7 @@ extern "C" void fn_8023E1FC(ControlsTableFields* self) {
         // The original calls the configuration object's virtual slot +0x70.
         // Its class name and the map's concrete type are deliberately unknown.
         ControlValueTableHandle map = ((ControlsConfigCallView*)self->inputConfig)->GetMap();
-        fn_801A7974(&input, action->key, map);
+        SaveInputBinding(&input, action->key, map);
         char text[20];
         if (input.id == 0) {
             const char* src = lbl_8055BBA0;
@@ -534,7 +534,7 @@ extern "C" void fn_8023E1FC(ControlsTableFields* self) {
             while ((*dst++ = *src++) != 0) {
                 if (--n <= 0) { dst[-1] = 0; break; }
             }
-        } else fn_801A7E54(text, 20, &input);
+        } else GetBindingText(text, 20, &input);
         ((UITable*)self)->Set(row, 1, text, 0);
     }
     ((UITable*)self)->Set(17, 0, "Restore Defaults", 0);
@@ -554,7 +554,7 @@ extern "C" void fn_8023E33C(void* pointer) {
         input.controller = 0;
         input.flag = 0;
         fn_801A9050(&input, self->selected);
-        fn_801A7E54(self->label, 20, &input);
+        GetBindingText(self->label, 20, &input);
     }
 }
 

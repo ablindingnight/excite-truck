@@ -12,7 +12,7 @@ extern "C" {
 double sqrt(double x);
 double fmod(double x, double y);
 void fn_802E30C8(const char* fmt, ...);  // debug print
-void fn_801564B0(void);
+void LoadRacingLines(void);
 void fn_801569FC(void);
 }
 
@@ -78,7 +78,7 @@ void LineFollower::SetPosition(V2* p, V2* d, IdealPoint* start) {
 
 extern "C" {
 
-IdealPoint* fn_80135420(V2* p, V2* d, CenterLine* line) {
+IdealPoint* FindClosestIdealPoint(V2* p, V2* d, CenterLine* line) {
     IdealPoint* found;
     f32 best = 1000.0f;
     IdealPoint* seg = line->points;
@@ -131,7 +131,7 @@ void LineFollower::Locate(V2* p, V2* d, ILPos* out, int unused) const {
         return;
     }
     if (!out->seg) {
-        out->seg = fn_80135420(p, d, line);
+        out->seg = FindClosestIdealPoint(p, d, line);
         out->t = 0.0f;
     }
     if (out->seg) {
@@ -591,7 +591,7 @@ static inline u32 RelativeIdealPosition(const IdealFollower* f, CenterLine* line
     return pos;
 }
 
-f32 fn_801365C4(const IdealFollower* f, const IdealFollower* o) {
+f32 CalculateTimeDifference(const IdealFollower* f, const IdealFollower* o) {
     IdealPoint* own;
     IdealPoint* theirs;
     bool same;
@@ -637,7 +637,7 @@ extern "C" {
 
 f32 fn_8013672C(void) { return ((CenterLine*)fn_80156A40()->GetLine(0))->len[0]; }
 
-void fn_80136764(void) { fn_801564B0(); }
+void fn_80136764(void) { LoadRacingLines(); }
 
 void fn_80136768(void) { fn_801569FC(); }
 

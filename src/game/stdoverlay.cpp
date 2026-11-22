@@ -31,7 +31,7 @@ int fn_801E85A4(void);
 int fn_80204CF0(void);
 void fn_8014784C(ILayout* layout, const char* name, const char* set, int index);
 void fn_801476D8(ArtElem* art, u32 color, s32 tex);
-int fn_801609C4(int score);
+int FindGradeForScore(int score);
 void fn_801476C4(TextElem* item);
 int fn_80160A90(void);
 void fn_801308F4(char* buf, int size, int value);
@@ -41,7 +41,7 @@ void fn_80147230(TextElem* item, const char* fmt, ...);
 RaceCarRec* fn_8017960C(int player);
 void fn_80147CEC(TextElem* out, TextElem* a, TextElem* b, f32 t);
 u32 fn_80147C50(u32 a, u32 b, f32 t);
-void fn_80232928(u32 color);
+void SetInputMask(u32 color);
 void fn_80232930(void);
 CarInfo* GetCarInfo(int player);
 f32 fn_801E7E18(void);
@@ -303,7 +303,7 @@ inline void ScoreOverlay::Update(int player, int score) {
         }
         fn_8014784C(layout, "score_art", "excite_artset", art);
         DrawStars(layout);
-        fn_801609C4(score);
+        FindGradeForScore(score);
         p = layout->Find("score");
         if (p) {
             item = *p;
@@ -359,7 +359,7 @@ inline void OverheatOverlay::Update(int player, int unused) {
                 glowAlpha <<= 24;
                 u32 glowColor = fn_80147C50(b->color, a->color, PulseFast());
                 glowColor &= 0xFFFFFFu;
-                fn_80232928(glowColor | glowAlpha);
+                SetInputMask(glowColor | glowAlpha);
                 fn_80147230(&item, "%s", fn_80131234("RaceOverlay:OVERHEAT"));
                 fn_80232930();
             }
@@ -390,7 +390,7 @@ inline GradeOverlay::~GradeOverlay(void) {
 }
 
 inline void GradeOverlay::Update(int player, int score) {
-    int grade = fn_801609C4(score);
+    int grade = FindGradeForScore(score);
     ILayout* layout = GetLayout();
     f32 scale;
     TextElem* p;
@@ -523,7 +523,7 @@ inline void LapTitleOverlay::Update(int player, int unused) {
                 seg = 2;
             }
             t = Lerp(0.0f, 1.0f, Clamp01(Unlerp(elapsed, keys[seg], keys[seg + 1])));
-            fn_80232928(0xFFFFFFFF);
+            SetInputMask(0xFFFFFFFF);
             fn_80147ABC(left[seg], left[seg + 1], "%s", t, leftText);
             fn_80147ABC(right[seg], right[seg + 1], "%s", t, rightText);
             fn_80232930();

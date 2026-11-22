@@ -57,7 +57,7 @@ void fn_80236914(int, f32*, f32);
 void fn_80216D28(void);
 void fn_802E30C8(const char* fmt, ...);
 void fn_8025C204(u8* p, s32 a);
-f32 fn_8023659C(void);
+f32 CalculateTimeDelta(void);
 void fn_80214A9C(int s);
 void fn_80214AF0(int s);
 void LoadScreenAssets(void);
@@ -1833,13 +1833,13 @@ inline void ScoreAccumulator::Enter(void) {
 
 
 inline void EventUnlockFx::Enter(void) {
-    start = fn_8023659C();
+    start = CalculateTimeDelta();
     done = 0;
     fn_80214A9C(0x1D);
 }
 
 inline void EventUnlockFx::Update(void) {
-    f32 t = fn_8023659C();
+    f32 t = CalculateTimeDelta();
     if (t < start || t - start > 1.5f) {
         done = 1;
     }

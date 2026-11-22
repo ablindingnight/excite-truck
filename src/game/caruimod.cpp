@@ -59,7 +59,7 @@ void* fn_801F0010(const char* cls, void* buf);
 void fn_801F1394(void* w, const CarUIFrame* f);
 void fn_801F1474(void* w, const CarUIFrame* f, f32 a);
 f32 fn_801F159C(void* w);
-f32 fn_8023659C(void);
+f32 CalculateTimeDelta(void);
 void LoadCarPhysicsValues(CarSetup* s, const char* name);
 s32 fn_802C6FC0(const char* name, s32 inst, const char* prefix);
 void mrModelUnload(s32 model);
@@ -236,7 +236,7 @@ void CarUIModel::Reset(void) {
 
 CarUIModel::CarUIModel(void) {
     Reset();
-    start = fn_8023659C();
+    start = CalculateTimeDelta();
     animSet = 0;
     anim = 0;
     fwheelBuf = fn_801284E8("fwheelbuf", fn_801F0008());
@@ -416,7 +416,7 @@ void CarUIModel::SetPose(const CarUIFrame* f, const f32* wy, const f32* steer) {
 void CarUIModel::Draw(void) {
     Vec tmp[80];
     memset(tmp, 0, sizeof(tmp));
-    f32 t = InvLerp(0.0f, 0.25f, fn_8023659C() - start);
+    f32 t = InvLerp(0.0f, 0.25f, CalculateTimeDelta() - start);
     t = MIN(1.0f, t);
     t = MAX(t, 0.0f);
     s32 frameNo = fn_80147C50(animSet, anim, Ease(Lerp(0.0f, 1.0f, t)));
@@ -1147,7 +1147,7 @@ void CarUIScreen::SetCar(const char* name) {
     SafeStrCopy(carName, name, 0x20);
     pending = 1;
     if (loaded[0]) {
-        requestTime = fn_8023659C();
+        requestTime = CalculateTimeDelta();
     } else {
         requestTime = -10000.0f;
     }
@@ -1221,7 +1221,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
         fn_80252F50(dt);
     }
     int ready = 0;
-    if (pending && fn_8023659C() - requestTime > 0.45f) {
+    if (pending && CalculateTimeDelta() - requestTime > 0.45f) {
         ready = 1;
     }
     if (ready && !loading[0]) {
@@ -1255,7 +1255,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
             u32 want = anim;
             if (m->anim != want) {
                 if (m->anim != 0) {
-                    f32 t = InvLerp(0.0f, 0.25f, fn_8023659C() - m->start);
+                    f32 t = InvLerp(0.0f, 0.25f, CalculateTimeDelta() - m->start);
                     t = MIN(1.0f, t);
                     t = MAX(t, 0.0f);
                     m->animSet = fn_80147C50(m->animSet, m->anim, Ease(Lerp(0.0f, 1.0f, t)));
@@ -1263,7 +1263,7 @@ void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
                     m->animSet = want;
                 }
                 m->anim = want;
-                m->start = fn_8023659C();
+                m->start = CalculateTimeDelta();
             }
         }
     }

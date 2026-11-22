@@ -24,7 +24,7 @@ UIContext* fn_8022EDE4(const UIXform* xf, f32 alpha = 1.0f);
 
 
 
-void fn_802321D8(void);
+void InitializeFontSystem(void);
 void fn_802324D8(void);
 void InitializeBackgroundSystem(void);
 void DeallocateBackgrounds(void);
@@ -49,7 +49,7 @@ int fn_802C9A68(void);
 int fn_802C9A60(void);
 int fn_802C9A58(void);
 s32 fn_802E2C20(void);  // milliseconds
-f32 fn_8023659C(void);  // seconds
+f32 CalculateTimeDelta(void);  // seconds
 extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 extern s32 lbl_8055FB9C;  // layout width
@@ -90,7 +90,7 @@ void fn_80230090(void) {
     xf.translation.v[2] = 0.0f;
     lbl_8055F028 = fn_8022EDE4(&xf);
     fn_8022ED00(lbl_8055F028);
-    fn_802321D8();
+    InitializeFontSystem();
     InitializeBackgroundSystem();
     fn_8023509C();
     fn_802365D8();
@@ -190,7 +190,7 @@ void fn_80230150(f32 x, u32 color, int flags, f32 y, f32 z, f32 w, f32 h, f32 sp
 
 void fn_802304EC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 scale, u32 color, int align,
                  f32 speed, f32 t, f32 margin) {
-    f32 width = fn_8023293C(font, text, 1.0f);
+    f32 width = CalculateTextWidth(font, text, 1.0f);
     f32 x0 = x + t * speed;
     width = scale * width;
     f32 l = -320.0f - margin;
@@ -208,14 +208,14 @@ void fn_802304EC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 sca
         wx = (x1 - (-l + r)) - width;
     }
     if (wrap) {
-        fn_80232BA4(text, font, wx, y, color, align, scale, a, 1.0f);
+        DrawColoredText(text, font, wx, y, color, align, scale, a, 1.0f);
     }
-    fn_80232BA4(text, font, x0, y, color, align, scale, a, 1.0f);
+    DrawColoredText(text, font, x0, y, color, align, scale, a, 1.0f);
 }
 
 void fn_80230650(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 scale, u32 color, int align,
                  f32 speed, f32 t, f32 margin) {
-    f32 width = fn_8023293C(font, text, 1.0f);
+    f32 width = CalculateTextWidth(font, text, 1.0f);
     f32 y0 = y + t * speed;
     width = scale * width;
     f32 l = -244.0f - margin;
@@ -234,9 +234,9 @@ void fn_80230650(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 sca
         wy = y0 - (-l + r);
     }
     if (wrap) {
-        fn_80233354(text, font, color, align, x, wy, scale, a);
+        DrawTextWithOutlineAndAlignment(text, font, color, align, x, wy, scale, a);
     }
-    fn_80233354(text, font, color, align, x, y0, scale, a);
+    DrawTextWithOutlineAndAlignment(text, font, color, align, x, y0, scale, a);
 }
 
 void fn_802307AC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 scale, u32 color, int align,
@@ -260,9 +260,9 @@ void fn_802307AC(const char* text, GTextFont* font, f32 x, f32 y, f32 a, f32 sca
         wy = y0 - (-l + r);
     }
     if (wrap) {
-        fn_80232BA4(text, font, x, wy, color, align, scale, a, 1.0f);
+        DrawColoredText(text, font, x, wy, color, align, scale, a, 1.0f);
     }
-    fn_80232BA4(text, font, x, y0, color, align, scale, a, 1.0f);
+    DrawColoredText(text, font, x, y0, color, align, scale, a, 1.0f);
 }
 
 void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
@@ -401,7 +401,7 @@ void fn_80230E90(int real) {
     if (real == 1) {
         fn_80230DA4(fn_802E2C20() / 1000.0f, 2.0f);
     } else {
-        fn_80230DA4(fn_8023659C(), 2.0f);
+        fn_80230DA4(CalculateTimeDelta(), 2.0f);
     }
 }
 
@@ -412,7 +412,7 @@ f32 fn_80230EF4(int real) {
     if (real == 1) {
         return fn_80230E54(fn_802E2C20() / 1000.0f, 2.0f);
     }
-    return fn_80230E54(fn_8023659C(), 2.0f);
+    return fn_80230E54(CalculateTimeDelta(), 2.0f);
 }
 
 void fn_80230F6C(u32* color) { *color = 0xFFFFCA44; }

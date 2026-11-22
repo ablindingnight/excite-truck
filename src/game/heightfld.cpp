@@ -383,7 +383,7 @@ void fn_801DC32C(GroundHeader* g) {
 }
 #pragma pop
 
-GroundHeader* fn_801DC9B0(void) {
+GroundHeader* LoadGroundHeader(void) {
     u32 ver = 0;
     u8 swapped;
     const char* name = "track.gnd";
@@ -405,7 +405,7 @@ void fn_801DCA5C(void* p) { fn_8012C4D8(p); }
 
 static inline f32 SqI(int a) { return (f32)a * (f32)a; }
 
-GroundHeader* fn_801DCA60(void) {
+GroundHeader* GenerateHeightField(void) {
     lbl_80446F08.h = 256;
     lbl_80446F08.w = 256;
     int w;
@@ -452,11 +452,11 @@ void fn_801DCD24(void* p) { operator delete(p); }
 void load_ground(int fake) {
     lbl_8055E998 = 0;
     if (!fake) {
-        lbl_8055E990 = fn_801DC9B0();
+        lbl_8055E990 = LoadGroundHeader();
         fn_802E30C8("load_ground: %p", lbl_8055E990);
         lbl_8055E994 = fn_801DCA5C;
     } else {
-        lbl_8055E990 = fn_801DCA60();
+        lbl_8055E990 = GenerateHeightField();
         lbl_8055E994 = fn_801DCD24;
     }
     lbl_8055E9A4 = 1;

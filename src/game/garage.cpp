@@ -94,7 +94,7 @@ struct GarageFlags {
 extern "C" {
 void fn_8024739C(u8* p);
 u32 fn_802E4A10(void);
-int fn_80129800(u32 ch, int feature);
+int GetButtonState(u32 ch, int feature);
 void fn_80216D28(void);
 void fn_80214D50(int s);
 void gxForgetTexture(u8* p);
@@ -561,7 +561,7 @@ u32 fn_8024EBE4(u8* p) { return GetSelColor(p); }
 
 int fn_8024EC3C(void) {
     int ok = 0;
-    if (fn_80129800(fn_802E4A10(), 5) && fn_80129800(fn_802E4A10(), 6)) {
+    if (GetButtonState(fn_802E4A10(), 5) && GetButtonState(fn_802E4A10(), 6)) {
         ok = 1;
     }
     if (ok || ((GarageList*)PTR(lbl_8055F2EC, 0xD0))->Unlocked(U32(lbl_8055F2EC, 0x2C))) {

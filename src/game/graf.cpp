@@ -265,9 +265,9 @@ void fn_801EB000(GNode* root, GrafVisitor* v) {
 
 GModelHandler* fn_801EB0E8(void) { return 0; }
 
-int fn_801EB0F0(int type) { return type >= 0 && type < 24; }
+int ValidateDisplayType(int type) { return type >= 0 && type < 24; }
 
-GModelHandler* fn_801EB110(GModel* m) { return lbl_804885E8[m->type]; }
+GModelHandler* GetModelHandler(GModel* m) { return lbl_804885E8[m->type]; }
 
 void fn_801EB128(void) {
     lbl_8055EB98[0] = 1.0f;
@@ -275,8 +275,8 @@ void fn_801EB128(void) {
 }
 
 #pragma push
-#pragma opt_propagation off  /* Proven by the pragma gate (aids audit 2026-11-16): fn_801EB13C exact with it, 74.30 without */
-void fn_801EB13C(GModel* m) {
+#pragma opt_propagation off  /* Proven by the pragma gate (aids audit 2026-11-16): FixupModelResources exact with it, 74.30 without */
+void FixupModelResources(GModel* m) {
     SwapWordV(&m->handle);
     SwapWordV(&m->res);
     SwapWordV(&m->unkC);
@@ -331,14 +331,14 @@ void fixup_display_list(GNode* root, u32 base) {
         case 4: {
             fn_801EB66C(&n->model, base);
             SwapWordV(&n->model->kind);
-            fn_801EB13C(n->model);
+            FixupModelResources(n->model);
             if (*(s32*)n->model->res <= 0) {
                 n->model = 0;
             }
             GModel* m = n->model;
             if (m && m->kind == 1) {
-                if (fn_801EB0F0(m->type)) {
-                    fn_801EB110(m)->Fixup(m);
+                if (ValidateDisplayType(m->type)) {
+                    GetModelHandler(m)->Fixup(m);
                 } else {
                     fn_802E30C8("graf: unrecognized model type %d", m->type);
                     m->type = 8;
@@ -395,9 +395,9 @@ void init_display_list(GNode* root) {
                 m->handle = fn_802C6DC4("graf", m->res, 0, 0);
                 fn_802C6FA8(m->res);
                 if (m->kind == 1) {
-                    fn_801EB110(m)->Init(m);
+                    GetModelHandler(m)->Init(m);
                     GrafRes* g = lbl_8055EBA0;
-                    fn_801EB110(m)->Attach(m, g->list0, m->unk1C, g->list1, m->unk18);
+                    GetModelHandler(m)->Attach(m, g->list0, m->unk1C, g->list1, m->unk18);
                 }
             }
             break;
@@ -437,7 +437,7 @@ void fn_801EB8BC(void) {
     }
 }
 
-void fn_801EB90C(void) {
+void StartAllSprites(void) {
     for (u32 i = 0; i < 24; i++) {
         lbl_804885E8[i]->Start();
     }
@@ -458,7 +458,7 @@ void fn_801EB9A4(GModelHandler** slot) {
     *slot = 0;
 }
 
-int fn_801EB9FC(const char* name) {
+int LoadGrafResource(const char* name) {
     u8 swapped;
     u8 first;
     u32 size;
@@ -477,7 +477,7 @@ int fn_801EB9FC(const char* name) {
                 fn_802CDDC8(lbl_8055EBA0->list1, lbl_8055EBA0->list1);
             }
             init_display_list(lbl_8055EBA0->root);
-            fn_801EB90C();
+            StartAllSprites();
         } else {
             fn_802E317C("bad graf version %d", ver, 0x15);
         }
@@ -690,7 +690,7 @@ void GrafReleaser::Visit(GModel* m, void* res, s32 handle) {
         fn_802C703C(m->handle);
     }
     if (m->kind == 1) {
-        fn_801EB110(m)->Release(m);
+        GetModelHandler(m)->Release(m);
     }
 }
 

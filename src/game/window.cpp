@@ -73,7 +73,7 @@ extern "C" {
 u32 fn_80216D14(int i);
 void fn_80216D28(void);
 void fn_80216D34(void);
-void fn_802C2CDC(void* p, int a, int b);
+void SetCanvasSize(void* p, int a, int b);
 void fn_802C2D94(void* p);
 int fn_8012C33C(const char* name);
 void* gxGetImage(const char* name);
@@ -92,7 +92,7 @@ void fn_80217C4C(Window* w);
 void fn_80217D84(Window* w);
 void fn_80217EC0(Window* w, int horizontal, int negative);
 void fn_80230C30(f32* x, f32* y, int a, int b);
-void fn_802C5310(void* p, int a, f32 x, f32 y, f32 z);
+void DrawImageFrame(void* p, int a, f32 x, f32 y, f32 z);
 int fn_80215228(void);
 void fn_802C86E8(u32 color);
 void fn_802C88BC(int a);
@@ -165,7 +165,7 @@ Window::Window(const char* bg, s32 x, s32 y, s32 w, s32 h, s32 f) {
     focus = 0;
     disabledGroups = 0;
     hiddenGroups = 0;
-    fn_802C2CDC(fC, 4, 4);
+    SetCanvasSize(fC, 4, 4);
     noSound = 0;
     f0 = 0;
     f4 = 0;
@@ -675,7 +675,7 @@ void fn_80218574(Window* win) {
         f32 x;
         f32 y;
         fn_80230C30(&x, &y, 0, 0);
-        fn_802C5310(win->image, 0, x, y, 0.0f);
+        DrawImageFrame(win->image, 0, x, y, 0.0f);
     } else if (fn_80215228() && !win->noSound) {
         fn_802C86E8(0xFF000000);
         fn_802C88BC(3);

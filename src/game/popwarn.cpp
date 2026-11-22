@@ -413,7 +413,7 @@ extern "C" {
 f32 fn_8020A5F0(void);
 void fn_8023D704(int a);
 void fn_80129AFC(void);
-void fn_802E47E8(void);
+void ClearInputBuffer(void);
 void fn_8023D7CC(void);
 int fn_80248668(void);
 int fn_80278A1C(const char* movie);
@@ -434,7 +434,7 @@ void fn_80247210(void) {
     lbl_8055F260 = 1;
     fn_8023D704(0);
     fn_80129AFC();
-    fn_802E47E8();
+    ClearInputBuffer();
     fn_8023D7CC();
     int skip = 0;
     for (;;) {
@@ -515,7 +515,7 @@ char* IdentGetDefaultName(int slot);
 void SetPlayerName(const char* name, int slot);
 
 extern "C" {
-void fn_80129AEC(int a);
+void SetInputChannel(int a);
 void fn_8020A600(void);
 int fn_80247C18(void);
 int fn_802478A4(void);
@@ -548,7 +548,7 @@ void MenuDoDemo(void) {
             ClearUnlockAll();
             int stay = 1;
             do {
-                fn_80129AEC(0);
+                SetInputChannel(0);
                 switch (fn_80247C18()) {
                 case 1:
                     fn_8024CF60();
@@ -599,7 +599,7 @@ void MenuDoDemo(void) {
                     fn_80137C78(1);
                     int slot = IdentGetCurrentSlot();
                     fn_80137C84(fn_802E4A10(), slot);
-                    fn_80129AEC(fn_802E4A10());
+                    SetInputChannel(fn_802E4A10());
                     RunPlayerRace();
                     break;
                 }
@@ -1285,11 +1285,11 @@ f32 fn_80235EF0(u8* art, int part);
 void DrawArtPictureAtPosition(u8* art, int part, f32 x, f32 y, f32 z);
 void fn_802354A0(u8* set, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, u32 color);
 #ifdef __MWERKS__
-void fn_80234AFC(CupText* st, f32 x, f32 y, const char* fmt, ...);
+void DrawTextFormatted(CupText* st, f32 x, f32 y, const char* fmt, ...);
 #else
 // PORT: gtext's definition takes (st, fmt, x, y, ...): reorder for the x86 stack (PPC floats ride in FPRs).
-void fn_80234AFC(CupText* st, const char* fmt, f32 x, f32 y, ...);
-#define fn_80234AFC(st, x, y, fmt, ...) (fn_80234AFC)(st, fmt, x, y, ##__VA_ARGS__)
+void DrawTextFormatted(CupText* st, const char* fmt, f32 x, f32 y, ...);
+#define DrawTextFormatted(st, x, y, fmt, ...) (DrawTextFormatted)(st, fmt, x, y, ##__VA_ARGS__)
 #endif
 
 }  // extern "C"
@@ -1304,7 +1304,7 @@ inline void CupSelect::Draw(void) {
         fn_802354A0(tracks, i, 30.0f + off, 70.0f, 0.0f, 140.0f, 140.0f, cur ? 0xFFFFFF00 : 0xC0202020);
         CupText* tx = text;
         tx->color = cur ? 0xFFFFFF00 : 0xC0202020;
-        fn_80234AFC(text, 100.0f + off - 20.0f, -86.0f, i == 0 ? FijiName() : MexicoName());
+        DrawTextFormatted(text, 100.0f + off - 20.0f, -86.0f, i == 0 ? FijiName() : MexicoName());
     }
     f32 p = pos;
     pos = p + 0.05f * ((f32)sel - p);

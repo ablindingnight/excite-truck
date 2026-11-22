@@ -30,7 +30,7 @@ s32 lbl_8042F798[4];
 
 extern "C" {
 
-const char* fn_80137950(int i) {
+const char* GetLeagueName(int i) {
     switch (i) {
     case 3:
         return "Cup";
@@ -53,7 +53,7 @@ League* fn_801379CC(void) {
     return lbl_8042F788[lbl_80559C00];
 }
 
-void fn_80137A18(void) {
+void LoadCarDimensions(void) {
     char buf[0x100];
     League* l = fn_801379CC();
     ValueTable* t;
@@ -75,11 +75,11 @@ void fn_80137A18(void) {
     fn_80131818(t);
 }
 
-void fn_80137B0C(s32 i) { lbl_80559C00 = i; }
+void SetPlayerIndex(s32 i) { lbl_80559C00 = i; }
 
 void fn_80137B14(void) { lbl_80559C00 = -1; }
 
-void fn_80137B20(void) {
+void InitializeLeagueData(void) {
     int i;
     lbl_8055E0E0 = 1;
     lbl_80559C00 = -1;
@@ -87,16 +87,16 @@ void fn_80137B20(void) {
         int j;
         lbl_8042F788[i] = (League*)operator new(sizeof(League), "league");
         memset(lbl_8042F788[i], 0, sizeof(League));
-        strcpy(lbl_8042F788[i]->name, fn_80137950(i));
-        fn_80137B0C(i);
+        strcpy(lbl_8042F788[i]->name, GetLeagueName(i));
+        SetPlayerIndex(i);
         fn_801379CC();
         for (j = 0; j < 4; j++) {
             lbl_8042F798[j] = 4;
         }
-        fn_80137A18();
+        LoadCarDimensions();
         fn_80137B14();
     }
-    fn_80137B0C(0);
+    SetPlayerIndex(0);
 }
 
 void fn_80137BE4(void) {
@@ -121,13 +121,13 @@ int fn_80137C74(void) { return GetNumPlayers(); }
 
 void fn_80137C78(int n) { SetNumPlayers(n); }
 
-void fn_80137C7C(s32 player, int driver) { SetPlayerDriver(player, driver); }
+void AssignPlayerDriver(s32 player, int driver) { SetPlayerDriver(player, driver); }
 
 void fn_80137C80(int player) { ClearPlayer(player); }
 
 void fn_80137C84(int player, int driver) { lbl_8042F798[driver] = driver; }
 
-int fn_80137C98(int driver) {
+int FindDriverIndex(int driver) {
     int i;
     int n = GetNumPlayers();
     for (i = 0; i < n; i++) {

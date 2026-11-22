@@ -35,12 +35,12 @@ void fn_802C8530(void);
 void fn_802C87B4(int a, int b, s32 w, s32 h);
 void fn_802C88BC(int a);
 void fn_802C974C(f32 a, f32 b, f32 c);
-void fn_802C5320(u8* img, int a, f32 x, f32 y, f32 z, f32 w, f32 h);
+void DrawImageWithParams(u8* img, int a, f32 x, f32 y, f32 z, f32 w, f32 h);
 void fn_802C92D0(void);
 void fn_802C92DC(int x0, int y0, int x1, int y1, u32 color);
 void fn_802C92D8(void);
-void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
-f32 fn_8023293C(u8* font, const char* text, f32 scale);
+void DrawColoredText(const char* text, u8* font, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs);
+f32 CalculateTextWidth(u8* font, const char* text, f32 scale);
 void fn_802335F0(const char* text, u8* font, f32 x, f32 y);
 void fn_802C9A70(int a);
 void fn_802C855C(void);
@@ -50,11 +50,11 @@ extern s32 lbl_8055CFF4;
 extern s32 lbl_8055FB9C;  // screen width
 extern s32 lbl_8055FBA0;  // screen height
 extern f32 __float_epsilon[];  // FLT_EPSILON
-void fn_802C5310(u8* img, int a, f32 x, f32 y, f32 z);
-void fn_802337A0(u8* font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 alpha, ...);
+void DrawImageFrame(u8* img, int a, f32 x, f32 y, f32 z);
+void PrintFormattedText(u8* font, u32 color, int flags, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 alpha, ...);
 s32 fn_802E2C20(void);  // milliseconds
 void fn_802E2D74(int ms);
-u16 fn_802E46F0(void);  // key
+u16 HandleScreenshotInput(void);  // key
 int fn_802E47B8(void);
 void fn_80129AFC(void);
 double sin(double x);
@@ -162,10 +162,10 @@ inline void MemCardDialogBg::Close(void) {
 static inline void DrawAccept(MemCardDialogBg* bg, f32 x, f32 y) {
     const char* label = "Accept";
     if (bg->image2) {
-        fn_802C5310(bg->image2, 0, 4.0f + (x + 0.5f * fn_8023293C(bg->font2, label, 1.0f)), 3.0f + y, lbl_80563830);
-        fn_802337A0(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, lbl_80563830, 0.5f, 1.0f, label);
+        DrawImageFrame(bg->image2, 0, 4.0f + (x + 0.5f * CalculateTextWidth(bg->font2, label, 1.0f)), 3.0f + y, lbl_80563830);
+        PrintFormattedText(bg->font2, 0xFFFFFFFF, 9, "%s", x, y, lbl_80563830, 0.5f, 1.0f, label);
     } else {
-        fn_802337A0(bg->font2, 0xFFFFFFFF, 0xC, "%s - Accept", x, y, lbl_80563830, 0.5f, 1.0f, "A");
+        PrintFormattedText(bg->font2, 0xFFFFFFFF, 0xC, "%s - Accept", x, y, lbl_80563830, 0.5f, 1.0f, "A");
     }
 }
 
@@ -193,7 +193,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
         f32 x0 = -1.0f * lbl_8055FB9C / 2.0f - 1.0f;
         f32 y0 = 1.0f + lbl_8055FBA0 / 2.0f;
         if (bg->image) {
-            fn_802C5320(bg->image, 0, x0, y0, lbl_80563830, w, h);
+            DrawImageWithParams(bg->image, 0, x0, y0, lbl_80563830, w, h);
         } else {
             fn_802C92D0();
             fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
@@ -205,8 +205,8 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
         brk = cfg->text;
         y = 145.0f;
         if (strlen(p)) {
-            fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
-            fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
+            DrawColoredText(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
+            DrawColoredText(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
         }
         y = y - 40.0f;
         strcpy(text, brk);
@@ -217,7 +217,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
             char line[0x200] = {0};
             char* d = line;
             u32 i = 0;
-            while (i < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
+            while (i < strlen(p) && CalculateTextWidth(bg->font, line, 1.0f) < 480.0f) {
                 char* c = &p[i];
                 if (*c == ' ') {
                     brk = c;
@@ -238,8 +238,8 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
             } else {
                 brk = &p[(int)i - 1];
             }
-            fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
-            fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
+            DrawColoredText(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
+            DrawColoredText(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
             char* split = const_cast<char*>(brk);
             if (!keep) {
                 p = split + 1;
@@ -253,7 +253,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
         for (choiceIndex = 0; choiceIndex < cfg->count; choiceIndex++) {
             f32 angle = 3.0f * (f32)fn_802E2C20() / 1000.0f;
             f32 pulse = 255.0f * (0.75f + 0.25f * (f32)sin(angle));
-            fn_80232BA4(cfg->entries[choiceIndex].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
+            DrawColoredText(cfg->entries[choiceIndex].title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
             u32 color;
             if (sel == choiceIndex) {
                 const u32 selected = ((u32)(int)pulse << 24) | 0xFFD03F;
@@ -261,7 +261,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
             } else {
                 color = 0xC8646464;
             }
-            fn_80232BA4(cfg->entries[choiceIndex].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
+            DrawColoredText(cfg->entries[choiceIndex].title, bg->font, bg->fade, y, color, 0xC, 1.0f, lbl_80563830, 1.0f);
             y -= 20.0f;
         }
         ay = -140.0f;
@@ -272,7 +272,7 @@ static inline int RunChoices(MemCardDialogBg* bg, const McDialogCfg* cfg, int& c
         fn_802C2B48();
         fn_80129AFC();
         if (fn_802E47B8()) {
-            switch (fn_802E46F0()) {
+            switch (HandleScreenshotInput()) {
             case 0x126:
                 if (sel > 0) {
                     fn_80214D50(0);
@@ -346,7 +346,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p, int
     x0 = -1.0f * lbl_8055FB9C / 2.0f - 1.0f;
     y0 = 1.0f + lbl_8055FBA0 / 2.0f;
     if (bg->image) {
-        fn_802C5320(bg->image, 0, x0, y0, lbl_80563830, w, h);
+        DrawImageWithParams(bg->image, 0, x0, y0, lbl_80563830, w, h);
     } else {
         fn_802C92D0();
         fn_802C92DC(0, 0, (int)w, (int)h, 0xFF000000);
@@ -356,8 +356,8 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p, int
     const char* title = m->title;
     y = 145.0f;
     if (strlen(title)) {
-        fn_80232BA4(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
-        fn_80232BA4(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
+        DrawColoredText(title, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 1.0f, lbl_80563830, 1.0f);
+        DrawColoredText(title, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 1.0f, lbl_80563830, 1.0f);
     }
     y -= 40.0f;
     strcpy(text, msg);
@@ -373,7 +373,7 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p, int
         char line[0x200] = {0};
         lineState.dest = line;
         lineState.used = 0;
-        while (lineState.used < strlen(p) && fn_8023293C(bg->font, line, 1.0f) < 480.0f) {
+        while (lineState.used < strlen(p) && CalculateTextWidth(bg->font, line, 1.0f) < 480.0f) {
             char* c = &p[lineState.used];
             if (*c == ' ') {
                 lineState.brk = c;
@@ -394,8 +394,8 @@ static inline void DrawDialog(MemCardDialogBg* bg, const McMsg* m, char*& p, int
         } else {
             lineState.brk = &p[(int)lineState.used - 1];
         }
-        fn_80232BA4(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
-        fn_80232BA4(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
+        DrawColoredText(p, bg->font, 2.0f + bg->fade, y - 2.0f, 0xFF000000, 0xC, 0.9f, lbl_80563830, 1.0f);
+        DrawColoredText(p, bg->font, bg->fade, y, 0xFFFFFFFF, 0xC, 0.9f, lbl_80563830, 1.0f);
         if (!lineState.keep) {
             p = lineState.brk + 1;
         } else {

@@ -13,13 +13,13 @@ s32 fn_80232578(const char* name);         // load font
 void fn_802328D4(s32 font);
 void* gxGetImage(const char* name);  // load image
 void fn_802C519C(void* img);
-f32 fn_8023293C(s32 font, const char* text, f32 scale);
+f32 CalculateTextWidth(s32 font, const char* text, f32 scale);
 void fn_80230C30(f32* x, f32* y, int lx, int ly);
 void fn_80230924(u32 color, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
 void fn_80230F78(u8* flash, f32* t, u32* color, int a);
-void fn_80232BA4(const char* text, s32 font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
+void DrawColoredText(const char* text, s32 font, f32 x, f32 y, u32 color, int align, f32 scale, f32 a, f32 b);
 void fn_80230E90(int a);
-f32 fn_8023659C(void);  // seconds
+f32 CalculateTimeDelta(void);  // seconds
 void fn_80221E7C(void* state);
 }
 
@@ -279,7 +279,7 @@ void NameChooser::Draw(void) {
                                     (2.0f + (ky - 38.0f)) - gy, 0.0f);
                     }
                     if (sel == (pass == 1)) {
-                        fn_80232BA4(text, font, -3.0f + (kx + 0.5f * (32.0f * k->width)), ky - 19.0f, color, 0x14, scale, 0.0f, 1.0f);
+                        DrawColoredText(text, font, -3.0f + (kx + 0.5f * (32.0f * k->width)), ky - 19.0f, color, 0x14, scale, 0.0f, 1.0f);
                     }
                 }
                 kx += 32.0f * k->width;
@@ -296,7 +296,7 @@ void NameChooser::Draw(void) {
     n = max - 1;
     int len = Length();
     last = len < n - 1 ? len : n - 1;
-    blink = (f32)fmod(fn_8023659C(), 0.6f) > 0.3f;
+    blink = (f32)fmod(CalculateTimeDelta(), 0.6f) > 0.3f;
     for (i = 0; i < n; i++) {
         int cursor = 0;
         if (blink && i == last) {
@@ -310,12 +310,12 @@ void NameChooser::Draw(void) {
             fn_80230924(0x80FFFF00, 2.0f + (nx + 23.0f * i), (17.0f + ny) - 2.0f, 4.0f + ((nx + 23.0f * (i + 1)) - 3.0f),
                         ny - 17.0f, 0.0f);
         }
-        fn_80232BA4(i < Length() ? ch : "_", font, nx + 23.0f * (0.5f + i), ny, color, 0x14, 0.57f, 0.0f, 1.0f);
+        DrawColoredText(i < Length() ? ch : "_", font, nx + 23.0f * (0.5f + i), ny, color, 0x14, 0.57f, 0.0f, 1.0f);
     }
 }
 
 void NameChooser::Accept(void) {
-    fn_8023293C(font, "WWWWWWWW", 1.0f);
+    CalculateTextWidth(font, "WWWWWWWW", 1.0f);
     KeyDef* k = &lbl_803428B0[row][col];
     switch (k->type) {
     case 4:

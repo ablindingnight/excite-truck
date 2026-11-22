@@ -83,7 +83,7 @@ void fn_802DAE18(void);
 void fn_802DB168(void);
 void InitializeBlurTexture(void);
 void ClearBlurTexture(void);
-void fn_802ECA48(void);
+void Setup2DRenderState(void);
 void LoadEnvironmentMapTexture(void* tex);
 void ValidateLightmapTexture(void* tex);
 void fn_802D92B0(void);
@@ -365,30 +365,30 @@ s32 lbl_8055FDCC;
 
 extern "C" {
 
-void fn_802CF850(void);
-void fn_802CED78(void);
+void InitializeGraphicsContext(void);
+void CheckGpHangState(void);
 void fn_802D3900(void);
-void fn_802D0BD8(void);
-void fn_802D0C98(void);
-void fn_802D1678(void);
-void fn_802D14D8(void);
-void fn_802D2218(void);
-void fn_802D0EEC(void);
+void SetupViewportAndInvalidateCaches(void);
+void CopyDisplayToFrameBuffer(void);
+void UpdateViewportSettings(void);
+void UpdateDirtyFlag(void);
+void SetupOverlayRenderState(void);
+void UpdateRenderState(void);
 void fn_802D18E8(void);
-void fn_802D1C04(void);
-void fn_802D2684(void);
+void UpdateModelViewMatrix(void);
+void SetupTextureEffectStages(void);
 void fn_802D2640(void);
 void fn_802D37E4(void);
 void fn_802D3894(void);
-void fn_802D0910(s32 fd, int x, int y, int w, int h);
+void WriteScreenshotTile(s32 fd, int x, int y, int w, int h);
 void fn_802D09E4(void);
-void fn_802CFF10(void);
+void ResetGraphicsState(void);
 void fn_802CFF5C(u32 flags);
-void fn_802CFFA4(u16 blend);
+void SetBlendMode(u16 blend);
 void fn_802CFF50(void);
 void fn_802CF5D0(void);
 void fn_802CF5D4(void);
-int fn_802CEC04(int reset);
+int ResetDisplayAndFlush(int reset);
 void fn_802CEC44(void);
 void fn_802CECF4(u16 token);
 static inline int DarkenPixel(int pixel) {
@@ -398,7 +398,7 @@ static inline int DarkenPixel(int pixel) {
 
 void fn_802CF10C(u32 count);
 
-GXColor fn_802CE9FC(u8 r, u8 g, u8 b, u8 a) {
+GXColor CreateGXColor(u8 r, u8 g, u8 b, u8 a) {
     GXColor c;
     c.r = r;
     c.g = g;
@@ -407,9 +407,9 @@ GXColor fn_802CE9FC(u8 r, u8 g, u8 b, u8 a) {
     return c;
 }
 
-GXColor fn_802CEA1C(u32 argb) { return fn_802CE9FC(argb >> 16, argb >> 8, argb, argb >> 24); }
+GXColor ConvertArgbToGxColor(u32 argb) { return CreateGXColor(argb >> 16, argb >> 8, argb, argb >> 24); }
 
-void fn_802CEA34(void) {
+void InitializeFrameBuffer(void) {
     GXRenderModeObj* rm = lbl_8055FD64;
     u32 n = ((rm->fbWidth + 15) & 0xFFF0) * rm->xfbHeight * 2;
     lbl_804C9760.w = rm->fbWidth;
@@ -420,7 +420,7 @@ void fn_802CEA34(void) {
     lbl_804C9760.cur = lbl_804C9760.buf;
 }
 
-void fn_802CEAC4(void) {
+void InitializeVideoMode(void) {
     switch (VIGetTvFormat()) {
     case 0:
         if (!fn_802E9A1C() || !VIGetDTVStatus()) {
@@ -453,7 +453,7 @@ void fn_802CEAC4(void) {
     lbl_804C9724.viXOrigin -= 5;
 }
 
-int fn_802CEC04(int reset) {
+int ResetDisplayAndFlush(int reset) {
     if (reset == 1) {
         fn_802D9C4C();
         GXDrawDone();
@@ -466,7 +466,7 @@ int fn_802CEC04(int reset) {
 
 void fn_802CEC44(void) { lbl_8055FD3C = 1; }
 
-void fn_802CEC50(u16 token) {
+void HandleDrawSyncToken(u16 token) {
     switch (token) {
     case 1:
         lbl_8055FD10 = fn_802E2C9C();
@@ -493,7 +493,7 @@ void fn_802CECF4(u16 token) {
         if (++lbl_8055D0F6 > 2) {
             lbl_8055D0F6 = 1;
         }
-        fn_802CEC50(lbl_8055D0F6);
+        HandleDrawSyncToken(lbl_8055D0F6);
     } while (lbl_8055D0F6 != token);
 }
 
@@ -506,7 +506,7 @@ void fn_802CED50(s32 x, s32 y, s32 w, s32 h) {
     lbl_804C5710.active = 1;
 }
 
-void fn_802CED78(void) {
+void CheckGpHangState(void) {
     u32 d0, c0, b0, a0, d1, c1, b1, a1;
     u8 readIdle, cmdIdle, overhi, underlow, brk;
     GXReadXfRasMetric((u32*)&c0, (u32*)&d0, (u32*)&a0, (u32*)&b0);
@@ -531,7 +531,7 @@ void fn_802CED78(void) {
     }
 }
 
-void fn_802CEF90(void) {
+void CheckGraphicsHang(void) {
     u8 overhi;
     u8 dummy;
     if (lbl_8055FD34) {
@@ -542,7 +542,7 @@ void fn_802CEF90(void) {
     if (overhi && n == lbl_8055FDBC) {
         if (++lbl_8055FDB8 >= 10) {
             OSReport("---------WARNING : HANG AT HIGH WATERMARK----------\n");
-            fn_802CED78();
+            CheckGpHangState();
             OSPanic("gx.cpp", 0x201, "Halting program");
         }
     } else {
@@ -551,7 +551,7 @@ void fn_802CEF90(void) {
     }
 }
 
-void fn_802CF048(int on) {
+void SetupGraphicsPipelineState(int on) {
     if (on) {
         GXSetGPMetric(0x23, 0x16);
         WGPIPE.uc = 0x61;
@@ -574,11 +574,11 @@ void fn_802CF048(int on) {
     }
 }
 
-void fn_802CF104(void) { fn_802CF048(1); }
+void fn_802CF104(void) { SetupGraphicsPipelineState(1); }
 
 void fn_802CF10C(u32 count) {
     u16* buf;
-    fn_802CEF90();
+    CheckGraphicsHang();
     if (lbl_8055FD44 == 4000) {
         OSReport("gx: hang? or perhaps the disk drive has powered down...\n");
     }
@@ -647,7 +647,7 @@ u8 lbl_8055D0FF = 1;
 void fn_802CF5A8(void) {
     if (lbl_8055D0FF) {
         lbl_8055D0FF = 0;
-        fn_802E2E0C(fn_802CEC04, "GX");
+        fn_802E2E0C(ResetDisplayAndFlush, "GX");
     }
 }
 
@@ -665,7 +665,7 @@ void fn_802CF5FC(void) {}
 
 static inline GXLightSet* NewLightSets(void) { return new ("local_flist") GXLightSet[0x800]; }
 
-void fn_802CF600(void) {
+void InitializeGraphicsSystem(void) {
     lbl_8055FD7C = 0;
     lbl_8055FD48 = 3;
     lbl_8055FD4C = 0;
@@ -676,10 +676,10 @@ void fn_802CF600(void) {
     lbl_8055FE24 = 0;
     fn_80127468();
     VIInit();
-    fn_802CEAC4();
+    InitializeVideoMode();
     fn_80127468();
     VIConfigure((const GXRenderModeObj*)lbl_8055FD64);
-    fn_802CEA34();
+    InitializeFrameBuffer();
     fn_80127468();
     fn_801282EC(0x20);
     fn_801282F4();
@@ -692,13 +692,13 @@ void fn_802CF600(void) {
     lbl_8055FD68 = new ("fifo_buf") u8[0x300000];
     lbl_8055FD6C = GXInit((void*)lbl_8055FD68, (u32)0x300000);
     fn_802D6810();
-    fn_802CF850();
+    InitializeGraphicsContext();
     fn_80127468();
     fn_802E30C8("gx: done with drReset");
-    fn_802D0BD8();
+    SetupViewportAndInvalidateCaches();
     fn_802E30C8("gx: done with before render");
     fn_80127468();
-    fn_802CFF10();
+    ResetGraphicsState();
     fn_802E30C8("gx: did flip");
     fn_80127468();
     fn_802CF5A8();
@@ -708,7 +708,7 @@ void fn_802CF600(void) {
     fn_80127468();
     InitializeBoneManager();
     fn_802CFF5C(0x17);
-    fn_802CFFA4(lbl_8055FD0A);
+    SetBlendMode(lbl_8055FD0A);
     lbl_8055FD20 = -1;
     u32 n = GXGetTexBufferSize((u16)0x280, (u16)0x1C0, (u32)1, (GXBool)0, (u8)0);
     fn_801282EC(0x20);
@@ -731,22 +731,22 @@ inline GXLightSet::GXLightSet(void) {}
 
 int fn_802CF834(void) { return lbl_804C9760.cur != 0; }
 
-void fn_802D0188(u8 r, u8 g, u8 b);
+void SetAmbientColor(u8 r, u8 g, u8 b);
 void fn_802D0160(u8 r, u8 g, u8 b);
 void fn_802D007C(f32 a);
-void fn_802D01B0(const V3* dir, f32 scale);
+void SetDirectionScale(const V3* dir, f32 scale);
 void fn_802D01E0(s32 x, s32 y, s32 w, s32 h);
 void fn_802D0368(f32 n, f32 f, f32 fovy, f32 zoom);
 void fn_802D03F4(const PlainValMatrix* cam);
 void fn_802D0610(u32 set);
 
-void fn_802CF850(void) {
+void InitializeGraphicsContext(void) {
     fn_802CF104();
     GXSetViewport(0.0f, 0.0f, lbl_8055FD64->fbWidth, lbl_8055FD64->efbHeight, 0.0f, 1.0f);
     GXSetScissor((u32)0, (u32)0, (u32)lbl_8055FD64->fbWidth, (u32)lbl_8055FD64->efbHeight);
     GXSetPixelFmt((GXPixelFmt)1, (GXZFmt16)0);
     GXSetDispCopyGamma((u32)0);
-    GXSetCopyClear((GXColor)(fn_802CE9FC(0, 0, 0, 0)), (u32)0xFFFFFF);
+    GXSetCopyClear((GXColor)(CreateGXColor(0, 0, 0, 0)), (u32)0xFFFFFF);
     GXSetDither((GXBool)1);
     VIWaitForRetrace();
     VISetNextFrameBuffer((void*)lbl_804C9760.buf);
@@ -799,14 +799,14 @@ void fn_802CF850(void) {
     lbl_804C56F0.z = 0.0f;
     lbl_8055FD70 = 1;
     lbl_804C5700.dirty = 1;
-    fn_802D0188(0xFF, 0xFF, 0xFF);
+    SetAmbientColor(0xFF, 0xFF, 0xFF);
     fn_802D0160(0x20, 0x20, 0x20);
     fn_802D007C(1.0f);
     V3 dir;
     dir.x = 0.0f;
     dir.y = -1.0f;
     dir.z = 0.0f;
-    fn_802D01B0(&dir, 1.0f);
+    SetDirectionScale(&dir, 1.0f);
     fn_802D01E0(0, 0, lbl_8055CFF0, lbl_8055CFF4);
     fn_802D0368(0.5f, 1000.0f, 1.5707964f, 1.0f);
     PlainValMatrix cam;
@@ -829,7 +829,7 @@ void fn_802CF850(void) {
     lbl_8055FD84 = 1;
     fn_802CFF5C(0x17);
     fn_802CFF50();
-    fn_802CFFA4(lbl_8055FD0A);
+    SetBlendMode(lbl_8055FD0A);
     if (lbl_8055FE1C) {
         LoadEnvironmentMapTexture(lbl_8055FE1C);
     }
@@ -839,7 +839,7 @@ void fn_802CF850(void) {
     lbl_8055FDB4 = 0;
 }
 
-void fn_802CFBA8(void) {
+void CleanupGraphicsAndDisplay(void) {
     RemoveBackgroundFunction(HandleResetSequence);
     fn_802D9C4C();
     VISetPreRetraceCallback((VIRetraceCallback)0);
@@ -850,7 +850,7 @@ void fn_802CFBA8(void) {
     delete[] (u8*)lbl_804C9940.buf;
     lbl_804C9940.buf = 0;
     fn_802DA4C4();
-    fn_802D0C98();
+    CopyDisplayToFrameBuffer();
     VISetBlack((BOOL)1);
     VIFlush();
     VIWaitForRetrace();
@@ -897,19 +897,19 @@ void fn_802CFCA0(void) {
     }
 }
 
-void fn_802CFD74(void) {
+void SetupGraphicsFifo(void) {
     GXFifoObj fifo;
     GXGetCPUFifo((GXFifoObj*)&fifo);
     void* base = GXGetFifoBase((const GXFifoObj*)&fifo);
     u32 size = GXGetFifoSize((const GXFifoObj*)&fifo);
     GXAbortFrame();
     lbl_8055FD6C = GXInit((void*)base, (u32)size);
-    fn_802CF850();
+    InitializeGraphicsContext();
     VIConfigure((const GXRenderModeObj*)lbl_8055FD64);
 }
 
-void fn_802CFDE0(void) {
-    fn_802ECA48();
+void HandleFrameSync(void) {
+    Setup2DRenderState();
     s32 used = lbl_8055FD94 + lbl_8055FD9C;
     lbl_8055FD98 = used > lbl_8055FD98 ? used : lbl_8055FD98;
     fn_802D6C78();
@@ -927,9 +927,9 @@ void fn_802CFDE0(void) {
     while (!lbl_8055FD3C) {
         if (lbl_8055FD38 > 10) {
             OSReport("---------WARNING : ABORTING FRAME----------\n");
-            fn_802CED78();
-            fn_802CFD74();
-            fn_802CF048(1);
+            CheckGpHangState();
+            SetupGraphicsFifo();
+            SetupGraphicsPipelineState(1);
             lbl_8055FD40 = fn_802E2C20();
             break;
         }
@@ -941,16 +941,16 @@ void fn_802CFDE0(void) {
 
 void fn_802CFEEC(void) {
     fn_802CFCA0();
-    fn_802CFDE0();
+    HandleFrameSync();
 }
 
 #pragma push
 #pragma peephole off
-void fn_802CFF10(void) {
+void ResetGraphicsState(void) {
     lbl_8055FD44 = 0;
     fn_802CF5D0();
-    fn_802D0C98();
-    fn_802D0BD8();
+    CopyDisplayToFrameBuffer();
+    SetupViewportAndInvalidateCaches();
     lbl_8055FDAC = 0;
     lbl_8055FE39 = 0;
 }
@@ -973,10 +973,10 @@ void* fn_802CFF64(u32 size) {
 
 void* fn_802CFFA0(u32 size) { return fn_802CFF64(size); }
 
-void fn_802CFFA4(u16 blend) { lbl_8055FD86 = blend; }
+void SetBlendMode(u16 blend) { lbl_8055FD86 = blend; }
 
 void fn_802CFFAC(u8 r, u8 g, u8 b) {
-    GXColor col = fn_802CE9FC(r, g, b, 0);
+    GXColor col = CreateGXColor(r, g, b, 0);
     lbl_804C97B0.color.r = col.r;
     lbl_804C97B0.color.g = col.g;
     lbl_804C97B0.color.b = col.b;
@@ -1017,7 +1017,7 @@ void fn_802D0160(u8 r, u8 g, u8 b) {
     lbl_804C97D0.dirty = 1;
 }
 
-void fn_802D0188(u8 r, u8 g, u8 b) {
+void SetAmbientColor(u8 r, u8 g, u8 b) {
     lbl_804C97D0.amb.r = r;
     lbl_804C97D0.amb.g = g;
     lbl_804C97D0.amb.b = b;
@@ -1025,7 +1025,7 @@ void fn_802D0188(u8 r, u8 g, u8 b) {
     lbl_804C97D0.dirty = 1;
 }
 
-void fn_802D01B0(const V3* dir, f32 scale) {
+void SetDirectionScale(const V3* dir, f32 scale) {
     lbl_804C97D0.dir.x = dir->x;
     lbl_804C97D0.dir.y = dir->y;
     lbl_804C97D0.dir.z = dir->z;
@@ -1038,7 +1038,7 @@ void fn_802D01E0(s32 x, s32 y, s32 w, s32 h) {
         y = 0.5f + 448.0f * y / 480.0f;
         h = 0.5f + 448.0f * h / 480.0f;
     }
-    fn_802D2218();
+    SetupOverlayRenderState();
     lbl_804C9778.vx = x;
     lbl_804C9778.vy = y;
     lbl_804C9778.vw = w;
@@ -1051,7 +1051,7 @@ void fn_802D01E0(s32 x, s32 y, s32 w, s32 h) {
 void fn_802D02F8(u32 color, u8 on) {
     lbl_804C9778.overlayC = on;
     lbl_804C9778.overlayZ = 1;
-    GXColor col = fn_802CEA1C(color);
+    GXColor col = ConvertArgbToGxColor(color);
     lbl_804C9778.overlay.r = col.r;
     lbl_804C9778.overlay.g = col.g;
     lbl_804C9778.overlay.b = col.b;
@@ -1146,7 +1146,7 @@ void GXCheckEnvMap(const char* name, int lut, int alpha) {
     }
 }
 
-void fn_802D07E4(const char* name, int announce) {
+void TakeScreenshot(const char* name, int announce) {
     if (lbl_8055D0B8 >= 0) {
         fn_802E30C8("gx: aborting screenshot...");
         lbl_8055D0B8 = lbl_8055D0BC * lbl_8055D0C0;
@@ -1172,7 +1172,7 @@ void fn_802D07E4(const char* name, int announce) {
 void GXScreenshotNumbered(int n) {
     char name[32];
     sprintf(name, "tmp_screenshot%02d.tga", n);
-    fn_802D07E4(name, 1);
+    TakeScreenshot(name, 1);
 }
 
 void fn_802D08B4(s32 tx, s32 ty, u8 raw) {
@@ -1183,7 +1183,7 @@ void fn_802D08B4(s32 tx, s32 ty, u8 raw) {
 
 void fn_802D08C4(u8 on) { lbl_8055FD78 = on; }
 
-void fn_802D08CC(int mode) {
+void SetCullMode(int mode) {
     int m;
     switch (mode) {
     case 1:
@@ -1203,7 +1203,7 @@ void fn_802D08CC(int mode) {
 }
 
 // Writes one screenshot tile (x, y in the full w x h image); empty in this build.
-void fn_802D0910(s32 fd, int x, int y, int w, int h) {}
+void WriteScreenshotTile(s32 fd, int x, int y, int w, int h) {}
 
 static inline u8 TgaHeader(u8* hdr) {
     u8 t;
@@ -1226,7 +1226,7 @@ static inline u8 TgaSwapDims(u8* hdr, u8 t) {
     return t;
 }
 
-void fn_802D0914(s32 fd, int w, int h) {
+void WriteTgaHeader(s32 fd, int w, int h) {
     u8 hdr[0x12];
     memset(hdr, 0, sizeof(hdr));
     *(u16*)(hdr + 8) = 0;
@@ -1248,7 +1248,7 @@ void fn_802D09E4(void) {}
 
 s32 lbl_8055D10C = -1;  // screenshot file
 
-void fn_802D09E8(void) {
+void TakeGxScreenshot(void) {
     if (!lbl_8055FD90) {
         return;
     }
@@ -1272,7 +1272,7 @@ void fn_802D09E8(void) {
         lbl_8055FDC4 = fn_802E2C20();
         fn_802E30C8("gx: starting screenshot %s", lbl_804C9830);
         if (!lbl_8055FD18) {
-            fn_802D0914(lbl_8055D10C, lbl_804C9760.w * lbl_8055D0BC, lbl_804C9760.h * lbl_8055D0C0);
+            WriteTgaHeader(lbl_8055D10C, lbl_804C9760.w * lbl_8055D0BC, lbl_804C9760.h * lbl_8055D0C0);
         }
     }
     s32 tile = lbl_8055D0B8;
@@ -1280,7 +1280,7 @@ void fn_802D09E8(void) {
         int tx = tile % lbl_8055D0BC;
         int ty = tile / lbl_8055D0BC;
         fn_802E30C8(" tile %d / %d", tile + 1, lbl_8055D0BC * lbl_8055D0C0);
-        fn_802D0910(lbl_8055D10C, lbl_804C9760.w * tx, lbl_804C9760.h * ty, lbl_804C9760.w * lbl_8055D0BC,
+        WriteScreenshotTile(lbl_8055D10C, lbl_804C9760.w * tx, lbl_804C9760.h * ty, lbl_804C9760.w * lbl_8055D0BC,
                     lbl_804C9760.h * lbl_8055D0C0);
         lbl_8055D0B8++;
     }
@@ -1297,7 +1297,7 @@ void fn_802D09E8(void) {
 // MATCHING-AID: linker-stripped (see GXCheckEnvMap).
 void GXPrintRow(const f32* v) { fn_802E30C8(" %5.2f %5.2f %5.2f %5.2f ", v[0], v[1], v[2], v[3]); }
 
-void fn_802D0BD8(void) {
+void SetupViewportAndInvalidateCaches(void) {
     GXRenderModeObj* rm = lbl_8055FD64;
     if (rm->field_rendering) {
         GXSetViewportJitter(0.0f, 0.0f, rm->fbWidth, rm->efbHeight, 0.0f, 1.0f, (u32)(VIGetNextField()));
@@ -1308,11 +1308,11 @@ void fn_802D0BD8(void) {
     GXInvalidateTexAll();
 }
 
-void fn_802D0C98(void) {
+void CopyDisplayToFrameBuffer(void) {
     lbl_8055FD4C = 0;
     GXSetZMode((GXBool)1, (GXCompare)GX_LEQUAL, (GXBool)1);
     GXSetColorUpdate((GXBool)1);
-    fn_802D09E8();
+    TakeGxScreenshot();
     GXSetColorUpdate((GXBool)lbl_8055D0C4);
     lbl_8055FD74 |= 1;
     GXSetZMode((GXBool)1, (GXCompare)GX_ALWAYS, (GXBool)1);
@@ -1335,7 +1335,7 @@ void fn_802D0C98(void) {
     fn_802CFF50();
 }
 
-void fn_802D0DD4(f32 out[3][4], const PlainValMatrix* m) {
+void ConvertMatrixToOpenGLFormat(f32 out[3][4], const PlainValMatrix* m) {
     out[0][0] = m->basis[0].x;
     out[1][0] = m->basis[0].y;
     out[2][0] = -m->basis[0].z;
@@ -1360,7 +1360,7 @@ void fn_802D0E48(int pass) {
     }
 }
 
-int fn_802D0EC8(int f) {
+int ConvertBlendMode(int f) {
     switch (f) {
     case 8:
         return 2;
@@ -1376,7 +1376,7 @@ static inline void ApplyBlend(void) {
     } else {
         int hi = lbl_8055FD86 >> 8;
         int lo = lbl_8055FD86 & 0xFF;
-        GXSetBlendMode((GXBlendMode)1, (GXBlendFactor)(fn_802D0EC8(hi)), (GXBlendFactor)(fn_802D0EC8(lo)), (GXLogicOp)5);
+        GXSetBlendMode((GXBlendMode)1, (GXBlendFactor)(ConvertBlendMode(hi)), (GXBlendFactor)(ConvertBlendMode(lo)), (GXLogicOp)5);
     }
 }
 
@@ -1395,7 +1395,7 @@ static inline GXColor ScaleColor(const GXColor& c, f32 s) {
     return out;
 }
 
-void fn_802D0EEC(void) {
+void UpdateRenderState(void) {
     if (lbl_8055FDB4) {
         return;
     }
@@ -1450,7 +1450,7 @@ void fn_802D0EEC(void) {
         lbl_804C5700.dirty = 1;
     }
     if (lbl_8055FE58) {
-        GXSetTevColor((GXTevRegID)3, (GXColor)(fn_802CEA1C(lbl_804DB458[1])));
+        GXSetTevColor((GXTevRegID)3, (GXColor)(ConvertArgbToGxColor(lbl_804DB458[1])));
         lbl_8055FE58 = 0;
     }
     if (lbl_804C97B0.dirty) {
@@ -1459,8 +1459,8 @@ void fn_802D0EEC(void) {
     }
     if (lbl_804C97D0.dirty) {
         lbl_804C97D0.dirty = 0;
-        GXColor w = fn_802CE9FC(0xFF, 0xFF, 0xFF, 0xFF);
-        GXColor k = fn_802CE9FC(0, 0, 0, 0xFF);
+        GXColor w = CreateGXColor(0xFF, 0xFF, 0xFF, 0xFF);
+        GXColor k = CreateGXColor(0, 0, 0, 0xFF);
         V3 p;
         ScaleV3(&p, &lbl_804C97D0.dir, -1048576.0f);
         GXInitLightPos((GXLightObj*)&lbl_804C97D0.obj, p.x, p.y, -p.z);
@@ -1468,7 +1468,7 @@ void fn_802D0EEC(void) {
         GXInitLightDistAttn((GXLightObj*)&lbl_804C97D0.obj, 1.0f, 1.0f, (GXDistAttnFn)0);
         GXLoadLightObjImm((const GXLightObj*)&lbl_804C97D0.obj, (GXLightID)1);
         GXSetChanMatColor((GXChannelID)0, (GXColor)w);
-        GXSetChanMatColor((GXChannelID)2, (GXColor)(fn_802CE9FC(0, 0, 0, lbl_804C97D0.alpha)));
+        GXSetChanMatColor((GXChannelID)2, (GXColor)(CreateGXColor(0, 0, 0, lbl_804C97D0.alpha)));
         GXSetChanAmbColor((GXChannelID)0, (GXColor)lbl_804C97D0.color);
         GXSetChanAmbColor((GXChannelID)2, (GXColor)k);
     }
@@ -1489,7 +1489,7 @@ void fn_802D0EEC(void) {
     }
 }
 
-/* Helper name unproven: the fitted field of view; the boundary is needed (in place: fn_802D14D8 100 -> 99.71) */
+/* Helper name unproven: the fitted field of view; the boundary is needed (in place: UpdateDirtyFlag 100 -> 99.71) */
 static inline f32 FovFit(f32 half, f32 a) { return 2.0f * (f32)atan((f32)tan(half) / a); }
 
 static inline void Loop1_fn_802D14D8(f32 k) {
@@ -1511,7 +1511,7 @@ static inline void Loop1_fn_802D14D8(f32 k) {
     GXSetProjection((const f32 (*)[4])(m), (GXProjectionType)0);
 }
 
-void fn_802D14D8(void) {
+void UpdateDirtyFlag(void) {
     if (!lbl_804C9778.dirty) {
         return;
     }
@@ -1520,7 +1520,7 @@ void fn_802D14D8(void) {
     Loop1_fn_802D14D8(k);
 }
 
-void fn_802D1678(void) {
+void UpdateViewportSettings(void) {
     if (!lbl_804C9778.vpDirty) {
         return;
     }
@@ -1534,7 +1534,7 @@ void fn_802D1678(void) {
     fn_802D6C68();
 }
 
-void fn_802D17BC(GXLightObj* l, const V3* pos, const V3* cam, GXColor color, f32 radius) {
+void SetupLightWithDirection(GXLightObj* l, const V3* pos, const V3* cam, GXColor color, f32 radius) {
     GXInitLightColor((GXLightObj*)l, (GXColor)color);
     V3 d;
     d.x = pos->x + cam->x;
@@ -1566,13 +1566,13 @@ void fn_802D18E8(void) {
         PointLight* p = lbl_804CA088;
         GXLightObj* o = lbl_804CA118;
         for (int i = 0; i < lbl_8055FDC8; i++) {
-            fn_802D17BC(o, &d, &p->pos, p->color, p->radius);
+            SetupLightWithDirection(o, &d, &p->pos, p->color, p->radius);
             p++;
             o++;
         }
         lbl_8055FDCC = lbl_8055FDC8;
     } else {
-        fn_802D17BC(lbl_804CA118, &d, &lbl_804C97D0.dir, ScaleColor(lbl_804C97D0.amb, lbl_804C97D0.scale), 64.0f);
+        SetupLightWithDirection(lbl_804CA118, &d, &lbl_804C97D0.dir, ScaleColor(lbl_804C97D0.amb, lbl_804C97D0.scale), 64.0f);
         lbl_8055FDCC++;
     }
     u32 mask = 0;
@@ -1685,7 +1685,7 @@ static inline void LoadProjectedTexture(Mat3& rotv, const PlainValMatrix& pose) 
     GXLoadTexMtxImm((const f32 (*)[4])(m), (u32)0x2A, (GXMtxType)1);
 }
 
-void fn_802D1C04(void) {
+void UpdateModelViewMatrix(void) {
     if (!lbl_8055FD70) {
         return;
     }
@@ -1695,7 +1695,7 @@ void fn_802D1C04(void) {
     PlainValMatrix w;
     fn_801BFD34(&w.origin, &lbl_804C5690.origin, &inv);
     Mat3Mul(&w.Mat(), &lbl_804C5690.Mat(), &inv.Mat());
-    fn_802D0DD4(lbl_804C5650, &w);
+    ConvertMatrixToOpenGLFormat(lbl_804C5650, &w);
     GXLoadPosMtxImm((const f32 (*)[4])(lbl_804C5650), (u32)0);
     if (lbl_8055FD19) {
         lbl_8055FD19 = 0;
@@ -1717,7 +1717,7 @@ void fn_802D1C04(void) {
         Invert(&li, &look);
         fn_801BFD34(&lw.origin, &lbl_804C5690.origin, &li);
         Mat3Mul(&lw.Mat(), &lbl_804C5690.Mat(), &li.Mat());
-        fn_802D0DD4(m, &lw);
+        ConvertMatrixToOpenGLFormat(m, &lw);
         PSMTXInvXpose((const f32 (*)[4])(m), (f32 (*)[4])(b));
         PSMTXScale((f32 (*)[4])(s), 0.5f, -0.5f, 0.0f);
         PSMTXTrans((f32 (*)[4])(t), 0.5f, 0.5f, 1.0f);
@@ -1737,7 +1737,7 @@ void fn_802D1C04(void) {
         break;
     }
     f32 n[3][4];
-    fn_802D0DD4(n, &lbl_804C5690);
+    ConvertMatrixToOpenGLFormat(n, &lbl_804C5690);
     n[0][3] = n[1][3] = n[2][3] = 0.0f;
     GXLoadNrmMtxImm((const f32 (*)[4])(n), (u32)0);
     if (lbl_804C5700.mode == 2) {
@@ -1745,11 +1745,11 @@ void fn_802D1C04(void) {
     }
 }
 
-void fn_802D2218(void) {
+void SetupOverlayRenderState(void) {
     if (!lbl_804C9778.overlayC && !lbl_804C9778.overlayZ) {
         return;
     }
-    fn_802D1678();
+    UpdateViewportSettings();
     PlainValMatrix id;
     PlainValMatrix* const identity = &id;
     identity->basis[0].x = 1.0f;
@@ -1765,7 +1765,7 @@ void fn_802D2218(void) {
     identity->origin.y = 0.0f;
     identity->origin.z = 0.0f;
     f32 pm[3][4];
-    fn_802D0DD4(pm, identity);
+    ConvertMatrixToOpenGLFormat(pm, identity);
     GXLoadPosMtxImm((const f32 (*)[4])(pm), (u32)0);
     f32 hw = 0.5f * lbl_804C9778.vw;
     f32 hh = 0.5f * lbl_804C9778.vh;
@@ -1809,7 +1809,7 @@ void fn_802D2218(void) {
     lbl_804C9778.overlayC = 0;
     fn_802CFF50();
     lbl_804C9778.dirty = 1;
-    fn_802D14D8();
+    UpdateDirtyFlag();
     lbl_804C5700.dirty = 1;
     lbl_8055FD70 = 1;
     lbl_804C97D0.dirty = 1;
@@ -1818,10 +1818,10 @@ void fn_802D2218(void) {
 }
 
 void fn_802D2614(void) {
-    fn_802D14D8();
-    fn_802D1678();
-    fn_802D2218();
-    fn_802D0EEC();
+    UpdateDirtyFlag();
+    UpdateViewportSettings();
+    SetupOverlayRenderState();
+    UpdateRenderState();
 }
 
 void fn_802D2640(void) {
@@ -1833,7 +1833,7 @@ void fn_802D2640(void) {
 
 #pragma push
 #pragma opt_strength_reduction off
-void fn_802D2684(void) {
+void SetupTextureEffectStages(void) {
     u8 env = lbl_804C5700.env;
     u8 envA;
     u8 base2;
@@ -1906,7 +1906,7 @@ void fn_802D2684(void) {
 }
 #pragma pop
 
-void fn_802D2AC4(void) {
+void SetupChannelOne(void) {
     GXSetNumChans((u8)1);
     GXSetChanCtrl((GXChannelID)1, (GXBool)0, (GXColorSrc)0, (GXColorSrc)0, (GXLightID)0, (GXDiffuseFn)0, (GXAttnFn)2);
     fn_802DFAF4();
@@ -1944,12 +1944,12 @@ void fn_802D2B0C(void) {
         case 4:
             fn_802D18E8();
             fn_802DF994();
-            lbl_8055FD80 = fn_802D2AC4;
+            lbl_8055FD80 = SetupChannelOne;
             lbl_8055FD70 = 1;
             break;
         case 3:
             if (lbl_8055FD86 == lbl_8055FD0C) {
-                fn_802D2684();
+                SetupTextureEffectStages();
             } else {
                 if (lbl_804C5700.base2) {
                     fn_802DF6D0();
@@ -1962,20 +1962,20 @@ void fn_802D2B0C(void) {
             }
             break;
         case 0:
-            fn_802D2684();
+            SetupTextureEffectStages();
             break;
         }
         lbl_804C5700.dirty = 0;
         lbl_804C9930 = lbl_804C5700;
     }
-    fn_802D1C04();
+    UpdateModelViewMatrix();
 }
 
 V3* fn_802D2D04(void) { return &lbl_804C97D0.dir; }
 
 GXRenderModeObj* fn_802D2D14(void) { return lbl_8055FD64; }
 
-void fn_802D2D1C(void) {
+void InvertCameraMatrix(void) {
     const PlainValMatrix* camera = &lbl_804C56C0;
     PlainValMatrix* const world = &lbl_804CA2D8;
     InvertR(world, camera);
@@ -1990,7 +1990,7 @@ void fn_802D2ED8(const PlainValMatrix* m, int slot) {
     PlainValMatrix t;
     fn_801BFD34(&t.origin, &m->origin, &lbl_804CA2D8);
     Mat3Mul(&t.Mat(), &m->Mat(), &lbl_804CA2D8.Mat());
-    fn_802D0DD4(lbl_804C5650, &t);
+    ConvertMatrixToOpenGLFormat(lbl_804C5650, &t);
     GXLoadPosMtxImm((const f32 (*)[4])(lbl_804C5650), (u32)(slot * 3));
 }
 
@@ -2005,7 +2005,7 @@ u16* fn_802D2F78(s32* w, s32* h) {
     return lbl_804C9760.cur;
 }
 
-void fn_802D2FD8(void) {
+void UpdateFrameBuffer(void) {
     lbl_804C9760.hold = 0;
     DCFlushRange((const void*)lbl_804C9760.cur, (u32)(lbl_804C9760.bpp * (lbl_804C9760.w * lbl_804C9760.h)));
     VISetNextFrameBuffer((void*)lbl_804C9760.cur);
@@ -2017,7 +2017,7 @@ void fn_802D2FD8(void) {
 
 void fn_802D3050(int on) { lbl_8055FD1C = on ? lbl_8055FD1C | 0x10 : lbl_8055FD1C & ~0x10; }
 
-void fn_802D306C(u8 a) {
+void SetDestinationAlpha(u8 a) {
     lbl_8055FD60 = a;
     GXSetDstAlpha((GXBool)1, (u8)a);
 }
@@ -2056,7 +2056,7 @@ void fn_802D3144(void) {
     lbl_804C5700.dirty = 1;
 }
 
-int fn_802D31D8(int) {
+int SetupTransparentRendering(int) {
     lbl_8055FDB4 = 1;
     GXSetColorUpdate((GXBool)0);
     GXSetAlphaUpdate((GXBool)1);
@@ -2071,11 +2071,11 @@ int fn_802D31D8(int) {
     GXSetTevAlphaOp((GXTevStageID)0, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)0, (GXTevRegID)0);
     GXSetTevColorOp((GXTevStageID)0, (GXTevOp)0, (GXTevBias)0, (GXTevScale)0, (GXBool)1, (GXTevRegID)0);
     GXSetTevColorIn((GXTevStageID)0, (GXTevColorArg)0xF, (GXTevColorArg)0xF, (GXTevColorArg)0xF, (GXTevColorArg)0xF);
-    GXSetTevColor((GXTevRegID)1, (GXColor)(fn_802CE9FC(0, 0, 0, 4)));
+    GXSetTevColor((GXTevRegID)1, (GXColor)(CreateGXColor(0, 0, 0, 4)));
     return 1;
 }
 
-void fn_802D3304(void) {
+void SetupRenderState(void) {
     lbl_804C5700.dirty = 1;
     fn_802CFF50();
     lbl_8055FDB4 = 0;
@@ -2102,7 +2102,7 @@ void fn_802D3360(void) {
     GXSetCurrentMtx((u32)0);
 }
 
-void fn_802D3420(void) {
+void Setup2DProjection(void) {
     PlainValMatrix id;
     PlainValMatrix* const identity = &id;
     identity->basis[0].x = 1.0f;
@@ -2118,7 +2118,7 @@ void fn_802D3420(void) {
     identity->origin.y = 0.0f;
     identity->origin.z = 0.0f;
     f32 pm[3][4];
-    fn_802D0DD4(pm, identity);
+    ConvertMatrixToOpenGLFormat(pm, identity);
     GXLoadPosMtxImm((const f32 (*)[4])(pm), (u32)0);
     f32 o[4][4];
     C_MTXOrtho((f32 (*)[4])(o), 0.0f, 480.0f, 0.0f, 640.0f, 1.0f, 2.0f);
@@ -2157,7 +2157,7 @@ void fn_802D3420(void) {
     lbl_8055FD70 = 1;
 }
 
-void fn_802D362C(u32 color) {
+void CopyTextureAndSetupRenderState(u32 color) {
     GXSetTexCopySrc((u16)lbl_804C9778.vx, (u16)lbl_804C9778.vy, (u16)lbl_804C9778.vw, (u16)lbl_804C9778.vh);
     GXSetTexCopyDst((u16)lbl_804C9778.vw, (u16)lbl_804C9778.vh, (GXTexFmt)0x27, (GXBool)0);
     GXCopyTex((void*)lbl_804C9940.buf, (GXBool)0);
@@ -2176,8 +2176,8 @@ void fn_802D362C(u32 color) {
     GXSetBlendMode((GXBlendMode)1, (GXBlendFactor)4, (GXBlendFactor)5, (GXLogicOp)3);
     GXSetZMode((GXBool)0, (GXCompare)GX_LEQUAL, (GXBool)0);
     GXSetTexCoordGen2((GXTexCoordID)0, (GXTexGenType)1, (GXTexGenSrc)0xC, (u32)0x3C, (GXBool)0, (u32)0x7D);
-    GXSetTevColor((GXTevRegID)1, (GXColor)(fn_802CEA1C(color)));
-    fn_802D3420();
+    GXSetTevColor((GXTevRegID)1, (GXColor)(ConvertArgbToGxColor(color)));
+    Setup2DProjection();
 }
 
 void fn_802D37E4(void) {
@@ -2208,7 +2208,7 @@ void fn_802D3900(void) {
     lbl_804C9984.count = 0;
 }
 
-VisTest* fn_802D39A4(void*, f32 rate) {
+VisTest* AllocateVisibilityTest(void*, f32 rate) {
     VisTest* t = 0;
     for (int i = 0; i < 0x40; i++) {
         if (!lbl_804C9984.tests[i].used) {

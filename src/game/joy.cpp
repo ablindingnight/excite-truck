@@ -53,7 +53,7 @@ void fn_80129400(void) {
     }
 }
 
-void fn_80129458(void) {
+void InitializeInputConfig(void) {
     lbl_80422380.enabled = 1;
     lbl_804223A0.enabled = 1;
     lbl_80422380.ownerOnly = 0;
@@ -78,7 +78,7 @@ void fn_80129458(void) {
 
 void fn_801294FC(int key, int chan) { fn_802E4800(key | (chan & 0xF) << 12); }
 
-void fn_80129508(JoyPad* p, int chan, KeyMap* m) {
+void ProcessJoyPadInput(JoyPad* p, int chan, KeyMap* m) {
     int key = 0;
     if (m->enabled) {
         u32 dir = p->status.dir;
@@ -142,7 +142,7 @@ void fn_80129690(JoyPad* p, int chan, KeyMap* m) {
     }
     p->changed = 0;
     if (active) {
-        fn_80129508(p, chan, m);
+        ProcessJoyPadInput(p, chan, m);
     }
     const s32* mapping = lbl_804223C0;
     for (int i = 0; i < 14; ++mapping, ++i) {
@@ -164,7 +164,7 @@ void fn_80129690(JoyPad* p, int chan, KeyMap* m) {
 void fn_80129790(void) {
     fn_802E7C64();
     RegisterBackgroundTask(fn_80129400, "JoyUpdate");
-    fn_80129458();
+    InitializeInputConfig();
     lbl_8055DFD0 = 1;
     memset(lbl_804223C0, -1, sizeof(lbl_804223C0));
     fn_802E830C(lbl_804223C0);
@@ -172,11 +172,11 @@ void fn_80129790(void) {
 
 s32* fn_801297F4(void) { return lbl_804223C0; }
 
-int fn_801298E8(JoyStatus* out, int chan);
+int ReadJoyStatus(JoyStatus* out, int chan);
 
-int fn_80129800(int chan, int button) {
+int GetButtonState(int chan, int button) {
     JoyStatus s;
-    if (fn_801298E8(&s, chan) && lbl_804223C0[button] >= 0) {
+    if (ReadJoyStatus(&s, chan) && lbl_804223C0[button] >= 0) {
         return s.buttons[lbl_804223C0[button]];
     }
     return 0;
@@ -187,7 +187,7 @@ void fn_80129864(void) {
     fn_802E7D0C();
 }
 
-int fn_80129890(void) {
+int CountActiveControllers(void) {
     int n = 0;
     int i;
     for (i = 0; i < 4; i++) {
@@ -198,7 +198,7 @@ int fn_80129890(void) {
     return n;
 }
 
-int fn_801298E8(JoyStatus* out, int chan) {
+int ReadJoyStatus(JoyStatus* out, int chan) {
     int ok = fn_802E8504(chan);
     if (ok) {
         *out = lbl_80422180[chan].status;
@@ -208,9 +208,9 @@ int fn_801298E8(JoyStatus* out, int chan) {
     return ok;
 }
 
-int fn_80129AE8(JoyStatus* out, int chan) { return fn_801298E8(out, chan); }
+int fn_80129AE8(JoyStatus* out, int chan) { return ReadJoyStatus(out, chan); }
 
-void fn_80129AEC(s32 chan) { lbl_8055DFD4 = chan; }
+void SetInputChannel(s32 chan) { lbl_8055DFD4 = chan; }
 
 s32 fn_80129AF4(void) { return lbl_8055DFD4; }
 
@@ -221,7 +221,7 @@ void fn_80129AFC(void) {
     }
 }
 
-void fn_80129B60(void) {
+void ProcessPlayerInput(void) {
     int i;
     for (i = 0; i < 4; i++) {
         fn_80129690(&lbl_80422180[i], i, &lbl_80422380);

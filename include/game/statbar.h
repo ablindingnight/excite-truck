@@ -9,7 +9,7 @@ extern "C" {
 void fn_802328D4(u8* p);
 u8* fn_80232578(const char* name);
 void fn_80230C30(f32* x, f32* y, s32 a, s32 b);
-void fn_80232BA4(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
+void DrawColoredText(const char* text, u8* font, f32 x, f32 y, s32 color, int align, f32 size, f32 a, f32 b);
 int fn_801345D8(char* buf, int n, const char* fmt, ...);
 const char* fn_80131234(const char* key);
 extern const s32 lbl_802FA300[3];  // stat level thresholds (mroll.cpp)
@@ -59,7 +59,7 @@ public:
                 size = lbl_80563760;
                 align = 9;
             }
-            fn_80232BA4(fn_80131234(buf), font, x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
+            DrawColoredText(fn_80131234(buf), font, x, y, -0x100, align, size, lbl_80563758, lbl_80563764);
         }
     }
     virtual void Set(int i, s32* v, u8* f) {

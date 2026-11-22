@@ -75,7 +75,7 @@ int fn_80128314(int heap);
 int fn_80265D58(void);
 int fn_80204024(void);
 void fn_8012BF28(void);
-void fn_80129AEC(int a);
+void SetInputChannel(int a);
 int fn_802411CC(void);
 void fn_802411C8(void);
 void fn_802411D0(int i, s32* vehicle, u32* color, int* pad);
@@ -89,7 +89,7 @@ void fn_80137C78(int n);
 int fn_802E4A10(void);
 void fn_80137C80(int slot);
 int fn_80137C74(void);
-void fn_80137C7C(s32 id, int slot);
+void AssignPlayerDriver(s32 id, int slot);
 void fn_8023B5E0(void);
 void fn_8000824C(s32* event, s32 index);
 extern u8 lbl_8055F291;
@@ -186,7 +186,7 @@ void RunSinglePlayerEvent(int track, int eve, RaceStandings* out, int difficulty
         fn_8023B904(&rs, out, skip);
         fn_8023B8AC(&rs);
     } while (fn_80204024());
-    fn_80129AEC(0);
+    SetInputChannel(0);
     if (paused) {
         fn_802ECEC4();
     }
@@ -320,7 +320,7 @@ void GameDoEve(int track, int eve) {
         } else {
             fn_80137C84(i, i);
         }
-        fn_80137C7C(GetDriver(i)->id, i);
+        AssignPlayerDriver(GetDriver(i)->id, i);
     }
     fn_8023BEB8(track, eve, NULL);
     for (i = 0; i < n; i++) {

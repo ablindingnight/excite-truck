@@ -50,7 +50,7 @@ void fn_8022C520(void);
 void fn_802C4C80(int);
 void fn_802C519C(int);
 int gxGetImage(const char*);
-int fn_802C49E8(const char*);
+int LoadStampWithVersionCheck(const char*);
 
 
 
@@ -97,10 +97,10 @@ extern UnkStatic7F lbl_8055EFC8;
 
 
 
-int fn_802C4EE4(u32);
+int GetStampWidth(u32);
 int fn_802C51C0(u32);
-u32 fn_802C4F14(u32);
-void fn_802C4C90(u32,int,int,u32,int);
+u32 GetStampFrameCount(u32);
+void DrawStampFrame(u32,int,int,u32,int);
 u32 fn_802C51AC(u32);
 
 char* strchr(const char*,int);
@@ -111,7 +111,7 @@ extern const char lbl_8033FC08[];
 
 
 extern const char lbl_8055B930[7],lbl_8055B938[6],lbl_8055B940[7],lbl_8055B948[7],lbl_8055B950[8];
-int fn_802C4EFC(u32);
+int GetStampHeight(u32);
 int fn_802C5220(u32);
 
 
@@ -219,7 +219,7 @@ void fn_802E30C8(const char*,...);
 
 
 extern const char lbl_8055B8C0[2];
-void fn_802C4F2C(u32,int*,int*);
+void GetStampOffset(u32,int*,int*);
 
 }
 
@@ -235,10 +235,10 @@ struct StyleViewportStorage { StyleViewport* active;u32 unknownTail; };
 typedef char CheckStyleViewportStorage[sizeof(StyleViewportStorage)==8?1:-1];
 extern StyleViewportStorage lbl_8055E050;
 void fn_80230F78(u8*,f32*,u32*,int);
-f32 fn_8023659C(void);
+f32 CalculateTimeDelta(void);
 double fmod(double,double);
 double sin(double);
-void fn_802C5310(u32,u32,f32,f32,f32);
+void DrawImageFrame(u32,u32,f32,f32,f32);
 void fn_80230924(u32,f32,f32,f32,f32,f32);
 
 
@@ -330,7 +330,7 @@ f32 fn_8022AAA8(int i,const char* text) {
     UIStyleRecordFields* s=fn_8022CA2C(i);
     if(s->resource08) {
         f32 scale=fn_8022CA40(s);
-        f32 width=fn_8023293C(s->resource08,text,1.0f);
+        f32 width=CalculateTextWidth(s->resource08,text,1.0f);
         width*=scale;
         return width;
     }
@@ -363,7 +363,7 @@ f32 fn_8022ABC8(GTextFont* font,const char* text,int n) {
     char buffer[2048];
     strncpy(buffer,text,n);
     buffer[n]=0;
-    return fn_8023293C(font,buffer,1.0f);
+    return CalculateTextWidth(font,buffer,1.0f);
 }
 
 void fn_8022AC1C(int style,const char* text,int x,int y,int* a,int* b,int* c,int* d) {
@@ -407,9 +407,9 @@ void fn_8022ACFC(int style,const char* text,f32 x,f32 y,f32* outLeft,f32* outTop
     f32 height,dx,dy;
     if(s->field64_0) {
         int ox,oy;
-        fn_802C4F2C(s->field64_0,&ox,&oy);
-        int width=fn_802C4EE4(s->field64_0);
-        int height=fn_802C4EFC(s->field64_0);
+        GetStampOffset(s->field64_0,&ox,&oy);
+        int width=GetStampWidth(s->field64_0);
+        int height=GetStampHeight(s->field64_0);
         left=StyleMinimum(x,x-(f32)ox);
         right=StyleMaximum(right,(f32)width+(x-(f32)ox));
         top=StyleMinimum(top,y-(f32)oy);
@@ -474,7 +474,7 @@ void fn_8022B390(int style,const char* text,int n,int* outX,int* outY) {
     for(int i=0;*text && i<n;i++,text++) {
         if((signed char)*text!=10) {
             ch[0]=*text;
-            if(s->resource08) x+=(int)fn_8023293C(s->resource08,ch,1.0f);
+            if(s->resource08) x+=(int)CalculateTextWidth(s->resource08,ch,1.0f);
             else if(s->resource04) x+=fn_801E4A6C(s->resource04,ch);
         } else {
             if(s->resource08) y+=fn_80232B70(s->resource08);
@@ -494,7 +494,7 @@ int fn_8022B498(int style,const char* text) {
     int right;
     UIStyleRecordFields* s=fn_8022CA2C(style);
     imageWidth=0;
-    if(s->field64_0) imageWidth=fn_802C4EE4(s->field64_0);
+    if(s->field64_0) imageWidth=GetStampWidth(s->field64_0);
     else if(s->field64_1) imageWidth=fn_802C51C0(s->field64_1);
     if(text) {
         left=0;right=0;
@@ -504,7 +504,7 @@ int fn_8022B498(int style,const char* text) {
             f32 scale;
             if(s->height<1.0f) scale=1.0f;
             else scale=s->height/(f32)fn_80232B70(s->resource08);
-            width=(int)(scale*fn_8023293C(s->resource08,text,1.0f));
+            width=(int)(scale*CalculateTextWidth(s->resource08,text,1.0f));
         }
         flags=s->field38;
         if(flags&2) left=-width;
@@ -522,7 +522,7 @@ int fn_8022B498(int style,const char* text) {
 int fn_8022B620(int style,const char* text) {
     UIStyleRecordFields* s=fn_8022CA2C(style);
     int imageHeight=0;
-    if(s->field64_0) imageHeight=fn_802C4EFC(s->field64_0);
+    if(s->field64_0) imageHeight=GetStampHeight(s->field64_0);
     else if(s->field64_1) imageHeight=fn_802C5220(s->field64_1);
     if(text) {
         int top=0;
@@ -569,8 +569,8 @@ void fn_8022B91C(int style,int x,int y,const char* text,u32 frame) {
     UIStyleRecordFields* s=fn_8022CA2C(style);
     u32 alternate=frame&1;
     if(s->field64_0) {
-        u32 remainder=frame%fn_802C4F14(s->field64_0);
-        fn_802C4C90(s->field64_0,x,y,remainder,0);
+        u32 remainder=frame%GetStampFrameCount(s->field64_0);
+        DrawStampFrame(s->field64_0,x,y,remainder,0);
     } else if(s->field64_1) fn_802C51AC(s->field64_1);
     if(text && !s->resource08) {
         fn_802E317C(lbl_8033FC08);
@@ -622,7 +622,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
     int effect=alternate?(int)s->field3C_1:(int)s->field3C_0;
     u32 cycleColor=0xFFFFFFFF;
     if((u32)(effect-5)<=1) {
-        f32 phase=(f32)fmod((double)(6.2831854820251465f*fn_8023659C()),9.42477798461914);
+        f32 phase=(f32)fmod((double)(6.2831854820251465f*CalculateTimeDelta()),9.42477798461914);
         f32 t=1.0f;
         if(phase<3.1415927410125732f) t=1.0f-(f32)sin((double)phase);
         if(alternate)cycleColor=fn_8022BC30(s->colors0C[3],s->colors0C[1],t);
@@ -631,7 +631,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
     if(s->field64_1) {
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
-        fn_802C5310(s->field64_1,frame%fn_802C51AC(s->field64_1),px,py,0.0f);
+        DrawImageFrame(s->field64_1,frame%fn_802C51AC(s->field64_1),px,py,0.0f);
     } else if(s->field64_2) {
         f32 px,py;
         fn_8022BB60(&px,&py,x,y);
@@ -641,7 +641,7 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
         if(s->field38&4)px-=Mul(lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current),0.5f);
         else if((s->field38&2)&&text&&s->resource08) {
             f32 scale=fn_8022CA40(s);
-            px-=Mul(fn_8023293C(s->resource08,text,1.0f),scale);
+            px-=Mul(CalculateTextWidth(s->resource08,text,1.0f),scale);
         }
         f32 imageWidth=lbl_8055E050.active->horizontalBias+fn_80235EF0(s->field64_2,current);
         f32 imageHeight=GetArtHeight(s->field64_2,current);
@@ -708,19 +708,19 @@ void fn_8022BD40(int style,f32 x,f32 y,f32 depth,f32 width,f32 height,f32 unused
             case 2:shadow=1;
             default: {
                 f32 scale=fn_8022CA40(s);
-                if(shadow)fn_80232BA4(line, s->resource08, px+2.0f, py-2.0f, 0xFF000000, flags, scale, textZ, 1.0f);
-                fn_80232BA4(line, s->resource08, px, py, color, flags, scale, textZ, 1.0f);
+                if(shadow)DrawColoredText(line, s->resource08, px+2.0f, py-2.0f, 0xFF000000, flags, scale, textZ, 1.0f);
+                DrawColoredText(line, s->resource08, px, py, color, flags, scale, textZ, 1.0f);
                 break;
             }
             case 1:case 4: {
                 f32 scale=fn_8022CA40(s);
-                fn_80232BA4(line, s->resource08, px, py, glowColor, flags, scale, textZ, 1.0f);
+                DrawColoredText(line, s->resource08, px, py, glowColor, flags, scale, textZ, 1.0f);
                 break;
             }
             case 5:case 6: {
-                if(effect==5)fn_80232928(-1);
+                if(effect==5)SetInputMask(-1);
                 f32 scale=fn_8022CA40(s);
-                fn_80232BA4(line, s->resource08, px, py, cycleColor, flags, scale, textZ, 1.0f);
+                DrawColoredText(line, s->resource08, px, py, cycleColor, flags, scale, textZ, 1.0f);
                 if(effect==5)fn_80232930();
                 break;
             }
@@ -831,7 +831,7 @@ void fn_8022CAA8(UIStyleRecordFields* s,const UIStyleInputFields* input) {
     if(resource) {
         if(fn_8022A7D4(resource)) s->field64_1=gxGetImage(resource);
         else if(fn_8022A804(resource)) s->field64_2=fn_8023512C(resource);
-        else s->field64_0=fn_802C49E8(resource);
+        else s->field64_0=LoadStampWithVersionCheck(resource);
     }
     s->field3C_7=(u32)-1;
 }

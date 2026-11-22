@@ -552,11 +552,11 @@ void fn_80129790(void);
 void fn_802E5478(void);
 void fn_802E7578(void);
 void fn_802EBE2C(void);
-void fn_802CF600(void);
-void fn_802EC614(void);
+void InitializeGraphicsSystem(void);
+void InitializeHomeButtonMenu(void);
 void fn_802E2CFC(KDate* d);
-void fn_802EC7AC(void);
-void fn_802CFBA8(void);
+void CleanupHomeButtonResources(void);
+void CleanupGraphicsAndDisplay(void);
 void fn_802EC038(void);
 void fn_802E759C(void);
 void fn_802E56F0(void);
@@ -593,8 +593,8 @@ int fn_802E2A5C(void) {
     fn_802E5478();
     fn_802E7578();
     fn_802EBE2C();
-    fn_802CF600();
-    fn_802EC614();
+    InitializeGraphicsSystem();
+    InitializeHomeButtonMenu();
     KDate d;
     fn_802E2CFC(&d);
     fn_802E30C8("date: %d/%d/%d (%d)", d.month, d.day, d.year, d.wday);
@@ -607,8 +607,8 @@ int fn_802E2A5C(void) {
 void fn_802E2B34(void) {
     RemoveBackgroundFunction(fn_802E2A1C);
     fn_802E29AC();
-    fn_802EC7AC();
-    fn_802CFBA8();
+    CleanupHomeButtonResources();
+    CleanupGraphicsAndDisplay();
     fn_802EC038();
     fn_802E759C();
     fn_802E56F0();

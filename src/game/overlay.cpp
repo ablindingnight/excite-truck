@@ -56,7 +56,7 @@ struct RetryFlags {
 };
 
 extern "C" {
-int fn_801298E8(f32* out, int unk);
+int ReadJoyStatus(f32* out, int unk);
 void QueueColoredRectangle(f32 x, f32 y, f32 w, f32 h, u32 color);
 int fn_801769B8(void);
 int GetHumanPlayerCount(void);
@@ -153,7 +153,7 @@ int fn_8023D6FC(void);
 void fn_802C9904(void);
 int fn_801DF238(int key);
 int fn_802E4A10(void);
-int fn_80137C98(int unk);
+int FindDriverIndex(int unk);
 void fn_80276DC8(int player);
 }  // extern "C"
 void fn_8000C630(long, int);
@@ -422,7 +422,7 @@ static void fn_800053CC(void) {
     f32 r;
     f32 x;
     f32 y;
-    if (fn_801298E8(v, 0)) {
+    if (ReadJoyStatus(v, 0)) {
         r = 10.0f;
         x = 300.0f * v[0];
         f32 xx = v[0] * v[0];
@@ -1179,7 +1179,7 @@ int fn_800074EC(int key) {
     if (fn_801DF238(key)) {
         return 1;
     }
-    return fn_80007554(fn_80137C98(fn_802E4A10()), 1000, key);
+    return fn_80007554(FindDriverIndex(fn_802E4A10()), 1000, key);
 }
 
 int fn_80007554(int player, u32 type, int key) {

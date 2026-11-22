@@ -741,7 +741,7 @@ inline void AchievementTrophyModel::Load(const char* name) {
     IDENTITY(rot);
 }
 
-// Pad state as read by fn_801298E8 (partial).
+// Pad state as read by ReadJoyStatus (partial).
 struct ViewPad {
     f32 x;            // offset 0x0
     f32 y;            // offset 0x4
@@ -761,7 +761,7 @@ extern f32 lbl_8055F398;     // trophy spin angle
 extern f32 lbl_80498EAC[3];  // smoothed view direction
 
 extern "C" {
-int fn_801298E8(ViewPad* pad, int chan);
+int ReadJoyStatus(ViewPad* pad, int chan);
 void fn_80144DAC(f32* dst, const f32* src);
 f32 fn_80144CC8(f32 x);
 void fn_801BFEBC(f32* v, f32 x, f32 y, f32 z);
@@ -810,7 +810,7 @@ inline void AchievementTrophyModel::Turn(f32 dt) {
     f32 c[3];
     f32 r[3];
     Mat3 spin;
-    if (fn_801298E8(&pad, 0)) {
+    if (ReadJoyStatus(&pad, 0)) {
         f32 plus = (pad.hold & 2) ? 1.0f : 0.0f;
         f32 minus = (pad.hold & 8) ? -1.0f : 0.0f;
         lbl_8055F398 += dt * (3.1415927f * (minus + plus));

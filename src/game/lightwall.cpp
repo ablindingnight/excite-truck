@@ -159,7 +159,7 @@ void fn_802A96E8(const ValVec3* pts, int n, u32 color, s32 tex, s32 tex2) {
     }
 }
 
-void fn_802A9BFC(const ValVec3* from, const ValVec3* to, s32 tex, f32 fade, int u0, int v0, int u1, int v1) {
+void DrawGateBarSegment(const ValVec3* from, const ValVec3* to, s32 tex, f32 fade, int u0, int v0, int u1, int v1) {
     LSeg seg(from, to);
     f32 top = seg.a.y > seg.b.y ? seg.a.y : seg.b.y;
     seg.b.y = 10.0f + top;

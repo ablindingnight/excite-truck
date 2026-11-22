@@ -15,12 +15,12 @@ typedef char FontSize28[sizeof(GTextFont)==0x1C?1:-1];
 extern "C" {
 GTextFont* fn_80232578(const char*);
 void fn_802328D4(GTextFont*);
-void fn_80232928(unsigned long);
-float fn_8023293C(GTextFont*,const char*,float);
+void SetInputMask(unsigned long);
+float CalculateTextWidth(GTextFont*,const char*,float);
 int fn_80232B70(GTextFont*);
 int fn_80232B78(GTextFont*);
-void fn_80232BA4(const char*,GTextFont*,float,float,unsigned long,int,float,float,float);
-void fn_80233354(const char*,GTextFont*,unsigned long,int,float,float,float,float);
+void DrawColoredText(const char*,GTextFont*,float,float,unsigned long,int,float,float,float);
+void DrawTextWithOutlineAndAlignment(const char*,GTextFont*,unsigned long,int,float,float,float,float);
 void fn_80233600(const char*,GTextFont*,unsigned long,int,float,float,float);
 void fn_802336AC(GTextFont*,unsigned long,int,const char*,float,float,float,...);
 }

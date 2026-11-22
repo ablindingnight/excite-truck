@@ -1451,7 +1451,7 @@ extern "C" void fn_8013EB0C(ZoneMaster* zm, int car) {
 extern "C" {
 int fn_801E866C(int player);
 Watcher* fn_802C86DC(void);
-void fn_802A9BFC(PlainVec3* a, PlainVec3* b, s32 tex, f32 t, int d, int e, int f, int g);
+void DrawGateBarSegment(PlainVec3* a, PlainVec3* b, s32 tex, f32 t, int d, int e, int f, int g);
 void fn_801E9E30(s16* h, ZoneVec3* p);
 f32 fn_801E7E24(void);
 void fn_802981F8(ZoneVec3* p);
@@ -1488,7 +1488,7 @@ static inline void DrawGateBar(const PlainVec3& from, const PlainVec3& to, const
         lo = 0x48;
         hi = 0x72;
     }
-    fn_802A9BFC(&a, &b, tex, t, 0, lo, 0x100, hi);
+    DrawGateBarSegment(&a, &b, tex, t, 0, lo, 0x100, hi);
 }
 
 void ZoneMaster::DrawNextGate(void) {
@@ -2066,7 +2066,7 @@ void ZoneMaster::DrawHits(FixedArray<GateHit, 8>* __restrict hits) {
 extern "C" {
 size_t strlen(const char* s);
 char* fn_801308F4(char* buf, s32 size, s32 value);
-int fn_801609C4(int score);
+int FindGradeForScore(int score);
 }
 const char* GetGradeDisplayName(int grade);
 
@@ -2111,7 +2111,7 @@ int ZoneHud::Update(ZoneCar* c) {
     fn_801308F4(totalText, 0x14, total);
     fn_801308F4(noBonusText, 0x14, total - tb);
     {
-        int g = fn_801609C4(total);
+        int g = FindGradeForScore(total);
         if (g != -1) {
             SafeStrCopy(grade, GetGradeDisplayName(g), 10);
         } else {
@@ -2187,7 +2187,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void UpdateDashHelper(void);
 int fn_80161C38(void);
 int fn_80160A74(void);
-int fn_80160998(int x);
+int GetGradeScoreThreshold(int x);
 f32 fn_80147204(TextElem* item, const char* text);
 void fn_80130978(char* buf, int size, f32 t);
 void qsort(void* base, size_t n, size_t size, int (*cmp)(const void*, const void*));
@@ -2347,7 +2347,7 @@ inline void ZoneMaster::UpdateCars(void) {
                 c->doneT = now;
                 c->timeBonus = Floor(c->clock);
                 c->score += c->timeBonus;
-                fn_801CB5DC(i, c->score, fn_801609C4(c->score));
+                fn_801CB5DC(i, c->score, FindGradeForScore(c->score));
                 fn_801CB648(i, 1, c->clock);
                 if (c->human) {
                     SetTotal(i);
@@ -2609,7 +2609,7 @@ inline int ZoneMaster::vf3C(int p) {
                 char buf[0x14];
                 TextElem it;
                 fn_801479A8(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(a));
-                fn_801308F4(buf, 0x14, fn_80160998(fn_80160A74()));
+                fn_801308F4(buf, 0x14, GetGradeScoreThreshold(fn_80160A74()));
                 it = *b0;
                 it.pos.x -= fn_80147204(&it, buf) * 0.5f;
                 fn_801479A8(&it, b1, buf, Ease(a));

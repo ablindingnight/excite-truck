@@ -72,7 +72,7 @@ void fn_802CB274(s32 rt);
 void fn_802CB288(s32 rt);
 void fn_802D050C(void* tex);
 void fn_802D3050(int a);
-void fn_802D306C(int a);
+void SetDestinationAlpha(int a);
 void fn_802D30DC(void* tex);
 void fn_802D3ECC(u16 a);
 void LoadEnvironmentMapTexture(void* tex);
@@ -415,12 +415,12 @@ void fn_802039CC(const EFrame* cam, const EFrame* m) {
 void fn_80203A88(const ValVec3* v, const EFrame* cam, EFrame* m) {
     if (fn_80202BE4() == 0) {
         fn_802D3050(1);
-        fn_802D306C(90);
+        SetDestinationAlpha(90);
         m->pos = *v;
         m->pos.y += 0.5f;
         fn_802039CC(cam, m);
         DrawEnvironmentRings(m);
-        fn_802D306C(0);
+        SetDestinationAlpha(0);
     }
 }
 

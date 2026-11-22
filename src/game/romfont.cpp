@@ -54,7 +54,7 @@ extern "C" {
 void* drCreateTexture(TexDesc* desc, const char* name);
 void ReleaseTextureResources(void* tex);
 u8* fn_802D2F78(int* width, int* height);
-void fn_802D2FD8(void);
+void UpdateFrameBuffer(void);
 
 void fn_802C32B8(int x, int y, u32 color);
 void fn_802CED50(int x, int y, int w, int h);
@@ -95,7 +95,7 @@ static inline u8* ClearScreen(void) {
     desc.stride = width * 2;
     desc.width2 = width;
     desc.height2 = height;
-    fn_802C3034(reinterpret_cast<gxCanvas*>(&desc));
+    SetCurrentCanvas(reinterpret_cast<gxCanvas*>(&desc));
     return pixels;
 }
 
@@ -217,7 +217,7 @@ void fn_802DB03C(const char* msg) {
     strcpy(text, msg);
     Replace(text, '\n', ' ');
     fn_802DAE64(320, 120, text);
-    fn_802D2FD8();
+    UpdateFrameBuffer();
 }
 
 // The boot screen (date/time stamp, version check and the progressive/interlaced dialog): never called in this
@@ -242,7 +242,7 @@ static void BootScreenUnused(const char* name, int a, int b, int t[6], int dtv, 
 void fn_802DB168(void) {
     ClearScreen();
     fn_802DAE64(-450, 380, "LOADING");
-    fn_802D2FD8();
+    UpdateFrameBuffer();
     fn_802CED50(450, 380, 120, 30);
 }
 

@@ -232,20 +232,20 @@ bool lbl_8055F074;          // drawing black text
 
 extern "C" {
 
-void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
-void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
+void DrawFormattedTextWithEscapes(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
+void RenderTextWithFormatting(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing);
 
 
-void fn_80233AA4(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
-void fn_80233BF0(const char* s, GTextFont* f, f32* x, f32* y, int align, f32 scale, f32 xs);
+void DrawGlyphCharacter(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z);
+void CalculateTextAlignmentOffset(const char* s, GTextFont* f, f32* x, f32* y, int align, f32 scale, f32 xs);
 void fn_80233DD8(GTextFont* f, u32 color);
 void fn_80233E34(GTextFont* f, const UIXform* m, u32 color);
 void fn_80233E80(GTextFont* f, u32 color);
 void fn_80233EBC(void);
-void fn_80233EC0(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
+void DrawGlyphQuad(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1);
 
 void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f32 scale);
-void fn_802346C8(void);
+void RenderTextWithOutline(void);
 
 int fn_80231504(int) { return 0; }
 
@@ -258,7 +258,7 @@ int fn_8023150C(const char* name) {
     return -1;
 }
 
-void fn_8023158C(GTextFont* f, const char* name) {
+void RegisterFontEntry(GTextFont* f, const char* name) {
     FontEntry* e = &lbl_8055F068->e[lbl_8055F068->count++];
     e->font = f;
     e->refs = 1;
@@ -266,7 +266,7 @@ void fn_8023158C(GTextFont* f, const char* name) {
     strcpy(e->name, name);
 }
 
-int fn_802315FC(int idx) {
+int ReleaseFontEntry(int idx) {
     FontEntry* e = &lbl_8055F068->e[idx];
     if (--e->refs < 1) {
         gxForgetTexture(e->font->tex);
@@ -282,7 +282,7 @@ int fn_802316A4(GTextFont* f) {
     FontEntry* e = lbl_8055F068->e;
     for (int i = 0; i < lbl_8055F068->count; e++, i++) {
         if (e->font == f) {
-            return fn_802315FC(i);
+            return ReleaseFontEntry(i);
         }
     }
     fn_802E30C8("gText: I don't remember the font %p I was asked to forget", f);
@@ -296,7 +296,7 @@ u32 fn_80231718(u32 c) {
     return (c & 0xFF000000) | (((m >> 16) & 0xFF) << 16) | (((m >> 8) & 0xFF) << 8) | (m & 0xFF);
 }
 
-GTextFont* fn_80231730(const char* name) {
+GTextFont* LoadOutlineFont(const char* name) {
     char buf[24];
     sprintf(buf, "_ol_%s", name);
     if (fn_8012C33C(buf)) {
@@ -331,7 +331,7 @@ static inline ArtItem* ItemAt(int off) {
     return (ArtItem*)((u8*)lbl_8049846C.data + off);
 }
 
-void fn_80231780(const UIXform* m) {
+void DrawUiArtItems(const UIXform* m) {
     int off;
     int i = 0;
     off = 0;
@@ -482,7 +482,7 @@ static inline int EscAdv(const char* const& s, f32 h, double& adv, EscSeq*& e) {
     return 0;
 }
 
-void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
+void DrawFormattedTextWithEscapes(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
     const char* p = s;
     strlen(p);
     while (*p) {
@@ -507,13 +507,13 @@ void fn_80231AF0(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
         } else {
             lbl_8055F070(x, y, &tx, &ty);
         }
-        fn_80233AA4(f, c, tx, ty + h, tx + scale * f->glyphs[c].width, ty, z);
+        DrawGlyphCharacter(f, c, tx, ty + h, tx + scale * f->glyphs[c].width, ty, z);
         x += scale * f->glyphs[c].width;
         x += spacing + xs * (scale * f->glyphs[c].post);
     }
 }
 
-void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
+void RenderTextWithFormatting(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 scale, f32 xs, f32 spacing) {
     const char* p = s;
     strlen(p);
     while (*p) {
@@ -529,7 +529,7 @@ void fn_80231D84(const char* s, GTextFont* f, f32 x, f32 y, f32 z, f32 h, f32 sc
         Glyph* g = &f->glyphs[c];
         x += xs * (scale * g->pre);
         p += next - p;
-        fn_80233AA4(f, c, x, y + h, x + scale * g->width, y, z);
+        DrawGlyphCharacter(f, c, x, y + h, x + scale * g->width, y, z);
         x += scale * f->glyphs[c].width;
         x += spacing + xs * (scale * f->glyphs[c].post);
     }
@@ -542,7 +542,7 @@ void fn_80232024(const char** s, u32* color) {
     }
 }
 
-DrawFn lbl_8055B9A8 = fn_80231D84;
+DrawFn lbl_8055B9A8 = RenderTextWithFormatting;
 void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXform* m, f32 x, f32 y, f32 scale, f32 z,
                  f32 xs, f32 spacing) {
     u32 c;
@@ -561,7 +561,7 @@ void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXfor
         passes = 2;
     }
     f32 lh = f->height * scale * fn_8022EDC4()->scale;
-    fn_80233BF0(str, f, &px, &py, align, scale, xs);
+    CalculateTextAlignmentOffset(str, f, &px, &py, align, scale, xs);
     while (passes > 0) {
         const bool outline = passes == 2;
         GTextFont* ff = f;
@@ -580,13 +580,13 @@ void fn_80232040(const char* s, GTextFont* f, u32 color, int align, const UIXfor
         if (outline) {
             fn_80231ADC();
         } else {
-            fn_80231780(m);
+            DrawUiArtItems(m);
         }
         passes--;
     }
 }
 
-void fn_802321D8(void) {
+void InitializeFontSystem(void) {
     if (lbl_8055F068) {
         fn_802E317C("Font system already loaded! (gTextBegin() called twice)");
     }
@@ -594,7 +594,7 @@ void fn_802321D8(void) {
     memset(lbl_8055F068, 0, sizeof(FontTracker));
 }
 
-void fn_80232230(void) {
+void LoadEscapeSequenceData(void) {
     EscSeq* e;
     ValueTable* t;
     ValueNode* n;
@@ -654,7 +654,7 @@ GTextFont* fn_80232578(const char* name) {
     if (idx >= 0) {
         FontEntry* e = &lbl_8055F068->e[idx];
         e->refs++;
-        e->font->outline = fn_80231730(name);
+        e->font->outline = LoadOutlineFont(name);
         return e->font;
     }
     u8 ok = 0;
@@ -700,8 +700,8 @@ GTextFont* fn_80232578(const char* name) {
         return NULL;
     }
     f->tex = t;
-    f->outline = fn_80231730(name);
-    fn_8023158C(f, name);
+    f->outline = LoadOutlineFont(name);
+    RegisterFontEntry(f, name);
     return f;
 }
 
@@ -712,7 +712,7 @@ void fn_802328D4(GTextFont* f) {
     fn_802316A4(f);
 }
 
-void fn_80232928(u32 mask) { lbl_8055F060.value = mask; }
+void SetInputMask(u32 mask) { lbl_8055F060.value = mask; }
 
 void fn_80232930(void) { lbl_8055F060.value = lbl_8055F04C.value; }
 
@@ -741,7 +741,7 @@ struct GTextAdv {
     double v;
 };
 
-f32 fn_8023293C(GTextFont* f, const char* s, f32 xs) {
+f32 CalculateTextWidth(GTextFont* f, const char* s, f32 xs) {
     f32 h;
     f32 w;
     f32 gaps;
@@ -780,10 +780,10 @@ int fn_80232B78(GTextFont* f) { return f->b5; }
 
 void fn_80232B80(XformFn fn) {
     lbl_8055F070 = fn;
-    lbl_8055B9A8 = (fn == NULL) ? fn_80231D84 : fn_80231AF0;
+    lbl_8055B9A8 = (fn == NULL) ? RenderTextWithFormatting : DrawFormattedTextWithEscapes;
 }
 
-void fn_80232BA4(const char* text, GTextFont* f, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs) {
+void DrawColoredText(const char* text, GTextFont* f, f32 x, f32 y, u32 color, int align, f32 scale, f32 z, f32 xs) {
     u32 c = color;
     fn_80231714(&c);
     if (*text) {
@@ -794,7 +794,7 @@ void fn_80232BA4(const char* text, GTextFont* f, f32 x, f32 y, u32 color, int al
 void fn_80232C50(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 width, f32 z,
                  f32 xs) {
     u32 c = color;
-    f32 spacing = width - scale * fn_8023293C(f, text, xs);
+    f32 spacing = width - scale * CalculateTextWidth(f, text, xs);
     spacing /= strlen(text);
     fn_80231714(&c);
     if (*text) {
@@ -811,7 +811,7 @@ void fn_80232D3C(const char* text, GTextFont* f, u32 color, int align, const UIX
     }
 }
 
-/* Helper name unproven: resets the pen, the character index and the colour for one pass; the boundary is needed (in place: fn_80232DF4 100 -> 98.52) */
+/* Helper name unproven: resets the pen, the character index and the colour for one pass; the boundary is needed (in place: DrawTextWithOutline 100 -> 98.52) */
 static inline f32 RestartLine(f32 x0, int& i, u32& cc, u32 c) {
     f32 px;
     px = x0;
@@ -820,7 +820,7 @@ static inline f32 RestartLine(f32 x0, int& i, u32& cc, u32 c) {
     return px;
 }
 
-void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs) {
+void DrawTextWithOutline(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z, f32 xs) {
     int i;
     u32 c;
     f32 py;
@@ -832,7 +832,7 @@ void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
         f32 lh;
         int passes;
         lh = f->height * scale * fn_8022EDC4()->unk34;
-        fn_80233BF0(text, f, &px, &py, align, scale, xs);
+        CalculateTextAlignmentOffset(text, f, &px, &py, align, scale, xs);
         f32 x0 = px;
         strlen(text);
         for (passes = (f->outline != NULL) + 1; passes > 0; passes--) {
@@ -853,7 +853,7 @@ void fn_80232DF4(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
                 ch = DecodeUTF8(next, &next, *reinterpret_cast<const u8*>(next));
                 g = &ff->glyphs[ch];
                 px += (scale * g->pre) * xs;
-                fn_80233AA4(ff, ch, px, py - lh, px + scale * ff->glyphs[ch].width, py, z);
+                DrawGlyphCharacter(ff, ch, px, py - lh, px + scale * ff->glyphs[ch].width, py, z);
                 px += scale * ff->glyphs[ch].width;
                 px += xs * (scale * ff->glyphs[ch].post);
                 i += next - (text + i);
@@ -881,7 +881,7 @@ void fn_80233010(const char* text, GTextFont* f, u32 color, int align, int ingam
         const char* start = p;
         memset(buf, 0, sizeof(buf));
         int n = 0;
-        while (scale * fn_8023293C(f, buf, xs) < maxw && *p && *p != '\n' && *p != '|') {
+        while (scale * CalculateTextWidth(f, buf, xs) < maxw && *p && *p != '\n' && *p != '|') {
             const char* next = NextGlyph(p);
             int len = next - p;
             for (int j = 0; j < len; j++) {
@@ -911,7 +911,7 @@ void fn_80233010(const char* text, GTextFont* f, u32 color, int align, int ingam
         }
         f32 yy = y - line++ * (scale * fn_80232B70(f));
         if (!ingame) {
-            fn_80232BA4(buf, f, x, yy, color, align, scale, z, xs);
+            DrawColoredText(buf, f, x, yy, color, align, scale, z, xs);
         } else {
             fn_802344CC(buf, color, align, 0, x, yy, scale);
         }
@@ -920,7 +920,7 @@ void fn_80233010(const char* text, GTextFont* f, u32 color, int align, int ingam
 
 #pragma push
 #pragma opt_dead_assignments off  // Retain the initial UTF-8 scan for the alignment pass, as in retail.
-void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z) {
+void DrawTextWithOutlineAndAlignment(const char* text, GTextFont* f, u32 color, int align, f32 x, f32 y, f32 scale, f32 z) {
     fn_80231714(&color);
     f32 y0 = y;
     strlen(text);
@@ -932,9 +932,9 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
         if (align & 1) {
             w = 0.0f;
         } else if (align & 2) {
-            w = fn_8023293C(f, text, 1.0f);
+            w = CalculateTextWidth(f, text, 1.0f);
         } else if (align & 4) {
-            w = fn_8023293C(f, text, 1.0f);
+            w = CalculateTextWidth(f, text, 1.0f);
         }
         if (align & 8) {
             x += f->height * scale;
@@ -960,7 +960,7 @@ void fn_80233354(const char* text, GTextFont* f, u32 color, int align, f32 x, f3
                 u16 ch = DecodeUTF8(p, &nx, *reinterpret_cast<const u8*>(p));
                 Glyph* g = &ff->glyphs[ch];
                 y -= scale * g->pre;
-                fn_80233EC0(ff, ch, x, y, z, x + lh, y - scale * g->width, z);
+                DrawGlyphQuad(ff, ch, x, y, z, x + lh, y - scale * g->width, z);
                 i += nx - (text + i);
                 y -= scale * (ff->glyphs[ch].width + ff->glyphs[ch].post);
             }
@@ -990,12 +990,12 @@ void fn_802336AC(GTextFont* f, u32 color, int align, const char* fmt, f32 x, f32
     fn_80233600(buf, f, color, align, x, y, z);
 }
 
-void fn_802337A0(GTextFont* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 xs, ...) {
+void PrintFormattedText(GTextFont* f, u32 color, int align, const char* fmt, f32 x, f32 y, f32 z, f32 scale, f32 xs, ...) {
     char buf[128];
     va_list ap;
     va_start(ap, xs);
     vsprintf(buf, fmt, ap);
-    fn_80232BA4(buf, f, x, y, color, align, scale, z, xs);
+    DrawColoredText(buf, f, x, y, color, align, scale, z, xs);
 }
 
 void fn_8023389C(GTextFont* f, u32 color, int align, const UIXform* m, const char* fmt, f32 x, f32 y, f32 z,
@@ -1012,10 +1012,10 @@ void fn_802339A8(GTextFont* f, u32 color, int align, const char* fmt, f32 x, f32
     va_list ap;
     va_start(ap, xs);
     vsprintf(buf, fmt, ap);
-    fn_80232DF4(buf, f, color, align, x, y, scale, z, xs);
+    DrawTextWithOutline(buf, f, color, align, x, y, scale, z, xs);
 }
 
-void fn_80233AA4(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
+void DrawGlyphCharacter(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
     if (c != ' ') {
         u32 color = lbl_8055F050;
         UIVert v[4];
@@ -1028,15 +1028,15 @@ void fn_80233AA4(GTextFont* f, u16 c, f32 x0, f32 y0, f32 x1, f32 y1, f32 z) {
     }
 }
 
-void fn_80233BF0(const char* s, GTextFont* f, f32* x, f32* y, int align, f32 scale, f32 xs) {
+void CalculateTextAlignmentOffset(const char* s, GTextFont* f, f32* x, f32* y, int align, f32 scale, f32 xs) {
     if (align & 1) {
         const char* next;
         u16 c = DecodeUTF8(s, &next, *reinterpret_cast<const u8*>(s));
         *x -= f->glyphs[c].pre;
     } else if (align & 2) {
-        *x -= scale * fn_8023293C(f, s, xs);
+        *x -= scale * CalculateTextWidth(f, s, xs);
     } else if (align & 4) {
-        *x -= Mul(scale * fn_8023293C(f, s, xs), 0.5f);
+        *x -= Mul(scale * CalculateTextWidth(f, s, xs), 0.5f);
     }
     f32 cs = fn_8022EDC4()->scale;
     if (align & 8) {
@@ -1066,7 +1066,7 @@ void fn_80233E80(GTextFont* f, u32 color) {
 
 void fn_80233EBC(void) { fn_802C8D74(); }
 
-void fn_80233EC0(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1) {
+void DrawGlyphQuad(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1) {
     if (c != ' ') {
         u32 color = lbl_8055F050;
         UIVert v[4];
@@ -1079,7 +1079,7 @@ void fn_80233EC0(GTextFont* f, int c, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f3
     }
 }
 
-f32 fn_8023400C(int idx) {
+f32 CalculateTextRenderWidth(int idx) {
     f32 w = 0.0f;
     f32 gaps = 0.0f;
     int i = 0;
@@ -1108,7 +1108,7 @@ f32 fn_8023400C(int idx) {
     return w + gaps;
 }
 
-void fn_8023423C(int idx, int align) {
+void AdjustTextAlignment(int idx, int align) {
     GTextFont* f = lbl_8055F058.font;
     f32 scale = lbl_8055F06C[idx].scale;
     f32 xs = lbl_8055F06C[idx].xs;
@@ -1118,9 +1118,9 @@ void fn_8023423C(int idx, int align) {
         u16 c = DecodeUTF8(p, &next, *reinterpret_cast<const u8*>(p));
         lbl_8055F06C[idx].x -= xs * f->glyphs[c].pre;
     } else if (align & 2) {
-        lbl_8055F06C[idx].x -= fn_8023400C(idx);
+        lbl_8055F06C[idx].x -= CalculateTextRenderWidth(idx);
     } else if (align & 4) {
-        lbl_8055F06C[idx].x -= Mul(fn_8023400C(idx), 0.5f);
+        lbl_8055F06C[idx].x -= Mul(CalculateTextRenderWidth(idx), 0.5f);
     }
     if (align & 8) {
         lbl_8055F06C[idx].y -= f->height * scale;
@@ -1131,7 +1131,7 @@ void fn_8023423C(int idx, int align) {
     }
 }
 
-GTextFont* fn_8023441C(const char* font) {
+GTextFont* LoadTextFont(const char* font) {
     lbl_8055F06C = (TextItem*)__nwa__FUlPCc(0x60 * sizeof(TextItem), "gText ingame buffer");
     lbl_8055F058.font = fn_80232578(font);
     lbl_8055F058.count = 0;
@@ -1155,7 +1155,7 @@ void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f3
     c = color;
     fn_80232024(&str, &c);
     if (lbl_8055F058.count >= 0x60) {
-        fn_802346C8();
+        RenderTextWithOutline();
     }
     strncpy(lbl_8055F06C[lbl_8055F058.count].text, str, 0x40);
     lbl_8055F06C[lbl_8055F058.count].text[0x3F] = 0;
@@ -1170,7 +1170,7 @@ void fn_802344CC(const char* s, u32 color, int align, int wide, f32 x, f32 y, f3
     } else {
         lbl_8055F06C[count].xs = scale;
     }
-    fn_8023423C(count, align);
+    AdjustTextAlignment(count, align);
     lbl_8055F058.Advance();
 }
 
@@ -1195,7 +1195,7 @@ static inline u16 DecodeUTF8WithLength(const char* p, int& len) {
     return c;
 }
 
-void fn_802346C8(void) {
+void RenderTextWithOutline(void) {
     struct DrawState {
         GTextFont* f;
         u32* cp;
@@ -1256,7 +1256,7 @@ void fn_802346C8(void) {
         if (passes == 2) {
             fn_80231ADC();
         } else {
-            fn_80231780(NULL);
+            DrawUiArtItems(NULL);
         }
     }
     lbl_8055F058.count = 0;
@@ -1272,12 +1272,12 @@ struct GTextStyle {
     f32 xs;      // offset 0x10
 };
 
-void fn_80234AFC(GTextStyle* st, const char* fmt, f32 x, f32 y, ...) {
+void DrawTextFormatted(GTextStyle* st, const char* fmt, f32 x, f32 y, ...) {
     char buf[128];
     va_list ap;
     va_start(ap, y);
     vsprintf(buf, fmt, ap);
-    fn_80232BA4(buf, st->font, x, y, st->color, st->align, st->scale, 1.0f, st->xs);
+    DrawColoredText(buf, st->font, x, y, st->color, st->align, st->scale, 1.0f, st->xs);
 }
 
 // Unused (the canvas path was removed): MWCC drops the function and keeps its string.

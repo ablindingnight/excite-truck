@@ -73,7 +73,7 @@ CamCar* fn_8017960C(s32 car);
 void CalculateCameraMatrix(CamFrame* out, const CamVec* eye, const CamVec* target, const CamVec* up);
 void fn_801BFD34(CamVec* out, const CamVec* v, const CamFrame* m);
 
-// The pad as fn_801298E8 fills it (achview's ViewPad, keybd's KeyState): sticks, the analog trigger at 0x1C,
+// The pad as ReadJoyStatus fills it (achview's ViewPad, keybd's KeyState): sticks, the analog trigger at 0x1C,
 // buttons, d-pad bits.
 typedef struct FreePad {
     f32 x0, y0, x1, y1, x2, y2, x3, y3;  // offset 0x0 (y3: the trigger)
@@ -93,7 +93,7 @@ extern f32 lbl_8055F4F8;        // its pitch
 extern s32 lbl_8055CFF0;        // screen width
 extern s32 lbl_8055CFF4;        // screen height
 void fn_80127A84(s32* x, s32* y, s32* buttons);
-int fn_801298E8(FreePad* pad, int chan);
+int ReadJoyStatus(FreePad* pad, int chan);
 u32 fn_802E2C20(void);
 int fn_802E4A1C(int key);
 f32 fn_801EA0E8(f32 x, f32 z);
@@ -182,7 +182,7 @@ void fn_8026B8A0(void) {
     right.y = 0.0f;
     fwd = lbl_80499050.rot.axes[2];
     fwd.y = 0.0f;
-    if (fn_801298E8(&pad, 0)) {
+    if (ReadJoyStatus(&pad, 0)) {
         turn = 3.1415927f;
         f32 t = CamUnit(pad.y3, -1.0f, 1.0f);
         speed = CamSpeed(t, 1.0f);
@@ -489,7 +489,7 @@ void fn_8026C014(int player) {
     if (fn_802D3EBC()) {
         return;
     }
-    if (fn_801298E8(&pad, player ? fn_80137CFC(0) : 0)) {
+    if (ReadJoyStatus(&pad, player ? fn_80137CFC(0) : 0)) {
         s32 b = fn_801297F4()[10];
         if (b >= 0) {
             u8 down = pad.keys[b];

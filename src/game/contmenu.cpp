@@ -67,7 +67,7 @@ void fn_802E8528(int ch, f32 a, f32 b);
 int fn_802E8D84(void);
 int fn_802E6FBC(void);
 void fn_802E8518(int ch);
-int fn_80129890(void);
+int CountActiveControllers(void);
 void fn_802E317C(const char* fmt, ...);
 extern char lbl_8055B860[8];
 }
@@ -324,7 +324,7 @@ void MenuDoControlUnified(void) {
         if (fn_802E8D84()) {
             fn_802E6FBC();
         }
-        for (int i = 0; i < fn_80129890(); i++) {
+        for (int i = 0; i < CountActiveControllers(); i++) {
             fn_802E8518(i);
         }
     case -1:

@@ -8,7 +8,7 @@ void* memset(void* dst, int c, size_t n);
 int sprintf(char* buf, const char* fmt, ...);
 s32 fn_802E2C20(void);                         // milliseconds
 int fn_802ECC10(void);                         // keys locked
-void fn_802D07E4(const char* name, int full);  // save screenshot
+void TakeScreenshot(const char* name, int full);  // save screenshot
 }
 
 // The raw input state.
@@ -36,21 +36,21 @@ u8 lbl_804FC458[0x100];  // keys held
 
 extern "C" {
 
-void fn_802E47E8(void);
+void ClearInputBuffer(void);
 void fn_802E4A2C(void);
 
 void fn_802E46AC(void) {}
 
 void fn_802E46B0(void) {
     lbl_8055FF5C = 0;
-    fn_802E47E8();
+    ClearInputBuffer();
     lbl_8055D1C0[0] = -1;
     fn_802E46AC();
 }
 
 void fn_802E46E4(void) { lbl_8055D1C0[0] = -1; }
 
-int fn_802E46F0(void) {
+int HandleScreenshotInput(void) {
     fn_802E4A2C();
     u16 k = lbl_8055FF50[0];
     lbl_8055FF5A = k;
@@ -71,7 +71,7 @@ int fn_802E46F0(void) {
         if (lbl_8055FF60 == 0x112) {
             char name[0x20];
             sprintf(name, "shot%02d.tga", lbl_8055FF64);
-            fn_802D07E4(name, key == 0x17B);
+            TakeScreenshot(name, key == 0x17B);
             lbl_8055FF64++;
             key = 0;
         }
@@ -87,7 +87,7 @@ int fn_802E47B8(void) {
     return lbl_8055FF50[0] != 0;
 }
 
-void fn_802E47E8(void) { memset(lbl_8055FF50, 0, sizeof(lbl_8055FF50)); }
+void ClearInputBuffer(void) { memset(lbl_8055FF50, 0, sizeof(lbl_8055FF50)); }
 
 int fn_802E47F8(int) { return 0; }
 

@@ -3,7 +3,7 @@
 
 #include "game/common.h"
 
-// joy.cpp's pad state (fn_801298E8 fills one; inputbind.cpp keeps arrays of them, 0x64 apart). Names are guesses.
+// joy.cpp's pad state (ReadJoyStatus fills one; inputbind.cpp keeps arrays of them, 0x64 apart). Names are guesses.
 
 struct JoyInfo {
     u32 hold;  // offset 0x0

@@ -11,8 +11,8 @@ void fn_8023D7CC(void);
 void fn_8023D70C(void);
 void MenuDoDemo(void);
 void fn_80247210(void);
-void fn_80129AEC(int a);
-void fn_802E47E8(void);
+void SetInputChannel(int a);
+void ClearInputBuffer(void);
 void fn_80127A24(void);
 void InitializeCareerEvents(void);
 #ifdef __MWERKS__
@@ -63,8 +63,8 @@ void fn_8023B670(void) {
 }
 
 void fn_8023B6B0(void) {
-    fn_80129AEC(0);
-    fn_802E47E8();
+    SetInputChannel(0);
+    ClearInputBuffer();
     fn_80127A24();
     fn_8023B618();
     InitializeCareerEvents();

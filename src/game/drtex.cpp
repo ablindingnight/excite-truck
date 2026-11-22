@@ -32,7 +32,7 @@ void fn_80128658(void* p);
 void fn_802CFEEC(void);
 void fn_802CFF50(void);
 void fn_802CFF5C(u32 flags);
-void fn_802CFFA4(u32 zhint);
+void SetBlendMode(u32 zhint);
 void fn_802D2614(void);
 void fn_802D6C68(void);
 void fn_802E30C8(const char* fmt, ...);
@@ -571,7 +571,7 @@ void LoadTextureObject(GXTex* t, int) {
     fn_802D6C68();
     lbl_8055FE18 = t;
     fn_802CFF5C(t->flags | (lbl_8055FD1C & ~0x14E));
-    fn_802CFFA4(t->zhint);
+    SetBlendMode(t->zhint);
     lbl_8055FD24 = t->alphaRef;
     if (t->lut) {
         GXLoadTlut((GXTlutObj*)&t->tlut, (u32)0);

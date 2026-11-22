@@ -28,12 +28,12 @@ void fn_802C5F48(void);
 void mrModelEnd(void);
 void fn_802CFFAC(int r, int g, int b);
 void fn_802D0160(int r, int g, int b);
-void fn_802D0188(int r, int g, int b);
+void SetAmbientColor(int r, int g, int b);
 void fn_802C7758(void);
 void fn_802C7734(int a);
 void fn_802CC60C(void);
 void fn_802CFCA0(void);
-void fn_802CFDE0(void);
+void HandleFrameSync(void);
 void fn_802CC770(void);
 void fn_802D03F4(void* mtx);
 void fn_802D01E0(int x, int y, int w, int h);
@@ -49,12 +49,12 @@ void fn_801E4FF4(void);
 void fn_802CB29C(int a);
 void fn_802D0368(f32 a, f32 b, f32 fov, f32 aspect);
 void fn_802D007C(f32 a);
-void fn_802D01B0(void* v, f32 a);
+void SetDirectionScale(void* v, f32 a);
 f32 fn_802D93E0(void);
-int fn_802D31D8(int a);
-void fn_802D362C(int a);
-void fn_802D3304(void);
-void fn_802D08CC(int a);
+int SetupTransparentRendering(int a);
+void CopyTextureAndSetupRenderState(int a);
+void SetupRenderState(void);
+void SetCullMode(int a);
 void* CreateGenericDrawList(int a);
 void DeleteGenericDrawList(void* p);
 void AddTriangleStrip(void* p, f32 x, f32 y, f32 z, int a, f32 s, f32 t, int b);
@@ -243,7 +243,7 @@ void fn_802C8530(void) {
 }
 
 void fn_802C855C(void) {
-    fn_802CFDE0();
+    HandleFrameSync();
     fn_802CC770();
     lbl_8055FC70 = 0;
 }
@@ -648,11 +648,11 @@ u32 fn_802C9950(u32 color) {
 u32 fn_802C9994(u32 color) {
     u32 old = lbl_8055FC80;
     lbl_8055FC80 = color;
-    fn_802D0188((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+    SetAmbientColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
     return old;
 }
 
-void fn_802C99D8(void) { fn_802D01B0(&lbl_804C1440, lbl_8055D01C); }
+void fn_802C99D8(void) { SetDirectionScale(&lbl_804C1440, lbl_8055D01C); }
 
 f32 fn_802C99E8(f32 v) {
     f32 old = lbl_8055D01C;
@@ -729,13 +729,13 @@ s32 fn_802C9C50(void) { return lbl_8055FC5C; }
 s32 fn_802C9C58(s32 mode) {
     s32 old = lbl_8055FC30;
     lbl_8055FC30 = mode;
-    fn_802D08CC(mode);
+    SetCullMode(mode);
     return old;
 }
 
 int fn_802C9C8C(int a) {
     fn_802CAD68();
-    if (fn_802D31D8(1)) {
+    if (SetupTransparentRendering(1)) {
         lbl_8055FC84 = a;
         lbl_8055FC70 = 4;
         return 1;
@@ -744,8 +744,8 @@ int fn_802C9C8C(int a) {
 }
 
 void fn_802C9CE0(void) {
-    fn_802D362C(lbl_8055FC84);
-    fn_802D3304();
+    CopyTextureAndSetupRenderState(lbl_8055FC84);
+    SetupRenderState();
     lbl_8055FC70 = 1;
 }
 

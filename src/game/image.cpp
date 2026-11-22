@@ -60,7 +60,7 @@ int fn_802C5220(void* img) {
     return 1;
 }
 
-int fn_802C5280(void* img, int x, int y, int) {
+int IsPixelInBounds(void* img, int x, int y, int) {
     int r;
     if (img) {
         r = 0;
@@ -73,13 +73,13 @@ int fn_802C5280(void* img, int x, int y, int) {
     return r;
 }
 
-void fn_802C5310(void* img, int frame, f32 x, f32 y, f32 z) {
+void DrawImageFrame(void* img, int frame, f32 x, f32 y, f32 z) {
     if (img) {
         DrawArtPictureAtPosition(static_cast<gArtSet*>(img), frame, x, y, z);
     }
 }
 
-void fn_802C5320(void* img, int frame, f32 x, f32 y, f32 z, f32 width, f32 height) {
+void DrawImageWithParams(void* img, int frame, f32 x, f32 y, f32 z, f32 width, f32 height) {
     if (img) {
         fn_802354A0(static_cast<gArtSet*>(img), frame, x, y, z, width, height, -1);
     }

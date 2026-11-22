@@ -31,7 +31,7 @@ const char* fn_80215264(void);
 void* fn_8022EDE4(const UiPose* p, f32 alpha);
 void fn_8022EE98(void* obj);
 void* fn_8022EE9C(void);
-f32 fn_8023659C(void);
+f32 CalculateTimeDelta(void);
 void fn_802E30C8(const char* fmt, ...);
 void fn_802E317C(const char* fmt, ...);
 }
@@ -558,7 +558,7 @@ inline void UiSpecialList::Start(const char* name) {
     for (int i = 0; i < n; i++) {
         if (!strcasecmp(items[i].name, name)) {
             items[i].active = 1;
-            items[i].start = fn_8023659C();
+            items[i].start = CalculateTimeDelta();
             StopOthers(i);
         }
     }
@@ -581,7 +581,7 @@ void fn_80237E7C(const char* name) { lbl_8055F0C0->special->Stop(name); }
 inline int UiSpecialList::State(const char* name) {
     int found = 0;
     int running = 0;
-    f32 now = fn_8023659C();
+    f32 now = CalculateTimeDelta();
     for (int i = 0; i < n; i++) {
         if (!strcasecmp(items[i].name, name)) {
             UiSpecial* s = &items[i];
@@ -638,7 +638,7 @@ UiSpecialList::~UiSpecialList(void) {
 f32 UiSpecialList::Length(void) { return 0.0f; }
 
 void UiSpecialList::Apply(f32 t) {
-    f32 now = fn_8023659C();
+    f32 now = CalculateTimeDelta();
     UiSpecial* s;
     for (int i = 0; i < n; i++) {
         s = &items[i];

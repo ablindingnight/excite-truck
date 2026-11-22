@@ -304,7 +304,7 @@ struct ProviderChoicePrefix {
  int fontResource; // 0x268: passed to font measurement/text APIs, not a pixel height
 };
 extern "C" {
-float fn_8023659C();void fn_80216D28();void fn_80230E90(int);
+float CalculateTimeDelta();void fn_80216D28();void fn_80230E90(int);
 }
 
 
@@ -380,8 +380,8 @@ extern "C" {
 extern float __float_epsilon[];extern const float lbl_80563508,lbl_8056350C,lbl_805634C8;
 }
 static inline float ObservedProviderClamp(float value){float one=(1.0f);float limited=one<value?one:value;float zero=(0.0f);return limited>zero?limited:zero;}
-static inline float ObservedArrowOffset(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
-static inline u32 ObservedArrowColor(const float* stamp){float now=fn_8023659C();float fraction=PaletteNaturalRemap(now-*stamp,0.0f,0.15f);int alpha=(int)PaletteNaturalLerp(255.0f,0.0f,fraction);return((u32)alpha<<24)|0x00ffffffu;}
+static inline float ObservedArrowOffset(const float* stamp){float now=CalculateTimeDelta();float fraction=PaletteNaturalRemap(0.3f+*stamp-now,0.0f,0.3f);return PaletteNaturalLerp(0.0f,10.0f,fraction);}
+static inline u32 ObservedArrowColor(const float* stamp){float now=CalculateTimeDelta();float fraction=PaletteNaturalRemap(now-*stamp,0.0f,0.15f);int alpha=(int)PaletteNaturalLerp(255.0f,0.0f,fraction);return((u32)alpha<<24)|0x00ffffffu;}
 extern "C" {
 
 struct DragViewportPrefix {char base[0x244];ObservedListViewport* state;void* first;void* second;bool dragging;char gap251[3];int direction,grabX,grabY;};
@@ -514,8 +514,8 @@ struct TextEntryPrefix {char base[0x244];int state,capacity,stride,cursor;char u
 typedef char TextEntryPrefixSize[(sizeof(TextEntryPrefix)==0xa64)?1:-1];
 extern "C" {
 
-void fn_802C2FC8(void*,int,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
-void fn_8022B390(int,const char*,int,int*,int*);void fn_802C47B8(int,int,int,int,int);void fn_802C3014(void*);
+void ClampCanvasCoordinates(void*,int,int,int,int);void fn_80228DC4(ObservedClipPrefix*,void*,int,int,int,int);
+void fn_8022B390(int,const char*,int,int*,int*);void fn_802C47B8(int,int,int,int,int);void SetCanvasCoordinates(void*);
 int fn_8022B2D4(int,const char*,int,int);extern const u32 lbl_8055FBF8;
 // Observed text-entry prefix only; no complete allocation or buffer-storage ownership claim.
 typedef struct TextPaintReceiverNew TextPaintReceiverNew;
@@ -563,7 +563,7 @@ struct TweenPrefix {char base[0x24c];int selected;char gap250[12];float blend;ch
 // RichCaptionPrefix supplies the same text/font fields to the legacy bitmap draw callback.
 extern "C" {
 
-void fn_801A7E54(char*,int,Binding*);void fn_802C40B8(gxCanvas*,int,int);void fn_802ECFEC(void*);void fn_802ED038(void*,float,float,float,float);
+void GetBindingText(char*,int,Binding*);void fn_802C40B8(gxCanvas*,int,int);void fn_802ECFEC(void*);void fn_802ED038(void*,float,float,float,float);
 void fn_802237DC(WidgetFragment*);
 void fn_80221E7C(WidgetFragment* self);
 void fn_80221EA0(WidgetFragment* self,int key,void* value,int size);
@@ -639,7 +639,7 @@ struct DelegatePaintPrefix {char base[0x244];DelegatePaintDispatch* child;int fi
 struct ResourceDescriptorPrefix {int zero,token,x,y,kind,width,height;float point;char text[0x64];int extra84,extra88,extra8c,extra90,extra94,extra98,extra9c,extraa0,extraa4;};
 extern "C" {
 extern KeyDetect lbl_80490934;
-void fn_801A7844(int);int fn_801A7C8C(Binding*);void fn_802E47E8();void fn_802E30C8(const char*,...);
+void InitializeJoyStatus(int);int FindValidInputBinding(Binding*);void ClearInputBuffer();void fn_802E30C8(const char*,...);
 int fn_8021F478(int* result);
 void fn_80227C9C(gArtSet* self,float x,float y,float width,float height);
 }
@@ -981,7 +981,7 @@ typedef struct ImageFillGlobalNew {char gap0[0x70];float padding;} ImageFillGlob
 
 extern "C" {
 extern const float lbl_805634A8,lbl_805634C0,lbl_805634C4,lbl_805634C8,lbl_805634D8,lbl_805634DC,lbl_805634E0;extern const double lbl_805634D0;
-float fn_8023659C(void);double fmod(double,double);double sin(double);
+float CalculateTimeDelta(void);double fmod(double,double);double sin(double);
 // Shared UIDraw declarations use one consistent source contract.
 // Remaining opaque graphics imports are bounded views, not recovered original headers.
 }
@@ -1088,7 +1088,7 @@ UILabel::UILabel(int x,int y,int width,int height,int dx,int dy) : UIWidget(x,y,
  self->x=0;self->y=0;self->width=width;self->height=height;
 }
 void UILabel::Slot24(void* context) {
- fn_802C3034(reinterpret_cast<gxCanvas*>(context));int frame=((WidgetDispatch*)((WidgetFragment*)this))->Slot84();const char* text=((WidgetDispatch*)((WidgetFragment*)this))->Slot88();
+ SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));int frame=((WidgetDispatch*)((WidgetFragment*)this))->Slot84();const char* text=((WidgetDispatch*)((WidgetFragment*)this))->Slot88();
  fn_8022B91C(((WidgetFragment*)this)->height,((WidgetFragment*)this)->x,((WidgetFragment*)this)->y,text,frame);
 }
 int UILabel::Slot84(void){return 0;}
@@ -1124,11 +1124,11 @@ void fn_80219AB4(WidgetFragment* self,int kind,const char* name,int style,int ar
  const char* font=0;if(kind!=6&&kind!=3)font=(const char*)argument;
  float sharedScale,sharedWidth;switch(kind){
  case 0:case 1:case 7:break;
- case 4:if(font){f->fontResource=fn_80232578(font);int height=fn_80232B70(f->fontResource);height=height<1?1:height;sharedWidth=(float)((WidgetDispatch*)self)->Slot78()/(float)height;float width=fn_8023293C(f->fontResource,name,(1.0f));width=width>(1.0f)?width:(1.0f);float other=(float)(self->bottom-self->top)/width;f->scale=sharedWidth<other?sharedWidth:other;}break;
- case 2:if(font){f->fontResource=fn_80232578(font);int h=fn_80232B70(f->fontResource);float height=(float)(self->bottom-self->top);h=h<1?1:h;float scale=height/(float)h;float width=fn_8023293C(f->fontResource,name,(1.0f));sharedWidth=(1.0f);if(width>sharedWidth)sharedWidth=width;float other=(float)((WidgetDispatch*)self)->Slot78()/sharedWidth;f->scale=scale<other?scale:other;}break;
+ case 4:if(font){f->fontResource=fn_80232578(font);int height=fn_80232B70(f->fontResource);height=height<1?1:height;sharedWidth=(float)((WidgetDispatch*)self)->Slot78()/(float)height;float width=CalculateTextWidth(f->fontResource,name,(1.0f));width=width>(1.0f)?width:(1.0f);float other=(float)(self->bottom-self->top)/width;f->scale=sharedWidth<other?sharedWidth:other;}break;
+ case 2:if(font){f->fontResource=fn_80232578(font);int h=fn_80232B70(f->fontResource);float height=(float)(self->bottom-self->top);h=h<1?1:h;float scale=height/(float)h;float width=CalculateTextWidth(f->fontResource,name,(1.0f));sharedWidth=(1.0f);if(width>sharedWidth)sharedWidth=width;float other=(float)((WidgetDispatch*)self)->Slot78()/sharedWidth;f->scale=scale<other?scale:other;}break;
  case 9:f->resource=fn_8023512C(name);break;
  case 3:case 6:case 8:f->resource=fn_8023512C(name);if(argument)fn_80219440(self,0,(void*)argument,4);break;
- case 5:if(font){f->fontResource=fn_80232578(font);int h=fn_80232B70(f->fontResource);float height=(float)(self->bottom-self->top);h=h<1?1:h;float scale=height/(float)h;float width=fn_8023293C(f->fontResource,name,(1.0f));sharedWidth=(1.0f);if(width>sharedWidth)sharedWidth=width;float other=(float)((WidgetDispatch*)self)->Slot78()/sharedWidth;f->scale=scale<other?scale:other;}break;
+ case 5:if(font){f->fontResource=fn_80232578(font);int h=fn_80232B70(f->fontResource);float height=(float)(self->bottom-self->top);h=h<1?1:h;float scale=height/(float)h;float width=CalculateTextWidth(f->fontResource,name,(1.0f));sharedWidth=(1.0f);if(width>sharedWidth)sharedWidth=width;float other=(float)((WidgetDispatch*)self)->Slot78()/sharedWidth;f->scale=scale<other?scale:other;}break;
  default:fn_802E317C("ArtWidget: unknown type %d",kind);break;
  }
 }
@@ -1162,7 +1162,7 @@ void ArtWidget::Slot28(void) {ImageFillPaintNew* fields=(ImageFillPaintNew*)((Wi
     float borderX;
     float leftCapWidth;
 
-    time = fn_8023659C();
+    time = CalculateTimeDelta();
     zero = (0.0f);
     x = zero;
     y = zero;
@@ -1210,7 +1210,7 @@ void ArtWidget::Slot28(void) {ImageFillPaintNew* fields=(ImageFillPaintNew*)((Wi
                 frameSign = (unsigned int) pulseFrame >> 0x1FU;
                 if ((((pulseFrame & 1) ^ frameSign) - frameSign) == 0) {
                     pulseSpan = (10.0f);
-                    double phase = fmod(fn_8023659C(), 1.0);
+                    double phase = fmod(CalculateTimeDelta(), 1.0);
                     extra = (pulseSpan * ((0.5f) + ((0.5f) * (float) sin((double) ((6.2831855f) * (float) phase))))) - (pulseSpan / 2.0f);
 
                     fn_802354A0(pulseImage, pulseFrame, x - (0.5f)*extra, y + (0.5f)*extra, (0.0f), extra + (float) ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), extra + (float) (fields->bottom - fields->top), -1U);
@@ -1312,7 +1312,7 @@ UIArrowButton::UIArrowButton(int x,int y,void* handle) : UIWidget(x,y,x+fn_802C5
  TimedAnimationPrefix* fields=(TimedAnimationPrefix*)self;fields->handle=handle;fields->active=0;fields->elapsed=(0.0f);fields->period=(0.3f);
 }
 void UIArrowButton::Slot24(void* context) {
- fn_802C3034(reinterpret_cast<gxCanvas*>(context));TimedAnimationPrefix* fields=(TimedAnimationPrefix*)((WidgetFragment*)this);
+ SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));TimedAnimationPrefix* fields=(TimedAnimationPrefix*)((WidgetFragment*)this);
  fn_802C51AC(fields->handle);int result=fn_802C51AC(fields->handle);
  if(result>0)fn_802C51AC(fields->handle);
 }
@@ -1322,7 +1322,7 @@ void UIArrowButton::Slot28(void) {
  if(fn_802C51AC(fields->handle)==3&&mode==3)mode=1;
  if(fn_802C51AC(fields->handle)>0)mode%=fn_802C51AC(fields->handle);
  int x=((WidgetFragment*)this)->left-lbl_8055FB9C/2;int y=lbl_8055FBA0/2-((WidgetFragment*)this)->top;
- fn_802C5310(fields->handle,mode,(float)x,(float)y,(0.0f));
+ DrawImageFrame(fields->handle,mode,(float)x,(float)y,(0.0f));
 }
 void UIArrowButton::Slot7C(void) {
  TimedAnimationPrefix* fields=(TimedAnimationPrefix*)((WidgetFragment*)this);
@@ -1376,7 +1376,7 @@ StaticText::StaticText(int x,int y,const char* label,int height,int* value,int w
  strcpy((char*)self+0x268,label);self->value=value;fn_80219718(self);}
 void StaticText::Slot7C(void) {UIWidget::Slot7C();CaptionBufferPrefix* f=(CaptionBufferPrefix*)((WidgetFragment*)this);const char* label=f->label;if(strcmp(label,f->text)!=0){strcpy(f->text,label);fn_80219718(((WidgetFragment*)this));WidgetMarkDirty(((WidgetFragment*)this));}}
 int StaticText::Slot84(void) {int* value=((WidgetFragment*)this)->value;if(value)return *value;return 0;}
-void ColorRect::Slot24(void* context) {fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802C3424(((WidgetFragment*)this)->x,((WidgetFragment*)this)->y,((WidgetFragment*)this)->width,((WidgetFragment*)this)->height,(int)((WidgetFragment*)this)->label);}
+void ColorRect::Slot24(void* context) {SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));fn_802C3424(((WidgetFragment*)this)->x,((WidgetFragment*)this)->y,((WidgetFragment*)this)->width,((WidgetFragment*)this)->height,(int)((WidgetFragment*)this)->label);}
 
 // Emit the base destructor here and expand it into the derived destructor.
 #pragma push
@@ -1396,21 +1396,21 @@ void CustomText::Slot28(void) {FullDrawStatePrefix scope;/* The context stack re
 Column::Column(FormattedChoiceDescriptor* desc, UITable* provider, int column) : UIWidget((WidgetDesc*)desc) { WidgetFragment* self=(WidgetFragment*)this;fn_8021BA64(self,desc->width,desc->height,provider,column,desc->name,desc->font,desc->option90,desc->optiona4,desc->option94,desc->option98,(int)desc->lineHeight,desc->option84);}
 void fn_8021BA64(WidgetFragment* self,int width,int height,UITable* list,int column,const char* font,int flags,int value,int unused,int first,int second,int rowHeight,int third){PageTextPrefix* f=(PageTextPrefix*)self;int horizontal=0;f->column=column;f->list=list;f->rowHeight=rowHeight;f->image=0;int vertical=0;if(flags&4)horizontal=width/2;else if(flags&2)horizontal=width;if(flags&0x60)vertical=rowHeight;else if(flags&0x10)vertical=rowHeight/2;UIStyleInputFields spec={};spec.fontName=font;spec.field08=flags;spec.words0C[0]=value;spec.words0C[1]=second;spec.words0C[2]=third;spec.words0C[3]=horizontal;spec.words0C[4]=vertical;spec.words0C[7]=first;spec.words0C[8]=second;spec.words0C[9]=third;spec.words0C[10]=horizontal;spec.field38=vertical;f->font=fn_8022A86C(&spec);f->iconOffset=(fn_8022B620(f->font,"Foo")-23)/2;fn_80219440(self,0,&list->changes,4);list->SetVisible(height/rowHeight);}
 Column::~Column(void) {WidgetFragment* self=(WidgetFragment*)this;PageTextPrefix* f=(PageTextPrefix*)self;fn_8022A8E4(f->font);if(f->image)fn_802C519C(f->image);}
-void Column::Slot28(void) {PageTextPrefix* f=(PageTextPrefix*)((WidgetFragment*)this);int end;int x=((WidgetFragment*)this)->left;int start=f->list->page*f->list->visible;int y=((WidgetFragment*)this)->top;end=start+f->list->visible;if(f->list->used<end)end=f->list->used;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=f->list->Get(i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);fn_802C5320(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
-void RichCaption::Slot24(void* context) {fn_802C3034(reinterpret_cast<gxCanvas*>(context));RichCaptionPrefix* f=(RichCaptionPrefix*)((WidgetFragment*)this);DrawTextWithFormatting(f->renderer,0,9,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top,f->label);}
+void Column::Slot28(void) {PageTextPrefix* f=(PageTextPrefix*)((WidgetFragment*)this);int end;int x=((WidgetFragment*)this)->left;int start=f->list->page*f->list->visible;int y=((WidgetFragment*)this)->top;end=start+f->list->visible;if(f->list->used<end)end=f->list->used;int zero=0;for(int i=start;i<end;i++){int flags=0;const char* label=f->list->Get(i,f->column,&flags);if(flags>2){flags-=3;float px,py;fn_80230C30(&px,&py,x-28,y+f->iconOffset);if(f->image){int frame=flags%fn_802C51AC(f->image);DrawImageWithParams(f->image,frame,px,py,(0.0f),(25.0f),(25.0f));}}fn_8022BAD0(f->font,x,y,0,0,0,label,flags,zero,(1.0f));y+=f->rowHeight;}}
+void RichCaption::Slot24(void* context) {SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));RichCaptionPrefix* f=(RichCaptionPrefix*)((WidgetFragment*)this);DrawTextWithFormatting(f->renderer,0,9,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top,f->label);}
 Numeric::Numeric(int x,int y,float* value,float scale,const char* format,float bias,int height) : UILabel(x,y,0,height,0,0), value(value) {WidgetFragment* self=(WidgetFragment*)this;FloatFormatPrefix* f=(FloatFormatPrefix*)self;f->scale=scale;f->bias=bias;f->format=format;f->text[0]=0;fn_80219440(self,0,value,4);fn_8021BE48(self);}
 void fn_8021BE48(WidgetFragment* self){FloatFormatPrefix* f=(FloatFormatPrefix*)self;sprintf(f->text,f->format,*f->value*f->scale+f->bias);fn_80130568(f->text);fn_80219718(self);WidgetMarkDirty(self);}
 void Numeric::Slot74(int, void*) {fn_8021BE48(((WidgetFragment*)this));}
 SpinCtl::SpinCtl(int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY) : UILabel(x,y,0,height,0,0), target(target) {WidgetFragment* self=(WidgetFragment*)this;ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)self;f->left=left;f->right=right;f->lineY=lineY;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C12C(self);f->focus=0;f->token=fn_80228F40(x,y);}
 void SpinCtl::Slot14(void) {if(fn_80129BC4(((WidgetFragment*)this))){Bound2a8* f=(Bound2a8*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}}
-void SpinCtl::Slot28(void) {UILabel::Slot28();ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)((WidgetFragment*)this);if(f->left!=f->right){int selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float zero=(0.0f);float x=zero,y=zero;fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,zero);fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,zero);}}
+void SpinCtl::Slot28(void) {UILabel::Slot28();ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)((WidgetFragment*)this);if(f->left!=f->right){int selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float zero=(0.0f);float x=zero,y=zero;fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())DrawImageFrame(left,selected,x,y,zero);fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())DrawImageFrame(right,selected,x,y,zero);}}
 void SpinCtl::Slot74(int, void*) {fn_8021C12C(((WidgetFragment*)this));}
 void fn_8021C12C(WidgetFragment* self){FormatPrefix* f=(FormatPrefix*)self;f->target->Format(f->text,80);fn_80219718(self);WidgetMarkDirty(self);}
 int SpinCtl::Slot64(int key) {ExtendedFormatPrefix* f=(ExtendedFormatPrefix*)((WidgetFragment*)this);if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x125:f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;case 0x126:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217D84(((WidgetFragment*)this)->window);return 1;}break;case 0x128:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217C4C(((WidgetFragment*)this)->window);return 1;}break;}return 0;}
 int SpinCtl::Slot84(void) {Bound2a8* f=(Bound2a8*)((WidgetFragment*)this);return !f->focus?0:*f->focus==f->token;}
 SpinText::SpinText(int x,int y,FullFormatDispatch* target,int height,int left,int right,int lineY,const char* label,int alignment) : UILabel(x,y,0,height,0,0), target(target) {WidgetFragment* self=(WidgetFragment*)this;ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)self;f->left=left;f->right=right;f->lineY=lineY;f->label=label;if(alignment==1)f->side=0;else f->side=1;f->labelLeft=left;f->font=8;int labelEnd=right+fn_802C51C0(fn_8021165C(1,2));f->labelRight=labelEnd-fn_8022B498(f->font,label);f->showArrows=0;void* buffer;int size;target->Bind(&buffer,&size);if(size>0)fn_80219440(self,0,buffer,size);fn_8021C6D0(self);f->focus=0;f->token=fn_80228F40(x,y);}
 void SpinText::Slot14(void) {if(fn_80129BC4(((WidgetFragment*)this))){Bound2a8* f=(Bound2a8*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}}
-void SpinText::Slot28(void) {UILabel::Slot28();ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)((WidgetFragment*)this);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;unsigned int flags=selected!=0;if(f->side==0&&f->label)fn_8022BAD0(f->font,f->labelLeft,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));else if(f->side==1&&f->label)fn_8022BAD0(f->font,f->labelRight,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));if(f->left!=f->right&&f->showArrows){selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())fn_802C5310(left,selected,x,y,(0.0f));fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())fn_802C5310(right,selected,x,y,(0.0f));}}
+void SpinText::Slot28(void) {UILabel::Slot28();ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)((WidgetFragment*)this);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;unsigned int flags=selected!=0;if(f->side==0&&f->label)fn_8022BAD0(f->font,f->labelLeft,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));else if(f->side==1&&f->label)fn_8022BAD0(f->font,f->labelRight,f->lineY-3,0,0,0,f->label,flags,1,(0.0f));if(f->left!=f->right&&f->showArrows){selected=0;if(f->focus&&f->token==*f->focus)selected=1;void* left=fn_8021165C(0,2);void* right=fn_8021165C(1,2);float x=(0.0f),y=(0.0f);fn_80230C30(&x,&y,f->left,f->lineY);if(f->target->CanPrevious())DrawImageFrame(left,selected,x,y,(0.0f));fn_80230C30(&x,&y,f->right,f->lineY);if(f->target->CanNext())DrawImageFrame(right,selected,x,y,(0.0f));}}
 void SpinText::Slot74(int, void*) {fn_8021C6D0(((WidgetFragment*)this));}
 void fn_8021C6D0(WidgetFragment* self){FormatPrefix* f=(FormatPrefix*)self;f->target->Format(f->text,80);fn_80219718(self);WidgetMarkDirty(self);}
 int SpinText::Slot64(int key) {ExtendedLabeledFormatPrefix* f=(ExtendedLabeledFormatPrefix*)((WidgetFragment*)this);if(!f->focus)return 0;if(f->token!=*f->focus)return 0;float old=f->target->Value();switch(key){case 0x127:if(f->showArrows){f->target->Increase();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180BC(((WidgetFragment*)this)->window);return 1;}break;case 0x125:if(f->showArrows){f->target->Decrease();if(ObservedAbsDecision(old-f->target->Value())<=__float_epsilon[0])fn_80216D28();return 1;}else if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180B0(((WidgetFragment*)this)->window);return 1;}break;case 0x126:if(!f->showArrows&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180C8(((WidgetFragment*)this)->window);return 1;}break;case 0x128:if(!f->showArrows&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_802180D4(((WidgetFragment*)this)->window);return 1;}break;case 13:f->showArrows=!f->showArrows;return 1;case 27:if(f->showArrows){f->showArrows=0;return 1;}return 0;}return 0;}
@@ -1428,9 +1428,9 @@ SpinSldr::~SpinSldr(void) {WidgetFragment* self=(WidgetFragment*)this;ProviderWi
 // Reconstructed unused int-to-float conversion work observed in the original.
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
 void SpinSldr::Slot24(void* context) {
-    WidgetFragment* self = (WidgetFragment*)this;fn_802C3034(reinterpret_cast<gxCanvas*>(context));GaugeValuePrefix* f=(GaugeValuePrefix*)self;f->target->Value();float span=(float)(((WidgetDispatch*)self)->Slot78()-f->inset);}
+    WidgetFragment* self = (WidgetFragment*)this;SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));GaugeValuePrefix* f=(GaugeValuePrefix*)self;f->target->Value();float span=(float)(((WidgetDispatch*)self)->Slot78()-f->inset);}
 void SpinSldr::Slot28(void) {
-    WidgetFragment* self = (WidgetFragment*)this;GaugeValuePrefix* f=(GaugeValuePrefix*)self;float x=(float)(self->left-lbl_8055FB9C/2);float y=CenteredGaugeY349(lbl_8055FBA0,self->top);fn_802C5310(f->background,0,x,y-(8.0f),(0.0f));float value=f->target->Value();int width=((WidgetDispatch*)self)->Slot78();int pixel=(int)(value*(float)(width-f->inset));pixel+=self->left;fn_80230C30(&x,&y,pixel,self->top+3);fn_802C5310(f->marker,0,x,y,(0.0f));}
+    WidgetFragment* self = (WidgetFragment*)this;GaugeValuePrefix* f=(GaugeValuePrefix*)self;float x=(float)(self->left-lbl_8055FB9C/2);float y=CenteredGaugeY349(lbl_8055FBA0,self->top);DrawImageFrame(f->background,0,x,y-(8.0f),(0.0f));float value=f->target->Value();int width=((WidgetDispatch*)self)->Slot78();int pixel=(int)(value*(float)(width-f->inset));pixel+=self->left;fn_80230C30(&x,&y,pixel,self->top+3);DrawImageFrame(f->marker,0,x,y,(0.0f));}
 void SpinSldr::Slot3C(int x, int y) {
  ProviderWidgetPrefix* fields=(ProviderWidgetPrefix*)((WidgetFragment*)this);
  if(!fields->active){fields->active=1;fields->elapsed=fields->provider->Value();}
@@ -1527,15 +1527,15 @@ void Multi::Slot28(void) {
         fn_80230C30(&x, &y, (int) fields->first, (int) fields->style);
         firstHeight = scale * (float) fn_802C5220(firstImage);
         firstWidth = (float) fn_802C51C0(firstImage);
-        fn_802C5320(firstImage, selected, x, y - ((float) fn_802C5220(firstImage) - firstHeight), zero, firstWidth, firstHeight);
+        DrawImageWithParams(firstImage, selected, x, y - ((float) fn_802C5220(firstImage) - firstHeight), zero, firstWidth, firstHeight);
         fn_80230C30(&x, &y, (int) fields->second, (int) fields->style);
         secondHeight = scale * (float) fn_802C5220(secondImage);
         secondWidth = (float) fn_802C51C0(secondImage);
-        fn_802C5320(secondImage, selected, x, y - ((float) fn_802C5220(secondImage) - secondHeight), zero, secondWidth, secondHeight);
+        DrawImageWithParams(secondImage, selected, x, y - ((float) fn_802C5220(secondImage) - secondHeight), zero, secondWidth, secondHeight);
     }
 }
 void Multi::Slot24(void* context) {
- fn_802C3034(reinterpret_cast<gxCanvas*>(context));ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)((WidgetFragment*)this);
+ SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));ChoiceWidgetPrefix* fields=(ChoiceWidgetPrefix*)((WidgetFragment*)this);
  if(fields->focus&&fields->token==*fields->focus){
   int x=((WidgetFragment*)this)->left,y=((WidgetFragment*)this)->top;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();
   fn_802C3424(x,y,x+width,((WidgetFragment*)this)->bottom,lbl_8055FBC0);
@@ -1557,7 +1557,7 @@ CustomMulti::CustomMulti(int x,int y,int* value,const char* list,const char* fir
  fn_80219718(self);}
 CustomMulti::~CustomMulti(void) {WidgetFragment* self=(WidgetFragment*)this;fn_8022A8E4(((ChoiceResourcePrefix*)self)->resource);}
 MutableMulti::MutableMulti(int x,int y,int dx,int dy,int height,ChoiceProviderDispatch* provider) : UILabel(x,y,0,height,dx,dy) {WidgetFragment* self=(WidgetFragment*)this;
- ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;float time=fn_8023659C()-(0.3f);
+ ProviderChoicePrefix* fields=(ProviderChoicePrefix*)self;float time=CalculateTimeDelta()-(0.3f);
  fields->provider=provider;fields->fontResource=height;fields->nextTime=time;fields->previousTime=time;fields->focus=0;
  fields->token=fn_80228F40(x,y);}
 const char* MutableMulti::Slot88(void) {return ((ProviderChoicePrefix*)((WidgetFragment*)this))->provider->Text();}
@@ -1578,9 +1578,9 @@ int MutableMulti::Slot64(int key) {
  else{if(!fields->focus)return 0;if(fields->token!=*fields->focus)return 0;}
  switch(key){
  case 0x127:
-  if(fields->provider->HasNext()){fields->provider->Next();fields->nextTime=fn_8023659C();}else fn_80216D28();return 1;
+  if(fields->provider->HasNext()){fields->provider->Next();fields->nextTime=CalculateTimeDelta();}else fn_80216D28();return 1;
  case 0x125:
-  if(fields->provider->HasPrevious()){fields->provider->Previous();fields->previousTime=fn_8023659C();}else fn_80216D28();return 1;
+  if(fields->provider->HasPrevious()){fields->provider->Previous();fields->previousTime=CalculateTimeDelta();}else fn_80216D28();return 1;
  case 0x126:
   if(!fields->provider->Modal()&&((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217D84(((WidgetFragment*)this)->window);fn_80230E90(0);return 1;}break;
  case 0x128:
@@ -1597,8 +1597,8 @@ void MutableMulti::Slot28(void) {
 // MWCC retains integer conversion setup/stores; the original spelling and purpose are unknown.
  float unusedHeight=(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top);
  UILabel::Slot28();
- int previousFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
- int nextFrame;if(selected){float now=fn_8023659C();if((0.3f)+fields->nextTime>=now)nextFrame=2;else nextFrame=1;}else nextFrame=0;
+ int previousFrame;if(selected){float now=CalculateTimeDelta();if((0.3f)+fields->previousTime>=now)previousFrame=2;else previousFrame=1;}else previousFrame=0;
+ int nextFrame;if(selected){float now=CalculateTimeDelta();if((0.3f)+fields->nextTime>=now)nextFrame=2;else nextFrame=1;}else nextFrame=0;
  gArtSet* previousArrow=static_cast<gArtSet*>(fn_80211660(0));gArtSet* nextArrow=static_cast<gArtSet*>(fn_80211660(1));
  float previousOffset=ObservedArrowOffset(&fields->previousTime),nextOffset=ObservedArrowOffset(&fields->nextTime);
  float baseX=x+(float)fn_8022AB18(fields->fontResource,0,3);
@@ -1711,7 +1711,7 @@ void ListBox::Slot7C(void) {
 }
 void ListBox::Slot24(void* context) {
  int drawY;int drawX;int color,index;RowListPrefix* fields=(RowListPrefix*)((WidgetFragment*)this);int start=0;if(fields->view)start=fields->view->start;
- UIWidget::Slot24(context);fn_802C3034(reinterpret_cast<gxCanvas*>(context));int flags=0;color=lbl_8055FBDC;
+ UIWidget::Slot24(context);SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));int flags=0;color=lbl_8055FBDC;
  for(int row=0;row<fields->rows&&(index=row+start,fields->list->Get(index,&flags)!=0);++row){
   int x,y;bool selected=*fields->selected==index;
   if(selected){x=((WidgetFragment*)this)->left;y=((WidgetFragment*)this)->top;int width=x+((WidgetDispatch*)((WidgetFragment*)this))->Slot78();
@@ -1757,7 +1757,7 @@ void fn_8021E7D4(WidgetFragment* self){
 ListBox::~ListBox(void) {}
 #pragma pop
 
-void DropdownList::Slot24(void* context) {DropdownRowPrefix* f=(DropdownRowPrefix*)((WidgetFragment*)this);if(f->list.active){((WidgetDispatch*)((WidgetFragment*)this))->Slot1c(((WidgetFragment*)this)->left,((WidgetFragment*)this)->bottom+3);int height=((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80219284(((WidgetFragment*)this),f->width,f->height);ListBox::Slot24(context);fn_80219284(((WidgetFragment*)this),width,height);((WidgetDispatch*)((WidgetFragment*)this))->Slot1c(((WidgetFragment*)this)->left,((WidgetFragment*)this)->top*2-3-((WidgetFragment*)this)->bottom);}fn_802C3034(reinterpret_cast<gxCanvas*>(context));UIWidget::Slot24(context);int y,x;x=((WidgetFragment*)this)->left;y=((WidgetFragment*)this)->top;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_802C3424(x,y,x+width,((WidgetFragment*)this)->bottom,lbl_8055FBDC);const char* label=f->list.list->Get(*f->list.selected,0);char buffer[80];sprintf(buffer,"%-*s `",f->list.columns,label?label:"");fn_802C4F58(((WidgetFragment*)this)->left+1,((WidgetFragment*)this)->top+1,buffer,lbl_8055FBC0);}
+void DropdownList::Slot24(void* context) {DropdownRowPrefix* f=(DropdownRowPrefix*)((WidgetFragment*)this);if(f->list.active){((WidgetDispatch*)((WidgetFragment*)this))->Slot1c(((WidgetFragment*)this)->left,((WidgetFragment*)this)->bottom+3);int height=((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80219284(((WidgetFragment*)this),f->width,f->height);ListBox::Slot24(context);fn_80219284(((WidgetFragment*)this),width,height);((WidgetDispatch*)((WidgetFragment*)this))->Slot1c(((WidgetFragment*)this)->left,((WidgetFragment*)this)->top*2-3-((WidgetFragment*)this)->bottom);}SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));UIWidget::Slot24(context);int y,x;x=((WidgetFragment*)this)->left;y=((WidgetFragment*)this)->top;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_802C3424(x,y,x+width,((WidgetFragment*)this)->bottom,lbl_8055FBDC);const char* label=f->list.list->Get(*f->list.selected,0);char buffer[80];sprintf(buffer,"%-*s `",f->list.columns,label?label:"");fn_802C4F58(((WidgetFragment*)this)->left+1,((WidgetFragment*)this)->top+1,buffer,lbl_8055FBC0);}
 Input::Input(int x,int y,int width,int height,char* buffer,int capacity,int stride,int font,bool clear) : UIWidget(x,y,x+width,y+height+3,0) {WidgetFragment* self=(WidgetFragment*)this;
  if(clear)buffer[0]=0;TextEntryPrefix* fields=(TextEntryPrefix*)self;
  fields->buffer=buffer;fields->font=font;fields->capacity=capacity<0?-capacity:capacity;fields->stride=stride;
@@ -1784,10 +1784,10 @@ void Input::Slot24(void* context) {TextPaintReceiverNew* fields=(TextPaintReceiv
     int imageLeft;
     int finalLeft;
 
-    fn_802C3034(reinterpret_cast<gxCanvas*>(context));
+    SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));
     initialLeft = fields->left;
     initialTop = fields->top;
-    fn_802C2FC8(context, initialLeft, initialTop, initialLeft + ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), fields->bottom);
+    ClampCanvasCoordinates(context, initialLeft, initialTop, initialLeft + ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), fields->bottom);
     UIWidget::Slot24(context);
     if ((void *) fields->second != 0) {
         imageTop = fields->top;
@@ -1796,7 +1796,7 @@ void Input::Slot24(void* context) {TextPaintReceiverNew* fields=(TextPaintReceiv
     }
     finalLeft = fields->left;
     finalTop = fields->top;
-    fn_802C2FC8(context, finalLeft, finalTop, finalLeft + ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), fields->bottom);
+    ClampCanvasCoordinates(context, finalLeft, finalTop, finalLeft + ((WidgetDispatch*)((WidgetFragment*)this))->Slot78(), fields->bottom);
     fn_8022B91C(fields->font, fields->left, fields->top, fields->buffer, fields->flag19 != 0);
     if ((int) fields->flag19 != 0) {
         fn_8022B390(fields->font, fields->buffer, fields->cursor, &cursorX, &cursorY);
@@ -1804,14 +1804,14 @@ void Input::Slot24(void* context) {TextPaintReceiverNew* fields=(TextPaintReceiv
         caretX = cursorX + fields->left;
         fn_802C47B8(caretX, caretY + 2, caretX, caretY + 0xC, lbl_8055FBF8);
     }
-    fn_802C3014(context);
+    SetCanvasCoordinates(context);
 }
 void Input::Slot28(void) {
  TextEntryPrefix* f=(TextEntryPrefix*)((WidgetFragment*)this);float height;
  if(f->second){
   float x=(float)(((WidgetFragment*)this)->left-lbl_8055FB9C/2);float y=(float)(lbl_8055FBA0/2-((WidgetFragment*)this)->top);
   height=(float)fn_802C5220(f->second);float width=(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78();
-  fn_802C5320(f->second,0,x,y,(0.0f),width,height);
+  DrawImageWithParams(f->second,0,x,y,(0.0f),width,height);
  }
  fn_8022BAD0(f->font,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top,0,0,0,f->buffer,((WidgetFragment*)this)->flag19!=0,0,(1.0f));
  if(((WidgetFragment*)this)->flag19){
@@ -1844,9 +1844,9 @@ int Input::Slot64(int key) {
  }
  return 1;
 }
-CDetect::CDetect(int x,int y,int parameter,Binding* value,int height) : UILabel(x,y,0,height,0,0), parameter(parameter) {WidgetFragment* self=(WidgetFragment*)this;BindingFieldPrefix* f=(BindingFieldPrefix*)self;f->value=value;fn_801A7E54(f->buffer,24,value);fn_80219440(self,0,value,16);fn_80219718(self);}
-void CDetect::Slot74(int, void*) {fn_801A7E54(((BindingFieldPrefix*)((WidgetFragment*)this))->buffer,24,((BindingFieldPrefix*)((WidgetFragment*)this))->value);WidgetMarkDirty(((WidgetFragment*)this));}
-int fn_8021F478(int* result){fn_801A7844(1);KeyDetect* file=&lbl_80490934;if(fn_801A7C8C(file->binding)){fn_801A7E54(file->label,24,file->binding);fn_802E47E8();*result=-2;return 1;}return 0;}
+CDetect::CDetect(int x,int y,int parameter,Binding* value,int height) : UILabel(x,y,0,height,0,0), parameter(parameter) {WidgetFragment* self=(WidgetFragment*)this;BindingFieldPrefix* f=(BindingFieldPrefix*)self;f->value=value;GetBindingText(f->buffer,24,value);fn_80219440(self,0,value,16);fn_80219718(self);}
+void CDetect::Slot74(int, void*) {GetBindingText(((BindingFieldPrefix*)((WidgetFragment*)this))->buffer,24,((BindingFieldPrefix*)((WidgetFragment*)this))->value);WidgetMarkDirty(((WidgetFragment*)this));}
+int fn_8021F478(int* result){InitializeJoyStatus(1);KeyDetect* file=&lbl_80490934;if(FindValidInputBinding(file->binding)){GetBindingText(file->label,24,file->binding);ClearInputBuffer();*result=-2;return 1;}return 0;}
 #include "game/captionctx.h"
 struct WidgetMenuEntry {
  const char* name;int type;const void* data;int arg0,arg1;
@@ -1913,9 +1913,9 @@ float snapped=(float)(int)((0.005f)+(float)steps*(raw-f->minimum)/(f->maximum-f-
   }
 }
 int fn_8021FBC4(WidgetFragment* self,int x,int y){HitAreaPrefix* f=(HitAreaPrefix*)self;int result=0,insideY=0,insideX=0;if(x>=f->x-20&&x<f->x+f->width+20)insideX=1;if(insideX&&y>=f->y-20)insideY=1;if(insideY&&y<f->y+f->height+20)result=1;return result;}
-void Slider::Slot24(void* context) {fn_802C3034(reinterpret_cast<gxCanvas*>(context));UIWidget::Slot24(context);FloatSliderPrefix* f=(FloatSliderPrefix*)((WidgetFragment*)this);int top,left;int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;top=((WidgetFragment*)this)->top;left=((WidgetFragment*)this)->left;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,((WidgetFragment*)this)->left+5,((WidgetFragment*)this)->top+5,fill,selected);}
-void Slider::Slot28(void) {FloatSliderPrefix* f=(FloatSliderPrefix*)((WidgetFragment*)this);int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;float width=(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78();float height=(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top);float x=(float)(((WidgetFragment*)this)->left-lbl_8055FB9C/2),y=(float)(lbl_8055FBA0/2-((WidgetFragment*)this)->top);fn_802C5320(f->background,selected,x,y,(0.0f),width,height);fn_802C5334(f->marker,selected,x,y,(0.0f),(float)fill,height,(0.0f),(0.0f),(float)fill/width,(1.0f));}
-SimpleSlider::SimpleSlider(WidgetDesc* desc,float* value,int divisions,float minimum,float maximum) : UIWidget(desc->x,desc->y,desc->x+desc->dx,desc->y+desc->dy,0) {WidgetFragment* self=(WidgetFragment*)this;SteppedFloatPrefix* f=(SteppedFloatPrefix*)self;f->value=value;f->minimum=minimum;f->maximum=maximum;f->step=(maximum-minimum)/(float)divisions;f->image=gxGetImage("slider2.img");f->focus=0;f->token=fn_80228F40(desc->x,desc->y);f->nextTime=fn_8023659C()-(0.3f);f->previousTime=f->nextTime;}
+void Slider::Slot24(void* context) {SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));UIWidget::Slot24(context);FloatSliderPrefix* f=(FloatSliderPrefix*)((WidgetFragment*)this);int top,left;int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;top=((WidgetFragment*)this)->top;left=((WidgetFragment*)this)->left;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,((WidgetFragment*)this)->left+5,((WidgetFragment*)this)->top+5,fill,selected);}
+void Slider::Slot28(void) {FloatSliderPrefix* f=(FloatSliderPrefix*)((WidgetFragment*)this);int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill;int selected=0;fill=(int)((float)span*(*f->value-f->minimum)/(f->maximum-f->minimum));if(f->focus&&*f->focus==f->token)selected=1;float width=(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78();float height=(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top);float x=(float)(((WidgetFragment*)this)->left-lbl_8055FB9C/2),y=(float)(lbl_8055FBA0/2-((WidgetFragment*)this)->top);DrawImageWithParams(f->background,selected,x,y,(0.0f),width,height);fn_802C5334(f->marker,selected,x,y,(0.0f),(float)fill,height,(0.0f),(0.0f),(float)fill/width,(1.0f));}
+SimpleSlider::SimpleSlider(WidgetDesc* desc,float* value,int divisions,float minimum,float maximum) : UIWidget(desc->x,desc->y,desc->x+desc->dx,desc->y+desc->dy,0) {WidgetFragment* self=(WidgetFragment*)this;SteppedFloatPrefix* f=(SteppedFloatPrefix*)self;f->value=value;f->minimum=minimum;f->maximum=maximum;f->step=(maximum-minimum)/(float)divisions;f->image=gxGetImage("slider2.img");f->focus=0;f->token=fn_80228F40(desc->x,desc->y);f->nextTime=CalculateTimeDelta()-(0.3f);f->previousTime=f->nextTime;}
 SimpleSlider::~SimpleSlider(void) {WidgetFragment* self=(WidgetFragment*)this;fn_802C519C((void*)self->label);}
 void SimpleSlider::Slot28(void) {int previousFrame;
  int nextFrame;
@@ -1946,13 +1946,13 @@ previousArrow=static_cast<gArtSet*>(fn_80211660(0));
  {int* focus=f->focus;
  previousSelected=false;
  if(focus){if(*focus==f->token)previousSelected=true;
- }}if(previousSelected){float now=fn_8023659C();
+ }}if(previousSelected){float now=CalculateTimeDelta();
  if((0.3f)+f->previousTime>now)previousFrame=2;
  else previousFrame=1;
  }else previousFrame=0;
  }bool nextSelected=false;
  if(f->focus&&*f->focus==f->token)nextSelected=true;
- if(nextSelected){float now=fn_8023659C();
+ if(nextSelected){float now=CalculateTimeDelta();
  if((0.3f)+f->nextTime>now)nextFrame=2;
  else nextFrame=1;
  }else nextFrame=0;
@@ -1972,7 +1972,7 @@ if(previousArrow){float arrowWidth=fn_80235EF0(previousArrow,previousFrame);
  float arrowHeight=GetArtHeight(nextArrow,nextFrame);
  fn_802354A0(nextArrow,nextFrame,nextX,coordinates[0]+(arrowHeight-height)/2.0f,(0.0f),arrowWidth,arrowHeight,nextColor);
  }}
-int SimpleSlider::Slot64(int key) {SteppedFloatPrefix* f=(SteppedFloatPrefix*)((WidgetFragment*)this);if(!f->focus||*f->focus!=f->token)return 0;switch(key){case 0x127:if(f->value&&*f->value!=f->maximum){f->nextTime=fn_8023659C();*f->value=InlineWidgetMinimum(*f->value+f->step,f->maximum);}break;case 0x125:if(f->value&&*f->value!=f->minimum){f->previousTime=fn_8023659C();*f->value=InlineWidgetMaximum(*f->value-f->step,f->minimum);}break;case 0x126:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217D84(((WidgetFragment*)this)->window);fn_80230E90(0);}else return 0;break;case 0x128:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217C4C(((WidgetFragment*)this)->window);fn_80230E90(0);}else return 0;break;default:return 0;}return 1;}
+int SimpleSlider::Slot64(int key) {SteppedFloatPrefix* f=(SteppedFloatPrefix*)((WidgetFragment*)this);if(!f->focus||*f->focus!=f->token)return 0;switch(key){case 0x127:if(f->value&&*f->value!=f->maximum){f->nextTime=CalculateTimeDelta();*f->value=InlineWidgetMinimum(*f->value+f->step,f->maximum);}break;case 0x125:if(f->value&&*f->value!=f->minimum){f->previousTime=CalculateTimeDelta();*f->value=InlineWidgetMaximum(*f->value-f->step,f->minimum);}break;case 0x126:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217D84(((WidgetFragment*)this)->window);fn_80230E90(0);}else return 0;break;case 0x128:if(((ChoiceWindowPrefix*)((WidgetFragment*)this)->window)->depth>1){fn_80217C4C(((WidgetFragment*)this)->window);fn_80230E90(0);}else return 0;break;default:return 0;}return 1;}
 void SimpleSlider::Slot14(void) {if(fn_80129BC4(((WidgetFragment*)this))){Bound258* f=(Bound258*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}}
 IntSlider::IntSlider(int x,int y,int width,int height,int* value,int minimum,int maximum) : UIWidget(x,y,x+width,y+height,0), value(value) {WidgetFragment* self=(WidgetFragment*)this;SliderFullPrefix* f=(SliderFullPrefix*)self;f->minimum=minimum;f->maximum=maximum;fn_80219440(self,0,value,4);f->background=gxGetImage("slider1.img");f->marker=gxGetImage("slider2.img");if(f->background){int height=fn_802C5220(f->background);int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,width,height);}f->dragging=0;f->focus=0;f->token=fn_80228F40(x,y);}
 IntSlider::~IntSlider(void) {WidgetFragment* self=(WidgetFragment*)this;PairImage248* f=(PairImage248*)self;fn_802C519C(f->first);fn_802C519C(f->second);}
@@ -1981,9 +1981,9 @@ int IntSlider::Slot64(int key) {SliderFullPrefix* f=(SliderFullPrefix*)((WidgetF
 void IntSlider::Slot3C(int x, int unused) {SliderFullPrefix* f=(SliderFullPrefix*)((WidgetFragment*)this);f->dragging=1;int left=((WidgetFragment*)this)->left;int minimum=f->minimum;int track=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-10;int value=minimum+(f->maximum-minimum)*(x-left-5)/track;if(value<minimum)value=minimum;value=ClampToExclusiveMaximum(f->maximum,value);*f->value=value;}
 void IntSlider::Slot40(int x, int y) {((RowInputDispatch*)((WidgetFragment*)this))->Slot4c(x,y);((PrefixFlag258*)((WidgetFragment*)this))->value=0;}
 void IntSlider::Slot4C(int x, int y) {if(((PrefixFlag258*)((WidgetFragment*)this))->value)((PointerEventDispatch*)((WidgetFragment*)this))->Slot3c(x,y);}
-void IntSlider::Slot24(void* context) {int top,left;fn_802C3034(reinterpret_cast<gxCanvas*>(context));SliderFullPrefix* f=(SliderFullPrefix*)((WidgetFragment*)this);int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;top=((WidgetFragment*)this)->top;left=((WidgetFragment*)this)->left;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,((WidgetFragment*)this)->left+5,((WidgetFragment*)this)->top+5,fill,selected);}
-void IntSlider::Slot28(void) {float height;SliderFullPrefix* f=(SliderFullPrefix*)((WidgetFragment*)this);int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;float x=(float)(((WidgetFragment*)this)->left-lbl_8055FB9C/2);float y=(float)(lbl_8055FBA0/2-((WidgetFragment*)this)->top);height=(float)fn_802C5220(f->background);fn_802C5320(f->background,selected,x,y,(0.0f),(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78(),height);height=(float)fn_802C5220(f->marker);fn_802C5320(f->marker,selected,(5.0f)+x,y-(5.0f),(0.0f),(float)fill,height);}
-void CanvasWidget::Slot24(void* context) {fn_802C3034(reinterpret_cast<gxCanvas*>(context));fn_802C40B8(((CanvasWidgetPrefix*)((WidgetFragment*)this))->canvas,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top);}
+void IntSlider::Slot24(void* context) {int top,left;SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));SliderFullPrefix* f=(SliderFullPrefix*)((WidgetFragment*)this);int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;top=((WidgetFragment*)this)->top;left=((WidgetFragment*)this)->left;int width=((WidgetDispatch*)((WidgetFragment*)this))->Slot78();fn_80228DC4((ObservedClipPrefix*)context,f->background,left,top,width,selected);fn_80228DC4((ObservedClipPrefix*)context,f->marker,((WidgetFragment*)this)->left+5,((WidgetFragment*)this)->top+5,fill,selected);}
+void IntSlider::Slot28(void) {float height;SliderFullPrefix* f=(SliderFullPrefix*)((WidgetFragment*)this);int span=((WidgetDispatch*)((WidgetFragment*)this))->Slot78()-11;int fill=(span*(*f->value-f->minimum))/(f->maximum-f->minimum-1);int selected=0;if(f->focus&&*f->focus==f->token)selected=1;float x=(float)(((WidgetFragment*)this)->left-lbl_8055FB9C/2);float y=(float)(lbl_8055FBA0/2-((WidgetFragment*)this)->top);height=(float)fn_802C5220(f->background);DrawImageWithParams(f->background,selected,x,y,(0.0f),(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78(),height);height=(float)fn_802C5220(f->marker);DrawImageWithParams(f->marker,selected,(5.0f)+x,y-(5.0f),(0.0f),(float)fill,height);}
+void CanvasWidget::Slot24(void* context) {SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));fn_802C40B8(((CanvasWidgetPrefix*)((WidgetFragment*)this))->canvas,((WidgetFragment*)this)->left,((WidgetFragment*)this)->top);}
 ScrollBar::ScrollBar(int x,int y,int width,int height,void* view,int vertical) : UIWidget(x,y,x+width,y+height,0) {WidgetFragment* self=(WidgetFragment*)this;ScrollbarPrefix* f=(ScrollbarPrefix*)self;if(!vertical){f->track=gxGetImage("vscroll.img");f->marker=gxGetImage("vthumb.img");}else{f->track=gxGetImage("hscroll.img");f->marker=gxGetImage("hthumb.img");}((WidgetDispatch*)self)->Slot1c(self->left,self->top);if(!vertical){int width=fn_802C51C0(f->track);fn_80219284(self,width,self->bottom-self->top);}else{int height=fn_802C5220(f->track);int width=((WidgetDispatch*)self)->Slot78();fn_80219284(self,width,height);}f->view=view;f->vertical=vertical;fn_80219440(self,0,view,12);f->dragging=0;}
 void ScrollBar::Slot3C(int x, int y) {
  DragViewportPrefix* f=(DragViewportPrefix*)((WidgetFragment*)this);f->dragging=1;float ratio;
@@ -2023,7 +2023,7 @@ void ScrollBar::Slot24(void* context) {
 
   DragViewportPrefix *f = (DragViewportPrefix *) ((WidgetFragment*)this);
 
-  fn_802C3034(reinterpret_cast<gxCanvas*>(context));
+  SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));
 
   if (f->direction == 0)
   {
@@ -2109,7 +2109,7 @@ void ScrollBar::Slot28(void) {
   float y=(float)((lbl_8055FBA0/2)-((WidgetFragment*)this)->top);
   float initialWidth=(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78();
   // Width is measured before these height reads, as in the original call sequence.
-  fn_802C5320(f->first,0,x,y,(0.0f),initialWidth,(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top));
+  DrawImageWithParams(f->first,0,x,y,(0.0f),initialWidth,(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top));
   int total=f->state->Total();
   if (f->state->page < total) {
     if (f->direction == 0) {
@@ -2133,7 +2133,7 @@ void ScrollBar::Slot28(void) {
           int tw = fn_802C51C0(image);
           fn_80230C30(&x,&y,left+((imageExtent-tw)/2),top);
           float imageMetric=(float)fn_802C51C0(f->second);
-          fn_802C5320(f->second,0,x,y,(0.0f),imageMetric,(float)(bottom-top));
+          DrawImageWithParams(f->second,0,x,y,(0.0f),imageMetric,(float)(bottom-top));
           return;
         }
         else {
@@ -2171,7 +2171,7 @@ void ScrollBar::Slot28(void) {
           int th = fn_802C5220(image);
           fn_80230C30(&x,&y,left,top+((imageExtent-th)/2));
           float imageMetric=(float)fn_802C5220(f->second);
-          fn_802C5320(f->second,0,x,y,(0.0f),(float)(right-left),imageMetric);
+          DrawImageWithParams(f->second,0,x,y,(0.0f),(float)(right-left),imageMetric);
           return;
         }
         else {
@@ -2225,7 +2225,7 @@ void MenuGrid::Slot24(void* context) {
     int off;
     int c;
     int l;
-    fn_802C3034(reinterpret_cast<gxCanvas*>(context));
+    SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));
     l = ((WidgetFragment*)this)->left;
     t = ((WidgetFragment*)this)->top;
     w = ((WidgetDispatch*)((WidgetFragment*)this))->Slot78();
@@ -2320,7 +2320,7 @@ void ResourcePrefix::Draw(int x, int y, int, unsigned int) {
 }
 void ResourcePrefix::Rect(int first, int second, int* left, int* top, int* right, int* bottom) {
     ResourcePrefix* self = (ResourcePrefix*)this;
- *left=first;*top=second;*right=first+(int)fn_8023293C(self->resource,self->text,(1.0f));*bottom=first+fn_80232B70(self->resource);
+ *left=first;*top=second;*right=first+(int)CalculateTextWidth(self->resource,self->text,(1.0f));*bottom=first+fn_80232B70(self->resource);
 }
 ImagePrefix::ImagePrefix(const char* path){image=fn_8023512C(path);}
 ImagePrefix::~ImagePrefix(void) {
@@ -2352,7 +2352,7 @@ void AnimationPrefix::Draw(int x, int y, int unused, unsigned int p_frame) {
     u32 frame = (u32)p_frame;
  if(fn_802C51AC(self->handle)){
   float zero=(0.0f);float a=zero,b=zero;fn_80230C30(&a,&b,x,y);
-  if(frame!=0xFFFFFFFFu){int selected=(int)frame%fn_802C51AC(self->handle);fn_802C5320(self->handle,selected,a,b,zero,self->width,self->height);}
+  if(frame!=0xFFFFFFFFu){int selected=(int)frame%fn_802C51AC(self->handle);DrawImageWithParams(self->handle,selected,a,b,zero,self->width,self->height);}
  }
 }
 void AnimationPrefix::Rect(int first, int second, int* left, int* top, int* right, int* bottom) {
@@ -2389,11 +2389,11 @@ void CircleList::Slot28(void) {
     char one[4];
     self = (CircularPaintNew*)((WidgetFragment*)this);
     count = self->list->used;
-    base = -self->rate * fn_8023659C();
+    base = -self->rate * CalculateTimeDelta();
     if (count > 0) {
         total = (0.0f);
         for (i1 = 0; i1 < count; i1++) {
-            total += fn_8023293C(self->font, self->list->Get(i1, 0), (1.0f));
+            total += CalculateTextWidth(self->font, self->list->Get(i1, 0), (1.0f));
         }
         spacing = (((6.2831855f) * self->radius) - total) / (float)count;
         scale = (-6.2831855f) / (total + (spacing * (float)count));
@@ -2413,9 +2413,9 @@ void CircleList::Slot28(void) {
                 Mat3FromEuler(&m, &rotation);
                 Mat3Mul(&dst->xf.basis, &m, &dst->xf.basis);
                 fn_8022ED00(dst);
-                fn_80232BA4(one, self->font, (0.0f), self->radius, self->color, 9, (1.0f), (0.0f), (1.0f));
+                DrawColoredText(one, self->font, (0.0f), self->radius, self->color, 9, (1.0f), (0.0f), (1.0f));
                 fn_8022EDB8();
-                pos += fn_8023293C(self->font, one, (1.0f));
+                pos += CalculateTextWidth(self->font, one, (1.0f));
             }
             pos += spacing;
         }
@@ -2455,7 +2455,7 @@ BottomBar::BottomBar(int x,int y,const StringList* list,int* selectedInput) : UI
       }
       entry = (SelectionFullPrefix *) (((u32) f) + byteOffset);
       entry->icons[0] = (flags >> 2) & 63;
-      entry->widths[0] = f->scale * fn_8023293C(f->resource, label, (1.0f));
+      entry->widths[0] = f->scale * CalculateTextWidth(f->resource, label, (1.0f));
       entry->labels[0] = label;
       continue;
     }
@@ -2481,7 +2481,7 @@ int i;for(i=0;i<f->count;i++){if(i==*f->selected){selectedX=x;{
 }if(i+1<f->count){
  float w=f->widths[i+1];
  x+=w*half;
-}}else{fn_80232BA4(f->labels[i],f->resource,shadow+x,y-shadow,0xff000000u,12,f->scale,(0.0f),(1.0f));u32 color=fn_802236C8(((WidgetFragment*)this),i);fn_80232BA4(f->labels[i],f->resource,x,y,color,12,f->scale,(0.0f),(1.0f));{
+}}else{DrawColoredText(f->labels[i],f->resource,shadow+x,y-shadow,0xff000000u,12,f->scale,(0.0f),(1.0f));u32 color=fn_802236C8(((WidgetFragment*)this),i);DrawColoredText(f->labels[i],f->resource,x,y,color,12,f->scale,(0.0f),(1.0f));{
  float w=f->widths[i];
  x+=f->spacing+w*half;
 }if(i+1<f->count){
@@ -2497,7 +2497,7 @@ fn_80230924(0x96282828u,left,y-(2.0f),(2.0f)+left,(y-height)-4.0f,(0.0f));
 fn_80230924(0x96282828u,left,y-(2.0f),left+width,y-4.0f,(0.0f));
 fn_80230924(0x96aaaaaau,left,(y-height)-(2.0f),left+width,(y-height)-4.0f,(0.0f));
 fn_80230924(0x96aaaaaau,(left+width)-(2.0f),y-(2.0f),left+width,(y-height)-4.0f,(0.0f));
-fn_80232BA4(f->labels[selected],f->resource,4.0f+selectedX,y-4.0f,0xff000000u,12,f->scale,(0.0f),(1.0f));u32 color=fn_802236C8(((WidgetFragment*)this),selected);fn_80232BA4(f->labels[selected],f->resource,(2.0f)+selectedX,y-(2.0f),color,12,f->scale,(0.0f),(1.0f));}
+DrawColoredText(f->labels[selected],f->resource,4.0f+selectedX,y-4.0f,0xff000000u,12,f->scale,(0.0f),(1.0f));u32 color=fn_802236C8(((WidgetFragment*)this),selected);DrawColoredText(f->labels[selected],f->resource,(2.0f)+selectedX,y-(2.0f),color,12,f->scale,(0.0f),(1.0f));}
 void fn_802235B4(WidgetFragment* self){SelectBooleanNavigationRelativeNew* f=(SelectBooleanNavigationRelativeNew*)self;int* value=f->selected;int selected=*value;int bounds[2]={selected+1,f->count};int step=1;for(;bounds[0]<bounds[1];bounds[0]++,step++){if(((SelectBooleanNavigationRelativeNew*)((unsigned int)f+((unsigned int)selected+(unsigned int)step)))->available[0]){*value+=step;return fn_8022375C(self);}}for(int step=selected;step>0;step--){if(((SelectBooleanNavigationRelativeNew*)((char*)f+(unsigned int)(selected-step)))->available[0]){*value-=step;return fn_8022375C(self);}}}
 void fn_80223644(WidgetFragment* self){NavigationPreviousNew* f=(NavigationPreviousNew*)self;int* value=f->selected;int selected=*value;for(int step=1;selected-step>=0;step++){if(((NavigationPreviousNew*)((char*)f+((unsigned int)selected-(unsigned int)step)))->available[0]){*value-=step;fn_8022375C(self);return;}}for(int step=f->count-selected-1;step>0;step--){if(((NavigationPreviousNew*)(((unsigned int)f+(unsigned int)selected)+(unsigned int)step))->available[0]){*value+=step;fn_8022375C(self);return;}}}
 u32 fn_802236C8(WidgetFragment* self,int index){SelectionColorPrefix* f=(SelectionColorPrefix*)self;if(f->locked)return 0xe6969696u;u32 color=0xff9f9f9fu;if(f->flags[index])color=0xffffffffu;if(index==*f->selected&&(1.0f)==f->pulse)color=0xffffd03fu;return color;}
@@ -2517,7 +2517,7 @@ int BarTab::Slot68(void) {return 1;}
 MenuImage::MenuImage(WidgetDesc* desc, void* context) : UIWidget(desc) { WidgetFragment* self=(WidgetFragment*)this;ImageDescriptorPrefix* f=(ImageDescriptorPrefix*)self;fn_80230C30(&f->x,&f->y,desc->x,desc->y);f->value=desc->field9c;const char* name=(const char*)desc+0x40;if(name)f->image=gxGetImage(name);else f->image=0;f->width=(float)desc->dx;f->height=(float)desc->dx;f->alpha=(1.0f);f->asset=fn_8022EE9C();f->context=context;}
 MenuImage::~MenuImage(void) {WidgetFragment* self=(WidgetFragment*)this;TwoCleanupPrefix* f=(TwoCleanupPrefix*)self;if(f->image)fn_802C519C(f->image);f->image=0;fn_8022EE98(f->asset);}
 void MenuImage::Slot28(void) {
-    WidgetFragment* self = (WidgetFragment*)this;ImageAlphaPrefix* f=(ImageAlphaPrefix*)self;f->asset->alpha=(1.0f)-f->blend;float zero=(0.0f);if(f->asset->alpha>zero&&f->image){FullDrawStatePrefix scope;const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);fn_802C5320(f->image,0,f->x,f->y,zero,f->width,f->height);fn_8022EDB8();}}
+    WidgetFragment* self = (WidgetFragment*)this;ImageAlphaPrefix* f=(ImageAlphaPrefix*)self;f->asset->alpha=(1.0f)-f->blend;float zero=(0.0f);if(f->asset->alpha>zero&&f->image){FullDrawStatePrefix scope;const UIContext* context=fn_8022EDC4();fn_8022EEF8(&scope,f->asset,context);fn_8022ED00(&scope);DrawImageWithParams(f->image,0,f->x,f->y,zero,f->width,f->height);fn_8022EDB8();}}
 void MenuImage::Slot7C(void) {
     WidgetFragment* self = (WidgetFragment*)this;TweenPrefix* f=(TweenPrefix*)self;if(f->selected==f->state[3])f->blend=(0.0f);else f->blend=(1.0f);UIWidget::Slot7C();}
 MovieWidget::MovieWidget(WidgetDesc* desc,const char* name) : UIWidget(desc) {WidgetFragment* self=(WidgetFragment*)this;LargeImage355* f=(LargeImage355*)self;f->name=0;f->flag=0;f->resource=-2;f->image=0;
@@ -2537,17 +2537,17 @@ void MovieWidget::Slot28(void) {RenderPrefix* f=(RenderPrefix*)((WidgetFragment*
 DynamicLoadBackground::DynamicLoadBackground(WidgetDesc* desc) : UIWidget(desc) { WidgetFragment* self=(WidgetFragment*)this;RenderPrefix* f=(RenderPrefix*)self;fn_80230C30(&f->x,&f->y,desc->x,desc->y);f->w=(float)desc->dx;f->h=(float)desc->dy;char path[256];sprintf(path,"*uibig.res/%s",desc->name);f->resource=gxGetImage(path);if(!f->resource)fn_802E30C8("Couldn't load the image %s",path);}
 DynamicLoadBackground::~DynamicLoadBackground(void) {WidgetFragment* self=(WidgetFragment*)this;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802C519C(f->resource);f->resource=0;}
 void DynamicLoadBackground::Slot28(void) {
-    WidgetFragment* self = (WidgetFragment*)this;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)fn_802C5320(f->resource,0,f->x,f->y,(0.0f),f->w,f->h);}
+    WidgetFragment* self = (WidgetFragment*)this;RenderPrefix* f=(RenderPrefix*)self;if(f->resource)DrawImageWithParams(f->resource,0,f->x,f->y,(0.0f),f->w,f->h);}
 FadeButton::FadeButton(void* context, WidgetDesc* desc, int (*callback)(void*) , int* frame) : UIWidget(desc) { WidgetFragment* self=(WidgetFragment*)this;ToggleImagePrefix* f=(ToggleImagePrefix*)self;fn_80230C30(&f->x,&f->y,desc->x,desc->y);f->width=(float)desc->dx;f->height=(float)desc->dy;f->active=0;f->pressed=0;f->mode=(u32)desc->field9c>>31;float alpha;if(f->mode==0)alpha=(0.0f);else alpha=(0.1f);f->blend=alpha;f->alpha=alpha;f->token=fn_80228F40(self->left,self->top);f->focus=0;f->callback=callback;f->context=context;f->speed=InlineWidgetAbsolute(desc->field9c);f->asset=fn_8022EE9C();f->scope=fn_8022EE9C();f->elapsed=(0.0f);f->frame=frame?*frame:0;char path[256];strcpy(path,(const char*)desc+0x40);f->image=gxGetImage(path);if(!f->image)fn_802E30C8("Couldn't load the image %s",path);}
 FadeButton::~FadeButton(void) {WidgetFragment* self=(WidgetFragment*)this;ThreeCleanupPrefix* f=(ThreeCleanupPrefix*)self;if(f->image)fn_802C519C(f->image);f->image=0;fn_8022EE98(f->assetSecond);fn_8022EE98(f->assetFirst);}
 void FadeButton::Slot14(void) {
     WidgetFragment* self = (WidgetFragment*)this;TimedFocusPrefix* f=(TimedFocusPrefix*)self;f->focus=fn_80217BD8(self->window,f->token,self);fn_80219440(self,0,f->focus,4);((WidgetDispatch*)self)->Slot74(0,0);}
 void FadeButton::Slot7C(void) {
-    WidgetFragment* self = (WidgetFragment*)this;ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(fn_8023659C()<f->elapsed)f->elapsed=fn_8023659C();switch(f->mode){case 0:if(f->active){float wave=(0.5f)+(0.5f)*(float)sin((float)(f->speed+1)*(fn_8023659C()-f->elapsed));f->alpha=InlineWidgetMinimum((float)(f->speed+1)*(fn_8023659C()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<(0.005f)){f->pressed=0;f->alpha=(0.0f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)(f->speed+1)*(fn_8023659C()-f->elapsed),(0.0f));}break;case 1:if(f->active){float wave=0.45f+((0.1f)+0.45f*(float)sin((float)-f->speed*(fn_8023659C()-f->elapsed)));f->alpha=InlineWidgetMinimum((0.1f)+(float)f->speed*(fn_8023659C()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<0.105000004f){f->pressed=0;f->alpha=(0.1f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)f->speed*(fn_8023659C()-f->elapsed),(0.1f));}break;}UIWidget::Slot7C();}
+    WidgetFragment* self = (WidgetFragment*)this;ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(CalculateTimeDelta()<f->elapsed)f->elapsed=CalculateTimeDelta();switch(f->mode){case 0:if(f->active){float wave=(0.5f)+(0.5f)*(float)sin((float)(f->speed+1)*(CalculateTimeDelta()-f->elapsed));f->alpha=InlineWidgetMinimum((float)(f->speed+1)*(CalculateTimeDelta()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<(0.005f)){f->pressed=0;f->alpha=(0.0f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)(f->speed+1)*(CalculateTimeDelta()-f->elapsed),(0.0f));}break;case 1:if(f->active){float wave=0.45f+((0.1f)+0.45f*(float)sin((float)-f->speed*(CalculateTimeDelta()-f->elapsed)));f->alpha=InlineWidgetMinimum((0.1f)+(float)f->speed*(CalculateTimeDelta()-f->elapsed),wave);}else if(f->pressed){if(f->alpha<0.105000004f){f->pressed=0;f->alpha=(0.1f);}else f->alpha=InlineWidgetMaximum(f->blend-(float)f->speed*(CalculateTimeDelta()-f->elapsed),(0.1f));}break;}UIWidget::Slot7C();}
 void FadeButton::Slot74(int, void*) {
-    WidgetFragment* self = (WidgetFragment*)this;TimedFocusPrefix* f=(TimedFocusPrefix*)self;if(!f->active&&f->token==*f->focus){f->inactive=0;f->active=1;}else if(f->active&&f->token!=*f->focus){f->active=0;f->inactive=1;}f->stamp=fn_8023659C();f->previous=f->value;}
+    WidgetFragment* self = (WidgetFragment*)this;TimedFocusPrefix* f=(TimedFocusPrefix*)self;if(!f->active&&f->token==*f->focus){f->inactive=0;f->active=1;}else if(f->active&&f->token!=*f->focus){f->active=0;f->inactive=1;}f->stamp=CalculateTimeDelta();f->previous=f->value;}
 void FadeButton::Slot28(void) {
-    WidgetFragment* self = (WidgetFragment*)this;ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(f->image){if(!self->enabled)f->asset->alpha=(0.5f);else if(f->active)f->asset->alpha=f->alpha;else f->asset->alpha=f->mode==1?(1.0f):(0.0f);fn_8022EEF8(f->scope,fn_8022EDC4(),f->asset);fn_8022ED00(f->scope);int frame,height;height=self->bottom-self->top;frame=f->frame%fn_802C51AC(f->image);fn_802C5320(f->image,frame,f->x,f->y,(0.0f),(float)((WidgetDispatch*)self)->Slot78(),(float)height);fn_8022EDB8();}}
+    WidgetFragment* self = (WidgetFragment*)this;ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(f->image){if(!self->enabled)f->asset->alpha=(0.5f);else if(f->active)f->asset->alpha=f->alpha;else f->asset->alpha=f->mode==1?(1.0f):(0.0f);fn_8022EEF8(f->scope,fn_8022EDC4(),f->asset);fn_8022ED00(f->scope);int frame,height;height=self->bottom-self->top;frame=f->frame%fn_802C51AC(f->image);DrawImageWithParams(f->image,frame,f->x,f->y,(0.0f),(float)((WidgetDispatch*)self)->Slot78(),(float)height);fn_8022EDB8();}}
 int FadeButton::Slot64(int key) {
     WidgetFragment* self = (WidgetFragment*)this;ToggleImagePrefix* f=(ToggleImagePrefix*)self;if(!f->focus)return 0;if(f->token!=*f->focus)return 0;switch(key){case 13:if(f->callback&&!f->callback(f->context))return 1;fn_802168BC(reinterpret_cast<int>(f->context));return 1;case 0x126:fn_80217D84(self->window);return 1;case 0x128:fn_80217C4C(self->window);return 1;}return 0;}
 int FadeButton::Slot6C(int key) {
@@ -2568,32 +2568,32 @@ void TextBox::Slot28(void) {
  float width=(float)((WidgetDispatch*)((WidgetFragment*)this))->Slot78();int top=((WidgetFragment*)this)->top;float height=(float)(((WidgetFragment*)this)->bottom-top);const char* text=(const char*)f->context;strlen((const char*)text);
  float left=(float)((WidgetFragment*)this)->left;ResourceOrigin origin;origin.y=(float)top;
  if(f->flags&16){int lines=0;while(*text){++lines;const char* begin=text;memset(firstPass,0,512);char* destination=firstPass;
-  do{const char* next=NextResourceTextGlyphNew(text);int n=next-text;for(int i=0;i<n;i++)*destination++=*text++;}while(f->scale*fn_8023293C(f->resource,firstPass,(1.0f))<width&&*text&&*text!='\n');
+  do{const char* next=NextResourceTextGlyphNew(text);int n=next-text;for(int i=0;i<n;i++)*destination++=*text++;}while(f->scale*CalculateTextWidth(f->resource,firstPass,(1.0f))<width&&*text&&*text!='\n');
   const char* end=text;if(*text){while(*text!=' '&&*text!='\n'&&text>begin)--text;}if(text<=begin)text=end;if(*text==' '||*text=='\n')++text;
  }
  origin.y=(float)origin.y+(0.5f)*(float)(((WidgetFragment*)this)->bottom-((WidgetFragment*)this)->top);int lineHeight=fn_80232B70(f->resource);float fontHeight=(float)lineHeight;float scaledLineCount=((0.5f)*(float)(lines-1))*f->scale;origin.y=(float)origin.y-scaledLineCount*fontHeight;
  }
  int line=0;text=(const char*)f->context;
  while(*text){const char* begin=text;memset(output,0,512);int size=0;
-  while(f->scale*fn_8023293C(f->resource,output,(1.0f))<width&&*text&&*text!='\n'){
+  while(f->scale*CalculateTextWidth(f->resource,output,(1.0f))<width&&*text&&*text!='\n'){
    const char* next=NextResourceTextGlyphNew(text);int n=next-text;for(int i=0;i<n;i++)output[size++]=(char)*text++;
   }
   const char* end=text;int originalSize=size;if(*text){while(*text!=' '&&text!=begin&&*text!='\n'){--text;--size;}}if(text==begin){text=end;size=originalSize;}output[size]=0;if(*text==' '||*text=='\n')++text;
   for(int i=0;i<size;i++){if(output[i]=='^')output[i]=' ';}
   int screenHeight=lbl_8055FBA0;float projectedX=(float)lbl_8055FB9C/(-2.0f);float x=projectedX+left;int h=fn_80232B70(f->resource);float metric=f->scale*(float)h;float y=(float)line++*metric;y=(float)origin.y+y;y=(((float)screenHeight/2.0f))-y;
-  if(!f->localized&&y<((float)screenHeight/2.0f)-(height+(float)((WidgetFragment*)this)->top)){fn_80232BA4(f->text,f->resource,x+width,y,f->style,10,f->scale-(0.1f),(0.0f),(1.0f));goto finish;}
+  if(!f->localized&&y<((float)screenHeight/2.0f)-(height+(float)((WidgetFragment*)this)->top)){DrawColoredText(f->text,f->resource,x+width,y,f->style,10,f->scale-(0.1f),(0.0f),(1.0f));goto finish;}
   int flags=f->flags;if(flags&4)x+=(width/2.0f);
   if(flags&2)fn_80232C50(output,f->resource,f->style,9,x,y,f->scale,width,(0.0f),(1.0f));
-  else fn_80232BA4(output,f->resource,x,y,f->style,flags,f->scale,(0.0f),(1.0f));
+  else DrawColoredText(output,f->resource,x,y,f->style,flags,f->scale,(0.0f),(1.0f));
 
  }
  finish:if(f->owned)fn_8022EDB8();
 }
-ButtonList::ButtonList(RollingListData* list,WidgetDesc* desc) : UIWidget(desc), list(list) {WidgetFragment* self=(WidgetFragment*)this;RollingListFullPrefix* f=(RollingListFullPrefix*)self;f->resource=fn_80232578("uifnt.gtx");f->count=InlineIntegerMinimum(InlineIntegerMaximum(desc->field9c,1),3);f->x=(float)lbl_8055FB9C/(-2.0f);f->x+=(float)self->left;f->y=(float)lbl_8055FBA0/2.0f-(float)self->top;f->lineHeight=(5.0f)+(float)fn_80232B70(f->resource);f->period=f->lineHeight*(float)f->list->count;f->upper=f->y+(0.5f)*f->period;f->lower=f->y-(0.5f)*f->period;int row=0;f->rows=(RollingRow*)__nwa__FUlPCc(f->list->count*12,"button_info");for(int i=f->list->index;i<f->list->count;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}for(int i=0;i<f->list->index;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}f->direction=0;f->stamp=fn_8023659C();f->elapsed=(0.0f);f->nextStamp=fn_8023659C();f->focus=0;f->token=fn_80228F40(self->left,self->top);}
+ButtonList::ButtonList(RollingListData* list,WidgetDesc* desc) : UIWidget(desc), list(list) {WidgetFragment* self=(WidgetFragment*)this;RollingListFullPrefix* f=(RollingListFullPrefix*)self;f->resource=fn_80232578("uifnt.gtx");f->count=InlineIntegerMinimum(InlineIntegerMaximum(desc->field9c,1),3);f->x=(float)lbl_8055FB9C/(-2.0f);f->x+=(float)self->left;f->y=(float)lbl_8055FBA0/2.0f-(float)self->top;f->lineHeight=(5.0f)+(float)fn_80232B70(f->resource);f->period=f->lineHeight*(float)f->list->count;f->upper=f->y+(0.5f)*f->period;f->lower=f->y-(0.5f)*f->period;int row=0;f->rows=(RollingRow*)__nwa__FUlPCc(f->list->count*12,"button_info");for(int i=f->list->index;i<f->list->count;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}for(int i=0;i<f->list->index;i++){f->rows[i].current=f->y-f->lineHeight*(float)row;if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;float current=f->rows[i].current;f->rows[i].target=current;f->rows[i].previous=current;row++;}f->direction=0;f->stamp=CalculateTimeDelta();f->elapsed=(0.0f);f->nextStamp=CalculateTimeDelta();f->focus=0;f->token=fn_80228F40(self->left,self->top);}
 ButtonList::~ButtonList(void) {WidgetFragment* self=(WidgetFragment*)this;RollingRowsPrefix* f=(RollingRowsPrefix*)self;if(f->rows)__dla__FPv(f->rows);f->rows=0;if(((RollingListFullPrefix*)self)->resource)fn_802328D4(((RollingListFullPrefix*)self)->resource);((RollingListFullPrefix*)self)->resource=0;self->x=0;}
 void ButtonList::Slot14(void) {Bound27c* f=(Bound27c*)((WidgetFragment*)this);f->focus=fn_80217BD8(((WidgetFragment*)this)->window,f->token,((WidgetFragment*)this));fn_80219440(((WidgetFragment*)this),1,f->focus,4);}
 void ButtonList::Slot7C(void) {UIWidget::Slot7C();}
-void fn_8022591C(WidgetFragment* self){RollingInterpolationPrefix* f=(RollingInterpolationPrefix*)self;if(f->direction){float now=fn_8023659C();if(f->stamp>now)f->stamp=now-0.2f;float elapsed=now-f->stamp;if(elapsed>0.2f){for(int i=0;i<f->list->count;i++){float target=f->rows[i].target;f->rows[i].current=target;f->rows[i].previous=target;}f->direction=0;}else{for(int i=0;i<f->list->count;i++){switch(f->direction){case 0:break;case 2:if(f->rows[i].target>f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,0.2f);else if(f->rows[i].target<f->rows[i].previous){if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->upper+(f->rows[i].target-f->lower),elapsed,0.2f);else if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->lower-(f->upper-f->rows[i].previous),f->rows[i].target,elapsed,0.2f);}break;case 1:if(f->rows[i].target<f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,0.2f);else if(f->rows[i].target>f->rows[i].previous){if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->lower-(f->upper-f->rows[i].target),elapsed,0.2f);else if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->upper+(f->rows[i].previous-f->lower),f->rows[i].target,elapsed,0.2f);}break;}if(f->rows[i].current>f->upper)f->rows[i].current-=f->period;else if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;}}}}
+void fn_8022591C(WidgetFragment* self){RollingInterpolationPrefix* f=(RollingInterpolationPrefix*)self;if(f->direction){float now=CalculateTimeDelta();if(f->stamp>now)f->stamp=now-0.2f;float elapsed=now-f->stamp;if(elapsed>0.2f){for(int i=0;i<f->list->count;i++){float target=f->rows[i].target;f->rows[i].current=target;f->rows[i].previous=target;}f->direction=0;}else{for(int i=0;i<f->list->count;i++){switch(f->direction){case 0:break;case 2:if(f->rows[i].target>f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,0.2f);else if(f->rows[i].target<f->rows[i].previous){if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->upper+(f->rows[i].target-f->lower),elapsed,0.2f);else if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->lower-(f->upper-f->rows[i].previous),f->rows[i].target,elapsed,0.2f);}break;case 1:if(f->rows[i].target<f->rows[i].previous)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->rows[i].target,elapsed,0.2f);else if(f->rows[i].target>f->rows[i].previous){if(f->rows[i].current<f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->rows[i].previous,f->lower-(f->upper-f->rows[i].target),elapsed,0.2f);else if(f->rows[i].current>f->rows[i].target)f->rows[i].current=InlineWidgetInterpolate(f->upper+(f->rows[i].previous-f->lower),f->rows[i].target,elapsed,0.2f);}break;}if(f->rows[i].current>f->upper)f->rows[i].current-=f->period;else if(f->rows[i].current<f->lower)f->rows[i].current+=f->period;}}}}
 void ButtonList::Slot28(void) {PalettePaintNew* arg0=(PalettePaintNew*)((WidgetFragment*)this);
     int var_r23;
     int *temp_r4;
@@ -2647,25 +2647,25 @@ void ButtonList::Slot28(void) {PalettePaintNew* arg0=(PalettePaintNew*)((WidgetF
 
     fn_8022591C(((WidgetFragment*)this));
     if ((int) arg0->enabled == 0) {
-        if (((float) __fabs(arg0->elapsed) <= *__float_epsilon) || (fn_8023659C() < arg0->nextStamp)) {
-            arg0->nextStamp = fn_8023659C();
+        if (((float) __fabs(arg0->elapsed) <= *__float_epsilon) || (CalculateTimeDelta() < arg0->nextStamp)) {
+            arg0->nextStamp = CalculateTimeDelta();
         }
-        temp_f0 = arg0->elapsed + ((4.0f) * (fn_8023659C() - arg0->nextStamp));
+        temp_f0 = arg0->elapsed + ((4.0f) * (CalculateTimeDelta() - arg0->nextStamp));
         var_f3 = (1.0f);
         var_f3=MapMinBranchNew(var_f3,temp_f0);
         var_f3=MapMaxBranchNew(var_f3,(0.001f));
         arg0->elapsed = var_f3;
-        arg0->nextStamp = fn_8023659C();
+        arg0->nextStamp = CalculateTimeDelta();
     } else {
-        if (((float) __fabs(arg0->elapsed - (1.0f)) <= *__float_epsilon) || (fn_8023659C() < arg0->nextStamp)) {
-            arg0->nextStamp = fn_8023659C();
+        if (((float) __fabs(arg0->elapsed - (1.0f)) <= *__float_epsilon) || (CalculateTimeDelta() < arg0->nextStamp)) {
+            arg0->nextStamp = CalculateTimeDelta();
         }
-        temp_f0_2 = arg0->elapsed - ((4.0f) * (fn_8023659C() - arg0->nextStamp));
+        temp_f0_2 = arg0->elapsed - ((4.0f) * (CalculateTimeDelta() - arg0->nextStamp));
         var_f3_2 = (0.999f);
         var_f3_2=MapMinBranchNew(var_f3_2,temp_f0_2);
         var_f3_2=MapMaxBranchNew(var_f3_2,(0.0f));
         arg0->elapsed = var_f3_2;
-        arg0->nextStamp = fn_8023659C();
+        arg0->nextStamp = CalculateTimeDelta();
     }
 
 
@@ -2761,7 +2761,7 @@ var_r4++;var_r7++;}
         }
     }
 }
-int ButtonList::Slot64(int key) {RollingActionPrefix* f=(RollingActionPrefix*)((WidgetFragment*)this);if(f->focus&&f->token!=*f->focus)return 0;switch(key){case 0x127:if(f->list->vertical){fn_80217C4C(((WidgetFragment*)this)->window);return 1;}break;case 0x125:if(f->list->vertical){fn_80217D84(((WidgetFragment*)this)->window);return 1;}break;case 0x128:((CycleList*)f->list)->Next();fn_80226570(((WidgetFragment*)this),-1);f->direction=2;f->stamp=fn_8023659C();return 1;case 0x126:((CycleList*)f->list)->Prev();fn_80226570(((WidgetFragment*)this),1);f->direction=1;f->stamp=fn_8023659C();return 1;case 13:{void* context;int(*callback)(void*)=f->list->callback;context=(void*)((CycleList*)f->list)->Value();if(!callback||callback(context))fn_802168BC(reinterpret_cast<int>(context));return 1;}}return 0;}
+int ButtonList::Slot64(int key) {RollingActionPrefix* f=(RollingActionPrefix*)((WidgetFragment*)this);if(f->focus&&f->token!=*f->focus)return 0;switch(key){case 0x127:if(f->list->vertical){fn_80217C4C(((WidgetFragment*)this)->window);return 1;}break;case 0x125:if(f->list->vertical){fn_80217D84(((WidgetFragment*)this)->window);return 1;}break;case 0x128:((CycleList*)f->list)->Next();fn_80226570(((WidgetFragment*)this),-1);f->direction=2;f->stamp=CalculateTimeDelta();return 1;case 0x126:((CycleList*)f->list)->Prev();fn_80226570(((WidgetFragment*)this),1);f->direction=1;f->stamp=CalculateTimeDelta();return 1;case 13:{void* context;int(*callback)(void*)=f->list->callback;context=(void*)((CycleList*)f->list)->Value();if(!callback||callback(context))fn_802168BC(reinterpret_cast<int>(context));return 1;}}return 0;}
 int ButtonList::Slot6C(int key) {Bound27c* f=(Bound27c*)((WidgetFragment*)this);if(f->focus&&f->token!=*f->focus)return 0;return key==13||(unsigned int)key==0x126||(unsigned int)key==0x128;}
 void fn_80226570(WidgetFragment* self,int delta){RollingRowsPrefix* f=(RollingRowsPrefix*)self;for(int i=0;i<f->list->count;i++){f->rows[i].previous=f->rows[i].current;f->rows[i].target-=f->speed*(float)delta;if(f->rows[i].target>f->upper)f->rows[i].target-=f->period;if(f->rows[i].target<f->lower)f->rows[i].target+=f->period;}}
 MenuBtn::MenuBtn(void* context,int x,int y,int dx,int dy,OwnedWidget* child,int (*callback)(void*)) : IButton(context,x,y,dx,dy,child,callback,1,0) {WidgetFragment* self=(WidgetFragment*)this;Bound264* f=(Bound264*)self;f->token=fn_80228F40(x,y);f->focus=0;}
@@ -2775,7 +2775,7 @@ int MenuBtn::Slot88(void) {SelectionActionPrefix* f=(SelectionActionPrefix*)((Wi
 RotImage::RotImage(WidgetDesc* desc) : UIWidget(desc) { WidgetFragment* self=(WidgetFragment*)this;CenteredImagePrefix* f=(CenteredImagePrefix*)self;f->image=gxGetImage(desc->name);if(!f->image)fn_802E30C8("RotImage: couldn't find image %s!",desc->name);f->asset=fn_8022EE9C();fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;f->value=desc->field9c;}
 RotImage::~RotImage(void) {WidgetFragment* self=(WidgetFragment*)this;GXAssetImage244Prefix* f=(GXAssetImage244Prefix*)self;if(f->asset)fn_8022EE98(f->asset);f->asset=0;if(f->image)fn_802C519C(f->image);f->image=0;}
 void RotImage::Slot28(void) {
-    WidgetFragment* self = (WidgetFragment*)this;FullDrawStatePrefix scope;CenteredImagePrefix* f=(CenteredImagePrefix*)self;float time=fn_8023659C();UIContext* m=f->asset;float zero=(0.0f),one=(1.0f);SetMat3Row(&m->xf.basis,0,one,zero,zero);SetMat3Row(&m->xf.basis,1,zero,one,zero);SetMat3Row(&m->xf.basis,2,zero,zero,one);SetUIVec3(&m->xf.translation,zero,zero,zero);RotationVec rotation;rotation.Set(zero, zero, SpinAngle359(f->value,time/(30.0f)));RotationMatrix matrix;RotationMatrix* target=&f->asset->xf.basis;Mat3FromEuler(&matrix,&rotation);Mat3Mul(target,&matrix,target);f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;if(f->image){fn_8022EEF8(&scope,f->asset,fn_8022EDC4());fn_8022ED00(&scope);fn_802C5320(f->image,0,-f->width/2.0f,f->height/2.0f,(0.0f),f->width,f->height);fn_8022EDB8();}}
+    WidgetFragment* self = (WidgetFragment*)this;FullDrawStatePrefix scope;CenteredImagePrefix* f=(CenteredImagePrefix*)self;float time=CalculateTimeDelta();UIContext* m=f->asset;float zero=(0.0f),one=(1.0f);SetMat3Row(&m->xf.basis,0,one,zero,zero);SetMat3Row(&m->xf.basis,1,zero,one,zero);SetMat3Row(&m->xf.basis,2,zero,zero,one);SetUIVec3(&m->xf.translation,zero,zero,zero);RotationVec rotation;rotation.Set(zero, zero, SpinAngle359(f->value,time/(30.0f)));RotationMatrix matrix;RotationMatrix* target=&f->asset->xf.basis;Mat3FromEuler(&matrix,&rotation);Mat3Mul(target,&matrix,target);f->asset->xf.translation.v[0]=f->x+f->width/2.0f;f->asset->xf.translation.v[1]=f->y-f->height/2.0f;if(f->image){fn_8022EEF8(&scope,f->asset,fn_8022EDC4());fn_8022ED00(&scope);DrawImageWithParams(f->image,0,-f->width/2.0f,f->height/2.0f,(0.0f),f->width,f->height);fn_8022EDB8();}}
 ControlButton::ControlButton(WidgetDesc* desc) : UIWidget(desc) {WidgetFragment* self=(WidgetFragment*)this;EffectImage351* f=(EffectImage351*)self;
  f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();
  f->mode=desc->field9c;if(f->mode<0)goto invalidMode;if(f->mode<=15)goto validMode;invalidMode:fn_802E30C8("Invalid type for ControlButtonImg! %d",f->mode);validMode:;
@@ -2796,7 +2796,7 @@ ColorBackground::ColorBackground(WidgetDesc* desc) : UIWidget(desc) {
  fn_80230C30(&f->x,&f->y,self->left,self->top);f->height=(float)(self->bottom-self->top);f->width=(float)((WidgetDispatch*)self)->Slot78();
  const char* name=(const char*)desc+0x40;f->resource=-1;if(name)f->resource=fn_802CAC28(name,0);
  if(f->resource==-2)goto failure; if(f->resource!=-1)goto loaded; failure:fn_802E30C8("Widget: ColorBackground can't find texture");loaded:;
- f->rate=(float)(u32)desc->field9c/(10.0f);f->stamp=fn_8023659C();f->asset=fn_8022EE9C();f->increasing=1;f->first=(0.0f);f->second=(0.0f);
+ f->rate=(float)(u32)desc->field9c/(10.0f);f->stamp=CalculateTimeDelta();f->asset=fn_8022EE9C();f->increasing=1;f->first=(0.0f);f->second=(0.0f);
  if(*(int*)((char*)desc+0xb0))f->reverse=1;else f->reverse=0;}
 ColorBackground::~ColorBackground(void) {WidgetFragment* self=(WidgetFragment*)this;ResourceHandlePrefix* f=(ResourceHandlePrefix*)self;fn_8022EE98(f->asset);if(f->handle!=-2&&f->handle!=-1)gxForgetTexture(f->handle);f->handle=-1;}
 void ColorBackground::Slot28(void) {
@@ -2814,7 +2814,7 @@ void ColorBackground::Slot28(void) {
     float decreasedBlend;
     float now;
 
-    now = fn_8023659C();
+    now = CalculateTimeDelta();
     textureHandle = image->textureHandle;
     if ((textureHandle != -2) && (textureHandle != -1)) {
         blendStep = (now - image->lastUpdateTime) / image->blendDuration;
@@ -2947,7 +2947,7 @@ void TopTabDisplay::Slot28(void) {
   for(int index=0;index<count;index++){
    bool active=index==selected;
    const char* text=f->list->Name(index);
-   measured = fn_8023293C(f->font,text,(1.0f));
+   measured = CalculateTextWidth(f->font,text,(1.0f));
    width = (0.0f)>measured?(0.0f):measured;
    rowY = y;
    DrawArtPictureAtPosition(f->frame,0,nextX,rowY,(0.0f));
@@ -2956,7 +2956,7 @@ void TopTabDisplay::Slot28(void) {
    textX = nextX+(width/2.0f);
    textY = rowY-(frameHeight/2.0f);
    unsigned int color=active?-1U:0xFF707070U;
-   fn_80232BA4(text,f->font,textX,textY,color,0x14,(1.0f),(0.0f),(1.0f));
+   DrawColoredText(text,f->font,textX,textY,color,0x14,(1.0f),(0.0f),(1.0f));
    nextX+=width;
    DrawArtPictureAtPosition(f->frame,2,nextX,rowY,(0.0f));
    nextX+=((9.0f)+lastWidth);
@@ -2978,7 +2978,7 @@ void TopTabDisplay::Slot28(void) {
  fn_802354A0(f->frame,5,nextX,panelY,(0.0f),bodyWidth,bodyHeight,-1U);
  titleX = nextX+((0.5f)*bodyWidth);
  const char* title=NameTabsTitleShared(f,selected);
- fn_80232BA4(title,f->font,titleX,((5.0f)+panelY)-((0.5f)*bodyHeight),-1U,0x14,(1.2f),(0.0f),(1.0f));
+ DrawColoredText(title,f->font,titleX,((5.0f)+panelY)-((0.5f)*bodyHeight),-1U,0x14,(1.2f),(0.0f),(1.0f));
  if(multiple){nextX+=bodyWidth;DrawArtPictureAtPosition(f->frame,4,nextX,panelY,(0.0f));}
  fn_802278F0(f->panel,left,bottom,available,(float)(f->bottom-f->top));
 }
@@ -3073,8 +3073,8 @@ int ModelWidget::Slot64(int){return ((AdapterPrefix*)this)->target->Flags();}
 int MenuCustomView::Unk20(void){return 0;}
 void ModelWidget::Slot10(void){((AdapterPrefix*)this)->target->State();}
 void MenuCustomView::Unk24(void){}
-void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,int){fn_802C3034(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);fn_802C51C0(image);int height=fn_802C5220(image);int bottom=y+height;int middle=x+width/2;fn_80218EE0(context,x,y,middle,bottom);fn_80218EBC(context,&saved);fn_80218EE0(context,middle,y,x+width,bottom);fn_80218EBC(context,&saved);}
-void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int){fn_802C3034(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);int width=fn_802C51C0(image);int imageHeight=fn_802C5220(image);int middle=y+height/2;fn_80218EE0(context,x,y,x+imageHeight,middle);fn_80218EBC(context,&saved);fn_80218EE0(context,x,middle,x+width,y+height);fn_80218EBC(context,&saved);}
+void fn_80228DC4(ObservedClipPrefix* context,void* image,int x,int y,int width,int){SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);fn_802C51C0(image);int height=fn_802C5220(image);int bottom=y+height;int middle=x+width/2;fn_80218EE0(context,x,y,middle,bottom);fn_80218EBC(context,&saved);fn_80218EE0(context,middle,y,x+width,bottom);fn_80218EBC(context,&saved);}
+void fn_80228E80(ObservedClipPrefix* context,void* image,int x,int y,int height,int){SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));ObservedClipRect saved;fn_80218E98(context,&saved);int width=fn_802C51C0(image);int imageHeight=fn_802C5220(image);int middle=y+height/2;fn_80218EE0(context,x,y,x+imageHeight,middle);fn_80218EBC(context,&saved);fn_80218EE0(context,x,middle,x+width,y+height);fn_80218EBC(context,&saved);}
 int fn_80228F40(int x,int y){return x+1000*y;}
 
 
@@ -3147,7 +3147,7 @@ inline void UIArrowButton::Slot3C(int,int){active=1;elapsed=(0.0f);if(flag1a)dir
 inline void UIArrowButton::Slot40(int,int){active=0;if(flag1a)dirty=1;}
 inline void UIArrowButton::Slot58(void){flag18=1;elapsed=(0.0f);if(flag1a)dirty=1;}
 inline void UIArrowButton::Slot5C(void){flag18=0;if(flag1a)dirty=1;}
-inline int UIArrowButton::Slot70(int x,int y){return fn_802C5280(handle,x-left,y-top,0);}
+inline int UIArrowButton::Slot70(int x,int y){return IsPixelInBounds(handle,x-left,y-top,0);}
 
 
 

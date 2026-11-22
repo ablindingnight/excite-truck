@@ -86,7 +86,7 @@ CameraRacerSlot::CameraRacerSlot(void) {}
 
 extern "C" {
 
-void fn_8026B11C(GameSound** out, const char* name) {
+void LoadSoundWithVolume(GameSound** out, const char* name) {
     GameSound* s = fn_80207848(name, 0);
     *out = s;
     if (s) {
@@ -94,14 +94,14 @@ void fn_8026B11C(GameSound** out, const char* name) {
     }
 }
 
-void fn_8026B178(GameSound** p) {
+void ReleaseGameSound(GameSound** p) {
     if (*p) {
         delete *p;
         *p = 0;
     }
 }
 
-void fn_8026B1D0(ValueNode* n) {
+void ParseJumpPointData(ValueNode* n) {
     JumpPt* j = &lbl_8049A028[lbl_8055F4C8];
     ValPoint pt = n->GetPoint("pt");
     j->x = pt.x;
@@ -109,7 +109,7 @@ void fn_8026B1D0(ValueNode* n) {
     j->rad = n->GetFloat("rad", 1.0f);
 }
 
-void fn_8026B260(void) {
+void LoadJumpCameraData(void) {
     char name[24];
     const char* file;
     lbl_8055F4C8 = 0;
@@ -131,7 +131,7 @@ void fn_8026B260(void) {
             do {
                 n = t->GetChild(i++);
                 if (n && !strcasecmp(n->GetName(), "Jump")) {
-                    fn_8026B1D0(n);
+                    ParseJumpPointData(n);
                     lbl_8055F4C8++;
                 }
             } while (n);
@@ -145,7 +145,7 @@ void fn_8026B260(void) {
 
 // Every function matches (2026-11-14 audit); not linked yet - run flipcheck.py before flipping it to Matching.
 
-void fn_8026B3D4(int player) {
+void HandleJumpCameraActivation(int player) {
     f32 now = lbl_8055E3C8;
     JumpCar* c = fn_8017960C(player);
     if (fn_80178CA4() == 1 && c->type == 'P') {
@@ -215,26 +215,26 @@ void JumpCamDump(void) {
 
 extern "C" {
 
-void fn_8026B644(void) {
-    fn_8026B260();
+void InitializeSoundEffects(void) {
+    LoadJumpCameraData();
     fn_801331C4(4, "effects_volume", &lbl_8055C4F8);
-    fn_8026B11C(&lbl_8055F4D0, "heart.sfx");
-    fn_8026B11C(&lbl_8055F4CC, "whoosh.sfx");
+    LoadSoundWithVolume(&lbl_8055F4D0, "heart.sfx");
+    LoadSoundWithVolume(&lbl_8055F4CC, "whoosh.sfx");
 }
 
 void fn_8026B69C(void) {
     lbl_8055F4C8 = 0;
-    fn_8026B178(&lbl_8055F4CC);
-    fn_8026B178(&lbl_8055F4D0);
+    ReleaseGameSound(&lbl_8055F4CC);
+    ReleaseGameSound(&lbl_8055F4D0);
 }
 
-void fn_8026B6D0(void) { memset(lbl_8049A0E8, 0, sizeof(lbl_8049A0E8)); }
+void ClearCameraBuffer(void) { memset(lbl_8049A0E8, 0, sizeof(lbl_8049A0E8)); }
 
 void fn_8026B6E4(void) {
     if (lbl_8055F4C8 > 0) {
         int i;
         for (i = 0; i < fn_801B2F24(); i++) {
-            fn_8026B3D4(i);
+            HandleJumpCameraActivation(i);
         }
     }
 }
@@ -255,6 +255,6 @@ int fn_8026B768(int player, int cam) {
     return 0;
 }
 
-int fn_8026B7B4(int player) { return lbl_8049A0E8[player].active; }
+int IsPlayerActive(int player) { return lbl_8049A0E8[player].active; }
 
 }  // extern "C"

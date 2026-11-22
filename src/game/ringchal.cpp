@@ -38,7 +38,7 @@ void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt
 void fn_801345D8(char* buf, int size, const char* fmt, ...);
 void fn_801308F4(char* buf, int size, int value);         // number with separators
 void fn_80130980(char* buf, int size, int digits, f32 v);  // fixed-point number
-int fn_801609C4(int score);                                // grade for a score
+int FindGradeForScore(int score);                                // grade for a score
 ValueTable* fn_80131808(const char* name);  // open .val table
 ValueTable* fn_80131810(const char* name);
 void fn_80131818(ValueTable* t);  // close .val table
@@ -105,7 +105,7 @@ int fn_801E866C(int view);
 const char* fn_80131234(const char* key);
 void fn_801479A8(const TextElem* a, const TextElem* b, const char* fmt, f32 t, ...);
 f32 fn_80147204(TextElem* e, const char* text);
-s32 fn_80160998(s32 a);
+s32 GetGradeScoreThreshold(s32 a);
 s32 fn_80160A74(void);
 void fn_8014784C(ILayout* l, const char* box, const char* set, int part);
 void fn_80130978(char* buf, int size, f32 v);
@@ -586,7 +586,7 @@ void RingResults::Update(int score, int rings, int bonus) {
         fn_801308F4(finalScore, 0x14, score);
         fn_801308F4(noBonusScore, 0x14, score - bonus);
         {
-            int g = fn_801609C4(score);
+            int g = FindGradeForScore(score);
             if (g != -1) {
                 StrCopyN(grade, GetGradeDisplayName(g), 0xA);
             } else {
@@ -1566,7 +1566,7 @@ inline int RingChalMaster::vf3C(int view) {
             if (h0 && h1 && body && denom) {
                 char buf[0x14];
                 Blend(h0, h1, fn_80131234("PreRaceOverlay:STARS_NEEDED"), Ease(k));
-                fn_801308F4(buf, sizeof(buf), fn_80160998(fn_80160A74()));
+                fn_801308F4(buf, sizeof(buf), GetGradeScoreThreshold(fn_80160A74()));
                 {
                     TextElem e;
                     e = *body;
@@ -2265,7 +2265,7 @@ inline void RingChalMaster::vf0C(void) {
                     int gradeSecs = (int)arena.timer.t;
                     int secs = (int)arena.timer.t;
                     int total = arena.f30;
-                    fn_801CB5DC(i, total + secs, fn_801609C4(total + gradeSecs));
+                    fn_801CB5DC(i, total + secs, FindGradeForScore(total + gradeSecs));
                 }
                 fn_801CB648(i, 1, arena.timer.t);
                 b9C = 0;

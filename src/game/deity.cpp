@@ -192,7 +192,7 @@ void fn_801E89F4(int a);
 int IsLoadingActive(void);
 extern "C" {
 void fn_801B84F8(void);
-f32 fn_801365C4(IdealFollower* a, IdealFollower* b);
+f32 CalculateTimeDifference(IdealFollower* a, IdealFollower* b);
 
 int fn_801B2F40(int place);
 int fn_801B0DF0(int car);
@@ -1230,7 +1230,7 @@ f32 CalculateRankDifference(int a, int b) {
     if (d != 0) {
         return 500.0f * (f32)d;
     }
-    return (f32)AbsD(fn_801365C4(lo->follower, hi->follower));
+    return (f32)AbsD(CalculateTimeDifference(lo->follower, hi->follower));
 }
 #pragma pop
 

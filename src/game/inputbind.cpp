@@ -359,19 +359,19 @@ static inline f32 MaxZero(f32 v) { return 0.0f > v ? 0.0f : v; }
 
 extern "C" {
 
-void fn_801A7628(void);
-f32 fn_801A7F98(const Binding* b);
+void InitializeInputBindings(void);
+f32 GetJoystickAxisValue(const Binding* b);
 f32 fn_801A85E8(const Binding* b);
 int fn_801A8A10(const Binding* b);
 int fn_801A8E38(const Binding* b);
 int fn_801A8EE4(Binding* b);
 int ControlExists(const Binding* b);
 void fn_801A90A4(char* out, int len, Binding* b);
-void fn_801A9110(Binding* b, const char* name);
-void fn_801A91B0(Binding* b, BindEntry* e);
-BindEntry* fn_801A9234(Binding* b);
+void BindInputToDevice(Binding* b, const char* name);
+void CopyBindingEntry(Binding* b, BindEntry* e);
+BindEntry* FindMatchingBindingEntry(Binding* b);
 
-const NamePair* fn_801A75B4(const char* name) {
+const NamePair* FindInputBindingByName(const char* name) {
     const NamePair* p = lbl_802F9588;
     int i;
     for (i = 0; i < 21; i++, p++) {
@@ -382,7 +382,7 @@ const NamePair* fn_801A75B4(const char* name) {
     return 0;
 }
 
-void fn_801A7628(void) {
+void InitializeInputBindings(void) {
     if (!lbl_8055E5D4) {
         lbl_803342D0[73].key = fn_802E47F8(0x1E);
         lbl_803342D0[74].key = fn_802E47F8(0x30);
@@ -428,7 +428,7 @@ void fn_801A7628(void) {
     lbl_8055E5D0 = 0x7A;
 }
 
-void fn_801A7844(int reset) {
+void InitializeJoyStatus(int reset) {
     s32 x;
     s32 y;
     s32 buttons;
@@ -451,11 +451,11 @@ void fn_801A7844(int reset) {
     }
 }
 
-void fn_801A7974(Binding* b, const char* key, int section) {
+void SaveInputBinding(Binding* b, const char* key, int section) {
     char buf[32] = {0};
     fn_801A90A4(buf, sizeof(buf), b);
     fn_801334F4(section, key, buf, sizeof(buf));
-    fn_801A9110(b, buf);
+    BindInputToDevice(b, buf);
 }
 
 void fn_801A7A08(Binding* b, const char* key, int section) {
@@ -471,23 +471,23 @@ void fn_801A7A5C(void) {
     lbl_80435370.b2 = 0;
     lbl_80435370.b1 = 0;
     lbl_80435370.b0 = 0;
-    fn_801A7844(1);
-    fn_801A7844(1);
+    InitializeJoyStatus(1);
+    InitializeJoyStatus(1);
     for (i = 0; i < 4; i++) {
         lbl_804351E0[i] = lbl_80435050[i];
     }
     lbl_8043537C = lbl_80435370;
 }
 
-int fn_801A7C8C(Binding* out) {
+int FindValidInputBinding(Binding* out) {
     int i;
-    fn_801A7628();
+    InitializeInputBindings();
     for (i = 0; i < lbl_8055E5D0; i++) {
         if (!lbl_8055E5CC[i].used) {
             Binding b;
             b.pad = 0;
             b.latched = 0;
-            fn_801A91B0(&b, &lbl_8055E5CC[i]);
+            CopyBindingEntry(&b, &lbl_8055E5CC[i]);
             if (b.type != 5 && b.type != 6) {
                 if (fn_801A8EE4(&b)) {
                     if (fn_801A8E38(&b) && !fn_801A8A10(&b)) {
@@ -495,7 +495,7 @@ int fn_801A7C8C(Binding* out) {
                         return 1;
                     }
                 } else {
-                    f32 v = fn_801A7F98(&b);
+                    f32 v = GetJoystickAxisValue(&b);
                     if ((f32)__fabs(fn_801A85E8(&b)) < 0.25 && v > 0.5f) {
                         *out = b;
                         return 1;
@@ -507,18 +507,18 @@ int fn_801A7C8C(Binding* out) {
     return 0;
 }
 
-void fn_801A7DFC(const char* key, const char* name, int section) {
+void BindInputKey(const char* key, const char* name, int section) {
     Binding b;
     b.pad = 0;
     b.latched = 0;
-    fn_801A9110(&b, name);
+    BindInputToDevice(&b, name);
     fn_801A7A08(&b, key, section);
 }
 
-void fn_801A7E54(char* out, int len, Binding* b) {
-    BindEntry* e = fn_801A9234(b);
+void GetBindingText(char* out, int len, Binding* b) {
+    BindEntry* e = FindMatchingBindingEntry(b);
     if (e) {
-        const NamePair* p = fn_801A75B4(e->name);
+        const NamePair* p = FindInputBindingByName(e->name);
         if (p) {
             SafeStrCopy(out, p->text, len);
         } else {
@@ -532,7 +532,7 @@ void fn_801A7E54(char* out, int len, Binding* b) {
 
 void fn_801A7F8C(void) { lbl_8055E5C8 = 0; }
 
-f32 fn_801A7F98(const Binding* b) {
+f32 GetJoystickAxisValue(const Binding* b) {
     JoyStatus* p;
     if (!ControlExists(b)) {
         return 0.0f;
@@ -663,7 +663,7 @@ f32 fn_801A85E8(const Binding* b) {
     Mouse m = lbl_80435370;
     lbl_80435050[pad] = lbl_804351E0[pad];
     lbl_80435370 = lbl_8043537C;
-    f32 result = fn_801A7F98(b);
+    f32 result = GetJoystickAxisValue(b);
     lbl_80435050[pad] = saved;
     lbl_80435370 = m;
     return result;
@@ -685,7 +685,7 @@ int fn_801A8A10(const Binding* b) {
     return result;
 }
 
-int fn_801A8E38(const Binding* b) { return fn_801A7F98(b) > 0.2f; }
+int fn_801A8E38(const Binding* b) { return GetJoystickAxisValue(b) > 0.2f; }
 
 int fn_801A8E68(Binding* b) {
     switch (b->type) {
@@ -774,17 +774,17 @@ int ControlExists(const Binding* b) {
 }
 
 int fn_801A902C(void*) {
-    fn_801A7628();
+    InitializeInputBindings();
     return 21;
 }
 
 void fn_801A9050(Binding* b, int i) {
     char unused[32] = {0};
-    fn_801A9110(b, lbl_802F9588[i].name);
+    BindInputToDevice(b, lbl_802F9588[i].name);
 }
 
 void fn_801A90A4(char* out, int len, Binding* b) {
-    BindEntry* e = fn_801A9234(b);
+    BindEntry* e = FindMatchingBindingEntry(b);
     if (e) {
         strncpy(out, e->name, len);
     } else {
@@ -793,19 +793,19 @@ void fn_801A90A4(char* out, int len, Binding* b) {
     out[len - 1] = 0;
 }
 
-void fn_801A9110(Binding* b, const char* name) {
+void BindInputToDevice(Binding* b, const char* name) {
     int i;
-    fn_801A7628();
+    InitializeInputBindings();
     for (i = 0; i < lbl_8055E5D0; i++) {
         if (!strcasecmp(lbl_8055E5CC[i].name, name)) {
-            fn_801A91B0(b, &lbl_8055E5CC[i]);
+            CopyBindingEntry(b, &lbl_8055E5CC[i]);
             return;
         }
     }
     b->type = 0;
 }
 
-void fn_801A91B0(Binding* b, BindEntry* e) {
+void CopyBindingEntry(Binding* b, BindEntry* e) {
     b->type = e->type;
     switch (b->type) {
     case 2:
@@ -829,11 +829,11 @@ void fn_801A91B0(Binding* b, BindEntry* e) {
     }
 }
 
-BindEntry* fn_801A9234(Binding* b) {
+BindEntry* FindMatchingBindingEntry(Binding* b) {
     BindEntry* e;
     int i;
     int n;
-    fn_801A7628();
+    InitializeInputBindings();
     n = lbl_8055E5D0;
     for (i = 0; i < n; i++) {
         e = &lbl_8055E5CC[i];

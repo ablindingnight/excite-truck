@@ -5,7 +5,7 @@
 
 extern "C" {
 s32 fn_80129AF4(void);
-int fn_801298E8(JoyStatus* info, int ch);
+int ReadJoyStatus(JoyStatus* info, int ch);
 void fn_80214FD8(const char* title, const char* msg);
 }
 
@@ -19,12 +19,12 @@ extern "C" void fn_8024683C(void) {
     int warn = 0;
     if (ch == -1) {
         for (int i = 0; i < 4; i++) {
-            if (fn_801298E8(&all, i) && (all.info.b & 1)) {
+            if (ReadJoyStatus(&all, i) && (all.info.b & 1)) {
                 warn = 1;
             }
         }
     } else {
-        if (fn_801298E8(&one, ch) && (one.info.b & 1)) {
+        if (ReadJoyStatus(&one, ch) && (one.info.b & 1)) {
             warn = 1;
         }
     }
