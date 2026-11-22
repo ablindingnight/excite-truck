@@ -2803,8 +2803,8 @@ void CarBody::vf20(void) {
     a.y *= -1.0f;
     a.z *= -1.0f;
     AddScaled(&f, &a, acc, -1.5f);
-    AddScaled(&f, &f, ang, -100.0f);
     AddScaled(&f, &f, vel, -5.0f);
+    AddScaled(&f, &f, ang, -100.0f);
     AddScaled(vel, vel, &f, 0.016683351f);
     AddScaled(ang, ang, vel, 0.016683351f);
     Scale(acc, acc, 0.95f);
