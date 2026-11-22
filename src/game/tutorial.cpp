@@ -1225,7 +1225,7 @@ inline void Challenge::Collect(int& i) {
 #pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
 // Helper names unproven.
 static inline f32 InitMidX(f32 a, f32 b) { return (a + b) * 0.5f; }
-static inline f32 InitMidZ(f32 a, f32 b) { return (a + b) / 2.0f; }
+static inline f32 InitMidZ(f32 a, f32 b) { return (a + b) * 0.5f; }
 
 inline void Challenge::Init(void) {
     ValueNode* n;
