@@ -174,25 +174,39 @@ void fn_80138434(void* p);
 
 #pragma push
 #pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+/* Helper name unproven: one real scratch byte across required word reversals. */
+static inline void SwapLoaderWord(void* p, unsigned char& byte) {
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
+    unsigned char* b = (unsigned char*)p;
+    byte = b[0];
+    b[0] = b[3];
+    b[3] = byte;
+    byte = b[1];
+    b[1] = b[2];
+    b[2] = byte;
+#endif
+}
+
 void fn_801381B4(IdealLineRes* res) {
+    unsigned char swapByte;
     int i;
     int t;
     IdealPoint* p;
     ResExt* e;
-    SwapWord(&res->hdr.resSize);
-    SwapWord(&res->hdr.segSize);
-    SwapWord(&res->len[0]);
-    SwapWord(&res->len[1]);
-    SwapWord(&res->len[2]);
-    SwapWord(&res->len[3]);
-    SwapWord(&res->total);
-    SwapWord(&res->nrelocs);
+    SwapLoaderWord(&res->hdr.resSize, swapByte);
+    SwapLoaderWord(&res->hdr.segSize, swapByte);
+    SwapLoaderWord(&res->len[0], swapByte);
+    SwapLoaderWord(&res->len[1], swapByte);
+    SwapLoaderWord(&res->len[2], swapByte);
+    SwapLoaderWord(&res->len[3], swapByte);
+    SwapLoaderWord(&res->total, swapByte);
+    SwapLoaderWord(&res->nrelocs, swapByte);
     for (i = 0; i < res->nrelocs; i++) {
-        SwapWord(&res->relocs[i]);
+        SwapLoaderWord(&res->relocs[i], swapByte);
     }
     for (i = 0; i < res->nrelocs; i++) {
         u32* r = (u32*)((u8*)res + res->relocs[i]);
-        SwapWord(r);
+        SwapLoaderWord(r, swapByte);
         *r += (u32)res;
     }
     fn_80138434(&res->points);
