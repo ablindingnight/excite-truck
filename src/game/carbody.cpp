@@ -2756,7 +2756,7 @@ void fn_80186DE8(void) {
 static inline void AddScaled(RVec3* o, const RVec3* a, const RVec3* b, f32 k) {
     o->x = a->x + b->x * k;
     o->y = a->y + b->y * k;
-    o->z = a->z + b->z * k;
+    o->z = AddScaledF(a->z, k, b->z);
 }
 
 // v times the body rotation (rows at 0x3C).
