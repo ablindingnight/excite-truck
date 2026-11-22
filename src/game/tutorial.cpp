@@ -1725,8 +1725,8 @@ static inline TVec2 QueryMid2(const TVec2& a, const TVec2& b) {
 static inline int QueryLongestSide(const TVec2& a, const TVec2& b, const TVec2& c) {
     int best;
     f32 max;
-    Delta2 d;
     Delta2 e;
+    Delta2 d;
     f32 len;
     d.z = c.z - a.z;
     f32 xv = a.x;
