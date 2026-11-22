@@ -2542,7 +2542,7 @@ void fn_80197BD0(u8* d, u8* out) {
                 const struct { f32 value; } currentOffset = {F32(d, 0x54)};
                 f32 dir = F32(d, 0x10C) > 0.0f ? 1.0f : -1.0f;
                 UpdateFollowLine(d, gap, dir, currentOffset.value);
-                f32 u = Clamp01((F32(d, 0xEC) - 4.0f) / -3.3f);
+                f32 u = Clamp01(AiRamp(F32(d, 0xEC), 4.0f, -3.3f));
                 F32(d, 0xF0) = Lerp(F32(d, 0xF0), Lerp(0.0f, 1.0f, u), 0.5f);
                 if (!fn_80193184(d, S32(d, 0x114))) {
                     f32 base = F32(d, 0x270) + F32(d, 0x110);
