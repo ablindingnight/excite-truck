@@ -147,18 +147,13 @@ static inline f32 FtToM(f32 x) { return 0.305f * x; }
 void RigidBody::SetMass(f32 m, f32 ix, f32 iy, f32 iz) {
     mass = LbToKg(m);
     // Convert pounds to kilograms, then both feet factors of inertia to metres.
-    ix = LbToKg(ix);
-    iy = LbToKg(iy);
-    iz = LbToKg(iz);
-    ix = FtToM(ix);
-    iy = FtToM(iy);
-    iz = FtToM(iz);
-    iy = FtToM(iy);
-    iz = FtToM(iz);
-    ix = FtToM(ix);
-    inertia.x = ix;
-    inertia.y = iy;
-    inertia.z = iz;
+    inertia.Set(LbToKg(ix), LbToKg(iy), LbToKg(iz));
+    inertia.x = FtToM(inertia.x);
+    inertia.y = FtToM(inertia.y);
+    inertia.z = FtToM(inertia.z);
+    inertia.y = FtToM(inertia.y);
+    inertia.z = FtToM(inertia.z);
+    inertia.x = FtToM(inertia.x);
     invInertia.x = 1.0f / inertia.x;
     invMass = 1.0f / mass;
     invInertia.y = 1.0f / inertia.y;
