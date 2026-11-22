@@ -2455,7 +2455,7 @@ void fn_80186DE8(void) {
             speed = PSVECMag((const Vec*)(car + 0x118));
             speed = speed > 1.0f ? speed : 1.0f;
             k = 9.81f * (-1.5f * ((CarBody*)car)->mass) * ((CarBody*)car)->f25E4 / speed;
-            force[0] = force[0] + ((CarBody*)car)->vel.x * k;
+            force[0] = AddScaledF(force[0], k, ((CarBody*)car)->vel.x);
             force[1] = force[1] + ((CarBody*)car)->vel.y * k;
             force[2] = force[2] + ((CarBody*)car)->vel.z * k;
             if (((CarBody*)car)->f259C && ((CarBody*)car)->speed < top) {
