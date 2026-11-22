@@ -1108,9 +1108,9 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
                 part = 4;
             }
             f32 t = Unlerp(alpha, 0.0f, 1.0f);
-            f32 s = 0.5f + Clamp01(t) * 0.5f;
+            f32 s = 0.5f + Clamp01(t) / 2.0f;
             f32 pw = fn_80235EF0(art, part) * s;
-            f32 s2 = 0.5f + Clamp01(t) * 0.5f;
+            f32 s2 = 0.5f + Clamp01(t) / 2.0f;
             f32 ph = fn_80235F64(art, part) * s2;
             int a = RoundF(GarageFadeAlpha(fade));
             a = a > 0x13F ? 0x13F : a;
