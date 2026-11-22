@@ -149,11 +149,11 @@ void fn_80294CCC(const Vec* p, const Vec* r, const Vec* u, f32 w, f32 h, u32 col
     f32 nw = -w;
     left.x = p->x + r->x * nw;
     f32 yv = r->y;
-    right.x = p->x + r->x * w;
+    right.x = AddScaledF(p->x, w, r->x);
     left.y = p->y + yv * nw;
     left.z = p->z + r->z * nw;
-    right.y = p->y + r->y * w;
-    right.z = p->z + r->z * w;
+    right.y = AddScaledF(p->y, w, r->y);
+    right.z = AddScaledF(p->z, w, r->z);
     f32 nh = -h;
     v[0].pos.x = left.x + u->x * h;
     v[0].pos.y = left.y + u->y * h;
