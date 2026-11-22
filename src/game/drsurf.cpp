@@ -439,13 +439,17 @@ void fn_802D4988(Surf* s) {
 /* Helper name unproven */
 // Actual two-target morph of the skinned base point.
 /* Helper name unproven */
+// Decode the actual signed16 morph displacement unit.
+/* Helper name unproven */
+static inline f32 DecodeMorphDelta(s16 raw) { return (1.0f / 255) * raw; }
+
 static inline void ApplySkinMorph(V3* o, const V3& p, const SkinMorphVtx* v) {
     f32 wb = lbl_804CA308[v->ib];
     f32 wa = lbl_804CA308[v->ia];
     V3 a;
-    a.Set((1.0f / 255) * v->a[0], Mul((1.0f / 255), v->a[1]), (1.0f / 255) * v->a[2]);
+    a.Set(DecodeMorphDelta(v->a[0]), DecodeMorphDelta(v->a[1]), DecodeMorphDelta(v->a[2]));
     V3 b;
-    b.Set(Mul((1.0f / 255), v->b[0]), Mul((1.0f / 255), v->b[1]), (1.0f / 255) * v->b[2]);
+    b.Set(DecodeMorphDelta(v->b[0]), DecodeMorphDelta(v->b[1]), DecodeMorphDelta(v->b[2]));
     o->x = p.x + a.x * wa;
     o->y = p.y + Mul(a.y, wa);
     o->z = p.z + a.z * wa;
