@@ -35,7 +35,7 @@ extern "C" {
 int fn_802E2C20(void);
 void fn_80235380(u8* p);
 void fn_8020A5F8(f32 v);
-void fn_80246CB8(const char* lyt);
+void ShowBootLogoLayout(const char* lyt);
 void fn_80214AF0(int s);
 void fn_80214A9C(int s);
 void fn_80214CB4(s32 a);
@@ -65,7 +65,7 @@ void fn_802C942C(u32 color);
 int fn_8020A640(void);
 void fn_802ECEC0(void);
 void fn_802ECEC4(void);
-void fn_802483E0(void);
+void DisplayThankYouScreen(void);
 u8* fn_80232578(const char* name);
 u8* gxGetImage(const char* name);
 u8* fn_8023512C(const char* art);
@@ -129,7 +129,7 @@ int fn_802E4A10(void);
 const char* fn_80131234(const char* key);
 
 // "Wrong controller type" warning, repeated while the bad controller stays connected.
-int fn_80246938(void) {
+int DisplayControllerTypeWarning(void) {
     int chan = fn_802E4A10();
     if (chan >= 0 && chan < 4) {
         fn_80214A9C(0x1F);
@@ -200,7 +200,7 @@ static inline void ShowKioskMenu(MenuArt& logo) {
     MenuItem items[] = {
         MenuItem(logoName, 5, &logo, 0, 0),
         KioskVersionItem(),
-        MenuItem(lbl_8055B860, 6, (const void*)fn_80246938, -2, 13),
+        MenuItem(lbl_8055B860, 6, (const void*)DisplayControllerTypeWarning, -2, 13),
         MenuItem(lbl_804988F0),
     };
     MenuDesc desc = {"kiosk.lyt", 0, (int (*)(int*))fn_8024762C, 0, 0};
@@ -259,7 +259,7 @@ public:
 void fn_80216CA8(void);
 
 // Shows one boot logo layout for 2.5 s.
-void fn_80246CB8(const char* lyt) {
+void ShowBootLogoLayout(const char* lyt) {
     MenuTimer t(2500, 1);
     MenuItem items[] = {
         MenuItem(0, 5, &t, 0, 0),
@@ -273,15 +273,15 @@ void fn_80246CB8(const char* lyt) {
 
 
 // Not in the DOL (dead-stripped); kept for their strings' places in the pool.
-void ShowLegal(void) { fn_80246CB8("dd_legal.lyt"); }
+void ShowLegal(void) { ShowBootLogoLayout("dd_legal.lyt"); }
 
-void ShowDemoControls(void) { fn_80246CB8("democtl.lyt"); }
+void ShowDemoControls(void) { ShowBootLogoLayout("democtl.lyt"); }
 
-void fn_80246DE8(void) { fn_80246CB8("LogoNint.lyt"); }
+void fn_80246DE8(void) { ShowBootLogoLayout("LogoNint.lyt"); }
 
-void fn_80246DF4(void) { fn_80246CB8("LogoMnst.lyt"); }
+void fn_80246DF4(void) { ShowBootLogoLayout("LogoMnst.lyt"); }
 
-void fn_80246E00(void) { fn_80246CB8("LogoDlby.lyt"); }
+void fn_80246E00(void) { ShowBootLogoLayout("LogoDlby.lyt"); }
 
 // Not in the DOL (dead-stripped): the wrist strap notice. Its screen's table and destructor are what remain.
 void ShowWiiStrap(void) {
@@ -366,7 +366,7 @@ private:
 extern "C" {
 
 // E3 demo track select; returns the chosen track or -1.
-int fn_80246E4C(void) {
+int HandleE3TrackSelection(void) {
     int r;
     fn_802ECEC4();
     {
@@ -384,7 +384,7 @@ int fn_80246E4C(void) {
         if (ret == -2) {
             r = w.sel;
         } else if (ret == -234) {
-            fn_802483E0();
+            DisplayThankYouScreen();
             r = -1;
         } else {
             r = -1;
@@ -415,7 +415,7 @@ void fn_8023D704(int a);
 void fn_80129AFC(void);
 void ClearInputBuffer(void);
 void fn_8023D7CC(void);
-int fn_80248668(void);
+int ShowKioskMenuScreen(void);
 int fn_80278A1C(const char* movie);
 void fn_8020C91C(int song);
 void GameDoEve(int track, int eve);
@@ -426,7 +426,7 @@ extern "C" {
 
 // Kiosk attract loop: logos, idle menu (or the attract movie), then the E3 track picker; loads the
 // chosen demo track with its song.
-void fn_80247210(void) {
+void HandleKioskAttractLoop(void) {
     if (!lbl_8055F268) {
         lbl_8055F264 = fn_8020A5F0();
         lbl_8055F268 = 1;
@@ -445,7 +445,7 @@ void fn_80247210(void) {
             fn_80246DF4();
             fn_80246E00();
         }
-        if (fn_80248668() == -234) {
+        if (ShowKioskMenuScreen() == -234) {
             if (!fn_80278A1C("attract.avi")) {
                 skip = 1;
             }
@@ -454,7 +454,7 @@ void fn_80247210(void) {
             }
             continue;
         }
-        skip = fn_80246E4C();
+        skip = HandleE3TrackSelection();
         if (skip >= 0) {
             break;
         }
@@ -473,7 +473,7 @@ void fn_80247210(void) {
     fn_8020C91C(song);
     fn_8020A634();
     GameDoEve(track, 0);
-    fn_802483E0();
+    DisplayThankYouScreen();
     fn_8020C91C(-1);
     lbl_8055F260 = 0;
 }
@@ -492,7 +492,7 @@ void ShowWiiConfig(int type) {
         lyt = "wiiconf_a.lyt";
         break;
     }
-    fn_80246CB8(lyt);
+    ShowBootLogoLayout(lyt);
 }
 
 u32 fn_8024739C(u8* p) { return 0; }
@@ -517,10 +517,10 @@ void SetPlayerName(const char* name, int slot);
 extern "C" {
 void SetInputChannel(int a);
 void PlayMusicTrack(void);
-int fn_80247C18(void);
-int fn_802478A4(void);
-int fn_80247AD0(void);
-void fn_8024CF60(void);
+int CalculateMenuOptions(void);
+int DrawCareerDifficultyMenu(void);
+int CreateChallengeMenu(void);
+void InitializeProfileSlot(void);
 void fn_8024CFB4(void);
 void fn_8027DDCC(int a);
 void MenuDoChallengeMode(int a);
@@ -532,7 +532,7 @@ void fn_80137C78(int n);
 void fn_80137C84(int pad, int slot);
 void RunPlayerRace(void);
 void fn_8025812C(void);
-void fn_8025C054(void);
+void HandleRecordsMenu(void);
 void fn_80161DE4(void);
 void fn_8027DE6C(void);
 void fn_80263F30(int a, int b, int c);
@@ -549,9 +549,9 @@ void MenuDoDemo(void) {
             int stay = 1;
             do {
                 SetInputChannel(0);
-                switch (fn_80247C18()) {
+                switch (CalculateMenuOptions()) {
                 case 1:
-                    fn_8024CF60();
+                    InitializeProfileSlot();
                     break;
                 case 2:
                     fn_8024CFB4();
@@ -607,7 +607,7 @@ void MenuDoDemo(void) {
                     fn_8025812C();
                     break;
                 case 16:
-                    fn_8025C054();
+                    HandleRecordsMenu();
                     break;
                 case 13:
                     UnlockAll();
@@ -662,7 +662,7 @@ int ShowTechDemo(void) {
     return fn_802146BC(&desc, -999, -999, 1);
 }
 
-void ShowHome(void) { fn_80246CB8("home.lyt"); }
+void ShowHome(void) { ShowBootLogoLayout("home.lyt"); }
 
 void ShowNeedControllers(void) { fn_80214FD8(lbl_8055BAC0, "Please plug in more controllers for Multi-Player"); }
 
@@ -767,7 +767,7 @@ void fn_8024778C(void) {
 void fn_80247880(void) { lbl_8055BEB0 = fn_80214D04(); }
 
 // Career difficulty menu.
-int fn_802478A4(void) {
+int DrawCareerDifficultyMenu(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_8024778C, 0, 0),
         MenuItem(lbl_8055BABC, 8, (const void*)fn_80247880, 1, 0),
@@ -814,7 +814,7 @@ void fn_80247AAC(void) { lbl_8055BEB4 = fn_80214D04(); }
 // Challenge difficulty menu.
 s32 lbl_8055BEC0 = -1;
 
-int fn_80247AD0(void) {
+int CreateChallengeMenu(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_80247A0C, 0, 0),
         MenuItem(lbl_8055BABC, 8, (const void*)fn_80247AAC, 1, 0),
@@ -871,7 +871,7 @@ int fn_8027DE68(int a);
 
 // The demo main menu: works out which modes are open, then runs the menu (career and challenge go
 // through their difficulty popups). Returns the chosen entry.
-int fn_80247C18(void) {
+int CalculateMenuOptions(void) {
     lbl_8055F26C = 0;
     int n = fn_80161D50();
     bool ok = fn_80161D14() > n;
@@ -937,14 +937,14 @@ int fn_80247C18(void) {
             r = fn_802146BC(&desc, -999, -999, 1);
         }
         if (r == 3) {
-            int d = fn_802478A4();
+            int d = DrawCareerDifficultyMenu();
             if (d != -1) {
                 lbl_8055F270 = 1;
                 return d;
             }
             lbl_8055F270 = 0;
         } else if (r == 6) {
-            int d = fn_80247AD0();
+            int d = CreateChallengeMenu();
             if (d != -1) {
                 lbl_8055F271 = 1;
                 return d;
@@ -991,7 +991,7 @@ static inline f32 BobCurve(f32 x, f32 y, f32 u) {
 extern "C" {
 
 // Attract-mode cursor drift: x eases in with a sway 1.5 s after lbl_8055F274; y follows a fixed curve over x.
-void fn_802481A0(f32 x, f32 y, f32* outX, f32* outY) {
+void CalculateAttractModeCursorDrift(f32 x, f32 y, f32* outX, f32* outY) {
     int ms = fn_802E2C20() - lbl_8055F274 - 1500;
     f32 t = MIN(1.0f, (f32)ms / 1000.0f);
     t = MAX(t, 0.0f);
@@ -1039,10 +1039,10 @@ typedef void (*XformFn)(f32 x, f32 y, f32* ox, f32* oy);
 
 extern "C" {
 void fn_80232B80(XformFn fn);
-void fn_802481A0(f32 x, f32 y, f32* outX, f32* outY);
+void CalculateAttractModeCursorDrift(f32 x, f32 y, f32* outX, f32* outY);
 
 // "Thank you" screen at the end of the demo: the logo drifts in, closes after 5 s.
-void fn_802483E0(void) {
+void DisplayThankYouScreen(void) {
     MenuTimer t(5000, 0);
     LogoMover logo(lbl_8055BEF4);
     MenuItem items[] = {
@@ -1055,7 +1055,7 @@ void fn_802483E0(void) {
     lbl_8055F278 = (u8*)&logo;
     MenuDesc desc = {"thankyou.lyt", 0, 0, 0, 0};
     desc.items = items;
-    fn_80232B80(fn_802481A0);
+    fn_80232B80(CalculateAttractModeCursorDrift);
     fn_802146BC(&desc, -999, -999, 1);
     fn_80232B80(0);
     lbl_8055F278 = 0;
@@ -1079,7 +1079,7 @@ extern "C" {
 int fn_8020A640(void);
 void PlayMusicTrack(void);
 
-int fn_80248668(void) {
+int ShowKioskMenuScreen(void) {
     if (!fn_8020A640()) {
         PlayMusicTrack();
     }

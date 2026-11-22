@@ -109,7 +109,7 @@ static inline void DrawRing(f32 y, f32 x, f32 r) {
 
 extern "C" {
 
-void fn_801DE7E8(int id) {
+void LoadPopupLayouts(int id) {
     switch (id) {
     case 1:
         lbl_804872B0[id].layout = fn_80145E70("betalyt.val");
@@ -172,7 +172,7 @@ void fn_801DEB10(void) {
     lbl_8055ADF0 = fn_802E2C9C();
 }
 
-int fn_801DEB6C(const char* name) {
+int LookupEffectNameIndex(const char* name) {
     const char* names[7] = {"none", "nice_landing", "morph_enabled", "morph_activated", "excite_turbo", "excite_jump",
                             "excite_overheat"};
     for (u32 i = 0; i < 7; i++) {
@@ -183,7 +183,7 @@ int fn_801DEB6C(const char* name) {
     return 0;
 }
 
-void fn_801DEC18(void) {
+void LoadPopupDefinitions(void) {
     PopupDef* d;
     const char* file;
     int i;
@@ -196,7 +196,7 @@ void fn_801DEC18(void) {
         n = lbl_8055E9E4->GetChild(0);
         while (n) {
             if (strcasecmp(n->GetName(), "popup") == 0) {
-                d = &lbl_804872B0[fn_801DEB6C(n->GetValue("name"))];
+                d = &lbl_804872B0[LookupEffectNameIndex(n->GetValue("name"))];
                 d->text = n->GetValue("text");
                 d->repeat = n->GetBool("repeat", 0);
             }
@@ -222,11 +222,11 @@ void fn_801DEC18(void) {
     lbl_8055E9E8 = 0;
     lbl_8055ADF0 = -1;
     for (u32 k = 0; k < 9; k++) {
-        fn_801DE7E8(k);
+        LoadPopupLayouts(k);
     }
 }
 
-void fn_801DEE3C(void) {
+void ClearPopupResources(void) {
     for (u32 i = 0; i < 9; i++) {
         PopupDef* d = &lbl_804872B0[i];
         if (d->layout) {
@@ -259,7 +259,7 @@ void fn_801DEE3C(void) {
     lbl_8055E9DC = 0;
 }
 
-void fn_801DEF98(void) {
+void SavePopupSeenFlags(void) {
     fn_801332D0(Prefs(), "popups_seen", &lbl_8055E9DC);
     lbl_8055E9E0 = 0;
     lbl_804873B8.count = 0;
@@ -288,7 +288,7 @@ int fn_801DF074(int id, int sound) {
     return 0;
 }
 
-int fn_801DF110(void) {
+int HandlePopupDisplay(void) {
     if (lbl_8055E9E8) {
         if (fn_801769F8()) {
             PopupDef* d = &lbl_804872B0[lbl_8055E9E8];
@@ -311,7 +311,7 @@ int fn_801DF110(void) {
     return 0;
 }
 
-int fn_801DF238(int key) {
+int HandlePopupInput(int key) {
     if (lbl_8055E9E8) {
         if (fn_801769F8()) {
             switch (key) {

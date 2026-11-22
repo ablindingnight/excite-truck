@@ -147,11 +147,11 @@ void fn_80230B5C(PlainValMatrix* cam);
 void fn_802C8638(PlainValMatrix* cam);
 void SetupCameraProjection(f32 a, f32 b, f32 c);
 void fn_80161C18(void);
-int fn_801DF110(void);
+int HandlePopupDisplay(void);
 int fn_80161A70(void);
 int fn_8023D6FC(void);
 void fn_802C9904(void);
-int fn_801DF238(int key);
+int HandlePopupInput(int key);
 int fn_802E4A10(void);
 int FindDriverIndex(int unk);
 void fn_80276DC8(int player);
@@ -1110,7 +1110,7 @@ void fn_80007238(void) {
     SetupCameraProjection(kOverlayFullScale.value, 1000.0f, lbl_8034EE84.numViews > 2 ? narrow : wide);
     fn_800057D0();
     fn_80161C18();
-    if (!LoadingDraw() && !fn_801DF110() && !fn_80161A70()) {
+    if (!LoadingDraw() && !HandlePopupDisplay() && !fn_80161A70()) {
         fn_80005930();
     }
     fn_80005B6C();
@@ -1176,7 +1176,7 @@ int fn_800074EC(int key) {
     if (LoadingHandleKey(key)) {
         return 1;
     }
-    if (fn_801DF238(key)) {
+    if (HandlePopupInput(key)) {
         return 1;
     }
     return fn_80007554(FindDriverIndex(fn_802E4A10()), 1000, key);

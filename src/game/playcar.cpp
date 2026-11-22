@@ -169,7 +169,7 @@ int fn_801B89E0(void);
 void fn_801B665C(void);
 void fn_801B6664(u8* p);
 void fn_8018AE24(u8* car, int v);
-void fn_80191084(u8* p, u32 a);
+void SwitchActiveView(u8* p, u32 a);
 void fn_80191758(u8* p);
 int fn_801B526C(u8* p);
 int fn_801769F8(void);
@@ -385,7 +385,7 @@ u32 GetArenaDriverByType(u32);
 u32 CreateParkDriver(void);
 
 // Builds the local player's car: driver, hybrid controller and the car itself.
-SpringCar* fn_8018FB18(void) {
+SpringCar* BuildLocalPlayerCar(void) {
     u8* drv;
     u8* hyb;
     u8* prof = (u8*)fn_801769CC();
@@ -408,7 +408,7 @@ SpringCar* fn_8018FB18(void) {
     return new ("LocalCar (player)") SpringCar((Controller*)hyb);
 }
 
-void fn_8018FC38(void) {
+void AllocateReplayBuffers(void) {
     s32 n = fn_80137C74();
     for (int i = 0; i < n; i++) {
         lbl_804349B0[i] = (u8*)operator new[](0x46500, "replaypkt");
@@ -445,7 +445,7 @@ static f32 TickCountAsFloat(s32 ticks) { return (f32)ticks; }
 HybridDriver::HybridDriver(u32 a, u32 b) {
     u8* p = (u8*)this;
     if (lbl_8055E518 == 0) {
-        fn_8018FC38();
+        AllocateReplayBuffers();
     }
     lbl_804349A0[lbl_8055E518++] = p;
     U8(p, 0x38) = 1;
@@ -672,15 +672,15 @@ void Recorder::SetRumble(int a) {
 
 #define p ((u8*)this)  // the parameter itself: a named u8* copy of this recolours it (retail registers)
 void HybridDriver::Start(void) {
-    fn_80191084(p, 0);
+    SwitchActiveView(p, 0);
     fn_801B6650(PTR(p, 0x20));
     u32 cur = fn_80191100(p);
     if (cur != U32(p, 0x8)) {
-        fn_80191084(p, U32(p, 0x8));
+        SwitchActiveView(p, U32(p, 0x8));
     } else {
-        fn_80191084(p, U32(p, 0xC));
+        SwitchActiveView(p, U32(p, 0xC));
     }
-    fn_80191084(p, cur);
+    SwitchActiveView(p, cur);
     if (U8(p, 0x38)) {
         U8(p, 0x38) = 0;
         ResetLightPreset(PTR(p, 0x28));
@@ -691,7 +691,7 @@ void HybridDriver::Start(void) {
 
 void HybridDriver::Stop(void) {
     u8* p = (u8*)this;
-    fn_80191084(p, 0); }
+    SwitchActiveView(p, 0); }
 
 // Modes 0 and 1 (meaning not known yet) are compared as an enum.
 enum PlayMode { PLAY_MODE_0, PLAY_MODE_1 };
@@ -748,11 +748,11 @@ BOOL OptPaTest(void);
 extern "C" {
 u32 fn_80190E00(u8* p);
 int fn_80190D9C(f32 x, f32 lo, f32 hi);
-int fn_80190D38(f32 x, f32 lo, f32 hi);
+int ConvertRangeToByte(f32 x, f32 lo, f32 hi);
 int fn_80190CD0(f32 x, f32 lo, f32 hi);
 int fn_801CF064(void);
 void fn_801769E0(void);
-void fn_80176A34(s32 frame);
+void SetFrameCount(s32 frame);
 int fn_801B851C(s32 car);
 int IsPlayerActive(s32 car);
 int fn_802B02C8(u8* p);
@@ -777,8 +777,8 @@ void HybridDriver::v48(void) {
             lbl_8055E524 = rec->pos = frame + 1;
         }
         SetThrottle(rec, fn_80190D9C(rec->src->Throttle(speed), kNegThree, 3.0f));
-        SetV14(rec, fn_80190D38(rec->src->v14(), 0.0f, 1.0f));
-        SetV10(rec, fn_80190D38(rec->src->v10(), 0.0f, 1.0f));
+        SetV14(rec, ConvertRangeToByte(rec->src->v14(), 0.0f, 1.0f));
+        SetV10(rec, ConvertRangeToByte(rec->src->v10(), 0.0f, 1.0f));
         SetV18(rec, fn_80190CD0(rec->src->v18(), 0.0f, 1.0f));
         SetV1C(rec, fn_80190CD0(rec->src->v1C(), 0.0f, 1.0f));
         SetGear(rec, rec->src->Gear() + 1);
@@ -787,12 +787,12 @@ void HybridDriver::v48(void) {
         SetV3C(rec, rec->src->v3C());
         SetV2C(rec, rec->src->v2C());
         SetV30(rec, rec->src->v30());
-        SetV44(rec, fn_80190D38(rec->src->v44(), kNegOne, 1.0f));
-        SetV48(rec, fn_80190D38(rec->src->v48(), kNegOne, 1.0f));
+        SetV44(rec, ConvertRangeToByte(rec->src->v44(), kNegOne, 1.0f));
+        SetV48(rec, ConvertRangeToByte(rec->src->v48(), kNegOne, 1.0f));
     }
     if (fn_801CF064() && frame >= rec->pos - 1) {
         fn_801769E0();
-        fn_80176A34(lbl_8055E3C4);
+        SetFrameCount(lbl_8055E3C4);
     }
     VP(PTR(p, 0x4))->v74();
     if (S32(PTR(p, 0x20), 0x2620)) {
@@ -801,22 +801,22 @@ void HybridDriver::v48(void) {
     if (!lbl_8055E529) {
         bool late = lbl_8055E3C8 - F32(PTR(p, 0x20), 0x26D8) < 0.4f;
         if (S32(info, 0x24) == 3 || lbl_8055E528 || OptPaTest() || late) {
-            fn_80191084(p, U32(p, 0x8));
+            SwitchActiveView(p, U32(p, 0x8));
         } else if (U8(p, 0x25)) {
             if (!U8(p, 0x26)) {
-                fn_80191084(p, U32(p, 0xC));
+                SwitchActiveView(p, U32(p, 0xC));
             } else {
-                fn_80191084(p, U32(p, 0x8));
+                SwitchActiveView(p, U32(p, 0x8));
             }
         } else if (S32(info, 0x24) == 1) {
-            fn_80191084(p, U32(p, 0x8));
+            SwitchActiveView(p, U32(p, 0x8));
         } else if (!fn_801B851C(S32(p, 0x1C)) || IsPlayerActive(S32(p, 0x1C))) {
-            fn_80191084(p, U32(p, 0x8));
+            SwitchActiveView(p, U32(p, 0x8));
         } else {
-            fn_80191084(p, U32(p, 0xC));
+            SwitchActiveView(p, U32(p, 0xC));
         }
     } else {
-        fn_80191084(p, U32(p, 0xC));
+        SwitchActiveView(p, U32(p, 0xC));
     }
     if (PTR(p, 0x10) == PTR(p, 0xC)) {
         VC(PTR(p, 0xC))->v48();
@@ -919,7 +919,7 @@ void Recorder::Buttons(void) {
 
 int fn_80190CD0(f32 x, f32 lo, f32 hi) { return ((int)(0.5f + Lerp(0.0f, 255.0f, Clamp01((x - lo) / (hi - lo)))) >> 4) & 0xF; }
 
-int fn_80190D38(f32 x, f32 lo, f32 hi) { return (int)(0.5f + Lerp(0.0f, 255.0f, Clamp01((x - lo) / (hi - lo)))); }
+int ConvertRangeToByte(f32 x, f32 lo, f32 hi) { return (int)(0.5f + Lerp(0.0f, 255.0f, Clamp01((x - lo) / (hi - lo)))); }
 
 int fn_80190D9C(f32 x, f32 lo, f32 hi) { return (int)(0.5f + Lerp(0.0f, 65535.0f, Clamp01((x - lo) / (hi - lo)))); }
 
@@ -957,8 +957,8 @@ void HybridDriver::vf30(void) {
     S32(o, 0x8) = S32(o, 0x18);
     VC(PTR(p, 0x8))->v30();
     VC(PTR(p, 0xC))->v30();
-    fn_80191084(p, 0);
-    fn_80191084(p, fn_80191100(p));
+    SwitchActiveView(p, 0);
+    SwitchActiveView(p, fn_80191100(p));
     fn_801B6658();
     VU8(p, 0x34) = 0;
     F32(p, 0x30) = 0.0f;
@@ -1015,7 +1015,7 @@ public:
 };
 
 // Makes `next` the active view (offset 0x10): the old one leaves, the new one enters.
-void fn_80191084(u8* p, u32 next) {
+void SwitchActiveView(u8* p, u32 next) {
     VSwitch* cur = (VSwitch*)PTR(p, 0x10);
     if ((VSwitch*)next != cur) {
         if (cur) {

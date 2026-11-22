@@ -458,7 +458,7 @@ f32 fn_80137850(ProxQuery* q) {
     return r->pos.x + Mul(r->vel.x, q->when->t);
 }
 
-void fn_80137884(s32 n) { lbl_8055E0D0 = lbl_8055E0D4 = new ("Proxer") Proxer(n); }
+void CreateProxer(s32 n) { lbl_8055E0D0 = lbl_8055E0D4 = new ("Proxer") Proxer(n); }
 
 void fn_801378D0(void) {
     delete lbl_8055E0D4;

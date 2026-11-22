@@ -24,7 +24,7 @@ void DeleteMemStream(s32 s);
 void WriteValueToStream(s32 s, s32 pos);
 s32 GetStreamPosition(s32 s);
 void fn_8012F4AC(s32 s, void* data, s32 size);
-void fn_8017EBE0(void);
+void ResetPhysicsFlagsAndState(void);
 void fn_8017EC30(void);
 void fn_801AE5A8(void);
 void fn_801AE5AC(void);
@@ -141,8 +141,8 @@ static inline s32 SpeedMode(void) { return lbl_8055A2F0; }
 extern "C" {
 
 void fn_80176610(void);
-void fn_80176A34(s32 frame);
-void fn_80176CC8(void);
+void SetFrameCount(s32 frame);
+void UpdatePhysicsState(void);
 void fn_80176DE0(void);
 int fn_80176F9C(void);
 void fn_80176F24(void);
@@ -151,8 +151,8 @@ void fn_801775EC(void);
 void fn_80177048(void);
 void fn_801770C8(void);
 void fn_80177138(void);
-void fn_801771A8(void);
-int fn_801773E4(void);
+void UpdateFadeState(void);
+int UpdateFadeAlpha(void);
 void fn_80177790(void);
 void fn_8017779C(void);
 void fn_801777C0(void);
@@ -175,7 +175,7 @@ void fn_80176460(const RaceOpts* s, const char* name, const s32* seed) {
     lbl_8055E3D8 = 1;
     lbl_8055A2F0 = 1;
     lbl_8055A2F4 = 3.0f;
-    fn_80176A34(0);
+    SetFrameCount(0);
     fn_801E1D20();
     fn_80178DD0();
     lbl_804303C8.Clear();
@@ -191,7 +191,7 @@ void fn_80176460(const RaceOpts* s, const char* name, const s32* seed) {
     lbl_8055E3DC = CreateMemBuffer(0x10000);
     lbl_8055E3E0 = fn_8012F3CC(lbl_8055E3DC);
     ResetMemStreamPosition(lbl_8055E3E0);
-    fn_8017EBE0();
+    ResetPhysicsFlagsAndState();
     fn_801AE5A8();
     fn_801B6604();
     fn_801D0BE4();
@@ -211,7 +211,7 @@ void fn_801765B8(void) {
     lbl_8055E3BC = 0;
 }
 
-void fn_80176610(void) { fn_80176CC8(); }
+void fn_80176610(void) { UpdatePhysicsState(); }
 
 void fn_80176614(void) {
     int tries;
@@ -220,7 +220,7 @@ void fn_80176614(void) {
     fn_802E30C8("physics: using %d of %d for init stream", GetStreamPosition(lbl_8055E3E0), 0x10000);
     tries = 0;
     while (lbl_8055E3F4 == 1) {
-        fn_80176CC8();
+        UpdatePhysicsState();
         if (++tries >= 10) {
             fn_802E317C("can't get physics out of init");
         }
@@ -235,7 +235,7 @@ void fn_801766C4(void) {
     int tries = 0;
     lbl_8055E3F4 = 7;
     while (lbl_8055E3F4 != 8) {
-        fn_80176CC8();
+        UpdatePhysicsState();
         if (++tries >= 10) {
             fn_802E317C("can't get physics to end");
         }
@@ -283,14 +283,14 @@ void fn_80176780(int mode, const u8* extra) {
 
 void fn_80176858(void) { fn_80177138(); }
 
-void fn_8017685C(int arg) {
+void ResetPhysicsSystem(int arg) {
     int tries;
     if (arg != 3) {
         fn_801769E0();
         lbl_8055E3F4 = 5;
         tries = 0;
         while (lbl_8055E3F4 == 5) {
-            fn_80176CC8();
+            UpdatePhysicsState();
             if (++tries >= 10) {
                 fn_802E317C("can't get physics to restart");
             }
@@ -300,7 +300,7 @@ void fn_8017685C(int arg) {
     lbl_8055E3EC = 1;
     tries = 0;
     while (lbl_8055E3EC) {
-        fn_80176CC8();
+        UpdatePhysicsState();
         if (++tries >= 10) {
             fn_802E317C("can't get physics to postrace phobs");
         }
@@ -353,12 +353,12 @@ void fn_80176A24(f32 v) { lbl_8055A2F4 = v; }
 
 f32 fn_80176A2C(void) { return lbl_8055A2F4; }
 
-void fn_80176A34(s32 frame) {
+void SetFrameCount(s32 frame) {
     lbl_8055E3C4 = frame;
     lbl_8055E3C8 = 0.016683351f * (f32)frame;
 }
 
-void fn_80176A6C(void) { fn_801771A8(); }
+void fn_80176A6C(void) { UpdateFadeState(); }
 
 StatePacket* PhysicsGetStatePacked(void) {
     s32 frame = lbl_8055E3C4;
@@ -387,7 +387,7 @@ StatePacket* PhysicsGetStatePacked(void) {
         lbl_8055E3D0 = dt + 0.95f * (lbl_8055E3D0 - dt);
     }
     pkt = PackPhysicsState();
-    pkt->fade = fn_801773E4();
+    pkt->fade = UpdateFadeAlpha();
     fn_801C6AD0(&pkt->fade);
     return pkt;
 }
@@ -396,7 +396,7 @@ void fn_80176BA8(void) {
     const char* fmts[] = {"%s%s%01d:%02d%c%02d", "%s%02d%c%02d", "%s%s%01d:%02d%c%01d", "%s%02d%c%01d"};
 }
 
-void fn_80176BAC(void) {
+void UpdatePhysicsDeltaTime(void) {
     f32 t = lbl_8055E3C8;
     f32 dt = t - lbl_8055E3FC;
     dt = MIN(0.25f, dt);
@@ -420,7 +420,7 @@ void fn_80176C4C(void) {
     lbl_8055E3F4 = 3;
 }
 
-void fn_80176CC8(void) {
+void UpdatePhysicsState(void) {
     fn_802E4C14(1);
     if (lbl_80430418.set) {
         fn_80178CAC(lbl_80430418.a, lbl_80430418.b);
@@ -494,7 +494,7 @@ void fn_80176EC0(void) {
         }
     }
     if (!IsReplayActive()) {
-        fn_80176A34(0);
+        SetFrameCount(0);
     }
     fn_80176C4C();
 }
@@ -580,7 +580,7 @@ static inline void FadeStep(void) {
     }
 }
 
-void fn_801771A8(void) {
+void UpdateFadeState(void) {
     FadeStep();
     if (lbl_80430558.alpha == 255 && lbl_80430558.hold > 0) {
         lbl_80430558.hold--;
@@ -598,7 +598,7 @@ void fn_801771A8(void) {
     }
 }
 
-int fn_801773E4(void) {
+int UpdateFadeAlpha(void) {
     u8 a;
     FadeStep();
     if (lbl_80430558.state <= 1u) {
@@ -621,18 +621,18 @@ void fn_80177618(PhysListener* l) { l->Start(); }
 
 void fn_80177628(PhysListener* l) { l->Restart(); }
 
-void fn_80177638(PhysListener* l) { l->Pause(); }
+void PausePhysicsListener(PhysListener* l) { l->Pause(); }
 
 void fn_80177648(PhysListener* l) { l->End(); }
 
-void fn_80177658(void (*fn)(PhysListener*)) {
+void InvokePhysicsListeners(void (*fn)(PhysListener*)) {
     int i;
     for (i = 0; i < lbl_8055E400; i++) {
         fn(lbl_80430570[i]);
     }
 }
 
-void fn_801776C4(PhysListener* l) {
+void RegisterPhysicsListener(PhysListener* l) {
     int n = lbl_8055E400;
     int i;
     for (i = 0; i < n; i++) {
@@ -645,7 +645,7 @@ void fn_801776C4(PhysListener* l) {
     lbl_8055E400++;
 }
 
-void fn_80177720(PhysListener* l) {
+void UnregisterPhysicsListener(PhysListener* l) {
     int n = lbl_8055E400;
     int i;
     for (i = 0; i < n; i++) {
@@ -659,18 +659,18 @@ void fn_80177720(PhysListener* l) {
     fn_802E317C("Physics: tried to unregister a state listener that was not registered!");
 }
 
-void fn_80177790(void) { fn_80177658(fn_80177608); }
+void fn_80177790(void) { InvokePhysicsListeners(fn_80177608); }
 
-void fn_8017779C(void) { fn_80177658(fn_80177618); }
+void fn_8017779C(void) { InvokePhysicsListeners(fn_80177618); }
 
-void fn_801777A8(void) { fn_80177658(fn_80177628); }
+void fn_801777A8(void) { InvokePhysicsListeners(fn_80177628); }
 
-void fn_801777B4(void) { fn_80177658(fn_80177638); }
+void fn_801777B4(void) { InvokePhysicsListeners(PausePhysicsListener); }
 
-void fn_801777C0(void) { fn_80177658(fn_80177648); }
+void fn_801777C0(void) { InvokePhysicsListeners(fn_80177648); }
 
-void fn_801777CC(PhysListener* l) { fn_801776C4(l); }
+void fn_801777CC(PhysListener* l) { RegisterPhysicsListener(l); }
 
-void fn_801777D0(PhysListener* l) { fn_80177720(l); }
+void fn_801777D0(PhysListener* l) { UnregisterPhysicsListener(l); }
 
 }  // extern "C"

@@ -104,7 +104,7 @@ void ProfBegin(const char* name) { fn_802E30C8("prof: out of profs for %s", name
 
 void ProfRestartTrace(void) { fn_802E30C8("prof: restarting trace system!"); }
 
-int fn_80127538(void) {
+int InitializeProfileData(void) {
     memset(lbl_8041D790, 0, sizeof(lbl_8041D790));
     memset(lbl_8041DC10, 0, sizeof(lbl_8041DC10));
     fn_80127968();
@@ -115,7 +115,7 @@ int fn_80127538(void) {
     return 1;
 }
 
-void fn_801275AC(void) {
+void PrintProfileTraceList(void) {
     int i;
     RemoveBackgroundFunction(fn_80127968);
     if (lbl_8055DF44) {
@@ -136,7 +136,7 @@ void ProfPrintLine(const char* indent, int width, const char* name, const char* 
 
 const char* ProfGetName(int index) { return index < 0 ? "Not Profiled" : 0; }
 
-void fn_8012766C(void) {
+void ResetProfileSlots(void) {
     int i;
     for (i = 0; i < 16; i++) {
         ProfSlot* s = &lbl_8041D790[i];
@@ -173,7 +173,7 @@ void fn_8012766C(void) {
 }
 
 void fn_80127930(void) {
-    fn_8012766C();
+    ResetProfileSlots();
     fn_801274C8();
 }
 

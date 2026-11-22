@@ -240,7 +240,7 @@ int fn_801AE790(RaceEntry* e) { return e->driver.x70 & 3; }
 
 RaceResult* fn_801AF8D0(int i);
 
-void fn_801AE79C(int mode) {
+void CheckAndApplyBonus(int mode) {
     int ok = 0;
     if (mode == 2 && lbl_80435780.n > 10) {
         ok = 1;
@@ -269,12 +269,12 @@ void fn_801AE874(u16* flags, int b) {
     }
 }
 
-/* Helper unproven: retail creates 86400.0f (a day, "no time yet") BEFORE the literals of fn_801AE894, although its
+/* Helper unproven: retail creates 86400.0f (a day, "no time yet") BEFORE the literals of CalculateRaceRate, although its
    first user in the code is the later fn_801AE9E0, so an unused static function with that literal was compiled
    here (dead static functions keep their constants). */
 static f32 NoTime(void) { return 86400.0f; }
 
-void fn_801AE894(RaceResult* r) {
+void CalculateRaceRate(RaceResult* r) {
     if (r->laps > 0 && r->time > 1.0f) {
         r->rate = lbl_8055E630 * r->laps / r->time;
         r->rate *= (f32)r->laps / lbl_8055E62C;
@@ -292,7 +292,7 @@ void fn_801AE928(void) {
                 fn_801AE874(&r->flags, 1);
                 r->flags |= 8;
                 r->time = -1.0f;
-                fn_801AE894(r);
+                CalculateRaceRate(r);
             }
         }
     }
@@ -322,7 +322,7 @@ int fn_801AEA64(f32 a, f32 b) {
     return -1;
 }
 
-int fn_801AEAA4(const void* pa, const void* pb) {
+int CompareRaceResults(const void* pa, const void* pb) {
     s32 ia = *(const s32*)pa;
     s32 ib = *(const s32*)pb;
     RaceResult* a = fn_801AF8D0(ia);
@@ -384,7 +384,7 @@ void fn_801AEBD0(void) {
 
 void fn_801AED54(void) {}
 
-void fn_801AED58(void) {}
+void HandleAppShutdown(void) {}
 
 void fn_801AED5C(void) {
     lbl_8055E634 = 1;
@@ -396,7 +396,7 @@ void fn_801AED68(void) {
     fn_801B878C();
 }
 
-void fn_801AED74(void) {
+void ResetRecordManagers(void) {
     if (!lbl_8055E634) {
         lbl_8055E624->Reset();
         lbl_8055E620->Reset();
@@ -404,7 +404,7 @@ void fn_801AED74(void) {
     lbl_8055E62C = fn_801B2ED4();
 }
 
-RecordMgr* fn_801AFA20(RecordSetup* s);
+RecordMgr* CreateRecordManager(RecordSetup* s);
 
 void fn_801AEF28(const RecordSetup* s) {
     int i;
@@ -412,7 +412,7 @@ void fn_801AEF28(const RecordSetup* s) {
     lbl_8055E635 = 1;
     lbl_8055E620 = new ("CarLapTable") CarLapTable;
     lbl_8055E624 = new ("RaceResultTable") RaceResultTable;
-    lbl_8055E628 = fn_801AFA20((RecordSetup*)s);
+    lbl_8055E628 = CreateRecordManager((RecordSetup*)s);
     RaceEntries* t = &st->entries;
     t->n = 0;
     s32* order = t->order;
@@ -443,11 +443,11 @@ void fn_801AEF28(const RecordSetup* s) {
     }
 }
 
-void fn_801AFA5C(RecordMgr* m);
+void DeleteRecordManager(RecordMgr* m);
 
 void fn_801AF598(void) {
     lbl_8055E635 = 0;
-    fn_801AFA5C(lbl_8055E628);
+    DeleteRecordManager(lbl_8055E628);
     lbl_8055E628 = 0;
     delete lbl_8055E620;
     lbl_8055E620 = 0;
@@ -496,14 +496,14 @@ void fn_801AF6FC(void) {
             st->best[i].a = fn_801AE9E0(i, &st->best[i].b);
         }
     }
-    qsort(st->entries.order, st->entries.n, 4, (mode == 1) ? fn_801AEB58 : fn_801AEAA4);
+    qsort(st->entries.order, st->entries.n, 4, (mode == 1) ? fn_801AEB58 : CompareRaceResults);
     AssignRacePlaces(&st->entries);
     fn_801AEBD0();
     fn_801AE628(fn_80137C4C());
     if (!notRace) {
         lbl_8055E628->Final(lbl_8055E624->r, lbl_8055E624->n);
     }
-    fn_801AE79C(mode);
+    CheckAndApplyBonus(mode);
     if (mode == 1) {
         for (int i = 0; i < st->entries.n; i++) {
             int idx = st->entries.order[i];
@@ -572,9 +572,9 @@ f32 fn_801AF9EC(int i, f32* b) {
     return lbl_80435740[i].a;
 }
 
-RecordMgr* fn_801AFA20(RecordSetup* s) { return new ("RecordMgr") RecordMgr(-1); }
+RecordMgr* CreateRecordManager(RecordSetup* s) { return new ("RecordMgr") RecordMgr(-1); }
 
-void fn_801AFA5C(RecordMgr* m) { delete m; }
+void DeleteRecordManager(RecordMgr* m) { delete m; }
 
 }  // extern "C"
 

@@ -18,7 +18,7 @@ void fn_802E30C8(const char* fmt, ...);  // debug print
 void fn_802E317C(const char* fmt, ...);  // fatal: print, then exit() -> PPCHalt (never returns)
 void SetDroneSpeedSettings(void* cars, void* race);
 f32 fn_8013672C(void);
-void fn_80137884(s32 count);
+void CreateProxer(s32 count);
 void fn_80139044(int* p);
 void CalculateCatchupValues(s32 count);
 void InitializeOrbitParameters(s32 count, void* cars, void* extra);
@@ -169,7 +169,7 @@ void InitializeRaceGrid(AIRace* race) {
     lbl_8055E0A8 = 0.44444445f * fn_80134B58("pit_speed", 20.0f);
     fn_802E30C8("ai: pit_speed = %1.1f mph", lbl_8055E0A8 / 0.44444445f);
     lbl_8055E0A4 = fn_80134B58("rtt_greenflag_lon", fn_8013672C() / 2);
-    fn_80137884(lbl_8055E0B0);
+    CreateProxer(lbl_8055E0B0);
     fn_80139044((int*)fn_801E87A8());
     CalculateCatchupValues(lbl_8055E0B0);
     InitializeOrbitParameters(lbl_8055E0B0, grid, race->extra);

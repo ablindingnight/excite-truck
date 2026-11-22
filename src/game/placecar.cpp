@@ -99,7 +99,7 @@ int fn_801B7688(int mode) {
 }
 
 
-void fn_801B7760(CarPlace* r, const ILPos* p, f32 side, f32 angle) {
+void CalculateCarPositionAndDirection(CarPlace* r, const ILPos* p, f32 side, f32 angle) {
     f32 nx;
     IdealPoint* s = p->seg;
     f32 t = p->t;
@@ -135,7 +135,7 @@ void fn_801B78EC(CarPlace* r, LineFollower* f, int byIlpos, f32 side, f32 dist, 
     } else {
         p = fn_80136468(f, dist);
     }
-    fn_801B7760(r, &p, side, angle);
+    CalculateCarPositionAndDirection(r, &p, side, angle);
 }
 
 f32 fn_801B79AC(void) { return fn_80137C54(-1)->carLen; }
@@ -184,7 +184,7 @@ void fn_801B79D4(Respawn* r, int car, int mode) {
 }
 #pragma pop
 
-void fn_801B7BA8(ValMatrix* m, const V3* up, const V2* d) {
+void BuildOrthonormalBasis(ValMatrix* m, const V3* up, const V2* d) {
     V3 u;
     u.x = up->x;
     u.y = up->y;
@@ -273,7 +273,7 @@ void fn_801B7C8C(CarPlace* r, const V2* pos, const V2* dir) {
         fn_801E9DC4(&r->hint);
         fn_801E9E78(&r->hint, &m.origin, &up, &info);
     }
-    fn_801B7BA8(&m, &up, dir);
+    BuildOrthonormalBasis(&m, &up, dir);
     TAddS(&m.origin, &m.origin, &m.basis[1], 0.6286f);
     r->place = m;
     r->unk3C = 0;
@@ -293,7 +293,7 @@ void fn_801B7F4C(Respawn* r, int slot, int mode) {
     }
 }
 
-void fn_801B8040(CarPlace* r, const ILPos* p, f32 side) { fn_801B7760(r, p, side, 0.0f); }
+void fn_801B8040(CarPlace* r, const ILPos* p, f32 side) { CalculateCarPositionAndDirection(r, p, side, 0.0f); }
 
 void fn_801B8048(CarPlace* r, LineFollower* f, f32 side, f32 dist) { fn_801B78EC(r, f, 0, side, dist, 0.0f); }
 

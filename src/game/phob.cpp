@@ -37,7 +37,7 @@ void fn_801AD5F0(void);
 void fn_80186DE8(void);
 void fn_801D0F38(void);
 void fn_801B535C(void* list, int n);
-void fn_801B50B4(void* list, int n);
+void ProcessReplayData(void* list, int n);
 void fn_8018A180(void* car);
 void fn_80176A6C(void);
 void fn_8026C014(int a);
@@ -65,7 +65,7 @@ void fn_801B24B8(void);
 void fn_80265D88(void);
 void fn_801777B4(void);
 void fn_801777A8(void);
-void fn_80176A34(s32 frame);
+void SetFrameCount(s32 frame);
 void fn_801279D0(void);
 void fn_80179D8C(void* p, s32 pos);
 int fn_801E2640(const f32* a, const f32* b, f32* hit, f32* n, s32* tri, s32* x, void* list, int count, s32 g);
@@ -116,7 +116,7 @@ void fn_801D32D0(void);
 void LoadMorphAndRegionData(void);
 void InitializeRumbleSound(void);
 void fn_801CB2D8(void);
-void fn_801DEC18(void);
+void LoadPopupDefinitions(void);
 void CreateBoostManager(void);
 void fn_801B8318(void);
 void fn_801FA978(void);
@@ -132,7 +132,7 @@ void fn_801B2320(void);
 void fn_801C4B10(void);
 void fn_801E1D38(void);
 void fn_801D47F4(void);
-void fn_801B5364(int type, s32 (*fn)(void*));
+void SetEventHandler(int type, s32 (*fn)(void*));
 void fn_80179320(void);
 void fn_801B2C6C(void);
 void fn_801B5354(void);
@@ -145,7 +145,7 @@ void fn_80128658(void* p);
 void fn_801AE50C(void);
 void fn_801E222C(void);
 void ClearBoostManager(void);
-void fn_801DEE3C(void);
+void ClearPopupResources(void);
 void fn_801CB518(void);
 void ResetSoundSystem(void);
 void fn_801D9828(void);
@@ -174,14 +174,14 @@ void fn_801E21B4(void*);  // Group* (physcol.cpp)
 int IsReplayActive(void);
 void fn_801D9A08(void);
 void fn_801B8BE8(void);
-void fn_801DEF98(void);
+void SavePopupSeenFlags(void);
 void fn_801B83A8(void);
 void fn_801B34A4(void);
 void ClearCameraBuffer(void);
 void fn_802C1928(void);
 void fn_80134998(void);
 void InitializeDeityTestMode(void);
-void fn_801AED74(void);
+void ResetRecordManagers(void);
 void fn_801E2294(void);
 void fn_801B2910(void);
 void InitializeCameraStructures(void);
@@ -462,7 +462,7 @@ void UpdateRaceLogic(void) {
         }
         fn_801B535C(lbl_8055E434, lbl_8055E438);
     } else {
-        fn_801B50B4(lbl_8055E434, lbl_8055E438);
+        ProcessReplayData(lbl_8055E434, lbl_8055E438);
     }
     for (i = 0; i < lbl_8055E468; i++) {
         lbl_804340C0[i]->vf20();
@@ -568,7 +568,7 @@ void fn_80177F40(void) {
     fn_80265D88();
     if (!paused) {
         fn_801777B4();
-        fn_80176A34(lbl_8055E3C4 + 1);
+        SetFrameCount(lbl_8055E3C4 + 1);
     }
     fn_801279D0();
     if (busy) {
@@ -606,7 +606,7 @@ Phob* CreateWheelPhob(void) { return (Phob*)new ("WheelPhob") Wheel; }
 
 Phob* fn_801782C8(void) { return (Phob*)new ("MutablePhob") MutPhob; }
 
-Phob* fn_8018FB18(void);
+Phob* BuildLocalPlayerCar(void);
 Phob* fn_80134F48(void);
 Phob* fn_801B8D80(void);
 Phob* fn_8017D688(void);
@@ -615,7 +615,7 @@ Phob* CreatePanelVolume(void);
 
 PhobType lbl_80331950[] = {
     {'CAR ', 0xFA8, 0},
-    {'PCAR', 0xFA8, fn_8018FB18},
+    {'PCAR', 0xFA8, BuildLocalPlayerCar},
     {'ACAR', 0xFA8, fn_80134F48},
     {'NCAR', 0xFA8, CreateNetCarInstance},
     {'TRLR', 0xFA8, fn_801B8D80},
@@ -973,7 +973,7 @@ void InitializeRacePhysics(s32 stream) {
     LoadMorphAndRegionData();
     InitializeRumbleSound();
     fn_801CB2D8();
-    fn_801DEC18();
+    LoadPopupDefinitions();
     fn_80127464();
     CreateBoostManager();
     fn_801B8318();
@@ -1021,7 +1021,7 @@ void InitializeRacePhysics(s32 stream) {
     lbl_80430850.Reset();
     fn_801E1D38();
     fn_801D47F4();
-    fn_801B5364(9, (s32 (*)(void*))fn_80178C4C);
+    SetEventHandler(9, (s32 (*)(void*))fn_80178C4C);
     Seeds();
     fn_80127464();
     fn_80179320();
@@ -1059,7 +1059,7 @@ void CleanupRaceSession(void) {
     fn_801AE50C();
     fn_801E222C();
     ClearBoostManager();
-    fn_801DEE3C();
+    ClearPopupResources();
     fn_801CB518();
     ResetSoundSystem();
     fn_801D9828();
@@ -1112,17 +1112,17 @@ void fn_80179320(void) {
         fn_80177814(lbl_8055E428);
     }
     Seeds();
-    fn_80176A34(0);
+    SetFrameCount(0);
     fn_801D9A08();
     fn_801B8BE8();
-    fn_801DEF98();
+    SavePopupSeenFlags();
     fn_801B83A8();
     fn_801B34A4();
     ClearCameraBuffer();
     fn_802C1928();
     fn_80134998();
     InitializeDeityTestMode();
-    fn_801AED74();
+    ResetRecordManagers();
     fn_801E2294();
     for (i = 0; i < lbl_8055E438; i++) {
         lbl_8055E434[i]->Reset();

@@ -117,7 +117,7 @@ void operator delete[](void* p);
 extern "C" {
 double sqrt(double x);
 void fn_801C1218(PSys* s);
-void fn_801C1364(PSys* s);
+void RelaxPhysicsConstraints(PSys* s);
 void fn_801C1320(PSys* s);
 void fn_801C1B60(PSys* s);
 void fn_801C2B9C(RVec3* out, const RVec3* a, const RVec3* d, f32 k);
@@ -125,7 +125,7 @@ void __ct__4VPosFfff(RVec3* v, f32 x, f32 y, f32 z);
 void fn_80144D64(RVec3* d, const RVec3* s);
 void fn_80144CD0(RVec3* out, const RVec3* p, const RMtx* m);
 void fn_80144DAC(RVec3* d, const RVec3* s);
-f32 fn_8017F70C(f32 x);
+f32 GetAbsoluteValue(f32 x);
 void fn_801BFD34(RVec3* out, const RVec3* v, const RMtx* m);
 void fn_801C0E60(RVec3* out, const RVec3* a, const RVec3* b);
 f32 fn_801C0E44(const RVec3* v);
@@ -337,7 +337,7 @@ static inline void Transform(RVec3* dst, const RVec3& src, const RMtx* m) {
 // along the link's frame axis, sticks restore their rest length (slack sticks only resist stretching), and
 // particles below the ground plane are pushed back out, losing their normal velocity and some of the rest
 // to friction.
-void fn_801C1364(PSys* s) {
+void RelaxPhysicsConstraints(PSys* s) {
     int pass;
     int i;
     RVec3 axis;
@@ -425,7 +425,7 @@ void fn_801C1364(PSys* s) {
 
 void fn_801C1B60(PSys* s) {
     fn_801C1218(s);
-    fn_801C1364(s);
+    RelaxPhysicsConstraints(s);
     fn_801C1320(s);
 }
 
@@ -511,7 +511,7 @@ static inline void SetBodyVelocity(PSys* s, const RVec3* at, const RVec3* avel, 
     }
 }
 
-void fn_801C256C(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) {
+void SetPanelVelocity(PSys* s, const RVec3* vel, const RVec3* at, const RVec3* avel) {
     SetBodyVelocity(s, at, avel, vel);
 }
 
@@ -610,18 +610,18 @@ void fn_801C28A8(PSys* s, const RMtx* m, const RVec3* half, const RVec3* vel, co
         fn_80144D64(&v, vel);
         fn_801C2B9C(&prev, &s->old[i], &v, 0.016666668f);
         fn_80144CD0(&q, &prev, m);
-        if (fn_8017F70C(p.x) < ex && fn_8017F70C(p.y) < ey && fn_8017F70C(p.z) < ez) {
-            if (fn_8017F70C(q.x) > -0.05f + ex) {
+        if (GetAbsoluteValue(p.x) < ex && GetAbsoluteValue(p.y) < ey && GetAbsoluteValue(p.z) < ez) {
+            if (GetAbsoluteValue(q.x) > -0.05f + ex) {
                 p.x = p.x >= 0.0f ? ex : -ex;
             }
-            if (fn_8017F70C(q.y) >= -0.05f + ey) {
+            if (GetAbsoluteValue(q.y) >= -0.05f + ey) {
                 if (p.y > 0.0f) {
                     p.y = ey;
                 } else {
                     p.y = -ey;
                 }
             }
-            if (fn_8017F70C(q.z) >= -0.05f + ez) {
+            if (GetAbsoluteValue(q.z) >= -0.05f + ez) {
                 if (p.z > 0.0f) {
                     p.z = ez;
                 } else {

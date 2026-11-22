@@ -281,7 +281,7 @@ static inline int Alpha(f32 a) {
 
 extern "C" {
 
-f32 fn_802A4A50(void) {
+f32 CalculateDeltaTime(void) {
     if (IsLoading()) {
         s32 now = fn_802E2C20();
         s32 d = now - lbl_8055F8A4;
@@ -294,16 +294,16 @@ f32 fn_802A4A50(void) {
 f32 fn_802A4AD4(void) { return lbl_8055F8A0; }
 
 void fn_802A5384(WeatherCfg* c);
-void fn_802A53B0(const DropHit* hits, int n);
-void fn_802A5878(void);
+void ProcessRainCollision(const DropHit* hits, int n);
+void InitializeMistEffects(void);
 
-void fn_802A4ADC(void) {
+void InitializeWeatherEffects(void) {
     WeatherCfg* c = fn_801E1F44();
     if (GetNumPlayers() == 1) {
         fn_802A5384(c);
     }
-    fn_80287B38(fn_802A53B0);
-    fn_802A5878();
+    fn_80287B38(ProcessRainCollision);
+    InitializeMistEffects();
     lbl_8055F89C = fn_802CAC28("white_st.tex", 0);
     const char* model = "litening.mod";
     ValueNode* w = fn_802AE414("weather");
@@ -336,22 +336,22 @@ void fn_802A4B90(void) {
     }
 }
 
-void fn_802A59E0(void);
+void ResetAllParticles(void);
 void fn_802A5A38(void);
-void fn_802A5A90(void);
+void DrawAllParticles(void);
 
-void fn_802A4C20(void) {
+void ResetRainEffects(void) {
     if (lbl_8055F88C) {
         lbl_8055F88C->Reset();
     }
     if (lbl_8055F888) {
         lbl_8055F888->Reset();
     }
-    fn_802A59E0();
+    ResetAllParticles();
 }
 
 void fn_802A4C60(void) {
-    lbl_8055F8A0 = fn_802A4A50();
+    lbl_8055F8A0 = CalculateDeltaTime();
     if (lbl_8055F88C) {
         lbl_8055F88C->Update();
     }
@@ -374,7 +374,7 @@ void fn_802A4D00(void) { fn_802C2C00(0); }
 
 void fn_802A4D08(void) {
     WeatherCfg* c = fn_801E1F44();
-    fn_802A5A90();
+    DrawAllParticles();
     if (c->fogOn) {
         fn_802D3D50();
     }
@@ -393,7 +393,7 @@ void fn_802A4D08(void) {
 }
 
 
-void fn_802A4E08(void) {
+void ProcessScreenEffects(void) {
     // MATCHING-AID: one variable holds the byte offset, then the pointer; plain &a[i] keeps the offset in its own register.
     ScreenFx* s = (ScreenFx*)(fn_801E85B4() * (int)sizeof(ScreenFx));
     s = (ScreenFx*)((u8*)fn_801E7E34() + (int)s);
@@ -444,7 +444,7 @@ int fn_802A4FA8(Droplet* d, ValueNode* vn) {
     return 0;
 }
 
-void fn_802A50F8(void) {
+void InitializeRainEffects(void) {
     PartParams pd;
     char key[32];
     pd.type = 0;
@@ -483,14 +483,14 @@ void fn_802A50F8(void) {
     }
 }
 
-void fn_802A5270(f32 density) {
+void InitializeRainSystem(f32 density) {
     f32 d = MaxF(MinFRev(density, 1.0f), 0.0f);
     int n = 512.0f * d;
     lbl_8055F88C = new ("rain system") RainSystem(n, 0);
-    fn_802A50F8();
+    InitializeRainEffects();
 }
 
-void fn_802A52FC(f32 density) {
+void InitializeSnowSystem(f32 density) {
     f32 d = MaxF(MinFRev(density, 1.0f), 0.0f);
     int n = 512.0f * d;
     lbl_8055F888 = new ("snow system") SnowSystem(n, 0);
@@ -499,15 +499,15 @@ void fn_802A52FC(f32 density) {
 void fn_802A5384(WeatherCfg* c) {
     switch (c->type) {
     case 1:
-        fn_802A5270(1.0f);
+        InitializeRainSystem(1.0f);
         break;
     case 2:
-        fn_802A52FC(1.0f);
+        InitializeSnowSystem(1.0f);
         break;
     }
 }
 
-void fn_802A53B0(const DropHit* hits, int n) {
+void ProcessRainCollision(const DropHit* hits, int n) {
     int m;
     int k2;
     Droplet* d;
@@ -566,7 +566,7 @@ void fn_802A53B0(const DropHit* hits, int n) {
     }
 }
 
-void fn_802A5878(void) {
+void InitializeMistEffects(void) {
     lbl_8055F890 = 0;
     if (GetNumPlayers() > 1) {
         return;
@@ -590,7 +590,7 @@ void fn_802A597C(void) {
     lbl_8055F890 = 0;
 }
 
-void fn_802A59E0(void) {
+void ResetAllParticles(void) {
     for (int i = 0; i < lbl_8055F890; i++) {
         lbl_804BCFA8[i]->Reset();
     }
@@ -602,7 +602,7 @@ void fn_802A5A38(void) {
     }
 }
 
-void fn_802A5A90(void) {
+void DrawAllParticles(void) {
     for (int i = 0; i < lbl_8055F890; i++) {
         lbl_804BCFA8[i]->Draw();
     }

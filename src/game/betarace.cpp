@@ -3162,7 +3162,7 @@ extern "C" {
 void fn_8016783C(void);
 void fn_801688FC(int a);
 void fn_80168020(void);
-void fn_8016A0D4(void);
+void ResetRingSystem(void);
 }
 
 inline void BetaMaster::vf10(void) {
@@ -3172,7 +3172,7 @@ inline void BetaMaster::vf10(void) {
         fn_801688FC(1);
         fn_80168020();
     }
-    fn_8016A0D4();
+    ResetRingSystem();
     StopSound(preraceSnd);
     b450 = 0;
 }
@@ -3201,7 +3201,7 @@ void fn_80168328(void);
 int fn_801B2F2C(int id);
 void fn_801688B4(int a);
 void fn_80167840(RaceCarRec* rc);
-s32 fn_8016A30C(int id);
+s32 CountPlayerRingEffects(int id);
 int fn_80179630(int view);
 void CheckTurtleEnabled(f32 left);
 double floor(double x);
@@ -3379,7 +3379,7 @@ inline void BetaMaster::vf0C(void) {
                 if (GetNumPlayers() == 1) {
                     fn_80167840(fn_8017960C(i));
                 }
-                n = fn_8016A30C(i);
+                n = CountPlayerRingEffects(i);
                 if (n > 0) {
                     AwardBetaCar(i, 5, n);
                 }
@@ -3447,7 +3447,7 @@ int fn_801E85B4(void);
 int fn_801E866C(int view);
 void DrawLineSegment(const V3* a, const V3* b, u32 color, f32 r);
 void fn_80167844(void);
-void fn_8016A438(void);
+void UpdateRingSet(void);
 }
 
 inline int BetaMaster::vf54(int p) {
@@ -3618,7 +3618,7 @@ inline void BetaMaster::vf44(void) {
         }
     }
     fn_80167844();
-    fn_8016A438();
+    UpdateRingSet();
 }
 #pragma dont_inline reset
 

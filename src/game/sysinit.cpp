@@ -3,7 +3,7 @@
 
 extern "C" {
 void fn_80129C24(void);
-void fn_8012BE90(void);
+void InitializeTocLib(void);
 void ResourceEnd(void);
 void fn_80129C60(void);
 }
@@ -14,7 +14,7 @@ extern "C" {
 
 void fn_80129BD4(void) {
     fn_80129C24();
-    fn_8012BE90();
+    InitializeTocLib();
 }
 
 void fn_80129BF8(void) {

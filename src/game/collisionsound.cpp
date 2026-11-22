@@ -92,7 +92,7 @@ extern Manager* lbl_8055E6C0;
 void* __nw__FUlPCc(unsigned long,const char*);
 void* memset(void*,int,size_t);
 void fn_801796CC(int,const Message*,int);
-void fn_801B5364(int,void*);
+void SetEventHandler(int,void*);
 void PhysReplayUninstallEventHandler(void*);
 void fn_802E317C(const char*,...);
 void __construct_array(void*,void*,void*,int,int);
@@ -159,7 +159,7 @@ int fn_801B3390(){return 0x14;}
 
 int fn_801B3398(const Message* input){Message message=*input;fn_801796CC(1,&message,0x38);return 0x38;}
 
-void fn_801B3448(){Manager* p=(Manager*)__nw__FUlPCc(0x5c0,lbl_80335D3C);if(p)p=InitializeCollisionSoundManager(p);lbl_8055E6C0=p;fn_801B5364(1,(void*)fn_801B3390);fn_801B5364(15,(void*)fn_801B3398);}
+void fn_801B3448(){Manager* p=(Manager*)__nw__FUlPCc(0x5c0,lbl_80335D3C);if(p)p=InitializeCollisionSoundManager(p);lbl_8055E6C0=p;SetEventHandler(1,(void*)fn_801B3390);SetEventHandler(15,(void*)fn_801B3398);}
 
 void fn_801B34A4(){fn_801B3DBC(lbl_8055E6C0);memset(lbl_80435C50,0,0x20);}
 

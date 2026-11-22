@@ -94,7 +94,7 @@ void fn_8020A634(void);
 void fn_80211F4C(void);
 void fn_8020CA34(void);
 void fn_802789B0(void);
-void fn_801AED58(void);
+void HandleAppShutdown(void);
 void fn_80141458(void);
 void CleanupGraphicsResources(void);
 void fn_80137BE4(void);
@@ -260,7 +260,7 @@ void AppShutdown(void) {
     fn_802789B0();
     UnlocksShutdown();
     RepShutdown();
-    fn_801AED58();
+    HandleAppShutdown();
     fn_80141458();
     FlagsShutdown();
     AchievementsShutdown();

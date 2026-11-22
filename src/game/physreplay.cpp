@@ -159,7 +159,7 @@ FramePool* fn_801B45E0(FramePool* p) {
     return p;
 }
 
-FramePool* fn_801B4610(FramePool* p, int flags) {
+FramePool* FreeFramePool(FramePool* p, int flags) {
     if (p) {
         delete p->heap;
         p->heap = 0;
@@ -174,17 +174,17 @@ FramePool* fn_801B4610(FramePool* p, int flags) {
     return p;
 }
 
-void fn_801B4720(FramePool* p);
+void ResetFramePool(FramePool* p);
 
-void fn_801B46BC(FramePool* p, u32 n, s32 size) {
+void InitializeFramePool(FramePool* p, u32 n, s32 size) {
     p->count = n;
     p->frames = new ("FramePool::mFrames") ReplayFrame[n];
     p->size = size;
     p->heap = fn_802E4CA4(size);
-    fn_801B4720(p);
+    ResetFramePool(p);
 }
 
-void fn_801B4720(FramePool* p) {
+void ResetFramePool(FramePool* p) {
     for (u32 i = 0; i < p->count; i++) {
         p->frames[i].time = -1;
         p->frames[i].unk4 = 0;
@@ -228,7 +228,7 @@ u32 fn_801B47F0(FramePool* p) {
 
 s32 fn_801B4818(Replay* r) { return 0x100000; }
 
-void fn_801B4820(Replay* r, s32* dataSize, s32* frames, u32 avail) {
+void CalculateReplayBufferSize(Replay* r, s32* dataSize, s32* frames, u32 avail) {
     int n = avail / ((fn_801B2F24() + 1) * 0x44 + 0xC);
     n = (n < 0x7E90) ? n : 0x7E90;
     *dataSize = 0x5000;
@@ -242,15 +242,15 @@ Replay* fn_801B4904(Replay* r) {
     s32 dataSize;
     s32 frames;
     fn_801B45E0(&r->pool);
-    fn_801B4820(r, &dataSize, &frames, fn_801B4818(r));
-    fn_801B46BC(&r->pool, frames, dataSize);
+    CalculateReplayBufferSize(r, &dataSize, &frames, fn_801B4818(r));
+    InitializeFramePool(&r->pool, frames, dataSize);
     r->enabled = 0;
     return r;
 }
 
 Replay* fn_801B496C(Replay* r, int flags) {
     if (r) {
-        fn_801B4610(&r->pool, -1);
+        FreeFramePool(&r->pool, -1);
         if (flags > 0) {
             operator delete(r);
         }
@@ -258,7 +258,7 @@ Replay* fn_801B496C(Replay* r, int flags) {
     return r;
 }
 
-void fn_801B49C8(Replay* r) { r->enabled = 1; }
+void EnableReplay(Replay* r) { r->enabled = 1; }
 
 int fn_801B4B44(Replay* r);
 int fn_801B4C1C(Replay* r, s32 time);
@@ -284,7 +284,7 @@ int fn_801B49D4(Replay* r, u8** a, u8** b, f32* t, s32 time) {
     return 1;
 }
 
-void fn_801B4AC4(Replay* r, s32 time) {
+void UnlockReplayHandles(Replay* r, s32 time) {
     u32 i = fn_801B4C9C(r, time);
     s32 h = fn_801B4C58(r, i)->handle;
     r->pool.heap->Unlock(h);
@@ -331,7 +331,7 @@ const f32 kReplayXSpan = 600.0f;
 
 }  // namespace
 
-void fn_801B4D80(Header* h, const HeaderPacket* a, const HeaderPacket* b, f32 t) {
+void InterpolateHeaderPacket(Header* h, const HeaderPacket* a, const HeaderPacket* b, f32 t) {
     h->unk0 = a->unk0;
     h->unk4 = a->unk4;
     h->x = LerpScaleFirst(UnpackX(a->x), UnpackX(b->x), t);
@@ -339,9 +339,9 @@ void fn_801B4D80(Header* h, const HeaderPacket* a, const HeaderPacket* b, f32 t)
     h->z = LerpScaleFirst(Unpack(a->z, -4.0f, 4.0f), Unpack(b->z, -4.0f, 4.0f), t);
 }
 
-void fn_801B5060(const HeaderPacket* a, const HeaderPacket* b, f32 t) { fn_801B4D80(fn_80178C90(), a, b, t); }
+void fn_801B5060(const HeaderPacket* a, const HeaderPacket* b, f32 t) { InterpolateHeaderPacket(fn_80178C90(), a, b, t); }
 
-void fn_801B50B4(ReplayObj** list, int n) {
+void ProcessReplayData(ReplayObj** list, int n) {
     if (lbl_8055E6D8 == 0 || !fn_801B4B44(lbl_8055E6D8)) {
         return;
     }
@@ -380,7 +380,7 @@ void fn_801B50B4(ReplayObj** list, int n) {
             }
         }
         lbl_8055E6DC = start;
-        fn_801B4AC4(lbl_8055E6D8, lbl_8055E3C4);
+        UnlockReplayHandles(lbl_8055E6D8, lbl_8055E3C4);
     }
     if (fn_801B4C1C(lbl_8055E6D8, lbl_8055E3C4)) {
         fn_801769E0();
@@ -416,13 +416,13 @@ void fn_801B531C(void) {
     }
 }
 
-void fn_801B5354(void) { fn_801B49C8(lbl_8055E6D8); }
+void fn_801B5354(void) { EnableReplay(lbl_8055E6D8); }
 
 void fn_801B535C(void* list, int n) {}
 
 void fn_801B5360(int, const void*, int) {}
 
-void fn_801B5364(int type, EventHandler h) { lbl_80435C70.handlers[type] = h; }
+void SetEventHandler(int type, EventHandler h) { lbl_80435C70.handlers[type] = h; }
 
 void PhysReplayUninstallEventHandler(EventHandler h) {
     for (int i = 0; i < 16; i++) {

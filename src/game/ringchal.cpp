@@ -48,9 +48,9 @@ void mrModelUnload(s32 model);
 s32 fn_802C6FC0(const char* name, int a, int b);
 void* fn_802BAA68(void* xlo, const ValMatrix* m);
 void fn_8016A0B0(void);
-void fn_8016A15C(const char* name);  // activate ring set
-void fn_8016A240(const char* name);  // deactivate ring set
-void fn_8016A0D4(void);
+void ActivateRingSetByName(const char* name);  // activate ring set
+void FindAndDisableRingSet(const char* name);  // deactivate ring set
+void ResetRingSystem(void);
 void fn_8016A68C(void);
 void fn_8001B450(s32 h);
 s32 fn_802BAF98(void* obj, int on);
@@ -130,7 +130,7 @@ double sqrt(double x);
 void fn_802C744C(s32 model, const ValMatrix* m);
 void fn_802C9900(f32 alpha);
 void fn_802C9904(void);
-void fn_8016A438(void);
+void UpdateRingSet(void);
 int GetFrameCounter(void);
 }  // extern "C"
 void UpdateContinueOverlay(void);
@@ -155,8 +155,8 @@ f32 CalculateFrameTime(void);
 }  // extern "C"
 int fn_80009C84(void);
 extern "C" {
-s32 fn_8016A30C(void* rings);
-s32 fn_8016A780(const char* name, void* rings);
+s32 CountPlayerRingEffects(void* rings);
+s32 CountRingsPassedByPlayer(const char* name, void* rings);
 s32 fn_8016A878(const char* name);
 // Retail calls the out-of-line forms of GameSound::Playing and GameSound::Play here.
 #ifdef __MWERKS__
@@ -1091,7 +1091,7 @@ extern "C" void fn_8016D294(int a, int b, int set) {
     {
         char name[0x1E];
         SET_NAME(ar, name, 0x1E);
-        fn_8016A15C(name);
+        ActivateRingSetByName(name);
     }
     LoadGemArt(ar);
 }
@@ -1122,8 +1122,8 @@ inline void Arena::Step(PlayerData* pd) {
         int hit;
         int left;
         stats->At(curSet)->score = timer.Get();
-        hit = fn_8016A30C(car->Rings());
-        left = fn_8016A780(name, car->Rings());
+        hit = CountPlayerRingEffects(car->Rings());
+        left = CountRingsPassedByPlayer(name, car->Rings());
         if (left == 0 && !b4A) {
             b4A = 1;
             ActivateRingSet();
@@ -1283,7 +1283,7 @@ inline void RingChalMaster::ResetGame(void) {
         pd->b8 = 0;
         pd->fC = 0.0f;
     }
-    fn_8016A0D4();
+    ResetRingSystem();
     if (arena.f40 == 0) {
         arena.difficulty = 0;
     } else {
@@ -1405,7 +1405,7 @@ inline void Arena::ShowSetGems(void) {
 inline void Arena::ActivateRingSet(void) {
     char name[0x1E];
     SET_NAME(this, name, 0x1E);
-    fn_8016A15C(name);
+    ActivateRingSetByName(name);
 }
 
 inline void Arena::ActivateObjSet(void) {
@@ -1446,7 +1446,7 @@ inline void ObjSet::Reset(void) {
 inline void Arena::Deactivate(int i) {
     char name[0x1E];
     SET_NAME(this, name, 0x1E);
-    fn_8016A240(name);
+    FindAndDisableRingSet(name);
     if (i < nFiles) {
         int j;
         ObjSet* s = &sets->data[i];
@@ -1679,7 +1679,7 @@ inline void RingChalMaster::vf44(void) {
         }
     }
     if (!any) {
-        fn_8016A438();
+        UpdateRingSet();
     }
 }
 

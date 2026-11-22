@@ -10,7 +10,7 @@ void MemCardSystemLoad(void);
 void fn_8023D7CC(void);
 void fn_8023D70C(void);
 void MenuDoDemo(void);
-void fn_80247210(void);
+void HandleKioskAttractLoop(void);
 void SetInputChannel(int a);
 void ClearInputBuffer(void);
 void fn_80127A24(void);
@@ -57,7 +57,7 @@ void InitDemoMode(void) {
     fn_802E30C8("mmain: e3 demo mode!");
     UnloadEves();
     LoadDemoEves();
-    fn_80247210();
+    HandleKioskAttractLoop();
     UnloadEves();
     LoadArcadeEves();
 }

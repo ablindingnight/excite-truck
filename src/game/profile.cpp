@@ -89,8 +89,8 @@ int sprintf(char*, const char*, ...);
 f32 CalculateTextWidth(int font, const char* text, f32 widthScale);
 
 // Forward declarations for bodies defined below.
-void fn_8024C464(void);
-int fn_8024C768(void);
+void UpdateSlotLabels(void);
+int DisplayProfileMenu(void);
 int fn_8024CC54(int* slot, int (*confirm)(int), int create);
 
 extern u8 lbl_8055F2D0[8];
@@ -321,7 +321,7 @@ static void SetupNameEntry(int upper, const char* name, int len) {
 
 extern "C" {
 // Slot label and selection-icon refresh, 8024C464-8024C524.
-void fn_8024C464(void) {
+void UpdateSlotLabels(void) {
     char* name = &lbl_80498A00[0][0];
     int* icon = lbl_80498A48;
     for (int slot = 0; slot < 4; slot++, name += 18, icon++) {
@@ -333,16 +333,16 @@ void fn_8024C464(void) {
     }
 }
 
-int fn_8024C524(void) {
+int LoadProfileData(void) {
     fn_802E712C();
     MemCardSystemLoad();
-    fn_8024C464();
+    UpdateSlotLabels();
     return 0;
 }
 
 int fn_8024C550(void) {
     fn_802E6FBC();
-    fn_8024C464();
+    UpdateSlotLabels();
     return 0;
 }
 
@@ -354,14 +354,14 @@ int fn_8024C578(int slot) {
             IdentClearSlot();
             IdentSetSlotName(name);
             fn_802E6FBC();
-            fn_8024C464();
+            UpdateSlotLabels();
             return 1;
         }
         return 0;
     }
     lbl_8055F2C4 = lbl_80498A00[slot];
     IdentSelectSlot(slot);
-    fn_8024C464();
+    UpdateSlotLabels();
     return 1;
 }
 
@@ -379,7 +379,7 @@ void fn_8024C628(void) {
 }
 
 
-int fn_8024C6F4(int slot) {
+int ValidateProfileCreation(int slot) {
     int allowed = 0;
     if (IdentIsSlotEmpty(slot)) {
         if (!fn_80215214(fn_80131234("Profile:TITLE"), fn_80131234("Profile:CONFIRM_CREATE"), 0)) goto finished;
@@ -389,20 +389,20 @@ finished:
     return allowed;
 }
 
-int fn_8024C768(void) {
+int DisplayProfileMenu(void) {
     ProfileMenuItem items[] = {
         ProfileMenuItem(lbl_8055BAC0,8,(const void*)fn_8024C628,0,0),
         ProfileMenuItem("slot_1",lbl_80498A00[0],NoCaption()),
-        ProfileMenuItem("slot_1",0,(const void*)fn_8024C6F4,0,0),
+        ProfileMenuItem("slot_1",0,(const void*)ValidateProfileCreation,0,0),
         ProfileMenuItem("icon_1",2,&lbl_80498A48[0],0,0),
         ProfileMenuItem("slot_2",lbl_80498A00[1],NoCaption()),
-        ProfileMenuItem("slot_2",0,(const void*)fn_8024C6F4,1,0),
+        ProfileMenuItem("slot_2",0,(const void*)ValidateProfileCreation,1,0),
         ProfileMenuItem("icon_2",2,&lbl_80498A48[1],0,0),
         ProfileMenuItem("slot_3",lbl_80498A00[2],NoCaption()),
-        ProfileMenuItem("slot_3",0,(const void*)fn_8024C6F4,2,0),
+        ProfileMenuItem("slot_3",0,(const void*)ValidateProfileCreation,2,0),
         ProfileMenuItem("icon_3",2,&lbl_80498A48[2],0,0),
         ProfileMenuItem("slot_4",lbl_80498A00[3],NoCaption()),
-        ProfileMenuItem("slot_4",0,(const void*)fn_8024C6F4,3,0),
+        ProfileMenuItem("slot_4",0,(const void*)ValidateProfileCreation,3,0),
         ProfileMenuItem("icon_4",2,&lbl_80498A48[3],0,0),
         ProfileMenuItem("load",0,0,4,0),
         ProfileMenuItem("save",0,0,5,0),
@@ -411,7 +411,7 @@ int fn_8024C768(void) {
     };
     ProfileMenuDesc desc={"demoprofile.lyt",0,0,0,0};
     desc.items=items;
-    fn_8024C464();
+    UpdateSlotLabels();
     if (!lbl_8055F2CA) {
         lbl_8055F2CC.shown=1;
         lbl_8055F2CA=1;
@@ -427,7 +427,7 @@ int fn_8024C768(void) {
         } else lbl_8055F2CC.shown=0;
         switch(result) {
         case -1: done=1; break;
-        case 4: fn_8024C524(); break;
+        case 4: LoadProfileData(); break;
         case 5: fn_8024C550(); break;
         default: done=fn_8024C578(result); break;
         }
@@ -435,7 +435,7 @@ int fn_8024C768(void) {
     return result!=-1;
 }
 
-void fn_8024CAAC(int emptyAvailable) {
+void InitializePlayerProfiles(int emptyAvailable) {
     char* name = &lbl_80498A58[0][0];
     char* description = &lbl_80498AA0[0][0];
     u8* available;int slot=0;available=lbl_8055F2D0;
@@ -488,29 +488,29 @@ int fn_8024CC54(int* slot, int (*confirm)(int), int create) {
     };
     ProfileMenuDesc desc={"demoprofile.lyt",0,0,0,0};
     desc.items=items;
-    fn_8024CAAC(create);
+    InitializePlayerProfiles(create);
     int result=fn_802146BC(&desc,-999,-999,1);
     if (result==-1) return 0;
     if (slot) *slot=result;
     return 1;
 }
 
-int fn_8024CEF0(int slot){
+int ValidateProfileOverwrite(int slot){
 if(IdentIsSlotEmpty(slot))return 1;
 const char* message="Do you really want overwrite this profile?";
 const char* title="Create Profile";
 return fn_80215214(title,message,0);
 }
 
-int fn_8024CF38(int* slot) { return fn_8024CC54(slot, fn_8024CEF0, 1); }
+int fn_8024CF38(int* slot) { return fn_8024CC54(slot, ValidateProfileOverwrite, 1); }
 int fn_8024CF48(int* slot) { return fn_8024CC54(slot, 0, 0); }
 
 int fn_8024CF54(void) {
     lbl_8055F2C8 = 1;
-    return fn_8024C768();
+    return DisplayProfileMenu();
 }
 
-void fn_8024CF60(void) {
+void InitializeProfileSlot(void) {
     int slot;
     if (fn_8024CF38(&slot)) {
         IdentSelectSlot(slot);

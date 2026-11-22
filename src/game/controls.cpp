@@ -249,7 +249,7 @@ void fn_8023D7CC(void);
 // MenuDesc: game/menu.h.
 extern char lbl_8055B860[8];
 int fn_802146BC(MenuDesc*, int, int, int);
-void fn_8017EBE0(void);
+void ResetPhysicsFlagsAndState(void);
 void fn_8017EC30(void);
 const char* fn_802E85B8(int);
 void __dt__7UITableFv(ControlsTableFields*, int);
@@ -277,7 +277,7 @@ extern "C" void fn_8023D4B8(int controller) {
     fn_8023DB68();
     fn_80137C78(1);
     fn_80137C84(controller, 0);
-    fn_8017EBE0();
+    ResetPhysicsFlagsAndState();
     lbl_8055F198 = fn_8018108C(FindDriverIndex(controller));
     ControlsTableFields table;
     fn_8023E078(&table, controller);

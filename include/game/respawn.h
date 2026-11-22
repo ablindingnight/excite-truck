@@ -4,7 +4,7 @@
 #include "game/common.h"
 
 // Where a car is put (placecar.cpp): its frame, velocity and line-hint node (-1 = find one). The place-only
-// functions (fn_801B7C8C, fn_801B7760, fn_801B8060, ...) fill just this part.
+// functions (fn_801B7C8C, CalculateCarPositionAndDirection, fn_801B8060, ...) fill just this part.
 struct CarPlace {  /* Helper name unproven */
     ValMatrix place;  // offset 0x0
     ValVec3 vel;      // offset 0x30

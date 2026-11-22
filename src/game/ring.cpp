@@ -314,17 +314,17 @@ inline int Ring::Check(RaceCarRec* rec) {
 
 extern "C" {
 
-void fn_8016A8F8(void);
-void fn_8016AC90(void);
-void fn_8016B598(void);
-void fn_8016B634(void);
+void InitializeRadiusScoreRings(void);
+void LoadRingSetsFromTable(void);
+void FreeRingResources(void);
+void UnloadRingData(void);
 
 void fn_8016A0B0(void) {
-    fn_8016A8F8();
-    fn_8016AC90();
+    InitializeRadiusScoreRings();
+    LoadRingSetsFromTable();
 }
 
-void fn_8016A0D4(void) {
+void ResetRingSystem(void) {
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
         lbl_80430340.data[i].enabled = 0;
@@ -334,7 +334,7 @@ void fn_8016A0D4(void) {
     }
 }
 
-int fn_8016A15C(const char* name) {
+int ActivateRingSetByName(const char* name) {
     int found = 0;
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
@@ -347,7 +347,7 @@ int fn_8016A15C(const char* name) {
     return found;
 }
 
-void fn_8016A240(const char* name) {
+void FindAndDisableRingSet(const char* name) {
     int i;
     for (i = 0; i < lbl_80430340.count; i++) {
         if (strcasecmp(lbl_80430340.data[i].name, name) == 0) {
@@ -359,13 +359,13 @@ void fn_8016A240(const char* name) {
 
 }
 template <class T>
-/* Helper name unproven: element i by reference; the accessor boundary is needed (in place: fn_8016A30C 100 -> 99.33) */
+/* Helper name unproven: element i by reference; the accessor boundary is needed (in place: CountPlayerRingEffects 100 -> 99.33) */
 static inline T& ElemRef(T* p, int i) {
     return p[i];
 }
 extern "C" {
 
-int fn_8016A30C(int player) {
+int CountPlayerRingEffects(int player) {
     RaceCarRec* rec = fn_8017960C(player);
     if (rec) {
         int n = 0;
@@ -419,7 +419,7 @@ static inline void UpdateRings(int k, RingSet* s) {
     }
 }
 
-void fn_8016A438(void) {
+void UpdateRingSet(void) {
     RingSet* s;
     int k;
     int i;
@@ -429,8 +429,8 @@ void fn_8016A438(void) {
 }
 
 void fn_8016A68C(void) {
-    fn_8016B598();
-    fn_8016B634();
+    FreeRingResources();
+    UnloadRingData();
 }
 
 V2 fn_8016A6B0(const char* name, int radius) {
@@ -451,7 +451,7 @@ V2 fn_8016A6B0(const char* name, int radius) {
     }
 }
 
-int fn_8016A780(const char* name, int player) {
+int CountRingsPassedByPlayer(const char* name, int player) {
     int n = 0;
     RaceCarRec* rec = fn_8017960C(player);
     if (rec) {
@@ -483,7 +483,7 @@ int fn_8016A878(const char* name) {
     return n;
 }
 
-void fn_8016A8F8(void) {
+void InitializeRadiusScoreRings(void) {
     int i;
     radiusScoreMode = fn_8000AC38()->node->GetBool("radius_score_mode", 0);
     lbl_804302F0.Reserve(5);
@@ -500,7 +500,7 @@ void fn_8016A8F8(void) {
     }
 }
 
-void fn_8016AC90(void) {
+void LoadRingSetsFromTable(void) {
     ValueNode* vals;
     const char* key;
     lbl_80430318.Reserve(180);
@@ -531,12 +531,12 @@ void fn_8016AC90(void) {
     }
 }
 
-void fn_8016B598(void) {
+void FreeRingResources(void) {
     lbl_80430340.Free();
     lbl_80430318.Free();
 }
 
-void fn_8016B634(void) {
+void UnloadRingData(void) {
     int i;
     for (i = 0; i < lbl_804302F0.count; i++) {
         lbl_804302F0.data[i].Unload();

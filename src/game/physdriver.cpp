@@ -258,7 +258,7 @@ f32 fn_8017EB80(f32 x, f32 dead, f32 over) {
     return -t;
 }
 
-int fn_8017EBE0(void) {
+int ResetPhysicsFlagsAndState(void) {
     lbl_8055E4BA = true;
     lbl_8055E4B8 = false;
     lbl_8055E4B9 = false;
@@ -298,8 +298,8 @@ inline f32 Min(f32 a, f32 b) { return a < b ? a : b; }
 
 extern "C" {
 f32 fn_8017EB80(f32 x, f32 dead, f32 over);
-f32 fn_8017F70C(f32 x);
-void fn_8017F628(PhysDriver* d);
+f32 GetAbsoluteValue(f32 x);
+void UpdateRumbleEffects(PhysDriver* d);
 }
 
 inline void PhysDriver::Update(f32 dt) {
@@ -367,8 +367,8 @@ inline void PhysDriver::Update(f32 dt) {
             steer = fn_8017EB80(v, steerDead, steerOver);
         } else if (!b343) {
             steer = fn_8017EB80(v, steerDead, steerOver);
-            steer = steer * (1.0f + nonlin * fn_8017F70C(steer) - nonlin);
-            steer = steer * (1.0f + nonlin2 * fn_8017F70C(steer) - nonlin2);
+            steer = steer * (1.0f + nonlin * GetAbsoluteValue(steer) - nonlin);
+            steer = steer * (1.0f + nonlin2 * GetAbsoluteValue(steer) - nonlin2);
         } else {
             steer = v;
             if (b342) {
@@ -558,7 +558,7 @@ inline void PhysDriver::Update(f32 dt) {
             maxGear = -1;
         }
     }
-    fn_8017F628(this);
+    UpdateRumbleEffects(this);
 }
 
 extern "C" void fn_8017ED00(f32 dt) {
@@ -580,7 +580,7 @@ extern "C" void fn_8017ED00(f32 dt) {
 
 extern "C" {
 
-void fn_8017F628(PhysDriver* d) {
+void UpdateRumbleEffects(PhysDriver* d) {
     f32 k = lbl_8055A334;
     if (!fn_801769F8() && !fn_801B526C() && !fn_801C5B60() && d->b5C && d->rumble) {
         fn_802E85AC(d->ch, d->rumA[2] + d->rumA[0] * k, d->rumA[1] * k);
@@ -592,7 +592,7 @@ void fn_8017F628(PhysDriver* d) {
     }
 }
 
-f32 fn_8017F70C(f32 x) {
+f32 GetAbsoluteValue(f32 x) {
     double r = __fabs(x);
     return r;
 }

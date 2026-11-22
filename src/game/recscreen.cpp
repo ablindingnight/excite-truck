@@ -43,7 +43,7 @@ extern char lbl_8055BAC0[4];  // ""
 extern char lbl_8055BABC[4];  // ""
 
 // Records menu: achievements, tricks or times until backed out.
-void fn_8025C054(void) {
+void HandleRecordsMenu(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (const void*)fn_8025C04C, 0, 0),
         MenuItem(lbl_8055BABC, 8, (const void*)fn_8025C028, 1, 0),

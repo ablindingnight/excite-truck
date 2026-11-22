@@ -133,7 +133,7 @@ void fn_8019EECC(CollVolume* v, RVec3* c);
 void* fn_801C1BA4(int verts, int edges, int links);
 void fn_801C1C7C(void* strip);
 void fn_801C1CBC(void* strip, int nv, PanelVert* v, int ne, const PanelEdge* e, int nl, PanelLink* l);
-void fn_801C256C(void* strip, const RVec3* vel, const RVec3* pos, const RVec3* avel);
+void SetPanelVelocity(void* strip, const RVec3* vel, const RVec3* pos, const RVec3* avel);
 void fn_801C2694(void* strip, RVec3* out, s32* n, const RVec3* pos, const RVec3* dir, RVec3* f, RVec3* t);
 void fn_801E9DC4(s16* h);
 int fn_801E9E78(s16* h, RVec3* p, RVec3* n, s32* id);
@@ -325,7 +325,7 @@ static inline void SetupPanel(PanelVol* p, RigidBody* car, s32 part, const RVec3
     fn_801C1CBC(p->strip, 4, verts, 6, edges, n, links);
     av = fn_801BF754(car);
     const RMtx* cm = ((RaceCarRec*)car)->Mtx();
-    fn_801C256C(p->strip, car->Vel(), &cm->pos, av);
+    SetPanelVelocity(p->strip, car->Vel(), &cm->pos, av);
 }
 
 int fn_801BF2A4(RigidBody* car, s32 part, const RVec3* off, const RVec3* lo, const RVec3* hi, int n, const s32* ids) {

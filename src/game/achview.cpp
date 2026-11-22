@@ -767,7 +767,7 @@ f32 fn_80144CC8(f32 x);
 void fn_801BFEBC(f32* v, f32 x, f32 y, f32 z);
 void fn_801F3198(f32* v);
 void __ct__4VPosFfff(f32* v, f32 x, f32 y, f32 z);
-f32 fn_8017F70C(f32 x);
+f32 GetAbsoluteValue(f32 x);
 void CalculateVectorCrossProduct(f32* out, const f32* a, const f32* b);
 Mat3* fn_802C86DC(void);
 inline void fn_8025AD3C(f32* out, const f32* a, const f32* b, f32 t);
@@ -826,8 +826,8 @@ inline void AchievementTrophyModel::Turn(f32 dt) {
     }
     __ct__4VPosFfff(side, 1.0f, 0.0f, 0.0f);
     __ct__4VPosFfff(fwd, 0.0f, 0.0f, 1.0f);
-    f32 tilt = fn_8017F70C(fn_8025AD88(side, &rot[3]));
-    fn_8017F70C(fn_8025AD88(&rot[3], fwd));
+    f32 tilt = GetAbsoluteValue(fn_8025AD88(side, &rot[3]));
+    GetAbsoluteValue(fn_8025AD88(&rot[3], fwd));
     if (tilt > 0.707f) {
         InitTrophyVec3(a);
         InitTrophyVec3(b);

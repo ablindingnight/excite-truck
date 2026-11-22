@@ -16,7 +16,7 @@ void* fn_802C6B44(const char* name);
 s32 fn_802C6DC4(const char* name, void* model, int a, int b);
 void mrModelUnload(s32 inst);
 void fn_802C744C(s32 inst, const ValMatrix* m);
-void fn_802A4E08(void);
+void ProcessScreenEffects(void);
 }
 
 struct SkyObj {
@@ -130,7 +130,7 @@ void fn_802C1020(void) {
         m.origin.z = cam->pos.z;
         fn_802C744C(lbl_8055FB14, (ValMatrix*)&m);
     }
-    fn_802A4E08();
+    ProcessScreenEffects();
     fn_8029231C(&lbl_804C0800);
 }
 

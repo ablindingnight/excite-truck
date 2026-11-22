@@ -715,8 +715,8 @@ void fn_801E9DC4(s16* h);
 }
 
 extern "C" {
-int fn_8016A15C(const char* name);  // switch a ring set on
-void fn_8016A240(const char* name);  // switch a ring set off
+int ActivateRingSetByName(const char* name);  // switch a ring set on
+void FindAndDisableRingSet(const char* name);  // switch a ring set off
 }
 
 extern "C" Sound3D* fn_80207848(const char* name, int flags);  // 2D sound
@@ -1800,7 +1800,7 @@ void Text_ASE::Stop(void) {
 
 void RingMaster_ASE::Activate(void) {
     if (!active) {
-        if (fn_8016A15C(name)) {
+        if (ActivateRingSetByName(name)) {
             snd->Play();
         }
         active = 1;
@@ -1855,7 +1855,7 @@ void RingMaster_ASE::Update(void) {
             f32 now = lbl_8055E3C8;
             f32 on = start + delay;
             if (length + on < now) {
-                fn_8016A240(name);
+                FindAndDisableRingSet(name);
                 state = 3;
             } else if (on < now) {
                 Activate();
@@ -1865,7 +1865,7 @@ void RingMaster_ASE::Update(void) {
 }
 
 void RingMaster_ASE::Stop(void) {
-    fn_8016A240(name);
+    FindAndDisableRingSet(name);
     state = 1;
     if (snd && snd->playing) {
         snd->Stop();

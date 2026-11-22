@@ -4,7 +4,7 @@
 #include "game/logomover.h"
 
 // LogoMover's Enter/Exit/Update bodies. Retail defines them out of line in popwarn.cpp, right after
-// fn_80248668 (popwarn defines LOGOMOVER_DEFINE before including this there; retail evpath only refers to them).
+// ShowKioskMenuScreen (popwarn defines LOGOMOVER_DEFINE before including this there; retail evpath only refers to them).
 // Other units see inline copies (evpath calls LogoMover::Update directly).
 #ifdef LOGOMOVER_DEFINE
 #define LOGOMOVER_INLINE

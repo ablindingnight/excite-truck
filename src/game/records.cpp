@@ -31,12 +31,12 @@ static inline s32 ScoreIsBest(u8* best, int level, int i) {
     return r->score[level][i];
 }
 
-s32 fn_80144E38(int i, int level, u8* best) {
+s32 CheckIfScoreIsBest(int i, int level, u8* best) {
     return ScoreIsBest(best, level, i);
 }
 
 int fn_80144F2C(void) { return lbl_8055E1E8; }
 
-s32 fn_80144F34(int i, int level, u8* best) { return fn_80144E38(i, level, best); }
+s32 fn_80144F34(int i, int level, u8* best) { return CheckIfScoreIsBest(i, level, best); }
 
 }  // extern "C"

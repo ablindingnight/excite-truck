@@ -153,15 +153,15 @@ const char* lbl_80559984 = "\\";
 extern "C" {
 void fn_8012A46C(void* p, const char* what);
 void fn_8012A7FC(void);
-void fn_8012A388(ResEntry* e);
+void FixResourceEntryHeader(ResEntry* e);
 void fn_8012A80C(ResSetHeader* h);
-int fn_8012A470(ResourceSet* set, int idx, ResEntry* e, u8* base);
-int fn_8012AA60(ResourceSet* set, s32 size);
-int fn_8012ACA0(ResourceSet* set, u8* base, s32 size);
+int ValidateResourceChecksum(ResourceSet* set, int idx, ResEntry* e, u8* base);
+int ValidateResourceSet(ResourceSet* set, s32 size);
+int ValidateResourceToc(ResourceSet* set, u8* base, s32 size);
 int fn_8012AC98(const char* name);
-void fn_8012BA1C(ResourceSet* set);
-void fn_8012BC24(ResourceSet** list, ResourceSet* set);
-ResourceSet* fn_8012BD3C(ResourceSet* list, const char* name);
+void ValidateResourceSetReferences(ResourceSet* set);
+void RemoveResourceSetFromList(ResourceSet** list, ResourceSet* set);
+ResourceSet* FindResourceByName(ResourceSet* list, const char* name);
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got);
 int fn_8012C4D8(void* p);
 void fn_8012D908(const char* name);
@@ -201,7 +201,7 @@ inline ResToc* GetToc(const char* name) {
                         toc->size, 0x14);
         }
         for (i = 0; i < toc->count; i++) {
-            fn_8012A388(&toc->entries[i]);
+            FixResourceEntryHeader(&toc->entries[i]);
         }
     }
     return toc;
@@ -332,7 +332,7 @@ Pool* lbl_8055E008;
 
 extern "C" {
 
-void fn_8012A388(ResEntry* e) {
+void FixResourceEntryHeader(ResEntry* e) {
     SwapWordB((u8*)&e->type);
     SwapWordB((u8*)&e->info);
     SwapWordB((u8*)&e->size);
@@ -345,7 +345,7 @@ void fn_8012A388(ResEntry* e) {
 
 void fn_8012A46C(void* p, const char* what) {}
 
-int fn_8012A470(ResourceSet* set, int idx, ResEntry* e, u8* base) {
+int ValidateResourceChecksum(ResourceSet* set, int idx, ResEntry* e, u8* base) {
     int ok;
     e->data = (ResData*)(base + e->offset - 8);
     fn_8012A46C(e->data->body, "toc fixup");
@@ -389,7 +389,7 @@ void AsyncResource::operator delete(void* p) {
 
 extern "C" {
 
-void fn_8012A648(void) {
+void CreateResourcePool(void) {
     void* p = AsyncResource::operator new(sizeof(AsyncResource), "baz");  // creates the pool first
     lbl_8055E008->Free(p);
 }
@@ -400,7 +400,7 @@ void fn_8012A67C(void) {
     lbl_8055E008 = 0;
 }
 
-int fn_8012A6C8(ResSetHeader* h, const char* name, u32 fileSize) {
+int ValidateResourceSetHeader(ResSetHeader* h, const char* name, u32 fileSize) {
     u32 magic;
     fn_80132E7C(h, 0x30);
     magic = h->magic;
@@ -441,7 +441,7 @@ void fn_8012A80C(ResSetHeader* h) {
     SwapWord((u8*)&h->unk30);
 }
 
-int fn_8012AA60(ResourceSet* set, s32 size) {
+int ValidateResourceSet(ResourceSet* set, s32 size) {
     ResEntry* e = set->entries;
     s32 count = set->hdr.resCount;
     u8* base = (u8*)e;
@@ -450,8 +450,8 @@ int fn_8012AA60(ResourceSet* set, s32 size) {
     if (ok) {
         int i;
         for (i = 0; i < count; e++, i++) {
-            fn_8012A388(e);
-            if (e->offset + e->size <= size && !fn_8012A470(set, i, e, base)) {
+            FixResourceEntryHeader(e);
+            if (e->offset + e->size <= size && !ValidateResourceChecksum(set, i, e, base)) {
                 ok = 0;
                 break;
             }
@@ -462,25 +462,25 @@ int fn_8012AA60(ResourceSet* set, s32 size) {
     return ok;
 }
 
-int fn_8012AB34(int fd, ResSetHeader* h, const char* name, u32 fileSize) {
+int LoadResourceHeader(int fd, ResSetHeader* h, const char* name, u32 fileSize) {
     int ok = 0;
     if (fn_802E39D0(fd, h, sizeof(ResSetHeader))) {
         fn_8012A80C(h);
-        ok = fn_8012A6C8(h, name, fileSize);
+        ok = ValidateResourceSetHeader(h, name, fileSize);
     }
     return ok;
 }
 
 int fn_8012ABB0(const char* path, ResSetHeader* h) {
     int fd = LoadFileWithName(path);
-    if (fd != -1 && !fn_8012AB34(fd, h, path, GetFileSize(fd))) {
+    if (fd != -1 && !LoadResourceHeader(fd, h, path, GetFileSize(fd))) {
         fn_802E3734(&fd);
         fd = -1;
     }
     return fd;
 }
 
-int fn_8012AC28(const char* name, s32* sizeOut) {
+int FindResourceSector(const char* name, s32* sizeOut) {
     char path[0x104];
     s32 sector = -1;
     s32 size;
@@ -496,9 +496,9 @@ int fn_8012AC28(const char* name, s32* sizeOut) {
     return sector;
 }
 
-int fn_8012AC98(const char* name) { return fn_8012AC28(name, 0); }
+int fn_8012AC98(const char* name) { return FindResourceSector(name, 0); }
 
-int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
+int ValidateResourceToc(ResourceSet* set, u8* base, s32 size) {
     int ok;
     ResEntry* entries;
     ResEntry* e;
@@ -523,7 +523,7 @@ int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
     e = entries;
     ok = 1;
     for (i = 0; i < toc->count; e++, i++) {
-        if (e->offset + e->size <= size && !fn_8012A470(set, i, e, base)) {
+        if (e->offset + e->size <= size && !ValidateResourceChecksum(set, i, e, base)) {
             ok = 0;
             break;
         }
@@ -533,7 +533,7 @@ int fn_8012ACA0(ResourceSet* set, u8* base, s32 size) {
     return ok;
 }
 
-ResourceSet* fn_8012AFE0(const char* path, const char* name) {
+ResourceSet* LoadResourceSet(const char* path, const char* name) {
     ResSetHeader hdr;
     ResourceSet* set = 0;
     int fd = fn_8012ABB0(path, &hdr);
@@ -551,10 +551,10 @@ ResourceSet* fn_8012AFE0(const char* path, const char* name) {
         set->mem = mem;
         if (hdr.flags & 1) {
             set->entries = 0;
-            ok = fn_8012ACA0(set, (u8*)mem, size);
+            ok = ValidateResourceToc(set, (u8*)mem, size);
         } else {
             set->entries = (ResEntry*)set->mem;
-            ok = fn_8012AA60(set, size);
+            ok = ValidateResourceSet(set, size);
         }
         if (!ok) {
             fn_8012A7FC();
@@ -595,7 +595,7 @@ char* fn_8012B2C4(char* buf, const char* name, int i) {
 
 char* fn_8012B314(const char* name, char* buf, int i) { return fn_8012B2C4(buf, name, i); }
 
-void fn_8012B324(const char* path) {}
+void LoadAsyncResourceFile(const char* path) {}
 
 void fn_8012B328(ResourceSet* set) {}
 
@@ -610,17 +610,17 @@ ResourceSet* fn_8012B32C(const char* name) {
         if (!path) {
             break;
         }
-        set = fn_8012AFE0(path, name);
+        set = LoadResourceSet(path, name);
         if (set) {
             fn_8012B328(set);
             break;
         }
-        fn_8012B324(path);
+        LoadAsyncResourceFile(path);
     }
     return set;
 }
 
-void fn_8012B3D4(char* setName, int setLen, char* resName, int resLen, const char* src) {
+void ExtractResourcePath(char* setName, int setLen, char* resName, int resLen, const char* src) {
     char* p;
     SafeStrCopy(setName, src, setLen);
     p = strrchr(setName, '/');
@@ -633,7 +633,7 @@ void fn_8012B3D4(char* setName, int setLen, char* resName, int resLen, const cha
     }
 }
 
-const char* fn_8012B4E4(const char* name, bool* star) {
+const char* ParseStarPrefix(const char* name, bool* star) {
     *star = *name == '*';
     if (*name == '*') {
         name++;
@@ -648,7 +648,7 @@ int fn_8012B50C(ResEntry* a, ResEntry* b) {
     return 0;
 }
 
-ResourceSet* fn_8012B534(const char* name, int* idx, int flags) {
+ResourceSet* FindResourceEntry(const char* name, int* idx, int flags) {
     bool star;
     char resName[0x100];
     char setName[0x100];
@@ -656,8 +656,8 @@ ResourceSet* fn_8012B534(const char* name, int* idx, int flags) {
     int quiet = (flags >> 1) & 1;
     ResourceSet* found;
     ResourceSet* set;
-    name = fn_8012B4E4(name, &star);
-    fn_8012B3D4(setName, sizeof(setName), resName, sizeof(resName), name);
+    name = ParseStarPrefix(name, &star);
+    ExtractResourcePath(setName, sizeof(setName), resName, sizeof(resName), name);
     if (star && !setName[0]) {
         fn_802E30C8("res: *%s is a meaningless resource name.", name);
     }
@@ -691,7 +691,7 @@ ResourceSet* fn_8012B534(const char* name, int* idx, int flags) {
     return found;
 }
 
-int fn_8012B6FC(ResourceSet* set, int idx) {
+int LoadResourceFile(ResourceSet* set, int idx) {
     ResEntry* e = &set->entries[idx];
     if (!(e->flags & 8)) {
         s32 size = e->size + 0x80;
@@ -728,12 +728,12 @@ int fn_8012B6FC(ResourceSet* set, int idx) {
     return (e->flags >> 3) & 1;
 }
 
-void* fn_8012B85C(const char* name, u32 type, u32* info, s32* sizeOut, bool* first, bool* got) {
+void* LoadResourceData(const char* name, u32 type, u32* info, s32* sizeOut, bool* first, bool* got) {
     int idx;
     void* data = 0;
-    ResourceSet* set = fn_8012B534(name, &idx, 0);
+    ResourceSet* set = FindResourceEntry(name, &idx, 0);
     if (set) {
-        if (fn_8012B6FC(set, idx)) {
+        if (LoadResourceFile(set, idx)) {
             ResEntry* e = &set->entries[idx];
             if (type == e->type) {
                 e->flags |= 2;
@@ -769,7 +769,7 @@ void* fn_8012B85C(const char* name, u32 type, u32* info, s32* sizeOut, bool* fir
     return data;
 }
 
-void fn_8012BA1C(ResourceSet* set) {
+void ValidateResourceSetReferences(ResourceSet* set) {
     int i;
     for (i = 0; i < set->hdr.resCount; i++) {
         ResEntry* e = &set->entries[i];
@@ -789,10 +789,10 @@ void fn_8012BA1C(ResourceSet* set) {
 
 int fn_8012BB18(ResourceSet* set) { return 1; }
 
-void fn_8012BB20(ResourceSet** list, ResourceSet* set) {
+void UnloadResourceSet(ResourceSet** list, ResourceSet* set) {
     if (fn_8012BB18(set)) {
-        fn_8012BA1C(set);
-        fn_8012BC24(list, set);
+        ValidateResourceSetReferences(set);
+        RemoveResourceSetFromList(list, set);
         if (set) {
             if (set->loaded) {
                 set->Unload();
@@ -802,7 +802,7 @@ void fn_8012BB20(ResourceSet** list, ResourceSet* set) {
     }
 }
 
-void fn_8012BC24(ResourceSet** list, ResourceSet* set) {
+void RemoveResourceSetFromList(ResourceSet** list, ResourceSet* set) {
     ResourceSet* s;
     while ((s = *list) != 0) {
         if (s == set) {
@@ -813,7 +813,7 @@ void fn_8012BC24(ResourceSet** list, ResourceSet* set) {
     }
 }
 
-int fn_8012BC50(void* data, void (*cb)(void*, void*), void* arg) {
+int DecrementResourceReference(void* data, void (*cb)(void*, void*), void* arg) {
     ResEntry* e = ((ResData*)((u8*)data - 8))->entry;
     if (!e) {
         return 0;
@@ -838,7 +838,7 @@ int fn_8012BC50(void* data, void (*cb)(void*, void*), void* arg) {
     return e->refs == 0;
 }
 
-ResourceSet* fn_8012BD3C(ResourceSet* list, const char* name) {
+ResourceSet* FindResourceByName(ResourceSet* list, const char* name) {
     ResourceSet* s = list;
     while (s) {
         if (!strcasecmp(name, s->name)) {
@@ -849,8 +849,8 @@ ResourceSet* fn_8012BD3C(ResourceSet* list, const char* name) {
     return s;
 }
 
-ResourceSet* fn_8012BD98(const char* name, ResourceSet** list) {
-    ResourceSet* set = fn_8012BD3C(*list, name);
+ResourceSet* LoadResourceSetWithRetry(const char* name, ResourceSet** list) {
+    ResourceSet* set = FindResourceByName(*list, name);
     if (!set) {
         int tries;
         for (tries = 0; tries < 10; tries++) {
@@ -877,11 +877,11 @@ ResourceSet* fn_8012BD98(const char* name, ResourceSet** list) {
     return set;
 }
 
-void fn_8012A648(void);
+void CreateResourcePool(void);
 void fn_8012DBD0(void);
 
-int fn_8012BE90(void) {
-    fn_8012A648();
+int InitializeTocLib(void) {
+    CreateResourcePool();
     lbl_8055DFF8 = 1;
     lbl_8055DFFC = new ("toclib") TocLib;
     fn_8012DBD0();
@@ -908,7 +908,7 @@ void fn_8012BF28(void) {
 
 int fn_8012C33C(const char* name) {
     int idx;
-    return fn_8012B534(name, &idx, 0) != 0;
+    return FindResourceEntry(name, &idx, 0) != 0;
 }
 
 void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first, bool* got) {
@@ -916,7 +916,7 @@ void* fn_8012C370(const char* name, u32 type, u32* info, s32* size, bool* first,
     int tries;
     for (tries = 0; tries < 10; tries++) {
         lbl_8055DFF9 = 0;
-        data = fn_8012B85C(name, type, info, size, first, got);
+        data = LoadResourceData(name, type, info, size, first, got);
         if (!lbl_8055DFF9 || data) {
             break;
         }
@@ -941,9 +941,9 @@ void fn_8012C41C(int (*cb)(ResEntry*, u32, ResourceSet*, void*), void* arg, cons
     }
 }
 
-int fn_8012C4D8(void* p) { return fn_8012BC50(p, 0, 0); }
+int fn_8012C4D8(void* p) { return DecrementResourceReference(p, 0, 0); }
 
-int fn_8012C4E4(void* p, void (*cb)(void*, void*), void* arg) { return fn_8012BC50(p, cb, arg); }
+int fn_8012C4E4(void* p, void (*cb)(void*, void*), void* arg) { return DecrementResourceReference(p, cb, arg); }
 
 void fn_8012DD00(void);
 
@@ -973,7 +973,7 @@ const char* fn_8012C58C(void* data) {
 AsyncResource* ResourceGetStream(const char* name, u32 type, u32* info) {
     int idx;
     AsyncResource* r = 0;
-    ResourceSet* set = fn_8012B534(name, &idx, 1);
+    ResourceSet* set = FindResourceEntry(name, &idx, 1);
     if (set) {
         ResEntry* e = &set->entries[idx];
         if (e->type == type) {
@@ -1083,8 +1083,8 @@ public:
             set.Unload();
             break;
         case 3:
-            fn_8012BA1C(&set);
-            fn_8012BC24(&lbl_8055E000, &set);
+            ValidateResourceSetReferences(&set);
+            RemoveResourceSetFromList(&lbl_8055E000, &set);
             set.Unload();
             break;
         }
@@ -1101,7 +1101,7 @@ public:
                 break;
             }
             ok = 0;
-            sector = fn_8012AC28(path, &size);
+            sector = FindResourceSector(path, &size);
             if (sector != -1) {
                 fileSize = bufSize;
                 if (fileSize <= bufSize) {
@@ -1189,10 +1189,10 @@ int AsyncResourceSet::Restart(const char* name) {
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;
-            ok = fn_8012ACA0(&set, buf + set.hdr.baseOffset, fileSize - set.hdr.baseOffset);
+            ok = ValidateResourceToc(&set, buf + set.hdr.baseOffset, fileSize - set.hdr.baseOffset);
         } else {
             set.entries = (ResEntry*)(buf + set.hdr.baseOffset);
-            ok = fn_8012AA60(&set, fileSize - set.hdr.baseOffset);
+            ok = ValidateResourceSet(&set, fileSize - set.hdr.baseOffset);
         }
         if (ok) {
             fn_8012B328(&set);
@@ -1201,7 +1201,7 @@ int AsyncResourceSet::Restart(const char* name) {
             state = 3;
         } else {
             Reset();
-            fn_8012B324(set.path);
+            LoadAsyncResourceFile(set.path);
             tries++;
             StartLoad(set.name);
         }
@@ -1215,8 +1215,8 @@ int AsyncResourceSet::Restart(const char* name) {
         set.Unload();
         break;
     case 3:
-        fn_8012BA1C(&set);
-        fn_8012BC24(&lbl_8055E000, &set);
+        ValidateResourceSetReferences(&set);
+        RemoveResourceSetFromList(&lbl_8055E000, &set);
         set.Unload();
         break;
     }
@@ -1252,7 +1252,7 @@ int AsyncResourceSet::StartLoad(const char* name) {
             break;
         }
         ok = 0;
-        Open(name, path, fn_8012AC28(path, &size), ok);
+        Open(name, path, FindResourceSector(path, &size), ok);
         tries++;
     } while (!ok);
     return ok;
@@ -1271,7 +1271,7 @@ void AsyncResourceSet::Finish(void) {
 
 /* Helper name unproven: reloads the set and starts it again. */
 inline void AsyncResourceSet::Retry(void) {
-    fn_8012B324(set.path);
+    LoadAsyncResourceFile(set.path);
     tries++;
     Begin(set.name);
 }
@@ -1289,10 +1289,10 @@ void AsyncResourceSet::Update(void) {
         }
         if (set.hdr.flags & 1) {
             set.entries = 0;
-            ok = fn_8012ACA0(&set, buf + set.hdr.baseOffset, fileSize - set.hdr.baseOffset);
+            ok = ValidateResourceToc(&set, buf + set.hdr.baseOffset, fileSize - set.hdr.baseOffset);
         } else {
             set.entries = (ResEntry*)(buf + set.hdr.baseOffset);
-            ok = fn_8012AA60(&set, fileSize - set.hdr.baseOffset);
+            ok = ValidateResourceSet(&set, fileSize - set.hdr.baseOffset);
         }
         if (ok) {
             fn_8012B328(&set);
@@ -1395,7 +1395,7 @@ public:
                     case 1:
                         break;
                     case 2: {
-                        ResourceSet* set = fn_8012BD3C(lbl_8055E000, n->name);
+                        ResourceSet* set = FindResourceByName(lbl_8055E000, n->name);
                         set->refs = n->refs;
                         set->pending = 1;
                         pending.PopFront();
@@ -1483,7 +1483,7 @@ extern "C" void fn_8012DD00(void) {
 extern "C" void fn_8012DDA8(const char* name) {
     int found;
     AsyncSetQueue* q;
-    if (!fn_8012BD3C(lbl_8055E000, name) && (q = lbl_8055E014) != 0) {
+    if (!FindResourceByName(lbl_8055E000, name) && (q = lbl_8055E014) != 0) {
         found = 0;
         QueueNode* n;
         for (n = q->pending.First(); n; n = n->next) {
@@ -1511,7 +1511,7 @@ extern "C" void fn_8012DDA8(const char* name) {
             return;
         }
     }
-    fn_8012BD98(name, &lbl_8055E000);
+    LoadResourceSetWithRetry(name, &lbl_8055E000);
 }
 
 void AsyncSetQueue::Process(void) {
@@ -1530,7 +1530,7 @@ void AsyncSetQueue::Process(void) {
                 case 1:
                     break;
                 case 2: {
-                    ResourceSet* set = fn_8012BD3C(lbl_8055E000, n->name);
+                    ResourceSet* set = FindResourceByName(lbl_8055E000, n->name);
                     set->refs = n->refs;
                     set->pending = 1;
                     {
@@ -1629,7 +1629,7 @@ extern "C" void fn_8012E498(const char* name) {
     AsyncSetQueue* q;
     ResourceSet* set;
     fn_8012E81C(name);
-    set = fn_8012BD3C(lbl_8055E000, name);
+    set = FindResourceByName(lbl_8055E000, name);
     if (set && --set->refs == 0) {
         q = lbl_8055E014;
         if (q) {
@@ -1658,7 +1658,7 @@ extern "C" void fn_8012E498(const char* name) {
                 return;
             }
         }
-        fn_8012BB20(&lbl_8055E000, set);
+        UnloadResourceSet(&lbl_8055E000, set);
     }
 }
 #pragma pop
@@ -1698,7 +1698,7 @@ inline void ReportWait(QueueNode* n, s32 start) {  /* Helper name unproven */
 }
 
 inline void ClearPending(const char* name) {  /* Helper name unproven */
-    ResourceSet* set = fn_8012BD3C(lbl_8055E000, name);
+    ResourceSet* set = FindResourceByName(lbl_8055E000, name);
     if (set) {
         set->pending = 0;
     } else {
@@ -1761,13 +1761,13 @@ extern "C" void fn_8012E81C(const char* name) {
     }
 }
 
-extern "C" int fn_8012E938(const char* name) { return fn_8012BD3C(lbl_8055E000, name) != 0; }
+extern "C" int fn_8012E938(const char* name) { return FindResourceByName(lbl_8055E000, name) != 0; }
 
 extern "C" void fn_8012E96C(const char* name) {
     AsyncSetQueue* q = lbl_8055E014;
     if (q) {
         int idx;
-        ResourceSet* set = fn_8012B534(name, &idx, 3);
+        ResourceSet* set = FindResourceEntry(name, &idx, 3);
         if (!set) {
             QueueNode* n = q->FindNodeFor(name);
             if (n) {

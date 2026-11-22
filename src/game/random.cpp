@@ -26,7 +26,7 @@ Ranmar lbl_804223F8[7];
 extern "C" {
 
 void fn_80129C64(int index);
-void fn_80129E34(Ranmar* r, int ij, int kl);
+void InitializeRandomGenerator(Ranmar* r, int ij, int kl);
 f32 fn_8012A080(Ranmar* r);
 
 void fn_80129C24(void) {
@@ -38,7 +38,7 @@ void fn_80129C24(void) {
 
 void fn_80129C60(void) {}
 
-void fn_80129C64(int index) { fn_80129E34(&lbl_804223F8[index], 23234, 17371); }
+void fn_80129C64(int index) { InitializeRandomGenerator(&lbl_804223F8[index], 23234, 17371); }
 
 void fn_80129C80(int index, int ij, int kl) {
     if (OptDirectToTrack()) {
@@ -47,7 +47,7 @@ void fn_80129C80(int index, int ij, int kl) {
     } else {
         fn_802E30C8("seed[%d]: %d, %d", index, ij, kl);
     }
-    fn_80129E34(&lbl_804223F8[index], ij, kl);
+    InitializeRandomGenerator(&lbl_804223F8[index], ij, kl);
 }
 
 int fn_80129D18(int index, int n) {
@@ -67,7 +67,7 @@ f32 fn_80129DC4(int index, f32 lo, f32 hi) {
 // Stripped from ET; only its constant remains.
 f32 RandomZero(void) { return 0.0f; }
 
-void fn_80129E34(Ranmar* r, int ij, int kl) {
+void InitializeRandomGenerator(Ranmar* r, int ij, int kl) {
     f32 s;
     f32 t;
     int i = (int)(f32)fmod(ij / 177.0f, 177.0) + 2;

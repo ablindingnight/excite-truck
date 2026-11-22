@@ -80,12 +80,12 @@ void fn_801618B4(void);
 void fn_801CB8C0(void);
 void fn_80238920(void);
 void fn_801E7DEC(RaceSetup* rs);
-void fn_8017685C(int unk);
+void ResetPhysicsSystem(int unk);
 void fn_801AF6FC(void);
 void fn_801AF92C(RaceStandings* res);
 CarInfo* GetCarInfo(int index);
 int fn_80231504(int unk);
-void fn_801DF110(void);
+void HandlePopupDisplay(void);
 void fn_802C8530(void);
 int fn_801DF060(void);
 void fn_801E81B8(int a, void (*draw)(void));
@@ -107,7 +107,7 @@ void fn_80265D50(void);
 void fn_801CB3F8(void);
 void fn_80210950(int (*fn)(int), int unk);
 int FindDriverIndex(int pad);
-int fn_801DF238(int key);
+int HandlePopupInput(int key);
 int fn_801769F8(void);
 int fn_801E86F8(int player);
 void fn_801E86E8(int index, int player);
@@ -132,7 +132,7 @@ int ReadJoyStatus(JoyStatus* pad, int index);
 int fn_801E85AC(void);
 void SetCameraNextMode(int cam, int player, int unk);
 void fn_801E7E48(void);
-void fn_80176BAC(void);
+void UpdatePhysicsDeltaTime(void);
 int fn_801E89EC(void);
 #ifdef __MWERKS__
 int fn_8012742C(void);  // defined char in unk_80127398.cpp; MWCC callees extend r3, retail callers read it whole
@@ -474,7 +474,7 @@ void fn_8000B09C(RaceSetup* rs) {
 void gameloop_postrace(RaceStandings* res) {
     RaceResultEntry* e;
     int i;
-    fn_8017685C(1);
+    ResetPhysicsSystem(1);
     fn_801AF6FC();
     if (res) {
         fn_801AF92C(res);
@@ -508,7 +508,7 @@ void fn_8000B210(void) {
 
 void fn_8000B288(void) {
     fn_8000B210();
-    fn_801DF110();
+    HandlePopupDisplay();
 }
 
 void fn_8000B2AC(void) {
@@ -618,7 +618,7 @@ void fn_8000B64C(int key, int pad) {
     if (player < 0) {
         return;
     }
-    if (fn_801DF238(key)) {
+    if (HandlePopupInput(key)) {
         return;
     }
     if (fn_8000AD84() && pad != lbl_8055D3E4) {
@@ -788,7 +788,7 @@ void game_loop(void) {
     }
     LoadingUpdate();
     fn_801E7E48();
-    fn_80176BAC();
+    UpdatePhysicsDeltaTime();
     fn_8000AE78(!fn_8000D75C());
     if (lbl_8055D3D0->update) {
         lbl_8055D3D0->update();
