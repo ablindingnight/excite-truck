@@ -792,7 +792,7 @@ void fn_80182DF4(u8* p, u8* desc) {
     f32 xSide = maxX - h;
     f32 zFrontMid = 0.5f * (zFront + zMid);
     f32 yFront = 0.44999998f + minY;
-    f32 ySide = h + minY;
+    f32 ySide = minY + h;
     f32 xFront = maxX - 0.44999998f;
     f32 nb = -b;
     f32 yr = 0.254f + yRear;
