@@ -432,6 +432,72 @@ static inline void PrepareTruckIcons(TruckDraw* draw, int me, int view) {
     draw->self = view;
 }
 
+// Name unproven: render the actual placed-marker operation.
+static inline void DrawPlacedMarkers(Basis* basis, f32 x, f32 y, f32 w, f32 h, f32 radius) {
+    f32 cy;
+    f32 cx = x + w / 2.0f;
+    cy = y - h / 2.0f;
+    unsigned int j;
+    for (j = 0; j < sizeof(lbl_803583C8) / sizeof(lbl_803583C8[0]); j++) {
+        Vec2 c;
+        c.x = cx;
+        c.y = cy;
+        if (lbl_803583C8[j].active) {
+            Vec3 rel;
+            f32 size;
+            rel.y = lbl_803583C8[j].pos.y - basis->pos.y;
+            rel.x = lbl_803583C8[j].pos.x - basis->pos.x;
+            rel.z = 0.0f;
+            rel.z -= basis->pos.z;
+            MulVecT(&rel, &rel, basis);
+            {
+                f32 s = w / 2.0f / radius;
+                rel.x *= s;
+                rel.y *= s;
+                rel.z *= s;
+            }
+            if (PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) > (w / 2.0f) * (w / 2.0f)) {
+                PSVECNormalize((const Vec*)&rel, (Vec*)&rel);
+                rel.x *= w / 2.0f;
+                rel.y *= w / 2.0f;
+                rel.z *= w / 2.0f;
+            }
+            size = fn_80235EF0(lbl_803583C8[j].art, lbl_803583C8[j].part);
+            fn_802354A0(lbl_803583C8[j].art, lbl_803583C8[j].part, c.x + rel.x - size / 2.0f, size * 0.5f + (c.y + rel.y), 0.0f, size, size, -1);
+        }
+    }
+}
+
+// Name unproven: project and draw the actual final start/finish marker.
+static inline void DrawFinalMarker(SFMarker* m, Basis* basis, const Vec2& tp, f32 centerX, f32 centerY, f32 w, f32 radius) {
+    Vec2 delta;
+    Vec2 c;
+    Vec3 rel;
+    c.x = centerX;
+    c.y = centerY;
+    SetXYZ(&rel, m->pos.x - basis->pos.x, m->pos.y - basis->pos.y, 0.0f);
+    rel.z -= basis->pos.z;
+    MulVecT(&rel, &rel, basis);
+    {
+        f32 s = w / 2.0f / radius;
+        rel.x *= s;
+        rel.y *= s;
+        rel.z *= s;
+    }
+    if (PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) < (w / 2.0f) * (w / 2.0f)) {
+        f32 size;
+        f32 fade;
+        f32 a;
+        delta.x = tp.x - m->pos.x;
+        delta.y = tp.y - m->pos.y;
+        size = fn_80235EF0(m->art, 0);
+        fade = Ease(1.0f - PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) / ((w / 2.0f) * (w / 2.0f)));
+        a = 255.0f * fade;
+        fn_80235AFC(m->art, 0, ARGB((int)(a < 0.0f ? a - 0.5f : 0.5f + a), 0xFF, 0xFF, 0xFF),
+                    c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->angle + m->unk10);
+    }
+}
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
@@ -595,40 +661,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         }
     }
     Vec2 tp;  // Actual final truck-position workspace; writes remain at their original points.
-    {
-        f32 cy;
-        f32 cx = x + w / 2.0f;
-        cy = y - h / 2.0f;
-        unsigned int j;
-        for (j = 0; j < sizeof(lbl_803583C8) / sizeof(lbl_803583C8[0]); j++) {
-            Vec2 c;
-            c.x = cx;
-            c.y = cy;
-            if (lbl_803583C8[j].active) {
-                Vec3 rel;
-                f32 size;
-                rel.y = lbl_803583C8[j].pos.y - basis.pos.y;
-                rel.x = lbl_803583C8[j].pos.x - basis.pos.x;
-                rel.z = 0.0f;
-                rel.z -= basis.pos.z;
-                MulVecT(&rel, &rel, &basis);
-                {
-                    f32 s = w / 2.0f / radius;
-                    rel.x *= s;
-                    rel.y *= s;
-                    rel.z *= s;
-                }
-                if (PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) > (w / 2.0f) * (w / 2.0f)) {
-                    PSVECNormalize((const Vec*)&rel, (Vec*)&rel);
-                    rel.x *= w / 2.0f;
-                    rel.y *= w / 2.0f;
-                    rel.z *= w / 2.0f;
-                }
-                size = fn_80235EF0(lbl_803583C8[j].art, lbl_803583C8[j].part);
-                fn_802354A0(lbl_803583C8[j].art, lbl_803583C8[j].part, c.x + rel.x - size / 2.0f, size * 0.5f + (c.y + rel.y), 0.0f, size, size, -1);
-            }
-        }
-    }
+    DrawPlacedMarkers(&basis, x, y, w, h, radius);
     {
         TruckDraw* d = map->trucks;
         int part = view == d->self ? 1 : 3;
@@ -640,35 +673,12 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     {
         RaceCarRec* tr = fn_8017960C(fn_801E866C(map->player));
         m = lbl_8055D5B4;
-        Vec2 c;
-        c.y = y - h / 2.0f;
+        f32 centerY = y - h / 2.0f;
         Vec3 p = *(const Vec3*)&tr->mtx.pos;  // a plain Vec3 copy (RVec3 has a constructor)
-        Vec3 rel;
         tp.x = p.x;
         tp.y = p.z;
-        c.x = x + w / 2.0f;
-        SetXYZ(&rel, m->pos.x - basis.pos.x, m->pos.y - basis.pos.y, 0.0f);
-        rel.z -= basis.pos.z;
-        MulVecT(&rel, &rel, &basis);
-        {
-            f32 s = w / 2.0f / radius;
-            rel.x *= s;
-            rel.y *= s;
-            rel.z *= s;
-        }
-        if (PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) < (w / 2.0f) * (w / 2.0f)) {
-            Vec2 delta;
-            f32 size;
-            f32 fade;
-            f32 a;
-            delta.x = tp.x - m->pos.x;
-            delta.y = tp.y - m->pos.y;
-            size = fn_80235EF0(m->art, 0);
-            fade = Ease(1.0f - PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) / ((w / 2.0f) * (w / 2.0f)));
-            a = 255.0f * fade;
-            fn_80235AFC(m->art, 0, ARGB((int)(a < 0.0f ? a - 0.5f : 0.5f + a), 0xFF, 0xFF, 0xFF),
-                        c.x + rel.x, c.y + rel.y, 0.0f, size, size, m->angle + m->unk10);
-        }
+        f32 centerX = x + w / 2.0f;
+        DrawFinalMarker(m, &basis, tp, centerX, centerY, w, radius);
     }
 }
 
