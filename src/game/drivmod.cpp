@@ -580,6 +580,11 @@ void fn_801C2694(u8* sys, BVec* pts, int* n, const BVec* g, const BVec* up, cons
 s32 fn_801E65BC(u8* skel, BonePose* bones, int n, int x);
 void fn_802C70AC(s32 model, const PlainValMatrix* m, s32 a, int b);
 
+// Name unproven.
+static inline f32 DriverOriginX(f32 offset, f32 origin) {
+    return origin + offset;
+}
+
 // Per-frame rider update for car state `car`: steering lean, seat frame, the body twist from yaw and roll,
 // the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
 // bent by speed and pitch) drawn at the car.
@@ -662,8 +667,7 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     cnt = 32;
     d->body = m;
     MulVec(&off, &d->butt, &d->body);
-    f32 x2 = off.x;
-    d->body.origin.x = x2 + d->body.origin.x;
+    d->body.origin.x = DriverOriginX(off.x, d->body.origin.x);
     d->body.origin.y = d->body.origin.y + off.y;
     d->body.origin.z = d->body.origin.z + off.z;
     f32 roll = -F32(car, 0x238);
