@@ -268,8 +268,13 @@ int fn_801CF828(PMesh* mesh, const PVec3* org, const PVec3* dir, f32* t, PVec3* 
 
 /* Helper names unproven: per-element byte swaps. */
 /* Helper names unproven: one byte-swap scratch owned by the caller (meshswap FixMeshHeaders shape) */
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
 static inline void SwapWordS(void* p, u8& t) { u8* b = (u8*)p; t = b[0]; b[0] = b[3]; b[3] = t; t = b[1]; b[1] = b[2]; b[2] = t; }
 static inline void SwapHalfS(void* p, u8& t) { u8* b = (u8*)p; t = b[0]; b[0] = b[1]; b[1] = t; }
+#else  // PORT: file data is already in host byte order (game/byteswap.h)
+static inline void SwapWordS(void*, u8&) {}
+static inline void SwapHalfS(void*, u8&) {}
+#endif
 static inline void SwapVec(PVec3* v, u8& sc) {
     SwapWordS(&v->x, sc);
     SwapWordS(&v->y, sc);
