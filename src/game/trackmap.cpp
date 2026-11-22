@@ -497,8 +497,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     f32 one = 1.0f;
     f32 zero = 0.0f;
     for (i = 0; i < 21; i++) {
-        Vec3 v;
         Vec3 c = lbl_803582C0[i];
+        Vec3 v;
         v.x = c.x * (half * radius);
         v.y = c.y * (half * radius);
         v.z = c.z * (half * radius);
