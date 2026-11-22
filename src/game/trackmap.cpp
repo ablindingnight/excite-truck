@@ -425,8 +425,8 @@ static inline void PrepareTruckIcons(TruckDraw* draw, int me, int view) {
     {
         Mtx34 m = *fn_801E8718(me);
         f32 rot = -Atan2F(m.m[1][2], m.m[2][0]);
-        for (i = 0; i < draw->count; i++) {
-            draw->icons[i].angle -= rot;
+        for (int heading = 0; heading < draw->count; heading++) {
+            draw->icons[heading].angle -= rot;
         }
     }
     draw->self = view;
