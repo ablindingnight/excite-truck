@@ -1315,7 +1315,7 @@ static inline void TargetLineAhead(u8* d, f32 ahead, V2* pos, f32* speed, f32* h
         if (height) {
             f32 ha = LerpRev(a.seg->next->height, a.seg->height, a.t);
             f32 hb = LerpRev(b.seg->next->height, b.seg->height, b.t);
-            *height = ha + ((at - F32(d, 0x1D0)) / 1.5f) * (hb - ha);
+            *height = ha + (AiRamp(at, F32(d, 0x1D0), 1.5f)) * (hb - ha);
         }
     } else if (height) {
         QueryLineHeight((LineFollower*)(d + 0x19C), ahead, pos, speed, height);
