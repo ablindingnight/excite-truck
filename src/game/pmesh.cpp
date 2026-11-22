@@ -302,12 +302,9 @@ void fn_801CFA48(PMesh* m) {
     for (i = 0; i < 6; i++) {
         SwapWordB((u8*)m + i * 4);
     }
-    u8* p = (u8*)(m + 1);
-    m->cells = (PCell*)p;
-    p += m->numCells * sizeof(PCell);
-    m->verts = (PVec3*)p;
-    p += m->numVerts * sizeof(PVec3);
-    m->tris = (PTri*)p;
+    m->cells = (PCell*)(m + 1);
+    m->verts = (PVec3*)(m->cells + m->numCells);
+    m->tris = (PTri*)(m->verts + m->numVerts);
     for (i = 0, off = 0; i < m->numCells; off += sizeof(m->cells[0]), i++) {
         SwapCell((PCell*)((u8*)m->cells + off));
     }
