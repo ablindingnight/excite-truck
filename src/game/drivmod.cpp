@@ -717,7 +717,8 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         pose[k].pos.x = xv + d->butt.x;
         f32 yv = pose[k].pos.y;
         pose[k].pos.y = yv + d->butt.y;
-        pose[k].pos.z = pose[k].pos.z + d->butt.z;
+        f32 zv = pose[k].pos.z;
+        pose[k].pos.z = zv + d->butt.z;
     }
     e1.z = 2.5f * -F32(car, 0x238) + Mul(F32(car, 0x3C), -0.17453292f);
     e1.y = F32(car, 0x3C) * 0.2617994f;
