@@ -1168,6 +1168,15 @@ static inline void Copy3(f32* d, const f32* s) {
     d[2] = s[2];
 }
 
+/* Helper name unproven */
+static inline int CameraEffectValueOf(const int& value) { return value; }
+/* Helper name unproven: the complete byte-effect mask calculation. */
+static inline int ComposeCameraEffects(int first, int shakey, int rumble, int blur) {
+    int s = shakey ? 2 : 0;
+    int r = rumble ? 4 : 0;
+    int b = blur ? 8 : 0;
+    return first | s | r | b;
+}
 int TvCamera::Load(ValueNode* t) {
     if (t->Has("x") && t->Has("y") && t->Has("z") && (t->Has("fov") || t->Has("new_fov")) && t->Has("type")) {
         pos[0] = t->GetFloat("x");
@@ -1182,14 +1191,11 @@ int TvCamera::Load(ValueNode* t) {
         ex[0] = t->GetFloat("ex_1", 0.0f);
         ex[1] = t->GetFloat("ex_2", 0.0f);
         ex[2] = t->GetFloat("ex_3", 1.0f);
-        u8 funky = t->GetBool("funky_fov", 0);
+        int funky = t->GetBool("funky_fov", 0);
         int shakey = t->GetBool("shakey", 0);
         int rumble = t->GetBool("rumble", 0);
         int blur = t->GetBool("focus_blur", 0);
-        int s = shakey ? 2 : 0;
-        int r = rumble ? 4 : 0;
-        int b = blur ? 8 : 0;
-        flags = funky | s | r | b;
+        flags = ComposeCameraEffects(CameraEffectValueOf(funky), shakey, rumble, blur);
         switch (type) {
         case 13:
             type = 1;
