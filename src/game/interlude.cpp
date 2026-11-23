@@ -1346,9 +1346,10 @@ void debug_event(void) {
                         Mat3 r;
                         Mat3FromEuler(&r, (const Vec3*)&euler);
                         Mat3Mul(&f.Mat(), &r, &f.Mat());
-                        f.origin.x += f.basis[0].x * off.x;
-                        f.origin.y += f.basis[0].y * off.x;
-                        f.origin.z += f.basis[0].z * off.x;
+                        f32 ox = off.x;
+                        f.origin.x += f.basis[0].x * ox;
+                        f.origin.y += f.basis[0].y * ox;
+                        f.origin.z += f.basis[0].z * ox;
                         f.origin.x += Mul(f.basis[2].x, off.y);
                         f.origin.y += f.basis[2].y * off.y;
                         f.origin.z += f.basis[2].z * off.y;
