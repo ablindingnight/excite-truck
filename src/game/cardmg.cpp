@@ -777,6 +777,8 @@ static inline void BreakAtBox(u8* p, DamagePart* t) {
 }
 
 // Pushes every dent goal near c0 back along nd by up to `moved` (helper name unproven).
+/* Helper name unproven: passes the push distance as an inline value (late-numbered temporary, like physcam CameraEffectValueOf). */
+static inline f32 MovedValueOf(const f32& v) { return v; }
 static inline void PushGoals(u8* p, DentVec& nd, DentVec& c0, f32 moved) {
     DentVec r;
     DentVec w;
@@ -935,7 +937,7 @@ void fn_8018E3EC(u8* p, const AVec* imp, const AVec* at, int flip, s32 other, in
         c0.x = best->pos.x + gb->x;
         c0.y = best->pos.y + gb->y;
         c0.z = best->pos.z + gb->z;
-        PushGoals(p, nd, c0, moved);
+        PushGoals(p, nd, c0, MovedValueOf(moved));
         sl = (CbJoint*)(p + 0x152C);
         t = lbl_80332840;
         for (int i = 0; i < 17; i++) {
