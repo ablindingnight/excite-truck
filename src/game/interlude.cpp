@@ -1173,6 +1173,18 @@ static inline f32 InterludeYaw(f32 x, f32 z) { return (f32)atan2(x, z); }
 
 // The interlude player, once per frame: runs every event whose time has come, in order. A wait (cars to
 // cross a point) or a fade still running holds the queue and pauses the clock.
+/* Helper type/name unproven: one complete existing rotation row, with no extra storage. */
+struct CameraRotationRow {
+    ValVec3 value;
+};
+
+/* Helper name unproven: copy the three actual camera rotation row records. */
+static inline void CopyCameraEventRotation(CamPlay* p, const CamEvent* c) {
+    for (int row = 0; row < 3; row++) {
+        ((CameraRotationRow*)&p->rot)[row] = ((const CameraRotationRow*)&c->rot)[row];
+    }
+}
+
 void debug_event(void) {
     if (lbl_8055E7E1) {
         fn_801769E0();
@@ -1254,7 +1266,7 @@ void debug_event(void) {
             p->origin.x = c->origin.x;
             p->origin.y = c->origin.y;
             p->origin.z = c->origin.z;
-            *(MatRows*)&p->rot = *(const MatRows*)&c->rot;
+            CopyCameraEventRotation(p, c);
             p->v.x = c->v.x;
             p->v.y = c->v.y;
             p->v.z = c->v.z;
