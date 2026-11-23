@@ -1197,8 +1197,6 @@ void debug_event(void) {
         lbl_8055E7E8 = fn_801E8838() != 0;
     }
     CarPlace place;
-    Message* msg;
-    u8* s;
     CarPlace* pl;
     int blocked = 0;
     if (lbl_8055E7FC && lbl_8055E800 > 4 && !fn_80202B00()) {
@@ -1209,8 +1207,6 @@ void debug_event(void) {
         lbl_8055E7E4 = -lbl_8055E3C8;
     }
     pl = &place;
-    s = (u8*)&lbl_80437D88;
-    msg = (Message*)&lbl_80437E24;
     while (!blocked && lbl_8055E7F4 < lbl_8055E7F0) {
         InterludeEvent* e = &lbl_8055E7F8[lbl_8055E7F4];
         if (!(t >= e->time)) {
@@ -1252,7 +1248,7 @@ void debug_event(void) {
         }
         case 1: {
             CamEvent* c = (CamEvent*)e;
-            CamPlay* p = (CamPlay*)s;
+            CamPlay* p = &lbl_80437D88.play;
             p->start = c->time;
             p->end = c->end;
             p->origin.x = c->origin.x;
@@ -1399,8 +1395,8 @@ void debug_event(void) {
         case 7: {
             TextEvent* tx = (TextEvent*)e;
             lbl_80437E24.title = tx->text;
-            msg->text = tx->title;
-            msg->time = lbl_8055E3C8;
+            lbl_80437E24.text = tx->title;
+            lbl_80437E24.time = lbl_8055E3C8;
             break;
         }
         default:
