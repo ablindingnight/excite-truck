@@ -139,6 +139,15 @@ s32 fn_802168E4(void);
 void fn_80214A9C(s32 s);
 void fn_80214AF0(s32 s);
 
+/* Helper name unproven: read the existing saved choice without copying it. */
+static inline void ConfigureRecordChoice(RecordIcon* icon, const VehicleChoice& c) {
+    int color = c.color;
+    icon->valid = c.flag;
+    VehicleInfo* v = GetVehicle(c.vehicle);
+    icon->icon = FindIcon(icon->icons, v->chassis);
+    icon->color = v->colors[color];
+}
+
 // Whether a record row shows its car icon. MWCC: an enum-typed local that holds a constant is not propagated
 // by the front end, so it stays a variable and the back end gives it its own `li` (literals share one register:
 // FACTS 2026-11-17 G5 run 3). Retail loads a fresh zero for the five stores below. Names unproven.
@@ -183,11 +192,7 @@ void fn_8025C204(int event, int difficulty) {
             time = hs->time;
             icons[i].visible = 1;
             VehicleChoice c = StatsUnpackChoice(hs->choice);
-            int color = c.color;
-            icons[i].valid = c.flag;
-            VehicleInfo* v = GetVehicle(c.vehicle);
-            icons[i].icon = FindIcon(icons[i].icons, v->chassis);
-            icons[i].color = v->colors[color];
+            ConfigureRecordChoice(&icons[i], c);
         }
         fn_80130980(rows[i].time, 20, 3, time);
     }
