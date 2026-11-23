@@ -558,9 +558,10 @@ static inline f32 BinLerpA(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // PROVISIONAL: original circle-bin helper API/input and output ownership is unproven.
 static inline void FinishCircleBins(f32 lowerFraction, f32 expandedRight, int& lo, int& hi) {
     lo = BinLerpA(0.0f, 64.0f, lowerFraction);
-    f32 upperFraction = (expandedRight - -kWidth.value / 2.0f) /
-                        (kWidth.value / 2.0f - -kWidth.value / 2.0f);
-    CLAMP01(upperFraction);
+    f32 upperFraction = MIN(kFullFraction.value,
+                            (expandedRight - -kWidth.value / 2.0f) /
+                            (kWidth.value / 2.0f - -kWidth.value / 2.0f));
+    upperFraction = MAX(upperFraction, 0.0f);
     hi = BinLerpA(0.0f, 64.0f, upperFraction);
 }
 struct Bins {
