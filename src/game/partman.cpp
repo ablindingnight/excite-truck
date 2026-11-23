@@ -982,8 +982,8 @@ void PartSys::DrawAnimated(Particle* p, int n) {
 
 
 // Name unproven.
-static inline f32 ParticleLighting(f32 y, const f32& originY, f32 inv, f32 shade) {
-    return 255.0f * (1.0f - shade * (1.0f - inv * (y - originY)));
+static inline f32 ParticleLightFraction(f32 y, const f32& originY, f32 inv, f32 shade) {
+    return 1.0f - shade * (1.0f - inv * (y - originY));
 }
 
 void PartSys::DrawRotating(Particle* p, int n) {
@@ -1037,7 +1037,7 @@ void PartSys::DrawRotating(Particle* p, int n) {
         q[3].u = 0.0f;
         PVtx* v = q;
         for (int k = 0; k < 4; k++, v++) {
-            f32 lit = ParticleLighting(v->pos.y, pos.y, inv, shade);
+            f32 lit = 255.0f * ParticleLightFraction(v->pos.y, pos.y, inv, shade);
             u8 al = Byte(p->size * (fade * (255.0f * (alphaConst + alphaRamp * t))));
             u8 r = Byte(lit * (redConst + redRamp * t));
             u8 g = Byte(lit * (greenConst + greenRamp * t));
