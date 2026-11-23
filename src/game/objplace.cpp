@@ -404,12 +404,17 @@ void fn_802B224C(ValueNode* node) {
 
 }  // extern "C"
 
+/* Helper name unproven: initialize the actual placer's complete order table. */
+static inline void InitializePlacerOrder(MatPlacer* placer) {
+    for (int k = 0; k < ARRAY_SIZE(placer->order); k++) {
+        placer->order[k] = k;
+    }
+}
+
 MatPlacer::MatPlacer(ValueNode* node, int i) {
     clumpy = 0;
     wasClumpy = 0;
-    for (int k = 0; k < ARRAY_SIZE(order); k++) {
-        order[k] = k;
-    }
+    InitializePlacerOrder(this);
     Shuffle(order, 128);
     clumpy = wasClumpy = node->GetBool("clumpy", 1);
     int k;
