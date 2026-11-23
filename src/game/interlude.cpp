@@ -1196,6 +1196,7 @@ void debug_event(void) {
     if (lbl_8055E7E8) {
         lbl_8055E7E8 = fn_801E8838() != 0;
     }
+    CarPlace place;
     Message* msg;
     u8* s;
     CarPlace* pl;
@@ -1207,6 +1208,7 @@ void debug_event(void) {
     if (lbl_8055E7FC) {
         lbl_8055E7E4 = -lbl_8055E3C8;
     }
+    pl = &place;
     s = (u8*)&lbl_80437D88;
     msg = (Message*)&lbl_80437E24;
     while (!blocked && lbl_8055E7F4 < lbl_8055E7F0) {
@@ -1318,9 +1320,7 @@ void debug_event(void) {
                 if (!car) {
                     break;
                 }
-                CarPlace place;
                 ResetPlace(&place);
-                pl = &place;
                 switch (tp->where) {
                 case 1:
                     fn_801C3A3C(pl, tp->pt.x + (f32)k * tp->pt.y, tp->yaw);
