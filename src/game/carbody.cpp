@@ -1312,9 +1312,11 @@ static inline CbSolVec CbSolVec4(f32 x, f32 y, f32 z, f32 w) {
 // CbV3: rvec.h's RVec3.
 // The game-side 4-vector: built from a solver record through its xyz and w, written back through a temporary.
 /* Helper names unproven (RVec3, CbF, CbVec4, Set, Sol, CbFrame): the shapes come from the target copies (2026-11-08), the names are guesses. CbF (a one-float value passed by value) gives retail's float store + word copy of the w lane (2026-11-14). */
-struct CbF {
-    CbF(f32 a) { v = a; }
+struct CbFPlain {
     f32 v;
+};
+struct CbF : CbFPlain {
+    CbF(f32 a) { v = a; }
 };
 
 struct CbVec4 {
@@ -2305,15 +2307,8 @@ static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
 /* Helper name unproven: one solver vector from three floats. */
 static inline void SolSet(CbSolVec* d, f32 x, f32 y, f32 z) { *d = CbSolVec4(x, y, z); }
 
-/* Type and helper names unproven: one float with a plain base, read back through the base by value (retail's
-   float store + word copy at the wheel's compression lane). */
-struct CbLanePlain {
-    f32 v;
-};
-struct CbLane : CbLanePlain {
-    CbLane(f32 x) { v = x; }
-};
-static inline f32 LaneOf(CbLanePlain p) { return p.v; }
+/* Helper name unproven: a lane read back through CbF's plain base by value (retail's float store + word copy). */
+static inline f32 LaneOf(CbFPlain p) { return p.v; }
 
 void fn_80186DE8(void) {
     CbSolMass* mass;
@@ -2604,7 +2599,7 @@ void fn_80186DE8(void) {
             w->plane.nFwd = pl[1];
             bool gr = nrm[1] > 0.01f;
             w->grounded = gr;
-            f32 comp = LaneOf(CbLane(c->pts[5 + j].w));
+            f32 comp = LaneOf(CbF(c->pts[5 + j].w));
             if (comp > 20000.0f) {
                 SolSet(&c->pts[5 + j], 0.0f, 0.0f, 0.0f);
                 CbVec4 half = CbVec4(c->v30);
