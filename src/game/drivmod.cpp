@@ -179,13 +179,8 @@ static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t
         (&out->x)[j] += (&a.x)[j];
     }
 }
-// Componentwise sums (names unproven). retail's hip/knee block mixes the pointer-loop form (rhip) with the
-// lanes-into-locals form; which vectors use which is fitted, not proven.
-static inline void AddV(ValVec3* out, const ValVec3& a, const ValVec3& b) {
-    for (int j = 2; j >= 0; j--) {
-        (&out->x)[j] = (&a.x)[j] + (&b.x)[j];
-    }
-}
+// Componentwise sums (names unproven). All four hip/knee vectors use AddVL, so every sum reads the rounded
+// d->butt copy as in retail.
 static inline void AddVL(ValVec3* out, const ValVec3& a, const ValVec3& b) {
     f32 x = a.x + b.x;
     f32 y = a.y + b.y;
@@ -239,11 +234,11 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     AddVL(&lhip, bones[7].m.origin, d->butt);
     ValVec3 lknee;
     AddVL(&lknee, bones[8].m.origin, d->butt);
-    // Retail keeps this store although lfoot is overwritten by m1 below: rhip's AddV loop stores through an indexed
-    // pointer right after it (an indirect kill), so the def is not removed. 472 instrs and retail's mnemonic mix.
+    // Retail keeps this store although lfoot is overwritten by m1 below: the AddVL stores through `out` that follow
+    // it keep the def alive. 472 instrs and retail's mnemonic mix.
     lfoot = bones[9].m.origin;
     ValVec3 rhip;
-    AddV(&rhip, bones[4].m.origin, d->butt);
+    AddVL(&rhip, bones[4].m.origin, d->butt);
     ValVec3 rknee;
     AddVL(&rknee, bones[5].m.origin, d->butt);
     ValVec3 pelvis;
