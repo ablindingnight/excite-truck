@@ -2299,6 +2299,11 @@ void FlatSphereShape::vf10(u8* o) {
 
 void FlatSphereShape::vf14(void) {}
 
+// Name unproven.
+static inline void SetAttachedSphereY(f32* out, f32 relativeY, f32 radius, f32 attachmentHeight) {
+    *out = relativeY + (0.06f + radius + attachmentHeight);
+}
+
 // Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
 void AttachedSphereShape::vf0C(void) {
     u8* p = (u8*)this;
@@ -2310,8 +2315,8 @@ void AttachedSphereShape::vf0C(void) {
     t.v[1] = t.v[1] - F32(o, 0x34);
     t.v[2] = t.v[2] - F32(o, 0x38);
     // Apply the sphere's actual lateral offset and attachment lift.
+    SetAttachedSphereY(&t.v[1], t.v[1], this->radius, F32(m, 0xC));
     t.v[0] = t.v[0] + this->f58;
-    t.v[1] = t.v[1] + (0.06f + this->radius + F32(m, 0xC));
     this->center.Set(t.v[0], t.v[1], t.v[2]);
     if (o) {
         fn_8019EECC(o, (RVec3*)&this->center);
