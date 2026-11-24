@@ -724,8 +724,8 @@ void fn_8026C014(int player) {
         u32 last = lbl_8055F514;
         f32 dt;
         f32 fovRate;
-        f32 speed;
         f32 turn;
+        f32 speed;
         f32 hi;
         f32 lo;
         f32 t;
@@ -734,18 +734,19 @@ void fn_8026C014(int player) {
         f32 lift;
         lbl_8055F514 = now;
         dt = CAM_MAX(0.001f * (f32)(now - last), 0.1f);
-        turn = dt * 0.5235988f;
+        turn = dt;
+        turn *= 0.5235988f;
         speed = 0.25f * (10.0f * dt);
         fovRate = Mul(dt, 0.034906585f);
-        lo = 0.2617994f;
         hi = 2.443461f;
+        lo = 0.2617994f;
         t = CamUnit(pad.y3, -1.0f, 1.0f);
         t = CamBlend(t, 5.0f);
         boost = 1.0f;
         if (pad.keys[6]) {
             boost = 4.0f;
         }
-        speed = speed * (boost * t);
+        speed *= boost * t;
         roll = 0.0f;
         if (pad.w40 & 8) {
             roll = speed;
