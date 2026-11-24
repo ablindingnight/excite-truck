@@ -246,8 +246,8 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     f32 bz = ((PlainValMatrix*)butt)->basis[1].z;
     d->yaw = atan2(bz, by);
     d->butt.x = SubF(d->butt.x, bones[0].m.origin.x);
-    d->butt.y = SubF(d->butt.y, bones[0].m.origin.y);
-    d->butt.z = SubF(d->butt.z, bones[0].m.origin.z);
+    d->butt.y = d->butt.y - bones[0].m.origin.y;
+    d->butt.z = d->butt.z - bones[0].m.origin.z;
     // Retail keeps this store although lfoot is overwritten by m1 below: the AddVL stores through `out` that follow
     // it keep the def alive. 472 instrs and retail's mnemonic mix.
     lfoot = bones[9].m.origin;
