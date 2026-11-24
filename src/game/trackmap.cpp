@@ -655,8 +655,9 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         fade = Ease(1.0f - PSVECDotProduct((const Vec*)&rel, (const Vec*)&rel) / ((w / 2.0f) * (w / 2.0f)));
         d = map->trucks;
         {
+            f32 px;
             f32 py = rel.y + (y - h / 2.0f);
-            f32 px = rel.x + (x + w / 2.0f);
+            px = rel.x + (x + w / 2.0f);
             part = truck == d->self ? 1 : 3;
             f32 size = fade * fn_80235EF0(d->art, part);
             fn_80235AFC(d->art, part, -1, px, py, 0.0f, size, size, d->icons[truck].angle);
