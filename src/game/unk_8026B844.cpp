@@ -510,6 +510,8 @@ struct Rate4 {
 static const Rate4 mr0 = {{1.0f, 0.1f, 10.0f, 0.01f}};
 static const Rate4 tr0 = {{0.05f, 0.0125f, 0.15f, 0.0025f}};
 
+static inline f32 MidF(f32 a, f32 b) { return a + 0.5f * (b - a); }  // name unproven
+
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
@@ -850,15 +852,10 @@ void fn_8026C014(int player) {
                 } else {
                     CamIdentity(&tgt.rot);
                 }
-                f32 deltaz = car->frame.pos.z - lbl_8049A168.pos.z;
-                f32 deltay = car->frame.pos.y - lbl_8049A168.pos.y;
-                f32 deltax = car->frame.pos.x - lbl_8049A168.pos.x;
-                tgt.pos.z = lbl_8049A168.pos.z + 0.5f * deltaz;
-                tgt.pos.y = lbl_8049A168.pos.y + 0.5f * deltay;
-                tgt.pos.x = lbl_8049A168.pos.x + 0.5f * deltax;
-                p.x = tgt.pos.x;
-                p.y = tgt.pos.y;
-                p.z = tgt.pos.z;
+                CamSet(&p, MidF(lbl_8049A168.pos.x, car->frame.pos.x), MidF(lbl_8049A168.pos.y, car->frame.pos.y), MidF(lbl_8049A168.pos.z, car->frame.pos.z));
+                tgt.pos.x = p.x;
+                tgt.pos.y = p.y;
+                tgt.pos.z = p.z;
                 QuatCopy(&lbl_8049A168.rot, &qs);
                 CamCopy(&lbl_8049A168.pos, &p);
             } else {
