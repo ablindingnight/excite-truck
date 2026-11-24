@@ -842,8 +842,8 @@ struct ScoreTally {
 
     // The current value, at most the target.
     s32 Value(void) const {
-        s32 v = (s32)((f32)from + acc);
         s32 m = to;
+        s32 v = (s32)((f32)from + acc);
         return v < m ? v : m;
     }
 };
@@ -1760,6 +1760,28 @@ void ShowEventUnlockedMessage(const char* title, const char* msg);
 // unlockables whose points the count passes pop up as it goes.
 }  // extern "C"
 
+// Pops up every unlockable the count passed (name unproven).
+static inline void ShowPassedUnlocks(ScoreTally* t, s32 lo) {
+    s32 hi = t->Value();
+    if (t->unlocks) {
+        for (int i = 0; i < GetUnlockableCount(); i++) {
+            Unlockable* u = GetUnlockable(i);
+            if (lo < u->points && hi >= u->points) {
+                char title[20];
+                char msg[200];
+                if (!strcasecmp(u->type, "CAR")) {
+                    CopyName(20, title, fn_80131234("EventPath:UNLOCK_TITLE"));
+                    CopyName(200, msg, u->name);
+                } else if (!strcasecmp(u->type, "RANK")) {
+                    CopyName(20, title, fn_80131234("EventPath:RANK_UP_TITLE"));
+                    CopyName(200, msg, u->name);
+                }
+                ShowEventUnlockedMessage(title, msg);
+            }
+        }
+    }
+}
+
 inline void ScoreAccumulator::Update(void) {
     ScoreTally* t = tally;
     if (!t) {
@@ -1795,24 +1817,7 @@ inline void ScoreAccumulator::Update(void) {
         s32 lo = t->Value();
         if (lo < t->to) {
             t->acc += t->rate * dt;
-            s32 hi = t->Value();
-            if (t->unlocks) {
-                for (int i = 0; i < GetUnlockableCount(); i++) {
-                    Unlockable* u = GetUnlockable(i);
-                    if (lo < u->points && hi >= u->points) {
-                        char title[20];
-                        char msg[200];
-                        if (!strcasecmp(u->type, "CAR")) {
-                            CopyName(20, title, fn_80131234("EventPath:UNLOCK_TITLE"));
-                            CopyName(200, msg, u->name);
-                        } else if (!strcasecmp(u->type, "RANK")) {
-                            CopyName(20, title, fn_80131234("EventPath:RANK_UP_TITLE"));
-                            CopyName(200, msg, u->name);
-                        }
-                        ShowEventUnlockedMessage(title, msg);
-                    }
-                }
-            }
+            ShowPassedUnlocks(t, lo);
         }
     }
 }
