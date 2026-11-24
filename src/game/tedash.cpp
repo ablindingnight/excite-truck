@@ -678,13 +678,22 @@ s32 lbl_8055CEA0 = 1;  // brush scale (.sdata: defined after the brush-list stri
 // PROVISIONAL: coordinate/corner record, scalarization and quotient/remainder ownership/order are inferred; source origin is unproven.
 struct BrushCellValues { u32 bi; u32 bj; u32 ri; u32 rj; u8 a; };
 
+// PROVISIONAL: equivalent retail-enabled representation of the existing second policy query.
+// Helper/type names and original predicates are unproven. Both existing policy sites remain always-retail.
+struct BrushRetailPolicy {
+    bool enabled;
+    BrushRetailPolicy(bool value) : enabled(value) {}
+    bool Enabled() const { return enabled; }
+};
+static inline BrushRetailPolicy BrushRetailEnabled() { return BrushRetailPolicy(true); }
+
 void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     if (b->w == 0) {
         return;
     }
+    u32 height;
     s16 signedZ;
     int maskZ;
-    u32 height;
     // PROVISIONAL: spacing and coordinate temporary ownership is inferred; pooled divisor identity is retail-verified.
     f32 spacing;
     f32 coordinateX = pos->x;
@@ -697,15 +706,14 @@ void fn_802B6F34(V3* pos, Brush* b, void (*cb)(s16, s16, int)) {
     signedZ = (s16)roundedZ;
     s16 cz;
     if (BuildMode() == kBuildRetail) {
-        s32 scale = lbl_8055CEA0;
+        const s32 scale = lbl_8055CEA0;
         u32 width = b->w;
         height = b->h;
         u32 nw = scale * width;
-        if (BuildMode() == kBuildRetail) {
+        if (BrushRetailEnabled().Enabled()) {
             int mode = lbl_8055FA38;
-            // PROVISIONAL: scaled-height accumulator ownership is inferred.
-            u32 nh = height;
-            nh *= scale;
+            // PROVISIONAL: scaled-height input/result ownership is inferred.
+            u32 nh = scale * height;
             int alignedZ = signedZ & ~maskZ;
             cz = (s16)alignedZ;
             if (mode == 5) {
