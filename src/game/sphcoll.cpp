@@ -1228,7 +1228,8 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RVec3 o;
     f32 d2;
     if (!off) {
-        d2 = PSVECSquareDistance((const Vec*)(p + 0x34), (const Vec*)(VE(q)->v50() + 0x24));
+        const Vec* t = (const Vec*)(VE(q)->v50() + 0x24);
+        d2 = PSVECSquareDistance((const Vec*)(p + 0x34), t);
     } else {
         RMtx* m = (RMtx*)VE(q)->v50();
         MulVec(&w, off, m);
@@ -1237,7 +1238,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
         w.z = w.z + m->pos.z;
         d2 = PSVECSquareDistance((const Vec*)(p + 0x34), (const Vec*)&w);
     }
-    f32 rr = F32(p, 0x24) + F32(q, 0x30);
+    f32 rr = LoadF((f32*)(q + 0x30)) + LoadF((f32*)(p + 0x24));
     if (d2 > rr * rr) {
         return 0;
     }
@@ -1310,7 +1311,7 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     }
     f32 comp = 0.2f + (-len + LoadF((f32*)((u8*)(p) + 0x24)));
     f32 fq = 0.0f;
-    if (fq < comp) {
+    if (comp > fq) {
         f32 fp = fq;
         f32 k = -1.0f / len;
         n.x = d.x * k;
