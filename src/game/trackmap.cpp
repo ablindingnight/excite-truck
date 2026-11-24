@@ -581,10 +581,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         v.z = c.z * (half * radius);
         MulVec(&v, &v, &basis);
         v.x += basis.pos.x;
-        f32 y2 = basis.pos.y;
-        v.y += y2;
-        f32 zv = basis.pos.z;
-        v.z += zv;
+        v.y += basis.pos.y;
+        v.z += basis.pos.z;
         fn_80231380(&verts[i], color, x + w * (1.0f + half * c.x) * half, y + h * (half * c.y - 1.0f) * half,
                     zero, half + scale / 2.0f * v.x + map->origin.x / map->texSize,
                     MapTextureV(1.0f, half, scale, v.y, map->origin.y, map->texSize));
