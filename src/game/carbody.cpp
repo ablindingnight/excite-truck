@@ -2302,6 +2302,18 @@ static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
     return 0.55181247f * (-forward * mass) * amount;
 }
 
+/* Helper name unproven: the car's frame and velocities into its solver record. */
+static inline void SolveIn(CbSolMass* m, u8* car) {
+    m->pos = CbSolVec4(((CarBody*)car)->mtx.pos.x, ((CarBody*)car)->mtx.pos.y, ((CarBody*)car)->mtx.pos.z);
+    m->vel = CbSolVec4(((CarBody*)car)->vel.x, ((CarBody*)car)->vel.y, ((CarBody*)car)->vel.z);
+    m->avel = CbSolVec4(((CarBody*)car)->avel.x, ((CarBody*)car)->avel.y, ((CarBody*)car)->avel.z);
+}
+/* Helper name unproven: the summed loads into the solver record. */
+static inline void SolveLoads(CbSolMass* m, const RVec3& F, const RVec3& T) {
+    m->force = CbSolVec4(F.x, F.y, F.z);
+    m->torque = CbSolVec4(T.x, T.y, T.z);
+}
+
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2347,15 +2359,12 @@ void fn_80186DE8(void) {
         F.y += f.y;
         F.z += f.z;
         T = RVec3(CbAdd(m->torque.x, t.x), m->torque.y + t.y, m->torque.z + t.z);
-        m->force = CbSolVec4(F.x, F.y, F.z);
-        m->torque = CbSolVec4(T.x, T.y, T.z);
+        SolveLoads(m, F, T);
         if (PSVECDotProduct((const Vec*)(car + 0x124), (const Vec*)(car + 0x124)) > 100.0f) {
             PSVECNormalize((const Vec*)(car + 0x124), (Vec*)(car + 0x124));
             CbScaleTo(&((CarBody*)car)->avel.x, &((CarBody*)car)->avel.x, 10.0f);
         }
-        m->pos = CbSolVec4(((CarBody*)car)->mtx.pos.x, ((CarBody*)car)->mtx.pos.y, ((CarBody*)car)->mtx.pos.z);
-        m->vel = CbSolVec4(((CarBody*)car)->vel.x, ((CarBody*)car)->vel.y, ((CarBody*)car)->vel.z);
-        m->avel = CbSolVec4(((CarBody*)car)->avel.x, ((CarBody*)car)->avel.y, ((CarBody*)car)->avel.z);
+        SolveIn(m, car);
     }
     fn_801BEDD4();
     for (i = 0; i < n; i++) {
