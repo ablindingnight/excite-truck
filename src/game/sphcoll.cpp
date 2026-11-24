@@ -3576,6 +3576,13 @@ PolyShape::PolyShape(const RMtx* id, const char* name, f32 s0, f32 s1) : CollSha
 }
 
 // Axis-aligned bounds of the extents (0x24 min, 0x30 max) through the frame, padded by 1.5 in x and z.
+// Helper name/boundary unproven: translate one complete rotated point.
+static inline void TranslatePolyPointInputs(RVec3* out, const RMtx* frame, f32 x, f32 y, f32 z) {
+    out->x = x + frame->pos.x;
+    out->y = y + frame->pos.y;
+    out->z = z + frame->pos.z;
+}
+
 void PolyShape::vf38(RVec3* lo, RVec3* hi) const {
     u8* p = (u8*)this;
     RVec3 b;
@@ -3587,12 +3594,20 @@ void PolyShape::vf38(RVec3* lo, RVec3* hi) const {
     a.z = a.z + f->pos.z;
     RMtx* g = (RMtx*)PTR(p, 0xC);
     MulVec(&b, (RVec3*)(p + 0x30), g);
-    f32 lx = a.x;
-    b.x = b.x + g->pos.x;
-    b.y = b.y + g->pos.y;
-    b.z = b.z + g->pos.z;
-    *hi = a;
-    *lo = *hi;
+    f32 firstX = LoadF(&a.x);
+    TranslatePolyPointInputs(&b, g, LoadF(&b.x), LoadF(&b.y), LoadF(&b.z));
+    // Unproven spelling: walk the two required endpoint copies.
+    RVec3* output = hi;
+    const RVec3* endpoint = &a;
+    int remaining = 2;
+    while (remaining--) {
+        output->x = firstX;
+        output->y = endpoint->y;
+        output->z = endpoint->z;
+        endpoint = output;
+        output = lo;
+    }
+    f32 lx = lo->x;
     lo->x = lx < b.x ? lx : b.x;
     lo->y = lo->y < b.y ? lo->y : b.y;
     lo->z = lo->z < b.z ? lo->z : b.z;
