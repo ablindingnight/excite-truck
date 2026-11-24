@@ -2368,7 +2368,6 @@ void fn_80186DE8(void) {
         f32 air;
         u8* car;
         int off;
-        x = &cross[i];
         car = lbl_804348E8[i];
         SurfType* st;
         m = &mass[i];
@@ -2384,6 +2383,7 @@ void fn_80186DE8(void) {
         int landing;
         int wet2;
         f32 cut;
+        x = &cross[i];
         e = &cx[i];
         CbVec4 grip4 = CbVec4(x->vB0);
         air = 1.0f - ((CarBody*)car)->speed;
