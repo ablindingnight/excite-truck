@@ -740,8 +740,9 @@ WaterSystem::WaterSystem(void) {
             // The row indices are written as expressions, not named locals: IRO only strength-reduces
             // `invariant + iv` into its own induction variable when the invariant side is an expression.
             // Post-increment stores keep the loop under IRO's unroll weight limit (the indexed form needed
-            // opt_unroll_instr_count 104 for the same x5 unroll).
-            int a1 = r * 16 + (c + 1);
+            // opt_unroll_instr_count 104 for the same x5 unroll). a1 is unsigned: IRO then does not merge copy 0's a + 1
+            // with copy 1's index, which gives the target's shared add plus an in-place incremented copy.
+            u32 a1 = r * 16 + (c + 1);
             *p++ = r * 16 + c;
             *p++ = a1;
             *p++ = (r + 1) * 16 + c;
