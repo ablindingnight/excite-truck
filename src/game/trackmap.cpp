@@ -438,14 +438,11 @@ static inline void PrepareTruckIcons(TruckDraw* draw, int me, int view) {
 
 // Name unproven: render the actual placed-marker operation.
 static inline void DrawPlacedMarkers(Basis* basis, f32 x, f32 y, f32 w, f32 h, f32 radius) {
-    f32 cy;
-    f32 cx = x + w / 2.0f;
-    cy = y - h / 2.0f;
     unsigned int j;
     for (j = 0; j < sizeof(lbl_803583C8) / sizeof(lbl_803583C8[0]); j++) {
         Vec2 c;
-        c.x = cx;
-        c.y = cy;
+        c.x = x + w / 2.0f;
+        c.y = y - h / 2.0f;
         if (lbl_803583C8[j].active) {
             Vec3 rel;
             f32 size;
