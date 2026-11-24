@@ -2371,13 +2371,16 @@ struct BoxSlip {
     RVec3 slip[8];  // offset 0x64
 };
 
+// The volume's owning body through a getter: its value is a late temporary, not a named local (vf14 registers).
+static inline RigidBody* BodyOf(CollShape* s) { return (RigidBody*)s->owner; }  // name unproven
+
 // Box (half extents at 0x58) on the ground: each of the eight corners below the track height gets a spring
 // impulse, clamped friction (with its own slip accumulator at 0x64) and the bounce event. In water (surface 7)
 // the box floats instead: buoyancy from the submerged depth on a bobbing water line, and drag.
 #pragma push
 #pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 void BoxSphereShape::vf14(void) {
-    RigidBody* rb = (RigidBody*)owner;
+    RigidBody* rb = BodyOf(this);
     int i;
     RVec3 at;
     RVec3 pos;
