@@ -1211,7 +1211,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0DA0.x = ValueOf(V1C10.x + V0DB0.x);
             V0DA0.y = V1C10.y + V0DB0.y;
             V0DA0.z = V1C10.z + V0DB0.z;
-            VADD(V0D90, V0DC0, V0DA0);
+            Vec4f V0D90;
+            V0D90.x = V0DC0.x + V0DA0.x;
+            f32 sy = V0DC0.y + V0DA0.y;
+            V0D90.y = ValueOf(sy);
+            V0D90.z = V0DC0.z + V0DA0.z;
             Vec4f V0D80(V0D90);
             VLOAD(V0D70, *rowA6);
             Vec4f V0D60(V0D70);
