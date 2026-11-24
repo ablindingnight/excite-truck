@@ -2313,7 +2313,7 @@ extern "C" {
 
 // Name unproven.
 static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
-    return 0.55181247f * (-forward * mass) * amount;
+    return Mul(0.55181247f * (-forward * mass), amount);
 }
 
 /* Helper name unproven: one solver vector from three floats. */
@@ -2371,7 +2371,7 @@ void fn_80186DE8(void) {
             t.z = 0.0f;
         }
         F = *(const RVec3*)&m->force;
-        RVec3 T(CbAdd(m->torque.x, t.x), m->torque.y + t.y, m->torque.z + t.z);
+        RVec3 T(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
         F.x += f.x;
         F.y += f.y;
         F.z += f.z;
@@ -2531,10 +2531,10 @@ void fn_80186DE8(void) {
             a = F32(car, wh * 0x74 + 0x23B4);
             f32 s1[4] = {0};
             f32 s0[4] = {0};
-            s1[wh] = (a - 6.2831855f) * ((a - 3.1415927f) * (0.09829f * a)) * 0.08726646f;
+            s1[wh] = Mul((a - 6.2831855f) * ((a - 3.1415927f) * (0.09829f * a)), 0.08726646f);
             b = fmod(1.5707964f + a, 6.2831854820251465);
+            s0[wh] = Mul(-((b - 6.2831855f) * (b - 3.1415927f) * (0.09829f * b)), 0.08726646f);
             x->v130 = CbSolVec4(s1[0], s1[1], s1[2], s1[3]);
-            s0[wh] = -((b - 6.2831855f) * (b - 3.1415927f) * (0.09829f * b)) * 0.08726646f;
             x->v140 = CbSolVec4(s0[0], s0[1], s0[2], s0[3]);
         }
         player = U32(car, 0x10) == 'PCAR' && ((*(CbFlagsV**)(car + 0x270C))->Flags() & 0x20);
@@ -2553,14 +2553,14 @@ void fn_80186DE8(void) {
         int boosting;
         f32 vmax;
         f32 out;
-        f32 ax = CbAdd(59.94f * vel.x, ((CarBody*)car)->vel.x * -59.94f);
+        f32 ax = 59.94f * vel.x + ((CarBody*)car)->vel.x * -59.94f;
         ((CarBody*)car)->accel.x = ax;
         f32 ay = CbAdd(vel.y * 59.94f, ((CarBody*)car)->vel.y * -59.94f);
         ((CarBody*)car)->accel.y = ay;
         ((CarBody*)car)->accel.z = CbAdd(vel.z * 59.94f, ((CarBody*)car)->vel.z * -59.94f);
         ((CarBody*)car)->aaccel.x = CbAdd(Mul(avel.x, 59.94f), ((CarBody*)car)->avel.x * -59.94f);
         ((CarBody*)car)->aaccel.y = CbAdd(Mul2(avel.y, 59.94f), ((CarBody*)car)->avel.y * -59.94f);
-        ((CarBody*)car)->aaccel.z = CbAdd(Mul(avel.z, 59.94f), ((CarBody*)car)->avel.z * -59.94f);
+        ((CarBody*)car)->aaccel.z = CbAdd((avel.z * 59.94f), ((CarBody*)car)->avel.z * -59.94f);
         ((CarBody*)car)->vel.x = vel.x;
         ((CarBody*)car)->vel.y = vel.y;
         ((CarBody*)car)->vel.z = vel.z;
@@ -2654,7 +2654,7 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->f25F0 = ((CarBody*)car)->f25F0 + ds;
         water = (f32*)(lbl_8055E918 + i * 0x9C);
         f32* ground = &lbl_8055E908[i].f0;
-        throttle = Clamp01(water[1] + ((CarBody*)car)->f25E0);
+        throttle = Clamp01(CbAdd(((CarBody*)car)->f25E0, water[1]));
         if (!(fn_801769CC()->type & 0x4000) && !NearZero(((CarBody*)car)->f2690)) {
             throttle = 0.0f;
             ((CarBody*)car)->f25E4 = 1.0f;
@@ -2733,7 +2733,7 @@ void fn_80186DE8(void) {
         if (boosting && CarOnGas(car)) {
             vmax = 0.44444445f * fn_80181A48(car) - 4.4444447f;
         }
-        vmax += 0.44444445f * (((CarBody*)car)->f5EC * lbl_8055E4E8[0]);
+        vmax += 0.44444445f * Mul(lbl_8055E4E8[0], ((CarBody*)car)->f5EC);
         off = fn_802B02C8(car + 0x60);
         wet2 = 0;
         if (fn_802BF4F0() && ((CarBody*)car)->wheels[3].plane.ground[1] < fn_802BF590()) {
