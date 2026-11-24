@@ -445,7 +445,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1900.w = V1BB0.w * V1920.w;
         tmp.x = (V1BB0.y * V1920.z) + (V1BB0.x * V1920.w);
         tmp.y = (V1BB0.z * V1920.x) + (V1BB0.y * V1920.w);
-        tmp.z = (V1BB0.x * V1920.y) + (V1BB0.z * V1920.w);
+        tmp.z = (V1BB0.z * V1920.w) + (V1BB0.x * V1920.y);
         tmp.w = (V1900.w - V1900.z) - (ident.w * V1900.y);
         tmp.x = tmp.x + (V1920.x * V1BB0.w);
         tmp.y = tmp.y + (V1920.y * V1BB0.w);
