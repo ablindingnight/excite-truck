@@ -716,10 +716,6 @@ static double WaterScrollOffset(f32 ticks) { return fmod(0.39999998f * ticks, 1.
 static f32 WaterCoordinate(int index) { return (f32)index; }
 #pragma pop
 
-/* Pragma unproven: with the row index as an expression the inner loop passes IRO's unroll weight limit (unrollinstrfactor
-   100); 104-116 keep the target's x5 unroll (101-102 fail, >= 128 crashes the compiler). */
-#pragma push
-#pragma opt_unroll_instr_count 104
 WaterSystem::WaterSystem(void) {
     const char* mskName = "watermsk.tex";
     const char* deepName = "gen_waterd.tex";
@@ -743,19 +739,19 @@ WaterSystem::WaterSystem(void) {
         for (int c = 0; c < 15; c++) {
             // The row indices are written as expressions, not named locals: IRO only strength-reduces
             // `invariant + iv` into its own induction variable when the invariant side is an expression.
+            // Post-increment stores keep the loop under IRO's unroll weight limit (the indexed form needed
+            // opt_unroll_instr_count 104 for the same x5 unroll).
             int a1 = r * 16 + (c + 1);
-            p[0] = r * 16 + c;
-            p[1] = a1;
-            p[2] = (r + 1) * 16 + c;
-            p[3] = (r + 1) * 16 + c;
-            p[4] = a1;
-            p[5] = (r + 1) * 16 + (c + 1);
-            p += 6;
+            *p++ = r * 16 + c;
+            *p++ = a1;
+            *p++ = (r + 1) * 16 + c;
+            *p++ = (r + 1) * 16 + c;
+            *p++ = a1;
+            *p++ = (r + 1) * 16 + (c + 1);
         }
     }
     valid = 1;
 }
-#pragma pop
 
 WaterSystem::~WaterSystem(void) {
     if (mask != -2) {
