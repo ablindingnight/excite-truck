@@ -837,7 +837,7 @@ void WaterSystem::Draw(void) {
     sx = sx * (f32)sqrt(1.5625);
     WVert* verts = fn_802DD42C(0x6000);
     f32 k;
-    f32 vx = fn_802C9C50();
+    f32 vx = WaterCoordinate(fn_802C9C50());
     f32 vy = WaterCoordinate(fn_802C9C40());
     f32 vw = fn_802C9C38();
     f32 vh = fn_802C9C48();
