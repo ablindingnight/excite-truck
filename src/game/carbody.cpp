@@ -2620,7 +2620,7 @@ void fn_80186DE8(void) {
             w->plane.nFwd = pl[1];
             bool gr = nrm[1] > 0.01f;
             w->grounded = gr;
-            f32 comp = LaneOf(CbF(c->pts[5 + j].w));
+            f32 comp = LaneOf(MakeF(c->pts[5 + j].w));
             if (comp > 20000.0f) {
                 RVec3 zero(0.0f, 0.0f, 0.0f);
                 SolSet(&c->pts[5 + j], zero.x, zero.y, zero.z);
