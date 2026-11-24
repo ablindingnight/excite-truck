@@ -404,11 +404,9 @@ inline void FillB(Shadow* s, ValueNode* node, const V2* pos, f32 scale) {
 }  // extern "C"
 
 struct Grid {
-    Grid(s16 s) {
-        int d = s * 2;
+    // The cell count comes from the caller (its k/cnt are fn_802B9108 locals: numbering of the pool's this copy).
+    Grid(s16 s, int cnt) {
         size = s;
-        int k = 0x400 / d;
-        int cnt = k * k;
         n = cnt;
         cells = new ("tmp") Cell<Item*>[cnt];
         pool = new ("tmpalloc") BufPool<Item*>(cnt * 6 / 4);
@@ -603,7 +601,9 @@ static inline int GroundItemCount(void) {
 
 void fn_802B9108(s16 size) {
     int d = size * 2;
-    Grid g(size);
+    int k = 0x400 / d;
+    int cnt = k * k;
+    Grid g(size, cnt);
     for (int i = 0; i < lbl_804BFFF4.count; i++) {
         TexEntry* te;
         Obj* o;
