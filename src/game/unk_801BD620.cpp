@@ -149,7 +149,6 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8 * sp1F8C;
     s32 sp1F88;
     s32 sp1F84;
-    s16 sp1F80;
     f32 sp1F78;
     f32 sp1F70;
     f32 sp1F68;
@@ -223,6 +222,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     f32 var_f27;
     s16 var_r22;
     int b17, b21, b4, b9, b13;  // contact-loop row starts (names unproven)
+    s16 sp1F80;
     s16 var_r21;
     s16 var_r20;
     s16 var_r19;
@@ -734,7 +734,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1780.x = V1790.z;
         V1780.y = V1780.x;
         V1780.z = V1780.y;
-        V1770.x = ValueOf(V17F0.z);
+        V1770.x = ValueOf(ValueOf(V17F0.z));
         V1770.y = ValueOf(V1770.x);
         V1770.z = ValueOf(V1770.y);
         V1760.x = V1770.x;  // lane-wise copy (retail stores f14/f13/f12 to both vectors)
@@ -1532,11 +1532,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             ROTATE(V0220, V1300);
             ROTATE(V0210, V1000);
             var_r22 = var_r22 + 1;
-            var_r17 = var_r17 + 1;
-            var_r19 = var_r19 + 1;
-            var_r20 = var_r20 + 1;
-            var_r18 = var_r18 + 1;
             var_r21 = var_r21 + 1;
+            var_r20 = var_r20 + 1;
+            var_r19 = var_r19 + 1;
+            var_r18 = var_r18 + 1;
+            var_r17 = var_r17 + 1;
         }
         {
             Vec4f V0200;
