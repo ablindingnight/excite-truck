@@ -2546,7 +2546,10 @@ void fn_80186DE8(void) {
         *((CollVolume*)car)->hint = e->id;
         HVec o = *(HVec*)(car + 0x16C);
         RVec3 vel(m->vel.x, m->vel.y, m->vel.z);
-        RVec3 avel(m->avel.x, m->avel.y, m->avel.z);
+        RVec3 avel;
+        avel.x = m->avel.x;
+        avel.y = m->avel.y;
+        avel.z = m->avel.z;
         f32 throttle;
         int boosting;
         f32 vmax;
