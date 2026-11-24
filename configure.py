@@ -1089,7 +1089,7 @@ config.libs.append(
             Object(Matching, "game/panelvol.cpp"),
             Object(Matching, "game/ppsys.cpp"),
             Object(Matching, "game/interlude.cpp"),
-            Object(NonMatching, "game/awards.cpp"),
+            Object(Matching, "game/awards.cpp"),
             Object(Matching, "game/dmginfo.cpp"),
             Object(Matching, "game/csreplay.cpp"),
             Object(NonMatching, "game/pmesh.cpp"),

@@ -233,11 +233,30 @@ inline void Results::Reset(void) {
     state = 0;
     t = 0.0f;
     n = 0;
-    for (int i = 0; i < 9; i++) {
-        scales[i].x = 1.0f;
-        scales[i].y = 0.0f;
-        scales[i].z = 0.0f;
-        scales[i].w = 0.0f;
+    scales[0].x = 1.0f;
+    scales[0].y = 0.0f;
+    scales[0].z = 0.0f;
+    scales[0].w = 0.0f;
+    scales[1].x = 1.0f;
+    scales[1].y = 0.0f;
+    scales[1].z = 0.0f;
+    scales[1].w = 0.0f;
+    scales[2].x = 1.0f;
+    scales[2].y = 0.0f;
+    scales[2].z = 0.0f;
+    scales[2].w = 0.0f;
+    scales[3].x = 1.0f;
+    scales[3].y = 0.0f;
+    scales[3].z = 0.0f;
+    scales[3].w = 0.0f;
+    Vec4* recordScale = scales + 4;
+    int remaining = 5;
+    while (remaining--) {
+        recordScale->x = 1.0f;
+        recordScale->y = 0.0f;
+        recordScale->z = 0.0f;
+        recordScale->w = 0.0f;
+        ++recordScale;
     }
     nameScale.x = 1.0f;
     nameScale.y = 0.0f;
