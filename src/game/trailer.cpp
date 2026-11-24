@@ -194,6 +194,11 @@ struct TrailerTargets {
     TrailerTarget t[3];
 };
 
+// PROVISIONAL: accessor name/ownership for the real attachment input.
+static inline f32 TrailerAttachmentValue(const CarBody& body) {
+    return body.f2694;
+}
+
 // A racer's trailer state (0xE0; was named RaceEntry here, which recordmgr uses for its race entries).
 struct TrailerEntry {
     u8 pad0[0x60];
@@ -216,7 +221,7 @@ struct TrailerEntry {
         body = id;
         f78 = 0.5f;
         f7C = t->f2690;
-        f80 = t->f2694;
+        f80 = TrailerAttachmentValue(*t);
         f84 = f7C - f80;
         a88 = t->a268C;
     }
