@@ -526,6 +526,7 @@ static inline void RotReset(CamFrame* fr) {  // name unproven
     b[2].z = 1.0f;
 }
 static inline f32 ZeroN(void) { f32 r = 0.0f; return r; }  // name unproven
+static inline CamFrame* GF(void) { CamFrame* f = (CamFrame*)&lbl_80499050; return f; }  // name unproven
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
@@ -836,7 +837,7 @@ void fn_8026C014(int player) {
         if (xx + zz > 0.01f) {
             PSVECCrossProduct((const Vec*)&up, (const Vec*)&lbl_80499050.rot.axes[2], (Vec*)&lbl_80499050.rot.axes[0]);
             PSVECCrossProduct((const Vec*)&lbl_80499050.rot.axes[2], (const Vec*)&lbl_80499050.rot.axes[0], (Vec*)&lbl_80499050.rot.axes[1]);
-            CamOrthonormal(lbl_80499050.rot);
+            CamOrthonormal(GF()->rot);
         }
     } else if ((s32)lbl_8055F4E0 == 2 && player) {
         s32 id = fn_8026A344(0);
