@@ -228,19 +228,22 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     ValVec3 lknee;
     ValVec3 rhip;
     ValVec3 rknee;
-    // Sums in retail's order: the four z lanes first, then x/y.
-    rknee.z = AddF(bones[5].m.origin.z, d->butt.z);
+    // Sums in retail's order: the four z lanes first, then x/y. rknee and rhip are copied, then accumulated: the
+    // read-backs are forwarded away but count as ISEL pcodes, which puts the block cut after m1.z as in retail.
+    rknee = bones[5].m.origin;
+    rknee.z = AddF(rknee.z, d->butt.z);
     lknee.z = bones[8].m.origin.z + d->butt.z;
     lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
-    rhip.z = AddF(bones[4].m.origin.z, d->butt.z);
+    rhip = bones[4].m.origin;
+    rhip.z = AddF(rhip.z, d->butt.z);
     lhip.y = AddF(bones[7].m.origin.y, d->butt.y);
     lhip.x = AddF(bones[7].m.origin.x, d->butt.x);
-    rhip.y = AddF(bones[4].m.origin.y, d->butt.y);
-    rhip.x = AddF(bones[4].m.origin.x, d->butt.x);
+    rhip.y = AddF(rhip.y, d->butt.y);
+    rhip.x = AddF(rhip.x, d->butt.x);
     lknee.x = bones[8].m.origin.x + d->butt.x;
-    rknee.x = AddF(bones[5].m.origin.x, d->butt.x);
+    rknee.x = AddF(rknee.x, d->butt.x);
     lknee.y = bones[8].m.origin.y + d->butt.y;
-    rknee.y = AddF(bones[5].m.origin.y, d->butt.y);
+    rknee.y = AddF(rknee.y, d->butt.y);
     ValVec3 pelvis;
     ValVec3 m1;
     LerpV(&m1, lfoot, lknee, 0.5f);
