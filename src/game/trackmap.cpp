@@ -399,7 +399,7 @@ static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g <<
 static inline f32 Unlerp(f32 lo, f32 hi, f32 v) { return (v - lo) / (hi - lo); }
 // Name unproven: map texture U projection.
 static inline f32 MapTextureU(f32 half, f32 scale, f32 value, f32 origin, f32 texSize) {
-    return half + scale / 2.0f * value + origin / texSize;
+    return half + half * scale * value + origin / texSize;
 }
 // Name unproven: consumed map texture projection.
 static inline f32 MapTextureV(f32 one, f32 half, f32 scale, f32 value, f32 origin, f32 texSize) {
