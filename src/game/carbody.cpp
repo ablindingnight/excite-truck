@@ -2393,6 +2393,7 @@ void fn_80186DE8(void) {
         int landing;
         int wet2;
         f32 cut;
+        f32 s;
         x = &cross[i];
         e = &cx[i];
         CbVec4 grip4 = CbVec4(x->vB0);
@@ -2677,7 +2678,7 @@ void fn_80186DE8(void) {
             cut = 0.0f;
         } else {
             if (((CarBody*)car)->f267C) {
-                f32 s = 4.0f * steerK - 0.6f * ((CarBody*)car)->avel.y;
+                s = 4.0f * steerK - 0.6f * ((CarBody*)car)->avel.y;
                 if (cut < s) {
                     s = cut;
                 }
