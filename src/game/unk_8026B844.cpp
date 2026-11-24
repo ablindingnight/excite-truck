@@ -333,6 +333,41 @@ static __inline void MtxToQuat(const CamFrame* f, CamQuat* q) {
     }
 }
 
+/* Helper name unproven: MtxToQuat with the axis branch written out (the debug camera's copy: its quaternion
+ address numbers with the frame pointer; fn_8026DDD8's copy keeps the nested axis helper). */
+static __inline void FrameToQuat(const CamFrame* f, CamQuat* q) {
+    const f32(*m)[3] = (const f32(*)[3])f;
+    f32 tr = f->rot.axes[2].z + (f->rot.axes[0].x + f->rot.axes[1].y);
+    if (tr > 0.0f) {
+        f32 s = sqrt(1.0f + tr);
+        q->w = 0.5f * s;
+        s = 0.5f / s;
+        q->x = s * (m[1][2] - m[2][1]);
+        q->y = s * (m[2][0] - m[0][2]);
+        q->z = s * (m[0][1] - m[1][0]);
+    } else {
+        f32* v = &q->x;
+        int i = 0;
+        int j;
+        int k;
+        f32 s;
+        if (m[1][1] > m[0][0]) {
+            i = 1;
+        }
+        if (m[2][2] > m[i][i]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        s = sqrt(1.0f + (m[i][i] - (m[j][j] + m[k][k])));
+        v[i] = 0.5f * s;
+        s = 0.5f / s;
+        v[3] = s * (m[j][k] - m[k][j]);
+        v[j] = s * (m[i][j] + m[j][i]);
+        v[k] = s * (m[i][k] + m[k][i]);
+    }
+}
+
 static __inline void QuatToMtx(const CamQuat* q, CamRot* r) {
     f32 x2 = q->x + q->x;
     f32 y2 = q->y + q->y;
@@ -805,7 +840,7 @@ void fn_8026C014(int player) {
         if (car && ((s32)lbl_8055F4E4 & 4)) {
             tgt = car->frame;
         } else if (car) {
-            MtxToQuat(&car->frame, &q);
+            FrameToQuat(&car->frame, &q);
             if (id == lbl_8049A168.car) {
                 CamVec p;
 
