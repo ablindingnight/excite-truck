@@ -586,9 +586,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         v.x += basis.pos.x;
         v.y += basis.pos.y;
         v.z += basis.pos.z;
-        fn_80231380(&verts[i], color, x + w * (1.0f + 0.5f * c.x) * 0.5f, y + h * (0.5f * c.y - 1.0f) * 0.5f,
-                    zero, MapTextureU(0.5f, scale, v.x, map->origin.x, map->texSize),
-                    MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
+        f32 tu = MapTextureU(0.5f, scale, v.x, map->origin.x, map->texSize);
+        fn_80231380(&verts[i], color, x + w * (1.0f + 0.5f * c.x) * 0.5f, y + h * (0.5f * c.y - 1.0f) * 0.5f, zero, tu, MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
         if (i < 20) {
             v.x = c.x * radius;
             v.y = c.y * radius;
@@ -597,10 +596,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             v.x += basis.pos.x;
             v.y += basis.pos.y;
             v.z += basis.pos.z;
-            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (1.0f + c.x) * 0.5f,
-                        y + h * (c.y - 1.0f) * 0.5f, zero,
-                        MapTextureU(0.5f, scale, v.x, map->origin.x, map->texSize),
-                        MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
+            f32 tu = MapTextureU(0.5f, scale, v.x, map->origin.x, map->texSize);
+            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (1.0f + c.x) * 0.5f, y + h * (c.y - 1.0f) * 0.5f, zero, tu, MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
         }
     }
     {
