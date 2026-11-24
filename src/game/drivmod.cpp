@@ -214,7 +214,9 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
         fn_802E317C("drivmod: can't get butt helper from %s", name);
     }
     CopyD(&d->butt, &((PlainValMatrix*)butt)->origin);
-    d->yaw = atan2(((PlainValMatrix*)butt)->basis[1].z, ((PlainValMatrix*)butt)->basis[1].y);
+    f32 by = ((PlainValMatrix*)butt)->basis[1].y;
+    f32 bz = ((PlainValMatrix*)butt)->basis[1].z;
+    d->yaw = atan2(bz, by);
     d->butt.x = d->butt.x - bones[0].m.origin.x;
     d->butt.y = d->butt.y - bones[0].m.origin.y;
     d->butt.z = d->butt.z - bones[0].m.origin.z;
