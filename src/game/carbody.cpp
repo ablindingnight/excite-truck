@@ -1321,6 +1321,8 @@ struct CbF : CbFPlain {
 
 /* Helper name unproven */
 static inline CbF MakeF(f32 v) { return CbF(v); }
+/* Helper name unproven: a lane read through a const reference (its result is an IRO temp, like retail). */
+static inline f32 LaneOfR(const CbF& p) { return p.v; }
 
 struct CbVec4 {
     CbVec4(void) {}
@@ -1338,7 +1340,7 @@ struct CbVec4 {
         x = p.x;
         y = p.y;
         z = p.z;
-        w = w_.v;
+        w = LaneOfR(w_);
     }
     void Set(const RVec3& p, CbF w_) {
         x = p.x;
