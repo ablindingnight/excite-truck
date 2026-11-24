@@ -1982,6 +1982,7 @@ extern "C" {
 int fn_8019E500(u8* p, u8* q) {
     TubeShape* t;
     RMtx fr = *(RMtx*)VE(q)->v50();
+    bool hit = false;
     BoxAxis ax[3] = {0};
     ax[0].dir = *(PVec3A*)&fr.rot.x.x;
     ax[1].dir = *(PVec3A*)&fr.rot.y.x;
@@ -1989,9 +1990,7 @@ int fn_8019E500(u8* p, u8* q) {
     ax[0].ext = ((BoxShape*)q)->half.x;
     ax[1].ext = ((BoxShape*)q)->half.y;
     ax[2].ext = ((BoxShape*)q)->half.z;
-    bool hit = false;
     int i;
-    f32 r = 0.75f;
     for (i = 0; i < 3; i++) {
         if (i == 1) {
             continue;
@@ -2004,24 +2003,22 @@ int fn_8019E500(u8* p, u8* q) {
         e.axis.x = ai->dir.v[0];
         e.axis.y = ai->dir.v[1];
         e.axis.z = ai->dir.v[2];
-        f32 eb = ab->ext - r;
-        f32 ea = aa->ext - r;
         e.b.x = ab->dir.v[0];
         e.b.y = ab->dir.v[1];
         e.b.z = ab->dir.v[2];
         e.a.Set(aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
         for (j = 0; j < 4; j++) {
             e.pos = fr.pos;
-            f32 k = ea * ((j & 1) ? -1.0f : 1.0f);
+            f32 k = (aa->ext - 0.75f) * ((j & 1) ? -1.0f : 1.0f);
             e.pos.x += aa->dir.v[0] * k;
             e.pos.y += aa->dir.v[1] * k;
             e.pos.z += aa->dir.v[2] * k;
-            k = eb * ((j & 2) ? -1.0f : 1.0f);
+            k = (ab->ext - 0.75f) * ((j & 2) ? -1.0f : 1.0f);
             e.pos.x += ab->dir.v[0] * k;
             e.pos.y += ab->dir.v[1] * k;
             e.pos.z += ab->dir.v[2] * k;
             t = new (lbl_80435020) TubeShape((CollVolume*)U32(q, 0x4), (const RMtx*)&e, ((BoxShape*)q)->stiff,
-                                             ((BoxShape*)q)->skin, r, ai->ext);
+                                             ((BoxShape*)q)->skin, 0.75f, ai->ext);
             hit |= fn_8019D618((u8*)t, p, 1, q);
         }
     }
