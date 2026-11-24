@@ -222,6 +222,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     f32 temp_f5_13;
     f32 var_f27;
     s16 var_r22;
+    int b17, b21, b4, b9, b13;  // contact-loop row starts (names unproven)
     s16 var_r21;
     s16 var_r20;
     s16 var_r19;
@@ -277,6 +278,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowC19 = &t[c + 19];
     rowC21 = &t[c + 21];
     rowC22 = &t[c + 22];
+    b17 = b + 17;
+    b21 = b + 21;
+    b4 = b + 4;
+    b9 = b + 9;
+    b13 = b + 13;
     sp2010 = (c + 23) * 16;  // byte offset of row c+23 (retail: addi r25,r6,23; slwi; stw 8208(r1)); was never assigned
     for (;;) {
         // the zero is read from ident.y every pass; MWCC hoists it (store-forwarded: the frsp f31 the target keeps
@@ -1192,11 +1198,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1000.y = V0E10.y;
         V1000.w = V0E00.w;
         var_r16 = 4;
-        var_r21 = b + 17;
-        var_r20 = b + 21;
-        var_r19 = b + 4;
-        var_r18 = b + 9;
-        var_r17 = b + 13;
+        var_r21 = b17;
+        var_r20 = b21;
+        var_r19 = b4;
+        var_r18 = b9;
+        var_r17 = b13;
         var_r22 = a3;
         for (;;) {
             if (var_r16 == 0) break;
