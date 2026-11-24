@@ -698,7 +698,10 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     } else {
         SetIdentity(&rot.rx.x);
     }
-    MulM(&d->rest.basis[0].x, &d->body.basis[0].x, &rot.rx.x);
+    // Named references: retail keeps both matrix addresses in saved registers through MulM's Dot calls.
+    const PlainValMatrix& body = d->body;
+    PlainValMatrix& rest = d->rest;
+    MulM(&rest.basis[0].x, &body.basis[0].x, &rot.rx.x);
     d->rest.origin = d->body.origin;
     fn_801E3284(&d->wheelMtx, d->wheel, &m);
     a.x = 0.0f;
