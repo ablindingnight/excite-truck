@@ -718,7 +718,7 @@ void fn_8026C014(int player) {
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
         z = 0.0f;
         z = KeyAxis(pad, z, speed, 1, 4);
-        x = KeyAxisRev(pad, ZeroN(), speed, 8, 2);
+        x = KeyAxisRev(pad, 0.0f, speed, 8, 2);
         CamSet(&v, x, ZeroN(), z);
         CamMove(&lbl_80499050, &v);
         lbl_8055F50C = yaw;
@@ -755,14 +755,14 @@ void fn_8026C014(int player) {
         if (pad.w40 & 8) {
             roll = speed;
         } else if (pad.w40 & 2) {
-            roll = Mul(-1.0f, speed);
+            roll = (-1.0f * speed);
         }
         lift = 0.0f;
         if (pad.w40 & 1) {
             lift = speed;
         }
         if (pad.w40 & 4) {
-            lift = Mul(-1.0f, speed);
+            lift = (-1.0f * speed);
         }
         if (pad.keys[5]) {
             lbl_8055F47C = MaxF(MinF(hi, lbl_8055F47C + pad.y0 * fovRate), lo);
