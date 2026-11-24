@@ -742,10 +742,12 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
         f32 zv = pose[k].pos.z;
         pose[k].pos.z = zv + d->butt.z;
     }
-    e1.z = 2.5f * -F32(car, 0x238) + Mul(F32(car, 0x3C), -0.17453292f);
-    e1.y = F32(car, 0x3C) * 0.2617994f;
+    f32 z = 2.5f * -F32(car, 0x238) + Mul(F32(car, 0x3C), -0.17453292f);
+    f32 y = F32(car, 0x3C) * 0.2617994f;
     f32 lean = 8.0f * F32(car, 0x23C);
     lean = MaxF(MinF(0.2617994f, lean), -0.2617994f);
+    e1.y = y;
+    e1.z = z;
     e1.x = 1.5f * F32(car, 0x240) - lean;
     Mat3FromEuler((Mat3*)&tilt, (Vec3*)&e1);
     Mat3Mul((Mat3*)&pose[3].rot, (Mat3*)&tilt, (Mat3*)&pose[3].rot);
