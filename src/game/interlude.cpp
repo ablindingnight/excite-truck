@@ -3048,9 +3048,12 @@ void fn_801CA67C(void) {
         fn_80238B44(x, 90, x + 1, 105, 0xFFFFFF00);
     }
     int y;
+    // PROVISIONAL: original panel-coordinate enum/local declaration unproven.
+    enum MenuPanelTop { kMenuPanelTop = 8 };
+    MenuPanelTop panelTop = kMenuPanelTop;
     Menu* m = &lbl_8055E86C[lbl_8055E81C];
     int hgt = lineH * (m->count + 1) + 10;
-    fn_801C94BC(398, 8, 600, hgt, bg);
+    fn_801C94BC(398, panelTop, 600, hgt, bg);
     fn_801C94BC(398, 8, 600, h + 10, 0x32000000);
     fn_801C94B8(400, 10, m->title, -1);
     y = lineH + 10;
