@@ -595,7 +595,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             v.z += basis.pos.z;
             f32 du = map->origin.x / map->texSize;
             f32 tu = 0.5f + 0.5f * scale * v.x + du;
-            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (1.0f + c.x) / 2.0f, y + h * (c.y - 1.0f) / 2.0f, zero, tu, MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
+            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + (1.0f + c.x) * w / 2.0f, y + (c.y - 1.0f) * h / 2.0f, zero, tu, MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
         }
     }
     {
