@@ -2668,6 +2668,10 @@ void fn_8019813C(u8* d, const u8* p, f32 a, f32 b) {
 // Lane blending while passing: eases the target lines towards the pass line (by how far into the pass zone the
 // car is) and, when the pass slows down, nudges the lateral offset away from the other car.
 /* Helper name unproven: the tail of fn_801981A0; the boundary is needed (in place: fn_801981A0 99.14 -> 98.84 with b as a local, 97.71 with F32(d, 0x134) written out) */
+// PROVISIONAL: original passing input query names/existence unproven.
+static inline f32 PassingEaseLow(void) { return lbl_8055A48C; }
+static inline f32 PassingBaseSpeed(const u8* d) { return F32(d, 0x130); }
+
 static inline void EaseAndNudge(u8* t, f32 b, u8* d, f32 lo, f32 hi, f32 x) {
     f32 y = F32(t, 0xC);
     f32 k = Clamp01((F32(d, 0x128) - lo) / (hi - lo));
@@ -2712,18 +2716,25 @@ void fn_801981A0(u8* d, u8* t) {
             F32(d, 0x14C) = fn_80129DC4(3, lbl_8055E55C, lbl_8055E560);
             S32(d, 0x13C) = S32(d, 0x138);
         }
-        f32 lo = lbl_8055A48C;
+        f32 lo = PassingEaseLow();
         f32 hi = lo + 0.8f * F32(d, 0x2EC) * lo;
         int ok = 1;
         if (U8(d, 0xFC) && S32(d, 0x114) == S32(d, 0x138)) {
             ok = 0;
         }
-        if (S32(d, 0x138) != S32(d, 0x2C4) && ok && (f32)__fabs(F32(d, 0x12C)) < lbl_8055E570 * lbl_8055A488) {
-            f32 x = F32(t, 0x8);
-            a = F32(d, 0x130);
-            f32 k = Clamp01((F32(d, 0x128) - lo) / (hi - lo));
-            F32(d, 0x120) = F32(t, 0x8) = a + (x - a) * k;
-            EaseAndNudge(t, F32(d, 0x134), d, lo, hi, x);
+        if (S32(d, 0x138) != S32(d, 0x2C4) && ok) {
+            // PROVISIONAL: name/scope of the existing double fabs result unproven.
+            // The original f32 narrowing stays at the comparison.
+            f64 absoluteDeviation = __fabs(F32(d, 0x12C));
+            if ((f32)absoluteDeviation < lbl_8055E570 * lbl_8055A488) {
+                f32 x = F32(t, 0x8);
+                a = PassingBaseSpeed(d);
+                f32 k = Clamp01((F32(d, 0x128) - lo) / (hi - lo));
+                // PROVISIONAL: shared result name/scope unproven; both real stores consume it.
+                f32 easedSpeed = a + (x - a) * k;
+                F32(d, 0x120) = F32(t, 0x8) = easedSpeed;
+                EaseAndNudge(t, F32(d, 0x134), d, lo, hi, x);
+            }
         }
     }
     U8(d, 0x154) = 0;
