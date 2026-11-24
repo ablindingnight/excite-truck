@@ -970,11 +970,14 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         }
         nd = -d;
         f32 ny = -offY;
+        // PROVISIONAL: original pitch-workspace lifetime and borrowed multiply input.
+        Mtx33 rx;
+        Mtx33* rotation = &rx;
         Mtx33* m = (Mtx33*)&cam;
         for (int i = 0; i < 400; i++) {
             f32 c = cos(pitch);
             f32 s = sin(pitch);
-            Mtx33 rx;
+
             rx.xy = 0.0f;
             rx.xx = 1.0f;
             rx.xz = 0.0f;
@@ -995,7 +998,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             cam.b.v[2].x = s2;
             cam.b.v[2].y = 0.0f;
             cam.b.v[2].z = c2;
-            MulM(m, &rx, m);
+            MulM(m, rotation, m);
             MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
             // PROVISIONAL: original camera-axis translation grouping is unproven.
             MAdd(&cam.pos, &cam.pos, &cam.b.v[0], -offX);
