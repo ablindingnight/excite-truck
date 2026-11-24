@@ -1241,9 +1241,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V1900.y = Sq(V0CB0.y);
             CROSS_BEGIN(V0D60, V0D50);
             V0D40.x = (tmp.x - (V0D50.y * V0D60.z));
+            V0D10.x = (V0D20.x + V0D40.x);
             V0D40.y = (tmp.y - (V0D50.z * V0D60.x));
             V0D40.z = (tmp.z - (V0D50.x * V0D60.y));
-            V0D10.x = (V0D20.x + V0D40.x);
             V0D10.y = (V0D20.y + V0D40.y);
             V0D10.z = (V0D20.z + V0D40.z);
             V0CF0.x = (V0D10.x + V0D00.x);
