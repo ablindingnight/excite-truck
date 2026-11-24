@@ -1264,9 +1264,11 @@ void fn_80268358(CamRec* c) {
     ka = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F0) : t / lbl_8055C4F0;
     f32 kb;
     kb = lbl_803467E8[lbl_8055F4A0].on ? ShakeEase(t / lbl_8055C4F4) : t / lbl_8055C4F4;
-    RVec3 bl(Lerp(out[0].b.x, out[1].b.x, ka), Lerp(out[0].b.y, out[1].b.y, ka), Lerp(out[0].b.z, out[1].b.z, ka));
-    RVec3 al(Lerp(out[0].a.x, out[1].a.x, kb), Lerp(out[0].a.y, out[1].a.y, kb), Lerp(out[0].a.z, out[1].a.z, kb));
-    RVec3 up(Lerp(out[0].up.x, out[1].up.x, ka), Lerp(out[0].up.y, out[1].up.y, ka), Lerp(out[0].up.z, out[1].up.z, ka));
+    MountView* o0 = &out[0];
+    MountView* o1 = &out[1];
+    RVec3 bl(Lerp(o0->b.x, o1->b.x, ka), Lerp(o0->b.y, o1->b.y, ka), Lerp(o0->b.z, o1->b.z, ka));
+    RVec3 al(Lerp(o0->a.x, o1->a.x, kb), Lerp(o0->a.y, o1->a.y, kb), Lerp(o0->a.z, o1->a.z, kb));
+    RVec3 up(Lerp(o0->up.x, o1->up.x, ka), Lerp(o0->up.y, o1->up.y, ka), Lerp(o0->up.z, o1->up.z, ka));
     PSVECNormalize((const Vec*)&up.x, (Vec*)&up.x);
     c->fov = Lerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
     fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
