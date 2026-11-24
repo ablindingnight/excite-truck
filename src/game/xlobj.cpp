@@ -836,19 +836,21 @@ Shadow* fn_802BA580(ValueNode* node, const V2* pos, f32 scale) {
     return s;
 }
 
-static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
+/* Helper name unproven; parameter order unproven */
+static inline f32 Dot4_hm(f32 ay, f32 ax, f32 by, f32 bx) { return ax * bx + ay * by; }
 // Complete inverse-basis shadow matrix output; helper name unproven.
 static inline void SetShadowMatrix(Shadow* s, const V2* c, const V2* b, const V2* a) {
-    f32 i11;
-    f32 det = c->x * b->y - b->x * c->y;
-    f32 i00 = b->y / det;
-    f32 i10 = -c->y / det;
-    f32 i01 = -b->x / det;
-    i11 = c->x / det;
-    s->mtx[0][0] = i00;
+    /* store-then-readback unproven (needed for retail's 0.0 birth) */
+    s->mtx[0][0] = c->x * b->y;
     s->mtx[0][1] = 0.0f;
+    f32 det = s->mtx[0][0] - b->x * c->y;
+    f32 i00 = b->y / det;
+    f32 i01 = -b->x / det;
+    f32 i10 = -c->y / det;
+    f32 i11 = c->x / det;
+    s->mtx[0][0] = i00;
     s->mtx[0][2] = i01;
-    s->mtx[0][3] = -(Dot4_hm(a->x, a->y, i00, i01));
+    s->mtx[0][3] = -(Dot4_hm(a->y, a->x, i01, i00));
     s->mtx[1][0] = i10;
     s->mtx[1][1] = 0.0f;
     s->mtx[1][2] = i11;
@@ -860,12 +862,17 @@ static inline void SetShadowMatrix(Shadow* s, const V2* c, const V2* b, const V2
     s->mtx[1][3] += 1.0f;
 }
 
-void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
-    SetShadowMatrix(s, c, b, a);
+// Bounds of the shadow quad; helper name unproven.
+static inline void SetShadowBounds(Shadow* s, const V2* c, const V2* b, const V2* a) {
     s->lo.x = MinF(a->x, MinF(a->x + c->x, MinF(a->x + b->x, b->x + (a->x + c->x))));
     s->lo.y = MinF(a->y, MinF(a->y + c->y, MinF(a->y + b->y, b->y + (a->y + c->y))));
     s->hi.x = MaxF(a->x, MaxF(a->x + c->x, MaxF(a->x + b->x, b->x + (a->x + c->x))));
     s->hi.y = MaxF(a->y, MaxF(a->y + c->y, MaxF(a->y + b->y, b->y + (a->y + c->y))));
+}
+
+void fn_802BA848(Shadow* s, const V2* c, const V2* b, const V2* a) {
+    SetShadowMatrix(s, c, b, a);
+    SetShadowBounds(s, c, b, a);
 }
 
 void fn_802BAA50(V2* v) {
