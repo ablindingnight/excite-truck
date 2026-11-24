@@ -172,41 +172,34 @@ void ProcessResourceExtension(ResExt* e) {
 
 void fn_80138434(void* p);
 
-#pragma push
-#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
-/* Helper name unproven: one real scratch byte across required word reversals. */
-static inline void SwapLoaderWord(void* p, unsigned char& byte) {
-#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
-    unsigned char* b = (unsigned char*)p;
-    byte = b[0];
-    b[0] = b[3];
-    b[3] = byte;
-    byte = b[1];
-    b[1] = b[2];
-    b[2] = byte;
-#endif
-}
-
 void fn_801381B4(IdealLineRes* res) {
-    unsigned char swapByte;
     int i;
     int t;
     IdealPoint* p;
     ResExt* e;
-    SwapLoaderWord(&res->hdr.resSize, swapByte);
-    SwapLoaderWord(&res->hdr.segSize, swapByte);
-    SwapLoaderWord(&res->len[0], swapByte);
-    SwapLoaderWord(&res->len[1], swapByte);
-    SwapLoaderWord(&res->len[2], swapByte);
-    SwapLoaderWord(&res->len[3], swapByte);
-    SwapLoaderWord(&res->total, swapByte);
-    SwapLoaderWord(&res->nrelocs, swapByte);
+    SwapWord(&res->hdr.resSize);
+    SwapWord(&res->hdr.segSize);
+    // len[0..2] in one loop with one byte temp: the unrolled copies share t, which keeps the three swaps in order
+    // (the shape the retail scheduler shows; this replaced an unproven opt_lifetimes off pragma, 2026-11-24).
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)  // PORT: native data needs no swap (byteswap.h)
+    for (int j = 0; j < 3; j++) {
+        u8 t = ((u8*)&res->len[j])[0];
+        ((u8*)&res->len[j])[0] = ((u8*)&res->len[j])[3];
+        ((u8*)&res->len[j])[3] = t;
+        t = ((u8*)&res->len[j])[1];
+        ((u8*)&res->len[j])[1] = ((u8*)&res->len[j])[2];
+        ((u8*)&res->len[j])[2] = t;
+    }
+#endif
+    SwapWord(&res->len[3]);
+    SwapWord(&res->total);
+    SwapWord(&res->nrelocs);
     for (i = 0; i < res->nrelocs; i++) {
-        SwapLoaderWord(&res->relocs[i], swapByte);
+        SwapWord(&res->relocs[i]);
     }
     for (i = 0; i < res->nrelocs; i++) {
         u32* r = (u32*)((u8*)res + res->relocs[i]);
-        SwapLoaderWord(r, swapByte);
+        SwapWord(r);
         *r += (u32)res;
     }
     fn_80138434(&res->points);
@@ -234,7 +227,6 @@ void fn_801381B4(IdealLineRes* res) {
         ProcessResourceExtension(e);
     }
 }
-#pragma pop
 
 void fn_80138434(void* p) { fn_80137F2C(p); }
 
