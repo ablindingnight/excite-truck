@@ -1207,7 +1207,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             MXV_BEGIN(V1B90, V0DF0, V0DD0);
             MXV_END(V0DC0, V1B50, V0DD0);
             VSCALE(V0DB0, V0DF0, V1690.x);
-            VADD(V0DA0, V1C10, V0DB0);
+            Vec4f V0DA0;
+            V0DA0.x = ValueOf(V1C10.x + V0DB0.x);
+            V0DA0.y = V1C10.y + V0DB0.y;
+            V0DA0.z = V1C10.z + V0DB0.z;
             VADD(V0D90, V0DC0, V0DA0);
             Vec4f V0D80(V0D90);
             VLOAD(V0D70, *rowA6);
