@@ -149,7 +149,7 @@ public:
     virtual ~IMenuCustomView(void) = 0;
     virtual void Load(const char* name) = 0;  // 0x0C
     virtual void Reset(void) = 0;             // 0x10
-    virtual void Update(f32 dt) = 0;          // 0x14
+    virtual void Update(int x, int y, int w, int h, f32 dt) = 0;  // 0x14, menucustomview.h signature
     virtual void Unk18(void) = 0;
     virtual void Draw(void) = 0;              // 0x1C
     virtual int Unk20(void) = 0;
@@ -240,7 +240,7 @@ public:
     virtual void Reset(void);
     virtual void Unk24(void);
     virtual void Load(const char* name);
-    virtual void Update(f32 dt);
+    virtual void Update(int x, int y, int w, int h, f32 dt);
     virtual void Draw(void);
     void Turn(f32 dt);  // Helper name unproven: Update's inlined body
     void Place(void);   // Helper name unproven: the first half of Draw
@@ -790,7 +790,7 @@ static inline f32 LerpF(f32 a, f32 b, f32 t) { return a + t * (b - a); }
 // The visibility test stays in the virtual; the work is one inline body (Turn). Turn calls Mat3Mul twice, and
 // Mat3Mul alone is over MWCC's nested-inline budget (FACTS 2026-11-17 fable-rules2), so every helper Turn uses
 // stays a call and the weak copies follow Update in reverse first-use order. No pragma is involved.
-inline void AchievementTrophyModel::Update(f32 dt) {
+inline void AchievementTrophyModel::Update(int x, int y, int w, int h, f32 dt) {
     if (handle == -1 || !shown) {
         return;
     }

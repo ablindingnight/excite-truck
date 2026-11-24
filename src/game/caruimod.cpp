@@ -573,7 +573,7 @@ public:
     virtual ~IMenuCustomView(void) = 0;
     virtual void SetCar(const char* name) = 0;
     virtual void Unk10(void) = 0;
-    virtual void Update(f32 dt, int x, int y, int w, int h) = 0;
+    virtual void Update(int x, int y, int w, int h, f32 dt) = 0;  // 0x14, menucustomview.h order
     virtual void SetupCamera(void) = 0;
     virtual void Draw(void) = 0;
     virtual int Unk20(void) = 0;
@@ -610,7 +610,7 @@ public:
     virtual ~CarUIScreen(void);
     virtual void SetCar(const char* name);
     virtual void Unk10(void);
-    virtual void Update(f32 dt, int x, int y, int w, int h);
+    virtual void Update(int x, int y, int w, int h, f32 dt);
     virtual void SetupCamera(void);
     virtual void Draw(void);
     virtual int Unk20(void);
@@ -1211,7 +1211,7 @@ void CarUIScreen::Deactivate(void) {
 static inline f32 BoxDiagonal(const f32* b) { return sqrt(Sq(b[1] - b[0]) + Sq(b[3] - b[2]) + Sq(b[5] - b[4])); }
 
 
-void CarUIScreen::Update(f32 dt, int x, int y, int w, int h) {
+void CarUIScreen::Update(int x, int y, int w, int h, f32 dt) {
     lbl_8055F334 = dt;
     if (fn_802D3EBC()) {
         dt = 0.0f;
