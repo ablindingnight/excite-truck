@@ -155,11 +155,11 @@ static inline void AxisAngle(RVec3* m, const RVec3* v) {
         f32 zDiag;
         f32 yDiag;
         f32 inv;
-        f32 s;
         f32 t;
         f32 y;
         f32 x;
         f32 z;
+        f32 s;
         inv = 1.0f / a;
         x = inv * v->x;
         y = inv * v->y;
