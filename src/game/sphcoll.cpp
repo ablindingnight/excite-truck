@@ -1227,9 +1227,16 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RVec3 n;
     RVec3 o;
     f32 d2;
+    // Declaration order sets the FPR numbering: comp, fp, fq after t, fr, k (comp f31, fp f30, fq f29).
+    f32 t;
+    f32 fr;
+    f32 k;
+    f32 comp;
+    f32 fp;
+    f32 fq;
     if (!off) {
-        const Vec* t = (const Vec*)(VE(q)->v50() + 0x24);
-        d2 = PSVECSquareDistance((const Vec*)(p + 0x34), t);
+        const Vec* qpos = (const Vec*)(VE(q)->v50() + 0x24);
+        d2 = PSVECSquareDistance((const Vec*)(p + 0x34), qpos);
     } else {
         RMtx* m = (RMtx*)VE(q)->v50();
         MulVec(&w, off, m);
@@ -1309,11 +1316,11 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     if (len < 0.05f) {
         return 0;
     }
-    f32 comp = 0.2f + (-len + LoadF((f32*)((u8*)(p) + 0x24)));
-    f32 fq = 0.0f;
+    comp = 0.2f + (-len + LoadF((f32*)((u8*)(p) + 0x24)));
+    fq = 0.0f;
     if (comp > fq) {
-        f32 fp = fq;
-        f32 k = -1.0f / len;
+        fp = fq;
+        k = -1.0f / len;
         n.x = d.x * k;
         n.y = d.y * k;
         n.z = d.z * k;
@@ -1324,8 +1331,8 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
             bool qa = (qf & mask) != 0;
             bool pa = (pf & mask) != 0;
             if ((qa && IsCarObj((u8*)pb)) || (pa && IsCarObj((u8*)qb))) {
-                f32 fr = lbl_8055A4C0;
-                f32 t = 2.8f * (PSVECDotProduct((const Vec*)((u8*)pb + 0x54), (const Vec*)((u8*)qb + 0x54)) - 0.5f);
+                fr = lbl_8055A4C0;
+                t = 2.8f * (PSVECDotProduct((const Vec*)((u8*)pb + 0x54), (const Vec*)((u8*)qb + 0x54)) - 0.5f);
                 fr *= MaxF(MinF(1.0f, t), 0.0f);
                 if (pa) {
                     fp = fr;
