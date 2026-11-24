@@ -134,32 +134,32 @@ static inline f32 Deq(u16 u) {
     return Lerp(-6.2831855f, 6.2831855f, t);
 }
 
-// PROVISIONAL: a borrowed packet angle input; original API/name unproven.
-static inline f32 DeqBorrowed(const u16& u) {
-    f32 t = MIN(1.0f, Unlerp(u, 0.0f, 65535.0f));
+// PROVISIONAL: borrowed packet input and encoded range API; original names/signature unproven.
+static inline f32 DeqBorrowed(const u16& u, f32 encodedLow, f32 encodedHigh) {
+    f32 t = MIN(1.0f, (u - encodedLow) / (encodedHigh - encodedLow));
     t = MAX(t, 0.0f);
     return Lerp(-6.2831855f, 6.2831855f, t);
 }
 
 
-static inline void AxisAngle(RVec3* m, const RVec3* v) {
-    f32 a = PSVECMag((const Vec*)v);
+// PROVISIONAL: separate rotation scalar scopes and borrowed magnitude API; both perform the actual rotation.
+static inline void AxisAngleFirst(RVec3* m, const RVec3* v, const f32& a) {
+    f32 c;
+    f32 zz;
+    f32 yy;
+    f32 xx;
+    f32 zDiag;
+    f32 yDiag;
+    f32 inv;
+    f32 t;
+    f32 y;
+    f32 x;
+    f32 z;
+    f32 s;
+
     if (a > 0.0001f) {
-        // The squares are named, t*x and t*y are written in each entry, and the y and z diagonal entries are
-        // computed ahead of their rows (rigid RigidBody::Update, FACTS 2026-11-17 13:25): the block's volatile
-        // registers are retail's. Declaration order unproven: the second expansion's saved registers are still off.
-        f32 c;
-        f32 zz;
-        f32 yy;
-        f32 xx;
-        f32 zDiag;
-        f32 yDiag;
-        f32 inv;
-        f32 t;
-        f32 y;
-        f32 x;
-        f32 z;
-        f32 s;
+        // Keep the named squares, repeated t*x/t*y terms and diagonal statement order.
+        // The two rotation scopes reproduce retail allocation; original scope/names are unproven.
         inv = 1.0f / a;
         x = inv * v->x;
         y = inv * v->y;
@@ -194,6 +194,62 @@ static inline void AxisAngle(RVec3* m, const RVec3* v) {
     }
 }
 
+static inline void AxisAngle(RVec3* m, const RVec3* v, const f32& a) {
+    f32 c;
+    f32 zz;
+    f32 yy;
+    f32 xx;
+    f32 zDiag;
+    f32 yDiag;
+    f32 inv;
+    f32 t;
+    f32 s;
+    f32 x;
+    f32 y;
+    f32 z;
+
+    if (a > 0.0001f) {
+        // Keep the named squares, repeated t*x/t*y terms and diagonal statement order.
+        // The two rotation scopes reproduce retail allocation; original scope/names are unproven.
+        inv = 1.0f / a;
+        x = inv * v->x;
+        y = inv * v->y;
+        z = inv * v->z;
+        s = sin(a);
+        c = cos(a);
+        xx = x * x;
+        yy = y * y;
+        zz = z * z;
+        t = 1.0f - c;
+        m[0].x = c + t * xx;
+        m[0].y = y * (t * x) + s * z;
+        m[0].z = z * (t * x) - s * y;
+        yDiag = c + t * yy;
+        m[1].x = y * (t * x) - s * z;
+        m[1].y = yDiag;
+        m[1].z = z * (t * y) + s * x;
+        zDiag = c + t * zz;
+        m[2].x = z * (t * x) + s * y;
+        m[2].y = z * (t * y) - s * x;
+        m[2].z = zDiag;
+    } else {
+        m[0].x = 1.0f;
+        m[0].y = 0.0f;
+        m[0].z = 0.0f;
+        m[1].x = 0.0f;
+        m[1].y = 1.0f;
+        m[1].z = 0.0f;
+        m[2].x = 0.0f;
+        m[2].y = 0.0f;
+        m[2].z = 1.0f;
+    }
+}
+
+// PROVISIONAL name: typed vector-length operation using the SDK magnitude call.
+static inline f32 AxisMagnitude(const RVec3* axis) {
+    return PSVECMag((const Vec*)axis);
+}
+
 extern "C" void fn_8017AE94(RMtx* out, const RMtx* a, const RMtx* b, f32 t);
 
 void CollVolume::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
@@ -204,9 +260,9 @@ void CollVolume::vf30(f32 t, RPacket* a, const RPacket* b, s32* na, s32* nb) {
     fn_8017A008((u8*)&ma.pos, (u8*)&a->pos, 12);
     fn_8017A008((u8*)&mb.pos, (u8*)&b->pos, 12);
     va.Set(Deq(a->rot[0]), Deq(a->rot[1]), Deq(a->rot[2]));
-    vb.Set(DeqBorrowed(b->rot[0]), DeqBorrowed(b->rot[1]), DeqBorrowed(b->rot[2]));
-    AxisAngle(&ma.rot.x, &va);
-    AxisAngle(&mb.rot.x, &vb);
+    vb.Set(DeqBorrowed(b->rot[0], 0.0f, 65535.0f), DeqBorrowed(b->rot[1], 0.0f, 65535.0f), DeqBorrowed(b->rot[2], 0.0f, 65535.0f));
+    AxisAngleFirst(&ma.rot.x, &va, AxisMagnitude(&va));
+    AxisAngle(&mb.rot.x, &vb, AxisMagnitude(&vb));
     fn_8017AE94(&mtx, &ma, &mb, t);
     Transform();
     *nb = 0x14;
