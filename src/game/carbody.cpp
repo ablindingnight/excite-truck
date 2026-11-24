@@ -2715,7 +2715,7 @@ void fn_80186DE8(void) {
         if (boosting && CarOnGas(car)) {
             vmax = 0.44444445f * fn_80181A48(car) - 4.4444447f;
         }
-        vmax = vmax + 0.44444445f * (((CarBody*)car)->f5EC * lbl_8055E4E8[0]);
+        vmax += 0.44444445f * (((CarBody*)car)->f5EC * lbl_8055E4E8[0]);
         off = fn_802B02C8(car + 0x60);
         wet2 = 0;
         if (fn_802BF4F0() && ((CarBody*)car)->wheels[3].plane.ground[1] < fn_802BF590()) {
