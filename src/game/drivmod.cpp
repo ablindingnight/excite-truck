@@ -224,28 +224,25 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->butt.y = SubF(d->butt.y, bones[0].m.origin.y);
     d->butt.z = SubF(d->butt.z, bones[0].m.origin.z);
     // Retail keeps this store although lfoot is overwritten by m1 below. 472 instrs and retail's mnemonic mix.
-    lfoot = bones[9].m.origin;
     ValVec3 lhip;
     ValVec3 lknee;
     ValVec3 rhip;
     ValVec3 rknee;
-    // Sums in retail's order: the four z lanes first, then x/y. rknee and rhip are copied, then accumulated: the
-    // read-backs are forwarded away but count as ISEL pcodes. With SubF on the three butt lanes the block cut falls
-    // between m1.z's lane value and its store, as in retail.
     lknee.z = bones[8].m.origin.z + d->butt.z;
+    lfoot = bones[9].m.origin;
     rknee = bones[5].m.origin;
-    rknee.z = AddF(d->butt.z, rknee.z);
     lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
+    rknee.y = AddF(rknee.y, d->butt.y);
+    rknee.z = AddF(rknee.z, d->butt.z);
+    lknee.y = d->butt.y + bones[8].m.origin.y;
     rhip = bones[4].m.origin;
     rhip.z = AddF(rhip.z, d->butt.z);
-    rhip.y = rhip.y + d->butt.y;
-    lhip.x = AddF(bones[7].m.origin.x, d->butt.x);
-    rhip.x = AddF(rhip.x, d->butt.x);
-    lknee.x = bones[8].m.origin.x + d->butt.x;
-    rknee.x = AddF(rknee.x, d->butt.x);
-    lknee.y = bones[8].m.origin.y + d->butt.y;
-    rknee.y = AddF(rknee.y, d->butt.y);
     lhip.y = AddF(bones[7].m.origin.y, d->butt.y);
+    lhip.x = AddF(d->butt.x, bones[7].m.origin.x);
+    lknee.x = bones[8].m.origin.x + d->butt.x;
+    rhip.x = AddF(d->butt.x, rhip.x);
+    rknee.x = AddF(rknee.x, d->butt.x);
+    rhip.y = rhip.y + d->butt.y;
     ValVec3 pelvis;
     ValVec3 m1;
     LerpV(&m1, lfoot, lknee, 0.5f);
