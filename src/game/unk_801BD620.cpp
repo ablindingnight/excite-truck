@@ -249,8 +249,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowA1 = &t[a + 1];
     rowA2 = &t[a + 2];
     rowA6 = &t[a + 6];
-    rowA5 = &t[a + 5];
     rowB0 = &t[b];
+    rowA5 = &t[a + 5];
     rowA4 = &t[a + 4];
     rowA8 = &t[a + 8];
     rowA9 = &t[a + 9];
@@ -1241,9 +1241,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSUB(V0CC0, V1B90, V0CD0);
             Vec4f V0CB0(V0CC0);
             CROSS_BEGIN(V0D60, V0D50);
+            V0D40.y = (tmp.y - (V0D50.z * V0D60.x));
             V0D40.x = (tmp.x - (V0D50.y * V0D60.z));
             V0D10.x = (V0D20.x + V0D40.x);
-            V0D40.y = (tmp.y - (V0D50.z * V0D60.x));
             V1900.y = Sq(V0CB0.y);
             V1900.z = Sq(V0CB0.z);
             V0D40.z = (tmp.z - (V0D50.x * V0D60.y));
