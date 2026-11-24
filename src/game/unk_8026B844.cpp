@@ -335,9 +335,10 @@ static __inline void MtxToQuat(const CamFrame* f, CamQuat* q) {
 
 /* Helper name unproven: MtxToQuat with the axis branch written out (the debug camera's copy: its quaternion
  address numbers with the frame pointer; fn_8026DDD8's copy keeps the nested axis helper). */
+static inline f32 AddF(f32 a, f32 b) { return a + b; }  // name unproven
 static __inline void FrameToQuat(const CamFrame* f, CamQuat* q) {
     const f32(*m)[3] = (const f32(*)[3])f;
-    f32 tr = f->rot.axes[2].z + (f->rot.axes[0].x + f->rot.axes[1].y);
+    f32 tr = f->rot.axes[2].z + AddF(f->rot.axes[0].x, f->rot.axes[1].y);
     if (tr > 0.0f) {
         f32 s = sqrt(1.0f + tr);
         q->w = 0.5f * s;
