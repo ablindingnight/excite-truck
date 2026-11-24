@@ -1344,23 +1344,28 @@ void BreakOffDetachedParts(u8* p) {
 
 }  // extern "C"
 
-class ModuleTag;
-void RegisterModuleTag(ModuleTag* tag);
-ModuleTag lbl_8055E500;  // this unit's module tag
-
-extern "C" {
-
-
-// Unit start-up: register the module tag and fill the damage table's computed entries.
-void fn_8018FACC(void) {
-    RegisterModuleTag(&lbl_8055E500);
-    lbl_80332840[0].axis.x = -0.6981317f;
-    lbl_80332840[1].axis.x = 0.6981317f;
-    lbl_80332840[8].axis.y = 1.2217305f;
-    lbl_80332840[9].axis.y = -1.2217305f;
-}
-
-}  // extern "C"
+// PROVISIONAL: original module-initializer class name and ownership.
+// The base registers the real tag; the same initializer fills computed angles.
+// Addressable damage angles occur here in the retail constant pool; original names unproven.
+// PROVISIONAL: the initializer type and local pointer ownership are reconstructed.
+extern const f32 lbl_80562058 = -0.6981317f;
+extern const f32 lbl_8056205C = 0.6981317f;
+extern const f32 lbl_80562060 = 1.2217305f;
+extern const f32 lbl_80562064 = -1.2217305f;
+class CarDamageModuleTag : public ModuleTag {
+public:
+    CarDamageModuleTag() {
+        const f32* leftHinge = &lbl_80562058;
+        const f32* rightHinge = &lbl_8056205C;
+        const f32* leftDoor = &lbl_80562060;
+        const f32* rightDoor = &lbl_80562064;
+        lbl_80332840[0].axis.x = *leftHinge;
+        lbl_80332840[1].axis.x = *rightHinge;
+        lbl_80332840[8].axis.y = *leftDoor;
+        lbl_80332840[9].axis.y = *rightDoor;
+    }
+};
+CarDamageModuleTag lbl_8055E500;
 
 // The race-start lead time (seconds). Defined here, read by racing (RacingOverlay::Draw): retail keeps it as the last
 // entry of this unit's .sdata2 and racing loads it from here. Name unproven.

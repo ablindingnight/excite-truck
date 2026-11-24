@@ -1059,7 +1059,7 @@ config.libs.append(
             Object(NonMatching, "game/collvol.cpp"),
             Object(Matching, "game/physdriver.cpp"),
             Object(NonMatching, "game/carbody.cpp"),
-            Object(NonMatching, "game/cardmg.cpp"),
+            Object(Matching, "game/cardmg.cpp"),
             Object(Matching, "game/playcar.cpp"),
             Object(NonMatching, "game/aicar.cpp"),
             Object(NonMatching, "game/sphcoll.cpp"),
