@@ -786,18 +786,16 @@ void fn_8026C014(int player) {
             case 3: {
                 CamFrame* f = &lbl_8049A1C0;
                 f32 s = speed * fn_8026B844(pad.y1);
-                f32 u;
-                lbl_80499050.pos.x = lbl_80499050.pos.x + f->rot.axes[0].x * s;
-                lbl_80499050.pos.y = lbl_80499050.pos.y + f->rot.axes[0].y * s;
-                lbl_80499050.pos.z = lbl_80499050.pos.z + f->rot.axes[0].z * s;
-                u = 0.1f * (lift * speed);
-                lbl_80499050.pos.x = lbl_80499050.pos.x + f->rot.axes[1].x * u;
-                lbl_80499050.pos.y = lbl_80499050.pos.y + f->rot.axes[1].y * u;
-                lbl_80499050.pos.z = lbl_80499050.pos.z + f->rot.axes[1].z * u;
+                lbl_80499050.pos.x += f->rot.axes[0].x * s;
+                lbl_80499050.pos.y += f->rot.axes[0].y * s;
+                lbl_80499050.pos.z += f->rot.axes[0].z * s;
+                lbl_80499050.pos.x += f->rot.axes[1].x * (0.1f * (lift * speed));
+                lbl_80499050.pos.y += f->rot.axes[1].y * (0.1f * (lift * speed));
+                lbl_80499050.pos.z += f->rot.axes[1].z * (0.1f * (lift * speed));
                 s = speed * -fn_8026B844(pad.x1);
-                lbl_80499050.pos.x = lbl_80499050.pos.x + f->rot.axes[2].x * s;
-                lbl_80499050.pos.y = lbl_80499050.pos.y + f->rot.axes[2].y * s;
-                lbl_80499050.pos.z = lbl_80499050.pos.z + f->rot.axes[2].z * s;
+                lbl_80499050.pos.x += f->rot.axes[2].x * s;
+                lbl_80499050.pos.y += f->rot.axes[2].y * s;
+                lbl_80499050.pos.z += f->rot.axes[2].z * s;
                 break;
             }
             case 2:
