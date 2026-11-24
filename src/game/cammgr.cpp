@@ -1173,6 +1173,17 @@ static inline ValVec3& CamMad(ValVec3& d, const f32* v, f32 k) {
     d.z += v[2] * k;
     return d;
 }
+// The same blend for the second sample, with x and y read before the stores (helper name unproven). Reading them
+// into locals first creates the two store-forwarded reads before the v loads, which is the target's float colouring
+// (99.73 -> 99.91; reading all three, or using it for both calls, is worse).
+static inline ValVec3& CamMadXY(ValVec3& d, const f32* v, f32 k) {
+    f32 x = d.x;
+    f32 y = d.y;
+    d.x = x + v[0] * k;
+    d.y = y + v[1] * k;
+    d.z += v[2] * k;
+    return d;
+}
 // A vector built from three values: the arguments evaluate right to left, so z loads first.
 // KV3: rvec.h's RVec3.
 // Helper name unproven: arguments read right to left, stores go x, y, z.
@@ -1257,7 +1268,7 @@ void fn_80268358(CamRec* c) {
             o->b.y += res2.y * half;
             o->b.z += res2.z * half;
         }
-        CamMad(CamMad(o->up, &fr[0].basis[1].x, half), &fr[1].basis[1].x, half);
+        CamMadXY(CamMad(o->up, &fr[0].basis[1].x, half), &fr[1].basis[1].x, half);
     }
     t = lbl_8055E3C8 - c->mount.start;
     f32 ka;
