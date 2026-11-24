@@ -889,9 +889,14 @@ static inline f32 PreviousRecoveryProjection(f32 ax, f32 ay, f32 bx, const f32& 
     f32 negativeX = -ax;
     return ay*bx + negativeX*previousOffsetY;
 }
+// PROVISIONAL: original actual-follower field accessor/name/ownership unproven.
+static inline f32 CurrentRecoveryDirectionX(const LineFollower& follower) {
+    return follower.dir.x;
+}
+
 // PROVISIONAL: original two-result blend ownership/names unproven.
-static inline f32 RecoveryCrossBlend(f32 px, f32 py, f32 cx, f32 cy, f32 qx, const f32& qy, f32 dx, f32 dy, f32 t) {
-    f32 currentCross = Cross2(cx,cy,dx,dy);
+static inline f32 RecoveryCrossBlend(f32 px, const f32& py, f32 cy, const f32& qx, const f32& qy, f32 dx, f32 negativeX, f32 dy, f32 t) {
+    f32 currentCross = cy*dx + negativeX*dy;
     f32 previousCross = PreviousRecoveryProjection(px,py,qx,qy);
     return Lerp(previousCross, currentCross, t);
 }
@@ -909,7 +914,7 @@ void fn_80194324(u8* d) {
             f32 v;
             if (ShortStep(dt)) {
                 f32 fraction = dt / 1.5f;
-                v = RecoveryCrossBlend(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x180), F32(d, 0x184), F32(d, 0x1B4), F32(d, 0x1B8), fraction);
+                v = RecoveryCrossBlend(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x1B0), F32(d, 0x180), F32(d, 0x184), F32(d, 0x1B4), -CurrentRecoveryDirectionX(*(const LineFollower*)(d + 0x19C)), F32(d, 0x1B8), fraction);
             } else {
                 // PROVISIONAL: original current right-Y input ownership unproven.
                 f32 currentRightY = F32(d, 0x1B8);
