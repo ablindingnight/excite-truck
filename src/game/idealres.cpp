@@ -175,6 +175,7 @@ void fn_80138434(void* p);
 void fn_801381B4(IdealLineRes* res) {
     int i;
     int t;
+    bool found;
     IdealPoint* p;
     ResExt* e;
     SwapWord(&res->hdr.resSize);
@@ -206,7 +207,7 @@ void fn_801381B4(IdealLineRes* res) {
     fn_80138434(&res->start);
     SwapIdealPointData(res->points, res);
     for (t = 0; t < 3; t++) {
-        bool found = false;
+        found = false;
         for (p = res->points->next; p != res->points; p = p->next) {
             if (p->type == t) {
                 found = true;
