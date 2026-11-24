@@ -2302,18 +2302,6 @@ static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
     return 0.55181247f * (-forward * mass) * amount;
 }
 
-/* Helper name and ownership unproven: accumulate both solved force and torque. */
-static inline void AccumulateBodyLoads(CbSolMass* m, const RVec3& f, const RVec3& t) {
-    RVec3 F;
-    F = *(const RVec3*)&m->force;
-    F.x += f.x;
-    F.y += f.y;
-    F.z += f.z;
-    RVec3 T(CbAdd(m->torque.x, t.x), m->torque.y + t.y, m->torque.z + t.z);
-    m->force = CbSolVec4(F.x, F.y, F.z);
-    m->torque = CbSolVec4(T.x, T.y, T.z);
-}
-
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2343,6 +2331,8 @@ void fn_80186DE8(void) {
         }
         RVec3 f;
         RVec3 t;
+        RVec3 F;
+        RVec3 T;
         ((RigidBody*)car)->Flush((RVec3*)&f, (RVec3*)&t);
         if (((CarBody*)car)->f26AC) {
             f.x = 0.0f;
@@ -2352,7 +2342,13 @@ void fn_80186DE8(void) {
             t.y = 0.0f;
             t.z = 0.0f;
         }
-        AccumulateBodyLoads(m, f, t);
+        F = *(const RVec3*)&m->force;
+        F.x += f.x;
+        F.y += f.y;
+        F.z += f.z;
+        T = RVec3(CbAdd(m->torque.x, t.x), m->torque.y + t.y, m->torque.z + t.z);
+        m->force = CbSolVec4(F.x, F.y, F.z);
+        m->torque = CbSolVec4(T.x, T.y, T.z);
         if (PSVECDotProduct((const Vec*)(car + 0x124), (const Vec*)(car + 0x124)) > 100.0f) {
             PSVECNormalize((const Vec*)(car + 0x124), (Vec*)(car + 0x124));
             CbScaleTo(&((CarBody*)car)->avel.x, &((CarBody*)car)->avel.x, 10.0f);
