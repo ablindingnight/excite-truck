@@ -177,36 +177,10 @@ static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t
         (&out->x)[j] += (&a.x)[j];
     }
 }
-// Componentwise sums (names unproven). Every sum reads the rounded d->butt copy as in retail. Only the left
-// hip (all lanes) and the x lanes of the left knee and right hip go through the value-returning AddF; the extra
-// inline statements place the scheduler's block cut and pass-1 order as in retail (FACTS STATEMENT-BLOCK-CUT-100).
-// Plain float sum / difference (names unproven).
+// Plain float sum / difference (names unproven). Value-returning helpers add ISEL pcodes, which moves the
+// scheduler's statement block cut (FACTS STATEMENT-BLOCK-CUT-100).
 static inline f32 AddF(f32 a, f32 b) { return a + b; }
 static inline f32 SubF(f32 a, f32 b) { return a - b; }
-static inline void AddVL(ValVec3* out, const ValVec3& a, const ValVec3& b) {
-    f32 x = AddF(a.x, b.x);
-    f32 y = AddF(a.y, b.y);
-    f32 z = AddF(a.z, b.z);
-    out->z = z;
-    out->y = y;
-    out->x = x;
-}
-static inline void AddVX(ValVec3* out, const ValVec3& a, const ValVec3& b) {
-    f32 x = AddF(a.x, b.x);
-    f32 y = a.y + b.y;
-    f32 z = a.z + b.z;
-    out->z = z;
-    out->y = y;
-    out->x = x;
-}
-static inline void AddVP(ValVec3* out, const ValVec3& a, const ValVec3& b) {
-    f32 x = a.x + b.x;
-    f32 y = a.y + b.y;
-    f32 z = a.z + b.z;
-    out->z = z;
-    out->y = y;
-    out->x = x;
-}
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
@@ -248,17 +222,25 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->butt.x = SubF(d->butt.x, bones[0].m.origin.x);
     d->butt.y = d->butt.y - bones[0].m.origin.y;
     d->butt.z = d->butt.z - bones[0].m.origin.z;
-    // Retail keeps this store although lfoot is overwritten by m1 below: the AddVL stores through `out` that follow
-    // it keep the def alive. 472 instrs and retail's mnemonic mix.
+    // Retail keeps this store although lfoot is overwritten by m1 below. 472 instrs and retail's mnemonic mix.
     lfoot = bones[9].m.origin;
     ValVec3 lhip;
-    AddVL(&lhip, bones[7].m.origin, d->butt);
     ValVec3 lknee;
-    AddVX(&lknee, bones[8].m.origin, d->butt);
     ValVec3 rhip;
-    AddVX(&rhip, bones[4].m.origin, d->butt);
     ValVec3 rknee;
-    AddVP(&rknee, bones[5].m.origin, d->butt);
+    // Sums in retail's order: the four z lanes first, then x/y.
+    lknee.z = bones[8].m.origin.z + d->butt.z;
+    lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
+    rhip.z = AddF(bones[4].m.origin.z, d->butt.z);
+    rknee.z = AddF(bones[5].m.origin.z, d->butt.z);
+    lhip.y = AddF(bones[7].m.origin.y, d->butt.y);
+    lhip.x = AddF(bones[7].m.origin.x, d->butt.x);
+    rhip.y = AddF(bones[4].m.origin.y, d->butt.y);
+    rhip.x = AddF(bones[4].m.origin.x, d->butt.x);
+    lknee.x = bones[8].m.origin.x + d->butt.x;
+    rknee.x = AddF(bones[5].m.origin.x, d->butt.x);
+    lknee.y = bones[8].m.origin.y + d->butt.y;
+    rknee.y = AddF(bones[5].m.origin.y, d->butt.y);
     ValVec3 pelvis;
     ValVec3 m1;
     LerpV(&m1, lfoot, lknee, 0.5f);
