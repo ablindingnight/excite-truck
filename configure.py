@@ -1273,7 +1273,7 @@ config.libs.append(
             Object(Matching, "game/zonelite.cpp"),
             Object(Matching, "game/lightwall.cpp"),
             Object(Matching, "game/trkefx.cpp"),
-            Object(NonMatching, "game/groundvis.cpp"),
+            Object(Matching, "game/groundvis.cpp"),
             Object(Matching, "game/gmat.cpp"),
             Object(NonMatching, "game/objplace.cpp"),
             Object(NonMatching, "game/skagbag.cpp"),

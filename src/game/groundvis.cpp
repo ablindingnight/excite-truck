@@ -31,6 +31,8 @@ struct GroundNode {
 struct GroundStack {
     s32 count;             // offset 0x0
     GroundNode nodes[64];  // offset 0x4
+    // PROVISIONAL: actual stack-element operation; original name unproven.
+    GroundNode& Pop(void) { return nodes[--count]; }
 };
 
 struct GroundLayer {
@@ -290,7 +292,7 @@ static inline int NodeVisible(const Vec* c, f32 radius, f32 k, f32* dist) {
     d.y = c->y - lbl_804BE0B0.cam.pos.y;
     d.z = c->z - lbl_804BE0B0.cam.pos.z;
     f32 depth = PSVECDotProduct(&d, &lbl_804BE0B0.cam.axes[2]);
-    f32 r = k * radius;
+    f32 r = radius * k;
     if (depth + r < lbl_804BE0B0.znear || depth - r > lbl_804BE0B0.zfar) {
         return 0;
     }
@@ -323,8 +325,8 @@ static inline void DrawNode(GroundNode* n, FanCell* cell) {
         fn_802BDFBC(cell, fn_802B0130(n), n->scale);
     }
     s32 used = 0;
-    int i;
     GroundList* bag = 0;
+    int i;
     if (!fn_802B0124(cell)) {
         s16 bx = n->x - step;
                 s16 by = n->y - step;
@@ -340,16 +342,17 @@ static inline void DrawNode(GroundNode* n, FanCell* cell) {
     Vec* centerp = bag ? &corner[4] : 0;
 
     Vec here;
-    DefaultConstructVec3(&here);
+    __ct__11Vec3StorageFv(&here);
     fn_802B009C(&here, 0, n->x, n->y);
     if (centerp) {
         fn_80144DAC(centerp, &here);
     }
     u16 id;
+    u16* e;
     if (1.0f != alpha) {
         Vec from;
-        DefaultConstructVec3(&from);
-        u16* e = n->edge[n->unk6];
+        __ct__11Vec3StorageFv(&from);
+        e = n->edge[n->unk6];
         u16 at = n->unk6 < 2 ? 0 : n->size;
         if (e[at] > 0xFFFD) {
             s16 px[4] = {-1, 1, 1, -1};
@@ -370,7 +373,7 @@ static inline void DrawNode(GroundNode* n, FanCell* cell) {
 
     u16 prev = n->edge[3][0];
     for (i = 0; i < 4; i++) {
-        u16* e = n->edge[i];
+        e = n->edge[i];
         u16* first = i < 2 ? e : e + n->size;
         u16* last = i >= 2 ? e : e + n->size;
         u16* em = e + n->size / 2;
@@ -398,14 +401,14 @@ static inline void DrawNode(GroundNode* n, FanCell* cell) {
                 *em = fn_802AFFA8(mx, my);
             } else {
                 Vec a;
-                DefaultConstructVec3(&a);
+                __ct__11Vec3StorageFv(&a);
                 if (*first > 0xFFFD) {
                     fn_802B1BF0(lbl_8055F974, &a, *first);
                 } else {
                     fn_802B009C(&a, 0, n->x + step * startX[i], n->y + step * startY[i]);
                 }
                 Vec b;
-                DefaultConstructVec3(&b);
+                __ct__11Vec3StorageFv(&b);
                 fn_802B009C(&b, 0, mx, my);
                 Vec m;
                 fn_8025AD3C(&m, &a, &b, alpha);
@@ -466,7 +469,7 @@ static inline void DrawNode(GroundNode* n, FanCell* cell) {
             GroundItem* it = (GroundItem*)fn_802AFF5C(bag, j);
             if (it->lists[lod]) {
                 Vec pos;
-                DefaultConstructVec3(&pos);
+                __ct__11Vec3StorageFv(&pos);
                 fn_801C2B9C(&pos, &corner[4], &corner[it->corner], it->t0);
                 fn_801C2B9C(&pos, &pos, &corner[(it->corner + 1) & 3], it->t1);
                 if (j < used) {
@@ -647,8 +650,9 @@ static inline void SplitNode(GroundNode* n, f32 blend) {
     u16* m2;
     u16* m1;
     u16* p;
-    s32 q = cur.size / 2;
-    int o = q / 2;
+    s32 childHalf = cur.size / 2;
+    s16 q = childHalf;
+    int o = childHalf / 2;
     p = fn_802AFEC0(q);
     int s = q + 1;
     m1 = p + s;
@@ -665,7 +669,7 @@ static inline void SplitNode(GroundNode* n, f32 blend) {
         break;
     case 2:
         fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
-        fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
         fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
         fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
         break;
@@ -676,7 +680,7 @@ static inline void SplitNode(GroundNode* n, f32 blend) {
         fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
         break;
     case 0:
-        fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
         fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
         fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
         fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
@@ -684,6 +688,33 @@ static inline void SplitNode(GroundNode* n, f32 blend) {
     }
 }
 // Walks the terrain quadtree from the camera, building the visible cell batches and their scattered objects.
+// PROVISIONAL: original actual cell-half-width query/name unproven.
+static inline f32 GroundCellRadius(int half) {
+    f32 radius = lbl_80564AF0.cell * half;
+    return radius;
+}
+
+// PROVISIONAL: original complete node center/vertical-scale query unproven.
+static inline f32 GroundNodeCenterScale(GroundNode* n, FanCell* cell, int half, Vec& c) {
+    f32 k;
+    if (half > 64) {
+        c.x = n->x * lbl_80564AF0.cell;
+        c.z = n->y * lbl_80564AF0.cell;
+        c.y = fn_801DCF48(0, c.x, c.z);
+        k = 2.1213f;
+    } else {
+        c.x = n->x * lbl_80564AF0.cell;
+        int h = n->size / 2;
+        c.z = n->y * lbl_80564AF0.cell;
+        c.y = -12.0f + (f32)((cell->bits >> 14) & 0x1FF);
+        k = Mul((f32)(((cell->bits >> 10) & 0xF) + 1), 1.5f);
+        if (h < 4) {
+            k *= (f32)(4 / h);
+        }
+    }
+    return k;
+}
+
 void fn_802AEB3C(const GroundFrame* cam) {
     fn_802AEAAC();
     fn_802B11BC(lbl_8055F974);
@@ -721,7 +752,7 @@ void fn_802AEB3C(const GroundFrame* cam) {
 
     FanCell* cell = 0;
     while (lbl_804BD8E8.count != 0) {
-        GroundNode* n = &lbl_804BD8E8.nodes[--lbl_804BD8E8.count];
+        GroundNode* n = &lbl_804BD8E8.Pop();
         if (n->size < 0) {
             continue;
         }
@@ -731,25 +762,11 @@ void fn_802AEB3C(const GroundFrame* cam) {
         }
         f32 dist = 0.0f;
         half = n->size / 2;
-        f32 radius = lbl_80564AF0.cell * half;
+        f32 radius = GroundCellRadius(half);
         Vec c;
         f32 blend;
         f32 k;
-        if (half > 64) {
-            c.x = n->x * lbl_80564AF0.cell;
-            c.z = n->y * lbl_80564AF0.cell;
-            c.y = fn_801DCF48(0, c.x, c.z);
-            k = 2.1213f;
-        } else {
-            c.x = n->x * lbl_80564AF0.cell;
-            int h = n->size / 2;
-            c.z = n->y * lbl_80564AF0.cell;
-            c.y = -12.0f + (f32)((cell->bits >> 14) & 0x1FF);
-            k = Mul((f32)(((cell->bits >> 10) & 0xF) + 1), 1.5f);
-            if (h < 4) {
-                k *= (f32)(4 / h);
-            }
-        }
+        k = GroundNodeCenterScale(n, cell, half, c);
         if (!NodeVisible(&c, radius, k, &dist)) {
             continue;
         }
