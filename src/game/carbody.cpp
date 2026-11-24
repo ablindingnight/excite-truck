@@ -2554,7 +2554,7 @@ void fn_80186DE8(void) {
         int boosting;
         f32 vmax;
         f32 out;
-        f32 ax = 59.94f * vel.x + ((CarBody*)car)->vel.x * -59.94f;
+        f32 ax = 59.94f * vel.x + *(f32*)(car + 0x118) * -59.94f;
         ((CarBody*)car)->accel.x = ax;
         f32 ay = Mul(vel.y, 59.94f) + Mul(((CarBody*)car)->vel.y, -59.94f);
         ((CarBody*)car)->accel.y = ay;
@@ -2565,12 +2565,12 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->vel.x = vel.x;
         ((CarBody*)car)->vel.y = vel.y;
         ((CarBody*)car)->vel.z = vel.z;
-        ((CarBody*)car)->push.x = ax - o.x;
-        ((CarBody*)car)->push.y = ay - o.y;
         ((CarBody*)car)->avel.x = avel.x;
         ((CarBody*)car)->avel.y = avel.y;
-        ((CarBody*)car)->push.z = ((CarBody*)car)->accel.z - o.z;
+        ((CarBody*)car)->push.x = ax - o.x;
+        ((CarBody*)car)->push.y = ay - o.y;
         ((CarBody*)car)->avel.z = avel.z;
+        ((CarBody*)car)->push.z = ((CarBody*)car)->accel.z - o.z;
         CbVec4 w0(c->v30);
         CbVec4 w1(c->v10);
         CbVec4 w2(c->v0);
