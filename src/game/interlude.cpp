@@ -3052,8 +3052,9 @@ void fn_801CA67C(void) {
     enum MenuPanelTop { kMenuPanelTop = 8 };
     MenuPanelTop panelTop = kMenuPanelTop;
     Menu* m = &lbl_8055E86C[lbl_8055E81C];
-    int hgt = lineH * (m->count + 1) + 10;
-    fn_801C94BC(398, panelTop, 600, hgt, bg);
+    // PROVISIONAL: original panel-bottom geometry spelling/ownership unproven.
+    // Bottom is the top plus all menu rows and the two-pixel bottom margin.
+    fn_801C94BC(398, panelTop, 600, panelTop + lineH * (m->count + 1) + 2, bg);
     fn_801C94BC(398, 8, 600, h + 10, 0x32000000);
     fn_801C94B8(400, 10, m->title, -1);
     y = lineH + 10;
