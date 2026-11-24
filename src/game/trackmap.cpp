@@ -393,8 +393,6 @@ static inline f32 Ease(f32 t) {
 }
 
 
-/* Helper name unproven */
-static inline f32 LerpF(f32 t, f32 a, f32 b) { return a + t * (b - a); }
 
 static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 // Name unproven: consumed map texture projection.
@@ -511,7 +509,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     int view;
     int i;
     f32 scale;
-    f32 radius;
     u32 color;
 
     if (!map) {
@@ -530,15 +527,18 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     draw = map->trucks;
     me = map->player;
     PrepareTruckIcons(draw, me, view);
-    {
-        f32 dist = GetCarInfo(view)->draw->lapDist;
-        f32 t;
-        scale = 1.0f / (map->width / 2.0f);
-        t = (GetCarInfo(view)->draw->speedXZ / 0.44444445f - map->minSpeed) /
-            (map->maxSpeed - map->minSpeed);
-        radius = LerpF(Max(Min(1.0f, t), 0.0f), map->minWidth, map->maxWidth);
-        const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
-    }
+    // radius is a named local declared here (after dist), not at the top and not an inline result:
+    // retail colours it first (f31), ahead of x/y/w/h, which needs its number below dist's.
+    f32 dist = GetCarInfo(view)->draw->lapDist;
+    f32 t;
+    scale = 1.0f / (map->width / 2.0f);
+    t = (GetCarInfo(view)->draw->speedXZ / 0.44444445f - map->minSpeed) /
+        (map->maxSpeed - map->minSpeed);
+    f32 hi = map->maxWidth;
+    f32 lo = map->minWidth;
+    f32 k = Max(Min(1.0f, t), 0.0f);
+    f32 radius = lo + k * (hi - lo);
+    const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
     {
         RaceCarRec* tr = fn_8017960C(view);
         PlayerObj* obj = fn_802678E4(map->player);
