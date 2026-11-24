@@ -55,6 +55,9 @@ void fn_8020404C(void) {}
 void fn_80204050(void) {}
 
 // Finds the terrain under screen point (sx, sy); returns 0 when there is none.
+// PROVISIONAL real three-phase BY accumulator; source-scoped lifetime ownership.
+#pragma push
+#pragma opt_lifetimes off
 int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PlainValMatrix* cam, int sx, int sy) {
     ValVec3 dir;
     ValVec3 hit;
@@ -62,28 +65,29 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PlainValMatri
     ValVec3 p;
     u32 info;
     s16 localHint[2];
+    f32 by;
+    f32 bx;
     int halfW = lbl_8055CFF0 / 2;
     f32 depth = halfW / lbl_8055FC88;
-    f32 ax;
-    f32 ay;
     f32 az;
+    f32 ay;
+    f32 ax;
     ax = cam->basis[2].x * depth;
     ay = cam->basis[2].y * depth;
-    az = cam->basis[2].z * depth;
+    by = cam->basis[2].z;
+    az = by * depth;
     f32 dx = sx - halfW;
-    f32 bx;
-    f32 by;
     f32 bz;
-    bx = Mul(cam->basis[0].x, dx);
+    bx = cam->basis[0].x * dx;
     by = cam->basis[0].y * dx;
     bz = cam->basis[0].z * dx;
-    f32 dy = sy - lbl_8055CFF4 / 2;
+    f32 vertical = -(f32)(sy - lbl_8055CFF4 / 2);
     f32 abx = ax + bx;
-    f32 aby = ay + by;
+    by = ay + by;
     f32 abz = az + bz;
-    dir.x = abx + cam->basis[1].x * -dy;
-    dir.y = aby + cam->basis[1].y * -dy;
-    dir.z = abz + cam->basis[1].z * -dy;
+    dir.x = abx + cam->basis[1].x * vertical;
+    dir.y = by + cam->basis[1].y * vertical;
+    dir.z = abz + cam->basis[1].z * vertical;
     PSVECNormalize((const Vec*)&dir, (Vec*)&dir);
     if (hint == NULL) {
         hint = localHint;
@@ -133,6 +137,8 @@ int fn_80204054(ValVec3* out, ValVec3* outNormal, s16* hint, const PlainValMatri
     }
     return !fail;
 }
+#pragma pop
+
 
 }  // extern "C"
 
