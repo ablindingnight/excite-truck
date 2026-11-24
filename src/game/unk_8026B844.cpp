@@ -22,8 +22,6 @@ extern void *lbl_8055F4E4;
 extern void *lbl_8055F4E8;
 
 
-void fn_8026B840(void) {}
-
 f32 fn_8026B844(f32 f) {
     f32 c = 0.0f;
     if (f > c) {
