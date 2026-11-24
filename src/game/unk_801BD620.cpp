@@ -1463,7 +1463,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0470;
             V0470.y = (V0A30.y * V0800.y);
             VSET(V0980, V0480);
-            VSCALE(V0460, V0980, V0470.y);
+            Vec4f V0460;
+            V0460.z = V0980.z * (V0470.y);
+            V0460.y = V0980.y * (V0470.y);
+            V0460.x = V0980.x * (V0470.y);
             Vec4f V0450;
             V0450.x = (temp_f31 - V0460.x);
             V0450.y = (temp_f31 - V0460.y);
@@ -1523,8 +1526,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V02C0.x = tmp.x - V02F0.y * V02D0.z;
             V02C0.y = tmp.y - V02F0.z * V02D0.x;
             Vec4f V02B0;
-            V02B0.y = (V1760.y + V02C0.y);
             V02B0.x = (V1760.x + V02C0.x);
+            V02B0.y = (V1760.y + V02C0.y);
             V02C0.z = tmp.z - V02F0.x * V02D0.y;
             t[var_r19].x = V0D80.x;
             t[var_r19].y = V0D80.y;
