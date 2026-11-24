@@ -726,11 +726,14 @@ public:
     virtual void ToggleEdit(void) { editing = !editing; }
     virtual int IsEditing(void) { return editing; }
     virtual void Edit(void) {
+        // PROVISIONAL: original ownership of the actual iteration/selection workspace.
         struct {
             int i;
+            int artIndex;
+            EditRect* selected;
+            int gartOffset;
         } edit;
         EditContext* c;
-        EditRect* r;
         u32 col;
         const char* label;
         ArtElem* a;
@@ -773,38 +776,39 @@ public:
             {
                 c = ctx;
                 for (edit.i = 0; edit.i < c->rects->a.count; edit.i++) {
-                    r = &c->rects->a.data[edit.i];
-                    if (r->target && c->active && r->target == c->active->target) {
+                    edit.selected = &c->rects->a.data[edit.i];
+                    if (edit.selected->target && c->active && edit.selected->target == c->active->target) {
                         continue;
                     }
-                    if (r == c->hover) {
-                        col = r->handler->HoverColor();
+                    if (edit.selected == c->hover) {
+                        col = edit.selected->handler->HoverColor();
                     } else {
-                        col = r->handler->Color();
+                        col = edit.selected->handler->Color();
                     }
-                    if (r->target) {
-                        QueueColoredRectangle(fn_801451DC(((ElemBase*)r->target)->pos.x + r->r.x, 4),
-                                    fn_801452B4(((ElemBase*)r->target)->pos.y + r->r.y), r->r.w, r->r.h, col);
+                    if (edit.selected->target) {
+                        QueueColoredRectangle(fn_801451DC(((ElemBase*)edit.selected->target)->pos.x + edit.selected->r.x, 4),
+                                    fn_801452B4(((ElemBase*)edit.selected->target)->pos.y + edit.selected->r.y), edit.selected->r.w, edit.selected->r.h, col);
                     } else {
-                        QueueColoredRectangle(fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), r->r.w, r->r.h, col);
+                        QueueColoredRectangle(fn_801451DC(edit.selected->r.x, 4), fn_801452B4(edit.selected->r.y), edit.selected->r.w, edit.selected->r.h, col);
                     }
-                    label = r->handler->Label();
+                    label = edit.selected->handler->Label();
                     if (label) {
-                        if (!r->target) {
-                            DrawFormattedString(0.6f, fn_801451DC(r->r.x, 4), fn_801452B4(r->r.y), -1, 9, LayoutTextFormat(), label);
-                        } else if (r == c->hover) {
-                            DrawFormattedString(0.6f, fn_801451DC(r->r.x + ((ElemBase*)r->target)->pos.x, 4),
-                                        fn_801452B4(r->r.y + ((ElemBase*)r->target)->pos.y - 10.0f), -1, 12,
+                        if (!edit.selected->target) {
+                            DrawFormattedString(0.6f, fn_801451DC(edit.selected->r.x, 4), fn_801452B4(edit.selected->r.y), -1, 9, LayoutTextFormat(), label);
+                        } else if (edit.selected == c->hover) {
+                            DrawFormattedString(0.6f, fn_801451DC(edit.selected->r.x + ((ElemBase*)edit.selected->target)->pos.x, 4),
+                                        fn_801452B4(edit.selected->r.y + ((ElemBase*)edit.selected->target)->pos.y - 10.0f), -1, 12,
                                         LayoutTextFormat(), label);
                             QueueColoredRectangle(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
                             DrawFormattedString(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, LayoutTextFormat(),
-                                        ((ElemBase*)r->target)->name);
+                                        ((ElemBase*)edit.selected->target)->name);
                         }
                     }
                 }
             }
+            edit.artIndex = 0;
             int off = 0;
-            for (edit.i = 0; edit.i < arts->a.count; off += sizeof(arts->a.data[0]), edit.i++) {
+            for (; edit.artIndex < arts->a.count; off += sizeof(arts->a.data[0]), edit.artIndex++) {
                 a = (ArtElem*)((u8*)arts->a.data + off);
                 c = ctx;
                 other = !c->hover || a != c->hover->target;
@@ -814,8 +818,9 @@ public:
                     DrawInfo(a);
                 }
             }
-            for (edit.i = 0; edit.i < garts->a.count; edit.i++) {
-                g = &garts->a.data[edit.i];
+            edit.gartOffset = 0;
+            for (edit.i = 0; edit.i < garts->a.count; edit.i++, edit.gartOffset += sizeof(GartElem)) {
+                g = (GartElem*)((u8*)garts->a.data + edit.gartOffset);
                 c = ctx;
                 other = !c->hover || g != c->hover->target;
                 if (other) {
