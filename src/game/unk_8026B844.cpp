@@ -512,6 +512,18 @@ static const Rate4 tr0 = {{0.05f, 0.0125f, 0.15f, 0.0025f}};
 
 static inline f32 MidF(f32 a, f32 b) { return a + 0.5f * (b - a); }  // name unproven
 
+static inline void RotReset(CamFrame* fr) {  // name unproven
+    CamVec* b = (CamVec*)fr;
+    b[0].x = 1.0f;
+    b[0].y = 0.0f;
+    b[0].z = 0.0f;
+    b[1].x = 0.0f;
+    b[1].y = 1.0f;
+    b[1].z = 0.0f;
+    b[2].x = 0.0f;
+    b[2].y = 0.0f;
+    b[2].z = 1.0f;
+}
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
@@ -693,18 +705,7 @@ void fn_8026C014(int player) {
         yaw += yawRate * s;
         target = Mul(pad.y0, 1.0471976f);
         lbl_8055F510 = target + 0.95f * (lbl_8055F510 - target);
-        {
-            CamVec* b = (CamVec*)&lbl_80499050;
-            b[0].x = 1.0f;
-            b[0].y = 0.0f;
-            b[0].z = 0.0f;
-            b[1].x = 0.0f;
-            b[1].y = 1.0f;
-            b[1].z = 0.0f;
-            b[2].x = 0.0f;
-            b[2].y = 0.0f;
-            b[2].z = 1.0f;
-        }
+        RotReset(&lbl_80499050);
         CamSet(&yawE, 0.0f, yaw, 0.0f);
         Mat3FromEuler((Mat3*)&yawM, (const Vec3*)&yawE);
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&yawM, (const Mat3*)&lbl_80499050.rot);
@@ -821,21 +822,19 @@ void fn_8026C014(int player) {
     }
     if ((s32)lbl_8055F4E0 == 1 && player) {
         CamCar* car = fn_8017960C(fn_8026A344(0));
-        CamFrame* f;
         if (!car) {
             return;
         }
-        f = &lbl_80499050;
-        f->rot.axes[2].x = car->frame.pos.x - f->pos.x;
-        f->rot.axes[2].y = car->frame.pos.y - f->pos.y;
-        f->rot.axes[2].z = car->frame.pos.z - f->pos.z;
+        lbl_80499050.rot.axes[2].x = car->frame.pos.x - lbl_80499050.pos.x;
+        lbl_80499050.rot.axes[2].y = car->frame.pos.y - lbl_80499050.pos.y;
+        lbl_80499050.rot.axes[2].z = car->frame.pos.z - lbl_80499050.pos.z;
         CamSet(&up, 0.0f, 1.0f, 0.0f);
-        f32 xx = f->rot.axes[2].x * f->rot.axes[2].x;
-        f32 zz = f->rot.axes[2].z * f->rot.axes[2].z;
+        f32 xx = lbl_80499050.rot.axes[2].x * lbl_80499050.rot.axes[2].x;
+        f32 zz = lbl_80499050.rot.axes[2].z * lbl_80499050.rot.axes[2].z;
         if (xx + zz > 0.01f) {
-            PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->rot.axes[2], (Vec*)&f->rot.axes[0]);
-            PSVECCrossProduct((const Vec*)&f->rot.axes[2], (const Vec*)&f->rot.axes[0], (Vec*)&f->rot.axes[1]);
-            CamOrthonormal(f->rot);
+            PSVECCrossProduct((const Vec*)&up, (const Vec*)&lbl_80499050.rot.axes[2], (Vec*)&lbl_80499050.rot.axes[0]);
+            PSVECCrossProduct((const Vec*)&lbl_80499050.rot.axes[2], (const Vec*)&lbl_80499050.rot.axes[0], (Vec*)&lbl_80499050.rot.axes[1]);
+            CamOrthonormal(lbl_80499050.rot);
         }
     } else if ((s32)lbl_8055F4E0 == 2 && player) {
         s32 id = fn_8026A344(0);
