@@ -562,39 +562,42 @@ extern "C" {
 // CarBody::Init: copies the descriptor's identity and setup blocks, reads the chassis tuning from
 // "<model>.car/physics.val" (camera, head positions in inches, suspension, speed limiter, gravity boosts),
 // sets up the rigid body, wheels, collision shapes and sub-systems, then resets the body.
-/* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
-   member body, MWCC keeps this+K in an extra register and the code differs. */
+/* Real member body (2026-11-23): the descriptor parameter is used directly, `this` until the chassis node is found, the
+   byte view p after it (numfit: p is numbered after table/chassis), and the name string as (char*)this + 0x234 at each use. */
 /* Helper name unproven (interlude has the same one for ValueNode) */
 static inline s32 GetEnumOr(CbValueNode* n, const char* key, const char* names, s32 def) {
     return n->Has(key) ? n->GetEnum(key, names) : def;
 }
-void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
-    CarBody* cb = (CarBody*)p;
+}  // extern "C"
+
+void CarBody::Init(BodyDesc* d) {
+    CarBody* cb = this;
     char path[0x50];
     CbSetup setup;
     cb->f2680 = 0;
-    cb->model = ((CarDesc*)desc)->model;
-    cb->f5A4 = ((CarDesc*)desc)->fE8;
-    cb->f5A0 = ((CarDesc*)desc)->ident.w70;
+    cb->model = ((CarDesc*)((u8*)d))->model;
+    cb->f5A4 = ((CarDesc*)((u8*)d))->fE8;
+    cb->f5A0 = ((CarDesc*)((u8*)d))->ident.w70;
     if (cb->f5A0 == 0) {
         cb->f5A0 = 0x0FF807FF;
     }
     if (fn_801769CC()->type & 0x400) {
-        U32(p, 0x5A0) |= 0x80000000;
+        U32(((u8*)this), 0x5A0) |= 0x80000000;
     }
-    cb->index = ((CarDesc*)desc)->index;
-    cb->f1F0 = ((CarDesc*)desc)->f68;
-    *(CbIdent*)(p + 0x1F4) = *(CbIdent*)&((CarDesc*)desc)->ident;
-    cb->layout = fn_802792E4((char*)(p + 0x234));
+    cb->index = ((CarDesc*)((u8*)d))->index;
+    cb->f1F0 = ((CarDesc*)((u8*)d))->f68;
+    *(CbIdent*)(((u8*)this) + 0x1F4) = *(CbIdent*)&((CarDesc*)((u8*)d))->ident;
+    cb->layout = fn_802792E4(((char*)this + 0x234));
     s32 id = cb->ident.vehicle;
-    *(CbDescBlock*)(p + 0x274) = *(CbDescBlock*)&((CarDesc*)desc)->block;
-    S32(p, 0x328) = FindVehicleBlockById(id);
+    *(CbDescBlock*)(((u8*)this) + 0x274) = *(CbDescBlock*)&((CarDesc*)((u8*)d))->block;
+    S32(((u8*)this), 0x328) = FindVehicleBlockById(id);
     if (!fn_8027AA48()) {
-        S32(p, 0x328) = 0;
+        S32(((u8*)this), 0x328) = 0;
     }
-    fn_801345D8(path, 0x50, "%s.car/physics.val", (char*)(p + 0x234));
+    fn_801345D8(path, 0x50, "%s.car/physics.val", ((char*)this + 0x234));
     CbValueTable* table = fn_80131808(path);
     CbValueNode* chassis = table->FindChild("Chassis");
+    u8* p = (u8*)this;
     cb->f5B4 = chassis->GetFloat("chase_camera_dist", 0.0f);
     cb->f5B8 = chassis->GetFloat("chase_camera_height", 0.0f);
     const ValVec3& head = chassis->GetVec3("head_pos");
@@ -620,7 +623,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     const char* treeClasses = "light\0medium\0heavy\0\0";
     cb->f5E8 = GetEnumOr(chassis, "treehit_class", treeClasses, 1);
     GetPlayerLook((PlayerLook*)(p + 0x2C4), cb->ident.vehicle);
-    ApplyDamageFactor(((CarDesc*)desc)->index, p + 0x2C4);
+    ApplyDamageFactor(((CarDesc*)((u8*)d))->index, p + 0x2C4);
     cb->f25C0 = (FindVehicle(cb->ident.vehicle)->flags >> 2) & 1;
     LoadCarChassisParams(&setup, table);
     ApplyTweakMultipliers(&setup, FindOrAddTweakMultiplier((char*)(p + 0x234)));
@@ -629,15 +632,15 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     setup.f114 = setup.f114 * cb->f2FC;
     for (s32 i = 0; i < 4; i++) {
         CbValueNode* axle = table->FindChild((i == 0 || i == 1) ? "Front" : "Rear");
-        F32(p + i * 0x74, 0x23E8) = F32(desc + i * 4, 0x10C);
+        F32(p + i * 0x74, 0x23E8) = F32(((u8*)d) + i * 4, 0x10C);
         F32(p + i * 0x74, 0x23EC) = 0.0254f * axle->GetFloat("max_compression", 8.0f) - F32(p + i * 0x74, 0x23E8);
         F32((u8*)&setup + i * 0x24, 0x98) = F32(p + i * 0x74, 0x23E8);
     }
-    ((CarDesc*)desc)->mass = setup.mass / 0.4545f;
-    ((CarDesc*)desc)->ix = setup.f04 / 0.042279866f;
-    ((CarDesc*)desc)->iy = setup.f08 / 0.042279866f;
-    ((CarDesc*)desc)->iz = setup.f0C / 0.042279866f;
-    ((RigidBody*)p)->RigidBody::Init((BodyDesc*)desc);
+    ((CarDesc*)((u8*)d))->mass = setup.mass / 0.4545f;
+    ((CarDesc*)((u8*)d))->ix = setup.f04 / 0.042279866f;
+    ((CarDesc*)((u8*)d))->iy = setup.f08 / 0.042279866f;
+    ((CarDesc*)((u8*)d))->iz = setup.f0C / 0.042279866f;
+    ((RigidBody*)p)->RigidBody::Init((BodyDesc*)((u8*)d));
     ((u8*&)cb->src) = fn_801B2EDC(cb->index, p);
     fn_801795D8(p, cb->index);
     cb->f5AC = -(0.0254f * chassis->GetFloat("susp_y", 0.0f));
@@ -668,11 +671,11 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
         RVec3* d = (RVec3*)(p + 0x23DC + w * 0x74);
         d->Set(F32(wheels, w * 0x10), F32(wheels, w * 0x10 + 4), F32(wheels, w * 0x10 + 8));
     }
-    fn_801836DC(p, desc);
-    fn_80182DF4(p, desc);
-    InitializeCarDamage(p, desc);
-    fn_8018A654(p, desc);
-    bool player = ((CarDesc*)desc)->kind == 'PCAR';
+    fn_801836DC(p, ((u8*)d));
+    fn_80182DF4(p, ((u8*)d));
+    InitializeCarDamage(p, ((u8*)d));
+    fn_8018A654(p, ((u8*)d));
+    bool player = ((CarDesc*)((u8*)d))->kind == 'PCAR';
     cb->f257C = fn_80209448(p);
     if (player) {
         cb->f2580 = fn_80209D4C(p);
@@ -692,6 +695,8 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     }
     fn_801838C8(p);
 }
+
+extern "C" {
 
 Corner* AllocateCornerFromPool(void);
 s32 fn_801E3004(s32 model, const char* name, s32 a);
@@ -3011,8 +3016,8 @@ void fn_8018E3EC(u8* p, const HVec* imp, const HVec* at, int a, s32 id, int kind
 // Collision response: scales the impulse `imp` at the world point `at` by the mass ratio of the two cars
 // for a car-on-car hit (and drops it when this car is the heavier one hit from the front), by the body
 // stiffness otherwise, and passes it on in centre-of-mass space when it is large enough.
-/* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
-   member body, MWCC keeps this+K in an extra register and the code differs. */
+/* Real member body (2026-11-23): the descriptor parameter is used directly, `this` until the chassis node is found, the
+   byte view p after it (numfit: p is numbered after table/chassis), and the name string as (char*)this + 0x234 at each use. */
 void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVec* at, int kind, u8* other, int c) {
     CarBody* cb = (CarBody*)p;
     fn_80189C64(p);
@@ -3203,8 +3208,8 @@ void fn_8018A750(u8* p);
 
 // Puts the car down at `s` (a frame for the body origin, the velocity at 0x30, the start point at
 // 0x3C and the surface at 0x40) at rest: clears the impulses, wheel loads and gear state.
-/* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
-   member body, MWCC keeps this+K in an extra register and the code differs. */
+/* Real member body (2026-11-23): the descriptor parameter is used directly, `this` until the chassis node is found, the
+   byte view p after it (numfit: p is numbered after table/chassis), and the name string as (char*)this + 0x234 at each use. */
 void SetState__7CarBodyFPC9BodyState(u8* p, const u8* s) {
     RMtx frame;
     RVec3 off;
@@ -3734,8 +3739,8 @@ f32 fn_801E9DD0(s16* surface, f32 x, f32 z);
 // CarBody::vf30: applies a state packet interpolated between `cur` and `prev` (t = 0 is cur): the rigid body
 // part, engine speed, steering, pedals, gear and the four wheels (suspension, spin with 2 pi wrap, slip, skid,
 // flags), then the ground lookup at prev's position. Both sizes read are 0x44 bytes.
-/* MATCHING-AID: this CarBody member is written on the raw object under its mangled name (extern "C"); as a
-   member body, MWCC keeps this+K in an extra register and the code differs. */
+/* Real member body (2026-11-23): the descriptor parameter is used directly, `this` until the chassis node is found, the
+   byte view p after it (numfit: p is numbered after table/chassis), and the name string as (char*)this + 0x234 at each use. */
 void vf30__7CarBodyFfP7RPacketPC7RPacketPlPl(u8* p, f32 t, const CbPacket* cur, const CbPacket* prev, s32* na, s32* nb) {
     CarBody* cb = (CarBody*)p;
     int teleport = (prev->flags >> 9) & 1;
