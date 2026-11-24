@@ -395,6 +395,8 @@ static inline f32 Ease(f32 t) {
 
 
 static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
+// Name unproven: inverse lerp; parameter order unproven (lo, hi, v evaluated right to left gives retail load order).
+static inline f32 Unlerp(f32 lo, f32 hi, f32 v) { return (v - lo) / (hi - lo); }
 // Name unproven: map texture U projection.
 static inline f32 MapTextureU(f32 half, f32 scale, f32 value, f32 origin, f32 texSize) {
     return half + scale / 2.0f * value + origin / texSize;
@@ -536,8 +538,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     f32 dist = GetCarInfo(view)->draw->lapDist;
     f32 t;
     scale = 1.0f / (map->width / 2.0f);
-    t = (GetCarInfo(view)->draw->speedXZ / 0.44444445f - map->minSpeed) /
-        (map->maxSpeed - map->minSpeed);
+    t = Unlerp(map->minSpeed, map->maxSpeed, GetCarInfo(view)->draw->speedXZ / 0.44444445f);
     f32 hi = map->maxWidth;
     f32 lo = map->minWidth;
     f32 k = Max(Min(1.0f, t), 0.0f);
