@@ -495,6 +495,15 @@ static inline void DrawFinalMarker(SFMarker* m, Basis* basis, const Vec2& tp, f3
     }
 }
 
+// Name unproven: draw the viewing truck's own icon at the map centre.
+static inline void DrawSelfIcon(TruckDraw* d, int view, f32 x, f32 y, f32 w, f32 h) {
+    int part = view == d->self ? 1 : 3;
+    f32 size = fn_80235EF0(d->art, part);
+    f32 one = 1.0f;
+    size = one * size;  // retail keeps the 1.0f multiply (fmuls after the call)
+    fn_80235AFC(d->art, part, -1, x + w / 2.0f, y - h / 2.0f, 0.0f, size, size, d->icons[view].angle);
+}
+
 void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     SFMarker* m;
     Vertex verts[41] __attribute__((aligned(16)));
@@ -661,14 +670,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     Vec2 tp;  // Actual final truck-position workspace; writes remain at their original points.
     DrawPlacedMarkers(&basis, x, y, w, h, radius, j);
-    {
-        TruckDraw* d = map->trucks;
-        int part = view == d->self ? 1 : 3;
-        f32 size = fn_80235EF0(d->art, part);
-        f32 one = 1.0f;
-        size = one * size;  // retail keeps the 1.0f multiply (fmuls after the call)
-        fn_80235AFC(d->art, part, -1, x + w / 2.0f, y - h / 2.0f, 0.0f, size, size, d->icons[view].angle);
-    }
+    DrawSelfIcon(map->trucks, view, x, y, w, h);
     {
         RaceCarRec* tr = fn_8017960C(fn_801E866C(map->player));
         m = lbl_8055D5B4;
