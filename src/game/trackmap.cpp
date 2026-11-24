@@ -437,8 +437,7 @@ static inline void PrepareTruckIcons(TruckDraw* draw, int me, int view) {
 }
 
 // Name unproven: render the actual placed-marker operation.
-static inline void DrawPlacedMarkers(Basis* basis, f32 x, f32 y, f32 w, f32 h, f32 radius) {
-    unsigned int j;
+static inline void DrawPlacedMarkers(Basis* basis, f32 x, f32 y, f32 w, f32 h, f32 radius, s32& j) {
     for (j = 0; j < sizeof(lbl_803583C8) / sizeof(lbl_803583C8[0]); j++) {
         Vec2 c;
         c.x = x + w / 2.0f;
@@ -512,6 +511,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     int i;
     f32 scale;
     u32 color;
+    s32 j;  // placed-marker counter owned here, used by DrawPlacedMarkers by reference (ownership unproven)
 
     if (!map) {
         return;
@@ -659,7 +659,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         }
     }
     Vec2 tp;  // Actual final truck-position workspace; writes remain at their original points.
-    DrawPlacedMarkers(&basis, x, y, w, h, radius);
+    DrawPlacedMarkers(&basis, x, y, w, h, radius, j);
     {
         TruckDraw* d = map->trucks;
         int part = view == d->self ? 1 : 3;
