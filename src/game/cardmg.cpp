@@ -468,6 +468,7 @@ static inline f32 AbsFlt(f32 v) { return (f32)__fabs(v); }
 
 /* Helper name unproven */
 static inline void ApplyDamagePointDeformation(DmgCarView* car, u8* p, f32 roll, f32 lean, f32 twist, DmgPose* mdl, int& pointIndex) {
+    f32 leanScale = 0.5f * lean;
     for (pointIndex = 1; pointIndex < car->nPoints; pointIndex++) {
         u8* pt = PTR(p, 0x26C) + pointIndex * 0x34;
         EVec v;
@@ -481,17 +482,28 @@ static inline void ApplyDamagePointDeformation(DmgCarView* car, u8* p, f32 roll,
         v.y += roll * (-0.3f * (F32(pt, 0x24) * (az - 0.7f)));
         v.z += -0.5f * z * roll;
         f32 w = DmgMax(0.0f, 3.0f - az);
-        v.y += 0.5f * lean * (F32(pt, 0x24) * w);
+        v.y += leanScale * (F32(pt, 0x24) * w);
         v.x += twist * DmgMax(0.0f, 3.0f - AbsFlt(F32(pt, 0x28)));
-        mdl->pt[pointIndex] = v;
+        // PROVISIONAL: original model-point view address grouping.
+        DmgPose* pointView = (DmgPose*)((EVec*)mdl + pointIndex);
+        pointView->pt[0] = v;
     }
 }
 
+/* Helper name and original operation ownership unproven. */
+static inline void ApplyBodyDeformation(DmgCarView* car, u8* p, DmgPose* mdl, int& pointIndex) {
+    f32 lean = ((CarBody*)p)->f26E8;
+    f32 roll;
+    f32 twist = 0.2f * ((CarBody*)p)->f26E4;
+    roll = 0.1f * ((CarBody*)p)->f26EC;
+    lean = lean > -0.25f ? lean : -0.25f;
+    ApplyDamagePointDeformation(car, p, roll, lean, twist, mdl, pointIndex);
+}
+
 #pragma push
-#pragma opt_lifetimes off  /* Pragma unproven: helps but not exact (pragcheck 2026-11-16: fn_8018DA5C 99.19 with it, 97.63 without) */
+#pragma opt_lifetimes off  /* Exact only with this scope: preserves deformation input webs (100 vs 98.44444). */
 void fn_8018DA5C(u8* p, u8* m) {
     DmgCarView* car = (DmgCarView*)p;
-    f32 roll;
     DmgPose* mdl = (DmgPose*)m;
     EVec* e = car->ease;
     for (int i = 0; i < car->nPoints; i++) {
@@ -499,12 +511,8 @@ void fn_8018DA5C(u8* p, u8* m) {
         SetE(&mdl->pt[i], e + i);
     }
     if (((CarBody*)p)->f26E0) {
-        f32 lean = ((CarBody*)p)->f26E8;
-        f32 twist = 0.2f * ((CarBody*)p)->f26E4;
-        roll = 0.1f * ((CarBody*)p)->f26EC;
-        lean = lean > -0.25f ? lean : -0.25f;
         int pointIndex;  // PROVISIONAL: original counter ownership.
-        ApplyDamagePointDeformation(car, p, roll, lean, twist, mdl, pointIndex);
+        ApplyBodyDeformation(car, p, mdl, pointIndex);
     }
     ((u32&)((CarDrawState*)m)->f29C) |= ((u32&)((CarBody*)p)->f1E40);
     DamagePart* tp = lbl_80332840;
