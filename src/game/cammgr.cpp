@@ -1167,9 +1167,15 @@ struct MountView {
 
 // d += v * k. Returns d: chained calls reload through the returned reference, which the optimizer cannot forward
 // (the target's frsp right after each stfs).
+// x and y build the product in a local and add d into it (a += d.x keeps the product and the sum one variable, so the
+// sum lands in the product's register as in the target; a = d.x + a splits the lifetimes, 99.91).
 static inline ValVec3& CamMad(ValVec3& d, const f32* v, f32 k) {
-    d.x += v[0] * k;
-    d.y += v[1] * k;
+    f32 a = v[0] * k;
+    a += d.x;
+    d.x = a;
+    f32 b = v[1] * k;
+    b += d.y;
+    d.y = b;
     d.z += v[2] * k;
     return d;
 }
