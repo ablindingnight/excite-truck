@@ -1672,7 +1672,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         }
     }
         // retail recomputes each row address from the raw index here (slwi + add), byte-offset form
-        SCALE_ROW((*(MVec4*)(arg0 + i9 * 16)), ident.x + lbl_805627B8);
+        SCALE_ROW((*(MVec4*)(arg0 + i9 * 16)), lbl_805627B8 + ident.x);
         SCALE_ROW((*(MVec4*)(arg0 + i10 * 16)), ident.x + lbl_805627B8);
     }
 }
