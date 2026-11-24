@@ -2606,7 +2606,7 @@ void fn_80186DE8(void) {
             w->grounded = gr;
             f32 comp = LaneOf(CbLane(c->pts[5 + j].w));
             if (comp > 20000.0f) {
-                c->pts[5 + j] = CbSolVec4(0.0f, 0.0f, 0.0f);
+                SolSet(&c->pts[5 + j], 0.0f, 0.0f, 0.0f);
                 CbVec4 half = CbVec4(c->v30);
                 half[j] = Mul(half[j], 0.5f);
                 c->v30 = half.Sol();
