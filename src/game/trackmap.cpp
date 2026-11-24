@@ -573,7 +573,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     color = fn_80230B9C(-1);
     f32 half = 0.5f;
     f32 zero = 0.0f;
-    f32 one = 1.0f;
     for (i = 0; i < 21; i++) {
         Vec3 c = lbl_803582C0[i];
         Vec3 v;
@@ -586,9 +585,9 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         v.y += y2;
         f32 zv = basis.pos.z;
         v.z += zv;
-        fn_80231380(&verts[i], color, x + w * (one + half * c.x) * half, y + h * (half * c.y - one) * half,
+        fn_80231380(&verts[i], color, x + w * (1.0f + half * c.x) * half, y + h * (half * c.y - 1.0f) * half,
                     zero, half + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                    MapTextureV(one, half, scale, v.y, map->origin.y, map->texSize));
+                    MapTextureV(1.0f, half, scale, v.y, map->origin.y, map->texSize));
         if (i < 20) {
             v.x = c.x * radius;
             v.y = c.y * radius;
@@ -597,10 +596,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             v.x += basis.pos.x;
             v.y += basis.pos.y;
             v.z += basis.pos.z;
-            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (one + c.x) * half,
-                        y + h * (c.y - one) * half, zero,
+            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (1.0f + c.x) * half,
+                        y + h * (c.y - 1.0f) * half, zero,
                         half + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                        MapTextureV(one, half, scale, v.y, map->origin.y, map->texSize));
+                        MapTextureV(1.0f, half, scale, v.y, map->origin.y, map->texSize));
         }
     }
     {
