@@ -2421,10 +2421,11 @@ void fn_80186DE8(void) {
         if (1.0f < air) {
             air = 1.0f;
         }
-        if (air > 0.0f) {
+        f32 lb = 0.0f;
+        if (air > lb) {
             air = air;
         } else {
-            air = 0.0f;
+            air = lb;
         }
         f32 ds;
         f32 grip;
@@ -2504,9 +2505,10 @@ void fn_80186DE8(void) {
             force[2] = force[2] + dv[2];
             if (((CarBody*)car)->f259C && ((CarBody*)car)->speed < top) {
                 f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
+                f32 hi = 0.6f * boost;
                 f32 lo = 2.4f * boost;
                 f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
-                f32 boostScale = LerpT(Clamp01(t), lo, Mul(0.6f, boost));
+                f32 boostScale = LerpT(Clamp01(t), lo, hi);
                 f32 mass = ((CarBody*)car)->mass;
                 k = boostScale * (((CarBody*)car)->f25E0 * mass);
                 AddScaled(force, car + 0x54, k);
