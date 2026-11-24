@@ -1212,6 +1212,16 @@ static inline void Clip(f32* v, f32 e, u32* in, u32 bit) {
 // A tenth of a frame, as a one-element const array defined here: fn_8019BD54 loads it like a global (velocity first,
 // then the constant), and it sits at this spot of .sdata2 in retail. Name and array form unproven.
 static const f32 kTenthStep[1] = {0.0016683352f};
+// In-place vector rotation, the alias branch of the existing operation; helper name unproven.
+static inline void RotatePointInPlace(RVec3* v, const RMtx* m) {
+    f32 x = Dot3(v->x, m->rot.x.x, v->y, m->rot.x.y, v->z, m->rot.x.z);
+    f32 y = Dot3(v->x, m->rot.y.x, v->y, m->rot.y.y, v->z, m->rot.y.z);
+    f32 z = Dot3(v->x, m->rot.z.x, v->y, m->rot.z.y, v->z, m->rot.z.z);
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+
 int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RMtx f;
     RVec3 w;
@@ -1260,10 +1270,13 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     RigidBody* qb = (RigidBody*)PTR(q, 0x4);
     u32 caps;
     u32 in = 0;
-    c.y = F32(p, 0x38);
     c.x = F32(p, 0x34);
+    c.y = F32(p, 0x38);
     c.z = F32(p, 0x3C);
-    ToBoxSpace(&l, &c, &f);
+    l.x = c.x - f.pos.x;
+    l.y = c.y - f.pos.y;
+    l.z = c.z - f.pos.z;
+    RotatePointInPlace(&l, &f);
     if (!dir || l.x * dir->x > 0.0f || (f32)__fabs(dir->y) > LoadF((f32*)(q + 0x28))) {
         f32* localX = &l.x;
         Clip(localX, F32(q, 0x24), &in, 1);
