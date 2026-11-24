@@ -179,6 +179,21 @@ static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t
         (&out->x)[j] += (&a.x)[j];
     }
 }
+// Componentwise sums (names unproven). retail's hip/knee block mixes the pointer-loop form (rhip) with the
+// lanes-into-locals form; which vectors use which is fitted, not proven.
+static inline void AddV(ValVec3* out, const ValVec3& a, const ValVec3& b) {
+    for (int j = 2; j >= 0; j--) {
+        (&out->x)[j] = (&a.x)[j] + (&b.x)[j];
+    }
+}
+static inline void AddVL(ValVec3* out, const ValVec3& a, const ValVec3& b) {
+    f32 x = a.x + b.x;
+    f32 y = a.y + b.y;
+    f32 z = a.z + b.z;
+    out->x = x;
+    out->y = y;
+    out->z = z;
+}
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
@@ -221,24 +236,16 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->butt.y = d->butt.y - bones[0].m.origin.y;
     d->butt.z = d->butt.z - bones[0].m.origin.z;
     ValVec3 lhip;
-    lhip.x = bones[7].m.origin.x + d->butt.x;
-    lhip.y = bones[7].m.origin.y + d->butt.y;
-    lhip.z = bones[7].m.origin.z + d->butt.z;
+    AddVL(&lhip, bones[7].m.origin, d->butt);
     // Retail keeps this store although lfoot is overwritten by m1 below: the m2 Lerp's bone reads sit between the
     // last read and the overwrite, so the def is not removed (IRO_UseDef). 472 instrs and retail's mnemonic mix.
     lfoot = bones[9].m.origin;
     ValVec3 lknee;
-    lknee.x = bones[8].m.origin.x + d->butt.x;
-    lknee.y = bones[8].m.origin.y + d->butt.y;
-    lknee.z = bones[8].m.origin.z + d->butt.z;
+    AddVL(&lknee, bones[8].m.origin, d->butt);
     ValVec3 rhip;
-    rhip.x = bones[4].m.origin.x + d->butt.x;
-    rhip.y = bones[4].m.origin.y + d->butt.y;
-    rhip.z = bones[4].m.origin.z + d->butt.z;
+    AddV(&rhip, bones[4].m.origin, d->butt);
     ValVec3 rknee;
-    rknee.x = bones[5].m.origin.x + d->butt.x;
-    rknee.y = bones[5].m.origin.y + d->butt.y;
-    rknee.z = bones[5].m.origin.z + d->butt.z;
+    AddVL(&rknee, bones[5].m.origin, d->butt);
     ValVec3 pelvis;
     ValVec3 m1;
     LerpV(&m1, lfoot, lknee, 0.5f);
