@@ -459,7 +459,8 @@ static inline void DrawPlacedMarkers(Basis* basis, f32 x, f32 y, f32 w, f32 h, f
                 rel.z *= w / 2.0f;
             }
             size = fn_80235EF0(lbl_803583C8[j].art, lbl_803583C8[j].part);
-            fn_802354A0(lbl_803583C8[j].art, lbl_803583C8[j].part, c.x + rel.x - size / 2.0f, size * 0.5f + (c.y + rel.y), 0.0f, size, size, -1);
+            f32 halfSize = size / 2.0f;
+            fn_802354A0(lbl_803583C8[j].art, lbl_803583C8[j].part, c.x + rel.x - halfSize, size * 0.5f + (c.y + rel.y), 0.0f, size, size, -1);
         }
     }
 }
