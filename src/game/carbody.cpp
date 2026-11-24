@@ -2695,10 +2695,11 @@ void fn_80186DE8(void) {
             f32 cl;
             f32 t;
             sp = ((CarBody*)car)->speed;
+            f32 g = ((CarBody*)car)->setupA.f124;
             if (sp > 15.555555f) {
                 cl = sp;
                 cl = 44.444447f < cl ? 44.444447f : cl;
-                steerK = steerK * (LerpT(((CarBody*)car)->setupA.f124, 1.0f, 1.2692307f + -0.017307691f * cl));
+                steerK = steerK * (LerpT(g, 1.0f, 1.2692307f + -0.017307691f * cl));
             }
             if (sp > 0.0f) {
                 t = Clamp01((sp / 20.0f) * 0.44444445f);
