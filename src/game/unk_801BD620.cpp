@@ -59,6 +59,7 @@ static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }  // helper names 
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Sq(const f32& a) { return a * a; }  // helper name unproven
 static inline void SetRow(MVec4& d, const Vec4f& s) { d.x = s.x; d.y = s.y; d.z = s.z; }  // helper name unproven
+static inline f32 ValueOf(const f32& v) { return v; }  // pass-through read, name unproven
 static inline f32 Sum3(f32 a, f32 b, f32 c) { return (a + b) + c; }  // by-value inline helper, name unproven
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
@@ -727,9 +728,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1780.x = V1790.z;
         V1780.y = V1780.x;
         V1780.z = V1780.y;
-        V1770.x = V17F0.z;
-        V1770.y = V1770.x;
-        V1770.z = V1770.y;
+        V1770.x = ValueOf(V17F0.z);
+        V1770.y = ValueOf(V1770.x);
+        V1770.z = ValueOf(V1770.y);
         V1760.x = V1770.x;  // lane-wise copy (retail stores f14/f13/f12 to both vectors)
         V1750.x = rowA0->x;
         V1760.y = V1770.y;
