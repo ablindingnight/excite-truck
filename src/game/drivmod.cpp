@@ -235,8 +235,8 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lfoot = bones[9].m.origin;
     lknee.x = d->butt.x + bones[8].m.origin.x;
     lknee.y = AddF(bones[8].m.origin.y, d->butt.y);
-    lhip.y = AddF(d->butt.y, bones[7].m.origin.y);
     rhip = bones[4].m.origin;
+    lhip.y = AddF(d->butt.y, bones[7].m.origin.y);
     rhip.y = d->butt.y + rhip.y;
     rknee.x = d->butt.x + rknee.x;
     rhip.z = AddF(d->butt.z, rhip.z);
