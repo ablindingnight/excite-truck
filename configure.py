@@ -1062,7 +1062,7 @@ config.libs.append(
             Object(Matching, "game/cardmg.cpp"),
             Object(Matching, "game/playcar.cpp"),
             Object(NonMatching, "game/aicar.cpp"),
-            Object(NonMatching, "game/sphcoll.cpp"),
+            Object(Matching, "game/sphcoll.cpp"),
             Object(Matching, "game/springcar.cpp"),
             Object(NonMatching, "game/netcar.cpp"),
             Object(Matching, "game/inputbind.cpp"),

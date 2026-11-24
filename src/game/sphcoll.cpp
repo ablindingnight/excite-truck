@@ -2323,6 +2323,13 @@ static inline void SetAttachedSphereY(f32* out, f32 relativeY, f32 radius, f32 a
 }
 
 // Re-centres the sphere on its attachment (offset by 0x58 / lift), then refreshes it.
+// Provisional original ownership: out-of-line destructors in retail function order.
+// Pragma unproven: keep actual inherited cleanup expandable under this unit's noauto policy.
+#pragma push
+#pragma auto_inline on
+SphereShape::~SphereShape(void) {}
+#pragma pop
+
 void AttachedSphereShape::vf0C(void) {
     u8* p = (u8*)this;
     u8* m = this->attach;
@@ -2601,6 +2608,9 @@ SphereGroup::~SphereGroup(void) {
     }
     delete *(VDel**)((u8*)this + 0x17C);
 }
+
+// Provisional original ownership: out-of-line destructors in retail function order.
+OrientedBoxShape::~OrientedBoxShape(void) {}
 
 void SphereGroup::vf0C(void) {
     u8* p = (u8*)this; VE(this->child)->v0C(); }
@@ -4032,6 +4042,16 @@ int fn_801A4E88(const RVec3* a, const RVec3* b, f32* c, RVec3* d, s32* out) {
     return 0;
 }
 
+// Provisional original ownership: out-of-line destructors in retail function order.
+PolyShape::~PolyShape(void) {}
+RingVol::~RingVol(void) {}
+RagdollShape::~RagdollShape(void) {}
+TubeShape::~TubeShape(void) {}
+OffsetSphereShape::~OffsetSphereShape(void) {}
+BoxSphereShape::~BoxSphereShape(void) {}
+AttachedSphereShape::~AttachedSphereShape(void) {}
+FlatSphereShape::~FlatSphereShape(void) {}
+
 f32 SphereShape::Radius(void) {
     u8* p = (u8*)this; return this->radius; }
 
@@ -4048,6 +4068,9 @@ f32 RingVol::Radius(void) {
     u8* p = (u8*)this; return this->ring; }
 
 int CollShape::vf18(const RVec3*, const RVec3*, f32*, RVec3*) { return 0; }
+
+// Provisional original ownership: out-of-line destructors in retail function order.
+StaticCollObject::~StaticCollObject(void) {}
 
 u32 StaticCollObject::vf08(void) {
     u8* p = (u8*)this; return ((u32&)this->vol); }

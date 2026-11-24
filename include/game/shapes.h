@@ -53,7 +53,7 @@ public:
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
     virtual void vf4C(void);
-    virtual ~SphereShape(void) {}
+    virtual ~SphereShape(void);
     f32 radius;    // offset 0x24
     RVec3 center;  // offset 0x28
     f32 f34;       // offset 0x34
@@ -79,7 +79,7 @@ public:
     }
     virtual void vf10(u8* other);
     virtual void vf14(void);
-    virtual ~FlatSphereShape(void) {}
+    virtual ~FlatSphereShape(void);
     f32 across;  // offset 0x54
     f32 along;   // offset 0x58
 };
@@ -91,7 +91,7 @@ public:
     virtual void vf0C(void);
     virtual void vf14(void);
     virtual void vf24(const RVec3* v, const RVec3* at, int kind, void* c, void* by);
-    virtual ~AttachedSphereShape(void) {}
+    virtual ~AttachedSphereShape(void);
     u8* attach;  // offset 0x54: the attachment
     f32 f58;     // offset 0x58
 };
@@ -103,7 +103,7 @@ public:
     BoxSphereShape(const RMtx* m, const RVec3* c, CollVolume* o, f32 k, f32 skin, f32 a, f32 hx, f32 hy, f32 hz);
     virtual void vf14(void);
     virtual void vf28(void);
-    virtual ~BoxSphereShape(void) {}
+    virtual ~BoxSphereShape(void);
     PlainRVec3 halfBox;  // offset 0x54: the box half sizes
     f32 cache[24];       // offset 0x60
     f32 fC0;             // offset 0xC0
@@ -115,7 +115,7 @@ class OffsetSphereShape : public SphereShape {
 public:
     virtual void vf1C(void);
     virtual void vf28(void);
-    virtual ~OffsetSphereShape(void) {}
+    virtual ~OffsetSphereShape(void);
     PlainRVec3 localOffset;  // offset 0x54: the local centre is reset from here
     u8 pad60[0x78 - 0x60];
     u8 b78;                  // offset 0x78
@@ -185,7 +185,7 @@ public:
     virtual void vf14(void);
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual void vf4C(void);
-    virtual ~TubeShape(void) {}
+    virtual ~TubeShape(void);
 };
 
 // A box ('BOX '; vtable __vt__8BoxShape): half sizes 0x24, bounding radius 0x30. Adds slot vf50. Each builder
@@ -265,7 +265,7 @@ public:
     OrientedBoxShape(const RMtx* frame, const RVec3* c, CollVolume* owner, f32 k, f32 skin, f32 hx, f32 hy, f32 hz);
     virtual void vf0C(void);
     virtual u8* vf54(void);
-    virtual ~OrientedBoxShape(void) {}
+    virtual ~OrientedBoxShape(void);
     PlainRVec3 centre;   // offset 0x38
     f32 rot[9];          // offset 0x44: its own copy of the frame's rotation (vf54)
     PlainRVec3 world;    // offset 0x68: world centre
@@ -279,7 +279,7 @@ public:
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
     virtual void vf4C(void);
-    virtual ~RagdollShape(void) {}
+    virtual ~RagdollShape(void);
     f32 radius;  // offset 0x24
     s32 f28;     // offset 0x28
     s32 f2C;     // offset 0x2C
@@ -299,7 +299,7 @@ public:
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
     virtual void vf4C(void);
-    virtual ~RingVol(void) {}
+    virtual ~RingVol(void);
     f32 inner;  // offset 0x24
     f32 ring;   // offset 0x28
 };
@@ -316,7 +316,7 @@ public:
     virtual void vf38(RVec3* lo, RVec3* hi) const;
     virtual f32 Radius(void);
     virtual void vf4C(void);
-    virtual ~PolyShape(void) {}
+    virtual ~PolyShape(void);
     PlainRVec3 lo;   // offset 0x24: bounds
     PlainRVec3 hi;   // offset 0x30
     u8 pad3C[0xBC - 0x3C];
@@ -357,7 +357,7 @@ public:
     virtual s32 vf20(void);
     virtual u32 vf24(void);
     virtual void vf28(u32 v);
-    virtual ~StaticCollObject(void) {}
+    virtual ~StaticCollObject(void);
     u8 pad4[0x34 - 0x4];
     u32 f34;                 // offset 0x34
     u32 f38;                 // offset 0x38
