@@ -1299,10 +1299,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0AF0;
             V0B00.y = (temp_f31 + V0B10.x);
             V19E0.x = (V0C80.x * V0CE0.x);
+            V19E0.y = (V0C80.y * V0CE0.y);
             V0AF0.y = (V0B60.y * V1730.x);
             Vec4f V0AE0;
             V0AE0.y = V0AF0.y;
-            V19E0.y = (V0C80.y * V0CE0.y);
             Vec4f V0AD0;
             Vec4f V0AC0((V1710.x * V0B00.y));
             Vec4f V0AB0;
