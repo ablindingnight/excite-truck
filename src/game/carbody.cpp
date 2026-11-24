@@ -23,6 +23,7 @@
 
 template <class O, class P, class V> static inline void CbProbe(O* a, O* b, const P* pos, const V* vel, f32 ka, f32 kb) { a->x = pos->x + vel->x * ka; a->y = pos->y + vel->y * ka; a->z = pos->z + vel->z * ka; b->x = pos->x + vel->x * kb; b->y = pos->y + vel->y * kb; b->z = pos->z + vel->z * kb; }
 static inline f32 CbAdd(f32 a, f32 b) { return a + b; }
+static inline f32 CbSub(const f32& a, const f32& b) { f32 r = a - b; return r; }  // name unproven
 /* Helper name unproven */
 // PROVISIONAL: spring first-component/stiffness input ownership is unproven.
 template <class O, class V> static inline void CbSpring3(O* o, f32 firstX, const V* x, f32 ks, const V* v, f32 kd) { f32 ax = firstX * ks; f32 ay = x->y * ks; f32 az = x->z * ks; o->x = ax + v->x * kd; o->y = ay + v->y * kd; o->z = az + v->z * kd; }
@@ -2560,17 +2561,17 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->accel.y = ay;
         ((CarBody*)car)->accel.z = vel.z * 59.94f + Mul(((CarBody*)car)->vel.z, -59.94f);
         ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + Mul(((CarBody*)car)->avel.x, -59.94f);
-        ((CarBody*)car)->aaccel.y = CbAdd(Mul(avel.y, 59.94f), Mul(((CarBody*)car)->avel.y, -59.94f));
-        ((CarBody*)car)->aaccel.z = CbAdd((avel.z * 59.94f), ((CarBody*)car)->avel.z * -59.94f);
+        ((CarBody*)car)->aaccel.y = CbAdd(avel.y * 59.94f, ((CarBody*)car)->avel.y * -59.94f);
+        ((CarBody*)car)->aaccel.z = CbAdd(Mul(avel.z, 59.94f), Mul(((CarBody*)car)->avel.z, -59.94f));
         ((CarBody*)car)->vel.x = vel.x;
         ((CarBody*)car)->vel.y = vel.y;
         ((CarBody*)car)->vel.z = vel.z;
         ((CarBody*)car)->avel.x = avel.x;
         ((CarBody*)car)->avel.y = avel.y;
+        ((CarBody*)car)->avel.z = avel.z;
         ((CarBody*)car)->push.x = ax - o.x;
         ((CarBody*)car)->push.y = ay - o.y;
-        ((CarBody*)car)->avel.z = avel.z;
-        ((CarBody*)car)->push.z = ((CarBody*)car)->accel.z - o.z;
+        ((CarBody*)car)->push.z = CbSub(((CarBody*)car)->accel.z, o.z);
         CbVec4 w0(c->v30);
         CbVec4 w1(c->v10);
         CbVec4 w2(c->v0);
