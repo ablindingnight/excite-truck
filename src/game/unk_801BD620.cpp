@@ -277,10 +277,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowC18 = &t[c + 18];
     rowC19 = &t[c + 19];
     rowC21 = &t[c + 21];
+    b4 = b + 4;
     rowC22 = &t[c + 22];
     b17 = b + 17;
     b21 = b + 21;
-    b4 = b + 4;
     b9 = b + 9;
     b13 = b + 13;
     sp2010 = (c + 23) * 16;  // byte offset of row c+23 (retail: addi r25,r6,23; slwi; stw 8208(r1)); was never assigned
@@ -793,9 +793,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1690.y = V16A0.y;
         V1690.z = V16A0.z;
         V1690.w = V16A0.w;
+        V1680.z = rowA5->z;
         V1680.x = rowA5->x;
         V1680.y = rowA5->y;
-        V1680.z = rowA5->z;
         V16B0.w = V16C0.w;
         V1670.x = V1680.x;
         V19E0.x = V1670.x * V1670.x;
@@ -824,10 +824,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V15E0.y = V15F0.y;
         V15E0.z = V15F0.z;
         V15E0.w = V15F0.w;
-        V15C0.x = ValueOf(rowC19->x);
         V15D0.x = (V15E0.x * V17A0.x);
         V15D0.y = (V15E0.y * V17A0.x);
         V15D0.z = (V15E0.z * V17A0.x);
+        V15C0.x = ValueOf(rowC19->x);
         V15C0.y = rowC19->y;
         V15C0.z = rowC19->z;
         V15D0.w = (V15E0.w * V17A0.x);
@@ -865,18 +865,18 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1540.z = V1550.z;
         V1530.x = rowB8->x;
         V1540.w = V1550.w;
+        V1520.x = V1530.x;
         V1510.x = V1540.y;
         V1510.y = V1540.z;
-        V1520.x = V1530.x;
         V1510.z = V1540.w;
         V1510.w = V1540.x;
         V1500.x = V1510.x + V1510.w;
         V1500.y = V1510.y + V1510.x;
         V1500.z = V1510.z + V1510.y;
         temp_f1_12 = V1500.x + V1500.z;
+        V1500.w = V1510.w + V1510.z;
         temp_f5_13 = V1500.x + V1500.z;
         V18F0.x = V1500.x + V1500.z;
-        V1500.w = V1510.w + V1510.z;
         V14F0.x = V18F0.x;
         V14E0.x = V14F0.x - V1520.x;
         V18F0.x = V1500.x + V1500.z;
@@ -1415,7 +1415,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V06A0((V0720.x * V06B0.x));
             Vec4f V0690((V06C0.x * V06A0.x));
             Vec4f V0680((temp_f31 + lbl_8056281C));  // retail stack object 0x0680 (restored; b72611f6a had dropped it)
-            Vec4f V0670((V06C0.x * V0680.x));
+            Vec4f V0670(ValueOf(V06C0.x * V0680.x));
             Vec4f V0660((temp_f31 + lbl_80562820));
             Vec4f V0650((V0720.x * V0660.x));
             Vec4f V0640((V0670.x + V0650.x));
@@ -1476,9 +1476,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0420.x = (tmp.x - (V0440.y * V0BB0.z));
             V19E0.x = (V0420.x * V0CB0.x);
             V0420.y = (tmp.y - (V0440.z * V0BB0.x));
-            V19E0.y = (V0420.y * V0CB0.y);
             V0420.z = (tmp.z - (V0440.x * V0BB0.y));
             V19E0.z = (V0420.z * V0CB0.z);
+            V19E0.y = (V0420.y * V0CB0.y);
             Vec4f V0410(Sum3(V19E0.x, V19E0.y, V19E0.z));
             Vec4f V0400((V1300.x + V0410.x));
             V1300.x = V0400.x;
