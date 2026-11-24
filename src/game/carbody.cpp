@@ -2313,6 +2313,12 @@ static inline f32 LaneOf(CbFPlain p) { return p.v; }
 /* Helper name unproven: the car's right axis (two-statement body: its result gets a late IRO temp, like retail). */
 static inline const Vec* RightOf(u8* car) { CarBody* cb = (CarBody*)car; return (const Vec*)&cb->mtx; }
 
+/* Helper name unproven */
+static inline f32 Mul2(f32 a, f32 b) {
+    f32 r = a * b;
+    return r;
+}
+
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2541,7 +2547,7 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->accel.y = ay;
         ((CarBody*)car)->accel.z = CbAdd(vel.z * 59.94f, ((CarBody*)car)->vel.z * -59.94f);
         ((CarBody*)car)->aaccel.x = CbAdd(Mul(avel.x, 59.94f), ((CarBody*)car)->avel.x * -59.94f);
-        ((CarBody*)car)->aaccel.y = CbAdd(Mul(avel.y, 59.94f), ((CarBody*)car)->avel.y * -59.94f);
+        ((CarBody*)car)->aaccel.y = CbAdd(Mul2(avel.y, 59.94f), ((CarBody*)car)->avel.y * -59.94f);
         ((CarBody*)car)->aaccel.z = CbAdd(Mul(avel.z, 59.94f), ((CarBody*)car)->avel.z * -59.94f);
         ((CarBody*)car)->push.x = ax - o.x;
         ((CarBody*)car)->push.y = ay - o.y;
