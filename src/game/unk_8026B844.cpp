@@ -715,9 +715,8 @@ void fn_8026C014(int player) {
         Mat3FromEuler((Mat3*)&pitchM, (const Vec3*)&pitchE);
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
         z = 0.0f;
-        x = z;
-        x = KeyAxisRev(pad, x, speed, 8, 2);
         z = KeyAxis(pad, z, speed, 1, 4);
+        x = KeyAxisRev(pad, ZeroN(), speed, 8, 2);
         CamSet(&v, x, ZeroN(), z);
         CamMove(&lbl_80499050, &v);
         lbl_8055F50C = yaw;
