@@ -1770,11 +1770,11 @@ static inline void ShowPassedUnlocks(ScoreTally* t, s32 lo) {
                 char title[20];
                 char msg[200];
                 if (!strcasecmp(u->type, "CAR")) {
-                    CopyName(20, title, fn_80131234("EventPath:UNLOCK_TITLE"));
-                    CopyName(200, msg, u->name);
+                    SafeStrCopy(title, fn_80131234("EventPath:UNLOCK_TITLE"), 20);
+                    SafeStrCopy(msg, u->name, 200);
                 } else if (!strcasecmp(u->type, "RANK")) {
-                    CopyName(20, title, fn_80131234("EventPath:RANK_UP_TITLE"));
-                    CopyName(200, msg, u->name);
+                    SafeStrCopy(title, fn_80131234("EventPath:RANK_UP_TITLE"), 20);
+                    SafeStrCopy(msg, u->name, 200);
                 }
                 ShowEventUnlockedMessage(title, msg);
             }
