@@ -160,6 +160,16 @@ static inline void CopyD(ValVec3* o, const ValVec3* v) {
     o->y = v->y;
     o->z = v->z;
 }
+// Midpoint of two points, halves added lane by lane (name unproven).
+static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
+    for (int j = 0; j < 3; j++) {
+        (&out->x)[j] = (&a->x)[j] / 2.0f;
+    }
+    for (int j = 0; j < 3; j++) {
+        (&out->x)[j] += (&b->x)[j] / 2.0f;
+    }
+}
+
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
@@ -233,9 +243,8 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     rfoot.x = m2.x;
     rfoot.y = m2.y;
     rfoot.z = m2.z;
-    pelvis.x = Mul(lhip.x, 0.5f) + rhip.x * 0.5f;
-    pelvis.y = lhip.y * 0.5f + rhip.y * 0.5f - 1.27f;
-    pelvis.z = lhip.z * 0.5f + rhip.z * 0.5f;
+    MidPoint(&pelvis, &lhip, &rhip);
+    pelvis.y -= 1.27f;
     d->body.basis[0].x = 1.0f;
     d->body.basis[0].y = 0.0f;
     d->body.basis[1].x = 0.0f;
@@ -278,16 +287,6 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->fCC = 0.0f;
     d->fC8 = 0.0f;
     return d;
-}
-
-// Midpoint of two points, halves added lane by lane (name unproven).
-static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
-    for (int j = 0; j < 3; j++) {
-        (&out->x)[j] = (&a->x)[j] / 2.0f;
-    }
-    for (int j = 0; j < 3; j++) {
-        (&out->x)[j] += (&b->x)[j] / 2.0f;
-    }
 }
 
 // The upper-body driver (skeletons with a "neck" and no "butt"; others use fn_801FFB74): shoulders, hands and the
