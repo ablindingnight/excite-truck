@@ -170,6 +170,15 @@ static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
     }
 }
 
+// Componentwise lerp in two passes: out = t * (b - a), then out += a (name unproven).
+static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t) {
+    for (int j = 0; j < 3; j++) {
+        (&out->x)[j] = t * ((&b.x)[j] - (&a.x)[j]);
+    }
+    for (int j = 0; j < 3; j++) {
+        (&out->x)[j] += (&a.x)[j];
+    }
+}
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
@@ -230,13 +239,9 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     rknee.z = bones[5].m.origin.z + d->butt.z;
     ValVec3 pelvis;
     ValVec3 m1;
-    m1.x = Lerp(lfoot.x, lknee.x, 0.5f);
-    m1.y = Lerp(lfoot.y, lknee.y, 0.5f);
-    m1.z = Lerp(lfoot.z, lknee.z, 0.5f);
+    LerpV(&m1, lfoot, lknee, 0.5f);
     ValVec3 m2;
-    m2.z = Lerp(bones[6].m.origin.z, rknee.z, 0.5f);
-    m2.y = Lerp(bones[6].m.origin.y, rknee.y, 0.5f);
-    m2.x = Lerp(bones[6].m.origin.x, rknee.x, 0.5f);
+    LerpV(&m2, bones[6].m.origin, rknee, 0.5f);
     lfoot.x = m1.x;
     lfoot.y = m1.y;
     lfoot.z = m1.z;
