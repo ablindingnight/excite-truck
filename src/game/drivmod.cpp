@@ -300,9 +300,12 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     ValVec3 lh;
     fn_801E3488(&lh, d->lhand);
     ValVec3 lmid;
-    lmid.x = lh.x / 2.0f + ls.x / 2.0f;
-    lmid.y = lh.y / 2.0f + ls.y / 2.0f - 0.2032f;
-    lmid.z = lh.z / 2.0f + ls.z / 2.0f;
+    // Component loop (unrolled by the compiler); the other two midpoints are still written out (open: they rise
+    // only in asmcmp rows, not objdiff, as loops).
+    for (int j = 0; j < 3; j++) {
+        (&lmid.x)[j] = (&lh.x)[j] / 2.0f + (&ls.x)[j] / 2.0f;
+    }
+    lmid.y -= 0.2032f;
     ValVec3 rs = *(ValVec3*)fn_801FFB08(skel, "rshoulder");
     ValVec3 rh;
     fn_801E3488(&rh, d->rhand);
