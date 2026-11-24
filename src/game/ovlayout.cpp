@@ -428,10 +428,7 @@ void* operator new[](size_t size, const char* tag);
 
 template <typename T>
 struct DynArray {
-    DynArray(int n, const char* tag = "dsa_buf") {
-        a.data = new (tag) T[n];
-        a.cap = n;
-        a.count = 0;
+    DynArray(int n, const char* tag = "dsa_buf") : a(new (tag) T[n], n) {
         mem = a.data;
     }
     ~DynArray(void) { delete[] mem; }
@@ -1112,13 +1109,14 @@ static inline DynArray<GartCmd>* ReadGartCmdArray(ValueNode* n, const char* name
 }
 
 static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
+    int i;
     int c;
     ValueNode* e;
     const char* name;
     DynArray<TextCmd>* at;
     name = "text_cmd";
     at = (CountChildInto(n, name, c), new ("overlaycmd_dsa") DynArray<TextCmd>(c));
-    for (int i = 0;; i++) {
+    for (i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
