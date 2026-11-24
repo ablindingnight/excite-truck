@@ -2340,6 +2340,13 @@ static inline f32 LaneOf(CbFPlain p) { return p.v; }
 /* Helper name unproven: the car's right axis (two-statement body: its result gets a late IRO temp, like retail). */
 static inline const Vec* RightOf(u8* car) { CarBody* cb = (CarBody*)car; return (const Vec*)&cb->mtx; }
 
+/* Helper name unproven */
+static inline void CbSet3(f32* d, f32 x, f32 y, f32 z) {
+    d[0] = x;
+    d[1] = y;
+    d[2] = z;
+}
+
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2614,12 +2621,10 @@ void fn_80186DE8(void) {
             w->slip = w2[j];
             w->steer = asin(steer * w4[j] + w3[j]);
             w->v18 = w5[j];
-            w->contact[0] = c->pts[j].x;
-            w->contact[1] = c->pts[j].y;
+            CbSet3(w->contact, c->pts[j].x, c->pts[j].y, c->pts[j].z);
             f32 nrm[3];
             f32 nrm_2 = c->pts[9 + j].z;
             f32 nrm_1 = c->pts[9 + j].y;
-            w->contact[2] = c->pts[j].z;
             nrm[0] = c->pts[9 + j].x;
             nrm[2] = nrm_2;
             nrm[1] = nrm_1;
