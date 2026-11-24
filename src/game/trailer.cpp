@@ -174,24 +174,15 @@ void fn_801B8E28(int slot) {
     fn_8018A08C(t);
 }
 
-struct TrailerTarget {
-    s32 id;  // offset 0x0
-    u8 pad4[0x18 - 0x4];
-};
-
-struct TrailerTargets {
-    void Drop(s32 id) {
-        if (t[0].id == id) {
-            t[0].id = -1;
-        }
-        if (t[1].id == id) {
-            t[1].id = -1;
-        }
-        if (t[2].id == id) {
-            t[2].id = -1;
-        }
-    }
-    TrailerTarget t[3];
+// Same packed 0x18-byte damage-output layout used by the exact caller in dmginfo.cpp.
+// Names/ownership are provisional; the first record is replaced by the trailer's state.
+struct TrailerDamageOut {
+    s32 id;
+    f32 age;
+    f32 x8;
+    f32 xC;
+    f32 amount;
+    s32 x14;
 };
 
 // PROVISIONAL: accessor name/ownership for the real attachment input.
@@ -199,32 +190,14 @@ static inline f32 TrailerAttachmentValue(const CarBody& body) {
     return body.f2694;
 }
 
-// A racer's trailer state (0xE0; was named RaceEntry here, which recordmgr uses for its race entries).
+// Per-player packet row (0xE0), matching the exact dmginfo caller's DmgPlayer layout.
 struct TrailerEntry {
     u8 pad0[0x60];
-    s32 trailer;        // offset 0x60
+    s32 trailer;        // offset 0x60: player car index used to select its trailer (name provisional)
     u8 pad64[0x74 - 0x64];
-    s32 body;           // offset 0x74
-    f32 f78;            // offset 0x78
-    f32 f7C;            // offset 0x7C
-    f32 f80;            // offset 0x80
-    f32 f84;            // offset 0x84
-    s32 a88;            // offset 0x88
-    TrailerTargets targets;  // offset 0x8C
+    TrailerDamageOut damage[4];  // offset 0x74; exact caller writes all four records
     u8 padD4[0xE0 - 0xD4];
-    void Attach(CarBody* t) {
-        s32 id = t->index;
-        if (body == id) {
-            body = -1;
-        }
-        targets.Drop(id);
-        body = id;
-        f78 = 0.5f;
-        f7C = t->f2690;
-        f80 = TrailerAttachmentValue(*t);
-        f84 = f7C - f80;
-        a88 = t->a268C;
-    }
+
 };
 
 struct TrailerEntries {
@@ -234,26 +207,38 @@ struct TrailerEntries {
     s32 count;             // offset 0x394
 };
 
-// Points each racer entry's trailer fields at its trailer body.
-/* Helper name unproven: the loop over the entries; the boundary is needed (in place -0.53) */
-static inline void AttachTrailers(TrailerEntries* r) {
-    TrailerEntry* e = r->entries;
-    for (int i = 0; i < r->count; e++, i++) {
-        Trailer* t;
-        if (e->trailer >= 0 && e->trailer < lbl_8055E774) {
-            t = lbl_80436D28[e->trailer];
-        } else {
-            t = 0;
-        }
-        if (t) {
-            e->Attach(t);
-        }
-    }
-}
-
+// The packet's four damage records are one array, as in the exact dmginfo caller.
 void fn_801B916C(TrailerEntries* r) {
+    Trailer* t;
+    s32 id;
+    TrailerEntry* e;
+    TrailerDamageOut* out;
+    int i;
+    int j;
     if (fn_801769CC()->type & 0x400) {
-        AttachTrailers(r);
+        e = r->entries;
+        for (i = 0; i < r->count; e++, i++) {
+            if (e->trailer >= 0 && e->trailer < lbl_8055E774) {
+                t = lbl_80436D28[e->trailer];
+            } else {
+                t = 0;
+            }
+            if (t) {
+                id = t->index;
+                out = e->damage;
+                for (j = 0; j < 4; ++j, ++out) {
+                    if (out->id == id) {
+                        out->id = -1;
+                    }
+                }
+                e->damage[0].id = id;
+                e->damage[0].age = 0.5f;
+                e->damage[0].x8 = t->f2690;
+                e->damage[0].xC = TrailerAttachmentValue(*t);
+                e->damage[0].amount = e->damage[0].x8 - e->damage[0].xC;
+                e->damage[0].x14 = t->a268C;
+            }
+        }
     }
 }
 
