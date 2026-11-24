@@ -203,6 +203,9 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lhip.x = bones[7].m.origin.x + d->butt.x;
     lhip.y = bones[7].m.origin.y + d->butt.y;
     lhip.z = bones[7].m.origin.z + d->butt.z;
+    // Retail keeps this store although lfoot is overwritten by m1 below: the m2 Lerp's bone reads sit between the
+    // last read and the overwrite, so the def is not removed (IRO_UseDef). 472 instrs and retail's mnemonic mix.
+    lfoot = bones[9].m.origin;
     ValVec3 lknee;
     lknee.x = bones[8].m.origin.x + d->butt.x;
     lknee.y = bones[8].m.origin.y + d->butt.y;
@@ -215,19 +218,18 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     rknee.x = bones[5].m.origin.x + d->butt.x;
     rknee.y = bones[5].m.origin.y + d->butt.y;
     rknee.z = bones[5].m.origin.z + d->butt.z;
-    lfoot = bones[9].m.origin;
     ValVec3 pelvis;
     ValVec3 m1;
     m1.x = Lerp(lfoot.x, lknee.x, 0.5f);
     m1.y = Lerp(lfoot.y, lknee.y, 0.5f);
     m1.z = Lerp(lfoot.z, lknee.z, 0.5f);
-    lfoot.x = m1.x;
-    lfoot.y = m1.y;
-    lfoot.z = m1.z;
     ValVec3 m2;
     m2.x = Lerp(bones[6].m.origin.x, rknee.x, 0.5f);
     m2.y = Lerp(bones[6].m.origin.y, rknee.y, 0.5f);
     m2.z = Lerp(bones[6].m.origin.z, rknee.z, 0.5f);
+    lfoot.x = m1.x;
+    lfoot.y = m1.y;
+    lfoot.z = m1.z;
     rfoot.x = m2.x;
     rfoot.y = m2.y;
     rfoot.z = m2.z;
