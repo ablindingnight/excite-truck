@@ -821,6 +821,9 @@ struct WaterPt {
     }
     f32 x, y, z;
 };
+/* Helper name unproven: Dot3 returning a named local, so the result is a frontend local and no IRO force-load temp is
+   made for it (that temp numbered after the WaterCoordinate conversions and took the wrong callee-saved FPR). */
+static inline f32 WaterDot3(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) { f32 r = a * b + c * d + e * f; return r; }
 
 void WaterSystem::Draw(void) {
     PlainValMatrix cam;
@@ -862,7 +865,8 @@ void WaterSystem::Draw(void) {
         if (r == 63) {
             p.y = cam.origin.y;
         }
-        f32 dist = nd + t * (far - nd) + tilt;
+        f32 dist = nd + t * (far - nd);
+        dist = dist + tilt;
         p.x += fwd.x * dist;
         p.y += fwd.y * dist;
         p.z += fwd.z * dist;
@@ -873,7 +877,7 @@ void WaterSystem::Draw(void) {
         lc.z = p.z - cam.origin.z;
         f32 x = Dot3(lc.x, cam.basis[0].x, lc.y, cam.basis[0].y, lc.z, cam.basis[0].z);
         f32 y = Dot3(lc.x, cam.basis[1].x, lc.y, cam.basis[1].y, lc.z, cam.basis[1].z);
-        f32 z = Dot3(lc.x, cam.basis[2].x, lc.y, cam.basis[2].y, lc.z, cam.basis[2].z);
+        f32 z = WaterDot3(lc.x, cam.basis[2].x, lc.y, cam.basis[2].y, lc.z, cam.basis[2].z);
         lc.x = x;
         lc.y = y;
         lc.z = z;
@@ -898,8 +902,10 @@ void WaterSystem::Draw(void) {
             TransformWorldToScreen(&v->pos, &s);
             // The viewport centring offsets are written inline here (the compiler hoists them; their constants are
             // created in the loop, which the target's colouring order needs).
-            v->u = (s.x - vx + 0.5f * (640.0f - vh)) / 640.0f;
-            v->v = (s.y - vy + 0.5f * (480.0f - vw)) / 480.0f;
+            f32 su = s.x - vx;
+            v->u = (su + 0.5f * (640.0f - vh)) / 640.0f;
+            f32 sv = s.y - vy;
+            v->v = (sv + 0.5f * (480.0f - vw)) / 480.0f;
             v->u = 0.5f + (v->u - 0.5f) * k;
             v->v = 0.5f + 0.75f * ((v->v - 0.5f) * k);
         }
