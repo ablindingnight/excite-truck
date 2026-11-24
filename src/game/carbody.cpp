@@ -2468,10 +2468,14 @@ void fn_80186DE8(void) {
             }
             speed = PSVECMag((const Vec*)(car + 0x118));
             speed = speed > 1.0f ? speed : 1.0f;
-            k = 9.81f * (-1.5f * ((CarBody*)car)->mass) * ((CarBody*)car)->f25E4 / speed;
-            force[0] = AddScaledF(force[0], k, ((CarBody*)car)->vel.x);
-            force[1] = force[1] + ((CarBody*)car)->vel.y * k;
-            force[2] = force[2] + ((CarBody*)car)->vel.z * k;
+            k = 9.81f * (-1.5f * ((CarBody*)car)->mass) * F32(car, 0x25E4) / speed;
+            f32 dv[3];
+            dv[0] = ((CarBody*)car)->vel.x * k;
+            dv[1] = ((CarBody*)car)->vel.y * k;
+            dv[2] = ((CarBody*)car)->vel.z * k;
+            force[0] = force[0] + dv[0];
+            force[1] = force[1] + dv[1];
+            force[2] = force[2] + dv[2];
             if (((CarBody*)car)->f259C && ((CarBody*)car)->speed < top) {
                 f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
                 f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
