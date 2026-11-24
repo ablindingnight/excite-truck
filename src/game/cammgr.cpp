@@ -1165,28 +1165,21 @@ struct MountView {
 // Fixed mount camera on the ideal line: for the current and the next mount, place both mount points in
 // the line's frame (an average of two samples), then blend from one mount to the other over time.
 
-// d += v * k. Returns d: chained calls reload through the returned reference, which the optimizer cannot forward
-// (the target's frsp right after each stfs).
-// x and y build the product in a local and add d into it (a += d.x keeps the product and the sum one variable, so the
-// sum lands in the product's register as in the target; a = d.x + a splits the lifetimes, 99.91).
-static inline ValVec3& CamMad(ValVec3& d, const f32* v, f32 k) {
-    f32 a = v[0] * k;
-    a += d.x;
-    d.x = a;
-    f32 b = v[1] * k;
-    b += d.y;
-    d.y = b;
-    d.z += v[2] * k;
-    return d;
-}
-// The same blend for the second sample, with x and y read before the stores (helper name unproven). Reading them
-// into locals first creates the two store-forwarded reads before the v loads, which is the target's float colouring
-// (99.73 -> 99.91; reading all three, or using it for both calls, is worse).
-static inline ValVec3& CamMadXY(ValVec3& d, const f32* v, f32 k) {
-    f32 x = d.x;
-    f32 y = d.y;
-    d.x = x + v[0] * k;
-    d.y = y + v[1] * k;
+// d += v * k (helper name unproven). Returns d: chained calls reload through the returned reference, which the
+// optimizer cannot forward (the target's frsp right after each stfs).
+// x, y and the x/y lane values are the caller's variables, shared by both calls: under opt_lifetimes off (see
+// fn_80268358) each keeps ONE register across both blends (x f3, y f2, px/py f1 in the target).
+static inline ValVec3& CamMad(ValVec3& d, const f32* v, f32 k, f32& x, f32& y, f32& px, f32& py) {
+    x = d.x;
+    px = v[0];
+    px *= k;
+    px = x + px;
+    d.x = px;
+    y = d.y;
+    py = v[1];
+    py *= k;
+    py = y + py;
+    d.y = py;
     d.z += v[2] * k;
     return d;
 }
@@ -1200,6 +1193,10 @@ static inline void SetM3(f32* o, f32 x, f32 y, f32 z) {
 }
 
 
+// Lifetime splitting off: the retail signature is the up blend's shared variables keeping one register across both
+// blends (the function is exact with it; every split-lifetime spelling tried stays at 8-10 rows, 2026-11-23).
+#pragma push
+#pragma opt_lifetimes off
 void fn_80268358(CamRec* c) {
     RVec3 mv[4] = {RVec3(lbl_803467E8[lbl_8055F4A0].off[0], lbl_803467E8[lbl_8055F4A0].off[1], lbl_803467E8[lbl_8055F4A0].off[2]), RVec3(lbl_803467E8[lbl_8055F4A0].look[0], lbl_803467E8[lbl_8055F4A0].look[1], lbl_803467E8[lbl_8055F4A0].look[2]), RVec3(lbl_803467E8[lbl_8055F4A4].off[0], lbl_803467E8[lbl_8055F4A4].off[1], lbl_803467E8[lbl_8055F4A4].off[2]), RVec3(lbl_803467E8[lbl_8055F4A4].look[0], lbl_803467E8[lbl_8055F4A4].look[1], lbl_803467E8[lbl_8055F4A4].look[2])};
     f32 (*m)[6] = (f32(*)[6])mv;
@@ -1274,7 +1271,8 @@ void fn_80268358(CamRec* c) {
             o->b.y += res2.y * half;
             o->b.z += res2.z * half;
         }
-        CamMadXY(CamMad(o->up, &fr[0].basis[1].x, half), &fr[1].basis[1].x, half);
+        f32 py, px, y, x;
+        CamMad(CamMad(o->up, &fr[0].basis[1].x, half, x, y, px, py), &fr[1].basis[1].x, half, x, y, px, py);
     }
     t = lbl_8055E3C8 - c->mount.start;
     f32 ka;
@@ -1290,6 +1288,7 @@ void fn_80268358(CamRec* c) {
     c->fov = Lerp(lbl_803467E8[lbl_8055F4A0].fov, lbl_803467E8[lbl_8055F4A4].fov, ka);
     fn_8026E850(&bl.x, &al.x, (u8*)c, &up.x);
 }
+#pragma pop
 
 void fn_80268B94(s32 v) {
     lbl_8055F4A0 = v;
