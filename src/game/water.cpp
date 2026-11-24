@@ -840,7 +840,6 @@ void WaterSystem::Draw(void) {
     f32 vx = fn_802C9C50();
     f32 vy = WaterCoordinate(fn_802C9C40());
     f32 vw = fn_802C9C38();
-    f32 cx;
     f32 vh = fn_802C9C48();
     k = 640.0f / (vh * env->Scale());
     PVec fwd;
@@ -856,7 +855,6 @@ void WaterSystem::Draw(void) {
     fwd.z *= inv;
     PVec side;
     CrossUpR(&side, &fwd);
-    cx = 0.5f * (640.0f - vh);
     for (int r = 0; r < 64; r++) {
         f32 t = (f32)r / 63.0f * ((f32)r / 63.0f);
         PVec p = cam.origin;
@@ -898,8 +896,11 @@ void WaterSystem::Draw(void) {
             v->color = col;
             PVec s;
             TransformWorldToScreen(&v->pos, &s);
+            // Viewport centring offsets, written in the loop (the compiler hoists them; their constants are created here).
+            f32 cx = 0.5f * (640.0f - vh);
+            f32 cy = 0.5f * (480.0f - vw);
             v->u = (s.x - vx + cx) / 640.0f;
-            v->v = (s.y - vy + 0.5f * (480.0f - vw)) / 480.0f;
+            v->v = (s.y - vy + cy) / 480.0f;
             v->u = 0.5f + (v->u - 0.5f) * k;
             v->v = 0.5f + 0.75f * ((v->v - 0.5f) * k);
         }
