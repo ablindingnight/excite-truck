@@ -174,14 +174,24 @@ static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
 static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t) {
     for (int j = 2; j >= 0; j--) {
         (&out->x)[j] = t * ((&b.x)[j] - (&a.x)[j]);
-    }
-    for (int j = 2; j >= 0; j--) {
         (&out->x)[j] += (&a.x)[j];
     }
 }
-// Componentwise sums (names unproven). All four hip/knee vectors use AddVL, so every sum reads the rounded
-// d->butt copy as in retail.
+// Componentwise sums (names unproven). Every sum reads the rounded d->butt copy as in retail. Only the left
+// hip goes through the value-returning AddF; its extra inline statements place the scheduler's block cut
+// after m1.z as in retail (FACTS STATEMENT-BLOCK-CUT-100).
+// Plain float sum / difference (names unproven).
+static inline f32 AddF(f32 a, f32 b) { return a + b; }
+static inline f32 SubF(f32 a, f32 b) { return a - b; }
 static inline void AddVL(ValVec3* out, const ValVec3& a, const ValVec3& b) {
+    f32 x = AddF(a.x, b.x);
+    f32 y = AddF(a.y, b.y);
+    f32 z = AddF(a.z, b.z);
+    out->z = z;
+    out->y = y;
+    out->x = x;
+}
+static inline void AddVP(ValVec3* out, const ValVec3& a, const ValVec3& b) {
     f32 x = a.x + b.x;
     f32 y = a.y + b.y;
     f32 z = a.z + b.z;
@@ -227,20 +237,20 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     f32 by = ((PlainValMatrix*)butt)->basis[1].y;
     f32 bz = ((PlainValMatrix*)butt)->basis[1].z;
     d->yaw = atan2(bz, by);
-    d->butt.x = d->butt.x - bones[0].m.origin.x;
-    d->butt.y = d->butt.y - bones[0].m.origin.y;
-    d->butt.z = d->butt.z - bones[0].m.origin.z;
+    d->butt.x = SubF(d->butt.x, bones[0].m.origin.x);
+    d->butt.y = SubF(d->butt.y, bones[0].m.origin.y);
+    d->butt.z = SubF(d->butt.z, bones[0].m.origin.z);
     // Retail keeps this store although lfoot is overwritten by m1 below: the AddVL stores through `out` that follow
     // it keep the def alive. 472 instrs and retail's mnemonic mix.
     lfoot = bones[9].m.origin;
     ValVec3 lhip;
     AddVL(&lhip, bones[7].m.origin, d->butt);
     ValVec3 lknee;
-    AddVL(&lknee, bones[8].m.origin, d->butt);
+    AddVP(&lknee, bones[8].m.origin, d->butt);
     ValVec3 rhip;
-    AddVL(&rhip, bones[4].m.origin, d->butt);
+    AddVP(&rhip, bones[4].m.origin, d->butt);
     ValVec3 rknee;
-    AddVL(&rknee, bones[5].m.origin, d->butt);
+    AddVP(&rknee, bones[5].m.origin, d->butt);
     ValVec3 pelvis;
     ValVec3 m1;
     LerpV(&m1, lfoot, lknee, 0.5f);
