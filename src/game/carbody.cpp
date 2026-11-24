@@ -2553,7 +2553,8 @@ void fn_80186DE8(void) {
         CbVec4 rpm(c->pts[4]);
         CbVec4 w6(x->v70);
         CbWheel* w;
-        ((CarBody*)car)->f25D0 = rpm.x / 0.10471976f;
+        f32 rpmT = rpm.x / 0.10471976f;
+        ((CarBody*)car)->f25D0 = rpmT;
         ((CarBody*)car)->speed = PSVECMag((const Vec*)(0x118 + car));
         ((CarBody*)car)->f25D8 = PSVECDotProduct((const Vec*)(car + 0x118), (const Vec*)(car + 0x54));
         ((CarBody*)car)->f25CC = rpm.y;
@@ -2593,7 +2594,8 @@ void fn_80186DE8(void) {
             pl[1] = up;
             w->plane.nRight = pl[0];
             w->plane.nFwd = pl[1];
-            w->grounded = nrm[1] > 0.01f;
+            bool gr = nrm[1] > 0.01f;
+            w->grounded = gr;
             f32 comp = c->pts[5 + j].w;
             if (comp > 20000.0f) {
                 c->pts[5 + j] = CbSolVec4(0.0f, 0.0f, 0.0f);
@@ -2602,7 +2604,7 @@ void fn_80186DE8(void) {
                 c->v30 = half.Sol();
             }
             fl = w->flags & 0xE;
-            if (w->grounded) {
+            if (gr) {
                 f32 d = comp - 1.4f;
                 grounded++;
                 w->comp = d > 0.0f ? d : 0.0f;
@@ -2679,7 +2681,6 @@ void fn_80186DE8(void) {
             gas = throttle < 1.0f - cut ? throttle : 1.0f - cut;
         }
         brake = ((CarBody*)car)->f25E8;
-        f32 rpmT = rpm.x / 0.10471976f;
         throttle = MaxF(gas, 0.0016666667f * (1800.0f - rpmT));
         if (rpmT > ground[12]) {
             throttle = 0.0f;
