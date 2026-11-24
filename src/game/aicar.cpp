@@ -902,7 +902,9 @@ void fn_80194324(u8* d) {
                 f32 fraction = dt / 1.5f;
                 v = RecoveryCrossBlend(F32(d, 0x178), F32(d, 0x17C), F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x180), F32(d, 0x184), F32(d, 0x1B4), F32(d, 0x1B8), fraction);
             } else {
-                v = Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), F32(d, 0x1B8));
+                // PROVISIONAL: original current right-Y input ownership unproven.
+                f32 currentRightY = F32(d, 0x1B8);
+                v = Cross2(F32(d, 0x1AC), F32(d, 0x1B0), F32(d, 0x1B4), currentRightY);
             }
             ok = (f32)__fabs(v) < lim;
         }
