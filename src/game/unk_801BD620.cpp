@@ -735,11 +735,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1780.y = V1780.x;
         V1780.z = V1780.y;
         V1770.x = ValueOf(ValueOf(V17F0.z));
-        V1770.y = ValueOf(ValueOf(V1770.x));
-        V1770.z = ValueOf(V1770.y);
-        V1760.x = V1770.x;  // lane-wise copy (retail stores f14/f13/f12 to both vectors)
+        V1760.x = V1770.x;
         V1750.x = rowA0->x;
+        V1770.y = ValueOf(ValueOf(V17F0.z));
         V1760.y = V1770.y;
+        V1770.z = ValueOf(V17F0.z);
         V1760.z = V1770.z;
         V1C10.x = V1750.x;
         V1750.y = rowA0->y;
