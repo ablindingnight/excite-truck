@@ -58,6 +58,7 @@ static inline f32 SqrtF(f32 v) { return fn_8002B0B0(v); }  // same shape (name u
 static inline f32 MinF(f32 a, f32 b) { return a < b ? a : b; }  // helper names unproven
 static inline f32 MaxF(f32 a, f32 b) { return a > b ? a : b; }
 static inline f32 Sq(const f32& a) { return a * a; }  // helper name unproven
+static inline void SetRow(MVec4& d, const Vec4f& s) { d.x = s.x; d.y = s.y; d.z = s.z; }  // helper name unproven
 static inline f32 Sum3(f32 a, f32 b, f32 c) { return (a + b) + c; }  // by-value inline helper, name unproven
 void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     u8* arg0 = (u8*)t_;
@@ -516,13 +517,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B50.y = V1B50.w + V1880.x;
         Vec4f V1870(V1BF0);
         V1B50.z = tmp.z - (ident.w * V18B0.y);
-        rowA5->x = V1870.x;
-        rowA5->y = V1870.y;
-        rowA5->z = V1870.z;
+        SetRow(*rowA5, V1870);
         Vec4f V1860(V1C10);
-        rowA0->x = V1860.x;
-        rowA0->y = V1860.y;
-        rowA0->z = V1860.z;
+        SetRow(*rowA0, V1860);
         Vec4f V1850(V1BD0);  // retail stack object 0x1850 (restored; 0e8671d42 had dropped it)
         rowA6->x = V1850.x;
         rowA6->y = V1850.y;
@@ -532,22 +529,14 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         rowA6->z = V1850.z;
         V1840.z = V1BB0.z;
         V1840.w = V1BB0.w;
-        rowA4->x = V1840.x;
-        rowA4->y = V1840.y;
-        rowA4->z = V1840.z;
+        SetRow(*rowA4, V1840);
         rowA4->w = V1840.w;
         Vec4f V1820(V1B70);
         Vec4f V1830(V1B90);
-        rowA1->x = V1830.x;
-        rowA1->y = V1830.y;
-        rowA1->z = V1830.z;
-        rowA2->x = V1820.x;
-        rowA2->y = V1820.y;
-        rowA2->z = V1820.z;
+        SetRow(*rowA1, V1830);
+        SetRow(*rowA2, V1820);
         Vec4f V1810(V1B50);
-        rowA3->x = V1810.x;
-        rowA3->y = V1810.y;
-        rowA3->z = V1810.z;
+        SetRow(*rowA3, V1810);
         Vec4f V1800(temp_f31);
         V1800.y = V1800.x;
         V1800.z = V1800.y;
@@ -1656,28 +1645,16 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V00B0.x = V1760.x;
         V00B0.y = V1760.y;
         V00B0.z = V1760.z;
-        rowB1->x = V0100.x;
-        rowB1->y = V0100.y;
-        rowB1->z = V0100.z;
+        SetRow(*rowB1, V0100);
         rowB1->w = V0100.w;
-        rowB2->x = V00F0.x;
-        rowB2->y = V00F0.y;
-        rowB2->z = V00F0.z;
+        SetRow(*rowB2, V00F0);
         rowB2->w = V00F0.w;
-        rowB3->x = V00E0.x;
-        rowB3->y = V00E0.y;
-        rowB3->z = V00E0.z;
+        SetRow(*rowB3, V00E0);
         rowB3->w = V00E0.w;
-        rowB0->x = V00D0.x;
-        rowB0->y = V00D0.y;
-        rowB0->z = V00D0.z;
+        SetRow(*rowB0, V00D0);
         rowB0->w = V00D0.w;
-        rowA9->x = V00C0.x;
-        rowA9->y = V00C0.y;
-        rowA9->z = V00C0.z;
-        rowA10->x = V00B0.x;
-        rowA10->y = V00B0.y;
-        rowA10->z = V00B0.z;
+        SetRow(*rowA9, V00C0);
+        SetRow(*rowA10, V00B0);
         }
     }
         // retail recomputes each row address from the raw index here (slwi + add), byte-offset form
