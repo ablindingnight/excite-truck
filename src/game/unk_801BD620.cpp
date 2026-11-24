@@ -799,9 +799,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V16B0.w = V16C0.w;
         V1670.z = V1680.z;
         V1670.x = V1680.x;
+        V19E0.z = V1670.z * V1670.z;
         V1670.y = V1680.y;
         V19E0.y = V1670.y * V1670.y;
-        V19E0.z = V1670.z * V1670.z;
         V19E0.x = V1670.x * V1670.x;
         V1660.x = Sum3(V19E0.x, V19E0.y, V19E0.z);
         V1650.x = V1770.x + SqrtF(V1660.x);
@@ -917,8 +917,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1320.w = V1330.w;
         V1310.w = V1320.w * V1340.x;
         V1310.x = V1320.x * V1340.x;
-        V1320.z = V1330.z;
         V1310.y = V1320.y * V1340.x;
+        V1320.z = V1330.z;
         V1310.z = V1320.z * V1340.x;
         V1300.x = V1310.x;
         V1300.y = V1310.y;
@@ -953,9 +953,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1510.x = V1260.y;
         V1260.z = V1270.z;
         V1500.x = V1510.x + V1510.w;
+        V1260.w = V1270.w;
         V1510.y = V1260.z;
         V1240.x = ((temp_f31 + lbl_805627EC));
-        V1260.w = V1270.w;
         V1510.z = V1260.w;
         V1500.y = V1510.y + V1510.x;
         V1500.z = V1510.z + V1510.y;
@@ -1010,8 +1010,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1170.z = V1300.z - V1180.z;
         V1170.w = V1300.w - V1180.w;
         V1300.x = V1170.x;
-        V1300.z = V1170.z;
         V1300.y = V1170.y;
+        V1300.z = V1170.z;
         V1300.w = V1170.w;
         V1160.w = V16D0.w - V16D0.z;
         V1150.x = F(arg0 + sp2010, 0);
@@ -1167,9 +1167,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0E60.x = rowC15->x;
         V0E60.y = rowC15->y;
         V0E90.w = (V1000.w - V0EA0.w);
-        V0E60.z = rowC15->z;
         V0E50.x = V0E60.x;
         V0E50.y = V0E60.y;
+        V0E60.z = rowC15->z;
         V0E50.z = V0E60.z;
         V0E60.w = rowC15->w;
         V0E80.y = V1690.z;
@@ -1191,10 +1191,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0E30.w = V0E40.w;
         V0E20.x = (V0E90.x + V0E30.x);
         V0E20.z = (V0E90.z + V0E30.z);
-        V0E00.w = (V0E90.w - V0E30.z);
         V1000.x = V0E20.x;
         V1000.z = V0E20.z;
         V0E10.y = (V0E90.y - V0E30.x);
+        V0E00.w = (V0E90.w - V0E30.z);
         V1000.y = V0E10.y;
         V1000.w = V0E00.w;
         var_r16 = 4;
@@ -1590,8 +1590,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V01C0.y = V16B0.y + V01D0.y;
         V01C0.z = V16B0.z + V01D0.z;
         V01C0.w = V16B0.w + V01D0.w;
-        V16B0.y = V01C0.y;
         V16B0.x = V01C0.x;
+        V16B0.y = V01C0.y;
         V16B0.z = V01C0.z;
         V16B0.w = V01C0.w;
         V01B0.x = rowC5->x;
