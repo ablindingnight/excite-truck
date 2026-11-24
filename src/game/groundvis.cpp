@@ -639,6 +639,50 @@ void fn_802AEAAC(void) {
     fn_802C10CC(lbl_8055F970->sky);
 }
 
+// The node split as an inline helper: its locals are inline objects (fn_802AEB3C register numbering). Name unproven.
+static inline void SplitNode(GroundNode* n, f32 blend) {
+    GroundNode cur;
+    cur = *n;
+    u16* m3;
+    u16* m2;
+    u16* m1;
+    u16* p;
+    s32 q = cur.size / 2;
+    int o = q / 2;
+    p = fn_802AFEC0(q);
+    int s = q + 1;
+    m1 = p + s;
+    m2 = p + s * 2;
+    m3 = p + s * 3;
+    fn_802AFEA4(&lbl_804BD8E8, -q);
+    // Children go on the stack far-to-near for the view quadrant.
+    switch (lbl_8055F988) {
+    case 3:
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+        break;
+    case 2:
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
+        break;
+    case 1:
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
+        break;
+    case 0:
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
+        fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
+        fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
+        break;
+    }
+}
 // Walks the terrain quadtree from the camera, building the visible cell batches and their scattered objects.
 void fn_802AEB3C(const GroundFrame* cam) {
     fn_802AEAAC();
@@ -735,51 +779,11 @@ void fn_802AEB3C(const GroundFrame* cam) {
         if (draw) {
             DrawNode(n, cell);
         } else {
-            GroundNode cur;
             int h = n->size / 2;
             if (h == 4) {
                 fn_802BDFBC(cell, h, n->scale);
             }
-            cur = *n;
-            u16* p;
-            u16* m1;
-            u16* m2;
-            u16* m3;
-            s32 q = cur.size / 2;
-            int o = q / 2;
-            p = fn_802AFEC0(q);
-            int s = q + 1;
-            m1 = p + s;
-            m2 = p + s * 2;
-            m3 = p + s * 3;
-            fn_802AFEA4(&lbl_804BD8E8, -q);
-            // Children go on the stack far-to-near for the view quadrant.
-            switch (lbl_8055F988) {
-            case 3:
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
-                break;
-            case 2:
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
-                break;
-            case 1:
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y + o, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
-                break;
-            case 0:
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, o + cur.y, q, 0, blend, cur.edge[0], p, cur.edge[3], m2);
-                fn_802AFE64(&lbl_804BD8E8, cur.x + o, cur.y - o, q, 3, blend, m2, m1, cur.edge[3] + q, cur.edge[2]);
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y + o, q, 1, blend, cur.edge[0] + q, cur.edge[1], p, m3);
-                fn_802AFE64(&lbl_804BD8E8, cur.x - o, cur.y - o, q, 2, blend, m3, cur.edge[1] + q, m1, cur.edge[2] + q);
-                break;
-            }
+            SplitNode(n, blend);
         }
     }
 }
