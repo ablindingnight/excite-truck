@@ -829,7 +829,9 @@ void fn_8026C014(int player) {
         f->rot.axes[2].y = car->frame.pos.y - f->pos.y;
         f->rot.axes[2].z = car->frame.pos.z - f->pos.z;
         CamSet(&up, 0.0f, 1.0f, 0.0f);
-        if (f->rot.axes[2].x * f->rot.axes[2].x + f->rot.axes[2].z * f->rot.axes[2].z > 0.01f) {
+        f32 xx = f->rot.axes[2].x * f->rot.axes[2].x;
+        f32 zz = f->rot.axes[2].z * f->rot.axes[2].z;
+        if (xx + zz > 0.01f) {
             PSVECCrossProduct((const Vec*)&up, (const Vec*)&f->rot.axes[2], (Vec*)&f->rot.axes[0]);
             PSVECCrossProduct((const Vec*)&f->rot.axes[2], (const Vec*)&f->rot.axes[0], (Vec*)&f->rot.axes[1]);
             CamOrthonormal(f->rot);
