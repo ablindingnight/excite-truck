@@ -563,7 +563,9 @@ extern "C" {
 // "<model>.car/physics.val" (camera, head positions in inches, suspension, speed limiter, gravity boosts),
 // sets up the rigid body, wheels, collision shapes and sub-systems, then resets the body.
 /* Real member body (2026-11-23): the descriptor parameter is used directly, `this` until the chassis node is found, the
-   byte view p after it (numfit: p is numbered after table/chassis), and the name string as (char*)this + 0x234 at each use. */
+   byte view p after it (numfit: p is numbered after table/chassis), and the name string as (char*)this + 0x234 at each use.
+   The CarDesc view cd of the descriptor is passed to the four (p, desc) calls: those argument moves keep cd's copy alive into
+   scheduling pass 1 as a user of d's entry copy, so d's copy (mr r28,r4) is scheduled before this's (mr r27,r3). */
 /* Helper name unproven (interlude has the same one for ValueNode) */
 static inline s32 GetEnumOr(CbValueNode* n, const char* key, const char* names, s32 def) {
     return n->Has(key) ? n->GetEnum(key, names) : def;
