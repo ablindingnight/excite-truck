@@ -2304,7 +2304,8 @@ static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
 
 /* Helper name and ownership unproven: accumulate both solved force and torque. */
 static inline void AccumulateBodyLoads(CbSolMass* m, const RVec3& f, const RVec3& t) {
-    RVec3 F(m->force.x, m->force.y, m->force.z);
+    RVec3 F;
+    F = *(const RVec3*)&m->force;
     F.x += f.x;
     F.y += f.y;
     F.z += f.z;
