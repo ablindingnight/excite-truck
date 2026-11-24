@@ -2373,6 +2373,8 @@ struct BoxSlip {
 
 // The volume's owning body through a getter: its value is a late temporary, not a named local (vf14 registers).
 static inline RigidBody* BodyOf(CollShape* s) { return (RigidBody*)s->owner; }  // name unproven
+// The sphere radius through a getter: keeps it the second operand of the water-depth sum (vf14).
+static inline f32 RadiusOf(const SphereShape* s) { return s->radius; }  // name unproven
 
 // Box (half extents at 0x58) on the ground: each of the eight corners below the track height gets a spring
 // impulse, clamped friction (with its own slip accumulator at 0x64) and the bounce event. In water (surface 7)
@@ -2492,7 +2494,7 @@ void BoxSphereShape::vf14(void) {
         RVec3 bv;
         RVec3 drag;
         RVec3 up;
-        f32 sub = this->f50 - this->f38 + this->radius;
+        f32 sub = this->f50 - this->f38 + RadiusOf(this);
         rb->VelAt(&bv, (RVec3*)(p + 0x34));
         f32 ph = fmod(this->f34 + Mul(6.2831855f, lbl_8055E3C8) / 2.0f, 6.2831854820251465);
         f32 s = sin(ph);
