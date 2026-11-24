@@ -567,8 +567,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         basis.pos.x = tpos.x;
         basis.pos.y = tpos.y;
         basis.pos.z = 0.0f;
-        f32 dx = dir.x;
-        SetXYZ(&basis.fwd, dx, dir.y, 0.0f);
+        f32 dx;
+        f32 dy = dir.y;
+        dx = dir.x;
+        SetXYZ(&basis.fwd, dx, dy, 0.0f);
     }
     PSVECNormalize((const Vec*)&basis.fwd, (Vec*)&basis.fwd);
     basis.up.x = 0.0f;
