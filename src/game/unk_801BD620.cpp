@@ -248,9 +248,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowA2 = &t[a + 2];
     rowA3 = &t[a + 3];
     rowA6 = &t[a + 6];
-    rowA4 = &t[a + 4];
     rowA5 = &t[a + 5];
     rowB0 = &t[b];
+    rowA4 = &t[a + 4];
     rowA8 = &t[a + 8];
     rowA9 = &t[a + 9];
     rowA10 = &t[a + 10];
@@ -413,8 +413,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1980.z = V1990.z * V1C50.w;
         Vec4f V1970;
         V1970.x = V1BD0.x + V1980.x;
-        V1980.y = ValueOf(V1990.y * V1C50.w);
         V1970.z = V1BD0.z + V1980.z;
+        V1980.y = ValueOf(V1990.y * V1C50.w);
         V1970.y = V1BD0.y + V1980.y;
         V1BD0.x = V1970.x;
         V1BD0.y = V1970.y;
@@ -794,11 +794,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1690.y = V16A0.y;
         V1690.z = V16A0.z;
         V1690.w = V16A0.w;
+        V1670.x = V1680.x;
         V1680.z = rowA5->z;
         V1680.y = rowA5->y;
         V16B0.w = V16C0.w;
         V1670.z = V1680.z;
-        V1670.x = V1680.x;
         V19E0.z = V1670.z * V1670.z;
         V1670.y = V1680.y;
         V19E0.y = V1670.y * V1670.y;
@@ -905,10 +905,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1390.w = V13A0.w * ((temp_f31 + lbl_805627E4));
         V1380.w = (V1390.w + V13D0.x);
         V1370.x = V1770.x + V1380.w;
+        V1330.x = rowC21->x;  // retail re-reads row c+21 here as well (lfs 0..12 through the row pointer)
         V1360.x = c1D74;
         V1350.w = V17A0.w * V1360.x;
         V1340.x = (V13D0.x * V1350.w);
-        V1330.x = rowC21->x;  // retail re-reads row c+21 here as well (lfs 0..12 through the row pointer)
         V1330.y = rowC21->y;
         V1330.z = rowC21->z;
         V1320.x = V1330.x;
@@ -923,8 +923,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1300.x = V1310.x;
         V1300.y = V1310.y;
         V1300.z = V1310.z;
-        V1300.w = V1310.w;
         V12E0.w = V1C50.w * ((temp_f31 + lbl_805627E8));
+        V1300.w = V1310.w;
         V12D0.x = (V1370.x * V12E0.w);
         V12F0.x = ((temp_f31 + lbl_805627E8));
         V12A0.x = V16D0.x * V16F0.x;
@@ -1153,10 +1153,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0EC0.w = rowC17->w;
         V0EB0.z = V0EC0.z;
         V0EB0.x = V0EC0.x;
-        V0EB0.y = V0EC0.y;
         V0EB0.w = V0EC0.w;
         V0EA0.x = V0ED0.x * V0EB0.x;
         temp_f19_12 = V1000.x - V0EA0.x;
+        V0EB0.y = V0EC0.y;
         V0EA0.y = V0ED0.y * V0EB0.y;
         V0E90.x = temp_f19_12;
         V0E90.y = (V1000.y - V0EA0.y);
@@ -1170,11 +1170,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0E50.x = V0E60.x;
         V0E50.y = V0E60.y;
         V0E60.z = rowC15->z;
-        V0E50.z = V0E60.z;
         V0E60.w = rowC15->w;
         V0E80.y = V1690.z;
         V0E80.x = V1690.y;
         V0E80.w = V1690.x;
+        V0E50.z = V0E60.z;
         V0E70.x = V0E80.x - V0E80.w;
         V0E70.y = V0E80.y - V0E80.x;
         V0E80.z = V1690.w;
@@ -1184,11 +1184,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0E40.y = V0E70.y * V0E50.y;
         V0E40.z = V0E70.z * V0E50.z;
         V0E50.w = V0E60.w;
-        V0E30.y = V0E40.y;
         V0E40.w = V0E70.w * V0E50.w;
         V0E30.x = V0E40.x;
         V0E30.z = V0E40.z;
         V0E30.w = V0E40.w;
+        V0E30.y = V0E40.y;
         V0E20.x = (V0E90.x + V0E30.x);
         V0E20.z = (V0E90.z + V0E30.z);
         V1000.x = V0E20.x;
