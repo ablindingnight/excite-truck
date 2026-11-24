@@ -397,9 +397,9 @@ static inline f32 Ease(f32 t) {
 static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
 // Name unproven: inverse lerp; parameter order unproven (lo, hi, v evaluated right to left gives retail load order).
 static inline f32 Unlerp(f32 lo, f32 hi, f32 v) { return (v - lo) / (hi - lo); }
-// Name unproven: consumed map texture projection.
-static inline f32 MapTextureV(f32 one, f32 half, f32 scale, f32 value, f32 origin, f32 texSize) {
-    return one - (half + half * scale * value) + origin / texSize;
+// Name unproven: consumed map texture projection; parameter order unproven (hs after value numbers it below value).
+static inline f32 MapTextureV(f32 one, f32 half, f32 value, f32 hs, f32 origin, f32 texSize) {
+    return one - (half + hs * value) + origin / texSize;
 }
 
 // Name unproven: initialize the real right row via its first float member.
@@ -585,7 +585,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         f32 du = map->origin.x / map->texSize;
         f32 pu = 0.5f + 0.5f * scale * v.x;
         f32 tu = pu + du;
-        fn_80231380(&verts[i], color, x + w * (1.0f + 0.5f * c.x) / 2.0f, y + h * (0.5f * c.y - 1.0f) / 2.0f, zero, tu, MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
+        fn_80231380(&verts[i], color, x + w * (1.0f + 0.5f * c.x) / 2.0f, y + h * (0.5f * c.y - 1.0f) / 2.0f, zero, tu, MapTextureV(1.0f, 0.5f, v.y, 0.5f * scale, map->origin.y, map->texSize));
         if (i < 20) {
             v.x = c.x * radius;
             v.y = c.y * radius;
@@ -597,7 +597,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             f32 du = map->origin.x / map->texSize;
             f32 pu = 0.5f + 0.5f * scale * v.x;
             f32 tu = pu + du;
-            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + (1.0f + c.x) * w / 2.0f, y + (c.y - 1.0f) * h / 2.0f, zero, tu, MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
+            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + (1.0f + c.x) * w / 2.0f, y + (c.y - 1.0f) * h / 2.0f, zero, tu, MapTextureV(1.0f, 0.5f, v.y, 0.5f * scale, map->origin.y, map->texSize));
         }
     }
     {
