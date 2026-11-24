@@ -3103,21 +3103,21 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
             fr.pos.y = Dot3(com->x, rot->rows0.y, com->y, rot->rows1.y, com->z, rot->rows2.y);
             fr.pos.z = Dot3(com->x, rot->rows0.z, com->y, rot->rows1.z, com->z, rot->rows2.z);
         }
-        fr.pos.x = fr.pos.x + org->x;
-        f32 yv = fr.pos.y;
-        f32 y_ = org->y;
-        fr.pos.y = y_ + yv;
-        f32 zv = org->z;
-        fr.pos.z = zv + fr.pos.z;
-        f32 dx = at->x - fr.pos.x;
-        f32 y2 = at->y;
-        f32 dy = y2 - fr.pos.y;
-        f32 dz = at->z - fr.pos.z;
+        fr.pos.x += org->x;
+        fr.pos.y += org->y;
+        fr.pos.z += org->z;
+        // The hit point in the frame: struct-lane deltas, named Dot3 results copied back (the same shape as the
+        // car-on-car local point above).
         HVec lp;
-        f32 lp_y = Dot3(dx, fr.rot.rows1.x, dy, fr.rot.rows1.y, dz, fr.rot.rows1.z);
-        lp.x = Dot3(dx, fr.rot.rows0.x, dy, fr.rot.rows0.y, dz, fr.rot.rows0.z);
-        lp.y = lp_y;
-        lp.z = Dot3(dx, fr.rot.rows2.x, dy, fr.rot.rows2.y, dz, fr.rot.rows2.z);
+        lp.x = at->x - fr.pos.x;
+        lp.y = at->y - fr.pos.y;
+        lp.z = at->z - fr.pos.z;
+        f32 x = Dot3(lp.x, fr.rot.rows0.x, lp.y, fr.rot.rows0.y, lp.z, fr.rot.rows0.z);
+        f32 y = Dot3(lp.x, fr.rot.rows1.x, lp.y, fr.rot.rows1.y, lp.z, fr.rot.rows1.z);
+        f32 z = Dot3(lp.x, fr.rot.rows2.x, lp.y, fr.rot.rows2.y, lp.z, fr.rot.rows2.z);
+        lp.x = x;
+        lp.y = y;
+        lp.z = z;
         HVec li;
         if (&li == &hit) {
             f32 x = Dot3(hit.x, fr.rot.rows0.x, hit.y, fr.rot.rows0.y, hit.z, fr.rot.rows0.z);
