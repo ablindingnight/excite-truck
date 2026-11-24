@@ -2305,6 +2305,16 @@ static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
 /* Helper name unproven: one solver vector from three floats. */
 static inline void SolSet(CbSolVec* d, f32 x, f32 y, f32 z) { *d = CbSolVec4(x, y, z); }
 
+/* Type and helper names unproven: one float with a plain base, read back through the base by value (retail's
+   float store + word copy at the wheel's compression lane). */
+struct CbLanePlain {
+    f32 v;
+};
+struct CbLane : CbLanePlain {
+    CbLane(f32 x) { v = x; }
+};
+static inline f32 LaneOf(CbLanePlain p) { return p.v; }
+
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2335,7 +2345,6 @@ void fn_80186DE8(void) {
         RVec3 f;
         RVec3 t;
         RVec3 F;
-        RVec3 T;
         ((RigidBody*)car)->Flush((RVec3*)&f, (RVec3*)&t);
         if (((CarBody*)car)->f26AC) {
             f.x = 0.0f;
@@ -2349,7 +2358,7 @@ void fn_80186DE8(void) {
         F.x += f.x;
         F.y += f.y;
         F.z += f.z;
-        T = RVec3(CbAdd(m->torque.x, t.x), m->torque.y + t.y, m->torque.z + t.z);
+        RVec3 T(CbAdd(m->torque.x, t.x), m->torque.y + t.y, m->torque.z + t.z);
         SolSet(&m->force, F.x, F.y, F.z);
         SolSet(&m->torque, T.x, T.y, T.z);
         if (PSVECDotProduct((const Vec*)(car + 0x124), (const Vec*)(car + 0x124)) > 100.0f) {
@@ -2595,7 +2604,7 @@ void fn_80186DE8(void) {
             w->plane.nFwd = pl[1];
             bool gr = nrm[1] > 0.01f;
             w->grounded = gr;
-            f32 comp = c->pts[5 + j].w;
+            f32 comp = LaneOf(CbLane(c->pts[5 + j].w));
             if (comp > 20000.0f) {
                 c->pts[5 + j] = CbSolVec4(0.0f, 0.0f, 0.0f);
                 CbVec4 half = CbVec4(c->v30);
