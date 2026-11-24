@@ -2369,7 +2369,6 @@ void fn_80186DE8(void) {
         CbSolMass* m;
         f32 steer;
         f32 lim;
-        CbSolCross* x;
         int wh;
         f32 bk2;
         f32 air;
@@ -2379,13 +2378,14 @@ void fn_80186DE8(void) {
         SurfType* st;
         m = &mass[i];
         CbSolContact* c = &contact[i];
+        CbSolCross* x;
+        CbSolCx* e;
         int grounded;
         f32 airK;
         f32 hold;
         u8 player;
         f32 slide;
         int surf;
-        CbSolCx* e;
         f32 s6;
         int landing;
         int wet2;
@@ -2555,7 +2555,6 @@ void fn_80186DE8(void) {
         CbVec4 ctl(c->v190);  // never read: retail copies c->v190 here too (dead stores in its frame); name unproven
         CbVec4 rpm(c->pts[4]);
         CbVec4 w6(x->v70);
-        CbWheel* w;
         f32 rpmT = rpm.x / 0.10471976f;
         ((CarBody*)car)->f25D0 = rpmT;
         ((CarBody*)car)->speed = PSVECMag((const Vec*)(0x118 + car));
@@ -2563,9 +2562,9 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->f25CC = rpm.y;
         steer = ((CarBody*)car)->f25F0;
         f32* water;
-        w = (CbWheel*)(car + 0x23AC);
         grounded = 0;
-        for (int j = 0; j < 4; j++, w = (CbWheel*)((u8*)w + 0x74)) {
+        for (int j = 0; j < 4; j++) {
+            CbWheel* w = &((CarBody*)car)->wheels[j];
             f32 load = w0[j];
             w->load = load;
             f32 spin = w1[j];
