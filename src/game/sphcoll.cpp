@@ -2360,7 +2360,7 @@ void BoxSphereShape::vf28(void) {
 }
 
 extern f32 lbl_8055E3C8;  // race time
-extern "C" double fn_801E9DDC(u8* hint, f32 x, f32 z);
+extern "C" f32 fn_801E9DDC(u8* hint, f32 x, f32 z);  // returns f32 as in ground.cpp (its stored result forwards through frsp)
 extern "C" void fn_801B3B24(u8* p, const RVec3* at, const RVec3* v);
 extern "C" double fmod(double x, double y);
 extern "C" double sin(double x);
@@ -2428,8 +2428,7 @@ void BoxSphereShape::vf14(void) {
                 pos.y = fn_801E9DDC((u8*)rb->hint, w.x, w.z);
                 d.x = pos.x - w.x;
                 d.y = pos.y - w.y;
-                f32 zv = pos.z;
-                d.z = zv - w.z;
+                d.z = pos.z - w.z;
                 f32 depth = PSVECDotProduct((const Vec*)&d, (const Vec*)&nrm);
                 f32* acc = &((BoxSlip*)p)->slip[i].x;
                 if (depth > 0.0f) {
