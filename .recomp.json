@@ -29,7 +29,7 @@
       "url": "https://github.com/ablindingnight/nice-crash"
     }
   ],
-  "notes": "Independent fork of orangedude27/excite-truck. 93.2% of code matched exactly (objdiff, Nov 2026): 13,636 of 13,780 functions, data 99.8%; every commit still rebuilds a byte-identical main.dol. Goal: 100% matching with natural source and no matching tricks. Contact: Discord ablindingnight.",
+  "notes": "Independent fork of orangedude27/excite-truck. 94.1% of code matched exactly (objdiff, Nov 2026): 13,651 of 13,780 functions, data 99.8%; every commit still rebuilds a byte-identical main.dol. Goal: 100% matching with natural source and no matching tricks. Contact: Discord ablindingnight.",
   "tags": [
     "matching",
     "mwcc"

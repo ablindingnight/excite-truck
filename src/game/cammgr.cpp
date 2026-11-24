@@ -1193,7 +1193,7 @@ static inline void SetM3(f32* o, f32 x, f32 y, f32 z) {
 }
 
 
-// Lifetime splitting off: the retail signature is the up blend's shared variables keeping one register across both
+// Pragma unproven: lifetime splitting off: the retail signature is the up blend's shared variables keeping one register across both
 // blends (the function is exact with it; every split-lifetime spelling tried stays at 8-10 rows, 2026-11-23).
 #pragma push
 #pragma opt_lifetimes off
