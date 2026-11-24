@@ -1055,10 +1055,11 @@ static inline int CountChildAt(ValueNode* n, const char* name) {
 }
 
 static inline DynArray<BoxCmd>* ReadBoxCmdArray(ValueNode* n, const char* name) {
+    int i;
     ValueNode* e;
     int c = CountChildAt(n, name);
     DynArray<BoxCmd>* items = new ("overlaycmd_dsa") DynArray<BoxCmd>(c);
-    for (int i = 0;; i++) {
+    for (i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
@@ -1075,10 +1076,11 @@ static inline DynArray<BoxCmd>* ReadBoxCmdArray(ValueNode* n, const char* name) 
 
 // Art command collection reader; helper name unproven.
 static inline DynArray<GartCmd>* ReadGartCmdArray(ValueNode* n, const char* name) {
+    int i;
     ValueNode* e;
     int c = CountChildAt(n, name);
     DynArray<GartCmd>* ag = new ("overlaycmd_dsa") DynArray<GartCmd>(c);
-    for (int i = 0;; i++) {
+    for (i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
             break;
