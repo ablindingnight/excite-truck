@@ -568,6 +568,9 @@ static inline void BinShadows(Grid& g, TexEntry* te, const f32& s) {
     }
 }
 
+// One level above BinShadows: its locals are created after the coarse-grid pass's (fn_802B9108 registers).
+static inline void BinTex(Grid& g, TexEntry* te) { BinShadows(g, te, lbl_80564CB0); }  // name unproven
+
 /* Helper name unproven: the coarse-grid pass over the neighbour cells; the boundary is needed (in place -1.00) */
 static inline void FillCoarseGrid(s16 sz, Grid& g) {
     for (int x = sz - 0x200; x < 0x200; x += sz * 2) {
@@ -610,7 +613,7 @@ void fn_802B9108(s16 size) {
         case 0:
         case 1:
             if (g.size == 4) {
-                BinShadows(g, te, lbl_80564CB0);
+                BinTex(g, te);
             }
             break;
         case 2:
