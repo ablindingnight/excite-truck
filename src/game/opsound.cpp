@@ -86,10 +86,11 @@ public:
     virtual void Unk24(gxCanvas*);
     // Restarts the announcer preview at volume v. The menu calls it only when a sample is loaded; right after
     // construction none is, so MWCC turns the caller's test into a branch over the (kept) body, as in the target.
-    // v by const reference: retail reads the volume global at the SetVolume compare, after Rewind.
-    void ResetPreview(const f32& v) {
+    // v by const reference: retail reads the volume global at the SetVolume compare, after SetParam0.
+    // param is the menu's music volume; on this (dead) path retail stores the register that holds it.
+    void ResetPreview(const f32& v, f32 param) {
         if (sound) {
-            sound->Rewind();
+            sound->SetParam0(param);
         }
         sound->SetVolume(v);
     }
@@ -186,8 +187,10 @@ void fn_8023CC84(const char* layout) {
     static char qualities[] = "Low\0Medium\0High\0";
     static char raceMusic[] = "In-Game Music Off\0In-Game Music On\0\0";
     LoadAudioSettings();
+    f32 music = lbl_8055F164;
     if (!lbl_8055F160) {
-        lbl_8055F164 = 0.0f;
+        music = 0.0f;
+        lbl_8055F164 = music;
     }
     {
         const char* qualityChoices = qualities;
@@ -197,7 +200,7 @@ void fn_8023CC84(const char* layout) {
         SoundOptions opts(&lbl_8055F16C, &lbl_8055F164, &lbl_8055F17C, &mixer, mixerName, &lbl_8055F168,
                           &lbl_8055F170, &lbl_8055F174);
         if (opts.sound) {
-            opts.ResetPreview(lbl_8055F168);
+            opts.ResetPreview(lbl_8055F168, music);
         }
         MenuStrList list;
         int i;

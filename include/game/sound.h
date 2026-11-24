@@ -85,10 +85,10 @@ public:
         }
     }
     int Playing(void) { return playing; }
-    // Back to the sample start (opsound): param[0] is the play position.
-    void Rewind(void) {
+    // Sets device parameter 0 (sent through Sound::vf44 by Apply); name unproven.
+    void SetParam0(f32 v) {
         paramDirty[0] = 1;
-        param[0] = 0.0f;
+        param[0] = v;
     }
 
     f32 pitch;        // offset 0x4
