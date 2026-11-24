@@ -524,6 +524,7 @@ static inline void RotReset(CamFrame* fr) {  // name unproven
     b[2].y = 0.0f;
     b[2].z = 1.0f;
 }
+static inline f32 ZeroN(void) { f32 r = 0.0f; return r; }  // name unproven
 void fn_8026C014(int player) {
     FreePad pad;
     FreePad keys;
@@ -675,7 +676,8 @@ void fn_8026C014(int player) {
         f32 z;
         lbl_8055F508 = now;
         dt = CAM_MAX(0.001f * (f32)(now - last), maxStep);
-        yawRate = dt * yawUnit;
+        yawRate = dt;
+        yawRate *= yawUnit;
         speed = Mul(4.0f, Mul(0.25f, Mul(10.0f, dt)));
         fovRate = Mul(dt, 0.034906585f);
         lo = 0.2617994f;
@@ -714,9 +716,9 @@ void fn_8026C014(int player) {
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
         z = 0.0f;
         x = z;
-        z = KeyAxis(pad, z, speed, 1, 4);
         x = KeyAxisRev(pad, x, speed, 8, 2);
-        CamSet(&v, x, 0.0f, z);
+        z = KeyAxis(pad, z, speed, 1, 4);
+        CamSet(&v, x, ZeroN(), z);
         CamMove(&lbl_80499050, &v);
         lbl_8055F50C = yaw;
     } else {
