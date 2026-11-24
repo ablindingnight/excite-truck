@@ -222,7 +222,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->yaw = atan2(bz, by);
     d->butt.x = SubF(d->butt.x, bones[0].m.origin.x);
     d->butt.y = d->butt.y - bones[0].m.origin.y;
-    d->butt.z = d->butt.z - bones[0].m.origin.z;
+    d->butt.z = SubF(d->butt.z, bones[0].m.origin.z);
     // Retail keeps this store although lfoot is overwritten by m1 below. 472 instrs and retail's mnemonic mix.
     lfoot = bones[9].m.origin;
     ValVec3 lhip;
@@ -230,10 +230,11 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     ValVec3 rhip;
     ValVec3 rknee;
     // Sums in retail's order: the four z lanes first, then x/y. rknee and rhip are copied, then accumulated: the
-    // read-backs are forwarded away but count as ISEL pcodes, which puts the block cut after m1.z as in retail.
+    // read-backs are forwarded away but count as ISEL pcodes. With SubF on butt.x and butt.z the block cut falls
+    // between m1.z's lane value and its store, as in retail.
+    lknee.z = bones[8].m.origin.z + d->butt.z;
     rknee = bones[5].m.origin;
     rknee.z = AddF(rknee.z, d->butt.z);
-    lknee.z = bones[8].m.origin.z + d->butt.z;
     lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
     rhip = bones[4].m.origin;
     rhip.z = AddF(rhip.z, d->butt.z);
