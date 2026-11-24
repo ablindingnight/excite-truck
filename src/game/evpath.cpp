@@ -1782,6 +1782,28 @@ static inline void ShowPassedUnlocks(ScoreTally* t, s32 lo) {
     }
 }
 
+// Once the animations are done, selects the event and shows what the result opened (name unproven).
+static inline void ShowResultsWhenIdle(ScoreAccumulator* a) {
+    if (!a->shown && !AnimsBusy(a)) {
+        fn_80214AF0(0x1F);
+        if (a->next >= 0) {
+            SelectBar(a->next);
+        } else {
+            SelectBar(a->sel);
+        }
+        a->shown = 1;
+        if (a->showCup) {
+            ShowCupCompletionScreen(a->cup, a->nextCup);
+        }
+        if (a->showUnlock) {
+            ShowCareerDifficultyUnlockMessage(a->unlockLevel);
+        }
+        if (a->quit) {
+            fn_802168BC(-1);
+        }
+    }
+}
+
 inline void ScoreAccumulator::Update(void) {
     ScoreTally* t = tally;
     if (!t) {
@@ -1793,23 +1815,8 @@ inline void ScoreAccumulator::Update(void) {
             counted = 1;
             fn_8027ED70()->StopSound("scoreup_tally");
         }
-    } else if (!shown && !AnimsBusy(this)) {
-        fn_80214AF0(0x1F);
-        if (next >= 0) {
-            SelectBar(next);
-        } else {
-            SelectBar(sel);
-        }
-        shown = 1;
-        if (showCup) {
-            ShowCupCompletionScreen(cup, nextCup);
-        }
-        if (showUnlock) {
-            ShowCareerDifficultyUnlockMessage(unlockLevel);
-        }
-        if (quit) {
-            fn_802168BC(-1);
-        }
+    } else {
+        ShowResultsWhenIdle(this);
     }
     if (lbl_8055F684) {
         f32 dt = fn_80214D48();
