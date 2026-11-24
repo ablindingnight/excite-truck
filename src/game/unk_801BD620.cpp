@@ -403,8 +403,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1990.y = tmp.y + (V1B50.y * V19A0.z);
         V1990.z = tmp.z + (V1B50.z * V19A0.z);
         Vec4f V1980;
-        V1980.x = V1990.x * V1C50.w;
-        V1980.y = V1990.y * V1C50.w;
+        V1980.x = ValueOf(V1990.x * V1C50.w);
+        V1980.y = ValueOf(V1990.y * V1C50.w);
         V1980.z = V1990.z * V1C50.w;
         Vec4f V1970;
         V1970.x = V1BD0.x + V1980.x;
