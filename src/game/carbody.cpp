@@ -1320,6 +1320,14 @@ struct CbF : CbFPlain {
     CbF(f32 a) { v = a; }
 };
 
+/* Helper name unproven: RVec3 built with reference lanes */
+struct CbV3R : RVec3 {
+    CbV3R(const f32& a, f32 b, f32 c) {
+        x = a;
+        y = b;
+        z = c;
+    }
+};
 /* Helper name unproven */
 static inline CbF MakeF(f32 v) { return CbF(v); }
 /* Helper name unproven: a lane read through a const reference (its result is an IRO temp, like retail). */
@@ -1333,8 +1341,12 @@ struct CbVec4 {
         z = z_;
         w = w_;
     }
+    /* Helper name unproven */
+    void SetSol(CbSolPlain s) {
+        SetWP(MakeF(s.w), CbV3R(s.x, s.y, s.z));
+    }
     CbVec4(CbSolPlain s) {
-        SetWP(MakeF(s.w), RVec3(s.x, s.y, s.z));
+        SetWP(MakeF(s.w), CbV3R(s.x, s.y, s.z));
     }
     /* Helper name unproven: Set with the lane first (retail's copy-before-temp slot order) */
     void SetWP(CbF w_, const RVec3& p) {
@@ -2575,8 +2587,9 @@ void fn_80186DE8(void) {
         CbVec4 w0(c->v30);
         CbVec4 w1(c->v10);
         CbVec4 w2(c->v0);
+        CbVec4 w3;
         CbVec4 w4(x->v120);
-        CbVec4 w3(x->v130);
+        w3.SetSol(x->v130);
         CbVec4 w5(x->v140);
         CbVec4 ctl(c->v190);  // never read: retail copies c->v190 here too (dead stores in its frame); name unproven
         CbVec4 rpm(c->pts[4]);
