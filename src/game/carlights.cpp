@@ -54,10 +54,11 @@ void gxForgetTexture(s32 tex);
 
 
 
-static inline void Rotate(Vec* out, const LightCar* c, f32 x, f32 y, f32 z) {
+// PROVISIONAL helper name/matrix-input API and local declaration grouping; actual geometry unchanged.
+static inline void Rotate(Vec* out, const Vec* axes, f32 x, f32 y, f32 z) {
     Vec v;
     SetVec(&v, x, y, z);
-    MulVec(out, &v, c->axes);
+    MulVec(out, &v, axes);
 }
 
 static inline int ColorByte(f32 f) {
@@ -192,17 +193,19 @@ void fn_80294ED4(void) {
     const VecMatrix* cam = fn_802C86DC();
     Vec right = cam->basis[0];
     Vec up = cam->basis[1];
+    LightSet* s;
+    CarLight* l;
     LightCar* car;
     int i;
     int j;
-    CarLight* l;
     fn_802C8BD0(lbl_8055C990);
-    LightSet* s = lbl_804B42F0;
+    s = lbl_804B42F0;
     for (i = 0; i < fn_80287B14(); i++, s++) {
         car = fn_80287B24(i);
         if (fn_802C88E8(&car->pos) * fn_801E88F0(-1) > maxDist || (car->flags & 8)) {
             continue;
         }
+        const Vec* axes = car->axes;
         j = 0;
         if (j >= s->count) {
             continue;
@@ -210,7 +213,7 @@ void fn_80294ED4(void) {
         l = s->lights;
         for (; j < s->count; l++, j++) {
             Vec p;
-            MulVec(&p, &l->frame->origin, car->axes);
+            MulVec(&p, &l->frame->origin, axes);
             p.x = p.x + car->pos.x;
             p.y = p.y + car->pos.y;
             p.z = p.z + car->pos.z;
@@ -221,25 +224,25 @@ void fn_80294ED4(void) {
             if (PSVECDotProduct(&d, &d) > 0.1f) {
                 PSVECNormalize(&d, &d);
                 Vec dir;
-                MulVec(&dir, &l->off, car->axes);
+                MulVec(&dir, &l->off, axes);
                 f32 t = PSVECDotProduct(&d, &dir);
                 t = MIN(1.0f, t);
                 t = MAX(t, 0.0f);
                 f32 k = 1.0f - t;
                 Vec a;
-                Rotate(&a, car, 0.0f, 0.0f, 1.0f);
+                Rotate(&a, axes, 0.0f, 0.0f, 1.0f);
                 Vec b;
-                Rotate(&b, car, 1.0f, 0.0f, 0.0f);
+                Rotate(&b, axes, 1.0f, 0.0f, 0.0f);
                 int a1 = ColorByte(196.0f * (f32)__fabs(PSVECDotProduct(&d, &a)));
                 int a2 = ColorByte(196.0f * (f32)__fabs(PSVECDotProduct(&d, &b)));
-                u32 c1 = a1 << 24 | l->r << 16 | l->g << 8 | l->b;
-                u32 c2 = a2 << 24 | l->r << 16 | l->g << 8 | l->b;
+                u32 c1 = ARGB(a1, l->r, l->g, l->b);
+                u32 c2 = ARGB(a2, l->r, l->g, l->b);
                 Vec e;
                 Vec g;
                 Vec f;
-                Rotate(&e, car, 1.0f, 0.0f, 0.0f);
-                Rotate(&f, car, 0.0f, 0.0f, 1.0f);
-                Rotate(&g, car, 0.0f, 1.0f, 0.0f);
+                Rotate(&e, axes, 1.0f, 0.0f, 0.0f);
+                Rotate(&f, axes, 0.0f, 0.0f, 1.0f);
+                Rotate(&g, axes, 0.0f, 1.0f, 0.0f);
                 fn_80294CCC(&p, &e, &g, (l->w + k * l->w) / 2.0f, (l->h + k * l->w) / 2.0f, c1, l->type);
                 fn_80294CCC(&p, &f, &g, (l->w + k * l->w) / 2.0f, (l->h + k * l->w) / 2.0f, c2, l->type);
             }
@@ -253,15 +256,18 @@ void fn_80294ED4(void) {
         if (fn_802C88E8(&car->pos) * fn_801E88F0(-1) > maxDist || (car->flags & 8)) {
             continue;
         }
+        const Vec* axes = car->axes;
+        CarLight* l;
+        const Vec* sourcePos;
         int j = 0;
         if (j >= s->count) {
             continue;
         }
-        CarLight* l = s->lights;
+        l = s->lights;
         for (; j < s->count; l++, j++) {
             Vec p;
-            const Vec* sourcePos = &l->frame->origin;
-            MulVec(&p, sourcePos, car->axes);
+            sourcePos = &l->frame->origin;
+            MulVec(&p, sourcePos, axes);
             p.x = p.x + car->pos.x;
             p.y = p.y + car->pos.y;
             p.z = p.z + car->pos.z;
@@ -272,7 +278,7 @@ void fn_80294ED4(void) {
             if (PSVECDotProduct(&d, &d) > 0.1f) {
                 PSVECNormalize(&d, &d);
                 Vec dir;
-                MulVec(&dir, &l->off, car->axes);
+                MulVec(&dir, &l->off, axes);
                 f32 t = PSVECDotProduct(&d, &dir);
                 t = MIN(1.0f, t);
                 t = MAX(t, 0.0f);
