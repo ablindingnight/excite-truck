@@ -178,8 +178,8 @@ static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t
     }
 }
 // Componentwise sums (names unproven). Every sum reads the rounded d->butt copy as in retail. Only the left
-// hip goes through the value-returning AddF; its extra inline statements place the scheduler's block cut
-// after m1.z as in retail (FACTS STATEMENT-BLOCK-CUT-100).
+// hip (all lanes) and the x lanes of the left knee and right hip go through the value-returning AddF; the extra
+// inline statements place the scheduler's block cut and pass-1 order as in retail (FACTS STATEMENT-BLOCK-CUT-100).
 // Plain float sum / difference (names unproven).
 static inline f32 AddF(f32 a, f32 b) { return a + b; }
 static inline f32 SubF(f32 a, f32 b) { return a - b; }
@@ -187,6 +187,14 @@ static inline void AddVL(ValVec3* out, const ValVec3& a, const ValVec3& b) {
     f32 x = AddF(a.x, b.x);
     f32 y = AddF(a.y, b.y);
     f32 z = AddF(a.z, b.z);
+    out->z = z;
+    out->y = y;
+    out->x = x;
+}
+static inline void AddVX(ValVec3* out, const ValVec3& a, const ValVec3& b) {
+    f32 x = AddF(a.x, b.x);
+    f32 y = a.y + b.y;
+    f32 z = a.z + b.z;
     out->z = z;
     out->y = y;
     out->x = x;
@@ -246,9 +254,9 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     ValVec3 lhip;
     AddVL(&lhip, bones[7].m.origin, d->butt);
     ValVec3 lknee;
-    AddVP(&lknee, bones[8].m.origin, d->butt);
+    AddVX(&lknee, bones[8].m.origin, d->butt);
     ValVec3 rhip;
-    AddVP(&rhip, bones[4].m.origin, d->butt);
+    AddVX(&rhip, bones[4].m.origin, d->butt);
     ValVec3 rknee;
     AddVP(&rknee, bones[5].m.origin, d->butt);
     ValVec3 pelvis;
