@@ -961,8 +961,10 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             f32 s = sin(0.5f * ax);
             s = 0.01f > s ? 0.01f : s;
             d = 3.190296f / s;
-            offX = ((Sum(l, r)) * 0.5f) * (proj * d) / hw;
-            offY = (0.5f * (t + b)) * (-aspect * d) / hh;
+            f32 mx = (Sum(l, r)) * 0.5f;
+            f32 my = 0.5f * (t + b);
+            offX = mx * (proj * d) / hw;
+            offY = my * (-aspect * d) / hh;
         }
         CarUISlotView pose;
         if (lbl_8055F330) {
