@@ -205,7 +205,7 @@ void fn_8025C204(int event, int difficulty) {
     }
     char location[1000];
     fn_801345D8(location, 1000, "%s - %s", track, e->node->GetValue("friendly_name") + 1);
-    int extra = GetEvent(event)->type != 0x180302;
+    bool extra = GetEvent(event)->type != 0x180302;
     const char* head = fn_80131234("Records:TIME");
     if (extra) {
         head = fn_80131234("Records:EXTRA_TIME");
