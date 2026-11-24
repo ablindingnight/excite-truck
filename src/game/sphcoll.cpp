@@ -1996,17 +1996,19 @@ int fn_8019E500(u8* p, u8* q) {
             continue;
         }
         EdgeFrame e;
-        BoxAxis* ab = &ax[(i + 2) % 3];
         BoxAxis* aa = &ax[(i + 1) % 3];
+        BoxAxis* ab = &ax[(i + 2) % 3];
         int j;
         BoxAxis* ai = (BoxAxis*)((char*)ax + i * (int)sizeof(BoxAxis));
         e.axis.x = ai->dir.v[0];
         e.axis.y = ai->dir.v[1];
         e.axis.z = ai->dir.v[2];
+        e.a.x = aa->dir.v[0];
+        e.a.y = aa->dir.v[1];
+        e.a.z = aa->dir.v[2];
         e.b.x = ab->dir.v[0];
         e.b.y = ab->dir.v[1];
         e.b.z = ab->dir.v[2];
-        e.a.Set(aa->dir.v[0], aa->dir.v[1], aa->dir.v[2]);
         for (j = 0; j < 4; j++) {
             e.pos = fr.pos;
             f32 k = (aa->ext - 0.75f) * ((j & 1) ? -1.0f : 1.0f);
