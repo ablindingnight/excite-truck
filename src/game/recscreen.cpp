@@ -158,15 +158,33 @@ enum IconShow {
 
 // The event records screen ("ep_records.lyt"): the five best scores of one event and difficulty with
 // their grades, times and cars, the event's best time and its location.
+// PROVISIONAL: helper/type names and original ownership of the score-row bounded-copy terminator are unproven.
+enum RecordCopyEnd { kRecordCopyEnd = 0 };
+struct RecordTextWriter {
+    RecordCopyEnd end;
+    RecordTextWriter() { RecordCopyEnd value = kRecordCopyEnd; end = value; }
+    void Copy(char* dst, const char* src, int n) const {
+        char* d = dst;
+        int left = n;
+        while ((*d++ = *src++) != 0) {
+            if (--left <= 0) {
+                d[-1] = end;
+                return;
+            }
+        }
+    }
+};
+
 void fn_8025C204(int event, int difficulty) {
     CarIconTable::Acquire();
     CarIconTable* set = lbl_8055F2E4;
+    RecordTextWriter text;
     ScoreRow rows[5];
     RecordIcon icons[5];
     IconShow hidden = kIconHidden;
     // Helper name unproven; PROVISIONAL (game/buildquery.h): retail starts a new scheduling block after the last
     // inlined ctor (the icons address and the hidden flag are formed there) with no instruction left of a test.
-    // Open: this spelling also leaves a join before the loop (one extra li of the loop zero).
+    // The score-row copy operation owns its actual zero terminator across this join; the independent best-time copy does not.
     if (BuildMode() == kBuildRetail) {
         icons[0].icons = set;
         icons[0].visible = hidden;
@@ -180,7 +198,7 @@ void fn_8025C204(int event, int difficulty) {
         icons[4].visible = hidden;
     }
     for (int i = 0; i < 5; i++) {
-        SafeStrCopy(rows[i].score, "-", 20);
+        text.Copy(rows[i].score, "-", 20);
         rows[i].grade = "-";
         f32 time = -__float_max[0];
         HighScore* hs = StatsGetHighScore(IdentGetCurrentSlot(), event, difficulty, i);
