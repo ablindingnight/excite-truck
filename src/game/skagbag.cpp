@@ -118,7 +118,8 @@ struct SkagBag : SkagVec<SkagPoint> {
         }
         f32 size = kSpan[0];
         for (int k = 0; k < count; k++) {
-            data[k].Place(&data[k].x, size, mid);
+            SkagPoint* point = &data[k];
+            point->Place(&point->x, size, mid);
         }
     }
     SkagBag(SkagBag** src, ValueNode* node, int rad, s32** used);
