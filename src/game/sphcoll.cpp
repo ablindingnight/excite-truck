@@ -2501,7 +2501,8 @@ void BoxSphereShape::vf14(void) {
             f32 r = this->radius;
             f32 area = 3.1415927f * (r * r);
             f32 vol = 0.4f * (4.1887903f * r * (r * r));
-            f32 dk = -area * (500.0f + 10.0f * PSVECMag((const Vec*)&bv.x));
+            f32 speed = PSVECMag((const Vec*)&bv.x);
+            f32 dk = -area * (500.0f + 10.0f * speed);
             drag.x = bv.x * dk;
             drag.y = bv.y * dk;
             drag.z = bv.z * dk;
