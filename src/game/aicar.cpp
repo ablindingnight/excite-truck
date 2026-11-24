@@ -883,8 +883,17 @@ static inline int ShortStep(f32 dt) {
 static inline f32 Cross2(f32 ax, f32 ay, f32 bx, f32 by) { f32 negativeX=-ax; return ay*bx + negativeX*by; }
 
 // PROVISIONAL: real previous/current geometry inputs and borrowed previous Y; original API unproven.
+// PROVISIONAL: original previous-projection borrow/local scope unproven.
+static inline f32 PreviousRecoveryProjection(f32 ax, f32 ay, f32 bx, const f32& by) {
+    f32 previousOffsetY = by;
+    f32 negativeX = -ax;
+    return ay*bx + negativeX*previousOffsetY;
+}
+// PROVISIONAL: original two-result blend ownership/names unproven.
 static inline f32 RecoveryCrossBlend(f32 px, f32 py, f32 cx, f32 cy, f32 qx, const f32& qy, f32 dx, f32 dy, f32 t) {
-    return Lerp(Cross2(px,py,qx,qy), Cross2(cx,cy,dx,dy), t);
+    f32 currentCross = Cross2(cx,cy,dx,dy);
+    f32 previousCross = PreviousRecoveryProjection(px,py,qx,qy);
+    return Lerp(previousCross, currentCross, t);
 }
 void fn_80194324(u8* d) {
     if (IsLoadingActive()) {
