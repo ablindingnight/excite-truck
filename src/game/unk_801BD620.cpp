@@ -720,7 +720,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V17D0.x = ((temp_f31 + lbl_805627B8));
         V17C0.x = (((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8)));
         V17B0.x = ValueOf(rowB25->x);
-        V17B0.y = rowB25->y;
+        V17B0.y = ValueOf(rowB25->y);
         V17B0.z = rowB25->z;
         V17B0.w = rowB25->w;
         temp_f1_10 = Sum3(V19E0.x, V19E0.y, V19E0.z);
