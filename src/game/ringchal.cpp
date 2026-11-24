@@ -1,3 +1,4 @@
+#include <stddef.h>
 // Ring challenge master (0x8016B964-0x80171698): the "ringchalmaster" game mode. It loads the Freestyle
 // arena's object sets ("object_file_%d", dynos and teleports), counts the ring sets in the ring file, runs the
 // timed ring challenge with its pre-race and results overlays ("ResultsOverlay:*", "PreRaceOverlay:*") and
@@ -1786,18 +1787,12 @@ static inline int Stopped(f32 speed) { return NearZeroF(speed); }
 // The teleport test: 1 when the car is at or facing away from the current teleport (out = held long enough),
 // 0 otherwise; reaching the last teleport clears it. Its 'return 0' paths share one block in retail.
 /* Helper name unproven */
-static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
-    ObjSet* s;
-    if (arena.curSet < arena.nFiles) {
-        s = &arena.sets->data[arena.curSet];
-        if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
-            RaceCarRec* c = fn_8017960C(p->index);
+/* Helper name/source ownership unproven: read the current teleport geometry into its two actual predicates. */
+static inline void ReadTeleportGeometry(ObjSet* s, RaceCarRec* c, bool& outside, int& behind) {
             ObjTeleport* t = &s->teles->data[s->f10];
             V2 d;
             V2 a;
             V2 b;
-            bool outside;
-            int behind;
             f32 dz;
             f32 dx;
             a.x = t->mtx.origin.x;
@@ -1813,6 +1808,17 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
             f32 distance = (f32)wide;
             outside = distance > radius;
             behind = PSVECDotProduct((const Vec*)&t->mtx.basis[2], (const Vec*)((const ValVec3*)&c->mtx.rot.z)) < 0.0f;
+}
+
+static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
+    ObjSet* s;
+    if (arena.curSet < arena.nFiles) {
+        s = &arena.sets->data[arena.curSet];
+        if (s->teles && s->teles->count > 0 && s->teles->data[s->f10].b30) {
+            RaceCarRec* c = fn_8017960C(p->index);
+            bool outside;
+            int behind;
+            ReadTeleportGeometry(s, c, outside, behind);
             if (s->f10 == s->teles->count - 1 && outside) {
                 s->teles->data[s->f10].b30 = 0;
             } else {
@@ -1840,6 +1846,25 @@ static inline int TeleCheck(Arena& arena, PlayerData* p, u8* out) {
 }
 
 
+/* Helper name/source ownership unproven: query the actual car and its first pad state. */
+static inline RaceCarRec* ReadCarPad(int index, int& bits) {
+    RaceCarRec* source = fn_8017960C(index);
+    bits = ((SpringCar*)source)->ctl->vf14();
+    return source;
+}
+/* Helper name/source ownership unproven: complete the existing transition using the first reading;
+   retain the original second controller-cell reload when its branch is taken. */
+static inline void UpdatePlayerHoldFromRead(u8* source, int bits, PlayerList& players, int index) {
+                    PlayerData* q;
+                    if ((bits & 0x10) && !(q = players.data[index])->b8) {
+                        q->b8 = 1;
+                        q->fC = 0.0f;
+                    } else if (!((*(Controller**)(source += offsetof(SpringCar, ctl)))->vf14() & 0x10) && (q = players.data[index])->b8) {
+                        q->b8 = 0;
+                        q->fC = 0.0f;
+                    }
+}
+
 inline int RingChalMaster::vfE0(int car, u8* out) {
     int r = 0;
     f32 now = lbl_8055E3C8;
@@ -1848,15 +1873,9 @@ inline int RingChalMaster::vfE0(int car, u8* out) {
             r = TeleCheck(arena, players.data[car], out);
             if (!r) {
                 if ((u32)fn_8017960C(players.data[car]->index)->type == 'PCAR') {
-                    RaceCarRec* c = fn_8017960C(players.data[car]->index);
-                    PlayerData* q;
-                    if ((((SpringCar*)c)->ctl->vf14() & 0x10) && !(q = players.data[car])->b8) {
-                        q->b8 = 1;
-                        q->fC = 0.0f;
-                    } else if (!(((SpringCar*)c)->ctl->vf14() & 0x10) && (q = players.data[car])->b8) {
-                        q->b8 = 0;
-                        q->fC = 0.0f;
-                    }
+                    int bits;
+                    RaceCarRec* c = ReadCarPad(players.data[car]->index, bits);
+                    UpdatePlayerHoldFromRead((u8*)c, bits, players, car);
                 }
             }
         }
