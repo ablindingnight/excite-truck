@@ -1858,7 +1858,4 @@ s32 lbl_8055C4EC = 1500;
 f32 lbl_8055C4F0 = 4.0f;
 f32 lbl_8055C4F4 = 4.0f;
 
-CamRec::CamRec(void) {
-    fn_80265DD8(reinterpret_cast<u8*>(&w160));
-    fn_80266120(reinterpret_cast<u8*>(&w178));
-}
+

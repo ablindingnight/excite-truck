@@ -60,7 +60,7 @@ struct CamFovPulse {
 
 // One player's camera record.
 struct CamRec {
-    CamRec(void);  // fn_8026A600 (defined in cammgr.cpp)
+    CamRec(void);  // fn_8026A600 (inline definition below)
     s32 w0;             // offset 0x0
     s32 w4;             // offset 0x4
     f32 f8;             // offset 0x8
@@ -109,5 +109,14 @@ struct CamRec {
     s16 h1EC;           // offset 0x1EC
     CamPrev prev;       // offset 0x1F0
 };
+
+// PROVISIONAL: original shared constructor definition ownership.
+// Inline emission puts the retained constructor after the generated unit initializer.
+extern "C" u8* fn_80265DD8(u8* p);
+extern "C" u8* fn_80266120(u8* p);
+inline CamRec::CamRec(void) {
+    fn_80265DD8(reinterpret_cast<u8*>(&w160));
+    fn_80266120(reinterpret_cast<u8*>(&w178));
+}
 
 #endif

@@ -56,10 +56,6 @@ static inline void MulVec(const Mat3& m, const ValVec3& src, ValVec3* dst) {
     }
 }
 
-extern "C" {
-void fn_80265DD8(u8* p);
-void fn_80266120(u8* p);
-}
 
 // The car's controller; slot 0x14 returns its option flags.
 class Ctl {

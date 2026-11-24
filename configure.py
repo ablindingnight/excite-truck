@@ -1219,7 +1219,7 @@ config.libs.append(
             Object(Matching, "game/credits.cpp"),
             Object(Matching, "game/stub16.cpp"),
             Object(Matching, "game/sortwrap.cpp"),
-            Object(NonMatching, "game/cammgr.cpp"),
+            Object(Matching, "game/cammgr.cpp"),
             Object(NonMatching, "game/racerslot.cpp"),
             Object(Matching, "game/jumpcam.cpp"),
             Object(NonMatching, "game/unk_8026B844.cpp"),
