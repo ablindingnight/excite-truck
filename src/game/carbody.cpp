@@ -2508,10 +2508,7 @@ void fn_80186DE8(void) {
             s0[wh] = -((b - 6.2831855f) * (b - 3.1415927f) * (0.09829f * b)) * 0.08726646f;
             x->v140 = CbSolVec4(s0[0], s0[1], s0[2], s0[3]);
         }
-        player = 0;
-        if (U32(car, 0x10) == 'PCAR' && ((*(CbFlagsV**)(car + 0x270C))->Flags() & 0x20)) {
-            player = 1;
-        }
+        player = U32(car, 0x10) == 'PCAR' && ((*(CbFlagsV**)(car + 0x270C))->Flags() & 0x20);
         RMtx fr;
         fr.pos.Set(m->pos.x, m->pos.y, m->pos.z);
         fr.rot.x.Set(m->rot[0].x, m->rot[0].y, m->rot[0].z);
