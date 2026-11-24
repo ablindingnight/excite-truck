@@ -259,8 +259,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowB3 = &t[b + 3];
     rowB8 = &t[b + 8];
     rowB2 = &t[b + 2];
-    rowB25 = &t[b + 25];
     rowB26 = &t[b + 26];
+    rowB25 = &t[b + 25];
     rowC8 = &t[c + 8];
     rowC4 = &t[c + 4];
     rowC5 = &t[c + 5];
