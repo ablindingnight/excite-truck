@@ -3083,10 +3083,11 @@ void OnImpulse__7CarBodyFPC5RVec3PC5RVec3iPvPv(u8* p, const HVec* imp, const HVe
     if (!(fn_801769CC()->type & 0x4000)) {
         k *= 10.0f;
     }
+    f32 force = mag * k;
     hit.x *= k;
     hit.y *= k;
     hit.z *= k;
-    if (mag * k > 741.6667f) {
+    if (force > 741.6667f) {
         const HRot* rot = (const HRot*)&cb->mtx;
         const HVec* org = (const HVec*)&cb->mtx.pos;
         const HVec* com = (const HVec*)&cb->offset;
