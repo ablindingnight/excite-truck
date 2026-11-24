@@ -548,6 +548,7 @@ int ValidateMp3Format(MP3Info* info, int strict) {
 
 // MPEG frame sync test. A macro, not an inline: retail tests the bytes directly with no 0/1 result in a register.
 #define SyncAt(b) ((b)[0] == 0xFF && ((b)[1] & 0xE0) == 0xE0)
+#define SyncIdx(p, k) ((p)[k] == 0xFF && ((p)[(k) + 1] & 0xE0) == 0xE0)
 
 void* fn_802EAB28(void* arg) {
     OSReport("kerngc/mp3:thread begins!\n");
@@ -784,7 +785,8 @@ void* fn_802EAB28(void* arg) {
                         int skip = -1;
                         int i;
                         for (i = 0; i < (n > 0x400 ? 0x400 : n); i++) {
-                            if (SyncAt(lbl_805600A8 + off + i)) {
+                            s32 idx = off + i;
+                            if (SyncAt(lbl_805600A8 + idx)) {
                                 if (i) {
                                     const u8* b = lbl_805600A8 + off;
                                     fn_802E30C8("mp3: found inner frame sync at %d (%x,%x,%x,%x)", i, b[0], b[1], b[2],
