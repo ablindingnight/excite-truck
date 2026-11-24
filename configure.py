@@ -1279,7 +1279,7 @@ config.libs.append(
             Object(NonMatching, "game/skagbag.cpp"),
             Object(Matching, "game/simpletga.cpp"),
             Object(Matching, "game/umat.cpp"),
-            Object(NonMatching, "game/tedash.cpp"),
+            Object(Matching, "game/tedash.cpp"),
             Object(NonMatching, "game/xlobj.cpp"),
             Object(Matching, "game/lweight.cpp"),
             Object(Matching, "game/stub14.cpp"),
