@@ -727,20 +727,21 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     rm.o.x = 0.0f;
     rm.o.y = 0.0f;
     rm.o.z = 0.0f;
+    BonePose* pp = pose;
     DBone* bone = bones;
-    for (int k = 0; k < n; bone++, k++) {
+    for (int k = 0; k < n; bone++, pp++, k++) {
         if (k) {
-            MulM(&pose[k].rot.rx.x, &bone->m.basis[0].x, &rot.rx.x);
-            MulVec(&pose[k].pos, &bone->m.origin, (PlainValMatrix*)&rot);
+            MulM(&pp->rot.rx.x, &bone->m.basis[0].x, &rot.rx.x);
+            MulVec(&pp->pos, &bone->m.origin, (PlainValMatrix*)&rot);
         } else {
-            pose[k] = *(BonePose*)bone;
+            *pp = *(BonePose*)bone;
         }
-        f32 xv = pose[k].pos.x;
-        pose[k].pos.x = xv + d->butt.x;
-        f32 yv = pose[k].pos.y;
-        pose[k].pos.y = yv + d->butt.y;
-        f32 zv = pose[k].pos.z;
-        pose[k].pos.z = zv + d->butt.z;
+        f32 xv = pp->pos.x;
+        pp->pos.x = xv + d->butt.x;
+        f32 yv = pp->pos.y;
+        pp->pos.y = yv + d->butt.y;
+        f32 zv = pp->pos.z;
+        pp->pos.z = zv + d->butt.z;
     }
     f32 z = Mul(2.5f, -F32(car, 0x238));
     f32 y = Mul(F32(car, 0x3C), 0.2617994f);
