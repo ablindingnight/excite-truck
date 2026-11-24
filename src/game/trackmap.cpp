@@ -471,7 +471,8 @@ static inline void DrawFinalMarker(SFMarker* m, Basis* basis, const Vec2& tp, f3
     Vec3 rel;
     c.x = centerX;
     c.y = centerY;
-    SetXYZ(&rel, m->pos.x - basis->pos.x, m->pos.y - basis->pos.y, 0.0f);
+    f32 z = 0.0f;
+    SetXYZ(&rel, m->pos.x - basis->pos.x, m->pos.y - basis->pos.y, z);
     rel.z -= basis->pos.z;
     MulVecT(&rel, &rel, basis);
     {
