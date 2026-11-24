@@ -281,8 +281,10 @@ void LoadWaterGraphicsSettings(void) {
         ValueNode* g = t->HasChild("Graphics") ? t->FindChild("Graphics") : 0;
         if (g) {
             waterHeight = g->GetFloat("water_height", waterHeight);
-            nearWaterColor = fn_802BECE4(g->GetString("near_water_color", ""), nearWaterColor);
-            farWaterColor = fn_802BECE4(g->GetString("far_water_color", ""), farWaterColor);
+            // The first colour global (0x8055FAE4) takes "near_water_color" and the second "far_water_color", as the
+            // linked DOL shows (objdiff does not see this pairing); the global names are ours (unproven).
+            farWaterColor = fn_802BECE4(g->GetString("near_water_color", ""), farWaterColor);
+            nearWaterColor = fn_802BECE4(g->GetString("far_water_color", ""), nearWaterColor);
             deepWaterSubColor = fn_802BECE4(g->GetString("deep_water_sub_color", ""), deepWaterSubColor);
             shimWaterColor = fn_802BECE4(g->GetString("shim_water_color", ""), shimWaterColor);
             fn_802E30C8("water colors: N %08x, F %08x DS %08x SH %08x", farWaterColor, nearWaterColor,
