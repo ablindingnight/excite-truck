@@ -236,11 +236,11 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lknee.x = d->butt.x + bones[8].m.origin.x;
     lknee.y = AddF(bones[8].m.origin.y, d->butt.y);
     rhip = bones[4].m.origin;
+    rhip.z = AddF(d->butt.z, rhip.z);
     lhip.y = AddF(d->butt.y, bones[7].m.origin.y);
     rhip.x = AddF(d->butt.x, rhip.x);
     rhip.y = d->butt.y + rhip.y;
     rknee.x = d->butt.x + rknee.x;
-    rhip.z = AddF(d->butt.z, rhip.z);
     lhip.x = AddF(bones[7].m.origin.x, d->butt.x);
     rknee.y = AddF(rknee.y, d->butt.y);
     ValVec3 pelvis;
