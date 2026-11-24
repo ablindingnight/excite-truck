@@ -237,11 +237,11 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->butt.z = d->butt.z - bones[0].m.origin.z;
     ValVec3 lhip;
     AddVL(&lhip, bones[7].m.origin, d->butt);
-    // Retail keeps this store although lfoot is overwritten by m1 below: the m2 Lerp's bone reads sit between the
-    // last read and the overwrite, so the def is not removed (IRO_UseDef). 472 instrs and retail's mnemonic mix.
-    lfoot = bones[9].m.origin;
     ValVec3 lknee;
     AddVL(&lknee, bones[8].m.origin, d->butt);
+    // Retail keeps this store although lfoot is overwritten by m1 below: rhip's AddV loop stores through an indexed
+    // pointer right after it (an indirect kill), so the def is not removed. 472 instrs and retail's mnemonic mix.
+    lfoot = bones[9].m.origin;
     ValVec3 rhip;
     AddV(&rhip, bones[4].m.origin, d->butt);
     ValVec3 rknee;
@@ -249,11 +249,11 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     ValVec3 pelvis;
     ValVec3 m1;
     LerpV(&m1, lfoot, lknee, 0.5f);
-    ValVec3 m2;
-    LerpV(&m2, bones[6].m.origin, rknee, 0.5f);
     lfoot.x = m1.x;
     lfoot.y = m1.y;
     lfoot.z = m1.z;
+    ValVec3 m2;
+    LerpV(&m2, bones[6].m.origin, rknee, 0.5f);
     rfoot.x = m2.x;
     rfoot.y = m2.y;
     rfoot.z = m2.z;
