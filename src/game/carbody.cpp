@@ -2327,12 +2327,6 @@ static inline f32 LaneOf(CbFPlain p) { return p.v; }
 /* Helper name unproven: the car's right axis (two-statement body: its result gets a late IRO temp, like retail). */
 static inline const Vec* RightOf(u8* car) { CarBody* cb = (CarBody*)car; return (const Vec*)&cb->mtx; }
 
-/* Helper name unproven */
-static inline f32 Mul2(f32 a, f32 b) {
-    f32 r = a * b;
-    return r;
-}
-
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2559,11 +2553,11 @@ void fn_80186DE8(void) {
         f32 out;
         f32 ax = 59.94f * vel.x + ((CarBody*)car)->vel.x * -59.94f;
         ((CarBody*)car)->accel.x = ax;
-        f32 ay = CbAdd(vel.y * 59.94f, ((CarBody*)car)->vel.y * -59.94f);
+        f32 ay = Mul(vel.y, 59.94f) + Mul(((CarBody*)car)->vel.y, -59.94f);
         ((CarBody*)car)->accel.y = ay;
-        ((CarBody*)car)->accel.z = CbAdd(vel.z * 59.94f, ((CarBody*)car)->vel.z * -59.94f);
-        ((CarBody*)car)->aaccel.x = CbAdd(Mul(avel.x, 59.94f), ((CarBody*)car)->avel.x * -59.94f);
-        ((CarBody*)car)->aaccel.y = CbAdd(Mul2(avel.y, 59.94f), ((CarBody*)car)->avel.y * -59.94f);
+        ((CarBody*)car)->accel.z = vel.z * 59.94f + Mul(((CarBody*)car)->vel.z, -59.94f);
+        ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + Mul(((CarBody*)car)->avel.x, -59.94f);
+        ((CarBody*)car)->aaccel.y = CbAdd(Mul(avel.y, 59.94f), Mul(((CarBody*)car)->avel.y, -59.94f));
         ((CarBody*)car)->aaccel.z = CbAdd((avel.z * 59.94f), ((CarBody*)car)->avel.z * -59.94f);
         ((CarBody*)car)->vel.x = vel.x;
         ((CarBody*)car)->vel.y = vel.y;
@@ -2583,8 +2577,8 @@ void fn_80186DE8(void) {
         CbVec4 ctl(c->v190);  // never read: retail copies c->v190 here too (dead stores in its frame); name unproven
         CbVec4 rpm(c->pts[4]);
         CbVec4 w6(x->v70);
-        f32 rpmT = rpm.x / 0.10471976f;
-        ((CarBody*)car)->f25D0 = rpmT;
+        ((CarBody*)car)->f25D0 = rpm.x / 0.10471976f;
+        f32 rpmT = ((CarBody*)car)->f25D0;
         ((CarBody*)car)->speed = PSVECMag((const Vec*)(0x118 + car));
         ((CarBody*)car)->f25D8 = PSVECDotProduct((const Vec*)(car + 0x118), (const Vec*)(car + 0x54));
         ((CarBody*)car)->f25CC = rpm.y;
