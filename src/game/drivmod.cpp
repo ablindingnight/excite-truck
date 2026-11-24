@@ -383,6 +383,10 @@ void fn_8020095C(u8* p) {
 }  // extern "C"
 
 // A bone's rotation, as three rows.
+// A pose whose rows copy as whole blocks (array rows, like camrec.h's CamVec3); names unproven.
+struct DriverRow {
+    f32 v[3];
+};
 struct BRot {
     BVec rx;  // offset 0x0
     BVec ry;  // offset 0xC
@@ -392,7 +396,8 @@ struct BRot {
 // A posed bone: rotation and position in the model's frame.
 struct BonePose {
     BRot rot;  // offset 0x0
-    BVec pos;  // offset 0x24
+    DriverRow pos;  // offset 0x24: an array vector, so `root = pose[0].pos` copies as one block (lwz/stw) as in
+                    // retail; the ValVec3 helpers (MulVec, TSub, DmPush) take it through a ValVec3 view.
 };
 
 // One bone of the rider: which pose slot, the skeleton point it sits on and the child point it aims at.
@@ -506,7 +511,7 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
         BonePose* o = &out[p->index];
         const BRot* b = (const BRot*)(bind + p->index * 0x38);
         BVec v;
-        TSub(&v, &pts[p->point], &f->pos);
+        TSub(&v, &pts[p->point], (const ValVec3*)&f->pos);
         {
             f32 x = Dot3(v.x, f->rot.rx.x, v.y, f->rot.rx.y, v.z, f->rot.rx.z);
             f32 y = Dot3(v.x, f->rot.ry.x, v.y, f->rot.ry.y, v.z, f->rot.ry.z);
@@ -515,12 +520,12 @@ void fn_802009CC(BonePose* out, const BVec* pts, const BoneLink* links, int n, c
             v.y = y;
             v.z = z;
         }
-        o->pos = v;
+        *(ValVec3*)&o->pos = v;
         if (p->child >= 0) {
             BVec c;
-            c.x = pts[p->child].x - f->pos.x;
-            c.y = pts[p->child].y - f->pos.y;
-            c.z = pts[p->child].z - f->pos.z;
+            c.x = pts[p->child].x - f->pos.v[0];
+            c.y = pts[p->child].y - f->pos.v[1];
+            c.z = pts[p->child].z - f->pos.v[2];
             {
                 f32 x = Dot3(c.x, f->rot.rx.x, c.y, f->rot.rx.y, c.z, f->rot.rx.z);
                 f32 y = Dot3(c.x, f->rot.ry.x, c.y, f->rot.ry.y, c.z, f->rot.ry.z);
@@ -589,10 +594,6 @@ static inline f32 DriverOriginX(f32 offset, f32 origin) {
 // the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
 // bent by speed and pitch) drawn at the car.
 
-// A pose whose rows copy as whole blocks (array rows, like camrec.h's CamVec3); names unproven.
-struct DriverRow {
-    f32 v[3];
-};
 struct DriverRowPose {
     DriverRow r0;
     DriverRow r1;
@@ -600,8 +601,16 @@ struct DriverRowPose {
     ValVec3 o;
 };
 
+// Moves m's origin by p taken through m's rotation (name unproven).
+static inline void OffsetOrigin(PlainValMatrix* m, const ValVec3* p) {
+    ValVec3 off;
+    MulVec(&off, p, m);
+    m->origin.x = m->origin.x + off.x;
+    m->origin.y = m->origin.y + off.y;
+    m->origin.z = m->origin.z + off.z;
+}
 void fn_80201018(DriverModel* d, const u8* car, int show) {
-    ValVec3 off2;
+    DriverRow root;
     BonePose pose[32];
     DBone bones[32];
     BVec pts[32];
@@ -732,16 +741,16 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     for (int k = 0; k < n; bone++, pp++, k++) {
         if (k) {
             MulM(&pp->rot.rx.x, &bone->m.basis[0].x, &rot.rx.x);
-            MulVec(&pp->pos, &bone->m.origin, (PlainValMatrix*)&rot);
+            MulVec((ValVec3*)&pp->pos, &bone->m.origin, (PlainValMatrix*)&rot);
         } else {
             *pp = *(BonePose*)bone;
         }
-        f32 xv = pp->pos.x;
-        pp->pos.x = xv + d->butt.x;
-        f32 yv = pp->pos.y;
-        pp->pos.y = yv + d->butt.y;
-        f32 zv = pp->pos.z;
-        pp->pos.z = zv + d->butt.z;
+        f32 xv = pp->pos.v[0];
+        pp->pos.v[0] = xv + d->butt.x;
+        f32 yv = pp->pos.v[1];
+        pp->pos.v[1] = yv + d->butt.y;
+        f32 zv = pp->pos.v[2];
+        pp->pos.v[2] = zv + d->butt.z;
     }
     f32 z = Mul(2.5f, -F32(car, 0x238));
     f32 y = Mul(F32(car, 0x3C), 0.2617994f);
@@ -754,25 +763,22 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     Mat3Mul((Mat3*)&pose[3].rot, (Mat3*)&tilt, (Mat3*)&pose[3].rot);
     links = lbl_802F9D00;
     fn_802009CC(pose, pts, links.l, 6, (u8*)bones, (BonePose*)&m);
-    DmPush(&pose[9].pos, &pose[8].rot.rx, 0.0762f);
-    DmPush(&pose[6].pos, &pose[5].rot.rx, 0.0762f);
+    DmPush((ValVec3*)&pose[9].pos, &pose[8].rot.rx, 0.0762f);
+    DmPush((ValVec3*)&pose[6].pos, &pose[5].rot.rx, 0.0762f);
     e2.x = d->yaw;
     e2.y = 0.0f;
     e2.z = 0.0f;
     Mat3FromEuler((Mat3*)&turn, (Vec3*)&e2);
     Mat3Mul((Mat3*)&pose[0].rot, (Mat3*)&turn, (Mat3*)&pose[0].rot);
-    ValVec3 root = pose[0].pos;
+    root = pose[0].pos;
     for (int i = 0; i < n; i++) {
-        pose[i].pos.x -= root.x;
-        pose[i].pos.y -= root.y;
-        pose[i].pos.z -= root.z;
+        pose[i].pos.v[0] -= root.v[0];
+        pose[i].pos.v[1] -= root.v[1];
+        pose[i].pos.v[2] -= root.v[2];
     }
     s32 r = UpdateBoneTransforms(d->skel, pose, n, 0);
     m2 = m;
-    MulVec(&off2, &root, &m2);
-    m2.origin.x = m2.origin.x + off2.x;
-    m2.origin.y = m2.origin.y + off2.y;
-    m2.origin.z = m2.origin.z + off2.z;
+    OffsetOrigin(&m2, (const ValVec3*)&root);
     fn_802C70AC(d->model, &m2, r, -1);
 }
 
