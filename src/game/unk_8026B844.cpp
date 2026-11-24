@@ -416,25 +416,23 @@ static __inline void CamFly(CamFrame* f, const FreePad* pad, f32 turn, f32 roll,
 
 // The debug camera, once a frame: the mode button cycles keyboard / pad / free camera control of the saved
 // frame (the pad modes move whichever camera is current), then the replay cameras follow their car.
-/* Helper names unproven: one keyboard axis of the free camera from two key bits. The forward/back axis tests its
-   plus key first, the strafe axis its minus key first (retail's order of the two tests). */
-static inline f32 KeyAxis(FreePad& pad, f32 v, f32 speed, int plus, int minus) {
-    if (pad.w40 & plus) {
-        v = speed;
-    } else if (pad.w40 & minus) {
+/* Helper name unproven: the orbit camera's two keyboard axes from the d-pad bits. Forward/back (z) tests its plus
+   key first, strafe (x) its minus key first (retail's order). One helper is retail's shape: the start value binds to
+   the formal v (x keeps it), z is a plain copy taken before its branches, so z's tests are emitted first. */
+static inline f32 OrbitKeys(FreePad& pad, f32 v, f32 speed, f32& z) {  // name unproven
+    z = v;
+    if (pad.w40 & 1) {
+        z = speed;
+    } else if (pad.w40 & 4) {
+        z = -speed;
+    }
+    if (pad.w40 & 8) {
         v = -speed;
+    } else if (pad.w40 & 2) {
+        v = speed;
     }
     return v;
 }
-static inline f32 KeyAxisRev(FreePad& pad, f32 v, f32 speed, int minus, int plus) {
-    if (pad.w40 & minus) {
-        v = -speed;
-    } else if (pad.w40 & plus) {
-        v = speed;
-    }
-    return v;
-}
-
 /* Helper name unproven */
 static __inline void CamOrthonormal(CamRot& d) {
     CamVec a0;
@@ -678,9 +676,7 @@ void fn_8026C014(int player) {
         CamSet(&pitchE, -lbl_8055F510, 0.0f, 0.0f);
         Mat3FromEuler((Mat3*)&pitchM, (const Vec3*)&pitchE);
         Mat3Mul((Mat3*)&lbl_80499050.rot, (const Mat3*)&pitchM, (const Mat3*)&lbl_80499050.rot);
-        z = 0.0f;
-        z = KeyAxis(pad, z, speed, 1, 4);
-        x = KeyAxisRev(pad, 0.0f, speed, 8, 2);
+        x = OrbitKeys(pad, 0.0f, speed, z);
         CamSet(&v, x, ZeroN(), z);
         CamMove(&lbl_80499050, &v);
         lbl_8055F50C = yaw;
