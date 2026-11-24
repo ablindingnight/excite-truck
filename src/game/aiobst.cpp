@@ -631,8 +631,9 @@ extern "C" {
 // The gap search itself. Its body is over the 512-unit nested-inline budget (FACTS 2026-11-17 11:16), so every
 // helper in it stays a call to a weak copy emitted after fn_8015FBCC in reverse first-use order, and its locals
 // take stack slots in declaration order (target below dir). found is a local of the function itself, lent by
-// reference. Helper name unproven.
-static inline void FindGap(RaceCarRec* rc, void* steer, u8 side, int flatten, int seg, int& found) {
+// reference. The actual velocity-input pointer is also caller-owned workspace; original ownership of both
+// workspaces and the helper name remain PROVISIONAL. Width / 2 keeps retail's actual width-then-half reference roles.
+static inline void FindGap(RaceCarRec* rc, void* steer, u8 side, int flatten, int seg, int& found, const Vec3*& vel) {
     Frame f;
     Opts opts;
     Bins bins;
@@ -643,7 +644,7 @@ static inline void FindGap(RaceCarRec* rc, void* steer, u8 side, int flatten, in
     f32 range = MAX(20.0f, scaledSpeed);
     opts.side = side;
     Obst* o = lbl_8055E2A0->a.data[seg];
-    const Vec3* vel = (Vec3*)&rc->vel;
+    vel = (Vec3*)&rc->vel;
     opts.Init();
     found = 0;
     for (i = 0; i < 64; i++) {
@@ -690,11 +691,11 @@ static inline void FindGap(RaceCarRec* rc, void* steer, u8 side, int flatten, in
                 int r = fn_8015FA44(bins.bins, c, range);
                 int l = fn_8015FAB8(bins.bins, c, range);
                 if (r >= 0 && (l < 0 || Abs(r - c) < Abs(l - c))) {
-                    target.Set(1.875f + (lbl_8055E2A4 * (f32)r - kWidth.value * 0.5f), bins.bins[r - 1].dist);
+                    target.Set(1.875f + (lbl_8055E2A4 * (f32)r - kWidth.value / 2.0f), bins.bins[r - 1].dist);
                     dir.Set(1.875f, 0.0f);
                     found = 1;
                 } else if (l >= 0 && (r < 0 || Abs(r - c) > Abs(l - c))) {
-                    target.Set(lbl_8055E2A4 * (f32)l - kWidth.value * 0.5f - 1.875f, bins.bins[l + 1].dist);
+                    target.Set(lbl_8055E2A4 * (f32)l - kWidth.value / 2.0f - 1.875f, bins.bins[l + 1].dist);
                     dir.Set(-1.875f, 0.0f);
                     found = 1;
                 }
@@ -704,14 +705,14 @@ static inline void FindGap(RaceCarRec* rc, void* steer, u8 side, int flatten, in
                 int k;
                 for (k = 1; k < n; k++) {
                     if (bins.bins[c + k].dist < range) {
-                        target.Set(lbl_8055E2A4 * (f32)(c + k - 1) - kWidth.value * 0.5f - 1.875f,
+                        target.Set(lbl_8055E2A4 * (f32)(c + k - 1) - kWidth.value / 2.0f - 1.875f,
                                    bins.bins[c + k].dist);
                         dir.Set(-1.875f, 0.0f);
                         found = 1;
                         break;
                     }
                     if (bins.bins[c - k].dist < range) {
-                        target.Set(1.875f + (lbl_8055E2A4 * (f32)(c - k + 1) - kWidth.value * 0.5f),
+                        target.Set(1.875f + (lbl_8055E2A4 * (f32)(c - k + 1) - kWidth.value / 2.0f),
                                    bins.bins[c - k].dist);
                         dir.Set(1.875f, 0.0f);
                         found = 1;
@@ -737,10 +738,12 @@ extern "C" {
 // Picks a gap for the car to steer into; returns whether it had to.
 int fn_8015FBCC(RaceCarRec* rc, void* steer, u8 side, int flatten) {
     int found = 0;
+    // PROVISIONAL: original ownership of this actual velocity input workspace is unproven.
+    const Vec3* vel;
     if (lbl_8055E2A0) {
         IdealFollower* trk = GetTrack(rc);
         int seg = trk->il.seg - trk->line->points;
-        FindGap(rc, steer, side, flatten, seg, found);
+        FindGap(rc, steer, side, flatten, seg, found, vel);
     }
     return found;
 }
