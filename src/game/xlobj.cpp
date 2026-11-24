@@ -273,6 +273,8 @@ struct Item : Cell<u16*> {
         on = 1;
     }
     int Type(void);
+    // The kind word through a getter: its value is a late temporary, not a named local (fn_802B9108 registers).
+    u32 Kind(void) { return type; }  // name unproven
     struct Shadow* AsShadow(void);
     struct Obj* AsObj(void);
     // Helper unproven: retail has "road_inhibits_skags" as a weak string after Grid's, so it lives in an in-class
@@ -574,7 +576,7 @@ static inline void FillCoarseGrid(s16 sz, Grid& g) {
             InlineVec<Item*, 64> near;
             for (int k = 0; k < 4; k++) {
                 for (Item** pp = fn_802B8EB8(x, y, sz, k)->items; *pp; pp++) {
-                    u32 t = (*pp)->type;
+                    u32 t = (*pp)->Kind();
                     if (t <= 1) {
                         if (near.Find(*pp) == -1 && near.CanAdd()) {
                             if (t != 1 || g.size <= 4) {
