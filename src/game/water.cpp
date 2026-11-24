@@ -868,15 +868,21 @@ void WaterSystem::Draw(void) {
         p.x += fwd.x * dist;
         p.y += fwd.y * dist;
         p.z += fwd.z * dist;
+        // The row point in camera space: struct-lane deltas, named Dot3 results copied back (Sound3D::PreUpdate's shape).
         PVec lc;
+        lc.x = p.x - cam.origin.x;
+        lc.y = p.y - cam.origin.y;
+        lc.z = p.z - cam.origin.z;
+        f32 x = Dot3(lc.x, cam.basis[0].x, lc.y, cam.basis[0].y, lc.z, cam.basis[0].z);
+        f32 y = Dot3(lc.x, cam.basis[1].x, lc.y, cam.basis[1].y, lc.z, cam.basis[1].z);
+        f32 z = Dot3(lc.x, cam.basis[2].x, lc.y, cam.basis[2].y, lc.z, cam.basis[2].z);
+        lc.x = x;
+        lc.y = y;
+        lc.z = z;
         PVec rel;
-        f32 dx = p.x - cam.origin.x;
-        f32 dy = p.y - cam.origin.y;
-        f32 dz = p.z - cam.origin.z;
-        lc.x = Dot3(dx, cam.basis[0].x, dy, cam.basis[0].y, dz, cam.basis[0].z);
-        lc.y = Dot3(dx, cam.basis[1].x, dy, cam.basis[1].y, dz, cam.basis[1].z);
-        lc.z = Dot3(dx, cam.basis[2].x, dy, cam.basis[2].y, dz, cam.basis[2].z);
-        rel.Set(dx, dy, dz);
+        rel.x = p.x - cam.origin.x;
+        rel.y = p.y - cam.origin.y;
+        rel.z = p.z - cam.origin.z;
         f32 depth = lc.z;
         fn_802BED90(&rel);
         f32 f = MaxF(MinFRev(1.0f - -rel.y, 1.0f), 0.0f);
