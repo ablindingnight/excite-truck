@@ -1319,6 +1319,9 @@ struct CbF : CbFPlain {
     CbF(f32 a) { v = a; }
 };
 
+/* Helper name unproven */
+static inline CbF MakeF(f32 v) { return CbF(v); }
+
 struct CbVec4 {
     CbVec4(void) {}
     CbVec4(f32 x_, f32 y_, f32 z_, f32 w_) {
@@ -1328,7 +1331,14 @@ struct CbVec4 {
         w = w_;
     }
     CbVec4(CbSolPlain s) {
-        Set(RVec3(s.x, s.y, s.z), CbF(s.w));
+        SetWP(MakeF(s.w), RVec3(s.x, s.y, s.z));
+    }
+    /* Helper name unproven: Set with the lane first (retail's copy-before-temp slot order) */
+    void SetWP(CbF w_, const RVec3& p) {
+        x = p.x;
+        y = p.y;
+        z = p.z;
+        w = w_.v;
     }
     void Set(const RVec3& p, CbF w_) {
         x = p.x;
