@@ -508,8 +508,12 @@ void PlaySlotUnlockAnimation(void);
 
 // A path's cup screen: a marker per cup (at most five) with its name and progress, coloured and titled for
 // the path's difficulty. Returns 1 with the picked cup in *sel, 0 when backed out.
+/* Helper name unproven: the path difficulty arrives as an inline value. Its extra copy at instruction selection puts the
+   >100-pcode statement cut (CodeGen.c newstatement) before bars[1].title like retail (FACTS STATEMENT-BLOCK-CUT-100). */
+static inline int PathDifficultyValueOf(const int& v) { return v; }
+
 int fn_8027F958(s32* sel, EvPath* path) {
-    int diff = path->Get(0)->Difficulty();
+    int diff = PathDifficultyValueOf(path->Get(0)->Difficulty());
     EvCupBar bars[5];
     int count = path->Count();
     int n = count < 5 ? count : 5;
