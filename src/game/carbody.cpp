@@ -2311,6 +2311,8 @@ extern "C" {
 // out the throttle/brake/steer limits (water, offroad, airborne, boost) before the drive model update.
 // MATCHING-AID: invented helpers (the target materialises these compares as values, mfcr); unproven.
 
+/* Helper name unproven: NearZero with the narrowed value held in a local (retail's numbering at the a.w test). */
+static inline int NearZeroD(f32 x) { f32 value = (f32)__fabs(x); return value <= __float_epsilon[0]; }
 // Name unproven.
 static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
     return Mul(0.55181247f * (-forward * mass), amount);
@@ -2501,9 +2503,9 @@ void fn_80186DE8(void) {
             force[1] = force[1] + dv[1];
             force[2] = force[2] + dv[2];
             if (((CarBody*)car)->f259C && ((CarBody*)car)->speed < top) {
-                f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
                 f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
                 f32 lo = 2.4f * boost;
+                f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
                 f32 boostScale = LerpT(Clamp01(t), lo, Mul(0.6f, boost));
                 f32 mass = ((CarBody*)car)->mass;
                 k = boostScale * (((CarBody*)car)->f25E0 * mass);
@@ -2528,7 +2530,7 @@ void fn_80186DE8(void) {
         if (wh >= 0) {
             f32 a;
             f32 b;
-            a = F32(car, wh * 0x74 + 0x23B4);
+            a = ((CarBody*)car)->wheels[wh].spin;
             f32 s1[4] = {0};
             f32 s0[4] = {0};
             s1[wh] = Mul((a - 6.2831855f) * ((a - 3.1415927f) * (0.09829f * a)), 0.08726646f);
@@ -2767,7 +2769,7 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->f25F8 = brake;
         CbVec4 a = CbVec4(x->pts[6]);
         a.w = ((CarBody*)car)->setupA.f20 - ((CarBody*)car)->setupA.f24;
-        if (!NearZero(((CarBody*)car)->f2650)) {
+        if (!NearZeroD(((CarBody*)car)->f2650)) {
             f32 off = 0.0f;
             a.w = a.w * off;
         }
