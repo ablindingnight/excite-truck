@@ -742,11 +742,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1770.z = ValueOf(V17F0.z);
         V1760.z = V1770.z;
         V1C10.x = V1750.x;
+        V1740.x = rowC8->x;
         V1750.y = rowA0->y;
         V1C10.y = V1750.y;
         V1750.z = rowA0->z;
         V1C10.z = V1750.z;
-        V1740.x = rowC8->x;
         V1740.y = rowC8->y;
         V1740.z = rowC8->z;
         V1740.w = rowC8->w;
@@ -789,11 +789,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V16A0.y = rowB0->y;
         V16A0.z = rowB0->z;
         V16A0.w = rowB0->w;
+        V1680.x = rowA5->x;
         V1690.x = V16A0.x;
         V1690.y = V16A0.y;
         V1690.z = V16A0.z;
         V1690.w = V16A0.w;
-        V1680.x = rowA5->x;
         V1680.z = rowA5->z;
         V1680.y = rowA5->y;
         V16B0.w = V16C0.w;
@@ -846,10 +846,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1590.w = V15A0.w;
         V1580.x = V16D0.x * V17A0.w;
         V1570.x = rowC21->x;
-        V1570.y = rowC21->y;
         V1580.y = V16D0.y * V17A0.w;
         V1580.z = V16D0.z * V17A0.w;
         V1580.w = V16D0.w * V17A0.w;
+        V1570.y = rowC21->y;
         V1570.z = rowC21->z;
         V1570.w = rowC21->w;
         V1560.x = V1570.x;
@@ -863,8 +863,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1540.x = V1550.x;
         V1540.y = V1550.y;
         V1540.z = V1550.z;
-        V1530.x = rowB8->x;
         V1540.w = V1550.w;
+        V1530.x = rowB8->x;
         V1520.x = V1530.x;
         V1510.x = V1540.y;
         V1510.y = V1540.z;
@@ -878,8 +878,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         temp_f5_13 = V1500.x + V1500.z;
         V18F0.x = V1500.x + V1500.z;
         V14F0.x = V18F0.x;
-        V14E0.x = V14F0.x - V1520.x;
         V18F0.x = V1500.x + V1500.z;
+        V14E0.x = V14F0.x - V1520.x;
         V14D0.x = (temp_f31 + lbl_805627AC);  // retail splats f29 = zero + 1 into each of these, not a copy chain
         V14C0.x = V14E0.x * V14D0.x;
         V14B0.x = (temp_f31 + lbl_805627AC);
@@ -1624,8 +1624,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V0160.w = V16B0.w * V1C50.w;
         V0150.x = V1690.x + V0160.x;
         V0150.y = V1690.y + V0160.y;
-        V1690.y = V0150.y;
         V0150.z = V1690.z + V0160.z;
+        V1690.y = V0150.y;
         V1690.x = V0150.x;
         V1690.z = V0150.z;
         V0150.w = V1690.w + V0160.w;
