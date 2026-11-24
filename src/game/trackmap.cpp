@@ -539,9 +539,13 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     f32 t;
     scale = 1.0f / (map->width / 2.0f);
     t = Unlerp(map->minSpeed, map->maxSpeed, GetCarInfo(view)->draw->speedXZ / 0.44444445f);
-    f32 hi = map->maxWidth;
-    f32 lo = map->minWidth;
-    f32 k = Max(Min(1.0f, t), 0.0f);
+    f32 lo;
+    f32 hi;
+    hi = map->maxWidth;
+    lo = map->minWidth;
+    f32 k = 1.0f;
+    k = Min(k, t);
+    k = Max(k, 0.0f);
     f32 radius = lo + k * (hi - lo);
     const Vec3& path = fn_80136468(fn_80178C9C(), dist);  // unused
     {
