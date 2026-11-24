@@ -1083,7 +1083,7 @@ config.libs.append(
             Object(Matching, "game/placecar.cpp"),
             Object(Matching, "game/amaster.cpp"),
             Object(Matching, "game/alarm.cpp"),
-            Object(NonMatching, "game/trailer.cpp"),
+            Object(Matching, "game/trailer.cpp"),
             Object(NonMatching, "game/unk_801BD620.cpp"),
             Object(NonMatching, "game/masslist.cpp"),
             Object(Matching, "game/panelvol.cpp"),

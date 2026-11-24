@@ -152,17 +152,19 @@ inline void Trailer::Reglue(void) {
 
 extern "C" {
 
-void GetTrailerJointPosition(RVec3* out, int model, const char* name, RVec3 def) {
-    *(WV3*)out = *(WV3*)&def;
+// PROVISIONAL: aggregate-result spelling; its hidden result pointer preserves the retail ABI.
+RVec3 GetTrailerJointPosition(int model, const char* name, RVec3 def) {
+    RVec3 out = def;
     if (fn_801E320C(model, name)) {
         Joint* j = fn_801E3004(model, name, -1);
         if (j) {
-            fn_801E3488(out, j);
+            fn_801E3488(&out, j);
             fn_801E323C(j);
         }
     } else {
         fn_802E30C8("trailer: can't find \"%s\" in %s", name, fn_802C7A10(model));
     }
+    return out;
 }
 
 Trailer* CreateTrailer(void) { return new ("trlr_car") Trailer; }
@@ -249,19 +251,10 @@ Trailer::~Trailer(void) {
     lbl_8055E774--;
 }
 
-/* Helper name unproven: a named model point returned by value, with a default. */
-static inline RVec3 FindPoint(int model, const char* name, RVec3 def) {
-    RVec3 r;
-    GetTrailerJointPosition(&r, model, name, def);
-    return r;
-}
-
 void Trailer::Init(BodyDesc* desc) {
     low = (fn_801769CC()->type >> 12) & 1;
     CarBody::Init(desc);
-    RVec3 p;
-    GetTrailerJointPosition(&p, model, "hitch", RVec3(0.0f, 0.0f, 3.0f));
-    hitchLocal = p;
+    hitchLocal = GetTrailerJointPosition(model, "hitch", RVec3(0.0f, 0.0f, 3.0f));
     f32 b[6];
     fn_802C77F0(model, b);
     if (low) {
@@ -270,7 +263,7 @@ void Trailer::Init(BodyDesc* desc) {
     f32 cb[6];
     fn_802C77F0(car->model, cb);
     RVec3 cd = low ? RVec3(0.0f, 0.0f, cb[4] - 0.1524f) : RVec3(0.0f, 0.4318f, cb[4] - 0.2032f);
-    hitchCar = FindPoint(car->model, "hitch", cd);
+    hitchCar = GetTrailerJointPosition(car->model, "hitch", cd);
     hitchCar.y += 0.127f;
 }
 
