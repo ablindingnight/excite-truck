@@ -1118,11 +1118,7 @@ static inline void NormV2(V2* d) {
 
 
 inline void CrushMaster::vfA8(int car, int b) {
-    f32 dz;
-    f32 dy;
-    f32 k;
     f32 t;
-    f32 dx;
     int jump;
     RaceCarRec* rec;
     ValVec3* pos;
@@ -1156,14 +1152,10 @@ inline void CrushMaster::vfA8(int car, int b) {
             }
             if (jump) {
                 t = 4.0f;
-                dy = dst.y - pos->y;
-                dx = dst.x - pos->x;
-                dz = dst.z - pos->z;
-                k = 1.0f / t;
-                v.y = dy * k;
-                v.z = Mul(dz, k);
-                k *= dx;
-                v.x = k;
+                v.x = dst.x - pos->x;
+                v.y = dst.y - pos->y;
+                v.z = dst.z - pos->z;
+                TScale(&v, &v, 1.0f / t);
                 v.y += 9.81f * t;
                 r.place.origin.x = rec->mtx.pos.x;
                 r.place.origin.y = rec->mtx.pos.y;
