@@ -170,11 +170,12 @@ static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
     }
 }
 
-// Componentwise lerp in two passes: out = t * (b - a), then out += a (name unproven).
+// Componentwise lerp, lane by lane: the lane value is computed into a local and stored by a separate statement,
+// so the block cut can fall between them as in retail (name unproven).
 static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t) {
     for (int j = 2; j >= 0; j--) {
-        (&out->x)[j] = t * ((&b.x)[j] - (&a.x)[j]);
-        (&out->x)[j] += (&a.x)[j];
+        f32 v = t * ((&b.x)[j] - (&a.x)[j]) + (&a.x)[j];
+        (&out->x)[j] = v;
     }
 }
 // Plain float sum / difference (names unproven). Value-returning helpers add ISEL pcodes, which moves the
