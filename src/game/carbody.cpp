@@ -2628,9 +2628,7 @@ void fn_80186DE8(void) {
             nrm[0] = c->pts[9 + j].x;
             nrm[2] = nrm_2;
             nrm[1] = nrm_1;
-            w->local[0] = x->pts[j].x;
-            w->local[2] = x->pts[j].z;
-            w->local[1] = x->pts[j].y - w6[j];
+            CbSet3(w->local, x->pts[j].x, x->pts[j].y - w6[j], x->pts[j].z);
             u32 fl;
             f32 up = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x54));
             // The pair is built in a stack object, then copied: retail forwards both stored values (frsp) into the
