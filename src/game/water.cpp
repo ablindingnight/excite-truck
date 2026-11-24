@@ -740,14 +740,15 @@ WaterSystem::WaterSystem(void) {
             // The row indices are written as expressions, not named locals: IRO only strength-reduces
             // `invariant + iv` into its own induction variable when the invariant side is an expression.
             // Post-increment stores keep the loop under IRO's unroll weight limit (the indexed form needed
-            // opt_unroll_instr_count 104 for the same x5 unroll). a1 is unsigned: IRO then does not merge copy 0's a + 1
-            // with copy 1's index, which gives the target's shared add plus an in-place incremented copy.
-            u32 a1 = r * 16 + (c + 1);
-            // b0 is a 16-bit local used twice, one use cast (cast unproven: needed for the target's two `add c,next`
-            // bases + three copies; any cast works, so the original spelling is not known).
+            // opt_unroll_instr_count 104 for the same x5 unroll).
+            // a1 and b0 are 16-bit locals used twice, one use of each cast (casts unproven: any cast works, so the
+            // original spelling is not known). The typed locals keep IRO from merging the copies' index adds (the
+            // target's shared add + in-place incremented copy, and two `add c,next` bases + three copies), and a1's
+            // dead zero-extension in the pass-1 DAG lets a+2 win the scheduler tie as in the target.
+            u16 a1 = r * 16 + (c + 1);
             u16 b0 = (r + 1) * 16 + c;
             *p++ = r * 16 + c;
-            *p++ = a1;
+            *p++ = (u32)a1;
             *p++ = (u32)b0;
             *p++ = b0;
             *p++ = a1;
