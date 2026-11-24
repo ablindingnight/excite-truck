@@ -221,7 +221,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     f32 bz = ((PlainValMatrix*)butt)->basis[1].z;
     d->yaw = atan2(bz, by);
     d->butt.x = SubF(d->butt.x, bones[0].m.origin.x);
-    d->butt.y = d->butt.y - bones[0].m.origin.y;
+    d->butt.y = SubF(d->butt.y, bones[0].m.origin.y);
     d->butt.z = SubF(d->butt.z, bones[0].m.origin.z);
     // Retail keeps this store although lfoot is overwritten by m1 below. 472 instrs and retail's mnemonic mix.
     lfoot = bones[9].m.origin;
@@ -238,7 +238,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
     rhip = bones[4].m.origin;
     rhip.z = AddF(rhip.z, d->butt.z);
-    rhip.y = AddF(rhip.y, d->butt.y);
+    rhip.y = rhip.y + d->butt.y;
     lhip.x = AddF(bones[7].m.origin.x, d->butt.x);
     rhip.x = AddF(rhip.x, d->butt.x);
     lknee.x = bones[8].m.origin.x + d->butt.x;
