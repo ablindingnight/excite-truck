@@ -2310,6 +2310,9 @@ static inline void SolSet(CbSolVec* d, f32 x, f32 y, f32 z) { *d = CbSolVec4(x, 
 /* Helper name unproven: a lane read back through CbF's plain base by value (retail's float store + word copy). */
 static inline f32 LaneOf(CbFPlain p) { return p.v; }
 
+/* Helper name unproven: the car's right axis (two-statement body: its result gets a late IRO temp, like retail). */
+static inline const Vec* RightOf(u8* car) { CarBody* cb = (CarBody*)car; return (const Vec*)&cb->mtx; }
+
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2594,7 +2597,7 @@ void fn_80186DE8(void) {
             // The pair is built in a stack object, then copied: retail forwards both stored values (frsp) into the
             // plane fields (fwdsig FWDCOPY, G9).
             f32 pl[2];
-            pl[0] = PSVECDotProduct((const Vec*)nrm, (const Vec*)&((CarBody*)car)->mtx);
+            pl[0] = PSVECDotProduct((const Vec*)nrm, RightOf(car));
             pl[1] = up;
             w->plane.nRight = pl[0];
             w->plane.nFwd = pl[1];
