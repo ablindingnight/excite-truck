@@ -1096,9 +1096,19 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     RVec3 l;
     RVec3 cp;
     RVec3 d;
-    ToBoxSpace(&l, c, &f);
+    {
+        l.x = c->x - f.pos.x;
+        l.y = c->y - f.pos.y;
+        l.z = c->z - f.pos.z;
+        f32 x = Dot3(l.x, f.rot.x.x, l.y, f.rot.x.y, l.z, f.rot.x.z);
+        f32 y = Dot3(l.x, f.rot.y.x, l.y, f.rot.y.y, l.z, f.rot.y.z);
+        f32 z = Dot3(l.x, f.rot.z.x, l.y, f.rot.z.y, l.z, f.rot.z.z);
+        l.x = x;
+        l.y = y;
+        l.z = z;
+    }
     if (debug) {
-        fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, ext->x, ext->y, ext->z);
+        fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, LoadF(&ext->x), LoadF(&ext->y), LoadF(&ext->z));
     }
     ClampToBox(&l, ext);
     MulVec(&cp, &l, &f);
@@ -1108,9 +1118,8 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
     d.x = cp.x - c->x;
     d.y = cp.y - c->y;
     d.z = cp.z - c->z;
-    f32 comp;
     f32 len = sqrt(PSVECDotProduct((const Vec*)&d, (const Vec*)&d));
-    comp = 0.2f + (-len + r);
+    r = 0.2f + (-len + r);
     if (len < 0.01f) {
         if (debug) {
             fn_802E30C8("-collide_explicit_sphere_box: delta_length = %f", len);
@@ -1128,7 +1137,7 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
                 }
                 return 0;
             }
-            comp = 0.254f;
+            r = 0.254f;
             if (len < 0.01f) {
                 return 0;
             }
@@ -1136,11 +1145,20 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             fn_802E317C("volume: explicit_sphere_box method: code should never get here");
             RVec3 v;
             rb->VelAt(&v, c);
-            f32 xv = c->x;
-            SphAheadXZY(&cp.x, xv, c, &v.x, 0.025025027f);
-            ToBoxSpace(&l, &cp, &f);
+            MulAdd(&cp.x, &c->x, &v.x, 0.025025027f);
+            {
+                l.x = cp.x - f.pos.x;
+                l.y = cp.y - f.pos.y;
+                l.z = cp.z - f.pos.z;
+                f32 x = Dot3(l.x, f.rot.x.x, l.y, f.rot.x.y, l.z, f.rot.x.z);
+                f32 y = Dot3(l.x, f.rot.y.x, l.y, f.rot.y.y, l.z, f.rot.y.z);
+                f32 z = Dot3(l.x, f.rot.z.x, l.y, f.rot.z.y, l.z, f.rot.z.z);
+                l.x = x;
+                l.y = y;
+                l.z = z;
+            }
             if (debug) {
-                fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, ext->x, ext->y, ext->z);
+                fn_802E30C8("cesb: cp1: %f, %f, %f R:(%f, %f, %f)", l.x, l.y, l.z, LoadF(&ext->x), LoadF(&ext->y), LoadF(&ext->z));
             }
             ClampToBox(&l, ext);
             RVec3 back;
@@ -1161,12 +1179,12 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
                 }
                 return 0;
             }
-            comp = 0.254f;
+            r = 0.254f;
         } else {
             return 0;
         }
     }
-    if (comp > 0.0f) {
+    if (r > 0.0f) {
         RVec3 n;
         f32 k = -1.0f / len;
         n.x = d.x * k;
@@ -1176,16 +1194,16 @@ int fn_8019B4D8(u8* p, u8* q, const RVec3* c, u32 debug, f32 r) {
             fn_802E30C8("colliding! cylinder_box(%p, %p: %d)", p, q, ((CollShape*)p)->surface);
             RMtx* pf = (RMtx*)((u8*&)((CollShape*)p)->frame);
             fn_802E30C8("%f,%f,%f", pf->pos.x, pf->pos.y, pf->pos.z);
-            fn_802E30C8("comp = %f!", comp);
+            fn_802E30C8("comp = %f!", r);
         }
-        fn_8019A788(p, q, &cp, &n, 0, 0, comp, 0.0f, 0.0f);
+        fn_8019A788(p, q, &cp, &n, 0, 0, r, 0.0f, 0.0f);
         if (debug) {
             fn_802E30C8("-collide_explicit_sphere_box: COLLIDE!");
         }
         return 1;
     }
     if (debug) {
-        fn_802E30C8("-collide_explicit_sphere_box: MISS (compression = %f)", comp);
+        fn_802E30C8("-collide_explicit_sphere_box: MISS (compression = %f)", r);
     }
     return 0;
 }
