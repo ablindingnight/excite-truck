@@ -1054,6 +1054,22 @@ static inline int CountChildAt(ValueNode* n, const char* name) {
     return c;
 }
 
+// PROVISIONAL: count writes the real caller capacity.
+static inline void CountChildInto(ValueNode* n, const char* name, int& c) {
+    c = 0;
+    int i;
+    ValueNode* e;
+    for (i = 0;; i++) {
+        e = n->GetChildAt(i);
+        if (!e) {
+            break;
+        }
+        if (!strcasecmp(e->GetName(), name)) {
+            c++;
+        }
+    }
+}
+
 static inline DynArray<BoxCmd>* ReadBoxCmdArray(ValueNode* n, const char* name) {
     int i;
     ValueNode* e;
@@ -1101,7 +1117,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     const char* name;
     DynArray<TextCmd>* at;
     name = "text_cmd";
-    c = CountChildAt(n, name);
+    CountChildInto(n, name, c);
     at = new ("overlaycmd_dsa") DynArray<TextCmd>(c);
     for (int i = 0;; i++) {
         e = n->GetChildAt(i);
