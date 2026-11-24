@@ -164,6 +164,9 @@ int fn_801E5370(int max, int subdiv, f32 scale) {
 
 // Adds a ribbon edge (p - side, p + side) with tangent tan; when drawing, the span from the previous
 // edge is tessellated with a Hermite curve.
+/* Helper name and ownership unproven: read a computed ribbon coordinate. */
+static inline f32 RibbonCoordinateValue(const f32& value) { return value; }
+
 void fn_801E53A8(const ValVec3* p, const ValVec3* tan, const ValVec3* side, int draw, f32 alpha) {
     if (lbl_80487C88.count >= lbl_80487C88.max) {
         fn_802E317C("tristrip: exceeded skid vert limit");
@@ -221,7 +224,7 @@ void fn_801E53A8(const ValVec3* p, const ValVec3* tan, const ValVec3* side, int 
             f32 h3 = -2.0f * t3 + 3.0f * t2;
             v = &lbl_80487578[nv];
             v->pos.x = tp.x + s->p0.x * h1 + h3 * a.x;
-            v->pos.y = tp.y + s->p0.y * h1 + a.y * h3;
+            v->pos.y = RibbonCoordinateValue(tp.y + s->p0.y * h1) + a.y * h3;
             v->u = 0.0f;
             v->pos.z = tp.z + s->p0.z * h1 + a.z * h3;
             v->v = t;
