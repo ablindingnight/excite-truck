@@ -1979,17 +1979,25 @@ u8 lbl_80435020[0x30];  // scratch tube volume for box edges
 }
 extern "C" {
 
+// Actual axis lookup by byte stride; original helper boundary/name unproven.
+static inline BoxAxis& BoxHalfAxisAt(BoxAxis* axes, int index) {
+    return *(BoxAxis*)((char*)axes + index * sizeof(BoxAxis));
+}
+
 int fn_8019E500(u8* p, u8* q) {
     TubeShape* t;
     RMtx fr = *(RMtx*)VE(q)->v50();
+    const f32 halfX = LoadF(&((BoxShape*)q)->half.x);
+    const f32 halfY = LoadF(&((BoxShape*)q)->half.y);
+    const f32 halfZ = LoadF(&((BoxShape*)q)->half.z);
     bool hit = false;
     BoxAxis ax[3] = {0};
     ax[0].dir = *(PVec3A*)&fr.rot.x.x;
+    ax[0].ext = halfX;
     ax[1].dir = *(PVec3A*)&fr.rot.y.x;
+    ax[1].ext = halfY;
     ax[2].dir = *(PVec3A*)&fr.rot.z.x;
-    ax[0].ext = ((BoxShape*)q)->half.x;
-    ax[1].ext = ((BoxShape*)q)->half.y;
-    ax[2].ext = ((BoxShape*)q)->half.z;
+    ax[2].ext = halfZ;
     int i;
     for (i = 0; i < 3; i++) {
         if (i == 1) {
@@ -1999,10 +2007,10 @@ int fn_8019E500(u8* p, u8* q) {
         BoxAxis* aa = &ax[(i + 1) % 3];
         BoxAxis* ab = &ax[(i + 2) % 3];
         int j;
-        BoxAxis* ai = (BoxAxis*)((char*)ax + i * (int)sizeof(BoxAxis));
-        e.axis.x = ai->dir.v[0];
-        e.axis.y = ai->dir.v[1];
-        e.axis.z = ai->dir.v[2];
+        BoxAxis& ai = BoxHalfAxisAt(ax, i);
+        e.axis.x = ai.dir.v[0];
+        e.axis.y = ai.dir.v[1];
+        e.axis.z = ai.dir.v[2];
         e.a.x = aa->dir.v[0];
         e.a.y = aa->dir.v[1];
         e.a.z = aa->dir.v[2];
@@ -2019,8 +2027,8 @@ int fn_8019E500(u8* p, u8* q) {
             e.pos.x += ab->dir.v[0] * k;
             e.pos.y += ab->dir.v[1] * k;
             e.pos.z += ab->dir.v[2] * k;
-            t = new (lbl_80435020) TubeShape((CollVolume*)U32(q, 0x4), (const RMtx*)&e, ((BoxShape*)q)->stiff,
-                                             ((BoxShape*)q)->skin, 0.75f, ai->ext);
+            t = new (lbl_80435020) TubeShape((CollVolume*)U32(q, 0x4), (const RMtx*)&e, LoadF(&((BoxShape*)q)->stiff),
+                                             LoadF(&((BoxShape*)q)->skin), 0.75f, LoadF(&ai.ext));
             hit |= fn_8019D618((u8*)t, p, 1, q);
         }
     }
