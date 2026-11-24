@@ -181,7 +181,7 @@ static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t
 // Plain float sum / difference (names unproven). Value-returning helpers add ISEL pcodes, which moves the
 // scheduler's statement block cut (FACTS STATEMENT-BLOCK-CUT-100).
 static inline f32 AddF(f32 a, f32 b) { return a + b; }
-static inline f32 SubF(f32 a, f32 b) { return a - b; }
+static inline f32 SubF(f32 a, const f32& b) { return a - b; }
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
@@ -230,7 +230,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     ValVec3 rhip;
     ValVec3 rknee;
     // Sums in retail's order: the four z lanes first, then x/y. rknee and rhip are copied, then accumulated: the
-    // read-backs are forwarded away but count as ISEL pcodes. With SubF on butt.x and butt.z the block cut falls
+    // read-backs are forwarded away but count as ISEL pcodes. With SubF on the three butt lanes the block cut falls
     // between m1.z's lane value and its store, as in retail.
     lknee.z = bones[8].m.origin.z + d->butt.z;
     rknee = bones[5].m.origin;
