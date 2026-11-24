@@ -3,6 +3,7 @@
 // per-car tuning accessors. Written against raw field offsets; the large routines are still stubs.
 // Names are guesses apart from the strings.
 #include "game/common.h"
+#include "game/plainvec.h"
 #include "game/rvec.h"
 #include "game/corner.h"
 #include "game/raceopts.h"
@@ -605,7 +606,7 @@ void Init__7CarBodyFP8BodyDesc(u8* p, u8* desc) {
     cb->f5D4 = cb->f5C8;
     cb->f5D4 += 3.0f;
     cb->f5D8 = cb->f5CC;
-    const ValVec3& back = chassis->GetVec3Or("lookback_head_pos", *(ValVec3*)(p + 0x5D0));
+    const ValVec3& back = chassis->GetVec3Or("lookback_head_pos", *(ValV3*)(p + 0x5D0));
     cb->f5D0 = back.x;
     cb->f5D4 = back.y;
     cb->f5D8 = back.z;
