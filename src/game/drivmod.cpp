@@ -278,6 +278,16 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     return d;
 }
 
+// Midpoint of two points, halves added lane by lane (name unproven).
+static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
+    for (int j = 0; j < 3; j++) {
+        (&out->x)[j] = (&a->x)[j] / 2.0f;
+    }
+    for (int j = 0; j < 3; j++) {
+        (&out->x)[j] += (&b->x)[j] / 2.0f;
+    }
+}
+
 // The upper-body driver (skeletons with a "neck" and no "butt"; others use fn_801FFB74): shoulders, hands and the
 // points between them make the 7-point ragdoll.
 DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
@@ -300,25 +310,17 @@ DriverModel* fn_802002D4(const char* name, u8* skel, u8* opt) {
     ValVec3 lh;
     fn_801E3488(&lh, d->lhand);
     ValVec3 lmid;
-    // Component loop (unrolled by the compiler); the other two midpoints are still written out (open: they rise
-    // only in asmcmp rows, not objdiff, as loops).
-    for (int j = 0; j < 3; j++) {
-        (&lmid.x)[j] = (&lh.x)[j] / 2.0f + (&ls.x)[j] / 2.0f;
-    }
+    MidPoint(&lmid, &lh, &ls);
     lmid.y -= 0.2032f;
     ValVec3 rs = *(ValVec3*)fn_801FFB08(skel, "rshoulder");
     ValVec3 rh;
     fn_801E3488(&rh, d->rhand);
     ValVec3 rmid;
-    f32 xv = rs.x;
-    rmid.x = rh.x / 2.0f + xv / 2.0f;
-    rmid.y = rh.y / 2.0f + rs.y / 2.0f - 0.2032f;
-    rmid.z = rh.z / 2.0f + rs.z / 2.0f;
+    MidPoint(&rmid, &rh, &rs);
+    rmid.y -= 0.2032f;
     ValVec3 chest;
-    chest.x = ls.x / 2.0f + rs.x / 2.0f;
-    chest.y = ls.y / 2.0f + rs.y / 2.0f - 1.27f;
-    f32 zv = ls.z;
-    chest.z = zv / 2.0f + rs.z / 2.0f;
+    MidPoint(&chest, &ls, &rs);
+    chest.y -= 1.27f;
     DBone bones[32];
     int n = 32;
     CopyBoneSet(d->skel, bones, &n);
