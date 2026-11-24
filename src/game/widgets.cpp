@@ -2872,10 +2872,10 @@ void ColorBackground::Slot28(void) {
         secondPose->xf.translation.v[2] += translatedAfterRotation.z;
         image->pose->alpha = (0.3f) + ((0.7f) * image->blend);
         AppendNodeToUIList(image->pose);
-        DrawTexturedQuad(image->x,image->y,image->width,image->height,image->textureHandle,-1U,(0.0f),(0.0f),(1.0f),(1.0f));
-        DrawTexturedQuad(image->x - (float) lbl_8055FB9C,image->y,image->width,image->height,image->textureHandle,-1U,(0.0f),(0.0f),(1.0f),(1.0f));
-        DrawTexturedQuad(image->x,image->y - ((30.0f) + (float) lbl_8055FBA0),image->width,image->height,image->textureHandle,-1U,(0.0f),(0.0f),(1.0f),(1.0f));
-        DrawTexturedQuad(image->x - (float) lbl_8055FB9C,image->y - ((30.0f) + (float) lbl_8055FBA0),image->width,image->height,image->textureHandle,-1U,(0.0f),(0.0f),(1.0f),(1.0f));
+        DrawTexturedQuad(image->x, image->y, image->width, image->height, image->textureHandle, (0.0f), (0.0f), (1.0f), (1.0f), -1U);
+        DrawTexturedQuad(image->x - (float) lbl_8055FB9C, image->y, image->width, image->height, image->textureHandle, (0.0f), (0.0f), (1.0f), (1.0f), -1U);
+        DrawTexturedQuad(image->x, image->y - ((30.0f) + (float) lbl_8055FBA0), image->width, image->height, image->textureHandle, (0.0f), (0.0f), (1.0f), (1.0f), -1U);
+        DrawTexturedQuad(image->x - (float) lbl_8055FB9C, image->y - ((30.0f) + (float) lbl_8055FBA0), image->width, image->height, image->textureHandle, (0.0f), (0.0f), (1.0f), (1.0f), -1U);
         UpdateTopSlot();
     }
     image->lastUpdateTime = now;

@@ -451,7 +451,7 @@ void CalculateScreenMargins(int* top, int* bottom, int* left, int* right) {
     }
 }
 
-void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1) {
+void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, s32 tex, f32 u0, f32 v0, f32 u1, f32 v1, u32 color) {
     fn_802C8B98(tex, GetTopUIContext());
     u32 c = fn_80230B9C(color);
     f32 z = 0.0f;

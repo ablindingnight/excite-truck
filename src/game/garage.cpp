@@ -1044,7 +1044,7 @@ int CarPick::Key(int key) {
 
 
 extern "C" {
-void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
+void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, u8* tex, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
 }
 
 // A car's paint `i`, or white when out of range.
@@ -1125,11 +1125,8 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     f32 u2 = ic->u2;
     f32 v2 = ic->v2;
     u32 tint = TintColor(color, locked ? 0xFF000000 : -1);
-    DrawTexturedQuad(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
-                0.8f * w, 0.8f * h, ic->tex, locked ? 0xFF000000 : -1, u1, v1, u2, v2);
-    DrawTexturedQuad(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h),
-                0.8f * w, 0.8f * h, ic->overlay, tint, u1, v1,
-                u2, v2);
+    DrawTexturedQuad(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h), 0.8f * w, 0.8f * h, ic->tex, u1, v1, u2, v2, locked ? 0xFF000000 : -1);
+    DrawTexturedQuad(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h), 0.8f * w, 0.8f * h, ic->overlay, u1, v1, u2, v2, tint);
 }
 
 
@@ -1227,7 +1224,7 @@ extern s32 lbl_8055CFF0;  // screen width
 extern s32 lbl_8055CFF4;  // screen height
 
 extern "C" {
-void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
+void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, u8* tex, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
 
 
 // Draws the slot strip: the backdrop, each slot sliding/fading by its distance from the cursor, and the frame.
@@ -1237,7 +1234,7 @@ void SlotStrip::Draw(void) {
     SlotStrip* p = this;
     f32 top = lbl_8055CFF4 / 2 - 24.0f;
     f32 w = 1.7777778f * lbl_8055CFF0 / 1.3333334f;
-    DrawTexturedQuad(-0.5f * w, 225.0f, w, 66.0f, p->tex, -1, 0.0f, 0.0f, 10.0f, 1.0f);
+    DrawTexturedQuad(-0.5f * w, 225.0f, w, 66.0f, p->tex, 0.0f, 0.0f, 10.0f, 1.0f, -1);
     f32 fade = fn_80216CB4();
     for (int i = 0; i < p->count; i++) {
         SlotAnim* e = &p->slots[i];

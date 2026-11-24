@@ -5,7 +5,8 @@ struct GTextFont;
 extern "C" {
 void DrawColoredQuad(unsigned long,float,float,float,float,float);
 void CalculateScreenPosition(float*,float*,int,int);
-void DrawTexturedQuad(float,float,float,float,long,unsigned long,float,float,float,float);
+// PROVISIONAL: relative source order of color/UV inputs; each PPC register-class argument sequence is unchanged.
+void DrawTexturedQuad(float, float, float, float, long, float, float, float, float, unsigned long);
 
 void DrawAnimatedWidget(float,unsigned long,int,float,float,float,float,float,float,float);
 void fn_802304EC(const char*,GTextFont*,float,float,float,float,unsigned long,int,float,float,float);

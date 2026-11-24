@@ -495,7 +495,7 @@ static inline u32 DimColor(u32 c) {
 
 extern "C" {
 void CalculateScreenPosition(f32* x, f32* y, s32 lx, s32 ly);
-void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, u8* tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
+void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, u8* tex, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
 
 // The chosen car icon in a frame, the overlay tinted with the player's colour.
 }  // extern "C"
@@ -530,6 +530,6 @@ void CarIconWidget::Draw(void) {
     u1 = e->u1;
     v1 = e->v1;
     c = tint;
-    DrawTexturedQuad(x, y, fw, fh, e->tex, -1, u0, v0, u1, v1);
-    DrawTexturedQuad(x, y, fw, fh, e->overlay, DimColor(c), u0, v0, u1, v1);
+    DrawTexturedQuad(x, y, fw, fh, e->tex, u0, v0, u1, v1, -1);
+    DrawTexturedQuad(x, y, fw, fh, e->overlay, u0, v0, u1, v1, DimColor(c));
 }

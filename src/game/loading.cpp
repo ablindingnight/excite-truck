@@ -79,7 +79,7 @@ void DrawColoredText(const char* text, void* font, f32 x, f32 y, u32 color, int 
 f32 CalculateTextWidth(void* font, const char* text, f32 scale);
 void fn_80233010(const char* text, void* font, u32 color, int align, int unk, f32 x, f32 y, f32 width,
                  f32 scale, f32 a, f32 b);
-void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, s32 tex, u32 color, f32 u0, f32 v0, f32 u1, f32 v1);
+void DrawTexturedQuad(f32 x, f32 y, f32 w, f32 h, s32 tex, f32 u0, f32 v0, f32 u1, f32 v1, u32 color);
 void fn_80148134(f32* out_x, f32* out_y, f32 x, f32 y, int mode);
 int GetNamedCameraPose(const char* name, RMtx* frame, f32* fov);
 void fn_802A1120(f32* center, f32* dir);
@@ -476,10 +476,10 @@ void DrawLoadingScreen(int alpha, f32 t) {
     if (lbl_8055D646) {
         bar_color = 0;
     }
-    DrawTexturedQuad(x0, y0, x1 - x0, y0 - y1, lbl_80558D80, bar_color, 0.0f, 0.0f, 1.0f, 1.0f);
-    DrawTexturedQuad(x0, y1, x1 - x0, y1 - y2, lbl_80558D84, bar_color, 0.0f, 0.0f, 1.0f, 1.0f);
-    DrawTexturedQuad(x0, y0, x1 - x0, y0 - y1, lbl_80558D78, color, 0.0f, 0.0f, 1.0f, 1.0f);
-    DrawTexturedQuad(x0, y1, x1 - x0, y1 - y2, lbl_80558D7C, color, 0.0f, 0.0f, 1.0f, 1.0f);
+    DrawTexturedQuad(x0, y0, x1 - x0, y0 - y1, lbl_80558D80, 0.0f, 0.0f, 1.0f, 1.0f, bar_color);
+    DrawTexturedQuad(x0, y1, x1 - x0, y1 - y2, lbl_80558D84, 0.0f, 0.0f, 1.0f, 1.0f, bar_color);
+    DrawTexturedQuad(x0, y0, x1 - x0, y0 - y1, lbl_80558D78, 0.0f, 0.0f, 1.0f, 1.0f, color);
+    DrawTexturedQuad(x0, y1, x1 - x0, y1 - y2, lbl_80558D7C, 0.0f, 0.0f, 1.0f, 1.0f, color);
     fn_80148134(&title_x, &title_y, 65.0f, 40.0f, 2);
     fn_80148134(&sub_x, &sub_y, 65.0f, 84.0f, 2);
     DrawColoredText(lbl_8055D660, lbl_8055D64C, title_x, title_y, color, 9, 1.1733334f, 0.0f, 1.0f);
