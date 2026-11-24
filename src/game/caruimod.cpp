@@ -1028,14 +1028,12 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         Mtx33 rx;
         Mat3FromEuler((Mat3*)&rx, (const Vec3*)&b);
         Mat3Mul((Mat3*)&cam, (const Mat3*)&rx, (const Mat3*)&cam);
-        f32 z2;
         f32 rideHeightv = model->rideHeight;
-        cam.pos.y = cam.pos.y - rideHeightv;
+        cam.pos.y -= rideHeightv;
+        cam.pos.z -= dist;
         cam.pos.y += camOffset.y;
-        z2 = cam.pos.z;
-        cam.pos.z = z2 - dist;
+        cam.pos.x += camOffset.x;
         cam.pos.z += camOffset.z;
-        cam.pos.x = cam.pos.x + camOffset.x;
         MulVec(&cam.pos, &cam.pos, cam.b.v);
     }
 }

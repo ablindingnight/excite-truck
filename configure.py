@@ -1205,7 +1205,7 @@ config.libs.append(
             Object(Matching, "game/profile.cpp"),
             Object(NonMatching, "game/garage.cpp"),
             Object(NonMatching, "game/minworld.cpp"),
-            Object(NonMatching, "game/caruimod.cpp"),
+            Object(Matching, "game/caruimod.cpp"),
             Object(Matching, "game/mstats.cpp"),
             Object(Matching, "game/tunemenu.cpp"),
             Object(Matching, "game/tutmenu.cpp"),
