@@ -2403,9 +2403,7 @@ void fn_80186DE8(void) {
         airK = AddScaledF(1.0f, air, 3.0f);
         surf = 0;
         for (int k = 0; k < 4; k++) {
-            if (e->surface[k] > surf) {
-                surf = e->surface[k];
-            }
+            surf = e->surface[k] > surf ? e->surface[k] : surf;
         }
         f32 wet;
         f32 hb;
