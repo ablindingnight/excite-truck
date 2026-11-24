@@ -230,13 +230,13 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     d->butt.x = d->butt.x - bones[0].m.origin.x;
     d->butt.y = d->butt.y - bones[0].m.origin.y;
     d->butt.z = d->butt.z - bones[0].m.origin.z;
+    // Retail keeps this store although lfoot is overwritten by m1 below: the AddVL stores through `out` that follow
+    // it keep the def alive. 472 instrs and retail's mnemonic mix.
+    lfoot = bones[9].m.origin;
     ValVec3 lhip;
     AddVL(&lhip, bones[7].m.origin, d->butt);
     ValVec3 lknee;
     AddVL(&lknee, bones[8].m.origin, d->butt);
-    // Retail keeps this store although lfoot is overwritten by m1 below: the AddVL stores through `out` that follow
-    // it keep the def alive. 472 instrs and retail's mnemonic mix.
-    lfoot = bones[9].m.origin;
     ValVec3 rhip;
     AddVL(&rhip, bones[4].m.origin, d->butt);
     ValVec3 rknee;
