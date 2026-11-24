@@ -2561,11 +2561,11 @@ void fn_80186DE8(void) {
         ((CarBody*)car)->aaccel.x = CbAdd(Mul(avel.x, 59.94f), ((CarBody*)car)->avel.x * -59.94f);
         ((CarBody*)car)->aaccel.y = CbAdd(Mul2(avel.y, 59.94f), ((CarBody*)car)->avel.y * -59.94f);
         ((CarBody*)car)->aaccel.z = CbAdd(Mul(avel.z, 59.94f), ((CarBody*)car)->avel.z * -59.94f);
-        ((CarBody*)car)->push.x = ax - o.x;
-        ((CarBody*)car)->push.y = ay - o.y;
         ((CarBody*)car)->vel.x = vel.x;
         ((CarBody*)car)->vel.y = vel.y;
         ((CarBody*)car)->vel.z = vel.z;
+        ((CarBody*)car)->push.x = ax - o.x;
+        ((CarBody*)car)->push.y = ay - o.y;
         ((CarBody*)car)->avel.x = avel.x;
         ((CarBody*)car)->avel.y = avel.y;
         ((CarBody*)car)->push.z = ((CarBody*)car)->accel.z - o.z;
