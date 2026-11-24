@@ -666,10 +666,10 @@ void fn_8026C014(int player) {
         f32 dt;
         f32 maxStep = 0.1f;
         f32 speed;
+        f32 lo;
         f32 yawRate;
         f32 fovRate;
         f32 hi;
-        f32 lo;
         f32 yaw;
         f32 s;
         f32 target;
@@ -679,7 +679,7 @@ void fn_8026C014(int player) {
         dt = CAM_MAX(0.001f * (f32)(now - last), maxStep);
         yawRate = dt;
         yawRate *= yawUnit;
-        speed = Mul(4.0f, Mul(0.25f, Mul(10.0f, dt)));
+        speed = Mul(4.0f, Mul(0.25f, 10.0f * dt));
         fovRate = Mul(dt, 0.034906585f);
         lo = 0.2617994f;
         hi = 2.443461f;
