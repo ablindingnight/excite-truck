@@ -743,10 +743,13 @@ WaterSystem::WaterSystem(void) {
             // opt_unroll_instr_count 104 for the same x5 unroll). a1 is unsigned: IRO then does not merge copy 0's a + 1
             // with copy 1's index, which gives the target's shared add plus an in-place incremented copy.
             u32 a1 = r * 16 + (c + 1);
+            // b0 is a 16-bit local used twice, one use cast (cast unproven: needed for the target's two `add c,next`
+            // bases + three copies; any cast works, so the original spelling is not known).
+            u16 b0 = (r + 1) * 16 + c;
             *p++ = r * 16 + c;
             *p++ = a1;
-            *p++ = (r + 1) * 16 + c;
-            *p++ = (r + 1) * 16 + c;
+            *p++ = (u32)b0;
+            *p++ = b0;
             *p++ = a1;
             *p++ = (r + 1) * 16 + (c + 1);
         }
