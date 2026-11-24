@@ -508,7 +508,6 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     Vec2 tpos;
     SFMarker* sf;
     TruckDraw* draw;
-    int me;
     int view;
     int i;
     f32 scale;
@@ -528,8 +527,7 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     }
     sf->lap = GetCarInfo(view)->params.lap;
     draw = map->trucks;
-    me = map->player;
-    PrepareTruckIcons(draw, me, view);
+    PrepareTruckIcons(draw, map->player, view);
     // radius is a named local declared here (after dist), not at the top and not an inline result:
     // retail colours it first (f31), ahead of x/y/w/h, which needs its number below dist's.
     f32 dist = GetCarInfo(view)->draw->lapDist;
