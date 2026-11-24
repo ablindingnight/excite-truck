@@ -807,6 +807,43 @@ static inline void SelectBar(int i, bool select = true) {
     }
 }
 
+// SelectBar written a second time with its locals declared first (name unproven): the results screen restores the
+// previous selection with it. Retail evidence: its inlined copy in ScoreAccumulator::Update numbers the bar pointer
+// above the difficulty/event results, which SelectBar's other three exact callers do not allow.
+static inline void ReselectBar(int i) {
+    if (i >= 0 && i < lbl_804B30D8.Count() && ((EvEventBar*)lbl_804B30D8.data[i])->contest) {
+        lbl_8055F698 = (u32)lbl_804B30D8.data[i];
+    } else {
+        lbl_8055F698 = 0;
+    }
+    int difficulty;
+    s32 event;
+    u8* e;
+    if (i >= 0 && i < lbl_804B30D8.Count() && ((EvEventBar*)(e = (u8*)lbl_804B30D8.data[i]))->contest) {
+        if (e) {
+            CopyName(32, sBrowseTitle, ((EvEventBar*)e)->contest->TrackName());
+            CopyName(32, sBrowseDesc, ((EvEventBar*)e)->contest->FriendlyName());
+            difficulty = ((EvEventBar*)e)->contest->Difficulty();
+            event = ((EvEventBar*)e)->contest->EventId();
+            RealStatistic best(IdentGetCurrentSlot(), 0x20507, event, difficulty);
+            if (best.HasValue()) {
+                fn_80130980(sBrowseBest, 20, 3, best.GetValue());
+            } else {
+                CopyName(20, sBrowseBest, fn_80131234("EventPath:NO_BEST_TIME"));
+            }
+            lbl_8055C7E0 = ((EvEventBar*)e)->contest->EventId();
+        } else {
+            sBrowseDesc[0] = 0;
+            sBrowseTitle[0] = 0;
+            lbl_8055C7E0 = -1;
+        }
+    } else {
+        sBrowseDesc[0] = 0;
+        sBrowseTitle[0] = 0;
+        lbl_8055C7E0 = -1;
+    }
+}
+
 extern "C" void FormatIntegerBuffer(char* buf, int n, int value);  // format a score
 const char* GetGradeDisplayName(int grade);
 
@@ -1789,7 +1826,7 @@ static inline void ShowResultsWhenIdle(ScoreAccumulator* a) {
         if (a->next >= 0) {
             SelectBar(a->next);
         } else {
-            SelectBar(a->sel);
+            ReselectBar(a->sel);
         }
         a->shown = 1;
         if (a->showCup) {
