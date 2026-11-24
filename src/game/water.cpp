@@ -716,18 +716,6 @@ static double WaterScrollOffset(f32 ticks) { return fmod(0.39999998f * ticks, 1.
 static f32 WaterCoordinate(int index) { return (f32)index; }
 #pragma pop
 
-// Name unproven.
-static inline void EmitWaterQuad(u16* p, int a, int b) {
-    p[0] = a;
-    ++a;
-    p[1] = a;
-    p[2] = b;
-    p[3] = b;
-    p[4] = a;
-    ++b;
-    p[5] = b;
-}
-
 WaterSystem::WaterSystem(void) {
     const char* mskName = "watermsk.tex";
     const char* deepName = "gen_waterd.tex";
@@ -749,9 +737,16 @@ WaterSystem::WaterSystem(void) {
     u16* p = &idx[0][0][0];
     for (int r = 0; r < 63; r++) {
         int row = r * 16;
-        int next = (r + 1) * 16;
         for (int c = 0; c < 15; c++) {
-            EmitWaterQuad(p, row + c, next + c);
+            // The next row's index is written as an expression, not a named local: IRO only strength-reduces
+            // `invariant + iv` into its own induction variable when the invariant side is an expression.
+            int a1 = row + (c + 1);
+            p[0] = row + c;
+            p[1] = a1;
+            p[2] = (r + 1) * 16 + c;
+            p[3] = (r + 1) * 16 + c;
+            p[4] = a1;
+            p[5] = (r + 1) * 16 + (c + 1);
             p += 6;
         }
     }
