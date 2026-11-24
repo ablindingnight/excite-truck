@@ -906,8 +906,10 @@ void InitializeCarSlotView(CarUISlotView* p, s32 model, CarUIModel* m) {
 // PROVISIONAL: original viewport helper API/input ownership is unproven.
 static inline void ViewportGeometry(f32 h, const f32& w, const f32& y, const f32& x,
                                     f32& hw, f32& hh, f32& cx, f32& cy) {
-    hh = h / 2.0f;
-    hw = w / 2.0f;
+    // Retail multiplies by the half constant (0.5f first operand), width before height: the constant is
+    // created before the height conversion, so it colours after it (f1).
+    hw = w * 0.5f;
+    hh = h * 0.5f;
     cy = y + hh;
     cx = x + hw;
 }
@@ -959,7 +961,7 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             f32 s = sin(0.5f * ax);
             s = 0.01f > s ? 0.01f : s;
             d = 3.190296f / s;
-            offX = ((Sum(l, r)) / 2.0f) * (proj * d) / hw;
+            offX = ((Sum(l, r)) * 0.5f) * (proj * d) / hw;
             offY = (0.5f * (t + b)) * (-aspect * d) / hh;
         }
         CarUISlotView pose;
