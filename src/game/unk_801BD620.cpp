@@ -959,10 +959,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1510.z = V1260.w;
         V1500.z = V1510.z + V1510.y;
         V1500.w = V1510.w + V1510.z;
+        V1230.y = V16D0.y * ((temp_f31 + lbl_805627EC));
         V18F0.x = V1500.x + V1500.z;
         V1240.x = ((temp_f31 + lbl_805627EC));
         V1230.x = V16D0.x * ((temp_f31 + lbl_805627EC));
-        V1230.y = V16D0.y * ((temp_f31 + lbl_805627EC));
         V1230.z = V16D0.z * ((temp_f31 + lbl_805627EC));
         V1230.w = V16D0.w * ((temp_f31 + lbl_805627EC));
         V1250.y = V1770.x + V18F0.x;
