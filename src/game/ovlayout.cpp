@@ -725,13 +725,32 @@ public:
     }
     virtual void ToggleEdit(void) { editing = !editing; }
     virtual int IsEditing(void) { return editing; }
+    // PROVISIONAL: original ownership/name of the complete Gart drawing operation.
+    inline void DrawGartEditor(GartElem*& g, int& other) {
+        u32 col;
+        EditContext* c;
+        int i;
+        for (i = 0; i < garts->a.count; i++) {
+            g = &garts->a.data[i];
+            c = ctx;
+            other = !c->hover || g != c->hover->target;
+            if (other) {
+                col = (g->color & 0xFFFFFF) | 0x70000000;
+            } else {
+                col = 0xC0FFFFFF;
+            }
+            QueueColoredRectangle(fn_801451DC(g->pos.x, 4), fn_801452B4(g->pos.y), g->w, g->h, col);
+            if (c->active && g == c->active->target) {
+                DrawInfo(g);
+            }
+        }
+    }
     virtual void Edit(void) {
         // PROVISIONAL: original ownership of the actual iteration/selection workspace.
         struct {
             int i;
             int artIndex;
             EditRect* selected;
-            int gartOffset;
         } edit;
         EditContext* c;
         u32 col;
@@ -818,21 +837,7 @@ public:
                     DrawInfo(a);
                 }
             }
-            edit.gartOffset = 0;
-            for (edit.i = 0; edit.i < garts->a.count; edit.i++, edit.gartOffset += sizeof(GartElem)) {
-                g = (GartElem*)((u8*)garts->a.data + edit.gartOffset);
-                c = ctx;
-                other = !c->hover || g != c->hover->target;
-                if (other) {
-                    col = (g->color & 0xFFFFFF) | 0x70000000;
-                } else {
-                    col = 0xC0FFFFFF;
-                }
-                QueueColoredRectangle(fn_801451DC(g->pos.x, 4), fn_801452B4(g->pos.y), g->w, g->h, col);
-                if (c->active && g == c->active->target) {
-                    DrawInfo(g);
-                }
-            }
+            DrawGartEditor(g, other);
         }
     }
     void BuildEditRects(void);
