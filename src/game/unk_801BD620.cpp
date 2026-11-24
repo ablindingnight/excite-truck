@@ -232,8 +232,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
 
 
 
-    ident.x = lbl_805627A8;
     ident.y = lbl_805627A8;
+    ident.x = lbl_805627A8;
     ident.z = lbl_805627A8;
     ident.w = lbl_805627AC;
     tmp.x = lbl_805627A8;
@@ -247,10 +247,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowA1 = &t[a + 1];
     rowA2 = &t[a + 2];
     rowA3 = &t[a + 3];
+    rowA6 = &t[a + 6];
     rowA4 = &t[a + 4];
     rowA5 = &t[a + 5];
     rowB0 = &t[b];
-    rowA6 = &t[a + 6];
     rowA8 = &t[a + 8];
     rowA9 = &t[a + 9];
     rowA10 = &t[a + 10];
@@ -260,11 +260,11 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
     rowB8 = &t[b + 8];
     rowB25 = &t[b + 25];
     rowB26 = &t[b + 26];
+    rowC8 = &t[c + 8];
     rowC4 = &t[c + 4];
     rowC5 = &t[c + 5];
     rowC6 = &t[c + 6];
     rowC7 = &t[c + 7];
-    rowC8 = &t[c + 8];
     rowC10 = &t[c + 10];
     rowC9 = &t[c + 9];
     rowC12 = &t[c + 12];
