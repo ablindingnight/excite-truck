@@ -2564,6 +2564,7 @@ void fn_80186DE8(void) {
         f32* water;
         w = (CbWheel*)(car + 0x23AC);
         grounded = 0;
+        const Vec* right = (const Vec*)(car + 0x3C);
         for (int j = 0; j < 4; j++, w = (CbWheel*)((u8*)w + 0x74)) {
             f32 load = w0[j];
             w->load = load;
@@ -2592,7 +2593,7 @@ void fn_80186DE8(void) {
             // The pair is built in a stack object, then copied: retail forwards both stored values (frsp) into the
             // plane fields (fwdsig FWDCOPY, G9).
             f32 pl[2];
-            pl[0] = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x3C));
+            pl[0] = PSVECDotProduct((const Vec*)nrm, right);
             pl[1] = up;
             w->plane.nRight = pl[0];
             w->plane.nFwd = pl[1];
