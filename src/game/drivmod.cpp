@@ -185,9 +185,9 @@ static inline void AddVL(ValVec3* out, const ValVec3& a, const ValVec3& b) {
     f32 x = a.x + b.x;
     f32 y = a.y + b.y;
     f32 z = a.z + b.z;
-    out->x = x;
-    out->y = y;
     out->z = z;
+    out->y = y;
+    out->x = x;
 }
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
