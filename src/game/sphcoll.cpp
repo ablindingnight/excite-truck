@@ -1649,6 +1649,22 @@ int fn_8019D484(const f32* p0, const f32* d0, const f32* p1, const f32* d1, f32*
 // Helper name unproven.
 static inline f32 TubeMidpointZ(f32 a, f32 b) { return (SphAdd(a, b)) / 2.0f; }
 
+// Complete tube overlap depth; original helper boundary and name unproven.
+static inline f32 TubeOverlapDepth(const TubeShape& tube, const f32& otherRadius, f32 distance) {
+    f32 ownRadius = tube.rad;
+    return SphAdd(LoadF(&otherRadius), ownRadius) - distance;
+}
+
+// Complete actual midpoint; original operation boundary and name unproven.
+static inline void BuildTubeContactPoint(RVec3& out, const RVec3& a, const RVec3& b) {
+    f32 x = a.x + b.x;
+    f32 y = a.y + b.y;
+    f32 z = a.z + b.z;
+    out.x = x / 2.0f;
+    out.y = y / 2.0f;
+    out.z = z / 2.0f;
+}
+
 int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     f32 m[3][3];
     RVec3 ca;
@@ -1683,8 +1699,8 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
         f32 xv = ca.x;
         mid.x = (xv + cb.x) / 2.0f;
         yv = ca.y;
-        zv = cb.z;
-        mid.z = TubeMidpointZ(ca.z, zv);
+        zv = ca.z;
+        mid.z = TubeMidpointZ(zv, cb.z);
         mid.y = (yv + cb.y) / 2.0f;
         w.x = mid.x - ca.x;
         w.y = mid.y - ca.y;
@@ -1741,17 +1757,12 @@ int fn_8019D618(u8* p, u8* q, int clamp, u8* who) {
     if ((f32)__fabs(dist) <= __float_epsilon[0]) {
         return 0;
     }
-    f32 pen = (((TubeShape*)q)->rad + F32(p, 0x24)) - dist;
+    f32 pen = TubeOverlapDepth(*(const TubeShape*)q, F32(p, 0x24), dist);
     if (pen < 0.0f) {
         return 0;
     }
-    f32 k = -1.0f / dist;
-    nrm.x = diff.x * k;
-    nrm.y = diff.y * k;
-    at.x = (SphAdd(pa.x, pb.x)) / 2.0f;
-    at.y = (pa.y + pb.y) / 2.0f;
-    nrm.z = diff.z * k;
-    at.z = (pa.z + pb.z) / 2.0f;
+    BuildTubeContactPoint(at, pa, pb);
+    SphScale(&nrm.x, &diff.x, -1.0f / dist);
     fn_8019A788(who ? who : p, q, (const RVec3*)&at.x, &nrm, 0, 0, pen, 0.0f, 0.0f);
     return 1;
 }
