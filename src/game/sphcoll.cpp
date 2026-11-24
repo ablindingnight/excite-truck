@@ -1257,13 +1257,13 @@ int fn_8019BD54(u8* p, u8* q, const RVec3* off, const RVec3* dir) {
     c.x = F32(p, 0x34);
     c.z = F32(p, 0x3C);
     ToBoxSpace(&l, &c, &f);
-    if (!dir || l.x * dir->x > 0.0f || F32(q, 0x28) < (f32)__fabs(dir->y)) {
+    if (!dir || l.x * dir->x > 0.0f || (f32)__fabs(dir->y) > LoadF((f32*)(q + 0x28))) {
         f32* localX = &l.x;
         Clip(localX, F32(q, 0x24), &in, 1);
     }
     Clip(&l.y, F32(q, 0x28), &in, 2);
     caps = U32(q, 0x34);
-    if ((caps & 1) && F32(q, 0x2C) < l.z) {
+    if ((caps & 1) && l.z > LoadF((f32*)(q + 0x2C))) {
         return 0;
     }
     if ((caps & 2) && l.z < -F32(q, 0x2C)) {
