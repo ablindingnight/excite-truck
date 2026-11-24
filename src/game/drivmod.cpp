@@ -224,9 +224,9 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     m1.y = Lerp(lfoot.y, lknee.y, 0.5f);
     m1.z = Lerp(lfoot.z, lknee.z, 0.5f);
     ValVec3 m2;
-    m2.x = Lerp(bones[6].m.origin.x, rknee.x, 0.5f);
-    m2.y = Lerp(bones[6].m.origin.y, rknee.y, 0.5f);
     m2.z = Lerp(bones[6].m.origin.z, rknee.z, 0.5f);
+    m2.y = Lerp(bones[6].m.origin.y, rknee.y, 0.5f);
+    m2.x = Lerp(bones[6].m.origin.x, rknee.x, 0.5f);
     lfoot.x = m1.x;
     lfoot.y = m1.y;
     lfoot.z = m1.z;
