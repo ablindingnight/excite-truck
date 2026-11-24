@@ -395,6 +395,10 @@ static inline f32 Ease(f32 t) {
 
 
 static inline u32 ARGB(u8 a, u8 r, u8 g, u8 b) { return a << 24 | r << 16 | g << 8 | b; }
+// Name unproven: map texture U projection.
+static inline f32 MapTextureU(f32 half, f32 scale, f32 value, f32 origin, f32 texSize) {
+    return half + scale / 2.0f * value + origin / texSize;
+}
 // Name unproven: consumed map texture projection.
 static inline f32 MapTextureV(f32 one, f32 half, f32 scale, f32 value, f32 origin, f32 texSize) {
     return one - (half + half * scale * value) + origin / texSize;
@@ -571,21 +575,20 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         basis.right.z *= -1.0f;
     }
     color = fn_80230B9C(-1);
-    f32 half = 0.5f;
     f32 zero = 0.0f;
     for (i = 0; i < 21; i++) {
         Vec3 c = lbl_803582C0[i];
         Vec3 v;
-        v.x = c.x * (half * radius);
-        v.y = c.y * (half * radius);
-        v.z = c.z * (half * radius);
+        v.x = c.x * (0.5f * radius);
+        v.y = c.y * (0.5f * radius);
+        v.z = c.z * (0.5f * radius);
         MulVec(&v, &v, &basis);
         v.x += basis.pos.x;
         v.y += basis.pos.y;
         v.z += basis.pos.z;
-        fn_80231380(&verts[i], color, x + w * (1.0f + half * c.x) * half, y + h * (half * c.y - 1.0f) * half,
-                    zero, half + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                    MapTextureV(1.0f, half, scale, v.y, map->origin.y, map->texSize));
+        fn_80231380(&verts[i], color, x + w * (1.0f + 0.5f * c.x) * 0.5f, y + h * (0.5f * c.y - 1.0f) * 0.5f,
+                    zero, MapTextureU(0.5f, scale, v.x, map->origin.x, map->texSize),
+                    MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
         if (i < 20) {
             v.x = c.x * radius;
             v.y = c.y * radius;
@@ -594,10 +597,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             v.x += basis.pos.x;
             v.y += basis.pos.y;
             v.z += basis.pos.z;
-            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (1.0f + c.x) * half,
-                        y + h * (c.y - 1.0f) * half, zero,
-                        half + scale / 2.0f * v.x + map->origin.x / map->texSize,
-                        MapTextureV(1.0f, half, scale, v.y, map->origin.y, map->texSize));
+            fn_80231380(&verts[i + 21], color & 0xFFFFFF, x + w * (1.0f + c.x) * 0.5f,
+                        y + h * (c.y - 1.0f) * 0.5f, zero,
+                        MapTextureU(0.5f, scale, v.x, map->origin.x, map->texSize),
+                        MapTextureV(1.0f, 0.5f, scale, v.y, map->origin.y, map->texSize));
         }
     }
     {
