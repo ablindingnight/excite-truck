@@ -1211,7 +1211,7 @@ config.libs.append(
             Object(Matching, "game/tutmenu.cpp"),
             Object(Matching, "game/uiobjs.cpp"),
             Object(Matching, "game/achview.cpp"),
-            Object(NonMatching, "game/recscreen.cpp"),
+            Object(Matching, "game/recscreen.cpp"),
             Object(Matching, "game/frname.cpp"),
             Object(Matching, "game/carpick.cpp"),
             Object(NonMatching, "game/chalpath.cpp"),
