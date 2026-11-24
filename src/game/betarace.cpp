@@ -4340,6 +4340,11 @@ inline CarHud::CarHud(int car, int acar) {
 }
 
 // PROVISIONAL: actual track-name input and/or consumed icon text workspace; original ownership/name unproven.
+// PROVISIONAL: original stunt-list construction helper name/ownership.
+static inline StuntList* CreateCarStunts() {
+    return new ("pr_stuntdash") StuntList;
+}
+
 inline void BetaMaster::a1(void) {
     int i = 0;
     nCars = lbl_8055E4D0;
@@ -4348,7 +4353,7 @@ inline void BetaMaster::a1(void) {
         for (; i < nCars; i++) {
         bool acar = (u32)lbl_804348E8[i]->type == 'ACAR';
         cars[i].hud = new ("stuntdash") CarHud(i, acar);
-        cars[i].stunts = new ("pr_stuntdash") StuntList;
+        cars[i].stunts = CreateCarStunts();
         cars[i].master = this;
         cars[i].id = i;
         cars[i].mode = !acar;
