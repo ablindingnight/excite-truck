@@ -589,14 +589,27 @@ static inline f32 DriverOriginX(f32 offset, f32 origin) {
 // the ragdoll step, then the posed skeleton (legs aimed by the ragdoll, hands slid along the arms, upper body
 // bent by speed and pitch) drawn at the car.
 
+// A pose whose rows copy as whole blocks (array rows, like camrec.h's CamVec3); names unproven.
+struct DriverRow {
+    f32 v[3];
+};
+struct DriverRowPose {
+    DriverRow r0;
+    DriverRow r1;
+    DriverRow r2;
+    ValVec3 o;
+};
+
 void fn_80201018(DriverModel* d, const u8* car, int show) {
     ValVec3 off2;
+    BonePose pose[32];
     DBone bones[32];
     BVec pts[32];
     RiderLinks links;
     PlainValMatrix m;
     BRot rot;
     PlainValMatrix m2;
+    DriverRowPose rm;
     BRot tilt;
     BRot turn;
     BVec v;
@@ -607,7 +620,6 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     BVec e1;
     BVec e2;
     ValVec3 off;
-    BonePose pose[32];
     int cnt;
     int n;
     if (!show || !d) {
@@ -704,16 +716,19 @@ void fn_80201018(DriverModel* d, const u8* car, int show) {
     fn_801C2694(d->sys, pts, &cnt, &g, &up, &b, &a);
     n = 32;
     CopyBoneSet(d->skel, bones, &n);
-    PlainValMatrix rm;
-    *(BRot*)&rm = rot;
-    rm.origin.x = 0.0f;
-    rm.origin.y = 0.0f;
-    rm.origin.z = 0.0f;
+    // Retail builds this pose and never reads it (its user was stripped): the compiler splits it into one home
+    // per member (IRO_ScalarizeClassDataMembers), the six dead stores in 240 extra frame bytes. The loop reads rot.
+    rm.r0 = *(const DriverRow*)&rot.rx;
+    rm.r1 = *(const DriverRow*)&rot.ry;
+    rm.r2 = *(const DriverRow*)&rot.rz;
+    rm.o.x = 0.0f;
+    rm.o.y = 0.0f;
+    rm.o.z = 0.0f;
     DBone* bone = bones;
     for (int k = 0; k < n; bone++, k++) {
         if (k) {
             MulM(&pose[k].rot.rx.x, &bone->m.basis[0].x, &rot.rx.x);
-            MulVec(&pose[k].pos, &bone->m.origin, &rm);
+            MulVec(&pose[k].pos, &bone->m.origin, (PlainValMatrix*)&rot);
         } else {
             pose[k] = *(BonePose*)bone;
         }
