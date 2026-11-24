@@ -800,8 +800,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1660.x = Sum3(V19E0.x, V19E0.y, V19E0.z);
         V1650.x = V1770.x + SqrtF(V1660.x);
         temp_f19_7 = V1650.x * rowC6->x;
-        V1610.x = V1670.x * temp_f19_7;
-        V1610.y = V1670.y * temp_f19_7;
+        V1610.x = ValueOf(V1670.x * temp_f19_7);
+        V1610.y = ValueOf(V1670.y * temp_f19_7);
         V1610.z = V1670.z * temp_f19_7;
         V1640.x = rowC6->x;
         V1630.x = V1640.x;
