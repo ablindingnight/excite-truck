@@ -896,11 +896,10 @@ void WaterSystem::Draw(void) {
             v->color = col;
             PVec s;
             TransformWorldToScreen(&v->pos, &s);
-            // Viewport centring offsets, written in the loop (the compiler hoists them; their constants are created here).
-            f32 cx = 0.5f * (640.0f - vh);
-            f32 cy = 0.5f * (480.0f - vw);
-            v->u = (s.x - vx + cx) / 640.0f;
-            v->v = (s.y - vy + cy) / 480.0f;
+            // The viewport centring offsets are written inline here (the compiler hoists them; their constants are
+            // created in the loop, which the target's colouring order needs).
+            v->u = (s.x - vx + 0.5f * (640.0f - vh)) / 640.0f;
+            v->v = (s.y - vy + 0.5f * (480.0f - vw)) / 480.0f;
             v->u = 0.5f + (v->u - 0.5f) * k;
             v->v = 0.5f + 0.75f * ((v->v - 0.5f) * k);
         }
