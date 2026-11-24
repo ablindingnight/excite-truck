@@ -2299,27 +2299,27 @@ void FlatSphereShape::vf10(u8* o) {
 
 void FlatSphereShape::vf14(void) {}
 
-// Name unproven.
+// Complete vertical point correction; original helper boundary and name unproven.
 static inline void SetAttachedSphereY(f32* out, f32 relativeY, f32 radius, f32 attachmentHeight) {
     *out = relativeY + (0.06f + radius + attachmentHeight);
 }
 
-// Re-centres the tube on its attachment (offset by 0x58 / lift), then refreshes it.
+// Re-centres the sphere on its attachment (offset by 0x58 / lift), then refreshes it.
 void AttachedSphereShape::vf0C(void) {
     u8* p = (u8*)this;
-    u8* o = ((u8*&)this->owner);
     u8* m = this->attach;
     PVec3A t = *(PVec3A*)(m + 0x30);
+    const RVec3& ownerOffset = this->owner->offset;
     // Express the attachment point relative to its owner's origin.
-    t.v[0] = t.v[0] - F32(o, 0x30);
-    t.v[1] = t.v[1] - F32(o, 0x34);
-    t.v[2] = t.v[2] - F32(o, 0x38);
-    // Apply the sphere's actual lateral offset and attachment lift.
+    t.v[0] = t.v[0] - ownerOffset.x;
+    t.v[1] = t.v[1] - ownerOffset.y;
+    t.v[2] = t.v[2] - ownerOffset.z;
+    // Apply the attachment lift and the sphere's actual lateral offset.
     SetAttachedSphereY(&t.v[1], t.v[1], this->radius, F32(m, 0xC));
     t.v[0] = t.v[0] + this->f58;
     this->center.Set(t.v[0], t.v[1], t.v[2]);
-    if (o) {
-        fn_8019EECC(o, (RVec3*)&this->center);
+    if (this->owner) {
+        fn_8019EECC((u8*)this->owner, (RVec3*)&this->center);
     }
     ((SphereShape*)p)->SphereShape::vf0C();
 }
