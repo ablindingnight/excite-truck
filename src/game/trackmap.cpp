@@ -441,8 +441,10 @@ static inline void DrawPlacedMarkers(Basis* basis, f32 x, f32 y, f32 w, f32 h, f
         if (lbl_803583C8[j].active) {
             Vec3 rel;
             f32 size;
-            rel.y = lbl_803583C8[j].pos.y - basis->pos.y;
-            rel.x = lbl_803583C8[j].pos.x - basis->pos.x;
+            f32 my = lbl_803583C8[j].pos.y;
+            f32 mx = lbl_803583C8[j].pos.x;
+            rel.y = my - basis->pos.y;
+            rel.x = mx - basis->pos.x;
             rel.z = 0.0f;
             rel.z -= basis->pos.z;
             MulVecT(&rel, &rel, basis);
