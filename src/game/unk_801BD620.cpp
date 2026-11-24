@@ -719,7 +719,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V17E0.x = ((temp_f31 + lbl_805627B4));
         V17D0.x = ((temp_f31 + lbl_805627B8));
         V17C0.x = (((temp_f31 + lbl_805627B4) * (temp_f31 + lbl_805627B8)));
-        V17B0.x = rowB25->x;
+        V17B0.x = ValueOf(rowB25->x);
         V17B0.y = rowB25->y;
         V17B0.z = rowB25->z;
         V17B0.w = rowB25->w;
@@ -824,7 +824,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V15E0.y = V15F0.y;
         V15E0.z = V15F0.z;
         V15E0.w = V15F0.w;
-        V15C0.x = rowC19->x;
+        V15C0.x = ValueOf(rowC19->x);
         V15D0.x = (V15E0.x * V17A0.x);
         V15D0.y = (V15E0.y * V17A0.x);
         V15D0.z = (V15E0.z * V17A0.x);
