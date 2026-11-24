@@ -1117,8 +1117,7 @@ static inline void ReadCmds(OverlayCmd* o, ValueNode* n) {
     const char* name;
     DynArray<TextCmd>* at;
     name = "text_cmd";
-    CountChildInto(n, name, c);
-    at = new ("overlaycmd_dsa") DynArray<TextCmd>(c);
+    at = (CountChildInto(n, name, c), new ("overlaycmd_dsa") DynArray<TextCmd>(c));
     for (int i = 0;; i++) {
         e = n->GetChildAt(i);
         if (!e) {
