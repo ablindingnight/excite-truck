@@ -726,10 +726,12 @@ public:
     virtual void ToggleEdit(void) { editing = !editing; }
     virtual int IsEditing(void) { return editing; }
     // PROVISIONAL: original ownership/name of the complete Gart drawing operation.
-    inline void DrawGartEditor(GartElem*& g, int& other) {
+    inline void DrawGartEditor(void) {
         u32 col;
         EditContext* c;
         int i;
+        GartElem* g;
+        int other;
         for (i = 0; i < garts->a.count; i++) {
             g = &garts->a.data[i];
             c = ctx;
@@ -745,19 +747,65 @@ public:
             }
         }
     }
-    virtual void Edit(void) {
-        // PROVISIONAL: original ownership of the actual iteration/selection workspace.
-        struct {
-            int i;
-            int artIndex;
-            EditRect* selected;
-        } edit;
+    // PROVISIONAL: original ownership/name of complete actual Art display loop.
+    inline void DrawArtEditor(void) {
+        ArtElem* a;
+        EditContext* c;
+        int artIndex;
+        u32 col;
+        int other;
+        for (artIndex = 0; artIndex < arts->a.count; artIndex++) {
+            a = &arts->a.data[artIndex];
+            c = ctx;
+            other = !c->hover || a != c->hover->target;
+            col = other ? 0x70FFFFFF : 0xC0FFFFFF;
+            QueueColoredRectangle(fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y), a->w, a->h, col);
+            if (c->active && a == c->active->target) {
+                DrawInfo(a);
+            }
+        }
+    }
+    // PROVISIONAL: original ownership/name of complete actual rectangle display loop.
+    inline void DrawRectangleEditor(void) {
+        const char* label;
+        EditRect* selected;
+        int i;
         EditContext* c;
         u32 col;
-        const char* label;
-        ArtElem* a;
-        GartElem* g;
-        int other;
+        c = ctx;
+        for (i = 0; i < c->rects->a.count; i++) {
+            selected = &c->rects->a.data[i];
+            if (selected->target && c->active && selected->target == c->active->target) {
+                continue;
+            }
+            if (selected == c->hover) {
+                col = selected->handler->HoverColor();
+            } else {
+                col = selected->handler->Color();
+            }
+            if (selected->target) {
+                QueueColoredRectangle(fn_801451DC(((ElemBase*)selected->target)->pos.x + selected->r.x, 4),
+                            fn_801452B4(((ElemBase*)selected->target)->pos.y + selected->r.y), selected->r.w, selected->r.h, col);
+            } else {
+                QueueColoredRectangle(fn_801451DC(selected->r.x, 4), fn_801452B4(selected->r.y), selected->r.w, selected->r.h, col);
+            }
+            label = selected->handler->Label();
+            if (label) {
+                if (!selected->target) {
+                    DrawFormattedString(0.6f, fn_801451DC(selected->r.x, 4), fn_801452B4(selected->r.y), -1, 9, LayoutTextFormat(), label);
+                } else if (selected == c->hover) {
+                    DrawFormattedString(0.6f, fn_801451DC(selected->r.x + ((ElemBase*)selected->target)->pos.x, 4),
+                                fn_801452B4(selected->r.y + ((ElemBase*)selected->target)->pos.y - 10.0f), -1, 12,
+                                LayoutTextFormat(), label);
+                    QueueColoredRectangle(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
+                    DrawFormattedString(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, LayoutTextFormat(),
+                                ((ElemBase*)selected->target)->name);
+                }
+            }
+        }
+    }
+    virtual void Edit(void) {
+        EditContext* c;
         if (editing) {
             {
                 MouseEvent ev;
@@ -792,52 +840,9 @@ public:
                     c->lastY = p.y;
                 }
             }
-            {
-                c = ctx;
-                for (edit.i = 0; edit.i < c->rects->a.count; edit.i++) {
-                    edit.selected = &c->rects->a.data[edit.i];
-                    if (edit.selected->target && c->active && edit.selected->target == c->active->target) {
-                        continue;
-                    }
-                    if (edit.selected == c->hover) {
-                        col = edit.selected->handler->HoverColor();
-                    } else {
-                        col = edit.selected->handler->Color();
-                    }
-                    if (edit.selected->target) {
-                        QueueColoredRectangle(fn_801451DC(((ElemBase*)edit.selected->target)->pos.x + edit.selected->r.x, 4),
-                                    fn_801452B4(((ElemBase*)edit.selected->target)->pos.y + edit.selected->r.y), edit.selected->r.w, edit.selected->r.h, col);
-                    } else {
-                        QueueColoredRectangle(fn_801451DC(edit.selected->r.x, 4), fn_801452B4(edit.selected->r.y), edit.selected->r.w, edit.selected->r.h, col);
-                    }
-                    label = edit.selected->handler->Label();
-                    if (label) {
-                        if (!edit.selected->target) {
-                            DrawFormattedString(0.6f, fn_801451DC(edit.selected->r.x, 4), fn_801452B4(edit.selected->r.y), -1, 9, LayoutTextFormat(), label);
-                        } else if (edit.selected == c->hover) {
-                            DrawFormattedString(0.6f, fn_801451DC(edit.selected->r.x + ((ElemBase*)edit.selected->target)->pos.x, 4),
-                                        fn_801452B4(edit.selected->r.y + ((ElemBase*)edit.selected->target)->pos.y - 10.0f), -1, 12,
-                                        LayoutTextFormat(), label);
-                            QueueColoredRectangle(fn_801451DC(20.0f, 4), fn_801452B4(60.0f), 150.0f, 15.0f, 0x40000000);
-                            DrawFormattedString(0.6f, fn_801451DC(20.0f, 4), fn_801452B4(60.0f), -1, 9, LayoutTextFormat(),
-                                        ((ElemBase*)edit.selected->target)->name);
-                        }
-                    }
-                }
-            }
-            edit.artIndex = 0;
-            int off = 0;
-            for (; edit.artIndex < arts->a.count; off += sizeof(arts->a.data[0]), edit.artIndex++) {
-                a = (ArtElem*)((u8*)arts->a.data + off);
-                c = ctx;
-                other = !c->hover || a != c->hover->target;
-                col = other ? 0x70FFFFFF : 0xC0FFFFFF;
-                QueueColoredRectangle(fn_801451DC(a->pos.x, 4), fn_801452B4(a->pos.y), a->w, a->h, col);
-                if (c->active && a == c->active->target) {
-                    DrawInfo(a);
-                }
-            }
-            DrawGartEditor(g, other);
+            DrawRectangleEditor();
+            DrawArtEditor();
+            DrawGartEditor();
         }
     }
     void BuildEditRects(void);
