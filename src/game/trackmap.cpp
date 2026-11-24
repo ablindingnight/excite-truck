@@ -676,11 +676,11 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     {
         RaceCarRec* tr = fn_8017960C(fn_801E866C(map->player));
         m = lbl_8055D5B4;
+        f32 centerX = x + w / 2.0f;
         f32 centerY = y - h / 2.0f;
         Vec3 p = *(const Vec3*)&tr->mtx.pos;  // a plain Vec3 copy (RVec3 has a constructor)
         tp.x = p.x;
         tp.y = p.z;
-        f32 centerX = x + w / 2.0f;
         DrawFinalMarker(m, &basis, tp, centerX, centerY, w, radius);
     }
 }
