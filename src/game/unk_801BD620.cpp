@@ -1237,7 +1237,6 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSUB(V0CC0, V1B90, V0CD0);
             Vec4f V0CB0(V0CC0);
             V0CF0.y = ((V0D20.y + ((V0D60.z * V0D50.x) - (V0D50.z * V0D60.x))) + V0D00.y);
-            V0CE0.y = V0CF0.y;
             V1900.y = Sq(V0CB0.y);
             CROSS_BEGIN(V0D60, V0D50);
             V0D40.x = (tmp.x - (V0D50.y * V0D60.z));
@@ -1249,6 +1248,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             V0CF0.x = (V0D10.x + V0D00.x);
             V0CF0.z = (V0D10.z + V0D00.z);
             V0CE0.x = V0CF0.x;
+            V0CE0.y = V0CF0.y;
             V0CE0.z = V0CF0.z;
             V1900.z = Sq(V0CB0.z);
             V1900.x = ((Sq(V0CB0.x) + V1900.y) + V1900.z);
