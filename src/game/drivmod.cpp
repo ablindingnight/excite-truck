@@ -234,7 +234,7 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     // between m1.z's lane value and its store, as in retail.
     lknee.z = bones[8].m.origin.z + d->butt.z;
     rknee = bones[5].m.origin;
-    rknee.z = AddF(rknee.z, d->butt.z);
+    rknee.z = AddF(d->butt.z, rknee.z);
     lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
     rhip = bones[4].m.origin;
     rhip.z = AddF(rhip.z, d->butt.z);
