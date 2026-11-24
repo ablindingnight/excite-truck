@@ -229,10 +229,10 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     ValVec3 rhip;
     ValVec3 rknee;
     // Sums in retail's order: the four z lanes first, then x/y.
+    rknee.z = AddF(bones[5].m.origin.z, d->butt.z);
     lknee.z = bones[8].m.origin.z + d->butt.z;
     lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
     rhip.z = AddF(bones[4].m.origin.z, d->butt.z);
-    rknee.z = AddF(bones[5].m.origin.z, d->butt.z);
     lhip.y = AddF(bones[7].m.origin.y, d->butt.y);
     lhip.x = AddF(bones[7].m.origin.x, d->butt.x);
     rhip.y = AddF(bones[4].m.origin.y, d->butt.y);
