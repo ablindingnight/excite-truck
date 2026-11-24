@@ -915,12 +915,12 @@ static inline void ViewportGeometry(f32 h, const f32& w, const f32& y, const f32
 }
 void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
     if (lbl_8055F330 || mode == 0) {
-        f32 offX = 0.0f;
-        f32 offY = offX;
         f32 d = dist;
+        f32 offX = 0.0f;
+        f32 b;
+        f32 offY = offX;
         int w2 = (f32)ceil(w / fn_802C9A50());
         f32 hw;
-        f32 nd;
         f32 hh;
         f32 cx;
         f32 cy;
@@ -936,7 +936,6 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         if (state.active) {
             f32 l = (f32)state.x - cx;
             f32 t = (f32)state.y - cy;
-            f32 b;
             f32 r = l + (f32)state.w;
             b = t + (f32)state.h;
             f32 p = MaxF(0.01f, proj);
@@ -972,8 +971,6 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
         } else {
             InitializeCarSlotView(&pose, bg, model);
         }
-        nd = -d;
-        f32 ny = -offY;
         // PROVISIONAL: original pitch-workspace lifetime and borrowed multiply input.
         Mtx33 rx;
         Mtx33* rotation = &rx;
@@ -982,8 +979,8 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             f32 c = cos(pitch);
             f32 s = sin(pitch);
 
-            rx.xy = 0.0f;
             rx.xx = 1.0f;
+            rx.xy = 0.0f;
             rx.xz = 0.0f;
             rx.yx = 0.0f;
             rx.yy = c;
@@ -1003,11 +1000,14 @@ void CarUIScreen::Camera(int x, int y, int w, int h, f32 yaw, f32 pitch) {
             cam.b.v[2].y = 0.0f;
             cam.b.v[2].z = c2;
             MulM(m, rotation, m);
-            MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], nd);
+            MAdd(&cam.pos, &lbl_80498E18, &cam.b.v[2], -d);
             // PROVISIONAL: original camera-axis translation grouping is unproven.
             MAdd(&cam.pos, &cam.pos, &cam.b.v[0], -offX);
+            f32 clearance;
+            f32 ny = -offY;
             MAdd(&cam.pos, &cam.pos, &cam.b.v[1], ny);
-            if (!lbl_8055F330 || Sum(fn_801DCF48(0, cam.pos.x, cam.pos.z), 2.0f * aspect) < cam.pos.y) {
+            clearance = 2.0f * aspect;
+            if (!lbl_8055F330 || Sum(fn_801DCF48(0, cam.pos.x, cam.pos.z), clearance) < cam.pos.y) {
                 break;
             }
             pitch += 1.5707964f / 800.0f;
