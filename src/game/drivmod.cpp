@@ -172,10 +172,10 @@ static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
 
 // Componentwise lerp in two passes: out = t * (b - a), then out += a (name unproven).
 static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t) {
-    for (int j = 0; j < 3; j++) {
+    for (int j = 2; j >= 0; j--) {
         (&out->x)[j] = t * ((&b.x)[j] - (&a.x)[j]);
     }
-    for (int j = 0; j < 3; j++) {
+    for (int j = 2; j >= 0; j--) {
         (&out->x)[j] += (&a.x)[j];
     }
 }
