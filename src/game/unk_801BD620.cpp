@@ -1451,8 +1451,8 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V04C0((V04D0.x * V0590.z));
             Vec4f V04B0;  // retail stack object 0x04B0 (restored)
             Vec4f V04A0;
-            V04B0.w = (V04F0.w + V04C0.x);
-            V04A0.y = (temp_f31 + V04B0.w);
+            V04B0.w = ValueOf(V04F0.w + V04C0.x);
+            V04A0.y = ValueOf(temp_f31 + V04B0.w);
             Vec4f V0490;
             V0490.y = (V04A0.y * V06E0.y);
             VSCALE(V0480, V0980, V0490.y);
@@ -1490,9 +1490,12 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSCALE(V03C0, V0DF0, V03D0.x);
             VSUB(V03B0, V03F0, V03C0);
             VSCALE(V03A0, V0DF0, V1000.x);
-            VSUB(V0390, V03B0, V03A0);
+            Vec4f V0390;
+            V0390.x = ValueOf(V03B0.x - V03A0.x);
+            V0390.y = V03B0.y - V03A0.y;
+            V0390.z = V03B0.z - V03A0.z;
             VSET(V0A10, V0390);
-            Vec4f V0380((V1000.x + V03D0.x));
+            Vec4f V0380(ValueOf(V1000.x + V03D0.x));
             V1000.x = V0380.x;
             VSUB(V0370, V0BD0, V0D80);
             DOT_BEGIN(V0370, V0DF0);
@@ -1511,7 +1514,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             VSET(V1780, V02E0);
             VSUB(V02D0, V0300, V1C10);
             CROSS_BEGIN(V02D0, V02F0);
-            CROSS_END(V02C0, V02D0, V02F0);
+            Vec4f V02C0;
+            V02C0.x = tmp.x - V02F0.y * V02D0.z;
+            V02C0.y = tmp.y - V02F0.z * V02D0.x;
+            V02C0.z = tmp.z - V02F0.x * V02D0.y;
             Vec4f V02B0;
             V02B0.x = (V1760.x + V02C0.x);
             V02B0.y = (V1760.y + V02C0.y);
