@@ -856,10 +856,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1560.y = V1570.y;
         V1560.z = V1570.z;
         V1560.w = V1570.w;
-        V1550.x = (V1570.x * V1580.x);
-        V1550.y = (V1570.y * V1580.y);
-        V1550.z = (V1570.z * V1580.z);
-        V1550.w = (V1570.w * V1580.w);
+        V1550.x = (V1560.x * V1580.x);  // V1560 = copy of V1570; reading the copy keeps V1560 one stack object
+        V1550.y = (V1560.y * V1580.y);
+        V1550.z = (V1560.z * V1580.z);
+        V1550.w = (V1560.w * V1580.w);
         V1540.x = V1550.x;
         V1540.y = V1550.y;
         V1540.z = V1550.z;
@@ -908,10 +908,10 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1350.w = V17A0.w * V1360.x;
         V1340.x = (V13D0.x * V1350.w);
         V1370.x = V1770.x + V1380.w;
-        V1330.x = V1560.x;
-        V1330.y = V1560.y;
-        V1330.z = V1560.z;
-        V1330.w = V1560.w;
+        V1330.x = rowC21->x;  // retail re-reads row c+21 here as well (lfs 0..12 through the row pointer)
+        V1330.y = rowC21->y;
+        V1330.z = rowC21->z;
+        V1330.w = rowC21->w;
         V1320.x = V1330.x;
         V1320.y = V1330.y;
         V1320.z = V1330.z;
