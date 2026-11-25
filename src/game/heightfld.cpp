@@ -129,6 +129,9 @@ static inline GLayer* LayerAt(s32 i) { return i >= 0 ? &lbl_8055E990->layers[i] 
 
 extern "C" int fn_801DB348(int x, int z, f32* out, s32* mat, u16* unused);
 
+// TileH: name unproven.
+static inline u16 TileH(const GTile* t, int lx, int lz) { return t->h[lx][lz]; }
+
 static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     if (x < 0 || z < 0) {
         return 0;
@@ -145,58 +148,7 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     if (!t) {
         return 0;
     }
-    // PROVISIONAL: row-view spelling (retail adds lz*2 before the shared row offset lx*64).
-    f32 h = t->base + t->scale * ((const u16(*)[32])&t->h[0][lz])[lx][0];
-    s32 li = t->layer;
-    if (li >= 0) {
-        GroundHeader* gg = lbl_8055E990;
-        for (GLayer* l = &gg->layers[li]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
-            f32 v = l->scale * l->h[lx][lz];
-            h += lbl_804424B0[l->weight] * (l->base + v);
-        }
-    }
-    u8* r = g->runs + t->rows[lz];
-    int n = 0;
-    int m;
-    for (;;) {
-        // PROVISIONAL: run-length local ownership and spelling.
-        u8 span = r[1];
-        if (n + span > lx) {
-            m = r[0];
-            break;
-        }
-        n += span;
-        r += 2;
-    }
-    if (m != 0xFF) {
-        *out = h;
-        if (mat) {
-            *mat = m;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-// Sample2: name unproven. The grid loop's sampler: retail's tile read there is t + lx*64 + lz*2 (plain indexing),
-// while the four corner probes add lz*2 first, so the two call sites use different helpers.
-static inline int Sample2(int x, int z, f32* out, s32* mat, u16* unused) {
-    if (x < 0 || z < 0) {
-        return 0;
-    }
-    GroundHeader* g = lbl_8055E990;
-    if (!g->tiled) {
-        return fn_801DB348(x, z, out, mat, unused);
-    }
-    int tx = x / 32;
-    int tz = z / 32;
-    int lx = x - tx * 32;
-    int lz = z - tz * 32;
-    GTile* t = TileAt(g, tx, tz);
-    if (!t) {
-        return 0;
-    }
-    f32 h = t->base + t->scale * t->h[lx][lz];
+    f32 h = t->base + t->scale * TileH(t, lx, lz);
     s32 li = t->layer;
     if (li >= 0) {
         GroundHeader* gg = lbl_8055E990;
@@ -330,7 +282,7 @@ int fn_801DB74C(int x, int z, f32* out, s32* mat, u16* unused, ValVec3* normal, 
     for (int j = 0; j < 4; j++) {
         int i;
         for (i = 0; i < 4; i++) {
-            if (!Sample2(x + i - 1, z + j - 1, &g[i][j], 0, 0)) {
+            if (!Sample(x + i - 1, z + j - 1, &g[i][j], 0, 0)) {
                 g[i][j] = h0;
             }
         }
