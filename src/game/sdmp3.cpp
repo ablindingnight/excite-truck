@@ -924,8 +924,9 @@ int fn_802EB7D4(void* dst, int n, int ch) {
         }
     } else {
         int want = n * nch;
+        int used = readPosition - wr;
         int toEnd = lbl_805600A4 - readPosition;
-        int total = lbl_805600A4 - (readPosition - wr);
+        int total = lbl_805600A4 - used;
         avail = want < toEnd ? want : toEnd;
         if (total < want && lbl_805600C0[ch]) {
             memset(dst, 0, n);
