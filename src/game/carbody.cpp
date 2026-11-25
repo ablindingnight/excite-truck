@@ -2532,9 +2532,10 @@ void fn_80186DE8(void) {
         }
         CbVec4 v = CbVec4(x->pts[6]);
         f32 brake;
-        s6 = v.w;
         if (((CarBody*)car)->f2618 > 0.25f) {
-            s6 = s6 * heatTune.v[4];
+            s6 = v.w * heatTune.v[4];
+        } else {
+            s6 = v.w;
         }
         v.x = s6;
         x->pts[6] = v.Sol();
