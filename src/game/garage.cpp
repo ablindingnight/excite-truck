@@ -392,6 +392,16 @@ inline const char* BarArt(int bar) {  // name unproven
     return a.art[bar];
 }
 
+static inline void InitColorSlots(u8* pp) {  // name unproven
+    SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
+    u8* e = fn_8024EB9C(pp, 0);
+    for (int i = 0; i < fn_8024EB94(pp); i++) {
+        e = fn_8024EB9C(pp, i);
+        S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
+    }
+    ShowSelectionColor(pp);
+}
+
 #pragma push
 #pragma opt_loop_invariants off  /* Pragma unproven: retail keeps bar spilled and indexes per use */
 int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar) {
@@ -414,8 +424,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
         s32* sel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
         CarPick cars(screen, sel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui);
         s32* pd = &lbl_80498C48.pairs[slot].d;
-        s32* pb = &lbl_80498C48.pairs[slot].b;
         s32* pc = &lbl_80498C48.pairs[slot].c;
+        s32* pb = &lbl_80498C48.pairs[slot].b;
         s32* pa = &lbl_80498C48.pairs[slot].a;
         for (;;) {
             if (!lbl_80498C48.alt) {
@@ -459,20 +469,14 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 }
                 s32* csel = lbl_80498C48.alt ? pd : pb;
                 ColorPick paint(colors, csel, lbl_80498C48.alt ? pc : pa, &panel, &ui, color);
-                u8* pp = (u8*)&paint;
-                SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
-                u8* e = fn_8024EB9C(pp, 0);
-                for (int i = 0; i < fn_8024EB94(pp); i++) {
-                    e = fn_8024EB9C(pp, i);
-                    S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
-                }
-                ShowSelectionColor(pp);
+                InitColorSlots((u8*)&paint);
+                MenuDesc desc = {"carchoose2b.lyt", 0, (int (*)(int*))fn_8024DADC, 0, 0};
                 MenuItem items[] = {
-                    MenuItem(0, 5, pp, 0, 0),
+                    MenuItem(0, 5, (u8*)&paint, 0, 0),
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
                     MenuItem("#car_model", cars.Chassis(), (int)NoCaption()),
                     MenuItem("#car_name", cars.Name(), (int)NoCaption()),
-                    MenuItem("#color_name", (char*)pp + 0xE0, (int)NoCaption()),
+                    MenuItem("#color_name", (char*)&paint + 0xE0, (int)NoCaption()),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
                     MenuItem("#car_bar_color", BarArt(bar), (int)NoCaption()),
@@ -482,7 +486,6 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem(lbl_8055B860, 6, 0, -2, 0xD),
                     MenuItem(lbl_80498C30),
                 };
-                MenuDesc desc = {"carchoose2b.lyt", 0, (int (*)(int*))fn_8024DADC, 0, 0};
                 desc.items = items;
                 int r2 = fn_802146BC(&desc, -999, -999, 1);
                 if (r2 == -2 && lbl_80498C48.alt) {
