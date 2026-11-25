@@ -1183,6 +1183,7 @@ public:
     virtual void b1(void);
     virtual void b2(StuntEvt* e, int car);
     void b2Body(StuntEvt* e, int car);
+    void InitCar(int i);  // name unproven: one car's HUD/stunt/texture setup (inline, its locals number after a1's)
     virtual void c0(Body* b);
     virtual void c1(void);
     virtual void c2(Body* b, int car);
@@ -4345,12 +4346,8 @@ static inline StuntList* CreateCarStunts() {
     return new ("pr_stuntdash") StuntList;
 }
 
-inline void BetaMaster::a1(void) {
-    int i = 0;
-    nCars = lbl_8055E4D0;
-    if (nCars > 0) {
-        const char* star = "betatex2.tex";
-        for (; i < nCars; i++) {
+inline void BetaMaster::InitCar(int i) {
+    const char* star = "betatex2.tex";
         bool acar = (u32)lbl_804348E8[i]->type == 'ACAR';
         cars[i].hud = new ("stuntdash") CarHud(i, acar);
         cars[i].stunts = CreateCarStunts();
@@ -4393,7 +4390,13 @@ inline void BetaMaster::a1(void) {
             }
             cars[i].fullSnd = CreateSoundDash("counter.sfx", 7, cars[i].id, 0);
         }
-    }
+}
+
+inline void BetaMaster::a1(void) {
+    int i = 0;
+    nCars = lbl_8055E4D0;
+    for (; i < nCars; i++) {
+        InitCar(i);
     }
     for (i = 0; i < bumps.a.count; i++) {
         Token* t = bumps.a.data[i];
