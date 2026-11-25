@@ -5,7 +5,6 @@
 #include "game/common.h"
 #include <revolution/MTX/vec.h>
 #include "game/byteswap.h"
-#include "game/buildquery.h"
 
 extern "C" {
 void* memset(void* p, int c, u32 n);
@@ -27,26 +26,20 @@ struct MMtx {
 #include "game/mmtx33.h"
 #include "game/mathutil.h"
 
-struct MCam {
-    MMtx33 r;  // offset 0x0
-    ValVec3 t;   // offset 0x24
-};
 
-// The pair without constructors: F4 holds two of these, so each half is copied as one 8-byte block (lfd/stfd), which
-// is how retail moves them (11 block moves in fn_802CD37C). F2 adds the constructors. Names unproven.
+// A projection row as two constructor-less pairs: fn_802CD37C passes three of these BY VALUE, so each pair of the
+// argument copies moves as one 8-byte block (lfd/stfd) like retail. The last float is never written (retail copies
+// it uninitialised). Names unproven.
 struct F2Plain {
     f32 a, b;
 };
-struct F2 : F2Plain {
-    F2(f32 x) { a = x; }
-    F2(f32 x, f32 y) {
-        a = x;
-        b = y;
-    }
-};
 
 struct F4 {
-    F4(const F2& l, const F2& h) : lo(l), hi(h) {}
+    F4(f32 x, f32 y, f32 z) {
+        lo.a = x;
+        lo.b = y;
+        hi.a = z;
+    }
     F2Plain lo, hi;
 };
 
@@ -149,7 +142,7 @@ void fn_801293C8(const char* name);
 void fn_801293D0(void);
 void CopyCourseData(void* buf);
 void CopyTextureData(void* buf);
-const MCam* fn_802C86DC(void);
+const PlainValMatrix* fn_802C86DC(void);
 void fn_802C8B70(s32 tex);
 void fn_802C8D74(void);
 int TestPointVisibility(const ValVec3* c, u8* clip, f32* dist, f32 r);
@@ -172,7 +165,7 @@ extern RenderCtx* lbl_8055DFC4;
 
 u8 lbl_804C1480[0x4000];   // profile buffer
 f32 lbl_804C5480[100];     // on-screen size per visibility slot
-MCam lbl_804C5610;         // camera of the last calc
+PlainValMatrix lbl_804C5610;         // camera of the last calc
 u8 lbl_804C5640[0x10];
 
 ModuleTag lbl_8055FCC8;
@@ -196,14 +189,14 @@ static inline void SwapItems(T& a, T& b) {
     b = t;
 }
 
-static inline u8 Cull(const MLSphere* sp) {
-    MLSphere s = *sp;
+// Cull is two inlines: retail's frame has both ValVec3 c objects below every other 16-byte local, i.e. created by
+// a nested inline expanded after the first level (stackfit 2026-11-24). Names unproven.
+static inline u8 CullPoint(const ValVec3& p, f32 r) {  // name unproven
     ValVec3 c;
     u8 clip;
-    c.x = s.x;
-    c.y = s.y;
-    c.z = s.z;
-    f32 r = s.r;
+    c.x = p.x;
+    c.y = p.y;
+    c.z = p.z;
     if (TestPointVisibility(&c, &clip, &lbl_8055FCE0, r)) {
         lbl_8055FCDC = clip ? 0x81 : 1;
     } else {
@@ -211,10 +204,14 @@ static inline u8 Cull(const MLSphere* sp) {
     }
     return lbl_8055FCDC;
 }
+static inline u8 Cull(const MLSphere* sp) {
+    MLSphere s = *sp;
+    return CullPoint(*(const ValVec3*)&s, s.r);
+}
 
 extern "C" {
 
-void fn_802CCBC0(const MMtx33* r, const F4& a, const F4& b, const F4& c) {}
+void fn_802CCBC0(const MMtx33* r, F4 a, F4 b, F4 c) {}
 
 u8 CheckBoxFrustumCull(const MLBox* e, MVec4 eye, f32 a, f32 b) {
     MVec4 w;
@@ -373,57 +370,55 @@ static inline void MulVecT(ValVec3* out, const ValVec3* in, const MMtx33* m) {
     }
 }
 
-static inline void Transpose(MMtx33* m) {
-    f32 t;
-    t = m->xy;
-    m->xy = m->yx;
-    m->yx = t;
-    t = m->xz;
-    m->xz = m->zx;
-    m->zx = t;
-    t = m->yz;
-    m->yz = m->zy;
-    m->zy = t;
-}
-
-static inline void SetIdentity(MCam* m) {
-    m->r.xx = 1.0f;
-    m->r.xy = 0.0f;
-    m->r.xz = 0.0f;
-    m->r.yx = 0.0f;
-    m->r.yy = 1.0f;
-    m->r.yz = 0.0f;
-    m->r.zx = 0.0f;
-    m->r.zy = 0.0f;
-    m->r.zz = 1.0f;
-    m->t.x = 0.0f;
-    m->t.y = 0.0f;
-    m->t.z = 0.0f;
+static inline void SetIdentity(PlainValMatrix* m) {
+    m->basis[0].x = 1.0f;
+    m->basis[0].y = 0.0f;
+    m->basis[0].z = 0.0f;
+    m->basis[1].x = 0.0f;
+    m->basis[1].y = 1.0f;
+    m->basis[1].z = 0.0f;
+    m->basis[2].x = 0.0f;
+    m->basis[2].y = 0.0f;
+    m->basis[2].z = 1.0f;
+    m->origin.x = 0.0f;
+    m->origin.y = 0.0f;
+    m->origin.z = 0.0f;
 }
 
 // opt_lifetimes off comes from the unit-wide flag in configure.py (per-file flag rule, FACTS 2026-11-16)
-// A rotation row as its first two floats plus the third, and a 3x3 of such rows (the same bytes as MMtx33).
-// Retail copies the camera rotation one row at a time as an 8-byte block (lfd/stfd) plus the third float. The
-// copy-shape harness (FACTS 2026-11-17 04:41) shows no 12-byte row or matrix copy does that: an 8-byte block
-// move needs a standalone constructor-less pair initialised from a local, here the helper's by-value parameter.
-// Names unproven.
-struct MRowPair {
-    F2Plain xy;
-    f32 z;
+// gx.cpp's Invert (rows copied as 12-byte array blocks, transpose, rotated and negated origin), same body. Retail
+// copies each camera row as lfd + lwz only when the source local is a PlainValMatrix (basis[] array member); an
+// MMtx33-field view of the same bytes gives word copies (2026-11-24). The two copies should share one header.
+struct MRow3 {
+    f32 v[3];
 };
-struct MRows {
-    MRowPair x, y, z;
-};
-static inline void SetRow(MRowPair* o, F2Plain xy, f32 z) {
-    o->xy = xy;
-    o->z = z;
+static inline void Invert(PlainValMatrix* out, const PlainValMatrix* m) {
+    for (int i = 0; i < 3; i++) {
+        *(MRow3*)&out->basis[i] = *(const MRow3*)&m->basis[i];
+    }
+    f32 t = out->basis[0].y;
+    out->basis[0].y = out->basis[1].x;
+    out->basis[1].x = t;
+    t = out->basis[0].z;
+    out->basis[0].z = out->basis[2].x;
+    out->basis[2].x = t;
+    t = out->basis[1].z;
+    out->basis[1].z = out->basis[2].y;
+    out->basis[2].y = t;
+    MulVecT(&out->origin, &m->origin, (const MMtx33*)m->basis);
+    out->origin.x *= -1.0f;
+    out->origin.y *= -1.0f;
+    out->origin.z *= -1.0f;
 }
 // Name unproven.
 static inline f32 ProjectionReciprocal(f32 value) { return 1.0f / value; }
 
+static inline u8 CullBox(const MLBox* e, const u8* vis, const MVec4& eye, f32 a, f32 b) {  // name unproven
+    return vis[e->sphere] ? CheckBoxFrustumCull(e, eye, a, b) : 0;
+}
 void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_801293C8("mlist: calc");
-    MCam ident;
+    PlainValMatrix ident;
     lbl_8055FCD8 = m;
     SetIdentity(&ident);
     RenderCtx* ctx = lbl_8055DFC4;
@@ -437,24 +432,18 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
         ctx->mtx[j] = id;
     }
     MLArray<MLSphere> sa = m->a;
-    MCam cam;
-    cam = lbl_804C5610 = *fn_802C86DC();
-    MMtx33 rt;
-    SetRow(&((MRows*)&rt)->x, ((const MRows*)&cam.r)->x.xy, cam.r.xz);
-    SetRow(&((MRows*)&rt)->y, ((const MRows*)&cam.r)->y.xy, cam.r.yz);
-    SetRow(&((MRows*)&rt)->z, ((const MRows*)&cam.r)->z.xy, cam.r.zz);
-    Transpose(&rt);
-    ValVec3 t;
-    MulVecT(&t, &cam.t, &cam.r);
-    t.x *= -1.0f;
-    t.y *= -1.0f;
-    t.z *= -1.0f;
+    PlainValMatrix cam = lbl_804C5610 = *fn_802C86DC();
+    PlainValMatrix inv;
+    Invert(&inv, &cam);
     f32 aspect;
     fn_802C98DC(&lbl_8055FCD4, &lbl_8055D0A0, &lbl_8055D0A4, &aspect);
     f32 zn = lbl_8055D0A0;
     f32 zf = lbl_8055D0A4;
-    fn_802CCBC0(&rt, F4(F2(ProjectionReciprocal(lbl_8055FCD4), ProjectionReciprocal(lbl_8055FCD4)), F2(((zf + zn) / (zf - zn)))),
-                F4(F2(0.0f, 0.0f), F2(zf * (1.0f - ((zf + zn) / (zf - zn))))), F4(F2(0.0f, 0.0f), F2(ProjectionReciprocal(aspect))));
+    F4 p1(ProjectionReciprocal(lbl_8055FCD4), ProjectionReciprocal(lbl_8055FCD4), (zf + zn) / (zf - zn));
+    F4 p2(0.0f, 0.0f, zf * (1.0f - ((zf + zn) / (zf - zn))));
+    F4 p3(0.0f, 0.0f, 1.0f / aspect);
+    MVec4 eye;
+    fn_802CCBC0((const MMtx33*)inv.basis, p1, p2, p3);
     u8* vis = ctx->vis;
     vis[0] = 0x81;
     const MLSphere* sp;
@@ -467,17 +456,16 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
         *vp = Cull(sp);
         sp++;
     }
-    MVec4 eye;
-    eye.x = cam.t.x;
-    eye.y = cam.t.y;
-    eye.z = cam.t.z;
+    eye.x = cam.origin.x;
+    eye.y = cam.origin.y;
+    eye.z = cam.origin.z;
     eye.w = 0.0f;
     MLArray<MLBox> ba = m->b;
     MLArray<MLPiece> ca;
     const MLBox* bp = ba.p;
     vp = vis + k;
     for (i = 0; i < ba.n; i++, k++, vp++) {
-        *vp = vis[bp->sphere] ? CheckBoxFrustumCull(bp, eye, a, b) : 0;
+        *vp = CullBox(bp, vis, eye, a, b);
         bp++;
     }
     ca = MLArray<MLPiece>(m->c);
@@ -485,15 +473,9 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     vp = vis + k;
     for (i = 0; i < ca.n; i++) {
         if (cp->flags == (vis[cp->ref] & 0x7F)) {
-            /* PROVISIONAL (game/buildquery.h, FACTS 2026-11-17 02:20 and 13:40): retail scheduled this branch as
-               if a test stood at its head (the piece pointer step `addi r25,r25,4` is not delayed). Found by
-               sweep_latefold.py; 93.23 -> 93.39 and the LATEFOLD row of standinscan is gone. What the original
-               tested here is unknown. */
-            if (BuildMode() == kBuildRetail) {
-                u8 r = Cull(&cp->s);
-                lbl_804C5480[k++] = lbl_8055FCE0;
-                *vp++ = r;
-            }
+            u8 r = Cull(&cp->s);
+            lbl_804C5480[k++] = lbl_8055FCE0;
+            *vp++ = r;
         } else {
             k++;
             *vp++ = 0;
@@ -547,7 +529,7 @@ void FlushRenderQueue(int pri) {
     MLArray<MLStrip> da = m->d;
     MLRange r = m->ranges[pri];
     MLArray<MLBatch> ea = m->e;
-    MCam ident;
+    PlainValMatrix ident;
     SetIdentity(&ident);
     ctx = lbl_8055DFC4;
     id = fn_802D0514(&ident);
