@@ -592,8 +592,15 @@ void fn_802CDDC8(MList* m, u32 base) {
     SwapItems(h[8], h[11]);
     SwapItems(h[9], h[10]);
     u32* w = (u32*)&m->a;
-    for (int i = 0; i < 10; i++) {
-        SwapWord(&w[i]);
+    // Two loops (8 + 2): the next loop's preheader merges into the last fully unrolled loop before it, which puts retail's
+    // li/mtctr among words 9-10 (TC helper CFG-merge trace, 2026-11-24).
+    for (int i = 0; i < 8; i++) {
+        SwapItems(((u8*)&w[i])[0], ((u8*)&w[i])[3]);
+        SwapItems(((u8*)&w[i])[1], ((u8*)&w[i])[2]);
+    }
+    for (int i = 8; i < 10; i++) {
+        SwapItems(((u8*)&w[i])[0], ((u8*)&w[i])[3]);
+        SwapItems(((u8*)&w[i])[1], ((u8*)&w[i])[2]);
     }
     w = (u32*)m->ranges;
     for (int i = 0; i < 20; i++) {
