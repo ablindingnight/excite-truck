@@ -35,6 +35,7 @@ struct F2Plain {
 };
 
 struct F4 {
+    F4() {}
     F4(f32 x, f32 y, f32 z) {
         lo.a = x;
         lo.b = y;
@@ -439,9 +440,12 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_802C98DC(&lbl_8055FCD4, &lbl_8055D0A0, &lbl_8055D0A4, &aspect);
     f32 zn = lbl_8055D0A0;
     f32 zf = lbl_8055D0A4;
-    f32 rt = 1.0f / lbl_8055FCD4;
+    F4 p1;
+    p1.lo.a = lbl_8055FCD4;
     f32 c = (zf + zn) / (zf - zn);
-    F4 p1(rt, rt, c);
+    p1.lo.a = 1.0f / p1.lo.a;
+    p1.lo.b = p1.lo.a;
+    p1.hi.a = c;
     F4 p2(0.0f, 0.0f, zf * (1.0f - c));
     F4 p3(0.0f, 0.0f, 1.0f / aspect);
     MVec4 eye;
