@@ -2287,9 +2287,9 @@ void fn_80198488(u8* d);
 // Existing V2/V2C layouts retained; original helper/input/scope ownership unproven.
 // Inherited opt_lifetimes-off and dead blend-test debt retained, not validated here.
 static inline V2 BlendAvoidanceSnapshot(f32 k, f32 xv, f32 yv, const V2& b) {
-    V2C endpoint;
-    endpoint.y = b.y;
+    RVec3 endpoint;  // 16-byte slot like retail's frame (96); the 3-vector type is unproven
     endpoint.x = b.x;
+    endpoint.y = b.y;
     V2 r;
     r.y = LerpT(k, yv, endpoint.y);
     r.x = LerpT(k, xv, endpoint.x);
