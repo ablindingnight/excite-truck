@@ -296,7 +296,7 @@ int fn_8023F2C4(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         MenuItem(lbl_8055B860, 6, (void*)fn_8023F9E8, -1, 27),
-        MenuItem("title", "Memory Card Not Found", CaptionContext(4)),
+        MenuItem("title", CaptionContext(4), "Memory Card Not Found"),
         MenuItem("line1", 3, "Please insert a memory card", 4, 0),
         MenuItem("line2", 3, "with at least 280KB of free space", 4, 0),
         MenuItem("line3", 3, "into MEMORY CARD slot 1", 4, 0),
