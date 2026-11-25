@@ -678,13 +678,29 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     }
 }
 
-static inline u8 gxBlend8(u32 ia, u32 dc, u32 a, u32 sc) {
-    int t = ((ia * dc + a * sc) >> 8) & 0xFF;
-    return t + (t >> 7);
+static inline u32 BlendCanvasARGBPixel(u32 p, u32 q) {
+    u32 a = p >> 24;
+    u32 out;
+    if (a == 0) {
+        out = q;
+    } else if (a == 0xFF) {
+        out = (p & 0xFFFFFF) | (q & 0xFF000000);
+    } else {
+        u32 ia = RemainingOpacity(a);
+        u8 r = q >> 16;
+        r = (ia * r + a * ((p >> 16) & 0xFF)) >> 8;
+        u8 g = q >> 8;
+        g = (ia * g + a * ((p >> 8) & 0xFF)) >> 8;
+        u8 b = (ia * (q & 0xFF) + a * (p & 0xFF)) >> 8;
+        r += r >> 7;
+        g += g >> 7;
+        b += b >> 7;
+        out = (b | (q & 0xFF000000)) | (g << 8 | r << 16);
+    }
+    return out;
 }
 
-#pragma push
-#pragma opt_loop_invariants off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+
 void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
@@ -698,28 +714,13 @@ void fn_802C4610(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     do {
         int n = w;
         do {
-            u32 p = *s++;
-            u32 q = *d;
-            u32 a = p >> 24;
-            u32 out;
-            if (a == 0) {
-                out = q;
-            } else if (a == 0xFF) {
-                out = (p & 0xFFFFFF) | (q & 0xFF000000);
-            } else {
-                u32 ia = 0xFF - a;
-                u8 r = gxBlend8(ia, (q >> 16) & 0xFF, a, (p >> 16) & 0xFF);
-                u8 g = gxBlend8(ia, (q >> 8) & 0xFF, a, (p >> 8) & 0xFF);
-                u8 b = gxBlend8(ia, q & 0xFF, a, p & 0xFF);
-                out = (r << 16 | g << 8) | ((q & 0xFF000000) | b);
-            }
-            *d++ = out;
+            u32 pixel = BlendCanvasARGBPixel(*s++, *d);
+            *d++ = pixel;
         } while (--n > 0);
         s += sskip;
         d += dskip;
     } while (--h > 0);
 }
-#pragma pop
 
 void fn_802C47B8(int x0, int y0, int x1, int y1, u32 color) {
     int dx = x1 - x0;
