@@ -673,19 +673,20 @@ void* fn_802EAB28(void* arg) {
                                 int tl = len - 1;
                                 int fsz = len + 10;
                                 if (f[0] == 'T' && tl > 0) {
+                                    char* txt = f + 11;
                                     if (!strncmp(f, "TIT2", 4)) {
                                         int k = tl + 1 < 0x20 ? tl + 1 : 0x20;
-                                        strncpy(lbl_80507640.title, (f + 11), k - 1);
+                                        strncpy(lbl_80507640.title, txt, k - 1);
                                         lbl_80507640.title[k - 1] = 0;
                                     }
                                     if (!strncmp(f, "TPE1", 4)) {
                                         int k = tl + 1 < 0x20 ? tl + 1 : 0x20;
-                                        strncpy(lbl_80507640.artist, (f + 11), k - 1);
+                                        strncpy(lbl_80507640.artist, txt, k - 1);
                                         lbl_80507640.artist[k - 1] = 0;
                                     }
                                     if (!strncmp(f, "TALB", 4)) {
                                         int k = tl + 1 < 0x20 ? tl + 1 : 0x20;
-                                        strncpy(lbl_80507640.album, (f + 11), k - 1);
+                                        strncpy(lbl_80507640.album, txt, k - 1);
                                         lbl_80507640.album[k - 1] = 0;
                                     }
                                 }
@@ -777,7 +778,7 @@ void* fn_802EAB28(void* arg) {
                     used = 0;
                     need = pcm * 2;
                     s32 rp = lbl_805600B0[0];
-                    while (off + 1 <= n) {
+                    while (!done && off + 1 <= n) {
                         int space = lbl_805600B8 >= rp ? lbl_805600A4 - (lbl_805600B8 - rp) : rp - lbl_805600B8;
                         if (space < need) {
                             break;
