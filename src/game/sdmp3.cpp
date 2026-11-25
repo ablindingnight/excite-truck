@@ -791,7 +791,8 @@ void* fn_802EAB28(void* arg) {
                     need = pcm * 2;
                     s32 rp = lbl_805600B0[0];
                     while (!done && off + 1 <= n) {
-                        int space = lbl_805600B8 >= rp ? lbl_805600A4 - (lbl_805600B8 - rp) : rp - lbl_805600B8;
+                        s32* prp = &rp;  // aid stand-in, unproven: pointer-variable deref keeps the arm unspeculated (see CLAMP_MAX)
+                        int space = lbl_805600B8 < rp ? rp - lbl_805600B8 : lbl_805600A4 - (lbl_805600B8 - *prp);
                         if (space < need) {
                             break;
                         }
