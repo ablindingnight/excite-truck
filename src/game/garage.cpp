@@ -392,6 +392,15 @@ inline const char* BarArt(int bar) {  // name unproven
     return a.art[bar];
 }
 
+static inline GarageList* MakeColorList(CarPick& cars) {  // name unproven
+    VehicleInfo* v = FindVehicleNamed(cars.Chassis(), 0);
+    GarageList* colors = (GarageList*)fn_8025007C(v->num_colors);
+    for (int i = 0; i < v->num_colors; i++) {
+        colors->Add(cars.Chassis(), 1, 0);
+    }
+    return colors;
+}
+
 static inline void InitColorSlots(u8* pp) {  // name unproven
     SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
     u8* e = fn_8024EB9C(pp, 0);
@@ -462,11 +471,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
             }
             if (lbl_80498C48.alt || r == -2) {
                 HeapMark mark("choosevehicle2");
-                VehicleInfo* v = FindVehicleNamed(cars.Chassis(), 0);
-                GarageList* colors = (GarageList*)fn_8025007C(v->num_colors);
-                for (int i = 0; i < v->num_colors; i++) {
-                    colors->Add(cars.Chassis(), 1, 0);
-                }
+                GarageList* colors = MakeColorList(cars);
                 s32* csel = lbl_80498C48.alt ? pd : pb;
                 ColorPick paint(colors, csel, lbl_80498C48.alt ? pc : pa, &panel, &ui, color);
                 InitColorSlots((u8*)&paint);
