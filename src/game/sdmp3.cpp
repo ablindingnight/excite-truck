@@ -816,14 +816,16 @@ void* fn_802EAB28(void* arg) {
                             fn_802E30C8("mp3: TMCCMP3Decode returns %d (%s) c=%d", rc, GetErrorString(rc), used);
                             if (!used || errs > 30) {
                                 done = 1;
-                                break;
+                            } else {
+                                pos += used;
+                                off += used;
+                                lbl_805600B8 += pcm;
                             }
-                            pos += used;
-                            off += used;
-                            lbl_805600B8 += pcm;
                         }
-                        decoded = 1;
-                        fn_802EAA08();
+                        if (!done) {
+                            decoded = 1;
+                            fn_802EAA08();
+                        }
                     }
                     if (lbl_805600B8 <= rp) {
                         lbl_805600BC = lbl_805600A4 - (rp - lbl_805600B8);
