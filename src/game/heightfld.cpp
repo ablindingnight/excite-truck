@@ -527,7 +527,11 @@ f32 fn_801DCF0C(f32 x, f32 z) {
 
 
 /* Helper name unproven: height and optional normal inside one tile; the boundary is needed (in place -19.0) */
-static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, int lx, int lz) {
+static inline f32 TileHeight(GroundHeader* g, int ix, int iz, ValVec3* normal) {
+    int tx = ix / 32;
+    int tz = iz / 32;
+    int lx = ix - tx * 32;
+    int lz = iz - tz * 32;
     f32 h;
     GTile* t = TileAt(g, tx, tz);
     if (!t) {
@@ -592,11 +596,7 @@ f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
     f32 fz = g->scaleZ * (z + g->offZ);
     int ix = Round(fx);
     int iz = Round(fz);
-    int tx = ix / 32;
-    int tz = iz / 32;
-    int lz = iz - tz * 32;
-    int lx = ix - tx * 32;
-    return TileHeight(g, tx, tz, normal, lx, lz);
+    return TileHeight(g, ix, iz, normal);
 }
 
 
