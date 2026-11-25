@@ -577,7 +577,7 @@ static inline f32 TileHeight(GroundHeader* g, int ix, int iz, ValVec3* normal) {
     return h;
 }
 
-f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
+static inline f32 GroundHeightAt(ValVec3* normal, f32 x, f32 z) {  // name unproven
     GroundHeader* g = lbl_8055E990;
     f32 h;
     if (!g->tiled) {
@@ -597,6 +597,10 @@ f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
     int ix = Round(fx);
     int iz = Round(fz);
     return TileHeight(g, ix, iz, normal);
+}
+
+f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
+    return GroundHeightAt(normal, x, z);
 }
 
 
