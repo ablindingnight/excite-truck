@@ -182,11 +182,11 @@ void UIObjectsImpl::DrawImage(const char* name, u32 flags, int a, f32 x, f32 y) 
         }
 #ifdef __MWERKS__
         // Retail: this unit's prototype put idx (frame) after the floats; on PowerPC it reaches
-        // fn_802354A0(s, idx, x, y, z, w, h, color) unchanged (separate int/float registers).
+        // fn_802354A0(s, x, y, z, idx, w, h, color) unchanged (separate int/float registers).
         ((void (*)(gArtSet*, f32, f32, f32, f32, f32, int, int))fn_802354A0)(e->img, x, y, 0.0f, w, h, e->frame, a);
 #else
         /* PORT: MWCC path keeps retail's argument order (registers), see the comment above */
-        fn_802354A0(e->img, e->frame, x, y, 0.0f, w, h, a);
+        fn_802354A0(e->img, x, y, 0.0f, e->frame, w, h, a);
 #endif
     }
 }
@@ -209,11 +209,11 @@ void UIObjectsImpl::DrawImageScaled(const char* name, u32 flags, int a, f32 x, f
         }
 #ifdef __MWERKS__
         // Retail: this unit's prototype put idx (frame) after the floats; on PowerPC it reaches
-        // fn_802354A0(s, idx, x, y, z, w, h, color) unchanged (separate int/float registers).
+        // fn_802354A0(s, x, y, z, idx, w, h, color) unchanged (separate int/float registers).
         ((void (*)(gArtSet*, f32, f32, f32, f32, f32, int, int))fn_802354A0)(e->img, x, y, 0.0f, w, h, e->frame, a);
 #else
         /* PORT: MWCC path keeps retail's argument order (registers), see the comment above */
-        fn_802354A0(e->img, e->frame, x, y, 0.0f, w, h, a);
+        fn_802354A0(e->img, x, y, 0.0f, e->frame, w, h, a);
 #endif
     }
 }

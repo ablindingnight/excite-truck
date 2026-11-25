@@ -1119,7 +1119,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
         extreme = 1;
     }
     int lit = shown && extreme;
-    fn_802354A0(art, lit, x, y, 0.0f, w, h, locked ? 0xFF808080 : -1);
+    fn_802354A0(art, x, y, 0.0f, lit, w, h, locked ? 0xFF808080 : -1);
     f32 fade = fn_80216CB4();
     if (extreme) {
         for (int k = 0; k < 2; k++) {
@@ -1134,7 +1134,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             f32 ph = GetArtHeight(art, part) * s2;
             int a = RoundF(GarageFadeAlpha(fade));
             a = a > 0x13F ? 0x13F : a;
-            fn_802354A0(art, part, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, pw, ph, (a << 24) | 0xFFFFFF);
+            fn_802354A0(art, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, part, pw, ph, (a << 24) | 0xFFFFFF);
         }
     }
     int k = shown > 0 ? shown : 0;
@@ -1153,10 +1153,10 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
 void ColorPick::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
     ColorPick* p = this;
     s32 v = S32(((u8*)p->entries) + i * 0x14, 0x10);
-    fn_802354A0(p->art, 0, x, y, 0.0f, w, h, -1);
+    fn_802354A0(p->art, x, y, 0.0f, 0, w, h, -1);
     fn_80216CB4();
-    fn_802354A0(p->art, 3, x, y, 0.0f, w, h, v);
-    fn_802354A0(p->art, 6, x, y, 0.0f, w, h, -1);
+    fn_802354A0(p->art, x, y, 0.0f, 3, w, h, v);
+    fn_802354A0(p->art, x, y, 0.0f, 6, w, h, -1);
 }
 
 extern "C" {
@@ -1271,7 +1271,7 @@ void SlotStrip::Draw(void) {
         f32 alpha = 1.0f - d;
         DrawSlot(i, e->shown, x, y + 5.0f * s, 82.5f, h + 10.0f * s, alpha);
     }
-    fn_802354A0(p->art, 2, -41.25f, 5.0f + top, 0.0f, 82.5f, 58.0f, -1);
+    fn_802354A0(p->art, -41.25f, 5.0f + top, 0.0f, 2, 82.5f, 58.0f, -1);
 }
 
 void UnlockScreen::Enter(void) {

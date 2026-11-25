@@ -902,8 +902,8 @@ void ColorPick::Draw(void) {
                 sw.tint = (this->vehicle->colors[i] & 0xFFFFFF) | (alpha << 24);
                 sw.frame = (alpha << 24) | 0xFFFFFF;
                 if (sx > x && sx + cell < x + w) {
-                    fn_802354A0(this->art, 3, sx, y, lbl_80563758, cell, h, sw.tint);
-                    fn_802354A0(this->art, 6, sx, y, lbl_80563758, cell, h, sw.frame);
+                    fn_802354A0(this->art, sx, y, lbl_80563758, 3, cell, h, sw.tint);
+                    fn_802354A0(this->art, sx, y, lbl_80563758, 6, cell, h, sw.frame);
                 } else if (sx > x) {
                     f32 vis = cell - (sx + cell - (x + w));
                     f32 u = vis / cell;

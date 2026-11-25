@@ -317,7 +317,7 @@ void RecordIcon::Draw(void) {
     fw = (f32)w;
     fh = (f32)h;
     f32 shadowY = 3.0f + sy;
-    fn_802354A0(art, c, sx - 3.0f, shadowY, 0.0f, 6.0f + fw, 6.0f + fh, -1);
+    fn_802354A0(art, sx - 3.0f, shadowY, 0.0f, c, 6.0f + fw, 6.0f + fh, -1);
     e = &icons->icons[icon];
     y = sy;
     x = sx;

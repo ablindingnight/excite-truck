@@ -120,7 +120,7 @@ TrackNode* lbl_8055F084;  // the open art sets
 extern "C" {
 
 
-void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int color);
+void fn_802354A0(gArtSet* s, f32 x, f32 y, f32 z, int idx, f32 w, f32 h, int color);
 
 void fn_80234D44(gArtSet* s) {
     if (s) {
@@ -295,12 +295,12 @@ void DrawArtPictureAtPosition(gArtSet* s, int idx, f32 x, f32 y, f32 z) {
         if (p == NULL) {
             fn_802E30C8("gArt: Picture #%d not found in gArtSet %s", idx, s->name);
         } else {
-            fn_802354A0(s, idx, x, y, z, p->width, p->height, -1);
+            fn_802354A0(s, x, y, z, idx, p->width, p->height, -1);
         }
     }
 }
 
-void fn_802354A0(gArtSet* s, int idx, f32 x, f32 y, f32 z, f32 w, f32 h, int color) {
+void fn_802354A0(gArtSet* s, f32 x, f32 y, f32 z, int idx, f32 w, f32 h, int color) {
     if (idx >= 0) {
         Picture* p = GetPictureAtIndex(s, idx);
         if (p == NULL) {

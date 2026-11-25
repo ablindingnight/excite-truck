@@ -13,7 +13,7 @@ void HandleArtCleanup(void);                            // end it
 gArtSet* fn_8023512C(const char*);                 // load (or share) a set by file name
 void fn_80235380(gArtSet*);                        // release
 void DrawArtPictureAtPosition(gArtSet*, int, float, float, float);  // draw image idx at x, y, z (its own size)
-void fn_802354A0(gArtSet* s, int idx, float x, float y, float z, float w, float h, int color);  // draw scaled, tinted
+void fn_802354A0(gArtSet* s, float x, float y, float z, int idx, float w, float h, int color);  // draw scaled, tinted
 void fn_80235AFC(gArtSet* s, int idx, unsigned long color, float x, float y, float z, float w, float h, float angle);  // rotated
 void fn_80235758(gArtSet* s, int idx, float x, float y, float w, float h, float left, float top, float right,
                  float bottom, int color);  // draw a sub-rectangle (u/v bounds)

@@ -353,13 +353,12 @@ void DrawUiArtItems(const UIXform* m) {
             f32 k = 1.0f / s;
 #ifdef __MWERKS__
             // Retail calls gArt's draw with the position before idx (this unit's own prototype; on PowerPC the floats and
-            // ints travel in separate registers, so it reaches fn_802354A0(s, idx, x, y, z, w, h, color) unchanged).
+            // ints travel in separate registers, so it reaches fn_802354A0(s, x, y, z, idx, w, h, color) unchanged).
             ((void (*)(gArtSet*, f32, f32, f32, int, u32, f32, f32))fn_802354A0)(e->art, p.x - 0.5f * (k * it->w - it->w),
                 p.y + 0.5f * (k * it->h - it->h), p.z, e->artIdx, color, k * it->w, k * it->h);
 #else
             /* PORT: MWCC path keeps retail's argument order (registers), see the comment above */
-            fn_802354A0(e->art, e->artIdx, p.x - 0.5f * (k * it->w - it->w), p.y + 0.5f * (k * it->h - it->h), p.z, k * it->w,
-                        k * it->h, color);
+            fn_802354A0(e->art, p.x - 0.5f * (k * it->w - it->w), p.y + 0.5f * (k * it->h - it->h), p.z, e->artIdx, k * it->w, k * it->h, color);
 #endif
         } else {
             if (m) {
