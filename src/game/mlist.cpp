@@ -442,7 +442,8 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     f32 zf = lbl_8055D0A4;
     F4 p1;
     p1.lo.a = lbl_8055FCD4;
-    f32 c = (zf + zn) / (zf - zn);
+    f32 s = zf + zn;
+    f32 c = s / (zf - zn);
     p1.lo.a = 1.0f / p1.lo.a;
     p1.lo.b = p1.lo.a;
     p1.hi.a = c;
