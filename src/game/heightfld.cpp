@@ -541,13 +541,12 @@ static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, i
     if (normal) {
         int ox = lx ^ 1;
         int oz = lz ^ 1;
-        h = t->base + t->scale * t->h[lx][lz];
-        f32 hz = t->base + t->scale * t->h[lx][oz];
-        f32 hx = t->base + t->scale * t->h[ox][lz];
+        h = t->base + t->scale * TileH(t, lx, lz);
+        f32 hz = t->base + t->scale * TileH(t, lx, oz);
+        f32 hx = t->base + t->scale * TileH(t, ox, lz);
         if (t->layer >= 0) {
             GroundHeader* gg = lbl_8055E990;
-            GLayer* layers = gg->layers;
-            for (GLayer* l = &layers[t->layer]; l; l = l->next >= 0 ? &layers[l->next] : 0) {
+            for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
                 f32 w = lbl_804424B0[l->weight];
                 h += w * (l->base + l->scale * l->h[lx][lz]);
                 hx += w * (l->base + l->scale * l->h[ox][lz]);
@@ -562,19 +561,16 @@ static inline f32 TileHeight(GroundHeader* g, int tx, int tz, ValVec3* normal, i
         PSVECNormalize((const Vec*)normal, (Vec*)normal);
         return h;
     }
-    h = t->base + t->scale * t->h[lx][lz];
+    h = t->base + t->scale * TileH(t, lx, lz);
     if (t->layer >= 0) {
         GroundHeader* gg = lbl_8055E990;
-        GLayer* layers = gg->layers;
-        for (GLayer* l = &layers[t->layer]; l; l = l->next >= 0 ? &layers[l->next] : 0) {
+        for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
             h += lbl_804424B0[l->weight] * (l->base + l->scale * l->h[lx][lz]);
         }
     }
     return h;
 }
 
-#pragma push
-#pragma opt_common_subs off  /* Pragma unproven: helps but not exact (PRAGMA_AUDIT_2026-11-15) */
 f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
     GroundHeader* g = lbl_8055E990;
     f32 h;
@@ -600,7 +596,6 @@ f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
     int lx = ix - tx * 32;
     return TileHeight(g, tx, tz, normal, lx, lz);
 }
-#pragma pop
 
 
 void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
