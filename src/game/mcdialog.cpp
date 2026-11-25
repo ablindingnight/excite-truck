@@ -191,6 +191,7 @@ void fn_8023E7A8(int status) {
         break;
     }
     lbl_8055F1C8 = fn_802E2C20() + 100;
+    const char* blank = "";  // name unproven
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8023EC94, 0, 0),
         MC("circle1", 2, &circle1, 0, 0),
@@ -200,10 +201,10 @@ void fn_8023E7A8(int status) {
         MenuItem(CaptionContext(128), "line1", line1),
         MenuItem(CaptionContext(128), "line2", line2),
         MenuItem("line3", CaptionContext(128), line3),
-        MenuItem("line4", 3, "", 4, 0),
-        MenuItem("line5", 3, "", 4, 0),
-        MenuItem("lbutton", 3, "", 4, 0),
-        MenuItem("rbutton", 3, "", 4, 0),
+        MenuItem("line4", 3, blank, 4, 0),
+        MenuItem("line5", 3, blank, 4, 0),
+        MenuItem("lbutton", 3, blank, 4, 0),
+        MenuItem("rbutton", 3, blank, 4, 0),
         MenuItem(lbl_804987E0),
     };
     MenuDesc desc = {"mem3line.lyt", items, fn_8023ECF8, 0, 0};
