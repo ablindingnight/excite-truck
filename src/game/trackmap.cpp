@@ -654,8 +654,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         GetCarInfo(truck);
         Vec3 rel = *(const Vec3*)&fn_8017960C(truck)->mtx.pos;
         rel.x = rel.x - basis.pos.x;
-        f32 yv = basis.pos.y;
-        rel.y = rel.z - yv;
+        f32 rz = rel.z;
+        rel.y = rz - basis.pos.y;
         rel.z = 0.0f;
         rel.z -= basis.pos.z;
         pr = &rel;
