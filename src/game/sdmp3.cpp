@@ -720,7 +720,7 @@ void* fn_802EAB28(void* arg) {
                 if (!hdr) {
                     int found = 0;
                     for (int i = 0; i < ClampedMax(n, 0x400); i++) {
-                        if (SyncAt(lbl_805600A8 + i)) {
+                        if (lbl_805600A8[i] == 0xFF && (((u8*)(i + (u32)lbl_805600A8))[1] & 0xE0) == 0xE0) {
                             if (i) {
                                 fn_802E30C8("mp3: found header frame sync at %d", i);
                             }
