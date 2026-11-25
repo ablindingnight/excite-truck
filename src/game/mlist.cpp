@@ -440,10 +440,12 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_802C98DC(&lbl_8055FCD4, &lbl_8055D0A0, &lbl_8055D0A4, &aspect);
     f32 zn = lbl_8055D0A0;
     f32 zf = lbl_8055D0A4;
+    f32 s;  // declared before ar, filled after it; t stored first and divided from the read-back (FPR numbering, 2026-11-24)
     F4 p1;
-    p1.lo.a = lbl_8055FCD4;
-    f32 ar = aspect;  // a named copy: its number sits between zf and s (colwhy FPR pair search 2026-11-24)
-    f32 s = zf + zn;
+    f32 t = lbl_8055FCD4;
+    p1.lo.a = t;
+    f32 ar = aspect;
+    s = zf + zn;
     f32 c = s / (zf - zn);
     p1.lo.a = 1.0f / p1.lo.a;
     p1.lo.b = p1.lo.a;
