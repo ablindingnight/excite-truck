@@ -386,7 +386,8 @@ static inline void SetIdentity(PlainValMatrix* m) {
 }
 
 // opt_lifetimes off comes from the unit-wide flag in configure.py (per-file flag rule, FACTS 2026-11-16)
-// gx.cpp's Invert (rows copied as 12-byte array blocks, transpose, rotated and negated origin), same body. Retail
+// gx.cpp's Invert (rows copied as 12-byte array blocks, transpose, rotated and negated origin). Here each swap has
+// its own temporary (one shared t serialises the swaps), declared xz, yz, xy (numbering, 2026-11-24). Retail
 // copies each camera row as lfd + lwz only when the source local is a PlainValMatrix (basis[] array member); an
 // MMtx33-field view of the same bytes gives word copies (2026-11-24). The two copies should share one header.
 struct MRow3 {
@@ -396,9 +397,16 @@ static inline void Invert(PlainValMatrix* out, const PlainValMatrix* m) {
     for (int i = 0; i < 3; i++) {
         *(MRow3*)&out->basis[i] = *(const MRow3*)&m->basis[i];
     }
-    SwapItems(out->basis[0].y, out->basis[1].x);
-    SwapItems(out->basis[0].z, out->basis[2].x);
-    SwapItems(out->basis[1].z, out->basis[2].y);
+    f32 xz, yz, xy;
+    xy = out->basis[0].y;
+    out->basis[0].y = out->basis[1].x;
+    out->basis[1].x = xy;
+    xz = out->basis[0].z;
+    out->basis[0].z = out->basis[2].x;
+    out->basis[2].x = xz;
+    yz = out->basis[1].z;
+    out->basis[1].z = out->basis[2].y;
+    out->basis[2].y = yz;
     MulVecT(&out->origin, &m->origin, (const MMtx33*)m->basis);
     out->origin.x *= -1.0f;
     out->origin.y *= -1.0f;
