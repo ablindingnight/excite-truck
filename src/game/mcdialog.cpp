@@ -188,13 +188,14 @@ void fn_8023E7A8(int status) {
         break;
     }
     lbl_8055F1C8 = fn_802E2C20() + 100;
+    const void* titleName = "title";  // name unproven
     const char* blank = "";  // name unproven
     MenuItem items[] = {
         MenuItem(lbl_8055BAC0, 8, (void*)fn_8023EC94, 0, 0),
         MenuItem("circle1", 2, &circle1, 0, 0),
         MenuItem("circle2", 2, &circle2, 0, 0),
         MenuItem("circle3", 2, &circle3, 0, 0),
-        MenuItem(CaptionContext(32), "title", title),
+        MenuItem(CaptionContext(32), (const char*)titleName, title),
         MenuItem(CaptionContext(128), "line1", line1),
         MenuItem(CaptionContext(128), "line2", line2),
         MenuItem("line3", CaptionContext(128), line3),
