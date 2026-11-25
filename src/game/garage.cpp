@@ -446,8 +446,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 for (int i = 0; i < v->num_colors; i++) {
                     colors->Add(cars.Chassis(), 1, 0);
                 }
-                ColorPick paint(colors, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b,
-                                lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
+                s32* csel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
+                ColorPick paint(colors, csel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
                 u8* pp = (u8*)&paint;
                 SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
                 u8* e = fn_8024EB9C(pp, 0);
