@@ -550,6 +550,14 @@ int ValidateMp3Format(MP3Info* info, int strict) {
 #define SyncAt(b) ((b)[0] == 0xFF && ((b)[1] & 0xE0) == 0xE0)
 #define SyncIdx(p, k) ((p)[k] == 0xFF && ((p)[(k) + 1] & 0xE0) == 0xE0)
 
+// aid stand-in, unproven: retail's clamp arms are non-speculated; only a pointer-variable deref reproduces it
+// (sibling fn_802EB7D4 speculates; flags ruled out). MWCC speculates any min whose arms are a constant or plain local.
+#define CLAMP_MAX(x, hi) do { int* _p = &(x); (x) = (x) < (hi) ? *_p : (hi); } while (0)
+static inline int ClampedMax(int v, int hi) {  // name unproven
+    int* p = &v;
+    return *p <= hi ? *p : hi;
+}
+
 void* fn_802EAB28(void* arg) {
     OSReport("kerngc/mp3:thread begins!\n");
     int pos;
@@ -619,7 +627,8 @@ void* fn_802EAB28(void* arg) {
             if (left < 0x780) {
                 fn_802E30C8("mp3: perhaps not enough bytes left?");
             }
-            int n = lbl_805600AC < left ? lbl_805600AC : left;
+            int n = lbl_805600AC;
+            CLAMP_MAX(n, left);
             int done = 1;
             if (pos >= size) {
                 done = 1;
@@ -675,17 +684,20 @@ void* fn_802EAB28(void* arg) {
                                 if (f[0] == 'T' && tl > 0) {
                                     char* txt = f + 11;
                                     if (!strncmp(f, "TIT2", 4)) {
-                                        int k = tl + 1 < 0x20 ? tl + 1 : 0x20;
+                                        int k = tl + 1;
+                                        CLAMP_MAX(k, 0x20);
                                         strncpy(lbl_80507640.title, txt, k - 1);
                                         lbl_80507640.title[k - 1] = 0;
                                     }
                                     if (!strncmp(f, "TPE1", 4)) {
-                                        int k = tl + 1 < 0x20 ? tl + 1 : 0x20;
+                                        int k = tl + 1;
+                                        CLAMP_MAX(k, 0x20);
                                         strncpy(lbl_80507640.artist, txt, k - 1);
                                         lbl_80507640.artist[k - 1] = 0;
                                     }
                                     if (!strncmp(f, "TALB", 4)) {
-                                        int k = tl + 1 < 0x20 ? tl + 1 : 0x20;
+                                        int k = tl + 1;
+                                        CLAMP_MAX(k, 0x20);
                                         strncpy(lbl_80507640.album, txt, k - 1);
                                         lbl_80507640.album[k - 1] = 0;
                                     }
@@ -707,7 +719,7 @@ void* fn_802EAB28(void* arg) {
                 }
                 if (!hdr) {
                     int found = 0;
-                    for (int i = 0; i < (n > 0x400 ? 0x400 : n); i++) {
+                    for (int i = 0; i < ClampedMax(n, 0x400); i++) {
                         if (SyncAt(lbl_805600A8 + i)) {
                             if (i) {
                                 fn_802E30C8("mp3: found header frame sync at %d", i);
@@ -785,7 +797,7 @@ void* fn_802EAB28(void* arg) {
                         }
                         int skip = -1;
                         int i;
-                        for (i = 0; i < (n > 0x400 ? 0x400 : n); i++) {
+                        for (i = 0; i < ClampedMax(n, 0x400); i++) {
                             s32 idx = off + i;
                             if (SyncAt(lbl_805600A8 + idx)) {
                                 if (i) {
