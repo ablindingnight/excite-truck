@@ -170,18 +170,12 @@ static inline void MidPoint(ValVec3* out, const ValVec3* a, const ValVec3* b) {
     }
 }
 
-// Componentwise lerp, lane by lane: the lane value is computed into a local and stored by a separate statement,
-// so the block cut can fall between them as in retail (name unproven).
-static inline void LerpV(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t) {
-    for (int j = 2; j >= 0; j--) {
-        f32 v = t * ((&b.x)[j] - (&a.x)[j]) + (&a.x)[j];
-        (&out->x)[j] = v;
-    }
+// Scalar lerp with the endpoints by reference, and the componentwise vector lerp built on it: Set evaluates its
+// arguments right to left (z, y, x) and stores x, y, z, which is retail's order (names unproven).
+static inline f32 LerpR(const f32& a, const f32& b, f32 t) { return a + t * (b - a); }
+static inline void LerpS(ValVec3* out, const ValVec3& a, const ValVec3& b, f32 t) {
+    out->Set(LerpR(a.x, b.x, t), LerpR(a.y, b.y, t), LerpR(a.z, b.z, t));
 }
-// Plain float sum / difference (names unproven). Value-returning helpers add ISEL pcodes, which moves the
-// scheduler's statement block cut (FACTS STATEMENT-BLOCK-CUT-100).
-static inline f32 AddF(f32 a, f32 b) { return a + b; }
-static inline f32 SubF(f32 a, const f32& b) { return a - b; }
 DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     lbl_8055ECA8 = name;
     if (!fn_801E320C(skel, "butt")) {
@@ -220,52 +214,52 @@ DriverModel* fn_801FFB74(const char* name, u8* skel, u8* opt) {
     f32 by = ((PlainValMatrix*)butt)->basis[1].y;
     f32 bz = ((PlainValMatrix*)butt)->basis[1].z;
     d->yaw = atan2(bz, by);
-    d->butt.x = SubF(d->butt.x, bones[0].m.origin.x);
-    d->butt.y = SubF(d->butt.y, bones[0].m.origin.y);
-    d->butt.z = SubF(d->butt.z, bones[0].m.origin.z);
-    // Retail keeps this store although lfoot is overwritten by m1 below. 472 instrs and retail's mnemonic mix.
+    d->butt.x -= bones[0].m.origin.x;
+    d->butt.y -= bones[0].m.origin.y;
+    d->butt.z -= bones[0].m.origin.z;
+    // The four joints are copied from their bones first, then each is offset by the seat; the foot positions are
+    // copied from their bones and then replaced by the foot-knee midpoints.
     ValVec3 lhip;
     ValVec3 lknee;
     ValVec3 rhip;
     ValVec3 rknee;
-    lknee.z = bones[8].m.origin.z + d->butt.z;
-    rknee = bones[5].m.origin;
-    lhip.z = AddF(bones[7].m.origin.z, d->butt.z);
-    rknee.z = AddF(rknee.z, d->butt.z);
-    lfoot = bones[9].m.origin;
-    lknee.x = d->butt.x + bones[8].m.origin.x;
-    lknee.y = AddF(bones[8].m.origin.y, d->butt.y);
+    lhip = bones[7].m.origin;
     rhip = bones[4].m.origin;
-    rhip.z = AddF(d->butt.z, rhip.z);
-    lhip.y = AddF(d->butt.y, bones[7].m.origin.y);
-    rhip.x = AddF(d->butt.x, rhip.x);
-    rhip.y = d->butt.y + rhip.y;
-    rknee.x = d->butt.x + rknee.x;
-    lhip.x = AddF(bones[7].m.origin.x, d->butt.x);
-    rknee.y = AddF(rknee.y, d->butt.y);
+    lknee = bones[8].m.origin;
+    rknee = bones[5].m.origin;
+    lhip.x += d->butt.x;
+    lhip.y += d->butt.y;
+    lhip.z += d->butt.z;
+    rhip.x += d->butt.x;
+    rhip.y += d->butt.y;
+    rhip.z += d->butt.z;
+    lknee.x += d->butt.x;
+    lknee.y += d->butt.y;
+    lknee.z += d->butt.z;
+    rknee.x += d->butt.x;
+    rknee.y += d->butt.y;
+    rknee.z += d->butt.z;
+    lfoot = bones[9].m.origin;
     ValVec3 pelvis;
     ValVec3 m1;
-    LerpV(&m1, lfoot, lknee, 0.5f);
-    lfoot.z = m1.z;
-    lfoot.y = m1.y;
-    lfoot.x = m1.x;
+    LerpS(&m1, lfoot, lknee, 0.5f);
+    lfoot = m1;
     ValVec3 m2;
-    LerpV(&m2, bones[6].m.origin, rknee, 0.5f);
-    rfoot.x = m2.x;
-    rfoot.y = m2.y;
-    rfoot.z = m2.z;
+    rfoot = bones[6].m.origin;
+    LerpS(&m2, rfoot, rknee, 0.5f);
+    rfoot = m2;
     MidPoint(&pelvis, &lhip, &rhip);
     pelvis.y -= 1.27f;
     d->body.basis[0].x = 1.0f;
     d->body.basis[0].y = 0.0f;
-    d->body.basis[1].x = 0.0f;
     d->body.basis[0].z = 0.0f;
-    d->body.basis[1].z = 0.0f;
+    d->body.basis[1].x = 0.0f;
     d->body.basis[1].y = 1.0f;
-    d->body.basis[2].z = 1.0f;
-    d->body.origin.x = 0.0f;
+    d->body.basis[1].z = 0.0f;
     d->body.basis[2].x = 0.0f;
     d->body.basis[2].y = 0.0f;
+    d->body.basis[2].z = 1.0f;
+    d->body.origin.x = 0.0f;
     d->body.origin.y = 0.0f;
     d->body.origin.z = 0.0f;
     ValVec3 off;
