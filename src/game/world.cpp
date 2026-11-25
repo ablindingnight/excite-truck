@@ -3,6 +3,7 @@
 // per-view accessors (viewport, camera fields, player index), the wind, and the track walls from
 // the event's "wall_file". Names are guesses apart from the strings.
 #include "game/common.h"
+#include <stddef.h>
 #include "game/carmodel.h"
 #include "game/racer.h"
 #include "game/shapes.h"
@@ -598,40 +599,50 @@ WorldState* fn_801E7E34(void) { return lbl_8055EB04; }
 
 RaceProgress* fn_801E7E3C(void) { return &lbl_8055EB04->progress; }
 
-static inline void SaveView(ViewState* s, WView* v) {
+// Private traversal state: actual source byte position and saved destination.
+// No padding, spare field, cached world root or synthetic status.
+struct WorldViewCopyCursor {
+    ptrdiff_t sourceOffset;
+    ViewState* saved;
+};
+
+static inline void SaveNextWorldView(WorldViewCopyCursor& cursor) {
+    u8* current = (u8*)&lbl_8055EB04->views;
+    current = (current + offsetof(WView, cam)) + cursor.sourceOffset;
     if (fn_801E87A8()->flags & 2) {
-        v->cam.rot.right.x *= -1.0f;
-        v->cam.rot.right.y *= -1.0f;
-        v->cam.rot.right.z *= -1.0f;
+        ((WCam*)current)->rot.right.x *= -1.0f;
+        ((WCam*)current)->rot.right.y *= -1.0f;
+        ((WCam*)current)->rot.right.z *= -1.0f;
     }
-    s->cam = v->cam;
-    s->prev = s->flags;
-    s->flags = v->flags;
+    cursor.saved->cam = *(WCam*)current;
+    cursor.saved->prev = cursor.saved->flags;
+    cursor.saved->flags = *(u32*)(current + offsetof(WView, flags) - offsetof(WView, cam));
+    cursor.sourceOffset += sizeof(WView);
+    ++cursor.saved;
 }
 
-/* Helper name unproven */
-static inline WorldState* ReadWorldState(void) {
-    WorldState* w;
-    w = PhysicsGetStatePacked();
-    lbl_8055EB14 = MaxF(DMax(MinFRev(w->views[0].time - lbl_8055EB18, 0.5f), -0.5f), 0.0f);
-    lbl_8055EB18 = w->views[0].time;
-    return w;
-}
+
 
 void fn_801E7E48(void) {
     WorldState* w;
     s64 start;
     int i;
     start = fn_802E2C9C();
-    w = ReadWorldState();
+    w = PhysicsGetStatePacked();
+    lbl_8055EB14 = MaxF(DMax(MinFRev(w->views[0].time - lbl_8055EB18, 0.5f), -0.5f), 0.0f);
+    lbl_8055EB18 = w->views[0].time;
     lbl_8055EB04 = w;
     if (lbl_8055EB2C != w->numViews) {
         fn_802C2C60(w->numViews);
         lbl_8055EB2C = w->numViews;
     }
     lbl_8055EB20 = 1;
-    for (i = 0; i < lbl_8055EB2C; i++) {
-        SaveView(&lbl_80487D00[i], &lbl_8055EB04->views[i]);
+    i = 0;
+    WorldViewCopyCursor copy;
+    copy.sourceOffset = 0;
+    copy.saved = lbl_80487D00;
+    for (; i < lbl_8055EB2C; ++i) {
+        SaveNextWorldView(copy);
     }
     if (lbl_8055EB0C != lbl_8055EB04->f398) {
         lbl_8055EB0C = lbl_8055EB04->f398;
