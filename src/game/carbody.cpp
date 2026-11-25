@@ -2398,8 +2398,8 @@ void fn_80186DE8(void) {
             t.z = 0.0f;
         }
         F = *(const RVec3*)&m->force;
-        RVec3 T(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
         F.x += f.x;
+        RVec3 T(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
         F.y += f.y;
         F.z += f.z;
         SolSet(&m->force, F.x, F.y, F.z);
