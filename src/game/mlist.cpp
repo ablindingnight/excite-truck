@@ -410,8 +410,6 @@ static inline void Invert(PlainValMatrix* out, const PlainValMatrix* m) {
     out->origin.y *= -1.0f;
     out->origin.z *= -1.0f;
 }
-// Name unproven.
-static inline f32 ProjectionReciprocal(f32 value) { return 1.0f / value; }
 
 static inline u8 CullBox(const MLBox* e, const u8* vis, const MVec4& eye, f32 a, f32 b) {  // name unproven
     return vis[e->sphere] ? CheckBoxFrustumCull(e, eye, a, b) : 0;
@@ -439,8 +437,10 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     fn_802C98DC(&lbl_8055FCD4, &lbl_8055D0A0, &lbl_8055D0A4, &aspect);
     f32 zn = lbl_8055D0A0;
     f32 zf = lbl_8055D0A4;
-    F4 p1(ProjectionReciprocal(lbl_8055FCD4), ProjectionReciprocal(lbl_8055FCD4), (zf + zn) / (zf - zn));
-    F4 p2(0.0f, 0.0f, zf * (1.0f - ((zf + zn) / (zf - zn))));
+    f32 rt = 1.0f / lbl_8055FCD4;
+    f32 c = (zf + zn) / (zf - zn);
+    F4 p1(rt, rt, c);
+    F4 p2(0.0f, 0.0f, zf * (1.0f - c));
     F4 p3(0.0f, 0.0f, 1.0f / aspect);
     MVec4 eye;
     fn_802CCBC0((const MMtx33*)inv.basis, p1, p2, p3);
