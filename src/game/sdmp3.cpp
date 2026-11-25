@@ -643,9 +643,9 @@ void* fn_802EAB28(void* arg) {
                                 if (!lbl_805600A8[p]) {
                                     break;
                                 }
-                                f = (char*)lbl_805600A8 + p;
+                                f = (char*)(p + (int)lbl_805600A8);
                                 fsz = ((u8)f[4] << 7) + ((u8)f[3] << 14) + (u8)f[5] + 6;
-                                if (f[0] == 'T') {
+                                if (((char*)lbl_805600A8)[p] == 'T') {
                                     txt = f + 7;
                                     if (!strncmp(f, "TT2", 3)) {
                                         strncpy(lbl_80507640.title, txt, 0x1F);
@@ -668,7 +668,7 @@ void* fn_802EAB28(void* arg) {
                                 if (!lbl_805600A8[p]) {
                                     break;
                                 }
-                                char* f = (char*)lbl_805600A8 + p;
+                                char* f = (char*)(p + (int)lbl_805600A8);
                                 int len = ((u8)f[5] << 14) + ((u8)f[4] << 21) + ((u8)f[6] << 7) + (u8)f[7];
                                 int tl = len - 1;
                                 int fsz = len + 10;
