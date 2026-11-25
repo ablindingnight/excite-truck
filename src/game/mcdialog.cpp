@@ -228,17 +228,20 @@ void fn_8023EC94(void) {
 
 int fn_8023ECF8(int* result) { return lbl_8055F1C8 < fn_802E2C20(); }
 
+static inline MenuItem MI(const void* n, int t, const char* d, MenuArg a, int c) {  // name unproven
+    return MenuItem((const char*)n, t, d, a, c);
+}
 void fn_8023ED30(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
-        MenuItem("title", 3, "Settings are corrupt", 4, 0),
+        MI("title", 3, "Settings are corrupt", 4, 0),
         MenuItem("line1", "Unable to load settings.", CaptionContext(4)),
-        MenuItem("line2", 3, "Press A to continue.", 4, 0),
-        MenuItem("line3", 3, "", 4, 0),
-        MenuItem("line4", 3, "", 4, 0),
-        MenuItem("line5", 3, "", 4, 0),
-        MenuItem("rbutton", 3, "A - Continue", 4, 0),
-        MenuItem("lbutton", 3, "", 4, 0),
+        MI("line2", 3, "Press A to continue.", 4, 0),
+        MI("line3", 3, "", 4, 0),
+        MI("line4", 3, "", 4, 0),
+        MI("line5", 3, "", 4, 0),
+        MI("rbutton", 3, "A - Continue", 4, 0),
+        MI("lbutton", 3, "", 4, 0),
         MenuItem(lbl_804987E0),
     };
     lbl_8055F1C4 = 0;
