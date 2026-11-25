@@ -2317,14 +2317,16 @@ void fn_8019743C(u8* d, u8* out) {
         fn_80198488(d);
         if (U8(d, 0x74)) {
             // PROVISIONAL: names for real neighbor-center and previous-bound values.
-            f32 relativeCenter = (F32(d, 0x7C) + Mul(0.5f, F32(d, 0x84)));
+            f32 c0 = F32(d, 0x7C);
+            f32 relativeCenter = (c0 + Mul(0.5f, F32(d, 0x84)));
             f32 priorLimit = F32(d, 0xC4);
             f32 lo = (0.61f + lbl_8055A488) + (F32(d, 0x278) + relativeCenter);
             F32(d, 0xC4) = priorLimit > lo ? priorLimit : lo;
         }
         if (U8(d, 0x9C)) {
             // PROVISIONAL: names for real neighbor-center and previous-bound values.
-            f32 relativeCenter = (F32(d, 0xA4) + Mul(0.5f, F32(d, 0xAC)));
+            f32 c0 = F32(d, 0xA4);
+            f32 relativeCenter = (c0 + Mul(0.5f, F32(d, 0xAC)));
             f32 priorLimit = F32(d, 0xC8);
             f32 hi = (F32(d, 0x278) + relativeCenter) - (0.61f + lbl_8055A488);
             F32(d, 0xC8) = priorLimit < hi ? priorLimit : hi;
