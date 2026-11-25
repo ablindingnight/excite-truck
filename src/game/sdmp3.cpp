@@ -889,7 +889,6 @@ int fn_802EB7D4(void* dst, int n, int ch) {
     u16* out;
     int avail;
     u16* src;
-    int got;
     s32 nch = lbl_8055D26C;
     s32 wr = lbl_805600B8;
     volatile s32& readPosition = lbl_805600B0[ch];
@@ -927,6 +926,8 @@ int fn_802EB7D4(void* dst, int n, int ch) {
         int used = readPosition - wr;
         int toEnd = lbl_805600A4 - readPosition;
         int total = lbl_805600A4 - used;
+        int got;
+        u16* s;
         avail = want < toEnd ? want : toEnd;
         if (total < want && lbl_805600C0[ch]) {
             memset(dst, 0, n);
@@ -936,15 +937,15 @@ int fn_802EB7D4(void* dst, int n, int ch) {
         int cnt = avail / (nch * 2);
         got = avail / nch;
         lbl_805600C0[ch] = 0;
-        src = (u16*)(lbl_805600A0 + readPosition);
+        s = (u16*)(lbl_805600A0 + readPosition);
         out = (u16*)dst;
         if (nch == 2) {
             for (int i = 0; i < cnt; i++) {
-                out[i] = src[i * 2 + ch];
+                out[i] = s[i * 2 + ch];
             }
         } else {
             for (int i = 0; i < cnt; i++) {
-                out[i] = src[i];
+                out[i] = s[i];
             }
         }
         readPosition += avail;
