@@ -401,7 +401,8 @@ static inline GarageList* MakeColorList(CarPick& cars) {  // name unproven
     return colors;
 }
 
-static inline void InitColorSlots(u8* pp) {  // name unproven
+static inline void InitColorSlots(ColorPick* p) {  // name unproven
+    u8* pp = (u8*)p;
     SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
     u8* e = fn_8024EB9C(pp, 0);
     for (int i = 0; i < fn_8024EB94(pp); i++) {
@@ -474,7 +475,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 GarageList* colors = MakeColorList(cars);
                 s32* csel = lbl_80498C48.alt ? pd : pb;
                 ColorPick paint(colors, csel, lbl_80498C48.alt ? pc : pa, &panel, &ui, color);
-                InitColorSlots((u8*)&paint);
+                InitColorSlots(&paint);
                 MenuDesc desc = {"carchoose2b.lyt", 0, (int (*)(int*))fn_8024DADC, 0, 0};
                 MenuItem items[] = {
                     MenuItem(0, 5, (u8*)&paint, 0, 0),
