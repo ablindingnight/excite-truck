@@ -386,14 +386,20 @@ void fn_80295C70(LightSet* s, const VecMatrix* frame, const Vec* off, f32 w, f32
     s->count++;
 }
 
+// PROVISIONAL private default-colour value name/copy API; all three RGB fields are consumed.
+struct LightDefaultColor : ValVec3 {
+    LightDefaultColor(const ValVec3& v) : ValVec3(v) {}
+};
+
 void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int unused, Vec off, f32 rad) {
     const VecMatrix* frame;
-    const ValV3 def(color.x, color.y, color.z);
+    const LightDefaultColor def(color);
+    // Start with the real width default; the property path updates it below.
+    f32 w = rad;
     if (fn_80288070(model, name, &frame)) {
         ValueNode* n;
         f32 r;
         u32 c;
-        f32 w;
         f32 h;
         s32 type;
         if (CheckEffectKeyExists(model, name)) {
@@ -410,7 +416,6 @@ void fn_80295CC4(LightSet* s, s32 model, const char* name, ValVec3 color, int un
             type = n->GetInt("light_type", 0);
         } else {
             c = MakeColor(ColorByte2(255.0f * def.x), ColorByte(255.0f * def.y), ColorByte(255.0f * def.z));
-            w = rad;
             h = rad;
             type = 0;
         }
