@@ -631,8 +631,8 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     d->terms[2].k = 0.0f;
     for (int i = 0; i < 75; i++) {
         int k;
-        f32 m;
         f32 dh;
+        f32 m;
         int j;
         lbl_804424B0[i] = 1.0f;
         dh = fn_801DCF0C(x, z) - h0;
