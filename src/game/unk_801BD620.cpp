@@ -479,6 +479,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1900.z = V1BB0.z * V1BB0.z;
         V1900.w = V1BB0.w * V1BB0.w;
         V1900.x = (((V1BB0.x * V1BB0.x) + V1900.y) + V1900.z) + V1900.w;
+        f32 oneP = temp_f31 + ident.w;  // second instance of "one" for half of the diagonal (retail computes every diagonal term twice; the copies appear after colouring); name unproven
         temp_f4_7 = ident.w / SqrtF(V1900.x);
         V18F0.x = ValueOf(V1BB0.x * temp_f4_7);
         V1BB0.x = V18F0.x;
@@ -506,7 +507,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         Vec4f V1890;
         V1890.x = ValueOf((V1900.y * V1900.z) - (V1900.x * temp_f16_6));
         V1890.y = ValueOf((V1900.z * V1900.x) - (V1900.y * temp_f16_6));
-        tmp.x = ValueOf(V18A0.z - (ident.w * V18B0.y));
+        tmp.x = V18A0.z - (V18A0.z * V18B0.y);
         tmp.y = ValueOf(V18A0.z - (V18A0.z * V18B0.x));
         V1B70.y = ValueOf(tmp.y - (V18A0.z * V18B0.z));
         V1890.z = ValueOf((V1900.x * V1900.y) - (V1900.z * temp_f16_6));
@@ -520,9 +521,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1B70.z = V1900.w;
         V1880.y = V1880.z;
         V1B50.x = V1890.y;
-        tmp.z = tmp.y;
-        V1B50.z = tmp.z - (V18A0.z * V18B0.y);
-        V1B90.x = ValueOf(tmp.x - (V18A0.z * V18B0.z));
+        tmp.z = ValueOf(oneP - (oneP * V18B0.x));
+        V1B50.z = tmp.z - (oneP * V18B0.y);
+        V1B90.x = ValueOf(tmp.x - (oneP * V18B0.z));
         V1B70.x = V1880.y;
         Vec4f V1870(V1BF0);
         SetRow(*rowA5, V1870);
