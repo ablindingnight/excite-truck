@@ -206,30 +206,31 @@ int fn_80270D1C(int x) {
     }
 }
 
-s32 fn_80270D4C(u8* a, const u8* b) {
+// View name unproven; layout follows the actual 8-byte stack records passed to qsort.
+// A view into a camera track's angle window; `alt` selects the second window.
+struct AngleRef {
+    CamRegion* track;  // actual owner of the four heading-window fields
+    u8 alt;     // offset 0x4
+};
+
+int fn_80270D4C(const void* a, const void* b) {
     f32* pb;
     f32* pa;
-    if (U8(b, 0x4)) {
-        pb = (f32*)(PTR(b, 0x0) + 0xC);
+    if (((const AngleRef*)b)->alt) {
+        pb = &((const AngleRef*)b)->track->lo2;
     } else {
-        pb = (f32*)(PTR(b, 0x0) + 0x4);
+        pb = &((const AngleRef*)b)->track->lo1;
     }
-    if (U8(a, 0x4)) {
-        pa = (f32*)(PTR(a, 0x0) + 0xC);
+    if (((const AngleRef*)a)->alt) {
+        pa = &((const AngleRef*)a)->track->lo2;
     } else {
-        pa = (f32*)(PTR(a, 0x0) + 0x4);
+        pa = &((const AngleRef*)a)->track->lo1;
     }
     return (s32)(*pa - *pb);
 }
 
-// A view into a camera track's angle window; `alt` selects the second window.
-struct AngleRef {
-    u8* track;  // offset 0x0
-    u8 alt;     // offset 0x4
-};
-
-static inline f32* AngleLo(AngleRef* r) { return (f32*)(r->alt ? r->track + 0xC : r->track + 0x4); }
-static inline f32* AngleHi(AngleRef* r) { return (f32*)(r->alt ? r->track + 0x10 : r->track + 0x8); }
+static inline f32* AngleLo(AngleRef* r) { return r->alt ? &r->track->lo2 : &r->track->lo1; }
+static inline f32* AngleHi(AngleRef* r) { return r->alt ? &r->track->hi2 : &r->track->hi1; }
 
 
 // Meets two adjacent windows halfway: a's end and b's start become their midpoint (mod wrap).
@@ -259,36 +260,31 @@ void qsort(void* base, u32 n, u32 size, int (*cmp)(const void*, const void*));
 void fn_80270EC4(u8* car, u32 id) {
     AngleRef refs[64];
     fn_80270C04(car, id);
-    u8*& viewedCar = car;
     if (id & 0x100) {
         for (int g = 0; g < 3; g++) {
             int n = 0;
             int i;
-            CamRegion* r = lbl_8049F9D8;
             for (i = 0; i < lbl_8055F554; i++) {
-                if (g == fn_80270D1C(S32(r->cam, 0x5C))) {
-                    refs[n].track = (u8*)r;
+                if (g == fn_80270D1C(S32(lbl_8049F9D8[i].cam, 0x5C))) {
+                    u8 dual = lbl_8049F9D8[i].dual;
+                    refs[n].track = &lbl_8049F9D8[i];
                     refs[n].alt = 0;
-                    if (r->dual) {
+                    if (dual) {
                         n++;
                         refs[n].track = refs[n - 1].track;
                         refs[n].alt = 1;
                     }
                     n++;
                 }
-                r++;
             }
             if (n > 0) {
-                qsort(refs, n, sizeof(AngleRef), (int (*)(const void*, const void*))fn_80270D4C);
-                f32 wrap = *(f32*)(PTR(viewedCar, 0x2C) + g * 4 + 8);
-                int last;
-                int i;
+                qsort(refs, n, sizeof(AngleRef), fn_80270D4C);
+                f32 wrap = *(f32*)(PTR(car, 0x2C) + g * 4 + 8);
                 AngleRef* ref = refs;
-                last = n - 1;
-                for (i = 0; i < last; ref++, i++) {
+                for (i = 0; i < n - 1; ref++, i++) {
                     fn_80270DB0(ref, &refs[i + 1], wrap);
                 }
-                fn_80270DB0(&refs[last], &refs[0], wrap);
+                fn_80270DB0(&refs[n - 1], &refs[0], wrap);
             }
         }
         fn_80270B00("Region longitudes: (%d)", lbl_8055F554);
