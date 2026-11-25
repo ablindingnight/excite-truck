@@ -622,6 +622,9 @@ void BlitAlphaSourceOver(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas
 }
 
 // ARGB8888 source over a 555/565 destination.
+// PROVISIONAL actual inverse-opacity operation; private API/name unproven.
+static inline u32 RemainingOpacity(u32 alpha) { return 0xFF - alpha; }
+
 void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, int dx, int dy) {
     int w = x1 - x0;
     int h = y1 - y0;
@@ -632,12 +635,13 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
     u16* d = GetPixelAddress(dst, dx, dy);
     int sskip = (src->stride - w * 4) / 4;
     int dskip = (dst->stride - w * 2) / 2;
+    u32 p;
+    u32 a;
     if (dst->fmt == 3) {
         do {
             int n = w;
             do {
-                u32 a;
-                u32 p = *s++;
+                p = *s++;
                 a = p >> 24;
                 u32 ia = 0xFF - a;
                 u8 b = (ia * ((*d & 0x1F) << 3) + a * (p & 0xFF)) / 0xFF;
@@ -649,23 +653,25 @@ void fn_802C4388(gxCanvas* src, int x0, int y0, int x1, int y1, gxCanvas* dst, i
             d += dskip;
         } while (--h > 0);
     } else if (dst->fmt == 4) {
+        int sourceRowBytes = sskip * 4;
+        int destinationRowBytes = dskip * 2;
         do {
             u32 ia;
-            struct { int remaining; } row = {w};
+            int remaining = w;
             do {
-                u32 p = *s++;
+                p = *s++;
                 u8 qb = ((*d & 0x1F) << 3) + 1;
                 u8 qr = ((*d >> 8) & 0xF8) + 1;
                 u8 qg = ((*d >> 3) & 0xFC) + 1;
-                u32 a = p >> 24;
-                ia = 0xFF - a;
+                a = p >> 24;
+                ia = RemainingOpacity(a);
                 u32 b = ((ia * qb + a * (p & 0xFF)) * 0x10101) >> 24;
                 u32 r = ((ia * qr + a * ((p >> 16) & 0xFF)) * 0x10101) >> 24;
                 u32 g = ((ia * qg + a * ((p >> 8) & 0xFF)) * 0x10101) >> 24;
                 *d++ = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
-            } while (--row.remaining > 0);
-            s += sskip;
-            d += dskip;
+            } while (--remaining > 0);
+            s = (u32*)((u8*)s + sourceRowBytes);
+            d = (u16*)((u8*)d + destinationRowBytes);
         } while (--h > 0);
     } else {
         fn_802E317C("unsupported alpha blit format");
