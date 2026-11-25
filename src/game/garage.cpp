@@ -386,6 +386,7 @@ public:
 // The garage: pick a car (unless the list has only one), then its paint; "3" opens the car's tuning screen.
 // Returns 0 when backed out.
 int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar) {
+    const int& b = bar;  // form unproven: retail re-reads bar per use instead of hoisting bar*4
     int cur = IdentGetCurrentSlot();
     if (lbl_80498C48.unk0 != cur) {
         lbl_80498C48.unk0 = cur;
@@ -424,7 +425,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#stat_art_5", 2, &panel.stats.stats[4].value, 0, 0),
                     MenuItem("#unlock_pts", lbl_80498C90, (int)NoCaption()),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
-                    MenuItem("#car_bar_color", bars[bar], (int)NoCaption()),
+                    MenuItem("#car_bar_color", bars[b], (int)NoCaption()),
                     MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
                     MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
                     MenuItem(0, 5, (u8*)&cars, 0, 0),
@@ -464,7 +465,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#color_name", (char*)pp + 0xE0, (int)NoCaption()),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
-                    MenuItem("#car_bar_color", bars[bar], (int)NoCaption()),
+                    MenuItem("#car_bar_color", bars[b], (int)NoCaption()),
                     MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
                     MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
                     MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
