@@ -91,6 +91,9 @@ void InitializeSaveMenu(CardTask* task) {
     fn_8022D2BC(strings.list, 1);
 }
 
+static inline MenuItem MI(const void* n, int t, const char* d, MenuArg a, int c) {  // name unproven
+    return MenuItem((const char*)n, t, d, a, c);
+}
 void fn_8023E7A8(int status) {
     char title[32] = {0};
     char line1[128] = {0};
@@ -190,7 +193,7 @@ void fn_8023E7A8(int status) {
         MenuItem("circle1", 2, &circle1, 0, 0),
         MenuItem("circle2", 2, &circle2, 0, 0),
         MenuItem("circle3", 2, &circle3, 0, 0),
-        MenuItem("title", 3, title, 32, 0),
+        MI("title", 3, title, 32, 0),
         MenuItem("line1", 3, line1, 128, 0),
         MenuItem("line2", 3, line2, 128, 0),
         MenuItem("line3", 3, line3, 128, 0),
@@ -228,9 +231,6 @@ void fn_8023EC94(void) {
 
 int fn_8023ECF8(int* result) { return lbl_8055F1C8 < fn_802E2C20(); }
 
-static inline MenuItem MI(const void* n, int t, const char* d, MenuArg a, int c) {  // name unproven
-    return MenuItem((const char*)n, t, d, a, c);
-}
 void fn_8023ED30(void) {
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
