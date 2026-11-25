@@ -396,15 +396,9 @@ static inline void Invert(PlainValMatrix* out, const PlainValMatrix* m) {
     for (int i = 0; i < 3; i++) {
         *(MRow3*)&out->basis[i] = *(const MRow3*)&m->basis[i];
     }
-    f32 t = out->basis[0].y;
-    out->basis[0].y = out->basis[1].x;
-    out->basis[1].x = t;
-    t = out->basis[0].z;
-    out->basis[0].z = out->basis[2].x;
-    out->basis[2].x = t;
-    t = out->basis[1].z;
-    out->basis[1].z = out->basis[2].y;
-    out->basis[2].y = t;
+    SwapItems(out->basis[0].y, out->basis[1].x);
+    SwapItems(out->basis[0].z, out->basis[2].x);
+    SwapItems(out->basis[1].z, out->basis[2].y);
     MulVecT(&out->origin, &m->origin, (const MMtx33*)m->basis);
     out->origin.x *= -1.0f;
     out->origin.y *= -1.0f;
