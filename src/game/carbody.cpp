@@ -2801,8 +2801,9 @@ void fn_80186DE8(void) {
             a.w = a.w * off;
         }
         x->pts[6] = a.Sol();
+        f32 gw = ground[0];
         rpm.x = rpm.x > 52.35988f ? rpm.x : 52.35988f;
-        rpm.w = ground[0];
+        rpm.w = gw;
         c->pts[4] = rpm.Sol();
         c->v190 = CbSolVec4X(steerK, rpmT < 9500.0f ? out : 0.0f, brake, water[0]);
         bk2 = ((CarBody*)car)->f25E4;
