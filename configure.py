@@ -1249,7 +1249,7 @@ config.libs.append(
             Object(NonMatching, "game/partman.cpp"),
             Object(Matching, "game/sunflare.cpp"),
             Object(Matching, "game/chunks.cpp"),
-            Object(NonMatching, "game/carlights.cpp"),
+            Object(Matching, "game/carlights.cpp"),
             Object(Matching, "game/stub12.cpp"),
             Object(NonMatching, "game/flipbook.cpp"),
             Object(Matching, "game/roadopac.cpp", extra_cflags=["-opt nopropagation"]),
