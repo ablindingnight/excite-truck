@@ -4294,8 +4294,9 @@ Meter* fn_801572A4(CarHud* hud, int car, f32* hispeed);
 
 static inline void InitCarHud(CarHud* h, int car, int acar) {
     int i;
+    const char* big;
     const char* bonus = "fcount.sfx";
-    const char* big = "cheerhit.sfx";
+    big = "cheerhit.sfx";
     for (i = 0; i < 16; i++) {
         StuntEvent* e = &h->pool[i];
         e->hud = h;
@@ -4347,7 +4348,6 @@ static inline StuntList* CreateCarStunts() {
 }
 
 inline void BetaMaster::InitCar(int i) {
-    const char* star = "betatex2.tex";
         bool acar = (u32)lbl_804348E8[i]->type == 'ACAR';
         cars[i].hud = new ("stuntdash") CarHud(i, acar);
         cars[i].stunts = CreateCarStunts();
@@ -4358,6 +4358,7 @@ inline void BetaMaster::InitCar(int i) {
         cars[i].tex[1] = fn_802CAC28("zonetex4.tex", 0);
         {
             const char* trackName = GetTrack(GetEvent(fn_801769CC()->event)->track)->name;
+            const char* star = "betatex2.tex";
             const char* set = 0;
             struct IconLookupBuffers {
                 char key[0x40];
