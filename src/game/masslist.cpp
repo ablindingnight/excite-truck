@@ -220,8 +220,8 @@ void fn_801BDA74(int car, const CarSetup* s) {
     }
     f32 lock = sin(s->wheelLock);
     x->row[18] = MVec4(lock, lock, 0.0f, 0.0f);
-    f32 a = DEG(-0.1);
     f32 b = DEG(0.1);
+    f32 a = DEG(-0.1);
     x->row[19] = MVec4(a, -a, b, -b);
     x->row[20] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     x->row[21] = MVec4(0.0f, 0.0f, 0.5f, 0.5f);
