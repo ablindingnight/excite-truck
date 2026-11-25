@@ -254,12 +254,13 @@ void fn_8023ED30(void) {
 }
 
 int fn_8023EEF8(void) {
+    const void* line2Name = "line2";  // name unproven
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         MenuItem(lbl_8055B860, 6, NULL, -1, 27),
         MenuItem("title", "Out of Room", CaptionContext(4)),
         MenuItem("line1", "Your Xbox does not have enough", CaptionContext(4)),
-        MenuItem("line2", 3, "free blocks to store settings.", 4, 0),
+        MenuItem((const char*)line2Name, 3, "free blocks to store settings.", 4, 0),
         MenuItem("line3", 3, "Press A to continue without saving", 4, 0),
         MenuItem("line4", 3, "or B to free more blocks.", 4, 0),
         MenuItem("line5", "", CaptionContext(4)),
@@ -275,12 +276,14 @@ int fn_8023EEF8(void) {
 }
 
 int fn_8023F0E8(void) {
+    const void* line1Name = "line1";  // name unproven
+    const void* line2Name = "line2";  // name unproven
     MenuItem items[] = {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         MenuItem(lbl_8055B860, 6, (void*)fn_8023F9E8, -1, 27),
         MenuItem(CaptionContext(4), "title", "Format"),
-        MenuItem("line1", 3, "Format your memory card  ?", 4, 0),
-        MenuItem(CaptionContext(4), "line2", ""),
+        MenuItem((const char*)line1Name, 3, "Format your memory card  ?", 4, 0),
+        MenuItem(CaptionContext(4), (const char*)line2Name, ""),
         MI("line3", 3, "This will erase any saved games", 4, 0),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
