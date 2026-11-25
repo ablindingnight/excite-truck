@@ -149,7 +149,8 @@ static inline int Sample(int x, int z, f32* out, s32* mat, u16* unused) {
     if (t->layer >= 0) {
         GroundHeader* gg = lbl_8055E990;
         for (GLayer* l = &gg->layers[t->layer]; l; l = l->next >= 0 ? &gg->layers[l->next] : 0) {
-            h += lbl_804424B0[l->weight] * (l->base + l->scale * (&l->h[0][lz])[lx * 32]);
+            f32 v = l->base + l->scale * (&l->h[0][lz])[lx * 32];
+            h += lbl_804424B0[l->weight] * v;
         }
     }
     u8* r = g->runs + t->rows[lz];
