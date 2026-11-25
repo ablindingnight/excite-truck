@@ -663,7 +663,8 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     }
     int any = 0;
     for (int i = 0; i < 3; i++) {
-        if (!((float)__fabs(d->terms[i].k) <= __float_epsilon[0])) {
+        f32 a = DAbs(d->terms[i].k);
+        if (!(a <= __float_epsilon[0])) {
             any = 1;
         }
     }
