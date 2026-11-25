@@ -876,8 +876,9 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
     p0 = &b->pts[i0];
     p2 = &b->pts[i2];
     p3 = &b->pts[(a + 3) % 4];
+    f32 hr = Mul(0.5f, rest);
     for (i = 0; i <= nx; i++) {
-        f32 t = (Mul(0.5f, rest) + (f32)i * params[0]) / w;
+        f32 t = (hr + (f32)i * params[0]) / w;
         f32 l;
         int ny;
         int j;
