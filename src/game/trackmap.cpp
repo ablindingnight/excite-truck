@@ -468,7 +468,7 @@ static inline void DrawPlacedMarkers(Basis* basis, f32 x, f32 y, f32 w, f32 h, f
 }
 
 // Name unproven: project and draw the actual final start/finish marker.
-static inline void DrawFinalMarker(SFMarker* m, Basis* basis, const Vec2& tp, f32 centerX, f32 centerY, f32 w, f32 radius) {
+static inline void DrawFinalMarker(SFMarker* m, Basis* basis, const Vec2& tp, f32 centerX, f32 centerY, f32 w, f32 radius, f32& mx) {
     Vec2 delta;
     Vec2 c;
     Vec3 rel;
@@ -476,7 +476,8 @@ static inline void DrawFinalMarker(SFMarker* m, Basis* basis, const Vec2& tp, f3
     c.y = centerY;
     f32 rx;
     f32 ry = m->pos.y - basis->pos.y;
-    rx = m->pos.x - basis->pos.x;
+    mx = m->pos.x;
+    rx = mx - basis->pos.x;
     f32 z = 0.0f;
     SetXYZ(&rel, rx, ry, z);
     rel.z -= basis->pos.z;
@@ -683,16 +684,18 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     {
         RaceCarRec* tr = fn_8017960C(fn_801E866C(map->player));
         m = lbl_8055D5B4;
+        f32 centerY;
         f32 centerX = x + w / 2.0f;
         f32 px;
         f32 pz;
-        f32 centerY = y - h / 2.0f;
+        f32 mx;  // final marker x read by DrawFinalMarker by reference (ownership unproven)
+        centerY = y - h / 2.0f;
         Vec3 p = *(const Vec3*)&tr->mtx.pos;  // a plain Vec3 copy (RVec3 has a constructor)
         px = p.x;
         pz = p.z;
         tp.x = px;
         tp.y = pz;
-        DrawFinalMarker(m, &basis, tp, centerX, centerY, w, radius);
+        DrawFinalMarker(m, &basis, tp, centerX, centerY, w, radius, mx);
     }
 }
 
