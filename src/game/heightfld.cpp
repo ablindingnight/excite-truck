@@ -605,6 +605,8 @@ f32 fn_801DCF48(ValVec3* normal, f32 x, f32 z) {
 }
 
 
+static inline f64 DAbs(f64 x) { return __fabs(x); }  // name unproven
+
 void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
     Deform* d = &lbl_80446F18[lbl_8055E9A8[0]++];
     d->out = out;
@@ -639,7 +641,7 @@ void fn_801DD3BC(f32* out, int fixed, f32 x, f32 z) {
                 k = -1;
                 m = 0.0f;
                 for (j = 0; j < 3; j++) {
-                    if (k < 0 || (float)__fabs(d->terms[j].k) < (float)__fabs(m)) {
+                    if (k < 0 || (f32)DAbs(d->terms[j].k) < (f32)DAbs(m)) {
                         k = j;
                         m = d->terms[j].k;
                     }
