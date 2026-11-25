@@ -264,7 +264,7 @@ volatile s32 lbl_8055D25C = -1;  // decoded sample rate
 volatile s32 lbl_8055D260 = -1;  // rate the voices play at
 volatile s32 lbl_8055D264 = -1;  // rate wanted
 volatile s32 lbl_8055D268 = 2;   // decoded channels
-s32 lbl_8055D26C = 2;   // channels in the PCM ring
+volatile s32 lbl_8055D26C = 2;   // channels in the PCM ring
 f32 lbl_8055D270 = 1.0f;
 
 const char* lbl_8055D274 = "EXCITE TRUCK";
