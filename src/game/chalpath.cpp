@@ -437,35 +437,45 @@ GameSound* fn_80207848(const char* name, int flags);
 }
 
 // Shows the event nodes of the selected difficulty (or all dimmed while picking a difficulty).
-static inline void RedrawNodes(void) {
-    for (int i = 0; i < SCREEN->numEvents; i++) {
-        if (!lbl_8055F3EB) {
-            SCREEN->events[i]->Dim();
-            SCREEN->events[i]->Refresh();
-        } else if (i == SCREEN->event) {
-            SCREEN->events[i]->Select();
-        } else if (i == SCREEN->level * 2 || i == SCREEN->level * 2 + 1) {
-            SCREEN->events[i]->Open();
-            SCREEN->events[i]->Refresh();
-        } else {
-            SCREEN->events[i]->Refresh();
-        }
+// Name unproven: one event node of RedrawNodes.
+static inline void RedrawEventNode(int i) {
+    if (!lbl_8055F3EB) {
+        SCREEN->events[i]->Dim();
+        SCREEN->events[i]->Refresh();
+    } else if (i == SCREEN->event) {
+        SCREEN->events[i]->Select();
+    } else if (i == SCREEN->level * 2 || i == SCREEN->level * 2 + 1) {
+        SCREEN->events[i]->Open();
+        SCREEN->events[i]->Refresh();
+    } else {
+        SCREEN->events[i]->Refresh();
     }
-    for (int i = 0; i < SCREEN->numLevels; i++) {
-        if (!lbl_8055F3EB) {
-            if (i == SCREEN->level) {
-                SCREEN->levels[i]->Select();
-            } else {
-                SCREEN->levels[i]->Open();
-                SCREEN->levels[i]->Refresh();
-            }
-        } else if (i == SCREEN->level) {
+}
+
+// Name unproven: one difficulty node of RedrawNodes.
+static inline void RedrawLevelNode(int i) {
+    if (!lbl_8055F3EB) {
+        if (i == SCREEN->level) {
             SCREEN->levels[i]->Select();
-            SCREEN->levels[SCREEN->level]->Focus();
         } else {
-            SCREEN->levels[i]->Dim();
+            SCREEN->levels[i]->Open();
             SCREEN->levels[i]->Refresh();
         }
+    } else if (i == SCREEN->level) {
+        SCREEN->levels[i]->Select();
+        SCREEN->levels[SCREEN->level]->Focus();
+    } else {
+        SCREEN->levels[i]->Dim();
+        SCREEN->levels[i]->Refresh();
+    }
+}
+
+static inline void RedrawNodes(void) {
+    for (int i = 0; i < SCREEN->numEvents; i++) {
+        RedrawEventNode(i);
+    }
+    for (int i = 0; i < SCREEN->numLevels; i++) {
+        RedrawLevelNode(i);
     }
 }
 
@@ -579,7 +589,12 @@ void fn_8026003C(void) {
         run.out = out;
         fn_8023BF4C(&run);
         RebuildMapAfterRace(arg);
-        RedrawNodes();
+        for (int i = 0; i < SCREEN->numEvents; i++) {
+            RedrawEventNode(i);
+        }
+        for (int i = 0; i < SCREEN->numLevels; i++) {
+            RedrawLevelNode(i);
+        }
         bool nowComplete = SCREEN_BUF->AllComplete();
         if (fn_802E8D84()) {
             fn_802E7128();
