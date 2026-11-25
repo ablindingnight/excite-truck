@@ -417,12 +417,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1970.z = V1BD0.z + V1980.z;
         V1980.y = ValueOf(V1990.y * V1C50.w);
         V1970.y = V1BD0.y + V1980.y;
-        V1BD0.x = V1970.x;
-        V1BD0.z = V1970.z;
         Vec4f V1960;
         V1960.x = V1BF0.x * V1C50.w;
         V1960.y = V1BF0.y * V1C50.w;
-        V1BD0.y = V1970.y;
         V1960.z = V1BF0.z * V1C50.w;
         Vec4f V1950;
         V1950.x = V1C10.x + V1960.x;
@@ -431,6 +428,9 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
         V1950.z = V1C10.z + V1960.z;
         V1C10.y = V1950.y;
         V1C10.z = V1950.z;
+        V1BD0.x = V1970.x;
+        V1BD0.z = V1970.z;
+        V1BD0.y = V1970.y;
         Vec4f V1940(temp_f31 + lbl_805627D0);
         Vec4f V1930;
         V1930.x = V1BD0.x * V1940.x;
