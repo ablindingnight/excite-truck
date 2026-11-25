@@ -696,8 +696,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         f32 mx;  // final marker x read by DrawFinalMarker by reference (ownership unproven)
         centerY = y - h / 2.0f;
         Vec3 p = *(const Vec3*)&tr->mtx.pos;  // a plain Vec3 copy (RVec3 has a constructor)
-        px = p.x;
         pz = p.z;
+        px = p.x;
         tp.x = px;
         tp.y = pz;
         DrawFinalMarker(m, &basis, tp, centerX, centerY, w, radius, mx);
