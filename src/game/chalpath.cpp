@@ -307,7 +307,7 @@ extern "C" void InitializeChallengeMode(PathScreenBuf* s);
 
 // Node lists with inline storage for 6 events / 3 difficulties.
 struct NodeVec6 {
-    inline NodeVec6(void);
+    inline void Init(void);  // name unproven (weak, emitted after use)
     void Push(EventNode* p) {
         EventNode** d = data;
         int k = count;
@@ -321,7 +321,7 @@ struct NodeVec6 {
 };
 
 struct NodeVec3 {
-    inline NodeVec3(void);
+    inline void Init(void);  // name unproven (weak, emitted after use)
     void Push(LevelNode* p) {
         LevelNode** d = data;
         int k = count;
@@ -337,11 +337,14 @@ struct NodeVec3 {
 // The whole screen as it sits on MenuDoChallengeMode's stack (PathScreen is its head).
 struct PathScreenBuf {
     PathScreenBuf(int a) {
-        lbl_8055F420 = (u8*)this;
-        arg = a;
-        level = 0;
-        event = 0;
-        sound = 0;
+        PathScreenBuf* b = (PathScreenBuf*)this;  // form unproven: the cast copy keeps &scr in a register across the Init calls like retail
+        events.Init();
+        levels.Init();
+        lbl_8055F420 = (u8*)b;
+        b->arg = a;
+        b->level = 0;
+        b->event = 0;
+        b->sound = 0;
     }
     ~PathScreenBuf(void) {
         lbl_8055F420 = 0;
@@ -947,13 +950,13 @@ void InitializeChallengeMode(PathScreenBuf* s) {
 
 }  // extern "C"
 
-inline NodeVec3::NodeVec3(void) {
+inline void NodeVec3::Init(void) {
     data = buf;
     cap = 3;
     count = 0;
 }
 
-inline NodeVec6::NodeVec6(void) {
+inline void NodeVec6::Init(void) {
     data = buf;
     cap = 6;
     count = 0;
