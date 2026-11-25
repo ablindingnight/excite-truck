@@ -385,8 +385,16 @@ public:
 
 // The garage: pick a car (unless the list has only one), then its paint; "3" opens the car's tuning screen.
 // Returns 0 when backed out.
+struct BarArts { const char* art[3]; };
+inline const char* BarArt(int bar) {  // name unproven
+    static const BarArts arts = {{"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"}};
+    BarArts a = *(BarArts*)&arts;
+    return a.art[bar];
+}
+
+#pragma push
+#pragma opt_loop_invariants off  /* Pragma unproven: retail keeps bar spilled and indexes per use */
 int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar) {
-    const int& b = bar;  // form unproven: retail re-reads bar per use instead of hoisting bar*4
     int cur = IdentGetCurrentSlot();
     if (lbl_80498C48.unk0 != cur) {
         lbl_80498C48.unk0 = cur;
@@ -405,9 +413,12 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
         panel.Clear();
         s32* sel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
         CarPick cars(screen, sel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui);
+        s32* pd = &lbl_80498C48.pairs[slot].d;
+        s32* pb = &lbl_80498C48.pairs[slot].b;
+        s32* pc = &lbl_80498C48.pairs[slot].c;
+        s32* pa = &lbl_80498C48.pairs[slot].a;
         for (;;) {
             if (!lbl_80498C48.alt) {
-                const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
                 MenuItem items[] = {
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
                     MenuItem("#car_model", 3, cars.Chassis(), 0, 0),
@@ -425,7 +436,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#stat_art_5", 2, &panel.stats.stats[4].value, 0, 0),
                     MenuItem("#unlock_pts", lbl_80498C90, (int)NoCaption()),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
-                    MenuItem("#car_bar_color", bars[b], (int)NoCaption()),
+                    MenuItem("#car_bar_color", BarArt(bar), (int)NoCaption()),
                     MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
                     MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
                     MenuItem(0, 5, (u8*)&cars, 0, 0),
@@ -446,8 +457,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 for (int i = 0; i < v->num_colors; i++) {
                     colors->Add(cars.Chassis(), 1, 0);
                 }
-                s32* csel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
-                ColorPick paint(colors, csel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
+                s32* csel = lbl_80498C48.alt ? pd : pb;
+                ColorPick paint(colors, csel, lbl_80498C48.alt ? pc : pa, &panel, &ui, color);
                 u8* pp = (u8*)&paint;
                 SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
                 u8* e = fn_8024EB9C(pp, 0);
@@ -456,7 +467,6 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
                 }
                 ShowSelectionColor(pp);
-                const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
                 MenuItem items[] = {
                     MenuItem(0, 5, pp, 0, 0),
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
@@ -465,7 +475,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#color_name", (char*)pp + 0xE0, (int)NoCaption()),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
-                    MenuItem("#car_bar_color", bars[b], (int)NoCaption()),
+                    MenuItem("#car_bar_color", BarArt(bar), (int)NoCaption()),
                     MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
                     MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
                     MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
@@ -493,6 +503,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
     *vehicle = *pv;
     return r != -1;
 }
+#pragma pop
 
 // Tints the car with the selected slot's animation, or its saved paint.
 static inline void ShowCarColor(u8* p) {
