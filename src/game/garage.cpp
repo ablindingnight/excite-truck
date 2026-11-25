@@ -396,22 +396,18 @@ static inline GarageList* MakeColorList(CarPick& cars) {  // name unproven
     return colors;
 }
 
-static inline void InitColorSlots(ColorPick* p) {  // name unproven
-    u8* pp = (u8*)p;
-    SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
-    u8* e = fn_8024EB9C(pp, 0);
-    for (int i = 0; i < fn_8024EB94(pp); i++) {
-        e = fn_8024EB9C(pp, i);
-        S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
-    }
-    ShowSelectionColor(pp);
-}
 inline ColorPick::ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out)
     : CarSlotList(list, color, car, panel, ui) {
     ui2 = ui;
     colors = (VDel*)list;
     this->out = out;
-    InitColorSlots(this);
+    SetCarSlotSelection((u8*)this, fn_8024EBE4((u8*)this), 1);
+    u8* e = fn_8024EB9C((u8*)this, 0);
+    for (int i = 0; i < fn_8024EB94((u8*)this); i++) {
+        e = fn_8024EB9C((u8*)this, i);
+        S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
+    }
+    ShowSelectionColor((u8*)this);
 }
 
 
