@@ -442,13 +442,14 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     f32 zf = lbl_8055D0A4;
     F4 p1;
     p1.lo.a = lbl_8055FCD4;
+    f32 ar = aspect;  // a named copy: its number sits between zf and s (colwhy FPR pair search 2026-11-24)
     f32 s = zf + zn;
     f32 c = s / (zf - zn);
     p1.lo.a = 1.0f / p1.lo.a;
     p1.lo.b = p1.lo.a;
     p1.hi.a = c;
     F4 p2(0.0f, 0.0f, zf * (1.0f - c));
-    F4 p3(0.0f, 0.0f, 1.0f / aspect);
+    F4 p3(0.0f, 0.0f, 1.0f / ar);
     MVec4 eye;
     fn_802CCBC0((const MMtx33*)inv.basis, p1, p2, p3);
     u8* vis = ctx->vis;
