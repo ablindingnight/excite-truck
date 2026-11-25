@@ -645,7 +645,7 @@ void* fn_802EAB28(void* arg) {
                                 }
                                 f = (char*)(p + (int)lbl_805600A8);
                                 fsz = ((u8)f[4] << 7) + ((u8)f[3] << 14) + (u8)f[5] + 6;
-                                if (((char*)lbl_805600A8)[p] == 'T') {
+                                if (*(char*)(p + (u32)lbl_805600A8) == 'T') {
                                     txt = f + 7;
                                     if (!strncmp(f, "TT2", 3)) {
                                         strncpy(lbl_80507640.title, txt, 0x1F);
