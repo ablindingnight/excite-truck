@@ -208,12 +208,11 @@ void fn_801BDA74(int car, const CarSetup* s) {
     CrossSet* x = &lbl_8055E79C[car];
     MassSet* m = &lbl_8055E794[car];
     int i;
-    __typeof__(x->row[5]) x_row_5 = MVec4(0.189215347f, 0.189215347f, 0.189215347f, 0.189215347f);
     lbl_8055E7A0[car] = 0;
     m->mass = mass;
     m->invMass = inv;
     x->row[4] = MVec4(0.0440043993f, 0.0440043993f, 0.0440043993f, 0.0440043993f);
-    x->row[5] = x_row_5;
+    x->row[5] = MVec4(0.189215347f, 0.189215347f, 0.189215347f, 0.189215347f);
     for (i = 0; i < 4; i++) {
         x->row[i] = MVec4(30.0f * 0.0254f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
                           54.0f * 0.0254f * ((i & 2) ? -1.0f : 1.0f));
@@ -238,9 +237,8 @@ void fn_801BDA74(int car, const CarSetup* s) {
         f32 b1 = 161887.922f * g * sl;
         f32 b0 = 104856.312f * g * sl;
         f32 kb = (b1 - b0) / (x1 - x0);
-        MVec4 tyre((1.46f * g) - ka * x0, ka, b0 - kb * x0, kb);
-        x->row[10] = tyre;
-        x->row[11] = tyre;
+        x->row[10] = MVec4((1.46f * g) - ka * x0, ka, b0 - kb * x0, kb);
+        x->row[11] = x->row[10];
     }
     for (i = 0; i < 4; i++) {
         const WheelSetup* w = &s->wheels[i];
