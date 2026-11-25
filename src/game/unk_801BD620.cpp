@@ -1287,7 +1287,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             Vec4f V0B80((V16F0.x + V0B90.x));
             Vec4f V0B70((MaxF(V0BA0.x, V0B80.x)));
             Vec4f V0B60;
-            V0B60.y = (temp_f31 + V0B70.x);
+            V0B60.y = (ident.y + V0B70.x);  // zero read straight from ident.y: this late instance is hoisted first and becomes THE zero register (f31 like retail); form unproven
             Vec4f V0B50((temp_f31 + ident.w));
             Vec4f V0B40((temp_f31 + lbl_805627FC));
             Vec4f V0B30;
