@@ -918,8 +918,8 @@ int fn_802EB7D4(void* dst, int n, int ch) {
                 out[i] = src[i];
             }
         }
-        readPosition += avail;
-        if (readPosition >= lbl_805600A4) {
+        lbl_805600B0[ch] += avail;
+        if (lbl_805600B0[ch] >= lbl_805600A4) {
             readPosition = 0;
         }
     } else {
