@@ -492,11 +492,9 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
     PlainValMatrix m = *(const PlainValMatrix*)car;
     if (p->sparkAmt > 0.001f) {
         fn_802C8BD0(lbl_8055CC64);
-        const f32 rightX = m.basis[0].x;
         for (int k = 0; k < 2; k++) {
             fn_802C8DBC(10);
             for (int j = 0; j < 5; j++) {
-                f32 bz, bx, by;
                 f32 fj = j;
                 f32 ang = 1.5707964f + 1.75f * ((fj - 1.0f) / 5.0f) + (k ? 3.1415927f : 0.0f);
                 if (p->sparkFlip) {
@@ -506,19 +504,16 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                 f32 sz = p->sizeZ * (f32)sin(ang) / 2.0f;
                 Vec v[2];
                 for (int i = 0; i < 2; i++) {
-                    bx = m.origin.x + rightX * cx;
-                    by = m.origin.y + m.basis[0].y * cx;
-                    bz = m.origin.z + m.basis[0].z * cx;
-                    bx = bx + m.basis[2].x * sz;
-                    by = by + m.basis[2].y * sz;
-                    bz = bz + m.basis[2].z * sz;
-                    v[i].x = bx;
-                    v[i].y = by;
-                    v[i].z = bz;
+                    v[i].x = m.origin.x + m.basis[0].x * cx;
+                    v[i].y = m.origin.y + m.basis[0].y * cx;
+                    v[i].z = m.origin.z + m.basis[0].z * cx;
+                    v[i].x = v[i].x + m.basis[2].x * sz;
+                    v[i].y = v[i].y + m.basis[2].y * sz;
+                    v[i].z = v[i].z + m.basis[2].z * sz;
                     f32 h = i ? p->sizeY / 2.0f - 0.4f : 0.4f + p->sizeY / 2.0f;
                     TAddS(&v[i], &v[i], (const Vec*)&m.basis[1], h);
                     u32 color = Round(255.0f * p->sparkAmt) << 24 | 0xFFFFFF;
-                    fn_802C8E00(v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj * 0.25f, color, 1);
+                    fn_802C8E00(v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj / 4.0f, color, 1);
                 }
             }
             fn_802C8E48();
