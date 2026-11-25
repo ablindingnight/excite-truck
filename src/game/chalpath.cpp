@@ -616,16 +616,36 @@ int DecrementDifficultyEvent(void);
 u8* fn_80260DC4(u8* p, int del);
 void CopyWords5Data(Words5* d, const Words5* s);
 
+// Name unproven: switches the loaded eves to a mode for a scope and restores the previous mode after.
+class EveModeScope {
+public:
+    EveModeScope(int m) {
+        mode = GetEveMode();
+        if (mode != m) {
+            if (mode != 0x134) {
+                UnloadEves();
+            }
+            LoadModeEves(m);
+        }
+    }
+    ~EveModeScope(void) {
+        int now = GetEveMode();
+        if (mode != now) {
+            if (now != 0x134) {
+                UnloadEves();
+            }
+            if (mode != 0x134) {
+                LoadModeEves(mode);
+            }
+        }
+    }
+    int mode;
+};
+
 // The challenge map screen: unlock popups, then the map menu until backed out.
 void MenuDoChallengeMode(int arg) {
     PathItem items[19];
-    int mode = GetEveMode();
-    if (mode != 0x130) {
-        if (mode != 0x134) {
-            UnloadEves();
-        }
-        LoadModeEves(0x130);
-    }
+    EveModeScope eves(0x130);
     lbl_8055F3E4 = fn_8027B878(arg);
     {
     PathScreenBuf scr(arg);
@@ -682,15 +702,6 @@ void MenuDoChallengeMode(int arg) {
         }
     done:;
     } while (r != -1);
-    }
-    int now = GetEveMode();
-    if (mode != now) {
-        if (now != 0x134) {
-            UnloadEves();
-        }
-        if (mode != 0x134) {
-            LoadModeEves(mode);
-        }
     }
 }
 
