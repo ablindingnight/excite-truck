@@ -459,8 +459,8 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
         vis[k] = CullBox(&ba.p[i], vis, eye, a, b);
     }
     MLArray<MLPiece> ca = m->c;
+    const MLPiece* cp = ca.p;
     for (int i = 0; i < ca.n; i++) {
-        const MLPiece* cp = &ca.p[i];
         if (cp->flags == (vis[cp->ref] & 0x7F)) {
             u8 r = Cull(&cp->s);
             lbl_804C5480[k] = lbl_8055FCE0;
@@ -468,6 +468,7 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
         } else {
             vis[k++] = 0;
         }
+        cp++;
     }
     for (int i = 0; i < m->numObjs; i++) {
         m->objs[i]->Calc(m);
