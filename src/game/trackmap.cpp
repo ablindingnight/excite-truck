@@ -643,9 +643,10 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
     fn_802C8D74();
     GetCarInfo(view);
     for (int truck = 0; truck < GetHumanPlayerCount(); truck++) {
+        Vec3* pr;  // &rel for MulVecT only (the PSVEC calls recompute &rel like retail)
         f32 fade;
-        int part;
         TruckDraw* d;
+        int part;
         bool self = truck == fn_801E866C(map->player);
         if (self) {
             continue;
@@ -657,7 +658,8 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
         rel.y = rel.z - yv;
         rel.z = 0.0f;
         rel.z -= basis.pos.z;
-        MulVecT(&rel, &rel, &basis);
+        pr = &rel;
+        MulVecT(pr, pr, &basis);
         {
             f32 s = w / 2.0f / radius;
             rel.x *= s;
@@ -673,7 +675,11 @@ void fn_8001A1F4(TrackMap* map, f32 x, f32 y, f32 w, f32 h) {
             f32 px;
             f32 py = rel.y + (y - h / 2.0f);
             px = rel.x + (x + w / 2.0f);
-            part = truck == d->self ? 1 : 3;
+            if (truck == d->self) {
+                part = 1;
+            } else {
+                part = 3;
+            }
             f32 size = fade * fn_80235EF0(d->art, part);
             fn_80235AFC(d->art, part, -1, px, py, 0.0f, size, size, d->icons[truck].angle);
         }
