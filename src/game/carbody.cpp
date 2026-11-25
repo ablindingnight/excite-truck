@@ -2348,6 +2348,27 @@ static inline void CbSet3(f32* d, f32 x, f32 y, f32 z) {
     d[2] = z;
 }
 
+static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, const HVec& o) {  // name unproven
+    f32 ax = 59.94f * vel.x + *(f32*)(car + 0x118) * -59.94f;
+    ((CarBody*)car)->accel.x = ax;
+    f32 ay = Mul(vel.y, 59.94f) + Mul(((CarBody*)car)->vel.y, -59.94f);
+    ((CarBody*)car)->accel.y = ay;
+    f32 px = ax - o.x;
+    ((CarBody*)car)->accel.z = vel.z * 59.94f + Mul(((CarBody*)car)->vel.z, -59.94f);
+    ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + Mul(((CarBody*)car)->avel.x, -59.94f);
+    ((CarBody*)car)->aaccel.y = CbAdd(avel.y * 59.94f, ((CarBody*)car)->avel.y * -59.94f);
+    ((CarBody*)car)->aaccel.z = CbAdd(avel.z * 59.94f, Mul(((CarBody*)car)->avel.z, -59.94f));
+    ((CarBody*)car)->vel.x = vel.x;
+    ((CarBody*)car)->vel.y = vel.y;
+    ((CarBody*)car)->vel.z = vel.z;
+    ((CarBody*)car)->avel.x = avel.x;
+    ((CarBody*)car)->avel.y = avel.y;
+    ((CarBody*)car)->avel.z = avel.z;
+    ((CarBody*)car)->push.x = px;
+    ((CarBody*)car)->push.y = ay - o.y;
+    ((CarBody*)car)->push.z = CbSub(((CarBody*)car)->accel.z, o.z);
+}
+
 void fn_80186DE8(void) {
     CbSolMass* mass;
     CbSolContact* contact;
@@ -2576,23 +2597,7 @@ void fn_80186DE8(void) {
         int boosting;
         f32 vmax;
         f32 out;
-        f32 ax = 59.94f * vel.x + *(f32*)(car + 0x118) * -59.94f;
-        ((CarBody*)car)->accel.x = ax;
-        f32 ay = Mul(vel.y, 59.94f) + Mul(((CarBody*)car)->vel.y, -59.94f);
-        ((CarBody*)car)->accel.y = ay;
-        ((CarBody*)car)->accel.z = vel.z * 59.94f + Mul(((CarBody*)car)->vel.z, -59.94f);
-        ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + Mul(((CarBody*)car)->avel.x, -59.94f);
-        ((CarBody*)car)->aaccel.y = CbAdd(avel.y * 59.94f, ((CarBody*)car)->avel.y * -59.94f);
-        ((CarBody*)car)->aaccel.z = CbAdd(Mul(avel.z, 59.94f), Mul(((CarBody*)car)->avel.z, -59.94f));
-        ((CarBody*)car)->vel.x = vel.x;
-        ((CarBody*)car)->vel.y = vel.y;
-        ((CarBody*)car)->vel.z = vel.z;
-        ((CarBody*)car)->avel.x = avel.x;
-        ((CarBody*)car)->avel.y = avel.y;
-        ((CarBody*)car)->avel.z = avel.z;
-        ((CarBody*)car)->push.x = ax - o.x;
-        ((CarBody*)car)->push.y = ay - o.y;
-        ((CarBody*)car)->push.z = CbSub(((CarBody*)car)->accel.z, o.z);
+        CbMotion(car, vel, avel, o);
         CbVec4 w0(c->v30);
         CbVec4 w1(c->v10);
         CbVec4 w2(c->v0);
