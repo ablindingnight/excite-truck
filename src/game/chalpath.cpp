@@ -555,6 +555,33 @@ static inline void RebuildMapAfterRace(s32 arg) {
 
 // Races the selected event (vehicle picked through the garage), then rebuilds the map; flags the
 // "difficulty unlocked" popup when that race completed the path.
+static inline void InitMapNodes(PathScreenBuf* s) {  // name unproven
+    int j;
+    int i;
+    s->numEvents = 0;
+    s->numLevels = lbl_8055F3E4->NumLevels();
+    memset(s->evObjs, 0, sizeof(s->evObjs));
+    memset(s->lvObjs, 0, sizeof(s->lvObjs));
+    s->events.count = 0;
+    s->levels.count = 0;
+    for (i = 0; i < MinIGe(lbl_8055F3E4->NumLevels(), 3); i++) {
+        s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
+        s->levels.Push(new ("pathcontrol") LevelNode(lbl_8055F3E4->GetLevel(i), i));
+        for (j = 0; j < MinIGe(s->lvObjs[i]->NumEvents(), 6); j++) {
+            s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
+            s->events.Push(new ("eventcontrol") EventNode(lbl_8055F3E4->GetLevel(i)->GetEvent(j)));
+            s->numEvents++;
+        }
+    }
+    s->sound = fn_80207848("a_levelup.sfx", 0);
+    if (s->sound) {
+        s->sound->SetVolume(1.0f);
+    } else {
+        fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
+    }
+    RedrawNodes();
+}
+
 void fn_8026003C(void) {
     s32 event;
     s32 arg;
@@ -588,13 +615,10 @@ void fn_8026003C(void) {
         run.which = arg;
         run.out = out;
         fn_8023BF4C(&run);
-        RebuildMapAfterRace(arg);
-        for (int i = 0; i < SCREEN->numEvents; i++) {
-            RedrawEventNode(i);
-        }
-        for (int i = 0; i < SCREEN->numLevels; i++) {
-            RedrawLevelNode(i);
-        }
+        ClearPlayer(0);
+        AchievementsClearSession();
+        lbl_8055F3E4 = fn_8027B878(arg);
+        InitMapNodes(SCREEN_BUF);
         bool nowComplete = SCREEN_BUF->AllComplete();
         if (fn_802E8D84()) {
             fn_802E7128();
