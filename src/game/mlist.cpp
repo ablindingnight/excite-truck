@@ -445,44 +445,31 @@ void fn_802CD37C(MList* m, int unused, const MMtx* mats, int n, f32 a, f32 b) {
     MVec4 eye;
     fn_802CCBC0((const MMtx33*)inv.basis, p1, p2, p3);
     u8* vis = ctx->vis;
-    vis[0] = 0x81;
-    const MLSphere* sp;
-    int i;
-    u8* vp = vis + 1;
-    int count = sa.n;
-    int k = 1;
-    sp = sa.p;
-    for (i = 0; i < count; i++, k++, vp++) {
-        *vp = Cull(sp);
-        sp++;
+    int k = 0;
+    vis[k++] = 0x81;
+    for (int i = 0; i < sa.n; i++, k++) {
+        vis[k] = Cull(&sa.p[i]);
     }
     eye.x = cam.origin.x;
     eye.y = cam.origin.y;
     eye.z = cam.origin.z;
     eye.w = 0.0f;
     MLArray<MLBox> ba = m->b;
-    MLArray<MLPiece> ca;
-    const MLBox* bp = ba.p;
-    vp = vis + k;
-    for (i = 0; i < ba.n; i++, k++, vp++) {
-        *vp = CullBox(bp, vis, eye, a, b);
-        bp++;
+    for (int i = 0; i < ba.n; i++, k++) {
+        vis[k] = CullBox(&ba.p[i], vis, eye, a, b);
     }
-    ca = MLArray<MLPiece>(m->c);
-    const MLPiece* cp = ca.p;
-    vp = vis + k;
-    for (i = 0; i < ca.n; i++) {
+    MLArray<MLPiece> ca = m->c;
+    for (int i = 0; i < ca.n; i++) {
+        const MLPiece* cp = &ca.p[i];
         if (cp->flags == (vis[cp->ref] & 0x7F)) {
             u8 r = Cull(&cp->s);
-            lbl_804C5480[k++] = lbl_8055FCE0;
-            *vp++ = r;
+            lbl_804C5480[k] = lbl_8055FCE0;
+            vis[k++] = r;
         } else {
-            k++;
-            *vp++ = 0;
+            vis[k++] = 0;
         }
-        cp++;
     }
-    for (i = 0; i < m->numObjs; i++) {
+    for (int i = 0; i < m->numObjs; i++) {
         m->objs[i]->Calc(m);
     }
     CopyCourseData(lbl_804C1480);
@@ -620,7 +607,7 @@ void fn_802CDDC8(MList* m, u32 base) {
         e->tex = -2;
     }
     Relocate(m->objs, base);
-    for (i = 0; i < m->numObjs; i++) {
+    for (int i = 0; i < m->numObjs; i++) {
         SwapWordV(&m->objs[i]);
     }
     m->flags |= 1;
