@@ -231,11 +231,11 @@ void fn_801BDA74(int car, const CarSetup* s) {
     {
         f32 g = 0.9f * s->grip;
         f32 lf = s->loadFactor;
-        f32 a0 = 1.46f * g;
-        f32 a1 = 1.25f * g;
         f32 sl = 0.25f * s->slip;
         f32 x0 = 3559.99976f * lf;
+        f32 a0 = 1.46f * g;
         f32 x1 = 8900.0f * lf;
+        f32 a1 = 1.25f * g;
         f32 ka = (a1 - a0) / (x1 - x0);
         f32 b0 = 104856.312f * g * sl;
         f32 b1 = 161887.922f * g * sl;
