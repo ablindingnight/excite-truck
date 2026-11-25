@@ -105,8 +105,9 @@ struct SkagBag : SkagVec<SkagPoint> {
                 bool far = false;
                 for (int k = 0; !far && k < count - 1; k++) {
                     f32 d[2];
-                    d[1] = data[j].y - p->y;
-                    d[0] = data[j].x - p->x;
+                    SkagPoint* q = &data[j];
+                    d[1] = q->y - p->y;
+                    d[0] = q->x - p->x;
                     far = d[0] * d[0] + d[1] * d[1] > 0.25f;
                 }
                 if (!far) {
