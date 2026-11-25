@@ -246,8 +246,8 @@ void fn_801BDA74(int car, const CarSetup* s) {
         int left = !(i & 1);
         f32 share = front ? s->balance : 1.0f - s->balance;
         f32 load = 9.81f * (0.5f * share * s->mass);
-        x->row[i] = MVec4(0.5f * (front ? s->ftrack : s->rtrack) * (left ? -1.0f : 1.0f),
-                          WheelRestHeight(*w, s->collideCmHeight, load),
+        f32 px = 0.5f * (front ? s->ftrack : s->rtrack) * (left ? -1.0f : 1.0f);
+        x->row[i] = MVec4(px, WheelRestHeight(*w, s->collideCmHeight, load),
                           (1.0f - share) * s->wheelbase * (front ? 1.0f : -1.0f));
     }
     x->row[12] = MVec4(s->wheels[0].spring, s->wheels[1].spring, s->wheels[2].spring, s->wheels[3].spring);
