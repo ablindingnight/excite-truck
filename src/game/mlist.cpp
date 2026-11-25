@@ -582,9 +582,15 @@ void FlushRenderQueue(int pri) {
 }
 
 void fn_802CDDC8(MList* m, u32 base) {
-    SwapWord(&m->magic);
-    SwapWord(&m->version);
-    SwapWord(&m->flags);
+    // Header words: one temporary per byte pair (retail loads all twelve bytes before any store; SwapWord's one t
+    // serialises them, FACTS ONE-SHARED-SWAP-TEMP-SERIALISES).
+    u8* h = (u8*)m;
+    SwapItems(h[0], h[3]);
+    SwapItems(h[1], h[2]);
+    SwapItems(h[4], h[7]);
+    SwapItems(h[5], h[6]);
+    SwapItems(h[8], h[11]);
+    SwapItems(h[9], h[10]);
     u32* w = (u32*)&m->a;
     for (int i = 0; i < 10; i++) {
         SwapWord(&w[i]);
