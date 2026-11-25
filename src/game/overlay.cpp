@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game/common.h"
+#include "game/joy.h"
 #include "game/raceinfo.h"
 #include "game/gamemode.h"
 #include "game/textelem.h"
@@ -56,7 +57,7 @@ struct RetryFlags {
 };
 
 extern "C" {
-int ReadJoyStatus(f32* out, int unk);
+int ReadJoyStatus(JoyStatus* out, int unk);
 void QueueColoredRectangle(f32 x, f32 y, f32 w, f32 h, u32 color);
 int fn_801769B8(void);
 int GetHumanPlayerCount(void);
@@ -197,7 +198,6 @@ struct OverlayConstant { f32 value; };
 extern const OverlayConstant kOverlayFullScale;
 extern const OverlayConstant kOverlayKioskLabelScale;
 extern const OverlayConstant kOverlayNoTime;
-extern const OverlayConstant kOverlayStickYScale;
 extern const OverlayConstant kOverlayStartSoundThreshold;
 extern const OverlayConstant kOverlayOffscreen;
 extern const OverlayConstant kOverlaySlideDistance;
@@ -412,30 +412,32 @@ void* lbl_8055D354;
 
 static inline f32 Dot4_hm(f32 ax, f32 ay, f32 bx, f32 by) { return ax * bx + ay * by; }  /* Helper name unproven */
 
-static inline void MeasureStickY(const f32& scale, const f32& axis, f32 xSquared, f32& y, f32& magnitude) {
-    magnitude = xSquared + axis * axis;
-    y = axis * scale;
+// Keep the Y-square accumulator identity through the X-first sum.
+// Helper name and original operation boundary unproven.
+#pragma push
+#pragma opt_lifetimes off
+static inline void DrawMeasuredStickDot(f32 rawX, f32 rawY, f32 x, f32 y, f32 size) {
+    f32 xx = rawX * rawX;
+    f32 mag = rawY * rawY;
+    mag = xx + mag;
+    f32 len = sqrt(mag);
+    QueueColoredRectangle(x, y, size, size, 0x800000FF);
 }
+
 static void fn_800053CC(void) {
-    f32 v[28];
-    f32 len;
+    JoyStatus v;
     f32 r;
     f32 x;
     f32 y;
-    if (ReadJoyStatus(v, 0)) {
+    if (ReadJoyStatus(&v, 0)) {
         r = 10.0f;
-        x = 300.0f * v[0];
-        f32 xx = v[0] * v[0];
-        f32 mag;
-        MeasureStickY(kOverlayStickYScale.value, v[1], xx, y, mag);
-        len = sqrt(mag);
-        QueueColoredRectangle(x, y, r, r, 0x800000FF);
+        x = 300.0f * v.x;
+        y = 200.0f * v.y;
+        DrawMeasuredStickDot(v.x, v.y, x, y, r);
     }
 }
 
-namespace {
-const OverlayConstant kOverlayStickYScale = {200.0f};
-} // namespace
+#pragma pop
 
 static void fn_8000545C(void) {}
 
@@ -974,7 +976,7 @@ void ResultsOverlay::DrawTimes(void) {
     for (i = 0; i < GetHumanPlayerCount(); i++) {
         r = fn_801EA9B0(i);
         y = y0 - 54.0f * i;
-        DrawSpriteWithSize(art, 0, x0, y - 21.6f, kOverlayStickYScale.value, 27.0f);
+        DrawSpriteWithSize(art, 0, x0, y - 21.6f, 200.0f, 27.0f);
         x = x0;
         x += 54.0f;
         if (r->params.flags & 1) {
