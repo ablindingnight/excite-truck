@@ -402,8 +402,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
         ui.channel = fn_802E4A10();
         StatPanel panel;
         panel.Clear();
-        CarPick cars(screen, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel,
-                     &ui);
+        s32* sel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
+        CarPick cars(screen, sel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui);
         for (;;) {
             if (!lbl_80498C48.alt) {
                 const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
