@@ -212,7 +212,7 @@ void fn_801BDA74(int car, const CarSetup* s) {
     m->mass = mass;
     m->invMass = inv;
     x->row[4] = MVec4(0.0440043993f, 0.0440043993f, 0.0440043993f, 0.0440043993f);
-    const f32& k5 = 0.189215347f;  // Form unproven: a reference temporary gives the constant retail's register numbering.
+    f32 k5 = 0.189215347f;
     x->row[5] = MVec4(k5, k5, k5, k5);
     for (i = 0; i < 4; i++) {
         x->row[i] = MVec4(30.0f * 0.0254f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
