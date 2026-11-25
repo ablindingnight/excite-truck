@@ -885,6 +885,7 @@ void* fn_802EAB28(void* arg) {
     return 0;
 }
 
+static inline int SampleBytes(int n, int nch) { return n * nch; }  // name unproven
 int fn_802EB7D4(void* dst, int n, int ch) {
     u16* out;
     int avail;
@@ -922,7 +923,7 @@ int fn_802EB7D4(void* dst, int n, int ch) {
             readPosition = 0;
         }
     } else {
-        int want = n * nch;
+        int want = SampleBytes(n, nch);
         int used = readPosition - wr;
         int toEnd = lbl_805600A4 - readPosition;
         int total = lbl_805600A4 - used;
