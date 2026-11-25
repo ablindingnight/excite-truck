@@ -1303,8 +1303,8 @@ static inline CbSolVec CbSolVec4(f32 x, f32 y, f32 z) {
 
 static inline CbSolVec CbSolVec4(f32 x, f32 y, f32 z, f32 w) {
     CbSolVec v;
-    v.y = y;
     v.x = x;
+    v.y = y;
     v.z = z;
     v.w = w;
     return v;
