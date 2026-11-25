@@ -447,20 +447,21 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 }
                 ColorPick paint(colors, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b,
                                 lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
-                SetCarSlotSelection((u8*)&paint, fn_8024EBE4((u8*)&paint), 1);
-                u8* e = fn_8024EB9C((u8*)&paint, 0);
-                for (int i = 0; i < fn_8024EB94((u8*)&paint); i++) {
-                    e = fn_8024EB9C((u8*)&paint, i);
+                u8* pp = (u8*)&paint;
+                SetCarSlotSelection(pp, fn_8024EBE4(pp), 1);
+                u8* e = fn_8024EB9C(pp, 0);
+                for (int i = 0; i < fn_8024EB94(pp); i++) {
+                    e = fn_8024EB9C(pp, i);
                     S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
                 }
-                ShowSelectionColor((u8*)&paint);
+                ShowSelectionColor(pp);
                 const char* bars[3] = {"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"};
                 MenuItem items[] = {
-                    MenuItem(0, 5, (u8*)&paint, 0, 0),
+                    MenuItem(0, 5, pp, 0, 0),
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
                     MenuItem("#car_model", cars.Chassis(), (int)NoCaption()),
                     MenuItem("#car_name", cars.Name(), (int)NoCaption()),
-                    MenuItem("#color_name", (char*)(u8*)&paint + 0xE0, (int)NoCaption()),
+                    MenuItem("#color_name", (char*)pp + 0xE0, (int)NoCaption()),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
                     MenuItem("#car_bar_color", bars[bar], (int)NoCaption()),
