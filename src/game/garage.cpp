@@ -365,12 +365,7 @@ public:
 // The paint list: one entry per colour of the chosen car.
 class ColorPick : public CarSlotList {
 public:
-    ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out)
-        : CarSlotList(list, color, car, panel, ui) {
-        ui2 = ui;
-        colors = (VDel*)list;
-        this->out = out;
-    }
+    ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out);
     virtual ~ColorPick(void) { delete colors; }
     virtual int Key(int key);
     virtual void DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha);
@@ -411,6 +406,14 @@ static inline void InitColorSlots(ColorPick* p) {  // name unproven
     }
     ShowSelectionColor(pp);
 }
+inline ColorPick::ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out)
+    : CarSlotList(list, color, car, panel, ui) {
+    ui2 = ui;
+    colors = (VDel*)list;
+    this->out = out;
+    InitColorSlots(this);
+}
+
 
 #pragma push
 #pragma opt_loop_invariants off  /* Pragma unproven: retail keeps bar spilled and indexes per use */
@@ -475,7 +478,6 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 GarageList* colors = MakeColorList(cars);
                 s32* csel = lbl_80498C48.alt ? pd : pb;
                 ColorPick paint(colors, csel, lbl_80498C48.alt ? pc : pa, &panel, &ui, color);
-                InitColorSlots(&paint);
                 MenuDesc desc = {"carchoose2b.lyt", 0, (int (*)(int*))fn_8024DADC, 0, 0};
                 MenuItem items[] = {
                     MenuItem(0, 5, (u8*)&paint, 0, 0),
