@@ -504,22 +504,21 @@ void fn_802AAF04(void* cam, const StuntPart* p, const StuntCar* car) {
                 }
                 f32 cx = p->sizeZ * (f32)cos(ang) / 2.0f;
                 f32 sz = p->sizeZ * (f32)sin(ang) / 2.0f;
-                bx = m.origin.x + rightX * cx;
-                by = m.origin.y + m.basis[0].y * cx;
-                bz = m.origin.z + m.basis[0].z * cx;
-                bx = bx + m.basis[2].x * sz;
-                by = by + m.basis[2].y * sz;
-                bz = bz + m.basis[2].z * sz;
-                fj *= 0.25f;
                 Vec v[2];
                 for (int i = 0; i < 2; i++) {
+                    bx = m.origin.x + rightX * cx;
+                    by = m.origin.y + m.basis[0].y * cx;
+                    bz = m.origin.z + m.basis[0].z * cx;
+                    bx = bx + m.basis[2].x * sz;
+                    by = by + m.basis[2].y * sz;
+                    bz = bz + m.basis[2].z * sz;
                     v[i].x = bx;
                     v[i].y = by;
                     v[i].z = bz;
                     f32 h = i ? p->sizeY / 2.0f - 0.4f : 0.4f + p->sizeY / 2.0f;
                     TAddS(&v[i], &v[i], (const Vec*)&m.basis[1], h);
                     u32 color = Round(255.0f * p->sparkAmt) << 24 | 0xFFFFFF;
-                    fn_802C8E00(v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj, color, 1);
+                    fn_802C8E00(v[i].x, v[i].y, v[i].z, i ? 1.0f : 0.0f, 1.0f - fj * 0.25f, color, 1);
                 }
             }
             fn_802C8E48();
