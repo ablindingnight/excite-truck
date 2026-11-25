@@ -277,12 +277,12 @@ int fn_8023F0E8(void) {
         MenuItem(lbl_8055B860, 6, NULL, -2, 13),
         MenuItem(lbl_8055B860, 6, (void*)fn_8023F9E8, -1, 27),
         MenuItem("title", "Format", CaptionContext(4)),
-        MenuItem("line1", 3, "Format your memory card  ?", 4, 0),
-        MenuItem("line2", 3, "", 4, 0),
+        MI("line1", 3, "Format your memory card  ?", 4, 0),
+        MI("line2", 3, "", 4, 0),
         MenuItem("line3", 3, "This will erase any saved games", 4, 0),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
-        MenuItem("rbutton", 3, "FORMAT", 4, 0),
+        MI("rbutton", 3, "FORMAT", 4, 0),
         MenuItem("lbutton", "DON'T SAVE", CaptionContext(4)),
         MenuItem(lbl_804987E0),
     };
@@ -322,7 +322,7 @@ int fn_8023F4B8(void) {
         MenuItem("line3", "MEMORY CARD slot 1?", CaptionContext(4)),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
-        MenuItem("rbutton", 3, "YES", 4, 0),
+        MI("rbutton", 3, "YES", 4, 0),
         MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
         MenuItem(lbl_804987E0),
     };
@@ -342,7 +342,7 @@ int fn_8023F694(void) {
         MenuItem("line3", "your previous saved game.", CaptionContext(4)),
         MenuItem("line4", "", CaptionContext(4)),
         MenuItem("line5", "", CaptionContext(4)),
-        MenuItem("rbutton", 3, "SAVE", 4, 0),
+        MI("rbutton", 3, "SAVE", 4, 0),
         MenuItem("lbutton", 3, "DON'T SAVE", 4, 0),
         MenuItem(lbl_804987E0),
     };
