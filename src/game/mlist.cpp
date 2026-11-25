@@ -190,6 +190,19 @@ static inline void SwapItems(T& a, T& b) {
     b = t;
 }
 
+// Helper name unproven: SwapItems one and two inline levels deeper. Nested inline calls are expanded after every
+// top-level one, so their temporaries are numbered later (fn_802CDDC8's header: retail colours the three outer-pair
+// temps first, then the inner pairs of words 0, 2, 1).
+template <class T>
+static inline void SwapItems2(T& a, T& b) {
+    SwapItems(a, b);
+}
+
+template <class T>
+static inline void SwapItems3(T& a, T& b) {
+    SwapItems2(a, b);
+}
+
 // Cull is two inlines: retail's frame has both ValVec3 c objects below every other 16-byte local, i.e. created by
 // a nested inline expanded after the first level (stackfit 2026-11-24). Names unproven.
 static inline u8 CullPoint(const ValVec3& p, f32 r) {  // name unproven
@@ -583,14 +596,15 @@ void FlushRenderQueue(int pri) {
 
 void fn_802CDDC8(MList* m, u32 base) {
     // Header words: one temporary per byte pair (retail loads all twelve bytes before any store; SwapWord's one t
-    // serialises them, FACTS ONE-SHARED-SWAP-TEMP-SERIALISES).
+    // serialises them, FACTS ONE-SHARED-SWAP-TEMP-SERIALISES). The inner pairs go through deeper inlines so their
+    // temps are created after the outer ones, word 1's last (retail colour order h0,h4,h8,h1,h9,h5).
     u8* h = (u8*)m;
     SwapItems(h[0], h[3]);
-    SwapItems(h[1], h[2]);
+    SwapItems2(h[1], h[2]);
     SwapItems(h[4], h[7]);
-    SwapItems(h[5], h[6]);
+    SwapItems3(h[5], h[6]);
     SwapItems(h[8], h[11]);
-    SwapItems(h[9], h[10]);
+    SwapItems2(h[9], h[10]);
     u32* w = (u32*)&m->a;
     // Two loops (8 + 2): the next loop's preheader merges into the last fully unrolled loop before it, which puts retail's
     // li/mtctr among words 9-10 (TC helper CFG-merge trace, 2026-11-24).
@@ -613,9 +627,12 @@ void fn_802CDDC8(MList* m, u32 base) {
     Relocate(m->b.p, base);
     Relocate(m->c.p, base);
     Relocate(m->d.p, base);
+    // s declared before the strip counter (named locals number in reverse declaration order: retail's strip i takes
+    // r31); the batch loop has its own counter (retail r6, not the strip loop's r31).
+    MLStrip* s;
     int i;
     for (i = 0; i < m->d.n; i++) {
-        MLStrip* s = &m->d.p[i];
+        s = &m->d.p[i];
         SwapHalf(&s->ref);
         SwapHalf(&s->flags);
         SwapHalf(&s->mtx);
@@ -624,7 +641,7 @@ void fn_802CDDC8(MList* m, u32 base) {
         Relocate(s->prim, base);
     }
     Relocate(m->e.p, base);
-    for (i = 0; i < m->e.n; i++) {
+    for (int i = 0; i < m->e.n; i++) {
         MLBatch* e = &m->e.p[i];
         SwapWordV(&e->start);
         SwapWordV(&e->end);
