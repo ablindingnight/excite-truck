@@ -1310,16 +1310,6 @@ static inline CbSolVec CbSolVec4(f32 x, f32 y, f32 z, f32 w) {
     return v;
 }
 
-/* Helper name unproven: CbSolVec4 with x written first. */
-static inline CbSolVec CbSolVec4X(f32 x, f32 y, f32 z, f32 w) {
-    CbSolVec v;
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    v.w = w;
-    return v;
-}
-
 // CbV3: rvec.h's RVec3.
 // The game-side 4-vector: built from a solver record through its xyz and w, written back through a temporary.
 /* Helper names unproven (RVec3, CbF, CbVec4, Set, Sol, CbFrame): the shapes come from the target copies (2026-11-08), the names are guesses. CbF (a one-float value passed by value) gives retail's float store + word copy of the w lane (2026-11-14). */
@@ -2802,7 +2792,7 @@ void fn_80186DE8(void) {
         rpm.x = rpm.x > 52.35988f ? rpm.x : 52.35988f;
         rpm.w = gw;
         c->pts[4] = rpm.Sol();
-        c->v190 = CbSolVec4X(steerK, rpmT < 9500.0f ? out : 0.0f, brake, water[0]);
+        c->v190 = CbSolVec4(steerK, rpmT < 9500.0f ? out : 0.0f, brake, water[0]);
         bk2 = ((CarBody*)car)->f25E4;
         hb = 8.0f * hold;
         if (bk2 > hb) {
