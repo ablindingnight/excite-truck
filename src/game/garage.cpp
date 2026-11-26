@@ -1118,8 +1118,8 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     if (!locked && ((GarageList*)PTR(p, 0xD0))->IsExtreme(i)) {
         extreme = 1;
     }
-    int lit = shown && extreme;
-    fn_802354A0(art, x, y, 0.0f, lit, w, h, locked ? 0xFF808080 : -1);
+    u32 frame = locked ? 0xFF808080 : -1;
+    fn_802354A0(art, x, y, 0.0f, shown && extreme, w, h, frame);
     f32 fade = fn_80216CB4();
     if (extreme) {
         for (int k = 0; k < 2; k++) {
@@ -1134,7 +1134,8 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             f32 ph = GetArtHeight(art, part) * s2;
             int a = RoundF(GarageFadeAlpha(fade));
             a = a > 0x13F ? 0x13F : a;
-            fn_802354A0(art, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, part, pw, ph, (a << 24) | 0xFFFFFF);
+            u32 c = (a << 24) | 0xFFFFFF;
+            fn_802354A0(art, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, part, pw, ph, c);
         }
     }
     int k = shown > 0 ? shown : 0;
