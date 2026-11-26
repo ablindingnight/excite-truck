@@ -1047,11 +1047,14 @@ void Mist::Update(void) {
     if (d2 > rad * rad) {
         f32 dt = fn_802A4AD4();
         ValPoint back;
-        back.x = v.x;
-        back.y = v.z;
         ValVec3 dv;
-        dv.Set(v.x * dt, v.y * dt, v.z * dt);
-        f32 k = -rad * (1.0f / (f32)sqrt(back.x * back.x + back.y * back.y));
+        back.x = v.x;
+        dv.x = Mul(v.x, dt);
+        dv.y = v.y * dt;
+        back.y = v.z;
+        f32 horizontalLengthSquared = Len2(back.x, back.y);
+        dv.z = Mul(v.z, dt);
+        f32 k = -rad * (1.0f / (f32)sqrt(horizontalLengthSquared));
         back.x *= k;
         back.y *= k;
         ValPoint side = back;
