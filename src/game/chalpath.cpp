@@ -551,9 +551,9 @@ static inline void RebuildMapAfterRace(s32 arg) {
 
 // Races the selected event (vehicle picked through the garage), then rebuilds the map; flags the
 // "difficulty unlocked" popup when that race completed the path.
-static inline void InitMapNodes(u8* p) {  // name unproven
-    int j;
+static inline void InitMapNodes(u8* p) {  // name unproven (InitializeChallengeMode's body, same int i; int j; order)
     int i;
+    int j;
     ((PathScreenBuf*)p)->numEvents = 0;
     ((PathScreenBuf*)p)->numLevels = lbl_8055F3E4->NumLevels();
     memset(((PathScreenBuf*)p)->evObjs, 0, sizeof(((PathScreenBuf*)p)->evObjs));
