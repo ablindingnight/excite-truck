@@ -28,7 +28,17 @@ u32 lbl_8055FAC8;
 
 u8 lbl_8055FACC;            // loaded from faninfo.fnf
 FanCell* lbl_804C06E0[0x41];  // grids by cell size
-u32 lbl_804C07E4[3];        // cell outside the map (a FanCell)
+// PROVISIONAL: ground-data and outside-cell types and names are unproven.
+struct DefaultGroundData {
+    u32 bits;
+};
+struct DefaultFanCellData {
+    Item** items;
+    TCell* head;
+    DefaultGroundData ground;
+};
+typedef char AssertDefaultCellSize[sizeof(DefaultFanCellData) == sizeof(FanCell) ? 1 : -1];
+DefaultFanCellData lbl_804C07E4;        // cell outside the map (a FanCell)
 
 static inline void SetMaterial(FanCell* c, u32 mask, int best) {
     c->bits = (((c->bits & ~0x3F) | mask) & ~0x1C0) | ((best << 6) & 0x1C0);
@@ -128,25 +138,22 @@ int fn_802BE7C4(int x, int z, int size) {
 
 void fn_802BE7F4(void) {}
 
-/* Helper name unproven: resets the cell used outside the map. */
-static inline void InitDefault(FanCell* def) {
-    def->items = (Item**)&lbl_8055FAC8;
-    def->head = 0;
-    def->bits = 0x200;
-    def->bits |= 0x84;
-    def->bits |= 0x800000;
-}
-
 void fn_802BE7F8(void) {
     fn_802BE694();
-    InitDefault((FanCell*)lbl_804C07E4);
+    lbl_804C07E4.items = (Item**)&lbl_8055FAC8;
+    lbl_804C07E4.head = 0;
+    lbl_804C07E4.ground.bits = 0x200;
+    // Materials present: bit 2; dominant material: 2.
+    lbl_804C07E4.ground.bits =
+        (((lbl_804C07E4.ground.bits & ~0x3F) | 4) & ~0x1C0) | ((2 << 6) & 0x1C0);
+    lbl_804C07E4.ground.bits |= 0x800000;
 }
 
 void fn_802BE840(void) { fn_802BE72C(); }
 
 FanCell* fn_802BE844(short x, short z, int size) {
     if (x < -0x200 || x >= 0x200 || z < -0x200 || z >= 0x200) {
-        return (FanCell*)lbl_804C07E4;
+        return (FanCell*)&lbl_804C07E4;
     }
     return &lbl_804C06E0[size][fn_802BE7C4(x, z, size)];
 }
