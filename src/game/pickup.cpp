@@ -656,6 +656,9 @@ static inline f32 DistC(f32 ax, f32 ay, f32 bx, f32 by) {
     return sqrt(d.x * d.x + d.y * d.y);
 }
 
+/* Helper name unproven: start a pickup group for a whole bound. */
+static inline void BeginBoundGroup(PickupObjMan* m, Bound* b) { m->BeginGroup(b, -1); }
+
 static inline f32 Dist(const BoundPt* a, const BoundPt* b) {
     V2 d;
     d.y = b->y - a->y;
@@ -883,7 +886,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
     if (strcasecmp(n->GetName(), "coin_box_2") == 0) {
         pick = fn_801698B8;
     }
-    m->BeginGroup(b, -1);
+    BeginBoundGroup(m, b);
     f32 hr = Mul(0.5f, rest);
     for (i = 0; i <= nx; i++) {
         f32 t = (hr + (f32)i * params[0]) / w;
