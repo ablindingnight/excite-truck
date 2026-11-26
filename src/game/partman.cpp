@@ -537,6 +537,14 @@ static inline void AppendTexturePeers(SysList* l, int k, PartSys** m, int& nMid,
     }
 }
 
+// Helper name/existence unproven: insert the seed and return the next scan index.
+static inline int BeginTextureGroup(PartSys** mid, int& nMid, PartSys* seed, int index) {
+    int next = index + 1;
+    mid[nMid] = seed;
+    nMid++;
+    return next;
+}
+
 void fn_8028F114(SysList* l, s32 first, s32 last) {
     s32 t;
     PartSys** o;
@@ -566,17 +574,14 @@ void fn_8028F114(SysList* l, s32 first, s32 last) {
             }
         }
     }
-    PartSys** mid = out + nFirst;
     for (int j = 0; j < l->count; j++) {
         PartSys* s = l->items[j];
         t = s->tex;
         if (t != first && t != last) {
-            bool found = ContainsTexture(mid, nMid, t);
+            bool found = ContainsTexture(out + nFirst, nMid, t);
             if (!found) {
-                int k = j + 1;
-                mid[nMid] = s;
-                nMid++;
-                AppendTexturePeers(l, k, &mid[nMid], nMid, t);
+                int k = BeginTextureGroup(out + nFirst, nMid, s, j);
+                AppendTexturePeers(l, k, &(out + nFirst)[nMid], nMid, t);
             }
         }
     }
