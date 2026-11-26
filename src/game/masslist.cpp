@@ -13,6 +13,20 @@
 // MVec3: valvec3.h's ValVec3.
 #include "game/mvec4.h"
 
+// Scalar accessor names and original operation/storage boundaries unproven.
+// These values are consumed by the existing vector and arithmetic expressions.
+extern const f32 kMassListMinusOne;
+// Pragma unproven: expand the zero/one value reads automatically. Value returns
+// preserve the compiler's handling of conditional float literals; the linker
+// discards the optional emitted local copies.
+#pragma push
+#pragma auto_inline on
+static f32 MassListZero(void) { return 0.0f; }
+static f32 MassListOne(void) { return 1.0f; }
+#pragma pop
+static inline const f32& MassListMinusOne(void) { return kMassListMinusOne; }
+const f32 kMassListMinusOne = -1.0f;
+
 // MLV3: rvec.h's RVec3.
 struct MLF {
     MLF(f32 a) { v = a; }
@@ -180,18 +194,18 @@ void fn_801BD808(void) {
     memset(x, 0, sizeof(CrossSet));
     memset(e, 0, sizeof(CxEntry));
     fn_801E9DC4(e);
-    m->pos = MVec4(0.0f, 2.0f, 0.0f);
-    m->vel = MVec4(0.0f, 0.0f, 0.0f);
-    m->v60 = MVec4(0.0f, 0.0f, 0.0001f);
-    m->vA0 = MVec4(0.0f, 0.0f, 0.0f);
-    f32 angle = 0.0f;
-    m->quat = MVec4(0.0f, 0.0f, sin(0.5f * angle), cos(0.5f * angle));
-    m->rot[0] = MVec4(1.0f, 0.0f, 0.0f);
-    m->rot[1] = MVec4(0.0f, 1.0f, 0.0f);
-    m->rot[2] = MVec4(0.0f, 0.0f, 1.0f);
-    c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v30 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    m->pos = MVec4(MassListZero(), 2.0f, MassListZero());
+    m->vel = MVec4(MassListZero(), MassListZero(), MassListZero());
+    m->v60 = MVec4(MassListZero(), MassListZero(), 0.0001f);
+    m->vA0 = MVec4(MassListZero(), MassListZero(), MassListZero());
+    f32 angle = MassListZero();
+    m->quat = MVec4(MassListZero(), MassListZero(), sin(0.5f * angle), cos(0.5f * angle));
+    m->rot[0] = MVec4(MassListOne(), MassListZero(), MassListZero());
+    m->rot[1] = MVec4(MassListZero(), MassListOne(), MassListZero());
+    m->rot[2] = MVec4(MassListZero(), MassListZero(), MassListOne());
+    c->v190 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
+    c->v1A0 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
+    c->v30 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
     fn_801BDA70(&out);
     fn_801BDA74(car, &out);
 }
@@ -204,31 +218,31 @@ void fn_801BDA70(CarSetup* out) { InitializeVehiclePhysicsParams(out); }
 
 void fn_801BDA74(int car, const CarSetup* s) {
     MVec4 mass(s->mx, s->my, s->mz, s->mass);
-    MVec4 inv(1.0f / s->mx, 1.0f / s->my, 1.0f / s->mz, 1.0f / s->mass);
+    MVec4 inv(MassListOne() / s->mx, MassListOne() / s->my, MassListOne() / s->mz, MassListOne() / s->mass);
     CrossSet* x = &lbl_8055E79C[car];
     MassSet* m = &lbl_8055E794[car];
     int i;
     lbl_8055E7A0[car] = 0;
     m->mass = mass;
     m->invMass = inv;
-    x->row[4] = MVec4(0.0440043993f, 0.0440043993f, 0.0440043993f, 0.0440043993f);
     f32 k5 = 0.189215347f;
+    x->row[4] = MVec4(0.0440043993f, 0.0440043993f, 0.0440043993f, 0.0440043993f);
     x->row[5] = MVec4(k5, k5, k5, k5);
     for (i = 0; i < 4; i++) {
-        x->row[i] = MVec4(30.0f * 0.0254f * ((i & 1) ? 1.0f : -1.0f), -0.127f - ((i & 1) ? 0.0f : 0.0f),
-                          54.0f * 0.0254f * ((i & 2) ? -1.0f : 1.0f));
+        x->row[i] = MVec4(30.0f * 0.0254f * ((i & 1) ? MassListOne() : MassListMinusOne()), -0.127f - ((i & 1) ? MassListZero() : MassListZero()),
+                          54.0f * 0.0254f * ((i & 2) ? MassListMinusOne() : MassListOne()));
     }
     f32 lock = sin(s->wheelLock);
-    x->row[18] = MVec4(lock, lock, 0.0f, 0.0f);
+    x->row[18] = MVec4(lock, lock, MassListZero(), MassListZero());
     f32 a = DEG(-0.1);
     f32 b = DEG(0.1);
     x->row[19] = MVec4(a, -a, b, -b);
-    x->row[20] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    x->row[21] = MVec4(0.0f, 0.0f, 0.5f, 0.5f);
+    x->row[20] = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
+    x->row[21] = MVec4(MassListZero(), MassListZero(), 0.5f, 0.5f);
     f32 drag = 0.5f * s->airDrag * 1.29f;
-    x->row[6] = MVec4(drag, 0.0f, 0.0f, s->collideCmHeight - s->cmHeight);
-    x->row[22] = MVec4(s->brake * s->unk11C, s->brake * s->unk11C, s->brake * (1.0f - s->unk11C),
-                       s->brake * (1.0f - s->unk11C));
+    x->row[6] = MVec4(drag, MassListZero(), MassListZero(), s->collideCmHeight - s->cmHeight);
+    x->row[22] = MVec4(s->brake * s->unk11C, s->brake * s->unk11C, s->brake * (MassListOne() - s->unk11C),
+                       s->brake * (MassListOne() - s->unk11C));
     {
         f32 g = 0.9f * s->grip;
         f32 lf = s->loadFactor;
@@ -249,17 +263,17 @@ void fn_801BDA74(int car, const CarSetup* s) {
         const WheelSetup* w = &s->wheels[i];
         int front = !(i & 2);
         int left = !(i & 1);
-        f32 share = front ? s->balance : 1.0f - s->balance;
+        f32 share = front ? s->balance : MassListOne() - s->balance;
         f32 load = 9.81f * (0.5f * share * s->mass);
         f32 t = front ? s->ftrack : s->rtrack;
-        f32 px = 0.5f * t * (left ? -1.0f : 1.0f);
+        f32 px = 0.5f * t * (left ? MassListMinusOne() : MassListOne());
         x->row[i] = MVec4(px, w->radius - w->rideHeight - s->collideCmHeight - load / w->spring - load / w->unk1C,
-                          (1.0f - share) * s->wheelbase * (front ? 1.0f : -1.0f));
+                          (1.0f - share) * s->wheelbase * (front ? MassListOne() : MassListMinusOne()));
     }
     x->row[12] = MVec4(s->wheels[0].spring, s->wheels[1].spring, s->wheels[2].spring, s->wheels[3].spring);
     x->row[13] = MVec4(s->wheels[0].bump, s->wheels[1].bump, s->wheels[2].bump, s->wheels[3].bump);
     x->row[14] = MVec4(s->wheels[0].rebound, s->wheels[1].rebound, s->wheels[2].rebound, s->wheels[3].rebound);
-    x->row[15] = MVec4(s->fsway, 0.0f, s->rsway, 0.0f);
+    x->row[15] = MVec4(s->fsway, MassListZero(), s->rsway, MassListZero());
     x->row[16] = MVec4(s->wheels[0].bumpstopHeight, s->wheels[1].bumpstopHeight, s->wheels[2].bumpstopHeight,
                        s->wheels[3].bumpstopHeight);
     x->row[17] = MVec4(s->wheels[0].bumpstopRate, s->wheels[1].bumpstopRate, s->wheels[2].bumpstopRate,
@@ -267,9 +281,9 @@ void fn_801BDA74(int car, const CarSetup* s) {
     x->row[8] = MVec4(s->wheels[0].unk1C, s->wheels[1].unk1C, s->wheels[2].unk1C, s->wheels[3].unk1C);
     x->row[9] = MVec4(s->wheels[0].unk20, s->wheels[1].unk20, s->wheels[2].unk20, s->wheels[3].unk20);
     x->row[7] = MVec4(s->wheels[0].radius, s->wheels[1].radius, s->wheels[2].radius, s->wheels[3].radius);
-    x->row[21] = MVec4(0.5f * (1.0f - s->torqueBalance), 0.5f * (1.0f - s->torqueBalance), 0.5f * s->torqueBalance,
+    x->row[21] = MVec4(0.5f * (MassListOne() - s->torqueBalance), 0.5f * (MassListOne() - s->torqueBalance), 0.5f * s->torqueBalance,
                        0.5f * s->torqueBalance);
-    x->row[23] = MVec4(1.29607821f, 0.0f, 0.0f, 0.216013029f);
+    x->row[23] = MVec4(1.29607821f, MassListZero(), MassListZero(), 0.216013029f);
 }
 
 // Sets a car's body from a matrix (rows + origin) and its linear/angular velocities: the rotation is
@@ -286,7 +300,7 @@ static inline void MtxToQuatAxis(f32 (*m)[3], MVec4* q) {
     }
     int j = (i + 1) % 3;
     int k = (j + 1) % 3;
-    f32 s = sqrt(m[i][i] - (m[j][j] + m[k][k]) + 1.0f);
+    f32 s = sqrt(MassListOne() + (m[i][i] - (m[j][j] + m[k][k])));
     v[i] = 0.5f * s;
     s = 0.5f / s;
     q->w = (m[j][k] - m[k][j]) * s;
@@ -294,11 +308,14 @@ static inline void MtxToQuatAxis(f32 (*m)[3], MVec4* q) {
     v[k] = (m[i][k] + m[k][i]) * s;
 }
 
+// Helper name and original arithmetic boundary unproven; the existing sum.
+static inline f32 MassListAdd(f32 a, f32 b) { return a + b; }
+
 static inline void MtxToQuat(const ValMatrix* r, MVec4* q) {
     const f32(*m)[3] = (const f32(*)[3])r;
     f32 tr = r->basis[0].x + r->basis[1].y + r->basis[2].z;
-    if (tr > 0.0f) {
-        f32 s = sqrt(tr + 1.0f);
+    if (tr > MassListZero()) {
+        f32 s = sqrt(MassListAdd(MassListOne(), tr));
         q->w = 0.5f * s;
         s = 0.5f / s;
         q->x = (m[1][2] - m[2][1]) * s;
@@ -364,38 +381,38 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     SetFromV3(AtR(s->rot, 0), mtx->basis[0]);
     SetFromV3(s->rot[1], mtx->basis[1]);
     SetFromV3(s->rot[2], mtx->basis[2]);
-    s->vA0 = MVec4(0.0f, 0.0f, 0.0f);
-    s->v90 = MVec4(0.0f, 0.0f, 0.0f);
+    s->vA0 = MVec4(MassListZero(), MassListZero(), MassListZero());
+    s->v90 = MVec4(MassListZero(), MassListZero(), MassListZero());
     ValVec3 v;
     v.x = mtx->basis[2].x * a;
     v.y = mtx->basis[2].y * a;
     v.z = mtx->basis[2].z * a;
     SetFromV3(s->vel, v);
-    s->v60 = MVec4(0.0f, 0.0f, 0.0f);
+    s->v60 = MVec4(MassListZero(), MassListZero(), MassListZero());
     MLVec4 k(x->row[7]);
     f32 ix = a;
     f32 iy = a;
     f32 iz = a;
     f32 iw = a;
-    c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    c->v0 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
+    c->v20 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
+    c->v10 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
     ix /= k.x;
     iy /= k.y;
     iz /= k.z;
     iw /= k.w;
     c->v30 = MVec4(ix, iy, iz, iw);
-    *(MVec4*)&c->pts[4] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    c->v1A0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    *(MVec4*)&c->pts[4] = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
+    c->v190 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
+    c->v1A0 = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
     for (int i = 0; i < 4; i++) {
         // The record as 16-byte rows, walked per wheel (retail keeps one pointer c + 16*i): row 4 = pts[i],
         // 9 = pts[5 + i], 13 = pts[9 + i], 17 = nrm[i], 21 = ref[i].
         MVec4* q = (MVec4*)c + i;
-        q[17] = MVec4(0.0f, 1.0f, 0.0f, -100.0f);
-        q[21] = MVec4(0.0f, -100.0f, 0.0f);
-        q[13] = MVec4(0.0f, 0.0f, 0.0f);
-        q[9] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
+        q[17] = MVec4(MassListZero(), MassListOne(), MassListZero(), -100.0f);
+        q[21] = MVec4(MassListZero(), -100.0f, MassListZero());
+        q[13] = MVec4(MassListZero(), MassListZero(), MassListZero());
+        q[9] = MVec4(MassListZero(), MassListZero(), MassListZero(), MassListZero());
         ValVec3 in;
         in.Set(x->row[i].x, x->row[i].y, x->row[i].z);
         ValVec3 out;
@@ -447,8 +464,8 @@ void fn_801BEB44(int car, int i, const RVec3* pt, const RVec3* n) {
         return;
     }
     f32 k = 2.5f * (0.2f + pen);
-    k = 1.0f < k ? 1.0f : k;
-    k = k > 0.0f ? k : 0.0f;
+    k = MassListOne() < k ? MassListOne() : k;
+    k = k > MassListZero() ? k : MassListZero();
     RVec3 nn(LerpT(k, n->x, nrm.x), LerpT(k, n->y, nrm.y), LerpT(k, n->z, nrm.z));
     nrm = nn;
     PSVECNormalize((const Vec*)&nrm, (Vec*)&nrm);
@@ -497,11 +514,11 @@ static inline void PostUpdateCar(int car) {
     fn_801BF198(&p, (ValVec3*)&m->pos);
     if (!fn_801BD628(&p)) {
         fn_802E30C8("CarPostUpdate: illegal mass position (%f %f %f)", p.x, p.y, p.z);
-        fn_801BF164(&m->pos, SetVector3Components(&t0, 0.0f, 100.0f, 0.0f));
-        CopyVector4(&m->quat, SetVector4Components(&t1, 0.0f, 0.0f, 0.0f, 1.0f));
-        fn_801BF164(&m->vel, fn_801BF164(&m->v60, SetVector3Components(&t2, 0.0f, 0.0f, 0.0f)));
+        fn_801BF164(&m->pos, SetVector3Components(&t0, MassListZero(), 100.0f, MassListZero()));
+        CopyVector4(&m->quat, SetVector4Components(&t1, MassListZero(), MassListZero(), MassListZero(), MassListOne()));
+        fn_801BF164(&m->vel, fn_801BF164(&m->v60, SetVector3Components(&t2, MassListZero(), MassListZero(), MassListZero())));
         CopyVector4(&cs->v0, CopyVector4(&cs->v10, CopyVector4(&cs->v20, CopyVector4(&cs->v30,
-            SetVector4Components(&t3, 0.0f, 0.0f, 0.0f, 0.0f)))));
+            SetVector4Components(&t3, MassListZero(), MassListZero(), MassListZero(), MassListZero())))));
         fn_801BF198(&p, (ValVec3*)&m->pos);
     }
     DefaultConstructVec3(&up);
@@ -510,7 +527,7 @@ static inline void PostUpdateCar(int car) {
         DefaultConstructVec3(&pt);
         fn_801BF198(&pt, &cs->pts[i].p);
         surface = 0xFF;
-        __ct__4VPosFfff(&n, 0.0f, 1.0f, 0.0f);
+        __ct__4VPosFfff(&n, MassListZero(), MassListOne(), MassListZero());
         fn_801BF0C4(&pt, &n, cx, &surface);
         cx->surface[i] = surface;
         CopyVector4((MVec4*)&cs->nrm[i], SetVector4Components(&t4, n.x, n.y, n.z, pt.y));
@@ -526,9 +543,9 @@ void fn_801BEDD4(void) {
 
 void fn_801BF0C4(ValVec3* p, ValVec3* n, void* h, s32* surface) {
     if (!fn_801E9E78(h, p, n, surface)) {
-        n->x = 0.0f;
-        n->y = 1.0f;
-        n->z = 0.0f;
+        n->x = MassListZero();
+        n->y = MassListOne();
+        n->z = MassListZero();
         p->y = -100.0f;
     }
 }
