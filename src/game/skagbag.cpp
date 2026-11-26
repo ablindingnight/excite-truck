@@ -182,8 +182,8 @@ inline void SkagPoint::Place(const f32* pt, f32 size, f32 mid) {
     f32 dx = pt[0] - c;
     f32 dy = pt[1] - c;
     u16 q = 0;
-    bool a = dx + dy > 0.0f;
-    bool b = -dx + dy > 0.0f;
+    int a = dx + dy > 0.0f;  // int flags (form unproven): bool gives retail's code but another value kind
+    int b = -dx + dy > 0.0f;
     if (a) {
         q |= 1;
     }
