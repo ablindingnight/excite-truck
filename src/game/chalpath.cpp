@@ -555,38 +555,43 @@ static inline void RebuildMapAfterRace(s32 arg) {
 
 // Races the selected event (vehicle picked through the garage), then rebuilds the map; flags the
 // "difficulty unlocked" popup when that race completed the path.
-static inline void InitMapNodes(PathScreenBuf* s) {  // name unproven
+static inline void InitMapNodes(u8* p) {  // name unproven
     int j;
     int i;
-    s->numEvents = 0;
-    s->numLevels = lbl_8055F3E4->NumLevels();
-    memset(s->evObjs, 0, sizeof(s->evObjs));
-    memset(s->lvObjs, 0, sizeof(s->lvObjs));
-    s->events.count = 0;
-    s->levels.count = 0;
+    ((PathScreenBuf*)p)->numEvents = 0;
+    i = lbl_8055F3E4->NumLevels();  // the count first lives in i: its loop range becomes a split lifetime like retail (form unproven)
+    ((PathScreenBuf*)p)->numLevels = i;
+    memset(((PathScreenBuf*)p)->evObjs, 0, sizeof(((PathScreenBuf*)p)->evObjs));
+    memset(((PathScreenBuf*)p)->lvObjs, 0, sizeof(((PathScreenBuf*)p)->lvObjs));
+    ((PathScreenBuf*)p)->events.count = 0;
+    ((PathScreenBuf*)p)->levels.count = 0;
     for (i = 0; i < MinIGe(lbl_8055F3E4->NumLevels(), 3); i++) {
-        s->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
-        s->levels.Push(new ("pathcontrol") LevelNode(lbl_8055F3E4->GetLevel(i), i));
-        for (j = 0; j < MinIGe(s->lvObjs[i]->NumEvents(), 6); j++) {
-            s->evObjs[s->numEvents] = s->lvObjs[i]->GetEvent(j);
-            s->events.Push(new ("eventcontrol") EventNode(lbl_8055F3E4->GetLevel(i)->GetEvent(j)));
-            s->numEvents++;
+        ((PathScreenBuf*)p)->lvObjs[i] = lbl_8055F3E4->GetLevel(i);
+        ((PathScreenBuf*)p)->levels.Push(new ("pathcontrol") LevelNode(lbl_8055F3E4->GetLevel(i), i));
+        for (j = 0; j < MinIGe(((PathScreenBuf*)p)->lvObjs[i]->NumEvents(), 6); j++) {
+            ((PathScreenBuf*)p)->evObjs[((PathScreenBuf*)p)->numEvents] = ((PathScreenBuf*)p)->lvObjs[i]->GetEvent(j);
+            ((PathScreenBuf*)p)->events.Push(new ("eventcontrol") EventNode(lbl_8055F3E4->GetLevel(i)->GetEvent(j)));
+            ((PathScreenBuf*)p)->numEvents++;
         }
     }
-    s->sound = fn_80207848("a_levelup.sfx", 0);
-    if (s->sound) {
-        s->sound->SetVolume(1.0f);
+    ((PathScreenBuf*)p)->sound = fn_80207848("a_levelup.sfx", 0);
+    if (((PathScreenBuf*)p)->sound) {
+        ((PathScreenBuf*)p)->sound->SetVolume(1.0f);
     } else {
         fn_802E317C("Error creating unlock sound in MCHALLENGEMODE!");
     }
     RedrawNodes();
 }
 
+// Name unproven. The u8* formal (lbl_8055F420's own type) is proven by the JP/PAL copy of fn_8026003C (exact with it):
+// the screen pointer is then a CSE temp, not an inline object (FACTS INLINE-FORMAL-OF-THE-GLOBAL'S-EXACT-TYPE-IS-REBORN-BY-CSE).
+static inline void FreeScreen(u8* p) { ((PathScreenBuf*)p)->Free(); }
+
 void fn_8026003C(void) {
     s32 event;
     s32 arg;
-    s32 track;
     s32 driver;
+    s32 track;
     driver = GetDriver(0)->id;
     s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->id;
     u32 color = GetDriver(0)->color;
@@ -598,7 +603,7 @@ void fn_8026003C(void) {
         int special = !(v->flags & 2);
         int hadSpecial = special && IsSpecialChassisUnlocked(v->chassis);
         bool wasComplete = SCREEN_BUF->AllComplete();
-        SCREEN_BUF->Free();
+        FreeScreen(lbl_8055F420);
         SetPlayer(0, driver, vehicle, color);
         SetPlayerName(IdentGetSlotName(IdentGetCurrentSlot()), 0);
         fn_80137C84(fn_802E4A10(), 0);
@@ -618,7 +623,7 @@ void fn_8026003C(void) {
         ClearPlayer(0);
         AchievementsClearSession();
         lbl_8055F3E4 = fn_8027B878(arg);
-        InitMapNodes(SCREEN_BUF);
+        InitMapNodes(lbl_8055F420);
         bool nowComplete = SCREEN_BUF->AllComplete();
         if (fn_802E8D84()) {
             fn_802E7128();
