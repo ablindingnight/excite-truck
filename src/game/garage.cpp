@@ -1092,7 +1092,7 @@ static inline u32 TintColor(u32 c, u32 t) {
     s32 b = t & 0xFF;
     b = (int)(c & 0xFF) * b * b / 256 / 256;
     g = (int)((c >> 8) & 0xFF) * g * g / 256 / 256;
-    r = (int)((c >> 16) & 0xFF) * a * r / 256 / 256;
+    r = (int)((c >> 16) & 0xFF) * r * a / 256 / 256;
     return 0xFF000000 | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
 }
 
@@ -1125,9 +1125,11 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
                 part = 4;
             }
             f32 s = 0.5f + UnlerpClamp01(0.0f, 1.0f, alpha) / 2.0f;
-            f32 pw = fn_80235EF0(art, part) * s;
+            f32 pw = fn_80235EF0(art, part);
+            pw *= s;
             f32 s2 = 0.5f + UnlerpClamp01(0.0f, 1.0f, alpha) / 2.0f;
-            f32 ph = GetArtHeight(art, part) * s2;
+            f32 ph = GetArtHeight(art, part);
+            ph *= s2;
             int a = RoundF(255.0f * fade);
             a = a > 0x13F ? 0x13F : a;
             u32 c = (a << 24) | 0xFFFFFF;
@@ -1137,10 +1139,10 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     int k = shown > 0 ? shown : 0;
     k = k >= 1 ? 1 : k;
     CarIcon* ic = &((CarIconTable*)PTR(p, 0xC8))->icons[e->icon[k]];
-    f32 v2;
-    f32 u1 = ic->u1;
-    f32 v1 = ic->v1;
-    f32 u2 = ic->u2;
+    f32 u1, v2, u2, v1;
+    u1 = ic->u1;
+    v1 = ic->v1;
+    u2 = ic->u2;
     v2 = ic->v2;
     u32 tint = TintColor(color, locked ? 0xFF000000 : -1);
     DrawTexturedQuad(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h), 0.8f * w, 0.8f * h, ic->tex, u1, v1, u2, v2, locked ? 0xFF000000 : -1);
