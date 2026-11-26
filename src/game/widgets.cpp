@@ -2205,62 +2205,98 @@ void MenuState::Finish(int r) { fn_802168BC(r); }
 
 extern "C" {
 extern const u32 lbl_8055FBE4;
-// NonMatching: clean two-argument menu draw remains41 original-address words off.
-void MenuGrid::Slot24(void* context) {
-    int color;
-    int background;
-    int highlight;
-    MenuEntryCountPrefix* list;
-    struct {
-        int ty;
-    } row;
-    int top;
-    int i;
-    int col;
-    int y;
-    int x;
-    MenuSelectionPrefix* f;
-    int w;
-    int t;
-    int off;
-    int c;
-    int l;
+// PROVISIONAL: helper/scratch names and form, caller ownership and row walker are unproven.
+// Every scratch value feeds existing geometry, selection, count or text work.
+#pragma push
+// Pragma unproven: retain distinct consumed scalar caches at their call boundaries.
+#pragma opt_propagation off
+static inline void PaintMenuGridWithScratch(
+    void*& owner, void* context, int& color, int& background,
+    int& highlight, int& off, int& top, int& ty,
+    int& i, int& col, int& y, int& x,
+    MenuSelectionPrefix*& f, int& c, int& l, int& t,
+    int& w, int& heightCount, int& rowOffset, int& rowSelected,
+    int& outlineSelected, int& textSelected, int& innerCount, int& outerCount,
+    int& scaledHeight, MenuRowPrefix*& tableRows, const char*& labelBase, MenuEntryCountPrefix*& currentList) {
+    f = (MenuSelectionPrefix*)owner;
     SetCurrentCanvas(reinterpret_cast<gxCanvas*>(context));
-    l = ((WidgetFragment*)this)->left;
-    t = ((WidgetFragment*)this)->top;
-    w = ((WidgetDispatch*)((WidgetFragment*)this))->Slot78();
+    l = ((WidgetFragment*)f)->left;
+    t = ((WidgetFragment*)f)->top;
+    w = ((WidgetDispatch*)((WidgetFragment*)f))->Slot78();
     fn_802C3424(l, t, l + w, t + 10, lbl_8055FBE4);
-    f = (MenuSelectionPrefix*)((WidgetFragment*)this);
-    x = ((WidgetFragment*)this)->left;
-    y = ((WidgetFragment*)this)->top;
+    x = ((WidgetFragment*)f)->left;
+    y = ((WidgetFragment*)f)->top;
     color = lbl_8055FBC0;
     background = lbl_8055FBFC;
     highlight = lbl_8055FBF8;
-    for (col = 0; col < ((MenuTablePrefix*)f->rows)->count; col++) {
-        list = (MenuEntryCountPrefix*)f->rows[col].handle;
-        fn_802C4F58(x + 2, y + 2, (const char*)&f->rows[col] + 4, color);
-        if (col == f->row) {
-            fn_802C3424(x, y + 10, x + 50, y + 10 + list->count * 10, background);
+    for (col = 0, rowOffset = 0; (tableRows = f->rows, outerCount = ((MenuTablePrefix*)tableRows)->count, col < outerCount); rowOffset += 36, col++) {
+        currentList = (MenuEntryCountPrefix*)((MenuRowPrefix*)((char*)tableRows + rowOffset))->handle;
+        owner = currentList;
+        labelBase = (const char*)((MenuRowPrefix*)((char*)tableRows + rowOffset));
+        fn_802C4F58(x + 2, y + 2, labelBase + 4, color);
+        rowSelected = f->row;
+        if (col == rowSelected) {
+            heightCount = ((MenuEntryCountPrefix*)owner)->count;
+            scaledHeight = heightCount + 1;
+            scaledHeight *= 10;
+            fn_802C3424(x, y + 10, x + 50, scaledHeight + y, background);
             top = y + 11;
-            row.ty = y + 12;
+            ty = y + 12;
             i = 0;
             off = 0;
-            for (; i < list->count; i++) {
-                if (i == f->column) {
+            for (; (innerCount = ((MenuEntryCountPrefix*)owner)->count, i < innerCount); i++) {
+                outlineSelected = f->column;
+                if (i == outlineSelected) {
                     fn_802C3424(x + 1, top, x + 49, off + y + 19, color);
                 }
                 c = color;
-                if (i == f->column) {
+                textSelected = f->column;
+                if (i == textSelected) {
                     c = highlight;
                 }
-                fn_802C4F58(x + 2, row.ty, (const char*)fn_8022D97C(list, i), c);
+                fn_802C4F58(x + 2, ty, (const char*)fn_8022D97C(currentList, i), c);
                 off += 10;
                 top += 10;
-                row.ty += 10;
+                ty += 10;
             }
         }
         x += 50;
-    }}
+    }
+}
+
+// Keep declaration order: GC3.0a5 allocation depends on these actual source values.
+void MenuGrid::Slot24(void* context) {
+    const char* labelBase;
+    int color;
+    int background;
+    int highlight;
+    int off;
+    int top;
+    int ty;
+    int x;
+    int y;
+    int col;
+    // Snapshot the menu view before the helper reuses this owner slot for each row list.
+    void* input = this;
+    MenuEntryCountPrefix* currentList;
+    int i;
+    int innerCount;
+    int textSelected;
+    MenuSelectionPrefix* f;
+    int outlineSelected;
+    int rowSelected;
+    int scaledHeight;
+    int outerCount;
+    int c;
+    MenuRowPrefix* tableRows;
+    int l;
+    int heightCount;
+    int rowOffset;
+    int w;
+    int t;
+    PaintMenuGridWithScratch(input,context,color,background,highlight,off,top,ty,i,col,y,x,f,c,l,t,w,heightCount,rowOffset,rowSelected,outlineSelected,textSelected,innerCount,outerCount,scaledHeight,tableRows,labelBase,currentList);
+}
+#pragma pop
 void MenuGrid::Slot3C(int x, int y) {((PrefixFlag248*)((WidgetFragment*)this))->value=1;((RowInputDispatch*)((WidgetFragment*)this))->Slot4c(x,y);WidgetMarkDirty(((WidgetFragment*)this));}
 void MenuGrid::Slot40(int x, int y) {((RowInputDispatch*)((WidgetFragment*)this))->Slot4c(x,y);MenuSelectionPrefix* f=(MenuSelectionPrefix*)((WidgetFragment*)this);f->active=0;if(f->row>=0&&f->column>=0){MenuRecord* record=fn_8022D97C(f->rows[f->row].handle,f->column);if(!record->callback||record->callback(record->context))fn_802168BC(reinterpret_cast<int>(record->context));}f->row=-1;f->column=-1;WidgetMarkDirty(((WidgetFragment*)this));}
 void MenuGrid::Slot4C(int x, int y) {

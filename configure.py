@@ -1166,7 +1166,7 @@ config.libs.append(
             Object(Matching, "game/uiapi.cpp"),
             Object(Matching, "game/widgetwin.cpp"),
             Object(Matching, "game/window.cpp"),
-            Object(NonMatching, "game/widgets.cpp"),
+            Object(Matching, "game/widgets.cpp"),
             Object(Matching, "game/uistyle.cpp"),
             Object(Matching, "game/strlist.cpp"),
             Object(Matching, "game/uitable.cpp"),
