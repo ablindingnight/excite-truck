@@ -634,8 +634,9 @@ void mrModelFixup(ModelInfo* m, const char* name) {
             break;
         }
         case 'SPHL': {
+            MSphere* s;
             int j;
-            MSphere* s = (MSphere*)&x->n;
+            s = (MSphere*)&x->n;
             for (j = 0; j < m->nElems; j++) {
                 MSWAP4(&s->c.x)
                 MSWAP4(&s->c.y)
