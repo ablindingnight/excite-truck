@@ -2412,9 +2412,13 @@ void fn_80186DE8(void) {
         }
         F = *(const RVec3*)&m->force;
         F.x += f.x;
-        RVec3 T(m->torque.x + t.x, m->torque.y + t.y, m->torque.z + t.z);
         F.y += f.y;
+        RVec3 T;
+        T.z = m->torque.z;
         F.z += f.z;
+        T.z += t.z;
+        T.y = m->torque.y + t.y;
+        T.x = m->torque.x + t.x;
         SolSet(&m->force, F.x, F.y, F.z);
         SolSet(&m->torque, T.x, T.y, T.z);
         if (PSVECDotProduct((const Vec*)(car + 0x124), (const Vec*)(car + 0x124)) > 100.0f) {
