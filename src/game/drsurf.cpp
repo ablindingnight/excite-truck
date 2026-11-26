@@ -1459,16 +1459,27 @@ void fn_802D6C78(void) {
             pout = (f32*)LC_BUF(buf) + 0x540;
             V3* o = (V3*)pout;
             for (int i = 0; i < pc; i++) {
-                f32 a = (1.0f / 255) * v->da;
-                f32 b = (1.0f / 255) * v->db;
                 V3 d = lbl_804C56F0;
-                f32 w = v->w;
+                // Same body as fn_802D50B4's (EXACT) unqueued dir-y-morph loop; wa must be declared before a.
+                f32 wa;
+                f32 a;
+                f32 wb;
+                f32 w;
+                f32 b;
                 V3 p;
-                p.y = v->y + d.y * w;
-                f32 ta = a * lbl_804CA308[v->ia];
+                w = v->w;
                 p.x = v->x + d.x * w;
+                p.y = v->y + d.y * w;
                 p.z = v->z + d.z * w;
-                o->Set(p.x, p.y + ta + b * lbl_804CA308[v->ib], p.z);
+                const int ia = v->ia;
+                wa = lbl_804CA308[ia];
+                const int ib = v->ib;
+                wb = lbl_804CA308[ib];
+                a = (1.0f / 255) * v->da;
+                b = (1.0f / 255) * v->db;
+                o->x = p.x;
+                o->y = p.y + a * wa + b * wb;
+                o->z = p.z;
                 v++;
                 o++;
             }
