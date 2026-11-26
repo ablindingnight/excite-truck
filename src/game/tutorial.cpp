@@ -1080,6 +1080,8 @@ int fn_80161ECC(void) {
 void fn_80161F10(int n) {
     EventInfo* e;
     u32 color;
+    const char* playerCarKey;
+    const char* playerColorKey;
     int ev;
     s32 driver;
     s32 vehicle;
@@ -1088,8 +1090,8 @@ void fn_80161F10(int n) {
     ev = (int)fn_80161E40(n);
     e = GetEvent(ev);
     fn_80137C78(1);
-    const char* playerCarKey = "player_car";
-    const char* playerColorKey = "player_color";
+    playerCarKey = "player_car";
+    playerColorKey = "player_color";
     fn_80137C84(fn_802E4A10(), 0);
     driver = GetDriver(0)->id;
     vehicle = GetDriverVehicle(driver)->id;
