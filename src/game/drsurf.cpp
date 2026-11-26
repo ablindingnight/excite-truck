@@ -1310,8 +1310,8 @@ static inline void FlushSkin(DeformQueue* q) {
 
 // Helper name unproven: the y-morph queue (the target numbers its locals in ascending declaration order, as the
 // locals of an inline are).
-static inline void FlushYMorph(DeformQueue* q) {
-    if (q->count) {
+static inline void FlushYMorph(DeformQueue* q, int count) {
+    if (count) {
         int left;
         DeformJob* next;
         int n;
@@ -1325,7 +1325,7 @@ static inline void FlushYMorph(DeformQueue* q) {
         f32* pout;
         u8* in;
         next = q->jobs;
-        left = q->count - 1;
+        left = count - 1;
         n = next->n;
         src = (YMorphVtx*)next->src;
         dst = (u8*)next->dst;
@@ -1386,10 +1386,11 @@ void fn_802D6C78(void) {
     SetGQR6();
     // Through q: retail reads jobs[0].n via the queue base (a direct &global folds it to an absolute address).
     q = &lbl_804D2C40;
-    FlushYMorph(q);
+    int count = q->count;
+    FlushYMorph(q, count);
     SetGQR6();
     q = &lbl_804D6C44;
-    int count = q->count;
+    count = q->count;
     if (count) {
         DirYMorphVtx* v;
         f32* pout;
