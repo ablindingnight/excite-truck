@@ -584,10 +584,11 @@ static inline void InitMapNodes(u8* p) {  // name unproven
 static inline void FreeScreen(u8* p) { ((PathScreenBuf*)p)->Free(); }
 
 void fn_8026003C(void) {
-    s32 event;
-    s32 arg;
+    // US order; the JP/PAL revision is exact with event, arg, driver, track instead (revisit if the graph changes)
     s32 driver;
     s32 track;
+    s32 event;
+    s32 arg;
     driver = GetDriver(0)->id;
     s32 vehicle = GetVehicle(GetDriver(0)->vehicle)->id;
     u32 color = GetDriver(0)->color;
