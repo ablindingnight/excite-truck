@@ -384,7 +384,10 @@ struct BarArts { const char* art[3]; };
 inline const char* BarArt(int bar) {  // name unproven
     static const BarArts arts = {{"car_bar1_e.art", "car_bar1_s.art", "car_bar1_m.art"}};
     BarArts a = *(BarArts*)&arts;
-    return a.art[bar];
+    // Reading the index through a reference keeps bar out of the loop-invariant pass (bar*4 is not hoisted;
+    // retail re-reads the spilled bar per menu).
+    const int& b = bar;
+    return a.art[b];
 }
 
 static inline GarageList* MakeColorList(CarPick& cars) {  // name unproven
@@ -411,8 +414,6 @@ inline ColorPick::ColorPick(GarageList* list, s32* color, s32* car, StatPanel* p
 }
 
 
-#pragma push
-#pragma opt_loop_invariants off  /* Pragma unproven: retail keeps bar spilled and indexes per use */
 int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar) {
     int cur = IdentGetCurrentSlot();
     if (lbl_80498C48.unk0 != cur) {
@@ -432,10 +433,6 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
         panel.Clear();
         s32* sel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
         CarPick cars(screen, sel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui);
-        s32* pd = &lbl_80498C48.pairs[slot].d;
-        s32* pc = &lbl_80498C48.pairs[slot].c;
-        s32* pb = &lbl_80498C48.pairs[slot].b;
-        s32* pa = &lbl_80498C48.pairs[slot].a;
         for (;;) {
             if (!lbl_80498C48.alt) {
                 MenuItem items[] = {
@@ -472,8 +469,8 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
             if (lbl_80498C48.alt || r == -2) {
                 HeapMark mark("choosevehicle2");
                 GarageList* colors = MakeColorList(cars);
-                s32* csel = lbl_80498C48.alt ? pd : pb;
-                ColorPick paint(colors, csel, lbl_80498C48.alt ? pc : pa, &panel, &ui, color);
+                s32* csel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
+                ColorPick paint(colors, csel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
                 MenuDesc desc = {"carchoose2b.lyt", 0, (int (*)(int*))fn_8024DADC, 0, 0};
                 MenuItem items[] = {
                     MenuItem(0, 5, (u8*)&paint, 0, 0),
@@ -510,7 +507,6 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
     *vehicle = *pv;
     return r != -1;
 }
-#pragma pop
 
 // Tints the car with the selected slot's animation, or its saved paint.
 static inline void ShowCarColor(u8* p) {
