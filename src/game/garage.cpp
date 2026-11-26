@@ -1102,6 +1102,9 @@ extern "C" {
 // with its colour.
 }  // extern "C"
 
+// v mapped from a..b to 0..1 and clamped (as in ring.cpp). Name unproven.
+static inline f32 UnlerpClamp01(f32 a, f32 b, f32 x) { return MaxF(MinF(1.0f, (x - a) / (b - a)), 0.0f); }
+
 void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
     u8* p = (u8*)this;
     CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[i];
@@ -1121,9 +1124,9 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             if (k == 0) {
                 part = 4;
             }
-            f32 s = 0.5f + Clamp01(Unlerp(alpha, 0.0f, 1.0f)) / 2.0f;
+            f32 s = 0.5f + UnlerpClamp01(0.0f, 1.0f, alpha) / 2.0f;
             f32 pw = fn_80235EF0(art, part) * s;
-            f32 s2 = 0.5f + Clamp01(Unlerp(alpha, 0.0f, 1.0f)) / 2.0f;
+            f32 s2 = 0.5f + UnlerpClamp01(0.0f, 1.0f, alpha) / 2.0f;
             f32 ph = GetArtHeight(art, part) * s2;
             int a = RoundF(255.0f * fade);
             a = a > 0x13F ? 0x13F : a;
