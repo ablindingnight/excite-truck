@@ -119,7 +119,8 @@ static inline void Normalize(Quat& q) {
     q.w *= inv;
 }
 static inline void ToMatrix(PlainValMatrix* m, const Quat& q) {
-    f32 y2 = q.y + q.y;
+    f32 y2 = q.y;
+    y2 += q.y;
     f32 z2 = q.z + q.z;
     f32 x2 = q.x + q.x;
     f32 yy = q.y * y2;
