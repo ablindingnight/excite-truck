@@ -19,6 +19,10 @@ struct MLF {
     f32 v;
 };
 
+/* Helper name and original operation boundary unproven; same solver-family
+   scalar field read as carbody LaneOfR(const CbF&). */
+static inline f32 MLScalarLane(const MLF& value) { return value.v; }
+
 /* Helper names unproven (RVec3, MLF, MLVec4, Set): the solver-record 4-vector family (carbody CbVec4, minworld MWV4). */
 struct MLVec4 {
     MLVec4(MVec4 s) {
@@ -29,7 +33,7 @@ struct MLVec4 {
         x = p.x;
         y = p.y;
         z = p.z;
-        w = w_.v;
+        w = MLScalarLane(w_);
     }
     f32 x, y, z, w;
 };
@@ -363,17 +367,23 @@ void fn_801BE400(int car, const ValMatrix* mtx, f32 a) {
     s->vA0 = MVec4(0.0f, 0.0f, 0.0f);
     s->v90 = MVec4(0.0f, 0.0f, 0.0f);
     ValVec3 v;
-    TScale(&v, &mtx->basis[2], a);
+    v.x = mtx->basis[2].x * a;
+    v.y = mtx->basis[2].y * a;
+    v.z = mtx->basis[2].z * a;
     SetFromV3(s->vel, v);
     s->v60 = MVec4(0.0f, 0.0f, 0.0f);
     MLVec4 k(x->row[7]);
+    f32 ix = a;
+    f32 iy = a;
+    f32 iz = a;
+    f32 iw = a;
     c->v0 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v20 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v10 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    f32 ix = a / k.x;
-    f32 iy = a / k.y;
-    f32 iz = a / k.z;
-    f32 iw = a / k.w;
+    ix /= k.x;
+    iy /= k.y;
+    iz /= k.z;
+    iw /= k.w;
     c->v30 = MVec4(ix, iy, iz, iw);
     *(MVec4*)&c->pts[4] = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
     c->v190 = MVec4(0.0f, 0.0f, 0.0f, 0.0f);
