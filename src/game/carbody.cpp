@@ -2651,7 +2651,7 @@ void fn_80186DE8(void) {
                 CbVec4 half;
                 half.SetSolV(c->v30);
                 half[j] = Mul(half[j], 0.5f);
-                c->v30 = half.Sol();
+                c->v30 = CbSolVec4(half.x, half.y, half.z, half.w);
             }
             fl = w->flags & 0xE;
             if (gr) {
