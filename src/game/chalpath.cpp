@@ -309,10 +309,8 @@ extern "C" void InitializeChallengeMode(PathScreenBuf* s);
 struct NodeVec6 {
     inline void Init(void);  // name unproven (weak, emitted after use)
     void Push(EventNode* p) {
-        EventNode** d = data;
-        int k = count;
-        count = k + 1;
-        d[k] = p;
+        EventNode** d = data + count++;  // the slot address in one expression: no index local, like retail (form unproven)
+        *d = p;
     }
     EventNode** data;  // offset 0x0
     s32 count;         // offset 0x4
@@ -323,10 +321,8 @@ struct NodeVec6 {
 struct NodeVec3 {
     inline void Init(void);  // name unproven (weak, emitted after use)
     void Push(LevelNode* p) {
-        LevelNode** d = data;
-        int k = count;
-        count = k + 1;
-        d[k] = p;
+        LevelNode** d = data + count++;  // the slot address in one expression: no index local, like retail (form unproven)
+        *d = p;
     }
     LevelNode** data;  // offset 0x0
     s32 count;         // offset 0x4
