@@ -2618,7 +2618,8 @@ void fn_80186DE8(void) {
             CbWheel* w = &((CarBody*)car)->wheels[j];
             f32 load = w0[j];
             w->load = load;
-            w->loadN = load / 0.10471976f;
+            f32 loadN = load / 0.10471976f;
+            w->loadN = loadN;
             w->spin = w1[j];
             w1[j] = fmod(6.2831855f + w1[j], 6.2831854820251465);
             w->prevSlip = w->slip;
