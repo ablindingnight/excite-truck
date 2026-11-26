@@ -379,6 +379,10 @@ void fn_802D81C4(GXTexDesc* d, const char*) {
     delete[] tmp;
 }
 
+// Helper name unproven: 8-texel tiles across a row. Used in place, its return is an inline object that IRO hoists;
+// a named `int tw` is numbered below the loop's strength-reduction values and takes the wrong register.
+static inline int TilesAcross(int w) { return w / 8; }
+
 void fn_802D86BC(GXTexDesc* d, const char*) {
     TexImage* img = d->data;
     s32 w = d->w;
@@ -391,16 +395,12 @@ void fn_802D86BC(GXTexDesc* d, const char*) {
     fn_801282EC(0x20);
     u8* tmp = new ("pal8_tmp") u8[w * h];
     memcpy(tmp, tex, w * h);
-    int tw = w / 8;
-    int off = 0;
-    // The rows are read by index through a named source pointer (retail re-derives src + off + x for the
-    // unrolled loop's remainder; a walking pointer would carry over instead).
+    // Rows read by index (retail re-derives src + y*w + x for the unrolled remainder; a walking pointer carries over).
     const u8* src = tmp;
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
-            tex[((y / 4) * tw + x / 8) * 32 + (y % 4) * 8 + x % 8] = src[off + x];
+            tex[((y / 4) * TilesAcross(w) + x / 8) * 32 + (y % 4) * 8 + x % 8] = src[y * w + x];
         }
-        off += w;
     }
     delete[] tmp;
 }
