@@ -67,10 +67,7 @@ class CamRegion {
 public:
 public:
     u8* cam;         // offset 0x0, null when unused
-    f32 lo1;         // offset 0x4, first heading window
-    f32 hi1;         // offset 0x8
-    f32 lo2;         // offset 0xC, second heading window
-    f32 hi2;         // offset 0x10
+    f32 longitudes[4]; // offset 0x4; two consecutive real low/high windows
     u8 dual;         // offset 0x14, second window in use
     u8 pad15[0x3];
 
@@ -79,6 +76,9 @@ public:
     virtual int Weight(u8* car, f32* weight, int type);
     virtual void Prepare(u8* car);
 };
+
+// Array name/original source representation unproven; exact physical extent required.
+typedef char RegionLongitudeExtentMustRemain28[(sizeof(CamRegion) == 0x1C) ? 1 : -1];
 
 // A "region_sphere" table from the camera file (0x60); camera regions point at these.
 class RegionSphere {
@@ -128,7 +128,6 @@ struct CamCycle {
 
 ModuleTag lbl_8055F538;
 static inline f32 DegToRad(f32 d) { return 0.017453292f * d; }
-template <class O, class S> static inline void PcSegEnds(O* s, O* e, const S* seg, f32 t0, f32 t1) { s->x = seg->pos.x + t0 * (seg->next->pos.x - seg->pos.x); e->x = seg->pos.x + t1 * (seg->next->pos.x - seg->pos.x); s->y = seg->pos.y + t0 * (seg->next->pos.y - seg->pos.y); e->y = seg->pos.y + t1 * (seg->next->pos.y - seg->pos.y); }  /* Helper name unproven */
 static inline f32 PcSq(f32 v) { return v * v; }  /* Helper name unproven */
 static inline f32 PcMul(f32 a, f32 b) { return a * b; }  /* Helper name unproven */
 static inline f32 PcLerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }  /* Helper name unproven */
@@ -217,20 +216,20 @@ int fn_80270D4C(const void* a, const void* b) {
     f32* pb;
     f32* pa;
     if (((const AngleRef*)b)->alt) {
-        pb = &((const AngleRef*)b)->track->lo2;
+        pb = &((const AngleRef*)b)->track->longitudes[2];
     } else {
-        pb = &((const AngleRef*)b)->track->lo1;
+        pb = &((const AngleRef*)b)->track->longitudes[0];
     }
     if (((const AngleRef*)a)->alt) {
-        pa = &((const AngleRef*)a)->track->lo2;
+        pa = &((const AngleRef*)a)->track->longitudes[2];
     } else {
-        pa = &((const AngleRef*)a)->track->lo1;
+        pa = &((const AngleRef*)a)->track->longitudes[0];
     }
     return (s32)(*pa - *pb);
 }
 
-static inline f32* AngleLo(AngleRef* r) { return r->alt ? &r->track->lo2 : &r->track->lo1; }
-static inline f32* AngleHi(AngleRef* r) { return r->alt ? &r->track->hi2 : &r->track->hi1; }
+static inline f32* AngleLo(AngleRef* r) { return r->alt ? &r->track->longitudes[2] : &r->track->longitudes[0]; }
+static inline f32* AngleHi(AngleRef* r) { return r->alt ? &r->track->longitudes[3] : &r->track->longitudes[1]; }
 
 
 // Meets two adjacent windows halfway: a's end and b's start become their midpoint (mod wrap).
@@ -291,9 +290,9 @@ void fn_80270EC4(u8* car, u32 id) {
         int i;
         CamRegion* r = lbl_8049F9D8;
         for (i = 0; i < lbl_8055F554; i++) {
-            fn_80270B00("  %2d: %.3f  %.3f", i, r->lo1, r->hi1);
+            fn_80270B00("  %2d: %.3f  %.3f", i, r->longitudes[0], r->longitudes[1]);
             if (r->dual) {
-                fn_80270B00(" +%2d: %.3f  %.3f", i, r->lo2, r->hi2);
+                fn_80270B00(" +%2d: %.3f  %.3f", i, r->longitudes[2], r->longitudes[3]);
             }
             r++;
         }
@@ -586,8 +585,8 @@ void fn_80271624(int mode, u8* p) {
                 if (lbl_8055F564) {
                     f32 f = 0.0f;
                     f32 h = lbl_8055F568;
-                    f32 lo = r->lo1;
-                    f32 hi = r->hi1;
+                    f32 lo = r->longitudes[0];
+                    f32 hi = r->longitudes[1];
                     if (lo >= hi) {
                         if (h >= lo) {
                             hi += *(f32*)(PTR(track, 0x2C) + PitMode(track) * 4 + 8);
@@ -598,8 +597,8 @@ void fn_80271624(int mode, u8* p) {
                     if (lo <= h && h <= hi) {
                         f = (h - lo) / (hi - lo);
                     } else {
-                        lo = r->lo2;
-                        hi = r->hi2;
+                        lo = r->longitudes[2];
+                        hi = r->longitudes[3];
                         if (lo >= hi) {
                             if (h >= lo) {
                                 hi += *(f32*)(PTR(track, 0x2C) + PitMode(track) * 4 + 8);
@@ -984,8 +983,14 @@ static inline void PrepareLong2(u8* line, const f32* lo) {
     fn_8027264C("end_long_2", line, lo[3]);
 }
 
+// Actual ring-head query: reads the required line and points fields.
+// Name/original source API unproven; no identity-only pointer wrapper.
+static inline IdealPoint* RegionRingHead(LineFollower* follower) {
+    return follower->line->points;
+}
+
 void CamRegion::Prepare(u8* line) {
-    V2 center;
+    V2C center(((const RegionSphere*)cam)->pos[0], ((const RegionSphere*)cam)->pos[2]);
     V2 s;
     V2 e;
     V2 dir;
@@ -994,44 +999,43 @@ void CamRegion::Prepare(u8* line) {
     V2 pt;
     V2 d1;
     V2 d2;
-    f32 cx;
-    f32 cy = F32(cam, 0x8);
-    cx = F32(cam, 0x0);
-    center.x = cx;
-    center.y = cy;
     f32 wrap;
-    f32 rad = F32(cam, 0xC);
+    f32 rad = ((const RegionSphere*)cam)->radius;
     wrap = ((LineFollower*)line)->line->len[0];
     f32 r2 = rad * rad;
-    ((LineFollower*)line)->il.mode = fn_80270D1C(S32(cam, 0x5C));
-    IdealPoint* first = ((LineFollower*)line)->line->points;
+    ((LineFollower*)line)->il.mode = fn_80270D1C(((const RegionSphere*)cam)->group);
+    IdealPoint* first = RegionRingHead((LineFollower*)line);
     IdealPoint* seg;
     int k = 0;
     int done = 0;
     seg = first;
     do {
         int n = 0;
-        PcSegEnds(&s, &e, seg, 0.0f, 1.0f);
+        s.x = ILerpT(0.0f, seg->pos.x, seg->next->pos.x);
+        s.y = ILerpT(0.0f, seg->pos.y, seg->next->pos.y);
+        e.x = ILerpT(1.0f, seg->pos.x, seg->next->pos.x);
+        e.y = ILerpT(1.0f, seg->pos.y, seg->next->pos.y);
         dir.x = e.x - s.x;
         dir.y = e.y - s.y;
-        f32 a = dir.x * dir.x + dir.y * dir.y;
-        f32 yv = center.y;
+        f32 a = PcSq(dir.x) + PcSq(dir.y);
         rel.x = s.x - center.x;
-        rel.y = s.y - yv;
-        f32 b = 2.0f * (dir.x * rel.x + dir.y * rel.y);
-        f32 disc = b * b - 4.0f * a * (rel.x * rel.x + PcSq(rel.y) - r2);
+        rel.y = s.y - center.y;
+        f32 b = 2.0f * (rel.x * dir.x + rel.y * dir.y);
+        f32 c = PcSq(rel.x) + PcSq(rel.y) - r2;
+        f32 disc = b * b - 4.0f * a * c;
         if (!(AbsF(a) <= __float_epsilon[0]) && disc > 0.0f) {
             f32 q = (f32)sqrt(disc);
             n = 2;
-            sol[0] = (-b - q) / (2.0f * a);
-            sol[1] = (-b + q) / (2.0f * a);
+            f32 denominator = 2.0f * a;
+            sol[0] = (-b - q) / denominator;
+            sol[1] = (-b + q) / denominator;
         }
         for (int j = 0; j < n; j++) {
             if (fn_802726EC(sol[j], 0.0f, 1.0f)) {
                 f32 v = seg->dist + seg->len * sol[j];
                 if (k < 4) {
-                    (&lo1)[k++] = v;
-                    fn_80270B00("  solution: %.3f", (&lo1)[k - 1]);
+                    longitudes[k++] = v;
+                    fn_80270B00("  solution: %.3f", longitudes[k - 1]);
                 } else {
                     fn_80270B00("    too many solutions, discarding %.3f", v);
                 }
@@ -1060,14 +1064,14 @@ void CamRegion::Prepare(u8* line) {
         if (rad > wrap - mid) {
             hi -= wrap;
         }
-        (&lo1)[0] = fn_80272428(line, &center.x, lo, mid, r2);
-        (&lo1)[1] = fn_80272428(line, &center.x, mid, hi, r2);
+        longitudes[0] = fn_80272428(line, &center.x, lo, mid, r2);
+        longitudes[1] = fn_80272428(line, &center.x, mid, hi, r2);
         k = 2;
     } else if (k == 1) {
-        (&lo1)[1] = (&lo1)[0];
+        longitudes[1] = longitudes[0];
         k++;
     } else if (k == 3) {
-        (&lo1)[3] = (&lo1)[2];
+        longitudes[3] = longitudes[2];
         k++;
     }
     if (k > 2) {
@@ -1076,33 +1080,33 @@ void CamRegion::Prepare(u8* line) {
     } else {
         dual = 0;
     }
-    fn_802723B4(line, &pt.x, 0.5f * ((&lo1)[0] + (&lo1)[1]));
+    fn_802723B4(line, &pt.x, 0.5f * (longitudes[0] + longitudes[1]));
     d1.y = pt.y - center.y;
     d1.x = pt.x - center.x;
     if (d1.x * d1.x + d1.y * d1.y > r2) {
         if (dual) {
-            fn_802723B4(line, &pt.x, 0.5f * ((&lo1)[1] + (&lo1)[2]));
+            fn_802723B4(line, &pt.x, 0.5f * (longitudes[1] + longitudes[2]));
             d2.y = pt.y - center.y;
             d2.x = pt.x - center.x;
             if (d2.x * d2.x + d2.y * d2.y > r2) {
                 dual = 0;
             } else {
-                f32 first0 = (&lo1)[0];
-                memmove(&(&lo1)[0], &(&lo1)[1], 12);
-                (&lo1)[3] = first0;
+                f32 first0 = longitudes[0];
+                memmove(&longitudes[0], &longitudes[1], 12);
+                longitudes[3] = first0;
             }
         }
         if (!dual) {
-            f32 t0 = (&lo1)[0];
-            (&lo1)[0] = (&lo1)[1];
-            (&lo1)[1] = t0;
+            f32 t0 = longitudes[0];
+            longitudes[0] = longitudes[1];
+            longitudes[1] = t0;
         }
     }
     fn_80270B00("  finding line points for (%.3f, %.3f)", center.x, center.y);
-    fn_8027264C("start_long", line, (&lo1)[0]);
-    fn_8027264C("end_long", line, (&lo1)[1]);
+    fn_8027264C("start_long", line, longitudes[0]);
+    fn_8027264C("end_long", line, longitudes[1]);
     if (dual) {
-        PrepareLong2(line, &lo1);
+        PrepareLong2(line, &longitudes[0]);
     }
 }
 extern "C" {
@@ -1136,8 +1140,8 @@ int CamRegion::Weight(u8* car, f32* weight, int type) {
     int ok = 1;
     if (lbl_8055F564) {
         f32 wrap = F32(PTR((u8*)((DeityCar*)PTR(car, 0x270))->Ideal(), 0x2C), 0x8);
-        if (fn_80272C24(lbl_8055F568, r->lo1, r->hi1, wrap) ||
-            (r->dual && fn_80272C24(lbl_8055F568, r->lo2, r->hi2, wrap))) {
+        if (fn_80272C24(lbl_8055F568, r->longitudes[0], r->longitudes[1], wrap) ||
+            (r->dual && fn_80272C24(lbl_8055F568, r->longitudes[2], r->longitudes[3], wrap))) {
             *weight = 1.0f;
             return 1;
         }
