@@ -1389,7 +1389,8 @@ void fn_802D6C78(void) {
     FlushYMorph(q);
     SetGQR6();
     q = &lbl_804D6C44;
-    if (q->count) {
+    int count = q->count;
+    if (count) {
         DirYMorphVtx* v;
         f32* pout;
         u8* pdst;
@@ -1402,7 +1403,7 @@ void fn_802D6C78(void) {
         int n;
         DeformJob* next;
         int left;
-        left = q->count - 1;
+        left = count - 1;
         next = q->jobs;
         n = next->n;
         src = (DirYMorphVtx*)next->src;
@@ -1466,7 +1467,8 @@ void fn_802D6C78(void) {
     }
     SetGQR6();
     q = &lbl_804CEC3C;
-    if (q->count) {
+    count = q->count;
+    if (count) {
         u8* in;
         f32* pout;
         u8* pdst;
@@ -1480,7 +1482,7 @@ void fn_802D6C78(void) {
         DeformJob* next;
         int left;
         next = q->jobs;
-        left = q->count - 1;
+        left = count - 1;
         n = next->n;
         src = (DirVtx*)next->src;
         dst = (u8*)next->dst;
