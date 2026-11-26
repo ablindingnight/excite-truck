@@ -545,6 +545,8 @@ static inline int BeginTextureGroup(PartSys** mid, int& nMid, PartSys* seed, int
     return next;
 }
 
+static inline s32 TexOf(const PartSys* p) { return p->tex; } // name unproven
+
 void fn_8028F114(SysList* l, s32 first, s32 last) {
     s32 t;
     PartSys** o;
@@ -577,7 +579,7 @@ void fn_8028F114(SysList* l, s32 first, s32 last) {
     PartSys* s;
     for (int j = 0; j < l->count; j++) {
         s = l->items[j];
-        t = s->tex;
+        t = TexOf(s);
         if (t != first && t != last) {
             bool found = ContainsTexture(out + nFirst, nMid, t);
             if (!found) {
