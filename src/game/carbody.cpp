@@ -773,7 +773,7 @@ void fn_80182DF4(u8* p, u8* desc) {
         fn_801E323C(wheel);
     }
     minY = MaxF(minY, 0.2f);
-    __memcpy(&c, &cb->offset, sizeof(HVec));
+    __memcpy(&c, &cb->offset, sizeof(HVec));  // MWCC memcpy intrinsic (word copy); c stays a frame object above rear
     minX += c.x;
     maxX += c.x;
     minY += c.y;
@@ -798,13 +798,13 @@ void fn_80182DF4(u8* p, u8* desc) {
     f32 xSide = maxX - h;
     f32 zFront = 0.44999998f + minZ;
     f32 yFront = 0.44999998f + minY;
-    f32 xFront = maxX - 0.44999998f;
     f32 zFrontMid = 0.5f * (zFront + zMid);
-    f32 yr = 0.254f + yRear;
+    f32 xFront = maxX - 0.44999998f;
     f32 nb = -b;
+    f32 yr = 0.254f + yRear;
     rear.Set(0.7f, 0.1f, 1.0f);
-    mid.Set(0.7f, 0.1f, 1.0f);
     front.Set(0.7f, 0.1f, 1.0f);
+    mid.Set(0.7f, 0.1f, 1.0f);
     {
         HVec rel;
         AddBodySphere(p, &rel, RVec3(nb, yr, zRear), &mid, 0.36f, stiff, damp, mass, invMass);
