@@ -198,7 +198,7 @@ void fn_802D78D4(u16* rgb, u16* alpha, const u32* pal, int n) {
         // without them 164/162 instrs, s16* parameters do not do it either.
         c.word = pal[i];
         rgb[i] = (s16)To565(c.b);
-        alpha[i] = (s16)(c.b[3] << 8);
+        alpha[i] = (s16)(c.b[3] << 8 & 0xFF00);
 #else
         // PORT: the palette words are little-endian on disc (A, B, G, R in memory) and the Wii's loader reversed
         // them to R, G, B, A; a little-endian host skips that swap, so reverse the word here. GX reads the TLUTs
