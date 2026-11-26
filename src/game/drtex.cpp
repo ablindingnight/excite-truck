@@ -340,18 +340,11 @@ GXTex* create_generic_texture(const GXTexDesc* d, const char* name) {
     return t;
 }
 
-/* Helper name unproven: copy linear CI4 bytes into GX tile order. */
 // Helper name unproven: 4-byte (8-texel) CI4 tiles across a row, used in place like TilesAcross (fn_802D86BC).
 static inline int TilesAcross4(int row) { return row / 4; }
-
-static inline void TileCI4(u8* tex, const u8* tmp, int w, int h, int row) {
-    const u8* src = tmp;
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w / 2; x++) {
-            tex[((y / 8) * TilesAcross4(row) + x / 4) * 32 + (y % 8) * 4 + x % 4] = src[y * row + x];
-        }
-    }
-}
+// Helper name unproven: bytes per CI4 row (two texels each). Used in place as the inner bound it stays a separate w / 2
+// (retail recomputes it after the named row); a plain `x < w / 2` here is CSE'd with row (315/318).
+static inline int BytesAcross(int w) { return w / 2; }
 
 void fn_802D81C4(GXTexDesc* d, const char*) {
     s32 w = d->w;
@@ -375,7 +368,13 @@ void fn_802D81C4(GXTexDesc* d, const char*) {
     fn_801282EC(0x20);
     u8* tmp = new ("tmp_tx8") u8[row * h];
     memcpy(tmp, tex, row * h);
-    TileCI4(tex, tmp, w, h, row);
+    // Copied into GX 8x8 CI4 tiles. y and x are this function's locals (as inline locals they were coloured first).
+    const u8* src = tmp;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < BytesAcross(w); x++) {
+            tex[((y / 8) * TilesAcross4(row) + x / 4) * 32 + (y % 8) * 4 + x % 4] = src[y * row + x];
+        }
+    }
     delete[] tmp;
 }
 
