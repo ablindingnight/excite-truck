@@ -2348,17 +2348,17 @@ static inline void CbSet3(f32* d, f32 x, f32 y, f32 z) {
     d[2] = z;
 }
 
-static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, f32 ox, f32 oy, const HVec& o) {  // name unproven
-    f32 ax = 59.94f * vel.x + *(f32*)(car + 0x118) * -59.94f;
+static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, f32 ox, f32 oy, const HVec& o, f32 k, f32 nk) {  // name unproven
+    f32 ax = vel.x * k + *(f32*)(car + 0x118) * nk;
     ((CarBody*)car)->accel.x = ax;
-    f32 ay = Mul(vel.y, 59.94f) + Mul(((CarBody*)car)->vel.y, -59.94f);
+    f32 ay = Mul(vel.y, k) + Mul(((CarBody*)car)->vel.y, nk);
     ((CarBody*)car)->accel.y = ay;
     f32 px = ax - ox;
     f32 py = ay - oy;
-    ((CarBody*)car)->accel.z = vel.z * 59.94f + Mul(((CarBody*)car)->vel.z, -59.94f);
-    ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + Mul(((CarBody*)car)->avel.x, -59.94f);
-    ((CarBody*)car)->aaccel.y = CbAdd(avel.y * 59.94f, ((CarBody*)car)->avel.y * -59.94f);
-    ((CarBody*)car)->aaccel.z = CbAdd(avel.z * 59.94f, Mul(((CarBody*)car)->avel.z, -59.94f));
+    ((CarBody*)car)->accel.z = vel.z * k + Mul(((CarBody*)car)->vel.z, nk);
+    ((CarBody*)car)->aaccel.x = Mul(avel.x, k) + Mul(((CarBody*)car)->avel.x, nk);
+    ((CarBody*)car)->aaccel.y = CbAdd(avel.y * k, ((CarBody*)car)->avel.y * nk);
+    ((CarBody*)car)->aaccel.z = CbAdd(avel.z * k, Mul(((CarBody*)car)->avel.z, nk));
     ((CarBody*)car)->vel.x = vel.x;
     ((CarBody*)car)->vel.y = vel.y;
     ((CarBody*)car)->vel.z = vel.z;
@@ -2595,7 +2595,7 @@ void fn_80186DE8(void) {
         int boosting;
         f32 vmax;
         f32 out;
-        CbMotion(car, vel, avel, o.x, o.y, o);
+        CbMotion(car, vel, avel, o.x, o.y, o, 59.94f, -59.94f);
         CbVec4 w0(c->v30);
         CbVec4 w1(c->v10);
         CbVec4 w2(c->v0);
