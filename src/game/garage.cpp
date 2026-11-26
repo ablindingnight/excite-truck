@@ -1102,9 +1102,6 @@ extern "C" {
 // with its colour.
 }  // extern "C"
 
-// Name unproven.
-static inline f32 GarageFadeAlpha(const f32& fade) { return 255.0f * fade; }
-
 void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
     u8* p = (u8*)this;
     CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[i];
@@ -1124,12 +1121,11 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             if (k == 0) {
                 part = 4;
             }
-            f32 t = Unlerp(alpha, 0.0f, 1.0f);
-            f32 s = 0.5f + Clamp01(t) / 2.0f;
+            f32 s = 0.5f + Clamp01(Unlerp(alpha, 0.0f, 1.0f)) / 2.0f;
             f32 pw = fn_80235EF0(art, part) * s;
-            f32 s2 = 0.5f + Clamp01(t) / 2.0f;
+            f32 s2 = 0.5f + Clamp01(Unlerp(alpha, 0.0f, 1.0f)) / 2.0f;
             f32 ph = GetArtHeight(art, part) * s2;
-            int a = RoundF(GarageFadeAlpha(fade));
+            int a = RoundF(255.0f * fade);
             a = a > 0x13F ? 0x13F : a;
             u32 c = (a << 24) | 0xFFFFFF;
             fn_802354A0(art, (x + 0.5f * w) - 0.5f * pw, k == 0 ? y + ph : y - h, 0.0f, pw, ph, part, c);
@@ -1138,10 +1134,11 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     int k = shown > 0 ? shown : 0;
     k = k >= 1 ? 1 : k;
     CarIcon* ic = &((CarIconTable*)PTR(p, 0xC8))->icons[e->icon[k]];
+    f32 v2;
     f32 u1 = ic->u1;
     f32 v1 = ic->v1;
     f32 u2 = ic->u2;
-    f32 v2 = ic->v2;
+    v2 = ic->v2;
     u32 tint = TintColor(color, locked ? 0xFF000000 : -1);
     DrawTexturedQuad(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h), 0.8f * w, 0.8f * h, ic->tex, u1, v1, u2, v2, locked ? 0xFF000000 : -1);
     DrawTexturedQuad(x + 0.5f * (w - 0.8f * w), y - 0.5f * (h - 0.8f * h), 0.8f * w, 0.8f * h, ic->overlay, u1, v1, u2, v2, tint);
