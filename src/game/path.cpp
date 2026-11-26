@@ -29,15 +29,15 @@ struct PathKey {
 };
 
 // PathMtx: common.h's PlainValMatrix.
-static inline void SwapKey(PathKey* k) {
-    for (unsigned w = 0; w < 2; ++w) {
-        u8* words = (u8*)k + w * 16;
-        SwapWord(words + 0);
-        SwapWord(words + 4);
-        SwapWord(words + 8);
-        SwapWord(words + 12);
-    }
-}
+
+// One 32-bit word byte-swapped through its own block temporary (macro name unproven). Expanded in the loader's own
+// body, so each word's temp is a NAMED local of fn_801D9CC4 (numbered below the record walker); an inline SwapWord's
+// temp is an inline object numbered above it, which gave retail's registers to the wrong values.
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
+#define SWAPBYTES4(b) { u8 t = (b)[0]; (b)[0] = (b)[3]; (b)[3] = t; t = (b)[1]; (b)[1] = (b)[2]; (b)[2] = t; }
+#else
+#define SWAPBYTES4(b) {}  // PC: the little-endian file data is already native (see byteswap.h)
+#endif
 
 ModuleTag lbl_8055E970;
 
@@ -75,15 +75,20 @@ PathFile* fn_801D9CC4(const char* name) {
         int i;
         int j;
         SwapWord(&f->count);
-        u8* cursor = (u8*)f->paths;
-        for (i = 0; i < f->count; cursor += sizeof(RecPath), ++i) {
-            p = (RecPath*)cursor;
+        for (i = 0; i < f->count; ++i) {
+            p = &f->paths[i];
             SwapPathCount(p);
             SwapWord(&p->keys);
             p->keys = (PathKey*)((u8*)f + (u32)p->keys);
             for (j = 0; j < p->count; j++) {
                 k = &p->keys[j];
-                SwapKey(k);
+                for (unsigned w = 0; w < 2; ++w) {
+                    u8* words = (u8*)k + w * 16;
+                    SWAPBYTES4(words + 0);
+                    SWAPBYTES4(words + 4);
+                    SWAPBYTES4(words + 8);
+                    SWAPBYTES4(words + 12);
+                }
             }
         }
     }
