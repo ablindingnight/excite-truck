@@ -380,7 +380,6 @@ void fn_802D81C4(GXTexDesc* d, const char*) {
 }
 
 void fn_802D86BC(GXTexDesc* d, const char*) {
-    const u8* wa;
     TexImage* img = d->data;
     s32 w = d->w;
     s32 h = d->h;
@@ -394,10 +393,12 @@ void fn_802D86BC(GXTexDesc* d, const char*) {
     memcpy(tmp, tex, w * h);
     int tw = w / 8;
     int off = 0;
+    // The rows are read by index through a named source pointer (retail re-derives src + off + x for the
+    // unrolled loop's remainder; a walking pointer would carry over instead).
+    const u8* src = tmp;
     for (int y = 0; y < h; y++) {
-        wa = tmp + off;
-        for (int x = 0; x < w; wa++, x++) {
-            tex[((y / 4) * tw + x / 8) * 32 + (y % 4) * 8 + x % 8] = *wa;
+        for (int x = 0; x < w; x++) {
+            tex[((y / 4) * tw + x / 8) * 32 + (y % 4) * 8 + x % 8] = src[off + x];
         }
         off += w;
     }
