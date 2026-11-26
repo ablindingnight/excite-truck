@@ -188,7 +188,11 @@ u32 lbl_8055D008 = 0xFFFFFFFF;  // element mask
 s32 lbl_8055D00C = 1;
 
 template <class T>
-inline void Relocate(T*& p, u32 base);
+void Relocate(T*& p, u32 base) {
+    if (p) {
+        p = (T*)((u8*)p + base);
+    }
+}
 
 static inline void SwapVec(ValVec3* v) {
     SwapWord(&v->x);
@@ -560,6 +564,96 @@ void mrModelEnd(void) {
 
 /* Macro name unproven: one word byte-swapped through its own block temporary. */
 #define MSWAP4(p) { u8* b_ = (u8*)(p); u8 t = b_[0]; b_[0] = b_[3]; b_[3] = t; t = b_[1]; b_[1] = b_[2]; b_[2] = t; }
+// PROVISIONAL: helper name/boundary unproven; each reference supplies a real byte store.
+static inline void StoreJointByteReference(u8* destination, const u8& value) {
+    *destination = value;
+}
+// PROVISIONAL: reconstructed joint count/payload helper; original name/boundary unproven.
+static inline void FixJointPayloadDirectReferences(MExtra* x) {
+    SwapWordT(&x->n);
+    int j;
+    u32* w;
+    u8* p = (u8*)x + 0x2C;
+    for (j = 0; j < x->n; j++) {
+        u32* q = (u32*)p;
+        w = q;
+        for (int k = 0; k < 12; w += 2, k += 2) {
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
+            {
+                u8* b = (u8*)w;
+                u8 saved = b[0];
+                u8 loaded = b[3];
+                StoreJointByteReference(b, loaded);
+                b[3] = saved;
+                saved = b[1];
+                loaded = b[2];
+                StoreJointByteReference(b + 1, loaded);
+                b[2] = saved;
+            }
+            {
+                u8* b = (u8*)(w + 1);
+                u8 saved = b[0];
+                u8 loaded = b[3];
+                StoreJointByteReference(b, loaded);
+                b[3] = saved;
+                saved = b[1];
+                loaded = b[2];
+                StoreJointByteReference(b + 1, loaded);
+                b[2] = saved;
+            }
+#endif
+        }
+        p += 0x50;
+    }
+}
+
+// PROVISIONAL: reconstructed bone count/payload/tail helper; original name/boundary unproven.
+static inline void FixBonePayloadPairedReferences(MExtra* x) {
+    SwapWordT(&x->n);
+    u32* w;
+    u8* p = (u8*)x + 0x10;
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
+    u8 saved0;
+    u8 loaded0;
+    u8 saved1;
+    u8 loaded1;
+#endif
+    int j;
+    for (j = 0; j < x->n; j++) {
+        u32* q = (u32*)p;
+        w = q;
+        for (int k = 0; k < 12; w += 2, k += 2) {
+#if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
+            {
+                u8* b = (u8*)w;
+                saved0 = b[0];
+                loaded0 = b[3];
+                StoreJointByteReference(b, loaded0);
+                b[3] = saved0;
+                saved0 = b[1];
+                loaded0 = b[2];
+                StoreJointByteReference(b + 1, loaded0);
+                b[2] = saved0;
+            }
+            {
+                u8* b = (u8*)(w + 1);
+                saved1 = b[0];
+                loaded1 = b[3];
+                StoreJointByteReference(b, loaded1);
+                b[3] = saved1;
+                saved1 = b[1];
+                loaded1 = b[2];
+                StoreJointByteReference(b + 1, loaded1);
+                b[2] = saved1;
+            }
+#endif
+        }
+        SwapWordT(p + 0x30);
+        SwapWordT(p + 0x34);
+        p += 0x38;
+    }
+}
+
 void mrModelFixup(ModelInfo* m, const char* name) {
 #if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
     if ((u32)m->nElems < 16000 && (u32)m->nExtras < 16000) {
@@ -610,32 +704,11 @@ void mrModelFixup(ModelInfo* m, const char* name) {
         SwapWordT(&x->size);
         switch (x->tag) {
         case 'MRJT': {
-            SwapWordT(&x->n);
-            int j;
-            u8* p = (u8*)x + 0x2C;
-            for (j = 0; j < x->n; j++) {
-                u32* q = (u32*)p;
-                u32* w = q;
-                for (int k = 0; k < 12; w++, k++) {
-                    SwapWordT(w);
-                }
-                p += 0x50;
-            }
+            FixJointPayloadDirectReferences(x);
             break;
         }
         case 'MRBN': {
-            SwapWordT(&x->n);
-            int j;
-            u8* p = (u8*)x + 0x10;
-            for (j = 0; j < x->n; j++) {
-                u32* q = (u32*)p;
-                for (int k = 0; k < 12; k++) {
-                    SwapWordT(&q[k]);
-                }
-                SwapWordT(p + 0x30);
-                SwapWordT(p + 0x34);
-                p += 0x38;
-            }
+            FixBonePayloadPairedReferences(x);
             break;
         }
         case 'SPHL': {
@@ -1092,9 +1165,3 @@ void fn_802C8234(f32) { fn_802DB2B8(); }
 
 }  // extern "C"
 
-template <class T>
-inline void Relocate(T*& p, u32 base) {
-    if (p) {
-        p = (T*)((u8*)p + base);
-    }
-}

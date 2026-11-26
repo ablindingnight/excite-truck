@@ -1297,7 +1297,7 @@ config.libs.append(
             # ppc_unroll_instructions_limit >= 88 is the only setting that reproduces both units' loop shapes and it
             # changes no other function in either unit; compiler versions (verscore) and standard flags (-proc,
             # -inline, -O3/-O4,s, -opt speed, -fp_contract) were ruled out (unit sprint flag probe).
-            Object(NonMatching, "game/model.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"']),
+            Object(Matching, "game/model.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"']),
             Object(Matching, "game/mrender.cpp"),
             Object(Matching, "game/texture.cpp"),
             Object(NonMatching, "game/mlist.cpp", extra_cflags=['-pragma "ppc_unroll_instructions_limit 88"', '-pragma "opt_lifetimes off"']),  # see model.cpp; opt_lifetimes off unit-wide: fn_802CDDC8 reaches retail's 294 instructions, every other function and data unchanged (2026-11-16 night probe)
