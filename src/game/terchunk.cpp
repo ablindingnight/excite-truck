@@ -258,8 +258,9 @@ void fn_80202718(void) {
     int center = fn_802022E4(&cam->origin);
     lbl_804888D0[fn_801E85B4()] = center;
     TerrainChunk* next = &lbl_8055ECC4[(center + 1) % lbl_8055ECC0];
+    f32 dy;
     f32 dx = next->pos.x - cam->origin.x;
-    f32 dy = next->pos.y - cam->origin.y;
+    dy = next->pos.y - cam->origin.y;
     f32 dz = next->pos.z - cam->origin.z;
     ValVec3 v;
     f32 planarX = Mul(dx, cam->basis[0].x) + dy * cam->basis[0].y;
