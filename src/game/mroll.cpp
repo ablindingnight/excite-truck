@@ -620,7 +620,7 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
         MenuItem("#controller_2", pp.p2.sel.name, NoCaption()),
         MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
-        MenuItem("#stat_text_1_p2", (text2 = pp.p2.stats.text)[0], NoCaption()),
+        MenuItem((const char*)"#stat_text_1_p2", (text2 = pp.p2.stats.text)[0], NoCaption()),
         MenuItem((const char*)"#stat_art_1_p2", 2, (sv2 = &pp.p2.stats.stats.stats[0].value), 0, 0),
         MenuItem("#stat_text_2_p2", text2[1], NoCaption()),
         MenuItem("#stat_art_2_p2", 2, sv2 + 2 * 1, 0, 0),
