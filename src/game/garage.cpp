@@ -1090,9 +1090,9 @@ static inline u32 TintColor(u32 c, u32 t) {
     int r = (t >> 16) & 0xFF;
     int g = (t >> 8) & 0xFF;
     s32 b = t & 0xFF;
-    b = b * b * (int)(c & 0xFF) / 256 / 256;
-    g = g * g * (int)((c >> 8) & 0xFF) / 256 / 256;
-    r = a * r * (int)((c >> 16) & 0xFF) / 256 / 256;
+    b = (int)(c & 0xFF) * b * b / 256 / 256;
+    g = (int)((c >> 8) & 0xFF) * g * g / 256 / 256;
+    r = (int)((c >> 16) & 0xFF) * a * r / 256 / 256;
     return 0xFF000000 | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
 }
 
@@ -1114,10 +1114,7 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
         color = e->value;
     }
     int locked = ((GarageList*)PTR(p, 0xD0))->Unlocked(i) == 0;
-    int extreme = 0;
-    if (!locked && ((GarageList*)PTR(p, 0xD0))->IsExtreme(i)) {
-        extreme = 1;
-    }
+    int extreme = !locked && ((GarageList*)PTR(p, 0xD0))->IsExtreme(i) ? 1 : 0;
     u32 frame = locked ? 0xFF808080 : -1;
     fn_802354A0(art, x, y, 0.0f, shown && extreme, w, h, frame);
     f32 fade = fn_80216CB4();
