@@ -85,12 +85,11 @@ f32 fn_8026A63C(const f32* a, const f32* b, const f32* axis) {
 }
 extern "C" {
 
+static inline f32 Approach(f32 a, f32 b, f32 k) { return a + k * (b - a); }  // name unproven
+
 static inline void FollowStep(CameraRacerSlot* s, const ValVec3& d) {  // name unproven
     ValVec3 v;
-    f32 zv = s->vel.z;
-    f32 blend = 0.2f;
-    f32 xv = s->vel.x;
-    v.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), zv + blend * (d.z - zv));
+    v.Set(Approach(s->vel.x, d.x, 0.2f), Approach(s->vel.y, d.y, 0.2f), Approach(s->vel.z, d.z, 0.2f));
     s->vel = v;
     TAddSTo(&s->pos, &v, 1.0f);
 }
