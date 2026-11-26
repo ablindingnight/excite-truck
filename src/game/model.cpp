@@ -572,63 +572,63 @@ void mrModelFixup(ModelInfo* m, const char* name) {
         return;
     }
     u32 base = (u32)m;
-    SwapWord(&m->nElems);
-    SwapWord(&m->elems);
-    SwapWord(&m->nExtras);
-    SwapWord(&m->extras);
-    SwapWord(&m->nLists);
-    SwapWord(&m->lists);
-    SwapWord(&m->maxInst);
+    SwapWordT(&m->nElems);
+    SwapWordT(&m->elems);
+    SwapWordT(&m->nExtras);
+    SwapWordT(&m->extras);
+    SwapWordT(&m->nLists);
+    SwapWordT(&m->lists);
+    SwapWordT(&m->maxInst);
     f32* f = &m->radius;
     for (int k = 0; k < 10; k++) {
-        SwapWord(&f[k]);
+        SwapWordT(&f[k]);
     }
-    SwapWord(&m->pad44);
+    SwapWordT(&m->pad44);
     Relocate(m->elems, base);
     int i;
     for (i = 0; i < m->nElems; i++) {
         MElem* e = &m->elems[i];
-        SwapWord((u32*)&e->bit);
-        SwapWord(&e->flags);
-        SwapWord(&e->list);
-        SwapWord(&e->prim);
+        SwapWordT((u32*)&e->bit);
+        SwapWordT(&e->flags);
+        SwapWordT(&e->list);
+        SwapWordT(&e->prim);
         Relocate(e->prim, base);
         fn_802D6B80(e->prim, base, name);
         Relocate(e->list, base);
     }
     Relocate(m->extras, base);
     for (i = 0; i < m->nExtras; i++) {
-        SwapWord(&m->extras[i]);
+        SwapWordT(&m->extras[i]);
         Relocate(m->extras[i], base);
         MExtra* x = m->extras[i];
-        SwapWord(&x->tag);
-        SwapWord(&x->size);
+        SwapWordT(&x->tag);
+        SwapWordT(&x->size);
         switch (x->tag) {
         case 'MRJT': {
-            SwapWord(&x->n);
+            SwapWordT(&x->n);
             int j;
             u8* p = (u8*)x + 0x2C;
             for (j = 0; j < x->n; j++) {
                 u32* q = (u32*)p;
                 u32* w = q;
                 for (int k = 0; k < 12; w++, k++) {
-                    SwapWord(w);
+                    SwapWordT(w);
                 }
                 p += 0x50;
             }
             break;
         }
         case 'MRBN': {
-            SwapWord(&x->n);
+            SwapWordT(&x->n);
             int j;
             u8* p = (u8*)x + 0x10;
             for (j = 0; j < x->n; j++) {
                 u32* q = (u32*)p;
                 for (int k = 0; k < 12; k++) {
-                    SwapWord(&q[k]);
+                    SwapWordT(&q[k]);
                 }
-                SwapWord(p + 0x30);
-                SwapWord(p + 0x34);
+                SwapWordT(p + 0x30);
+                SwapWordT(p + 0x34);
                 p += 0x38;
             }
             break;
@@ -653,16 +653,16 @@ void mrModelFixup(ModelInfo* m, const char* name) {
     }
     Relocate(m->lists, base);
     for (i = 0; i < m->nLists; i++) {
-        SwapWord(&m->lists[i]);
+        SwapWordT(&m->lists[i]);
         Relocate(m->lists[i], base);
         MSurfList* l = m->lists[i];
-        SwapWord(&l->n);
-        SwapWord(&l->surfs);
+        SwapWordT(&l->n);
+        SwapWordT(&l->surfs);
         Relocate(l->surfs, base);
         for (int j = 0; j < l->n; j++) {
-            SwapWord(&l->surfs[j]);
+            SwapWordT(&l->surfs[j]);
             Relocate(l->surfs[j], base);
-            SwapWord(&l->surfs[j]->type);
+            SwapWordT(&l->surfs[j]->type);
         }
     }
 }
