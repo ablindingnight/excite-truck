@@ -591,6 +591,7 @@ int fn_8023FF1C(u8 flag) {
     AddFocus(&w, &pp.p2.sel, 4, 2, 6, 8, 10);
     // PROVISIONAL: text-row base ownership and first-use spelling.
     char (*text2)[0x64];
+    s32* sv2;
     MenuItem items[] = {
         MenuItem(NULL, 5, &w, 0, 0),
         MenuItem(NULL, 5, &pp.p1.sel, 0, 0),
@@ -613,22 +614,22 @@ int fn_8023FF1C(u8 flag) {
         MenuItem("#stat_art_5_p1", 2, &pp.p1.stats.stats.stats[4].value, 0, 0),
         MenuItem(NULL, 5, &pp.p2.sel, 0, 0),
         MenuItem("#carmodel_2", 0x13, &pp.p2.screen, 0, 0),
-        MenuItem("#carmodel_2", pp.p2.picker.chassis, NoCaption()),
+        MenuItem("#carmodel_2", pp.p2.picker.chassis),
         MenuItem("#model_2", 0x10, NULL, (MenuArg)&pp.p2.picker, 0),
         MenuItem("#color_2", 5, static_cast<MenuState*>(&pp.p2.color), 0, 0),
         MenuItem("#locker_2", 2, &pp.p2.picker.item, 0, 0),
         MenuItem("#controller_2", pp.p2.sel.name, NoCaption()),
         MenuItem("#car_position_2", 5, pp.p2.screen.state, 0, 0),
         MenuItem("#stat_text_1_p2", (text2 = pp.p2.stats.text)[0], NoCaption()),
-        MenuItem("#stat_art_1_p2", 2, &pp.p2.stats.stats.stats[0].value, 0, 0),
+        MenuItem("#stat_art_1_p2", 2, (sv2 = &pp.p2.stats.stats.stats[0].value), 0, 0),
         MenuItem("#stat_text_2_p2", text2[1], NoCaption()),
-        MenuItem("#stat_art_2_p2", 2, &pp.p2.stats.stats.stats[1].value, 0, 0),
+        MenuItem("#stat_art_2_p2", 2, sv2 + 2 * 1, 0, 0),
         MenuItem("#stat_text_3_p2", text2[2], NoCaption()),
-        MenuItem("#stat_art_3_p2", 2, &pp.p2.stats.stats.stats[2].value, 0, 0),
+        MenuItem("#stat_art_3_p2", 2, sv2 + 2 * 2, 0, 0),
         MenuItem("#stat_text_4_p2", text2[3], NoCaption()),
         MenuItem("#stat_custom_4_p2", 5, &pp.p2.stats.bars[3], 0, 0),
         MenuItem("#stat_text_5_p2", text2[4], NoCaption()),
-        MenuItem("#stat_art_5_p2", 2, &pp.p2.stats.stats.stats[4].value, 0, 0),
+        MenuItem("#stat_art_5_p2", 2, sv2 + 2 * 4, 0, 0),
         MenuItem(lbl_80498810),
     };
     const char* layout = lbl_8055FC8C ? "rollcall2_w.lyt" : "rollcall2.lyt";
