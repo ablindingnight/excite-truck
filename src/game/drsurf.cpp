@@ -1379,6 +1379,16 @@ static inline void FlushYMorph(DeformQueue* q, int count) {
     }
 }
 
+// Helper name unproven: copies pc 16-byte vertices' xyz into 12-byte output slots.
+static inline void CopyDirXYZ(f32* pout, u8* in, int pc) {
+    f32* out = pout;
+    for (int i = 0; i < pc; i++) {
+        SetXYZ((V3*)out, ((f32*)in)[0], ((f32*)in)[1], ((f32*)in)[2]);
+        in += 0x10;
+        out += 3;
+    }
+}
+
 void fn_802D6C78(void) {
     DeformQueue* q;
     FlushSkin(&lbl_804CAC38);
@@ -1525,12 +1535,7 @@ void fn_802D6C78(void) {
                 break;
             }
             pout = (f32*)(LC_BUF(buf) + 0x1000);
-            f32* out = pout;
-            for (int i = 0; i < pc; i++) {
-                SetXYZ((V3*)out, ((f32*)in)[0], ((f32*)in)[1], ((f32*)in)[2]);
-                in += 0x10;
-                out += 3;
-            }
+            CopyDirXYZ(pout, in, pc);
         }
         LCQueueWait((u32)0);
         lbl_804CEC3C.count = 0;
