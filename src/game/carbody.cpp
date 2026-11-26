@@ -2797,7 +2797,13 @@ void fn_80186DE8(void) {
         x->pts[6] = a.Sol();
         f32 wa;
         f32 gw = ground[0];
-        rpm.x = rpm.x > 52.35988f ? rpm.x : 52.35988f;
+        f32 rx;
+        if (rpm.x > 52.35988f) {
+            rx = rpm.x;
+        } else {
+            rx = 52.35988f;
+        }
+        rpm.x = rx;
         rpm.w = gw;
         c->pts[4] = rpm.Sol();
         wa = water[0];
