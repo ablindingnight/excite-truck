@@ -677,11 +677,13 @@ void* fn_802EAB28(void* arg) {
                                 if (!lbl_805600A8[p]) {
                                     break;
                                 }
+                                int tl;
+                                int fsz;
                                 char* f = (char*)(p + (int)lbl_805600A8);
                                 int len = ((u8)f[5] << 14) + ((u8)f[4] << 21) + ((u8)f[6] << 7);
                                 len += (u8)f[7];
-                                int tl = len - 1;
-                                int fsz = len + 10;
+                                tl = len - 1;
+                                fsz = len + 10;
                                 if (f[0] == 'T' && tl > 0) {
                                     char* txt = f + 11;
                                     if (!strncmp(f, "TIT2", 4)) {
