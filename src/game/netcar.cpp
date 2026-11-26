@@ -288,9 +288,10 @@ void NetCar::Extrapolate(Blend* b) {
         double b0 = DL(tn, t0, 0.0, t1);
         double b2 = DL(tn, 0.0, t1, t0);
         double b1 = DL(tn, t1, 0.0, t0);
+        f32 x0;
         f32 x2 = ptab[2].pose.pos.v[0];
         f32 x1 = ptab[1].pose.pos.v[0];
-        f32 x0 = ptab[0].pose.pos.v[0];
+        x0 = ptab[0].pose.pos.v[0];
         d.x = x0 * b0 + (x2 * b2 + x1 * b1);
         f32 y2 = ptab[2].pose.pos.v[1];
         f32 y1 = ptab[1].pose.pos.v[1];
