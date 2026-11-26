@@ -757,8 +757,6 @@ void fn_80182DF4(u8* p, u8* desc) {
     stiff = 50000.0f;
     f32 mass = 4938240000.0f;
     f32 invMass = 0.5f / mass;
-    f32 zRear;
-    f32 zFront;
     damp = 0.3f;
     fn_802C7760(cb->model, &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
     s32 wheel = fn_801E3004(cb->model, "wheel", -1);
@@ -775,7 +773,7 @@ void fn_80182DF4(u8* p, u8* desc) {
         fn_801E323C(wheel);
     }
     minY = MaxF(minY, 0.2f);
-    __memcpy(&c, &cb->offset, sizeof(HVec));  // MWCC memcpy intrinsic (word copy); c stays a frame object above rear
+    __memcpy(&c, &cb->offset, sizeof(HVec));
     minX += c.x;
     maxX += c.x;
     minY += c.y;
@@ -788,26 +786,25 @@ void fn_80182DF4(u8* p, u8* desc) {
     cb->f5BC = maxZ;
     u8* g = (u8*)new ("car-volume") SphereGroup((const RMtx*)&cb->mtx, (CollVolume*)p);
     cb->f268 = g;
-    rear.Set(0.7f, 0.1f, 1.0f);
-    mid.Set(0.7f, 0.1f, 1.0f);
-    front.Set(0.7f, 0.1f, 1.0f);
-    zRear = maxZ - 0.45000002f;
-    zFront = 0.44999998f + minZ;
-    f32 a;
+    f32 zRear = maxZ - 0.45000002f;
     f32 yMid = 0.45000002f + minY;
-    a = maxX - 0.45000002f;
+    f32 a = maxX - 0.45000002f;
+    f32 b = 0.8f * a;
     f32 yRear = 0.36f + minY;
     f32 h = 0.5f * (maxY - minY);
     f32 zMid = 0.5f * (minZ + maxZ);
     f32 zRearMid = 0.5f * (zRear + zMid);
-    f32 b = 0.8f * a;
-    f32 xSide = maxX - h;
-    f32 zFrontMid = 0.5f * (zFront + zMid);
-    f32 yFront = 0.44999998f + minY;
     f32 ySide = minY + h;
+    f32 xSide = maxX - h;
+    f32 zFront = 0.44999998f + minZ;
+    f32 yFront = 0.44999998f + minY;
     f32 xFront = maxX - 0.44999998f;
-    f32 nb = -b;
+    f32 zFrontMid = 0.5f * (zFront + zMid);
     f32 yr = 0.254f + yRear;
+    f32 nb = -b;
+    rear.Set(0.7f, 0.1f, 1.0f);
+    mid.Set(0.7f, 0.1f, 1.0f);
+    front.Set(0.7f, 0.1f, 1.0f);
     {
         HVec rel;
         AddBodySphere(p, &rel, RVec3(nb, yr, zRear), &mid, 0.36f, stiff, damp, mass, invMass);
