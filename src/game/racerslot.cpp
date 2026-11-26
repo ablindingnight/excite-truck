@@ -206,7 +206,7 @@ int fn_8026A698(u8* p, int i) {
         s->active = 1;
         s->frame = *(const PlainValMatrix*)&((CamRec*)p)->lastPose;
         s->fov = ((CamRec*)p)->f194;
-        s->yaw = atan2(s->frame.basis[2].x, s->frame.basis[2].z);
+        s->yaw = atan2f(s->frame.basis[2].x, s->frame.basis[2].z);
         f32 turn = 2.3561945f;
         // p + 0xC0 = CamRec::carFrame (typed, together with the MulVec read above, it grows the frame by 16)
         turn = PSVECDotProduct((const Vec*)&((CarBody*)((CamRec*)p)->car)->vel, (const Vec*)((f32*)(p + 0xC0))) > 0.0f ? turn : -turn;
