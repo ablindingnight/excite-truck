@@ -1342,10 +1342,6 @@ struct CbVec4 {
         w = w_;
     }
     /* Helper name unproven */
-    /* Helper name unproven */
-    void SetSolV(CbSolPlain s) {
-        SetWP(MakeF(s.w), RVec3(s.x, s.y, s.z));
-    }
     void SetSol(CbSolPlain s) {
         SetWP(MakeF(s.w), CbV3R(s.x, s.y, s.z));
     }
@@ -2648,9 +2644,8 @@ void fn_80186DE8(void) {
             if (comp > 20000.0f) {
                 RVec3 zero(0.0f, 0.0f, 0.0f);
                 SolSet(&c->pts[5 + j], zero.x, zero.y, zero.z);
-                CbVec4 half;
-                half.SetSolV(c->v30);
-                half[j] = Mul(half[j], 0.5f);
+                CbVec4 half = CbVec4(c->v30);
+                half[j] *= 0.5f;
                 c->v30 = CbSolVec4(half.x, half.y, half.z, half.w);
             }
             fl = w->flags & 0xE;
