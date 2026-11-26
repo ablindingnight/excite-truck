@@ -856,7 +856,7 @@ void fn_80182DF4(u8* p, u8* desc) {
         HVec rel;
         AddBodySphere(p, &rel, RVec3(xFront, 0.254f + yFront, zFront), &front, 0.44999998f, stiff, damp, mass, invMass);
     }
-    center.Set(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.5f * (minZ + maxZ));
+    center.Set(0.5f * (maxX + minX), 0.5f * (maxY + minY), 0.5f * (maxZ + minZ));
     u8* box = (u8*)new ("car_box") OrientedBoxShape((const RMtx*)&cb->mtx, &center, (CollVolume*)p, 5.0f * stiff, damp, 0.5f * (maxX - minX), 0.5f * (maxY - minY),
                           0.5f * (maxZ - minZ));
     fn_801A0444(cb->f268, box);
