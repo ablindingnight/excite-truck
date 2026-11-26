@@ -146,9 +146,8 @@ struct SkagGrid {
     SkagGrid(SkagVec<SkagBag*>* bags) {
         for (int x = 0; x < 32; x++) {
             for (int y = 0; y < 32; y++) {
-                SkagCell* c = &cells[0][x & 31] + (y & 31) * 32;  // column first, then the row: retail adds this+x*8 then +y*256
-                c->bag = fn_802B475C(bags);
-                c->used = 0;
+                cells[y & 31][x & 31].bag = fn_802B475C(bags);
+                cells[y & 31][x & 31].used = 0;
             }
         }
         owns = 0;
