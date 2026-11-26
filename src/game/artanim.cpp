@@ -629,11 +629,12 @@ void fn_802AD4C4(ArtAnim* a, f32 t, ArtXform* parent) {
                 f32 z2;
                 f32 y2;
                 f32 x2 = q[0] + q[0];
+                f32 yy;
                 f32 xx;
                 y2 = q[1] + q[1];
                 z2 = q[2] + q[2];
                 xx = q[0] * x2;
-                f32 yy = q[1] * y2;
+                yy = q[1] * y2;
                 f32 zz = q[2] * z2;
                 f32 wy;
                 f32 xz = q[0] * z2;
