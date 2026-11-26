@@ -792,8 +792,9 @@ void fn_80182DF4(u8* p, u8* desc) {
     front.Set(0.7f, 0.1f, 1.0f);
     zRear = maxZ - 0.45000002f;
     zFront = 0.44999998f + minZ;
+    f32 a;
     f32 yMid = 0.45000002f + minY;
-    f32 a = maxX - 0.45000002f;
+    a = maxX - 0.45000002f;
     f32 yRear = 0.36f + minY;
     f32 h = 0.5f * (maxY - minY);
     f32 zMid = 0.5f * (minZ + maxZ);
