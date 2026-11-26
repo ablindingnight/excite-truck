@@ -152,35 +152,52 @@ FanCell* fn_802BE844(short x, short z, int size) {
 }
 
 #pragma push
-#pragma opt_dead_assignments off  /* Pragma unproven: helps but not exact (PRAGSCAN_2026-11-15) */
+#pragma opt_dead_assignments off  /* Proven exact here by own scoped ablation; original spelling unproven. */
+// PROVISIONAL: accumulate one actual weighted material vote and its presence.
+static inline void AccumulateMaterialVote(int& total, int material, int weight, u32& presence) {
+    // PROVISIONAL: the original presence-bit type and name are unproven.
+    enum MaterialBit { kFirstMaterialBit = 1 };
+    MaterialBit materialBit = kFirstMaterialBit;
+    total += weight;
+    if (weight) {
+        presence |= materialBit << material;
+    }
+}
+
+// PROVISIONAL: one complete child geometry, lookup and material-vote operation.
+static inline void AccumulateChildMaterial(short x, short z, int parentSize, int corner,
+                                          int (&counts)[6], u32& presence) {
+    int childSize = parentSize / 2;
+    short px = x + ((corner & 1) ? childSize : -childSize);
+    short pz = z + ((corner & 2) ? childSize : -childSize);
+    FanCell* cell = fn_802BE844(px, pz, childSize);
+    presence |= cell->bits & 0x3F;
+    counts[(cell->bits >> 6) & 7]++;
+}
+
+// PROVISIONAL: query a real material layer, then apply its weighted vote.
+static inline void SampleMaterialLayer(short px, short pz, int layer,
+                                      int (&counts)[6], u32& presence) {
+    int weight = fn_802BBD38(px, pz, layer);
+    AccumulateMaterialVote(counts[layer], layer, weight, presence);
+}
+
 void fn_802BE8B4(short x, short z, int size) {
-    struct {
-        u32 mask;
-        int k;
-    } sample;
-    sample.mask = 0;
+    u32 mask;
+    mask = 0;
     int counts[6];
     memset(counts, 0, sizeof(counts));
     if (size == 4) {
         for (short px = x - size; px <= x + size; px += 2) {
             for (short pz = z - size; pz <= z + size; pz += 2) {
                 for (int i = 0; i < 6; i++) {
-                    int w = fn_802BBD38(px, pz, i);
-                    counts[i] += w;
-                    if (w) {
-                        sample.mask |= 1 << i;
-                    }
+                    SampleMaterialLayer(px, pz, i, counts, mask);
                 }
             }
         }
     } else {
-        int h = size / 2;
-        for (sample.k = 0; sample.k < 4; sample.k++) {
-            short px = x + ((sample.k & 1) ? h : -h);
-            short pz = z + ((sample.k & 2) ? h : -h);
-            FanCell* c = fn_802BE844(px, pz, h);
-            sample.mask |= c->bits & 0x3F;
-            counts[(c->bits >> 6) & 7]++;
+        for (int k = 0; k < 4; k++) {
+            AccumulateChildMaterial(x, z, size, k, counts, mask);
         }
     }
     int best = 0;
@@ -189,7 +206,7 @@ void fn_802BE8B4(short x, short z, int size) {
             best = i;
         }
     }
-    SetMaterial(fn_802BE844(x, z, size), sample.mask, best);
+    SetMaterial(fn_802BE844(x, z, size), mask, best);
 }
 #pragma pop
 
