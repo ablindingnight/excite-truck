@@ -558,6 +558,8 @@ void mrModelEnd(void) {
     lbl_804C139C.max = 0;
 }
 
+/* Macro name unproven: one word byte-swapped through its own block temporary. */
+#define MSWAP4(p) { u8* b_ = (u8*)(p); u8 t = b_[0]; b_[0] = b_[3]; b_[3] = t; t = b_[1]; b_[1] = b_[2]; b_[2] = t; }
 void mrModelFixup(ModelInfo* m, const char* name) {
 #if defined(__MWERKS__) || defined(GAME_FILE_DATA_NEEDS_SWAP)
     if ((u32)m->nElems < 16000 && (u32)m->nExtras < 16000) {
@@ -635,10 +637,10 @@ void mrModelFixup(ModelInfo* m, const char* name) {
             int j;
             MSphere* s = (MSphere*)&x->n;
             for (j = 0; j < m->nElems; j++) {
-                SwapWord(&s->c.x);
-                SwapWord(&s->c.y);
-                SwapWord(&s->c.z);
-                SwapWord(&s->r);
+                MSWAP4(&s->c.x)
+                MSWAP4(&s->c.y)
+                MSWAP4(&s->c.z)
+                MSWAP4(&s->r)
                 s++;
             }
             break;
