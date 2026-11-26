@@ -2691,11 +2691,11 @@ void fn_80186DE8(void) {
         int down = ((CarBody*)car)->airborne >= 3;
         steerK = ((CarBody*)car)->f25F0;
         if (player) {
+            f32 g = ((CarBody*)car)->setupA.f124;
             f32 sp;
             f32 cl;
             f32 t;
             sp = ((CarBody*)car)->speed;
-            f32 g = ((CarBody*)car)->setupA.f124;
             if (sp > 15.555555f) {
                 cl = sp;
                 cl = 44.444447f < cl ? 44.444447f : cl;
@@ -2703,7 +2703,8 @@ void fn_80186DE8(void) {
             }
             if (sp > 0.0f) {
                 t = Clamp01((sp / 20.0f) * 0.44444445f);
-                steerK = steerK * (1.0f - 0.5f * t) * (1.0f - Mul(0.6f, t));
+                steerK *= 1.0f - 0.5f * t;
+                steerK *= 1.0f - Mul(0.6f, t);
             }
         }
         slide = (f32)__fabs(((CarBody*)car)->f25CC) - 1.3f * (f32)AbsD(((CarBody*)car)->f25D8) - 3.0f;
