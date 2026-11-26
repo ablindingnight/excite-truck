@@ -640,6 +640,14 @@ static inline V2 Lerp2(const V2& a, const V2& b, f32 t) {
     return r;
 }
 
+/* Helper name unproven: lerp of two points given as components. */
+static inline V2 LerpC(f32 ax, f32 ay, f32 bx, f32 by, f32 t) {
+    V2 r;
+    r.y = ay + t * (by - ay);
+    r.x = ax + t * (bx - ax);
+    return r;
+}
+
 static inline f32 Dist(const BoundPt* a, const BoundPt* b) {
     V2 d;
     d.y = b->y - a->y;
@@ -882,8 +890,8 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         f32 l;
         int ny;
         int j;
-        V2 pa = Lerp2(*p0, *p1, t);
-        V2 pb = Lerp2(*p3, *p2, t);
+        V2 pa = LerpC(p0->x, p0->y, p1->x, p1->y, t);
+        V2 pb = LerpC(p3->x, p3->y, p2->x, p2->y, t);
         l = Dist(&pb, &pa);
         ny = 1;
         {
