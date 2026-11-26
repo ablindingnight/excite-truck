@@ -2794,11 +2794,13 @@ void fn_80186DE8(void) {
             a.w = a.w * off;
         }
         x->pts[6] = a.Sol();
+        f32 wa;
         f32 gw = ground[0];
         rpm.x = rpm.x > 52.35988f ? rpm.x : 52.35988f;
         rpm.w = gw;
         c->pts[4] = rpm.Sol();
-        c->v190 = CbSolVec4(steerK, rpmT < 9500.0f ? out : 0.0f, brake, water[0]);
+        wa = water[0];
+        c->v190 = CbSolVec4(steerK, rpmT < 9500.0f ? out : 0.0f, brake, wa);
         bk2 = ((CarBody*)car)->f25E4;
         hb = 8.0f * hold;
         if (bk2 > hb) {
