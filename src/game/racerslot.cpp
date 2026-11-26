@@ -85,6 +85,51 @@ f32 fn_8026A63C(const f32* a, const f32* b, const f32* axis) {
 }
 extern "C" {
 
+static inline void FollowStep(CameraRacerSlot* s, const ValVec3& d) {  // name unproven
+    ValVec3 v;
+    f32 xv = s->vel.x;
+    f32 blend = 0.2f;
+    v.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
+    s->vel = v;
+    TAddSTo(&s->pos, &v, 1.0f);
+}
+
+// name unproven
+static inline void Turn(Mat3* m, f32 x, f32 y, f32 z) {
+    f32 e[3];
+    e[0] = x;
+    e[1] = y;
+    e[2] = z;
+    Mat3 r;
+    Mat3FromEuler(&r, (const Vec3*)e);
+    Mat3Mul(m, &r, m);
+}
+
+// name unproven
+static inline ValVec3 Rotated(const Mat3& m, const ValVec3& v) {
+    ValVec3 o;
+    MulVec(m, v, &o);
+    return o;
+}
+
+// name unproven
+static inline void AddRotated(ValVec3* o, const Mat3& m, const ValVec3& v) {
+    ValVec3 off;
+    MulVec(m, v, &off);
+    o->x += off.x;
+    o->y += off.y;
+    o->z += off.z;
+}
+
+// name unproven
+static inline void Push(PlainValMatrix& f, f32 x, f32 y, f32 z) {
+    ValVec3 back;
+    back.x = x;
+    back.y = y;
+    back.z = z;
+    AddRotated(&f.origin, f.Mat(), back);
+}
+
 struct MatRef { Mat3* m; };  // name unproven
 
 int fn_8026A698(u8* p, int i) {
@@ -194,17 +239,12 @@ int fn_8026A698(u8* p, int i) {
     if (lbl_8055E3C4 != s->frameNo) {
         ValVec3 at = *(const ValVec3*)&((CamRec*)p)->carFrame.pos;
         TAddSTo(&at, (const ValVec3*)&((CamRec*)p)->carFrame.rot.m[3], 0.7f);
-        ValVec3 v;
         ValVec3 d;
         d.x = at.x - s->pos.x;
         d.y = at.y - s->pos.y;
         d.z = at.z - s->pos.z;
         s->target = at;
-        f32 xv = s->vel.x;
-        f32 blend = 0.2f;
-        v.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
-        s->vel = v;
-        TAddSTo(&s->pos, &v, 1.0f);
+        FollowStep(s, d);
     }
     PlainValMatrix f;
     f.origin = s->pos;
@@ -218,42 +258,15 @@ int fn_8026A698(u8* p, int i) {
     f.basis[2].y = 0.0f;
     f.basis[2].z = 1.0f;
     MatRef fr = {&f.Mat()};
-    f32 orbit[3];
-    f32 orbit_1 = s->yaw + s->t * s->spin;
-    orbit[0] = 0.0f;
-    orbit[1] = orbit_1;
-    orbit[2] = 0.0f;
-    Mat3 m1;
-    Mat3FromEuler(&m1, (const Vec3*)orbit);
-    Mat3Mul(fr.m, &m1, fr.m);
-    f32 tilt[3];
-    tilt[0] = 0.2617994f;
-    tilt[1] = 0.0f;
-    tilt[2] = 0.0f;
-    Mat3 m2;
-    Mat3FromEuler(&m2, (const Vec3*)tilt);
-    Mat3Mul(fr.m, &m2, fr.m);
-    ValVec3 back;
-    back.x = 0.0f;
-    back.y = 0.0f;
-    back.z = -6.0f;
-    ValVec3 off;
-    MulVec(f.Mat(), back, &off);
-    f.origin.x += off.x;
-    f.origin.y += off.y;
-    f.origin.z += off.z;
+    Turn(fr.m, 0.0f, s->yaw + s->t * s->spin, 0.0f);
+    Turn(fr.m, 0.2617994f, 0.0f, 0.0f);
+    Push(f, 0.0f, 0.0f, -6.0f);
     ValVec3 g = f.origin;
     if (fn_801EA03C((u8*)((CarBody*)((CamRec*)p)->car)->hint, &g)) {
         g.y += 1.0f;
         f32 up = MaxF(0.0f, g.y - f.origin.y);
         f.origin.y += up;
-        f32 euler[3];
-        euler[0] = (f32)atan(up / 6.0f);
-        euler[1] = 0.0f;
-        euler[2] = 0.0f;
-        Mat3 m3;
-        Mat3FromEuler(&m3, (const Vec3*)euler);
-        Mat3Mul(&f.Mat(), &m3, &f.Mat());
+        Turn(&f.Mat(), (f32)atan(up / 6.0f), 0.0f, 0.0f);
     }
     const f32& duration = lbl_80563D08;
     fn_80176A24(duration);
