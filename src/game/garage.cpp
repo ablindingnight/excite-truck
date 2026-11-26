@@ -1106,6 +1106,8 @@ extern "C" {
 static inline f32 UnlerpClamp01(f32 a, f32 b, f32 x) { return MaxF(MinF(1.0f, (x - a) / (b - a)), 0.0f); }
 
 void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alpha) {
+    f32 s, pw;           // the star pulse and its width
+    f32 v2, u2, v1, u1;  // the icon's texture rectangle
     u8* p = (u8*)this;
     CarEntry* e = &((CarEntry*)PTR(p, 0xCC))[i];
     u32* sel = GetVehicleColor(e->vehicle, 0);
@@ -1124,8 +1126,8 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
             if (k == 0) {
                 part = 4;
             }
-            f32 s = 0.5f + UnlerpClamp01(0.0f, 1.0f, alpha) / 2.0f;
-            f32 pw = fn_80235EF0(art, part);
+            s = 0.5f + UnlerpClamp01(0.0f, 1.0f, alpha) / 2.0f;
+            pw = fn_80235EF0(art, part);
             pw *= s;
             f32 s2 = 0.5f + UnlerpClamp01(0.0f, 1.0f, alpha) / 2.0f;
             f32 ph = GetArtHeight(art, part);
@@ -1139,7 +1141,6 @@ void CarSlotList::DrawSlot(int i, s32 shown, f32 x, f32 y, f32 w, f32 h, f32 alp
     int k = shown > 0 ? shown : 0;
     k = k >= 1 ? 1 : k;
     CarIcon* ic = &((CarIconTable*)PTR(p, 0xC8))->icons[e->icon[k]];
-    f32 u1, v2, u2, v1;
     u1 = ic->u1;
     v1 = ic->v1;
     u2 = ic->u2;
