@@ -87,9 +87,10 @@ extern "C" {
 
 static inline void FollowStep(CameraRacerSlot* s, const ValVec3& d) {  // name unproven
     ValVec3 v;
-    f32 xv = s->vel.x;
+    f32 zv = s->vel.z;
     f32 blend = 0.2f;
-    v.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), s->vel.z + blend * (d.z - s->vel.z));
+    f32 xv = s->vel.x;
+    v.Set(xv + blend * (d.x - xv), s->vel.y + blend * (d.y - s->vel.y), zv + blend * (d.z - zv));
     s->vel = v;
     TAddSTo(&s->pos, &v, 1.0f);
 }
