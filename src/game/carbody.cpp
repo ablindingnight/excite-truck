@@ -2426,7 +2426,6 @@ void fn_80186DE8(void) {
     fn_801BEDD4();
     for (i = 0; i < n; i++) {
         CbSolMass* m;
-        f32 steer;
         f32 lim;
         int wh;
         f32 bk2;
@@ -2591,6 +2590,7 @@ void fn_80186DE8(void) {
         HVec o = *(HVec*)(car + 0x16C);
         RVec3 vel(m->vel.x, m->vel.y, m->vel.z);
         RVec3 avel(m->avel.x, m->avel.y, m->avel.z);
+        f32 steer;
         f32 throttle;
         int boosting;
         f32 vmax;
