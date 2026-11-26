@@ -2351,13 +2351,14 @@ static inline void CbSet3(f32* d, f32 x, f32 y, f32 z) {
 static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, f32 ox, f32 oy, const HVec& o, f32 k, f32 nk) {  // name unproven
     f32 ax = vel.x * k + *(f32*)(car + 0x118) * nk;
     ((CarBody*)car)->accel.x = ax;
-    f32 ay = Mul(vel.y, k) + Mul(((CarBody*)car)->vel.y, nk);
+    f32 ay = Mul(vel.y, k);
+    ay += Mul(((CarBody*)car)->vel.y, nk);
     ((CarBody*)car)->accel.y = ay;
     f32 px = ax - ox;
     f32 py = ay - oy;
     ((CarBody*)car)->accel.z = vel.z * k + Mul(((CarBody*)car)->vel.z, nk);
-    ((CarBody*)car)->aaccel.x = Mul(avel.x, k) + Mul(((CarBody*)car)->avel.x, nk);
-    ((CarBody*)car)->aaccel.y = CbAdd(avel.y * k, ((CarBody*)car)->avel.y * nk);
+    ((CarBody*)car)->aaccel.x = avel.x * k + Mul(((CarBody*)car)->avel.x, nk);
+    ((CarBody*)car)->aaccel.y = avel.y * k + Mul(((CarBody*)car)->avel.y, nk);
     ((CarBody*)car)->aaccel.z = CbAdd(avel.z * k, Mul(((CarBody*)car)->avel.z, nk));
     ((CarBody*)car)->vel.x = vel.x;
     ((CarBody*)car)->vel.y = vel.y;
