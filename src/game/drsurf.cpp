@@ -1284,28 +1284,25 @@ static inline void SetGQR6(void) {
 
 #define LC_BUF(i) ((u8*)0xE0000000 + ((i) << 13))
 
-// Helper name unproven: the two-bone queue. Each vertex indexes the job's source and destination (the target reloads
-// both every time).
-static inline void FlushSkin(DeformQueue* q) {
-    for (int k = 0; k < q->count; k++) {
-        DeformJob* j = &q->jobs[k];
-        int n = j->n;
-        for (int i = 0; i < n; i++) {
-            const SkinVtx* v = &((const SkinVtx*)j->src)[i];
-            V3* o = &((V3*)j->dst)[i];
-            const BVec* a = &lbl_804DB068[v->b0];
-            const BVec* b = &lbl_804DB068[v->b1];
-            f32 w0 = (1.0f / 255) * v->w0;
-            f32 w1 = (1.0f / 255) * v->w1;
-            o->x = v->x + a->x * w0;
-            o->y = v->y + a->y * w0;
-            o->z = v->z + a->z * w0;
-            o->x = o->x + b->x * w1;
-            o->y = o->y + b->y * w1;
-            o->z = o->z + b->z * w1;
-        }
+// Helper name unproven: skins one two-bone deform job. Each vertex indexes the job's source and destination (the
+// target reloads both every time). The job loop is in fn_802D6C78 itself: its counter k is coloured after the
+// inline's values like a named local (as an inline local it took r9, retail r12).
+static inline void SkinJob(DeformJob* j) {
+    int n = j->n;
+    for (int i = 0; i < n; i++) {
+        const SkinVtx* v = &((const SkinVtx*)j->src)[i];
+        V3* o = &((V3*)j->dst)[i];
+        const BVec* a = &lbl_804DB068[v->b0];
+        const BVec* b = &lbl_804DB068[v->b1];
+        f32 w0 = (1.0f / 255) * v->w0;
+        f32 w1 = (1.0f / 255) * v->w1;
+        o->x = v->x + a->x * w0;
+        o->y = v->y + a->y * w0;
+        o->z = v->z + a->z * w0;
+        o->x = o->x + b->x * w1;
+        o->y = o->y + b->y * w1;
+        o->z = o->z + b->z * w1;
     }
-    q->count = 0;
 }
 
 // Helper name unproven: the y-morph queue (the target numbers its locals in ascending declaration order, as the
@@ -1391,7 +1388,10 @@ static inline void CopyDirXYZ(f32* pout, u8* in, int pc) {
 
 void fn_802D6C78(void) {
     DeformQueue* q;
-    FlushSkin(&lbl_804CAC38);
+    for (int k = 0; k < lbl_804CAC38.count; k++) {
+        SkinJob(&lbl_804CAC38.jobs[k]);
+    }
+    lbl_804CAC38.count = 0;
     SetGQR6();
     SetGQR6();
     // Through q: retail reads jobs[0].n via the queue base (a direct &global folds it to an absolute address).
