@@ -1011,6 +1011,8 @@ void CamRegion::Prepare(u8* line) {
     seg = first;
     do {
         int n = 0;
+        double d;
+        f32 m;
         s.x = ILerpT(0.0f, seg->pos.x, seg->next->pos.x);
         s.y = ILerpT(0.0f, seg->pos.y, seg->next->pos.y);
         e.x = ILerpT(1.0f, seg->pos.x, seg->next->pos.x);
@@ -1023,7 +1025,9 @@ void CamRegion::Prepare(u8* line) {
         f32 b = 2.0f * (rel.x * dir.x + rel.y * dir.y);
         f32 c = PcSq(rel.x) + PcSq(rel.y) - r2;
         f32 disc = b * b - 4.0f * a * c;
-        if (!(AbsF(a) <= __float_epsilon[0]) && disc > 0.0f) {
+        d = __fabs(a);
+        m = (f32)d;
+        if (!(m <= __float_epsilon[0]) && disc > 0.0f) {
             f32 q = (f32)sqrt(disc);
             n = 2;
             f32 denominator = 2.0f * a;
