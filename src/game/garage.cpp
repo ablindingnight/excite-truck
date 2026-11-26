@@ -444,7 +444,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#stat_art_1", 2, &panel.stats.stats[0].value, 0, 0),
                     MenuItem("#stat_text_2", panel.text[1], (int)NoCaption()),
                     MenuItem("#stat_art_2", 2, &panel.stats.stats[1].value, 0, 0),
-                    MenuItem("#stat_text_3", panel.text[2], NoCaption()),
+                    MenuItem("#stat_text_3", panel.text[2], (int)NoCaption()),
                     MenuItem("#stat_art_3", 2, &panel.stats.stats[2].value, 0, 0),
                     MenuItem("#stat_text_4", panel.text[3], (int)NoCaption()),
                     MenuItem("#stat_custom_4", 5, &panel.bars[3], 0, 0),
@@ -471,23 +471,22 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 GarageList* colors = MakeColorList(cars);
                 s32* csel = lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].d : &lbl_80498C48.pairs[slot].b;
                 ColorPick paint(colors, csel, lbl_80498C48.alt ? &lbl_80498C48.pairs[slot].c : &lbl_80498C48.pairs[slot].a, &panel, &ui, color);
-                MenuDesc desc = {"carchoose2b.lyt", 0, (int (*)(int*))fn_8024DADC, 0, 0};
                 MenuItem items[] = {
                     MenuItem(0, 5, (u8*)&paint, 0, 0),
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
-                    MenuItem("#car_model", cars.Chassis(), (int)NoCaption()),
-                    MenuItem("#car_name", cars.Name(), (int)NoCaption()),
-                    MenuItem("#color_name", (char*)&paint + 0xE0, (int)NoCaption()),
+                    MenuItem("#car_model", cars.Chassis(), NoCaption()),
+                    MenuItem("#car_name", cars.Name(), NoCaption()),
+                    MenuItem("#color_name", (char*)&paint + 0xE0, NoCaption()),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
-                    MenuItem("#car_bar_color", BarArt(bar), (int)NoCaption()),
-                    MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
-                    MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
+                    MenuItem("#car_bar_color", BarArt(bar), NoCaption()),
+                    MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, NoCaption()),
+                    MenuItem("#aaa", (char*)(u8*)&cars + 0x50, NoCaption()),
                     MenuItem(lbl_8055B860, 6, 0, -1, 0x1B),
                     MenuItem(lbl_8055B860, 6, 0, -2, 0xD),
                     MenuItem(lbl_80498C30),
                 };
-                desc.items = items;
+                MenuDesc desc = {"carchoose2b.lyt", items, (int (*)(int*))fn_8024DADC, 0, 0};
                 int r2 = fn_802146BC(&desc, -999, -999, 1);
                 if (r2 == -2 && lbl_80498C48.alt) {
                     r = r2;
