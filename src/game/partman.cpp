@@ -574,14 +574,22 @@ void fn_8028F114(SysList* l, s32 first, s32 last) {
             }
         }
     }
+    PartSys* s;
     for (int j = 0; j < l->count; j++) {
-        PartSys* s = l->items[j];
+        s = l->items[j];
         t = s->tex;
         if (t != first && t != last) {
             bool found = ContainsTexture(out + nFirst, nMid, t);
             if (!found) {
+                PartSys* peer;
                 int k = BeginTextureGroup(out + nFirst, nMid, s, j);
-                AppendTexturePeers(l, k, &(out + nFirst)[nMid], nMid, t);
+                for (; k < l->count; ++k) {
+                    peer = l->items[k];
+                    if (peer->tex == t) {
+                        (out + nFirst)[nMid] = peer;
+                        nMid++;
+                    }
+                }
             }
         }
     }
