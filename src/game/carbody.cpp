@@ -2541,7 +2541,8 @@ void fn_80186DE8(void) {
             force[1] = force[1] + dv[1];
             force[2] = force[2] + dv[2];
             if (((CarBody*)car)->f259C && ((CarBody*)car)->speed < top) {
-                f32 boost = (heatTune.v[5] * ((CarBody*)car)->f2D8 * ((CarBody*)car)->setupA.f70) * 9.81f;
+                f32 boost = heatTune.v[5] * ((CarBody*)car)->f2D8;
+                boost = boost * ((CarBody*)car)->setupA.f70 * 9.81f;
                 f32 hi = 0.6f * boost;
                 f32 lo = 2.4f * boost;
                 f32 t = (((CarBody*)car)->speed - 26.666666f) / 35.555557f;
