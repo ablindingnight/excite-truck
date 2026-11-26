@@ -2354,6 +2354,7 @@ static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, const 
     f32 ay = Mul(vel.y, 59.94f) + Mul(((CarBody*)car)->vel.y, -59.94f);
     ((CarBody*)car)->accel.y = ay;
     f32 px = ax - o.x;
+    f32 py = ay - o.y;
     ((CarBody*)car)->accel.z = vel.z * 59.94f + Mul(((CarBody*)car)->vel.z, -59.94f);
     ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + Mul(((CarBody*)car)->avel.x, -59.94f);
     ((CarBody*)car)->aaccel.y = CbAdd(avel.y * 59.94f, ((CarBody*)car)->avel.y * -59.94f);
@@ -2365,7 +2366,7 @@ static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, const 
     ((CarBody*)car)->avel.y = avel.y;
     ((CarBody*)car)->avel.z = avel.z;
     ((CarBody*)car)->push.x = px;
-    ((CarBody*)car)->push.y = ay - o.y;
+    ((CarBody*)car)->push.y = py;
     ((CarBody*)car)->push.z = CbSub(((CarBody*)car)->accel.z, o.z);
 }
 
