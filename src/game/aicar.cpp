@@ -3,6 +3,7 @@
 // passing and pushing, overheat and turbo management, and the per-frame steering and throttle.
 // Written against raw field offsets (the AIDriver object is 0x30C bytes). Names are guesses apart from
 // the strings.
+#include "game/buildquery.h"
 #include "game/common.h"
 #include "game/proxer.h"
 #include "game/aiexc.h"
@@ -757,13 +758,16 @@ void AIDriver::vf30(void) {
     u8* p = PTR(d, 0x28C);
     S32(d, 0x288) = (s32)VI(p)->v10();
     u8* car = CAR(d);
-    F32(d, 0x25C) = 0.0f;
-    F32(d, 0x144) = 0.0f;
-    F32(d, 0x148) = 0.0f;
-    F32(d, 0x14C) = 1.0f;
-    F32(d, 0x150) = 0.0f;
+    f32 fullControl = 1.0f;
+    f32 defaultSpeed = 4.4444447f;
+    f32 clearControl = 0.0f;
+    F32(d, 0x25C) = clearControl;
+    F32(d, 0x144) = clearControl;
+    F32(d, 0x148) = clearControl;
+    F32(d, 0x14C) = fullControl;
+    F32(d, 0x150) = clearControl;
     S32(d, 0x140) = 0;
-    F32(d, 0x1C) = 4.4444447f;
+    F32(d, 0x1C) = defaultSpeed;
     F32(d, 0x2BC) = 6.0f;
     u8* x = PTR(car, 0x2C0);
     if (x) {
@@ -779,38 +783,41 @@ void AIDriver::vf30(void) {
     F32(d, 0x2A0) = 0.0f;
     memset(d + 0x2FC, 0, 0xC);
     U8(d, 0x74) = 0;
-    U8(d, 0x250) = 0;
-    F32(d, 0xE8) = 0.0f;
-    F32(d, 0xE0) = 0.0f;
-    F32(d, 0xF0) = 0.0f;
-    F32(d, 0xF4) = 0.0f;
-    S32(d, 0x118) = -1;
-    S32(d, 0x114) = -1;
-    F32(d, 0x248) = 0.0f;
-    F32(d, 0x234) = -1000.0f;
-    F32(d, 0x22C) = -1000.0f;
-    F32(d, 0x224) = 0.0f;
-    F32(d, 0x228) = 0.0f;
-    F32(d, 0x220) = 0.0f;
-    F32(d, 0x244) = 0.0f;
-    F32(d, 0x240) = 0.0f;
-    F32(d, 0x23C) = 0.0f;
-    S32(d, 0x13C) = -1;
-    U8(d, 0x11C) = 0;
-    F32(d, 0x120) = 0.0f;
-    S32(d, 0x98) = 0;
-    F32(d, 0x94) = -1000.0f;
-    S32(d, 0xC0) = 0;
-    F32(d, 0xBC) = 1000.0f;
-    U8(d, 0x9C) = 0;
-    U8(d, 0x74) = 0;
-    F32(d, 0xC4) = 0.0f;
-    F32(d, 0xD0) = 0.0f;
-    F32(d, 0xC8) = 0.0f;
-    F32(d, 0xD4) = 0.0f;
-    U8(d, 0xFC) = 0;
-    S32(d, 0x100) = 0;
-    S32(PTR(d, 0x164), 0xC) = 0;
+    s32* f = &S32(PTR(d, 0x164), 0xC);
+    if (BuildMode() == kBuildRetail) {
+        U8(d, 0x250) = 0;
+        F32(d, 0xE8) = 0.0f;
+        F32(d, 0xE0) = 0.0f;
+        F32(d, 0xF0) = 0.0f;
+        F32(d, 0xF4) = 0.0f;
+        S32(d, 0x118) = -1;
+        S32(d, 0x114) = -1;
+        F32(d, 0x248) = 0.0f;
+        F32(d, 0x234) = -1000.0f;
+        F32(d, 0x22C) = -1000.0f;
+        F32(d, 0x224) = 0.0f;
+        F32(d, 0x228) = 0.0f;
+        F32(d, 0x220) = 0.0f;
+        F32(d, 0x244) = 0.0f;
+        F32(d, 0x240) = 0.0f;
+        F32(d, 0x23C) = 0.0f;
+        S32(d, 0x13C) = -1;
+        U8(d, 0x11C) = 0;
+        F32(d, 0x120) = 0.0f;
+        S32(d, 0x98) = 0;
+        F32(d, 0x94) = -1000.0f;
+        S32(d, 0xC0) = 0;
+        F32(d, 0xBC) = 1000.0f;
+        U8(d, 0x9C) = 0;
+        U8(d, 0x74) = 0;
+        F32(d, 0xC4) = 0.0f;
+        F32(d, 0xD0) = 0.0f;
+        F32(d, 0xC8) = 0.0f;
+        F32(d, 0xD4) = 0.0f;
+        U8(d, 0xFC) = 0;
+        S32(d, 0x100) = 0;
+        *f = 0;
+    }
     if (S32(CAR(d), 0x1F0) == 0x50) {
         fn_801B30D0(CARID(d));
         int take = 0;
