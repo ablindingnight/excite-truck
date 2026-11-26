@@ -2326,7 +2326,7 @@ extern "C" {
 
 /* Helper name unproven: NearZero with the narrowed value held in a local (retail's numbering at the a.w test). */
 static inline int NearZeroD(f32 x) { f32 value = (f32)__fabs(x); return value <= __float_epsilon[0]; }
-static inline void CbSet3Y(f32* d, f32 x, f32 y, f32 z) { d[0] = x; d[2] = z; d[1] = y; } // name unproven
+static inline void CbSet3Y(f32* d, const f32& o, f32 x, f32 y, f32 z) { d[0] = x; d[2] = z; d[1] = y - o; } // name unproven
 // Name unproven.
 static inline f32 ForwardBrakingForce(f32 forward, f32 mass, f32 amount) {
     return Mul(0.55181247f * (-forward * mass), amount);
@@ -2629,7 +2629,7 @@ void fn_80186DE8(void) {
             CbSet3(w->contact, c->pts[j].x, c->pts[j].y, c->pts[j].z);
             f32 nrm[3];
             CbSet3(nrm, c->pts[9 + j].x, c->pts[9 + j].y, c->pts[9 + j].z);
-            CbSet3Y(w->local, x->pts[j].x, x->pts[j].y - w6[j], x->pts[j].z);
+            CbSet3Y(w->local, w6[j], x->pts[j].x, x->pts[j].y, x->pts[j].z);
             u32 fl;
             f32 up = PSVECDotProduct((const Vec*)nrm, (const Vec*)(car + 0x54));
             // The pair is built in a stack object, then copied: retail forwards both stored values (frsp) into the
