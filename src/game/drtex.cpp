@@ -361,9 +361,10 @@ void fn_802D81C4(GXTexDesc* d, const char*) {
     tex = img->tex;
     int i;
     u8* p = tex;
-    int n = w * h / 2;  // bytes (two CI4 texels each)
-    for (i = 0; i < n; i++) {
-        *p = *p >> 4 | *p << 4;
+    // Bound as a plain expression (the unroller duplicates its srawi); the byte read once into a local.
+    for (i = 0; i < w * h / 2; i++) {
+        u8 c = *p;
+        *p = c >> 4 | c << 4;
         p++;
     }
     u32* pal = img->pal;
