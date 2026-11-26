@@ -1209,7 +1209,7 @@ void fn_801BA088(MVec4* t_, int a1, int a2, s16 a3) {
             var_r16 = var_r16 - 1;
             Vec4f V0DF0(V1B70);
             VLOAD(V0DE0, t[var_r22]);
-            Vec4f V0DD0(V0DE0);
+            Vec4f V0DD0; V0DD0.z = V0DE0.z; V0DD0.y = V0DE0.y; V0DD0.x = V0DE0.x;  // z, y, x copy (Set-style order)
             f32 ddx = V0DD0.x;
             f32 ddy = V0DD0.y;
             tmp.x = V1B90.x * ddx + V0DF0.x * ddy; tmp.y = V1B90.y * ddx + V0DF0.y * ddy; tmp.z = V1B90.z * ddx + V0DF0.z * ddy;
