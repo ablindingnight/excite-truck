@@ -26,15 +26,15 @@ the original author.
 
 ### Progress
 
-Exact matches only (objdiff `report.json`), as of 2026-11-20:
+Exact matches only (objdiff `report.json`), as of 2026-11-26:
 
 | | Exactly matched code | Functions |
 | :--- | :--- | :--- |
-| **Whole game** | 94.1% (2,869,356 / 3,050,236 bytes) | 13,651 / 13,780 (99.1%) |
-| Excite Truck's own code | 91.2% (1,864,352 / 2,045,232 bytes) | 10,016 / 10,145 |
+| **Whole game** | 97.6% (2,976,016 / 3,050,236 bytes) | 13,721 / 13,780 (99.6%) |
+| Excite Truck's own code | 96.4% (1,971,012 / 2,045,232 bytes) | 10,086 / 10,145 |
 | Nintendo SDK libraries | **100%** (1,005,004 / 1,005,004 bytes) | 3,635 / 3,635 |
 
-The SDK is complete: every SDK function is matched and built from source. The RAD Bink video library linked into the game is complete too: all five Bink units match and are built from source. Data matches 99.8%; 687 of 772 units are fully matched.
+The SDK is complete: every SDK function is matched and built from source. The RAD Bink video library linked into the game is complete too: all five Bink units match and are built from source. Data matches 99.8%; 709 of 772 units are fully matched.
 
 Names: about 1,460 fully matched game functions that only had address names (`fn_XXXXXXXX`) now have descriptive names
 (proposed by a local model from each function's code, comments and callers, reviewed, confidence 4-5 of 5). Names are
