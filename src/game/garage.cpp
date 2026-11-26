@@ -446,7 +446,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                 MenuItem items[] = {
                     MenuItem("#car_model", 0x13, &ui, 0, 0),
                     MenuItem("#car_model", 3, cars.Chassis(), 0, 0),
-                    MenuItem("#car_name", cars.Name(), (int)NoCaption()),
+                    MenuItem("#car_name", cars.Name(), 0),
                     MenuItem("#car_position", 5, ui.state, 0, 0),
                     MenuItem("#stat_text_1", panel.text[0], (int)NoCaption()),
                     MenuItem("#stat_art_1", 2, &panel.stats.stats[0].value, 0, 0),
