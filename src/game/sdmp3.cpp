@@ -680,7 +680,8 @@ void* fn_802EAB28(void* arg) {
                                 int tl;
                                 int fsz;
                                 char* f = (char*)(p + (int)lbl_805600A8);
-                                int len = ((u8)f[5] << 14) + ((u8)f[4] << 21) + ((u8)f[6] << 7);
+                                int len = ((u8)f[5] << 14) + ((u8)f[4] << 21);
+                                len += ((u8)f[6] << 7);
                                 len += (u8)f[7];
                                 tl = len - 1;
                                 fsz = len + 10;
