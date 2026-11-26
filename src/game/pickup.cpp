@@ -904,7 +904,7 @@ inline int CoinBoxPickupMaker::Make(ValueNode* n, PickupObjMan* m, const f32* pa
         off = 0.5f * (l - (f32)ny * paramsv);
         for (j = 0; j <= ny; j++) {
             f32 s = (off + (f32)j * params[0]) / l;
-            V2 pt = Lerp2(pa, pb, s);
+            V2 pt = LerpC(pa.x, pa.y, pb.x, pb.y, s);
             m->Add(pick(j, i, ny, nx), pt, 0.0f);
         }
     }
