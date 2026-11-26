@@ -2348,13 +2348,13 @@ static inline void CbSet3(f32* d, f32 x, f32 y, f32 z) {
     d[2] = z;
 }
 
-static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, const HVec& o) {  // name unproven
+static inline void CbMotion(u8* car, const RVec3& vel, const RVec3& avel, f32 ox, f32 oy, const HVec& o) {  // name unproven
     f32 ax = 59.94f * vel.x + *(f32*)(car + 0x118) * -59.94f;
     ((CarBody*)car)->accel.x = ax;
     f32 ay = Mul(vel.y, 59.94f) + Mul(((CarBody*)car)->vel.y, -59.94f);
     ((CarBody*)car)->accel.y = ay;
-    f32 px = ax - o.x;
-    f32 py = ay - o.y;
+    f32 px = ax - ox;
+    f32 py = ay - oy;
     ((CarBody*)car)->accel.z = vel.z * 59.94f + Mul(((CarBody*)car)->vel.z, -59.94f);
     ((CarBody*)car)->aaccel.x = Mul(avel.x, 59.94f) + Mul(((CarBody*)car)->avel.x, -59.94f);
     ((CarBody*)car)->aaccel.y = CbAdd(avel.y * 59.94f, ((CarBody*)car)->avel.y * -59.94f);
@@ -2590,15 +2590,12 @@ void fn_80186DE8(void) {
         *((CollVolume*)car)->hint = e->id;
         HVec o = *(HVec*)(car + 0x16C);
         RVec3 vel(m->vel.x, m->vel.y, m->vel.z);
-        RVec3 avel;
-        avel.x = m->avel.x;
-        avel.y = m->avel.y;
-        avel.z = m->avel.z;
+        RVec3 avel(m->avel.x, m->avel.y, m->avel.z);
         f32 throttle;
         int boosting;
         f32 vmax;
         f32 out;
-        CbMotion(car, vel, avel, o);
+        CbMotion(car, vel, avel, o.x, o.y, o);
         CbVec4 w0(c->v30);
         CbVec4 w1(c->v10);
         CbVec4 w2(c->v0);
