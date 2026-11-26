@@ -399,15 +399,23 @@ static inline GarageList* MakeColorList(CarPick& cars) {  // name unproven
     return colors;
 }
 
+// name unproven
+struct SlotIter {
+    u8* list;
+    int Count(void) { return fn_8024EB94(list); }
+    u8* At(int i) { return fn_8024EB9C(list, i); }
+};
+
 inline ColorPick::ColorPick(GarageList* list, s32* color, s32* car, StatPanel* panel, CarUIScreen* ui, u32* out)
     : CarSlotList(list, color, car, panel, ui) {
     ui2 = ui;
     colors = (VDel*)list;
     this->out = out;
     SetCarSlotSelection((u8*)this, fn_8024EBE4((u8*)this), 1);
-    u8* e = fn_8024EB9C((u8*)this, 0);
-    for (int i = 0; i < fn_8024EB94((u8*)this); i++) {
-        e = fn_8024EB9C((u8*)this, i);
+    SlotIter it = {(u8*)this};
+    u8* e = it.At(0);
+    for (int i = 0; i < it.Count(); i++) {
+        e = it.At(i);
         S32(e, 0x10) = ((VehicleInfo*)PTR(e, 0x8))->colors[i];
     }
     ShowSelectionColor((u8*)this);
@@ -452,7 +460,7 @@ int fn_8024DAE0(s32* vehicle, u32* color, int slot, GarageList* screen, int bar)
                     MenuItem("#stat_art_5", 2, &panel.stats.stats[4].value, 0, 0),
                     MenuItem("#unlock_pts", lbl_80498C90, (int)NoCaption()),
                     MenuItem("#locker", 2, (u8*)&cars + 0xC0, 0, 0),
-                    MenuItem("#car_bar_color", BarArt(bar), (int)NoCaption()),
+                    MenuItem("#car_bar_color", BarArt(bar), NoCaption()),
                     MenuItem("#races_run", (char*)(u8*)&cars + 0x3C, (int)NoCaption()),
                     MenuItem("#aaa", (char*)(u8*)&cars + 0x50, (int)NoCaption()),
                     MenuItem(0, 5, (u8*)&cars, 0, 0),
