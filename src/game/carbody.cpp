@@ -2706,7 +2706,7 @@ void fn_80186DE8(void) {
                 steerK = steerK * (1.0f - 0.5f * t) * (1.0f - Mul(0.6f, t));
             }
         }
-        slide = (f32)__fabs(((CarBody*)car)->f25CC) - 1.3f * AbsNarrow(((CarBody*)car)->f25D8) - 3.0f;
+        slide = (f32)__fabs(((CarBody*)car)->f25CC) - 1.3f * (f32)AbsD(((CarBody*)car)->f25D8) - 3.0f;
         if (0.0f > slide) {
             slide = 0.0f;
         }
